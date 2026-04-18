@@ -10,9 +10,17 @@ from dartlab.scan._helpers import parse_num, scan_parquets
 
 
 def scan_bonds() -> dict[str, dict]:
-    """corporateBond → {종목코드: {사채잔액, 단기잔액, 단기비중}}.
+    """전종목 사채 잔액 스캔.
 
-    합계(remndr_exprtn2) 행 기준.  잔액이 0보다 큰 기업만 반환.
+    합계(remndr_exprtn2) 행 기준. 잔액이 0보다 큰 기업만 반환.
+
+    Returns
+    -------
+    dict[str, dict]
+        {종목코드: info} 매핑. 각 info:
+            사채잔액 : float — 사채 총잔액 (백만원)
+            단기잔액 : float — 1년 이내 만기 잔액 (백만원)
+            단기비중 : float — 단기잔액/사채잔액 (%)
     """
     raw = scan_parquets(
         "corporateBond",
@@ -67,9 +75,17 @@ EQUITY_NMS = {"자본총계", "자본 총계"}
 
 
 def scan_short_debt() -> dict[str, dict]:
-    """shortTermBond + commercialPaper → {종목코드: {단기사채잔액, CP잔액, 단기채무합계}}.
+    """전종목 단기사채 + 기업어음 스캔.
 
     회사채(corporateBond)와 별도로, 기업어음/단기사채의 실질 단기 부채 노출을 측정한다.
+
+    Returns
+    -------
+    dict[str, dict]
+        {종목코드: info} 매핑. 각 info:
+            단기사채잔액 : float — 단기사채 잔액 (백만원)
+            CP잔액 : float — 기업어음 잔액 (백만원)
+            단기채무합계 : float — 단기사채 + CP 합산 (백만원)
     """
     stb = scan_parquets(
         "shortTermBond",
@@ -114,10 +130,17 @@ def scan_short_debt() -> dict[str, dict]:
 
 
 def scan_debt_mix() -> dict[str, dict]:
-    """finance BS → {종목코드: {총부채, 부채비율}}.
+    """전종목 부채 구성 스캔.
 
     부채비율 = 총부채 / 자본총계 x 100.
-    scan/finance.parquet 프리빌드가 있으면 단일 파일에서 즉시 필터.
+    scan/finance.parquet 프리빌드 우선, 없으면 종목별 순회.
+
+    Returns
+    -------
+    dict[str, dict]
+        {종목코드: info} 매핑. 각 info:
+            총부채 : float — 부채총계 (원)
+            부채비율 : float | None — 부채비율 (%)
     """
     from dartlab.scan._helpers import _ensureScanData
 
@@ -183,7 +206,18 @@ def scan_debt_mix() -> dict[str, dict]:
 
 
 def _debtMixFromMerged(scanPath: Path) -> dict[str, dict]:
-    """합산 finance parquet에서 부채/자본 추출."""
+    """합산 finance parquet에서 부채/자본 추출.
+
+    Parameters
+    ----------
+    scanPath : Path
+        프리빌드 finance.parquet 경로.
+
+    Returns
+    -------
+    dict[str, dict]
+        {종목코드: {총부채(원), 부채비율(%)}} — 종목별 최신 연도 기준.
+    """
     scCol = "stockCode" if "stockCode" in pl.scan_parquet(str(scanPath)).collect_schema().names() else "stock_code"
 
     bs = (
@@ -203,9 +237,6 @@ def _debtMixFromMerged(scanPath: Path) -> dict[str, dict]:
     # 종목별 최신 연도
     latestYear = target.group_by(scCol).agg(pl.col("bsns_year").max().alias("_maxYear"))
     target = target.join(latestYear, on=scCol).filter(pl.col("bsns_year") == pl.col("_maxYear")).drop("_maxYear")
-
-    LIABILITIES_IDS | LIABILITIES_NMS
-    EQUITY_IDS | EQUITY_NMS
 
     liabRows = target.filter(
         pl.col("account_id").is_in(list(LIABILITIES_IDS)) | pl.col("account_nm").is_in(list(LIABILITIES_NMS))

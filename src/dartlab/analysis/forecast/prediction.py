@@ -68,6 +68,18 @@ def collectSignals(company, *, usePredictionAxis: bool = False) -> ContextSignal
 
     usePredictionAxis=True이면 analysis("forecast", "예측신호") 결과를 추가로 소비하여
     공시 tone, 변화 강도, 성장 조정치를 enrichment한다.
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    usePredictionAxis : bool
+        예측신호 축 결과 추가 소비 여부.
+
+    Returns
+    -------
+    ContextSignals
+        insight 등급, diff 변화율, 사이클 정보 등 맥락 신호.
     """
     signals = ContextSignals()
 
@@ -233,6 +245,7 @@ def _computeAdjustments(signals: ContextSignals) -> tuple[dict[str, float], list
     reasons: list[str] = []
 
     def _add(scenario: str, delta: float, reason: str) -> None:
+        """시나리오별 조정값을 누적하고 사유 기록."""
         adj[scenario] = adj.get(scenario, 0.0) + delta
         reasons.append(reason)
 
@@ -283,7 +296,20 @@ def adjustProbabilities(
     baseProbs: dict[str, float],
     signals: ContextSignals,
 ) -> dict[str, float]:
-    """기본 확률을 맥락 신호로 재가중한다."""
+    """기본 확률을 맥락 신호로 재가중한다.
+
+    Parameters
+    ----------
+    baseProbs : dict[str, float]
+        시나리오별 기본 확률.
+    signals : ContextSignals
+        맥락 신호.
+
+    Returns
+    -------
+    dict[str, float]
+        재가중된 시나리오별 확률 (합계 1.0 정규화).
+    """
     # adjustments가 아직 계산되지 않았으면 자동 계산
     if not signals.adjustments and (
         signals.insightGrades

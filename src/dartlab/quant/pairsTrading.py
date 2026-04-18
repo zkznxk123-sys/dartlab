@@ -18,7 +18,32 @@ _ADF_CRITICAL = {"1%": -3.43, "5%": -2.86, "10%": -2.57}
 
 
 def calcPairs(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> dict:
-    """공적분 기반 페어 탐색."""
+    """공적분 기반 페어 탐색.
+
+    자산 상위 종목 간 Engle-Granger ADF 검정으로 공적분 페어를 탐색한다.
+
+    Parameters
+    ----------
+    market : str
+        시장. 기본 "KR".
+    stockCode : str | None
+        특정 종목 포함 시 해당 종목을 페어 후보에 강제 포함.
+
+    Returns
+    -------
+    dict
+        market : str — 시장
+        pairs : list[dict] — ADF 통계량 기준 정렬된 페어 (최대 10개)
+            stockA : str, stockB : str,
+            adfStat : float — ADF 검정 통계량,
+            cointegrated : str — "1%" | "5%" | "10%" | "no",
+            halfLife : float | None — 평균 회귀 반감기 (일),
+            spreadZ : float — 현재 스프레드 z-score (배),
+            dataPoints : int — 공통 관측치 수
+        totalPairsTested : int — 검정한 총 페어 수
+        cointegratedPairs : int — 공적분 성립 페어 수
+        stocksUsed : list[str] — 분석에 사용된 종목 코드
+    """
     result: dict = {"market": market}
 
     # 자산 상위 5종목 선정 (finance.parquet)
@@ -137,7 +162,7 @@ def _get_top_stocks(market: str, n: int = 5) -> list[str]:
             .filter(pl.col("fs_nm").str.contains("연결"))
             .collect()
         )
-    except Exception:  # noqa: BLE001
+    except (KeyError, ValueError, TypeError, AttributeError):
         return []
 
     if bs.is_empty():

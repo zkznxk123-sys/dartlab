@@ -180,6 +180,18 @@ def _fit_garch11(returns: np.ndarray) -> dict | None:
     var_init = float(np.var(resid))
 
     def neg_log_likelihood(params):
+        """GARCH(1,1) 음의 로그우도 — Nelder-Mead 최적화 목적함수.
+
+        Parameters
+        ----------
+        params : array-like
+            [omega, alpha, beta] GARCH 파라미터.
+
+        Returns
+        -------
+        float
+            음의 로그우도 (값). 파라미터 제약 위반 시 1e10.
+        """
         omega, alpha, beta = params
         if omega <= 0 or alpha < 0 or beta < 0 or alpha + beta >= 1:
             return 1e10

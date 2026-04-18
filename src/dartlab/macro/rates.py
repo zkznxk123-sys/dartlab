@@ -19,10 +19,20 @@ from dartlab.macro._helpers import (
 
 
 def _fetch_payrolls_3m_avg(g) -> float | None:
-    """PAYEMS(비농업고용) 최근 3개월 평균 변화(천명).
+    """PAYEMS(비농업고용) 최근 3개월 평균 변화.
 
     PAYEMS는 누적 고용 수준(천명). 월간 변화 = 당월 - 전월.
     최근 3개월 변화의 평균을 반환.
+
+    Parameters
+    ----------
+    g : Gather
+        ``getDefaultGather()`` 로 생성된 Gather 인스턴스.
+
+    Returns
+    -------
+    float | None
+        최근 3개월 비농업고용 월간 변화 평균 (천명). 데이터 부족 시 ``None``.
     """
     try:
         df = g.macro("PAYEMS")
@@ -39,7 +49,32 @@ def _fetch_payrolls_3m_avg(g) -> float | None:
 
 
 def _fetch_rate_data(market: str, as_of: str | None = None) -> dict[str, float | None]:
-    """gather에서 금리 관련 지표 수집."""
+    """gather에서 금리 관련 지표 수집.
+
+    Parameters
+    ----------
+    market : str
+        ``"US"`` | ``"KR"``.
+    as_of : str | None
+        기준일. ``None`` 이면 최신.
+
+    Returns
+    -------
+    dict[str, float]
+        None 값은 제거된 채 반환. 가능한 키:
+
+        - fed_funds : float — 연방기금금리 (%)
+        - dgs2 : float — 2년 국채금리 (%)
+        - dgs10 : float — 10년 국채금리 (%)
+        - dfii10 : float — 10년 TIPS 실질금리 (%)
+        - t10yie : float — 10년 BEI 기대인플레 (%)
+        - t5yie : float — 5년 BEI 기대인플레 (%)
+        - unrate : float — 실업률 (%)
+        - cpi_yoy : float — CPI 전년비 (%)
+        - core_cpi : float — 근원 CPI 전년비 (%)
+        - payrolls_3m_avg : float — 비농업고용 3개월 평균 변화 (천명)
+        - base_rate : float — 한국 기준금리 (%, KR 전용)
+    """
     g = get_gather(as_of)
     data: dict[str, float | None] = {}
 
@@ -67,7 +102,32 @@ def _fetch_rate_data(market: str, as_of: str | None = None) -> dict[str, float |
 
 
 def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """금리 종합 분석."""
+    """금리 종합 분석 — 방향 전망 + 고용/물가 해석 + 수익률곡선 분해.
+
+    Parameters
+    ----------
+    market : str
+        ``"US"`` | ``"KR"``.
+    as_of : str | None
+        기준일. ``None`` 이면 최신.
+    overrides : dict | None
+        지표 강제 치환 (예: ``{"fed_funds": 5.5}``).
+
+    Returns
+    -------
+    dict
+        - market : str — 시장 코드
+        - outlook : dict — 금리 방향 전망 (direction:str, reasoning:list[str])
+        - expectation : dict | None — FedWatch 근사 (spread2yFf:float(%p), direction:str, directionLabel:str, strength:str)
+        - decomposition : dict | None — DKW 장기금리 분해 (nominal:float(%), expectedInflation:float(%), realRate:float(%), termPremium:float(%p), termPremiumSource:str). US 전용.
+        - employment : dict | None — 고용 해석 (state:str, stateLabel:str, reasoning:list[str])
+        - inflation : dict | None — 물가 해석 (state:str, stateLabel:str, reasoning:list[str])
+        - yieldCurve : dict | None — Nelson-Siegel 분해 (beta0~2:float, lambda:float, rmse:float, interpretation:str, description:str). US 전용.
+        - realRateRegime : dict | None — BEI/실질금리 4분면 (realRate:float(%), bei:float(%), regime:str, regimeLabel:str, description:str). US 전용.
+        - termPremium : dict | None — ACM 텀프리미엄 (value:float(%p), zone:str, zoneLabel:str, implication:str, description:str). US 전용.
+        - bondRiskPremium : dict | None — Cochrane-Piazzesi 채권 리스크 프리미엄. US 전용.
+        - timeseries : dict — fed_funds / dgs2 / dgs10 / bei / cpi 시계열
+    """
     data = _fetch_rate_data(market, as_of=as_of)
     if overrides:
         data = apply_overrides(data, overrides)

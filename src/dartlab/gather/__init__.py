@@ -162,7 +162,24 @@ class Gather:
         return self.history(stock_code, start=start, end=end, market=market)
 
     def _priceSnapshot(self, stock_code: str, *, market: str = "KR") -> PriceSnapshot | None:
-        """현재가 스냅샷 — naver → naver_global fallback."""
+        """현재가 스냅샷 — naver → naver_global fallback.
+
+        Parameters
+        ----------
+        stock_code : str
+            종목코드 ("005930") 또는 티커 ("AAPL").
+        market : str
+            "KR" 또는 "US". 기본 "KR".
+
+        Returns
+        -------
+        PriceSnapshot | None
+            price : float — 현재가 (원 또는 USD).
+            change : float — 전일 대비 변동 (원 또는 USD).
+            changePercent : float — 전일 대비 변동률 (%).
+            volume : int — 거래량 (주).
+            None — 데이터 수집 실패 시.
+        """
         cached = self._cache.get_typed(stock_code, "price")
         if cached is not None:
             return cached  # type: ignore[return-value]
@@ -248,7 +265,24 @@ class Gather:
         return df
 
     def _flowSnapshot(self, stock_code: str, *, market: str = "KR") -> FlowData | None:
-        """수급 스냅샷 (GatherSnapshot 내부용)."""
+        """수급 스냅샷 — flow() 시계열의 최신 행을 FlowData로 변환 (GatherSnapshot 내부용).
+
+        Parameters
+        ----------
+        stock_code : str
+            종목코드 ("005930").
+        market : str
+            "KR"만 지원. "US"이면 None 반환.
+
+        Returns
+        -------
+        FlowData | None
+            foreign_net : float — 외국인 순매수 (주).
+            institution_net : float — 기관 순매수 (주).
+            foreign_holding_ratio : float — 외국인 보유비율 (%).
+            source : str — 데이터 출처 ("naver").
+            None — KR 외 시장이거나 데이터 없을 때.
+        """
         df = self.flow(stock_code, market=market)
         if df is None or df.is_empty():
             return None
@@ -742,7 +776,19 @@ class Gather:
         return self._macroUS(indicator, start=start, end=end)
 
     def _detectMarket(self, indicator: str) -> str:
-        """지표 코드로 market 자동 감지."""
+        """지표 코드로 market 자동 감지 — ECOS 카탈로그에 있으면 KR, 없으면 US.
+
+        Parameters
+        ----------
+        indicator : str
+            거시지표 코드 ("CPI", "FEDFUNDS" 등).
+
+        Returns
+        -------
+        str
+            "KR" — ECOS 카탈로그에 등록된 지표.
+            "US" — 그 외 (FRED 지표로 간주).
+        """
         try:
             from dartlab.gather.ecos.catalog import getEntry
 
@@ -753,7 +799,24 @@ class Gather:
         return "US"
 
     def _macroKR(self, indicator: str | None, *, start: str | None, end: str | None):
-        """KR 거시지표 — ECOS."""
+        """KR 거시지표 — ECOS (한국은행) API 조회.
+
+        Parameters
+        ----------
+        indicator : str | None
+            지표 코드 ("CPI", "BASE_RATE" 등). None이면 12개 핵심 지표 전체.
+        start : str | None
+            시작일 (YYYY-MM-DD). None이면 기본 기간.
+        end : str | None
+            종료일 (YYYY-MM-DD). None이면 오늘.
+
+        Returns
+        -------
+        pl.DataFrame | None
+            단일 지표: date (Date), value (Float64) 컬럼.
+            전체 지표: date + 각 지표명 컬럼 (wide DataFrame).
+            None — ECOS 모듈 없거나 API 키 미설정 시.
+        """
         try:
             from dartlab.gather.ecos import Ecos
             from dartlab.gather.ecos.types import EcosError
@@ -788,7 +851,24 @@ class Gather:
             return None
 
     def _macroUS(self, indicator: str | None, *, start: str | None, end: str | None):
-        """US 거시지표 — FRED."""
+        """US 거시지표 — FRED API 조회.
+
+        Parameters
+        ----------
+        indicator : str | None
+            지표 코드 ("FEDFUNDS", "GDP" 등). None이면 24개 핵심 지표 전체.
+        start : str | None
+            시작일 (YYYY-MM-DD). None이면 기본 기간.
+        end : str | None
+            종료일 (YYYY-MM-DD). None이면 오늘.
+
+        Returns
+        -------
+        pl.DataFrame | None
+            단일 지표: date (Date), value (Float64) 컬럼.
+            전체 지표: date + 각 지표명 컬럼 (wide DataFrame).
+            None — FRED 모듈 없거나 API 키 미설정 시.
+        """
         try:
             from dartlab.gather.fred import Fred
             from dartlab.gather.fred.types import FredError
@@ -860,7 +940,25 @@ class Gather:
         return snapshot
 
     async def _collect_async(self, stock_code: str, market: str) -> GatherSnapshot:
-        """내부 async 수집 — 도메인별 + 보조 데이터 병렬, 10초 타임아웃."""
+        """내부 async 수집 — 도메인별 + 보조 데이터 병렬, 10초 타임아웃.
+
+        Parameters
+        ----------
+        stock_code : str
+            종목코드 ("005930") 또는 티커 ("AAPL").
+        market : str
+            "KR" 또는 "US".
+
+        Returns
+        -------
+        GatherSnapshot
+            stock_code : str — 종목코드.
+            results : dict[str, GatherResult] — 도메인별 수집 결과.
+            collected_at : str — 수집 시각 (ISO 8601 UTC).
+            _news : list[NewsItem] — 최근 7일 뉴스.
+            _sectorInfo : SectorInfo | None — 업종 분류.
+            _insiderTrades : list[InsiderTrade] — 내부자 거래.
+        """
         config = get_market_config(market)
         domains = list(dict.fromkeys(config.fallback_chain))  # 순서 유지 중복 제거
 
@@ -912,7 +1010,26 @@ class Gather:
         )
 
     async def _fetch_domain_async(self, domain_name: str, stock_code: str, market: str) -> GatherResult:
-        """단일 도메인에서 모든 데이터 수집 (async)."""
+        """단일 도메인에서 모든 데이터 수집 (async).
+
+        Parameters
+        ----------
+        domain_name : str
+            도메인 모듈명 ("naver", "naver_global", "fmp" 등).
+        stock_code : str
+            종목코드 ("005930") 또는 티커 ("AAPL").
+        market : str
+            "KR" 또는 "US".
+
+        Returns
+        -------
+        GatherResult
+            domain : str — 도메인명.
+            price : PriceSnapshot | None — 현재가 스냅샷.
+            consensus : ConsensusData | None — 컨센서스 (fetch_all 도메인만).
+            flow : FlowData | None — 수급 (fetch_all 도메인만).
+            error : str | None — 에러 메시지 (실패 시).
+        """
         module = load_domain(domain_name)
         # fetch_all이 있는 도메인 (naver, naver_global)
         if hasattr(module, "fetch_all"):
@@ -926,10 +1043,17 @@ class Gather:
         return GatherResult(domain=domain_name, price=price)
 
     def invalidate(self, stock_code: str) -> None:
-        """특정 종목의 캐시 무효화.
+        """특정 종목의 캐시 무효화 — live + stale 모두 제거.
 
-        Args:
-            stock_code: 캐시를 삭제할 종목코드.
+        Parameters
+        ----------
+        stock_code : str
+            캐시를 삭제할 종목코드 ("005930").
+
+        Returns
+        -------
+        None
+            캐시에서 해당 종목의 모든 데이터 유형 항목을 제거한다.
 
         Example::
 
@@ -939,7 +1063,13 @@ class Gather:
         self._cache.invalidate(stock_code)
 
     def close(self) -> None:
-        """HTTP 클라이언트 등 리소스 정리."""
+        """HTTP 클라이언트 등 리소스 정리 — 자체 생성한 클라이언트만 닫는다.
+
+        Returns
+        -------
+        None
+            _owns_client=True일 때만 내부 GatherHttpClient 세션을 종료한다.
+        """
         if self._owns_client:
             run_async(self._client.close())
 

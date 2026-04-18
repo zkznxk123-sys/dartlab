@@ -73,6 +73,15 @@ class CompanyGraph:
     """
 
     def __init__(self, stockCode: str = "", corpName: str = "") -> None:
+        """그래프 초기화.
+
+        Parameters
+        ----------
+        stockCode : str
+            종목코드.
+        corpName : str
+            기업명.
+        """
         self.stockCode = stockCode
         self.corpName = corpName
         self.nodes: dict[str, Node] = {}
@@ -80,9 +89,23 @@ class CompanyGraph:
         self.reverse: dict[str, dict[str, Edge]] = {}  # backward
 
     def addNode(self, node: Node) -> None:
+        """노드 추가 (동일 id면 덮어쓰기).
+
+        Parameters
+        ----------
+        node : Node
+            추가할 노드.
+        """
         self.nodes[node.id] = node
 
     def addEdge(self, edge: Edge) -> None:
+        """엣지 추가 (forward + reverse 동시 등록).
+
+        Parameters
+        ----------
+        edge : Edge
+            추가할 엣지.
+        """
         # forward
         if edge.source not in self.edges:
             self.edges[edge.source] = {}
@@ -93,18 +116,65 @@ class CompanyGraph:
         self.reverse[edge.target][edge.source] = edge
 
     def getNode(self, node_id: str) -> Node | None:
+        """노드 ID로 조회.
+
+        Parameters
+        ----------
+        node_id : str
+            노드 고유 ID.
+
+        Returns
+        -------
+        Node | None
+            해당 노드. 없으면 None.
+        """
         return self.nodes.get(node_id)
 
     def outgoing(self, node_id: str) -> list[Edge]:
-        """node_id에서 나가는 엣지들."""
+        """node_id에서 나가는 엣지들 (forward).
+
+        Parameters
+        ----------
+        node_id : str
+            출발 노드 ID.
+
+        Returns
+        -------
+        list[Edge]
+            해당 노드에서 나가는 엣지 리스트.
+        """
         return list(self.edges.get(node_id, {}).values())
 
     def incoming(self, node_id: str) -> list[Edge]:
-        """node_id로 들어오는 엣지들 (역방향)."""
+        """node_id로 들어오는 엣지들 (역방향).
+
+        Parameters
+        ----------
+        node_id : str
+            도착 노드 ID.
+
+        Returns
+        -------
+        list[Edge]
+            해당 노드로 들어오는 엣지 리스트.
+        """
         return list(self.reverse.get(node_id, {}).values())
 
     def findNodes(self, *, type: NodeType | None = None, label: str = "") -> list[Node]:
-        """조건 매칭 노드 검색. label은 부분 매칭."""
+        """조건 매칭 노드 검색.
+
+        Parameters
+        ----------
+        type : NodeType, optional
+            필터링할 노드 타입.
+        label : str
+            부분 매칭할 라벨 (대소문자 무시).
+
+        Returns
+        -------
+        list[Node]
+            조건에 맞는 노드 리스트.
+        """
         results = []
         for n in self.nodes.values():
             if type and n.type != type:
@@ -118,7 +188,21 @@ class CompanyGraph:
         return len(self.nodes)
 
     def edgeCount(self) -> int:
+        """전체 엣지 수.
+
+        Returns
+        -------
+        int
+            그래프 내 총 엣지 수.
+        """
         return sum(len(targets) for targets in self.edges.values())
 
     def summary(self) -> str:
+        """그래프 요약 문자열.
+
+        Returns
+        -------
+        str
+            "CompanyGraph(기업명): N nodes, M edges" 형식.
+        """
         return f"CompanyGraph({self.corpName}): {len(self)} nodes, {self.edgeCount()} edges"

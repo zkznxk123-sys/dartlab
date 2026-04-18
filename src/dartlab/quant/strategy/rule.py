@@ -53,7 +53,18 @@ class Rule:
 
     @classmethod
     def entry(cls, expr) -> "_RuleBuilder":
-        """체이닝 빌더 시작점."""
+        """체이닝 빌더 시작점.
+
+        Parameters
+        ----------
+        expr : array-like
+            boolean numpy array (True = 진입 시그널).
+
+        Returns
+        -------
+        _RuleBuilder
+            .exit() 로 이어서 Rule 완성.
+        """
         return _RuleBuilder(entry=expr)
 
     def with_sizing(self, method: str, **kwargs) -> "Rule":
@@ -83,6 +94,18 @@ class Rule:
         )
 
     def with_meta(self, **kw) -> "Rule":
+        """메타데이터 주입 — 백테스트 결과에 식별자/주석 포함.
+
+        Parameters
+        ----------
+        **kw
+            임의의 key=value 쌍 (예: name="myRule", version=2).
+
+        Returns
+        -------
+        Rule
+            meta 가 병합된 새 Rule.
+        """
         merged = {**self.meta, **kw}
         return Rule(
             entry_expr=self.entry_expr,
@@ -176,4 +199,16 @@ class _RuleBuilder:
     entry: Any
 
     def exit(self, expr) -> Rule:
+        """청산 시그널을 받아 Rule 을 완성한다.
+
+        Parameters
+        ----------
+        expr : array-like
+            boolean numpy array (True = 청산 시그널).
+
+        Returns
+        -------
+        Rule
+            entry + exit 가 결합된 완성 Rule.
+        """
         return Rule(entry_expr=self.entry, exit_expr=expr)

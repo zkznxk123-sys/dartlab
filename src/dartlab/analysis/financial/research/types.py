@@ -987,7 +987,13 @@ class ResearchResult:
         console.print(Panel(st, title=f"[bold]섹터 KPI — {self.sectorKpis.sectorName}[/bold]", border_style="yellow"))
 
     def summary(self) -> str:
-        """plain text 전체 출력 (rich 없는 환경용)."""
+        """plain text 전체 출력 (rich 없는 환경용).
+
+        Returns
+        -------
+        str
+            리포트 전체를 plain text로 포맷한 문자열.
+        """
         sep = "-" * 50
         lines: list[str] = []
         name = self.meta.corpName or self.meta.stockCode
@@ -1083,5 +1089,11 @@ class ResearchResult:
         return "\n".join(lines)
 
     def toDict(self) -> dict:
-        """전체 리포트를 dict로 변환."""
+        """전체 리포트를 dict로 변환.
+
+        Returns
+        -------
+        dict
+            dataclass 전체를 재귀적으로 dict로 변환한 결과.
+        """
         return asdict(self)

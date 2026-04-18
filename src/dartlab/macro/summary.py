@@ -10,11 +10,58 @@ log = logging.getLogger(__name__)
 def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """매크로 전체 종합 판정.
 
-    각 축을 독립 호출하여 종합. 다른 축 모듈을 직접 import하지 않고
-    각 축의 analyze_* 함수를 개별 호출한다.
+    11개 축(cycle, rates, assets, sentiment, liquidity, forecast, crisis,
+    inventory, trade, corporate, scenario)을 독립 호출하여 종합 스코어와
+    자산배분, 투자전략 대시보드를 산출한다.
 
-    Returns:
-        dict: cycle, rates, assets, sentiment, liquidity + overall 판정
+    Parameters
+    ----------
+    market : str
+        시장 코드 ("US" | "KR"). 기본 "US".
+    as_of : str | None
+        기준일 (YYYY-MM-DD). None이면 최신.
+    overrides : dict | None
+        AI 가정 교체. 전체 축에 전파.
+
+    Returns
+    -------
+    dict
+        market : str — 시장 코드
+        overall : str — 종합 판정 ("favorable" | "neutral" | "unfavorable")
+        overallLabel : str — 종합 판정 한글 ("우호적" | "중립" | "비우호적")
+        score : float — 종합 스코어 (점, -4 ~ +4, 양수=우호적)
+        contributions : dict[str, float] — 축별 기여도 (0이 아닌 축만)
+        reasons : list[str] — 판정 근거 문장 리스트
+        cycle : dict — 경기사이클 분석 결과
+        rates : dict — 금리/채권 분석 결과
+        assets : dict — 자산시장 분석 결과
+        sentiment : dict — 시장 심리 분석 결과
+        liquidity : dict — 유동성 분석 결과
+        forecast : dict | None — 경제 예측 (LEI, 침체확률, Hamilton RS, Nowcast)
+        crisis : dict | None — 위기 감지 (Credit Gap, GHS, Minsky, Dalio 등)
+        inventory : dict | None — 재고순환 (ISM 바로미터, 재고 국면)
+        trade : dict | None — 교역 분석 (교역조건, 대용치, 수출이익)
+        corporate : dict | None — 기업집계 (이익사이클, Ponzi, 레버리지)
+        allocation : dict | None — 자산배분 추천
+            equity : float — 주식 비중 (%)
+            bond : float — 채권 비중 (%)
+            gold : float — 금 비중 (%)
+            cash : float — 현금 비중 (%)
+            regime : str — 레짐 코드
+            rationale : str — 근거 해설
+        strategies : dict | None — 투자전략 대시보드
+            total : int — 전체 전략 수
+            active : int — 활성 전략 수
+            bullish : int — 강세 전략 수
+            bearish : int — 약세 전략 수
+            signals : list[dict] — 개별 전략 시그널
+                id : int — 전략 번호
+                name : str — 전략명
+                active : bool — 활성 여부
+                direction : str — 방향 ("bullish" | "bearish")
+                strength : float — 강도 (0~1)
+                confidence : float — 신뢰도 (0~1)
+                description : str — 해설
     """
     from dartlab.macro.assets import analyze_assets
     from dartlab.macro.cycle import analyze_cycle

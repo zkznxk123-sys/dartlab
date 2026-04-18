@@ -8,7 +8,20 @@ from dartlab.scan._helpers import find_latest_year, parse_num, scan_parquets
 
 
 def _scanHolderChange() -> dict[str, dict]:
-    """majorHolder 2개년 비교 → 종목별 최대주주 지분 변동."""
+    """전종목 최대주주 지분 변동 스캔.
+
+    majorHolder parquet에서 유효 데이터 500건 이상인 최신 2개 연도를 선택하여
+    종목별 최대주주 지분율 변동을 계산한다.
+
+    Returns
+    -------
+    dict[str, dict]
+        종목코드 : dict
+            pct : float — 최신 연도 최대주주 지분율 (%)
+            prevPct : float — 직전 연도 최대주주 지분율 (%), 2개년 비교 가능 시
+            change : float — 지분 변동폭 (%p), 2개년 비교 가능 시
+        빈 dict — 데이터 없음
+    """
     raw = scan_parquets(
         "majorHolder",
         ["stockCode", "year", "quarter", "bsis_posesn_stock_qota_rt"],
@@ -63,7 +76,18 @@ def _scanHolderChange() -> dict[str, dict]:
 
 
 def _scanTreasuryStock() -> dict[str, dict]:
-    """treasuryStock → 종목별 자기주식 현황 (기말 보유수량 기준)."""
+    """전종목 자기주식 현황 스캔.
+
+    treasuryStock parquet에서 최신 연도의 기말 보유수량(trmend_qy)을
+    종목별로 합산한다. 보유수량이 0 이하인 종목은 제외된다.
+
+    Returns
+    -------
+    dict[str, dict]
+        종목코드 : dict
+            treasuryShares : int — 자기주식 보유수량 (주)
+        빈 dict — 데이터 없음
+    """
     raw = scan_parquets(
         "treasuryStock",
         ["stockCode", "year", "quarter", "stock_knd", "trmend_qy"],

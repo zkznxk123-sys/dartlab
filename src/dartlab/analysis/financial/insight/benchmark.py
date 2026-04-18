@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 from dartlab.industry import Sector
 
@@ -24,17 +23,17 @@ class SectorBenchmark:
     roeQ3: float
     n: int
     # Merton D2D 벤치마크 (실험 085_mertonEngine/004 결과 기반)
-    d2dMedian: Optional[float] = None
-    d2dQ1: Optional[float] = None
-    d2dQ3: Optional[float] = None
+    d2dMedian: float | None = None
+    d2dQ1: float | None = None
+    d2dQ3: float | None = None
     # 총자산회전율 벤치마크 (섹터별 구조적 차이 반영)
-    tatMedian: Optional[float] = None
-    tatQ1: Optional[float] = None
-    tatQ3: Optional[float] = None
+    tatMedian: float | None = None
+    tatQ1: float | None = None
+    tatQ3: float | None = None
     # ROIC 벤치마크
-    roicMedian: Optional[float] = None
-    roicQ1: Optional[float] = None
-    roicQ3: Optional[float] = None
+    roicMedian: float | None = None
+    roicQ1: float | None = None
+    roicQ3: float | None = None
 
 
 BENCHMARKS: dict[Sector, SectorBenchmark] = {
@@ -367,18 +366,53 @@ US_DEFAULT_BENCHMARK = SectorBenchmark(
 
 
 def getBenchmark(sector: Sector, market: str = "KR") -> SectorBenchmark:
-    """섹터별 벤치마크 반환."""
+    """섹터별 벤치마크 반환.
+
+    Parameters
+    ----------
+    sector : Sector
+        GICS 섹터.
+    market : str
+        시장 코드 ('KR' | 'US').
+
+    Returns
+    -------
+    SectorBenchmark
+        omMedian : float — 영업이익률 중앙값 (%)
+        omQ1 : float — 영업이익률 Q1 (%)
+        omQ3 : float — 영업이익률 Q3 (%)
+        roeMedian : float — ROE 중앙값 (%)
+        roeQ1 : float — ROE Q1 (%)
+        roeQ3 : float — ROE Q3 (%)
+        n : int — 표본 수
+    """
     if market == "US":
         return US_BENCHMARKS.get(sector, US_DEFAULT_BENCHMARK)
     return BENCHMARKS.get(sector, DEFAULT_BENCHMARK)
 
 
-def sectorAdjustment(value: Optional[float], median: float, q1: float, q3: float) -> int:
+def sectorAdjustment(value: float | None, median: float, q1: float, q3: float) -> int:
     """섹터 중앙값 대비 가점/감점 (±1).
 
     Q3 이상 → +1 (업종 상위)
     Q1 이하 → -1 (업종 하위)
     Q1~Q3 → 0 (업종 평균)
+
+    Parameters
+    ----------
+    value : float | None
+        비교 대상 값. None이면 0 반환.
+    median : float
+        섹터 중앙값.
+    q1 : float
+        섹터 Q1 (25th percentile).
+    q3 : float
+        섹터 Q3 (75th percentile).
+
+    Returns
+    -------
+    int
+        adjustment : int — +1 (업종 상위) | 0 (평균) | -1 (업종 하위) (점)
     """
     if value is None:
         return 0

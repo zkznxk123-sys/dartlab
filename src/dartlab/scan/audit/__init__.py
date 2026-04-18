@@ -16,7 +16,24 @@ _OPINION_RISK = {
 
 
 def _normalizeOpinion(raw: str | None) -> str | None:
-    """감사의견 정규화 — 다양한 표기를 통일."""
+    """감사의견 정규화 — 다양한 표기를 통일.
+
+    Parameters
+    ----------
+    raw : str | None
+        DART 원본 감사의견 문자열. 공백·줄바꿈 포함 가능.
+
+    Returns
+    -------
+    str | None
+        정규화된 감사의견. 다음 중 하나:
+        - ``"적정의견"`` — 적정 계열
+        - ``"한정의견"`` — 한정 계열
+        - ``"부적정의견"`` — 부적정 계열
+        - ``"의견거절"`` — 의견거절 계열
+        - ``None`` — 감사의견 대상 아님 (해당없음, 반기검토 등)
+        - 원본 문자열 — 위 범주에 해당하지 않는 기타 의견
+    """
     if not raw:
         return None
     s = raw.strip().replace(" ", "").replace("\n", "")
@@ -45,7 +62,18 @@ def _normalizeOpinion(raw: str | None) -> str | None:
 
 
 def _sortedYears(years: list) -> list[str]:
-    """모든 연도를 정렬: 숫자 연도 우선 (내림차순), 그 다음 한국 회계연도 (문자열 내림차순)."""
+    """모든 연도를 정렬: 숫자 연도 우선 (내림차순), 그 다음 한국 회계연도 (문자열 내림차순).
+
+    Parameters
+    ----------
+    years : list
+        연도 값 리스트. 숫자 문자열(``"2024"``)과 한국 회계연도(``"제55기"``) 혼재 가능.
+
+    Returns
+    -------
+    list[str]
+        정렬된 연도 문자열 리스트. 숫자 연도 내림차순 → 기타 문자열 내림차순 순서.
+    """
     numeric = []
     other = []
     for y in years:
@@ -60,7 +88,18 @@ def _sortedYears(years: list) -> list[str]:
 def scanAudit() -> pl.DataFrame:
     """종목별 감사 리스크 종합 분석.
 
-    컬럼: stockCode, opinion, auditor, auditorChanged, hasSpecialMatter, riskLevel
+    프리빌드 auditOpinion parquet에서 전종목 감사의견·감사인·특기사항을 추출하고,
+    감사인 변경 여부와 결합하여 종합 리스크 등급을 산출한다.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        opinion : str — 정규화된 감사의견 (적정의견/한정의견/부적정의견/의견거절)
+        auditor : str — 감사인명
+        auditorChanged : bool — 직전 연도 대비 감사인 변경 여부
+        hasSpecialMatter : bool — 감사보고서 특기사항 존재 여부
+        riskLevel : str — 종합 리스크 등급 (안전/관찰/주의/고위험)
     """
     raw = scan_parquets(
         "auditOpinion",

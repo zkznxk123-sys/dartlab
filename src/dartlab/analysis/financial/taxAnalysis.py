@@ -24,21 +24,23 @@ from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
 def calcEffectiveTaxRate(company, *, basePeriod: str | None = None) -> dict | None:
     """유효세율 시계열 — 법인세비용/세전이익.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {
-                    "period": str,
-                    "preTaxIncome": float,
-                    "taxExpense": float,
-                    "effectiveTaxRate": float | None,
-                    "statutoryRate": float,
-                    "taxGap": float | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            preTaxIncome : float — 세전이익 (원)
+            taxExpense : float — 법인세비용 (원)
+            effectiveTaxRate : float | None — 유효세율 (%)
+            statutoryRate : float — 법정세율 (%)
+            taxGap : float | None — 유효-법정 세율 갭 (%p)
     """
     accounts = ["법인세비용", "법인세차감전순이익", "세전이익"]
     isResult = company.select("IS", accounts)
@@ -92,19 +94,21 @@ def calcEffectiveTaxRate(company, *, basePeriod: str | None = None) -> dict | No
 def calcTaxCashConversion(company, *, basePeriod: str | None = None) -> dict | None:
     """세금 현금화 시계열 — IS 법인세비용 vs CF 법인세납부.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {
-                    "period": str,
-                    "taxExpense": float,
-                    "taxPaid": float | None,
-                    "taxCashRatio": float | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            taxExpense : float — 법인세비용 (원)
+            taxPaid : float | None — 법인세납부액 (원)
+            taxCashRatio : float | None — 납부/비용 비율 (%)
     """
     isResult = company.select("IS", ["법인세비용"])
     cfResult = company.select("CF", ["payments_of_income_taxes"])
@@ -161,20 +165,22 @@ def calcTaxCashConversion(company, *, basePeriod: str | None = None) -> dict | N
 def calcDeferredTax(company, *, basePeriod: str | None = None) -> dict | None:
     """이연법인세 시계열 — 이연자산/부채 추세.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {
-                    "period": str,
-                    "deferredTaxAsset": float,
-                    "deferredTaxLiability": float,
-                    "netDeferredTax": float,
-                    "dtaToTotalAssets": float | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            deferredTaxAsset : float — 이연법인세자산 (원)
+            deferredTaxLiability : float — 이연법인세부채 (원)
+            netDeferredTax : float — 순이연법인세 (원)
+            dtaToTotalAssets : float | None — 이연자산/총자산 비율 (%)
     """
     bsResult = company.select("BS", ["이연법인세자산", "이연법인세부채", "자산총계"])
     bsParsed = toDictBySnakeId(bsResult)

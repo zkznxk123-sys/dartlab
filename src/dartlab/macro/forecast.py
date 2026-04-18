@@ -17,7 +17,40 @@ from dartlab.core.finance.regimeSwitching import clevelandProbit, conferenceBoar
 
 
 def _fetch_forecast_data(market: str, as_of: str | None = None) -> dict[str, float | list | None]:
-    """gather에서 LEI 구성요소 + 프로빗 입력 수집."""
+    """gather에서 LEI 구성요소 + 프로빗 입력 수집.
+
+    Parameters
+    ----------
+    market : str
+        시장 코드 ("US" | "KR").
+    as_of : str | None
+        기준일 (YYYY-MM-DD). None이면 최신.
+
+    Returns
+    -------
+    dict[str, float | list | None]
+        US 시장:
+            t10y3m : float — 10Y-3M 금리 스프레드 (%p)
+            t10y3m_prev : float — 전기 값 (%p)
+            awhman : float — 제조업 주당 평균근로시간 (시간)
+            icsa : float — 신규 실업수당 청구건수 (건)
+            acogno : float — 소비재 신규주문 (백만달러)
+            napmnoi : float — ISM 신규주문 (pt)
+            acdgno : float — 비국방 자본재 신규주문 (백만달러)
+            permit : float — 건축허가 건수 (천건)
+            sp500 : float — S&P500 지수
+            m2real : float — 실질 M2 통화량
+            umcsent : float — 미시간 소비자심리지수 (pt)
+            fedfunds : float — 연방기금금리 (%)
+            dgs10 : float — 10년 국채수익률 (%)
+            *_prev : float — 각 지표의 전기값
+            *_6m : float — 각 지표의 6개월 전 값
+        KR 시장:
+            cli : float — 경기선행지수 (pt)
+            cci : float — 경기동행지수 (pt)
+            cli_lag : float — 경기후행지수 (pt)
+            *_prev : float — 각 지표의 전기값
+    """
     from dartlab.macro._helpers import fetch_with_history, get_gather
 
     g = get_gather(as_of)
@@ -60,7 +93,20 @@ def _fetch_forecast_data(market: str, as_of: str | None = None) -> dict[str, flo
 
 
 def _pct_change(current: float | None, prev: float | None) -> float | None:
-    """전기대비 변화율 (%)."""
+    """전기대비 변화율 계산.
+
+    Parameters
+    ----------
+    current : float | None
+        현재 값.
+    prev : float | None
+        전기 값.
+
+    Returns
+    -------
+    float | None
+        변화율 (%). 입력이 None이거나 prev가 0이면 None.
+    """
     if current is None or prev is None or prev == 0:
         return None
     return ((current - prev) / abs(prev)) * 100
@@ -69,8 +115,58 @@ def _pct_change(current: float | None, prev: float | None) -> float | None:
 def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """경제 예측 종합 분석.
 
-    Returns:
-        dict: recessionProb, lei, growthMomentum, timeseries
+    LEI 복제, Cleveland Fed 프로빗 침체확률, Sahm Rule,
+    Hamilton Regime Switching, GDP Nowcasting을 종합한다.
+
+    Parameters
+    ----------
+    market : str
+        시장 코드 ("US" | "KR"). 기본 "US".
+    as_of : str | None
+        기준일 (YYYY-MM-DD). None이면 최신.
+    overrides : dict | None
+        AI 가정 교체 (예: ``{"t10y3m": -0.5}``).
+
+    Returns
+    -------
+    dict
+        market : str — 시장 코드
+        recessionProb : dict | None — Cleveland Fed 프로빗 침체확률 (US 전용)
+            probability : float — 12개월 내 침체 확률 (0~1)
+            zone : str — 위험 구간 ("low" | "elevated" | "high")
+            zoneLabel : str — 한글 레이블
+            spread : float — 10Y-3M 스프레드 (%p)
+            description : str — 해설
+        lei : dict | None — 경기선행지수 (Conference Board LEI 복제)
+            level : float — LEI 수준 (pt)
+            mom : float — 전월비 변화율 (%)
+            mom6m : float — 6개월 연율 변화율 (%)
+            signal : str — 시그널 ("expansion" | "slowdown" | "recession_warning")
+            signalLabel : str — 한글 레이블
+            availableComponents : int — 사용 가능 구성요소 수
+            totalComponents : int — 전체 구성요소 수
+            description : str — 해설
+        sahmRule : dict | None — Sahm Rule 침체 판별 (US 전용)
+            value : float — Sahm 값 (%p)
+            triggered : bool — 0.5%p 임계값 초과 여부
+            zone : str — 위험 구간
+            zoneLabel : str — 한글 레이블
+            description : str — 해설
+        hamiltonRegime : dict | None — Hamilton Regime Switching
+            currentRegime : str — 현재 레짐 ("확장" | "수축")
+            currentProb : float — 현재 레짐 확률 (0~1)
+            params : dict — 모형 파라미터
+            converged : bool — 수렴 여부
+            iterations : int — 반복 횟수
+            contractionProb : float — 수축 레짐 확률 (0~1)
+            description : str — 해설
+        nowcast : dict | None — GDP Nowcasting (Dynamic Factor Model, US 전용)
+            gdpEstimate : float — GDP 성장률 추정 (%)
+            confidence : float — 신뢰도 (0~1)
+            factorCurrent : float — 공통 요인 현재값
+            converged : bool — 수렴 여부
+            description : str — 해설
+        timeseries : dict — 주요 시계열 (t10y3m, sp500, permit 등)
     """
     data = _fetch_forecast_data(market, as_of=as_of)
     if overrides:

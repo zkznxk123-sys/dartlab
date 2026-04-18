@@ -63,14 +63,30 @@ _ACT_LABELS: dict[int, str] = {
 
 @dataclass(frozen=True)
 class _AxisEntry:
-    """macro 축 메타데이터."""
+    """macro 축 메타데이터.
+
+    Attributes
+    ----------
+    module : str
+        축 구현 모듈의 정규화된 import 경로 (예: ``"dartlab.macro.cycle"``).
+    fn : str
+        모듈 내 진입 함수 이름 (예: ``"analyze_cycle"``).
+    label : str
+        사용자 노출용 한글 축 이름 (예: ``"사이클"``).
+    description : str
+        축이 수행하는 분석에 대한 한 줄 설명.
+    example : str
+        호출 예시 코드 문자열 (예: ``'macro("사이클")'``).
+    act : int
+        6막 인과 서사에서의 위치. 1~6=해당 막, 0=종합.
+    """
 
     module: str
     fn: str
     label: str
     description: str
     example: str
-    act: int  # 6막 중 어느 막 (0=종합)
+    act: int
 
 
 _AXIS_REGISTRY: dict[str, _AxisEntry] = {
@@ -164,7 +180,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         module="dartlab.macro.scenarios",
         fn="analyze_scenario",
         label="시��리오",
-        description="역사적 충격 재현 + 유형별 스트레스 (110개 프리셋)",
+        description="역사적 충격 재현 + 유형별 스트레스 (~146개 프리셋)",
         example='macro("시나리오", "2008 금융위기")',
         act=6,
     ),
@@ -218,7 +234,23 @@ _ALIASES: dict[str, str] = {
 
 
 def _resolve(axis: str) -> str:
-    """한글/��문 alias → 정규 축 이름으로 변환."""
+    """한글/영문 alias → 정규 축 이름으로 변환.
+
+    Parameters
+    ----------
+    axis : str
+        축 이름. 정규 영문(``"cycle"``), 한글(``"사이클"``), 별칭(``"경기"``) 모두 허용.
+
+    Returns
+    -------
+    str
+        ``_AXIS_REGISTRY`` 의 정규 키 (예: ``"cycle"``, ``"rates"``).
+
+    Raises
+    ------
+    KeyError
+        매칭되는 축이 없을 때. 사용 가능한 축 목록을 메시지에 포함.
+    """
     lower = axis.strip().lower()
     if lower in _AXIS_REGISTRY:
         return lower
@@ -250,14 +282,20 @@ class Macro:
     ) -> pl.DataFrame | dict:
         """매크로 분석 실행.
 
-        Args:
-            axis: 분석 축. None이면 가이드.
-            target: 2번째 인자 (시나리오 이름 등).
-                macro("시나리오", "2008 금융위기") 형태.
-            market: "US" | "KR"
-            overrides: AI/사용자가 매크로 시나리오 강제. 키: cyclePhase/rateScenario/
-                fxScenario/liquidityScenario. 상세: core/overrides.py.
-            **kwargs: 축별 추가 파라미터
+        Parameters
+        ----------
+        axis : str | None
+            분석 축. ``None`` 이면 가이드 DataFrame 반환.
+        target : str | None
+            2번째 positional 인자 (시나리오 이름 등).
+            ``macro("시나리오", "2008 금융위기")`` 형태.
+        market : str
+            ``"US"`` | ``"KR"``.
+        overrides : dict | None
+            AI/사용자가 매크로 시나리오 강제. 키: cyclePhase/rateScenario/
+            fxScenario/liquidityScenario. 상세: ``core/overrides.py``.
+        **kwargs
+            축별 추가 파라미터.
 
         Returns
         -------
@@ -311,7 +349,20 @@ class Macro:
         return result
 
     def _guide(self) -> pl.DataFrame:
-        """6막 기반 축 가이드."""
+        """6막 기반 축 가이드.
+
+        Returns
+        -------
+        pl.DataFrame
+            축별 메타데이터 테이블. 컬럼:
+
+            - axis : str — 정규 축 키 (예: ``"cycle"``, ``"rates"``).
+            - label : str — 한글 축 이름 (예: ``"사이클"``, ``"금리"``).
+            - description : str — 축이 수행하는 분석 한 줄 설명.
+            - example : str — 호출 예시 코드 문자열.
+            - group : str — 6막 내 위치 (예: ``"제1막: 경제는 어디에 있나"``).
+            - apiKey : str — 필요한 API 키 안내.
+        """
         rows = []
         for key, entry in _AXIS_REGISTRY.items():
             act_label = _ACT_LABELS.get(entry.act, "")
@@ -323,19 +374,41 @@ class Macro:
                     "description": entry.description,
                     "example": entry.example,
                     "group": f"{act_str}: {act_label}",
+                    "apiKey": "ECOS_API_KEY (KR) / FRED_API_KEY (US)",
                 }
             )
         return pl.DataFrame(rows)
 
     def __repr__(self) -> str:
-        acts = []
+        n = len(_AXIS_REGISTRY)
+        lines = [f"Macro — 6막 인과 서사, {n}축 시장 레벨 매크로 분석"]
+        lines.append("")
+
+        lines.append("━━━ 6막 구조 ━━━")
+        # 막별 축 매핑
         for act_num in sorted(_ACT_LABELS.keys()):
             if act_num == 0:
                 continue
+            act_label = _ACT_LABELS[act_num]
             act_axes = [e.label for e in _AXIS_REGISTRY.values() if e.act == act_num]
             if act_axes:
-                acts.append(f"{act_num}막({'+'.join(act_axes)})")
-        return f"Macro({', '.join(acts)})"
+                axes_str = ", ".join(act_axes)
+                lines.append(f"  {act_num}막: {act_label:<16s} {axes_str}")
+
+        lines.append("")
+        lines.append("━━━ 빠른 시작 ━━━")
+        lines.append('  dartlab.macro()                              # 이 가이드')
+        lines.append('  dartlab.macro("사이클")                       # 1막: 국면 진단')
+        lines.append('  dartlab.macro("금리")                         # 3막: 정책 대응')
+        lines.append('  dartlab.macro("종합")                         # 전체 종합 판정')
+        lines.append('  dartlab.macro("시나리오", "2008 금융위기")     # 6막: 시나리오')
+        lines.append("")
+        lines.append("━━━ API 키 필요 ━━━")
+        lines.append("  KR: ECOS_API_KEY  (한국은행 → https://ecos.bok.or.kr/api/)")
+        lines.append("  US: FRED_API_KEY  (연준    → https://fred.stlouisfed.org/docs/api/api_key.html)")
+        lines.append("")
+        lines.append("노트북: https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py")
+        return "\n".join(lines)
 
     # accessor 패턴: macro.cycle, macro.rates ...
     def __getattr__(self, name: str) -> Any:

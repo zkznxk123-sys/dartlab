@@ -18,7 +18,20 @@ from dartlab.scan._edgar_helpers import pct, safe_div, scan_edgar_accounts
 
 
 def edgarScan(axis: str, **kwargs) -> pl.DataFrame:
-    """EDGAR 전종목 scan 디스패치."""
+    """EDGAR 전종목 scan 디스패치.
+
+    Parameters
+    ----------
+    axis : str
+        scan 축 이름 (예: "profitability", "growth", "debt").
+    **kwargs
+        축별 추가 인자.
+
+    Returns
+    -------
+    pl.DataFrame
+        축별 전종목 스캔 결과. 미구현 축이면 info 컬럼 1행 DataFrame.
+    """
     fn = _DISPATCH.get(axis)
     if fn is None:
         return pl.DataFrame({"info": [f"EDGAR scan '{axis}' 미구현"]})
@@ -29,7 +42,19 @@ def edgarScan(axis: str, **kwargs) -> pl.DataFrame:
 
 
 def _scanProfitability(**_kw) -> pl.DataFrame:
-    """수익성 — 영업이익률/순이익률/ROE/ROA + 등급."""
+    """수익성 — 영업이익률/순이익률/ROE/ROA + 등급.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        opMargin : float — 영업이익률 (%)
+        netMargin : float — 순이익률 (%)
+        roe : float — 자기자본이익률 (%)
+        roa : float — 총자산이익률 (%)
+        grade : str — 등급 (우수/양호/보통/저수익/적자)
+    """
     df = scan_edgar_accounts(
         ["sales", "operating_profit", "net_profit", "total_assets", "total_stockholders_equity"],
     )
@@ -68,7 +93,18 @@ def _scanProfitability(**_kw) -> pl.DataFrame:
 
 
 def _scanGrowth(**_kw) -> pl.DataFrame:
-    """성장성 — 매출/영업이익 YoY + 패턴 분류."""
+    """성장성 — 매출/영업이익/순이익 YoY + 패턴 분류.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        revenueYoy : float — 매출 전년대비 (%)
+        opYoy : float — 영업이익 전년대비 (%)
+        niYoy : float — 순이익 전년대비 (%)
+        pattern : str — 패턴 (고성장/성장/정체/역성장/급감)
+    """
     df = scan_edgar_accounts(["sales", "operating_profit", "net_profit"])
     if df.is_empty():
         return df
@@ -105,7 +141,17 @@ def _scanGrowth(**_kw) -> pl.DataFrame:
 
 
 def _scanQuality(**_kw) -> pl.DataFrame:
-    """이익의 질 — Accrual Ratio + CF/NI."""
+    """이익의 질 — Accrual Ratio + CF/NI.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        cfToNi : float — 영업CF/순이익 (배), 극단값(±20 초과) 제거
+        accrualRatio : float — 발생액비율 (NI-OCF)/총자산
+        grade : str — 등급 (우수/양호/보통/주의/위험)
+    """
     df = scan_edgar_accounts(["net_profit", "operating_cashflow", "total_assets"])
     if df.is_empty():
         return df
@@ -147,7 +193,17 @@ def _scanQuality(**_kw) -> pl.DataFrame:
 
 
 def _scanLiquidity(**_kw) -> pl.DataFrame:
-    """유동성 — 유동비율 + 당좌비율."""
+    """유동성 — 유동비율 + 당좌비율.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        currentRatio : float — 유동비율 (%)
+        quickRatio : float — 당좌비율 (%)
+        grade : str — 등급 (우수/양호/보통/주의/위험)
+    """
     df = scan_edgar_accounts(["current_assets", "current_liabilities", "inventories"])
     if df.is_empty():
         return df
@@ -183,7 +239,17 @@ def _scanLiquidity(**_kw) -> pl.DataFrame:
 
 
 def _scanEfficiency(**_kw) -> pl.DataFrame:
-    """효율성 — 자산회전율 + CCC."""
+    """효율성 — 자산회전율 + CCC.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        assetTurnover : float — 총자산회전율 (배)
+        ccc : float — 현금전환주기 (일)
+        grade : str — 등급 (우수/양호/보통/비효율)
+    """
     df = scan_edgar_accounts(
         [
             "sales",
@@ -229,7 +295,19 @@ def _scanEfficiency(**_kw) -> pl.DataFrame:
 
 
 def _scanCashflow(**_kw) -> pl.DataFrame:
-    """현금흐름 — OCF/ICF/FCF + 패턴 분류."""
+    """현금흐름 — OCF/ICF/FCF + 패턴 분류.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        operating_cashflow : float — 영업활동 현금흐름 (USD)
+        investing_cashflow : float — 투자활동 현금흐름 (USD)
+        fcf : float — 잉여현금흐름 OCF+CAPEX (USD)
+        ocfMargin : float — OCF/매출 (%)
+        pattern : str — 패턴 (성장투자형/공격성장형/외부의존형/축소정리형/현금위기형/기타)
+    """
     df = scan_edgar_accounts(
         [
             "operating_cashflow",
@@ -289,7 +367,17 @@ def _scanCashflow(**_kw) -> pl.DataFrame:
 
 
 def _scanDividendTrend(**_kw) -> pl.DataFrame:
-    """배당추이 — DPS 시계열 + 패턴."""
+    """배당추이 — 배당금액 + 배당성향 + 등급.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        dividendAmount : float — 배당금 절대값 (USD)
+        payoutRatio : float — 배당성향 (%), 극단값(±200% 초과) 제거
+        grade : str — 등급 (양호/보통/주의/무배당)
+    """
     df = scan_edgar_accounts(["dividends_paid", "net_profit"])
     if df.is_empty():
         return df
@@ -326,7 +414,18 @@ def _scanDividendTrend(**_kw) -> pl.DataFrame:
 
 
 def _scanCapital(**_kw) -> pl.DataFrame:
-    """주주환원 — 배당 + 자사주."""
+    """주주환원 — 배당 + 자사주 + 분류.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        dividendAmount : float — 배당금 절대값 (USD)
+        payoutRatio : float — 배당성향 (%), 극단값 제거
+        treasury_stock : float — 자기주식 (USD)
+        classification : str — 분류 (적극환원/환원형/자사주/중립)
+    """
     df = scan_edgar_accounts(["dividends_paid", "net_profit", "treasury_stock"])
     if df.is_empty():
         return df
@@ -365,7 +464,18 @@ def _scanCapital(**_kw) -> pl.DataFrame:
 
 
 def _scanDebt(**_kw) -> pl.DataFrame:
-    """부채구조 — 부채비율 + 차입금 구조."""
+    """부채구조 — 부채비율 + ICR + 차입금 구조.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        debtRatio : float — 부채비율 (%)
+        icr : float — 이자보상배율 (배)
+        shortTermRatio : float — 단기차입금 비중 (%)
+        riskLevel : str — 위험등급 (안전/주의/관찰/고위험)
+    """
     df = scan_edgar_accounts(
         [
             "total_liabilities",
@@ -410,7 +520,17 @@ def _scanDebt(**_kw) -> pl.DataFrame:
 
 
 def _scanValuation(**_kw) -> pl.DataFrame:
-    """밸류에이션 — PER/PBR/EV/EBITDA. Yahoo 주가 데이터 필요."""
+    """밸류에이션 — EBITDA + 자기자본승수 + ROE.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        ebitda : float — EBITDA (USD)
+        equityMultiplier : float — 자기자본승수 총자산/자본 (배)
+        roe : float — 자기자본이익률 (%)
+    """
     df = scan_edgar_accounts(
         [
             "net_profit",
@@ -449,7 +569,18 @@ def _scanValuation(**_kw) -> pl.DataFrame:
 
 
 def _scanAudit(**_kw) -> pl.DataFrame:
-    """감사 — XBRL AuditFees/NonAuditFees."""
+    """감사 — XBRL 감사/비감사 보수.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        AuditFees : float — 감사보수 (USD)
+        NonAuditServicesFees : float — 비감사 보수 (USD)
+        AllOtherFees : float — 기타 보수 (USD)
+        TaxFees : float — 세무 보수 (USD)
+    """
     df = scan_edgar_accounts(
         ["sales"],  # 기본 계정으로 종목 목록 획득
     )

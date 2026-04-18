@@ -31,7 +31,26 @@ _JINA_PREFIX = "https://r.jina.ai/"
 
 
 def _readJina(url: str) -> str:
-    """Jina Reader API로 URL -> 마크다운 변환."""
+    """Jina Reader API로 URL 본문을 마크다운으로 변환.
+
+    r.jina.ai 프록시를 통해 웹 페이지를 마크다운으로 추출한다.
+    결과는 _MAX_CONTENT_LENGTH(8000자)로 잘린다.
+
+    Parameters
+    ----------
+    url : str
+        추출할 웹 페이지 URL.
+
+    Returns
+    -------
+    str
+        마크다운 형식의 본문 텍스트 (최대 8000자).
+
+    Raises
+    ------
+    httpx.HTTPStatusError
+        HTTP 응답 상태가 4xx/5xx인 경우.
+    """
     import httpx
 
     headers: dict[str, str] = {
@@ -49,7 +68,27 @@ def _readJina(url: str) -> str:
 
 
 def _readBs4(url: str) -> str:
-    """httpx + BeautifulSoup으로 URL 본문 추출."""
+    """httpx + BeautifulSoup으로 URL 본문을 플레인 텍스트로 추출.
+
+    script/style/nav/footer 등 비본문 태그를 제거한 뒤
+    article > main > body 순으로 본문 영역을 탐색한다.
+    결과는 _MAX_CONTENT_LENGTH(8000자)로 잘린다.
+
+    Parameters
+    ----------
+    url : str
+        추출할 웹 페이지 URL.
+
+    Returns
+    -------
+    str
+        줄바꿈 구분 플레인 텍스트 (최대 8000자).
+
+    Raises
+    ------
+    httpx.HTTPStatusError
+        HTTP 응답 상태가 4xx/5xx인 경우.
+    """
     import httpx
     from bs4 import BeautifulSoup
 

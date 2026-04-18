@@ -517,7 +517,13 @@ _groups: dict[str, list[CatalogEntry]] = {}
 
 
 def _build() -> None:
-    """카탈로그 인덱스 빌드 (최초 1회)."""
+    """카탈로그 인덱스 빌드 (최초 1회).
+
+    Returns
+    -------
+    None
+        ``_entries``/``_groups`` 모듈 변수에 인덱스를 채운다.
+    """
     if _entries:
         return
     for code, info in _INDICATORS.items():
@@ -536,43 +542,112 @@ def _build() -> None:
 
 
 def getEntry(indicatorId: str) -> CatalogEntry | None:
-    """지표 ID로 카탈로그 항목 조회."""
+    """지표 ID로 카탈로그 항목 조회.
+
+    Parameters
+    ----------
+    indicatorId : str
+        ECOS 카탈로그 지표 ID (예: "GDP", "CPI").
+
+    Returns
+    -------
+    CatalogEntry | None
+        매칭된 카탈로그 엔트리. 없으면 None.
+    """
     _build()
     return _entries.get(indicatorId)
 
 
 def getGroups() -> list[str]:
-    """그룹 이름 목록."""
+    """그룹 이름 목록.
+
+    Returns
+    -------
+    list[str]
+        등록된 그룹명 리스트 (예: ["국민계정", "물가", "금리", ...]).
+    """
     _build()
     return list(_groups.keys())
 
 
 def getGroup(name: str) -> list[CatalogEntry]:
-    """특정 그룹의 지표 목록."""
+    """특정 그룹의 지표 목록.
+
+    Parameters
+    ----------
+    name : str
+        그룹명 (예: "금리", "환율").
+
+    Returns
+    -------
+    list[CatalogEntry]
+        해당 그룹의 카탈로그 엔트리 리스트. 그룹이 없으면 빈 리스트.
+    """
     _build()
     return _groups.get(name, [])
 
 
 def getGroupIds(name: str) -> list[str]:
-    """특정 그룹의 지표 ID 목록."""
+    """특정 그룹의 지표 ID 목록.
+
+    Parameters
+    ----------
+    name : str
+        그룹명.
+
+    Returns
+    -------
+    list[str]
+        해당 그룹의 지표 ID 리스트 (예: ["BASE_RATE", "TREASURY_3Y", ...]).
+    """
     return [e.id for e in getGroup(name)]
 
 
 def getAllIds() -> list[str]:
-    """전체 지표 ID 목록."""
+    """전체 지표 ID 목록.
+
+    Returns
+    -------
+    list[str]
+        카탈로그에 등록된 모든 지표 ID 리스트.
+    """
     _build()
     return list(_entries.keys())
 
 
 def search(keyword: str) -> list[CatalogEntry]:
-    """키워드로 카탈로그 검색 (ID, 라벨, 설명에서 매칭)."""
+    """키워드로 카탈로그 검색 (ID, 라벨, 설명에서 매칭).
+
+    Parameters
+    ----------
+    keyword : str
+        검색 키워드 (대소문자 무시).
+
+    Returns
+    -------
+    list[CatalogEntry]
+        매칭된 카탈로그 엔트리 리스트.
+    """
     _build()
     kw = keyword.lower()
     return [e for e in _entries.values() if kw in e.id.lower() or kw in e.label.lower() or kw in e.description.lower()]
 
 
 def toDataframe(group: str | None = None) -> pl.DataFrame:
-    """카탈로그 → Polars DataFrame."""
+    """카탈로그 → Polars DataFrame.
+
+    Parameters
+    ----------
+    group : str | None
+        특정 그룹만 필터. None이면 전체.
+
+    Returns
+    -------
+    pl.DataFrame
+        컬럼: ``id`` (Utf8) — 지표 ID, ``label`` (Utf8) — 한글 라벨,
+        ``group`` (Utf8) — 그룹명, ``frequency`` (Utf8) — 주기 코드,
+        ``unit`` (Utf8) — 단위, ``description`` (Utf8) — 설명.
+    """
     _build()
     entries = getGroup(group) if group else list(_entries.values())
     return pl.DataFrame(

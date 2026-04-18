@@ -17,7 +17,34 @@ from dartlab.core.finance.macroCycle import (
 
 
 def _fetch_asset_data(market: str, as_of: str | None = None) -> dict[str, float | None]:
-    """gather에서 5대 자산 지표 수집."""
+    """gather에서 5대 자산 지표 수집.
+
+    Parameters
+    ----------
+    market : str
+        ``"US"`` | ``"KR"``.
+    as_of : str | None
+        기준일. ``None`` 이면 최신.
+
+    Returns
+    -------
+    dict[str, float]
+        None 값은 제거된 채 반환. 가능한 키:
+
+        - short_rate : float — 2년 국채금리 (%)
+        - short_rate_change : float — 2년 국채금리 3개월 변화율 (%)
+        - long_rate : float — 10년 국채금리 (%)
+        - long_rate_change : float — 10년 국채금리 3개월 변화율 (%)
+        - vix : float — VIX 지수 (pt)
+        - vix_change : float — VIX 3개월 변화율 (%)
+        - dfii10 : float — 10년 TIPS 실질금리 (%)
+        - dfii10_change : float — 실질금리 3개월 변화율 (%)
+        - fx_usdkrw : float — 환율 (원/달러 또는 DXY)
+        - fx_change_pct : float — 환율 3개월 변화율 (%)
+        - gold : float — 금 가격 (달러/oz)
+        - gold_yoy : float — 금 가격 전년비 변화율 (%)
+        - dxy_change_pct : float — 달러인덱스 3개월 변화율 (%)
+    """
     from dartlab.macro._helpers import fetch_change_pct, fetch_latest, fetch_yoy, get_gather
 
     g = get_gather(as_of)
@@ -39,10 +66,27 @@ def _fetch_asset_data(market: str, as_of: str | None = None) -> dict[str, float 
 
 
 def analyze_assets(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """5대 자산 종합 해석.
+    """5대 자산 종합 해석 — 주식/채권/원자재/환율/금 + 심층 드라이버.
 
-    Returns:
-        dict: assets (기본 해석), goldDrivers, vixRegime
+    Parameters
+    ----------
+    market : str
+        ``"US"`` | ``"KR"``.
+    as_of : str | None
+        기준일. ``None`` 이면 최신.
+    overrides : dict | None
+        지표 강제 치환 (예: ``{"vix": 30}``).
+
+    Returns
+    -------
+    dict
+        - market : str — 시장 코드
+        - assets : list[dict] — 자산별 해석. 각 원소: asset:str, label:str, level:float, change:float(%), interpretation:str, implication:str
+        - goldDrivers : dict | None — 금 3요인 분해 (realRateEffect:str, dollarEffect:str, safeHavenEffect:str, dominant:str)
+        - vixRegime : dict | None — VIX 구간 판정 (level:float(pt), zone:str, zoneLabel:str, buySignal:bool)
+        - fxDrivers : dict | None — 환율 3요인 분해 (rateDiffEffect:str, tradeEffect:str, riskEffect:str, dominant:str, divergence:bool)
+        - copperGold : dict | None — 구리/금 비율 (ratio:float(배), direction:str, directionLabel:str, implication:str, description:str)
+        - marketValuation : dict | None — Buffett Indicator (buffettIndicator:float(%), zone:str, zoneLabel:str, description:str). US 전용.
     """
     data = _fetch_asset_data(market, as_of=as_of)
     if overrides:

@@ -26,7 +26,32 @@ def synthesizeThesis(
     forecastData: ForecastData | None = None,
     narrativeAnalysis: NarrativeAnalysis | None = None,
 ) -> InvestmentThesis:
-    """분석 결과를 종합하여 bull/bear case 생성."""
+    """분석 결과를 종합하여 bull/bear case 생성.
+
+    Parameters
+    ----------
+    executive : ExecutiveSummary
+        경영진 요약.
+    insightDetails : list[InsightDetail], optional
+        인사이트 상세 목록.
+    valuationAnalysis : ValuationSection, optional
+        밸류에이션 분석.
+    riskAnalysis : RiskSection, optional
+        리스크 분석.
+    quantScores : QuantScores, optional
+        정량 모델 점수.
+    earningsQuality : EarningsQuality, optional
+        이익품질 분석.
+    forecastData : ForecastData, optional
+        예측 데이터.
+    narrativeAnalysis : NarrativeAnalysis, optional
+        서술 분석.
+
+    Returns
+    -------
+    InvestmentThesis
+        bull/bear case, catalysts, monitoring 항목.
+    """
     bull: list[str] = []
     bear: list[str] = []
     catalysts: list[str] = []
@@ -338,7 +363,20 @@ def _firstSentence(text: str) -> str:
 
 
 def classifyProfile(grades: dict[str, str], upside: float | None) -> str:
-    """투자 프로파일 분류."""
+    """투자 프로파일 분류.
+
+    Parameters
+    ----------
+    grades : dict[str, str]
+        영역별 등급 ("A"~"F") 매핑.
+    upside : float | None
+        upside 비율 (%).
+
+    Returns
+    -------
+    str
+        프로파일 ("premium"|"growth"|"stable"|"caution"|"distress").
+    """
     gradeValues = {"A": 5, "B": 4, "C": 3, "D": 2, "F": 1}
     vals = [gradeValues.get(g, 3) for g in grades.values()]
     avg = sum(vals) / len(vals) if vals else 3

@@ -160,7 +160,16 @@ CREDIT_RATING = {
 
 
 def buildSpec() -> dict:
-    """insight 엔진 스펙 반환."""
+    """insight 엔진 스펙 반환.
+
+    Returns
+    -------
+    dict
+        name : str — 엔진명
+        description : str — 엔진 설명
+        summary : dict — 영역/등급/이상치/부실/신용 요약
+        detail : dict — 영역별 상세 메타데이터
+    """
     return {
         "name": "insight",
         "description": "기업 분석 등급 (10영역 A~F) + 이상치 탐지 + 부실 예측 + 신용평가 + 프로파일 분류",

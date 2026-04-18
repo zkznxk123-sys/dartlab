@@ -760,6 +760,7 @@ def calcQualityAnomalies(company, *, basePeriod: str | None = None) -> dict | No
     t, t1 = annual_years[0], annual_years[1]
 
     def _ga(row_dict: dict, period: str, *keys: str) -> float | None:
+        """다중 키 fallback으로 특정 기간 값 추출."""
         for k in keys:
             row = row_dict.get(k) or {}
             v = row.get(period)

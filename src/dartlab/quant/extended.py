@@ -449,7 +449,24 @@ def calcMarketAnalysisFlags(company) -> list[str]:
 
 @_memoized_calc
 def calcTrendData(company) -> dict | None:
-    """추세 데이터 — MA 정배열 + ADX. 서사는 review가 생성."""
+    """추세 데이터 — MA 정배열 + ADX. 서사는 review가 생성.
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+
+    Returns
+    -------
+    dict
+        data : dict | None — 추세 카테고리 상세
+            label : str — 추세 방향 ("상승" | "횡보" | "하락")
+            score : int — 추세 점수 (점)
+        verdict : dict — calcTechnicalVerdict 전체 결과
+
+    Examples
+    --------
+    >>> c.quant("trend")"""
     verdict = calcTechnicalVerdict(company)
     if verdict is None:
         return None
@@ -458,7 +475,28 @@ def calcTrendData(company) -> dict | None:
 
 @_memoized_calc
 def calcRiskData(company) -> dict | None:
-    """리스크 데이터 — ATR + 베타 + 변동성. 서사는 review가 생성."""
+    """리스크 데이터 — ATR + 베타 + 변동성. 서사는 review가 생성.
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+
+    Returns
+    -------
+    dict
+        data : dict | None — calcMarketRisk 결과
+            beta : float | None — 베타 계수 (배)
+            atr : float | None — ATR 14일 (원)
+            atrPercent : float | None — ATR / 종가 비율 (%)
+            relativeStrength : float | None — 벤치마크 대비 상대강도 (배)
+            volatilityGrade : str | None — "낮음" | "보통" | "높음" | "매우 높음"
+            price : float — 최근 종가 (원)
+        verdict : dict | None — calcTechnicalVerdict 전체 결과
+
+    Examples
+    --------
+    >>> c.quant("risk")"""
     verdict = calcTechnicalVerdict(company)
     risk = calcMarketRisk(company)
     return {"data": risk, "verdict": verdict}
@@ -466,28 +504,112 @@ def calcRiskData(company) -> dict | None:
 
 @_memoized_calc
 def calcSignalData(company) -> dict | None:
-    """수급 신호 데이터 — 최근 20일 매수/매도. 서사는 review가 생성."""
+    """수급 신호 데이터 — 최근 20일 매수/매도. 서사는 review가 생성.
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+
+    Returns
+    -------
+    dict
+        data : dict | None — calcTechnicalSignals 결과
+            signals : dict — 신호별 누적 점수
+                goldenCross : int — 골든/데드크로스 누적
+                rsiSignal : int — RSI 신호 누적
+                macdSignal : int — MACD 신호 누적
+                bollingerSignal : int — 볼린저 신호 누적
+            signalSummary : dict
+                bullish : int — 매수 신호 건수 (건)
+                bearish : int — 매도 신호 건수 (건)
+            recentEvents : list[dict] — 최근 이벤트 목록
+
+    Examples
+    --------
+    >>> c.quant("signal")"""
     signals = calcTechnicalSignals(company)
     return {"data": signals}
 
 
 @_memoized_calc
 def calcStrategyData(company) -> dict | None:
-    """전략 검증 데이터 — 스타일별 Sharpe + 진입. 서사는 review가 생성."""
+    """전략 검증 데이터 — 스타일별 Sharpe + 진입. 서사는 review가 생성.
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+
+    Returns
+    -------
+    dict
+        data : dict | None — calcStrategySnapshot 결과
+            {style_key} : dict — 스타일별 백테스트 결과
+                sharpe : float — Sharpe 비율 (배)
+                mdd : float — 최대 낙폭 (%)
+                dsr : float — Deflated Sharpe Ratio (배)
+                trades : int — 거래 횟수 (건)
+                entry_today : bool — 오늘 진입 신호 여부
+                exit_today : bool — 오늘 청산 신호 여부
+                stop_level : float | None — 스톱 가격 (원)
+                status : str — "ok" | "error" | "not_applicable"
+
+    Examples
+    --------
+    >>> c.quant("strategy")"""
     strategy = calcStrategySnapshot(company)
     return {"data": strategy}
 
 
 @_memoized_calc
 def calcCrosscheckData(company) -> dict | None:
-    """교차 검증 데이터 — analysis 등급 vs 기술적 판단. 서사는 review가 생성."""
+    """교차 검증 데이터 — analysis 등급 vs 기술적 판단. 서사는 review가 생성.
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+
+    Returns
+    -------
+    dict
+        data : dict | None — calcFundamentalDivergence 결과
+            financialGrade : str | None — 재무 등급 ("A+" ~ "D")
+            technicalVerdict : str | None — "강세" | "중립" | "약세"
+            technicalScore : int — 기술적 점수 (점)
+            divergence : str — 괴리 유형 ("순풍" | "괴리" | "위험" 등)
+            diagnosis : str — 진단 메시지
+            matrix : str — 2×3 매트릭스 키
+
+    Examples
+    --------
+    >>> c.quant("crosscheck")"""
     divergence = calcFundamentalDivergence(company)
     return {"data": divergence}
 
 
 @_memoized_calc
 def calcQuantConclusionData(company) -> dict | None:
-    """결론 데이터 — 5축 방향 집계. 서사는 review가 생성."""
+    """결론 데이터 — 5축 방향 집계. 서사는 review가 생성.
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+
+    Returns
+    -------
+    dict
+        trend_label : str — 추세 방향 라벨 ("상승" | "횡보" | "하락")
+        bullish : int — 매수 신호 건수 (건)
+        bearish : int — 매도 신호 건수 (건)
+        active_styles : list[str] — 오늘 진입 신호가 활성인 스타일명
+        diagnosis : str — 교차검증 진단 메시지
+
+    Examples
+    --------
+    >>> c.quant("conclusion")"""
     verdict = calcTechnicalVerdict(company)
     signals = calcTechnicalSignals(company)
     strategy = calcStrategySnapshot(company)

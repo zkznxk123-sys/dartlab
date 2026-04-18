@@ -28,7 +28,20 @@ _SEVERE_KEYWORDS = ["횡령", "배임", "과징금", "손해배상"]
 
 
 def _gradeRisk(activeCount: int, hasSevereKeyword: bool) -> str:
-    """활성 시그널 수 + 심각 키워드 → 등급."""
+    """활성 시그널 수 + 심각 키워드 → 위험 등급.
+
+    Parameters
+    ----------
+    activeCount : int
+        활성 시그널 수 (0~6).
+    hasSevereKeyword : bool
+        심각 키워드(횡령/배임/과징금/손해배상) 신규 등장 여부.
+
+    Returns
+    -------
+    str
+        위험 등급 — "고위험" (심각키워드 or 3+시그널) / "주의" (1+) / "안정" (0).
+    """
     if hasSevereKeyword or activeCount >= 3:
         return "고위험"
     if activeCount >= 1:
@@ -57,7 +70,21 @@ def _calcChronicYears(fullDf: pl.DataFrame) -> pl.DataFrame:
 
 
 def _calcRiskKeyword(latest: pl.DataFrame, prev: pl.DataFrame) -> pl.DataFrame:
-    """리스크 키워드 신규 등장 탐지 (전년 대비 차분)."""
+    """리스크 키워드 신규 등장 탐지 (전년 대비 차분).
+
+    Parameters
+    ----------
+    latest : pl.DataFrame
+        최신 기간 changes (preview 컬럼 포함).
+    prev : pl.DataFrame
+        이전 기간 changes.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 신규 키워드 등장 종목코드
+        riskKeyword : int — 1 (플래그)
+    """
     now_stocks: set[str] = set()
     prev_stocks: set[str] = set()
 

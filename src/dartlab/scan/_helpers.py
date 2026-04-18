@@ -14,10 +14,15 @@ _SCAN_FRESHNESS_TTL_SECONDS = 24 * 3600
 
 
 def _ensureScanData() -> Path:
-    """scan 프리빌드 디렉토리 확인. 없거나 오래됐으면 HF에서 자동 다운로드.
+    """scan 프리빌드 디렉토리 확인 — 없거나 오래됐으면 HF에서 자동 다운로드.
 
-    로컬에 finance.parquet이 있고 TTL 이내면 즉시 반환 (HF 호출 0).
+    로컬에 finance.parquet이 있고 TTL(24h) 이내면 즉시 반환 (HF 호출 0).
     없으면 다운로드, TTL 초과면 백그라운드 갱신 시도.
+
+    Returns
+    -------
+    Path
+        scan 프리빌드 디렉토리 경로 (~/.dartlab/data/scan/).
     """
     from dartlab.core.dataLoader import _dataDir
     from dartlab.core.messaging import emit
@@ -65,6 +70,19 @@ def scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
 
     scan/report/{apiType}.parquet 프리빌드가 있으면 단일 파일에서 즉시 로드.
     없으면 종목별 parquet 순회 (fallback).
+
+    Parameters
+    ----------
+    api_type : str
+        DART API 유형 (예: "majorHolder", "auditReport").
+    keep_cols : list[str]
+        추출할 컬럼 목록 (예: ["stockCode", "year", "지분율"]).
+
+    Returns
+    -------
+    pl.DataFrame
+        keep_cols 중 존재하는 컬럼만 포함한 전종목 결과.
+        데이터 없으면 빈 DataFrame.
     """
     # 1순위: 프리빌드 scan parquet (없으면 자동 다운로드 시도)
     scanDir = _ensureScanData()
@@ -125,7 +143,22 @@ def scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
 
 
 def parse_num(s) -> float | None:
-    """문자열/숫자 → float. core.finance.helpers.parseNumStr SSOT."""
+    """문자열/숫자 → float 변환.
+
+    Parameters
+    ----------
+    s : str | int | float | None
+        변환 대상. 쉼표/공백 포함 문자열도 처리.
+
+    Returns
+    -------
+    float | None
+        숫자 변환 결과. 변환 불가면 None.
+
+    Notes
+    -----
+    core.finance.helpers.parseNumStr 이 SSOT.
+    """
     if isinstance(s, (int, float)):
         return float(s)
     from dartlab.core.finance.helpers import parseNumStr
@@ -134,7 +167,24 @@ def parse_num(s) -> float | None:
 
 
 def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_amount") -> float | None:
-    """DataFrame에서 account_id/account_nm 매칭 → 금액 추출."""
+    """DataFrame에서 account_id/account_nm 매칭 → 금액 추출.
+
+    Parameters
+    ----------
+    sub : pl.DataFrame
+        단일 종목의 재무 데이터.
+    ids : set
+        매칭할 account_id 집합.
+    nms : set
+        매칭할 account_nm 집합.
+    amtCol : str
+        금액 컬럼명 (기본 "thstrm_amount").
+
+    Returns
+    -------
+    float | None
+        첫 매칭 계정의 금액 (원). 매칭 없으면 None.
+    """
     for row in sub.iter_rows(named=True):
         aid = row.get("account_id", "")
         anm = row.get("account_nm", "")
@@ -146,7 +196,22 @@ def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_
 
 
 def find_latest_year(raw: pl.DataFrame, check_col: str, min_count: int = 500) -> str | None:
-    """check_col에 유효 데이터가 min_count 이상인 가장 최근 연도 반환."""
+    """check_col에 유효 데이터가 min_count 이상인 가장 최근 연도 반환.
+
+    Parameters
+    ----------
+    raw : pl.DataFrame
+        year 컬럼을 포함한 전종목 데이터.
+    check_col : str
+        유효성 검사 대상 컬럼명.
+    min_count : int
+        해당 연도에 필요한 최소 유효 행 수.
+
+    Returns
+    -------
+    str | None
+        가장 최근 유효 연도 문자열 (예: "2024"). 없으면 None.
+    """
     years_desc = sorted(raw["year"].unique().to_list(), reverse=True)
     for y in years_desc:
         sub = raw.filter(pl.col("year") == y)
@@ -162,21 +227,53 @@ QUARTER_ORDER = {"2분기": 1, "4분기": 2, "3분기": 3, "1분기": 4}
 
 
 def pick_best_quarter(df: pl.DataFrame) -> pl.DataFrame:
-    """가장 선호하는 분기만 필터 (Q2 > Q4 > Q3 > Q1)."""
+    """가장 선호하는 분기만 필터 (Q2 > Q4 > Q3 > Q1).
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        quarter 컬럼을 포함한 전종목 데이터.
+
+    Returns
+    -------
+    pl.DataFrame
+        가장 선호하는 분기 1개만 남긴 DataFrame.
+    """
     quarters = df["quarter"].unique().to_list()
     best = sorted(quarters, key=lambda q: QUARTER_ORDER.get(q, 99))
     return df.filter(pl.col("quarter") == best[0]) if best else df
 
 
 def load_listing():
-    """상장사 목록 로드 (network/scanner.py 위임)."""
+    """상장사 목록 로드.
+
+    Returns
+    -------
+    pl.DataFrame
+        종목코드, 종목명, 업종 등 상장사 기본 정보.
+
+    Notes
+    -----
+    network/scanner.py 의 load_listing 에 위임.
+    """
     from dartlab.scan.network.scanner import load_listing as _ll
 
     return _ll()
 
 
 def parse_date_year(s) -> int | None:
-    """'2021.06.15' 또는 '2021-06-15' → 2021."""
+    """날짜 문자열에서 연도 추출.
+
+    Parameters
+    ----------
+    s : str | None
+        날짜 문자열 (예: "2021.06.15", "2021-06-15").
+
+    Returns
+    -------
+    int | None
+        연도 (예: 2021). 파싱 불가면 None.
+    """
     if s is None:
         return None
     s = str(s).strip()
@@ -202,7 +299,26 @@ def _scanFinanceFromMerged(
     accountNms: set[str],
     amountCol: str,
 ) -> dict[str, float]:
-    """합산 finance parquet에서 종목별 최신 연도 값 추출."""
+    """합산 finance parquet에서 종목별 최신 연도 값 추출.
+
+    Parameters
+    ----------
+    scanPath : Path
+        프리빌드 finance.parquet 경로.
+    sjDivs : list[str]
+        재무제표 구분 코드 (예: ["IS", "CIS"]).
+    accountIds : set[str]
+        매칭할 account_id 집합.
+    accountNms : set[str]
+        매칭할 account_nm 집합.
+    amountCol : str
+        금액 컬럼명 (예: "thstrm_amount").
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: 금액(원)} — 종목별 최신 연도 첫 매칭 계정의 값.
+    """
     scCol = "stockCode" if "stockCode" in pl.scan_parquet(str(scanPath)).collect_schema().names() else "stock_code"
 
     target = (
@@ -246,10 +362,26 @@ def scan_finance_parquets(
     *,
     amount_col: str = "thstrm_amount",
 ) -> dict[str, float]:
-    """finance parquet 전수 스캔 → {종목코드: 값}.
+    """finance parquet 전수 스캔 → 종목별 계정 값.
 
     scan/finance.parquet 프리빌드가 있으면 단일 파일에서 즉시 필터.
     없으면 종목별 parquet 순회 (fallback).
+
+    Parameters
+    ----------
+    statement : str
+        재무제표 구분 (예: "IS", "BS", "CF").
+    account_ids : set[str]
+        매칭할 account_id 집합.
+    account_nms : set[str]
+        매칭할 account_nm 집합.
+    amount_col : str
+        금액 컬럼명 (기본 "thstrm_amount").
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: 금액(원)} — 종목별 최신 연도 첫 매칭 계정의 값.
     """
     sj_divs = [statement] if statement != "IS" else ["IS", "CIS"]
 

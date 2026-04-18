@@ -36,7 +36,30 @@ _RISK_KEYWORDS = {
 
 
 def calcRiskText(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
-    """리스크 팩터 텍스트 델타 분석."""
+    """리스크 팩터 텍스트 델타 분석.
+
+    공시 문서에서 리스크 키워드(위험·소송·부도 등) 출현 빈도를 집계하고,
+    기간별 추세·신규 리스크·밀도 기반 리스크 등급을 산출한다.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드.
+    market : str
+        "KR" | "US" | "auto". 기본 "auto".
+
+    Returns
+    -------
+    dict
+        stockCode : str — 종목코드
+        market : str — 시장
+        totalMentions : int — 전체 리스크 키워드 출현 횟수
+        riskTimeSeries : list[dict] — 기간별 멘션 수·키워드 목록 (최근 10개)
+        trend : str — "increasing" | "decreasing" | "stable" | "insufficient_data"
+        newRisks : list[str] — 최근 기간에 새로 등장한 키워드
+        riskScore : float — 멘션 밀도 (천 단어당, 점)
+        riskGrade : str — "high" | "medium" | "low"
+    """
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 

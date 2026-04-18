@@ -416,6 +416,13 @@ def _triangulate(primary_key: str, primary_value: float, secondary_keys: list[st
 
 
 def _getCurrentPrice(company: Any) -> float | None:
+    """현재 주가 추출 — currentPrice 속성 우선, 없으면 gather 경유.
+
+    Returns
+    -------
+    float | None
+        현재 주가 (원). 조회 실패 시 None.
+    """
     try:
         price = getattr(company, "currentPrice", None)
         if price:
@@ -431,6 +438,13 @@ def _getCurrentPrice(company: Any) -> float | None:
 
 
 def _calcOpinion(upside: float | None) -> str:
+    """upside 기반 투자 의견 산출.
+
+    Returns
+    -------
+    str
+        "강력매수" | "매수" | "보유" | "매도" | "강력매도" | "판단 불가".
+    """
     if upside is None:
         return "판단 불가"
     if upside > 30:
@@ -523,6 +537,7 @@ def _calcLiquidationDetail(company: Any, overrides: dict) -> dict | None:
         latest = periods[0]
 
         def _get(*keys: str) -> float:
+            """BS 다중 키에서 첫 번째 유효 값 추출 (None → 0)."""
             for k in keys:
                 v = (data.get(k) or {}).get(latest)
                 if v:
@@ -748,6 +763,7 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
         latest = periods[0]
 
         def _g(*keys: str) -> float:
+            """BS 다중 키에서 차입금 값 추출 (None → 0)."""
             for k in keys:
                 v = (data.get(k) or {}).get(latest)
                 if v:

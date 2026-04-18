@@ -38,7 +38,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="USD",
         exchange_suffix="",
         benchmark_ticker="^GSPC",
-        fallback_chain=("naver_global", "fmp"),
+        fallback_chain=("yahoo_chart", "naver_global", "fmp"),
         trading_hours_utc=(14, 21),
     ),
     "JP": MarketConfig(
@@ -47,7 +47,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="JPY",
         exchange_suffix=".T",
         benchmark_ticker="^N225",
-        fallback_chain=("naver_global", "fmp"),
+        fallback_chain=("yahoo_chart", "naver_global", "fmp"),
         trading_hours_utc=(0, 6),
     ),
     "HK": MarketConfig(
@@ -56,7 +56,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="HKD",
         exchange_suffix=".HK",
         benchmark_ticker="^HSI",
-        fallback_chain=("naver_global", "fmp"),
+        fallback_chain=("yahoo_chart", "naver_global", "fmp"),
         trading_hours_utc=(1, 8),
     ),
     "UK": MarketConfig(
@@ -65,7 +65,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="GBP",
         exchange_suffix=".L",
         benchmark_ticker="^FTSE",
-        fallback_chain=("naver_global", "fmp"),
+        fallback_chain=("yahoo_chart", "naver_global", "fmp"),
         trading_hours_utc=(8, 16),
     ),
     "DE": MarketConfig(
@@ -74,7 +74,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="EUR",
         exchange_suffix=".DE",
         benchmark_ticker="^GDAXI",
-        fallback_chain=("naver_global", "fmp"),
+        fallback_chain=("yahoo_chart", "naver_global", "fmp"),
         trading_hours_utc=(7, 16),
     ),
     "CN": MarketConfig(
@@ -83,7 +83,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="CNY",
         exchange_suffix=".SS",
         benchmark_ticker="000001.SS",
-        fallback_chain=("naver_global", "fmp"),
+        fallback_chain=("yahoo_chart", "naver_global", "fmp"),
         trading_hours_utc=(1, 7),
     ),
     "IN": MarketConfig(
@@ -92,7 +92,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="INR",
         exchange_suffix=".NS",
         benchmark_ticker="^NSEI",
-        fallback_chain=("naver_global", "fmp"),
+        fallback_chain=("yahoo_chart", "naver_global", "fmp"),
         trading_hours_utc=(4, 10),
     ),
 }
@@ -102,7 +102,18 @@ _CN_SZ_PREFIXES = ("00", "30")
 
 
 def get_market_config(market: str) -> MarketConfig:
-    """시장 코드 → MarketConfig. 없으면 US 기본값."""
+    """시장 코드 → MarketConfig. 없으면 US 기본값.
+
+    Parameters
+    ----------
+    market : str
+        시장 코드 (예: "KR", "US", "JP"). 대소문자 무관.
+
+    Returns
+    -------
+    MarketConfig
+        해당 시장의 설정. 미등록 시장이면 US 기본값 반환.
+    """
     return MARKETS.get(market.upper(), MARKETS["US"])
 
 
@@ -112,6 +123,21 @@ def resolve_ticker(stock_code: str, market: str, source: str) -> str:
     - naver: 종목코드 그대로 (KR only)
     - naver_global: 종목코드 + 거래소 접미사
     - fmp: 종목코드 + 거래소 접미사 (Yahoo와 동일 형식)
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드/티커 (예: "005930", "AAPL", "7203").
+    market : str
+        시장 코드 ("KR", "US", "JP", "HK", "CN" 등).
+    source : str
+        데이터 소스 이름 ("naver", "naver_global", "fmp", "yahoo_chart" 등).
+
+    Returns
+    -------
+    str
+        소스에 맞게 변환된 ticker 문자열.
+        예: "7203.T" (JP/yahoo_chart), "0293.HK" (HK), "005930" (KR/naver).
     """
     market = market.upper()
     config = get_market_config(market)

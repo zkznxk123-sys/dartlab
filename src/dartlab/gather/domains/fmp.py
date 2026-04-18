@@ -18,11 +18,45 @@ _BASE = "https://financialmodelingprep.com/api/v3"
 
 
 def _get_api_key() -> str | None:
+    """환경변수에서 FMP API 키를 조회.
+
+    Returns
+    -------
+    str | None
+        ``FMP_API_KEY`` 환경변수 값. 미설정 시 None.
+    """
     return os.environ.get("FMP_API_KEY")
 
 
 async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSnapshot | None:
-    """현재가 — /quote/{ticker}."""
+    """현재가 — FMP /quote/{ticker}.
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"AAPL"``, ``"005930"``).
+    client
+        비동기 HTTP 클라이언트.
+    market : str
+        시장 코드 (기본값 ``"US"``).
+
+    Returns
+    -------
+    PriceSnapshot | None
+        현재가 스냅샷. 주요 필드:
+
+        - current : float — 현재가 (해당 통화 단위)
+        - change : float — 전일 대비 변동액
+        - change_pct : float — 전일 대비 변동률 (%)
+        - high_52w : float — 52주 최고가
+        - low_52w : float — 52주 최저가
+        - volume : int — 거래량 (주)
+        - market_cap : float — 시가총액
+        - per : float | None — PER (배)
+        - source : str — ``"fmp"``
+
+        API 키 미설정이거나 조회 실패 시 None.
+    """
     key = _get_api_key()
     if not key:
         return None  # 키 없으면 skip
@@ -77,10 +111,34 @@ async def fetch_history(
     end: str,
     market: str = "US",
 ) -> list[dict]:
-    """히스토리 OHLCV — /historical-price-full/{ticker}.
+    """히스토리 OHLCV — FMP /historical-price-full/{ticker}.
 
-    Returns:
-        [{"date": ..., "open": ..., "high": ..., "low": ..., "close": ..., "volume": ...}, ...]
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"AAPL"``).
+    client
+        비동기 HTTP 클라이언트.
+    start : str
+        시작일 (YYYY-MM-DD).
+    end : str
+        종료일 (YYYY-MM-DD).
+    market : str
+        시장 코드 (기본값 ``"US"``).
+
+    Returns
+    -------
+    list[dict]
+        OHLCV 행 목록 (날짜 오름차순). 각 dict 키:
+
+        - date : str — 거래일 (YYYY-MM-DD)
+        - open : float — 시가
+        - high : float — 고가
+        - low : float — 저가
+        - close : float — 종가
+        - volume : int — 거래량 (주)
+
+        API 키 미설정이거나 조회 실패 시 빈 리스트.
     """
     key = _get_api_key()
     if not key:
@@ -127,7 +185,27 @@ async def fetchDividends(
     *,
     market: str = "US",
 ) -> list[dict]:
-    """배당 이력 — FMP /historical-price-full/stock_dividend."""
+    """배당 이력 — FMP /historical-price-full/stock_dividend.
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"AAPL"``).
+    client
+        비동기 HTTP 클라이언트.
+    market : str
+        시장 코드 (기본값 ``"US"``).
+
+    Returns
+    -------
+    list[dict]
+        배당 내역 (날짜 오름차순). 각 dict 키:
+
+        - date : str — 배당 기준일 (YYYY-MM-DD)
+        - amount : float — 주당 배당금 (해당 통화 단위)
+
+        API 키 미설정이거나 조회 실패 시 빈 리스트.
+    """
     key = _get_api_key()
     if not key:
         return []
@@ -162,7 +240,28 @@ async def fetchSplits(
     *,
     market: str = "US",
 ) -> list[dict]:
-    """분할 이력 — FMP /historical-price-full/stock_split."""
+    """분할 이력 — FMP /historical-price-full/stock_split.
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"AAPL"``).
+    client
+        비동기 HTTP 클라이언트.
+    market : str
+        시장 코드 (기본값 ``"US"``).
+
+    Returns
+    -------
+    list[dict]
+        분할 내역 (날짜 오름차순). 각 dict 키:
+
+        - date : str — 분할 기준일 (YYYY-MM-DD)
+        - numerator : int — 분할 비율 분자
+        - denominator : int — 분할 비율 분모
+
+        API 키 미설정이거나 조회 실패 시 빈 리스트.
+    """
     key = _get_api_key()
     if not key:
         return []

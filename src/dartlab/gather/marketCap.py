@@ -36,7 +36,26 @@ log = logging.getLogger(__name__)
 
 
 def _stockSharesSeries(stockCode: str, market: str) -> pl.DataFrame | None:
-    """단일 종목의 발행주식수 분기 시계열."""
+    """단일 종목의 발행주식수 분기 시계열.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드/티커 (예: "005930", "AAPL").
+    market : str
+        시장 코드 ("KR" 또는 "US").
+
+    Returns
+    -------
+    pl.DataFrame | None
+        발행주식수 시계열. 컬럼:
+
+        - rcept_date : Date — 보고서 접수일
+        - outstandingShares : float — 보통주 발행주식수 (주)
+        - preferredOutstanding : float — 우선주 발행주식수 (주)
+
+        데이터 없거나 파싱 실패 시 None.
+    """
     lf = load_shares_outstanding(market)
     if lf is None:
         return None
@@ -74,13 +93,27 @@ def _stockSharesSeries(stockCode: str, market: str) -> pl.DataFrame | None:
 def marketCap(stockCode: str, *, market: str = "auto") -> pl.DataFrame | None:
     """시가총액 일별 시계열.
 
-    Args:
-        stockCode: 종목코드/티커
-        market: KR | US | auto
+    Parameters
+    ----------
+    stockCode : str
+        종목코드/티커 (예: "005930", "AAPL").
+    market : str
+        시장 코드 ("KR", "US", "auto"). "auto"이면 종목코드로 추론.
 
-    Returns:
-        Polars DataFrame (date, close, volume, commonOutstanding,
-        preferredOutstanding, marketCap, marketCapTotal) 또는 None.
+    Returns
+    -------
+    pl.DataFrame | None
+        일별 시가총액 시계열. 컬럼:
+
+        - date : Date — 거래일
+        - close : float — 종가 (원 또는 해당 통화)
+        - volume : int — 거래량 (주)
+        - commonOutstanding : float — 보통주 발행주식수 (주)
+        - preferredOutstanding : float — 우선주 발행주식수 (주)
+        - marketCap : float — 보통주 시가총액 (원) = close × commonOutstanding
+        - marketCapTotal : float — 전체 시가총액 (원) = close × (보통주 + 우선주)
+
+        주가 또는 발행주식수 없으면 None.
     """
     market = resolve_market(stockCode, market)
 
@@ -119,7 +152,31 @@ def marketCap(stockCode: str, *, market: str = "auto") -> pl.DataFrame | None:
 
 
 def marketCapSnapshot(stockCode: str, *, market: str = "auto") -> dict | None:
-    """최신 시가총액 한 점."""
+    """최신 시가총액 한 점.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드/티커 (예: "005930", "AAPL").
+    market : str
+        시장 코드 ("KR", "US", "auto"). "auto"이면 종목코드로 추론.
+
+    Returns
+    -------
+    dict | None
+        최신 시가총액 스냅샷. 키:
+
+        - stockCode : str — 종목코드
+        - market : str — 시장 코드
+        - date : Date — 기준일
+        - close : float — 종가 (원)
+        - commonOutstanding : float — 보통주 발행주식수 (주)
+        - preferredOutstanding : float — 우선주 발행주식수 (주)
+        - marketCap : float — 보통주 시가총액 (원)
+        - marketCapTotal : float — 전체 시가총액 (원)
+
+        데이터 없으면 None.
+    """
     df = marketCap(stockCode, market=market)
     if df is None or df.is_empty():
         return None

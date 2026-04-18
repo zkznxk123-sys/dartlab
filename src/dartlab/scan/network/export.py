@@ -51,7 +51,20 @@ def _build_enriched_edges(data: dict) -> list[dict]:
 
 
 def _build_enriched_nodes(data: dict, edges: list[dict]) -> list[dict]:
-    """degree 재계산 + industry 메타."""
+    """엣지 기반 degree 재계산 + listing 메타(시장/업종) 부착.
+
+    Parameters
+    ----------
+    data : dict
+        build_graph 결과 (all_node_ids, listing_meta, code_to_group 등).
+    edges : list[dict]
+        엣지 목록 (source, target, type).
+
+    Returns
+    -------
+    list[dict]
+        id, label, type, group, market, industry, degree 를 포함한 노드 목록.
+    """
     in_deg: dict[str, int] = defaultdict(int)
     out_deg: dict[str, int] = defaultdict(int)
     for e in edges:

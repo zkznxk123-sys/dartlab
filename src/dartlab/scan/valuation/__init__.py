@@ -15,7 +15,23 @@ _CONCURRENCY = 50  # 동시 요청 제한
 
 
 def _gradeValuation(pbr: float | None) -> str:
-    """PBR 기준 밸류에이션 등급."""
+    """PBR 기준 밸류에이션 등급 분류.
+
+    Parameters
+    ----------
+    pbr : float | None
+        주가순자산비율 (배). None 또는 음수면 ``"해당없음"``.
+
+    Returns
+    -------
+    grade : str
+        밸류에이션 등급. 다음 중 하나:
+        - ``"저평가"``   : 0 <= pbr < 0.5 (배)
+        - ``"적정"``     : 0.5 <= pbr <= 1.5 (배)
+        - ``"고평가"``   : 1.5 < pbr <= 3.0 (배)
+        - ``"과열"``     : pbr > 3.0 (배)
+        - ``"해당없음"`` : pbr 이 None 이거나 음수
+    """
     if pbr is None:
         return "해당없음"
     if pbr < 0:
@@ -30,7 +46,26 @@ def _gradeValuation(pbr: float | None) -> str:
 
 
 async def _fetchAll(codes: list[str], verbose: bool) -> dict[str, dict]:
-    """네이버 API 배치 수집."""
+    """네이버 API 에서 종목별 시세·밸류에이션 지표를 비동기 배치 수집.
+
+    Parameters
+    ----------
+    codes : list[str]
+        수집 대상 종목코드 목록.
+    verbose : bool
+        True 이면 배치별 진행 상황을 stdout 에 출력.
+
+    Returns
+    -------
+    dict[str, dict]
+        종목코드를 키로 하는 dict. 각 값은 다음 키를 가진 dict:
+
+        - marketCap : int — 시가총액 (원)
+        - per : float | None — 주가수익비율 (배)
+        - pbr : float | None — 주가순자산비율 (배)
+        - dividendYield : float | None — 배당수익률 (%)
+        - current : int — 현재가 (원)
+    """
     import httpx
 
     from dartlab.gather.domains.naver import fetch_price

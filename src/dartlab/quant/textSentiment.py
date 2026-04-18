@@ -13,7 +13,36 @@ log = logging.getLogger(__name__)
 
 
 def calcSentiment(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
-    """공시 텍스트 감성 스코어링."""
+    """공시 텍스트 감성 스코어링.
+
+    Loughran-McDonald 한국어 사전으로 공시 텍스트의 긍정·부정·불확실 단어를
+    집계하고 감성 점수를 산출한다.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드.
+    market : str
+        "KR" | "US" | "auto". 기본 "auto".
+
+    Returns
+    -------
+    dict
+        stockCode : str — 종목코드
+        market : str — 시장
+        sentimentScore : float — 종합 감성 점수 (-1~1, 점)
+        positiveCount : int — 긍정 단어 수
+        negativeCount : int — 부정 단어 수
+        uncertaintyCount : int — 불확실 단어 수
+        totalWords : int — 전체 단어 수
+        positiveRatio : float — 긍정 비율 (비율)
+        negativeRatio : float — 부정 비율 (비율)
+        topNegativeWords : list[dict] — 부정 단어 빈도 상위 10개
+            word : str, count : int
+        timeSeries : list[dict] — 기간별 감성 점수 (최근 20개)
+            period : str, score : float, pos : int, neg : int, words : int
+        sentimentVerdict : str — "positive" | "negative" | "neutral"
+    """
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 

@@ -25,7 +25,20 @@ _EMPTY_SCHEMA = {"date": pl.Date, "title": pl.Utf8, "source": pl.Utf8, "url": pl
 
 
 def _parseDate(dateStr: str) -> datetime | None:
-    """RSS date 파싱."""
+    """RSS pubDate 문자열을 datetime으로 파싱.
+
+    RFC 822 형식 두 가지(timezone 약어 / offset)를 순서대로 시도한다.
+
+    Parameters
+    ----------
+    dateStr : str
+        RSS ``<pubDate>`` 값 (예: ``"Tue, 15 Apr 2026 09:30:00 GMT"``).
+
+    Returns
+    -------
+    datetime | None
+        파싱 성공 시 datetime 객체, 모든 포맷 실패 시 None.
+    """
     for fmt in ("%a, %d %b %Y %H:%M:%S %Z", "%a, %d %b %Y %H:%M:%S %z"):
         try:
             return datetime.strptime(dateStr, fmt)
@@ -35,7 +48,26 @@ def _parseDate(dateStr: str) -> datetime | None:
 
 
 def _parseRss(data: str, *, days: int = 30) -> list[NewsItem]:
-    """RSS XML → NewsItem 리스트."""
+    """RSS XML 문자열을 파싱하여 NewsItem 리스트로 변환.
+
+    cutoff(현재 시각 - days) 이전 기사는 제외한다.
+    XML 파싱 실패 시 빈 리스트를 반환한다.
+
+    Parameters
+    ----------
+    data : str
+        RSS XML 원본 문자열.
+    days : int, optional
+        최근 N일 이내 기사만 포함 (기본 30일).
+
+    Returns
+    -------
+    list[NewsItem]
+        date : str — 발행일 (``"YYYY-MM-DD"`` 형식).
+        title : str — 기사 제목 (HTML 엔티티 디코딩 완료).
+        source : str — 언론사명.
+        url : str — 기사 링크.
+    """
     items: list[NewsItem] = []
     try:
         root = ET.fromstring(data)
@@ -68,7 +100,28 @@ async def _fetchAsync(
     days: int = 30,
     client=None,
 ) -> list[NewsItem]:
-    """뉴스 수집 (async) — GatherHttpClient 사용, circuit breaker 적용."""
+    """뉴스 수집 (async) — GatherHttpClient 사용, circuit breaker 적용.
+
+    Parameters
+    ----------
+    query : str
+        검색 쿼리 (기업명 또는 티커).
+    market : str
+        시장 코드. ``"KR"`` (한국어) 또는 ``"US"`` (영문). 기본 ``"KR"``.
+    days : int
+        최근 N일 이내 뉴스만 수집 (일). 기본 30.
+    client
+        GatherHttpClient 인스턴스. None이면 임시 httpx.AsyncClient 사용.
+
+    Returns
+    -------
+    list[NewsItem]
+        date : str — 발행일 (YYYY-MM-DD)
+        title : str — 기사 제목
+        source : str — 언론사명
+        url : str — 기사 링크
+        circuit breaker open 또는 수집 실패 시 빈 리스트.
+    """
     if _circuit_breaker.is_open(_SOURCE_NAME):
         log.debug("news circuit breaker open — skip")
         return []
@@ -103,7 +156,22 @@ async def _fetchAsync(
 
 
 def toDataFrame(items: list[NewsItem]) -> pl.DataFrame:
-    """NewsItem 리스트 → pl.DataFrame 변환."""
+    """NewsItem 리스트 → pl.DataFrame 변환.
+
+    Parameters
+    ----------
+    items : list[NewsItem]
+        변환할 뉴스 항목 리스트.
+
+    Returns
+    -------
+    pl.DataFrame
+        date : date — 발행일
+        title : str — 기사 제목
+        source : str — 언론사명
+        url : str — 기사 링크
+        최신순 정렬. 빈 리스트이면 빈 DataFrame (동일 스키마).
+    """
     if not items:
         return pl.DataFrame(schema=_EMPTY_SCHEMA)
     rows = [{"date": i.date, "title": i.title, "source": i.source, "url": i.url} for i in items]

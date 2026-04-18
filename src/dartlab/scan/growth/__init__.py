@@ -35,7 +35,25 @@ from dartlab.core.finance.calc import cagr as _cagr  # noqa: E402
 
 
 def _gradeGrowth(revCagr: float | None, opCagr: float | None) -> str:
-    """성장성 등급."""
+    """매출·영업이익 CAGR 중 높은 값으로 성장성 등급 분류.
+
+    Parameters
+    ----------
+    revCagr : float | None
+        매출액 연평균 복합성장률 (%).
+    opCagr : float | None
+        영업이익 연평균 복합성장률 (%).
+
+    Returns
+    -------
+    grade : str
+        성장성 등급. 다음 중 하나:
+        - ``"고성장"`` : best >= 20 (%)
+        - ``"성장"``   : 10 <= best < 20 (%)
+        - ``"정체"``   : 0 <= best < 10 (%)
+        - ``"역성장"`` : -10 <= best < 0 (%)
+        - ``"급감"``   : best < -10 (%)
+    """
     best = max(revCagr or -999, opCagr or -999)
     if best >= 20:
         return "고성장"
@@ -49,7 +67,28 @@ def _gradeGrowth(revCagr: float | None, opCagr: float | None) -> str:
 
 
 def _classifyPattern(revCagr: float | None, opCagr: float | None, niCagr: float | None) -> str:
-    """성장 패턴 분류."""
+    """매출·영업이익·순이익 CAGR 조합으로 성장 패턴 분류.
+
+    Parameters
+    ----------
+    revCagr : float | None
+        매출액 CAGR (%). None 이면 0 으로 취급.
+    opCagr : float | None
+        영업이익 CAGR (%). None 이면 0 으로 취급.
+    niCagr : float | None
+        순이익 CAGR (%). None 이면 0 으로 취급.
+
+    Returns
+    -------
+    pattern : str
+        성장 패턴명. 다음 중 하나:
+        - ``"균형성장"``   : 매출·영업·순이익 모두 > 5 %
+        - ``"수익개선"``   : 매출 > 5 % 이고 영업이익률이 매출 성장을 상회
+        - ``"외형성장"``   : 매출 > 5 % 이나 영업이익 역성장
+        - ``"구조조정"``   : 매출 역성장이나 영업이익 흑자 전환
+        - ``"전면역성장"`` : 매출·영업이익 모두 < -5 %
+        - ``"혼합"``       : 위 패턴에 해당하지 않는 경우
+    """
     r = revCagr or 0
     o = opCagr or 0
     n = niCagr or 0
@@ -79,7 +118,20 @@ def scanGrowth() -> pl.DataFrame:
 
 
 def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
-    """프리빌드 finance.parquet에서 성장성 계산."""
+    """프리빌드 finance.parquet 에서 전종목 성장성 지표 계산.
+
+    Parameters
+    ----------
+    scanPath : Path
+        ``finance.parquet`` 파일 경로.
+
+    Returns
+    -------
+    pl.DataFrame
+        ``_computeGrowth`` 가 반환하는 DataFrame 과 동일한 스키마.
+        컬럼 상세는 ``_computeGrowth`` 독스트링 참조.
+        데이터가 없으면 빈 DataFrame.
+    """
     schema = pl.scan_parquet(str(scanPath)).collect_schema().names()
     scCol = "stockCode" if "stockCode" in schema else "stock_code"
 
@@ -108,7 +160,17 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
 
 
 def _scanPerFile() -> pl.DataFrame:
-    """종목별 finance parquet 순회 fallback."""
+    """종목별 finance parquet 파일을 순회하여 성장성 계산 (fallback).
+
+    ``finance.parquet`` 통합 파일이 없을 때 개별 종목 parquet 을 순회한다.
+
+    Returns
+    -------
+    pl.DataFrame
+        ``_computeGrowth`` 가 반환하는 DataFrame 과 동일한 스키마.
+        컬럼 상세는 ``_computeGrowth`` 독스트링 참조.
+        데이터가 없으면 빈 DataFrame.
+    """
     from dartlab.core.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
@@ -141,7 +203,30 @@ def _scanPerFile() -> pl.DataFrame:
 
 
 def _computeGrowth(target: pl.DataFrame, scCol: str) -> pl.DataFrame:
-    """종목별 3년 CAGR 계산."""
+    """종목별 매출·영업이익·순이익 3년 CAGR 을 계산하고 등급·패턴을 부여.
+
+    Parameters
+    ----------
+    target : pl.DataFrame
+        손익계산서(IS/CIS) 행만 포함된 DataFrame.
+        필수 컬럼: ``bsns_year``, ``account_id``, ``account_nm``, ``thstrm_amount``.
+    scCol : str
+        종목코드 컬럼명 (``"stockCode"`` 또는 ``"stock_code"``).
+
+    Returns
+    -------
+    pl.DataFrame
+        종목별 성장성 지표. 컬럼:
+
+        - stockCode : str — 종목코드
+        - revenue : float — 최신 연도 매출액 (원)
+        - revenueCagr : float — 매출액 CAGR (%)
+        - opIncomeCagr : float — 영업이익 CAGR (%)
+        - netIncomeCagr : float — 순이익 CAGR (%)
+        - years : int — CAGR 계산 기간 (년)
+        - grade : str — 성장성 등급 (고성장/성장/정체/역성장/급감)
+        - pattern : str — 성장 패턴 (균형성장/수익개선/외형성장/구조조정/전면역성장/혼합)
+    """
     years = sorted(target["bsns_year"].unique().to_list(), reverse=True)
     if len(years) < 2:
         return pl.DataFrame()

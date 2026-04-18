@@ -79,7 +79,35 @@ def narrateRepayment(
     captive: bool = False,
     separateMetrics: dict | None = None,
 ) -> AxisNarrative:
-    """축 1: 채무상환능력."""
+    """축 1: 채무상환능력 서사 생성.
+
+    EBITDA 이자보상배율, 차입금/EBITDA, 총차입금 규모 등을
+    업종 기준표 위치와 결합하여 채무상환능력 해석 문장을 생성한다.
+
+    Parameters
+    ----------
+    latest : dict
+        최신 분기 지표. 주요 키: ``ebitda`` (원), ``totalBorrowing`` (원),
+        ``revenue`` (원), ``ebitdaInterestCoverage`` (배).
+    axisScore : float | None
+        채무상환능력 축 점수 (점). None이면 평가 불가.
+    sectorLabel : str
+        업종 분류 레이블 (예: ``"제조업"``).
+    captive : bool
+        캡티브 금융 복합기업 여부. True이면 금융자회사 차입금
+        관련 보정 문구를 추가한다.
+    separateMetrics : dict | None
+        별도 재무제표 기반 지표. 캡티브 기업에서 제조 부문만
+        분리 평가할 때 사용한다.
+
+    Returns
+    -------
+    AxisNarrative
+        axisName : str — 축 이름 (``"채무상환능력"``)
+        summary : str — 한 줄 요약 문장
+        details : list[str] — 세부 해석 문장 목록
+        severity : str — 심각도 (``"strong"`` / ``"moderate"`` / ``"weak"`` / ``"critical"``)
+    """
     details = []
     sev = _severity(axisScore)
 
@@ -166,7 +194,31 @@ def narrateCapitalStructure(
     captive: bool = False,
     separateMetrics: dict | None = None,
 ) -> AxisNarrative:
-    """축 2: 자본구조."""
+    """축 2: 자본구조 서사 생성.
+
+    부채비율, 차입금의존도, 순차입금/자기자본 등을
+    업종 기준표 위치와 결합하여 자본구조 해석 문장을 생성한다.
+
+    Parameters
+    ----------
+    latest : dict
+        최신 분기 지표. 주요 키: ``debtRatio`` (%),
+        ``borrowingDependency`` (%), ``netDebtToEquity`` (%).
+    axisScore : float | None
+        자본구조 축 점수 (점). None이면 평가 불가.
+    captive : bool
+        캡티브 금융 복합기업 여부.
+    separateMetrics : dict | None
+        별도 재무제표 기반 지표.
+
+    Returns
+    -------
+    AxisNarrative
+        axisName : str — 축 이름 (``"자본구조"``)
+        summary : str — 한 줄 요약 문장
+        details : list[str] — 세부 해석 문장 목록
+        severity : str — 심각도 (``"strong"`` / ``"moderate"`` / ``"weak"`` / ``"critical"``)
+    """
     details = []
     sev = _severity(axisScore)
 
@@ -272,7 +324,31 @@ def narrateCashFlow(
     *,
     captive: bool = False,
 ) -> AxisNarrative:
-    """축 4: 현금흐름."""
+    """축 4: 현금흐름 서사 생성.
+
+    OCF/매출, FCF 추이, 현금흐름 패턴(+/-/-)을 해석하여
+    현금 창출력과 투자 부담에 대한 서사를 생성한다.
+
+    Parameters
+    ----------
+    latest : dict
+        최신 분기 지표. 주요 키: ``ocfToSales`` (%),
+        ``fcf`` (원), ``ocf`` (원).
+    axisScore : float | None
+        현금흐름 축 점수 (점). None이면 평가 불가.
+    metrics : dict
+        전체 메트릭스 딕셔너리 (추이 분석용).
+    captive : bool
+        캡티브 금융 복합기업 여부.
+
+    Returns
+    -------
+    AxisNarrative
+        axisName : str — 축 이름 (``"현금흐름"``)
+        summary : str — 한 줄 요약 문장
+        details : list[str] — 세부 해석 문장 목록
+        severity : str — 심각도 (``"strong"`` / ``"moderate"`` / ``"weak"`` / ``"critical"``)
+    """
     details = []
     sev = _severity(axisScore)
 
@@ -759,9 +835,30 @@ def buildOverallNarrative(
 ) -> str:
     """등급 근거 종합 서사 — 인과 체인 통합.
 
-    기존 "핵심 강점은 X, Y이다" → 인과 연결 문장으로 교체.
-    narrateCausalChain()의 흐름을 overall에 녹여서,
-    매출→이익→현금→안정성→등급의 인과가 한 문단에 드러난다.
+    각 축별 서사(AxisNarrative)를 종합하여 매출→이익→현금→안정성→등급의
+    인과 체인이 한 문단에 드러나는 종합 서사를 생성한다.
+
+    Parameters
+    ----------
+    result : dict
+        신용분석 결과. 주요 키: ``grade`` (str), ``score`` (점),
+        ``metricsHistory`` (list[dict]).
+    narratives : list[AxisNarrative]
+        축별 서사 리스트 (narrateRepayment, narrateCapitalStructure 등의 반환값).
+    captive : bool
+        캡티브 금융 복합기업 여부. True이면 금융자회사 관련
+        구조적 참고 문구를 추가한다.
+    holding : bool
+        지주사 여부. True이면 지분법손익 비중이 큰 구조적 특성
+        관련 문구를 추가한다.
+    separateMetrics : dict | None
+        별도 재무제표 기반 지표.
+
+    Returns
+    -------
+    str
+        등급 근거 종합 서사 문단. 인과 체인(매출→이익→현금→안정성)을
+        하나의 흐름으로 연결한 문장이며, 강점·약점·구조적 참고가 포함된다.
     """
     grade = result.get("grade", "?")
     score = result.get("score", 0)

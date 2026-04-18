@@ -36,6 +36,18 @@ def detectFinancialSector(
     4. 이자수익 계정 존재
     5. 순이자수익 계정 존재
     6. 보험수익 계정 존재
+
+    Parameters
+    ----------
+    aSeries : dict
+        finance.timeseries 시계열 dict.
+    ratios : RatioResult
+        재무비율 결과.
+
+    Returns
+    -------
+    tuple[bool, list[str]]
+        (금융업 여부, 감지된 신호 목록).
     """
     signals: list[str] = []
 

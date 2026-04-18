@@ -16,12 +16,26 @@ log = logging.getLogger(__name__)
 
 
 def _cacheFile() -> Path:
+    """KIND 상장법인 캐시 파일 경로 반환.
+
+    Returns
+    -------
+    Path
+        ``{dataRoot}/kindList/corpList.parquet`` 경로.
+    """
     from dartlab.core.dataLoader import _getDataRoot
 
     return _getDataRoot() / "kindList" / "corpList.parquet"
 
 
 def _krxCacheFile() -> Path:
+    """KRX 상장법인 캐시 파일 경로 반환.
+
+    Returns
+    -------
+    Path
+        ``{dataRoot}/krxList/corpList.parquet`` 경로.
+    """
     from dartlab.core.dataLoader import _getDataRoot
 
     return _getDataRoot() / "krxList" / "corpList.parquet"
@@ -46,7 +60,16 @@ _searchCache: dict[str, object] | None = None
 
 
 class _TableParser(HTMLParser):
-    """KRX KIND HTML 테이블 → 리스트 변환."""
+    """KRX KIND HTML 테이블 → 2차원 리스트 변환.
+
+    KIND에서 반환하는 EUC-KR 인코딩 HTML 테이블을 파싱하여
+    ``list[list[str]]`` (행 × 열) 형태로 변환한다.
+
+    Attributes
+    ----------
+    _rows : list[list[str]]
+        파싱 완료된 전체 행 목록.
+    """
 
     def __init__(self):
         super().__init__()
@@ -87,6 +110,22 @@ class _TableParser(HTMLParser):
 
 
 def _fetchKind() -> pl.DataFrame:
+    """KRX KIND API에서 상장법인 목록 HTML 수집 → DataFrame 변환.
+
+    SPAC·리츠 제외, 6자리 종목코드만 포함.
+    네트워크 실패 시 빈 DataFrame 반환.
+
+    Returns
+    -------
+    pl.DataFrame
+        종목코드 : str — 6자리 종목코드
+        회사명 : str — 법인명
+        업종 : str — 업종명
+        주요제품 : str — 주요 제품
+        상장일 : str — 상장일
+        결산월 : str — 결산월
+        대표자명 : str — 대표자명
+    """
     try:
         r = httpx.post(KIND_URL, data=KIND_DATA, timeout=30)
     except (httpx.ConnectError, httpx.TimeoutException):
@@ -115,6 +154,13 @@ def _fetchKind() -> pl.DataFrame:
 
 
 def _loadCache() -> pl.DataFrame | None:
+    """KIND 파일 캐시 로드. TTL(24h) 초과 또는 Pyodide면 None.
+
+    Returns
+    -------
+    pl.DataFrame | None
+        캐시된 상장법인 DataFrame. 없거나 만료 시 None.
+    """
     import sys
 
     if sys.platform == "emscripten":
@@ -129,6 +175,15 @@ def _loadCache() -> pl.DataFrame | None:
 
 
 def _saveCache(df: pl.DataFrame) -> None:
+    """KIND 상장법인 DataFrame을 Parquet 파일로 캐시 저장.
+
+    Pyodide 환경에서는 저장하지 않는다 (영속 FS 없음).
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        저장할 상장법인 DataFrame.
+    """
     import sys
 
     if sys.platform == "emscripten":
@@ -144,11 +199,21 @@ def getKindList(*, forceRefresh: bool = False) -> pl.DataFrame:
     캐시 우선순위: 메모리 → 파일(24h TTL) → KIND API.
     SPAC·리츠 제외, 6자리 종목코드만 포함.
 
-    Args:
-        forceRefresh: True면 캐시 무시하고 KIND API 재요청.
+    Parameters
+    ----------
+    forceRefresh : bool
+        True면 캐시 무시하고 KIND API 재요청. 기본 False.
 
-    Returns:
-        DataFrame (회사명, 종목코드, 업종, 주요제품, 상장일, 결산월, 대표자명, 홈페이지, 지역, ...).
+    Returns
+    -------
+    pl.DataFrame
+        종목코드 : str — 6자리 종목코드
+        회사명 : str — 법인명
+        업종 : str — 업종명
+        주요제품 : str — 주요 제품
+        상장일 : str — 상장일
+        결산월 : str — 결산월
+        대표자명 : str — 대표자명
     """
     global _memory, _memoryTs, _searchCache
 
@@ -191,7 +256,17 @@ def getKindList(*, forceRefresh: bool = False) -> pl.DataFrame:
 
 
 def _getSearchCache() -> dict[str, object]:
-    """fuzzySearch용 사전 계산 캐시. names, names_lower, names_chosung을 한 번만 계산."""
+    """fuzzySearch용 사전 계산 캐시 — 회사명·소문자·초성 목록을 한 번만 계산.
+
+    getKindList() 갱신 시 ``_searchCache`` 가 None으로 리셋되어 재계산된다.
+
+    Returns
+    -------
+    dict[str, object]
+        names : list[str] — 원본 회사명 목록
+        names_lower : list[str] — 소문자 변환 회사명 목록
+        names_chosung : list[str] — 초성 추출 회사명 목록
+    """
     global _searchCache
     if _searchCache is not None:
         return _searchCache
@@ -262,7 +337,18 @@ _CHO_PERIOD = 588  # 21 * 28
 
 
 def _decompose_char(ch: str) -> str:
-    """한글 음절 → 초성 추출. 이미 자모이면 그대로."""
+    """한글 음절 → 초성 추출. 이미 자모이거나 비한글이면 그대로.
+
+    Parameters
+    ----------
+    ch : str
+        단일 문자.
+
+    Returns
+    -------
+    str
+        초성 자모 1글자. 비한글이면 원문 그대로.
+    """
     cp = ord(ch)
     if 0xAC00 <= cp <= 0xD7A3:
         return _CHOSUNG[(cp - _CHO_BASE) // _CHO_PERIOD]
@@ -272,17 +358,54 @@ def _decompose_char(ch: str) -> str:
 
 
 def _extract_chosung(text: str) -> str:
-    """문자열의 초성만 추출. 비한글은 원문 그대로."""
+    """문자열의 초성만 추출. 비한글은 원문 그대로.
+
+    Parameters
+    ----------
+    text : str
+        입력 문자열 (예: "삼성전자").
+
+    Returns
+    -------
+    str
+        초성 문자열 (예: "ㅅㅅㅈㅈ").
+    """
     return "".join(_decompose_char(c) for c in text)
 
 
 def _is_all_chosung(text: str) -> bool:
-    """입력이 모두 자음(초성)으로만 이루어졌는지 확인."""
+    """입력이 모두 자음(초성)으로만 이루어졌는지 확인.
+
+    Parameters
+    ----------
+    text : str
+        판별할 문자열.
+
+    Returns
+    -------
+    bool
+        전부 초성이면 True.
+    """
     return all(c in _CHOSUNG for c in text)
 
 
 def _levenshtein(s: str, t: str) -> int:
-    """최소 편집 거리 (Levenshtein distance)."""
+    """최소 편집 거리 (Levenshtein distance).
+
+    삽입·삭제·치환 각 비용 1. Wagner-Fischer 알고리즘.
+
+    Parameters
+    ----------
+    s : str
+        비교 문자열 A.
+    t : str
+        비교 문자열 B.
+
+    Returns
+    -------
+    int
+        편집 거리 (회).
+    """
     if len(s) < len(t):
         s, t = t, s
     if not t:
@@ -396,6 +519,13 @@ def fuzzySearch(keyword: str, *, maxResults: int = 10) -> pl.DataFrame:
 
 
 def _dartListCacheFile() -> Path:
+    """OpenDART 법인 목록 캐시 파일 경로 반환.
+
+    Returns
+    -------
+    Path
+        ``{dataRoot}/dartList/dartList.parquet`` 경로.
+    """
     from dartlab.core.dataLoader import _getDataRoot
 
     return _getDataRoot() / "dartList" / "dartList.parquet"
@@ -407,7 +537,19 @@ _dartMemoryLock = threading.Lock()
 
 
 def _loadDartListFromHf() -> pl.DataFrame | None:
-    """HuggingFace에서 dartList.parquet 다운로드."""
+    """HuggingFace에서 dartList.parquet 다운로드.
+
+    ``eddmpython/dartlab-data`` 데이터셋에서 ``metadata/dartList.parquet`` 를 가져온다.
+    huggingface_hub 미설치 또는 네트워크 실패 시 None.
+
+    Returns
+    -------
+    pl.DataFrame | None
+        corp_code : str — DART 고유 법인코드 (8자리)
+        corp_name : str — 법인명
+        stock_code : str — 종목코드 (6자리, 비상장은 빈 문자열)
+        modify_date : str — 최종 수정일
+    """
     try:
         from huggingface_hub import hf_hub_download
 
@@ -417,7 +559,7 @@ def _loadDartListFromHf() -> pl.DataFrame | None:
             filename="metadata/dartList.parquet",
         )
         return pl.read_parquet(path)
-    except Exception:
+    except (ImportError, OSError, ValueError, KeyError):
         return None
 
 
@@ -496,7 +638,18 @@ _krxMemoryLock = threading.Lock()
 
 
 def _fetchKrx() -> pl.DataFrame:
-    """KRX data.krx.co.kr에서 상장법인 목록 수집."""
+    """KRX data.krx.co.kr JSON API에서 상장법인 목록 수집.
+
+    네트워크 실패·HTTP 오류·JSON 파싱 실패 시 빈 DataFrame 반환.
+
+    Returns
+    -------
+    pl.DataFrame
+        full_code : str — ISIN 전체 코드 (12자리)
+        short_code : str — 단축 종목코드 (6자리)
+        codeName : str — 종목명
+        marketName : str — 시장구분 (KOSPI/KOSDAQ/KONEX)
+    """
     schema = {
         "full_code": pl.Utf8,
         "short_code": pl.Utf8,
@@ -534,6 +687,13 @@ def _fetchKrx() -> pl.DataFrame:
 
 
 def _loadKrxCache() -> pl.DataFrame | None:
+    """KRX 파일 캐시 로드. TTL(24h) 초과면 None.
+
+    Returns
+    -------
+    pl.DataFrame | None
+        캐시된 KRX 상장법인 DataFrame. 없거나 만료 시 None.
+    """
     path = _krxCacheFile()
     if not path.exists():
         return None
@@ -544,6 +704,13 @@ def _loadKrxCache() -> pl.DataFrame | None:
 
 
 def _saveKrxCache(df: pl.DataFrame) -> None:
+    """KRX 상장법인 DataFrame을 Parquet 파일로 캐시 저장.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        저장할 KRX 상장법인 DataFrame.
+    """
     path = _krxCacheFile()
     path.parent.mkdir(parents=True, exist_ok=True)
     df.write_parquet(str(path))
@@ -555,11 +722,18 @@ def getKrxList(*, forceRefresh: bool = False) -> pl.DataFrame:
     캐시 우선순위: 메모리 -> 파일(24h TTL) -> KRX API.
     KIND 목록보다 상세 컬럼(full_code, short_code, marketName 등) 제공.
 
-    Args:
-        forceRefresh: True면 캐시 무시하고 KRX API 재요청.
+    Parameters
+    ----------
+    forceRefresh : bool
+        True면 캐시 무시하고 KRX API 재요청. 기본 False.
 
-    Returns:
-        DataFrame -- KRX 상장법인 목록.
+    Returns
+    -------
+    pl.DataFrame
+        full_code : str — ISIN 전체 코드 (12자리)
+        short_code : str — 단축 종목코드 (6자리)
+        codeName : str — 종목명
+        marketName : str — 시장구분 (KOSPI/KOSDAQ/KONEX)
     """
     global _krxMemory, _krxMemoryTs
 

@@ -49,7 +49,16 @@ REPORT_SECTIONS = [
 
 
 def buildSpec() -> dict:
-    """research 엔진 스펙."""
+    """research 엔진 스펙.
+
+    Returns
+    -------
+    dict
+        name : str — 엔진명
+        description : str — 엔진 설명
+        summary : dict — 섹션 수, 정량 모델 수
+        detail : dict — 섹션 목록, 모델, 데이터소스
+    """
     return {
         "name": "research",
         "description": "종합 기업분석 리포트 — 종목코드 하나로 equity research 생성",

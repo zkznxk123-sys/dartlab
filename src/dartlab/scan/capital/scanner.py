@@ -18,9 +18,18 @@ TOTAL_KEYS = {"현금배당금총액(백만원)", "현금배당금총액"}
 
 
 def scan_dividend() -> dict[str, dict]:
-    """dividend → {종목코드: {배당여부, DPS, 배당수익률, 배당총액_백만}}.
+    """전종목 배당 스캔.
 
-    최신 연도 Q4 기준.  DPS 행이 100개 이상인 연도를 선택.
+    최신 연도 Q4 기준. DPS 행이 100개 이상인 연도를 선택.
+
+    Returns
+    -------
+    dict[str, dict]
+        {종목코드: info} 매핑. 각 info:
+            배당여부 : bool — DPS > 0 여부
+            DPS : float — 주당 현금배당금 (원)
+            배당수익률 : float — 현금배당수익률 (%)
+            배당총액_백만 : float — 현금배당금 총액 (백만원)
     """
     raw = scan_parquets(
         "dividend",
@@ -86,7 +95,20 @@ def scan_dividend() -> dict[str, dict]:
 
 
 def scan_treasury_stock() -> dict[str, dict]:
-    """treasuryStock → {종목코드: {자사주보유, 당기취득, 당기처분, 당기소각, 소각수량, 처분수량, 취득수량}}."""
+    """전종목 자사주 스캔.
+
+    Returns
+    -------
+    dict[str, dict]
+        {종목코드: info} 매핑. 각 info:
+            자사주보유 : bool — 기말 보유 여부
+            당기취득 : bool — 당기 취득 여부
+            당기처분 : bool — 당기 처분 여부
+            당기소각 : bool — 당기 소각 여부
+            취득수량 : int — 당기 취득 주식수 (주)
+            처분수량 : int — 당기 처분 주식수 (주)
+            소각수량 : int — 당기 소각 주식수 (주)
+    """
     raw = scan_parquets(
         "treasuryStock",
         ["stockCode", "year", "quarter", "trmend_qy", "change_qy_acqs", "change_qy_dsps", "change_qy_incnr"],
@@ -152,9 +174,15 @@ INCREASE_TYPES = {
 
 
 def scan_capital_change() -> dict[str, dict]:
-    """capitalChange → {종목코드: {최근증자: bool}}.
+    """전종목 증자/감자 스캔.
 
     최근 3년(2023~) 이내 증자(INCREASE_TYPES) 여부.
+
+    Returns
+    -------
+    dict[str, dict]
+        {종목코드: info} 매핑. 각 info:
+            최근증자 : bool — 최근 3년 내 증자 여부
     """
     raw = scan_parquets(
         "capitalChange",

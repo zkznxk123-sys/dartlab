@@ -42,7 +42,35 @@ def _safe_float(val) -> float | None:
 
 
 def calcGovernanceQuant(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
-    """거버넌스 품질 정량화."""
+    """거버넌스 품질 정량화.
+
+    소유집중도·감사의견·이사회 독립성·보수 투명성 4개 하위 점수를 산출하고
+    복합 거버넌스 점수(0~100) + 등급(A~F)을 부여한다.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드.
+    market : str
+        "KR" | "US" | "auto". 기본 "auto".
+
+    Returns
+    -------
+    dict
+        stockCode : str — 종목코드
+        market : str — 시장
+        governanceScore : float | None — 복합 점수 (점, 0~100)
+        grade : str — "A" | "B" | "C" | "D" | "F" | "N/A"
+        subScores : dict — 하위 점수 (점, 0~100)
+            ownership : float — 소유집중도
+            audit : float — 감사의견
+            boardIndependence : float — 사외이사 비율
+            payTransparency : float — 보수 투명성
+        maxHolderPct : float — 최대주주 지분율 (%)
+        auditOpinion : str — 감사의견 요약
+        outsideDirectorRatio : float — 사외이사 비율 (%)
+        availableData : list[str] — 사용된 데이터 목록
+    """
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
     sub_scores: dict[str, float | None] = {}

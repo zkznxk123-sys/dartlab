@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from dartlab.analysis.financial.insight.benchmark import getBenchmark, sectorAdjustment
 from dartlab.analysis.financial.insight.detector import detectIncompleteYear
@@ -20,6 +20,20 @@ if TYPE_CHECKING:
 
 
 def _scoreToGrade(score: int, maxScore: int) -> str:
+    """점수를 A~F 등급으로 변환.
+
+    Parameters
+    ----------
+    score : int
+        획득 점수.
+    maxScore : int
+        만점 기준.
+
+    Returns
+    -------
+    str
+        grade : str — 'A' (>=80%) | 'B' (>=50%) | 'C' (>=20%) | 'D' (>=0%) | 'F'
+    """
     ratio = score / maxScore if maxScore > 0 else 0
     if ratio >= 0.8:
         return "A"
@@ -32,7 +46,19 @@ def _scoreToGrade(score: int, maxScore: int) -> str:
     return "F"
 
 
-def _getGrowthYoY(annualVals: list[Optional[float]]) -> Optional[float]:
+def _getGrowthYoY(annualVals: list[float | None]) -> float | None:
+    """최근 2개 유효값의 YoY 성장률 계산.
+
+    Parameters
+    ----------
+    annualVals : list[float | None]
+        연간 시계열 값 리스트.
+
+    Returns
+    -------
+    float | None
+        yoyPct : float | None — YoY 변화율 (%). 유효값 2개 미만이면 None.
+    """
     from dartlab.core.finance.ratios import yoy_pct
 
     valid = [(i, v) for i, v in enumerate(annualVals) if v is not None]
@@ -43,7 +69,19 @@ def _getGrowthYoY(annualVals: list[Optional[float]]) -> Optional[float]:
     return yoy_pct(curr, prev)
 
 
-def _getVolatility(qVals: list[Optional[float]]) -> Optional[float]:
+def _getVolatility(qVals: list[float | None]) -> float | None:
+    """최근 4분기 최대 변동률 계산.
+
+    Parameters
+    ----------
+    qVals : list[float | None]
+        분기 시계열 값 리스트.
+
+    Returns
+    -------
+    float | None
+        maxChange : float | None — 최근 4분기 중 최대 QoQ 변동률 (%). 유효값 2개 미만이면 None.
+    """
     recent = [v for v in qVals[-4:] if v is not None]
     if len(recent) < 2:
         return None
@@ -61,7 +99,30 @@ def analyzePerformance(
     qPeriods: list[str],
     isFinancial: bool = False,
 ) -> InsightResult:
-    """실적 성장성 분석."""
+    """실적 성장성 분석.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+    aYears : list[str]
+        연간 기간 라벨 리스트.
+    qSeries : dict
+        분기 재무 시계열.
+    qPeriods : list[str]
+        분기 기간 라벨 리스트.
+    isFinancial : bool
+        금융업 여부.
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'F' 등급
+        summary : str — 요약 문장
+        details : list[str] — 세부 분석 항목
+        risks : list[Flag] — 리스크 플래그
+        opportunities : list[Flag] — 기회 플래그
+    """
     lastYear, qCount = detectIncompleteYear(qPeriods)
     incomplete = qCount < 4
 
@@ -168,7 +229,30 @@ def analyzeProfitability(
     sector: Sector = Sector.UNKNOWN,
     market: str = "KR",
 ) -> InsightResult:
-    """수익성 분석."""
+    """수익성 분석.
+
+    Parameters
+    ----------
+    ratios : RatioResult
+        재무비율 계산 결과.
+    aSeries : dict
+        연간 재무 시계열.
+    isFinancial : bool
+        금융업 여부. True이면 금융업 전용 분석으로 분기.
+    sector : Sector
+        GICS 섹터. 섹터 벤치마크 보정에 사용.
+    market : str
+        시장 ('KR' | 'US'). 벤치마크 선택에 사용.
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'F' 등급
+        summary : str — 수익성 요약
+        details : list[str] — 영업이익률, ROE, 레버리지 등 세부 항목
+        risks : list[Flag] — 수익성 리스크
+        opportunities : list[Flag] — 수익성 강점
+    """
     details: list[str] = []
     risks: list[Flag] = []
     opps: list[Flag] = []
@@ -260,7 +344,28 @@ def _analyzeProfitabilityFinancial(
     risks: list[Flag],
     opps: list[Flag],
 ) -> InsightResult:
-    """금융업 전용 수익성 분석 (ROE/ROA/CIR)."""
+    """금융업 전용 수익성 분석 (ROE/ROA/CIR).
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+    details : list[str]
+        세부 항목 리스트 (in-place 추가).
+    risks : list[Flag]
+        리스크 플래그 리스트 (in-place 추가).
+    opps : list[Flag]
+        기회 플래그 리스트 (in-place 추가).
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'F' 등급
+        summary : str — 금융업 수익성 요약
+        details : list[str] — ROE, ROA, CIR 세부 항목
+        risks : list[Flag] — 금융업 수익성 리스크
+        opportunities : list[Flag] — 금융업 수익성 강점
+    """
     details.append("[금융업 수익성 기준 적용]")
     score = 0
     netIncome = getLatest(aSeries, "IS", "net_profit")
@@ -326,7 +431,26 @@ def _analyzeProfitabilityFinancial(
 
 
 def analyzeHealth(ratios: RatioResult, isFinancial: bool = False, currency: str = "KRW") -> InsightResult:
-    """재무건전성 분석."""
+    """재무건전성 분석.
+
+    Parameters
+    ----------
+    ratios : RatioResult
+        재무비율 계산 결과.
+    isFinancial : bool
+        금융업 여부. True이면 금융업 부채비율 기준 적용.
+    currency : str
+        통화 코드 ('KRW' | 'USD'). USD이면 미국 기준 적용.
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'F' 등급
+        summary : str — 재무건전성 요약
+        details : list[str] — 부채비율, 유동비율, O-Score, Z''-Score 등
+        risks : list[Flag] — 건전성 리스크
+        opportunities : list[Flag] — 건전성 강점
+    """
     details: list[str] = []
     risks: list[Flag] = []
     opps: list[Flag] = []
@@ -457,7 +581,26 @@ def analyzeCashflow(
     aSeries: dict,
     isFinancial: bool = False,
 ) -> InsightResult:
-    """현금흐름 분석."""
+    """현금흐름 분석.
+
+    Parameters
+    ----------
+    ratios : RatioResult
+        재무비율 계산 결과.
+    aSeries : dict
+        연간 재무 시계열.
+    isFinancial : bool
+        금융업 여부. True이면 금융업 전용 분석으로 분기.
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'F' 등급
+        summary : str — 현금흐름 요약
+        details : list[str] — 영업CF, FCF 마진, CF 추세 등
+        risks : list[Flag] — 현금흐름 리스크
+        opportunities : list[Flag] — 현금흐름 강점
+    """
     if isFinancial:
         return _analyzeCashflowFinancial(aSeries)
 
@@ -520,7 +663,22 @@ def analyzeCashflow(
 
 
 def _analyzeCashflowFinancial(aSeries: dict) -> InsightResult:
-    """금융업 전용 현금흐름 분석."""
+    """금융업 전용 현금흐름 분석.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'F' 등급
+        summary : str — 금융업 현금흐름 요약
+        details : list[str] — 영업CF, 배당, 순이익 세부
+        risks : list[Flag] — 리스크
+        opportunities : list[Flag] — 강점
+    """
     details: list[str] = ["[금융업 현금흐름]"]
     risks: list[Flag] = []
     opps: list[Flag] = []
@@ -548,7 +706,20 @@ def _analyzeCashflowFinancial(aSeries: dict) -> InsightResult:
 
 
 def _analyzeGovernanceFromSections(company: Company) -> InsightResult:
-    """report가 없을 때 sections 기반 governance 분석 (EDGAR 등)."""
+    """report가 없을 때 sections 기반 governance 분석 (EDGAR 등).
+
+    Parameters
+    ----------
+    company : Company
+        기업 객체. docs.sections DataFrame 사용.
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'N' 등급
+        summary : str — 지배구조 요약
+        details : list[str] — topic/블록 수, 기간 일관성 등
+    """
     import polars as pl
 
     docs = getattr(company, "docs", None)
@@ -597,7 +768,22 @@ def _analyzeGovernanceFromSections(company: Company) -> InsightResult:
 
 
 def analyzeGovernance(company: Company | None) -> InsightResult:
-    """지배구조 분석."""
+    """지배구조 분석.
+
+    Parameters
+    ----------
+    company : Company | None
+        기업 객체. None이면 'N' 등급 반환.
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'N' 등급
+        summary : str — 지배구조 요약
+        details : list[str] — 최대주주, 감사의견, 감사인, 내부통제, 배당 등
+        risks : list[Flag] — 지배구조 리스크
+        opportunities : list[Flag] — 지배구조 강점
+    """
     details: list[str] = []
     risks: list[Flag] = []
     opps: list[Flag] = []
@@ -753,7 +939,21 @@ def analyzeGovernance(company: Company | None) -> InsightResult:
 
 
 def analyzeRiskSummary(insights: dict[str, InsightResult]) -> InsightResult:
-    """리스크 종합 분석."""
+    """리스크 종합 분석.
+
+    Parameters
+    ----------
+    insights : dict[str, InsightResult]
+        영역별 인사이트 결과 (performance, profitability 등 키).
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'F' 등급
+        summary : str — 리스크 종합 요약
+        details : list[str] — 개별 리스크 텍스트 목록
+        risks : list[Flag] — 전체 리스크 플래그 취합
+    """
     allRisks: list[Flag] = []
     for key in [
         "performance",
@@ -794,7 +994,21 @@ def analyzeRiskSummary(insights: dict[str, InsightResult]) -> InsightResult:
 
 
 def analyzeOpportunitySummary(insights: dict[str, InsightResult]) -> InsightResult:
-    """기회 종합 분석."""
+    """기회 종합 분석.
+
+    Parameters
+    ----------
+    insights : dict[str, InsightResult]
+        영역별 인사이트 결과.
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'F' 등급
+        summary : str — 기회 종합 요약
+        details : list[str] — 개별 기회 텍스트 목록
+        opportunities : list[Flag] — 전체 기회 플래그 취합
+    """
     allOpps: list[Flag] = []
     for key in [
         "performance",
@@ -840,7 +1054,24 @@ def analyzePredictability(
     aYears: list[str],
     isFinancial: bool = False,
 ) -> InsightResult:
-    """사업 예측가능성 분석 (0~10점 → A~F)."""
+    """사업 예측가능성 분석 (0~10점 → A~F).
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+    aYears : list[str]
+        연간 기간 라벨 리스트.
+    isFinancial : bool
+        금융업 여부. True이면 매출 대신 영업이익 사용.
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'F' 등급
+        summary : str — 예측가능성 점수/10 + 수준
+        details : list[str] — 매출 CV, 영업이익 CV, 연속성장, 흑자 비율 등 (점)
+    """
     import statistics
 
     revVals = getAnnualValues(aSeries, "IS", "sales")
@@ -898,7 +1129,18 @@ def analyzePredictability(
 
 
 def _predictabilityGrade(score: float) -> str:
-    """예측가능성 점수 → 등급."""
+    """예측가능성 점수 → 등급.
+
+    Parameters
+    ----------
+    score : float
+        예측가능성 점수 (0~10) (점).
+
+    Returns
+    -------
+    str
+        grade : str — 'A' (>=8) | 'B' (>=6) | 'C' (>=4) | 'D' (>=2) | 'F'
+    """
     if score >= 8:
         return "A"
     if score >= 6:
@@ -915,7 +1157,24 @@ def analyzeUncertainty(
     aYears: list[str],
     isFinancial: bool = False,
 ) -> InsightResult:
-    """불확실성 등급 분석 (Morningstar 방식 5단계)."""
+    """불확실성 등급 분석 (Morningstar 방식 5단계).
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+    aYears : list[str]
+        연간 기간 라벨 리스트.
+    isFinancial : bool
+        금융업 여부. True이면 매출 대신 영업이익 사용.
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'F' 등급 (낮은 불확실성 = 좋은 등급)
+        summary : str — 불확실성 등급 + Fair Value 밴드
+        details : list[str] — 매출CV, DOL, D/E, 영업CV, 종합점수/100
+    """
     import statistics
 
     revVals = getAnnualValues(aSeries, "IS", "sales")
@@ -983,7 +1242,18 @@ def analyzeUncertainty(
 
 
 def _uncertaintyGrade(rating: str) -> str:
-    """불확실성 등급 → insight 등급 (낮은 불확실성 = 좋은 등급)."""
+    """불확실성 등급 → insight 등급 (낮은 불확실성 = 좋은 등급).
+
+    Parameters
+    ----------
+    rating : str
+        불확실성 등급 ('Low' | 'Medium' | 'High' | 'Very High' | 'Extreme').
+
+    Returns
+    -------
+    str
+        grade : str — 'A'~'F' 등급
+    """
     return {"Low": "A", "Medium": "B", "High": "C", "Very High": "D", "Extreme": "F"}.get(rating, "C")
 
 
@@ -992,7 +1262,24 @@ def analyzeCoreEarnings(
     aYears: list[str],
     isFinancial: bool = False,
 ) -> InsightResult:
-    """핵심이익 품질 분석 (비경상 항목 분리)."""
+    """핵심이익 품질 분석 (비경상 항목 분리).
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+    aYears : list[str]
+        연간 기간 라벨 리스트.
+    isFinancial : bool
+        금융업 여부.
+
+    Returns
+    -------
+    InsightResult
+        grade : str — 'A'~'F' 등급
+        summary : str — 이익 품질 요약
+        details : list[str] — Core CV vs Reported CV, 안정성, 괴리 등
+    """
     import statistics
 
     opVals = getAnnualValues(aSeries, "IS", "operating_profit")
@@ -1080,6 +1367,20 @@ def disclosureGapFlags(
 
     diff 기반으로 리스크 서술 급증/감소를 감지하고, 재무 건전성 등급과 교차 비교하여
     '서술형 리스크 급증 vs 재무 안정' 또는 '재무 악화 vs 서술형 은폐' 불일치를 찾는다.
+
+    Parameters
+    ----------
+    company : Company | None
+        기업 객체. None이면 빈 리스트 반환.
+    healthGrade : str | None
+        재무건전성 등급 ('A'~'F'). 교차 비교에 사용.
+
+    Returns
+    -------
+    list[Flag]
+        level : str — 'warning'
+        category : str — 'disclosure_gap'
+        text : str — 불일치 설명
     """
     if company is None:
         return []

@@ -23,15 +23,23 @@ _CACHE_DIR = Path.home() / ".dartlab" / "cache" / "macro"
 def addChangeRate(df: pl.DataFrame, *, valueName: str = "value") -> pl.DataFrame:
     """시계열 DataFrame에 변화율 컬럼 추가.
 
-    추가 컬럼:
-        - change: 전기대비 변화량
-        - changePct: 전기대비 변화율 (%)
-        - yoyChange: 전년동기대비 변화량 (4기 lag, 분기 기준)
-        - yoyChangePct: 전년동기대비 변화율 (%)
+    Parameters
+    ----------
+    df : pl.DataFrame
+        ``(date, value)`` 형태 시계열 DataFrame.
+    valueName : str
+        값 컬럼명. 기본 ``"value"``.
 
-    Args:
-        df: ``(date, value)`` 형태 DataFrame.
-        valueName: 값 컬럼명.
+    Returns
+    -------
+    pl.DataFrame
+        date : date — 관측일
+        {valueName} : float — 원본 지표값
+        change : float — 전기대비 변화량
+        changePct : float — 전기대비 변화율 (%)
+        yoyChange : float — 전년동기대비 변화량 (8행 이상 시)
+        yoyChangePct : float — 전년동기대비 변화율 (%) (8행 이상 시)
+        빈 DataFrame 또는 valueName 컬럼 미존재 시 원본 그대로 반환.
     """
     if df.is_empty() or valueName not in df.columns:
         return df
@@ -72,8 +80,21 @@ def addChangeRate(df: pl.DataFrame, *, valueName: str = "value") -> pl.DataFrame
 def resampleToQuarterly(df: pl.DataFrame, *, valueName: str = "value", method: str = "last") -> pl.DataFrame:
     """시계열을 분기별로 리샘플링.
 
-    Args:
-        method: "last" (기말값), "mean" (평균), "sum" (합계).
+    Parameters
+    ----------
+    df : pl.DataFrame
+        ``(date, value)`` 형태 시계열 DataFrame.
+    valueName : str
+        값 컬럼명. 기본 ``"value"``.
+    method : str
+        집계 방식. ``"last"`` (기말값), ``"mean"`` (평균), ``"sum"`` (합계).
+
+    Returns
+    -------
+    pl.DataFrame
+        date : date — 분기 시작일
+        {valueName} : float — 집계된 지표값
+        빈 DataFrame 또는 valueName 컬럼 미존재 시 원본 그대로 반환.
     """
     if df.is_empty() or valueName not in df.columns:
         return df
@@ -92,8 +113,21 @@ def resampleToQuarterly(df: pl.DataFrame, *, valueName: str = "value", method: s
 def resampleToAnnual(df: pl.DataFrame, *, valueName: str = "value", method: str = "last") -> pl.DataFrame:
     """시계열을 연간으로 리샘플링.
 
-    Args:
-        method: "last" (기말값), "mean" (평균), "sum" (합계).
+    Parameters
+    ----------
+    df : pl.DataFrame
+        ``(date, value)`` 형태 시계열 DataFrame.
+    valueName : str
+        값 컬럼명. 기본 ``"value"``.
+    method : str
+        집계 방식. ``"last"`` (기말값), ``"mean"`` (평균), ``"sum"`` (합계).
+
+    Returns
+    -------
+    pl.DataFrame
+        date : date — 연도 시작일
+        {valueName} : float — 집계된 지표값
+        빈 DataFrame 또는 valueName 컬럼 미존재 시 원본 그대로 반환.
     """
     if df.is_empty() or valueName not in df.columns:
         return df
@@ -115,12 +149,19 @@ def resampleToAnnual(df: pl.DataFrame, *, valueName: str = "value", method: str 
 def saveMacroParquet(indicatorId: str, df: pl.DataFrame, *, source: str = "ecos") -> Path:
     """거시지표 시계열을 Parquet으로 영구 저장.
 
-    Args:
-        indicatorId: 지표 ID (예: "GDP", "CPI").
-        source: "ecos" 또는 "fred".
+    Parameters
+    ----------
+    indicatorId : str
+        지표 ID (예: "GDP", "CPI").
+    df : pl.DataFrame
+        ``(date, value, ...)`` 형태 시계열 DataFrame.
+    source : str
+        데이터 출처. "ecos" 또는 "fred".
 
-    Returns:
-        저장된 파일 경로.
+    Returns
+    -------
+    Path
+        저장된 Parquet 파일 경로 (``~/.dartlab/cache/macro/{source}/{indicatorId}.parquet``).
     """
     dirPath = _CACHE_DIR / source
     dirPath.mkdir(parents=True, exist_ok=True)
@@ -133,15 +174,28 @@ def saveMacroParquet(indicatorId: str, df: pl.DataFrame, *, source: str = "ecos"
 def loadMacroParquet(indicatorId: str, *, source: str = "ecos") -> pl.DataFrame | None:
     """Parquet 영구 캐시에서 거시지표 로드.
 
-    Returns:
-        DataFrame 또는 None (캐시 없음).
+    Parameters
+    ----------
+    indicatorId : str
+        지표 ID (예: "GDP", "CPI").
+    source : str
+        데이터 출처. "ecos" 또는 "fred".
+
+    Returns
+    -------
+    pl.DataFrame | None
+        date : date — 관측일
+        value : float — 지표값
+        changePct : float — 전기대비 변화율 (%), enrichAndCache 사용 시
+        yoyChangePct : float — 전년동기대비 변화율 (%), enrichAndCache 사용 시
+        캐시 파일 없거나 읽기 실패 시 None.
     """
     path = _CACHE_DIR / source / f"{indicatorId}.parquet"
     if not path.exists():
         return None
     try:
         return pl.read_parquet(path)
-    except Exception:  # noqa: BLE001
+    except (OSError, ValueError, ImportError):
         log.warning("Parquet 읽기 실패: %s", path)
         return None
 
@@ -155,13 +209,29 @@ def enrichAndCache(
 ) -> pl.DataFrame:
     """변화율 추가 + Parquet 저장을 한 번에 처리.
 
-    Args:
-        indicatorId: 지표 ID.
-        df: raw ``(date, value)`` DataFrame.
-        source: "ecos" 또는 "fred".
+    ``addChangeRate`` 로 변화율 컬럼을 추가한 뒤
+    ``saveMacroParquet`` 로 영구 캐시에 저장한다.
 
-    Returns:
-        변화율이 추가된 DataFrame.
+    Parameters
+    ----------
+    indicatorId : str
+        지표 ID (예: "GDP", "CPI").
+    df : pl.DataFrame
+        raw ``(date, value)`` DataFrame.
+    source : str
+        데이터 출처. "ecos" 또는 "fred".
+    valueName : str
+        값 컬럼명.
+
+    Returns
+    -------
+    pl.DataFrame
+        date : date — 관측일
+        value : float — 원본 지표값
+        change : float — 전기대비 변화량
+        changePct : float — 전기대비 변화율 (%)
+        yoyChange : float — 전년동기대비 변화량 (8행 이상 시)
+        yoyChangePct : float — 전년동기대비 변화율 (%) (8행 이상 시)
     """
     enriched = addChangeRate(df, valueName=valueName)
     saveMacroParquet(indicatorId, enriched, source=source)
@@ -179,15 +249,24 @@ def alignToFinancialPeriods(
 ) -> pl.DataFrame:
     """거시지표 시계열을 재무 기간에 맞춰 정렬.
 
-    재무 기간 "2024A" → 2024년 연간 평균/기말값으로 매핑.
-    재무 기간 "2024Q3" → 해당 분기 평균/기말값으로 매핑.
+    재무 기간 "2024A" → 2024년 기말값으로 매핑.
+    재무 기간 "2024Q3" → 해당 분기 기말값으로 매핑.
+    해당 기간에 데이터 없으면 value=None.
 
-    Args:
-        macroDf: ``(date, value, ...)`` 거시지표 DataFrame.
-        periods: 재무 기간 목록 (예: ["2024A", "2023A", "2022A"]).
+    Parameters
+    ----------
+    macroDf : pl.DataFrame
+        ``(date, value, ...)`` 거시지표 DataFrame.
+    periods : list[str]
+        재무 기간 목록 (예: ``["2024A", "2023A", "2024Q3"]``).
+    valueName : str
+        값 컬럼명.
 
-    Returns:
-        ``(period, value)`` DataFrame.
+    Returns
+    -------
+    pl.DataFrame
+        period : str — 재무 기간 레이블
+        value : float | None — 해당 기간 기말 지표값
     """
     if macroDf.is_empty():
         return pl.DataFrame({"period": periods, "value": [None] * len(periods)})

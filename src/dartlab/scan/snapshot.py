@@ -21,12 +21,26 @@ from pathlib import Path
 
 
 def _cacheDir() -> Path:
+    """scan 스냅샷 캐시 디렉토리.
+
+    Returns
+    -------
+    Path
+        ~/.dartlab/data/_cache/
+    """
     from dartlab import config
 
     return Path(config.dataDir) / "_cache"
 
 
 def _cachePath() -> Path:
+    """scan 스냅샷 JSON 캐시 경로.
+
+    Returns
+    -------
+    Path
+        ~/.dartlab/data/_cache/scan_snapshot.json
+    """
     return _cacheDir() / "scan_snapshot.json"
 
 
@@ -36,8 +50,21 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
     기존 scan 함수를 그대로 호출하여 종목별 핵심 지표를 추출한다.
     결과를 JSON으로 저장하여 이후 조회는 즉시 가능.
 
-    Returns:
-        {stockCode: {governance_score, rev_per_employee, capital_class, icr, debt_risk}}
+    Parameters
+    ----------
+    verbose : bool
+        진행 로그 출력 여부.
+
+    Returns
+    -------
+    dict[str, dict]
+        {종목코드: snapshot} 매핑. 각 snapshot:
+            governance_score : float | None — 지배구조 총점 (점)
+            governance_grade : str | None — 지배구조 등급 (A~E)
+            rev_per_employee : float | None — 직원당 매출 (억)
+            capital_class : str | None — 주주환원 분류 (환원형/중립/희석형)
+            icr : float | None — 이자보상배율 (배)
+            debt_risk : str | None — 부채 위험등급 (안전/관찰/주의/고위험)
     """
     if verbose:
         print("[scan] 전종목 스냅샷 빌드 시작...")
@@ -192,6 +219,13 @@ _CACHE_LOCK = threading.Lock()
 
 
 def _ensureCache() -> dict | None:
+    """스냅샷 JSON 캐시 로드 (thread-safe, lazy).
+
+    Returns
+    -------
+    dict | None
+        {"snapshot": {...}, "distributions": {...}}. 캐시 없으면 None.
+    """
     global _CACHE
     if _CACHE is not None:
         return _CACHE
@@ -206,7 +240,20 @@ def _ensureCache() -> dict | None:
 
 
 def _percentile(sorted_arr: list[float], value: float) -> float:
-    """정렬 배열에서 percentile rank 산출 (0~100)."""
+    """정렬 배열에서 percentile rank 산출.
+
+    Parameters
+    ----------
+    sorted_arr : list[float]
+        오름차순 정렬된 값 배열.
+    value : float
+        rank를 산출할 값.
+
+    Returns
+    -------
+    float
+        백분위 순위 (%) — 0.0~100.0.
+    """
     if not sorted_arr:
         return 0.0
     pos = bisect.bisect_right(sorted_arr, value)
@@ -218,11 +265,32 @@ def getScanPosition(stockCode: str) -> dict | None:
 
     스냅샷이 없으면 None. buildScanSnapshot() 선행 필요.
 
-    Returns:
-        {governance: {value, percentile, grade, total},
-         workforce: {value, percentile, total},
-         capital: {class, distribution},
-         debt: {icr, percentile, risk, total}}
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (6자리).
+
+    Returns
+    -------
+    dict | None
+        governance : dict | None
+            value : float — 지배구조 총점 (점)
+            percentile : float — 백분위 (%)
+            grade : str — 등급 (A~E)
+            total : int — 전종목 수
+        workforce : dict | None
+            value : float — 직원당 매출 (억)
+            percentile : float — 백분위 (%)
+            total : int — 전종목 수
+        capital : dict | None
+            class : str — 주주환원 분류
+            distribution : dict — 분류별 종목 수
+        debt : dict | None
+            icr : float | None — 이자보상배율 (배)
+            percentile : float | None — 백분위 (%)
+            risk : str — 위험등급
+            total : int — 전종목 수
+        스냅샷 없으면 None.
     """
     cache = _ensureCache()
     if cache is None:

@@ -35,13 +35,39 @@ class ForwardTestRecord:
 
 
 def generateKey(stockCode: str, horizon: int, version: str = "v3") -> str:
-    """고유 키 생성."""
+    """Forward test 고유 키 생성.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드.
+    horizon : int
+        예측 기간 (년).
+    version : str
+        예측 버전 (기본 "v3").
+
+    Returns
+    -------
+    str
+        "{stockCode}_{YYYYMMDD}_{horizon}y_{version}" 형태의 키.
+    """
     dateStr = datetime.now(timezone.utc).strftime("%Y%m%d")
     return f"{stockCode}_{dateStr}_{horizon}y_{version}"
 
 
 def saveForecast(record: ForwardTestRecord) -> Path:
-    """예측 기록 저장 (opt-in)."""
+    """예측 기록을 로컬 JSON에 저장 (opt-in).
+
+    Parameters
+    ----------
+    record : ForwardTestRecord
+        저장할 예측 기록.
+
+    Returns
+    -------
+    Path
+        저장된 파일 경로 (~/.dartlab/forward_tests/{stockCode}.json).
+    """
     _FORWARD_TEST_DIR.mkdir(parents=True, exist_ok=True)
     filepath = _FORWARD_TEST_DIR / f"{record.stockCode}.json"
 
@@ -58,7 +84,18 @@ def saveForecast(record: ForwardTestRecord) -> Path:
 
 
 def loadRecords(stockCode: str) -> list[ForwardTestRecord]:
-    """종목별 저장된 예측 기록 로드."""
+    """종목별 저장된 예측 기록 로드.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드.
+
+    Returns
+    -------
+    list[ForwardTestRecord]
+        해당 종목의 모든 예측 기록. 파일 없으면 빈 리스트.
+    """
     filepath = _FORWARD_TEST_DIR / f"{stockCode}.json"
     raw = _loadRaw(filepath)
     results = []
@@ -74,7 +111,25 @@ def evaluate(
     record: ForwardTestRecord,
     actualRevenue: list[float],
 ) -> dict:
-    """예측 vs 실적 비교 평가."""
+    """예측 vs 실적 비교 평가.
+
+    Parameters
+    ----------
+    record : ForwardTestRecord
+        평가할 예측 기록.
+    actualRevenue : list[float]
+        실제 매출 시계열 (원).
+
+    Returns
+    -------
+    dict
+        mae : int — 평균 절대 오차 (원)
+        mape : float — 평균 절대 백분율 오차 (%)
+        directionAccuracy : float — 방향(증/감) 정확도 (%)
+        scenarioHit : str — 시나리오 적중 범위 ("within_range" | "above_bull" | "below_bear")
+        nCompared : int — 비교 기간 수
+        evaluatedAt : str — 평가 시각 (ISO 8601)
+    """
     projected = record.projected
     n = min(len(projected), len(actualRevenue))
     if n == 0:
@@ -159,11 +214,22 @@ def _checkScenarioHit(
 
 def evaluateCalibration(
     stockCodes: list[str] | None = None,
-) -> dict | None:  # CalibrationReport from calibrationMetrics
+) -> dict | None:
     """저장된 forward test 전체의 캘리브레이션 평가.
 
     모든 기록에서 directionProbability와 directionActual을 수집하여
     Brier Score + reliability diagram 생성.
+
+    Parameters
+    ----------
+    stockCodes : list[str], optional
+        평가할 종목코드 목록. None이면 전체 스캔.
+
+    Returns
+    -------
+    dict | None
+        CalibrationReport dict (brierScore, reliabilityBins 등).
+        데이터 5건 미만 시 None.
     """
     from dartlab.analysis.forecast.calibrationMetrics import generateCalibrationReport
 

@@ -7,7 +7,21 @@ from __future__ import annotations
 
 
 def score_ownership(pct: float | None) -> float:
-    """최대주주 지분율 점수 (0~20). 30~50%가 최적."""
+    """최대주주 지분율 → 거버넌스 점수.
+
+    30~50% 구간이 최적(20점). 과소(경영권 불안)·과대(독단 리스크) 모두 감점.
+    None이면 중간값 10점을 반환한다.
+
+    Parameters
+    ----------
+    pct : float | None
+        최대주주 지분율 (%)
+
+    Returns
+    -------
+    float
+        지분율 점수 (점, 0~20)
+    """
     if pct is None:
         return 10.0
     if 30 <= pct <= 50:
@@ -27,7 +41,26 @@ def score_outside_ratio(
     resign: int = 0,
     concurrent: int = 0,
 ) -> float:
-    """사외이사 비율 점수 (0~25). 중도사임/겸직 페널티 포함."""
+    """사외이사 비율 → 거버넌스 점수.
+
+    비율이 높을수록 고점수. 중도사임(건당 -3, 최대 -6)과
+    겸직(건당 -2, 최대 -4) 페널티를 차감한다.
+    None이면 중간값 12.5점을 반환한다.
+
+    Parameters
+    ----------
+    ratio : float | None
+        사외이사 비율 (%)
+    resign : int
+        중도사임 인원 (명)
+    concurrent : int
+        겸직 인원 (명)
+
+    Returns
+    -------
+    float
+        사외이사 점수 (점, 0~25)
+    """
     if ratio is None:
         return 12.5
 
@@ -54,7 +87,21 @@ def score_outside_ratio(
 
 
 def score_pay_ratio(ratio: float | None) -> float:
-    """pay ratio 점수 (0~15). 낮을수록 좋음."""
+    """임원-직원 보수 배율 → 거버넌스 점수.
+
+    배율이 낮을수록 고점수. 2배 이하 만점(15), 20배 초과 최저(1).
+    None이면 중간값 7.5점을 반환한다.
+
+    Parameters
+    ----------
+    ratio : float | None
+        임원/직원 보수 배율 (배)
+
+    Returns
+    -------
+    float
+        보수 배율 점수 (점, 0~15)
+    """
     if ratio is None:
         return 7.5
     if ratio <= 2:
@@ -71,7 +118,21 @@ def score_pay_ratio(ratio: float | None) -> float:
 
 
 def score_audit(opinion: str | None) -> float:
-    """감사의견 점수 (0~25)."""
+    """감사의견 → 거버넌스 점수.
+
+    적정의견 만점(25), 한정의견 5점, 부적정·의견거절 0점.
+    None이면 중간값 12.5점을 반환한다.
+
+    Parameters
+    ----------
+    opinion : str | None
+        감사의견 문자열 (적정의견 | 한정의견 | 부적정의견 | 의견거절)
+
+    Returns
+    -------
+    float
+        감사의견 점수 (점, 0~25)
+    """
     if opinion is None or opinion == "":
         return 12.5
     if opinion == "적정의견":
@@ -82,7 +143,22 @@ def score_audit(opinion: str | None) -> float:
 
 
 def score_minority(pct: float | None) -> float:
-    """소액주주 지분율 점수 (0~15). 높을수록 분산 양호."""
+    """소액주주 지분율 → 거버넌스 점수.
+
+    지분율이 높을수록 주주 분산이 양호하여 고점수.
+    60% 이상 만점(15), 20% 미만 최저(2).
+    None이면 중간값 7.5점을 반환한다.
+
+    Parameters
+    ----------
+    pct : float | None
+        소액주주 지분율 (%)
+
+    Returns
+    -------
+    float
+        소액주주 분산 점수 (점, 0~15)
+    """
     if pct is None:
         return 7.5
     if pct >= 60:
@@ -99,7 +175,20 @@ def score_minority(pct: float | None) -> float:
 
 
 def grade(score: float) -> str:
-    """총점 → A~E 등급."""
+    """거버넌스 총점 → 등급 변환.
+
+    A(85+) / B(70+) / C(55+) / D(40+) / E(40 미만).
+
+    Parameters
+    ----------
+    score : float
+        거버넌스 종합 점수 (점, 0~100)
+
+    Returns
+    -------
+    str
+        등급 (A | B | C | D | E)
+    """
     if score >= 85:
         return "A"
     if score >= 70:

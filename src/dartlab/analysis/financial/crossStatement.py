@@ -27,21 +27,23 @@ from dartlab.core.finance.safe import getFirst as _getFirst  # SSOT
 def calcIsCfDivergence(company, *, basePeriod: str | None = None) -> dict | None:
     """IS-CF 괴리 시계열 — 순이익 vs 영업CF.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {
-                    "period": str,
-                    "netIncome": float,
-                    "ocf": float,
-                    "divergence": float | None,
-                    "direction": str | None,
-                    "nonRecurringDistortion": bool,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            netIncome : float — 당기순이익 (원)
+            ocf : float — 영업현금흐름 (원)
+            divergence : float | None — 괴리율 (%)
+            direction : str | None — 괴리 방향 ("NI>CF"|"CF>NI")
+            nonRecurringDistortion : bool — 비경상 왜곡 여부
     """
     isResult = company.select("IS", ["당기순이익", "영업이익"])
     cfResult = company.select("CF", ["영업활동현금흐름"])
@@ -106,21 +108,23 @@ def calcIsCfDivergence(company, *, basePeriod: str | None = None) -> dict | None
 def calcIsBsDivergence(company, *, basePeriod: str | None = None) -> dict | None:
     """IS-BS 괴리 시계열 — 매출 성장 vs 매출채권/재고 성장.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {
-                    "period": str,
-                    "revenueGrowth": float | None,
-                    "receivableGrowth": float | None,
-                    "inventoryGrowth": float | None,
-                    "revRecGap": float | None,
-                    "revInvGap": float | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            revenueGrowth : float | None — 매출 성장률 (%)
+            receivableGrowth : float | None — 매출채권 성장률 (%)
+            inventoryGrowth : float | None — 재고자산 성장률 (%)
+            revRecGap : float | None — 매출-채권 성장 괴리 (%p)
+            revInvGap : float | None — 매출-재고 성장 괴리 (%p)
     """
     isResult = company.select("IS", ["매출액"])
     bsResult = company.select("BS", ["매출채권및기타채권", "재고자산"])
@@ -194,18 +198,20 @@ def calcIsBsDivergence(company, *, basePeriod: str | None = None) -> dict | None
 def calcAnomalyScore(company, *, basePeriod: str | None = None) -> dict | None:
     """종합 이상 점수 시계열 — 교차검증 결과 종합.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {
-                    "period": str,
-                    "score": float,
-                    "components": dict,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            score : float — 이상 점수 (점, 0~100)
+            components : dict — 구성 요소별 점수
     """
     isCf = calcIsCfDivergence(company, basePeriod=basePeriod)
     isBs = calcIsBsDivergence(company, basePeriod=basePeriod)
@@ -343,16 +349,25 @@ def calcArticulationCheck(company, *, basePeriod: str | None = None) -> dict | N
 
     오차가 크면 연결범위 변동, 환율 효과, 재분류 가능성.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {"period": str, "ppeError": float, "cashError": float,
-                 "equityError": float, "maxErrorPct": float},
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            ppeError : float — PPE 정합 오차 (원)
+            cashError : float — 현금 정합 오차 (원)
+            equityError : float — 자본 정합 오차 (원)
+            maxErrorPct : float — 최대 오차율 (%)
 
+    Notes
+    -----
     학술근거: Articulation of Financial Statements (FASB/IASB).
     """
     bsResult = company.select(

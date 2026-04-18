@@ -14,12 +14,26 @@ _MAX_YEARS = MAX_RATIO_YEARS
 
 
 def _yoy(cur, prev) -> float | None:
+    """전기대비 증감률 계산.
+
+    Returns
+    -------
+    float | None
+        YoY 변화율 (%). 계산 불가 시 None.
+    """
     if cur is None or prev is None or prev == 0:
         return None
     return round((cur - prev) / abs(prev) * 100, 2)
 
 
 def _cagrFromList(values: list[float | None], periods: int) -> float | None:
+    """양수 값 리스트에서 CAGR 산출.
+
+    Returns
+    -------
+    float | None
+        연복합성장률 (%). 양수 값 2개 미만이면 None.
+    """
     valid = [v for v in values if v is not None and v > 0]
     if len(valid) < 2 or periods < 1:
         return None
@@ -374,10 +388,12 @@ def calcCagrComparison(company, *, basePeriod: str | None = None) -> dict | None
         return None
 
     def _v(row, col):
+        """BS 행에서 값 추출 (None → 0)."""
         v = row.get(col) if row else None
         return v if v is not None else 0
 
     def _vF(row, col):
+        """IS/CF flow 행에서 값 추출 (None → 0)."""
         v = row.get(col)
         return v if v is not None else 0
 

@@ -25,12 +25,26 @@ OP_NMS = {"영업이익", "영업이익(손실)", "영업손익"}
 
 
 def _revenueMap() -> dict[str, float]:
-    """전종목 매출(원) → {종목코드: 매출}."""
+    """전종목 매출액을 scan/finance parquet에서 추출한다.
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: 매출액(원)}. 손익계산서(IS)에서 매출 관련
+        account_id/account_nm에 매칭되는 값을 반환한다.
+    """
     return scan_finance_parquets("IS", REVENUE_IDS, REVENUE_NMS)
 
 
 def _opIncomeMap() -> dict[str, float]:
-    """전종목 영업이익(원) → {종목코드: 영업이익}."""
+    """전종목 영업이익을 scan/finance parquet에서 추출한다.
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: 영업이익(원)}. 손익계산서(IS)에서 영업이익 관련
+        account_id/account_nm에 매칭되는 값을 반환한다.
+    """
     return scan_finance_parquets("IS", OP_IDS, OP_NMS)
 
 

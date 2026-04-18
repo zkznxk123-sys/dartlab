@@ -27,14 +27,36 @@ def build_digest(
 ) -> str | pl.DataFrame | dict:
     """스캔 결과에서 다이제스트를 생성한다.
 
-    Args:
-        scan_df: scan_market() 결과 DataFrame.
-        title: 다이제스트 제목 (None이면 자동 생성).
-        format: "markdown", "json", "dataframe" 중 택1.
-        top_n: 다이제스트에 포함할 최대 항목 수.
+    score 내림차순으로 정렬한 뒤 top_n개를 선택하여
+    지정 format으로 변환한다.
 
-    Returns:
-        format에 따라 str(markdown), dict(json), pl.DataFrame.
+    Parameters
+    ----------
+    scan_df : pl.DataFrame
+        scan_market() 결과 DataFrame. 필수 컬럼: score.
+        선택 컬럼: stockCode, corpName, topic, changeRate,
+        latestPeriod, reason, deltaBytes.
+    title : str | None
+        다이제스트 제목. None이면 날짜 기반 자동 생성.
+    format : str
+        출력 형식. "markdown" | "json" | "dataframe".
+    top_n : int
+        다이제스트에 포함할 최대 항목 수.
+
+    Returns
+    -------
+    str | dict | pl.DataFrame
+        format에 따라 반환 타입이 달라진다.
+
+        - ``"markdown"`` → str — 마크다운 문자열 (기업별 그룹핑, 배지 포함)
+        - ``"json"`` → dict:
+            - title : str — 다이제스트 제목
+            - date : str — 생성일 (ISO 8601)
+            - count : int — 항목 수
+            - items : list[dict] — 각 항목 (stockCode, corpName, topic,
+              score(점), changeRate(비율), deltaBytes(바이트),
+              latestPeriod, reason)
+        - ``"dataframe"`` → pl.DataFrame — score 내림차순 상위 top_n행
     """
     if scan_df.height == 0:
         if format == "dataframe":
@@ -55,7 +77,23 @@ def build_digest(
 
 
 def _to_markdown(df: pl.DataFrame, title: str | None) -> str:
-    """DataFrame → 마크다운 다이제스트."""
+    """DataFrame을 마크다운 형식 다이제스트 문자열로 변환한다.
+
+    기업별로 그룹핑하여 score 배지, 변화율, 기간, 근거를 포함한
+    계층형 마크다운을 생성한다.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        score 내림차순 정렬된 스캔 결과.
+    title : str | None
+        다이제스트 제목. None이면 날짜 기반 자동 생성.
+
+    Returns
+    -------
+    str
+        마크다운 형식 다이제스트 문자열.
+    """
     today = date.today().isoformat()
     header = title or f"시장 변화 다이제스트 ({today})"
 
@@ -93,7 +131,25 @@ def _to_markdown(df: pl.DataFrame, title: str | None) -> str:
 
 
 def _to_json(df: pl.DataFrame, title: str | None) -> dict:
-    """DataFrame → JSON dict."""
+    """DataFrame을 JSON-직렬화 가능한 dict로 변환한다.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        score 내림차순 정렬된 스캔 결과.
+    title : str | None
+        다이제스트 제목. None이면 날짜 기반 자동 생성.
+
+    Returns
+    -------
+    dict
+        - title : str — 다이제스트 제목
+        - date : str — 생성일 (ISO 8601)
+        - count : int — 항목 수
+        - items : list[dict] — 각 항목별 stockCode, corpName,
+          topic, score(점), changeRate(비율), deltaBytes(바이트),
+          latestPeriod, reason
+    """
     today = date.today().isoformat()
     items = []
     for row in df.iter_rows(named=True):
@@ -118,7 +174,19 @@ def _to_json(df: pl.DataFrame, title: str | None) -> dict:
 
 
 def _score_badge(score: float) -> str:
-    """점수에 따른 텍스트 배지."""
+    """점수 구간에 따른 텍스트 배지를 반환한다.
+
+    Parameters
+    ----------
+    score : float
+        중요도 점수 (0~100).
+
+    Returns
+    -------
+    str
+        배지 문자열. 80+ → ``"[!!!]"``, 50+ → ``"[!!]"``,
+        25+ → ``"[!]"``, 그 외 → ``"[~]"``.
+    """
     if score >= 80:
         return "[!!!]"
     if score >= 50:

@@ -44,7 +44,25 @@ _EQ_NMS = {"자본총계", "자본 총계", "지배기업 소유주지분"}
 
 
 def _gradeProfitability(opMargin: float | None, roe: float | None) -> str:
-    """수익성 등급."""
+    """영업이익률·ROE 중 높은 값으로 수익성 등급 분류.
+
+    Parameters
+    ----------
+    opMargin : float | None
+        영업이익률 (%).
+    roe : float | None
+        자기자본이익률 (%).
+
+    Returns
+    -------
+    grade : str
+        수익성 등급. 다음 중 하나:
+        - ``"우수"``   : best >= 20 (%)
+        - ``"양호"``   : 10 <= best < 20 (%)
+        - ``"보통"``   : 5 <= best < 10 (%)
+        - ``"저수익"`` : 0 <= best < 5 (%)
+        - ``"적자"``   : best < 0 (%)
+    """
     best = max(opMargin or -999, roe or -999)
     if best >= 20:
         return "우수"
@@ -69,7 +87,20 @@ def scanProfitability() -> pl.DataFrame:
 
 
 def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
-    """프리빌드 finance.parquet에서 수익성 계산."""
+    """프리빌드 finance.parquet 에서 전종목 수익성 지표 계산.
+
+    Parameters
+    ----------
+    scanPath : Path
+        ``finance.parquet`` 파일 경로.
+
+    Returns
+    -------
+    pl.DataFrame
+        ``_computeProfitability`` 가 반환하는 DataFrame 과 동일한 스키마.
+        컬럼 상세는 ``_computeProfitability`` 독스트링 참조.
+        데이터가 없으면 빈 DataFrame.
+    """
     schema = pl.scan_parquet(str(scanPath)).collect_schema().names()
     scCol = "stockCode" if "stockCode" in schema else "stock_code"
 
@@ -97,7 +128,17 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
 
 
 def _scanPerFile() -> pl.DataFrame:
-    """종목별 finance parquet 순회 fallback."""
+    """종목별 finance parquet 파일을 순회하여 수익성 계산 (fallback).
+
+    ``finance.parquet`` 통합 파일이 없을 때 개별 종목 parquet 을 순회한다.
+
+    Returns
+    -------
+    pl.DataFrame
+        ``_computeProfitability`` 가 반환하는 DataFrame 과 동일한 스키마.
+        컬럼 상세는 ``_computeProfitability`` 독스트링 참조.
+        데이터가 없으면 빈 DataFrame.
+    """
     from dartlab.core.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
@@ -130,7 +171,29 @@ def _scanPerFile() -> pl.DataFrame:
 
 
 def _computeProfitability(target: pl.DataFrame, scCol: str) -> pl.DataFrame:
-    """종목별 수익성 비율 계산 (최신 연도)."""
+    """최신 연도 기준 종목별 수익성 비율 계산 및 등급 부여.
+
+    Parameters
+    ----------
+    target : pl.DataFrame
+        손익계산서(IS/CIS) + 재무상태표(BS) 행을 포함한 DataFrame.
+        필수 컬럼: ``bsns_year``, ``account_id``, ``account_nm``, ``thstrm_amount``.
+    scCol : str
+        종목코드 컬럼명 (``"stockCode"`` 또는 ``"stock_code"``).
+
+    Returns
+    -------
+    pl.DataFrame
+        종목별 수익성 지표. 컬럼:
+
+        - stockCode : str — 종목코드
+        - opMargin : float — 영업이익률 (%)
+        - netMargin : float — 순이익률 (%)
+        - roe : float — 자기자본이익률 (%)
+        - roa : float — 총자산이익률 (%)
+        - grade : str — 수익성 등급 (우수/양호/보통/저수익/적자)
+        - nonRecurring : bool — 비경상 이익 의심 여부 (순이익률이 영업이익률 대비 극단적으로 클 때 True)
+    """
     years = sorted(target["bsns_year"].unique().to_list(), reverse=True)
     if not years:
         return pl.DataFrame()

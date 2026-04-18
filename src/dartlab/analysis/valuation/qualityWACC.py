@@ -46,6 +46,15 @@ def calcQualityWACC(company: Any, base_wacc: float, *, basePeriod: str | None = 
 
 
 def _creditSpread(company: Any, basePeriod: str | None) -> dict:
+    """신용등급 기반 WACC 스프레드 산출.
+
+    Returns
+    -------
+    dict
+        name : str — "신용등급"
+        spread : float — WACC 가감 (%p)
+        reason : str — 판단 근거
+    """
     try:
         data = company.credit("등급") if hasattr(company, "credit") else None
         if not data:
@@ -66,6 +75,15 @@ def _creditSpread(company: Any, basePeriod: str | None) -> dict:
 
 
 def _governancePremium(company: Any, basePeriod: str | None) -> dict:
+    """거버넌스 리스크 기반 WACC 스프레드 산출.
+
+    Returns
+    -------
+    dict
+        name : str — "거버넌스"
+        spread : float — WACC 가감 (%p)
+        reason : str — 판단 근거
+    """
     try:
         from dartlab.analysis.financial.governance import calcBoardComposition
 
@@ -81,6 +99,15 @@ def _governancePremium(company: Any, basePeriod: str | None) -> dict:
 
 
 def _earningsQualitySpread(company: Any, basePeriod: str | None) -> dict:
+    """이익품질(발생액 비율) 기반 WACC 스프레드 산출.
+
+    Returns
+    -------
+    dict
+        name : str — "이익품질"
+        spread : float — WACC 가감 (%p)
+        reason : str — 판단 근거
+    """
     try:
         from dartlab.analysis.financial.earningsQuality import calcAccrualAnalysis
 
@@ -96,6 +123,15 @@ def _earningsQualitySpread(company: Any, basePeriod: str | None) -> dict:
 
 
 def _cycleSpread(company: Any) -> dict:
+    """경기 사이클 국면 기반 WACC 스프레드 산출.
+
+    Returns
+    -------
+    dict
+        name : str — "사이클"
+        spread : float — WACC 가감 (%p)
+        reason : str — 판단 근거
+    """
     try:
         data = company.macro("위기") if hasattr(company, "macro") else None
         if not data:

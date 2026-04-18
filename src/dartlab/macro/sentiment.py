@@ -15,7 +15,26 @@ from dartlab.macro._helpers import (
 
 
 def _fetch_sentiment_data(market: str, as_of: str | None = None) -> dict[str, float | None]:
-    """gather에서 심리 지표 수집."""
+    """gather에서 심리 지표 수집.
+
+    Parameters
+    ----------
+    market : str
+        ``"US"`` | ``"KR"``.
+    as_of : str | None
+        기준일. ``None`` 이면 최신.
+
+    Returns
+    -------
+    dict[str, float | None]
+        가능한 키:
+
+        - vix : float — VIX 지수 (pt)
+        - sp500_vs_ma125 : float — S&P 500 / 125일 이평 비율 (배)
+        - hy_spread : float — HY 스프레드 (bp)
+        - gold_equity_ratio : float — 금/S&P 500 비율 (배)
+        - crypto_momentum : float — BTC 90일 변화율 (%)
+    """
     g = get_gather(as_of)
     data: dict[str, float | None] = {}
 
@@ -46,7 +65,26 @@ def _fetch_sentiment_data(market: str, as_of: str | None = None) -> dict[str, fl
 
 
 def calcSentiment(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """시장 심리 종합 분석."""
+    """시장 심리 종합 분석 — 공포탐욕 근사 + VIX 구간 + JLN 불확실성.
+
+    Parameters
+    ----------
+    market : str
+        ``"US"`` | ``"KR"``.
+    as_of : str | None
+        기준일. ``None`` 이면 최신.
+    overrides : dict | None
+        지표 강제 치환 (예: ``{"vix": 35}``).
+
+    Returns
+    -------
+    dict
+        - market : str — 시장 코드
+        - fearGreed : dict | None — 공포탐욕 근사 (score:float(점, 0-100), zone:str, zoneLabel:str, components:dict)
+        - vixRegime : dict | None — VIX 구간 판정 (level:float(pt), zone:str, zoneLabel:str, buySignal:bool)
+        - timeseries : dict — vix / sp500 / hy_spread 시계열
+        - macroUncertainty : dict | None — JLN 실물 불확실성 (value:float, zone:str, zoneLabel:str, vsVix:str, description:str)
+    """
     data = _fetch_sentiment_data(market, as_of=as_of)
     if overrides:
         data = apply_overrides(data, overrides)

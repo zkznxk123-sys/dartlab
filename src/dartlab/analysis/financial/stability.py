@@ -37,6 +37,13 @@ def _isHoldingOrFinancial(company) -> bool:
 
 
 def _yoy(cur, prev) -> float | None:
+    """전기대비 증감률 계산.
+
+    Returns
+    -------
+    float | None
+        YoY 변화율 (%). 계산 불가 시 None.
+    """
     if cur is None or prev is None or prev == 0:
         return None
     return round((cur - prev) / abs(prev) * 100, 2)

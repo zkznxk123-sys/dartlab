@@ -41,12 +41,35 @@ class CircuitBreaker:
         failure_threshold: int = 5,
         recovery_timeout: float = 300.0,
     ) -> None:
+        """CircuitBreaker 초기화.
+
+        Parameters
+        ----------
+        failure_threshold : int
+            서킷을 open으로 전환하는 연속 실패 횟수. 기본 5.
+        recovery_timeout : float
+            open 상태에서 half_open 시도까지 대기 시간 (초). 기본 300.0.
+        """
         self._failure_threshold = failure_threshold
         self._recovery_timeout = recovery_timeout
         self._circuits: dict[str, _CircuitState] = {}
         self._lock = threading.Lock()
 
     def _get(self, source: str) -> _CircuitState:
+        """소스별 서킷 상태 반환 (없으면 CLOSED로 생성).
+
+        Parameters
+        ----------
+        source : str
+            데이터 소스 이름.
+
+        Returns
+        -------
+        _CircuitState
+            state : _State — 현재 서킷 상태
+            failure_count : int — 연속 실패 횟수 (회)
+            opened_at : float — OPEN 전환 시각 (monotonic, 초)
+        """
         if source not in self._circuits:
             self._circuits[source] = _CircuitState()
         return self._circuits[source]
@@ -56,6 +79,16 @@ class CircuitBreaker:
 
         half_open은 1회만 허용 — 첫 호출이 허용되면 즉시 OPEN으로 되돌려
         다른 스레드의 동시 통과를 방지한다. record_success()에서 CLOSED로 전환.
+
+        Parameters
+        ----------
+        source : str
+            데이터 소스 이름 (예: "naver", "fmp").
+
+        Returns
+        -------
+        bool
+            True면 차단 상태 (요청 불가), False면 통과 허용.
         """
         with self._lock:
             cs = self._get(source)
@@ -74,14 +107,26 @@ class CircuitBreaker:
             return True
 
     def record_success(self, source: str) -> None:
-        """소스 성공 기록 및 서킷 닫기."""
+        """소스 성공 기록 및 서킷 닫기.
+
+        Parameters
+        ----------
+        source : str
+            데이터 소스 이름.
+        """
         with self._lock:
             cs = self._get(source)
             cs.state = _State.CLOSED
             cs.failure_count = 0
 
     def record_failure(self, source: str) -> None:
-        """소스 실패 기록 및 임계치 초과 시 서킷 열기."""
+        """소스 실패 기록 및 임계치 초과 시 서킷 열기.
+
+        Parameters
+        ----------
+        source : str
+            데이터 소스 이름.
+        """
         with self._lock:
             cs = self._get(source)
             cs.failure_count += 1
@@ -94,7 +139,18 @@ class CircuitBreaker:
                 cs.opened_at = time.monotonic()
 
     def state(self, source: str) -> str:
-        """현재 상태 문자열 반환 (디버깅용)."""
+        """현재 상태 문자열 반환 (디버깅용).
+
+        Parameters
+        ----------
+        source : str
+            데이터 소스 이름.
+
+        Returns
+        -------
+        str
+            "closed", "open", "half_open" 중 하나.
+        """
         with self._lock:
             return self._get(source).state.value
 
@@ -117,7 +173,13 @@ class _SourceHealth:
 
     @property
     def score(self) -> float:
-        """health_score = success_rate × 0.7 + latency_score × 0.3."""
+        """health_score = success_rate × 0.7 + latency_score × 0.3.
+
+        Returns
+        -------
+        float
+            건강도 점수 (0.0~1.0, 점). 기록 없으면 0.5 (중립).
+        """
         if not self.records:
             return 0.5  # 데이터 없으면 중립
         successes = sum(1 for r in self.records if r.success)
@@ -142,7 +204,17 @@ class SourceHealthTracker:
         self._lock = threading.Lock()
 
     def record(self, source: str, *, success: bool, latency: float = 0.0) -> None:
-        """소스 요청 결과(성공/실패, 지연시간) 기록."""
+        """소스 요청 결과(성공/실패, 지연시간) 기록.
+
+        Parameters
+        ----------
+        source : str
+            데이터 소스 이름.
+        success : bool
+            요청 성공 여부.
+        latency : float
+            응답 지연시간 (초). 기본 0.0.
+        """
         with self._lock:
             if source not in self._sources:
                 self._sources[source] = _SourceHealth()
@@ -155,7 +227,18 @@ class SourceHealthTracker:
             )
 
     def score(self, source: str) -> float:
-        """소스의 현재 건강도 점수 반환 (0.0~1.0)."""
+        """소스의 현재 건강도 점수 반환.
+
+        Parameters
+        ----------
+        source : str
+            데이터 소스 이름.
+
+        Returns
+        -------
+        float
+            건강도 점수 (0.0~1.0, 점). 데이터 없으면 0.5 (중립).
+        """
         with self._lock:
             if source not in self._sources:
                 return 0.5
@@ -165,6 +248,17 @@ class SourceHealthTracker:
         """fallback 체인을 health score 높은 순으로 재정렬.
 
         원본 순서를 존중하되 health 차이가 유의미하면(0.2+) 재정렬.
+
+        Parameters
+        ----------
+        chain : tuple[str, ...] | list[str]
+            원본 fallback 소스 순서.
+
+        Returns
+        -------
+        list[str]
+            health score 기준 재정렬된 소스 이름 리스트.
+            1위와 최하위 차이가 0.2 미만이면 원본 순서 유지.
         """
         scored = [(name, self.score(name)) for name in chain]
         # 안정적 정렬: score 같으면 원래 순서 유지

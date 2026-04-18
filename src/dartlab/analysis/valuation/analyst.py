@@ -118,11 +118,27 @@ class Analyst:
         )
 
     def collect_market(self, stock_code: str) -> MarketSnapshot:
-        """시장 데이터만 수집."""
+        """시장 데이터만 수집.
+
+        Parameters
+        ----------
+        stock_code : str
+            종목코드.
+
+        Returns
+        -------
+        MarketSnapshot
+            현재가, 시가총액, 거래량 등 시장 스냅샷.
+        """
         return self._gather.collect(stock_code).to_market_snapshot()
 
     def close(self) -> None:
-        """리소스 정리."""
+        """리소스 정리.
+
+        Returns
+        -------
+        None
+        """
         if self._owns_gather:
             self._gather.close()
 

@@ -33,9 +33,15 @@ _BATCH = 200
 
 
 def _fiscalMonthMap() -> dict[str, int]:
-    """종목코드 → 결산월(int) 매핑. 12월 결산은 포함하지 않음 (기본값이므로).
+    """종목코드 → 결산월(int) 매핑.
 
+    12월 결산은 포함하지 않음 (기본값이므로).
     listing + 데이터 패턴 양쪽에서 비12월 결산을 판별.
+
+    Returns
+    -------
+    dict[str, int]
+        {종목코드: 결산월} — 비12월 결산 종목만 포함 (예: {"035720": 3}).
     """
     result: dict[str, int] = {}
 
@@ -88,16 +94,24 @@ def _fiscalMonthMap() -> dict[str, int]:
 def _toCalendarPeriod(bsnsYear: int, fiscalQ: int, fiscalMonth: int) -> tuple[int, int]:
     """사업연도 분기 → 달력 (연도, 분기) 변환.
 
-    Args:
-        bsnsYear: 사업연도 (예: 2026)
-        fiscalQ: 사업연도 분기 (1~4)
-        fiscalMonth: 결산월 (1~12)
+    Parameters
+    ----------
+    bsnsYear : int
+        사업연도 (예: 2026).
+    fiscalQ : int
+        사업연도 분기 (1~4).
+    fiscalMonth : int
+        결산월 (1~12).
 
-    Returns:
-        (calYear, calQ) — 달력 연도와 분기
+    Returns
+    -------
+    tuple[int, int]
+        (calYear, calQ) — 달력 연도와 분기.
 
-    예: 3월 결산(M=3), bsns_year=2026
-        Q1→2025Q2, Q2→2025Q3, Q3→2025Q4, Q4→2026Q1
+    Examples
+    --------
+    3월 결산(M=3), bsns_year=2026:
+    Q1→2025Q2, Q2→2025Q3, Q3→2025Q4, Q4→2026Q1.
     """
     import math
 
@@ -139,7 +153,22 @@ def _log(msg: str) -> None:
 
 
 def _mergeBatchFiles(batchDir: Path, outputPath: Path, *, how: str = "vertical") -> int:
-    """배치 파일들을 읽어서 1개로 합산. 반환: 총 행수."""
+    """배치 parquet 파일들을 1개로 합산.
+
+    Parameters
+    ----------
+    batchDir : Path
+        배치 파일 디렉토리 (batch_*.parquet).
+    outputPath : Path
+        합산 결과 저장 경로.
+    how : str
+        concat 방식 ("vertical" | "diagonal").
+
+    Returns
+    -------
+    int
+        합산된 총 행 수.
+    """
     batchFiles = sorted(batchDir.glob("batch_*.parquet"))
     if not batchFiles:
         return 0
@@ -156,7 +185,31 @@ def _mergeBatchFiles(batchDir: Path, outputPath: Path, *, how: str = "vertical")
 
 
 def _buildRawChanges(parquetPath: Path, stockCode: str, sinceYear: int = 2021) -> pl.DataFrame | None:
-    """raw docs parquet → section 단위 changes."""
+    """raw docs parquet → section 단위 변화 감지.
+
+    Parameters
+    ----------
+    parquetPath : Path
+        종목별 docs parquet 경로.
+    stockCode : str
+        종목코드.
+    sinceYear : int
+        시작 연도 (이전 연도는 비교 기준으로만 사용).
+
+    Returns
+    -------
+    pl.DataFrame | None
+        fromPeriod : str — 이전 기간
+        toPeriod : str — 현재 기간
+        sectionTitle : str — 변경 섹션명
+        changeType : str — 변화 유형 (appeared/disappeared/numeric/structural/wording)
+        sizeA : int — 이전 크기 (문자수)
+        sizeB : int — 현재 크기 (문자수)
+        sizeDelta : int — 크기 변화량 (문자수)
+        preview : str — 현재 내용 미리보기 (200자)
+        stockCode : str — 종목코드
+        변화 없으면 None.
+    """
     try:
         raw = pl.read_parquet(str(parquetPath))
     except (pl.exceptions.PolarsError, OSError):
@@ -249,7 +302,20 @@ def _buildRawChanges(parquetPath: Path, stockCode: str, sinceYear: int = 2021) -
 
 
 def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
-    """docs → changes 프리빌드. 반환: 출력 parquet 경로."""
+    """docs → changes 프리빌드.
+
+    Parameters
+    ----------
+    sinceYear : int
+        시작 연도.
+    verbose : bool
+        진행 로그 출력 여부.
+
+    Returns
+    -------
+    Path | None
+        생성된 changes.parquet 경로. 데이터 없으면 None.
+    """
     docsDir = _docsDir()
     outDir = _scanDir()
     outDir.mkdir(parents=True, exist_ok=True)
@@ -316,7 +382,13 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
 
 
 def _loadAccountMap() -> dict[str, str]:
-    """accountMappings.json → {원본계정명: snakeId} 매핑 로드."""
+    """accountMappings.json → 계정명 매핑 로드.
+
+    Returns
+    -------
+    dict[str, str]
+        {원본계정명: snakeId} 매핑 (예: {"매출액": "sales"}).
+    """
     import json
 
     mapPath = Path(__file__).resolve().parents[1] / "core" / "data" / "accountMappings.json"
@@ -330,7 +402,20 @@ def _loadAccountMap() -> dict[str, str]:
 
 
 def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
-    """finance 전종목 합산. 반환: 출력 parquet 경로."""
+    """finance 전종목 합산 프리빌드.
+
+    Parameters
+    ----------
+    sinceYear : int
+        시작 연도.
+    verbose : bool
+        진행 로그 출력 여부.
+
+    Returns
+    -------
+    Path | None
+        생성된 finance.parquet 경로. 데이터 없으면 None.
+    """
     finDir = _financeDir()
     outDir = _scanDir()
     outDir.mkdir(parents=True, exist_ok=True)
@@ -443,7 +528,20 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
 
 
 def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
-    """report → apiType별 분리 parquet. 반환: 생성된 파일 경로 목록."""
+    """report → apiType별 분리 parquet 프리빌드.
+
+    Parameters
+    ----------
+    sinceYear : int
+        시작 연도.
+    verbose : bool
+        진행 로그 출력 여부.
+
+    Returns
+    -------
+    list[Path]
+        생성된 apiType별 parquet 경로 목록.
+    """
     repDir = _reportDir()
     outDir = _scanDir() / "report"
     outDir.mkdir(parents=True, exist_ok=True)
@@ -550,7 +648,13 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
 
 
 def _buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
-    """발행주식수 풀 빌드 — 빌드 실패해도 전체 scan은 계속 진행."""
+    """발행주식수 풀 빌드 — 실패해도 전체 scan 진행.
+
+    Returns
+    -------
+    Path | None
+        생성된 sharesOutstanding.parquet 경로. 실패 시 None.
+    """
     try:
         from dartlab.providers.dart.docs.finance.shareCapital.builder import buildSharesOutstandingScan
 
@@ -567,7 +671,23 @@ def _buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
 
 
 def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path | list[Path] | None]:
-    """changes + finance + report 전체 프리빌드."""
+    """changes + finance + report + sharesOutstanding 전체 프리빌드.
+
+    Parameters
+    ----------
+    sinceYear : int
+        시작 연도.
+    verbose : bool
+        진행 로그 출력 여부.
+
+    Returns
+    -------
+    dict[str, Path | list[Path] | None]
+        changes : Path | None — changes.parquet 경로
+        finance : Path | None — finance.parquet 경로
+        report : list[Path] — apiType별 parquet 경로 목록
+        sharesOutstanding : Path | None — sharesOutstanding.parquet 경로
+    """
     if verbose:
         _log(f"전종목 scan 프리빌드 시작 (sinceYear={sinceYear})")
         _log("=" * 60)

@@ -23,14 +23,29 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
     scan/finance.parquet 에서 수익성/성장성/이익품질/부채 4축 백분위 산출 후
     교차 조합으로 관점 (crossViews) 생성.
 
-    Args:
-        company: Company 객체 (stockCode 필요)
-        basePeriod: 기준 연도 (None 이면 최신)
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업 (stockCode 필요).
+    basePeriod : str, optional
+        기준 연도 (None 이면 최신).
 
-    Returns:
-        dict {profitability_pct, growth_pct, quality_pct, debt_pct, total_stocks,
-              crossViews: list[dict], narrative: str}
-        또는 None
+    Returns
+    -------
+    dict | None
+        stockCode : str — 종목코드
+        year : str — 기준 연도
+        total_stocks : int — 전종목 수
+        profitability_pct : float | None — 수익성 백분위 (%)
+        growth_pct : float | None — 성장성 백분위 (%)
+        quality_pct : float | None — 이익품질 백분위 (%)
+        debt_pct : float | None — 부채 백분위 (%)
+        op_margin : float | None — 영업이익률 (%)
+        roe : float | None — 자기자본이익률 (%)
+        debt_ratio : float | None — 부채비율 (%)
+        crossViews : list[dict] — 교차 관점 (view, basis)
+        narrative : str — 서사 요약 문장
+        데이터 부족 시 None.
     """
     import polars as pl
 
@@ -126,9 +141,8 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
     # 백분위 (전종목 대비)
     profitability_pct = _percentile(cur.filter(cur["sj_div"] == "IS"), op_nms, op)
     # 성장성: 전기 대비 (간략 — 전기 데이터 없으면 None)
-    growth_pct = None  # 뼈대 — 전기 데이터 비교 필요 (추후)
-
-    quality_pct = None  # 뼈대 — OCF/NI 비교 (추후)
+    growth_pct = None
+    quality_pct = None
     debt_pct = _percentile(cur.filter(cur["sj_div"] == "BS"), debt_nms, debt)
 
     # 교차 조합 관점
@@ -188,9 +202,23 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
 
 
 def calcGovernanceSummary(company) -> dict | None:
-    """scan governance → 종목의 지배구조 5축 점수/등급 (뼈대).
+    """scan governance → 종목의 지배구조 5축 점수/등급.
 
     c.governance() 가 이미 구현돼 있으면 위임, 아니면 scan report 에서 추출.
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업 (stockCode 필요).
+
+    Returns
+    -------
+    dict | None
+        stockCode : str — 종목코드
+        totalScore : float | None — 종합점수 (점)
+        grade : str | None — 등급 (A~E)
+        narrative : str — 요약 문장
+        데이터 없으면 narrative만 포함한 dict.
     """
     code = getattr(company, "stockCode", None) or getattr(company, "stock_code", None)
     if not code:

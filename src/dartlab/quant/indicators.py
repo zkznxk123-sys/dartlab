@@ -343,7 +343,20 @@ def vmomentum(close: NDArray[np.float64], period: int = 10) -> NDArray[np.float6
 
 
 def vobv(close: NDArray[np.float64], volume: NDArray[np.float64]) -> NDArray[np.float64]:
-    """On Balance Volume."""
+    """On Balance Volume.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    volume : NDArray[np.float64]
+        거래량 배열.
+
+    Returns
+    -------
+    NDArray[np.float64]
+        OBV 누적 시계열. 첫 원소는 0.
+    """
     n = len(close)
     obv = np.zeros(n, dtype=np.float64)
     for i in range(1, n):
@@ -362,7 +375,24 @@ def vwilliamsR(
     close: NDArray[np.float64],
     period: int = 14,
 ) -> NDArray[np.float64]:
-    """Williams %R (-100~0)."""
+    """Williams %R (-100~0).
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        룩백 기간 (기본 14).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        Williams %R 값 (-100~0). 처음 (period-1)개는 NaN.
+    """
     n = len(close)
     result = np.full(n, np.nan, dtype=np.float64)
     for i in range(period - 1, n):
@@ -381,7 +411,24 @@ def vcci(
     close: NDArray[np.float64],
     period: int = 20,
 ) -> NDArray[np.float64]:
-    """Commodity Channel Index."""
+    """Commodity Channel Index.
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        룩백 기간 (기본 20).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        CCI 값. 처음 (period-1)개는 NaN. ±100 이상이면 과매수/과매도.
+    """
     tp = (high + low + close) / 3
     n = len(close)
     result = np.full(n, np.nan, dtype=np.float64)
@@ -401,7 +448,26 @@ def vmfi(
     volume: NDArray[np.float64],
     period: int = 14,
 ) -> NDArray[np.float64]:
-    """Money Flow Index (0~100)."""
+    """Money Flow Index (0~100).
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    close : NDArray[np.float64]
+        종가 배열.
+    volume : NDArray[np.float64]
+        거래량 배열.
+    period : int
+        룩백 기간 (기본 14).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        MFI 값 (0~100). 처음 period개는 NaN.
+    """
     tp = (high + low + close) / 3
     mf = tp * volume
     n = len(close)
@@ -428,7 +494,26 @@ def vpsar(
     afStep: float = 0.02,
     afMax: float = 0.2,
 ) -> NDArray[np.float64]:
-    """Parabolic SAR."""
+    """Parabolic SAR.
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    afStart : float
+        가속 인자 초기값 (기본 0.02).
+    afStep : float
+        가속 인자 증분 (기본 0.02).
+    afMax : float
+        가속 인자 최대값 (기본 0.2).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        각 시점의 Parabolic SAR 가격. 데이터 2개 미만이면 전부 NaN.
+    """
     n = len(high)
     psar = np.full(n, np.nan, dtype=np.float64)
     if n < 2:
@@ -476,7 +561,26 @@ def vsupertrend(
     period: int = 10,
     multiplier: float = 3.0,
 ) -> Tuple[NDArray[np.float64], NDArray[np.int8]]:
-    """SuperTrend. Returns (supertrend, direction: +1=up, -1=down)."""
+    """SuperTrend.
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        ATR 계산 기간 (기본 10).
+    multiplier : float
+        ATR 배수 (기본 3.0).
+
+    Returns
+    -------
+    Tuple[NDArray[np.float64], NDArray[np.int8]]
+        (supertrend 가격, direction). direction: +1=상승추세, -1=하락추세.
+    """
     atr = vatr(high, low, close, period)
     n = len(close)
     hl2 = (high + low) / 2
@@ -512,7 +616,28 @@ def vkeltner(
     atrPeriod: int = 10,
     multiplier: float = 2.0,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
-    """Keltner Channel (upper, middle, lower)."""
+    """Keltner Channel (upper, middle, lower).
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        EMA 기간 (기본 20).
+    atrPeriod : int
+        ATR 기간 (기본 10).
+    multiplier : float
+        ATR 배수 (기본 2.0).
+
+    Returns
+    -------
+    Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]
+        (upper, middle, lower) 채널 배열.
+    """
     middle = vema(close, period)
     atr = vatr(high, low, close, atrPeriod)
     upper = middle + multiplier * atr
@@ -525,7 +650,22 @@ def vdonchian(
     low: NDArray[np.float64],
     period: int = 20,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
-    """Donchian Channel (upper, middle, lower)."""
+    """Donchian Channel (upper, middle, lower).
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    period : int
+        룩백 기간 (기본 20).
+
+    Returns
+    -------
+    Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]
+        (upper, middle, lower) 채널 배열. 처음 (period-1)개는 NaN.
+    """
     n = len(high)
     upper = np.full(n, np.nan, dtype=np.float64)
     lower = np.full(n, np.nan, dtype=np.float64)
@@ -537,7 +677,20 @@ def vdonchian(
 
 
 def vcmo(close: NDArray[np.float64], period: int = 14) -> NDArray[np.float64]:
-    """Chande Momentum Oscillator (-100~+100)."""
+    """Chande Momentum Oscillator (-100~+100).
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        룩백 기간 (기본 14).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        CMO 값 (-100~+100). 처음 period개는 NaN.
+    """
     n = len(close)
     result = np.full(n, np.nan, dtype=np.float64)
     for i in range(period, n):
@@ -561,7 +714,24 @@ def velderRay(
     close: NDArray[np.float64],
     period: int = 13,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Elder Ray (bull_power, bear_power)."""
+    """Elder Ray (bull_power, bear_power).
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        EMA 기간 (기본 13).
+
+    Returns
+    -------
+    Tuple[NDArray[np.float64], NDArray[np.float64]]
+        (bull_power, bear_power). bull = high - EMA, bear = low - EMA.
+    """
     ema = vema(close, period)
     bull = high - ema
     bear = low - ema
@@ -573,7 +743,22 @@ def vforceIndex(
     volume: NDArray[np.float64],
     period: int = 13,
 ) -> NDArray[np.float64]:
-    """Force Index (EMA smoothed)."""
+    """Force Index (EMA smoothed).
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    volume : NDArray[np.float64]
+        거래량 배열.
+    period : int
+        EMA 평활 기간 (기본 13).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        Force Index 시계열. 양수=매수압력, 음수=매도압력.
+    """
     n = len(close)
     raw = np.zeros(n, dtype=np.float64)
     raw[1:] = (close[1:] - close[:-1]) * volume[1:]
@@ -584,7 +769,20 @@ def vforceIndex(
 
 
 def vwma(close: NDArray[np.float64], period: int = 20) -> NDArray[np.float64]:
-    """Weighted Moving Average."""
+    """Weighted Moving Average.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        가중 이동평균 기간 (기본 20).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        WMA 값. 처음 (period-1)개는 NaN.
+    """
     n = len(close)
     result = np.full(n, np.nan, dtype=np.float64)
     weights = np.arange(1, period + 1, dtype=np.float64)
@@ -595,7 +793,20 @@ def vwma(close: NDArray[np.float64], period: int = 20) -> NDArray[np.float64]:
 
 
 def vdema(close: NDArray[np.float64], period: int = 20) -> NDArray[np.float64]:
-    """Double EMA."""
+    """Double EMA.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        EMA 기간 (기본 20).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        DEMA = 2*EMA1 - EMA2. 유효하지 않은 구간은 NaN.
+    """
     e1 = vema(close, period)
     e2 = vema(e1[~np.isnan(e1)], period)
     result = np.full(len(close), np.nan, dtype=np.float64)
@@ -610,7 +821,20 @@ def vdema(close: NDArray[np.float64], period: int = 20) -> NDArray[np.float64]:
 
 
 def vtema(close: NDArray[np.float64], period: int = 20) -> NDArray[np.float64]:
-    """Triple EMA."""
+    """Triple EMA.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        EMA 기간 (기본 20).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        TEMA = 3*EMA1 - 3*EMA2 + EMA3. 유효하지 않은 구간은 NaN.
+    """
     e1 = vema(close, period)
     v1 = e1[~np.isnan(e1)]
     e2 = vema(v1, period) if len(v1) >= period else np.array([])
@@ -629,7 +853,20 @@ def vtema(close: NDArray[np.float64], period: int = 20) -> NDArray[np.float64]:
 
 
 def vhma(close: NDArray[np.float64], period: int = 20) -> NDArray[np.float64]:
-    """Hull Moving Average."""
+    """Hull Moving Average.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        HMA 기간 (기본 20).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        HMA 값. 데이터 부족 시 전부 NaN.
+    """
     half = vwma(close, period // 2) if period // 2 > 0 else close.copy()
     full = vwma(close, period)
     diff = 2 * half - full
@@ -651,7 +888,22 @@ def vvwma(
     volume: NDArray[np.float64],
     period: int = 20,
 ) -> NDArray[np.float64]:
-    """Volume Weighted Moving Average."""
+    """Volume Weighted Moving Average.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    volume : NDArray[np.float64]
+        거래량 배열.
+    period : int
+        룩백 기간 (기본 20).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        VWMA 값. 처음 (period-1)개는 NaN.
+    """
     n = len(close)
     result = np.full(n, np.nan, dtype=np.float64)
     for i in range(period - 1, n):
@@ -672,7 +924,24 @@ def vvwap(
     close: NDArray[np.float64],
     volume: NDArray[np.float64],
 ) -> NDArray[np.float64]:
-    """VWAP (Volume Weighted Average Price) — 누적."""
+    """VWAP (Volume Weighted Average Price) — 누적.
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    close : NDArray[np.float64]
+        종가 배열.
+    volume : NDArray[np.float64]
+        거래량 배열.
+
+    Returns
+    -------
+    NDArray[np.float64]
+        누적 VWAP 가격. 거래량 0인 구간은 NaN.
+    """
     tp = (high + low + close) / 3
     cumTPV = np.cumsum(tp * volume)
     cumV = np.cumsum(volume)
@@ -687,7 +956,26 @@ def vstochasticRsi(
     kPeriod: int = 3,
     dPeriod: int = 3,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Stochastic RSI (%K, %D)."""
+    """Stochastic RSI (%K, %D).
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    rsiPeriod : int
+        RSI 계산 기간 (기본 14).
+    stochPeriod : int
+        RSI에 적용할 스토캐스틱 기간 (기본 14).
+    kPeriod : int
+        %K 평활 기간 (기본 3).
+    dPeriod : int
+        %D 평활 기간 (기본 3).
+
+    Returns
+    -------
+    Tuple[NDArray[np.float64], NDArray[np.float64]]
+        (%K, %D) 배열. 값 범위 0~100.
+    """
     rsi = vrsi(close, rsiPeriod)
     n = len(close)
     k = np.full(n, np.nan, dtype=np.float64)
@@ -713,7 +1001,28 @@ def vkdj(
     kSmooth: int = 3,
     dSmooth: int = 3,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
-    """KDJ Indicator (K, D, J)."""
+    """KDJ Indicator (K, D, J).
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        스토캐스틱 %K 기간 (기본 9).
+    kSmooth : int
+        K선 SMA 평활 기간 (기본 3).
+    dSmooth : int
+        D선 SMA 평활 기간 (기본 3).
+
+    Returns
+    -------
+    Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]
+        (K, D, J) 배열. J = 3K - 2D.
+    """
     rawK, _ = vstochastic(high, low, close, period, 1)
     k = vsma(rawK, kSmooth)
     d = vsma(k, dSmooth)
@@ -727,7 +1036,24 @@ def vawesomeOscillator(
     fastPeriod: int = 5,
     slowPeriod: int = 34,
 ) -> NDArray[np.float64]:
-    """Awesome Oscillator."""
+    """Awesome Oscillator.
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    fastPeriod : int
+        빠른 SMA 기간 (기본 5).
+    slowPeriod : int
+        느린 SMA 기간 (기본 34).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        AO = SMA(midpoint, fast) - SMA(midpoint, slow). 양수=상승 모멘텀.
+    """
     midpoint = (high + low) / 2
     return vsma(midpoint, fastPeriod) - vsma(midpoint, slowPeriod)
 
@@ -740,7 +1066,28 @@ def vultimateOscillator(
     medium: int = 14,
     long: int = 28,
 ) -> NDArray[np.float64]:
-    """Ultimate Oscillator."""
+    """Ultimate Oscillator.
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    close : NDArray[np.float64]
+        종가 배열.
+    short : int
+        단기 기간 (기본 7).
+    medium : int
+        중기 기간 (기본 14).
+    long : int
+        장기 기간 (기본 28).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        UO 값 (0~100). 처음 (long-1)개는 NaN.
+    """
     n = len(close)
     bp = np.zeros(n, dtype=np.float64)
     tr = np.zeros(n, dtype=np.float64)
@@ -766,7 +1113,20 @@ def vultimateOscillator(
 
 
 def vulcer(close: NDArray[np.float64], period: int = 14) -> NDArray[np.float64]:
-    """Ulcer Index — 하방 변동성."""
+    """Ulcer Index — 하방 변동성.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        룩백 기간 (기본 14).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        Ulcer Index 값 (%). 처음 (period-1)개는 NaN. 값이 클수록 하방 위험 큼.
+    """
     n = len(close)
     result = np.full(n, np.nan, dtype=np.float64)
     for i in range(period - 1, n):
@@ -782,7 +1142,22 @@ def vbollingerPercentB(
     period: int = 20,
     std: float = 2.0,
 ) -> NDArray[np.float64]:
-    """Bollinger %B (0~1, 밴드 내 위치)."""
+    """Bollinger %B (0~1, 밴드 내 위치).
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        볼린저밴드 SMA 기간 (기본 20).
+    std : float
+        표준편차 배수 (기본 2.0).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        %B 값. 0=하단밴드, 1=상단밴드. 밴드 외부 시 0 미만 또는 1 초과.
+    """
     upper, _, lower = vbollinger(close, period, std)
     rng = upper - lower
     result = np.where(rng > 0, (close - lower) / rng, np.nan)
@@ -794,7 +1169,22 @@ def vbollingerWidth(
     period: int = 20,
     std: float = 2.0,
 ) -> NDArray[np.float64]:
-    """Bollinger Bandwidth (밴드 폭 / 중심)."""
+    """Bollinger Bandwidth (밴드 폭 / 중심).
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        볼린저밴드 SMA 기간 (기본 20).
+    std : float
+        표준편차 배수 (기본 2.0).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        Bandwidth = (upper - lower) / middle. 값이 작을수록 밴드 수축 (스퀴즈).
+    """
     upper, middle, lower = vbollinger(close, period, std)
     result = np.where(middle > 0, (upper - lower) / middle, np.nan)
     return result.astype(np.float64)
@@ -806,7 +1196,24 @@ def vbollingerWidth(
 def vadl(
     close: NDArray[np.float64], high: NDArray[np.float64], low: NDArray[np.float64], volume: NDArray[np.float64]
 ) -> NDArray[np.float64]:
-    """Accumulation/Distribution Line."""
+    """Accumulation/Distribution Line.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    volume : NDArray[np.float64]
+        거래량 배열.
+
+    Returns
+    -------
+    NDArray[np.float64]
+        ADL 누적 시계열. 상승=매집, 하락=분산.
+    """
     n = len(close)
     adl = np.zeros(n, dtype=np.float64)
     for i in range(n):
@@ -827,7 +1234,28 @@ def vchaikin(
     fastPeriod: int = 3,
     slowPeriod: int = 10,
 ) -> NDArray[np.float64]:
-    """Chaikin Oscillator (ADL의 EMA 차이)."""
+    """Chaikin Oscillator (ADL의 EMA 차이).
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    volume : NDArray[np.float64]
+        거래량 배열.
+    fastPeriod : int
+        빠른 EMA 기간 (기본 3).
+    slowPeriod : int
+        느린 EMA 기간 (기본 10).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        Chaikin Oscillator = EMA(ADL, fast) - EMA(ADL, slow).
+    """
     adl = vadl(close, high, low, volume)
     return vema(adl, fastPeriod) - vema(adl, slowPeriod)
 
@@ -838,7 +1266,24 @@ def vemv(
     volume: NDArray[np.float64],
     period: int = 14,
 ) -> NDArray[np.float64]:
-    """Ease of Movement (EMA smoothed)."""
+    """Ease of Movement (EMA smoothed).
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    volume : NDArray[np.float64]
+        거래량 배열.
+    period : int
+        EMA 평활 기간 (기본 14).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        EMV 시계열. 양수=적은 거래량으로 상승, 음수=적은 거래량으로 하락.
+    """
     n = len(high)
     raw = np.zeros(n, dtype=np.float64)
     for i in range(1, n):
@@ -851,7 +1296,20 @@ def vemv(
 
 
 def vnvi(close: NDArray[np.float64], volume: NDArray[np.float64]) -> NDArray[np.float64]:
-    """Negative Volume Index."""
+    """Negative Volume Index.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    volume : NDArray[np.float64]
+        거래량 배열.
+
+    Returns
+    -------
+    NDArray[np.float64]
+        NVI 시계열. 초기값 1000. 거래량 감소일에만 가격 변동 반영.
+    """
     n = len(close)
     nvi = np.full(n, 1000.0, dtype=np.float64)
     for i in range(1, n):
@@ -863,7 +1321,20 @@ def vnvi(close: NDArray[np.float64], volume: NDArray[np.float64]) -> NDArray[np.
 
 
 def vpvi(close: NDArray[np.float64], volume: NDArray[np.float64]) -> NDArray[np.float64]:
-    """Positive Volume Index."""
+    """Positive Volume Index.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    volume : NDArray[np.float64]
+        거래량 배열.
+
+    Returns
+    -------
+    NDArray[np.float64]
+        PVI 시계열. 초기값 1000. 거래량 증가일에만 가격 변동 반영.
+    """
     n = len(close)
     pvi = np.full(n, 1000.0, dtype=np.float64)
     for i in range(1, n):
@@ -875,7 +1346,20 @@ def vpvi(close: NDArray[np.float64], volume: NDArray[np.float64]) -> NDArray[np.
 
 
 def vpvt(close: NDArray[np.float64], volume: NDArray[np.float64]) -> NDArray[np.float64]:
-    """Price Volume Trend."""
+    """Price Volume Trend.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    volume : NDArray[np.float64]
+        거래량 배열.
+
+    Returns
+    -------
+    NDArray[np.float64]
+        PVT 누적 시계열. OBV의 비율 가중 변형.
+    """
     n = len(close)
     pvt = np.zeros(n, dtype=np.float64)
     for i in range(1, n):
@@ -894,7 +1378,22 @@ def vtrix(
     period: int = 15,
     signalPeriod: int = 9,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """TRIX + Signal."""
+    """TRIX + Signal.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        삼중 EMA 기간 (기본 15).
+    signalPeriod : int
+        시그널선 EMA 기간 (기본 9).
+
+    Returns
+    -------
+    Tuple[NDArray[np.float64], NDArray[np.float64]]
+        (TRIX, signal) 배열. TRIX = 삼중 EMA의 변화율 (%).
+    """
     e1 = vema(close, period)
     v1 = e1[~np.isnan(e1)]
     e2 = vema(v1, period) if len(v1) >= period else np.full(len(v1), np.nan)
@@ -925,7 +1424,20 @@ def vtrix(
 
 
 def vdpo(close: NDArray[np.float64], period: int = 20) -> NDArray[np.float64]:
-    """Detrended Price Oscillator."""
+    """Detrended Price Oscillator.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        SMA 기간 (기본 20).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        DPO = close - SMA(shifted). 추세 제거 후 순환 주기 확인용.
+    """
     sma = vsma(close, period)
     shift = period // 2 + 1
     n = len(close)
@@ -949,7 +1461,22 @@ def vpivotPoints(
     NDArray[np.float64],
     NDArray[np.float64],
 ]:
-    """Pivot Points (PP, R1, R2, R3, S1, S2, S3). 전일 기준."""
+    """Pivot Points (PP, R1, R2, R3, S1, S2, S3). 전일 기준.
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    close : NDArray[np.float64]
+        종가 배열.
+
+    Returns
+    -------
+    Tuple[NDArray[np.float64], ...]
+        (PP, R1, R2, R3, S1, S2, S3) 7개 배열. 첫 원소는 NaN (전일 없음).
+    """
     n = len(close)
     pp = np.full(n, np.nan, dtype=np.float64)
     r1 = np.full(n, np.nan, dtype=np.float64)
@@ -974,7 +1501,20 @@ def vlinearRegression(
     close: NDArray[np.float64],
     period: int = 20,
 ) -> Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
-    """Linear Regression (value, slope, r-squared)."""
+    """Linear Regression (value, slope, r-squared).
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        회귀 윈도우 기간 (기본 20).
+
+    Returns
+    -------
+    Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]
+        (value, slope, r_squared). value=회귀 예측값, slope=기울기, r_squared=결정계수.
+    """
     n = len(close)
     value = np.full(n, np.nan, dtype=np.float64)
     slope = np.full(n, np.nan, dtype=np.float64)
@@ -1001,7 +1541,20 @@ def vzigzag(
     close: NDArray[np.float64],
     threshold: float = 5.0,
 ) -> NDArray[np.float64]:
-    """ZigZag (threshold % 이상 변화만 추적)."""
+    """ZigZag (threshold % 이상 변화만 추적).
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    threshold : float
+        전환점 인식 임계값 (%, 기본 5.0).
+
+    Returns
+    -------
+    NDArray[np.float64]
+        피벗 지점에만 가격 값, 나머지는 NaN.
+    """
     n = len(close)
     result = np.full(n, np.nan, dtype=np.float64)
     result[0] = close[0]

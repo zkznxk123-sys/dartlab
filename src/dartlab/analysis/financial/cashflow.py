@@ -26,6 +26,7 @@ def _classifyCfPattern(ocf: float, icf: float, fcf: float) -> str | None:
     """영업/투자/재무 CF 부호 조합으로 패턴 분류."""
 
     def _s(v: float) -> str:
+        """CF 부호를 '+' / '-' / '0' 문자로 변환."""
         if v > 0:
             return "+"
         if v < 0:

@@ -11,7 +11,23 @@ from dataclasses import dataclass, field
 
 @dataclass(slots=True)
 class DomainConfig:
-    """도메인별 rate limit + 동시 연결 정책."""
+    """도메인별 rate limit + 동시 연결 정책.
+
+    Attributes
+    ----------
+    rpm : int
+        분당 최대 요청 수 (회/분). 기본 30.
+    concurrency : int
+        동시 연결 수 상한. 기본 2.
+    timeout : float
+        요청 타임아웃 (초). 기본 10.0.
+    jitter_min : float
+        요청 전 최소 랜덤 대기 (초). 기본 0.3.
+    jitter_max : float
+        요청 전 최대 랜덤 대기 (초). 기본 1.5.
+    min_interval : float
+        요청 간 최소 간격 (초). 0이면 제한 없음. 기본 0.0.
+    """
 
     rpm: int = 30
     concurrency: int = 2
@@ -28,7 +44,43 @@ class DomainConfig:
 
 @dataclass
 class PriceSnapshot:
-    """주가 스냅샷."""
+    """주가 스냅샷.
+
+    Attributes
+    ----------
+    current : float
+        현재가 (원 또는 해당 통화).
+    change : float
+        전일 대비 변동 (원).
+    change_pct : float
+        전일 대비 변동률 (%).
+    high_52w : float
+        52주 최고가 (원).
+    low_52w : float
+        52주 최저가 (원).
+    volume : int
+        거래량 (주).
+    market_cap : float
+        시가총액 (억원).
+    per : float | None
+        PER (배).
+    pbr : float | None
+        PBR (배).
+    dividend_yield : float | None
+        배당수익률 (%).
+    source : str
+        데이터 출처.
+    fetched_at : str
+        수집 시각 (ISO 형식).
+    currency : str
+        통화 코드 ("KRW", "USD" 등).
+    exchange : str
+        거래소 코드.
+    market : str
+        시장 코드 ("KR", "US" 등).
+    is_stale : bool
+        stale cache 반환 여부.
+    """
 
     current: float = 0.0
     change: float = 0.0
@@ -65,7 +117,23 @@ class PriceSnapshot:
 
 @dataclass
 class ConsensusData:
-    """애널리스트 컨센서스."""
+    """애널리스트 컨센서스.
+
+    Attributes
+    ----------
+    target_price : float
+        목표 주가 (원).
+    analyst_count : int
+        커버 애널리스트 수 (명).
+    buy_ratio : float
+        매수 의견 비율 (0~1).
+    high : float
+        최고 목표가 (원).
+    low : float
+        최저 목표가 (원).
+    source : str
+        데이터 출처.
+    """
 
     target_price: float = 0.0
     analyst_count: int = 0
@@ -85,7 +153,25 @@ class ConsensusData:
 
 @dataclass
 class RevenueConsensus:
-    """애널리스트 매출/이익 컨센서스 — 네이버 금융 finance/annual API."""
+    """애널리스트 매출/이익 컨센서스 — 네이버 금융 finance/annual API.
+
+    Attributes
+    ----------
+    fiscal_year : int
+        회계연도.
+    revenue_est : float
+        예상 매출 (억원).
+    operating_profit_est : float | None
+        예상 영업이익 (억원).
+    net_income_est : float | None
+        예상 순이익 (억원).
+    eps_est : float | None
+        예상 EPS (원).
+    per_est : float | None
+        예상 PER (배).
+    source : str
+        데이터 출처.
+    """
 
     fiscal_year: int = 0
     revenue_est: float = 0.0  # 예상 매출 (억원)
@@ -108,7 +194,19 @@ class RevenueConsensus:
 
 @dataclass
 class FlowData:
-    """투자자별 수급 데이터."""
+    """투자자별 수급 데이터.
+
+    Attributes
+    ----------
+    foreign_net : float
+        외국인 순매수 (주).
+    institution_net : float
+        기관 순매수 (주).
+    foreign_holding_ratio : float
+        외국인 보유 비율 (%).
+    source : str
+        데이터 출처.
+    """
 
     foreign_net: float = 0.0  # 외국인 순매수 (주)
     institution_net: float = 0.0  # 기관 순매수 (주)
@@ -125,7 +223,19 @@ class FlowData:
 
 @dataclass
 class NewsItem:
-    """뉴스 항목."""
+    """뉴스 항목.
+
+    Attributes
+    ----------
+    date : str
+        발행일 (YYYY-MM-DD).
+    title : str
+        기사 제목.
+    source : str
+        언론사/출처.
+    url : str
+        기사 URL.
+    """
 
     date: str = ""  # ISO date (YYYY-MM-DD)
     title: str = ""
@@ -135,7 +245,23 @@ class NewsItem:
 
 @dataclass
 class SectorInfo:
-    """업종 분류 정보."""
+    """업종 분류 정보.
+
+    Attributes
+    ----------
+    sectorCode : str
+        업종 코드.
+    sectorName : str
+        업종명.
+    industryCode : str
+        산업 코드.
+    industryName : str
+        산업명.
+    market : str
+        시장 구분 (KOSPI/KOSDAQ).
+    source : str
+        데이터 출처.
+    """
 
     sectorCode: str = ""
     sectorName: str = ""
@@ -154,7 +280,27 @@ class SectorInfo:
 
 @dataclass
 class ShortSellingData:
-    """공매도 잔고/거래 데이터."""
+    """공매도 잔고/거래 데이터.
+
+    Attributes
+    ----------
+    date : str
+        기준일 (YYYY-MM-DD).
+    shortVolume : int
+        공매도 거래량 (주).
+    shortAmount : int
+        공매도 거래대금 (원).
+    totalVolume : int
+        전체 거래량 (주).
+    shortRatio : float
+        공매도 비중 (%).
+    balance : int
+        공매도 잔고 수량 (주).
+    balanceRatio : float
+        공매도 잔고 비율 (%).
+    source : str
+        데이터 출처.
+    """
 
     date: str = ""
     shortVolume: int = 0
@@ -171,7 +317,27 @@ class ShortSellingData:
 
 @dataclass
 class InsiderTrade:
-    """내부자(임원/주요주주) 주식 거래."""
+    """내부자(임원/주요주주) 주식 거래.
+
+    Attributes
+    ----------
+    date : str
+        거래일 (YYYY-MM-DD).
+    name : str
+        거래자 이름.
+    position : str
+        직위/관계.
+    tradeType : str
+        거래 유형 (취득/처분/장내매수/장내매도).
+    changeShares : int
+        변동 주식수 (주).
+    afterShares : int
+        변동 후 보유 주식수 (주).
+    reason : str
+        변동 사유.
+    source : str
+        데이터 출처.
+    """
 
     date: str = ""
     name: str = ""
@@ -188,7 +354,23 @@ class InsiderTrade:
 
 @dataclass
 class MajorHolder:
-    """5% 이상 대량보유 주주."""
+    """5% 이상 대량보유 주주.
+
+    Attributes
+    ----------
+    holderName : str
+        보유자 이름.
+    shares : int
+        보유 주식수 (주).
+    ratio : float
+        보유비율 (%).
+    changeDate : str
+        변동일 (YYYY-MM-DD).
+    changeType : str
+        변동 유형 (취득/처분/변동).
+    source : str
+        데이터 출처.
+    """
 
     holderName: str = ""
     shares: int = 0
@@ -203,7 +385,23 @@ class MajorHolder:
 
 @dataclass
 class InstitutionOwnership:
-    """기관/외국인 지분 보유."""
+    """기관/외국인 지분 보유.
+
+    Attributes
+    ----------
+    holderName : str
+        보유 주체명 (예: "외국인 합계").
+    shares : int
+        보유 주식수 (주).
+    ratio : float
+        보유비율 (%).
+    value : float
+        보유금액 (원).
+    changeShares : int
+        변동수량 (주).
+    source : str
+        데이터 출처.
+    """
 
     holderName: str = ""
     shares: int = 0
@@ -218,7 +416,23 @@ class InstitutionOwnership:
 
 @dataclass
 class UpgradeDowngrade:
-    """애널리스트 등급 변경."""
+    """애널리스트 등급 변경.
+
+    Attributes
+    ----------
+    date : str
+        변경일 (YYYY-MM-DD).
+    firm : str
+        증권사/리서치 하우스.
+    toGrade : str
+        변경 후 등급.
+    fromGrade : str
+        변경 전 등급.
+    action : str
+        변경 유형 (upgrade/downgrade/init/maintain/reiterated).
+    source : str
+        데이터 출처.
+    """
 
     date: str = ""
     firm: str = ""
@@ -233,7 +447,29 @@ class UpgradeDowngrade:
 
 @dataclass
 class GatherResult:
-    """도메인 1개의 수집 결과 — 병렬 수집 시 반환 단위."""
+    """도메인 1개의 수집 결과 — 병렬 수집 시 반환 단위.
+
+    Attributes
+    ----------
+    domain : str
+        소스 도메인 이름.
+    price : PriceSnapshot | None
+        주가 스냅샷.
+    consensus : ConsensusData | None
+        애널리스트 컨센서스.
+    flow : FlowData | None
+        투자자별 수급.
+    sector_per : float | None
+        업종 평균 PER (배).
+    sectorInfo : SectorInfo | None
+        업종 분류 정보.
+    insiderTrades : list[InsiderTrade]
+        내부자 거래 리스트.
+    shortSelling : ShortSellingData | None
+        공매도 데이터.
+    error : str | None
+        오류 메시지. 정상이면 None.
+    """
 
     domain: str = ""
     price: PriceSnapshot | None = None
@@ -260,7 +496,13 @@ class GatherSnapshot:
 
     @property
     def price(self) -> PriceSnapshot | None:
-        """첫 번째 가용 주가."""
+        """첫 번째 가용 주가.
+
+        Returns
+        -------
+        PriceSnapshot | None
+            수집된 소스 중 첫 번째 유효한 주가 스냅샷. 없으면 None.
+        """
         for r in self.results.values():
             if r.price:
                 return r.price
@@ -268,7 +510,13 @@ class GatherSnapshot:
 
     @property
     def consensus(self) -> ConsensusData | None:
-        """수집된 컨센서스 데이터 반환."""
+        """수집된 컨센서스 데이터 반환.
+
+        Returns
+        -------
+        ConsensusData | None
+            첫 번째 유효한 컨센서스. 없으면 None.
+        """
         for r in self.results.values():
             if r.consensus:
                 return r.consensus
@@ -276,7 +524,13 @@ class GatherSnapshot:
 
     @property
     def flow(self) -> FlowData | None:
-        """수집된 수급 데이터 반환."""
+        """수집된 수급 데이터 반환.
+
+        Returns
+        -------
+        FlowData | None
+            첫 번째 유효한 수급 데이터. 없으면 None.
+        """
         for r in self.results.values():
             if r.flow:
                 return r.flow
@@ -284,12 +538,24 @@ class GatherSnapshot:
 
     @property
     def news(self) -> list[NewsItem]:
-        """수집된 뉴스 항목."""
+        """수집된 뉴스 항목.
+
+        Returns
+        -------
+        list[NewsItem]
+            뉴스 항목 리스트.
+        """
         return self._news
 
     @property
     def sectorInfo(self) -> SectorInfo | None:
-        """수집된 업종 분류."""
+        """수집된 업종 분류.
+
+        Returns
+        -------
+        SectorInfo | None
+            업종 분류 정보. 없으면 None.
+        """
         for r in self.results.values():
             if r.sectorInfo:
                 return r.sectorInfo
@@ -297,7 +563,13 @@ class GatherSnapshot:
 
     @property
     def insiderTrades(self) -> list[InsiderTrade]:
-        """수집된 내부자 거래."""
+        """수집된 내부자 거래.
+
+        Returns
+        -------
+        list[InsiderTrade]
+            내부자 거래 리스트.
+        """
         for r in self.results.values():
             if r.insiderTrades:
                 return r.insiderTrades
@@ -305,7 +577,13 @@ class GatherSnapshot:
 
     @property
     def shortSelling(self) -> ShortSellingData | None:
-        """수집된 공매도 데이터."""
+        """수집된 공매도 데이터.
+
+        Returns
+        -------
+        ShortSellingData | None
+            공매도 데이터. 없으면 None.
+        """
         for r in self.results.values():
             if r.shortSelling:
                 return r.shortSelling
@@ -313,16 +591,34 @@ class GatherSnapshot:
 
     @property
     def sources_available(self) -> list[str]:
-        """정상 응답한 소스 목록."""
+        """정상 응답한 소스 목록.
+
+        Returns
+        -------
+        list[str]
+            오류 없이 수집 완료된 소스 이름 리스트.
+        """
         return [d for d, r in self.results.items() if r.error is None]
 
     @property
     def sources_failed(self) -> list[str]:
-        """오류가 발생한 소스 목록."""
+        """오류가 발생한 소스 목록.
+
+        Returns
+        -------
+        list[str]
+            오류가 발생한 소스 이름 리스트.
+        """
         return [d for d, r in self.results.items() if r.error is not None]
 
     def to_market_snapshot(self) -> MarketSnapshot:
-        """Analyst 엔진 호환 flat 스냅샷으로 변환."""
+        """Analyst 엔진 호환 flat 스냅샷으로 변환.
+
+        Returns
+        -------
+        MarketSnapshot
+            현재가, 컨센서스, 멀티플, 수급, 52주 범위를 포함한 flat 구조.
+        """
         price = self.price
         flow = self.flow
 
@@ -386,7 +682,23 @@ class GatherSnapshot:
 
 @dataclass
 class PeerData:
-    """피어 기업 멀티플 데이터."""
+    """피어 기업 멀티플 데이터.
+
+    Attributes
+    ----------
+    ticker : str
+        종목코드/티커.
+    name : str
+        기업명.
+    per : float | None
+        PER (배).
+    pbr : float | None
+        PBR (배).
+    ev_ebitda : float | None
+        EV/EBITDA (배).
+    market_cap : float | None
+        시가총액 (억원).
+    """
 
     ticker: str = ""
     name: str = ""
@@ -408,7 +720,33 @@ class PeerData:
 
 @dataclass
 class MarketSnapshot:
-    """Analyst 호환 flat 시장 데이터 — GatherSnapshot → MarketSnapshot 변환용."""
+    """Analyst 호환 flat 시장 데이터 — GatherSnapshot → MarketSnapshot 변환용.
+
+    Attributes
+    ----------
+    stock_code : str
+        종목코드.
+    current_price : float
+        현재가 (원 또는 해당 통화).
+    consensus : ConsensusData | None
+        애널리스트 컨센서스.
+    multiples : dict[str, float]
+        멀티플 (per, pbr, dividend_yield, sector_per 등) (배 또는 %).
+    peer_multiples : list[PeerData]
+        피어 기업 멀티플 리스트.
+    supply_demand : dict[str, float]
+        수급 (foreign_net, institution_net (주), foreign_holding_ratio (%)).
+    macro : dict[str, float]
+        매크로 지표.
+    price_range_52w : tuple[float, float] | None
+        52주 가격 범위 (최저, 최고) (원).
+    collected_at : str
+        수집 시각 (ISO 형식).
+    sources_available : list[str]
+        정상 응답 소스 목록.
+    sources_failed : list[str]
+        오류 발생 소스 목록.
+    """
 
     stock_code: str = ""
     current_price: float = 0.0

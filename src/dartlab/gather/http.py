@@ -31,7 +31,9 @@ DOMAIN_POLICY: dict[str, DomainConfig] = {
     "ecos.bok.or.kr": DomainConfig(rpm=30, concurrency=2, jitter_min=0.3, jitter_max=1.5),
     # 해외 — 네이버 글로벌
     "api.stock.naver.com": DomainConfig(rpm=30, concurrency=2, jitter_min=0.5, jitter_max=2.0),
-    # 해외 — Yahoo (fallback)
+    # 해외 — Yahoo v8 Chart API
+    "query2.finance.yahoo.com": DomainConfig(rpm=20, concurrency=2, jitter_min=0.5, jitter_max=2.0),
+    # 해외 — FMP (fallback)
     "financialmodelingprep.com": DomainConfig(rpm=4, concurrency=1, timeout=15.0, jitter_min=1.0, jitter_max=3.0),
     # 뉴스
     "news.google.com": DomainConfig(rpm=20, concurrency=2, jitter_min=0.3, jitter_max=1.5),
@@ -57,7 +59,16 @@ _thread_pool = ThreadPoolExecutor(max_workers=1)
 
 
 def _get_thread_loop() -> asyncio.AbstractEventLoop:
-    """별도 스레드 전용 persistent event loop."""
+    """별도 스레드 전용 persistent event loop 반환.
+
+    기존 loop가 없거나 닫혀 있으면 새로 생성한다.
+    loop를 닫지 않으므로 httpx connection pool 재사용이 가능하다.
+
+    Returns
+    -------
+    asyncio.AbstractEventLoop
+        스레드 전용 event loop 인스턴스.
+    """
     global _thread_loop
     if _thread_loop is None or _thread_loop.is_closed():
         _thread_loop = asyncio.new_event_loop()
@@ -65,7 +76,20 @@ def _get_thread_loop() -> asyncio.AbstractEventLoop:
 
 
 def _run_in_thread_loop(coro):
-    """persistent loop에서 코루틴 실행 (loop 닫지 않음)."""
+    """persistent loop에서 코루틴을 동기적으로 실행.
+
+    loop를 닫지 않으므로 이후 호출에서도 동일 loop를 재사용한다.
+
+    Parameters
+    ----------
+    coro : Coroutine
+        실행할 코루틴 객체.
+
+    Returns
+    -------
+    Any
+        코루틴의 반환값. 타입은 전달된 코루틴에 따라 다르다.
+    """
     loop = _get_thread_loop()
     return loop.run_until_complete(coro)
 
@@ -75,6 +99,16 @@ def run_async(coro):
 
     이미 event loop가 실행 중이면(Marimo/FastAPI 등) 별도 스레드의
     persistent loop에서 실행. httpx connection pool 재사용 가능.
+
+    Parameters
+    ----------
+    coro : Coroutine
+        실행할 코루틴 객체.
+
+    Returns
+    -------
+    Any
+        코루틴의 반환값. 타입은 전달된 코루틴에 따라 다르다.
     """
     try:
         asyncio.get_running_loop()
@@ -104,7 +138,18 @@ class _AsyncRateLimiter:
         self._lock = asyncio.Lock()
 
     async def acquire(self, timeout: float = 30.0) -> None:
-        """속도 제한 슬롯 획득 (윈도우 내 최대 요청 수 준수)."""
+        """속도 제한 슬롯 획득 (윈도우 내 최대 요청 수 준수).
+
+        Parameters
+        ----------
+        timeout : float
+            슬롯 획득 대기 최대 시간 (초). 기본 30.0.
+
+        Raises
+        ------
+        RateLimitExceededError
+            timeout 내 슬롯 획득 실패 시.
+        """
         deadline = time.monotonic() + timeout
         while True:
             async with self._lock:
@@ -165,15 +210,55 @@ class GatherHttpClient:
         self._semaphores: dict[str, asyncio.Semaphore] = {}
 
     def _get_policy(self, domain: str) -> DomainConfig:
+        """도메인별 정책 반환. 미등록 도메인은 기본 정책 사용.
+
+        Parameters
+        ----------
+        domain : str
+            호스트명 (예: ``"m.stock.naver.com"``).
+
+        Returns
+        -------
+        DomainConfig
+            rpm : int — 분당 최대 요청 수 (회)
+            concurrency : int — 동시 연결 제한 수 (개)
+            timeout : float — 요청 타임아웃 (초)
+            jitter_min : float — 최소 지터 딜레이 (초)
+            jitter_max : float — 최대 지터 딜레이 (초)
+        """
         return DOMAIN_POLICY.get(domain, _DEFAULT_POLICY)
 
     def _get_limiter(self, domain: str) -> _AsyncRateLimiter:
+        """도메인별 rate limiter 인스턴스 반환 (lazy 생성).
+
+        Parameters
+        ----------
+        domain : str
+            호스트명.
+
+        Returns
+        -------
+        _AsyncRateLimiter
+            해당 도메인의 sliding window rate limiter.
+        """
         if domain not in self._limiters:
             policy = self._get_policy(domain)
             self._limiters[domain] = _AsyncRateLimiter(domain, policy.rpm, policy.min_interval)
         return self._limiters[domain]
 
     def _get_semaphore(self, domain: str) -> asyncio.Semaphore:
+        """도메인별 동시 연결 제한 세마포어 반환 (lazy 생성).
+
+        Parameters
+        ----------
+        domain : str
+            호스트명.
+
+        Returns
+        -------
+        asyncio.Semaphore
+            해당 도메인의 동시 요청 수 제한 세마포어.
+        """
         if domain not in self._semaphores:
             policy = self._get_policy(domain)
             self._semaphores[domain] = asyncio.Semaphore(policy.concurrency)
@@ -190,8 +275,28 @@ class GatherHttpClient:
     ) -> httpx.Response:
         """GET 요청 — rate limit + semaphore + 재시도 (async).
 
-        Raises:
-            SourceUnavailableError: 모든 재시도 실패.
+        Parameters
+        ----------
+        url : str
+            요청 URL.
+        params : dict | None
+            쿼리 파라미터.
+        headers : dict | None
+            추가 HTTP 헤더.
+        timeout : float | None
+            요청 타임아웃 (초). None이면 도메인 정책 기본값.
+        max_retries : int
+            최대 재시도 횟수 (회). 기본 3.
+
+        Returns
+        -------
+        httpx.Response
+            HTTP 응답 객체. status_code, text, json() 등 사용 가능.
+
+        Raises
+        ------
+        SourceUnavailableError
+            모든 재시도 실패 시.
         """
         domain = urlparse(url).netloc
         policy = self._get_policy(domain)
@@ -249,8 +354,30 @@ class GatherHttpClient:
     ) -> httpx.Response:
         """POST 요청 -- rate limit + semaphore + 재시도 (async).
 
-        Raises:
-            SourceUnavailableError: 모든 재시도 실패.
+        Parameters
+        ----------
+        url : str
+            요청 URL.
+        data : dict | None
+            form-encoded 요청 본문.
+        json : dict | None
+            JSON 요청 본문.
+        headers : dict | None
+            추가 HTTP 헤더.
+        timeout : float | None
+            요청 타임아웃 (초). None이면 도메인 정책 기본값.
+        max_retries : int
+            최대 재시도 횟수 (회). 기본 3.
+
+        Returns
+        -------
+        httpx.Response
+            HTTP 응답 객체. status_code, text, json() 등 사용 가능.
+
+        Raises
+        ------
+        SourceUnavailableError
+            모든 재시도 실패 시.
         """
         domain = urlparse(url).netloc
         policy = self._get_policy(domain)
@@ -297,5 +424,5 @@ class GatherHttpClient:
         raise SourceUnavailableError(f"{domain} POST 요청 실패 ({max_retries}회 재시도): {last_exc}")
 
     async def close(self) -> None:
-        """HTTP 클라이언트 종료."""
+        """HTTP 클라이언트 종료. 내부 httpx.AsyncClient의 커넥션 풀을 정리."""
         await self._client.aclose()

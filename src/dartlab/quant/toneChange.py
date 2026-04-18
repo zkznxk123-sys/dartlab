@@ -13,7 +13,30 @@ log = logging.getLogger(__name__)
 
 
 def calcToneChange(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
-    """기간별 공시 톤 변화 분석."""
+    """기간별 공시 톤 변화 분석.
+
+    연속 공시 기간의 감성 점수 차이를 측정해 톤 악화/개선/유지를 판정한다.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드.
+    market : str
+        "KR" | "US" | "auto". 기본 "auto".
+
+    Returns
+    -------
+    dict
+        stockCode : str — 종목코드
+        market : str — 시장
+        toneShift : float — 최근 기간 톤 변화량 (점, 양수=개선)
+        magnitude : float — 변화 절대값 (점)
+        direction : str — "악화" | "개선" | "유지"
+        periods : list[dict] — 기간별 변화 (최근 5개)
+            from : str, to : str, shift : float (점),
+            newNegatives : list[str]
+        totalPeriods : int — 전체 분석 기간 수
+    """
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 

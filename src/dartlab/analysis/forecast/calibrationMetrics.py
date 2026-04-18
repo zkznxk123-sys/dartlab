@@ -41,6 +41,18 @@ def computeBrierScore(
     """Brier Score = mean((predicted - actual)^2).
 
     0 = 완벽, 1 = 최악.
+
+    Parameters
+    ----------
+    predictions : list[float]
+        예측 확률 목록 (0~1).
+    outcomes : list[int]
+        실제 결과 목록 (0 또는 1).
+
+    Returns
+    -------
+    float
+        Brier Score (0~1). 데이터 없으면 1.0.
     """
     if not predictions or len(predictions) != len(outcomes):
         return 1.0
@@ -53,7 +65,22 @@ def buildCalibrationBins(
     outcomes: list[int],
     nBins: int = 5,
 ) -> list[CalibrationBin]:
-    """확률 구간별 적중률 계산 (reliability diagram 데이터)."""
+    """확률 구간별 적중률 계산 (reliability diagram 데이터).
+
+    Parameters
+    ----------
+    predictions : list[float]
+        예측 확률 목록 (0~1).
+    outcomes : list[int]
+        실제 결과 목록 (0 또는 1).
+    nBins : int
+        구간 수 (기본 5).
+
+    Returns
+    -------
+    list[CalibrationBin]
+        구간별 예측/실제 평균 + 괴리.
+    """
     if not predictions:
         return []
 
@@ -92,7 +119,20 @@ def generateCalibrationReport(
     predictions: list[float],
     outcomes: list[int],
 ) -> CalibrationReport | None:
-    """전체 캘리브레이션 리포트 생성."""
+    """전체 캘리브레이션 리포트 생성.
+
+    Parameters
+    ----------
+    predictions : list[float]
+        예측 확률 목록 (0~1).
+    outcomes : list[int]
+        실제 결과 목록 (0 또는 1).
+
+    Returns
+    -------
+    CalibrationReport | None
+        Brier Score, Skill Score, 구간별 적중률. 데이터 5개 미만이면 None.
+    """
     if not predictions or len(predictions) < 5:
         return None
 

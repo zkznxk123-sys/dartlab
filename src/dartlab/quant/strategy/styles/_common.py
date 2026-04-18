@@ -39,6 +39,18 @@ def is_kr(company) -> bool:
 
 
 def stock_code(company) -> str:
+    """Company 객체에서 종목코드 추출.
+
+    Parameters
+    ----------
+    company : Company
+        dartlab Company 객체 또는 stockCode 속성 가진 stub.
+
+    Returns
+    -------
+    str
+        종목코드 문자열. 속성 없으면 빈 문자열.
+    """
     return getattr(company, "stockCode", None) or getattr(company, "stock_code", "")
 
 

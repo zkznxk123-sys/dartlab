@@ -29,43 +29,52 @@ class _GatherAxisEntry:
 _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
     "price": _GatherAxisEntry(
         label="주가",
-        description="OHLCV 시계열 (기본 1년) — Naver/Yahoo/FMP fallback",
-        example='gather("price", "005930")',
+        description=(
+            "OHLCV 시계열 (수정주가). "
+            "KR: 네이버 차트 API (최대 12년 일봉, API 키 불필요). "
+            "US/해외: Yahoo v8 → 네이버 글로벌 자동 fallback. "
+            "시장 지수도 가능: gather('price', 'KOSPI')"
+        ),
+        example='gather("price", "005930") / gather("price", "AAPL", market="US")',
     ),
     "flow": _GatherAxisEntry(
         label="수급",
-        description="외국인/기관 매매 동향 (KR 전용)",
+        description="외국인/기관 순매수 동향 (KR 전용, 네이버 금융). US는 미지원 → None",
         example='gather("flow", "005930")',
     ),
     "macro": _GatherAxisEntry(
         label="거시지표",
-        description="ECOS(KR 12개) / FRED(US 25개) 거시 시계열",
-        example='gather("macro") 또는 gather("macro", "CPI")',
+        description=(
+            "KR: ECOS 한국은행 12개 지표 (API 키: ECOS_API_KEY). "
+            "US: FRED 연준 25개 지표 (API 키: FRED_API_KEY). "
+            "지표 미지정 시 전체 반환. 단일 지표: gather('macro', 'CPI')"
+        ),
+        example='gather("macro") / gather("macro", "FEDFUNDS", market="US")',
         targetRequired=False,
     ),
     "news": _GatherAxisEntry(
         label="뉴스",
-        description="Google News RSS — 최근 30일",
-        example='gather("news", "삼성전자")',
+        description="Google News RSS 최근 30일. API 키 불필요. 한글/영문 검색어 모두 지원",
+        example='gather("news", "삼성전자") / gather("news", "AAPL")',
     ),
     "sector": _GatherAxisEntry(
         label="업종",
-        description="업종 분류 — KR(KIND+Naver) / US(Yahoo)",
+        description="업종 분류 + 동종업종 PER. KR: KRX KIND + 네이버 금융",
         example='gather("sector", "005930")',
     ),
     "insider": _GatherAxisEntry(
         label="내부자거래",
-        description="임원/주요주주 주식 거래 — KR(DART) / US(Yahoo)",
+        description="임원/주요주주 주식 거래 내역. KR: DART API (API 키: DART_API_KEY)",
         example='gather("insider", "005930")',
     ),
     "ownership": _GatherAxisEntry(
         label="지분",
-        description="기관/외국인 보유 현황",
+        description="기관/외국인 보유 현황 (비율+주수). KR: 네이버 금융",
         example='gather("ownership", "005930")',
     ),
     "peers": _GatherAxisEntry(
         label="피어",
-        description="같은 업종 내 피어 종목 목록 (시총 포함)",
+        description="동종업종 피어 종목 목록 (종목코드+시총). KR: KRX/네이버",
         example='gather("peers", "005930")',
     ),
 }
@@ -99,7 +108,26 @@ _INDEX_SYMBOLS: dict[str, str] = {
 
 
 def _fetchNaverIndex(symbol: str, count: int = 500) -> pl.DataFrame:
-    """네이버 차트 API로 시장 지수 OHLCV 수집."""
+    """네이버 차트 API로 시장 지수 OHLCV 수집.
+
+    Parameters
+    ----------
+    symbol : str
+        지수 심볼 (예: ``"KOSPI"``, ``"KOSDAQ"``, ``"KPI200"``).
+    count : int
+        요청 거래일 수 (일). 기본 500.
+
+    Returns
+    -------
+    pl.DataFrame
+        date : date — 거래일
+        open : float — 시가 (포인트)
+        high : float — 고가 (포인트)
+        low : float — 저가 (포인트)
+        close : float — 종가 (포인트)
+        volume : int — 거래량 (주)
+        데이터 없으면 빈 DataFrame.
+    """
     import re
 
     import httpx
@@ -135,7 +163,23 @@ def _fetchNaverIndex(symbol: str, count: int = 500) -> pl.DataFrame:
 
 
 def _resolveAxis(axis: str) -> str:
-    """축 이름/별칭 -> 정규 키."""
+    """축 이름/별칭 -> 정규 키.
+
+    Parameters
+    ----------
+    axis : str
+        축 이름 또는 한글 별칭 (예: ``"price"``, ``"주가"``).
+
+    Returns
+    -------
+    str
+        정규 축 키 (예: ``"price"``, ``"flow"``, ``"macro"``).
+
+    Raises
+    ------
+    ValueError
+        미등록 축 이름일 때.
+    """
     lower = axis.lower()
     if lower in _AXIS_REGISTRY:
         return lower
@@ -267,7 +311,22 @@ class GatherEntry:
         return self._run(resolved, target, **kwargs)
 
     def _run(self, axis: str, target: str | None, **kwargs: Any) -> pl.DataFrame:
-        """축별 실행 디스패치."""
+        """축별 실행 디스패치.
+
+        Parameters
+        ----------
+        axis : str
+            정규 축 키 (예: ``"price"``, ``"flow"``).
+        target : str | None
+            종목코드/지표코드/검색어.
+        **kwargs
+            market, start, end, days 등 축별 옵션.
+
+        Returns
+        -------
+        pl.DataFrame
+            축별 시계열 데이터. 스키마는 ``__call__`` 독스트링 참조.
+        """
         from dartlab.gather import getDefaultGather
 
         g = getDefaultGather()
@@ -357,22 +416,87 @@ class GatherEntry:
         raise ValueError(f"미지원 gather 축: {axis}")
 
     def _guide(self) -> pl.DataFrame:
-        """가이드 DataFrame — 축 목록 + 설명 + 사용 예시."""
+        """가이드 DataFrame — 축 목록 + 설명 + 사용 예시 + API 키 안내.
+
+        Returns
+        -------
+        pl.DataFrame
+            axis : str — 축 이름
+            label : str — 한글 레이블
+            description : str — 설명 (소스+제한 포함)
+            example : str — 사용 예시
+            apiKey : str — 필요한 API 키 (없으면 "불필요")
+        """
+        _API_KEY_INFO: dict[str, str] = {
+            "price": "불필요",
+            "flow": "불필요",
+            "macro": "ECOS_API_KEY (KR) / FRED_API_KEY (US)",
+            "news": "불필요",
+            "sector": "불필요",
+            "insider": "DART_API_KEY",
+            "ownership": "불필요",
+            "peers": "불필요",
+        }
         rows = [
             {
                 "axis": key,
                 "label": entry.label,
                 "description": entry.description,
                 "example": entry.example,
+                "apiKey": _API_KEY_INFO.get(key, "불필요"),
             }
             for key, entry in _AXIS_REGISTRY.items()
         ]
         return pl.DataFrame(rows)
 
+    def _apiKeyGuide(self) -> str:
+        """API 키 설정 안내 문자열.
+
+        Returns
+        -------
+        str
+            .env 설정 방법 + 발급 링크.
+        """
+        return (
+            "━━━ API 키 설정 안내 ━━━\n"
+            "\n"
+            "거시지표(macro)와 내부자거래(insider)는 API 키가 필요합니다.\n"
+            ".env 파일에 아래 키를 추가하세요:\n"
+            "\n"
+            "  ECOS_API_KEY=발급키     # 한국은행 ECOS (KR 거시지표)\n"
+            "  FRED_API_KEY=발급키     # 미국 연준 FRED (US 거시지표)\n"
+            "  DART_API_KEY=발급키     # 금융감독원 DART (내부자거래)\n"
+            "\n"
+            "발급 링크:\n"
+            "  ECOS: https://ecos.bok.or.kr/api/#/DevGuide/StatisticalCodeSearch\n"
+            "  FRED: https://fred.stlouisfed.org/docs/api/api_key.html\n"
+            "  DART: https://opendart.fss.or.kr/uss/uia/egovLoginUss498.do\n"
+        )
+
     def __repr__(self) -> str:
-        lines = [f"Gather -- {len(_AXIS_REGISTRY)}축 외부 시장 데이터"]
+        lines = [
+            f"Gather — {len(_AXIS_REGISTRY)}축 외부 시장 데이터 수집",
+            "",
+            "━━━ 축 목록 ━━━",
+        ]
         for key, entry in _AXIS_REGISTRY.items():
-            lines.append(f"  {key:12s} {entry.label} -- {entry.description}")
+            lines.append(f"  {key:12s} {entry.label} — {entry.description[:60]}")
         lines.append("")
-        lines.append("사용법: gather(), gather('축', '대상')")
+        lines.append("━━━ 빠른 시작 ━━━")
+        lines.append("  dartlab.gather()                        # 이 가이드")
+        lines.append('  dartlab.gather("price", "005930")       # 삼성전자 주가')
+        lines.append('  dartlab.gather("price", "AAPL", market="US")  # 미국 주가')
+        lines.append('  dartlab.gather("macro")                 # KR 거시지표 전체')
+        lines.append('  dartlab.gather("news", "삼성전자")       # 뉴스')
+        lines.append("")
+        lines.append("━━━ 시장 지수 ━━━")
+        lines.append('  dartlab.gather("price", "KOSPI")        # 코스피 지수')
+        lines.append('  dartlab.gather("price", "KOSDAQ")       # 코스닥 지수')
+        lines.append("")
+        lines.append("━━━ API 키 필요 ━━━")
+        lines.append("  macro: ECOS_API_KEY (KR) / FRED_API_KEY (US)")
+        lines.append("  insider: DART_API_KEY")
+        lines.append("  → dartlab.gather._apiKeyGuide() 로 발급 링크 확인")
+        lines.append("")
+        lines.append("노트북: https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/02_gather.py")
         return "\n".join(lines)

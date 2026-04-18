@@ -43,7 +43,13 @@ _SKIP_KEYWORDS = {"합계", "조정", "내부", "소계", "총계", "부문계",
 
 
 def _getRatios(company):
-    """ratios 객체 (RatioResult) 를 안전하게 가져온다 — internal 사용."""
+    """ratios 객체 (RatioResult) 를 안전하게 가져온다 — internal 사용.
+
+    Returns
+    -------
+    RatioResult | None
+        회사의 재무비율 객체. 데이터 없으면 None.
+    """
     try:
         return company._getRatiosInternal()
     except (ValueError, KeyError, AttributeError):
@@ -59,7 +65,13 @@ def _selectDocsRevenue(
     dimension(axis/member) 을 제공하지 않아 segment 분해 불가 — None 반환.
     (EDGAR segment 지원은 10-K 본문 파싱 별도 파이프라인 필요.)
 
-    반환: ({부문명: {period: 매출액}}, annualCols) 또는 None.
+    Returns
+    -------
+    tuple[dict[str, dict[str, float]], list[str]] | None
+        ``(segData, annualCols)`` 튜플.
+        segData : dict — ``{부문명: {period: 매출액(원)}}`` 매핑.
+        annualCols : list[str] — 최신순 정렬된 연간 컬럼 목록.
+        데이터 없으면 None.
     """
     for topic in ("productService", "salesOrder"):
         try:
@@ -78,7 +90,13 @@ def _selectDocsRevenue(
 def _parseDocsRevenueResult(
     result, *, basePeriod: str | None = None
 ) -> tuple[dict[str, dict[str, float]], list[str]] | None:
-    """docs select 결과에서 부문별 매출 시계열 파싱."""
+    """docs select 결과에서 부문별 매출 시계열 파싱.
+
+    Returns
+    -------
+    tuple[dict[str, dict[str, float]], list[str]] | None
+        ``(segData, annualCols)`` 튜플. 파싱 실패 시 None.
+    """
     df = result.df
     if df.is_empty():
         return None
@@ -113,7 +131,13 @@ def _parseDocsRevenueResult(
 
 
 def _selectDocsOpIncome(company, yCols: list[str]) -> dict[str, dict[str, float]] | None:
-    """productService/salesOrder에서 부문별 영업이익 시계열을 추출 (있는 기업만)."""
+    """productService/salesOrder에서 부문별 영업이익 시계열을 추출 (있는 기업만).
+
+    Returns
+    -------
+    dict[str, dict[str, float]] | None
+        ``{부문명: {period: 영업이익(원)}}`` 매핑. 데이터 없으면 None.
+    """
     for topic in ("productService", "salesOrder"):
         result = company.select(topic, ["영업이익", "영업손익"], strict=False)
         if result is None:
@@ -145,7 +169,13 @@ def _selectDocsOpIncome(company, yCols: list[str]) -> dict[str, dict[str, float]
 
 
 def _selectDocsSalesOrder(company, keyword: str | None = None):
-    """salesOrder에서 항목별 매출 시계열을 추출."""
+    """salesOrder에서 항목별 매출 시계열을 추출.
+
+    Returns
+    -------
+    SelectResult | None
+        select() 결과 객체. 데이터 없으면 None.
+    """
     if keyword:
         result = company.select("salesOrder", [keyword])
     else:
@@ -237,16 +267,26 @@ def calcCompanyProfile(company, *, basePeriod: str | None = None) -> dict | None
 def calcSegmentComposition(company, *, basePeriod: str | None = None) -> dict | None:
     """부문별 매출 구성 (최신 기간).
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "segments": [{"name": str, "revenue": float, "opIncome": float|None}, ...],
-            "totalRevenue": float,
-            "totalOpIncome": float,
-            "hasOpIncome": bool,
-            "summary": str,
-            "compositionHistory": [{"year": str, "shares": {seg: pct}}, ...] | None,
-        }
+    Returns
+    -------
+    dict | None
+        segments : list[dict]
+            name : str — 부문명
+            revenue : float — 부문 매출 (원)
+            opIncome : float | None — 부문 영업이익 (원)
+            opMargin : float | None — 부문 영업이익률 (%)
+        totalRevenue : float — 전체 매출 (원)
+        totalOpIncome : float — 전체 영업이익 (원)
+        hasOpIncome : bool — 영업이익 데이터 존재 여부
+        summary : str — 상위 부문 요약
+        compositionHistory : list[dict] | None — 연도별 비중 시계열
     """
     docsResult = _selectDocsRevenue(company, basePeriod=basePeriod)
     if docsResult is None:
@@ -308,21 +348,23 @@ def calcSegmentComposition(company, *, basePeriod: str | None = None) -> dict | 
 def calcSegmentTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """다년간 부문별 매출 추이 + YoY + 영업이익률 추세.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "yearCols": [str, ...],
-            "rows": [
-                {
-                    "name": str,
-                    "values": {year: float},
-                    "yoy": float|None,
-                    "opMargins": {year: float}|None,
-                    "opMarginDirection": str|None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        yearCols : list[str] — 기간 컬럼
+        rows : list[dict]
+            name : str — 부문명
+            values : dict[str, float] — 연도별 매출 (원)
+            yoy : float | None — 최근 전기대비 (%)
+            opMargins : dict[str, float] | None — 연도별 영업이익률 (%)
+            opMarginDirection : str | None — 마진 방향 ("개선"|"악화"|"안정")
     """
     docsResult = _selectDocsRevenue(company, basePeriod=basePeriod)
     if docsResult is None:
@@ -391,13 +433,24 @@ def calcSegmentTrend(company, *, basePeriod: str | None = None) -> dict | None:
 def calcBreakdown(company, sub: str, *, basePeriod: str | None = None) -> dict | None:
     """지역별/제품별 매출 비중 + 다년간 비중 변화.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    sub : str
+        분해 기준 ("지역"|"제품").
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "items": [{"name": str, "value": float, "pct": float}, ...],
-            "total": float,
-            "breakdownHistory": [{"year": str, "shares": {name: pct}}, ...] | None,
-        }
+    Returns
+    -------
+    dict | None
+        items : list[dict]
+            name : str — 항목명
+            value : float — 금액 (원)
+            pct : float — 비중 (%)
+        total : float — 합계 (원)
+        breakdownHistory : list[dict] | None — 연도별 비중 변화
     """
     result = _selectDocsSalesOrder(company)
     if result is None:
@@ -448,13 +501,19 @@ def calcBreakdown(company, sub: str, *, basePeriod: str | None = None) -> dict |
 def calcRevenueGrowth(company, *, basePeriod: str | None = None) -> dict | None:
     """매출 성장 지표.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "yoy": float|None,
-            "cagr3y": float|None,
-            "quarterlySelect": SelectResult|None,
-        }
+    Returns
+    -------
+    dict | None
+        yoy : float | None — 매출 전기대비 성장률 (%)
+        cagr3y : float | None — 매출 3년 CAGR (%)
+        quarterlySelect : SelectResult | None — 분기별 매출 원본
     """
     ratios = _getRatios(company)
     yoy = getattr(ratios, "revenueGrowth", None) if ratios else None
@@ -494,16 +553,22 @@ def calcRevenueGrowth(company, *, basePeriod: str | None = None) -> dict | None:
 def calcConcentration(company, *, basePeriod: str | None = None) -> dict | None:
     """매출 집중도.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "hhi": float,
-            "hhiLabel": str,
-            "topPct": float,
-            "domesticPct": float|None,
-            "hhiHistory": list|None,
-            "hhiDirection": str,
-        }
+    Returns
+    -------
+    dict | None
+        hhi : float — 허핀달-허쉬만 지수
+        hhiLabel : str — 집중도 판단 ("고집중"|"중간 집중"|"분산")
+        topPct : float — 최대 부문 매출 비중 (%)
+        domesticPct : float | None — 내수 비중 (%)
+        hhiHistory : list | None — HHI 시계열
+        hhiDirection : str — HHI 추세 방향
     """
     revVals = _getDocsRevenueVals(company)
     if not revVals:
@@ -541,15 +606,21 @@ def calcConcentration(company, *, basePeriod: str | None = None) -> dict | None:
 def calcRevenueQuality(company, *, basePeriod: str | None = None) -> dict | None:
     """매출 품질 — 현금 뒷받침과 마진 추세.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "cashConversion": float|None,
-            "cashConversionLabel": str,
-            "grossMargin": float|None,
-            "grossMarginTrend": [float, ...],
-            "grossMarginDirection": str,
-        }
+    Returns
+    -------
+    dict | None
+        cashConversion : float | None — 현금전환율 (%)
+        cashConversionLabel : str — 현금전환 판단 ("양호"|"주의"|"위험")
+        grossMargin : float | None — 매출총이익률 (%)
+        grossMarginTrend : list[float] — 최근 4기 매출총이익률 추이 (%)
+        grossMarginDirection : str — 마진 추세 ("개선"|"악화"|"안정")
     """
     ratios = _getRatios(company)
     if ratios is None:
@@ -605,14 +676,23 @@ def calcRevenueQuality(company, *, basePeriod: str | None = None) -> dict | None
 def calcGrowthContribution(company, *, basePeriod: str | None = None) -> dict | None:
     """부문별 성장 기여 분해 — 성장이 어디에서 왔는가.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "totalGrowthPct": float,
-            "contributions": [{"name": str, "amount": float, "pct": float}, ...],
-            "driver": str,
-            "period": str,
-        }
+    Returns
+    -------
+    dict | None
+        totalGrowthPct : float — 전체 매출 성장률 (%)
+        contributions : list[dict]
+            name : str — 부문명
+            amount : float — 성장 기여 금액 (원)
+            pct : float — 성장 기여 비중 (%)
+        driver : str — 핵심 성장 동인 요약
+        period : str — 비교 기간 ("2021 -> 2024")
     """
     docsResult = _selectDocsRevenue(company, basePeriod=basePeriod)
     if docsResult is None:
@@ -721,7 +801,13 @@ def calcFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]
 
 
 def _getDocsRevenueVals(company) -> list[float]:
-    """productService에서 최신 기간 부문별 매출 양수 값 리스트."""
+    """productService에서 최신 기간 부문별 매출 양수 값 리스트.
+
+    Returns
+    -------
+    list[float]
+        부문별 매출 양수 값 리스트 (원). 데이터 없으면 빈 리스트.
+    """
     docsResult = _selectDocsRevenue(company)
     if docsResult is None:
         return []
@@ -738,7 +824,14 @@ def _getDocsRevenueVals(company) -> list[float]:
 
 
 def _calcCompositionHistory(segData: dict[str, dict[str, float]], yCols: list[str]) -> list[dict] | None:
-    """연도별 부문 비중 변화. [{year, shares: {seg: pct}}, ...]."""
+    """연도별 부문 비중 변화.
+
+    Returns
+    -------
+    list[dict] | None
+        ``[{"year": str, "shares": {부문명: 비중(%)}}, ...]``.
+        2개 연도 미만이면 None.
+    """
     history = []
     for yc in yCols:
         yearVals = {s: segData[s].get(yc, 0) for s in segData}
@@ -751,7 +844,15 @@ def _calcCompositionHistory(segData: dict[str, dict[str, float]], yCols: list[st
 
 
 def _calcHhiHistory(company) -> tuple[list[dict], str] | None:
-    """연도별 HHI 시계열 + 방향. ([{year, hhi}], direction)."""
+    """연도별 HHI 시계열 + 방향.
+
+    Returns
+    -------
+    tuple[list[dict], str] | None
+        ``([{"year": str, "hhi": float(점)}, ...], direction)`` 튜플.
+        direction은 ``"다각화 진행"`` | ``"집중 심화"`` | ``"안정"``.
+        데이터 없으면 None.
+    """
     docsResult = _selectDocsRevenue(company)
     if docsResult is None:
         return None
@@ -779,7 +880,14 @@ def _calcHhiHistory(company) -> tuple[list[dict], str] | None:
 
 
 def _calcBreakdownHistoryFromDocs(company, *, basePeriod: str | None = None) -> list[dict] | None:
-    """salesOrder���서 다년간 비중 변화."""
+    """salesOrder에서 다년간 비중 변화.
+
+    Returns
+    -------
+    list[dict] | None
+        ``[{"year": str, "shares": {항목명: 비중(%)}}, ...]``.
+        2개 연도 미만이면 None.
+    """
     result = _selectDocsSalesOrder(company)
     if result is None:
         return None
@@ -813,7 +921,13 @@ def _calcBreakdownHistoryFromDocs(company, *, basePeriod: str | None = None) -> 
 
 
 def _calcDomesticExportRatio(company) -> float | None:
-    """내수 비중(%) — salesOrder��서 국내 키워드 매칭."""
+    """내수 비중 — salesOrder에서 국내 키워드 매칭.
+
+    Returns
+    -------
+    float | None
+        내수 매출 비중 (%). 데이터 없으면 None.
+    """
     result = _selectDocsSalesOrder(company)
     if result is None:
         return None

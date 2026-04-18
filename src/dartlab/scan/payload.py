@@ -18,7 +18,23 @@ from __future__ import annotations
 
 
 def governance_to_insight(row: dict) -> dict | None:
-    """governance 1행 → InsightResult 호환 dict."""
+    """governance 1행 → InsightResult 호환 dict.
+
+    Parameters
+    ----------
+    row : dict
+        governance scan 결과 1행 (등급, 총점, 지분율, 사외이사비율, pay_ratio, 감사의견).
+
+    Returns
+    -------
+    dict | None
+        grade : str — 등급 (A~E)
+        summary : str — 요약 문장
+        details : list[str] — 세부 지표 문자열 목록
+        risks : list[dict] — 위험 요인 (level, category, text)
+        opportunities : list[dict] — 기회 요인 (level, category, text)
+        등급 없으면 None.
+    """
     grade = row.get("등급")
     score = row.get("총점")
     if grade is None:
@@ -68,7 +84,23 @@ def governance_to_insight(row: dict) -> dict | None:
 
 
 def workforce_to_insight(row: dict) -> dict | None:
-    """workforce 1행 → InsightResult 호환 dict."""
+    """workforce 1행 → InsightResult 호환 dict.
+
+    Parameters
+    ----------
+    row : dict
+        workforce scan 결과 1행 (직원수, 평균급여_만원, 직원당매출_억, 급여매출괴리, 남녀격차).
+
+    Returns
+    -------
+    dict | None
+        grade : str — 등급 (A~F, 직원당매출 기준)
+        summary : str — 요약 문장
+        details : list[str] — 세부 지표 문자열 목록
+        risks : list[dict] — 위험 요인 (level, category, text)
+        opportunities : list[dict] — 기회 요인 (level, category, text)
+        직원수 없으면 None.
+    """
     emp = row.get("직원수")
     if emp is None:
         return None
@@ -128,7 +160,23 @@ def workforce_to_insight(row: dict) -> dict | None:
 
 
 def capital_to_insight(row: dict) -> dict | None:
-    """capital 1행 → InsightResult 호환 dict."""
+    """capital 1행 → InsightResult 호환 dict.
+
+    Parameters
+    ----------
+    row : dict
+        capital scan 결과 1행 (분류, 배당여부, DPS, 배당수익률, 자사주보유, 최근증자, 모순형).
+
+    Returns
+    -------
+    dict | None
+        grade : str — 등급 (A/C/D, 환원형/중립/희석형 매핑)
+        summary : str — 요약 문장
+        details : list[str] — 세부 지표 문자열 목록
+        risks : list[dict] — 위험 요인 (level, category, text)
+        opportunities : list[dict] — 기회 요인 (level, category, text)
+        분류 없으면 None.
+    """
     cls = row.get("분류")
     if cls is None:
         return None
@@ -179,7 +227,23 @@ def capital_to_insight(row: dict) -> dict | None:
 
 
 def debt_to_insight(row: dict) -> dict | None:
-    """debt 1행 → InsightResult 호환 dict."""
+    """debt 1행 → InsightResult 호환 dict.
+
+    Parameters
+    ----------
+    row : dict
+        debt scan 결과 1행 (위험등급, 부채비율, ICR, 사채잔액, 단기비중).
+
+    Returns
+    -------
+    dict | None
+        grade : str — 등급 (A/B/C/F, 위험등급 매핑)
+        summary : str — 요약 문장
+        details : list[str] — 세부 지표 문자열 목록
+        risks : list[dict] — 위험 요인 (level, category, text)
+        opportunities : list[dict] — 기회 요인 (level, category, text)
+        위험등급 없으면 None.
+    """
     risk_level = row.get("위험등급")
     if risk_level is None:
         return None
@@ -232,11 +296,18 @@ _SCAN_CONVERTERS = {
 def build_scan_payload(company) -> dict[str, dict | None]:
     """scan 4축 → InsightResult 호환 dict들.
 
-    Args:
-        company: dartlab.Company 인스턴스.
+    Parameters
+    ----------
+    company : Company
+        dartlab.Company 인스턴스.
 
-    Returns:
-        {governance: {...}, workforce: {...}, capital: {...}, debt: {...}}
+    Returns
+    -------
+    dict[str, dict | None]
+        governance : dict | None — 지배구조 insight (grade/summary/details/risks/opportunities)
+        workforce : dict | None — 인력 insight
+        capital : dict | None — 주주환원 insight
+        debt : dict | None — 부채구조 insight
     """
     result: dict[str, dict | None] = {}
     for axis, converter in _SCAN_CONVERTERS.items():
@@ -259,11 +330,25 @@ def build_scan_payload(company) -> dict[str, dict | None]:
 def build_unified_payload(company) -> dict[str, dict | None]:
     """insight 7영역 + scan 4축 = 11영역 통합 payload.
 
-    Args:
-        company: dartlab.Company 인스턴스.
+    Parameters
+    ----------
+    company : Company
+        dartlab.Company 인스턴스.
 
-    Returns:
-        {performance, profitability, ..., scan_governance, workforce, capital, debt}
+    Returns
+    -------
+    dict[str, dict | None]
+        performance : dict | None — 실적 insight
+        profitability : dict | None — 수익성 insight
+        health : dict | None — 재무건전성 insight
+        cashflow : dict | None — 현금흐름 insight
+        governance : dict | None — 지배구조 insight (insight 기준)
+        risk : dict | None — 리스크 insight
+        opportunity : dict | None — 기회 insight
+        scan_governance : dict | None — scan 지배구조 (insight와 키 충돌 시)
+        workforce : dict | None — 인력 insight
+        capital : dict | None — 주주환원 insight
+        debt : dict | None — 부채구조 insight
     """
     # insight 7영역
     insight_areas: dict[str, dict] = {}

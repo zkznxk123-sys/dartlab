@@ -24,6 +24,23 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
 
     각 CIK parquet에서 최신 연간 BS/IS/CF 주요 계정을 추출하여
     하나의 wide DataFrame으로 합산한다.
+
+    Parameters
+    ----------
+    sinceYear : int
+        시작 연도.
+    verbose : bool
+        진행 로그 출력 여부.
+
+    Returns
+    -------
+    Path
+        생성된 scan/finance.parquet 경로.
+
+    Raises
+    ------
+    FileNotFoundError
+        EDGAR finance 디렉토리 또는 parquet 없을 때.
     """
     from dartlab import config as _cfg
 
@@ -193,7 +210,13 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
 
 
 def buildEdgarScan(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
-    """전체 EDGAR scan 프리빌드."""
+    """전체 EDGAR scan 프리빌드.
+
+    Returns
+    -------
+    Path
+        생성된 scan/finance.parquet 경로.
+    """
     return buildEdgarFinance(sinceYear=sinceYear, verbose=verbose)
 
 
@@ -201,8 +224,12 @@ def _buildCikToSicMap() -> dict[str, str]:
     """meta/sub/*.parquet 전 분기 병합 → CIK → SIC 매핑 (최신 filed 우선).
 
     SIC(Standard Industrial Classification) 는 SEC submission 메타 (sub.txt) 의
-    sic 필드에 기업별로 기록됨. REIT/은행/ETF 같은 특수 업종을 구분하는 데 사용.
-    분기 벌크 (`{Y}q{Q}.zip` → `meta/sub/*.parquet`) 가 없으면 빈 dict 반환.
+    sic 필드에 기업별로 기록됨.
+
+    Returns
+    -------
+    dict[str, str]
+        {CIK: SIC코드} — 최신 filing 기준. 데이터 없으면 빈 dict.
     """
     from dartlab import config as _cfg
 
@@ -257,7 +284,18 @@ _SIC_SECTOR_RANGES: list[tuple[int, int, str]] = [
 
 
 def _sicToSector(sic: str | None) -> str | None:
-    """SIC 코드 → 섹터 분류. 매칭 실패 시 None."""
+    """SIC 코드 → 섹터 분류.
+
+    Parameters
+    ----------
+    sic : str | None
+        4자리 SIC 코드 (예: "3674").
+
+    Returns
+    -------
+    str | None
+        섹터명 (예: "manufacturing"). 매칭 실패 시 None.
+    """
     if not sic:
         return None
     try:
@@ -273,8 +311,15 @@ def _sicToSector(sic: str | None) -> str | None:
 def _buildReverseTagMap(snakeIds: list[str]) -> dict[str, list[str]]:
     """snakeId → XBRL 태그 목록 역조회 테이블.
 
-    EdgarMapper.getTagsForSnakeIds()를 개별 snakeId씩 호출하여
-    snakeId별 후보 태그 목록을 구축. map_elements 회피.
+    Parameters
+    ----------
+    snakeIds : list[str]
+        조회할 snakeId 목록 (예: ["sales", "total_assets"]).
+
+    Returns
+    -------
+    dict[str, list[str]]
+        {snakeId: [태그1, 태그2, ...]} — 정렬된 XBRL 태그 목록.
     """
     from dartlab.providers.edgar.finance.mapper import EdgarMapper
 
@@ -286,7 +331,13 @@ def _buildReverseTagMap(snakeIds: list[str]) -> dict[str, list[str]]:
 
 
 def _guessStmt(snakeId: str) -> str:
-    """snakeId로 재무제표 유형 추정."""
+    """snakeId로 재무제표 유형 추정.
+
+    Returns
+    -------
+    str
+        재무제표 구분 ("IS" | "CF" | "BS").
+    """
     if snakeId in ("sales", "operating_profit", "net_profit", "interest_expense", "depreciation_amortization"):
         return "IS"
     if snakeId in ("operating_cashflow", "investing_cashflow", "financing_cash_flow", "capex", "dividends_paid"):

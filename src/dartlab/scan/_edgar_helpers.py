@@ -12,8 +12,20 @@ import polars as pl
 def scan_edgar_accounts(snake_ids: list[str], *, annual: bool = True) -> pl.DataFrame:
     """여러 EDGAR 계정을 한번에 스캔하여 wide DataFrame으로 반환.
 
-    Returns:
-        stockCode | corpName | {snakeId}_latest | {snakeId}_prev | ...
+    Parameters
+    ----------
+    snake_ids : list[str]
+        스캔할 계정 snakeId 목록 (예: ["sales", "operating_profit"]).
+    annual : bool
+        연간(10-K) 데이터 사용 여부.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — CIK 또는 종목코드
+        corpName : str — 회사명
+        {snakeId} : float — 해당 계정의 최신 기간 값
+        {snakeId}_prev : float — 해당 계정의 전기 값 (YoY 계산용)
     """
     from dartlab.providers.edgar.finance.scanAccount import scanAccount
 
@@ -45,19 +57,43 @@ def scan_edgar_accounts(snake_ids: list[str], *, annual: bool = True) -> pl.Data
 
 
 def safe_div(num: pl.Expr, den: pl.Expr) -> pl.Expr:
-    """안전한 나눗셈 — 0이면 None."""
+    """안전한 나눗셈 — 분모 0이면 None.
+
+    Returns
+    -------
+    pl.Expr
+        num / den. 분모가 0이면 None.
+    """
     return pl.when(den != 0).then(num / den).otherwise(None)
 
 
 def pct(num: pl.Expr, den: pl.Expr) -> pl.Expr:
-    """백분율 계산."""
+    """백분율 계산 — (num/den)*100, 소수점 2자리.
+
+    Returns
+    -------
+    pl.Expr
+        비율 (%). 분모 0이면 None.
+    """
     return (safe_div(num, den) * 100).round(2)
 
 
 def scan_edgar_raw_tags(tags: list[str], *, annual: bool = True) -> pl.DataFrame:
-    """XBRL 태그명으로 직접 ��종목 스캔 (snakeId 매핑 없이).
+    """XBRL 태그명으로 직접 전종목 스캔 (snakeId 매핑 없이).
 
-    Returns: stockCode | corpName | {tag1} | {tag2} | ...
+    Parameters
+    ----------
+    tags : list[str]
+        XBRL 태그명 목록 (예: ["AuditFees", "NonAuditServicesFees"]).
+    annual : bool
+        연간(10-K/20-F) 데이터만 필터.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — CIK
+        corpName : str — 회사명
+        {tag} : float — 각 태그의 최신 연도 값 (USD)
     """
     from dartlab.providers.edgar.report import edgarFinancePath
 
@@ -99,7 +135,22 @@ def scan_edgar_raw_tags(tags: list[str], *, annual: bool = True) -> pl.DataFrame
 
 
 def grade_by_value(val: pl.Expr, thresholds: list[tuple[float, str]], default: str = "해당없음") -> pl.Expr:
-    """값 기반 등급 분류. thresholds는 (상한, 등급) 리스트 (오름차순)."""
+    """값 기반 등급 분류.
+
+    Parameters
+    ----------
+    val : pl.Expr
+        등급 판정 대상 Polars 표현식.
+    thresholds : list[tuple[float, str]]
+        (하한, 등급) 리스트 (내림차순). 예: [(20, "우수"), (10, "양호")].
+    default : str
+        어떤 threshold에도 해당 안 되면 반환할 등급.
+
+    Returns
+    -------
+    pl.Expr
+        등급 문자열 (예: "우수", "양호", ..., default).
+    """
     expr = val
     for i, (threshold, label) in enumerate(thresholds):
         if i == 0:

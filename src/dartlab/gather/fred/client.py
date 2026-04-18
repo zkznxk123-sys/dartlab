@@ -46,9 +46,26 @@ class FredClient:
     def get(self, endpoint: str, **params) -> dict:
         """GET 요청 → JSON dict.
 
-        Args:
-            endpoint: ``/series/observations`` 등 FRED 엔드포인트 경로.
-            **params: 쿼리 파라미터 (api_key, file_type 자동 추가).
+        Parameters
+        ----------
+        endpoint : str
+            FRED 엔드포인트 경로 (예: ``/series/observations``).
+        **params
+            쿼리 파라미터 (api_key, file_type 자동 추가).
+
+        Returns
+        -------
+        dict
+            FRED API JSON 응답 딕셔너리.
+
+        Raises
+        ------
+        SeriesNotFoundError
+            시리즈를 찾을 수 없을 때.
+        AuthenticationError
+            API 키가 유효하지 않을 때 (403).
+        FredError
+            기타 API 오류 또는 3회 재시도 초과.
         """
         params.setdefault("file_type", "json")
         params["api_key"] = self._resolve_key()
@@ -91,20 +108,45 @@ class FredClient:
         raise last_exc or FredError("FRED API 요청 실패 (3회 재시도 초과)")
 
     def close(self) -> None:
-        """세션 닫기."""
+        """세션 닫기.
+
+        Returns
+        -------
+        None
+        """
         self._session.close()
 
     # ── internal ──
 
     def _resolve_key(self) -> str:
+        """현재 인덱스의 API 키 반환.
+
+        Returns
+        -------
+        str
+            현재 활성 FRED API 키.
+        """
         return self._keys[self._key_idx % len(self._keys)]
 
     def _rotate_key(self) -> None:
+        """다음 API 키로 로테이션 (multi-key 지원).
+
+        Returns
+        -------
+        None
+            키가 1개뿐이면 아무 동작 없음.
+        """
         if len(self._keys) > 1:
             self._key_idx = (self._key_idx + 1) % len(self._keys)
 
     def _rate_limit(self) -> None:
-        """슬라이딩 윈도우 120 RPM 제한."""
+        """슬라이딩 윈도우 120 RPM 제한.
+
+        Returns
+        -------
+        None
+            윈도우 초과 시 대기 후 반환.
+        """
         now = time.monotonic()
         cutoff = now - _RATE_LIMIT_WINDOW
         self._timestamps = [t for t in self._timestamps if t > cutoff]
@@ -117,5 +159,16 @@ class FredClient:
 
     @staticmethod
     def _backoff(attempt: int) -> None:
+        """지수 백오프.
+
+        Parameters
+        ----------
+        attempt : int
+            현재 재시도 횟수 (0부터). 대기 시간 = min(2^attempt, 8) (초).
+
+        Returns
+        -------
+        None
+        """
         delay = min(2**attempt, 8)
         time.sleep(delay)

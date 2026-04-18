@@ -138,7 +138,34 @@ def _parse(val) -> float | None:
 
 
 def calcScreen(*, market: str = "KR", preset: str = "quality", stockCode: str | None = None, **kwargs) -> dict:
-    """팩터 스크리닝."""
+    """팩터 스크리닝.
+
+    프리셋 조건(quality/value/growth/dividend/momentum/lowvol/breakout 등)에
+    해당하는 종목을 필터링한다.
+
+    Parameters
+    ----------
+    market : str
+        시장. 기본 "KR".
+    preset : str
+        스크리닝 프리셋 키. 기본 "quality".
+    stockCode : str | None
+        특정 종목이 프리셋을 통과했는지 확인.
+
+    Returns
+    -------
+    dict
+        market : str — 시장
+        preset : str — 사용된 프리셋
+        criteria : str — 프리셋 설명
+        year : str — 기준 연도
+        count : int — 통과 종목 수
+        stocks : list[dict] — 통과 종목 리스트 (최대 30개)
+            stockCode : str, name : str,
+            ROA : float (%) | opMargin : float (%) | salesGrowth : float (%)
+        targetPassed : bool — stockCode 지정 시 통과 여부
+        target : dict | None — stockCode 지정 시 해당 종목 정보
+    """
     if preset not in _PRESETS:
         return {"error": f"알 수 없는 프리셋: {preset}", "available": list(_PRESETS.keys())}
 
@@ -162,7 +189,7 @@ def calcScreen(*, market: str = "KR", preset: str = "quality", stockCode: str | 
         df = lf.filter(pl.col("fs_nm").str.contains("연결")).collect()
         if df.is_empty():
             df = lf.collect()
-    except Exception as e:  # noqa: BLE001
+    except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {**result, "error": str(e)}
 
     yr = df.get_column("bsns_year").sort(descending=True).to_list()[0]
@@ -249,7 +276,7 @@ def _screen_dividend(result: dict, market: str, stockCode: str | None) -> dict:
         return {**result, "error": "dividend.parquet 없음"}
     try:
         df = lf.collect()
-    except Exception as e:  # noqa: BLE001
+    except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {**result, "error": str(e)}
 
     # DPS > 0인 종목 찾기

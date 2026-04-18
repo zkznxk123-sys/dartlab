@@ -13,7 +13,6 @@ from __future__ import annotations
 import math
 import random
 from dataclasses import dataclass, field
-from typing import Optional
 
 from dartlab.core.finance.extract import (
     getAnnualValues,
@@ -51,7 +50,7 @@ class SimulationResult:
     marginPath: list[float]
     fcfPath: list[float]
     dcfValue: float
-    perShareValue: Optional[float]
+    perShareValue: float | None
     revenueChangePct: float
     marginChangeBps: float
     elasticityUsed: SectorElasticity
@@ -126,9 +125,9 @@ class StressTestResult:
     scenarioLabel: str
     year3RevenueChange: float
     year3MarginChange: float
-    year3DebtRatio: Optional[float]
-    year3CurrentRatio: Optional[float]
-    year3InterestCoverage: Optional[float]
+    year3DebtRatio: float | None
+    year3CurrentRatio: float | None
+    year3InterestCoverage: float | None
     survivalRisk: str  # "low" | "medium" | "high" | "critical"
     dividendSustainable: bool
     recoveryTimeline: str
@@ -159,8 +158,36 @@ class StressTestResult:
 # ── 내부 유틸 ──
 
 
-def _extractBaseMetrics(series: dict) -> dict[str, Optional[float]]:
-    """현재 기업 기본 지표 추출."""
+def _extractBaseMetrics(series: dict) -> dict[str, float | None]:
+    """현재 기업 기본 지표 추출.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+
+    Returns
+    -------
+    dict
+        revenue : float | None — TTM 매출 (원)
+        operatingIncome : float | None — TTM 영업이익 (원)
+        netIncome : float | None — TTM 순이익 (원)
+        margin : float | None — 영업이익률 (%)
+        ocf : float | None — 영업현금흐름 (원)
+        fcf : float | None — 잉여현금흐름 (원)
+        capex : float | None — 자본적지출 (원)
+        dividendsPaid : float | None — 배당금 지급액 (원)
+        totalAssets : float | None — 총자산 (원)
+        totalEquity : float | None — 자기자본 (원)
+        totalLiabilities : float | None — 총부채 (원)
+        currentAssets : float | None — 유동자산 (원)
+        currentLiabilities : float | None — 유동부채 (원)
+        debtRatio : float | None — 부채비율 (%)
+        currentRatio : float | None — 유동비율 (%)
+        interestCoverage : float | None — 이자보상배율 (배)
+        netDebt : float — 순차입금 (원)
+        financeCosts : float | None — 금융비용 (원)
+    """
     rev = getTTM(series, "IS", "sales") or getTTM(series, "IS", "revenue")
     oi = getTTM(series, "IS", "operating_profit") or getTTM(series, "IS", "operating_income")
     ni = getTTM(series, "IS", "net_profit") or getTTM(series, "IS", "net_income")
@@ -212,11 +239,24 @@ def _extractBaseMetrics(series: dict) -> dict[str, Optional[float]]:
 
 
 def _extractVolatility(series: dict) -> dict[str, float]:
-    """과거 시계열에서 변동성 추출."""
+    """과거 시계열에서 변동성 추출.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+
+    Returns
+    -------
+    dict
+        revenueCv : float — 매출 변동계수 (비율, 0~1)
+        marginStd : float — 영업이익률 표준편차 (%p)
+    """
     revVals = getAnnualValues(series, "IS", "sales") or getAnnualValues(series, "IS", "revenue")
     oiVals = getAnnualValues(series, "IS", "operating_profit") or getAnnualValues(series, "IS", "operating_income")
 
     def _std(values: list) -> float:
+        """변동계수(CV) 산출 — 표준편차 / 평균 (비율, 0~1)."""
         valid = [v for v in values if v is not None]
         if len(valid) < 3:
             return 0.1  # 기본값 10%
@@ -227,6 +267,7 @@ def _extractVolatility(series: dict) -> dict[str, float]:
         return math.sqrt(variance) / abs(mean)
 
     def _marginStd(revList: list, oiList: list) -> float:
+        """영업이익률 표준편차 산출 (%p)."""
         margins = []
         for r, o in zip(revList, oiList):
             if r is not None and o is not None and r > 0:
@@ -251,7 +292,30 @@ def _applyMacroShock(
     yearIdx: int,
     baseWacc: float,
 ) -> tuple[float, float, float]:
-    """매크로 충격 적용 -> (조정 매출, 조정 마진%, 조정 할인율)."""
+    """매크로 충격을 기업 실적에 적용.
+
+    Parameters
+    ----------
+    baseRevenue : float
+        기준 매출 (원).
+    baseMargin : float
+        기준 영업이익률 (%).
+    scenario : MacroScenario
+        거시경제 시나리오.
+    elasticity : SectorElasticity
+        업종별 경기감응도.
+    yearIdx : int
+        시나리오 내 연도 인덱스 (0-based).
+    baseWacc : float
+        기준 가중평균자본비용 (%).
+
+    Returns
+    -------
+    tuple[float, float, float]
+        adjustedRevenue : float — 조정 매출 (원)
+        adjustedMargin : float — 조정 영업이익률 (%, 하한 -50%)
+        adjustedWacc : float — 조정 할인율 (%)
+    """
     gdp = scenario.gdpGrowth[yearIdx]
     rate = scenario.interestRate[yearIdx]
     fx = scenario.krwUsd[yearIdx]
@@ -284,11 +348,40 @@ def _applyMacroShock(
 def simulateScenario(
     series: dict,
     scenario: MacroScenario | str,
-    sectorKey: Optional[str] = None,
-    sectorParams: Optional[SectorParams] = None,
-    shares: Optional[int] = None,
+    sectorKey: str | None = None,
+    sectorParams: SectorParams | None = None,
+    shares: int | None = None,
 ) -> SimulationResult:
-    """단일 거시경제 시나리오 하에서 3년 실적 경로 시뮬레이션."""
+    """단일 거시경제 시나리오 하에서 3년 실적 경로 시뮬레이션.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    scenario : MacroScenario | str
+        거시경제 시나리오 객체 또는 프리셋 이름 ("baseline", "adverse" 등).
+    sectorKey : str, optional
+        WICS 업종 키.
+    sectorParams : SectorParams, optional
+        업종별 파라미터 (할인율, 성장률 등).
+    shares : int, optional
+        발행주식수.
+
+    Returns
+    -------
+    SimulationResult
+        scenarioName : str — 시나리오 코드명
+        scenarioLabel : str — 시나리오 한글명
+        years : int — 시뮬레이션 기간 (년)
+        revenuePath : list[float] — 연도별 예상 매출 (원)
+        operatingIncomePath : list[float] — 연도별 예상 영업이익 (원)
+        marginPath : list[float] — 연도별 예상 영업이익률 (%)
+        fcfPath : list[float] — 연도별 예상 FCF (원)
+        dcfValue : float — DCF 기업가치 (원)
+        perShareValue : float | None — 주당 가치 (원)
+        revenueChangePct : float — 최종연도 매출 변화율 (%)
+        marginChangeBps : float — 최종연도 마진 변화 (bps)
+    """
     warnings: list[str] = []
 
     # 시나리오 로드
@@ -427,12 +520,31 @@ def simulateScenario(
 
 def simulateAllScenarios(
     series: dict,
-    sectorKey: Optional[str] = None,
-    sectorParams: Optional[SectorParams] = None,
-    shares: Optional[int] = None,
-    scenarios: Optional[list[str]] = None,
+    sectorKey: str | None = None,
+    sectorParams: SectorParams | None = None,
+    shares: int | None = None,
+    scenarios: list[str] | None = None,
 ) -> dict[str, SimulationResult]:
-    """모든 사전 정의 시나리오 일괄 시뮬레이션."""
+    """모든 사전 정의 시나리오 일괄 시뮬레이션.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    sectorKey : str, optional
+        WICS 업종 키.
+    sectorParams : SectorParams, optional
+        업종별 파라미터.
+    shares : int, optional
+        발행주식수.
+    scenarios : list[str], optional
+        실행할 시나리오 키 목록. None이면 전체 프리셋.
+
+    Returns
+    -------
+    dict[str, SimulationResult]
+        시나리오 키 → SimulationResult 매핑.
+    """
     keys = scenarios or list(PRESET_SCENARIOS.keys())
     return {
         key: simulateScenario(series, key, sectorKey, sectorParams, shares) for key in keys if key in PRESET_SCENARIOS
@@ -444,15 +556,46 @@ def simulateAllScenarios(
 
 def monteCarloForecast(
     series: dict,
-    sectorKey: Optional[str] = None,
-    sectorParams: Optional[SectorParams] = None,
-    shares: Optional[int] = None,
+    sectorKey: str | None = None,
+    sectorParams: SectorParams | None = None,
+    shares: int | None = None,
     scenario: MacroScenario | str = "baseline",
     iterations: int = 10000,
     horizon: int = 3,
-    seed: Optional[int] = None,
+    seed: int | None = None,
 ) -> MonteCarloResult:
-    """Monte Carlo 시뮬레이션 (순수 Python)."""
+    """Monte Carlo 시뮬레이션으로 매출·이익·FCF 분포 추정.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    sectorKey : str, optional
+        WICS 업종 키.
+    sectorParams : SectorParams, optional
+        업종별 파라미터.
+    shares : int, optional
+        발행주식수.
+    scenario : MacroScenario | str
+        기준 시나리오 (기본 "baseline").
+    iterations : int
+        시뮬레이션 반복 횟수 (기본 10,000).
+    horizon : int
+        예측 기간 (년, 기본 3).
+    seed : int, optional
+        난수 시드 (재현성용).
+
+    Returns
+    -------
+    MonteCarloResult
+        iterations : int — 실행 횟수
+        scenarioName : str — 기준 시나리오명
+        percentiles : dict[str, dict[str, float]] — 메트릭별 백분위 (P5/P25/P50/P75/P95)
+        expectedValue : float — 기대 매출 (원)
+        stdDev : float — 매출 표준편차 (원)
+        var95 : float — 95% VaR 매출 (원)
+        upsideProbability : float — 현재 대비 상승 확률 (%)
+    """
     if seed is not None:
         random.seed(seed)
 
@@ -526,6 +669,7 @@ def monteCarloForecast(
 
     # 백분위 산출
     def _percentiles(vals: list[float]) -> dict[str, float]:
+        """P5/P25/P50/P75/P95 백분위 산출."""
         sortedVals = sorted(vals)
         n = len(sortedVals)
         return {
@@ -568,11 +712,35 @@ def monteCarloForecast(
 
 def stressTest(
     series: dict,
-    sectorKey: Optional[str] = None,
-    sectorParams: Optional[SectorParams] = None,
+    sectorKey: str | None = None,
+    sectorParams: SectorParams | None = None,
     scenario: str = "adverse",
 ) -> StressTestResult:
-    """CCAR 스타일 스트레스 테스트."""
+    """CCAR 스타일 스트레스 테스트 — 극한 시나리오 하 재무 건전성 평가.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    sectorKey : str, optional
+        WICS 업종 키.
+    sectorParams : SectorParams, optional
+        업종별 파라미터.
+    scenario : str
+        스트레스 시나리오 키 (기본 "adverse").
+
+    Returns
+    -------
+    StressTestResult
+        year3RevenueChange : float — 3년 후 매출 변화율 (%)
+        year3MarginChange : float — 3년 후 마진 변화 (bps)
+        year3DebtRatio : float | None — 3년 후 추정 부채비율 (%)
+        year3CurrentRatio : float | None — 3년 후 추정 유동비율 (%)
+        year3InterestCoverage : float | None — 3년 후 추정 이자보상배율 (배)
+        survivalRisk : str — 생존 위험도 ("low" | "medium" | "high" | "critical")
+        dividendSustainable : bool — 배당 지속 가능 여부
+        recoveryTimeline : str — 회복 전망 설명
+    """
     warnings: list[str] = []
 
     sim = simulateScenario(series, scenario, sectorKey, sectorParams)
@@ -718,19 +886,35 @@ HISTORICAL_SCENARIOS: dict[str, MacroScenario] = {
 def simulateHistorical(
     series: dict,
     historicalKey: str,
-    sectorKey: Optional[str] = None,
-    sectorParams: Optional[SectorParams] = None,
-    shares: Optional[int] = None,
-    learnedBetas: Optional[dict[str, float]] = None,
+    sectorKey: str | None = None,
+    sectorParams: SectorParams | None = None,
+    shares: int | None = None,
+    learnedBetas: dict[str, float] | None = None,
 ) -> SimulationResult:
-    """역사적 충격 재현 시뮬레이션.
+    """역사적 충격 재현 시뮬레이션 — 과거 위기가 반복되면 어떻게 되는가.
 
-    "2008년 금융위기가 다시 오면 이 기업은 어떻게 되는가?"
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    historicalKey : str
+        역사적 시나리오 키 ("gfc_2008", "covid_2020",
+        "euro_crisis_2011", "rate_hike_2022").
+    sectorKey : str, optional
+        WICS 업종 키.
+    sectorParams : SectorParams, optional
+        업종별 파라미터.
+    shares : int, optional
+        발행주식수.
+    learnedBetas : dict[str, float], optional
+        calcMacroRegression에서 학습된 기업별 베타.
+        None이면 정적 탄성치 사용.
 
-    Args:
-        historicalKey: "gfc_2008", "covid_2020", "euro_crisis_2011", "rate_hike_2022"
-        learnedBetas: calcMacroRegression에서 학습된 기업별 베타.
-            None이면 정적 탄성치 사용.
+    Returns
+    -------
+    SimulationResult
+        역사적 시나리오 기반 시뮬레이션 결과.
+        elasticityUsed가 학습값이면 assumptions에 "학습" 표기.
     """
     sc = HISTORICAL_SCENARIOS.get(historicalKey)
     if sc is None:
@@ -800,8 +984,8 @@ class BacktestResult:
 
 def backtestSimulation(
     series: dict,
-    sectorKey: Optional[str] = None,
-    sectorParams: Optional[SectorParams] = None,
+    sectorKey: str | None = None,
+    sectorParams: SectorParams | None = None,
 ) -> BacktestResult | None:
     """과거 시점으로 돌아가서 시뮬레이션 정확도 측정.
 
@@ -809,6 +993,25 @@ def backtestSimulation(
     1. 해당 시점 직전 재무 데이터 기준으로 시뮬레이션 실행
     2. 실제 결과와 비교
     3. 방향 정확도 + 오차 + 시나리오 적중률 산출
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    sectorKey : str, optional
+        WICS 업종 키.
+    sectorParams : SectorParams, optional
+        업종별 파라미터.
+
+    Returns
+    -------
+    BacktestResult | None
+        scenariosTested : int — 테스트된 시나리오 수
+        directionAccuracy : float — 매출 방향(증/감) 정확도 (%)
+        avgError : float — 평균 절대 오차 (%)
+        scenarioHitRate : float — 15%p 이내 적중률 (%)
+        details : list[dict] — 시나리오별 상세 비교
+        데이터 부족 시 None.
     """
     details: list[dict] = []
     warnings: list[str] = []

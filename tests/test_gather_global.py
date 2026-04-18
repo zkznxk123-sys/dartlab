@@ -50,29 +50,29 @@ class TestMarketConfig:
         assert resolve_ticker("005930", "KR", "naver") == "005930"
 
     def test_resolve_ticker_kr_yahoo(self):
-        assert resolve_ticker("005930", "KR", "yahoo_direct") == "005930.KS"
+        assert resolve_ticker("005930", "KR", "yahoo_chart") == "005930.KS"
 
     def test_resolve_ticker_us(self):
-        assert resolve_ticker("AAPL", "US", "yahoo_direct") == "AAPL"
+        assert resolve_ticker("AAPL", "US", "yahoo_chart") == "AAPL"
         assert resolve_ticker("AAPL", "US", "fmp") == "AAPL"
 
     def test_resolve_ticker_jp(self):
-        assert resolve_ticker("7203", "JP", "yahoo_direct") == "7203.T"
+        assert resolve_ticker("7203", "JP", "yahoo_chart") == "7203.T"
 
     def test_resolve_ticker_hk_padding(self):
         # HK 4자리 패딩
-        assert resolve_ticker("293", "HK", "yahoo_direct") == "0293.HK"
-        assert resolve_ticker("9988", "HK", "yahoo_direct") == "9988.HK"
+        assert resolve_ticker("293", "HK", "yahoo_chart") == "0293.HK"
+        assert resolve_ticker("9988", "HK", "yahoo_chart") == "9988.HK"
 
     def test_resolve_ticker_cn_shanghai(self):
-        assert resolve_ticker("600519", "CN", "yahoo_direct") == "600519.SS"
+        assert resolve_ticker("600519", "CN", "yahoo_chart") == "600519.SS"
 
     def test_resolve_ticker_cn_shenzhen(self):
-        assert resolve_ticker("000858", "CN", "yahoo_direct") == "000858.SZ"
-        assert resolve_ticker("300750", "CN", "yahoo_direct") == "300750.SZ"
+        assert resolve_ticker("000858", "CN", "yahoo_chart") == "000858.SZ"
+        assert resolve_ticker("300750", "CN", "yahoo_chart") == "300750.SZ"
 
     def test_resolve_ticker_uk(self):
-        assert resolve_ticker("SHEL", "UK", "yahoo_direct") == "SHEL.L"
+        assert resolve_ticker("SHEL", "UK", "yahoo_chart") == "SHEL.L"
 
     def test_resolve_ticker_de(self):
         assert resolve_ticker("SAP", "DE", "fmp") == "SAP.DE"
@@ -272,7 +272,7 @@ class TestPriceFallback:
         """모든 도메인이 load_domain으로 로드 가능."""
         from dartlab.gather.domains import load_domain
 
-        for name in ("naver", "yahoo_direct", "fmp"):
+        for name in ("naver", "yahoo_chart", "fmp"):
             module = load_domain(name)
             assert hasattr(module, "fetch_price")
 

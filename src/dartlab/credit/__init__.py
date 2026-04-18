@@ -135,12 +135,60 @@ _GRADE_ALIASES = {"등급", "grade", "종합", "종합등급", "credit", "신용
 def guide():
     """credit 엔진 7축 + 종합 가이드 DataFrame.
 
-    Returns:
-        polars DataFrame (axis, label, description, example, group)
+    공시 재무제표만으로 독립 신용등급(dCR)을 산출하는 엔진의 축 카탈로그.
+    외부 API 키 불필요 — DART/EDGAR 재무 데이터 기반.
+
+    Returns
+    -------
+    polars.DataFrame
+        axis : str — 영문 축 키 (grade, repayment, leverage, …)
+        label : str — 한글 라벨 (등급, 채무상환능력, 자본구조, …)
+        description : str — 축 설명
+        example : str — 호출 예시
+        group : str — 그룹 분류 (dCR)
+        apiKey : str — API 키 필요 여부 ("불필요" — 재무 데이터 기반)
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> dartlab.credit()                        # 이 가이드
+    >>> dartlab.credit("005930")                # 삼성전자 종합 등급
+    >>> dartlab.credit("005930", "채무상환")     # 채무상환 축만
+    >>> c = dartlab.Company("005930")
+    >>> c.credit()                              # Company-bound 가이드
+    >>> c.credit("등급")                        # 종합 등급
+    >>> c.credit("채무상환", detail=True)        # 채무상환 축 상세
     """
     import polars as pl
 
-    return pl.DataFrame([asdict(e) for e in _AXIS_REGISTRY.values()])
+    rows = [asdict(e) for e in _AXIS_REGISTRY.values()]
+    for row in rows:
+        row["apiKey"] = "불필요"
+    df = pl.DataFrame(rows)
+
+    # 빠른 시작 안내 출력
+    _lines = [
+        "",
+        "dCR — 독립 신용등급 (7축 정량 스코어링)",
+        "",
+        "━━━ 빠른 시작 ━━━",
+        '  c = dartlab.Company("005930")',
+        '  c.credit("등급")                        # dCR 종합 등급',
+        '  c.credit("채무상환")                     # 채무상환능력 축',
+        '  c.credit("등급", detail=True)            # 7축 상세 + 시계열',
+        "",
+        "━━━ 7축 ━━━",
+        "  채무상환능력 · 자본구조 · 유동성 · 현금흐름",
+        "  사업안정성 · 재무신뢰성 · 공시리스크",
+        "",
+        "━━━ 데이터 ━━━",
+        "  재무제표: DART/EDGAR 공시 (API 키 불필요)",
+        "  등급 범위: dCR-AAA ~ dCR-D",
+        "",
+    ]
+    print("\n".join(_lines))
+
+    return df
 
 
 def _resolveAxis(axis: str) -> str | None:
@@ -188,17 +236,43 @@ def credit(
 
     Parameters
     ----------
-    stockCode : 종목코드 또는 ticker. None이면 7축 가이드 DataFrame 반환.
-    axis : 축 이름 ("등급" → 종합, "채무상환" 등 → 해당 축만)
-    detail : True이면 7축 상세 + 모든 지표 포함
-    basePeriod : 분석 기준 기간 (None이면 최신)
+    stockCode : str | None
+        종목코드 또는 ticker. None이면 7축 가이드 DataFrame 반환.
+    axis : str | None
+        축 이름 ("등급" → 종합, "채무상환"/"자본구조"/"유동성"/"현금흐름"/
+        "사업안정성"/"재무신뢰성"/"공시리스크" → 해당 축만).
+        영문 alias("repayment", "leverage" 등)도 지원.
+    detail : bool
+        True이면 7축 상세 + 모든 지표 시계열 + 서사(narrative) 포함.
+    basePeriod : str | None
+        분석 기준 기간 (예: "2024"). None이면 최신.
 
     Returns
     -------
     DataFrame | dict | None
-        - stockCode=None → 가이드 DataFrame
+        - stockCode=None → 가이드 DataFrame (axis, label, description, example, group)
         - axis="등급" 또는 None+stockCode → 종합 등급 dict
+
+          grade : str — dCR 등급 (예: "dCR-AA+")
+          score : float — 위험 점수 (0=최우량, 100=최위험) (점)
+          healthScore : float — 건전성 점수 (100-score) (점)
+          axes : list[dict] — 7축 상세 (name, score, weight, metrics)
+          eCR : str | None — 현금흐름등급
+          outlook : str — 전망 ("안정적"/"긍정적"/"부정적")
+
         - axis=축이름 → 해당 축 dict
+
+          axis : str — 축 풀네임
+          score : float — 해당 축 위험 점수 (점)
+          weight : int — 가중치 (%)
+          metrics : list[dict] — 개별 지표 (name, value, score)
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> dartlab.credit("005930")                # 삼성전자 종합
+    >>> dartlab.credit("005930", "채무상환")     # 채무상환 축만
+    >>> dartlab.credit()                        # 가이드 DataFrame
     """
     if stockCode is None:
         return guide()
@@ -229,10 +303,34 @@ def creditCompany(
 ):
     """Company 객체로 신용등급 산출 (Company-bound용).
 
-    axis=None → 가이드 DataFrame (self-discovery)
-    axis="등급" → 종합 등급 dict
-    axis="채무상환" → 해당 축 dict
-    overrides → core/overrides.py CREDIT_KEYS. AI 가 시나리오 가정 교체.
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+    axis : str | None
+        None → 가이드 DataFrame (self-discovery).
+        "등급"/"grade" → 종합 등급 dict.
+        "채무상환"/"자본구조" 등 → 해당 축 dict.
+    detail : bool
+        True이면 7축 상세 + 서사 + 시계열 포함.
+    basePeriod : str | None
+        분석 기준 기간 (예: "2024"). None이면 최신.
+    overrides : dict | None
+        AI/사용자 시나리오 가정 교체. core/overrides.py CREDIT_KEYS 참조.
+        예: ``{"debtRatio": 150}`` → 부채비율을 150%로 가정한 시나리오.
+
+    Returns
+    -------
+    DataFrame | dict | None
+        axis=None → 가이드 DataFrame.
+        axis 지정 시 → 해당 축 또는 종합 등급 dict.
+        overrides 적용 시 결과 dict에 ``assumptions`` 키가 추가됨.
+
+    Examples
+    --------
+    >>> c = dartlab.Company("005930")
+    >>> c.credit("등급")                      # 종합
+    >>> c.credit("채무상환", detail=True)      # 채무상환 축 상세
     """
     if axis is None:
         return guide()

@@ -20,7 +20,26 @@ def _ensureDir(path: Path) -> None:
 
 
 def recordGrade(stockCode: str, result: dict) -> Path:
-    """등급 이력에 현재 결과 추가."""
+    """등급 이력에 현재 결과 추가.
+
+    ``data/credit/history/{stockCode}.json``에 등급·점수·outlook 등을
+    JSON 배열로 축적한다. 이전 등급 대비 변경이 있으면
+    전이 매트릭스도 자동 업데이트한다.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (예: ``"005930"``).
+    result : dict
+        신용분석 결과. 주요 키: ``grade`` (str), ``gradeRaw`` (str),
+        ``score`` (점), ``eCR`` (str), ``outlook`` (str),
+        ``methodologyVersion`` (str), ``latestPeriod`` (str).
+
+    Returns
+    -------
+    Path
+        저장된 이력 파일의 경로 (``data/credit/history/{stockCode}.json``).
+    """
     _ensureDir(_HISTORY_DIR)
     path = _HISTORY_DIR / f"{stockCode}.json"
 
@@ -53,7 +72,31 @@ def recordGrade(stockCode: str, result: dict) -> Path:
 
 
 def loadHistory(stockCode: str) -> list[dict]:
-    """등급 이력 로드."""
+    """종목의 등급 이력 전체를 로드.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (예: ``"005930"``).
+
+    Returns
+    -------
+    list[dict]
+        등급 이력 리스트. 각 항목의 키:
+
+        - ``date`` : str — 기록일 (``"YYYY-MM-DD"``)
+        - ``grade`` : str — 최종 등급 (예: ``"A+"``)
+        - ``gradeRaw`` : str — 보정 전 원시 등급
+        - ``score`` : float — 종합 점수 (점)
+        - ``eCR`` : str — 추정 신용등급
+        - ``outlook`` : str — 등급 전망 (``"안정적"`` / ``"부정적"`` 등)
+        - ``methodologyVersion`` : str — 평가 방법론 버전
+        - ``period`` : str — 평가 기준 기간
+        - ``previousGrade`` : str | None — 이전 등급
+        - ``changed`` : bool — 등급 변경 여부
+
+        파일이 없거나 파싱 실패 시 빈 리스트를 반환한다.
+    """
     path = _HISTORY_DIR / f"{stockCode}.json"
     if not path.exists():
         return []
@@ -94,7 +137,20 @@ def _loadTransition() -> dict:
 
 
 def updateTransitionMatrix() -> dict:
-    """전체 히스토리에서 전이 매트릭스 재계산."""
+    """전체 히스토리에서 전이 매트릭스 재계산.
+
+    ``data/credit/history/`` 내 모든 종목 이력 파일을 순회하여
+    등급 변경 건수를 집계하고, 전이 매트릭스를
+    ``data/credit/transition.json``에 저장한다.
+
+    Returns
+    -------
+    dict
+        전이 매트릭스. 구조: ``{from_grade: {to_grade: count}}``
+        예: ``{"A+": {"A": 3, "AA-": 1}}``.
+        ``from_grade`` — 변경 전 등급, ``to_grade`` — 변경 후 등급,
+        ``count`` : int — 해당 전이 발생 횟수 (건).
+    """
     _ensureDir(_HISTORY_DIR)
     matrix: dict = {}
 

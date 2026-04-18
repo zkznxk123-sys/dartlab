@@ -23,7 +23,18 @@ _FINANCIAL_GROUP_KEYWORDS = (
 
 
 def isFinancialCompany(company: Any) -> bool:
-    """sector/industryGroup 기반 금융업 검출 (Enum/str 모두 처리)."""
+    """sector/industryGroup 기반 금융업 검출 (Enum/str 모두 처리).
+
+    Parameters
+    ----------
+    company : Company
+        판별 대상 기업.
+
+    Returns
+    -------
+    bool
+        금융업이면 True.
+    """
     sector = getattr(company, "sector", None)
     if sector is None:
         return False
@@ -203,6 +214,13 @@ def calcBankDFV(company: Any, *, basePeriod: str | None = None, overrides: dict 
 
 
 def _getCurrentPriceLight(company: Any) -> float | None:
+    """현재 주가 추출 — currentPrice 속성 우선, 없으면 gather 경유.
+
+    Returns
+    -------
+    float | None
+        현재 주가 (원). 조회 실패 시 None.
+    """
     try:
         price = getattr(company, "currentPrice", None)
         if price:
@@ -218,6 +236,13 @@ def _getCurrentPriceLight(company: Any) -> float | None:
 
 
 def _opinion(upside: float | None) -> str:
+    """upside 기반 투자 의견 산출.
+
+    Returns
+    -------
+    str
+        "강력매수" | "매수" | "보유" | "매도" | "강력매도" | "판단 불가".
+    """
     if upside is None:
         return "판단 불가"
     if upside > 30:

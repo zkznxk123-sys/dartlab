@@ -91,7 +91,20 @@ def _norm_ppf(p: float) -> float:
 
 
 def sharpe(returns: np.ndarray, rf: float = 0.0) -> float:
-    """연환산 Sharpe ratio. returns 는 일별 log return."""
+    """연환산 Sharpe ratio.
+
+    Parameters
+    ----------
+    returns : np.ndarray
+        일별 log return 시계열.
+    rf : float
+        연간 무위험 이자율. 기본 0.
+
+    Returns
+    -------
+    float
+        연환산 Sharpe ratio (배). 표본 < 2 또는 std=0 이면 0.0.
+    """
     r = np.asarray(returns, dtype=np.float64)
     r = r[~np.isnan(r)]
     if len(r) < 2:
@@ -104,7 +117,20 @@ def sharpe(returns: np.ndarray, rf: float = 0.0) -> float:
 
 
 def sortino(returns: np.ndarray, rf: float = 0.0) -> float:
-    """Sortino ratio — 하방편차 기반."""
+    """Sortino ratio — 하방편차 기반.
+
+    Parameters
+    ----------
+    returns : np.ndarray
+        일별 log return 시계열.
+    rf : float
+        연간 무위험 이자율. 기본 0.
+
+    Returns
+    -------
+    float
+        연환산 Sortino ratio (배). 하방 수익률 없거나 std=0 이면 0.0.
+    """
     r = np.asarray(returns, dtype=np.float64)
     r = r[~np.isnan(r)]
     if len(r) < 2:
@@ -120,7 +146,18 @@ def sortino(returns: np.ndarray, rf: float = 0.0) -> float:
 
 
 def mdd(equity: np.ndarray) -> float:
-    """최대낙폭 (음수). equity 는 누적 자산 곡선."""
+    """최대낙폭 (Maximum Drawdown).
+
+    Parameters
+    ----------
+    equity : np.ndarray
+        누적 자산 곡선 (예: 초기 1.0 부터).
+
+    Returns
+    -------
+    float
+        최대낙폭 비율 (음수, %). 예: -0.25 = -25% 낙폭. 표본 < 2 이면 0.0.
+    """
     e = np.asarray(equity, dtype=np.float64)
     e = e[~np.isnan(e)]
     if len(e) < 2:
@@ -131,7 +168,18 @@ def mdd(equity: np.ndarray) -> float:
 
 
 def winrate(trade_pnls: np.ndarray) -> float:
-    """승률 — pnl > 0 비율."""
+    """승률 — pnl > 0 비율.
+
+    Parameters
+    ----------
+    trade_pnls : np.ndarray
+        거래별 손익 배열.
+
+    Returns
+    -------
+    float
+        승률 (비율, 0~1). 거래 없으면 0.0.
+    """
     p = np.asarray(trade_pnls, dtype=np.float64)
     if len(p) == 0:
         return 0.0
@@ -139,7 +187,18 @@ def winrate(trade_pnls: np.ndarray) -> float:
 
 
 def profit_factor(trade_pnls: np.ndarray) -> float:
-    """수익 / 손실 비율."""
+    """총 수익 / 총 손실 비율.
+
+    Parameters
+    ----------
+    trade_pnls : np.ndarray
+        거래별 손익 배열.
+
+    Returns
+    -------
+    float
+        Profit Factor (배). 손실 0 이면 inf (수익 있을 때) 또는 0.0.
+    """
     p = np.asarray(trade_pnls, dtype=np.float64)
     if len(p) == 0:
         return 0.0
@@ -151,7 +210,18 @@ def profit_factor(trade_pnls: np.ndarray) -> float:
 
 
 def expectancy(trade_pnls: np.ndarray) -> float:
-    """1 거래당 기대수익."""
+    """1 거래당 기대수익.
+
+    Parameters
+    ----------
+    trade_pnls : np.ndarray
+        거래별 손익 배열.
+
+    Returns
+    -------
+    float
+        거래당 평균 손익 (원). 거래 없으면 0.0.
+    """
     p = np.asarray(trade_pnls, dtype=np.float64)
     if len(p) == 0:
         return 0.0
@@ -159,7 +229,18 @@ def expectancy(trade_pnls: np.ndarray) -> float:
 
 
 def turnover(positions: np.ndarray) -> float:
-    """포지션 회전율 — 절대값 변화 합계."""
+    """포지션 회전율 — 절대값 변화 합계.
+
+    Parameters
+    ----------
+    positions : np.ndarray
+        시점별 포지션 크기 배열.
+
+    Returns
+    -------
+    float
+        총 회전 (절대값 변화 합, 배). 표본 < 2 이면 0.0.
+    """
     p = np.asarray(positions, dtype=np.float64)
     if len(p) < 2:
         return 0.0
@@ -167,7 +248,18 @@ def turnover(positions: np.ndarray) -> float:
 
 
 def exposure(positions: np.ndarray) -> float:
-    """포지션 유지 비율 — non-zero 비중."""
+    """포지션 유지 비율 — non-zero 비중.
+
+    Parameters
+    ----------
+    positions : np.ndarray
+        시점별 포지션 크기 배열.
+
+    Returns
+    -------
+    float
+        포지션 유지 비율 (0~1). 포지션 없으면 0.0.
+    """
     p = np.asarray(positions, dtype=np.float64)
     if len(p) == 0:
         return 0.0
@@ -348,7 +440,20 @@ def _avgRank(a: np.ndarray) -> np.ndarray:
 
 
 def spearmanCorr(x: np.ndarray, y: np.ndarray) -> float:
-    """Spearman 순위상관계수 — 동률 평균 rank 처리."""
+    """Spearman 순위상관계수 — 동률 평균 rank 처리.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        첫 번째 변수 배열.
+    y : np.ndarray
+        두 번째 변수 배열 (x 와 같은 길이).
+
+    Returns
+    -------
+    float
+        ρ_s ∈ [-1, 1]. 표본 < 2 이면 NaN.
+    """
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)
     mask = ~(np.isnan(x) | np.isnan(y))
@@ -486,7 +591,26 @@ def breadthFromFrequency(
 
 
 def impliedIRFromICDistribution(icSeries: np.ndarray, breadth: int) -> dict:
-    """IC 분포 + breadth → 이론 IR vs 실현 ICIR 비교."""
+    """IC 분포 + breadth → 이론 IR vs 실현 ICIR 비교.
+
+    Fundamental Law (IR = IC × √breadth) 이론값과 실현 ICIR 을 비교해
+    전략 효율성을 평가한다.
+
+    Parameters
+    ----------
+    icSeries : np.ndarray
+        IC 시계열 (각 기간의 횡단면 IC).
+    breadth : int
+        연간 독립 베팅 수 (Grinold Fundamental Law 정의).
+
+    Returns
+    -------
+    dict
+        meanIC : float — 평균 IC (비율)
+        theoreticalIR : float — 이론 IR = meanIC × √breadth (배)
+        realizedICIR : float — 실현 ICIR = meanIC / stdIC (배)
+        efficiency : float — realizedICIR / theoreticalIR (비율)
+    """
     r = np.asarray(icSeries, dtype=float)
     r = r[~np.isnan(r)]
     if r.size < 2:

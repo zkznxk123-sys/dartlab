@@ -3,13 +3,24 @@
 from __future__ import annotations
 
 import math
-from typing import Optional
 
 from dartlab.analysis.financial.insight.types import Anomaly, AuditDataForAnomaly
 from dartlab.core.finance.extract import getAnnualValues
 
 
-def _yoyChange(vals: list[Optional[float]]) -> Optional[float]:
+def _yoyChange(vals: list[float | None]) -> float | None:
+    """최근 2개 유효값의 YoY 변화율 계산.
+
+    Parameters
+    ----------
+    vals : list[float | None]
+        연간 시계열 값 리스트.
+
+    Returns
+    -------
+    float | None
+        yoyPct : float | None — YoY 변화율 (%). 유효값 2개 미만이면 None.
+    """
     from dartlab.core.finance.ratios import yoy_pct
 
     valid = [(i, v) for i, v in enumerate(vals) if v is not None]
@@ -21,7 +32,23 @@ def _yoyChange(vals: list[Optional[float]]) -> Optional[float]:
 
 
 def detectEarningsQuality(aSeries: dict, isFinancial: bool = False) -> list[Anomaly]:
-    """이익 품질 이상치: 영업이익↑ but 영업CF↓ (금융업 제외)."""
+    """이익 품질 이상치: 영업이익↑ but 영업CF↓ (금융업 제외).
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열 (IS/BS/CF 키 구조).
+    isFinancial : bool
+        금융업 여부. True이면 빈 리스트 반환.
+
+    Returns
+    -------
+    list[Anomaly]
+        severity : str — 'danger' | 'warning'
+        category : str — 'earningsQuality'
+        text : str — 이상치 설명 메시지
+        magnitude : float — 괴리 크기 (%)
+    """
     anomalies: list[Anomaly] = []
 
     if isFinancial:
@@ -79,7 +106,21 @@ def detectEarningsQuality(aSeries: dict, isFinancial: bool = False) -> list[Anom
 
 
 def detectWorkingCapitalAnomaly(aSeries: dict) -> list[Anomaly]:
-    """운전자본 이상치: 매출채권/재고 급증 > 매출 증가."""
+    """운전자본 이상치: 매출채권/재고 급증 > 매출 증가.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+
+    Returns
+    -------
+    list[Anomaly]
+        severity : str — 'warning' | 'info'
+        category : str — 'workingCapital'
+        text : str — 이상치 설명 메시지
+        magnitude : float — 매출 대비 초과 증가율 (%p)
+    """
     anomalies: list[Anomaly] = []
 
     arVals = getAnnualValues(aSeries, "BS", "trade_and_other_receivables")
@@ -127,7 +168,21 @@ def detectWorkingCapitalAnomaly(aSeries: dict) -> list[Anomaly]:
 
 
 def detectBalanceSheetShift(aSeries: dict) -> list[Anomaly]:
-    """BS 구조 급변: 부채/차입금/자본 ±50% 이상."""
+    """BS 구조 급변: 부채/차입금/자본 ±50% 이상.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+
+    Returns
+    -------
+    list[Anomaly]
+        severity : str — 'danger' | 'warning' | 'info'
+        category : str — 'balanceSheetShift'
+        text : str — 항목별 급변 설명
+        magnitude : float — YoY 변화율 (%)
+    """
     anomalies: list[Anomaly] = []
 
     checkItems = [
@@ -169,7 +224,23 @@ def detectBalanceSheetShift(aSeries: dict) -> list[Anomaly]:
 
 
 def detectCashBurn(aSeries: dict, isFinancial: bool = False) -> list[Anomaly]:
-    """현금 소진: 현금 급감, 영업CF적자+재무CF양수 (금융업 제외)."""
+    """현금 소진: 현금 급감, 영업CF적자+재무CF양수 (금융업 제외).
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+    isFinancial : bool
+        금융업 여부. True이면 영업CF+재무CF 패턴 검사 스킵.
+
+    Returns
+    -------
+    list[Anomaly]
+        severity : str — 'warning'
+        category : str — 'cashBurn'
+        text : str — 현금 소진 설명
+        magnitude : float — 현금 변화율 (%) 또는 None
+    """
     anomalies: list[Anomaly] = []
 
     cashVals = getAnnualValues(aSeries, "BS", "cash_and_cash_equivalents")
@@ -212,7 +283,21 @@ def detectCashBurn(aSeries: dict, isFinancial: bool = False) -> list[Anomaly]:
 
 
 def detectMarginDivergence(aSeries: dict) -> list[Anomaly]:
-    """마진 급변: 영업이익률 ±5%p, 영업외손익 급변."""
+    """마진 급변: 영업이익률 ±5%p, 영업외손익 급변.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+
+    Returns
+    -------
+    list[Anomaly]
+        severity : str — 'info' | 'warning'
+        category : str — 'marginDivergence'
+        text : str — 마진 변동 설명
+        magnitude : float — 마진 변동 (%p) 또는 영업외손익 비율 (%)
+    """
     anomalies: list[Anomaly] = []
 
     revVals = getAnnualValues(aSeries, "IS", "sales")
@@ -263,7 +348,23 @@ def detectMarginDivergence(aSeries: dict) -> list[Anomaly]:
 
 
 def detectFinancialSectorAnomaly(aSeries: dict, isFinancial: bool) -> list[Anomaly]:
-    """금융업 전용 이상치: 부채비율 급변, 순이익 급감."""
+    """금융업 전용 이상치: 부채비율 급변, 순이익 급감.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+    isFinancial : bool
+        금융업 여부. False이면 빈 리스트 반환.
+
+    Returns
+    -------
+    list[Anomaly]
+        severity : str — 'warning'
+        category : str — 'financialSector'
+        text : str — 금융업 이상치 설명
+        magnitude : float — 부채비율 변동 (%p) 또는 순이익 변화율 (%)
+    """
     if not isFinancial:
         return []
 
@@ -314,6 +415,18 @@ def detectTrendDeterioration(aSeries: dict, isFinancial: bool = False) -> list[A
 
     실험 084/006 검증 결과 기반.
     severity: 4기+ danger, 3기 warning, 2기 info.
+
+    Parameters
+    ----------
+    aSeries : dict
+        finance.timeseries 시계열 dict.
+    isFinancial : bool
+        금융업 여부.
+
+    Returns
+    -------
+    list[Anomaly]
+        감지된 악화 패턴 목록.
     """
     anomalies: list[Anomaly] = []
 
@@ -402,6 +515,18 @@ def detectCCCDeterioration(aSeries: dict, isFinancial: bool = False) -> list[Ano
     실험 084/007 검증 결과 기반.
     CCC 3기+ 연속 확대 시 운전자본 경색 경고.
     금융업 제외 (DSO/DIO/CCC 비적용).
+
+    Parameters
+    ----------
+    aSeries : dict
+        finance.timeseries 시계열 dict.
+    isFinancial : bool
+        금융업 여부 (True이면 빈 리스트 반환).
+
+    Returns
+    -------
+    list[Anomaly]
+        CCC 악화 이상 신호 목록.
     """
     if isFinancial:
         return []
@@ -423,7 +548,7 @@ def detectCCCDeterioration(aSeries: dict, isFinancial: bool = False) -> list[Ano
     if n < 3:
         return anomalies
 
-    cccSeries: list[Optional[float]] = []
+    cccSeries: list[float | None] = []
     for i in range(n):
         rv = revVals[i]
         rc = recVals[i]
@@ -468,7 +593,18 @@ _BIG4_KEYWORDS = ["삼일", "PwC", "삼정", "KPMG", "한영", "EY", "안진", "
 
 
 def _isBig4(auditor: str | None) -> bool:
-    """감사인이 Big4인지 판정."""
+    """감사인이 Big4인지 판정.
+
+    Parameters
+    ----------
+    auditor : str | None
+        감사인 이름.
+
+    Returns
+    -------
+    bool
+        Big4 여부. None이면 False.
+    """
     if not auditor:
         return False
     return any(kw in auditor for kw in _BIG4_KEYWORDS)
@@ -479,6 +615,16 @@ def detectAuditRedFlags(auditData: AuditDataForAnomaly | None) -> list[Anomaly]:
 
     6개 항목: 감사인 교체, 감사보수 급변, 계속기업 불확실성,
     내부통제 취약점, 감사의견 비적정, KAM 급증.
+
+    Parameters
+    ----------
+    auditData : AuditDataForAnomaly | None
+        감사 데이터. None이면 빈 리스트 반환.
+
+    Returns
+    -------
+    list[Anomaly]
+        감사 관련 이상 신호 목록.
     """
     if auditData is None:
         return []
@@ -568,6 +714,16 @@ def detectBenfordAnomaly(aSeries: dict) -> list[Anomaly]:
     Nigrini (1996), AICPA 공식 감사 절차.
     재무제표 수치의 첫째 유효 자릿수 분포를 Benford 기대 분포와 비교.
     χ² > 15.51 (df=8, p<0.05) → warning, χ² > 20.09 (p<0.01) → danger.
+
+    Parameters
+    ----------
+    aSeries : dict
+        finance.timeseries 시계열 dict.
+
+    Returns
+    -------
+    list[Anomaly]
+        Benford 분포 이탈 이상 신호 목록.
     """
     anomalies: list[Anomaly] = []
 
@@ -638,6 +794,16 @@ def detectRevenueQuality(aSeries: dict) -> list[Anomaly]:
     - OCF/Revenue < 0 (매출 흑자인데 영업CF 적자) → danger
     - OCF/Revenue 3기 연속 하락 → warning
     - 매출채권 증가율 > 매출 증가율 × 1.5 (3기 연속) → warning
+
+    Parameters
+    ----------
+    aSeries : dict
+        finance.timeseries 시계열 dict.
+
+    Returns
+    -------
+    list[Anomaly]
+        매출 품질 이상 신호 목록.
     """
     anomalies: list[Anomaly] = []
 
@@ -737,12 +903,25 @@ def runAnomalyDetection(
     *,
     auditData: AuditDataForAnomaly | None = None,
 ) -> list[Anomaly]:
-    """전체 이상치 탐지 실행.
+    """전체 이상치 탐지 실행 — 11개 룰 기반 종합.
 
-    Args:
-        aSeries: 연간 재무 시계열.
-        isFinancial: 금융업 여부.
-        auditData: 감사 데이터 (None이면 감사 탐지기 스킵, 하위호환).
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열 (IS/BS/CF 키 구조).
+    isFinancial : bool
+        금융업 여부.
+    auditData : AuditDataForAnomaly | None
+        감사 데이터. None이면 감사 탐지기 스킵 (하위호환).
+
+    Returns
+    -------
+    list[Anomaly]
+        severity 기준 정렬된 이상치 리스트.
+        severity : str — 'danger' > 'warning' > 'info' 순
+        category : str — 이상치 분류 (earningsQuality, workingCapital, balanceSheetShift 등)
+        text : str — 한국어 이상치 설명
+        magnitude : float | None — 이상치 크기
     """
     anomalies: list[Anomaly] = []
     anomalies.extend(detectEarningsQuality(aSeries, isFinancial))

@@ -23,7 +23,19 @@ def detect_market(stockCode: str) -> str:
 
 
 def resolve_market(stockCode: str, market: str = "auto") -> str:
-    """market 파라미터 해석. auto이면 자동 감지."""
+    """market 파라미터 해석 — auto이면 종목코드 패턴으로 자동 감지.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (예: "005930", "AAPL").
+    market : str
+        "KR" | "US" | "auto" (기본 "auto").
+
+    Returns
+    -------
+    str
+        "KR" 또는 "US"."""
     if market and market.lower() != "auto":
         return market.upper()
     return detect_market(stockCode)
@@ -33,7 +45,25 @@ def resolve_market(stockCode: str, market: str = "auto") -> str:
 
 
 def fetch_ohlcv(stockCode: str, **kwargs: Any):
-    """gather("price")로 OHLCV 수집. 실패 시 None."""
+    """gather("price")로 OHLCV 수집 — 실패 시 None.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (예: "005930", "AAPL").
+    **kwargs
+        GatherEntry 전달 인자 (start, market 등).
+
+    Returns
+    -------
+    pl.DataFrame | None
+        date : date — 거래일
+        open : float — 시가 (원)
+        high : float — 고가 (원)
+        low : float — 저가 (원)
+        close : float — 종가 (원)
+        volume : int — 거래량 (주)
+        수집 실패 시 None."""
     try:
         from dartlab.gather.entry import GatherEntry
 
@@ -45,7 +75,25 @@ def fetch_ohlcv(stockCode: str, **kwargs: Any):
 
 
 def fetch_benchmark(market: str = "KR", **kwargs: Any):
-    """벤치마크 OHLCV 수집. KR=KOSPI, US=S&P500."""
+    """벤치마크 OHLCV 수집 — KR=KOSPI, US=S&P500.
+
+    Parameters
+    ----------
+    market : str
+        "KR" (KOSPI) 또는 "US" (S&P500).
+    **kwargs
+        GatherEntry 전달 인자 (start 등).
+
+    Returns
+    -------
+    pl.DataFrame | None
+        date : date — 거래일
+        open : float — 시가
+        high : float — 고가
+        low : float — 저가
+        close : float — 종가
+        volume : int — 거래량
+        수집 실패 시 None."""
     symbol = "KOSPI" if market == "KR" else "^GSPC"
     try:
         from dartlab.gather.entry import GatherEntry
@@ -385,7 +433,27 @@ def extract_account(df, key: str) -> float | None:
 
 
 def extract_accounts(df, keys: list[str]) -> dict[str, float | None]:
-    """여러 표준 계정 일괄 추출."""
+    """여러 표준 계정 일괄 추출 — DART finance.parquet 용.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        DART finance.parquet 의 단일 종목/단일 기간 DataFrame.
+        sj_div, account_nm, thstrm_amount 컬럼 보유.
+    keys : list[str]
+        표준 계정 키 리스트
+        ("sales", "operating_profit", "net_income", "total_assets",
+         "total_liabilities", "total_equity", "operating_cf",
+         "investing_cf", "financing_cf").
+
+    Returns
+    -------
+    dict[str, float | None]
+        키별 금액 (원). 매칭 실패 시 해당 키 = None.
+
+    Examples
+    --------
+    >>> extract_accounts(df, ["sales", "net_income"])"""
     return {k: extract_account(df, k) for k in keys}
 
 

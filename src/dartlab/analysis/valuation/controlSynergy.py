@@ -231,6 +231,13 @@ def _estimateBaseFcf(company: Any) -> float | None:
 
 
 def _estimateNetDebt(company: Any) -> float | None:
+    """순차입금 추정 — 단기+장기차입금+사채 - 현금.
+
+    Returns
+    -------
+    float | None
+        순차입금 (원). 추출 실패 시 None.
+    """
     try:
         from dartlab.analysis.financial._helpers import toDictBySnakeId
 
@@ -244,6 +251,7 @@ def _estimateNetDebt(company: Any) -> float | None:
         latest = periods[0]
 
         def _g(*keys):
+            """BS 다중 키에서 첫 번째 유효 값 추출 (None → 0)."""
             for k in keys:
                 v = (data.get(k) or {}).get(latest)
                 if v:
@@ -258,6 +266,13 @@ def _estimateNetDebt(company: Any) -> float | None:
 
 
 def _inferShares(company: Any) -> int | None:
+    """calcDcf 결과에서 발행주식수 역산.
+
+    Returns
+    -------
+    int | None
+        추정 발행주식수. 역산 실패 시 None.
+    """
     try:
         from dartlab.analysis.financial.valuation import calcDcf
 

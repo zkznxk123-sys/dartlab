@@ -17,7 +17,20 @@ from dartlab.quant.indicators import vbollinger, vmacd, vsma
 
 
 def vcrossover(fast: NDArray[np.float64], slow: NDArray[np.float64]) -> NDArray[np.int8]:
-    """상향 돌파 감지. 1=크로스오버, 0=없음."""
+    """상향 돌파 감지. 1=크로스오버, 0=없음.
+
+    Parameters
+    ----------
+    fast : NDArray[np.float64]
+        빠른 지표 배열.
+    slow : NDArray[np.float64]
+        느린 지표 배열.
+
+    Returns
+    -------
+    NDArray[np.int8]
+        1=상향 돌파 시점, 0=없음.
+    """
     n = len(fast)
     signals = np.zeros(n, dtype=np.int8)
     prevFast = np.roll(fast, 1)
@@ -30,7 +43,20 @@ def vcrossover(fast: NDArray[np.float64], slow: NDArray[np.float64]) -> NDArray[
 
 
 def vcrossunder(fast: NDArray[np.float64], slow: NDArray[np.float64]) -> NDArray[np.int8]:
-    """하향 돌파 감지. -1=크로스언더, 0=없음."""
+    """하향 돌파 감지. -1=크로스언더, 0=없음.
+
+    Parameters
+    ----------
+    fast : NDArray[np.float64]
+        빠른 지표 배열.
+    slow : NDArray[np.float64]
+        느린 지표 배열.
+
+    Returns
+    -------
+    NDArray[np.int8]
+        -1=하향 돌파 시점, 0=없음.
+    """
     n = len(fast)
     signals = np.zeros(n, dtype=np.int8)
     prevFast = np.roll(fast, 1)
@@ -43,7 +69,20 @@ def vcrossunder(fast: NDArray[np.float64], slow: NDArray[np.float64]) -> NDArray
 
 
 def vcross(fast: NDArray[np.float64], slow: NDArray[np.float64]) -> NDArray[np.int8]:
-    """양방향 돌파. +1=상향, -1=하향, 0=없음."""
+    """양방향 돌파. +1=상향, -1=하향, 0=없음.
+
+    Parameters
+    ----------
+    fast : NDArray[np.float64]
+        빠른 지표 배열.
+    slow : NDArray[np.float64]
+        느린 지표 배열.
+
+    Returns
+    -------
+    NDArray[np.int8]
+        +1=상향 돌파, -1=하향 돌파, 0=없음.
+    """
     n = len(fast)
     signals = np.zeros(n, dtype=np.int8)
     prevFast = np.roll(fast, 1)
@@ -56,12 +95,42 @@ def vcross(fast: NDArray[np.float64], slow: NDArray[np.float64]) -> NDArray[np.i
 
 
 def vgoldenCross(close: NDArray[np.float64], fast: int = 10, slow: int = 30) -> NDArray[np.int8]:
-    """골든크로스(+1) / 데스크로스(-1)."""
+    """골든크로스(+1) / 데스크로스(-1).
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    fast : int
+        단기 SMA 기간 (기본 10).
+    slow : int
+        장기 SMA 기간 (기본 30).
+
+    Returns
+    -------
+    NDArray[np.int8]
+        +1=골든크로스, -1=데드크로스, 0=없음.
+    """
     return vcross(vsma(close, fast), vsma(close, slow))
 
 
 def vrsiSignal(rsi: NDArray[np.float64], oversold: float = 30.0, overbought: float = 70.0) -> NDArray[np.int8]:
-    """RSI 과매도 회복(+1) / 과매수 반전(-1)."""
+    """RSI 과매도 회복(+1) / 과매수 반전(-1).
+
+    Parameters
+    ----------
+    rsi : NDArray[np.float64]
+        RSI 값 배열 (0~100).
+    oversold : float
+        과매도 임계값 (기본 30.0).
+    overbought : float
+        과매수 임계값 (기본 70.0).
+
+    Returns
+    -------
+    NDArray[np.int8]
+        +1=과매도 탈출 매수, -1=과매수 이탈 매도, 0=없음.
+    """
     n = len(rsi)
     signals = np.zeros(n, dtype=np.int8)
     prevRsi = np.roll(rsi, 1)
@@ -73,13 +142,45 @@ def vrsiSignal(rsi: NDArray[np.float64], oversold: float = 30.0, overbought: flo
 
 
 def vmacdSignal(close: NDArray[np.float64], fast: int = 12, slow: int = 26, signal: int = 9) -> NDArray[np.int8]:
-    """MACD/Signal 크로스."""
+    """MACD/Signal 크로스.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    fast : int
+        MACD 빠른 EMA 기간 (기본 12).
+    slow : int
+        MACD 느린 EMA 기간 (기본 26).
+    signal : int
+        시그널선 EMA 기간 (기본 9).
+
+    Returns
+    -------
+    NDArray[np.int8]
+        +1=MACD 상향 돌파, -1=하향 돌파, 0=없음.
+    """
     macdLine, signalLine, _ = vmacd(close, fast, slow, signal)
     return vcross(macdLine, signalLine)
 
 
 def vbollingerSignal(close: NDArray[np.float64], period: int = 20, std: float = 2.0) -> NDArray[np.int8]:
-    """볼린저밴드 하단 반등(+1) / 상단 돌파(-1)."""
+    """볼린저밴드 하단 반등(+1) / 상단 돌파(-1).
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        볼린저밴드 SMA 기간 (기본 20).
+    std : float
+        표준편차 배수 (기본 2.0).
+
+    Returns
+    -------
+    NDArray[np.int8]
+        +1=하단 반등 매수, -1=상단 접촉 매도, 0=없음.
+    """
     upper, _, lower = vbollinger(close, period, std)
     n = len(close)
     signals = np.zeros(n, dtype=np.int8)
@@ -98,7 +199,24 @@ def vbreakoutSignal(
     close: NDArray[np.float64],
     period: int = 20,
 ) -> NDArray[np.int8]:
-    """채널 돌파 (Turtle Trading). 상방(+1) / 하방(-1)."""
+    """채널 돌파 (Turtle Trading). 상방(+1) / 하방(-1).
+
+    Parameters
+    ----------
+    high : NDArray[np.float64]
+        고가 배열.
+    low : NDArray[np.float64]
+        저가 배열.
+    close : NDArray[np.float64]
+        종가 배열.
+    period : int
+        채널 룩백 기간 (기본 20).
+
+    Returns
+    -------
+    NDArray[np.int8]
+        +1=상방 돌파, -1=하방 돌파, 0=없음.
+    """
     n = len(close)
     signals = np.zeros(n, dtype=np.int8)
     for i in range(period, n):
@@ -197,7 +315,26 @@ def vTrendFilter(
     signals: NDArray[np.int8],
     adxThreshold: float = 25.0,
 ) -> NDArray[np.int8]:
-    """ADX 추세 필터. 약한 추세 신호 제거."""
+    """ADX 추세 필터. 약한 추세 신호 제거.
+
+    Parameters
+    ----------
+    close : NDArray[np.float64]
+        종가 배열.
+    sma : NDArray[np.float64]
+        SMA 배열 (추세 방향 판별).
+    adx : NDArray[np.float64]
+        ADX 배열 (추세 강도 판별).
+    signals : NDArray[np.int8]
+        원본 매수/매도 신호 배열.
+    adxThreshold : float
+        ADX 임계값 (기본 25.0). 이상이면 강한 추세.
+
+    Returns
+    -------
+    NDArray[np.int8]
+        필터링된 신호. ADX < 임계값이면 0으로 제거.
+    """
     n = len(close)
     filtered = np.zeros(n, dtype=np.int8)
     valid = ~np.isnan(sma) & ~np.isnan(adx)

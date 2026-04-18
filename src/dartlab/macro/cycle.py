@@ -15,7 +15,29 @@ from dartlab.macro._helpers import (
 
 
 def _fetch_indicators(market: str, as_of: str | None = None) -> dict[str, float | None]:
-    """gather에서 사이클 판별에 필요한 지표 수집."""
+    """gather에서 사이클 판별에 필요한 지표 수집.
+
+    Parameters
+    ----------
+    market : str
+        ``"US"`` | ``"KR"``.
+    as_of : str | None
+        기준일 (``"2024-06-30"``). ``None`` 이면 최신.
+
+    Returns
+    -------
+    dict[str, float]
+        None 값은 제거된 채 반환. 가능한 키:
+
+        - hy_spread : float — HY 스프레드 (bp)
+        - hy_spread_3m_change : float — HY 스프레드 3개월 변화율 (%)
+        - term_spread : float — 10Y-2Y 금리차 (%p)
+        - vix : float — VIX 지수 (pt)
+        - gold_yoy : float — 금 가격 전년비 변화율 (%)
+        - bei_10y : float — 10년 BEI 기대인플레 (%)
+        - cpi_yoy : float — CPI 전년비 (%)
+        - cli_mom : float — OECD CLI 전월차 (pt, KR 전용)
+    """
     g = get_gather(as_of)
     indicators: dict[str, float | None] = {}
 
@@ -47,7 +69,26 @@ def _fetch_indicators(market: str, as_of: str | None = None) -> dict[str, float 
 def _build_signal_history(market: str, as_of: str | None = None) -> dict[str, list[tuple[str, float]]] | None:
     """전환 시퀀스 순서 검증을 위한 시계열 이력 구축.
 
-    최근 12개월 데이터를 [(날짜, 값)] 형태로 반환.
+    최근 12개월 데이터를 ``[(날짜, 값)]`` 형태로 반환.
+
+    Parameters
+    ----------
+    market : str
+        ``"US"`` 만 지원. 그 외 시장은 ``None`` 반환.
+    as_of : str | None
+        기준일. ``None`` 이면 최신.
+
+    Returns
+    -------
+    dict[str, list[tuple[str, float]]] | None
+        신호별 최근 12개월 시계열. ``None`` = US 외 시장이거나 데이터 부재. 키:
+
+        - hy_spread_3m_change — HY 스프레드 3개월 변화
+        - gold_yoy — 금 전년비
+        - long_rate_change — 10Y 국채금리 변화
+        - vix — VIX 지수
+        - term_spread — 10Y-2Y 금리차
+        - bei_10y — 10년 BEI
     """
     if market.upper() != "US":
         return None
@@ -72,7 +113,30 @@ def _build_signal_history(market: str, as_of: str | None = None) -> dict[str, li
 
 
 def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """경제 사이클 분석."""
+    """경제 사이클 4국면 판별 + 전환 시퀀스 감지.
+
+    Parameters
+    ----------
+    market : str
+        ``"US"`` | ``"KR"``.
+    as_of : str | None
+        기준일. ``None`` 이면 최신.
+    overrides : dict | None
+        지표 강제 치환 (예: ``{"vix": 35}``).
+
+    Returns
+    -------
+    dict
+        - market : str — 시장 코드
+        - phase : str — 국면 (``"expansion"``/``"slowdown"``/``"contraction"``/``"recovery"``)
+        - phaseLabel : str — 국면 한글명 (``"확장"``/``"둔화"``/``"수축"``/``"회복"``)
+        - confidence : str — 판별 신뢰도 (``"high"``/``"medium"``/``"low"``)
+        - signals : list[str] — 판별에 사용된 신호 목록
+        - sectorStrategy : str — 국면별 섹터 전략 가이드
+        - transition : dict | None — 전환 시퀀스 (from, to, progress(%), triggered, pending, sequenceOrder, orderValid)
+        - timeseries : dict — hy_spread / vix / term_spread 시계열
+        - quadrant : dict | None — Bridgewater 4분면 (성장×인플레)
+    """
     indicators = _fetch_indicators(market, as_of=as_of)
     if overrides:
         indicators = apply_overrides(indicators, overrides)

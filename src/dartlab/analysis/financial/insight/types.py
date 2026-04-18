@@ -199,7 +199,13 @@ class AnalysisResult:
     profile: str = ""
 
     def grades(self) -> dict[str, str]:
-        """10영역 등급 dict 반환."""
+        """10영역 등급 dict 반환.
+
+        Returns
+        -------
+        dict[str, str]
+            영역 키 → 등급 문자열 ("A"~"F") 매핑.
+        """
         result = {
             "performance": self.performance.grade,
             "profitability": self.profitability.grade,

@@ -599,13 +599,32 @@ DFAST_SCENARIOS: dict[str, dict] = {
 def get_scenario(name: str, *, severity: str | None = None, market: str = "US") -> dict | None:
     """시나리오 이름으로 프리셋 조회.
 
-    Args:
-        name: 시나리오 이름 (한글/영문, 부분 매칭)
-        severity: 심각도 (mild/moderate/severe/extreme)
-        market: "US" | "KR"
+    역사적 재현 → DFAST → 현대적 리스크 → 구조적 → 유형별 → 한국 특화
+    → 복합(+ 구분) 순으로 탐색하며, 부분 문자열 매칭으로 찾는다.
 
-    Returns:
-        시나리오 dict (overrides 포함) 또는 None
+    Parameters
+    ----------
+    name : str
+        시나리오 이름 (한글/영문). 부분 매칭 가능.
+        복합 시나리오는 ``"금리 충격 + 유가 충격"`` 형태.
+    severity : str | None
+        심각도. ``"mild"`` / ``"moderate"`` / ``"severe"`` / ``"extreme"``.
+        유형별·구조적 시나리오에서 사용. 미지정 시 ``"moderate"``.
+    market : str
+        시장 구분. ``"US"`` | ``"KR"``.
+        ``"KR"`` 이면 역사적 재현의 ``kr_overrides`` 병합.
+
+    Returns
+    -------
+    dict | None
+        매칭 시나리오가 없으면 ``None``. 있으면:
+
+        description : str — 시나리오 설명
+        type : str — 충격 유형 (신용 충격, 금리 충격 등)
+        severity : str — 심각도
+        transmission : str — 전파 경로
+        reference : str — 참조 문헌/사건
+        overrides : dict — 매크로 지표 override 값
     """
     # 1. 역사적 재현
     for key, val in HISTORICAL_SCENARIOS.items():
@@ -703,7 +722,27 @@ def get_scenario(name: str, *, severity: str | None = None, market: str = "US") 
 
 
 def list_all_scenarios(market: str = "US") -> list[dict]:
-    """모든 시나리오 목록."""
+    """모든 시나리오 목록.
+
+    역사적 재현, DFAST, 유형별, 현대적 리스크, 구조적, 한국 특화
+    카테고리의 전체 시나리오를 평탄화하여 반환한다.
+
+    Parameters
+    ----------
+    market : str
+        시장 구분. ``"US"`` | ``"KR"``.
+
+    Returns
+    -------
+    list[dict]
+        각 항목:
+
+        name : str — 시나리오 이름
+        category : str — 분류 (역사적 재현 / Fed DFAST / 유형별 / 현대적 리스크 / 구조적 / 한국 특화)
+        type : str — 충격 유형
+        severity : str — 심각도 (mild/moderate/severe/extreme)
+        description : str — 시나리오 설명
+    """
     result: list[dict] = []
 
     for name, val in HISTORICAL_SCENARIOS.items():

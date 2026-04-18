@@ -25,7 +25,31 @@ def _parse(val) -> float | None:
 
 
 def calcEarnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
-    """SUE + PEAD 이익 모멘텀 분석."""
+    """SUE + PEAD 이익 모멘텀 분석.
+
+    Standardized Unexpected Earnings 로 서프라이즈 크기를 측정하고,
+    PEAD(Post-Earnings Announcement Drift) 신호 강도를 판정한다.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드.
+    market : str
+        "KR" | "US" | "auto". 기본 "auto".
+
+    Returns
+    -------
+    dict
+        stockCode : str — 종목코드
+        market : str — 시장
+        sue : float — Standardized Unexpected Earnings (배)
+        latestOpIncome : float — 최근 영업이익 (원)
+        prevMean : float — 과거 평균 영업이익 (원)
+        peadSignal : str — "positive_drift" | "negative_drift" | "mild_positive" | "mild_negative" | "none"
+        peadStrength : str — "strong" | "moderate" | "weak"
+        earningsTrend : str — "consistent_growth" | "mostly_growing" | "mostly_declining" | "mixed"
+        opIncomeHistory : dict[str, float] — 연도별 영업이익 (원)
+    """
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
@@ -39,7 +63,7 @@ def calcEarnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
             .filter(pl.col("account_nm").str.contains("영업이익"))
             .collect()
         )
-    except Exception as e:  # noqa: BLE001
+    except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {**result, "error": str(e)}
     if stock.is_empty():
         return {**result, "error": "영업이익 데이터 없음"}

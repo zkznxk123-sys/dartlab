@@ -20,7 +20,13 @@ from dartlab.analysis.financial.research.types import (
 
 
 def _val(series: dict, sjDiv: str, snakeId: str, idx: int) -> float | None:
-    """시계열에서 특정 인덱스 값."""
+    """시계열에서 특정 인덱스 값.
+
+    Returns
+    -------
+    float | None
+        해당 인덱스의 값. 범위 밖이면 None.
+    """
     vals = series.get(sjDiv, {}).get(snakeId, [])
     if 0 <= idx < len(vals):
         return vals[idx]
@@ -28,7 +34,13 @@ def _val(series: dict, sjDiv: str, snakeId: str, idx: int) -> float | None:
 
 
 def _latest(series: dict, sjDiv: str, snakeId: str) -> float | None:
-    """최신 non-null 값."""
+    """최신 non-null 값.
+
+    Returns
+    -------
+    float | None
+        시계열 끝에서부터 탐색한 첫 non-null 값. 없으면 None.
+    """
     vals = series.get(sjDiv, {}).get(snakeId, [])
     for v in reversed(vals):
         if v is not None:
@@ -37,7 +49,13 @@ def _latest(series: dict, sjDiv: str, snakeId: str) -> float | None:
 
 
 def _latestTwo(series: dict, sjDiv: str, snakeId: str) -> tuple[float | None, float | None]:
-    """최근 2개 non-null (latest, prev)."""
+    """최근 2개 non-null (latest, prev).
+
+    Returns
+    -------
+    tuple[float | None, float | None]
+        ``(latest, prev)`` 쌍. 데이터 부족 시 해당 위치 None.
+    """
     vals = series.get(sjDiv, {}).get(snakeId, [])
     found: list[float] = []
     for v in reversed(vals):
@@ -60,7 +78,20 @@ def _latestTwo(series: dict, sjDiv: str, snakeId: str) -> tuple[float | None, fl
 def calcPiotroski(
     aSeries: dict[str, dict[str, list[float | None]]],
 ) -> PiotroskiScore:
-    """Piotroski F-Score 9-signal."""
+    """Piotroski F-Score 9-signal.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열 ``{sjDiv: {snakeId: [값, ...]}}``.
+
+    Returns
+    -------
+    PiotroskiScore
+        total : int — F-Score 합계 (0~9점)
+        components : dict[str, bool] — 9개 신호별 통과 여부
+        interpretation : str — ``"strong"`` | ``"moderate"`` | ``"weak"``
+    """
     components: dict[str, bool] = {}
 
     # --- 수익성 (4 signals) ---
@@ -154,7 +185,23 @@ def calcMagicFormula(
     currentPrice: float | None = None,
     sharesOutstanding: float | None = None,
 ) -> MagicFormulaScore:
-    """ROIC + Earnings Yield."""
+    """Greenblatt Magic Formula — ROIC + Earnings Yield.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+    currentPrice : float | None
+        현재 주가 (원 또는 달러).
+    sharesOutstanding : float | None
+        발행주식수 (주).
+
+    Returns
+    -------
+    MagicFormulaScore
+        roic : float | None — 투하자본수익률 (%)
+        earningsYield : float | None — 이익수익률 (%)
+    """
     op = _latest(aSeries, "IS", "operating_profit")
     ta = _latest(aSeries, "BS", "total_assets")
     _latest(aSeries, "BS", "current_assets")
@@ -191,7 +238,24 @@ def calcQmj(
     aSeries: dict[str, dict[str, list[float | None]]],
     aYears: list[str],
 ) -> QmjScore:
-    """AQR Quality Minus Junk 4-pillar."""
+    """AQR Quality Minus Junk 4-pillar.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+    aYears : list[str]
+        연도 목록.
+
+    Returns
+    -------
+    QmjScore
+        profitability : float | None — 수익성 평균 (비율)
+        growth : float | None — 매출 CAGR (비율)
+        safety : float | None — 안전성 점수 (0~1)
+        payout : float | None — 배당성향 (비율)
+        composite : float | None — 4-pillar 평균 (비율)
+    """
     # --- Profitability ---
     ni = _latest(aSeries, "IS", "net_profit")
     eq = _latest(aSeries, "BS", "total_stockholders_equity")
@@ -259,7 +323,26 @@ def calcLynchFairValue(
     currentPrice: float | None = None,
     sharesOutstanding: float | None = None,
 ) -> LynchFairValue:
-    """Peter Lynch: Fair Value = EPS Growth Rate × EPS."""
+    """Peter Lynch: Fair Value = EPS Growth Rate * EPS.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+    currentPrice : float | None
+        현재 주가 (원 또는 달러).
+    sharesOutstanding : float | None
+        발행주식수 (주).
+
+    Returns
+    -------
+    LynchFairValue
+        earningsGrowthRate : float | None — EPS 성장률 (%)
+        fairValue : float | None — Lynch 적정가 (원 또는 달러)
+        currentPrice : float | None — 현재 주가
+        pegRatio : float | None — PEG 비율 (배)
+        signal : str | None — ``"undervalued"`` | ``"fair"`` | ``"overvalued"``
+    """
     niList = aSeries.get("IS", {}).get("net_profit", [])
     validNi = [(i, v) for i, v in enumerate(niList) if v is not None and v > 0]
 
@@ -308,7 +391,18 @@ def calcLynchFairValue(
 def calcBuffettOwnerEarnings(
     aSeries: dict[str, dict[str, list[float | None]]],
 ) -> float | None:
-    """Buffett Owner Earnings = NI + D&A - maintenance CAPEX."""
+    """Buffett Owner Earnings = NI + D&A - maintenance CAPEX.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+
+    Returns
+    -------
+    float | None
+        Owner Earnings (원 또는 달러). 데이터 부족 시 None.
+    """
     ni = _latest(aSeries, "IS", "net_profit")
     # depreciation 근사: operating_profit - ebit가 아니라 CF에서 D&A 추출
     ocf = _latest(aSeries, "CF", "operating_cashflow")
@@ -332,7 +426,29 @@ def calcDuPont(
     aSeries: dict[str, dict[str, list[float | None]]],
     aYears: list[str],
 ) -> DuPontResult:
-    """DuPont 5-factor 분해: ROE = 세금부담 × 이자부담 × OPM × 회전율 × 레버리지."""
+    """DuPont 5-factor 분해: ROE = 세금부담 * 이자부담 * OPM * 회전율 * 레버리지.
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 재무 시계열.
+    aYears : list[str]
+        연도 목록.
+
+    Returns
+    -------
+    DuPontResult
+        netMargin : list[float | None] — 순이익률 (비율)
+        assetTurnover : list[float | None] — 총자산회전율 (배)
+        equityMultiplier : list[float | None] — 자기자본승수 (배)
+        roe : list[float | None] — 자기자본이익률 (비율)
+        periods : list[str] — 연도 목록
+        driver : str — ROE 변동 주요 동인 (``"margin"`` | ``"turnover"`` | ``"leverage"`` | ``"balanced"``)
+        taxBurden : list[float | None] — 세금부담률 (비율)
+        interestBurden : list[float | None] — 이자부담률 (비율)
+        operatingMargin : list[float | None] — 영업이익률 (비율)
+        roic : list[float | None] — 투하자본수익률 (비율)
+    """
     niList = aSeries.get("IS", {}).get("net_profit", [])
     salesList = aSeries.get("IS", {}).get("sales", [])
     taList = aSeries.get("BS", {}).get("total_assets", [])
@@ -414,9 +530,16 @@ def _identifyDriver(
     turnovers: list[float | None],
     leverages: list[float | None],
 ) -> str:
-    """ROE 변동의 주요 동인 식별."""
+    """ROE 변동의 주요 동인 식별.
+
+    Returns
+    -------
+    str
+        ``"margin"`` | ``"turnover"`` | ``"leverage"`` | ``"balanced"``.
+    """
 
     def _cv(vals: list[float | None]) -> float:
+        """변동계수(CV) 산출 — 표준편차 / 평균."""
         valid = [v for v in vals if v is not None]
         if len(valid) < 2:
             return 0
@@ -452,7 +575,18 @@ def calcAllScores(
     currentPrice: float | None = None,
     sharesOutstanding: float | None = None,
 ) -> QuantScores:
-    """모든 정량 스코어 한 번에 계산."""
+    """모든 정량 스코어 한 번에 계산.
+
+    Returns
+    -------
+    QuantScores
+        piotroski : PiotroskiScore — F-Score (0~9점)
+        magicFormula : MagicFormulaScore — ROIC + Earnings Yield
+        qmj : QmjScore — Quality Minus Junk 4-pillar
+        lynchFairValue : LynchFairValue — Lynch 적정가
+        buffettOwnerEarnings : float | None — Owner Earnings (원 또는 달러)
+        dupont : DuPontResult — DuPont 5-factor 분해
+    """
     return QuantScores(
         piotroski=calcPiotroski(aSeries),
         magicFormula=calcMagicFormula(aSeries, currentPrice, sharesOutstanding),
@@ -464,7 +598,13 @@ def calcAllScores(
 
 
 def _round(v: float | None, ndigits: int = 4) -> float | None:
-    """None-safe round."""
+    """None-safe round.
+
+    Returns
+    -------
+    float | None
+        반올림된 값. None이면 None.
+    """
     if v is None:
         return None
     return round(v, ndigits)

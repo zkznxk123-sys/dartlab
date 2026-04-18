@@ -290,7 +290,30 @@ def optimizeMeanVar(
 
 
 def optimizeRiskParity(stockCodes: list[str], *, market: str = "auto", **kwargs) -> dict:
-    """HRP — 계층적 리스크 패리티 (Lopez de Prado 2016)."""
+    """HRP — 계층적 리스크 패리티 (Lopez de Prado 2016).
+
+    상관행렬 기반 거리로 계층 클러스터링한 뒤, recursive bisection으로
+    역분산 가중치를 배분한다. 공분산 추정 오류에 강건.
+
+    Parameters
+    ----------
+    stockCodes : list[str]
+        종목코드 리스트 (2개 이상).
+    market : str
+        "KR" | "US" | "auto".
+
+    Returns
+    -------
+    dict
+        stockCodes : list[str] — 입력 종목 리스트
+        weights : dict[str, float] — 종목별 배분 비중 (%, 합=1)
+        riskContribution : dict[str, float] — 종목별 리스크 기여도 (%, 합≈1)
+        clusterOrder : list[str] — 클러스터링 leaf 순서
+
+    Examples
+    --------
+    >>> from dartlab.quant.portfolio import optimizeRiskParity
+    >>> optimizeRiskParity(["005930", "000660", "035720"])"""
     result: dict = {"stockCodes": stockCodes}
 
     if len(stockCodes) < 2:
@@ -412,7 +435,31 @@ def _cluster_variance(cov: np.ndarray, indices: list[int]) -> float:
 
 
 def allocateERC(stockCodes: list[str], *, market: str = "auto", **kwargs) -> dict:
-    """리스크 버짓팅 — Equal Risk Contribution."""
+    """리스크 버짓팅 — Equal Risk Contribution (Maillard et al. 2010).
+
+    모든 종목의 리스크 기여도가 동일(1/N)이 되도록 가중치를 반복 조정.
+    역분산 가중의 확장으로, 상관관계까지 고려한 균등 리스크 배분.
+
+    Parameters
+    ----------
+    stockCodes : list[str]
+        종목코드 리스트 (2개 이상).
+    market : str
+        "KR" | "US" | "auto".
+
+    Returns
+    -------
+    dict
+        stockCodes : list[str] — 입력 종목 리스트
+        weights : dict[str, float] — 종목별 배분 비중 (%, 합=1)
+        riskContribution : dict[str, float] — 종목별 리스크 기여도 (%, 합≈1)
+        converged : bool — 수렴 여부
+        targetRC : float — 목표 리스크 기여도 (%, 1/N)
+
+    Examples
+    --------
+    >>> from dartlab.quant.portfolio import allocateERC
+    >>> allocateERC(["005930", "000660", "035720"])"""
     result: dict = {"stockCodes": stockCodes}
 
     if len(stockCodes) < 2:
@@ -471,7 +518,29 @@ def holdingsToFactorExposure(
     weights: dict[str, float],
     factorLoadings: dict[str, dict[str, float]],
 ) -> dict[str, float]:
-    """포트폴리오 weights × 종목별 loadings → 포트폴리오 factor exposure."""
+    """포트폴리오 weights × 종목별 loadings → 포트폴리오 factor exposure.
+
+    Grinold Ch.3 기반. 각 종목의 팩터 로딩에 가중치를 곱하여
+    포트폴리오 전체의 팩터별 노출도를 산출한다.
+
+    Parameters
+    ----------
+    weights : dict[str, float]
+        종목별 가중치 (종목코드 → 비중).
+    factorLoadings : dict[str, dict[str, float]]
+        종목별 팩터 로딩 (종목코드 → {팩터명: 로딩값}).
+
+    Returns
+    -------
+    dict[str, float]
+        팩터별 포트폴리오 노출도 (팩터명 → 노출값).
+
+    Examples
+    --------
+    >>> holdingsToFactorExposure(
+    ...     {"005930": 0.6, "000660": 0.4},
+    ...     {"005930": {"value": 0.3, "size": 0.8}, "000660": {"value": 0.7, "size": 0.2}},
+    ... )"""
     exposure: dict[str, float] = {}
     for stock, w in weights.items():
         loadings = factorLoadings.get(stock)
@@ -519,7 +588,32 @@ def activeExposure(
     benchmarkWeights: dict[str, float],
     factorLoadings: dict[str, dict[str, float]],
 ) -> dict[str, float]:
-    """액티브 익스포저 = 포트 노출 − 벤치 노출 (Grinold Ch.4)."""
+    """액티브 익스포저 = 포트 노출 − 벤치 노출 (Grinold Ch.4).
+
+    포트폴리오와 벤치마크의 팩터 노출도 차이를 계산하여
+    액티브 베팅 방향과 크기를 파악한다.
+
+    Parameters
+    ----------
+    portfolioWeights : dict[str, float]
+        포트폴리오 종목별 가중치.
+    benchmarkWeights : dict[str, float]
+        벤치마크 종목별 가중치.
+    factorLoadings : dict[str, dict[str, float]]
+        종목별 팩터 로딩 (종목코드 → {팩터명: 로딩값}).
+
+    Returns
+    -------
+    dict[str, float]
+        팩터별 액티브 노출도 (팩터명 → 포트−벤치 차이).
+        양수 = 포트폴리오가 해당 팩터에 오버웨이트.
+
+    Examples
+    --------
+    >>> activeExposure(
+    ...     {"005930": 0.5}, {"005930": 0.3},
+    ...     {"005930": {"value": 0.5}},
+    ... )"""
     stocks = set(portfolioWeights) | set(benchmarkWeights)
     active = {s: portfolioWeights.get(s, 0.0) - benchmarkWeights.get(s, 0.0) for s in stocks}
     return holdingsToFactorExposure(active, factorLoadings)
@@ -621,7 +715,34 @@ def factorExposureConstraint(
     factorLoadings: np.ndarray,
     factorLimits: np.ndarray,
 ) -> dict:
-    """팩터 익스포저 제약 체크 (|exposure| ≤ limit)."""
+    """팩터 익스포저 제약 체크 — |exposure| ≤ limit 위반 탐지.
+
+    Grinold Ch.13 제약 최적화의 사후 검증. 포트폴리오 가중치에
+    팩터 로딩을 곱한 노출도가 한도를 초과하는 팩터를 식별한다.
+
+    Parameters
+    ----------
+    weights : np.ndarray
+        포트폴리오 가중치 벡터 (N,).
+    factorLoadings : np.ndarray
+        팩터 로딩 행렬 (N × K), N=종목수, K=팩터수.
+    factorLimits : np.ndarray
+        팩터별 노출 한도 벡터 (K,).
+
+    Returns
+    -------
+    dict
+        exposure : np.ndarray — 팩터별 노출도 벡터 (K,)
+        breaches : list[int] — 한도 초과 팩터 인덱스 목록
+        compliant : bool — 모든 팩터가 한도 이내이면 True
+
+    Examples
+    --------
+    >>> factorExposureConstraint(
+    ...     np.array([0.5, 0.5]),
+    ...     np.array([[0.3, 0.1], [0.7, 0.2]]),
+    ...     np.array([0.6, 0.2]),
+    ... )"""
     w = np.asarray(weights, dtype=float)
     L = np.asarray(factorLoadings, dtype=float)
     lim = np.asarray(factorLimits, dtype=float)

@@ -79,7 +79,18 @@ def STYLE_REGISTRY() -> dict[str, Callable[..., Any]]:  # noqa: N802
 
 
 def resolve_style(name: str) -> str:
-    """한글/영문 alias → 정규 키."""
+    """한글/영문 alias → 정규 스타일 키 변환.
+
+    Parameters
+    ----------
+    name : str
+        스타일명 (한글 또는 영문). 예: "추세추종", "trendFollow".
+
+    Returns
+    -------
+    str
+        정규 영문 키. 예: "trendFollow". 매칭 실패 시 원본 반환.
+    """
     if not name:
         return name
     s = name.strip()
@@ -92,7 +103,17 @@ def resolve_style(name: str) -> str:
 
 
 def list_styles() -> list[dict]:
-    """가이드 카탈로그 — c.quant("style") (인자 없이) 반환용."""
+    """가이드 카탈로그 — c.quant("style") (인자 없이) 반환용.
+
+    Returns
+    -------
+    list[dict]
+        각 원소:
+        key : str — 정규 스타일 키 (예: "trendFollow")
+        label : str — 스타일 한 줄 요약
+        description : str — build 함수 docstring 첫 줄
+        kr_only : bool — KR 전용 여부
+    """
     reg = STYLE_REGISTRY()
     items = []
     for key, fn in reg.items():

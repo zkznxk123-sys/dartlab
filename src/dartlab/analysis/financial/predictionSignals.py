@@ -57,6 +57,7 @@ from dartlab.core.finance.calc import safeDiv as _safe
 
 
 def _getStockCode(company) -> str | None:
+    """Company 객체에서 종목코드 추출."""
     return getattr(company, "stockCode", None)
 
 
@@ -1769,6 +1770,7 @@ def calcSupplyChainSignal(company, *, basePeriod: str | None = None) -> dict | N
 
 
 def _clamp(v: float, lo: float = -1.0, hi: float = 1.0) -> float:
+    """값을 [lo, hi] 범위로 클램핑."""
     return max(lo, min(hi, v))
 
 

@@ -890,6 +890,7 @@ def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> di
     _maxVal = currentPrice * 10 if currentPrice and currentPrice > 0 else float("inf")
 
     def _inRange(v: float) -> bool:
+        """적정가가 현재가 대비 합리적 범위(2%~10배) 내인지 검증."""
         return _minVal < v < _maxVal
 
     estimates: list[dict] = []

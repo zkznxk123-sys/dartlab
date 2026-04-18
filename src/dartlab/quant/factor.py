@@ -276,7 +276,22 @@ def residualRiskForecast(
     horizonDays: int = 252,
     halfLifeDays: int = 60,
 ) -> float:
-    """EWMA 기반 잔여 변동성 예측 (Grinold Ch.7 권고)."""
+    """EWMA 기반 잔여 변동성 예측 (Grinold Ch.7 권고).
+
+    Parameters
+    ----------
+    historicalResidual : np.ndarray
+        팩터 제거 후 잔여 일별 수익률 시계열.
+    horizonDays : int
+        예측 기간 (일). 기본 252 (1년).
+    halfLifeDays : int
+        EWMA 반감기 (일). 기본 60.
+
+    Returns
+    -------
+    float
+        horizonDays 기간의 잔여 변동성 예측치 (%). 표본 < 10 이면 NaN.
+    """
     r = np.asarray(historicalResidual, dtype=float)
     r = r[~np.isnan(r)]
     if r.size < 10:
@@ -290,7 +305,23 @@ def residualRiskForecast(
 
 
 def residualAlphaIR(residualSeries: np.ndarray, *, annualize: bool = True) -> dict:
-    """Grinold 잔여 시계열로부터 raw IR + 연환산 alpha/trackingError."""
+    """Grinold 잔여 시계열로부터 raw IR + 연환산 alpha/trackingError.
+
+    Parameters
+    ----------
+    residualSeries : np.ndarray
+        팩터 제거 후 잔여 일별 수익률 시계열.
+    annualize : bool
+        True 면 252 거래일 기준 연환산. 기본 True.
+
+    Returns
+    -------
+    dict
+        rawIR : float — 일별 IR = mean/std (배)
+        annualizedIR : float | None — 연환산 IR (배). annualize=False 시 None
+        alpha : float — 잔여 알파 (%, 연환산 시 ×252)
+        trackingError : float — 추적오차 = std × √252 (%)
+    """
     r = np.asarray(residualSeries, dtype=float)
     r = r[~np.isnan(r)]
     if r.size < 2:

@@ -65,7 +65,24 @@ _PATTERNS = {
 
 
 def _classifyPattern(ocf: float, icf: float, finCf: float) -> str:
-    """OCF/ICF/FINCF 부호 조합 → 패턴 라벨."""
+    """OCF/ICF/FINCF 부호 조합 → 라이프사이클 패턴 라벨.
+
+    Parameters
+    ----------
+    ocf : float
+        영업활동현금흐름 (원).
+    icf : float
+        투자활동현금흐름 (원).
+    finCf : float
+        재무활동현금흐름 (원).
+
+    Returns
+    -------
+    str
+        패턴명. 다음 중 하나:
+        성장투자형 / 공격성장형 / 구조재편형 / 현금축적형 /
+        외부의존형 / 축소정리형 / 위기대응형 / 현금위기형 / 미분류.
+    """
     key = (
         "P" if ocf >= 0 else "N",
         "P" if icf >= 0 else "N",
@@ -75,7 +92,23 @@ def _classifyPattern(ocf: float, icf: float, finCf: float) -> str:
 
 
 def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
-    """프리빌드 finance.parquet → 종목별 CF 패턴."""
+    """프리빌드 finance.parquet → 종목별 CF 패턴.
+
+    Parameters
+    ----------
+    scanPath : Path
+        프리빌드 finance.parquet 파일 경로.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        ocf : int — 영업활동현금흐름 (원)
+        icf : int | None — 투자활동현금흐름 (원)
+        finCf : int | None — 재무활동현금흐름 (원)
+        fcf : int — 잉여현금흐름, OCF + ICF (원)
+        pattern : str — 라이프사이클 패턴명
+    """
     scCol = "stockCode" if "stockCode" in pl.scan_parquet(str(scanPath)).collect_schema().names() else "stock_code"
 
     allIds = list(OCF_IDS | ICF_IDS | FINCF_IDS)
@@ -138,7 +171,21 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
 
 
 def _scanPerFile() -> pl.DataFrame:
-    """종목별 finance parquet 순회 fallback."""
+    """종목별 finance parquet 순회 fallback.
+
+    프리빌드 finance.parquet가 없을 때 개별 종목 parquet을 순회하여
+    최신 연도 CF 데이터를 추출한다.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        ocf : int — 영업활동현금흐름 (원)
+        icf : int | None — 투자활동현금흐름 (원)
+        finCf : int | None — 재무활동현금흐름 (원)
+        fcf : int — 잉여현금흐름, OCF + ICF (원)
+        pattern : str — 라이프사이클 패턴명
+    """
     from dartlab.core.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
@@ -204,6 +251,16 @@ def scanCashflow() -> pl.DataFrame:
     """종목별 OCF/ICF/FCF + 현금흐름 패턴 분류.
 
     프리빌드 finance.parquet 우선, 없으면 per-file fallback.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        ocf : int — 영업활동현금흐름 (원)
+        icf : int | None — 투자활동현금흐름 (원)
+        finCf : int | None — 재무활동현금흐름 (원)
+        fcf : int — 잉여현금흐름, OCF + ICF (원)
+        pattern : str — 라이프사이클 패턴명
     """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

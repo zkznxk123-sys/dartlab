@@ -15,9 +15,19 @@ from dartlab.scan._helpers import (
 
 
 def scan_employee() -> dict[str, dict]:
-    """employee → {종목코드: {직원수, 평균급여_만원, 남녀격차%, 근속_년}}.
+    """employee 공시에서 종목별 인력 현황을 추출한다.
 
-    최신 연도 + 최적 분기(Q2) 기준.  급여는 가중평균.
+    최신 연도 + 최적 분기(Q2) 기준. 급여는 직원수 가중평균.
+
+    Returns
+    -------
+    dict[str, dict]
+        {종목코드: 인력현황}. 각 인력현황 dict 키:
+
+        - 직원수 : int — 전체 직원 수 (명)
+        - 평균급여_만원 : float — 직원수 가중평균 연봉 (만원)
+        - 남녀격차 : float | None — (남성평균 - 여성평균) / 남성평균 (%)
+        - 근속_년 : float | None — 직원수 가중평균 근속연수 (년)
     """
     raw = scan_parquets(
         "employee",
@@ -91,10 +101,15 @@ def scan_employee() -> dict[str, dict]:
 
 
 def scan_total_payroll() -> dict[str, float]:
-    """employee → {종목코드: 연간 총급여(원)}.
+    """employee 공시에서 종목별 연간 총급여를 추출한다.
 
     fyer_salary_totamt 합산 우선, 없으면 sm*jan_salary_am fallback.
     Q4 우선 (연간 누적). Q4 없으면 Q2*2 연환산.
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: 연간 총급여(원)}.
     """
     PAYROLL_QUARTER_ORDER = {"4분기": 1, "2분기": 2, "3분기": 3, "1분기": 4}
 
@@ -141,9 +156,15 @@ def scan_total_payroll() -> dict[str, float]:
 
 
 def scan_revenue_per_employee() -> dict[str, float]:
-    """employee + finance IS → {종목코드: 직원당 매출(억)}.
+    """employee + finance IS에서 종목별 직원당 매출을 산출한다.
 
-    scan/finance.parquet 프리빌드가 있으면 단일 파일에서 매출 추출.
+    scan/finance.parquet 프리빌드가 있으면 단일 파일에서 매출 추출,
+    없으면 종목별 parquet 순회 fallback.
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: 직원당 매출(억)}.
     """
     emp_map = scan_employee()
 
@@ -181,7 +202,25 @@ def scan_revenue_per_employee() -> dict[str, float]:
 
 
 def _revenueFromMerged(scanPath: Path, revIds: set[str], revNms: set[str]) -> dict[str, float]:
-    """합산 finance parquet에서 매출 추출."""
+    """합산 finance parquet에서 종목별 매출을 추출한다.
+
+    연결재무제표 우선, 없으면 개별재무제표. 종목별 최신 연도 기준.
+    1차 매칭 실패 시 account_nm에 "매출" 포함 행으로 fallback.
+
+    Parameters
+    ----------
+    scanPath : Path
+        scan/finance.parquet 파일 경로.
+    revIds : set[str]
+        매출 account_id 후보 집합.
+    revNms : set[str]
+        매출 account_nm 후보 집합.
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: 매출액(원)}.
+    """
     scCol = "stockCode" if "stockCode" in pl.scan_parquet(str(scanPath)).collect_schema().names() else "stock_code"
 
     target = (
@@ -229,7 +268,23 @@ def _revenueFromMerged(scanPath: Path, revIds: set[str], revNms: set[str]) -> di
 
 
 def _revenueFallback(revIds: set[str], revNms: set[str]) -> dict[str, float]:
-    """종목별 finance parquet 순회 (fallback)."""
+    """종목별 finance parquet 파일을 순회하여 매출을 추출한다 (fallback).
+
+    합산 finance.parquet이 없거나 읽기 실패 시 사용.
+    각 종목 parquet에서 연결재무제표 우선, 최신 연도 기준.
+
+    Parameters
+    ----------
+    revIds : set[str]
+        매출 account_id 후보 집합.
+    revNms : set[str]
+        매출 account_nm 후보 집합.
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: 매출액(원)}.
+    """
     from dartlab.core.dataLoader import _dataDir
 
     finance_dir = Path(_dataDir("finance"))
@@ -273,9 +328,17 @@ def _revenueFallback(revIds: set[str], revNms: set[str]) -> dict[str, float]:
 
 
 def scan_top_pay() -> dict[str, dict]:
-    """executivePayIndividual → {종목코드: {공개인원, 최고보수_억}}.
+    """executivePayIndividual 공시에서 종목별 고액 보수자 현황을 추출한다.
 
-    5억 이상 의무공개자.  최신 연도 기준.
+    5억 이상 의무공개 대상. 최신 연도(유효 종목 200개 이상인 해) 기준.
+
+    Returns
+    -------
+    dict[str, dict]
+        {종목코드: 고액보수 현황}. 각 dict 키:
+
+        - 공개인원 : int — 5억 이상 보수 공개 대상 인원 (명)
+        - 최고보수_억 : float — 최고 개인 보수 (억)
     """
     raw = scan_parquets(
         "executivePayIndividual",

@@ -21,12 +21,32 @@ async def fetch(
 ) -> list[dict]:
     """히스토리 OHLCV — fallback 체인 (async).
 
-    Args:
-        start: "2024-01-01"
-        end: "2024-12-31"
+    Parameters
+    ----------
+    stock_code : str
+        종목코드/티커 (예: "005930", "AAPL").
+    start : str
+        조회 시작일 (ISO 형식, 예: "2024-01-01").
+    end : str
+        조회 종료일 (ISO 형식, 예: "2024-12-31").
+    market : str
+        시장 코드 ("KR", "US" 등). 기본 "KR".
+    client : httpx.AsyncClient | None
+        HTTP 클라이언트. None이면 GatherHttpClient 자동 생성.
 
-    Returns:
-        [{"date": ..., "open": ..., "high": ..., "low": ..., "close": ..., "volume": ...}, ...]
+    Returns
+    -------
+    list[dict]
+        일별 OHLCV 리스트. 각 dict 키:
+
+        - date : str — 거래일 (YYYY-MM-DD)
+        - open : float — 시가 (원 또는 해당 통화)
+        - high : float — 고가 (원)
+        - low : float — 저가 (원)
+        - close : float — 종가 (원)
+        - volume : int — 거래량 (주)
+
+        전체 fallback 실패 시 빈 리스트 [].
     """
     chain: list[str] = []
     # KR → naver 최우선

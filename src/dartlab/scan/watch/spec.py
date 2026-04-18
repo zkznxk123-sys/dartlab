@@ -4,7 +4,26 @@ from __future__ import annotations
 
 
 def buildSpec() -> dict:
-    """watch 엔진 스펙 반환."""
+    """watch 엔진 스펙을 코드에서 자동 추출하여 반환한다.
+
+    Returns
+    -------
+    dict
+        watch 엔진 메타 정보. 구조:
+
+        - name : str — 엔진명 ("watch")
+        - description : str — 엔진 설명
+        - summary : dict
+            - scoringFactors : int — 스코어링 요소 수
+            - highWeightTopics : int — 고가중 topic 수
+            - lowWeightTopics : int — 저가중 topic 수
+            - maxScore : int — 최대 점수 (점, 100)
+        - detail : dict
+            - scoringFactors : list[str] — 스코어링 요소 설명
+            - highWeightTopics : list[str] — 고가중 topic 목록
+            - lowWeightTopics : list[str] — 저가중 topic 목록
+            - publicAPI : list[str] — 공개 API 사용법
+    """
     from dartlab.scan.watch.scorer import _HIGH_WEIGHT_TOPICS, _LOW_WEIGHT_TOPICS
 
     return {

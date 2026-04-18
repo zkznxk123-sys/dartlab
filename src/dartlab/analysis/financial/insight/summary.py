@@ -2,14 +2,28 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from dartlab.analysis.financial.insight.types import Anomaly, InsightResult
 
 GRADE_SCORE = {"A": 4, "B": 3, "C": 2, "D": 1, "F": 0, "N": None}
 
 
 def _josa(word: str, withBatchim: str, withoutBatchim: str) -> str:
+    """한글 조사 자동 선택 (받침 유무).
+
+    Parameters
+    ----------
+    word : str
+        단어.
+    withBatchim : str
+        받침 있을 때 조사.
+    withoutBatchim : str
+        받침 없을 때 조사.
+
+    Returns
+    -------
+    str
+        단어 + 적절한 조사.
+    """
     if not word:
         return word + withBatchim
     lastChar = ord(word[-1])
@@ -20,14 +34,28 @@ def _josa(word: str, withBatchim: str, withoutBatchim: str) -> str:
 
 
 def _eunNeun(word: str) -> str:
+    """'은/는' 조사 자동 선택."""
     return _josa(word, "은", "는")
 
 
 def _iGa(word: str) -> str:
+    """'이/가' 조사 자동 선택."""
     return _josa(word, "이", "가")
 
 
 def _avgGrade(grades: dict[str, str]) -> float:
+    """등급 평균 점수 계산 (A=4, B=3, C=2, D=1, F=0).
+
+    Parameters
+    ----------
+    grades : dict[str, str]
+        영역별 등급 딕셔너리.
+
+    Returns
+    -------
+    float
+        avgScore : float — 평균 점수 (점). 유효 등급 없으면 0.
+    """
     scores = [GRADE_SCORE[g] for g in grades.values() if GRADE_SCORE.get(g) is not None]
     if not scores:
         return 0
@@ -35,7 +63,18 @@ def _avgGrade(grades: dict[str, str]) -> float:
 
 
 def classifyProfile(grades: dict[str, str]) -> str:
-    """등급 조합으로 기업 프로필 분류."""
+    """등급 조합으로 기업 프로필 분류.
+
+    Parameters
+    ----------
+    grades : dict[str, str]
+        영역별 등급 딕셔너리 (performance, profitability, health 등).
+
+    Returns
+    -------
+    str
+        profile : str — 'premium' | 'growth' | 'stable' | 'caution' | 'distress' | 'mixed'
+    """
     avgScore = _avgGrade(grades)
     perf = grades.get("performance", "C")
     profit = grades.get("profitability", "C")
@@ -57,6 +96,18 @@ def classifyProfile(grades: dict[str, str]) -> str:
 
 
 def _getStrengths(insights: dict[str, InsightResult]) -> list[str]:
+    """A등급 영역의 한국어 라벨 목록 추출.
+
+    Parameters
+    ----------
+    insights : dict[str, InsightResult]
+        영역별 인사이트 결과.
+
+    Returns
+    -------
+    list[str]
+        A등급 영역 라벨 리스트 (예: ['실적', '수익성']).
+    """
     strengths = []
     mapping = {
         "performance": "실적",
@@ -72,6 +123,18 @@ def _getStrengths(insights: dict[str, InsightResult]) -> list[str]:
 
 
 def _getWeaknesses(insights: dict[str, InsightResult]) -> list[str]:
+    """F등급 영역의 한국어 라벨 목록 추출.
+
+    Parameters
+    ----------
+    insights : dict[str, InsightResult]
+        영역별 인사이트 결과.
+
+    Returns
+    -------
+    list[str]
+        F등급 영역 라벨 리스트 (예: ['재무건전성']).
+    """
     weaknesses = []
     mapping = {
         "performance": "실적",
@@ -86,7 +149,19 @@ def _getWeaknesses(insights: dict[str, InsightResult]) -> list[str]:
     return weaknesses
 
 
-def _getKeyMetric(insights: dict[str, InsightResult]) -> Optional[str]:
+def _getKeyMetric(insights: dict[str, InsightResult]) -> str | None:
+    """핵심 지표 문장 추출 (성장/이익률/ROE 키워드 기반).
+
+    Parameters
+    ----------
+    insights : dict[str, InsightResult]
+        영역별 인사이트 결과.
+
+    Returns
+    -------
+    str | None
+        핵심 지표 설명 문장. 해당 없으면 None.
+    """
     for key in ("performance", "profitability"):
         if key in insights:
             for detail in insights[key].details:
@@ -102,7 +177,24 @@ def generateSummary(
     anomalies: list[Anomaly],
     profile: str,
 ) -> str:
-    """한국어 종합 요약 생성."""
+    """한국어 종합 요약 생성.
+
+    Parameters
+    ----------
+    corpName : str
+        기업명.
+    insights : dict[str, InsightResult]
+        영역별 인사이트 결과.
+    anomalies : list[Anomaly]
+        이상치 탐지 결과.
+    profile : str
+        기업 프로필 ('premium' | 'growth' | 'stable' | 'caution' | 'distress' | 'mixed').
+
+    Returns
+    -------
+    str
+        summary : str — 2~4문장의 한국어 종합 요약.
+    """
     strengths = _getStrengths(insights)
     weaknesses = _getWeaknesses(insights)
     keyMetric = _getKeyMetric(insights)

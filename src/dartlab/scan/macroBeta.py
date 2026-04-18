@@ -26,21 +26,31 @@ def scan_macroBeta(
     """전종목 거시경제 베타 횡단면 계산.
 
     각 종목의 매출 성장률 vs GDP/금리/환율 변화율 간 OLS 베타를 계산한다.
-    scan 데이터(ratioSeries)에서 매출 시계열을 가져오고,
-    Parquet 캐시에서 거시지표를 로드한다.
 
-    Returns:
-        DataFrame with columns:
-        - stockCode, companyName, sector
-        - gdpBeta, rateBeta, fxBeta
-        - rSquared, nObs, confidence
+    Parameters
+    ----------
+    stockCode : str, optional
+        특정 종목만 필터 (None이면 전종목).
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        companyName : str — 회사명
+        sector : str — 섹터
+        gdpBeta : float — GDP 베타 계수
+        rateBeta : float — 금리 베타 계수
+        fxBeta : float — 환율 베타 계수
+        rSquared : float — 결정계수 R²
+        nObs : int — 유효 관측치 수
+        confidence : str — 신뢰도 (high/medium/low)
     """
     from dartlab.scan._helpers import _ensureScanData
 
     # 전종목 매출 시계열 로드 (프리빌드 finance.parquet에서 추출)
     try:
         revDf = _loadRevenueSeries(_ensureScanData())
-    except Exception as exc:  # noqa: BLE001
+    except (pl.exceptions.PolarsError, OSError, FileNotFoundError, KeyError) as exc:
         log.warning("매출 시계열 로드 실패: %s", exc)
         return _emptyDf()
 
@@ -118,8 +128,19 @@ def scan_macroBeta(
 def _loadRevenueSeries(scanDir: Path) -> pl.DataFrame | None:
     """프리빌드 finance.parquet에서 종목별 매출 시계열 추출.
 
-    Returns:
-        DataFrame with columns: stockCode, companyName, sector, <yearA>, ...
+    Parameters
+    ----------
+    scanDir : Path
+        scan 프리빌드 디렉토리.
+
+    Returns
+    -------
+    pl.DataFrame | None
+        stockCode : str — 종목코드
+        companyName : str — 회사명
+        sector : str — 섹터
+        {year}A : float — 연도별 매출 (원). 컬럼명 예: "2024A"
+        데이터 없으면 None.
     """
     from dartlab.scan._helpers import parse_num
 
@@ -179,7 +200,19 @@ def _loadRevenueSeries(scanDir: Path) -> pl.DataFrame | None:
 
 
 def _loadMacroForScan(periodCols: list[str]) -> dict[str, list[float | None]] | None:
-    """Parquet 캐시에서 거시지표 로드 + 기간 정렬."""
+    """Parquet 캐시에서 거시지표 로드 + 기간 정렬.
+
+    Parameters
+    ----------
+    periodCols : list[str]
+        기간 컬럼명 목록 (예: ["2024A", "2023A", ...]).
+
+    Returns
+    -------
+    dict[str, list[float | None]] | None
+        {gdp: [...], rate: [...], fx: [...]} — 기간별 값.
+        유효 데이터 없으면 None.
+    """
     from dartlab.gather.macro import alignToFinancialPeriods, loadMacroParquet
 
     indicators = {"gdp": "GDP", "rate": "BASE_RATE", "fx": "USDKRW"}
@@ -199,7 +232,18 @@ def _loadMacroForScan(periodCols: list[str]) -> dict[str, list[float | None]] | 
 
 
 def _calcMacroChanges(macroData: dict[str, list[float | None]]) -> dict[str, list[float | None]]:
-    """거시지표 전년대비 변화율."""
+    """거시지표 전년대비 변화율.
+
+    Parameters
+    ----------
+    macroData : dict[str, list[float | None]]
+        {gdp/rate/fx: 기간별 값}.
+
+    Returns
+    -------
+    dict[str, list[float | None]]
+        {gdp/rate/fx: YoY 변화율(%)} — 금리(rate)는 차분(pp).
+    """
     changes: dict[str, list[float | None]] = {}
     for key, vals in macroData.items():
         ch = []
@@ -220,7 +264,21 @@ def _quickOLS(
     y: list[float | None],
     macroChanges: dict[str, list[float | None]],
 ) -> tuple[dict[str, float] | None, float | None]:
-    """간이 OLS (scan 용, 속도 우선)."""
+    """간이 OLS 회귀 (scan 용, 속도 우선).
+
+    Parameters
+    ----------
+    y : list[float | None]
+        종속변수 (매출 성장률).
+    macroChanges : dict[str, list[float | None]]
+        독립변수 {gdp/rate/fx: 변화율}.
+
+    Returns
+    -------
+    tuple[dict[str, float] | None, float | None]
+        (betas, rSquared) — betas: {gdp: β, rate: β, fx: β}.
+        유효 관측치 3개 미만이면 (None, None).
+    """
     n = min(len(y), *(len(v) for v in macroChanges.values()))
     validY: list[float] = []
     validX: list[list[float]] = []
@@ -258,7 +316,18 @@ def _quickOLS(
 
 
 def _invertMatrix4(m: list[list[float]]) -> list[list[float]] | None:
-    """4x4 가우스-조르단 역행렬."""
+    """4x4 가우스-조르단 역행렬.
+
+    Parameters
+    ----------
+    m : list[list[float]]
+        4x4 정방행렬.
+
+    Returns
+    -------
+    list[list[float]] | None
+        4x4 역행렬. 특이행렬이면 None.
+    """
     n = len(m)
     aug = [row[:] + [1.0 if i == j else 0.0 for j in range(n)] for i, row in enumerate(m)]
     for col in range(n):
@@ -276,7 +345,14 @@ def _invertMatrix4(m: list[list[float]]) -> list[list[float]] | None:
 
 
 def _emptyDf() -> pl.DataFrame:
-    """빈 결과 DataFrame."""
+    """빈 결과 DataFrame.
+
+    Returns
+    -------
+    pl.DataFrame
+        scan_macroBeta 스키마와 동일한 빈 DataFrame
+        (stockCode, companyName, sector, gdpBeta, rateBeta, fxBeta, rSquared, nObs, confidence).
+    """
     return pl.DataFrame(
         schema={
             "stockCode": pl.Utf8,

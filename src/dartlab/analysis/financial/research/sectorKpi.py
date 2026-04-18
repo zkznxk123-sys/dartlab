@@ -111,7 +111,22 @@ def calcSectorKpis(
     aSeries: dict[str, dict[str, list[float | None]]],
     ratios: object = None,
 ) -> SectorKpis | None:
-    """섹터별 특화 KPI 계산."""
+    """섹터별 특화 KPI 계산.
+
+    Parameters
+    ----------
+    sector : Sector | None
+        WICS 섹터 Enum.
+    aSeries : dict[str, dict[str, list[float | None]]]
+        연간 시계열 dict.
+    ratios : object, optional
+        재무비율 결과.
+
+    Returns
+    -------
+    SectorKpis | None
+        섹터 KPI 목록. 해당 섹터 정의 없으면 None.
+    """
     if sector is None or sector == Sector.UNKNOWN:
         return None
 

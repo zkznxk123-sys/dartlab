@@ -28,7 +28,19 @@ from dartlab.macro._helpers import get_gather
 
 
 def _frozen_to_dict(obj) -> dict | None:
-    """frozen dataclass → dict. None이면 None."""
+    """frozen dataclass → dict 변환. None이면 None 반환.
+
+    Parameters
+    ----------
+    obj : frozen dataclass | None
+        변환할 frozen dataclass 인스턴스. None이면 그대로 반환.
+
+    Returns
+    -------
+    dict | None
+        dataclass 필드를 키로 가진 dict.
+        입력이 None이면 None.
+    """
     if obj is None:
         return None
     from dataclasses import asdict
@@ -37,7 +49,40 @@ def _frozen_to_dict(obj) -> dict | None:
 
 
 def _fetch_crisis_data(market: str, as_of: str | None = None) -> dict[str, float | list | None]:
-    """gather에서 위기 감지 지표 수집."""
+    """gather에서 위기 감지 지표 수집.
+
+    Parameters
+    ----------
+    market : str
+        시장 코드 ("US" | "KR").
+    as_of : str | None
+        기준일 (YYYY-MM-DD). None이면 최신.
+
+    Returns
+    -------
+    dict[str, float | list | None]
+        credit_gdp_series : list[float] — Credit/GDP 비율 시계열 (%)
+        sp500_3y_return : float — S&P500 3년 수익률 (%)
+        vix : float — VIX 지수 (pt)
+        dxy_current : float — 달러인덱스 현재값
+        dxy_3m_ago : float — 달러인덱스 3개월 전 값
+        hy_series : list[float] — HY 스프레드 시계열 (bps)
+        hy_current : float — HY 스프레드 현재값 (bps)
+        cpi_yoy : float — CPI YoY 변화율 (%, KR 전용)
+        apt_yoy : float — 아파트 가격 YoY 변화율 (%, KR 전용)
+        private_saving : float — 민간 저축 (US, 십억달러)
+        private_investment : float — 민간 투자 (US, 십억달러)
+        gdp_level : float — GDP 수준 (US, 십억달러)
+        fed_funds : float — 연방기금금리 (US, %)
+        dsr : float — 부채서비스비율 (US, %)
+        npl : float — 부실채권비율 (US, %)
+        us_cpi_yoy : float — 미국 CPI YoY (%)
+        public_debt_to_gdp : float — 공공부채/GDP (%)
+        gdp_growth : float — 실질GDP 성장률 (%)
+        real_rate : float — 10Y TIPS 실질금리 (%)
+        debt_service_yoy : float — 부채서비스율 전년 대비 변화 (%p)
+        total_debt_to_gdp : float — 총부채/GDP (%)
+    """
     from dartlab.macro._helpers import fetch_latest, fetch_series_list, fetch_yoy
 
     g = get_gather(as_of)
@@ -119,9 +164,84 @@ def _fetch_crisis_data(market: str, as_of: str | None = None) -> dict[str, float
 def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """위기 감지 종합 분석.
 
-    Returns:
-        dict: creditGap, ghsScore, capexPressure, recessionDashboard,
-              dollarSafeHaven, timeseries
+    Credit-to-GDP Gap, GHS 위기점수, 설비투자 압력, 침체 대시보드 등
+    위기 관련 지표를 종합 산출한다.
+
+    Parameters
+    ----------
+    market : str
+        시장 코드 ("US" | "KR"). 기본 "US".
+    as_of : str | None
+        기준일 (YYYY-MM-DD). None이면 최신.
+    overrides : dict | None
+        AI 가정 교체 (예: ``{"vix": 30}``).
+    **kwargs
+        probitProb : float — 프로빗 침체확률 (summary에서 전달)
+        leiSignal : str — LEI 시그널 (summary에서 전달)
+        ismLevel : float — ISM PMI 수준 (summary에서 전달)
+        realRate : float — 실질금리 (%)
+
+    Returns
+    -------
+    dict
+        market : str — 시장 코드
+        creditGap : dict | None — Credit-to-GDP Gap 분석
+            gap : float — 갭 (%p)
+            trend : float — 추세선 (%)
+            actual : float — 실제 비율 (%)
+            zone : str — 위험 구간 ("normal" | "warning" | "danger")
+            zoneLabel : str — 위험 구간 한글 레이블
+            ccybBuffer : float — 경기대응 완충자본 (%)
+            description : str — 해설
+        ghsScore : dict | None — GHS 위기예측 점수
+            score : float — 위기 점수 (점, 0~1)
+            zone : str — 위험 구간
+            zoneLabel : str — 위험 구간 한글 레이블
+            components : dict — 구성요소별 기여
+            crisisProb : float — 위기 확률 (%)
+            description : str — 해설
+            regime : str — 레짐 코드
+            regimeLabel : str — 레짐 한글 레이블
+        capexPressure : dict | None — 설비투자 조정 압력
+            pressure : str — 압력 코드
+            pressureLabel : str — 압력 한글 레이블
+            spreadLevel : float — HY 스프레드 수준 (bps)
+            spreadChange : float — HY 스프레드 변화 (bps)
+            description : str — 해설
+        dollarSafeHaven : dict | None — 달러 안전자산 효과
+            status : str — 상태 ("active" | "mild" | "inactive")
+            statusLabel : str — 한글 레이블
+            vix : float — VIX (pt)
+            dxyChange3m : float — 달러인덱스 3개월 변화율 (%)
+            description : str — 해설
+        historicalContext : dict | None — 역사적 맥락 (US 전용)
+        recessionDashboard : dict — 침체 대시보드
+            composite : float — 종합 점수 (점, 0~1)
+            zone : str — 위험 구간
+            zoneLabel : str — 한글 레이블
+            components : dict — 구성 지표
+            historicalMatch : str | None — 역사적 유사 사례
+            historicalFacts : dict | None — 역사적 맥락
+            description : str — 해설
+        minskyPhase : dict | None — Minsky 5단계 분류
+            phase : int — 단계 (1~5)
+            phaseLabel : str — 단계 한글명
+            confidence : float — 신뢰도 (0~1)
+            signals : list[str] — 근거 시그널
+            description : str — 해설
+        debtCyclePhase : dict | None — Dalio 부채사이클 단계 (US 전용)
+        policyLeverStatus : dict | None — Dalio 정책 4 레버 소진도 (US 전용)
+        dalioCaseMatch : list[dict] | None — Dalio Part 2 상세 사례 매칭
+        dalio48Match : list[dict] | None — Dalio Part 3 48 사례 매칭
+        crisisType : dict | None — R&R 위기 유형 분류
+        rrMatch : list[dict] | None — R&R 역사적 매칭
+        kooRecession : dict | None — Koo 대차대조표 불황 (US 전용)
+        fisherDeflation : dict | None — Fisher 부채디플레이션 (US 전용)
+        krHousingStress : dict | None — 한국 부동산-금융 스트레스 (KR 전용)
+        krCreditRisk : dict | None — 한국 신용위험 ↔ CPI (KR 전용)
+        excessBondPremium : dict | None — 초과채권프리미엄 (Gilchrist-Zakrajsek)
+        creditCycle : dict | None — Verdad 신용사이클 4단계
+        timeseries : dict — 주요 시계열 (hy_spread, vix, dxy)
     """
     data = _fetch_crisis_data(market, as_of=as_of)
     if overrides:

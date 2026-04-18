@@ -139,7 +139,10 @@ def scan_major_holders() -> pl.DataFrame:
 
 
 class UnionFind:
-    """경로 압축 + 랭크 합침."""
+    """서로소 집합 자료구조 — 경로 압축 + 랭크 기반 합침.
+
+    계열회사 그룹핑에 사용. find/union/components 3개 연산 제공.
+    """
 
     def __init__(self) -> None:
         self.parent: dict[str, str] = {}

@@ -211,32 +211,83 @@ CATALOG: dict[str, list[CatalogEntry]] = {
 
 
 def get_groups() -> list[str]:
-    """카탈로그 그룹 이름 목록."""
+    """카탈로그 그룹 이름 목록.
+
+    Returns
+    -------
+    list[str]
+        등록된 그룹명 리스트 (예: ["growth", "inflation", "rates", ...]).
+    """
     return list(CATALOG.keys())
 
 
 def get_group(name: str) -> list[CatalogEntry]:
-    """그룹 내 시리즈 목록. 없으면 빈 리스트."""
+    """그룹 내 시리즈 목록.
+
+    Parameters
+    ----------
+    name : str
+        그룹명 (예: "growth", "rates").
+
+    Returns
+    -------
+    list[CatalogEntry]
+        해당 그룹의 카탈로그 엔트리 리스트. 그룹이 없으면 빈 리스트.
+    """
     return CATALOG.get(name, [])
 
 
 def get_group_ids(name: str) -> list[str]:
-    """그룹 내 시리즈 ID 목록."""
+    """그룹 내 시리즈 ID 목록.
+
+    Parameters
+    ----------
+    name : str
+        그룹명.
+
+    Returns
+    -------
+    list[str]
+        해당 그룹의 시리즈 ID 리스트 (예: ["GDP", "GDPC1", "INDPRO", ...]).
+    """
     return [e.id for e in CATALOG.get(name, [])]
 
 
 def get_all_ids() -> list[str]:
-    """전체 카탈로그 시리즈 ID."""
+    """전체 카탈로그 시리즈 ID.
+
+    Returns
+    -------
+    list[str]
+        카탈로그에 등록된 모든 시리즈 ID 리스트.
+    """
     return [e.id for entries in CATALOG.values() for e in entries]
 
 
 def get_all_entries() -> list[CatalogEntry]:
-    """전체 카탈로그 엔트리."""
+    """전체 카탈로그 엔트리.
+
+    Returns
+    -------
+    list[CatalogEntry]
+        모든 그룹의 CatalogEntry 리스트 (id, label, group, frequency, unit, description).
+    """
     return [e for entries in CATALOG.values() for e in entries]
 
 
 def find_entry(series_id: str) -> CatalogEntry | None:
-    """시리즈 ID로 카탈로그 엔트리 검색."""
+    """시리즈 ID로 카탈로그 엔트리 검색.
+
+    Parameters
+    ----------
+    series_id : str
+        FRED 시리즈 ID (예: "GDP", "UNRATE").
+
+    Returns
+    -------
+    CatalogEntry | None
+        매칭된 카탈로그 엔트리. 없으면 None.
+    """
     for entries in CATALOG.values():
         for e in entries:
             if e.id == series_id:
@@ -247,8 +298,17 @@ def find_entry(series_id: str) -> CatalogEntry | None:
 def to_dataframe(group: str | None = None) -> pl.DataFrame:
     """카탈로그 → Polars DataFrame.
 
-    Args:
-        group: 특정 그룹만. None이면 전체.
+    Parameters
+    ----------
+    group : str | None
+        특정 그룹만 필터. None이면 전체.
+
+    Returns
+    -------
+    pl.DataFrame
+        컬럼: ``id`` (Utf8) — 시리즈 ID, ``label`` (Utf8) — 한글 라벨,
+        ``group`` (Utf8) — 그룹명, ``frequency`` (Utf8) — 주기,
+        ``unit`` (Utf8) — 단위, ``description`` (Utf8) — 설명.
     """
     entries = get_group(group) if group else get_all_entries()
     if not entries:

@@ -72,17 +72,32 @@ def score_changes(
     """DiffResult의 각 topic에 중요도 점수를 부여한다.
 
     스코어링 요소:
-    1. changeRate (기본 50%)
-    2. topic 가중치 — 핵심 경영 topic 가중
-    3. 텍스트 크기 변화율 — 큰 변화일수록 중요
-    4. 키워드 매칭 (sections 제공 시) — 트렌드/리스크 키워드 포함 여부
+    1. changeRate 기반 기본 점수 (최대 50점)
+    2. topic 가중치 — 핵심 경영 topic 1.5x, 저가중 0.6x
+    3. 텍스트 크기 변화율 (최대 30점)
+    4. 키워드 매칭 — 트렌드/리스크 키워드 포함 여부 (최대 20점)
 
-    Args:
-        diff_result: sectionsDiff() 결과.
-        sections: (선택) 키워드 매칭에 사용할 sections DataFrame.
+    Parameters
+    ----------
+    diff_result : DiffResult
+        sectionsDiff() 결과. summaries와 entries를 포함한다.
+    sections : pl.DataFrame | None
+        키워드 매칭에 사용할 sections DataFrame. None이면 키워드
+        가중치를 건너뛴다.
 
-    Returns:
-        ScoredChange 리스트 (score 내림차순 정렬).
+    Returns
+    -------
+    list[ScoredChange]
+        score 내림차순 정렬된 ScoredChange 리스트. 각 항목 필드:
+
+        - topic : str — 공시 topic 식별자
+        - chapter : str | None — 소속 chapter
+        - changeRate : float — 변화율 (비율, 0.0~1.0+)
+        - score : float — 중요도 점수 (점, 0~100)
+        - latestFromPeriod : str | None — 비교 시작 기간
+        - latestToPeriod : str | None — 비교 종료 기간
+        - deltaBytes : int — 최근 변화의 바이트 크기 차이 (바이트)
+        - reason : str — 점수 주요 근거 요약
     """
     {s.topic: s for s in diff_result.summaries}
 
@@ -185,7 +200,25 @@ def score_changes(
 
 
 def scored_to_dataframe(scored: list[ScoredChange]) -> pl.DataFrame:
-    """ScoredChange 리스트를 DataFrame으로 변환."""
+    """ScoredChange 리스트를 DataFrame으로 변환한다.
+
+    Parameters
+    ----------
+    scored : list[ScoredChange]
+        score_changes 결과.
+
+    Returns
+    -------
+    pl.DataFrame
+        변환된 DataFrame. 컬럼:
+
+        - topic : str — 공시 topic 식별자
+        - score : float — 중요도 점수 (점, 0~100)
+        - changeRate : float — 변화율 (비율)
+        - deltaBytes : int — 바이트 크기 변화 (바이트)
+        - latestPeriod : str — "fromPeriod→toPeriod" 형식 기간 문자열
+        - reason : str — 점수 주요 근거
+    """
     if not scored:
         return pl.DataFrame(
             schema={

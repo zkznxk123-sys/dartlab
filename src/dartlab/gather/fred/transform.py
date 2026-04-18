@@ -16,31 +16,98 @@ def yoy(df: pl.DataFrame, col: str = "value") -> pl.DataFrame:
 
     12개월 전 값 대비 퍼센트 변화. 월별 데이터 기준.
     분기별 데이터는 4행 전, 연간은 1행 전.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        ``(date, value)`` 형태 시계열 DataFrame.
+    col : str
+        변화율 계산 대상 컬럼명.
+
+    Returns
+    -------
+    pl.DataFrame
+        원본 컬럼 + ``{col}_yoy`` (Float64) — 전년 동기 대비 변화율 (%).
     """
     period = _infer_period(df)
     return df.with_columns(((pl.col(col) / pl.col(col).shift(period) - 1) * 100).alias(f"{col}_yoy"))
 
 
 def mom(df: pl.DataFrame, col: str = "value") -> pl.DataFrame:
-    """전월 대비 변화율 (%). 일별 데이터는 전일 대비."""
+    """전월 대비 변화율 (%). 일별 데이터는 전일 대비.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        ``(date, value)`` 형태 시계열 DataFrame.
+    col : str
+        변화율 계산 대상 컬럼명.
+
+    Returns
+    -------
+    pl.DataFrame
+        원본 컬럼 + ``{col}_mom`` (Float64) — 전월(전기) 대비 변화율 (%).
+    """
     return df.with_columns(((pl.col(col) / pl.col(col).shift(1) - 1) * 100).alias(f"{col}_mom"))
 
 
 def diff(df: pl.DataFrame, col: str = "value", periods: int = 1) -> pl.DataFrame:
-    """차분 (현재 값 - N기간 전 값)."""
+    """차분 (현재 값 - N기간 전 값).
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        ``(date, value)`` 형태 시계열 DataFrame.
+    col : str
+        차분 대상 컬럼명.
+    periods : int
+        차분 기간 (행 수).
+
+    Returns
+    -------
+    pl.DataFrame
+        원본 컬럼 + ``{col}_diff{periods}`` (Float64) — 차분값.
+    """
     return df.with_columns((pl.col(col) - pl.col(col).shift(periods)).alias(f"{col}_diff{periods}"))
 
 
 def moving_average(df: pl.DataFrame, col: str = "value", window: int = 12) -> pl.DataFrame:
-    """이동평균."""
+    """이동평균.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        ``(date, value)`` 형태 시계열 DataFrame.
+    col : str
+        이동평균 대상 컬럼명.
+    window : int
+        이동평균 윈도우 크기 (기).
+
+    Returns
+    -------
+    pl.DataFrame
+        원본 컬럼 + ``{col}_ma{window}`` (Float64) — 이동평균값.
+    """
     return df.with_columns(pl.col(col).rolling_mean(window_size=window).alias(f"{col}_ma{window}"))
 
 
 def normalize(df: pl.DataFrame, col: str = "value", base_date: str | None = None) -> pl.DataFrame:
     """기준일 = 100 정규화.
 
-    Args:
-        base_date: 기준일 (YYYY-MM-DD). None이면 첫 번째 유효값.
+    Parameters
+    ----------
+    df : pl.DataFrame
+        ``(date, value)`` 형태 시계열 DataFrame.
+    col : str
+        정규화 대상 컬럼명.
+    base_date : str | None
+        기준일 (YYYY-MM-DD). None이면 첫 번째 유효값.
+
+    Returns
+    -------
+    pl.DataFrame
+        원본 컬럼 + ``{col}_norm`` (Float64) — 기준일 = 100 정규화 값.
+        기준값이 0 또는 None이면 ``{col}_norm`` = None.
     """
     if base_date is not None:
         from datetime import datetime
@@ -69,6 +136,18 @@ def normalize_multi(df: pl.DataFrame, base_date: str | None = None) -> pl.DataFr
     """wide DataFrame의 모든 값 컬럼을 기준일=100 정규화.
 
     date 컬럼 제외한 모든 수치 컬럼을 정규화.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        wide 형태 DataFrame (date, col1, col2, ...).
+    base_date : str | None
+        기준일 (YYYY-MM-DD). None이면 각 컬럼의 첫 번째 유효값.
+
+    Returns
+    -------
+    pl.DataFrame
+        동일 컬럼 구조에 각 수치 컬럼이 기준일=100으로 정규화된 DataFrame.
     """
     result = df.clone()
     for col in df.columns:
@@ -166,11 +245,19 @@ def lead_lag(
 def _infer_period(df: pl.DataFrame) -> int:
     """데이터 간격 추론 → YoY 기간 결정.
 
-    - 일별: 252 (영업일)
-    - 주별: 52
-    - 월별: 12
-    - 분기별: 4
-    - 연간: 1
+    date 컬럼의 중앙 간격(일)으로 주기를 판별한다.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        ``(date, value)`` 형태 시계열 DataFrame.
+
+    Returns
+    -------
+    int
+        YoY 비교용 행 수 (개).
+        일별 252, 주별 52, 월별 12, 분기별 4, 연간 1.
+        데이터 3행 미만이면 1.
     """
     if df.height < 3:
         return 1

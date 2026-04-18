@@ -869,6 +869,7 @@ class _GroupAccessor:
             raise AttributeError(f"'{name}' 축은 '{self._group}' 그룹에 속하지 않습니다")
 
         def _bound_axis(company=None, *, basePeriod=None, overrides=None):
+            """그룹 내 특정 축 실행 바인딩."""
             return self._analysis(self._group, resolved, company=company, basePeriod=basePeriod, overrides=overrides)
 
         _bound_axis.__name__ = name
@@ -1015,7 +1016,19 @@ class Analysis:
         return pl.DataFrame(rows)
 
     def _guide(self) -> pl.DataFrame:
-        """축 가이드 — 4엔진 통일 컬럼 (axis, label, description, example, group, items)."""
+        """축 가이드 — 4엔진 통일 컬럼 (axis, label, description, example, group, items, apiKey).
+
+        Returns
+        -------
+        pl.DataFrame
+            axis : str — 축 이름
+            label : str — 한글 레이블
+            description : str — 설명
+            example : str — 사용 예시
+            group : str — 소속 그룹
+            items : int — calc 함수 개수
+            apiKey : str — 필요한 API 키 ("불필요" — 모든 축이 DART 공시 기반)
+        """
         rows = []
         for key, entry in _AXIS_REGISTRY.items():
             rows.append(
@@ -1026,6 +1039,7 @@ class Analysis:
                     "example": entry.example,
                     "group": entry.section,
                     "items": len(entry.calcs),
+                    "apiKey": "불필요",
                 }
             )
         return pl.DataFrame(rows)
@@ -1119,9 +1133,37 @@ class Analysis:
         raise AttributeError(f"Analysis에 '{name}' 속성이 없습니다")
 
     def __repr__(self) -> str:
-        lines = [f"Analysis -- {len(_AXIS_REGISTRY)}축 종합 분석", ""]
-        for key, entry in _AXIS_REGISTRY.items():
-            lines.append(f"  {entry.partId}  {key:8s} {entry.description} ({len(entry.calcs)}항목)")
+        total_calcs = sum(len(e.calcs) for e in _AXIS_REGISTRY.values())
+        lines = [
+            f"Analysis — {len(_AXIS_REGISTRY)}축 · {total_calcs}개 분석 함수 | 단일 종목 재무 심층 분석",
+            "",
+            "━━━ 분석 축 ━━━",
+        ]
+        # 그룹별로 묶어 표시
+        _GROUP_LABELS = {
+            "financial": "Part 1~3 — 재무분석",
+            "valuation": "Part 4 — 가치평가",
+            "governance": "Part 5 — 비재무 심화",
+            "forecast": "Part 6 — 전망분석",
+            "macro": "Part 6 — 매크로 연결",
+        }
+        for group, axes in _GROUPS.items():
+            lines.append(f"  [{_GROUP_LABELS.get(group, group)}]")
+            for key in axes:
+                entry = _AXIS_REGISTRY.get(key)
+                if entry:
+                    lines.append(f"    {key:10s} {entry.description} ({len(entry.calcs)}항목)")
+            lines.append("")
+        lines.append("━━━ 빠른 시작 ━━━")
+        lines.append("  c.analysis()                            # 이 가이드")
+        lines.append('  c.analysis("수익구조")                    # 수익구조 분석')
+        lines.append('  c.analysis("financial", "수익성")         # 그룹+축 지정')
+        lines.append('  c.analysis("종합평가")                    # 재무 스코어카드')
+        lines.append('  c.analysis("가치평가")                    # DCF/DDM/RIM/상대가치')
         lines.append("")
-        lines.append("사용법: analysis(), analysis('그룹', '축'), analysis('그룹', '축', company)")
+        lines.append("━━━ 데이터 ━━━")
+        lines.append("  DART 전자공시 기반 재무제표 — API 키 불필요 (자동 다운로드)")
+        lines.append("  전체 결과를 보고서로 → c.review()")
+        lines.append("")
+        lines.append("노트북: https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_quickstart.ipynb")
         return "\n".join(lines)

@@ -67,6 +67,13 @@ class Signal:
         return self._length or 0
 
     def keys(self) -> list[str]:
+        """등록된 신호 키 목록 반환.
+
+        Returns
+        -------
+        list[str]
+            add() 로 등록된 신호 이름 리스트.
+        """
         return list(self._signals.keys())
 
     def __repr__(self) -> str:

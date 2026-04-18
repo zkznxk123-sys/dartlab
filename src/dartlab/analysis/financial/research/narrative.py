@@ -359,6 +359,7 @@ def _analyzeGrowthQuality(inp: _Input) -> NarrativeParagraph | None:
 
     # 직전 YoY 성장률
     def _yoyGrowth(vals: list[float | None]) -> float | None:
+        """값 리스트의 직전 YoY 성장률 산출 (%)."""
         clean = [(i, v) for i, v in enumerate(vals) if v is not None and v != 0]
         if len(clean) < 2:
             return None
@@ -2516,7 +2517,34 @@ def buildNarrative(
     sectorParams: object | None = None,
     ratios: object | None = None,
 ) -> NarrativeAnalysis | None:
-    """15차원 교차분석 서술 생성 (IS/BS/CF 3표 연결)."""
+    """15차원 교차분석 서술 생성 (IS/BS/CF 3표 연결).
+
+    Parameters
+    ----------
+    aSeries : dict
+        연간 시계열 dict.
+    aYears : list[str]
+        연간 기간 컬럼 목록.
+    dupont : DuPontResult | None
+        듀퐁 분해 결과.
+    earningsQuality : EarningsQuality | None
+        이익품질 분석 결과.
+    marketData : MarketData | None
+        시장 데이터.
+    company : object
+        Company 객체.
+    sectorBenchmark : object, optional
+        섹터 벤치마크.
+    sectorParams : object, optional
+        섹터 파라미터.
+    ratios : object, optional
+        재무비율 결과.
+
+    Returns
+    -------
+    NarrativeAnalysis | None
+        15차원 교차분석 결과. 데이터 부족 시 None.
+    """
     # segments, costByNature 수집 (show → notes fallback)
     segDf = None
     costDf = None

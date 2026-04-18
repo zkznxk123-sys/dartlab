@@ -30,7 +30,7 @@ import functools
 import logging
 import math
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import polars as pl
@@ -71,7 +71,7 @@ class SegmentForecast:
     """개별 세그먼트 예측 결과."""
 
     name: str
-    historical: list[Optional[float]]
+    historical: list[float | None]
     projected: list[float]
     growthRates: list[float]
     method: str
@@ -111,7 +111,7 @@ class RevenueForecastAIOverlay:
 class RevenueForecastResult:
     """매출 예측 결과 — 소스별 기여도 투명 공개."""
 
-    historical: list[Optional[float]]
+    historical: list[float | None]
     projected: list[float]
     horizon: int
     method: str  # "ensemble" | "timeseries_only" | "consensus_only" | "N/A"
@@ -242,7 +242,27 @@ def _fetchConsensusRevenue(
 
 
 def _fundamentalGrowth(series: dict) -> tuple[float | None, dict]:
-    """ROIC × Reinvestment Rate → 내재 성장률."""
+    """ROIC x Reinvestment Rate → 내재 성장률 (Damodaran Value Driver).
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+
+    Returns
+    -------
+    tuple[float | None, dict]
+        fundamentalGrowth : float | None — 내재 성장률 (%). 계산 불가 시 None.
+        detail : dict
+            roic : float — 투하자본수익률 (%)
+            reinvestmentRate : float — 재투자율 (%)
+            nopat : float — 세후영업이익 (원)
+            investedCapital : float — 투하자본 (원)
+            capex : float — 자본적지출 (원)
+            depreciation : float — 감가상각비 (원)
+            deltaNwc : float — 순운전자본 변동 (원)
+            fundamentalGrowth : float — 내재 성장률 (%)
+    """
     detail: dict = {}
 
     # NOPAT = 영업이익 × (1 - 유효세율)
@@ -303,6 +323,7 @@ def _fundamentalGrowth(series: dict) -> tuple[float | None, dict]:
     if len(caVals) >= 2 and len(clVals) >= 2:
 
         def _nwcAt(idx: int) -> float | None:
+            """특정 인덱스의 순운전자본(유동자산-현금-유동부채) 산출."""
             ca = caVals[idx] if idx < len(caVals) else None
             cl = clVals[idx] if idx < len(clVals) else None
             c = cashVals[idx] if idx < len(cashVals) and cashVals[idx] else 0
@@ -347,7 +368,23 @@ def _fundamentalGrowth(series: dict) -> tuple[float | None, dict]:
 
 
 def _classifyLifecycle(series: dict) -> tuple[str, dict]:
-    """기업 라이프사이클 단계 판별."""
+    """기업 라이프사이클 단계 판별.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+
+    Returns
+    -------
+    tuple[str, dict]
+        lifecycle : str — "high_growth" | "mature" | "transition" | "decline" | "unknown"
+        detail : dict
+            cagr_3y : float — 3년 CAGR (%)
+            cv : float — 변동계수 (비율)
+            signChanges : int — 성장률 부호 전환 횟수
+            dataPoints : int — 유효 데이터 수
+    """
     revVals = getAnnualValues(series, "IS", "revenue") or getAnnualValues(series, "IS", "sales")
     valid = [v for v in revVals if v is not None and v > 0]
 
@@ -395,7 +432,20 @@ def _lifecycleWeightAdjustments(
     lifecycle: str,
     baseWeights: dict[str, float],
 ) -> dict[str, float]:
-    """라이프사이클에 따른 가중치 조정."""
+    """라이프사이클에 따른 앙상블 소스 가중치 조정.
+
+    Parameters
+    ----------
+    lifecycle : str
+        라이프사이클 단계.
+    baseWeights : dict[str, float]
+        기본 소스별 가중치.
+
+    Returns
+    -------
+    dict[str, float]
+        조정된 소스별 가중치 (합계 불변).
+    """
     w = dict(baseWeights)
 
     if lifecycle == "high_growth":
@@ -432,10 +482,26 @@ def _computeWeights(
     roicGrowth: float | None,
     structuralBreak: dict | None = None,
 ) -> dict[str, float]:
-    """소스별 가중치 계산.
+    """앙상블 소스별 가중치 계산.
 
     structuralBreak가 전달되면 구조변화 심각도에 따라
     시계열 가중치를 삭감하고 컨센서스로 이전한다.
+
+    Parameters
+    ----------
+    tsAvailable : bool
+        시계열 예측 가용 여부.
+    consensusItems : list[tuple[int, float, str]]
+        (연도, 매출추정, 소스) 튜플 리스트.
+    roicGrowth : float | None
+        ROIC 기반 내재 성장률 (%).
+    structuralBreak : dict, optional
+        구조변화 분석 결과.
+
+    Returns
+    -------
+    dict[str, float]
+        소스명 → 가중치 매핑 ("timeseries", "consensus", "roic" 등).
     """
     weights: dict[str, float] = {}
 
@@ -487,7 +553,21 @@ def _extractSegmentForecasts(
     segmentRevenue: object,  # pl.DataFrame | None (TYPE_CHECKING 회피)
     horizon: int = 3,
 ) -> list[SegmentForecast]:
-    """세그먼트별 개별 시계열 예측."""
+    """세그먼트별 개별 시계열 예측.
+
+    Parameters
+    ----------
+    segmentRevenue : pl.DataFrame | None
+        세그먼트 매출 DataFrame (컬럼: "부문" + 연도).
+    horizon : int
+        예측 기간 (년, 기본 3).
+
+    Returns
+    -------
+    list[SegmentForecast]
+        세그먼트별 예측 결과 (비중 내림차순 정렬).
+        데이터 부족 시 빈 리스트.
+    """
     if segmentRevenue is None:
         return []
 
@@ -577,7 +657,23 @@ def _segmentBottomUpGrowth(
     horizon: int,
     lastRevenue: float | None,
 ) -> list[float]:
-    """세그먼트별 예측을 합산하여 Bottom-Up 성장률 시계열 생성."""
+    """세그먼트별 예측을 합산하여 Bottom-Up 성장률 시계열 생성.
+
+    Parameters
+    ----------
+    segmentForecasts : list[SegmentForecast]
+        세그먼트별 예측 결과.
+    horizon : int
+        예측 기간 (년).
+    lastRevenue : float | None
+        최근 총 매출 (원).
+
+    Returns
+    -------
+    list[float]
+        연도별 Bottom-Up 매출 성장률 (%).
+        데이터 부족 시 빈 리스트.
+    """
     if not segmentForecasts or not lastRevenue or lastRevenue <= 0:
         return []
 
@@ -613,7 +709,27 @@ def _computeBacklogSignal(
     salesDf: object,  # pl.DataFrame | None
     sectorKey: str | None = None,
 ) -> BacklogSignal | None:
-    """수주잔고 기반 선행 시그널 계산."""
+    """수주잔고 기반 선행 시그널 계산.
+
+    Parameters
+    ----------
+    orderDf : pl.DataFrame | None
+        수주잔고 DataFrame.
+    salesDf : pl.DataFrame | None
+        매출 DataFrame.
+    sectorKey : str, optional
+        WICS 업종 키 (건설/조선/방산 강신호 판별).
+
+    Returns
+    -------
+    BacklogSignal | None
+        backlogRevenueRatio : float — B/R ratio (배)
+        brRatioTrend : str — 추세 ("increasing" | "stable" | "declining")
+        impliedRevenueGrowth : float — 내재 매출 성장률 (%)
+        conversionRate : float — 수주→매출 전환율 (비율)
+        sectorsApplicable : bool — 강신호 업종 여부
+        데이터 부족 시 None.
+    """
     if orderDf is None or salesDf is None:
         return None
 
@@ -720,7 +836,7 @@ _LIFECYCLE_SPREAD = {
 def _buildScenarios(
     projected: list[float],
     growthRates: list[float],
-    historical: list[Optional[float]],
+    historical: list[float | None],
     lifecycle: str,
     lastRevenue: float | None,
     structuralBreak: dict | None = None,
@@ -800,7 +916,38 @@ def forecastRevenue(
     currency: str = "KRW",
     overrides: dict | None = None,
 ) -> RevenueForecastResult:
-    """매출액 앙상블 예측. overrides로 AI/사용자 가정 조율 가능."""
+    """매출액 4-소스 앙상블 예측. overrides로 AI/사용자 가정 조율 가능.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    stockCode : str, optional
+        종목코드 (컨센서스 조회용).
+    sectorKey : str, optional
+        WICS 업종 키.
+    market : str
+        시장 ("KR", "US" 등, 기본 "KR").
+    horizon : int
+        예측 기간 (년, 기본 3).
+    companyData : CompanyDataBundle, optional
+        세그먼트/수주잔고 등 L1 데이터 브릿지.
+    currency : str
+        통화 (기본 "KRW").
+    overrides : dict, optional
+        AI/사용자 가정 오버라이드 ("baseRevenue", "growthRates" 등).
+
+    Returns
+    -------
+    RevenueForecastResult
+        projected : list[float] — 연도별 예측 매출 (원)
+        growthRates : list[float] — 연도별 YoY 성장률 (%)
+        method : str — 예측 방법 ("ensemble" | "{source}_only")
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
+        sourceWeights : dict[str, float] — 소스별 가중치
+        scenarios : dict[str, list[float]] — Base/Bull/Bear 매출 경로 (원)
+        forecastable : bool — 예측 가능 판정
+    """
     warnings: list[str] = []
     assumptions: list[str] = []
 
@@ -1266,7 +1413,21 @@ def applyAiOverlay(
     result: RevenueForecastResult,
     overlay: RevenueForecastAIOverlay,
 ) -> RevenueForecastResult:
-    """AI 보정을 예측 결과에 적용."""
+    """AI 보정을 예측 결과에 적용.
+
+    Parameters
+    ----------
+    result : RevenueForecastResult
+        기존 예측 결과.
+    overlay : RevenueForecastAIOverlay
+        AI 보정 (성장률 조정, 시나리오 확률 이동 등).
+
+    Returns
+    -------
+    RevenueForecastResult
+        보정 적용된 새 예측 결과.
+        aiOverlay.applied = True, assumptions에 보정 요약 추가.
+    """
     if not overlay.reasoning:
         log.warning("AI overlay rejected: reasoning 비어있음")
         return result

@@ -35,7 +35,22 @@ def generateResearch(
     sections: list[str] | None = None,
     includeMarket: bool = True,
 ) -> ResearchResult:
-    """종합 기업분석 리포트 생성."""
+    """종합 기업분석 리포트 생성.
+
+    Parameters
+    ----------
+    company : object
+        Company 객체.
+    sections : list[str], optional
+        포함할 섹션 목록. None이면 전체.
+    includeMarket : bool
+        시장 데이터 포함 여부.
+
+    Returns
+    -------
+    ResearchResult
+        종합 리포트 (executive/thesis/risk/valuation/forecast/narrative 등).
+    """
     result = ResearchResult()
     wantAll = sections is None
     want = set(sections) if sections else set()

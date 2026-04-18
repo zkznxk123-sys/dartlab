@@ -23,13 +23,28 @@ def fetch_series(
 ) -> pl.DataFrame:
     """FRED 시계열 → Polars DataFrame ``(date, value)``.
 
-    Args:
-        series_id: FRED 시리즈 ID (예: "GDP", "UNRATE").
-        start: 시작일 (YYYY-MM-DD). None이면 전체.
-        end: 종료일. None이면 최신까지.
-        frequency: 리샘플 주파수 (d/w/bw/m/q/sa/a). None이면 원본.
-        aggregation: 리샘플 집계 방법 (avg/sum/eop).
-        enrich: True이면 변화율 추가 + Parquet 영구 캐시.
+    Parameters
+    ----------
+    client : FredClient
+        FRED REST API 클라이언트.
+    series_id : str
+        FRED 시리즈 ID (예: "GDP", "UNRATE").
+    start : str | None
+        시작일 (YYYY-MM-DD). None이면 전체.
+    end : str | None
+        종료일. None이면 최신까지.
+    frequency : str | None
+        리샘플 주파수 (d/w/bw/m/q/sa/a). None이면 원본.
+    aggregation : str
+        리샘플 집계 방법 (avg/sum/eop).
+    enrich : bool
+        True이면 변화율 추가 + Parquet 영구 캐시.
+
+    Returns
+    -------
+    pl.DataFrame
+        컬럼: ``date`` (Date) — 관측일, ``value`` (Float64) — 지표값.
+        enrich=True 시 변화율 컬럼 추가.
     """
     cached = _cache.get(series_id, start, end, frequency, aggregation)
     if cached is not None:
@@ -94,6 +109,25 @@ def fetch_multi(
     """복수 시계열 → wide DataFrame ``(date, GDP, UNRATE, ...)``.
 
     주파수가 다른 시리즈를 합칠 때 outer join 후 forward-fill.
+
+    Parameters
+    ----------
+    client : FredClient
+        FRED REST API 클라이언트.
+    series_ids : list[str]
+        FRED 시리즈 ID 리스트.
+    start : str | None
+        시작일. None이면 전체.
+    end : str | None
+        종료일. None이면 최신까지.
+    frequency : str | None
+        리샘플 주파수. None이면 원본.
+
+    Returns
+    -------
+    pl.DataFrame
+        컬럼: ``date`` (Date) — 관측일, 각 시리즈 ID (Float64) — 지표값.
+        빈 리스트 입력 시 빈 DataFrame.
     """
     if not series_ids:
         return pl.DataFrame()
@@ -123,11 +157,26 @@ def search_series(
     *,
     limit: int = 20,
 ) -> pl.DataFrame:
-    """키워드 검색 → DataFrame ``(id, title, frequency, units, popularity)``.
+    """키워드 검색 → DataFrame.
 
-    Args:
-        query: 검색어 (영문).
-        limit: 최대 결과 수.
+    Parameters
+    ----------
+    client : FredClient
+        FRED REST API 클라이언트.
+    query : str
+        검색어 (영문).
+    limit : int
+        최대 결과 수.
+
+    Returns
+    -------
+    pl.DataFrame
+        컬럼: ``id`` (Utf8) — 시리즈 ID, ``title`` (Utf8) — 제목,
+        ``frequency`` (Utf8) — 주기, ``units`` (Utf8) — 단위,
+        ``seasonal_adjustment`` (Utf8) — 계절조정,
+        ``popularity`` (Int64) — 인기도,
+        ``observation_start`` (Utf8) — 시작일,
+        ``observation_end`` (Utf8) — 종료일.
     """
     data = client.get(
         "/series/search",
@@ -172,7 +221,26 @@ def search_series(
 
 
 def fetch_meta(client: FredClient, series_id: str) -> SeriesMeta:
-    """시계열 메타데이터 조회."""
+    """시계열 메타데이터 조회.
+
+    Parameters
+    ----------
+    client : FredClient
+        FRED REST API 클라이언트.
+    series_id : str
+        FRED 시리즈 ID.
+
+    Returns
+    -------
+    SeriesMeta
+        id, title, frequency, units, seasonal_adjustment,
+        observation_start, observation_end, last_updated, notes 포함.
+
+    Raises
+    ------
+    SeriesNotFoundError
+        시리즈를 찾을 수 없을 때.
+    """
     data = client.get("/series", series_id=series_id)
     serieses = data.get("seriess", [])
     if not serieses:
@@ -195,7 +263,21 @@ def fetch_meta(client: FredClient, series_id: str) -> SeriesMeta:
 
 
 def fetch_releases(client: FredClient, *, limit: int = 20) -> pl.DataFrame:
-    """최근 데이터 릴리즈 일정."""
+    """최근 데이터 릴리즈 일정.
+
+    Parameters
+    ----------
+    client : FredClient
+        FRED REST API 클라이언트.
+    limit : int
+        최대 결과 수.
+
+    Returns
+    -------
+    pl.DataFrame
+        컬럼: ``id`` (Int64) — 릴리즈 ID, ``name`` (Utf8) — 릴리즈명,
+        ``press_release`` (Boolean) — 보도자료 여부, ``link`` (Utf8) — URL.
+    """
     data = client.get("/releases", limit=limit, order_by="press_release", sort_order="desc")
     releases = data.get("releases", [])
 

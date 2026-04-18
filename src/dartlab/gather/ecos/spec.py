@@ -6,7 +6,23 @@ from . import catalog as _catalog
 
 
 def buildSpec() -> dict:
-    """AI spec 수집기용 ECOS 엔진 스펙."""
+    """AI spec 수집기용 ECOS 엔진 스펙 메타데이터 생성.
+
+    카탈로그 그룹·시리즈 목록을 순회하여 AI 자동 발견(autoDiscover)용
+    구조화된 dict 를 반환한다.
+
+    Returns
+    -------
+    dict
+        name : str — 엔진 이름 ("ecos")
+        label : str — 표시 레이블
+        description : str — 엔진 설명
+        tier : str — 안정성 단계 ("beta")
+        capabilities : list[str] — 지원 기능 목록
+        catalog_groups : dict — 그룹별 시리즈 메타 (count, series)
+        total_catalog_series : int — 전체 카탈로그 시리즈 수 (개)
+        tools : list[dict] — AI tool 정의 목록 (name, description)
+    """
     groups = {}
     for name in _catalog.getGroups():
         entries = _catalog.getGroup(name)

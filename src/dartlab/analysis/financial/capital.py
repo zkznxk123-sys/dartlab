@@ -17,7 +17,20 @@ _MAX_YEARS = 8
 
 
 def _quarterlyCols(periods: list[str], maxQ: int = _MAX_QUARTERS) -> list[str]:
-    """기간 목록에서 분기 컬럼 추출. 분기가 없으면 연간 컬럼 fallback (EDGAR 호환)."""
+    """기간 목록에서 분기 컬럼 추출. 분기가 없으면 연간 컬럼 fallback (EDGAR 호환).
+
+    Parameters
+    ----------
+    periods : list[str]
+        전체 기간 문자열 목록 (예: ``["2024Q4", "2024Q3", "2024"]``).
+    maxQ : int
+        반환할 최대 컬럼 수.
+
+    Returns
+    -------
+    list[str]
+        최신순 정렬된 분기(또는 연간 fallback) 컬럼 목록.
+    """
     quarterly = sorted([c for c in periods if "Q" in c], reverse=True)[:maxQ]
     if quarterly:
         return quarterly
@@ -26,7 +39,13 @@ def _quarterlyCols(periods: list[str], maxQ: int = _MAX_QUARTERS) -> list[str]:
 
 
 def _getRatios(company):
-    """RatioResult 객체 — 내부 compute 전용 (attribute access)."""
+    """RatioResult 객체 — 내부 compute 전용 (attribute access).
+
+    Returns
+    -------
+    RatioResult | None
+        회사의 재무비율 객체. 데이터 없으면 None.
+    """
     try:
         return company._finance.ratios
     except (ValueError, KeyError, AttributeError):
@@ -39,7 +58,19 @@ _analysis_currency: contextvars.ContextVar[str] = contextvars.ContextVar("analys
 
 
 def _fmtAmt(value) -> str:
-    """금액을 조/억 또는 B/M 단위로 포맷 (순수 문자열, review import 없이)."""
+    """금액을 조/억 또는 B/M 단위로 포맷 (순수 문자열, review import 없이).
+
+    Parameters
+    ----------
+    value : float | None
+        포맷할 금액 (원 또는 달러).
+
+    Returns
+    -------
+    str
+        단위 포함 문자열. KRW이면 ``"1.2조"``, ``"500억"``, USD이면 ``"$1.2B"``, ``"$500M"`` 등.
+        None이면 ``"-"``.
+    """
     if value is None:
         return "-"
     absVal = abs(value)
@@ -71,24 +102,28 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
     4가지 원천: 내부유보, 외부(주주), 금융차입, 영업조달.
     시계열로 비중 변화를 추적한다.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "latest": {
-                "totalAssets": float,
-                "retained": float, "retainedPct": float,
-                "paidIn": float, "paidInPct": float,
-                "finDebt": float, "finDebtPct": float,
-                "opFunding": float, "opFundingPct": float,
-                "otherLiab": float, "otherLiabPct": float,
-                "otherEquity": float, "otherEquityPct": float,
-            },
-            "history": [
-                {"period": str, "retainedPct": float, "paidInPct": float,
-                 "finDebtPct": float, "opFundingPct": float}, ...
-            ],
-            "diagnosis": str,
-        }
+    Returns
+    -------
+    dict | None
+        latest : dict
+            totalAssets : float — 총자산 (원)
+            retained : float — 이익잉여금 (원)
+            retainedPct : float — 이익잉여금 비중 (%)
+            paidIn : float — 납입자본 (원)
+            paidInPct : float — 납입자본 비중 (%)
+            finDebt : float — 금융차입 (원)
+            finDebtPct : float — 금융차입 비중 (%)
+            opFunding : float — 영업조달 (원)
+            opFundingPct : float — 영업조달 비중 (%)
+        history : list[dict] — 연도별 조달원 비중 시계열
+        diagnosis : str — 조달구조 진단
     """
     accounts = [
         "자산총계",
@@ -242,6 +277,20 @@ def _latestAnnualVal(company, stmt: str, accountName: str) -> float | None:
     """select(stmt, [accountName])에서 최신 연도 값을 꺼낸다.
 
     회사마다 한국어 변형이 달라서 accountName 매칭 실패 가능 → None 반환.
+
+    Parameters
+    ----------
+    company : Company
+        대상 기업 객체.
+    stmt : str
+        재무제표 구분 (``"BS"``, ``"IS"``, ``"CF"``).
+    accountName : str
+        계정과목명.
+
+    Returns
+    -------
+    float | None
+        최신 연도의 계정 값 (원). 데이터 없으면 None.
     """
     try:
         result = company.select(stmt, [accountName])
@@ -261,7 +310,20 @@ def _latestAnnualVal(company, stmt: str, accountName: str) -> float | None:
 
 
 def _calcNetDebtEbitda(company, finDebt: float) -> float | None:
-    """순차입금/EBITDA — 차입 감당 능력."""
+    """순차입금/EBITDA — 차입 감당 능력.
+
+    Parameters
+    ----------
+    company : Company
+        대상 기업 객체.
+    finDebt : float
+        금융부채 합계 (원).
+
+    Returns
+    -------
+    float | None
+        순차입금/영업이익 (배). 순현금이면 0.0, 영업이익 없으면 None.
+    """
     cash = _latestAnnualVal(company, "BS", "현금및현금성자산") or 0
     netDebt = finDebt - cash
     if netDebt <= 0:
@@ -273,7 +335,20 @@ def _calcNetDebtEbitda(company, finDebt: float) -> float | None:
 
 
 def _calcImpliedBorrowingRate(company, finDebt: float) -> float | None:
-    """암묵적 차입금리(%) — 금융비용/금융부채."""
+    """암묵적 차입금리 — 금융비용/금융부채.
+
+    Parameters
+    ----------
+    company : Company
+        대상 기업 객체.
+    finDebt : float
+        금융부채 합계 (원).
+
+    Returns
+    -------
+    float | None
+        암묵적 차입금리 (%). 금융부채 없거나 이자비용 없으면 None.
+    """
     if finDebt <= 0:
         return None
     ie = _latestAnnualVal(company, "IS", "이자비용") or _latestAnnualVal(company, "IS", "금융비용")
@@ -286,9 +361,17 @@ def _calcImpliedBorrowingRate(company, finDebt: float) -> float | None:
 def calcCapitalOverview(company, *, basePeriod: str | None = None) -> dict | None:
     """총자산/총부채/자기자본/순차입금 스냅샷.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {"metrics": [(label, value_str), ...]}
+    Returns
+    -------
+    dict | None
+        metrics : list[tuple[str, str]] — (항목명, 값 문자열) 쌍 목록
     """
     ratios = _getRatios(company)
     if ratios is None:
@@ -337,9 +420,17 @@ def calcCapitalOverview(company, *, basePeriod: str | None = None) -> dict | Non
 def calcCapitalTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """자본총계·이익잉여금 시계열.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {"tables": [(label, rows, cols), ...]}
+    Returns
+    -------
+    dict | None
+        tables : list[tuple[str, list[dict], list[str]]] — (라벨, 행 목록, 기간 컬럼) 튜플
     """
     result = company.select("BS", ["자본총계", "이익잉여금", "미처분이익잉여금(결손금)"])
     parsed = toDictBySnakeId(result)
@@ -372,7 +463,22 @@ def calcCapitalTimeline(company, *, basePeriod: str | None = None) -> dict | Non
 
 
 def _buildCapitalTable(equityRow: dict, retainedRow: dict | None, cols: list[str]) -> list[dict]:
-    """자본구조 테이블 행 구성."""
+    """자본구조 테이블 행 구성.
+
+    Parameters
+    ----------
+    equityRow : dict
+        자본총계 {period: value} 매핑.
+    retainedRow : dict | None
+        이익잉여금 {period: value} 매핑.
+    cols : list[str]
+        표시할 기간 컬럼 목록.
+
+    Returns
+    -------
+    list[dict]
+        테이블 행 목록. 각 행은 ``{"": 항목명, period: 값, ...}`` 형태.
+    """
     rows: list[dict] = []
     rows.append({"": "자본총계", **{c: equityRow.get(c) for c in cols}})
 
@@ -406,9 +512,17 @@ def _buildCapitalTable(equityRow: dict, retainedRow: dict | None, cols: list[str
 def calcDebtTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """부채총계·금융부채·영업부채 시계열.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {"tables": [(label, rows, cols), ...]}
+    Returns
+    -------
+    dict | None
+        tables : list[tuple[str, list[dict], list[str]]] — (라벨, 행 목록, 기간 컬럼) 튜플
     """
     result = company.select("BS", ["부채총계", "단기차입금", "장기차입금", "차입부채", "사채"])
     parsed = toDictBySnakeId(result)
@@ -445,7 +559,26 @@ def calcDebtTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 
 
 def _buildDebtTable(liabRow: dict, stbRow, ltbRow, bondRow, cols: list[str]) -> list[dict]:
-    """부채구조 테이블 행 구성."""
+    """부채구조 테이블 행 구성.
+
+    Parameters
+    ----------
+    liabRow : dict
+        부채총계 {period: value} 매핑.
+    stbRow : dict | None
+        단기차입금 매핑.
+    ltbRow : dict | None
+        장기차입금 매핑.
+    bondRow : dict | None
+        사채 매핑.
+    cols : list[str]
+        표시할 기간 컬럼 목록.
+
+    Returns
+    -------
+    list[dict]
+        테이블 행 목록. 각 행은 ``{"": 항목명, period: 값, ...}`` 형태.
+    """
     rows: list[dict] = []
     rows.append({"": "부채총계", **{c: liabRow.get(c) for c in cols}})
 
@@ -491,9 +624,17 @@ def _buildDebtTable(liabRow: dict, stbRow, ltbRow, bondRow, cols: list[str]) -> 
 def calcInterestBurden(company, *, basePeriod: str | None = None) -> dict | None:
     """이자보상배율·이자비용.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {"metrics": [(label, value_str), ...]}
+    Returns
+    -------
+    dict | None
+        metrics : list[tuple[str, str]] — (항목명, 값 문자열) 쌍 목록
     """
     ratios = _getRatios(company)
     if ratios is None:
@@ -527,9 +668,17 @@ def calcInterestBurden(company, *, basePeriod: str | None = None) -> dict | None
 def calcLiquidity(company, *, basePeriod: str | None = None) -> dict | None:
     """유동비율·당좌비율·현금비율·순운전자본.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {"metrics": [(label, value_str), ...]}
+    Returns
+    -------
+    dict | None
+        metrics : list[tuple[str, str]] — (항목명, 값 문자열) 쌍 목록
     """
     ratios = _getRatios(company)
     if ratios is None:
@@ -564,14 +713,20 @@ def calcLiquidity(company, *, basePeriod: str | None = None) -> dict | None:
 def calcCashFlowStructure(company, *, basePeriod: str | None = None) -> dict | None:
     """영업CF/투자CF/재무CF + FCF + CF 패턴.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "tableRows": [dict, ...],
-            "cols": [str, ...],
-            "pattern": str | None,
-            "metrics": [(label, value_str), ...] | None,
-        }
+    Returns
+    -------
+    dict | None
+        tableRows : list[dict] — CF 항목별 기간 매핑 행
+        cols : list[str] — 기간 컬럼
+        pattern : str | None — CF 패턴 진단
+        metrics : list[tuple[str, str]] | None — FCF 등 요약 지표
     """
     result = company.select(
         "CF",
@@ -654,7 +809,13 @@ def calcCashFlowStructure(company, *, basePeriod: str | None = None) -> dict | N
 
 
 def _sign(val) -> str:
-    """양/음/0 부호."""
+    """양/음/0 부호.
+
+    Returns
+    -------
+    str
+        ``"+"``, ``"-"``, ``"0"``, 또는 ``"?"`` (None).
+    """
     if val is None:
         return "?"
     if val > 0:
@@ -665,7 +826,23 @@ def _sign(val) -> str:
 
 
 def _classifyCfPattern(ocf: str, icf: str, fcf: str) -> str | None:
-    """영업/투자/재무 CF 부호 조합으로 패턴 분류."""
+    """영업/투자/재무 CF 부호 조합으로 패턴 분류.
+
+    Parameters
+    ----------
+    ocf : str
+        영업CF 부호 (``"+"``, ``"-"``, ``"0"``, ``"?"``).
+    icf : str
+        투자CF 부호.
+    fcf : str
+        재무CF 부호.
+
+    Returns
+    -------
+    str | None
+        CF 패턴 한국어 설명 (예: ``"성숙형 — 영업으로 벌어 투자하고 부채 상환"``).
+        미분류 조합이면 None.
+    """
     patterns = {
         ("+", "-", "-"): "성숙형 — 영업으로 벌어 투자하고 부채 상환",
         ("+", "-", "+"): "확장형 — 영업 + 외부 조달로 적극 투자",
@@ -683,7 +860,13 @@ def _classifyCfPattern(ocf: str, icf: str, fcf: str) -> str | None:
 
 
 def _isFinancialCompany(company) -> bool:
-    """금융업 판별 (capital.py 내부용)."""
+    """금융업 판별 (capital.py 내부용).
+
+    Returns
+    -------
+    bool
+        금융업/지주사이면 True.
+    """
     try:
         sector = getattr(company, "sector", None)
         if sector is not None:
@@ -703,9 +886,17 @@ def _isFinancialCompany(company) -> bool:
 def calcDistressIndicators(company, *, basePeriod: str | None = None) -> dict | None:
     """Altman Z, Ohlson O, Piotroski F, Springate S.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {"metrics": [(label, value_str), ...]}
+    Returns
+    -------
+    dict | None
+        metrics : list[tuple[str, str]] — (지표명, 값+판정 문자열) 쌍 목록
     """
     ratios = _getRatios(company)
     if ratios is None:
@@ -864,7 +1055,13 @@ def calcCapitalFlags(company, *, basePeriod: str | None = None) -> list[tuple[st
 
 
 def _calcRetainedPct(equityRow, retainedRow) -> float | None:
-    """이익잉여금 / 자본총계 비중 (%)."""
+    """이익잉여금 / 자본총계 비중.
+
+    Returns
+    -------
+    float | None
+        내부유보 비중 (%). 데이터 없으면 None.
+    """
     if equityRow is None or retainedRow is None:
         return None
     for key in equityRow:
@@ -876,7 +1073,13 @@ def _calcRetainedPct(equityRow, retainedRow) -> float | None:
 
 
 def _calcFinDebtPct(liabRow, stbRow, ltbRow, bondRow) -> float | None:
-    """금융부채 / 부채총계 비중 (%) — 최신 기간."""
+    """금융부채 / 부채총계 비중 — 최신 기간.
+
+    Returns
+    -------
+    float | None
+        금융부채 비중 (%). 데이터 없으면 None.
+    """
     if liabRow is None:
         return None
     for key in liabRow:

@@ -73,7 +73,24 @@ _FIXED_OP_KEYS = ["유형자산", "사용권자산", "무형자산", "영업권"
 
 
 def _sumOp(data: dict, col: str, simpleKeys: list[str], fallbackPairs: list[list[str]]) -> float:
-    """영업자산/부채 합산 (fallback 쌍은 하나만 선택)."""
+    """영업자산/부채 합산 (fallback 쌍은 하나만 선택).
+
+    Parameters
+    ----------
+    data : dict
+        ``{snakeId: {period: value}}`` 형태의 BS 데이터.
+    col : str
+        대상 기간 컬럼.
+    simpleKeys : list[str]
+        단순 합산 대상 계정 키 목록.
+    fallbackPairs : list[list[str]]
+        fallback 쌍 목록. 각 쌍에서 첫 번째 값이 있으면 사용, 없으면 두 번째.
+
+    Returns
+    -------
+    float
+        합산 금액 (원). 모두 없으면 0.
+    """
     total = sum(_get(data.get(k, {}), col) for k in simpleKeys)
     for pair in fallbackPairs:
         total += _getFirst(data, pair, col)
@@ -87,27 +104,29 @@ def _sumOp(data: dict, col: str, simpleKeys: list[str], fallbackPairs: list[list
 def calcAssetStructure(company, *, basePeriod: str | None = None) -> dict | None:
     """자산을 영업/비영업으로 재분류 — 시계열.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "latest": {
-                "totalAssets": float,
-                "opAssets": float, "opAssetsPct": float,
-                "nonOpAssets": float, "nonOpAssetsPct": float,
-                "workingCapitalAssets": float,
-                "fixedOpAssets": float,
-                "noa": float,
-                "netFinDebt": float,
-            },
-            "composition": {
-                "receivables": float, "inventory": float,
-                "ppe": float, "intangibles": float,
-                "rou": float, "cip": float,
-                "cash": float, "investments": float,
-            },
-            "history": [{period, opAssetsPct, nonOpAssetsPct, noa, ...}, ...],
-            "diagnosis": str,
-        }
+    Returns
+    -------
+    dict | None
+        latest : dict
+            totalAssets : float — 총자산 (원)
+            opAssets : float — 영업자산 (원)
+            opAssetsPct : float — 영업자산 비중 (%)
+            nonOpAssets : float — 비영업자산 (원)
+            nonOpAssetsPct : float — 비영업자산 비중 (%)
+            workingCapital : float — 순운전자본 (원)
+            fixedOpAssets : float — 고정영업자산 (원)
+            noa : float — 순영업자산 (원)
+            netFinDebt : float — 순금융부채 (원)
+        history : list[dict] — 연도별 자산 구조 시계열
+        diagnosis : str — 자산 구조 진단
+        notesDetail : dict | None — 주석 상세 데이터
     """
     _allFallback = [k for pair in _OP_ASSET_FALLBACK + _OP_LIAB_FALLBACK for k in pair]
     allAccounts = (
@@ -271,18 +290,26 @@ def calcAssetStructure(company, *, basePeriod: str | None = None) -> dict | None
 def calcWorkingCapital(company, *, basePeriod: str | None = None) -> dict | None:
     """운전자본 상세 + CCC.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "latest": {
-                "wc": float,
-                "receivables": float, "inventory": float,
-                "payables": float,
-                "receivableDays": float, "inventoryDays": float,
-                "payableDays": float, "ccc": float,
-            },
-            "history": [{period, wc, receivableDays, inventoryDays, payableDays, ccc}, ...],
-        }
+    Returns
+    -------
+    dict | None
+        latest : dict
+            wc : float — 순운전자본 (원)
+            receivables : float — 매출채권 (원)
+            inventory : float — 재고자산 (원)
+            payables : float — 매입채무 (원)
+            receivableDays : float — 매출채권 회수일수 (일)
+            inventoryDays : float — 재고자산 보유일수 (일)
+            payableDays : float — 매입채무 지급일수 (일)
+            ccc : float — 현금전환주기 (일)
+        history : list[dict] — 연도별 운전자본 시계열
     """
     bsAccounts = ["매출채권", "매출채권및기타채권", "재고자산", "매입채무", "매입채무및기타채무"]
     isAccounts = ["매출액", "매출원가"]
@@ -306,6 +333,7 @@ def calcWorkingCapital(company, *, basePeriod: str | None = None) -> dict | None
         return None
 
     def _getFlow(row: dict, col: str) -> float:
+        """flow 행에서 값 추출 (None → 0)."""
         v = row.get(col)
         return v if v is not None else 0
 
@@ -362,17 +390,24 @@ def calcWorkingCapital(company, *, basePeriod: str | None = None) -> dict | None
 def calcCapexPattern(company, *, basePeriod: str | None = None) -> dict | None:
     """CAPEX vs 감가상각 + 건설중인자산 추이.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "latest": {
-                "capex": float, "depreciation": float,
-                "capexToDepRatio": float,
-                "cip": float, "cipPct": float,
-                "investmentType": str,
-            },
-            "history": [{period, capex, depreciation, capexToDepRatio, cip}, ...],
-        }
+    Returns
+    -------
+    dict | None
+        latest : dict
+            capex : float — 자본적지출 (원)
+            depreciation : float — 감가상각비 (원)
+            capexToDepRatio : float — CAPEX/감가상각 비율 (배)
+            cip : float — 건설중인자산 (원)
+            cipPct : float — 건설중인자산 비중 (%)
+            investmentType : str — 투자 유형 판단
+        history : list[dict] — 연도별 CAPEX 패턴 시계열
     """
     # CAPEX = 유형자산 취득(CF 투자활동에서)
     cfAccounts = ["유형자산의취득", "무형자산의취득", "감가상각비"]
@@ -410,6 +445,7 @@ def calcCapexPattern(company, *, basePeriod: str | None = None) -> dict | None:
         return None
 
     def _getFlow2(row: dict, col: str) -> float:
+        """CF/IS flow 행에서 값 추출 (None → 0)."""
         v = row.get(col)
         return v if v is not None else 0
 
@@ -486,16 +522,23 @@ def calcInvestmentPropertyTrend(company, *, basePeriod: str | None = None) -> di
     부동산 비중이 높은 기업(REIT, 건설사, 보험사)에서 자산 분석 정확도 향상.
     notes.investmentProperty에서 항목별 시계열을 추출하여 총자산 대비 비중 추적.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {"period": str, "totalAssets": float, "ipValue": float, "ipPct": float},
-                ...
-            ],
-            "trend": str | None,
-            "notesDetail": list[dict] | None,
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            totalAssets : float — 총자산 (원)
+            ipValue : float — 투자부동산 금액 (원)
+            ipPct : float — 총자산 대비 비중 (%)
+        trend : str | None — 비중 추세 ("비중 증가"|"비중 감소"|"안정")
+        notesDetail : list[dict] | None — 주석 상세 데이터
     """
     bsResult = company.select("BS", ["자산총계", "투자부동산"])
     parsed = toDictBySnakeId(bsResult)
@@ -567,15 +610,26 @@ def calcIntangibleAssetDetail(company, *, basePeriod: str | None = None) -> dict
     영업권 비중, R&D 자산화 추세, 손상차손 리스크를 분석.
     바이오/IT 등 IP 비중 높은 기업에서 이익품질 판단에 중요.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "items": [{"name": str, "latestValue": float, "pct": float}, ...],
-            "totalIntangible": float,
-            "goodwillPct": float | None,
-            "trend": str | None,
-            "notesDetail": list[dict] | None,
-        }
+    Returns
+    -------
+    dict | None
+        items : list[dict]
+            name : str — 항목명
+            latestValue : float — 최근 금액 (원)
+            pct : float — 무형자산 내 비중 (%)
+        totalIntangible : float — 무형자산 합계 (원)
+        totalAssets : float — 총자산 (원)
+        intangiblePct : float — 총자산 대비 무형자산 비중 (%)
+        goodwillPct : float | None — 영업권 비중 (%)
+        trend : str | None — 비중 추세 ("비중 증가"|"비중 감소"|"안정")
+        notesDetail : list[dict] | None — 주석 원본
     """
     from dartlab.analysis.financial._helpers import fetchNotesDetail, parseNumStr
 

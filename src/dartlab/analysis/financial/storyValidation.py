@@ -356,12 +356,14 @@ def calcPlausibilityBand(
         pass
 
     def _percentile(series: list[float], value: float | None) -> float | None:
+        """시리즈 내 값의 백분위 위치 산출 (0~100)."""
         if value is None or not series:
             return None
         below = sum(1 for x in series if x < value)
         return round(below / len(series) * 100, 1)
 
     def _quantile(series: list[float], q: float) -> float | None:
+        """시리즈에서 q 분위수 값 추출."""
         if not series:
             return None
         sorted_s = sorted(series)

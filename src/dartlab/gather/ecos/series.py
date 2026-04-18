@@ -19,7 +19,23 @@ _START_YEAR = 2000
 
 
 def _formatDate(dt: str, frequency: str, *, isEnd: bool = False) -> str:
-    """날짜를 ECOS 주기별 형식으로 변환."""
+    """날짜를 ECOS 주기별 형식으로 변환.
+
+    Parameters
+    ----------
+    dt : str
+        날짜 문자열 (YYYY, YYYYMM, YYYYMMDD, 또는 YYYYQn).
+    frequency : str
+        ECOS 주기 코드. "A"(연), "Q"(분기), "M"(월), "D"(일).
+    isEnd : bool
+        True 면 기간 종료일 방향으로 확장 (12월/Q4/31일).
+
+    Returns
+    -------
+    str
+        ECOS API 형식 날짜 문자열.
+        A → "YYYY", Q → "YYYYQ1", M → "YYYYMM", D → "YYYYMMDD".
+    """
     dt = str(dt).replace("-", "")
 
     # 이미 분기 형식이면 그대로
@@ -53,7 +69,20 @@ def _formatDate(dt: str, frequency: str, *, isEnd: bool = False) -> str:
 
 
 def _parseDate(timeStr: str, frequency: str) -> date | None:
-    """ECOS TIME 문자열 → Python date."""
+    """ECOS TIME 문자열 → Python date.
+
+    Parameters
+    ----------
+    timeStr : str
+        ECOS 응답의 TIME 필드 (예: "2024", "2024Q1", "202401", "20240101").
+    frequency : str
+        ECOS 주기 코드. "A"/"Q"/"M"/"D".
+
+    Returns
+    -------
+    date | None
+        변환된 날짜. 파싱 실패 시 None.
+    """
     try:
         if frequency == "A":
             return datetime.strptime(timeStr, "%Y").date()
@@ -72,12 +101,34 @@ def _parseDate(timeStr: str, frequency: str) -> date | None:
 
 
 def _defaultStart(frequency: str) -> str:
-    """기본 시작일."""
+    """기본 시작일 — 2000년을 주기 형식으로 반환.
+
+    Parameters
+    ----------
+    frequency : str
+        ECOS 주기 코드. "A"/"Q"/"M"/"D".
+
+    Returns
+    -------
+    str
+        주기별 형식의 시작일 (예: A → "2000", M → "200001").
+    """
     return _formatDate(str(_START_YEAR), frequency)
 
 
 def _defaultEnd(frequency: str) -> str:
-    """기본 종료일 (오늘)."""
+    """기본 종료일 — 오늘 날짜를 주기 형식으로 반환.
+
+    Parameters
+    ----------
+    frequency : str
+        ECOS 주기 코드. "A"/"Q"/"M"/"D".
+
+    Returns
+    -------
+    str
+        주기별 형식의 종료일 (예: A → "2026", Q → "2026Q2").
+    """
     today = date.today()
     return _formatDate(today.strftime("%Y%m%d"), frequency, isEnd=True)
 
@@ -92,11 +143,29 @@ def fetchSeries(
 ) -> pl.DataFrame:
     """ECOS 지표 시계열 → Polars DataFrame ``(date, value)``.
 
-    Args:
-        indicatorId: 카탈로그 지표 ID (예: "GDP", "CPI", "BASE_RATE").
-        start: 시작일 (YYYY, YYYYMM, YYYYMMDD). None이면 2000년부터.
-        end: 종료일. None이면 최신까지.
-        enrich: True이면 변화율 추가 + Parquet 영구 캐시.
+    Parameters
+    ----------
+    client : EcosClient
+        ECOS REST API 클라이언트.
+    indicatorId : str
+        카탈로그 지표 ID (예: "GDP", "CPI", "BASE_RATE").
+    start : str | None
+        시작일 (YYYY, YYYYMM, YYYYMMDD). None이면 2000년부터.
+    end : str | None
+        종료일. None이면 최신까지.
+    enrich : bool
+        True이면 변화율 추가 + Parquet 영구 캐시.
+
+    Returns
+    -------
+    pl.DataFrame
+        컬럼: ``date`` (Date) — 관측일, ``value`` (Float64) — 지표값.
+        enrich=True 시 변화율 컬럼 추가.
+
+    Raises
+    ------
+    SeriesNotFoundError
+        카탈로그에 없는 indicatorId.
     """
     cached = _cache.get(indicatorId, start, end)
     if cached is not None:
@@ -166,6 +235,23 @@ def fetchMulti(
     """복수 지표 → wide DataFrame ``(date, GDP, CPI, ...)``.
 
     주기가 다른 지표를 합칠 때 outer join 후 forward-fill.
+
+    Parameters
+    ----------
+    client : EcosClient
+        ECOS REST API 클라이언트.
+    indicatorIds : list[str]
+        카탈로그 지표 ID 리스트.
+    start : str | None
+        시작일. None이면 2000년부터.
+    end : str | None
+        종료일. None이면 최신까지.
+
+    Returns
+    -------
+    pl.DataFrame
+        컬럼: ``date`` (Date) — 관측일, 각 지표 ID (Float64) — 지표값.
+        빈 리스트 입력 시 빈 DataFrame.
     """
     if not indicatorIds:
         return pl.DataFrame()

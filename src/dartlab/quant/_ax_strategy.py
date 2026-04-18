@@ -154,7 +154,40 @@ def runBacktest(
     embargo: int = 5,
     **kwargs,
 ) -> BacktestResult:
-    """`c.quant("backtest", style=... or rule=...)` — 단일 백테스트."""
+    """`c.quant("backtest", style=... or rule=...)` — 단일 백테스트.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (예: "005930").
+    style : str | Rule | None
+        8 프리셋 스타일명 또는 사용자 Rule 객체.
+    cpcv : bool
+        True 면 Combinatorial Purged Cross-Validation 실행.
+    n_splits : int
+        CPCV fold 수.
+    n_test : int
+        CPCV 테스트 fold 수.
+    embargo : int
+        CPCV 엠바고 기간 (일).
+    **kwargs
+        start : str — OHLCV 시작일 (예: "2014-01-01").
+
+    Returns
+    -------
+    BacktestResult
+        status : str — "ok" | "error" | "data_limited" | "not_applicable"
+        reason : str | None — 에러/제한 사유
+        style : str | None — 스타일명
+        sharpe : float — Sharpe 비율 (배)
+        mdd : float — 최대 낙폭 (%)
+        dsr : float — Deflated Sharpe Ratio (배)
+        trades : pl.DataFrame | None — 개별 거래 내역
+        oos : bool — Out-of-Sample 여부
+
+    Examples
+    --------
+    >>> c.quant("backtest", style="trendFollow")"""
     if style is None:
         return BacktestResult(status="error", reason="style= or Rule= is required", style=None)
 
@@ -365,7 +398,44 @@ def runWalkforward(
     step: int = 63,
     **kwargs,
 ) -> BacktestResult:
-    """`c.quant("walkforward", rule=... 또는 style=...)` — Lopez 슬라이딩 OOS."""
+    """Lopez 슬라이딩 window Out-of-Sample 검증.
+
+    학술 근거: Lopez de Prado (2018) — Advances in Financial ML.
+    train 윈도우로 규칙을 학습하고 test 윈도우에서 OOS 성과를 측정,
+    step 간격으로 슬라이딩하여 DSR·PBO 등 과적합 보정 지표를 산출한다.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (예: "005930").
+    rule : Rule | None
+        사용자 정의 Rule 객체. style 과 배타적.
+    style : str | None
+        8 프리셋 스타일명. rule 과 배타적.
+    train : int
+        학습 윈도우 크기 (일, 기본 252).
+    test : int
+        테스트 윈도우 크기 (일, 기본 63).
+    step : int
+        슬라이딩 간격 (일, 기본 63).
+    **kwargs
+        start : str — OHLCV 시작일 (예: "2014-01-01").
+
+    Returns
+    -------
+    BacktestResult
+        status : str — "ok" | "error"
+        reason : str | None — 에러 사유
+        style : str | None — 스타일명
+        sharpe : float — OOS Sharpe 비율 (배)
+        mdd : float — OOS 최대 낙폭 (%)
+        dsr : float — Deflated Sharpe Ratio (배)
+        trades : pl.DataFrame | None — OOS 거래 내역
+        oos : bool — True (항상 OOS)
+
+    Examples
+    --------
+    >>> c.quant("walkforward", style="trendFollow")"""
     if rule is None and style is None:
         return BacktestResult(status="error", reason="rule= or style= required", style=None)
 

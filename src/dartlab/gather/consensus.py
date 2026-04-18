@@ -26,9 +26,27 @@ async def fetch(
     """컨센서스 — fallback 체인 (async) + stale-while-revalidate.
 
     KR: naver → naver_global
-    US/기타: naver_global → naver
+    US/기타: naver_global
 
     모든 소스 실패 시 24시간 이내 stale 캐시를 반환한다.
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 ("005930") 또는 티커 ("AAPL").
+    market : str
+        "KR" 또는 "US". 기본 "KR".
+    client : GatherHttpClient | None
+        HTTP 클라이언트. None이면 도메인 모듈 기본값 사용.
+
+    Returns
+    -------
+    ConsensusData | None
+        targetPrice : float — 목표 주가 (원 또는 USD).
+        recommendation : str — 투자의견 ("Buy", "Hold" 등).
+        numAnalysts : int — 분석 애널리스트 수 (명).
+        source : str — 데이터 출처 도메인명.
+        None — 모든 소스 실패 + stale 만료(24시간 초과) 시.
     """
     cacheKey = f"{market}:{stock_code}"
     now = time.monotonic()

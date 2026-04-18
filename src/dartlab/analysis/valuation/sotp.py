@@ -220,6 +220,13 @@ def calcHoldingDFV(company: Any, *, basePeriod: str | None = None, overrides: di
 
 
 def _getCurrentPriceLight(company: Any) -> float | None:
+    """현재 주가 추출 — currentPrice 속성 우선, 없으면 gather 경유.
+
+    Returns
+    -------
+    float | None
+        현재 주가 (원). 조회 실패 시 None.
+    """
     try:
         price = getattr(company, "currentPrice", None)
         if price:
@@ -235,6 +242,13 @@ def _getCurrentPriceLight(company: Any) -> float | None:
 
 
 def _opinion(upside: float | None) -> str:
+    """upside 기반 투자 의견 산출.
+
+    Returns
+    -------
+    str
+        "강력매수" | "매수" | "보유" | "매도" | "강력매도" | "판단 불가".
+    """
     if upside is None:
         return "판단 불가"
     if upside > 30:

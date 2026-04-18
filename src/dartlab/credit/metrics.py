@@ -125,8 +125,56 @@ def _getRatios(company):
 def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
     """7축 모든 지표를 한 번에 산출.
 
-    company.select()로 원본 데이터를 직접 가져오고,
-    notes/sections에서 추가 정보를 보강한다.
+    company.select()로 원본 데이터(BS/IS/CF)를 직접 가져오고,
+    notes/sections에서 차입금 내역, 부문 구성, 감사의견 등을 보강한다.
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+    basePeriod : str | None
+        분석 기준 기간 (예: "2024"). None이면 최신 9개년.
+
+    Returns
+    -------
+    dict | None
+        history : list[dict] — 기간별 지표 시계열. 각 dict 포함 키:
+            period : str — 기간 (예: "2024")
+            totalAssets : float | None — 자산총계 (원)
+            totalBorrowing : float | None — 총차입금 (원)
+            ebitda : float | None — EBITDA (원)
+            ffo : float | None — FFO (원)
+            ocf : float | None — 영업활동현금흐름 (원)
+            fcf : float | None — 잉여현금흐름 (원)
+            revenue : float | None — 매출액 (원)
+            ffoToDebt : float | None — FFO/총차입금 (%)
+            debtToEbitda : float | None — 총차입금/EBITDA (배)
+            focfToDebt : float | None — FOCF/총차입금 (%)
+            ebitdaInterestCoverage : float | None — EBITDA/이자비용 (배)
+            debtRatio : float | None — 부채비율 (%)
+            borrowingDependency : float | None — 차입금의존도 (%)
+            netDebtToEbitda : float | None — 순차입금/EBITDA (배)
+            currentRatio : float | None — 유동비율 (%)
+            cashRatio : float | None — 현금비율 (%)
+            shortTermDebtRatio : float | None — 단기차입금비중 (%)
+            ocfToSales : float | None — OCF/매출 (%)
+            fcfToSales : float | None — FCF/매출 (%)
+            ocfToDebt : float | None — OCF/총차입금 (%)
+        businessStability : dict — 사업 안정성 지표
+            opMarginCV : float | None — 영업이익률 변동계수 (%)
+            revenueCV : float | None — 매출 변동계수 (%)
+            latestRevenue : float | None — 최신 매출 (원)
+            avgMargin : float | None — 평균 영업이익률 (%)
+            segmentHHI : float | None — 부문 HHI (점)
+        reliability : dict — 재무 신뢰성 (Beneish M, Piotroski F 등)
+        disclosureRisk : dict | None — 공시 리스크 (우발부채, 키워드)
+        auditOpinion : str | None — 감사의견 ("적정"/"한정"/"부적정"/"의견거절")
+        borrowingsDetail : list[dict] | None — 차입금 상세 내역
+        provisionsDetail : list[dict] | None — 충당금 상세 내역
+        segmentsDetail : list[dict] | None — 부문 상세 내역
+        profile : dict | None — 기업 프로필 (섹터, 주요제품)
+        segmentComposition : dict | None — 부문별 매출 구성
+        rank : dict | None — 업종 내 순위
     """
     # ── 원본 데이터 수집 ──
     bsResult = company.select(
@@ -682,10 +730,33 @@ def _fetchAuditOpinion(company) -> str | None:
 
 
 def calcSeparateMetrics(company) -> dict | None:
-    """별도재무제표 기반 보조 지표.
+    """별도재무제표(OFS) 기반 보조 지표.
 
     연결(CFS) 대비 별도(OFS)의 부채/차입금/EBITDA를 산출.
     지주사/캡티브 금융에서 연결 D/EBITDA 왜곡을 보정하는 데 사용.
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+
+    Returns
+    -------
+    dict | None
+        period : str | None — 별도재무제표 기간
+        totalAssets : float — 별도 자산총계 (원)
+        totalBorrowing : float — 별도 총차입금 (원)
+        ebitda : float — 별도 EBITDA (원)
+        netDebt : float — 별도 순차입금 (원)
+        revenue : float — 별도 매출 (원)
+        ocf : float — 별도 영업현금흐름 (원)
+        fcf : float | None — 별도 잉여현금흐름 (원)
+        separateDebtRatio : float | None — 별도 부채비율 (%)
+        separateDebtToEbitda : float | None — 별도 D/EBITDA (배)
+        separateNetDebtToEbitda : float | None — 별도 순차입금/EBITDA (배)
+        separateBorrowingDep : float | None — 별도 차입금의존도 (%)
+        separateOcfToSales : float | None — 별도 OCF/매출 (%)
+        separateOcfToDebt : float | None — 별도 OCF/총차입금 (%)
     """
     try:
         ofs = company._getFinanceBuild("y", "OFS")
@@ -760,6 +831,35 @@ def calcFinancialMetrics(company, *, basePeriod: str | None = None) -> dict | No
 
     일반기업용 D/EBITDA, FFO/Debt 대신
     자본비율, ROA, NIM 대리, 충당금 비율 등 금융업 핵심 지표 사용.
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스 (금융업).
+    basePeriod : str | None
+        분석 기준 기간 (예: "2024"). None이면 최신 9개년.
+
+    Returns
+    -------
+    dict | None
+        history : list[dict] — 기간별 금융업 지표 시계열. 각 dict 포함 키:
+            period : str — 기간
+            totalAssets : float | None — 자산총계 (원)
+            equity : float | None — 자본총계 (원)
+            netIncome : float | None — 당기순이익 (원)
+            operatingIncome : float | None — 영업이익 (원)
+            ocf : float | None — 영업활동현금흐름 (원)
+            equityRatio : float | None — 자기자본비율 (%)
+            roa : float | None — 총자산이익률 (%)
+            nimProxy : float | None — NIM 대리 (이자수익/자산) (%)
+            provisionRatio : float | None — 충당금비율 (대손상각비/자산) (%)
+            cashToAsset : float | None — 현금/자산 비율 (%)
+            currentRatio : float | None — 유동비율 (%)
+        businessStability : dict — 사업 안정성
+            revenueCV : float | None — 영업이익 변동계수 (%)
+            roaCV : float | None — ROA 변동계수 (%)
+            totalAssets : float | None — 최신 자산총계 (원)
+        track : str — "B" (금융업 트랙 식별자)
     """
     bsResult = company.select(
         "BS",

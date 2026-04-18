@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 from dartlab.core.finance.extract import getAnnualValues
 from dartlab.core.finance.fmt import fmtBig, fmtPrice
@@ -23,7 +22,7 @@ class ForecastResult:
 
     metric: str
     metricLabel: str
-    historical: list[Optional[float]]
+    historical: list[float | None]
     projected: list[float]
     horizon: int
     method: str
@@ -64,8 +63,8 @@ class ScenarioResult:
     bull: dict[str, float]
     bear: dict[str, float]
     probability: dict[str, float]
-    weightedValue: Optional[float]
-    currentPrice: Optional[float]
+    weightedValue: float | None
+    currentPrice: float | None
     warnings: list[str] = field(default_factory=list)
     currency: str = "KRW"
 
@@ -140,9 +139,34 @@ def forecastMetric(
     series: dict,
     metric: str = "revenue",
     horizon: int = 3,
-    sectorParams: Optional[SectorParams] = None,
+    sectorParams: SectorParams | None = None,
 ) -> ForecastResult:
-    """단일 메트릭 시계열 예측."""
+    """단일 메트릭 시계열 예측.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    metric : str
+        예측 대상 ("revenue", "operating_income", "net_income", "operating_cashflow").
+    horizon : int
+        예측 기간 (년, 기본 3).
+    sectorParams : SectorParams, optional
+        업종별 파라미터 (성장률 등).
+
+    Returns
+    -------
+    ForecastResult
+        metric : str — 예측 대상 코드
+        metricLabel : str — 한글 라벨
+        historical : list[float | None] — 과거 연간 실적 (원)
+        projected : list[float] — 예측값 시계열 (원)
+        horizon : int — 예측 기간 (년)
+        method : str — 사용 모델 ("linear" | "cagr_decay" | "mean_revert")
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
+        rSquared : float — 결정계수 (0~1)
+        growthRate : float — 적용 성장률 (%)
+    """
     warnings: list[str] = []
     target = FORECAST_TARGETS.get(metric)
     if target is None:
@@ -340,12 +364,27 @@ def _marginLinkedForecast(
 def forecastAll(
     series: dict,
     horizon: int = 3,
-    sectorParams: Optional[SectorParams] = None,
+    sectorParams: SectorParams | None = None,
 ) -> dict[str, ForecastResult]:
     """모든 주요 메트릭 예측.
 
-    매출은 정교한 앙상블, 영업이익/순이익은 매출×마진 연동.
+    매출은 정교한 앙상블, 영업이익/순이익은 매출x마진 연동.
     마진 연동 실패 시 단순 시계열 OLS fallback.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    horizon : int
+        예측 기간 (년, 기본 3).
+    sectorParams : SectorParams, optional
+        업종별 파라미터.
+
+    Returns
+    -------
+    dict[str, ForecastResult]
+        메트릭 키 → ForecastResult 매핑.
+        키: "revenue", "operating_income", "net_income", "operating_cashflow".
     """
     results: dict[str, ForecastResult] = {}
 
@@ -374,11 +413,33 @@ def forecastAll(
 
 def scenarioAnalysis(
     series: dict,
-    shares: Optional[int] = None,
-    sectorParams: Optional[SectorParams] = None,
-    currentPrice: Optional[float] = None,
+    shares: int | None = None,
+    sectorParams: SectorParams | None = None,
+    currentPrice: float | None = None,
 ) -> ScenarioResult:
-    """3-Scenario DCF 분석."""
+    """3-Scenario DCF 분석 — Bull/Base/Bear 확률가중 적정가.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    shares : int, optional
+        발행주식수.
+    sectorParams : SectorParams, optional
+        업종별 파라미터 (할인율, 성장률, 멀티플).
+    currentPrice : float, optional
+        현재 주가 (원).
+
+    Returns
+    -------
+    ScenarioResult
+        base : dict — Base 시나리오 (growth, discountRate, perShareValue 등)
+        bull : dict — Bull 시나리오
+        bear : dict — Bear 시나리오
+        probability : dict — 시나리오별 확률 (%)
+        weightedValue : float | None — 확률가중 주당 적정가 (원)
+        currentPrice : float | None — 현재 주가 (원)
+    """
     from dartlab.core.finance.dcf import DCFResult, dcfValuation
 
     warnings: list[str] = []
@@ -410,6 +471,7 @@ def scenarioAnalysis(
     )
 
     def _scenarioDict(dcf: DCFResult) -> dict[str, float | None]:
+        """DCFResult를 시나리오 요약 dict로 변환."""
         return {
             "growth": dcf.growthRateInitial,
             "discountRate": dcf.discountRate,
@@ -454,14 +516,42 @@ def scenarioAnalysis(
 
 def sensitivityAnalysis(
     series: dict,
-    shares: Optional[int] = None,
-    sectorParams: Optional[SectorParams] = None,
+    shares: int | None = None,
+    sectorParams: SectorParams | None = None,
     waccSteps: int = 5,
     waccRange: float = 2.0,
     growthSteps: int = 5,
     growthRange: float = 1.0,
 ) -> SensitivityResult:
-    """WACC × Terminal Growth 민감도 테이블."""
+    """WACC x Terminal Growth 민감도 테이블.
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    shares : int, optional
+        발행주식수.
+    sectorParams : SectorParams, optional
+        업종별 파라미터.
+    waccSteps : int
+        WACC 축 단계 수 (기본 5).
+    waccRange : float
+        WACC 기준 대비 상하 범위 (%p, 기본 2.0).
+    growthSteps : int
+        영구성장률 축 단계 수 (기본 5).
+    growthRange : float
+        영구성장률 기준 대비 상하 범위 (%p, 기본 1.0).
+
+    Returns
+    -------
+    SensitivityResult
+        waccValues : list[float] — WACC 축 값 (%)
+        growthValues : list[float] — 영구성장률 축 값 (%)
+        matrix : list[list[float]] — 주당 가치 매트릭스 (원)
+        baseWacc : float — 기준 WACC (%)
+        baseGrowth : float — 기준 영구성장률 (%)
+        baseValue : float — 기준 주당 가치 (원)
+    """
     from dartlab.core.finance.dcf import dcfValuation
 
     sp = sectorParams or SectorParams(

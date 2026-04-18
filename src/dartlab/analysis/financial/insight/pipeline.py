@@ -132,6 +132,7 @@ def _extractAuditData(company: Company | None) -> AuditDataForAnomaly | None:
 
 
 def _ratio_archetype_override(company: Company | None) -> str | None:
+    """업종별 비율 아키타입 강제 지정 (금융업 등 특수 업종)."""
     if company is None:
         return None
 
@@ -284,6 +285,17 @@ def analyzeFinancial(
 
 
 def analyzeAudit(company) -> list[Anomaly]:
-    """감사 Red Flag만 단독 분석."""
+    """감사 Red Flag만 단독 분석.
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+
+    Returns
+    -------
+    list[Anomaly]
+        감사 관련 이상 신호 목록.
+    """
     auditData = _extractAuditData(company)
     return detectAuditRedFlags(auditData)

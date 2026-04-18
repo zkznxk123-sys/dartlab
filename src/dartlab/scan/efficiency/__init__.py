@@ -38,7 +38,21 @@ _CCC_CAP = 3000.0  # CCC +-3000일 초과 클램핑
 
 
 def _gradeEfficiency(ccc: float | None) -> str:
-    """CCC 기준 효율 등급."""
+    """현금전환주기(CCC) → 운영 효율 등급 변환.
+
+    우수(90일 미만) / 양호(180일 미만) / 보통(365일 미만) / 비효율(365일 이상).
+    None이면 '해당없음'을 반환한다.
+
+    Parameters
+    ----------
+    ccc : float | None
+        현금전환주기 (일)
+
+    Returns
+    -------
+    str
+        효율 등급 (우수 | 양호 | 보통 | 비효율 | 해당없음)
+    """
     if ccc is None:
         return "해당없음"
     if ccc < 90:

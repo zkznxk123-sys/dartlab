@@ -19,6 +19,13 @@ _MAX_YEARS = MAX_RATIO_YEARS
 
 
 def _yoy(cur, prev) -> float | None:
+    """전기대비 증감률 계산.
+
+    Returns
+    -------
+    float | None
+        YoY 변화율 (%). 계산 불가 시 None.
+    """
     if cur is None or prev is None or prev == 0:
         return None
     return round((cur - prev) / abs(prev) * 100, 2)
@@ -331,6 +338,7 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
         return None
 
     def _pct(val, r):
+        """매출 대비 비율 계산 (%)."""
         if val is None or r is None or r == 0:
             return None
         return round(val / r * 100, 2)

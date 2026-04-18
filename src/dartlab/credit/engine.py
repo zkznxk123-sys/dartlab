@@ -640,9 +640,51 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
     """Company 객체로 신용등급 산출.
 
     기업 유형에 따라 3-Track 분기:
-    - Track A: 일반기업 (기존 7축)
-    - Track B: 금융업 (5축 전용)
-    - Track C: 지주사 (7축 + 가중치 차별화)
+    - Track A: 일반기업 (7축 가중평균)
+    - Track B: 금융업 (5축 전용 — 자본적정성/수익성/자산건전성/유동성/사업안정성)
+    - Track C: 지주사 (7축 + 가중치 차별화 + 별도재무 블렌딩)
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+    detail : bool
+        True이면 metricsHistory, businessStability, narratives 등 상세 포함.
+    basePeriod : str | None
+        분석 기준 기간 (예: "2024"). None이면 최신.
+
+    Returns
+    -------
+    dict | None
+        grade : str — dCR 등급 (예: "dCR-AA+")
+        gradeRaw : str — 등급 코드 (예: "AA+")
+        gradeDescription : str — 등급 설명
+        gradeCategory : str — 등급 범주 (최우량/우량/투자적격/투기/부실)
+        investmentGrade : bool — 투자적격 여부
+        score : float — 위험 점수 (0=최우량, 100=최위험) (점)
+        healthScore : float — 건전성 점수 (100-score) (점)
+        currentScore : float — 시계열 안정화 전 당기 점수 (점)
+        pdEstimate : float — 추정 부도확률 (%)
+        eCR : str | None — 현금흐름등급 (Track B는 None)
+        outlook : str — 전망 ("안정적"/"긍정적"/"부정적")
+        sector : str — 업종 라벨
+        captiveFinance : bool — 캡티브 금융 여부
+        holding : bool — 지주사 여부
+        latestPeriod : str — 최신 분석 기간
+        chsAdjustment : dict | None — CHS 부도확률 보정 결과
+        notchAdjustment : dict | None — Notch 보정 결과
+        divergenceExplanation : list[str] — 괴리 원인 설명
+        methodologyVersion : str — 방법론 버전
+        axes : list[dict] — 축별 상세 (name, score, weight, contribution, metrics)
+        metricsHistory : list[dict] — (detail=True) 기간별 지표 시계열
+        narratives : dict — (detail=True) 서사 (overall, causalChain, axes 등)
+
+    Examples
+    --------
+    >>> from dartlab.credit.engine import evaluateCompany
+    >>> result = evaluateCompany(company)
+    >>> result["grade"]
+    'dCR-AA+'
     """
     sector, industryGroup = _getSectorInfo(company)
     isFinancialCo = _isFinancial(company)

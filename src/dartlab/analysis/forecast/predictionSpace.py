@@ -56,10 +56,20 @@ class PredictionSpace:
     dataFreshness: str = "unavailable"
 
     def impactOn(self, sectorKey: str | None) -> dict[str, float]:
-        """섹터별 매출 영향 추정 (%).
+        """섹터별 매출 영향 추정.
 
         SECTOR_ELASTICITY의 탄성치를 사용하여
         각 축 상태 → 매출 변화율로 변환.
+
+        Parameters
+        ----------
+        sectorKey : str | None
+            WICS 업종 키.
+
+        Returns
+        -------
+        dict[str, float]
+            축 이름 → 매출 영향 추정치 (%).
         """
         from dartlab.core.finance.scenario import getElasticity
 
@@ -100,7 +110,15 @@ class PredictionSpace:
         return {k: round(v, 2) for k, v in impacts.items()}
 
     def summary(self) -> dict:
-        """AI 컨텍스트용 요약."""
+        """AI 컨텍스트용 요약.
+
+        Returns
+        -------
+        dict
+            axes : dict — 축별 상태/방향/수준/모멘텀
+            timestamp : str — 생성 시각
+            freshness : str — 데이터 신선도
+        """
         return {
             "axes": {
                 name: {
@@ -164,6 +182,7 @@ _AXIS_DEFS = {
 
 
 def _clamp(v: float, lo: float = -1.0, hi: float = 1.0) -> float:
+    """값을 [lo, hi] 범위로 클램핑."""
     return max(lo, min(hi, v))
 
 
@@ -361,6 +380,16 @@ def getPredictionSpace(*, forceRefresh: bool = False) -> PredictionSpace | None:
     첫 호출 시 매크로 데이터 fetch (2-5초).
     이후 세션 내 캐시 반환 (마이크로초).
     API 키 없으면 None.
+
+    Parameters
+    ----------
+    forceRefresh : bool
+        캐시 무시하고 재수집.
+
+    Returns
+    -------
+    PredictionSpace | None
+        6축 보편 예측 공간. 데이터 없으면 None.
     """
     global _SPACE_CACHE, _CACHE_TS
 

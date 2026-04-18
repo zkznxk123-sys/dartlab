@@ -39,6 +39,7 @@ _SAFE = (
 
 
 def _safe(fn: Any, *args: Any, **kwargs: Any) -> Any:
+    """함수 호출을 안전하게 실행 — 예외 발생 시 None 반환."""
     try:
         return fn(*args, **kwargs)
     except _SAFE:
@@ -75,18 +76,70 @@ def _addMetricNode(
 
 
 def _addCauses(g: CompanyGraph, source_id: str, target_id: str, label: str = "") -> None:
+    """인과 엣지 추가 — source 가 target 의 원인.
+
+    Parameters
+    ----------
+    g : CompanyGraph
+        대상 그래프.
+    source_id : str
+        원인 노드 ID.
+    target_id : str
+        결과 노드 ID.
+    label : str
+        엣지 설명.
+    """
     g.addEdge(Edge(source=source_id, target=target_id, type=EdgeType.CAUSES, label=label))
 
 
 def _addPartOf(g: CompanyGraph, part_id: str, whole_id: str, label: str = "") -> None:
+    """구성 엣지 추가 — part 가 whole 의 구성 요소.
+
+    Parameters
+    ----------
+    g : CompanyGraph
+        대상 그래프.
+    part_id : str
+        부분 노드 ID.
+    whole_id : str
+        전체 노드 ID.
+    label : str
+        엣지 설명 (비중 등).
+    """
     g.addEdge(Edge(source=part_id, target=whole_id, type=EdgeType.PART_OF, label=label))
 
 
 def _addDerived(g: CompanyGraph, base_id: str, derived_id: str, label: str = "") -> None:
+    """파생 엣지 추가 — base 에서 derived 가 계산됨.
+
+    Parameters
+    ----------
+    g : CompanyGraph
+        대상 그래프.
+    base_id : str
+        원본 노드 ID.
+    derived_id : str
+        파생 노드 ID.
+    label : str
+        계산 설명.
+    """
     g.addEdge(Edge(source=base_id, target=derived_id, type=EdgeType.DERIVED, label=label))
 
 
 def _addAnomaly(g: CompanyGraph, source_id: str, target_id: str, label: str = "") -> None:
+    """이상치 엣지 추가 — source 에서 target 으로의 이상 신호.
+
+    Parameters
+    ----------
+    g : CompanyGraph
+        대상 그래프.
+    source_id : str
+        이상 감지 노드 ID.
+    target_id : str
+        영향 받는 노드 ID.
+    label : str
+        이상 내용 설명.
+    """
     g.addEdge(Edge(source=source_id, target=target_id, type=EdgeType.ANOMALY, label=label))
 
 
@@ -280,10 +333,22 @@ def _buildActTransitions(g: CompanyGraph) -> None:
 
 
 def buildGraph(company: Any, *, basePeriod: str | None = None) -> CompanyGraph:
-    """Company → CompanyGraph.
+    """Company → CompanyGraph — 6막 인과 그래프 빌드.
 
     14축 calc 캐시 재사용 → 빌드 < 2초.
     메모리 < 50MB (dict-of-dicts, Polars 비사용).
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
+
+    Returns
+    -------
+    CompanyGraph
+        6막 인과 그래프. nodes (metric/segment/event) + edges (causes/partOf/derived/anomaly).
     """
     stockCode = getattr(company, "stockCode", None) or getattr(company, "ticker", "") or ""
     corpName = getattr(company, "corpName", "") or ""

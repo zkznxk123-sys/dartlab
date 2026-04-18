@@ -24,6 +24,13 @@ from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
 
 
 def _yoy(cur, prev) -> float | None:
+    """전기대비 증감률 계산.
+
+    Returns
+    -------
+    float | None
+        YoY 변화율 (%). 계산 불가 시 None.
+    """
     if cur is None or prev is None or prev == 0:
         return None
     return round((cur - prev) / abs(prev) * 100, 2)
@@ -472,13 +479,19 @@ def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 def calcInvestmentInOther(company, *, basePeriod: str | None = None) -> dict | None:
     """investmentInOtherDetail docs 토픽에서 타법인 출자 총액 추출.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "totalBookValue": float | None,
-            "description": str | None,
-            "period": str | None,
-        }
+    Returns
+    -------
+    dict | None
+        totalBookValue : float | None — 출자 총 장부금액 (억원)
+        description : str | None — 원문 서술 발췌
+        period : str | None — 기준 연도
     """
     import re
 

@@ -617,12 +617,36 @@ class Quant:
         return pl.DataFrame(rows)
 
     def __repr__(self) -> str:
-        counts = {}
-        for entry in _AXIS_REGISTRY.values():
+        # 그룹별 축 이름 수집
+        grouped: dict[str, list[str]] = {}
+        for key, entry in _AXIS_REGISTRY.items():
             g = _GROUPS.get(entry.group, entry.group)
-            counts[g] = counts.get(g, 0) + 1
-        parts = [f"{g} {n}" for g, n in counts.items()]
-        return f"Quant({len(_AXIS_REGISTRY)}축: {', '.join(parts)})"
+            grouped.setdefault(g, []).append(key)
+
+        lines = [
+            f"Quant — {len(_AXIS_REGISTRY)}축 종목 레벨 정량분석",
+            "",
+            "━━━ 그룹별 축 ━━━",
+        ]
+        for g, axes in grouped.items():
+            lines.append(f"  {g} ({len(axes)}): {', '.join(axes)}")
+
+        lines += [
+            "",
+            "━━━ 빠른 시작 ━━━",
+            '  c = dartlab.Company("005930")',
+            "  c.quant()                             # 이 가이드",
+            '  c.quant("종합")                        # 기술적 종합 판정',
+            '  c.quant("모멘텀")                      # 모멘텀 분석',
+            '  c.quant("베타")                        # 시장 베타 + CAPM',
+            "",
+            "━━━ 데이터 ━━━",
+            "  주가 OHLCV: 자동 수집 (네이버/Yahoo, API 키 불필요)",
+            "  재무 데이터: scan/finance.parquet (자동 다운로드)",
+            "",
+            "  노트북: https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/04_quant.py",
+        ]
+        return "\n".join(lines)
 
     # accessor 패턴: quant.momentum("005930")
     def __getattr__(self, name: str) -> Any:

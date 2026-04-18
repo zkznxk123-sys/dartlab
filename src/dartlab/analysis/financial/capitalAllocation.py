@@ -30,21 +30,23 @@ from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
 def calcDividendPolicy(company, *, basePeriod: str | None = None) -> dict | None:
     """배당 정책 시계열 — 배당성향, 배당금 추이, 연속 배당.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {
-                    "period": str,
-                    "dividendsPaid": float,
-                    "netIncome": float,
-                    "payoutRatio": float | None,
-                    "dividendGrowth": float | None,
-                },
-                ...
-            ],
-            "consecutiveYears": int,
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            dividendsPaid : float — 배당금 지급액 (원)
+            netIncome : float — 당기순이익 (원)
+            payoutRatio : float | None — 배당성향 (%)
+            dividendGrowth : float | None — 배당 성장률 (%)
+        consecutiveYears : int — 연속 배당 연수
     """
     cfResult = company.select("CF", ["dividends_paid"])
     isResult = company.select("IS", ["당기순이익"])
@@ -110,23 +112,25 @@ def calcDividendPolicy(company, *, basePeriod: str | None = None) -> dict | None
 
 @memoized_calc
 def calcShareholderReturn(company, *, basePeriod: str | None = None) -> dict | None:
-    """주주환��� 시계열 — 배당 + 자사주 매입 vs FCF.
+    """주주환원 시계열 — 배당 + 자사주 매입 vs FCF.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {
-                    "period": str,
-                    "dividendsPaid": float,
-                    "treasuryStockPurchase": float,
-                    "totalReturn": float,
-                    "fcf": float,
-                    "returnToFcf": float | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            dividendsPaid : float — 배당금 (원)
+            treasuryStockPurchase : float — 자사주 매입액 (원)
+            totalReturn : float — 총주주환원 (원)
+            fcf : float — 잉여현금흐름 (원)
+            returnToFcf : float | None — 주주환원/FCF 비율 (%)
     """
     cfResult = company.select(
         "CF",
@@ -188,21 +192,23 @@ def calcShareholderReturn(company, *, basePeriod: str | None = None) -> dict | N
 def calcReinvestment(company, *, basePeriod: str | None = None) -> dict | None:
     """재투자 시계열 — 재투자율, CAPEX/매출.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {
-                    "period": str,
-                    "capex": float,
-                    "operatingIncome": float,
-                    "revenue": float,
-                    "capexToRevenue": float | None,
-                    "retentionRate": float | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            capex : float — 자본적지출 (원)
+            operatingIncome : float — 영업이익 (원)
+            revenue : float — 매출 (원)
+            capexToRevenue : float | None — CAPEX/매출 비율 (%)
+            retentionRate : float | None — 유보율 (%)
     """
     cfResult = company.select(
         "CF",
@@ -264,20 +270,22 @@ def calcReinvestment(company, *, basePeriod: str | None = None) -> dict | None:
 def calcFcfUsage(company, *, basePeriod: str | None = None) -> dict | None:
     """FCF 사용처 분해 시계열 — 배당/부채상환/잔여.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "history": [
-                {
-                    "period": str,
-                    "fcf": float,
-                    "dividendsPaid": float,
-                    "debtRepaid": float,
-                    "residual": float,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            period : str — 기간
+            fcf : float — 잉여현금흐름 (원)
+            dividendsPaid : float — 배당금 지급 (원)
+            debtRepaid : float — 부채 상환 (원)
+            residual : float — 잔여 현금 (원)
     """
     cfResult = company.select(
         "CF",
@@ -342,14 +350,20 @@ def calcFcfUsage(company, *, basePeriod: str | None = None) -> dict | None:
 def calcDividendDocs(company, *, basePeriod: str | None = None) -> dict | None:
     """docs dividend 토픽에서 배당성향, 배당수익률, 주당배당금 추출.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "dps": float | None,
-            "payoutRatio": float | None,
-            "dividendYield": float | None,
-            "period": str,
-        }
+    Returns
+    -------
+    dict | None
+        dps : float | None — 주당배당금 (원)
+        payoutRatio : float | None — 배당성향 (%)
+        dividendYield : float | None — 배당수익률 (%)
+        period : str — 기준 기간
     """
     from dartlab.analysis.financial._helpers import parseNumStr
 
@@ -408,15 +422,23 @@ def calcDividendDocs(company, *, basePeriod: str | None = None) -> dict | None:
 def calcTreasuryStockStatus(company, *, basePeriod: str | None = None) -> dict | None:
     """treasuryStock 토픽에서 자사주 취득/처분/소각 현황 추출.
 
-    반환::
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
-        {
-            "rows": [
-                {"method": str, "beginShares": float, "acquired": float,
-                 "disposed": float, "retired": float, "endShares": float},
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict | None
+        rows : list[dict]
+            method : str — 취득방법
+            beginShares : float — 기초수량 (주)
+            acquired : float — 취득수량 (주)
+            disposed : float — 처분수량 (주)
+            retired : float — 소각수량 (주)
+            endShares : float — 기말수량 (주)
     """
     result = company.show("treasuryStock")
 
@@ -465,7 +487,14 @@ def calcTreasuryStockStatus(company, *, basePeriod: str | None = None) -> dict |
 
 
 def _edgarTreasuryStockFallback(company) -> dict | None:
-    """EDGAR: companyfacts XBRL에서 자사주 관련 태그 추출."""
+    """EDGAR: companyfacts XBRL에서 자사주 관련 태그 추출.
+
+    Returns
+    -------
+    dict | None
+        ``{"rows": [{"method": str, "acquired": float(달러), "endShares": None}, ...], "source": "XBRL"}``.
+        데이터 없으면 None.
+    """
     try:
         from dartlab.analysis.financial._helpers import toDictBySnakeId
         from dartlab.core.finance.helpers import annualColsFromPeriods

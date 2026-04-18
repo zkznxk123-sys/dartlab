@@ -16,7 +16,14 @@ _CACHE_DIR = Path.home() / ".dartlab" / "cache" / "history"
 
 
 def _available() -> bool:
-    """FDR 설치 여부."""
+    """FinanceDataReader 패키지 설치 여부를 확인.
+
+    Returns
+    -------
+    bool
+        ``True`` — ``finance-datareader`` import 가능.
+        ``False`` — 미설치.
+    """
     try:
         import FinanceDataReader  # noqa: F401
 
@@ -63,7 +70,7 @@ async def fetch_history(
 
     try:
         df = fdr.DataReader(stock_code, startDate, endDate)
-    except Exception as exc:  # noqa: BLE001
+    except (ImportError, OSError, ValueError, KeyError, TypeError) as exc:
         log.warning("FDR fetch 실패 (%s): %s", stock_code, exc)
         return []
 
@@ -91,14 +98,43 @@ async def fetch_history(
 
 
 def _cacheKey(stockCode: str, market: str) -> Path:
-    """캐시 파일 경로."""
+    """OHLCV 히스토리 Parquet 캐시 파일 경로를 생성.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (예: ``"005930"``, ``"AAPL"``).
+    market : str
+        시장 코드 (예: ``"KR"``, ``"US"``). 소문자로 변환하여 하위 디렉터리 결정.
+
+    Returns
+    -------
+    Path
+        ``~/.dartlab/cache/history/{market}/{stockCode}.parquet`` 경로.
+        부모 디렉터리가 없으면 자동 생성.
+    """
     subdir = _CACHE_DIR / market.lower()
     subdir.mkdir(parents=True, exist_ok=True)
     return subdir / f"{stockCode}.parquet"
 
 
 def _saveCache(stockCode: str, market: str, rows: list[dict]) -> None:
-    """히스토리를 Parquet으로 저장."""
+    """OHLCV 히스토리를 Parquet 캐시로 저장.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드.
+    market : str
+        시장 코드.
+    rows : list[dict]
+        OHLCV 행 목록. 빈 리스트면 저장하지 않음.
+
+    Returns
+    -------
+    None
+        파일 저장 완료 후 반환. 저장 실패 시 경고 로그만 남김.
+    """
     if not rows:
         return
     try:
@@ -108,14 +144,27 @@ def _saveCache(stockCode: str, market: str, rows: list[dict]) -> None:
         path = _cacheKey(stockCode, market)
         df.write_parquet(path)
         log.debug("FDR 캐시 저장: %s (%d rows)", path, len(rows))
-    except Exception as exc:  # noqa: BLE001
+    except (ImportError, OSError, ValueError, KeyError, TypeError) as exc:
         log.warning("FDR 캐시 저장 실패: %s", exc)
 
 
 def _loadCache(stockCode: str, market: str) -> list[dict] | None:
-    """Parquet 캐시에서 히스토리 로드.
+    """Parquet 캐시에서 OHLCV 히스토리를 로드.
 
-    캐시가 1일 이내면 사용, 아니면 None.
+    캐시 파일이 1일 이내 생성된 경우만 사용한다.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드.
+    market : str
+        시장 코드.
+
+    Returns
+    -------
+    list[dict] | None
+        캐시된 OHLCV 행 목록. 각 dict는 date/open/high/low/close/volume 키 포함.
+        캐시 없음, 1일 초과, 읽기 실패 시 None.
     """
     path = _cacheKey(stockCode, market)
     if not path.exists():
@@ -133,5 +182,5 @@ def _loadCache(stockCode: str, market: str) -> list[dict] | None:
 
         df = pl.read_parquet(path)
         return df.to_dicts()
-    except Exception:  # noqa: BLE001
+    except (ImportError, OSError, ValueError):
         return None

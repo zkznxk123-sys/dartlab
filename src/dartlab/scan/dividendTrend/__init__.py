@@ -12,9 +12,22 @@ def _classifyPattern(
     dps1: float | None,
     dps2: float | None,
 ) -> str:
-    """3개년 DPS → 패턴 분류.
+    """3개년 DPS → 배당 패턴 분류.
 
-    dps0=당기, dps1=전기, dps2=전전기.
+    Parameters
+    ----------
+    dps0 : float | None
+        당기 주당배당금 (원).
+    dps1 : float | None
+        전기 주당배당금 (원).
+    dps2 : float | None
+        전전기 주당배당금 (원).
+
+    Returns
+    -------
+    str
+        패턴명. 다음 중 하나:
+        무배당 / 시작 / 중단 / 연속증가 / 연속감소 / 안정 / 증가 / 감소 / 불규칙.
     """
     has0 = dps0 is not None and dps0 > 0
     has1 = dps1 is not None and dps1 > 0
@@ -47,7 +60,20 @@ def _classifyPattern(
 
 
 def _gradeDividend(pattern: str, dpsGrowth: float | None) -> str:
-    """배당 등급."""
+    """배당 패턴 → 등급 변환.
+
+    Parameters
+    ----------
+    pattern : str
+        ``_classifyPattern`` 이 반환한 패턴명.
+    dpsGrowth : float | None
+        DPS 전기 대비 성장률 (%).
+
+    Returns
+    -------
+    str
+        등급. 다음 중 하나: 우수 / 양호 / 보통 / 주의 / 위험 / 무배당.
+    """
     if pattern == "무배당":
         return "무배당"
     if pattern in ("연속증가",):
@@ -64,7 +90,26 @@ def _gradeDividend(pattern: str, dpsGrowth: float | None) -> str:
 
 
 def scanDividendTrend(*, verbose: bool = True) -> pl.DataFrame:
-    """전종목 배당 추이 스캔 -- DPS 3개년 + 패턴 + 등급."""
+    """전종목 배당 추이 스캔 — DPS 3개년 + 패턴 + 등급.
+
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 상황 출력 여부.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        dpsCurrent : float — 당기 주당배당금 (원)
+        dpsPrev : float — 전기 주당배당금 (원)
+        dpsPrev2 : float — 전전기 주당배당금 (원)
+        dpsGrowth : float — DPS 전기 대비 성장률 (%)
+        payoutRatio : float — 현금배당성향 (%)
+        yieldCurrent : float — 현금배당수익률 (%)
+        pattern : str — 배당 패턴 (무배당/시작/중단/연속증가/연속감소/안정/증가/감소/불규칙)
+        grade : str — 배당 등급 (우수/양호/보통/주의/위험/무배당)
+    """
     raw = scan_parquets(
         "dividend",
         ["stockCode", "year", "quarter", "se", "thstrm", "frmtrm", "lwfr", "stock_knd"],

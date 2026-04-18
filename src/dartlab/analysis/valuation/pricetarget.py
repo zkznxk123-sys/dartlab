@@ -395,6 +395,18 @@ def _monte_carlo_price_distribution(
     n = len(values)
 
     def pct(p: float) -> float:
+        """백분위 값 추출.
+
+        Parameters
+        ----------
+        p : float
+            백분위 (0.0~1.0).
+
+        Returns
+        -------
+        float
+            해당 백분위의 값.
+        """
         idx = int(n * p)
         return values[min(idx, n - 1)]
 
@@ -448,17 +460,37 @@ def compute_price_target(
 
     v2: context_signals가 있으면 확률 동적 재가중 + sizeClass별 MC σ 차등.
 
-    Args:
-        series: 시계열 dict (unwrap 완료).
-        sector_key: 업종 키 (SectorElasticity 조회).
-        current_price: 현재 주가 (원).
-        shares: 발행주식수.
-        market_cap: 시가총액 (WACC의 equity weight 계산용).
-        terminal_growth: 영구성장률 (%).
-        mc_iterations: Monte Carlo 반복 횟수.
-        mc_seed: 난수 시드 (재현용).
-        scenario_probabilities: 시나리오별 확률 오버라이드.
-        context_signals: v2 맥락 신호 (확률 재가중 + MC σ 차등).
+    Parameters
+    ----------
+    series : dict
+        시계열 dict (unwrap 완료).
+    sector_key : str, optional
+        업종 키 (SectorElasticity 조회).
+    current_price : float, optional
+        현재 주가 (원).
+    shares : int, optional
+        발행주식수.
+    market_cap : float, optional
+        시가총액 (WACC의 equity weight 계산용) (원).
+    terminal_growth : float
+        영구성장률 (%).
+    mc_iterations : int
+        Monte Carlo 반복 횟수.
+    mc_seed : int, optional
+        난수 시드 (재현용).
+    scenario_probabilities : dict[str, float], optional
+        시나리오별 확률 오버라이드.
+    context_signals : ContextSignals, optional
+        v2 맥락 신호 (확률 재가중 + MC σ 차등).
+
+    Returns
+    -------
+    PriceTargetResult
+        target : float — 가중 평균 목표주가 (원)
+        upside_pct : float — 현재가 대비 upside (%)
+        signal : str — 투자 신호 ("strong_buy"|"buy"|"hold"|"sell"|"strong_sell")
+        scenarios : dict — 시나리오별 DCF 결과
+        percentiles : dict — Monte Carlo 백분위 분포
     """
     warnings: list[str] = []
     probs = scenario_probabilities or dict(SCENARIO_PROBABILITIES)

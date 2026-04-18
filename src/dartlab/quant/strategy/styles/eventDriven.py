@@ -81,7 +81,23 @@ def _date_to_filing_flag(dates: list, filing_date_strs: list[str], window: int =
 
 
 def build(company, *, hold_window: int = 20, atr_k: float = 3.0) -> Rule:
-    """이벤트드리븐 룰 빌드. allFilings 없으면 빈 룰."""
+    """이벤트드리븐 룰 빌드 — DART 공시 발표 후 PEAD drift 포착.
+
+    Parameters
+    ----------
+    company : Company
+        dartlab Company 객체.
+    hold_window : int
+        공시 후 보유 기간 (일). 기본 20.
+    atr_k : float
+        ATR stop 배수. 기본 3.0.
+
+    Returns
+    -------
+    Rule
+        entry = filing_flag & above_sma5, exit = 보유기간 경과.
+        allFilings 없으면 빈 룰 (entry/exit 전부 False).
+    """
     arr = get_arrays(company)
     close = arr.get("close")
     dates = arr.get("date")

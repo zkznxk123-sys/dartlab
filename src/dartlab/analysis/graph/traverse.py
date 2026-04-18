@@ -17,8 +17,19 @@ def causes(
 ) -> list[tuple[Node, Edge, int]]:
     """label 매칭 노드의 원인 트리 (역방향 BFS).
 
-    Returns:
-        [(원인노드, 엣지, depth), ...] — depth 1이 직접 원인.
+    Parameters
+    ----------
+    graph : CompanyGraph
+        탐색 대상 그래프.
+    label : str
+        검색할 노드 라벨 (부분 매칭).
+    max_depth : int
+        최대 탐색 깊이 (기본 3).
+
+    Returns
+    -------
+    list[tuple[Node, Edge, int]]
+        (원인노드, 엣지, depth) 튜플 리스트. depth 1이 직접 원인.
     """
     targets = graph.findNodes(label=label)
     if not targets:
@@ -50,7 +61,22 @@ def ancestors(
     *,
     max_depth: int = 5,
 ) -> list[Node]:
-    """label 매칭 노드의 조상 체인 (PART_OF 엣지만)."""
+    """label 매칭 노드의 조상 체인 (PART_OF 엣지만).
+
+    Parameters
+    ----------
+    graph : CompanyGraph
+        탐색 대상 그래프.
+    label : str
+        검색할 노드 라벨 (부분 매칭).
+    max_depth : int
+        최대 조상 수 (기본 5).
+
+    Returns
+    -------
+    list[Node]
+        PART_OF 관계의 조상 노드 리스트.
+    """
     targets = graph.findNodes(label=label)
     if not targets:
         return []
@@ -81,7 +107,20 @@ def timeline(
     graph: CompanyGraph,
     label: str,
 ) -> list[Node]:
-    """같은 label의 노드를 기간순 정렬."""
+    """같은 label의 노드를 기간순 정렬.
+
+    Parameters
+    ----------
+    graph : CompanyGraph
+        탐색 대상 그래프.
+    label : str
+        검색할 노드 라벨 (부분 매칭).
+
+    Returns
+    -------
+    list[Node]
+        period 오름차순 정렬된 노드 리스트.
+    """
     nodes = graph.findNodes(label=label)
     return sorted(nodes, key=lambda n: n.period)
 
@@ -92,7 +131,22 @@ def related(
     *,
     edge_type: EdgeType | None = None,
 ) -> list[tuple[Node, Edge]]:
-    """label 매칭 노드의 연결된 노드 (forward + backward)."""
+    """label 매칭 노드의 연결된 노드 (forward + backward).
+
+    Parameters
+    ----------
+    graph : CompanyGraph
+        탐색 대상 그래프.
+    label : str
+        검색할 노드 라벨 (부분 매칭).
+    edge_type : EdgeType, optional
+        필터링할 엣지 타입. None이면 전체.
+
+    Returns
+    -------
+    list[tuple[Node, Edge]]
+        (연결 노드, 엣지) 튜플 리스트 (중복 제거).
+    """
     targets = graph.findNodes(label=label)
     if not targets:
         return []
@@ -128,6 +182,18 @@ def causesNarrative(graph: CompanyGraph, label: str) -> str:
     """causes() 결과를 자연어 서사로 변환.
 
     환각 0 보장: 모든 문장이 노드 value + edge label에서 생성됨.
+
+    Parameters
+    ----------
+    graph : CompanyGraph
+        탐색 대상 그래프.
+    label : str
+        원인 분석할 노드 라벨.
+
+    Returns
+    -------
+    str
+        마크다운 원인 분석 서사. 원인 없으면 안내 메시지.
     """
     chain = causes(graph, label)
     if not chain:
@@ -145,7 +211,20 @@ def causesNarrative(graph: CompanyGraph, label: str) -> str:
 
 
 def timelineNarrative(graph: CompanyGraph, label: str) -> str:
-    """timeline() 결과를 추이 서사로."""
+    """timeline() 결과를 추이 서사로.
+
+    Parameters
+    ----------
+    graph : CompanyGraph
+        대상 그래프.
+    label : str
+        추적할 지표 라벨.
+
+    Returns
+    -------
+    str
+        추이 서사 마크다운 텍스트. 데이터 없으면 안내 문구.
+    """
     nodes = timeline(graph, label)
     if not nodes:
         return f"'{label}' 시계열 데이터 없음."

@@ -104,14 +104,35 @@ class EcosClient:
         raise last_exc or EcosError("요청 실패 (최대 재시도 초과)")
 
     def close(self) -> None:
-        """HTTP 세션 종료."""
+        """HTTP 세션 종료.
+
+        Returns
+        -------
+        None
+        """
         self._session.close()
 
     # ── private ──
 
     @staticmethod
     def _parseResponse(data: dict) -> list[dict]:
-        """ECOS JSON 응답 파싱."""
+        """ECOS JSON 응답 파싱.
+
+        Parameters
+        ----------
+        data : dict
+            ECOS REST API 원본 JSON 응답.
+
+        Returns
+        -------
+        list[dict]
+            ``StatisticSearch.row`` 리스트. 데이터 없으면 빈 리스트.
+
+        Raises
+        ------
+        EcosError
+            ECOS 에러 코드가 INFO-000/INFO-200 이외일 때.
+        """
         # 에러 응답 체크
         if "RESULT" in data:
             code = data["RESULT"].get("CODE", "")
@@ -128,7 +149,13 @@ class EcosClient:
         return rows if isinstance(rows, list) else [rows]
 
     def _rateLimit(self) -> None:
-        """슬라이딩 윈도우 레이트 리밋."""
+        """슬라이딩 윈도우 레이트 리밋 (30 RPM).
+
+        Returns
+        -------
+        None
+            윈도우 초과 시 대기 후 반환.
+        """
         now = time.monotonic()
         cutoff = now - _RATE_LIMIT_WINDOW
         self._timestamps = [t for t in self._timestamps if t > cutoff]
@@ -141,6 +168,16 @@ class EcosClient:
 
     @staticmethod
     def _backoff(attempt: int) -> None:
-        """지수 백오프."""
+        """지수 백오프.
+
+        Parameters
+        ----------
+        attempt : int
+            현재 재시도 횟수 (0부터). 대기 시간 = min(2^attempt, 8) (초).
+
+        Returns
+        -------
+        None
+        """
         delay = min(2**attempt, 8)
         time.sleep(delay)

@@ -32,6 +32,7 @@ def calibrate_scenarios(
     reasons: list[str] = []
 
     def _adjust(scenario: str, delta: float, reason: str) -> None:
+        """특정 시나리오 확률을 delta만큼 조정하고 사유 기록."""
         if scenario in probs:
             probs[scenario] += delta
             reasons.append(reason)

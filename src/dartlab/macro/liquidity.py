@@ -15,7 +15,26 @@ from dartlab.macro._helpers import (
 
 
 def _fetch_liquidity_data(market: str, as_of: str | None = None) -> dict[str, float | None]:
-    """gather에서 유동성 지표 수집."""
+    """gather에서 유동성 지표 수집.
+
+    Parameters
+    ----------
+    market : str
+        ``"US"`` | ``"KR"``.
+    as_of : str | None
+        기준일. ``None`` 이면 최신.
+
+    Returns
+    -------
+    dict[str, float]
+        None 값은 제거된 채 반환. 가능한 키:
+
+        - m2_yoy : float — M2 통화량 전년비 증가율 (%)
+        - fed_bs_change_pct : float — 연준 대차대조표 13주 변화율 (%)
+        - hy_spread : float — HY 스프레드 (bp)
+        - ig_spread : float — IG 스프레드 (bp)
+        - rrp_change_pct : float — 역레포 잔액 3개월 변화율 (%)
+    """
     g = get_gather(as_of)
     data: dict[str, float | None] = {}
 
@@ -36,7 +55,29 @@ def _fetch_liquidity_data(market: str, as_of: str | None = None) -> dict[str, fl
 
 
 def calcLiquidity(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """유동성 환경 종합 분석."""
+    """유동성 환경 종합 분석 — M2 + 연준 B/S + 신용스프레드 + FCI.
+
+    Parameters
+    ----------
+    market : str
+        ``"US"`` | ``"KR"``.
+    as_of : str | None
+        기준일. ``None`` 이면 최신.
+    overrides : dict | None
+        지표 강제 치환 (예: ``{"m2_yoy": 5.0}``).
+
+    Returns
+    -------
+    dict
+        - market : str — 시장 코드
+        - regime : str — 유동성 국면 (``"abundant"``/``"neutral"``/``"tight"``)
+        - regimeLabel : str — 국면 한글명 (``"풍부"``/``"중립"``/``"긴축"``)
+        - score : float — 유동성 종합 점수 (점, -100~100)
+        - signals : list[str] — 판별에 사용된 신호 목록
+        - nfci : dict | None — 시카고 연준 NFCI (value:float, regime:str, regimeLabel:str, description:str). US 전용.
+        - fci : dict | None — 자체 FCI (value:float, regime:str, regimeLabel:str, components:dict, description:str)
+        - timeseries : dict — m2 / hy_spread / ig_spread 시계열
+    """
     data = _fetch_liquidity_data(market, as_of=as_of)
     if overrides:
         data = apply_overrides(data, overrides)

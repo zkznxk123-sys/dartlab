@@ -40,7 +40,20 @@ INV_NMS = {"재고자산"}
 
 
 def _gradeLiquidity(currentRatio: float) -> str:
-    """유동비율 → 등급."""
+    """유동비율 → 유동성 등급 변환.
+
+    우수(200%+) / 양호(150%+) / 보통(100%+) / 주의(50%+) / 위험(50% 미만).
+
+    Parameters
+    ----------
+    currentRatio : float
+        유동비율 (%)
+
+    Returns
+    -------
+    str
+        유동성 등급 (우수 | 양호 | 보통 | 주의 | 위험)
+    """
     if currentRatio >= 200:
         return "우수"
     if currentRatio >= 150:
@@ -56,7 +69,30 @@ _extractVal = extractAccount  # backward compat alias
 
 
 def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
-    """프리빌드 finance.parquet → 종목별 유동성."""
+    """프리빌드 finance.parquet에서 종목별 유동성 지표 산출.
+
+    연결재무제표 우선, 없으면 별도재무제표를 사용한다.
+    종목별 최신 연도의 유동자산·유동부채·재고자산을 추출하여
+    유동비율·당좌비율·등급을 계산한다.
+
+    Parameters
+    ----------
+    scanPath : Path
+        finance.parquet 파일 경로
+
+    Returns
+    -------
+    pl.DataFrame
+        컬럼:
+            stockCode : str — 종목코드
+            currentAssets : int — 유동자산 (원)
+            currentLiabilities : int — 유동부채 (원)
+            inventories : int | None — 재고자산 (원)
+            currentRatio : float — 유동비율 (%)
+            quickRatio : float | None — 당좌비율 (%)
+            grade : str — 유동성 등급
+        빈 DataFrame — 데이터 없음
+    """
     schema = pl.scan_parquet(str(scanPath)).collect_schema().names()
     scCol = "stockCode" if "stockCode" in schema else "stock_code"
 
@@ -113,7 +149,24 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
 
 
 def _scanPerFile() -> pl.DataFrame:
-    """종목별 finance parquet 순회 fallback."""
+    """종목별 finance parquet 개별 순회 fallback.
+
+    프리빌드 finance.parquet이 없을 때 종목별 parquet 파일을 하나씩 읽어
+    유동성 지표를 산출한다. 반환 구조는 ``_scanFromMerged``와 동일.
+
+    Returns
+    -------
+    pl.DataFrame
+        컬럼:
+            stockCode : str — 종목코드
+            currentAssets : int — 유동자산 (원)
+            currentLiabilities : int — 유동부채 (원)
+            inventories : int | None — 재고자산 (원)
+            currentRatio : float — 유동비율 (%)
+            quickRatio : float | None — 당좌비율 (%)
+            grade : str — 유동성 등급
+        빈 DataFrame — 데이터 없음
+    """
     from dartlab.core.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))

@@ -15,7 +15,13 @@ log = logging.getLogger(__name__)
 
 
 def _getDart():
-    """Dart 인스턴스 lazy 생성. API 키 없으면 None."""
+    """Dart 인스턴스를 lazy 생성.
+
+    Returns
+    -------
+    Dart | None
+        DART OpenAPI 클라이언트 인스턴스. API 키 미설정 또는 import 실패 시 None.
+    """
     try:
         from dartlab.providers.dart.openapi.dart import Dart
 
@@ -26,7 +32,29 @@ def _getDart():
 
 
 async def fetchInsiderTrading(stockCode: str) -> list[InsiderTrade]:
-    """임원/주요주주 주식 거래 내역 -- DART elestock.json."""
+    """임원/주요주주 주식 거래 내역 -- DART elestock.json.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (예: ``"005930"``).
+
+    Returns
+    -------
+    list[InsiderTrade]
+        거래 내역 목록. 각 항목 필드:
+
+        - date : str — 공시 접수일 (YYYYMMDD)
+        - name : str — 보고자 성명
+        - position : str — 직위
+        - tradeType : str — 변동 구분 (취득/처분)
+        - changeShares : int — 변동 주식 수 (주)
+        - afterShares : int — 변동 후 보유 주식 수 (주)
+        - reason : str — 변동 사유
+        - source : str — ``"dart"``
+
+        API 키 미설정이거나 조회 실패 시 빈 리스트.
+    """
     dart = _getDart()
     if dart is None:
         return []
@@ -55,7 +83,27 @@ async def fetchInsiderTrading(stockCode: str) -> list[InsiderTrade]:
 
 
 async def fetchMajorShareholders(stockCode: str) -> list[MajorHolder]:
-    """5% 이상 대량보유 변동 -- DART majorstock.json."""
+    """5% 이상 대량보유 변동 -- DART majorstock.json.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (예: ``"005930"``).
+
+    Returns
+    -------
+    list[MajorHolder]
+        대량보유 변동 목록. 각 항목 필드:
+
+        - holderName : str — 보고서명 또는 보유자명
+        - shares : int — 보유 주식 수 (주)
+        - ratio : float — 보유 비율 (%)
+        - changeDate : str — 공시 접수일 (YYYYMMDD)
+        - changeType : str — 변동 구분
+        - source : str — ``"dart"``
+
+        API 키 미설정이거나 조회 실패 시 빈 리스트.
+    """
     dart = _getDart()
     if dart is None:
         return []
@@ -82,7 +130,18 @@ async def fetchMajorShareholders(stockCode: str) -> list[MajorHolder]:
 
 
 def _safeInt(val) -> int:
-    """안전한 int 변환."""
+    """안전한 int 변환 — 콤마, +기호 제거 포함.
+
+    Parameters
+    ----------
+    val
+        변환할 값. str, int, float 또는 None.
+
+    Returns
+    -------
+    int
+        변환된 정수. None이거나 변환 불가 시 0.
+    """
     if val is None:
         return 0
     try:
@@ -92,7 +151,18 @@ def _safeInt(val) -> int:
 
 
 def _safeFloat(val) -> float:
-    """안전한 float 변환."""
+    """안전한 float 변환 — 콤마, +기호 제거 포함.
+
+    Parameters
+    ----------
+    val
+        변환할 값. str, int, float 또는 None.
+
+    Returns
+    -------
+    float
+        변환된 실수. None이거나 변환 불가 시 0.0.
+    """
     if val is None:
         return 0.0
     try:

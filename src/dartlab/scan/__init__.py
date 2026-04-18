@@ -79,7 +79,19 @@ _COLUMN_RENAME = {
 
 
 def _enrichWithKorean(df: pl.DataFrame) -> pl.DataFrame:
-    """영문 컬럼 → 한글 rename + 종목명 추가."""
+    """영문 컬럼 → 한글 rename + 종목명 추가.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        scan 결과 DataFrame (stockCode 컬럼 필요).
+
+    Returns
+    -------
+    pl.DataFrame
+        종목명 : str — 종목코드에 대응하는 회사명 (join)
+        (기존 영문 컬럼) — _COLUMN_RENAME 매핑에 따라 한글로 rename
+    """
     # 종목명 매핑
     if "stockCode" in df.columns:
         try:
@@ -117,7 +129,21 @@ def _enrichWithKorean(df: pl.DataFrame) -> pl.DataFrame:
 
 @dataclass(frozen=True)
 class _AxisEntry:
-    """scan 축 메타데이터."""
+    """scan 축 레지스트리 엔트리 — 모듈/함수/라벨/설명 등 축별 메타데이터.
+
+    Attributes
+    ----------
+    module : str — 축 구현 모듈 경로 (dotted)
+    fn : str — 모듈 내 호출 함수명
+    label : str — 한글 축 이름
+    description : str — 축 설명 (가이드 출력용)
+    example : str — 사용 예시 문자열
+    targetParam : str | None — target 파라미터명 (None 이면 stockCode 필터)
+    targetRequired : bool — target 필수 여부
+    returnType : str — 반환 타입 ("DataFrame" | "dict")
+    listModule : str | None — 목록 반환용 모듈 (target 없이 호출 시)
+    listFn : str | None — 목록 반환용 함수명
+    """
 
     module: str
     fn: str
@@ -359,7 +385,20 @@ _ALIASES: dict[str, str] = {
 
 
 def _edgarDispatch(axis: str, kwargs: dict) -> pl.DataFrame | None:
-    """EDGAR 전용 scan 축 디스패치. 구현 없으면 None 반환."""
+    """EDGAR 전용 scan 축 디스패치.
+
+    Parameters
+    ----------
+    axis : str
+        정규화된 축 이름 (예: "profitability", "account").
+    kwargs : dict
+        축 함수에 전달할 키워드 인자.
+
+    Returns
+    -------
+    pl.DataFrame | None
+        EDGAR 축 결과 DataFrame. 구현 없는 축이면 None.
+    """
     # XBRL 기반 7축 — _edgar_helpers.scan_edgar_accounts 활용
     _EDGAR_XBRL_AXES = {
         "profitability",
@@ -410,7 +449,18 @@ _GROUP_ALIASES: dict[str, str] = {
 
 
 def _resolveGroup(name: str) -> str | None:
-    """그룹 이름 또는 alias → 정규 그룹 이름. 그룹이 아니면 None."""
+    """그룹 이름 또는 alias → 정규 그룹 이름.
+
+    Parameters
+    ----------
+    name : str
+        그룹 이름 또는 한글 alias (예: "financial", "재무").
+
+    Returns
+    -------
+    str | None
+        정규 그룹 이름 (예: "financial"). 그룹이 아니면 None.
+    """
     if name in _SCAN_GROUPS:
         return name
     lower = name.lower()
@@ -424,7 +474,23 @@ def _resolveGroup(name: str) -> str | None:
 
 
 def _resolveAxis(axis: str) -> str:
-    """축 이름 또는 alias → 정규 축 이름."""
+    """축 이름 또는 alias → 정규 축 이름.
+
+    Parameters
+    ----------
+    axis : str
+        축 이름 또는 한글 alias (예: "governance", "지배구조").
+
+    Returns
+    -------
+    str
+        정규 축 이름 (예: "governance").
+
+    Raises
+    ------
+    ValueError
+        알 수 없는 축 이름.
+    """
     if axis in _AXIS_REGISTRY:
         return axis
     lower = axis.lower()
@@ -651,16 +717,47 @@ class Scan:
         return result
 
     def _guide(self) -> pl.DataFrame:
-        """축 목록 + 사용법 가이드."""
-        rows = [
-            {
-                "axis": key,
-                "label": entry.label,
-                "description": entry.description,
-                "example": entry.example,
-            }
-            for key, entry in _AXIS_REGISTRY.items()
-        ]
+        """축 목록 + 사용법 가이드.
+
+        Returns
+        -------
+        pl.DataFrame
+            축별 메타데이터 테이블. 컬럼:
+
+            - axis : str — 정규 축 키 (예: ``"governance"``, ``"profitability"``).
+            - label : str — 한글 축 이름 (예: ``"거버넌스"``, ``"수익성"``).
+            - group : str — 데이터 그룹 (``"DART"``, ``"EDGAR"``, ``"financial"``).
+            - description : str — 축이 수행하는 분석 한 줄 설명.
+            - example : str — 호출 예시 코드 문자열.
+            - apiKey : str — 필요한 API 키 (scan은 전부 불필요).
+        """
+        # financial 그룹에 속하는 축 목록
+        financial_axes = set(_SCAN_GROUPS.get("financial", []))
+        # EDGAR에서도 지원하는 축
+        _EDGAR_AXES = {
+            "profitability", "growth", "quality", "liquidity",
+            "efficiency", "cashflow", "dividendTrend", "capital",
+            "debt", "account", "ratio",
+        }
+
+        rows = []
+        for key, entry in _AXIS_REGISTRY.items():
+            if key in financial_axes:
+                group = "financial"
+            elif key in _EDGAR_AXES:
+                group = "DART+EDGAR"
+            else:
+                group = "DART"
+            rows.append(
+                {
+                    "axis": key,
+                    "label": entry.label,
+                    "group": group,
+                    "description": entry.description,
+                    "example": entry.example,
+                    "apiKey": "불필요",
+                }
+            )
         return pl.DataFrame(rows)
 
     def _financialGuide(self) -> pl.DataFrame:
@@ -710,11 +807,26 @@ class Scan:
         return _bound_axis
 
     def __repr__(self) -> str:
-        lines = [f"Scan -- {len(_AXIS_REGISTRY)}축 시장 횡단분석"]
-        for key, entry in _AXIS_REGISTRY.items():
-            lines.append(f"  {key:12s} {entry.label} -- {entry.description}")
+        n = len(_AXIS_REGISTRY)
+        lines = [f"Scan — {n}축 시장 횡단분석"]
         lines.append("")
-        lines.append("사용법: scan(), scan('축'), scan('축', '대상')")
+
+        for key, entry in _AXIS_REGISTRY.items():
+            lines.append(f"  {key:20s} {entry.label} — {entry.description}")
+
+        lines.append("")
+        lines.append("━━━ 빠른 시작 ━━━")
+        lines.append('  dartlab.scan()                              # 이 가이드')
+        lines.append('  dartlab.scan("governance")                  # 지배구조 전종목')
+        lines.append('  dartlab.scan("financial", "profitability")  # 수익성 (financial 그룹)')
+        lines.append('  dartlab.scan("screen", "value")             # 멀티팩터 스크리닝')
+        lines.append('  c.scan("governance")                        # Company-bound')
+        lines.append("")
+        lines.append("━━━ 데이터 ━━━")
+        lines.append("  DART : 프리빌드 parquet (자동 다운로드, API 키 불필요)")
+        lines.append("  EDGAR: XBRL 기반 (자동 다운로드, API 키 불필요)")
+        lines.append("")
+        lines.append("노트북: https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/03_scan.py")
         return "\n".join(lines)
 
 

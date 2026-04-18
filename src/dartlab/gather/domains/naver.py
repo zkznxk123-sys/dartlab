@@ -29,7 +29,18 @@ _INTRADAY_URL = "https://api.stock.naver.com/chart/domestic/item/{code}/minute"
 
 
 def _clean_number(text: str | None) -> float | None:
-    """숫자 텍스트 파싱 — 콤마, 공백, +/- 처리."""
+    """숫자 텍스트 파싱 — 콤마, 공백, +/- 처리.
+
+    Parameters
+    ----------
+    text : str | None
+        파싱할 숫자 문자열. "N/A", "-", 빈 문자열은 None 처리.
+
+    Returns
+    -------
+    float | None
+        파싱된 숫자값. 변환 불가 시 None.
+    """
     if not text:
         return None
     cleaned = str(text).strip().replace(",", "").replace("+", "").replace(" ", "")
@@ -47,12 +58,36 @@ def _clean_number(text: str | None) -> float | None:
 
 
 def _parseInfos(infos: list[dict]) -> dict[str, str]:
-    """totalInfos 배열을 {code: value} dict로 변환."""
+    """totalInfos 배열을 {code: value} dict로 변환.
+
+    Parameters
+    ----------
+    infos : list[dict]
+        네이버 integration API의 totalInfos 배열.
+        각 항목은 ``{"code": "per", "value": "12.5배"}`` 형태.
+
+    Returns
+    -------
+    dict[str, str]
+        code를 키, value를 값으로 하는 매핑.
+        예: ``{"per": "12.5배", "pbr": "1.2배", "marketValue": "100조"}``.
+    """
     return {item.get("code", ""): item.get("value", "") for item in infos if item.get("code")}
 
 
 def _parseMarketCap(text: str) -> float:
-    """'1,063조 7,589억' -> 숫자 변환."""
+    """한글 단위 시가총액 텍스트를 숫자로 변환.
+
+    Parameters
+    ----------
+    text : str
+        네이버 시총 텍스트. 예: ``"1,063조 7,589억"``.
+
+    Returns
+    -------
+    float
+        원 단위 시가총액 (원). 빈 문자열이면 0.0.
+    """
     if not text:
         return 0.0
     total = 0.0
@@ -68,14 +103,54 @@ def _parseMarketCap(text: str) -> float:
 
 
 def _cleanSuffix(text: str, *suffixes: str) -> str:
-    """'27.38배' -> '27.38', '6,564원' -> '6564'."""
+    """숫자 텍스트에서 한글 단위 접미사를 제거.
+
+    Parameters
+    ----------
+    text : str
+        단위가 붙은 숫자 문자열. 예: ``"27.38배"``, ``"6,564원"``.
+    *suffixes : str
+        제거할 접미사 목록. 예: ``"배"``, ``"원"``, ``"%"``.
+
+    Returns
+    -------
+    str
+        접미사 제거 후 strip된 문자열. 예: ``"27.38"``, ``"6,564"``.
+    """
     for suffix in suffixes:
         text = text.replace(suffix, "")
     return text.strip()
 
 
 async def fetch_price(stock_code: str, client, **kwargs) -> PriceSnapshot | None:
-    """네이버 -> 현재가 + PER/PBR + 52주 범위 + 시총."""
+    """네이버 -> 현재가 + PER/PBR + 52주 범위 + 시총.
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"005930"``).
+    client
+        비동기 HTTP 클라이언트.
+
+    Returns
+    -------
+    PriceSnapshot | None
+        현재가 스냅샷. 주요 필드:
+
+        - current : float — 현재가 (원)
+        - change : float — 전일 대비 변동액 (원)
+        - change_pct : float — 전일 대비 변동률 (%)
+        - high_52w : float — 52주 최고가 (원)
+        - low_52w : float — 52주 최저가 (원)
+        - volume : int — 누적 거래량 (주)
+        - market_cap : float — 시가총액 (원)
+        - per : float | None — PER (배)
+        - pbr : float | None — PBR (배)
+        - dividend_yield : float | None — 배당수익률 (%)
+        - source : str — ``"naver"``
+
+        API 실패 또는 현재가 없으면 None.
+    """
     # basic: 현재가, 등락
     url = f"{_API_BASE}/{stock_code}/basic"
     try:
@@ -133,7 +208,29 @@ async def fetch_price(stock_code: str, client, **kwargs) -> PriceSnapshot | None
 
 
 async def fetch_consensus(stock_code: str, client) -> ConsensusData | None:
-    """네이버 → 컨센서스 목표가 + 투자의견."""
+    """네이버 → 컨센서스 목표가 + 투자의견.
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"005930"``).
+    client
+        비동기 HTTP 클라이언트.
+
+    Returns
+    -------
+    ConsensusData | None
+        컨센서스 데이터. 주요 필드:
+
+        - target_price : float — 목표주가 평균 (원)
+        - analyst_count : int — 추정 참여 애널리스트 수 (명)
+        - buy_ratio : float — 매수 의견 비율 (0.0~1.0)
+        - high : float — 목표가 최고 (원)
+        - low : float — 목표가 최저 (원)
+        - source : str — ``"naver"``
+
+        API 실패 또는 컨센서스 없으면 None.
+    """
     url = f"{_API_BASE}/{stock_code}/integration"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
@@ -188,7 +285,28 @@ async def fetch_consensus(stock_code: str, client) -> ConsensusData | None:
 
 
 async def fetch_flow(stock_code: str, client) -> list[dict] | None:
-    """네이버 → 외국인/기관 수급 시계열."""
+    """네이버 → 외국인/기관 수급 시계열.
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"005930"``).
+    client
+        비동기 HTTP 클라이언트.
+
+    Returns
+    -------
+    list[dict] | None
+        수급 시계열 (최신순). 각 dict 키:
+
+        - date : str — 거래일 (YYYYMMDD 또는 빈 문자열)
+        - foreignNet : float — 외국인 순매수 (주)
+        - institutionNet : float — 기관 순매수 (주)
+        - individualNet : float — 개인 순매수 (주)
+        - foreignHoldingRatio : float — 외국인 보유 비율 (%)
+
+        데이터 없으면 None.
+    """
     url = f"{_API_BASE}/{stock_code}/integration"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
@@ -261,6 +379,28 @@ async def fetch_revenue_consensus(stock_code: str, client) -> list[RevenueConsen
 
     finance/annual API에서 isConsensus='Y'인 기간의 재무 추정치를 추출한다.
     실적 확정 기간(isConsensus='N')도 함께 반환하여 시계열 비교 가능.
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"005930"``).
+    client
+        비동기 HTTP 클라이언트.
+
+    Returns
+    -------
+    list[RevenueConsensus]
+        연간 컨센서스 목록. 각 항목 주요 필드:
+
+        - fiscal_year : int — 사업연도
+        - revenue_est : float — 매출액 추정치 (억원)
+        - operating_profit_est : float | None — 영업이익 추정치 (억원)
+        - net_income_est : float | None — 당기순이익 추정치 (억원)
+        - eps_est : float | None — EPS 추정치 (원)
+        - per_est : float | None — PER 추정치 (배)
+        - source : str — ``"naver_consensus"`` 또는 ``"naver_actual"``
+
+        API 실패 또는 데이터 없으면 빈 리스트.
     """
     url = f"{_API_BASE}/{stock_code}/finance/annual"
     try:
@@ -321,7 +461,20 @@ async def fetch_revenue_consensus(stock_code: str, client) -> list[RevenueConsen
 
 
 async def fetch_sector_per(stock_code: str, client) -> float | None:
-    """네이버 → 동종업종 PER."""
+    """네이버 → 동종업종 PER.
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"005930"``).
+    client
+        비동기 HTTP 클라이언트.
+
+    Returns
+    -------
+    float | None
+        동종업종 평균 PER (배). API 실패 또는 데이터 없으면 None.
+    """
     url = f"{_API_BASE}/{stock_code}/integration"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
@@ -343,7 +496,25 @@ async def fetch_sector_per(stock_code: str, client) -> float | None:
 
 
 async def fetch_all(stock_code: str, client) -> GatherResult:
-    """네이버에서 가져올 수 있는 모든 데이터를 수집."""
+    """네이버에서 가져올 수 있는 모든 데이터를 수집.
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"005930"``).
+    client
+        비동기 HTTP 클라이언트.
+
+    Returns
+    -------
+    GatherResult
+        domain : str — ``"naver"``
+        price : PriceSnapshot | None — 현재가 스냅샷
+        consensus : ConsensusData | None — 컨센서스 목표가
+        flow : FlowData | None — 외국인/기관 수급 스냅샷
+        sector_per : float | None — 동종업종 PER (배)
+        error : str | None — 수집 실패 시 에러 메시지
+    """
     result = GatherResult(domain="naver")
     try:
         result.price = await fetch_price(stock_code, client)
@@ -377,14 +548,28 @@ async def fetch_intraday(
     당일분 전체가 한 번에 온다. 5/15/30/60분봉은 이 결과를 Polars로 리샘플하여 얻는다.
     과거 분봉은 제공하지 않음 (fchart는 OHL=null이라 미사용).
 
-    Returns:
-        list[dict]
-            datetime : str — ISO8601 (yyyy-mm-ddTHH:MM:SS, KST)
-            open : float — 시가 (원)
-            high : float — 고가 (원)
-            low : float — 저가 (원)
-            close : float — 종가 (원)
-            volume : int — 누적 거래량 (주)
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"005930"``).
+    client
+        비동기 HTTP 클라이언트.
+    market : str
+        시장 코드. ``"KR"`` 외에는 빈 리스트 반환.
+
+    Returns
+    -------
+    list[dict]
+        당일 1분봉 OHLCV 목록. 각 dict 키:
+
+        - datetime : str — ISO8601 (``YYYY-MM-DDTHH:MM:SS``, KST)
+        - open : float — 시가 (원)
+        - high : float — 고가 (원)
+        - low : float — 저가 (원)
+        - close : float — 종가 (원)
+        - volume : int — 누적 거래량 (주)
+
+        KR 외 시장이거나 조회 실패 시 빈 리스트.
     """
     if market != "KR":
         return []
@@ -429,7 +614,35 @@ async def fetch_history(
     end: str = "",
     market: str = "KR",
 ) -> list[dict]:
-    """네이버 차트 API — 한번에 6000일 수정주가 OHLCV (FDR 방식)."""
+    """네이버 차트 API — 한번에 6000일 수정주가 OHLCV (FDR 방식).
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드 (예: ``"005930"``).
+    client
+        비동기 HTTP 클라이언트.
+    start : str
+        시작일 (YYYY-MM-DD). 빈 문자열이면 필터 없음.
+    end : str
+        종료일 (YYYY-MM-DD). 빈 문자열이면 필터 없음.
+    market : str
+        시장 코드. ``"KR"`` 외에는 빈 리스트 반환.
+
+    Returns
+    -------
+    list[dict]
+        수정주가 OHLCV 행 목록 (날짜 오름차순). 각 dict 키:
+
+        - date : str — 거래일 (YYYY-MM-DD)
+        - open : float — 시가 (원)
+        - high : float — 고가 (원)
+        - low : float — 저가 (원)
+        - close : float — 종가 (원)
+        - volume : int — 거래량 (주)
+
+        KR 외 시장이거나 조회 실패 시 빈 리스트.
+    """
     if market != "KR":
         return []
     import re

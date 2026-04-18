@@ -254,6 +254,7 @@ def calcExecutivePayDivergence(company, *, basePeriod: str | None = None) -> dic
 
     # 분기 컬럼 → 연도 매핑 (annual cols: "2024" 혹은 "2024Q4")
     def _yearOf(col: str) -> str:
+        """기간 컬럼에서 연도 4자리 추출."""
         return col[:4]
 
     salesRow = isData.get("sales", {})
@@ -278,6 +279,7 @@ def calcExecutivePayDivergence(company, *, basePeriod: str | None = None) -> dic
         return None
 
     def _cagr(vals: list[float | None]) -> float | None:
+        """양수 값 리스트에서 CAGR 산출 (%)."""
         vv = [v for v in vals if v is not None and v > 0]
         if len(vv) < 2:
             return None

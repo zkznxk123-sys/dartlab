@@ -19,8 +19,6 @@ Merton 미제공 시 기존 4축(40/20/30/10) 그대로 동작 (하위호환 100
 
 from __future__ import annotations
 
-from typing import Optional
-
 from dartlab.analysis.financial.insight.types import (
     Anomaly,
     DistressAxis,
@@ -47,7 +45,19 @@ _CREDIT_GRADE_TABLE: list[tuple[float, str, str]] = [
 
 
 def _mapCreditGrade(overall: float) -> tuple[str, str]:
-    """종합 점수 → (등급, 설명). 기존 10단계."""
+    """종합 점수 → (등급, 설명). 기존 10단계.
+
+    Parameters
+    ----------
+    overall : float
+        종합 부실 점수 (0~100) (점).
+
+    Returns
+    -------
+    tuple[str, str]
+        grade : str — 신용등급 ('AAA'~'D')
+        description : str — 등급 설명
+    """
     for threshold, grade, desc in _CREDIT_GRADE_TABLE:
         if overall < threshold:
             return grade, desc
@@ -57,7 +67,17 @@ def _mapCreditGrade(overall: float) -> tuple[str, str]:
 def _mapCreditGrade20(overall: float) -> tuple[str, str, float]:
     """종합 점수 → (등급, 설명, PD%). 20단계 세분화.
 
-    creditScorecard.mapTo20Grade()의 래퍼.
+    Parameters
+    ----------
+    overall : float
+        종합 부실 점수 (0~100) (점).
+
+    Returns
+    -------
+    tuple[str, str, float]
+        grade : str — 20단계 세분화 신용등급
+        description : str — 등급 설명
+        pd : float — 부도 확률 (%)
     """
     from dartlab.core.finance.creditScorecard import mapTo20Grade
 
@@ -68,6 +88,21 @@ def _mapCreditGrade20(overall: float) -> tuple[str, str, float]:
 
 
 def _interpretOhlson(probability: float) -> ModelScore:
+    """Ohlson O-Score 부도확률 → ModelScore 해석.
+
+    Parameters
+    ----------
+    probability : float
+        부도 확률 (%).
+
+    Returns
+    -------
+    ModelScore
+        name : str — 'Ohlson O-Score'
+        rawValue : float — 부도 확률 (%)
+        zone : str — 'safe' | 'gray' | 'distress'
+        interpretation : str — 해석 텍스트
+    """
     if probability < 1:
         zone, interp = "safe", "부도 확률 극히 낮음. 재무구조 건전."
     elif probability < 10:
@@ -87,6 +122,21 @@ def _interpretOhlson(probability: float) -> ModelScore:
 
 
 def _interpretAltmanZpp(score: float) -> ModelScore:
+    """Altman Z''-Score → ModelScore 해석.
+
+    Parameters
+    ----------
+    score : float
+        Z''-Score 값.
+
+    Returns
+    -------
+    ModelScore
+        name : str — 'Altman Z''-Score'
+        rawValue : float — Z'' 값
+        zone : str — 'safe' | 'gray' | 'distress'
+        interpretation : str — 해석 텍스트
+    """
     if score > 5.0:
         zone, interp = "safe", "비제조업/신흥시장 기준 안전 영역."
     elif score > 2.6:
@@ -106,6 +156,21 @@ def _interpretAltmanZpp(score: float) -> ModelScore:
 
 
 def _interpretAltmanZ(score: float) -> ModelScore:
+    """Altman Z-Score → ModelScore 해석.
+
+    Parameters
+    ----------
+    score : float
+        Z-Score 값.
+
+    Returns
+    -------
+    ModelScore
+        name : str — 'Altman Z-Score'
+        rawValue : float — Z 값
+        zone : str — 'safe' | 'gray' | 'distress'
+        interpretation : str — 해석 텍스트
+    """
     if score > 3.0:
         zone, interp = "safe", "제조업 기준 안전 영역."
     elif score > 1.8:
@@ -123,6 +188,21 @@ def _interpretAltmanZ(score: float) -> ModelScore:
 
 
 def _interpretBeneish(score: float) -> ModelScore:
+    """Beneish M-Score → ModelScore 해석.
+
+    Parameters
+    ----------
+    score : float
+        M-Score 값.
+
+    Returns
+    -------
+    ModelScore
+        name : str — 'Beneish M-Score'
+        rawValue : float — M 값
+        zone : str — 'safe' | 'gray' | 'distress'
+        interpretation : str — 이익 조작 가능성 해석
+    """
     if score > -1.78:
         zone, interp = "distress", "이익 조작 가능성 높음. 회계 품질 의심."
     elif score > -2.22:
@@ -140,6 +220,21 @@ def _interpretBeneish(score: float) -> ModelScore:
 
 
 def _interpretSloan(ratio: float) -> ModelScore:
+    """Sloan Accrual Ratio → ModelScore 해석.
+
+    Parameters
+    ----------
+    ratio : float
+        발생주의 이익 비율 (%).
+
+    Returns
+    -------
+    ModelScore
+        name : str — 'Sloan Accrual'
+        rawValue : float — 비율 (%)
+        zone : str — 'safe' | 'gray' | 'distress'
+        interpretation : str — 이익 품질 해석
+    """
     abs_r = abs(ratio)
     if abs_r > 20:
         zone, interp = "distress", "발생주의 이익 비중 과다. 이익 품질 의심."
@@ -158,6 +253,21 @@ def _interpretSloan(ratio: float) -> ModelScore:
 
 
 def _interpretPiotroski(score: int) -> ModelScore:
+    """Piotroski F-Score → ModelScore 해석.
+
+    Parameters
+    ----------
+    score : int
+        F-Score (0~9) (점).
+
+    Returns
+    -------
+    ModelScore
+        name : str — 'Piotroski F-Score'
+        rawValue : float — F 값 (점)
+        zone : str — 'safe' | 'gray' | 'distress'
+        interpretation : str — 펀더멘탈 해석
+    """
     if score >= 7:
         zone, interp = "safe", "펀더멘탈 강건. 수익성·레버리지·효율성 양호."
     elif score >= 5:
@@ -180,10 +290,34 @@ def _interpretPiotroski(score: int) -> ModelScore:
 
 
 def _normalizeOhlson(p: float) -> float:
+    """Ohlson 부도확률 → 0~100 정규화 (높을수록 위험).
+
+    Parameters
+    ----------
+    p : float
+        부도 확률 (%).
+
+    Returns
+    -------
+    float
+        normalized : float — 정규화 점수 (0~100) (점)
+    """
     return min(p, 100)
 
 
 def _normalizeZpp(z: float) -> float:
+    """Z''-Score → 0~100 정규화 (높을수록 위험).
+
+    Parameters
+    ----------
+    z : float
+        Z''-Score 값.
+
+    Returns
+    -------
+    float
+        normalized : float — 정규화 점수 (0~100) (점)
+    """
     if z < 1.1:
         return 100
     if z > 5.0:
@@ -192,6 +326,18 @@ def _normalizeZpp(z: float) -> float:
 
 
 def _normalizeZ(z: float) -> float:
+    """Z-Score → 0~100 정규화 (높을수록 위험).
+
+    Parameters
+    ----------
+    z : float
+        Z-Score 값.
+
+    Returns
+    -------
+    float
+        normalized : float — 정규화 점수 (0~100) (점)
+    """
     if z < 1.8:
         return 100
     if z > 3.0:
@@ -200,6 +346,18 @@ def _normalizeZ(z: float) -> float:
 
 
 def _normalizeBeneish(m: float) -> float:
+    """Beneish M-Score → 0~100 정규화 (높을수록 위험).
+
+    Parameters
+    ----------
+    m : float
+        M-Score 값.
+
+    Returns
+    -------
+    float
+        normalized : float — 정규화 점수 (0~80) (점)
+    """
     if m > -1.78:
         return 80
     if m > -2.22:
@@ -208,6 +366,18 @@ def _normalizeBeneish(m: float) -> float:
 
 
 def _normalizeSloan(ratio: float) -> float:
+    """Sloan Accrual Ratio → 0~100 정규화 (높을수록 위험).
+
+    Parameters
+    ----------
+    ratio : float
+        발생주의 이익 비율 (%).
+
+    Returns
+    -------
+    float
+        normalized : float — 정규화 점수 (0~80) (점)
+    """
     abs_r = abs(ratio)
     if abs_r > 20:
         return 80
@@ -217,6 +387,18 @@ def _normalizeSloan(ratio: float) -> float:
 
 
 def _normalizeFScore(f: int) -> float:
+    """Piotroski F-Score → 0~100 정규화 (높을수록 위험).
+
+    Parameters
+    ----------
+    f : int
+        F-Score (0~9) (점).
+
+    Returns
+    -------
+    float
+        normalized : float — 정규화 점수 (0~80) (점)
+    """
     if f <= 2:
         return 80
     if f <= 4:
@@ -282,8 +464,20 @@ def _normalizeMerton(d2d: float) -> float:
 # ── 유동성 경보 ──
 
 
-def _calcCashRunway(ratios: RatioResult) -> tuple[Optional[float], Optional[str]]:
-    """현금 소진 예상 개월 수 계산."""
+def _calcCashRunway(ratios: RatioResult) -> tuple[float | None, str | None]:
+    """현금 소진 예상 개월 수 계산.
+
+    Parameters
+    ----------
+    ratios : RatioResult
+        재무비율 계산 결과.
+
+    Returns
+    -------
+    tuple[float | None, str | None]
+        months : float | None — 현금 소진 예상 개월 수 (개월). 산정 불가 시 None.
+        alert : str | None — 유동성 경보 수준 ('충분'~'위험').
+    """
     cash = ratios.cash or 0
     ocf = ratios.operatingCashflowTTM
 
@@ -324,7 +518,20 @@ def _extractRiskFactors(
     anomalies: list[Anomaly],
     ratios: RatioResult,
 ) -> list[str]:
-    """anomaly + ratios에서 구조화된 위험 요인 목록 추출."""
+    """anomaly + ratios에서 구조화된 위험 요인 목록 추출.
+
+    Parameters
+    ----------
+    anomalies : list[Anomaly]
+        이상치 탐지 결과.
+    ratios : RatioResult
+        재무비율 계산 결과.
+
+    Returns
+    -------
+    list[str]
+        위험 요인 텍스트 목록.
+    """
     factors: list[str] = []
 
     for a in anomalies:
@@ -350,6 +557,18 @@ def _extractRiskFactors(
 
 
 def _assessDataQuality(modelCount: int) -> str:
+    """모델 수 기반 데이터 품질 판정.
+
+    Parameters
+    ----------
+    modelCount : int
+        사용된 모델 수.
+
+    Returns
+    -------
+    str
+        quality : str — '충분' (>=5) | '보통' (>=3) | '부족'
+    """
     if modelCount >= 5:
         return "충분"
     if modelCount >= 3:
@@ -374,6 +593,22 @@ def calcDistress(
 
     mertonResult가 제공되면 5축(30/20/15/25/10), 미제공 시 4축(40/20/30/10).
     isFinancial=True이면 Merton을 무시한다 (은행 부채 구조적 왜곡).
+
+    Parameters
+    ----------
+    ratios : RatioResult
+        재무비율 결과.
+    anomalies : list[Anomaly]
+        감지된 이상 신호 목록.
+    isFinancial : bool
+        금융업 여부.
+    mertonResult : MertonResult | None
+        Merton D2D 모델 결과.
+
+    Returns
+    -------
+    DistressResult
+        종합 부실 점수, zone, 개별 모델 판정, 해석 텍스트.
     """
     # Merton 사용 여부: 비금융 + 수렴된 결과만
     useMerton = mertonResult is not None and not isFinancial and mertonResult.converged
@@ -484,7 +719,6 @@ def calcDistress(
 
     # 감사 Red Flag 수 기반 점수
     n_critical = sum(1 for a in audit_anomalies if a.severity == "danger")
-    sum(1 for a in audit_anomalies if a.severity == "warning")
     n_total = len(audit_anomalies)
 
     if n_total > 0:

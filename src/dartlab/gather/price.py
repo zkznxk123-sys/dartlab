@@ -30,6 +30,35 @@ async def fetch(
     2. circuit open인 소스 skip
     3. 성공/실패를 circuit breaker + health tracker에 기록
     4. 전부 실패 시 stale cache에서 반환 시도
+
+    Parameters
+    ----------
+    stock_code : str
+        종목코드/티커 (예: "005930", "AAPL").
+    market : str
+        시장 코드 ("KR", "US", "JP" 등). 기본 "KR".
+    client : httpx.AsyncClient | None
+        HTTP 클라이언트. None이면 GatherHttpClient 자동 생성.
+
+    Returns
+    -------
+    PriceSnapshot | None
+        주가 스냅샷. 주요 필드:
+
+        - current : float — 현재가 (원 또는 해당 통화)
+        - change : float — 전일 대비 변동 (원)
+        - change_pct : float — 전일 대비 변동률 (%)
+        - high_52w : float — 52주 최고가 (원)
+        - low_52w : float — 52주 최저가 (원)
+        - volume : int — 거래량 (주)
+        - market_cap : float — 시가총액 (억원)
+        - per : float | None — PER (배)
+        - pbr : float | None — PBR (배)
+        - dividend_yield : float | None — 배당수익률 (%)
+        - currency : str — 통화 코드 ("KRW", "USD" 등)
+        - is_stale : bool — stale cache 반환 여부
+
+        전체 fallback + stale cache 모두 실패 시 None.
     """
     config = get_market_config(market)
     chain = get_price_fallback(market)

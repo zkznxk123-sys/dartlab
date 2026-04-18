@@ -76,7 +76,24 @@ def icTimeSeries(
     factorScoresSeries: list[dict[str, float]],
     forwardReturnsSeries: list[dict[str, float]],
 ) -> dict:
-    """IC 시계열 통계 — 여러 시점 IC 의 평균/표준편차/ICIR."""
+    """IC 시계열 통계 — 여러 시점 IC 의 평균/표준편차/ICIR.
+
+    Parameters
+    ----------
+    factorScoresSeries : list[dict[str, float]]
+        시점별 {종목코드: 팩터 스코어} dict 리스트.
+    forwardReturnsSeries : list[dict[str, float]]
+        시점별 {종목코드: forward return} dict 리스트 (동일 길이).
+
+    Returns
+    -------
+    dict
+        mean_ic : float — 평균 Spearman IC (비율)
+        std_ic : float — IC 표준편차 (비율)
+        icir : float — ICIR = mean_ic / std_ic (배)
+        n_periods : int — 유효 기간 수
+        hit_rate : float — IC 부호 일치 비율 (0~1)
+    """
     if len(factorScoresSeries) != len(forwardReturnsSeries):
         raise ValueError("factorScoresSeries / forwardReturnsSeries 길이 불일치")
     ics: list[float] = []
@@ -128,7 +145,7 @@ def _load_account(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[st
             .select("stockCode", "thstrm_amount")
             .collect()
         )
-    except Exception:  # noqa: BLE001
+    except (KeyError, ValueError, TypeError, AttributeError):
         df = None
 
     # fallback: 연결 없으면 전체
@@ -141,7 +158,7 @@ def _load_account(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[st
                 .select("stockCode", "thstrm_amount")
                 .collect()
             )
-        except Exception:  # noqa: BLE001
+        except (KeyError, ValueError, TypeError, AttributeError):
             return {}
 
     if df is None or df.is_empty():
@@ -157,7 +174,29 @@ def _load_account(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[st
 
 
 def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> dict:
-    """전종목 멀티팩터 복합 순위."""
+    """전종목 멀티팩터 복합 순위.
+
+    영업마진·ROA·부채비율 백분위를 동일 가중 합산해 복합 순위를 매긴다.
+
+    Parameters
+    ----------
+    market : str
+        시장. 기본 "KR".
+    stockCode : str | None
+        특정 종목 지정 시 해당 종목 순위 + 상위 10 반환.
+
+    Returns
+    -------
+    dict
+        market : str — 시장
+        year : str — 기준 연도
+        totalStocks : int — 순위 산출 종목 수
+        rankings : list[dict] — 상위 종목 리스트 (최대 50개)
+            stockCode : str, opMargin : float (%), ROA : float (%),
+            debtRatio : float (%), compositeScore : float (0~1),
+            rank : int
+        target : dict | None — stockCode 지정 시 해당 종목 정보
+    """
     result: dict = {"market": market}
 
     lf = load_scan_parquet("finance", market)
@@ -167,7 +206,7 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
     # 최신 연도 확인
     try:
         years = lf.select("bsns_year").unique().collect().to_series().sort(descending=True).to_list()
-    except Exception as e:  # noqa: BLE001
+    except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {**result, "error": str(e)}
 
     if not years:

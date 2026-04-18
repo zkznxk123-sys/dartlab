@@ -176,7 +176,22 @@ GROUP_KEYWORDS: dict[str, list[str]] = {
 
 
 def _label_group(members: list[str], code_to_name: dict[str, str]) -> str:
-    """컴포넌트 멤버에서 그룹 라벨."""
+    """컴포넌트 멤버 종목코드 리스트에서 대표 그룹 라벨을 결정한다.
+
+    well-known 매핑 → 공통 접두사 → 첫 번째 종목명 순으로 fallback.
+
+    Parameters
+    ----------
+    members : list[str]
+        그룹에 속한 종목코드 리스트.
+    code_to_name : dict[str, str]
+        종목코드 → 회사명 매핑.
+
+    Returns
+    -------
+    str
+        그룹 라벨 (예: "삼성", "현대차", 또는 회사명).
+    """
     for m in members:
         if m in _WELL_KNOWN:
             return _WELL_KNOWN[m]
@@ -203,7 +218,7 @@ def classify_balanced(
     *,
     verbose: bool = True,
 ) -> dict[str, str]:
-    """5단계 균형 분류.
+    """5단계 균형 분류 — 상장사를 그룹(재벌/독립)으로 배정한다.
 
     Phase 0: docs ground truth lock
     Phase 1: well-known ext lock
@@ -211,6 +226,29 @@ def classify_balanced(
     Phase 3: majorHolder 법인주주
     Phase 4: 공유 개인주주
     Phase 5: 이름 키워드 + 나머지 독립
+
+    Parameters
+    ----------
+    invest_edges : pl.DataFrame
+        investedCompany 정제 엣지 (build_invest_edges 결과).
+    corp_edges : pl.DataFrame
+        majorHolder 중 법인 엣지 (build_holder_edges 결과의 첫 번째).
+    person_edges : pl.DataFrame
+        majorHolder 중 개인 엣지 (build_holder_edges 결과의 두 번째).
+    all_node_ids : set[str]
+        분류 대상 전체 종목코드 집합.
+    code_to_name : dict[str, str]
+        종목코드 → 회사명 매핑.
+    docs_ground_truth : dict[str, str]
+        공시 기반 확정 그룹 매핑 {종목코드: 그룹명}.
+    verbose : bool
+        True이면 각 Phase 진행 로그를 출력한다.
+
+    Returns
+    -------
+    dict[str, str]
+        종목코드 → 그룹명 매핑. all_node_ids 전체를 커버한다.
+        그룹에 1개만 속하면 독립 기업(회사명이 그룹명).
     """
     code_to_group: dict[str, str] = {}
     locked: set[str] = set()

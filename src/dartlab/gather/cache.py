@@ -71,7 +71,19 @@ class GatherCache:
         self._lock = threading.Lock()
 
     def get(self, key: str) -> object | None:
-        """캐시 조회. 만료되었으면 stale로 이동 후 None 반환."""
+        """캐시 조회 — 만료되었으면 stale로 이동 후 None 반환.
+
+        Parameters
+        ----------
+        key : str
+            캐시 키 (예: "005930:price").
+
+        Returns
+        -------
+        object | None
+            캐시된 값 — 유효한 항목이 있을 때.
+            None — 키가 없거나 TTL 만료 시 (만료 데이터는 stale로 이동).
+        """
         with self._lock:
             entry = self._store.get(key)
             if entry is None:
@@ -86,7 +98,22 @@ class GatherCache:
             return entry.value
 
     def put(self, key: str, value: object, ttl: int = TTL_DEFAULT) -> None:
-        """캐시 저장."""
+        """캐시 저장 — max_entries 초과 시 가장 오래된 항목 LRU 축출.
+
+        Parameters
+        ----------
+        key : str
+            캐시 키 (예: "005930:price").
+        value : object
+            저장할 데이터.
+        ttl : int
+            만료 시간 (초). 기본 TTL_DEFAULT (3600초).
+
+        Returns
+        -------
+        None
+            기존 키가 있으면 덮어쓰고, stale 항목도 제거한다.
+        """
         with self._lock:
             if key in self._store:
                 del self._store[key]
@@ -99,19 +126,53 @@ class GatherCache:
                 self._store.popitem(last=False)
 
     def _trim_stale(self) -> None:
-        """stale store 용량 제한 (lock 내에서 호출)."""
+        """stale store 용량 제한 — 삽입순으로 가장 오래된 항목부터 제거 (lock 내에서 호출).
+
+        Returns
+        -------
+        None
+            stale_max 초과분만큼 가장 오래된 항목을 삭제한다.
+        """
         while len(self._stale) > self._stale_max:
             # dict는 삽입순 — 가장 오래된 것 제거
             first_key = next(iter(self._stale))
             del self._stale[first_key]
 
     def get_stale(self, key: str) -> object | None:
-        """만료된 데이터 반환 (stale-while-revalidate)."""
+        """만료된 데이터 반환 — stale-while-revalidate 패턴의 최후 fallback.
+
+        Parameters
+        ----------
+        key : str
+            캐시 키 (예: "005930:price").
+
+        Returns
+        -------
+        object | None
+            만료 후 보존된 마지막 값.
+            None — stale 항목이 없을 때.
+        """
         with self._lock:
             return self._stale.get(key)
 
     def get_typed(self, stock_code: str, data_type: str, *, allow_stale: bool = False) -> object | None:
-        """데이터 유형별 캐시 조회. allow_stale=True이면 만료 데이터도 반환."""
+        """데이터 유형별 캐시 조회 — "{stock_code}:{data_type}" 키로 자동 조합.
+
+        Parameters
+        ----------
+        stock_code : str
+            종목코드 또는 캐시 prefix ("005930", "KR:005930" 등).
+        data_type : str
+            데이터 유형 ("price", "consensus", "flow", "snapshot" 등).
+        allow_stale : bool
+            True이면 live 미스 시 만료 데이터도 반환. 기본 False.
+
+        Returns
+        -------
+        object | None
+            캐시된 값 (PriceSnapshot, ConsensusData, pl.DataFrame 등).
+            None — 캐시 미스이고 allow_stale=False이거나 stale도 없을 때.
+        """
         key = f"{stock_code}:{data_type}"
         result = self.get(key)
         if result is not None:
@@ -121,12 +182,38 @@ class GatherCache:
         return None
 
     def put_typed(self, stock_code: str, data_type: str, value: object) -> None:
-        """데이터 유형에 맞는 TTL로 저장."""
+        """데이터 유형에 맞는 TTL로 저장 — _TTL_MAP에서 자동 매핑.
+
+        Parameters
+        ----------
+        stock_code : str
+            종목코드 또는 캐시 prefix.
+        data_type : str
+            데이터 유형 ("price", "consensus" 등). _TTL_MAP에 없으면 TTL_DEFAULT (3600초).
+        value : object
+            저장할 데이터.
+
+        Returns
+        -------
+        None
+            "{stock_code}:{data_type}" 키로 적절한 TTL과 함께 저장한다.
+        """
         ttl = _TTL_MAP.get(data_type, TTL_DEFAULT)
         self.put(f"{stock_code}:{data_type}", value, ttl)
 
     def invalidate(self, stock_code: str) -> None:
-        """특정 종목의 모든 캐시 제거 (live + stale)."""
+        """특정 종목의 모든 캐시 제거 — live + stale 양쪽에서 prefix 매칭 삭제.
+
+        Parameters
+        ----------
+        stock_code : str
+            종목코드 ("005930"). "{stock_code}:" prefix로 시작하는 모든 키를 제거.
+
+        Returns
+        -------
+        None
+            해당 종목의 price, consensus, flow 등 모든 데이터 유형 캐시를 삭제한다.
+        """
         with self._lock:
             prefix = f"{stock_code}:"
             for store in (self._store, self._stale):
@@ -135,14 +222,26 @@ class GatherCache:
                     del store[k]
 
     def clear(self) -> None:
-        """전체 캐시 초기화 (live + stale)."""
+        """전체 캐시 초기화 — live + stale 모두 비운다.
+
+        Returns
+        -------
+        None
+            모든 캐시 항목을 제거한다. size가 0이 된다.
+        """
         with self._lock:
             self._store.clear()
             self._stale.clear()
 
     @property
     def size(self) -> int:
-        """캐시에 저장된 항목 수."""
+        """캐시에 저장된 live 항목 수 (stale 제외).
+
+        Returns
+        -------
+        int
+            현재 live 캐시에 저장된 항목 수 (개).
+        """
         return len(self._store)
 
     def __repr__(self) -> str:

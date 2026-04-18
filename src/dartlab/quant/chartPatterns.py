@@ -35,7 +35,22 @@ class ChartPattern:
 
 
 def detectDoubleBottom(pivots: list[dict], prices: np.ndarray, dates: list) -> ChartPattern | None:
-    """쌍바닥 W: 두 저점이 비슷, 사이 고점이 충분히 높음."""
+    """쌍바닥 W: 두 저점이 비슷, 사이 고점이 충분히 높음.
+
+    Parameters
+    ----------
+    pivots : list[dict]
+        _find_pivots 결과. 각 dict에 "type", "idx", "price" 키 포함.
+    prices : np.ndarray
+        종가 배열 (넥라인 돌파 확인용).
+    dates : list
+        날짜 리스트 (formedAt 산출용).
+
+    Returns
+    -------
+    ChartPattern | None
+        탐지 시 ChartPattern(direction="bullish"), 미탐지 시 None.
+    """
     lows = [p for p in pivots if p["type"] == "low"]
     if len(lows) < 2:
         return None
@@ -73,7 +88,22 @@ def detectDoubleBottom(pivots: list[dict], prices: np.ndarray, dates: list) -> C
 
 
 def detectDoubleTop(pivots: list[dict], prices: np.ndarray, dates: list) -> ChartPattern | None:
-    """쌍봉 M: 두 고점이 비슷, 사이 저점이 충분히 낮음, 넥라인 하향 이탈."""
+    """쌍봉 M: 두 고점이 비슷, 사이 저점이 충분히 낮음, 넥라인 하향 이탈.
+
+    Parameters
+    ----------
+    pivots : list[dict]
+        _find_pivots 결과.
+    prices : np.ndarray
+        종가 배열.
+    dates : list
+        날짜 리스트.
+
+    Returns
+    -------
+    ChartPattern | None
+        탐지 시 ChartPattern(direction="bearish"), 미탐지 시 None.
+    """
     highs = [p for p in pivots if p["type"] == "high"]
     if len(highs) < 2:
         return None
@@ -107,7 +137,22 @@ def detectDoubleTop(pivots: list[dict], prices: np.ndarray, dates: list) -> Char
 
 
 def detectHeadShoulders(pivots: list[dict], prices: np.ndarray, dates: list) -> ChartPattern | None:
-    """헤드앤숄더: 좌어깨 < 머리 > 우어깨, 어깨 비율 ±10%, 넥라인 수평."""
+    """헤드앤숄더: 좌어깨 < 머리 > 우어깨, 어깨 비율 ±10%, 넥라인 수평.
+
+    Parameters
+    ----------
+    pivots : list[dict]
+        _find_pivots 결과.
+    prices : np.ndarray
+        종가 배열.
+    dates : list
+        날짜 리스트.
+
+    Returns
+    -------
+    ChartPattern | None
+        탐지 시 ChartPattern(direction="bearish"), 미탐지 시 None.
+    """
     highs = [p for p in pivots if p["type"] == "high"]
     if len(highs) < 3:
         return None
@@ -151,7 +196,22 @@ def detectHeadShoulders(pivots: list[dict], prices: np.ndarray, dates: list) -> 
 
 
 def detectInvertedHS(pivots: list[dict], prices: np.ndarray, dates: list) -> ChartPattern | None:
-    """역H&S: H&S 거꾸로. 좌어깨 > 머리 < 우어깨, 넥라인 상향 돌파."""
+    """역H&S: H&S 거꾸로. 좌어깨 > 머리 < 우어깨, 넥라인 상향 돌파.
+
+    Parameters
+    ----------
+    pivots : list[dict]
+        _find_pivots 결과.
+    prices : np.ndarray
+        종가 배열.
+    dates : list
+        날짜 리스트.
+
+    Returns
+    -------
+    ChartPattern | None
+        탐지 시 ChartPattern(direction="bullish"), 미탐지 시 None.
+    """
     lows = [p for p in pivots if p["type"] == "low"]
     if len(lows) < 3:
         return None
@@ -191,7 +251,22 @@ def detectInvertedHS(pivots: list[dict], prices: np.ndarray, dates: list) -> Cha
 
 
 def detectTripleBottom(pivots: list[dict], prices: np.ndarray, dates: list) -> ChartPattern | None:
-    """삼중바닥: 3개 저점이 비슷한 수준."""
+    """삼중바닥: 3개 저점이 비슷한 수준.
+
+    Parameters
+    ----------
+    pivots : list[dict]
+        _find_pivots 결과.
+    prices : np.ndarray
+        종가 배열.
+    dates : list
+        날짜 리스트.
+
+    Returns
+    -------
+    ChartPattern | None
+        탐지 시 ChartPattern(direction="bullish"), 미탐지 시 None.
+    """
     lows = [p for p in pivots if p["type"] == "low"]
     if len(lows) < 3:
         return None
@@ -225,7 +300,22 @@ def detectTripleBottom(pivots: list[dict], prices: np.ndarray, dates: list) -> C
 
 
 def detectTripleTop(pivots: list[dict], prices: np.ndarray, dates: list) -> ChartPattern | None:
-    """삼중천장: 3개 고점이 비슷한 수준."""
+    """삼중천장: 3개 고점이 비슷한 수준.
+
+    Parameters
+    ----------
+    pivots : list[dict]
+        _find_pivots 결과.
+    prices : np.ndarray
+        종가 배열.
+    dates : list
+        날짜 리스트.
+
+    Returns
+    -------
+    ChartPattern | None
+        탐지 시 ChartPattern(direction="bearish"), 미탐지 시 None.
+    """
     highs = [p for p in pivots if p["type"] == "high"]
     if len(highs) < 3:
         return None
@@ -258,7 +348,22 @@ def detectTripleTop(pivots: list[dict], prices: np.ndarray, dates: list) -> Char
 
 
 def detectRoundingBottom(prices: np.ndarray, dates: list, window: int = 60) -> ChartPattern | None:
-    """원형바닥: 최근 window 구간에 2차 다항식 fit, 계수>0, R² 충분."""
+    """원형바닥: 최근 window 구간에 2차 다항식 fit, 계수>0, R² 충분.
+
+    Parameters
+    ----------
+    prices : np.ndarray
+        종가 배열.
+    dates : list
+        날짜 리스트.
+    window : int
+        분석 구간 길이 (기본 60일).
+
+    Returns
+    -------
+    ChartPattern | None
+        탐지 시 ChartPattern(direction="bullish", targetPrice=None), 미탐지 시 None.
+    """
     if len(prices) < window:
         return None
 
@@ -297,7 +402,22 @@ def detectRoundingBottom(prices: np.ndarray, dates: list, window: int = 60) -> C
 
 
 def detectRoundingTop(prices: np.ndarray, dates: list, window: int = 60) -> ChartPattern | None:
-    """원형천장: 2차 다항식 계수<0."""
+    """원형천장: 2차 다항식 계수<0.
+
+    Parameters
+    ----------
+    prices : np.ndarray
+        종가 배열.
+    dates : list
+        날짜 리스트.
+    window : int
+        분석 구간 길이 (기본 60일).
+
+    Returns
+    -------
+    ChartPattern | None
+        탐지 시 ChartPattern(direction="bearish", targetPrice=None), 미탐지 시 None.
+    """
     if len(prices) < window:
         return None
 
@@ -346,13 +466,23 @@ def detectChartPatterns(
 ) -> list[ChartPattern]:
     """모든 거시 차트 패턴을 한 번에 탐지.
 
-    Args:
-        high, low, close: OHLC numpy 배열
-        dates: 날짜 리스트
-        pivot_threshold: zigzag 임계값 (5%)
+    Parameters
+    ----------
+    high : np.ndarray
+        고가 배열.
+    low : np.ndarray
+        저가 배열.
+    close : np.ndarray
+        종가 배열.
+    dates : list
+        날짜 리스트.
+    pivot_threshold : float
+        zigzag 피벗 임계값 (기본 0.05 = 5%).
 
-    Returns:
-        탐지된 ChartPattern 리스트 (신뢰도 내림차순)
+    Returns
+    -------
+    list[ChartPattern]
+        탐지된 패턴 리스트 (신뢰도 내림차순). 미탐지 시 빈 리스트.
     """
     if len(close) < 30:
         return []
@@ -391,12 +521,21 @@ def detectChartPatterns(
 def calcChartPatterns(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """quant 축 진입점 — 거시 차트 패턴 자동 탐지.
 
-    Args:
-        stockCode: 종목코드 또는 ticker
-        market: "KR" | "US" | "auto"
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 또는 ticker.
+    market : str
+        "KR" | "US" | "auto" (기본 "auto").
 
-    Returns:
-        dict with detected patterns + metadata
+    Returns
+    -------
+    dict
+        stockCode : str — 종목코드
+        market : str — 시장 구분
+        dataPoints : int — 분석 데이터 수
+        patterns : list[dict] — 탐지된 패턴 목록. 각 dict에
+            name, label, formedAt, confidence, direction, targetPrice, description 포함.
     """
     market = resolve_market(stockCode, market)
     ohlcv = fetch_ohlcv(stockCode, **kwargs)

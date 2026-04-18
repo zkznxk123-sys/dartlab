@@ -13,7 +13,17 @@ from dartlab.scan._helpers import (
 
 
 def scan_major_holder_pct() -> dict[str, float]:
-    """majorHolder → {종목코드: 최대주주 지분율(%)}."""
+    """전종목 최대주주 지분율 스캔.
+
+    majorHolder parquet에서 최신 연도의 최대주주 지분율을 추출한다.
+    종목별로 해당 연도 내 가장 높은 지분율 값을 선택한다.
+
+    Returns
+    -------
+    dict[str, float]
+        종목코드 : 최대주주 지분율 (%)
+        빈 dict — 데이터 없음
+    """
     raw = scan_parquets(
         "majorHolder",
         ["stockCode", "year", "quarter", "bsis_posesn_stock_qota_rt"],
@@ -39,10 +49,20 @@ def scan_major_holder_pct() -> dict[str, float]:
 
 
 def scan_outside_directors() -> dict[str, dict]:
-    """outsideDirector → {종목코드: {사외이사비율, 중도사임, 겸직}}.
+    """전종목 사외이사 현황 스캔.
 
-    outsideDirector parquet의 drctr_co/otcmp_drctr_co 집계값 사용.
-    fallback: executive parquet의 ofcps 문자열 파싱.
+    outsideDirector parquet의 drctr_co/otcmp_drctr_co 집계값을 사용한다.
+    해당 parquet이 비어 있으면 executive parquet의 ofcps 문자열을 파싱하여
+    fallback 처리한다.
+
+    Returns
+    -------
+    dict[str, dict]
+        종목코드 : dict
+            사외이사비율 : float — 사외이사 비율 (%)
+            중도사임 : int — 중도사임 인원 (명)
+            겸직 : int — 겸직 인원 (명)
+        빈 dict — 데이터 없음
     """
     raw = scan_parquets(
         "outsideDirector",
@@ -57,7 +77,24 @@ def scan_outside_directors() -> dict[str, dict]:
 
 
 def _outsideFromDedicated(raw: pl.DataFrame) -> dict[str, dict]:
-    """outsideDirector parquet → 사외이사 비율 + 중도사임 + 겸직."""
+    """outsideDirector parquet에서 사외이사 현황 집계.
+
+    최신 연도의 종목별 이사 수(drctr_co)와 사외이사 수(otcmp_drctr_co)를
+    합산하여 비율을 계산하고, 중도사임·겸직 인원을 집계한다.
+
+    Parameters
+    ----------
+    raw : pl.DataFrame
+        outsideDirector parquet 로드 결과
+
+    Returns
+    -------
+    dict[str, dict]
+        종목코드 : dict
+            사외이사비율 : float — 사외이사 비율 (%)
+            중도사임 : int — 중도사임 인원 (명)
+            겸직 : int — 겸직 인원 (명)
+    """
     latestYear = find_latest_year(raw, "drctr_co", 500)
     if latestYear is None:
         return {}
@@ -100,7 +137,19 @@ def _outsideFromDedicated(raw: pl.DataFrame) -> dict[str, dict]:
 
 
 def _outsideFromExecutive() -> dict[str, dict]:
-    """executive parquet fallback → 사외이사 비율만 (중도사임/겸직 없음)."""
+    """executive parquet fallback으로 사외이사 비율 추정.
+
+    ofcps 컬럼에서 '사외' 문자열을 포함하는 행을 사외이사로 간주한다.
+    중도사임·겸직 정보는 executive parquet에 없어 0으로 고정.
+
+    Returns
+    -------
+    dict[str, dict]
+        종목코드 : dict
+            사외이사비율 : float — 사외이사 비율 (%)
+            중도사임 : int — 항상 0 (명)
+            겸직 : int — 항상 0 (명)
+    """
     raw = scan_parquets(
         "executive",
         ["stockCode", "year", "quarter", "ofcps"],
@@ -126,7 +175,18 @@ def _outsideFromExecutive() -> dict[str, dict]:
 
 
 def scan_pay_ratio() -> dict[str, float]:
-    """executivePayAllTotal + employee → {종목코드: pay ratio(배)}."""
+    """전종목 임원-직원 보수 배율 스캔.
+
+    executivePayAllTotal parquet에서 임원 평균보수를, employee parquet에서
+    직원 평균급여를 산출한 뒤 비율을 계산한다. 500배 초과는 데이터 오류로
+    판단하여 제외한다.
+
+    Returns
+    -------
+    dict[str, float]
+        종목코드 : 임원/직원 보수 배율 (배)
+        빈 dict — 데이터 없음
+    """
     raw_pay = scan_parquets(
         "executivePayAllTotal",
         ["stockCode", "year", "quarter", "nmpr", "jan_avrg_mendng_am"],
@@ -184,7 +244,17 @@ def scan_pay_ratio() -> dict[str, float]:
 
 
 def scan_audit_opinion() -> dict[str, str]:
-    """auditOpinion → {종목코드: 감사의견 문자열}."""
+    """전종목 감사의견 스캔.
+
+    auditOpinion parquet에서 유효 데이터가 500건 이상인 최신 연도를 선택하고,
+    종목별로 가장 나쁜 감사의견(의견거절 > 부적정 > 한정 > 적정)을 반환한다.
+
+    Returns
+    -------
+    dict[str, str]
+        종목코드 : 감사의견 문자열 (적정의견 | 한정의견 | 부적정의견 | 의견거절)
+        빈 dict — 데이터 없음
+    """
     raw = scan_parquets(
         "auditOpinion",
         ["stockCode", "year", "quarter", "adt_opinion"],
@@ -220,9 +290,16 @@ def scan_audit_opinion() -> dict[str, str]:
 
 
 def scan_minority_holder() -> dict[str, float]:
-    """minorityHolder → {종목코드: 소액주주 지분율(%)}.
+    """전종목 소액주주 지분율 스캔.
 
-    hold_stock_rate가 높을수록 주주 분산이 양호.
+    minorityHolder parquet에서 hold_stock_rate를 추출한다.
+    값이 높을수록 주주 분산이 양호함을 의미한다.
+
+    Returns
+    -------
+    dict[str, float]
+        종목코드 : 소액주주 지분율 (%)
+        빈 dict — 데이터 없음
     """
     raw = scan_parquets(
         "minorityHolder",

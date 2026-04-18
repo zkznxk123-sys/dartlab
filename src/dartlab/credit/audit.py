@@ -82,7 +82,40 @@ def auditCredit(
     corpName: str = "",
     result: dict | None = None,
 ) -> CreditAuditResult:
-    """신평사 대조 + 동의/비동의 자동 생성."""
+    """신평사 대조 + 동의/비동의 자동 생성.
+
+    dCR 등급을 제도권 신평사(KIS/KR/NICE) 등급과 비교하여
+    notch 차이를 계산하고, 동의·비동의·구조적 참고사항을
+    자동 생성한다.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (예: ``"005930"``).
+    corpName : str
+        기업명. 빈 문자열이면 종목코드만 사용.
+    result : dict | None
+        신용분석 결과 딕셔너리. None이면 내부에서
+        ``credit.evaluate(stockCode, detail=True)``를 호출한다.
+        주요 키: ``grade`` (str), ``gradeRaw`` (str), ``score`` (점),
+        ``captiveFinance`` (bool), ``holding`` (bool), ``axes`` (list).
+
+    Returns
+    -------
+    CreditAuditResult
+        stockCode : str — 종목코드
+        corpName : str — 기업명
+        dcrGrade : str — dartlab 최종 등급 (예: ``"A+"``)
+        dcrGradeRaw : str — 보정 전 원시 등급
+        dcrScore : float — 종합 점수 (점)
+        externalGrades : dict — 외부 등급 ``{기관명: 등급}``
+        notchDifferences : dict — notch 차이 ``{기관명: int}`` (notch)
+        avgNotchDiff : float — 평균 notch 괴리 (notch)
+        agreements : list[str] — 동의 근거 문장 목록
+        disagreements : list[str] — 비동의 근거 문장 목록
+        structuralNotes : list[str] — 구조적 참고사항 목록
+        auditDate : str — audit 실행일 (``"YYYY-MM-DD"``)
+    """
     if result is None:
         from dartlab.credit.engine import evaluate
 
@@ -198,11 +231,24 @@ def _findDisagreementReasons(result: dict, direction: str) -> str:
 
 
 def auditToMarkdown(audit: CreditAuditResult, *, sectionNum: int = 8) -> str:
-    """audit 결과를 마크다운으로 변환.
+    """audit 결과를 마크다운 문자열로 변환.
 
-    Args:
-        audit: 신용분석 audit 결과.
-        sectionNum: 보고서 내 섹션 번호 (기본 8).
+    신평사 등급 대조표, 동의/비동의 근거, 구조적 참고사항을
+    보고서에 삽입 가능한 마크다운 형식으로 변환한다.
+
+    Parameters
+    ----------
+    audit : CreditAuditResult
+        ``auditCredit()``의 반환값.
+    sectionNum : int
+        보고서 내 섹션 번호. 마크다운 ``## N. 신평사 등급 대조``
+        헤더에 사용된다.
+
+    Returns
+    -------
+    str
+        마크다운 형식의 audit 보고서 문자열. 등급 대조표,
+        동의/비동의 항목, 구조적 참고사항 섹션을 포함한다.
     """
     lines = []
     lines.append(f"## {sectionNum}. 신평사 등급 대조")
@@ -240,7 +286,21 @@ def auditToMarkdown(audit: CreditAuditResult, *, sectionNum: int = 8) -> str:
 
 
 def saveAudit(audit: CreditAuditResult) -> Path:
-    """audit 결과를 파일로 저장."""
+    """audit 결과를 마크다운 파일로 저장.
+
+    ``data/credit/audit/{stockCode}_{corpName}.md`` 경로에
+    등급·점수·audit 일자 + 마크다운 본문을 저장한다.
+
+    Parameters
+    ----------
+    audit : CreditAuditResult
+        ``auditCredit()``의 반환값.
+
+    Returns
+    -------
+    Path
+        저장된 파일의 절대 경로.
+    """
     _AUDIT_DIR.mkdir(parents=True, exist_ok=True)
     name = audit.corpName or audit.stockCode
     path = _AUDIT_DIR / f"{audit.stockCode}_{name}.md"

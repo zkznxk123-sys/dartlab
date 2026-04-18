@@ -13,7 +13,33 @@ from dartlab.core.finance.sentiment import ismAssetAllocation
 
 
 def _fetch_ism_data(market: str, as_of: str | None = None) -> dict[str, float | None]:
-    """gather에서 ISM/재고 지표 수집."""
+    """gather에서 ISM/재고 지표 수집.
+
+    Parameters
+    ----------
+    market : str
+        시장 코드 ("US" | "KR").
+    as_of : str | None
+        기준일 (YYYY-MM-DD). None이면 최신.
+
+    Returns
+    -------
+    dict[str, float | None]
+        US 시장:
+            ism_pmi : float — ISM 제조업 PMI (pt)
+            ism_pmi_prev : float — 전기 ISM PMI (pt)
+            ism_new_orders : float — ISM 신규주문 (pt)
+            ism_new_orders_prev : float — 전기 ISM 신규주문 (pt)
+            ism_inventories : float — ISM 재고 (pt)
+            ism_inventories_prev : float — 전기 ISM 재고 (pt)
+            new_orders : float — 제조업 신규주문 (백만달러)
+            inventories : float — 제조업 재고 (백만달러)
+        KR 시장:
+            manufacturing : float — 광공업생산지수 (pt)
+            manufacturing_prev : float — 전기 광공업생산지수 (pt)
+            bsi : float — 기업경기실사지수 (pt, 100 기준)
+            bsi_prev : float — 전기 BSI (pt)
+    """
     from dartlab.macro._helpers import fetch_latest_with_prev, get_gather
 
     g = get_gather(as_of)
@@ -46,8 +72,47 @@ def _fetch_ism_data(market: str, as_of: str | None = None) -> dict[str, float | 
 def analyze_inventory(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """재고순환 종합 분석.
 
-    Returns:
-        dict: inventoryPhase, ismBarometer, ismAllocation, timeseries
+    ISM 신규주문/재고 비율로 재고순환 4국면을 판별하고,
+    ISM PMI 수준에 따른 자산배분 바로미터를 산출한다.
+
+    Parameters
+    ----------
+    market : str
+        시장 코드 ("US" | "KR"). 기본 "US".
+    as_of : str | None
+        기준일 (YYYY-MM-DD). None이면 최신.
+    overrides : dict | None
+        AI 가정 교체 (예: ``{"ism_pmi": 52}``).
+
+    Returns
+    -------
+    dict
+        market : str — 시장 코드
+        inventoryPhase : dict | None — 재고순환 국면
+            phase : str — 국면 코드 ("recovery" | "expansion" | "slowdown" | "contraction")
+            phaseLabel : str — 한글 레이블
+            ratio : float — 신규주문/재고 비율 (배)
+            ratioMom : float | None — 비율 전기비 변화
+            equityImplication : str — 주식 시사 ("bullish" | "bearish" | "neutral")
+            equityLabel : str — 한글 레이블
+            description : str — 해설
+            source : str | None — 데이터 출처 (fallback 시 명시)
+        ismBarometer : dict | None — ISM 바로미터 (US 전용)
+            level : float — ISM PMI 수준 (pt)
+            zone : str — 구간 코드
+            zoneLabel : str — 한글 레이블
+            equityStance : str — 주식 스탠스
+            equityLabel : str — 한글 레이블
+            rateImplication : str — 금리 시사
+            rateLabel : str — 한글 레이블
+            description : str — 해설
+        ismAllocation : dict | None — ISM 기반 자산배분 (US 전용)
+            stance : str — 스탠스 코드
+            stanceLabel : str — 한글 레이블
+            equityWeight : float — 주식 비중 (%)
+            bondWeight : float — 채권 비중 (%)
+            description : str — 해설
+        timeseries : dict — 주요 시계열 (ism_pmi, new_orders, inventories)
     """
     data = _fetch_ism_data(market, as_of=as_of)
     if overrides:

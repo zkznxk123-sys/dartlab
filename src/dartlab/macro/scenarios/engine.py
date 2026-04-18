@@ -19,18 +19,31 @@ def run_scenario(
 ) -> dict:
     """시나리오 실행.
 
-    Args:
-        name: 시나리오 이름 ("2008 금융위기", "신용 충격", "금리 충격 + 유가 충격")
-        severity: 심각도 (유형별 시나리오용. mild/moderate/severe/extreme)
-        market: "US" | "KR"
-        compare: True면 현재 baseline과 비교
+    프리셋 overrides 를 매크로 종합에 적용하고, 선택적으로
+    현재 baseline 과 비교 delta 를 산출한다.
 
-    Returns:
-        dict:
-            scenario: 시나리오 적용 결과 (macro 종합과 동일 구조)
-            baseline: 현재 상태 (compare=True일 때)
-            delta: 주요 지표 변화량 (compare=True일 때)
-            meta: 시나리오 메타데이터
+    Parameters
+    ----------
+    name : str
+        시나리오 이름. ``"2008 금융위기"``, ``"신용 충격"``,
+        ``"금리 충격 + 유가 충격"`` (복합) 등.
+    severity : str | None
+        심각도. ``"mild"`` / ``"moderate"`` / ``"severe"`` / ``"extreme"``.
+        유형별·구조적 시나리오에서 사용.
+    market : str
+        시장 구분. ``"US"`` | ``"KR"``.
+    compare : bool
+        ``True`` 이면 현재 baseline 과 비교 delta 포함.
+
+    Returns
+    -------
+    dict
+        scenario : dict — 시나리오 적용 매크로 종합 결과 (macro 종합과 동일 구조)
+        baseline : dict | None — 현재 상태 (compare=True 일 때만 포함)
+        delta : dict | None — 주요 지표 변화량 (compare=True 일 때만 포함)
+        meta : dict — 시나리오 메타데이터 (name:str, description:str,
+            type:str, severity:str, transmission:str, reference:str,
+            outcome:str, overrides:dict)
     """
     from .presets import get_scenario
 
@@ -77,16 +90,36 @@ def compare_scenarios(
 ) -> dict:
     """여러 시나리오 동시 비교.
 
-    Args:
-        scenarios: 시나리오 이름 리스트
-        severity: 공통 심각도
-        market: "US" | "KR"
+    각 시나리오를 실행하고, baseline 대비 점수·국면·위기 수준 등을
+    비교 테이블로 정리한다.
 
-    Returns:
-        dict:
-            baseline: 현재 상태
-            scenarios: {name: result}
-            comparison: 비교 테이블
+    Parameters
+    ----------
+    scenarios : list[str]
+        시나리오 이름 리스트.
+    severity : str | None
+        모든 시나리오에 공통 적용할 심각도.
+    market : str
+        시장 구분. ``"US"`` | ``"KR"``.
+
+    Returns
+    -------
+    dict
+        baseline : dict — 현재 상태 요약
+            score : float — 매크로 종합 점수 (점)
+            overall : str — 종합 판정 (bullish/neutral/bearish 등)
+        scenarios : dict[str, dict] — {시나리오명: run_scenario 결과}
+        comparison : list[dict] — 비교 테이블. 각 항목:
+            scenario : str — 시나리오명
+            severity : str — 심각도
+            type : str — 충격 유형
+            score : float — 시나리오 점수 (점)
+            score_delta : float — baseline 대비 점수 변화 (점)
+            overall : str — 종합 판정
+            cycle_phase : str — 경기 국면
+            crisis_zone : str — 위기 수준
+            transmission : str — 전파 경로
+            outcome : str — 예상 결과
     """
     from dartlab.macro.summary import analyze_summary
 
@@ -134,7 +167,43 @@ def compare_scenarios(
 
 
 def _compute_delta(baseline: dict, scenario: dict) -> dict:
-    """baseline vs scenario 주요 지표 변화량."""
+    """baseline vs scenario 주요 지표 변화량.
+
+    Parameters
+    ----------
+    baseline : dict
+        현재 상태 매크로 종합 결과.
+    scenario : dict
+        시나리오 적용 매크로 종합 결과.
+
+    Returns
+    -------
+    dict
+        score : dict — 종합 점수 변화
+            baseline : float — 기존 점수 (점)
+            scenario : float — 시나리오 점수 (점)
+            change : float — 변화량 (점)
+        overall : dict — 종합 판정 변화
+            baseline : str — 기존 판정
+            scenario : str — 시나리오 판정
+        cycle_phase : dict — 경기 국면 변화
+            baseline : str — 기존 국면
+            scenario : str — 시나리오 국면
+            changed : bool — 변화 여부
+        crisis_zone : dict — 위기 수준 변화
+            baseline : str — 기존 수준
+            scenario : str — 시나리오 수준
+            changed : bool — 변화 여부
+        fear_greed : dict — 공포·탐욕 지수 변화
+            baseline : float | None — 기존 점수 (점)
+            scenario : float | None — 시나리오 점수 (점)
+            change : float | None — 변화량 (점)
+        historical_risk : dict — 역사적 리스크 수준 변화
+            baseline : str — 기존 수준
+            scenario : str — 시나리오 수준
+            changed : bool — 변화 여부
+        summary : str — 변화 종합 서술
+    """
     delta: dict = {}
 
     # score

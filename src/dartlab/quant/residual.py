@@ -11,7 +11,30 @@ from dartlab.quant._helpers import fetch_benchmark, fetch_ohlcv, ohlcv_to_arrays
 
 
 def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
-    """팩터 제거 후 잔여 모멘텀/알파."""
+    """팩터 제거 후 잔여 모멘텀/알파.
+
+    FF5 회귀에서 팩터 설명을 제거한 잔여 수익으로 모멘텀·알파·Sharpe 를 산출한다.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드.
+    market : str
+        "KR" | "US" | "auto". 기본 "auto".
+
+    Returns
+    -------
+    dict
+        stockCode : str — 종목코드
+        market : str — 시장
+        residualMomentum6m : float — 6개월 잔여 모멘텀 (%, 연환산)
+        residualMomentum1m : float — 1개월 잔여 모멘텀 (%, 연환산)
+        idiosyncraticVol : float — 고유 변동성 (%, 연환산)
+        residualAlpha : float — 잔여 알파 (%, 연환산)
+        residualSharpe : float — 잔여 Sharpe = alpha / vol (배)
+        factorRSquared : float — 팩터 모델 R² (비율)
+        residualVerdict : str — "positive_alpha" | "negative_alpha" | "neutral"
+    """
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 

@@ -44,7 +44,24 @@ TA_NMS = {"자산총계"}
 
 
 def _gradeQuality(accrualRatio: float) -> str:
-    """accrual ratio → 등급."""
+    """Accrual Ratio 로 이익의 질 등급 분류.
+
+    Parameters
+    ----------
+    accrualRatio : float
+        발생액 비율. ``(순이익 - 영업CF) / |총자산|``.
+        음수일수록 현금흐름이 이익을 상회하여 이익의 질이 높음.
+
+    Returns
+    -------
+    grade : str
+        이익의 질 등급. 다음 중 하나:
+        - ``"우수"`` : accrualRatio <= -0.05 (CF가 이익보다 훨씬 큼)
+        - ``"양호"`` : -0.05 < accrualRatio <= 0.05 (이익과 CF가 비슷)
+        - ``"보통"`` : 0.05 < accrualRatio <= 0.15 (약간의 accrual)
+        - ``"주의"`` : 0.15 < accrualRatio <= 0.25 (accrual 비중 높음)
+        - ``"위험"`` : accrualRatio > 0.25 (이익 대부분이 accrual)
+    """
     if accrualRatio <= -0.05:
         return "우수"  # CF가 이익보다 훨씬 큼
     if accrualRatio <= 0.05:
@@ -60,7 +77,26 @@ _extractVal = extractAccount  # backward compat alias
 
 
 def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
-    """프리빌드 finance.parquet → 종목별 이익의 질."""
+    """프리빌드 finance.parquet 에서 전종목 이익의 질 지표 계산.
+
+    Parameters
+    ----------
+    scanPath : Path
+        ``finance.parquet`` 파일 경로.
+
+    Returns
+    -------
+    pl.DataFrame
+        종목별 이익의 질 지표. 컬럼:
+
+        - stockCode : str — 종목코드
+        - netIncome : float — 당기순이익 (원)
+        - operatingCf : float — 영업활동 현금흐름 (원)
+        - totalAssets : float — 총자산 (원)
+        - accrualRatio : float — 발생액 비율 (순이익 - 영업CF) / |총자산| (비율)
+        - cfToNi : float — 영업CF / 순이익 (배). 극단값(|x|>20) 은 None
+        - grade : str — 이익의 질 등급 (우수/양호/보통/주의/위험)
+    """
     schema = pl.scan_parquet(str(scanPath)).collect_schema().names()
     scCol = "stockCode" if "stockCode" in schema else "stock_code"
 
@@ -129,7 +165,23 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
 
 
 def _scanPerFile() -> pl.DataFrame:
-    """종목별 finance parquet 순회 fallback."""
+    """종목별 finance parquet 파일을 순회하여 이익의 질 계산 (fallback).
+
+    ``finance.parquet`` 통합 파일이 없을 때 개별 종목 parquet 을 순회한다.
+
+    Returns
+    -------
+    pl.DataFrame
+        ``_scanFromMerged`` 와 동일한 스키마. 컬럼:
+
+        - stockCode : str — 종목코드
+        - netIncome : float — 당기순이익 (원)
+        - operatingCf : float — 영업활동 현금흐름 (원)
+        - totalAssets : float — 총자산 (원)
+        - accrualRatio : float — 발생액 비율 (비율)
+        - cfToNi : float — 영업CF / 순이익 (배). 극단값(|x|>20) 은 None
+        - grade : str — 이익의 질 등급 (우수/양호/보통/주의/위험)
+    """
     from dartlab.core.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))

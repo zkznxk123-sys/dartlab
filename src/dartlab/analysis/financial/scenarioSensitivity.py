@@ -63,6 +63,7 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
     col = yCols[0]
 
     def _get(row_key: str) -> float | None:
+        """IS 데이터에서 최신 기간 값 추출."""
         v = isData.get(row_key, {}).get(col)
         return float(v) if v is not None else None
 
@@ -483,6 +484,13 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
 
 
 def _verdict_opm(opm: float, ic: float | None) -> str:
+    """OPM shock 후 위험 판단문 반환.
+
+    Returns
+    -------
+    str
+        "영업적자 전환" | "이자 감당 위험" | "마진 압박 심각" | "감내 가능".
+    """
     if opm < 0:
         return "영업적자 전환"
     if ic is not None and ic < 1.5:
@@ -493,12 +501,26 @@ def _verdict_opm(opm: float, ic: float | None) -> str:
 
 
 def _verdict_rev(ic: float | None) -> str:
+    """매출 shock 후 위험 판단문 반환.
+
+    Returns
+    -------
+    str
+        "이자 감당 위험" | "감내 가능".
+    """
     if ic is not None and ic < 1.5:
         return "이자 감당 위험"
     return "감내 가능"
 
 
 def _verdict_rate(ic: float | None) -> str:
+    """금리 shock 후 위험 판단문 반환.
+
+    Returns
+    -------
+    str
+        "이자 감당 위험" | "여유 축소" | "감내 가능".
+    """
     if ic is not None and ic < 1.5:
         return "이자 감당 위험"
     if ic is not None and ic < 3:

@@ -47,10 +47,19 @@ class CrossSectionModel:
     warnings: list[str] = field(default_factory=list)
 
     def predict(self, features: dict[str, float], sector: str = "") -> float | None:
-        """개별 기업의 매출 성장률 예측 (%).
+        """개별 기업의 매출 성장률 예측.
 
-        features dict 키: FEATURES 목록과 동일.
-        sector: WICS 업종명 (sectorNames에 있으면 해당 더미 1, 아니면 0).
+        Parameters
+        ----------
+        features : dict[str, float]
+            FEATURES 목록과 동일한 키의 피처 dict.
+        sector : str
+            WICS 업종명 (sectorNames에 있으면 해당 더미 1, 아니면 0).
+
+        Returns
+        -------
+        float | None
+            예측 매출 성장률 (%). 피처 누락 시 None.
         """
         if not self.coefficients:
             return None
@@ -91,7 +100,20 @@ class PanelModel:
     grandMean: float  # 전체 평균 성장률
 
     def predict(self, stockCode: str, features: dict[str, float]) -> float | None:
-        """기업 고정효과 + 변수 효과 → 매출 성장률 예측."""
+        """기업 고정효과 + 변수 효과로 매출 성장률 예측.
+
+        Parameters
+        ----------
+        stockCode : str
+            종목코드 (고정효과 조회용).
+        features : dict[str, float]
+            FEATURES 목록과 동일한 키의 피처 dict.
+
+        Returns
+        -------
+        float | None
+            예측 매출 성장률 (%). 피처 누락 시 None.
+        """
         x = []
         for fname in self.featureNames:
             v = features.get(fname)
@@ -127,7 +149,13 @@ class CompanyFeatures:
     revenueGrowthLag: float  # 전년 매출 성장률
 
     def toFeatureDict(self) -> dict[str, float]:
-        """FEATURES 순서에 맞는 dict 반환."""
+        """FEATURES 순서에 맞는 dict 반환.
+
+        Returns
+        -------
+        dict[str, float]
+            피처명 → 값 매핑 (per, pbr, lnMarketCap 등).
+        """
         return {
             "per": self.per,
             "pbr": self.pbr,
@@ -140,7 +168,13 @@ class CompanyFeatures:
         }
 
     def toFeatureVector(self) -> list[float]:
-        """FEATURES 순서의 float 리스트."""
+        """FEATURES 순서의 float 리스트.
+
+        Returns
+        -------
+        list[float]
+            FEATURES 순서대로 정렬된 피처 값 리스트.
+        """
         d = self.toFeatureDict()
         return [d[f] for f in FEATURES]
 
@@ -160,9 +194,22 @@ def fitCrossSection(
 
     Parameters
     ----------
-    observations : 같은 연도의 CompanyFeatures 리스트
-    minObs : 최소 관측치 수
-    winsorize : 양쪽 꼬리 절사 비율 (기본 2%)
+    observations : list[CompanyFeatures]
+        같은 연도의 CompanyFeatures 리스트.
+    minObs : int
+        최소 관측치 수 (기본 30).
+    winsorize : float
+        양쪽 꼬리 절사 비율 (기본 0.02 = 2%).
+
+    Returns
+    -------
+    CrossSectionModel | None
+        year : int — 적합 연도
+        coefficients : list[float] — 회귀계수 [절편, beta1, ...]
+        rSquared : float — 결정계수 (0~1)
+        adjRSquared : float — 수정 결정계수 (0~1)
+        nObs : int — 관측치 수
+        관측치 부족 시 None.
     """
     if len(observations) < minObs:
         return None
@@ -221,10 +268,29 @@ def fitPanel(
     minObs: int = 50,
     minYears: int = 3,
 ) -> PanelModel | None:
-    """패널 회귀 (within estimator — 기업 고정효과).
+    """패널 회귀 (within estimator -- 기업 고정효과).
 
     각 변수에서 기업 평균을 빼고(demean) OLS 적합.
-    기업별 절편(αi) = 기업 평균 y - β · 기업 평균 X.
+    기업별 절편(alpha_i) = 기업 평균 y - beta * 기업 평균 X.
+
+    Parameters
+    ----------
+    observations : list[CompanyFeatures]
+        여러 연도의 CompanyFeatures 리스트.
+    minObs : int
+        최소 관측치 수 (기본 50).
+    minYears : int
+        최소 연도 수 (기본 3).
+
+    Returns
+    -------
+    PanelModel | None
+        coefficients : list[float] — 회귀계수 (절편 없음, demeaned)
+        rSquared : float — 결정계수 (0~1)
+        nObs : int — 관측치 수
+        nFirms : int — 기업 수
+        firmIntercepts : dict[str, float] — 기업별 고정효과
+        관측치/연도 부족 시 None.
     """
     if len(observations) < minObs:
         return None
@@ -307,7 +373,18 @@ def fitPanel(
 
 
 def saveModel(model: CrossSectionModel) -> Path:
-    """횡단면 모델 JSON 저장."""
+    """횡단면 모델 JSON 저장.
+
+    Parameters
+    ----------
+    model : CrossSectionModel
+        저장할 횡단면 회귀 모델.
+
+    Returns
+    -------
+    Path
+        저장된 파일 경로 (~/.dartlab/models/crossSection_{year}.json).
+    """
     _MODEL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = _MODEL_CACHE_DIR / f"crossSection_{model.year}.json"
     data = {
@@ -326,7 +403,18 @@ def saveModel(model: CrossSectionModel) -> Path:
 
 
 def loadModel(year: int) -> CrossSectionModel | None:
-    """캐시된 횡단면 모델 로드."""
+    """캐시된 횡단면 모델 로드.
+
+    Parameters
+    ----------
+    year : int
+        적합 연도.
+
+    Returns
+    -------
+    CrossSectionModel | None
+        캐시된 모델. 파일 없거나 파싱 실패 시 None.
+    """
     path = _MODEL_CACHE_DIR / f"crossSection_{year}.json"
     if not path.exists():
         return None
@@ -339,7 +427,18 @@ def loadModel(year: int) -> CrossSectionModel | None:
 
 
 def savePanelModel(model: PanelModel) -> Path:
-    """패널 모델 JSON 저장."""
+    """패널 모델 JSON 저장.
+
+    Parameters
+    ----------
+    model : PanelModel
+        저장할 패널 회귀 모델.
+
+    Returns
+    -------
+    Path
+        저장된 파일 경로 (~/.dartlab/models/panel_latest.json).
+    """
     _MODEL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = _MODEL_CACHE_DIR / "panel_latest.json"
     data = {
@@ -357,7 +456,13 @@ def savePanelModel(model: PanelModel) -> Path:
 
 
 def loadPanelModel() -> PanelModel | None:
-    """캐시된 패널 모델 로드."""
+    """캐시된 패널 모델 로드.
+
+    Returns
+    -------
+    PanelModel | None
+        캐시된 모델. 파일 없거나 파싱 실패 시 None.
+    """
     path = _MODEL_CACHE_DIR / "panel_latest.json"
     if not path.exists():
         return None

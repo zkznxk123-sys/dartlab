@@ -16,12 +16,39 @@ _cache = BoundedCache(max_entries=256)
 
 
 def _makeKey(*parts: Any) -> str:
+    """캐시 키 생성 — 인자들을 파이프로 연결 후 MD5 해시.
+
+    Parameters
+    ----------
+    *parts : Any
+        키 구성 요소 (indicatorId, start, end 등).
+
+    Returns
+    -------
+    str
+        32자리 MD5 해시 문자열.
+    """
     raw = "|".join(str(p) for p in parts)
     return hashlib.md5(raw.encode()).hexdigest()
 
 
 def get(indicatorId: str, start: str | None, end: str | None) -> Any | None:
-    """캐시 조회. TTL 만료 시 None."""
+    """캐시 조회. TTL 만료 시 자동 삭제 후 None 반환.
+
+    Parameters
+    ----------
+    indicatorId : str
+        ECOS 카탈로그 지표 ID (예: "GDP", "CPI").
+    start : str | None
+        조회 시작일.
+    end : str | None
+        조회 종료일.
+
+    Returns
+    -------
+    Any | None
+        캐시된 값 (보통 pl.DataFrame). 미스 또는 TTL 만료 시 None.
+    """
     key = _makeKey(indicatorId, start, end)
     entry = _cache.get(key)
     if entry is None:
@@ -41,12 +68,31 @@ def put(
     *,
     daily: bool = False,
 ) -> None:
-    """캐시 저장."""
+    """캐시 저장. daily=True 면 TTL 6시간, 아니면 24시간.
+
+    Parameters
+    ----------
+    indicatorId : str
+        ECOS 카탈로그 지표 ID.
+    start : str | None
+        조회 시작일.
+    end : str | None
+        조회 종료일.
+    value : Any
+        저장할 값 (보통 pl.DataFrame).
+    daily : bool
+        True 면 TTL 6시간 (일별 데이터용), False 면 24시간.
+    """
     key = _makeKey(indicatorId, start, end)
     ttl = _TTL_DAILY if daily else _TTL_OTHER
     _cache[key] = (time.monotonic(), ttl, value)
 
 
 def clear() -> None:
-    """캐시 전체 비우기."""
+    """ECOS 메모리 캐시 전체 비우기. BoundedCache 엔트리 모두 삭제.
+
+    Returns
+    -------
+    None
+    """
     _cache.clear()

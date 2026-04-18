@@ -12,7 +12,6 @@ import logging
 import threading
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -21,30 +20,54 @@ from dartlab.core.dataConfig import DATA_RELEASES
 
 @dataclass
 class RankInfo:
-    """단일 종목의 랭크 정보."""
+    """단일 종목의 랭크 정보.
+
+    Attributes
+    ----------
+    stockCode : str — 종목코드
+    corpName : str — 회사명
+    sector : str — 섹터
+    industryGroup : str — 산업군
+    revenue : float | None — 매출 TTM (원)
+    totalAssets : float | None — 총자산 (원)
+    revenueGrowth3Y : float | None — 매출 3년 성장률 (%)
+    revenueRank : int | None — 전체 매출 순위
+    revenueTotal : int — 매출 집계 종목 수
+    revenueRankInSector : int | None — 섹터 내 매출 순위
+    revenueSectorTotal : int — 섹터 내 종목 수
+    assetRank : int | None — 전체 자산 순위
+    assetTotal : int — 자산 집계 종목 수
+    assetRankInSector : int | None — 섹터 내 자산 순위
+    assetSectorTotal : int — 섹터 내 종목 수
+    growthRank : int | None — 전체 성장 순위
+    growthTotal : int — 성장 집계 종목 수
+    growthRankInSector : int | None — 섹터 내 성장 순위
+    growthSectorTotal : int — 섹터 내 종목 수
+    sizeClass : str — 규모 분류 (large/mid/small)
+    """
 
     stockCode: str
     corpName: str
     sector: str
     industryGroup: str
 
-    revenue: Optional[float] = None
-    totalAssets: Optional[float] = None
-    revenueGrowth3Y: Optional[float] = None
+    revenue: float | None = None
+    totalAssets: float | None = None
+    revenueGrowth3Y: float | None = None
 
-    revenueRank: Optional[int] = None
+    revenueRank: int | None = None
     revenueTotal: int = 0
-    revenueRankInSector: Optional[int] = None
+    revenueRankInSector: int | None = None
     revenueSectorTotal: int = 0
 
-    assetRank: Optional[int] = None
+    assetRank: int | None = None
     assetTotal: int = 0
-    assetRankInSector: Optional[int] = None
+    assetRankInSector: int | None = None
     assetSectorTotal: int = 0
 
-    growthRank: Optional[int] = None
+    growthRank: int | None = None
     growthTotal: int = 0
-    growthRankInSector: Optional[int] = None
+    growthRankInSector: int | None = None
     growthSectorTotal: int = 0
 
     sizeClass: str = ""
@@ -56,16 +79,37 @@ class RankInfo:
 
 
 def _cacheDir() -> Path:
+    """랭크 스냅샷 캐시 디렉토리.
+
+    Returns
+    -------
+    Path
+        ~/.dartlab/data/_cache/
+    """
     from dartlab import config
 
     return Path(config.dataDir) / "_cache"
 
 
 def _cachePath() -> Path:
+    """랭크 스냅샷 JSON 캐시 경로.
+
+    Returns
+    -------
+    Path
+        ~/.dartlab/data/_cache/rank_snapshot.json
+    """
     return _cacheDir() / "rank_snapshot.json"
 
 
 def _financeExists(stockCode: str) -> bool:
+    """종목의 finance parquet 존재 여부.
+
+    Returns
+    -------
+    bool
+        finance/{stockCode}.parquet 존재 시 True.
+    """
     from dartlab import config
 
     dataDir = Path(config.dataDir) / DATA_RELEASES["finance"]["dir"]
@@ -75,8 +119,15 @@ def _financeExists(stockCode: str) -> bool:
 def buildSnapshot(*, verbose: bool = True) -> dict[str, RankInfo]:
     """전체 종목 랭크 스냅샷 생성 및 캐시 저장.
 
-    Returns:
-        stockCode → RankInfo 매핑 dict.
+    Parameters
+    ----------
+    verbose : bool
+        진행 로그 출력 여부.
+
+    Returns
+    -------
+    dict[str, RankInfo]
+        {종목코드: RankInfo} — 매출/자산/성장 순위 + 섹터 내 순위 + sizeClass.
     """
     from dartlab.core.finance.ratios import calcRatios
     from dartlab.gather.listing import getKindList
@@ -222,6 +273,13 @@ def buildSnapshot(*, verbose: bool = True) -> dict[str, RankInfo]:
 
 
 def _loadCache() -> dict[str, RankInfo] | None:
+    """JSON 캐시에서 RankInfo dict 로드.
+
+    Returns
+    -------
+    dict[str, RankInfo] | None
+        {종목코드: RankInfo}. 캐시 없으면 None.
+    """
     cachePath = _cachePath()
     if not cachePath.exists():
         return None
@@ -237,6 +295,13 @@ _SNAPSHOT_LOCK = threading.Lock()
 
 
 def _ensureSnapshot() -> dict[str, RankInfo] | None:
+    """스냅샷 캐시 로드 (thread-safe, lazy).
+
+    Returns
+    -------
+    dict[str, RankInfo] | None
+        {종목코드: RankInfo}. 캐시 없으면 None.
+    """
     global _SNAPSHOT
     if _SNAPSHOT is not None:
         return _SNAPSHOT
@@ -248,7 +313,18 @@ def _ensureSnapshot() -> dict[str, RankInfo] | None:
 
 
 def getRank(stockCode: str) -> RankInfo | None:
-    """종목 랭크 정보 조회. 스냅샷이 없으면 None."""
+    """종목 랭크 정보 조회.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (6자리).
+
+    Returns
+    -------
+    RankInfo | None
+        랭크 정보. 스냅샷 없거나 종목 없으면 None.
+    """
     snap = _ensureSnapshot()
     if snap is None:
         return None
@@ -256,7 +332,20 @@ def getRank(stockCode: str) -> RankInfo | None:
 
 
 def getRankOrBuild(stockCode: str, *, verbose: bool = True) -> RankInfo | None:
-    """종목 랭크 정보 조회. 스냅샷이 없으면 빌드 후 조회."""
+    """종목 랭크 정보 조회 — 스냅샷 없으면 자동 빌드.
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (6자리).
+    verbose : bool
+        빌드 시 진행 로그 출력 여부.
+
+    Returns
+    -------
+    RankInfo | None
+        랭크 정보. 빌드 후에도 종목 없으면 None.
+    """
     global _SNAPSHOT
     snap = _ensureSnapshot()
     if snap is None:

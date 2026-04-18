@@ -42,7 +42,15 @@ _cache = GatherCache(max_entries=100)
 
 
 def _tavilyAvailable() -> bool:
-    """Tavily SDK + API 키 존재 여부."""
+    """Tavily 검색 백엔드 사용 가능 여부 확인.
+
+    TAVILY_API_KEY 환경변수 존재 + tavily 패키지 import 가능 여부를 모두 검사한다.
+
+    Returns
+    -------
+    bool
+        True이면 Tavily 검색 가능, False이면 키 미설정 또는 SDK 미설치.
+    """
     if not os.environ.get("TAVILY_API_KEY"):
         return False
     try:
@@ -56,7 +64,28 @@ def _tavilyAvailable() -> bool:
 def _searchTavily(
     query: str, *, maxResults: int = _MAX_RESULTS, days: int | None = None, topic: str = "general"
 ) -> list[SearchResult]:
-    """Tavily API 검색."""
+    """Tavily API로 웹 검색 실행.
+
+    Parameters
+    ----------
+    query : str
+        검색 쿼리 문자열.
+    maxResults : int
+        최대 반환 결과 수 (개). 기본 8.
+    days : int | None
+        최근 N일 이내 결과만 반환. None이면 제한 없음.
+    topic : str
+        검색 토픽. ``"general"`` 또는 ``"news"``.
+
+    Returns
+    -------
+    list[SearchResult]
+        title : str — 제목
+        url : str — 페이지 URL
+        snippet : str — 요약 텍스트
+        source : str — ``"tavily"``
+        published : str | None — 발행일
+    """
     from tavily import TavilyClient
 
     client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
@@ -95,7 +124,27 @@ def webSearch(
     maxResults: int = _MAX_RESULTS,
     days: int | None = None,
 ) -> list[SearchResult]:
-    """웹 검색. Tavily API 키가 없으면 빈 리스트."""
+    """웹 검색. Tavily API 키가 없으면 빈 리스트.
+
+    Parameters
+    ----------
+    query : str
+        검색 쿼리 문자열.
+    maxResults : int
+        최대 반환 결과 수 (개). 기본 8.
+    days : int | None
+        최근 N일 이내 결과만. None이면 전체 기간.
+
+    Returns
+    -------
+    list[SearchResult]
+        title : str — 제목
+        url : str — 페이지 URL
+        snippet : str — 요약 텍스트
+        source : str — ``"tavily"``
+        published : str | None — 발행일
+        캐시 TTL 30분. Tavily 미설정 시 빈 리스트.
+    """
     cacheKey = f"search:{query}:{maxResults}:{days}"
     cached = _cache.get(cacheKey)
     if cached is not None:
@@ -126,7 +175,27 @@ def newsSearch(
     maxResults: int = _MAX_RESULTS,
     days: int | None = None,
 ) -> list[SearchResult]:
-    """뉴스 검색. Tavily topic=news."""
+    """뉴스 검색. Tavily topic=news.
+
+    Parameters
+    ----------
+    query : str
+        검색 쿼리 문자열.
+    maxResults : int
+        최대 반환 결과 수 (개). 기본 8.
+    days : int | None
+        최근 N일 이내 뉴스만. None이면 전체 기간.
+
+    Returns
+    -------
+    list[SearchResult]
+        title : str — 뉴스 제목
+        url : str — 기사 URL
+        snippet : str — 요약 텍스트
+        source : str — ``"tavily"``
+        published : str | None — 발행일
+        캐시 TTL 30분. Tavily 미설정 시 빈 리스트.
+    """
     cacheKey = f"news_search:{query}:{maxResults}:{days}"
     cached = _cache.get(cacheKey)
     if cached is not None:
@@ -152,7 +221,14 @@ def newsSearch(
 
 
 def searchAvailable() -> dict[str, bool]:
-    """검색 백엔드 가용성 확인."""
+    """검색 백엔드 가용성 확인.
+
+    Returns
+    -------
+    dict[str, bool]
+        tavily : bool — Tavily 백엔드 사용 가능 여부
+        any : bool — 하나 이상의 백엔드 사용 가능 여부
+    """
     tavily = _tavilyAvailable()
     return {
         "tavily": tavily,
@@ -161,7 +237,20 @@ def searchAvailable() -> dict[str, bool]:
 
 
 def formatResults(results: list[SearchResult], *, maxChars: int = 4000) -> str:
-    """검색 결과를 LLM 컨텍스트용 마크다운으로 포맷."""
+    """검색 결과를 LLM 컨텍스트용 마크다운으로 포맷.
+
+    Parameters
+    ----------
+    results : list[SearchResult]
+        포맷할 검색 결과 목록.
+    maxChars : int
+        최대 출력 문자 수 (자). 기본 4000. 초과 시 나머지 생략.
+
+    Returns
+    -------
+    str
+        마크다운 형식 문자열. 결과 없으면 ``"(검색 결과 없음)"``.
+    """
     if not results:
         return "(검색 결과 없음)"
 

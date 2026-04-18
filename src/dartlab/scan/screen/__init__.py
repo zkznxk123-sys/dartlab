@@ -168,7 +168,7 @@ def _screenCycleRecovery() -> pl.DataFrame:
     """
     try:
         macro = _loadAxis("macroBeta")
-    except Exception:  # noqa: BLE001
+    except (ValueError, FileNotFoundError, OSError, pl.exceptions.PolarsError, ImportError):
         macro = pl.DataFrame()
 
     prof = _loadAxis("profitability")
@@ -210,7 +210,7 @@ def _screenCycleDefensive() -> pl.DataFrame:
     """
     try:
         macro = _loadAxis("macroBeta")
-    except Exception:  # noqa: BLE001
+    except (ValueError, FileNotFoundError, OSError, pl.exceptions.PolarsError, ImportError):
         macro = pl.DataFrame()
 
     debt = _loadAxis("debt")

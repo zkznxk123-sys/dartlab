@@ -92,7 +92,13 @@ def scan_company(
 
 
 def _list_local_docs() -> list[str]:
-    """로컬에 다운로드된 docs parquet 종목코드 목록."""
+    """로컬에 다운로드된 docs parquet 종목코드 목록.
+
+    Returns
+    -------
+    list[str]
+        정렬된 종목코드 목록 (6자리). 디렉토리 없으면 빈 리스트.
+    """
     from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.core.dataLoader import _getDataRoot
 

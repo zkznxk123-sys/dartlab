@@ -126,7 +126,23 @@ def selectModels(company: Any, *, lifeCyclePhase: str | None = None) -> dict:
 
 
 def calcMethodFitness(company: Any, *, basePeriod: str | None = None) -> dict:
-    """각 밸류에이션 방법론의 적합도 자동 판정 (v1 호환 유지)."""
+    """각 밸류에이션 방법론의 적합도 자동 판정 (v1 호환 유지).
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
+
+    Returns
+    -------
+    dict
+        dcf : dict — DCF 적합도 (fitness: float, reason: str)
+        rim : dict — RIM 적합도
+        ddm : dict — DDM 적합도
+        relative : dict — 상대가치 적합도
+    """
     return {
         "dcf": _dcfFitness(company, basePeriod),
         "rim": _rimFitness(company, basePeriod),

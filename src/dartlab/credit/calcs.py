@@ -33,7 +33,21 @@ def _evaluate(company, basePeriod=None):
 
 @_memoized_calc
 def calcCreditMetrics(company, *, basePeriod: str | None = None) -> dict | None:
-    """신용분석 핵심 지표 시계열."""
+    """신용분석 핵심 지표 시계열.
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+    basePeriod : str | None
+        분석 기준 기간. None이면 최신.
+
+    Returns
+    -------
+    dict | None
+        history : list[dict] — 기간별 7축 지표 시계열 (calcAllMetrics 결과)
+        businessStability : dict — 사업안정성 지표 (opMarginCV, revenueCV 등)
+    """
     result = _evaluate(company, basePeriod)
     if result is None:
         return None
@@ -48,7 +62,28 @@ def calcCreditMetrics(company, *, basePeriod: str | None = None) -> dict | None:
 
 @_memoized_calc
 def calcCreditScore(company, *, basePeriod: str | None = None, overrides: dict | None = None) -> dict | None:
-    """신용등급 종합 산출. overrides로 시나리오 metric 조율 가능."""
+    """신용등급 종합 산출.
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+    basePeriod : str | None
+        분석 기준 기간. None이면 최신.
+    overrides : dict | None
+        시나리오 가정 교체. core/overrides.py CREDIT_KEYS에 정의된 키만 유효.
+        예: ``{"debtRatio": 150, "interestCoverage": 5.0}``
+        적용 시 결과에 ``overrides``/``overrideNote`` 키가 추가됨.
+
+    Returns
+    -------
+    dict | None
+        evaluateCompany() 반환 dict 전체 (grade, score, axes 등).
+        overrides 적용 시 추가 키:
+
+        overrides : dict — 적용된 override 값
+        overrideNote : str — "AI/사용자 override 적용 시나리오"
+    """
     result = _evaluate(company, basePeriod)
     # override 적용: 시나리오 부채비율 등으로 등급 재산출
     if result and overrides:
@@ -63,7 +98,29 @@ def calcCreditScore(company, *, basePeriod: str | None = None, overrides: dict |
 
 @_memoized_calc
 def calcCreditHistory(company, *, basePeriod: str | None = None) -> dict | None:
-    """신용등급 시계열."""
+    """신용등급 시계열.
+
+    기간별 간이 점수를 산출하고, 등급 안정성을 판단한다.
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+    basePeriod : str | None
+        분석 기준 기간. None이면 최신.
+
+    Returns
+    -------
+    dict | None
+        history : list[dict] — 기간별 등급 시계열
+            period : str — 기간 (예: "2024")
+            score : float — 간이 위험 점수 (점)
+            grade : str — 등급 코드 (예: "AA+")
+            pdEstimate : float — 추정 부도확률 (%)
+        stable : bool — 등급 안정성 (고유 등급 2개 이하면 True)
+        latestGrade : str | None — 최신 기간 등급
+        oldestGrade : str | None — 가장 오래된 기간 등급
+    """
     result = _evaluate(company, basePeriod)
     if result is None:
         return None
@@ -123,7 +180,27 @@ def calcCreditHistory(company, *, basePeriod: str | None = None) -> dict | None:
 
 @_memoized_calc
 def calcCashFlowGrade(company, *, basePeriod: str | None = None) -> dict | None:
-    """현금흐름등급(eCR)."""
+    """현금흐름등급(eCR) 시계열.
+
+    OCF/매출, FCF 양수 여부, OCF/차입금 기반으로 기간별 eCR 등급 산출.
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+    basePeriod : str | None
+        분석 기준 기간. None이면 최신.
+
+    Returns
+    -------
+    dict | None
+        history : list[dict] — 기간별 현금흐름등급
+            period : str — 기간 (예: "2024")
+            eCR : str — 현금흐름등급 (예: "A", "BB")
+            ocfToSales : float | None — OCF/매출 (%)
+            fcfPositive : bool — FCF 양수 여부
+            ocfToDebt : float | None — OCF/총차입금 (%)
+    """
     result = _evaluate(company, basePeriod)
     if result is None:
         return None
@@ -156,7 +233,28 @@ def calcCashFlowGrade(company, *, basePeriod: str | None = None) -> dict | None:
 
 @_memoized_calc
 def calcCreditPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
-    """업종 내 신용 순위."""
+    """업종 내 신용 순위.
+
+    최신 기간의 핵심 지표를 추출하여 peer 비교 기반 제공.
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+    basePeriod : str | None
+        분석 기준 기간. None이면 최신.
+
+    Returns
+    -------
+    dict | None
+        latestPeriod : str — 최신 분석 기간
+        metrics : dict — 핵심 비교 지표
+            debtRatio : float | None — 부채비율 (%)
+            ebitdaInterestCoverage : float | None — EBITDA/이자비용 (배)
+            ffoToDebt : float | None — FFO/총차입금 (%)
+            currentRatio : float | None — 유동비율 (%)
+        peerAvailable : bool — peer 데이터 가용 여부
+    """
     result = _evaluate(company, basePeriod)
     if result is None:
         return None
@@ -180,7 +278,27 @@ def calcCreditPeerPosition(company, *, basePeriod: str | None = None) -> dict | 
 
 @_memoized_calc
 def calcCreditFlags(company, *, basePeriod: str | None = None) -> dict | None:
-    """신용 경고/개선 플래그."""
+    """신용 경고(warning)/개선(opportunity) 플래그.
+
+    최신 기간의 핵심 지표를 검사하여 등급에 영향을 미치는
+    경고 신호와 개선 기회를 식별한다.
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+    basePeriod : str | None
+        분석 기준 기간. None이면 최신.
+
+    Returns
+    -------
+    dict | None
+        flags : list[dict] — 경고/개선 플래그 목록
+            type : str — "warning" 또는 "opportunity"
+            signal : str — 신호 요약 (예: "이자보상배율 1.5배 미달")
+            detail : str — 상세 설명 (예: "EBITDA/이자비용 = 1.2배")
+            impact : str — 등급 영향 (예: "등급 하방 1~2 notch")
+    """
     result = _evaluate(company, basePeriod)
     if result is None:
         return None
@@ -282,6 +400,24 @@ def calcCreditNarrative(company, *, basePeriod: str | None = None) -> dict | Non
 
     credit/narrative.py::buildNarratives() 결과를 그대로 반환.
     review가 5-7 신용평가 섹션에서 소비.
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+    basePeriod : str | None
+        분석 기준 기간. None이면 최신.
+
+    Returns
+    -------
+    dict | None
+        axes : list[dict] — 축별 서사
+            axisName : str — 축 이름 (예: "채무상환능력")
+            summary : str — 한 줄 요약
+            details : list[str] — 상세 설명 문장들
+            severity : str — 심각도 ("good"/"neutral"/"warning"/"critical")
+        grade : str — dCR 등급 (예: "dCR-AA+")
+        gradeDescription : str — 등급 설명
     """
     result = _evaluate(company, basePeriod)
     if result is None:
@@ -317,6 +453,26 @@ def calcCreditAudit(company, *, basePeriod: str | None = None) -> dict | None:
     """credit publisher의 외부 신평사 대조를 review 블록용으로 변환.
 
     credit/audit.py::auditCredit() 결과를 그대로 반환.
+
+    Parameters
+    ----------
+    company : Company
+        DartCompany 또는 EdgarCompany 인스턴스.
+    basePeriod : str | None
+        분석 기준 기간. None이면 최신.
+
+    Returns
+    -------
+    dict | None
+        stockCode : str — 종목코드
+        corpName : str — 기업명
+        dcrGrade : str — dartlab dCR 등급
+        dcrScore : float — dCR 점수 (점)
+        externalGrades : dict — 외부 신평사 등급 (기관명→등급)
+        notchDifferences : dict — 신평사별 notch 차이 (기관명→notch 수)
+        avgNotchDiff : float — 평균 notch 차이 (notch)
+        agreements : list[str] — 일치 포인트
+        disagreements : list[str] — 괴리 포인트
     """
     result = _evaluate(company, basePeriod)
     if result is None:
