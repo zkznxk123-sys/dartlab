@@ -5652,3 +5652,44 @@ def sectorOutlookBlock(cycle: dict | None, dynamics: dict | None) -> list:
             blocks.append(TextBlock("역풍: " + " · ".join(headwind)))
 
     return blocks
+
+
+def macroSensitivityBlock(data: dict | None) -> list:
+    """calcMacroSensitivity 결과 → 매크로 민감도 블록.
+
+    Returns
+    -------
+    list[Block]
+        HeadingBlock + MetricBlock(지표별 R²/영향) + TextBlock(종합 방향).
+    """
+    if not data:
+        return []
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("macroSensitivity").label,
+            level=2,
+            helper="거시 지표 민감도 — 금리/환율/유가 등이 이 회사에 미치는 영향",
+        )
+    ]
+
+    selected = data.get("selected") or []
+    if selected:
+        metrics: list[tuple[str, str]] = []
+        for ind in selected[:5]:
+            label = ind.get("label", "")
+            r2 = ind.get("rSquared", 0)
+            impact = ind.get("impact", "")
+            change = ind.get("latestChange")
+            desc = f"R²={r2:.2f} · {impact}"
+            if change is not None:
+                desc += f" · 최근 {change:+.1f}%"
+            metrics.append((label, desc))
+        blocks.append(MetricBlock(metrics))
+
+    net = data.get("netDirectionLabel", "")
+    source = data.get("selectedSource", "")
+    if net:
+        blocks.append(TextBlock(f"종합 방향: {net} ({source} 기준)"))
+
+    return blocks

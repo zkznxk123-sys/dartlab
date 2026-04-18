@@ -1147,6 +1147,7 @@ def buildBlocks(
         "macroFlags",
         "valuationBand",
         "companyCyclePosition",
+        "macroSensitivity",
     }
     if keys is None or keys & _MACRO_KEYS:
         from dartlab.analysis.financial.macroExposure import calcValuationBand
@@ -1158,6 +1159,7 @@ def buildBlocks(
             macroForecastBlock,
             macroLiquidityBlock,
             macroRatesBlock,
+            macroSensitivityBlock,
             macroSentimentBlock,
             macroTradeBlock,
             valuationBandBlock,
@@ -1200,6 +1202,10 @@ def buildBlocks(
                 b["macroTrade"] = _safe(lambda: macroTradeBlock(_ensure_summary().get("trade")))
         if _need("macroFlags"):
             b["macroFlags"] = _safe(lambda: macroFlagsBlock(_ensure_summary()))
+        if _need("macroSensitivity"):
+            from dartlab.analysis.financial.macroExposure import calcMacroSensitivity
+
+            b["macroSensitivity"] = _safe(lambda: macroSensitivityBlock(calcMacroSensitivity(company, basePeriod=basePeriod)))
         if _need("valuationBand"):
             b["valuationBand"] = _safe(lambda: valuationBandBlock(calcValuationBand(company, basePeriod=basePeriod)))
         if _need("companyCyclePosition"):

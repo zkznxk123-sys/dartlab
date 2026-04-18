@@ -268,6 +268,7 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("macroCorporate", "기업집계", "매크로", "전종목 이익사이클 + Ponzi비율 + 레버리지 추세"),
     BlockMeta("macroTrade", "교역조건", "매크로", "교역조건 방향 + 수출이익 함의 (KR)"),
     BlockMeta("macroFlags", "매크로 플래그", "매크로", "매크로 경고/기회 신호 집계"),
+    BlockMeta("macroSensitivity", "매크로 민감도", "매크로", "금리/환율/유가 등 거시 지표가 이 회사에 미치는 영향"),
     BlockMeta("valuationBand", "밸류에이션 밴드", "매크로", "PER/PBR 과거 정규분포 대비 현재 위치"),
     BlockMeta(
         "companyCyclePosition",
