@@ -211,8 +211,8 @@ def calcSectorMetrics(company: Any) -> dict | None:
 
     # 같은 산업 primary 노드들의 scan 지표 수집
     try:
-        from dartlab.scan.profitability import scanProfitability
         from dartlab.scan.growth import scanGrowth
+        from dartlab.scan.profitability import scanProfitability
 
         prof = scanProfitability()
         grow = scanGrowth()
