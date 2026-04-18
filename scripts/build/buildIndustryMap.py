@@ -549,7 +549,7 @@ def _computeLayout(nodes, taxonomy, atlasFlows=None, edges=None) -> dict[str, tu
         spread = indSpreads[ind_id]
         indInternalEdges = internalEdges.get(ind_id, [])
 
-        # stage별 그룹핑
+        # stage별 그룹핑 → 초기 위치 anchor
         stageGroups: dict[str, list] = {}
         for m in members:
             stage = m.stage or "_unclassified"
@@ -559,51 +559,62 @@ def _computeLayout(nodes, taxonomy, atlasFlows=None, edges=None) -> dict[str, tu
         cols = max(1, int(math.ceil(math.sqrt(len(stageKeys)))))
         rows = max(1, int(math.ceil(len(stageKeys) / cols)))
 
-        # stage 중심점 (산업 중심 주변 격자)
+        # stage 중심점: 산업 중심 주변 격자 (initial position anchor)
         stageCenters: dict[str, tuple[float, float]] = {}
         for i, sk in enumerate(stageKeys):
             col = i % cols
             row = i // cols
-            # 격자 offset (산업 spread에 비례)
-            dx = (col - (cols - 1) / 2) * (spread * 0.8 / max(1, cols))
-            dy = (row - (rows - 1) / 2) * (spread * 0.8 / max(1, rows))
+            dx = (col - (cols - 1) / 2) * (spread * 0.7 / max(1, cols))
+            dy = (row - (rows - 1) / 2) * (spread * 0.7 / max(1, rows))
             stageCenters[sk] = (cx + dx, cy + dy)
 
-        # 각 stage 내에서 force-directed (엣지 기반)
-        memberByCode = {m.stockCode: m for m in members}
-        for sk, stageMembers in stageGroups.items():
-            scx, scy = stageCenters[sk]
-            stageCodes = {m.stockCode for m in stageMembers}
-            # stage 내 엣지만
-            stageEdges = [(f, t, w) for f, t, w in indInternalEdges
-                          if f in stageCodes and t in stageCodes]
-            stageSpread = max(60, min(400, spread * 0.35))
-
-            if len(stageMembers) >= 4 and len(stageEdges) >= 2:
-                try:
-                    subG = nx.Graph()
-                    for m in stageMembers:
-                        subG.add_node(m.stockCode)
-                    for f, t, w in stageEdges:
+        # 전체 산업 노드를 하나의 spring_layout으로 (stage 초기 위치 + 전체 엣지)
+        if len(members) >= 5 and len(indInternalEdges) >= 2:
+            try:
+                subG = nx.Graph()
+                # 모든 회사 추가 (stage 중심 주변 random jitter로 초기 위치)
+                initPos: dict[str, tuple[float, float]] = {}
+                import random
+                rng = random.Random(42)
+                for m in members:
+                    subG.add_node(m.stockCode)
+                    scx, scy = stageCenters[m.stage or "_unclassified"]
+                    # stage 중심 주변 약간의 랜덤 (spring_layout의 초기점 역할)
+                    initPos[m.stockCode] = (
+                        scx - cx + rng.uniform(-30, 30),
+                        scy - cy + rng.uniform(-30, 30),
+                    )
+                # 모든 산업 내부 엣지 (stage 무관)
+                for f, t, w in indInternalEdges:
+                    if subG.has_node(f) and subG.has_node(t):
                         if subG.has_edge(f, t):
                             subG[f][t]["weight"] += w
                         else:
                             subG.add_edge(f, t, weight=w)
 
-                    subPos = nx.spring_layout(
-                        subG, weight="weight",
-                        k=stageSpread / math.sqrt(len(stageMembers)),
-                        iterations=80, seed=42, scale=stageSpread
-                    )
-                    avgX = sum(float(p[0]) for p in subPos.values()) / len(subPos)
-                    avgY = sum(float(p[1]) for p in subPos.values()) / len(subPos)
-                    for code, (px, py) in subPos.items():
-                        coords[code] = (float(scx + px - avgX), float(scy + py - avgY))
-                    continue
-                except Exception:
-                    pass
+                # 초기 위치를 pos로 전달 → spring_layout이 starting point로 사용
+                subPos = nx.spring_layout(
+                    subG,
+                    pos=initPos,
+                    weight="weight",
+                    k=spread / math.sqrt(len(members)) * 0.8,
+                    iterations=50,  # 초기 위치 유지 위해 낮게
+                    seed=42,
+                    scale=spread * 0.9,
+                )
+                # 산업 중심점으로 평행이동
+                avgX = sum(float(p[0]) for p in subPos.values()) / len(subPos)
+                avgY = sum(float(p[1]) for p in subPos.values()) / len(subPos)
+                for code, (px, py) in subPos.items():
+                    coords[code] = (float(cx + px - avgX), float(cy + py - avgY))
+                continue
+            except Exception:
+                pass
 
-            # Fallback: stage 중심 주변 golden spiral
+        # Fallback: stage 격자 + stage별 golden spiral
+        for sk, stageMembers in stageGroups.items():
+            scx, scy = stageCenters[sk]
+            stageSpread = max(60, min(400, spread * 0.3))
             ranked = sorted(stageMembers, key=lambda x: x.revenue or 0, reverse=True)
             for j, n in enumerate(ranked):
                 if j == 0:
