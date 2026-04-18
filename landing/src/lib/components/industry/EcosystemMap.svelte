@@ -255,7 +255,12 @@
 	// props 변경 시 Cosmograph 데이터 재설정
 	$effect(() => {
 		if (!graph) return;
-		graph.setData(nodes, links);
+		// companies 뷰: 줌 아웃 상태면 엣지 숨김
+		if (!isAtlas && currentZoom < 3) {
+			graph.setData(nodes, []);
+		} else {
+			graph.setData(nodes, links);
+		}
 	});
 
 	// 외부 제어 함수
