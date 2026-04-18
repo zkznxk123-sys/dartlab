@@ -175,11 +175,12 @@
 			curvedLinks: true,
 			curvedLinkSegments: 16,
 			simulation: {
-				repulsion: isAtlas ? 1.0 : 0.1,
-				gravity: isAtlas ? 0.15 : 0.0,
-				linkDistance: isAtlas ? 10 : 2,
-				friction: isAtlas ? 0.85 : 0.98,
-				decay: isAtlas ? 1000 : 200,
+				repulsion: isAtlas ? 1.0 : 0,
+				gravity: isAtlas ? 0.15 : 0,
+				linkDistance: isAtlas ? 10 : 0,
+				linkSpring: isAtlas ? 1 : 0,
+				friction: isAtlas ? 0.85 : 1,
+				decay: isAtlas ? 1000 : 1,
 				onTick: () => updateLabels(),
 			},
 			events: {
