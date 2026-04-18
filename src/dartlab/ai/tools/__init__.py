@@ -44,7 +44,6 @@ _BLACKLIST: set[str] = {
     "config",
     "dataDir",
     "verbose",
-    "capabilities",
     # 진입점 자체
     "ask",
     # 유틸 (searchCompany 로 대체)
