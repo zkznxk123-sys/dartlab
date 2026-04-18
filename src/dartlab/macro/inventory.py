@@ -47,7 +47,7 @@ def _fetch_ism_data(market: str, as_of: str | None = None) -> dict[str, float | 
 
     if market.upper() == "US":
         for label, sid in [
-            ("ism_pmi", "NAPM"),
+            ("ism_pmi", "NAPMNOI"),
             ("ism_new_orders", "NAPMNOI"),
             ("ism_inventories", "NAPMII"),
             ("new_orders", "NEWORDER"),
@@ -230,7 +230,7 @@ def analyze_inventory(*, market: str = "US", as_of: str | None = None, overrides
     g = get_gather(as_of)
     if market.upper() == "US":
         result["timeseries"] = collect_timeseries(
-            g, {"ism_pmi": "NAPM", "new_orders": "NAPMNOI", "inventories": "NAPMII"}
+            g, {"ism_pmi": "NAPMNOI", "new_orders": "NAPMNOI", "inventories": "NAPMII"}
         )
     else:
         result["timeseries"] = collect_timeseries(g, {"manufacturing": "MANUFACTURING", "bsi": "BSI_ALL"})

@@ -51,7 +51,7 @@ def _fetch_sentiment_data(market: str, as_of: str | None = None) -> dict[str, fl
     if hy is not None:
         data["hy_spread"] = hy * 100
 
-    gold = fetch_latest(g, "GOLDAMGBD228NLBM")
+    gold = fetch_latest(g, "IR14270")
     sp = fetch_latest(g, "SP500")
     if gold is not None and sp is not None and sp > 0:
         data["gold_equity_ratio"] = gold / sp

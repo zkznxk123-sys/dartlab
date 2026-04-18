@@ -51,7 +51,7 @@ def _fetch_indicators(market: str, as_of: str | None = None) -> dict[str, float 
 
         indicators["term_spread"] = fetch_latest(g, "T10Y2Y")
         indicators["vix"] = fetch_latest(g, "VIXCLS")
-        indicators["gold_yoy"] = fetch_yoy(g, "GOLDAMGBD228NLBM")
+        indicators["gold_yoy"] = fetch_yoy(g, "IR14270")
         indicators["bei_10y"] = fetch_latest(g, "T10YIE")
         indicators["cpi_yoy"] = fetch_yoy(g, "CPIAUCSL")
 
@@ -98,7 +98,7 @@ def _build_signal_history(market: str, as_of: str | None = None) -> dict[str, li
     # 신호 → FRED 시리즈 매핑
     series_map = {
         "hy_spread_3m_change": "BAMLH0A0HYM2",
-        "gold_yoy": "GOLDAMGBD228NLBM",
+        "gold_yoy": "IR14270",
         "long_rate_change": "DGS10",
         "vix": "VIXCLS",
         "term_spread": "T10Y2Y",
@@ -187,7 +187,7 @@ def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: di
 
         if market.upper() == "US":
             # ISM PMI - 50 (성장 신호)
-            ism = fetch_latest(g, "NAPM")
+            ism = fetch_latest(g, "NAPMNOI")
             # CPI YoY 3개월 모멘텀 (인플레 신호)
             cpi_yoy = indicators.get("cpi_yoy")
             cpi_yoy_prev = fetch_change_pct(g, "CPIAUCSL", 63)  # 3M ago

@@ -58,8 +58,8 @@ def _fetch_asset_data(market: str, as_of: str | None = None) -> dict[str, float 
     data["fx_usdkrw"] = fetch_latest(g, fx_id)
     data["fx_change_pct"] = fetch_change_pct(g, fx_id, 63)
 
-    data["gold"] = fetch_latest(g, "GOLDAMGBD228NLBM")
-    data["gold_yoy"] = fetch_yoy(g, "GOLDAMGBD228NLBM")
+    data["gold"] = fetch_latest(g, "IR14270")
+    data["gold_yoy"] = fetch_yoy(g, "IR14270")
     data["dxy_change_pct"] = fetch_change_pct(g, "DTWEXBGS", 63)
 
     return {k: v for k, v in data.items() if v is not None}
@@ -223,7 +223,7 @@ def analyze_assets(*, market: str = "US", as_of: str | None = None, overrides: d
 
         g = getDefaultGather()
         cu_df = g.macro("PCOPPUSDM")
-        gold_df = g.macro("GOLDAMGBD228NLBM")
+        gold_df = g.macro("IR14270")
         if cu_df is not None and gold_df is not None:
             cu_vals = cu_df.get_column("value").drop_nulls()
             au_vals = gold_df.get_column("value").drop_nulls()

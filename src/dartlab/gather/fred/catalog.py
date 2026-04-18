@@ -73,7 +73,7 @@ CATALOG: dict[str, list[CatalogEntry]] = {
         CatalogEntry("DTWEXBGS", "달러인덱스", "markets", "Daily", "Index Jan 2006=100", "무역가중 달러인덱스 (광의)"),
         CatalogEntry("DCOILWTICO", "WTI 유가", "markets", "Daily", "Dollars per Barrel", "WTI 원유 현물 가격"),
         CatalogEntry(
-            "GOLDAMGBD228NLBM", "금 가격", "markets", "Daily", "U.S. Dollars per Troy Ounce", "런던 금 현물 (오전)"
+            "IR14270", "금 가격", "markets", "Daily", "U.S. Dollars per Troy Ounce", "런던 금 현물 (오전)"
         ),
         CatalogEntry(
             "WILL5000PRFC",
@@ -108,8 +108,7 @@ CATALOG: dict[str, list[CatalogEntry]] = {
         CatalogEntry("EXHOSLUSM495S", "기존주택판매", "housing", "Monthly", "Number of Units", "기존 주택 판매건수"),
     ],
     "ism": [
-        CatalogEntry("NAPM", "ISM PMI", "ism", "Monthly", "Index", "ISM 제조업 PMI (구 NAPM)"),
-        CatalogEntry("NAPMNOI", "ISM 신규수주", "ism", "Monthly", "Index", "ISM 제조업 신규수주 지수"),
+        CatalogEntry("NAPMNOI", "ISM 신규수주", "ism", "Monthly", "Index", "ISM 제조업 신규수주 (PMI 프록시)"),
         CatalogEntry("NAPMII", "ISM 재고", "ism", "Monthly", "Index", "ISM 제조업 재고 지수"),
         CatalogEntry("NEWORDER", "제조업 신규수주", "ism", "Monthly", "Millions of Dollars", "제조업 신규수주"),
         CatalogEntry("BUSINV", "총사업재고", "ism", "Monthly", "Millions of Dollars", "총 사업 재고"),
