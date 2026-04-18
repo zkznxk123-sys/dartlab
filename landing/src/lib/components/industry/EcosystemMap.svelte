@@ -153,17 +153,23 @@
 			nodeColor: (n: NodeDatum) => n.color,
 			nodeGreyoutOpacity: 0.12,
 			linkColor: (l: LinkDatum) => {
+				if (!isAtlas) {
+					// companies 뷰: 엣지 거의 안 보이게 (호버 시 greyout으로 밝아짐)
+					if (l.type === 'supplier') return l.amount ? 'rgba(251,191,36,0.04)' : 'rgba(249,115,22,0.04)';
+					if (l.type === 'customer') return 'rgba(96,165,250,0.04)';
+					if (l.type === 'investor') return 'rgba(167,139,250,0.04)';
+					return 'rgba(107,114,128,0.03)';
+				}
 				if (l.type === 'supplier') return l.amount ? '#fbbf24' : '#f97316';
 				if (l.type === 'customer') return '#60a5fa';
 				if (l.type === 'investor') return '#a78bfa';
-				return '#6b7280'; // affiliate
+				return '#6b7280';
 			},
 			linkWidth: (l: LinkDatum) => {
-				// atlas: edgeCount 기반 굵기 (산업간 supplier flow)
 				if (l.edgeCount) {
 					return Math.max(2.5, Math.min(9, 1.2 + Math.log2(l.edgeCount + 1) * 1.3));
 				}
-				// companies: amount 기반, 없으면 2.0 최소치
+				if (!isAtlas) return 0.5; // companies: 가느다란 선
 				if (!l.amount) return 2.0;
 				return Math.max(1.8, Math.min(7, 1.5 + Math.log10(l.amount + 1) * 0.8));
 			},
