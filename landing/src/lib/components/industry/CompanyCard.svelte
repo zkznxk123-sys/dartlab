@@ -700,12 +700,12 @@
 		text-align: center;
 	}
 
-	/* T1: 3초 요약 */
+	/* T1: 3초 요약 — dartlab brand gradient */
 	.t1-summary {
 		margin-top: 12px;
 		padding: 12px 14px;
-		background: linear-gradient(135deg, rgba(96, 165, 250, 0.08), rgba(52, 211, 153, 0.04));
-		border: 1px solid rgba(96, 165, 250, 0.2);
+		background: linear-gradient(135deg, rgba(234, 70, 71, 0.06), rgba(251, 146, 60, 0.04));
+		border: 1px solid rgba(234, 70, 71, 0.15);
 		border-radius: 8px;
 	}
 	.t1-verdict {

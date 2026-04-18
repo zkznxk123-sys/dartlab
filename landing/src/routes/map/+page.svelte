@@ -739,7 +739,7 @@
 		{/if}
 
 		<div class="header">
-			<h1>산업 생태계</h1>
+			<h1><span class="brand-gradient">산업 생태계</span></h1>
 			{#if viewMode === 'atlas'}
 				<p class="sub">{data.atlas.industries.length}개 산업 · {data.atlas.flows.length}개 플로우</p>
 			{:else if viewMode === 'industry' && industryDetail}
@@ -1327,7 +1327,13 @@
 	.header h1 {
 		margin: 0 0 4px;
 		font-size: 18px;
-		color: #f1f5f9;
+		font-weight: 800;
+	}
+	.brand-gradient {
+		background: linear-gradient(135deg, #ea4647, #fb923c);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
 	}
 	.header .sub {
 		margin: 0;
@@ -1377,11 +1383,11 @@
 
 	/* 색상 기준 셀렉터 */
 	.color-switch {
-		background: rgba(52, 211, 153, 0.04);
+		background: rgba(234, 70, 71, 0.04);
 		border-radius: 8px;
 		padding: 10px 12px;
 		margin-top: 16px;
-		border: 1px solid rgba(52, 211, 153, 0.15);
+		border: 1px solid rgba(234, 70, 71, 0.12);
 	}
 	.metric-select {
 		width: 100%;
@@ -1417,11 +1423,11 @@
 	}
 	/* 관점 셀렉터 */
 	.view-switch {
-		background: rgba(96, 165, 250, 0.04);
+		background: rgba(234, 70, 71, 0.03);
 		border-radius: 8px;
 		padding: 10px 12px;
 		margin-top: 16px;
-		border: 1px solid rgba(96, 165, 250, 0.15);
+		border: 1px solid rgba(234, 70, 71, 0.1);
 	}
 	.view-tabs {
 		display: flex;
@@ -1473,9 +1479,13 @@
 		color: #f1f5f9;
 	}
 	.view-tab.active {
-		background: rgba(96, 165, 250, 0.18);
-		border-color: rgba(96, 165, 250, 0.45);
+		background: linear-gradient(135deg, rgba(234, 70, 71, 0.12), rgba(251, 146, 60, 0.08));
+		border-color: rgba(234, 70, 71, 0.4);
 		color: #f1f5f9;
+	}
+	.view-tab.active .tab-icon {
+		background: rgba(234, 70, 71, 0.2);
+		color: #fb923c;
 	}
 	.view-tab:disabled {
 		color: #475569;
