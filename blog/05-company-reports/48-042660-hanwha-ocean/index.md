@@ -4,7 +4,7 @@ date: 2026-04-18
 description: "OPM -39%(2021)에서 +9.1%(2025), 자본 0.74조에서 6.17조. 방산(잠수함·호위함) 16%를 가진 조선소인데, 상선 올인 대한조선 OPM 24%의 절반이다. 수주잔고 34.5조, 부채비율 226%의 턴어라운드를 추적한다."
 category: company-reports
 series: company-reports
-seriesOrder: 47
+seriesOrder: 48
 stockCode: "042660"
 corpName: "한화오션"
 storyTemplate: "턴어라운드"
@@ -53,7 +53,7 @@ import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 
 ---
 
-![한화오션 핵심 구조 — 방산 16%, 상선 82%, 그런데 OPM은 상선 올인 조선소의 절반](./assets/47-hero-map.svg)
+![한화오션 핵심 구조 — 방산 16%, 상선 82%, 그런데 OPM은 상선 올인 조선소의 절반](./assets/48-hero-map.svg)
 
 ## 1막: OPM -39%에서 +9.1%로 — 조선업 역대급 턴어라운드
 
@@ -75,7 +75,7 @@ c.select("IS", ["매출액","영업이익","당기순이익"])
 
 **표시: 2021~2022 영업손실 합계 -3.36조. 2025 영업이익 1.17조. 4년 만에 4.53조 스윙.**
 
-![한화오션 조선소 — 대형 선박 건조 현장](./assets/47-shipyard.webp)
+![한화오션 조선소 — 대형 선박 건조 현장](./assets/48-shipyard.webp)
 
 ### OPM 궤적 — V자가 아니라 U자
 
@@ -116,7 +116,7 @@ prof = c.analysis("financial", "수익성")
 
 ---
 
-![한화오션 OPM 턴어라운드 궤적 — 2021 -39%에서 2025 +9.1%](./assets/47-turnaround-timeline.svg)
+![한화오션 OPM 턴어라운드 궤적 — 2021 -39%에서 2025 +9.1%](./assets/48-turnaround-timeline.svg)
 
 ## 2막: 방산 16%, 상선 82% — 매출의 정체
 
@@ -129,7 +129,7 @@ rev = c.analysis("financial", "수익구조")
 # segmentComposition 2025: 상선 82.3%, 해양·특수선 15.9%, E&I 6.4%
 ```
 
-![한화오션 매출 구조 — 상선 82%, 방산(해양·특수선) 16%](./assets/47-segment-split.svg)
+![한화오션 매출 구조 — 상선 82%, 방산(해양·특수선) 16%](./assets/48-segment-split.svg)
 
 | 사업부문 (2025, 조원) | 매출 | 비중 |
 |:---|---:|---:|
@@ -239,7 +239,7 @@ stab = c.analysis("financial", "안정성")
 # coverageTrend 2025: ICR 1.52배
 ```
 
-![한화오션 재무 회복 대시보드 — 부채 226%, ICR 1.52배](./assets/47-debt-recovery.svg)
+![한화오션 재무 회복 대시보드 — 부채 226%, ICR 1.52배](./assets/48-debt-recovery.svg)
 
 | 항목 | 2025 | 2024 | 2023 | 2022 |
 |:---|---:|---:|---:|---:|
@@ -312,7 +312,7 @@ c.select("CF", ["영업활동현금흐름","유형자산의 취득"])
 
 한화오션의 수주잔고 34.5조(매출 2.7년치)는 이 사이클이 당분간 지속된다는 시장의 베팅이다. [HMM](/blog/hmm)의 해운 사이클이 조선 수주의 원천이다 — 해운사가 돈을 벌면 새 배를 주문한다. 문제는 사이클이 꺾이면 DOL 20배가 반대로 작동한다는 것이다.
 
-![한화오션 투자 체크포인트 5가지](./assets/47-checklist.svg)
+![한화오션 투자 체크포인트 5가지](./assets/48-checklist.svg)
 
 ### 투자자가 봐야 할 체크포인트 5가지
 
