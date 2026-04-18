@@ -893,37 +893,6 @@
 			{/if}
 		</div>
 
-		<!-- 타임라인 슬라이더 -->
-		{#if timelinePeriods.length > 1}
-			<div class="section timeline-section">
-				<h3>시간 여행</h3>
-				<div class="timeline-slider">
-					<input
-						type="range"
-						min="0"
-						max={timelinePeriods.length}
-						step="1"
-						value={selectedYear ? timelinePeriods.indexOf(selectedYear) : timelinePeriods.length}
-						oninput={(e) => {
-							const idx = parseInt((e.target as HTMLInputElement).value);
-							selectedYear = idx >= timelinePeriods.length ? '' : timelinePeriods[idx];
-						}}
-					/>
-					<div class="timeline-labels">
-						{#each timelinePeriods as yr}
-							<span class="tl-year" class:active={selectedYear === yr}>{yr.slice(-2)}</span>
-						{/each}
-						<span class="tl-year" class:active={!selectedYear}>현재</span>
-					</div>
-				</div>
-				{#if selectedYear}
-					<div class="timeline-info">
-						{selectedYear}년 기준 · {Object.keys(timelineData[selectedYear] || {}).length}사
-					</div>
-				{/if}
-			</div>
-		{/if}
-
 		<!-- 오버레이 토글 -->
 		{#if moversCount > 0}
 			<div class="section overlay-toggles">
@@ -1298,6 +1267,28 @@
 					onImpactChange={(m) => (shockImpactMap = m)}
 					onClose={() => { shockTargetId = null; shockImpactMap = new Map(); }}
 				/>
+			</div>
+		{/if}
+
+		<!-- 타임라인 바 (메인 뷰 하단 고정) -->
+		{#if timelinePeriods.length > 1}
+			<div class="timeline-bar">
+				<span class="tl-icon">⏱</span>
+				{#each timelinePeriods as yr}
+					<button
+						class="tl-btn"
+						class:active={selectedYear === yr}
+						onclick={() => (selectedYear = selectedYear === yr ? '' : yr)}
+					>{yr}</button>
+				{/each}
+				<button
+					class="tl-btn"
+					class:active={!selectedYear}
+					onclick={() => (selectedYear = '')}
+				>현재</button>
+				{#if selectedYear}
+					<span class="tl-info">{selectedYear}년 · {Object.keys(timelineData[selectedYear] || {}).length}사</span>
+				{/if}
 			</div>
 		{/if}
 	</main>
@@ -2008,36 +1999,51 @@
 		background: rgba(96, 165, 250, 0.3);
 	}
 
-	.timeline-section h3 {
-		margin-bottom: 6px;
-	}
-	.timeline-slider {
+	.timeline-bar {
+		position: absolute;
+		bottom: 12px;
+		left: 50%;
+		transform: translateX(-50%);
 		display: flex;
-		flex-direction: column;
+		align-items: center;
 		gap: 4px;
+		background: rgba(15, 18, 25, 0.9);
+		backdrop-filter: blur(10px);
+		border: 1px solid var(--color-dl-border);
+		border-radius: 8px;
+		padding: 6px 12px;
+		z-index: 30;
 	}
-	.timeline-slider input[type="range"] {
-		width: 100%;
-		accent-color: var(--color-dl-primary);
+	.tl-icon {
+		font-size: 14px;
+		margin-right: 4px;
 	}
-	.timeline-labels {
-		display: flex;
-		justify-content: space-between;
-		font-size: 9px;
+	.tl-btn {
+		background: transparent;
+		border: 1px solid transparent;
 		color: var(--color-dl-text-dim);
-	}
-	.tl-year {
+		font-size: 12px;
+		font-weight: 500;
+		padding: 4px 10px;
+		border-radius: 5px;
 		cursor: pointer;
+		transition: all 0.15s;
 	}
-	.tl-year.active {
+	.tl-btn:hover {
+		color: var(--color-dl-text);
+		background: rgba(148, 163, 184, 0.08);
+	}
+	.tl-btn.active {
+		background: rgba(234, 70, 71, 0.15);
+		border-color: rgba(234, 70, 71, 0.3);
 		color: var(--color-dl-primary-light);
 		font-weight: 700;
 	}
-	.timeline-info {
-		font-size: 10px;
+	.tl-info {
+		font-size: 11px;
 		color: var(--color-dl-text-muted);
-		margin-top: 4px;
-		text-align: center;
+		margin-left: 8px;
+		font-family: var(--font-mono);
 	}
 
 	.overlay-toggles {

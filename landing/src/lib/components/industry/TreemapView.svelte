@@ -72,6 +72,9 @@
 
 	// Build hierarchical data: root → industries → companies
 	let treemapData = $derived.by(() => {
+		// 의존성 등록: timelineYear/timelineData 변경 시 재계산
+		void timelineYear;
+		void timelineData;
 		// Group nodes by industry
 		const groups = new Map<string, any[]>();
 		for (const n of nodes) {
@@ -148,7 +151,9 @@
 						? (shockMap.has(leaf.data.id)
 							? (shockMap.get(leaf.data.id)! > 0.5 ? '#ef4444' : shockMap.get(leaf.data.id)! > 0.1 ? '#fb923c' : '#fbbf24')
 							: '#1e293b')
-						: colorFor(leaf.data._node, colorMetric),
+						: timelineYear && timelineData[leaf.data.id]
+							? colorFor({ ...leaf.data._node, opMargin: timelineData[leaf.data.id].opMargin ?? leaf.data._node.opMargin }, colorMetric)
+							: colorFor(leaf.data._node, colorMetric),
 					showLabel: w > 40 && h > 16,
 					signal: moversMap.get(leaf.data.id) || null
 				});
