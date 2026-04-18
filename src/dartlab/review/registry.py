@@ -750,6 +750,19 @@ def buildBlocks(
             )
         if _need("creditAudit"):
             b["creditAudit"] = _safe(lambda: creditAuditBlock(calcCreditAudit(company, basePeriod=basePeriod)))
+        if _need("creditScenario"):
+            from dartlab.review.builders import creditScenarioBlock
+
+            _base_credit = b.get("creditScore")
+            _stress_overrides = {"debtRatio": 80.0, "interestCoverage": 2.0}
+            _stress_credit = _safe(lambda: calcCreditScore(company, basePeriod=basePeriod, overrides=_stress_overrides))
+            if _base_credit and _stress_credit:
+                # creditScoreBlock 결과에서 원본 dict 추출
+                _base_data = calcCreditScore(company, basePeriod=basePeriod)
+                _stress_data = calcCreditScore(company, basePeriod=basePeriod, overrides=_stress_overrides)
+                b["creditScenario"] = _safe(
+                    lambda: creditScenarioBlock(_base_data, _stress_data, _stress_overrides)
+                )
 
     # ── 4부: 가치평가 ──
     if keys is None or keys & {

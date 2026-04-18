@@ -5693,3 +5693,57 @@ def macroSensitivityBlock(data: dict | None) -> list:
         blocks.append(TextBlock(f"종합 방향: {net} ({source} 기준)"))
 
     return blocks
+
+
+def creditScenarioBlock(base: dict | None, scenario: dict | None, overrides: dict | None) -> list:
+    """base vs 시나리오 credit 등급 비교 블록.
+
+    Parameters
+    ----------
+    base : dict
+        calcCreditScore(company) 기본 결과.
+    scenario : dict
+        calcCreditScore(company, overrides=overrides) 시나리오 결과.
+    overrides : dict
+        적용된 시나리오 가정.
+
+    Returns
+    -------
+    list[Block]
+        HeadingBlock + MetricBlock(base/scenario 비교) + TextBlock(해석).
+    """
+    if not base or not scenario:
+        return []
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("creditScenario").label,
+            level=2,
+            helper="시나리오별 신용등급 변화 — 부채비율/ICR 가정 교체 시 등급 영향",
+        )
+    ]
+
+    base_grade = base.get("grade", "-")
+    base_score = base.get("score", 0)
+    sc_grade = scenario.get("grade", "-")
+    sc_score = scenario.get("score", 0)
+
+    metrics: list[tuple[str, str]] = [
+        ("기본 등급", f"{base_grade} (점수 {base_score:.1f})"),
+        ("시나리오 등급", f"{sc_grade} (점수 {sc_score:.1f})"),
+    ]
+    if overrides:
+        for k, v in overrides.items():
+            metrics.append((f"가정: {k}", str(v)))
+    blocks.append(MetricBlock(metrics))
+
+    diff = sc_score - base_score
+    if abs(diff) < 0.3:
+        interpretation = "등급 변화 미미 — 해당 시나리오에 대한 내성이 강함."
+    elif diff < 0:
+        interpretation = f"등급 {abs(diff):.1f}점 하락 — 해당 시나리오에 취약."
+    else:
+        interpretation = f"등급 {diff:.1f}점 상승 — 해당 시나리오에서 오히려 개선."
+    blocks.append(TextBlock(interpretation))
+
+    return blocks

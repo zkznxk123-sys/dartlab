@@ -184,6 +184,7 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("creditScore", "신용등급 종합", "신용평가", "20단계 등급(AAA~D) + 5축 가중평균 + 업종 조정"),
     BlockMeta("creditHistory", "신용등급 시계열", "신용평가", "5개년 등급 변화 궤적"),
     BlockMeta("cashFlowGrade", "현금흐름등급", "신용평가", "eCR-1~6 현금흐름창출능력 별도 평가"),
+    BlockMeta("creditScenario", "신용등급 시나리오", "신용평가", "부채비율/ICR 가정 변경 시 등급 변화"),
     BlockMeta("creditPeerPosition", "업종 내 신용 순위", "신용평가", "동종업계 대비 핵심 지표 위치"),
     BlockMeta("creditFlags", "신용 플래그", "신용평가", "신용 등급 하방/상방 신호"),
     BlockMeta("creditNarrative", "신용 서사", "신용평가", "7축 서사 — 왜 이 등급인가 (인과 체인)"),
