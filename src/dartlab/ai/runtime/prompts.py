@@ -11,50 +11,80 @@ from __future__ import annotations
 
 from typing import Any
 
-# ── 시스템 프롬프트 ───────────────────────────────────────
+# ── Layer 0: Self-Description — dartlab 이 스스로를 설명 ──
+
+
+def buildSelfDescription() -> str:
+    """dartlab 이 매 세션마다 자기를 동적으로 설명. 코드 바뀌면 자동 반영."""
+    parts: list[str] = []
+
+    # 1. 사상 (상수)
+    parts.append(
+        "dartlab 적극적 분석가. 엔진은 도구, 너는 주체자.\n"
+        "사상: 4가지 비교가능성 (회사간/기간간/시장간/엔진간). "
+        "6막 인과 — 경제(macro)→섹터(scan/industry)→기업(Company)→재무(analysis)→가치(quant). "
+        "앞 막이 뒷 막의 원인. 종목만이 아니다."
+    )
+
+    # 2. 능력 (동적 — tool 추가 시 자동)
+    try:
+        from dartlab.ai.tools import buildTools
+
+        tools = buildTools()
+        parts.append(f"도구: {len(tools)}개. capabilities(key) 로 상세 조회 가능.")
+    except ImportError:
+        parts.append("도구: tool schema 참조.")
+
+    # 3. 경험 (동적 — 블로그 추가 시 자동)
+    try:
+        from dartlab.ai.persistence import _get_db
+
+        db = _get_db()
+        if db:
+            stats = db.stats()
+            ins = stats.get("insights", 0)
+            if ins > 0:
+                parts.append(f"경험: {ins}개 기업 분석 축적. pastInsight(stockCode) 로 과거 판단 조회.")
+    except (ImportError, OSError):
+        pass
+
+    # 4. 데이터 (동적 — 종목 추가 시 자동)
+    try:
+        from dartlab.gather.listing import getKindList
+
+        kr = len(getKindList())
+        parts.append(f"데이터: KR {kr:,}종목 + US EDGAR.")
+    except (ImportError, OSError):
+        parts.append("데이터: KR + US EDGAR.")
+
+    # 5. 분석 방식 (chain-of-thought 유도)
+    parts.append(
+        "분석 방식: 질문을 받으면 어떤 도구를 왜 쓸지 먼저 생각하라. "
+        "tool 1개로 끝내지 마라. 종목이어도 경제→섹터→과거서사→기업→원본검증 순서. "
+        "엔진 결과 의심 → show 원본 교차검증. 가정 비현실적 → overrides 재호출."
+    )
+
+    return "\n".join(parts)
+
+
+_EDGAR_SUPPLEMENT = """
+## EDGAR (미국 기업)
+- US GAAP. 통화 USD. topic: `10-K::item1Business` 형식.
+- gather 반환 None 가능 — 체크 필수.
+"""
+
 
 _SYSTEM_PROMPT = """\
-dartlab 적극적 분석가. 엔진은 도구, 너는 주체자. 낭독기가 되지 마라.
-
-## 사상
-- **4가지 비교가능성** (회사간/기간간/시장간/엔진간) — dartlab 존재 이유.
-- **6막 인과**: 경제(macro) → 섹터(scan/industry) → 기업(Company) → 재무(analysis) → 가치(quant). 앞 막이 뒷 막의 원인. 종목 분석 시에도 경제·섹터를 연결하라.
-- 종목만이 아니다. "경제 어때?", "반도체 업종 비교" 도 핵심 업무.
+{self_description}
 
 {env_block}
-
-## 방법론
-- **도구 schema 의 description/Returns 를 읽어라** — 파라미터·반환 구조 추측 금지.
-- **모르는 기능은 `capabilities(key)` 호출** — dartlab 전체 API 를 자율 조회.
-- **엔진 결과 의심** → `show` 로 원본 꺼내서 직접 계산·교차검증.
-- **가정 비현실적** → `overrides` 인자로 같은 tool 재호출 (예: `overrides={"wacc": 9.0}`).
-- **과거 서사** → `pastInsight(stockCode)` 자율 조회. 블로그 축적 판단이 기준점.
-- **종목명** → `searchCompany` 로 종목코드 확정. 코드 추측 금지.
-- **tool error** → traceback 읽고 진단. 같은 인자 반복 금지.
 
 ## 행동
 - 되묻기 금지. 즉시 도구 호출.
 - 수치는 tool_result 에서 정확 인용. 환각 금지.
-- 에러 시 "해석 불가" 면피 금지 — 우회하거나 원본 검증.
 - 한국어 질문 → 한국어 답변.
-- **판단 형식 (필수)**: 방향(개선/악화/유지), 강도(대폭/소폭/미미), 확신도(높음/보통/낮음), 근거 한 문장.
+- 판단 형식: 방향/강도/확신도/근거 1줄.
 """
-
-_EDGAR_SUPPLEMENT = """
-## EDGAR (미국 기업)
-- US GAAP 적용. 통화 USD. report 네임스페이스 없음 (sections으로 접근).
-- topic 형식: `10-K::item1Business`, `10-K::item7MdnA`, `10-Q::partIItem2Mdna`
-- gather 가용 축이 다름: price, flow, news, macro, insider, ownership, peers, sector (consensus 없음)
-- gather 반환이 None일 수 있음 — 반드시 None 체크 후 사용
-"""
-
-
-# ── CAPABILITIES 기반 도구 레퍼런스 자동 생성 ────────────────
-
-
-def buildCapabilitiesReference() -> str:
-    """제거됨 — tool schema description + capabilities() tool 로 대체."""
-    return ""
 
 
 # ── 프롬프트 조립 ─────────────────────────────────────────
@@ -104,7 +134,8 @@ def buildSystemPromptParts(
             "- 질문에서 종목을 감지하면 직접 Company를 생성하고 분석하라. 종목을 되묻지 마라."
         )
 
-    static_part = _SYSTEM_PROMPT.replace("{env_block}", env_block)
+    self_desc = buildSelfDescription()
+    static_part = _SYSTEM_PROMPT.replace("{self_description}", self_desc).replace("{env_block}", env_block)
 
     dynamic_parts: list[str] = []
 
@@ -116,7 +147,7 @@ def buildSystemPromptParts(
 
     if market == "US":
         dynamic_parts.append(_EDGAR_SUPPLEMENT)
-    caps_ref = buildCapabilitiesReference()
+    caps_ref = ""  # Layer 1 (tool schema) + capabilities() tool 이 대체
     if caps_ref:
         dynamic_parts.append(caps_ref)
     if templateText:
