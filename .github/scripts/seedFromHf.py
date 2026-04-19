@@ -1,0 +1,161 @@
+"""HF dataset 에서 category별 parquet 다운로드 (idempotent seed).
+
+HF 를 single source of truth 로 격상. GHA cache 가 miss/stale 이어도 이 step 이 부족분을 채워
+cold start death spiral 차단.
+
+설계:
+  1. `list_repo_files` 로 HF 의 파일 목록 1회 조회 (resolver 1 request)
+  2. 로컬에 이미 있는 파일은 건너뜀 (HEAD 안 씀 → rate limit 회피)
+  3. 누락/신규만 직접 HTTP GET 으로 다운로드 (파일당 1 request)
+  4. 파일 크기로 로컬 완결성 검증 (HF metadata size 와 비교)
+
+왜 `snapshot_download` 가 아닌가:
+  - snapshot_download 는 파일마다 HEAD 로 etag 검증 → 2920 HEAD + 2920 GET = 5840 requests
+  - HF rate limit: 5000 resolvers/5min/IP → cold start 에서 초과
+  - 이 스크립트는 list 1회 + 누락분 GET 만 → cold 풀다운로드도 2920 requests
+
+사용:
+  uv run python -X utf8 .github/scripts/seedFromHf.py --category finance
+  uv run python -X utf8 .github/scripts/seedFromHf.py --category finance,report,docs
+
+환경변수:
+  DARTLAB_DATA_DIR: 데이터 루트 (기본 ./data)
+  HF_TOKEN: HF 토큰 (private dataset 이면 필수, public 에선 rate limit 완화용)
+"""
+
+import argparse
+import os
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+
+
+def _download(url: str, dest: Path, token: str | None, timeout: int = 60) -> int:
+    """단일 파일 HTTP GET. 반환: 다운로드 바이트 수."""
+    import urllib.request
+
+    req = urllib.request.Request(url)
+    if token:
+        req.add_header("Authorization", f"Bearer {token}")
+
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dest.with_suffix(dest.suffix + ".tmp")
+    bytesWritten = 0
+    with urllib.request.urlopen(req, timeout=timeout) as resp, tmp.open("wb") as f:
+        while chunk := resp.read(1 << 20):  # 1MB
+            f.write(chunk)
+            bytesWritten += len(chunk)
+    tmp.replace(dest)
+    return bytesWritten
+
+
+def seedCategory(cat: str, dataDir: Path) -> tuple[int, int, float]:
+    """반환: (총 파일 수, 신규 다운로드 수, 다운로드 MB)."""
+    from huggingface_hub import HfApi
+
+    from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+
+    if cat not in DATA_RELEASES:
+        print(f"[seed] ERROR: unknown category '{cat}' — {list(DATA_RELEASES)}")
+        sys.exit(1)
+
+    dirPath = DATA_RELEASES[cat]["dir"]
+    token = os.environ.get("HF_TOKEN") or None
+
+    api = HfApi(token=token)
+
+    # 1. HF 파일 목록 + size 조회 (resolver 1 request)
+    print(f"[seed] {cat}: list {HF_REPO}/{dirPath}/*.parquet", flush=True)
+    repoInfo = api.repo_info(repo_id=HF_REPO, repo_type="dataset", files_metadata=True)
+    remoteFiles: dict[str, int] = {}  # relpath -> size
+    prefix = f"{dirPath}/"
+    for sibling in repoInfo.siblings or []:
+        if sibling.rfilename.startswith(prefix) and sibling.rfilename.endswith(".parquet"):
+            remoteFiles[sibling.rfilename] = sibling.size or 0
+
+    print(f"[seed] {cat}: HF {len(remoteFiles)}개 parquet 발견", flush=True)
+
+    # 2. 로컬 대조 — 파일 존재 + 크기 일치하면 스킵
+    missing: list[tuple[str, int]] = []
+    for rel, size in remoteFiles.items():
+        local = dataDir / rel
+        if local.exists() and local.stat().st_size == size:
+            continue
+        missing.append((rel, size))
+
+    if not missing:
+        print(f"[seed] {cat}: 로컬 모두 최신 — 스킵", flush=True)
+        downloadedBytes = 0
+    else:
+        print(f"[seed] {cat}: {len(missing)}개 다운로드", flush=True)
+
+        # 3. 병렬 GET (동시 4 — rate limit 대비 여유)
+        baseUrl = f"https://huggingface.co/datasets/{HF_REPO}/resolve/main"
+        downloadedBytes = 0
+        started = time.time()
+
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            futures = {
+                pool.submit(_download, f"{baseUrl}/{rel}", dataDir / rel, token): rel
+                for rel, _ in missing
+            }
+            done = 0
+            for fut in as_completed(futures):
+                rel = futures[fut]
+                try:
+                    downloadedBytes += fut.result()
+                except Exception as e:
+                    print(f"[seed] {cat} FAIL {rel}: {type(e).__name__}: {str(e)[:120]}", flush=True)
+                    raise
+                done += 1
+                if done % 100 == 0 or done == len(missing):
+                    elapsed = time.time() - started
+                    mb = downloadedBytes / 1024 / 1024
+                    print(f"[seed] {cat}: {done}/{len(missing)} ({mb:.1f}MB, {elapsed:.0f}s)", flush=True)
+
+    localCat = dataDir / dirPath
+    localParquets = list(localCat.rglob("*.parquet"))
+    totalCount = len(localParquets)
+    downloadedMb = downloadedBytes / 1024 / 1024
+    print(f"[seed] {cat}: 로컬 {totalCount}개, 이번 신규 {len(missing)}개 / {downloadedMb:.1f}MB", flush=True)
+    return totalCount, len(missing), downloadedMb
+
+
+def main() -> None:
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument(
+        "--category",
+        required=True,
+        help="쉼표 구분 (예: finance,report,docs). DATA_RELEASES 키 중 택일 가능",
+    )
+    p.add_argument(
+        "--data-dir",
+        default=os.environ.get("DARTLAB_DATA_DIR", "./data"),
+        help="데이터 루트 (기본 $DARTLAB_DATA_DIR 또는 ./data)",
+    )
+    args = p.parse_args()
+
+    dataDir = Path(args.data_dir).resolve()
+    dataDir.mkdir(parents=True, exist_ok=True)
+
+    summary: dict[str, tuple[int, int, float]] = {}
+    for cat in args.category.split(","):
+        cat = cat.strip()
+        if not cat:
+            continue
+        summary[cat] = seedCategory(cat, dataDir)
+
+    print(f"[seed] done: {summary}")
+
+    # GitHub Actions step summary
+    stepSummary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if stepSummary:
+        with open(stepSummary, "a", encoding="utf-8") as f:
+            f.write("## HF Seed\n\n| 카테고리 | 로컬 총 | 신규 다운로드 | 다운로드 크기 |\n|---|---|---|---|\n")
+            for cat, (total, newCount, mb) in summary.items():
+                f.write(f"| {cat} | {total} | {newCount} | {mb:.1f}MB |\n")
+
+
+if __name__ == "__main__":
+    main()

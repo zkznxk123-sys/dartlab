@@ -25,7 +25,7 @@ on:
     inputs:
       lookback_days:
         description: '신규 공시 조회 기간 (일)'
-        default: '60'
+        default: '14'
         type: string
       mode:
         description: 'recent (list.json 기반) / full (88분기 차집합, 무거움)'
@@ -52,7 +52,7 @@ jobs:
   sync-finance-report:
     if: ${{ github.event.inputs.mode != 'full' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
       - uses: actions/checkout@v5
@@ -94,11 +94,18 @@ jobs:
           key: dartlab-collect-state-fr-${{ github.run_id }}
           restore-keys: dartlab-collect-state-fr-
 
+      # HF seed: GHA cache 가 cold/stale 해도 부족 parquet 을 HF 에서 채움 (idempotent).
+      # cold start death spiral 차단 — HF 가 source of truth, GHA cache 는 속도 부스터.
+      - name: Seed missing parquet from HF
+        run: uv run python -X utf8 .github/scripts/seedFromHf.py --category finance,report,docs
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
       - name: Sync recent (finance + report)
-        run: uv run python .github/scripts/syncRecent.py
+        run: uv run python -X utf8 .github/scripts/syncRecent.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
-          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '60' }}
+          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '14' }}
           SYNC_CATEGORIES: finance,report
           SYNC_STATE_SCOPE: fr  # 병렬 Job pending.txt 경쟁 회피
 
@@ -128,18 +135,21 @@ jobs:
       # data-finance/data-report 태그는 정리됨. uploadData.py --target gh 호출 금지.
 
       - name: Save finance cache
+        if: always()
         uses: actions/cache/save@v5
         with:
           path: data/dart/finance
           key: dartlab-data-finance-${{ github.run_id }}
 
       - name: Save report cache
+        if: always()
         uses: actions/cache/save@v5
         with:
           path: data/dart/report
           key: dartlab-data-report-${{ github.run_id }}
 
       - name: Save collect state — fr scope
+        if: always()
         uses: actions/cache/save@v5
         with:
           path: data/dart/_collect_state/fr
@@ -177,11 +187,17 @@ jobs:
           key: dartlab-collect-state-docs-${{ github.run_id }}
           restore-keys: dartlab-collect-state-docs-
 
+      # HF seed: cold/stale cache 대비 (idempotent).
+      - name: Seed missing parquet from HF
+        run: uv run python -X utf8 .github/scripts/seedFromHf.py --category docs
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
       - name: Sync recent (docs)
-        run: uv run python .github/scripts/syncRecent.py
+        run: uv run python -X utf8 .github/scripts/syncRecent.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
-          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '60' }}
+          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '14' }}
           SYNC_CATEGORIES: docs
           SYNC_STATE_SCOPE: docs
 
@@ -199,12 +215,14 @@ jobs:
       # GitHub Releases 업로드 폐지 (2026-04-08): HF만 유지.
 
       - name: Save docs cache
+        if: always()
         uses: actions/cache/save@v5
         with:
           path: data/dart/docs
           key: dartlab-data-docs-${{ github.run_id }}
 
       - name: Save collect state — docs scope
+        if: always()
         uses: actions/cache/save@v5
         with:
           path: data/dart/_collect_state/docs
