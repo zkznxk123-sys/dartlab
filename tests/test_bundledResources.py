@@ -36,20 +36,19 @@ _PKG_ROOT = Path(__file__).resolve().parents[1] / "src" / "dartlab"
 # 필수 파일 존재 계약
 # ════════════════════════════════════════
 
+# git-tracked + wheel-bundled 필수 리소스만 검증.
+# dalio48Cases/dalioDetailCases/damodaranDefaults/rrCrises800y 는 로컬 생성물이라
+# git 에 커밋되지 않고 wheel 에도 포함되지 않음 — 필수 목록 제외.
 _REQUIRED_FILES = [
     # core parserMappings — 2026-04-19 사고 발생 위치
     "core/data/parserMappings/sections.json",
     "core/data/parserMappings/affiliate.json",
     "core/data/parserMappings/costByNature.json",
     "core/data/parserMappings/sectorPriors.json",
-    # core data
+    # core data (git-tracked)
     "core/data/accountMappings.json",
     "core/data/notesStructure.json",
-    "core/data/dalio48Cases.json",
-    "core/data/dalioDetailCases.json",
-    "core/data/damodaranDefaults.json",
     "core/data/labelSupplements.json",
-    "core/data/rrCrises800y.json",
     # sections runtime 의존 JSON
     "providers/dart/docs/sections/mapperData/sectionMappings.json",
     "providers/dart/docs/sections/mapperData/tableMappings.json",
