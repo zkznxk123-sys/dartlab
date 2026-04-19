@@ -89,10 +89,7 @@ def _loadMappings() -> dict[str, str]:
     """2026-04-19 계열 사고 방지 — wheel 누락 시 silent `{}` 대신 loud-fail."""
     path = _DATA_DIR / "sectionMappings.json"
     if not path.exists():
-        raise FileNotFoundError(
-            f"필수 번들 리소스 누락: {path}\n"
-            f"  → pip install -U --force-reinstall dartlab"
-        )
+        raise FileNotFoundError(f"필수 번들 리소스 누락: {path}\n  → pip install -U --force-reinstall dartlab")
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 

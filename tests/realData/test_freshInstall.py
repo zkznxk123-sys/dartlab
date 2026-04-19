@@ -100,6 +100,4 @@ class TestFreshInstallSmoke:
         import re
 
         periods = re.findall(r"20\d\dQ[1-4]", html)
-        assert len(set(periods)) >= 4, (
-            f"HTML 렌더에 기간 컬럼이 {len(set(periods))}개 — Rich width 고정 회귀"
-        )
+        assert len(set(periods)) >= 4, f"HTML 렌더에 기간 컬럼이 {len(set(periods))}개 — Rich width 고정 회귀"

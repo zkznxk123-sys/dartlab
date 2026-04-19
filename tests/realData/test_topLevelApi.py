@@ -16,16 +16,12 @@ def _publicTopLevel() -> list[str]:
     import dartlab
 
     skip = {
-        "sys",          # 표준 라이브러리 re-export
-        "config",       # 구성 객체 (접근해도 의미 없음)
-        "core",         # 내부 패키지
-        "providers",    # 내부 패키지
+        "sys",  # 표준 라이브러리 re-export
+        "config",  # 구성 객체 (접근해도 의미 없음)
+        "core",  # 내부 패키지
+        "providers",  # 내부 패키지
     }
-    return sorted(
-        name
-        for name in dir(dartlab)
-        if not name.startswith("_") and name not in skip
-    )
+    return sorted(name for name in dir(dartlab) if not name.startswith("_") and name not in skip)
 
 
 TOP_LEVEL = _publicTopLevel()
@@ -43,9 +39,7 @@ def test_topLevelSymbol_accessible(symbol):
     except Exception as e:
         pytest.fail(f"dartlab.{symbol} 접근 크래시: {type(e).__name__}: {e}")
     # 접근만 보장 — 값 자체는 타입 무관
-    assert value is not None or symbol in {"reload_plugins"}, (
-        f"dartlab.{symbol} 가 None — 공개 심볼에서 None 은 의심"
-    )
+    assert value is not None or symbol in {"reload_plugins"}, f"dartlab.{symbol} 가 None — 공개 심볼에서 None 은 의심"
 
 
 @pytest.mark.realData

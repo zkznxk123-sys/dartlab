@@ -359,10 +359,7 @@ def loadSectionMappings() -> dict[str, str]:
     """
     path = _mappingPath()
     if not path.exists():
-        raise FileNotFoundError(
-            f"필수 번들 리소스 누락: {path}\n"
-            f"  → pip install -U --force-reinstall dartlab"
-        )
+        raise FileNotFoundError(f"필수 번들 리소스 누락: {path}\n  → pip install -U --force-reinstall dartlab")
 
     raw = json.loads(path.read_text(encoding="utf-8"))
     expanded: dict[str, str] = {}

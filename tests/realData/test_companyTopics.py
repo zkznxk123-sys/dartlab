@@ -25,17 +25,17 @@ ALL_TOPICS = _allTopics()
 # 비상장 성격/소규모 회사에서는 특정 공시 파트가 비어있을 수 있음.
 _TOPIC_NONE_ALLOWED: frozenset[str] = frozenset(
     {
-        "bond",                    # 채무증권 발행 이력 없을 수 있음
-        "sanction",                # 제재 이력 없을 수 있음
-        "contingentLiability",     # 우발부채 없을 수 있음
-        "fundraising",             # 증자감자 이벤트 없을 수 있음
-        "investmentInOther",       # 타법인 출자 없을 수 있음
-        "riskDerivative",          # 파생상품 없을 수 있음
-        "relatedPartyTx",          # 관계자 거래 없을 수 있음
-        "affiliate",               # 관계기업 투자 없을 수 있음
-        "executivePay",            # 임원보수 공시 안한 경우
-        "dividend",                # 무배당 회사
-        "otherFinance",            # 기타 재무 없음 가능
+        "bond",  # 채무증권 발행 이력 없을 수 있음
+        "sanction",  # 제재 이력 없을 수 있음
+        "contingentLiability",  # 우발부채 없을 수 있음
+        "fundraising",  # 증자감자 이벤트 없을 수 있음
+        "investmentInOther",  # 타법인 출자 없을 수 있음
+        "riskDerivative",  # 파생상품 없을 수 있음
+        "relatedPartyTx",  # 관계자 거래 없을 수 있음
+        "affiliate",  # 관계기업 투자 없을 수 있음
+        "executivePay",  # 임원보수 공시 안한 경우
+        "dividend",  # 무배당 회사
+        "otherFinance",  # 기타 재무 없음 가능
     }
 )
 

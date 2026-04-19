@@ -21,8 +21,8 @@ ANALYSIS_AXES = _analysisAxes()
 # 데이터 부재 시 None 허용 axis (과거 기간 부족 등)
 _NONE_ALLOWED: frozenset[str] = frozenset(
     {
-        "예측신호",        # 예측 모델 입력 부족 가능
-        "매크로민감도",   # 매크로 데이터 없음 시 skip
+        "예측신호",  # 예측 모델 입력 부족 가능
+        "매크로민감도",  # 매크로 데이터 없음 시 skip
     }
 )
 

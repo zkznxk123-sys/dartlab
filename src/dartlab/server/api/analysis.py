@@ -365,9 +365,17 @@ def api_company_modules(code: str):
     """기업의 사용 가능한 데이터 모듈 목록."""
     try:
         c = get_company(code)
-        # scan_available_modules 제거됨 — topics 목록으로 대체
+        # scan_available_modules 제거됨 — topics 목록으로 대체.
+        # c.topics 는 Polars DataFrame 이므로 truthy 평가 금지 (ambiguous error).
         topics = getattr(c, "topics", None)
-        modules = list(topics) if topics else []
+        if topics is None:
+            modules: list = []
+        elif hasattr(topics, "height"):
+            # DataFrame: topic 컬럼 우선, 없으면 첫 컬럼 사용
+            col = "topic" if "topic" in topics.columns else topics.columns[0]
+            modules = topics[col].to_list() if topics.height > 0 else []
+        else:
+            modules = list(topics)
         return {"stockCode": c.stockCode, "corpName": c.corpName, "modules": modules}
     except HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))

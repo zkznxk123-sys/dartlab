@@ -92,8 +92,7 @@ def test_parserMappingsSections_hasChapterByMajor():
     # I~IX 까지 기본 장번호는 반드시 존재해야 함 (DART 보고서 표준 장 구조)
     for majorNum in ("1", "2", "3", "4", "5"):
         assert majorNum in chapterByMajor, (
-            f"chapterByMajor 에 장번호 {majorNum!r} 누락 — "
-            f"DART 표준 I~IX 장 구조 보장 실패"
+            f"chapterByMajor 에 장번호 {majorNum!r} 누락 — DART 표준 I~IX 장 구조 보장 실패"
         )
 
 
@@ -119,9 +118,7 @@ def test_sectionMappings_isNonEmpty():
     path = _PKG_ROOT / "providers/dart/docs/sections/mapperData/sectionMappings.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     assert isinstance(data, dict)
-    assert len(data) > 100, (
-        f"sectionMappings.json 항목 {len(data)}개 — 정상(500+) 대비 비정상"
-    )
+    assert len(data) > 100, f"sectionMappings.json 항목 {len(data)}개 — 정상(500+) 대비 비정상"
 
 
 # ════════════════════════════════════════
@@ -147,8 +144,7 @@ def test_chapterFromMajorNum_mapsKnownRange():
     for majorNum in range(1, 10):
         result = chapterFromMajorNum(majorNum)
         assert result is not None, (
-            f"chapterFromMajorNum({majorNum}) None — "
-            f"_CHAPTER_BY_MAJOR 초기화 실패 (parserMappings 누락)"
+            f"chapterFromMajorNum({majorNum}) None — _CHAPTER_BY_MAJOR 초기화 실패 (parserMappings 누락)"
         )
         assert isinstance(result, str)
         assert result  # 빈 문자열도 아님
