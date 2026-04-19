@@ -85,9 +85,7 @@ def extractAnnualConsolidated(df: pl.DataFrame) -> pl.DataFrame:
         return df
     # DART
     if "fs_nm" in df.columns:
-        return df.filter(
-            (pl.col("fs_nm") == "연결재무제표") & (pl.col("reprt_nm") == "4분기")
-        )
+        return df.filter((pl.col("fs_nm") == "연결재무제표") & (pl.col("reprt_nm") == "4분기"))
     if "fs_div" in df.columns:
         return df.filter(pl.col("fs_div") == "CFS")
     return df
@@ -292,11 +290,7 @@ def _medianRatioEdgar(df: pl.DataFrame, numer: str, denom: str) -> pl.DataFrame:
         (pl.col(ncol) / pl.col(dcol) * 100).alias("ratio"),
         pl.col("fy").cast(pl.Utf8).alias("year"),
     )
-    return (
-        valid.group_by("year")
-        .agg(pl.col("ratio").median().alias("median_ratio"))
-        .sort("year")
-    )
+    return valid.group_by("year").agg(pl.col("ratio").median().alias("median_ratio")).sort("year")
 
 
 def _medianRatioDart(df: pl.DataFrame, numer: str, denom: str) -> pl.DataFrame:
@@ -337,11 +331,25 @@ def _resolveNames(account: str) -> set[str]:
 def _guessSjDiv(account: str) -> str | None:
     """계정명에서 sj_div 추정."""
     en = ACCOUNT_MAP.get(account, account)
-    if en in ("sales", "operating_profit", "net_profit", "interest_expense",
-              "depreciation_amortization", "cost_of_goods_sold", "gross_profit",
-              "selling_general_and_administrative", "research_and_development"):
+    if en in (
+        "sales",
+        "operating_profit",
+        "net_profit",
+        "interest_expense",
+        "depreciation_amortization",
+        "cost_of_goods_sold",
+        "gross_profit",
+        "selling_general_and_administrative",
+        "research_and_development",
+    ):
         return "IS"
-    if en in ("operating_cashflow", "investing_cashflow", "financing_cash_flow",
-              "capex", "dividends_paid", "share_repurchase"):
+    if en in (
+        "operating_cashflow",
+        "investing_cashflow",
+        "financing_cash_flow",
+        "capex",
+        "dividends_paid",
+        "share_repurchase",
+    ):
         return "CF"
     return "BS"

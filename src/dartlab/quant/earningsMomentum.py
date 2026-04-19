@@ -83,10 +83,7 @@ def calcEarnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
                     yearly[y] = v
     else:
         # DART: sj_div + account_nm 필터
-        stock = annual.filter(
-            (pl.col("sj_div") == "IS")
-            & pl.col("account_nm").str.contains("영업이익")
-        )
+        stock = annual.filter((pl.col("sj_div") == "IS") & pl.col("account_nm").str.contains("영업이익"))
         for row in stock.iter_rows(named=True):
             y = row.get("bsns_year")
             v = _parse(row.get("thstrm_amount"))
