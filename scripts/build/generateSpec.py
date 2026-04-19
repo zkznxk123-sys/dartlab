@@ -2020,6 +2020,10 @@ def _generateMcpToolsPy() -> str:
     lines.append("TOOL_FEATURE_MAP: dict[str, str] = {")
     for t in toolDefs:
         lines.append(f'    "{t[0]}": "{t[1]}",')
+    # mcp/__init__.py 에서 직접 등록되는 Dartlab API 도구 — dispatch 에서 _TOOL_FEATURE_MAP.get 호출 시 매칭 필요.
+    lines.append('    "listDartlabApi": "meta",')
+    lines.append('    "searchDartlabApi": "meta",')
+    lines.append('    "verifyDartlabApi": "meta",')
     lines.append("}")
     lines.append("")
     lines.append("# fmt: on")

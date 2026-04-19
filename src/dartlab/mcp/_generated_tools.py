@@ -63,6 +63,9 @@ TOOL_FEATURE_MAP: dict[str, str] = {
     "topdownScreen": "data",
     "dartlabSearch": "data",
     "dartlabListing": "data",
+    "listDartlabApi": "meta",
+    "searchDartlabApi": "meta",
+    "verifyDartlabApi": "meta",
 }
 
 # fmt: on
