@@ -13,7 +13,6 @@ corporateAggregate, quant ranking/screening/earningsMomentum 등에서 사용.
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 
 import polars as pl
 
@@ -229,7 +228,6 @@ def _sumEdgar(df: pl.DataFrame, account: str) -> pl.DataFrame:
 
 def _sumDart(df: pl.DataFrame, account: str) -> pl.DataFrame:
     """DART: sj_div + account_nm 필터 후 group_by."""
-    from dartlab.core.finance.helpers import parseNumStr as parse_num
 
     if account in _REVERSE_MAP:
         names = set(_REVERSE_MAP[account])

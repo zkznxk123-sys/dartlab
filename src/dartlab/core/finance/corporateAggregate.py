@@ -63,10 +63,13 @@ class LeverageCycleResult:
 
 from dartlab.core.finance.scanBridge import (
     extractAnnualConsolidated as _extract_annual_consolidated,
+)
+from dartlab.core.finance.scanBridge import (
     medianRatioByYear as _median_ratio_bridge,
+)
+from dartlab.core.finance.scanBridge import (
     sumAccountByYear as _sum_account_bridge,
 )
-
 
 # ══════════════════════════════════════
 # 공개 함수
