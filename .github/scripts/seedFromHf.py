@@ -32,22 +32,45 @@ from pathlib import Path
 
 
 def _download(url: str, dest: Path, token: str | None, timeout: int = 60) -> int:
-    """단일 파일 HTTP GET. 반환: 다운로드 바이트 수."""
-    import urllib.request
+    """단일 파일 HTTP GET. 429 Too Many Requests 시 Retry-After 따라 대기 후 재시도.
 
-    req = urllib.request.Request(url)
-    if token:
-        req.add_header("Authorization", f"Bearer {token}")
+    반환: 다운로드 바이트 수.
+
+    HF 제한: 5000 resolvers / 5분 / account. cold seed 로 3 카테고리 풀다운로드하면
+    ~8800 요청 → 도중 429 히트. 429 응답의 Retry-After (보통 60~300s) 존중 + 지수 백오프.
+    """
+    import urllib.error
+    import urllib.request
 
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".tmp")
-    bytesWritten = 0
-    with urllib.request.urlopen(req, timeout=timeout) as resp, tmp.open("wb") as f:
-        while chunk := resp.read(1 << 20):  # 1MB
-            f.write(chunk)
-            bytesWritten += len(chunk)
-    tmp.replace(dest)
-    return bytesWritten
+
+    maxRetries = 4
+    # HF rate limit window = 5분. 첫 retry 부터 window 완전 재설정 + 10초 버퍼.
+    baseWait = 310.0
+
+    for attempt in range(maxRetries):
+        try:
+            req = urllib.request.Request(url)
+            if token:
+                req.add_header("Authorization", f"Bearer {token}")
+            bytesWritten = 0
+            with urllib.request.urlopen(req, timeout=timeout) as resp, tmp.open("wb") as f:
+                while chunk := resp.read(1 << 20):  # 1MB
+                    f.write(chunk)
+                    bytesWritten += len(chunk)
+            tmp.replace(dest)
+            return bytesWritten
+        except urllib.error.HTTPError as e:
+            if e.code != 429 or attempt == maxRetries - 1:
+                raise
+            retryAfter = e.headers.get("Retry-After")
+            try:
+                wait = max(float(retryAfter), baseWait) if retryAfter else baseWait * (1 + attempt * 0.5)
+            except ValueError:
+                wait = baseWait * (1 + attempt * 0.5)
+            print(f"[seed] 429 rate limit ({dest.name}) — {wait:.0f}s 대기 후 재시도 {attempt+1}/{maxRetries}", flush=True)
+            time.sleep(wait)
 
 
 def seedCategory(cat: str, dataDir: Path) -> tuple[int, int, float]:
