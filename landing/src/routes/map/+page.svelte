@@ -2018,13 +2018,14 @@
 		display: flex;
 		align-items: center;
 		gap: 2px;
-		background: rgba(5, 8, 17, 0.8);
+		background: rgba(5, 8, 17, 0.85);
 		backdrop-filter: blur(16px) saturate(1.4);
 		-webkit-backdrop-filter: blur(16px) saturate(1.4);
-		border: 1px solid rgba(255, 255, 255, 0.06);
+		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 999px;
 		padding: 6px 8px;
-		z-index: 30;
+		z-index: 50;
+		pointer-events: auto;
 		box-shadow:
 			0 1px 0 rgba(255, 255, 255, 0.04) inset,
 			0 12px 32px -8px rgba(0, 0, 0, 0.6);
