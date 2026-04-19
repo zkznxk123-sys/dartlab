@@ -175,7 +175,7 @@ class _ProfileAccessor:
                 if rows:
                     frames.append(pl.DataFrame(rows))
 
-        if self._company.report is not None:
+        if self._company._report is not None:
             for apiType in self._company._report.apiTypes:
                 df = self._company._report.extractAnnual(apiType)
                 if df is None or df.is_empty():
@@ -283,10 +283,10 @@ class _ProfileAccessor:
             return getattr(self._company.finance, topic)
         if topic == "SCE":
             return self._company._finance.SCE
-        if topic in self._REPORT_AUTHORITATIVE_TOPICS and self._company.report is not None:
+        if topic in self._REPORT_AUTHORITATIVE_TOPICS and self._company._report is not None:
             if topic == "audit":
                 return self._company._report.audit
-            return getattr(self._company.report, topic, None)
+            return getattr(self._company._report, topic, None)
         sections = self.sections
         if sections is None:
             return None

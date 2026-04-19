@@ -353,10 +353,16 @@ def normalizeSectionTitle(title: str) -> str:
 
 @lru_cache(maxsize=1)
 def loadSectionMappings() -> dict[str, str]:
-    """sectionMappings.json을 로드하여 정규화된 키-값 매핑 dict를 반환."""
+    """sectionMappings.json을 로드하여 정규화된 키-값 매핑 dict를 반환.
+
+    2026-04-19 계열 사고 방지 — wheel 누락 시 silent `{}` 대신 loud-fail.
+    """
     path = _mappingPath()
     if not path.exists():
-        return {}
+        raise FileNotFoundError(
+            f"필수 번들 리소스 누락: {path}\n"
+            f"  → pip install -U --force-reinstall dartlab"
+        )
 
     raw = json.loads(path.read_text(encoding="utf-8"))
     expanded: dict[str, str] = {}

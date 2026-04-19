@@ -290,10 +290,18 @@ def normalizeSectionTitle(title: str) -> str:
 
 @lru_cache(maxsize=1)
 def loadSectionMappings() -> dict[str, str]:
-    """sectionMappings.json을 로드하여 정규화된 제목-topic 매핑 dict를 반환한다."""
+    """sectionMappings.json을 로드하여 정규화된 제목-topic 매핑 dict를 반환한다.
+
+    과거 사고 (2026-04-19) 계열: wheel 에 sectionMappings.json 이 누락되면
+    silent `{}` → `mapSectionTitle` 이 모든 제목을 매핑 실패로 처리 → section
+    분류 붕괴. silent 대신 loud-fail.
+    """
     path = _mappingPath()
     if not path.exists():
-        return {}
+        raise FileNotFoundError(
+            f"필수 번들 리소스 누락: {path}\n"
+            f"  → pip install -U --force-reinstall dartlab"
+        )
     raw = json.loads(path.read_text(encoding="utf-8"))
     expanded: dict[str, str] = {}
     for key, value in raw.items():

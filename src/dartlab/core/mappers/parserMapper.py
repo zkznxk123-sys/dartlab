@@ -17,31 +17,49 @@ from dartlab.core.mappers.engine import BaseMapper, MapperStats
 _DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "parserMappings"
 
 
+def _loadRequired(filename: str) -> dict:
+    """필수 파서 매핑 JSON 로드. 누락 = 빌드/패키징 사고이므로 즉시 예외.
+
+    과거 사고 (2026-04-19): PyPI wheel 0.9.15 에서 `core/data/parserMappings/`
+    디렉토리가 통째로 누락된 채 배포됨. loadSections() 가 빈 dict 를 리턴했고,
+    sections runtime 의 `_CHAPTER_BY_MAJOR` 가 빈 상태로 초기화되어 모든
+    `chapterFromMajorNum(N)` 이 None → _reportRowsToTopicRows 빈 리스트 →
+    sections() None → c.sections `.raw.columns` AttributeError 로 외부 사용자
+    첫 호출이 크래시.
+
+    silent `{}` 리턴은 위 사고의 근본 원인. 파일이 없다는 것은 wheel 패키징
+    누락 또는 설치 손상이므로 사용자에게 명확히 알려야 한다.
+    """
+    path = _DATA_DIR / filename
+    if not path.exists():
+        raise FileNotFoundError(
+            f"필수 매핑 파일 누락: {path}\n"
+            f"  원인 후보:\n"
+            f"    1) 설치된 dartlab wheel 에 data/parserMappings/ 가 빠짐 (패키징 사고)\n"
+            f"       → pip install -U --force-reinstall dartlab\n"
+            f"    2) 편집가능 설치 (editable) 중 파일이 외부 프로세스에 의해 삭제됨\n"
+            f"       → git status / git restore 로 복구\n"
+            f"  재현 방지: 릴리즈 전 bash scripts/build/testWheelSmoke.sh 필수"
+        )
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 @lru_cache(maxsize=1)
 def loadAffiliate() -> dict:
     """affiliate 파서 매핑 로드."""
-    path = _DATA_DIR / "affiliate.json"
-    if not path.exists():
-        return {}
-    return json.loads(path.read_text(encoding="utf-8"))
+    return _loadRequired("affiliate.json")
 
 
 @lru_cache(maxsize=1)
 def loadCostByNature() -> dict:
     """costByNature 파서 매핑 로드."""
-    path = _DATA_DIR / "costByNature.json"
-    if not path.exists():
-        return {}
-    return json.loads(path.read_text(encoding="utf-8"))
+    return _loadRequired("costByNature.json")
 
 
 @lru_cache(maxsize=1)
 def loadSections() -> dict:
     """sections 파서 매핑 로드."""
-    path = _DATA_DIR / "sections.json"
-    if not path.exists():
-        return {}
-    return json.loads(path.read_text(encoding="utf-8"))
+    return _loadRequired("sections.json")
 
 
 class ParserMapper(BaseMapper):

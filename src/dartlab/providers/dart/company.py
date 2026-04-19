@@ -1465,6 +1465,10 @@ class Company:
             return None
 
         docsSec = sectionsSource.raw
+        if docsSec is None:
+            self._hintOnce("sections", "sections", "docs")
+            self._cache[cacheKey] = None
+            return None
         periodCols = [c for c in docsSec.columns if _isPeriodColumn(c)]
         chapterMap = self._chapterMap()
 

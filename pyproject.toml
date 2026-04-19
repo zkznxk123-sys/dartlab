@@ -1,6 +1,6 @@
 [project]
 name = "dartlab"
-version = "0.9.15"
+version = "0.9.16"
 description = "One stock code → full company story. Korean DART & US SEC EDGAR filings as structured Python data."
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -153,6 +153,8 @@ markers = [
     "unit: 순수 로직/mock만 — 데이터 로드 없음, 병렬 안전",
     "integration: Company 1개 로딩 필요 — 중간 무게",
     "heavy: 대량 데이터 로드 — 단독 실행 필수",
+    "realData: 엔진별 실제 데이터 스모크 — HF parquet + 실제 파이프라인 실행 (schema drift/silent None 방어)",
+    "freshInstall: 빈 캐시 → 자동 다운로드 경로 검증 (외부 사용자 첫 호출 시나리오)",
 ]
 
 [tool.coverage.run]
@@ -170,6 +172,9 @@ exclude_lines = [
     "if __name__",
     "raise NotImplementedError",
 ]
+# 2026-04-19: CI 가 requires_data 테스트를 활성화하고 fixture-integration/realdata-suite 를
+# 분리 실행하기 시작. 실제 커버리지가 30% 대비 상승할 것이므로 첫 master 빌드 결과로
+# 이 값을 측정값-5%p 로 조정하고 단계적으로 상향 (50 → 65 → 80 → 90 목표).
 fail_under = 30
 
 [tool.pyright]

@@ -13,10 +13,20 @@ from pathlib import Path
 
 @lru_cache(maxsize=1)
 def _load_account_mappings() -> dict:
-    """K-IFRS account mappings — core SSOT (`core/data/accountMappings.json`)."""
+    """K-IFRS account mappings — core SSOT (`core/data/accountMappings.json`).
+
+    과거 사고 (2026-04-19): wheel 에 data/ 디렉토리가 누락된 채 publish 되어
+    silent `{}` 리턴 경로가 발동되면 모든 계정 라벨이 손실되어 "IS/BS/CF 가
+    숫자만 나오고 계정명 없음" 같은 이상 증상이 발생한다. 재발 방지를 위해
+    silent 리턴 대신 명시적 예외로 사용자에게 원인을 즉시 알린다.
+    """
     mapper_path = Path(__file__).parent.parent / "data" / "accountMappings.json"
     if not mapper_path.exists():
-        return {}
+        raise FileNotFoundError(
+            f"필수 번들 리소스 누락: {mapper_path}\n"
+            f"  → pip install -U --force-reinstall dartlab\n"
+            f"  (wheel 패키징 사고 시 이 파일이 빠질 수 있음)"
+        )
     return json.loads(mapper_path.read_text(encoding="utf-8"))
 
 

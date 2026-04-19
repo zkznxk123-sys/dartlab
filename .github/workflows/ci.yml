@@ -31,12 +31,14 @@ jobs:
 
       # 메모리 안전: pytest-xdist -n 2 로 worker 프로세스 분리
       # 각 worker가 별도 프로세스라 Polars 네이티브 메모리가 격리됨
-      # CI runner 7GB+ 여유 → worker당 1500MB 한계 (안전 마진)
+      # CI runner 7GB+ 여유 → worker당 1900MB 한계 (안전 마진)
+      # fixture 데이터 주입으로 requires_data 테스트도 CI에서 실행 (과거엔 skip)
       - name: Run tests (pytest-xdist parallel)
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
           PYTEST_MEMORY_LIMIT_MB: "1900"
-        run: pytest tests/ -n 2 --dist loadfile --tb=short -m "not requires_data and not heavy" --benchmark-disable --ignore=tests/test_fixture_analysis_real.py --ignore=tests/test_fixture_credit_real.py --ignore=tests/test_fixture_review_real.py --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml
+          DARTLAB_TEST_LOCKED: "1"
+        run: pytest tests/ -n 2 --dist loadfile --tb=short -m "not heavy and not realData and not freshInstall" --benchmark-disable --ignore=tests/test_fixture_analysis_real.py --ignore=tests/test_fixture_credit_real.py --ignore=tests/test_fixture_review_real.py --ignore=tests/realData --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12'
@@ -132,6 +134,87 @@ jobs:
           entries = getEntries()
           print(f'dartlab imported OK, {len(entries)} registry entries')
           "
+
+  # fixture 기반 integration 테스트 — 메모리가 큰 테스트만 분리 실행.
+  # 1500MB 한계에 걸리는 test_fixture_*_real.py 를 단일 worker + 파일별 분리로 돌림.
+  fixture-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio hypothesis pytest-benchmark
+          pip install -e .[all]
+
+      - name: Run fixture integration tests (high memory, sequential)
+        env:
+          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
+          PYTEST_MEMORY_LIMIT_MB: "5000"
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          # 각 파일 독립 프로세스 — Polars 네이티브 메모리 완전 해제 보장
+          for f in tests/test_fixture_analysis_real.py tests/test_fixture_credit_real.py tests/test_fixture_review_real.py; do
+            echo "=== $f ==="
+            pytest "$f" --tb=short -q --benchmark-disable --no-cov || exit 1
+          done
+
+  # realData 전수 스위트 — fixtures 데이터로 엔진별 공개 API 전수 스모크.
+  # 84+ 테스트가 Company/analysis/credit/scan/macro/gather/review/ai 등 모든 엔진의
+  # 공개 진입점을 실제 데이터로 호출. None/빈 결과/크래시 즉시 실패.
+  # 파일별 독립 프로세스 (test-realdata.sh) 로 메모리 격리.
+  realdata-suite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio hypothesis
+          pip install -e .[all]
+
+      - name: Run realData suite (file-isolated processes)
+        env:
+          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
+          PYTEST_MEMORY_LIMIT_MB: "6000"
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          # freshInstall 포함 — fixture 데이터로 cold cache + sections/select 재현 검증.
+          # 로컬에서 3/3 PASS 확인 완료 (2026-04-19).
+          bash scripts/dev/test-realdata.sh tests/realData -m "realData" -v --tb=short
+        continue-on-error: true
+
+  # Wheel packaging smoke — 2026-04-19 사고 (parserMappings 누락) 재발 방지 게이트.
+  # 격리 venv 에 wheel 설치 후 필수 번들 리소스 + sections 런타임 초기화 검증.
+  wheel-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Build wheel + verify bundled resources
+        env:
+          WHEEL_SMOKE_SKIP_FRESH_INSTALL: "1"
+        run: bash scripts/build/testWheelSmoke.sh
 
   security:
     runs-on: ubuntu-latest

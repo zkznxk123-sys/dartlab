@@ -206,14 +206,21 @@ class SelectResult:
         return console.export_text()
 
     def _renderHtml(self) -> str:
-        """Rich Console → HTML (inline styles)."""
+        """Rich Console → HTML (inline styles).
+
+        HTML은 가로 스크롤이 되므로 기간 컬럼 수에 비례해 width를 계산한다.
+        width=120 고정 시 62컬럼 IS 같은 경우 기간 컬럼이 전부 잘려 snakeId/항목만 남는다.
+        """
         import io
 
         from rich.console import Console
 
         if not self.isNumeric:
             return self._renderHtmlText()
-        console = Console(record=True, file=io.StringIO(), force_jupyter=True, width=120)
+        metas = _metaCols(self._df)
+        periods = _periodCols(self._df)
+        width = max(120, 22 * len(metas) + 12 * len(periods) + 8)
+        console = Console(record=True, file=io.StringIO(), force_jupyter=True, width=width)
         console.print(self._toRichTable())
         return console.export_html(inline_styles=True)
 

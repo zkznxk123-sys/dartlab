@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.16] - 2026-04-19
+
+### Fixed
+
+- **외부 사용자 첫 호출 크래시 해소**: `Company("005930").sections` 가 `AttributeError: NoneType has no columns` 로 크래시하던 문제 수정. 원인은 0.9.15 wheel 에 `core/data/parserMappings/` 디렉토리가 번들에서 누락되어 `loadSections()` 가 빈 dict 를 리턴, 섹션 파이프라인 전체가 silent-fail 한 것.
+- **`c.select("IS").render("html")` 기간 컬럼 누락**: Rich Console `width=120` 고정 때문에 60+ 기간 컬럼이 모두 잘려 `snakeId`, `항목` 두 메타 컬럼만 렌더되던 문제. 컬럼 수에 비례한 동적 width 로 전환.
+- **`c.facts` AttributeError**: `_profile_accessor` 가 `self._company.report` (존재하지 않음) 를 참조. `_report` 로 수정.
+- **`c.sections` silent-None 가드**: `_SectionsSource.raw` 가 None 일 때 명시적 None 리턴 (과거 `.columns` 크래시 경로 차단).
+
+### Changed
+
+- **Silent `{}` → loud `FileNotFoundError` 전환** (4 로더): `parserMapper._loadRequired`, `core/finance/labels`, `dart/docs/sections/mapper`, `edgar/docs/sections/mapper`, `edinet/docs/sections/mapper`. 번들 리소스 누락 시 복구 명령 포함한 명확한 예외를 최상위 함수에서 즉시 발생.
+
+### Added
+
+- **`tests/test_bundledResources.py`**: 24 unit 테스트 — 필수 JSON/parquet 존재 + 런타임 로더 계약 (`chapterByMajor` non-empty, `chapterFromMajorNum(1~9)` non-None 등) 검증. PR 마다 CI 실행 (2.6초).
+- **`tests/realData/` 스위트**: 엔진별 공개 API 전수 스모크. Company 59 속성 + analysis 22 axes + scan 20 axes + credit 7 axes + macro 12 axes + gather 8 axes + topLevel 30+ 심볼 parametrize. None/빈 결과/크래시 즉시 실패.
+- **`scripts/build/testWheelSmoke.sh`**: 격리 venv 에 wheel 설치 후 번들 리소스 + `sections.chapterByMajor` 런타임 검증. `publish.yml` 의 필수 게이트.
+- **`scripts/dev/test-realdata.sh`**: 파일별 독립 프로세스 runner (Polars 네이티브 메모리 격리).
+- **CI jobs**: `fixture-integration` (메모리 큰 fixture 테스트 분리), `realdata-suite` (84+ 엔진 전수), `wheel-smoke` (2026-04-19 사고 재발 차단 게이트). `publish.yml` 에 `wheel-smoke` 가 `build` 의 pre-requisite 로 wire.
+- **pytest 마커 2종**: `realData`, `freshInstall`.
+
 ## [0.9.15] - 2026-04-18
 
 ### Changed
