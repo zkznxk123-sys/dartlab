@@ -1213,8 +1213,8 @@
 					<span>산업지도</span>
 				</button>
 				<span class="db-divider">|</span>
-				<div class="db-current">
-					<span class="db-name" style:color={(drillIndustry && indColorMap.get(drillIndustry)) || '#fbbf24'}>{industryDetail.name}</span>
+				<div class="db-current" style:color={String((drillIndustry && indColorMap.get(drillIndustry)) || '#fbbf24')}>
+					<span class="db-name">{industryDetail.name}</span>
 					<span class="db-meta">{industryDetail.nodeCount}사{industryDetail.totalRevenue ? ` · ${(industryDetail.totalRevenue / 1e12).toFixed(1)}조` : ''}</span>
 				</div>
 			</div>
@@ -1276,7 +1276,12 @@
 		<!-- 타임라인 바 (메인 뷰 하단 고정) -->
 		{#if timelinePeriods.length > 1}
 			<div class="timeline-bar">
-				<span class="tl-icon">⏱</span>
+				<span class="tl-icon" aria-hidden="true">
+					<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="9" />
+						<path d="M12 7v5l3 2" />
+					</svg>
+				</span>
 				{#each timelinePeriods as yr}
 					<button
 						class="tl-btn"
@@ -1912,21 +1917,23 @@
 	.movers-banner {
 		position: absolute;
 		top: 16px;
-		left: 50%;
-		transform: translateX(-50%);
+		right: 16px;
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		padding: 8px 14px;
-		background: rgba(15, 18, 25, 0.92);
-		border: 1px solid rgba(251, 191, 36, 0.4);
-		border-radius: 999px;
-		color: #f1f5f9;
+		gap: 10px;
+		padding: 10px 14px 10px 12px;
+		background: rgba(5, 8, 17, 0.8);
+		border: 1px solid rgba(251, 191, 36, 0.25);
+		border-radius: 12px;
+		color: rgba(241, 245, 249, 0.95);
 		font-size: 12px;
-		backdrop-filter: blur(8px);
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-		z-index: 4;
-		max-width: calc(100% - 120px);
+		backdrop-filter: blur(16px) saturate(1.4);
+		-webkit-backdrop-filter: blur(16px) saturate(1.4);
+		box-shadow:
+			0 1px 0 rgba(255, 255, 255, 0.04) inset,
+			0 12px 32px -8px rgba(0, 0, 0, 0.6);
+		z-index: 25;
+		max-width: 440px;
 	}
 	.m-icon {
 		font-size: 14px;
@@ -2002,51 +2009,77 @@
 		background: rgba(96, 165, 250, 0.3);
 	}
 
+	/* Timeline Bar — 하단 중앙 editorial */
 	.timeline-bar {
 		position: absolute;
-		bottom: 12px;
+		bottom: 20px;
 		left: 50%;
 		transform: translateX(-50%);
 		display: flex;
 		align-items: center;
-		gap: 4px;
-		background: rgba(15, 18, 25, 0.9);
-		backdrop-filter: blur(10px);
-		border: 1px solid var(--color-dl-border);
-		border-radius: 8px;
-		padding: 6px 12px;
+		gap: 2px;
+		background: rgba(5, 8, 17, 0.8);
+		backdrop-filter: blur(16px) saturate(1.4);
+		-webkit-backdrop-filter: blur(16px) saturate(1.4);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		border-radius: 999px;
+		padding: 6px 8px;
 		z-index: 30;
+		box-shadow:
+			0 1px 0 rgba(255, 255, 255, 0.04) inset,
+			0 12px 32px -8px rgba(0, 0, 0, 0.6);
 	}
 	.tl-icon {
-		font-size: 14px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
 		margin-right: 4px;
+		color: rgba(203, 213, 225, 0.5);
+		font-size: 13px;
 	}
 	.tl-btn {
 		background: transparent;
-		border: 1px solid transparent;
-		color: var(--color-dl-text-dim);
-		font-size: 12px;
+		border: none;
+		color: rgba(148, 163, 184, 0.7);
+		font-family: var(--font-mono);
+		font-size: 11px;
 		font-weight: 500;
-		padding: 4px 10px;
-		border-radius: 5px;
+		letter-spacing: 0.04em;
+		padding: 6px 12px;
+		border-radius: 999px;
 		cursor: pointer;
-		transition: all 0.15s;
+		transition:
+			color 180ms ease,
+			background 180ms ease,
+			transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+		position: relative;
 	}
 	.tl-btn:hover {
-		color: var(--color-dl-text);
-		background: rgba(148, 163, 184, 0.08);
+		color: rgba(241, 245, 249, 0.95);
+		background: rgba(255, 255, 255, 0.04);
 	}
 	.tl-btn.active {
-		background: rgba(234, 70, 71, 0.15);
-		border-color: rgba(234, 70, 71, 0.3);
-		color: var(--color-dl-primary-light);
+		background: linear-gradient(
+			135deg,
+			var(--color-dl-primary) 0%,
+			var(--color-dl-accent) 100%
+		);
+		color: #fff;
 		font-weight: 700;
+		box-shadow: 0 2px 8px rgba(234, 70, 71, 0.4);
 	}
 	.tl-info {
-		font-size: 11px;
-		color: var(--color-dl-text-muted);
-		margin-left: 8px;
 		font-family: var(--font-mono);
+		font-size: 10px;
+		font-weight: 500;
+		letter-spacing: 0.05em;
+		color: rgba(148, 163, 184, 0.6);
+		margin-left: 10px;
+		padding-left: 10px;
+		padding-right: 6px;
+		border-left: 1px solid rgba(255, 255, 255, 0.08);
 	}
 
 	.overlay-toggles {
@@ -2064,58 +2097,99 @@
 		accent-color: var(--color-dl-primary);
 	}
 
+	/* Editorial Breadcrumb — 좌측 상단 고정 */
 	.drill-breadcrumb {
 		position: absolute;
-		top: 12px;
-		left: 50%;
-		transform: translateX(-50%);
+		top: 16px;
+		left: 16px;
 		z-index: 30;
 		display: flex;
-		align-items: center;
-		gap: 12px;
-		background: rgba(15, 18, 25, 0.92);
-		backdrop-filter: blur(10px);
-		border: 1px solid var(--color-dl-border);
-		border-radius: 10px;
-		padding: 8px 14px;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+		align-items: stretch;
+		background: rgba(5, 8, 17, 0.75);
+		backdrop-filter: blur(16px) saturate(1.4);
+		-webkit-backdrop-filter: blur(16px) saturate(1.4);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		border-radius: 14px;
+		padding: 0;
+		box-shadow:
+			0 1px 0 rgba(255, 255, 255, 0.04) inset,
+			0 12px 32px -8px rgba(0, 0, 0, 0.6);
+		overflow: hidden;
+		animation: db-fade-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+	}
+	@keyframes db-fade-in {
+		0% { opacity: 0; transform: translateY(-4px); }
+		100% { opacity: 1; transform: translateY(0); }
 	}
 	.db-back {
 		display: flex;
 		align-items: center;
-		gap: 6px;
+		gap: 8px;
 		background: transparent;
-		border: 1px solid var(--color-dl-border);
-		color: var(--color-dl-text-muted);
-		padding: 4px 10px 4px 8px;
-		border-radius: 6px;
+		border: none;
+		border-right: 1px solid rgba(255, 255, 255, 0.05);
+		color: rgba(203, 213, 225, 0.7);
+		padding: 12px 16px;
 		cursor: pointer;
-		font-size: 12px;
+		font-family: var(--font-mono);
+		font-size: 11px;
 		font-weight: 500;
-		transition: all 0.15s;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		transition: color 180ms ease, background 180ms ease;
 	}
 	.db-back:hover {
-		border-color: var(--color-dl-primary);
 		color: var(--color-dl-primary-light);
-		background: rgba(234, 70, 71, 0.08);
+		background: linear-gradient(
+			90deg,
+			rgba(234, 70, 71, 0.12) 0%,
+			rgba(234, 70, 71, 0) 100%
+		);
+	}
+	.db-back svg {
+		transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+	}
+	.db-back:hover svg {
+		transform: translateX(-3px);
 	}
 	.db-divider {
-		color: var(--color-dl-text-dim);
-		font-size: 14px;
+		display: none;
 	}
 	.db-current {
 		display: flex;
 		flex-direction: column;
-		line-height: 1.1;
+		justify-content: center;
+		padding: 10px 18px 10px 16px;
+		position: relative;
+		min-width: 160px;
+	}
+	/* 좌측에 산업 컬러 엑센트 바 */
+	.db-current::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 20%;
+		bottom: 20%;
+		width: 2px;
+		background: currentColor;
+		opacity: 0.7;
+		border-radius: 2px;
 	}
 	.db-name {
-		font-size: 15px;
+		color: inherit;
+		font-size: 16px;
 		font-weight: 700;
+		letter-spacing: -0.01em;
+		line-height: 1.1;
+		font-family: 'Pretendard Variable', sans-serif;
 	}
 	.db-meta {
-		font-size: 11px;
-		color: var(--color-dl-text-dim);
-		margin-top: 2px;
+		font-family: var(--font-mono);
+		font-size: 10px;
+		color: rgba(148, 163, 184, 0.75);
+		margin-top: 4px;
+		letter-spacing: 0.04em;
+		font-weight: 500;
 	}
 
 	.shock-overlay {

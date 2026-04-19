@@ -306,7 +306,10 @@
 	});
 
 	$effect(() => {
-		// 프롭 배열이 매 렌더마다 새 참조라도 내용이 같으면 재빌드 안 함
+		// 의존성 명시 — timelineYear 변경 시 재빌드
+		void timelineYear;
+		void industries;
+		void flows;
 		if (!container) return;
 		const sig = dataSignature();
 		if (sig !== builtSignature) {
