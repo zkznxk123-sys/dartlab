@@ -3,7 +3,7 @@ name: Industry Map Build
 # ──────────────────────────────────────────────────────────────
 # scan 프리빌드 완료 후 산업지도 JSON 전체 재생성.
 # ecosystem.json + companies/*.json + industryStats.json 등
-# landing/static/map/ 에 커밋.
+# landing/static/map/ 변경분을 PR 로 제출 → auto-merge(rebase).
 # ──────────────────────────────────────────────────────────────
 
 on:
@@ -18,6 +18,7 @@ concurrency:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   build-map:
@@ -44,21 +45,57 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
-      - name: Check for changes
-        id: changes
+      - name: Validate map output
         run: |
-          git add landing/static/map/
-          if git diff --cached --quiet; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "$(git diff --cached --stat)"
+          set -euo pipefail
+          count=$(find landing/static/map/companies -maxdepth 1 -name '*.json' | wc -l)
+          if [ "$count" -lt 2000 ]; then
+            echo "ERROR: companies JSON 개수 $count < 2000 (하한 미달)"
+            exit 1
           fi
+          for f in atlas.json ecosystem.json meta.json; do
+            path="landing/static/map/$f"
+            if [ ! -f "$path" ]; then
+              echo "ERROR: $path 없음"
+              exit 1
+            fi
+            if ! jq empty "$path" >/dev/null 2>&1; then
+              echo "ERROR: $path JSON 파싱 실패"
+              exit 1
+            fi
+          done
+          atlas_size=$(stat -c%s landing/static/map/atlas.json)
+          if [ "$atlas_size" -lt 1024 ]; then
+            echo "ERROR: atlas.json 크기 $atlas_size < 1024 바이트"
+            exit 1
+          fi
+          changed=$(git status --short landing/static/map/ | wc -l)
+          if [ "$changed" -gt 5000 ]; then
+            echo "ERROR: 변경 파일 $changed > 5000 (폭주 의심)"
+            exit 1
+          fi
+          echo "validation OK: companies=$count atlas=${atlas_size}B changed=$changed"
 
-      - name: Commit & push map data
-        if: steps.changes.outputs.changed == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(map): auto-rebuild industry map data [skip ci]"
-          git push
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(map): auto-rebuild industry map data"
+          branch: auto/map-rebuild
+          delete-branch: true
+          title: "chore(map): auto-rebuild industry map data"
+          body: |
+            scan 프리빌드 완료 후 산업지도 JSON 재빌드. validation PASS.
+
+            - companies/*.json ≥ 2000
+            - atlas/ecosystem/meta.json 존재 + JSON 유효
+            - 변경 파일 ≤ 5000 (폭주 방지)
+          labels: automated, map-build
+          add-paths: landing/static/map
+
+      - name: Enable auto-merge (rebase)
+        if: steps.cpr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge --rebase --auto --delete-branch "${{ steps.cpr.outputs.pull-request-number }}"
