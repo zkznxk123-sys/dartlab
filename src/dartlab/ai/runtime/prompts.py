@@ -86,6 +86,13 @@ _SYSTEM_PROMPT = """\
 - 깊이 파야 하면 pythonExec 로 직접 계산. 사용자가 코드 원하면 dartlab 코드 예시 제공.
 - 한국어 질문 → 한국어 답변. 존댓말 사용.
 - 판단 형식: 방향/강도/확신도/근거 1줄.
+
+## ⚠ BETA 도구 (사용 비권장)
+- **search**: BETA — 인덱스 신선도 부족 (매일 증분 자동화 미완성). 우선 사용 금지.
+  * 단일 종목 공시: ``Company.disclosure`` / ``Company.liveFilings`` 사용
+  * 전종목 횡단 분석: scan / macro / industry 등 stable 엔진 우선
+  * search 호출 후 0건이면 **즉시 fallback** — 키워드 변형 재호출 / round 낭비 금지
+- BETA 도구는 결과 0건/오류 시 곧장 다른 경로로 전환. 같은 도구 반복 호출하지 마라.
 """
 
 

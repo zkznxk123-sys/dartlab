@@ -11,6 +11,7 @@ import functools
 import gc
 import logging
 import os
+import time
 from collections import OrderedDict
 from typing import Any, Callable, TypeVar
 
@@ -23,6 +24,7 @@ log = logging.getLogger(__name__)
 PRESSURE_WARNING_MB = 800.0  # 경고: 캐시 절반 축소
 PRESSURE_CRITICAL_MB = 1500.0  # 위험: 캐시 1/4 축소 + GC
 PRESSURE_FATAL_MB = 1900.0  # 치명: 캐시 전체 비우기 + GC
+PRESSURE_EMERGENCY_MB = 3500.0  # 응급: pinned 까지 비우기 + polars string cache 회수
 
 
 def get_memory_mb() -> float:
@@ -155,7 +157,17 @@ class BoundedCache:
     ⚠ pressure_mb 기본값 800MB — Polars Company 2개 수준에서 이미 경고.
     """
 
-    __slots__ = ("_store", "_max", "_default_max", "_pressure_mb", "_put_count", "_lock", "_pinned_prefixes")
+    __slots__ = (
+        "_store",
+        "_max",
+        "_default_max",
+        "_pressure_mb",
+        "_put_count",
+        "_lock",
+        "_pinned_prefixes",
+        "_critical_prefixes",
+        "_emergency_at",
+    )
 
     def __init__(self, max_entries: int = 30, pressure_mb: float = 800.0):
         import threading
@@ -166,17 +178,24 @@ class BoundedCache:
         self._pressure_mb = pressure_mb
         self._put_count = 0
         self._lock = threading.RLock()
-        # pinned: 이 prefix로 시작하는 키는 evict하지 않음 (외부 API + 무거운 계산 결과 보호)
-        # review에서 여러 calc가 공유하는 핵심 캐시. 작은 dict이고 재로드 비용 큼.
-        self._pinned_prefixes: tuple[str, ...] = (
-            # Accessor (dualAccess wrapper — 재생성 로직이 없음, 반드시 보호)
-            # Phase 4 G11: 대형 기업 (한국전력 등) 에서 메모리 압박 시
-            # _check_pressure() 가 accessor 까지 삭제 → 다음 select/show 에서 KeyError
+        self._emergency_at = 0.0  # EMERGENCY 발생 시각 — cool-down 용
+        # critical: EMERGENCY에서도 절대 비우면 안 되는 키 (재생성 로직 없음 → KeyError).
+        # 다른 pinned는 재로드 비용 크지만 가능. critical은 비우면 후속 호출 즉시 실패.
+        # _pinned_prefixes 의 "Accessor" 그룹과 동기화 — pinned 의 첫 5 entries.
+        self._critical_prefixes: tuple[str, ...] = (
             "_showAccessor",
             "_selectAccessor",
             "_reviewAccessor",
             "_creditAccessor",
             "_analysisAccessor",
+        )
+        # pinned: 이 prefix로 시작하는 키는 evict하지 않음 (외부 API + 무거운 계산 결과 보호)
+        # review에서 여러 calc가 공유하는 핵심 캐시. 작은 dict이고 재로드 비용 큼.
+        self._pinned_prefixes: tuple[str, ...] = (
+            # Accessor (dualAccess wrapper — 재생성 로직이 없음, 반드시 보호) = critical
+            # Phase 4 G11: 대형 기업 (한국전력 등) 에서 메모리 압박 시
+            # _check_pressure() 가 accessor 까지 삭제 → 다음 select/show 에서 KeyError
+            *self._critical_prefixes,
             # 외부 API / 데이터 로드
             "_quant_ohlcv",
             "_quant_benchmark",
@@ -230,8 +249,10 @@ class BoundedCache:
                 return
             self._store[key] = value
             self._put_count += 1
-            if self._put_count % 5 == 0:
-                self._check_pressure()
+            # 매 put마다 압박 체크 — get_memory_mb는 ~µs 수준의 OS API라 overhead 무시 가능.
+            # 이전 5번에 1번 체크는 burst write 중 8GB까지 폭증하는 케이스 못 잡음.
+            # just_set_key 전달 — EMERGENCY 시 방금 넣은 key 가 clear 되어 직후 read 가 KeyError 나는 race 방지.
+            self._check_pressure(just_set_key=key)
             # LRU evict — pinned 키는 건너뜀
             while len(self._store) > self._max:
                 # 가장 오래된 unpinned 키 찾기
@@ -248,10 +269,36 @@ class BoundedCache:
         with self._lock:
             return len(self._store)
 
-    def _check_pressure(self) -> None:
+    def _check_pressure(self, just_set_key: str | None = None) -> None:
         # caller already holds _lock (called from __setitem__)
         mem = get_memory_mb()
         if mem <= 0:
+            return
+        if mem > PRESSURE_EMERGENCY_MB:
+            # 응급: critical accessor + 방금 set 한 키만 보존하고 나머지 전부 비움.
+            # 직전 EMERGENCY 후 1초 이내면 skip (반복 호출 방지 — gc 가 회수할 시간 필요).
+            # 5초는 너무 길어 burst write 중 9GB 까지 폭증. 1초로 단축.
+            now = time.monotonic()
+            if now - self._emergency_at < 1.0:
+                return
+            self._emergency_at = now
+            log.warning(
+                "[BoundedCache] EMERGENCY: %.0fMB — clearing all except critical accessors + polars cache",
+                mem,
+            )
+            for k in list(self._store.keys()):
+                if k == just_set_key:
+                    continue  # 방금 set 한 키는 보존 — 직후 read race 방지
+                if not any(k.startswith(p) for p in self._critical_prefixes):
+                    del self._store[k]
+            self._max = max(self._default_max // 8, 1)
+            try:
+                import polars as pl
+
+                pl.disable_string_cache()
+            except (ImportError, AttributeError):
+                pass
+            gc.collect()
             return
         if mem > PRESSURE_FATAL_MB:
             # 치명: pinned 제외 모두 비우기

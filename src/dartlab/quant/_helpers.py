@@ -369,22 +369,42 @@ def _parse_amount(val) -> float | None:
 
 
 def extract_account(df, key: str) -> float | None:
-    """DART finance.parquet의 단일 종목/단일 기간 DataFrame에서 표준 계정 추출.
+    """단일 종목/단일 기간 DataFrame에서 표준 계정 추출 — DART/EDGAR 자동 분기.
 
     Args:
-        df: pl.DataFrame — sj_div, account_nm, thstrm_amount 컬럼 보유
+        df: pl.DataFrame — DART (sj_div/account_nm/thstrm_amount) 또는 EDGAR (직접 컬럼).
         key: 표준 키 ("sales", "operating_profit", "net_income", "total_assets", ...)
 
     Returns:
-        float 또는 None. 우선순위 패턴 순회하며 첫 매치 사용.
+        float 또는 None. DART: 패턴 매칭. EDGAR: 직접 컬럼 + ACCOUNT_MAP 매핑.
     """
     import polars as pl
+
+    if df is None or df.is_empty():
+        return None
+
+    # EDGAR 스키마 — fy 컬럼 + sj_div 없음 → 직접 컬럼 read
+    if "fy" in df.columns and "sj_div" not in df.columns:
+        from dartlab.core.finance.scanBridge import ACCOUNT_MAP
+
+        # key 가 EDGAR snake_case 면 그대로, 한글이면 매핑
+        col = ACCOUNT_MAP.get(key, key)
+        # net_income 별칭 처리 (EDGAR 컬럼명은 net_profit)
+        if col == "net_income" and "net_profit" in df.columns:
+            col = "net_profit"
+        if col == "total_equity" and "total_stockholders_equity" in df.columns:
+            col = "total_stockholders_equity"
+        if col not in df.columns:
+            return None
+        try:
+            v = df[col][0]
+            return float(v) if v is not None else None
+        except (ValueError, TypeError, IndexError):
+            return None
 
     patterns = _ACCOUNT_PATTERNS.get(key)
     sj_list = _ACCOUNT_SJ.get(key)
     if patterns is None or sj_list is None:
-        return None
-    if df is None or df.is_empty():
         return None
 
     for sj in sj_list:

@@ -111,6 +111,18 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
     # CIK → SIC 매핑 (meta/sub/*.parquet 전분기 병합, 최신 filed 우선)
     sicMap = _buildCikToSicMap()
 
+    # CIK → ticker 매핑 (universe 기준) — stockCode 컬럼을 user-facing ticker 로 저장하기 위함.
+    # 다운스트림 소비자(quant/AI)는 ticker 만 사용한다. CIK 는 내부 SEC 식별자.
+    try:
+        from dartlab.core.dataLoader import loadEdgarListedUniverse
+
+        _univ = loadEdgarListedUniverse()
+        cikToTicker: dict[str, str] = {
+            str(c).zfill(10): t for c, t in zip(_univ["cik"].to_list(), _univ["ticker"].to_list()) if t
+        }
+    except (OSError, ValueError, KeyError):
+        cikToTicker = {}
+
     batchFiles: list[Path] = []
     records: list[dict] = []
 
@@ -150,8 +162,11 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
                 continue
 
             # snakeId 매핑 → 값 추출. end 가 최대인 값(해당 fy 결산일) 우선.
+            # stockCode 는 ticker 우선 (AI/quant user-facing), universe 에 없으면 CIK fallback.
+            ticker = cikToTicker.get(cik, cik)
             record: dict = {
-                "stockCode": cik,
+                "stockCode": ticker,
+                "cik": cik,
                 "corpName": entityName,
                 "fy": int(latestFy),
                 "sic": sicMap.get(cik),

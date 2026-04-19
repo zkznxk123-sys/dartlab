@@ -18,7 +18,7 @@
 | `config` | module | dartlab 전역 설정. |
 | `ask` | function | AI 에게 질문. AI 가 모든 엔진(analysis/scan/macro/credit/gather/search)을 tool 로 다룬다. |
 | `setup` | function | AI provider 설정 안내 + 인터랙티브 설정. |
-| `search` | function | 공시 검색. *(alpha)* |
+| `search` | function | 공시 검색. **⚠ BETA — AI 사용 비권장**. |
 | `listing` | function | 목록 조회 단일 진입점. |
 | `collect` | function | 지정 종목 DART 데이터 수집 (OpenAPI). |
 | `collectAll` | function | 전체 상장종목 DART 데이터 일괄 수집. |
@@ -105,10 +105,11 @@ llm.configure: 프로그래밍 방식 provider 설정
 종목/기간 필터 지원
 DART 공시 뷰어 링크 포함 (dartUrl 컬럼)
 **Requires:** 데이터: stemIndex (scope=title) + contentIndex (scope=content)
-**AIContext:** 공시를 찾을 때 사용. 공시 유형명으로 찾으면 제목 검색, 내용으로 찾으면 본문 검색.
-scope 지정 없이 자동 판별.
-**Guide:** "유상증자 한 회사?" -> search("유상증자")
-"반도체 투자 트렌드?" -> search("반도체 HBM 투자")
+**AIContext:** BETA — 우선 사용 비권장. 단일 종목 공시는 Company.disclosure/liveFilings 우선.
+search 호출 후 0건이면 즉시 fallback (재호출/키워드 변형 round 낭비 금지).
+**Guide:** "유상증자 한 회사?" -> search("유상증자") [BETA, 0건이면 stop]
+"반도체 투자 트렌드?" -> search("반도체 HBM 투자") [BETA, 0건이면 stop]
+"삼성전자 최근 공시" -> Company("005930").disclosure() (search 아님)
 **SeeAlso:** Company: 종목코드/회사명으로 Company 생성
 listing: 전체 상장법인 목록
 
@@ -416,14 +417,14 @@ dartlab.scan.topics()                   # 가용 축 목록
 
 | 축 | 한글 | 설명 | target 필수 |
 |----|------|------|------------|
-| `price` | 주가 | OHLCV 시계열 (기본 1년) — Naver/Yahoo/FMP fallback | O |
-| `flow` | 수급 | 외국인/기관 매매 동향 (KR 전용) | O |
-| `macro` | 거시지표 | ECOS(KR 12개) / FRED(US 25개) 거시 시계열 | - |
-| `news` | 뉴스 | Google News RSS — 최근 30일 | O |
-| `sector` | 업종 | 업종 분류 — KR(KIND+Naver) / US(Yahoo) | O |
-| `insider` | 내부자거래 | 임원/주요주주 주식 거래 — KR(DART) / US(Yahoo) | O |
-| `ownership` | 지분 | 기관/외국인 보유 현황 | O |
-| `peers` | 피어 | 같은 업종 내 피어 종목 목록 (시총 포함) | O |
+| `price` | 주가 | OHLCV 시계열 (수정주가). KR: 네이버 차트 API (최대 12년 일봉, API 키 불필요). US/해외: Yahoo v8 → 네이버 글로벌 자동 fallback. 시장 지수도 가능: gather('price', 'KOSPI') | O |
+| `flow` | 수급 | 외국인/기관 순매수 동향 (KR 전용, 네이버 금융). US는 미지원 → None | O |
+| `macro` | 거시지표 | KR: ECOS 한국은행 12개 지표 (API 키: ECOS_API_KEY). US: FRED 연준 25개 지표 (API 키: FRED_API_KEY). 지표 미지정 시 전체 반환. 단일 지표: gather('macro', 'CPI') | - |
+| `news` | 뉴스 | Google News RSS 최근 30일. API 키 불필요. 한글/영문 검색어 모두 지원 | O |
+| `sector` | 업종 | 업종 분류 + 동종업종 PER. KR: KRX KIND + 네이버 금융 | O |
+| `insider` | 내부자거래 | 임원/주요주주 주식 거래 내역. KR: DART API (API 키: DART_API_KEY) | O |
+| `ownership` | 지분 | 기관/외국인 보유 현황 (비율+주수). KR: 네이버 금융 | O |
+| `peers` | 피어 | 동종업종 피어 종목 목록 (종목코드+시총). KR: KRX/네이버 | O |
 
 **한글 별칭:**
 
@@ -492,7 +493,7 @@ DartCompany에서 동적 추출 (57개).
 | `currency` | property | 통화 코드 (DART 제공자는 항상 KRW). |
 | `debt` | method | 부채 구조 분석 (차입금, 부채비율, 만기 구조). |
 | `diff` | method | 기간간 텍스트 변경 비교. |
-| `disclosure` | method | OpenDART 전체 공시 목록 조회. |
+| `disclosure` | method | **[단일 종목 전용]** OpenDART 공시 목록 조회. **stockCode 필수**. |
 | `facts` | property | topic × period 형태의 통합 facts 테이블 (sections + finance + report merge). |
 | `filings` | method | 공시 문서 목록 + DART 뷰어 링크. |
 | `fiscalYearEnd` | property | 회계연도 종료 월-일 (한국 종목은 12-31 표준). |
@@ -652,14 +653,14 @@ show: 특정 기간 원문 조회
 기간, 유형, 키워드 필터링
 최종보고서만 필터 (정정 이전 제외)
 **Requires:** API 키: DART_API_KEY
-**AIContext:** 특정 유형 공시 존재 여부 확인 → 분석 범위 동적 결정
-최근 공시 빈도/유형 패턴으로 기업 이벤트 감지
-**Guide:** "최근 공시 뭐 나왔어?" → c.disclosure(days=30)
-"주요사항 공시 있어?" → c.disclosure(type="B")
-"사업보고서 언제 나왔어?" → c.disclosure(keyword="사업보고서")
-**SeeAlso:** liveFilings: 실시간 최신 공시 (정규화된 포맷)
+**AIContext:** 특정 종목의 공시 빈도/유형 패턴 → 이벤트 감지
+단일 종목 분석 시 최근 공시 컨텍스트 보강용
+**Guide:** 단일 종목: "삼성전자 최근 공시 뭐 나왔어?" → c.disclosure(days=30)
+전종목: "최근 어떤 회사들이 자사주 매입했어?" → dartlab.search("자기주식 취득")
+**SeeAlso:** dartlab.search: **전종목 공시 검색 — 키워드 기반 (이 함수 대안)**
+liveFilings: 실시간 최신 공시 (정규화된 포맷, 단일 종목)
 readFiling: 공시 원문 텍스트 읽기
-filings: 로컬 보유 공시 목록
+filings: 로컬 보유 공시 목록 (단일 종목)
 
 #### Company.filings
 **Capabilities:** 로컬에 보유한 공시 문서 목록
@@ -1235,25 +1236,48 @@ SectorParams(discountRate: 'float' = 10.0, growthRate: 'float' = 3.0, perMultipl
 
 단일 종목의 랭크 정보.
 
+    Attributes
+    ----------
+    stockCode : str — 종목코드
+    corpName : str — 회사명
+    sector : str — 섹터
+    industryGroup : str — 산업군
+    revenue : float | None — 매출 TTM (원)
+    totalAssets : float | None — 총자산 (원)
+    revenueGrowth3Y : float | None — 매출 3년 성장률 (%)
+    revenueRank : int | None — 전체 매출 순위
+    revenueTotal : int — 매출 집계 종목 수
+    revenueRankInSector : int | None — 섹터 내 매출 순위
+    revenueSectorTotal : int — 섹터 내 종목 수
+    assetRank : int | None — 전체 자산 순위
+    assetTotal : int — 자산 집계 종목 수
+    assetRankInSector : int | None — 섹터 내 자산 순위
+    assetSectorTotal : int — 섹터 내 종목 수
+    growthRank : int | None — 전체 성장 순위
+    growthTotal : int — 성장 집계 종목 수
+    growthRankInSector : int | None — 섹터 내 성장 순위
+    growthSectorTotal : int — 섹터 내 종목 수
+    sizeClass : str — 규모 분류 (large/mid/small)
+
 | 필드 | 타입 | 기본값 |
 |------|------|--------|
 | `stockCode` | `str` |  |
 | `corpName` | `str` |  |
 | `sector` | `str` |  |
 | `industryGroup` | `str` |  |
-| `revenue` | `Optional` | None |
-| `totalAssets` | `Optional` | None |
-| `revenueGrowth3Y` | `Optional` | None |
-| `revenueRank` | `Optional` | None |
+| `revenue` | `float | None` | None |
+| `totalAssets` | `float | None` | None |
+| `revenueGrowth3Y` | `float | None` | None |
+| `revenueRank` | `int | None` | None |
 | `revenueTotal` | `int` | 0 |
-| `revenueRankInSector` | `Optional` | None |
+| `revenueRankInSector` | `int | None` | None |
 | `revenueSectorTotal` | `int` | 0 |
-| `assetRank` | `Optional` | None |
+| `assetRank` | `int | None` | None |
 | `assetTotal` | `int` | 0 |
-| `assetRankInSector` | `Optional` | None |
+| `assetRankInSector` | `int | None` | None |
 | `assetSectorTotal` | `int` | 0 |
-| `growthRank` | `Optional` | None |
+| `growthRank` | `int | None` | None |
 | `growthTotal` | `int` | 0 |
-| `growthRankInSector` | `Optional` | None |
+| `growthRankInSector` | `int | None` | None |
 | `growthSectorTotal` | `int` | 0 |
 | `sizeClass` | `str` |  |

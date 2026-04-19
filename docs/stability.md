@@ -24,7 +24,6 @@ Changes include a deprecation period with a migration guide.
 | `Company.docs` | Docs source namespace |
 | `Company.finance` | Financial statement time-series and statement namespace |
 | `Company.report` | Structured disclosure namespace (28 API types) |
-| `dartlab.search()` | Company search |
 | `dartlab.listing()` | Full listed company directory |
 | `Company.IS/BS/CF` | Authoritative statement shortcuts |
 | `Company.CIS` | Comprehensive income statement shortcut |
@@ -47,6 +46,7 @@ May change after a warning. Recorded in CHANGELOG.
 
 | API | Description |
 |-----|-------------|
+| `dartlab.search()` | DART filings ngram/BM25 search — index freshness limited (daily delta automation pending). For single-stock disclosures prefer `Company.disclosure` / `liveFilings`. |
 | `engines.edgar.finance.SCE` | Statement of Changes in Equity (BS delta + CF) |
 | `engines.edgar.finance.explore()` | XBRL Fact Explorer (tag-level history) |
 | `engines.edgar.finance.listTags()` | XBRL tag inventory |

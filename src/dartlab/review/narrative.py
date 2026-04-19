@@ -745,18 +745,21 @@ def buildCausalWeights(company, blockMap: dict) -> list[dict]:
     except (AttributeError, ValueError):
         return []
 
-    def _delta(seriesData, cat, key):
-        vals = seriesData.get(cat, {}).get(key, [])
-        valid = [v for v in vals if v is not None]
-        if len(valid) < 2:
-            return None
-        return valid[0] - valid[1]
-
     chains = []
+    # toSeriesDict 는 모든 카테고리를 "RATIO" 단일 키로 묶는다 (core/finance/ratios.py).
+    # 따라서 narrative.py 도 "RATIO" 단일 source 만 사용 — GROWTH/EFFICIENCY 등 별도 카테고리 lookup 금지.
+    ratio = data.get("RATIO", {})
+
+    def _seriesDelta(key: str) -> float | None:
+        vals = [v for v in ratio.get(key, []) if v is not None]
+        return (vals[0] - vals[1]) if len(vals) >= 2 else None
+
+    def _seriesLatest(key: str) -> float | None:
+        return next((v for v in ratio.get(key, []) if v is not None), None)
 
     # 1→2: 매출 성장 → 마진 변화 (operating leverage)
-    rev_yoy = _delta(data, "GROWTH", "revenueYoy")
-    opm_delta = _delta(data, "RATIO", "operatingMargin")
+    rev_yoy = _seriesDelta("revenueGrowth")
+    opm_delta = _seriesDelta("operatingMargin")
     if rev_yoy is not None and opm_delta is not None:
         w = abs(opm_delta / rev_yoy) if rev_yoy != 0 else 0
         chains.append(
@@ -772,13 +775,8 @@ def buildCausalWeights(company, blockMap: dict) -> list[dict]:
             }
         )
 
-    # 2→3: 마진 → FCF 전환
-    opm = _r("operatingMargin")
-    ocf_ni = None
-    ni = _r("netIncomeTTM")
-    ocf = _r("operatingCashflowTTM")
-    if ni and ni != 0 and ocf:
-        ocf_ni = ocf / ni
+    # 2→3: 마진 → FCF 전환 — 이미 계산된 RATIO.operatingCfToNetIncome 직접 사용
+    ocf_ni = _seriesLatest("operatingCfToNetIncome")
     if opm_delta is not None and ocf_ni is not None:
         chains.append(
             {
@@ -793,9 +791,9 @@ def buildCausalWeights(company, blockMap: dict) -> list[dict]:
             }
         )
 
-    # 3→4: 현금흐름 → 부채 변화
-    fcf = _r("fcf") or _r("fcfTTM")
-    dr_delta = _delta(data, "RATIO", "debtRatio")
+    # 3→4: 현금흐름 → 부채 변화 — RATIO.fcf 시리즈 latest 사용 (시리즈 없으면 attribute fallback)
+    fcf = _seriesLatest("fcf") or _r("fcf") or _r("fcfTTM")
+    dr_delta = _seriesDelta("debtRatio")
     if fcf is not None and dr_delta is not None:
         chains.append(
             {
@@ -811,8 +809,8 @@ def buildCausalWeights(company, blockMap: dict) -> list[dict]:
         )
 
     # 4→5: 부채 → 재투자
-    roic = _r("roic")
-    roic_delta = _delta(data, "RATIO", "roic") if data.get("RATIO", {}).get("roic") else None
+    roic = _seriesLatest("roic") or _r("roic")
+    roic_delta = _seriesDelta("roic")
     if dr_delta is not None and roic_delta is not None:
         chains.append(
             {
@@ -827,8 +825,13 @@ def buildCausalWeights(company, blockMap: dict) -> list[dict]:
             }
         )
 
-    # 5→6: ROIC → 가치 함의
-    wacc_est = _r("waccEstimate")
+    # 5→6: ROIC → 가치 함의 — WACC 는 시장 모델 (ratios 영역 아님) 이므로 analysis._estimateWacc 직접 호출
+    try:
+        from dartlab.analysis.financial.investmentAnalysis import _estimateWacc
+
+        wacc_est = _estimateWacc(company)
+    except (ImportError, AttributeError, ValueError):
+        wacc_est = None
     if roic is not None and wacc_est:
         spread = roic - wacc_est
         chains.append(

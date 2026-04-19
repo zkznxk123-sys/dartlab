@@ -76,12 +76,12 @@ CATALOG: dict[str, list[CatalogEntry]] = {
             "IR14270", "금 가격", "markets", "Daily", "U.S. Dollars per Troy Ounce", "런던 금 현물 (오전)"
         ),
         CatalogEntry(
-            "WILL5000PRFC",
-            "Wilshire 5000 시가총액",
+            "WILL5000IND",
+            "Wilshire 5000 지수",
             "markets",
-            "Quarterly",
-            "Billions of Dollars",
-            "Wilshire 5000 전체 시가총액 (Buffett Indicator용)",
+            "Daily",
+            "Index",
+            "Wilshire 5000 Total Market Full Cap 지수 (WILL5000PRFC 폐기 후 대체)",
         ),
         CatalogEntry(
             "CBBTCUSD",

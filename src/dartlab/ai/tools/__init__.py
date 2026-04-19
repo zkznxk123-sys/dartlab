@@ -49,6 +49,8 @@ _BLACKLIST: set[str] = {
     # 유틸 (searchCompany 로 대체)
     "codeToName",
     "nameToCode",
+    # 종목코드→이름은 Company(stockCode).corpName 으로 이미 접근 가능 (AI 가 stockCode 없이 호출하면 실패)
+    "codeName",
     # listing = 카탈로그. AI 가 직접 쓸 일 없음
     "listing",
     # Company 내부 helper
@@ -519,8 +521,12 @@ def _scanPostProcess(df: Any, post: dict) -> Any:
             col = "종목코드" if "종목코드" in df.columns else "stockCode" if "stockCode" in df.columns else None
             if col:
                 df = df.filter(df[col] == stockCode)
-        if post.get("sortBy"):
-            df = df.sort(post["sortBy"], descending=post.get("descending", True), nulls_last=True)
+        sortBy = post.get("sortBy")
+        if sortBy:
+            # AI 가 실재하지 않는 컬럼명("이익품질" 등) 을 sortBy 로 보내는 케이스 — sort 스킵하고 df 반환.
+            # 도구 호출 자체를 실패시키면 AI 는 데이터 자체를 못 받음.
+            if hasattr(df, "columns") and sortBy in df.columns:
+                df = df.sort(sortBy, descending=post.get("descending", True), nulls_last=True)
         limit = post.get("limit", 20)
         if limit and limit > 0:
             df = df.head(limit)

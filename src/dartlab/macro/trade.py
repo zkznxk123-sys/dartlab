@@ -60,6 +60,16 @@ def _mom(series: list[float]) -> float | None:
     return series[-1] - series[-2]
 
 
+def _momPct(series: list[float]) -> float | None:
+    """최근 2개 값의 MoM 변화율 (%). 절대값 차이가 아닌 % 단위가 필요한 비교용."""
+    if len(series) < 2:
+        return None
+    prev = series[-2]
+    if prev == 0:
+        return None
+    return ((series[-1] - prev) / abs(prev)) * 100
+
+
 def _fetch_trade_data(market: str, as_of: str | None = None) -> dict[str, float | list | None]:
     """gather에서 교역/환율/유가 지표 수집.
 
@@ -240,9 +250,10 @@ def analyze_trade(*, market: str = "US", as_of: str | None = None, overrides: di
         cli_series = data.get("cli_series")
         us_retail = data.get("us_retail_series")
         if cli_series:
-            kr_cli_mom = _mom(cli_series)
+            # leadingIndexRelativeStrength 가 기대하는 단위는 % (전월대비). _mom 은 단순 차이값이라 단위 불일치 — _momPct 사용.
+            kr_cli_mom = _momPct(cli_series)
             # US LEI는 아직 구현 전이므로 US 소매판매 모멘텀으로 근사
-            us_mom = _mom(us_retail) if us_retail and len(us_retail) >= 2 else None
+            us_mom = _momPct(us_retail) if us_retail else None
             if kr_cli_mom is not None and us_mom is not None:
                 leading = leadingIndexRelativeStrength(us_mom, kr_cli_mom)
                 result["leadingRelativeStrength"] = {

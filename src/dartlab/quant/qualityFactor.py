@@ -123,7 +123,18 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     # 단일 종목 추출
     stock = snap_yr.filter(pl.col("stockCode") == stockCode)
     if stock.is_empty():
-        return {**result, "error": f"{yr} 데이터 없음"}
+        # 회계연도 비표준 종목 (예: NVDA fy=2026, 1월결산) — 해당 종목의 최신 fy 로 fallback.
+        company_years = (
+            snap.filter(pl.col("stockCode") == stockCode).select(year_col).unique().to_series().to_list()
+        )
+        if not company_years:
+            return {**result, "error": f"{stockCode} scan parquet 데이터 없음"}
+        yr = max(company_years)
+        snap_yr = snap.filter(pl.col(year_col) == yr)
+        stock = snap_yr.filter(pl.col("stockCode") == stockCode)
+        result["year"] = str(yr)
+        if stock.is_empty():
+            return {**result, "error": f"{yr} 데이터 없음"}
     sales = extract_account(stock, "sales")
     op = extract_account(stock, "operating_profit")
     ni = extract_account(stock, "net_income")

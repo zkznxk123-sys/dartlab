@@ -145,8 +145,9 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
 
         accrualRatio = (ni - ocf) / abs(ta)
         cfToNi = ocf / ni if ni != 0 else None
-        # cfToNi 극단값 cap: ±20 초과는 의미 없음 (분모 극소)
-        if cfToNi is not None and abs(cfToNi) > 20:
+        # cfToNi 극단값 cap: ±5 초과는 분모(NI) 극소 신호 — None 처리해야 AI 가 "우수"로 오판하지 않음.
+        # 일반 회사의 CF/NI 는 0.5~2배. 5배 이상은 일회성 이익/적자 직후 등 비정상.
+        if cfToNi is not None and abs(cfToNi) > 5:
             cfToNi = None
 
         rows.append(
@@ -226,8 +227,9 @@ def _scanPerFile() -> pl.DataFrame:
 
         accrualRatio = (ni - ocf) / abs(ta)
         cfToNi = ocf / ni if ni != 0 else None
-        # cfToNi 극단값 cap: ±20 초과는 의미 없음 (분모 극소)
-        if cfToNi is not None and abs(cfToNi) > 20:
+        # cfToNi 극단값 cap: ±5 초과는 분모(NI) 극소 신호 — None 처리해야 AI 가 "우수"로 오판하지 않음.
+        # 일반 회사의 CF/NI 는 0.5~2배. 5배 이상은 일회성 이익/적자 직후 등 비정상.
+        if cfToNi is not None and abs(cfToNi) > 5:
             cfToNi = None
 
         rows.append(
@@ -246,7 +248,29 @@ def _scanPerFile() -> pl.DataFrame:
 
 
 def scanQuality() -> pl.DataFrame:
-    """전종목 이익의 질 스캔 -- Accrual Ratio + CF/NI 비율 + 등급."""
+    """전종목 이익의 질 스캔 -- Accrual Ratio + CF/NI 비율 + 등급 (**KR 전용**).
+
+    AI 사용 가이드:
+        - **KR 종목 컨텍스트에서만**. US/글로벌 종목은 지원하지 않는다.
+        - 전종목 횡단분석. 단일 종목 이익품질 조사에는 ``Company.show("CF")`` 사용.
+        - ``sortBy`` 로 정렬할 때는 **한글 컬럼명 그대로** 전달
+          (예: ``"발생액비율"``, ``"CF/NI"``, ``"등급"``). ``"영업현금흐름/순이익"``, ``"earnings_quality"`` 같은 임의 이름 금지.
+
+    Returns
+    -------
+    pl.DataFrame
+        다음 컬럼을 가진 회사 단위 행:
+
+        - 종목코드 : str — 6자리 종목코드
+        - 종목명   : str — 회사명
+        - netIncome : float — 당기순이익 (원)
+        - operatingCf : float — 영업활동현금흐름 (원)
+        - totalAssets : float — 자산총계 (원)
+        - 발생액비율 : float — (netIncome - operatingCf) / totalAssets. 0에 가까울수록 이익이 현금으로 뒷받침
+        - CF/NI : float | None — operatingCf / netIncome (배). 1.0 이상이면 순이익 전부 현금 회수.
+          ``|x|>5`` 인 극단값은 분모(NI) 가 극소이므로 None 처리. ``CF/NI=None`` 이면 "이익품질 양호"로 해석 금지.
+        - 등급 : str — ``"우수"`` / ``"보통"`` / ``"주의"`` / ``"위험"``
+    """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"
     if scanPath.exists():

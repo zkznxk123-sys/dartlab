@@ -90,10 +90,17 @@ def search(
     topK: int = 10,
     scope: str = "auto",
 ):
-    """공시 검색. *(alpha)*
+    """공시 검색. **⚠ BETA — AI 사용 비권장**.
 
     제목형 쿼리와 본문형 쿼리를 자동 판별하여 검색.
     DART 공시 뷰어 링크(dartUrl) 포함.
+
+    ⚠ BETA 한계 (AI 사용 시 주의):
+        - **인덱스 신선도 부족**: 매일 증분 자동화 미완성. 최근 N일 데이터 누락 가능.
+        - **0건 반환 시 인덱스 stale 가능성**. round 낭비 금지 — 즉시 다른 경로로 전환.
+        - **AI 권장 대안**:
+            * 단일 종목 공시: ``Company(stockCode).disclosure()`` / ``.liveFilings()``
+            * 전종목 횡단: scan/macro 등 안정 엔진 우선 사용
 
     Capabilities:
         - 제목 검색: 공시 유형명/섹션 제목에서 매칭 ("유상증자", "대표이사 변경")
@@ -105,12 +112,13 @@ def search(
         데이터: stemIndex (scope=title) + contentIndex (scope=content)
 
     AIContext:
-        공시를 찾을 때 사용. 공시 유형명으로 찾으면 제목 검색, 내용으로 찾으면 본문 검색.
-        scope 지정 없이 자동 판별.
+        BETA — 우선 사용 비권장. 단일 종목 공시는 Company.disclosure/liveFilings 우선.
+        search 호출 후 0건이면 즉시 fallback (재호출/키워드 변형 round 낭비 금지).
 
     Guide:
-        - "유상증자 한 회사?" -> search("유상증자")
-        - "반도체 투자 트렌드?" -> search("반도체 HBM 투자")
+        - "유상증자 한 회사?" -> search("유상증자") [BETA, 0건이면 stop]
+        - "반도체 투자 트렌드?" -> search("반도체 HBM 투자") [BETA, 0건이면 stop]
+        - "삼성전자 최근 공시" -> Company("005930").disclosure() (search 아님)
 
     SeeAlso:
         - Company: 종목코드/회사명으로 Company 생성

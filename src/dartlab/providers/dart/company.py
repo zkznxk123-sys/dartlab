@@ -170,6 +170,20 @@ _TOPIC_ALIASES: dict[str, str] = {
     "stock": "stockTotal",
     "treasury": "treasuryStock",
     "summary": "fsSummary",
+    # 재무제표 약칭 — AI 가 흔히 시도하는 영문 lower-case
+    "cashflow": "CF",
+    "cashflows": "CF",
+    "cf": "CF",
+    "incomestatement": "IS",
+    "is": "IS",
+    "pl": "IS",
+    "profitloss": "IS",
+    "balancesheet": "BS",
+    "bs": "BS",
+    "comprehensiveincome": "CIS",
+    "cis": "CIS",
+    "equitychanges": "SCE",
+    "sce": "SCE",
 }
 
 _TOPIC_LABELS: dict[str, str] = {
@@ -680,7 +694,13 @@ class Company:
         keyword: str | None = None,
         finalOnly: bool = False,
     ) -> pl.DataFrame:
-        """OpenDART 전체 공시 목록 조회.
+        """**[단일 종목 전용]** OpenDART 공시 목록 조회. **stockCode 필수**.
+
+        ⚠ AI 사용 분기 — 절대 헷갈리지 마라:
+            - "**삼성전자** 최근 공시" → ``c.disclosure(stockCode="005930")`` ✅
+            - "**최근 자사주 매입 공시 낸 회사**" → ``dartlab.search("자사주 취득")`` (전종목 검색)
+            - "**전종목 정기공시 5건**" → ``dartlab.search("사업보고서")`` (전종목 검색)
+            - 전종목 검색에 disclosure 호출 금지. stockCode 없이는 실패한다.
 
         Capabilities:
             - 전체 공시유형 조회 (정기, 주요사항, 발행, 지분, 외부감사 등)
@@ -696,7 +716,7 @@ class Company:
             finalOnly: True면 최종보고서만 (정정 이전 제외).
 
         Returns:
-            pl.DataFrame -- docId, filedAt, title, formType 등 공시 목록.
+            pl.DataFrame -- docId, filedAt, title, formType 등 공시 목록 (이 종목 한정).
 
         Requires:
             API 키: DART_API_KEY
@@ -710,18 +730,18 @@ class Company:
             c.disclosure(keyword="사업보고서")
 
         AIContext:
-            - 특정 유형 공시 존재 여부 확인 → 분석 범위 동적 결정
-            - 최근 공시 빈도/유형 패턴으로 기업 이벤트 감지
+            - 특정 종목의 공시 빈도/유형 패턴 → 이벤트 감지
+            - 단일 종목 분석 시 최근 공시 컨텍스트 보강용
 
         Guide:
-            - "최근 공시 뭐 나왔어?" → c.disclosure(days=30)
-            - "주요사항 공시 있어?" → c.disclosure(type="B")
-            - "사업보고서 언제 나왔어?" → c.disclosure(keyword="사업보고서")
+            - 단일 종목: "삼성전자 최근 공시 뭐 나왔어?" → c.disclosure(days=30)
+            - 전종목: "최근 어떤 회사들이 자사주 매입했어?" → dartlab.search("자기주식 취득")
 
         SeeAlso:
-            - liveFilings: 실시간 최신 공시 (정규화된 포맷)
+            - dartlab.search: **전종목 공시 검색 — 키워드 기반 (이 함수 대안)**
+            - liveFilings: 실시간 최신 공시 (정규화된 포맷, 단일 종목)
             - readFiling: 공시 원문 텍스트 읽기
-            - filings: 로컬 보유 공시 목록
+            - filings: 로컬 보유 공시 목록 (단일 종목)
         """
         from dartlab.providers.dart.openapi.dart import Dart
 

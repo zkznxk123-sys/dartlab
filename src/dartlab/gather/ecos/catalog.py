@@ -542,12 +542,12 @@ def _build() -> None:
 
 
 def getEntry(indicatorId: str) -> CatalogEntry | None:
-    """지표 ID로 카탈로그 항목 조회.
+    """지표 ID 또는 한글 레이블로 카탈로그 항목 조회.
 
     Parameters
     ----------
     indicatorId : str
-        ECOS 카탈로그 지표 ID (예: "GDP", "CPI").
+        ECOS 카탈로그 지표 ID (예: "GDP", "CPI") 또는 한글 레이블 (예: "기준금리", "국고채(3년)").
 
     Returns
     -------
@@ -555,7 +555,14 @@ def getEntry(indicatorId: str) -> CatalogEntry | None:
         매칭된 카탈로그 엔트리. 없으면 None.
     """
     _build()
-    return _entries.get(indicatorId)
+    hit = _entries.get(indicatorId)
+    if hit is not None:
+        return hit
+    # 한글 레이블로도 매칭 (AI 가 "기준금리" 같은 레이블을 전달할 때)
+    for entry in _entries.values():
+        if entry.label == indicatorId:
+            return entry
+    return None
 
 
 def getGroups() -> list[str]:
