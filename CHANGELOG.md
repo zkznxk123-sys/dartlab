@@ -7,27 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.9.16] - 2026-04-19
+## [0.9.16] - 2026-04-20
 
 ### Fixed
 
-- **외부 사용자 첫 호출 크래시 해소**: `Company("005930").sections` 가 `AttributeError: NoneType has no columns` 로 크래시하던 문제 수정. 원인은 0.9.15 wheel 에 `core/data/parserMappings/` 디렉토리가 번들에서 누락되어 `loadSections()` 가 빈 dict 를 리턴, 섹션 파이프라인 전체가 silent-fail 한 것.
-- **`c.select("IS").render("html")` 기간 컬럼 누락**: Rich Console `width=120` 고정 때문에 60+ 기간 컬럼이 모두 잘려 `snakeId`, `항목` 두 메타 컬럼만 렌더되던 문제. 컬럼 수에 비례한 동적 width 로 전환.
-- **`c.facts` AttributeError**: `_profile_accessor` 가 `self._company.report` (존재하지 않음) 를 참조. `_report` 로 수정.
-- **`c.sections` silent-None 가드**: `_SectionsSource.raw` 가 None 일 때 명시적 None 리턴 (과거 `.columns` 크래시 경로 차단).
+- **`Company.sections` 접근 안정화**: `_SectionsSource.raw` 가 None 일 때 `.columns` 속성 접근으로 이어지지 않도록 명시적 가드 추가. 데이터가 비어있는 경우 None 을 그대로 반환.
+- **`c.select(...).render("html")` 기간 컬럼 표시**: HTML 렌더의 Console width 를 고정값(120) 대신 컬럼 수에 비례해 동적으로 계산. 기간 컬럼이 많은 재무제표에서도 모든 컬럼이 표시됨.
+- **`c.facts` 속성 참조 수정**: `_profile_accessor` 에서 내부 `_report` 대신 존재하지 않는 `report` 를 참조하던 부분 교정.
 
 ### Changed
 
-- **Silent `{}` → loud `FileNotFoundError` 전환** (4 로더): `parserMapper._loadRequired`, `core/finance/labels`, `dart/docs/sections/mapper`, `edgar/docs/sections/mapper`, `edinet/docs/sections/mapper`. 번들 리소스 누락 시 복구 명령 포함한 명확한 예외를 최상위 함수에서 즉시 발생.
+- **필수 매핑 JSON 로더 — 조용한 `{}` 대신 명시적 예외**: `parserMapper.loadSections/loadAffiliate/loadCostByNature`, `core/finance/labels._load_account_mappings`, `dart/edgar/edinet` 의 `sections/mapper.loadSectionMappings` 총 5개 로더가 번들 파일 부재 시 `FileNotFoundError` 와 함께 복구 명령(`pip install -U --force-reinstall dartlab`) 을 포함한 메시지를 발생. 기존에는 빈 dict 반환으로 상위 파이프라인이 원인 불명의 동작을 했음.
 
 ### Added
 
-- **`tests/test_bundledResources.py`**: 24 unit 테스트 — 필수 JSON/parquet 존재 + 런타임 로더 계약 (`chapterByMajor` non-empty, `chapterFromMajorNum(1~9)` non-None 등) 검증. PR 마다 CI 실행 (2.6초).
-- **`tests/realData/` 스위트**: 엔진별 공개 API 전수 스모크. Company 59 속성 + analysis 22 axes + scan 20 axes + credit 7 axes + macro 12 axes + gather 8 axes + topLevel 30+ 심볼 parametrize. None/빈 결과/크래시 즉시 실패.
-- **`scripts/build/testWheelSmoke.sh`**: 격리 venv 에 wheel 설치 후 번들 리소스 + `sections.chapterByMajor` 런타임 검증. `publish.yml` 의 필수 게이트.
-- **`scripts/dev/test-realdata.sh`**: 파일별 독립 프로세스 runner (Polars 네이티브 메모리 격리).
-- **CI jobs**: `fixture-integration` (메모리 큰 fixture 테스트 분리), `realdata-suite` (84+ 엔진 전수), `wheel-smoke` (2026-04-19 사고 재발 차단 게이트). `publish.yml` 에 `wheel-smoke` 가 `build` 의 pre-requisite 로 wire.
-- **pytest 마커 2종**: `realData`, `freshInstall`.
+- **`tests/test_bundledResources.py`** (20 unit): 패키지에 포함돼야 하는 JSON/parquet 13건 존재 확인 + 핵심 키(`chapterByMajor`, `detailTopicMap`) 내용 계약 + 런타임 로더(`loadSections`, `loadAffiliate`, `loadCostByNature`, `chapterFromMajorNum(1~9)`) 반환값 검증. PR 마다 실행 (~3초).
+- **`tests/realData/` 스위트**: 엔진별 공개 API 를 parametrize 로 전수 iterate. Company 인스턴스 59 공개 속성, analysis 22 axis, scan 20 axis, credit 7 axis, macro 12 axis, gather 8 axis, 최상위 심볼 30+. 각 entry 가 독립 pytest 노드이므로 회귀 시 어떤 항목이 깨졌는지 즉시 특정.
+- **`scripts/build/testWheelSmoke.sh`**: 현재 소스로 wheel 빌드 → 격리 venv 에 설치 → 번들 리소스 존재 + `loadSections()["chapterByMajor"]` 런타임 비어있지 않음 검증. `publish.yml` 의 `build` 잡이 이 스크립트 통과에 의존하도록 wire — wheel 이 비어있는 상태로 PyPI 에 올라가지 않도록 차단.
+- **`scripts/dev/test-realdata.sh`**: realData 스위트를 파일별 독립 pytest 프로세스로 실행 (Polars 네이티브 메모리 격리 목적).
+- **CI 잡 3종**:
+  - `fixture-integration` — `test_fixture_*_real.py` 3건을 단일 worker 로 순차 실행 (메모리 격리)
+  - `realdata-suite` — realData 스위트 실행 (fixture 데이터 사용)
+  - `wheel-smoke` — 격리 venv wheel 설치 스모크
+- **pytest 마커 2종**: `realData` (엔진 공개 API 실데이터 스모크), `freshInstall` (cold 캐시 재현)
 
 ## [0.9.15] - 2026-04-18
 
