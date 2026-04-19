@@ -242,7 +242,7 @@
 		container.appendChild(canvas);
 
 		graph = new Graph(canvas, {
-			spaceSize: 4096,
+			spaceSize: 16384,
 			backgroundColor: '#050811',
 			nodeSize: (n: NodeDatum) => {
 				if (n.isIndustry) return Math.max(10, Math.min(40, n.size * 2));
