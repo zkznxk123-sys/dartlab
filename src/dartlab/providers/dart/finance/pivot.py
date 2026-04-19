@@ -362,11 +362,67 @@ def _buildPeriods(df: pl.DataFrame) -> list[str]:
     return [r[2] for r in result]
 
 
+# IFRS 표준 "상위 집계" 라인 — 해당 snakeId의 총합으로 간주할 수 있는 공식 IFRS 태그.
+# 한국 DART 공시에서 매출/원가/이익이 세분화 공시될 때 이 태그가 있으면 총합으로 채택.
+# (한미약품: 매출액은 제품매출+상품매출+임가공매출 세분화되지만 ifrs-full_Revenue 14,955억이 공식 총합)
+_IFRS_TOP_LEVEL_IDS = frozenset(
+    {
+        "ifrs-full_revenue",
+        "ifrs-full_costofsales",
+        "ifrs-full_grossprofit",
+        "ifrs-full_profitloss",
+        "ifrs-full_profitlossbeforetax",
+        "ifrs-full_profitlossfromoperatingactivities",
+        "ifrs-full_comprehensiveincome",
+        "ifrs-full_othercomprehensiveincome",
+        "ifrs-full_assets",
+        "ifrs-full_liabilities",
+        "ifrs-full_equity",
+        "ifrs-full_currentassets",
+        "ifrs-full_noncurrentassets",
+        "ifrs-full_currentliabilities",
+        "ifrs-full_noncurrentliabilities",
+    }
+)
+
+
+def _accountIdPriority(accountId: str) -> int:
+    """account_id 기반 우선순위. 낮을수록 우선 (덮어쓰기 대상).
+
+    한국 DART 공시에서 같은 기간에 같은 개념(예: '매출액')이 여러 라인으로
+    공시되는 경우 (한미약품: ifrs-full_Revenue 총합 + dart_RevenueFromSaleOfGoodsProduct
+    서브라인 등)를 해결하기 위한 우선순위.
+
+    - IFRS 상위 집계 라인 (``ifrs-full_Revenue`` 등 화이트리스트): 최우선 (priority 0)
+    - 그 외 ``ifrs-full_*`` (예: ``ifrs-full_OtherRevenue``): priority 1
+    - ``dart_*``: DART 사내 세분화 라인 → priority 2
+    - 그 외 / 빈 값: 최후순위 (priority 3)
+
+    Returns:
+            정수 우선순위 (낮을수록 먼저).
+    """
+    if not accountId:
+        return 3
+    lower = accountId.lower()
+    if lower in _IFRS_TOP_LEVEL_IDS:
+        return 0
+    if lower.startswith("ifrs-full_") or lower.startswith("ifrs_"):
+        return 1
+    if lower.startswith("dart_"):
+        return 2
+    return 3
+
+
 def _pivotToSeries(
     df: pl.DataFrame,
     periods: list[str],
 ) -> dict[str, dict[str, list[float | None]]]:
-    """DataFrame → {sjDiv: {snakeId: [값...]}} 피벗."""
+    """DataFrame → {sjDiv: {snakeId: [값...]}} 피벗.
+
+    같은 (sjDiv, snakeId, period) 슬롯에 여러 값이 들어올 경우 account_id
+    우선순위(IFRS 표준 > DART 사내 > 기타)로 선택. 사유는
+    ``_accountIdPriority`` docstring 참조.
+    """
     mapper = AccountMapper.get()
     periodIdx = {p: i for i, p in enumerate(periods)}
     nPeriods = len(periods)
@@ -376,6 +432,8 @@ def _pivotToSeries(
         "IS": {},
         "CF": {},
     }
+    # (sjDiv, snakeId, idx) → 현재 저장된 값의 우선순위
+    priorityTrack: dict[tuple[str, str, int], int] = {}
 
     totalRows = 0
     unmappedRows = 0
@@ -414,8 +472,17 @@ def _pivotToSeries(
         if snakeId not in target:
             target[snakeId] = [None] * nPeriods
 
+        priority = _accountIdPriority(accountId)
+        slotKey = (sjDiv, snakeId, idx)
+        existingPriority = priorityTrack.get(slotKey)
+
         if target[snakeId][idx] is None:
             target[snakeId][idx] = amount
+            priorityTrack[slotKey] = priority
+        elif existingPriority is None or priority < existingPriority:
+            # 더 우선순위 높은 account_id 발견 → 덮어쓰기
+            target[snakeId][idx] = amount
+            priorityTrack[slotKey] = priority
 
     if unmappedAccounts:
         _log.info(
