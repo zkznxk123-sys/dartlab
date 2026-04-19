@@ -93,7 +93,7 @@
 	// atlas: 34개 산업 노드 + 산업간 supplier flow (default)
 	// companies: 기존 ecosystem 전체 2,664사
 	// industry: 한 산업 내부 drill-down
-	type ViewMode = 'atlas' | 'treemap' | 'industry';
+	type ViewMode = 'atlas' | 'treemap' | 'companies' | 'industry';
 	let viewMode: ViewMode = $state('atlas');
 	let drillIndustry: string | null = $state(null);
 	// 업종 체력 카드 (atlas 뷰에서 업종 클릭 시)
@@ -945,24 +945,15 @@
 						<span class="hint">시장 전체 한눈에 (T)</span>
 					</span>
 				</button>
+				<!-- companies/industry 탭은 v12에서 숨김 (코드는 유지, 자동 드릴다운만) -->
+				<!-- hidden: 전 회사 뷰 -->
+				<!-- hidden: 산업 내부 — atlas에서 산업 클릭 시 자동 진입 -->
+				{#if false}
 				<button
 					class="view-tab"
 					class:active={viewMode === 'companies'}
 					onclick={() => switchView('companies')}
 				>
-					<span class="tab-icon">
-						<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-							<circle cx="5" cy="5" r="2" />
-							<circle cx="12" cy="5" r="2" />
-							<circle cx="19" cy="5" r="2" />
-							<circle cx="5" cy="12" r="2" />
-							<circle cx="12" cy="12" r="2" />
-							<circle cx="19" cy="12" r="2" />
-							<circle cx="5" cy="19" r="2" />
-							<circle cx="12" cy="19" r="2" />
-							<circle cx="19" cy="19" r="2" />
-						</svg>
-					</span>
 					<span class="tab-body">
 						<span class="tab-title">전 회사</span>
 						<span class="hint">2,664사 전체 그래프</span>
@@ -974,13 +965,6 @@
 					disabled={!drillIndustry}
 					onclick={() => drillIndustry && enterIndustry(drillIndustry)}
 				>
-					<span class="tab-icon">
-						<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-							<circle cx="11" cy="11" r="7" />
-							<path d="M21 21l-4.3-4.3" />
-							<path d="M11 8v6M8 11h6" />
-						</svg>
-					</span>
 					<span class="tab-body">
 						<span class="tab-title">산업 내부</span>
 						<span class="hint">
@@ -990,6 +974,7 @@
 						</span>
 					</span>
 				</button>
+				{/if}
 			</div>
 			<div class="external-links">
 				<a class="ext-link" href="{base}/map/screen">🔍 조건 검색 (스크리너)</a>
@@ -1216,8 +1201,23 @@
 				onSelect={(ind: any) => enterIndustry(ind.id)}
 				{colorMetric}
 				industryStats={(data as any).industryStats || {}}
+				timelineYear={selectedYear}
+				industryTotalsByYear={timelineIndustryTotals}
 			/>
 		{:else if viewMode === 'industry' && industryDetail}
+			<div class="drill-breadcrumb">
+				<button class="db-back" onclick={exitToAtlas} title="산업지도로 돌아가기">
+					<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M19 12H5M12 19l-7-7 7-7" />
+					</svg>
+					<span>산업지도</span>
+				</button>
+				<span class="db-divider">|</span>
+				<div class="db-current">
+					<span class="db-name" style:color={(drillIndustry && indColorMap.get(drillIndustry)) || '#fbbf24'}>{industryDetail.name}</span>
+					<span class="db-meta">{industryDetail.nodeCount}사{industryDetail.totalRevenue ? ` · ${(industryDetail.totalRevenue / 1e12).toFixed(1)}조` : ''}</span>
+				</div>
+			</div>
 			<IndustryDrilldown
 				nodes={industryNodes}
 				links={industryLinks.map((l: any) => ({ ...l }))}
@@ -2062,6 +2062,60 @@
 	}
 	.overlay-toggle input {
 		accent-color: var(--color-dl-primary);
+	}
+
+	.drill-breadcrumb {
+		position: absolute;
+		top: 12px;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 30;
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		background: rgba(15, 18, 25, 0.92);
+		backdrop-filter: blur(10px);
+		border: 1px solid var(--color-dl-border);
+		border-radius: 10px;
+		padding: 8px 14px;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+	}
+	.db-back {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		background: transparent;
+		border: 1px solid var(--color-dl-border);
+		color: var(--color-dl-text-muted);
+		padding: 4px 10px 4px 8px;
+		border-radius: 6px;
+		cursor: pointer;
+		font-size: 12px;
+		font-weight: 500;
+		transition: all 0.15s;
+	}
+	.db-back:hover {
+		border-color: var(--color-dl-primary);
+		color: var(--color-dl-primary-light);
+		background: rgba(234, 70, 71, 0.08);
+	}
+	.db-divider {
+		color: var(--color-dl-text-dim);
+		font-size: 14px;
+	}
+	.db-current {
+		display: flex;
+		flex-direction: column;
+		line-height: 1.1;
+	}
+	.db-name {
+		font-size: 15px;
+		font-weight: 700;
+	}
+	.db-meta {
+		font-size: 11px;
+		color: var(--color-dl-text-dim);
+		margin-top: 2px;
 	}
 
 	.shock-overlay {

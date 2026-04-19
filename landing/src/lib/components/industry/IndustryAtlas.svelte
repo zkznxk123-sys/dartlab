@@ -33,9 +33,20 @@
 		onSelect?: (ind: IndustryNode) => void;
 		colorMetric?: string;
 		industryStats?: Record<string, any>;
+		// 타임라인 — 선택 연도의 산업별 totalRevenue (원 단위)
+		timelineYear?: string;
+		industryTotalsByYear?: Record<string, Record<string, { totalRevenue: number; count: number; avgOpm: number | null }>>;
 	}
 
-	let { industries, flows, onSelect, colorMetric = 'industry', industryStats = {} }: Props = $props();
+	let {
+		industries,
+		flows,
+		onSelect,
+		colorMetric = 'industry',
+		industryStats = {},
+		timelineYear = '',
+		industryTotalsByYear = {}
+	}: Props = $props();
 
 	function metricLabel(ind: IndustryNode): string {
 		if (colorMetric === 'industry' || !industryStats) return '';
@@ -151,8 +162,25 @@
 	}
 
 	function radius(nodeCount: number): number {
-		// area ∝ nodeCount, min 18, max 90
 		return Math.max(18, Math.min(90, 9 + Math.sqrt(nodeCount) * 4.5));
+	}
+
+	// 산업별 표시용 revenue (timelineYear 있으면 해당 연도, 없으면 현재 revenue)
+	function effectiveRevenueOk(indId: string, fallbackRevOk: number): number {
+		if (timelineYear && industryTotalsByYear[timelineYear]) {
+			const t = industryTotalsByYear[timelineYear][indId];
+			if (t && t.totalRevenue) {
+				return t.totalRevenue / 1e8; // 원 → 억
+			}
+		}
+		return fallbackRevOk;
+	}
+
+	// 매출 기반 반지름 (타임라인 연동)
+	function radiusByRev(revOk: number): number {
+		// 억 단위 매출 → log 스케일
+		const val = Math.max(1, revOk);
+		return Math.max(18, Math.min(100, 8 + Math.log10(val) * 14));
 	}
 
 	function build() {
@@ -166,9 +194,13 @@
 		const R = Math.min(w, h) * 0.33;
 		simNodes = sorted.map((ind, i) => {
 			const theta = (i / sorted.length) * Math.PI * 2 - Math.PI / 2;
+			const revOk = effectiveRevenueOk(ind.id, ind.revenue || 0);
+			// 타임라인 모드면 매출 기반 반지름, 아니면 기존 nodeCount 기반
+			const r = timelineYear ? radiusByRev(revOk) : radius(ind.nodeCount);
 			return {
 				...ind,
-				r: radius(ind.nodeCount),
+				effectiveRevenue: revOk,
+				r,
 				x: w / 2 + R * Math.cos(theta),
 				y: h / 2 + R * Math.sin(theta)
 			};
@@ -232,7 +264,6 @@
 
 	let builtSignature = '';
 	function dataSignature(): string {
-		// 데이터 실제 변화 감지 (배열 참조가 아니라 내용 기준)
 		const indIds = industries
 			.map((i) => i.id)
 			.sort()
@@ -241,7 +272,8 @@
 			.map((f) => `${f.fromIndustry}>${f.toIndustry}:${f.edgeCount}`)
 			.sort()
 			.join(',');
-		return `${industries.length}|${indIds}|${flows.length}|${flowIds}`;
+		// timelineYear 포함 → 연도 변경 시 재빌드
+		return `${industries.length}|${indIds}|${flows.length}|${flowIds}|tl=${timelineYear}`;
 	}
 
 	onMount(() => {
