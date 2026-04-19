@@ -88,16 +88,17 @@ def seedCategory(cat: str, dataDir: Path) -> tuple[int, int, float]:
 
     api = HfApi(token=token)
 
-    # 1. HF 파일 목록 + size 조회 (resolver 1 request)
-    print(f"[seed] {cat}: list {HF_REPO}/{dirPath}/*.parquet", flush=True)
+    # 1. HF 파일 목록 + size 조회 (resolver 1 request).
+    # dirPath 하위 전부 (확장자 무관, 서브디렉토리 포함) — dart/* 는 parquet, landing/map 은 json.
+    print(f"[seed] {cat}: list {HF_REPO}/{dirPath}/", flush=True)
     repoInfo = api.repo_info(repo_id=HF_REPO, repo_type="dataset", files_metadata=True)
     remoteFiles: dict[str, int] = {}  # relpath -> size
     prefix = f"{dirPath}/"
     for sibling in repoInfo.siblings or []:
-        if sibling.rfilename.startswith(prefix) and sibling.rfilename.endswith(".parquet"):
+        if sibling.rfilename.startswith(prefix) and not sibling.rfilename.endswith("/"):
             remoteFiles[sibling.rfilename] = sibling.size or 0
 
-    print(f"[seed] {cat}: HF {len(remoteFiles)}개 parquet 발견", flush=True)
+    print(f"[seed] {cat}: HF {len(remoteFiles)}개 파일 발견", flush=True)
 
     # 2. 로컬 대조 — 파일 존재 + 크기 일치하면 스킵
     missing: list[tuple[str, int]] = []
@@ -138,8 +139,8 @@ def seedCategory(cat: str, dataDir: Path) -> tuple[int, int, float]:
                     print(f"[seed] {cat}: {done}/{len(missing)} ({mb:.1f}MB, {elapsed:.0f}s)", flush=True)
 
     localCat = dataDir / dirPath
-    localParquets = list(localCat.rglob("*.parquet"))
-    totalCount = len(localParquets)
+    localFiles = [p for p in localCat.rglob("*") if p.is_file()]
+    totalCount = len(localFiles)
     downloadedMb = downloadedBytes / 1024 / 1024
     print(f"[seed] {cat}: 로컬 {totalCount}개, 이번 신규 {len(missing)}개 / {downloadedMb:.1f}MB", flush=True)
     return totalCount, len(missing), downloadedMb

@@ -33,8 +33,8 @@ TODO.md
 /main.py
 /skills-lock.json
 /BROKEN_LINKS_REPORT.txt
-# Data
-data/
+# Data (repo-root 만 — src/dartlab/core/data/ 같은 패키지 번들 리소스는 제외하면 안 됨)
+/data/
 
 # Backup (파일 삭제 대신 이동)
 _backup/
@@ -60,6 +60,8 @@ ui/.svelte-kit/
 landing/build/
 landing/.svelte-kit/
 landing/static/blog/assets/
+# Industry map generated artifacts — HF SSoT. 빌드/로컬 dev 시 seedFromHf.py --category industryMap 로 내려받음.
+landing/static/map/
 
 # MkDocs build
 site/

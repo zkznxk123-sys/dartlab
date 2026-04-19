@@ -3,7 +3,8 @@ name: Industry Map Build
 # ──────────────────────────────────────────────────────────────
 # scan 프리빌드 완료 후 산업지도 JSON 전체 재생성.
 # ecosystem.json + companies/*.json + industryStats.json 등
-# landing/static/map/ 변경분을 PR 로 제출 → auto-merge(rebase).
+# 결과물은 HF dataset (eddmpython/dartlab-data/landing/map/) 에 업로드.
+# git master 에는 커밋하지 않음 — landing 빌드가 HF 에서 pull.
 # ──────────────────────────────────────────────────────────────
 
 on:
@@ -17,8 +18,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   build-map:
@@ -28,8 +28,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -40,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Build industry map (all companies)
+      - name: Build industry map (all companies) + HF upload
         run: uv run python -X utf8 scripts/build/buildIndustryMap.py --companies 0
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -69,33 +67,4 @@ jobs:
             echo "ERROR: atlas.json 크기 $atlas_size < 1024 바이트"
             exit 1
           fi
-          changed=$(git status --short landing/static/map/ | wc -l)
-          if [ "$changed" -gt 5000 ]; then
-            echo "ERROR: 변경 파일 $changed > 5000 (폭주 의심)"
-            exit 1
-          fi
-          echo "validation OK: companies=$count atlas=${atlas_size}B changed=$changed"
-
-      - name: Create pull request
-        id: cpr
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore(map): auto-rebuild industry map data"
-          branch: auto/map-rebuild
-          delete-branch: true
-          title: "chore(map): auto-rebuild industry map data"
-          body: |
-            scan 프리빌드 완료 후 산업지도 JSON 재빌드. validation PASS.
-
-            - companies/*.json ≥ 2000
-            - atlas/ecosystem/meta.json 존재 + JSON 유효
-            - 변경 파일 ≤ 5000 (폭주 방지)
-          labels: automated, map-build
-          add-paths: landing/static/map
-
-      - name: Enable auto-merge (rebase)
-        if: steps.cpr.outputs.pull-request-number
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr merge --rebase --auto --delete-branch "${{ steps.cpr.outputs.pull-request-number }}"
+          echo "validation OK: companies=$count atlas=${atlas_size}B"

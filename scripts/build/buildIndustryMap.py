@@ -1491,6 +1491,39 @@ def main() -> None:
 
     print(f"\n완료: {OUT_DIR}")
 
+    # HF 업로드 — HF_TOKEN 있을 때만. landing 빌드가 여기서 pull 해 가는 구조.
+    _uploadToHf()
+
+
+def _uploadToHf() -> None:
+    """생성된 map JSON 을 HF dataset 에 업로드 (SSoT). HF_TOKEN 없으면 스킵."""
+    import os
+
+    token = os.environ.get("HF_TOKEN", "")
+    if not token:
+        print("[map] HF_TOKEN 없음 → HF 업로드 스킵 (로컬 파일만 생성)")
+        return
+
+    from huggingface_hub import HfApi
+
+    from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
+
+    cfg = DATA_RELEASES["industryMap"]
+    dirPath = cfg["dir"]
+
+    fileCount = sum(1 for p in OUT_DIR.rglob("*") if p.is_file())
+    print(f"[map] HF 업로드: {fileCount}개 파일 → {HF_REPO}/{dirPath}/")
+
+    api = HfApi(token=token)
+    api.upload_folder(
+        repo_id=HF_REPO,
+        repo_type="dataset",
+        folder_path=str(OUT_DIR),
+        path_in_repo=dirPath,
+        commit_message=f"map: auto-rebuild {fileCount} files",
+    )
+    print("[map] HF 업로드 완료")
+
 
 def _buildMeta() -> dict:
     """meta.json — 빌드·데이터 신선도.

@@ -46,6 +46,12 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "SEC EDGAR 분기 벌크 메타 (sub/pre/tag)",
         "public": True,
     },
+    # ── generated artifact (landing 빌드 시 HF 에서 fetch) ──
+    "industryMap": {
+        "dir": "landing/map",
+        "label": "산업지도 JSON (landing/ SvelteKit 정적 asset)",
+        "public": True,
+    },
     # ── 내부용 (brand.ts 동기화 불필요) ──
     "edgarScan": {
         "dir": "edgar/scan",
