@@ -200,8 +200,10 @@ jobs:
           bash scripts/dev/test-realdata.sh tests/realData -m "realData" -v --tb=short
         continue-on-error: true
 
-  # Wheel packaging smoke — 2026-04-19 사고 (parserMappings 누락) 재발 방지 게이트.
-  # 격리 venv 에 wheel 설치 후 필수 번들 리소스 + sections 런타임 초기화 검증.
+  # Wheel packaging 게이트 — 2026-04-19 사고 (parserMappings 누락) 재발 방지.
+  # python -m build 로 실제 wheel 빌드 → 번들 리소스 zip 검증 → 격리 venv 설치 →
+  # loadSections() 런타임 체인 호출. publish.yml 의 "실제 PyPI 갈 wheel" 검증
+  # 단계와 로직이 동일. 차이점: CI 는 PR 마다 실행, publish.yml 은 tag push 시.
   wheel-smoke:
     runs-on: ubuntu-latest
     steps:

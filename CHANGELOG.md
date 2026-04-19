@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.17] - 2026-04-20
+
+### Fixed
+
+- **PyPI wheel 에 `src/dartlab/core/data/` 누락 재발 방지**: `.gitignore` 의 루트-미지정 `data/` 패턴이 `src/dartlab/core/data/` 까지 매치해 `python -m build` 가 해당 디렉토리를 wheel 에서 제외하던 문제. `.gitignore` 를 `/data/` 로 루트-스코프 제한하고, `pyproject.toml` 의 `[tool.hatch.build.targets.wheel]` 에 `include` 명시를 추가해 다중 방어.
+- **wheel-smoke 검증 대상과 publish wheel 일치**: 기존에는 wheel-smoke 가 별도로 빌드한 wheel 을 검증하고 publish 는 재빌드한 wheel 을 올려 둘이 달라질 수 있었음. `publish.yml` 의 `build` 잡이 `python -m build` 직후 생성된 wheel 의 zip 목록과 격리 venv 설치 런타임을 직접 검증하도록 변경.
+
+### Added
+
+- **`tests/test_wheelPackaging.py`** (6 테스트): `python -m build` 로 실제 wheel 을 빌드한 후 git-tracked 번들 리소스가 모두 zip 목록에 존재하는지 전수 대조. 핵심 JSON/parquet 개별 확인. 격리 venv 설치 후 `loadSections()` 런타임 체인까지 실행 (heavy 마커 — wheel-smoke job 에서 실행).
+- **`publish.yml` 내부 검증 단계 2종**: (1) 빌드 직후 wheel zip 에 필수 리소스 13건 포함 확인 (2) 격리 venv 에 방금 빌드된 wheel 설치 후 `loadSections()["chapterByMajor"]` 비어있지 않음 확인. 실패 시 PyPI 업로드 중단.
+
+### Changed
+
+- **`scripts/build/testWheelSmoke.sh` 빌드 도구 통일**: `uv build --wheel` → `python -m build` 로 변경해 publish.yml 과 동일 빌드 경로 사용. CI/publish 환경 간 wheel 차이 제거.
+
 ## [0.9.16] - 2026-04-20
 
 ### Fixed

@@ -28,9 +28,15 @@ trap 'rm -rf "$WORK_DIR"' EXIT
 echo "[wheel-smoke] 작업 디렉토리: $WORK_DIR"
 
 # 1. wheel 빌드 (지정 안 된 경우)
+# `python -m build` 를 사용 — publish.yml 과 동일한 빌드 경로로 맞춤.
+# 과거 사고 (2026-04-19): `uv build` 로 wheel-smoke 검증은 통과했으나
+# publish.yml 의 `python -m build` 가 다른 wheel 을 생산해 PyPI 에 깨진 wheel
+# 업로드. 이제 동일 도구로 빌드해서 CI/publish 불일치 제거.
 if [ -z "$WHEEL_PATH" ]; then
-    echo "[wheel-smoke] wheel 빌드 중..."
-    uv build --wheel --out-dir "$WORK_DIR/dist"
+    echo "[wheel-smoke] wheel 빌드 (python -m build)..."
+    pip install --quiet build 2>&1 | tail -1
+    mkdir -p "$WORK_DIR/dist"
+    python -m build --wheel --outdir "$WORK_DIR/dist" "$REPO_ROOT"
     WHEEL_PATH="$(ls "$WORK_DIR/dist"/*.whl | head -n 1)"
 fi
 
