@@ -263,7 +263,8 @@
 	}
 
 	let builtSignature = '';
-	function dataSignature(): string {
+	// $derived로 반응성 보장 — timelineYear 변경 시 자동 재계산
+	let currentSignature = $derived.by(() => {
 		const indIds = industries
 			.map((i) => i.id)
 			.sort()
@@ -272,13 +273,12 @@
 			.map((f) => `${f.fromIndustry}>${f.toIndustry}:${f.edgeCount}`)
 			.sort()
 			.join(',');
-		// timelineYear 포함 → 연도 변경 시 재빌드
 		return `${industries.length}|${indIds}|${flows.length}|${flowIds}|tl=${timelineYear}`;
-	}
+	});
 
 	onMount(() => {
 		build();
-		builtSignature = dataSignature();
+		builtSignature = currentSignature;
 		const ro = new ResizeObserver(() => {
 			if (!container) return;
 			const rect = container.getBoundingClientRect();
@@ -306,12 +306,9 @@
 	});
 
 	$effect(() => {
-		// 의존성 명시 — timelineYear 변경 시 재빌드
-		void timelineYear;
-		void industries;
-		void flows;
+		// $derived.by인 currentSignature를 읽어 반응성 추적
+		const sig = currentSignature;
 		if (!container) return;
-		const sig = dataSignature();
 		if (sig !== builtSignature) {
 			build();
 			builtSignature = sig;
