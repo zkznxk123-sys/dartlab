@@ -30,13 +30,22 @@ _SCALE = {
 
 
 def _loadCases() -> dict:
-    """JSON 로드 (pkg resources)."""
+    """Dalio detail case compendium 로드.
+
+    과거 사고 class (2026-04-19): 번들 리소스 누락 시 silent `{"cases": []}` →
+    consumer 가 "매칭 없음" 으로 처리 → 사용자에게 crisis 비교 엔진이 깨졌음을
+    알리지 않음. loud-fail 로 전환.
+    """
     try:
         with resources.files("dartlab.core.data").joinpath("dalioDetailCases.json").open("r", encoding="utf-8") as f:
             return json.load(f)
-    except (FileNotFoundError, OSError, json.JSONDecodeError) as e:
-        log.debug("dalioDetailCases.json 로드 실패: %s", e)
-        return {"cases": []}
+    except (FileNotFoundError, OSError) as e:
+        raise FileNotFoundError(
+            f"필수 번들 리소스 누락: dartlab/core/data/dalioDetailCases.json ({e})\n"
+            f"  → pip install -U --force-reinstall dartlab"
+        ) from e
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"dalioDetailCases.json 포맷 손상: {e}") from e
 
 
 def _vectorize(state: dict[str, Any]) -> list[float | None]:

@@ -113,57 +113,14 @@ jobs:
       - name: Build sdist and wheel
         run: python -m build
 
-      # PyPI 에 업로드될 "바로 그" wheel 을 검증. 로컬 별도 빌드와 격리 빌드가 다른
-      # 경우(.gitignore 영향 등)를 차단 — 2026-04-19 0.9.15/0.9.16 사고 직접 방어.
-      - name: Verify published wheel — bundled resources present
+      # PyPI 에 업로드될 "바로 그" wheel 을 검증.
+      # scripts/build/verifyWheel.py — ci.yml 의 wheel-smoke 잡과 공통 로직.
+      # 2026-04-19 사고 (wheel 간 drift) 재발 방지: 검증 코드 한 곳에만 있음.
+      - name: Verify published wheel (bundle + runtime)
         run: |
           set -euo pipefail
           WHL=$(ls dist/*.whl | head -n1)
-          echo "Validating wheel: $WHL"
-          python -X utf8 <<PY
-          import sys, zipfile
-          whl = r"""$WHL"""
-          with zipfile.ZipFile(whl) as z:
-              names = set(z.namelist())
-
-          # (1) 필수 번들 리소스 — 2026-04-19 사고 class 방어
-          required = [
-              "dartlab/core/data/parserMappings/sections.json",
-              "dartlab/core/data/parserMappings/affiliate.json",
-              "dartlab/core/data/parserMappings/costByNature.json",
-              "dartlab/core/data/parserMappings/sectorPriors.json",
-              "dartlab/core/data/accountMappings.json",
-              "dartlab/core/data/labelSupplements.json",
-              "dartlab/core/data/notesStructure.json",
-              "dartlab/providers/dart/docs/sections/mapperData/sectionMappings.json",
-              "dartlab/providers/dart/docs/sections/mapperData/tableMappings.json",
-              "dartlab/providers/dart/docs/sections/profileData/projectionRules.chapterII.json",
-              "dartlab/providers/dart/docs/sections/profileData/sectionProfileTable.parquet",
-              "dartlab/providers/edgar/docs/sections/mapperData/sectionMappings.json",
-              "dartlab/providers/edinet/docs/sections/mapperData/sectionMappings.json",
-          ]
-          missing = [r for r in required if r not in names]
-          if missing:
-              print("FAIL — PyPI 에 올라갈 wheel 에 필수 리소스 누락:")
-              for m in missing:
-                  print("  -", m)
-              sys.exit(1)
-          print(f"OK — {len(required)} 개 필수 리소스 모두 포함, wheel 총 {len(names)} 파일")
-          PY
-
-      # 격리 venv 에 방금 빌드된 wheel 을 설치해서 loadSections() 런타임 체인까지 검증
-      - name: Install built wheel into fresh venv and smoke-test runtime
-        run: |
-          set -euo pipefail
-          WHL=$(ls dist/*.whl | head -n1)
-          python -m venv /tmp/wheel-smoke-venv
-          /tmp/wheel-smoke-venv/bin/pip install --quiet "$WHL"
-          /tmp/wheel-smoke-venv/bin/python -X utf8 -c "
-          from dartlab.core.mappers.parserMapper import loadSections
-          s = loadSections()
-          assert s.get('chapterByMajor'), 'chapterByMajor 비어있음 — 2026-04-19 사고 재현'
-          print('OK chapterByMajor:', len(s['chapterByMajor']))
-          "
+          python -X utf8 scripts/build/verifyWheel.py "$WHL"
 
       - name: Generate SBOM
         run: |

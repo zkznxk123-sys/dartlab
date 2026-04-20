@@ -128,16 +128,19 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.sdist]
+# wheel include 와 동일 패턴으로 맞춰 산출물 drift 방지
 include = [
     "src/dartlab/**/*.py",
     "src/dartlab/**/*.json",
     "src/dartlab/**/*.parquet",
+    "src/dartlab/**/py.typed",
     "src/dartlab/ui/build/**",
     "README.md",
     "LICENSE",
 ]
 exclude = [
     "**/_reference/**",
+    "**/_backup/**",
     "src/dartlab/engines/edinet/**",
     "src/dartlab/engines/esg/**",
     "src/dartlab/engines/event/**",

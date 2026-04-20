@@ -206,3 +206,164 @@ def test_installedWheel_importAndSectionsLoad(builtWheel: Path, tmp_path):
         f"STDOUT: {check.stdout}\n"
         f"STDERR: {check.stderr}"
     )
+
+
+# ════════════════════════════════════════
+# .gitignore 구조 lint — 2026-04-19 사고 원인 패턴 재유입 차단
+# ════════════════════════════════════════
+
+
+def _gitignoreDirPatterns() -> list[tuple[int, str]]:
+    """`.gitignore` 에서 디렉토리 ignore 패턴을 (line_no, pattern) 로 수집.
+
+    주석/빈 줄/negation(`!...`)/파일 확장자 패턴(`*.x`) 는 제외.
+    """
+    result: list[tuple[int, str]] = []
+    gi = _REPO_ROOT / ".gitignore"
+    for idx, raw in enumerate(gi.read_text(encoding="utf-8").splitlines(), start=1):
+        s = raw.strip()
+        if not s or s.startswith("#") or s.startswith("!"):
+            continue
+        # 디렉토리 패턴: 트레일링 슬래시 or 명확한 디렉토리 이름
+        if s.endswith("/"):
+            result.append((idx, s))
+    return result
+
+
+def test_gitignorePatterns_noUnrootedDirsOverlappingSrcDartlab():
+    """`.gitignore` 의 루트-미지정 디렉토리 패턴이 src/dartlab 하위와 매치되지 않음.
+
+    2026-04-19 사고 직접 원인: `.gitignore` 의 `data/` (leading `/` 없음) 이
+    `src/dartlab/core/data/` 까지 매치해서 wheel 에서 누락됨. 같은 class 의
+    재유입을 lint 로 차단한다.
+
+    검사: 각 unrooted 디렉토리 패턴 (예: `data/`, `_backup/`, `logs/`) 이
+    `src/dartlab/` 하위에 동명 디렉토리와 매치되면 FAIL. leading `/` 를 붙여
+    루트 스코프로 명시하거나, 구체 경로를 지정해야 함.
+
+    단, 명백히 전체 repo 에서 제외돼도 안전한 패턴 (예: `__pycache__/`,
+    `.venv`) 은 화이트리스트로 허용.
+    """
+    # src/dartlab 하위에 있어도 제외하는 게 실제로 의도된 패턴
+    _SAFE_UNROOTED: frozenset[str] = frozenset(
+        {
+            "__pycache__/",
+            "node_modules/",  # src/dartlab 내부에 존재 불가
+            ".venv/",
+        }
+    )
+
+    offenders: list[str] = []
+    for lineNo, pattern in _gitignoreDirPatterns():
+        if pattern.startswith("/"):
+            continue  # 이미 루트 스코프
+        if pattern in _SAFE_UNROOTED:
+            continue
+        # src/dartlab 하위에 동일 이름 디렉토리가 존재하면 위험 패턴
+        dirName = pattern.rstrip("/")
+        matches = list(_SRC_ROOT.rglob(dirName))
+        matches = [m for m in matches if m.is_dir()]
+        if matches:
+            offenders.append(
+                f"  .gitignore:{lineNo}  `{pattern}`  → 매치: "
+                + ", ".join(str(m.relative_to(_REPO_ROOT)) for m in matches[:3])
+            )
+
+    assert not offenders, (
+        "⚠ .gitignore 에 src/dartlab 하위와 매치되는 루트-미지정 디렉토리 패턴 발견:\n" + "\n".join(offenders) + "\n\n"
+        "해결: 패턴 앞에 `/` 를 붙여 루트 스코프로 만들거나, 구체 경로를 지정하세요.\n"
+        "  예: `data/` → `/data/`\n"
+        "  예: `_backup/` → `/_backup/` 또는 `/providers/dart/finance/mapperData/_backup/`\n"
+        "과거 사고 (2026-04-19) 와 동일 class 의 packaging 누락을 구조적으로 차단합니다."
+    )
+
+
+# ════════════════════════════════════════
+# Loud-fail 로더 계약 — Phase A1 에서 전환한 로더들
+# ════════════════════════════════════════
+
+
+def test_dalio48Match_loadCases_loudFail_onMissingData(monkeypatch):
+    """dalio48Match._loadCases 가 파일 부재 시 FileNotFoundError 발생."""
+    from importlib import resources
+
+    import dartlab.core.finance.dalio48Match as mod
+
+    # 실제 파일이 있는 상태 기준선: 정상 로드
+    cases = mod._loadCases()
+    assert isinstance(cases, list)
+    assert len(cases) > 0, "dalio48Cases.json 이 빈 cases — 번들 리소스 손상"
+
+    # 파일 부재 시뮬레이션: resources.files 의 joinpath 를 가짜로 만들어 FNF 유도
+    class _FakeRef:
+        def open(self, *args, **kwargs):
+            raise FileNotFoundError("simulated missing")
+
+    class _FakeFiles:
+        def joinpath(self, name):
+            return _FakeRef()
+
+    monkeypatch.setattr(resources, "files", lambda pkg: _FakeFiles())
+    with pytest.raises(FileNotFoundError) as exc:
+        mod._loadCases()
+    assert "dalio48Cases.json" in str(exc.value)
+    assert "pip install" in str(exc.value), "복구 명령 안내 누락"
+
+
+def test_rrCrisisDB_loadRrCrises_loudFail_onMissingData(monkeypatch):
+    """rrCrisisDB._loadRrCrises 가 파일 부재 시 FileNotFoundError 발생."""
+    from importlib import resources
+
+    import dartlab.core.finance.rrCrisisDB as mod
+
+    crises = mod._loadRrCrises()
+    assert isinstance(crises, list)
+    assert len(crises) > 0
+
+    class _FakeRef:
+        def open(self, *args, **kwargs):
+            raise FileNotFoundError("simulated missing")
+
+    class _FakeFiles:
+        def joinpath(self, name):
+            return _FakeRef()
+
+    monkeypatch.setattr(resources, "files", lambda pkg: _FakeFiles())
+    with pytest.raises(FileNotFoundError) as exc:
+        mod._loadRrCrises()
+    assert "rrCrises800y.json" in str(exc.value)
+
+
+def test_loadProjectionRules_loudFail_onKnownChapterMissing(monkeypatch):
+    """loadProjectionRules 가 알려진 chapter 의 파일 부재 시 loud-fail."""
+
+    import dartlab.providers.dart.docs.sections.artifacts as mod
+
+    # 정상 로드 확인
+    mod.loadProjectionRules.cache_clear()
+    rules = mod.loadProjectionRules("chapterII")
+    assert isinstance(rules, dict)
+    assert rules, "projectionRules.chapterII.json 이 빈 dict"
+
+    # 미등록 chapter 는 여전히 빈 dict (기존 동작 유지)
+    mod.loadProjectionRules.cache_clear()
+    assert mod.loadProjectionRules("chapter_does_not_exist_xyz") == {}
+
+    # 알려진 chapter 의 파일이 없다고 가정하면 FNF
+    mod.loadProjectionRules.cache_clear()
+
+    class _FakeRef:
+        def read_text(self, *args, **kwargs):
+            raise FileNotFoundError("simulated missing")
+
+    def _fakeFiles(pkg):
+        class _F:
+            def __truediv__(self, name):
+                return _FakeRef()
+
+        return _F()
+
+    monkeypatch.setattr(mod, "files", _fakeFiles)
+    with pytest.raises(FileNotFoundError) as exc:
+        mod.loadProjectionRules("chapterII")
+    assert "projectionRules.chapterII.json" in str(exc.value)

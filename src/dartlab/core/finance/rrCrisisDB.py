@@ -89,12 +89,20 @@ def classifyCrisisType(
 
 
 def _loadRrCrises() -> list[dict]:
+    """Reinhart-Rogoff 800y crisis database 로드.
+
+    2026-04-19 사고 class 방어 — silent `[]` 대신 loud-fail.
+    """
     try:
         with resources.files("dartlab.core.data").joinpath("rrCrises800y.json").open("r", encoding="utf-8") as f:
             return json.load(f).get("crises", [])
-    except (FileNotFoundError, OSError, json.JSONDecodeError) as e:
-        log.debug("rrCrises800y.json 로드 실패: %s", e)
-        return []
+    except (FileNotFoundError, OSError) as e:
+        raise FileNotFoundError(
+            f"필수 번들 리소스 누락: dartlab/core/data/rrCrises800y.json ({e})\n"
+            f"  → pip install -U --force-reinstall dartlab"
+        ) from e
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"rrCrises800y.json 포맷 손상: {e}") from e
 
 
 def matchRrHistorical(

@@ -28,12 +28,23 @@ _SCALE = {
 
 
 def _loadCases() -> list[dict]:
+    """Dalio 48 케이스 compendium 로드.
+
+    과거 사고 (2026-04-19 class): 번들 리소스 누락 시 조용히 `[]` 리턴 →
+    match48Cases 가 빈 결과를 "매칭 없음" 으로 반환 → 사용자는 crisis
+    감지 파이프라인이 정상 동작하는 줄 착각. silent-fail 대신 loud-fail.
+    """
     try:
         with resources.files("dartlab.core.data").joinpath("dalio48Cases.json").open("r", encoding="utf-8") as f:
             return json.load(f).get("cases", [])
-    except (FileNotFoundError, OSError, json.JSONDecodeError) as e:
-        log.debug("dalio48Cases.json 로드 실패: %s", e)
-        return []
+    except (FileNotFoundError, OSError) as e:
+        raise FileNotFoundError(
+            f"필수 번들 리소스 누락: dartlab/core/data/dalio48Cases.json ({e})\n"
+            f"  → pip install -U --force-reinstall dartlab\n"
+            f"  (wheel 패키징 사고 시 이 파일이 빠질 수 있음)"
+        ) from e
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"dalio48Cases.json 포맷 손상: {e}") from e
 
 
 def _vec(d: dict) -> list[float | None]:

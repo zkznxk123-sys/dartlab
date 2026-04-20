@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "source": "Dalio, R. (2018), Principles for Navigating Big Debt Crises, Part 3 Compendium",
+    "description": "Dalio's 48 big debt cycle cases — deflationary (DEF) + inflationary (INF) archetypes. Subset below is verified against public sources (Reinhart-Rogoff, Laeven-Valencia IMF DB, IMF WEO); 'incomplete' flag marks entries requiring further source cross-check.",
+    "lastUpdated": "2026-04-15",
+    "signature_keys": ["peakDebtToGdp", "peakCreditGap", "troughRealRate", "troughGdpGrowth"]
+  },
+  "cases": [
+    {"id": "weimar_1919_23", "country": "DE", "startYear": 1919, "endYear": 1923, "archetype": "inflationary", "peakDebtToGdp": 300, "peakCreditGap": 30, "troughRealRate": -90, "troughGdpGrowth": -15, "outcome": "hyperinflation", "reserveCurrency": false},
+    {"id": "us_great_depression_1929_37", "country": "US", "startYear": 1929, "endYear": 1937, "archetype": "deflationary", "peakDebtToGdp": 260, "peakCreditGap": 15, "troughRealRate": 10, "troughGdpGrowth": -13, "outcome": "ugly_deflation", "reserveCurrency": false},
+    {"id": "uk_great_depression_1929_34", "country": "GB", "startYear": 1929, "endYear": 1934, "archetype": "deflationary", "peakDebtToGdp": 180, "peakCreditGap": 8, "troughRealRate": 5, "troughGdpGrowth": -5.1, "outcome": "managed_deflation", "reserveCurrency": true},
+    {"id": "japan_1989_2005", "country": "JP", "startYear": 1989, "endYear": 2005, "archetype": "deflationary", "peakDebtToGdp": 220, "peakCreditGap": 20, "troughRealRate": 3, "troughGdpGrowth": -2, "outcome": "lost_decades", "reserveCurrency": false},
+    {"id": "finland_1991_94", "country": "FI", "startYear": 1991, "endYear": 1994, "archetype": "deflationary", "peakDebtToGdp": 110, "peakCreditGap": 18, "troughRealRate": 8, "troughGdpGrowth": -6, "outcome": "beautiful_deleveraging", "reserveCurrency": false},
+    {"id": "sweden_1991_94", "country": "SE", "startYear": 1991, "endYear": 1994, "archetype": "deflationary", "peakDebtToGdp": 130, "peakCreditGap": 15, "troughRealRate": 6, "troughGdpGrowth": -4, "outcome": "beautiful_deleveraging", "reserveCurrency": false},
+    {"id": "norway_1988_92", "country": "NO", "startYear": 1988, "endYear": 1992, "archetype": "deflationary", "peakDebtToGdp": 120, "peakCreditGap": 12, "troughRealRate": 5, "troughGdpGrowth": -1, "outcome": "beautiful_deleveraging", "reserveCurrency": false},
+    {"id": "kr_1997_98", "country": "KR", "startYear": 1997, "endYear": 1998, "archetype": "deflationary", "peakDebtToGdp": 150, "peakCreditGap": 10, "troughRealRate": 8, "troughGdpGrowth": -5.7, "outcome": "v_shape_recovery", "reserveCurrency": false},
+    {"id": "thailand_1997_98", "country": "TH", "startYear": 1997, "endYear": 1998, "archetype": "deflationary", "peakDebtToGdp": 170, "peakCreditGap": 20, "troughRealRate": 10, "troughGdpGrowth": -7.6, "outcome": "imf_bailout", "reserveCurrency": false},
+    {"id": "indonesia_1997_99", "country": "ID", "startYear": 1997, "endYear": 1999, "archetype": "inflationary", "peakDebtToGdp": 160, "peakCreditGap": 15, "troughRealRate": -20, "troughGdpGrowth": -13, "outcome": "currency_collapse", "reserveCurrency": false},
+    {"id": "russia_1998", "country": "RU", "startYear": 1998, "endYear": 1999, "archetype": "inflationary", "peakDebtToGdp": 90, "peakCreditGap": 5, "troughRealRate": -40, "troughGdpGrowth": -5, "outcome": "sovereign_default", "reserveCurrency": false},
+    {"id": "argentina_2001_02", "country": "AR", "startYear": 2001, "endYear": 2002, "archetype": "inflationary", "peakDebtToGdp": 160, "peakCreditGap": 8, "troughRealRate": -30, "troughGdpGrowth": -11, "outcome": "sovereign_default", "reserveCurrency": false},
+    {"id": "us_subprime_2007_11", "country": "US", "startYear": 2007, "endYear": 2011, "archetype": "deflationary", "peakDebtToGdp": 350, "peakCreditGap": 12, "troughRealRate": 0.5, "troughGdpGrowth": -2.8, "outcome": "beautiful_deleveraging", "reserveCurrency": true},
+    {"id": "iceland_2008_10", "country": "IS", "startYear": 2008, "endYear": 2010, "archetype": "deflationary", "peakDebtToGdp": 700, "peakCreditGap": 50, "troughRealRate": 6, "troughGdpGrowth": -6.8, "outcome": "bank_collapse", "reserveCurrency": false},
+    {"id": "ireland_2008_13", "country": "IE", "startYear": 2008, "endYear": 2013, "archetype": "deflationary", "peakDebtToGdp": 400, "peakCreditGap": 40, "troughRealRate": 2, "troughGdpGrowth": -5.1, "outcome": "imf_bailout", "reserveCurrency": false},
+    {"id": "spain_2008_13", "country": "ES", "startYear": 2008, "endYear": 2013, "archetype": "deflationary", "peakDebtToGdp": 350, "peakCreditGap": 30, "troughRealRate": 1.5, "troughGdpGrowth": -3.8, "outcome": "managed_deleveraging", "reserveCurrency": false},
+    {"id": "greece_2010_18", "country": "GR", "startYear": 2010, "endYear": 2018, "archetype": "deflationary", "peakDebtToGdp": 180, "peakCreditGap": 15, "troughRealRate": 3, "troughGdpGrowth": -9, "outcome": "ugly_deflation", "reserveCurrency": false},
+    {"id": "zimbabwe_2007_09", "country": "ZW", "startYear": 2007, "endYear": 2009, "archetype": "inflationary", "peakDebtToGdp": 100, "peakCreditGap": 5, "troughRealRate": -99, "troughGdpGrowth": -18, "outcome": "hyperinflation", "reserveCurrency": false},
+    {"id": "venezuela_2013_now", "country": "VE", "startYear": 2013, "endYear": 2024, "archetype": "inflationary", "peakDebtToGdp": 180, "peakCreditGap": 10, "troughRealRate": -85, "troughGdpGrowth": -19, "outcome": "hyperinflation", "reserveCurrency": false},
+    {"id": "turkey_2021_now", "country": "TR", "startYear": 2021, "endYear": 2024, "archetype": "inflationary", "peakDebtToGdp": 90, "peakCreditGap": 8, "troughRealRate": -30, "troughGdpGrowth": 5, "outcome": "inflation_spike", "reserveCurrency": false}
+  ]
+}

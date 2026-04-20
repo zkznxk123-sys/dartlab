@@ -194,11 +194,12 @@ jobs:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
           PYTEST_MEMORY_LIMIT_MB: "6000"
           DARTLAB_TEST_LOCKED: "1"
+        # 2026-04-20: continue-on-error 제거 — 필수 게이트로 전환.
+        # 84+ 엔진 공개 API smoke 가 실제로 PR 머지를 차단하도록.
+        # 네트워크/키 의존 테스트는 테스트 코드 내에서 pytest.skip 처리되어
+        # 실제 failure 만 차단. freshInstall 포함.
         run: |
-          # freshInstall 포함 — fixture 데이터로 cold cache + sections/select 재현 검증.
-          # 로컬에서 3/3 PASS 확인 완료 (2026-04-19).
           bash scripts/dev/test-realdata.sh tests/realData -m "realData" -v --tb=short
-        continue-on-error: true
 
   # Wheel packaging 게이트 — 2026-04-19 사고 (parserMappings 누락) 재발 방지.
   # python -m build 로 실제 wheel 빌드 → 번들 리소스 zip 검증 → 격리 venv 설치 →
@@ -214,13 +215,18 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install uv
-        run: pip install uv
+      - name: Install build tool
+        run: pip install build
 
-      - name: Build wheel + verify bundled resources
-        env:
-          WHEEL_SMOKE_SKIP_FRESH_INSTALL: "1"
-        run: bash scripts/build/testWheelSmoke.sh
+      # publish.yml 과 동일한 스크립트 호출 — 검증 로직 단일 출처.
+      - name: Build wheel (python -m build, publish.yml 과 동일)
+        run: python -m build --wheel --outdir dist
+
+      - name: Verify wheel (bundle + install runtime)
+        run: |
+          set -euo pipefail
+          WHL=$(ls dist/*.whl | head -n1)
+          python -X utf8 scripts/build/verifyWheel.py "$WHL"
 
   security:
     runs-on: ubuntu-latest

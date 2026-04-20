@@ -36,8 +36,9 @@ TODO.md
 # Data (repo-root 만 — src/dartlab/core/data/ 같은 패키지 번들 리소스는 제외하면 안 됨)
 /data/
 
-# Backup (파일 삭제 대신 이동)
-_backup/
+# Backup (파일 삭제 대신 이동) — repo-root 만. src/dartlab 내부의 _backup/
+# (예: providers/dart/finance/mapperData/_backup/) 은 번들 리소스이므로 제외하면 안 됨.
+/_backup/
 
 # Node modules (all locations)
 node_modules/
