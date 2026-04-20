@@ -43,7 +43,7 @@ jobs:
         # fixture 에서 돌아가는 subset 을 실행. 핵심 안전장치는 wheel-smoke + test_bundledResources.
         # --cov-fail-under 플래그로 coverage ratchet 강제. pyproject 의 fail_under
         # 는 디폴트이며 이 플래그가 실제 gate. 하락하면 CI 실패.
-        run: pytest tests/ -n 2 --dist loadfile --tb=short -m "not requires_data and not heavy and not realData and not freshInstall" --benchmark-disable --ignore=tests/test_fixture_analysis_real.py --ignore=tests/test_fixture_credit_real.py --ignore=tests/test_fixture_review_real.py --ignore=tests/realData --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=38
+        run: pytest tests/ -n 2 --dist loadfile --tb=short -m "not requires_data and not heavy and not realData and not freshInstall" --benchmark-disable --ignore=tests/test_fixture_analysis_real.py --ignore=tests/test_fixture_credit_real.py --ignore=tests/test_fixture_review_real.py --ignore=tests/realData --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=40
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12'
@@ -116,6 +116,40 @@ jobs:
       - name: Run pyright
         run: pyright
         continue-on-error: true
+
+  # Cross-OS smoke — Windows/macOS 특이 버그 방어 (경로/인코딩/라인 엔딩).
+  # 전체 test 잡은 ubuntu 만 돌리고 (CI 시간 절약), 이 잡은 환경 독립성이 필요한
+  # unit + bundle 검증만 3 OS 에서 실행. 약 +5분 CI 시간 추가.
+  cross-os-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install minimal deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio hypothesis build
+          pip install -e .
+
+      # unit 마커 + bundle 계약 + silent-fail lint 만 실행 (환경 무관한 핵심).
+      - name: Run unit + bundle tests
+        env:
+          PYTHONIOENCODING: utf-8
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          python -X utf8 -m pytest tests/test_bundledResources.py tests/test_wheelPackaging.py -m "unit and not heavy" --tb=short --no-cov --benchmark-disable
+
+      - name: Silent-fail lint
+        run: python -X utf8 scripts/dev/checkSilentFail.py
 
   smoke:
     runs-on: ubuntu-latest
