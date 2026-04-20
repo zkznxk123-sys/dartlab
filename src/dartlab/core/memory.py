@@ -188,6 +188,10 @@ class BoundedCache:
             "_reviewAccessor",
             "_creditAccessor",
             "_analysisAccessor",
+            # 2026-04-20: realdata-suite 에서 `c.quant` / `c.topics` KeyError 검출.
+            # 동일한 CallableAccessor 패턴인데 critical_prefixes 에서 누락됐었음.
+            "_quantAccessor",
+            "_sectionsAnalyzer",
         )
         # pinned: 이 prefix로 시작하는 키는 evict하지 않음 (외부 API + 무거운 계산 결과 보호)
         # review에서 여러 calc가 공유하는 핵심 캐시. 작은 dict이고 재로드 비용 큼.

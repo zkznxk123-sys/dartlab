@@ -137,10 +137,10 @@ jobs:
       - name: Install minimal deps
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio hypothesis build
+          pip install pytest pytest-asyncio hypothesis build pytest-cov pytest-benchmark
           pip install -e .
 
-      # unit 마커 + bundle 계약 + silent-fail lint 만 실행 (환경 무관한 핵심).
+      # unit 마커 + bundle 계약 만 실행 (환경 무관한 핵심).
       - name: Run unit + bundle tests
         env:
           PYTHONIOENCODING: utf-8
