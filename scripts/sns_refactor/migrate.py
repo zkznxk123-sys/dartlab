@@ -14,6 +14,7 @@ sns/ 및 관련 외부 문서·메모리 파일의 "sns" 문자열 리터럴을 
 - git mv 사용 안 함 (gitignored 파일). 단순 OS mv 전제.
 - .bak 파일은 원본 옆에 생성. --cleanup 으로 일괄 삭제.
 """
+
 from __future__ import annotations
 
 import argparse

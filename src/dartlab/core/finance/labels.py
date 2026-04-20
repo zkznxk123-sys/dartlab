@@ -43,10 +43,7 @@ def _load_label_supplements() -> dict[str, str]:
     """
     p = Path(__file__).parent.parent / "data" / "labelSupplements.json"
     if not p.exists():
-        raise FileNotFoundError(
-            f"필수 번들 리소스 누락: {p}\n"
-            f"  → pip install -U --force-reinstall dartlab"
-        )
+        raise FileNotFoundError(f"필수 번들 리소스 누락: {p}\n  → pip install -U --force-reinstall dartlab")
     return json.loads(p.read_text(encoding="utf-8")).get("supplements", {})
 
 
@@ -58,10 +55,7 @@ def _load_edgar_standard_accounts() -> dict[str, str]:
     """
     p = Path(__file__).parent.parent.parent / "providers" / "edgar" / "finance" / "mapperData" / "standardAccounts.json"
     if not p.exists():
-        raise FileNotFoundError(
-            f"필수 번들 리소스 누락: {p}\n"
-            f"  → pip install -U --force-reinstall dartlab"
-        )
+        raise FileNotFoundError(f"필수 번들 리소스 누락: {p}\n  → pip install -U --force-reinstall dartlab")
     data = json.loads(p.read_text(encoding="utf-8"))
     return {a["snakeId"]: a["korName"] for a in data.get("accounts", []) if a.get("korName")}
 

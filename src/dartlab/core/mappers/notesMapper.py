@@ -26,8 +26,7 @@ def _loadKeywords() -> dict[str, list[str]]:
     """
     if not _STRUCTURE_PATH.exists():
         raise FileNotFoundError(
-            f"필수 번들 리소스 누락: {_STRUCTURE_PATH}\n"
-            f"  → pip install -U --force-reinstall dartlab"
+            f"필수 번들 리소스 누락: {_STRUCTURE_PATH}\n  → pip install -U --force-reinstall dartlab"
         )
     data = json.loads(_STRUCTURE_PATH.read_text(encoding="utf-8"))
     return data.get("keywords", {})
