@@ -186,10 +186,10 @@ exclude_lines = [
     "if __name__",
     "raise NotImplementedError",
 ]
-# 2026-04-19: CI 가 requires_data 테스트를 활성화하고 fixture-integration/realdata-suite 를
-# 분리 실행하기 시작. 실제 커버리지가 30% 대비 상승할 것이므로 첫 master 빌드 결과로
-# 이 값을 측정값-5%p 로 조정하고 단계적으로 상향 (50 → 65 → 80 → 90 목표).
-fail_under = 30
+# Coverage ratchet — 실측 39% 기준 38 에서 시작, 단방향 상향만 허용.
+# 단계 계획: 38 → 45 → 55 → 65 → 75 → 85 → 90. PR 마다 하락하면 CI FAIL.
+# CI 에서 `pytest --cov-fail-under` 플래그로 실제 강제 (pyproject 설정은 디폴트).
+fail_under = 38
 
 [tool.pyright]
 pythonVersion = "3.12"

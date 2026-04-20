@@ -41,7 +41,9 @@ jobs:
         # requires_data 제외 유지 — fixture 데이터는 충분치 않아 test_affiliate/test_company 등이
         # 전체 데이터 가정으로 실패. 대신 fixture-integration + realdata-suite jobs 에서
         # fixture 에서 돌아가는 subset 을 실행. 핵심 안전장치는 wheel-smoke + test_bundledResources.
-        run: pytest tests/ -n 2 --dist loadfile --tb=short -m "not requires_data and not heavy and not realData and not freshInstall" --benchmark-disable --ignore=tests/test_fixture_analysis_real.py --ignore=tests/test_fixture_credit_real.py --ignore=tests/test_fixture_review_real.py --ignore=tests/realData --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml
+        # --cov-fail-under 플래그로 coverage ratchet 강제. pyproject 의 fail_under
+        # 는 디폴트이며 이 플래그가 실제 gate. 하락하면 CI 실패.
+        run: pytest tests/ -n 2 --dist loadfile --tb=short -m "not requires_data and not heavy and not realData and not freshInstall" --benchmark-disable --ignore=tests/test_fixture_analysis_real.py --ignore=tests/test_fixture_credit_real.py --ignore=tests/test_fixture_review_real.py --ignore=tests/realData --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=38
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12'

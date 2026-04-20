@@ -52,7 +52,12 @@ trap cleanup EXIT INT TERM
 
 echo "[test-lock] lock 획득 (PID $$). pytest 시작."
 export DARTLAB_TEST_LOCKED=1
-uv run pytest "$@"
+# uv 가 있으면 uv run, 없으면 pytest 직접 호출 (CI 환경 대응).
+if command -v uv >/dev/null 2>&1; then
+    uv run pytest "$@"
+else
+    pytest "$@"
+fi
 EXIT_CODE=$?
 
 echo "[test-lock] pytest 완료 (exit=$EXIT_CODE). lock 해제."
