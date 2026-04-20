@@ -1,0 +1,48 @@
+# codecov 설정 — PR coverage diff 리포팅.
+#
+# 목적: 매 PR 마다 coverage 변동량 (+0.5% / -1.2% 같은) 을 자동 comment 로 남겨
+# 회귀를 가시화. pyproject.toml 의 `fail_under` 는 하드 플로어이고, 이 설정은
+# "PR 이 coverage 를 떨어뜨리면 경고" 하는 연속적 방어.
+
+coverage:
+  precision: 2
+  round: down
+  range: "40...90"
+
+  status:
+    # project: 프로젝트 전체 coverage
+    project:
+      default:
+        # base branch 대비 0.5% 이상 떨어지면 실패 처리.
+        target: auto
+        threshold: 0.5%
+        base: auto
+        if_ci_failed: error
+        informational: false
+
+    # patch: PR 에서 변경된 라인들의 coverage
+    patch:
+      default:
+        # 새로 추가되는 코드는 80% 이상 커버돼야 함 (신규 코드 표준).
+        target: 80%
+        threshold: 5%
+        base: auto
+        informational: false
+
+parsers:
+  v1:
+    include_full_missed_files: true
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+ignore:
+  - "tests/**"
+  - "src/dartlab/ai/providers/**"
+  - "src/dartlab/_reference/**"
+  - "**/_backup/**"
+  - "experiments/**"

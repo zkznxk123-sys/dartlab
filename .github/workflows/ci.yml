@@ -76,6 +76,11 @@ jobs:
       - name: Lint check
         run: ruff check src/dartlab/ tests/
 
+      # silent-fail 패턴 lint — 2026-04-19 사고 class 재유입 차단.
+      # 번들 리소스 로더가 silent `{}` / `[]` 리턴 패턴을 검사.
+      - name: Silent-fail pattern check
+        run: python scripts/dev/checkSilentFail.py
+
   format:
     runs-on: ubuntu-latest
     steps:

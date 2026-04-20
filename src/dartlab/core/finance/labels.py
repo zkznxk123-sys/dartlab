@@ -37,19 +37,31 @@ def _load_standard_accounts() -> dict[str, dict]:
 
 @lru_cache(maxsize=1)
 def _load_label_supplements() -> dict[str, str]:
-    """labelSupplements.json — standardAccounts 외 보충 라벨 SSOT."""
+    """labelSupplements.json — standardAccounts 외 보충 라벨 SSOT.
+
+    번들 필수 리소스 — 누락 시 loud-fail (2026-04-19 사고 class).
+    """
     p = Path(__file__).parent.parent / "data" / "labelSupplements.json"
     if not p.exists():
-        return {}
+        raise FileNotFoundError(
+            f"필수 번들 리소스 누락: {p}\n"
+            f"  → pip install -U --force-reinstall dartlab"
+        )
     return json.loads(p.read_text(encoding="utf-8")).get("supplements", {})
 
 
 @lru_cache(maxsize=1)
 def _load_edgar_standard_accounts() -> dict[str, str]:
-    """EDGAR standardAccounts.json에서 snakeId → korName."""
+    """EDGAR standardAccounts.json에서 snakeId → korName.
+
+    번들 필수 리소스 — 누락 시 loud-fail.
+    """
     p = Path(__file__).parent.parent.parent / "providers" / "edgar" / "finance" / "mapperData" / "standardAccounts.json"
     if not p.exists():
-        return {}
+        raise FileNotFoundError(
+            f"필수 번들 리소스 누락: {p}\n"
+            f"  → pip install -U --force-reinstall dartlab"
+        )
     data = json.loads(p.read_text(encoding="utf-8"))
     return {a["snakeId"]: a["korName"] for a in data.get("accounts", []) if a.get("korName")}
 

@@ -20,9 +20,15 @@ _STRUCTURE_PATH = Path(__file__).resolve().parents[1] / "data" / "notesStructure
 
 
 def _loadKeywords() -> dict[str, list[str]]:
-    """notesStructure.json에서 keywords 로드."""
+    """notesStructure.json에서 keywords 로드.
+
+    번들 필수 리소스 — 누락 시 loud-fail (2026-04-19 사고 class).
+    """
     if not _STRUCTURE_PATH.exists():
-        return {}
+        raise FileNotFoundError(
+            f"필수 번들 리소스 누락: {_STRUCTURE_PATH}\n"
+            f"  → pip install -U --force-reinstall dartlab"
+        )
     data = json.loads(_STRUCTURE_PATH.read_text(encoding="utf-8"))
     return data.get("keywords", {})
 

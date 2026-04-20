@@ -1,0 +1,227 @@
+"""Silent-fail 패턴 lint — 2026-04-19 사고 class 재유입 차단.
+
+번들 리소스 로더가 파일 부재 시 조용히 빈 값(`{}`, `[]`)을 리턴하면 상위
+파이프라인이 "데이터 없음" 과 "파일 누락" 을 구분 못 해 사용자 crash 로
+이어질 수 있다. 해당 패턴을 lint 해서 새 코드에서 재유입을 차단한다.
+
+탐지 패턴 (AST 기반, 보수적):
+    1. `if not X.exists(): return {}` / `return []`  — 파일 부재 silent fallback
+    2. `except FileNotFoundError: return {}` / `return []`
+    3. `try: ... open(...) ... except (...): return {}/[]`  — 동일 패턴
+
+허용 (화이트리스트):
+    - 사용자 입력 파싱 (tests, scripts/dev)
+    - core/ai/secrets.py 같은 옵셔널 설정 로더
+    - 이미 명시적으로 허용된 경로
+
+사용법::
+
+    python scripts/dev/checkSilentFail.py  # src/dartlab/ 전체 스캔
+    python scripts/dev/checkSilentFail.py --warn-only  # 경고만, exit 0
+
+종료 코드: 0 깨끗 / 1 위반 발견 / 2 입력 오류
+"""
+
+from __future__ import annotations
+
+import ast
+import sys
+from pathlib import Path
+
+_SRC_ROOT = Path(__file__).resolve().parents[2] / "src" / "dartlab"
+
+# 옵셔널 리소스 로더 — 누락이 정상 동작 (사용자 설정/선택 데이터 등)
+_ALLOWLIST_FILES: frozenset[str] = frozenset(
+    {
+        # 사용자 설정/인증 파일 (옵셔널)
+        "core/ai/secrets.py",
+        "core/ai/profile.py",
+        "ai/persistence/knowledge_db.py",
+        "ai/providers/support/codex_cli.py",
+        "ai/tools/__init__.py",
+        "channel/devtunnel.py",
+        "server/api/ai.py",
+        # 런타임 데이터 캐시 (HF/API 응답 파일) — 없으면 빈 결과가 정상
+        "gather/domains/naver.py",
+        "gather/domains/yahoo_chart.py",
+        "providers/dart/openapi/allFilingsCollector.py",
+        "providers/dart/openapi/batch.py",
+        "providers/dart/openapi/dartKey.py",
+        "providers/edgar/openapi/batch.py",
+        "providers/edgar/docs/notesParsers.py",
+        "providers/edgar/report/employee.py",
+        "scan/watch/scanner.py",
+        # gather 도메인 — 외부 API 응답 (네트워크 실패 시 빈 결과가 정상)
+        "gather/domains/dartApi.py",
+        "gather/domains/fdr.py",
+        "gather/insider.py",
+        "gather/news.py",
+        # credit runtime history/audit — 사용자 생성 데이터
+        "credit/audit.py",
+        "credit/history.py",
+        # scan builder — 프리빌드 runtime 상태 (데이터 없으면 스킵)
+        "scan/builder.py",
+        "scan/edgarBuilder.py",
+        # AI 런타임 상태 저장 (없으면 첫 실행)
+        "ai/context/playbook.py",
+        "ai/persistence/store.py",
+        # analysis/forecast/core 런타임 캐시 (HF seed/backtest output)
+        "analysis/forecast/forwardTest.py",
+        "core/finance/bottomUpBeta.py",
+        # core mappers 런타임 data (scanner 출력)
+        "core/mappers/scanner.py",
+        # AI provider 옵셔널 (Ollama 등 로컬 LLM)
+        "ai/providers/ollama.py",
+        # analysis runtime 결과 (이전 스토리 캐시)
+        "analysis/financial/storyValidation.py",
+        # industry build pipeline — 단계별 중간 산출물 (없으면 이전 단계 재실행)
+        "industry/build/delta.py",
+        "industry/build/enrichCompany.py",
+        "industry/build/pipeline.py",
+        "industry/build/stage3_docs.py",
+        "industry/build/stage4_review.py",
+        # artifacts.loadProjectionRules — 알려진 chapter 만 loud-fail, 미등록은 빈 dict (의도적)
+        "providers/dart/docs/sections/artifacts.py",
+    }
+)
+
+
+class _SilentFailVisitor(ast.NodeVisitor):
+    def __init__(self, filename: str):
+        self.filename = filename
+        self.offenders: list[tuple[int, str]] = []
+
+    def _isEmptyCollection(self, node: ast.expr) -> bool:
+        """`{}` / `[]` / `dict()` / `list()` / `set()` 판정."""
+        if isinstance(node, ast.Dict) and not node.keys:
+            return True
+        if isinstance(node, ast.List) and not node.elts:
+            return True
+        if isinstance(node, ast.Set) and not node.elts:
+            return True
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            if node.func.id in {"dict", "list", "set"} and not node.args and not node.keywords:
+                return True
+        return False
+
+    def _findEmptyReturn(self, stmts: list[ast.stmt]) -> ast.Return | None:
+        for s in stmts:
+            if isinstance(s, ast.Return) and s.value is not None and self._isEmptyCollection(s.value):
+                return s
+        return None
+
+    def visit_If(self, node: ast.If):
+        # Pattern 1: `if not X.exists(): return {}/[]`
+        test = node.test
+        isExistsCheck = False
+        if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
+            operand = test.operand
+            if isinstance(operand, ast.Call) and isinstance(operand.func, ast.Attribute):
+                if operand.func.attr in {"exists", "is_file", "is_dir"}:
+                    isExistsCheck = True
+        if isExistsCheck:
+            ret = self._findEmptyReturn(node.body)
+            if ret is not None:
+                self.offenders.append(
+                    (
+                        ret.lineno,
+                        f"`if not X.exists(): return {ast.unparse(ret.value)}` "
+                        f"— 파일 부재 시 silent-fail. loud-fail (FileNotFoundError) 권장.",
+                    )
+                )
+        self.generic_visit(node)
+
+    def visit_ExceptHandler(self, node: ast.ExceptHandler):
+        # Pattern 2/3: `except FileNotFoundError (or tuple with): return {}/[]`
+        exType = node.type
+        isFileRelated = False
+        if isinstance(exType, ast.Name) and exType.id in {"FileNotFoundError", "OSError", "IOError"}:
+            isFileRelated = True
+        elif isinstance(exType, ast.Tuple):
+            for elt in exType.elts:
+                if isinstance(elt, ast.Name) and elt.id in {
+                    "FileNotFoundError",
+                    "OSError",
+                    "IOError",
+                }:
+                    isFileRelated = True
+                    break
+        if isFileRelated:
+            ret = self._findEmptyReturn(node.body)
+            if ret is not None:
+                self.offenders.append(
+                    (
+                        ret.lineno,
+                        f"`except (FileNotFoundError, ...): return {ast.unparse(ret.value)}` "
+                        f"— silent-fail. 번들 리소스라면 loud-fail 권장.",
+                    )
+                )
+        self.generic_visit(node)
+
+
+def scanFile(path: Path) -> list[tuple[int, str]]:
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except SyntaxError:
+        return []
+    visitor = _SilentFailVisitor(str(path))
+    visitor.visit(tree)
+    return visitor.offenders
+
+
+def main() -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="silent-fail 패턴 lint")
+    parser.add_argument(
+        "--warn-only",
+        action="store_true",
+        help="위반 발견해도 exit 0 (경고만)",
+    )
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        type=Path,
+        help="검사할 파일/디렉토리 (기본: src/dartlab)",
+    )
+    args = parser.parse_args()
+
+    roots = args.paths or [_SRC_ROOT]
+    targets: list[Path] = []
+    for root in roots:
+        if root.is_file() and root.suffix == ".py":
+            targets.append(root)
+        elif root.is_dir():
+            targets.extend(root.rglob("*.py"))
+
+    # 화이트리스트 필터
+    filtered: list[Path] = []
+    for p in targets:
+        rel = p.resolve().relative_to(_SRC_ROOT).as_posix() if _SRC_ROOT in p.resolve().parents else None
+        if rel and rel in _ALLOWLIST_FILES:
+            continue
+        if "__pycache__" in p.parts or "/_reference/" in p.as_posix():
+            continue
+        filtered.append(p)
+
+    totalOffenders: list[tuple[Path, int, str]] = []
+    for path in filtered:
+        for line, msg in scanFile(path):
+            totalOffenders.append((path, line, msg))
+
+    if not totalOffenders:
+        print(f"[check-silent-fail] OK — {len(filtered)}개 파일 스캔, 위반 없음")
+        return 0
+
+    print(f"[check-silent-fail] ⚠ {len(totalOffenders)}건 silent-fail 패턴 발견:")
+    for path, line, msg in totalOffenders:
+        rel = path.resolve().relative_to(_SRC_ROOT.parent).as_posix()
+        print(f"  {rel}:{line}  {msg}")
+    print()
+    print("2026-04-19 사고 class 방어 — 번들 리소스 로더는 loud-fail 해야 합니다.")
+    print("화이트리스트 가능한 옵셔널 로더라면 checkSilentFail.py 의 _ALLOWLIST_FILES 에 추가.")
+    return 0 if args.warn_only else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

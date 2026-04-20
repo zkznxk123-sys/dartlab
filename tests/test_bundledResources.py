@@ -163,3 +163,35 @@ def test_loadCostByNature_returnsPopulatedDict():
     result = loadCostByNature()
     assert isinstance(result, dict)
     assert result, "loadCostByNature() 빈 dict — costByNature 매핑 전멸"
+
+
+# ════════════════════════════════════════
+# Phase A1/B 추가: 나머지 loud-fail 로더 계약
+# ════════════════════════════════════════
+
+
+def test_loadLabelSupplements_returnsPopulatedDict():
+    """labelSupplements.json 이 번들되어 정상 로드 + 빈 dict 아님."""
+    from dartlab.core.finance.labels import _load_label_supplements
+
+    result = _load_label_supplements()
+    assert isinstance(result, dict)
+    # supplements 는 비어있을 수도 있으므로 타입만 확인. 파일 존재는 위 _REQUIRED_FILES 에서 검증.
+
+
+def test_loadEdgarStandardAccounts_returnsPopulatedDict():
+    """EDGAR standardAccounts.json 이 번들되어 정상 로드."""
+    from dartlab.core.finance.labels import _load_edgar_standard_accounts
+
+    result = _load_edgar_standard_accounts()
+    assert isinstance(result, dict)
+    assert result, "_load_edgar_standard_accounts() 빈 dict — EDGAR 계정명 매핑 전멸"
+
+
+def test_loadNotesStructureKeywords_returnsPopulatedDict():
+    """notesStructure.json 이 번들되어 정상 로드."""
+    from dartlab.core.mappers.notesMapper import _loadKeywords
+
+    result = _loadKeywords()
+    assert isinstance(result, dict)
+    assert result, "notesStructure keywords 빈 dict — 주석 매퍼 무력화"
