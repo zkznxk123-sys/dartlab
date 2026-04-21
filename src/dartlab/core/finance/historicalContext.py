@@ -788,159 +788,245 @@ _HISTORICAL_EPOCHS: list[dict] = [
 ]
 
 
+# signature 조건 → (curr 키, 비교 함수 (값, 임계값) → bool)
+# 임계값 없는 키는 sig 내 boolean flag 만 검사 (두 번째 인자 무시).
+_SIGNATURE_CHECKS: list[tuple[str, str, object]] = [
+    ("cpi_yoy_high", "cpi_yoy", lambda v, t: v >= t),
+    ("cpi_yoy_low", "cpi_yoy", lambda v, t: v <= t),
+    ("ff_high", "ff", lambda v, t: v >= t),
+    ("ff_rising", "ff", lambda v, _t: v > 3),
+    ("ur_high", "ur", lambda v, t: v >= t),
+    ("ur_low", "ur", lambda v, t: v <= t),
+    ("ur_rising", "ur_d6", lambda v, _t: v > 0.3),
+    ("vix_high", "vix", lambda v, t: v >= t),
+    ("vix_low", "vix", lambda v, t: v <= t),
+    ("vix_falling", "vix", lambda v, _t: v < 20),
+    ("hy_high", "hy", lambda v, t: v >= t),
+    ("hy_low", "hy", lambda v, t: v <= t),
+    ("hy_rising", "hy_d3", lambda v, _t: v > 0.5),
+    ("hy_falling", "hy_d3", lambda v, _t: v < -0.5),
+    ("yc_inverted", "yc", lambda v, _t: v < 0),
+    ("yc_positive", "yc", lambda v, _t: v > 0.5),
+    ("yc_flat", "yc", lambda v, _t: -0.3 <= v <= 0.3),
+    ("nfci_tight", "nfci", lambda v, _t: v > 0),
+    ("nfci_easing", "nfci", lambda v, _t: v < -0.3),
+    ("ip_falling", "ip_yoy", lambda v, _t: v < 0),
+    ("ip_strong", "ip_yoy", lambda v, _t: v > 3),
+    ("ip_stable", "ip_yoy", lambda v, _t: v > -1),
+]
+
+
+def _extractCurrentSnapshot(data: dict[str, dict[str, float] | None]) -> dict[str, float | None]:
+    """10개 거시 시리즈에서 최신 월 값을 뽑아 dict 로 반환."""
+
+    def _latest(d: dict | None) -> float | None:
+        if not d:
+            return None
+        return d[max(d.keys())]
+
+    return {
+        "hy": _latest(data.get("hy_spread")),
+        "yc": _latest(data.get("spread_10y2y")),
+        "ur": _latest(data.get("unrate")),
+        "cpi_yoy": _latest(data.get("cpi_yoy")),
+        "vix": _latest(data.get("vix")),
+        "nfci": _latest(data.get("nfci")),
+        "ip_yoy": _latest(data.get("ip_yoy")),
+        "ff": _latest(data.get("fedfunds")),
+        "hy_d3": _latest(data.get("hy_spread_d3")),
+        "ur_d6": _latest(data.get("ur_d6")),
+    }
+
+
+def _scoreSignatureMatch(sig: dict[str, float], curr: dict[str, float | None]) -> tuple[int, int]:
+    """signature 대 현재 지표 — (score, checks) 리턴. _SIGNATURE_CHECKS 루프 기반."""
+    score = 0
+    checks = 0
+    for sigKey, currKey, test in _SIGNATURE_CHECKS:
+        if sigKey not in sig:
+            continue
+        currVal = curr.get(currKey)
+        if currVal is None:
+            continue
+        checks += 1
+        if test(currVal, sig.get(sigKey)):  # type: ignore[operator]
+            score += 1
+    return score, checks
+
+
 def matchHistoricalEvents(
     data: dict[str, dict[str, float] | None],
 ) -> list[HistoricalEvent]:
-    """현재 매크로 상태와 유사한 역사적 사건 매칭.
+    """현재 매크로 상태와 유사한 역사적 사건 매칭 (Q3.1e split).
 
-    각 사건의 signature와 현재 지표를 비교하여 유사도 판정.
+    _SIGNATURE_CHECKS 테이블 기반 스코어링 → 0.5 이상 매치만 반환 (상위 3).
     """
-    hy = data.get("hy_spread") or {}
-    yc = data.get("spread_10y2y") or {}
-    ur = data.get("unrate") or {}
-    cpi_yoy = data.get("cpi_yoy") or {}
-    vix_d = data.get("vix") or {}
-    nfci_d = data.get("nfci") or {}
-    ip_yoy = data.get("ip_yoy") or {}
-    ff = data.get("fedfunds") or {}
-    hy_d3 = data.get("hy_spread_d3") or {}
-    ur_d6 = data.get("ur_d6") or {}
-
-    # 최신 값 추출
-    def _latest(d: dict) -> float | None:
-        if not d:
-            return None
-        latest_m = max(d.keys())
-        return d[latest_m]
-
-    curr = {
-        "hy": _latest(hy),
-        "yc": _latest(yc),
-        "ur": _latest(ur),
-        "cpi_yoy": _latest(cpi_yoy),
-        "vix": _latest(vix_d),
-        "nfci": _latest(nfci_d),
-        "ip_yoy": _latest(ip_yoy),
-        "ff": _latest(ff),
-        "hy_d3": _latest(hy_d3),
-        "ur_d6": _latest(ur_d6),
-    }
-
+    curr = _extractCurrentSnapshot(data)
     matches: list[tuple[float, HistoricalEvent]] = []
 
     for epoch in _HISTORICAL_EPOCHS:
-        sig = epoch["signature"]
-        score = 0
-        checks = 0
-
-        # 각 signature 조건 매칭
-        if "cpi_yoy_high" in sig and curr["cpi_yoy"] is not None:
-            checks += 1
-            if curr["cpi_yoy"] >= sig["cpi_yoy_high"]:
-                score += 1
-        if "cpi_yoy_low" in sig and curr["cpi_yoy"] is not None:
-            checks += 1
-            if curr["cpi_yoy"] <= sig["cpi_yoy_low"]:
-                score += 1
-        if "ff_high" in sig and curr["ff"] is not None:
-            checks += 1
-            if curr["ff"] >= sig["ff_high"]:
-                score += 1
-        if "ff_rising" in sig and curr["ff"] is not None:
-            checks += 1
-            # 금리 상승 중 (간단 체크)
-            if curr["ff"] > 3:
-                score += 1
-        if "ur_high" in sig and curr["ur"] is not None:
-            checks += 1
-            if curr["ur"] >= sig["ur_high"]:
-                score += 1
-        if "ur_low" in sig and curr["ur"] is not None:
-            checks += 1
-            if curr["ur"] <= sig["ur_low"]:
-                score += 1
-        if "ur_rising" in sig and curr["ur_d6"] is not None:
-            checks += 1
-            if curr["ur_d6"] > 0.3:
-                score += 1
-        if "vix_high" in sig and curr["vix"] is not None:
-            checks += 1
-            if curr["vix"] >= sig["vix_high"]:
-                score += 1
-        if "vix_low" in sig and curr["vix"] is not None:
-            checks += 1
-            if curr["vix"] <= sig["vix_low"]:
-                score += 1
-        if "vix_falling" in sig and curr["vix"] is not None:
-            checks += 1
-            if curr["vix"] < 20:
-                score += 1
-        if "hy_high" in sig and curr["hy"] is not None:
-            checks += 1
-            if curr["hy"] >= sig["hy_high"]:
-                score += 1
-        if "hy_low" in sig and curr["hy"] is not None:
-            checks += 1
-            if curr["hy"] <= sig["hy_low"]:
-                score += 1
-        if "hy_rising" in sig and curr["hy_d3"] is not None:
-            checks += 1
-            if curr["hy_d3"] > 0.5:
-                score += 1
-        if "hy_falling" in sig and curr["hy_d3"] is not None:
-            checks += 1
-            if curr["hy_d3"] < -0.5:
-                score += 1
-        if "yc_inverted" in sig and curr["yc"] is not None:
-            checks += 1
-            if curr["yc"] < 0:
-                score += 1
-        if "yc_positive" in sig and curr["yc"] is not None:
-            checks += 1
-            if curr["yc"] > 0.5:
-                score += 1
-        if "yc_flat" in sig and curr["yc"] is not None:
-            checks += 1
-            if -0.3 <= curr["yc"] <= 0.3:
-                score += 1
-        if "nfci_tight" in sig and curr["nfci"] is not None:
-            checks += 1
-            if curr["nfci"] > 0:
-                score += 1
-        if "nfci_easing" in sig and curr["nfci"] is not None:
-            checks += 1
-            if curr["nfci"] < -0.3:
-                score += 1
-        if "ip_falling" in sig and curr["ip_yoy"] is not None:
-            checks += 1
-            if curr["ip_yoy"] < 0:
-                score += 1
-        if "ip_strong" in sig and curr["ip_yoy"] is not None:
-            checks += 1
-            if curr["ip_yoy"] > 3:
-                score += 1
-        if "ip_stable" in sig and curr["ip_yoy"] is not None:
-            checks += 1
-            if curr["ip_yoy"] > -1:
-                score += 1
-
+        score, checks = _scoreSignatureMatch(epoch["signature"], curr)
         if checks == 0:
             continue
-
         match_ratio = score / checks
-        if match_ratio >= 0.5:
-            similarity = "높음" if match_ratio >= 0.75 else "보통"
-            event = HistoricalEvent(
-                eventName=epoch["name"],
-                eventDate=epoch["period"][0],
-                similarity=similarity,
-                context=f"조건 {score}/{checks} 매칭 ({match_ratio:.0%})",
-                outcome=epoch["outcome"],
-            )
-            matches.append((match_ratio, event))
+        if match_ratio < 0.5:
+            continue
+        similarity = "높음" if match_ratio >= 0.75 else "보통"
+        event = HistoricalEvent(
+            eventName=epoch["name"],
+            eventDate=epoch["period"][0],
+            similarity=similarity,
+            context=f"조건 {score}/{checks} 매칭 ({match_ratio:.0%})",
+            outcome=epoch["outcome"],
+        )
+        matches.append((match_ratio, event))
 
     matches.sort(key=lambda x: x[0], reverse=True)
     return [m[1] for m in matches[:3]]
+
+
+def _buildSimultaneousWarningData(
+    hy, hy_d3, spread_2y, ur, ur_d6, vix_d, nfci_d, ip_yoy, cpi_yoy
+) -> dict[str, dict[str, float] | None]:
+    """simultaneousWarningFlags + matchHistoricalEvents 공용 data dict 조립."""
+    sw_data: dict[str, dict[str, float] | None] = {}
+    if hy:
+        sw_data["hy_spread"] = hy
+        sw_data["hy_spread_d3"] = hy_d3
+    if spread_2y:
+        sw_data["spread_10y2y"] = spread_2y
+    if ur:
+        sw_data["ur_d6"] = ur_d6
+    if vix_d:
+        sw_data["vix"] = vix_d
+    if nfci_d:
+        sw_data["nfci"] = nfci_d
+    if ip_yoy:
+        sw_data["ip_yoy"] = ip_yoy
+    if cpi_yoy:
+        sw_data["cpi_yoy"] = cpi_yoy
+    return sw_data
+
+
+def _computeRawSignals(hy, hy_d3, spread_3m, ur, cpi_raw, sw_data) -> dict:
+    """7개 신호 계산: hy/yc/ur/cpi/sw/bull/hy_comp."""
+    hy_result = None
+    if hy and hy_d3:
+        latest_hy_month = max(hy_d3.keys()) if hy_d3 else None
+        current_delta = hy_d3.get(latest_hy_month) if latest_hy_month else None
+        hy_result = hySpikesToRecession(hy, current_delta=current_delta)
+    return {
+        "hy": hy_result,
+        "yc": yieldCurveInversionsToRecession(spread_3m) if spread_3m else None,
+        "ur": unemploymentBounceToRecession(ur) if ur else None,
+        "cpi": cpiAccelerationEvents(cpi_raw) if cpi_raw else None,
+        "sw": simultaneousWarningFlags(sw_data) if sw_data else None,
+        "bull": bullishSignalFlags(sw_data) if sw_data else None,
+        "hy_comp": hyCompressionToExpansion(hy) if hy else None,
+    }
+
+
+def _computeRiskScore(signals: dict) -> int:
+    """위기 지표 종합 점수 (0~10+)."""
+    hy_result = signals["hy"]
+    yc_result = signals["yc"]
+    ur_result = signals["ur"]
+    cpi_result = signals["cpi"]
+    sw_result = signals["sw"]
+
+    risk = 0
+    if hy_result and hy_result.currentDelta and hy_result.currentDelta > 1.0:
+        risk += 2
+    elif hy_result and hy_result.currentDelta and hy_result.currentDelta > 0.5:
+        risk += 1
+    if yc_result and yc_result.currentInversionStart:
+        risk += 2
+    if ur_result and ur_result.currentBounce and ur_result.currentBounce >= 0.5:
+        risk += 2
+    elif ur_result and ur_result.currentBounce and ur_result.currentBounce >= 0.3:
+        risk += 1
+    if cpi_result and cpi_result.get("isAccelerating"):
+        risk += 1
+    if sw_result and sw_result.flagCount >= 4:
+        risk += 2
+    elif sw_result and sw_result.flagCount >= 3:
+        risk += 1
+    return risk
+
+
+def _riskLevelFromScore(score: int) -> tuple[str, str]:
+    if score >= 6:
+        return "high", "위험"
+    if score >= 4:
+        return "elevated", "주의"
+    if score >= 2:
+        return "moderate", "관찰"
+    return "low", "양호"
+
+
+def _computeOpportunityScore(signals: dict) -> int:
+    """호황 지표 종합 점수."""
+    bull_result = signals["bull"]
+    hy_comp_result = signals["hy_comp"]
+    opp = bull_result.signalCount if bull_result else 0
+    if hy_comp_result and hy_comp_result.currentDelta and hy_comp_result.currentDelta < -1.0:
+        opp += 2
+    return opp
+
+
+def _opportunityLevelFromScore(score: int) -> tuple[str, str]:
+    if score >= 6:
+        return "strong", "강한 호황 조짐"
+    if score >= 4:
+        return "favorable", "우호적"
+    if score >= 2:
+        return "moderate", "보통"
+    return "neutral", "중립"
+
+
+def _buildDescriptionParts(risk_score: int, label: str, opp_label: str, signals: dict, events: list) -> list[str]:
+    """종합 서술 조립."""
+    hy_result = signals["hy"]
+    yc_result = signals["yc"]
+    sw_result = signals["sw"]
+    bull_result = signals["bull"]
+    hy_comp_result = signals["hy_comp"]
+
+    parts: list[str] = []
+    if risk_score >= 2:
+        parts.append(f"위험 수준 {label} ({risk_score}점)")
+    if hy_result and hy_result.currentDelta and hy_result.currentDelta > 0.5:
+        parts.append(hy_result.description)
+    if yc_result and yc_result.currentInversionStart:
+        parts.append(yc_result.description)
+    if sw_result and sw_result.flagCount >= 2:
+        parts.append(sw_result.description)
+    if bull_result and bull_result.signalCount >= 3:
+        parts.append(bull_result.description)
+    if hy_comp_result and hy_comp_result.currentDelta and hy_comp_result.currentDelta < -0.5:
+        parts.append(hy_comp_result.description)
+    if events:
+        top = events[0]
+        parts.append(f"역사적 유사 사건: {top.eventName} (유사도 {top.similarity}). 당시 결과: {top.outcome}")
+    if not parts:
+        parts.append(f"역사적 맥락: 위험 {label}, 기회 {opp_label}")
+    return parts
+
+
+def _findSuggestedScenario(events: list) -> tuple[str | None, str | None]:
+    """최근접 역사 사건 → nextRisk/nextEvent 찾기."""
+    if not events:
+        return None, None
+    top_event = events[0]
+    for epoch in _HISTORICAL_EPOCHS:
+        if epoch["name"] != top_event.eventName:
+            continue
+        nr = epoch.get("nextRisk")
+        if not nr:
+            break
+        ne = epoch.get("nextEvent")
+        return nr, f"현재 = {top_event.eventName} 유사 ({top_event.similarity}). 당시 다음 장: {ne or nr}"
+    return None, None
 
 
 def buildHistoricalContext(
@@ -973,153 +1059,39 @@ def buildHistoricalContext(
     vix_d = data.get("vix")
     nfci_d = data.get("nfci")
 
-    # ── 파생 시계열 (공통) ──
     hy_d3 = _delta_n(hy, 3) if hy else {}
     ur_d6 = _delta_n(ur, 6) if ur else {}
     ip_yoy = _yoy(indpro) if indpro else {}
     cpi_yoy = _yoy(cpi_raw) if cpi_raw else {}
 
-    # ── 위기 신호 ──
-    hy_result = None
-    if hy and hy_d3:
-        latest_hy_month = max(hy_d3.keys()) if hy_d3 else None
-        current_delta = hy_d3.get(latest_hy_month) if latest_hy_month else None
-        hy_result = hySpikesToRecession(hy, current_delta=current_delta)
+    sw_data = _buildSimultaneousWarningData(hy, hy_d3, spread_2y, ur, ur_d6, vix_d, nfci_d, ip_yoy, cpi_yoy)
 
-    yc_result = None
-    if spread_3m:
-        yc_result = yieldCurveInversionsToRecession(spread_3m)
+    signals = _computeRawSignals(hy, hy_d3, spread_3m, ur, cpi_raw, sw_data)
 
-    ur_result = None
-    if ur:
-        ur_result = unemploymentBounceToRecession(ur)
-
-    cpi_result = None
-    if cpi_raw:
-        cpi_result = cpiAccelerationEvents(cpi_raw)
-
-    sw_data: dict[str, dict[str, float] | None] = {}
-    if hy:
-        sw_data["hy_spread"] = hy
-        sw_data["hy_spread_d3"] = hy_d3
-    if spread_2y:
-        sw_data["spread_10y2y"] = spread_2y
-    if ur:
-        sw_data["ur_d6"] = ur_d6
-    if vix_d:
-        sw_data["vix"] = vix_d
-    if nfci_d:
-        sw_data["nfci"] = nfci_d
-    if ip_yoy:
-        sw_data["ip_yoy"] = ip_yoy
-    if cpi_yoy:
-        sw_data["cpi_yoy"] = cpi_yoy
-
-    sw_result = simultaneousWarningFlags(sw_data) if sw_data else None
-
-    # ── 호황 신호 ──
-    bull_result = bullishSignalFlags(sw_data) if sw_data else None
-
-    hy_comp_result = None
-    if hy:
-        hy_comp_result = hyCompressionToExpansion(hy)
-
-    # ── 역사적 사건 매칭 ──
     event_data = dict(sw_data)
     if data.get("fedfunds"):
         event_data["fedfunds"] = data["fedfunds"]
     events = matchHistoricalEvents(event_data) if event_data else []
 
-    # ── 위험 수준 (위기) ──
-    risk_score = 0
-    if hy_result and hy_result.currentDelta and hy_result.currentDelta > 1.0:
-        risk_score += 2
-    elif hy_result and hy_result.currentDelta and hy_result.currentDelta > 0.5:
-        risk_score += 1
-    if yc_result and yc_result.currentInversionStart:
-        risk_score += 2
-    if ur_result and ur_result.currentBounce and ur_result.currentBounce >= 0.5:
-        risk_score += 2
-    elif ur_result and ur_result.currentBounce and ur_result.currentBounce >= 0.3:
-        risk_score += 1
-    if cpi_result and cpi_result.get("isAccelerating"):
-        risk_score += 1
-    if sw_result and sw_result.flagCount >= 4:
-        risk_score += 2
-    elif sw_result and sw_result.flagCount >= 3:
-        risk_score += 1
+    risk_score = _computeRiskScore(signals)
+    level, label = _riskLevelFromScore(risk_score)
 
-    if risk_score >= 6:
-        level, label = "high", "위험"
-    elif risk_score >= 4:
-        level, label = "elevated", "주의"
-    elif risk_score >= 2:
-        level, label = "moderate", "관찰"
-    else:
-        level, label = "low", "양호"
+    opp_score = _computeOpportunityScore(signals)
+    opp_level, opp_label = _opportunityLevelFromScore(opp_score)
 
-    # ── 기회 수준 (호황) ──
-    opp_score = 0
-    if bull_result:
-        opp_score = bull_result.signalCount
-    if hy_comp_result and hy_comp_result.currentDelta and hy_comp_result.currentDelta < -1.0:
-        opp_score += 2
+    desc_parts = _buildDescriptionParts(risk_score, label, opp_label, signals, events)
 
-    if opp_score >= 6:
-        opp_level, opp_label = "strong", "강한 호황 조짐"
-    elif opp_score >= 4:
-        opp_level, opp_label = "favorable", "우호적"
-    elif opp_score >= 2:
-        opp_level, opp_label = "moderate", "보통"
-    else:
-        opp_level, opp_label = "neutral", "중립"
-
-    # ── 종합 서술 ──
-    desc_parts: list[str] = []
-
-    # 위기 측면
-    if risk_score >= 2:
-        desc_parts.append(f"위험 수준 {label} ({risk_score}점)")
-    if hy_result and hy_result.currentDelta and hy_result.currentDelta > 0.5:
-        desc_parts.append(hy_result.description)
-    if yc_result and yc_result.currentInversionStart:
-        desc_parts.append(yc_result.description)
-    if sw_result and sw_result.flagCount >= 2:
-        desc_parts.append(sw_result.description)
-
-    # 호황 측면
-    if bull_result and bull_result.signalCount >= 3:
-        desc_parts.append(bull_result.description)
-    if hy_comp_result and hy_comp_result.currentDelta and hy_comp_result.currentDelta < -0.5:
-        desc_parts.append(hy_comp_result.description)
-
-    # 역사적 사건
-    if events:
-        top = events[0]
-        desc_parts.append(f"역사적 유사 사건: {top.eventName} (유사도 {top.similarity}). 당시 결과: {top.outcome}")
-
-    if not desc_parts:
-        desc_parts.append(f"역사적 맥락: 위험 {label}, 기회 {opp_label}")
-
-    # ── "다음 장" — 가장 유사한 시대의 후속 위험 ──
-    suggested_scenario = None
-    suggested_reason = None
-    if events:
-        top_event = events[0]
-        # _HISTORICAL_EPOCHS에서 nextRisk 찾기
-        for epoch in _HISTORICAL_EPOCHS:
-            if epoch["name"] == top_event.eventName:
-                nr = epoch.get("nextRisk")
-                ne = epoch.get("nextEvent")
-                if nr:
-                    suggested_scenario = nr
-                    suggested_reason = (
-                        f"현재 = {top_event.eventName} 유사 ({top_event.similarity}). 당시 다음 장: {ne or nr}"
-                    )
-                break
-
+    suggested_scenario, suggested_reason = _findSuggestedScenario(events)
     if suggested_scenario:
         desc_parts.append(f"다음 장 주의: {suggested_scenario} ({suggested_reason})")
+
+    hy_result = signals["hy"]
+    yc_result = signals["yc"]
+    ur_result = signals["ur"]
+    cpi_result = signals["cpi"]
+    sw_result = signals["sw"]
+    bull_result = signals["bull"]
+    hy_comp_result = signals["hy_comp"]
 
     return HistoricalContext(
         # 위기
