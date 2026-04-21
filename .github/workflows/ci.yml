@@ -216,6 +216,7 @@ jobs:
   # 파일별 독립 프로세스 (test-realdata.sh) 로 메모리 격리.
   realdata-suite:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
 
