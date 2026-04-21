@@ -198,214 +198,262 @@ def _cleanName(text: str) -> str:
     return name
 
 
+_CATEGORY_KEYWORDS = [("관계기업", "관계기업"), ("공동기업", "공동기업")]
+
+_LOCATION_COUNTRIES = [
+    "한국",
+    "대한민국",
+    "미국",
+    "중국",
+    "일본",
+    "독일",
+    "프랑스",
+    "싱가포르",
+    "영국",
+    "인도",
+    "베트남",
+]
+
+_PROFILE_DETAIL_KEYWORDS_EXT = _PROFILE_SUBHEADER_KEYWORDS + [
+    "소재지",
+    "소재국가",
+    "관계의 성격",
+    "주요영업활동",
+    "주요 영업활동",
+]
+
+
+def _detectCategory(text: str, currentCategory: str | None) -> str | None:
+    """관계기업/공동기업 키워드가 있으면 업데이트, 없으면 기존값 유지."""
+    for kw, cat in _CATEGORY_KEYWORDS:
+        if kw in text:
+            return cat
+    return currentCategory
+
+
+def _isHeaderRow(cells: list[str], cellStr: str) -> bool:
+    """헤더 행 판정: 3가지 패턴 (이름+세부 / 빈첫셀+세부2+ / 세부2+만)."""
+    hasName = any(kw in cellStr for kw in _PROFILE_NAME_KEYWORDS)
+    hasDetail = any(kw in cellStr for kw in _PROFILE_DETAIL_KEYWORDS_EXT + ["결산월"])
+    firstEmpty = len(cells) >= 3 and not cells[0].strip()
+    detailCount = sum(1 for kw in _PROFILE_DETAIL_KEYWORDS_EXT if kw in cellStr)
+    uniqueNonEmpty = set(c.strip() for c in cells if c.strip())
+    isRepeating = len(uniqueNonEmpty) * 2 < len([c for c in cells if c.strip()])
+    if isRepeating:
+        return False
+    return (
+        (hasName and hasDetail)
+        or (firstEmpty and detailCount >= 2 and len(cells) <= 12)
+        or (not hasName and detailCount >= 2 and 3 <= len(cells) <= 12)
+    )
+
+
+def _isGroupSeparator2Cell(cells: list[str], cellStr: str, rows: list[list[str]], i: int) -> bool:
+    """'구 분 | 당기말' 같은 2셀 헤더 여부 — 다음 행이 실제 프로필 헤더이면 skip."""
+    if len(cells) != 2 or not any(kw in cellStr for kw in ["구 분", "구분"]):
+        return False
+    if not any(kw in cellStr for kw in ["당기", "전기"]):
+        return False
+    if i + 1 >= len(rows):
+        return False
+    nextStr = " ".join(rows[i + 1])
+    return any(kw in nextStr for kw in _PROFILE_SUBHEADER_KEYWORDS)
+
+
+def _applyDirectMapping(profile: AffiliateProfile, cells: list[str], headers: list[str], mapping: dict) -> None:
+    """헤더에 이름열 명시된 경우 — 컬럼 매핑으로 필드 추출."""
+    offset = len(headers) - len(cells)
+
+    def _adj(idx: int | None) -> int | None:
+        if idx is None:
+            return None
+        adj = idx - offset
+        return adj if 0 <= adj < len(cells) else None
+
+    idx = _adj(mapping["ownershipIdx"])
+    if idx is not None:
+        val = cells[idx].strip().rstrip("%")
+        amt = _parseAmount(val)
+        if amt is not None and 0 < amt <= 100:
+            profile.ownership = amt
+
+    idx = _adj(mapping["bookValueIdx"])
+    if idx is not None:
+        profile.bookValue = _parseAmount(cells[idx])
+
+    idx = _adj(mapping["acquisitionIdx"])
+    if idx is not None:
+        profile.acquisitionCost = _parseAmount(cells[idx])
+
+    idx = _adj(mapping["locationIdx"])
+    if idx is not None:
+        profile.location = cells[idx].strip() or None
+
+    idx = _adj(mapping["activityIdx"])
+    if idx is not None:
+        profile.activity = cells[idx].strip() or None
+
+
+def _fallbackOwnership(profile: AffiliateProfile, cells: list[str]) -> None:
+    """fallback 지분율 추출: % 또는 0<v<=100 소수."""
+    if profile.ownership is not None:
+        return
+    for c in cells[1:]:
+        cs = c.strip()
+        if cs.endswith("%"):
+            val = _parseAmount(cs.rstrip("%"))
+            if val is not None and 0 < val <= 100:
+                profile.ownership = val
+                return
+        elif "." in cs and cs.replace(".", "").replace(",", "").isdigit():
+            val = _parseAmount(cs)
+            if val is not None and 0 < val <= 100:
+                profile.ownership = val
+                return
+
+
+def _fallbackBookValue(profile: AffiliateProfile, cells: list[str]) -> None:
+    """fallback 장부금액: 마지막 숫자 셀."""
+    if profile.bookValue is not None:
+        return
+    for j in range(len(cells) - 1, 0, -1):
+        val = _parseAmount(cells[j])
+        if val is not None:
+            profile.bookValue = val
+            return
+
+
+def _fallbackLocation(profile: AffiliateProfile, cells: list[str]) -> None:
+    """fallback 소재지: 국가명 키워드 포함 셀."""
+    if profile.location is not None:
+        return
+    for c in cells[1:]:
+        cs = c.strip()
+        if cs and not _parseAmount(cs) and len(cs) <= 10:
+            if any(kw in cs for kw in _LOCATION_COUNTRIES):
+                profile.location = cs
+                return
+
+
+def _fallbackActivity(profile: AffiliateProfile, cells: list[str], headerHasName: bool) -> None:
+    """fallback 영업활동: 기업명 다음 텍스트 셀 (헤더 없는 경우)."""
+    if profile.activity is not None or headerHasName:
+        return
+    for c in cells[1:]:
+        cs = c.strip()
+        if cs and _parseAmount(cs) is None and not cs.endswith("%"):
+            if len(cs) >= 2 and cs != profile.location:
+                profile.activity = cs
+                return
+
+
+def _shouldSkipDataRow(firstCell: str) -> bool:
+    """계·합계·소계 행 스킵 여부."""
+    return firstCell in ("계", "합 계", "합계", "소 계", "소계")
+
+
+def _shouldResetHeaders(firstCell: str) -> bool:
+    """헤더 리셋 행: (*1/(주1 주석, 기간 구분."""
+    if re.match(r"^\(\*?\d", firstCell) or re.match(r"^\(주\d", firstCell):
+        return True
+    return firstCell in ("당기", "전기", "당기말", "전기말")
+
+
+def _parseProfileDataRow(
+    cells: list[str],
+    headers: list[str],
+    subHeaders: list[str] | None,
+    category: str | None,
+) -> AffiliateProfile | None:
+    """데이터 행에서 AffiliateProfile 생성. 무효 행이면 None."""
+    firstCell = cells[0].strip()
+    if _shouldSkipDataRow(firstCell) or not firstCell:
+        return None
+
+    if firstCell.startswith("전체 "):
+        category = _detectCategory(firstCell, category)
+        if len(cells) >= 3 and _isNameCell(cells[1].strip()):
+            firstCell = cells[1].strip()
+        else:
+            return None
+
+    if not _isNameCell(firstCell):
+        return None
+
+    mapping = _findHeaderColumns(headers, subHeaders)
+    headerHasName = any(kw in headers[0].strip() for kw in _PROFILE_NAME_KEYWORDS) if headers[0].strip() else False
+
+    profile = AffiliateProfile(name=_cleanName(firstCell), category=category)
+    if headerHasName:
+        _applyDirectMapping(profile, cells, headers, mapping)
+
+    _fallbackOwnership(profile, cells)
+    _fallbackBookValue(profile, cells)
+    _fallbackLocation(profile, cells)
+    _fallbackActivity(profile, cells, headerHasName)
+    return profile
+
+
 def extractProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
-    """투자현황 추출. 2행 헤더 지원."""
+    """투자현황 추출 orchestrator — 2행 헤더 + 카테고리 + fallback 매핑 (Q3.1e)."""
     results: list[AffiliateProfile] = []
-    headers = None
-    subHeaders = None
-    headerIdx = None
-    category = None
+    headers: list[str] | None = None
+    subHeaders: list[str] | None = None
+    headerIdx: int | None = None
+    category: str | None = None
 
     for i, cells in enumerate(rows):
         cellStr = " ".join(cells)
 
         if len(cells) <= 2:
-            for kw, cat in [("관계기업", "관계기업"), ("공동기업", "공동기업")]:
-                if kw in cellStr:
-                    category = cat
+            category = _detectCategory(cellStr, category)
 
         if len(cells) > 30:
             continue
 
-        hasName = any(kw in cellStr for kw in _PROFILE_NAME_KEYWORDS)
-        hasDetail = any(
-            kw in cellStr
-            for kw in _PROFILE_SUBHEADER_KEYWORDS
-            + ["소재지", "소재국가", "관계의 성격", "주요영업활동", "주요 영업활동", "결산월"]
-        )
-        # 헤더 감지:
-        # 1) 이름키워드 + 세부키워드 (일반)
-        # 2) 첫 셀 비어있고 세부키워드 2개+ (현대차/LG전자)
-        # 3) 이름키워드 없지만 세부키워드 2개+ 3셀이상 (LG에너지 순자산|지분율|장부금액)
-        firstEmpty = len(cells) >= 3 and not cells[0].strip()
-        detailCount = sum(
-            1
-            for kw in _PROFILE_SUBHEADER_KEYWORDS
-            + ["소재지", "소재국가", "관계의 성격", "주요영업활동", "주요 영업활동"]
-            if kw in cellStr
-        )
-        # 반복 패턴 체크: 고유 비어있지 않은 셀이 절반 이하면 횡전개 서브헤더
-        uniqueNonEmpty = set(c.strip() for c in cells if c.strip())
-        isRepeating = len(uniqueNonEmpty) * 2 < len([c for c in cells if c.strip()])
-        if not isRepeating and (
-            (hasName and hasDetail)
-            or (firstEmpty and detailCount >= 2 and len(cells) <= 12)
-            or (not hasName and detailCount >= 2 and 3 <= len(cells) <= 12)
-        ):
+        # 헤더 감지
+        if _isHeaderRow(cells, cellStr):
             headers = cells
             headerIdx = i
             subHeaders = None
-            len(cells)
             continue
 
-        # 서브헤더: 헤더 바로 다음 행이고 지분율/장부금액 키워드 포함
-        if headers and headerIdx is not None and i == headerIdx + 1:
-            if any(kw in cellStr for kw in _PROFILE_SUBHEADER_KEYWORDS):
-                subHeaders = cells
-                max(len(headers), len(subHeaders))
-                continue
+        # 서브헤더
+        if (
+            headers
+            and headerIdx is not None
+            and i == headerIdx + 1
+            and any(kw in cellStr for kw in _PROFILE_SUBHEADER_KEYWORDS)
+        ):
+            subHeaders = cells
+            continue
 
-        # "구 분 | 당기말" 같은 2셀 헤더 → 다음 행이 실제 컬럼 헤더
-        if len(cells) == 2 and any(kw in cellStr for kw in ["구 분", "구분"]):
-            if any(kw in cellStr for kw in ["당기", "전기"]):
-                # 다음 행을 미리 확인해서 프로필 헤더인지 체크
-                if i + 1 < len(rows):
-                    nextStr = " ".join(rows[i + 1])
-                    if any(kw in nextStr for kw in _PROFILE_SUBHEADER_KEYWORDS):
-                        # 다음 행이 실제 헤더가 될 것이므로 skip
-                        continue
+        # 2셀 구분 헤더 skip
+        if _isGroupSeparator2Cell(cells, cellStr, rows, i):
+            continue
 
         if headers is None:
             continue
 
+        # 짧은 셀 — 주석/카테고리 업데이트
         if len(cells) < 2:
             s = cells[0].strip() if cells else ""
             if s.startswith("(") and ("*" in s or "주" in s):
                 headers = None
                 subHeaders = None
-            elif any(kw in s for kw in ["관계기업", "공동기업"]):
-                for kw, cat in [("관계기업", "관계기업"), ("공동기업", "공동기업")]:
-                    if kw in s:
-                        category = cat
+            elif any(kw in s for kw in ("관계기업", "공동기업")):
+                category = _detectCategory(s, category)
             continue
 
         firstCell = cells[0].strip()
-        if firstCell in ("계", "합 계", "합계", "소 계", "소계"):
-            continue
-        if not firstCell:
-            continue
-        if re.match(r"^\(\*?\d", firstCell) or re.match(r"^\(주\d", firstCell):
+        if _shouldResetHeaders(firstCell):
             headers = None
             subHeaders = None
             continue
-        # 기간 행 스킵 + 헤더 리셋
-        if firstCell in ("당기", "전기", "당기말", "전기말"):
-            headers = None
-            subHeaders = None
-            continue
-        # "전체 관계기업 투자금액" 등 그룹 행은 카테고리만 추출
-        if firstCell.startswith("전체 "):
-            for kw, cat in [("관계기업", "관계기업"), ("공동기업", "공동기업")]:
-                if kw in firstCell:
-                    category = cat
-            # 첫 행은 카테고리 + 기업명이 합쳐진 경우 (현대차)
-            if len(cells) >= 3 and _isNameCell(cells[1].strip()):
-                firstCell = cells[1].strip()
-            else:
-                continue
 
-        if not _isNameCell(firstCell):
-            continue
-
-        mapping = _findHeaderColumns(headers, subHeaders)
-
-        # offset: 헤더의 비어있지 않은 첫 셀 위치 vs 데이터의 두 번째 셀 위치
-        # 헤더에 이름열이 명시적이면 직접 매핑, 아니면 fallback 사용
-        headerHasName = any(kw in headers[0].strip() for kw in _PROFILE_NAME_KEYWORDS) if headers[0].strip() else False
-
-        name = _cleanName(firstCell)
-        profile = AffiliateProfile(name=name, category=category)
-
-        if headerHasName:
-            # 직접 매핑: 헤더와 데이터의 셀 수 차이로 offset
-            offset = len(headers) - len(cells)
-
-            def _adj(idx: int | None) -> int | None:
-                if idx is None:
-                    return None
-                adj = idx - offset
-                return adj if 0 <= adj < len(cells) else None
-
-            idx = _adj(mapping["ownershipIdx"])
-            if idx is not None:
-                val = cells[idx].strip().rstrip("%")
-                amt = _parseAmount(val)
-                if amt is not None and 0 < amt <= 100:
-                    profile.ownership = amt
-
-            idx = _adj(mapping["bookValueIdx"])
-            if idx is not None:
-                profile.bookValue = _parseAmount(cells[idx])
-
-            idx = _adj(mapping["acquisitionIdx"])
-            if idx is not None:
-                profile.acquisitionCost = _parseAmount(cells[idx])
-
-            idx = _adj(mapping["locationIdx"])
-            if idx is not None:
-                profile.location = cells[idx].strip() or None
-
-            idx = _adj(mapping["activityIdx"])
-            if idx is not None:
-                profile.activity = cells[idx].strip() or None
-
-        # fallback: 셀 탐색으로 지분율/장부금액/소재지 추출
-        if profile.ownership is None:
-            for c in cells[1:]:
-                cs = c.strip()
-                if cs.endswith("%"):
-                    val = _parseAmount(cs.rstrip("%"))
-                    if val is not None and 0 < val <= 100:
-                        profile.ownership = val
-                        break
-                elif "." in cs and cs.replace(".", "").replace(",", "").isdigit():
-                    val = _parseAmount(cs)
-                    if val is not None and 0 < val <= 100:
-                        profile.ownership = val
-                        break
-
-        if profile.bookValue is None:
-            # 마지막 숫자 셀을 장부금액으로
-            for j in range(len(cells) - 1, 0, -1):
-                val = _parseAmount(cells[j])
-                if val is not None:
-                    profile.bookValue = val
-                    break
-
-        if profile.location is None:
-            # 한글 2자+ 비숫자 셀 중 기업명이 아닌 것을 소재지로
-            for c in cells[1:]:
-                cs = c.strip()
-                if cs and not _parseAmount(cs) and len(cs) <= 10:
-                    if any(
-                        kw in cs
-                        for kw in [
-                            "한국",
-                            "대한민국",
-                            "미국",
-                            "중국",
-                            "일본",
-                            "독일",
-                            "프랑스",
-                            "싱가포르",
-                            "영국",
-                            "인도",
-                            "베트남",
-                        ]
-                    ):
-                        profile.location = cs
-                        break
-
-        if profile.activity is None and not headerHasName:
-            # 헤더 없는 경우: 기업명 바로 다음 텍스트 셀이 영업활동
-            for c in cells[1:]:
-                cs = c.strip()
-                if cs and _parseAmount(cs) is None and not cs.endswith("%"):
-                    if len(cs) >= 2 and cs != profile.location:
-                        profile.activity = cs
-                        break
-
-        results.append(profile)
+        profile = _parseProfileDataRow(cells, headers, subHeaders, category)
+        if profile is not None:
+            results.append(profile)
 
     return results
 
