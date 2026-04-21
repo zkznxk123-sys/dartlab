@@ -14,7 +14,7 @@ thumbnail: /avatar-chart.png
 
 중요한 것은 `무엇을 비용 처리하고 무엇을 자산화했는가`, `언제 상각하고 언제 손상을 인식하는가`, `그 과정이 현금흐름과 실제 매출로 이어지는가`다. 같은 개발비 증가라도 어떤 회사는 제품화가 진행되는 건강한 투자일 수 있고, 어떤 회사는 아직 검증되지 않은 스토리를 자산으로 오래 붙들고 있는 구조일 수 있다.
 
-이 글은 개발비·무형자산을 `자산화 정책 -> 상각·손상 인식 -> 매출과 현금흐름 연결 -> 후속 보고서 추적` 순서로 읽는 법을 정리한다. 숫자 해석의 기본 프레임은 [숫자만 보면 왜 자주 틀리나](/blog/beyond-the-numbers), 현금 검증은 [영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income), 투자 집행의 앞단은 [건설중인자산은 왜 중요한가](/blog/capacity-utilization-capex), CAPEX 이후 비용 반영은 [CAPEX 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex)와 같이 보면 더 잘 이어진다.
+이 글은 개발비·무형자산을 `자산화 정책 -> 상각·손상 인식 -> 매출과 현금흐름 연결 -> 후속 보고서 추적` 순서로 읽는 법을 정리한다. 숫자 해석의 기본 프레임은 [숫자만 보면 왜 자주 틀리나](/blog/beyond-the-numbers), 현금 검증은 [영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income), 투자 집행의 앞단은 [건설중인자산은 왜 중요한가](/blog/capacity-utilization-capex), 설비투자 이후 비용 반영은 [설비투자 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex)와 같이 보면 더 잘 이어진다.
 
 ![개발비와 무형자산을 어떤 순서로 읽어야 하는지 정리한 구조도](./assets/045-reading-flow.svg)
 
@@ -157,7 +157,7 @@ thumbnail: /avatar-chart.png
 
 ### 무엇을 같이 보면 좋은가
 
-신규사업 계획, 영업현금흐름, CAPEX 이후 비용 구조, 자금조달 공시를 같이 보면 좋다.
+신규사업 계획, 영업현금흐름, 설비투자 이후 비용 구조, 자금조달 공시를 같이 보면 좋다.
 
 ### 가장 먼저 적어볼 한 줄은 무엇인가
 
@@ -172,7 +172,7 @@ thumbnail: /avatar-chart.png
 - [숫자만 보면 왜 자주 틀리나](/blog/beyond-the-numbers)
 - [영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income)
 - [건설중인자산은 왜 중요한가](/blog/capacity-utilization-capex)
-- [CAPEX 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex)
+- [설비투자 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex)
 - [공시에서 신규사업 계획은 어디까지 믿어야 하나](/blog/how-far-to-trust-new-business-plans)
 - [유상증자 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
 - [전환사채와 BW 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)

@@ -129,7 +129,7 @@ thumbnail: /avatar-chart.png
 ### CMO·CDMO(위탁생산)
 
 - 바이오 의약품을 위탁 생산하는 CDMO는 바이오지만 사실상 **제조업에 가까운 구조**다.
-- 수주잔고, 설비 가동률, CAPEX가 핵심이다. 건설업처럼 수주 파이프라인을 읽어야 한다.
+- 수주잔고, 설비 가동률, 설비투자가 핵심이다. 건설업처럼 수주 파이프라인을 읽어야 한다.
 - [건설업 사업보고서는 어디부터 읽어야 하나](/blog/construction-company-filings)의 수주-현금 루프 프레임이 CDMO에도 적용된다.
 
 ### 플랫폼·진단
@@ -196,7 +196,7 @@ thumbnail: /avatar-chart.png
 
 **CMO·CDMO는 일반 바이오와 같은 기준으로 읽어야 하나?**
 
-아니다. CDMO는 바이오 기업이지만 비즈니스 모델은 제조업에 가깝다. 수주잔고, 설비 가동률, CAPEX 효율성이 핵심이다. 파이프라인 리스크보다 설비 투자 회수와 고객 집중도 리스크를 먼저 본다. [건설업 사업보고서는 어디부터 읽어야 하나](/blog/construction-company-filings)의 수주-현금 프레임과 [CAPEX 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex)의 설비 투자 프레임을 함께 적용하면 된다.
+아니다. CDMO는 바이오 기업이지만 비즈니스 모델은 제조업에 가깝다. 수주잔고, 설비 가동률, 설비투자 효율성이 핵심이다. 파이프라인 리스크보다 설비 투자 회수와 고객 집중도 리스크를 먼저 본다. [건설업 사업보고서는 어디부터 읽어야 하나](/blog/construction-company-filings)의 수주-현금 프레임과 [설비투자 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex)의 설비 투자 프레임을 함께 적용하면 된다.
 
 **계속기업 불확실성이 기재되면 바로 위험한가?**
 
@@ -228,7 +228,7 @@ thumbnail: /avatar-chart.png
 
 **설비 투자 (CDMO 참고)**
 - [건설업 사업보고서는 어디부터 읽어야 하나](/blog/construction-company-filings) — 수주-현금 루프 (CDMO 적용 가능)
-- [CAPEX 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex) — 설비 투자 회수 프레임
+- [설비투자 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex) — 설비 투자 회수 프레임
 
 ---
 

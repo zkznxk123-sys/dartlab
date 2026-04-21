@@ -15,7 +15,7 @@ keywords:
   - 비경상 이익
 ---
 
-**조엘 그린블라트의 마법공식은 단순하다.** PER이 낮고(EBIT/EV가 높고) ROIC가 높은 종목을 두 랭킹의 합으로 줄세운다. 1988~2004년 미국 시장에서 연 30.8%, S&P 11.6% 대비 압도적. 책 한 권([『The Little Book that Beats the Market』, 2005](https://en.wikipedia.org/wiki/The_Little_Book_That_Beats_the_Market))이 그걸로 끝낸다.
+**조엘 그린블라트의 마법공식은 단순하다.** PER이 낮고(EBIT/EV가 높고) 투하자본수익률가 높은 종목을 두 랭킹의 합으로 줄세운다. 1988~2004년 미국 시장에서 연 30.8%, S&P 11.6% 대비 압도적. 책 한 권([『The Little Book that Beats the Market』, 2005](https://en.wikipedia.org/wiki/The_Little_Book_That_Beats_the_Market))이 그걸로 끝낸다.
 
 이 공식을 한국 시장에 dartlab으로 5분 만에 돌려봤다. **그리고 1위가 함정이었다.** 그 함정을 발견하는 데 또 5분 걸렸다 — 그게 dartlab의 진짜 효용이다.
 
@@ -48,9 +48,9 @@ keywords:
 | 그린블라트 | 한국 적용 (dartlab) | 출처 |
 |---|---|---|
 | EBIT / EV | 1 / PER | `dartlab.scan("valuation")` — 네이버 실시간 |
-| Return on Capital | ROA (대체) | `dartlab.scan("profitability")` — 프리빌드 parquet |
+| Return on Capital | 총자산수익률 (대체) | `dartlab.scan("profitability")` — 프리빌드 parquet |
 
-> EBIT/EV가 1/PER보다 정밀하지만, 한국 어댑테이션 연구들은 1/PER도 충분히 작동함을 보였다(Kim & Kim 2018). ROIC도 NWC + Net Fixed Assets 분모가 표준이지만, ROA는 그 핵심을 잡으면서 데이터가 깔끔하다.
+> EBIT/EV가 1/PER보다 정밀하지만, 한국 어댑테이션 연구들은 1/PER도 충분히 작동함을 보였다(Kim & Kim 2018). 투하자본수익률도 NWC + Net Fixed Assets 분모가 표준이지만, 총자산수익률는 그 핵심을 잡으면서 데이터가 깔끔하다.
 
 dartlab 두 줄이면 끝난다.
 
@@ -96,7 +96,7 @@ print(ranked.head(5))
 
 **실행 결과 (2026-04-07 기준 실측):**
 
-| 순위 | 종목명 | PER | EY% | ROA% | MagicScore |
+| 순위 | 종목명 | PER | EY% | 총자산수익률% | MagicScore |
 |---|---|---|---|---|---|
 | **1** | **케이씨씨 (002380)** | **2.64** | **37.9** | **5.3** | **44** |
 | 2 | 선진 (136490) | 1.99 | 50.3 | 3.5 | 73 |
@@ -155,7 +155,7 @@ cleaner = df.filter(
 
 같은 코드로 다시 돌리면:
 
-| 순위 | 종목명 | PER | EY% | ROA% | 영업이익률 | 순이익률 |
+| 순위 | 종목명 | PER | EY% | 총자산수익률% | 영업이익률 | 순이익률 |
 |---|---|---|---|---|---|---|
 | **1** | **선진 (136490)** | **1.99** | **50.3** | **3.5** | **12.3** | **10.0** |
 | 2 | 대원산업 (005710) | 3.26 | 30.7 | 3.3 | 8.0 | 9.6 |

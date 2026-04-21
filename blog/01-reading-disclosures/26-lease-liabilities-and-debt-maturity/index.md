@@ -14,7 +14,7 @@ thumbnail: /avatar-chart.png
 
 같은 1조원 차입이라도 5년 이상 분산된 만기와 충분한 영업현금흐름을 가진 회사는 다르게 읽어야 하고, 1년 안에 대규모 상환이 몰려 있는데 영업현금흐름과 보유현금이 약한 회사는 훨씬 더 보수적으로 봐야 한다. 리스부채도 마찬가지다. 사용권자산과 함께 잡히는 리스 구조는 겉으로 보기엔 안정적일 수 있어도, 실제로는 고정 현금 유출 압박으로 작동할 수 있다.
 
-이 글은 리스부채와 차입 만기 구조를 `부채 총액 -> 만기 분포 -> 영업현금흐름 -> 차환 가능성 -> 다음 보고서 추적` 순서로 읽는 방법을 정리한다. 현금 검증은 [영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income), 숫자 해석의 기본은 [숫자만 보면 왜 자주 틀리나](/blog/beyond-the-numbers), 고정비 압박은 [CAPEX 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex), 구조 재편 이벤트는 [감자와 주식병합 공시는 무엇을 먼저 봐야 하나](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)와 같이 보면 더 잘 맞물린다.
+이 글은 리스부채와 차입 만기 구조를 `부채 총액 -> 만기 분포 -> 영업현금흐름 -> 차환 가능성 -> 다음 보고서 추적` 순서로 읽는 방법을 정리한다. 현금 검증은 [영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income), 숫자 해석의 기본은 [숫자만 보면 왜 자주 틀리나](/blog/beyond-the-numbers), 고정비 압박은 [설비투자 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex), 구조 재편 이벤트는 [감자와 주식병합 공시는 무엇을 먼저 봐야 하나](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)와 같이 보면 더 잘 맞물린다.
 
 ![리스부채와 차입 만기 구조를 어떤 순서로 읽어야 하는지 정리한 구조도](./assets/047-reading-flow.svg)
 
@@ -43,7 +43,7 @@ thumbnail: /avatar-chart.png
 
 이때 가장 먼저 해야 할 일은 `차입금 총액`을 보는 것이 아니라 `단기 구간`을 표시해 두는 것이다. 1년 안에 갚아야 하는 차입금과 리스부채, 그리고 같은 기간의 보유현금과 영업현금흐름이 얼마나 버텨 주는지를 먼저 봐야 한다. 그다음에야 장기 구조를 평가할 수 있다.
 
-또 하나 중요한 것은 리스부채를 별개로 떼어 보지 않는 것이다. 리스는 종종 차입보다 덜 위험해 보이지만, 실제 현금 유출은 매우 꾸준하고 경기 둔화기에 줄이기 쉽지 않은 경우가 많다. 특히 오프라인 유통, 물류, 항공, 운송, 장비 집약 업종은 리스가 사실상 고정비 구조와 겹친다. 이 점은 [생산능력·가동률·CAPEX 읽는 법](/blog/capacity-utilization-capex), [건설중인자산은 왜 중요한가](/blog/capacity-utilization-capex)와 같이 보면 더 잘 보인다.
+또 하나 중요한 것은 리스부채를 별개로 떼어 보지 않는 것이다. 리스는 종종 차입보다 덜 위험해 보이지만, 실제 현금 유출은 매우 꾸준하고 경기 둔화기에 줄이기 쉽지 않은 경우가 많다. 특히 오프라인 유통, 물류, 항공, 운송, 장비 집약 업종은 리스가 사실상 고정비 구조와 겹친다. 이 점은 [생산능력·가동률·설비투자 읽는 법](/blog/capacity-utilization-capex), [건설중인자산은 왜 중요한가](/blog/capacity-utilization-capex)와 같이 보면 더 잘 보인다.
 
 ![리스부채와 차입 구조를 읽을 때 같이 확인해야 할 레이어를 정리한 도식](./assets/047-evidence-layer.svg)
 
@@ -91,7 +91,7 @@ thumbnail: /avatar-chart.png
 
 첫째, `단기 차입 증가 + 영업현금흐름 약화` 조합이다. 이 경우는 본업이 벌어 주는 현금보다 가까운 상환 압박이 빨리 커지고 있을 가능성이 있다. 둘째, `리스부채 부담 확대 + 사용권자산 유지 + 매출 둔화` 조합이다. 점포, 설비, 물류 같은 고정 구조는 유지되는데 매출이 둔화되면 리스료 부담이 체감상 더 빨리 커진다.
 
-셋째, `만기 집중 + 증자나 사채 발행 반복` 조합이다. 이 경우는 총부채보다 차환 의존이 더 큰 문제일 수 있다. 넷째, `보유현금은 커 보이는데 단기 압박도 같이 커지는 구조`다. 현금이 많아 보여도 운영자금과 예정된 CAPEX, 리스료 지급을 빼면 실제 여유가 생각보다 얇을 수 있다.
+셋째, `만기 집중 + 증자나 사채 발행 반복` 조합이다. 이 경우는 총부채보다 차환 의존이 더 큰 문제일 수 있다. 넷째, `보유현금은 커 보이는데 단기 압박도 같이 커지는 구조`다. 현금이 많아 보여도 운영자금과 예정된 설비투자, 리스료 지급을 빼면 실제 여유가 생각보다 얇을 수 있다.
 
 이 네 조합만 익혀도 부채 해석은 훨씬 빨라진다. 숫자를 많이 외우는 것보다, 어떤 두세 줄이 같이 움직일 때 먼저 위험을 의심해야 하는지 아는 편이 더 실전적이다.
 
@@ -167,7 +167,7 @@ thumbnail: /avatar-chart.png
 
 ### 무엇을 같이 보면 좋은가
 
-영업현금흐름, CAPEX 이후 비용 구조, 신규 자금조달 공시를 같이 보면 좋다.
+영업현금흐름, 설비투자 이후 비용 구조, 신규 자금조달 공시를 같이 보면 좋다.
 
 ### 가장 먼저 적어볼 한 줄은 무엇인가
 
@@ -177,9 +177,9 @@ thumbnail: /avatar-chart.png
 
 - [숫자만 보면 왜 자주 틀리나](/blog/beyond-the-numbers)
 - [영업현금흐름이 순이익을 부정할 때](/blog/operating-cash-flow-vs-net-income)
-- [생산능력·가동률·CAPEX 읽는 법](/blog/capacity-utilization-capex)
+- [생산능력·가동률·설비투자 읽는 법](/blog/capacity-utilization-capex)
 - [건설중인자산은 왜 중요한가](/blog/capacity-utilization-capex)
-- [CAPEX 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex)
+- [설비투자 뒤 감가상각은 언제 보이나](/blog/capacity-utilization-capex)
 - [유상증자 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
 - [전환사채와 BW 공시 읽는 법](/blog/treasury-stock-third-party-allotment-and-major-shareholder-change)
 - [공시에서 신규사업 계획은 어디까지 믿어야 하나](/blog/how-far-to-trust-new-business-plans)
