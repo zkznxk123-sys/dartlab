@@ -105,7 +105,7 @@ def finance(book: xw.Book):
 
 `@func`는 완전히 다르다. 파이썬 함수가 **엑셀 사용자 정의 함수(UDF)**로 등록된다. 그래서 사용자는 셀에 `=GETFINANCE("005930")`처럼 **수식**을 입력하면 되고, 결과가 스필(spill) 배열로 주변 셀까지 자동으로 채워진다.
 
-![xlwings Lite — @func 모드, 셀에 =GETFINANCE("005930") 입력 즉시 SK하이닉스 IS가 5분기 분량 자동 스필](./assets/145-xlwings-lite-func.webp)
+![xlwings Lite func 모드, 셀에 GETFINANCE 수식 입력 즉시 SK하이닉스 IS가 5분기 분량 자동 스필](./assets/145-xlwings-lite-func.webp)
 
 ```python
 @func
