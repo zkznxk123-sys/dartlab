@@ -316,8 +316,13 @@ def _safe_ratio_list(num_vals: list[float], den_vals: list[float], *, pct: bool 
 
 def _ehrCollectSeries(series: dict, n: int) -> dict[str, list]:
     """IS/CF/BS 10+ 계정 시계열 일괄 수집. 반환: {key: list[float]}."""
-    ttm = lambda sj, acc: _annual_ttm_values(series, sj, acc, n)
-    bs = lambda acc: _annual_latest_values(series, "BS", acc, n)
+
+    def ttm(sj: str, acc: str) -> list:
+        return _annual_ttm_values(series, sj, acc, n)
+
+    def bs(acc: str) -> list:
+        return _annual_latest_values(series, "BS", acc, n)
+
     return {
         "rev": ttm("IS", "sales"),
         "gp": ttm("IS", "gross_profit"),
