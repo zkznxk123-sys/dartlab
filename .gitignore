@@ -70,6 +70,17 @@ site/
 # Hypothesis test artifacts
 .hypothesis/
 
+# Coverage artifacts (local runtime)
+.coverage
+htmlcov/
+
+# Log files (any directory)
+*.log
+
+# Backup directories (landing·experiments 로컬 작업 백업)
+landing/_backup/
+experiments/**/_backup/
+
 # Local experiment artifacts
 experiments/**/output/
 experiments/**/*.parquet
