@@ -18,13 +18,17 @@ pytestmark = pytest.mark.unit
 
 
 def test_dart_company_show_has_explicit_error_path():
-    """R26-1: DART company._showImpl 가 ValueError 발생 코드 가짐."""
+    """R26-1: DART company show dispatch 가 미등록 topic 을 warning 으로 surface.
+
+    Q1.5 (2026-04-21): _showImpl 분할 후 warning 로직은 _showSectionsTopic 과
+    _warnUnknownTopic 에 위치. silent None 대신 warnings.warn 으로 사용자 안내.
+    """
     import inspect
 
     from dartlab.providers.dart.company import Company
 
-    src = inspect.getsource(Company._showImpl)
-    assert "ValueError" in src
+    src = inspect.getsource(Company._showSectionsTopic) + inspect.getsource(Company._warnUnknownTopic)
+    assert "warnings.warn" in src
     assert "찾을 수 없" in src
 
 
