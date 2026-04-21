@@ -68,7 +68,9 @@ def scan_debt(*, verbose: bool = True) -> pl.DataFrame:
             }
         )
 
-    df = pl.DataFrame(results)
+    # infer_schema_length=None: 전체 행 스캔 (기본 100행 추론이 큰 금액에서 overflow
+    # 유발. "ComputeError: could not append value 1.2e11 of type f64" 재발 방지.
+    df = pl.DataFrame(results, infer_schema_length=None)
     _log(f"부채 스캔 완료: {df.shape[0]}종목")
     return df
 

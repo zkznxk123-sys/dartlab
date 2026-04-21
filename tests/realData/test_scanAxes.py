@@ -18,13 +18,13 @@ def _scanAxes() -> list[str]:
 SCAN_AXES = _scanAxes()
 
 
-# fixture 환경에서 scan 프리빌드 데이터 제한으로 인해 빈 DF / ComputeError 가 날 수 있는 축
+# fixture 환경에서 scan 프리빌드 데이터 제한으로 인해 빈 DF 가 날 수 있는 축
 # (로컬 실데이터 환경에서는 엄격 검증).
+# 2026-04-21 Phase E: debt ComputeError 수정 완료 → 목록에서 제거.
 _FIXTURE_KNOWN_ISSUES: frozenset[str] = frozenset(
     {
-        "debt",  # polars schema inference — fixture 데이터 타입 섞임
-        "disclosureRisk",  # fixture 에 disclosureRisk 프리빌드 부재
-        "macroBeta",  # macro 데이터 의존
+        "disclosureRisk",  # fixture 에 disclosureRisk 프리빌드 (changes.parquet) 부재
+        "macroBeta",  # macro 데이터 의존, fixture 는 macro 없음
     }
 )
 
