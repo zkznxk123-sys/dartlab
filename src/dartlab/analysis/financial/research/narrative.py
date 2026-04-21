@@ -47,7 +47,6 @@ class _Input:
 # ══════════════════════════════════════
 
 
-from dartlab.core.finance.calc import safeDiv as _safeDiv  # noqa: E402
 
 
 def _pct(v: float | None) -> str:
@@ -206,146 +205,178 @@ def _analyzeDupont(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(dimension="dupont", title="수익구조 분해 (DuPont 5-Factor)", body=body, severity=severity)
 
 
-def _analyzeMarginTrend(inp: _Input) -> NarrativeParagraph | None:
-    """마진 추세 분해 — 원가율/판관비 기여도 분석."""
-    sales = _getVals(inp.aSeries, "IS", "sales")
-    cogs = _getVals(inp.aSeries, "IS", "cost_of_sales")
-    op = _getVals(inp.aSeries, "IS", "operating_profit")
-    if not sales or len(sales) < 2:
-        return None
-
-    # 마진 계산
-    gmList = (
-        [
-            _safeDiv(
-                s - c if s is not None and c is not None else None,
-                s,
-            )
-            for s, c in zip(sales, cogs)
-        ]
-        if cogs
-        else []
-    )
-    # 더 간단하게 다시
-    gmList = []
+def _computeMarginSeries(sales: list, cogs: list, op: list) -> tuple[list, list]:
+    """sales/cogs/op → (gmList, omPctList). 둘 다 len(sales) 매칭."""
+    gmList: list[float | None] = []
     if cogs:
         for s, c in zip(sales, cogs):
             if s is not None and c is not None and s != 0:
                 gmList.append((s - c) / s * 100)
             else:
                 gmList.append(None)
-
-    omPctList = []
+    omPctList: list[float | None] = []
     for o, s in zip(op, sales):
         if o is not None and s is not None and s != 0:
             omPctList.append(o / s * 100)
         else:
             omPctList.append(None)
+    return gmList, omPctList
 
-    if not omPctList or all(v is None for v in omPctList):
-        return None
 
-    parts: list[str] = []
+def _marginOpTrendLine(omPctList: list) -> str | None:
+    """영업이익률 trend 한 줄 — 3년+ 연속 방향 우선, 아니면 전년 대비."""
     clean = [v for v in omPctList if v is not None]
-    if len(clean) >= 2:
-        latest = clean[-1]
-        prev = clean[-2]
-        diff = latest - prev
-        direction, count = _consecutiveDirection(omPctList)
+    if len(clean) < 2:
+        return None
+    latest = clean[-1]
+    prev = clean[-2]
+    diff = latest - prev
+    direction, count = _consecutiveDirection(omPctList)
+    if count >= 3:
+        dirLabel = "개선" if direction == "up" else "악화"
+        vals = [f"{v:.1f}%" for v in clean[-count - 1 :] if v is not None]
+        return f"영업이익률 {count}년 연속 {dirLabel} ({'→'.join(vals)})"
+    return f"영업이익률 {latest:.1f}%(전년 {prev:.1f}%, {_pp(diff)})"
 
-        if count >= 3:
-            dirLabel = "개선" if direction == "up" else "악화"
-            vals = [f"{v:.1f}%" for v in clean[-count - 1 :] if v is not None]
-            parts.append(f"영업이익률 {count}년 연속 {dirLabel} ({'→'.join(vals)})")
+
+def _marginGrossContribLine(gmList: list) -> str | None:
+    """매출총이익률 변동 기여 (|diff| > 0.3% 만)."""
+    if not gmList or len(gmList) < 2:
+        return None
+    cleanGm = [(i, v) for i, v in enumerate(gmList) if v is not None]
+    if len(cleanGm) < 2:
+        return None
+    gmDiff = cleanGm[-1][1] - cleanGm[-2][1]
+    if abs(gmDiff) <= 0.3:
+        return None
+    label = "원가율 개선" if gmDiff > 0 else "원가율 악화"
+    return f"매출총이익률 {_pp(gmDiff)} ({label} 기여)"
+
+
+def _marginSgaLine(sales: list, cogs: list, op: list) -> str | None:
+    """판관비율 변동 (sales - cogs - op = SGA)."""
+    if not (cogs and op):
+        return None
+    sgaList: list[float | None] = []
+    for s, c, o in zip(sales, cogs, op):
+        if all(v is not None for v in (s, c, o)) and s != 0:
+            sga = s - c - o
+            sgaList.append(sga / s * 100)
         else:
-            parts.append(f"영업이익률 {latest:.1f}%(전년 {prev:.1f}%, {_pp(diff)})")
+            sgaList.append(None)
+    cleanSga = [(i, v) for i, v in enumerate(sgaList) if v is not None]
+    if len(cleanSga) < 2:
+        return None
+    sgaDiff = cleanSga[-1][1] - cleanSga[-2][1]
+    if abs(sgaDiff) <= 0.3:
+        return None
+    label = "판관비 효율화" if sgaDiff < 0 else "판관비 증가"
+    return f"판관비율 {_pp(sgaDiff)} ({label})"
 
-    # 원가율 변동 기여
-    if gmList and len(gmList) >= 2:
-        cleanGm = [(i, v) for i, v in enumerate(gmList) if v is not None]
-        if len(cleanGm) >= 2:
-            gmDiff = cleanGm[-1][1] - cleanGm[-2][1]
-            if abs(gmDiff) > 0.3:
-                label = "원가율 개선" if gmDiff > 0 else "원가율 악화"
-                parts.append(f"매출총이익률 {_pp(gmDiff)} ({label} 기여)")
 
-    # SGA 비율 (sales - cogs - op = SGA)
-    if cogs and op:
-        sgaList = []
-        for s, c, o in zip(sales, cogs, op):
-            if all(v is not None for v in (s, c, o)) and s != 0:
-                sga = s - c - o
-                sgaList.append(sga / s * 100)
-            else:
-                sgaList.append(None)
-        cleanSga = [(i, v) for i, v in enumerate(sgaList) if v is not None]
-        if len(cleanSga) >= 2:
-            sgaDiff = cleanSga[-1][1] - cleanSga[-2][1]
-            if abs(sgaDiff) > 0.3:
-                label = "판관비 효율화" if sgaDiff < 0 else "판관비 증가"
-                parts.append(f"판관비율 {_pp(sgaDiff)} ({label})")
-
-    # EBITDA 마진 (Lens 1 강화)
+def _marginEbitdaLine(inp: _Input, sales: list, op: list) -> str | None:
+    """EBITDA 마진 — op + |depreciation|."""
     depreciation = _getVals(inp.aSeries, "CF", "depreciation_and_amortization")
     if not depreciation:
         depreciation = _getVals(inp.aSeries, "IS", "depreciation")
-    if op and depreciation:
-        ebitdaMarginList = []
-        for o, d, s in zip(op, depreciation, sales):
-            if all(v is not None for v in (o, d, s)) and s != 0:
-                ebitdaMarginList.append((o + abs(d)) / s * 100)
-            else:
-                ebitdaMarginList.append(None)
-        emClean = [v for v in ebitdaMarginList if v is not None]
-        if len(emClean) >= 2:
-            emDiff = emClean[-1] - emClean[-2]
-            parts.append(f"EBITDA마진 {emClean[-1]:.1f}%({_pp(emDiff)})")
+    if not (op and depreciation):
+        return None
+    emList: list[float | None] = []
+    for o, d, s in zip(op, depreciation, sales):
+        if all(v is not None for v in (o, d, s)) and s != 0:
+            emList.append((o + abs(d)) / s * 100)
+        else:
+            emList.append(None)
+    emClean = [v for v in emList if v is not None]
+    if len(emClean) < 2:
+        return None
+    emDiff = emClean[-1] - emClean[-2]
+    return f"EBITDA마진 {emClean[-1]:.1f}%({_pp(emDiff)})"
 
-    # 유효세율 추이 (Lens 1 강화)
+
+def _marginTaxRateLine(inp: _Input) -> str | None:
+    """유효세율 추이 (|diff| > 3% 만)."""
     ebt = _getVals(inp.aSeries, "IS", "income_before_tax")
     if not ebt:
         ebt = _getVals(inp.aSeries, "IS", "profit_before_tax")
     taxExpense = _getVals(inp.aSeries, "IS", "income_tax_expense")
-    if ebt and taxExpense:
-        taxRateList = []
-        for e, t in zip(ebt, taxExpense):
-            if e is not None and t is not None and e != 0 and e > 0:
-                taxRateList.append(abs(t) / e * 100)
-            else:
-                taxRateList.append(None)
-        trClean = [v for v in taxRateList if v is not None]
-        if len(trClean) >= 2:
-            trDiff = trClean[-1] - trClean[-2]
-            if abs(trDiff) > 3:
-                label = "세부담 증가" if trDiff > 0 else "세부담 경감"
-                parts.append(f"유효세율 {trClean[-1]:.1f}%({_pp(trDiff)}, {label})")
+    if not (ebt and taxExpense):
+        return None
+    trList: list[float | None] = []
+    for e, t in zip(ebt, taxExpense):
+        if e is not None and t is not None and e != 0 and e > 0:
+            trList.append(abs(t) / e * 100)
+        else:
+            trList.append(None)
+    trClean = [v for v in trList if v is not None]
+    if len(trClean) < 2:
+        return None
+    trDiff = trClean[-1] - trClean[-2]
+    if abs(trDiff) <= 3:
+        return None
+    label = "세부담 증가" if trDiff > 0 else "세부담 경감"
+    return f"유효세율 {trClean[-1]:.1f}%({_pp(trDiff)}, {label})"
 
-    # costByNature 원가 구조 분해 (Lens 1 강화)
-    costDf = inp.costByNatureDf
-    if costDf is not None:
+
+def _marginCostByNatureLines(costDf) -> list[str]:
+    """costByNature 원재료/인건비/감가상각 비중 변화 (|diff| > 1% 만)."""
+    if costDf is None:
+        return []
+    try:
+        import polars as pl
+    except ImportError:
+        return []
+    if not (isinstance(costDf, pl.DataFrame) and len(costDf) > 0):
+        return []
+    cols = costDf.columns
+    lines: list[str] = []
+    for keyword, label in [("원재료", "원재료비율"), ("인건비", "인건비율"), ("감가상각", "감가상각비율")]:
+        matchCols = [c for c in cols if keyword in c]
+        if not matchCols:
+            continue
         try:
-            import polars as pl
+            vals = costDf[matchCols[0]].to_list()
+        except (AttributeError, ValueError, KeyError):
+            continue
+        cleanVals = [v for v in vals if v is not None]
+        if len(cleanVals) < 2:
+            continue
+        diff = cleanVals[-1] - cleanVals[-2]
+        if abs(diff) > 1:
+            lines.append(f"{label} {cleanVals[-1]:.1f}%({_pp(diff)})")
+    return lines
 
-            if isinstance(costDf, pl.DataFrame) and len(costDf) > 0:
-                # 원재료비/인건비 비중 추이 (가용 컬럼 기반)
-                cols = costDf.columns
-                for keyword, label in [("원재료", "원재료비율"), ("인건비", "인건비율"), ("감가상각", "감가상각비율")]:
-                    matchCols = [c for c in cols if keyword in c]
-                    if matchCols:
-                        vals = costDf[matchCols[0]].to_list()
-                        cleanVals = [v for v in vals if v is not None]
-                        if len(cleanVals) >= 2:
-                            diff = cleanVals[-1] - cleanVals[-2]
-                            if abs(diff) > 1:
-                                parts.append(f"{label} {cleanVals[-1]:.1f}%({_pp(diff)})")
-        except (ImportError, AttributeError, ValueError, KeyError):
-            pass
+
+def _analyzeMarginTrend(inp: _Input) -> NarrativeParagraph | None:
+    """마진 추세 분해 orchestrator — 6 sub (Q3.1f split)."""
+    sales = _getVals(inp.aSeries, "IS", "sales")
+    cogs = _getVals(inp.aSeries, "IS", "cost_of_sales")
+    op = _getVals(inp.aSeries, "IS", "operating_profit")
+    if not sales or len(sales) < 2:
+        return None
+
+    gmList, omPctList = _computeMarginSeries(sales, cogs, op)
+    if not omPctList or all(v is None for v in omPctList):
+        return None
+
+    parts: list[str] = []
+    for line in (
+        _marginOpTrendLine(omPctList),
+        _marginGrossContribLine(gmList),
+        _marginSgaLine(sales, cogs, op),
+        _marginEbitdaLine(inp, sales, op),
+        _marginTaxRateLine(inp),
+    ):
+        if line:
+            parts.append(line)
+    parts.extend(_marginCostByNatureLines(inp.costByNatureDf))
 
     if not parts:
         return None
-    body = ". ".join(parts) + "."
+    clean = [v for v in omPctList if v is not None]
     latestOm = clean[-1] if clean else 0
     severity = "positive" if latestOm > 10 else "neutral" if latestOm > 5 else "negative"
+    body = ". ".join(parts) + "."
     return NarrativeParagraph(dimension="margin", title="마진 추세 분석", body=body, severity=severity)
 
 
