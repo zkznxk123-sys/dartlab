@@ -116,9 +116,49 @@
 					</div>
 					<div><span class="text-dl-text-muted">)</span></div>
 					<br />
-					<div class="text-dl-text-dim"># 5 providers: ollama (free), openai,</div>
+					<div class="text-dl-text-dim"># 5 providers: ollama, openai,</div>
 					<div class="text-dl-text-dim"># oauth-codex, codex, custom</div>
 				</div>
+			</div>
+		</div>
+
+		<!-- AI as active analyst: override engine assumptions mid-conversation -->
+		<div class="mt-6 rounded-lg overflow-hidden bg-[#0d1117] border border-dl-border shadow-lg shadow-black/20">
+			<div class="flex items-center gap-2 px-4 py-2.5 bg-white/[0.03] border-b border-dl-border">
+				<span class="w-2 h-2 rounded-full bg-dl-primary"></span>
+				<span class="text-xs text-dl-text-dim font-mono ml-1">AI is not read-only &mdash; engine assumptions are negotiable</span>
+			</div>
+			<div class="p-4 font-mono text-xs leading-relaxed space-y-2">
+				<div>
+					<span class="text-dl-accent">you</span>
+					<span class="text-dl-text-dim">›</span>
+					<span class="text-dl-text">삼성전자 DCF 계산해봐</span>
+				</div>
+				<div>
+					<span class="text-dl-primary">ai</span>
+					<span class="text-dl-text-dim">›</span>
+					<span class="text-dl-text-muted">c.analysis("valuation")</span>
+					<span class="text-dl-text-dim">&rarr;</span>
+					<span class="text-dl-warning">implied WACC 18.2% looks high for this profile</span>
+				</div>
+				<div>
+					<span class="text-dl-accent">you</span>
+					<span class="text-dl-text-dim">›</span>
+					<span class="text-dl-text">WACC 9%로 재계산</span>
+				</div>
+				<div>
+					<span class="text-dl-primary">ai</span>
+					<span class="text-dl-text-dim">›</span>
+					<span class="text-dl-text-muted">c.analysis(</span><span class="text-emerald-400">"valuation"</span><span class="text-dl-text-muted">, overrides=&#123;</span><span class="text-emerald-400">"wacc"</span><span class="text-dl-text-muted">:</span>
+					<span class="text-dl-accent">0.09</span><span class="text-dl-text-muted">&#125;)</span>
+				</div>
+				<div class="pl-6 text-dl-text">
+					<span class="text-dl-text-dim">&rarr;</span> revised fair value band: <span class="text-dl-success">91.2k ~ 115.4k KRW / share</span>
+				</div>
+			</div>
+			<div class="px-4 py-3 border-t border-dl-border text-[11px] text-dl-text-dim leading-relaxed">
+				The AI is not a read-only summarizer. It can <span class="text-dl-text">override engine assumptions</span> &mdash;
+				WACC, growth rate, peer group, discount period &mdash; and recompute inside the same session. You stay in the driver's seat.
 			</div>
 		</div>
 

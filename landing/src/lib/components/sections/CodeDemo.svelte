@@ -81,10 +81,10 @@
 				</CodeWindow>
 			{:else}
 				<CodeWindow title="diff-finance.py">
-					<span class="text-dl-text-dim"># finance shortcuts</span><br />
-					<span class="text-dl-text">samsung</span><span class="text-dl-text-muted">.</span><span class="text-rose-300">BS</span> <span class="text-dl-text-dim"># balance sheet</span><br />
-					<span class="text-dl-text">samsung</span><span class="text-dl-text-muted">.</span><span class="text-rose-300">IS</span> <span class="text-dl-text-dim"># income statement</span><br />
-					<span class="text-dl-text">samsung</span><span class="text-dl-text-muted">.</span><span class="text-rose-300">ratios</span> <span class="text-dl-text-dim"># financial ratios</span><br /><br />
+					<span class="text-dl-text-dim"># finance shortcuts via show()</span><br />
+					<span class="text-dl-text">samsung</span><span class="text-dl-text-muted">.</span><span class="text-cyan-400">show</span><span class="text-dl-text-muted">(</span><span class="text-emerald-400">"BS"</span><span class="text-dl-text-muted">)</span> <span class="text-dl-text-dim"># balance sheet</span><br />
+					<span class="text-dl-text">samsung</span><span class="text-dl-text-muted">.</span><span class="text-cyan-400">show</span><span class="text-dl-text-muted">(</span><span class="text-emerald-400">"IS"</span><span class="text-dl-text-muted">)</span> <span class="text-dl-text-dim"># income statement</span><br />
+					<span class="text-dl-text">samsung</span><span class="text-dl-text-muted">.</span><span class="text-cyan-400">show</span><span class="text-dl-text-muted">(</span><span class="text-emerald-400">"ratios"</span><span class="text-dl-text-muted">)</span> <span class="text-dl-text-dim"># financial ratios</span><br /><br />
 					<span class="text-dl-text-dim"># text change detection</span><br />
 					<span class="text-dl-text">samsung</span><span class="text-dl-text-muted">.</span><span class="text-cyan-400">diff</span><span class="text-dl-text-muted">(</span><span class="text-emerald-400">"businessOverview"</span><span class="text-dl-text-muted">)</span>
 				</CodeWindow>

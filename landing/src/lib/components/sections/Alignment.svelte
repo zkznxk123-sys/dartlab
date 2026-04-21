@@ -98,5 +98,57 @@
 				</div>
 			</Card>
 		</div>
+
+		<!-- trace() + diff() — two tools built on the same spine -->
+		<div class="mt-6 grid md:grid-cols-2 gap-6">
+			<Card>
+				<div class="text-xs font-mono text-dl-text-dim mb-5 uppercase tracking-wider">
+					Number → Source
+				</div>
+
+				<div class="font-mono text-sm space-y-2">
+					<div class="text-dl-text">
+						<span class="text-dl-primary">samsung</span>.<span class="text-dl-accent">trace</span>(<span class="text-dl-text-muted">"revenue"</span>)
+					</div>
+					<div class="pl-3 border-l border-dl-border/60 space-y-1 text-xs">
+						<div class="text-dl-text-dim">primarySource: <span class="text-dl-text">finance</span></div>
+						<div class="text-dl-text-dim">fallback: <span class="text-dl-text">docs.sections</span></div>
+						<div class="text-dl-text-dim">block: <span class="text-dl-text">Q4 2024 · IS table</span></div>
+					</div>
+				</div>
+
+				<div class="flex items-start gap-2 mt-6 pt-4 border-t border-dl-border">
+					<svg class="w-4 h-4 text-dl-primary shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+					</svg>
+					<span class="text-dl-text text-xs">Every number reveals which filing, section, and block it came from. No black-box numbers.</span>
+				</div>
+			</Card>
+
+			<Card>
+				<div class="text-xs font-mono text-dl-text-dim mb-5 uppercase tracking-wider">
+					Period → Change
+				</div>
+
+				<div class="font-mono text-sm space-y-2">
+					<div class="text-dl-text">
+						<span class="text-dl-primary">samsung</span>.<span class="text-dl-accent">diff</span>(<span class="text-dl-text-muted">"riskManagement"</span>)
+					</div>
+					<div class="pl-3 border-l border-dl-border/60 space-y-1 text-xs">
+						<div class="text-dl-text-dim">2024 → 2023</div>
+						<div><span class="text-dl-success">+ added</span> <span class="text-dl-text">supply chain concentration</span></div>
+						<div><span class="text-dl-warning">~ modified</span> <span class="text-dl-text">FX exposure paragraph</span></div>
+						<div><span class="text-dl-text-dim">= unchanged</span> <span class="text-dl-text-dim">audit opinion</span></div>
+					</div>
+				</div>
+
+				<div class="flex items-start gap-2 mt-6 pt-4 border-t border-dl-border">
+					<svg class="w-4 h-4 text-dl-primary shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+					</svg>
+					<span class="text-dl-text text-xs">Every narrative reveals what the company quietly rewrote between periods. Diff the text, not your eyeballs.</span>
+				</div>
+			</Card>
+		</div>
 	</div>
 </section>

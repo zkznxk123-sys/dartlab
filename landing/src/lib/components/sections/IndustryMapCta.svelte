@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { Button } from '$lib/components/ui/button';
 </script>
 
 <section class="dl-map-cta" aria-labelledby="map-cta-title">
@@ -14,8 +15,8 @@
 				<strong>Automatic detection of sudden changes this fiscal year.</strong>
 			</p>
 			<div class="ctas">
-				<a class="primary" href="{base}/map">Open Industry Map →</a>
-				<a class="ghost" href="{base}/changes">View Recent Changes</a>
+				<Button href="{base}/map">Open Industry Map →</Button>
+				<Button variant="secondary" href="{base}/changes">View Recent Changes</Button>
 			</div>
 			<p class="disclaimer">
 				dartlab visualizes disclosure and financial data. Not investment advice.
@@ -74,7 +75,7 @@
 	}
 	.kicker {
 		font-size: 11px;
-		color: #60a5fa;
+		color: var(--color-dl-primary);
 		text-transform: uppercase;
 		letter-spacing: 0.12em;
 		font-weight: 600;
@@ -100,31 +101,6 @@
 		display: flex;
 		gap: 10px;
 		flex-wrap: wrap;
-	}
-	.primary {
-		padding: 12px 22px;
-		background: #60a5fa;
-		color: #050811;
-		border-radius: 8px;
-		text-decoration: none;
-		font-weight: 700;
-		font-size: 14px;
-	}
-	.primary:hover {
-		background: #93c5fd;
-	}
-	.ghost {
-		padding: 12px 22px;
-		background: transparent;
-		color: #cbd5e1;
-		border: 1px solid #334155;
-		border-radius: 8px;
-		text-decoration: none;
-		font-size: 14px;
-	}
-	.ghost:hover {
-		background: #1e2433;
-		color: #f1f5f9;
 	}
 	.disclaimer {
 		margin-top: 16px;

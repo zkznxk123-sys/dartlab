@@ -4,7 +4,7 @@
  * - 최대 20개 stockCode
  * - 페이지 새로고침/재방문 시 복원
  * - URL 공유: `?watch=AAA,BBB,...` 로 export/import
- * - Pro 기능 아님 — 모든 사용자 무료
+ * - 구독·계정 불필요 — 로컬 저장
  *
  * 사용:
  * ```ts

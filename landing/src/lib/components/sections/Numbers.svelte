@@ -1,11 +1,11 @@
 <script lang="ts">
-	const stats = [
-		{ value: '2,700+', label: 'Korean companies', sub: 'every filing structured' },
-		{ value: '970+', label: 'US companies', sub: 'same interface, different country' },
-		{ value: '34,249', label: 'account names resolved', sub: 'one revenue, not 47 variations' },
-		{ value: '545+', label: 'section variations', sub: 'all mapped to canonical topics' },
-		{ value: '97%', label: 'of raw data', sub: 'automatically structured' },
-		{ value: '47', label: 'ratios calculated', sub: 'before you even ask' }
+	const features = [
+		{ title: 'Korean DART', desc: 'Every filing pre-structured' },
+		{ title: 'US EDGAR', desc: 'Same interface, different country' },
+		{ title: 'Account resolution', desc: 'One revenue, not dozens of variations' },
+		{ title: 'Section canonicals', desc: 'Every variant mapped to the same topic' },
+		{ title: 'Auto-structuring', desc: 'Raw filings to DataFrame. No cleaning.' },
+		{ title: 'Ratios precomputed', desc: 'Profitability, liquidity, valuation — ready on load' }
 	];
 </script>
 
@@ -14,18 +14,20 @@
 
 	<div class="relative max-w-5xl mx-auto">
 		<div class="text-center mb-12">
-			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">Data Scale</span>
+			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">What's Already Done</span>
 			<h2 class="text-3xl md:text-4xl font-bold text-dl-text">Already Structured, Ready to Use</h2>
 		</div>
 
-		<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 stagger">
-			{#each stats as stat, i}
-				<div class="group relative text-center px-4 py-6 rounded-lg border border-dl-border/50 bg-dl-bg-card/30 hover:border-dl-primary/30 hover:bg-dl-bg-card/60 transition-all duration-300">
-					<div class="text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-black bg-gradient-to-b from-dl-primary to-dl-accent bg-clip-text text-transparent mb-1 tabular-nums whitespace-nowrap">
-						{stat.value}
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+			{#each features as f}
+				<div class="relative px-5 py-5 rounded-lg border border-dl-border/50 bg-dl-bg-card/30 hover:border-dl-primary/30 hover:bg-dl-bg-card/60 transition-all duration-300">
+					<div class="flex items-start gap-3">
+						<span class="mt-1 w-1.5 h-1.5 rounded-full bg-dl-primary shrink-0"></span>
+						<div>
+							<div class="text-sm font-semibold text-dl-text mb-1">{f.title}</div>
+							<div class="text-xs text-dl-text-muted leading-relaxed">{f.desc}</div>
+						</div>
 					</div>
-					<div class="text-xs font-semibold text-dl-text mb-1">{stat.label}</div>
-					<div class="text-[10px] text-dl-text-dim">{stat.sub}</div>
 				</div>
 			{/each}
 		</div>

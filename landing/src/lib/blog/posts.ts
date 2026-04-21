@@ -53,7 +53,7 @@ export const categoryDefinitions = [
 		slug: 'macro-reports',
 		folder: '06-macro-reports',
 		label: '경제분석 보고서',
-		description: '매월 자동 발간되는 매크로 경제분석 보고서입니다. 11축 분석 + 40개 투자전략.',
+		description: '매월 자동 발간되는 매크로 경제분석 보고서입니다. 경제 사이클·금리·위기를 해석하고 40개 투자전략까지.',
 		seoTitle: '경제분석 보고서 | dartlab 매크로 엔진',
 		seoDescription:
 			'dartlab 경제분석 보고서. 사이클→금리→위기→전망의 3막 서사 구조로 경제를 분석합니다. Hamilton RS, Kalman DFM, Nelson-Siegel, BIS Credit-to-GDP gap 등 12개 방법론.',

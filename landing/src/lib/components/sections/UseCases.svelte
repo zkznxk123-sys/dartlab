@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Card } from '$lib/components/ui/card';
-	import { BarChart3, Shield, TrendingUp, GraduationCap, Search, Bell } from 'lucide-svelte';
+	import { Scale, Shield, TrendingUp, GraduationCap, Search, Bell } from 'lucide-svelte';
 
 	const cases = [
-		{ icon: BarChart3, color: 'text-dl-primary bg-dl-primary/10', title: '"How did their story change?"', desc: 'Compare business descriptions, risk factors, or any disclosure section across 5+ years. One line: diff("businessOverview"). See exactly what was added, removed, or reworded.' },
+		{ icon: Scale, color: 'text-dl-primary bg-dl-primary/10', title: '"What\'s their real credit risk?"', desc: 'Independent credit evaluation (dCR) rebuilt from disclosure data alone — repayment capacity, capital structure, liquidity, cash-flow quality, disclosure risk. No agency rating, no black box. One call: c.credit().' },
 		{ icon: TrendingUp, color: 'text-dl-success bg-dl-success/10', title: '"Show me the numbers in context"', desc: 'Financial statements alone miss half the story. DartLab puts BS/IS/CF next to the narrative that explains them — same company, same timeline, same object.' },
 		{ icon: Shield, color: 'text-dl-accent bg-dl-accent/10', title: '"Screen the entire market"', desc: 'Scan all 2,700 listed companies by governance quality, workforce trends, capital returns, or debt risk. One call: dartlab.governance("all"). Filter, rank, compare.' },
 		{ icon: GraduationCap, color: 'text-dl-primary bg-dl-primary/10', title: '"Build a research dataset"', desc: 'Standardized text + financial data across hundreds of companies. Ready for NLP, ML training, or academic research. No cleaning, no alignment — already done.' },

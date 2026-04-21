@@ -40,8 +40,8 @@
 		</h1>
 
 		<p class="text-lg md:text-xl text-dl-text-muted max-w-2xl mx-auto mb-6 leading-relaxed">
-			Korean DART + US SEC EDGAR filings, structured.<br />
-			2,700+ KR / 970+ US companies, one line of Python.
+			Korean DART + US SEC EDGAR filings, pre-structured.<br />
+			Datasets hosted on Hugging Face. One line of Python.
 		</p>
 
 		<div class="mb-10 inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-dl-bg-card/70 border border-dl-border/50 font-mono text-sm md:text-base text-dl-text">
@@ -62,24 +62,29 @@
 			<a href={brand.molab} class="hover:text-dl-text transition-colors">Molab</a>
 		</div>
 
-		<div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">
-			{#each [
-				{ value: '2,700+', unit: '', label: 'Korean companies structured' },
-				{ value: '970+', unit: '', label: 'US companies (SEC EDGAR)' },
-				{ value: '329', unit: '', label: 'topics mapped per company' },
-				{ value: '1 line', unit: '', label: "of Python. That's it." }
-			] as stat}
-				<div
-					class="px-4 py-3 rounded-lg bg-dl-bg-card/50 border border-dl-border/50 hover:border-dl-primary/20 transition-colors"
-				>
-					<div
-						class="text-2xl font-extrabold bg-gradient-to-r from-dl-primary to-dl-accent bg-clip-text text-transparent"
-					>
-						{stat.value}<span class="text-sm">{stat.unit}</span>
+		<a
+			href="https://huggingface.co/datasets/{brand.hfRepo}"
+			target="_blank"
+			rel="noopener"
+			class="group block max-w-2xl mx-auto px-5 py-4 rounded-lg bg-dl-bg-card/50 border border-dl-border/50 hover:border-dl-primary/30 transition-colors text-left no-underline"
+		>
+			<div class="flex items-center gap-3 mb-3">
+				<span class="text-2xl" aria-hidden="true">🤗</span>
+				<div class="min-w-0">
+					<div class="text-[10px] font-mono text-dl-text-dim tracking-[0.15em] uppercase">Datasets · Hugging Face</div>
+					<div class="font-mono text-sm text-dl-text group-hover:text-dl-primary-light transition-colors truncate">
+						{brand.hfRepo}
 					</div>
-					<div class="text-xs text-dl-text-dim mt-1">{stat.label}</div>
 				</div>
-			{/each}
-		</div>
+				<span class="ml-auto text-dl-primary text-xs font-mono opacity-60 group-hover:opacity-100 transition-opacity">View →</span>
+			</div>
+			<div class="flex flex-wrap gap-1.5">
+				{#each Object.values(brand.data) as block}
+					<span class="px-2 py-0.5 rounded-md bg-dl-bg-darker/70 border border-dl-border/50 text-[11px] font-mono text-dl-text-muted">
+						{block.dir}
+					</span>
+				{/each}
+			</div>
+		</a>
 	</div>
 </section>

@@ -31,8 +31,8 @@
 			footer: 'source: finance (authoritative) — quarterly standalone normalization'
 		},
 		{
-			label: 'ratios',
-			code: 'samsung.ratios',
+			label: 'show("ratios")',
+			code: 'samsung.show("ratios")',
 			desc: 'Financial ratios time series — profitability, stability, valuation',
 			headers: ['ratio', '2024Q4', '2024Q3', '2024Q2', '2024Q1', '2023Q4'],
 			rows: [
