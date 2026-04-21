@@ -789,6 +789,25 @@ https://eddmpython.github.io/dartlab/
 - 태그: 회사명, 영문명, 종목코드, 산업 키워드, 핵심 재무 키워드, dartlab — 10~15개
 - 해시태그: 검색 유입될 구체 숫자 포함 (#매출원가율141 #부채130조 #PBR0점2배)
 
+### 썸네일 (og:image) — dartlab-news 카테고리 (2026-04-21 확장)
+
+`02-dartlab-news` 8편도 회사분석보고서와 **동일 MNST 풀블리드 스펙**을 따른다. 차이는 좌상단 prefix + 저장 경로 + frontmatter 3개뿐.
+
+- **좌상단** (회사명 자리): `DartLab 소식 · {주제}` malgun.ttf 24px `#94a3b8`
+- **저장 경로**: `landing/static/thumbnails/news-{slug}.webp`
+- **원본 배경**: `blog/02-dartlab-news/{NN}-{slug}/assets/{NN}-thumbnail-bg.webp` (덮어쓰기 금지)
+- **frontmatter**:
+  - `thumbnail: /avatar-*.png` (리스트 아바타, 기존 유지)
+  - `ogImage: /thumbnails/news-{slug}.webp` (신규 추가)
+- **FLUX 프롬프트 원칙** (회사분석보고서 §287과 동일):
+  - dartlab 기능/제품을 **딱 보면 알 수 있는 구체 장면** — 업종 일반 추상화 금지
+  - 예: #08 Pyodide → "Excel web interface with Python sidebar panel, spreadsheet cells glowing"
+  - 예: #07 dataset-auto-sync → "cloud data pipeline flowing into a laptop terminal, dark theme"
+  - `no text, no logos, no watermark, no brand marks` 유지
+- **생성 스크립트**: [scripts/blog/gen_news_flux.py](scripts/blog/gen_news_flux.py) (배경) + [scripts/blog/gen_news_thumbnails.py](scripts/blog/gen_news_thumbnails.py) (합성)
+
+나머지 합성 스펙(그라데이션·필터·폰트·마스코트·사이즈)은 §썸네일 — 회사분석보고서만 섹션을 그대로 재사용한다.
+
 ### 썸네일 (og:image) — 회사분석보고서만
 
 **[최우선] 풀블리드 이미지 + 좌측 그라데이션 + 흰 제목 오버레이 (MNST 스타일 고정)**

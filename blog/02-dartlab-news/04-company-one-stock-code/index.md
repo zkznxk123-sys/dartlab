@@ -6,6 +6,7 @@ category: dartlab-news
 series: dartlab-news
 seriesOrder: 4
 thumbnail: /avatar-study.png
+ogImage: /thumbnails/news-company-one-stock-code.webp
 keywords:
   - dartlab Company
   - 종목코드

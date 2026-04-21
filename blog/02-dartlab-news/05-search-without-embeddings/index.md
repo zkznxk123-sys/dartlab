@@ -6,6 +6,7 @@ category: dartlab-news
 series: dartlab-news
 seriesOrder: 5
 thumbnail: /avatar-study.png
+ogImage: /thumbnails/news-search-without-embeddings.webp
 keywords:
   - 전자공시 검색
   - DART 공시 검색

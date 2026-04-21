@@ -6,6 +6,7 @@ category: dartlab-news
 series: dartlab-news
 seriesOrder: 2
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/news-vscode-extension-install.webp
 keywords:
   - dartlab vscode
   - dartlab 익스텐션

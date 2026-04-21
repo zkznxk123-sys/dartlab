@@ -6,6 +6,7 @@ category: dartlab-news
 series: dartlab-news
 seriesOrder: 7
 thumbnail: /avatar-study.png
+ogImage: /thumbnails/news-dataset-auto-sync.webp
 keywords:
   - DART 데이터셋
   - 전자공시 데이터

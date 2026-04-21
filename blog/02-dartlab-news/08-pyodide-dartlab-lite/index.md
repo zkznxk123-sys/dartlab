@@ -6,6 +6,7 @@ category: dartlab-news
 series: dartlab-news
 seriesOrder: 8
 thumbnail: /avatar-code.png
+ogImage: /thumbnails/news-pyodide-dartlab-lite.webp
 keywords:
   - Pyodide
   - xlwings Lite

@@ -6,6 +6,7 @@ category: dartlab-news
 series: dartlab-news
 seriesOrder: 1
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/news-dartlab-easy-start.webp
 keywords:
   - dartlab 설치
   - uv 설치

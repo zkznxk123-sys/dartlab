@@ -6,6 +6,7 @@ category: dartlab-news
 series: dartlab-news
 seriesOrder: 6
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/news-magic-formula-korea.webp
 keywords:
   - 마법공식
   - 그린블라트

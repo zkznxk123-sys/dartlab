@@ -6,6 +6,7 @@ category: dartlab-news
 series: dartlab-news
 seriesOrder: 3
 thumbnail: /avatar-chart.png
+ogImage: /thumbnails/news-scan-market-finance.webp
 keywords:
   - dartlab scan
   - 전종목 재무분석
