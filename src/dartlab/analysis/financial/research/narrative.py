@@ -1558,68 +1558,82 @@ def _analyzeIsToCs(inp: _Input) -> NarrativeParagraph | None:
     )
 
 
+def _cfToBsCapexDepLines(capex, depreciation) -> list[str]:
+    """CAPEX/감가상각 비율 + 확장/노후화 라벨."""
+    if not (capex and depreciation):
+        return []
+    pairs = [(c, d) for c, d in zip(capex, depreciation) if c is not None and d is not None and d != 0]
+    if not pairs:
+        return []
+    latestCapex, latestDep = pairs[-1]
+    capexToDep = abs(latestCapex) / abs(latestDep)
+    lines = [f"CAPEX/감가상각 {capexToDep:.1f}배"]
+    if capexToDep > 2.0:
+        lines.append("감가상각의 2배 이상 투자 — 적극적 확장투자")
+    elif capexToDep < 0.8:
+        lines.append("감가상각 미만 투자 — 설비 노후화 리스크")
+    return lines
+
+
+def _cfToBsTangibleRetentionLine(tangible, capex) -> str | None:
+    """유형자산 변동 vs CAPEX — 순감소 감지."""
+    if not (tangible and capex):
+        return None
+    tanClean = [v for v in tangible if v is not None]
+    capexClean = [v for v in capex if v is not None]
+    if not (len(tanClean) >= 2 and capexClean and abs(capexClean[-1]) > 0):
+        return None
+    retentionRate = (tanClean[-1] - tanClean[-2]) / abs(capexClean[-1])
+    if retentionRate < 0:
+        return "CAPEX 투입에도 유형자산 순감소 — 처분 또는 감가상각 과대"
+    return None
+
+
+def _cfToBsBorrowChangeLine(shortBorrow, longBorrow) -> str | None:
+    """총차입금 변동 (|>15%|)."""
+    if not (shortBorrow and longBorrow):
+        return None
+    totalBorrowList = [
+        sb + lb if sb is not None and lb is not None else None for sb, lb in zip(shortBorrow, longBorrow)
+    ]
+    bClean = [v for v in totalBorrowList if v is not None]
+    if len(bClean) < 2:
+        return None
+    bGr = (bClean[-1] - bClean[-2]) / abs(bClean[-2]) * 100 if bClean[-2] != 0 else 0
+    if abs(bGr) <= 15:
+        return None
+    direction = "증가" if bGr > 0 else "감소"
+    return f"총차입금 {bGr:+.1f}% {direction}"
+
+
 def _analyzeCfToBs(inp: _Input) -> NarrativeParagraph | None:
-    """3표 연결 — CF 투자활동 → BS 유형자산, CF 재무활동 → BS 차입금."""
-    capex = _getVals(inp.aSeries, "CF", "capital_expenditure")
-    if not capex:
-        capex = _getVals(inp.aSeries, "CF", "acquisition_of_property_plant_and_equipment")
-    depreciation = _getVals(inp.aSeries, "CF", "depreciation_and_amortization")
-    if not depreciation:
-        depreciation = _getVals(inp.aSeries, "IS", "depreciation")
+    """CF ↔ BS 연결 orchestrator (Q3.1f split)."""
+    capex = _getVals(inp.aSeries, "CF", "capital_expenditure") or _getVals(
+        inp.aSeries, "CF", "acquisition_of_property_plant_and_equipment"
+    )
+    depreciation = _getVals(inp.aSeries, "CF", "depreciation_and_amortization") or _getVals(
+        inp.aSeries, "IS", "depreciation"
+    )
     tangible = _getVals(inp.aSeries, "BS", "property_plant_and_equipment")
     shortBorrow = _getVals(inp.aSeries, "BS", "short_term_borrowings")
     longBorrow = _getVals(inp.aSeries, "BS", "long_term_borrowings")
 
     parts: list[str] = []
-
-    # CAPEX vs 감가상각 (유지보수 투자 수준)
-    if capex and depreciation:
-        pairs = [(c, d) for c, d in zip(capex, depreciation) if c is not None and d is not None and d != 0]
-        if pairs:
-            latestCapex, latestDep = pairs[-1]
-            capexToDep = abs(latestCapex) / abs(latestDep)
-            parts.append(f"CAPEX/감가상각 {capexToDep:.1f}배")
-            if capexToDep > 2.0:
-                parts.append("감가상각의 2배 이상 투자 — 적극적 확장투자")
-            elif capexToDep < 0.8:
-                parts.append("감가상각 미만 투자 — 설비 노후화 리스크")
-
-    # BS 유형자산 변동 vs CAPEX 규모
-    if tangible and capex:
-        tanClean = [v for v in tangible if v is not None]
-        capexClean = [v for v in capex if v is not None]
-        if len(tanClean) >= 2 and capexClean:
-            tanChange = tanClean[-1] - tanClean[-2]
-            latestCapex = abs(capexClean[-1])
-            if latestCapex > 0:
-                retentionRate = tanChange / latestCapex
-                if retentionRate < 0:
-                    parts.append("CAPEX 투입에도 유형자산 순감소 — 처분 또는 감가상각 과대")
-
-    # BS 차입금 변동
-    if shortBorrow and longBorrow:
-        totalBorrowList = []
-        for sb, lb in zip(shortBorrow, longBorrow):
-            if sb is not None and lb is not None:
-                totalBorrowList.append(sb + lb)
-            else:
-                totalBorrowList.append(None)
-        bClean = [v for v in totalBorrowList if v is not None]
-        if len(bClean) >= 2:
-            bGr = (bClean[-1] - bClean[-2]) / abs(bClean[-2]) * 100 if bClean[-2] != 0 else 0
-            if abs(bGr) > 15:
-                direction = "증가" if bGr > 0 else "감소"
-                parts.append(f"총차입금 {bGr:+.1f}% {direction}")
+    parts.extend(_cfToBsCapexDepLines(capex, depreciation))
+    retentionLine = _cfToBsTangibleRetentionLine(tangible, capex)
+    if retentionLine:
+        parts.append(retentionLine)
+    borrowLine = _cfToBsBorrowChangeLine(shortBorrow, longBorrow)
+    if borrowLine:
+        parts.append(borrowLine)
 
     if not parts:
         return None
-    body = ". ".join(parts) + "."
-    severity = "neutral"
     return NarrativeParagraph(
         dimension="cfToBs",
         title="현금흐름↔재무상태 연결분석",
-        body=body,
-        severity=severity,
+        body=". ".join(parts) + ".",
+        severity="neutral",
     )
 
 
@@ -2084,74 +2098,97 @@ def _analyzeSalesOrder(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(dimension="salesOrder", title="수주잔고 분석", body=body, severity=severity)
 
 
-def _analyzeProductMix(inp: _Input) -> NarrativeParagraph | None:
-    """제품별 매출 구성 + 비중 변화 (Lens 13)."""
-    psDf = inp.productServiceDf
-    if psDf is None:
-        return None
-
-    try:
-        import polars as pl
-
-        if not isinstance(psDf, pl.DataFrame) or len(psDf) == 0:
-            return None
-    except ImportError:
-        return None
-
-    parts: list[str] = []
-    cols = psDf.columns
-
-    # 제품명 + 매출 컬럼 탐색
-    nameCol = None
-    valCols = []
+def _findProductMixCols(cols: list[str]) -> tuple[str | None, list[str]]:
+    """제품명 컬럼 + 매출 숫자 컬럼 리스트."""
+    nameCol: str | None = None
+    valCols: list[str] = []
     for c in cols:
         cl = c.lower()
         if "품목" in c or "제품" in c or "부문" in c or "product" in cl or "name" in cl:
             nameCol = c
         elif any(ch.isdigit() for ch in c) or "매출" in c or "금액" in c or "sales" in cl:
             valCols.append(c)
+    return nameCol, valCols
 
-    if nameCol and valCols:
-        try:
-            names = psDf[nameCol].to_list()
-            latestCol = valCols[-1]
-            vals = psDf[latestCol].to_list()
-            total = sum(v for v in vals if v is not None and v > 0)
-            if total > 0:
-                items = [(n, v) for n, v in zip(names, vals) if v is not None and v > 0]
-                items.sort(key=lambda x: x[1], reverse=True)
-                topItems = items[:3]
-                topParts = [f"{n} {v / total * 100:.0f}%" for n, v in topItems]
-                parts.append(f"제품 구성: {', '.join(topParts)}")
 
-                # 집중도
-                if items:
-                    topShare = items[0][1] / total * 100
-                    if topShare > 60:
-                        parts.append(f"최대 제품 비중 {topShare:.0f}% — 높은 제품 집중 리스크")
+def _productMixTopShareLines(items: list, total: float) -> list[str]:
+    """상위 3 제품 비중 + 최대 비중 집중 경고."""
+    lines: list[str] = []
+    topItems = items[:3]
+    topParts = [f"{n} {v / total * 100:.0f}%" for n, v in topItems]
+    lines.append(f"제품 구성: {', '.join(topParts)}")
+    if items:
+        topShare = items[0][1] / total * 100
+        if topShare > 60:
+            lines.append(f"최대 제품 비중 {topShare:.0f}% — 높은 제품 집중 리스크")
+    return lines
 
-                # 비중 변화 (이전 기간 데이터 있으면)
-                if len(valCols) >= 2:
-                    prevCol = valCols[-2]
-                    prevVals = psDf[prevCol].to_list()
-                    prevTotal = sum(v for v in prevVals if v is not None and v > 0)
-                    if prevTotal > 0 and items:
-                        topName = items[0][0]
-                        topIdx = names.index(topName) if topName in names else -1
-                        if topIdx >= 0 and topIdx < len(prevVals) and prevVals[topIdx] is not None:
-                            prevShare = prevVals[topIdx] / prevTotal * 100
-                            currShare = items[0][1] / total * 100
-                            shareDiff = currShare - prevShare
-                            if abs(shareDiff) > 3:
-                                parts.append(f"주력제품 비중 {_pp(shareDiff)}")
-        except (AttributeError, ValueError, IndexError, KeyError):
-            pass
+
+def _productMixShareChangeLine(psDf, names: list, items: list, total: float, valCols: list[str]) -> str | None:
+    """주력제품 비중 YoY 변화 (|diff|>3%)."""
+    if len(valCols) < 2 or not items:
+        return None
+    try:
+        prevVals = psDf[valCols[-2]].to_list()
+    except (AttributeError, ValueError, KeyError):
+        return None
+    prevTotal = sum(v for v in prevVals if v is not None and v > 0)
+    if prevTotal <= 0:
+        return None
+    topName = items[0][0]
+    if topName not in names:
+        return None
+    topIdx = names.index(topName)
+    if topIdx >= len(prevVals) or prevVals[topIdx] is None:
+        return None
+    prevShare = prevVals[topIdx] / prevTotal * 100
+    currShare = items[0][1] / total * 100
+    shareDiff = currShare - prevShare
+    if abs(shareDiff) <= 3:
+        return None
+    return f"주력제품 비중 {_pp(shareDiff)}"
+
+
+def _analyzeProductMix(inp: _Input) -> NarrativeParagraph | None:
+    """제품별 매출 구성 orchestrator — 비중 + 집중도 + 변화 (Lens 13, Q3.1f split)."""
+    psDf = inp.productServiceDf
+    if psDf is None:
+        return None
+    try:
+        import polars as pl
+    except ImportError:
+        return None
+    if not isinstance(psDf, pl.DataFrame) or len(psDf) == 0:
+        return None
+
+    nameCol, valCols = _findProductMixCols(psDf.columns)
+    if not (nameCol and valCols):
+        return None
+
+    parts: list[str] = []
+    try:
+        names = psDf[nameCol].to_list()
+        vals = psDf[valCols[-1]].to_list()
+        total = sum(v for v in vals if v is not None and v > 0)
+        if total > 0:
+            items = [(n, v) for n, v in zip(names, vals) if v is not None and v > 0]
+            items.sort(key=lambda x: x[1], reverse=True)
+            parts.extend(_productMixTopShareLines(items, total))
+            changeLine = _productMixShareChangeLine(psDf, names, items, total, valCols)
+            if changeLine:
+                parts.append(changeLine)
+    except (AttributeError, ValueError, IndexError, KeyError):
+        pass
 
     if not parts:
         return None
-    body = ". ".join(parts) + "."
     severity = "warning" if any("리스크" in p for p in parts) else "neutral"
-    return NarrativeParagraph(dimension="productMix", title="제품별 매출 구성", body=body, severity=severity)
+    return NarrativeParagraph(
+        dimension="productMix",
+        title="제품별 매출 구성",
+        body=". ".join(parts) + ".",
+        severity=severity,
+    )
 
 
 def _analyzeQuarterlyMomentum(inp: _Input) -> NarrativeParagraph | None:
@@ -2222,8 +2259,40 @@ def _analyzeQuarterlyMomentum(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(dimension="quarterlyMomentum", title="분기별 모멘텀", body=body, severity=severity)
 
 
+def _classifyBusinessStrategy(salesCagr: float, latestOpm: float, cogsRatio: float, prevCogsRatio: float) -> str:
+    """수치 패턴 → 사업 전략 유형 분류."""
+    if salesCagr > 15 and latestOpm > 15:
+        return "고성장·고마진(프리미엄/기술주도형)"
+    if salesCagr > 15 and latestOpm <= 5:
+        return "고성장·저마진(시장점유율 확대전략)"
+    if salesCagr < 3 and latestOpm > 15:
+        return "안정형·고마진(캐시카우/니치마켓)"
+    if salesCagr < 3 and latestOpm <= 5:
+        return "저성장·저마진(원가경쟁/구조조정 필요)"
+    if salesCagr > 5 and cogsRatio < prevCogsRatio - 2:
+        return "수익구조 개선형(원가 절감 성과)"
+    if salesCagr > 5 and cogsRatio > prevCogsRatio + 2:
+        return "외형 확대형(원가 전가 미흡)"
+    if abs(salesCagr) <= 5 and latestOpm > 5:
+        return "안정 성숙형(매출 보합, 수익성 유지)"
+    return "전환기(명확한 패턴 미형성)"
+
+
+def _strategySegmentCountLine(segDf) -> str | None:
+    """사업부문 개수 한 줄."""
+    if segDf is None:
+        return None
+    try:
+        import polars as pl
+    except ImportError:
+        return None
+    if isinstance(segDf, pl.DataFrame) and len(segDf) >= 2:
+        return f"사업부문 {len(segDf)}개 운영"
+    return None
+
+
 def _analyzeBusinessStrategy(inp: _Input) -> NarrativeParagraph | None:
-    """정량→정성 브릿지 — 수치 패턴에서 사업 전략 자동 분류 (Lens 13 종합)."""
+    """정량→정성 브릿지 orchestrator — 수치 → 전략 분류 (Lens 13, Q3.1f split)."""
     sales = _getVals(inp.aSeries, "IS", "sales")
     op = _getVals(inp.aSeries, "IS", "operating_profit")
     cogs = _getVals(inp.aSeries, "IS", "cost_of_sales")
@@ -2236,51 +2305,19 @@ def _analyzeBusinessStrategy(inp: _Input) -> NarrativeParagraph | None:
     if len(sClean) < 3:
         return None
 
-    parts: list[str] = []
-
-    # 매출 CAGR
     salesCagr = ((sClean[-1] / sClean[0]) ** (1 / (len(sClean) - 1)) - 1) * 100 if sClean[0] > 0 else 0
-
-    # OPM 수준
     latestOpm = opClean[-1] / sClean[-1] * 100 if opClean and sClean[-1] > 0 else 0
-
-    # 원가율 추이
     cogsRatio = cClean[-1] / sClean[-1] * 100 if cClean and sClean[-1] > 0 else 0
     prevCogsRatio = cClean[-2] / sClean[-2] * 100 if len(cClean) >= 2 and len(sClean) >= 2 and sClean[-2] > 0 else 0
 
-    # 전략 분류
-    strategy = ""
-    if salesCagr > 15 and latestOpm > 15:
-        strategy = "고성장·고마진(프리미엄/기술주도형)"
-    elif salesCagr > 15 and latestOpm <= 5:
-        strategy = "고성장·저마진(시장점유율 확대전략)"
-    elif salesCagr < 3 and latestOpm > 15:
-        strategy = "안정형·고마진(캐시카우/니치마켓)"
-    elif salesCagr < 3 and latestOpm <= 5:
-        strategy = "저성장·저마진(원가경쟁/구조조정 필요)"
-    elif salesCagr > 5 and cogsRatio < prevCogsRatio - 2:
-        strategy = "수익구조 개선형(원가 절감 성과)"
-    elif salesCagr > 5 and cogsRatio > prevCogsRatio + 2:
-        strategy = "외형 확대형(원가 전가 미흡)"
-    elif abs(salesCagr) <= 5 and latestOpm > 5:
-        strategy = "안정 성숙형(매출 보합, 수익성 유지)"
-    else:
-        strategy = "전환기(명확한 패턴 미형성)"
-
-    parts.append(f"사업전략 유형: {strategy}")
-    parts.append(f"매출 CAGR {salesCagr:.1f}%, 영업이익률 {latestOpm:.1f}%")
-
-    # segments 정보가 있으면 포트폴리오 판단
-    segDf = inp.segmentsDf
-    if segDf is not None:
-        try:
-            import polars as pl
-
-            if isinstance(segDf, pl.DataFrame) and len(segDf) >= 2:
-                # 부문수
-                parts.append(f"사업부문 {len(segDf)}개 운영")
-        except (ImportError, AttributeError):
-            pass
+    strategy = _classifyBusinessStrategy(salesCagr, latestOpm, cogsRatio, prevCogsRatio)
+    parts: list[str] = [
+        f"사업전략 유형: {strategy}",
+        f"매출 CAGR {salesCagr:.1f}%, 영업이익률 {latestOpm:.1f}%",
+    ]
+    segLine = _strategySegmentCountLine(inp.segmentsDf)
+    if segLine:
+        parts.append(segLine)
 
     body = ". ".join(parts) + "."
     severity = (
@@ -2293,68 +2330,73 @@ def _analyzeBusinessStrategy(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(dimension="businessStrategy", title="사업전략 분류", body=body, severity=severity)
 
 
+def _findHeadcountCol(cols: list[str]) -> str | None:
+    """직원수 컬럼 탐색."""
+    for c in cols:
+        if "직원" in c or "인원" in c or "총원" in c or "headcount" in c.lower():
+            return c
+    return None
+
+
+def _humanCapitalLines(hClean: list, sClean: list, opClean: list) -> list[str]:
+    """1인당 매출/영업이익 + 직원수 변동 + 생산성 판정."""
+    lines: list[str] = []
+    if sClean:
+        perCapSales = sClean[-1] / hClean[-1] / 1e8
+        lines.append(f"직원수 {hClean[-1]:,.0f}명, 1인당 매출 {perCapSales:.1f}억")
+    if opClean:
+        perCapOp = opClean[-1] / hClean[-1] / 1e8
+        lines.append(f"1인당 영업이익 {perCapOp:.2f}억")
+    if len(hClean) >= 2:
+        hGr = (hClean[-1] - hClean[-2]) / abs(hClean[-2]) * 100
+        lines.append(f"직원수 {hGr:+.1f}% 변동")
+        if sClean and len(sClean) >= 2 and sClean[-2] > 0:
+            sGr = (sClean[-1] - sClean[-2]) / abs(sClean[-2]) * 100
+            if hGr > sGr + 5:
+                lines.append("직원 증가율 > 매출 증가율 — 생산성 하락 추세")
+            elif sGr > hGr + 5:
+                lines.append("매출 증가율 > 직원 증가율 — 생산성 향상")
+    return lines
+
+
 def _analyzeHumanCapital(inp: _Input) -> NarrativeParagraph | None:
-    """인적자본 분석 — 1인당 매출/영업이익, 직원수 추이 (Lens 14)."""
+    """인적자본 orchestrator — 1인당 매출/영업이익, 직원수 추이 (Lens 14, Q3.1f split)."""
     empDf = inp.employeeDf
     if empDf is None:
         return None
-
     try:
         import polars as pl
-
-        if not isinstance(empDf, pl.DataFrame) or len(empDf) == 0:
-            return None
     except ImportError:
+        return None
+    if not isinstance(empDf, pl.DataFrame) or len(empDf) == 0:
+        return None
+
+    headcountCol = _findHeadcountCol(empDf.columns)
+    if not headcountCol:
         return None
 
     parts: list[str] = []
-    cols = empDf.columns
-
-    # 직원수 컬럼 탐색
-    headcountCol = None
-    for c in cols:
-        if "직원" in c or "인원" in c or "총원" in c or "headcount" in c.lower():
-            headcountCol = c
-            break
-
-    if headcountCol:
-        try:
-            headcounts = empDf[headcountCol].to_list()
-            hClean = [v for v in headcounts if v is not None and v > 0]
-            if hClean:
-                sales = _getVals(inp.aSeries, "IS", "sales")
-                op = _getVals(inp.aSeries, "IS", "operating_profit")
-                sClean = [v for v in sales if v is not None] if sales else []
-                opClean = [v for v in op if v is not None] if op else []
-
-                # 1인당 매출
-                if sClean:
-                    perCapSales = sClean[-1] / hClean[-1] / 1e8  # 억 단위
-                    parts.append(f"직원수 {hClean[-1]:,.0f}명, 1인당 매출 {perCapSales:.1f}억")
-
-                # 1인당 영업이익
-                if opClean and hClean:
-                    perCapOp = opClean[-1] / hClean[-1] / 1e8
-                    parts.append(f"1인당 영업이익 {perCapOp:.2f}억")
-
-                # 추이
-                if len(hClean) >= 2:
-                    hGr = (hClean[-1] - hClean[-2]) / abs(hClean[-2]) * 100
-                    parts.append(f"직원수 {hGr:+.1f}% 변동")
-                    if sClean and len(sClean) >= 2 and sClean[-2] > 0:
-                        sGr = (sClean[-1] - sClean[-2]) / abs(sClean[-2]) * 100
-                        if hGr > sGr + 5:
-                            parts.append("직원 증가율 > 매출 증가율 — 생산성 하락 추세")
-                        elif sGr > hGr + 5:
-                            parts.append("매출 증가율 > 직원 증가율 — 생산성 향상")
-        except (AttributeError, ValueError, IndexError):
-            pass
+    try:
+        headcounts = empDf[headcountCol].to_list()
+        hClean = [v for v in headcounts if v is not None and v > 0]
+        if hClean:
+            sales = _getVals(inp.aSeries, "IS", "sales")
+            op = _getVals(inp.aSeries, "IS", "operating_profit")
+            sClean = [v for v in sales if v is not None] if sales else []
+            opClean = [v for v in op if v is not None] if op else []
+            parts.extend(_humanCapitalLines(hClean, sClean, opClean))
+    except (AttributeError, ValueError, IndexError):
+        pass
 
     if not parts:
         return None
-    body = ". ".join(parts) + "."
     severity = "warning" if any("하락" in p for p in parts) else "neutral"
-    return NarrativeParagraph(dimension="humanCapital", title="인적자본 분석", body=body, severity=severity)
+    return NarrativeParagraph(
+        dimension="humanCapital",
+        title="인적자본 분석",
+        body=". ".join(parts) + ".",
+        severity=severity,
+    )
 
 
 def _analyzeRndEfficiency(inp: _Input) -> NarrativeParagraph | None:
