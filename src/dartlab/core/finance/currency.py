@@ -5,6 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 
 import polars as pl
+
 from dartlab.core.polarsUtil import isEmptyDf
 
 # FRED 시리즈 ID → USD 기준 환율

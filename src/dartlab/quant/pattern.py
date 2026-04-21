@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
 def calcPattern(stockCode: str, *, market: str = "auto", lookback: int = 20, **kwargs) -> dict:

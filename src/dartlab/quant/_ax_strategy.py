@@ -17,6 +17,7 @@ from dataclasses import dataclass
 import numpy as np
 import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 from dartlab.quant.strategy.backtest import (
     BacktestResult,
@@ -33,7 +34,6 @@ from dartlab.quant.strategy.presets import (
     resolve_style,
 )
 from dartlab.quant.strategy.rule import Rule
-from dartlab.core.polarsUtil import isEmptyDf
 
 
 @dataclass

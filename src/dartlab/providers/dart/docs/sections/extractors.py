@@ -7,8 +7,8 @@ from dataclasses import dataclass, field
 import polars as pl
 
 from dartlab.core.mappers.common import isCurrentPeriod, normalizeName, pickValue
-from dartlab.providers.dart.docs.sections._common import sortPeriods
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.providers.dart.docs.sections._common import sortPeriods
 
 
 @dataclass(frozen=True)

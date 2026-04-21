@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.quant._helpers import fetch_ohlcv
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.quant._helpers import fetch_ohlcv
 
 
 class _OHLCVWrapper:

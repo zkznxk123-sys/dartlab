@@ -11,6 +11,7 @@ import polars as pl
 from dartlab import config as _dartlabConfig
 from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.core.dataLoader import loadEdgarListedUniverse
+from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.providers.edgar.docs.fetch import fetchEdgarDocs
 from dartlab.providers.edgar.openapi.client import EdgarClient
 from dartlab.providers.edgar.openapi.facts import (
@@ -19,7 +20,6 @@ from dartlab.providers.edgar.openapi.facts import (
     getCompanyFactsJson,
 )
 from dartlab.providers.edgar.openapi.identity import loadTickers
-from dartlab.core.polarsUtil import isEmptyDf
 
 EDGAR_DOCS_SCHEMA = {
     "cik": pl.Utf8,

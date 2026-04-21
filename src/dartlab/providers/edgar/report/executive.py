@@ -6,6 +6,7 @@ import re
 from typing import TYPE_CHECKING
 
 import polars as pl
+
 from dartlab.core.polarsUtil import isEmptyDf
 
 if TYPE_CHECKING:

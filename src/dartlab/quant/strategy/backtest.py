@@ -21,6 +21,8 @@ from datetime import date
 import numpy as np
 import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
+
 from .metrics import (
     cpcv_splits,
     dsr,
@@ -35,7 +37,6 @@ from .metrics import (
     winrate,
 )
 from .rule import Rule
-from dartlab.core.polarsUtil import isEmptyDf
 
 # 체결/비용 상수
 DEFAULT_FEE_BPS = 15.0  # 양방향 합산 (진입 + 청산)

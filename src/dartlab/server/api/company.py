@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, Query, Request, Response
 from sse_starlette.sse import EventSourceResponse
 
 import dartlab
+from dartlab.core.polarsUtil import isEmptyDf
 
 from ..services.ai_analysis import stream_topic_summary
 from ..services.company_api import (
@@ -15,7 +16,6 @@ from ..services.company_api import (
     safe_topic_label,
 )
 from .common import (
-from dartlab.core.polarsUtil import isEmptyDf
     HANDLED_API_ERRORS,
     etag_response,
     guideDetail,

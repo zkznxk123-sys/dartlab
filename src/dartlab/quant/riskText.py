@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import logging
 
-from dartlab.quant._helpers import load_docs_for_stock, resolve_market
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.quant._helpers import load_docs_for_stock, resolve_market
 
 log = logging.getLogger(__name__)
 

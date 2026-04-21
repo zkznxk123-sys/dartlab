@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from dartlab.quant._helpers import fetch_benchmark, fetch_ohlcv, ohlcv_to_arrays, resolve_market
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.quant._helpers import fetch_benchmark, fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
 def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:

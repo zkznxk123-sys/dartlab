@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
 def _volatilitySeries(close: np.ndarray, window: int = 20) -> dict:

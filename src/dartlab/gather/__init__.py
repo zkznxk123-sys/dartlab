@@ -26,6 +26,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
+
 from . import consensus as _consensus
 from . import flow as _flow
 from . import history as _history
@@ -39,7 +41,6 @@ from .domains import load_domain
 from .http import GatherHttpClient, run_async
 from .market_config import get_market_config
 from .types import (
-from dartlab.core.polarsUtil import isEmptyDf
     ConsensusData,
     FlowData,
     GatherResult,

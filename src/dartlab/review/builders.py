@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.review.blocks import (
     FlagBlock,
     HeadingBlock,
@@ -33,7 +34,6 @@ from dartlab.review.narrate import (
     narrateValuationSins,
 )
 from dartlab.review.utils import unifyTableScale
-from dartlab.core.polarsUtil import isEmptyDf
 
 # ── notes enrichment 렌더링 ──
 

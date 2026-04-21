@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.providers.dart.report.types import (
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.providers.dart.report.types import (
     API_TYPE_LABELS,
     KEEP_META_COLS,
     META_DROP_COLS,

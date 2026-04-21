@@ -12,9 +12,9 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 from dartlab.quant.pattern import _find_pivots
-from dartlab.core.polarsUtil import isEmptyDf
 
 
 @dataclass(frozen=True)

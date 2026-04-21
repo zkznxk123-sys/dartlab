@@ -7,6 +7,7 @@ import re
 import unicodedata
 
 import polars as pl
+
 from dartlab.core.polarsUtil import isEmptyDf
 
 # 공개 freq 상수 — AI tool schema enum + 사용자 문서 단일 출처

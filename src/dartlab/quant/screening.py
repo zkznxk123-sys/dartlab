@@ -10,8 +10,8 @@ import logging
 import polars as pl
 
 from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant._helpers import load_scan_parquet
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.quant._helpers import load_scan_parquet
 
 log = logging.getLogger(__name__)
 
