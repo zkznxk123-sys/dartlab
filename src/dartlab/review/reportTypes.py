@@ -213,6 +213,39 @@ REPORT_TYPES: dict[str, ReportType] = {
         focusQuestions=(),
         detail=True,
     ),
+    # ── P6: 대시보드 ── (2026-Q2)
+    "dashboard": ReportType(
+        key="dashboard",
+        label="대시보드",
+        description="한 페이지 회사 스냅샷 — 스코어/재무/리스크/가치/매크로/AI논제 집약",
+        sectionOrder=(
+            "종합평가",       # 스코어카드 + 신용등급 + 가치평가 verdict + peer rank
+            "수익구조",       # 매출·영업이익·ROE·부채 5년 sparkline
+            "안정성",         # distress/leverage 경고
+            "가치평가",       # DCF/DDM/상대가치 통합
+            "매크로",         # 사이클 + 순풍/역풍
+            "storyValidation",  # AI 논제 요약
+        ),
+        emphasize=frozenset({
+            "scorecard",
+            "creditScore",
+            "valuationSynthesis",
+            "peerPosition",
+            "marginTrend",
+            "leverageTrend",
+            "distressScore",
+            "macroCycle",
+            "companyCyclePosition",
+        }),
+        focusQuestions=(
+            "한 눈에 보는 스코어는?",
+            "5년 재무 추이는?",
+            "가장 큰 리스크는?",
+            "현재가 대비 적정가는?",
+            "매크로 순풍/역풍은?",
+        ),
+        detail=False,  # executive처럼 간결
+    ),
 }
 
 
@@ -244,6 +277,10 @@ _ALIASES: dict[str, str] = {
     "논제": "thesis",
     "가설": "thesis",
     "검증": "thesis",
+    "대시보드": "dashboard",
+    "snapshot": "dashboard",
+    "스냅샷": "dashboard",
+    "요약": "dashboard",
 }
 
 
