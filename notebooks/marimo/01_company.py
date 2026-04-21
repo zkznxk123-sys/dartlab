@@ -5,7 +5,7 @@
 
 import marimo
 
-__generated_with = "0.23.1"
+__generated_with = "0.23.2"
 app = marimo.App(width="medium")
 
 
@@ -13,7 +13,7 @@ app = marimo.App(width="medium")
 def _():
     import dartlab
 
-    c = dartlab.Company("TSLA")
+    c = dartlab.Company("000020")
     c.corpName
     return (c,)
 
