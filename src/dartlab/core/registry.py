@@ -61,6 +61,10 @@ class DataEntry:
     # 아니면 _call_module(callerModuleName) 호출.
     notesDispatch: tuple[str, str] | None = None
 
+    # topic 단축 alias — 사용자가 `show("board")` 처럼 짧은 이름으로 접근 가능.
+    # 2026-04-21 Q1.4: company.py 의 _TOPIC_ALIASES 하드코딩 dict 를 이관.
+    aliases: tuple[str, ...] = ()
+
     requires: str | None = None
     unit: str = "백만원"
     columns: tuple[ColumnMeta, ...] = ()
@@ -77,6 +81,7 @@ class DataEntry:
 
 
 # DataEntry 목록은 _entries.py에서 관리 (942줄 → 별도 파일)
+from dartlab.core._entries import _BUSINESS_ALIASES as _BUSINESS_ALIASES  # noqa: I001, E402
 from dartlab.core._entries import _ENTRIES as _ENTRIES  # noqa: I001, E402
 
 
@@ -88,6 +93,18 @@ for _e in _ENTRIES:
     _BY_CATEGORY.setdefault(_e.category, []).append(_e)
 
 
+# alias → canonical name 역인덱스.
+# 출처 2가지 병합: (1) DataEntry.aliases 필드, (2) _entries.py 의 _BUSINESS_ALIASES 맵.
+# resolveAlias() 가 이 인덱스로 단일 조회.
+_ALIAS_TO_NAME: dict[str, str] = {}
+for _name, _aliases in _BUSINESS_ALIASES.items():
+    for _a in _aliases:
+        _ALIAS_TO_NAME[_a] = _name
+for _e in _ENTRIES:
+    for _a in _e.aliases:
+        _ALIAS_TO_NAME[_a] = _e.name
+
+
 # ── 동적 등록 (플러그인용) ──
 
 
@@ -96,12 +113,19 @@ class PluginNameCollisionError(ValueError):
 
 
 def _rebuild_indices() -> None:
-    """_INDEX, _BY_CATEGORY 파생 인덱스 재구축."""
-    global _INDEX, _BY_CATEGORY
+    """_INDEX, _BY_CATEGORY, _ALIAS_TO_NAME 파생 인덱스 재구축."""
+    global _INDEX, _BY_CATEGORY, _ALIAS_TO_NAME
     _INDEX = {e.name: e for e in _ENTRIES}
     _BY_CATEGORY = {}
     for e in _ENTRIES:
         _BY_CATEGORY.setdefault(e.category, []).append(e)
+    _ALIAS_TO_NAME = {}
+    for name, aliases in _BUSINESS_ALIASES.items():
+        for a in aliases:
+            _ALIAS_TO_NAME[a] = name
+    for e in _ENTRIES:
+        for a in e.aliases:
+            _ALIAS_TO_NAME[a] = e.name
 
 
 def registerEntry(entry: DataEntry, *, source: str = "core") -> None:
@@ -139,6 +163,15 @@ def getEntries(*, category: str | None = None) -> list[DataEntry]:
 def getEntry(name: str) -> DataEntry | None:
     """이름으로 단일 엔트리 조회."""
     return _INDEX.get(name)
+
+
+def resolveAlias(topicOrAlias: str) -> str:
+    """alias 라면 canonical topic name 리턴, 아니면 그대로.
+
+    예: ``resolveAlias("board")`` → ``"boardOfDirectors"``.
+    ``resolveAlias("boardOfDirectors")`` → ``"boardOfDirectors"`` (이미 canonical).
+    """
+    return _ALIAS_TO_NAME.get(topicOrAlias, topicOrAlias)
 
 
 def getCategories() -> list[str]:

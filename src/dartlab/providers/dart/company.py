@@ -163,40 +163,11 @@ def _topicForApiType(apiType: str) -> str:
     return apiType
 
 
-# ── topic 단축 alias ────────────────────────────────────────────
-# show("board") → show("boardOfDirectors") 등 짧은 이름으로 접근 가능
-_TOPIC_ALIASES: dict[str, str] = {
-    # 지배구조 / 경영
-    "board": "boardOfDirectors",
-    "directors": "boardOfDirectors",
-    "pay": "executivePay",
-    "holder": "majorHolder",
-    "holders": "holderOverview",
-    "meeting": "shareholderMeeting",
-    # 위험 / 공시
-    "contingent": "contingentLiability",
-    "relatedParty": "relatedPartyTx",
-    "risk": "riskDerivative",
-    "control": "internalControl",
-    # 자산 / 투자
-    "tangible": "tangibleAsset",
-    "intangible": "intangibleAsset",
-    "material": "rawMaterial",
-    "cost": "costByNature",
-    "sales": "salesOrder",
-    "product": "productService",
-    "invested": "investedCompany",
-    "investment": "investmentInOther",
-    # 기타
-    "overview": "companyOverview",
-    "history": "companyHistory",
-    "articles": "articlesOfIncorporation",
-    "capital": "shareCapital",
-    "capitalChange": "capitalChange",
-    "stock": "stockTotal",
-    "treasury": "treasuryStock",
-    "summary": "fsSummary",
-    # 재무제표 약칭 — AI 가 흔히 시도하는 영문 lower-case
+# ── 재무제표 약칭 (AI-친화 layer) ──────────────────────────────────
+# AI 가 흔히 시도하는 영문 lower-case / 복수형 / 합성어 → canonical 재무제표 topic.
+# Business alias (board/pay/tangible 등 → 해당 topic) 는 registry.resolveAlias() 로
+# 이관 (2026-04-21 Q1.4). 여기는 핵심 4 재무제표의 case-insensitive 변형만 유지.
+_AI_CASE_ALIAS: dict[str, str] = {
     "cashflow": "CF",
     "cashflows": "CF",
     "cf": "CF",
@@ -211,6 +182,19 @@ _TOPIC_ALIASES: dict[str, str] = {
     "equitychanges": "SCE",
     "sce": "SCE",
 }
+
+
+def _resolveTopic(topic: str) -> str:
+    """topic 또는 alias → canonical topic name.
+
+    순서: (1) AI-친화 lowercase 변형, (2) registry business alias, (3) 그대로.
+    """
+    if topic in _AI_CASE_ALIAS:
+        return _AI_CASE_ALIAS[topic]
+    from dartlab.core.registry import resolveAlias
+
+    return resolveAlias(topic)
+
 
 _TOPIC_LABELS: dict[str, str] = {
     "businessOverview": "사업의 개요",
@@ -2068,7 +2052,7 @@ class Company:
             c.show("dividend")                        # 배당
         """
         # alias 해석 (board → boardOfDirectors 등)
-        topic = _TOPIC_ALIASES.get(topic, topic)
+        topic = _resolveTopic(topic)
 
         # period 가 리스트면 세로 뷰: 먼저 전체 데이터 → transpose
         if isinstance(period, list):
@@ -2548,7 +2532,7 @@ class Company:
             - show: topic 데이터 조회 (trace로 출처 확인 후 열람)
             - sources: 3개 source 전체 가용 현황
         """
-        topic = _TOPIC_ALIASES.get(topic, topic)
+        topic = _resolveTopic(topic)
         if topic == "docsStatus" and not self._hasDocs:
             return {
                 "topic": topic,
@@ -2653,7 +2637,7 @@ class Company:
             - show: 특정 기간 원문 조회
         """
         if topic is not None:
-            topic = _TOPIC_ALIASES.get(topic, topic)
+            topic = _resolveTopic(topic)
         from dartlab.core.docs.diff import (
             diffSummaryDataFrame,
             lineDiffDataFrame,
