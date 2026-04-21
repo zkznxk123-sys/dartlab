@@ -114,7 +114,7 @@ c.reviewer(guide="...")
 | 6막-3 시장분석 | 시장분석 | **quant** | calcTrendData, calcRiskData, calcSignalData, calcStrategyData, calcCrosscheckData, calcQuantConclusionData (엔진=숫자만, review가 narrate 호출) |
 | 6막-4 매크로 | 매크로 | **macro** | macroEnvironment, macroCycle, macroRates, macroLiquidity, macroSentiment, macroForecast, macroCorporate, macroTrade, macroFlags, valuationBand (10블록, `macro("종합")` 1회 호출) |
 
-## 보고서 타입 (reportTypes.py — 11종)
+## 보고서 타입 (reportTypes.py — 12종)
 
 기존 perspective/preset를 **reportType 단일축**으로 통합. `c.review(type="credit")`.
 
@@ -131,8 +131,32 @@ c.reviewer(guide="...")
 | `governance` | 경영진·지배구조 | 거버넌스 리스크 | 지배구조→자본배분→공시변화→종합평가→SV |
 | `macro` | 매크로 사이클 위치 | 탑다운 투자자 | 매크로→시장분석→매출전망→가치평가→SV |
 | `thesis` | AI 논제 검증 | 가설→증거→판정 | thesisReport→SV (NarrativeSection 기반) |
+| `dashboard` | **대시보드** | 한 페이지 스냅샷 | 종합평가→수익구조→안정성→가치평가→매크로→SV |
 
-SV = storyValidation 섹션. 한글 alias: `c.review(type="신용")`, `c.review(type="배당")` 등.
+SV = storyValidation 섹션. 한글 alias: `c.review(type="신용")`, `c.review(type="배당")`, `c.review(type="대시보드")` 등.
+
+### dashboard — 한 페이지 회사 스냅샷 (2026-Q2 추가)
+
+**목적**: 블로그(서사)와 구분되는 **구조화 스냅샷**. 회사를 6섹션으로 요약 — 스코어·재무·리스크·가치·매크로·AI논제.
+
+**emphasize 블록** (기존 calc 재사용):
+- `scorecard` — 5영역 A~F 종합평가
+- `creditScore` — 20등급 신용평가
+- `valuationSynthesis` — DCF/DDM/상대가치 통합
+- `peerPosition` — 업종 내 백분위
+- `marginTrend`, `leverageTrend`, `distressScore` — 5년 재무 추이
+- `macroCycle`, `companyCyclePosition` — 매크로 맥락
+
+**4채널 렌더링**: 같은 `c.review(type='dashboard')` 결과를 4채널로 출력.
+
+| 채널 | API | 용도 |
+|------|-----|------|
+| 웹 | `/dashboard/{stockCode}` (GitHub Pages) | `landing/static/dashboards/{code}.json` 사전빌드 |
+| Jupyter | `c.review(type='dashboard')` → 변수 자동 렌더 | `VizSpec._repr_html_` |
+| Marimo | 동일 | `VizSpec._repr_mimebundle_` |
+| CLI | `renderAscii(review)` | `dartlab.review.formats.renderAscii` (터미널 ANSI) |
+
+**사전빌드**: `scripts/build/buildDashboards.py` (mapBuild workflow에 연동).
 
 ### (deprecated) PERSPECTIVE_TEMPLATES
 

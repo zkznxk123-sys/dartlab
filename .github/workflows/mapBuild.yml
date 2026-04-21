@@ -43,6 +43,12 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
+      - name: Build dashboards (review type=dashboard per company)
+        run: uv run python -X utf8 scripts/build/buildDashboards.py --companies 0
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        continue-on-error: true  # 대시보드 실패해도 맵 배포는 진행
+
       - name: Validate map output
         run: |
           set -euo pipefail
