@@ -161,6 +161,388 @@ def _fetch_crisis_data(market: str, as_of: str | None = None) -> dict[str, float
     return {k: v for k, v in data.items() if v is not None}
 
 
+def _crisisCreditGap(data: dict) -> tuple[dict | None, float | None]:
+    """Credit-to-GDP Gap. 반환: (dict | None, gap_value | None)."""
+    series = data.get("credit_gdp_series")
+    if not (series and len(series) >= 4):
+        return None, None
+    gap_result = creditToGDPGap(series)
+    return {
+        "gap": gap_result.gap,
+        "trend": gap_result.trend,
+        "actual": gap_result.actual,
+        "zone": gap_result.zone,
+        "zoneLabel": gap_result.zoneLabel,
+        "ccybBuffer": gap_result.ccybBuffer,
+        "description": gap_result.description,
+    }, gap_result.gap
+
+
+def _crisisGhsScore(data: dict, credit_gap_val, real_rate) -> dict | None:
+    """GHS 위기 점수. 반환: 구성요소/확률 포함 dict or None."""
+    series = data.get("credit_gdp_series")
+    sp500_3y = data.get("sp500_3y_return")
+    if not (series and sp500_3y is not None):
+        return None
+    if len(series) >= 12:
+        credit_3y = series[-1] - series[-12]
+    elif len(series) >= 4:
+        credit_3y = series[-1] - series[0]
+    else:
+        credit_3y = 0
+    ghs = ghsCrisisScore(credit_3y, sp500_3y, realRate=real_rate)
+    return {
+        "score": ghs.score,
+        "zone": ghs.zone,
+        "zoneLabel": ghs.zoneLabel,
+        "components": ghs.components,
+        "crisisProb": ghs.crisisProb,
+        "description": ghs.description,
+        "regime": ghs.regime,
+        "regimeLabel": ghs.regimeLabel,
+    }
+
+
+def _crisisCapexPressure(data: dict) -> dict | None:
+    """설비투자 압력 — HY 스프레드 수준 + 3개월 변화."""
+    hy_series = data.get("hy_series")
+    hy_current = data.get("hy_current")
+    if hy_current is None or not (isinstance(hy_series, list) and len(hy_series) > 60):
+        return None
+    hy_change = hy_current - hy_series[-60]
+    capex = capexPressure(hy_current, hy_change)
+    return {
+        "pressure": capex.pressure,
+        "pressureLabel": capex.pressureLabel,
+        "spreadLevel": capex.spreadLevel,
+        "spreadChange": capex.spreadChange,
+        "description": capex.description,
+    }
+
+
+def _crisisDollarSafeHaven(data: dict) -> dict | None:
+    """VIX + 달러 3개월 변화 → 안전자산 효과 상태. 반환: 상태 dict or None."""
+    vix = data.get("vix")
+    dxy_current = data.get("dxy_current")
+    dxy_3m = data.get("dxy_3m_ago")
+    if not (vix is not None and dxy_current is not None and dxy_3m and dxy_3m > 0):
+        return None
+    dxy_change = ((dxy_current / dxy_3m) - 1) * 100
+    if vix > 25 and dxy_change > 2:
+        status, label = "active", "활성"
+        desc = f"VIX {vix:.1f} + 달러 {dxy_change:+.1f}% — 안전자산 수요로 달러 강세"
+    elif vix > 20:
+        status, label = "mild", "경미"
+        desc = f"VIX {vix:.1f} + 달러 {dxy_change:+.1f}% — 약한 안전자산 효과"
+    else:
+        status, label = "inactive", "비활성"
+        desc = f"VIX {vix:.1f} — 금융위험 낮음, 달러 안전자산 효과 없음"
+    return {
+        "status": status,
+        "statusLabel": label,
+        "vix": round(vix, 1),
+        "dxyChange3m": round(dxy_change, 1),
+        "description": desc,
+    }
+
+
+def _crisisHistoricalContext(market: str, as_of: str | None) -> dict | None:
+    """역사적 맥락 (US 전용) — 9 시계열 기반 buildHistoricalContext 호출."""
+    if market.upper() != "US":
+        return None
+    try:
+        from dartlab.core.finance.historicalContext import buildHistoricalContext
+        from dartlab.macro._helpers import fetch_monthly_dict
+
+        g_hist = get_gather(as_of)
+        hist_data: dict = {}
+        for key, sid in [
+            ("hy_spread", "BAMLH0A0HYM2"),
+            ("spread_10y3m", "T10Y3M"),
+            ("spread_10y2y", "T10Y2Y"),
+            ("unrate", "UNRATE"),
+            ("cpi_raw", "CPIAUCSL"),
+            ("indpro", "INDPRO"),
+            ("vix", "VIXCLS"),
+            ("nfci", "NFCI"),
+            ("fedfunds", "FEDFUNDS"),
+        ]:
+            md = fetch_monthly_dict(g_hist, sid)
+            if md:
+                hist_data[key] = md
+        if not hist_data:
+            return None
+        hc = buildHistoricalContext(hist_data)
+        return {
+            "hySpike": _frozen_to_dict(hc.hySpike),
+            "yieldCurveInversion": _frozen_to_dict(hc.yieldCurveInversion),
+            "unemploymentBounce": _frozen_to_dict(hc.unemploymentBounce),
+            "cpiAcceleration": hc.cpiAcceleration,
+            "simultaneousWarnings": _frozen_to_dict(hc.simultaneousWarnings),
+            "bullishSignals": _frozen_to_dict(hc.bullishSignals),
+            "hyCompression": _frozen_to_dict(hc.hyCompression),
+            "historicalEvents": [_frozen_to_dict(e) for e in hc.historicalEvents] if hc.historicalEvents else None,
+            "riskLevel": hc.riskLevel,
+            "riskLabel": hc.riskLabel,
+            "opportunityLevel": hc.opportunityLevel,
+            "opportunityLabel": hc.opportunityLabel,
+            "suggestedScenario": hc.suggestedScenario,
+            "suggestedScenarioReason": hc.suggestedScenarioReason,
+            "description": hc.description,
+        }
+    except (ImportError, KeyError, ValueError, TypeError) as e:
+        log.debug("역사적 맥락 계산 실패: %s", e)
+        return None
+
+
+def _crisisMinsky(data: dict, credit_gap_val, hy_current, vix, dxy_current) -> dict | None:
+    """Minsky 5단계. 반환: phase/label/confidence/signals dict or None."""
+    try:
+        dxy_chg_val = None
+        d3m = data.get("dxy_3m_ago")
+        if dxy_current is not None and d3m and d3m > 0:
+            dxy_chg_val = ((dxy_current / d3m) - 1) * 100
+        mk = minskyPhase(
+            creditGap=credit_gap_val,
+            assetReturn3y=data.get("sp500_3y_return"),
+            hySpread=hy_current,
+            vix=vix,
+            dxyChange=dxy_chg_val,
+        )
+        return {
+            "phase": mk.phase,
+            "phaseLabel": mk.phaseLabel,
+            "confidence": mk.confidence,
+            "signals": mk.signals,
+            "description": mk.description,
+        }
+    except (KeyError, ValueError, TypeError, AttributeError):
+        return None
+
+
+def _crisisDalioCaseMatch(data: dict, credit_gap_val) -> list | None:
+    """Dalio Part 2 detail case matching (Weimar/GD/Subprime)."""
+    try:
+        from dartlab.core.finance.dalioCaseMatch import matchDalioDetailCase
+
+        case_state = {
+            "totalDebtToGdp": data.get("total_debt_to_gdp"),
+            "creditGap": credit_gap_val,
+            "realRate": data.get("real_rate"),
+            "gdpGrowth": data.get("gdp_growth"),
+            "debtServiceYoY": data.get("debt_service_yoy"),
+        }
+        if not any(v is not None for v in case_state.values()):
+            return None
+        return matchDalioDetailCase(case_state, topK=3)
+    except (ImportError, KeyError, ValueError, TypeError):
+        return None
+
+
+def _crisisDalio48Match(data: dict, credit_gap_val) -> list | None:
+    """Dalio Part 3 — 48 case compendium matching."""
+    try:
+        from dartlab.core.finance.dalio48Match import match48Cases
+
+        state_48 = {
+            "peakDebtToGdp": data.get("total_debt_to_gdp"),
+            "peakCreditGap": credit_gap_val,
+            "troughRealRate": data.get("real_rate"),
+            "troughGdpGrowth": data.get("gdp_growth"),
+        }
+        if not any(v is not None for v in state_48.values()):
+            return None
+        return match48Cases(state_48, topK=5)
+    except (ImportError, KeyError, ValueError, TypeError):
+        return None
+
+
+def _crisisRRTypes(data: dict, hy_current, market: str, kwargs: dict) -> tuple[dict | None, list | None]:
+    """R&R 위기 유형 분류 + 역사 매칭. 반환: (crisisType dict, rrMatch list)."""
+    try:
+        from dartlab.core.finance.rrCrisisDB import classifyCrisisType, matchRrHistorical
+
+        ct = classifyCrisisType(
+            hySpread=hy_current,
+            npl=data.get("npl"),
+            fxDepreciationYoy=kwargs.get("fxDepreciationYoy"),
+            inflationYoy=data.get("us_cpi_yoy") or data.get("cpi_yoy"),
+            sovereignSpread=kwargs.get("sovereignSpread"),
+            gdpGrowth=data.get("gdp_growth"),
+        )
+        crisisType = {
+            "activeTypes": ct["activeTypes"],
+            "dominantType": ct["dominantType"],
+            "isTripleCrisis": ct["isTripleCrisis"],
+            "signals": ct["signals"],
+        }
+        rrMatch = None
+        if ct["activeTypes"]:
+            rrMatch = matchRrHistorical(
+                ct["activeTypes"],
+                country=market.upper() if market.upper() in ("US", "KR") else None,
+                topK=3,
+            )
+        return crisisType, rrMatch
+    except (ImportError, KeyError, ValueError, TypeError):
+        return None, None
+
+
+def _crisisDalioDebtCycle(data: dict, credit_gap_val, kwargs: dict) -> tuple[dict | None, dict | None]:
+    """Dalio Part 1 — 6 phase + 4 lever 소진도. 반환: (debtCyclePhase, policyLeverStatus)."""
+    try:
+        dp = dalioDebtCyclePhase(
+            totalDebtToGdp=kwargs.get("totalDebtToGdp") or data.get("total_debt_to_gdp"),
+            debtServiceYoY=kwargs.get("debtServiceYoY") or data.get("debt_service_yoy"),
+            creditGap=credit_gap_val,
+            realRate=kwargs.get("realRate") or data.get("real_rate"),
+            gdpGrowth=kwargs.get("gdpGrowth") or data.get("gdp_growth"),
+        )
+        dp_dict = {
+            "phase": dp.phase,
+            "phaseLabel": dp.phaseLabel,
+            "signals": list(dp.signals),
+            "description": dp.description,
+        }
+        pl = dalioPolicyLeverStatus(
+            policyRate=kwargs.get("policyRate") or data.get("fed_funds"),
+            publicDebtToGdp=kwargs.get("publicDebtToGdp") or data.get("public_debt_to_gdp"),
+            creditGap=credit_gap_val,
+            fxFlexibility=kwargs.get("fxFlexibility"),
+        )
+        pl_dict = {
+            "monetary": pl.monetary,
+            "fiscal": pl.fiscal,
+            "credit": pl.credit,
+            "fx": pl.fx,
+            "exhaustionScore": pl.exhaustionScore,
+            "signals": list(pl.signals),
+        }
+        return dp_dict, pl_dict
+    except (KeyError, ValueError, TypeError, AttributeError):
+        return None, None
+
+
+def _crisisKooBsr(data: dict) -> dict | None:
+    """Koo Balance Sheet Recession (US). 반환: dict or None."""
+    try:
+        saving = data.get("private_saving")
+        investment = data.get("private_investment")
+        gdp_level = data.get("gdp_level")
+        ff = data.get("fed_funds")
+        if not all(v is not None for v in (saving, investment, gdp_level, ff)):
+            return None
+        koo = kooBalanceSheetRecession(saving, investment, gdp_level, ff)
+        return {
+            "privateSurplus": koo.privateSurplus,
+            "policyRate": koo.policyRate,
+            "isBSR": koo.isBSR,
+            "description": koo.description,
+        }
+    except (KeyError, ValueError, TypeError, AttributeError):
+        return None
+
+
+def _crisisFisherDeflation(data: dict) -> dict | None:
+    """Fisher Debt-Deflation (US). 반환: dict or None."""
+    try:
+        dsr = data.get("dsr")
+        us_cpi = data.get("us_cpi_yoy")
+        npl = data.get("npl")
+        if dsr is None or us_cpi is None:
+            return None
+        fisher = fisherDebtDeflation(dsr, us_cpi, npl)
+        return {
+            "dsr": fisher.dsr,
+            "nplRate": fisher.nplRate,
+            "cpiYoy": fisher.cpiYoy,
+            "risk": fisher.risk,
+            "riskLabel": fisher.riskLabel,
+            "description": fisher.description,
+        }
+    except (KeyError, ValueError, TypeError, AttributeError):
+        return None
+
+
+def _crisisKrHousingStress(data: dict) -> dict | None:
+    """KR 부동산-금융 스트레스. 반환: dict or None."""
+    try:
+        apt_yoy = data.get("apt_yoy")
+        if apt_yoy is None:
+            return None
+        hs = krHousingFinancialStress(apt_yoy)
+        return {
+            "housePriceYoy": hs.housePriceYoy,
+            "stress": hs.stress,
+            "stressLabel": hs.stressLabel,
+            "description": hs.description,
+        }
+    except (KeyError, ValueError, TypeError, AttributeError):
+        return None
+
+
+def _crisisKrCreditRisk(data: dict) -> dict | None:
+    """KR 신용위험 ↔ CPI (전략 35). 반환: dict or None."""
+    cpi_yoy = data.get("cpi_yoy")
+    if cpi_yoy is None:
+        return None
+    if cpi_yoy > 4:
+        signal = "CPI 상승률 높음 → 신용위험 확대 경계"
+    elif cpi_yoy > 2:
+        signal = "CPI 안정 → 신용위험 보통"
+    else:
+        signal = "CPI 둔화 → 신용위험 낮음"
+    return {"cpiYoy": round(cpi_yoy, 1), "signal": signal}
+
+
+def _crisisExcessBondPremium(as_of: str | None) -> dict | None:
+    """Gilchrist-Zakrajšek EBP. 반환: classifyEBP dict or None."""
+    try:
+        from dartlab.core.finance.excessBondPremium import approximateEBP, classifyEBP
+        from dartlab.macro._helpers import fetch_latest as _fl
+        from dartlab.macro._helpers import get_gather as _gg
+
+        _g = _gg(as_of)
+        _hy = _fl(_g, "BAMLH0A0HYM2")
+        _baa_aaa = _fl(_g, "BAA10Y")
+        if _hy is None or _baa_aaa is None:
+            return None
+        hy_bp = _hy * 100
+        default_proxy = _baa_aaa * 150
+        ebp_val = approximateEBP(hy_bp, default_proxy)
+        return classifyEBP(ebp_val)
+    except (KeyError, ValueError, TypeError, AttributeError):
+        return None
+
+
+def _crisisCreditCycle(as_of: str | None) -> dict | None:
+    """Verdad Credit Cycle 4단계 (Greenwood-Hanson-Jin 2019). 반환: classifyCreditCycle dict."""
+    try:
+        from dartlab.core.finance.creditCycle import classifyCreditCycle
+        from dartlab.macro._helpers import fetch_latest as _fl2
+        from dartlab.macro._helpers import get_gather as _gg2
+
+        _g2 = _gg2(as_of)
+        _hy2 = _fl2(_g2, "BAMLH0A0HYM2")
+        if _hy2 is None:
+            return None
+        hy_bp2 = _hy2 * 100
+        hy_6m = None
+        try:
+            from dartlab.macro._helpers import fetch_series_list as _fsl
+
+            hy_list = _fsl(_g2, "BAMLH0A0HYM2")
+            if hy_list and len(hy_list) > 125:
+                hy_6m = hy_list[-125] * 100
+        except (KeyError, ValueError, TypeError):
+            pass
+        loan = _fl2(_g2, "DRTSCLCC")
+        co = _fl2(_g2, "CORCCACBS")
+        return classifyCreditCycle(hy_bp2, hy_spread_6m_ago=hy_6m, loan_tightening=loan, charge_off=co)
+    except (KeyError, ValueError, TypeError, AttributeError):
+        return None
+
+
 def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """위기 감지 종합 분석.
 
@@ -250,146 +632,16 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
         data = apply_overrides(data, overrides)
     result: dict = {"market": market.upper()}
 
-    # Credit-to-GDP Gap
-    credit_gdp_series = data.get("credit_gdp_series")
-    if credit_gdp_series and len(credit_gdp_series) >= 4:
-        gap_result = creditToGDPGap(credit_gdp_series)
-        result["creditGap"] = {
-            "gap": gap_result.gap,
-            "trend": gap_result.trend,
-            "actual": gap_result.actual,
-            "zone": gap_result.zone,
-            "zoneLabel": gap_result.zoneLabel,
-            "ccybBuffer": gap_result.ccybBuffer,
-            "description": gap_result.description,
-        }
-        credit_gap_val = gap_result.gap
-    else:
-        result["creditGap"] = None
-        credit_gap_val = None
+    result["creditGap"], credit_gap_val = _crisisCreditGap(data)
+    result["ghsScore"] = _crisisGhsScore(data, credit_gap_val, kwargs.get("realRate"))
+    result["capexPressure"] = _crisisCapexPressure(data)
+    result["dollarSafeHaven"] = _crisisDollarSafeHaven(data)
 
-    # GHS 위기 점수
-    sp500_3y = data.get("sp500_3y_return")
-    if credit_gdp_series and sp500_3y is not None:
-        # 3년 신용 변화
-        if len(credit_gdp_series) >= 12:  # 분기 데이터 3년
-            credit_3y = credit_gdp_series[-1] - credit_gdp_series[-12]
-        elif len(credit_gdp_series) >= 4:
-            credit_3y = credit_gdp_series[-1] - credit_gdp_series[0]
-        else:
-            credit_3y = 0
-
-        ghs = ghsCrisisScore(credit_3y, sp500_3y, realRate=kwargs.get("realRate"))
-        result["ghsScore"] = {
-            "score": ghs.score,
-            "zone": ghs.zone,
-            "zoneLabel": ghs.zoneLabel,
-            "components": ghs.components,
-            "crisisProb": ghs.crisisProb,
-            "description": ghs.description,
-            "regime": ghs.regime,
-            "regimeLabel": ghs.regimeLabel,
-        }
-    else:
-        result["ghsScore"] = None
-
-    # 설비투자 압력 (전략 32)
-    hy_series = data.get("hy_series")
     hy_current = data.get("hy_current")
-    if hy_current is not None and isinstance(hy_series, list) and len(hy_series) > 60:
-        hy_3m_ago = hy_series[-60]
-        hy_change = hy_current - hy_3m_ago
-        capex = capexPressure(hy_current, hy_change)
-        result["capexPressure"] = {
-            "pressure": capex.pressure,
-            "pressureLabel": capex.pressureLabel,
-            "spreadLevel": capex.spreadLevel,
-            "spreadChange": capex.spreadChange,
-            "description": capex.description,
-        }
-    else:
-        result["capexPressure"] = None
-
-    # 달러 안전자산 효과 (전략 38)
     vix = data.get("vix")
     dxy_current = data.get("dxy_current")
-    dxy_3m = data.get("dxy_3m_ago")
-    if vix is not None and dxy_current is not None and dxy_3m is not None and dxy_3m > 0:
-        dxy_change = ((dxy_current / dxy_3m) - 1) * 100
-        if vix > 25 and dxy_change > 2:
-            safe_haven = "active"
-            safe_label = "활성"
-            desc = f"VIX {vix:.1f} + 달러 {dxy_change:+.1f}% — 안전자산 수요로 달러 강세"
-        elif vix > 20:
-            safe_haven = "mild"
-            safe_label = "경미"
-            desc = f"VIX {vix:.1f} + 달러 {dxy_change:+.1f}% — 약한 안전자산 효과"
-        else:
-            safe_haven = "inactive"
-            safe_label = "비활성"
-            desc = f"VIX {vix:.1f} — 금융위험 낮음, 달러 안전자산 효과 없음"
-        result["dollarSafeHaven"] = {
-            "status": safe_haven,
-            "statusLabel": safe_label,
-            "vix": round(vix, 1),
-            "dxyChange3m": round(dxy_change, 1),
-            "description": desc,
-        }
-    else:
-        result["dollarSafeHaven"] = None
 
-    # ── 역사적 맥락 (L0 순수함수) ──
-    result["historicalContext"] = None
-    if market.upper() == "US":
-        try:
-            from dartlab.core.finance.historicalContext import buildHistoricalContext
-            from dartlab.macro._helpers import fetch_monthly_dict
-
-            g_hist = get_gather(as_of)
-            hist_data: dict = {}
-            for key, sid in [
-                ("hy_spread", "BAMLH0A0HYM2"),
-                ("spread_10y3m", "T10Y3M"),
-                ("spread_10y2y", "T10Y2Y"),
-                ("unrate", "UNRATE"),
-                ("cpi_raw", "CPIAUCSL"),
-                ("indpro", "INDPRO"),
-                ("vix", "VIXCLS"),
-                ("nfci", "NFCI"),
-                ("fedfunds", "FEDFUNDS"),
-            ]:
-                md = fetch_monthly_dict(g_hist, sid)
-                if md:
-                    hist_data[key] = md
-
-            if hist_data:
-                hc = buildHistoricalContext(hist_data)
-                result["historicalContext"] = {
-                    # 위기
-                    "hySpike": _frozen_to_dict(hc.hySpike),
-                    "yieldCurveInversion": _frozen_to_dict(hc.yieldCurveInversion),
-                    "unemploymentBounce": _frozen_to_dict(hc.unemploymentBounce),
-                    "cpiAcceleration": hc.cpiAcceleration,
-                    "simultaneousWarnings": _frozen_to_dict(hc.simultaneousWarnings),
-                    # 호황
-                    "bullishSignals": _frozen_to_dict(hc.bullishSignals),
-                    "hyCompression": _frozen_to_dict(hc.hyCompression),
-                    # 역사적 사건
-                    "historicalEvents": [_frozen_to_dict(e) for e in hc.historicalEvents]
-                    if hc.historicalEvents
-                    else None,
-                    # 종합
-                    "riskLevel": hc.riskLevel,
-                    "riskLabel": hc.riskLabel,
-                    "opportunityLevel": hc.opportunityLevel,
-                    "opportunityLabel": hc.opportunityLabel,
-                    # 다음 장
-                    "suggestedScenario": hc.suggestedScenario,
-                    "suggestedScenarioReason": hc.suggestedScenarioReason,
-                    "description": hc.description,
-                }
-        except (ImportError, KeyError, ValueError, TypeError) as e:
-            log.debug("역사적 맥락 계산 실패: %s", e)
+    result["historicalContext"] = _crisisHistoricalContext(market, as_of)
 
     # 침체 대시보드 (다른 축 결과 필요 — 독립 실행 시 가용 데이터만 사용)
     probit_prob = kwargs.get("probitProb")
@@ -413,253 +665,24 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
         "description": dashboard.description,
     }
 
-    # ── Minsky 5단계 ──
-    result["minskyPhase"] = None
-    try:
-        dxy_chg_val = None
-        if dxy_current is not None and data.get("dxy_3m_ago") is not None:
-            d3m = data["dxy_3m_ago"]
-            if d3m > 0:
-                dxy_chg_val = ((dxy_current / d3m) - 1) * 100
-        mk = minskyPhase(
-            creditGap=credit_gap_val,
-            assetReturn3y=data.get("sp500_3y_return"),
-            hySpread=hy_current,
-            vix=vix,
-            dxyChange=dxy_chg_val,
-        )
-        result["minskyPhase"] = {
-            "phase": mk.phase,
-            "phaseLabel": mk.phaseLabel,
-            "confidence": mk.confidence,
-            "signals": mk.signals,
-            "description": mk.description,
-        }
-    except (KeyError, ValueError, TypeError, AttributeError):
-        pass
-
-    # ── Dalio Part 2: detail case matching (Weimar/GreatDepression/Subprime) ──
-    result["dalioCaseMatch"] = None
-    try:
-        from dartlab.core.finance.dalioCaseMatch import matchDalioDetailCase
-
-        case_state = {
-            "totalDebtToGdp": data.get("total_debt_to_gdp"),
-            "creditGap": credit_gap_val,
-            "realRate": data.get("real_rate"),
-            "gdpGrowth": data.get("gdp_growth"),
-            "debtServiceYoY": data.get("debt_service_yoy"),
-        }
-        if any(v is not None for v in case_state.values()):
-            result["dalioCaseMatch"] = matchDalioDetailCase(case_state, topK=3)
-    except (ImportError, KeyError, ValueError, TypeError):
-        pass
-
-    # ── Dalio Part 3: 48-case compendium matching ──
-    result["dalio48Match"] = None
-    try:
-        from dartlab.core.finance.dalio48Match import match48Cases
-
-        state_48 = {
-            "peakDebtToGdp": data.get("total_debt_to_gdp"),
-            "peakCreditGap": credit_gap_val,
-            "troughRealRate": data.get("real_rate"),
-            "troughGdpGrowth": data.get("gdp_growth"),
-        }
-        if any(v is not None for v in state_48.values()):
-            result["dalio48Match"] = match48Cases(state_48, topK=5)
-    except (ImportError, KeyError, ValueError, TypeError):
-        pass
-
-    # ── R&R 위기 유형 분류 + 역사 매칭 ──
-    result["crisisType"] = None
-    result["rrMatch"] = None
-    try:
-        from dartlab.core.finance.rrCrisisDB import classifyCrisisType, matchRrHistorical
-
-        ct = classifyCrisisType(
-            hySpread=hy_current,
-            npl=data.get("npl"),
-            fxDepreciationYoy=kwargs.get("fxDepreciationYoy"),
-            inflationYoy=data.get("us_cpi_yoy") or data.get("cpi_yoy"),
-            sovereignSpread=kwargs.get("sovereignSpread"),
-            gdpGrowth=data.get("gdp_growth"),
-        )
-        result["crisisType"] = {
-            "activeTypes": ct["activeTypes"],
-            "dominantType": ct["dominantType"],
-            "isTripleCrisis": ct["isTripleCrisis"],
-            "signals": ct["signals"],
-        }
-        if ct["activeTypes"]:
-            result["rrMatch"] = matchRrHistorical(
-                ct["activeTypes"],
-                country=market.upper() if market.upper() in ("US", "KR") else None,
-                topK=3,
-            )
-    except (ImportError, KeyError, ValueError, TypeError):
-        pass
-
-    # ── Dalio 부채사이클 + 정책 4 레버 ──
-    # Big Debt Crises Part 1 — 6 phase enum + 4 lever 소진도
-    # 입력: kwargs 우선, 없으면 _fetch_crisis_data 에서 자동 주입
-    result["debtCyclePhase"] = None
-    result["policyLeverStatus"] = None
-    try:
-        dp = dalioDebtCyclePhase(
-            totalDebtToGdp=kwargs.get("totalDebtToGdp") or data.get("total_debt_to_gdp"),
-            debtServiceYoY=kwargs.get("debtServiceYoY") or data.get("debt_service_yoy"),
-            creditGap=credit_gap_val,
-            realRate=kwargs.get("realRate") or data.get("real_rate"),
-            gdpGrowth=kwargs.get("gdpGrowth") or data.get("gdp_growth"),
-        )
-        result["debtCyclePhase"] = {
-            "phase": dp.phase,
-            "phaseLabel": dp.phaseLabel,
-            "signals": list(dp.signals),
-            "description": dp.description,
-        }
-
-        pl = dalioPolicyLeverStatus(
-            policyRate=kwargs.get("policyRate") or data.get("fed_funds"),
-            publicDebtToGdp=kwargs.get("publicDebtToGdp") or data.get("public_debt_to_gdp"),
-            creditGap=credit_gap_val,
-            fxFlexibility=kwargs.get("fxFlexibility"),
-        )
-        result["policyLeverStatus"] = {
-            "monetary": pl.monetary,
-            "fiscal": pl.fiscal,
-            "credit": pl.credit,
-            "fx": pl.fx,
-            "exhaustionScore": pl.exhaustionScore,
-            "signals": list(pl.signals),
-        }
-    except (KeyError, ValueError, TypeError, AttributeError):
-        pass
-
-    # ── Koo Balance Sheet Recession (US) ──
-    result["kooRecession"] = None
-    if market.upper() == "US":
-        try:
-            saving = data.get("private_saving")
-            investment = data.get("private_investment")
-            gdp_level = data.get("gdp_level")
-            ff = data.get("fed_funds")
-            if saving is not None and investment is not None and gdp_level is not None and ff is not None:
-                koo = kooBalanceSheetRecession(saving, investment, gdp_level, ff)
-                result["kooRecession"] = {
-                    "privateSurplus": koo.privateSurplus,
-                    "policyRate": koo.policyRate,
-                    "isBSR": koo.isBSR,
-                    "description": koo.description,
-                }
-        except (KeyError, ValueError, TypeError, AttributeError):
-            pass
-
-    # ── Fisher Debt-Deflation (US) ──
-    result["fisherDeflation"] = None
-    if market.upper() == "US":
-        try:
-            dsr = data.get("dsr")
-            us_cpi = data.get("us_cpi_yoy")
-            npl = data.get("npl")
-            if dsr is not None and us_cpi is not None:
-                fisher = fisherDebtDeflation(dsr, us_cpi, npl)
-                result["fisherDeflation"] = {
-                    "dsr": fisher.dsr,
-                    "nplRate": fisher.nplRate,
-                    "cpiYoy": fisher.cpiYoy,
-                    "risk": fisher.risk,
-                    "riskLabel": fisher.riskLabel,
-                    "description": fisher.description,
-                }
-        except (KeyError, ValueError, TypeError, AttributeError):
-            pass
-
-    # ── KR 부동산-금융 스트레스 ──
+    result["minskyPhase"] = _crisisMinsky(data, credit_gap_val, hy_current, vix, dxy_current)
+    result["dalioCaseMatch"] = _crisisDalioCaseMatch(data, credit_gap_val)
+    result["dalio48Match"] = _crisisDalio48Match(data, credit_gap_val)
+    ct_res, rr_res = _crisisRRTypes(data, hy_current, market, kwargs)
+    result["crisisType"] = ct_res
+    result["rrMatch"] = rr_res
+    dp_res, pl_res = _crisisDalioDebtCycle(data, credit_gap_val, kwargs)
+    result["debtCyclePhase"] = dp_res
+    result["policyLeverStatus"] = pl_res
+    result["kooRecession"] = _crisisKooBsr(data) if market.upper() == "US" else None
+    result["fisherDeflation"] = _crisisFisherDeflation(data) if market.upper() == "US" else None
     if market.upper() == "KR":
-        try:
-            apt_yoy = data.get("apt_yoy")
-            if apt_yoy is not None:
-                hs = krHousingFinancialStress(apt_yoy)
-                result["krHousingStress"] = {
-                    "housePriceYoy": hs.housePriceYoy,
-                    "stress": hs.stress,
-                    "stressLabel": hs.stressLabel,
-                    "description": hs.description,
-                }
-        except (KeyError, ValueError, TypeError, AttributeError):
-            pass
-
-    # 한국 신용위험 ↔ CPI (전략 35)
-    if market.upper() == "KR":
-        cpi_yoy = data.get("cpi_yoy")
-        if cpi_yoy is not None:
-            if cpi_yoy > 4:
-                cr_signal = "CPI 상승률 높음 → 신용위험 확대 경계"
-            elif cpi_yoy > 2:
-                cr_signal = "CPI 안정 → 신용위험 보통"
-            else:
-                cr_signal = "CPI 둔화 → 신용위험 낮음"
-            result["krCreditRisk"] = {
-                "cpiYoy": round(cpi_yoy, 1),
-                "signal": cr_signal,
-            }
-
-    # ── Excess Bond Premium — Gilchrist & Zakrajšek (2012) AER ──
-    result["excessBondPremium"] = None
-    try:
-        from dartlab.core.finance.excessBondPremium import approximateEBP, classifyEBP
-        from dartlab.macro._helpers import fetch_latest as _fl
-        from dartlab.macro._helpers import get_gather as _gg
-
-        _g = _gg(as_of)
-        _hy = _fl(_g, "BAMLH0A0HYM2")
-        _baa_aaa = _fl(_g, "BAA10Y")  # BAA-AAA spread (부도 프리미엄 근사)
-        if _hy is not None and _baa_aaa is not None:
-            hy_bp = _hy * 100  # % → bp
-            # BAA-AAA spread를 기대부도프리미엄 근사치로 사용 (스케일: ×1.5)
-            default_proxy = _baa_aaa * 150  # %p → bp, 스케일 조정
-            ebp_val = approximateEBP(hy_bp, default_proxy)
-            result["excessBondPremium"] = classifyEBP(ebp_val)
-    except (KeyError, ValueError, TypeError, AttributeError):
-        pass
-
-    # ── Verdad Credit Cycle 4단계 — Greenwood, Hanson, Jin (2019) ──
-    result["creditCycle"] = None
-    try:
-        from dartlab.core.finance.creditCycle import classifyCreditCycle
-        from dartlab.macro._helpers import fetch_latest as _fl2
-        from dartlab.macro._helpers import get_gather as _gg2
-
-        _g2 = _gg2(as_of)
-        _hy2 = _fl2(_g2, "BAMLH0A0HYM2")
-        if _hy2 is not None:
-            hy_bp2 = _hy2 * 100
-            # 6개월 전 HY (방향 판별)
-            hy_6m = None
-            try:
-                from dartlab.macro._helpers import fetch_series_list as _fsl
-
-                hy_list = _fsl(_g2, "BAMLH0A0HYM2")
-                if hy_list and len(hy_list) > 125:
-                    hy_6m = hy_list[-125] * 100
-            except (KeyError, ValueError, TypeError):
-                pass
-
-            # Senior Loan Officer Survey (분기, % tightening)
-            loan = _fl2(_g2, "DRTSCLCC")
-            # Charge-off rate
-            co = _fl2(_g2, "CORCCACBS")
-
-            result["creditCycle"] = classifyCreditCycle(
-                hy_bp2,
-                hy_spread_6m_ago=hy_6m,
-                loan_tightening=loan,
-                charge_off=co,
-            )
-    except (KeyError, ValueError, TypeError, AttributeError):
-        pass
+        result["krHousingStress"] = _crisisKrHousingStress(data)
+        kr_credit = _crisisKrCreditRisk(data)
+        if kr_credit:
+            result["krCreditRisk"] = kr_credit
+    result["excessBondPremium"] = _crisisExcessBondPremium(as_of)
+    result["creditCycle"] = _crisisCreditCycle(as_of)
 
     from dartlab.macro._helpers import collect_timeseries
 

@@ -19,22 +19,11 @@ keywords:
   - dartlab-lite
 ---
 
-<script>
-import { Button } from '$lib/components/ui/button';
-</script>
-
 **dartlab은 파이썬 패키지다.** 그런데 파이썬이 설치돼 있지 않은 환경에서도 돌아간다. 엑셀 웹 버전, 사내 웹 주피터, 크롬 탭 하나 — 어디서든 `import dartlab` 한 줄로 삼성전자의 손익계산서가 나온다. 지난 2년 사이 조용히 퍼진 한 인프라, **Pyodide** 덕분이다.
 
 이 글에서는 dartlab의 Pyodide 지원(이하 **dartlab-lite**)이 어떤 환경에서 어떻게 돌아가는지, 그리고 엑셀에서 사용자 정의 함수로 쓰는 실제 화면을 두 장 보여준다. 더불어 Pyodide가 뭔지, 어떤 제약이 있는지도 정확히 짚는다. 설치형 dartlab과 **같은 API**, **같은 데이터**인데 배포만 브라우저 안에서 이뤄진다.
 
-<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;margin:24px 0;padding:20px;background:linear-gradient(135deg,rgba(234,70,71,0.08),rgba(251,191,36,0.05));border:1px solid rgba(234,70,71,0.25);border-radius:12px;">
-  <div style="font-size:14px;color:#94a3b8;">설치 없이 지금 바로 체험</div>
-  <div style="font-size:17px;font-weight:600;color:#f1f5f9;line-height:1.4;">미리 세팅된 워크북이 웹 엑셀에서 열린다.<br/>버튼을 누르거나 셀에 <code style="background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:4px;font-size:14px;">=GETFINANCE("005930")</code>만 치면 끝.</div>
-  <Button href="https://1drv.ms/x/c/4e17617bfea66347/IQB9zW91TaD4TJvHM8LRQTh4ARj0gHMapx4LVhCCSbBz92Q?e=HQ4E7d" variant="default" size="lg" target="_blank" rel="noopener">
-    ▶ 웹 엑셀에서 dartlab 체험하기
-  </Button>
-  <div style="font-size:12px;color:#64748b;">OneDrive 공유 · Microsoft 계정만 있으면 즉시 열림</div>
-</div>
+> **이 글을 끝까지 읽으면**, 아래에서 미리 세팅된 **데모 엑셀**을 열어 직접 빠르게 테스트해볼 수 있다. 설치·계정 설정 전부 생략하고 결과만 보고 싶다면 엑셀 섹션이 끝나는 지점의 체험 링크를 쓰면 된다.
 
 ---
 
@@ -219,6 +208,14 @@ await micropip.install(
 HuggingFace에서 받는 `.parquet`(공시·재무 데이터)도 동일 도메인이라 **CORS 설정 0줄**로 동작한다.
 
 ---
+
+<div style="margin:36px 0;padding:28px 32px;background:linear-gradient(135deg,rgba(234,70,71,0.10),rgba(251,191,36,0.06));border:1px solid rgba(234,70,71,0.30);border-radius:14px;">
+  <div style="font-size:13px;font-weight:600;letter-spacing:0.5px;color:#fbbf24;text-transform:uppercase;margin-bottom:10px;">데모 워크북</div>
+  <div style="font-size:20px;font-weight:700;color:#f1f5f9;line-height:1.4;margin-bottom:8px;">설치 없이 지금 엑셀에서 바로 돌려보기</div>
+  <div style="font-size:15px;color:#cbd5e1;line-height:1.6;margin-bottom:20px;">xlwings Lite 설치·requirements 설정·스크립트 배치까지 이미 끝낸 워크북을 공유한다. Microsoft 계정으로 웹 엑셀을 열 수만 있으면 바로 돌아간다.</div>
+  <a href="https://1drv.ms/x/c/4e17617bfea66347/IQB9zW91TaD4TJvHM8LRQTh4ARj0gHMapx4LVhCCSbBz92Q?e=HQ4E7d" target="_blank" rel="noopener" style="display:inline-block;padding:14px 32px;background:#ea4647;color:#ffffff;font-size:16px;font-weight:700;border-radius:10px;text-decoration:none;box-shadow:0 4px 14px rgba(234,70,71,0.35);">▶ 데모 워크북 열기 (OneDrive)</a>
+  <div style="font-size:12px;color:#94a3b8;margin-top:14px;">열리지 않으면 Microsoft 계정 로그인 후 다시 시도. 파일 권한은 "보기 전용" — 자유롭게 복제해서 실험해도 된다.</div>
+</div>
 
 ## JupyterLite / Colab / HTML 임베드에서 쓰기
 
