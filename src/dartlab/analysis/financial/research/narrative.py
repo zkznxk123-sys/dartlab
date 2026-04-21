@@ -1153,90 +1153,108 @@ def _analyzeLiquidity(inp: _Input) -> NarrativeParagraph | None:
     )
 
 
+def _capitalRetainedLines(retainedEarnings) -> list[str]:
+    """이익잉여금 추세."""
+    reClean = [v for v in retainedEarnings if v is not None] if retainedEarnings else []
+    if len(reClean) < 2:
+        return []
+    reGr = (reClean[-1] - reClean[-2]) / abs(reClean[-2]) * 100 if reClean[-2] != 0 else 0
+    lines = [f"이익잉여금 {reGr:+.1f}% 변동"]
+    if reGr < -5:
+        lines.append("이익잉여금 감소 — 배당/자사주 또는 결손 영향")
+    return lines
+
+
+def _capitalRaisingLine(shareCapital) -> str | None:
+    """자본금 증가 → 유상증자 감지."""
+    scClean = [v for v in shareCapital if v is not None] if shareCapital else []
+    if len(scClean) < 2 or scClean[-2] == 0:
+        return None
+    scGr = (scClean[-1] - scClean[-2]) / abs(scClean[-2]) * 100
+    if scGr > 5:
+        return f"자본금 {scGr:+.1f}% 증가 — 유상증자 가능성"
+    return None
+
+
+def _capitalTreasuryLine(treasuryStock) -> str | None:
+    """자사주 변동 (>10억)."""
+    tsClean = [v for v in treasuryStock if v is not None] if treasuryStock else []
+    if len(tsClean) < 2:
+        return None
+    tsDiff = tsClean[-1] - tsClean[-2]
+    if tsDiff < -1e9:
+        return "자사주 매입 확대 — 주주환원 강화 시그널"
+    if tsDiff > 1e9:
+        return "자사주 처분 — 희석 가능성"
+    return None
+
+
+def _capitalPayoutLines(inp) -> tuple[list[str], list]:
+    """배당성향 라인 + niClean 리턴 (Owner Earnings 에서 재사용)."""
+    ni = _getVals(inp.aSeries, "IS", "net_profit")
+    niClean = [v for v in ni if v is not None] if ni else []
+    divs = _getVals(inp.aSeries, "CF", "dividends_paid") or _getVals(inp.aSeries, "CF", "dividend_paid")
+    divClean = [v for v in divs if v is not None] if divs else []
+    if not (divClean and niClean and niClean[-1] and niClean[-1] > 0):
+        return [], niClean
+    payoutRatio = abs(divClean[-1]) / niClean[-1] * 100
+    lines = [f"배당성향 {payoutRatio:.0f}%"]
+    if payoutRatio > 80:
+        lines.append("배당성향 과다 — 재투자 여력 부족 가능")
+    elif payoutRatio < 10 and niClean[-1] > 0:
+        lines.append("배당성향 매우 낮음 — 내부유보 위주 경영")
+    return lines, niClean
+
+
+def _capitalOwnerEarningsLines(inp, niClean) -> list[str]:
+    """Owner Earnings = NI + D&A - maintenance CAPEX."""
+    depreciation = _getVals(inp.aSeries, "CF", "depreciation_and_amortization") or _getVals(
+        inp.aSeries, "IS", "depreciation"
+    )
+    capex = _getVals(inp.aSeries, "CF", "capital_expenditure") or _getVals(
+        inp.aSeries, "CF", "acquisition_of_property_plant_and_equipment"
+    )
+    depAll = [v for v in depreciation if v is not None] if depreciation else []
+    capexAll = [v for v in capex if v is not None] if capex else []
+    if not (niClean and depAll and capexAll and niClean[-1] != 0):
+        return []
+    ownerEarnings = niClean[-1] + abs(depAll[-1]) - abs(capexAll[-1])
+    oeRatio = ownerEarnings / niClean[-1]
+    if abs(oeRatio) <= 0.1:
+        return []
+    lines = [f"Owner Earnings/NI {oeRatio:.2f}"]
+    if oeRatio > 1.3:
+        lines.append("유지보수 CAPEX 이하 투자 — 현금 창출 우수")
+    elif oeRatio < 0.3:
+        lines.append("성장투자로 현금 대부분 소진 — 주주 환원 여력 제한적")
+    return lines
+
+
 def _analyzeCapitalChange(inp: _Input) -> NarrativeParagraph | None:
-    """자본변동 분석 — 이익잉여금 축적, 자사주/배당, 유상증자."""
+    """자본변동 분석 orchestrator (Q3.1f split)."""
     totalEquity = _getVals(inp.aSeries, "BS", "total_equity")
     retainedEarnings = _getVals(inp.aSeries, "BS", "retained_earnings")
-    shareCapital = _getVals(inp.aSeries, "BS", "share_capital")
-    if not shareCapital:
-        shareCapital = _getVals(inp.aSeries, "BS", "capital_stock")
-    treasuryStock = _getVals(inp.aSeries, "BS", "treasury_stock")
-    if not treasuryStock:
-        treasuryStock = _getVals(inp.aSeries, "BS", "treasury_shares")
+    shareCapital = _getVals(inp.aSeries, "BS", "share_capital") or _getVals(inp.aSeries, "BS", "capital_stock")
+    treasuryStock = _getVals(inp.aSeries, "BS", "treasury_stock") or _getVals(inp.aSeries, "BS", "treasury_shares")
 
     if not totalEquity or len(totalEquity) < 2:
         return None
-
     teClean = [v for v in totalEquity if v is not None]
     if len(teClean) < 2:
         return None
 
-    parts: list[str] = []
-
-    # 자본 증감
     teGr = (teClean[-1] - teClean[-2]) / abs(teClean[-2]) * 100
-    parts.append(f"자기자본 {teClean[-1] / 1e8:,.0f}억(전년 대비 {teGr:+.1f}%)")
-
-    # 이익잉여금 추세
-    reClean = [v for v in retainedEarnings if v is not None] if retainedEarnings else []
-    if len(reClean) >= 2:
-        reGr = (reClean[-1] - reClean[-2]) / abs(reClean[-2]) * 100 if reClean[-2] != 0 else 0
-        parts.append(f"이익잉여금 {reGr:+.1f}% 변동")
-        if reGr < -5:
-            parts.append("이익잉여금 감소 — 배당/자사주 또는 결손 영향")
-
-    # 유상증자 감지
-    scClean = [v for v in shareCapital if v is not None] if shareCapital else []
-    if len(scClean) >= 2 and scClean[-2] != 0:
-        scGr = (scClean[-1] - scClean[-2]) / abs(scClean[-2]) * 100
-        if scGr > 5:
-            parts.append(f"자본금 {scGr:+.1f}% 증가 — 유상증자 가능성")
-
-    # 자사주 변동
-    tsClean = [v for v in treasuryStock if v is not None] if treasuryStock else []
-    if len(tsClean) >= 2:
-        tsDiff = tsClean[-1] - tsClean[-2]
-        if tsDiff < -1e9:  # 10억 이상 증가 (자사주는 음수이므로 감소 = 매입)
-            parts.append("자사주 매입 확대 — 주주환원 강화 시그널")
-        elif tsDiff > 1e9:
-            parts.append("자사주 처분 — 희석 가능성")
-
-    # Shareholder Yield (배당 + 자사주 매입) / 시가총액 (Lens 6)
-    ni = _getVals(inp.aSeries, "IS", "net_profit")
-    niClean = [v for v in ni if v is not None] if ni else []
-    dividendPaid = _getVals(inp.aSeries, "CF", "dividends_paid")
-    if not dividendPaid:
-        dividendPaid = _getVals(inp.aSeries, "CF", "dividend_paid")
-    divClean = [v for v in dividendPaid if v is not None] if dividendPaid else []
-    if divClean and niClean:
-        payoutRatio = abs(divClean[-1]) / niClean[-1] * 100 if niClean[-1] and niClean[-1] > 0 else None
-        if payoutRatio is not None:
-            parts.append(f"배당성향 {payoutRatio:.0f}%")
-            if payoutRatio > 80:
-                parts.append("배당성향 과다 — 재투자 여력 부족 가능")
-            elif payoutRatio < 10 and niClean[-1] > 0:
-                parts.append("배당성향 매우 낮음 — 내부유보 위주 경영")
-
-    # Owner Earnings 추정 (= NI + D&A - maintenance CAPEX)
-    depreciation = _getVals(inp.aSeries, "CF", "depreciation_and_amortization")
-    if not depreciation:
-        depreciation = _getVals(inp.aSeries, "IS", "depreciation")
-    capex = _getVals(inp.aSeries, "CF", "capital_expenditure")
-    if not capex:
-        capex = _getVals(inp.aSeries, "CF", "acquisition_of_property_plant_and_equipment")
-    depAll = [v for v in depreciation if v is not None] if depreciation else []
-    capexAll = [v for v in capex if v is not None] if capex else []
-    if niClean and depAll and capexAll:
-        # maintenance capex ≈ 감가상각 수준으로 추정
-        ownerEarnings = niClean[-1] + abs(depAll[-1]) - abs(capexAll[-1])
-        if niClean[-1] != 0:
-            oeRatio = ownerEarnings / niClean[-1]
-            if abs(oeRatio) > 0.1:
-                parts.append(f"Owner Earnings/NI {oeRatio:.2f}")
-                if oeRatio > 1.3:
-                    parts.append("유지보수 CAPEX 이하 투자 — 현금 창출 우수")
-                elif oeRatio < 0.3:
-                    parts.append("성장투자로 현금 대부분 소진 — 주주 환원 여력 제한적")
+    parts: list[str] = [f"자기자본 {teClean[-1] / 1e8:,.0f}억(전년 대비 {teGr:+.1f}%)"]
+    parts.extend(_capitalRetainedLines(retainedEarnings))
+    raisingLine = _capitalRaisingLine(shareCapital)
+    if raisingLine:
+        parts.append(raisingLine)
+    treasuryLine = _capitalTreasuryLine(treasuryStock)
+    if treasuryLine:
+        parts.append(treasuryLine)
+    payoutLines, niClean = _capitalPayoutLines(inp)
+    parts.extend(payoutLines)
+    parts.extend(_capitalOwnerEarningsLines(inp, niClean))
 
     if not parts:
         return None
@@ -1537,86 +1555,126 @@ def _analyzeCfToBs(inp: _Input) -> NarrativeParagraph | None:
     )
 
 
+def _isToBsRetentionLine(ni, retainedEarnings) -> str | None:
+    """순이익 → 이익잉여금 축적률."""
+    if not retainedEarnings:
+        return None
+    reClean = [v for v in retainedEarnings if v is not None]
+    niClean = [v for v in ni if v is not None]
+    if not (len(reClean) >= 2 and niClean and niClean[-1] != 0):
+        return None
+    reChange = reClean[-1] - reClean[-2]
+    retentionRate = reChange / niClean[-1] * 100
+    if retentionRate > 0:
+        return f"순이익 중 {retentionRate:.0f}%가 잉여금으로 축적(배당성향 {100 - retentionRate:.0f}%)"
+    if retentionRate < -20:
+        return "이익잉여금 감소 — 순이익 대비 과도한 유출"
+    return None
+
+
+def _isToBsGrowthGapLine(
+    salesClean: list,
+    otherClean: list,
+    otherLabel: str,
+    threshold: float,
+    warnWhenPos: str,
+    warnWhenNeg: str | None = None,
+) -> str | None:
+    """매출 증가율 vs other 증가율 gap 판정."""
+    if not (len(salesClean) >= 2 and len(otherClean) >= 2):
+        return None
+    sGr = (salesClean[-1] - salesClean[-2]) / abs(salesClean[-2]) * 100 if salesClean[-2] != 0 else 0
+    oGr = (otherClean[-1] - otherClean[-2]) / abs(otherClean[-2]) * 100 if otherClean[-2] != 0 else 0
+    gap = oGr - sGr
+    if gap > threshold:
+        return warnWhenPos.format(otherGr=oGr, salesGr=sGr)
+    if warnWhenNeg and gap < -threshold and oGr < 0:
+        return warnWhenNeg
+    return None
+
+
+def _isToBsRatioIndex(salesClean, otherClean, label, upMsg, downMsg=None) -> str | None:
+    """(other/sales)t / (other/sales)t-1 지수 — 1.2↑ 경고, (옵션) 0.8↓ 개선."""
+    if not (len(salesClean) >= 2 and len(otherClean) >= 2 and salesClean[-2] > 0 and salesClean[-1] > 0):
+        return None
+    prev = otherClean[-2] / salesClean[-2]
+    curr = otherClean[-1] / salesClean[-1]
+    if prev <= 0:
+        return None
+    idx = curr / prev
+    if idx > 1.2:
+        return upMsg.format(idx=idx)
+    if downMsg and idx < 0.8:
+        return downMsg.format(idx=idx)
+    return None
+
+
 def _analyzeIsToBs(inp: _Input) -> NarrativeParagraph | None:
-    """3표 연결 — IS 순이익 → BS 이익잉여금, 매출 → 매출채권/재고 비례."""
+    """3표 연결 — IS 순이익 → BS 이익잉여금, 매출 → 매출채권/재고 비례 (Q3.1f split)."""
     ni = _getVals(inp.aSeries, "IS", "net_profit")
     retainedEarnings = _getVals(inp.aSeries, "BS", "retained_earnings")
     sales = _getVals(inp.aSeries, "IS", "sales")
-    receivables = _getVals(inp.aSeries, "BS", "trade_receivable")
-    if not receivables:
-        receivables = _getVals(inp.aSeries, "BS", "trade_and_other_receivables")
+    receivables = _getVals(inp.aSeries, "BS", "trade_receivable") or _getVals(
+        inp.aSeries, "BS", "trade_and_other_receivables"
+    )
     inventories = _getVals(inp.aSeries, "BS", "inventories")
 
     if not ni or not sales or len(ni) < 2:
         return None
 
-    parts: list[str] = []
-
-    # 순이익 → 이익잉여금 축적률
-    if retainedEarnings:
-        reClean = [v for v in retainedEarnings if v is not None]
-        niClean = [v for v in ni if v is not None]
-        if len(reClean) >= 2 and len(niClean) >= 1 and niClean[-1] != 0:
-            reChange = reClean[-1] - reClean[-2]
-            retentionRate = reChange / niClean[-1] * 100 if niClean[-1] != 0 else 0
-            if retentionRate > 0:
-                parts.append(f"순이익 중 {retentionRate:.0f}%가 잉여금으로 축적(배당성향 {100 - retentionRate:.0f}%)")
-            elif retentionRate < -20:
-                parts.append("이익잉여금 감소 — 순이익 대비 과도한 유출")
-
-    # 매출 증가 vs 매출채권 증가 비례 여부
     salesClean = [v for v in sales if v is not None]
     arClean = [v for v in receivables if v is not None] if receivables else []
-    if len(salesClean) >= 2 and len(arClean) >= 2:
-        salesGr = (salesClean[-1] - salesClean[-2]) / abs(salesClean[-2]) * 100 if salesClean[-2] != 0 else 0
-        arGr = (arClean[-1] - arClean[-2]) / abs(arClean[-2]) * 100 if arClean[-2] != 0 else 0
-        gap = arGr - salesGr
-        if gap > 20:
-            parts.append(
-                f"매출채권 증가율({arGr:+.1f}%)이 매출 증가율({salesGr:+.1f}%)을 크게 상회 — 수금 악화 또는 채널 스터핑 주의"
-            )
-        elif gap < -20 and arGr < 0:
-            parts.append("매출채권 감소율이 매출 대비 과도 — 공격적 회수 또는 매출 구조 변화")
-
-    # 매출 증가 vs 재고 증가 비례 여부
     invClean = [v for v in inventories if v is not None] if inventories else []
-    if len(salesClean) >= 2 and len(invClean) >= 2:
-        salesGr = (salesClean[-1] - salesClean[-2]) / abs(salesClean[-2]) * 100 if salesClean[-2] != 0 else 0
-        invGr = (invClean[-1] - invClean[-2]) / abs(invClean[-2]) * 100 if invClean[-2] != 0 else 0
-        gap = invGr - salesGr
-        if gap > 15:
-            parts.append(f"재고 증가율({invGr:+.1f}%)이 매출 증가율({salesGr:+.1f}%)을 상회 — 재고 리스크 주의")
 
-    # Revenue Recognition Quality — 지수 분석 (Lens 4 강화)
-    # 매출채권지수(DSRI) = (AR/Sales)t / (AR/Sales)t-1
-    if len(salesClean) >= 2 and len(arClean) >= 2 and salesClean[-2] > 0 and salesClean[-1] > 0:
-        arRatioPrev = arClean[-2] / salesClean[-2]
-        arRatioCurr = arClean[-1] / salesClean[-1]
-        if arRatioPrev > 0:
-            dsri = arRatioCurr / arRatioPrev
-            if dsri > 1.2:
-                parts.append(f"매출채권지수(DSRI) {dsri:.2f} — 매출 대비 매출채권 비정상 팽창, 매출 인식 공격성 주의")
-            elif dsri < 0.8:
-                parts.append(f"매출채권지수(DSRI) {dsri:.2f} — 매출 대비 회수 효율 개선")
+    parts: list[str] = []
+    retentionLine = _isToBsRetentionLine(ni, retainedEarnings)
+    if retentionLine:
+        parts.append(retentionLine)
 
-    # 재고자산지수 = (Inv/Sales)t / (Inv/Sales)t-1
-    if len(salesClean) >= 2 and len(invClean) >= 2 and salesClean[-2] > 0 and salesClean[-1] > 0:
-        invRatioPrev = invClean[-2] / salesClean[-2]
-        invRatioCurr = invClean[-1] / salesClean[-1]
-        if invRatioPrev > 0:
-            invIdx = invRatioCurr / invRatioPrev
-            if invIdx > 1.2:
-                parts.append(f"재고자산지수 {invIdx:.2f} — 매출 대비 재고 과잉 축적, 수요 둔화 또는 과잉 생산 신호")
+    arGapLine = _isToBsGrowthGapLine(
+        salesClean,
+        arClean,
+        "매출채권",
+        20,
+        "매출채권 증가율({otherGr:+.1f}%)이 매출 증가율({salesGr:+.1f}%)을 크게 상회 — 수금 악화 또는 채널 스터핑 주의",
+        "매출채권 감소율이 매출 대비 과도 — 공격적 회수 또는 매출 구조 변화",
+    )
+    if arGapLine:
+        parts.append(arGapLine)
+
+    invGapLine = _isToBsGrowthGapLine(
+        salesClean,
+        invClean,
+        "재고",
+        15,
+        "재고 증가율({otherGr:+.1f}%)이 매출 증가율({salesGr:+.1f}%)을 상회 — 재고 리스크 주의",
+    )
+    if invGapLine:
+        parts.append(invGapLine)
+
+    dsriLine = _isToBsRatioIndex(
+        salesClean,
+        arClean,
+        "DSRI",
+        "매출채권지수(DSRI) {idx:.2f} — 매출 대비 매출채권 비정상 팽창, 매출 인식 공격성 주의",
+        "매출채권지수(DSRI) {idx:.2f} — 매출 대비 회수 효율 개선",
+    )
+    if dsriLine:
+        parts.append(dsriLine)
+
+    invIdxLine = _isToBsRatioIndex(
+        salesClean,
+        invClean,
+        "재고자산지수",
+        "재고자산지수 {idx:.2f} — 매출 대비 재고 과잉 축적, 수요 둔화 또는 과잉 생산 신호",
+    )
+    if invIdxLine:
+        parts.append(invIdxLine)
 
     if not parts:
         return None
     body = ". ".join(parts) + "."
-    # severity 판단
-    severity = "neutral"
-    for p in parts:
-        if "주의" in p or "과도" in p or "악화" in p:
-            severity = "warning"
-            break
+    severity = "warning" if any("주의" in p or "과도" in p or "악화" in p for p in parts) else "neutral"
     return NarrativeParagraph(
         dimension="isToBs",
         title="손익↔재무상태 연결분석",
