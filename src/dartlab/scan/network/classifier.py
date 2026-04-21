@@ -208,6 +208,197 @@ def _label_group(members: list[str], code_to_name: dict[str, str]) -> str:
     return code_to_name.get(members[0], members[0])
 
 
+def _cbPhase0Docs(
+    docs_ground_truth: dict[str, str],
+    all_node_ids: set[str],
+    code_to_group: dict[str, str],
+    locked: set[str],
+) -> int:
+    """Phase 0: docs ground truth lock. 반환: 이번 Phase 에서 lock 된 종목 수."""
+    before = len(locked)
+    for code, group in docs_ground_truth.items():
+        if code in all_node_ids:
+            code_to_group[code] = group
+            locked.add(code)
+    return len(locked) - before
+
+
+def _cbPhase1WellKnown(
+    all_node_ids: set[str],
+    code_to_group: dict[str, str],
+    locked: set[str],
+) -> int:
+    """Phase 1: WELL_KNOWN_EXT lock. 반환: 새로 lock 된 수."""
+    before = len(locked)
+    for code, group in WELL_KNOWN_EXT.items():
+        if code in all_node_ids and code not in locked:
+            code_to_group[code] = group
+            locked.add(code)
+    return len(locked) - before
+
+
+def _cbKnownGroupNames(locked: set[str], code_to_group: dict[str, str]) -> set[str]:
+    """locked 에서 2명+ 멤버 보유한 그룹 이름 set."""
+    known_groups: dict[str, set[str]] = defaultdict(set)
+    for code in locked:
+        known_groups[code_to_group[code]].add(code)
+    return {g for g, members in known_groups.items() if len(members) >= 2}
+
+
+def _cbBuildMgmtDirected(invest_edges: pl.DataFrame, all_node_ids: set[str]) -> dict[str, set[str]]:
+    """경영참여 엣지 → {from: {to, ...}} directed map."""
+    mgmt = invest_edges.filter(
+        (pl.col("purpose") == "경영참여") & pl.col("is_listed") & pl.col("to_code").is_not_null()
+    )
+    mgmt_directed: dict[str, set[str]] = defaultdict(set)
+    for row in mgmt.iter_rows(named=True):
+        a, b = row["from_code"], row["to_code"]
+        if a != b and a in all_node_ids and b in all_node_ids:
+            mgmt_directed[a].add(b)
+    return mgmt_directed
+
+
+def _cbPhase2Propagate(
+    mgmt_directed: dict[str, set[str]],
+    code_to_group: dict[str, str],
+    locked: set[str],
+    known_group_names: set[str],
+) -> None:
+    """Phase 2a: 방향성 전파 (unknown 그룹 자녀 → 부모 그룹, 3회 반복)."""
+    for _round in range(3):
+        newly = 0
+        for parent in list(code_to_group.keys()):
+            pg = code_to_group[parent]
+            if pg in known_group_names:
+                continue
+            for child in mgmt_directed.get(parent, set()):
+                if child in locked or child in code_to_group:
+                    continue
+                code_to_group[child] = pg
+                newly += 1
+        if newly == 0:
+            break
+
+
+def _cbPhase2Cluster(
+    mgmt_directed: dict[str, set[str]],
+    code_to_group: dict[str, str],
+    locked: set[str],
+    known_group_names: set[str],
+    code_to_name: dict[str, str],
+) -> None:
+    """Phase 2b: 미분류 경영참여 클러스터 → _label_group 적용."""
+    parent_children: dict[str, set[str]] = defaultdict(set)
+    for parent, children in mgmt_directed.items():
+        if parent not in code_to_group:
+            for child in children:
+                if child not in code_to_group:
+                    parent_children[parent].add(child)
+
+    for parent in list(code_to_group.keys()):
+        if code_to_group[parent] not in known_group_names:
+            continue
+        uc = [c for c in mgmt_directed.get(parent, set()) if c not in code_to_group and c not in locked]
+        if len(uc) < 2:
+            continue
+        for u in uc:
+            if u not in parent_children:
+                parent_children[u] = set()
+            for u2 in uc:
+                if u != u2 and u2 in mgmt_directed.get(u, set()):
+                    parent_children[u].add(u2)
+
+    for parent, children in parent_children.items():
+        cluster = {parent} | children
+        if len(cluster) >= 2:
+            label = _label_group(list(cluster), code_to_name)
+            for m in cluster:
+                if m not in code_to_group:
+                    code_to_group[m] = label
+
+
+def _cbPhase3Corp(
+    corp_edges: pl.DataFrame,
+    all_node_ids: set[str],
+    code_to_group: dict[str, str],
+    locked: set[str],
+    known_group_names: set[str],
+) -> int:
+    """Phase 3: majorHolder 법인주주 (known 20%+). 반환: 새 배정 수."""
+    matched_corp = corp_edges.filter(pl.col("from_code").is_not_null())
+    count = 0
+    for row in matched_corp.iter_rows(named=True):
+        fc, tc = row["from_code"], row["to_code"]
+        pct = row.get("ownership_pct") or 0
+        if fc in code_to_group and tc not in code_to_group and tc in all_node_ids and tc not in locked:
+            pg = code_to_group[fc]
+            if pg in known_group_names and pct < 20:
+                continue
+            code_to_group[tc] = pg
+            count += 1
+        elif tc in code_to_group and fc not in code_to_group and fc in all_node_ids and fc not in locked:
+            pg = code_to_group[tc]
+            if pg in known_group_names and pct < 20:
+                continue
+            code_to_group[fc] = pg
+            count += 1
+    return count
+
+
+def _cbPhase4PersonShares(
+    person_edges: pl.DataFrame,
+    all_node_ids: set[str],
+    code_to_group: dict[str, str],
+    locked: set[str],
+) -> int:
+    """Phase 4: 공유 개인주주. 반환: 새 배정 수."""
+    person_groups = (
+        person_edges.group_by("person_name")
+        .agg(pl.col("to_code").unique().alias("companies"))
+        .filter(pl.col("companies").list.len() >= 2)
+    )
+    count = 0
+    for row in person_groups.iter_rows(named=True):
+        codes = [c for c in row["companies"] if c in all_node_ids and c not in locked]
+        if len(codes) < 2:
+            continue
+        group_dist: dict[str, list[str]] = defaultdict(list)
+        unassigned: list[str] = []
+        for c in codes:
+            if c in code_to_group:
+                group_dist[code_to_group[c]].append(c)
+            else:
+                unassigned.append(c)
+        if not group_dist or not unassigned:
+            continue
+        best = max(group_dist, key=lambda g: len(group_dist[g]))
+        if len(group_dist[best]) >= 2:
+            for c in unassigned:
+                code_to_group[c] = best
+                count += 1
+    return count
+
+
+def _cbPhase5KeywordAndIndep(
+    all_node_ids: set[str],
+    code_to_group: dict[str, str],
+    code_to_name: dict[str, str],
+) -> tuple[int, set[str]]:
+    """Phase 5: 키워드 + 나머지 독립. 반환: (키워드 배정 수, 최종 독립 set)."""
+    kw_count = 0
+    for node in list(all_node_ids - set(code_to_group.keys())):
+        name = code_to_name.get(node, "")
+        for group, keywords in GROUP_KEYWORDS.items():
+            if any(kw in name for kw in keywords):
+                code_to_group[node] = group
+                kw_count += 1
+                break
+    still = all_node_ids - set(code_to_group.keys())
+    for node in still:
+        code_to_group[node] = code_to_name.get(node, node)
+    return kw_count, still
+
+
 def classify_balanced(
     invest_edges: pl.DataFrame,
     corp_edges: pl.DataFrame,
@@ -218,11 +409,11 @@ def classify_balanced(
     *,
     verbose: bool = True,
 ) -> dict[str, str]:
-    """5단계 균형 분류 — 상장사를 그룹(재벌/독립)으로 배정한다.
+    """5단계 균형 분류 orchestrator — 상장사를 그룹(재벌/독립)으로 배정.
 
     Phase 0: docs ground truth lock
     Phase 1: well-known ext lock
-    Phase 2: 경영참여 방향 확장
+    Phase 2: 경영참여 방향 확장 (propagate + cluster)
     Phase 3: majorHolder 법인주주
     Phase 4: 공유 개인주주
     Phase 5: 이름 키워드 + 나머지 독립
@@ -257,149 +448,29 @@ def classify_balanced(
         if verbose:
             print(msg)
 
-    # Phase 0: docs lock
-    for code, group in docs_ground_truth.items():
-        if code in all_node_ids:
-            code_to_group[code] = group
-            locked.add(code)
-    phase0 = len(locked)
-
-    # Phase 1: well-known ext lock
-    for code, group in WELL_KNOWN_EXT.items():
-        if code in all_node_ids and code not in locked:
-            code_to_group[code] = group
-            locked.add(code)
-    phase1 = len(locked) - phase0
+    phase0 = _cbPhase0Docs(docs_ground_truth, all_node_ids, code_to_group, locked)
+    phase1 = _cbPhase1WellKnown(all_node_ids, code_to_group, locked)
     _log(f"  Phase 0+1 (docs+well-known lock): {len(locked)} ({phase0} docs + {phase1} well-known)")
 
-    # known 그룹 = locked에 2명+
-    known_groups: dict[str, set[str]] = defaultdict(set)
-    for code in locked:
-        known_groups[code_to_group[code]].add(code)
-    known_group_names = {g for g, members in known_groups.items() if len(members) >= 2}
+    known_group_names = _cbKnownGroupNames(locked, code_to_group)
     _log(f"  known 그룹: {len(known_group_names)}개")
 
-    # Phase 2: 경영참여 방향 확장
-    mgmt = invest_edges.filter(
-        (pl.col("purpose") == "경영참여") & pl.col("is_listed") & pl.col("to_code").is_not_null()
-    )
-    mgmt_directed: dict[str, set[str]] = defaultdict(set)
-    for row in mgmt.iter_rows(named=True):
-        a, b = row["from_code"], row["to_code"]
-        if a != b and a in all_node_ids and b in all_node_ids:
-            mgmt_directed[a].add(b)
-
-    for _round in range(3):
-        newly = 0
-        for parent in list(code_to_group.keys()):
-            pg = code_to_group[parent]
-            for child in mgmt_directed.get(parent, set()):
-                if child in locked or child in code_to_group:
-                    continue
-                if pg in known_group_names:
-                    continue
-                code_to_group[child] = pg
-                newly += 1
-        if newly == 0:
-            break
-
-    # 미분류 경영참여 클러스터
-    parent_children: dict[str, set[str]] = defaultdict(set)
-    for parent, children in mgmt_directed.items():
-        if parent not in code_to_group:
-            for child in children:
-                if child not in code_to_group:
-                    parent_children[parent].add(child)
-
-    for parent in list(code_to_group.keys()):
-        if code_to_group[parent] in known_group_names:
-            uc = [c for c in mgmt_directed.get(parent, set()) if c not in code_to_group and c not in locked]
-            if len(uc) >= 2:
-                for u in uc:
-                    if u not in parent_children:
-                        parent_children[u] = set()
-                    for u2 in uc:
-                        if u != u2 and u2 in mgmt_directed.get(u, set()):
-                            parent_children[u].add(u2)
-
-    for parent, children in parent_children.items():
-        cluster = {parent} | children
-        if len(cluster) >= 2:
-            label = _label_group(list(cluster), code_to_name)
-            for m in cluster:
-                if m not in code_to_group:
-                    code_to_group[m] = label
-
+    mgmt_directed = _cbBuildMgmtDirected(invest_edges, all_node_ids)
+    _cbPhase2Propagate(mgmt_directed, code_to_group, locked, known_group_names)
+    _cbPhase2Cluster(mgmt_directed, code_to_group, locked, known_group_names, code_to_name)
     phase2 = len(code_to_group) - len(locked)
     _log(f"  Phase 2 (경영참여 확장): +{phase2}")
 
-    # Phase 3: majorHolder 법인 (known 20%+)
-    matched_corp = corp_edges.filter(pl.col("from_code").is_not_null())
-    phase3 = 0
-    for row in matched_corp.iter_rows(named=True):
-        fc, tc = row["from_code"], row["to_code"]
-        pct = row.get("ownership_pct") or 0
-        if fc in code_to_group and tc not in code_to_group and tc in all_node_ids and tc not in locked:
-            pg = code_to_group[fc]
-            if pg in known_group_names and pct < 20:
-                continue
-            code_to_group[tc] = pg
-            phase3 += 1
-        elif tc in code_to_group and fc not in code_to_group and fc in all_node_ids and fc not in locked:
-            pg = code_to_group[tc]
-            if pg in known_group_names and pct < 20:
-                continue
-            code_to_group[fc] = pg
-            phase3 += 1
+    phase3 = _cbPhase3Corp(corp_edges, all_node_ids, code_to_group, locked, known_group_names)
     _log(f"  Phase 3 (법인주주): +{phase3}")
 
-    # Phase 4: 공유 개인주주
-    person_groups = (
-        person_edges.group_by("person_name")
-        .agg(
-            pl.col("to_code").unique().alias("companies"),
-        )
-        .filter(pl.col("companies").list.len() >= 2)
-    )
-
-    phase4 = 0
-    for row in person_groups.iter_rows(named=True):
-        codes = [c for c in row["companies"] if c in all_node_ids and c not in locked]
-        if len(codes) < 2:
-            continue
-        group_dist: dict[str, list[str]] = defaultdict(list)
-        unassigned: list[str] = []
-        for c in codes:
-            if c in code_to_group:
-                group_dist[code_to_group[c]].append(c)
-            else:
-                unassigned.append(c)
-        if not group_dist or not unassigned:
-            continue
-        best = max(group_dist, key=lambda g: len(group_dist[g]))
-        if len(group_dist[best]) >= 2:
-            for c in unassigned:
-                code_to_group[c] = best
-                phase4 += 1
+    phase4 = _cbPhase4PersonShares(person_edges, all_node_ids, code_to_group, locked)
     _log(f"  Phase 4 (공유주주): +{phase4}")
 
-    # Phase 5: 키워드 + 독립
-    phase5_kw = 0
-    for node in list(all_node_ids - set(code_to_group.keys())):
-        name = code_to_name.get(node, "")
-        for group, keywords in GROUP_KEYWORDS.items():
-            if any(kw in name for kw in keywords):
-                code_to_group[node] = group
-                phase5_kw += 1
-                break
-
-    still = all_node_ids - set(code_to_group.keys())
-    for node in still:
-        code_to_group[node] = code_to_name.get(node, node)
-
+    kw_count, still = _cbPhase5KeywordAndIndep(all_node_ids, code_to_group, code_to_name)
     group_counts = Counter(code_to_group[n] for n in all_node_ids)
     real_indep = sum(1 for c in group_counts.values() if c == 1)
-    _log(f"  Phase 5 (키워드): +{phase5_kw}, 독립: {len(still)}")
+    _log(f"  Phase 5 (키워드): +{kw_count}, 독립: {len(still)}")
     _log(f"  최종: {len(all_node_ids)} nodes, 독립 {real_indep} ({real_indep / len(all_node_ids):.0%})")
 
     return code_to_group
