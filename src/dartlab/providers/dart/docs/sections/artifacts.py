@@ -45,10 +45,12 @@ def loadProjectionRules(chapter: str) -> dict[str, list[str]]:
         return {}
 
 
+@lru_cache(maxsize=1)
 def loadSectionProfileTable() -> pl.DataFrame | None:
     """패키지에 포함된 sectionProfileTable parquet을 DataFrame으로 로드한다.
 
     필수 번들 리소스 — 파일 누락은 packaging 사고로 간주해 loud-fail.
+    Parquet 로드는 비용 큼 — 호출당 재로드 방지를 위해 @lru_cache(1).
     """
     try:
         with packagedArtifactPath("sectionProfileTable.parquet") as path:

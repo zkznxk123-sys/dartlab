@@ -275,8 +275,13 @@ def stripSectionPrefix(title: str) -> str:
     return _LEAF_PREFIX_RE.sub("", title.strip())
 
 
+@lru_cache(maxsize=4096)
 def normalizeSectionTitle(title: str) -> str:
-    """섹션 제목을 접두사/업종명/특수문자 제거 후 정규화된 문자열로 변환한다."""
+    """섹션 제목을 접두사/업종명/특수문자 제거 후 정규화된 문자열로 변환한다.
+
+    O(n²) 섹션 파이프라인 (mapSectionTitle 루프) 에서 중복 호출 다발 — lru_cache
+    로 normalize 연산 (5 regex + 2 replace) 캐싱.
+    """
     text = stripSectionPrefix(title)
     text = _INDUSTRY_PREFIX_RE.sub("", text)
     text = stripSectionPrefix(text)
@@ -310,8 +315,12 @@ _DETAIL_SUFFIX_RE = re.compile(r"\(상세\)$")
 _COMPANY_SUFFIX_RE = re.compile(r"_.+$")
 
 
+@lru_cache(maxsize=4096)
 def mapSectionTitle(title: str) -> str:
-    """섹션 제목을 canonical topic 이름으로 매핑한다."""
+    """섹션 제목을 canonical topic 이름으로 매핑한다.
+
+    O(n²) 파이프라인 hotpath — 같은 title 반복 조회가 많아 lru_cache.
+    """
     normalized = normalizeSectionTitle(title)
     mapped = loadSectionMappings().get(normalized)
     if mapped:
