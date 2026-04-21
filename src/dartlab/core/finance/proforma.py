@@ -314,192 +314,195 @@ def _safe_ratio_list(num_vals: list[float], den_vals: list[float], *, pct: bool 
 # ══════════════════════════════════════
 
 
-def extract_historical_ratios(
-    series: dict,
-    years: int = 5,
-) -> HistoricalRatios:
-    """과거 시계열에서 구조적 비율을 중위값으로 추출한다."""
-    warnings: list[str] = []
-    n = years
+def _ehrCollectSeries(series: dict, n: int) -> dict[str, list]:
+    """IS/CF/BS 10+ 계정 시계열 일괄 수집. 반환: {key: list[float]}."""
+    ttm = lambda sj, acc: _annual_ttm_values(series, sj, acc, n)
+    bs = lambda acc: _annual_latest_values(series, "BS", acc, n)
+    return {
+        "rev": ttm("IS", "sales"),
+        "gp": ttm("IS", "gross_profit"),
+        "sga": ttm("IS", "selling_and_administrative_expenses"),
+        "pbt": ttm("IS", "profit_before_tax"),
+        "tax": ttm("IS", "income_tax_expense"),
+        "fc": ttm("IS", "finance_costs") or ttm("IS", "interest_expense"),
+        "ni": ttm("IS", "net_profit") or ttm("IS", "net_income"),
+        "op": ttm("IS", "operating_profit") or ttm("IS", "operating_income"),
+        "dep": (
+            ttm("CF", "depreciation_and_amortization")
+            or ttm("CF", "depreciation_cf")
+            or ttm("IS", "depreciation_and_amortization")
+            or ttm("IS", "depreciation")
+        ),
+        "capex": ttm("CF", "purchase_of_property_plant_and_equipment"),
+        "div": ttm("CF", "dividends_paid"),
+        "ca": bs("current_assets"),
+        "cl": bs("current_liabilities"),
+        "cash": bs("cash_and_cash_equivalents"),
+        "stb": bs("shortterm_borrowings"),
+        "ltb": bs("longterm_borrowings"),
+        "bond": bs("debentures"),
+        "ar": bs("trade_receivables") or bs("trade_and_other_receivables"),
+        "inv": bs("inventories"),
+        "ap": bs("trade_payables") or bs("trade_and_other_payables"),
+    }
 
-    # IS 계정들
-    rev_vals = _annual_ttm_values(series, "IS", "sales", n)
-    gp_vals = _annual_ttm_values(series, "IS", "gross_profit", n)
-    sga_vals = _annual_ttm_values(series, "IS", "selling_and_administrative_expenses", n)
-    pbt_vals = _annual_ttm_values(series, "IS", "profit_before_tax", n)
-    tax_vals = _annual_ttm_values(series, "IS", "income_tax_expense", n)
-    fc_vals = _annual_ttm_values(series, "IS", "finance_costs", n)
-    if not fc_vals:
-        fc_vals = _annual_ttm_values(series, "IS", "interest_expense", n)
-    ni_vals = _annual_ttm_values(series, "IS", "net_profit", n)
-    if not ni_vals:
-        ni_vals = _annual_ttm_values(series, "IS", "net_income", n)
-    op_vals = _annual_ttm_values(series, "IS", "operating_profit", n)
-    if not op_vals:
-        op_vals = _annual_ttm_values(series, "IS", "operating_income", n)
 
-    # CF 계정
-    dep_vals = _annual_ttm_values(series, "CF", "depreciation_and_amortization", n)
-    if not dep_vals:
-        dep_vals = _annual_ttm_values(series, "CF", "depreciation_cf", n)
-    if not dep_vals:
-        # IS에서 감가상각비 조회 시도
-        dep_vals = _annual_ttm_values(series, "IS", "depreciation_and_amortization", n)
-    if not dep_vals:
-        dep_vals = _annual_ttm_values(series, "IS", "depreciation", n)
-    capex_vals = _annual_ttm_values(series, "CF", "purchase_of_property_plant_and_equipment", n)
-    div_vals = _annual_ttm_values(series, "CF", "dividends_paid", n)
+def _ehrDepInSga(s: dict) -> bool:
+    """K-IFRS IS 구조 감지 — D&A 가 SGA 에 포함되었는지 (최근 3년 gap<2%p)."""
+    gp, sga, op, rev = s["gp"], s["sga"], s["op"], s["rev"]
+    if not (gp and sga and op):
+        return False
+    check_n = min(3, len(gp), len(sga), len(op), len(rev))
+    if check_n < 1:
+        return False
+    matches = 0
+    for j in range(check_n):
+        idx = -(j + 1)
+        if rev[idx] and rev[idx] > 0:
+            gap_pct = abs((gp[idx] - sga[idx] - op[idx]) / rev[idx]) * 100
+            if gap_pct < 2.0:
+                matches += 1
+    return matches >= max(1, check_n - 1)
 
-    # BS 계정 (연말 잔액)
-    ca_vals = _annual_latest_values(series, "BS", "current_assets", n)
-    cl_vals = _annual_latest_values(series, "BS", "current_liabilities", n)
-    cash_vals = _annual_latest_values(series, "BS", "cash_and_cash_equivalents", n)
-    stb_vals = _annual_latest_values(series, "BS", "shortterm_borrowings", n)
-    ltb_vals = _annual_latest_values(series, "BS", "longterm_borrowings", n)
-    bond_vals = _annual_latest_values(series, "BS", "debentures", n)
-    ar_vals = _annual_latest_values(series, "BS", "trade_receivables", n)
-    if not ar_vals:
-        ar_vals = _annual_latest_values(series, "BS", "trade_and_other_receivables", n)
-    inv_vals = _annual_latest_values(series, "BS", "inventories", n)
-    ap_vals = _annual_latest_values(series, "BS", "trade_payables", n)
-    if not ap_vals:
-        ap_vals = _annual_latest_values(series, "BS", "trade_and_other_payables", n)
 
-    actual_years = len(rev_vals)
-    if actual_years < 2:
-        warnings.append("과거 데이터 2년 미만 — 비율 신뢰도 낮음")
-
-    # 비율 계산 (v2: 최근 가중 + 트렌드)
-    trends: dict[str, float] = {}
-
-    gm_list = _safe_ratio_list(gp_vals, rev_vals) if gp_vals else []
-    if gm_list:
-        gross_margin, trends["gross_margin"] = _weighted_ratio(gm_list)
-    else:
-        gross_margin = 30.0
-
-    sga_list = _safe_ratio_list(sga_vals, rev_vals) if sga_vals else []
-    if sga_list:
-        sga_ratio, trends["sga_ratio"] = _weighted_ratio(sga_list)
-    else:
-        sga_ratio = 15.0
-
-    capex_list = [abs(c) / r * 100 for c, r in zip(capex_vals, rev_vals) if r > 0] if capex_vals else []
-    if capex_list:
-        capex_ratio, trends["capex_to_revenue"] = _weighted_ratio(capex_list)
-    else:
-        capex_ratio = 5.0
-
-    dep_list = _safe_ratio_list(dep_vals, rev_vals) if dep_vals else []
-    if dep_list:
-        dep_ratio, trends["depreciation_ratio"] = _weighted_ratio(dep_list)
-    elif capex_ratio > 0:
-        # D&A 데이터 없으면 CAPEX의 80% 추정 (성숙 기업 순투자 < 총투자)
-        dep_ratio = capex_ratio * 0.8
-        warnings.append(f"감가상각 데이터 없음 — CAPEX×80% 추정 ({dep_ratio:.1f}%)")
-    else:
-        dep_ratio = 3.0
-
-    # v3: K-IFRS IS 구조 감지 — D&A가 SGA에 포함되었는지 자동 판별
-    # GP - SGA ≈ OP → D&A가 SGA에 이미 포함 (삼성전자, SK하이닉스 등)
-    # GP - SGA - D&A ≈ OP → D&A 별도 (LG화학 등)
-    dep_in_sga = False
-    if gp_vals and sga_vals and op_vals:
-        # 최근 3년 기준으로 판별 (안정적 판단)
-        check_n = min(3, len(gp_vals), len(sga_vals), len(op_vals), len(rev_vals))
-        if check_n >= 1:
-            matches = 0
-            for j in range(check_n):
-                idx = -(j + 1)
-                gp_j = gp_vals[idx]
-                sga_j = sga_vals[idx]
-                op_j = op_vals[idx]
-                rev_j = rev_vals[idx]
-                if rev_j and rev_j > 0:
-                    # GP - SGA vs OP: 매출 대비 차이가 2%p 이내면 SGA에 D&A 포함
-                    gap_pct = abs((gp_j - sga_j - op_j) / rev_j) * 100
-                    if gap_pct < 2.0:
-                        matches += 1
-            if matches >= max(1, check_n - 1):
-                dep_in_sga = True
-                warnings.append("IS 구조 감지: D&A가 SGA에 포함 — 별도 차감 생략 (EBITDA 계산에만 사용)")
-
-    # 유효세율
-    tax_ratios = _safe_ratio_list(tax_vals, pbt_vals) if tax_vals and pbt_vals else []
-    tax_ratios = [t for t in tax_ratios if 0 < t < 50]  # 비정상 제거
-    if tax_ratios:
-        effective_tax, trends["effective_tax_rate"] = _weighted_ratio(tax_ratios)
-    else:
-        effective_tax = 22.0
-
-    # 이자율
-    debt_totals = []
-    for i in range(min(len(stb_vals), len(ltb_vals))):
+def _ehrInterestRate(s: dict) -> float:
+    """FC / 총차입금 가중 비율. 기본 4%."""
+    debt_totals: list[float] = []
+    for i in range(min(len(s["stb"]), len(s["ltb"]))):
         d = (
-            (stb_vals[i] if i < len(stb_vals) else 0)
-            + (ltb_vals[i] if i < len(ltb_vals) else 0)
-            + (bond_vals[i] if i < len(bond_vals) else 0)
+            (s["stb"][i] if i < len(s["stb"]) else 0)
+            + (s["ltb"][i] if i < len(s["ltb"]) else 0)
+            + (s["bond"][i] if i < len(s["bond"]) else 0)
         )
         debt_totals.append(d)
-    int_ratios = []
-    for fc_v, d_v in zip(fc_vals, debt_totals):
+    int_ratios: list[float] = []
+    for fc_v, d_v in zip(s["fc"], debt_totals):
         if d_v and d_v > 0 and fc_v:
             r = abs(fc_v) / d_v * 100
-            if 0 < r < 30:  # 비정상 제거
+            if 0 < r < 30:
                 int_ratios.append(r)
-    if int_ratios:
-        interest_rate, _ = _weighted_ratio(int_ratios)
-    else:
-        interest_rate = 4.0
+    return _weighted_ratio(int_ratios)[0] if int_ratios else 4.0
 
-    # NWC/매출
-    nwc_ratios = []
-    for i in range(min(len(ca_vals), len(cl_vals), len(cash_vals), len(rev_vals))):
-        nwc = ca_vals[i] - cl_vals[i] - cash_vals[i]
-        if rev_vals[i] and abs(rev_vals[i]) > 0:
-            nwc_ratios.append(nwc / rev_vals[i] * 100)
+
+def _ehrNwcRatio(s: dict, trends: dict) -> float:
+    """순운전자본 / 매출 가중 비율. 기본 10%."""
+    nwc_ratios: list[float] = []
+    for i in range(min(len(s["ca"]), len(s["cl"]), len(s["cash"]), len(s["rev"]))):
+        nwc = s["ca"][i] - s["cl"][i] - s["cash"][i]
+        if s["rev"][i] and abs(s["rev"][i]) > 0:
+            nwc_ratios.append(nwc / s["rev"][i] * 100)
     if nwc_ratios:
-        nwc_ratio, trends["nwc_to_revenue"] = _weighted_ratio(nwc_ratios)
-    else:
-        nwc_ratio = 10.0
+        ratio, trends["nwc_to_revenue"] = _weighted_ratio(nwc_ratios)
+        return ratio
+    return 10.0
 
-    # 매출채권/매출, 재고/매출, 매입채무/매출
-    ar_list = _safe_ratio_list(ar_vals, rev_vals[: len(ar_vals)]) if ar_vals else []
-    inv_list = _safe_ratio_list(inv_vals, rev_vals[: len(inv_vals)]) if inv_vals else []
-    ap_list = _safe_ratio_list(ap_vals, rev_vals[: len(ap_vals)]) if ap_vals else []
-    ar_ratio = _weighted_ratio(ar_list)[0] if ar_list else 15.0
-    inv_ratio = _weighted_ratio(inv_list)[0] if inv_list else 10.0
-    ap_ratio = _weighted_ratio(ap_list)[0] if ap_list else 8.0
 
-    # 배당성향
-    payout_ratios = []
-    for dv, ni in zip(div_vals, ni_vals):
+def _ehrPayoutRatio(s: dict) -> float:
+    """배당성향 가중 비율 (0 < p < 200). 기본 0%."""
+    payout_ratios: list[float] = []
+    for dv, ni in zip(s["div"], s["ni"]):
         if ni and ni > 0 and dv:
             p = abs(dv) / ni * 100
             if 0 < p < 200:
                 payout_ratios.append(p)
-    if payout_ratios:
-        payout, _ = _weighted_ratio(payout_ratios)
-    else:
-        payout = 0.0
+    return _weighted_ratio(payout_ratios)[0] if payout_ratios else 0.0
 
-    # 신뢰도
-    if actual_years >= 4:
-        confidence = "high"
-    elif actual_years >= 2:
-        confidence = "medium"
-    else:
-        confidence = "low"
 
-    # 기본값 사용 경고
-    if not gp_vals:
+def _ehrWeightedOrDefault(ratios: list[float], default: float, trends: dict, trend_key: str) -> float:
+    """_weighted_ratio(ratios) 계산. 비어있으면 default. trend 는 trends[trend_key] 에 저장."""
+    if not ratios:
+        return default
+    val, trend = _weighted_ratio(ratios)
+    trends[trend_key] = trend
+    return val
+
+
+def _ehrDepreciationRatio(s: dict, capex_ratio: float, trends: dict) -> tuple[float, list[str]]:
+    """감가상각/매출 비율 계산 — D&A 시계열 없으면 CAPEX×80% 추정. 반환: (비율, warnings)."""
+    dep_list = _safe_ratio_list(s["dep"], s["rev"]) if s["dep"] else []
+    warnings: list[str] = []
+    if dep_list:
+        ratio, trends["depreciation_ratio"] = _weighted_ratio(dep_list)
+        return ratio, warnings
+    if capex_ratio > 0:
+        ratio = capex_ratio * 0.8
+        warnings.append(f"감가상각 데이터 없음 — CAPEX×80% 추정 ({ratio:.1f}%)")
+        return ratio, warnings
+    return 3.0, warnings
+
+
+def _ehrBuildWarnings(s: dict, actual_years: int, capex_ratio: float) -> list[str]:
+    """기본값 사용 / 저신뢰 경고 문자열 리스트."""
+    warnings: list[str] = []
+    if actual_years < 2:
+        warnings.append("과거 데이터 2년 미만 — 비율 신뢰도 낮음")
+    if not s["gp"]:
         warnings.append("매출총이익 데이터 없음 — 기본값 30% 사용")
-    if not sga_vals:
+    if not s["sga"]:
         warnings.append("판관비 데이터 없음 — 기본값 15% 사용")
-    if not dep_vals and capex_ratio <= 0:
+    if not s["dep"] and capex_ratio <= 0:
         warnings.append("감가상각 데이터 없음 — 기본값 3% 사용")
-    if not capex_vals:
+    if not s["capex"]:
         warnings.append("CAPEX 데이터 없음 — 기본값 5% 사용")
+    return warnings
+
+
+def extract_historical_ratios(
+    series: dict,
+    years: int = 5,
+) -> HistoricalRatios:
+    """과거 시계열에서 구조적 비율을 중위값으로 추출 orchestrator (Q3.1f split).
+
+    Parameters
+    ----------
+    series : dict
+        {sjDiv: {accountNm: list[float]}} 형태의 시계열.
+    years : int
+        과거 몇 년치를 사용할지 (기본 5).
+
+    Returns
+    -------
+    HistoricalRatios
+        gross_margin/sga_ratio/effective_tax_rate/depreciation_ratio/
+        interest_rate_on_debt/nwc_to_revenue/capex_to_revenue/dividend_payout/
+        receivables_to_revenue/inventory_to_revenue/payables_to_revenue (모두 %)
+        years_used : int, confidence : str, dep_in_sga : bool,
+        warnings : list[str], trends : dict[str, float]
+    """
+    s = _ehrCollectSeries(series, years)
+    trends: dict[str, float] = {}
+    actual_years = len(s["rev"])
+
+    gross_margin = _ehrWeightedOrDefault(
+        _safe_ratio_list(s["gp"], s["rev"]) if s["gp"] else [], 30.0, trends, "gross_margin"
+    )
+    sga_ratio = _ehrWeightedOrDefault(
+        _safe_ratio_list(s["sga"], s["rev"]) if s["sga"] else [], 15.0, trends, "sga_ratio"
+    )
+    capex_list = [abs(c) / r * 100 for c, r in zip(s["capex"], s["rev"]) if r > 0] if s["capex"] else []
+    capex_ratio = _ehrWeightedOrDefault(capex_list, 5.0, trends, "capex_to_revenue")
+
+    dep_ratio, warnings_extra = _ehrDepreciationRatio(s, capex_ratio, trends)
+    dep_in_sga = _ehrDepInSga(s)
+    if dep_in_sga:
+        warnings_extra.append("IS 구조 감지: D&A가 SGA에 포함 — 별도 차감 생략 (EBITDA 계산에만 사용)")
+
+    tax_ratios_raw = _safe_ratio_list(s["tax"], s["pbt"]) if s["tax"] and s["pbt"] else []
+    effective_tax = _ehrWeightedOrDefault([t for t in tax_ratios_raw if 0 < t < 50], 22.0, trends, "effective_tax_rate")
+
+    interest_rate = _ehrInterestRate(s)
+    nwc_ratio = _ehrNwcRatio(s, trends)
+
+    ar_list = _safe_ratio_list(s["ar"], s["rev"][: len(s["ar"])]) if s["ar"] else []
+    inv_list = _safe_ratio_list(s["inv"], s["rev"][: len(s["inv"])]) if s["inv"] else []
+    ap_list = _safe_ratio_list(s["ap"], s["rev"][: len(s["ap"])]) if s["ap"] else []
+    ar_ratio = _weighted_ratio(ar_list)[0] if ar_list else 15.0
+    inv_ratio = _weighted_ratio(inv_list)[0] if inv_list else 10.0
+    ap_ratio = _weighted_ratio(ap_list)[0] if ap_list else 8.0
+
+    payout = _ehrPayoutRatio(s)
+    confidence = "high" if actual_years >= 4 else "medium" if actual_years >= 2 else "low"
+    warnings = _ehrBuildWarnings(s, actual_years, capex_ratio) + warnings_extra
 
     return HistoricalRatios(
         gross_margin=gross_margin,
