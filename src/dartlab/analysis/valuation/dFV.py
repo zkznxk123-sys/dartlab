@@ -625,39 +625,33 @@ def _calcLiquidationDetail(company: Any, overrides: dict) -> dict | None:
         return None
 
 
-def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> dict | None:
-    """Damodaran Multi-stage DCF (Ch.12) — lifeCycle 별 phase 자동 구성.
+def _tsdResolveWacc(company: Any, overrides: dict) -> float:
+    """WACC 해결 — override chain (forced/implied/bottomUp/country) → roic fallback → 9.0.
 
-    - earlyGrowth → 3-phase: [5, 3, 2]년 × [g_high, g_high×0.6, g_high×0.3]
-    - highGrowth → 2-phase: [5, 2]년 × [g_high, g_high×0.5]
-    - matureGrowth / matureStable / decline → 단일 phase
+    Returns
+    -------
+    float
+        Phase 4 G13 우선순위: forced wacc → Damodaran override path (compute_company_wacc)
+        → calcRoicTimeline waccEstimate → 9.0 (최종 폴백).
     """
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
-        from dartlab.analysis.financial.growthAnalysis import calcGrowthTrend
         from dartlab.analysis.financial.investmentAnalysis import calcRoicTimeline
-        from dartlab.core.finance.dcf import multiStageDcf
-        from dartlab.core.finance.riskPremiums import loadDamodaranERP
         from dartlab.core.overrides import applyOverride
     except ImportError:
-        return None
+        return 9.0
 
-    # WACC — Phase 4 G13: override chain 전파 (impliedERP / bottomUpBeta / countryCode)
-    wacc: float | None = None
     forced_wacc = applyOverride(None, "wacc", overrides)
     implied_flag = applyOverride(False, "impliedERP", overrides)
     bottom_up_flag = applyOverride(False, "bottomUpBeta", overrides)
     country_code = applyOverride(None, "countryCode", overrides)
 
     if forced_wacc is not None:
-        # 사용자/AI 가 WACC 직접 지정 — 최우선
-        wacc = float(forced_wacc)
-    elif implied_flag or bottom_up_flag or country_code:
-        # Phase 3 Damodaran override 경로 — compute_company_wacc 직접 호출로 override 반영
+        return float(forced_wacc)
+
+    if implied_flag or bottom_up_flag or country_code:
         try:
             from dartlab.core.finance.proforma import compute_company_wacc
 
-            # series 추출 — Company finance 접근 (AttributeError fallback)
             series = None
             try:
                 series = getattr(company, "_series", None)
@@ -674,22 +668,34 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
                     implied_erp=bool(implied_flag),
                     bottom_up_beta=bool(bottom_up_flag),
                 )
-                wacc = float(wacc_val)
+                return float(wacc_val)
         except (ImportError, AttributeError, ValueError, TypeError):
-            wacc = None
-
-    if wacc is None:
-        # 기본 경로 — 기존 _estimateWacc
-        try:
-            roic = calcRoicTimeline(company)
-            if roic and roic.get("history"):
-                wacc = roic["history"][0].get("waccEstimate")
-        except (AttributeError, ValueError, TypeError):
             pass
-    if wacc is None:
-        wacc = 9.0
 
-    # 고성장률: calcGrowthTrend CAGR
+    try:
+        roic = calcRoicTimeline(company)
+        if roic and roic.get("history"):
+            v = roic["history"][0].get("waccEstimate")
+            if v is not None:
+                return float(v)
+    except (AttributeError, ValueError, TypeError):
+        pass
+
+    return 9.0
+
+
+def _tsdResolveHighGrowth(company: Any) -> float:
+    """매출 CAGR 기반 고성장률 — 기본 8.0%, clamp [-5%, 25%].
+
+    Returns
+    -------
+    float
+        calcGrowthTrend cagr.revenue → 폴백 8.0 → 상·하한 clamp.
+    """
+    try:
+        from dartlab.analysis.financial.growthAnalysis import calcGrowthTrend
+    except ImportError:
+        return 8.0
     high_g: float | None = None
     try:
         g = calcGrowthTrend(company)
@@ -699,32 +705,56 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
         pass
     if high_g is None:
         high_g = 8.0
-    # 고성장률 상한 25% (과도 방지)
-    high_g = max(-5.0, min(high_g, 25.0))
+    return max(-5.0, min(high_g, 25.0))
 
-    # lifeCycle 별 phase 구성 (Damodaran 권고) — Phase 5 G17: highGrowth 10년 확장 (Ch.12)
+
+def _tsdBuildPhases(life_phase: str | None, high_g: float, overrides: dict) -> tuple[list[int], list[float]]:
+    """lifeCycle 별 phase 구성 (Damodaran Ch.12) + growthRates override.
+
+    Returns
+    -------
+    (years_vec, rates_vec)
+        phase 별 연수 리스트 와 성장률 리스트. growthRates override 있으면 교체
+        (연수 는 10년 을 len 으로 균등 분할).
+    """
+    try:
+        from dartlab.core.overrides import applyOverride
+    except ImportError:
+        return [5], [high_g]
+
     phase_config: dict[str, tuple[list[int], list[float]]] = {
         "earlyGrowth": ([5, 3, 2], [high_g, high_g * 0.5, high_g * 0.2]),
-        "highGrowth": ([5, 3, 2], [high_g, high_g * 0.7, high_g * 0.4]),  # 7→10년
-        "matureGrowth": ([4], [min(high_g, 8.0)]),  # cap 8%
-        "matureStable": ([3], [min(high_g, 3.0)]),  # cap 3% (GDP 근접)
+        "highGrowth": ([5, 3, 2], [high_g, high_g * 0.7, high_g * 0.4]),
+        "matureGrowth": ([4], [min(high_g, 8.0)]),
+        "matureStable": ([3], [min(high_g, 3.0)]),
         "decline": ([2], [min(high_g, -2.0) if high_g < 0 else min(high_g, 0.0)]),
         "turnaround": ([5], [high_g]),
     }
     years_vec, rates_vec = phase_config.get(life_phase or "", ([5], [high_g]))
 
-    # override: growthRates 명시되면 우선
     rates_override = applyOverride(None, "growthRates", overrides)
     if isinstance(rates_override, list) and rates_override:
         rates_vec = rates_override
         if len(years_vec) != len(rates_vec):
-            # 수동 phase 조정 — years 는 균등 분할
             years_vec = [max(1, 10 // len(rates_vec))] * len(rates_vec)
 
-    margin_path = applyOverride(None, "marginPath", overrides)
-    reinvestment_path = applyOverride(None, "reinvestmentPath", overrides)
+    return years_vec, rates_vec
 
-    # 영구성장률 — Phase 4 G12.3: phase 별 Rf 감쇠 매핑
+
+def _tsdResolveTerminalGrowth(life_phase: str | None, company: Any, overrides: dict) -> float:
+    """영구성장률 — Phase 4 G12.3 phase 별 Rf 감쇠 매핑 + terminalGrowth override.
+
+    Returns
+    -------
+    float
+        Damodaran ERP riskFreeRate 기준 phase 별 감쇠값. override 있으면 우선.
+    """
+    try:
+        from dartlab.core.finance.riskPremiums import loadDamodaranERP
+        from dartlab.core.overrides import applyOverride
+    except ImportError:
+        return 2.5
+
     currency = getattr(company, "currency", None)
     country = applyOverride(None, "countryCode", overrides)
     erp = loadDamodaranERP(countryCode=country, currency=currency)
@@ -733,81 +763,115 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
         "earlyGrowth": max(2.0, rf - 0.5),
         "highGrowth": max(2.0, rf - 1.0),
         "matureGrowth": max(2.0, rf - 1.5),
-        "matureStable": max(1.5, rf - 2.0),  # GDP 추종 (Damodaran 권고)
+        "matureStable": max(1.5, rf - 2.0),
         "decline": 0.5,
         "turnaround": max(2.0, rf - 1.0),
     }
     tg_default = tg_by_phase.get(life_phase or "", max(1.0, rf - 1.0))
-    terminal_g = applyOverride(tg_default, "terminalGrowth", overrides)
+    return float(applyOverride(tg_default, "terminalGrowth", overrides))
 
-    # baseFcf: 최근 5개년 중 양수 FCF 의 중앙값 (mid-cycle) — 최근 YTD 편향 회피
-    base_fcf: float | None = None
+
+def _tsdExtractBaseFcf(company: Any) -> float | None:
+    """최근 5개년 양수 FCF (ocf - |capex|) 중앙값 (mid-cycle) 추출.
+
+    Returns
+    -------
+    float | None
+        positives 리스트 의 median. 양수 FCF 하나도 없으면 None.
+    """
+    try:
+        from dartlab.analysis.financial._helpers import toDictBySnakeId
+    except ImportError:
+        return None
     try:
         cf = company.select("CF", ["영업활동현금흐름", "유형자산의취득"])
         parsed = toDictBySnakeId(cf)
-        if parsed:
-            data, periods = parsed
-            ocf_row = data.get("operating_cashflow") or {}
-            capex_row = data.get("purchase_of_property_plant_and_equipment") or {}
-            annual_years = [p for p in periods if p.isdigit() and len(p) == 4][:5]
-            fcf_history: list[float] = []
-            for y in annual_years:
-                o = ocf_row.get(y)
-                cx = capex_row.get(y)
-                if o:
-                    fcf_val = float(o) - abs(float(cx or 0))
-                    fcf_history.append(fcf_val)
-            positives = sorted([f for f in fcf_history if f > 0])
-            if positives:
-                base_fcf = positives[len(positives) // 2]  # 중앙값
+        if not parsed:
+            return None
+        data, periods = parsed
+        ocf_row = data.get("operating_cashflow") or {}
+        capex_row = data.get("purchase_of_property_plant_and_equipment") or {}
+        annual_years = [p for p in periods if p.isdigit() and len(p) == 4][:5]
+        fcf_history: list[float] = []
+        for y in annual_years:
+            o = ocf_row.get(y)
+            cx = capex_row.get(y)
+            if o:
+                fcf_history.append(float(o) - abs(float(cx or 0)))
+        positives = sorted([f for f in fcf_history if f > 0])
+        if positives:
+            return positives[len(positives) // 2]
     except (AttributeError, KeyError, TypeError, ValueError):
         pass
+    return None
 
-    if not base_fcf or base_fcf <= 0:
-        return None
 
-    # Phase 5 G16: Normalized Earnings (Damodaran Ch.22)
-    # 사이클/회복/적자 이력 기업은 mid-cycle FCF 중앙값 대신 Normalized FCF 사용
+def _tsdMaybeNormalizeFcf(base_fcf: float, life_phase: str | None, company: Any) -> float:
+    """Phase 5 G16 — 사이클/회복/적자 이력 기업은 Normalized FCF 로 교체 (Damodaran Ch.22).
+
+    Returns
+    -------
+    float
+        needsNormalized False 이면 base_fcf 그대로, True 면 calcNormalizedFcf 결과.
+    """
     try:
+        from dartlab.analysis.financial._helpers import toDictBySnakeId
+        from dartlab.analysis.financial.investmentAnalysis import calcRoicTimeline
         from dartlab.core.finance.normalized import calcNormalizedFcf, needsNormalized
+    except ImportError:
+        return base_fcf
 
-        # ROIC history 추출 (적자 이력 판별용)
-        roic_history_data: list[dict] = []
-        try:
-            _roic_for_norm = calcRoicTimeline(company)
-            if _roic_for_norm and _roic_for_norm.get("history"):
-                roic_history_data = _roic_for_norm["history"]
-        except (AttributeError, ValueError, TypeError):
-            pass
-
-        if needsNormalized(life_phase, roic_history_data):
-            # 매출/마진 시계열 추출 (최신 먼저)
-            rev_history: list[float] = []
-            margin_history: list[float] = []
-            try:
-                is_rev = company.select("IS", ["매출액", "영업이익"])
-                is_parsed = toDictBySnakeId(is_rev)
-                if is_parsed:
-                    is_data, is_periods = is_parsed
-                    rev_row = is_data.get("sales") or {}
-                    op_row = is_data.get("operating_profit") or {}
-                    annual_ys = [p for p in is_periods if p.isdigit() and len(p) == 4][:5]
-                    for y in annual_ys:
-                        rv = rev_row.get(y)
-                        op = op_row.get(y)
-                        if rv and isinstance(rv, (int, float)) and rv > 0:
-                            rev_history.append(float(rv))
-                            margin_history.append(float(op) / float(rv) if op else 0.0)
-            except (AttributeError, KeyError, TypeError, ValueError):
-                pass
-
-            norm = calcNormalizedFcf(rev_history, margin_history)
-            if norm["method"] != "skip" and norm["normalizedFcf"]:
-                base_fcf = norm["normalizedFcf"]  # 사이클 중립 FCF 로 교체
-    except (ImportError, AttributeError, ValueError, TypeError):
+    roic_history_data: list[dict] = []
+    try:
+        roic = calcRoicTimeline(company)
+        if roic and roic.get("history"):
+            roic_history_data = roic["history"]
+    except (AttributeError, ValueError, TypeError):
         pass
 
-    # 순차입금 + 발행주식수 (shares 는 calcDcf 결과 역산)
+    if not needsNormalized(life_phase, roic_history_data):
+        return base_fcf
+
+    rev_history: list[float] = []
+    margin_history: list[float] = []
+    try:
+        is_rev = company.select("IS", ["매출액", "영업이익"])
+        is_parsed = toDictBySnakeId(is_rev)
+        if is_parsed:
+            is_data, is_periods = is_parsed
+            rev_row = is_data.get("sales") or {}
+            op_row = is_data.get("operating_profit") or {}
+            annual_ys = [p for p in is_periods if p.isdigit() and len(p) == 4][:5]
+            for y in annual_ys:
+                rv = rev_row.get(y)
+                op = op_row.get(y)
+                if rv and isinstance(rv, (int, float)) and rv > 0:
+                    rev_history.append(float(rv))
+                    margin_history.append(float(op) / float(rv) if op else 0.0)
+    except (AttributeError, KeyError, TypeError, ValueError):
+        return base_fcf
+
+    try:
+        norm = calcNormalizedFcf(rev_history, margin_history)
+        if norm["method"] != "skip" and norm["normalizedFcf"]:
+            return float(norm["normalizedFcf"])
+    except (AttributeError, ValueError, TypeError):
+        pass
+    return base_fcf
+
+
+def _tsdExtractNetDebtShares(company: Any) -> tuple[float, float] | None:
+    """순차입금 (단기+장기+사채 - 현금) + 발행주식수 추출.
+
+    Returns
+    -------
+    (net_debt, shares) | None
+        BS periods 없거나 예외 시 None.
+    """
+    try:
+        from dartlab.analysis.financial._helpers import toDictBySnakeId
+    except ImportError:
+        return None
     try:
         bs = company.select("BS", ["단기차입금", "장기차입금", "사채", "현금및현금성자산"])
         parsed = toDictBySnakeId(bs)
@@ -833,8 +897,46 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
             - _g("cash_and_cash_equivalents", "cash_and_equivalents")
         )
         shares = _inferShares(company)
+        return net_debt, shares
     except (AttributeError, KeyError, TypeError, ValueError):
         return None
+
+
+def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> dict | None:
+    """Damodaran Multi-stage DCF (Ch.12) — lifeCycle 별 phase 자동 구성.
+
+    - earlyGrowth → 3-phase: [5, 3, 2]년 × [g_high, g_high×0.5, g_high×0.2]
+    - highGrowth → 3-phase: [5, 3, 2]년 × [g_high, g_high×0.7, g_high×0.4]
+    - matureGrowth / matureStable / decline → 단일 phase
+
+    Returns
+    -------
+    dict | None
+        multiStageDcf(...) 결과. 필수 데이터 (positive FCF / BS periods) 없으면 None.
+    """
+    try:
+        from dartlab.core.finance.dcf import multiStageDcf
+        from dartlab.core.overrides import applyOverride
+    except ImportError:
+        return None
+
+    wacc = _tsdResolveWacc(company, overrides)
+    high_g = _tsdResolveHighGrowth(company)
+    years_vec, rates_vec = _tsdBuildPhases(life_phase, high_g, overrides)
+    terminal_g = _tsdResolveTerminalGrowth(life_phase, company, overrides)
+
+    margin_path = applyOverride(None, "marginPath", overrides)
+    reinvestment_path = applyOverride(None, "reinvestmentPath", overrides)
+
+    base_fcf = _tsdExtractBaseFcf(company)
+    if not base_fcf or base_fcf <= 0:
+        return None
+    base_fcf = _tsdMaybeNormalizeFcf(base_fcf, life_phase, company)
+
+    nd_shares = _tsdExtractNetDebtShares(company)
+    if nd_shares is None:
+        return None
+    net_debt, shares = nd_shares
 
     return multiStageDcf(
         baseFcf=base_fcf,
