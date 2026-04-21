@@ -748,8 +748,48 @@ def _analyzeEfficiency(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(dimension="efficiency", title="운전자본 효율성", body=body, severity=severity)
 
 
+def _extractSegments(rows: list, nameCol: str, valCol: str) -> tuple[list[dict], float]:
+    """segments 행에서 (name, value) 추출 + total."""
+    segments: list[dict] = []
+    total = 0.0
+    for row in rows:
+        name = row.get(nameCol, "")
+        if not name or "합계" in str(name) or "소계" in str(name):
+            continue
+        val = row.get(valCol)
+        if val is not None and isinstance(val, (int, float)):
+            total += abs(val)
+            segments.append({"name": name, "value": val})
+    return segments, total
+
+
+def _segmentShiftLine(rows: list, nameCol: str, prevCol: str, sortedSegs: list, total: float) -> str | None:
+    """기간별 비중 변화 (|>3pp|)."""
+    _, prevTotal = _extractSegments(rows, nameCol, prevCol)
+    prevMap: dict[str, float] = {}
+    for row in rows:
+        name = row.get(nameCol, "")
+        if not name or "합계" in str(name):
+            continue
+        val = row.get(prevCol)
+        if val is not None and isinstance(val, (int, float)):
+            prevMap[name] = val
+    if prevTotal <= 0:
+        return None
+    bigShift = []
+    for seg in sortedSegs[:3]:
+        currShare = abs(seg["value"]) / total * 100
+        prevVal = prevMap.get(seg["name"])
+        if prevVal is not None:
+            prevShare = abs(prevVal) / prevTotal * 100
+            shiftPp = currShare - prevShare
+            if abs(shiftPp) > 3:
+                bigShift.append(f"{seg['name']} {_pp(shiftPp)}")
+    return f"비중 변화: {', '.join(bigShift)}" if bigShift else None
+
+
 def _analyzeSegments(inp: _Input) -> NarrativeParagraph | None:
-    """사업부문 분석 — 비중 + 집중도."""
+    """사업부문 분석 orchestrator — 비중 + 집중도 + 변화 (Q3.1f split)."""
     import polars as pl
 
     segDf = inp.segmentsDf
@@ -761,67 +801,27 @@ def _analyzeSegments(inp: _Input) -> NarrativeParagraph | None:
     if not numCols:
         return None
 
-    latestCol = numCols[-1]
     nameCol = cols[0]
     rows = segDf.to_dicts()
-
-    segments: list[dict] = []
-    total = 0.0
-    for row in rows:
-        name = row.get(nameCol, "")
-        if not name or "합계" in str(name) or "소계" in str(name):
-            continue
-        val = row.get(latestCol)
-        if val is not None and isinstance(val, (int, float)):
-            total += abs(val)
-            segments.append({"name": name, "value": val})
+    segments, total = _extractSegments(rows, nameCol, numCols[-1])
 
     if not segments or total == 0:
         return None
 
-    parts: list[str] = []
-    # 비중 상위 3개
     sorted_segs = sorted(segments, key=lambda s: abs(s["value"]), reverse=True)
-    topParts = []
-    for seg in sorted_segs[:4]:
-        share = abs(seg["value"]) / total * 100
-        topParts.append(f"{seg['name']} {share:.0f}%")
-    parts.append(f"사업구성: {', '.join(topParts)}")
+    topParts = [f"{seg['name']} {abs(seg['value']) / total * 100:.0f}%" for seg in sorted_segs[:4]]
+    parts: list[str] = [f"사업구성: {', '.join(topParts)}"]
 
-    # 집중도
     maxShare = max(abs(s["value"]) / total * 100 for s in segments)
     if maxShare > 70:
-        topName = sorted_segs[0]["name"]
-        parts.append(f"{topName} 비중 {maxShare:.0f}% — 단일 부문 의존 구조")
+        parts.append(f"{sorted_segs[0]['name']} 비중 {maxShare:.0f}% — 단일 부문 의존 구조")
     elif maxShare < 30 and len(segments) >= 3:
         parts.append("사업 다각화 구조")
 
-    # 기간별 비중 변화 (2개 이상 기간)
     if len(numCols) >= 2:
-        prevCol = numCols[-2]
-        prevTotal = 0.0
-        prevMap: dict[str, float] = {}
-        for row in rows:
-            name = row.get(nameCol, "")
-            if not name or "합계" in str(name):
-                continue
-            val = row.get(prevCol)
-            if val is not None and isinstance(val, (int, float)):
-                prevTotal += abs(val)
-                prevMap[name] = val
-
-        if prevTotal > 0:
-            bigShift = []
-            for seg in sorted_segs[:3]:
-                currShare = abs(seg["value"]) / total * 100
-                prevVal = prevMap.get(seg["name"])
-                if prevVal is not None:
-                    prevShare = abs(prevVal) / prevTotal * 100
-                    shiftPp = currShare - prevShare
-                    if abs(shiftPp) > 3:
-                        bigShift.append(f"{seg['name']} {_pp(shiftPp)}")
-            if bigShift:
-                parts.append(f"비중 변화: {', '.join(bigShift)}")
+        shiftLine = _segmentShiftLine(rows, nameCol, numCols[-2], sorted_segs, total)
+        if shiftLine:
+            parts.append(shiftLine)
 
     body = ". ".join(parts) + "."
     severity = "warning" if maxShare > 70 else "neutral"
@@ -2790,70 +2790,56 @@ def _detectCrossReferences(paragraphs: list[NarrativeParagraph]) -> list[str]:
     return refs[:10]
 
 
+_POSITIVE_IMPLICATIONS: dict[str, str] = {
+    "growth": "현 성장 추세 유지 시 실적 개선 지속 전망",
+    "dupont": "수익구조 건전성 기반 안정적 주주가치 창출 기대",
+    "sectorRelative": "업종 대비 저평가 구간 — 촉매 발생 시 재평가 여지",
+    "margin": "마진 개선 추세 지속 시 이익 레버리지 확대 기대",
+    "cashflow": "양호한 현금창출력 기반 주주환원 또는 재투자 여력 충분",
+    "cashflowDeep": "양호한 현금창출력 기반 주주환원 또는 재투자 여력 충분",
+    "bsStructure": "자산 구성 효율성 유지 시 자본수익률 개선 기대",
+    "liquidity": "풍부한 유동성 — 경기 둔화에도 안정적 운영 가능",
+    "capitalChange": "자본 축적 추세 지속 시 재무 안전판 강화",
+    "isToCs": "현금주의 이익 양호 — 높은 이익의 질 유지 전망",
+    "valueCreation": "ROIC > WACC — 자본비용 초과 수익 창출, 기업가치 증대 지속 기대",
+    "distressModels": "부실 모델 전원 안전 판정 — 재무건전성 우수",
+    "salesOrder": "수주잔고 풍부 — 향후 매출 가시성 높음",
+    "businessStrategy": "고성장·고마진 전략 유효 — 프리미엄 밸류에이션 정당화",
+}
+
+_NEGATIVE_IMPLICATIONS: dict[str, str] = {
+    "efficiency": "운전자본 효율 악화 방치 시 유동성 리스크 확대 가능",
+    "cashflow": "현금흐름 부진 지속 시 재무 안정성 악화 우려",
+    "cashflowDeep": "현금흐름 부진 지속 시 재무 안정성 악화 우려",
+    "growth": "성장 둔화 추세 반전 없으면 밸류에이션 디레이팅 가능",
+    "margin": "마진 하락 추세 지속 시 구조적 수익성 문제 대두 가능",
+    "sectorRelative": "업종 대비 프리미엄 지속 시 하방 리스크 존재",
+    "debtStructure": "부채구조 악화 추세 지속 시 신용 리스크 상승 가능",
+    "liquidity": "유동성 부족 심화 시 차입 의존도 확대 불가피",
+    "isToCs": "이익-현금흐름 괴리 지속 시 이익의 질 의문 심화",
+    "isToBs": "매출채권/재고 과잉 축적 시 대손·평가손실 리스크",
+    "cfToBs": "투자-자산 불일치 지속 시 자산 효율성 저하 우려",
+    "valueCreation": "EVA 부진 지속 시 기업가치 훼손 — 자본 배분 재검토 필요",
+    "distressModels": "다수 부실 모델 경고 — 재무 안정성 심층 점검 시급",
+    "earningsManipulation": "Beneish 경고 지속 시 이익의 신뢰성 의문 — 감사보고서 주의",
+}
+
+
 def _buildForwardImplications(paragraphs: list[NarrativeParagraph], inp: _Input) -> list[str]:
-    """전망 시사점 — 가장 강한 신호에서 조건부 시사점 생성."""
+    """전망 시사점 — 가장 강한 신호에서 조건부 시사점 생성 (Q3.1f dict dispatch)."""
     implications: list[str] = []
 
     positive = [p for p in paragraphs if p.severity == "positive"]
     negative = [p for p in paragraphs if p.severity in ("negative", "warning")]
 
     if positive:
-        best = positive[0]
-        if best.dimension == "growth":
-            implications.append("현 성장 추세 유지 시 실적 개선 지속 전망")
-        elif best.dimension == "dupont":
-            implications.append("수익구조 건전성 기반 안정적 주주가치 창출 기대")
-        elif best.dimension == "sectorRelative":
-            implications.append("업종 대비 저평가 구간 — 촉매 발생 시 재평가 여지")
-        elif best.dimension == "margin":
-            implications.append("마진 개선 추세 지속 시 이익 레버리지 확대 기대")
-        elif best.dimension in ("cashflow", "cashflowDeep"):
-            implications.append("양호한 현금창출력 기반 주주환원 또는 재투자 여력 충분")
-        elif best.dimension == "bsStructure":
-            implications.append("자산 구성 효율성 유지 시 자본수익률 개선 기대")
-        elif best.dimension == "liquidity":
-            implications.append("풍부한 유동성 — 경기 둔화에도 안정적 운영 가능")
-        elif best.dimension == "capitalChange":
-            implications.append("자본 축적 추세 지속 시 재무 안전판 강화")
-        elif best.dimension == "isToCs":
-            implications.append("현금주의 이익 양호 — 높은 이익의 질 유지 전망")
-        elif best.dimension == "valueCreation":
-            implications.append("ROIC > WACC — 자본비용 초과 수익 창출, 기업가치 증대 지속 기대")
-        elif best.dimension == "distressModels":
-            implications.append("부실 모델 전원 안전 판정 — 재무건전성 우수")
-        elif best.dimension == "salesOrder":
-            implications.append("수주잔고 풍부 — 향후 매출 가시성 높음")
-        elif best.dimension == "businessStrategy":
-            implications.append("고성장·고마진 전략 유효 — 프리미엄 밸류에이션 정당화")
-
+        msg = _POSITIVE_IMPLICATIONS.get(positive[0].dimension)
+        if msg:
+            implications.append(msg)
     if negative:
-        worst = negative[0]
-        if worst.dimension == "efficiency":
-            implications.append("운전자본 효율 악화 방치 시 유동성 리스크 확대 가능")
-        elif worst.dimension in ("cashflow", "cashflowDeep"):
-            implications.append("현금흐름 부진 지속 시 재무 안정성 악화 우려")
-        elif worst.dimension == "growth":
-            implications.append("성장 둔화 추세 반전 없으면 밸류에이션 디레이팅 가능")
-        elif worst.dimension == "margin":
-            implications.append("마진 하락 추세 지속 시 구조적 수익성 문제 대두 가능")
-        elif worst.dimension == "sectorRelative":
-            implications.append("업종 대비 프리미엄 지속 시 하방 리스크 존재")
-        elif worst.dimension == "debtStructure":
-            implications.append("부채구조 악화 추세 지속 시 신용 리스크 상승 가능")
-        elif worst.dimension == "liquidity":
-            implications.append("유동성 부족 심화 시 차입 의존도 확대 불가피")
-        elif worst.dimension == "isToCs":
-            implications.append("이익-현금흐름 괴리 지속 시 이익의 질 의문 심화")
-        elif worst.dimension == "isToBs":
-            implications.append("매출채권/재고 과잉 축적 시 대손·평가손실 리스크")
-        elif worst.dimension == "cfToBs":
-            implications.append("투자-자산 불일치 지속 시 자산 효율성 저하 우려")
-        elif worst.dimension == "valueCreation":
-            implications.append("EVA 부진 지속 시 기업가치 훼손 — 자본 배분 재검토 필요")
-        elif worst.dimension == "distressModels":
-            implications.append("다수 부실 모델 경고 — 재무 안정성 심층 점검 시급")
-        elif worst.dimension == "earningsManipulation":
-            implications.append("Beneish 경고 지속 시 이익의 신뢰성 의문 — 감사보고서 주의")
+        msg = _NEGATIVE_IMPLICATIONS.get(negative[0].dimension)
+        if msg:
+            implications.append(msg)
 
     return implications[:4]
 
