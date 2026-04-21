@@ -1,0 +1,3232 @@
+{
+  "BS": {
+    "current_assets": {
+      "sortOrder": 1000,
+      "level": 1
+    },
+    "cash_and_cash_equivalents": {
+      "sortOrder": 1010,
+      "level": 2
+    },
+    "cash_and_receivables_from_banks": {
+      "sortOrder": 1011,
+      "level": 2
+    },
+    "shortterm_financial_instruments": {
+      "sortOrder": 1020,
+      "level": 2
+    },
+    "current_financial_assets": {
+      "sortOrder": 1021,
+      "level": 2
+    },
+    "shortterm_investment_assets": {
+      "sortOrder": 1025,
+      "level": 2
+    },
+    "financial_assets_at_amortised_cost": {
+      "sortOrder": 1031,
+      "level": 2
+    },
+    "securities_at_amortised_cost": {
+      "sortOrder": 1032,
+      "level": 2
+    },
+    "loans": {
+      "sortOrder": 1033,
+      "level": 2
+    },
+    "financial_assets_measured_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 1041,
+      "level": 2
+    },
+    "shortterm_trading_financial_assets": {
+      "sortOrder": 1043,
+      "level": 2
+    },
+    "shortterm_financial_assets_measured_at_fair_value_through_other_comprehensive_income": {
+      "sortOrder": 1045,
+      "level": 2
+    },
+    "shortterm_financial_assets_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 1047,
+      "level": 2
+    },
+    "shortterm_availableforsale_financial_assets": {
+      "sortOrder": 1050,
+      "level": 2
+    },
+    "shortterm_held_to_maturity_investments": {
+      "sortOrder": 1055,
+      "level": 2
+    },
+    "other_current_financial_assets": {
+      "sortOrder": 1058,
+      "level": 2
+    },
+    "shortterm_derivative_assets": {
+      "sortOrder": 1059,
+      "level": 2
+    },
+    "trade_receivables": {
+      "sortOrder": 1060,
+      "level": 2
+    },
+    "trade_and_other_current_receivables": {
+      "sortOrder": 1061,
+      "level": 2
+    },
+    "shortterm_loans": {
+      "sortOrder": 1062,
+      "level": 2
+    },
+    "assets_held_under_a_finance_lease": {
+      "sortOrder": 1064,
+      "level": 2
+    },
+    "longterm_loans": {
+      "sortOrder": 1065,
+      "level": 2
+    },
+    "receivables": {
+      "sortOrder": 1070,
+      "level": 2
+    },
+    "shortterm_other_receivables": {
+      "sortOrder": 1071,
+      "level": 2
+    },
+    "other_receivables": {
+      "sortOrder": 1072,
+      "level": 2
+    },
+    "accrued_income": {
+      "sortOrder": 1075,
+      "level": 2
+    },
+    "other_accrued_income": {
+      "sortOrder": 1076,
+      "level": 2
+    },
+    "advance_payments": {
+      "sortOrder": 1080,
+      "level": 2
+    },
+    "other_advance_payments": {
+      "sortOrder": 1081,
+      "level": 2
+    },
+    "prepaid_expenses": {
+      "sortOrder": 1085,
+      "level": 2
+    },
+    "shortterm_prepaid_expenses": {
+      "sortOrder": 1086,
+      "level": 2
+    },
+    "financial_assets_at_fv_through_profit": {
+      "sortOrder": 1089,
+      "level": 2
+    },
+    "inventories": {
+      "sortOrder": 1090,
+      "level": 2
+    },
+    "other_inventories": {
+      "sortOrder": 1091,
+      "level": 2
+    },
+    "current_income_tax_assetsprepaid_income_tax_payments": {
+      "sortOrder": 1095,
+      "level": 2
+    },
+    "other_current_assets": {
+      "sortOrder": 1100,
+      "level": 2
+    },
+    "asset_held_for_sale": {
+      "sortOrder": 1110,
+      "level": 2
+    },
+    "noncurrent_asset_held_for_sale_or_disposal_group": {
+      "sortOrder": 1111,
+      "level": 2
+    },
+    "raw_materialssubmaterials": {
+      "sortOrder": 1183,
+      "level": 2
+    },
+    "biological_assets": {
+      "sortOrder": 1185,
+      "level": 2
+    },
+    "goods_in_transit": {
+      "sortOrder": 1186,
+      "level": 2
+    },
+    "work_in_process": {
+      "sortOrder": 1187,
+      "level": 2
+    },
+    "suppliesconsumables": {
+      "sortOrder": 1188,
+      "level": 2
+    },
+    "current_derivative_assets": {
+      "sortOrder": 1190,
+      "level": 2
+    },
+    "shortterm_deposits_provided": {
+      "sortOrder": 1192,
+      "level": 2
+    },
+    "contract_assets": {
+      "sortOrder": 1195,
+      "level": 2
+    },
+    "allowance_for_doubtful_accounts": {
+      "sortOrder": 1196,
+      "level": 2
+    },
+    "construction_in_progress_receivables": {
+      "sortOrder": 1198,
+      "level": 2
+    },
+    "noncurrent_assets": {
+      "sortOrder": 1200,
+      "level": 1
+    },
+    "longterm_financial_instruments": {
+      "sortOrder": 1210,
+      "level": 2
+    },
+    "longterm_financial_assets": {
+      "sortOrder": 1211,
+      "level": 2
+    },
+    "longterm_investment_assets": {
+      "sortOrder": 1215,
+      "level": 2
+    },
+    "longterm_financial_assets_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 1231,
+      "level": 2
+    },
+    "financial_assets_measured_at_fair_value_through_other_comprehensive_income": {
+      "sortOrder": 1241,
+      "level": 2
+    },
+    "longterm_financial_assets_measured_at_fair_value_through_other_comprehensive_income": {
+      "sortOrder": 1243,
+      "level": 2
+    },
+    "longterm_availableforsale_financial_assets": {
+      "sortOrder": 1250,
+      "level": 2
+    },
+    "other_longterm_availableforsale_financial_assets": {
+      "sortOrder": 1252,
+      "level": 2
+    },
+    "held_to_maturity_investments": {
+      "sortOrder": 1260,
+      "level": 2
+    },
+    "longterm_held_to_maturity_investments": {
+      "sortOrder": 1261,
+      "level": 2
+    },
+    "other_longterm_held_to_maturity_investments": {
+      "sortOrder": 1263,
+      "level": 2
+    },
+    "other_noncurrent_financial_assets": {
+      "sortOrder": 1265,
+      "level": 2
+    },
+    "longterm_derivative_assets": {
+      "sortOrder": 1266,
+      "level": 2
+    },
+    "other_longterm_derivatives": {
+      "sortOrder": 1267,
+      "level": 2
+    },
+    "derivatives_assets": {
+      "sortOrder": 1269,
+      "level": 2
+    },
+    "investments_in_subsidiaries": {
+      "sortOrder": 1270,
+      "level": 2
+    },
+    "investments_in_associates_subsidiaries_and_joint_venteures": {
+      "sortOrder": 1272,
+      "level": 2
+    },
+    "investments_in_associates": {
+      "sortOrder": 1280,
+      "level": 2
+    },
+    "investments_in_associatesinvestments_in_equity_method": {
+      "sortOrder": 1282,
+      "level": 2
+    },
+    "investments_in_associatesequity_method_securities": {
+      "sortOrder": 1283,
+      "level": 2
+    },
+    "investments_in_equity_method": {
+      "sortOrder": 1286,
+      "level": 2
+    },
+    "longterm_receivables": {
+      "sortOrder": 1295,
+      "level": 2
+    },
+    "longterm_accounts_receivablesconstruction_work": {
+      "sortOrder": 1296,
+      "level": 2
+    },
+    "longterm_trade_receivables": {
+      "sortOrder": 1297,
+      "level": 2
+    },
+    "lt_trade_and_other_receivables": {
+      "sortOrder": 1298,
+      "level": 2
+    },
+    "property_plant_and_equipment": {
+      "sortOrder": 1300,
+      "level": 2
+    },
+    "other_property_plant_equipment": {
+      "sortOrder": 1301,
+      "level": 2
+    },
+    "construction_in_progress": {
+      "sortOrder": 1302,
+      "level": 2
+    },
+    "right_of_use_assets": {
+      "sortOrder": 1310,
+      "level": 2
+    },
+    "leased_assets": {
+      "sortOrder": 1311,
+      "level": 2
+    },
+    "other_leased_assets": {
+      "sortOrder": 1313,
+      "level": 2
+    },
+    "rental_assets": {
+      "sortOrder": 1315,
+      "level": 2
+    },
+    "intangible_assets": {
+      "sortOrder": 1400,
+      "level": 2
+    },
+    "other_intangible_assets": {
+      "sortOrder": 1401,
+      "level": 2
+    },
+    "intangible_assets_under_development": {
+      "sortOrder": 1402,
+      "level": 2
+    },
+    "goodwill": {
+      "sortOrder": 1410,
+      "level": 2
+    },
+    "investment_in_properties": {
+      "sortOrder": 1450,
+      "level": 2
+    },
+    "other_investment_in_properties": {
+      "sortOrder": 1451,
+      "level": 2
+    },
+    "defined_benefit_assets": {
+      "sortOrder": 1500,
+      "level": 2
+    },
+    "deferred_tax_assets": {
+      "sortOrder": 1600,
+      "level": 2
+    },
+    "longterm_prepaid_expenses": {
+      "sortOrder": 1700,
+      "level": 2
+    },
+    "longterm_advance_payments": {
+      "sortOrder": 1710,
+      "level": 2
+    },
+    "longterm_gurarantee": {
+      "sortOrder": 1720,
+      "level": 2
+    },
+    "longterm_leasehold_deposits_provided": {
+      "sortOrder": 1721,
+      "level": 2
+    },
+    "insurance_contract_assets": {
+      "sortOrder": 1750,
+      "level": 2
+    },
+    "reinsurance_assets": {
+      "sortOrder": 1751,
+      "level": 2
+    },
+    "separate_account_credits": {
+      "sortOrder": 1760,
+      "level": 2
+    },
+    "other_assets": {
+      "sortOrder": 1801,
+      "level": 2
+    },
+    "assets": {
+      "sortOrder": 1900,
+      "level": 1
+    },
+    "current_liabilities": {
+      "sortOrder": 2000,
+      "level": 1
+    },
+    "trade_payables": {
+      "sortOrder": 2010,
+      "level": 2
+    },
+    "trade_and_other_current_payables": {
+      "sortOrder": 2011,
+      "level": 2
+    },
+    "shortterm_trade_and_other_current_payables": {
+      "sortOrder": 2012,
+      "level": 2
+    },
+    "trade_and_other_payables": {
+      "sortOrder": 2015,
+      "level": 2
+    },
+    "shortterm_borrowings": {
+      "sortOrder": 2020,
+      "level": 2
+    },
+    "other_shortterm_borrowings": {
+      "sortOrder": 2021,
+      "level": 2
+    },
+    "borrowings_from_financial_institutes": {
+      "sortOrder": 2022,
+      "level": 2
+    },
+    "borrowings": {
+      "sortOrder": 2023,
+      "level": 2
+    },
+    "shortterm_bonds": {
+      "sortOrder": 2025,
+      "level": 2
+    },
+    "financial_liabilities_at_amortised_cost": {
+      "sortOrder": 2026,
+      "level": 2
+    },
+    "other_payables": {
+      "sortOrder": 2030,
+      "level": 2
+    },
+    "other_payables_others": {
+      "sortOrder": 2032,
+      "level": 2
+    },
+    "accrued_expenses": {
+      "sortOrder": 2040,
+      "level": 2
+    },
+    "shortterm_accrued_expenses": {
+      "sortOrder": 2041,
+      "level": 2
+    },
+    "other_accrued_expenses": {
+      "sortOrder": 2042,
+      "level": 2
+    },
+    "advance_from_customers": {
+      "sortOrder": 2050,
+      "level": 2
+    },
+    "shortterm_advance_from_customers": {
+      "sortOrder": 2051,
+      "level": 2
+    },
+    "others_in_advance_from_customers": {
+      "sortOrder": 2052,
+      "level": 2
+    },
+    "unearned_income": {
+      "sortOrder": 2055,
+      "level": 2
+    },
+    "contract_liabilities": {
+      "sortOrder": 2056,
+      "level": 2
+    },
+    "withholdings": {
+      "sortOrder": 2060,
+      "level": 2
+    },
+    "other_withholdings": {
+      "sortOrder": 2062,
+      "level": 2
+    },
+    "deposits_liabilities": {
+      "sortOrder": 2063,
+      "level": 2
+    },
+    "guarantee_deposits_withhold": {
+      "sortOrder": 2065,
+      "level": 2
+    },
+    "income_taxes_payable": {
+      "sortOrder": 2070,
+      "level": 2
+    },
+    "current_income_tax_liabilitiesincome_taxes_payable": {
+      "sortOrder": 2075,
+      "level": 2
+    },
+    "current_portion_of_longterm_debt": {
+      "sortOrder": 2080,
+      "level": 2
+    },
+    "current_portion_of_longterm_borrowings": {
+      "sortOrder": 2081,
+      "level": 2
+    },
+    "current_portion_of_bonds": {
+      "sortOrder": 2082,
+      "level": 2
+    },
+    "financial_liabilities_measured_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 2083,
+      "level": 2
+    },
+    "shortterm_financial_liabilities": {
+      "sortOrder": 2085,
+      "level": 2
+    },
+    "shortterm_derivative_liabilities": {
+      "sortOrder": 2086,
+      "level": 2
+    },
+    "other_current_financial_liabilities": {
+      "sortOrder": 2087,
+      "level": 2
+    },
+    "current_lease_liabilities": {
+      "sortOrder": 2088,
+      "level": 2
+    },
+    "shortterm_trading_financial_liabilities": {
+      "sortOrder": 2089,
+      "level": 2
+    },
+    "provisions": {
+      "sortOrder": 2090,
+      "level": 2
+    },
+    "lease_obligations": {
+      "sortOrder": 2090,
+      "level": 2
+    },
+    "current_provisions": {
+      "sortOrder": 2091,
+      "level": 2
+    },
+    "other_shortterm_provisions": {
+      "sortOrder": 2092,
+      "level": 2
+    },
+    "other_allowance": {
+      "sortOrder": 2094,
+      "level": 2
+    },
+    "defined_benefit_liability": {
+      "sortOrder": 2095,
+      "level": 2
+    },
+    "other_current_liabilities": {
+      "sortOrder": 2100,
+      "level": 2
+    },
+    "liabilities_included_in_disposal_groups_classified_as_held_for_sale": {
+      "sortOrder": 2111,
+      "level": 2
+    },
+    "noncurrent_derivative_assets": {
+      "sortOrder": 2190,
+      "level": 2
+    },
+    "other_financial_assets": {
+      "sortOrder": 2195,
+      "level": 2
+    },
+    "noncurrent_liabilities": {
+      "sortOrder": 2200,
+      "level": 1
+    },
+    "investments_in_joint_ventures": {
+      "sortOrder": 2200,
+      "level": 2
+    },
+    "bonds": {
+      "sortOrder": 2210,
+      "level": 2
+    },
+    "longterm_finance_lease_receivables": {
+      "sortOrder": 2210,
+      "level": 2
+    },
+    "convertible_bonds": {
+      "sortOrder": 2211,
+      "level": 2
+    },
+    "bonds_with_stock_warrants": {
+      "sortOrder": 2212,
+      "level": 2
+    },
+    "longterm_borrowings": {
+      "sortOrder": 2220,
+      "level": 2
+    },
+    "government_grants": {
+      "sortOrder": 2220,
+      "level": 2
+    },
+    "other_longterm_borrowings": {
+      "sortOrder": 2221,
+      "level": 2
+    },
+    "longterm_financial_liabilities": {
+      "sortOrder": 2225,
+      "level": 2
+    },
+    "financial_liability_at_fv_through_profit": {
+      "sortOrder": 2226,
+      "level": 2
+    },
+    "longterm_other_payables": {
+      "sortOrder": 2230,
+      "level": 2
+    },
+    "motor_vehicles": {
+      "sortOrder": 2230,
+      "level": 2
+    },
+    "longterm_other_payables_others": {
+      "sortOrder": 2231,
+      "level": 2
+    },
+    "tools_and_office_equipment": {
+      "sortOrder": 2231,
+      "level": 2
+    },
+    "longterm_accrued_expenses": {
+      "sortOrder": 2232,
+      "level": 2
+    },
+    "structures": {
+      "sortOrder": 2232,
+      "level": 2
+    },
+    "office_furniture_and_equipment": {
+      "sortOrder": 2234,
+      "level": 2
+    },
+    "longterm_trade_and_other_noncurrent_payables": {
+      "sortOrder": 2235,
+      "level": 2
+    },
+    "facilities": {
+      "sortOrder": 2235,
+      "level": 2
+    },
+    "longterm_advance_from_customers": {
+      "sortOrder": 2240,
+      "level": 2
+    },
+    "accumulated_depreciation": {
+      "sortOrder": 2240,
+      "level": 2
+    },
+    "longterm_unearned_income": {
+      "sortOrder": 2241,
+      "level": 2
+    },
+    "accumulated_impairment_losses": {
+      "sortOrder": 2241,
+      "level": 2
+    },
+    "longterm_guarantee_deposits_withhold": {
+      "sortOrder": 2245,
+      "level": 2
+    },
+    "longterm_derivative_liabilities": {
+      "sortOrder": 2250,
+      "level": 2
+    },
+    "plan_assets": {
+      "sortOrder": 2250,
+      "level": 2
+    },
+    "derivatives_liabilities": {
+      "sortOrder": 2253,
+      "level": 2
+    },
+    "other_longterm_financial_liabilities": {
+      "sortOrder": 2255,
+      "level": 2
+    },
+    "noncurrent_lease_liabilities": {
+      "sortOrder": 2260,
+      "level": 2
+    },
+    "computer_software": {
+      "sortOrder": 2260,
+      "level": 2
+    },
+    "copyrights": {
+      "sortOrder": 2270,
+      "level": 2
+    },
+    "defined_benefit_liabilities": {
+      "sortOrder": 2300,
+      "level": 2
+    },
+    "noncurrent_provisions_for_employee_benefits": {
+      "sortOrder": 2303,
+      "level": 2
+    },
+    "present_value_of_defined_benefit_obligations": {
+      "sortOrder": 2305,
+      "level": 2
+    },
+    "deferred_tax_liabilities": {
+      "sortOrder": 2400,
+      "level": 2
+    },
+    "longterm_provisions": {
+      "sortOrder": 2500,
+      "level": 2
+    },
+    "noncurrent_provisions": {
+      "sortOrder": 2501,
+      "level": 2
+    },
+    "other_longterm_provisions": {
+      "sortOrder": 2502,
+      "level": 2
+    },
+    "other_noncurrent_liabilities": {
+      "sortOrder": 2600,
+      "level": 2
+    },
+    "other_liabilities": {
+      "sortOrder": 2602,
+      "level": 2
+    },
+    "insurance_contract_liabilities": {
+      "sortOrder": 2700,
+      "level": 2
+    },
+    "reserve_for_outstanding_claims_for_reinsurance_ceded": {
+      "sortOrder": 2701,
+      "level": 2
+    },
+    "separate_account_liabilities": {
+      "sortOrder": 2710,
+      "level": 2
+    },
+    "liabilities": {
+      "sortOrder": 2900,
+      "level": 1
+    },
+    "owners_of_parent_equity": {
+      "sortOrder": 3000,
+      "level": 1
+    },
+    "paidin_capital": {
+      "sortOrder": 3005,
+      "level": 2
+    },
+    "capital_stock": {
+      "sortOrder": 3010,
+      "level": 2
+    },
+    "common_stock": {
+      "sortOrder": 3011,
+      "level": 3
+    },
+    "preferred_stock": {
+      "sortOrder": 3012,
+      "level": 3
+    },
+    "paidin_capital_in_excess_of_par_value": {
+      "sortOrder": 3100,
+      "level": 2
+    },
+    "capital_surplus": {
+      "sortOrder": 3110,
+      "level": 2
+    },
+    "other_capital_surplus": {
+      "sortOrder": 3111,
+      "level": 2
+    },
+    "revaluation_surplus": {
+      "sortOrder": 3115,
+      "level": 2
+    },
+    "retained_earnings": {
+      "sortOrder": 3200,
+      "level": 2
+    },
+    "unappropriated_retained_earnings_deficit": {
+      "sortOrder": 3210,
+      "level": 2
+    },
+    "other_retained_earnings": {
+      "sortOrder": 3215,
+      "level": 2
+    },
+    "other_reserves": {
+      "sortOrder": 3300,
+      "level": 2
+    },
+    "other_equity": {
+      "sortOrder": 3301,
+      "level": 2
+    },
+    "treasury_stock": {
+      "sortOrder": 3310,
+      "level": 2
+    },
+    "policyholders_equity_adjustment": {
+      "sortOrder": 3320,
+      "level": 2
+    },
+    "accumulated_other_comprehensive_income": {
+      "sortOrder": 3400,
+      "level": 2
+    },
+    "equity_related_to_assets_held_for_sale": {
+      "sortOrder": 3451,
+      "level": 2
+    },
+    "accumulated_oci_related_to_assets_held_for_sale": {
+      "sortOrder": 3452,
+      "level": 2
+    },
+    "hybrid_bond": {
+      "sortOrder": 3500,
+      "level": 2
+    },
+    "noncontrolling_interests_equity": {
+      "sortOrder": 3600,
+      "level": 1
+    },
+    "stockholders_equity": {
+      "sortOrder": 3900,
+      "level": 1
+    },
+    "total_liabilities_and_equity": {
+      "sortOrder": 4001,
+      "level": 1
+    },
+    "current_derivative_liabilities": {
+      "sortOrder": 4110,
+      "level": 2
+    },
+    "current_portion_of_convertible_bonds": {
+      "sortOrder": 4120,
+      "level": 2
+    },
+    "accrued_dividends": {
+      "sortOrder": 4130,
+      "level": 2
+    },
+    "longterm_preferred_stock_of_redemption": {
+      "sortOrder": 4140,
+      "level": 2
+    },
+    "current_financial_guarantee_liabilities": {
+      "sortOrder": 4150,
+      "level": 2
+    },
+    "returned_products_provisions": {
+      "sortOrder": 4160,
+      "level": 2
+    },
+    "current_portion_of_lease_obligationsother_payables": {
+      "sortOrder": 4170,
+      "level": 2
+    },
+    "gross_amount_due_to_customers_for_contract_work": {
+      "sortOrder": 4190,
+      "level": 2
+    },
+    "leasehold_deposits_received": {
+      "sortOrder": 4200,
+      "level": 2
+    },
+    "noncurrent_derivative_liabilities": {
+      "sortOrder": 5110,
+      "level": 2
+    },
+    "longterm_trade_payables": {
+      "sortOrder": 5115,
+      "level": 2
+    },
+    "longterm_leasehold_deposits_received": {
+      "sortOrder": 5120,
+      "level": 2
+    },
+    "provisions_for_restoration_costs": {
+      "sortOrder": 5130,
+      "level": 2
+    },
+    "noncurrent_financial_guarantee_liabilities": {
+      "sortOrder": 5140,
+      "level": 2
+    },
+    "legal_proceedings_provisions": {
+      "sortOrder": 5160,
+      "level": 2
+    },
+    "provision_for_construction_provisions": {
+      "sortOrder": 5170,
+      "level": 2
+    },
+    "product_warranties_provisions": {
+      "sortOrder": 5190,
+      "level": 2
+    },
+    "other_financial_institutions_liabilities": {
+      "sortOrder": 5200,
+      "level": 2
+    },
+    "present_value_discount": {
+      "sortOrder": 5220,
+      "level": 2
+    },
+    "government_grants_deferred_income": {
+      "sortOrder": 5230,
+      "level": 2
+    },
+    "estimates_of_contract_losses": {
+      "sortOrder": 5240,
+      "level": 2
+    },
+    "gains_from_capital_reduction": {
+      "sortOrder": 7090,
+      "level": 2
+    },
+    "other_paid_in_capital": {
+      "sortOrder": 7095,
+      "level": 2
+    },
+    "legal_reserve": {
+      "sortOrder": 7130,
+      "level": 2
+    },
+    "voluntary_reserves": {
+      "sortOrder": 7140,
+      "level": 2
+    },
+    "other_legal_reserves": {
+      "sortOrder": 7145,
+      "level": 2
+    },
+    "stock_options": {
+      "sortOrder": 7150,
+      "level": 2
+    },
+    "consideration_for_conversion_rights": {
+      "sortOrder": 7155,
+      "level": 2
+    },
+    "consideration_for_stock_warrants": {
+      "sortOrder": 7156,
+      "level": 2
+    },
+    "gains_on_disposition_of_treasury_stock": {
+      "sortOrder": 7160,
+      "level": 2
+    },
+    "gains_on_valuation_of_availableforsale_financial_assets": {
+      "sortOrder": 7165,
+      "level": 2
+    },
+    "losses_on_valuation_of_availableforsale_financial_assets": {
+      "sortOrder": 7166,
+      "level": 2
+    },
+    "gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": {
+      "sortOrder": 7167,
+      "level": 2
+    },
+    "gains_on_foreign_currency_translation": {
+      "sortOrder": 7170,
+      "level": 2
+    },
+    "losses_on_foreign_currency_translation": {
+      "sortOrder": 7175,
+      "level": 2
+    },
+    "other_comprehensive_income_of_associates_etc": {
+      "sortOrder": 7180,
+      "level": 2
+    },
+    "financial_assets_at_amortized_cost": {
+      "sortOrder": 1031,
+      "level": 2
+    },
+    "financial_assets_at_fv_through_oci": {
+      "sortOrder": 1046,
+      "level": 2
+    },
+    "current_afs_financial_assets": {
+      "sortOrder": 1050,
+      "level": 2
+    },
+    "held_to_maturity_financial_assets": {
+      "sortOrder": 1055,
+      "level": 2
+    },
+    "investments_in_subsidiaries_and_associates_equity_method": {
+      "sortOrder": 1275,
+      "level": 2
+    },
+    "noncurrent_afs_financial_assets": {
+      "sortOrder": 1250,
+      "level": 2
+    },
+    "tangible_assets": {
+      "sortOrder": 1300,
+      "level": 2
+    },
+    "other_noncurrent_assets": {
+      "sortOrder": 1801,
+      "level": 2
+    },
+    "debentures": {
+      "sortOrder": 2210,
+      "level": 2
+    },
+    "liabilities_classified_as_held_for_sale": {
+      "sortOrder": 2111,
+      "level": 2
+    },
+    "share_premium": {
+      "sortOrder": 3100,
+      "level": 2
+    },
+    "total_assets": {
+      "sortOrder": 1900,
+      "level": 1
+    },
+    "total_liabilities": {
+      "sortOrder": 2900,
+      "level": 1
+    },
+    "total_stockholders_equity": {
+      "sortOrder": 3900,
+      "level": 1
+    },
+    "trade_and_other_receivables": {
+      "sortOrder": 1062,
+      "level": 2
+    },
+    "current_inventories": {
+      "sortOrder": 1090,
+      "level": 2
+    }
+  },
+  "IS": {
+    "sales": {
+      "sortOrder": 1000,
+      "level": 1
+    },
+    "operating_revenues": {
+      "sortOrder": 1002,
+      "level": 1
+    },
+    "sales_of_merchandise_finished_goods": {
+      "sortOrder": 1010,
+      "level": 2
+    },
+    "service_revenue": {
+      "sortOrder": 1020,
+      "level": 2
+    },
+    "other_sales": {
+      "sortOrder": 1030,
+      "level": 2
+    },
+    "sales_of_merchandise": {
+      "sortOrder": 1040,
+      "level": 2
+    },
+    "sales_of_finished_goods": {
+      "sortOrder": 1050,
+      "level": 2
+    },
+    "cost_of_sales": {
+      "sortOrder": 1100,
+      "level": 1
+    },
+    "operating_expenses": {
+      "sortOrder": 1101,
+      "level": 1
+    },
+    "gross_profit": {
+      "sortOrder": 1200,
+      "level": 1
+    },
+    "sga": {
+      "sortOrder": 1300,
+      "level": 1
+    },
+    "operating_profit": {
+      "sortOrder": 1400,
+      "level": 1
+    },
+    "other_nonoperating_income": {
+      "sortOrder": 1502,
+      "level": 2
+    },
+    "others_expense": {
+      "sortOrder": 1600,
+      "level": 2
+    },
+    "other_nonoperating_expenses": {
+      "sortOrder": 1602,
+      "level": 2
+    },
+    "financial_income": {
+      "sortOrder": 1700,
+      "level": 2
+    },
+    "interest_income": {
+      "sortOrder": 1710,
+      "level": 3
+    },
+    "stock_dividends": {
+      "sortOrder": 1720,
+      "level": 3
+    },
+    "gains_on_valuations_of_derivatives": {
+      "sortOrder": 1750,
+      "level": 3
+    },
+    "financing_expenses": {
+      "sortOrder": 1800,
+      "level": 2
+    },
+    "financial_costs": {
+      "sortOrder": 1801,
+      "level": 2
+    },
+    "interest_expenses": {
+      "sortOrder": 1810,
+      "level": 3
+    },
+    "gains_on_valuation_of_equity_method_securities": {
+      "sortOrder": 1850,
+      "level": 2
+    },
+    "gainslosses_in_equity_method": {
+      "sortOrder": 1851,
+      "level": 2
+    },
+    "losses_on_valuation_of_equity_method_securities": {
+      "sortOrder": 1860,
+      "level": 2
+    },
+    "profit_before_tax": {
+      "sortOrder": 1900,
+      "level": 1
+    },
+    "income_taxes": {
+      "sortOrder": 2000,
+      "level": 1
+    },
+    "cost_of_merchandise_sold": {
+      "sortOrder": 2005,
+      "level": 2
+    },
+    "cost_of_finished_goods_sold": {
+      "sortOrder": 2010,
+      "level": 2
+    },
+    "cost_of_merchandise_finished_goods": {
+      "sortOrder": 2015,
+      "level": 2
+    },
+    "cost_of_service": {
+      "sortOrder": 2020,
+      "level": 2
+    },
+    "other_cost_of_sales": {
+      "sortOrder": 2030,
+      "level": 2
+    },
+    "profit_from_continuing_operations": {
+      "sortOrder": 2100,
+      "level": 1
+    },
+    "profit_from_discontinued_operations": {
+      "sortOrder": 2200,
+      "level": 1
+    },
+    "net_profit": {
+      "sortOrder": 2300,
+      "level": 1
+    },
+    "net_incomenet_loss_for_the_year_attributable_toowners_of_parent_equity": {
+      "sortOrder": 2401,
+      "level": 2
+    },
+    "owners_of_parent_equity": {
+      "sortOrder": 2402,
+      "level": 2
+    },
+    "profit_from_continuing_operations_attributable_to_owners_of_parent": {
+      "sortOrder": 2410,
+      "level": 2
+    },
+    "profit_from_discontinued_operations_attributable_to_owners_of_parent": {
+      "sortOrder": 2420,
+      "level": 2
+    },
+    "noncontrolling_interests_equity": {
+      "sortOrder": 2500,
+      "level": 2
+    },
+    "profit_attributable_to_noncontrolling_interests": {
+      "sortOrder": 2501,
+      "level": 2
+    },
+    "net_incomenet_loss_for_the_year_attributable_tononcontrolling_interests_equity": {
+      "sortOrder": 2510,
+      "level": 2
+    },
+    "profit_from_continuing_operations_attributable_to_noncontrolling_interests": {
+      "sortOrder": 2511,
+      "level": 2
+    },
+    "profit_from_discontinued_operations_attributable_to_noncontrolling_interests": {
+      "sortOrder": 2512,
+      "level": 2
+    },
+    "other_comprehensive_income": {
+      "sortOrder": 2600,
+      "level": 1
+    },
+    "other_comprehensive_income_not_to_be_reclassified": {
+      "sortOrder": 2610,
+      "level": 2
+    },
+    "remeasurement_elements_of_defined_benefit_plans": {
+      "sortOrder": 2611,
+      "level": 2
+    },
+    "actuarial_gains_or_losses_on_defined_benefit_plans": {
+      "sortOrder": 2612,
+      "level": 2
+    },
+    "gains_on_assets_revaluations": {
+      "sortOrder": 2613,
+      "level": 2
+    },
+    "gainslosses_on_valuation_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": {
+      "sortOrder": 2620,
+      "level": 2
+    },
+    "gainslosses_on_valuation_of_availableforsale_financial_assets": {
+      "sortOrder": 2621,
+      "level": 2
+    },
+    "reclassification_of_availableforsale_financial_assets": {
+      "sortOrder": 2623,
+      "level": 2
+    },
+    "gainslosses_on_disposal_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": {
+      "sortOrder": 2624,
+      "level": 2
+    },
+    "other_comprehensive_income_to_be_reclassified": {
+      "sortOrder": 2630,
+      "level": 2
+    },
+    "capital_change_in_equity_method": {
+      "sortOrder": 2640,
+      "level": 2
+    },
+    "share_of_other_comprehensive_income_of_associates_and_joint_ventures": {
+      "sortOrder": 2641,
+      "level": 2
+    },
+    "foreign_currency_translation": {
+      "sortOrder": 2650,
+      "level": 2
+    },
+    "foreign_currency_translation_differences": {
+      "sortOrder": 2651,
+      "level": 2
+    },
+    "hedges_of_net_investment_in_foreign_operations": {
+      "sortOrder": 2652,
+      "level": 2
+    },
+    "derivative_valuation": {
+      "sortOrder": 2661,
+      "level": 2
+    },
+    "cash_flow_hedges": {
+      "sortOrder": 2670,
+      "level": 2
+    },
+    "total_comprehensive_income": {
+      "sortOrder": 2700,
+      "level": 1
+    },
+    "total_comprehensive_income_owners_of_parent": {
+      "sortOrder": 2710,
+      "level": 2
+    },
+    "earnings_per_share": {
+      "sortOrder": 2800,
+      "level": 1
+    },
+    "basic_earnings_per_share": {
+      "sortOrder": 2810,
+      "level": 2
+    },
+    "basic_earnings_per_share_from_continuing_operations": {
+      "sortOrder": 2815,
+      "level": 2
+    },
+    "basic_earnings_per_share_from_discontinued_operations": {
+      "sortOrder": 2816,
+      "level": 2
+    },
+    "diluted_earnings_per_share": {
+      "sortOrder": 2820,
+      "level": 2
+    },
+    "diluted_earnings_per_share_from_continuing_operations": {
+      "sortOrder": 2825,
+      "level": 2
+    },
+    "diluted_earnings_per_share_from_discontinued_operations": {
+      "sortOrder": 2826,
+      "level": 2
+    },
+    "salaries_and_wages": {
+      "sortOrder": 4010,
+      "level": 2
+    },
+    "severance_and_retirement_benefits": {
+      "sortOrder": 4015,
+      "level": 2
+    },
+    "employee_benefits": {
+      "sortOrder": 4020,
+      "level": 2
+    },
+    "supplies": {
+      "sortOrder": 4025,
+      "level": 2
+    },
+    "entertainment": {
+      "sortOrder": 4030,
+      "level": 2
+    },
+    "traveling_expenses": {
+      "sortOrder": 4035,
+      "level": 2
+    },
+    "rent": {
+      "sortOrder": 4036,
+      "level": 2
+    },
+    "depreciation": {
+      "sortOrder": 4037,
+      "level": 2
+    },
+    "advertising_expenses": {
+      "sortOrder": 4038,
+      "level": 2
+    },
+    "commission_expenses": {
+      "sortOrder": 4039,
+      "level": 2
+    },
+    "periodicals_and_printing_expenses": {
+      "sortOrder": 4040,
+      "level": 2
+    },
+    "communication_expenses": {
+      "sortOrder": 4041,
+      "level": 2
+    },
+    "vehicle_maintenance_expenses": {
+      "sortOrder": 4042,
+      "level": 2
+    },
+    "repairs_and_maintenance_expenses": {
+      "sortOrder": 4043,
+      "level": 2
+    },
+    "insurance_premium": {
+      "sortOrder": 4044,
+      "level": 2
+    },
+    "taxes_and_dues": {
+      "sortOrder": 4045,
+      "level": 2
+    },
+    "training_expenses": {
+      "sortOrder": 4046,
+      "level": 2
+    },
+    "water_light_and_heating_expenses": {
+      "sortOrder": 4047,
+      "level": 2
+    },
+    "amortization_of_intangible_assets": {
+      "sortOrder": 4049,
+      "level": 2
+    },
+    "expenses_of_allowance_for_doubtful_accounts_provision_for_allowance_for_bad_debits": {
+      "sortOrder": 4050,
+      "level": 2
+    },
+    "transportation_expenses": {
+      "sortOrder": 4051,
+      "level": 2
+    },
+    "stock_compensation_expenses": {
+      "sortOrder": 4052,
+      "level": 2
+    },
+    "impairment_losses_on_financial_assets": {
+      "sortOrder": 4053,
+      "level": 2
+    },
+    "expenses_of_allowance_for_doubtful_accounts": {
+      "sortOrder": 4055,
+      "level": 2
+    },
+    "sales_promotion_expenses": {
+      "sortOrder": 4056,
+      "level": 2
+    },
+    "packing_expenses": {
+      "sortOrder": 4057,
+      "level": 2
+    },
+    "other_sga": {
+      "sortOrder": 4060,
+      "level": 2
+    },
+    "research_development": {
+      "sortOrder": 4070,
+      "level": 2
+    },
+    "other_operating_expenses": {
+      "sortOrder": 4080,
+      "level": 2
+    },
+    "nonoperating_income_expenses": {
+      "sortOrder": 5500,
+      "level": 1
+    },
+    "other_financial_income": {
+      "sortOrder": 6010,
+      "level": 2
+    },
+    "dividends": {
+      "sortOrder": 6015,
+      "level": 2
+    },
+    "miscellaneous_income_for_lease": {
+      "sortOrder": 6020,
+      "level": 2
+    },
+    "rental_lease_income": {
+      "sortOrder": 6025,
+      "level": 2
+    },
+    "rental_income": {
+      "sortOrder": 6026,
+      "level": 2
+    },
+    "gains_on_disposal_of_tangible_assets": {
+      "sortOrder": 6030,
+      "level": 2
+    },
+    "gains_on_foreign_currencies_transaction": {
+      "sortOrder": 6040,
+      "level": 2
+    },
+    "gains_on_foreign_currency_translation": {
+      "sortOrder": 6050,
+      "level": 2
+    },
+    "gains_on_disposition_of_subsidiaries": {
+      "sortOrder": 6060,
+      "level": 2
+    },
+    "gains_on_disposition_of_equity_method_securities": {
+      "sortOrder": 6062,
+      "level": 2
+    },
+    "gains_on_disposition_of_associates": {
+      "sortOrder": 6065,
+      "level": 2
+    },
+    "reversal_of_allowance_for_other_doubtful_accounts": {
+      "sortOrder": 6070,
+      "level": 2
+    },
+    "gains_on_valuation_of_shortterm_trading_financial_assets": {
+      "sortOrder": 6080,
+      "level": 2
+    },
+    "gains_on_disposal_of_other_assets": {
+      "sortOrder": 6081,
+      "level": 2
+    },
+    "gains_on_disposition_of_investments": {
+      "sortOrder": 6082,
+      "level": 2
+    },
+    "gains_on_disposal_of_intangible_assets": {
+      "sortOrder": 6083,
+      "level": 2
+    },
+    "miscellaneous_losses": {
+      "sortOrder": 7050,
+      "level": 2
+    },
+    "other_expenses_of_allowance_for_doubtful_accounts": {
+      "sortOrder": 7060,
+      "level": 2
+    },
+    "donations": {
+      "sortOrder": 7070,
+      "level": 2
+    },
+    "losses_on_foreign_currencies_transaction": {
+      "sortOrder": 7080,
+      "level": 2
+    },
+    "losses_on_disposition_of_subsidiaries": {
+      "sortOrder": 7090,
+      "level": 2
+    },
+    "losses_on_disposition_of_associates": {
+      "sortOrder": 7095,
+      "level": 2
+    },
+    "losses_on_foreign_currency_translation": {
+      "sortOrder": 7100,
+      "level": 2
+    },
+    "losses_on_disposal_of_intangible_assets": {
+      "sortOrder": 7120,
+      "level": 2
+    },
+    "losses_on_disposal_of_tangible_assets": {
+      "sortOrder": 7130,
+      "level": 2
+    },
+    "impairment_losses_on_intangible_assets": {
+      "sortOrder": 7140,
+      "level": 2
+    },
+    "impairment_losses_on_associates": {
+      "sortOrder": 7150,
+      "level": 2
+    },
+    "losses_on_valuation_of_shortterm_trading_financial_assets": {
+      "sortOrder": 7160,
+      "level": 2
+    },
+    "other_financial_expenses": {
+      "sortOrder": 7170,
+      "level": 2
+    },
+    "losses_on_valuations_of_derivatives": {
+      "sortOrder": 7175,
+      "level": 2
+    },
+    "losses_on_disposition_of_investments": {
+      "sortOrder": 7180,
+      "level": 2
+    },
+    "losses_on_evaluation_of_inventories": {
+      "sortOrder": 7185,
+      "level": 2
+    },
+    "impairment_losses_on_property_plant_and_equipment": {
+      "sortOrder": 7190,
+      "level": 2
+    },
+    "impairment_losses_on_availableforsale_financial_assets": {
+      "sortOrder": 7195,
+      "level": 2
+    },
+    "impairment_losses_on_investments_in_subsidiaries": {
+      "sortOrder": 7200,
+      "level": 2
+    },
+    "basic_earnings_per_share_preferred": {
+      "sortOrder": 9510,
+      "level": 2
+    },
+    "remeasurement_elements_of_defined_benefit_plans_before_tax": {
+      "sortOrder": 9600,
+      "level": 2
+    },
+    "tax_on_items_not_reclassified_to_profit_or_loss": {
+      "sortOrder": 9610,
+      "level": 2
+    },
+    "foreign_currency_translation_differences_before_tax": {
+      "sortOrder": 9620,
+      "level": 2
+    },
+    "tax_on_items_reclassified_to_profit_or_loss": {
+      "sortOrder": 9630,
+      "level": 2
+    },
+    "other_comprehensive_income_not_to_be_reclassified_before_tax": {
+      "sortOrder": 9640,
+      "level": 2
+    },
+    "other_comprehensive_income_to_be_reclassified_before_tax": {
+      "sortOrder": 9650,
+      "level": 2
+    },
+    "impairment_losses_on_financial_assets_measured_at_fair_value_through_other_comprehensive_income": {
+      "sortOrder": 9665,
+      "level": 2
+    },
+    "change_of_retained_earnings_in_equity_method": {
+      "sortOrder": 9670,
+      "level": 2
+    },
+    "financial_assets_measured_at_fair_value_through_other_comprehensive_income": {
+      "sortOrder": 9680,
+      "level": 2
+    },
+    "total_comprehensive_income_from_continuing_operations_owners_of_parent": {
+      "sortOrder": 9700,
+      "level": 2
+    },
+    "total_comprehensive_income_from_discontinued_operations_owners_of_parent": {
+      "sortOrder": 9710,
+      "level": 2
+    },
+    "comprehensive_income": {
+      "sortOrder": 2700,
+      "level": 1
+    },
+    "other_income": {
+      "sortOrder": 1500,
+      "level": 2
+    },
+    "other_expenses": {
+      "sortOrder": 1600,
+      "level": 2
+    },
+    "finance_income": {
+      "sortOrder": 1700,
+      "level": 2
+    },
+    "finance_costs": {
+      "sortOrder": 1800,
+      "level": 2
+    },
+    "share_of_oci_of_associates_and_joint_ventures": {
+      "sortOrder": 2650,
+      "level": 2
+    },
+    "availableforsale_financial_assets_valuation": {
+      "sortOrder": 2640,
+      "level": 2
+    }
+  },
+  "CF": {
+    "cash_flows_from_operating_activities": {
+      "sortOrder": 1000,
+      "level": 1
+    },
+    "cash_flows_from_operatings": {
+      "sortOrder": 1001,
+      "level": 1
+    },
+    "net_profit": {
+      "sortOrder": 1010,
+      "level": 2
+    },
+    "adjustments_to_reconcile_net_income": {
+      "sortOrder": 1095,
+      "level": 2
+    },
+    "profit_from_discontinued_operations": {
+      "sortOrder": 1096,
+      "level": 3
+    },
+    "other_items_classified_as_investing_or_financing_activities": {
+      "sortOrder": 1097,
+      "level": 3
+    },
+    "depreciation_other_amortization_and_impairment_losses_expense": {
+      "sortOrder": 1098,
+      "level": 3
+    },
+    "adjustments_for_sales": {
+      "sortOrder": 1100,
+      "level": 2
+    },
+    "depreciation": {
+      "sortOrder": 1110,
+      "level": 3
+    },
+    "amortization_of_intangible_assets": {
+      "sortOrder": 1111,
+      "level": 3
+    },
+    "expenses_of_allowance_for_doubtful_accounts": {
+      "sortOrder": 1112,
+      "level": 3
+    },
+    "severance_and_retirement_benefits": {
+      "sortOrder": 1113,
+      "level": 3
+    },
+    "financial_income": {
+      "sortOrder": 1114,
+      "level": 3
+    },
+    "financing_expenses": {
+      "sortOrder": 1115,
+      "level": 3
+    },
+    "income_taxes": {
+      "sortOrder": 1116,
+      "level": 3
+    },
+    "gains_on_foreign_currency_translation": {
+      "sortOrder": 1117,
+      "level": 3
+    },
+    "losses_on_foreign_currency_translation": {
+      "sortOrder": 1118,
+      "level": 3
+    },
+    "gains_on_disposal_of_tangible_assets": {
+      "sortOrder": 1119,
+      "level": 3
+    },
+    "losses_on_disposal_of_tangible_assets": {
+      "sortOrder": 1120,
+      "level": 3
+    },
+    "impairment_losses_on_property_plant_and_equipment": {
+      "sortOrder": 1121,
+      "level": 3
+    },
+    "gains_on_disposal_of_intangible_assets": {
+      "sortOrder": 1122,
+      "level": 3
+    },
+    "losses_on_disposal_of_intangible_assets": {
+      "sortOrder": 1123,
+      "level": 3
+    },
+    "impairment_losses_on_intangible_assets": {
+      "sortOrder": 1124,
+      "level": 3
+    },
+    "losses_on_valuation_of_equity_method_securities": {
+      "sortOrder": 1125,
+      "level": 3
+    },
+    "gains_on_valuation_of_equity_method_securities": {
+      "sortOrder": 1126,
+      "level": 3
+    },
+    "gains_on_valuations_of_derivatives": {
+      "sortOrder": 1127,
+      "level": 3
+    },
+    "losses_on_valuations_of_derivatives": {
+      "sortOrder": 1128,
+      "level": 3
+    },
+    "losses_on_evaluation_of_inventories": {
+      "sortOrder": 1129,
+      "level": 3
+    },
+    "losses_on_inventory_clearing": {
+      "sortOrder": 1130,
+      "level": 3
+    },
+    "losses_on_disposal_of_trade_receivables": {
+      "sortOrder": 1131,
+      "level": 3
+    },
+    "gains_on_valuation_of_financial_assets_at_fv_through_profit": {
+      "sortOrder": 1132,
+      "level": 3
+    },
+    "losses_on_valuation_of_financial_assets_at_fv_through_profit": {
+      "sortOrder": 1133,
+      "level": 3
+    },
+    "gains_on_valuation_of_financial_assets_measured_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 1134,
+      "level": 3
+    },
+    "losses_on_valuation_of_financial_assets_measured_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 1135,
+      "level": 3
+    },
+    "impairment_losses_on_investments_in_subsidiaries": {
+      "sortOrder": 1136,
+      "level": 3
+    },
+    "losses_on_redemption_of_bonds": {
+      "sortOrder": 1137,
+      "level": 3
+    },
+    "gains_on_redemption_of_bonds": {
+      "sortOrder": 1138,
+      "level": 3
+    },
+    "losses_on_disposition_of_subsidiaries": {
+      "sortOrder": 1139,
+      "level": 3
+    },
+    "gains_on_disposition_of_subsidiaries": {
+      "sortOrder": 1140,
+      "level": 3
+    },
+    "gains_on_disposition_of_associates": {
+      "sortOrder": 1142,
+      "level": 3
+    },
+    "gains_on_disposal_of_leased_housing_assets": {
+      "sortOrder": 1144,
+      "level": 3
+    },
+    "other_reserves": {
+      "sortOrder": 1145,
+      "level": 3
+    },
+    "gains_on_disposal_of_assets": {
+      "sortOrder": 1146,
+      "level": 3
+    },
+    "impairment_losses_on_asset_held_for_sale_or_disposal_group": {
+      "sortOrder": 1147,
+      "level": 3
+    },
+    "gains_on_investment_in_properties": {
+      "sortOrder": 1148,
+      "level": 3
+    },
+    "losses_on_investment_in_properties": {
+      "sortOrder": 1149,
+      "level": 3
+    },
+    "stock_compensation_expenses": {
+      "sortOrder": 1150,
+      "level": 3
+    },
+    "stock_dividends": {
+      "sortOrder": 1157,
+      "level": 3
+    },
+    "gains_on_disposal_of_financial_assets_measured_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 1160,
+      "level": 3
+    },
+    "losses_on_disposition_of_designatedfinancial_assets_at_fv_through_profit": {
+      "sortOrder": 1161,
+      "level": 3
+    },
+    "gains_on_disposition_of_availableforsale_financial_assets": {
+      "sortOrder": 1162,
+      "level": 3
+    },
+    "losses_on_disposition_of_availableforsale_financial_assets": {
+      "sortOrder": 1163,
+      "level": 3
+    },
+    "impairment_losses_on_availableforsale_financial_assets": {
+      "sortOrder": 1164,
+      "level": 3
+    },
+    "amortization_of_discount_on_bonds": {
+      "sortOrder": 1168,
+      "level": 3
+    },
+    "gainslosses_on_disposition_of_noncurrent_assets": {
+      "sortOrder": 1169,
+      "level": 3
+    },
+    "other_expenses_of_allowance_for_doubtful_accounts": {
+      "sortOrder": 1170,
+      "level": 3
+    },
+    "gains_on_disposition_of_financial_assets": {
+      "sortOrder": 1171,
+      "level": 3
+    },
+    "losses_on_disposition_of_financial_assets": {
+      "sortOrder": 1172,
+      "level": 3
+    },
+    "impairment_losses_on_investments_in_subsidiaries_associates_joint_ventures": {
+      "sortOrder": 1173,
+      "level": 3
+    },
+    "gains_on_disposition_of_associates_subsidiaries_joint_ventures": {
+      "sortOrder": 1174,
+      "level": 3
+    },
+    "losses_on_disposition_of_associates_subsidiaries_joint_ventures": {
+      "sortOrder": 1175,
+      "level": 3
+    },
+    "gainslosses_in_equity_method": {
+      "sortOrder": 1176,
+      "level": 3
+    },
+    "reversal_of_allowance_for_doubtful_accounts": {
+      "sortOrder": 1178,
+      "level": 3
+    },
+    "miscellaneous_income_for_lease": {
+      "sortOrder": 1179,
+      "level": 3
+    },
+    "miscellaneous_losses": {
+      "sortOrder": 1180,
+      "level": 3
+    },
+    "gains_on_disposition_of_investments": {
+      "sortOrder": 1182,
+      "level": 3
+    },
+    "losses_on_disposition_of_investments": {
+      "sortOrder": 1183,
+      "level": 3
+    },
+    "other_adjustments_to_reconcile_net_income": {
+      "sortOrder": 1184,
+      "level": 3
+    },
+    "losses_on_derivatives_transactions": {
+      "sortOrder": 1185,
+      "level": 3
+    },
+    "gains_on_derivatives_transactions": {
+      "sortOrder": 1186,
+      "level": 3
+    },
+    "recovery_of_losses_on_evaluation_of_inventories": {
+      "sortOrder": 1187,
+      "level": 3
+    },
+    "recovery_of_impairment_losses_on_intangible_assets": {
+      "sortOrder": 1190,
+      "level": 3
+    },
+    "losses_on_disposal_of_assets": {
+      "sortOrder": 1191,
+      "level": 3
+    },
+    "liability_provisions": {
+      "sortOrder": 1192,
+      "level": 3
+    },
+    "reversion_of_liability_provisions": {
+      "sortOrder": 1193,
+      "level": 3
+    },
+    "recovery_of_impairment_losses_on_assets": {
+      "sortOrder": 1195,
+      "level": 3
+    },
+    "addition_of_expenses_of_noncash_transactions": {
+      "sortOrder": 1196,
+      "level": 3
+    },
+    "other_revenues_without_cash_inflows": {
+      "sortOrder": 1197,
+      "level": 3
+    },
+    "impairment_losses_on_investments": {
+      "sortOrder": 1198,
+      "level": 3
+    },
+    "gains_on_valuation_of_investments": {
+      "sortOrder": 1199,
+      "level": 3
+    },
+    "losses_on_valuation_of_investment_assets": {
+      "sortOrder": 1200,
+      "level": 3
+    },
+    "gains_on_debt_restructuring": {
+      "sortOrder": 1202,
+      "level": 3
+    },
+    "change_in_working_capital": {
+      "sortOrder": 1203,
+      "level": 2
+    },
+    "gains_on_disposal_of_held_for_sale_or_disposal_group": {
+      "sortOrder": 1204,
+      "level": 3
+    },
+    "losses_on_disposal_of_held_for_sale_or_disposal_group": {
+      "sortOrder": 1206,
+      "level": 3
+    },
+    "recovery_of_impairment_losses_on_property_plant_and_equipment": {
+      "sortOrder": 1207,
+      "level": 3
+    },
+    "impairment_losses_on_associates": {
+      "sortOrder": 1208,
+      "level": 3
+    },
+    "impairment_losses_on_right_of_use_assets": {
+      "sortOrder": 1209,
+      "level": 3
+    },
+    "decreaseincrease_in_trade_receivables": {
+      "sortOrder": 1210,
+      "level": 3
+    },
+    "decreaseincrease_in_other_receivables": {
+      "sortOrder": 1211,
+      "level": 3
+    },
+    "decreaseincrease_in_advance_payments": {
+      "sortOrder": 1212,
+      "level": 3
+    },
+    "decreaseincrease_in_prepaid_expenses": {
+      "sortOrder": 1213,
+      "level": 3
+    },
+    "decreaseincrease_in_inventories": {
+      "sortOrder": 1214,
+      "level": 3
+    },
+    "increasedecrease_in_trade_payables": {
+      "sortOrder": 1215,
+      "level": 3
+    },
+    "increasedecrease_in_other_payables": {
+      "sortOrder": 1216,
+      "level": 3
+    },
+    "increasedecrease_in_accrued_expenses": {
+      "sortOrder": 1217,
+      "level": 3
+    },
+    "increasedecrease_in_withholdings": {
+      "sortOrder": 1218,
+      "level": 3
+    },
+    "increasedecrease_in_advance_from_customers": {
+      "sortOrder": 1219,
+      "level": 3
+    },
+    "increasedecrease_in_deferred_revenue": {
+      "sortOrder": 1220,
+      "level": 3
+    },
+    "increasedecrease_in_current_income_tax_liabilitiesincome_taxes_payable": {
+      "sortOrder": 1221,
+      "level": 3
+    },
+    "increasedecrease_in_provisions": {
+      "sortOrder": 1222,
+      "level": 3
+    },
+    "payments_of_retirement_allowance": {
+      "sortOrder": 1223,
+      "level": 3
+    },
+    "decreaseincrease_in_other_current_assets": {
+      "sortOrder": 1225,
+      "level": 3
+    },
+    "increasedecrease_in_defined_benefit_liabilities": {
+      "sortOrder": 1225,
+      "level": 3
+    },
+    "increasedecrease_in_other_current_liabilities": {
+      "sortOrder": 1226,
+      "level": 3
+    },
+    "decreaseincrease_in_plan_assets": {
+      "sortOrder": 1226,
+      "level": 3
+    },
+    "increasedecrease_in_defined_benefit_liability": {
+      "sortOrder": 1227,
+      "level": 3
+    },
+    "increasedecrease_in_other_noncurrent_liabilities": {
+      "sortOrder": 1228,
+      "level": 3
+    },
+    "decreaseincrease_in_contract_assetscosts": {
+      "sortOrder": 1229,
+      "level": 3
+    },
+    "increasedecrease_in_contract_liabilities": {
+      "sortOrder": 1230,
+      "level": 3
+    },
+    "decreaseincrease_in_longterm_receivables": {
+      "sortOrder": 1231,
+      "level": 3
+    },
+    "increasedecrease_in_longterm_other_payables": {
+      "sortOrder": 1232,
+      "level": 3
+    },
+    "longterm_advance_from_customers": {
+      "sortOrder": 1233,
+      "level": 3
+    },
+    "decreaseincrease_in_longterm_prepaid_expenses": {
+      "sortOrder": 1234,
+      "level": 3
+    },
+    "impairment_loss_on_inventories": {
+      "sortOrder": 1240,
+      "level": 3
+    },
+    "product_warranties_expenses": {
+      "sortOrder": 1241,
+      "level": 3
+    },
+    "other_noncash_adjustments": {
+      "sortOrder": 1242,
+      "level": 3
+    },
+    "other_nonoperating_income": {
+      "sortOrder": 1243,
+      "level": 3
+    },
+    "commission_expenses": {
+      "sortOrder": 1244,
+      "level": 3
+    },
+    "reserve_of_sharebased_payments": {
+      "sortOrder": 1245,
+      "level": 3
+    },
+    "others_longterm_employee_benefits_liabilitiesbonuses_etc": {
+      "sortOrder": 1246,
+      "level": 3
+    },
+    "change_of_consolidated_scope": {
+      "sortOrder": 1247,
+      "level": 3
+    },
+    "provision_for_loss_on_acceptances_and_guarantees": {
+      "sortOrder": 1248,
+      "level": 3
+    },
+    "recovery_of_impairment_losses_on_associates": {
+      "sortOrder": 1249,
+      "level": 3
+    },
+    "provision_for_construction_provisions": {
+      "sortOrder": 1250,
+      "level": 3
+    },
+    "supplies": {
+      "sortOrder": 1251,
+      "level": 3
+    },
+    "impairment_losses_on_held_to_maturity_investments": {
+      "sortOrder": 1255,
+      "level": 3
+    },
+    "recovery_of_impairment_losses_on_availableforsale_financial_assets": {
+      "sortOrder": 1256,
+      "level": 3
+    },
+    "gains_on_disposal_of_financial_liabilities_measured_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 1257,
+      "level": 3
+    },
+    "losses_on_disposal_of_financial_assets_measured_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 1258,
+      "level": 3
+    },
+    "gains_on_bargain_purchase": {
+      "sortOrder": 1259,
+      "level": 3
+    },
+    "increasedecrease_in_trade_and_other_payables": {
+      "sortOrder": 1260,
+      "level": 3
+    },
+    "reversion_of_provisions_for_restoration_costs": {
+      "sortOrder": 1260,
+      "level": 3
+    },
+    "losses_on_revaluation_of_property_plant_and_equipment": {
+      "sortOrder": 1261,
+      "level": 3
+    },
+    "increase_in_advance_payments": {
+      "sortOrder": 1262,
+      "level": 3
+    },
+    "discontinued_operating_incomeloss": {
+      "sortOrder": 1262,
+      "level": 3
+    },
+    "decreaseincrease_in_trade_and_other_receivables": {
+      "sortOrder": 1263,
+      "level": 3
+    },
+    "foreign_currency_translation": {
+      "sortOrder": 1263,
+      "level": 3
+    },
+    "decreaseincrease_in_trade_and_other_current_receivables": {
+      "sortOrder": 1264,
+      "level": 3
+    },
+    "gains_on_foreign_currencies_transaction": {
+      "sortOrder": 1264,
+      "level": 3
+    },
+    "decreaseincrease_in_derivative_assets": {
+      "sortOrder": 1265,
+      "level": 3
+    },
+    "provisions_for_others": {
+      "sortOrder": 1265,
+      "level": 3
+    },
+    "increasedecrease_in_derivative_liabilities": {
+      "sortOrder": 1266,
+      "level": 3
+    },
+    "increasedecrease_in_other_trade_and_payables": {
+      "sortOrder": 1267,
+      "level": 3
+    },
+    "employee_benefits": {
+      "sortOrder": 1268,
+      "level": 3
+    },
+    "longterm_withholdings": {
+      "sortOrder": 1269,
+      "level": 3
+    },
+    "reversal_of_allowance_for_acceptances_and_guarantees": {
+      "sortOrder": 1269,
+      "level": 3
+    },
+    "decreaseincrease_in_accrued_revenues": {
+      "sortOrder": 1270,
+      "level": 3
+    },
+    "other_financing_cost": {
+      "sortOrder": 1270,
+      "level": 3
+    },
+    "decreaseincrease_in_deposits_provided": {
+      "sortOrder": 1271,
+      "level": 3
+    },
+    "rent": {
+      "sortOrder": 1271,
+      "level": 3
+    },
+    "decreaseincrease_in_other_noncurrent_assets": {
+      "sortOrder": 1272,
+      "level": 3
+    },
+    "reversal_of_other_provisions": {
+      "sortOrder": 1273,
+      "level": 3
+    },
+    "decreaseincrease_in_current_income_tax_assetsprepaid_income_tax_payments": {
+      "sortOrder": 1274,
+      "level": 3
+    },
+    "decreaseincrease_in_other_current_financial_assets": {
+      "sortOrder": 1275,
+      "level": 3
+    },
+    "increasedecrease_in_other_financial_liabilities": {
+      "sortOrder": 1277,
+      "level": 3
+    },
+    "decreaseincrease_in_other_noncurrent_financial_assets": {
+      "sortOrder": 1278,
+      "level": 3
+    },
+    "decreaseincrease_in_trade_and_other_noncurrent_receivables": {
+      "sortOrder": 1281,
+      "level": 3
+    },
+    "decreaseincrease_in_longterm_trade_receivables": {
+      "sortOrder": 1282,
+      "level": 3
+    },
+    "decreaseincrease_in_other_assets": {
+      "sortOrder": 1283,
+      "level": 3
+    },
+    "decrease_in_other_liabilities": {
+      "sortOrder": 1284,
+      "level": 3
+    },
+    "increasedecrease_in_liability_provisions": {
+      "sortOrder": 1286,
+      "level": 3
+    },
+    "increasedecrease_in_longterm_trade_and_other_payables": {
+      "sortOrder": 1288,
+      "level": 3
+    },
+    "increase_in_lease_obligations": {
+      "sortOrder": 1289,
+      "level": 3
+    },
+    "increasedecrease_in_provisions_for_employee_benefits": {
+      "sortOrder": 1290,
+      "level": 3
+    },
+    "increasedecrease_in_noncurrent_provisions": {
+      "sortOrder": 1291,
+      "level": 3
+    },
+    "decreaseincrease_in_shortterm_deposits_provided": {
+      "sortOrder": 1293,
+      "level": 3
+    },
+    "decreaseincrease_in_other_financial_assets": {
+      "sortOrder": 1294,
+      "level": 3
+    },
+    "decrease_in_other_financial_liabilities": {
+      "sortOrder": 1295,
+      "level": 3
+    },
+    "leasehold_deposits_received": {
+      "sortOrder": 1296,
+      "level": 3
+    },
+    "increasedecrease_in_other_provisions": {
+      "sortOrder": 1297,
+      "level": 3
+    },
+    "increasedecrease_in_other_liabilities": {
+      "sortOrder": 1298,
+      "level": 3
+    },
+    "decreaseincrease_in_other_trade_and_other_receivables": {
+      "sortOrder": 1299,
+      "level": 3
+    },
+    "cash_flows_from_business": {
+      "sortOrder": 1300,
+      "level": 2
+    },
+    "decreaseincrease_in_longterm_advance_payments": {
+      "sortOrder": 1305,
+      "level": 3
+    },
+    "decreaseincrease_in_longterm_deposits_provided": {
+      "sortOrder": 1306,
+      "level": 3
+    },
+    "returned_products_provisions": {
+      "sortOrder": 1307,
+      "level": 3
+    },
+    "increase_in_other_financial_liabilities": {
+      "sortOrder": 1308,
+      "level": 3
+    },
+    "increasedecrease_in_product_warranties_provisions": {
+      "sortOrder": 1309,
+      "level": 3
+    },
+    "financial_guarantee_provisions": {
+      "sortOrder": 1310,
+      "level": 3
+    },
+    "decreaseincrease_in_construction_in_progress_receivables": {
+      "sortOrder": 1311,
+      "level": 3
+    },
+    "decreaseincrease_in_deferred_income_tax_assets": {
+      "sortOrder": 1312,
+      "level": 3
+    },
+    "increasedecrease_in_deferred_income_tax_liabilities": {
+      "sortOrder": 1313,
+      "level": 3
+    },
+    "longterm_accrued_expenses": {
+      "sortOrder": 1314,
+      "level": 3
+    },
+    "decreaseincrease_in_due_from_banks": {
+      "sortOrder": 1315,
+      "level": 3
+    },
+    "increasedecrease_in_excess_billing": {
+      "sortOrder": 1316,
+      "level": 3
+    },
+    "increasedecrease_in_provisions_for_restoration_costs": {
+      "sortOrder": 1317,
+      "level": 3
+    },
+    "longterm_guarantee_deposits_withhold": {
+      "sortOrder": 1318,
+      "level": 3
+    },
+    "decreaseincrease_in_shortterm_prepaid_expenses": {
+      "sortOrder": 1319,
+      "level": 3
+    },
+    "decreaseincrease_in_receivables": {
+      "sortOrder": 1320,
+      "level": 3
+    },
+    "decrease_in_biological_assets": {
+      "sortOrder": 1321,
+      "level": 3
+    },
+    "other_current_financial_assets": {
+      "sortOrder": 1322,
+      "level": 3
+    },
+    "trade_and_other_noncurrent_receivables": {
+      "sortOrder": 1323,
+      "level": 3
+    },
+    "other_current_financial_liabilities": {
+      "sortOrder": 1324,
+      "level": 3
+    },
+    "increasedecrease_in_dividends_payable": {
+      "sortOrder": 1325,
+      "level": 3
+    },
+    "interest_received": {
+      "sortOrder": 1400,
+      "level": 2
+    },
+    "interest_paid": {
+      "sortOrder": 1500,
+      "level": 2
+    },
+    "interest_expensesamortization_of_discount_on_bonds_etc": {
+      "sortOrder": 1501,
+      "level": 2
+    },
+    "dividends_received": {
+      "sortOrder": 1600,
+      "level": 2
+    },
+    "dividends_paid": {
+      "sortOrder": 1650,
+      "level": 2
+    },
+    "payments_of_income_taxes": {
+      "sortOrder": 1700,
+      "level": 2
+    },
+    "refunds_of_income_taxes": {
+      "sortOrder": 1704,
+      "level": 2
+    },
+    "refunds_payments_of_income_taxes": {
+      "sortOrder": 1705,
+      "level": 2
+    },
+    "cash_flows_from_investing_activities": {
+      "sortOrder": 2000,
+      "level": 1
+    },
+    "cash_flows_from_investing": {
+      "sortOrder": 2001,
+      "level": 1
+    },
+    "cash_inflows_from_investing_activities": {
+      "sortOrder": 2002,
+      "level": 2
+    },
+    "cash_outflows_from_investing_activities": {
+      "sortOrder": 2003,
+      "level": 2
+    },
+    "increase_in_shortterm_financial_instruments": {
+      "sortOrder": 2011,
+      "level": 2
+    },
+    "decrease_in_shortterm_financial_instruments": {
+      "sortOrder": 2012,
+      "level": 2
+    },
+    "decrease_in_longterm_financial_instruments": {
+      "sortOrder": 2021,
+      "level": 2
+    },
+    "increase_in_longterm_financial_instruments": {
+      "sortOrder": 2022,
+      "level": 2
+    },
+    "increase_in_shortterm_loans": {
+      "sortOrder": 2030,
+      "level": 2
+    },
+    "decrease_in_shortterm_loans": {
+      "sortOrder": 2031,
+      "level": 2
+    },
+    "increase_in_loans": {
+      "sortOrder": 2032,
+      "level": 2
+    },
+    "decrease_in_loans": {
+      "sortOrder": 2033,
+      "level": 2
+    },
+    "decreaseincrease_in_loans": {
+      "sortOrder": 2035,
+      "level": 2
+    },
+    "increase_in_loans_and_receivables": {
+      "sortOrder": 2036,
+      "level": 2
+    },
+    "decrease_in_loans_and_receivables": {
+      "sortOrder": 2037,
+      "level": 2
+    },
+    "increase_in_financial_assets_at_fv_through_profit": {
+      "sortOrder": 2040,
+      "level": 2
+    },
+    "decrease_in_financial_assets_at_fv_through_profit": {
+      "sortOrder": 2041,
+      "level": 2
+    },
+    "decrease_in_financial_assets_measured_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 2044,
+      "level": 2
+    },
+    "increase_in_financial_assets_measured_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 2045,
+      "level": 2
+    },
+    "increase_in_shortterm_financial_assets_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 2046,
+      "level": 2
+    },
+    "financial_assets_measured_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 2046,
+      "level": 2
+    },
+    "decrease_in_shortterm_financial_assets_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 2047,
+      "level": 2
+    },
+    "increase_in_longterm_financial_assets_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 2048,
+      "level": 2
+    },
+    "decrease_in_longterm_financial_assets_at_fair_value_through_profit_or_loss": {
+      "sortOrder": 2049,
+      "level": 2
+    },
+    "increase_in_availableforsale_financial_assets": {
+      "sortOrder": 2050,
+      "level": 2
+    },
+    "decrease_in_availableforsale_financial_assets": {
+      "sortOrder": 2051,
+      "level": 2
+    },
+    "increase_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income": {
+      "sortOrder": 2052,
+      "level": 2
+    },
+    "gains_on_disposal_of_financial_assets_measured_at_fair_value_through_other_comprehensive_income": {
+      "sortOrder": 2053,
+      "level": 2
+    },
+    "increase_in_other_financial_assets": {
+      "sortOrder": 2054,
+      "level": 2
+    },
+    "decrease_in_other_financial_assets": {
+      "sortOrder": 2055,
+      "level": 2
+    },
+    "increase_in_other_noncurrent_financial_assets": {
+      "sortOrder": 2056,
+      "level": 2
+    },
+    "decrease_in_other_noncurrent_financial_assets": {
+      "sortOrder": 2057,
+      "level": 2
+    },
+    "increase_in_held_to_maturity_investments": {
+      "sortOrder": 2058,
+      "level": 2
+    },
+    "decrease_in_held_to_maturity_investments": {
+      "sortOrder": 2059,
+      "level": 2
+    },
+    "increase_in_leasehold_deposits_provided": {
+      "sortOrder": 2060,
+      "level": 2
+    },
+    "decrease_in_leasehold_deposits_provided": {
+      "sortOrder": 2061,
+      "level": 2
+    },
+    "increase_in_leasehold_deposits_received": {
+      "sortOrder": 2062,
+      "level": 2
+    },
+    "decrease_in_leasehold_deposits_received": {
+      "sortOrder": 2063,
+      "level": 2
+    },
+    "increasedecrease_in_deposits_provided": {
+      "sortOrder": 2064,
+      "level": 2
+    },
+    "decrease_in_guarantee_deposits": {
+      "sortOrder": 2065,
+      "level": 2
+    },
+    "financial_assets_at_amortised_cost": {
+      "sortOrder": 2071,
+      "level": 2
+    },
+    "decrease_in_financial_assets_measured_at_fair_value_through_other_comprehensive_income": {
+      "sortOrder": 2080,
+      "level": 2
+    },
+    "decrease_in_other_current_financial_assets": {
+      "sortOrder": 2082,
+      "level": 2
+    },
+    "increase_in_other_current_financial_assets": {
+      "sortOrder": 2083,
+      "level": 2
+    },
+    "decrease_in_financial_instruments": {
+      "sortOrder": 2084,
+      "level": 2
+    },
+    "increase_in_financial_instruments": {
+      "sortOrder": 2085,
+      "level": 2
+    },
+    "increase_in_longterm_availableforsale_financial_assets": {
+      "sortOrder": 2086,
+      "level": 2
+    },
+    "decrease_in_longterm_availableforsale_financial_assets": {
+      "sortOrder": 2087,
+      "level": 2
+    },
+    "availableforsale_financial_assets": {
+      "sortOrder": 2088,
+      "level": 2
+    },
+    "decrease_in_shortterm_availableforsale_financial_assets": {
+      "sortOrder": 2089,
+      "level": 2
+    },
+    "increase_in_financial_assets_at_amortised_cost": {
+      "sortOrder": 2090,
+      "level": 2
+    },
+    "decrease_in_financial_assets_at_amortised_cost": {
+      "sortOrder": 2091,
+      "level": 2
+    },
+    "decrease_in_shortterm_held_to_maturity_investments": {
+      "sortOrder": 2093,
+      "level": 2
+    },
+    "increase_in_shortterm_held_to_maturity_investments": {
+      "sortOrder": 2094,
+      "level": 2
+    },
+    "longterm_held_to_maturity_investments": {
+      "sortOrder": 2095,
+      "level": 2
+    },
+    "purchase_of_property_plant_and_equipment": {
+      "sortOrder": 2100,
+      "level": 2
+    },
+    "disposal_of_tangible_assets": {
+      "sortOrder": 2101,
+      "level": 2
+    },
+    "increase_in_investment_in_properties": {
+      "sortOrder": 2110,
+      "level": 2
+    },
+    "decrease_in_investment_in_properties": {
+      "sortOrder": 2111,
+      "level": 2
+    },
+    "increase_in_right_of_use_assets": {
+      "sortOrder": 2130,
+      "level": 2
+    },
+    "increase_in_other_longterm_assets": {
+      "sortOrder": 2140,
+      "level": 2
+    },
+    "gainslosses_on_disposition_of_other_noncurrent_assets": {
+      "sortOrder": 2141,
+      "level": 2
+    },
+    "increase_in_construction_in_progress": {
+      "sortOrder": 2150,
+      "level": 2
+    },
+    "decrease_in_construction_in_progress": {
+      "sortOrder": 2151,
+      "level": 2
+    },
+    "decrease_in_motor_vehicles": {
+      "sortOrder": 2160,
+      "level": 2
+    },
+    "increase_in_machinery_and_equipment": {
+      "sortOrder": 2160,
+      "level": 2
+    },
+    "increase_in_motor_vehicles": {
+      "sortOrder": 2161,
+      "level": 2
+    },
+    "decrease_in_machinery_and_equipment": {
+      "sortOrder": 2161,
+      "level": 2
+    },
+    "increase_in_land": {
+      "sortOrder": 2162,
+      "level": 2
+    },
+    "decrease_in_land": {
+      "sortOrder": 2163,
+      "level": 2
+    },
+    "increase_in_buildings_and_structures": {
+      "sortOrder": 2164,
+      "level": 2
+    },
+    "decrease_in_buildings_and_structures": {
+      "sortOrder": 2165,
+      "level": 2
+    },
+    "increase_in_property_and_equipment": {
+      "sortOrder": 2166,
+      "level": 2
+    },
+    "increase_in_structures": {
+      "sortOrder": 2168,
+      "level": 2
+    },
+    "decrease_in_structures": {
+      "sortOrder": 2169,
+      "level": 2
+    },
+    "disposal_of_finance_lease_assets": {
+      "sortOrder": 2170,
+      "level": 2
+    },
+    "increase_in_other_property_and_equipment": {
+      "sortOrder": 2170,
+      "level": 2
+    },
+    "decreaseincrease_in_financing_leases_receivables": {
+      "sortOrder": 2171,
+      "level": 2
+    },
+    "decrease_in_other_property_and_equipment": {
+      "sortOrder": 2171,
+      "level": 2
+    },
+    "increase_in_property_plant_and_equipment": {
+      "sortOrder": 2172,
+      "level": 2
+    },
+    "decrease_in_property_plant_and_equipment": {
+      "sortOrder": 2173,
+      "level": 2
+    },
+    "decrease_in_tools_and_office_equipment": {
+      "sortOrder": 2174,
+      "level": 2
+    },
+    "purchase_of_intangible_assets": {
+      "sortOrder": 2200,
+      "level": 2
+    },
+    "disposal_of_intangible_assets": {
+      "sortOrder": 2201,
+      "level": 2
+    },
+    "decrease_in_intangible_assets": {
+      "sortOrder": 2201,
+      "level": 2
+    },
+    "increase_in_intangible_assets": {
+      "sortOrder": 2202,
+      "level": 2
+    },
+    "other_intangible_assets": {
+      "sortOrder": 2203,
+      "level": 2
+    },
+    "increase_in_industrial_property_rights": {
+      "sortOrder": 2205,
+      "level": 2
+    },
+    "increase_in_goodwill": {
+      "sortOrder": 2208,
+      "level": 2
+    },
+    "decrease_in_goodwill": {
+      "sortOrder": 2209,
+      "level": 2
+    },
+    "software": {
+      "sortOrder": 2210,
+      "level": 2
+    },
+    "increase_in_investments_in_associates": {
+      "sortOrder": 2300,
+      "level": 2
+    },
+    "investments_in_associates": {
+      "sortOrder": 2301,
+      "level": 2
+    },
+    "decrease_in_investments_in_associates": {
+      "sortOrder": 2311,
+      "level": 2
+    },
+    "increase_in_investments_in_associates_subsidiaries_and_joint_venteures": {
+      "sortOrder": 2312,
+      "level": 2
+    },
+    "decrease_in_investments_in_associates_subsidiaries_and_joint_venteures": {
+      "sortOrder": 2315,
+      "level": 2
+    },
+    "increase_in_investments_in_associatesequity_method_securities": {
+      "sortOrder": 2320,
+      "level": 2
+    },
+    "decrease_in_investments_in_associatesequity_method_securities": {
+      "sortOrder": 2321,
+      "level": 2
+    },
+    "increase_in_investments_in_joint_ventures": {
+      "sortOrder": 2330,
+      "level": 2
+    },
+    "decrease_in_investments_in_joint_ventures": {
+      "sortOrder": 2331,
+      "level": 2
+    },
+    "increase_in_equity_investments": {
+      "sortOrder": 2350,
+      "level": 2
+    },
+    "investments_in_associates_and_joint_ventures_transactions": {
+      "sortOrder": 2351,
+      "level": 2
+    },
+    "decrease_in_equity_investments": {
+      "sortOrder": 2352,
+      "level": 2
+    },
+    "increase_in_investments_in_subsidiaries": {
+      "sortOrder": 2400,
+      "level": 2
+    },
+    "decrease_in_investments_in_subsidiaries": {
+      "sortOrder": 2401,
+      "level": 2
+    },
+    "disposition_of_interest_in_subsidiaries": {
+      "sortOrder": 2404,
+      "level": 2
+    },
+    "cash_flows_from_control_of_subsidiaries_or_other_businesses": {
+      "sortOrder": 2406,
+      "level": 2
+    },
+    "cash_flows_from_loss_of_control_of_subsidiaries_or_other_businesses": {
+      "sortOrder": 2407,
+      "level": 2
+    },
+    "business_combination": {
+      "sortOrder": 2410,
+      "level": 2
+    },
+    "decrease_in_noncurrent_asset_held_for_sale": {
+      "sortOrder": 2500,
+      "level": 2
+    },
+    "increase_in_noncurrent_asset_held_for_sale": {
+      "sortOrder": 2502,
+      "level": 2
+    },
+    "transfer_to_assets_held_for_sale": {
+      "sortOrder": 2503,
+      "level": 2
+    },
+    "decrease_in_liabilities_held_for_sale": {
+      "sortOrder": 2504,
+      "level": 2
+    },
+    "cash_outflows_from_derivatives": {
+      "sortOrder": 2600,
+      "level": 2
+    },
+    "cash_inflows_from_derivatives": {
+      "sortOrder": 2601,
+      "level": 2
+    },
+    "cash_outflows_from_acquisition_of_equity_or_debt_instruments": {
+      "sortOrder": 2610,
+      "level": 2
+    },
+    "cash_inflows_from_disposal_of_equity_or_debt_instruments": {
+      "sortOrder": 2611,
+      "level": 2
+    },
+    "collection_of_advance_payments_and_loans_to_third_parties": {
+      "sortOrder": 2620,
+      "level": 2
+    },
+    "other_cash_inflows_outflows": {
+      "sortOrder": 2900,
+      "level": 2
+    },
+    "government_grants_received": {
+      "sortOrder": 2910,
+      "level": 2
+    },
+    "other_operating_income": {
+      "sortOrder": 2930,
+      "level": 2
+    },
+    "cash_flows_from_financing_activities": {
+      "sortOrder": 3000,
+      "level": 1
+    },
+    "cash_flows_from_financing": {
+      "sortOrder": 3001,
+      "level": 1
+    },
+    "increasedecrease_in_shortterm_borrowings": {
+      "sortOrder": 3010,
+      "level": 2
+    },
+    "increase_in_shortterm_borrowings": {
+      "sortOrder": 3011,
+      "level": 2
+    },
+    "repayment_of_shortterm_borrowings": {
+      "sortOrder": 3012,
+      "level": 2
+    },
+    "decrease_in_shortterm_borrowings": {
+      "sortOrder": 3013,
+      "level": 2
+    },
+    "increase_in_longterm_borrowings": {
+      "sortOrder": 3100,
+      "level": 2
+    },
+    "repayment_of_longterm_borrowings": {
+      "sortOrder": 3101,
+      "level": 2
+    },
+    "increase_in_longtermborrowings": {
+      "sortOrder": 3102,
+      "level": 2
+    },
+    "repayment_of_borrowings": {
+      "sortOrder": 3103,
+      "level": 2
+    },
+    "redemption_of_current_portion_of_longterm_borrowings": {
+      "sortOrder": 3105,
+      "level": 2
+    },
+    "increase_in_borrowings": {
+      "sortOrder": 3107,
+      "level": 2
+    },
+    "decrease_in_lease_obligations": {
+      "sortOrder": 3110,
+      "level": 2
+    },
+    "issuance_of_bonds": {
+      "sortOrder": 3200,
+      "level": 2
+    },
+    "repayments_of_bonds": {
+      "sortOrder": 3201,
+      "level": 2
+    },
+    "increase_of_longtermbonds": {
+      "sortOrder": 3202,
+      "level": 2
+    },
+    "increase_of_convertible_bonds": {
+      "sortOrder": 3210,
+      "level": 2
+    },
+    "decrease_of_convertible_bonds": {
+      "sortOrder": 3211,
+      "level": 2
+    },
+    "repayment_of_convertible_bonds": {
+      "sortOrder": 3212,
+      "level": 2
+    },
+    "bonds_with_stock_warrants": {
+      "sortOrder": 3222,
+      "level": 2
+    },
+    "increase_in_bonds": {
+      "sortOrder": 3223,
+      "level": 2
+    },
+    "exchangeable_bonds": {
+      "sortOrder": 3230,
+      "level": 2
+    },
+    "increase_of_exchangeable_bonds": {
+      "sortOrder": 3232,
+      "level": 2
+    },
+    "decrease_of_exchangeable_bonds": {
+      "sortOrder": 3233,
+      "level": 2
+    },
+    "purchase_of_treasury_stock": {
+      "sortOrder": 3300,
+      "level": 2
+    },
+    "sale_of_treasury_stock": {
+      "sortOrder": 3301,
+      "level": 2
+    },
+    "issuance_of_common_stock": {
+      "sortOrder": 3500,
+      "level": 2
+    },
+    "payment_of_stock_issuance_costs": {
+      "sortOrder": 3501,
+      "level": 2
+    },
+    "paidin_capital_in_excess_of_par_value": {
+      "sortOrder": 3502,
+      "level": 2
+    },
+    "exercise_of_stock_options": {
+      "sortOrder": 3510,
+      "level": 2
+    },
+    "cash_inflows_from_exercise_of_conversion_rights": {
+      "sortOrder": 3511,
+      "level": 2
+    },
+    "increase_in_noncontrolling_interests": {
+      "sortOrder": 3520,
+      "level": 2
+    },
+    "decrease_in_noncontrolling_interests": {
+      "sortOrder": 3521,
+      "level": 2
+    },
+    "contribution_from_noncontrolling_interests": {
+      "sortOrder": 3522,
+      "level": 2
+    },
+    "paid_in_capital_increase": {
+      "sortOrder": 3530,
+      "level": 2
+    },
+    "paid_in_capital_decrease": {
+      "sortOrder": 3531,
+      "level": 2
+    },
+    "increase_in_preferred_stock_of_redemption": {
+      "sortOrder": 3540,
+      "level": 2
+    },
+    "redemption_of_callable_stock": {
+      "sortOrder": 3541,
+      "level": 2
+    },
+    "issue_of_hybrid_bond": {
+      "sortOrder": 3551,
+      "level": 2
+    },
+    "redemption_of_hybrid_bond": {
+      "sortOrder": 3552,
+      "level": 2
+    },
+    "hybrid_bond_dividends": {
+      "sortOrder": 3553,
+      "level": 2
+    },
+    "change_by_merger_and_acquisition": {
+      "sortOrder": 3580,
+      "level": 2
+    },
+    "cash_from_acquisition_or_loss_of_control_of_subsidiaries": {
+      "sortOrder": 3590,
+      "level": 2
+    },
+    "repayments_of_government_grants": {
+      "sortOrder": 3600,
+      "level": 2
+    },
+    "decrease_in_consolidated_capital_transaction": {
+      "sortOrder": 3610,
+      "level": 2
+    },
+    "increase_in_consolidated_capital_transaction": {
+      "sortOrder": 3611,
+      "level": 2
+    },
+    "cash_inflows_from_discontinued_operations": {
+      "sortOrder": 3620,
+      "level": 2
+    },
+    "cash_outflows_from_discontinued_operations": {
+      "sortOrder": 3621,
+      "level": 2
+    },
+    "difference_by_changes_in_foreign_exchange_rates": {
+      "sortOrder": 4000,
+      "level": 1
+    },
+    "effect_of_exchange_rate_changes": {
+      "sortOrder": 4001,
+      "level": 1
+    },
+    "increasedecrease_in_cash_and_cash_equivalents": {
+      "sortOrder": 4990,
+      "level": 1
+    },
+    "cash_and_cash_equivalents_at_the_beginning_of_year": {
+      "sortOrder": 6000,
+      "level": 1
+    },
+    "cash_and_cash_equivalents_at_the_end_of_year": {
+      "sortOrder": 7000,
+      "level": 1
+    },
+    "cash_and_cash_equivalents": {
+      "sortOrder": 7003,
+      "level": 1
+    },
+    "operating_cashflow": {
+      "sortOrder": 1000,
+      "level": 1
+    },
+    "investing_cashflow": {
+      "sortOrder": 2000,
+      "level": 1
+    },
+    "financing_cashflow": {
+      "sortOrder": 3000,
+      "level": 1
+    },
+    "cash_and_cash_equivalents_beginning": {
+      "sortOrder": 6000,
+      "level": 1
+    },
+    "cash_and_cash_equivalents_ending": {
+      "sortOrder": 7000,
+      "level": 1
+    },
+    "changes_in_operating_assets_and_liabilities": {
+      "sortOrder": 1020,
+      "level": 2
+    },
+    "net_increase_in_shortterm_borrowings": {
+      "sortOrder": 3015,
+      "level": 2
+    },
+    "net_decrease_in_shortterm_borrowings": {
+      "sortOrder": 3016,
+      "level": 2
+    },
+    "net_increase_decrease_in_cash_and_cash_equivalents": {
+      "sortOrder": 4990,
+      "level": 1
+    },
+    "change_in_noncontrolling_interests": {
+      "sortOrder": 3500,
+      "level": 2
+    }
+  }
+}

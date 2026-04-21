@@ -28,6 +28,7 @@ from typing import Any
 
 import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.providers.edgar._docs_accessor import _DocsAccessor
 from dartlab.providers.edgar._finance_accessor import _FinanceAccessor
 from dartlab.providers.edgar._profile_accessor import _ProfileAccessor
@@ -1330,7 +1331,7 @@ class Company:
             since=startDate,
             until=endDate,
         )
-        if df is None or df.is_empty():
+        if isEmptyDf(df):
             result = pl.DataFrame(
                 schema={
                     "docId": pl.Utf8,
@@ -2171,7 +2172,7 @@ class Company:
 
     @staticmethod
     def _previewFinance(df: pl.DataFrame | None) -> str:
-        if df is None or df.is_empty():
+        if isEmptyDf(df):
             return "-"
         return f"{df.height} accounts"
 

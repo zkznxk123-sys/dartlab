@@ -16,6 +16,8 @@ from pathlib import Path
 
 import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
+
 log = logging.getLogger(__name__)
 
 
@@ -54,7 +56,7 @@ def scan_macroBeta(
         log.warning("매출 시계열 로드 실패: %s", exc)
         return _emptyDf()
 
-    if revDf is None or revDf.is_empty():
+    if isEmptyDf(revDf):
         return _emptyDf()
 
     # stockCode 필터
@@ -220,7 +222,7 @@ def _loadMacroForScan(periodCols: list[str]) -> dict[str, list[float | None]] | 
 
     for key, indicatorId in indicators.items():
         df = loadMacroParquet(indicatorId, source="ecos")
-        if df is None or df.is_empty():
+        if isEmptyDf(df):
             result[key] = [None] * len(periodCols)
             continue
 

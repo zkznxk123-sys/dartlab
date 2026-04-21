@@ -11,6 +11,7 @@ import polars as pl
 
 from dartlab.core.dataLoader import loadData
 from dartlab.core.memory import BoundedCache
+from dartlab.core.polarsUtil import isEmptyDf
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
@@ -155,7 +156,7 @@ def reportFrameInner(stockCode: str, apiType: str, topic: str, *, raw: bool = Fa
     from dartlab.providers.dart.report.extract import extractClean
 
     df = extractClean(stockCode, apiType)
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return None
 
     # 2015년 제외 (sections/finance와 통일)
@@ -398,7 +399,7 @@ class _ReportAccessor:
         except (FileNotFoundError, RuntimeError, ValueError, TypeError):
             raw = None
 
-        if raw is None or raw.is_empty() or "apiType" not in raw.columns:
+        if isEmptyDf(raw) or "apiType" not in raw.columns:
             result: list[str] = []
         else:
             available = set(raw["apiType"].drop_nulls().cast(pl.Utf8).unique().to_list())

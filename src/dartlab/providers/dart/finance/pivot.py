@@ -33,6 +33,7 @@ import polars as pl
 
 from dartlab.core.finance.ordering import sortSeries
 from dartlab.core.finance.period import extractYear, formatPeriod
+from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.providers.dart.finance.mapper import AccountMapper
 
 _log = logging.getLogger(__name__)
@@ -109,7 +110,7 @@ def _loadAndNormalize(
         "thstrm_add_amount",
     ]
     df = loadData(stockCode, category="finance", columns=_FINANCE_COLS)
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return None
 
     if "sj_div" not in df.columns:
@@ -596,7 +597,7 @@ def buildSceMatrix(
         "thstrm_amount",
     ]
     df = loadData(stockCode, category="finance", columns=_SCE_COLS)
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return None
 
     return _buildSceMatrixFromDf(df, fsDivPref)

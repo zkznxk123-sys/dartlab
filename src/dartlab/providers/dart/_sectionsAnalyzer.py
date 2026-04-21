@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
+
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
 
@@ -57,7 +59,7 @@ class SectionsAnalyzer:
             columns=["year", "report_type", "rcept_date", "section_order", "section_title"],
         )
         requiredCols = {"year", "report_type", "section_order", "section_title"}
-        if raw is None or raw.is_empty() or not requiredCols.issubset(set(raw.columns)):
+        if isEmptyDf(raw) or not requiredCols.issubset(set(raw.columns)):
             self._cache[cacheKey] = empty
             return empty
 
@@ -73,7 +75,7 @@ class SectionsAnalyzer:
         for year in years:
             for reportKind, suffix in REPORT_KINDS:
                 report = selectReport(raw, year, reportKind=reportKind)
-                if report is None or report.is_empty():
+                if isEmptyDf(report):
                     continue
 
                 periodKey = f"{year}{suffix}"
@@ -204,7 +206,7 @@ class SectionsAnalyzer:
             ],
         )
         requiredCols = {"year", "report_type", "section_order", "section_title"}
-        if raw is None or raw.is_empty() or not requiredCols.issubset(set(raw.columns)):
+        if isEmptyDf(raw) or not requiredCols.issubset(set(raw.columns)):
             self._cache[cacheKey] = empty
             return empty
 
@@ -220,7 +222,7 @@ class SectionsAnalyzer:
         for year in years:
             for reportKind, suffix in REPORT_KINDS:
                 report = selectReport(raw, year, reportKind=reportKind)
-                if report is None or report.is_empty() or contentCol not in report.columns:
+                if isEmptyDf(report) or contentCol not in report.columns:
                     continue
 
                 periodKey = f"{year}{suffix}"
@@ -613,7 +615,7 @@ class SectionsAnalyzer:
         if cacheKey in self._cache:
             return self._cache[cacheKey]
         blocks = self._company._retrievalBlocks()
-        if blocks is None or blocks.is_empty():
+        if isEmptyDf(blocks):
             self._cache[cacheKey] = None
             return None
         from dartlab.providers.dart.docs.sections import topicSubtables

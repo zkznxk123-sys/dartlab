@@ -6,6 +6,8 @@ import re
 
 import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
+
 _TOPIC_RE = re.compile(r"^(10-K|10-Q|20-F)::")
 _PERIOD_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
@@ -41,7 +43,7 @@ def sortTopics(topics: list[str], topicOrder: dict[str, int]) -> list[str]:
 
 def buildMarkdownWide(df: pl.DataFrame | None) -> str:
     """sections DataFrame을 마크다운 wide 테이블 문자열로 변환."""
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return ""
     periods = [col for col in df.columns if col != "topic"]
     header = "| topic | " + " | ".join(periods) + " |"
@@ -67,7 +69,7 @@ def retrievalBlocks(ticker: str) -> pl.DataFrame | None:
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 
     sec = sections(ticker)
-    if sec is None or sec.is_empty():
+    if isEmptyDf(sec):
         return None
 
     periodCols = [c for c in sec.columns if _PERIOD_RE.fullmatch(c)]
@@ -244,7 +246,7 @@ def contextSlices(ticker: str, *, maxChars: int = 1800) -> pl.DataFrame | None:
         isTable, blockPriority
     """
     blocks = retrievalBlocks(ticker)
-    if blocks is None or blocks.is_empty():
+    if isEmptyDf(blocks):
         return None
 
     # ── slice 생성 ──
@@ -334,7 +336,7 @@ def freq(ticker: str) -> pl.DataFrame | None:
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 
     sec = sections(ticker)
-    if sec is None or sec.is_empty():
+    if isEmptyDf(sec):
         return None
 
     periodCols = [c for c in sec.columns if _PERIOD_RE.fullmatch(c)]
@@ -368,7 +370,7 @@ def coverage(ticker: str) -> pl.DataFrame | None:
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 
     sec = sections(ticker)
-    if sec is None or sec.is_empty():
+    if isEmptyDf(sec):
         return None
 
     periodCols = [c for c in sec.columns if _PERIOD_RE.fullmatch(c)]

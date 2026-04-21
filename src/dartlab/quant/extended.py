@@ -12,6 +12,7 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.memory import memoized_calc as _memoized_calc
+from dartlab.core.polarsUtil import isEmptyDf
 
 # ── OHLCV 캐싱 헬퍼 ──
 
@@ -103,7 +104,7 @@ def calcTechnicalVerdict(company) -> dict | None:
         dict — verdict, score, rsi, adx, aboveSma20, aboveSma60, bbPosition, signals.
     """
     ohlcv = _fetchOHLCV(company)
-    if ohlcv is None or ohlcv.is_empty() or len(ohlcv) < 30:
+    if isEmptyDf(ohlcv) or len(ohlcv) < 30:
         return None
 
     from dartlab.quant.analyzer import technicalVerdict
@@ -126,7 +127,7 @@ def calcTechnicalSignals(company) -> dict | None:
         dict — signals, signalSummary, recentEvents.
     """
     ohlcv = _fetchOHLCV(company)
-    if ohlcv is None or ohlcv.is_empty() or len(ohlcv) < 60:
+    if isEmptyDf(ohlcv) or len(ohlcv) < 60:
         return None
 
     close = ohlcv["close"].to_numpy().astype(np.float64)
@@ -193,11 +194,11 @@ def calcMarketBeta(company) -> dict | None:
         dict — value, r2, capmExpected, relativeStrength, interpretation.
     """
     ohlcv = _fetchOHLCV(company)
-    if ohlcv is None or ohlcv.is_empty() or len(ohlcv) < 60:
+    if isEmptyDf(ohlcv) or len(ohlcv) < 60:
         return None
 
     benchmark = _fetchBenchmarkForCompany(company)
-    if benchmark is None or benchmark.is_empty():
+    if isEmptyDf(benchmark):
         return None
 
     from dartlab.quant.analyzer import _calcBeta, _relativeStrength
@@ -322,7 +323,7 @@ def calcMarketRisk(company) -> dict | None:
         dict — beta, atr, atrPercent, relativeStrength, volatilityGrade, price.
     """
     ohlcv = _fetchOHLCV(company)
-    if ohlcv is None or ohlcv.is_empty() or len(ohlcv) < 30:
+    if isEmptyDf(ohlcv) or len(ohlcv) < 30:
         return None
 
     close = ohlcv["close"].to_numpy().astype(np.float64)
@@ -380,7 +381,7 @@ def calcMarketAnalysisFlags(company) -> list[str]:
     flags: list[str] = []
 
     ohlcv = _fetchOHLCV(company)
-    if ohlcv is None or ohlcv.is_empty() or len(ohlcv) < 30:
+    if isEmptyDf(ohlcv) or len(ohlcv) < 30:
         return flags
 
     tv = technicalVerdict(ohlcv)
@@ -652,7 +653,7 @@ def calcStrategySnapshot(company) -> dict | None:
         또는 None (데이터 부족).
     """
     ohlcv = _fetchOHLCV(company)
-    if ohlcv is None or ohlcv.is_empty() or len(ohlcv) < 60:
+    if isEmptyDf(ohlcv) or len(ohlcv) < 60:
         return None
 
     from dartlab.quant._ax_strategy import runEntry, runStyle
@@ -710,7 +711,7 @@ def calcActionableTargets(company, *, overrides: dict | None = None) -> dict | N
     except (AttributeError, ValueError, TypeError):
         return None
 
-    if ohlcv is None or ohlcv.is_empty():
+    if isEmptyDf(ohlcv):
         return None
 
     closes = ohlcv["close"].to_list()

@@ -30,6 +30,7 @@ import logging
 
 import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.quant._helpers import fetch_ohlcv, load_shares_outstanding, resolve_market
 
 log = logging.getLogger(__name__)
@@ -178,7 +179,7 @@ def marketCapSnapshot(stockCode: str, *, market: str = "auto") -> dict | None:
         데이터 없으면 None.
     """
     df = marketCap(stockCode, market=market)
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return None
     df = df.drop_nulls("marketCap")
     if df.is_empty():

@@ -6,6 +6,7 @@ import re
 
 import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.providers.dart.docs.sections._common import periodOrderValue, sortPeriods
 from dartlab.providers.dart.docs.sections.pipeline import _joinPathSegments, _splitPathSegments
 
@@ -393,7 +394,7 @@ def semanticRegistry(
     includeMixed: bool = True,
 ) -> pl.DataFrame:
     """textSemanticPathKey 기준 semantic registry를 만든다."""
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return _emptySemanticRegistryFrame()
 
     required = {"topic", "textSemanticPathKey", "textPathKey", "segmentKey"}
@@ -478,7 +479,7 @@ def structureRegistry(
     nodeType: str | None = None,
 ) -> pl.DataFrame:
     """Comparable slot spine 기준 structure registry를 만든다."""
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return _emptyStructureRegistryFrame()
 
     required = {"topic", "textComparablePathKey", "textSemanticPathKey", "segmentKey"}
@@ -606,7 +607,7 @@ def structureEvents(
     nodeType: str | None = None,
 ) -> pl.DataFrame:
     """기간 간 텍스트 구조 변화 이벤트(추가/삭제/변경)를 감지하여 반환한다."""
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return _emptyStructureEventsFrame()
 
     required = {"topic", "textComparablePathKey", "textSemanticPathKey", "segmentKey"}

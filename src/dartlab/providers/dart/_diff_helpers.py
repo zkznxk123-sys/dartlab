@@ -13,6 +13,8 @@ from typing import Any
 
 import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
+
 
 def _normalizeTextCell(value: Any) -> str:
     if value is None:
@@ -282,7 +284,7 @@ def _buildTopicChangeLedger(topicBlocks: pl.DataFrame | None) -> pl.DataFrame:
         "restatedBlocks": pl.Int64,
         "placeholderBlocks": pl.Int64,
     }
-    if topicBlocks is None or topicBlocks.is_empty():
+    if isEmptyDf(topicBlocks):
         return pl.DataFrame(schema=schema)
 
     from dartlab.providers.dart.docs.sections import sortPeriods
@@ -396,7 +398,7 @@ def _buildTopicEvidence(topicBlocks: pl.DataFrame | None, period: str) -> pl.Dat
         "tableShape": pl.Utf8,
         "previousTableShape": pl.Utf8,
     }
-    if topicBlocks is None or topicBlocks.is_empty():
+    if isEmptyDf(topicBlocks):
         return pl.DataFrame(schema=schema)
 
     from dartlab.providers.dart.docs.sections import sortPeriods

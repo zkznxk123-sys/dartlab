@@ -9,6 +9,8 @@ from __future__ import annotations
 import asyncio
 import logging
 
+from dartlab.core.polarsUtil import isEmptyDf
+
 from ..types import InsiderTrade, MajorHolder
 
 log = logging.getLogger(__name__)
@@ -60,7 +62,7 @@ async def fetchInsiderTrading(stockCode: str) -> list[InsiderTrade]:
         return []
     try:
         df = await asyncio.to_thread(dart.executiveShares, stockCode)
-        if df is None or df.is_empty():
+        if isEmptyDf(df):
             return []
         result = []
         for row in df.iter_rows(named=True):
@@ -109,7 +111,7 @@ async def fetchMajorShareholders(stockCode: str) -> list[MajorHolder]:
         return []
     try:
         df = await asyncio.to_thread(dart.majorShareholders, stockCode)
-        if df is None or df.is_empty():
+        if isEmptyDf(df):
             return []
         result = []
         for row in df.iter_rows(named=True):

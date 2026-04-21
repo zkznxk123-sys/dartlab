@@ -30,6 +30,7 @@ from typing import Any
 
 import numpy as np
 
+from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.quant._helpers import fetch_benchmark, fetch_ohlcv, ohlcv_to_arrays, resolve_market
 from dartlab.quant.strategy.metrics import TRADING_DAYS, calcIR, fundamentalLawIR
 
@@ -51,7 +52,7 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
     market = resolve_market(stockCode, market)
 
     ohlcv = fetch_ohlcv(stockCode, **kwargs)
-    if ohlcv is None or ohlcv.is_empty():
+    if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음"}
     arr = ohlcv_to_arrays(ohlcv)
     close = arr.get("close")
@@ -60,7 +61,7 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
     stock_ret = np.diff(np.log(close))
 
     bench = fetch_benchmark(market)
-    if bench is None or bench.is_empty():
+    if isEmptyDf(bench):
         return {"error": "벤치마크 데이터 없음"}
     bench_close = ohlcv_to_arrays(bench).get("close")
     if bench_close is None:

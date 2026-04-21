@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 
 from dartlab.core.market import detectMarket as detect_market  # noqa: F401
 from dartlab.core.market import resolveMarket as resolve_market  # noqa: F401
+from dartlab.core.polarsUtil import isEmptyDf
 
 # ── OHLCV fetch ──────────────────────────────────────────
 
@@ -379,7 +380,7 @@ def extract_account(df, key: str) -> float | None:
     """
     import polars as pl
 
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return None
 
     # EDGAR 스키마 — fy 컬럼 + sj_div 없음 → 직접 컬럼 read
@@ -459,7 +460,7 @@ def ohlcv_to_arrays(df):
     """
     import numpy as np
 
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return {}
 
     result = {}

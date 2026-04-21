@@ -28,6 +28,7 @@ from dartlab.core.dataLoader import (
     extractCorpName,
     loadData,
 )
+from dartlab.core.polarsUtil import isEmptyDf
 
 # ── 모듈 레지스트리 (core/registry.py에서 자동 생성) ──
 # (모듈 import 경로, 함수명, 한글 라벨, primary DataFrame 추출)
@@ -425,7 +426,7 @@ class Company:
                 )
                 for year in years:
                     report = selectReport(raw, year, reportKind="annual")
-                    if report is None or report.is_empty():
+                    if isEmptyDf(report):
                         continue
                     scoped = report.filter(pl.col("section_content").is_not_null()).sort("section_order")
                     seen: set[str] = set()
@@ -835,7 +836,7 @@ class Company:
             endDate,
             final=finalOnly,
         )
-        if df is None or df.is_empty():
+        if isEmptyDf(df):
             result = pl.DataFrame(
                 schema={
                     "docId": pl.Utf8,
@@ -2272,7 +2273,7 @@ class Company:
             )
 
             hDf = horizontalizeTableBlock(topicRows, bo, periodCols)
-            if hDf is None or hDf.is_empty():
+            if isEmptyDf(hDf):
                 continue
 
             itemCol = "항목" if "항목" in hDf.columns else None
@@ -3726,7 +3727,7 @@ class Company:
             if apiType in existing:
                 continue
             df = self._report.extract(apiType)
-            if df is None or df.is_empty():
+            if isEmptyDf(df):
                 continue
             chapter = self._chapterForTopic(apiType)
             chapterNum = _CHAPTER_ORDER.get(chapter, 12)
@@ -4621,7 +4622,7 @@ class Company:
 
     def _scanView(self, df: pl.DataFrame | None, view: str | None) -> pl.DataFrame | None:
         """scan DataFrame에서 view별 필터."""
-        if df is None or df.is_empty():
+        if isEmptyDf(df):
             return None
         if view == "all":
             return df
