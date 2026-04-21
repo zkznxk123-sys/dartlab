@@ -444,6 +444,138 @@ def liquidationValuation(
 # ── DCF ──────────────────────────────────────────────
 
 
+def _normalizeBaseFcf(series: dict, fcfCurrent: float | None, fcfHist: list, warnings: list[str]) -> float | None:
+    """사이클 기업 mid-cycle FCF 정규화. 최근 FCF 가 극단 왜곡이면 중앙값 채택."""
+    positiveFcfs = [f for f in fcfHist if f is not None and f > 0]
+    if len(positiveFcfs) < 3:
+        return fcfCurrent
+    midCycleFcf = sorted(positiveFcfs)[len(positiveFcfs) // 2]
+    if fcfCurrent is not None and fcfCurrent > 0:
+        ratio = fcfCurrent / midCycleFcf if midCycleFcf > 0 else 1
+        if ratio > 1.8 or ratio < 0.5:
+            warnings.append(f"사이클 정규화: mid-cycle FCF 적용 (최근 대비 {ratio:.1f}배 괴리)")
+            return midCycleFcf
+        return fcfCurrent
+    warnings.append("FCF 음수 → mid-cycle 양수 FCF 중앙값으로 대체")
+    return midCycleFcf
+
+
+def _fallbackOcfBasedFcf(series: dict, warnings: list[str]) -> float | None:
+    """FCF 부재 시 영업CF × 할인률 fallback (호황기 과대 방지)."""
+    ocfHist = getAnnualValues(series, "CF", "operating_cashflow")
+    positiveOcfs = [v for v in ocfHist if v is not None and v > 0]
+    allOcfs = [v for v in ocfHist if v is not None]
+    if len(positiveOcfs) >= 3:
+        midOcf = sorted(positiveOcfs)[len(positiveOcfs) // 2]
+        lossRatio = 1 - len(positiveOcfs) / max(len(allOcfs), 1) if allOcfs else 0
+        discount = 0.5 if lossRatio >= 0.5 else 0.7
+        warnings.append(f"FCF 음수 → mid-cycle 영업CF × {discount * 100:.0f}%로 대체 (적자비율 {lossRatio * 100:.0f}%)")
+        return midOcf * discount
+    ocf = getTTM(series, "CF", "operating_cashflow")
+    if ocf is not None and ocf > 0:
+        warnings.append("FCF 음수/미확인 → 영업CF × 70%로 대체 추정")
+        return ocf * 0.7
+    return None
+
+
+def _fallbackNormalizedEarningsFcf(series: dict, warnings: list[str]) -> float | None:
+    """Damodaran normalized earnings — 정상 OPM × 현재 매출 → FCF proxy."""
+    oiHist = getAnnualValues(series, "IS", "operating_profit")
+    revHist = getAnnualValues(series, "IS", "sales")
+    if not (oiHist and revHist):
+        return None
+    margins = [
+        oi / rev for oi, rev in zip(oiHist, revHist) if oi is not None and rev is not None and rev > 0 and oi > 0
+    ]
+    if not margins:
+        return None
+    normalMargin = sorted(margins)[len(margins) // 2]
+    latestRev = next((v for v in reversed(revHist) if v is not None and v > 0), None)
+    if not (latestRev and normalMargin > 0):
+        return None
+    warnings.append(f"Normalized earnings: 정상 OPM {normalMargin * 100:.1f}% × 현재 매출 → FCF proxy")
+    return latestRev * normalMargin * 0.65
+
+
+def _resolveBaseFcf(series: dict, warnings: list[str]) -> tuple[float | None, list]:
+    """기준 FCF 결정: series → mid-cycle → OCF fallback → normalized earnings."""
+    fcfCurrent = _getFcfFromSeries(series)
+    fcfHist = _fcfHistory(series)
+    fcfCurrent = _normalizeBaseFcf(series, fcfCurrent, fcfHist, warnings)
+    if fcfCurrent is None or fcfCurrent <= 0:
+        fcfCurrent = _fallbackOcfBasedFcf(series, warnings)
+    if fcfCurrent is None or fcfCurrent <= 0:
+        fcfCurrent = _fallbackNormalizedEarningsFcf(series, warnings)
+    return fcfCurrent, fcfHist
+
+
+def _projectFcf(
+    fcfCurrent: float,
+    initialGrowth: float,
+    tg: float,
+    projectionYears: int,
+    proformaFCF: list[float] | None,
+    warnings: list[str],
+) -> list[float]:
+    """Pro Forma 우선 → 아니면 (initialGrowth → tg) blend 로 FCF 시계열 예측."""
+    if proformaFCF and len(proformaFCF) > 0:
+        pf = [float(f) for f in proformaFCF if f is not None and float(f) != 0]
+        if pf:
+            while len(pf) < projectionYears:
+                pf.append(pf[-1] * (1 + tg / 100))
+            warnings.append(f"추정재무제표(Pro Forma) 기반 FCF 사용 ({len(proformaFCF)}년 원본 + 연장)")
+            return pf[:projectionYears]
+
+    projections: list[float] = []
+    prevFcf = fcfCurrent
+    for yr in range(1, projectionYears + 1):
+        blend = (yr - 1) / max(projectionYears - 1, 1)
+        growth = initialGrowth * (1 - blend) + tg * blend
+        proj = prevFcf * (1 + growth / 100)
+        projections.append(proj)
+        prevFcf = proj
+    return projections
+
+
+def _computeExitMultipleTv(
+    series: dict,
+    sectorParams: SectorParams | None,
+    initialGrowth: float,
+    tg: float,
+    projectionYears: int,
+    wacc: float,
+    pvFcfs: float,
+    netDebt: float,
+    shares: int | None,
+) -> tuple[float | None, float | None, float | None, float | None]:
+    """Exit Multiple TV 교차검증 — EBITDA × 섹터 exit multiple. (tv, ev, perShare, mult)."""
+    exitMult = sectorParams.exitMultiple if sectorParams and sectorParams.exitMultiple else None
+    if not (exitMult and exitMult > 0):
+        return None, None, None, None
+    oi = getTTM(series, "IS", "operating_profit") or getTTM(series, "IS", "operating_income")
+    if oi is None or oi <= 0:
+        return None, None, None, exitMult
+    dep = getTTM(series, "CF", "depreciation_and_amortization")
+    if dep is None:
+        ta = getLatest(series, "BS", "tangible_assets") or 0
+        ia = getLatest(series, "BS", "intangible_assets") or 0
+        dep = ta * 0.05 + ia * 0.1
+    ebitda = oi + (dep or 0)
+    if ebitda <= 0:
+        return None, None, None, exitMult
+    projEbitda = ebitda
+    for yr in range(1, projectionYears + 1):
+        blend = (yr - 1) / max(projectionYears - 1, 1)
+        g = initialGrowth * (1 - blend) + tg * blend
+        projEbitda *= 1 + g / 100
+    exitTv = projEbitda * exitMult
+    pvExitTv = exitTv / (1 + wacc / 100) ** projectionYears
+    exitEv = pvFcfs + pvExitTv
+    exitEqValue = exitEv - netDebt
+    exitPerShare = exitEqValue / shares if shares and shares > 0 else None
+    return exitTv, exitEv, exitPerShare, exitMult
+
+
 def dcfValuation(
     series: dict,
     shares: Optional[int] = None,
@@ -455,7 +587,7 @@ def dcfValuation(
     currency: str = "KRW",
     proformaFCF: Optional[list[float]] = None,
 ) -> DCFResult:
-    """2-Stage DCF 밸류에이션."""
+    """2-Stage DCF 밸류에이션 orchestrator (Q3.1e split)."""
     warnings: list[str] = []
 
     wacc = discountRate or (sectorParams.discountRate if sectorParams else 10.0)
@@ -466,62 +598,7 @@ def dcfValuation(
         tg = max(wacc - 2.0, 1.0)
         warnings.append(f"영구성장률이 할인율 이상이어서 {tg:.1f}%로 조정")
 
-    fcfCurrent = _getFcfFromSeries(series)
-    fcfHist = _fcfHistory(series)
-
-    # ── 정규화 FCF (mid-cycle) ──
-    # 사이클 기업은 최근 FCF가 호황/불황에 극단적 왜곡.
-    # 과거 양수 FCF의 중앙값을 base로 사용하여 사이클 중립화.
-    positiveFcfs = [f for f in fcfHist if f is not None and f > 0]
-    if len(positiveFcfs) >= 3:
-        midCycleFcf = sorted(positiveFcfs)[len(positiveFcfs) // 2]
-        # 최근 FCF와 mid-cycle의 괴리가 크면 mid-cycle 채택
-        if fcfCurrent is not None and fcfCurrent > 0:
-            ratio = fcfCurrent / midCycleFcf if midCycleFcf > 0 else 1
-            if ratio > 1.8 or ratio < 0.5:
-                fcfCurrent = midCycleFcf
-                warnings.append(f"사이클 정규화: mid-cycle FCF 적용 (최근 대비 {ratio:.1f}배 괴리)")
-        elif fcfCurrent is None or fcfCurrent <= 0:
-            fcfCurrent = midCycleFcf
-            warnings.append("FCF 음수 → mid-cycle 양수 FCF 중앙값으로 대체")
-
-    if fcfCurrent is None or fcfCurrent <= 0:
-        # 영업CF fallback도 mid-cycle 적용 (호황기 영업CF 과대 방지)
-        ocfHist = getAnnualValues(series, "CF", "operating_cashflow")
-        positiveOcfs = [v for v in ocfHist if v is not None and v > 0]
-        allOcfs = [v for v in ocfHist if v is not None]
-        if len(positiveOcfs) >= 3:
-            midOcf = sorted(positiveOcfs)[len(positiveOcfs) // 2]
-            # 적자 비율 50%+ → 추가 할인 (호황기 mid-cycle 과대 방지)
-            lossRatio = 1 - len(positiveOcfs) / max(len(allOcfs), 1) if allOcfs else 0
-            discount = 0.5 if lossRatio >= 0.5 else 0.7
-            fcfCurrent = midOcf * discount
-            warnings.append(
-                f"FCF 음수 → mid-cycle 영업CF × {discount * 100:.0f}%로 대체 (적자비율 {lossRatio * 100:.0f}%)"
-            )
-        else:
-            ocf = getTTM(series, "CF", "operating_cashflow")
-            if ocf is not None and ocf > 0:
-                fcfCurrent = ocf * 0.7
-                warnings.append("FCF 음수/미확인 → 영업CF × 70%로 대체 추정")
-
-    if fcfCurrent is None or fcfCurrent <= 0:
-        # Normalized earnings fallback (Damodaran Ch.22):
-        # 과거 정상기 영업이익률 × 현재 매출 → 정상 영업이익 → FCF proxy
-        oiHist = getAnnualValues(series, "IS", "operating_profit")
-        revHist = getAnnualValues(series, "IS", "sales")
-        if oiHist and revHist:
-            margins = []
-            for oi, rev in zip(oiHist, revHist):
-                if oi is not None and rev is not None and rev > 0 and oi > 0:
-                    margins.append(oi / rev)
-            if margins:
-                normalMargin = sorted(margins)[len(margins) // 2]  # 중앙값
-                latestRev = next((v for v in reversed(revHist) if v is not None and v > 0), None)
-                if latestRev and normalMargin > 0:
-                    normalOi = latestRev * normalMargin
-                    fcfCurrent = normalOi * 0.65  # 세후 × (1 - 재투자율 추정)
-                    warnings.append(f"Normalized earnings: 정상 OPM {normalMargin * 100:.1f}% × 현재 매출 → FCF proxy")
+    fcfCurrent, fcfHist = _resolveBaseFcf(series, warnings)
 
     if fcfCurrent is None or fcfCurrent <= 0:
         return DCFResult(
@@ -539,9 +616,6 @@ def dcfValuation(
             currency=currency,
         )
 
-    # ── 성장률 추정 ──
-    # 3Y CAGR 상한 15% (30%는 사이클 호황 왜곡 유발)
-    # 업계 표준: Simply Wall St 10Y 컨센서스, GuruFocus 10Y 평균 + 20% 상한
     revCagr = getRevenueGrowth3Y(series)
     if revCagr is not None:
         initialGrowth = min(max(revCagr, -5.0), 15.0)
@@ -549,70 +623,24 @@ def dcfValuation(
         initialGrowth = sectorGrowth
         warnings.append("매출 3Y CAGR 미확인 → 섹터 평균 성장률 적용")
 
-    # 추정재무제표 FCF 우선 사용 (부족한 연도는 마지막 FCF × 터미널 성장률로 연장)
-    if proformaFCF and len(proformaFCF) > 0:
-        pf = [float(f) for f in proformaFCF if f is not None and float(f) != 0]
-        if pf:
-            while len(pf) < projectionYears:
-                pf.append(pf[-1] * (1 + tg / 100))
-            projections = pf[:projectionYears]
-            warnings.append(f"추정재무제표(Pro Forma) 기반 FCF 사용 ({len(proformaFCF)}년 원본 + 연장)")
-    else:
-        projections: list[float] = []
-        prevFcf = fcfCurrent
-        for yr in range(1, projectionYears + 1):
-            blend = (yr - 1) / max(projectionYears - 1, 1)
-            growth = initialGrowth * (1 - blend) + tg * blend
-            proj = prevFcf * (1 + growth / 100)
-            projections.append(proj)
-            prevFcf = proj
+    projections = _projectFcf(fcfCurrent, initialGrowth, tg, projectionYears, proformaFCF, warnings)
 
     finalFcf = projections[-1]
-    # Gordon Growth TV
     tv = finalFcf * (1 + tg / 100) / (wacc / 100 - tg / 100)
-
     pvFcfs = sum(fcf / (1 + wacc / 100) ** yr for yr, fcf in enumerate(projections, 1))
     pvTv = tv / (1 + wacc / 100) ** projectionYears
     ev = pvFcfs + pvTv
 
     netDebt = _getNetDebt(series)
     eqValue = ev - netDebt
-
-    perShare = None
-    if shares and shares > 0:
-        perShare = eqValue / shares
-
+    perShare = eqValue / shares if shares and shares > 0 else None
     mos = None
     if perShare is not None and currentPrice is not None and currentPrice > 0:
         mos = (perShare - currentPrice) / perShare * 100
 
-    # Exit Multiple TV 교차검증 -- EBITDA × 섹터 exit multiple
-    exitTv = None
-    exitEv = None
-    exitPerShare = None
-    exitMult = sectorParams.exitMultiple if sectorParams and sectorParams.exitMultiple else None
-    if exitMult and exitMult > 0:
-        oi = getTTM(series, "IS", "operating_profit") or getTTM(series, "IS", "operating_income")
-        dep = getTTM(series, "CF", "depreciation_and_amortization")
-        if oi is not None and oi > 0:
-            if dep is None:
-                ta = getLatest(series, "BS", "tangible_assets") or 0
-                ia = getLatest(series, "BS", "intangible_assets") or 0
-                dep = ta * 0.05 + ia * 0.1
-            ebitda = oi + (dep or 0)
-            if ebitda > 0:
-                # 5년차 EBITDA 추정 (현재 EBITDA에 초기성장률 적용)
-                projEbitda = ebitda
-                for yr in range(1, projectionYears + 1):
-                    blend = (yr - 1) / max(projectionYears - 1, 1)
-                    g = initialGrowth * (1 - blend) + tg * blend
-                    projEbitda *= 1 + g / 100
-                exitTv = projEbitda * exitMult
-                pvExitTv = exitTv / (1 + wacc / 100) ** projectionYears
-                exitEv = pvFcfs + pvExitTv
-                exitEqValue = exitEv - netDebt
-                if shares and shares > 0:
-                    exitPerShare = exitEqValue / shares
+    exitTv, exitEv, exitPerShare, exitMult = _computeExitMultipleTv(
+        series, sectorParams, initialGrowth, tg, projectionYears, wacc, pvFcfs, netDebt, shares
+    )
 
     assumptions = {
         "할인율": f"{wacc:.1f}%",
