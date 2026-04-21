@@ -404,22 +404,85 @@ def _analyzeMarginTrend(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(dimension="margin", title="마진 추세 분석", body=body, severity=severity)
 
 
+def _yoyGrowth(vals: list[float | None]) -> float | None:
+    """값 리스트의 직전 YoY 성장률 산출 (%)."""
+    clean = [(i, v) for i, v in enumerate(vals) if v is not None and v != 0]
+    if len(clean) < 2:
+        return None
+    prev, curr = clean[-2][1], clean[-1][1]
+    return (curr - prev) / abs(prev) * 100
+
+
+def _growthQualityJudgmentLine(salesGr: float | None, opGr: float | None) -> str | None:
+    """매출 vs 이익 성장률 질적 판단."""
+    if salesGr is None or opGr is None:
+        return None
+    if opGr > salesGr + 5:
+        return "이익 성장이 매출 성장을 상회하는 질적 성장"
+    if salesGr > opGr + 5 and salesGr > 0:
+        return "외형 성장 대비 수익성 미흡 — 마진 압박 가능성"
+    if salesGr > 0 and opGr > 0:
+        return "매출과 이익 동반 성장"
+    return None
+
+
+def _growthSgrLines(inp, ni: list, salesGr: float | None) -> list[str]:
+    """SGR (지속가능성장률 = ROE × (1-배당성향)) 라인 + gap 판정."""
+    totalEquity = _getVals(inp.aSeries, "BS", "total_equity")
+    niVals = [v for v in ni if v is not None]
+    teVals = [v for v in totalEquity if v is not None] if totalEquity else []
+    if not (niVals and teVals and teVals[-1] and teVals[-1] > 0):
+        return []
+    roe = niVals[-1] / teVals[-1]
+    retainedEarnings = _getVals(inp.aSeries, "BS", "retained_earnings")
+    reVals = [v for v in retainedEarnings if v is not None] if retainedEarnings else []
+    retentionRate = 0.7
+    if len(reVals) >= 2 and niVals[-1] != 0:
+        rr = (reVals[-1] - reVals[-2]) / niVals[-1]
+        if 0 < rr <= 1:
+            retentionRate = rr
+    sgr = roe * retentionRate * 100
+    if salesGr is None or sgr <= 0:
+        return []
+    gap = salesGr - sgr
+    lines = [f"SGR(지속가능성장률) {sgr:.1f}%"]
+    if gap > 10:
+        lines.append("실제 매출 성장률이 SGR을 크게 상회 — 외부 자금 조달 필요 구간")
+    elif gap < -10:
+        lines.append("SGR 대비 저성장 — 잉여 자본 활용 여력 존재")
+    return lines
+
+
+def _growthCagrLine(sales: list, op: list) -> str | None:
+    """3년+ CAGR 매출/영업이익 괴리 한 줄."""
+    salesAll = [v for v in sales if v is not None]
+    opAll = [v for v in op if v is not None]
+    if len(salesAll) < 3 or len(opAll) < 3:
+        return None
+    salesCagr = ((salesAll[-1] / salesAll[0]) ** (1 / (len(salesAll) - 1)) - 1) * 100 if salesAll[0] > 0 else None
+    opCagr = ((opAll[-1] / opAll[0]) ** (1 / (len(opAll) - 1)) - 1) * 100 if opAll[0] > 0 else None
+    if salesCagr is None or opCagr is None:
+        return None
+    return f"매출 CAGR {salesCagr:.1f}% / 영업이익 CAGR {opCagr:.1f}%"
+
+
+def _growthSegmentLines(segDf) -> list[str]:
+    """부문별 기여 (try/except wrap)."""
+    if segDf is None:
+        return []
+    try:
+        return _analyzeSegmentGrowth(segDf) or []
+    except (AttributeError, ValueError, KeyError):
+        return []
+
+
 def _analyzeGrowthQuality(inp: _Input) -> NarrativeParagraph | None:
-    """성장의 질 — 매출 vs 이익 성장률 + 부문별 기여."""
+    """성장의 질 orchestrator — 매출/이익 성장 + SGR + CAGR + 부문 (Q3.1f split)."""
     sales = _getVals(inp.aSeries, "IS", "sales")
     op = _getVals(inp.aSeries, "IS", "operating_profit")
     ni = _getVals(inp.aSeries, "IS", "net_profit")
     if not sales or len(sales) < 2:
         return None
-
-    # 직전 YoY 성장률
-    def _yoyGrowth(vals: list[float | None]) -> float | None:
-        """값 리스트의 직전 YoY 성장률 산출 (%)."""
-        clean = [(i, v) for i, v in enumerate(vals) if v is not None and v != 0]
-        if len(clean) < 2:
-            return None
-        prev, curr = clean[-2][1], clean[-1][1]
-        return (curr - prev) / abs(prev) * 100
 
     salesGr = _yoyGrowth(sales)
     opGr = _yoyGrowth(op)
@@ -436,60 +499,15 @@ def _analyzeGrowthQuality(inp: _Input) -> NarrativeParagraph | None:
     if not parts:
         return None
 
-    # 질적 판단
-    qualityNote = ""
-    if salesGr is not None and opGr is not None:
-        if opGr > salesGr + 5:
-            qualityNote = "이익 성장이 매출 성장을 상회하는 질적 성장"
-        elif salesGr > opGr + 5 and salesGr > 0:
-            qualityNote = "외형 성장 대비 수익성 미흡 — 마진 압박 가능성"
-        elif salesGr > 0 and opGr > 0:
-            qualityNote = "매출과 이익 동반 성장"
-    if qualityNote:
-        parts.append(qualityNote)
+    quality = _growthQualityJudgmentLine(salesGr, opGr)
+    if quality:
+        parts.append(quality)
 
-    # SGR (지속가능성장률 = ROE × (1 - 배당성향))
-    totalEquity = _getVals(inp.aSeries, "BS", "total_equity")
-    niVals = [v for v in ni if v is not None]
-    teVals = [v for v in totalEquity if v is not None] if totalEquity else []
-    if len(niVals) >= 1 and len(teVals) >= 1 and teVals[-1] and teVals[-1] > 0:
-        roe = niVals[-1] / teVals[-1]
-        # 배당성향 추정: 이익잉여금 변동 / 순이익
-        retainedEarnings = _getVals(inp.aSeries, "BS", "retained_earnings")
-        reVals = [v for v in retainedEarnings if v is not None] if retainedEarnings else []
-        retentionRate = 0.7  # 기본 70%
-        if len(reVals) >= 2 and niVals[-1] != 0:
-            reChange = reVals[-1] - reVals[-2]
-            rr = reChange / niVals[-1]
-            if 0 < rr <= 1:
-                retentionRate = rr
-        sgr = roe * retentionRate * 100
-        if salesGr is not None and sgr > 0:
-            gap = (salesGr or 0) - sgr
-            parts.append(f"SGR(지속가능성장률) {sgr:.1f}%")
-            if gap > 10:
-                parts.append("실제 매출 성장률이 SGR을 크게 상회 — 외부 자금 조달 필요 구간")
-            elif gap < -10:
-                parts.append("SGR 대비 저성장 — 잉여 자본 활용 여력 존재")
-
-    # 매출 vs 이익 3년+ 성장률 괴리 패턴
-    salesAll = [v for v in sales if v is not None]
-    opAll = [v for v in op if v is not None]
-    if len(salesAll) >= 3 and len(opAll) >= 3:
-        salesCagr = ((salesAll[-1] / salesAll[0]) ** (1 / (len(salesAll) - 1)) - 1) * 100 if salesAll[0] > 0 else None
-        opCagr = ((opAll[-1] / opAll[0]) ** (1 / (len(opAll) - 1)) - 1) * 100 if opAll[0] > 0 else None
-        if salesCagr is not None and opCagr is not None:
-            parts.append(f"매출 CAGR {salesCagr:.1f}% / 영업이익 CAGR {opCagr:.1f}%")
-
-    # 부문별 기여 (segments)
-    segDf = inp.segmentsDf
-    if segDf is not None:
-        try:
-            segParts = _analyzeSegmentGrowth(segDf)
-            if segParts:
-                parts.extend(segParts)
-        except (AttributeError, ValueError, KeyError):
-            pass
+    parts.extend(_growthSgrLines(inp, ni, salesGr))
+    cagrLine = _growthCagrLine(sales, op)
+    if cagrLine:
+        parts.append(cagrLine)
+    parts.extend(_growthSegmentLines(inp.segmentsDf))
 
     body = ". ".join(parts) + "."
     severity = "positive" if (salesGr or 0) > 5 else "neutral" if (salesGr or 0) > -5 else "negative"
@@ -871,8 +889,81 @@ def _analyzeSectorRelative(inp: _Input) -> NarrativeParagraph | None:
 # ══════════════════════════════════════
 
 
+def _bsStructureRatioLine(currentAssets, nonCurrentAssets, taLast: float) -> str | None:
+    """유동/비유동 비중 한 줄."""
+    ca = _lastN(currentAssets, 1)
+    nca = _lastN(nonCurrentAssets, 1)
+    if not (ca and nca and taLast > 0):
+        return None
+    return f"유동 {ca[-1] / taLast * 100:.0f}% / 비유동 {nca[-1] / taLast * 100:.0f}%"
+
+
+def _bsTangibleIntangibleLines(tangible, intangible, taLast: float) -> list[str]:
+    """유형/무형 자산 비중."""
+    tanClean = _lastN(tangible, 1)
+    intClean = _lastN(intangible, 1)
+    if not (tanClean and taLast > 0):
+        return []
+    tanRatio = tanClean[-1] / taLast * 100
+    intRatio = intClean[-1] / taLast * 100 if intClean else 0
+    lines: list[str] = []
+    if tanRatio > 30:
+        lines.append(f"유형자산 비중 {tanRatio:.0f}% — 자본집약적 구조")
+    if intRatio > 15:
+        lines.append(f"무형자산 비중 {intRatio:.0f}% — 지식자산 기반")
+    return lines
+
+
+def _bsAssetVsSalesCrossLine(inp, taGr: float) -> str | None:
+    """자산 증가율 vs 매출 증가율 교차."""
+    sales = _getVals(inp.aSeries, "IS", "sales")
+    salesClean = [v for v in sales if v is not None] if sales else []
+    if not (len(salesClean) >= 2 and salesClean[-2] != 0):
+        return None
+    salesGr = (salesClean[-1] - salesClean[-2]) / abs(salesClean[-2]) * 100
+    if taGr > salesGr + 10:
+        return "자산증가율이 매출증가율 상회 — 자산효율 하락 주의"
+    return None
+
+
+def _bsDepreciationRateLine(inp, tangible) -> str | None:
+    """감가상각률 변동 (Lens 4 — 이익의 질)."""
+    depreciation = _getVals(inp.aSeries, "CF", "depreciation_and_amortization") or _getVals(
+        inp.aSeries, "IS", "depreciation"
+    )
+    tanVals = [v for v in tangible if v is not None] if tangible else []
+    depVals = [v for v in depreciation if v is not None] if depreciation else []
+    if not (len(tanVals) >= 2 and len(depVals) >= 2):
+        return None
+    depRatePrev = abs(depVals[-2]) / tanVals[-2] * 100 if tanVals[-2] > 0 else None
+    depRateCurr = abs(depVals[-1]) / tanVals[-1] * 100 if tanVals[-1] > 0 else None
+    if depRatePrev is None or depRateCurr is None:
+        return None
+    depDiff = depRateCurr - depRatePrev
+    if abs(depDiff) <= 2:
+        return None
+    label = "감가상각 강화" if depDiff > 0 else "감가상각 완화(이익 부풀리기 가능성)"
+    return f"감가상각률 {depRateCurr:.1f}%({_pp(depDiff)}, {label})"
+
+
+def _bsDeferredTaxLine(inp, ta: list) -> str | None:
+    """이연법인세 비중 추이."""
+    deferredTax = _getVals(inp.aSeries, "BS", "deferred_tax_liabilities") or _getVals(
+        inp.aSeries, "BS", "deferred_tax_assets"
+    )
+    dtVals = [v for v in deferredTax if v is not None] if deferredTax else []
+    if not (len(dtVals) >= 2 and ta[-1] > 0 and len(ta) >= 2 and ta[-2] > 0):
+        return None
+    dtRatioCurr = dtVals[-1] / ta[-1] * 100
+    dtRatioPrev = dtVals[-2] / ta[-2] * 100
+    dtDiff = dtRatioCurr - dtRatioPrev
+    if abs(dtDiff) <= 0.5:
+        return None
+    return f"이연법인세 비중 {dtRatioCurr:.1f}%({_pp(dtDiff)}) — 세무·회계 차이 변동 주시"
+
+
 def _analyzeBalanceSheetStructure(inp: _Input) -> NarrativeParagraph | None:
-    """자산구성 분석 — 유동/비유동 비중, 유형 vs 무형, 추세."""
+    """자산구성 분석 orchestrator — 7 지표 (Q3.1f split)."""
     totalAssets = _getVals(inp.aSeries, "BS", "total_assets")
     currentAssets = _getVals(inp.aSeries, "BS", "total_current_assets")
     nonCurrentAssets = _getVals(inp.aSeries, "BS", "total_non_current_assets")
@@ -885,74 +976,31 @@ def _analyzeBalanceSheetStructure(inp: _Input) -> NarrativeParagraph | None:
     if len(ta) < 2 or ta[-1] == 0:
         return None
 
-    parts: list[str] = []
-
-    # 자산 규모 변동
     taGr = (ta[-1] - ta[-2]) / abs(ta[-2]) * 100
-    parts.append(f"총자산 {ta[-1] / 1e8:,.0f}억(전년 대비 {taGr:+.1f}%)")
+    parts: list[str] = [f"총자산 {ta[-1] / 1e8:,.0f}억(전년 대비 {taGr:+.1f}%)"]
 
-    # 유동/비유동 비중
-    ca = _lastN(currentAssets, 1)
-    nca = _lastN(nonCurrentAssets, 1)
-    if ca and nca and ta[-1] > 0:
-        caRatio = ca[-1] / ta[-1] * 100
-        ncaRatio = nca[-1] / ta[-1] * 100
-        parts.append(f"유동 {caRatio:.0f}% / 비유동 {ncaRatio:.0f}%")
+    ratioLine = _bsStructureRatioLine(currentAssets, nonCurrentAssets, ta[-1])
+    if ratioLine:
+        parts.append(ratioLine)
 
-    # 유형 vs 무형
-    tanClean = _lastN(tangible, 1)
-    intClean = _lastN(intangible, 1)
-    if tanClean and ta[-1] > 0:
-        tanRatio = tanClean[-1] / ta[-1] * 100
-        intRatio = intClean[-1] / ta[-1] * 100 if intClean else 0
-        if tanRatio > 30:
-            parts.append(f"유형자산 비중 {tanRatio:.0f}% — 자본집약적 구조")
-        if intRatio > 15:
-            parts.append(f"무형자산 비중 {intRatio:.0f}% — 지식자산 기반")
+    parts.extend(_bsTangibleIntangibleLines(tangible, intangible, ta[-1]))
 
-    # 자산 성장 vs 매출 성장 교차
-    sales = _getVals(inp.aSeries, "IS", "sales")
-    salesClean = [v for v in sales if v is not None] if sales else []
-    if len(salesClean) >= 2 and salesClean[-2] != 0:
-        salesGr = (salesClean[-1] - salesClean[-2]) / abs(salesClean[-2]) * 100
-        if taGr > salesGr + 10:
-            parts.append("자산증가율이 매출증가율 상회 — 자산효율 하락 주의")
+    crossLine = _bsAssetVsSalesCrossLine(inp, taGr)
+    if crossLine:
+        parts.append(crossLine)
 
-    # 감가상각률 변동 (Lens 4 — 이익의 질)
-    depreciation = _getVals(inp.aSeries, "CF", "depreciation_and_amortization")
-    if not depreciation:
-        depreciation = _getVals(inp.aSeries, "IS", "depreciation")
-    tanVals = [v for v in tangible if v is not None] if tangible else []
-    depVals = [v for v in depreciation if v is not None] if depreciation else []
-    if len(tanVals) >= 2 and len(depVals) >= 2:
-        depRatePrev = abs(depVals[-2]) / tanVals[-2] * 100 if tanVals[-2] > 0 else None
-        depRateCurr = abs(depVals[-1]) / tanVals[-1] * 100 if tanVals[-1] > 0 else None
-        if depRatePrev is not None and depRateCurr is not None:
-            depDiff = depRateCurr - depRatePrev
-            if abs(depDiff) > 2:
-                label = "감가상각 강화" if depDiff > 0 else "감가상각 완화(이익 부풀리기 가능성)"
-                parts.append(f"감가상각률 {depRateCurr:.1f}%({_pp(depDiff)}, {label})")
+    depLine = _bsDepreciationRateLine(inp, tangible)
+    if depLine:
+        parts.append(depLine)
 
-    # 이연법인세 추세 (BS)
-    deferredTax = _getVals(inp.aSeries, "BS", "deferred_tax_liabilities")
-    if not deferredTax:
-        deferredTax = _getVals(inp.aSeries, "BS", "deferred_tax_assets")
-    dtVals = [v for v in deferredTax if v is not None] if deferredTax else []
-    if len(dtVals) >= 2 and ta[-1] > 0:
-        dtRatioCurr = dtVals[-1] / ta[-1] * 100
-        dtRatioPrev = dtVals[-2] / ta[-2] * 100 if len(ta) >= 2 and ta[-2] > 0 else None
-        if dtRatioPrev is not None and abs(dtRatioCurr - dtRatioPrev) > 0.5:
-            dtDiff = dtRatioCurr - dtRatioPrev
-            parts.append(f"이연법인세 비중 {dtRatioCurr:.1f}%({_pp(dtDiff)}) — 세무·회계 차이 변동 주시")
+    dtLine = _bsDeferredTaxLine(inp, ta)
+    if dtLine:
+        parts.append(dtLine)
 
     if not parts:
         return None
     body = ". ".join(parts) + "."
-    severity = "neutral"
-    if taGr > 20:
-        severity = "warning"
-    elif taGr < -10:
-        severity = "negative"
+    severity = "warning" if taGr > 20 else "negative" if taGr < -10 else "neutral"
     return NarrativeParagraph(
         dimension="bsStructure",
         title="자산구성 분석",
