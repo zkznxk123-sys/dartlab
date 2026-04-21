@@ -545,6 +545,81 @@ codex mcp add dartlab -- uv run dartlab mcp
 | 시장/거시 | macroAnalysis, marketScan, gatherData, quantAnalysis, topdownScreen |
 | 검색 | searchCompany, dartlabSearch, dartlabListing |
 
+## dartlab-lite — 브라우저·엑셀에서 설치 없이 (Pyodide)
+
+> 상세: [블로그 — 엑셀·브라우저·노트북에서 설치 없이 dartlab 쓰기 (Pyodide)](https://eddmpython.github.io/dartlab/blog/pyodide-dartlab-lite)
+
+[Pyodide](https://pyodide.org/)가 CPython을 WebAssembly로 포팅한 덕에 **파이썬이 설치되지 않은 환경**에서도 dartlab이 그대로 돈다. 같은 API, 같은 데이터.
+
+**지원 환경**: [xlwings Lite](https://lite.xlwings.org/) (Excel) · [Anaconda Code](https://www.anaconda.com/products/code-for-excel) (Excel) · [JupyterLite](https://jupyterlite.readthedocs.io/) · Google Colab WASM 런타임 · marimo (pyodide) · 순수 HTML 임베드.
+
+**[👉 웹 엑셀에서 바로 열어보기 — OneDrive 공유 워크북](https://1drv.ms/x/c/4e17617bfea66347/IQB9zW91TaD4TJvHM8LRQTh4ARj0gHMapx4LVhCCSbBz92Q?e=HQ4E7d)** — xlwings Lite + dartlab 세팅 완료. 버튼만 누르면 시트에 재무제표가 찍힌다.
+
+### 두 가지 사용 방식 — script형 vs func형
+
+xlwings Lite는 두 데코레이터를 제공한다. **`@script`는 버튼형(명령형)**, **`@func`는 수식형(선언형)**. dartlab은 둘 다 지원하며, **함수형이 dartlab을 엑셀답게 쓰는 방법**이다.
+
+**1. `@script` — 사이드바 버튼 → 시트에 채우기**
+
+```python
+import dartlab
+import xlwings as xw
+from xlwings import arg, func, script
+
+@script(name="isTest")
+def finance(book: xw.Book):
+    c = dartlab.Company('000020')
+    df = c.show('IS')
+    data = [list(df.columns)] + [list(r) for r in df.iter_rows()]
+    sheet = book.sheets.active
+    sheet["A3"].value = data
+```
+
+<img src=".github/assets/xlwings-lite-script.webp" alt="xlwings Lite — @script 모드, 버튼 누르면 시트에 IS가 채워진다" width="720">
+
+**2. `@func` — 엑셀 셀에 수식처럼 `=GETFINANCE("005930")`**
+
+```python
+@func
+def getFinance(code: str):
+    c = dartlab.Company(code)
+    df = c.show('IS')
+    data = [list(df.columns)] + [list(r) for r in df.iter_rows()]
+    return data
+```
+
+<img src=".github/assets/xlwings-lite-func.webp" alt="xlwings Lite — @func 모드, 셀에 =GETFINANCE(\"005930\")만 쳐도 5분기 IS가 자동 스필" width="720">
+
+VLOOKUP과 나란히 **`=GETFINANCE`가 엑셀 네이티브 함수**로 동작한다. 종목코드를 바꾸면 셀 재계산으로 전부 갱신된다.
+
+### 설치 (xlwings Lite · 한 줄)
+
+```python
+import micropip
+await micropip.install(["diff-match-patch", "openpyxl"])
+await micropip.install(
+    "https://huggingface.co/eddmpython/dartlab-data/resolve/main/pyodide/dartlab-latest-py3-none-any.whl",
+    deps=False,
+)
+
+import dartlab
+c = dartlab.Company("005930")
+c.show("IS")
+```
+
+또는 xlwings Lite 사이드바의 `requirements.txt`에 `dartlab` 한 줄 — 그것만으로 끝. **로컬 파이썬 0줄, uv 0줄, venv 0줄.**
+
+### 제약 (브라우저 런타임의 한계)
+
+| 기능 | Pyodide | 비고 |
+|---|:---:|---|
+| `Company()` · `c.show()` · `analysis` · `review` · `credit` | ✅ | HF parquet 자동 다운로드 |
+| `dartlab.ask()` | ✅ | API 키 설정 필요 (gemini·openai CORS OK) |
+| `dartlab.scan()` | ❌ | 사전 빌드 parquet 271MB (브라우저 비현실적) |
+| `dartlab.gather()` | ❌ | Naver·Yahoo·Google News CORS 차단 |
+
+스레드 없음 · MEMFS 휘발 · CORS 미허용 API 불가 — 이 세 제약이 근본이다. 상세와 빌드 파이프라인은 [pyodide/README.md](pyodide/README.md), 설치 5단계 스크린샷은 [블로그 글](https://eddmpython.github.io/dartlab/blog/pyodide-dartlab-lite)을 본다.
+
 ## REST API — 키 없이 공시 조회
 
 HuggingFace Spaces에서 DART API 프록시 제공. API 키 없이 실시간 공시 데이터 접근:

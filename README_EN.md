@@ -522,6 +522,81 @@ Or auto-generate: `dartlab mcp --config claude-desktop`
 | Market | macroAnalysis, marketScan, gatherData, quantAnalysis, topdownScreen |
 | Search | searchCompany, dartlabSearch, dartlabListing |
 
+## dartlab-lite — Browser & Excel, No Install (Pyodide)
+
+> Deep dive: [Blog — Run dartlab in Excel, browser, and notebooks without install (Pyodide)](https://eddmpython.github.io/dartlab/blog/pyodide-dartlab-lite)
+
+[Pyodide](https://pyodide.org/) ports CPython to WebAssembly, so dartlab runs in environments **without Python installed**. Same API, same data.
+
+**Supported hosts**: [xlwings Lite](https://lite.xlwings.org/) (Excel) · [Anaconda Code](https://www.anaconda.com/products/code-for-excel) (Excel) · [JupyterLite](https://jupyterlite.readthedocs.io/) · Google Colab WASM runtime · marimo (pyodide) · plain HTML embed.
+
+**[👉 Open the demo workbook in Web Excel (OneDrive)](https://1drv.ms/x/c/4e17617bfea66347/IQB9zW91TaD4TJvHM8LRQTh4ARj0gHMapx4LVhCCSbBz92Q?e=HQ4E7d)** — xlwings Lite + dartlab pre-wired. Click the button, or type `=GETFINANCE("005930")` in any cell.
+
+### Two modes — script vs. func
+
+xlwings Lite provides two decorators. **`@script` is imperative (sidebar button writes into sheet)**, **`@func` is declarative (the cell calls it like a formula)**. dartlab supports both; **`@func` is the most Excel-native way** to use dartlab.
+
+**1. `@script` — sidebar button fills the sheet**
+
+```python
+import dartlab
+import xlwings as xw
+from xlwings import arg, func, script
+
+@script(name="isTest")
+def finance(book: xw.Book):
+    c = dartlab.Company('000020')
+    df = c.show('IS')
+    data = [list(df.columns)] + [list(r) for r in df.iter_rows()]
+    sheet = book.sheets.active
+    sheet["A3"].value = data
+```
+
+<img src=".github/assets/xlwings-lite-script.webp" alt="xlwings Lite — @script mode, button fills the IS into the sheet" width="720">
+
+**2. `@func` — call it like a formula: `=GETFINANCE("005930")`**
+
+```python
+@func
+def getFinance(code: str):
+    c = dartlab.Company(code)
+    df = c.show('IS')
+    data = [list(df.columns)] + [list(r) for r in df.iter_rows()]
+    return data
+```
+
+<img src=".github/assets/xlwings-lite-func.webp" alt="xlwings Lite — @func mode, =GETFINANCE(\"005930\") spills 5 quarterly IS rows automatically" width="720">
+
+`=GETFINANCE` becomes a native Excel UDF, sitting next to VLOOKUP. Change the ticker, Excel recalculates.
+
+### Install (xlwings Lite — one line)
+
+```python
+import micropip
+await micropip.install(["diff-match-patch", "openpyxl"])
+await micropip.install(
+    "https://huggingface.co/eddmpython/dartlab-data/resolve/main/pyodide/dartlab-latest-py3-none-any.whl",
+    deps=False,
+)
+
+import dartlab
+c = dartlab.Company("005930")
+c.show("IS")
+```
+
+Or add `dartlab` as a single line to the `requirements.txt` tab in the xlwings Lite sidebar — done. **No local Python, no uv, no venv.**
+
+### Limits (what the browser runtime can't do)
+
+| Feature | Pyodide | Note |
+|---|:---:|---|
+| `Company()` · `c.show()` · `analysis` · `review` · `credit` | ✅ | HF parquet auto-download |
+| `dartlab.ask()` | ✅ | Needs API key (gemini·openai CORS-friendly) |
+| `dartlab.scan()` | ❌ | Pre-built parquet 271MB (not practical in browser) |
+| `dartlab.gather()` | ❌ | Naver·Yahoo·Google News block CORS |
+
+Three fundamentals: no threads, MEMFS is volatile, no access to CORS-blocked APIs. Build pipeline in [pyodide/README.md](pyodide/README.md); step-by-step install screenshots in the [blog post](https://eddmpython.github.io/dartlab/blog/pyodide-dartlab-lite).
+
 ## REST API — No API Key Required
 
 DART API proxy on HuggingFace Spaces. Access real-time disclosure data without an API key:

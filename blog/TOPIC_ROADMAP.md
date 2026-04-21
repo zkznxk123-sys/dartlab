@@ -77,7 +77,7 @@
 | 42 | asset-structure-how-to-read | financial-context |
 | 43 | cashflow-how-to-read | financial-context |
 
-### 02 DartLab 소식 (6편, 사용자 관리)
+### 02 DartLab 소식 (8편, 사용자 관리)
 
 | # | slug |
 |---|------|
@@ -87,6 +87,8 @@
 | 04 | company-one-stock-code |
 | 05 | search-without-embeddings |
 | 06 | magic-formula-korea |
+| 07 | dataset-auto-sync |
+| 08 | pyodide-dartlab-lite |
 
 ### 04 신용분석 보고서 (프로그래매틱, publisher.py 관리)
 
