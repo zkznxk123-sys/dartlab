@@ -47,8 +47,6 @@ class _Input:
 # ══════════════════════════════════════
 
 
-
-
 def _pct(v: float | None) -> str:
     """% 포맷."""
     if v is None:
@@ -589,102 +587,115 @@ def _analyzeCashflowQuality(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(dimension="cashflow", title="현금흐름의 질", body=body, severity=cfSev)
 
 
-def _analyzeEfficiency(inp: _Input) -> NarrativeParagraph | None:
-    """운전자본 효율성 — DSO/DIO/DPO/CCC 추세."""
-    sales = _getVals(inp.aSeries, "IS", "sales")
-    cogs = _getVals(inp.aSeries, "IS", "cost_of_sales")
-    receivables = _getVals(inp.aSeries, "BS", "trade_receivable")
-    if not receivables:
-        receivables = _getVals(inp.aSeries, "BS", "trade_and_other_receivables")
-    inventories = _getVals(inp.aSeries, "BS", "inventories")
-    payables = _getVals(inp.aSeries, "BS", "trade_payable")
-    if not payables:
-        payables = _getVals(inp.aSeries, "BS", "trade_and_other_payables")
+def _daysRatioSeries(nums: list, dens: list) -> list[float | None]:
+    """N일 비율 시계열 — 각 기간 nums[i] / (dens[i]/365)."""
+    out: list[float | None] = []
+    for n, d in zip(nums, dens):
+        out.append(n / (d / 365) if n is not None and d is not None and d != 0 else None)
+    return out
 
-    if not sales or len(sales) < 2:
+
+def _efficiencyDayLine(
+    clean: list,
+    metric: str,
+    diffThreshold: float,
+    worseLabel: str,
+    betterLabel: str,
+    showStableOn: bool = True,
+) -> str | None:
+    """DSO/DIO/DPO 공통 line — diff > threshold 이면 변화 라벨, 아니면 안정."""
+    if len(clean) < 2:
         return None
+    diff = clean[-1] - clean[-2]
+    if abs(diff) > diffThreshold:
+        label = worseLabel if diff > 0 else betterLabel
+        return f"{metric} {clean[-2]:.0f}일→{clean[-1]:.0f}일({label})"
+    if showStableOn:
+        return f"{metric} {clean[-1]:.0f}일(안정)"
+    return None
 
-    # DSO 계산
-    dsoList: list[float | None] = []
-    for r, s in zip(receivables, sales):
-        dsoList.append(r / (s / 365) if r is not None and s is not None and s != 0 else None)
 
-    # DIO 계산
-    dioList: list[float | None] = []
-    for inv, c in zip(inventories, cogs):
-        dioList.append(inv / (c / 365) if inv is not None and c is not None and c != 0 else None)
-
-    # DPO 계산
-    dpoList: list[float | None] = []
-    for p, c in zip(payables, cogs):
-        dpoList.append(p / (c / 365) if p is not None and c is not None and c != 0 else None)
-
-    # CCC
-    cccList: list[float | None] = []
-    for dso, dio, dpo in zip(dsoList, dioList, dpoList):
-        if all(v is not None for v in (dso, dio, dpo)):
-            cccList.append(dso + dio - dpo)
-        else:
-            cccList.append(None)
-
-    parts: list[str] = []
-
-    # DSO 추세
-    cleanDso = [v for v in dsoList if v is not None]
-    if len(cleanDso) >= 2:
-        dsoDiff = cleanDso[-1] - cleanDso[-2]
-        if abs(dsoDiff) > 3:
-            label = "악화" if dsoDiff > 0 else "개선"
-            parts.append(f"DSO {cleanDso[-2]:.0f}일→{cleanDso[-1]:.0f}일({label})")
-        else:
-            parts.append(f"DSO {cleanDso[-1]:.0f}일(안정)")
-
-    # DIO 추세 (개별 표시)
-    cleanDio = [v for v in dioList if v is not None]
-    if len(cleanDio) >= 2:
-        dioDiff = cleanDio[-1] - cleanDio[-2]
-        if abs(dioDiff) > 3:
-            label = "재고부담 증가" if dioDiff > 0 else "재고 효율화"
-            parts.append(f"DIO {cleanDio[-2]:.0f}일→{cleanDio[-1]:.0f}일({label})")
-        else:
-            parts.append(f"DIO {cleanDio[-1]:.0f}일(안정)")
-
-    # DPO 추세 (개별 표시)
-    cleanDpo = [v for v in dpoList if v is not None]
-    if len(cleanDpo) >= 2:
-        dpoDiff = cleanDpo[-1] - cleanDpo[-2]
-        if abs(dpoDiff) > 3:
-            label = "지급 지연" if dpoDiff > 0 else "조기 지급"
-            parts.append(f"DPO {cleanDpo[-2]:.0f}일→{cleanDpo[-1]:.0f}일({label})")
-
-    # CCC 추세
+def _efficiencyCccLines(cccList: list) -> list[str]:
+    """CCC trend + 음수 특이 구조 라인."""
+    lines: list[str] = []
     cleanCcc = [v for v in cccList if v is not None]
     if len(cleanCcc) >= 2:
         cccDiff = cleanCcc[-1] - cleanCcc[-2]
         if abs(cccDiff) > 5:
             label = "연장" if cccDiff > 0 else "단축"
-            parts.append(f"CCC {cleanCcc[-2]:.0f}일→{cleanCcc[-1]:.0f}일({cccDiff:+.0f}일 {label})")
-        # CCC 마이너스 해석 (선수금·선결제 비즈니스)
+            lines.append(f"CCC {cleanCcc[-2]:.0f}일→{cleanCcc[-1]:.0f}일({cccDiff:+.0f}일 {label})")
         if cleanCcc[-1] < 0:
-            parts.append(f"CCC 음수({cleanCcc[-1]:.0f}일) — 매입채무 지급 전 현금 회수, 운전자본 우위 구조")
+            lines.append(f"CCC 음수({cleanCcc[-1]:.0f}일) — 매입채무 지급 전 현금 회수, 운전자본 우위 구조")
     elif len(cleanCcc) == 1 and cleanCcc[0] < 0:
-        parts.append(f"CCC 음수({cleanCcc[0]:.0f}일) — 운전자본 우위 구조")
+        lines.append(f"CCC 음수({cleanCcc[0]:.0f}일) — 운전자본 우위 구조")
+    return lines
 
-    # 운전자본 절대치 추이
+
+def _efficiencyNwcLine(sales, receivables, inventories, payables) -> str | None:
+    """순운전자본 / 매출 비율."""
     salesClean = [v for v in sales if v is not None]
     arClean = [v for v in receivables if v is not None] if receivables else []
     invClean = [v for v in inventories if v is not None] if inventories else []
     apClean = [v for v in payables if v is not None] if payables else []
-    if arClean and invClean and apClean:
-        nwc = (arClean[-1] + invClean[-1]) - apClean[-1]
-        nwcRatio = nwc / salesClean[-1] * 100 if salesClean and salesClean[-1] > 0 else None
-        if nwcRatio is not None:
-            parts.append(f"순운전자본/매출 {nwcRatio:.1f}%")
+    if not (arClean and invClean and apClean and salesClean and salesClean[-1] > 0):
+        return None
+    nwc = (arClean[-1] + invClean[-1]) - apClean[-1]
+    return f"순운전자본/매출 {nwc / salesClean[-1] * 100:.1f}%"
 
-    # 매출 증가 + CCC 악화 교차
-    if len(salesClean) >= 2 and salesClean[-1] > salesClean[-2] and cleanCcc and len(cleanCcc) >= 2:
-        if cleanCcc[-1] > cleanCcc[-2]:
-            parts.append("매출 증가에도 운전자본 부담 확대")
+
+def _efficiencyDayLines(dsoList: list, dioList: list, dpoList: list) -> list[str]:
+    """DSO/DIO/DPO 3 line 생성."""
+    lines: list[str] = []
+    for line in (
+        _efficiencyDayLine([v for v in dsoList if v is not None], "DSO", 3, "악화", "개선"),
+        _efficiencyDayLine([v for v in dioList if v is not None], "DIO", 3, "재고부담 증가", "재고 효율화"),
+        _efficiencyDayLine(
+            [v for v in dpoList if v is not None], "DPO", 3, "지급 지연", "조기 지급", showStableOn=False
+        ),
+    ):
+        if line:
+            lines.append(line)
+    return lines
+
+
+def _crossSalesCccLine(sales: list, cccList: list) -> str | None:
+    """매출 증가 + CCC 악화 교차 한 줄."""
+    salesClean = [v for v in sales if v is not None]
+    cleanCcc = [v for v in cccList if v is not None]
+    if len(salesClean) >= 2 and salesClean[-1] > salesClean[-2] and len(cleanCcc) >= 2 and cleanCcc[-1] > cleanCcc[-2]:
+        return "매출 증가에도 운전자본 부담 확대"
+    return None
+
+
+def _analyzeEfficiency(inp: _Input) -> NarrativeParagraph | None:
+    """운전자본 효율성 orchestrator — DSO/DIO/DPO/CCC + 교차 (Q3.1f split)."""
+    sales = _getVals(inp.aSeries, "IS", "sales")
+    cogs = _getVals(inp.aSeries, "IS", "cost_of_sales")
+    receivables = _getVals(inp.aSeries, "BS", "trade_receivable") or _getVals(
+        inp.aSeries, "BS", "trade_and_other_receivables"
+    )
+    inventories = _getVals(inp.aSeries, "BS", "inventories")
+    payables = _getVals(inp.aSeries, "BS", "trade_payable") or _getVals(inp.aSeries, "BS", "trade_and_other_payables")
+
+    if not sales or len(sales) < 2:
+        return None
+
+    dsoList = _daysRatioSeries(receivables, sales)
+    dioList = _daysRatioSeries(inventories, cogs)
+    dpoList = _daysRatioSeries(payables, cogs)
+    cccList: list[float | None] = [
+        dso + dio - dpo if all(v is not None for v in (dso, dio, dpo)) else None
+        for dso, dio, dpo in zip(dsoList, dioList, dpoList)
+    ]
+
+    parts: list[str] = _efficiencyDayLines(dsoList, dioList, dpoList)
+    parts.extend(_efficiencyCccLines(cccList))
+    nwcLine = _efficiencyNwcLine(sales, receivables, inventories, payables)
+    if nwcLine:
+        parts.append(nwcLine)
+    crossLine = _crossSalesCccLine(sales, cccList)
+    if crossLine:
+        parts.append(crossLine)
 
     if not parts:
         return None
@@ -924,65 +935,59 @@ def _analyzeBalanceSheetStructure(inp: _Input) -> NarrativeParagraph | None:
     )
 
 
-def _analyzeDebtStructure(inp: _Input) -> NarrativeParagraph | None:
-    """부채구조 분석 — 부채비율, 차입금 의존도, 이자보상배율."""
-    totalLiab = _getVals(inp.aSeries, "BS", "total_liabilities")
-    totalEquity = _getVals(inp.aSeries, "BS", "total_equity")
-    shortBorrow = _getVals(inp.aSeries, "BS", "short_term_borrowings")
-    longBorrow = _getVals(inp.aSeries, "BS", "long_term_borrowings")
-    totalAssets = _getVals(inp.aSeries, "BS", "total_assets")
-    op = _getVals(inp.aSeries, "IS", "operating_profit")
-    interest = _getVals(inp.aSeries, "IS", "interest_expense")
-    if not interest:
-        interest = _getVals(inp.aSeries, "IS", "finance_costs")
-
-    if not totalLiab or len(totalLiab) < 2:
-        return None
-
-    parts: list[str] = []
-
-    # 부채비율 추세
-    debtRatioList = []
-    for tl, te in zip(totalLiab, totalEquity):
-        debtRatioList.append(tl / te * 100 if tl is not None and te is not None and te != 0 else None)
+def _debtRatioLines(debtRatioList: list) -> tuple[list[str], list[float]]:
+    """부채비율 trend 라인 + cleanDr 리턴."""
     cleanDr = [v for v in debtRatioList if v is not None]
+    lines: list[str] = []
     if len(cleanDr) >= 2:
         drDiff = cleanDr[-1] - cleanDr[-2]
         direction, count = _consecutiveDirection(debtRatioList)
         if count >= 3:
             label = "상승" if direction == "up" else "하락"
-            parts.append(f"부채비율 {count}년 연속 {label}({cleanDr[-1]:.0f}%)")
+            lines.append(f"부채비율 {count}년 연속 {label}({cleanDr[-1]:.0f}%)")
         else:
-            parts.append(f"부채비율 {cleanDr[-1]:.0f}%(전년 {cleanDr[-2]:.0f}%, {_pp(drDiff)})")
+            lines.append(f"부채비율 {cleanDr[-1]:.0f}%(전년 {cleanDr[-2]:.0f}%, {_pp(drDiff)})")
+    return lines, cleanDr
 
-    # 차입금 의존도
-    if shortBorrow and longBorrow and totalAssets:
-        latestShort = _lastN(shortBorrow, 1)
-        latestLong = _lastN(longBorrow, 1)
-        latestTa = _lastN(totalAssets, 1)
-        if latestShort and latestLong and latestTa and latestTa[-1] > 0:
-            borrowTotal = (latestShort[-1] or 0) + (latestLong[-1] or 0)
-            borrowDep = borrowTotal / latestTa[-1] * 100
-            parts.append(f"차입금 의존도 {borrowDep:.1f}%")
-            if borrowDep > 30:
-                parts.append("차입금 의존도 과다 — 금리 변동 리스크")
 
-    # 이자보상배율
-    latestIcr = None
-    if interest and op:
-        pairs = [(o, i) for o, i in zip(op, interest) if o is not None and i is not None and i != 0]
-        if pairs:
-            latestOp, latestInt = pairs[-1]
-            latestIcr = latestOp / abs(latestInt)
-            parts.append(f"이자보상배율 {latestIcr:.1f}배")
-            if latestIcr < 1.5:
-                parts.append("이자보상배율 위험 수준 — 이자비용 충당 불안")
+def _borrowDependencyLines(shortBorrow, longBorrow, totalAssets) -> list[str]:
+    """차입금 의존도 + 경고 라인."""
+    if not (shortBorrow and longBorrow and totalAssets):
+        return []
+    latestShort = _lastN(shortBorrow, 1)
+    latestLong = _lastN(longBorrow, 1)
+    latestTa = _lastN(totalAssets, 1)
+    if not (latestShort and latestLong and latestTa and latestTa[-1] > 0):
+        return []
+    borrowTotal = (latestShort[-1] or 0) + (latestLong[-1] or 0)
+    borrowDep = borrowTotal / latestTa[-1] * 100
+    lines = [f"차입금 의존도 {borrowDep:.1f}%"]
+    if borrowDep > 30:
+        lines.append("차입금 의존도 과다 — 금리 변동 리스크")
+    return lines
 
-    # Net Debt/EBITDA (Lens 10 — 부채상환능력 핵심)
+
+def _interestCoverageLines(op: list, interest: list) -> list[str]:
+    """이자보상배율 + 경고."""
+    if not (op and interest):
+        return []
+    pairs = [(o, i) for o, i in zip(op, interest) if o is not None and i is not None and i != 0]
+    if not pairs:
+        return []
+    latestOp, latestInt = pairs[-1]
+    icr = latestOp / abs(latestInt)
+    lines = [f"이자보상배율 {icr:.1f}배"]
+    if icr < 1.5:
+        lines.append("이자보상배율 위험 수준 — 이자비용 충당 불안")
+    return lines
+
+
+def _netDebtEbitdaLines(inp, op, shortBorrow, longBorrow) -> list[str]:
+    """Net Debt / EBITDA — 부채상환능력."""
     cash = _getVals(inp.aSeries, "BS", "cash_and_cash_equivalents")
-    depreciation = _getVals(inp.aSeries, "CF", "depreciation_and_amortization")
-    if not depreciation:
-        depreciation = _getVals(inp.aSeries, "IS", "depreciation")
+    depreciation = _getVals(inp.aSeries, "CF", "depreciation_and_amortization") or _getVals(
+        inp.aSeries, "IS", "depreciation"
+    )
     cashLast = next((v for v in reversed(cash) if v is not None), None) if cash else None
     opLast = next((v for v in reversed(op) if v is not None), None) if op else None
     depLast = next((v for v in reversed(depreciation) if v is not None), None) if depreciation else None
@@ -991,29 +996,60 @@ def _analyzeDebtStructure(inp: _Input) -> NarrativeParagraph | None:
         sb = next((v for v in reversed(shortBorrow) if v is not None), 0)
         lb = next((v for v in reversed(longBorrow) if v is not None), 0)
         borrowLast = (sb or 0) + (lb or 0)
-    if borrowLast is not None and cashLast is not None and opLast is not None and depLast is not None:
-        netDebt = borrowLast - cashLast
-        ebitda = opLast + abs(depLast)
-        if ebitda > 0:
-            ndEbitda = netDebt / ebitda
-            parts.append(f"Net Debt/EBITDA {ndEbitda:.1f}배")
-            if ndEbitda > 4:
-                parts.append("Net Debt/EBITDA 4배 초과 — 부채 부담 과중")
-            elif ndEbitda < 0:
-                parts.append("순현금 상태 — 실질 무차입 경영")
+    if not (borrowLast is not None and cashLast is not None and opLast is not None and depLast is not None):
+        return []
+    netDebt = borrowLast - cashLast
+    ebitda = opLast + abs(depLast)
+    if ebitda <= 0:
+        return []
+    ndEbitda = netDebt / ebitda
+    lines = [f"Net Debt/EBITDA {ndEbitda:.1f}배"]
+    if ndEbitda > 4:
+        lines.append("Net Debt/EBITDA 4배 초과 — 부채 부담 과중")
+    elif ndEbitda < 0:
+        lines.append("순현금 상태 — 실질 무차입 경영")
+    return lines
 
-    # CF/Debt (OCF/총부채)
+
+def _ocfToDebtLines(inp, totalLiab) -> list[str]:
+    """OCF / 총부채 — 상환여력."""
     ocf = _getVals(inp.aSeries, "CF", "operating_cashflow")
     ocfLast = next((v for v in reversed(ocf) if v is not None), None) if ocf else None
     liabLast = next((v for v in reversed(totalLiab) if v is not None), None)
-    if ocfLast is not None and liabLast is not None and liabLast > 0:
-        cfDebt = ocfLast / liabLast * 100
-        parts.append(f"OCF/총부채 {cfDebt:.1f}%")
-        if cfDebt < 10:
-            parts.append("현금흐름 대비 부채 과중 — 상환여력 미흡")
+    if not (ocfLast is not None and liabLast is not None and liabLast > 0):
+        return []
+    cfDebt = ocfLast / liabLast * 100
+    lines = [f"OCF/총부채 {cfDebt:.1f}%"]
+    if cfDebt < 10:
+        lines.append("현금흐름 대비 부채 과중 — 상환여력 미흡")
+    return lines
 
-    # Fixed Charge Coverage (영업이익 / (이자비용 + 리스비용))
-    # 리스비용 별도 계정 없으면 이자보상배율로 대체 (이미 계산)
+
+def _analyzeDebtStructure(inp: _Input) -> NarrativeParagraph | None:
+    """부채구조 분석 orchestrator — 5 지표 그룹 (Q3.1f split)."""
+    totalLiab = _getVals(inp.aSeries, "BS", "total_liabilities")
+    totalEquity = _getVals(inp.aSeries, "BS", "total_equity")
+    shortBorrow = _getVals(inp.aSeries, "BS", "short_term_borrowings")
+    longBorrow = _getVals(inp.aSeries, "BS", "long_term_borrowings")
+    totalAssets = _getVals(inp.aSeries, "BS", "total_assets")
+    op = _getVals(inp.aSeries, "IS", "operating_profit")
+    interest = _getVals(inp.aSeries, "IS", "interest_expense") or _getVals(inp.aSeries, "IS", "finance_costs")
+
+    if not totalLiab or len(totalLiab) < 2:
+        return None
+
+    debtRatioList = [
+        tl / te * 100 if tl is not None and te is not None and te != 0 else None
+        for tl, te in zip(totalLiab, totalEquity)
+    ]
+
+    parts: list[str] = []
+    drLines, cleanDr = _debtRatioLines(debtRatioList)
+    parts.extend(drLines)
+    parts.extend(_borrowDependencyLines(shortBorrow, longBorrow, totalAssets))
+    parts.extend(_interestCoverageLines(op, interest))
+    parts.extend(_netDebtEbitdaLines(inp, op, shortBorrow, longBorrow))
+    parts.extend(_ocfToDebtLines(inp, totalLiab))
 
     if not parts:
         return None
