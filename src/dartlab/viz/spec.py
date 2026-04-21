@@ -105,6 +105,44 @@ class VizSpec:
         except (ImportError, ValueError, OSError):
             return False
 
+    def toSvgRaw(self, width: int = 800, height: int = 400) -> str:
+        """경량 SVG 문자열 (kaleido 불필요).
+
+        landing 컴포넌트와 유사한 간결한 SVG. bar/line/sparkline/pie/combo 지원.
+        """
+        from dartlab.viz.svg import render_svg
+
+        return render_svg(self.toDict(), width=width, height=height)
+
+    def toAscii(self, width: int = 80, height: int = 20) -> str:
+        """터미널용 ASCII/ANSI 차트.
+
+        bar/line/sparkline 지원. plotext 우선, 없으면 fallback.
+        """
+        from dartlab.viz.ascii import render_ascii
+
+        return render_ascii(self.toDict(), width=width, height=height)
+
+    def _repr_html_(self) -> str:
+        """Jupyter/IPython 자동 렌더 훅."""
+        try:
+            return self.toHtml()
+        except Exception:
+            return f"<pre>{self.toJson()}</pre>"
+
+    def _repr_mimebundle_(self, include=None, exclude=None) -> dict[str, Any]:
+        """Marimo/IPython MIME bundle 렌더.
+
+        text/html (Plotly 기본) + application/vnd.plotly.v1+json (Marimo 선호).
+        """
+        try:
+            return {
+                "text/html": self.toHtml(),
+                "application/vnd.plotly.v1+json": self.toDict(),
+            }
+        except Exception:
+            return {"text/plain": self.toJson()}
+
     @staticmethod
     def fromDict(d: dict[str, Any]) -> "VizSpec":
         """dict → VizSpec 변환."""
