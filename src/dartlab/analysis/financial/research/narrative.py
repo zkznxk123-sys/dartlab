@@ -1936,75 +1936,89 @@ def _analyzeDistressModels(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(dimension="distressModels", title="부실예측 다중모델", body=body, severity=severity)
 
 
+_COST_ITEMS = [
+    ("원재료", "원재료비"),
+    ("인건비", "인건비"),
+    ("감가상각", "감가상각비"),
+    ("외주", "외주가공비"),
+    ("연료", "연료비"),
+]
+
+_COST_FIXED_KEYS = ("인건비", "감가상각", "임차")
+_COST_VAR_KEYS = ("원재료", "외주", "연료")
+
+
+def _costItemLine(costDf, keyword: str, label: str, salesClean: list) -> str | None:
+    """비용 항목 단일 line — 매출 대비 비중 or 자체 변동률."""
+    cols = costDf.columns
+    matchCols = [c for c in cols if keyword in c]
+    if not matchCols:
+        return None
+    try:
+        vals = costDf[matchCols[0]].to_list()
+    except (AttributeError, ValueError, IndexError):
+        return None
+    cleanVals = [v for v in vals if v is not None]
+    if len(cleanVals) < 2:
+        return None
+    if salesClean and len(salesClean) >= len(cleanVals):
+        latestRatio = cleanVals[-1] / salesClean[-1] * 100 if salesClean[-1] > 0 else None
+        prevRatio = (
+            cleanVals[-2] / salesClean[-(len(cleanVals))] * 100 if len(salesClean) >= 2 and salesClean[-2] > 0 else None
+        )
+        if latestRatio is None:
+            return None
+        if prevRatio is not None:
+            diff = latestRatio - prevRatio
+            return f"{label}/매출 {latestRatio:.1f}%({_pp(diff)})"
+        return f"{label}/매출 {latestRatio:.1f}%"
+    diff = cleanVals[-1] - cleanVals[-2]
+    pctDiff = diff / abs(cleanVals[-2]) * 100 if cleanVals[-2] != 0 else 0
+    return f"{label} {pctDiff:+.1f}% 변동"
+
+
+def _costFixedVariableLine(costDf, salesClean: list) -> str | None:
+    """고정비/변동비 비중 추정."""
+    cols = costDf.columns
+    fixedCols = [c for c in cols if any(k in c for k in _COST_FIXED_KEYS)]
+    variableCols = [c for c in cols if any(k in c for k in _COST_VAR_KEYS)]
+    if not (fixedCols and variableCols and salesClean):
+        return None
+    try:
+        fixedTotal = sum(costDf[c].to_list()[-1] or 0 for c in fixedCols)
+        variableTotal = sum(costDf[c].to_list()[-1] or 0 for c in variableCols)
+    except (AttributeError, ValueError, IndexError):
+        return None
+    total = fixedTotal + variableTotal
+    if total <= 0:
+        return None
+    fixedRatio = fixedTotal / total * 100
+    return f"고정비 비중 추정 {fixedRatio:.0f}% / 변동비 {100 - fixedRatio:.0f}%"
+
+
 def _analyzeCostStructure(inp: _Input) -> NarrativeParagraph | None:
-    """비용 구조 분해 — costByNature 기반 원재료/인건비/감가상각 비중 (Lens 13)."""
+    """비용 구조 분해 orchestrator — costByNature 기반 (Q3.1f split)."""
     costDf = inp.costByNatureDf
     if costDf is None:
         return None
-
     try:
         import polars as pl
-
-        if not isinstance(costDf, pl.DataFrame) or len(costDf) == 0:
-            return None
     except ImportError:
         return None
-
-    parts: list[str] = []
-    cols = costDf.columns
+    if not isinstance(costDf, pl.DataFrame) or len(costDf) == 0:
+        return None
 
     sales = _getVals(inp.aSeries, "IS", "sales")
     salesClean = [v for v in sales if v is not None] if sales else []
 
-    # 주요 비용 항목 비중 추출
-    for keyword, label in [
-        ("원재료", "원재료비"),
-        ("인건비", "인건비"),
-        ("감가상각", "감가상각비"),
-        ("외주", "외주가공비"),
-        ("연료", "연료비"),
-    ]:
-        matchCols = [c for c in cols if keyword in c]
-        if not matchCols:
-            continue
-        try:
-            vals = costDf[matchCols[0]].to_list()
-            cleanVals = [v for v in vals if v is not None]
-            if len(cleanVals) >= 2:
-                # 매출 대비 비중 계산
-                if salesClean and len(salesClean) >= len(cleanVals):
-                    latestRatio = cleanVals[-1] / salesClean[-1] * 100 if salesClean[-1] > 0 else None
-                    prevRatio = (
-                        cleanVals[-2] / salesClean[-(len(cleanVals))] * 100
-                        if len(salesClean) >= 2 and salesClean[-2] > 0
-                        else None
-                    )
-                    if latestRatio is not None:
-                        if prevRatio is not None:
-                            diff = latestRatio - prevRatio
-                            parts.append(f"{label}/매출 {latestRatio:.1f}%({_pp(diff)})")
-                        else:
-                            parts.append(f"{label}/매출 {latestRatio:.1f}%")
-                elif len(cleanVals) >= 2:
-                    diff = cleanVals[-1] - cleanVals[-2]
-                    pctDiff = diff / abs(cleanVals[-2]) * 100 if cleanVals[-2] != 0 else 0
-                    parts.append(f"{label} {pctDiff:+.1f}% 변동")
-        except (AttributeError, ValueError, IndexError):
-            continue
-
-    # 고정비/변동비 추이 추정 (원재료=변동, 감가상각+인건비=고정)
-    fixedCols = [c for c in cols if any(k in c for k in ("인건비", "감가상각", "임차"))]
-    variableCols = [c for c in cols if any(k in c for k in ("원재료", "외주", "연료"))]
-    if fixedCols and variableCols and salesClean:
-        try:
-            fixedTotal = sum(costDf[c].to_list()[-1] or 0 for c in fixedCols)
-            variableTotal = sum(costDf[c].to_list()[-1] or 0 for c in variableCols)
-            total = fixedTotal + variableTotal
-            if total > 0:
-                fixedRatio = fixedTotal / total * 100
-                parts.append(f"고정비 비중 추정 {fixedRatio:.0f}% / 변동비 {100 - fixedRatio:.0f}%")
-        except (AttributeError, ValueError, IndexError):
-            pass
+    parts: list[str] = []
+    for keyword, label in _COST_ITEMS:
+        line = _costItemLine(costDf, keyword, label, salesClean)
+        if line:
+            parts.append(line)
+    fvLine = _costFixedVariableLine(costDf, salesClean)
+    if fvLine:
+        parts.append(fvLine)
 
     if not parts:
         return None
@@ -2406,80 +2420,87 @@ def _analyzeRndEfficiency(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(dimension="rndEfficiency", title="R&D 투자 효율", body=body, severity=severity)
 
 
+def _vcEstimateWacc(teClean: list, tlClean: list, taxRate: float) -> float:
+    """WACC 간이 추정 (자기자본비용 10%, 세후 부채비용 3%)."""
+    equity = teClean[-1] if teClean else 0
+    debt = tlClean[-1] if tlClean else 0
+    totalCap = equity + debt
+    if not (totalCap > 0 and equity > 0):
+        return 8.0
+    equityWeight = equity / totalCap
+    debtWeight = debt / totalCap
+    return (equityWeight * 0.10 + debtWeight * 0.03 * (1 - taxRate)) * 100
+
+
+def _vcEvaInterpretLine(eva_억: float, spread: float) -> str:
+    """EVA 해석 라인 (spread 구간별)."""
+    if spread > 3:
+        return f"경제적 부가가치(EVA) {eva_억:+,.0f}억 — 가치 창출 기업"
+    if spread > 0:
+        return f"EVA {eva_억:+,.0f}억 — 소폭 가치 창출"
+    if spread > -3:
+        return f"EVA {eva_억:+,.0f}억 — 가치 중립(WACC 근접)"
+    return f"EVA {eva_억:+,.0f}억 — 가치 파괴(자본비용 미달)"
+
+
+def _vcRoicTrendLine(opClean, taClean, clClean, cashClean, taxRate, roic: float) -> str | None:
+    """ROIC 전기 대비 변화 라인 (|diff|>1%)."""
+    if len(opClean) < 2 or len(taClean) < 2:
+        return None
+    prevCl = clClean[-2] if len(clClean) >= 2 else 0
+    prevCash = cashClean[-2] if len(cashClean) >= 2 else 0
+    prevIc = taClean[-2] - prevCl - prevCash
+    if prevIc <= 0:
+        return None
+    prevRoic = opClean[-2] * (1 - taxRate) / prevIc * 100
+    roicDiff = roic - prevRoic
+    if abs(roicDiff) <= 1:
+        return None
+    label = "자본효율 개선" if roicDiff > 0 else "자본효율 악화"
+    return f"ROIC {_pp(roicDiff)}({label})"
+
+
+def _vcExtractCleanLists(inp: _Input) -> dict[str, list]:
+    """_analyzeValueCreation 에 필요한 7개 clean 시계열 추출."""
+    getv = inp.aSeries
+    currentLiab = _getVals(getv, "BS", "current_liabilities") or _getVals(getv, "BS", "total_current_liabilities")
+    return {
+        "op": [v for v in _getVals(getv, "IS", "operating_profit") or [] if v is not None],
+        "ta": [v for v in _getVals(getv, "BS", "total_assets") or [] if v is not None],
+        "cl": [v for v in currentLiab or [] if v is not None],
+        "cash": [v for v in _getVals(getv, "BS", "cash_and_cash_equivalents") or [] if v is not None],
+        "te": [v for v in _getVals(getv, "BS", "total_equity") or [] if v is not None],
+        "tl": [v for v in _getVals(getv, "BS", "total_liabilities") or [] if v is not None],
+    }
+
+
 def _analyzeValueCreation(inp: _Input) -> NarrativeParagraph | None:
-    """EVA + 가치창출 판정 — ROIC vs WACC (Lens 6)."""
-    op = _getVals(inp.aSeries, "IS", "operating_profit")
-    totalAssets = _getVals(inp.aSeries, "BS", "total_assets")
-    currentLiab = _getVals(inp.aSeries, "BS", "current_liabilities")
-    if not currentLiab:
-        currentLiab = _getVals(inp.aSeries, "BS", "total_current_liabilities")
-    cash = _getVals(inp.aSeries, "BS", "cash_and_cash_equivalents")
-    totalEquity = _getVals(inp.aSeries, "BS", "total_equity")
-    totalLiab = _getVals(inp.aSeries, "BS", "total_liabilities")
-
-    opClean = [v for v in op if v is not None] if op else []
-    taClean = [v for v in totalAssets if v is not None] if totalAssets else []
-    clClean = [v for v in currentLiab if v is not None] if currentLiab else []
-    cashClean = [v for v in cash if v is not None] if cash else []
-    teClean = [v for v in totalEquity if v is not None] if totalEquity else []
-    tlClean = [v for v in totalLiab if v is not None] if totalLiab else []
-
+    """EVA + ROIC vs WACC orchestrator (Q3.1f split)."""
+    S = _vcExtractCleanLists(inp)
+    opClean, taClean = S["op"], S["ta"]
     if not opClean or not taClean or len(opClean) < 2:
         return None
 
-    parts: list[str] = []
-    taxRate = 0.22  # 법인세율 22% 근사
-
-    # Invested Capital = 총자산 - 유동부채 - 현금
-    cl = clClean[-1] if clClean else 0
-    ca = cashClean[-1] if cashClean else 0
+    taxRate = 0.22
+    cl = S["cl"][-1] if S["cl"] else 0
+    ca = S["cash"][-1] if S["cash"] else 0
     ic = taClean[-1] - cl - ca
     if ic <= 0:
         return None
 
     nopat = opClean[-1] * (1 - taxRate)
     roic = nopat / ic * 100
-
-    # WACC 추정 (간이: 자기자본비용 10% + 부채비용 3% × (1-세율))
-    equity = teClean[-1] if teClean else 0
-    debt = tlClean[-1] if tlClean else 0
-    totalCap = equity + debt
-    if totalCap > 0 and equity > 0:
-        equityWeight = equity / totalCap
-        debtWeight = debt / totalCap
-        costOfEquity = 0.10  # 주주 기대수익률 10% 근사
-        costOfDebt = 0.03  # 세후 부채비용 3% 근사
-        wacc = (equityWeight * costOfEquity + debtWeight * costOfDebt * (1 - taxRate)) * 100
-    else:
-        wacc = 8.0  # 기본값
-
-    # EVA = NOPAT - IC × WACC
+    wacc = _vcEstimateWacc(S["te"], S["tl"], taxRate)
     eva = nopat - ic * (wacc / 100)
-    evaBillions = eva / 1e8  # 억 단위
-
-    parts.append(f"ROIC {roic:.1f}% vs WACC {wacc:.1f}%")
     spread = roic - wacc
-    if spread > 3:
-        parts.append(f"경제적 부가가치(EVA) {evaBillions:+,.0f}억 — 가치 창출 기업")
-    elif spread > 0:
-        parts.append(f"EVA {evaBillions:+,.0f}억 — 소폭 가치 창출")
-    elif spread > -3:
-        parts.append(f"EVA {evaBillions:+,.0f}억 — 가치 중립(WACC 근접)")
-    else:
-        parts.append(f"EVA {evaBillions:+,.0f}억 — 가치 파괴(자본비용 미달)")
 
-    # ROIC 추이 (2년 이상)
-    if len(opClean) >= 2 and len(taClean) >= 2:
-        prevCl = clClean[-2] if len(clClean) >= 2 else 0
-        prevCash = cashClean[-2] if len(cashClean) >= 2 else 0
-        prevIc = taClean[-2] - prevCl - prevCash
-        if prevIc > 0:
-            prevNopat = opClean[-2] * (1 - taxRate)
-            prevRoic = prevNopat / prevIc * 100
-            roicDiff = roic - prevRoic
-            if abs(roicDiff) > 1:
-                label = "자본효율 개선" if roicDiff > 0 else "자본효율 악화"
-                parts.append(f"ROIC {_pp(roicDiff)}({label})")
+    parts: list[str] = [
+        f"ROIC {roic:.1f}% vs WACC {wacc:.1f}%",
+        _vcEvaInterpretLine(eva / 1e8, spread),
+    ]
+    trendLine = _vcRoicTrendLine(opClean, taClean, S["cl"], S["cash"], taxRate, roic)
+    if trendLine:
+        parts.append(trendLine)
 
     body = ". ".join(parts) + "."
     severity = "positive" if spread > 3 else "neutral" if spread > 0 else "warning" if spread > -3 else "negative"
@@ -2487,88 +2508,116 @@ def _analyzeValueCreation(inp: _Input) -> NarrativeParagraph | None:
 
 
 def _analyzeIndexTrend(inp: _Input) -> NarrativeParagraph | None:
-    """지수형 분석 — 기준년=100, 주요 계정 추이, 비정상 팽창 감지 (Lens 3)."""
+    """지수형 분석 — 기준년=100, 주요 계정 추이, 비정상 팽창 감지 (Lens 3, Q3.1f split)."""
     sales = _getVals(inp.aSeries, "IS", "sales")
-    op = _getVals(inp.aSeries, "IS", "operating_profit")
-    ni = _getVals(inp.aSeries, "IS", "net_profit")
-    receivables = _getVals(inp.aSeries, "BS", "trade_receivable")
-    if not receivables:
-        receivables = _getVals(inp.aSeries, "BS", "trade_and_other_receivables")
-    inventories = _getVals(inp.aSeries, "BS", "inventories")
-    totalAssets = _getVals(inp.aSeries, "BS", "total_assets")
-    totalEquity = _getVals(inp.aSeries, "BS", "total_equity")
-
     if not sales or len(sales) < 3:
         return None
 
-    def _toIndex(vals: list[float | None]) -> list[float | None]:
-        """첫 non-None 값 = 100 기준 지수 변환."""
-        base = next((v for v in vals if v is not None and v != 0), None)
-        if base is None:
-            return [None] * len(vals)
-        return [round(v / base * 100, 1) if v is not None else None for v in vals]
-
-    salesIdx = _toIndex(sales)
-    opIdx = _toIndex(op) if op else []
-    _toIndex(ni) if ni else []
-    arIdx = _toIndex(receivables) if receivables else []
-    invIdx = _toIndex(inventories) if inventories else []
-    taIdx = _toIndex(totalAssets) if totalAssets else []
-    teIdx = _toIndex(totalEquity) if totalEquity else []
-
-    parts: list[str] = []
-
-    # 매출 지수 추이
-    salesIdxClean = [v for v in salesIdx if v is not None]
-    if len(salesIdxClean) >= 3:
-        parts.append(f"매출지수 {salesIdxClean[0]:.0f}→{salesIdxClean[-1]:.0f}(기준년=100)")
-
-    # 매출채권지수 vs 매출지수 괴리
-    arIdxClean = [v for v in arIdx if v is not None]
-    if len(arIdxClean) >= 3 and len(salesIdxClean) >= 3:
-        arGap = arIdxClean[-1] - salesIdxClean[-1]
-        if arGap > 30:
-            parts.append(
-                f"매출채권지수({arIdxClean[-1]:.0f})가 매출지수({salesIdxClean[-1]:.0f}) 대비 {arGap:.0f}p 초과 팽창 — 수금 악화 또는 매출 인식 공격성"
-            )
-        elif arGap < -30:
-            parts.append(f"매출채권지수가 매출 대비 {abs(arGap):.0f}p 축소 — 회수 효율 개선")
-
-    # 재고지수 vs 매출지수 괴리
-    invIdxClean = [v for v in invIdx if v is not None]
-    if len(invIdxClean) >= 3 and len(salesIdxClean) >= 3:
-        invGap = invIdxClean[-1] - salesIdxClean[-1]
-        if invGap > 30:
-            parts.append(
-                f"재고지수({invIdxClean[-1]:.0f})가 매출지수 대비 {invGap:.0f}p 초과 팽창 — 재고 과잉 축적 경고"
-            )
-
-    # 영업이익지수 vs 매출지수 (마진 변화 시각화)
-    opIdxClean = [v for v in opIdx if v is not None]
-    if len(opIdxClean) >= 3 and len(salesIdxClean) >= 3:
-        opGap = opIdxClean[-1] - salesIdxClean[-1]
-        if opGap > 20:
-            parts.append(f"영업이익지수({opIdxClean[-1]:.0f})가 매출지수 상회 — 수익성 레버리지 확대")
-        elif opGap < -20:
-            parts.append(f"영업이익지수({opIdxClean[-1]:.0f})가 매출지수 하회 — 마진 압축")
-
-    # 자산지수 vs 자본지수 (레버리지 변화)
-    taIdxClean = [v for v in taIdx if v is not None]
-    teIdxClean = [v for v in teIdx if v is not None]
-    if len(taIdxClean) >= 3 and len(teIdxClean) >= 3:
-        leverageGap = taIdxClean[-1] - teIdxClean[-1]
-        if leverageGap > 30:
-            parts.append(f"자산지수({taIdxClean[-1]:.0f}) vs 자본지수({teIdxClean[-1]:.0f}) 괴리 확대 — 레버리지 증가")
-
-    if not parts:
+    salesIdxClean = [v for v in _toIndex(sales) if v is not None]
+    if len(salesIdxClean) < 3:
         return None
+
+    parts: list[str] = [f"매출지수 {salesIdxClean[0]:.0f}→{salesIdxClean[-1]:.0f}(기준년=100)"]
+
+    arIdxClean = _toIndexClean(
+        _getVals(inp.aSeries, "BS", "trade_receivable") or _getVals(inp.aSeries, "BS", "trade_and_other_receivables")
+    )
+    invIdxClean = _toIndexClean(_getVals(inp.aSeries, "BS", "inventories"))
+    opIdxClean = _toIndexClean(_getVals(inp.aSeries, "IS", "operating_profit"))
+    taIdxClean = _toIndexClean(_getVals(inp.aSeries, "BS", "total_assets"))
+    teIdxClean = _toIndexClean(_getVals(inp.aSeries, "BS", "total_equity"))
+
+    for line in (
+        _indexGapLine(
+            arIdxClean,
+            salesIdxClean,
+            "매출채권",
+            30,
+            isSales=True,
+            negMsg="매출채권지수가 매출 대비 {gap:.0f}p 축소 — 회수 효율 개선",
+        ),
+        _indexGapLine(
+            invIdxClean,
+            salesIdxClean,
+            "재고",
+            30,
+            posMsg="재고지수({other:.0f})가 매출지수 대비 {gap:.0f}p 초과 팽창 — 재고 과잉 축적 경고",
+        ),
+        _indexOpGapLine(opIdxClean, salesIdxClean),
+        _indexLeverageGapLine(taIdxClean, teIdxClean),
+    ):
+        if line:
+            parts.append(line)
+
     body = ". ".join(parts) + "."
-    severity = "neutral"
-    for p in parts:
-        if "경고" in p or "공격성" in p or "과잉" in p:
-            severity = "warning"
-            break
+    severity = "warning" if any("경고" in p or "공격성" in p or "과잉" in p for p in parts) else "neutral"
     return NarrativeParagraph(dimension="indexTrend", title="지수형 추세 분석", body=body, severity=severity)
+
+
+def _toIndex(vals: list[float | None]) -> list[float | None]:
+    """첫 non-None·non-zero 값 = 100 기준 지수 변환."""
+    base = next((v for v in vals if v is not None and v != 0), None)
+    if base is None:
+        return [None] * len(vals)
+    return [round(v / base * 100, 1) if v is not None else None for v in vals]
+
+
+def _toIndexClean(vals) -> list[float]:
+    """_toIndex 후 None 제거."""
+    if not vals:
+        return []
+    return [v for v in _toIndex(vals) if v is not None]
+
+
+def _indexGapLine(
+    otherClean: list,
+    salesIdxClean: list,
+    label: str,
+    threshold: float,
+    posMsg: str | None = None,
+    negMsg: str | None = None,
+    isSales: bool = False,
+) -> str | None:
+    """other 지수 - 매출 지수 gap 판정.
+
+    기본 posMsg: '{label}지수({other:.0f})가 매출지수({sales:.0f}) 대비 {gap:.0f}p 초과 팽창 — 수금 악화 또는 매출 인식 공격성'
+    """
+    if not (len(otherClean) >= 3 and len(salesIdxClean) >= 3):
+        return None
+    gap = otherClean[-1] - salesIdxClean[-1]
+    if gap > threshold:
+        msg = posMsg or (
+            "매출채권지수({other:.0f})가 매출지수({sales:.0f}) 대비 {gap:.0f}p 초과 팽창 — 수금 악화 또는 매출 인식 공격성"
+            if isSales
+            else None
+        )
+        if msg:
+            return msg.format(other=otherClean[-1], sales=salesIdxClean[-1], gap=gap)
+    if negMsg and gap < -threshold:
+        return negMsg.format(other=otherClean[-1], sales=salesIdxClean[-1], gap=abs(gap))
+    return None
+
+
+def _indexOpGapLine(opIdxClean, salesIdxClean) -> str | None:
+    """영업이익지수 vs 매출지수 (마진 변화)."""
+    if not (len(opIdxClean) >= 3 and len(salesIdxClean) >= 3):
+        return None
+    opGap = opIdxClean[-1] - salesIdxClean[-1]
+    if opGap > 20:
+        return f"영업이익지수({opIdxClean[-1]:.0f})가 매출지수 상회 — 수익성 레버리지 확대"
+    if opGap < -20:
+        return f"영업이익지수({opIdxClean[-1]:.0f})가 매출지수 하회 — 마진 압축"
+    return None
+
+
+def _indexLeverageGapLine(taIdxClean, teIdxClean) -> str | None:
+    """자산지수 vs 자본지수 (레버리지 변화)."""
+    if not (len(taIdxClean) >= 3 and len(teIdxClean) >= 3):
+        return None
+    leverageGap = taIdxClean[-1] - teIdxClean[-1]
+    if leverageGap > 30:
+        return f"자산지수({taIdxClean[-1]:.0f}) vs 자본지수({teIdxClean[-1]:.0f}) 괴리 확대 — 레버리지 증가"
+    return None
 
 
 # ══════════════════════════════════════
