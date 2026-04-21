@@ -222,7 +222,9 @@ jobs:
   # 파일별 독립 프로세스 (test-realdata.sh) 로 메모리 격리.
   realdata-suite:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 84+ 엔진 smoke + 파일별 격리 프로세스. 2026-04-21 측정: 48% @ 28m →
+    # 전체 ~60m. timeout 30 → 60 (여유). Q4 효율 개선 완료 시 재조정.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
 
