@@ -2040,54 +2040,55 @@ def _analyzeCostStructure(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(dimension="costStructure", title="비용 구조 분석", body=body, severity="neutral")
 
 
+def _findBacklogCol(cols: list[str]) -> str | None:
+    """수주잔고 컬럼 탐색."""
+    for c in cols:
+        if "잔고" in c or "backlog" in c.lower():
+            return c
+    return None
+
+
+def _salesOrderLines(cleanVals: list, inp: _Input) -> list[str]:
+    """수주잔고 추세 + Book-to-Bill 비율 라인."""
+    lines: list[str] = []
+    if len(cleanVals) >= 2:
+        diff = (cleanVals[-1] - cleanVals[-2]) / abs(cleanVals[-2]) * 100 if cleanVals[-2] != 0 else 0
+        lines.append(f"수주잔고 {cleanVals[-1] / 1e8:,.0f}억(전년 대비 {diff:+.1f}%)")
+    sales = _getVals(inp.aSeries, "IS", "sales")
+    salesClean = [v for v in sales if v is not None] if sales else []
+    if salesClean and cleanVals and salesClean[-1] > 0:
+        btb = cleanVals[-1] / salesClean[-1]
+        lines.append(f"수주잔고/매출 비율 {btb:.2f}")
+        if btb > 1.5:
+            lines.append("수주잔고 풍부 — 1.5년 이상 매출 보장")
+        elif btb < 0.3:
+            lines.append("수주잔고 부족 — 매출 가시성 낮음")
+    return lines
+
+
 def _analyzeSalesOrder(inp: _Input) -> NarrativeParagraph | None:
-    """수주잔고 분석 — Book-to-Bill, 수주 추이 (Lens 13)."""
+    """수주잔고 orchestrator (Lens 13, Q3.1f split)."""
     soDf = inp.salesOrderDf
     if soDf is None:
         return None
-
     try:
         import polars as pl
-
-        if not isinstance(soDf, pl.DataFrame) or len(soDf) == 0:
-            return None
     except ImportError:
+        return None
+    if not isinstance(soDf, pl.DataFrame) or len(soDf) == 0:
+        return None
+
+    backlogCol = _findBacklogCol(soDf.columns)
+    if not backlogCol:
         return None
 
     parts: list[str] = []
-    cols = soDf.columns
-
-    # 수주잔고 컬럼 탐색
-    backlogCol = None
-    for c in cols:
-        cl = c.lower()
-        if "잔고" in c or "backlog" in cl:
-            backlogCol = c
-        elif "수주" in c and "잔고" not in c or "order" in cl:
-            pass
-        elif "매출" in c or "sales" in cl or "납품" in c:
-            pass
-
-    if backlogCol:
-        try:
-            vals = soDf[backlogCol].to_list()
-            cleanVals = [v for v in vals if v is not None]
-            if len(cleanVals) >= 2:
-                diff = (cleanVals[-1] - cleanVals[-2]) / abs(cleanVals[-2]) * 100 if cleanVals[-2] != 0 else 0
-                parts.append(f"수주잔고 {cleanVals[-1] / 1e8:,.0f}억(전년 대비 {diff:+.1f}%)")
-
-            # Book-to-Bill 비율 (수주잔고/매출)
-            sales = _getVals(inp.aSeries, "IS", "sales")
-            salesClean = [v for v in sales if v is not None] if sales else []
-            if salesClean and len(cleanVals) >= 1 and salesClean[-1] > 0:
-                btb = cleanVals[-1] / salesClean[-1]
-                parts.append(f"수주잔고/매출 비율 {btb:.2f}")
-                if btb > 1.5:
-                    parts.append("수주잔고 풍부 — 1.5년 이상 매출 보장")
-                elif btb < 0.3:
-                    parts.append("수주잔고 부족 — 매출 가시성 낮음")
-        except (AttributeError, ValueError, IndexError):
-            pass
+    try:
+        vals = soDf[backlogCol].to_list()
+        cleanVals = [v for v in vals if v is not None]
+        parts.extend(_salesOrderLines(cleanVals, inp))
+    except (AttributeError, ValueError, IndexError):
+        pass
 
     if not parts:
         return None
@@ -2399,67 +2400,72 @@ def _analyzeHumanCapital(inp: _Input) -> NarrativeParagraph | None:
     )
 
 
-def _analyzeRndEfficiency(inp: _Input) -> NarrativeParagraph | None:
-    """R&D 투자 효율성 — R&D/매출 비율, 추이 (Lens 14)."""
-    rndDf = inp.rndDf
-    if rndDf is None:
-        return None
-
-    try:
-        import polars as pl
-
-        if not isinstance(rndDf, pl.DataFrame) or len(rndDf) == 0:
-            return None
-    except ImportError:
-        return None
-
-    parts: list[str] = []
-    cols = rndDf.columns
-
-    # R&D 금액 컬럼 탐색
-    rndCol = None
+def _findRndCol(cols: list[str]) -> str | None:
+    """R&D 금액 컬럼 탐색."""
     for c in cols:
         cl = c.lower()
         if "연구" in c or "개발" in c or "r&d" in cl or "rnd" in cl or "금액" in c:
-            rndCol = c
-            break
+            return c
+    return None
 
-    if rndCol:
-        try:
-            rndVals = rndDf[rndCol].to_list()
-            rClean = [v for v in rndVals if v is not None and v > 0]
-            if rClean:
-                sales = _getVals(inp.aSeries, "IS", "sales")
-                sClean = [v for v in sales if v is not None] if sales else []
 
-                if sClean and sClean[-1] > 0:
-                    rndIntensity = rClean[-1] / sClean[-1] * 100
-                    parts.append(f"R&D/매출 {rndIntensity:.1f}%")
-                    if rndIntensity > 10:
-                        parts.append("R&D 집약적 — 기술주도형 기업")
-                    elif rndIntensity < 1:
-                        parts.append("R&D 투자 미미")
+def _rndEfficiencyLines(rClean: list, sClean: list) -> list[str]:
+    """R&D/매출 intensity + 지출 추이 + 매출 효율 판정."""
+    lines: list[str] = []
+    if sClean and sClean[-1] > 0:
+        intensity = rClean[-1] / sClean[-1] * 100
+        lines.append(f"R&D/매출 {intensity:.1f}%")
+        if intensity > 10:
+            lines.append("R&D 집약적 — 기술주도형 기업")
+        elif intensity < 1:
+            lines.append("R&D 투자 미미")
+    if len(rClean) >= 2:
+        rGr = (rClean[-1] - rClean[-2]) / abs(rClean[-2]) * 100
+        lines.append(f"R&D 지출 {rGr:+.1f}% 변동")
+        if sClean and len(sClean) >= 2 and sClean[-2] > 0:
+            sGr = (sClean[-1] - sClean[-2]) / abs(sClean[-2]) * 100
+            if rGr > 20 and sGr < 5:
+                lines.append("R&D 대폭 확대에도 매출 정체 — 투자 회수 시차 또는 효율성 점검 필요")
+            elif sGr > 10 and rGr > 10:
+                lines.append("R&D 확대 + 매출 성장 동반 — 투자 효율 양호")
+    return lines
 
-                # R&D 지출 추이
-                if len(rClean) >= 2:
-                    rGr = (rClean[-1] - rClean[-2]) / abs(rClean[-2]) * 100
-                    parts.append(f"R&D 지출 {rGr:+.1f}% 변동")
 
-                    # R&D 투자 대비 매출 증가 효율
-                    if sClean and len(sClean) >= 2 and sClean[-2] > 0:
-                        sGr = (sClean[-1] - sClean[-2]) / abs(sClean[-2]) * 100
-                        if rGr > 20 and sGr < 5:
-                            parts.append("R&D 대폭 확대에도 매출 정체 — 투자 회수 시차 또는 효율성 점검 필요")
-                        elif sGr > 10 and rGr > 10:
-                            parts.append("R&D 확대 + 매출 성장 동반 — 투자 효율 양호")
-        except (AttributeError, ValueError, IndexError):
-            pass
+def _analyzeRndEfficiency(inp: _Input) -> NarrativeParagraph | None:
+    """R&D 투자 효율 orchestrator (Lens 14, Q3.1f split)."""
+    rndDf = inp.rndDf
+    if rndDf is None:
+        return None
+    try:
+        import polars as pl
+    except ImportError:
+        return None
+    if not isinstance(rndDf, pl.DataFrame) or len(rndDf) == 0:
+        return None
+
+    rndCol = _findRndCol(rndDf.columns)
+    if not rndCol:
+        return None
+
+    parts: list[str] = []
+    try:
+        rndVals = rndDf[rndCol].to_list()
+        rClean = [v for v in rndVals if v is not None and v > 0]
+        if rClean:
+            sales = _getVals(inp.aSeries, "IS", "sales")
+            sClean = [v for v in sales if v is not None] if sales else []
+            parts.extend(_rndEfficiencyLines(rClean, sClean))
+    except (AttributeError, ValueError, IndexError):
+        pass
 
     if not parts:
         return None
-    body = ". ".join(parts) + "."
-    severity = "neutral"
-    return NarrativeParagraph(dimension="rndEfficiency", title="R&D 투자 효율", body=body, severity=severity)
+    return NarrativeParagraph(
+        dimension="rndEfficiency",
+        title="R&D 투자 효율",
+        body=". ".join(parts) + ".",
+        severity="neutral",
+    )
 
 
 def _vcEstimateWacc(teClean: list, tlClean: list, taxRate: float) -> float:

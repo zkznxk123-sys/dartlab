@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [master]
 
+# 같은 브랜치/PR 의 새 push 가 들어오면 이전 실행 중 CI 즉시 cancel.
+# 연쇄 commit 시 CI 큐 적체 방지 — 항상 최신 commit 만 완주.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
