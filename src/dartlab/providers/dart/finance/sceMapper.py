@@ -645,10 +645,179 @@ def normalizeCause(accountNm: str) -> str:
     return f"unmapped:{nm}"
 
 
-def normalizeDetail(detail: str | None) -> str:
-    """account_detail → 자본항목 snakeId.
+def _matchOwnersEquity(last: str) -> str | None:
+    """소유주·지배 관련 자본 패턴."""
+    if "자본" in last and ("소유주" in last or "지배" in last):
+        return "owners_equity"
+    if "지배" in last and ("지분" in last or "귀속" in last or "소유" in last):
+        return "owners_equity"
+    if "지배기업" in last and len(last) < 15:
+        return "owners_equity"
+    if last in ("소계", "합계", "총계"):
+        return "owners_equity"
+    if "소유주" in last and "자본" in last:
+        return "owners_equity"
+    if "소유주귀속" in last or "소유주 귀속" in last:
+        return "owners_equity"
+    if "자본합계" in last:
+        return "owners_equity"
+    if "총자본" in last:
+        return "owners_equity"
+    if "지배주주" in last:
+        return "owners_equity"
+    return None
 
-    파이프(|) 구분 마지막 세그먼트에서 DETAIL_MAP → fallback 패턴.
+
+def _matchAccumulatedOci(last: str) -> str | None:
+    """기타포괄손익누계 관련 패턴."""
+    if "매도가능" in last and ("평가" in last or "손익" in last):
+        return "accumulated_oci"
+    if "해외사업" in last and "환산" in last:
+        return "accumulated_oci"
+    if "지분법" in last and ("자본" in last or "변동" in last):
+        return "accumulated_oci"
+    if "공정가치" in last and ("평가" in last or "손익" in last):
+        return "accumulated_oci"
+    if "파생상품" in last and "평가" in last:
+        return "accumulated_oci"
+    if "포괄손익누계" in last:
+        return "accumulated_oci"
+    if "연결" in last and "포괄" in last:
+        return "accumulated_oci"
+    if "외화환산" in last or "해외환산" in last or "환산손익" in last:
+        return "accumulated_oci"
+    if "현금흐름위험회피" in last:
+        return "accumulated_oci"
+    if "FV_OCI" in last or "FVOCI" in last:
+        return "accumulated_oci"
+    return None
+
+
+def _matchCapitalSurplus(last: str) -> str | None:
+    """자본잉여금·감자차·합병차익 관련."""
+    if "감자차" in last:
+        return "capital_surplus"
+    if "합병" in last and "차" in last:
+        return "capital_surplus"
+    if "할인발행" in last:
+        return "capital_surplus"
+    if "불입자본" in last or "불입 자본" in last:
+        return "capital_surplus"
+    if "불입자금" in last:
+        return "capital_surplus"
+    return None
+
+
+def _matchOtherEquity(last: str) -> str | None:
+    """기타자본·주식선택권·출자전환 등."""
+    if "전환권" in last or "신주인수권" in last:
+        return "other_equity"
+    if last == "기타":
+        return "other_equity"
+    if "주식매입선택권" in last or "주식매수선택권" in last:
+        return "other_equity"
+    if "종속기업" in last and ("취득" in last or "추가" in last):
+        return "other_equity"
+    if "기타 자본" in last or "기타자본" in last:
+        return "other_equity"
+    if "기타지분" in last:
+        return "other_equity"
+    if last == "자본" or last == "자본 조정":
+        return "other_equity"
+    if "종속기업" in last and ("평가" in last or "손실" in last):
+        return "other_equity"
+    if "자기조정" in last or "자본조" in last:
+        return "other_equity"
+    if "주식기준보상" in last or "주식결제형" in last or "종업원급여" in last:
+        return "other_equity"
+    if "기타의자본" in last:
+        return "other_equity"
+    if "출자전환" in last:
+        return "other_equity"
+    if "기타" == last.strip():
+        return "other_equity"
+    return None
+
+
+def _matchNoncontrolling(last: str) -> str | None:
+    """비지배주주 지분."""
+    if "외부주주" in last or "소수주주" in last:
+        return "noncontrolling_interest"
+    if "비지배주주" in last or "비지배" in last:
+        return "noncontrolling_interest"
+    if "비재비지분" in last:
+        return "noncontrolling_interest"
+    return None
+
+
+def _matchRetainedEarnings(last: str) -> str | None:
+    """이익잉여금 관련."""
+    if "잉여금" in last:
+        return "retained_earnings"
+    if "이익영여금" in last:
+        return "retained_earnings"
+    if "연구인력" in last or "개발준비금" in last:
+        return "retained_earnings"
+    return None
+
+
+def _matchMisc(last: str) -> str | None:
+    """기타 단일 결과 패턴 (share_premium, held_for_sale, revaluation)."""
+    if "주식발행" in last and ("초과" in last or "과" in last):
+        return "share_premium"
+    if "매각예정" in last:
+        return "held_for_sale"
+    if "재평가" in last and ("차익" in last or "이익" in last):
+        return "revaluation_surplus"
+    return None
+
+
+_DETAIL_PATTERN_MATCHERS = (
+    _matchOwnersEquity,
+    _matchAccumulatedOci,
+    _matchCapitalSurplus,
+    _matchNoncontrolling,
+    _matchRetainedEarnings,
+    _matchOtherEquity,
+    _matchMisc,
+)
+
+
+def _matchDetailPatterns(last: str) -> str | None:
+    """7 그룹 matcher 를 순차 시도. 첫 매치 반환."""
+    for matcher in _DETAIL_PATTERN_MATCHERS:
+        result = matcher(last)
+        if result is not None:
+            return result
+    return None
+
+
+def _parseDetailLast(detail: str) -> str | None:
+    """detail 문자열 정규화 → 파이프 분리 → 마지막 세그먼트 반환.
+
+    빈 결과면 None (호출자가 "unknown" 반환).
+    """
+    cleaned = re.sub(r"\s*\[(member|구성요소|구성 요소)\]", "", detail)
+    parts = [p.strip() for p in cleaned.split("|") if p.strip()]
+    return parts[-1] if parts else None
+
+
+def _matchDetailMap(last: str) -> str | None:
+    """DETAIL_MAP 직접 매칭 (공백 포함 + 무시)."""
+    for key, val in DETAIL_MAP.items():
+        if key in last:
+            return val
+    lastNoSpace = last.replace(" ", "")
+    for key, val in DETAIL_MAP.items():
+        if key.replace(" ", "") in lastNoSpace:
+            return val
+    return None
+
+
+def normalizeDetail(detail: str | None) -> str:
+    """account_detail → 자본항목 snakeId (Q3.1e orchestrator split).
+
+    파이프(|) 구분 마지막 세그먼트에서 DETAIL_MAP → 7 패턴 그룹 → unmapped.
     미매핑 시 'unmapped:{원본}' 반환.
     """
     if not detail:
@@ -661,115 +830,17 @@ def normalizeDetail(detail: str | None) -> str:
     if re.search(r"별도재무제표\s*\[", detail):
         return "total_separate"
 
-    cleaned = re.sub(r"\s*\[(member|구성요소|구성 요소)\]", "", detail)
-    parts = [p.strip() for p in cleaned.split("|") if p.strip()]
-
-    if not parts:
+    last = _parseDetailLast(detail)
+    if last is None:
         return "unknown"
 
-    last = parts[-1]
+    directMatch = _matchDetailMap(last)
+    if directMatch is not None:
+        return directMatch
 
-    for key, val in DETAIL_MAP.items():
-        if key in last:
-            return val
-
-    lastNoSpace = last.replace(" ", "")
-    for key, val in DETAIL_MAP.items():
-        if key.replace(" ", "") in lastNoSpace:
-            return val
-
-    if "자본" in last and ("소유주" in last or "지배" in last):
-        return "owners_equity"
-    if "지배" in last and ("지분" in last or "귀속" in last or "소유" in last):
-        return "owners_equity"
-    if "지배기업" in last and len(last) < 15:
-        return "owners_equity"
-    if last in ("소계", "합계", "총계"):
-        return "owners_equity"
-    if "전환권" in last or "신주인수권" in last:
-        return "other_equity"
-    if "매도가능" in last and ("평가" in last or "손익" in last):
-        return "accumulated_oci"
-    if "해외사업" in last and "환산" in last:
-        return "accumulated_oci"
-    if "지분법" in last and ("자본" in last or "변동" in last):
-        return "accumulated_oci"
-    if "감자차" in last:
-        return "capital_surplus"
-    if last == "기타":
-        return "other_equity"
-    if "주식매입선택권" in last or "주식매수선택권" in last:
-        return "other_equity"
-    if "잉여금" in last:
-        return "retained_earnings"
-    if "합병" in last and "차" in last:
-        return "capital_surplus"
-    if "할인발행" in last:
-        return "capital_surplus"
-    if "주식발행" in last and ("초과" in last or "과" in last):
-        return "share_premium"
-    if "불입자본" in last or "불입 자본" in last:
-        return "capital_surplus"
-    if "매각예정" in last:
-        return "held_for_sale"
-    if "공정가치" in last and ("평가" in last or "손익" in last):
-        return "accumulated_oci"
-    if "파생상품" in last and "평가" in last:
-        return "accumulated_oci"
-    if "종속기업" in last and ("취득" in last or "추가" in last):
-        return "other_equity"
-    if "소유주" in last and "자본" in last:
-        return "owners_equity"
-    if "기타 자본" in last or "기타자본" in last:
-        return "other_equity"
-    if "기타지분" in last:
-        return "other_equity"
-    if "외부주주" in last or "소수주주" in last:
-        return "noncontrolling_interest"
-    if "비지배주주" in last or "비지배" in last:
-        return "noncontrolling_interest"
-    if last == "자본" or last == "자본 조정":
-        return "other_equity"
-    if "포괄손익누계" in last:
-        return "accumulated_oci"
-    if "연결" in last and "포괄" in last:
-        return "accumulated_oci"
-    if "외화환산" in last or "해외환산" in last or "환산손익" in last:
-        return "accumulated_oci"
-    if "불입자금" in last or "불입자본" in last:
-        return "capital_surplus"
-    if "재평가" in last and ("차익" in last or "이익" in last):
-        return "revaluation_surplus"
-    if "소유주귀속" in last or "소유주 귀속" in last:
-        return "owners_equity"
-    if "자본합계" in last:
-        return "owners_equity"
-    if "종속기업" in last and ("평가" in last or "손실" in last):
-        return "other_equity"
-    if "이익영여금" in last:
-        return "retained_earnings"
-    if "총자본" in last:
-        return "owners_equity"
-    if "자기조정" in last or "자본조" in last:
-        return "other_equity"
-    if "주식기준보상" in last or "주식결제형" in last or "종업원급여" in last:
-        return "other_equity"
-    if "지배주주" in last:
-        return "owners_equity"
-    if "비재비지분" in last or "비지배" in last:
-        return "noncontrolling_interest"
-    if "현금흐름위험회피" in last:
-        return "accumulated_oci"
-    if "연구인력" in last or "개발준비금" in last:
-        return "retained_earnings"
-    if "FV_OCI" in last or "FVOCI" in last:
-        return "accumulated_oci"
-    if "기타의자본" in last:
-        return "other_equity"
-    if "출자전환" in last:
-        return "other_equity"
-    if "기타" == last.strip():
-        return "other_equity"
+    patternMatch = _matchDetailPatterns(last)
+    if patternMatch is not None:
+        return patternMatch
 
     return f"unmapped:{last}"
 
