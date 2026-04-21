@@ -355,89 +355,101 @@ def generate_circulation_summary(summary: dict, template: str = "normal") -> str
         return f"{cycle_text} {fci_text} {corporate_text}".strip()
 
 
+def _transitionAct1(cycle: dict, corporate: dict) -> str:
+    """1→2: 경제 국면 → 기업 이익 인과. 반환: 전환 문장 한 줄."""
+    phase_label = cycle.get("phaseLabel", cycle.get("phase", ""))
+    ec = corporate.get("earningsCycle") or {}
+    yoys = ec.get("yoyChanges") or []
+    last_yoy = yoys[-1] if yoys and yoys[-1] is not None else None
+    if last_yoy is not None:
+        return f"{phase_label} 국면에서 전종목 영업이익은 YoY {last_yoy:+.1f}% — 이 성장의 동력은?"
+    return f"{phase_label} 국면 — 기업 이익과 교역은 이 국면을 뒷받침하는가?"
+
+
+def _transitionAct2(rates: dict, corporate: dict) -> str:
+    """2→3: 기업/물가 상태 → 통화 정책 인과. 반환: 전환 문장 한 줄."""
+    outlook = (rates.get("outlook") or {}).get("direction", "")
+    cpi = (rates.get("employment") or {}).get("cpi_yoy")
+    ponzi = (corporate.get("ponziRatio") or {}).get("currentRatio")
+    parts: list[str] = []
+    if cpi is not None:
+        parts.append(f"CPI {cpi:.1f}%")
+    if ponzi is not None:
+        parts.append(f"Ponzi비율 {ponzi:.1%}")
+    ctx = " + ".join(parts) if parts else "실물 상태"
+    direction_label = {"cut": "인하", "hold": "동결", "hike": "인상"}.get(outlook, outlook)
+    return f"{ctx} → 연준은 금리 {direction_label}로 대응하고 있다. 이 정책이 금융 시스템에 미치는 영향은?"
+
+
+def _transitionAct3(rates: dict, liquidity: dict, crisis: dict) -> str:
+    """3→4: 정책금리 → 금융 상태 인과. 반환: 전환 문장 한 줄."""
+    ff = (rates.get("outlook") or {}).get("level")
+    fci = (liquidity.get("fci") or {}).get("value")
+    hy = (crisis.get("capexPressure") or {}).get("spreadLevel")
+    parts: list[str] = []
+    if ff is not None:
+        parts.append(f"기준금리 {ff:.1f}%")
+    if fci is not None:
+        parts.append(f"FCI {fci:+.2f}")
+    if hy is not None:
+        parts.append(f"HY {hy:.0f}bp")
+    return f"{' + '.join(parts)} — 금융 시스템에 균열이 있는가?"
+
+
+def _transitionAct4(liquidity: dict, sentiment: dict) -> str:
+    """4→5: 금융 상태 → 자산/심리 인과. 반환: 전환 문장 한 줄."""
+    fci = (liquidity.get("fci") or {}).get("regimeLabel", "")
+    fg = (sentiment.get("fearGreed") or {}).get("zoneLabel", "")
+    return f"금융환경 {fci} → 시장 심리 {fg} — 자산가격은 이를 어떻게 반영하나?"
+
+
+def _transitionAct5(forecast: dict, crisis: dict, summary: dict) -> str:
+    """5→6: 시장 상태 → 전망 인과 (지속 여부 + 충돌 탐지). 반환: 전환 문장 한 줄."""
+    rp = (forecast.get("recessionProb") or {}).get("probability")
+    hist = crisis.get("historicalContext") or {}
+    suggested = hist.get("suggestedScenario")
+    parts: list[str] = []
+    if rp is not None:
+        parts.append(f"침체확률 {rp * 100:.0f}%")
+    if suggested:
+        parts.append(f"다음 장 주의: {suggested}")
+    conflicts = detect_conflicts(summary)
+    if conflicts:
+        parts.append(conflicts[0])
+    if parts:
+        return "이 상태가 지속될 것인가? " + ". ".join(parts) + "."
+    return "이 상태가 지속될 것인가?"
+
+
+_ACT_TRANSITION_DISPATCH: dict[int, object] = {
+    1: lambda s: _transitionAct1(s.get("cycle") or {}, s.get("corporate") or {}),
+    2: lambda s: _transitionAct2(s.get("rates") or {}, s.get("corporate") or {}),
+    3: lambda s: _transitionAct3(s.get("rates") or {}, s.get("liquidity") or {}, s.get("crisis") or {}),
+    4: lambda s: _transitionAct4(s.get("liquidity") or {}, s.get("sentiment") or {}),
+    5: lambda s: _transitionAct5(s.get("forecast") or {}, s.get("crisis") or {}, s),
+}
+
+
 def generate_act_transition(act: int, summary: dict) -> str:
-    """6막 인과 전환 — "앞 막이 뒷 막의 원인".
+    """6막 인과 전환 orchestrator — 앞 막이 뒷 막의 원인 (Q3.1f split).
 
-    1→2: 국면 → 실물 인과 ("이 국면에서 기업 이익은?")
-    2→3: 실물 → 정책 ("기업/물가 상태가 정책을 결정")
-    3→4: 정책 → 금융 ("정책금리가 금융상태를 결정")
-    4→5: 금융 → 시장 ("금융상태가 자산/심리를 결정")
-    5→6: 시장 → 전망 ("현재 시장 상태가 지속될 것인가")
+    각 act 는 별도 _transitionAct{N} sub 에 위임. act 6 이상은 빈 문자열.
+
+    Parameters
+    ----------
+    act : int
+        전환 기준 막 번호 (1~5). 1→2, 2→3, 3→4, 4→5, 5→6.
+    summary : dict
+        macro summary 전체 dict — cycle/corporate/rates/liquidity/crisis/
+        assets/sentiment/forecast 키를 선택적으로 포함.
+
+    Returns
+    -------
+    str
+        한 줄 전환 문장. act 가 1~5 범위 밖이면 빈 문자열.
     """
-    cycle = summary.get("cycle") or {}
-    corporate = summary.get("corporate") or {}
-    rates = summary.get("rates") or {}
-    liquidity = summary.get("liquidity") or {}
-    crisis = summary.get("crisis") or {}
-    assets = summary.get("assets") or {}
-    sentiment = summary.get("sentiment") or {}
-    forecast = summary.get("forecast") or {}
-
-    if act == 1:
-        # 1→2: "경제 국면에서 기업 이익은?"
-        phase = cycle.get("phase", "")
-        phase_label = cycle.get("phaseLabel", phase)
-        ec = corporate.get("earningsCycle") or {}
-        yoys = ec.get("yoyChanges") or []
-        last_yoy = yoys[-1] if yoys and yoys[-1] is not None else None
-        if last_yoy is not None:
-            return f"{phase_label} 국면에서 전종목 영업이익은 YoY {last_yoy:+.1f}% — 이 성장의 동력은?"
-        return f"{phase_label} 국면 — 기업 이익과 교역은 이 국면을 뒷받침하는가?"
-
-    if act == 2:
-        # 2→3: "기업/물가 상태가 정책을 결정"
-        outlook = (rates.get("outlook") or {}).get("direction", "")
-        cpi = (rates.get("employment") or {}).get("cpi_yoy")
-        ponzi = (corporate.get("ponziRatio") or {}).get("currentRatio")
-        parts = []
-        if cpi is not None:
-            parts.append(f"CPI {cpi:.1f}%")
-        if ponzi is not None:
-            parts.append(f"Ponzi비율 {ponzi:.1%}")
-        ctx = " + ".join(parts) if parts else "실물 상태"
-        direction_label = {"cut": "인하", "hold": "동결", "hike": "인상"}.get(outlook, outlook)
-        return f"{ctx} → 연준은 금리 {direction_label}로 대응하고 있다. 이 정책이 금융 시스템에 미치는 영향은?"
-
-    if act == 3:
-        # 3→4: "정책금리가 금융상태를 결정"
-        ff = (rates.get("outlook") or {}).get("level")
-        fci = (liquidity.get("fci") or {}).get("value")
-        hy = (crisis.get("capexPressure") or {}).get("spreadLevel")
-        parts = []
-        if ff is not None:
-            parts.append(f"기준금리 {ff:.1f}%")
-        if fci is not None:
-            parts.append(f"FCI {fci:+.2f}")
-        if hy is not None:
-            parts.append(f"HY {hy:.0f}bp")
-        return f"{' + '.join(parts)} — 금융 시스템에 균열이 있는가?"
-
-    if act == 4:
-        # 4→5: "금융상태가 자산/심리를 결정"
-        fci = (liquidity.get("fci") or {}).get("regimeLabel", "")
-        fg = (sentiment.get("fearGreed") or {}).get("zoneLabel", "")
-        return f"금융환경 {fci} → 시장 심리 {fg} — 자산가격은 이를 어떻게 반영하나?"
-
-    if act == 5:
-        # 5→6: "시장 상태가 지속될 것인가"
-        rp = (forecast.get("recessionProb") or {}).get("probability")
-        hist = crisis.get("historicalContext") or {}
-        suggested = hist.get("suggestedScenario")
-        parts = []
-        if rp is not None:
-            parts.append(f"침체확률 {rp * 100:.0f}%")
-        if suggested:
-            parts.append(f"다음 장 주의: {suggested}")
-
-        conflicts = detect_conflicts(summary)
-        if conflicts:
-            parts.append(conflicts[0])
-
-        if parts:
-            return "이 상태가 지속될 것인가? " + ". ".join(parts) + "."
-        return "이 상태가 지속될 것인가?"
-
-    return ""
+    handler = _ACT_TRANSITION_DISPATCH.get(act)
+    return handler(summary) if handler else ""
 
 
 def generate_so_what(summary: dict) -> str:
