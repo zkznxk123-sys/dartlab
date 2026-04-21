@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from dartlab.core.formatting import formatDecimal, formatKr
+
 
 @dataclass
 class AxisNarrative:
@@ -46,24 +48,13 @@ def _severity(score: float | None) -> str:
 
 
 def _fmt(v, suffix="", decimals=1) -> str:
-    if v is None:
-        return "N/A"
-    if isinstance(v, float):
-        return f"{v:.{decimals}f}{suffix}"
-    return f"{v}{suffix}"
+    """고정 소수 + suffix (None → N/A)."""
+    return formatDecimal(v, decimals=decimals, suffix=suffix, nullStr="N/A")
 
 
 def _fmtTril(v) -> str:
-    """금액을 조/억 단위로 변환."""
-    if v is None:
-        return "N/A"
-    absV = abs(v)
-    sign = "-" if v < 0 else ""
-    if absV >= 1e12:
-        return f"{sign}{absV / 1e12:,.1f}조원"
-    if absV >= 1e8:
-        return f"{sign}{absV / 1e8:,.0f}억원"
-    return f"{sign}{absV:,.0f}원"
+    """금액을 조/억 단위로 변환 (원 접미사 포함)."""
+    return formatKr(v, withWon=True, nullStr="N/A")
 
 
 # ═══════════════════════════════════════════════════════════

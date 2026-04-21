@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 from rich.console import Console
 from rich.table import Table
 
+from dartlab.core.formatting import formatComma
+
 if TYPE_CHECKING:
     import polars as pl
 
@@ -43,18 +45,8 @@ def _is_numeric_col(dtype_str: str) -> bool:
 
 
 def _format_number(val) -> str:
-    """숫자 포맷: 천단위 쉼표, 소수점 유지."""
-    if val is None:
-        return ""
-    if isinstance(val, float):
-        if val != val:  # NaN
-            return ""
-        if val == int(val) and abs(val) < 1e15:
-            return f"{int(val):,}"
-        return f"{val:,.2f}"
-    if isinstance(val, int):
-        return f"{val:,}"
-    return str(val)
+    """숫자 포맷: 천단위 쉼표, 소수점 유지 (None/NaN → 빈 문자열)."""
+    return formatComma(val, decimals=2, nullStr="")
 
 
 def print_dataframe(

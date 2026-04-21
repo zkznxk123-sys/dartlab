@@ -8,26 +8,14 @@ import polars as pl
 from rich.console import Console
 from rich.table import Table
 
+from dartlab.core.formatting import formatKr
+
 _PERIOD_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
 
 def _formatValue(v: float | int | None) -> str:
-    """숫자를 한국어 단위로 포맷."""
-    if v is None:
-        return "[dim]-[/dim]"
-    if not isinstance(v, (int, float)):
-        return str(v)
-    absV = abs(v)
-    sign = "-" if v < 0 else ""
-    if absV >= 1e12:
-        return f"{sign}{absV / 1e12:,.1f}조"
-    if absV >= 1e8:
-        return f"{sign}{absV / 1e8:,.0f}억"
-    if absV >= 1e4:
-        return f"{sign}{absV / 1e4:,.0f}만"
-    if isinstance(v, float):
-        return f"{v:,.1f}"
-    return f"{v:,}"
+    """숫자를 한국어 단위로 포맷 (Rich dim 태그로 None 표시)."""
+    return formatKr(v, nullStr="[dim]-[/dim]")
 
 
 def _yoyMark(cur: float | None, prev: float | None) -> str:

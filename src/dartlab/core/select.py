@@ -18,9 +18,10 @@ from typing import Any
 
 import polars as pl
 
-_PERIOD_RE = re.compile(r"^\d{4}(Q[1-4])?$")
-
+from dartlab.core.formatting import formatComma, formatDecimal
 from dartlab.viz.palette import COLORS as _COLORS
+
+_PERIOD_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
 
 def _isPeriod(name: str) -> bool:
@@ -44,14 +45,12 @@ def _isNumericDf(df: pl.DataFrame) -> bool:
 
 
 def _fmtVal(val: Any) -> str:
-    """셀 값 포맷."""
+    """셀 값 포맷 — select 특화: 큰 float 은 정수 반올림, 작은 float 은 .2f."""
     if val is None:
         return "-"
-    if isinstance(val, float):
-        return f"{val:,.0f}" if abs(val) >= 1 else f"{val:.2f}"
-    if isinstance(val, int):
-        return f"{val:,}"
-    return str(val)
+    if isinstance(val, float) and abs(val) < 1:
+        return formatDecimal(val, decimals=2, nullStr="-")
+    return formatComma(val, decimals=0)
 
 
 # ══════════════════════════════════════
