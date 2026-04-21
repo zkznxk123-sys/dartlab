@@ -996,9 +996,31 @@ def _calcComposite(
     annual: bool = False,
     maxTrailingNones: int | None = None,
 ) -> None:
-    """복합 지표 (11개): ROIC, DuPont, Debt/EBITDA, CCC, Piotroski, Altman."""
-    # ── ROIC: NOPAT / Invested Capital ──
-    # 유효세율 동적 계산. 불가능하면 22% 기본값.
+    """복합 지표 (11개) orchestrator — 각 블록은 별도 함수로 분리 (Q3.1).
+
+    ROIC / DuPont / Debt/EBITDA / CCC / Piotroski / Altman Z / Sloan / Beneish /
+    Altman Z'' / Ohlson / Springate / Zmijewski.
+    """
+    _calcRoic(r, series, maxTrailingNones)
+    _calcDupont(r)
+    _calcDebtToEbitda(r)
+    _calcCCC(r)
+    _calcPiotroski(r, series)
+    _calcAltmanZ(r)
+    _calcSloanAccrual(r)
+    _calcBeneish(r, series, annual)
+    _calcAltmanZpp(r)
+    _calcOhlsonO(r, series)
+    _calcSpringate(r)
+    _calcZmijewski(r)
+
+
+def _calcRoic(
+    r: RatioResult,
+    series: dict[str, dict[str, list[float | None]]],
+    maxTrailingNones: int | None,
+) -> None:
+    """ROIC = NOPAT / Invested Capital. 유효세율은 동적, 불가능하면 22%."""
     effective_tax = 0.22
     pbt = getTTM(series, "IS", "profit_before_tax", maxTrailingNones=maxTrailingNones)
     tax_exp = getTTM(series, "IS", "income_tax_expense", maxTrailingNones=maxTrailingNones) or getTTM(
@@ -1017,23 +1039,30 @@ def _calcComposite(
         if invested > 0:
             r.roic = _safeRound((nopat / invested) * 100, 2)
 
-    # ── DuPont 3분해: ROE = Margin × Turnover × Leverage ──
+
+def _calcDupont(r: RatioResult) -> None:
+    """DuPont 3분해: ROE = Margin × Turnover × Leverage."""
     r.dupontMargin = _safePct(r.netIncomeTTM, r.revenueTTM)
     r.dupontTurnover = _safeRound(_safeDiv(r.revenueTTM, r.totalAssets), 2)
     if r.totalAssets and r.totalEquity and r.totalEquity > 0:
         r.dupontLeverage = _safeRound(r.totalAssets / r.totalEquity, 2)
 
-    # ── Debt/EBITDA ──
-    if r.operatingIncomeTTM is not None:
-        dep = r.depreciationExpense
-        if dep is None:
-            dep = (r.tangibleAssets or 0) * 0.05 + (r.intangibleAssets or 0) * 0.1
-        ebitda = r.operatingIncomeTTM + dep
-        totalBorr = r.shortTermBorrowings + r.longTermBorrowings + r.bonds
-        if ebitda > 0:
-            r.debtToEbitda = _safeRound(totalBorr / ebitda, 2)
 
-    # ── CCC: Cash Conversion Cycle ──
+def _calcDebtToEbitda(r: RatioResult) -> None:
+    """Debt / EBITDA. 감가상각 누락 시 유형/무형 자산 비율로 추정."""
+    if r.operatingIncomeTTM is None:
+        return
+    dep = r.depreciationExpense
+    if dep is None:
+        dep = (r.tangibleAssets or 0) * 0.05 + (r.intangibleAssets or 0) * 0.1
+    ebitda = r.operatingIncomeTTM + dep
+    totalBorr = r.shortTermBorrowings + r.longTermBorrowings + r.bonds
+    if ebitda > 0:
+        r.debtToEbitda = _safeRound(totalBorr / ebitda, 2)
+
+
+def _calcCCC(r: RatioResult) -> None:
+    """Cash Conversion Cycle + 영업순환주기."""
     if r.revenueTTM and r.revenueTTM > 0:
         if r.receivables:
             r.dso = _safeRound(r.receivables / r.revenueTTM * 365, 1)
@@ -1044,12 +1073,61 @@ def _calcComposite(
             r.dpo = _safeRound(r.payables / cos * 365, 1)
         if r.dso is not None and r.dio is not None and r.dpo is not None:
             r.ccc = _safeRound(r.dso + r.dio - r.dpo, 1)
-
-    # 영업순환주기: DSO + DIO (CCC와 달리 DPO를 빼지 않음)
     if r.dso is not None and r.dio is not None:
         r.operatingCycle = _safeRound(r.dso + r.dio, 1)
 
-    # ── Piotroski F-Score (9점 만점) ──
+
+def _piotroskiTimeSeries(
+    series: dict[str, dict[str, list[float | None]]],
+) -> dict[str, list[float | None]]:
+    """Piotroski 시계열 추출 — 전기 비교용."""
+    npSeries = _pick_series(series, "IS", ["net_profit", "net_income"])
+    taSeries = _get(series, "BS", "total_assets")
+    tlSeries = _get(series, "BS", "total_liabilities")
+    teSeries = _get(series, "BS", "total_stockholders_equity")
+    if not any(v is not None for v in teSeries):
+        teSeries = _get(series, "BS", "owners_of_parent_equity")
+    caSeries = _get(series, "BS", "current_assets")
+    clSeries = _get(series, "BS", "current_liabilities")
+    issuedCapital = _get(series, "BS", "issued_capital")
+    if not any(v is not None for v in issuedCapital):
+        issuedCapital = _get(series, "BS", "capital_stock")
+    gpSeries = _get(series, "IS", "gross_profit")
+    revSeries = _pick_series(series, "IS", ["sales", "revenue"])
+    return {
+        "np": npSeries,
+        "ta": taSeries,
+        "tl": tlSeries,
+        "te": teSeries,
+        "ca": caSeries,
+        "cl": clSeries,
+        "cap": issuedCapital,
+        "gp": gpSeries,
+        "rev": revSeries,
+    }
+
+
+def _piotroskiImprovement(cur: list, prev: list, metric: str, increasing: bool) -> int:
+    """시계열 2기 ratio 개선 여부 판정. 1점 or 0점.
+
+    metric: 명목상 용도 식별자 (디버그용). increasing=True 면 cur>prev 일 때 1점.
+    """
+    _ = metric
+    if len(cur) < 2 or len(prev) < 2:
+        return -1  # 계산 불가
+    a = _safeDiv(cur[-1], prev[-1])
+    b = _safeDiv(cur[-2], prev[-2])
+    if a is None or b is None:
+        return -1
+    return 1 if (a > b if increasing else a < b) else 0
+
+
+def _calcPiotroski(
+    r: RatioResult,
+    series: dict[str, dict[str, list[float | None]]],
+) -> None:
+    """Piotroski F-Score (9점 만점)."""
+    ts = _piotroskiTimeSeries(series)
     score = 0
 
     # 1. ROA > 0
@@ -1058,186 +1136,165 @@ def _calcComposite(
     # 2. Operating CF > 0
     if r.operatingCashflowTTM is not None and r.operatingCashflowTTM > 0:
         score += 1
-    # 3. ROA 개선 (전년 대비) — 시계열에서 전기 ROA 계산
-    npSeries = _pick_series(series, "IS", ["net_profit", "net_income"])
-    taSeries = _get(series, "BS", "total_assets")
-    if len(npSeries) >= 2 and len(taSeries) >= 2:
-        curROA = _safeDiv(npSeries[-1], taSeries[-1]) if npSeries[-1] is not None and taSeries[-1] else None
-        prevROA = _safeDiv(npSeries[-2], taSeries[-2]) if npSeries[-2] is not None and taSeries[-2] else None
-        if curROA is not None and prevROA is not None and curROA > prevROA:
-            score += 1
-    # 4. Operating CF > Net Income (발생주의 품질)
-    if r.operatingCashflowTTM is not None and r.netIncomeTTM is not None:
-        if r.operatingCashflowTTM > r.netIncomeTTM:
-            score += 1
-    # 5. 부채비율 감소 — 시계열에서 전기 비교
-    tlSeries = _get(series, "BS", "total_liabilities")
-    teSeries = _get(series, "BS", "total_stockholders_equity")
-    if not any(v is not None for v in teSeries):
-        teSeries = _get(series, "BS", "owners_of_parent_equity")
-    if len(tlSeries) >= 2 and len(teSeries) >= 2:
-        curDR = _safeDiv(tlSeries[-1], teSeries[-1])
-        prevDR = _safeDiv(tlSeries[-2], teSeries[-2])
-        if curDR is not None and prevDR is not None and curDR < prevDR:
-            score += 1
-    elif r.debtRatio is not None and r.debtRatio < 100:
-        score += 1  # 전기 비교 불가 시 fallback
-    # 6. 유동비율 개선 — 시계열 비교 or 현재 > 100%
-    caSeries = _get(series, "BS", "current_assets")
-    clSeries = _get(series, "BS", "current_liabilities")
-    if len(caSeries) >= 2 and len(clSeries) >= 2:
-        curCR = _safeDiv(caSeries[-1], clSeries[-1])
-        prevCR = _safeDiv(caSeries[-2], clSeries[-2])
-        if curCR is not None and prevCR is not None and curCR > prevCR:
-            score += 1
-    elif r.currentRatio is not None and r.currentRatio > 100:
+    # 3. ROA 개선
+    roaImp = _piotroskiImprovement(ts["np"], ts["ta"], "ROA", increasing=True)
+    if roaImp == 1:
         score += 1
-    # 7. 신주 미발행 — 자본금 시계열 비교
-    issuedCapital = _get(series, "BS", "issued_capital")
-    if not any(v is not None for v in issuedCapital):
-        issuedCapital = _get(series, "BS", "capital_stock")
-    if len(issuedCapital) >= 2:
-        cur_cap = issuedCapital[-1]
-        prev_cap = issuedCapital[-2]
+    # 4. Operating CF > Net Income
+    if r.operatingCashflowTTM is not None and r.netIncomeTTM is not None and r.operatingCashflowTTM > r.netIncomeTTM:
+        score += 1
+    # 5. 부채비율 감소
+    drImp = _piotroskiImprovement(ts["tl"], ts["te"], "DR", increasing=False)
+    if drImp == 1:
+        score += 1
+    elif drImp == -1 and r.debtRatio is not None and r.debtRatio < 100:
+        score += 1
+    # 6. 유동비율 개선
+    crImp = _piotroskiImprovement(ts["ca"], ts["cl"], "CR", increasing=True)
+    if crImp == 1:
+        score += 1
+    elif crImp == -1 and r.currentRatio is not None and r.currentRatio > 100:
+        score += 1
+    # 7. 신주 미발행
+    if len(ts["cap"]) >= 2:
+        cur_cap = ts["cap"][-1]
+        prev_cap = ts["cap"][-2]
         if cur_cap is not None and prev_cap is not None and cur_cap <= prev_cap:
             score += 1
     else:
-        score += 1  # 데이터 없으면 신주 미발행으로 간주 (보수적)
-    # 8. 매출총이익률 개선 — 시계열 비교
-    gpSeries = _get(series, "IS", "gross_profit")
-    revSeries = _pick_series(series, "IS", ["sales", "revenue"])
-    if len(gpSeries) >= 2 and len(revSeries) >= 2:
-        curGM = _safeDiv(gpSeries[-1], revSeries[-1])
-        prevGM = _safeDiv(gpSeries[-2], revSeries[-2])
-        if curGM is not None and prevGM is not None and curGM > prevGM:
-            score += 1
-    elif r.grossMargin is not None and r.grossMargin > 0:
+        score += 1  # 데이터 없으면 보수적으로 1점
+    # 8. 매출총이익률 개선
+    gmImp = _piotroskiImprovement(ts["gp"], ts["rev"], "GM", increasing=True)
+    if gmImp == 1:
         score += 1
-    # 9. 총자산회전율 개선 — 시계열 비교
-    if len(revSeries) >= 2 and len(taSeries) >= 2:
-        curTAT = _safeDiv(revSeries[-1], taSeries[-1])
-        prevTAT = _safeDiv(revSeries[-2], taSeries[-2])
-        if curTAT is not None and prevTAT is not None and curTAT > prevTAT:
-            score += 1
-    elif r.totalAssetTurnover is not None and r.totalAssetTurnover > 0:
+    elif gmImp == -1 and r.grossMargin is not None and r.grossMargin > 0:
+        score += 1
+    # 9. 총자산회전율 개선
+    tatImp = _piotroskiImprovement(ts["rev"], ts["ta"], "TAT", increasing=True)
+    if tatImp == 1:
+        score += 1
+    elif tatImp == -1 and r.totalAssetTurnover is not None and r.totalAssetTurnover > 0:
         score += 1
 
     r.piotroskiFScore = score
 
-    # ── Altman Z-Score (제조업, 1968) ──
-    # Z = 1.2×A + 1.4×B + 3.3×C + 0.6×D + 1.0×E
-    # A=WC/TA, B=RE/TA, C=EBIT/TA, D=MarketCap/TL, E=Sales/TA
-    # marketCap 없으면 원본 Z 계산 불가 → Z' (비상장 모델, 1983) 사용
-    # Z' = 0.717×A + 0.847×B + 3.107×C + 0.420×D' + 0.998×E (D'=BookEquity/TL)
-    if r.totalAssets and r.totalAssets > 0 and r.totalLiabilities and r.totalLiabilities > 0:
-        wc = (r.currentAssets or 0) - (r.currentLiabilities or 0)
-        a = wc / r.totalAssets
-        b = (r.retainedEarnings or 0) / r.totalAssets
-        c = (r.operatingIncomeTTM or 0) / r.totalAssets
-        e = (r.revenueTTM or 0) / r.totalAssets
-        if r.marketCap is not None:
-            # 원본 Altman Z (상장 기업용)
-            d = r.marketCap / r.totalLiabilities
-            z = 1.2 * a + 1.4 * b + 3.3 * c + 0.6 * d + 1.0 * e
-            r.altmanZScore = _safeRound(z, 2)
-        else:
-            # Z' (비상장 기업용, 장부가)
-            dPrime = (r.totalEquity or 0) / r.totalLiabilities
-            zPrime = 0.717 * a + 0.847 * b + 3.107 * c + 0.420 * dPrime + 0.998 * e
-            r.altmanZScore = _safeRound(zPrime, 2)
 
-    # ── Sloan Accrual Ratio ──
-    # (순이익 - 영업CF) / 총자산. 높으면 발생주의 이익 비중 과다 (조작 의심)
+def _calcAltmanZ(r: RatioResult) -> None:
+    """Altman Z (1968 제조업 상장) or Z' (1983 비상장, 장부가).
+
+    marketCap 유무로 분기. Z'': Z''-Score 함수 별도.
+    """
+    if not (r.totalAssets and r.totalAssets > 0 and r.totalLiabilities and r.totalLiabilities > 0):
+        return
+    wc = (r.currentAssets or 0) - (r.currentLiabilities or 0)
+    a = wc / r.totalAssets
+    b = (r.retainedEarnings or 0) / r.totalAssets
+    c = (r.operatingIncomeTTM or 0) / r.totalAssets
+    e = (r.revenueTTM or 0) / r.totalAssets
+    if r.marketCap is not None:
+        d = r.marketCap / r.totalLiabilities
+        z = 1.2 * a + 1.4 * b + 3.3 * c + 0.6 * d + 1.0 * e
+        r.altmanZScore = _safeRound(z, 2)
+    else:
+        dPrime = (r.totalEquity or 0) / r.totalLiabilities
+        zPrime = 0.717 * a + 0.847 * b + 3.107 * c + 0.420 * dPrime + 0.998 * e
+        r.altmanZScore = _safeRound(zPrime, 2)
+
+
+def _calcSloanAccrual(r: RatioResult) -> None:
+    """Sloan Accrual Ratio — (순이익 - 영업CF) / 총자산.
+
+    높으면 발생주의 이익 비중 과다 (조작 의심).
+    """
     if r.netIncomeTTM is not None and r.operatingCashflowTTM is not None and r.totalAssets and r.totalAssets > 0:
         accrual = r.netIncomeTTM - r.operatingCashflowTTM
         r.sloanAccrualRatio = _safeRound((accrual / r.totalAssets) * 100, 2)
 
-    # ── Beneish M-Score (8변수 모델) ──
-    # M = -4.84 + 0.920×DSRI + 0.528×GMI + 0.404×AQI + 0.892×SGI
-    #     + 0.115×DEPI - 0.172×SGAI + 4.679×TATA - 0.327×LVGI
-    # M > -2.22이면 이익 조작 가능성
-    _calcBeneish(r, series, annual)
 
-    # ── Altman Z''-Score (비제조업/신흥시장, 1995) ──
-    # Z'' = 6.56×(WC/TA) + 3.26×(RE/TA) + 6.72×(EBIT/TA) + 1.05×(BV_Equity/TL)
-    # Sales/TA 제거 → 금융업/서비스업도 적용 가능
-    if r.totalAssets and r.totalAssets > 0 and r.totalLiabilities and r.totalLiabilities > 0:
-        wc = (r.currentAssets or 0) - (r.currentLiabilities or 0)
-        zpp = (
-            6.56 * (wc / r.totalAssets)
-            + 3.26 * ((r.retainedEarnings or 0) / r.totalAssets)
-            + 6.72 * ((r.operatingIncomeTTM or 0) / r.totalAssets)
-            + 1.05 * ((r.totalEquity or 0) / r.totalLiabilities)
-        )
-        r.altmanZppScore = _safeRound(zpp, 2)
+def _calcAltmanZpp(r: RatioResult) -> None:
+    """Altman Z'' (1995 비제조업/신흥시장). Sales/TA 제거 — 금융/서비스업도 적용."""
+    if not (r.totalAssets and r.totalAssets > 0 and r.totalLiabilities and r.totalLiabilities > 0):
+        return
+    wc = (r.currentAssets or 0) - (r.currentLiabilities or 0)
+    zpp = (
+        6.56 * (wc / r.totalAssets)
+        + 3.26 * ((r.retainedEarnings or 0) / r.totalAssets)
+        + 6.72 * ((r.operatingIncomeTTM or 0) / r.totalAssets)
+        + 1.05 * ((r.totalEquity or 0) / r.totalLiabilities)
+    )
+    r.altmanZppScore = _safeRound(zpp, 2)
 
-    # ── Ohlson O-Score (1980) — 9변수 로지스틱 ──
-    # 금융업 포함 범용. P(bankruptcy) = 1 / (1 + exp(-O))
-    if r.totalAssets and r.totalAssets > 0:
-        ni = r.netIncomeTTM or 0
-        tl = r.totalLiabilities or 0
-        ca = r.currentAssets or 0
-        cl = r.currentLiabilities or 0
 
-        size = math.log(max(r.totalAssets / 1e6, 1))  # 백만원 단위
-        tlta = tl / r.totalAssets
-        wcta = (ca - cl) / r.totalAssets
-        clca = cl / ca if ca > 0 else 0
-        oeneg = 1 if tl > r.totalAssets else 0
-        nita = ni / r.totalAssets
-        futl = 0  # FFO 간이 대체 (보수적)
+def _calcOhlsonO(
+    r: RatioResult,
+    series: dict[str, dict[str, list[float | None]]],
+) -> None:
+    """Ohlson O-Score (1980) — 9변수 로지스틱. 금융업 포함 범용."""
+    if not (r.totalAssets and r.totalAssets > 0):
+        return
+    ni = r.netIncomeTTM or 0
+    tl = r.totalLiabilities or 0
+    ca = r.currentAssets or 0
+    cl = r.currentLiabilities or 0
 
-        # INTWO: 최근 2기 연속 적자
-        npSeries = _pick_series(series, "IS", ["net_profit", "net_income"])
-        intwo = 0
-        if len(npSeries) >= 2:
-            n1 = npSeries[-1]
-            n2 = npSeries[-2]
-            if n1 is not None and n2 is not None and n1 < 0 and n2 < 0:
-                intwo = 1
+    size = math.log(max(r.totalAssets / 1e6, 1))
+    tlta = tl / r.totalAssets
+    wcta = (ca - cl) / r.totalAssets
+    clca = cl / ca if ca > 0 else 0
+    oeneg = 1 if tl > r.totalAssets else 0
+    nita = ni / r.totalAssets
+    futl = 0  # FFO 간이 대체 (보수적)
 
-        # CHIN: 순이익 변화율
-        chin = 0
-        if len(npSeries) >= 2 and npSeries[-1] is not None and npSeries[-2] is not None:
-            denom = abs(npSeries[-1]) + abs(npSeries[-2])
-            if denom > 0:
-                chin = (npSeries[-1] - npSeries[-2]) / denom
+    npSeries = _pick_series(series, "IS", ["net_profit", "net_income"])
+    intwo = 0
+    if len(npSeries) >= 2:
+        n1 = npSeries[-1]
+        n2 = npSeries[-2]
+        if n1 is not None and n2 is not None and n1 < 0 and n2 < 0:
+            intwo = 1
 
-        o = (
-            -1.32
-            - 0.407 * size
-            + 6.03 * tlta
-            - 1.43 * wcta
-            + 0.0757 * clca
-            - 1.72 * oeneg
-            - 2.37 * nita
-            - 1.83 * futl
-            + 0.285 * intwo
-            - 0.521 * chin
-        )
-        r.ohlsonOScore = _safeRound(o, 4)
-        r.ohlsonProbability = _safeRound(1 / (1 + math.exp(-o)) * 100, 2)
+    chin = 0
+    if len(npSeries) >= 2 and npSeries[-1] is not None and npSeries[-2] is not None:
+        denom = abs(npSeries[-1]) + abs(npSeries[-2])
+        if denom > 0:
+            chin = (npSeries[-1] - npSeries[-2]) / denom
 
-    # ── Springate S-Score (1978) ──
-    # S = 1.03×(WC/TA) + 3.07×(EBIT/TA) + 0.66×(EBT/CL) + 0.40×(Sales/TA)
-    # S < 0.862 → 부실 위험
-    if r.totalAssets and r.totalAssets > 0 and r.currentLiabilities and r.currentLiabilities > 0:
-        wc = (r.currentAssets or 0) - (r.currentLiabilities or 0)
-        ebit = r.operatingIncomeTTM or 0
-        ebt = r.profitBeforeTax if r.profitBeforeTax is not None else (r.netIncomeTTM or 0)
-        rev = r.revenueTTM or 0
-        s = (
-            1.03 * (wc / r.totalAssets)
-            + 3.07 * (ebit / r.totalAssets)
-            + 0.66 * (ebt / r.currentLiabilities)
-            + 0.40 * (rev / r.totalAssets)
-        )
-        r.springateSScore = _safeRound(s, 4)
+    o = (
+        -1.32
+        - 0.407 * size
+        + 6.03 * tlta
+        - 1.43 * wcta
+        + 0.0757 * clca
+        - 1.72 * oeneg
+        - 2.37 * nita
+        - 1.83 * futl
+        + 0.285 * intwo
+        - 0.521 * chin
+    )
+    r.ohlsonOScore = _safeRound(o, 4)
+    r.ohlsonProbability = _safeRound(1 / (1 + math.exp(-o)) * 100, 2)
 
-    # ── Zmijewski X-Score (1984) — 3변수 프로빗 ──
-    # X = -4.336 - 4.513×(NI/TA) + 5.679×(TL/TA) + 0.004×(CA/CL)
-    # X > 0 → 부실 위험. 금융업 부채비율 왜곡 주의.
-    if (
+
+def _calcSpringate(r: RatioResult) -> None:
+    """Springate S-Score (1978). S < 0.862 → 부실 위험."""
+    if not (r.totalAssets and r.totalAssets > 0 and r.currentLiabilities and r.currentLiabilities > 0):
+        return
+    wc = (r.currentAssets or 0) - (r.currentLiabilities or 0)
+    ebit = r.operatingIncomeTTM or 0
+    ebt = r.profitBeforeTax if r.profitBeforeTax is not None else (r.netIncomeTTM or 0)
+    rev = r.revenueTTM or 0
+    s = (
+        1.03 * (wc / r.totalAssets)
+        + 3.07 * (ebit / r.totalAssets)
+        + 0.66 * (ebt / r.currentLiabilities)
+        + 0.40 * (rev / r.totalAssets)
+    )
+    r.springateSScore = _safeRound(s, 4)
+
+
+def _calcZmijewski(r: RatioResult) -> None:
+    """Zmijewski X-Score (1984) — 3변수 프로빗. X > 0 → 부실 위험."""
+    if not (
         r.totalAssets
         and r.totalAssets > 0
         and r.totalLiabilities is not None
@@ -1245,13 +1302,14 @@ def _calcComposite(
         and r.currentLiabilities
         and r.currentLiabilities > 0
     ):
-        x = (
-            -4.336
-            - 4.513 * ((r.netIncomeTTM or 0) / r.totalAssets)
-            + 5.679 * (r.totalLiabilities / r.totalAssets)
-            + 0.004 * (r.currentAssets / r.currentLiabilities)
-        )
-        r.zmijewskiXScore = _safeRound(x, 4)
+        return
+    x = (
+        -4.336
+        - 4.513 * ((r.netIncomeTTM or 0) / r.totalAssets)
+        + 5.679 * (r.totalLiabilities / r.totalAssets)
+        + 0.004 * (r.currentAssets / r.currentLiabilities)
+    )
+    r.zmijewskiXScore = _safeRound(x, 4)
 
 
 def _calcBeneishForPeriod(
