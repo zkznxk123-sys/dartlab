@@ -128,10 +128,203 @@ def _polarsToMarkdown(df) -> str:
         return str(df)
 
 
-def renderMarkdown(review, *, chart_dir: str | None = None) -> str:
-    """마크다운 렌더링.
+# ── 6막 전환 경계 매핑 (섹션 key → 전환 key) ──
+_MD_ACT_BOUNDARIES: dict[str, str] = {
+    "수익성": "1→2",
+    "현금흐름": "2→3",
+    "자금조달": "3→4",
+    "자산구조": "4→5",
+    "가치평가": "5→6",
+}
 
-    chart_dir 지정 시 ChartBlock을 SVG로 저장하고 이미지 참조 생성.
+_THREAD_SEVERITY_ICON: dict[str, str] = {
+    "critical": "[!!]",
+    "warning": "[!]",
+    "positive": "[+]",
+    "neutral": "[-]",
+}
+
+
+def _mdRenderSummaryCard(summaryCard) -> str | None:
+    """요약 카드 한 블록. 반환: markdown 문자열 or None."""
+    if not summaryCard:
+        return None
+    lines: list[str] = []
+    if summaryCard.conclusion:
+        lines.append(f"**{summaryCard.conclusion}**")
+    for s in summaryCard.strengths:
+        lines.append(f"- [+] {s}")
+    for w in summaryCard.warnings:
+        lines.append(f"- [-] {w}")
+    return "\n".join(lines) if lines else None
+
+
+def _mdRenderTemplateHeader(review, templateName: str | None, tmplInfo: dict) -> list[str]:
+    """스토리 템플릿 표시 블록. 반환: markdown 문자열 리스트."""
+    if not templateName:
+        return []
+    parts: list[str] = []
+    allTemplates = getattr(review, "templates", []) or []
+    if len(allTemplates) > 1:
+        parts.append(f"**스토리: {' + '.join(allTemplates)}**")
+    else:
+        desc = tmplInfo.get("description", "") if tmplInfo else ""
+        parts.append(f"**스토리: {templateName}** — {desc}")
+    keyQuestions = tmplInfo.get("keyQuestions", []) if tmplInfo else []
+    if keyQuestions:
+        qLines = [f"  - {q}" for q in keyQuestions]
+        parts.append("> **핵심 질문**\n" + "\n".join(f"> {q}" for q in qLines))
+    return parts
+
+
+def _mdRenderSectionHeader(section, mainAct: str, _ACT_HEADERS, renderedActs: set, actFocus: dict) -> list[str]:
+    """섹션 막 헤더 + actFocus 인트로. 반환: markdown 문자열 리스트."""
+    if not mainAct or mainAct in renderedActs:
+        return []
+    renderedActs.add(mainAct)
+    parts: list[str] = []
+    if mainAct not in _ACT_HEADERS:
+        parts.append(f"\n---\n\n# {section.title}\n")
+        if section.helper:
+            parts.append(f"> {section.helper}")
+        return parts
+    actTitle, actQuestion = _ACT_HEADERS[mainAct]
+    parts.append(f"\n---\n\n# {actTitle}\n")
+    parts.append(f"> **핵심 질문**: {actQuestion}")
+    focus = actFocus.get(mainAct)
+    if focus:
+        parts.append(f"> **이 기업의 관전 포인트**: {focus}")
+    return parts
+
+
+def _mdRenderBlock(block, chart_dir: str | None, blockTypes: dict) -> list[str]:
+    """단일 block → markdown 라인 리스트. 반환: 빈 리스트면 미지원."""
+    HeadingBlock = blockTypes["HeadingBlock"]
+    TextBlock = blockTypes["TextBlock"]
+    MetricBlock = blockTypes["MetricBlock"]
+    TableBlock = blockTypes["TableBlock"]
+    ChartBlock = blockTypes["ChartBlock"]
+    FlagBlock = blockTypes["FlagBlock"]
+
+    isEmphasized = getattr(block, "emphasized", False)
+    if isinstance(block, HeadingBlock):
+        mark = "\u2605 " if isEmphasized else ""
+        return [f"{block.markdownPrefix} {mark}{block.title}"]
+    if isinstance(block, TextBlock):
+        return [block.text]
+    if isinstance(block, MetricBlock):
+        return [f"- **{label}**: {value}" for label, value in block.metrics]
+    if isinstance(block, TableBlock):
+        return [_mdRenderTableBlock(block)]
+    if isinstance(block, ChartBlock):
+        return [_mdRenderChartBlock(block, chart_dir)]
+    if isinstance(block, FlagBlock):
+        return [f"- {block.icon} {f}" for f in block.flags]
+    if hasattr(block, "render"):
+        return [block.render("markdown")]
+    return []
+
+
+def _mdRenderTableBlock(block) -> str:
+    """TableBlock → markdown table (pandas fallback polars)."""
+    if hasattr(block.df, "to_pandas"):
+        try:
+            pdf = block.df.to_pandas()
+            pdf.columns = [c[:-2] if isinstance(c, str) and c.endswith("Q4") else c for c in pdf.columns]
+            return pdf.to_markdown(index=False)
+        except (ImportError, Exception):
+            pass
+    return _polarsToMarkdown(block.df)
+
+
+def _mdRenderChartBlock(block, chart_dir: str | None) -> str:
+    """ChartBlock → 이미지 참조 또는 [chart: ...] placeholder."""
+    title = block.spec.get("title", "차트") if isinstance(block.spec, dict) else "차트"
+    if chart_dir and isinstance(block.spec, dict):
+        from dartlab.viz.spec import VizSpec
+
+        key = block.spec.get("title", "chart").replace(" ", "_")[:30]
+        img_path = f"{chart_dir}/chart-{key}.svg"
+        try:
+            vs = VizSpec.fromDict(block.spec)
+            if vs.toImage(img_path):
+                return f"![{title}](assets/chart-{key}.svg)"
+        except (ImportError, ValueError, OSError, TypeError):
+            pass
+    return f"*[chart: {title}]*"
+
+
+def _mdRenderSectionThreads(section, renderedThreads: set) -> list[str]:
+    """Thread 제목 표시 (중복 제외). 반환: markdown 문자열 리스트."""
+    if not section.threads:
+        return []
+    lines: list[str] = []
+    for t in section.threads:
+        if t.title in renderedThreads:
+            continue
+        renderedThreads.add(t.title)
+        icon = _THREAD_SEVERITY_ICON.get(t.severity, "")
+        lines.append(f"**{icon} {t.title}**")
+    return lines
+
+
+def _mdRenderSection(
+    section,
+    review,
+    blockTypes: dict,
+    renderedActs: set,
+    renderedThreads: set,
+    _ACT_HEADERS,
+    actFocus: dict,
+    chart_dir: str | None,
+    detailMode: bool,
+) -> list[str]:
+    """단일 섹션 전체 렌더링. 반환: markdown 문자열 리스트."""
+    actNum = getattr(section, "partId", "")
+    mainAct = actNum.split("-")[0] if actNum else ""
+
+    parts = _mdRenderSectionHeader(section, mainAct, _ACT_HEADERS, renderedActs, actFocus)
+
+    transKey = _MD_ACT_BOUNDARIES.get(section.key)
+    if transKey and hasattr(review, "actTransitions") and review.actTransitions:
+        trans = review.actTransitions.get(transKey)
+        if trans:
+            parts.append(f"\n> **{transKey}** {trans}\n")
+
+    if not detailMode:
+        parts.append(f"### {section.title}")
+        if section.summary:
+            parts.append(f"*{section.summary}*")
+        return parts
+
+    parts.extend(_mdRenderSectionThreads(section, renderedThreads))
+
+    if not section.blocks:
+        parts.append(f"_{section.title}: 데이터가 부족하여 이 섹션은 생략되었습니다._\n")
+        return parts
+
+    for block in section.blocks:
+        parts.extend(_mdRenderBlock(block, chart_dir, blockTypes))
+    return parts
+
+
+def renderMarkdown(review, *, chart_dir: str | None = None) -> str:
+    """마크다운 렌더링 orchestrator (Q3.1f split).
+
+    chart_dir 지정 시 ChartBlock 을 SVG 로 저장하고 이미지 참조 생성.
+
+    Parameters
+    ----------
+    review : ReviewLayout
+        렌더링 대상. sections / summaryCard / circulationSummary /
+        actTransitions / template 속성 소비.
+    chart_dir : str, optional
+        SVG 출력 디렉토리. None 이면 placeholder 로 대체.
+
+    Returns
+    -------
+    str
+        완성된 마크다운 문서 (섹션/요약/막 결론 포함).
     """
     from dartlab.review.blocks import (
         ChartBlock,
@@ -143,86 +336,50 @@ def renderMarkdown(review, *, chart_dir: str | None = None) -> str:
     )
     from dartlab.review.catalog import ACT_HEADERS
 
-    _ACT_HEADERS = ACT_HEADERS
-
-    # ── 6막 전환 경계 매핑 (섹션 key → 전환 key) ──
-    _ACT_BOUNDARIES: dict[str, str] = {
-        "수익성": "1→2",
-        "현금흐름": "2→3",
-        "자금조달": "3→4",
-        "자산구조": "4→5",
-        "가치평가": "5→6",
+    blockTypes = {
+        "HeadingBlock": HeadingBlock,
+        "TextBlock": TextBlock,
+        "MetricBlock": MetricBlock,
+        "TableBlock": TableBlock,
+        "ChartBlock": ChartBlock,
+        "FlagBlock": FlagBlock,
     }
 
-    # 스토리 템플릿에서 actFocus 로드
-    actFocus: dict[str, str] = {}
     templateName = getattr(review, "template", None)
+    tmplInfo: dict = {}
+    actFocus: dict[str, str] = {}
     if templateName:
         from dartlab.review.templates import STORY_TEMPLATES
 
         tmplInfo = STORY_TEMPLATES.get(templateName, {})
         actFocus = tmplInfo.get("actFocus", {})
 
-    parts: list[str] = []
-    parts.append(f"## {review.corpName} ({review.stockCode})\n")
+    parts: list[str] = [f"## {review.corpName} ({review.stockCode})\n"]
 
-    # ── 요약 카드 ──
-    if review.summaryCard:
-        card = review.summaryCard
-        cardLines = []
-        if card.conclusion:
-            cardLines.append(f"**{card.conclusion}**")
-        for s in card.strengths:
-            cardLines.append(f"- [+] {s}")
-        for w in card.warnings:
-            cardLines.append(f"- [-] {w}")
-        if cardLines:
-            parts.append("\n".join(cardLines))
+    card = _mdRenderSummaryCard(review.summaryCard)
+    if card:
+        parts.append(card)
 
-    # ── 스토리 템플릿 표시 ──
-    allTemplates = getattr(review, "templates", []) or []
-    if templateName:
-        if len(allTemplates) > 1:
-            descs = []
-            for t in allTemplates:
-                STORY_TEMPLATES.get(t, {})
-                descs.append(f"{t}")
-            parts.append(f"**스토리: {' + '.join(descs)}**")
-        else:
-            desc = tmplInfo.get("description", "") if tmplInfo else ""
-            parts.append(f"**스토리: {templateName}** — {desc}")
+    parts.extend(_mdRenderTemplateHeader(review, templateName, tmplInfo))
 
-        # 핵심 질문 표시
-        keyQuestions = tmplInfo.get("keyQuestions", []) if tmplInfo else []
-        if keyQuestions:
-            qLines = [f"  - {q}" for q in keyQuestions]
-            parts.append("> **핵심 질문**\n" + "\n".join(f"> {q}" for q in qLines))
-
-    # ── 순환 서사 ──
     if review.circulationSummary:
         parts.append(f"> **재무 순환 서사**\n> {review.circulationSummary.replace(chr(10), chr(10) + '> ')}")
 
     detailMode = getattr(review.layout, "detail", True)
-
-    # 이미 렌더링된 막 번호 + thread title + 막 결론 thread 추적
     renderedActs: set[str] = set()
     renderedThreads: set[str] = set()
     actSummaryUsedIds: set[str] = set()
-    # 막별 섹션 수집 (막 결론용)
     currentAct: str = ""
     currentActSections: list = []
-    # threads 수집 (전체)
+
     allThreads: list = []
     for sec in review.sections:
         if sec.threads:
             allThreads.extend(sec.threads)
 
     for section in review.sections:
-        # ── 6막 헤더 삽입 (해당 막의 첫 섹션일 때) ──
-        actNum = getattr(section, "partId", "")
-        mainAct = actNum.split("-")[0] if actNum else ""
+        mainAct = getattr(section, "partId", "").split("-")[0]
 
-        # 막이 바뀌면 이전 막 결론 삽입
         if mainAct and mainAct != currentAct and currentAct and currentActSections:
             from dartlab.review.narrate import buildActSummary
 
@@ -234,104 +391,21 @@ def renderMarkdown(review, *, chart_dir: str | None = None) -> str:
         if mainAct:
             currentAct = mainAct
 
-        # 6막에 매핑되지 않는 섹션(macro 보고서 등)은 section.title을 직접 표시
-        if mainAct and mainAct not in _ACT_HEADERS and mainAct not in renderedActs:
-            renderedActs.add(mainAct)
-            parts.append(f"\n---\n\n# {section.title}\n")
-            if section.helper:
-                parts.append(f"> {section.helper}")
-
-        if mainAct and mainAct in _ACT_HEADERS and mainAct not in renderedActs:
-            renderedActs.add(mainAct)
-            actTitle, actQuestion = _ACT_HEADERS[mainAct]
-            parts.append(f"\n---\n\n# {actTitle}\n")
-            parts.append(f"> **핵심 질문**: {actQuestion}")
-
-            # actFocus 인트로 (스토리 템플릿이 있을 때)
-            focus = actFocus.get(mainAct)
-            if focus:
-                parts.append(f"> **이 기업의 관전 포인트**: {focus}")
-
-        # ── 막 전환 인과 문장 삽입 ──
-        transKey = _ACT_BOUNDARIES.get(section.key)
-        if transKey and hasattr(review, "actTransitions") and review.actTransitions:
-            trans = review.actTransitions.get(transKey)
-            if trans:
-                parts.append(f"\n> **{transKey}** {trans}\n")
-
-        if not detailMode:
-            parts.append(f"### {section.title}")
-            if section.summary:
-                parts.append(f"*{section.summary}*")
-            continue
-
-        # ── Threads (인과 패턴) — 중복 건너뛰기 ──
-        if section.threads:
-            for t in section.threads:
-                if t.title in renderedThreads:
-                    continue
-                renderedThreads.add(t.title)
-                icon = {"critical": "[!!]", "warning": "[!]", "positive": "[+]", "neutral": "[-]"}
-                parts.append(f"**{icon.get(t.severity, '')} {t.title}**")
-
-        # ── 빈 섹션 안내 ──
-        if not section.blocks:
-            parts.append(f"_{section.title}: 데이터가 부족하여 이 섹션은 생략되었습니다._\n")
-            currentActSections.append(section)
-            continue
-
-        # ── 블록 렌더링 ──
-        for block in section.blocks:
-            isEmphasized = getattr(block, "emphasized", False)
-
-            if isinstance(block, HeadingBlock):
-                prefix = block.markdownPrefix
-                mark = "\u2605 " if isEmphasized else ""
-                parts.append(f"{prefix} {mark}{block.title}")
-            elif isinstance(block, TextBlock):
-                parts.append(block.text)
-            elif isinstance(block, MetricBlock):
-                for label, value in block.metrics:
-                    parts.append(f"- **{label}**: {value}")
-            elif isinstance(block, TableBlock):
-                rendered = False
-                if hasattr(block.df, "to_pandas"):
-                    try:
-                        pdf = block.df.to_pandas()
-                        pdf.columns = [c[:-2] if isinstance(c, str) and c.endswith("Q4") else c for c in pdf.columns]
-                        parts.append(pdf.to_markdown(index=False))
-                        rendered = True
-                    except (ImportError, Exception):
-                        pass
-                if not rendered:
-                    parts.append(_polarsToMarkdown(block.df))
-            elif isinstance(block, ChartBlock):
-                title = block.spec.get("title", "차트") if isinstance(block.spec, dict) else "차트"
-                rendered_chart = False
-                if chart_dir and isinstance(block.spec, dict):
-                    from dartlab.viz.spec import VizSpec
-
-                    key = block.spec.get("title", "chart").replace(" ", "_")[:30]
-                    img_path = f"{chart_dir}/chart-{key}.svg"
-                    try:
-                        vs = VizSpec.fromDict(block.spec)
-                        if vs.toImage(img_path):
-                            rel = f"assets/chart-{key}.svg"
-                            parts.append(f"![{title}]({rel})")
-                            rendered_chart = True
-                    except (ImportError, ValueError, OSError, TypeError):
-                        pass
-                if not rendered_chart:
-                    parts.append(f"*[chart: {title}]*")
-            elif isinstance(block, FlagBlock):
-                for f in block.flags:
-                    parts.append(f"- {block.icon} {f}")
-            elif hasattr(block, "render"):
-                parts.append(block.render("markdown"))
-
+        parts.extend(
+            _mdRenderSection(
+                section,
+                review,
+                blockTypes,
+                renderedActs,
+                renderedThreads,
+                ACT_HEADERS,
+                actFocus,
+                chart_dir,
+                detailMode,
+            )
+        )
         currentActSections.append(section)
 
-    # 마지막 막 결론
     if currentAct and currentActSections:
         from dartlab.review.narrate import buildActSummary
 
