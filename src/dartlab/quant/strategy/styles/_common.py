@@ -9,6 +9,7 @@ from __future__ import annotations
 import numpy as np
 
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.core.polarsUtil import isEmptyDf
 
 
 def get_arrays(company, *, start: str | None = None) -> dict:
@@ -27,7 +28,7 @@ def get_arrays(company, *, start: str | None = None) -> dict:
     # company 객체에 _strategy_start 속성 있으면 그것도 사용 (옵션)
     s = start or getattr(company, "_strategy_start", None)
     df = fetch_ohlcv(code, **({"start": s} if s else {}))
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return {}
     return ohlcv_to_arrays(df)
 

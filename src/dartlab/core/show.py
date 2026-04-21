@@ -7,6 +7,7 @@ import re
 import unicodedata
 
 import polars as pl
+from dartlab.core.polarsUtil import isEmptyDf
 
 # 공개 freq 상수 — AI tool schema enum + 사용자 문서 단일 출처
 # Q: 분기 기본값 (IS/BS/CF 분기 컬럼), Y: 연간 합산, YTD: 연초누적
@@ -267,7 +268,7 @@ def selectFromShow(
         collectedIdx: set[int] = set()
         for mc in metaCols:
             sub = _cascadeFilterRows(result, mc, indList)
-            if sub is None or sub.is_empty():
+            if isEmptyDf(sub):
                 continue
             # sub의 메타값 → 원본 result에서 해당 행 인덱스 찾기
             subSigs: set[tuple] = set()

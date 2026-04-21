@@ -8,6 +8,7 @@ from __future__ import annotations
 import numpy as np
 
 from dartlab.quant._helpers import fetch_benchmark, fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.core.polarsUtil import isEmptyDf
 
 
 def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
@@ -45,7 +46,7 @@ def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         return {**result, "error": fr["error"]}
 
     ohlcv = fetch_ohlcv(stockCode)
-    if ohlcv is None or ohlcv.is_empty():
+    if isEmptyDf(ohlcv):
         return {**result, "error": "주가 데이터 없음"}
 
     close = ohlcv_to_arrays(ohlcv).get("close")

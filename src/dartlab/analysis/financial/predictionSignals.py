@@ -54,6 +54,7 @@ from dartlab.analysis.financial._constants import (
     TREND_RSQUARED_MEDIUM,
 )
 from dartlab.core.finance.calc import safeDiv as _safe
+from dartlab.core.polarsUtil import isEmptyDf
 
 
 def _getStockCode(company) -> str | None:
@@ -827,7 +828,7 @@ def _loadAdaptive(
 
     for sid, source in candidates:
         df = loadMacroParquet(sid, source=source)
-        if df is None or df.is_empty():
+        if isEmptyDf(df):
             continue
         curVals = alignToFinancialPeriods(df, periodCols).get_column("value").to_list()
         prevVals = alignToFinancialPeriods(df, prevCols).get_column("value").to_list()

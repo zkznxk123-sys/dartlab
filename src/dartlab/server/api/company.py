@@ -15,6 +15,7 @@ from ..services.company_api import (
     safe_topic_label,
 )
 from .common import (
+from dartlab.core.polarsUtil import isEmptyDf
     HANDLED_API_ERRORS,
     etag_response,
     guideDetail,
@@ -504,7 +505,7 @@ def api_company_scan(code: str, axis: str):
 
     try:
         df = method()
-        if df is None or df.is_empty():
+        if isEmptyDf(df):
             return {"stockCode": company.stockCode, "corpName": company.corpName, "available": False}
         return {
             "stockCode": company.stockCode,

@@ -8,6 +8,7 @@ from __future__ import annotations
 import logging
 
 from dartlab.quant._helpers import load_allfilings_for_stock, resolve_market
+from dartlab.core.polarsUtil import isEmptyDf
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ def calcEventSignal(stockCode: str, *, market: str = "auto", series: bool = Fals
     result: dict = {"stockCode": stockCode, "market": market}
 
     filings = load_allfilings_for_stock(stockCode)
-    if filings is None or filings.is_empty():
+    if isEmptyDf(filings):
         return {**result, "error": "allFilings 데이터 없음"}
 
     report_col = next((c for c in ["report_nm", "report_name", "title"] if c in filings.columns), None)

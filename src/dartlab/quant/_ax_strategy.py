@@ -33,6 +33,7 @@ from dartlab.quant.strategy.presets import (
     resolve_style,
 )
 from dartlab.quant.strategy.rule import Rule
+from dartlab.core.polarsUtil import isEmptyDf
 
 
 @dataclass
@@ -75,7 +76,7 @@ def _arrays(stockCode: str, *, start: str | None = None) -> dict:
     """OHLCV 가져오기. start='2020-01-01' 같이 명시하면 장기 데이터."""
     kwargs = {"start": start} if start else {}
     df = fetch_ohlcv(stockCode, **kwargs)
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return {}
     return ohlcv_to_arrays(df)
 

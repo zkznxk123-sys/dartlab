@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import polars as pl
+from dartlab.core.polarsUtil import isEmptyDf
 
 if TYPE_CHECKING:
     from dartlab.providers.edgar.company import Company
@@ -88,7 +89,7 @@ class _DocsAccessor:
         from dartlab.core.dataLoader import loadData
 
         df = loadData(self._company.ticker, category="edgarDocs")
-        if df is None or df.is_empty():
+        if isEmptyDf(df):
             self._company._cache[key] = None
             return None
 

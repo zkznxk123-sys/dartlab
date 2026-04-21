@@ -26,6 +26,7 @@ import polars as pl
 
 from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import (
+from dartlab.core.polarsUtil import isEmptyDf
     extract_account,
     fetch_ohlcv,
     load_scan_parquet,
@@ -151,7 +152,7 @@ def _portfolio_returns(codes: list[str], market: str, year: str, max_n: int = 30
             o = fetch_ohlcv(c)
         except (ValueError, KeyError, OSError, AttributeError, RuntimeError):
             continue
-        if o is None or o.is_empty():
+        if isEmptyDf(o):
             continue
         cl = ohlcv_to_arrays(o).get("close")
         if cl is None or len(cl) < 60:

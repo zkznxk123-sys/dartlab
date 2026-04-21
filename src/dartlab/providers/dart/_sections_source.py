@@ -10,6 +10,7 @@ import re
 from typing import TYPE_CHECKING, Any
 
 import polars as pl
+from dartlab.core.polarsUtil import isEmptyDf
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
@@ -204,7 +205,7 @@ class _SectionsSource:
     def changeSummary(self, *, topN: int = 10) -> pl.DataFrame | None:
         """topic별 변화 요약 — AI 컨텍스트용."""
         ch = self.changes()
-        if ch is None or ch.is_empty():
+        if isEmptyDf(ch):
             return None
         return (
             ch.group_by(["topic", "changeType"])

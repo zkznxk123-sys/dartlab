@@ -35,6 +35,7 @@ from .metrics import (
     winrate,
 )
 from .rule import Rule
+from dartlab.core.polarsUtil import isEmptyDf
 
 # 체결/비용 상수
 DEFAULT_FEE_BPS = 15.0  # 양방향 합산 (진입 + 청산)
@@ -514,7 +515,7 @@ def multi_asset_backtest(
 
     for code in stock_codes:
         ohlcv = fetch_ohlcv(code)
-        if ohlcv is None or ohlcv.is_empty():
+        if isEmptyDf(ohlcv):
             continue
         arr = ohlcv_to_arrays(ohlcv)
         if "close" not in arr or len(arr["close"]) < 60:

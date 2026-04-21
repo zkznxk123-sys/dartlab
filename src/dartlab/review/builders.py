@@ -33,6 +33,7 @@ from dartlab.review.narrate import (
     narrateValuationSins,
 )
 from dartlab.review.utils import unifyTableScale
+from dartlab.core.polarsUtil import isEmptyDf
 
 # ── notes enrichment 렌더링 ──
 
@@ -278,7 +279,7 @@ def _quarterlyRevenueTable(selectResult) -> TableBlock | None:
         return None
 
     df = selectResult.df
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return None
 
     # 기간 컬럼만 추출 (Q 포함)

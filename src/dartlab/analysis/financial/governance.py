@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dartlab.analysis.financial._helpers import MAX_RATIO_YEARS
 from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.polarsUtil import isEmptyDf
 
 # ── 최대주주 지분 시계열 ──
 
@@ -229,7 +230,7 @@ def calcExecutivePayDivergence(company, *, basePeriod: str | None = None) -> dic
     import polars as pl
 
     df = pay.payByTypeDf
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return None
 
     # category 합산 → year별 전체 임원보수

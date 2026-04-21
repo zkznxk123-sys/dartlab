@@ -5,6 +5,7 @@ from __future__ import annotations
 import polars as pl
 
 from dartlab.providers.dart.report.types import (
+from dartlab.core.polarsUtil import isEmptyDf
     API_TYPE_LABELS,
     KEEP_META_COLS,
     META_DROP_COLS,
@@ -33,7 +34,7 @@ def extractRaw(
     from dartlab.core.dataLoader import loadData
 
     df = base_df if base_df is not None else loadData(stockCode, category="report")
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return None
 
     sub = df.filter(pl.col("apiType") == apiType)

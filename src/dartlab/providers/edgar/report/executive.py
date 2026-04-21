@@ -6,6 +6,7 @@ import re
 from typing import TYPE_CHECKING
 
 import polars as pl
+from dartlab.core.polarsUtil import isEmptyDf
 
 if TYPE_CHECKING:
     from dartlab.providers.edgar.company import Company
@@ -25,7 +26,7 @@ def extractExecutive(company: "Company") -> pl.DataFrame | None:
     2순위: XBRL에서 officer 관련 태그 (제한적)
     """
     sections = company._docs.sections
-    if sections is None or sections.is_empty():
+    if isEmptyDf(sections):
         return None
 
     # Item 10 Directors & Officers 섹션

@@ -8,6 +8,7 @@ import polars as pl
 
 from dartlab.core.mappers.common import isCurrentPeriod, normalizeName, pickValue
 from dartlab.providers.dart.docs.sections._common import sortPeriods
+from dartlab.core.polarsUtil import isEmptyDf
 
 
 @dataclass(frozen=True)
@@ -59,7 +60,7 @@ def _normalizeSubtopic(record: dict[str, object]) -> str:
 
 def topicSubtables(blocks: pl.DataFrame | None, topic: str) -> TopicSubtables | None:
     """retrievalBlocks에서 해당 topic의 테이블을 추출하여 TopicSubtables로 반환한다."""
-    if blocks is None or blocks.is_empty():
+    if isEmptyDf(blocks):
         return None
 
     resolved = _resolvedTopic(topic)

@@ -39,6 +39,7 @@ from .domains import load_domain
 from .http import GatherHttpClient, run_async
 from .market_config import get_market_config
 from .types import (
+from dartlab.core.polarsUtil import isEmptyDf
     ConsensusData,
     FlowData,
     GatherResult,
@@ -298,7 +299,7 @@ class Gather:
             None — KR 외 시장이거나 데이터 없을 때.
         """
         df = self.flow(stock_code, market=market)
-        if df is None or df.is_empty():
+        if isEmptyDf(df):
             return None
         row = df.row(0, named=True)
         return FlowData(

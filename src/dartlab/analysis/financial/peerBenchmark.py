@@ -9,6 +9,7 @@ from __future__ import annotations
 import polars as pl
 
 from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.polarsUtil import isEmptyDf
 
 # 비교할 핵심 비율 목록 (scanRatio name → 표시 label)
 _BENCHMARK_RATIOS = [
@@ -232,7 +233,7 @@ def _calcPercentile(stockCode: str, ratioName: str, label: str) -> dict | None:
     except (ValueError, ImportError, RuntimeError, FileNotFoundError):
         return None
 
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return None
 
     # 최신 기간 컬럼 찾기

@@ -14,6 +14,7 @@ import logging
 import numpy as np
 
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays
+from dartlab.core.polarsUtil import isEmptyDf
 
 # ── 공분산 추정 ──────────────────────────────────────────
 
@@ -185,7 +186,7 @@ def _build_returns(stockCodes: list[str]) -> tuple[np.ndarray | None, list[str]]
     valid_codes = []
     for code in stockCodes:
         ohlcv = fetch_ohlcv(code)
-        if ohlcv is None or ohlcv.is_empty():
+        if isEmptyDf(ohlcv):
             continue
         arr = ohlcv_to_arrays(ohlcv)
         close = arr.get("close")

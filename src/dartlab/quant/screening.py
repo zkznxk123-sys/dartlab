@@ -11,6 +11,7 @@ import polars as pl
 
 from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import load_scan_parquet
+from dartlab.core.polarsUtil import isEmptyDf
 
 log = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ def _screen_price_based(preset: str, market: str, universe: list[str] | None = N
     for code in universe:
         try:
             ohlcv = fetch_ohlcv(code)
-            if ohlcv is None or ohlcv.is_empty():
+            if isEmptyDf(ohlcv):
                 continue
             closes = ohlcv.get_column("close").to_list()
             if cfg.get("ma_align"):

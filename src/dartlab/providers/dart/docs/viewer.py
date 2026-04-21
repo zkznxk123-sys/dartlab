@@ -20,6 +20,8 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import polars as pl
 
+from dartlab.core.polarsUtil import isEmptyDf
+
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
 
@@ -505,7 +507,7 @@ def _buildTextBlock(boRows: pl.DataFrame, bo: int, periodCols: list[str]) -> Vie
 
 def _textPeriodMap(block: ViewerBlock) -> dict[str, str]:
     """text block의 period -> text 매핑."""
-    if block.data is None or block.data.is_empty():
+    if isEmptyDf(block.data):
         return {}
     row = block.data.row(0, named=True)
     result: dict[str, str] = {}

@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 from dartlab.quant._helpers import fetch_ohlcv
+from dartlab.core.polarsUtil import isEmptyDf
 
 
 class _OHLCVWrapper:
@@ -23,7 +24,7 @@ class _OHLCVWrapper:
 def _get_ohlcv(stockCode: str, **kwargs):
     """OHLCV fetch + 검증."""
     ohlcv = fetch_ohlcv(stockCode, **kwargs)
-    if ohlcv is None or ohlcv.is_empty():
+    if isEmptyDf(ohlcv):
         return None, {"error": f"{stockCode} 주가 데이터 없음"}
     return ohlcv, None
 

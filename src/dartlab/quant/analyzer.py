@@ -12,6 +12,7 @@ import polars as pl
 
 from dartlab.quant import indicators as ind
 from dartlab.quant import signals as sig
+from dartlab.core.polarsUtil import isEmptyDf
 
 
 def enrichWithIndicators(df: pl.DataFrame) -> pl.DataFrame:
@@ -576,7 +577,7 @@ def _categoryEdgeAudit(
 
     for code in stockCodes:
         ohlcv = fetch_ohlcv(code, start="2014-01-01")
-        if ohlcv is None or ohlcv.is_empty():
+        if isEmptyDf(ohlcv):
             continue
         arr = ohlcv_to_arrays(ohlcv)
         close = arr.get("close")

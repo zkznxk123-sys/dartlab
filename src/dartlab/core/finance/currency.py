@@ -5,6 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 
 import polars as pl
+from dartlab.core.polarsUtil import isEmptyDf
 
 # FRED 시리즈 ID → USD 기준 환율
 _FRED_SERIES: dict[str, str] = {
@@ -46,7 +47,7 @@ def getExchangeRate(fromCurrency: str, toCurrency: str = "USD") -> float | None:
         return aToUsd / bToUsd
 
     df = _fetchRate(fc)
-    if df is None or df.is_empty():
+    if isEmptyDf(df):
         return None
 
     # 최신 non-null 값

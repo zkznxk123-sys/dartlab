@@ -19,6 +19,7 @@ from dartlab.providers.edgar.openapi.facts import (
     getCompanyFactsJson,
 )
 from dartlab.providers.edgar.openapi.identity import loadTickers
+from dartlab.core.polarsUtil import isEmptyDf
 
 EDGAR_DOCS_SCHEMA = {
     "cik": pl.Utf8,
@@ -111,7 +112,7 @@ def _validateSavedDocsParquet(path: Path, ticker: str) -> None:
     _validateSchema(df, EDGAR_DOCS_SCHEMA, label="edgarDocs")
 
     sec = sections(ticker)
-    if sec is None or sec.is_empty():
+    if isEmptyDf(sec):
         raise ValueError("edgarDocs consumer smoke check failed: sections() returned empty; overwrite prevented")
 
 

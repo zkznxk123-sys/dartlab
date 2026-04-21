@@ -25,6 +25,7 @@ from dartlab.core.reportSelector import selectEdgarReport
 from dartlab.providers.edgar.docs.sections.mapper import mapSectionTitle
 from dartlab.providers.edgar.docs.sections.textStructure import parseTextStructure
 from dartlab.providers.edgar.docs.sections.views import sortPeriods
+from dartlab.core.polarsUtil import isEmptyDf
 
 
 def _splitTextTable(content: str) -> tuple[str, str]:
@@ -118,7 +119,7 @@ def sections(stockCode: str, *, sinceYear: int | None = None) -> pl.DataFrame | 
     topicOrder: dict[tuple[str, str], tuple[int, int, int]] = {}
     for period in periods:
         report = selectEdgarReport(df, period)
-        if report is None or report.is_empty():
+        if isEmptyDf(report):
             continue
         for row in _rowsToTopicRows(report):
             topic = str(row["topic"])

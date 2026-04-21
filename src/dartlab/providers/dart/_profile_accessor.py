@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any
 import polars as pl
 
 from dartlab.providers.dart._utils import _isPeriodColumn
+from dartlab.core.polarsUtil import isEmptyDf
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
@@ -178,7 +179,7 @@ class _ProfileAccessor:
         if self._company._report is not None:
             for apiType in self._company._report.apiTypes:
                 df = self._company._report.extractAnnual(apiType)
-                if df is None or df.is_empty():
+                if isEmptyDf(df):
                     continue
                 rows = []
                 for row in df.iter_rows(named=True):

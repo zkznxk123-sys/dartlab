@@ -9,6 +9,7 @@ import re
 from typing import TYPE_CHECKING
 
 import polars as pl
+from dartlab.core.polarsUtil import isEmptyDf
 
 if TYPE_CHECKING:
     from dartlab.providers.edgar.company import Company
@@ -27,7 +28,7 @@ def extractOutsideDirector(company: "Company") -> pl.DataFrame | None:
     independent director 언급을 파싱.
     """
     sections = company._docs.sections
-    if sections is None or sections.is_empty():
+    if isEmptyDf(sections):
         return None
 
     item10 = sections.filter(pl.col("topic").str.contains("(?i)item10|directors|corporateGovernance"))
