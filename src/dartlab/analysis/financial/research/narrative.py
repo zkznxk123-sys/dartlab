@@ -114,28 +114,27 @@ def _consecutiveDirection(vals: list[float | None]) -> tuple[str, int]:
 # ══════════════════════════════════════
 
 
-def _analyzeDupont(inp: _Input) -> NarrativeParagraph | None:
-    """DuPont 5-factor 교차분해 + ROIC."""
-    dp = inp.dupont
-    if dp is None or not dp.roe:
+_DUPONT_DRIVER_MAP = {
+    "margin": "마진 주도형",
+    "turnover": "회전율 주도형",
+    "leverage": "레버리지 주도형",
+    "balanced": "균형형",
+}
+
+
+def _lastNonNull(lst: list | None):
+    """list 의 마지막 None 아닌 값 (없으면 None)."""
+    if not lst:
         return None
-    roeLast = next((v for v in reversed(dp.roe) if v is not None), None)
-    marginLast = next((v for v in reversed(dp.netMargin) if v is not None), None)
-    turnoverLast = next((v for v in reversed(dp.assetTurnover) if v is not None), None)
-    leverageLast = next((v for v in reversed(dp.equityMultiplier) if v is not None), None)
-    if roeLast is None or marginLast is None:
-        return None
+    return next((v for v in reversed(lst) if v is not None), None)
 
-    parts: list[str] = []
-    roePct = roeLast * 100
-    marginPct = marginLast * 100
-    roeStr = f"ROE {roePct:.1f}%"
 
-    # 5-factor 분해
-    tbLast = next((v for v in reversed(dp.taxBurden) if v is not None), None) if dp.taxBurden else None
-    ibLast = next((v for v in reversed(dp.interestBurden) if v is not None), None) if dp.interestBurden else None
-    opmLast = next((v for v in reversed(dp.operatingMargin) if v is not None), None) if dp.operatingMargin else None
-
+def _dupontDecompLines(dp, roeStr: str, marginLast, turnoverLast, leverageLast) -> list[str]:
+    """DuPont 5-factor 우선 / 3-factor fallback 분해 + 부담 경고."""
+    tbLast = _lastNonNull(dp.taxBurden)
+    ibLast = _lastNonNull(dp.interestBurden)
+    opmLast = _lastNonNull(dp.operatingMargin)
+    lines: list[str] = []
     if tbLast is not None and ibLast is not None and opmLast is not None:
         decomp5 = [
             f"세금부담 {tbLast:.2f}",
@@ -144,59 +143,86 @@ def _analyzeDupont(inp: _Input) -> NarrativeParagraph | None:
             f"회전율 {turnoverLast:.2f}배" if turnoverLast else "",
             f"레버리지 {leverageLast:.1f}배" if leverageLast else "",
         ]
-        parts.append(f"{roeStr} = {' × '.join(d for d in decomp5 if d)}")
+        lines.append(f"{roeStr} = {' × '.join(d for d in decomp5 if d)}")
         if tbLast < 0.7:
-            parts.append(f"세금부담률 높음(유효세율 {(1 - tbLast) * 100:.0f}%)")
+            lines.append(f"세금부담률 높음(유효세율 {(1 - tbLast) * 100:.0f}%)")
         if ibLast < 0.7:
-            parts.append("이자비용이 세전이익을 크게 잠식")
+            lines.append("이자비용이 세전이익을 크게 잠식")
     else:
-        decomp = []
+        decomp: list[str] = []
         if marginLast is not None:
-            decomp.append(f"순이익률 {marginPct:.1f}%")
+            decomp.append(f"순이익률 {marginLast * 100:.1f}%")
         if turnoverLast is not None:
             decomp.append(f"자산회전율 {turnoverLast:.2f}배")
         if leverageLast is not None:
             decomp.append(f"레버리지 {leverageLast:.1f}배")
-        parts.append(f"{roeStr}는 {' × '.join(decomp)}로 구성")
+        lines.append(f"{roeStr}는 {' × '.join(decomp)}로 구성")
+    return lines
 
-    # ROIC
-    roicLast = next((v for v in reversed(dp.roic) if v is not None), None) if dp.roic else None
-    if roicLast is not None:
-        roicPct = roicLast * 100
-        parts.append(f"ROIC {roicPct:.1f}%")
-        if roicPct > 10:
-            parts.append("투자자본 대비 양호한 가치창출")
-        elif roicPct < 5:
-            parts.append("ROIC 낮음 — 자본비용 대비 가치파괴 가능성")
 
-    # 업종 비교
-    bench = inp.sectorBenchmark
-    if bench is not None:
-        roeMedian = getattr(bench, "roeMedian", None)
-        if roeMedian is not None:
-            if roePct > roeMedian:
-                parts.append(f"업종 중앙값({roeMedian:.1f}%) 대비 우수")
-            else:
-                parts.append(f"업종 중앙값({roeMedian:.1f}%) 하회")
+def _dupontRoicLines(dp) -> list[str]:
+    """ROIC 한 줄 + 평가."""
+    roicLast = _lastNonNull(dp.roic)
+    if roicLast is None:
+        return []
+    roicPct = roicLast * 100
+    lines = [f"ROIC {roicPct:.1f}%"]
+    if roicPct > 10:
+        lines.append("투자자본 대비 양호한 가치창출")
+    elif roicPct < 5:
+        lines.append("ROIC 낮음 — 자본비용 대비 가치파괴 가능성")
+    return lines
 
-    # 추세 (assetTurnover)
-    if len(dp.assetTurnover) >= 2:
-        cleanTurnover = [v for v in dp.assetTurnover if v is not None]
-        if len(cleanTurnover) >= 2:
-            diff = cleanTurnover[-1] - cleanTurnover[-2]
-            if abs(diff) > 0.05:
-                direction = "상승" if diff > 0 else "하락"
-                parts.append(f"자산회전율 {direction} 추세(전년 대비 {diff:+.2f})")
 
-    # driver
-    driverMap = {
-        "margin": "마진 주도형",
-        "turnover": "회전율 주도형",
-        "leverage": "레버리지 주도형",
-        "balanced": "균형형",
-    }
-    driverLabel = driverMap.get(dp.driver, dp.driver)
-    parts.append(driverLabel)
+def _dupontSectorCompareLine(roePct: float, bench) -> str | None:
+    """업종 중앙값 비교 한 줄."""
+    if bench is None:
+        return None
+    roeMedian = getattr(bench, "roeMedian", None)
+    if roeMedian is None:
+        return None
+    return f"업종 중앙값({roeMedian:.1f}%) 대비 우수" if roePct > roeMedian else f"업종 중앙값({roeMedian:.1f}%) 하회"
+
+
+def _dupontTurnoverTrendLine(dp) -> str | None:
+    """자산회전율 trend (|diff| > 0.05) 한 줄."""
+    if len(dp.assetTurnover) < 2:
+        return None
+    clean = [v for v in dp.assetTurnover if v is not None]
+    if len(clean) < 2:
+        return None
+    diff = clean[-1] - clean[-2]
+    if abs(diff) <= 0.05:
+        return None
+    direction = "상승" if diff > 0 else "하락"
+    return f"자산회전율 {direction} 추세(전년 대비 {diff:+.2f})"
+
+
+def _analyzeDupont(inp: _Input) -> NarrativeParagraph | None:
+    """DuPont 5-factor 교차분해 + ROIC orchestrator (Q3.1f split)."""
+    dp = inp.dupont
+    if dp is None or not dp.roe:
+        return None
+    roeLast = _lastNonNull(dp.roe)
+    marginLast = _lastNonNull(dp.netMargin)
+    turnoverLast = _lastNonNull(dp.assetTurnover)
+    leverageLast = _lastNonNull(dp.equityMultiplier)
+    if roeLast is None or marginLast is None:
+        return None
+
+    roePct = roeLast * 100
+    roeStr = f"ROE {roePct:.1f}%"
+
+    parts: list[str] = []
+    parts.extend(_dupontDecompLines(dp, roeStr, marginLast, turnoverLast, leverageLast))
+    parts.extend(_dupontRoicLines(dp))
+    sectorLine = _dupontSectorCompareLine(roePct, inp.sectorBenchmark)
+    if sectorLine:
+        parts.append(sectorLine)
+    trendLine = _dupontTurnoverTrendLine(dp)
+    if trendLine:
+        parts.append(trendLine)
+    parts.append(_DUPONT_DRIVER_MAP.get(dp.driver, dp.driver))
 
     body = ". ".join(parts) + "."
     severity = "positive" if roeLast > 0.10 else "neutral" if roeLast > 0.05 else "negative"
@@ -1224,111 +1250,135 @@ def _analyzeCapitalChange(inp: _Input) -> NarrativeParagraph | None:
     )
 
 
-def _analyzeCashflowDeep(inp: _Input) -> NarrativeParagraph | None:
-    """현금흐름 심층 — 투자CF/재무CF 분해, FCF 추세, 배당 여력."""
-    ocf = _getVals(inp.aSeries, "CF", "operating_cashflow")
-    icf = _getVals(inp.aSeries, "CF", "investing_cashflow")
-    if not icf:
-        icf = _getVals(inp.aSeries, "CF", "investing_activities")
-    fcf_cf = _getVals(inp.aSeries, "CF", "financing_cashflow")
-    if not fcf_cf:
-        fcf_cf = _getVals(inp.aSeries, "CF", "financing_activities")
-    capex = _getVals(inp.aSeries, "CF", "capital_expenditure")
+def _cfOcfNiLine(eq) -> str | None:
+    """OCF/순이익 비율 한 줄 (earningsQuality 기반)."""
+    if not (eq and eq.cfToNi is not None):
+        return None
+    ratio = eq.cfToNi
+    if ratio > 1.2:
+        return f"OCF/순이익 {ratio:.1f}배 — 현금 뒷받침 우수"
+    if ratio > 0.8:
+        return f"OCF/순이익 {ratio:.1f}배 — 보통 수준"
+    if ratio > 0:
+        return f"OCF/순이익 {ratio:.1f}배 — 현금 뒷받침 미흡"
+    return f"OCF/순이익 {ratio:.1f}배 — 영업현금흐름 적자"
+
+
+def _cfOcfTrendLine(ocf: list) -> str | None:
+    """영업CF trend (2기+ 개선/악화)."""
+    ocfClean = [v for v in ocf if v is not None]
+    if len(ocfClean) < 2:
+        return None
+    trendDir = _trend(ocf)
+    if trendDir == "improving":
+        return "영업CF 지속 개선 추세"
+    if trendDir == "deteriorating":
+        return "영업CF 지속 악화 추세 — 현금창출 능력 점검 필요"
+    return None
+
+
+def _cfFcfTrendLines(ocf: list, capex: list) -> list[str]:
+    """FCF = OCF - |CAPEX| 추세 라인 (최대 3줄)."""
     if not capex:
-        capex = _getVals(inp.aSeries, "CF", "acquisition_of_property_plant_and_equipment")
+        return []
+    fcfList: list[float | None] = []
+    for o, c in zip(ocf, capex):
+        if o is not None and c is not None:
+            fcfList.append(o - abs(c))
+        else:
+            fcfList.append(None)
+    fcfClean = [v for v in fcfList if v is not None]
+    if len(fcfClean) < 2:
+        return []
+    lines = [f"FCF {fcfClean[-1] / 1e8:,.0f}억(전년 {fcfClean[-2] / 1e8:,.0f}억)"]
+    if fcfClean[-1] < 0:
+        lines.append("FCF 적자 — 투자 부담 과다")
+    if _trend(fcfList) == "deteriorating" and fcfClean[-1] > 0:
+        lines.append("FCF 감소 추세 주의")
+    return lines
+
+
+def _cfDividendCoverageLines(ocf, capex, dividend) -> list[str]:
+    """배당 커버리지 (FCF/배당)."""
+    if not (capex and dividend):
+        return []
+    pairs = [(o, c, d) for o, c, d in zip(ocf, capex, dividend) if all(v is not None for v in (o, c, d))]
+    if not pairs:
+        return []
+    latestOcf, latestCapex, latestDiv = pairs[-1]
+    if latestDiv == 0:
+        return []
+    fcf = latestOcf - abs(latestCapex)
+    divCover = fcf / abs(latestDiv)
+    lines = [f"배당 커버리지(FCF/배당) {divCover:.1f}배"]
+    if divCover < 1:
+        lines.append("FCF로 배당 충당 불가 — 배당 지속성 의문")
+    return lines
+
+
+def _cfLifecyclePatternLine(ocf: list, icf: list, fcf_cf: list) -> str | None:
+    """CF 라이프사이클 스테이지 판별 — OCF/ICF/FCF 부호 조합."""
+    latestOcfVal = _lastN(ocf, 1)
+    latestIcfVal = _lastN(icf, 1) if icf else []
+    latestFcfVal = _lastN(fcf_cf, 1) if fcf_cf else []
+    if not (latestOcfVal and latestIcfVal and latestFcfVal):
+        return None
+    oSign = latestOcfVal[-1] is not None and latestOcfVal[-1] > 0
+    iSign = latestIcfVal[-1] is not None and latestIcfVal[-1] > 0
+    fSign = latestFcfVal[-1] is not None and latestFcfVal[-1] > 0
+    patterns = {
+        (True, False, True): "CF패턴 [+,-,+] 성장기 — 영업흑자, 투자확대, 외부조달",
+        (True, False, False): "CF패턴 [+,-,-] 성숙기 — 자체 현금으로 투자와 주주환원 병행",
+        (False, True, False): "CF패턴 [-,+,-] 쇠퇴기 — 영업적자, 자산매각, 부채상환",
+        (False, False, True): "CF패턴 [-,-,+] 도입기 — 적자, 투자중, 외부조달 의존",
+        (False, True, True): "CF패턴 [-,+,+] 구조조정 — 자산매각 + 외부조달로 적자 보전",
+    }
+    return patterns.get((oSign, iSign, fSign))
+
+
+def _cfSeverity(eq) -> str:
+    """OCF/NI 비율 기반 severity."""
+    if not (eq and eq.cfToNi is not None):
+        return "positive"
+    if eq.cfToNi < 0.5:
+        return "negative"
+    if eq.cfToNi < 0.8:
+        return "warning"
+    if eq.cfToNi < 1.2:
+        return "neutral"
+    return "positive"
+
+
+def _analyzeCashflowDeep(inp: _Input) -> NarrativeParagraph | None:
+    """현금흐름 심층 orchestrator (Q3.1f split)."""
+    ocf = _getVals(inp.aSeries, "CF", "operating_cashflow")
+    icf = _getVals(inp.aSeries, "CF", "investing_cashflow") or _getVals(inp.aSeries, "CF", "investing_activities")
+    fcf_cf = _getVals(inp.aSeries, "CF", "financing_cashflow") or _getVals(inp.aSeries, "CF", "financing_activities")
+    capex = _getVals(inp.aSeries, "CF", "capital_expenditure") or _getVals(
+        inp.aSeries, "CF", "acquisition_of_property_plant_and_equipment"
+    )
     dividend = _getVals(inp.aSeries, "CF", "dividends_paid")
 
     if not ocf or len(ocf) < 2:
         return None
 
     parts: list[str] = []
-
-    # OCF/NI 비율 (기존 cashflowQuality 기능 포함)
-    eq = inp.earningsQuality
-    if eq and eq.cfToNi is not None:
-        ratio = eq.cfToNi
-        if ratio > 1.2:
-            parts.append(f"OCF/순이익 {ratio:.1f}배 — 현금 뒷받침 우수")
-        elif ratio > 0.8:
-            parts.append(f"OCF/순이익 {ratio:.1f}배 — 보통 수준")
-        elif ratio > 0:
-            parts.append(f"OCF/순이익 {ratio:.1f}배 — 현금 뒷받침 미흡")
-        else:
-            parts.append(f"OCF/순이익 {ratio:.1f}배 — 영업현금흐름 적자")
-
-    # OCF 추세
-    ocfClean = [v for v in ocf if v is not None]
-    if len(ocfClean) >= 2:
-        trendDir = _trend(ocf)
-        if trendDir == "improving":
-            parts.append("영업CF 지속 개선 추세")
-        elif trendDir == "deteriorating":
-            parts.append("영업CF 지속 악화 추세 — 현금창출 능력 점검 필요")
-
-    # FCF 추세 (OCF - CAPEX)
-    if capex:
-        fcfList = []
-        for o, c in zip(ocf, capex):
-            if o is not None and c is not None:
-                fcfList.append(o - abs(c))
-            else:
-                fcfList.append(None)
-        fcfClean = [v for v in fcfList if v is not None]
-        if len(fcfClean) >= 2:
-            parts.append(f"FCF {fcfClean[-1] / 1e8:,.0f}억(전년 {fcfClean[-2] / 1e8:,.0f}억)")
-            if fcfClean[-1] < 0:
-                parts.append("FCF 적자 — 투자 부담 과다")
-            fcfTrend = _trend(fcfList)
-            if fcfTrend == "deteriorating" and fcfClean[-1] > 0:
-                parts.append("FCF 감소 추세 주의")
-
-    # 배당 여력 (FCF / 배당)
-    if capex and dividend:
-        pairs = [(o, c, d) for o, c, d in zip(ocf, capex, dividend) if all(v is not None for v in (o, c, d))]
-        if pairs:
-            latestOcf, latestCapex, latestDiv = pairs[-1]
-            fcf = latestOcf - abs(latestCapex)
-            if latestDiv != 0:
-                divCover = fcf / abs(latestDiv)
-                parts.append(f"배당 커버리지(FCF/배당) {divCover:.1f}배")
-                if divCover < 1:
-                    parts.append("FCF로 배당 충당 불가 — 배당 지속성 의문")
-
-    # CF 라이프사이클 스테이지 판별 (Lens 5)
-    latestOcfVal = _lastN(ocf, 1)
-    latestIcfVal = _lastN(icf, 1) if icf else []
-    latestFcfVal = _lastN(fcf_cf, 1) if fcf_cf else []
-    if latestOcfVal and latestIcfVal and latestFcfVal:
-        oSign = latestOcfVal[-1] is not None and latestOcfVal[-1] > 0
-        iSign = latestIcfVal[-1] is not None and latestIcfVal[-1] > 0
-        fSign = latestFcfVal[-1] is not None and latestFcfVal[-1] > 0
-        if oSign and not iSign and fSign:
-            parts.append("CF패턴 [+,-,+] 성장기 — 영업흑자, 투자확대, 외부조달")
-        elif oSign and not iSign and not fSign:
-            parts.append("CF패턴 [+,-,-] 성숙기 — 자체 현금으로 투자와 주주환원 병행")
-        elif not oSign and iSign and not fSign:
-            parts.append("CF패턴 [-,+,-] 쇠퇴기 — 영업적자, 자산매각, 부채상환")
-        elif not oSign and not iSign and fSign:
-            parts.append("CF패턴 [-,-,+] 도입기 — 적자, 투자중, 외부조달 의존")
-        elif not oSign and iSign and fSign:
-            parts.append("CF패턴 [-,+,+] 구조조정 — 자산매각 + 외부조달로 적자 보전")
+    for line in (_cfOcfNiLine(inp.earningsQuality), _cfOcfTrendLine(ocf)):
+        if line:
+            parts.append(line)
+    parts.extend(_cfFcfTrendLines(ocf, capex))
+    parts.extend(_cfDividendCoverageLines(ocf, capex, dividend))
+    patternLine = _cfLifecyclePatternLine(ocf, icf, fcf_cf)
+    if patternLine:
+        parts.append(patternLine)
 
     if not parts:
         return None
-    body = ". ".join(parts) + "."
-    cfSev = "positive"
-    if eq and eq.cfToNi is not None:
-        if eq.cfToNi < 0.5:
-            cfSev = "negative"
-        elif eq.cfToNi < 0.8:
-            cfSev = "warning"
-        elif eq.cfToNi < 1.2:
-            cfSev = "neutral"
     return NarrativeParagraph(
         dimension="cashflowDeep",
         title="현금흐름 심층분석",
-        body=body,
-        severity=cfSev,
+        body=". ".join(parts) + ".",
+        severity=_cfSeverity(inp.earningsQuality),
     )
 
 
