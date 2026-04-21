@@ -2051,35 +2051,66 @@ class Company:
             c.show("IS", period="2023")               # 2023년 필터
             c.show("dividend")                        # 배당
         """
-        # alias 해석 (board → boardOfDirectors 등)
+        # Q1.5 dispatcher: alias 해석 → 5 사례 분기 (list period / segments / finance / notes / sections).
+        # 각 분기는 별도 sub-method 에 위임. 실제 로직은 _showFinanceStatement / _showSectionsTopic.
         topic = _resolveTopic(topic)
 
-        # period 가 리스트면 세로 뷰: 먼저 전체 데이터 → transpose
         if isinstance(period, list):
             wide = self.show(topic, block, freq=freq, scope=scope, raw=raw)
             if wide is None or not isinstance(wide, pl.DataFrame):
                 return None
             return self._transposeToVertical(wide, period)
 
-        # segments 하위 topic (segments:region, segments:product, segments:composition)
         if topic.startswith("segments:"):
             return self._showSegmentsSub(topic.split(":", 1)[1])
 
-        if topic in {"BS", "IS", "CF", "CIS", "SCE", "ratios", "ratioSeries", "sceMatrix"}:
-            if block not in (None, 0):
-                return None
-            result = self._showFinanceTopic(topic, period=period, freq=freq, scope=scope)
-            if topic in {"IS", "BS", "CIS", "CF", "SCE"} and isinstance(result, pl.DataFrame) and result.width > 0:
-                result = self._cleanFinanceDataFrame(result, topic)
-            return result if isinstance(result, pl.DataFrame) else None
+        if topic in self._SHOW_FINANCE_TOPICS:
+            return self._showFinanceStatement(topic, block, period=period, freq=freq, scope=scope)
 
-        # Notes 12 항목 — c.notes.X 제거 후 show topic 으로 흡수 (Plan v10 P2)
         from dartlab.providers.dart.docs.notes import _NOTES_DISPATCH
 
         if topic in _NOTES_DISPATCH and self._notesAccessor is not None:
             return self._notesAccessor._get(topic)
 
-        # 전체 sections 캐시가 있으면 재사용, 없으면 해당 topic만 부분 빌드
+        return self._showSectionsTopic(topic, block, period=period, raw=raw, freq=freq, scope=scope)
+
+    _SHOW_FINANCE_TOPICS = frozenset({"BS", "IS", "CF", "CIS", "SCE", "ratios", "ratioSeries", "sceMatrix"})
+
+    def _showFinanceStatement(
+        self,
+        topic: str,
+        block: int | None,
+        *,
+        period: str | None,
+        freq: str,
+        scope: str,
+    ) -> pl.DataFrame | None:
+        """finance topic (BS/IS/CF/CIS/SCE/ratios/ratioSeries/sceMatrix) 조회.
+
+        block 이 지정되면 (not None and not 0) None. BS/IS/CIS/CF/SCE 는 clean 적용.
+        """
+        if block not in (None, 0):
+            return None
+        result = self._showFinanceTopic(topic, period=period, freq=freq, scope=scope)
+        if topic in {"IS", "BS", "CIS", "CF", "SCE"} and isinstance(result, pl.DataFrame) and result.width > 0:
+            result = self._cleanFinanceDataFrame(result, topic)
+        return result if isinstance(result, pl.DataFrame) else None
+
+    def _showSectionsTopic(
+        self,
+        topic: str,
+        block: int | None,
+        *,
+        period: str | None,
+        raw: bool,
+        freq: str,
+        scope: str,
+    ) -> pl.DataFrame | None:
+        """docs/report sections 기반 topic 조회.
+
+        sections 캐시 → topic 필터 → block dispatch (finance / report / docs).
+        미등록 topic 은 warning + None. registered-but-empty 는 silent None.
+        """
         if "_sections" in self._cache:
             sec = self._cache["_sections"]
         else:
@@ -2091,16 +2122,14 @@ class Company:
                 sec = partialDocs
             else:
                 sec = None
+
         if sec is None:
             if block in (None, 0):
                 direct = self._showDirectTopic(topic, period=period, raw=raw)
                 if direct is not None:
                     return direct
-            # registry 에 등록된 topic 은 "데이터 없음" 으로 간주해 None 리턴.
-            # 미등록 topic 만 warning + None (아래 sec!=None 분기와 일관된 동작).
-            # 2026-04-21: 기존에는 이 경로에서 일괄 ValueError 를 raise했으나,
-            # 이로 인해 bond/business 등 registry 는 있지만 특정 회사에 데이터
-            # 없을 때 crash 가 발생. registered-but-empty 와 unknown-topic 을 구분.
+            # registry 에 등록된 topic 은 "데이터 없음" 으로 간주해 silent None.
+            # 미등록 topic 만 warning. registered-but-empty vs unknown-topic 구분.
             if topic not in _get_module_index():
                 import warnings
 
@@ -2116,48 +2145,26 @@ class Company:
                 direct = self._showDirectTopic(topic, period=period, raw=raw)
                 if isinstance(direct, pl.DataFrame):
                     return direct
-            import difflib
-
-            all_topics = sec["topic"].unique().sort().to_list() if "topic" in sec.columns else []
-            import warnings
-
-            similar = difflib.get_close_matches(topic, all_topics, n=3, cutoff=0.4)
-            if similar:
-                warnings.warn(
-                    f"'{topic}' topic을 찾을 수 없습니다. "
-                    f"유사한 topic: {', '.join(similar)}. "
-                    f"전체 목록은 c.topics로 확인하세요.",
-                    stacklevel=2,
-                )
-            else:
-                warnings.warn(
-                    f"'{topic}' topic을 찾을 수 없습니다. 전체 목록은 c.topics 또는 c.index로 확인하세요.",
-                    stacklevel=2,
-                )
+            self._warnUnknownTopic(topic, sec)
             return None
 
         if block is None:
-            # 블록 목차 반환
             blockIndex = self._buildBlockIndex(topicRows)
             if blockIndex.height == 1:
-                # 블록이 1개면 바로 데이터 반환
                 return self.show(topic, blockIndex["block"][0], period=period, raw=raw)
             return blockIndex
 
-        # 특정 block의 실제 데이터
         boRows = topicRows.filter(pl.col("blockOrder") == block)
         if boRows.is_empty():
             return None
 
         source = boRows["source"][0] if "source" in boRows.columns else "docs"
-        boRows["blockType"][0]
 
         if source == "finance":
             result = self._showFinanceTopic(topic, period=period, freq=freq, scope=scope)
         elif source == "report":
             result = self._showReportTopic(topic, period=period, raw=raw)
         else:
-            # docs — text 또는 table 수평화
             result = self._showSectionBlock(
                 sec.filter(pl.col("topic") == topic),
                 block=block,
@@ -2168,6 +2175,26 @@ class Company:
             result = self._cleanFinanceDataFrame(result, topic)
 
         return result if isinstance(result, pl.DataFrame) else None
+
+    @staticmethod
+    def _warnUnknownTopic(topic: str, sec: pl.DataFrame) -> None:
+        import difflib
+        import warnings
+
+        all_topics = sec["topic"].unique().sort().to_list() if "topic" in sec.columns else []
+        similar = difflib.get_close_matches(topic, all_topics, n=3, cutoff=0.4)
+        if similar:
+            warnings.warn(
+                f"'{topic}' topic을 찾을 수 없습니다. "
+                f"유사한 topic: {', '.join(similar)}. "
+                f"전체 목록은 c.topics로 확인하세요.",
+                stacklevel=3,
+            )
+        else:
+            warnings.warn(
+                f"'{topic}' topic을 찾을 수 없습니다. 전체 목록은 c.topics 또는 c.index로 확인하세요.",
+                stacklevel=3,
+            )
 
     @staticmethod
     def _transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame | None:
