@@ -151,14 +151,16 @@
 						? (shockMap.has(leaf.data.id)
 							? (shockMap.get(leaf.data.id)! > 0.5 ? '#ef4444' : shockMap.get(leaf.data.id)! > 0.1 ? '#fb923c' : '#fbbf24')
 							: '#1e293b')
-						: timelineYear && timelineData[leaf.data.id]
-							? colorFor(
-								{ ...leaf.data._node, opMargin: timelineData[leaf.data.id].opMargin ?? leaf.data._node.opMargin, revenue: timelineData[leaf.data.id].revenue ?? leaf.data._node.revenue },
-								colorMetric === 'industry' ? 'opMargin' : colorMetric
-							)
-							: timelineYear && !timelineData[leaf.data.id]
-								? '#1e293b'
-								: colorFor(leaf.data._node, colorMetric),
+						: colorMetric === 'industry'
+							? leaf.data._node.color  // 산업 팔레트는 타임라인 모드에서도 원본 유지
+							: timelineYear && timelineData[leaf.data.id]
+								? colorFor(
+									{ ...leaf.data._node, opMargin: timelineData[leaf.data.id].opMargin ?? leaf.data._node.opMargin, revenue: timelineData[leaf.data.id].revenue ?? leaf.data._node.revenue },
+									colorMetric
+								)
+								: timelineYear && !timelineData[leaf.data.id]
+									? '#1e293b'
+									: colorFor(leaf.data._node, colorMetric),
 					showLabel: w > 40 && h > 16,
 					signal: moversMap.get(leaf.data.id) || null
 				});

@@ -330,7 +330,7 @@
 			{/if}
 		</div>
 
-		<!-- scan 7축 배지행 -->
+		<!-- scan 배지행 -->
 		<div class="scan-badges">
 			{#if node.govGrade}<span class="scan-badge" title="지배구조 등급">G:{node.govGrade}</span>{/if}
 			{#if node.cfPattern}<span class="scan-badge" title="현금흐름 패턴">CF:{node.cfPattern}</span>{/if}
@@ -810,6 +810,9 @@
 
 	<!-- 액션 버튼 -->
 	<div class="actions">
+		<a class="action dashboard-btn" href="{base}/dashboard/{node.id}" target="_blank" rel="noopener" title="대시보드 — 회사 종합 분석 (신규 탭)">
+			📊 대시보드
+		</a>
 		<button class="action share-btn" onclick={shareCard} title="이 회사 정보 공유">
 			🔗 공유
 		</button>
@@ -1504,6 +1507,17 @@
 		align-items: center;
 		justify-content: center;
 		border: 1px solid transparent;
+	}
+	.action.dashboard-btn {
+		background: linear-gradient(135deg, var(--color-dl-primary), var(--color-dl-accent));
+		color: #fff;
+		border-color: transparent;
+		font-weight: 700;
+		text-decoration: none;
+	}
+	.action.dashboard-btn:hover {
+		opacity: 0.9;
+		transform: translateY(-1px);
 	}
 	.action.primary {
 		background: #60a5fa;
