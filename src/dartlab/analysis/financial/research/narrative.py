@@ -1448,79 +1448,99 @@ def _analyzeCashflowDeep(inp: _Input) -> NarrativeParagraph | None:
     )
 
 
+def _isToCsGapLine(gapList: list) -> str | None:
+    """OCF - NI 갭 (|>10억|)."""
+    gapClean = [v for v in gapList if v is not None]
+    if len(gapClean) < 2:
+        return None
+    latestGap = gapClean[-1]
+    if abs(latestGap) <= 1e9:
+        return None
+    direction = "초과" if latestGap > 0 else "부족"
+    return f"영업CF가 순이익 대비 {abs(latestGap) / 1e8:,.0f}억 {direction}"
+
+
+def _isToCsRatioTrendLine(ratioList: list) -> str | None:
+    """OCF/NI 비율 추세 (3기+)."""
+    if len([v for v in ratioList if v is not None]) < 3:
+        return None
+    rTrend = _trend(ratioList)
+    if rTrend == "deteriorating":
+        return "OCF/순이익 비율 추세적 하락 — 이익의 질 저하 경고"
+    if rTrend == "improving":
+        return "OCF/순이익 비율 추세적 개선 — 이익의 질 향상"
+    return None
+
+
+def _isToCsDepContribLine(depreciation, ni) -> str | None:
+    """감가상각이 순이익의 50%+ → 비현금비용 기여 큼."""
+    if not depreciation:
+        return None
+    depClean = _lastN(depreciation, 2)
+    niClean = _lastN(ni, 2)
+    if not (depClean and niClean and niClean[-1] is not None and niClean[-1] != 0):
+        return None
+    depToNi = abs(depClean[-1]) / abs(niClean[-1])
+    if depToNi > 0.5:
+        return f"감가상각이 순이익의 {depToNi:.0%} — 비현금비용 기여 큼(OCF 양호 원인)"
+    return None
+
+
+def _isToCsEarningsPersistenceLine(ni: list, ocf: list) -> str | None:
+    """Earnings Persistence — 3년+ 평균 OCF/NI."""
+    niAll = [v for v in ni if v is not None]
+    ocfAll = [v for v in ocf if v is not None]
+    if len(niAll) < 3 or len(ocfAll) < 3:
+        return None
+    ratios = [o / n for n, o in zip(niAll, ocfAll) if n != 0]
+    if len(ratios) < 3:
+        return None
+    avgCer = sum(ratios) / len(ratios)
+    if avgCer > 1.2:
+        return f"평균 OCF/NI {avgCer:.2f} — 높은 이익의 질(Earnings Persistence 양호)"
+    if avgCer < 0.5:
+        return f"평균 OCF/NI {avgCer:.2f} — 발생이익 의존도 높음(이익 지속성 취약)"
+    return None
+
+
+def _isToCsLatestRatioLines(ratioClean: list) -> list[str]:
+    """최신 OCF/NI 비율 + 극단 평가."""
+    if not ratioClean:
+        return []
+    latest = ratioClean[-1]
+    lines = [f"이익품질비율(OCF/NI) {latest:.2f}"]
+    if latest < 0:
+        lines.append("OCF 적자 — 이익의 현금 전환 실패")
+    elif latest > 2.0:
+        lines.append("OCF가 순이익의 2배 이상 — 비현금비용 또는 운전자본 환입 효과 큼")
+    return lines
+
+
 def _analyzeIsToCs(inp: _Input) -> NarrativeParagraph | None:
-    """3표 연결 — IS 순이익 vs CF OCF 괴리 분석."""
+    """3표 연결 — IS 순이익 vs CF OCF 괴리 (Q3.1f split)."""
     ni = _getVals(inp.aSeries, "IS", "net_profit")
     ocf = _getVals(inp.aSeries, "CF", "operating_cashflow")
-    depreciation = _getVals(inp.aSeries, "CF", "depreciation_and_amortization")
-    if not depreciation:
-        depreciation = _getVals(inp.aSeries, "IS", "depreciation")
+    depreciation = _getVals(inp.aSeries, "CF", "depreciation_and_amortization") or _getVals(
+        inp.aSeries, "IS", "depreciation"
+    )
 
     if not ni or not ocf or len(ni) < 2:
         return None
 
-    parts: list[str] = []
-
-    # OCF - NI 갭 추세
-    gapList = []
-    for n, o in zip(ni, ocf):
-        if n is not None and o is not None:
-            gapList.append(o - n)
-        else:
-            gapList.append(None)
-
-    gapClean = [v for v in gapList if v is not None]
-    if len(gapClean) >= 2:
-        latestGap = gapClean[-1]
-        if abs(latestGap) > 1e9:  # 10억 이상 차이
-            direction = "초과" if latestGap > 0 else "부족"
-            parts.append(f"영업CF가 순이익 대비 {abs(latestGap) / 1e8:,.0f}억 {direction}")
-
-    # OCF/NI 비율 추세 (시계열)
-    ratioList = []
-    for n, o in zip(ni, ocf):
-        ratioList.append(o / n if n is not None and o is not None and n != 0 else None)
+    gapList = [o - n if n is not None and o is not None else None for n, o in zip(ni, ocf)]
+    ratioList = [o / n if n is not None and o is not None and n != 0 else None for n, o in zip(ni, ocf)]
     ratioClean = [v for v in ratioList if v is not None]
-    if len(ratioClean) >= 3:
-        rTrend = _trend(ratioList)
-        if rTrend == "deteriorating":
-            parts.append("OCF/순이익 비율 추세적 하락 — 이익의 질 저하 경고")
-        elif rTrend == "improving":
-            parts.append("OCF/순이익 비율 추세적 개선 — 이익의 질 향상")
 
-    # 감가상각 기여
-    if depreciation:
-        depClean = _lastN(depreciation, 2)
-        niClean = _lastN(ni, 2)
-        if len(depClean) >= 1 and len(niClean) >= 1 and niClean[-1] is not None and niClean[-1] != 0:
-            depToNi = abs(depClean[-1]) / abs(niClean[-1])
-            if depToNi > 0.5:
-                parts.append(f"감가상각이 순이익의 {depToNi:.0%} — 비현금비용 기여 큼(OCF 양호 원인)")
-
-    # Earnings Persistence (현금이익 비중, Lens 4)
-    # 현금이익 = OCF, 발생이익 = NI - OCF
-    niAll = [v for v in ni if v is not None]
-    ocfAll = [v for v in ocf if v is not None]
-    if len(niAll) >= 3 and len(ocfAll) >= 3:
-        cashEarningsRatios = []
-        for n, o in zip(niAll, ocfAll):
-            if n != 0:
-                cashEarningsRatios.append(o / n)
-        if len(cashEarningsRatios) >= 3:
-            avgCer = sum(cashEarningsRatios) / len(cashEarningsRatios)
-            if avgCer > 1.2:
-                parts.append(f"평균 OCF/NI {avgCer:.2f} — 높은 이익의 질(Earnings Persistence 양호)")
-            elif avgCer < 0.5:
-                parts.append(f"평균 OCF/NI {avgCer:.2f} — 발생이익 의존도 높음(이익 지속성 취약)")
-
-    # incomeQualityRatio (직전 기간)
-    if ratioClean:
-        latest = ratioClean[-1]
-        parts.append(f"이익품질비율(OCF/NI) {latest:.2f}")
-        if latest < 0:
-            parts.append("OCF 적자 — 이익의 현금 전환 실패")
-        elif latest > 2.0:
-            parts.append("OCF가 순이익의 2배 이상 — 비현금비용 또는 운전자본 환입 효과 큼")
+    parts: list[str] = []
+    for line in (
+        _isToCsGapLine(gapList),
+        _isToCsRatioTrendLine(ratioList),
+        _isToCsDepContribLine(depreciation, ni),
+        _isToCsEarningsPersistenceLine(ni, ocf),
+    ):
+        if line:
+            parts.append(line)
+    parts.extend(_isToCsLatestRatioLines(ratioClean))
 
     if not parts:
         return None
@@ -1731,8 +1751,74 @@ def _analyzeIsToBs(inp: _Input) -> NarrativeParagraph | None:
     )
 
 
+_BENEISH_DETAIL_CHECKS = [
+    ("dsri", 1.465, "DSRI", "매출채권지수 경고", "{:.2f}"),
+    ("gmi", 1.193, "GMI", "매출총이익지수 경고", "{:.2f}"),
+    ("aqi", 1.254, "AQI", "자산품질지수 경고", "{:.2f}"),
+    ("sgi", 1.607, "SGI", "매출성장지수 경고", "{:.2f}"),
+    ("depi", 1.077, "DEPI", "감가상각지수 경고", "{:.2f}"),
+    ("tata", 0.018, "TATA", "발생이익비율 경고", "{:.3f}"),
+]
+
+
+def _beneishMScoreLine(mScore: float) -> str:
+    """M-Score 해석 라인."""
+    if mScore < -2.22:
+        return f"Beneish M-Score {mScore:.2f} — 이익 조작 가능성 낮음(양호)"
+    if mScore < -1.78:
+        return f"Beneish M-Score {mScore:.2f} — 경계 구간(주의 관찰)"
+    return f"Beneish M-Score {mScore:.2f} — 이익 조작 가능성 높음(경고)"
+
+
+def _beneishDetailWarnings(ratios) -> str | None:
+    """BeneishDetail 세부 지표 → 개별 경고 한 줄."""
+    if ratios is None:
+        return None
+    bd = getattr(ratios, "beneishDetail", None)
+    if bd is None or not hasattr(bd, "dsri"):
+        return None
+    warnings: list[str] = []
+    for attr, threshold, label, desc, fmt in _BENEISH_DETAIL_CHECKS:
+        v = getattr(bd, attr, None)
+        if v is not None and v > threshold:
+            warnings.append(f"{label} {fmt.format(v)}({desc})")
+    if warnings:
+        return "개별 경고: " + ", ".join(warnings)
+    return None
+
+
+def _beneishDirectCalcLines(inp) -> list[str]:
+    """BeneishDetail 없을 때 aSeries 기반 DSRI/GMI 직접 계산."""
+    sales = _getVals(inp.aSeries, "IS", "sales")
+    cogs = _getVals(inp.aSeries, "IS", "cost_of_sales")
+    receivables = _getVals(inp.aSeries, "BS", "trade_receivable") or _getVals(
+        inp.aSeries, "BS", "trade_and_other_receivables"
+    )
+    sClean = [v for v in sales if v is not None] if sales else []
+    cClean = [v for v in cogs if v is not None] if cogs else []
+    arClean = [v for v in receivables if v is not None] if receivables else []
+
+    lines: list[str] = []
+    if len(sClean) >= 2 and len(arClean) >= 2 and sClean[-2] > 0 and sClean[-1] > 0:
+        arPrev = arClean[-2] / sClean[-2]
+        arCurr = arClean[-1] / sClean[-1]
+        if arPrev > 0:
+            dsri = arCurr / arPrev
+            if dsri > 1.465:
+                lines.append(f"DSRI {dsri:.2f} — 매출 대비 매출채권 비정상 팽창")
+
+    if len(sClean) >= 2 and len(cClean) >= 2 and sClean[-2] > 0 and sClean[-1] > 0:
+        gmPrev = (sClean[-2] - cClean[-2]) / sClean[-2]
+        gmCurr = (sClean[-1] - cClean[-1]) / sClean[-1]
+        if gmCurr > 0:
+            gmi = gmPrev / gmCurr
+            if gmi > 1.193:
+                lines.append(f"GMI {gmi:.2f} — 매출총이익률 악화(이익 품질 저하)")
+    return lines
+
+
 def _analyzeEarningsManipulation(inp: _Input) -> NarrativeParagraph | None:
-    """Beneish M-Score 8변수 개별 분석 (Lens 4 — 이익의 질)."""
+    """Beneish M-Score 8변수 개별 분석 orchestrator (Q3.1f split)."""
     eq = inp.earningsQuality
     if eq is None:
         return None
@@ -1740,62 +1826,14 @@ def _analyzeEarningsManipulation(inp: _Input) -> NarrativeParagraph | None:
     if mScore is None:
         return None
 
-    parts: list[str] = []
-    flagged = mScore < -1.78  # 조작 가능성 임계값
+    flagged = mScore < -1.78
+    parts: list[str] = [_beneishMScoreLine(mScore)]
 
-    if mScore < -2.22:
-        parts.append(f"Beneish M-Score {mScore:.2f} — 이익 조작 가능성 낮음(양호)")
-    elif mScore < -1.78:
-        parts.append(f"Beneish M-Score {mScore:.2f} — 경계 구간(주의 관찰)")
-    else:
-        parts.append(f"Beneish M-Score {mScore:.2f} — 이익 조작 가능성 높음(경고)")
-
-    # ratios에서 Beneish 세부 변수 추출 시도 (BeneishDetail이 있으면)
-    ratios = inp.ratios
-    if ratios is not None:
-        # ratios 객체에서 개별 Beneish 지표 확인
-        bd = getattr(ratios, "beneishDetail", None)
-        if bd is not None and hasattr(bd, "dsri"):
-            warnings = []
-            if bd.dsri is not None and bd.dsri > 1.465:
-                warnings.append(f"DSRI {bd.dsri:.2f}(매출채권지수 경고)")
-            if bd.gmi is not None and bd.gmi > 1.193:
-                warnings.append(f"GMI {bd.gmi:.2f}(매출총이익지수 경고)")
-            if bd.aqi is not None and bd.aqi > 1.254:
-                warnings.append(f"AQI {bd.aqi:.2f}(자산품질지수 경고)")
-            if bd.sgi is not None and bd.sgi > 1.607:
-                warnings.append(f"SGI {bd.sgi:.2f}(매출성장지수 경고)")
-            if bd.depi is not None and bd.depi > 1.077:
-                warnings.append(f"DEPI {bd.depi:.2f}(감가상각지수 경고)")
-            if bd.tata is not None and bd.tata > 0.018:
-                warnings.append(f"TATA {bd.tata:.3f}(발생이익비율 경고)")
-            if warnings:
-                parts.append("개별 경고: " + ", ".join(warnings))
-
-    # aSeries 기반 직접 계산 (ratios에 BeneishDetail 없을 때)
-    if len(parts) == 1:  # mScore만 있고 세부 없으면 직접 계산
-        sales = _getVals(inp.aSeries, "IS", "sales")
-        cogs = _getVals(inp.aSeries, "IS", "cost_of_sales")
-        receivables = _getVals(inp.aSeries, "BS", "trade_receivable")
-        if not receivables:
-            receivables = _getVals(inp.aSeries, "BS", "trade_and_other_receivables")
-        sClean = [v for v in sales if v is not None] if sales else []
-        cClean = [v for v in cogs if v is not None] if cogs else []
-        arClean = [v for v in receivables if v is not None] if receivables else []
-        if len(sClean) >= 2 and len(arClean) >= 2:
-            arSalesRatioPrev = arClean[-2] / sClean[-2] if sClean[-2] > 0 else 0
-            arSalesRatioCurr = arClean[-1] / sClean[-1] if sClean[-1] > 0 else 0
-            if arSalesRatioPrev > 0:
-                dsri = arSalesRatioCurr / arSalesRatioPrev
-                if dsri > 1.465:
-                    parts.append(f"DSRI {dsri:.2f} — 매출 대비 매출채권 비정상 팽창")
-        if len(sClean) >= 2 and len(cClean) >= 2:
-            gmPrev = (sClean[-2] - cClean[-2]) / sClean[-2] if sClean[-2] > 0 else 0
-            gmCurr = (sClean[-1] - cClean[-1]) / sClean[-1] if sClean[-1] > 0 else 0
-            if gmCurr > 0:
-                gmi = gmPrev / gmCurr
-                if gmi > 1.193:
-                    parts.append(f"GMI {gmi:.2f} — 매출총이익률 악화(이익 품질 저하)")
+    detailLine = _beneishDetailWarnings(inp.ratios)
+    if detailLine:
+        parts.append(detailLine)
+    elif len(parts) == 1:
+        parts.extend(_beneishDirectCalcLines(inp))
 
     if not parts:
         return None
