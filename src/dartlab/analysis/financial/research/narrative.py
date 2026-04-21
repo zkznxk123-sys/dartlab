@@ -828,60 +828,78 @@ def _analyzeSegments(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(dimension="segment", title="사업부문 분석", body=body, severity=severity)
 
 
+def _sectorPerLine(md, perMultiple: float | None, sectorLabel: str) -> str | None:
+    """PER vs 업종 평균 할인/할증."""
+    if md.per is None or perMultiple is None or perMultiple <= 0:
+        return None
+    discount = (md.per - perMultiple) / perMultiple * 100
+    label = "할인" if discount < 0 else "할증"
+    return f"PER {md.per:.1f}배 vs {sectorLabel} 평균 {perMultiple:.1f}배 = {abs(discount):.0f}% {label}"
+
+
+def _sectorPbrLine(md, pbrMultiple: float | None) -> str | None:
+    """PBR vs 업종 평균."""
+    if md.pbr is None or pbrMultiple is None or pbrMultiple <= 0:
+        return None
+    discount = (md.pbr - pbrMultiple) / pbrMultiple * 100
+    label = "할인" if discount < 0 else "할증"
+    return f"PBR {md.pbr:.2f}배 vs 업종 {pbrMultiple:.1f}배({abs(discount):.0f}% {label})"
+
+
+def _sectorRoeValueLine(md, perMultiple: float | None, bench, dp) -> str | None:
+    """ROE vs 업종 대비 밸류에이션 정당성."""
+    if bench is None or md.per is None or perMultiple is None:
+        return None
+    roeMedian = getattr(bench, "roeMedian", None)
+    if roeMedian is None or dp is None or not dp.roe:
+        return None
+    roeLast = next((v for v in reversed(dp.roe) if v is not None), None)
+    if roeLast is None:
+        return None
+    roePct = roeLast * 100
+    perDiscount = md.per < perMultiple
+    roeAbove = roePct > roeMedian
+    if perDiscount and roeAbove:
+        return f"ROE({roePct:.1f}%)가 업종 중앙값({roeMedian:.1f}%) 상회하나 PER 할인 — 저평가 가능성"
+    if not perDiscount and not roeAbove:
+        return f"ROE({roePct:.1f}%)가 업종 중앙값({roeMedian:.1f}%) 하회하나 PER 할증 — 프리미엄 과도"
+    return None
+
+
 def _analyzeSectorRelative(inp: _Input) -> NarrativeParagraph | None:
-    """섹터 상대 포지셔닝 — PER/PBR vs 섹터 + ROE 대비."""
+    """섹터 상대 포지셔닝 orchestrator — PER/PBR/ROE vs 업종 (Q3.1f split)."""
     md = inp.marketData
     sp = inp.sectorParams
-    bench = inp.sectorBenchmark
     if md is None or sp is None:
         return None
 
-    parts: list[str] = []
-
-    # PER 비교
     perMultiple = getattr(sp, "perMultiple", None)
-    if md.per is not None and perMultiple is not None and perMultiple > 0:
-        discount = (md.per - perMultiple) / perMultiple * 100
-        label = "할인" if discount < 0 else "할증"
-        sectorLabel = getattr(sp, "label", "업종")
-        parts.append(f"PER {md.per:.1f}배 vs {sectorLabel} 평균 {perMultiple:.1f}배 = {abs(discount):.0f}% {label}")
-
-    # PBR 비교
     pbrMultiple = getattr(sp, "pbrMultiple", None)
-    if md.pbr is not None and pbrMultiple is not None and pbrMultiple > 0:
-        discount = (md.pbr - pbrMultiple) / pbrMultiple * 100
-        label = "할인" if discount < 0 else "할증"
-        parts.append(f"PBR {md.pbr:.2f}배 vs 업종 {pbrMultiple:.1f}배({abs(discount):.0f}% {label})")
+    sectorLabel = getattr(sp, "label", "업종")
 
-    # ROE vs 업종 대비 밸류에이션 정당성
-    if bench is not None and md.per is not None and perMultiple is not None:
-        roeMedian = getattr(bench, "roeMedian", None)
-        dp = inp.dupont
-        roeLast = None
-        if dp and dp.roe:
-            roeLast = next((v for v in reversed(dp.roe) if v is not None), None)
-            if roeLast is not None:
-                roeLast = roeLast * 100
-
-        if roeLast is not None and roeMedian is not None:
-            perDiscount = md.per < perMultiple
-            roeAbove = roeLast > roeMedian
-            if perDiscount and roeAbove:
-                parts.append(f"ROE({roeLast:.1f}%)가 업종 중앙값({roeMedian:.1f}%) 상회하나 PER 할인 — 저평가 가능성")
-            elif not perDiscount and not roeAbove:
-                parts.append(f"ROE({roeLast:.1f}%)가 업종 중앙값({roeMedian:.1f}%) 하회하나 PER 할증 — 프리미엄 과도")
+    parts: list[str] = []
+    for line in (
+        _sectorPerLine(md, perMultiple, sectorLabel),
+        _sectorPbrLine(md, pbrMultiple),
+        _sectorRoeValueLine(md, perMultiple, inp.sectorBenchmark, inp.dupont),
+    ):
+        if line:
+            parts.append(line)
 
     if not parts:
         return None
-    body = ". ".join(parts) + "."
-    # PER 할인 + ROE 우수 → positive
     severity = "neutral"
     if md.per is not None and perMultiple is not None:
         if md.per < perMultiple * 0.8:
             severity = "positive"
         elif md.per > perMultiple * 1.2:
             severity = "negative"
-    return NarrativeParagraph(dimension="sectorRelative", title="섹터 상대 포지셔닝", body=body, severity=severity)
+    return NarrativeParagraph(
+        dimension="sectorRelative",
+        title="섹터 상대 포지셔닝",
+        body=". ".join(parts) + ".",
+        severity=severity,
+    )
 
 
 # ══════════════════════════════════════
@@ -1141,8 +1159,50 @@ def _analyzeDebtStructure(inp: _Input) -> NarrativeParagraph | None:
     )
 
 
+def _liquidityCurrentRatioLine(currentAssets, currentLiab) -> tuple[str | None, list]:
+    """유동비율 trend + cleanCr 리턴."""
+    crList = [
+        ca / cl * 100 if ca is not None and cl is not None and cl != 0 else None
+        for ca, cl in zip(currentAssets, currentLiab)
+    ]
+    cleanCr = [v for v in crList if v is not None]
+    if len(cleanCr) < 2:
+        return None, cleanCr
+    diff = cleanCr[-1] - cleanCr[-2]
+    return f"유동비율 {cleanCr[-1]:.0f}%(전년 {cleanCr[-2]:.0f}%, {_pp(diff)})", cleanCr
+
+
+def _liquidityQuickRatioLine(currentAssets, currentLiab, inventories) -> str | None:
+    """당좌비율 ((유동자산 - 재고) / 유동부채)."""
+    if not inventories:
+        return None
+    qrList = [
+        (ca - inv) / cl * 100 if all(v is not None for v in (ca, cl, inv)) and cl != 0 else None
+        for ca, cl, inv in zip(currentAssets, currentLiab, inventories)
+    ]
+    cleanQr = [v for v in qrList if v is not None]
+    if not cleanQr:
+        return None
+    return f"당좌비율 {cleanQr[-1]:.0f}%"
+
+
+def _liquidityCashCoverLines(cash, shortBorrow) -> list[str]:
+    """현금/단기차입금 배율 + 부족 경고."""
+    if not (cash and shortBorrow):
+        return []
+    cashClean = _lastN(cash, 1)
+    sbClean = _lastN(shortBorrow, 1)
+    if not (cashClean and sbClean and sbClean[-1] > 0):
+        return []
+    cashCover = cashClean[-1] / sbClean[-1]
+    lines = [f"현금/단기차입금 {cashCover:.1f}배"]
+    if cashCover < 0.5:
+        lines.append("단기차입금 대비 현금 부족 — 유동성 리스크")
+    return lines
+
+
 def _analyzeLiquidity(inp: _Input) -> NarrativeParagraph | None:
-    """유동성 분석 — 유동비율, 당좌비율, 현금 대비 단기차입금."""
+    """유동성 orchestrator — 유동비율 + 당좌비율 + 현금/단기차입금 (Q3.1f split)."""
     currentAssets = _getVals(inp.aSeries, "BS", "total_current_assets")
     currentLiab = _getVals(inp.aSeries, "BS", "total_current_liabilities")
     inventories = _getVals(inp.aSeries, "BS", "inventories")
@@ -1152,42 +1212,18 @@ def _analyzeLiquidity(inp: _Input) -> NarrativeParagraph | None:
     if not currentAssets or not currentLiab or len(currentAssets) < 2:
         return None
 
+    crLine, cleanCr = _liquidityCurrentRatioLine(currentAssets, currentLiab)
+    qrLine = _liquidityQuickRatioLine(currentAssets, currentLiab, inventories)
+
     parts: list[str] = []
-
-    # 유동비율 추세
-    crList = []
-    for ca, cl in zip(currentAssets, currentLiab):
-        crList.append(ca / cl * 100 if ca is not None and cl is not None and cl != 0 else None)
-    cleanCr = [v for v in crList if v is not None]
-    if len(cleanCr) >= 2:
-        crDiff = cleanCr[-1] - cleanCr[-2]
-        parts.append(f"유동비율 {cleanCr[-1]:.0f}%(전년 {cleanCr[-2]:.0f}%, {_pp(crDiff)})")
-
-    # 당좌비율
-    if inventories:
-        qrList = []
-        for ca, cl, inv in zip(currentAssets, currentLiab, inventories):
-            if all(v is not None for v in (ca, cl, inv)) and cl != 0:
-                qrList.append((ca - inv) / cl * 100)
-            else:
-                qrList.append(None)
-        cleanQr = [v for v in qrList if v is not None]
-        if cleanQr:
-            parts.append(f"당좌비율 {cleanQr[-1]:.0f}%")
-
-    # 현금 대비 단기차입금
-    if cash and shortBorrow:
-        cashClean = _lastN(cash, 1)
-        sbClean = _lastN(shortBorrow, 1)
-        if cashClean and sbClean and sbClean[-1] > 0:
-            cashCover = cashClean[-1] / sbClean[-1]
-            parts.append(f"현금/단기차입금 {cashCover:.1f}배")
-            if cashCover < 0.5:
-                parts.append("단기차입금 대비 현금 부족 — 유동성 리스크")
+    if crLine:
+        parts.append(crLine)
+    if qrLine:
+        parts.append(qrLine)
+    parts.extend(_liquidityCashCoverLines(cash, shortBorrow))
 
     if not parts:
         return None
-    body = ". ".join(parts) + "."
     severity = "neutral"
     if cleanCr and cleanCr[-1] < 100:
         severity = "negative"
@@ -1196,7 +1232,7 @@ def _analyzeLiquidity(inp: _Input) -> NarrativeParagraph | None:
     return NarrativeParagraph(
         dimension="liquidity",
         title="유동성 분석",
-        body=body,
+        body=". ".join(parts) + ".",
         severity=severity,
     )
 
@@ -1858,16 +1894,58 @@ def _analyzeEarningsManipulation(inp: _Input) -> NarrativeParagraph | None:
     )
 
 
+def _classifyDistress(
+    label: str,
+    value: float | None,
+    safeThreshold: float,
+    dangerThreshold: float,
+    safeOp: str,
+    dangerOp: str,
+    displayFmt: str | None = None,
+) -> tuple[str | None, str | None]:
+    """부실 모델 단일 판정 → (verdict, line). verdict: safe/danger/neutral/None."""
+    if value is None:
+        return None, None
+    cmp = {
+        ">": lambda a, b: a > b,
+        "<": lambda a, b: a < b,
+        ">=": lambda a, b: a >= b,
+        "<=": lambda a, b: a <= b,
+    }
+    if cmp[safeOp](value, safeThreshold):
+        verdict = "safe"
+    elif cmp[dangerOp](value, dangerThreshold):
+        verdict = "danger"
+    else:
+        verdict = "neutral"
+    line = displayFmt.format(value=value, verdict=verdict) if displayFmt else None
+    return verdict, line
+
+
+def _distressCrossVerdictLine(safeCount: int, dangerCount: int, total: int) -> str | None:
+    """모델 간 consensus / disagreement 한 줄."""
+    if total < 2:
+        return None
+    if safeCount == total:
+        return f"부실모델 {total}개 전원 안전 판정 — 재무건전성 높음"
+    if dangerCount == total:
+        return f"부실모델 {total}개 전원 위험 판정 — 심각한 부실 신호"
+    if dangerCount > 0 and safeCount > 0:
+        return f"모델 간 disagreement(안전 {safeCount} vs 위험 {dangerCount}/{total}) — 불확실성 구간, 심층 분석 필요"
+    if dangerCount > 0:
+        return f"부실 위험 모델 {dangerCount}개 경고 — 재무 안정성 점검 필요"
+    return None
+
+
 def _analyzeDistressModels(inp: _Input) -> NarrativeParagraph | None:
-    """부실예측 다중모델 교차판정 (Lens 10+15)."""
+    """부실예측 다중모델 교차판정 orchestrator (Lens 10+15, Q3.1f split)."""
     ratios = inp.ratios
     if ratios is None:
         return None
 
     parts: list[str] = []
-    models: dict[str, str] = {}  # 모델명 → safe/warning/danger
+    models: dict[str, str] = {}
 
-    # Piotroski F-Score
     piotroski = getattr(ratios, "piotroskiFScore", None)
     if piotroski is not None:
         if piotroski >= 7:
@@ -1880,7 +1958,6 @@ def _analyzeDistressModels(inp: _Input) -> NarrativeParagraph | None:
             models["Piotroski"] = "neutral"
             parts.append(f"Piotroski F-Score {piotroski}/9(보통)")
 
-    # Altman Z-Score
     altmanZ = getattr(ratios, "altmanZScore", None)
     if altmanZ is not None:
         if altmanZ > 2.99:
@@ -1893,51 +1970,29 @@ def _analyzeDistressModels(inp: _Input) -> NarrativeParagraph | None:
             models["Altman"] = "neutral"
             parts.append(f"Altman Z-Score {altmanZ:.2f}(회색지대)")
 
-    # Altman Z''-Score (신흥시장)
     altmanZpp = getattr(ratios, "altmanZppScore", None)
     if altmanZpp is not None:
-        if altmanZpp > 2.6:
-            models["Altman-Z''"] = "safe"
-        elif altmanZpp < 1.1:
-            models["Altman-Z''"] = "danger"
-        else:
-            models["Altman-Z''"] = "neutral"
+        models["Altman-Z''"] = "safe" if altmanZpp > 2.6 else "danger" if altmanZpp < 1.1 else "neutral"
         parts.append(f"Z''-Score {altmanZpp:.2f}")
 
-    # Beneish M-Score (이미 earningsManipulation에서 분석하지만, 부실 관점 교차)
     eq = inp.earningsQuality
     beneish = getattr(eq, "beneishMScore", None) if eq else None
     if beneish is not None:
-        if beneish < -2.22:
-            models["Beneish"] = "safe"
-        elif beneish > -1.78:
-            models["Beneish"] = "danger"
-        else:
-            models["Beneish"] = "neutral"
+        models["Beneish"] = "safe" if beneish < -2.22 else "danger" if beneish > -1.78 else "neutral"
 
     if not models:
         return None
 
-    # 교차판정 — 모델 간 consensus / disagreement
     safeCount = sum(1 for v in models.values() if v == "safe")
     dangerCount = sum(1 for v in models.values() if v == "danger")
     total = len(models)
 
-    if total >= 2:
-        if safeCount == total:
-            parts.append(f"부실모델 {total}개 전원 안전 판정 — 재무건전성 높음")
-        elif dangerCount == total:
-            parts.append(f"부실모델 {total}개 전원 위험 판정 — 심각한 부실 신호")
-        elif dangerCount > 0 and safeCount > 0:
-            parts.append(
-                f"모델 간 disagreement(안전 {safeCount} vs 위험 {dangerCount}/{total}) — 불확실성 구간, 심층 분석 필요"
-            )
-        elif dangerCount > 0:
-            parts.append(f"부실 위험 모델 {dangerCount}개 경고 — 재무 안정성 점검 필요")
+    crossLine = _distressCrossVerdictLine(safeCount, dangerCount, total)
+    if crossLine:
+        parts.append(crossLine)
 
     if not parts:
         return None
-    body = ". ".join(parts) + "."
     severity = (
         "negative"
         if dangerCount >= 2
@@ -1947,7 +2002,12 @@ def _analyzeDistressModels(inp: _Input) -> NarrativeParagraph | None:
         if safeCount == total
         else "neutral"
     )
-    return NarrativeParagraph(dimension="distressModels", title="부실예측 다중모델", body=body, severity=severity)
+    return NarrativeParagraph(
+        dimension="distressModels",
+        title="부실예측 다중모델",
+        body=". ".join(parts) + ".",
+        severity=severity,
+    )
 
 
 _COST_ITEMS = [
@@ -2192,72 +2252,79 @@ def _analyzeProductMix(inp: _Input) -> NarrativeParagraph | None:
     )
 
 
+def _findQuarterlySalesCol(cols: list[str]) -> str | None:
+    """분기별 매출 컬럼 탐색."""
+    for c in cols:
+        cl = c.lower()
+        if ("매출" in c and "원가" not in c) or "sales" in cl or "revenue" in cl:
+            return c
+    return None
+
+
+def _quarterlyQoqYoyLines(cleanQ: list) -> list[str]:
+    """QoQ + YoY 라인."""
+    if len(cleanQ) < 4:
+        return []
+    latest, prev = cleanQ[-1], cleanQ[-2]
+    qoq = (latest - prev) / abs(prev) * 100 if prev != 0 else 0
+    lines = [f"직전분기 매출 QoQ {qoq:+.1f}%"]
+    if len(cleanQ) >= 5 and cleanQ[-5] != 0:
+        yoy = (latest - cleanQ[-5]) / abs(cleanQ[-5]) * 100
+        lines.append(f"YoY {yoy:+.1f}%")
+    return lines
+
+
+def _quarterlySeasonalityLine(cleanQ: list) -> str | None:
+    """계절성 패턴 (Q4/Q1 비교, 최근 2년)."""
+    if len(cleanQ) < 8:
+        return None
+    q4s = [cleanQ[i] for i in range(3, len(cleanQ), 4)]
+    q1s = [cleanQ[i] for i in range(0, len(cleanQ), 4)]
+    if not (q4s and q1s):
+        return None
+    avgQ4 = sum(q4s) / len(q4s)
+    avgQ1 = sum(q1s) / len(q1s)
+    if avgQ4 > avgQ1 * 1.3:
+        return "Q4 매출 집중 패턴 — 연말 계절성"
+    if avgQ1 > avgQ4 * 1.3:
+        return "Q1 매출 집중 패턴 — 연초 계절성"
+    return None
+
+
 def _analyzeQuarterlyMomentum(inp: _Input) -> NarrativeParagraph | None:
-    """분기별 손익 QoQ/YoY + 계절성 패턴 (Lens 13)."""
+    """분기별 모멘텀 orchestrator (Lens 13, Q3.1f split)."""
     qDf = inp.quarterlyIsDf
     if qDf is None:
         return None
-
     try:
         import polars as pl
-
-        if not isinstance(qDf, pl.DataFrame) or len(qDf) == 0:
-            return None
     except ImportError:
+        return None
+    if not isinstance(qDf, pl.DataFrame) or len(qDf) == 0:
+        return None
+
+    salesCol = _findQuarterlySalesCol(qDf.columns)
+    if not salesCol:
         return None
 
     parts: list[str] = []
-    cols = qDf.columns
-
-    # 분기별 매출/영업이익 시계열 추출
-    salesCol = None
-    for c in cols:
-        cl = c.lower()
-        if "매출" in c and "원가" not in c or "sales" in cl or "revenue" in cl:
-            salesCol = c
-        elif "영업이익" in c or "operating" in cl:
-            pass
-        elif "기간" in c or "period" in cl or "quarter" in cl or "분기" in c:
-            pass
-
-    if salesCol:
-        try:
-            qSales = qDf[salesCol].to_list()
-            cleanQ = [v for v in qSales if v is not None]
-            if len(cleanQ) >= 4:
-                # 최근 4분기 QoQ 추세
-                latest = cleanQ[-1]
-                prev = cleanQ[-2]
-                qoq = (latest - prev) / abs(prev) * 100 if prev != 0 else 0
-                parts.append(f"직전분기 매출 QoQ {qoq:+.1f}%")
-
-                # YoY (4분기 전 대비)
-                if len(cleanQ) >= 5:
-                    yoyBase = cleanQ[-5]
-                    if yoyBase != 0:
-                        yoy = (latest - yoyBase) / abs(yoyBase) * 100
-                        parts.append(f"YoY {yoy:+.1f}%")
-
-                # 계절성 패턴 (Q4 > Q1 패턴 등)
-                if len(cleanQ) >= 8:
-                    # 최근 2년 분기별 평균으로 계절성 탐지
-                    q4s = [cleanQ[i] for i in range(3, len(cleanQ), 4)]
-                    q1s = [cleanQ[i] for i in range(0, len(cleanQ), 4)]
-                    if q4s and q1s:
-                        avgQ4 = sum(q4s) / len(q4s)
-                        avgQ1 = sum(q1s) / len(q1s)
-                        if avgQ4 > avgQ1 * 1.3:
-                            parts.append("Q4 매출 집중 패턴 — 연말 계절성")
-                        elif avgQ1 > avgQ4 * 1.3:
-                            parts.append("Q1 매출 집중 패턴 — 연초 계절성")
-        except (AttributeError, ValueError, IndexError):
-            pass
+    try:
+        cleanQ = [v for v in qDf[salesCol].to_list() if v is not None]
+        parts.extend(_quarterlyQoqYoyLines(cleanQ))
+        seasonalLine = _quarterlySeasonalityLine(cleanQ)
+        if seasonalLine:
+            parts.append(seasonalLine)
+    except (AttributeError, ValueError, IndexError):
+        pass
 
     if not parts:
         return None
-    body = ". ".join(parts) + "."
-    severity = "neutral"
-    return NarrativeParagraph(dimension="quarterlyMomentum", title="분기별 모멘텀", body=body, severity=severity)
+    return NarrativeParagraph(
+        dimension="quarterlyMomentum",
+        title="분기별 모멘텀",
+        body=". ".join(parts) + ".",
+        severity="neutral",
+    )
 
 
 def _classifyBusinessStrategy(salesCagr: float, latestOpm: float, cogsRatio: float, prevCogsRatio: float) -> str:
