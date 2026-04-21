@@ -2088,8 +2088,19 @@ class Company:
                 direct = self._showDirectTopic(topic, period=period, raw=raw)
                 if direct is not None:
                     return direct
-            # silent None 대신 명시적 ValueError 로 안내
-            raise ValueError(f"'{topic}' topic 을 찾을 수 없습니다.\n  전체 목록: c.topics 또는 c.index 로 확인하세요.")
+            # registry 에 등록된 topic 은 "데이터 없음" 으로 간주해 None 리턴.
+            # 미등록 topic 만 warning + None (아래 sec!=None 분기와 일관된 동작).
+            # 2026-04-21: 기존에는 이 경로에서 일괄 ValueError 를 raise했으나,
+            # 이로 인해 bond/business 등 registry 는 있지만 특정 회사에 데이터
+            # 없을 때 crash 가 발생. registered-but-empty 와 unknown-topic 을 구분.
+            if topic not in _get_module_index():
+                import warnings
+
+                warnings.warn(
+                    f"'{topic}' topic 을 찾을 수 없습니다. 전체 목록은 c.topics 또는 c.index 로 확인하세요.",
+                    stacklevel=2,
+                )
+            return None
 
         topicRows = sec.filter(pl.col("topic") == topic)
         if topicRows.is_empty():

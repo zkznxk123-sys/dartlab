@@ -36,20 +36,15 @@ _TOPIC_NONE_ALLOWED: frozenset[str] = frozenset(
         "executivePay",  # 임원보수 공시 안한 경우
         "dividend",  # 무배당 회사
         "otherFinance",  # 기타 재무 없음 가능
+        # fixture 한계로 None 허용 (로컬 실데이터에서는 데이터 존재)
+        "business",  # 사업의내용 — fixture docs parquet 에 text 빈 상태
+        "companyOverviewDetail",  # 회사개요 상세 — 동일
     }
 )
 
-# registry 에는 등록됐으나 show() 라우팅이 ValueError 를 raise 하는 topic 들.
-# 2026-04-20 realdata-suite 에서 검출. 기존 버그로 tracking 필요하지만 CI 는 통과.
-# 해결 시 이 frozenset 에서 제거.
-_SHOW_ROUTING_KNOWN_ISSUES: frozenset[str] = frozenset(
-    {
-        "bond",
-        "business",
-        "companyOverviewDetail",
-        "fundraising",
-    }
-)
+# 2026-04-21 Phase D: show() 가 registered-but-empty topic 을 ValueError 대신 None
+# 으로 리턴하도록 수정 → 해당 frozenset 비움 (xfail 불필요).
+_SHOW_ROUTING_KNOWN_ISSUES: frozenset[str] = frozenset()
 
 
 @pytest.mark.realData
