@@ -303,6 +303,7 @@ def _loadScanMetrics() -> dict[str, dict]:
     # governance (지배구조 A~E)
     try:
         from dartlab.scan.governance import scan_governance
+
         gov = scan_governance()
         for r in gov.iter_rows(named=True):
             code = r.get("종목코드") or r.get("stockCode")
@@ -316,6 +317,7 @@ def _loadScanMetrics() -> dict[str, dict]:
     # cashflow (8종 패턴)
     try:
         from dartlab.scan.cashflow import scanCashflow
+
         cf = scanCashflow()
         for r in cf.iter_rows(named=True):
             code = r.get("종목코드") or r.get("stockCode")
@@ -329,6 +331,7 @@ def _loadScanMetrics() -> dict[str, dict]:
     # audit (감사 리스크)
     try:
         from dartlab.scan.audit import scanAudit
+
         aud = scanAudit()
         for r in aud.iter_rows(named=True):
             code = r.get("종목코드") or r.get("stockCode")
@@ -342,6 +345,7 @@ def _loadScanMetrics() -> dict[str, dict]:
     # quality (이익의 질)
     try:
         from dartlab.scan.quality import scanQuality
+
         qual = scanQuality()
         for r in qual.iter_rows(named=True):
             code = r.get("종목코드") or r.get("stockCode")
@@ -355,6 +359,7 @@ def _loadScanMetrics() -> dict[str, dict]:
     # liquidity (유동성)
     try:
         from dartlab.scan.liquidity import scanLiquidity
+
         liq = scanLiquidity()
         for r in liq.iter_rows(named=True):
             code = r.get("종목코드") or r.get("stockCode")
@@ -368,6 +373,7 @@ def _loadScanMetrics() -> dict[str, dict]:
     # capital (주주환원 분류)
     try:
         from dartlab.scan.capital import scan_capital
+
         cap = scan_capital()
         for r in cap.iter_rows(named=True):
             code = r.get("종목코드") or r.get("stockCode")
@@ -381,6 +387,7 @@ def _loadScanMetrics() -> dict[str, dict]:
     # workforce (직원수)
     try:
         from dartlab.scan.workforce import scan_workforce
+
         wf = scan_workforce()
         for r in wf.iter_rows(named=True):
             code = r.get("종목코드") or r.get("stockCode")
@@ -575,6 +582,7 @@ def _computeLayout(nodes, taxonomy, atlasFlows=None, edges=None) -> dict[str, tu
                 # 모든 회사 추가 (stage 중심 주변 random jitter로 초기 위치)
                 initPos: dict[str, tuple[float, float]] = {}
                 import random
+
                 rng = random.Random(42)
                 for m in members:
                     subG.add_node(m.stockCode)
@@ -685,9 +693,7 @@ def _buildTimeline(outDir, companies):
         "data": timeline,
         "industryTotals": industryTotals,
     }
-    (outDir / "timeline.json").write_text(
-        json.dumps(result, ensure_ascii=False), encoding="utf-8"
-    )
+    (outDir / "timeline.json").write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
     print(f"  - {len(sortedYears)}개 연도 × {sum(len(v) for v in timeline.values())}건")
 
 
@@ -914,9 +920,7 @@ def buildEcosystem(
         cy = sum(ys) / len(ys)
 
         # radius: 회사 분산 기반 (줌 아웃 시 산업 버블 크기)
-        maxDist = max(
-            ((nd["x"] - cx) ** 2 + (nd["y"] - cy) ** 2) ** 0.5 for nd in memberNodes
-        )
+        maxDist = max(((nd["x"] - cx) ** 2 + (nd["y"] - cy) ** 2) ** 0.5 for nd in memberNodes)
         radius = max(80, maxDist * 1.1)
 
         totalRev = sum(nd["revenue"] for nd in memberNodes)
@@ -996,18 +1000,20 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
         if not n.primary:
             continue
         m = scanMetrics.get(n.stockCode, {})
-        byIndustry.setdefault(n.industry, []).append({
-            "stockCode": n.stockCode,
-            "corpName": n.corpName,
-            "revenue": n.revenue or 0,
-            "roe": m.get("roe"),
-            "opMargin": m.get("opMargin"),
-            "debtRatio": m.get("debtRatio"),
-            "revCagr": m.get("revCagr"),
-            "profGrade": m.get("profGrade") or "",
-            "debtGrade": m.get("debtGrade") or "",
-            "growthGrade": m.get("growthGrade") or "",
-        })
+        byIndustry.setdefault(n.industry, []).append(
+            {
+                "stockCode": n.stockCode,
+                "corpName": n.corpName,
+                "revenue": n.revenue or 0,
+                "roe": m.get("roe"),
+                "opMargin": m.get("opMargin"),
+                "debtRatio": m.get("debtRatio"),
+                "revCagr": m.get("revCagr"),
+                "profGrade": m.get("profGrade") or "",
+                "debtGrade": m.get("debtGrade") or "",
+                "growthGrade": m.get("growthGrade") or "",
+            }
+        )
 
     # 산업간 supplier flow (atlas.flows 와 동일 로직 — 모든 flow 보존)
     codeToIndustry = {n.stockCode: n.industry for n in nodes}
@@ -1058,7 +1064,7 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
 
         mean = sum(cleaned) / n
         variance = sum((v - mean) ** 2 for v in cleaned) / n
-        std = variance ** 0.5
+        std = variance**0.5
         return {
             "n": n,
             "p10": round(_quantile(0.10), 2),
@@ -1081,32 +1087,18 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
         avgCagr = _avg([m["revCagr"] for m in members])
 
         # Top 5 — None 제외 정렬
-        sortedRoe = sorted(
-            [m for m in members if m["roe"] is not None],
-            key=lambda x: x["roe"], reverse=True
-        )[:5]
+        sortedRoe = sorted([m for m in members if m["roe"] is not None], key=lambda x: x["roe"], reverse=True)[:5]
         sortedGrowth = sorted(
-            [m for m in members if m["revCagr"] is not None],
-            key=lambda x: x["revCagr"], reverse=True
+            [m for m in members if m["revCagr"] is not None], key=lambda x: x["revCagr"], reverse=True
         )[:5]
         # 위험: 부채 등급 위험/주의 + ROE 음수
-        risks = [
-            m for m in members
-            if m.get("debtGrade") == "위험"
-            or (m.get("roe") is not None and m["roe"] < 0)
-        ]
+        risks = [m for m in members if m.get("debtGrade") == "위험" or (m.get("roe") is not None and m["roe"] < 0)]
         risks.sort(key=lambda x: (x.get("debtRatio") or 0), reverse=True)
         riskFlags = risks[:5]
 
         # supply flows
-        supplyTo = sorted(
-            flowsByFrom.get(indId, []),
-            key=lambda x: x["amount"], reverse=True
-        )[:5]
-        supplyFrom = sorted(
-            flowsByTo.get(indId, []),
-            key=lambda x: x["amount"], reverse=True
-        )[:5]
+        supplyTo = sorted(flowsByFrom.get(indId, []), key=lambda x: x["amount"], reverse=True)[:5]
+        supplyFrom = sorted(flowsByTo.get(indId, []), key=lambda x: x["amount"], reverse=True)[:5]
 
         # 분포 통계 (업종 정규화용)
         distribution = {
@@ -1128,12 +1120,22 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
                 for m in sortedRoe
             ],
             "topGrowth": [
-                {"stockCode": m["stockCode"], "corpName": m["corpName"], "revCagr": m["revCagr"], "revenue": m["revenue"]}
+                {
+                    "stockCode": m["stockCode"],
+                    "corpName": m["corpName"],
+                    "revCagr": m["revCagr"],
+                    "revenue": m["revenue"],
+                }
                 for m in sortedGrowth
             ],
             "riskFlags": [
-                {"stockCode": m["stockCode"], "corpName": m["corpName"],
-                 "debtRatio": m["debtRatio"], "debtGrade": m["debtGrade"], "roe": m["roe"]}
+                {
+                    "stockCode": m["stockCode"],
+                    "corpName": m["corpName"],
+                    "debtRatio": m["debtRatio"],
+                    "debtGrade": m["debtGrade"],
+                    "roe": m["roe"],
+                }
                 for m in riskFlags
             ],
             "supplyTo": [
@@ -1219,10 +1221,13 @@ def buildMovers(
         m = scanMetrics.get(code, {})
         # Extreme (검증 필요)
         if d.get("roeDelta") is not None and abs(d["roeDelta"]) > 100:
-            e = _entry(code, {
-                "signal": f"ROE Δ{d['roeDelta']:+.1f}%p — 극단 변화",
-                "note": "1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.",
-            })
+            e = _entry(
+                code,
+                {
+                    "signal": f"ROE Δ{d['roeDelta']:+.1f}%p — 극단 변화",
+                    "note": "1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.",
+                },
+            )
             if e:
                 extreme_warn.append(e)
             continue  # 정상 카테고리엔 넣지 않음
@@ -1231,17 +1236,23 @@ def buildMovers(
         rev_yoy = d.get("revenueYoyPct")
         if rev_yoy is not None:
             if rev_yoy >= 30:
-                e = _entry(code, {
-                    "signal": f"매출 YoY +{rev_yoy:.1f}% — 고성장",
-                    "note": f"{d.get('priorYear')}→{d.get('asOfYear')} 매출 급증. 신제품/시장 확대 가능성.",
-                })
+                e = _entry(
+                    code,
+                    {
+                        "signal": f"매출 YoY +{rev_yoy:.1f}% — 고성장",
+                        "note": f"{d.get('priorYear')}→{d.get('asOfYear')} 매출 급증. 신제품/시장 확대 가능성.",
+                    },
+                )
                 if e:
                     revenue_spike.append(e)
             elif rev_yoy <= -20:
-                e = _entry(code, {
-                    "signal": f"매출 YoY {rev_yoy:+.1f}% — 급락",
-                    "note": f"{d.get('priorYear')}→{d.get('asOfYear')} 매출 급감. 수요 둔화/고객사 이탈 의심.",
-                })
+                e = _entry(
+                    code,
+                    {
+                        "signal": f"매출 YoY {rev_yoy:+.1f}% — 급락",
+                        "note": f"{d.get('priorYear')}→{d.get('asOfYear')} 매출 급감. 수요 둔화/고객사 이탈 의심.",
+                    },
+                )
                 if e:
                     revenue_drop.append(e)
 
@@ -1251,17 +1262,23 @@ def buildMovers(
             z = _roe_zscore(code)
             if z is not None and abs(z) >= 1.5:
                 if roe_d > 0:
-                    e = _entry(code, {
-                        "signal": f"ROE Δ{roe_d:+.1f}%p · 산업 z={z:+.1f}σ",
-                        "note": "수익성 개선. 원인은 본업 회복/일회성 여부 확인.",
-                    })
+                    e = _entry(
+                        code,
+                        {
+                            "signal": f"ROE Δ{roe_d:+.1f}%p · 산업 z={z:+.1f}σ",
+                            "note": "수익성 개선. 원인은 본업 회복/일회성 여부 확인.",
+                        },
+                    )
                     if e:
                         profit_improve.append(e)
                 elif roe_d < 0:
-                    e = _entry(code, {
-                        "signal": f"ROE Δ{roe_d:+.1f}%p · 산업 z={z:+.1f}σ",
-                        "note": "수익성 악화. 마진 압박/일회성 손실 가능성.",
-                    })
+                    e = _entry(
+                        code,
+                        {
+                            "signal": f"ROE Δ{roe_d:+.1f}%p · 산업 z={z:+.1f}σ",
+                            "note": "수익성 악화. 마진 압박/일회성 손실 가능성.",
+                        },
+                    )
                     if e:
                         profit_decline.append(e)
 
@@ -1269,10 +1286,13 @@ def buildMovers(
         debt_d = d.get("debtRatioDelta")
         debt_now = m.get("debtRatio")
         if debt_d is not None and debt_now is not None and debt_d >= 20 and debt_now > 150:
-            e = _entry(code, {
-                "signal": f"부채비율 {debt_now:.0f}% (+{debt_d:.0f}%p)",
-                "note": "부채 급증 + 높은 절대값. 재무 스트레스 신호.",
-            })
+            e = _entry(
+                code,
+                {
+                    "signal": f"부채비율 {debt_now:.0f}% (+{debt_d:.0f}%p)",
+                    "note": "부채 급증 + 높은 절대값. 재무 스트레스 신호.",
+                },
+            )
             if e:
                 debt_stress.append(e)
 
@@ -1435,17 +1455,13 @@ def main() -> None:
     # 산업 통계 (사용자 가치 인사이트)
     print("[산업 통계] industryStats.json")
     indStats = buildIndustryStats(scanMetrics)
-    (OUT_DIR / "industryStats.json").write_text(
-        json.dumps(indStats, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    (OUT_DIR / "industryStats.json").write_text(json.dumps(indStats, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"  - {len(indStats)}개 산업 (avgRoe + topN + supply flows)")
 
     # Movers — 급변 회사 Top N (변화 감지)
     print("[변화 감지] movers.json")
     movers = buildMovers(scanMetrics, yoyDeltas, indStats)
-    (OUT_DIR / "movers.json").write_text(
-        json.dumps(movers, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    (OUT_DIR / "movers.json").write_text(json.dumps(movers, ensure_ascii=False, indent=2), encoding="utf-8")
     cat_counts = {k: len(v["entries"]) for k, v in movers["categories"].items()}
     print(f"  - {sum(cat_counts.values())}건 (카테고리별: {cat_counts})")
 
@@ -1487,7 +1503,7 @@ def main() -> None:
     print("[메타] meta.json")
     meta = _buildMeta()
     (OUT_DIR / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"  - buildId={meta['buildId']}, dart={meta['dataAsOf'].get('dart','?')}")
+    print(f"  - buildId={meta['buildId']}, dart={meta['dataAsOf'].get('dart', '?')}")
 
     print(f"\n완료: {OUT_DIR}")
 
@@ -1567,7 +1583,10 @@ def _buildMeta() -> dict:
 
         r = subprocess.run(
             ["git", "rev-parse", "--short", "HEAD"],
-            capture_output=True, text=True, cwd=ROOT, timeout=5,
+            capture_output=True,
+            text=True,
+            cwd=ROOT,
+            timeout=5,
         )
         if r.returncode == 0:
             commit_sha = r.stdout.strip()

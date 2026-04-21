@@ -64,7 +64,7 @@ def _parse_ai_block(text: str) -> dict | None:
             continue
         if in_metrics:
             if raw.startswith("    ") or raw.startswith("\t"):
-                m = re.match(r'^(\w+):\s*(.+)$', line)
+                m = re.match(r"^(\w+):\s*(.+)$", line)
                 if m:
                     key, val = m.group(1), m.group(2).strip()
                     try:

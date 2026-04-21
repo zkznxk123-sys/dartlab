@@ -3,6 +3,7 @@
 dataLoader.repairLocalCache는 직렬이라 1413종목에 ~14분 걸림.
 이 스크립트는 단순 stdout flush로 진행 표시. 카테고리/최대 개수 옵션.
 """
+
 import sys
 import time
 from pathlib import Path
@@ -65,8 +66,11 @@ def main() -> int:
 
     elapsed = time.time() - started
     print(f"\n=== 전체 결과 ({elapsed:.0f}초) ===", flush=True)
-    print(f"checked={totals['checked']} fresh={totals['fresh']} stale={totals['stale']} "
-          f"repaired={totals['repaired']} failed={totals['failed']}", flush=True)
+    print(
+        f"checked={totals['checked']} fresh={totals['fresh']} stale={totals['stale']} "
+        f"repaired={totals['repaired']} failed={totals['failed']}",
+        flush=True,
+    )
     return 0 if totals["failed"] == 0 else 1
 
 

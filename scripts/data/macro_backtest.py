@@ -123,10 +123,14 @@ for thresh in [0.10, 0.15, 0.20, 0.25, 0.30]:
         prob = clevelandProbit(float(v)).probability
         pred = prob >= thresh
         actual = will_recession_within(d, 12)
-        if pred and actual: tp += 1
-        elif pred and not actual: fp += 1
-        elif not pred and actual: fn += 1
-        else: tn += 1
+        if pred and actual:
+            tp += 1
+        elif pred and not actual:
+            fp += 1
+        elif not pred and actual:
+            fn += 1
+        else:
+            tn += 1
     prec = tp / (tp + fp) if tp + fp > 0 else 0
     rec = tp / (tp + fn) if tp + fn > 0 else 0
     fpr = fp / (fp + tn) if fp + tn > 0 else 0
@@ -291,6 +295,7 @@ series_ids = ["DGS1", "DGS2", "DGS3", "DGS5", "DGS7", "DGS10", "DGS20", "DGS30"]
 yields_list, valid_mats = [], []
 for mat, sid in zip(maturities, series_ids):
     from dartlab.macro._helpers import fetch_latest
+
     val = fetch_latest(g, sid)
     if val is not None:
         yields_list.append(val)
@@ -310,7 +315,13 @@ from dartlab.core.finance.fci import calcFCI
 from dartlab.macro._helpers import fetch_series_list
 
 fci_vars = {}
-sid_map = {"policy_rate": "FEDFUNDS", "long_rate": "DGS10", "credit_spread": "BAMLH0A0HYM2", "equity": "SP500", "fx": "DTWEXBGS"}
+sid_map = {
+    "policy_rate": "FEDFUNDS",
+    "long_rate": "DGS10",
+    "credit_spread": "BAMLH0A0HYM2",
+    "equity": "SP500",
+    "fx": "DTWEXBGS",
+}
 for key, sid in sid_map.items():
     series = fetch_series_list(g, sid)
     if series:
@@ -358,7 +369,7 @@ out("- 11축 + 40전략 + 포트폴리오 매핑을 단일 API로")
 out()
 out("### 실증 근거")
 out("- 프로빗: 3/3 침체 사전 감지, recall 90% (임계값 0.20)")
-out("- 금리역전 후 12개월 S&P500 평균 +20.9% — \"역전 = 즉시 매도\"가 아닌 \"12-18개월 후 대비\"")
+out('- 금리역전 후 12개월 S&P500 평균 +20.9% — "역전 = 즉시 매도"가 아닌 "12-18개월 후 대비"')
 out("- Ponzi비율 32.8% (2025년) — 한국 상장기업 1/3이 이자 미충당")
 out()
 

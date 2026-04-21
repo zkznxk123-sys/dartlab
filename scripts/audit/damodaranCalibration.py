@@ -142,15 +142,17 @@ def main() -> int:
             phase = "unknown"
             conf = 0.0
 
-        rows.append({
-            "stockCode": sc,
-            "phase": phase,
-            "phaseConfidence": round(conf, 2),
-            "revenueCAGR": round(cagr_val, 2) if cagr_val else None,
-            "marginCV": round(margin_cv, 3) if margin_cv else None,
-            "latestMargin": round(op_margins[0], 2) if op_margins else None,
-            "sampleYears": len(revs),
-        })
+        rows.append(
+            {
+                "stockCode": sc,
+                "phase": phase,
+                "phaseConfidence": round(conf, 2),
+                "revenueCAGR": round(cagr_val, 2) if cagr_val else None,
+                "marginCV": round(margin_cv, 3) if margin_cv else None,
+                "latestMargin": round(op_margins[0], 2) if op_margins else None,
+                "sampleYears": len(revs),
+            }
+        )
 
     # parquet 저장
     out_dir = _REPO_ROOT / "data" / "audit" / "damodaran" / datetime.now().strftime("%Y-%m-%d")
@@ -194,21 +196,28 @@ def main() -> int:
     eg = distributions.get("earlyGrowth", {})
     if eg.get("count", 0) < 10 and eg.get("cagrP25") is not None:
         proposal["earlyGrowth_cagrMin"] = max(20, int(eg["cagrP25"]))
-        notes.append(f"earlyGrowth count={eg['count']} 부족 → cagrMin {current_thresholds['earlyGrowth_cagrMin']}% → {proposal['earlyGrowth_cagrMin']}% 제안")
+        notes.append(
+            f"earlyGrowth count={eg['count']} 부족 → cagrMin {current_thresholds['earlyGrowth_cagrMin']}% → {proposal['earlyGrowth_cagrMin']}% 제안"
+        )
 
     ms_count = distributions.get("matureStable", {}).get("count", 0)
     total = sum(d.get("count", 0) for d in distributions.values())
     if ms_count / max(total, 1) > 0.6:
-        notes.append(f"matureStable 비중 {ms_count/max(total,1)*100:.0f}% — 과도 편중. threshold 세분화 권장")
+        notes.append(f"matureStable 비중 {ms_count / max(total, 1) * 100:.0f}% — 과도 편중. threshold 세분화 권장")
 
     with (out_dir / "thresholdProposal.json").open("w", encoding="utf-8") as f:
-        json.dump({
-            "current": current_thresholds,
-            "proposed": proposal,
-            "notes": notes,
-            "totalSampled": total,
-            "distributions": distributions,
-        }, f, indent=2, ensure_ascii=False)
+        json.dump(
+            {
+                "current": current_thresholds,
+                "proposed": proposal,
+                "notes": notes,
+                "totalSampled": total,
+                "distributions": distributions,
+            },
+            f,
+            indent=2,
+            ensure_ascii=False,
+        )
 
     # Markdown 보고서
     report = [f"# Damodaran Calibration Report\n\nGenerated: {datetime.now().isoformat()}\n"]
