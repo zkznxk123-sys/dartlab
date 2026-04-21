@@ -407,6 +407,7 @@ _ENTRIES: list[DataEntry] = [
         modulePath="dartlab.providers.dart.docs.finance.audit",
         funcName="audit",
         extractor=lambda r: r.opinionDf,
+        apiType="auditOpinion",
         requires="docs",
         unit="백만원 (보수)",
         columns=(

@@ -133,10 +133,36 @@ _CHAPTER_TITLES: dict[str, str] = {
 }
 
 _CHAPTER_ORDER: dict[str, int] = {chapter: idx for idx, chapter in enumerate(_CHAPTER_TITLES, start=1)}
-_REPORT_TOPIC_TO_API_TYPE: dict[str, str] = {
-    "audit": "auditOpinion",
-}
-_API_TYPE_TO_TOPIC: dict[str, str] = {v: k for k, v in _REPORT_TOPIC_TO_API_TYPE.items()}
+
+
+# Q1.1 (2026-04-21): `_REPORT_TOPIC_TO_API_TYPE` / `_API_TYPE_TO_TOPIC` 하드코딩
+# dict 제거. registry DataEntry.apiType 필드로 단일 출처화.
+# topic ↔ DART API apiType 변환은 아래 두 헬퍼 하나로.
+
+
+def _apiTypeForTopic(topic: str) -> str:
+    """topic → DART API apiType. registry entry 의 apiType 이 있으면 그걸, 없으면 topic 그대로."""
+    from dartlab.core.registry import getEntry
+
+    entry = getEntry(topic)
+    if entry is not None and entry.apiType:
+        return entry.apiType
+    return topic
+
+
+def _topicForApiType(apiType: str) -> str:
+    """DART API apiType → user-facing topic. registry 에서 역탐색.
+
+    registry 에서 apiType 필드가 매치되는 entry 찾아 name 리턴. 없으면 apiType 그대로.
+    """
+    from dartlab.core.registry import getModuleEntries
+
+    for e in getModuleEntries():
+        if e.apiType and e.apiType == apiType:
+            return e.name
+    return apiType
+
+
 # ── topic 단축 alias ────────────────────────────────────────────
 # show("board") → show("boardOfDirectors") 등 짧은 이름으로 접근 가능
 _TOPIC_ALIASES: dict[str, str] = {
@@ -1510,9 +1536,7 @@ class Company:
         if self.rawReport is not None:
             try:
                 for apiType in self._report.availableApiTypes:
-                    topic = apiType
-                    if topic in _API_TYPE_TO_TOPIC:
-                        topic = _API_TYPE_TO_TOPIC[topic]
+                    topic = _topicForApiType(apiType)
                     chapter = chapterMap.get(topic, "X")
                     topicExtras.setdefault(topic, []).append(
                         _baseExtraRow(chapter=chapter, topic=topic, source="report")
@@ -1889,7 +1913,7 @@ class Company:
     def _reportFrame(self, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
         if self._report is None:
             return None
-        apiType = _REPORT_TOPIC_TO_API_TYPE.get(topic, topic)
+        apiType = _apiTypeForTopic(topic)
         try:
             if apiType not in self._report.apiTypes:
                 return None

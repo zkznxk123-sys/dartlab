@@ -50,6 +50,11 @@ class DataEntry:
     funcName: str | None = None
     extractor: Any = None
 
+    # DART API 의 apiType 이름 — topic name 과 다를 때만 명시.
+    # 없으면 topic name 과 apiType 동일 취급.
+    # 예: audit topic 의 DART apiType = "auditOpinion".
+    apiType: str | None = None
+
     requires: str | None = None
     unit: str = "백만원"
     columns: tuple[ColumnMeta, ...] = ()
