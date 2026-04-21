@@ -1312,6 +1312,71 @@ def _calcZmijewski(r: RatioResult) -> None:
     r.zmijewskiXScore = _safeRound(x, 4)
 
 
+def _beneishDsri(rev_t: float | None, rec_t: float | None, rev_p: float | None, rec_p: float | None) -> float | None:
+    if rec_t is None or rec_p is None or not rev_t or rev_t <= 0 or not rev_p or rev_p == 0:
+        return None
+    dsr_t = rec_t / rev_t
+    dsr_p = rec_p / rev_p
+    return dsr_t / dsr_p if dsr_p > 0 else None
+
+
+def _beneishGmi(rev_t: float, cogs_t: float | None, rev_p: float, cogs_p: float | None) -> float | None:
+    if cogs_t is None or cogs_p is None or rev_t <= 0 or rev_p == 0:
+        return None
+    gm_t = (rev_t - cogs_t) / rev_t
+    gm_p = (rev_p - cogs_p) / rev_p
+    return gm_p / gm_t if gm_t > 0 and gm_p > 0 else None
+
+
+def _beneishAqi(
+    ta_t: float,
+    ca_t: float | None,
+    tan_t: float | None,
+    ta_p: float,
+    ca_p: float | None,
+    tan_p: float | None,
+) -> float | None:
+    if ca_t is None or ca_p is None or ta_t <= 0 or ta_p <= 0:
+        return None
+    aq_t = 1 - (ca_t + (tan_t or 0)) / ta_t
+    aq_p = 1 - (ca_p + (tan_p or 0)) / ta_p
+    return aq_t / aq_p if aq_p != 0 else None
+
+
+def _beneishDepi(dep_t: float | None, tan_t: float | None, dep_p: float | None, tan_p: float | None) -> float | None:
+    if dep_t is None or dep_p is None:
+        return None
+    ppe_t = (tan_t or 0) + dep_t
+    ppe_p = (tan_p or 0) + dep_p
+    if ppe_t <= 0 or ppe_p <= 0:
+        return None
+    dr_t = dep_t / ppe_t
+    dr_p = dep_p / ppe_p
+    return dr_p / dr_t if dr_t > 0 else None
+
+
+def _beneishSgai(rev_t: float, sga_t: float | None, rev_p: float, sga_p: float | None) -> float | None:
+    if sga_t is None or sga_p is None or rev_t <= 0 or rev_p <= 0:
+        return None
+    sga_r_t = sga_t / rev_t
+    sga_r_p = sga_p / rev_p
+    return sga_r_t / sga_r_p if sga_r_p > 0 else None
+
+
+def _beneishTata(np_t: float | None, ocf_t: float | None, ta_t: float) -> float | None:
+    if np_t is None or ocf_t is None or ta_t <= 0:
+        return None
+    return (np_t - ocf_t) / ta_t
+
+
+def _beneishLvgi(tl_t: float | None, ta_t: float, tl_p: float | None, ta_p: float) -> float | None:
+    if tl_t is None or tl_p is None or ta_t <= 0 or ta_p <= 0:
+        return None
+    lev_t = tl_t / ta_t
+    lev_p = tl_p / ta_p
+    return lev_t / lev_p if lev_p > 0 else None
+
+
 def _calcBeneishForPeriod(
     *,
     rev_t: float | None,
@@ -1335,88 +1400,36 @@ def _calcBeneishForPeriod(
     tl_t: float | None,
     tl_p: float | None,
 ) -> float | None:
-    """Beneish M-Score 단일 기간 계산 (현재 t vs 전기 p)."""
+    """Beneish M-Score 단일 기간 계산 (현재 t vs 전기 p). 8 sub-index orchestrator."""
     if rev_t is None or rev_p is None or rev_p == 0:
         return None
     if ta_t is None or ta_p is None or ta_p == 0:
         return None
 
-    # DSRI
-    dsri = None
-    if rec_t is not None and rec_p is not None and rev_t > 0:
-        dsr_t = rec_t / rev_t
-        dsr_p = rec_p / rev_p
-        if dsr_p > 0:
-            dsri = dsr_t / dsr_p
-
-    # GMI
-    gmi = None
-    if cogs_t is not None and cogs_p is not None and rev_t > 0:
-        gm_t = (rev_t - cogs_t) / rev_t
-        gm_p = (rev_p - cogs_p) / rev_p
-        if gm_t > 0 and gm_p > 0:
-            gmi = gm_p / gm_t
-
-    # AQI
-    aqi = None
-    if ca_t is not None and ca_p is not None:
-        ppe_t = tan_t or 0
-        ppe_p = tan_p or 0
-        aq_t = 1 - (ca_t + ppe_t) / ta_t if ta_t > 0 else None
-        aq_p = 1 - (ca_p + ppe_p) / ta_p if ta_p > 0 else None
-        if aq_t is not None and aq_p is not None and aq_p != 0:
-            aqi = aq_t / aq_p
-
-    # SGI
+    dsri = _beneishDsri(rev_t, rec_t, rev_p, rec_p)
+    gmi = _beneishGmi(rev_t, cogs_t, rev_p, cogs_p)
+    aqi = _beneishAqi(ta_t, ca_t, tan_t, ta_p, ca_p, tan_p)
     sgi = rev_t / rev_p
-
-    # DEPI
-    depi = None
-    if dep_t is not None and dep_p is not None:
-        ppe_t = tan_t or 0
-        ppe_p = tan_p or 0
-        if ppe_t + dep_t > 0 and ppe_p + dep_p > 0:
-            dr_t = dep_t / (ppe_t + dep_t)
-            dr_p = dep_p / (ppe_p + dep_p)
-            if dr_t > 0:
-                depi = dr_p / dr_t
-
-    # SGAI
-    sgai = None
-    if sga_t is not None and sga_p is not None and rev_t > 0 and rev_p > 0:
-        sga_r_t = sga_t / rev_t
-        sga_r_p = sga_p / rev_p
-        if sga_r_p > 0:
-            sgai = sga_r_t / sga_r_p
-
-    # TATA
-    tata = None
-    if np_t is not None and ocf_t is not None and ta_t > 0:
-        tata = (np_t - ocf_t) / ta_t
-
-    # LVGI
-    lvgi = None
-    if tl_t is not None and tl_p is not None and ta_t > 0 and ta_p > 0:
-        lev_t = tl_t / ta_t
-        lev_p = tl_p / ta_p
-        if lev_p > 0:
-            lvgi = lev_t / lev_p
+    depi = _beneishDepi(dep_t, tan_t, dep_p, tan_p)
+    sgai = _beneishSgai(rev_t, sga_t, rev_p, sga_p)
+    tata = _beneishTata(np_t, ocf_t, ta_t)
+    lvgi = _beneishLvgi(tl_t, ta_t, tl_p, ta_p)
 
     vs = [dsri, gmi, aqi, sgi, depi, sgai, tata, lvgi]
-    if all(v is not None for v in vs):
-        m = (
-            -4.84
-            + 0.920 * dsri
-            + 0.528 * gmi
-            + 0.404 * aqi
-            + 0.892 * sgi
-            + 0.115 * depi
-            - 0.172 * sgai
-            + 4.679 * tata
-            - 0.327 * lvgi
-        )
-        return _safeRound(m, 2)
-    return None
+    if any(v is None for v in vs):
+        return None
+    m = (
+        -4.84
+        + 0.920 * dsri
+        + 0.528 * gmi
+        + 0.404 * aqi
+        + 0.892 * sgi
+        + 0.115 * depi
+        - 0.172 * sgai
+        + 4.679 * tata
+        - 0.327 * lvgi
+    )
+    return _safeRound(m, 2)
 
 
 def _calcBeneish(
@@ -1508,6 +1521,476 @@ def _calcValuation(r: RatioResult) -> None:
             r.evEbitda = round(ev / ebitda, 2)
 
 
+def _sv(lst: list, i: int) -> float | None:
+    """시계열 리스트 i 번째 안전 조회 (범위 초과 시 None)."""
+    return lst[i] if i < len(lst) else None
+
+
+def _extractRatioSeriesInputs(
+    annualSeries: dict[str, dict[str, list[float | None]]],
+) -> dict[str, list]:
+    """계산에 필요한 전체 시계열을 단일 dict 로 추출 — Q3.1c split 의 기준 입력."""
+    totalEquity = _get(annualSeries, "BS", "total_stockholders_equity")
+    if not any(v is not None for v in totalEquity):
+        totalEquity = _get(annualSeries, "BS", "owners_of_parent_equity")
+    ownersEquity = _get(annualSeries, "BS", "owners_of_parent_equity")
+    if not any(v is not None for v in ownersEquity):
+        ownersEquity = totalEquity
+    depreciation = _get(annualSeries, "CF", "depreciation_and_amortization")
+    if not any(v is not None for v in depreciation):
+        depreciation = _get(annualSeries, "CF", "depreciation_cf")
+    if not any(v is not None for v in depreciation):
+        depreciation = _get(annualSeries, "CF", "depreciation")
+    return {
+        "revenue": _pick_series(annualSeries, "IS", ["sales", "revenue"]),
+        "costOfSales": _get(annualSeries, "IS", "cost_of_sales"),
+        "grossProfit": _get(annualSeries, "IS", "gross_profit"),
+        "opProfit": _pick_series(annualSeries, "IS", ["operating_profit", "operating_income"]),
+        "netProfit": _pick_series(annualSeries, "IS", ["net_profit", "net_income"]),
+        "sga": _get(annualSeries, "IS", "selling_and_administrative_expenses"),
+        "finCosts": _pick_series(annualSeries, "IS", ["finance_costs", "interest_expense"]),
+        "totalAssets": _get(annualSeries, "BS", "total_assets"),
+        "totalEquity": totalEquity,
+        "ownersEquity": ownersEquity,
+        "totalLiab": _get(annualSeries, "BS", "total_liabilities"),
+        "curAssets": _get(annualSeries, "BS", "current_assets"),
+        "curLiab": _get(annualSeries, "BS", "current_liabilities"),
+        "cash": _get(annualSeries, "BS", "cash_and_cash_equivalents"),
+        "inventories": _get(annualSeries, "BS", "inventories"),
+        "receivables": _get(annualSeries, "BS", "trade_and_other_receivables"),
+        "payables": _get(annualSeries, "BS", "trade_and_other_payables"),
+        "tangible": _get(annualSeries, "BS", "tangible_assets"),
+        "intangible": _get(annualSeries, "BS", "intangible_assets"),
+        "stBorrow": _get(annualSeries, "BS", "shortterm_borrowings"),
+        "ltBorrow": _get(annualSeries, "BS", "longterm_borrowings"),
+        "bonds": _get(annualSeries, "BS", "debentures"),
+        "ncAssets": _get(annualSeries, "BS", "noncurrent_assets"),
+        "profitBeforeTax": _get(annualSeries, "IS", "profit_before_tax"),
+        "incomeTaxExpense": (
+            _get(annualSeries, "IS", "income_tax_expense") or _get(annualSeries, "IS", "income_taxes")
+        ),
+        "opCf": _get(annualSeries, "CF", "operating_cashflow"),
+        "capex": _get(annualSeries, "CF", "purchase_of_property_plant_and_equipment"),
+        "divPaid": _get(annualSeries, "CF", "dividends_paid"),
+        "depreciation": depreciation,
+    }
+
+
+def _appendBasicAndProfitability(rs: RatioSeriesResult, i: int, S: dict[str, list]) -> None:
+    """기본 6개 + 수익성 13개 (ROE/ROA/ROCE, margin, costRatio, 유효세율, 이익품질, EBITDA)."""
+    rev_i = _sv(S["revenue"], i)
+    cos_i = _sv(S["costOfSales"], i)
+    gp_i = _sv(S["grossProfit"], i)
+    op_i = _sv(S["opProfit"], i)
+    np_i = _sv(S["netProfit"], i)
+    sga_i = _sv(S["sga"], i)
+    ta_i = _sv(S["totalAssets"], i)
+    te_i = _sv(S["totalEquity"], i)
+    oe_i = _sv(S["ownersEquity"], i)
+    cl_i = _sv(S["curLiab"], i)
+    opcf_i = _sv(S["opCf"], i)
+    tan_i = _sv(S["tangible"], i)
+    int_i = _sv(S["intangible"], i)
+
+    rs.revenue.append(rev_i)
+    rs.operatingProfit.append(op_i)
+    rs.netProfit.append(np_i)
+    rs.totalAssets.append(ta_i)
+    rs.totalEquity.append(te_i)
+    rs.operatingCashflow.append(opcf_i)
+
+    rs.roe.append(_safePct(np_i, oe_i))
+    rs.roa.append(_safePct(np_i, ta_i))
+
+    if op_i is not None and ta_i and cl_i is not None:
+        ce_i = ta_i - cl_i
+        rs.roce.append(_safeRound((op_i / ce_i) * 100, 2) if ce_i > 0 else None)
+    else:
+        rs.roce.append(None)
+
+    rs.operatingMargin.append(_safePct(op_i, rev_i))
+    rs.netMargin.append(_safePct(np_i, rev_i))
+
+    pbt_i = _sv(S["profitBeforeTax"], i)
+    rs.preTaxMargin.append(_safePct(pbt_i, rev_i))
+
+    rs.grossMargin.append(_safePct(gp_i, rev_i))
+    rs.costOfSalesRatio.append(_safePct(cos_i, rev_i))
+    rs.sgaRatio.append(_safePct(sga_i, rev_i))
+
+    tax_i = _sv(S["incomeTaxExpense"], i)
+    if pbt_i and pbt_i > 0 and tax_i is not None:
+        et_rate = tax_i / pbt_i
+        rs.effectiveTaxRate.append(_safeRound(et_rate * 100, 2) if 0 <= et_rate <= 1 else None)
+    else:
+        rs.effectiveTaxRate.append(None)
+
+    if opcf_i is not None and np_i and np_i > 0:
+        rs.incomeQualityRatio.append(_safeRound((opcf_i / np_i) * 100, 2))
+    else:
+        rs.incomeQualityRatio.append(None)
+
+    dep = _sv(S["depreciation"], i)
+    if dep is None:
+        dep = (tan_i or 0) * 0.05 + (int_i or 0) * 0.1
+    ebitda = (op_i + dep) if op_i is not None else None
+    rs.ebitdaMargin.append(_safePct(ebitda, rev_i))
+
+
+def _appendStability(rs: RatioSeriesResult, i: int, S: dict[str, list]) -> None:
+    """안정성 9개 (debt, current, quick, cash, equity, interestCov, netDebt, noncurrent, workingCapital)."""
+    tl_i = _sv(S["totalLiab"], i)
+    te_i = _sv(S["totalEquity"], i)
+    ta_i = _sv(S["totalAssets"], i)
+    ca_i = _sv(S["curAssets"], i)
+    cl_i = _sv(S["curLiab"], i)
+    cash_i = _sv(S["cash"], i)
+    inv_i = _sv(S["inventories"], i)
+    nca_i = _sv(S["ncAssets"], i)
+    op_i = _sv(S["opProfit"], i)
+    fc_i = _sv(S["finCosts"], i)
+    stb_i = _sv(S["stBorrow"], i) or 0
+    ltb_i = _sv(S["ltBorrow"], i) or 0
+    bnd_i = _sv(S["bonds"], i) or 0
+
+    rs.debtRatio.append(_safePct(tl_i, te_i))
+    rs.currentRatio.append(_safePct(ca_i, cl_i))
+
+    if ca_i is not None and inv_i is not None and cl_i and cl_i > 0:
+        rs.quickRatio.append(_safeRound(((ca_i - inv_i) / cl_i) * 100, 2))
+    else:
+        rs.quickRatio.append(None)
+
+    rs.cashRatio.append(_safePct(cash_i, cl_i))
+    rs.equityRatio.append(_safePct(te_i, ta_i))
+
+    if op_i is not None and fc_i and fc_i > 0:
+        rs.interestCoverage.append(_safeRound(op_i / fc_i, 2))
+    else:
+        rs.interestCoverage.append(None)
+
+    nd = stb_i + ltb_i + bnd_i - (cash_i or 0)
+    rs.netDebtRatio.append(_safePct(nd, te_i))
+
+    if nca_i is not None and te_i and te_i > 0:
+        rs.noncurrentRatio.append(_safeRound((nca_i / te_i) * 100, 2))
+    else:
+        rs.noncurrentRatio.append(None)
+
+    if ca_i is not None and cl_i is not None:
+        rs.workingCapital.append(ca_i - cl_i)
+    else:
+        rs.workingCapital.append(None)
+
+
+def _appendGrowth(rs: RatioSeriesResult, i: int, S: dict[str, list], yoyLag: int) -> None:
+    """성장성 YoY 5개."""
+    rs.revenueGrowth.append(_yoy(S["revenue"], i, yoyLag) if len(S["revenue"]) > i else None)
+    rs.operatingProfitGrowth.append(_yoy(S["opProfit"], i, yoyLag) if len(S["opProfit"]) > i else None)
+    rs.netProfitGrowth.append(_yoy(S["netProfit"], i, yoyLag) if len(S["netProfit"]) > i else None)
+    rs.assetGrowth.append(_yoy(S["totalAssets"], i, yoyLag) if len(S["totalAssets"]) > i else None)
+    rs.equityGrowthRate.append(_yoy(S["totalEquity"], i, yoyLag) if len(S["totalEquity"]) > i else None)
+
+
+def _appendEfficiency(rs: RatioSeriesResult, i: int, S: dict[str, list]) -> None:
+    """회전율 5개 (총자산/고정자산/재고/매출채권/매입채무)."""
+    rev_i = _sv(S["revenue"], i)
+    cos_i = _sv(S["costOfSales"], i)
+    ta_i = _sv(S["totalAssets"], i)
+    tan_i = _sv(S["tangible"], i)
+    inv_i = _sv(S["inventories"], i)
+    rec_i = _sv(S["receivables"], i)
+    pay_i = _sv(S["payables"], i)
+
+    rs.totalAssetTurnover.append(_safeRound(_safeDiv(rev_i, ta_i), 2))
+    rs.fixedAssetTurnover.append(_safeRound(_safeDiv(rev_i, tan_i), 2))
+    rs.inventoryTurnover.append(_safeRound(_safeDiv(rev_i, inv_i), 2))
+    rs.receivablesTurnover.append(_safeRound(_safeDiv(rev_i, rec_i), 2))
+    rs.payablesTurnover.append(_safeRound(_safeDiv(cos_i, pay_i), 2))
+
+
+def _appendCashflow(rs: RatioSeriesResult, i: int, S: dict[str, list]) -> None:
+    """현금흐름 7개 (FCF, 영업CF margin/to NI/to CL, capex/매출, 배당성향, FCF/OCF)."""
+    rev_i = _sv(S["revenue"], i)
+    np_i = _sv(S["netProfit"], i)
+    cl_i = _sv(S["curLiab"], i)
+    opcf_i = _sv(S["opCf"], i)
+    cap_i = _sv(S["capex"], i)
+    div_i = _sv(S["divPaid"], i)
+
+    capAmt = abs(cap_i) if cap_i and cap_i > 0 else 0
+    fcf_i: float | None
+    if opcf_i is not None:
+        fcf_i = opcf_i - capAmt
+    else:
+        fcf_i = None
+    rs.fcf.append(fcf_i)
+
+    rs.operatingCfMargin.append(_safePct(opcf_i, rev_i))
+    rs.operatingCfToNetIncome.append(_safePctPositive(opcf_i, np_i))
+    rs.operatingCfToCurrentLiab.append(_safePct(opcf_i, cl_i))
+
+    if cap_i and rev_i and rev_i > 0:
+        rs.capexRatio.append(_safeRound((abs(cap_i) / rev_i) * 100, 2))
+    else:
+        rs.capexRatio.append(None)
+
+    if div_i and np_i and np_i > 0:
+        rs.dividendPayoutRatio.append(_safeRound((abs(div_i) / np_i) * 100, 2))
+    else:
+        rs.dividendPayoutRatio.append(None)
+
+    if fcf_i is not None and opcf_i and opcf_i > 0:
+        rs.fcfToOcfRatio.append(_safeRound((fcf_i / opcf_i) * 100, 2))
+    else:
+        rs.fcfToOcfRatio.append(None)
+
+
+def _piotroskiSeriesImproved(series: list, prevSeries: list, i: int, yoyLag: int, increasing: bool) -> int:
+    """Piotroski 전기 대비 ratio 개선 여부 판정.
+
+    리턴: 1=개선, 0=악화/동일, -1=계산불가 (fallback 판정에 활용).
+    """
+    if i < yoyLag:
+        return -1
+    a_now = _sv(series, i)
+    b_now = _sv(prevSeries, i)
+    a_prev = _sv(series, i - yoyLag)
+    b_prev = _sv(prevSeries, i - yoyLag)
+    cur = _safeDiv(a_now, b_now)
+    prev = _safeDiv(a_prev, b_prev)
+    if cur is None or prev is None:
+        return -1
+    return 1 if (cur > prev if increasing else cur < prev) else 0
+
+
+def _piotroskiProfitPoints(i: int, S: dict[str, list], yoyLag: int) -> int:
+    """Piotroski 1~4: ROA>0, OCF>0, ROA 개선, OCF>NI."""
+    np_i = _sv(S["netProfit"], i)
+    ta_i = _sv(S["totalAssets"], i)
+    opcf_i = _sv(S["opCf"], i)
+    score = 0
+    if np_i is not None and ta_i and ta_i > 0 and np_i / ta_i > 0:
+        score += 1
+    if opcf_i is not None and opcf_i > 0:
+        score += 1
+    if _piotroskiSeriesImproved(S["netProfit"], S["totalAssets"], i, yoyLag, increasing=True) == 1:
+        score += 1
+    if opcf_i is not None and np_i is not None and opcf_i > np_i:
+        score += 1
+    return score
+
+
+def _piotroskiLeveragePoints(i: int, S: dict[str, list], yoyLag: int) -> int:
+    """Piotroski 5~6: 부채비율 감소, 유동비율 개선."""
+    tl_i = _sv(S["totalLiab"], i)
+    te_i = _sv(S["totalEquity"], i)
+    ca_i = _sv(S["curAssets"], i)
+    cl_i = _sv(S["curLiab"], i)
+    score = 0
+    drImp = _piotroskiSeriesImproved(S["totalLiab"], S["totalEquity"], i, yoyLag, increasing=False)
+    if drImp == 1:
+        score += 1
+    elif drImp == -1 and tl_i is not None and te_i and te_i > 0 and (tl_i / te_i * 100) < 100:
+        score += 1
+    crImp = _piotroskiSeriesImproved(S["curAssets"], S["curLiab"], i, yoyLag, increasing=True)
+    if crImp == 1:
+        score += 1
+    elif crImp == -1 and ca_i and cl_i and cl_i > 0 and (ca_i / cl_i * 100) > 100:
+        score += 1
+    return score
+
+
+def _piotroskiShareIssuePoint(i: int, yoyLag: int, annualSeries: dict) -> int:
+    """Piotroski 7: 신주 미발행 (자본금 감소 or 동일)."""
+    issuedCap = _get(annualSeries, "BS", "issued_capital")
+    if not any(v is not None for v in issuedCap):
+        issuedCap = _get(annualSeries, "BS", "capital_stock")
+    if i < yoyLag or i >= len(issuedCap) or (i - yoyLag) >= len(issuedCap):
+        return 1  # 데이터 없으면 보수적
+    cur_cap_i = issuedCap[i]
+    prev_cap_i = issuedCap[i - yoyLag]
+    if cur_cap_i is not None and prev_cap_i is not None and cur_cap_i <= prev_cap_i:
+        return 1
+    if cur_cap_i is None and prev_cap_i is None:
+        return 1
+    return 0
+
+
+def _piotroskiEfficiencyPoints(i: int, S: dict[str, list], yoyLag: int) -> int:
+    """Piotroski 8~9: 매출총이익률 개선, 총자산회전율 개선."""
+    gp_i = _sv(S["grossProfit"], i)
+    rev_i = _sv(S["revenue"], i)
+    ta_i = _sv(S["totalAssets"], i)
+    score = 0
+    gmImp = _piotroskiSeriesImproved(S["grossProfit"], S["revenue"], i, yoyLag, increasing=True)
+    if gmImp == 1:
+        score += 1
+    elif gmImp == -1:
+        gm = _safePct(gp_i, rev_i)
+        if gm is not None and gm > 0:
+            score += 1
+    tatImp = _piotroskiSeriesImproved(S["revenue"], S["totalAssets"], i, yoyLag, increasing=True)
+    if tatImp == 1:
+        score += 1
+    elif tatImp == -1:
+        tat = _safeDiv(rev_i, ta_i)
+        if tat is not None and tat > 0:
+            score += 1
+    return score
+
+
+def _piotroskiScoreSeries(i: int, S: dict[str, list], yoyLag: int, annualSeries: dict) -> int:
+    """calcRatioSeries 의 Piotroski F-Score (9점 만점) — 4 sub 합산."""
+    return (
+        _piotroskiProfitPoints(i, S, yoyLag)
+        + _piotroskiLeveragePoints(i, S, yoyLag)
+        + _piotroskiShareIssuePoint(i, yoyLag, annualSeries)
+        + _piotroskiEfficiencyPoints(i, S, yoyLag)
+    )
+
+
+def _appendRoicDupontDebt(rs: RatioSeriesResult, i: int, S: dict[str, list]) -> None:
+    """ROIC + DuPont 3분해 + Debt/EBITDA."""
+    rev_i = _sv(S["revenue"], i)
+    op_i = _sv(S["opProfit"], i)
+    np_i = _sv(S["netProfit"], i)
+    ta_i = _sv(S["totalAssets"], i)
+    te_i = _sv(S["totalEquity"], i)
+    cash_i = _sv(S["cash"], i)
+    tan_i = _sv(S["tangible"], i)
+    int_i = _sv(S["intangible"], i)
+    stb_i = _sv(S["stBorrow"], i) or 0
+    ltb_i = _sv(S["ltBorrow"], i) or 0
+    bnd_i = _sv(S["bonds"], i) or 0
+
+    # ROIC
+    pbt_i = _sv(S["profitBeforeTax"], i)
+    tax_i = _sv(S["incomeTaxExpense"], i)
+    et_i = 0.22
+    if pbt_i and pbt_i > 0 and tax_i is not None:
+        _et_i = tax_i / pbt_i
+        if 0 <= _et_i <= 0.5:
+            et_i = _et_i
+    nopat_i = op_i * (1 - et_i) if op_i is not None else None
+    nd_i = stb_i + ltb_i + bnd_i - (cash_i or 0)
+    invested_i = (te_i or 0) + max(nd_i, 0) if te_i is not None else None
+    rs.roic.append(_safePct(nopat_i, invested_i))
+
+    # DuPont
+    rs.dupontMargin.append(_safePct(np_i, rev_i))
+    rs.dupontTurnover.append(_safeRound(_safeDiv(rev_i, ta_i), 2))
+    rs.dupontLeverage.append(_safeRound(_safeDiv(ta_i, te_i), 2) if te_i and te_i > 0 else None)
+
+    # Debt/EBITDA
+    dep_i = _sv(S["depreciation"], i)
+    if dep_i is None:
+        dep_i = (tan_i or 0) * 0.05 + (int_i or 0) * 0.1
+    ebitda_i = (op_i + dep_i) if op_i is not None else None
+    totalBorr_i = stb_i + ltb_i + bnd_i
+    if ebitda_i and ebitda_i > 0:
+        rs.debtToEbitda.append(_safeRound(totalBorr_i / ebitda_i, 2))
+    else:
+        rs.debtToEbitda.append(None)
+
+
+def _appendCCC(rs: RatioSeriesResult, i: int, S: dict[str, list]) -> None:
+    """CCC + DSO/DIO/DPO + 영업순환주기."""
+    rev_i = _sv(S["revenue"], i)
+    cos_i = _sv(S["costOfSales"], i)
+    inv_i = _sv(S["inventories"], i)
+    rec_i = _sv(S["receivables"], i)
+    pay_i = _sv(S["payables"], i)
+
+    cos_for_days = cos_i if cos_i and cos_i > 0 else rev_i
+    dso_i = _safeRound(rec_i / rev_i * 365, 1) if rec_i and rev_i and rev_i > 0 else None
+    dio_i = _safeRound(inv_i / cos_for_days * 365, 1) if inv_i and cos_for_days and cos_for_days > 0 else None
+    dpo_i = _safeRound(pay_i / cos_for_days * 365, 1) if pay_i and cos_for_days and cos_for_days > 0 else None
+    rs.dso.append(dso_i)
+    rs.dio.append(dio_i)
+    rs.dpo.append(dpo_i)
+    rs.ccc.append(_safeRound(dso_i + dio_i - dpo_i, 1) if dso_i and dio_i and dpo_i else None)
+    rs.operatingCycle.append(_safeRound(dso_i + dio_i, 1) if dso_i is not None and dio_i is not None else None)
+
+
+def _appendAltmanSloan(rs: RatioSeriesResult, i: int, S: dict[str, list], annualSeries: dict) -> None:
+    """Altman Z' (비상장, 시계열에 marketCap 없음) + Sloan Accrual Ratio."""
+    rev_i = _sv(S["revenue"], i)
+    op_i = _sv(S["opProfit"], i)
+    np_i = _sv(S["netProfit"], i)
+    ta_i = _sv(S["totalAssets"], i)
+    te_i = _sv(S["totalEquity"], i)
+    tl_i = _sv(S["totalLiab"], i)
+    ca_i = _sv(S["curAssets"], i)
+    cl_i = _sv(S["curLiab"], i)
+    opcf_i = _sv(S["opCf"], i)
+
+    if ta_i and ta_i > 0 and tl_i and tl_i > 0:
+        wc_i = (ca_i or 0) - (cl_i or 0)
+        re_i = _sv(_get(annualSeries, "BS", "retained_earnings"), i)
+        dPrime = (te_i or 0) / tl_i
+        zPrime = (
+            0.717 * (wc_i / ta_i)
+            + 0.847 * ((re_i or 0) / ta_i)
+            + 3.107 * ((op_i or 0) / ta_i)
+            + 0.420 * dPrime
+            + 0.998 * ((rev_i or 0) / ta_i)
+        )
+        rs.altmanZScore.append(_safeRound(zPrime, 2))
+    else:
+        rs.altmanZScore.append(None)
+
+    if np_i is not None and opcf_i is not None and ta_i and ta_i > 0:
+        rs.sloanAccrualRatio.append(_safeRound((np_i - opcf_i) / ta_i * 100, 2))
+    else:
+        rs.sloanAccrualRatio.append(None)
+
+
+def _appendBeneishSeries(rs: RatioSeriesResult, i: int, S: dict[str, list]) -> None:
+    """Beneish M-Score 기간별 (2년 이상 필요)."""
+    if i < 1:
+        rs.beneishMScore.append(None)
+        return
+    m = _calcBeneishForPeriod(
+        rev_t=_sv(S["revenue"], i),
+        rev_p=_sv(S["revenue"], i - 1),
+        rec_t=_sv(S["receivables"], i),
+        rec_p=_sv(S["receivables"], i - 1),
+        cogs_t=_sv(S["costOfSales"], i),
+        cogs_p=_sv(S["costOfSales"], i - 1),
+        ta_t=_sv(S["totalAssets"], i),
+        ta_p=_sv(S["totalAssets"], i - 1),
+        ca_t=_sv(S["curAssets"], i),
+        ca_p=_sv(S["curAssets"], i - 1),
+        sga_t=_sv(S["sga"], i),
+        sga_p=_sv(S["sga"], i - 1),
+        dep_t=_sv(S["depreciation"], i),
+        dep_p=_sv(S["depreciation"], i - 1),
+        tan_t=_sv(S["tangible"], i),
+        tan_p=_sv(S["tangible"], i - 1),
+        np_t=_sv(S["netProfit"], i),
+        ocf_t=_sv(S["opCf"], i),
+        tl_t=_sv(S["totalLiab"], i),
+        tl_p=_sv(S["totalLiab"], i - 1),
+    )
+    rs.beneishMScore.append(m)
+
+
+def _appendComposite(
+    rs: RatioSeriesResult,
+    i: int,
+    S: dict[str, list],
+    yoyLag: int,
+    annualSeries: dict,
+) -> None:
+    """복합 지표 orchestrator — 5 sub 로 분할."""
+    _appendRoicDupontDebt(rs, i, S)
+    _appendCCC(rs, i, S)
+    rs.piotroskiFScore.append(_piotroskiScoreSeries(i, S, yoyLag, annualSeries))
+    _appendAltmanSloan(rs, i, S, annualSeries)
+    _appendBeneishSeries(rs, i, S)
+
+
 def calcRatioSeries(
     annualSeries: dict[str, dict[str, list[float | None]]],
     years: list[str],
@@ -1515,6 +1998,8 @@ def calcRatioSeries(
     yoyLag: int = 1,
 ) -> RatioSeriesResult:
     """재무비율 시계열 계산 (연간 또는 분기).
+
+    Q3.1c split: 6 category sub-function 으로 분해. 각 기간별로 6 호출.
 
     Args:
             annualSeries: buildAnnual() 또는 timeseries 결과의 series.
@@ -1527,386 +2012,15 @@ def calcRatioSeries(
     n = len(years)
     rs = RatioSeriesResult(years=list(years))
     archetype = archetypeOverride or _detectArchetype(annualSeries)
-
-    revenue = _pick_series(annualSeries, "IS", ["sales", "revenue"])
-    costOfSales = _get(annualSeries, "IS", "cost_of_sales")
-    grossProfit = _get(annualSeries, "IS", "gross_profit")
-    opProfit = _pick_series(annualSeries, "IS", ["operating_profit", "operating_income"])
-    netProfit = _pick_series(annualSeries, "IS", ["net_profit", "net_income"])
-    sga = _get(annualSeries, "IS", "selling_and_administrative_expenses")
-    finCosts = _pick_series(annualSeries, "IS", ["finance_costs", "interest_expense"])
-
-    totalAssets = _get(annualSeries, "BS", "total_assets")
-    totalEquity = _get(annualSeries, "BS", "total_stockholders_equity")
-    if not any(v is not None for v in totalEquity):
-        totalEquity = _get(annualSeries, "BS", "owners_of_parent_equity")
-    ownersEquity = _get(annualSeries, "BS", "owners_of_parent_equity")
-    if not any(v is not None for v in ownersEquity):
-        ownersEquity = totalEquity
-    totalLiab = _get(annualSeries, "BS", "total_liabilities")
-    curAssets = _get(annualSeries, "BS", "current_assets")
-    curLiab = _get(annualSeries, "BS", "current_liabilities")
-    cash = _get(annualSeries, "BS", "cash_and_cash_equivalents")
-    inventories = _get(annualSeries, "BS", "inventories")
-    receivables = _get(annualSeries, "BS", "trade_and_other_receivables")
-    payables = _get(annualSeries, "BS", "trade_and_other_payables")
-    tangible = _get(annualSeries, "BS", "tangible_assets")
-    intangible = _get(annualSeries, "BS", "intangible_assets")
-    stBorrow = _get(annualSeries, "BS", "shortterm_borrowings")
-    ltBorrow = _get(annualSeries, "BS", "longterm_borrowings")
-    bonds = _get(annualSeries, "BS", "debentures")
-    ncAssets = _get(annualSeries, "BS", "noncurrent_assets")
-
-    profitBeforeTax = _get(annualSeries, "IS", "profit_before_tax")
-    incomeTaxExpense = _get(annualSeries, "IS", "income_tax_expense") or _get(annualSeries, "IS", "income_taxes")
-
-    opCf = _get(annualSeries, "CF", "operating_cashflow")
-    capex = _get(annualSeries, "CF", "purchase_of_property_plant_and_equipment")
-    divPaid = _get(annualSeries, "CF", "dividends_paid")
-    depreciation = _get(annualSeries, "CF", "depreciation_and_amortization")
-    if not any(v is not None for v in depreciation):
-        depreciation = _get(annualSeries, "CF", "depreciation_cf")
-    if not any(v is not None for v in depreciation):
-        depreciation = _get(annualSeries, "CF", "depreciation")
-
-    def _v(lst: list, i: int) -> float | None:
-        if i < len(lst):
-            return lst[i]
-        return None
+    S = _extractRatioSeriesInputs(annualSeries)
 
     for i in range(n):
-        rev_i = _v(revenue, i)
-        cos_i = _v(costOfSales, i)
-        gp_i = _v(grossProfit, i)
-        op_i = _v(opProfit, i)
-        np_i = _v(netProfit, i)
-        sga_i = _v(sga, i)
-        fc_i = _v(finCosts, i)
-
-        ta_i = _v(totalAssets, i)
-        te_i = _v(totalEquity, i)
-        oe_i = _v(ownersEquity, i)
-        tl_i = _v(totalLiab, i)
-        ca_i = _v(curAssets, i)
-        cl_i = _v(curLiab, i)
-        cash_i = _v(cash, i)
-        inv_i = _v(inventories, i)
-        rec_i = _v(receivables, i)
-        pay_i = _v(payables, i)
-        tan_i = _v(tangible, i)
-        int_i = _v(intangible, i)
-        stb_i = _v(stBorrow, i) or 0
-        ltb_i = _v(ltBorrow, i) or 0
-        bnd_i = _v(bonds, i) or 0
-        nca_i = _v(ncAssets, i)
-
-        opcf_i = _v(opCf, i)
-        cap_i = _v(capex, i)
-        div_i = _v(divPaid, i)
-
-        rs.revenue.append(rev_i)
-        rs.operatingProfit.append(op_i)
-        rs.netProfit.append(np_i)
-        rs.totalAssets.append(ta_i)
-        rs.totalEquity.append(te_i)
-        rs.operatingCashflow.append(opcf_i)
-
-        rs.roe.append(_safePct(np_i, oe_i))
-        rs.roa.append(_safePct(np_i, ta_i))
-
-        # ROCE
-        if op_i is not None and ta_i and cl_i is not None:
-            ce_i = ta_i - cl_i
-            rs.roce.append(_safeRound((op_i / ce_i) * 100, 2) if ce_i > 0 else None)
-        else:
-            rs.roce.append(None)
-
-        rs.operatingMargin.append(_safePct(op_i, rev_i))
-        rs.netMargin.append(_safePct(np_i, rev_i))
-
-        pbt_i = _v(profitBeforeTax, i)
-        rs.preTaxMargin.append(_safePct(pbt_i, rev_i))
-
-        rs.grossMargin.append(_safePct(gp_i, rev_i))
-        rs.costOfSalesRatio.append(_safePct(cos_i, rev_i))
-        rs.sgaRatio.append(_safePct(sga_i, rev_i))
-
-        # 유효세율
-        tax_i = _v(incomeTaxExpense, i)
-        if pbt_i and pbt_i > 0 and tax_i is not None:
-            et_rate = tax_i / pbt_i
-            rs.effectiveTaxRate.append(_safeRound(et_rate * 100, 2) if 0 <= et_rate <= 1 else None)
-        else:
-            rs.effectiveTaxRate.append(None)
-
-        # 이익품질비율
-        if opcf_i is not None and np_i and np_i > 0:
-            rs.incomeQualityRatio.append(_safeRound((opcf_i / np_i) * 100, 2))
-        else:
-            rs.incomeQualityRatio.append(None)
-
-        dep = _v(depreciation, i)
-        if dep is None:
-            dep = (tan_i or 0) * 0.05 + (int_i or 0) * 0.1
-        ebitda = (op_i + dep) if op_i is not None else None
-        rs.ebitdaMargin.append(_safePct(ebitda, rev_i))
-
-        rs.debtRatio.append(_safePct(tl_i, te_i))
-        rs.currentRatio.append(_safePct(ca_i, cl_i))
-
-        if ca_i is not None and inv_i is not None and cl_i and cl_i > 0:
-            rs.quickRatio.append(_safeRound(((ca_i - inv_i) / cl_i) * 100, 2))
-        else:
-            rs.quickRatio.append(None)
-
-        # 현금비율
-        rs.cashRatio.append(_safePct(cash_i, cl_i))
-
-        rs.equityRatio.append(_safePct(te_i, ta_i))
-
-        if op_i is not None and fc_i and fc_i > 0:
-            rs.interestCoverage.append(_safeRound(op_i / fc_i, 2))
-        else:
-            rs.interestCoverage.append(None)
-
-        nd = stb_i + ltb_i + bnd_i - (cash_i or 0)
-        rs.netDebtRatio.append(_safePct(nd, te_i))
-
-        if nca_i is not None and te_i and te_i > 0:
-            rs.noncurrentRatio.append(_safeRound((nca_i / te_i) * 100, 2))
-        else:
-            rs.noncurrentRatio.append(None)
-
-        # 운전자본
-        if ca_i is not None and cl_i is not None:
-            rs.workingCapital.append(ca_i - cl_i)
-        else:
-            rs.workingCapital.append(None)
-
-        rs.revenueGrowth.append(_yoy(revenue, i, yoyLag) if len(revenue) > i else None)
-        rs.operatingProfitGrowth.append(_yoy(opProfit, i, yoyLag) if len(opProfit) > i else None)
-        rs.netProfitGrowth.append(_yoy(netProfit, i, yoyLag) if len(netProfit) > i else None)
-        rs.assetGrowth.append(_yoy(totalAssets, i, yoyLag) if len(totalAssets) > i else None)
-        rs.equityGrowthRate.append(_yoy(totalEquity, i, yoyLag) if len(totalEquity) > i else None)
-
-        rs.totalAssetTurnover.append(_safeRound(_safeDiv(rev_i, ta_i), 2))
-        rs.fixedAssetTurnover.append(_safeRound(_safeDiv(rev_i, tan_i), 2))
-        rs.inventoryTurnover.append(_safeRound(_safeDiv(rev_i, inv_i), 2))
-        rs.receivablesTurnover.append(_safeRound(_safeDiv(rev_i, rec_i), 2))
-        rs.payablesTurnover.append(_safeRound(_safeDiv(cos_i, pay_i), 2))
-
-        capAmt = abs(cap_i) if cap_i and cap_i > 0 else 0
-        if opcf_i is not None:
-            fcf_i = opcf_i - capAmt
-            rs.fcf.append(fcf_i)
-        else:
-            fcf_i = None
-            rs.fcf.append(None)
-
-        rs.operatingCfMargin.append(_safePct(opcf_i, rev_i))
-        rs.operatingCfToNetIncome.append(_safePctPositive(opcf_i, np_i))
-
-        # 영업CF/유동부채
-        rs.operatingCfToCurrentLiab.append(_safePct(opcf_i, cl_i))
-
-        if cap_i and rev_i and rev_i > 0:
-            rs.capexRatio.append(_safeRound((abs(cap_i) / rev_i) * 100, 2))
-        else:
-            rs.capexRatio.append(None)
-
-        if div_i and np_i and np_i > 0:
-            rs.dividendPayoutRatio.append(_safeRound((abs(div_i) / np_i) * 100, 2))
-        else:
-            rs.dividendPayoutRatio.append(None)
-
-        # FCF/OCF비율
-        if fcf_i is not None and opcf_i and opcf_i > 0:
-            rs.fcfToOcfRatio.append(_safeRound((fcf_i / opcf_i) * 100, 2))
-        else:
-            rs.fcfToOcfRatio.append(None)
-
-        # ── 복합 지표 (시계열) ──
-
-        # ROIC — 유효세율 동적 계산
-        pbt_i = _v(profitBeforeTax, i)
-        tax_i = _v(incomeTaxExpense, i)
-        et_i = 0.22
-        if pbt_i and pbt_i > 0 and tax_i is not None:
-            _et_i = tax_i / pbt_i
-            if 0 <= _et_i <= 0.5:
-                et_i = _et_i
-        nopat_i = op_i * (1 - et_i) if op_i is not None else None
-        nd_i = stb_i + ltb_i + bnd_i - (cash_i or 0)
-        invested_i = (te_i or 0) + max(nd_i, 0) if te_i is not None else None
-        rs.roic.append(_safePct(nopat_i, invested_i))
-
-        # DuPont
-        rs.dupontMargin.append(_safePct(np_i, rev_i))
-        rs.dupontTurnover.append(_safeRound(_safeDiv(rev_i, ta_i), 2))
-        rs.dupontLeverage.append(_safeRound(_safeDiv(ta_i, te_i), 2) if te_i and te_i > 0 else None)
-
-        # Debt/EBITDA
-        dep_i = _v(depreciation, i)
-        if dep_i is None:
-            dep_i = (tan_i or 0) * 0.05 + (int_i or 0) * 0.1
-        ebitda_i = (op_i + dep_i) if op_i is not None else None
-        totalBorr_i = stb_i + ltb_i + bnd_i
-        if ebitda_i and ebitda_i > 0:
-            rs.debtToEbitda.append(_safeRound(totalBorr_i / ebitda_i, 2))
-        else:
-            rs.debtToEbitda.append(None)
-
-        # CCC (DSO + DIO - DPO)
-        cos_for_days = cos_i if cos_i and cos_i > 0 else rev_i
-        dso_i = _safeRound(rec_i / rev_i * 365, 1) if rec_i and rev_i and rev_i > 0 else None
-        dio_i = _safeRound(inv_i / cos_for_days * 365, 1) if inv_i and cos_for_days and cos_for_days > 0 else None
-        dpo_i = _safeRound(pay_i / cos_for_days * 365, 1) if pay_i and cos_for_days and cos_for_days > 0 else None
-        rs.dso.append(dso_i)
-        rs.dio.append(dio_i)
-        rs.dpo.append(dpo_i)
-        rs.ccc.append(_safeRound(dso_i + dio_i - dpo_i, 1) if dso_i and dio_i and dpo_i else None)
-
-        # 영업순환주기
-        rs.operatingCycle.append(_safeRound(dso_i + dio_i, 1) if dso_i is not None and dio_i is not None else None)
-
-        # Piotroski F-Score (9/9 시계열)
-        fscore = 0
-        # 1. ROA > 0
-        if np_i is not None and ta_i and ta_i > 0 and np_i / ta_i > 0:
-            fscore += 1
-        # 2. Operating CF > 0
-        if opcf_i is not None and opcf_i > 0:
-            fscore += 1
-        # 3. ROA 개선 (전기 대비)
-        if i >= yoyLag:
-            prev_np_i = _v(netProfit, i - yoyLag)
-            prev_ta_i = _v(totalAssets, i - yoyLag)
-            curROA_i = _safeDiv(np_i, ta_i)
-            prevROA_i = _safeDiv(prev_np_i, prev_ta_i)
-            if curROA_i is not None and prevROA_i is not None and curROA_i > prevROA_i:
-                fscore += 1
-        # 4. Operating CF > Net Income (발생주의 품질)
-        if opcf_i is not None and np_i is not None and opcf_i > np_i:
-            fscore += 1
-        # 5. 부채비율 감소
-        if i >= yoyLag:
-            prev_tl_i = _v(totalLiab, i - yoyLag)
-            prev_te_i = _v(totalEquity, i - yoyLag)
-            curDR_i = _safeDiv(tl_i, te_i)
-            prevDR_i = _safeDiv(prev_tl_i, prev_te_i)
-            if curDR_i is not None and prevDR_i is not None and curDR_i < prevDR_i:
-                fscore += 1
-        elif tl_i is not None and te_i and te_i > 0 and (tl_i / te_i * 100) < 100:
-            fscore += 1
-        # 6. 유동비율 개선
-        if i >= yoyLag:
-            prev_ca_i = _v(curAssets, i - yoyLag)
-            prev_cl_i = _v(curLiab, i - yoyLag)
-            curCR_i = _safeDiv(ca_i, cl_i)
-            prevCR_i = _safeDiv(prev_ca_i, prev_cl_i)
-            if curCR_i is not None and prevCR_i is not None and curCR_i > prevCR_i:
-                fscore += 1
-        elif ca_i and cl_i and cl_i > 0 and (ca_i / cl_i * 100) > 100:
-            fscore += 1
-        # 7. 신주 미발행
-        issuedCap = _get(annualSeries, "BS", "issued_capital")
-        if not any(v is not None for v in issuedCap):
-            issuedCap = _get(annualSeries, "BS", "capital_stock")
-        if i >= yoyLag and i < len(issuedCap) and (i - yoyLag) < len(issuedCap):
-            cur_cap_i = issuedCap[i]
-            prev_cap_i = issuedCap[i - yoyLag]
-            if cur_cap_i is not None and prev_cap_i is not None and cur_cap_i <= prev_cap_i:
-                fscore += 1
-            elif cur_cap_i is None and prev_cap_i is None:
-                fscore += 1  # 데이터 없으면 미발행 간주
-        else:
-            fscore += 1  # 데이터 없으면 미발행 간주
-        # 8. 매출총이익률 개선
-        if i >= yoyLag:
-            prev_gp_i = _v(grossProfit, i - yoyLag)
-            prev_rev_i = _v(revenue, i - yoyLag)
-            curGM_i = _safeDiv(gp_i, rev_i)
-            prevGM_i = _safeDiv(prev_gp_i, prev_rev_i)
-            if curGM_i is not None and prevGM_i is not None and curGM_i > prevGM_i:
-                fscore += 1
-        else:
-            gm = _safePct(gp_i, rev_i)
-            if gm is not None and gm > 0:
-                fscore += 1
-        # 9. 총자산회전율 개선
-        if i >= yoyLag:
-            prev_rev_i2 = _v(revenue, i - yoyLag)
-            prev_ta_i2 = _v(totalAssets, i - yoyLag)
-            curTAT_i = _safeDiv(rev_i, ta_i)
-            prevTAT_i = _safeDiv(prev_rev_i2, prev_ta_i2)
-            if curTAT_i is not None and prevTAT_i is not None and curTAT_i > prevTAT_i:
-                fscore += 1
-        else:
-            tat = _safeDiv(rev_i, ta_i)
-            if tat is not None and tat > 0:
-                fscore += 1
-        rs.piotroskiFScore.append(fscore)
-
-        # Altman Z'-Score (비상장 모델 — 시계열에 marketCap 없으므로 항상 Z')
-        if ta_i and ta_i > 0 and tl_i and tl_i > 0:
-            wc_i = (ca_i or 0) - (cl_i or 0)
-            re_i = _v(_get(annualSeries, "BS", "retained_earnings"), i)
-            dPrime = (te_i or 0) / tl_i
-            zPrime = (
-                0.717 * (wc_i / ta_i)
-                + 0.847 * ((re_i or 0) / ta_i)
-                + 3.107 * ((op_i or 0) / ta_i)
-                + 0.420 * dPrime
-                + 0.998 * ((rev_i or 0) / ta_i)
-            )
-            rs.altmanZScore.append(_safeRound(zPrime, 2))
-        else:
-            rs.altmanZScore.append(None)
-
-        # Sloan Accrual Ratio
-        if np_i is not None and opcf_i is not None and ta_i and ta_i > 0:
-            rs.sloanAccrualRatio.append(_safeRound((np_i - opcf_i) / ta_i * 100, 2))
-        else:
-            rs.sloanAccrualRatio.append(None)
-
-        # Beneish M-Score (2년 이상 데이터 필요)
-        if i >= 1:
-            rev_p = _v(revenue, i - 1)
-            rec_p = _v(receivables, i - 1)
-            cos_p = _v(costOfSales, i - 1)
-            ta_p = _v(totalAssets, i - 1)
-            ca_p = _v(curAssets, i - 1)
-            sga_p = _v(sga, i - 1)
-            dep_p = _v(depreciation, i - 1)
-            dep_i_val = _v(depreciation, i)
-            tan_p = _v(tangible, i - 1)
-            tl_p = _v(totalLiab, i - 1)
-
-            m = _calcBeneishForPeriod(
-                rev_t=rev_i,
-                rev_p=rev_p,
-                rec_t=rec_i,
-                rec_p=rec_p,
-                cogs_t=cos_i,
-                cogs_p=cos_p,
-                ta_t=ta_i,
-                ta_p=ta_p,
-                ca_t=ca_i,
-                ca_p=ca_p,
-                sga_t=sga_i,
-                sga_p=sga_p,
-                dep_t=dep_i_val,
-                dep_p=dep_p,
-                tan_t=tan_i,
-                tan_p=tan_p,
-                np_t=np_i,
-                ocf_t=opcf_i,
-                tl_t=tl_i,
-                tl_p=tl_p,
-            )
-            rs.beneishMScore.append(m)
-        else:
-            rs.beneishMScore.append(None)
+        _appendBasicAndProfitability(rs, i, S)
+        _appendStability(rs, i, S)
+        _appendGrowth(rs, i, S, yoyLag)
+        _appendEfficiency(rs, i, S)
+        _appendCashflow(rs, i, S)
+        _appendComposite(rs, i, S, yoyLag, annualSeries)
 
     _applyArchetypePolicySeries(rs, archetype)
     return rs
