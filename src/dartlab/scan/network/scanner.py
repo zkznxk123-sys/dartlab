@@ -8,6 +8,9 @@ from pathlib import Path
 
 import polars as pl
 
+_SCAN_CORP_RE = re.compile(r"[\(（]주[\)）]|㈜|주식회사")
+_SCAN_REGNUM_RE = re.compile(r"\d{6}-?\d{7}")
+
 # ── 공통 유틸 ──────────────────────────────────────────────
 
 
@@ -186,8 +189,6 @@ def scan_affiliate_docs(
     docs_dir = Path(_dataDir("docs"))
     parquet_files = sorted(docs_dir.glob("*.parquet"))
 
-    _CORP_RE = re.compile(r"[\(（]주[\)）]|㈜|주식회사")
-    _REGNUM_RE = re.compile(r"\d{6}-?\d{7}")
     _TABLE_NOISE = {
         "상장",
         "비상장",
@@ -211,10 +212,10 @@ def scan_affiliate_docs(
             if "|" not in line:
                 continue
             cells = [c.strip() for c in line.split("|") if c.strip()]
-            if not any(_REGNUM_RE.search(c) for c in cells):
+            if not any(_SCAN_REGNUM_RE.search(c) for c in cells):
                 continue
             for cell in cells:
-                if _REGNUM_RE.search(cell):
+                if _SCAN_REGNUM_RE.search(cell):
                     continue
                 if re.match(r"^[\d,.\-\s]+$", cell):
                     continue
@@ -227,7 +228,7 @@ def scan_affiliate_docs(
                     continue
                 cells = [c.strip() for c in line.split("|") if c.strip()]
                 for cell in cells:
-                    if _CORP_RE.search(cell) and len(cell) >= 3:
+                    if _SCAN_CORP_RE.search(cell) and len(cell) >= 3:
                         if not re.match(r"^[\d,.\-\s]+$", cell):
                             companies.append(cell)
         return companies

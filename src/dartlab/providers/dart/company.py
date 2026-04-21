@@ -244,6 +244,7 @@ _TOPIC_LABELS: dict[str, str] = {
 }
 
 _RCEPT_NO_PATTERN = re.compile(r"[?&]rcpNo=(\d{14})")
+_QUARTER_COL_RE = re.compile(r"^(\d{4})Q[1-4]$")
 
 
 def listExportModules() -> list[tuple[str, str]]:
@@ -1383,12 +1384,9 @@ class Company:
     @staticmethod
     def _aggregateCisAnnual(qDf: pl.DataFrame) -> pl.DataFrame | None:
         """CIS 분기 DataFrame → 연간 (4분기 합)."""
-        import re
-
-        quarterRe = re.compile(r"^(\d{4})Q[1-4]$")
         yearGroups: dict[str, list[str]] = {}
         for col in qDf.columns:
-            m = quarterRe.match(col)
+            m = _QUARTER_COL_RE.match(col)
             if m:
                 yearGroups.setdefault(m.group(1), []).append(col)
         if not yearGroups:
@@ -1397,7 +1395,7 @@ class Company:
         years = sorted([y for y, qs in yearGroups.items() if len(qs) == 4], reverse=True)
         if not years:
             return None
-        metaCols = [c for c in qDf.columns if not quarterRe.match(c)]
+        metaCols = [c for c in qDf.columns if not _QUARTER_COL_RE.match(c)]
         exprs = [pl.col(c) for c in metaCols]
         for year in years:
             qs = sorted(yearGroups[year])

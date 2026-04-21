@@ -28,6 +28,8 @@ from datetime import date, datetime, timezone
 from io import BytesIO
 from pathlib import Path
 
+_QUARTER_PARQUET_RE = re.compile(r"^(\d{4})Q([1-4])\.parquet$")
+
 import httpx
 import polars as pl
 
@@ -342,10 +344,9 @@ def convertQuarterlyToParquets(
 def listLocalQuarters(*, kind: str = "sub") -> list[tuple[int, int]]:
     """로컬 `data/edgar/meta/{kind}/` 에 있는 (year, quarter) 목록."""
     d = _metaDir(kind)
-    pattern = re.compile(r"^(\d{4})Q([1-4])\.parquet$")
     out: list[tuple[int, int]] = []
     for p in d.glob("*.parquet"):
-        m = pattern.match(p.name)
+        m = _QUARTER_PARQUET_RE.match(p.name)
         if m:
             out.append((int(m.group(1)), int(m.group(2))))
     return sorted(out)

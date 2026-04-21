@@ -10,6 +10,16 @@ import re
 
 import polars as pl
 
+_UNIT_ONLY_RE = re.compile(
+    r"^[\(\[\（<〈]?\s*"
+    r"(?:<[^>]+>\s*)?"
+    r"[\(\[\（]?\s*"
+    r"(?:단위|원화\s*단위|외화\s*단위|금액\s*단위)"
+    r".*$",
+    re.IGNORECASE,
+)
+_DATE_ONLY_RE = re.compile(r"^\(?\s*기준일\s*:")
+
 
 def stripUnitHeader(sub: list[str]) -> list[str] | None:
     """단위행/기준일행이 헤더인 서브테이블 → 단위행 제거 + 나머지 반환.
@@ -19,16 +29,6 @@ def stripUnitHeader(sub: list[str]) -> list[str] | None:
     반환: 실제헤더 행부터의 서브테이블 (기존 파서가 그대로 동작).
     해당하지 않으면 None.
     """
-    _UNIT_ONLY_RE = re.compile(
-        r"^[\(\[\（<〈]?\s*"
-        r"(?:<[^>]+>\s*)?"
-        r"[\(\[\（]?\s*"
-        r"(?:단위|원화\s*단위|외화\s*단위|금액\s*단위)"
-        r".*$",
-        re.IGNORECASE,
-    )
-    _DATE_ONLY_RE = re.compile(r"^\(?\s*기준일\s*:")
-
     firstRow = None
     for line in sub:
         cells = [c.strip() for c in line.strip("|").split("|")]

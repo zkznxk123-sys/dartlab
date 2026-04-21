@@ -18,6 +18,8 @@ SECTION_KEYS = {
     "financial": ["재무건전성"],
 }
 
+_SPLIT_BY_NUMBER_RE = re.compile(r"^(\d+)\.\s+(.+?)$", re.MULTILINE)
+
 
 def classifySection(title: str) -> str | None:
     """섹션 타이틀을 키로 분류."""
@@ -89,8 +91,7 @@ def extractFromUnified(report: pl.DataFrame) -> dict[str, dict]:
 
 def splitByNumber(text: str) -> list[tuple[str, str, str]]:
     """텍스트를 순차 번호 패턴으로 분리."""
-    pattern = re.compile(r"^(\d+)\.\s+(.+?)$", re.MULTILINE)
-    allMatches = list(pattern.finditer(text))
+    allMatches = list(_SPLIT_BY_NUMBER_RE.finditer(text))
 
     topMatches = []
     expectedNum = 1

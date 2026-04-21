@@ -2,6 +2,10 @@
 
 import re
 
+_MEETING_DATE_RE = re.compile(r"(?:\d{4}|'\d{2})[.\-/]\d{1,2}[.\-/]\d{1,2}")
+_SESSION_NUM_RE = re.compile(r"^(\d+)$")
+_SESSION_IN_TEXT_RE = re.compile(r"\((\d+)차\)")
+
 # ──────────────────────────────────────────────
 # 유틸리티
 # ──────────────────────────────────────────────
@@ -210,23 +214,20 @@ def parseBoardMeeting(block: list[str]) -> dict | None:
                 except ValueError:
                     pass
 
-    datePattern = re.compile(r"(?:\d{4}|'\d{2})[.\-/]\d{1,2}[.\-/]\d{1,2}")
     meetingDates = set()
     for row in rows[headerIdx + 1 :]:
         for cell in row:
-            for d in datePattern.findall(cell):
+            for d in _MEETING_DATE_RE.findall(cell):
                 meetingDates.add(d)
 
     maxSession = 0
-    sessionPattern = re.compile(r"^(\d+)$")
-    sessionInText = re.compile(r"\((\d+)차\)")
     for row in rows[headerIdx + 1 :]:
         if row:
-            m = sessionPattern.match(row[0].strip())
+            m = _SESSION_NUM_RE.match(row[0].strip())
             if m:
                 maxSession = max(maxSession, int(m.group(1)))
         for cell in row:
-            for sm in sessionInText.finditer(cell):
+            for sm in _SESSION_IN_TEXT_RE.finditer(cell):
                 maxSession = max(maxSession, int(sm.group(1)))
 
     meetingCount = max(len(meetingDates), maxSession)

@@ -28,6 +28,13 @@ SINCE_YEAR = 2009
 REQUEST_INTERVAL = 0.2
 FILING_TIMEOUT_SECONDS = 45
 BATCH_SIZE = 25
+
+_ITEM_HEADER_RE = re.compile(r"Item\s+\d+[A-K]?\.\s*\S", re.IGNORECASE)
+_ITEM_HEADER_EXACT_RE = re.compile(r"Item\s+\d+[A-K]?\.\s*$", re.IGNORECASE)
+_IX_DECOMPOSE_RE = re.compile(r"^(ix:header|ix:hidden|ix:references|ix:resources|xbrli:|dei:|link:)")
+_IX_UNWRAP_RE = re.compile(r"^ix:")
+_WHITESPACE_RE = re.compile(r"\s+")
+_MULTI_NEWLINE_RE = re.compile(r"\n{3,}")
 BATCH_COOLDOWN_SECONDS = 8.0
 SUPPORTED_REGULAR_FORMS = ("10-K", "10-Q", "20-F", "40-F")
 SUPPORTED_ANNUAL_FORMS = ("10-K", "20-F", "40-F")
@@ -862,11 +869,9 @@ def _tableToMarkdown(table) -> str:
 
 
 def _extractItemHeaders(soup) -> None:
-    itemRe = re.compile(r"Item\s+\d+[A-K]?\.\s*\S", re.IGNORECASE)
-    itemExact = re.compile(r"Item\s+\d+[A-K]?\.\s*$", re.IGNORECASE)
     for tag in soup.find_all(["font", "span", "b", "strong", "p", "div"]):
         text = tag.get_text(strip=True)
-        if not itemRe.match(text) and not itemExact.match(text):
+        if not _ITEM_HEADER_RE.match(text) and not _ITEM_HEADER_EXACT_RE.match(text):
             continue
         if tag.find_parent("a", href=True) or tag.find("a", href=True):
             continue
@@ -892,9 +897,9 @@ def _htmlToText(html: str) -> str:
         style = str(attrs.get("style") or "").lower()
         if "display:none" in style or "visibility:hidden" in style:
             tag.decompose()
-    for tag in soup.find_all(re.compile(r"^(ix:header|ix:hidden|ix:references|ix:resources|xbrli:|dei:|link:)")):
+    for tag in soup.find_all(_IX_DECOMPOSE_RE):
         tag.decompose()
-    for ix_tag in soup.find_all(re.compile(r"^ix:")):
+    for ix_tag in soup.find_all(_IX_UNWRAP_RE):
         ix_tag.unwrap()
     _extractItemHeaders(soup)
     for table in soup.find_all("table"):
@@ -908,9 +913,9 @@ def _htmlToText(html: str) -> str:
     for p in soup.find_all(["p", "div", "li", "h1", "h2", "h3", "h4"]):
         p.insert_after("\n")
     text = (soup.body or soup).get_text("\n")
-    lines = [re.sub(r"\s+", " ", line).strip() for line in text.splitlines()]
+    lines = [_WHITESPACE_RE.sub(" ", line).strip() for line in text.splitlines()]
     text = "\n".join(line for line in lines if line)
-    return re.sub(r"\n{3,}", "\n\n", text).strip()
+    return _MULTI_NEWLINE_RE.sub("\n\n", text).strip()
 
 
 def _splitItems(text: str, formType: str) -> list[dict]:

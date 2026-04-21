@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import re
+
 from fastapi import APIRouter, HTTPException, Query, Request, Response
 from sse_starlette.sse import EventSourceResponse
 
 import dartlab
 from dartlab.core.polarsUtil import isEmptyDf
+
+_PERIOD_COL_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
 from ..services.ai_analysis import stream_topic_summary
 from ..services.company_api import (
@@ -210,8 +214,6 @@ def apiViewerDoc(
     response: Response = None,
 ):
     """sections 기반 신구대조 뷰어 — viewer() dict 반환."""
-    import re
-
     try:
         company = get_company(code)
         sec = company._docs.sections.raw
@@ -219,9 +221,8 @@ def apiViewerDoc(
             raise HTTPException(status_code=404, detail="sections 없음")
 
         if not base:
-            periodRe = re.compile(r"^\d{4}(Q[1-4])?$")
             periods = sorted(
-                [c for c in sec.columns if periodRe.fullmatch(c)],
+                [c for c in sec.columns if _PERIOD_COL_RE.fullmatch(c)],
                 reverse=True,
             )
             base = periods[0] if periods else None
