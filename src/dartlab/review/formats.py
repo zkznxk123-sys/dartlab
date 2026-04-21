@@ -1,4 +1,4 @@
-"""review 멀티포맷 렌더링 (html/markdown/json)."""
+"""review 멀티포맷 렌더링 (html/markdown/json/ascii)."""
 
 from __future__ import annotations
 
@@ -437,3 +437,119 @@ def renderJson(review) -> str:
         ensure_ascii=False,
         default=str,
     )
+
+
+def renderAscii(review, *, width: int = 80) -> str:
+    """터미널 ASCII 렌더링.
+
+    TextBlock → plain text
+    HeadingBlock → 밑줄
+    MetricBlock → "label: value" 한 줄
+    TableBlock → 간단 문자 표 (첫 3컬럼)
+    FlagBlock → "[⚠] severity — message"
+    ChartBlock → ``spec.toAscii()``
+
+    Parameters
+    ----------
+    review : Review
+        c.review(...) 결과 객체
+    width : int
+        콘솔 너비 (기본 80)
+
+    Returns
+    -------
+    str
+        print() 가능한 ASCII/ANSI 문자열
+    """
+    from dartlab.review.blocks import (
+        ChartBlock,
+        FlagBlock,
+        HeadingBlock,
+        MetricBlock,
+        TableBlock,
+        TextBlock,
+    )
+    from dartlab.viz.ascii import render_ascii
+
+    lines: list[str] = []
+    rule = "═" * width
+
+    # 헤더
+    corpName = getattr(review, "corpName", "") or getattr(review, "stockCode", "")
+    stockCode = getattr(review, "stockCode", "")
+    lines.append(rule)
+    title = f"  {corpName}  ({stockCode})" if stockCode and corpName != stockCode else f"  {corpName}"
+    lines.append(title)
+    lines.append(rule)
+    lines.append("")
+
+    sections = getattr(review, "sections", []) or []
+    for sec in sections:
+        secTitle = getattr(sec, "title", "") or getattr(sec, "key", "")
+        if not secTitle:
+            continue
+        lines.append("")
+        lines.append(f"■ {secTitle}")
+        lines.append("─" * width)
+
+        helper = getattr(sec, "helper", None)
+        if helper:
+            lines.append(f"  {helper}")
+
+        summary = getattr(sec, "summary", None)
+        if summary:
+            lines.append("")
+            lines.append(f"  » {summary}")
+
+        blocks = getattr(sec, "blocks", []) or []
+        for block in blocks:
+            if isinstance(block, HeadingBlock):
+                text = getattr(block, "text", "") or ""
+                if text:
+                    lines.append("")
+                    lines.append(f"  ▶ {text}")
+            elif isinstance(block, TextBlock):
+                text = getattr(block, "text", "") or ""
+                if text:
+                    for line in text.split("\n"):
+                        lines.append(f"    {line}")
+            elif isinstance(block, MetricBlock):
+                label = getattr(block, "label", "")
+                value = getattr(block, "value", "")
+                lines.append(f"    {label:<24} {value}")
+            elif isinstance(block, FlagBlock):
+                severity = getattr(block, "severity", "info")
+                message = getattr(block, "message", "")
+                icon = "⚠" if severity in ("warning", "error", "danger") else "●"
+                lines.append(f"    [{icon}] {severity:<8} — {message}")
+            elif isinstance(block, TableBlock):
+                try:
+                    df = getattr(block, "df", None)
+                    if df is not None and hasattr(df, "columns"):
+                        cols = df.columns[:3]
+                        lines.append("    " + " | ".join(str(c) for c in cols))
+                        rows = df.head(5).to_numpy().tolist() if hasattr(df, "to_numpy") else []
+                        for row in rows:
+                            cells = [str(c)[:15] for c in row[:3]]
+                            lines.append("    " + " | ".join(cells))
+                except Exception:
+                    pass
+            elif isinstance(block, ChartBlock):
+                try:
+                    spec = getattr(block, "spec", {}) or {}
+                    if spec:
+                        chart_text = render_ascii(spec, width=width - 4, height=12)
+                        for line in chart_text.split("\n"):
+                            lines.append(f"  {line}")
+                except Exception:
+                    lines.append("    [chart: 렌더 실패]")
+
+        aiOp = getattr(sec, "aiOpinion", None)
+        if aiOp:
+            lines.append("")
+            lines.append(f"  [AI] {aiOp}")
+
+    # Footer
+    lines.append("")
+    lines.append(rule)
+    return "\n".join(lines)

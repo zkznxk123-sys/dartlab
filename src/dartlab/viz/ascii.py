@@ -11,15 +11,14 @@ from __future__ import annotations
 
 from typing import Any
 
-
 # 8색 brand 팔레트 → ANSI 256 근사
 _ANSI_COLORS = {
     "#ea4647": 203,  # red
     "#fb923c": 208,  # orange
-    "#3b82f6": 33,   # blue
-    "#22c55e": 41,   # green
+    "#3b82f6": 33,  # blue
+    "#22c55e": 41,  # green
     "#8b5cf6": 135,  # purple
-    "#06b6d4": 45,   # cyan
+    "#06b6d4": 45,  # cyan
     "#f59e0b": 214,  # amber
     "#ec4899": 205,  # pink
 }

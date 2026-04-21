@@ -219,24 +219,26 @@ REPORT_TYPES: dict[str, ReportType] = {
         label="대시보드",
         description="한 페이지 회사 스냅샷 — 스코어/재무/리스크/가치/매크로/AI논제 집약",
         sectionOrder=(
-            "종합평가",       # 스코어카드 + 신용등급 + 가치평가 verdict + peer rank
-            "수익구조",       # 매출·영업이익·ROE·부채 5년 sparkline
-            "안정성",         # distress/leverage 경고
-            "가치평가",       # DCF/DDM/상대가치 통합
-            "매크로",         # 사이클 + 순풍/역풍
+            "종합평가",  # 스코어카드 + 신용등급 + 가치평가 verdict + peer rank
+            "수익구조",  # 매출·영업이익·ROE·부채 5년 sparkline
+            "안정성",  # distress/leverage 경고
+            "가치평가",  # DCF/DDM/상대가치 통합
+            "매크로",  # 사이클 + 순풍/역풍
             "storyValidation",  # AI 논제 요약
         ),
-        emphasize=frozenset({
-            "scorecard",
-            "creditScore",
-            "valuationSynthesis",
-            "peerPosition",
-            "marginTrend",
-            "leverageTrend",
-            "distressScore",
-            "macroCycle",
-            "companyCyclePosition",
-        }),
+        emphasize=frozenset(
+            {
+                "scorecard",
+                "creditScore",
+                "valuationSynthesis",
+                "peerPosition",
+                "marginTrend",
+                "leverageTrend",
+                "distressScore",
+                "macroCycle",
+                "companyCyclePosition",
+            }
+        ),
         focusQuestions=(
             "한 눈에 보는 스코어는?",
             "5년 재무 추이는?",
