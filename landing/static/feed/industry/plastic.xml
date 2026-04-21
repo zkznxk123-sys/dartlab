@@ -5,7 +5,7 @@
 <link>https://eddmpython.github.io/dartlab/industry/plastic</link>
 <description>plastic 산업 이번 회계연도 급변 회사</description>
 <language>ko-kr</language>
-<lastBuildDate>Sat, 18 Apr 2026 06:16:38 +0000</lastBuildDate>
+<lastBuildDate>Sat, 18 Apr 2026 20:29:04 +0000</lastBuildDate>
 <item>
   <title>[수익성 악화 (ROE)] 빌리언스 (플라스틱·고무)</title>
   <link>https://eddmpython.github.io/dartlab/map?focus=044480</link>
@@ -28,18 +28,18 @@
   <description>ROE Δ-5.7%p · 산업 z=-1.6σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
 </item>
 <item>
-  <title>[수익성 악화 (ROE)] 동원시스템즈 (플라스틱·고무)</title>
-  <link>https://eddmpython.github.io/dartlab/map?focus=014820</link>
-  <guid isPermaLink="false">profitDecline-014820-2025</guid>
-  <category>수익성 악화 (ROE)</category>
-  <description>ROE Δ-2.7%p · 산업 z=+1.5σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
-</item>
-<item>
   <title>[수익성 악화 (ROE)] 예선테크 (플라스틱·고무)</title>
   <link>https://eddmpython.github.io/dartlab/map?focus=250930</link>
   <guid isPermaLink="false">profitDecline-250930-2025</guid>
   <category>수익성 악화 (ROE)</category>
   <description>ROE Δ-2.7%p · 산업 z=-1.7σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
+</item>
+<item>
+  <title>[수익성 악화 (ROE)] 동원시스템즈 (플라스틱·고무)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=014820</link>
+  <guid isPermaLink="false">profitDecline-014820-2025</guid>
+  <category>수익성 악화 (ROE)</category>
+  <description>ROE Δ-2.7%p · 산업 z=+1.5σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
 </item>
 </channel>
 </rss>

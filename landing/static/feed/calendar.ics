@@ -238,20 +238,20 @@ DESCRIPTION:ROE Δ-5.7%p · 산업 z=-1.6σ
 URL:https://eddmpython.github.io/dartlab/map?focus=105330
 END:VEVENT
 BEGIN:VEVENT
-UID:profitDecline-014820-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 동원시스템즈
-DESCRIPTION:ROE Δ-2.7%p · 산업 z=+1.5σ
-URL:https://eddmpython.github.io/dartlab/map?focus=014820
-END:VEVENT
-BEGIN:VEVENT
 UID:profitDecline-250930-2026-04-18@dartlab
 DTSTAMP:20260418T000000Z
 DTSTART;VALUE=DATE:20260418
 SUMMARY:[수익성 악화 (ROE)] 예선테크
 DESCRIPTION:ROE Δ-2.7%p · 산업 z=-1.7σ
 URL:https://eddmpython.github.io/dartlab/map?focus=250930
+END:VEVENT
+BEGIN:VEVENT
+UID:profitDecline-014820-2026-04-18@dartlab
+DTSTAMP:20260418T000000Z
+DTSTART;VALUE=DATE:20260418
+SUMMARY:[수익성 악화 (ROE)] 동원시스템즈
+DESCRIPTION:ROE Δ-2.7%p · 산업 z=+1.5σ
+URL:https://eddmpython.github.io/dartlab/map?focus=014820
 END:VEVENT
 BEGIN:VEVENT
 UID:revenueSpike-226330-2026-04-18@dartlab
@@ -542,20 +542,20 @@ DESCRIPTION:매출 YoY -86.2% — 급락
 URL:https://eddmpython.github.io/dartlab/map?focus=288620
 END:VEVENT
 BEGIN:VEVENT
-UID:revenueDrop-065440-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 이루온
-DESCRIPTION:매출 YoY -86.0% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=065440
-END:VEVENT
-BEGIN:VEVENT
 UID:revenueDrop-049950-2026-04-18@dartlab
 DTSTAMP:20260418T000000Z
 DTSTART;VALUE=DATE:20260418
 SUMMARY:[매출 급락 (YoY -20% 이하)] 미래컴퍼니
 DESCRIPTION:매출 YoY -86.0% — 급락
 URL:https://eddmpython.github.io/dartlab/map?focus=049950
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueDrop-065440-2026-04-18@dartlab
+DTSTAMP:20260418T000000Z
+DTSTART;VALUE=DATE:20260418
+SUMMARY:[매출 급락 (YoY -20% 이하)] 이루온
+DESCRIPTION:매출 YoY -86.0% — 급락
+URL:https://eddmpython.github.io/dartlab/map?focus=065440
 END:VEVENT
 BEGIN:VEVENT
 UID:revenueDrop-031980-2026-04-18@dartlab
