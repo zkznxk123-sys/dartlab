@@ -20,6 +20,9 @@ import sys
 import time
 from datetime import datetime, timedelta
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _hfRetry import retryHfCall  # noqa: E402
+
 
 def main() -> int:
     lookback = int(os.environ.get("LOOKBACK_DAYS", "30"))
@@ -75,7 +78,8 @@ def main() -> int:
             print(f"  [skip] {f} 없음")
             continue
         dstPath = f"dart/contentIndex/{f}"
-        api.upload_file(
+        retryHfCall(
+            api.upload_file,
             path_or_fileobj=str(src),
             path_in_repo=dstPath,
             repo_id="eddmpython/dartlab-data",

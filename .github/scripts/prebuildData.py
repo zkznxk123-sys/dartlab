@@ -18,6 +18,9 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _hfRetry import retryHfCall  # noqa: E402
+
 
 def _checkDataReady(dataDir: str) -> dict[str, int]:
     """finance/report/docs 캐시 존재 여부 확인. 카테고리별 파일 수 반환."""
@@ -63,7 +66,8 @@ def _uploadScan(dataDir: str) -> None:
     dirPath = DATA_RELEASES["scan"]["dir"]
 
     print(f"[prebuild] HF 업로드: {len(parquets)}개 파일 → {HF_REPO}/{dirPath}/")
-    api.upload_folder(
+    retryHfCall(
+        api.upload_folder,
         repo_id=HF_REPO,
         repo_type="dataset",
         folder_path=str(scanDir),

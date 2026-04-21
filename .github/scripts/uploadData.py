@@ -41,71 +41,11 @@ def _changedFiles(localDir: Path) -> list[Path] | None:
     return [localDir / name for name in names if (localDir / name).exists()]
 
 
-# HF 무료 플랜: commit 한도 128회/시간. 초과 시 429 + "retry in X minutes" 메시지.
-# 땜질 기록 (2026-04-13 ~ 04-21): 고정 (30,60,120,240) = 7.5분 backoff 는 18분
-# recovery 에 모자라 매일 실패. 이번에 서버가 돌려주는 실제 대기시간을 존중하도록
-# 수정 — Retry-After 헤더 → "X minutes" 파싱 → fallback exponential 순.
-import re as _re
+# HF 무료 플랜 commit 한도 128/hour. 공용 retry helper 사용 — 서버 권장
+# 대기시간 ("retry this action in X minutes") 을 파싱해 실제 대기.
+from _hfRetry import retryHfCall  # noqa: E402
 
-_RETRYABLE_STATUS = {429, 503, 504}
-_BACKOFF_SECONDS_FALLBACK = (60, 300, 900, 1200)  # 총 40분 (HF 128/hr 복구 여유)
-_MAX_SINGLE_WAIT = 1800  # 한 번 backoff 최대 30분 (과도한 대기 방지)
 _BATCH_INTERVAL_SECONDS = 10
-_RETRY_MIN_RE = _re.compile(r"retry this action in (\d+)\s*minutes?", _re.IGNORECASE)
-_RETRY_SEC_RE = _re.compile(r"retry this action in (\d+)\s*seconds?", _re.IGNORECASE)
-
-
-def _parseRetryWait(exc, attempt: int) -> int:
-    """HF 응답에서 권장 대기시간 추출. 실패 시 exponential fallback.
-
-    Priority:
-        1. response.headers['Retry-After'] — RFC 표준
-        2. 에러 메시지 "retry this action in X minutes" — HF 본문
-        3. _BACKOFF_SECONDS_FALLBACK[attempt] — 고정값
-
-    Returns
-    -------
-    int
-        대기 초 (_MAX_SINGLE_WAIT 로 clamp).
-    """
-    response = getattr(exc, "response", None)
-    if response is not None:
-        retryAfter = response.headers.get("Retry-After") if hasattr(response, "headers") else None
-        if retryAfter:
-            try:
-                return min(int(retryAfter), _MAX_SINGLE_WAIT)
-            except ValueError:
-                pass
-
-    msg = str(exc)
-    m = _RETRY_MIN_RE.search(msg)
-    if m:
-        return min(int(m.group(1)) * 60 + 30, _MAX_SINGLE_WAIT)  # +30s 여유
-    m = _RETRY_SEC_RE.search(msg)
-    if m:
-        return min(int(m.group(1)) + 10, _MAX_SINGLE_WAIT)
-
-    if attempt < len(_BACKOFF_SECONDS_FALLBACK):
-        return _BACKOFF_SECONDS_FALLBACK[attempt]
-    return _BACKOFF_SECONDS_FALLBACK[-1]
-
-
-def _commitWithBackoff(api, **kwargs):
-    """api.create_commit 을 429/503/504 백오프로 감싼다 (HF 권장 대기시간 우선)."""
-    from huggingface_hub.errors import HfHubHTTPError
-
-    attempts = len(_BACKOFF_SECONDS_FALLBACK) + 1
-    for attempt in range(attempts):
-        try:
-            return api.create_commit(**kwargs)
-        except HfHubHTTPError as exc:
-            status = getattr(getattr(exc, "response", None), "status_code", None)
-            if status not in _RETRYABLE_STATUS or attempt == attempts - 1:
-                raise
-            wait = _parseRetryWait(exc, attempt)
-            print(f"[uploadData] HF {status} — {wait}s 후 재시도 ({attempt + 1}/{attempts - 1})", flush=True)
-            time.sleep(wait)
-    raise RuntimeError("unreachable")
 
 
 def _uploadHf(category: str) -> None:
@@ -147,8 +87,8 @@ def _uploadHf(category: str) -> None:
             ]
             batchNum = i // batchSize + 1
             totalBatches = (len(changed) + batchSize - 1) // batchSize
-            _commitWithBackoff(
-                api,
+            retryHfCall(
+                api.create_commit,
                 repo_id=HF_REPO,
                 repo_type="dataset",
                 operations=operations,
@@ -167,7 +107,8 @@ def _uploadHf(category: str) -> None:
         return
 
     print(f"[uploadData] HuggingFace 전체 업로드: {len(files)}개 파일 → {HF_REPO}/{dirPath}/")
-    api.upload_folder(
+    retryHfCall(
+        api.upload_folder,
         repo_id=HF_REPO,
         repo_type="dataset",
         folder_path=str(localDir),

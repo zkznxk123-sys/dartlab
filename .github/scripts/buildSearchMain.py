@@ -15,6 +15,9 @@ import os
 import sys
 import time
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _hfRetry import retryHfCall  # noqa: E402
+
 
 def main() -> int:
     hfToken = os.environ.get("HF_TOKEN", "")
@@ -50,7 +53,8 @@ def main() -> int:
             print(f"  [skip] {f} 없음")
             continue
         dstPath = f"dart/contentIndex/{f}"
-        api.upload_file(
+        retryHfCall(
+            api.upload_file,
             path_or_fileobj=str(src),
             path_in_repo=dstPath,
             repo_id="eddmpython/dartlab-data",
