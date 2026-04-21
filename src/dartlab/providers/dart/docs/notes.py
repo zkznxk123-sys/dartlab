@@ -8,8 +8,8 @@
     c.notes.keys()              # 지원 항목 목록
     c.notes.all()               # 전체 dict
 
-주석 항목 추가 시 core/registry.py의 notes 카테고리에 DataEntry를 추가하고,
-아래 _NOTES_DISPATCH에 디스패치 정보를 추가하면 자동 반영됨.
+주석 항목 추가 시 `core/_entries.py` 의 notes 카테고리에 DataEntry 한 줄 추가
+(extractor + notesDispatch 명시) 하면 자동 반영. 별도 하드코딩 dispatch dict 없음.
 """
 
 from __future__ import annotations
@@ -18,29 +18,26 @@ from collections import OrderedDict
 from typing import TYPE_CHECKING, Any
 
 from dartlab.core.memory import BoundedCache
+from dartlab.core.registry import getNotesEntries
 
 if TYPE_CHECKING:
     import polars as pl
 
 
-# 주석별 디스패치 정보: 영문명 → (호출 모듈, 한글 키워드, extractor)
-# "notesDetail"이면 _call_notesDetail(한글키워드) 호출, 아니면 _call_module(모듈명) 호출.
-_NOTES_DISPATCH: OrderedDict[str, tuple[str, str, Any]] = OrderedDict(
-    [
-        ("receivables", ("notesDetail", "매출채권", lambda r: r.tableDf)),
-        ("inventory", ("notesDetail", "재고자산", lambda r: r.tableDf)),
-        ("tangibleAsset", ("tangibleAsset", "유형자산", lambda r: r.movementDf)),
-        ("intangibleAsset", ("notesDetail", "무형자산", lambda r: r.tableDf)),
-        ("investmentProperty", ("notesDetail", "투자부동산", lambda r: r.tableDf)),
-        ("affiliates", ("affiliate", "관계기업", lambda r: r.movementDf)),
-        ("borrowings", ("notesDetail", "차입금", lambda r: r.tableDf)),
-        ("provisions", ("notesDetail", "충당부채", lambda r: r.tableDf)),
-        ("eps", ("notesDetail", "주당이익", lambda r: r.tableDf)),
-        ("lease", ("notesDetail", "리스", lambda r: r.tableDf)),
-        ("segments", ("segments", "부문정보", lambda r: r.revenue)),
-        ("costByNature", ("costByNature", "비용의성격별분류", lambda r: r.timeSeries)),
-    ]
-)
+# Q1.2 (2026-04-21): _NOTES_DISPATCH 하드코딩 제거 — registry 에서 동적 생성.
+# `category="notes"` 엔트리 중 `notesDispatch` + `extractor` 가 설정된 것만 포함.
+def _buildDispatch() -> "OrderedDict[str, tuple[str, str, Any]]":
+    dispatch: OrderedDict[str, tuple[str, str, Any]] = OrderedDict()
+    for e in getNotesEntries():
+        if e.notesDispatch is None or e.extractor is None:
+            continue
+        # "notes.receivables" → "receivables" bare name
+        bareName = e.name.removeprefix("notes.") if e.name.startswith("notes.") else e.name
+        dispatch[bareName] = (e.notesDispatch[0], e.notesDispatch[1], e.extractor)
+    return dispatch
+
+
+_NOTES_DISPATCH: OrderedDict[str, tuple[str, str, Any]] = _buildDispatch()
 
 # core/registry.py와 동기화된 외부 인터페이스 (하위 호환)
 _REGISTRY = _NOTES_DISPATCH

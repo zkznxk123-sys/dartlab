@@ -55,6 +55,12 @@ class DataEntry:
     # 예: audit topic 의 DART apiType = "auditOpinion".
     apiType: str | None = None
 
+    # notes 카테고리 전용 dispatch 정보 (notes.py 가 소비).
+    # (callerModuleName, koreanKeyword) 튜플.
+    # callerModuleName 이 "notesDetail" 이면 _call_notesDetail(koreanKeyword) 호출,
+    # 아니면 _call_module(callerModuleName) 호출.
+    notesDispatch: tuple[str, str] | None = None
+
     requires: str | None = None
     unit: str = "백만원"
     columns: tuple[ColumnMeta, ...] = ()
