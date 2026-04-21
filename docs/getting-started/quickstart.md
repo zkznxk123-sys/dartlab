@@ -87,9 +87,9 @@ dartlab.ask("Analyze Samsung Electronics financial health")
 
 Requires a provider. Run `dartlab setup` for options (OpenAI, Ollama, ChatGPT OAuth).
 
-## Next
+## 실습
 
-- [Sections guide](./sections) -- how the company map works
-- [Notebooks](../tutorials/) -- Colab / Marimo 노트북
-- [API Reference](../api/overview)
+실습은 **[노트북 섹션](../tutorials/)** 에서. Colab / Molab / 로컬 마리모 — 같은 코드를 세 경로로 돌려볼 수 있다.
+
+- [Notebooks →](../tutorials/)
 - [Installation details](./installation)

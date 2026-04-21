@@ -11,27 +11,7 @@ export const navigation: NavItem[] = [
 		href: '/docs/getting-started',
 		items: [
 			{ title: 'Installation', href: '/docs/getting-started/installation' },
-			{ title: 'Quick Start', href: '/docs/getting-started/quickstart' },
-			{ title: 'Sections', href: '/docs/getting-started/sections' },
-			{ title: 'CLI', href: '/docs/getting-started/cli-maintenance' }
-		]
-	},
-	{
-		title: 'API Reference',
-		href: '/docs/api',
-		items: [
-			{ title: 'Overview', href: '/docs/api/overview' },
-			{ title: 'Company', href: '/docs/api/company' },
-			{ title: 'Financial Data', href: '/docs/api/finance' },
-			{ title: 'Scan', href: '/docs/api/scan' },
-			{ title: 'Gather', href: '/docs/api/gather' },
-			{ title: 'Analysis', href: '/docs/api/analysis' },
-			{ title: 'Credit Rating', href: '/docs/api/credit' },
-			{ title: 'Review', href: '/docs/api/review' },
-			{ title: 'AI', href: '/docs/api/ai' },
-			{ title: 'Advanced', href: '/docs/api/advanced' },
-			{ title: 'MCP', href: '/docs/api/mcp' },
-			{ title: 'Export', href: '/docs/api/export' }
+			{ title: 'Quick Start', href: '/docs/getting-started/quickstart' }
 		]
 	},
 	{
