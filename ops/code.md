@@ -146,6 +146,42 @@ pl.DataFrame
 - fixture scope는 `module` (session scope 사용하지 않는다)
 - 전 기간 데이터로 테스트한다
 
+## 질적 안정 정의 + 1.0.0 선언 기준
+
+**dartlab "질적 안정" = 기능 안정 + 아키텍처 정리 두 축 모두 충족. coverage 숫자만으로 "안정" 선언 금지.**
+
+사용자 원문 (2026-04-21):
+> "덕지덕지가 있으면 근본 원소스로 옮기고, 너무 많은 헬퍼들 필요없는 것들 정리하고, 코드 효율성까지 하면서 안정화를 노린다. 안정화가 되어야 1.0.0으로 정식 버전을 선언할 거다."
+
+### 축 1 — 기능 안정
+- 외부 사용자 `pip install -U dartlab` → 주요 API crash 없음
+- show/select/analysis/scan/credit/quant/review/gather/ask 모두 정상 동작
+- wheel-smoke / test_bundledResources / silent-fail lint 다중 방어
+
+### 축 2 — 아키텍처 정리 (4 하위 기준 모두 충족)
+
+1. **덕지덕지 → 근본 SSoT 이전** — 하드코딩 dict + registry 공존 제거. 다단 fallback → 단일 진입점. 패치 위에 패치 금지
+2. **불필요한 헬퍼 정리** — 중복 formatter/validator 1곳으로, 반복 boilerplate → 공통 util, 각 엔진 `_helpers.py`·`_utils.py` 10개 → 6 이하, 단일 사용처 helper 는 소비 파일로 inline
+3. **코드 효율성** — `@lru_cache` 누락 로더 보강, regex compile 모듈 레벨 상수화, polars native 미활용 hotspot 정리, realData 스위트 30%+ 단축 지표
+4. **Dead code 제거** — 0% coverage 실사용 판정 후 삭제, `_reference/`·`_backup/` git rm, 소스 줄 수 10%+ 감축
+
+### 1.0.0 정식 선언 체크리스트 (모두 YES)
+
+- [ ] Q1: routing SSoT 통합 (하드코딩 dict 4/5 제거 + `_showImpl` 복잡도 36→10)
+- [ ] Q2: 헬퍼 파일 수 10→6, formatter/validator 중복 제거
+- [ ] Q3: F-rank 함수 197→150 이하
+- [ ] Q4: realData 스위트 30%+ 속도 개선
+- [ ] Q5: src/dartlab 줄 수 10%+ 감축, 0% coverage 파일 0개
+- [ ] Q6: 전체 회귀 테스트 + 외부 venv 종합 smoke 통과
+- [ ] CHANGELOG 1.0.0 entry (breaking changes + 마이그레이션 가이드)
+- [ ] CI green 100%
+
+### 판정 원칙
+
+- 사용자가 "안정" / "1.0.0" 언급 시 이 체크리스트로 판정. 하나라도 미완 → "1.0.0 선언 불가"
+- coverage 90% 같은 양적 지표만으로 안정 선언 금지 — 4 축 아키텍처 기준이 항상 함께
+- 양적 coverage 는 Q6 이후 별도 축으로 상향 가능하지만 선언 기준은 아님
+
 ## 릴리즈
 
 - **release 절대 금지** — 사용자 명시 지시 없으면 version bump / git tag / PyPI publish 금지. "릴리즈할까요?" 제안도 금지
