@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.18] - 2026-04-21
+
+### Fixed
+
+- **`c.show()` 라우팅 ValueError 제거**: `c.show("bond")` / `show("business")` / `show("fundraising")` / `show("companyOverviewDetail")` 등 registry 에는 등록됐으나 특정 회사에 데이터가 없는 topic 에서 `ValueError: 'topic 을 찾을 수 없습니다'` 로 크래시하던 문제. 이제 **registered-but-empty** 는 `None` 리턴, **truly-unknown** 만 warning + `None`.
+- **`scan("debt")` ComputeError 수정**: polars schema inference 한도(기본 100행)를 넘는 큰 금액 값에서 `could not append value 1.2e11 ... schema mismatch` 로 크래시. `pl.DataFrame(..., infer_schema_length=None)` 로 전체 행 스캔 후 schema 결정.
+
+### Added
+
+- **`tests/test_showRouting.py`** (38 parametrize 테스트): registry 의 report/disclosure topic 전수 iterate 해 `show()` 가 ValueError 없이 DataFrame or None 리턴 확인. `_showImpl` 라우팅 회귀 구조적 차단.
+
+### Changed
+
+- **quality gate baseline**: `ef_count` 196 → 197 (`_showImpl` registered-but-empty 분기 추가로 복잡도 +1, 기능적 가치 대비 수용).
+
 ## [0.9.17] - 2026-04-20
 
 ### Fixed
