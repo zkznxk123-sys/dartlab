@@ -2315,11 +2315,8 @@ def _analyzeIndexTrend(inp: _Input) -> NarrativeParagraph | None:
 # ══════════════════════════════════════
 
 
-def _detectCrossReferences(paragraphs: list[NarrativeParagraph]) -> list[str]:
-    """차원 간 교차 패턴 탐지."""
-    dimMap = {p.dimension: p for p in paragraphs}
-    refs: list[str] = []
-
+def _crossBase(dimMap: dict, refs: list[str]) -> None:
+    """v1~v3 기본 교차 패턴 (6개) — margin/efficiency/growth/cashflow/dupont/sector."""
     margin = dimMap.get("margin")
     eff = dimMap.get("efficiency")
     growth = dimMap.get("growth")
@@ -2327,60 +2324,52 @@ def _detectCrossReferences(paragraphs: list[NarrativeParagraph]) -> list[str]:
     dp = dimMap.get("dupont")
     sector = dimMap.get("sectorRelative")
     segment = dimMap.get("segment")
+
+    if margin and eff and margin.severity == "positive" and eff.severity == "warning":
+        refs.append("마진 개선에도 운전자본 효율 악화 — 실질 현금 수익성 점검 필요")
+    if growth and cf and growth.severity == "positive" and cf.severity in ("negative", "warning"):
+        refs.append("매출 성장 대비 현금창출 부족 — 성장의 지속가능성 의문")
+    if dp and sector and "레버리지 주도" in dp.body and sector.severity == "positive":
+        refs.append("레버리지 의존 수익구조가 밸류에이션 할인의 원인일 수 있음")
+    if segment and growth and segment.severity == "warning" and growth.severity == "positive":
+        refs.append("성장이 단일 부문에 집중 — 해당 부문 둔화 시 전체 실적 급락 리스크")
+    if eff and cf and eff.severity == "warning" and cf.severity in ("negative", "warning"):
+        refs.append("운전자본 비효율과 현금흐름 부진 동반 — 유동성 관리 강화 필요")
+    if margin and growth and margin.severity == "negative" and growth.severity == "negative":
+        refs.append("마진과 성장 동시 악화 — 구조적 수익성 하락 우려")
+
+
+def _cross3Table(dimMap: dict, refs: list[str]) -> None:
+    """v4 3표 연결 교차 패턴 (5개) — bs/debt/isToCs/liquidity/isToBs."""
+    margin = dimMap.get("margin")
+    growth = dimMap.get("growth")
+    cf = dimMap.get("cashflowDeep") or dimMap.get("cashflow")
     bs = dimMap.get("bsStructure")
     debt = dimMap.get("debtStructure")
     liq = dimMap.get("liquidity")
     isToCs = dimMap.get("isToCs")
     isToBs = dimMap.get("isToBs")
 
-    # ── 기존 교차 패턴 ──
-    if margin and eff and margin.severity == "positive" and eff.severity == "warning":
-        refs.append("마진 개선에도 운전자본 효율 악화 — 실질 현금 수익성 점검 필요")
-
-    if growth and cf and growth.severity == "positive" and cf.severity in ("negative", "warning"):
-        refs.append("매출 성장 대비 현금창출 부족 — 성장의 지속가능성 의문")
-
-    if dp and sector and "레버리지 주도" in dp.body and sector.severity == "positive":
-        refs.append("레버리지 의존 수익구조가 밸류에이션 할인의 원인일 수 있음")
-
-    if segment and growth and segment.severity == "warning" and growth.severity == "positive":
-        refs.append("성장이 단일 부문에 집중 — 해당 부문 둔화 시 전체 실적 급락 리스크")
-
-    if eff and cf and eff.severity == "warning" and cf.severity in ("negative", "warning"):
-        refs.append("운전자본 비효율과 현금흐름 부진 동반 — 유동성 관리 강화 필요")
-
-    if margin and growth and margin.severity == "negative" and growth.severity == "negative":
-        refs.append("마진과 성장 동시 악화 — 구조적 수익성 하락 우려")
-
-    # ── v4 3표 연결 교차 패턴 ──
     if bs and growth and bs.severity == "warning" and growth.severity in ("negative", "neutral"):
         refs.append("자산 증가에도 매출 정체 — 투자 효율성 점검 필요")
-
     if cf and debt and cf.severity in ("negative", "warning") and debt.body and "증가" in debt.body:
         refs.append("영업현금 부진 + 차입금 증가 — 적자 보전 차입 가능성")
-
     if isToCs and isToCs.severity == "warning" and growth and growth.severity == "positive":
         refs.append("이익 증가에도 현금흐름 악화 — 이익의 질 의문")
-
     if liq and liq.severity == "negative" and cf and cf.severity in ("negative", "warning"):
         refs.append("유동성 악화 + 현금흐름 부진 — 단기 자금 경색 리스크")
-
     if margin and isToBs and margin.severity == "positive" and isToBs.severity == "warning":
         refs.append("마진 개선에도 매출채권/재고 과잉 — 채널 스터핑 의심")
 
-    # ── v5 신규 교차 패턴 (Phase 7) ──
+
+def _crossPhase7SegCost(dimMap: dict, refs: list[str]) -> None:
+    """Phase 7 segment/cost 교차 (3개)."""
+    margin = dimMap.get("margin")
+    growth = dimMap.get("growth")
+    segment = dimMap.get("segment")
     costStr = dimMap.get("costStructure")
     salesOrder = dimMap.get("salesOrder")
-    quarterly = dimMap.get("quarterlyMomentum")
-    employee = dimMap.get("humanCapital")
-    rnd = dimMap.get("rndEfficiency")
-    distress = dimMap.get("distressModels")
-    beneish = dimMap.get("earningsManipulation")
-    valueCreation = dimMap.get("valueCreation")
-    indexTrend = dimMap.get("indexTrend")
-    dimMap.get("businessStrategy")
 
-    # segment + margin: 고마진 부문 비중 하락
     if (
         segment
         and margin
@@ -2389,47 +2378,63 @@ def _detectCrossReferences(paragraphs: list[NarrativeParagraph]) -> list[str]:
         and margin.severity in ("negative", "warning")
     ):
         refs.append("고마진 부문 비중 하락 → 전체 이익률 압박")
-
-    # costStructure + margin: 원재료비 비중 상승 + 마진 축소
     if costStr and margin and costStr.body and "원재료" in costStr.body and margin.severity in ("negative", "warning"):
         refs.append("원재료비 비중 상승 + 마진 축소 → 원가 전가 실패")
-
-    # salesOrder + growth: 수주잔고 증가 + 매출 정체
     if salesOrder and growth and salesOrder.severity == "positive" and growth.severity in ("negative", "neutral"):
         refs.append("수주잔고 증가 + 매출 정체 → 생산능력 병목 또는 인식 시차")
 
-    # quarterly + cashflow: Q4 매출 집중 + OCF 우수
+
+def _crossPhase7Ops(dimMap: dict, refs: list[str]) -> None:
+    """Phase 7 ops 교차 (3개) — quarterly/employee/rnd."""
+    margin = dimMap.get("margin")
+    growth = dimMap.get("growth")
+    cf = dimMap.get("cashflowDeep") or dimMap.get("cashflow")
+    quarterly = dimMap.get("quarterlyMomentum")
+    employee = dimMap.get("humanCapital")
+    rnd = dimMap.get("rndEfficiency")
+
     if quarterly and cf and quarterly.body and "Q4" in quarterly.body and cf.severity == "positive":
         refs.append("Q4 매출 집중 + OCF 우수 → 건전한 계절성")
-
-    # employee + growth: 직원 증가율 > 매출 증가율
     if employee and growth and employee.body and "생산성 하락" in employee.body:
         refs.append("직원 증가율 > 매출 증가율 → 생산성 하락 추세, 인력 효율화 필요")
-
-    # rnd + margin: R&D 투자 확대 + 마진 유지
     if rnd and margin and rnd.body and "확대" in rnd.body and margin.severity in ("positive", "neutral"):
         refs.append("R&D 투자 확대 + 마진 유지 → 기술 투자 효율적")
 
-    # distress + debt: 부실 모델 disagreement + 부채 비율 높음
+
+def _crossPhase7Risk(dimMap: dict, refs: list[str]) -> None:
+    """Phase 7 risk/value 교차 (5개) — distress/beneish/costSegment/valueCreation/indexTrend."""
+    growth = dimMap.get("growth")
+    segment = dimMap.get("segment")
+    debt = dimMap.get("debtStructure")
+    isToCs = dimMap.get("isToCs")
+    isToBs = dimMap.get("isToBs")
+    costStr = dimMap.get("costStructure")
+    distress = dimMap.get("distressModels")
+    beneish = dimMap.get("earningsManipulation")
+    valueCreation = dimMap.get("valueCreation")
+    indexTrend = dimMap.get("indexTrend")
+
     if distress and debt and "disagreement" in (distress.body or "") and debt.severity in ("negative", "warning"):
         refs.append("부실 모델 disagreement + 부채 비율 높음 → 불확실성 구간")
-
-    # beneish + isToCs: Beneish 경고 + OCF/NI 괴리
     if beneish and isToCs and beneish.severity == "warning" and isToCs.severity == "warning":
         refs.append("Beneish 경고 + OCF/NI 괴리 → 이익 품질 심층 검토 필요")
-
-    # costStructure + segment: 비용 구조 변화 + 부문 비중 변화
     if costStr and segment and costStr.body and segment.body:
         refs.append("비용 구조 변화 + 부문 비중 변화 → 포트폴리오 전환 진행 가능성")
-
-    # valueCreation + growth: 가치 파괴 + 성장
     if valueCreation and growth and valueCreation.severity in ("warning", "negative") and growth.severity == "positive":
         refs.append("매출 성장에도 EVA 부진 → 자본비용 초과 투자, 성장의 질 의문")
-
-    # indexTrend + isToBs: 매출채권 비정상 팽창 교차 확인
     if indexTrend and isToBs and indexTrend.severity == "warning" and isToBs.severity == "warning":
         refs.append("지수분석·3표 연결 모두 매출채권/재고 비정상 팽창 감지 → 매출 인식 공격성 심각")
 
+
+def _detectCrossReferences(paragraphs: list[NarrativeParagraph]) -> list[str]:
+    """차원 간 교차 패턴 탐지 orchestrator — 5 group × 22 rule (Q3.1e split)."""
+    dimMap = {p.dimension: p for p in paragraphs}
+    refs: list[str] = []
+    _crossBase(dimMap, refs)
+    _cross3Table(dimMap, refs)
+    _crossPhase7SegCost(dimMap, refs)
+    _crossPhase7Ops(dimMap, refs)
+    _crossPhase7Risk(dimMap, refs)
     return refs[:10]
 
 
