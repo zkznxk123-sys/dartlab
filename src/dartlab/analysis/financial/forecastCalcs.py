@@ -86,7 +86,7 @@ def _buildCompanyDataBundle(company: Any):
 
     # 구조변화 감지 결과 전달 (Chow Test 기반)
     try:
-        from dartlab.analysis.financial.research.predictionSignals import calcStructuralBreak
+        from dartlab.analysis.financial.predictionSignals import calcStructuralBreak
 
         structuralBreak = calcStructuralBreak(company)
     except (ImportError, AttributeError, TypeError, ValueError):
