@@ -29,7 +29,7 @@
 | `quant` | function | 종목 레벨 정량분석 엔진 — 30축 7그룹. |
 | `credit` | function | 신용등급 산출 단일 진입점. |
 | `macro` | function | 시장 레벨 매크로 분석 엔진 — 6막 인과 서사. |
-| `industry` | function | 산업 매퍼엔진 진입점. |
+| `industry` | function | 산업 매퍼엔진 — 데이터 주도 산업지도. |
 | `topdown` | function | `dartlab.topdown(...)` 를 callable로 노출. |
 | `verbose` | module | bool(x) -> bool |
 | `dataDir` | module | str(object='') -> str |
