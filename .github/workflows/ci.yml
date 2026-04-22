@@ -216,15 +216,49 @@ jobs:
             pytest "$f" --tb=short -q --benchmark-disable -p no:cacheprovider || exit 1
           done
 
-  # realData 전수 스위트 — fixtures 데이터로 엔진별 공개 API 전수 스모크.
-  # 84+ 테스트가 Company/analysis/credit/scan/macro/gather/review/ai 등 모든 엔진의
-  # 공개 진입점을 실제 데이터로 호출. None/빈 결과/크래시 즉시 실패.
-  # 파일별 독립 프로세스 (test-realdata.sh) 로 메모리 격리.
-  realdata-suite:
+  # realData plan — git diff 로 영향받은 엔진만 골라 matrix 생성.
+  # 변경 파일 → planRealdata.py → test 파일 리스트. infra(core/providers/
+  # workflow/pyproject) 변경 시 전수. 엔진 변경 시 해당 엔진 + company facade
+  # smoke. docs 변경만 있으면 skip.
+  realdata-plan:
     runs-on: ubuntu-latest
-    # 84+ 엔진 smoke + 파일별 격리 프로세스. 2026-04-21 측정: 48% @ 28m →
-    # 전체 ~60m. timeout 30 → 60 (여유). Q4 효율 개선 완료 시 재조정.
-    timeout-minutes: 60
+    outputs:
+      tests: ${{ steps.plan.outputs.tests }}
+      hasAny: ${{ steps.plan.outputs.hasAny }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # PR multi-commit 다음 base..HEAD 정확 diff
+
+      - name: Plan realData tests by path diff
+        id: plan
+        env:
+          GITHUB_BASE_REF: ${{ github.event.pull_request.base.ref || '' }}
+        run: |
+          python -X utf8 .github/scripts/planRealdata.py > /tmp/tests.json
+          echo "plan 결과:"
+          cat /tmp/tests.json
+          echo
+          COUNT=$(python -c "import json; print(len(json.load(open('/tmp/tests.json'))))")
+          echo "tests=$(cat /tmp/tests.json)" >> $GITHUB_OUTPUT
+          if [ "$COUNT" -gt 0 ]; then
+            echo "hasAny=true" >> $GITHUB_OUTPUT
+          else
+            echo "hasAny=false" >> $GITHUB_OUTPUT
+          fi
+
+  # realData 스위트 — plan 결과의 test 파일만 matrix 로 병렬 실행.
+  # 각 shard 는 단일 파일 단일 세션 (test-realdata.sh 가 자동 감지).
+  # 메모리 격리: shard = 독립 runner.
+  realdata-suite:
+    needs: realdata-plan
+    if: ${{ needs.realdata-plan.outputs.hasAny == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30  # per-shard (heaviest file test_companyTopics 약 15m)
+    strategy:
+      fail-fast: false
+      matrix:
+        test_file: ${{ fromJson(needs.realdata-plan.outputs.tests) }}
     steps:
       - uses: actions/checkout@v5
 
@@ -232,6 +266,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+          cache: "pip"  # shard 간 pip wheel 캐시 재사용
 
       - name: Install dependencies
         run: |
@@ -239,17 +274,13 @@ jobs:
           pip install pytest pytest-asyncio hypothesis
           pip install -e .[all]
 
-      - name: Run realData suite (file-isolated processes)
+      - name: Run ${{ matrix.test_file }}
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
           PYTEST_MEMORY_LIMIT_MB: "6000"
           DARTLAB_TEST_LOCKED: "1"
-        # 2026-04-20: continue-on-error 제거 — 필수 게이트로 전환.
-        # 84+ 엔진 공개 API smoke 가 실제로 PR 머지를 차단하도록.
-        # 네트워크/키 의존 테스트는 테스트 코드 내에서 pytest.skip 처리되어
-        # 실제 failure 만 차단. freshInstall 포함.
         run: |
-          bash scripts/dev/test-realdata.sh tests/realData -m "realData" -v --tb=short
+          bash scripts/dev/test-realdata.sh tests/realData/${{ matrix.test_file }} -v --tb=short
 
   # Wheel packaging 게이트 — 2026-04-19 사고 (parserMappings 누락) 재발 방지.
   # python -m build 로 실제 wheel 빌드 → 번들 리소스 zip 검증 → 격리 venv 설치 →
