@@ -251,7 +251,7 @@ analysis는 두 소비자를 모두 최고로 지원한다:
 
 | Part | 축 | 설명 | calc 수 | calc 파일 |
 |------|------|------|---------|-----------|
-| 5-1 | 지배구조 | 주인과 감시 | 4 | governance.py |
+| 5-1 | 지배구조 | 주인과 감시 | 5 | governance.py |
 | 5-2 | 공시변화 | 공시 변동 감지 | 4 | disclosureDelta.py |
 | 5-3 | 비교분석 | 시장 내 위치 | 3 | peerBenchmark.py |
 
@@ -304,6 +304,7 @@ analysis는 DART/EDGAR 양쪽에서 동일하게 동작한다.
 | 비용구조 | rawMaterialBreakdown | DART report `rawMaterial` 전용 |
 | 자본배분 | treasuryStockStatus | DART report `treasuryStock` 전용 |
 | 투자효율 | investmentInOther | DART report `investedCompany` 전용 |
+| 지배구조 | legalEventRisk 전체 | DART docs `sanction` + `contingentLiability` 섹션 전용 |
 
 이 4건은 SEC 공시 구조의 근본적 차이. 상세: `src/dartlab/providers/edgar/README.md` "구조적 한계" 섹션.
 
@@ -500,7 +501,7 @@ test_spec_integrity.py   ← 누락/불일치 검증 (CI 강제)
 audit 파일(`data/dart/auditAnalysis/{종목코드}.md`)은 반드시 아래 3섹션 구조를 따른다:
 
 1. **review 전문**: `c.review().toMarkdown()` 출력을 그대로 붙인다. 편집하지 않는다.
-2. **AI 분석**: review를 읽고 분석가 관점으로 직접 해석. 핵심 스토리, 수치 교차검증, 업종 맥락, 내 관점.
+2. **AI 분석**: review를 읽고 분석가 관점으로 직접 해석. 핵심 스토리, 수치 교차검증, 업종 맥락, 독자 관점의 시사점.
 3. **엔진 개선 사항**: 치명/보완/표현 분류. 숫자 오류, null 누락, 왜곡된 지표 등.
 
 - `[OK]` 찍고 "양호" 쓰는 건 audit이 아니다
