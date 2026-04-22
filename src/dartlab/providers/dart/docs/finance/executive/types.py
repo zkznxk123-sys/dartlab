@@ -18,7 +18,10 @@ class ExecutiveResult:
         nYears: 시계열 연도 수
         executiveDf: 등기임원 집계 시계열
             year | totalRegistered | insideDirectors | outsideDirectors |
-            otherNonexec | fullTimeCount | partTimeCount | maleCount | femaleCount
+            otherNonexec | fullTimeCount | partTimeCount | maleCount | femaleCount | ceoCount
+        individualDf: 등기임원 개인별 시계열 (대표이사 추적용)
+            year | name | gender | position | registrationType | fullTime |
+            responsibility | isCeo
         unregPayDf: 미등기임원 보수 시계열
             year | headcount | totalSalary | avgSalary
     """
@@ -26,4 +29,5 @@ class ExecutiveResult:
     corpName: str | None = None
     nYears: int = 0
     executiveDf: pl.DataFrame | None = None
+    individualDf: pl.DataFrame | None = None
     unregPayDf: pl.DataFrame | None = None

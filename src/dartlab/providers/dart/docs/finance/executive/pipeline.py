@@ -37,6 +37,7 @@ def executive(stockCode: str) -> ExecutiveResult | None:
     years = sorted(df["year"].unique().to_list(), reverse=True)
 
     execRows: list[dict] = []
+    individualRows: list[dict] = []
     payRows: list[dict] = []
 
     for year in years:
@@ -54,6 +55,8 @@ def executive(stockCode: str) -> ExecutiveResult | None:
                     stats = aggregateExecutives(executives)
                     stats["year"] = int(year)
                     execRows.append(stats)
+                    for e in executives:
+                        individualRows.append({**e, "year": int(year)})
                 break
 
         # 미등기임원 보수
@@ -70,8 +73,10 @@ def executive(stockCode: str) -> ExecutiveResult | None:
 
     execRows = _dedup(execRows)
     payRows = _dedup(payRows)
+    individualRows = _dedupIndividual(individualRows)
 
     executiveDf = _buildExecutiveDf(execRows) if execRows else None
+    individualDf = _buildIndividualDf(individualRows) if individualRows else None
     unregPayDf = _buildUnregPayDf(payRows) if payRows else None
 
     nYears = max(len(execRows), len(payRows))
@@ -80,6 +85,7 @@ def executive(stockCode: str) -> ExecutiveResult | None:
         corpName=corpName,
         nYears=nYears,
         executiveDf=executiveDf,
+        individualDf=individualDf,
         unregPayDf=unregPayDf,
     )
 
@@ -136,9 +142,51 @@ def _buildExecutiveDf(rows: list[dict]) -> pl.DataFrame:
                 "partTimeCount": r["partTimeCount"],
                 "maleCount": r["maleCount"],
                 "femaleCount": r["femaleCount"],
+                "ceoCount": r.get("ceoCount", 0),
             }
         )
     return pl.DataFrame(data)
+
+
+def _dedupIndividual(rows: list[dict]) -> list[dict]:
+    """(year, name) 중복 제거 — 같은 연도에 블록 두 번 파싱된 경우 대비."""
+    seen: set[tuple[int, str]] = set()
+    result = []
+    for r in rows:
+        key = (r["year"], r.get("name", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(r)
+    return result
+
+
+def _buildIndividualDf(rows: list[dict]) -> pl.DataFrame:
+    schema = {
+        "year": pl.Int64,
+        "name": pl.Utf8,
+        "gender": pl.Utf8,
+        "position": pl.Utf8,
+        "registrationType": pl.Utf8,
+        "fullTime": pl.Utf8,
+        "responsibility": pl.Utf8,
+        "isCeo": pl.Boolean,
+    }
+    data = []
+    for r in sorted(rows, key=lambda x: (x["year"], x.get("name", ""))):
+        data.append(
+            {
+                "year": r["year"],
+                "name": r.get("name", ""),
+                "gender": r.get("gender", ""),
+                "position": r.get("position", ""),
+                "registrationType": r.get("registrationType", ""),
+                "fullTime": r.get("fullTime", ""),
+                "responsibility": r.get("responsibility", ""),
+                "isCeo": bool(r.get("isCeo", False)),
+            }
+        )
+    return pl.DataFrame(data, schema=schema)
 
 
 def _buildUnregPayDf(rows: list[dict]) -> pl.DataFrame:
