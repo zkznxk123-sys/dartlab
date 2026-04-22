@@ -15,6 +15,13 @@ async function fetchJson(url: string, fetchFn: typeof fetch) {
 	}
 }
 
+// 로컬 우선 · HF 폴백 (landing 이 prebuild 한 파일이 HF 에 미러링 됨)
+async function fetchLocalOrHf(path: string, fetchFn: typeof fetch) {
+	const local = await fetchJson(`${base}/${path}`, fetchFn);
+	if (local) return local;
+	return await fetchJson(`${HF}/landing/${path}`, fetchFn);
+}
+
 export const load: PageLoad = async ({ params, fetch }) => {
 	const { stockCode } = params;
 
@@ -27,17 +34,24 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		fetchJson(`${base}/dashboards/macro.json`, fetch)
 	]);
 
-	// 회사 메타 — 로컬 우선, HF CDN 폴백 (dartlab CI 가 매번 prebuild 후 HF 업로드)
-	const companyMetaP = (async () => {
-		const local = await fetchJson(`${base}/map/companies/${stockCode}.json`, fetch);
-		if (local) return local;
-		return await fetchJson(`${HF}/landing/map/companies/${stockCode}.json`, fetch);
-	})();
+	// 회사 메타
+	const companyMetaP = fetchLocalOrHf(`map/companies/${stockCode}.json`, fetch);
 
 	const [[ecosystem, finance, quarters, meta, macro], companyMeta] = await Promise.all([
 		globalP,
 		companyMetaP
 	]);
+
+	// industry 추출 — companyMeta.ego.industry 우선, 없으면 ecosystem node lookup
+	const industryId =
+		companyMeta?.ego?.industry ??
+		ecosystem?.nodes?.find((n: any) => n.id === stockCode)?.industry ??
+		null;
+
+	// 업종 파일 fetch (100% 커버 — 34 업종 모두 prebuild 되어 있음)
+	const industryMeta = industryId
+		? await fetchLocalOrHf(`map/industries/${industryId}.json`, fetch)
+		: null;
 
 	return {
 		stockCode,
@@ -47,6 +61,8 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		meta: meta ?? { engines: [], blog: {}, thesisTemplates: {} },
 		macro,
 		companyMeta,
-		version: 'v22'
+		industryMeta,
+		industryId,
+		version: 'v23'
 	};
 };

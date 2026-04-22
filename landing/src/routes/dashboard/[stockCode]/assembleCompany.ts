@@ -189,8 +189,21 @@ export function assembleCompany(payload: {
 	quarters?: any;
 	macro?: any;
 	companyMeta?: any;
+	industryMeta?: any;
+	industryId?: string | null;
 }) {
-	const { stockCode, ecosystem, finance, valuation, meta, quarters, macro, companyMeta } = payload;
+	const {
+		stockCode,
+		ecosystem,
+		finance,
+		valuation,
+		meta,
+		quarters,
+		macro,
+		companyMeta,
+		industryMeta,
+		industryId
+	} = payload;
 	// node lookup: ecosystem 우선, 없으면 companyMeta.ego 활용 (HF 폴백 시)
 	let node = ecosystem?.nodes?.find((n: any) => n.id === stockCode);
 	if (!node && companyMeta?.ego) {
@@ -257,30 +270,43 @@ export function assembleCompany(payload: {
 		sector: [3, 3, 3, 3, 3]
 	};
 
-	// ── 4. Verdict (from valuation or grades) ──
-	let call: 'BUY' | 'HOLD' | 'SELL' = 'HOLD';
-	let confidence = 62;
-	if (val?.mos) {
-		if (val.mos > 20) {
+	// ── 4. Verdict — 실제 grade 있을 때만 생성 (없으면 null → Hero 에서 배지 숨김) ──
+	const gradeValues = [grades.profit, grades.growth, grades.stable, grades.quality, grades.gov];
+	const haveGrades = gradeValues.filter(Boolean).length >= 3;
+	let verdict: any = null;
+	if (haveGrades) {
+		const scores = gradeValues.map((g) => (g ? gradeToScore(g) : null)).filter((v) => v != null);
+		const avgGrade = scores.reduce((s, v) => s + (v as number), 0) / scores.length;
+		let call: 'BUY' | 'HOLD' | 'SELL';
+		let confidence: number;
+		if (val?.mos && val.mos > 20) {
 			call = 'BUY';
 			confidence = 72;
-		} else if (val.mos < -15) {
+		} else if (val?.mos && val.mos < -15) {
 			call = 'SELL';
 			confidence = 68;
+		} else if (avgGrade >= 4) {
+			call = 'BUY';
+			confidence = 64;
+		} else if (avgGrade <= 2) {
+			call = 'SELL';
+			confidence = 62;
+		} else {
+			call = 'HOLD';
+			confidence = 60;
 		}
+		const verdictLine =
+			call === 'BUY'
+				? meta?.thesisTemplates?.default?.call_buy
+				: call === 'SELL'
+					? meta?.thesisTemplates?.default?.call_sell
+					: meta?.thesisTemplates?.default?.call_hold;
+		verdict = {
+			call,
+			confidence,
+			oneLiner: verdictLine ?? `종합 스코어 ${avgGrade.toFixed(1)}/5. 재무·공급망·매크로 통합 분석.`
+		};
 	}
-	const avgGrade = radar.company.reduce((s, v) => s + v, 0) / 5;
-	const verdictLine =
-		call === 'BUY'
-			? meta?.thesisTemplates?.default?.call_buy
-			: call === 'SELL'
-				? meta?.thesisTemplates?.default?.call_sell
-				: meta?.thesisTemplates?.default?.call_hold;
-	const verdict = {
-		call,
-		confidence,
-		oneLiner: verdictLine ?? `종합 스코어 ${avgGrade.toFixed(1)}/5. 재무·공급망·매크로 통합 분석.`
-	};
 
 	// ── 5. Health 6축 ──
 	const health = [
@@ -397,27 +423,12 @@ export function assembleCompany(payload: {
 	const fairValue = val?.blended ?? 0;
 	const fairRange = fairValue > 0 ? [Math.round(fairValue * 0.85), Math.round(fairValue * 1.15)] : [0, 0];
 
-	// ── 9. Future (12개월 simple growth from grades) ──
-	const currP = price.price || 50000;
-	const months: string[] = [];
-	const consensus: number[] = [];
-	const band_hi: number[] = [];
-	const band_lo: number[] = [];
-	const epsPath: number[] = [];
-	const now = new Date();
-	for (let i = 0; i < 12; i++) {
-		const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-		months.push(`${String(d.getFullYear()).slice(2)}M${String(d.getMonth() + 1).padStart(2, '0')}`);
-		const growth = 1 + 0.01 * i * (gradeToScore(grades.growth) / 5);
-		const c = (currP * growth) / 1000;
-		consensus.push(Math.round(c * 10) / 10);
-		band_hi.push(Math.round(c * (1 + 0.025 * i) * 10) / 10);
-		band_lo.push(Math.round(c * (1 - 0.008 * i) * 10) / 10);
-		epsPath.push(Math.round((currP * growth) / 14));
-	}
-	const future = { months, consensus, band_hi, band_lo, epsPath };
+	// ── 9. Future — 합성 curve 제거. quant prebuild 없으면 null (섹션 숨김) ──
+	// 현재 quant forecast prebuild 가 없으므로 항상 null.
+	// TODO: c.future = quant?.forecast?.companies?.[stockCode] 같이 실데이터 연결 시 복원.
+	const future = null;
 
-	// ── 10. Health_fin ──
+	// ── 10. Health_fin — Altman/Beneish 계산 실패 시 null → 섹션 숨김 ──
 	const altmanZ = calcAltmanZ(fin, null);
 	const beneishM = calcBeneishM(fin);
 	const flags: { level: string; text: string }[] = [];
@@ -430,23 +441,32 @@ export function assembleCompany(payload: {
 	if (node.icr && node.icr > 5) {
 		flags.push({ level: 'info', text: `이자보상배율 ${fmt1(node.icr)}x (안전)` });
 	}
-	if (flags.length === 0) flags.push({ level: 'info', text: '주요 재무 flag 없음' });
 
-	const health_fin = {
-		altmanZ: {
-			value: altmanZ ?? 3.0,
-			zones: [
-				{ max: 1.81, l: 'Distress' },
-				{ max: 2.99, l: 'Grey' },
-				{ max: 6, l: 'Safe' }
-			]
-		},
-		beneishM: {
-			value: beneishM ?? -2.5,
-			flag: beneishM !== null && beneishM > -1.78 ? 'Manipulation risk — review' : 'Low manipulation risk'
-		},
-		flags
-	};
+	// Altman/Beneish 둘 다 null + flags 도 비어있으면 health_fin 자체 null
+	const hasHealthData = altmanZ != null || beneishM != null || flags.length > 0;
+	const health_fin = hasHealthData
+		? {
+				altmanZ:
+					altmanZ != null
+						? {
+								value: altmanZ,
+								zones: [
+									{ max: 1.81, l: 'Distress' },
+									{ max: 2.99, l: 'Grey' },
+									{ max: 6, l: 'Safe' }
+								]
+							}
+						: null,
+				beneishM:
+					beneishM != null
+						? {
+								value: beneishM,
+								flag: beneishM > -1.78 ? 'Manipulation risk — review' : 'Low manipulation risk'
+							}
+						: null,
+				flags: flags.length ? flags : [{ level: 'info', text: '주요 재무 flag 없음' }]
+			}
+		: null;
 
 	// ── 11. Supply ──
 	const supply = extractSupply(stockCode, ecosystem.nodes ?? [], ecosystem.links ?? []);
@@ -504,6 +524,71 @@ export function assembleCompany(payload: {
 			}
 		: null;
 
+	// ── 18. Industry Context (v23) — industries/{id}.json 에서 derive ──
+	let industryContext: any = null;
+	let peersFromIndustry: any = null;
+	if (industryMeta && Array.isArray(industryMeta.stages)) {
+		// 전체 회사 flat + 이 회사의 stage
+		const allNodes: any[] = [];
+		let myStage: string | null = null;
+		let myStageName: string | null = null;
+		for (const stg of industryMeta.stages) {
+			for (const nd of stg.nodes ?? []) {
+				allNodes.push({ ...nd, _stageKey: stg.key, _stageName: stg.name });
+				if (nd.stockCode === stockCode) {
+					myStage = stg.key;
+					myStageName = stg.name;
+				}
+			}
+		}
+
+		// stage 분포
+		const stagesSummary = (industryMeta.stages ?? []).map((stg: any) => ({
+			key: stg.key,
+			name: stg.name,
+			count: (stg.nodes ?? []).length,
+			totalRevenue: (stg.nodes ?? []).reduce((s: number, n: any) => s + (Number(n.revenue) || 0), 0)
+		}));
+
+		// 전체 순위 (revenue 기준)
+		const sortedByRev = [...allNodes].sort((a, b) => (b.revenue ?? 0) - (a.revenue ?? 0));
+		const myRankOverall = sortedByRev.findIndex((n) => n.stockCode === stockCode) + 1 || null;
+
+		industryContext = {
+			industryId,
+			name: industryMeta.name ?? industryId,
+			totalRevenue: industryMeta.totalRevenue ?? 0,
+			nodeCount: industryMeta.nodeCount ?? allNodes.length,
+			stagesSummary,
+			myStage,
+			myStageName,
+			myRank: myRankOverall,
+			totalInIndustry: allNodes.length,
+			edgesCount: Array.isArray(industryMeta.edges) ? industryMeta.edges.length : 0
+		};
+
+		// Peer 선정: 같은 stage top 10 by revenue (없으면 업종 전체 top 10). 본인 포함.
+		const sameStage = myStage ? allNodes.filter((n) => n._stageKey === myStage) : allNodes;
+		const peerPool = sameStage.length >= 3 ? sameStage : allNodes;
+		const peersSorted = [...peerPool].sort((a, b) => (b.revenue ?? 0) - (a.revenue ?? 0)).slice(0, 10);
+		peersFromIndustry = {
+			stageKey: myStage,
+			stageName: myStageName,
+			stageFallback: sameStage.length < 3, // peer 부족해서 업종 전체 기준으로 대체했는지
+			rows: peersSorted.map((n) => ({
+				stockCode: n.stockCode,
+				corpName: n.corpName,
+				revenue: n.revenue ?? null,
+				roe: n.roe ?? null,
+				opMargin: n.opMargin ?? null,
+				debtRatio: n.debtRatio ?? null,
+				revCagr: n.revCagr ?? null,
+				profGrade: n.profGrade ?? null,
+				isSelf: n.stockCode === stockCode
+			}))
+		};
+	}
+
 	return {
 		...identity,
 		...price,
@@ -527,6 +612,9 @@ export function assembleCompany(payload: {
 		quarters: quartersOut,
 		macro: macroOut,
 		// v22 신규
-		egoData: egoOut
+		egoData: egoOut,
+		// v23 신규
+		industryContext,
+		peersFromIndustry
 	};
 }

@@ -17,18 +17,34 @@
 	import ThesisCTA from './sections/ThesisCTA.svelte';
 	import EnginesCard from './sections/EnginesCard.svelte';
 	import BottomCTA from './sections/BottomCTA.svelte';
+	import IndustryContextCard from './sections/IndustryContextCard.svelte';
+	import PeerCard from './sections/PeerCard.svelte';
 	import { assembleCompany } from './assembleCompany';
 
 	let { data } = $props();
 	const c = $derived(assembleCompany(data));
 	const mapLink = $derived(`${base}/map?focus=${data.stockCode}`);
+
+	// Hero 의 drop-in 은 verdict 필수 요구 — null 이면 placeholder 주입하고
+	// 실제 값 없음 표시는 sectionCls 로 숨김 처리 (간단한 fallback)
+	const heroData = $derived.by(() => {
+		if (!c) return null;
+		return {
+			...c,
+			verdict: c.verdict ?? {
+				call: 'HOLD',
+				confidence: 0,
+				oneLiner: '— 등급 데이터 수집 중 —'
+			}
+		};
+	});
 </script>
 
 <svelte:head>
 	<title>{c?.name ?? data.stockCode} 전자공시 대시보드 · dartlab</title>
 	<meta
 		name="description"
-		content="{c?.name ?? data.stockCode} 재무·가치평가·리스크·공급망·매크로·AI 논제. DART 기반, 무료·오픈소스."
+		content="{c?.name ?? data.stockCode} 재무·가치평가·리스크·공급망·매크로. DART 기반, 무료·오픈소스."
 	/>
 </svelte:head>
 
@@ -43,33 +59,57 @@
 		<a class="chip chip-link" href={brand.coffee} target="_blank" rel="noopener">☕ 후원</a>
 	</div>
 
-	<Hero data={c} />
+	<!-- ─── Hero (항상) ─── -->
+	<Hero data={heroData} />
 	<HealthStrip data={c.health} />
-	<PastPerformance data={c.past} />
 
+	<!-- ─── 1막 · Macro (있을 때만) ─── -->
+	{#if c.macro}
+		<MacroCard data={c.macro} />
+	{/if}
+
+	<!-- ─── 2막 · Industry Context (100% 커버 — industries json) ─── -->
+	{#if c.industryContext}
+		<IndustryContextCard data={c.industryContext} />
+	{/if}
+
+	<!-- ─── 3막 · 과거 (재무 시계열) ─── -->
+	<PastPerformance data={c.past} />
 	{#if c.quarters}
 		<PastQuarters data={c.quarters} />
 	{/if}
 
+	<!-- ─── 4막 · 재무제표 상세 ─── -->
 	<section class="container"><FinancialsCard data={{ is: c.is, bs: c.bs, cf: c.cf }} /></section>
 
+	<!-- ─── 5막 · 리스크 (Altman/Beneish 있을 때만) ─── -->
+	{#if c.health_fin}
+		<section class="container"><HealthCard data={c.health_fin} /></section>
+	{/if}
+
+	<!-- ─── 6막 · 가치 (valuation 있을 때만) ─── -->
 	{#if c.value?.methods?.length}
 		<section class="container"><ValueCard data={{ value: c.value, price: c.price }} /></section>
 	{/if}
 
-	<section class="container"><FutureCard data={{ future: c.future, currentPrice: c.price }} /></section>
-	<section class="container"><HealthCard data={c.health_fin} /></section>
+	<!-- ─── 6막 · 미래 (quant forecast 있을 때만) ─── -->
+	{#if c.future}
+		<section class="container"><FutureCard data={{ future: c.future, currentPrice: c.price }} /></section>
+	{/if}
 
+	<!-- ─── 비교 · peer (industries 기반) ─── -->
+	{#if c.peersFromIndustry}
+		<PeerCard data={c.peersFromIndustry} />
+	{/if}
+
+	<!-- ─── AI / Supply (companies json, 있을 때만) ─── -->
 	{#if c.egoData}
 		<EgoCard data={c.egoData} />
 	{/if}
 
 	<section class="container"><SupplyCard data={c.supply} /></section>
 
-	{#if c.macro}
-		<MacroCard data={c.macro} />
-	{/if}
-
+	<!-- ─── Thesis / Engines ─── -->
 	<section class="container"><ThesisCTA data={{ thesis: c.thesis, blog: c.blog }} /></section>
 	<section class="container"><EnginesCard data={c.engines} /></section>
 

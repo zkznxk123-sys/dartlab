@@ -813,6 +813,11 @@
 		<a class="action dashboard-btn" href="{base}/dashboard/{node.id}" target="_blank" rel="noopener" title="대시보드 — 회사 종합 분석 (신규 탭)">
 			📊 대시보드
 		</a>
+		{#if node.industry}
+			<a class="action industry-btn" href="{base}/map?industry={node.industry}" title="이 회사가 속한 업종 지도">
+				🏭 업종 전체
+			</a>
+		{/if}
 		<button class="action share-btn" onclick={shareCard} title="이 회사 정보 공유">
 			🔗 공유
 		</button>
