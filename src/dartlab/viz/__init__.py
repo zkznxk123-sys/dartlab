@@ -190,7 +190,8 @@ def emit_chart(spec: dict) -> None:
         )
         return
     spec.setdefault("vizType", "chart")
-    _log.info(f"{_MARKER_START}{json.dumps(spec, ensure_ascii=False)}{_MARKER_END}")
+    # DARTLAB_VIZ 마커는 **사용자 출력** (webview 가 stdout 을 파싱) — print 유지.
+    print(f"{_MARKER_START}{json.dumps(spec, ensure_ascii=False)}{_MARKER_END}")
 
 
 def emit_diagram(diagram_type: str, source: str, *, title: str = "") -> None:
@@ -211,7 +212,8 @@ def emit_diagram(diagram_type: str, source: str, *, title: str = "") -> None:
         "source": source,
         "title": title,
     }
-    _log.info(f"{_MARKER_START}{json.dumps(spec, ensure_ascii=False)}{_MARKER_END}")
+    # DARTLAB_VIZ 마커는 **사용자 출력** (webview 가 stdout 을 파싱) — print 유지.
+    print(f"{_MARKER_START}{json.dumps(spec, ensure_ascii=False)}{_MARKER_END}")
 
 
 __all__ = [

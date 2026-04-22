@@ -39,13 +39,19 @@ class TestMessaging:
         assert "005930" in text
         assert "찾을 수 없습니다" in text
 
-    def test_emit_prints_hint(self, capsys):
+    def test_emit_prints_hint(self, capsys, caplog):
+        """emit() 는 logger 경유 — stdout 깨끗, 메시지는 caplog 로 캡처."""
+        import logging
+
         from dartlab.core.messaging import emit
 
-        emit("hint:no_finance", stockCode="005930", prop="BS")
+        with caplog.at_level(logging.INFO, logger="dartlab.core.messaging"):
+            emit("hint:no_finance", stockCode="005930", prop="BS")
         captured = capsys.readouterr()
-        assert "[dartlab]" in captured.out
-        assert "005930" in captured.out
+        # A1: emit() 는 logger.info 경유 → stdout 오염 금지.
+        assert captured.out == ""
+        assert "[dartlab]" in caplog.text
+        assert "005930" in caplog.text
 
     def test_emit_raises_when_requested(self):
         from dartlab.core.messaging import emit
@@ -62,7 +68,9 @@ class TestMessaging:
         try:
             progress("테스트 메시지")
             captured = capsys.readouterr()
+            # stdout/stderr 모두 조용해야 함
             assert captured.out == ""
+            assert captured.err == ""
         finally:
             _ctx._verbose = original
 

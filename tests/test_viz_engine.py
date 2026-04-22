@@ -198,8 +198,13 @@ def test_emit_diagram_default_title(capsys):
 # ── 메타 가이드 차트 거부 (R21 audit 후속 발견) ──
 
 
-def test_emit_chart_rejects_meta_guide_axis_items(capsys):
-    """analysis() 가이드 dataframe 의 axis/items 를 차트화하면 거부."""
+def test_emit_chart_rejects_meta_guide_axis_items(capsys, caplog):
+    """analysis() 가이드 dataframe 의 axis/items 를 차트화하면 거부.
+
+    거부 경고는 logger.warning (caplog), 정상 marker 는 stdout (capsys).
+    """
+    import logging
+
     from dartlab.viz import emit_chart
 
     spec = {
@@ -223,16 +228,19 @@ def test_emit_chart_rejects_meta_guide_axis_items(capsys):
         ],
         "series": [{"name": "items", "data": [8, 9, 4, 4, 6, 5, 6, 2, 6, 5, 7, 5, 6, 9]}],
     }
-    emit_chart(spec)
-    captured = capsys.readouterr().out
-    # 마커 emit 안 되고, 거부 메시지 출력
-    assert "DARTLAB_VIZ" not in captured
-    assert "차트 거부" in captured
-    assert "메타데이터" in captured
+    with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
+        emit_chart(spec)
+    out = capsys.readouterr().out
+    # 마커 emit 안 되고 (stdout), 거부 메시지 출력 (logger.warning)
+    assert "DARTLAB_VIZ" not in out
+    assert "차트 거부" in caplog.text
+    assert "메타데이터" in caplog.text
 
 
-def test_emit_chart_passes_real_data(capsys):
+def test_emit_chart_passes_real_data(capsys, caplog):
     """진짜 종목 시계열 데이터는 통과."""
+    import logging
+
     from dartlab.viz import emit_chart
 
     spec = {
@@ -241,10 +249,11 @@ def test_emit_chart_passes_real_data(capsys):
         "categories": ["2021", "2022", "2023", "2024", "2025"],
         "series": [{"name": "매출", "data": [279.6, 302.2, 258.9, 300.9, 333.6]}],
     }
-    emit_chart(spec)
-    captured = capsys.readouterr().out
-    assert "DARTLAB_VIZ" in captured
-    assert "차트 거부" not in captured
+    with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
+        emit_chart(spec)
+    out = capsys.readouterr().out
+    assert "DARTLAB_VIZ" in out
+    assert "차트 거부" not in caplog.text
 
 
 def test_emit_chart_passes_axis_categories_with_real_values(capsys):

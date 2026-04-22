@@ -37,7 +37,9 @@ def _ensureDefaultHandler() -> None:
     """root ``dartlab`` 로거에 기본 stderr 핸들러 부착 (최초 1회).
 
     사용자가 이미 핸들러를 붙였으면 아무것도 하지 않는다 (idempotent).
-    propagate=False 로 root logger 로 흘러가지 않게 차단 — 다른 라이브러리 로거 설정과 충돌 방지.
+    propagate=True 유지 — pytest caplog / 사용자 root logger 훅 이 dartlab
+    레코드를 볼 수 있도록. 중복 출력은 root 가 별도 핸들러 설정했을 때만
+    발생하며, 그 경우 사용자가 ``dartlab`` 핸들러를 따로 관리해야 한다.
     """
     global _DEFAULT_CONFIGURED
     if _DEFAULT_CONFIGURED:
@@ -54,7 +56,7 @@ def _ensureDefaultHandler() -> None:
     # 사용자가 이미 setLevel 호출했으면 (NOTSET=0 아님) 존중. 아니면 INFO.
     if root.level == logging.NOTSET:
         root.setLevel(logging.INFO)
-    root.propagate = False
+    # propagate=True (default) 유지 — caplog 가 dartlab.* 레코드를 캡처 가능.
     _DEFAULT_CONFIGURED = True
 
 

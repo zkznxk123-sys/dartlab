@@ -10,39 +10,52 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def test_emit_chart_rejects_empty_spec(capsys):
-    """R32-1: 빈 dict 거부."""
+def test_emit_chart_rejects_empty_spec(capsys, caplog):
+    """R32-1: 빈 dict 거부.
+
+    거부 경고는 logger.warning (caplog 로 캡처), marker 는 stdout.
+    """
+    import logging
+
     from dartlab.viz import emit_chart
 
-    emit_chart({})
+    with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
+        emit_chart({})
     out = capsys.readouterr().out
+    log_text = caplog.text
     assert "DARTLAB_VIZ" not in out
-    assert "차트 거부" in out
-    assert "chartType" in out
+    assert "차트 거부" in log_text
+    assert "chartType" in log_text
 
 
-def test_emit_chart_rejects_no_charttype(capsys):
+def test_emit_chart_rejects_no_charttype(capsys, caplog):
     """R32-1: chartType / vizType 없으면 거부."""
+    import logging
+
     from dartlab.viz import emit_chart
 
-    emit_chart({"title": "test", "categories": ["A"], "series": [{"data": [1]}]})
+    with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
+        emit_chart({"title": "test", "categories": ["A"], "series": [{"data": [1]}]})
     out = capsys.readouterr().out
     assert "DARTLAB_VIZ" not in out
-    assert "차트 거부" in out
+    assert "차트 거부" in caplog.text
 
 
-def test_emit_chart_passes_with_charttype(capsys):
+def test_emit_chart_passes_with_charttype(capsys, caplog):
     """R32-1: chartType 있으면 통과."""
+    import logging
+
     from dartlab.viz import emit_chart
 
-    emit_chart(
-        {
-            "chartType": "line",
-            "title": "test",
-            "categories": ["2022", "2023"],
-            "series": [{"name": "A", "data": [100, 110]}],
-        }
-    )
+    with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
+        emit_chart(
+            {
+                "chartType": "line",
+                "title": "test",
+                "categories": ["2022", "2023"],
+                "series": [{"name": "A", "data": [100, 110]}],
+            }
+        )
     out = capsys.readouterr().out
     assert "DARTLAB_VIZ" in out
-    assert "차트 거부" not in out
+    assert "차트 거부" not in caplog.text
