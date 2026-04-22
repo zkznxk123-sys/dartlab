@@ -836,7 +836,13 @@ class Gather:
         pl.DataFrame | None
             단일 지표: date (Date), value (Float64) 컬럼.
             전체 지표: date + 각 지표명 컬럼 (wide DataFrame).
-            None — ECOS 모듈 없거나 API 키 미설정 시.
+            None — ECOS 모듈 미설치. CLI 대화형에서 사용자가 키 입력을 건너뛴 경우.
+
+        Raises
+        ------
+        AuthKeyMissing
+            서버·백그라운드 등 TTY 가 없는 환경에서 ECOS_API_KEY 미설정 시.
+            예외 본문에 발급 URL + `.env` 설정법 포함 — AI tool 이 그대로 사용자 응답에 전달.
         """
         try:
             from dartlab.gather.ecos import Ecos
@@ -888,7 +894,13 @@ class Gather:
         pl.DataFrame | None
             단일 지표: date (Date), value (Float64) 컬럼.
             전체 지표: date + 각 지표명 컬럼 (wide DataFrame).
-            None — FRED 모듈 없거나 API 키 미설정 시.
+            None — FRED 모듈 미설치. CLI 대화형에서 사용자가 키 입력을 건너뛴 경우.
+
+        Raises
+        ------
+        AuthKeyMissing
+            서버·백그라운드 등 TTY 가 없는 환경에서 FRED_API_KEY 미설정 시.
+            예외 본문에 발급 URL + `.env` 설정법 포함 — AI tool 이 그대로 사용자 응답에 전달.
         """
         try:
             from dartlab.gather.fred import Fred
