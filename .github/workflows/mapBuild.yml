@@ -43,11 +43,17 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
-      - name: Build dashboards (review type=dashboard per company)
-        run: uv run python -X utf8 scripts/build/buildDashboards.py --companies 0
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        continue-on-error: true  # 대시보드 실패해도 맵 배포는 진행
+      - name: Build dashboard finance.json (Polars batch)
+        run: uv run python -X utf8 scripts/build/buildFinanceJson.py
+
+      - name: Build dashboard quarters.json (Polars batch)
+        run: uv run python -X utf8 scripts/build/buildQuartersJson.py
+
+      - name: Build dashboard meta.json
+        run: uv run python -X utf8 scripts/build/buildMetaJson.py
+
+      - name: Build dashboard macro.json
+        run: uv run python -X utf8 scripts/build/buildMacroJson.py
 
       - name: Validate map output
         run: |
