@@ -10,4 +10,67 @@ else
   exit 1
 fi
 
-"$PYTHON" scripts/audit/check_no_ai_markers.py --check-push
+# 1) AI 마커 차단
+"$PYTHON" scripts/audit/check_no_ai_markers.py --check-push || exit $?
+
+# 2) push 범위의 변경 파일에 대응하는 테스트만 선별 실행.
+#    전수 unit 은 10분+ 소요로 비현실적 (CI 가 최종 게이트). 변경 모듈 관련 테스트 통과만
+#    강제해 이번 같은 유형 (predictionSignals 변경 → test_analysis_prediction 실패) 사고 차단.
+REMOTE_BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null)
+if [ -n "$REMOTE_BRANCH" ]; then
+  CHANGED_PY=$(git diff --name-only "$REMOTE_BRANCH..HEAD" -- 'src/dartlab/*.py' 'tests/*.py' 2>/dev/null)
+else
+  CHANGED_PY=$(git diff-tree --no-commit-id --name-only -r HEAD -- 'src/dartlab/*.py' 'tests/*.py' 2>/dev/null)
+fi
+
+if [ -n "$CHANGED_PY" ]; then
+  # 관련 테스트 파일 수집:
+  # 1) 직접 변경된 tests/*.py 파일
+  # 2) 변경된 src/dartlab/<module>/*.py 의 모듈 키워드로 tests/test_<module>*.py 매칭
+  TEST_FILES=""
+  KEYWORDS=""
+  for f in $CHANGED_PY; do
+    case "$f" in
+      tests/*)
+        TEST_FILES="$TEST_FILES $f"
+        ;;
+      src/dartlab/*)
+        # src/dartlab/analysis/financial/predictionSignals.py → keywords: analysis financial predictionSignals
+        stem=$(basename "$f" .py)
+        path=$(dirname "$f" | sed 's|src/dartlab/||; s|/| |g')
+        KEYWORDS="$KEYWORDS $path $stem"
+        ;;
+    esac
+  done
+
+  # 중복 제거된 테스트 파일 목록
+  TEST_FILES=$(echo "$TEST_FILES" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+
+  # 키워드 매칭으로 추가 테스트 파일 발견
+  for kw in $KEYWORDS; do
+    [ -z "$kw" ] && continue
+    matched=$(ls tests/test_*${kw}* 2>/dev/null | tr '\n' ' ')
+    TEST_FILES="$TEST_FILES $matched"
+  done
+  TEST_FILES=$(echo "$TEST_FILES" | tr ' ' '\n' | sort -u | grep -v '^$' | tr '\n' ' ')
+
+  if [ -n "$(echo $TEST_FILES | tr -d ' ')" ]; then
+    echo "[pre-push] 변경 대응 테스트 실행 중 (스킵: --no-verify):"
+    for tf in $TEST_FILES; do echo "  - $tf"; done
+    if command -v uv >/dev/null 2>&1; then
+      PYTEST_CMD="uv run pytest"
+    elif [ -x .venv/bin/pytest ]; then
+      PYTEST_CMD=".venv/bin/pytest"
+    else
+      PYTEST_CMD="pytest"
+    fi
+    $PYTEST_CMD $TEST_FILES -q --no-cov -x --no-header -m "unit or not (integration or heavy or realData or freshInstall)" 2>&1 | tail -40
+    RC=${PIPESTATUS:-$?}
+    if [ "$RC" != "0" ]; then
+      echo "" >&2
+      echo "[pre-push] 관련 테스트 실패 — push 차단." >&2
+      echo "  수정 후 재push. 일시 우회: git push --no-verify" >&2
+      exit 1
+    fi
+  fi
+fi
