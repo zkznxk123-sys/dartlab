@@ -19,6 +19,7 @@ import ast
 import dataclasses
 import inspect
 import json
+import subprocess
 import sys
 import textwrap
 from pathlib import Path
@@ -2112,6 +2113,19 @@ def main():
     mcpToolsPy = _generateMcpToolsPy()
     mcpToolsPyPath.write_text(mcpToolsPy, encoding="utf-8")
     print(f"  _generated_tools.py ({len(mcpToolsPy):,} chars) -> {mcpToolsPyPath}")
+
+    # 생성된 파이썬 파일은 raw 출력이므로 CI `ruff format --check` 통과를 위해 재포맷.
+    for pyPath in (capabilitiesPyPath, mcpToolsPyPath):
+        subprocess.run(
+            ["uv", "run", "ruff", "format", str(pyPath)],
+            check=False,
+            cwd=ROOT,
+        )
+        subprocess.run(
+            ["uv", "run", "ruff", "check", "--fix", str(pyPath)],
+            check=False,
+            cwd=ROOT,
+        )
 
     print("\n  완료.")
 
