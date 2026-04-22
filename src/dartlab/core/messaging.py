@@ -16,7 +16,10 @@ from __future__ import annotations
 
 from typing import Any
 
+from dartlab.core.logger import getLogger
+
 _PREFIX = "[dartlab]"
+_log = getLogger(__name__)
 
 # ── Simple Messages (template 문자열) ────────────────────────────
 
@@ -88,6 +91,14 @@ _SIMPLE: dict[str, str] = {
     "scan:prebuild_missing": "scan 프리빌드 데이터 없음 \u2192 HuggingFace에서 다운로드 (약 271MB, 시간이 걸릴 수 있습니다)",
     "scan:prebuild_ready": "\u2713 scan 프리빌드 준비 완료 ({fileCount}개 파일)",
     "scan:prebuild_failed": "\u26a0 scan 프리빌드 다운로드 실패: {error} \u2014 종목별 fallback 사용 (느림)",
+    "scan:prebuild_incomplete": (
+        "⚠ scan 프리빌드 다운로드 불완전 — 누락 파일: {missing}. "
+        "네트워크 확인 후 dartlab.downloadAll('scan', forceUpdate=True) 로 재시도하세요."
+    ),
+    "scan:fallback_insufficient": (
+        "⚠ scan/finance.parquet 프리빌드가 없어 종목별 파일 {count}개만으로 fallback. "
+        "전종목(~2700)이 아닌 부분 결과입니다. dartlab.downloadAll('scan') 으로 프리빌드를 받으세요."
+    ),
     # EDGAR bulk batch (finance/docs 공통)
     "edgar:bulk_start": "EDGAR {kind} 배치 수집 시작 \u2014 {total}종목 (시간이 걸릴 수 있습니다)",
     "edgar:bulk_done": "\u2713 EDGAR {kind} 배치 완료 (성공 {success} / 실패 {failed} / {elapsedSec:.0f}초)",
@@ -308,11 +319,11 @@ def emit(key: str, *, raise_as: type | None = None, **kwargs: Any) -> str:
         "data:",
     )
     if key in _STRUCTURED or any(key.startswith(p) for p in _ALWAYS_SHOW):
-        print(f"{_PREFIX} {text}")
+        _log.info("%s %s", _PREFIX, text)
     else:
         # 그 외 simple 메시지는 verbose일 때만 출력
         if _ctx.verbose:
-            print(f"{_PREFIX} {text}")
+            _log.info("%s %s", _PREFIX, text)
 
     return text
 
@@ -327,7 +338,7 @@ def format(key: str, **kwargs: Any) -> str:
 def progress(text: str) -> None:
     """verbose-aware 한 줄 진행 메시지. ``config.verbose=False``이면 무시."""
     if _ctx.verbose:
-        print(f"{_PREFIX} {text}")
+        _log.info("%s %s", _PREFIX, text)
 
 
 # ── suggest() — CAPABILITIES 기반 함수 안내 ──────────────────────

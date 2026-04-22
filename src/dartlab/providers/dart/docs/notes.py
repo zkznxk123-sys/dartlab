@@ -17,8 +17,11 @@ from __future__ import annotations
 from collections import OrderedDict
 from typing import TYPE_CHECKING, Any
 
+from dartlab.core.logger import getLogger
 from dartlab.core.memory import BoundedCache
 from dartlab.core.registry import getNotesEntries
+
+_log = getLogger(__name__)
 
 if TYPE_CHECKING:
     import polars as pl
@@ -92,7 +95,7 @@ class Notes:
 
         if config.verbose:
             periodLabel = {"y": "", "q": " (분기)", "h": " (반기)"}.get(period, "")
-            print(f"  ▶ {self._company.corpName} · {krName}{periodLabel}")
+            _log.info("  ▶ %s · %s%s", self._company.corpName, krName, periodLabel)
 
         try:
             if module == "notesDetail":

@@ -28,7 +28,10 @@ from dartlab.core.dataLoader import (
     extractCorpName,
     loadData,
 )
+from dartlab.core.logger import getLogger
 from dartlab.core.polarsUtil import isEmptyDf
+
+_log = getLogger(__name__)
 
 # ── 모듈 레지스트리 (core/registry.py에서 자동 생성) ──
 # (모듈 import 경로, 함수명, 한글 라벨, primary DataFrame 추출)
@@ -512,7 +515,7 @@ class Company:
         label = entry[2]
 
         if config.verbose and cacheKey not in self._cache and name != "sections":
-            print(f"  ▶ {self.corpName} · {label}")
+            _log.info("  ▶ %s · %s", self.corpName, label)
 
         result = self._call_module(name, **kwargs)
         extractor = entry[3]

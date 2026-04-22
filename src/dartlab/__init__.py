@@ -46,7 +46,10 @@ async def prefetch(*stockCodes: str, categories: list[str] | None = None) -> Non
     await pyodide_js.loadPackage(["pyarrow", "lxml", "polars", "numpy", "pydantic"])
 
     from dartlab.core.dataConfig import DATA_RELEASES, hfBaseUrl
+    from dartlab.core.logger import getLogger
     from pyodide.http import pyfetch  # type: ignore[import-not-found]
+
+    _prefetchLog = getLogger(__name__ + ".prefetch")
 
     cats = categories or ["docs", "finance", "report"]
     for code in stockCodes:
@@ -64,15 +67,15 @@ async def prefetch(*stockCodes: str, categories: list[str] | None = None) -> Non
             try:
                 resp = await pyfetch(url)
                 if resp.status != 200:
-                    print(f"  ⚠ {cat}/{code} 실패 (HTTP {resp.status})")
+                    _prefetchLog.warning("  ⚠ %s/%s 실패 (HTTP %d)", cat, code, resp.status)
                     continue
                 buf = await resp.bytes()
                 os.makedirs(f"/data/{dirPath}", exist_ok=True)
                 with open(path, "wb") as f:
                     f.write(buf)
-                print(f"  {cat}/{code}: {len(buf) // 1024} KB")
+                _prefetchLog.info("  %s/%s: %d KB", cat, code, len(buf) // 1024)
             except Exception as e:
-                print(f"  ⚠ {cat}/{code} 실패: {e}")
+                _prefetchLog.warning("  ⚠ %s/%s 실패: %s", cat, code, e)
 
 
 try:
