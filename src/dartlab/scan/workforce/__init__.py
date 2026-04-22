@@ -34,30 +34,30 @@ def scan_workforce(*, verbose: bool = True) -> pl.DataFrame:
           최고보수_억, 공개인원
     """
 
-    def _log(msg: str) -> None:
+    def _say(msg: str) -> None:
         if verbose:
             _log.info(msg)
 
-    _log("1/6 직원 현황...")
+    _say("1/6 직원 현황...")
     emp_map = scan_employee()
-    _log(f"  → {len(emp_map)}종목")
+    _say(f"  → {len(emp_map)}종목")
 
-    _log("2/6 직원당 매출...")
+    _say("2/6 직원당 매출...")
     rpe_map = scan_revenue_per_employee()
-    _log(f"  → {len(rpe_map)}종목")
+    _say(f"  → {len(rpe_map)}종목")
 
-    _log("3/5 급여 vs 매출 성장률...")
+    _say("3/5 급여 vs 매출 성장률...")
     sal_map = scan_salary_growth()
     rev_map = scan_revenue_growth()
     growth_df = compute_salary_vs_revenue(sal_map, rev_map)
     growth_dict: dict[str, dict] = {}
     for row in growth_df.iter_rows(named=True):
         growth_dict[row["stockCode"]] = row
-    _log(f"  → {len(growth_dict)}종목")
+    _say(f"  → {len(growth_dict)}종목")
 
-    _log("4/5 고액 보수...")
+    _say("4/5 고액 보수...")
     top_map = scan_top_pay()
-    _log(f"  → {len(top_map)}종목")
+    _say(f"  → {len(top_map)}종목")
 
     # 합집합
     all_codes = set(emp_map) | set(rpe_map) | set(growth_dict) | set(top_map)
@@ -99,7 +99,7 @@ def scan_workforce(*, verbose: bool = True) -> pl.DataFrame:
         "공개인원": pl.Float64,
     }
     df = pl.DataFrame(results, schema=schema)
-    _log(f"인력 스캔 완료: {df.shape[0]}종목, 5/5")
+    _say(f"인력 스캔 완료: {df.shape[0]}종목, 5/5")
     return df
 
 

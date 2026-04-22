@@ -449,33 +449,33 @@ def classify_balanced(
     code_to_group: dict[str, str] = {}
     locked: set[str] = set()
 
-    def _log(msg: str) -> None:
+    def _say(msg: str) -> None:
         if verbose:
             _log.info(msg)
 
     phase0 = _cbPhase0Docs(docs_ground_truth, all_node_ids, code_to_group, locked)
     phase1 = _cbPhase1WellKnown(all_node_ids, code_to_group, locked)
-    _log(f"  Phase 0+1 (docs+well-known lock): {len(locked)} ({phase0} docs + {phase1} well-known)")
+    _say(f"  Phase 0+1 (docs+well-known lock): {len(locked)} ({phase0} docs + {phase1} well-known)")
 
     known_group_names = _cbKnownGroupNames(locked, code_to_group)
-    _log(f"  known 그룹: {len(known_group_names)}개")
+    _say(f"  known 그룹: {len(known_group_names)}개")
 
     mgmt_directed = _cbBuildMgmtDirected(invest_edges, all_node_ids)
     _cbPhase2Propagate(mgmt_directed, code_to_group, locked, known_group_names)
     _cbPhase2Cluster(mgmt_directed, code_to_group, locked, known_group_names, code_to_name)
     phase2 = len(code_to_group) - len(locked)
-    _log(f"  Phase 2 (경영참여 확장): +{phase2}")
+    _say(f"  Phase 2 (경영참여 확장): +{phase2}")
 
     phase3 = _cbPhase3Corp(corp_edges, all_node_ids, code_to_group, locked, known_group_names)
-    _log(f"  Phase 3 (법인주주): +{phase3}")
+    _say(f"  Phase 3 (법인주주): +{phase3}")
 
     phase4 = _cbPhase4PersonShares(person_edges, all_node_ids, code_to_group, locked)
-    _log(f"  Phase 4 (공유주주): +{phase4}")
+    _say(f"  Phase 4 (공유주주): +{phase4}")
 
     kw_count, still = _cbPhase5KeywordAndIndep(all_node_ids, code_to_group, code_to_name)
     group_counts = Counter(code_to_group[n] for n in all_node_ids)
     real_indep = sum(1 for c in group_counts.values() if c == 1)
-    _log(f"  Phase 5 (키워드): +{kw_count}, 독립: {len(still)}")
-    _log(f"  최종: {len(all_node_ids)} nodes, 독립 {real_indep} ({real_indep / len(all_node_ids):.0%})")
+    _say(f"  Phase 5 (키워드): +{kw_count}, 독립: {len(still)}")
+    _say(f"  최종: {len(all_node_ids)} nodes, 독립 {real_indep} ({real_indep / len(all_node_ids):.0%})")
 
     return code_to_group

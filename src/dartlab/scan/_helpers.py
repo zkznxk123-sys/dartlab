@@ -12,12 +12,27 @@ _scanDownloaded = False
 # scan 프리빌드 freshness — HF 수집 주기(일 1회)에 맞춰 24h TTL
 _SCAN_FRESHNESS_TTL_SECONDS = 24 * 3600
 
+# scan 프리빌드 루트 필수 파일 — HF `dart/scan/` 루트에 있어야 하는 산출물.
+# 과거 `allow_patterns="dart/scan/**/*.parquet"` 버그로 루트 파일이 누락된
+# 불완전 캐시 상태 환경이 존재한다 (report/ 12개만 받아진 상태). 이 리스트로
+# 완전성을 검증해 한 개라도 없으면 재다운로드를 강제한다.
+_REQUIRED_SCAN_ROOT_FILES: tuple[str, ...] = (
+    "finance.parquet",
+    "changes.parquet",
+    "sharesOutstanding.parquet",
+)
+
+
+def _isScanComplete(scanDir: Path) -> bool:
+    """scan 프리빌드 루트 필수 파일이 모두 존재하는지 확인."""
+    return all((scanDir / name).exists() for name in _REQUIRED_SCAN_ROOT_FILES)
+
 
 def _ensureScanData() -> Path:
     """scan 프리빌드 디렉토리 확인 — 없거나 오래됐으면 HF에서 자동 다운로드.
 
-    로컬에 finance.parquet이 있고 TTL(24h) 이내면 즉시 반환 (HF 호출 0).
-    없으면 다운로드, TTL 초과면 백그라운드 갱신 시도.
+    루트 필수 파일(finance/changes/sharesOutstanding)이 모두 존재하고 TTL(24h)
+    이내면 즉시 반환 (HF 호출 0). 하나라도 없거나 TTL 초과면 다운로드 시도.
 
     Returns
     -------
@@ -33,8 +48,8 @@ def _ensureScanData() -> Path:
     if _scanDownloaded:
         return scanDir
 
-    financeParquet = scanDir / "finance.parquet"
-    if financeParquet.exists():
+    if _isScanComplete(scanDir):
+        financeParquet = scanDir / "finance.parquet"
         age = time.time() - financeParquet.stat().st_mtime
         if age < _SCAN_FRESHNESS_TTL_SECONDS:
             # 최신 — HF 호출 없이 즉시 반환
@@ -50,7 +65,7 @@ def _ensureScanData() -> Path:
         _scanDownloaded = True
         return scanDir
 
-    # 신규 사용자: 파일 없음 → HF에서 다운로드
+    # 루트 필수 파일 누락 (신규 사용자 또는 과거 버그로 불완전 캐시) → HF 다운로드
     emit("scan:prebuild_missing")
     try:
         from dartlab.core.dataLoader import downloadAll

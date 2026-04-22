@@ -49,24 +49,24 @@ def build_graph(*, verbose: bool = True) -> dict:
     """
     t0 = time.perf_counter()
 
-    def _log(msg: str) -> None:
+    def _say(msg: str) -> None:
         if verbose:
             _log.info(msg)
 
-    _log("1. 상장사 목록...")
+    _say("1. 상장사 목록...")
     name_to_code, code_to_name, listing_codes, listing_meta = load_listing()
 
-    _log("2. investedCompany 스캔...")
+    _say("2. investedCompany 스캔...")
     raw_inv = scan_invested()
     invest_edges = build_invest_edges(raw_inv, name_to_code, code_to_name)
     invest_deduped = deduplicate_edges(invest_edges)
     invest_deduped = invest_deduped.filter(pl.col("from_code") != pl.col("to_code"))
-    _log(f"   → {len(invest_deduped):,} edges")
+    _say(f"   → {len(invest_deduped):,} edges")
 
-    _log("3. majorHolder 스캔...")
+    _say("3. majorHolder 스캔...")
     raw_mh = scan_major_holders()
     corp_edges, person_edges = build_holder_edges(raw_mh, name_to_code)
-    _log(f"   → corp {len(corp_edges):,}, person {len(person_edges):,}")
+    _say(f"   → corp {len(corp_edges):,}, person {len(person_edges):,}")
 
     # 노드 수집
     all_node_ids: set[str] = set()
@@ -79,13 +79,13 @@ def build_graph(*, verbose: bool = True) -> dict:
         all_node_ids.add(row["from_code"])
         all_node_ids.add(row["to_code"])
     all_node_ids = all_node_ids & listing_codes
-    _log(f"   → {len(all_node_ids)} 상장사 노드")
+    _say(f"   → {len(all_node_ids)} 상장사 노드")
 
-    _log("4. docs ground truth...")
+    _say("4. docs ground truth...")
     docs_gt = _scan_affiliate_docs_fn(name_to_code, code_to_name)
-    _log(f"   → {len(docs_gt)} 종목 매핑")
+    _say(f"   → {len(docs_gt)} 종목 매핑")
 
-    _log("5. 균형 분류...")
+    _say("5. 균형 분류...")
     code_to_group = classify_balanced(
         invest_deduped,
         corp_edges,
@@ -96,12 +96,12 @@ def build_graph(*, verbose: bool = True) -> dict:
         verbose=verbose,
     )
 
-    _log("6. 순환출자 탐지...")
+    _say("6. 순환출자 탐지...")
     cycles = detect_cycles(invest_deduped, code_to_name, max_length=6)
-    _log(f"   → {len(cycles)}개")
+    _say(f"   → {len(cycles)}개")
 
     elapsed = time.perf_counter() - t0
-    _log(f"\n파이프라인 완료: {elapsed:.1f}초")
+    _say(f"\n파이프라인 완료: {elapsed:.1f}초")
 
     return {
         "listing_meta": listing_meta,

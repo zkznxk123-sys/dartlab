@@ -29,21 +29,21 @@ def scan_capital(*, verbose: bool = True) -> pl.DataFrame:
           최근증자, 환원점수, 분류, 모순형
     """
 
-    def _log(msg: str) -> None:
+    def _say(msg: str) -> None:
         if verbose:
             _log.info(msg)
 
-    _log("1/3 배당 스캔...")
+    _say("1/3 배당 스캔...")
     div_map = scan_dividend()
-    _log(f"  → {len(div_map)}종목")
+    _say(f"  → {len(div_map)}종목")
 
-    _log("2/3 자사주 스캔...")
+    _say("2/3 자사주 스캔...")
     treasury_map = scan_treasury_stock()
-    _log(f"  → {len(treasury_map)}종목")
+    _say(f"  → {len(treasury_map)}종목")
 
-    _log("3/3 증자/감자 스캔...")
+    _say("3/3 증자/감자 스캔...")
     cap_map = scan_capital_change()
-    _log(f"  → {len(cap_map)}종목")
+    _say(f"  → {len(cap_map)}종목")
 
     all_codes = set(div_map) | set(treasury_map) | set(cap_map)
 
@@ -94,7 +94,7 @@ def scan_capital(*, verbose: bool = True) -> pl.DataFrame:
         )
 
     df = pl.DataFrame(results)
-    _log(f"주주환원 스캔 완료: {df.shape[0]}종목")
+    _say(f"주주환원 스캔 완료: {df.shape[0]}종목")
     return df
 
 

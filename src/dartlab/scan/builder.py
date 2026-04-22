@@ -153,7 +153,7 @@ def _reportDir() -> Path:
     return Path(_dataDir("report"))
 
 
-def _log(msg: str) -> None:
+def _say(msg: str) -> None:
     _log.info(msg)
 
 
@@ -331,11 +331,11 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     allFiles = sorted(docsDir.glob("*.parquet"))
     if not allFiles:
         if verbose:
-            _log("docs parquet 없음 — changes 빌드 건너뜀")
+            _say("docs parquet 없음 — changes 빌드 건너뜀")
         return None
 
     if verbose:
-        _log(f"[changes] {len(allFiles)}종목, sinceYear={sinceYear}")
+        _say(f"[changes] {len(allFiles)}종목, sinceYear={sinceYear}")
 
     t0 = time.perf_counter()
     batchChunks: list[pl.DataFrame] = []
@@ -362,13 +362,13 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
                 batchIdx += 1
 
         if verbose and (i + 1) % 500 == 0:
-            _log(
+            _say(
                 f"  [{i + 1}/{len(allFiles)}] {success}ok {failed}fail {totalRows:,}rows {time.perf_counter() - t0:.0f}s"
             )
 
     if batchIdx == 0:
         if verbose:
-            _log("  changes 결과 없음")
+            _say("  changes 결과 없음")
         shutil.rmtree(batchDir, ignore_errors=True)
         return None
 
@@ -378,7 +378,7 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     elapsed = time.perf_counter() - t0
     diskMb = outputPath.stat().st_size / 1024 / 1024
     if verbose:
-        _log(f"  완료: {success}종목, {totalRows:,}행, {diskMb:.1f}MB, {elapsed:.0f}초")
+        _say(f"  완료: {success}종목, {totalRows:,}행, {diskMb:.1f}MB, {elapsed:.0f}초")
 
     return outputPath
 
@@ -431,21 +431,21 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     allFiles = sorted(finDir.glob("*.parquet"))
     if not allFiles:
         if verbose:
-            _log("finance parquet 없음 — 빌드 건너뜀")
+            _say("finance parquet 없음 — 빌드 건너뜀")
         return None
 
     # 계정명 정규화 매핑 로드
     acctMap = _loadAccountMap()
     if verbose and acctMap:
-        _log(f"[finance] accountMappings: {len(acctMap)}개 매핑 로드")
+        _say(f"[finance] accountMappings: {len(acctMap)}개 매핑 로드")
 
     # 비12월 결산 종목 → 달력 분기 변환 준비
     fmMap = _fiscalMonthMap()
     if verbose and fmMap:
-        _log(f"[finance] 비12월 결산 {len(fmMap)}종목 → 달력 분기 변환")
+        _say(f"[finance] 비12월 결산 {len(fmMap)}종목 → 달력 분기 변환")
 
     if verbose:
-        _log(f"[finance] {len(allFiles)}종목, sinceYear={sinceYear}")
+        _say(f"[finance] {len(allFiles)}종목, sinceYear={sinceYear}")
 
     t0 = time.perf_counter()
     batchChunks: list[pl.DataFrame] = []
@@ -510,11 +510,11 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
                 batchIdx += 1
 
         if verbose and (i + 1) % 500 == 0:
-            _log(f"  [{i + 1}/{len(allFiles)}] {success}ok {totalRows:,}rows {time.perf_counter() - t0:.0f}s")
+            _say(f"  [{i + 1}/{len(allFiles)}] {success}ok {totalRows:,}rows {time.perf_counter() - t0:.0f}s")
 
     if batchIdx == 0:
         if verbose:
-            _log("  finance 결과 없음")
+            _say("  finance 결과 없음")
         shutil.rmtree(batchDir, ignore_errors=True)
         return None
 
@@ -524,7 +524,7 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     elapsed = time.perf_counter() - t0
     diskMb = outputPath.stat().st_size / 1024 / 1024
     if verbose:
-        _log(f"  완료: {success}종목, {totalRows:,}행, {diskMb:.1f}MB, {elapsed:.0f}초")
+        _say(f"  완료: {success}종목, {totalRows:,}행, {diskMb:.1f}MB, {elapsed:.0f}초")
 
     return outputPath
 
@@ -554,11 +554,11 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
     allFiles = sorted(repDir.glob("*.parquet"))
     if not allFiles:
         if verbose:
-            _log("report parquet 없음 — 빌드 건너뜀")
+            _say("report parquet 없음 — 빌드 건너뜀")
         return []
 
     if verbose:
-        _log(f"[report] {len(allFiles)}종목 → apiType별 분리")
+        _say(f"[report] {len(allFiles)}종목 → apiType별 분리")
 
     t0 = time.perf_counter()
 
@@ -613,7 +613,7 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
                     apiBatchIdx[apiType] = idx + 1
 
         if verbose and (i + 1) % 500 == 0:
-            _log(f"  [{i + 1}/{len(allFiles)}] {processed}ok {time.perf_counter() - t0:.0f}s")
+            _say(f"  [{i + 1}/{len(allFiles)}] {processed}ok {time.perf_counter() - t0:.0f}s")
 
     # 남은 청크 flush + 합산
     outputs: list[Path] = []
@@ -640,11 +640,11 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
         diskMb = outPath.stat().st_size / 1024 / 1024
         outputs.append(outPath)
         if verbose:
-            _log(f"  {apiType}: {apiRows[apiType]:,}행, {diskMb:.1f}MB")
+            _say(f"  {apiType}: {apiRows[apiType]:,}행, {diskMb:.1f}MB")
 
     elapsed = time.perf_counter() - t0
     if verbose:
-        _log(f"  report 완료: {len(outputs)}개 apiType, {elapsed:.0f}초")
+        _say(f"  report 완료: {len(outputs)}개 apiType, {elapsed:.0f}초")
 
     return outputs
 
@@ -664,14 +664,14 @@ def _buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
         from dartlab.providers.dart.docs.finance.shareCapital.builder import buildSharesOutstandingScan
 
         if verbose:
-            _log("[shares] 발행주식수 풀 빌드 시작")
+            _say("[shares] 발행주식수 풀 빌드 시작")
         df = buildSharesOutstandingScan()
         if verbose:
-            _log(f"[shares] 완료: rows={df.height} stocks={df['stock_code'].n_unique()}")
+            _say(f"[shares] 완료: rows={df.height} stocks={df['stock_code'].n_unique()}")
         return _scanDir() / "sharesOutstanding.parquet"
     except (FileNotFoundError, RuntimeError, OSError, ValueError) as exc:
         if verbose:
-            _log(f"[shares] 실패: {exc}")
+            _say(f"[shares] 실패: {exc}")
         return None
 
 
@@ -694,8 +694,8 @@ def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path 
         sharesOutstanding : Path | None — sharesOutstanding.parquet 경로
     """
     if verbose:
-        _log(f"전종목 scan 프리빌드 시작 (sinceYear={sinceYear})")
-        _log("=" * 60)
+        _say(f"전종목 scan 프리빌드 시작 (sinceYear={sinceYear})")
+        _say("=" * 60)
 
     results: dict[str, Path | list[Path] | None] = {}
 
@@ -705,10 +705,10 @@ def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path 
     results["sharesOutstanding"] = _buildSharesOutstandingSafe(verbose=verbose)
 
     if verbose:
-        _log("=" * 60)
+        _say("=" * 60)
         scanDir = _scanDir()
         if scanDir.exists():
             totalMb = sum(f.stat().st_size for f in scanDir.rglob("*.parquet")) / 1024 / 1024
-            _log(f"scan 전체: {totalMb:.1f}MB")
+            _say(f"scan 전체: {totalMb:.1f}MB")
 
     return results

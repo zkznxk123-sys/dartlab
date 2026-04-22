@@ -38,29 +38,29 @@ def scan_governance(*, verbose: bool = True) -> pl.DataFrame:
           총점, 등급, 유효축수
     """
 
-    def _log(msg: str) -> None:
+    def _say(msg: str) -> None:
         if verbose:
             _log.info(msg)
 
-    _log("1/5 최대주주 지분율...")
+    _say("1/5 최대주주 지분율...")
     holder_map = scan_major_holder_pct()
-    _log(f"  → {len(holder_map)}종목")
+    _say(f"  → {len(holder_map)}종목")
 
-    _log("2/5 사외이사 비율...")
+    _say("2/5 사외이사 비율...")
     outside_map = scan_outside_directors()
-    _log(f"  → {len(outside_map)}종목")
+    _say(f"  → {len(outside_map)}종목")
 
-    _log("3/5 pay ratio...")
+    _say("3/5 pay ratio...")
     pay_ratio_map = scan_pay_ratio()
-    _log(f"  → {len(pay_ratio_map)}종목")
+    _say(f"  → {len(pay_ratio_map)}종목")
 
-    _log("4/5 감사의견...")
+    _say("4/5 감사의견...")
     audit_map = scan_audit_opinion()
-    _log(f"  → {len(audit_map)}종목")
+    _say(f"  → {len(audit_map)}종목")
 
-    _log("5/5 소액주주 지분율...")
+    _say("5/5 소액주주 지분율...")
     minority_map = scan_minority_holder()
-    _log(f"  → {len(minority_map)}종목")
+    _say(f"  → {len(minority_map)}종목")
 
     all_codes = set(holder_map) | set(outside_map) | set(pay_ratio_map) | set(audit_map) | set(minority_map)
 
@@ -106,7 +106,7 @@ def scan_governance(*, verbose: bool = True) -> pl.DataFrame:
         )
 
     df = pl.DataFrame(results)
-    _log(f"거버넌스 스캔 완료: {df.shape[0]}종목, 5/5")
+    _say(f"거버넌스 스캔 완료: {df.shape[0]}종목, 5/5")
     return df
 
 

@@ -24,25 +24,25 @@ def scan_debt(*, verbose: bool = True) -> pl.DataFrame:
           단기채무합계, 총부채, 부채비율, ICR, 위험등급
     """
 
-    def _log(msg: str) -> None:
+    def _say(msg: str) -> None:
         if verbose:
             _log.info(msg)
 
-    _log("1/4 사채 만기...")
+    _say("1/4 사채 만기...")
     bond_map = scan_bonds()
-    _log(f"  -> {len(bond_map)}종목")
+    _say(f"  -> {len(bond_map)}종목")
 
-    _log("2/4 단기사채/CP...")
+    _say("2/4 단기사채/CP...")
     short_map = scan_short_debt()
-    _log(f"  -> {len(short_map)}종목")
+    _say(f"  -> {len(short_map)}종목")
 
-    _log("3/4 부채비율...")
+    _say("3/4 부채비율...")
     debt_map = scan_debt_mix()
-    _log(f"  -> {len(debt_map)}종목")
+    _say(f"  -> {len(debt_map)}종목")
 
-    _log("4/4 이자보상배율...")
+    _say("4/4 이자보상배율...")
     icr_map = scan_icr()
-    _log(f"  -> {len(icr_map)}종목")
+    _say(f"  -> {len(icr_map)}종목")
 
     all_codes = set(bond_map) | set(debt_map) | set(icr_map) | set(short_map)
 
@@ -76,7 +76,7 @@ def scan_debt(*, verbose: bool = True) -> pl.DataFrame:
     # infer_schema_length=None: 전체 행 스캔 (기본 100행 추론이 큰 금액에서 overflow
     # 유발. "ComputeError: could not append value 1.2e11 of type f64" 재발 방지.
     df = pl.DataFrame(results, infer_schema_length=None)
-    _log(f"부채 스캔 완료: {df.shape[0]}종목")
+    _say(f"부채 스캔 완료: {df.shape[0]}종목")
     return df
 
 
