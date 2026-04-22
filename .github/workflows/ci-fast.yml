@@ -103,9 +103,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-cov hypothesis pytest-xdist
+          pip install pytest pytest-asyncio pytest-cov hypothesis pytest-xdist pytest-benchmark
           pip install -e .[all]
       # unit marker 만 — 가장 빠른 피드백.
+      # pytest-benchmark 는 pyproject.toml 에 addopts 로 잡혀있는 bench_*.py 파일
+      # 수집 때문에 필요. --benchmark-disable 로 실제 벤치 실행은 차단.
       - name: Run unit tests (pytest-xdist)
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
