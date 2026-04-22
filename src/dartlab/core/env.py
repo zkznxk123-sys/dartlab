@@ -3,11 +3,42 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 from dartlab.core.logger import getLogger
 
 _log = getLogger(__name__)
+
+
+class AuthKeyMissing(RuntimeError):
+    """API 키 미설정 — 사용자 안내 (발급 URL + .env 설정법) 포함.
+
+    서버/백그라운드 등 TTY 가 없어 대화형 입력이 불가능한 환경에서
+    ``promptAndSave`` 가 이 예외를 raise 한다. AI tool 은 이 예외의
+    문자열 본문을 응답에 그대로 포함해 사용자에게 키 설정 방법을 안내한다.
+
+    Attributes
+    ----------
+    envKey : str
+        환경변수 이름 (예: "ECOS_API_KEY").
+    label : str
+        서비스 설명 (예: "한국은행 ECOS API 키가 필요합니다.").
+    guide : str
+        발급 URL 또는 안내.
+    """
+
+    def __init__(self, envKey: str, *, label: str, guide: str):
+        self.envKey = envKey
+        self.label = label
+        self.guide = guide
+        super().__init__(
+            f"{label}\n"
+            f"  - 발급: {guide}\n"
+            f"  - 설정: 프로젝트 루트의 .env 파일에 `{envKey}=<발급받은키>` 추가\n"
+            f"  - 또는 셸 환경변수로 `export {envKey}=...` 후 재실행\n"
+            f"  - 대화형 CLI 에서는 `dartlab.setup()` 실행 시 안내에 따라 입력 가능"
+        )
 
 
 _ENV_FILE: Path | None = None
@@ -159,6 +190,11 @@ def promptAndSave(envKey: str, *, label: str, guide: str) -> str | None:
         masked = existing[:4] + "..." + existing[-4:] if len(existing) > 8 else "***"
         _log.info(f"\n  \u2713 {envKey} 이미 설정됨 ({masked})\n")
         return existing
+
+    # TTY 없는 환경 (서버·백그라운드·서브프로세스) 은 input() 대기 불가.
+    # AI tool 이 이 예외 본문을 응답에 담아 사용자에게 키 설정 방법을 안내한다.
+    if sys.stdin is None or not sys.stdin.isatty():
+        raise AuthKeyMissing(envKey, label=label, guide=guide)
 
     _log.info(f"\n  {label}")
     _log.info(f"  {guide}")
