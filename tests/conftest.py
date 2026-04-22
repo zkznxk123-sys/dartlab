@@ -102,14 +102,30 @@ _DATA_SKIP_REASONS = frozenset(
 
 
 def pytest_collection_modifyitems(items):
-    """skipif reason이 데이터 관련이면 requires_data 마커 자동 추가."""
+    """skipif reason이 데이터 관련이면 requires_data 마커 자동 추가.
+
+    realData 마커가 있으면 network 마커 자동 추가 (외부 HF 다운로드 필수).
+    network 마커가 있으면 flaky 재시도 2회 자동 적용 — pytest-rerunfailures
+    설치 시만 효과 (미설치 환경에선 무시, 안전).
+    """
     data_mark = pytest.mark.requires_data
+    network_mark = pytest.mark.network
+    flaky_mark = pytest.mark.flaky(reruns=2, reruns_delay=5)
     for item in items:
+        # 데이터 의존 → requires_data 자동 부착
         for marker in item.iter_markers("skipif"):
             reason = marker.kwargs.get("reason", "")
             if reason in _DATA_SKIP_REASONS:
                 item.add_marker(data_mark)
                 break
+
+        # realData → network 자동 부착
+        if item.get_closest_marker("realData") and not item.get_closest_marker("network"):
+            item.add_marker(network_mark)
+
+        # network → flaky (reruns=2) 자동 부착. HF 429 / DART timeout 등 transient 실패 재시도.
+        if item.get_closest_marker("network"):
+            item.add_marker(flaky_mark)
 
 
 @pytest.fixture(autouse=True)

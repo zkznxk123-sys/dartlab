@@ -170,6 +170,8 @@ markers = [
     "heavy: 대량 데이터 로드 — 단독 실행 필수",
     "realData: 엔진별 실제 데이터 스모크 — HF parquet + 실제 파이프라인 실행 (schema drift/silent None 방어)",
     "freshInstall: 빈 캐시 → 자동 다운로드 경로 검증 (외부 사용자 첫 호출 시나리오)",
+    "network: 외부 HTTP API 호출 (HF/DART/EDGAR/FRED) — transient 실패 재시도 대상",
+    "slow: 실행 30초 이상 — PR fast path 에서 제외",
 ]
 
 [tool.coverage.run]

@@ -1,0 +1,214 @@
+name: CI Fast
+
+# Tier 1 — PR / push 에 매번 도는 즉시 피드백 게이트 (목표 ≤ 3분).
+# 업계 표준 (polars / huggingface / pandas / dbt): PR 은 fast 만, heavy 는 nightly/master-only.
+# dartlab 이전 ci.yml 이 realdata-suite 까지 매 PR 마다 돌려 10~15분 허들 → 본 파일로 분할.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# 같은 ref 새 push 시 이전 실행 cancel.
+concurrency:
+  group: ci-fast-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # format / lint / typecheck / smoke — 각 30초~2분, 병렬.
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install ruff==0.11.6
+      - name: Format check
+        run: ruff format --check src/dartlab/ tests/
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install ruff==0.11.6
+      - name: Lint check
+        run: ruff check src/dartlab/ tests/
+      # silent-fail 패턴 lint — 2026-04-19 사고 class 재유입 차단.
+      - name: Silent-fail pattern check
+        run: python scripts/dev/checkSilentFail.py
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package and pyright
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[all]
+          pip install pyright
+      - name: Run pyright
+        run: pyright
+        continue-on-error: true
+
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Import smoke test
+        run: |
+          python -c "
+          import dartlab
+          from dartlab import Company
+          from dartlab.core.registry import getEntries
+          from dartlab.core.finance.ratios import calcRatios
+          from dartlab.analysis.financial.insight.grading import analyzePerformance
+          from dartlab.providers.dart.finance.mapper import AccountMapper
+          entries = getEntries()
+          print(f'dartlab imported OK, {len(entries)} registry entries')
+          "
+
+  # Tier 1 의 핵심 — unit marker 만. 이전 test job 이 모든 non-realData 를 돌렸으나
+  # 그 때문에 PR feedback 이 5~10분. unit 만 돌리면 ~90초 예상.
+  # integration / requires_data / cross-os / fixture-integration 은 ci-full 로 이관.
+  test-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov hypothesis pytest-xdist
+          pip install -e .[all]
+      # unit marker 만 — 가장 빠른 피드백.
+      - name: Run unit tests (pytest-xdist)
+        env:
+          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
+          PYTEST_MEMORY_LIMIT_MB: "1900"
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          pytest tests/ -n auto --dist loadfile --tb=short -m "unit" \
+            --ignore=tests/test_fixture_analysis_real.py \
+            --ignore=tests/test_fixture_credit_real.py \
+            --ignore=tests/test_fixture_review_real.py \
+            --ignore=tests/realData \
+            --benchmark-disable --no-cov
+
+  # Wheel packaging 게이트 — 2026-04-19 사고 (parserMappings 누락) 재발 방지.
+  # 사이즈 작고 빠름. Tier 1 유지.
+  wheel-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install build tool
+        run: pip install build
+      - name: Build wheel
+        run: python -m build --wheel --outdir dist
+      - name: Verify wheel (bundle + install runtime)
+        run: |
+          set -euo pipefail
+          WHL=$(ls dist/*.whl | head -n1)
+          python -X utf8 scripts/build/verifyWheel.py "$WHL"
+
+  quality-gate:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install tools
+        run: pip install radon vulture
+      - name: Run quality gate
+        run: python scripts/audit/qualityGate.py
+      - name: Record quality history
+        if: github.ref == 'refs/heads/master'
+        run: python scripts/audit/qualityGate.py --record
+      - name: Upload quality history
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v5
+        with:
+          name: quality-history
+          path: scripts/audit/qualityHistory.jsonl
+          retention-days: 90
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package and pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . pip-audit
+      - name: Run pip-audit
+        run: pip-audit --strict --desc on 2>&1 | tee audit-report.txt
+        continue-on-error: true
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: pip-audit-report
+          path: audit-report.txt
+          retention-days: 30
+
+  deps-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package and deptry
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[all] deptry
+      - name: Check dependency health
+        run: deptry src/dartlab/ --ignore DEP002,DEP003 --extend-exclude _reference
+        continue-on-error: true
+
+  notebooks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Validate notebook syntax
+        run: python scripts/audit/validateNotebooks.py
