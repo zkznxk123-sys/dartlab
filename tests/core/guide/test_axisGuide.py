@@ -91,3 +91,63 @@ class TestBuildAxisGuideDataFrame:
     def test_empty_registry(self):
         df = buildAxisGuideDataFrame({}, groupExtractor=lambda k, e: "")
         assert df.is_empty()
+
+
+class Test5EngineGuideRegression:
+    """5엔진 _guide() 리팩터 전후 출력 DataFrame 회귀 보호.
+
+    리팩터가 컬럼 순서·이름·행 개수·첫 행 내용을 바꾸지 않아야 한다.
+    """
+
+    def test_analysis_engine(self):
+        from dartlab.analysis.financial import Analysis
+
+        df = Analysis()._guide()
+        assert df.columns == ["axis", "label", "description", "example", "group", "items", "apiKey"]
+        assert df.height >= 20  # 최소 보장선 (축 추가될 수 있음)
+        row0 = df.row(0, named=True)
+        assert row0["axis"] == "수익구조"
+        assert row0["apiKey"] == "불필요"
+        assert isinstance(row0["items"], int) and row0["items"] >= 1
+
+    def test_scan_engine(self):
+        import dartlab
+
+        df = dartlab.scan()
+        assert df.columns == ["axis", "label", "group", "description", "example", "apiKey"]
+        assert df.height >= 10
+        row0 = df.row(0, named=True)
+        assert row0["axis"] == "governance"
+        assert row0["group"] == "DART"
+        assert row0["apiKey"] == "불필요"
+
+    def test_macro_engine(self):
+        import dartlab
+
+        df = dartlab.macro()
+        assert df.columns == ["axis", "label", "description", "example", "group", "apiKey"]
+        assert df.height >= 8
+        row0 = df.row(0, named=True)
+        assert row0["axis"] == "cycle"
+        assert "제" in row0["group"] and "막" in row0["group"]
+        assert "ECOS_API_KEY" in row0["apiKey"]
+
+    def test_credit_engine(self):
+        import dartlab
+
+        df = dartlab.credit()
+        assert df.columns == ["axis", "label", "description", "example", "group", "apiKey"]
+        assert df.height >= 7
+        row0 = df.row(0, named=True)
+        assert row0["axis"] == "grade"
+        assert row0["apiKey"] == "불필요"
+
+    def test_quant_engine(self):
+        import dartlab
+
+        df = dartlab.quant()
+        # quant는 apiKey 컬럼 없음
+        assert df.columns == ["axis", "label", "description", "example", "group"]
+        assert df.height >= 20
+        row0 = df.row(0, named=True)
+        assert row0["axis"] == "indicators"

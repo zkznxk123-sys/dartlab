@@ -371,21 +371,18 @@ class Macro:
             - group : str — 6막 내 위치 (예: ``"제1막: 경제는 어디에 있나"``).
             - apiKey : str — 필요한 API 키 안내.
         """
-        rows = []
-        for key, entry in _AXIS_REGISTRY.items():
+        from dartlab.core.guide import buildAxisGuideDataFrame
+
+        def _group(_key: str, entry) -> str:
             act_label = _ACT_LABELS.get(entry.act, "")
             act_str = f"제{entry.act}막" if entry.act > 0 else "종합"
-            rows.append(
-                {
-                    "axis": key,
-                    "label": entry.label,
-                    "description": entry.description,
-                    "example": entry.example,
-                    "group": f"{act_str}: {act_label}",
-                    "apiKey": "ECOS_API_KEY (KR) / FRED_API_KEY (US)",
-                }
-            )
-        return pl.DataFrame(rows)
+            return f"{act_str}: {act_label}"
+
+        return buildAxisGuideDataFrame(
+            _AXIS_REGISTRY,
+            groupExtractor=_group,
+            apiKey="ECOS_API_KEY (KR) / FRED_API_KEY (US)",
+        )
 
     def __repr__(self) -> str:
         n = len(_AXIS_REGISTRY)

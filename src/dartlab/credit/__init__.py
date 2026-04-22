@@ -26,7 +26,7 @@ src/dartlab/analysis/CREDIT.md 참조.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 
 from dartlab.core.logger import getLogger
 
@@ -164,12 +164,12 @@ def guide():
     >>> c.credit("등급")                        # 종합 등급
     >>> c.credit("채무상환", detail=True)        # 채무상환 축 상세
     """
-    import polars as pl
+    from dartlab.core.guide import buildAxisGuideDataFrame
 
-    rows = [asdict(e) for e in _AXIS_REGISTRY.values()]
-    for row in rows:
-        row["apiKey"] = "불필요"
-    df = pl.DataFrame(rows)
+    df = buildAxisGuideDataFrame(
+        _AXIS_REGISTRY,
+        groupExtractor=lambda _k, e: e.group,
+    )
 
     # 빠른 시작 안내 출력
     _lines = [

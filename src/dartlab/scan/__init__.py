@@ -726,14 +726,14 @@ class Scan:
 
             - axis : str — 정규 축 키 (예: ``"governance"``, ``"profitability"``).
             - label : str — 한글 축 이름 (예: ``"거버넌스"``, ``"수익성"``).
-            - group : str — 데이터 그룹 (``"DART"``, ``"EDGAR"``, ``"financial"``).
+            - group : str — 데이터 그룹 (``"DART"``, ``"DART+EDGAR"``, ``"financial"``).
             - description : str — 축이 수행하는 분석 한 줄 설명.
             - example : str — 호출 예시 코드 문자열.
             - apiKey : str — 필요한 API 키 (scan은 전부 불필요).
         """
-        # financial 그룹에 속하는 축 목록
+        from dartlab.core.guide import buildAxisGuideDataFrame
+
         financial_axes = set(_SCAN_GROUPS.get("financial", []))
-        # EDGAR에서도 지원하는 축
         _EDGAR_AXES = {
             "profitability",
             "growth",
@@ -748,25 +748,18 @@ class Scan:
             "ratio",
         }
 
-        rows = []
-        for key, entry in _AXIS_REGISTRY.items():
+        def _group(key: str, _entry) -> str:
             if key in financial_axes:
-                group = "financial"
-            elif key in _EDGAR_AXES:
-                group = "DART+EDGAR"
-            else:
-                group = "DART"
-            rows.append(
-                {
-                    "axis": key,
-                    "label": entry.label,
-                    "group": group,
-                    "description": entry.description,
-                    "example": entry.example,
-                    "apiKey": "불필요",
-                }
-            )
-        return pl.DataFrame(rows)
+                return "financial"
+            if key in _EDGAR_AXES:
+                return "DART+EDGAR"
+            return "DART"
+
+        return buildAxisGuideDataFrame(
+            _AXIS_REGISTRY,
+            groupExtractor=_group,
+            columnOrder=["axis", "label", "group", "description", "example", "apiKey"],
+        )
 
     def _financialGuide(self) -> pl.DataFrame:
         """financial 그룹 8축 가이드."""

@@ -1040,7 +1040,7 @@ class Analysis:
         return pl.DataFrame(rows)
 
     def _guide(self) -> pl.DataFrame:
-        """축 가이드 — 4엔진 통일 컬럼 (axis, label, description, example, group, items, apiKey).
+        """축 가이드 — 5엔진 통일 컬럼 (axis, label, description, example, group, items, apiKey).
 
         Returns
         -------
@@ -1049,24 +1049,17 @@ class Analysis:
             label : str — 한글 레이블
             description : str — 설명
             example : str — 사용 예시
-            group : str — 소속 그룹
+            group : str — 소속 그룹 (entry.section)
             items : int — calc 함수 개수
             apiKey : str — 필요한 API 키 ("불필요" — 모든 축이 DART 공시 기반)
         """
-        rows = []
-        for key, entry in _AXIS_REGISTRY.items():
-            rows.append(
-                {
-                    "axis": key,
-                    "label": getattr(entry, "label", key),
-                    "description": entry.description,
-                    "example": entry.example,
-                    "group": entry.section,
-                    "items": len(entry.calcs),
-                    "apiKey": "불필요",
-                }
-            )
-        return pl.DataFrame(rows)
+        from dartlab.core.guide import buildAxisGuideDataFrame
+
+        return buildAxisGuideDataFrame(
+            _AXIS_REGISTRY,
+            groupExtractor=lambda k, e: e.section,
+            extraColumns={"items": lambda k, e: len(e.calcs)},
+        )
 
     def _listCalcs(self, axis: str, entry: _AxisEntry) -> pl.DataFrame:
         """해당 축의 분석 항목 목록."""

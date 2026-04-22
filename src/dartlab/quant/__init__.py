@@ -606,24 +606,21 @@ class Quant:
 
     def _guide(self) -> pl.DataFrame:
         """축 카탈로그 — 통일 컬럼 (axis, label, description, example, group)."""
-        rows = []
-        for key, entry in _AXIS_REGISTRY.items():
-            group_label = _GROUPS.get(entry.group, entry.group)
-            stock_note = ""
+        from dartlab.core.guide import buildAxisGuideDataFrame
+
+        def _desc(_k: str, entry) -> str:
             if not entry.stockRequired:
-                stock_note = " (종목 불필요)"
-            elif entry.multiStock:
-                stock_note = " (종목 리스트)"
-            rows.append(
-                {
-                    "axis": key,
-                    "label": entry.label,
-                    "description": entry.description + stock_note,
-                    "example": entry.example,
-                    "group": group_label,
-                }
-            )
-        return pl.DataFrame(rows)
+                return entry.description + " (종목 불필요)"
+            if entry.multiStock:
+                return entry.description + " (종목 리스트)"
+            return entry.description
+
+        return buildAxisGuideDataFrame(
+            _AXIS_REGISTRY,
+            groupExtractor=lambda _k, e: _GROUPS.get(e.group, e.group),
+            descriptionExtractor=_desc,
+            apiKey=None,
+        )
 
     def __repr__(self) -> str:
         # 그룹별 축 이름 수집
