@@ -1,0 +1,137 @@
+{
+"version": "v19",
+"asOf": "2026-04-22",
+"kr": {
+"market": "KR",
+"phase": "recovery",
+"phaseLabel": "회복",
+"confidence": "high",
+"signals": [
+"CLI 급등 (+1.00)"
+],
+"sectorStrategy": {
+"high": "overweight",
+"moderate": "overweight",
+"defensive": "neutral",
+"low": "neutral"
+},
+"transition": null,
+"quadrant": {
+"quadrant": "stagflation",
+"quadrantLabel": "스태그플레이션",
+"growth": "falling",
+"growthSignal": -6.9,
+"inflation": "rising",
+"inflationSignal": 0.65,
+"assetImplication": {
+"equity": "underweight",
+"bond": "underweight",
+"commodity": "overweight",
+"gold": "overweight",
+"tips": "overweight",
+"cash": "overweight"
+},
+"confidence": "high",
+"description": "성장 둔화 + 물가 상승 — 금·TIPS·현금 방어, 주식·채권 불리"
+}
+},
+"us": {
+"market": "US",
+"phase": "expansion",
+"phaseLabel": "확장",
+"confidence": "medium",
+"signals": [
+"HY 스프레드 안정 (287bp)",
+"수익률곡선 정상 (+0.52%)",
+"금 급등 (YoY +62.1%)",
+"CPI 3.3% — 인플레 동반 확장"
+],
+"sectorStrategy": {
+"high": "overweight",
+"moderate": "overweight",
+"defensive": "neutral",
+"low": "neutral"
+},
+"transition": null,
+"quadrant": {
+"quadrant": "reflation",
+"quadrantLabel": "리플레이션",
+"growth": "rising",
+"growthSignal": 619557.0,
+"inflation": "rising",
+"inflationSignal": 26.04,
+"assetImplication": {
+"equity": "overweight",
+"bond": "underweight",
+"commodity": "overweight",
+"gold": "neutral",
+"tips": "overweight",
+"cash": "underweight"
+},
+"confidence": "high",
+"description": "성장 가속 + 물가 상승 — 원자재·EM 주식·TIPS 유리, 명목채 불리"
+}
+},
+"sectorTailwind": {
+"automotive": {
+"kr": 0.4,
+"us": 0.5,
+"blended": 0.44
+},
+"biotech": {
+"kr": 0.0,
+"us": 0.1,
+"blended": 0.04
+},
+"chemicals": {
+"kr": 0.3,
+"us": 0.2,
+"blended": 0.26
+},
+"construction": {
+"kr": 0.5,
+"us": 0.3,
+"blended": 0.42
+},
+"display": {
+"kr": 0.3,
+"us": 0.4,
+"blended": 0.34
+},
+"energy": {
+"kr": 0.3,
+"us": 0.0,
+"blended": 0.18
+},
+"finance": {
+"kr": 0.4,
+"us": 0.3,
+"blended": 0.36
+},
+"it_software": {
+"kr": 0.4,
+"us": 0.5,
+"blended": 0.44
+},
+"retail": {
+"kr": 0.3,
+"us": 0.4,
+"blended": 0.34
+},
+"semiconductor": {
+"kr": 0.5,
+"us": 0.6,
+"blended": 0.54
+},
+"shipbuilding": {
+"kr": 0.3,
+"us": 0.4,
+"blended": 0.34
+},
+"steel": {
+"kr": 0.4,
+"us": 0.2,
+"blended": 0.32
+}
+}
+}
