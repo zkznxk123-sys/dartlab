@@ -108,14 +108,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest pytest-asyncio hypothesis build pytest-cov pytest-benchmark
           pip install -e .
+      # shell: bash — Windows 에서 기본 PowerShell 은 backslash 연속 미지원.
+      # 단일 라인으로 써도 되지만 가독성 위해 bash 명시. Linux/macOS 도 bash 기본.
       - name: Run unit + bundle tests
         env:
           PYTHONIOENCODING: utf-8
           DARTLAB_TEST_LOCKED: "1"
-        run: |
-          python -X utf8 -m pytest tests/test_bundledResources.py tests/test_wheelPackaging.py \
-            -m "unit and not heavy" --tb=short --no-cov --benchmark-disable
+        shell: bash
+        run: python -X utf8 -m pytest tests/test_bundledResources.py tests/test_wheelPackaging.py -m "unit and not heavy" --tb=short --no-cov --benchmark-disable
       - name: Silent-fail lint
+        shell: bash
         run: python -X utf8 scripts/dev/checkSilentFail.py
 
   # realData 스위트 path-filter matrix — master push 에만 실행.
