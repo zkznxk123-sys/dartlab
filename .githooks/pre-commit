@@ -1,0 +1,39 @@
+#!/bin/sh
+if [ -x .venv/bin/python ]; then
+  PYTHON=.venv/bin/python
+elif command -v python3 >/dev/null 2>&1; then
+  PYTHON=$(command -v python3)
+elif command -v python >/dev/null 2>&1; then
+  PYTHON=$(command -v python)
+else
+  echo "[ai-policy] Python interpreter not found." >&2
+  exit 1
+fi
+
+# 1) AI 마커 차단
+"$PYTHON" scripts/audit/check_no_ai_markers.py --check-staged || exit $?
+
+# 2) staged Python 파일 ruff format + check (experiments / notebooks 제외)
+STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.py$' | grep -vE '^(experiments|notebooks)/' | tr '\n' ' ')
+if [ -n "$STAGED_PY" ]; then
+  if command -v uv >/dev/null 2>&1; then
+    RUFF="uv run ruff"
+  elif [ -x .venv/bin/ruff ]; then
+    RUFF=".venv/bin/ruff"
+  else
+    RUFF="ruff"
+  fi
+
+  $RUFF format --check $STAGED_PY || {
+    echo "" >&2
+    echo "[ruff-format] 포맷 불일치. 아래 명령으로 재포맷 후 재커밋:" >&2
+    echo "  uv run ruff format src/dartlab tests/" >&2
+    exit 1
+  }
+  $RUFF check $STAGED_PY || {
+    echo "" >&2
+    echo "[ruff-check] lint 에러. 아래 명령으로 자동수정 후 재커밋:" >&2
+    echo "  uv run ruff check --fix src/dartlab tests/" >&2
+    exit 1
+  }
+fi

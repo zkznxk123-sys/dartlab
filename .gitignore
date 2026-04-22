@@ -27,7 +27,6 @@ PLAN.md
 TODO.md
 .agent/
 .claude/
-.githooks/
 
 # Misc local files (not for repo)
 /main.py
