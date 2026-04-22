@@ -9,26 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.19] - 2026-04-22
 
-질적 안정 Q3.1 tail + Q4 효율성 + Q5 dead code 제거. **정식 1.0.0 아님** — 외부 venv 종합 검증 및 사용자 최종 승인 후에만 1.0.0 릴리즈.
-
-### Changed
-
-- **F/E-rank 복잡도 감축 (Q3.1 tail)**: `_calcTwoStageDcf` CC 63→5 (7 sub-helper 로 분할 — wacc 해결, 고성장률, phase config, terminal growth, baseFcf, normalized FCF, netDebt+shares). E/F-rank (CC≥30) 함수 수 **197 → 149** (-24%) 달성.
-- **효율성 — hotpath lru_cache (Q4.1)**: `mapSectionTitle` / `normalizeSectionTitle` / `loadSectionProfileTable` `@lru_cache` 적용. O(n²) 파이프라인 섹션 매핑 루프에서 동일 title 반복 조회 캐시 재사용.
-- **효율성 — regex 모듈 상수화 (Q4.2)**: 함수 내부 `re.compile(...)` 15건 → 모듈 레벨 상수. `providers/dart/company._QUARTER_COL_RE`, `providers/dart/_table_horizontalizer._UNIT_ONLY_RE/_DATE_ONLY_RE`, `providers/dart/docs/finance/boardOfDirectors/parser._MEETING_DATE_RE` 등 8 파일. 호출당 재컴파일 비용 제거.
-
-### Removed
-
-- **Dead code 제거 (Q5, 8,201줄 삭감)**: `analysis/financial/research/narrative.py` (3,106줄), `research/orchestrator.py` (1,123줄), `research/thesis.py · sectorKpi · spec · quality` (685줄) — `generateResearch()` 는 export 됐으나 외부 호출 경로 0건. `research/scoring.py`, `research/types.py` 는 scorecard 에서 실사용하므로 유지. `providers/dart/finance/mapperData/_backup/sortOrder.json` (3,231줄) — 과거 snapshot, 현 sortOrder.json 이 SSoT.
+내부 안정화 + 버그 수정.
 
 ### Fixed
 
-- **`forecastCalcs.calcStructuralBreak` import 복구**: 기존 `from dartlab.analysis.financial.research.predictionSignals import calcStructuralBreak` 는 존재하지 않는 경로. `try/except ImportError` 가 silent 하게 삼켰고 `structuralBreak` 는 항상 None 이었음 (Chow Test 신호 실종). `dartlab.analysis.financial.predictionSignals` 로 정상 경로 복구.
+- **`c.analysis("예측신호")` 의 구조변화 감지가 이전엔 항상 None 이었음** — 내부 import 경로가 잘못 설정되어 Chow Test 결과가 silent 하게 버려지던 버그. 이제 `structuralBreak` 필드에 감지 결과가 정상 반환된다.
 
-### Migration
+### Changed
 
-- 제거된 `research.generateResearch` · `research.sectorKpi.calcSectorKpis` · `research.thesis` · `research.quality` · `research.narrative.buildNarrative` 는 외부 호출 경로가 없던 미공개 API — 외부 사용자 영향 없음.
-- `from dartlab.analysis.financial.research import calcPiotroski` 는 계속 유지.
+- **섹션 분석 반복 호출 속도 개선** — `c.show("businessOverview")` · `c.analysis("가치평가")` 같이 섹션 매핑을 여러 번 쓰는 분석에서 캐시 적용으로 2회째부터 즉시 반환.
+
+### Removed
+
+- **미사용 내부 모듈 정리** — `dartlab.analysis.financial.research` 하위 `generateResearch` · `buildNarrative` · `calcSectorKpis` 등은 공개 API 로 쓰인 적 없어 제거. `from dartlab.analysis.financial.research import calcPiotroski` 는 계속 사용 가능.
 
 ## [0.9.18] - 2026-04-21
 
