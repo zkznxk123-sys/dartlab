@@ -1823,7 +1823,15 @@ def _getLinkedCompanies(company, stockCode: str) -> list[dict]:
                                 "relationship": "거래",
                             }
                         )
-    except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
+    except (
+        ValueError,
+        KeyError,
+        TypeError,
+        AttributeError,
+        FileNotFoundError,
+        RuntimeError,  # DART 다운로드 실패 (404 등) — mock/신규 종목에서 발생
+        OSError,  # 네트워크 단절
+    ):
         pass
 
     return linked
