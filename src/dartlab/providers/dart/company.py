@@ -288,6 +288,17 @@ class Company:
         c.finance.SCE                    # 자본변동표
         c.report.treasuryStock           # 정형 공시
         c.docs.sections                  # pure docs source view
+
+    Notes
+    -----
+    **첫 호출 시간** — Company(stockCode) 최초 호출은 해당 종목의 docs /
+    finance / report parquet 를 HuggingFace 에서 자동 다운로드한다 (총
+    ~수MB ~ 수십MB). 네트워크 속도에 따라 **30~60초** 소요. 2회째부터는
+    로컬 캐시 사용 — 즉시 반환.
+
+    Company 편의성 3원칙 (CLAUDE.md) 중 "속도 — 첫 호출 5초 이내" 는 캐시
+    적중 기준. cold start (캐시 없음) 는 다운로드 시간 포함이며 진행 상황
+    은 기본 INFO 레벨 logger 로 출력 (silence: ``logging.getLogger("dartlab").setLevel(WARNING)``).
     """
 
     @staticmethod
@@ -305,6 +316,10 @@ class Company:
         return 10
 
     def __init__(self, codeOrName: str):
+        import time as _time
+
+        _initStart = _time.perf_counter()
+
         normalized = codeOrName.strip()
         if re.match(r"^[0-9A-Za-z]{6}$", normalized):
             self.stockCode = normalized.upper()
@@ -357,6 +372,12 @@ class Company:
         self._docs = _DocsAccessor(self)
         self._finance = _FinanceAccessor(self)
         self._report = _ReportAccessor(self)
+
+        # 초기화 wall-clock — 2초 이상이면 사용자에게 총 시간 보고 (cold start
+        # 시 HF 다운로드 포함. Company 편의성 3원칙 "첫 호출 5초 이내" 감시).
+        _initElapsed = _time.perf_counter() - _initStart
+        if _initElapsed >= 2.0:
+            _log.info("Company('%s') 준비 완료 (%.1fs)", self.stockCode, _initElapsed)
 
     def __repr__(self):
         try:
