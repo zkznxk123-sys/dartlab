@@ -93,7 +93,7 @@ jobs:
   # integration / requires_data / cross-os / fixture-integration 은 ci-full 로 이관.
   test-fast:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
       - name: Set up Python 3.12
