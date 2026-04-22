@@ -172,6 +172,9 @@ markers = [
     "freshInstall: 빈 캐시 → 자동 다운로드 경로 검증 (외부 사용자 첫 호출 시나리오)",
     "network: 외부 HTTP API 호출 (HF/DART/EDGAR/FRED) — transient 실패 재시도 대상",
     "slow: 실행 30초 이상 — PR fast path 에서 제외",
+    # flaky 는 pytest-rerunfailures 가 설치된 환경에서 작동. 미설치 환경에선 무시.
+    # 미등록 시 PytestUnknownMarkWarning — 본 항목으로 warning 차단.
+    "flaky: transient 실패 자동 재시도 (pytest-rerunfailures)",
 ]
 
 [tool.coverage.run]
