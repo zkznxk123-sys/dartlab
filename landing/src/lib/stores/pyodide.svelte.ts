@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 // @ts-expect-error — JS module with JSDoc, resolved via $pyodide alias
-import { initDartlab, loadCompany, setApiKey } from '$pyodide/loader.js';
+import { initDartlab, loadCompany, loadScanLite, setApiKey } from '$pyodide/loader.js';
 
 type Status = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -24,6 +24,8 @@ export const pyodideStore = $state<State>({
 
 let _py: any = null;
 let _initPromise: Promise<void> | null = null;
+let _scanLiteLoaded = false;
+let _scanLitePromise: Promise<void> | null = null;
 
 function pushLog(msg: string) {
 	pyodideStore.logs = [...pyodideStore.logs, msg];
@@ -74,6 +76,31 @@ export async function ensureCompany(stockCode: string): Promise<void> {
 	if (pyodideStore.currentStock === stockCode) return;
 	await loadCompany(_py, stockCode, { onLog: pushLog });
 	pyodideStore.currentStock = stockCode;
+}
+
+export async function ensureScanLite(): Promise<void> {
+	if (!_py) throw new Error('pyodide not initialized');
+	if (_scanLiteLoaded) return;
+	if (_scanLitePromise) return _scanLitePromise;
+	_scanLitePromise = (async () => {
+		await loadScanLite(_py, { onLog: pushLog });
+		_scanLiteLoaded = true;
+	})();
+	try {
+		await _scanLitePromise;
+	} finally {
+		_scanLitePromise = null;
+	}
+}
+
+export async function runScan(axis: string, target?: string): Promise<RunResult> {
+	if (!_py) throw new Error('pyodide not initialized');
+	await ensureScanLite();
+	const call =
+		target === undefined
+			? `dartlab.scan(${JSON.stringify(axis)})`
+			: `dartlab.scan(${JSON.stringify(axis)}, ${JSON.stringify(target)})`;
+	return runCode(`print(${call})`);
 }
 
 export type RunResult = { ok: boolean; output: string };

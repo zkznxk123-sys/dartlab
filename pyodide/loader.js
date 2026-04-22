@@ -141,6 +141,27 @@ export async function loadCompany(py, stockCode, options = {}) {
 }
 
 /**
+ * 전종목 scan 프리빌드 경량본(`finance-lite.parquet`, ~18MB)을 FS에 다운로드한다.
+ *
+ * dartlab.scan() 이 호출되면 파이썬 측에서도 자동 fetch 가 시도되지만,
+ * 대시보드 페이지처럼 미리 받아두는 게 UX 상 좋을 때 명시적으로 호출한다.
+ *
+ * @param {PyodideInterface} py
+ * @param {Object} [options]
+ * @param {(msg: string) => void} [options.onLog]
+ */
+export async function loadScanLite(py, options = {}) {
+  const { onLog = () => {} } = options;
+  const url = `${HF_BASE}/dart/scan/finance-lite.parquet`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`scan finance-lite fetch 실패: ${r.status} ${url}`);
+  const buf = new Uint8Array(await r.arrayBuffer());
+  py.FS.mkdirTree(`/data/dart/scan`);
+  py.FS.writeFile(`/data/dart/scan/finance-lite.parquet`, buf);
+  onLog(`scan finance-lite: ${(buf.length / 1024 / 1024).toFixed(1)} MB`);
+}
+
+/**
  * AI provider API 키를 설정한다.
  */
 export async function setApiKey(py, provider, apiKey) {
