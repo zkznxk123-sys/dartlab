@@ -552,8 +552,11 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
     lastErr = None
     for attempt in range(_HF_MAX_RETRIES):
         try:
-            # scan은 하위 폴더(report/)도 포함하므로 ** 패턴 사용
-            pattern = f"{hfDir}/**/*.parquet" if category == "scan" else f"{hfDir}/*.parquet"
+            # scan 은 루트(finance.parquet 등) + 하위 폴더(report/) 둘 다 받아야 한다.
+            # huggingface_hub 의 allow_patterns 는 fnmatch — `**` 가 특수문자가 아니라
+            # 중간 디렉토리 최소 1개를 강제한다. `dart/scan/**/*.parquet` 는 루트 파일을
+            # 제외시키므로 두 패턴을 모두 넘겨야 finance.parquet 같은 루트 파일까지 받아진다.
+            pattern = [f"{hfDir}/*.parquet", f"{hfDir}/**/*.parquet"] if category == "scan" else f"{hfDir}/*.parquet"
             snapshot_download(
                 repo_id=HF_REPO,
                 repo_type="dataset",
@@ -579,6 +582,19 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
     # scan은 테마별 parquet (안에 전종목 포함) → 파일 수 ≠ 종목 수
     countLabel = f"{fileCount}파일" if category == "scan" else f"{fileCount}종목"
     emit("download_all:hf_done", label=label, count=countLabel, dataDir=str(dataDir))
+
+    # scan 은 finance.parquet 이 핵심 산출물. allow_patterns 회귀 등으로
+    # 조용히 누락되면 상위 fallback 경로가 부분 결과(예: 종목 2개)를 전수인 양
+    # 반환하는 심각한 오동작이 발생한다. 필수 파일 존재를 강제 검증.
+    if category == "scan":
+        required = ("finance.parquet",)
+        missing = [name for name in required if not (dataDir / name).exists()]
+        if missing:
+            emit("scan:prebuild_incomplete", missing=missing)
+            raise RuntimeError(
+                f"scan 프리빌드 다운로드가 불완전합니다 (누락: {missing}). "
+                f"네트워크 확인 후 dartlab.downloadAll('scan', forceUpdate=True) 로 재시도하세요."
+            )
 
 
 def download(stockCode: str) -> None:

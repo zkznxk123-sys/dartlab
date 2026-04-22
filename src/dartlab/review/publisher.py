@@ -15,6 +15,11 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 _BLOG_DIR = Path("blog/05-company-reports")
 _REGISTRY_PATH = _BLOG_DIR / "_registry.json"
 
@@ -89,11 +94,11 @@ def publishBatch(
             path = publishReport(code, template=template, basePeriod=basePeriod)
             paths.append(path)
             if (i + 1) % 5 == 0:
-                print(f"[review] {i + 1}/{len(stockCodes)} 발간 완료")
+                _log.info(f"[review] {i + 1}/{len(stockCodes)} 발간 완료")
         except (ValueError, KeyError, TypeError, FileNotFoundError) as e:
-            print(f"[review] {code} 발간 실패: {e}")
+            _log.info(f"[review] {code} 발간 실패: {e}")
         gc.collect()
-    print(f"[review] 배치 완료: {len(paths)}/{len(stockCodes)} 성공")
+    _log.info(f"[review] 배치 완료: {len(paths)}/{len(stockCodes)} 성공")
     return paths
 
 

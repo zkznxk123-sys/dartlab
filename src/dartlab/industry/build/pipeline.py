@@ -111,31 +111,31 @@ def buildIndustryMap(
     # KindList 로드
     kindList = _getKindListDicts()
     if verbose:
-        print(f"[industry] KindList: {len(kindList)}사")
+        logger.info(f"[industry] KindList: {len(kindList)}사")
 
     # 1단계: KSIC → 대분류
     nodes = stage1(kindList)
     if verbose:
-        print(f"[industry] 1단계 KSIC: {len(nodes)}사 분류")
+        logger.info(f"[industry] 1단계 KSIC: {len(nodes)}사 분류")
 
     # 2단계: 주요제품 → 중분류
     nodes = stage2(nodes, kindList)
     staged = sum(1 for n in nodes if n.stage)
     if verbose:
-        print(f"[industry] 2단계 제품: {staged}사 공정 매칭")
+        logger.info(f"[industry] 2단계 제품: {staged}사 공정 매칭")
 
     # 3단계: docs → 소분류
     if not skipDocs:
         nodes = stage3(nodes)
         docsStaged = sum(1 for n in nodes if n.source == "docs")
         if verbose:
-            print(f"[industry] 3단계 docs: {docsStaged}사 보강")
+            logger.info(f"[industry] 3단계 docs: {docsStaged}사 보강")
 
     # 4단계: override 적용
     nodes = stage4(nodes)
     manualCount = sum(1 for n in nodes if n.source == "manual")
     if verbose:
-        print(f"[industry] 4단계 override: {manualCount}건 적용")
+        logger.info(f"[industry] 4단계 override: {manualCount}건 적용")
 
     # updatedAt 일괄 설정
     for n in nodes:
@@ -147,14 +147,14 @@ def buildIndustryMap(
     nodes = attachFinancials(nodes)
     revCount = sum(1 for n in nodes if n.revenue)
     if verbose:
-        print(f"[industry] 재무: {revCount}사 매출 데이터 join")
+        logger.info(f"[industry] 재무: {revCount}사 매출 데이터 join")
 
     # 엣지 빌드
     from dartlab.industry.build.edges import buildAllEdges
 
     edges = buildAllEdges(nodes, skipDocs=skipDocs)
     if verbose:
-        print(f"[industry] 엣지: {len(edges)}건 (network + docs)")
+        logger.info(f"[industry] 엣지: {len(edges)}건 (network + docs)")
 
     # 저장
     _saveNodes(nodes)
@@ -163,8 +163,12 @@ def buildIndustryMap(
     if verbose:
         total = len(nodes)
         withStage = sum(1 for n in nodes if n.stage)
-        print(
-            f"[industry] 완료: {total}사, {withStage}사 공정 매칭 ({withStage / total * 100:.0f}%), {len(edges)} 엣지"
+        logger.info(
+            "[industry] 완료: %d사, %d사 공정 매칭 (%.0f%%), %d 엣지",
+            total,
+            withStage,
+            withStage / total * 100,
+            len(edges),
         )
 
     return nodes

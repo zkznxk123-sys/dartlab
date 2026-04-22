@@ -26,6 +26,11 @@ import re
 from pathlib import Path
 from typing import Any
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
@@ -1439,7 +1444,7 @@ class Company:
             c = Company("AAPL")
             filings = c.liveFilings(forms=["10-K"], limit=1)
             result = c.readFiling(filings[0])
-            print(result["text"][:500])
+            _log.info(result["text"][:500])
         """
         record = filingRecord(filing) or {}
 

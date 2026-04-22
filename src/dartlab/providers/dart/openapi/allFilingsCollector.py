@@ -30,8 +30,11 @@ from bs4 import BeautifulSoup
 
 from dartlab import config as _cfg
 from dartlab.core.dataConfig import DATA_RELEASES
+from dartlab.core.logger import getLogger
 from dartlab.providers.dart.openapi.client import DartClient
 from dartlab.providers.dart.openapi.disclosure import listFilings
+
+_log = getLogger(__name__)
 from dartlab.providers.dart.openapi.zipCollector import (
     _RE_MULTI_NEWLINE,
     _collectOneZip,
@@ -152,18 +155,18 @@ def collectMetaDay(
     # 원문까지 완료됐거나 목록이 있으면 건너뜀
     if fullPath.exists():
         if showProgress:
-            print(f"[{date}] 원문 수집 완료됨")
+            _log.info("[%s] 원문 수집 완료됨", date)
         return None
     if metaPath.exists():
         if showProgress:
             df = pl.read_parquet(metaPath)
-            print(f"[{date}] 목록 있음 ({df.height}건)")
+            _log.info("[%s] 목록 있음 (%d건)", date, df.height)
         return None
 
     meta = listFilings(client, start=date, end=date, fetchAll=True)
     if meta.height == 0:
         if showProgress:
-            print(f"[{date}] 공시 없음 (휴일)")
+            _log.info("[%s] 공시 없음 (휴일)", date)
         return None
 
     if corpClasses:
@@ -171,7 +174,7 @@ def collectMetaDay(
 
     if meta.height == 0:
         if showProgress:
-            print(f"[{date}] 상장사 공시 없음")
+            _log.info("[%s] 상장사 공시 없음", date)
         return None
 
     # 저장
@@ -180,7 +183,7 @@ def collectMetaDay(
     tmpPath.rename(metaPath)
 
     if showProgress:
-        print(f"[{date}] 목록 {meta.height}건 저장")
+        _log.info("[%s] 목록 %d건 저장", date, meta.height)
 
     return meta
 
@@ -217,7 +220,7 @@ def collectMetaRange(
     collected = 0
     for i, date in enumerate(dates):
         if showProgress and (i + 1) % 10 == 0:
-            print(f"--- 목록 진행: {i + 1}/{len(dates)} ---")
+            _log.info("--- 목록 진행: %d/%d ---", i + 1, len(dates))
         result = collectMetaDay(
             date,
             client=client,
@@ -228,7 +231,7 @@ def collectMetaRange(
             collected += 1
 
     if showProgress:
-        print(f"\n목록 수집 완료: {collected}일")
+        _log.info("목록 수집 완료: %d일", collected)
 
     return collected
 
@@ -258,20 +261,20 @@ def fillContent(
     # 원문 완료 → 건너뜀
     if fullPath.exists():
         if showProgress:
-            print(f"[{date}] 원문 이미 완료")
+            _log.info("[%s] 원문 이미 완료", date)
         return None
 
     # 목록 없음
     if not metaPath.exists():
         if showProgress:
-            print(f"[{date}] 목록 없음 (먼저 collectMetaDay 실행)")
+            _log.info("[%s] 목록 없음 (먼저 collectMetaDay 실행)", date)
         return None
 
     meta = pl.read_parquet(metaPath)
     total = meta.height
 
     if showProgress:
-        print(f"[{date}] {total}건 원문 수집 시작")
+        _log.info("[%s] %d건 원문 수집 시작", date, total)
 
     allRows: list[dict] = []
     success = empty = 0
@@ -317,7 +320,7 @@ def fillContent(
             )
 
         if showProgress and (idx + 1) % 100 == 0:
-            print(f"  [{idx + 1}/{total}] 성공={success} 빈={empty}")
+            _log.info("  [%d/%d] 성공=%d 빈=%d", idx + 1, total, success, empty)
 
     if not allRows:
         return None
@@ -336,9 +339,13 @@ def fillContent(
         metaPath.unlink()
 
     if showProgress:
-        print(
-            f"[{date}] 완료: {success}건 성공, {empty}건 빈, "
-            f"{df.height}행, {fullPath.stat().st_size / 1024 / 1024:.1f}MB"
+        _log.info(
+            "[%s] 완료: %d건 성공, %d건 빈, %d행, %.1fMB",
+            date,
+            success,
+            empty,
+            df.height,
+            fullPath.stat().st_size / 1024 / 1024,
         )
 
     return df
@@ -362,27 +369,27 @@ def fillContentAll(
     pending = pendingDates()
     if not pending:
         if showProgress:
-            print("원문 미수집 날짜 없음")
+            _log.info("원문 미수집 날짜 없음")
         return 0
 
     if showProgress:
-        print(f"원문 미수집 {len(pending)}일 처리 시작")
+        _log.info("원문 미수집 %d일 처리 시작", len(pending))
 
     filled = 0
     for i, date in enumerate(pending):
         if showProgress:
-            print(f"\n=== [{i + 1}/{len(pending)}] ===")
+            _log.info("=== [%d/%d] ===", i + 1, len(pending))
         try:
             result = fillContent(date, client=client, showProgress=showProgress)
             if result is not None:
                 filled += 1
         except Exception as e:  # noqa: BLE001
             if showProgress:
-                print(f"[{date}] 에러: {e}")
+                _log.warning("[%s] 에러: %s", date, e)
             break  # API 한도 초과 등이면 중단
 
     if showProgress:
-        print(f"\n원문 수집 완료: {filled}일")
+        _log.info("원문 수집 완료: %d일", filled)
 
     return filled
 

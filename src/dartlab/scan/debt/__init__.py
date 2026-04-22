@@ -8,6 +8,11 @@ from __future__ import annotations
 
 import polars as pl
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 from dartlab.scan.debt.risk import classify_risk, scan_icr
 from dartlab.scan.debt.scanner import scan_bonds, scan_debt_mix, scan_short_debt
 
@@ -21,7 +26,7 @@ def scan_debt(*, verbose: bool = True) -> pl.DataFrame:
 
     def _log(msg: str) -> None:
         if verbose:
-            print(msg)
+            _log.info(msg)
 
     _log("1/4 사채 만기...")
     bond_map = scan_bonds()

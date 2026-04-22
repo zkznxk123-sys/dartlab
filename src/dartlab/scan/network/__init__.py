@@ -11,6 +11,11 @@ from __future__ import annotations
 
 import time
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 import polars as pl
 
 from dartlab.scan.network.classifier import classify_balanced
@@ -46,7 +51,7 @@ def build_graph(*, verbose: bool = True) -> dict:
 
     def _log(msg: str) -> None:
         if verbose:
-            print(msg)
+            _log.info(msg)
 
     _log("1. 상장사 목록...")
     name_to_code, code_to_name, listing_codes, listing_meta = load_listing()

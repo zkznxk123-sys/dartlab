@@ -8,6 +8,10 @@ from __future__ import annotations
 
 from typing import Any
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
 
 def onCompanyCreated(company: Any) -> list[str]:
     """Company 생성 후 표시할 힌트 목록.
@@ -291,7 +295,7 @@ def promptKeyIfMissing(service: str) -> str | None:
         if existing:
             return existing
         # 대화형 입력 시도
-        print(onKeyRequired(service))
+        _log.info(onKeyRequired(service))
         try:
             from dartlab.core.env import promptAndSave
 
@@ -308,7 +312,7 @@ def promptKeyIfMissing(service: str) -> str | None:
             existing = os.environ.get(spec.env_key)
             if existing:
                 return existing
-            print(onKeyRequired(service))
+            _log.info(onKeyRequired(service))
             try:
                 from dartlab.core.env import promptAndSave
 

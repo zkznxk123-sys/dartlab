@@ -76,18 +76,19 @@ def deployEdgarToHF(
     validCats: list[str] = []
     for cat in cats:
         if cat in _BULK_ORIGIN_CATEGORIES:
-            print(
-                f"[deploy] '{cat}' 는 SEC 벌크가 원본이라 HF 미러링 정책상 제외 (사용자 PC 에서 자동 다운로드). 스킵."
+            _log.info(
+                "[deploy] '%s' 는 SEC 벌크가 원본이라 HF 미러링 정책상 제외 (사용자 PC 에서 자동 다운로드). 스킵.",
+                cat,
             )
             continue
         configKey = _CATEGORY_MAP.get(cat, cat)
         if configKey not in DATA_RELEASES:
-            print(f"[deploy] 카테고리 '{cat}' → configKey '{configKey}'가 DATA_RELEASES에 없음. 스킵.")
+            _log.info(f"[deploy] 카테고리 '{cat}' → configKey '{configKey}'가 DATA_RELEASES에 없음. 스킵.")
             continue
         validCats.append(cat)
 
     if not validCats:
-        print("[deploy] 유효한 카테고리가 없습니다.")
+        _log.info("[deploy] 유효한 카테고리가 없습니다.")
         return {}
 
     api = HfApi(token=hfToken) if not dryRun else None
@@ -101,14 +102,14 @@ def deployEdgarToHF(
 
         localDir = Path(_cfg.dataDir) / config["dir"]
         if not localDir.exists():
-            print(f"[deploy] {localDir} 없음. 스킵.")
+            _log.info(f"[deploy] {localDir} 없음. 스킵.")
             result[cat] = 0
             continue
 
         # scan/meta 는 하위 폴더 구조가 있음 (scan/finance.parquet, meta/sub/*.parquet)
         parquets = sorted(localDir.rglob("*.parquet"))
         if not parquets:
-            print(f"[deploy] {localDir}에 parquet 없음. 스킵.")
+            _log.info(f"[deploy] {localDir}에 parquet 없음. 스킵.")
             result[cat] = 0
             continue
 
@@ -116,12 +117,12 @@ def deployEdgarToHF(
         nFiles = len(parquets)
 
         if dryRun:
-            print(f"[deploy] DRY RUN — {cat}: {nFiles}개 파일 → {HF_REPO}/{hfDir}/")
+            _log.info(f"[deploy] DRY RUN — {cat}: {nFiles}개 파일 → {HF_REPO}/{hfDir}/")
             result[cat] = nFiles
             continue
 
         msg = commitMessage or f"sync: edgar {cat} ({nFiles} files)"
-        print(f"[deploy] {cat}: {nFiles}개 파일 upload_folder → {HF_REPO}/{hfDir}/")
+        _log.info(f"[deploy] {cat}: {nFiles}개 파일 upload_folder → {HF_REPO}/{hfDir}/")
 
         try:
             api.upload_folder(
@@ -133,7 +134,7 @@ def deployEdgarToHF(
                 ignore_patterns=["*.freshness", "*.etag", "*.tmp-*", "*.tmp", "*.bak-*"],
             )
             result[cat] = nFiles
-            print(f"[deploy] {cat}: {nFiles} 업로드 완료 (단일 커밋)")
+            _log.info(f"[deploy] {cat}: {nFiles} 업로드 완료 (단일 커밋)")
         except (OSError, ValueError, RuntimeError) as exc:
             _log.error("[deploy] %s 실패: %s", cat, exc)
             result[cat] = 0

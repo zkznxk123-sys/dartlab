@@ -17,6 +17,9 @@ _DETECT_ORDER = (
     "ollama",
     "codex",
 )
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
 
 
 def _quick_check(provider_id: str) -> bool:
@@ -48,6 +51,6 @@ def auto_detect_provider(*, verbose: bool = False) -> str | None:
     if verbose:
         from dartlab.core.ai.aiSetup import no_provider_message
 
-        print(no_provider_message())
+        _log.info(no_provider_message())
 
     return None

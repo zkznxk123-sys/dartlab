@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 import polars as pl
 
 # ── seed 상수 ─────────────────────────────────────────────
@@ -446,7 +451,7 @@ def classify_balanced(
 
     def _log(msg: str) -> None:
         if verbose:
-            print(msg)
+            _log.info(msg)
 
     phase0 = _cbPhase0Docs(docs_ground_truth, all_node_ids, code_to_group, locked)
     phase1 = _cbPhase1WellKnown(all_node_ids, code_to_group, locked)

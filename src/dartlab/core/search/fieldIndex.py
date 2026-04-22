@@ -34,6 +34,11 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 import numpy as np
 import polars as pl
 
@@ -166,8 +171,12 @@ def buildContentSegment(
     meta = pl.DataFrame(metaRecs)
     if showProgress:
         elapsed = time.perf_counter() - t0
-        print(
-            f"  [content] {idx['nDocs']:,}문서, {len(idx['stemDict']):,} stems, {idx['offsets'][-1]:,} postings, {elapsed:.1f}초"
+        _log.info(
+            "  [content] %s문서, %s stems, %s postings, %.1f초",
+            f"{idx['nDocs']:,}",
+            f"{len(idx['stemDict']):,}",
+            f"{idx['offsets'][-1]:,}",
+            elapsed,
         )
     return idx, meta
 
@@ -402,7 +411,7 @@ def rebuildMain(
         outDir = _allFilingsDir()
         files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
         if showProgress:
-            print(f"[main] allFilings 스트리밍: {len(files)}개 파일")
+            _log.info(f"[main] allFilings 스트리밍: {len(files)}개 파일")
         for i, f in enumerate(files):
             try:
                 df = pl.read_parquet(f).filter(pl.col("section_content").is_not_null())
@@ -414,7 +423,7 @@ def rebuildMain(
                 gc.collect()
                 if showProgress:
                     elapsed = time.perf_counter() - t0
-                    print(f"  allFilings {i + 1}/{len(files)}: {totalDocs:,} docs, {elapsed:.0f}초")
+                    _log.info(f"  allFilings {i + 1}/{len(files)}: {totalDocs:,} docs, {elapsed:.0f}초")
 
     if includeDocs:
         from dartlab import config as _cfg
@@ -422,7 +431,7 @@ def rebuildMain(
         docsDir = Path(_cfg.dataDir) / "dart" / "docs"
         docsFiles = sorted(docsDir.glob("*.parquet"))
         if showProgress:
-            print(f"[main] docs 스트리밍: {len(docsFiles)}개 파일")
+            _log.info(f"[main] docs 스트리밍: {len(docsFiles)}개 파일")
         for i, f in enumerate(docsFiles):
             try:
                 df = pl.read_parquet(f).filter(pl.col("section_content").is_not_null())
@@ -434,10 +443,10 @@ def rebuildMain(
                 gc.collect()
                 if showProgress:
                     elapsed = time.perf_counter() - t0
-                    print(f"  docs {i + 1}/{len(docsFiles)}: {totalDocs:,} docs, {elapsed:.0f}초")
+                    _log.info(f"  docs {i + 1}/{len(docsFiles)}: {totalDocs:,} docs, {elapsed:.0f}초")
 
     if showProgress:
-        print(f"[main] 축적 완료: {totalDocs:,} 문서, finalize 시작")
+        _log.info(f"[main] 축적 완료: {totalDocs:,} 문서, finalize 시작")
 
     idx = builder.finalize()
     meta = pl.DataFrame(metaRecs)
@@ -450,7 +459,7 @@ def rebuildMain(
 
     if showProgress:
         elapsed = time.perf_counter() - t0
-        print(f"[main] 저장 완료. 총 {elapsed / 60:.1f}분, {idx['nDocs']:,} 문서.")
+        _log.info(f"[main] 저장 완료. 총 {elapsed / 60:.1f}분, {idx['nDocs']:,} 문서.")
 
     return idx["nDocs"]
 
@@ -476,7 +485,7 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
     files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem and f.stem >= sinceDate)
 
     if showProgress:
-        print(f"[delta] {sinceDate} 이후: {len(files)}개 파일")
+        _log.info(f"[delta] {sinceDate} 이후: {len(files)}개 파일")
 
     rows: list[dict] = []
     for f in files:
@@ -489,7 +498,7 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
             rows.append(row)
 
     if showProgress:
-        print(f"[delta] 총 {len(rows):,} 문서")
+        _log.info(f"[delta] 총 {len(rows):,} 문서")
 
     if not rows:
         _clearDelta()

@@ -35,9 +35,12 @@ from bs4 import BeautifulSoup
 
 from dartlab import config as _cfg
 from dartlab.core.dataConfig import DATA_RELEASES
+from dartlab.core.logger import getLogger
 from dartlab.providers.dart.openapi.client import DartClient
 from dartlab.providers.dart.openapi.corpCode import findCorpCode, loadCorpCodes
 from dartlab.providers.dart.openapi.disclosure import listFilings
+
+_log = getLogger(__name__)
 
 # ── 상수 ──────────────────────────────────────────────
 
@@ -308,10 +311,10 @@ class DocsCollector:
         )
 
         if filings.is_empty():
-            print(f"수집할 문서 없음: {self.corpName}")
+            _log.info("수집할 문서 없음: %s", self.corpName)
             return 0
 
-        print(f"수집 대상: {filings.height}건 ({self.corpName})")
+        _log.info("수집 대상: %d건 (%s)", filings.height, self.corpName)
 
         rceptNos = filings["rcept_no"].to_list()
         rceptDates = filings["rcept_dt"].to_list()
@@ -353,10 +356,10 @@ class DocsCollector:
                     time.sleep(random.uniform(minDelay, maxDelay))
 
         if failCount1:
-            print(f"  목차 수집 실패: {failCount1}건")
+            _log.warning("  목차 수집 실패: %d건", failCount1)
 
         if not allSubDocs:
-            print("하위문서 없음")
+            _log.info("하위문서 없음")
             return 0
 
         # Phase 2: HTML 수집 및 텍스트 변환
@@ -397,7 +400,7 @@ class DocsCollector:
                     time.sleep(random.uniform(minDelay, maxDelay))
 
         if failCount2:
-            print(f"  HTML 수집 실패: {failCount2}건")
+            _log.warning("  HTML 수집 실패: %d건", failCount2)
 
         # Phase 3: 텍스트 변환 → parquet 저장
         allSections: list[dict] = []
@@ -435,12 +438,12 @@ class DocsCollector:
 
         if allSections:
             savedCount = self._appendSections(allSections)
-            print(f"\n저장 완료: {len(seenReports)}개 보고서, {savedCount}개 섹션")
-            print(f"파일: {self._parquetPath}")
+            _log.info("저장 완료: %d개 보고서, %d개 섹션", len(seenReports), savedCount)
+            _log.info("파일: %s", self._parquetPath)
             self._loadExisting()
             return savedCount
 
-        print("저장할 섹션 없음")
+        _log.info("저장할 섹션 없음")
         return 0
 
 
@@ -478,9 +481,7 @@ def collectMultiple(
     failCount = 0
 
     for i, code in enumerate(stockCodes):
-        print(f"\n{'=' * 60}")
-        print(f"[{i + 1}/{len(stockCodes)}] {code}")
-        print("=" * 60)
+        _log.info("── [%d/%d] %s ──", i + 1, len(stockCodes), code)
 
         try:
             collector = DocsCollector(code, client=sharedClient)
@@ -494,16 +495,16 @@ def collectMultiple(
             if count > 0:
                 successCount += 1
         except (ValueError, OSError) as e:
-            print(f"수집 실패: {e}")
+            _log.warning("수집 실패: %s", e)
             results[code] = -1
             failCount += 1
 
         if i < len(stockCodes) - 1:
             delay = random.uniform(*stockDelay)
-            print(f"\n다음 종목까지 {delay:.0f}초 대기...")
+            _log.info("다음 종목까지 %.0f초 대기...", delay)
             time.sleep(delay)
 
-    print(f"\n전체 완료: 성공 {successCount} / 실패 {failCount} / 총 {len(stockCodes)}")
+    _log.info("전체 완료: 성공 %d / 실패 %d / 총 %d", successCount, failCount, len(stockCodes))
     return results
 
 

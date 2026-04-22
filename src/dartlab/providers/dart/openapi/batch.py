@@ -18,6 +18,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 import httpx
 import polars as pl
 
@@ -886,7 +891,7 @@ def batchCollect(
         try:
             return _runAsync(_run(None, None, None))
         except KeyboardInterrupt:
-            print("\n[배치] 사용자 중단.")
+            _log.info("\n[배치] 사용자 중단.")
             return {}
 
     # ── progress 모드: rich Live 기반 워커별 실시간 표시 ──
@@ -961,7 +966,7 @@ def batchCollect(
             with lock:
                 live.update(_buildDisplay())
     except KeyboardInterrupt:
-        print("\n[배치] 사용자 중단.")
+        _log.info("\n[배치] 사용자 중단.")
 
     if runError and not isinstance(runError[0], KeyboardInterrupt):
         raise runError[0]
@@ -1002,10 +1007,10 @@ def batchCollectAll(
         targetCodes = allCodes
 
     if not targetCodes:
-        print("[배치] 수집할 종목이 없습니다.")
+        _log.info("[배치] 수집할 종목이 없습니다.")
         return {}
 
-    print(f"[배치] {mode} 모드: {len(targetCodes)}개 종목")
+    _log.info(f"[배치] {mode} 모드: {len(targetCodes)}개 종목")
     return batchCollect(
         targetCodes,
         categories=categories,

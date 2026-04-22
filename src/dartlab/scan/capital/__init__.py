@@ -8,6 +8,11 @@ from __future__ import annotations
 
 import polars as pl
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 from dartlab.scan.capital.classifier import classify_return
 from dartlab.scan.capital.scanner import (
     scan_capital_change,
@@ -26,7 +31,7 @@ def scan_capital(*, verbose: bool = True) -> pl.DataFrame:
 
     def _log(msg: str) -> None:
         if verbose:
-            print(msg)
+            _log.info(msg)
 
     _log("1/3 배당 스캔...")
     div_map = scan_dividend()

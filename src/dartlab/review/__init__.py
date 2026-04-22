@@ -26,6 +26,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 from dartlab.review.blockMap import BlockMap
 from dartlab.review.blocks import (
     Block,
@@ -271,7 +276,7 @@ class Review:
         Example::
 
             review = c.review()
-            print(review.render())              # rich 터미널 출력
+            _log.info(review.render())              # rich 터미널 출력
             html = review.render("html")        # HTML 문자열
             md = review.render("markdown")      # Markdown 문자열
         """

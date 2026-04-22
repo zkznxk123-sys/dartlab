@@ -5,6 +5,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 _ENV_FILE: Path | None = None
 
 
@@ -152,21 +157,21 @@ def promptAndSave(envKey: str, *, label: str, guide: str) -> str | None:
     existing = os.environ.get(envKey)
     if existing:
         masked = existing[:4] + "..." + existing[-4:] if len(existing) > 8 else "***"
-        print(f"\n  \u2713 {envKey} 이미 설정됨 ({masked})\n")
+        _log.info(f"\n  \u2713 {envKey} 이미 설정됨 ({masked})\n")
         return existing
 
-    print(f"\n  {label}")
-    print(f"  {guide}")
-    print("  입력하면 프로젝트 .env 파일에 안전하게 저장됩니다. (공유되지 않음)\n")
+    _log.info(f"\n  {label}")
+    _log.info(f"  {guide}")
+    _log.info("  입력하면 프로젝트 .env 파일에 안전하게 저장됩니다. (공유되지 않음)\n")
 
     try:
         key = input(f"  {envKey}: ").strip()
         if key:
             path = saveEnvKey(envKey, key)
-            print(f"\n  \u2713 {path} 에 저장 완료.\n")
+            _log.info(f"\n  \u2713 {path} 에 저장 완료.\n")
             return key
-        print("\n  건너뛰었습니다.\n")
+        _log.info("\n  건너뛰었습니다.\n")
         return None
     except (EOFError, KeyboardInterrupt):
-        print("\n  건너뛰었습니다.\n")
+        _log.info("\n  건너뛰었습니다.\n")
         return None

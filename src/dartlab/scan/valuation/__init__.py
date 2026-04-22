@@ -4,6 +4,11 @@ from __future__ import annotations
 
 import asyncio
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 import polars as pl
 
 from dartlab.scan._helpers import scan_finance_parquets
@@ -96,7 +101,7 @@ async def _fetchAll(codes: list[str], verbose: bool) -> dict[str, dict]:
             tasks = [_fetch(c, client) for c in chunk]
             await asyncio.gather(*tasks)
             if verbose:
-                print(f"  {min(i + batch, total)}/{total} 수집...")
+                _log.info(f"  {min(i + batch, total)}/{total} 수집...")
 
     return result
 
@@ -119,7 +124,7 @@ def scanValuation(*, verbose: bool = True) -> pl.DataFrame:
         stockCode/종목명/marketCap/per/pbr/psr/grade 컬럼. KR 2700종목.
     """
     if verbose:
-        print("밸류에이션 스캔: 상장사 목록 수집...")
+        _log.info("밸류에이션 스캔: 상장사 목록 수집...")
 
     # 상장사 코드 목록
     import dartlab as _dl
@@ -130,7 +135,7 @@ def scanValuation(*, verbose: bool = True) -> pl.DataFrame:
         return pl.DataFrame()
 
     if verbose:
-        print(f"  {len(codes)}종목 → 네이버 API 수집 시작")
+        _log.info(f"  {len(codes)}종목 → 네이버 API 수집 시작")
 
     # 매출 데이터 (PSR 계산용)
     revMap = scan_finance_parquets("IS", _REVENUE_IDS, _REVENUE_NMS)
@@ -139,7 +144,7 @@ def scanValuation(*, verbose: bool = True) -> pl.DataFrame:
     priceMap = asyncio.run(_fetchAll(codes, verbose))
 
     if verbose:
-        print(f"  수집 완료: {len(priceMap)}종목")
+        _log.info(f"  수집 완료: {len(priceMap)}종목")
 
     rows: list[dict] = []
     for code, data in priceMap.items():
@@ -165,7 +170,7 @@ def scanValuation(*, verbose: bool = True) -> pl.DataFrame:
         )
 
     if verbose:
-        print(f"밸류에이션 스캔 완료: {len(rows)}종목")
+        _log.info(f"밸류에이션 스캔 완료: {len(rows)}종목")
 
     if not rows:
         return pl.DataFrame()

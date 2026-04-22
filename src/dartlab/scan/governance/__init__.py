@@ -8,6 +8,11 @@ from __future__ import annotations
 
 import polars as pl
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 from dartlab.scan.governance.scanner import (
     scan_audit_opinion,
     scan_major_holder_pct,
@@ -35,7 +40,7 @@ def scan_governance(*, verbose: bool = True) -> pl.DataFrame:
 
     def _log(msg: str) -> None:
         if verbose:
-            print(msg)
+            _log.info(msg)
 
     _log("1/5 최대주주 지분율...")
     holder_map = scan_major_holder_pct()

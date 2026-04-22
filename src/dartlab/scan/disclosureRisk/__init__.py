@@ -21,6 +21,11 @@ from __future__ import annotations
 
 import polars as pl
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 from dartlab.scan._helpers import _ensureScanData
 
 # 심각 키워드 (audit 안전 67%가 미감지 — 실험 107-002 검증)
@@ -113,11 +118,11 @@ def scanDisclosureRisk(*, verbose: bool = True) -> pl.DataFrame:
 
     if not changesPath.exists():
         if verbose:
-            print("changes.parquet 없음 — 공시리스크 스캔 불가")
+            _log.info("changes.parquet 없음 — 공시리스크 스캔 불가")
         return _emptyDf()
 
     if verbose:
-        print("공시리스크 스캔: changes.parquet 로드...")
+        _log.info("공시리스크 스캔: changes.parquet 로드...")
 
     fullDf = pl.read_parquet(str(changesPath))
 
@@ -136,7 +141,7 @@ def scanDisclosureRisk(*, verbose: bool = True) -> pl.DataFrame:
         return _emptyDf()
 
     if verbose:
-        print(f"  기간: {latestFrom}→{latestTo}, {changes['stockCode'].n_unique()}종목")
+        _log.info(f"  기간: {latestFrom}→{latestTo}, {changes['stockCode'].n_unique()}종목")
 
     # ── 시그널 계산 ──
 
@@ -229,8 +234,8 @@ def scanDisclosureRisk(*, verbose: bool = True) -> pl.DataFrame:
     if verbose:
         grade_dist = result["grade"].value_counts()
         for r in grade_dist.to_dicts():
-            print(f"  {r['grade']}: {r['count']}종목")
-        print(f"공시리스크 스캔 완료: {result.height}종목")
+            _log.info(f"  {r['grade']}: {r['count']}종목")
+        _log.info(f"공시리스크 스캔 완료: {result.height}종목")
 
     return result
 

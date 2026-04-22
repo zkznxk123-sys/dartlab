@@ -8,6 +8,11 @@ from __future__ import annotations
 
 import polars as pl
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 from dartlab.scan.workforce.growth import (
     compute_salary_vs_revenue,
     scan_revenue_growth,
@@ -31,7 +36,7 @@ def scan_workforce(*, verbose: bool = True) -> pl.DataFrame:
 
     def _log(msg: str) -> None:
         if verbose:
-            print(msg)
+            _log.info(msg)
 
     _log("1/6 직원 현황...")
     emp_map = scan_employee()

@@ -17,8 +17,8 @@
 
     space = getPredictionSpace()
     if space:
-        print(space.axes["businessCycle"].level)    # -1.0 ~ +1.0
-        print(space.impactOn("반도체"))              # 축별 매출 영향 %
+        log.info(space.axes["businessCycle"].level)    # -1.0 ~ +1.0
+        log.info(space.impactOn("반도체"))              # 축별 매출 영향 %
 """
 
 from __future__ import annotations

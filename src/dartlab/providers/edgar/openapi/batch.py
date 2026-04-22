@@ -378,7 +378,7 @@ def batchCollectEdgar(
             _emitDone(res)
             return res
         except KeyboardInterrupt:
-            print("\n[EDGAR 배치] 사용자 중단.")
+            _log.info("\n[EDGAR 배치] 사용자 중단.")
             return {}
 
     # ── Rich Live progress ──
@@ -447,7 +447,7 @@ def batchCollectEdgar(
             with lock:
                 live.update(_buildDisplay())
     except KeyboardInterrupt:
-        print("\n[EDGAR 배치] 사용자 중단.")
+        _log.info("\n[EDGAR 배치] 사용자 중단.")
 
     if runError and not isinstance(runError[0], KeyboardInterrupt):
         raise runError[0]

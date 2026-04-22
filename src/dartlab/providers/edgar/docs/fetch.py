@@ -14,6 +14,11 @@ import warnings
 from pathlib import Path
 from typing import Callable
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 import httpx
 import polars as pl
 from bs4 import BeautifulSoup, NavigableString, XMLParsedAsHTMLWarning
@@ -468,7 +473,7 @@ def downloadListedEdgarDocs(
                 _bar()
 
             if batchSize > 0 and idx < total and idx % batchSize == 0:
-                print()
+                _log.info()
                 emit("edgar:batch_progress", idx=idx, cooldown=cooldownSeconds)
                 time.sleep(cooldownSeconds)
 

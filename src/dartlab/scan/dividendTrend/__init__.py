@@ -4,6 +4,11 @@ from __future__ import annotations
 
 import polars as pl
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 from dartlab.scan._helpers import parse_num, scan_parquets
 
 
@@ -118,7 +123,7 @@ def scanDividendTrend(*, verbose: bool = True) -> pl.DataFrame:
         return pl.DataFrame()
 
     if verbose:
-        print(f"배당 추이 스캔: {raw.shape[0]}행 로드")
+        _log.info(f"배당 추이 스캔: {raw.shape[0]}행 로드")
 
     # 보통주 + 주당 현금배당금 + Q4 우선
     dpsRows = raw.filter((pl.col("se") == "주당 현금배당금(원)") & (pl.col("stock_knd") == "보통주"))
@@ -148,7 +153,7 @@ def scanDividendTrend(*, verbose: bool = True) -> pl.DataFrame:
         latestYear = years[0]
 
     if verbose:
-        print(f"  기준 연도: {latestYear}")
+        _log.info(f"  기준 연도: {latestYear}")
 
     rows: list[dict] = []
     allCodes = dpsRows["stockCode"].unique().to_list()
@@ -211,7 +216,7 @@ def scanDividendTrend(*, verbose: bool = True) -> pl.DataFrame:
         )
 
     if verbose:
-        print(f"배당 추이 스캔 완료: {len(rows)}종목")
+        _log.info(f"배당 추이 스캔 완료: {len(rows)}종목")
 
     if not rows:
         return pl.DataFrame()

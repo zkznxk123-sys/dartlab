@@ -29,6 +29,11 @@ from __future__ import annotations
 
 import json
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 from dartlab.viz.charts import (
     balance_sheet as balance_sheet_chart,
 )
@@ -163,7 +168,7 @@ def emit_chart(spec: dict) -> None:
     """
     # R32-1: 빈 spec 거부 — chartType 없으면 webview 가 렌더 못 함
     if not spec or "chartType" not in spec and "vizType" not in spec:
-        print(
+        _log.warning(
             "[차트 거부] emit_chart 에 chartType 이 필요합니다. "
             "예: emit_chart({'chartType': 'line', 'title': '...', "
             "'categories': [...], 'series': [{'name': '...', 'data': [...]}]})"
@@ -173,7 +178,7 @@ def emit_chart(spec: dict) -> None:
     # 메타 가이드 차트 거부 — AI 가 dartlab.analysis() 가이드 dataframe 의
     # items 컬럼을 막대로 그리는 패턴 차단. 사용자 가치 0.
     if _is_meta_guide_chart(spec):
-        print(
+        _log.warning(
             "[차트 거부] analysis() 가이드 dataframe 의 'items' 컬럼은 사용자에게 "
             "가치 없는 메타데이터입니다. 차트를 그리지 말고, 진짜 종목 데이터로 "
             "다시 시각화하세요. 예시:\n"
@@ -185,7 +190,7 @@ def emit_chart(spec: dict) -> None:
         )
         return
     spec.setdefault("vizType", "chart")
-    print(f"{_MARKER_START}{json.dumps(spec, ensure_ascii=False)}{_MARKER_END}")
+    _log.info(f"{_MARKER_START}{json.dumps(spec, ensure_ascii=False)}{_MARKER_END}")
 
 
 def emit_diagram(diagram_type: str, source: str, *, title: str = "") -> None:
@@ -206,7 +211,7 @@ def emit_diagram(diagram_type: str, source: str, *, title: str = "") -> None:
         "source": source,
         "title": title,
     }
-    print(f"{_MARKER_START}{json.dumps(spec, ensure_ascii=False)}{_MARKER_END}")
+    _log.info(f"{_MARKER_START}{json.dumps(spec, ensure_ascii=False)}{_MARKER_END}")
 
 
 __all__ = [

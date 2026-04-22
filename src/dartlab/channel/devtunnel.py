@@ -119,7 +119,7 @@ def install_devtunnel(auto_yes: bool = False) -> str:
     if os_name == "Windows":
         # 1차: winget
         try:
-            print("  winget으로 devtunnel 설치 중... (1~2분)")
+            logger.info("  winget으로 devtunnel 설치 중... (1~2분)")
             result = subprocess.run(
                 [
                     "winget",
@@ -138,29 +138,29 @@ def install_devtunnel(auto_yes: bool = False) -> str:
                 errors="replace",
             )
             if result.returncode == 0:
-                print("  devtunnel 설치 완료 (winget)")
+                logger.info("  devtunnel 설치 완료 (winget)")
                 bin_path = find_devtunnel_binary()
                 if bin_path:
                     return bin_path
             else:
-                print(f"  winget 실패 (rc={result.returncode}): {(result.stderr or '').strip()[:200]}")
+                logger.info(f"  winget 실패 (rc={result.returncode}): {(result.stderr or '').strip()[:200]}")
         except (FileNotFoundError, subprocess.SubprocessError) as exc:
-            print(f"  winget 실행 실패: {exc}")
+            logger.info(f"  winget 실행 실패: {exc}")
 
         # 2차: 직접 다운로드
-        print("  직접 다운로드 fallback 시도...")
+        logger.info("  직접 다운로드 fallback 시도...")
         try:
             from urllib.request import urlretrieve
 
             _DARTLAB_BIN_DIR.mkdir(parents=True, exist_ok=True)
             url = "https://aka.ms/TunnelsCliDownload/win-x64"
             target = _DARTLAB_BIN_DIR / "devtunnel.exe"
-            print(f"  다운로드: {url}")
+            logger.info(f"  다운로드: {url}")
             urlretrieve(url, target)
-            print(f"  설치 완료: {target}")
+            logger.info(f"  설치 완료: {target}")
             return str(target)
         except OSError as exc:
-            print(f"  직접 다운로드 실패: {exc}")
+            logger.info(f"  직접 다운로드 실패: {exc}")
 
         raise DevTunnelSetupError(
             "Windows 자동 설치 실패. 수동 설치:\n  https://learn.microsoft.com/azure/developer/dev-tunnels/get-started"
@@ -214,7 +214,7 @@ def install_devtunnel(auto_yes: bool = False) -> str:
                 "  수동 설치: https://learn.microsoft.com/azure/developer/dev-tunnels/get-started"
             )
         try:
-            print("  curl로 devtunnel 설치 중... (사용자 동의 OK)")
+            logger.info("  curl로 devtunnel 설치 중... (사용자 동의 OK)")
             result = subprocess.run(
                 ["sh", "-c", "curl -sL https://aka.ms/DevTunnelCliInstall | bash"],
                 capture_output=True,
@@ -263,11 +263,11 @@ def is_logged_in(bin_path: str) -> bool:
 def ensure_logged_in(bin_path: str, auto_yes: bool = False) -> None:
     """미인증 시 GitHub 로그인 자동 실행."""
     if is_logged_in(bin_path):
-        print("  ✓ devtunnel 이미 인증됨")
+        logger.info("  ✓ devtunnel 이미 인증됨")
         return
 
-    print("\n  GitHub 인증 필요. 잠시 후 브라우저가 자동으로 열립니다.")
-    print("  → GitHub 로그인 → dev tunnel 권한 허용\n")
+    logger.info("\n  GitHub 인증 필요. 잠시 후 브라우저가 자동으로 열립니다.")
+    logger.info("  → GitHub 로그인 → dev tunnel 권한 허용\n")
 
     if not auto_yes:
         try:
@@ -278,7 +278,7 @@ def ensure_logged_in(bin_path: str, auto_yes: bool = False) -> None:
             raise DevTunnelSetupError("devtunnel 인증을 사용자가 취소했습니다.")
 
     # devtunnel user login -g (GitHub) — 출력을 그대로 콘솔로
-    print("\n  devtunnel user login -g 실행 중...\n")
+    logger.info("\n  devtunnel user login -g 실행 중...\n")
     try:
         result = subprocess.run(
             [bin_path, "user", "login", "-g"],
@@ -294,7 +294,7 @@ def ensure_logged_in(bin_path: str, auto_yes: bool = False) -> None:
     if not is_logged_in(bin_path):
         raise DevTunnelSetupError("로그인 후에도 인증 상태가 아닙니다.")
 
-    print("\n  ✓ devtunnel 인증 완료")
+    logger.info("\n  ✓ devtunnel 인증 완료")
 
 
 # ── tunnel 생성/재사용 ────────────────────────────────────────────────────
@@ -318,7 +318,7 @@ def ensure_tunnel(bin_path: str, port: int) -> str:
                 errors="replace",
             )
             if result.returncode == 0:
-                print(f"  기존 tunnel 재사용: {existing_id}")
+                logger.info(f"  기존 tunnel 재사용: {existing_id}")
                 _ensure_port_mapping(bin_path, existing_id, port)
                 _ensure_anonymous_access(bin_path, existing_id)
                 return existing_id
@@ -332,7 +332,7 @@ def ensure_tunnel(bin_path: str, port: int) -> str:
     tunnel_id = None
 
     for attempt in range(3):
-        print(f"  tunnel 생성: {tunnel_label}")
+        logger.info(f"  tunnel 생성: {tunnel_label}")
         try:
             result = subprocess.run(
                 [bin_path, "create", tunnel_label, "--allow-anonymous"],
@@ -368,10 +368,10 @@ def ensure_tunnel(bin_path: str, port: int) -> str:
                     errors="replace",
                 )
                 if list_res.returncode == 0:
-                    print("  devtunnel list 결과:")
+                    logger.info("  devtunnel list 결과:")
                     for line in list_res.stdout.splitlines():
                         if line.strip():
-                            print(f"    {line}")
+                            logger.info(f"    {line}")
                     # 진짜 ID 형식: <label>.<region>  예: dartlab-desktop-rses20s.jpe1
                     # 라벨 자체에 dash가 들어가므로 더 넓은 정규식 필요
                     for line in list_res.stdout.splitlines():
@@ -384,7 +384,7 @@ def ensure_tunnel(bin_path: str, port: int) -> str:
                             if id_match:
                                 tunnel_id = id_match.group(1)
                                 tunnel_label = base_label
-                                print(f"  ✓ 기존 tunnel 발견: {tunnel_id}")
+                                logger.info(f"  ✓ 기존 tunnel 발견: {tunnel_id}")
                                 break
                 if tunnel_id:
                     break
@@ -395,7 +395,7 @@ def ensure_tunnel(bin_path: str, port: int) -> str:
             import time as _t
 
             tunnel_label = f"{base_label}-{int(_t.time()) % 100000}"
-            print(f"  conflict — 새 라벨로 재시도: {tunnel_label}")
+            logger.info(f"  conflict — 새 라벨로 재시도: {tunnel_label}")
             continue
 
         raise DevTunnelSetupError(f"tunnel 생성 실패: {out.strip()[:300]}")
@@ -404,7 +404,7 @@ def ensure_tunnel(bin_path: str, port: int) -> str:
         raise DevTunnelSetupError("tunnel 생성 3회 시도 후 실패")
 
     _save_state(tunnel_id=tunnel_id, tunnel_label=tunnel_label)
-    print(f"  ✓ tunnel ID: {tunnel_id}")
+    logger.info(f"  ✓ tunnel ID: {tunnel_id}")
 
     _ensure_port_mapping(bin_path, tunnel_id, port)
     _ensure_anonymous_access(bin_path, tunnel_id)
@@ -428,15 +428,15 @@ def _ensure_anonymous_access(bin_path: str, tunnel_id: str) -> None:
             errors="replace",
         )
         if result.returncode == 0:
-            print("  ✓ anonymous 접근 허용")
+            logger.info("  ✓ anonymous 접근 허용")
         else:
             err = (result.stderr or "").lower()
             if "already" in err or "exist" in err:
                 pass  # 멱등
             else:
-                print(f"  anonymous access 경고 (계속 진행): {result.stderr.strip()[:200]}")
+                logger.info(f"  anonymous access 경고 (계속 진행): {result.stderr.strip()[:200]}")
     except subprocess.SubprocessError as exc:
-        print(f"  anonymous access 실패 (계속 진행): {exc}")
+        logger.info(f"  anonymous access 실패 (계속 진행): {exc}")
 
 
 def _ensure_port_mapping(bin_path: str, tunnel_id: str, port: int) -> None:
@@ -451,15 +451,15 @@ def _ensure_port_mapping(bin_path: str, tunnel_id: str, port: int) -> None:
             errors="replace",
         )
         if result.returncode == 0:
-            print(f"  포트 매핑: {port} → http")
+            logger.info(f"  포트 매핑: {port} → http")
         else:
             err = (result.stderr or "").lower()
             if "already exists" in err or "already added" in err:
                 pass  # 멱등
             else:
-                print(f"  포트 매핑 경고 (계속 진행): {result.stderr.strip()[:200]}")
+                logger.info(f"  포트 매핑 경고 (계속 진행): {result.stderr.strip()[:200]}")
     except subprocess.SubprocessError as exc:
-        print(f"  포트 매핑 실패 (계속 진행): {exc}")
+        logger.info(f"  포트 매핑 실패 (계속 진행): {exc}")
 
 
 # ── host 시작 ─────────────────────────────────────────────────────────────
@@ -467,7 +467,7 @@ def _ensure_port_mapping(bin_path: str, tunnel_id: str, port: int) -> None:
 
 def start_host(bin_path: str, tunnel_id: str, port: int) -> tuple[str, subprocess.Popen]:
     """`devtunnel host <id>` 백그라운드 시작. (URL, process) 반환."""
-    print(f"  devtunnel host 시작: {tunnel_id}")
+    logger.info(f"  devtunnel host 시작: {tunnel_id}")
     try:
         proc = subprocess.Popen(
             [bin_path, "host", tunnel_id],
@@ -494,7 +494,7 @@ def start_host(bin_path: str, tunnel_id: str, port: int) -> tuple[str, subproces
             if len(captured) > 100:
                 captured.pop(0)
             if line:
-                print(f"  [dt] {line}", flush=True)
+                logger.info(f"  [dt] {line}", flush=True)
             m = _URL_PATTERN.search(line)
             if m and not url_event.is_set():
                 url_holder.append(m.group(0))

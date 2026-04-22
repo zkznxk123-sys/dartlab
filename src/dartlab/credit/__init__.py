@@ -28,6 +28,11 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 # ── 7축 레지스트리 (Phase 8 A4: 4엔진 통일 — @dataclass _AxisEntry) ──
 
 
@@ -186,7 +191,7 @@ def guide():
         "  등급 범위: dCR-AAA ~ dCR-D",
         "",
     ]
-    print("\n".join(_lines))
+    _log.info("\n".join(_lines))
 
     return df
 

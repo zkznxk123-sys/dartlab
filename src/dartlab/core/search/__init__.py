@@ -19,6 +19,11 @@ from __future__ import annotations
 
 import polars as pl
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 # 공개 scope 상수 — AI tool schema enum + 사용자 문서 단일 출처
 SEARCH_SCOPES: tuple[str, ...] = ("auto", "title", "content", "both")
 
@@ -250,9 +255,9 @@ def pullIndex(**kwargs):
     try:
         nContent = pullContentIndex()
         if nContent > 0:
-            print(f"  content 인덱스 {nContent}개 파일 다운로드")
+            _log.info(f"  content 인덱스 {nContent}개 파일 다운로드")
     except Exception as e:
-        print(f"  content 인덱스 다운로드 건너뜀: {e}")
+        _log.info(f"  content 인덱스 다운로드 건너뜀: {e}")
     return ngramResult
 
 

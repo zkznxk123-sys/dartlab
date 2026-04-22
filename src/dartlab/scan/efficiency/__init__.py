@@ -4,6 +4,11 @@ from __future__ import annotations
 
 import polars as pl
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 from dartlab.scan._helpers import scan_finance_parquets
 
 # ── 계정 매핑 ──
@@ -67,7 +72,7 @@ def _gradeEfficiency(ccc: float | None) -> str:
 def scanEfficiency(*, verbose: bool = True) -> pl.DataFrame:
     """전종목 운영 효율 스캔 -- 회전율 + CCC + 등급."""
     if verbose:
-        print("효율성 스캔: 계정 수집 중...")
+        _log.info("효율성 스캔: 계정 수집 중...")
 
     revMap = scan_finance_parquets("IS", _REVENUE_IDS, _REVENUE_NMS)
     taMap = scan_finance_parquets("BS", _TA_IDS, _TA_NMS)
@@ -121,7 +126,7 @@ def scanEfficiency(*, verbose: bool = True) -> pl.DataFrame:
         )
 
     if verbose:
-        print(f"효율성 스캔 완료: {len(rows)}종목")
+        _log.info(f"효율성 스캔 완료: {len(rows)}종목")
 
     if not rows:
         return pl.DataFrame()

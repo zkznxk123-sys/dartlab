@@ -18,6 +18,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 import polars as pl
 
 from dartlab.core.docs.diff import DiffResult, sectionsDiff
@@ -172,7 +177,7 @@ def scan_market(
                     frames.append(df)
             scanned += 1
             if verbose and scanned % 50 == 0:
-                print(f"[watch] {scanned}/{len(codes)} 스캔 완료...")
+                _log.info(f"[watch] {scanned}/{len(codes)} 스캔 완료...")
         except (FileNotFoundError, ValueError, KeyError, OSError):
             continue
 
@@ -195,7 +200,7 @@ def scan_market(
     combined = combined.sort("score", descending=True).head(top_n)
 
     if verbose:
-        print(f"[watch] 스캔 완료: {scanned}개 기업, {combined.height}개 변화 감지")
+        _log.info(f"[watch] 스캔 완료: {scanned}개 기업, {combined.height}개 변화 감지")
 
     return combined
 

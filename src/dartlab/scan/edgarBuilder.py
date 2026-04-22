@@ -14,6 +14,11 @@ from __future__ import annotations
 import gc
 from pathlib import Path
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 import polars as pl
 
 _BATCH_SIZE = 200
@@ -56,7 +61,7 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
         raise FileNotFoundError("EDGAR finance parquet 없음")
 
     if verbose:
-        print(f"[edgarBuilder] {len(parquets)} CIK parquets → scan/finance.parquet")
+        _log.info(f"[edgarBuilder] {len(parquets)} CIK parquets → scan/finance.parquet")
 
     # 주요 계정
     # DART 호환 snakeId 기준 — scan 소비자(_edgar_scan.py) 가 total_assets/total_liabilities 사용.
@@ -196,7 +201,7 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
             records.clear()
             gc.collect()
             if verbose:
-                print(f"  batch {len(batchFiles)}: {idx + 1}/{len(parquets)}")
+                _log.info(f"  batch {len(batchFiles)}: {idx + 1}/{len(parquets)}")
 
     # 나머지
     if records:
@@ -219,7 +224,7 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
         bp.unlink(missing_ok=True)
 
     if verbose:
-        print(f"[edgarBuilder] 완료: {outPath} ({merged.height}행, {merged.width}열)")
+        _log.info(f"[edgarBuilder] 완료: {outPath} ({merged.height}행, {merged.width}열)")
 
     return outPath
 

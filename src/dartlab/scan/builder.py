@@ -11,6 +11,11 @@ import shutil
 import time
 from pathlib import Path
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 import polars as pl
 
 # scanner에서 실제 사용하는 apiType 12개
@@ -149,7 +154,7 @@ def _reportDir() -> Path:
 
 
 def _log(msg: str) -> None:
-    print(msg)
+    _log.info(msg)
 
 
 def _mergeBatchFiles(batchDir: Path, outputPath: Path, *, how: str = "vertical") -> int:

@@ -9,13 +9,18 @@ finance DataFrame(account × year)에서 전년 대비 급변 지점을 감지�
 
     inflections = detectInflections(df)
     for inf in inflections:
-        print(f"{inf.account} {inf.year}: {inf.changeRate:+.1%} ({inf.severity})")
+        _log.info(f"{inf.account} {inf.year}: {inf.changeRate:+.1%} ({inf.severity})")
 """
 
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
 
 import polars as pl
 

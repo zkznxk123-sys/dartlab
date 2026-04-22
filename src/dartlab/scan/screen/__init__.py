@@ -20,6 +20,11 @@ from __future__ import annotations
 
 import polars as pl
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 _PRESETS = {
     "value": "가치투자 후보 (저PBR + 이익 양호 + 부채 안전)",
     "dividend": "배당 성장 우량주 (연속증가/안정 + 부채 안전)",
@@ -270,10 +275,10 @@ def scanScreen(target: str | None = None, *, verbose: bool = True) -> pl.DataFra
         raise ValueError(f"알 수 없는 screen 프리셋: '{target}'. 가용: {available}")
 
     if verbose:
-        print(f"screen({key}): 실행 중...")
+        _log.info(f"screen({key}): 실행 중...")
     result = _DISPATCH[key]()
     if verbose:
-        print(f"screen({key}): {result.shape[0]}종목")
+        _log.info(f"screen({key}): {result.shape[0]}종목")
     return result
 
 

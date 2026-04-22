@@ -6,7 +6,7 @@ Usage::
 
     a = Analyst()
     report = a.report(company, current_price=200000)
-    print(report)
+    log.info(report)
 """
 
 from __future__ import annotations
@@ -50,8 +50,8 @@ class Analyst:
 
         a = Analyst()
         report = a.report(company, current_price=200000)
-        print(report.target_price)
-        print(report.opinion)
+        log.info(report.target_price)
+        log.info(report.opinion)
     """
 
     def __init__(self, gather: Gather | None = None) -> None:

@@ -19,6 +19,10 @@ import json
 import threading
 from pathlib import Path
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
 
 def _cacheDir() -> Path:
     """scan 스냅샷 캐시 디렉토리.
@@ -67,11 +71,11 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
             debt_risk : str | None — 부채 위험등급 (안전/관찰/주의/고위험)
     """
     if verbose:
-        print("[scan] 전종목 스냅샷 빌드 시작...")
+        _log.info("[scan] 전종목 스냅샷 빌드 시작...")
 
     # ── governance: 총점 ──
     if verbose:
-        print("  [1/4] governance 스캔...")
+        _log.info("  [1/4] governance 스캔...")
     from dartlab.scan.governance.scanner import (
         scan_audit_opinion,
         scan_major_holder_pct,
@@ -105,20 +109,20 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
         governance_grades[code] = grade(s)
 
     if verbose:
-        print(f"    governance: {len(governance_scores)}종목")
+        _log.info("    governance: %d종목", len(governance_scores))
 
     # ── workforce: 직원당매출 ──
     if verbose:
-        print("  [2/4] workforce 스캔...")
+        _log.info("  [2/4] workforce 스캔...")
     from dartlab.scan.workforce.scanner import scan_revenue_per_employee
 
     rev_per_emp = scan_revenue_per_employee()
     if verbose:
-        print(f"    workforce: {len(rev_per_emp)}종목")
+        _log.info("    workforce: %d종목", len(rev_per_emp))
 
     # ── capital: 분류 ──
     if verbose:
-        print("  [3/4] capital 스캔...")
+        _log.info("  [3/4] capital 스캔...")
     from dartlab.scan.capital.classifier import classify_return
     from dartlab.scan.capital.scanner import (
         scan_capital_change,
@@ -145,11 +149,11 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
         capital_classes[code] = cls
 
     if verbose:
-        print(f"    capital: {len(capital_classes)}종목")
+        _log.info("    capital: %d종목", len(capital_classes))
 
     # ── debt: ICR + 위험등급 ──
     if verbose:
-        print("  [4/4] debt 스캔...")
+        _log.info("  [4/4] debt 스캔...")
     from dartlab.scan.debt.risk import classify_risk, scan_icr
     from dartlab.scan.debt.scanner import scan_bonds
 
@@ -168,7 +172,7 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
             debt_icr[code] = icr_val
 
     if verbose:
-        print(f"    debt: {len(debt_risk)}종목 (ICR {len(debt_icr)}종목)")
+        _log.info("    debt: %d종목 (ICR %d종목)", len(debt_risk), len(debt_icr))
 
     # ── 통합 ──
     all_known = set(governance_scores) | set(rev_per_emp) | set(capital_classes) | set(debt_risk)
@@ -207,7 +211,7 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
     _cachePath().write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
 
     if verbose:
-        print(f"  [scan] {len(snapshot)}종목 스냅샷 저장: {_cachePath()}")
+        _log.info("  [scan] %d종목 스냅샷 저장: %s", len(snapshot), _cachePath())
 
     return snapshot
 

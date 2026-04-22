@@ -12,6 +12,11 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
+
 import numpy as np
 import polars as pl
 
@@ -226,7 +231,7 @@ def buildNgramIndex(
                 globalDocId += 1
 
         if showProgress:
-            print(f"[stemIndex] allFilings: {globalDocId:,}문서, {nextId:,} stems")
+            _log.info(f"[stemIndex] allFilings: {globalDocId:,}문서, {nextId:,} stems")
 
     # ── Phase 2: docs 로드 (배치) ──
     if includeDocs:
@@ -234,7 +239,7 @@ def buildNgramIndex(
         docsFiles = sorted(docsDir.glob("*.parquet"))
 
         if showProgress:
-            print(f"[stemIndex] docs: {len(docsFiles)}종목 처리 시작")
+            _log.info(f"[stemIndex] docs: {len(docsFiles)}종목 처리 시작")
 
         for batchStart in range(0, len(docsFiles), docsBatchSize):
             batchFiles = docsFiles[batchStart : batchStart + docsBatchSize]
@@ -295,9 +300,13 @@ def buildNgramIndex(
 
             if showProgress and (batchStart + docsBatchSize) % (docsBatchSize * 5) == 0:
                 elapsed = time.time() - t0
-                print(
-                    f"  [{batchStart + len(batchFiles)}/{len(docsFiles)}] "
-                    f"{globalDocId:,}문서, {nextId:,} stems, {elapsed:.0f}초"
+                _log.info(
+                    "  [%d/%d] %s문서, %s stems, %.0f초",
+                    batchStart + len(batchFiles),
+                    len(docsFiles),
+                    f"{globalDocId:,}",
+                    f"{nextId:,}",
+                    elapsed,
                 )
 
     if globalDocId == 0:
@@ -334,7 +343,7 @@ def buildNgramIndex(
     buildEventTimeline(metaDf, outDir)
     buildDna(metaDf, outDir)
     if showProgress:
-        print("[stemIndex] 파생 집계 빌드 완료 (companyProfile, eventTimeline, dna)")
+        _log.info("[stemIndex] 파생 집계 빌드 완료 (companyProfile, eventTimeline, dna)")
 
     # 캐시 갱신
     _cachedIndex = {
@@ -347,7 +356,7 @@ def buildNgramIndex(
     elapsed = time.time() - t0
     npzMb = (outDir / "stemIndex.npz").stat().st_size / 1024 / 1024
     if showProgress:
-        print(f"[stemIndex] 완료: {globalDocId:,}문서, {nextId:,} stems, {npzMb:.1f}MB, {elapsed:.0f}초")
+        _log.info(f"[stemIndex] 완료: {globalDocId:,}문서, {nextId:,} stems, {npzMb:.1f}MB, {elapsed:.0f}초")
 
     return globalDocId
 
@@ -668,7 +677,7 @@ def pushStemIndex(*, token: str | None = None) -> str:
     )
 
     url = f"https://huggingface.co/datasets/{HF_REPO}/tree/main/{hfDir}"
-    print(f"[stemIndex] HF 업로드 완료: {url}")
+    _log.info(f"[stemIndex] HF 업로드 완료: {url}")
     return url
 
 
