@@ -20,7 +20,7 @@ import pytest
 @pytest.mark.unit
 def test_lite_accounts_all_in_sortOrder():
     """LITE_ACCOUNTS 30 개가 sortOrder.json 에 모두 존재."""
-    from dartlab.scan._helpers import LITE_ACCOUNTS, _LITE_ACCOUNTS_BS, _LITE_ACCOUNTS_CF, _LITE_ACCOUNTS_IS
+    from dartlab.scan._helpers import _LITE_ACCOUNTS_BS, _LITE_ACCOUNTS_CF, _LITE_ACCOUNTS_IS, LITE_ACCOUNTS
 
     sortOrderPath = Path(__file__).resolve().parents[1] / "src" / "dartlab" / "core" / "finance" / "sortOrder.json"
     data = json.loads(sortOrderPath.read_text(encoding="utf-8"))
@@ -86,8 +86,15 @@ def test_buildFinanceLite_filters_correctly(tmp_path, monkeypatch):
     assert result["bsns_year"].cast(pl.Int32, strict=False).min() >= LITE_SINCE_YEAR, "sinceYear 필터 실패"
     assert "SCE" not in result["sj_div"].unique().to_list(), "SCE 제외 실패"
     assert set(result.columns) == {
-        "stockCode", "bsns_year", "reprt_nm", "sj_div", "fs_nm",
-        "account_id", "account_nm", "thstrm_amount", "thstrm_add_amount",
+        "stockCode",
+        "bsns_year",
+        "reprt_nm",
+        "sj_div",
+        "fs_nm",
+        "account_id",
+        "account_nm",
+        "thstrm_amount",
+        "thstrm_add_amount",
     }, f"컬럼 스펙 위반: {result.columns}"
 
     # 2021 과 SCE 가 다 필터되면 2023 × (IS 매출액 + BS 자산총계 + CF 영업CF) = 3 행

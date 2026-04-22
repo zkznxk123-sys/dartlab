@@ -226,11 +226,29 @@ class TestOwnerConcentration:
         df = _buildMajorHolderDf(
             [
                 {"year": 2024, "quarterNum": 2, "nm": "김회장", "relate": "본인", "trmend_posesn_stock_qota_rt": 8.5},
-                {"year": 2024, "quarterNum": 2, "nm": "김사장", "relate": "특수관계인", "trmend_posesn_stock_qota_rt": 12.0},
-                {"year": 2024, "quarterNum": 2, "nm": "홀딩스", "relate": "특수관계인", "trmend_posesn_stock_qota_rt": 30.0},
+                {
+                    "year": 2024,
+                    "quarterNum": 2,
+                    "nm": "김사장",
+                    "relate": "특수관계인",
+                    "trmend_posesn_stock_qota_rt": 12.0,
+                },
+                {
+                    "year": 2024,
+                    "quarterNum": 2,
+                    "nm": "홀딩스",
+                    "relate": "특수관계인",
+                    "trmend_posesn_stock_qota_rt": 30.0,
+                },
                 {"year": 2024, "quarterNum": 2, "nm": "계", "relate": "-", "trmend_posesn_stock_qota_rt": 50.5},
                 {"year": 2023, "quarterNum": 2, "nm": "김회장", "relate": "본인", "trmend_posesn_stock_qota_rt": 8.0},
-                {"year": 2023, "quarterNum": 2, "nm": "김사장", "relate": "특수관계인", "trmend_posesn_stock_qota_rt": 12.0},
+                {
+                    "year": 2023,
+                    "quarterNum": 2,
+                    "nm": "김사장",
+                    "relate": "특수관계인",
+                    "trmend_posesn_stock_qota_rt": 12.0,
+                },
             ]
         )
         result_obj = MockMajorHolderResult(
@@ -265,7 +283,13 @@ class TestOwnerConcentration:
         df = _buildMajorHolderDf(
             [
                 {"year": 2024, "quarterNum": 2, "nm": "김회장", "relate": "본인", "trmend_posesn_stock_qota_rt": 5.0},
-                {"year": 2024, "quarterNum": 2, "nm": "홀딩스", "relate": "특수관계인", "trmend_posesn_stock_qota_rt": 40.0},
+                {
+                    "year": 2024,
+                    "quarterNum": 2,
+                    "nm": "홀딩스",
+                    "relate": "특수관계인",
+                    "trmend_posesn_stock_qota_rt": 40.0,
+                },
             ]
         )
         mh = MockMajorHolderResult(
@@ -280,12 +304,10 @@ class TestOwnerConcentration:
         company._report.majorHolder = mh
         company._report.executive = MockExecutiveResult(totalCount=10, registeredCount=5, outsideCount=4)
         company._report.audit = MockAuditResult()
-        with patch(
-            "dartlab.analysis.financial.governance._loadSanction", return_value=None
-        ), patch(
-            "dartlab.analysis.financial.governance._loadContingentLiability", return_value=None
-        ), patch(
-            "dartlab.analysis.financial.governance._fetchLatestEquity", return_value=None
+        with (
+            patch("dartlab.analysis.financial.governance._loadSanction", return_value=None),
+            patch("dartlab.analysis.financial.governance._loadContingentLiability", return_value=None),
+            patch("dartlab.analysis.financial.governance._fetchLatestEquity", return_value=None),
         ):
             flags = calcGovernanceFlags(company)
         assert any("소유-지배 괴리" in msg for msg, _ in flags)
@@ -349,29 +371,30 @@ class TestRelatedPartyIntensity:
                 {"year": 2024, "entity": "자회사B", "sales": 50_000, "purchases": 5_000},
             ]
         )
-        guaranteeDf = _buildRptGuaranteeDf(
-            [{"year": 2024, "entity": "자회사A", "amount": 200_000}]
-        )
+        guaranteeDf = _buildRptGuaranteeDf([{"year": 2024, "entity": "자회사A", "amount": 200_000}])
         company = MagicMock()
         company._cache = {}
         # select/toDictBySnakeId mock — IS sales 시계열
-        with patch(
-            "dartlab.analysis.financial.governance._loadRelatedPartyTx",
-            return_value=_MockRelatedPartyResult(
-                revenueTxDf=revenueTx, guaranteeDf=guaranteeDf
+        with (
+            patch(
+                "dartlab.analysis.financial.governance._loadRelatedPartyTx",
+                return_value=_MockRelatedPartyResult(revenueTxDf=revenueTx, guaranteeDf=guaranteeDf),
             ),
-        ), patch(
-            "dartlab.analysis.financial.governance._fetchLatestEquity",
-            return_value=500_000_000_000,  # 5000억원
-        ), patch(
-            "dartlab.analysis.financial.governance.toDictBySnakeId",
-            return_value=(
-                {"sales": {"2023": 1_000_000_000_000, "2024": 2_500_000_000_000}},
-                ["2023", "2024"],
+            patch(
+                "dartlab.analysis.financial.governance._fetchLatestEquity",
+                return_value=500_000_000_000,  # 5000억원
             ),
-        ), patch(
-            "dartlab.analysis.financial.governance.annualColsFromPeriods",
-            return_value=["2023", "2024"],
+            patch(
+                "dartlab.analysis.financial.governance.toDictBySnakeId",
+                return_value=(
+                    {"sales": {"2023": 1_000_000_000_000, "2024": 2_500_000_000_000}},
+                    ["2023", "2024"],
+                ),
+            ),
+            patch(
+                "dartlab.analysis.financial.governance.annualColsFromPeriods",
+                return_value=["2023", "2024"],
+            ),
         ):
             result = calcRelatedPartyIntensity(company)
 
@@ -408,25 +431,28 @@ class TestRelatedPartyIntensity:
         )
         company = _mockCompanyWithReport()
         company._cache = {}
-        with patch(
-            "dartlab.analysis.financial.governance._loadRelatedPartyTx",
-            return_value=_MockRelatedPartyResult(revenueTxDf=revenueTx, guaranteeDf=None),
-        ), patch(
-            "dartlab.analysis.financial.governance._fetchLatestEquity",
-            return_value=None,
-        ), patch(
-            "dartlab.analysis.financial.governance.toDictBySnakeId",
-            return_value=(
-                {"sales": {"2023": 1_000_000_000_000, "2024": 1_000_000_000_000}},
-                ["2023", "2024"],
+        with (
+            patch(
+                "dartlab.analysis.financial.governance._loadRelatedPartyTx",
+                return_value=_MockRelatedPartyResult(revenueTxDf=revenueTx, guaranteeDf=None),
             ),
-        ), patch(
-            "dartlab.analysis.financial.governance.annualColsFromPeriods",
-            return_value=["2023", "2024"],
-        ), patch(
-            "dartlab.analysis.financial.governance._loadSanction", return_value=None
-        ), patch(
-            "dartlab.analysis.financial.governance._loadContingentLiability", return_value=None
+            patch(
+                "dartlab.analysis.financial.governance._fetchLatestEquity",
+                return_value=None,
+            ),
+            patch(
+                "dartlab.analysis.financial.governance.toDictBySnakeId",
+                return_value=(
+                    {"sales": {"2023": 1_000_000_000_000, "2024": 1_000_000_000_000}},
+                    ["2023", "2024"],
+                ),
+            ),
+            patch(
+                "dartlab.analysis.financial.governance.annualColsFromPeriods",
+                return_value=["2023", "2024"],
+            ),
+            patch("dartlab.analysis.financial.governance._loadSanction", return_value=None),
+            patch("dartlab.analysis.financial.governance._loadContingentLiability", return_value=None),
         ):
             flags = calcGovernanceFlags(company)
         assert any("내부거래 의존" in msg for msg, _ in flags)
@@ -499,11 +525,12 @@ class TestLegalEventRisk:
 
         company = MagicMock()
         company._cache = {}
-        with patch(
-            "dartlab.analysis.financial.governance._loadSanction", return_value=None
-        ), patch(
-            "dartlab.analysis.financial.governance._loadContingentLiability",
-            return_value=None,
+        with (
+            patch("dartlab.analysis.financial.governance._loadSanction", return_value=None),
+            patch(
+                "dartlab.analysis.financial.governance._loadContingentLiability",
+                return_value=None,
+            ),
         ):
             assert calcLegalEventRisk(company) is None
 
@@ -542,21 +569,23 @@ class TestLegalEventRisk:
                 }
             ]
         )
-        guaranteeDf = _buildGuaranteeDf(
-            [{"year": thisYear - 1, "totalGuaranteeAmount": 500_0000_0000, "lineCount": 3}]
-        )
+        guaranteeDf = _buildGuaranteeDf([{"year": thisYear - 1, "totalGuaranteeAmount": 500_0000_0000, "lineCount": 3}])
 
         company = MagicMock()
         company._cache = {}
-        with patch(
-            "dartlab.analysis.financial.governance._loadSanction",
-            return_value=_MockSanctionResult(sanctionDf=sanctionDf),
-        ), patch(
-            "dartlab.analysis.financial.governance._loadContingentLiability",
-            return_value=_MockContingentResult(guaranteeDf=guaranteeDf, lawsuitDf=lawsuitDf),
-        ), patch(
-            "dartlab.analysis.financial.governance._fetchLatestEquity",
-            return_value=1000_0000_0000,
+        with (
+            patch(
+                "dartlab.analysis.financial.governance._loadSanction",
+                return_value=_MockSanctionResult(sanctionDf=sanctionDf),
+            ),
+            patch(
+                "dartlab.analysis.financial.governance._loadContingentLiability",
+                return_value=_MockContingentResult(guaranteeDf=guaranteeDf, lawsuitDf=lawsuitDf),
+            ),
+            patch(
+                "dartlab.analysis.financial.governance._fetchLatestEquity",
+                return_value=1000_0000_0000,
+            ),
         ):
             result = calcLegalEventRisk(company)
 
@@ -601,15 +630,19 @@ class TestLegalEventRisk:
         )
         company = _mockCompanyWithReport()
         company._cache = {}
-        with patch(
-            "dartlab.analysis.financial.governance._loadSanction",
-            return_value=_MockSanctionResult(sanctionDf=sanctionDf),
-        ), patch(
-            "dartlab.analysis.financial.governance._loadContingentLiability",
-            return_value=None,
-        ), patch(
-            "dartlab.analysis.financial.governance._fetchLatestEquity",
-            return_value=None,
+        with (
+            patch(
+                "dartlab.analysis.financial.governance._loadSanction",
+                return_value=_MockSanctionResult(sanctionDf=sanctionDf),
+            ),
+            patch(
+                "dartlab.analysis.financial.governance._loadContingentLiability",
+                return_value=None,
+            ),
+            patch(
+                "dartlab.analysis.financial.governance._fetchLatestEquity",
+                return_value=None,
+            ),
         ):
             flags = calcGovernanceFlags(company)
         assert any("제재 1건" in msg for msg, _ in flags)

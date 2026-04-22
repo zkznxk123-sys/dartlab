@@ -13,7 +13,6 @@ from __future__ import annotations
 import pytest
 from huggingface_hub.utils import filter_repo_objects
 
-
 _EXPECTED_SCAN_FILES = [
     "dart/scan/finance.parquet",
     "dart/scan/changes.parquet",

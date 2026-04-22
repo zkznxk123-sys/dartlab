@@ -219,15 +219,11 @@ def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple
             )
         # 과소 지배 — 20% 미만 + 특수관계도 낮음
         if totalR > 0 and totalR < 20:
-            flags.append(
-                (f"본인+특수관계 {totalR:.1f}% -- 경영권 방어 취약", "warning")
-            )
+            flags.append((f"본인+특수관계 {totalR:.1f}% -- 경영권 방어 취약", "warning"))
         # 본인 지분 5년 급격 희석
         ch = owner.get("top1Change5y")
         if ch is not None and ch <= -5:
-            flags.append(
-                (f"본인 지분 5년간 {ch:+.1f}%p 희석 -- 승계/상속 이벤트 가능", "warning")
-            )
+            flags.append((f"본인 지분 5년간 {ch:+.1f}%p 희석 -- 승계/상속 이벤트 가능", "warning"))
 
     # 법적 이벤트 리스크 (제재·소송·채무보증)
     legal = calcLegalEventRisk(company)
@@ -238,25 +234,15 @@ def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple
             amt = legal.get("sanctionAmount") or 0
             # 1억 이상만 금액 표시 — 파서 단위 혼재로 1억 미만은 불확실
             amtText = f" (누적 {amt / 1e8:.1f}억원)" if amt >= 1_0000_0000 else ""
-            flags.append(
-                (f"최근 {n}년 제재 {sanctionCount}건{amtText} -- 규제 리스크", "warning")
-            )
+            flags.append((f"최근 {n}년 제재 {sanctionCount}건{amtText} -- 규제 리스크", "warning"))
         lawsuitCount = legal.get("lawsuitCount") or 0
         lawsuitAmount = legal.get("lawsuitAmount") or 0
         if lawsuitCount >= 1 or lawsuitAmount >= 100_0000_0000:
-            amtText = (
-                f" (청구금액 {lawsuitAmount / 1e8:.0f}억원)"
-                if lawsuitAmount >= 1_0000_0000
-                else ""
-            )
-            flags.append(
-                (f"최근 {n}년 소송 {lawsuitCount}건{amtText} -- 법적 분쟁 진행", "warning")
-            )
+            amtText = f" (청구금액 {lawsuitAmount / 1e8:.0f}억원)" if lawsuitAmount >= 1_0000_0000 else ""
+            flags.append((f"최근 {n}년 소송 {lawsuitCount}건{amtText} -- 법적 분쟁 진행", "warning"))
         gRatio = legal.get("guaranteeToEquity")
         if gRatio is not None and gRatio >= 50:
-            flags.append(
-                (f"채무보증/자기자본 {gRatio:.0f}% -- 우발채무 부담 큼", "warning")
-            )
+            flags.append((f"채무보증/자기자본 {gRatio:.0f}% -- 우발채무 부담 큼", "warning"))
 
     # 특수관계자 거래 집중도
     rpt = calcRelatedPartyIntensity(company)
@@ -265,9 +251,7 @@ def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple
         rev = lt.get("relatedRevenueRatio")
         if rev is not None and rev >= 30:
             trend = rpt.get("trend", "unknown")
-            trendText = {"increasing": ", 증가 추세", "decreasing": ", 감소 추세", "stable": ""}.get(
-                trend, ""
-            )
+            trendText = {"increasing": ", 증가 추세", "decreasing": ", 감소 추세", "stable": ""}.get(trend, "")
             flags.append(
                 (
                     f"특수관계 매출 {rev:.0f}%{trendText} -- 내부거래 의존 높음",
@@ -778,7 +762,6 @@ def calcRelatedPartyIntensity(company, *, basePeriod: str | None = None) -> dict
     calcOwnerConcentration : 소유-지배 괴리 (별도 축).
     calcLegalEventRisk : 제재·소송 (별도 축).
     """
-    import polars as pl
 
     rpt = _loadRelatedPartyTx(company)
     if rpt is None:

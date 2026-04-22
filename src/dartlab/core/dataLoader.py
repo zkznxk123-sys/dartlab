@@ -1246,9 +1246,7 @@ def _pyodideFetchScanLite() -> None:
             "scan:prebuild_incomplete",
             missing=["finance-lite.parquet (수신 실패 또는 1MB 미만)"],
         )
-        raise RuntimeError(
-            "scan finance-lite 수신 실패. 네트워크/HF 응답 확인 후 재시도하세요."
-        )
+        raise RuntimeError("scan finance-lite 수신 실패. 네트워크/HF 응답 확인 후 재시도하세요.")
 
     sizeMb = dest.stat().st_size / 1024 / 1024
     emit("scan:prebuild_ready", fileCount=f"{sizeMb:.1f}MB (finance-lite)")
