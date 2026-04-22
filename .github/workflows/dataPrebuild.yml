@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: hf-dataset-push
+  group: hf-dart-push
   cancel-in-progress: false
 
 permissions:

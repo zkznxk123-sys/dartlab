@@ -8,10 +8,9 @@ on:
 permissions:
   contents: write
 
-# HF push 워크플로우와 직렬화 (sliding-window 429 회피).
-# dataSync / dataPrebuild / edgarSync 와 같은 group.
+# kindlist 경로 (dart/kindlist/*) 전용 group — 다른 카테고리와 분리.
 concurrency:
-  group: hf-dataset-push
+  group: hf-kindlist-push
   cancel-in-progress: false
 
 jobs:
