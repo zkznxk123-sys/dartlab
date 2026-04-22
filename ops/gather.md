@@ -6,6 +6,16 @@
 
 외부 시장 데이터 수집. 공시 데이터와 시장 데이터를 연결.
 
+## API 키 미설정 시 동작
+
+ECOS (한국은행) · FRED (미 연준) 등 외부 API 키가 필요한 축은 키 부재 시 다음 경로를 따른다.
+
+- **대화형 CLI (TTY)**: `promptAndSave` 가 입력을 받아 `.env` 에 저장하고 계속 실행. 사용자가 건너뛰면 `None` 반환.
+- **서버·백그라운드 (TTY 없음)**: `core.env.AuthKeyMissing` 예외를 raise. 예외 본문에 서비스명 · 발급 URL · `.env` 설정법이 포함된다.
+- **AI tool 경유**: `ai/runtime/toolLoop.py` 가 `AuthKeyMissing` 을 `status="auth_required"` 로 태깅하고 사용자 응답에 안내 그대로 전달.
+
+관련: `core/env.py::AuthKeyMissing`, `gather.__init__._macroKR/_macroUS`.
+
 ## 호출 계약
 
 ```python
