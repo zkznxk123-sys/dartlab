@@ -189,7 +189,19 @@ class Industry:
         return buildTimelineSummary(loadNodes(), industryId)
 
     def build(self, *, skipDocs: bool = False) -> None:
-        """산업지도를 빌드한다 (4단계 파이프라인)."""
+        """산업지도를 빌드한다 (4단계 파이프라인).
+
+        Parameters
+        ----------
+        skipDocs : bool
+            True 면 docs 기반 제품 분류 단계 생략 (빌드 시간 단축).
+
+        Returns
+        -------
+        None
+            결과는 ``data/industry/nodes.json`` + ``edges.json`` 에 저장.
+            조회는 ``industry(industryId)`` / ``industry.edges()``.
+        """
         from dartlab.industry.build.pipeline import buildIndustryMap
 
         buildIndustryMap(skipDocs=skipDocs)
@@ -249,7 +261,21 @@ class Industry:
         )
 
     def map(self, industryId: str) -> Any:
-        """IndustryDef 객체를 반환 (taxonomy 조회)."""
+        """IndustryDef 객체를 반환 (taxonomy 조회).
+
+        Parameters
+        ----------
+        industryId : str
+            산업 ID (예: "semiconductor").
+
+        Returns
+        -------
+        IndustryDef | None
+            industryId : str — 산업 식별자
+            name : str — 한글 산업명
+            stages : list[StageDef] — 공정 단계 정의 (key, name, role, note).
+            등록되지 않은 산업이면 None.
+        """
         from dartlab.industry.taxonomy import getIndustry
 
         return getIndustry(industryId)
@@ -282,6 +308,12 @@ def addOverride(
         보정 근거 (선택).
     confidence : float
         신뢰도 (기본 1.0).
+
+    Returns
+    -------
+    None
+        결과는 ``src/dartlab/industry/overrides.json`` 에 저장. 다음
+        ``industry.build()`` 호출 시 반영된다.
     """
     ovFile = _DATA_DIR / "overrides.json"
     data: dict = {}

@@ -380,5 +380,12 @@ def creditCompany(
 
 
 def axes() -> dict[str, str]:
-    """가용한 7축 목록."""
+    """가용한 7축 목록.
+
+    Returns
+    -------
+    dict[str, str]
+        키 : str — 축 이름 (예: "repayment", "leverage").
+        값 : str — 한글 레이블 (예: "채무상환능력", "자본구조").
+    """
     return dict(_CREDIT_AXES)

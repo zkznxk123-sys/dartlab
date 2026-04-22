@@ -251,7 +251,15 @@ _QUARTER_COL_RE = re.compile(r"^(\d{4})Q[1-4]$")
 
 
 def listExportModules() -> list[tuple[str, str]]:
-    """Excel/export용 DART 공개 모듈 목록."""
+    """Excel/export용 DART 공개 모듈 목록.
+
+    Returns
+    -------
+    list[tuple[str, str]]
+        (prop : str, label : str) 튜플 리스트 — Excel export 시 컬럼 이름
+        생성용. prop 은 Company 속성명 (예: "businessOverview"), label 은
+        사용자 표시용 한글 라벨.
+    """
     return list(_get_all_properties())
 
 
@@ -303,7 +311,19 @@ class Company:
 
     @staticmethod
     def canHandle(code: str) -> bool:
-        """DART 종목코드(6자) 또는 한글 회사명이면 처리 가능."""
+        """DART 종목코드(6자) 또는 한글 회사명이면 처리 가능.
+
+        Parameters
+        ----------
+        code : str
+            종목코드 또는 회사명 후보.
+
+        Returns
+        -------
+        bool
+            True 면 DART provider 로 처리. 6자리 alphanumeric (KR 종목코드)
+            또는 한글 포함 문자열이면 True.
+        """
         if re.match(r"^[0-9A-Za-z]{6}$", code):
             return True
         if any("\uac00" <= ch <= "\ud7a3" for ch in code):
@@ -312,7 +332,13 @@ class Company:
 
     @staticmethod
     def priority() -> int:
-        """낮을수록 먼저 시도. DART=10 (기본 provider)."""
+        """낮을수록 먼저 시도. DART=10 (기본 provider).
+
+        Returns
+        -------
+        int
+            provider 우선순위. DART 는 10 — EDGAR (20) 보다 먼저 시도.
+        """
         return 10
 
     def __init__(self, codeOrName: str):
@@ -1983,6 +2009,13 @@ class Company:
             - "사업 개요" → c.show("businessOverview")
             - "주요 제품" → c.show("mainProduct")
             - "차입금" → c.show("borrowings")
+
+        Returns
+        -------
+        CallableAccessor
+            dual-access proxy. ``c.show("BS")`` call-form 또는 ``c.show.BS()``
+            attr-form 호출 시 ``_showImpl`` 이 실행되어 ``pl.DataFrame`` 반환.
+            반환 구조 상세는 ``_showImpl`` docstring 참조.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2428,6 +2461,13 @@ class Company:
             c.select.IS(["매출액"], freq="Y")    # attr + kwargs
 
         실제 동작은 ``_selectImpl`` 참조.
+
+        Returns
+        -------
+        CallableAccessor
+            dual-access proxy. call/attr form 둘 다 ``_selectImpl`` 호출
+            — ``SelectResult`` 반환 (filtered DataFrame + meta). 상세는
+            ``_selectImpl`` docstring.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2852,6 +2892,12 @@ class Company:
             - "사이클 관점" → c.review(type="full", template="사이클")
 
         실제 동작은 ``_reviewImpl`` 참조.
+
+        Returns
+        -------
+        CallableAccessor
+            dual-access proxy. 호출 시 ``_reviewImpl`` 이 ``Review`` 객체 반환
+            (blocks / toMarkdown() / toHtml()). 상세는 ``_reviewImpl`` docstring.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2952,6 +2998,13 @@ class Company:
             - "override 재계산" → c.analysis("가치평가", overrides={"wacc": 9.0})
 
         실제 동작은 ``_analysisImpl`` 참조.
+
+        Returns
+        -------
+        CallableAccessor
+            dual-access proxy. 호출 시 ``_analysisImpl`` 이
+            ``pl.DataFrame | dict`` 반환 (axis=None → 가이드 DataFrame, axis
+            지정 → 축별 dict). 상세는 ``_analysisImpl`` docstring.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -3085,6 +3138,12 @@ class Company:
             - "속성 접근" → c.credit.유동성()
 
         실제 동작은 ``_creditImpl`` 참조.
+
+        Returns
+        -------
+        CallableAccessor
+            dual-access proxy. 호출 시 ``_creditImpl`` 이 dict 반환 (grade,
+            score (점), healthScore (점), axes, outlook). 상세는 ``_creditImpl``.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -4690,6 +4749,13 @@ class Company:
             - "베타" → c.quant("베타")
 
         실제 동작은 ``_quantImpl`` 참조.
+
+        Returns
+        -------
+        CallableAccessor
+            dual-access proxy. 호출 시 ``_quantImpl`` 이 axis 따라
+            ``pl.DataFrame`` (지표 시계열) 또는 dict (판단/팩터 등) 반환.
+            상세는 ``_quantImpl`` docstring.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
