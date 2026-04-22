@@ -13,6 +13,7 @@ from typing import Any, Generator
 from dartlab.ai.runtime.events import AnalysisEvent
 from dartlab.ai.tools import buildTools, executeTool, toolsToOpenAiSchemas
 from dartlab.ai.tools.serialize import serializeForLlm, serializeForUi
+from dartlab.core.env import AuthKeyMissing
 
 log = logging.getLogger("dartlab.ai.toolLoop")
 
@@ -159,6 +160,14 @@ def streamWithTools(
                 llmText = serializeForLlm(raw, name=tc.name, arguments=tc.arguments)
                 uiText = serializeForUi(raw, name=tc.name)
                 status = "ok"
+            except AuthKeyMissing as e:
+                # 친절 메시지 (발급 URL + .env 설정법) 이 예외 본문에 이미 포함 — 스택트레이스 불필요.
+                # AI 는 이 메시지를 응답에 그대로 포함해 사용자에게 키 설정 방법을 안내한다.
+                llmText = f"[API 키 필요 — 사용자에게 아래 안내를 그대로 전달하세요]\n{e}"
+                uiText = llmText
+                status = "auth_required"
+                raw = None
+                log.info("tool %s: API key missing (%s)", tc.name, e.envKey)
             except Exception as e:  # noqa: BLE001
                 tbText = traceback.format_exc(limit=3)
                 llmText = f"[tool error] {type(e).__name__}: {e}\n{tbText}"
