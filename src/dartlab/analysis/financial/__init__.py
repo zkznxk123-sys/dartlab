@@ -489,6 +489,12 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
                 "relatedPartyIntensity",
                 "특수관계자 거래 집중도 (매출·매입·보증)",
             ),
+            _CalcEntry(
+                "calcCEOTurnover",
+                "dartlab.analysis.financial.governance",
+                "ceoTurnover",
+                "대표이사 교체 시계열",
+            ),
         ),
     ),
     "공시변화": _AxisEntry(

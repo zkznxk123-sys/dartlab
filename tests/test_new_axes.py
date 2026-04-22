@@ -313,6 +313,115 @@ class TestOwnerConcentration:
         assert any("소유-지배 괴리" in msg for msg, _ in flags)
 
 
+# ── 대표이사 교체 테스트 ──
+
+
+@dataclass
+class _MockExecutiveDocsResult:
+    individualDf: object = None
+
+
+def _buildIndividualDf(rows: list[dict]):
+    import polars as pl
+
+    schema = {
+        "year": pl.Int64,
+        "name": pl.Utf8,
+        "gender": pl.Utf8,
+        "position": pl.Utf8,
+        "registrationType": pl.Utf8,
+        "fullTime": pl.Utf8,
+        "responsibility": pl.Utf8,
+        "isCeo": pl.Boolean,
+    }
+    for r in rows:
+        for col in schema:
+            r.setdefault(col, None if col != "isCeo" else False)
+    return pl.DataFrame(rows, schema=schema)
+
+
+class TestCEOTurnover:
+    def test_none_when_no_executive_docs(self):
+        from dartlab.analysis.financial.governance import calcCEOTurnover
+
+        company = MagicMock()
+        company._cache = {}
+        with patch(
+            "dartlab.analysis.financial.governance._loadExecutiveDocs",
+            return_value=None,
+        ):
+            assert calcCEOTurnover(company) is None
+
+    def test_turnover_detection(self):
+        from dartlab.analysis.financial.governance import calcCEOTurnover
+
+        df = _buildIndividualDf(
+            [
+                {"year": 2021, "name": "김A", "isCeo": True},
+                {"year": 2021, "name": "이B", "isCeo": True},
+                {"year": 2022, "name": "김A", "isCeo": True},
+                {"year": 2022, "name": "이B", "isCeo": True},
+                {"year": 2023, "name": "김A", "isCeo": True},
+                {"year": 2023, "name": "박C", "isCeo": True},  # 이B → 박C
+                {"year": 2024, "name": "박C", "isCeo": True},  # 김A 퇴임
+                {"year": 2025, "name": "박C", "isCeo": True},
+                {"year": 2025, "name": "최D", "isCeo": True},  # 최D 합류
+                # CEO 아닌 임원 섞어 — 무시되어야
+                {"year": 2025, "name": "일반이사", "isCeo": False},
+            ]
+        )
+        company = MagicMock()
+        company._cache = {}
+        with patch(
+            "dartlab.analysis.financial.governance._loadExecutiveDocs",
+            return_value=_MockExecutiveDocsResult(individualDf=df),
+        ):
+            r = calcCEOTurnover(company)
+
+        assert r is not None
+        assert r["windowYears"] == 5
+        # 2022→2023: 1, 2023→2024: 1, 2024→2025: 1 → 총 3
+        assert r["turnoverCount"] == 3
+        assert r["lastChangeYear"] == 2025
+        assert r["currentCeos"] == ["박C", "최D"]
+        assert len(r["history"]) == 5
+        assert r["avgTenureYears"] is not None
+
+    def test_edgar_company_returns_none(self):
+        from dartlab.analysis.financial.governance import calcCEOTurnover
+
+        company = MagicMock()
+        company._cache = {}
+        company.currency = "USD"
+        company.stockCode = "AAPL"
+        assert calcCEOTurnover(company) is None
+
+    def test_governance_flags_include_ceo_turnover(self):
+        from dartlab.analysis.financial.governance import calcGovernanceFlags
+
+        df = _buildIndividualDf(
+            [
+                {"year": 2023, "name": "A", "isCeo": True},
+                {"year": 2024, "name": "B", "isCeo": True},
+                {"year": 2025, "name": "C", "isCeo": True},
+            ]
+        )
+        company = _mockCompanyWithReport()
+        company._cache = {}
+        with (
+            patch(
+                "dartlab.analysis.financial.governance._loadExecutiveDocs",
+                return_value=_MockExecutiveDocsResult(individualDf=df),
+            ),
+            patch("dartlab.analysis.financial.governance._loadSanction", return_value=None),
+            patch("dartlab.analysis.financial.governance._loadContingentLiability", return_value=None),
+            patch("dartlab.analysis.financial.governance._loadRelatedPartyTx", return_value=None),
+            patch("dartlab.analysis.financial.governance._fetchLatestEquity", return_value=None),
+        ):
+            flags = calcGovernanceFlags(company)
+        assert any("대표이사 교체 2회" in msg for msg, _ in flags)
+
+
 # ── 특수관계자 거래 집중도 테스트 ──
 
 

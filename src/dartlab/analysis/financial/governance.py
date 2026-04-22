@@ -203,6 +203,17 @@ def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple
         if len(changes) >= 2:
             flags.append(("감사인 잦은 변경 -- 감사 독립성 점검 필요", "warning"))
 
+    # 대표이사 교체
+    ceo = calcCEOTurnover(company)
+    if ceo:
+        cnt = ceo.get("turnoverCount") or 0
+        n = ceo.get("windowYears", CEO_TURNOVER_WINDOW_YEARS)
+        if cnt >= 2:
+            flags.append((f"최근 {n}년 대표이사 교체 {cnt}회 -- 경영진 불안정", "warning"))
+        avgT = ceo.get("avgTenureYears")
+        if avgT is not None and avgT < 3:
+            flags.append((f"대표이사 평균 재임 {avgT:.1f}년 -- 단기 재임 구간 (crash risk)", "warning"))
+
     # 오너 집중도 (본인/특수관계 분리)
     owner = calcOwnerConcentration(company)
     if owner and owner.get("latest"):
@@ -673,6 +684,143 @@ def calcOwnerConcentration(company, *, basePeriod: str | None = None) -> dict | 
         "latest": latest,
         "history": history,
         "top1Change5y": top1Change5y,
+    }
+
+
+def _loadExecutiveDocs(company):
+    """docs/finance/executive 파이프라인 호출 — 개인별 임원 시계열."""
+    code = _getDartStockCode(company)
+    if not code:
+        return None
+    try:
+        from dartlab.providers.dart.docs.finance.executive import executive
+
+        return executive(code)
+    except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
+        return None
+
+
+# ── 대표이사 교체 ──
+
+
+CEO_TURNOVER_WINDOW_YEARS = 5
+
+
+@memoized_calc
+def calcCEOTurnover(company, *, basePeriod: str | None = None) -> dict | None:
+    """대표이사 교체 — 최근 5년 교체 건수·평균 재임·현 CEO.
+
+    사업보고서 「임원의 현황」 섹션 개인별 테이블에서 "대표이사" 담당업무
+    문자열로 CEO 식별, 연도별 CEO 이름 집합 변동을 교체 이벤트로 카운트한다.
+    MSCI Board refreshment 와 SSRN CEO tenure inverted-U 이론(취임 3년 이내
+    고위험) 에 대응하는 축.
+
+    Parameters
+    ----------
+    company : Company
+        분석 대상 기업 (DART).
+    basePeriod : str, optional
+        기준 기간. 현재 구현에서는 참고만 — 최근 5년 시계열 반환.
+
+    Returns
+    -------
+    dict | None
+        None : executive docs 파서 데이터 없음 또는 DART 외 provider.
+        windowYears : int — 집계 윈도우 (년). 상수 5.
+        turnoverCount : int — 윈도우 내 CEO 교체 건수 (건). 전기에 없던
+            새 CEO가 등장하거나 전기 CEO가 사라지면 1로 카운트한다.
+        currentCeos : list[str] — 최근 연도 대표이사 이름.
+        lastChangeYear : int | None — 마지막 교체가 감지된 연도.
+        avgTenureYears : float | None — 시계열에서 관찰된 평균 재임 (년).
+            한 CEO의 첫·마지막 출현 연도 차이 + 1 의 평균.
+        history : list[dict] — 연도별 스냅샷
+            year : int — 연도
+            ceos : list[str] — 해당 연도 대표이사 이름
+            added : list[str] — 전기 대비 새로 등장
+            removed : list[str] — 전기 대비 빠진 이름
+
+    Raises
+    ------
+    없음 — 데이터 없음은 None 반환.
+
+    Examples
+    --------
+    >>> c = dartlab.Company("005930")
+    >>> c.analysis("지배구조")["ceoTurnover"]
+
+    Notes
+    -----
+    - CEO 식별은 임원 표의 "대표이사" / "CEO" 문자열 매칭 기반. 표기가 다른
+      케이스(예: "각자 대표집행임원")는 파서 키워드에 포함되지 않으면 놓칠 수 있다.
+    - 첫 연도는 비교 기준이 없어 교체 판정에서 제외된다.
+    - 공동대표 체제에서는 동일 연도에 여러 이름이 등장하므로 `currentCeos`
+      도 리스트로 반환한다.
+
+    Guide
+    -----
+    `turnoverCount >= 2` 이면 5년간 경영진 불안정 신호. `avgTenureYears < 3`
+    은 SSRN 연구의 bad-news hoarding 구간으로 crash risk 상승 경고.
+
+    See Also
+    --------
+    calcGovernanceFlags : 교체 빈도를 warning 플래그로 소비.
+    calcBoardComposition : 이사회 구성 (최신 스냅샷).
+    """
+    import polars as pl
+
+    result = _loadExecutiveDocs(company)
+    if result is None or result.individualDf is None or result.individualDf.is_empty():
+        return None
+
+    df = result.individualDf.filter(pl.col("isCeo"))
+    if df.is_empty():
+        return None
+
+    years = sorted(df["year"].unique().to_list())
+    recent = years[-CEO_TURNOVER_WINDOW_YEARS:]
+    if not recent:
+        return None
+
+    ceosByYear: dict[int, set[str]] = {}
+    for y in recent:
+        names = [n for n in df.filter(pl.col("year") == y)["name"].to_list() if n]
+        ceosByYear[int(y)] = set(names)
+
+    history: list[dict] = []
+    turnoverCount = 0
+    lastChangeYear: int | None = None
+    prev: set[str] | None = None
+    for y in sorted(ceosByYear.keys()):
+        current = ceosByYear[y]
+        added: list[str] = []
+        removed: list[str] = []
+        if prev is not None:
+            added = sorted(current - prev)
+            removed = sorted(prev - current)
+            if added or removed:
+                turnoverCount += 1
+                lastChangeYear = y
+        history.append({"year": y, "ceos": sorted(current), "added": added, "removed": removed})
+        prev = current
+
+    # 평균 재임 — 윈도우 내 CEO별 (first, last) 연도 차이
+    tenures: list[int] = []
+    for ceo in {c for s in ceosByYear.values() for c in s}:
+        presentYears = [y for y, s in ceosByYear.items() if ceo in s]
+        if presentYears:
+            tenures.append(max(presentYears) - min(presentYears) + 1)
+    avgTenure = round(sum(tenures) / len(tenures), 1) if tenures else None
+
+    latestYear = sorted(ceosByYear.keys())[-1]
+    currentCeos = sorted(ceosByYear[latestYear])
+
+    return {
+        "windowYears": CEO_TURNOVER_WINDOW_YEARS,
+        "turnoverCount": turnoverCount,
+        "currentCeos": currentCeos,
+        "lastChangeYear": lastChangeYear,
+        "avgTenureYears": avgTenure,
+        "history": history,
     }
 
 
