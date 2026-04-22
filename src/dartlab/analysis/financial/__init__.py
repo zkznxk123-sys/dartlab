@@ -471,6 +471,24 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
             _CalcEntry(
                 "calcGovernanceFlags", "dartlab.analysis.financial.governance", "governanceFlags", "지배구조 플래그"
             ),
+            _CalcEntry(
+                "calcLegalEventRisk",
+                "dartlab.analysis.financial.governance",
+                "legalEventRisk",
+                "법적 이벤트 리스크 (제재·소송·채무보증)",
+            ),
+            _CalcEntry(
+                "calcOwnerConcentration",
+                "dartlab.analysis.financial.governance",
+                "ownerConcentration",
+                "오너 집중도 (본인/특수관계 분리)",
+            ),
+            _CalcEntry(
+                "calcRelatedPartyIntensity",
+                "dartlab.analysis.financial.governance",
+                "relatedPartyIntensity",
+                "특수관계자 거래 집중도 (매출·매입·보증)",
+            ),
         ),
     ),
     "공시변화": _AxisEntry(
