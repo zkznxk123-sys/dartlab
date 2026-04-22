@@ -39,6 +39,9 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Smoke import (fail fast on src regression)
+        run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
+
       # workflow_run 컨텍스트는 소스 workflow 의 run_id 를 모름 → restore-keys 접두사 매칭으로
       # 최신 dataSync 캐시 찾는다. key 는 의도적으로 miss 시켜 fallback 강제.
       - name: Restore finance cache

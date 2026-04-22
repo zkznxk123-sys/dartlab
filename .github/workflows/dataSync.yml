@@ -66,6 +66,9 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Smoke import (fail fast on src regression)
+        run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
+
       - name: Restore finance cache
         uses: actions/cache/restore@v5
         with:
@@ -173,6 +176,9 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Smoke import (fail fast on src regression)
+        run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
+
       - name: Restore docs cache
         uses: actions/cache/restore@v5
         with:
@@ -250,6 +256,9 @@ jobs:
 
       - name: Install dependencies
         run: uv sync
+
+      - name: Smoke import (fail fast on src regression)
+        run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
 
       - name: Restore data cache
         uses: actions/cache/restore@v5

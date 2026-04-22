@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Smoke import (fail fast on src regression)
+        run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
+
       - name: Build industry map (all companies) + HF upload
         run: uv run python -X utf8 scripts/build/buildIndustryMap.py --companies 0
         env:
