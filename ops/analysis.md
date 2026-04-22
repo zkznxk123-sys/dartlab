@@ -255,7 +255,7 @@ analysis는 두 소비자를 모두 최고로 지원한다:
 
 | Part | 축 | 설명 | calc 수 | calc 파일 |
 |------|------|------|---------|-----------|
-| 5-1 | 지배구조 | 주인과 감시 | 7 | governance.py |
+| 5-1 | 지배구조 | 주인과 감시 | 8 | governance.py |
 | 5-2 | 공시변화 | 공시 변동 감지 | 4 | disclosureDelta.py |
 | 5-3 | 비교분석 | 시장 내 위치 | 3 | peerBenchmark.py |
 
@@ -310,6 +310,7 @@ analysis는 DART/EDGAR 양쪽에서 동일하게 동작한다.
 | 투자효율 | investmentInOther | DART report `investedCompany` 전용 |
 | 지배구조 | legalEventRisk 전체 | DART docs `sanction` + `contingentLiability` 섹션 전용 |
 | 지배구조 | relatedPartyIntensity 전체 | DART docs `relatedPartyTx` 섹션 전용 |
+| 지배구조 | ceoTurnover 전체 | DART docs `executive` 섹션 전용 |
 
 이 4건은 SEC 공시 구조의 근본적 차이. 상세: `src/dartlab/providers/edgar/README.md` "구조적 한계" 섹션.
 
