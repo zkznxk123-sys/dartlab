@@ -130,10 +130,12 @@ def evaluate(
         nCompared : int — 비교 기간 수
         evaluatedAt : str — 평가 시각 (ISO 8601)
     """
+    from dartlab.core.guide import missingDataHint
+
     projected = record.projected
     n = min(len(projected), len(actualRevenue))
     if n == 0:
-        return {"error": "비교할 데이터 없음"}
+        return {"error": missingDataHint("비교", detail="projected · actualRevenue 최소 1기 필요")}
 
     # MAE, MAPE
     errors = []

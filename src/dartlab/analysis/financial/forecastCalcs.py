@@ -472,7 +472,9 @@ def calcForecastFlags(company: Any, *, basePeriod: str | None = None) -> dict | 
 
     # 시계열 전용 (컨센서스/매크로 부재)
     if result.method == "timeseries_only":
-        flags.append(("TIMESERIES_ONLY", "시계열만 사용 -- 컨센서스 데이터 없음"))
+        from dartlab.core.guide import missingDataHint
+
+        flags.append(("TIMESERIES_ONLY", f"시계열만 사용 -- {missingDataHint('컨센서스')}"))
 
     # 구조변화 감지
     if "structural_break" in result.aiContext:
