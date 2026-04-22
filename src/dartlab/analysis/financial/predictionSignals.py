@@ -1798,21 +1798,32 @@ def _getLinkedCompanies(company, stockCode: str) -> list[dict]:
     except (ImportError, ValueError, TypeError):
         pass
 
-    # 2. 관계사 거래 (relatedPartyTx에서)
+    # 2. 관계사 거래 (relatedPartyTx 파이프라인 직접 호출)
+    # Company facade namespace 제거(Plan v10 P3) 후 getattr(company, "relatedPartyTx")
+    # 는 항상 None 반환하는 dead branch 였음. KRW 6자리 종목에만 호출.
     try:
-        rpt = getattr(company, "relatedPartyTx", None)
-        if rpt and hasattr(rpt, "revenueTxDf") and rpt.revenueTxDf is not None:
-            for row in rpt.revenueTxDf.iter_rows(named=True):
-                entity = row.get("entity", "")
-                if entity and entity not in {lc["name"] for lc in linked}:
-                    linked.append(
-                        {
-                            "code": "",
-                            "name": entity,
-                            "relationship": "거래",
-                        }
-                    )
-    except (AttributeError, TypeError):
+        stockCode = getattr(company, "stockCode", None)
+        if (
+            isinstance(stockCode, str)
+            and len(stockCode) == 6
+            and stockCode.isdigit()
+            and getattr(company, "currency", None) == "KRW"
+        ):
+            from dartlab.providers.dart.docs.finance.relatedPartyTx import relatedPartyTx
+
+            rpt = relatedPartyTx(stockCode)
+            if rpt and rpt.revenueTxDf is not None:
+                for row in rpt.revenueTxDf.iter_rows(named=True):
+                    entity = row.get("entity", "")
+                    if entity and entity not in {lc["name"] for lc in linked}:
+                        linked.append(
+                            {
+                                "code": "",
+                                "name": entity,
+                                "relationship": "거래",
+                            }
+                        )
+    except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
         pass
 
     return linked
