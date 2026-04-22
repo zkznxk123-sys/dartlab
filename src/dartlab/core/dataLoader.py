@@ -525,6 +525,17 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
             f"{category}는 전체 다운로드를 지원하지 않음. 개별 종목 loadData(..., category='{category}')를 사용하세요."
         )
 
+    # Pyodide (WASM 브라우저) 는 huggingface_hub 가 설치 안 되고 전체 다운로드가 용량상
+    # 부적합. scan 카테고리만 경량 `finance-lite.parquet`(~18MB) 을 pyfetch 로 개별 수신.
+    if _IS_PYODIDE:
+        if category == "scan":
+            _pyodideFetchScanLite()
+            return
+        raise NotImplementedError(
+            f"Pyodide 환경에서 downloadAll('{category}') 는 지원하지 않습니다. "
+            "scan 은 'finance-lite' 경량본만 지원되며 개별 종목은 Company() 로 자동 수신됩니다."
+        )
+
     try:
         from huggingface_hub import snapshot_download
     except ImportError as exc:
@@ -1208,6 +1219,39 @@ def _loadDataPyodide(
             df = df.select(available)
 
     return _normalizeLoadedFrame(df, category)
+
+
+def _pyodideFetchScanLite() -> None:
+    """Pyodide: scan 경량 프리빌드(`finance-lite.parquet`, ~18MB) 만 받아 FS에 저장.
+
+    `huggingface_hub.snapshot_download` 는 pyodide 에 설치되지 않고, 전체 프리빌드
+    (307MB finance + report 12개 등) 를 브라우저에서 받기엔 부담이므로 스캔 카테고리의
+    경량본 1 파일만 선별 수신한다. 실패 시 명시적 에러를 emit 하여 fallback 이 조용히
+    부분 결과를 돌려주는 상황을 차단한다.
+    """
+    from dartlab.core.guidance import emit
+
+    scanDir = _dataDir("scan")
+    scanDir.mkdir(parents=True, exist_ok=True)
+    dest = scanDir / "finance-lite.parquet"
+
+    try:
+        _pyodideFetchToFS("finance-lite", "scan", "dart/scan", dest)
+    except (RuntimeError, OSError) as exc:
+        emit("scan:prebuild_failed", error=str(exc))
+        raise
+
+    if not dest.exists() or dest.stat().st_size < 1024 * 1024:
+        emit(
+            "scan:prebuild_incomplete",
+            missing=["finance-lite.parquet (수신 실패 또는 1MB 미만)"],
+        )
+        raise RuntimeError(
+            "scan finance-lite 수신 실패. 네트워크/HF 응답 확인 후 재시도하세요."
+        )
+
+    sizeMb = dest.stat().st_size / 1024 / 1024
+    emit("scan:prebuild_ready", fileCount=f"{sizeMb:.1f}MB (finance-lite)")
 
 
 def _pyodideFetchToFS(stockCode: str, category: str, dirPath: str, path: Path) -> None:

@@ -136,7 +136,7 @@ def configure_parser(subparsers) -> None:
         nargs="?",
         const="all",
         default=None,
-        help="전종목 scan 프리빌드 (all/changes/finance/report)",
+        help="전종목 scan 프리빌드 (all/changes/finance/finance-lite/report)",
     )
     parser.add_argument(
         "--since-year",
@@ -232,6 +232,7 @@ def _printHelp(console) -> None:
     console.print("  dartlab collect --scan              DART 전종목 횡단분석 프리빌드")
     console.print("  dartlab collect --scan changes      changes만 프리빌드")
     console.print("  dartlab collect --scan finance      finance만 프리빌드")
+    console.print("  dartlab collect --scan finance-lite 브라우저 용 경량 finance (~18MB)")
     console.print("  dartlab collect --scan report       report만 프리빌드")
     console.print("  dartlab collect --tier sp500 --scan EDGAR scan 프리빌드")
     console.print()
@@ -289,7 +290,13 @@ def _runRepairCache(console, args) -> int:
 
 def _runScan(console, args) -> int:
     """전종목 scan 프리빌드 실행."""
-    from dartlab.scan.builder import buildChanges, buildFinance, buildReport, buildScan
+    from dartlab.scan.builder import (
+        buildChanges,
+        buildFinance,
+        buildFinanceLite,
+        buildReport,
+        buildScan,
+    )
 
     target = getattr(args, "scan", "all")
     sinceYear = getattr(args, "since_year", 2021)
@@ -302,6 +309,8 @@ def _runScan(console, args) -> int:
         buildChanges(sinceYear=sinceYear, verbose=True)
     elif target == "finance":
         buildFinance(sinceYear=sinceYear, verbose=True)
+    elif target == "finance-lite":
+        buildFinanceLite(verbose=True)
     elif target == "report":
         buildReport(sinceYear=sinceYear, verbose=True)
     else:
