@@ -268,20 +268,41 @@ def _scanAccountFromMerged(
 
     기존 _FileProcessor 로직을 단일 DataFrame에서 재현한다.
     실패 시 None을 반환하여 fallback으로 넘긴다.
+
+    Pyodide(브라우저 WASM) 에서는 polars `scan_parquet` 이 미지원이라 pyarrow 로
+    전체 로드 → `pl.from_arrow` 로 DataFrame 전환 후 동일 필터 연산. 원본 파일은
+    `finance-lite.parquet`(18MB) 이므로 메모리 부담 없음.
     """
+    from dartlab.core.dataLoader import _IS_PYODIDE
+
     try:
-        schema = pl.scan_parquet(str(scanPath)).collect_schema()
-        scCol = "stockCode" if "stockCode" in schema.names() else "stock_code"
+        if _IS_PYODIDE:
+            import pyarrow.parquet as pq
 
-        lz = pl.scan_parquet(str(scanPath)).filter(
-            pl.col("sj_div").is_in(filterDivs)
-            & (pl.col("account_nm").is_in(list(fastKeys)) | pl.col("account_id").is_in(list(fastKeys)))
-        )
+            fastKeysList = list(fastKeys)
+            # finance-lite 스키마 고정: stockCode, bsns_year, reprt_nm, sj_div, fs_nm,
+            # account_id, account_nm, thstrm_amount, thstrm_add_amount
+            tbl = pq.read_table(str(scanPath))
+            scCol = "stockCode" if "stockCode" in tbl.column_names else "stock_code"
+            df = pl.from_arrow(tbl).filter(
+                pl.col("sj_div").is_in(filterDivs)
+                & (pl.col("account_nm").is_in(fastKeysList) | pl.col("account_id").is_in(fastKeysList))
+            )
+            if annual:
+                df = df.filter(pl.col("reprt_nm") == "4분기")
+        else:
+            schema = pl.scan_parquet(str(scanPath)).collect_schema()
+            scCol = "stockCode" if "stockCode" in schema.names() else "stock_code"
 
-        if annual:
-            lz = lz.filter(pl.col("reprt_nm") == "4분기")
+            lz = pl.scan_parquet(str(scanPath)).filter(
+                pl.col("sj_div").is_in(filterDivs)
+                & (pl.col("account_nm").is_in(list(fastKeys)) | pl.col("account_id").is_in(list(fastKeys)))
+            )
 
-        df = lz.collect()
+            if annual:
+                lz = lz.filter(pl.col("reprt_nm") == "4분기")
+
+            df = lz.collect()
     except (pl.exceptions.PolarsError, OSError, FileNotFoundError):
         return None
 
@@ -399,11 +420,15 @@ def scanAccount(
     filterDivs = ["IS", "CIS"] if sjDiv in ("IS", "CIS") else [sjDiv]
     fastKeys = _buildFastKeys(snakeId)
 
-    # ── scan/finance.parquet 가속 경로 ──
+    # ── scan/finance(-lite).parquet 가속 경로 ──
+    # Pyodide(브라우저) 에서는 경량본 `finance-lite.parquet`(~18MB) 을 우선 사용한다.
+    # 일반 환경은 전량 `finance.parquet`(~307MB) 사용.
+    from dartlab.core.dataLoader import _IS_PYODIDE
     from dartlab.scan._helpers import _ensureScanData
 
     scanDir = _ensureScanData()
-    scanPath = scanDir / "finance.parquet"
+    scanFileName = "finance-lite.parquet" if _IS_PYODIDE else "finance.parquet"
+    scanPath = scanDir / scanFileName
     allDf = None
 
     if scanPath.exists():
@@ -417,7 +442,7 @@ def scanAccount(
             annual=annual,
         )
         if allDf is not None:
-            _log.info("scanAccount('%s'): scan/finance.parquet 가속 경로 사용", snakeId)
+            _log.info("scanAccount('%s'): %s 가속 경로 사용", snakeId, scanFileName)
 
     # ── fallback: 종목별 파일 순회 ──
     if allDf is None:

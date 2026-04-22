@@ -12,6 +12,61 @@ _scanDownloaded = False
 # scan 프리빌드 freshness — HF 수집 주기(일 1회)에 맞춰 24h TTL
 _SCAN_FRESHNESS_TTL_SECONDS = 24 * 3600
 
+
+# ── finance-lite 스펙 (pyodide/브라우저 용 경량 프리빌드) ──────────────
+#
+# 원본 `finance.parquet`(307MB) 을 아래 30 개 snakeId 로 필터하고 2022년부터만
+# 남긴 경량본. 실측 18MB 수준. 브라우저 pyodide 에서 `pl.scan_parquet` 미지원이라
+# pyarrow 로 전체 로드 → `pl.from_arrow` 로 변환해 쓴다.
+#
+# 선정 기준: scan 하위 모듈(profitability/growth/quality/liquidity/efficiency/
+# cashflow/dividendTrend/capital/debt)과 analysis 엔진이 실사용하는 계정 union.
+# 전부 sortOrder.json 에 등록된 정규 snakeId.
+
+_LITE_ACCOUNTS_IS: tuple[str, ...] = (
+    "sales",
+    "cost_of_sales",
+    "gross_profit",
+    "operating_expenses",
+    "operating_profit",
+    "finance_income",
+    "finance_costs",
+    "profit_before_tax",
+    "income_tax_expense",
+    "net_income",
+)
+_LITE_ACCOUNTS_BS: tuple[str, ...] = (
+    "cash_and_cash_equivalents",
+    "current_assets",
+    "inventories",
+    "trade_receivables",
+    "noncurrent_assets",
+    "property_plant_and_equipment",
+    "intangible_assets",
+    "current_liabilities",
+    "trade_payables",
+    "noncurrent_liabilities",
+    "total_stockholders_equity",
+    "retained_earnings",
+)
+_LITE_ACCOUNTS_CF: tuple[str, ...] = (
+    "operating_cashflow",
+    "investing_cashflow",
+    "financing_cashflow",
+    "cash_and_cash_equivalents_at_the_end_of_year",
+    "cash_and_cash_equivalents_beginning",
+    "changes_in_operating_assets_and_liabilities",
+    "depreciation",
+    "net_increase_decrease_in_cash_and_cash_equivalents",
+)
+LITE_ACCOUNTS: tuple[str, ...] = _LITE_ACCOUNTS_IS + _LITE_ACCOUNTS_BS + _LITE_ACCOUNTS_CF
+
+# lite 빌드에 포함할 재무제표 구분 (SCE 제외 — 용량 27.8% 차지, scan 미사용)
+LITE_SJ_DIVS: tuple[str, ...] = ("IS", "BS", "CIS", "CF")
+
+# lite 기본 시작 연도 (5년치 분기 보장: 2022Q1 ~ 최신)
+LITE_SINCE_YEAR: int = 2022
+
 # scan 프리빌드 루트 필수 파일 — HF `dart/scan/` 루트에 있어야 하는 산출물.
 # 과거 `allow_patterns="dart/scan/**/*.parquet"` 버그로 루트 파일이 누락된
 # 불완전 캐시 상태 환경이 존재한다 (report/ 12개만 받아진 상태). 이 리스트로
@@ -31,21 +86,41 @@ def _isScanComplete(scanDir: Path) -> bool:
 def _ensureScanData() -> Path:
     """scan 프리빌드 디렉토리 확인 — 없거나 오래됐으면 HF에서 자동 다운로드.
 
-    루트 필수 파일(finance/changes/sharesOutstanding)이 모두 존재하고 TTL(24h)
-    이내면 즉시 반환 (HF 호출 0). 하나라도 없거나 TTL 초과면 다운로드 시도.
+    일반 환경: 루트 필수 파일(finance/changes/sharesOutstanding) 이 모두 존재하고
+    TTL(24h) 이내면 즉시 반환. 하나라도 없거나 TTL 초과면 다운로드 시도.
+
+    Pyodide(브라우저): 경량본 `finance-lite.parquet` 1 개만 요구. 없으면 HF 에서
+    개별 fetch (`_pyodideFetchScanLite` 경유).
 
     Returns
     -------
     Path
         scan 프리빌드 디렉토리 경로 (~/.dartlab/data/scan/).
     """
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _IS_PYODIDE, _dataDir
     from dartlab.core.messaging import emit
 
     scanDir = Path(_dataDir("scan"))
 
     global _scanDownloaded
     if _scanDownloaded:
+        return scanDir
+
+    # Pyodide: finance-lite.parquet 단일 파일만 체크 (전체 프리빌드는 용량상 불가)
+    if _IS_PYODIDE:
+        liteParquet = scanDir / "finance-lite.parquet"
+        if liteParquet.exists():
+            _scanDownloaded = True
+            return scanDir
+        emit("scan:prebuild_missing")
+        try:
+            from dartlab.core.dataLoader import downloadAll
+
+            downloadAll("scan")  # pyodide 분기에서 _pyodideFetchScanLite 호출
+            _scanDownloaded = True
+            emit("scan:prebuild_ready", fileCount="finance-lite")
+        except (ImportError, RuntimeError, OSError) as e:
+            emit("scan:prebuild_failed", error=str(e))
         return scanDir
 
     if _isScanComplete(scanDir):

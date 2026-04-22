@@ -675,13 +675,99 @@ def _buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
         return None
 
 
+def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> Path | None:
+    """pyodide(브라우저) 용 경량 finance 프리빌드.
+
+    이미 빌드된 ``finance.parquet``(307MB) 에서 주요 계정 30 개(`LITE_ACCOUNTS`)
+    × 5년치 분기만 추려 ``finance-lite.parquet``(~18MB) 를 생성한다.
+    브라우저 pyodide 가 pyarrow 로 전체 로드 후 필터링에 사용한다.
+
+    Parameters
+    ----------
+    sinceYear : int | None
+        시작 연도. ``None`` 이면 `LITE_SINCE_YEAR` 기본값 사용.
+    verbose : bool
+        진행 로그 출력 여부.
+
+    Returns
+    -------
+    Path | None
+        생성된 ``finance-lite.parquet`` 경로. 원본 없거나 결과 비면 None.
+
+    Notes
+    -----
+    - `LITE_ACCOUNTS` 는 `scan/_helpers.py` 가 SSOT.
+    - 원본 재빌드 없이 이미 정규화된 finance.parquet 에서 필터만 하므로 <1초.
+    """
+    from dartlab.providers.dart.finance.scanAccount import _buildFastKeys
+    from dartlab.scan._helpers import LITE_ACCOUNTS, LITE_SINCE_YEAR, LITE_SJ_DIVS
+
+    effectiveSinceYear = LITE_SINCE_YEAR if sinceYear is None else sinceYear
+    outDir = _scanDir()
+    outDir.mkdir(parents=True, exist_ok=True)
+    outputPath = outDir / "finance-lite.parquet"
+    srcPath = outDir / "finance.parquet"
+
+    if not srcPath.exists():
+        if verbose:
+            _say("[finance-lite] finance.parquet 없음 → buildFinance 먼저 실행 필요")
+        return None
+
+    # 30개 snakeId → 원본 account_id/account_nm synonym union
+    allKeys: set[str] = set()
+    for sid in LITE_ACCOUNTS:
+        allKeys.update(_buildFastKeys(sid))
+    keysList = list(allKeys)
+
+    if verbose:
+        _say(f"[finance-lite] {len(LITE_ACCOUNTS)}계정 → {len(keysList)}키, sinceYear={effectiveSinceYear}")
+
+    t0 = time.perf_counter()
+
+    keepCols = [
+        "stockCode",
+        "bsns_year",
+        "reprt_nm",
+        "sj_div",
+        "fs_nm",
+        "account_id",
+        "account_nm",
+        "thstrm_amount",
+        "thstrm_add_amount",
+    ]
+
+    df = (
+        pl.scan_parquet(str(srcPath))
+        .filter(pl.col("sj_div").is_in(list(LITE_SJ_DIVS)))
+        .filter(pl.col("bsns_year").cast(pl.Int32, strict=False) >= effectiveSinceYear)
+        .filter(pl.col("account_id").is_in(keysList) | pl.col("account_nm").is_in(keysList))
+        .select(keepCols)
+        .collect()
+    )
+
+    if df.is_empty():
+        if verbose:
+            _say("[finance-lite] 결과 없음")
+        return None
+
+    df.write_parquet(str(outputPath), compression="zstd")
+
+    elapsed = time.perf_counter() - t0
+    diskMb = outputPath.stat().st_size / 1024 / 1024
+    stocks = df["stockCode"].n_unique()
+    if verbose:
+        _say(f"[finance-lite] 완료: {stocks}종목, {df.height:,}행, {diskMb:.1f}MB, {elapsed:.1f}초 → {outputPath.name}")
+
+    return outputPath
+
+
 def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path | list[Path] | None]:
-    """changes + finance + report + sharesOutstanding 전체 프리빌드.
+    """changes + finance + finance-lite + report + sharesOutstanding 전체 프리빌드.
 
     Parameters
     ----------
     sinceYear : int
-        시작 연도.
+        시작 연도 (`buildFinance` 용). `buildFinanceLite` 는 `LITE_SINCE_YEAR` 기본값 사용.
     verbose : bool
         진행 로그 출력 여부.
 
@@ -690,6 +776,7 @@ def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path 
     dict[str, Path | list[Path] | None]
         changes : Path | None — changes.parquet 경로
         finance : Path | None — finance.parquet 경로
+        finance_lite : Path | None — finance-lite.parquet 경로 (pyodide 용 경량)
         report : list[Path] — apiType별 parquet 경로 목록
         sharesOutstanding : Path | None — sharesOutstanding.parquet 경로
     """
@@ -701,6 +788,8 @@ def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path 
 
     results["changes"] = buildChanges(sinceYear=sinceYear, verbose=verbose)
     results["finance"] = buildFinance(sinceYear=sinceYear, verbose=verbose)
+    # finance-lite 는 finance.parquet 직후에 파생 (재빌드 아니라 필터만)
+    results["finance_lite"] = buildFinanceLite(verbose=verbose)
     results["report"] = buildReport(sinceYear=sinceYear, verbose=verbose)
     results["sharesOutstanding"] = _buildSharesOutstandingSafe(verbose=verbose)
 
