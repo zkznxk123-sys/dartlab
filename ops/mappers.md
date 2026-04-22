@@ -1,8 +1,10 @@
 # Mappers
 
-dartlab 전체 매핑 데이터의 통합 엔진. 6개 매퍼를 단일 인터페이스로 관리.
-모든 매핑 데이터는 JSON이 단일 진실의 원천. 코드에 매핑 데이터 0줄.
-AI 학습을 전제로 설계 — 매퍼 데이터는 AI가 소비하고 학습한다.
+**주체**: mappers 엔진 (accountMappings · sectionMappings · industry taxonomy · topic graph · snakeId aliases · korean labels).
+**현재**: 6 매퍼 단일 인터페이스 · JSON SSOT (코드 매핑 데이터 0줄) · AI 소비·학습 전제 설계.
+**방향**: 매핑률 ≥95% 유지 자동 검증 · 매퍼 리포트 블록화 · 학습 워크플로우 자동 측정.
+
+dartlab 전체 매핑 데이터의 통합 엔진. 6 매퍼를 단일 인터페이스로 관리한다.
 
 ## 한눈에 보기
 

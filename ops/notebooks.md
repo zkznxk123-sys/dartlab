@@ -1,5 +1,9 @@
 # notebooks 정책 — Colab vs Marimo
 
+**주체**: 노트북 배포 (`notebooks/colab/*.ipynb` + `notebooks/marimo/*.py`).
+**현재**: 두 포맷 동일 내용 유지 · 마크다운 설명 전략 포맷별 분리 · 코드 셀 상단 짧은 주석 1줄.
+**방향**: marimo 인터랙티브 셀 확대 · Colab 배지 자동 삽입 · 노트북↔docs 교차 링크.
+
 > `notebooks/colab/*.ipynb` 와 `notebooks/marimo/*.py` 는 **같은 내용**을 두 포맷으로 유지한다.
 > 단, 마크다운 처리 차이가 있어 **포맷별 설명 전략이 다르다.**
 

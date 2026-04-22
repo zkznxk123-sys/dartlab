@@ -1,5 +1,9 @@
 # Experiments
 
+**주체**: 실험 워크플로우 (`experiments/NNN_*/`).
+**현재**: 폴더 분리 + STATUS.md · 실험 산출물 gitignored 경로 · 검증 결과는 본체 흡수 또는 archive.
+**방향**: 실험→프로덕션 흡수 추적 자동화 · 실험 결과 review audit 연계.
+
 가설 검증 → 결론 → 흡수 판단의 실험 체계.
 
 ## 폴더 규칙

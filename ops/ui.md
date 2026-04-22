@@ -1,6 +1,10 @@
 # UI 엔진 (L4 표현 계층)
 
-> dartlab의 모든 시각 인터페이스를 관리한다.
+**주체**: UI surface 2종 — Svelte SPA (`ui/web/`) + VSCode 확장 (`ui/vscode/`).
+**현재**: Svelte 5.55 + vite-plugin-svelte 6 · legacy plugin (es2020 target) · module singleton 패턴 · 모바일 호환 검증.
+**방향**: 공유 컴포넌트 라이브러리 분리 · 대시보드 v19 정착 · VSCode Webview parity 유지.
+
+dartlab 의 모든 시각 인터페이스를 관리한다.
 
 ## 한 눈에 보기
 

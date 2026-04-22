@@ -1,5 +1,9 @@
 # 코드 규칙
 
+**주체**: 개발자 + AI (dartlab 전 코드베이스).
+**현재**: camelCase 네이밍 · 9섹션 독스트링 규약 · 1.0.0 선언 체크리스트 · CHANGELOG 사용자 관점 원칙 확립.
+**방향**: 공개 API Returns 단위 보강 · CAPABILITIES 자동 생성 확대 · wheel 검증 강화.
+
 dartlab 전체에 적용되는 코드 스타일, 독스트링, 테스트, 릴리즈 규칙.
 
 | 항목 | 내용 |
@@ -146,81 +150,21 @@ pl.DataFrame
 - fixture scope는 `module` (session scope 사용하지 않는다)
 - 전 기간 데이터로 테스트한다
 
-## 질적 안정 정의 + 1.0.0 선언 기준
+## 릴리즈 절차
 
-**dartlab "질적 안정" = 기능 안정 + 아키텍처 정리 두 축 모두 충족. coverage 숫자만으로 "안정" 선언 금지.**
+dartlab 은 Semantic Versioning + GitHub Actions trusted publishing 을 사용한다.
 
-사용자 원문 (2026-04-21):
-> "덕지덕지가 있으면 근본 원소스로 옮기고, 너무 많은 헬퍼들 필요없는 것들 정리하고, 코드 효율성까지 하면서 안정화를 노린다. 안정화가 되어야 1.0.0으로 정식 버전을 선언할 거다."
+**기본 흐름**:
+1. `pyproject.toml` 의 `version` 수정.
+2. 변경 내역을 `CHANGELOG.md` 에 기록 (keep-a-changelog 포맷).
+3. master push 후 `git tag vX.Y.Z && git push origin vX.Y.Z`.
+4. publish.yml 이 PyPI 업로드 + wheel 리소스 검증 실행.
 
-### 축 1 — 기능 안정
-- 외부 사용자 `pip install -U dartlab` → 주요 API crash 없음
-- show/select/analysis/scan/credit/quant/review/gather/ask 모두 정상 동작
-- wheel-smoke / test_bundledResources / silent-fail lint 다중 방어
-
-### 축 2 — 아키텍처 정리 (4 하위 기준 모두 충족)
-
-1. **덕지덕지 → 근본 SSoT 이전** — 하드코딩 dict + registry 공존 제거. 다단 fallback → 단일 진입점. 패치 위에 패치 금지
-2. **불필요한 헬퍼 정리** — 중복 formatter/validator 1곳으로, 반복 boilerplate → 공통 util, 각 엔진 `_helpers.py`·`_utils.py` 10개 → 6 이하, 단일 사용처 helper 는 소비 파일로 inline
-3. **코드 효율성** — `@lru_cache` 누락 로더 보강, regex compile 모듈 레벨 상수화, polars native 미활용 hotspot 정리, realData 스위트 30%+ 단축 지표
-4. **Dead code 제거** — 0% coverage 실사용 판정 후 삭제, `_reference/`·`_backup/` git rm, 소스 줄 수 10%+ 감축
-
-### 1.0.0 정식 선언 체크리스트 (모두 YES)
-
-- [ ] Q1: routing SSoT 통합 (하드코딩 dict 4/5 제거 + `_showImpl` 복잡도 36→10)
-- [ ] Q2: 헬퍼 파일 수 10→6, formatter/validator 중복 제거
-- [ ] Q3: F-rank 함수 197→150 이하
-- [ ] Q4: realData 스위트 30%+ 속도 개선
-- [ ] Q5: src/dartlab 줄 수 10%+ 감축, 0% coverage 파일 0개
-- [ ] Q6: 전체 회귀 테스트 + 외부 venv 종합 smoke 통과
-- [ ] CHANGELOG 1.0.0 entry (breaking changes + 마이그레이션 가이드)
-- [ ] CI green 100%
-
-### 판정 원칙
-
-- **1.0.0 은 사용자가 직접 "1.0.0 해라" 지시할 때까지 어떤 형태로도 다루지 않는다**. 체크리스트 모두 통과해도 자동 선언·제안·version bump·CHANGELOG 1.0.0 entry·"이제 1.0.0 가능합니다" 발언 전부 금지. 체크리스트는 "불가 판정" 도구일 뿐, "가능 선언" 트리거 아님
-- 사용자가 "안정" / "1.0.0" 언급 시 이 체크리스트로 판정. 하나라도 미완 → "1.0.0 선언 불가". 전부 통과여도 선언하지 않고 "기준 충족, 선언 대기" 보고만
-- coverage 90% 같은 양적 지표만으로 안정 선언 금지 — 4 축 아키텍처 기준이 항상 함께
-- 양적 coverage 는 Q6 이후 별도 축으로 상향 가능하지만 선언 기준은 아님
-
-## 릴리즈
-
-- **release 절대 금지** — 사용자 명시 지시 없으면 version bump / git tag / PyPI publish 금지. "릴리즈할까요?" 제안도 금지
-- **끝자리(patch)만 올린다** — minor/major는 사용자 지시 시에만
-- GitHub Actions trusted publishing
-- 절차: `pyproject.toml` 버전 → 커밋 → `git tag vX.Y.Z && git push origin vX.Y.Z`
-- CHANGELOG.md + docs/changelog.md 동시 업데이트
-- **PyPI wheel 검증 필수** (0.9.11 accountMappings.json 빠진 사고로 확정):
-  1. `uv build --wheel` 후 accountMappings.json 포함 확인
-  2. json 파일 30개 이상 포함 확인
-  3. Node.js 테스트 `cd pyodide && node test_node.mjs` 13/13 통과
-  4. PyPI 같은 버전 덮어쓰기 불가
-
-### CHANGELOG 작성 원칙 (사용자가 읽는다)
-
-**관점: 외부 사용자가 이 버전 설치 후 무엇이 달라지는가.** 내부 리팩토링 코드명·플랜 번호·함수 이름·CC 지표는 사용자에게 의미 없다. 쓰지 않는다.
-
-- ❌ 금지: "Q3.1 tail", "F-rank 197→149", "_calcTwoStageDcf CC 63→5", "lru_cache 적용", "regex 상수화", "Phase 2 Act1"
-- ✓ 허용: "c.show('bond') 크래시 → None 반환", "c.analysis('예측신호') 에서 구조변화 감지가 이제 정상 동작", "섹션 분석 반복 호출 속도 개선"
-
-**엔트리 구성**:
-- `### Fixed` — 사용자가 만나던 크래시·버그가 해결된 것 (증상 + 해결).
-- `### Changed` — 사용자가 체감할 동작 변화 (속도 / 반환 타입 / 기본값 등).
-- `### Added` — 새 API / 새 옵션.
-- `### Removed` — 공개 API 제거 시만. 내부 미사용 정리는 "내부 정리" 한 줄.
-- `### Migration` — breaking change 가 있을 때만. 이전 코드 → 새 코드 변환 예시 포함.
-
-**문체**: 간결한 기술체 (중립/사용자 주어). 함수 경로나 라인 번호 나열 금지 (필요하면 commit 해시 링크).
-
-**서문 한 줄**: 이 버전의 주제를 한 문장으로. "내부 안정화 작업" · "성능 개선" · "버그 수정" · "새 기능 X 추가" 중 하나.
-
-**1.0.0 자체 언급 금지** (사용자가 "1.0.0" 지시 전까지). "정식 릴리즈 아님" 같은 문구도 불필요.
-
-## Git
-
-- AI 흔적 커밋 메시지/코드/주석에 포함하지 않는다 (pre-commit hook 자동 차단)
-- 커밋 메시지는 한국어 또는 영어
-- force push 하지 않는다
+**wheel 번들 검증 (0.9.11 accountMappings.json 누락 사고 이후 고정)**:
+- `uv build --wheel` 결과에 `accountMappings.json` 포함 확인.
+- 번들 json 파일 30개 이상 포함 확인.
+- `cd pyodide && node test_node.mjs` 13/13 통과.
+- PyPI 는 같은 버전 덮어쓰기를 허용하지 않으므로, 검증 실패 시 새 patch 버전으로 재발행.
 
 ## 검증 엄격성
 

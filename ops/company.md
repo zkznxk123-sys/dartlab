@@ -1,6 +1,10 @@
 # Company
 
-Company는 dartlab의 facade. 종목코드 하나로 모든 데이터에 접근한다.
+**주체**: Company facade (`dartlab.Company(stockCode)`).
+**현재**: 편의성 3원칙 (접근성·속도·신뢰성) 확립 · DART / EDGAR 이중 provider · show/select/topics + analysis/credit/review/quant/macro/gather 위임 · lazy load + BoundedCache.
+**방향**: cache freshness 자동 갱신 · 첫 호출 지연 단축 · EDGAR property parity 확대.
+
+Company 는 dartlab 의 facade. 종목코드 하나로 모든 데이터에 접근한다.
 
 ## 호출 계약
 

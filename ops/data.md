@@ -1,5 +1,9 @@
 # Data
 
+**주체**: 데이터 파이프라인 (HuggingFace `eddmpython/dartlab-data` + 자동 수집 워크플로우).
+**현재**: 5 워크플로우 (DART/EDGAR 일일·주간·분기) · concurrency group 직렬화 · SEC 벌크 primary · 429 Retry-After 대응.
+**방향**: realtime freshness 모니터링 대시보드 · 분기 DART 재정산 자동 감지 · cross-source validator.
+
 HuggingFace 데이터셋 관리, 자동 수집 파이프라인, 프리빌드, 모니터링.
 
 | 항목 | 내용 |
@@ -276,7 +280,7 @@ workflow_run trigger → Data Prebuild (DART) 자동 실행
 
 ### edgarSync.yml — EDGAR 통합 수집 (벌크 기반)
 
-> ⛔ **dartlab EDGAR finance = SEC 벌크.** `data.sec.gov/api/xbrl/companyfacts` API는 사용자가 명시적으로 요청할 때(`c.finance.refreshFromApi()`)만 호출되는 **선택 경로**다. 자동 CI/프리빌드/HF 배포는 전부 벌크를 쓴다. 상세: `ops/edgar.md`.
+> **dartlab EDGAR finance primary 소스는 SEC 벌크.** `data.sec.gov/api/xbrl/companyfacts` API 는 사용자가 명시적으로 요청할 때 (`c.finance.refreshFromApi()`) 만 호출되는 **선택 경로**. 자동 CI·프리빌드·HF 배포는 전부 벌크를 쓴다. 상세: `ops/edgar.md`.
 
 - **스케줄**: 매일 UTC 04:30 (companyfacts.zip 갱신 04:25 직후) + 일요일 전체 정산
 - **finance (daily 벌크)**:

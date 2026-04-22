@@ -1,6 +1,10 @@
 # ops/ — dartlab 모든 설계/규칙 SSOT
 
-> 모든 엔진별 + cross-cutting 문서가 여기에 있다. 엔진 폴더의 README는 포인터만.
+**주체**: dartlab 전체 (엔진 · cross-cutting · 콘텐츠 작업).
+**현재**: 29 문서. 엔진별 설계 + api-contract + architecture + testing + code + data + issues + experiments + 콘텐츠.
+**방향**: 공개 기여자 기준 톤 통일 · 운영자↔AI 약속은 memory 로 분리 유지 · 엔진 추가 시 라우팅 테이블 갱신.
+
+> 모든 엔진별 + cross-cutting 문서가 여기에 있다. 엔진 폴더의 README 는 포인터만.
 
 ## 엔진별 문서
 

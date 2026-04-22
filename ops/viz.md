@@ -1,5 +1,9 @@
 # Viz
 
+**주체**: viz 패키지 (`dartlab.viz` — `emit_chart` · `emit_diagram`).
+**현재**: 교차 관심사 — 모든 레이어에서 import 허용 · stdout marker (`<!--DARTLAB_VIZ:-->`) · webview/extension 파싱.
+**방향**: 차트 타입 확대 · 다이어그램 템플릿 통일 · viz → dashboard 직결.
+
 통합 시각화 엔진. 차트·다이어그램을 하나의 패키지에서 관리한다.
 
 ## 호출 계약

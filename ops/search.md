@@ -1,8 +1,11 @@
 # Search *(beta — AI 사용 비권장)*
 
-> ⚠ **현재 상태**: 인덱스 신선도 부족. max date = `20260331`(2026-04-19 기준 19일 갭). 매일 증분(`rebuildContentDelta`) / 풀빌드 자동화 미완성.
+**주체**: search 엔진 (`dartlab.search("키워드")` · `dartlab.searchCompany(ticker|name)`).
+**현재**: beta — scope 분리 (`title` ngram · `content` BM25) · 단일 종목 조회는 `Company.disclosure`/`liveFilings` 권장.
+**방향**: 매일 증분 (`rebuildContentDelta`) 자동화 · 풀빌드 cron · HF push 안정화 후 stable 승격.
+
+> ⚠ **현재 인덱스 신선도**: max date = `20260331` (2026-04-19 기준 19일 갭). 매일 증분 / 풀빌드 자동화 미완성.
 > AI 도구에서는 우선 사용 비권장 — 단일 종목 공시는 `Company.disclosure` / `Company.liveFilings` 경유.
-> 인프라(GitHub Actions cron + HF push) 구축 후 stable 승격 검토.
 
 공시 검색 — DART 사이트는 유형/기업/기간 필터만 지원하고 텍스트 검색이 안 된다. dartlab은 scope 분리로 두 종류 검색을 지원한다.
 

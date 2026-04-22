@@ -1,5 +1,9 @@
 # EDGAR 동기화 규칙
 
+**주체**: EDGAR provider (`providers/edgar/`) + DartCompany ↔ EdgarCompany 인터페이스.
+**현재**: SEC 벌크 primary (companyfacts.zip + 분기 `{Y}q{Q}.zip`) · 16,601 종목 · CompanyProtocol 완전 구현 · scan 11축 프리빌드.
+**방향**: sectorKpi 커버리지 확대 (XBRL segments fallback) · EDGAR docs (10-K/10-Q) 파서 고도화 · 일일 파이프라인 실패율 감소.
+
 DartCompany ↔ EdgarCompany 인터페이스 동기화의 단일 규칙 문서.
 데이터 소스/수집/분석 동작은 각 엔진 문서에 통합되어 있다:
 - 데이터 수집/배포/freshness → `ops/data.md`, `ops/edgar.md`
@@ -9,7 +13,7 @@ DartCompany ↔ EdgarCompany 인터페이스 동기화의 단일 규칙 문서.
 - analysis 통화/브릿지 → `ops/analysis.md`
 - review 통화 포맷 → `ops/review.md`
 
-## ⛔ [최상위 원칙] dartlab EDGAR finance = SEC 벌크
+## [핵심 원칙] dartlab EDGAR finance = SEC 벌크
 
 **dartlab의 EDGAR finance primary 소스는 SEC 벌크.** 자동 파이프라인·프리빌드·HF 배포는 전부 벌크 경로를 쓴다.
 

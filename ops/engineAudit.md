@@ -1,7 +1,11 @@
 # Engine Audit — 엔진 기능 점검 규격
 
-> AI audit(AI가 엔진을 제대로 쓰는지) 과 달리, engine audit은 **엔진 자체가 제대로 작동하는지** 점검한다.
-> 단위 테스트는 로직을 보고, engine audit은 **실제 데이터로 end-to-end 결과**를 본다.
+**주체**: engine audit (엔진 자체의 end-to-end 동작 검증).
+**현재**: Company → 전체 엔진 통로 점검 · 주요 종목 (KR + US) 샘플 · 회귀 감지용 실행 규격.
+**방향**: 샘플 종목 자동 순회 · 결과 snapshot diff · engine audit → review audit 연계.
+
+> AI audit (AI 가 엔진을 제대로 쓰는지) 과 달리, engine audit 은 **엔진 자체가 제대로 작동하는지** 점검한다.
+> 단위 테스트는 로직을 보고, engine audit 은 **실제 데이터로 end-to-end 결과**를 본다.
 
 ## 목적
 

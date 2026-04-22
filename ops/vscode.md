@@ -1,6 +1,10 @@
 # VSCode Extension
 
-dartlab의 1순위 UI surface. AI 채팅 + 프로바이더 연결 + MCP 자동 등록.
+**주체**: VSCode 확장 (`ui/vscode/` — webview + extension host).
+**현재**: Svelte webview ↔ postMessage ↔ extension host ↔ stdio JSON Lines ↔ `dartlab chat --stdio` · VS Marketplace 배포.
+**방향**: MCP 자동 등록 확장 · 대시보드 통합 · 확장 첫 실행 UX 개선.
+
+dartlab 의 1순위 UI surface. AI 채팅 + 프로바이더 연결 + MCP 자동 등록.
 
 | 항목 | 내용 |
 |------|------|

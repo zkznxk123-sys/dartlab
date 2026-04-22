@@ -1,6 +1,10 @@
 # Pyodide
 
-dartlab을 브라우저/Excel에서 실행. 설치 없이 재무분석.
+**주체**: Pyodide 배포 (브라우저 · Excel Python · pyodide node 테스트).
+**현재**: 번들 json 30개 + accountMappings 검증 · `test_node.mjs` 13/13 · `dartlab.prefetch()` 경로 확립.
+**방향**: 번들 크기 축소 · Excel 시나리오 템플릿 · 브라우저용 lazy-load 경로.
+
+dartlab 을 브라우저/Excel 에서 실행. 설치 없이 재무분석.
 
 ## 호출 계약
 
@@ -82,17 +86,25 @@ if sys.platform == "emscripten":
 | `providers/dart/docs/sections/artifacts.py` | `readParquetSafe` 사용 |
 | `core/finance/exogenousAxes.py` | `readParquetSafe` 사용 |
 
-## pyodide 불가 기능
+## pyodide 불가 / 제한 기능
 
-| 기능 | 사유 |
+| 기능 | 상태 |
 |------|------|
-| `dartlab.scan()` | scan 프리빌드 271MB |
-| `dartlab.gather()` | 외부 API CORS 차단 |
-| `dartlab.collect()` | DART OpenAPI CORS 차단 |
-| `dartlab.ask()` (oauth-codex) | chatgpt.com CORS 차단 |
-| `dartlab.ask()` (gemini/openai) | API 키 방식으로 가능 (CORS OK) |
-| KRX 상장법인 목록 | KRX API CORS 차단 → 빈 DataFrame |
-| threading | WASM 단일 스레드 |
+| `dartlab.scan("account"/"ratio")` | ✅ **지원** — `finance-lite.parquet`(~18MB) 경량본 사용. 30 주요 계정 × 5년 분기만 |
+| `dartlab.scan("governance"/"audit"/...)` | ❌ `report/*.parquet` 미전송 (필요 시 추가 경량본 설계 필요) |
+| `dartlab.gather()` | ❌ 외부 API CORS 차단 |
+| `dartlab.collect()` | ❌ DART OpenAPI CORS 차단 |
+| `dartlab.ask()` (oauth-codex) | ❌ chatgpt.com CORS 차단 |
+| `dartlab.ask()` (gemini/openai) | ✅ API 키 방식으로 가능 (CORS OK) |
+| KRX 상장법인 목록 | ❌ KRX API CORS 차단 → 빈 DataFrame |
+| threading | ❌ WASM 단일 스레드 |
+
+### scan 지원 경로
+
+- 프리빌드: `dart/scan/finance-lite.parquet` (~18MB, 30 계정, 2022년~ 분기)
+- 다운로드: `loader.js::loadScanLite(py)` 또는 파이썬 측 `dartlab.scan(...)` 첫 호출 시 자동
+- 내부 구현: `scanAccount._scanAccountFromMerged` 가 `_IS_PYODIDE` 분기에서 `pyarrow.parquet.read_table` + `pl.from_arrow` 로 전환 (polars `scan_parquet` 미지원 우회)
+- SSOT 계정 리스트: `src/dartlab/scan/_helpers.py::LITE_ACCOUNTS`
 
 ## 배포 타겟
 

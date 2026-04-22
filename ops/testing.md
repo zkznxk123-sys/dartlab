@@ -1,8 +1,10 @@
 # dartlab 테스트 · CI 운영 규칙
 
-Phase 3 개편 (2026-04-22) 으로 확립된 **3-tier CI + 직교 marker + 메모리
-정책 단일화** 의 규칙. 매일 CI 가 깨지고 재수정하던 근본 원인 (logger/print
-혼동 · realdata PR 과잉 · flaky retry 부재) 해소가 목적.
+**주체**: CI · 개발자 (pytest 실행자).
+**현재**: 3-tier CI (ci-fast 3분 / ci-full 10분 / ci-nightly 45분) · 8 marker 직교 체계 · 메모리 한계 매트릭스 · pytest-rerunfailures 자동 부착 · logger/print 경계 문서화.
+**방향**: test-fast 추가 튜닝 (6분 → 3분 이하) · fixture 기반 realData 전환 확대 · flaky 재시도 통계 대시보드.
+
+3-tier CI + 직교 marker + 메모리 정책 단일화로 구성된 테스트 운영 체계.
 
 ## 핵심 원칙
 
@@ -121,7 +123,7 @@ CRITICAL_MB=1500` 적용.
 ### Fixture scope 규칙
 
 - **module scope 권장** — 파일 단위 로드/해제.
-- **session scope 금지** — Company 여러 개 로드 누적 → OOM (2026-03-21 사고 이력).
+- **session scope 지양** — Company 여러 개 로드 누적 시 OOM.
 - **function scope**: 필요하면 사용. 단 `gc.collect()` 권장.
 
 ---
@@ -234,7 +236,7 @@ worker 격리.
 **회피**: `@pytest.mark.realData` 달면 자동으로 `network` + `flaky(reruns=
 2)` 부착. 아니면 수동 `@pytest.mark.network`.
 
-### 5. 번들 리소스 누락 (2026-04-19 사고)
+### 5. 번들 리소스 누락
 
 **증상**: wheel 설치 후 런타임에서 `sectionMappings.json` 등 누락 → None
 조용히 반환.
@@ -271,5 +273,4 @@ Coverage ratchet:
 
 ## 변경 이력
 
-- 2026-04-22: Phase 3 — 3-tier split + 직교 marker + flaky retry 자동화.
-- 이전: `커버리지 90% 목표` 중심이었으나 실행 게이트 설계가 미흡 → 본 개편으로 tier 별 책임 분리.
+- 2026-04-22: 3-tier split + 직교 marker + flaky retry 자동화 적용.

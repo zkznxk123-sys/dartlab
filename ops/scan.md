@@ -1,5 +1,9 @@
 # Scan
 
+**주체**: scan 엔진 (`dartlab.scan()` 단일 진입점).
+**현재**: DART 7축 정식 · EDGAR 11축 · 프리빌드 parquet (`edgar/scan/finance.parquet`) · 종목코드+종목명 첫 2컬럼 표준 · `_enrichWithKorean` 한글 매핑 경유.
+**방향**: governance/지배구조 축 확대 · scan→review 블록 통합 · realData 스위트 단축.
+
 전 종목 횡단분석. `scan()` 단일 진입점으로 시장 전체를 한 번에. DART + EDGAR 양쪽 지원.
 
 ## 호출 계약
@@ -98,15 +102,27 @@ governance/workforce/capital/debt/network 5축이 Company-bound.
 
 ```
 data/dart/scan/
-├── changes.parquet     # docs 변화 전종목 5Y
-├── finance.parquet     # finance 전종목 5Y
-└── report/             # apiType별 12개 parquet
+├── changes.parquet           # docs 변화 전종목 5Y (~51MB)
+├── finance.parquet           # finance 전종목 5Y (~307MB)
+├── finance-lite.parquet      # 브라우저 pyodide 용 경량본 (~18MB, 30계정 × 2022~분기)
+├── sharesOutstanding.parquet # 상장주식수 (~1MB)
+└── report/                   # apiType별 12개 parquet
 ```
 
-- 배포자: `dartlab collect --scan` → HF push
-- 사용자: `downloadAll("scan")` (271MB) → 즉시 횡단 분석
+- 배포자: `dartlab collect --scan` → HF push (자동 파이프라인 `dataPrebuild.yml` 12h 주기)
+- 사용자: `downloadAll("scan")` (약 360MB) → 즉시 횡단 분석
 - scan 파일 없으면 HF 자동 다운로드 시도, 실패 시 종목별 순회 fallback
-- **첫 호출 안내**: 로컬 프리빌드가 없으면 `scan:prebuild_missing` (271MB 안내) → 다운로드 → `scan:prebuild_ready`. 실패 시 `scan:prebuild_failed`. guide.emit `_ALWAYS_SHOW` 카테고리라 verbose=False여도 출력 (자세히는 src/dartlab/guide/README.md)
+- **첫 호출 안내**: 로컬 프리빌드가 없으면 `scan:prebuild_missing` → 다운로드 → `scan:prebuild_ready`. 실패 시 `scan:prebuild_failed`, 불완전 다운로드면 `scan:prebuild_incomplete`. `_ALWAYS_SHOW` 카테고리라 verbose=False 여도 출력
+
+### finance-lite (pyodide/브라우저 전용)
+
+- **목적**: `finance.parquet`(307MB) 은 브라우저 fetch 비용 + polars WASM `scan_parquet` 미지원 때문에 쓸 수 없음. 주요 30 계정 × 2022~ 분기만 추린 **18MB** 경량본이 pyodide 전용 대체본
+- **SSOT**: 계정 리스트 `src/dartlab/scan/_helpers.py::LITE_ACCOUNTS` (IS 10 + BS 12 + CF 8 = 30)
+- **빌드**: `dartlab collect --scan finance-lite` 또는 `buildScan()` 이 자동 포함. 기존 `finance.parquet` 에서 필터만 하므로 <1초
+- **로딩 경로**:
+  - 일반 환경: `scanAccount` 가 `finance.parquet` 우선 사용 (finance-lite 는 무시)
+  - Pyodide: `scanAccount` 가 `finance-lite.parquet` 로 분기 → `pyarrow.parquet.read_table` + `pl.from_arrow` 경유 (WASM polars `scan_parquet` 미지원 우회)
+- **경량본에 없는 계정을 pyodide 에서 조회하면** `_scanAccountFromMerged` 가 빈 DataFrame 반환 → 기존 fallback (`data/dart/finance/*.parquet`) 시도. 브라우저엔 종목별 파일도 없어 최종 빈 결과 (경고 emit)
 
 ## EDGAR scan (11축)
 

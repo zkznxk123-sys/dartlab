@@ -1,5 +1,9 @@
 # Gather
 
+**주체**: gather 엔진 (`dartlab.gather(axis, stockCode?)` · `c.gather(axis)`).
+**현재**: 주가 · 수급 · 뉴스 · ownership 축 · Naver/Yahoo/FMP fallback · 30분 TTL 뉴스 · 5분 TTL 주가(KR).
+**방향**: 미국 실시간성 보강 · news sentiment 정교화 · gather → quant 팩터 직결.
+
 외부 시장 데이터 수집. 공시 데이터와 시장 데이터를 연결.
 
 ## 호출 계약

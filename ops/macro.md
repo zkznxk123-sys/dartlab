@@ -1,5 +1,9 @@
 # Macro
 
+**주체**: macro 엔진 (`dartlab.macro(axis, market=?)`).
+**현재**: 12축 dict 반환 도구화 · 6막 서사 조립은 review/macro 에 이관 (1.0.0 리팩토링) · FRED + ECOS 이중 공급 · 6h cache.
+**방향**: review/macro 블록 템플릿 완성 · 기업이익 축 고도화 · macro 데이터 신선도 대시보드.
+
 시장 레벨 매크로 분석 엔진 — **L2 분석 엔진**. Company 없이 경제 환경을 해석한다.
 
 > **1.0.0 리팩토링 이후**: macro는 **dict만 반환하는 도구**다. 보고서 조립은 review(L3)의 책임.

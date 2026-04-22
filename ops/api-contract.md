@@ -1,5 +1,9 @@
 # API Contract — dartlab 호출 규칙 단일 진실의 원천
 
+**주체**: dartlab 공개 API 계약 (Company · 모든 엔진 · property).
+**현재**: Dual Access (call form + attr form) 확립 · 무인자 호출 = 가이드 DataFrame · camelCase + snake_case shim · 영문/한글 alias.
+**방향**: guide DataFrame 표준 확산 · override 키 자동 노출 · contract 위반 CI 게이트.
+
 dartlab 의 모든 공개 API 가 따르는 contract 와 사상. 새 함수/엔진/property 를
 추가하기 전에 이 문서를 먼저 읽고 contract 위반이 없는지 확인한다.
 
@@ -359,9 +363,9 @@ source 우선순위: **finance > report > docs** (숫자 → 정형 → 서술)
 
 ---
 
-## 12. EDGAR 수집 경로 — dartlab=벌크, 사용자 API=선택 [최우선]
+## 12. EDGAR 수집 경로 — dartlab = 벌크, 사용자 API = 선택
 
-> ⛔ **dartlab 자체는 SEC 벌크가 primary 소스.** 자동 CI·프리빌드·HF 배포는 전부 벌크(`companyfacts.zip` + 분기 `{Y}q{Q}.zip`) 파이프라인을 쓴다. 상세: `ops/edgar.md`.
+> **dartlab 자체는 SEC 벌크가 primary 소스.** 자동 CI·프리빌드·HF 배포는 전부 벌크 (`companyfacts.zip` + 분기 `{Y}q{Q}.zip`) 파이프라인을 쓴다. 상세: `ops/edgar.md`.
 
 ### 경로 분리
 

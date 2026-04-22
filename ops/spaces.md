@@ -1,5 +1,9 @@
 # HuggingFace Spaces — API + MCP 서버
 
+**주체**: HF Space 원격 서버 (`https://eddmpython-dartlab.hf.space`).
+**현재**: REST API + MCP SSE 동시 제공 · DART API 키 없이도 실시간 공시 조회 · 설치 없는 사용 경로.
+**방향**: Space GPU 업그레이드 검토 · 캐시 정책 최적화 · MCP tool 목록 자동 동기화.
+
 **설치 없이** dartlab 전체 엔진을 사용할 수 있는 원격 서버.
 REST API + MCP SSE 동시 제공. DART API 키 없이도 실시간 공시 조회.
 

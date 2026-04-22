@@ -1,5 +1,9 @@
 # Analysis
 
+**주체**: analysis 엔진 (L2) · AI (엔진 결과 소비자).
+**현재**: 22축 5그룹 (financial 14 · valuation 1 · governance 3 · forecast 2 · macro 2) · 6막 인과 구조 · 스토리 템플릿 7종.
+**방향**: 템플릿 자동 감지 정밀도 · audit 피드백 루프 강화 · override 키 자동 생성.
+
 회사는 스토리가 있다. 재무제표를 그 스토리의 구조화된 데이터로 변환한다.
 숫자의 나열이 아니라, 인과로 연결된 서사가 분석의 목표다.
 
@@ -251,7 +255,7 @@ analysis는 두 소비자를 모두 최고로 지원한다:
 
 | Part | 축 | 설명 | calc 수 | calc 파일 |
 |------|------|------|---------|-----------|
-| 5-1 | 지배구조 | 주인과 감시 | 5 | governance.py |
+| 5-1 | 지배구조 | 주인과 감시 | 7 | governance.py |
 | 5-2 | 공시변화 | 공시 변동 감지 | 4 | disclosureDelta.py |
 | 5-3 | 비교분석 | 시장 내 위치 | 3 | peerBenchmark.py |
 
@@ -305,6 +309,7 @@ analysis는 DART/EDGAR 양쪽에서 동일하게 동작한다.
 | 자본배분 | treasuryStockStatus | DART report `treasuryStock` 전용 |
 | 투자효율 | investmentInOther | DART report `investedCompany` 전용 |
 | 지배구조 | legalEventRisk 전체 | DART docs `sanction` + `contingentLiability` 섹션 전용 |
+| 지배구조 | relatedPartyIntensity 전체 | DART docs `relatedPartyTx` 섹션 전용 |
 
 이 4건은 SEC 공시 구조의 근본적 차이. 상세: `src/dartlab/providers/edgar/README.md` "구조적 한계" 섹션.
 

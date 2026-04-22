@@ -1,7 +1,10 @@
 # Channel
 
-dartlab의 외부 공유 엔진. PC dartlab을 폰/외부 어디서나 그대로 쓰게 한다.
-**dartlab의 5번째 정식 엔진** (Company / Scan / Analysis / Macro / Quant + Credit + Review + **Channel**).
+**주체**: 사용자 · Channel 엔진 (`dartlab channel`).
+**현재**: Microsoft DevTunnels 자동화 파이프라인 (Phase A~G) · GitHub OAuth 1회 · anonymous access entry · 영구 URL 재사용.
+**방향**: `--auth-github` access control · VSCode 확장 통합 · HF Space 이관 옵션.
+
+PC dartlab 을 폰·외부 어디서나 그대로 쓰게 하는 공유 엔진.
 
 | 항목 | 내용 |
 |------|------|
@@ -163,94 +166,46 @@ dartlab channel --discord <BOT_TOKEN>
 | 폰에서 anti-phishing 페이지 | 첫 접속 confirmation | "Continue" 1번 클릭 (이후 쿠키) |
 | 폰에서 화면 안 뜸 | dartlab UI 모바일 깨짐 | dartlab 0.x 빌드 확인. legacy plugin 적용된 빌드인지 |
 
-## 검증된 진단 사례 — 우리가 개고생한 이유 (2026-04-06 ~ 04-07)
+## 모바일 호환 진단 가이드
 
-> **이건 dartlab 특유의 문제가 아니라 일반 Svelte 5 SPA에서 누구나 부딪칠 수 있는 함정이다. 다음에 비슷한 증상이 보이면 여기 먼저 확인할 것.**
+Svelte 5 SPA 의 모바일 전용 hydration 실패 유형을 진단할 때 유용한 패턴.
 
-### 사건 개요
+### 대표 증상
 
-- **데스크탑 Chrome OK / Android Chrome NG.**
-- 서버 로그(PowerShell) 모든 API 200 응답.
-- 폰 Chrome에서 dartlab UI는 로드되는데 우상단 ProviderDropdown이 영원히 "확인 중..." 스피너만 돔.
-- 버튼 클릭도 무반응.
-- 같은 폰에서 다른 페이지(블로그)는 정상 동작.
-- 8시간 이상 추적.
+- 데스크탑 Chrome 정상, 모바일 Chrome 에서 화면은 렌더되지만 상호작용 전체가 멎음 (버튼 무반응, 스피너 영원).
+- 서버 로그 상 모든 API 200 응답.
+- 같은 폰에서 다른 SPA (예: 정적 블로그) 는 정상 동작.
 
-### 추적 단서들 (모두 잘못된 가설이었음)
+### 일반적 근본 원인
 
-| 시도한 가설 | 결과 |
-|---|---|
-| Cloudflare Quick Tunnel의 fetch hang | 부분적으로 맞음. 모바일 LTE에서 Quick Tunnel은 fetch 응답이 지연되거나 손실되는 경향 있음. 그러나 진짜 원인은 아니었음 |
-| 토큰 시스템(`token.js` + `authedFetch`) 누락 | 도입했지만 무관 |
-| `_WHITELIST_PATTERNS` 화이트리스트 좁음 | 확장했지만 무관 |
-| `share.py` import 순서 → TokenManager 두 인스턴스 | 진짜 버그였지만 모바일 스피너와는 별개 |
-| Svelte 5 `$state` getter 패턴 reactivity 끊김 | 부분적. _core 객체로 통합했지만 진짜 원인은 아님 |
-| `$effect`/`onMount` 모바일 미발화 | 가설일 뿐, 실제로는 발화함 |
-| `$state` proxy → 폰 Chrome 옛 버전 호환성 | 가설. legacy plugin + es2020 target 적용. 부분 효과 |
-| Svelte 5.0.0 → 5.55.1 + vite-plugin-svelte 5 → 6.2.4 업그레이드 | 안정성 향상은 됐지만 직접 원인 아님 |
-| `stopPropagation()` + Svelte 5 body delegation 충돌 | 일부 케이스 영향. 제거했지만 직접 원인 아님 |
+- 외부 패키지의 deprecated export 가 번들에 남아 런타임 `ReferenceError` 발생 → 모듈 평가 단계 throw → SPA 전체 hydration 실패.
+- 데스크탑 V8 은 dead-code 에 관용적이라 우회되나, 모바일 V8 은 stricter 하게 reject 하는 경향.
 
-### 진짜 원인 — `<Settings>` 아이콘 ReferenceError
+### 진단법
 
-**lucide-svelte 0.575+ 에서 `Settings` 아이콘이 deprecated → 완전 제거됨.**
+1. **폰 콘솔 접근이 어렵다 → 진단 페이지를 별도로 제공**. 단순 HTML + `window.addEventListener('error', ...)` 핸들러로 화면에 에러 메시지 직접 표시.
+2. **`document.title` 을 진단 정보로 활용**. `document.title = "[" + step + "]"` 로 단계 표기 → 폰 탭 제목에서 즉시 확인.
+3. **블로그/정적 페이지 비교**. 같은 폰에서 다른 SPA 가 동작하면 환경 문제가 아닌 코드 문제로 좁힘.
+4. **lucide-svelte 등 외부 패키지의 deprecated export 의심**. 메이저 업데이트 후 이전에 잘 됐던 게 깨지면 import 일괄 grep.
+5. **데스크탑 ↔ 모바일 차이가 명확 → syntax/runtime 에러 의심**. 빌드 번들에서 deprecated symbol grep.
 
-dartlab 코드에 다음 사용처가 남아있었음:
-- `App.svelte` `<Settings size={18}>`
-- `CompanyContextBar.svelte` import 잔재
-- `SearchModal.svelte` 의 quick action 데이터: `{ id: "openSettings", icon: Settings, ... }`
+### 기본 설정
 
-**데스크탑 Chrome**: tree-shaking + dead-code 관용으로 어떻게든 동작
-**모바일 Chrome**: 빌드된 번들에서 `Settings`가 미정의 → **`Uncaught ReferenceError: Settings is not defined`** → 모듈 평가 단계에서 throw → **SPA 전체 hydration 실패** → DOM은 그려지지만 모든 reactivity/이벤트 핸들러가 안 붙음 → "스피너 영원, 버튼 무반응"
+안정적 모바일 호환을 위해 다음 기본 조합을 유지한다:
 
-### 결정적 단서 (사용자가 던진 두 마디)
+- `svelte ^5.55` + `@sveltejs/vite-plugin-svelte ^6.2`.
+- `@vitejs/plugin-legacy` (es2020 target + nomodule fallback).
+- `getUiStore()` 모듈 싱글톤 패턴 (createUiStore factory + getter export).
+- `_core` 단일 `$state` 객체로 핵심 reactive state 묶기.
+- `AppShell.isMobile` 은 `$effect` 대신 `matchMedia` listener + module-level 즉시 평가.
+- 모바일 반응형: EmptyState/ChatArea 풀너비, 우상단 검색 숨김, 하단 nav `position: fixed`.
 
-1. **"블로그(landing/)는 모바일에서 잘 됨"**
-   - 같은 Svelte, 같은 폰. dartlab만 깨짐 → dartlab 코드 자체에 모바일 특이 문제가 있다 확정
-   - dartlab `vite-plugin-svelte 5.0.0` vs 블로그 `6.2.4` 차이 발견 → 업그레이드 (도움은 됐지만 결정타 아님)
-
-2. **"test 페이지는 데스크탑 viewport일 땐 됐었음"**
-   - test3.html 만들어서 `window.addEventListener('error', ...)` 핸들러 박음
-   - 폰에서 열어보니 진단 패널에 **`ERR: Uncaught ReferenceError: Settings is not defined @ index-XXX.js:2026`** 출력
-   - 8시간 만에 진짜 원인 확정
-
-### 진단법 (다음에 비슷한 증상 만나면)
-
-1. **폰 콘솔 직접 보기 어려움 → 진단 페이지를 따로 만들어라**
-   - `build/test.html` 같이 단순 HTML + `window.addEventListener('error', ...)` 핸들러
-   - 화면에 직접 에러 메시지 표시
-2. **`document.title`을 진단 정보로 활용**
-   - `document.title = "[" + step + "]"` 식으로 단계 박으면 폰 탭 제목으로 즉시 확인
-3. **블로그/정적 페이지 비교**
-   - 같은 폰에서 다른 SPA가 동작하면 → 코드 문제, 환경 문제 아님
-4. **lucide-svelte 같은 외부 패키지의 deprecated export 의심**
-   - 패키지 메이저 업데이트 후 이전엔 잘 됐던 게 깨지면 → import 일괄 grep
-5. **데스크탑 ↔ 모바일 차이가 명확하면 syntax/runtime 에러 의심**
-   - 데스크탑 V8은 dead-code 관용이 큼, 모바일 V8은 stricter
-   - 빌드된 번들에서 `grep` 으로 deprecated symbol 찾기
-
-### 부수적 fix들 (정상 정착 시 같이 적용된 것)
-
-- `vite-plugin-svelte 5 → 6` + `svelte 5.0 → 5.55`
-- `@vitejs/plugin-legacy` 도입 (es2020 target + nomodule fallback)
-- `<Settings>` → `<Cog>` 일괄 교체
-- ProviderDropdown 의 `stopPropagation()` 제거 (Svelte 5 body delegation 호환)
-- `handleClickOutside`를 `<div onclick>` 대신 `document.addEventListener('click', ...)` 로 직접
-- `getUiStore()` 모듈 싱글톤 패턴 (createUiStore factory + getter export)
-- `_core` 단일 $state 객체로 핵심 reactive state 묶기
-- AppShell `isMobile` 을 `$effect` 대신 `matchMedia` listener + module-level 즉시 평가
-- 모바일 반응형: EmptyState/ChatArea 풀너비, 우상단 검색 숨김, 하단 nav `position: fixed`
-
-### 한 줄 요약
-
-> **lucide-svelte의 `Settings` 아이콘이 사라진 걸 모르고 코드에 남겨둔 게 진짜 원인이었다.**
-> 8시간을 fetch/CORS/token/Svelte reactivity로 헛수고. 진단 패널에 onerror 한 줄이 전부였다.
-
-## ops 문서 사상
+## 설계 원칙
 
 - **진입점 1개** — `dartlab channel`
-- **백엔드 1개** — Microsoft DevTunnels (다른 백엔드는 폐기 검증됨)
+- **백엔드 1개** — Microsoft DevTunnels
 - **자동화 파이프라인** — 사람 손은 GitHub OAuth 1번
-- **dead-code 0** — 모든 path가 진짜 사용됨
+- **dead-code 0** — 모든 path 실사용 확인
 
 ## 관련 코드
 
@@ -265,18 +220,13 @@ dartlab 코드에 다음 사용처가 남아있었음:
 | `ui/web/vite.config.js` | `@vitejs/plugin-legacy` + es2020 target |
 | `ui/web/package.json` | `svelte ^5.55.1`, `@sveltejs/vite-plugin-svelte ^6.2.4` (블로그와 동일) |
 
-## 검증 (사용자 셀프 테스트 통과 — 2026-04-07)
+## 검증된 경로
 
-- ✅ Windows 11 + winget devtunnel 자동 설치
-- ✅ GitHub OAuth 1회 인증
-- ✅ 영구 tunnel ID 재사용 (재실행 시 같은 URL)
-- ✅ Conflict 자동 해결 (`devtunnel list` fallback)
-- ✅ Anonymous access entry 자동 등록
-- ✅ Android Chrome (KT LTE) 정상 동작
-  - dartlab UI 렌더
-  - ProviderDropdown 정상 표시 (`oauth-codex`)
-  - AI 질문 → 스트리밍 응답 OK (POST /api/ask 200)
-  - 모바일 반응형 (EmptyState/ChatArea 풀너비, 하단 탭바 fixed)
+- Windows 11 + winget devtunnel 자동 설치.
+- GitHub OAuth 1회 인증 후 tunnel ID 재사용 (재실행 시 같은 URL).
+- Conflict 자동 해결 (`devtunnel list` fallback).
+- Anonymous access entry 자동 등록.
+- Android Chrome (LTE) 에서 dartlab UI 렌더 · ProviderDropdown · AI 질문 스트리밍 · 모바일 반응형 정상.
 
 ## 비범위 (Phase 2)
 
