@@ -8,6 +8,7 @@ Rule (ops/notebooks.md):
 Run:
   uv run python scripts/build/syncColabFromMarimo.py
 """
+
 from __future__ import annotations
 
 import json
@@ -57,20 +58,20 @@ NOTEBOOKS: dict[str, list[dict]] = {
         code(
             "import dartlab",
             "",
-            "c = dartlab.Company(\"000020\")",
+            'c = dartlab.Company("000020")',
             "c.corpName",
         ),
         code(
             "# 손익계산서 (분기)",
-            "c.show(\"IS\")",
+            'c.show("IS")',
         ),
         code(
             "# 연간 합산",
-            "c.show(\"IS\", freq=\"Y\")",
+            'c.show("IS", freq="Y")',
         ),
         code(
             "# 행 필터",
-            "c.select(\"IS\")",
+            'c.select("IS")',
         ),
         md(
             "## 주석 · 정형 공시",
@@ -79,7 +80,7 @@ NOTEBOOKS: dict[str, list[dict]] = {
         ),
         code(
             "# 주석 — 재고자산",
-            "c.show(\"inventory\")",
+            'c.show("inventory")',
         ),
         md(
             "## 사업보고서 섹션 · 공시 이력",
@@ -109,11 +110,11 @@ NOTEBOOKS: dict[str, list[dict]] = {
         ),
         code(
             "# 주가",
-            "dartlab.gather(\"price\", \"005930\")",
+            'dartlab.gather("price", "005930")',
         ),
         code(
             "# 코스피 지수",
-            "dartlab.gather(\"price\", \"KOSPI\")",
+            'dartlab.gather("price", "KOSPI")',
         ),
         md(
             "## 매크로 · 수급 · 뉴스",
@@ -122,15 +123,15 @@ NOTEBOOKS: dict[str, list[dict]] = {
         ),
         code(
             "# 매크로",
-            "dartlab.gather(\"macro\")",
+            'dartlab.gather("macro")',
         ),
         code(
             "# 수급 (KR 전용)",
-            "dartlab.gather(\"flow\", \"005930\")",
+            'dartlab.gather("flow", "005930")',
         ),
         code(
             "# 뉴스",
-            "dartlab.gather(\"news\", \"삼성전자\")",
+            'dartlab.gather("news", "삼성전자")',
         ),
     ],
     "03_scan.ipynb": [
@@ -147,7 +148,7 @@ NOTEBOOKS: dict[str, list[dict]] = {
             "dartlab.scan()",
         ),
         md("## 계정 횡단 — 특정 계정(매출액)을 전종목에서 뽑기"),
-        code("dartlab.scan(\"account\", \"매출액\")"),
+        code('dartlab.scan("account", "매출액")'),
     ],
     "04_quant.ipynb": [
         md(
@@ -159,17 +160,17 @@ NOTEBOOKS: dict[str, list[dict]] = {
         code(
             "import dartlab",
             "",
-            "c = dartlab.Company(\"005930\")",
+            'c = dartlab.Company("005930")',
             "# 가이드 — 25지표 + 9신호",
             "c.quant()",
         ),
         code(
             "# 종합 판단",
-            "c.quant(\"종합\")",
+            'c.quant("종합")',
         ),
         code(
             "# 모멘텀 / RSI",
-            "c.quant(\"모멘텀\")",
+            'c.quant("모멘텀")',
         ),
     ],
     "05_analysis.ipynb": [
@@ -182,35 +183,35 @@ NOTEBOOKS: dict[str, list[dict]] = {
         code(
             "import dartlab",
             "",
-            "c = dartlab.Company(\"005930\")",
+            'c = dartlab.Company("005930")',
             "# 가이드 — 14축 + forecast + valuation",
             "c.analysis()",
         ),
         md("## 수익성 / 성장성 / 안정성 / 현금흐름"),
         code(
             "# 수익성",
-            "c.analysis(\"수익성\")",
+            'c.analysis("수익성")',
         ),
         code(
             "# 성장성",
-            "c.analysis(\"성장성\")",
+            'c.analysis("성장성")',
         ),
         code(
             "# 안정성",
-            "c.analysis(\"안정성\")",
+            'c.analysis("안정성")',
         ),
         code(
             "# 현금흐름",
-            "c.analysis(\"현금흐름\")",
+            'c.analysis("현금흐름")',
         ),
         md("## 전망 · 가치평가"),
         code(
             "# 매출전망",
-            "c.analysis(\"매출전망\")",
+            'c.analysis("매출전망")',
         ),
         code(
             "# 가치평가",
-            "c.analysis(\"가치평가\")",
+            'c.analysis("가치평가")',
         ),
     ],
     "06_macro.ipynb": [
@@ -228,11 +229,11 @@ NOTEBOOKS: dict[str, list[dict]] = {
         ),
         code(
             "# 사이클",
-            "dartlab.macro(\"사이클\")",
+            'dartlab.macro("사이클")',
         ),
         code(
             "# 금리",
-            "dartlab.macro(\"금리\")",
+            'dartlab.macro("금리")',
         ),
     ],
     "07_credit.ipynb": [
@@ -245,22 +246,22 @@ NOTEBOOKS: dict[str, list[dict]] = {
         code(
             "import dartlab",
             "",
-            "c = dartlab.Company(\"005930\")",
+            'c = dartlab.Company("005930")',
             "# 가이드 — 7축 dCR 등급",
             "c.credit()",
         ),
         md("## 종합등급 · 수익성 · 부채"),
         code(
             "# 등급",
-            "c.credit(\"등급\")",
+            'c.credit("등급")',
         ),
         code(
             "# 수익성",
-            "c.credit(\"수익성\")",
+            'c.credit("수익성")',
         ),
         code(
             "# 부채",
-            "c.credit(\"부채\")",
+            'c.credit("부채")',
         ),
     ],
     "08_review.ipynb": [
@@ -273,18 +274,18 @@ NOTEBOOKS: dict[str, list[dict]] = {
         code(
             "import dartlab",
             "",
-            "c = dartlab.Company(\"005930\")",
+            'c = dartlab.Company("005930")',
         ),
         md("## 섹션 단위 호출 — 메모리 안전"),
         code(
             "# 단일 섹션 (메모리 안전 — 추천)",
-            "print(c.review(\"수익성\").toMarkdown())",
+            'print(c.review("수익성").toMarkdown())',
         ),
-        code("print(c.review(\"성장성\").toMarkdown())"),
+        code('print(c.review("성장성").toMarkdown())'),
         md("## AI 종합의견 (reviewer) — provider 키 필요"),
         code(
             "# AI 종합의견 포함",
-            "# c.reviewer(guide=\"반도체 사이클 관점에서 평가해줘\")",
+            '# c.reviewer(guide="반도체 사이클 관점에서 평가해줘")',
         ),
     ],
     "09_ai.ipynb": [
@@ -299,11 +300,11 @@ NOTEBOOKS: dict[str, list[dict]] = {
             "# AI provider 키 필요 (GEMINI_API_KEY, GROQ_API_KEY 등)",
             "import dartlab",
             "",
-            "dartlab.ask(\"뭐할수있니\")",
+            'dartlab.ask("뭐할수있니")',
         ),
         code(
             "# Company-bound 대화",
-            "# dartlab.chat(\"005930\", \"배당 추세는?\")",
+            '# dartlab.chat("005930", "배당 추세는?")',
         ),
     ],
     "10_search.ipynb": [
@@ -316,10 +317,10 @@ NOTEBOOKS: dict[str, list[dict]] = {
         code(
             "import dartlab",
             "",
-            "dartlab.search(\"유상증자\")",
+            'dartlab.search("유상증자")',
         ),
-        code("dartlab.search(\"대표이사 변경\", corp=\"005930\")"),
-        code("dartlab.searchName(\"삼성\")"),
+        code('dartlab.search("대표이사 변경", corp="005930")'),
+        code('dartlab.searchName("삼성")'),
     ],
     "11_listing.ipynb": [
         md(
@@ -333,10 +334,10 @@ NOTEBOOKS: dict[str, list[dict]] = {
             "",
             "dartlab.listing()",
         ),
-        code("dartlab.listing(\"filings\", corp=\"005930\")"),
+        code('dartlab.listing("filings", corp="005930")'),
         code(
             "# DART 전체 법인 (비상장 포함, corp_code 8자리)",
-            "dartlab.listing(\"dartlist\")",
+            'dartlab.listing("dartlist")',
         ),
     ],
 }
