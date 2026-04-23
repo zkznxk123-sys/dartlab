@@ -64,6 +64,10 @@ def test_logging_handler_routes_to_queue_in_ctx():
     log = logging.getLogger("dartlab.test_progress_handler")
     log.setLevel(logging.INFO)
     log.addHandler(h)
+    # 부모 "dartlab" 로거에 installProgressCapture 가 이미 붙어 있으면
+    # 레코드가 이중 enqueue 되므로 propagate 차단.
+    prev_propagate = log.propagate
+    log.propagate = False
     try:
         q1: queue.Queue = queue.Queue(maxsize=100)
         token = _progressCtx.set(q1)
@@ -78,6 +82,7 @@ def test_logging_handler_routes_to_queue_in_ctx():
         assert q1.get_nowait() == "message"
     finally:
         log.removeHandler(h)
+        log.propagate = prev_propagate
 
 
 def test_logging_handler_noop_without_ctx():
