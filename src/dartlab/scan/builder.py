@@ -761,6 +761,71 @@ def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> P
     return outputPath
 
 
+def buildValuation(*, verbose: bool = True) -> Path | None:
+    """네이버 API 로 전종목 시세·밸류에이션 raw 수집 → ``valuation.parquet``.
+
+    GH Actions cron (`valuationSnapshot.yml`, 매일 KST 04:00) 에서 호출. 결과 parquet 은
+    HuggingFace ``eddmpython/dartlab-data`` 의 ``dart/scan/`` 에 업로드되며, 사용자는
+    `dartlab.scan("valuation")` 호출 시 자동 다운로드 + 즉시 로드한다 (1초 이내).
+
+    Returns
+    -------
+    Path | None
+        생성된 `valuation.parquet` 경로. 수집 실패 또는 rate-limit 으로 0건이면
+        기존 parquet 덮어쓰지 않고 ``None`` 반환.
+    """
+    from dartlab.scan.valuation import _RAW_SCHEMA, fetchValuationRaw
+
+    if verbose:
+        _say("[valuation] 상장사 목록 로드...")
+
+    try:
+        from dartlab.gather.listing import getKindList
+
+        listing = getKindList()
+    except (ImportError, OSError, RuntimeError) as e:
+        if verbose:
+            _say(f"[valuation] listing 로드 실패: {e}")
+        return None
+
+    if listing is None or listing.is_empty() or "종목코드" not in listing.columns:
+        if verbose:
+            _say("[valuation] 상장사 목록 없음")
+        return None
+
+    codes = listing["종목코드"].to_list()
+    if verbose:
+        _say(f"[valuation] {len(codes)}종목 네이버 API 수집 시작")
+
+    t0 = time.perf_counter()
+    raw = fetchValuationRaw(codes, verbose=verbose)
+    elapsed = time.perf_counter() - t0
+
+    if raw.is_empty():
+        if verbose:
+            _say(f"[valuation] 수집 0건 (rate-limit 의심, {elapsed:.1f}s) — 기존 parquet 유지")
+        return None
+
+    # 품질 게이트: 최소 55% 이상 수집됐을 때만 덮어쓰기
+    coverage = raw.height / max(len(codes), 1)
+    if coverage < 0.55:
+        if verbose:
+            _say(f"[valuation] 수집 {raw.height}/{len(codes)} ({coverage:.0%}) — 55% 미만, 기존 parquet 유지")
+        return None
+
+    outDir = _scanDir()
+    outDir.mkdir(parents=True, exist_ok=True)
+    outPath = outDir / "valuation.parquet"
+    # 원본 네이버 raw (stockCode/marketCap/per/pbr/dividendYield/current/snapshotAt)
+    # PSR/grade 는 loader 에서 매출 parquet 결합 후 runtime 계산.
+    raw.select(list(_RAW_SCHEMA.keys())).write_parquet(str(outPath), compression="zstd")
+
+    if verbose:
+        sizeMb = outPath.stat().st_size / 1024 / 1024
+        _say(f"[valuation] 완료: {raw.height}종목, {sizeMb:.1f}MB, {elapsed:.1f}s → {outPath}")
+    return outPath
+
+
 def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path | list[Path] | None]:
     """changes + finance + finance-lite + report + sharesOutstanding 전체 프리빌드.
 

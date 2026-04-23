@@ -1,0 +1,48 @@
+name: Valuation Snapshot
+
+# ──────────────────────────────────────────────────────────────
+# 매일 KST 04:00 (UTC 19:00) 전종목 네이버 시세·밸류에이션 수집 →
+# dart/scan/valuation.parquet 생성 → HuggingFace 업로드.
+#
+# 설계 의도: dataPrebuild.yml 과 분리해 실패 격리. valuation 은
+# 외부 API (네이버) 의존이라 rate-limit / IP 블록 리스크가 있어
+# 기존 scan prebuild (finance/changes/report) 파이프라인을 건드리지
+# 않는다. 실패해도 HF 에 남은 이전 snapshot 이 계속 사용됨.
+# ──────────────────────────────────────────────────────────────
+
+on:
+  schedule:
+    - cron: '0 19 * * *'   # UTC 19:00 = KST 04:00 (장 마감 + 마감동시호가 완료 후)
+  workflow_dispatch:
+
+concurrency:
+  group: hf-dart-push
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Smoke import
+        run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
+
+      - name: Build valuation snapshot + upload to HF
+        run: uv run python -X utf8 .github/scripts/prebuildValuation.py
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
