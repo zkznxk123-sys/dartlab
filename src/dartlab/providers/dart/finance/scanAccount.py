@@ -398,17 +398,87 @@ def scanAccount(
     fsPref: str = "CFS",
     annual: bool = False,
 ) -> pl.DataFrame:
-    """전종목 단일 계정 시계열 추출.
+    """전종목 단일 계정 시계열 — dartlab scan 의 **원자 primitive**.
 
-    Args:
-        snakeId: 계정 식별자. 영문("sales") 또는 한글("매출액") 모두 가능.
-        sjDiv: 재무제표 구분 ("IS", "BS", "CF"). None이면 자동 결정.
-        fsPref: 연결/별도 우선순위 ("CFS"=연결 우선, "OFS"=별도 우선)
-        annual: True면 연간 (기본 False=분기별 standalone).
+    scan 의 모든 복합 축 (profitability · growth · quality · liquidity 등) 은 이 함수의
+    반환값을 **polars join + with_columns** 로 조합해 만들 수 있다. prebuild 된
+    ``finance.parquet`` 한 파일을 lazy scan + push-down filter 로 한 번에 추출하므로
+    2664 종목 전체가 수 초에 나온다. Python for 문 없음, iter_rows 없음.
 
-    Returns:
-        stockCode | 2025Q4 | 2025Q3 | ... (분기, 기본)
-        stockCode | 2025 | 2024 | ... (연간)
+    **사상**: 개별 계정 (원자) + ``scanRatio`` (비율) 조합이 **무궁무진**. AI 는 질문에
+    맞춰 이 두 축을 자유롭게 엮어라. 복합 축 (scan("profitability") 등) 은 그저
+    **자주 쓰는 프리셋** 일 뿐이다.
+
+    Parameters
+    ----------
+    snakeId : str
+        계정 식별자. 영문 snake_case (``"sales"``, ``"operating_profit"``,
+        ``"net_income"``) 또는 한글 (``"매출액"``, ``"영업이익"``, ``"당기순이익"``)
+        모두 가능. 지원 목록은 ``scanAccountList()``.
+    sjDiv : str | None, optional
+        재무제표 구분 (``"IS"`` · ``"CIS"`` · ``"BS"`` · ``"CF"``). None 이면 snakeId
+        로부터 자동 판정 (sortOrder.json).
+    fsPref : {"CFS", "OFS"}, default "CFS"
+        연결(CFS) 우선 · 별도(OFS) 우선. 연결 없으면 별도 fallback.
+    annual : bool, default False
+        True = 연간 데이터 (``2025`` · ``2024`` 컬럼). False = 분기
+        (``2025Q4`` · ``2025Q3``) — 가장 최신 마일스톤 포함.
+
+    Returns
+    -------
+    df : pl.DataFrame
+        2664 종목 행. 컬럼:
+
+        - ``stockCode`` : str — 종목코드
+        - 기간 컬럼들 : float — 금액 (원)
+          * annual=False: ``"2025Q4"`` · ``"2025Q3"`` · ``"2025Q2"`` · ``"2024Q4"`` · ...
+          * annual=True:  ``"2025"`` · ``"2024"`` · ``"2023"`` · ...
+
+        종목별 자기 최신 기간이 있는 컬럼에만 값, 없으면 null. sort / head /
+        with_columns 로 바로 조작 가능한 wide 테이블.
+
+    Examples
+    --------
+    **단순 랭킹** — "영업이익 큰 회사 10":
+
+    >>> scanAccount("operating_profit", annual=True).sort("2025", descending=True).head(10)
+
+    **YoY 성장률 상위**:
+
+    >>> df = scanAccount("sales", annual=True)
+    >>> df.with_columns(((pl.col("2025") - pl.col("2024")) / pl.col("2024") * 100).alias("yoy")).sort("yoy", descending=True).head(20)
+
+    **다계정 조합** — "매출 > 1조인데 영업이익 역성장":
+
+    >>> rev = scanAccount("sales", annual=True).select(["stockCode", "2025"]).rename({"2025": "rev25"})
+    >>> op  = scanAccount("operating_profit", annual=True).select(["stockCode", "2024", "2025"]).rename({"2024": "op24", "2025": "op25"})
+    >>> rev.join(op, on="stockCode").filter((pl.col("rev25") > 1e12) & (pl.col("op25") < pl.col("op24")))
+
+    **분기 모멘텀** — "최근 분기 대비 전분기 증가":
+
+    >>> df = scanAccount("operating_profit", annual=False)  # 분기
+    >>> df.with_columns(((pl.col("2025Q4") - pl.col("2025Q3")) / pl.col("2025Q3")).alias("qoq"))
+
+    Notes
+    -----
+    - ``finance.parquet`` prebuild 사용 (첫 호출 자동 다운로드). Python loop 없음.
+    - 종목별 최신 기간 자동 정렬 — **latestYear 글로벌 필터 버그 없음**.
+    - pyodide 환경은 경량본 ``finance-lite.parquet`` (~18MB) 자동 사용.
+
+    Guide
+    -----
+    "이 계정으로 뭘 할 수 있어?" 는 dartlab scan 사상의 **프리미티브 관점**:
+
+    1. **단일 축 랭킹** — ``scanAccount("X", annual=True).sort("YYYY", desc).head(N)``
+    2. **시계열 변화** — 두 기간 컬럼으로 YoY/QoQ/CAGR 계산 (``with_columns`` + ``pct_change``)
+    3. **크로스 계정** — 매출 · 영업이익 · 순이익 · 자산 · 부채를 join 해 독자 비율 산출
+    4. **프리셋 대체** — 복합 축 (profitability 등) 은 이 함수 + ``scanRatio`` 의 조합. 필요하면 AI 가 즉석 조합.
+
+    See Also
+    --------
+    scanRatio : 비율 시계열 (primitive 2/2)
+    scanAccountList : 지원 계정 목록
+    scan("profitability") · scan("growth") 등 : 자주 쓰는 프리셋 (이 함수 + scanRatio 조합 결과)
     """
     from dartlab.core.dataLoader import _dataDir
 
@@ -571,15 +641,107 @@ def scanRatio(
     fsPref: str = "CFS",
     annual: bool = False,
 ) -> pl.DataFrame:
-    """전종목 단일 재무비율 시계열 추출.
+    """전종목 단일 재무비율 시계열 — dartlab scan 의 **원자 primitive 2**.
 
-    Args:
-        ratioName: 비율 식별자. 지원 목록은 scanRatioList() 참조.
-        fsPref: 연결/별도 우선순위 ("CFS"=연결 우선, "OFS"=별도 우선)
-        annual: True면 연간 (기본 False=분기별).
+    ``scanAccount`` 와 짝. 비율 (영업이익률·ROE·ROA·부채비율·CCC 등) 을 전종목 ×
+    시계열 형태로 추출. 모든 복합 축 프리셋 (profitability · quality · liquidity) 이
+    이 함수의 결과를 **polars join + with_columns** 로 조합한 것에 지나지 않는다.
 
-    Returns:
-        stockCode | 기간컬럼들...
+    **사상**: "수익성 좋은 회사 찾아줘" 같은 질문에 scan 복합 축만 쓰지 말고, 이 함수
+    + ``scanAccount`` 를 자유 조합해 **질문 맥락에 딱 맞는 스크리닝** 을 즉석에서 구성.
+    prebuild ``finance.parquet`` 을 lazy scan + pivot 으로 **한 번에 벡터 계산**.
+
+    Parameters
+    ----------
+    ratioName : str
+        비율 식별자. 지원 목록은 ``scanRatioList()``. 주요 항목:
+
+        - 수익성: ``"opMargin"`` (영업이익률) · ``"netMargin"`` (순이익률) · ``"roe"`` · ``"roa"``
+        - 성장: ``"salesGrowth"`` · ``"opIncomeGrowth"`` · ``"netIncomeGrowth"``
+        - 안정성: ``"debtRatio"`` (부채비율) · ``"currentRatio"`` (유동비율) · ``"quickRatio"`` · ``"interestCoverage"``
+        - 효율성: ``"assetTurnover"`` · ``"inventoryTurnover"`` · ``"ccc"`` (현금전환주기)
+        - 품질: ``"accrualRatio"`` (발생액비율) · ``"cfNi"`` (영업CF/순이익)
+        - 현금흐름: ``"opCfMargin"`` (영업CF마진)
+    fsPref : {"CFS", "OFS"}, default "CFS"
+        연결(CFS) 우선 · 별도(OFS) 우선.
+    annual : bool, default False
+        연간 vs 분기.
+
+    Returns
+    -------
+    df : pl.DataFrame
+        2664 종목 행 × 기간 컬럼들.
+
+        - ``stockCode`` : str
+        - 기간 컬럼들 : float — 비율 값 (%·배·일). 단위는 ``_RATIO_DEFS[ratioName]["label"]`` 참조.
+
+    Examples
+    --------
+    **단일 비율 랭킹** — "ROE 최상위 30":
+
+    >>> scanRatio("roe", annual=True).sort("2025", descending=True).head(30)
+
+    **"요즘 수익성 좋은 회사"** — 영업이익률 · ROE 둘 다 높은 교집합:
+
+    >>> opm = scanRatio("opMargin", annual=True).select(["stockCode", "2025"]).rename({"2025": "opm"})
+    >>> roe = scanRatio("roe",      annual=True).select(["stockCode", "2025"]).rename({"2025": "roe"})
+    >>> opm.join(roe, on="stockCode").filter((pl.col("opm") >= 10) & (pl.col("roe") >= 15)).sort("roe", descending=True)
+
+    **안정성 필터** — "부채비율 < 50% · 유동비율 > 150% · 영업이익률 > 15%":
+
+    >>> dr  = scanRatio("debtRatio",     annual=True).select(["stockCode", "2025"]).rename({"2025": "debt"})
+    >>> cr  = scanRatio("currentRatio",  annual=True).select(["stockCode", "2025"]).rename({"2025": "curr"})
+    >>> opm = scanRatio("opMargin",      annual=True).select(["stockCode", "2025"]).rename({"2025": "opm"})
+    >>> dr.join(cr, on="stockCode").join(opm, on="stockCode") \
+    ...   .filter((pl.col("debt") < 50) & (pl.col("curr") > 150) & (pl.col("opm") > 15))
+
+    **관점별 스크리닝** — "성장주"·"가치주"·"퀄리티주":
+
+    >>> # 성장주: 매출 CAGR · 이익 CAGR 둘 다 상위
+    >>> salesG = scanRatio("salesGrowth", annual=True)
+    >>> opG    = scanRatio("opIncomeGrowth", annual=True)
+    >>> # 가치주: scan("valuation") 과 ROE 결합 — 저평가 + 수익성
+    >>> # 퀄리티주: accrualRatio · cfNi · ROE 3축 스크린
+
+    **추이 반전** — "최근 4분기 영업이익률 턴어라운드":
+
+    >>> df = scanRatio("opMargin", annual=False)
+    >>> df.filter(
+    ...     (pl.col("2024Q4") < 0) & (pl.col("2025Q1") < 0)
+    ...     & (pl.col("2025Q3") > 0) & (pl.col("2025Q4") > 0)
+    ... )
+
+    Notes
+    -----
+    - prebuild finance.parquet 기반. Python loop 없음. 2664 종목 한 번에 계산.
+    - 부호 전환 (흑자 ↔ 적자) YoY 는 None 반환 (``yoy_pct`` 정책).
+    - 섹터 평균 대비는 이 함수 + listing 의 섹터 컬럼 join 으로.
+
+    Guide
+    -----
+    **질문 → primitive 매핑** (AI 활용 가이드):
+
+    ============================  ===========================================
+    사용자 질문                     scan 호출 조합
+    ============================  ===========================================
+    "요즘 성장세 좋은 회사"          ``scanRatio("salesGrowth")`` + ``scanRatio("opIncomeGrowth")``
+    "돈 잘 버는 회사"                ``scanRatio("roe") & opMargin``
+    "저평가인데 수익성 좋은 회사"     ``scan("valuation")`` + ``scanRatio("roe")``
+    "부채 적고 현금 많은 회사"       ``scanRatio("debtRatio")`` + ``scanRatio("currentRatio")``
+    "턴어라운드 조짐"                ``scanRatio("opMargin", annual=False)`` 분기 추이
+    "업종 평균 뛰어넘는 곳"           scanRatio 결과 + listing 의 섹터 join + 섹터내 랭킹
+    "최근 매출 늘었는데 이익 줄어든"  scanAccount("sales") · scanAccount("operating_profit") 두 개 diff
+    ============================  ===========================================
+
+    **복합 축 프리셋**:
+    ``scan("profitability")`` 같은 프리셋은 이 함수 + ``scanAccount`` 의 자주 쓰는 조합.
+    같은 효과를 primitive 조합으로 만들면 **필터 자유도** 가 훨씬 높다.
+
+    See Also
+    --------
+    scanAccount : 단일 계정 시계열 (primitive 1/2)
+    scanRatioList : 지원 비율 목록
+    scan("profitability") · scan("quality") 등 : 프리셋 조합
     """
     if ratioName not in _RATIO_DEFS:
         available = ", ".join(sorted(_RATIO_DEFS))

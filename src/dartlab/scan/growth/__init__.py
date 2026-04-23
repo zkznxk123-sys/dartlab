@@ -227,32 +227,31 @@ def _computeGrowth(target: pl.DataFrame, scCol: str) -> pl.DataFrame:
         - grade : str — 성장성 등급 (고성장/성장/정체/역성장/급감)
         - pattern : str — 성장 패턴 (균형성장/수익개선/외형성장/구조조정/전면역성장/혼합)
     """
-    years = sorted(target["bsns_year"].unique().to_list(), reverse=True)
-    if len(years) < 2:
-        return pl.DataFrame()
-
-    latestYear = years[0]
-    # 3년 전 연도 찾기, 없으면 가장 오래된 연도
-    baseYear = None
-    nYears = 0
-    for y in years:
-        if int(latestYear) - int(y) >= 3:
-            baseYear = y
-            nYears = int(latestYear) - int(y)
-            break
-    if baseYear is None:
-        baseYear = years[-1]
-        nYears = int(latestYear) - int(baseYear)
-    if nYears == 0:
-        return pl.DataFrame()
-
-    latest = target.filter(pl.col("bsns_year") == latestYear)
-    base = target.filter(pl.col("bsns_year") == baseYear)
-
+    # 종목별 최신·기준 연도 (CAGR 은 pair 필요) — 글로벌 years[0] 버그 방지 (2026-04-23).
+    # 한 종목의 2026 Q1 조기 제출 때문에 전종목이 2025 로 커트되던 현상 수정.
     rows: list[dict] = []
     for code in target[scCol].unique().to_list():
-        latSub = latest.filter(pl.col(scCol) == code)
-        baseSub = base.filter(pl.col(scCol) == code)
+        sub = target.filter(pl.col(scCol) == code)
+        yrs = sorted(sub["bsns_year"].unique().to_list(), reverse=True)
+        if len(yrs) < 2:
+            continue
+        latestYear = yrs[0]
+        # 3년 전 연도 찾기, 없으면 가장 오래된 연도
+        baseYear = None
+        nYears = 0
+        for y in yrs:
+            if int(latestYear) - int(y) >= 3:
+                baseYear = y
+                nYears = int(latestYear) - int(y)
+                break
+        if baseYear is None:
+            baseYear = yrs[-1]
+            nYears = int(latestYear) - int(baseYear)
+        if nYears == 0:
+            continue
+
+        latSub = sub.filter(pl.col("bsns_year") == latestYear)
+        baseSub = sub.filter(pl.col("bsns_year") == baseYear)
 
         revNow = extractAccount(latSub, _REVENUE_IDS, _REVENUE_NMS)
         revOld = extractAccount(baseSub, _REVENUE_IDS, _REVENUE_NMS)

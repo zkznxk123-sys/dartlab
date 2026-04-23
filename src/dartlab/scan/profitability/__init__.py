@@ -6,7 +6,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan._helpers import _ensureScanData, extractAccount
+from dartlab.scan._helpers import _ensureScanData, extractAccount, filterLatestPerStock
 
 # ── 계정 매핑 ──
 
@@ -194,12 +194,11 @@ def _computeProfitability(target: pl.DataFrame, scCol: str) -> pl.DataFrame:
         - grade : str — 수익성 등급 (우수/양호/보통/저수익/적자)
         - nonRecurring : bool — 비경상 이익 의심 여부 (순이익률이 영업이익률 대비 극단적으로 클 때 True)
     """
-    years = sorted(target["bsns_year"].unique().to_list(), reverse=True)
-    if not years:
+    # 종목별 최신 연도 — 글로벌 max 버그 방지 (2026 Q1 조기 제출 3 종목 때문에
+    # 2025 자 2895 종목이 전부 버려지던 현상 수정, 2026-04-23).
+    latest = filterLatestPerStock(target, scCol)
+    if latest.is_empty():
         return pl.DataFrame()
-
-    latestYear = years[0]
-    latest = target.filter(pl.col("bsns_year") == latestYear)
 
     rows: list[dict] = []
     for code in latest[scCol].unique().to_list():

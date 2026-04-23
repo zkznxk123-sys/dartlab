@@ -1,0 +1,131 @@
+"""scan 엔진의 글로벌 `latestYear = years[0]` 버그 수정 검증.
+
+2026-04-23 확인: 한 종목이라도 2026 Q1 조기 제출하면 글로벌 latestYear=2026 이 되고
+2025 자 데이터만 있는 수천 종목이 전부 탈락하던 현상 수정.
+`filterLatestPerStock` 공용 유틸 도입 + profitability · growth per-stock loop 재구성.
+"""
+
+from __future__ import annotations
+
+import polars as pl
+import pytest
+
+pytestmark = pytest.mark.unit
+
+
+def _mockFinanceRow(stockCode: str, year: int, accountId: str, accountNm: str, amount: int, sj_div: str = "IS") -> dict:
+    return {
+        "stockCode": stockCode,
+        "bsns_year": year,
+        "account_id": accountId,
+        "account_nm": accountNm,
+        "thstrm_amount": amount,
+        "sj_div": sj_div,
+        "fs_nm": "연결재무제표",
+    }
+
+
+def test_filterLatestPerStock_keepsEachStocksOwnMaxYear():
+    """A 종목은 2026 까지, B 는 2025 까지, C 는 2024 까지만 있을 때 각자 자기 max 만 통과."""
+    from dartlab.scan._helpers import filterLatestPerStock
+
+    rows = [
+        {"stockCode": "A", "bsns_year": 2025, "val": 100},
+        {"stockCode": "A", "bsns_year": 2026, "val": 110},  # A max
+        {"stockCode": "B", "bsns_year": 2024, "val": 200},
+        {"stockCode": "B", "bsns_year": 2025, "val": 220},  # B max
+        {"stockCode": "C", "bsns_year": 2022, "val": 300},
+        {"stockCode": "C", "bsns_year": 2024, "val": 330},  # C max
+    ]
+    df = pl.DataFrame(rows)
+    result = filterLatestPerStock(df, scCol="stockCode", yearCol="bsns_year").sort("stockCode")
+    assert result.height == 3
+    years_per_stock = dict(zip(result["stockCode"].to_list(), result["bsns_year"].to_list()))
+    assert years_per_stock == {"A": 2026, "B": 2025, "C": 2024}
+
+
+def test_filterLatestPerStock_emptyReturnsEmpty():
+    from dartlab.scan._helpers import filterLatestPerStock
+
+    df = pl.DataFrame(schema={"stockCode": pl.Utf8, "bsns_year": pl.Int64})
+    result = filterLatestPerStock(df)
+    assert result.is_empty()
+
+
+def test_filterLatestPerStock_missingColumnReturnsAsIs():
+    from dartlab.scan._helpers import filterLatestPerStock
+
+    df = pl.DataFrame({"other": [1, 2, 3]})
+    result = filterLatestPerStock(df)
+    assert result.equals(df)
+
+
+def test_computeProfitability_noLongerDroppedByGlobalLatestYear():
+    """엔진 버그: 전 샘플 중 단 1 종목만 2026, 나머지는 2025 자. 결과는 전종목이어야 함 (수정 전엔 1건만 남음)."""
+    from dartlab.scan.profitability import _computeProfitability
+
+    rows = []
+    # A: 2026 까지 있음 (조기 제출 종목 시뮬)
+    for sj, aid, nm, amt in [
+        ("IS", "Revenue", "매출액", 1_000_000),
+        ("IS", "ProfitLossFromOperatingActivities", "영업이익", 100_000),
+        ("IS", "ProfitLoss", "당기순이익", 80_000),
+        ("BS", "Assets", "자산총계", 10_000_000),
+        ("BS", "Equity", "자본총계", 5_000_000),
+    ]:
+        rows.append(_mockFinanceRow("A", 2026, aid, nm, amt, sj_div=sj))
+
+    # B · C · D: 2025 까지만 있음 (정상 대다수 종목)
+    for code in ["B", "C", "D"]:
+        for sj, aid, nm, amt in [
+            ("IS", "Revenue", "매출액", 2_000_000),
+            ("IS", "ProfitLossFromOperatingActivities", "영업이익", 200_000),
+            ("IS", "ProfitLoss", "당기순이익", 160_000),
+            ("BS", "Assets", "자산총계", 20_000_000),
+            ("BS", "Equity", "자본총계", 10_000_000),
+        ]:
+            rows.append(_mockFinanceRow(code, 2025, aid, nm, amt, sj_div=sj))
+
+    df = pl.DataFrame(rows)
+    result = _computeProfitability(df, "stockCode")
+
+    # 수정 전엔 글로벌 latestYear=2026 → A 만 통과 (1건)
+    # 수정 후엔 A=2026, B/C/D=2025 각자 자기 최신 → 4건 전부
+    assert result.height == 4, f"expected 4 stocks, got {result.height}: {result}"
+    codes = set(result["stockCode"].to_list())
+    assert codes == {"A", "B", "C", "D"}
+
+
+def test_computeGrowth_perStockYearsNotGlobal():
+    """CAGR 계산이 각 종목의 자기 최신·기준 연도 pair 를 쓰는지 검증."""
+    from dartlab.scan.growth import _computeGrowth
+
+    rows = []
+    # A: 2023, 2026 (4년 gap → baseYear=2023)
+    rows.append(_mockFinanceRow("A", 2023, "Revenue", "매출액", 100_000))
+    rows.append(_mockFinanceRow("A", 2023, "ProfitLossFromOperatingActivities", "영업이익", 10_000))
+    rows.append(_mockFinanceRow("A", 2023, "ProfitLoss", "당기순이익", 8_000))
+    rows.append(_mockFinanceRow("A", 2026, "Revenue", "매출액", 200_000))
+    rows.append(_mockFinanceRow("A", 2026, "ProfitLossFromOperatingActivities", "영업이익", 22_000))
+    rows.append(_mockFinanceRow("A", 2026, "ProfitLoss", "당기순이익", 16_000))
+
+    # B: 2022, 2025 (3년 gap → baseYear=2022)
+    rows.append(_mockFinanceRow("B", 2022, "Revenue", "매출액", 500_000))
+    rows.append(_mockFinanceRow("B", 2022, "ProfitLossFromOperatingActivities", "영업이익", 50_000))
+    rows.append(_mockFinanceRow("B", 2022, "ProfitLoss", "당기순이익", 40_000))
+    rows.append(_mockFinanceRow("B", 2025, "Revenue", "매출액", 800_000))
+    rows.append(_mockFinanceRow("B", 2025, "ProfitLossFromOperatingActivities", "영업이익", 90_000))
+    rows.append(_mockFinanceRow("B", 2025, "ProfitLoss", "당기순이익", 70_000))
+
+    df = pl.DataFrame(rows)
+    result = _computeGrowth(df, "stockCode")
+
+    # 수정 전엔 글로벌 latestYear=2026 · baseYear=2023 → B 의 2026 자가 없어 baseSub 비어 결과 0 건
+    # 수정 후엔 A/B 각자 자기 연도 pair 로 계산 → 2 건
+    assert result.height == 2, f"expected 2 stocks, got {result.height}: {result}"
+    codes = set(result["stockCode"].to_list())
+    assert codes == {"A", "B"}
+    # A 는 nYears=3 (2026-2023), B 는 nYears=3 (2025-2022)
+    yrs_per_stock = dict(zip(result["stockCode"].to_list(), result["years"].to_list()))
+    assert yrs_per_stock["A"] == 3
+    assert yrs_per_stock["B"] == 3

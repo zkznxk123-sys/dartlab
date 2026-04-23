@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from datetime import datetime
 from pathlib import Path
 
 import polars as pl
@@ -232,28 +233,7 @@ def scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
     return pl.concat(unified).collect()
 
 
-def parse_num(s) -> float | None:
-    """문자열/숫자 → float 변환.
-
-    Parameters
-    ----------
-    s : str | int | float | None
-        변환 대상. 쉼표/공백 포함 문자열도 처리.
-
-    Returns
-    -------
-    float | None
-        숫자 변환 결과. 변환 불가면 None.
-
-    Notes
-    -----
-    core.finance.helpers.parseNumStr 이 SSOT.
-    """
-    if isinstance(s, (int, float)):
-        return float(s)
-    from dartlab.core.finance.helpers import parseNumStr
-
-    return parseNumStr(s)
+from dartlab.core.finance.helpers import parseNumStr as parse_num  # noqa: E402 — SSOT re-export
 
 
 def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_amount") -> float | None:
@@ -382,6 +362,35 @@ def parse_date_year(s) -> int | None:
     return None
 
 
+def filterLatestPerStock(target: pl.DataFrame, scCol: str = "stockCode", yearCol: str = "bsns_year") -> pl.DataFrame:
+    """종목별 최신 ``bsns_year`` 행만 남긴다.
+
+    scan 축이 ``target.filter(bsns_year == latestYear)`` 처럼 **글로벌 최신 연도** 로
+    커트하면, 2026 Q1 조기 제출 3 종목 때문에 2025 자 2895 종목이 전부 버려지는 버그가
+    발생 (2026-04-23 확인). 해당 버그는 13 개 축 파일에 분산 존재.
+
+    올바른 패턴: 종목별 ``group_by`` 로 **각자 최신 연도** 선택.
+
+    Parameters
+    ----------
+    target : pl.DataFrame
+        scan 대상 (finance parquet filter 결과). 반드시 ``scCol`` · ``yearCol`` 컬럼 포함.
+    scCol : str, default ``"stockCode"``
+        종목코드 컬럼명.
+    yearCol : str, default ``"bsns_year"``
+        사업년도 컬럼명.
+
+    Returns
+    -------
+    pl.DataFrame
+        각 종목의 자기 최신 연도 행만 남긴 DataFrame.
+    """
+    if target.is_empty() or scCol not in target.columns or yearCol not in target.columns:
+        return target
+    latest = target.group_by(scCol).agg(pl.col(yearCol).max().alias("_maxYear"))
+    return target.join(latest, on=scCol).filter(pl.col(yearCol) == pl.col("_maxYear")).drop("_maxYear")
+
+
 def _scanFinanceFromMerged(
     scanPath: Path,
     sjDivs: list[str],
@@ -443,6 +452,60 @@ def _scanFinanceFromMerged(
                 result[code] = val
 
     return result
+
+
+_VALUATION_REQUIRED_COLS: tuple[str, ...] = (
+    "stockCode",
+    "marketCap",
+    "per",
+    "pbr",
+    "dividendYield",
+    "current",
+    "snapshotAt",
+)
+
+
+def loadValuationSnapshot() -> tuple[pl.DataFrame | None, datetime | None]:
+    """일일 prebuild 된 밸류에이션 스냅샷 parquet 로드.
+
+    ``dart/scan/valuation.parquet`` 는 GH Actions cron (KST 04:00) 이 네이버 API 에서
+    시가총액·PER·PBR·배당수익률·현재가를 전종목 수집해 HuggingFace 에 배포한 파일이다.
+    ``_ensureScanData()`` 가 HF 자동 다운로드를 보장한다.
+
+    Returns
+    -------
+    frame : pl.DataFrame | None
+        prebuild snapshot. 필수 컬럼 누락이나 파일 부재 시 ``None``.
+    snapshotAt : datetime | None
+        수집 시각 (UTC). 파일 부재 시 ``None``.
+
+    Notes
+    -----
+    - 호출자는 ``None`` 인 경우 네이버 실시간 수집 (``_fetchAll``) 으로 fallback 한다.
+    - 스냅샷이 1일 이상 오래된 경우 상위 경로 ``_maybeWarnStale("scan")`` 가 경고.
+    """
+    scanDir = _ensureScanData()
+    path = scanDir / "valuation.parquet"
+    if not path.exists():
+        return None, None
+    try:
+        frame = pl.read_parquet(str(path))
+    except (pl.exceptions.PolarsError, OSError):
+        return None, None
+    missing = [c for c in _VALUATION_REQUIRED_COLS if c not in frame.columns]
+    if missing:
+        return None, None
+    if frame.is_empty():
+        return None, None
+    first = frame["snapshotAt"][0]
+    if isinstance(first, datetime):
+        snapshotAt: datetime | None = first
+    else:
+        try:
+            snapshotAt = datetime.fromisoformat(str(first))
+        except (TypeError, ValueError):
+            snapshotAt = None
+    return frame, snapshotAt
 
 
 def scan_finance_parquets(
