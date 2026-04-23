@@ -196,7 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **엔진 자가 의심 flags** (`core/overrides.py::detectExtremeFlags`): WACC>15%/<6%, Kd>12%, terminalGrowth>4%/≤0, debtRatio>200%, ICR<1.5, cycle contraction-trough 룰을 엔진이 자동 검사 → `{flag, reason, suggestedRetry}` 리스트로 결과에 박음. AI 가 verbal 시뮬로 도망가지 않고 구체 JSON 복사 수준으로 override 재호출.
+- **엔진 자가 의심 flags** (`core/overrides.py::detectExtremeFlags`): WACC>15%/&lt;6%, Kd>12%, terminalGrowth>4%/≤0, debtRatio>200%, ICR&lt;1.5, cycle contraction-trough 룰을 엔진이 자동 검사 → `{flag, reason, suggestedRetry}` 리스트로 결과에 박음. AI 가 verbal 시뮬로 도망가지 않고 구체 JSON 복사 수준으로 override 재호출.
 - **autoEnrich `[엔진가정]` 한 줄 자동 주입**: 모든 tool_result `_summary` 끝에 `[엔진가정] WACC=10.4% · g=3.0% · Kd=15.0% ...` 줄 자동 추가. flag 가 있으면 `⚠ {reason} → 다음 호출 실행 권장: overrides={"wacc":9.0}` JSON 동봉.
 - **4엔진 결과 표준 `assumptions` 필드**: analysis (FORECAST + VALUATION + ANALYSIS) / credit / macro / quant 결과에 엔진이 쓴 가정값을 표준 키(`wacc`, `terminalGrowth`, `debtRatio`, `cyclePhase` 등)로 통합. AI 가 흩어진 `discountRate`/`baseWacc`/`assumedWacc` 추측 불필요.
 - **`pastInsight(stockCode)` / `sectorInsights(sector)` AI tool**: KnowledgeDB 경험 조회 — 블로그(검증 프리미엄) 우선, 없으면 AI 축적. 떠먹이기가 아니라 AI 자율 호출. 식품 업종 분석 시 불닭 OPM 21.8% 같은 과거 인사이트 자동 인용.
@@ -1105,7 +1105,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 - **CI test 마커 필터 보강**: `-m "not requires_data"` → `-m "not requires_data and not heavy"` (CI에서 heavy 테스트 제외)
 - **pre-commit ruff 버전 동기화**: v0.9.0 → v0.11.4 (CI ruff 버전과 일치시켜 format 불일치 해소)
 - **ruff exclude에 `_reference/` 추가**: 참조 파일 lint 제외
-- **의존성 상한 추가**: `polars<2`, `requests<3`, `rich<14`, `beautifulsoup4<5` 등 주요 의존성에 major version 상한 설정
+- **의존성 상한 추가**: `polars&lt;2`, `requests&lt;3`, `rich&lt;14`, `beautifulsoup4&lt;5` 등 주요 의존성에 major version 상한 설정
 - **rank 엔진 print → logger**: `rank.py`, `screen.py`의 print문을 `logging.getLogger(__name__)` 전환
 - **서버 bare except 구체화**: `streaming.py`의 `except Exception` → OSError, RuntimeError 등 7개 구체 예외 타입
 - **publish.yml 버전 검증 추가**: git tag와 pyproject.toml 버전 불일치 시 빌드 자동 실패
