@@ -822,6 +822,31 @@ def _resolveAxis(axis: str) -> str:
     )
 
 
+# ── axis warm-up — calc 간 공유 accessor 선제 빌드 ──
+
+
+def _warmupFinanceAccessors(company: Any) -> None:
+    """축 실행 전 IS/BS/CF 공통 accessor 를 선제 빌드해 calc 간 공유.
+
+    14축 × 50+ calc 가 각자 ``company.select("IS", ...)`` / ``company._finance.BS``
+    를 독립 접근하면 accessor 캐시가 BoundedCache evict 뒤 재빌드되며
+    loadData 반복 호출을 유발한다. 축 실행 직전에 한 번 빌드해 Company.
+    _cache 의 ``_financeStmt_{sjDiv}_Q_consolidated`` key 를 미리 적재하면
+    이후 calc 들은 전부 cache-hit 로 수렴한다.
+
+    금융업 CF 부재 같은 정상 예외는 조용히 무시 — 해당 calc 가 내부에서
+    None 반환으로 처리한다.
+    """
+    stmt = getattr(company, "_financeStmt", None)
+    if stmt is None:
+        return
+    for sjDiv in ("IS", "BS", "CF"):
+        try:
+            stmt(sjDiv, freq="Q", scope="consolidated")
+        except (AttributeError, KeyError, ValueError, TypeError):
+            pass
+
+
 # ── basePeriod 지원 여부 검사 (캐싱) ──
 
 _BP_CACHE: dict[str, bool] = {}
@@ -1090,6 +1115,7 @@ class Analysis:
             AI/사용자가 지정한 가정 override. overrides 파라미터를
             받는 calc 함수에만 전달된다.
         """
+        _warmupFinanceAccessors(company)
         results: dict[str, Any] = {}
         for calc in entry.calcs:
             try:
