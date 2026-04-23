@@ -302,6 +302,12 @@ class BoundedCache:
                     del self._store[k]
             self._max = max(self._default_max // 8, 1)
             try:
+                from dartlab.core.dataLoader import _clearLoadCache
+
+                _clearLoadCache()
+            except (ImportError, AttributeError):
+                pass
+            try:
                 import polars as pl
 
                 pl.disable_string_cache()

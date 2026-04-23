@@ -5,6 +5,7 @@ import json
 import re
 import sys
 import time
+from collections import OrderedDict
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -17,6 +18,23 @@ from dartlab.core.dataConfig import (
 )
 
 _IS_PYODIDE = sys.platform == "emscripten"
+
+# ── loadData LRU (parquet 재로드 방지) ──
+# 같은 (stockCode, category, …) 조합이 여러 calc 에서 반복 호출될 때 disk
+# 재파싱을 막는다. accessor 레벨 캐시(Company._cache 의 _financeStmt_*)가
+# BoundedCache 에 의해 evict 되어도 이 캐시가 남아있으면 loadData 는 disk
+# 를 다시 건들이지 않는다. 결과는 이미 메모리 상 DataFrame 이므로 복제
+# 오버헤드 없음.
+#
+# max_entries 는 작게 유지: (stockCode × category=4) × 사용자 분석 빈도 =
+# 일반 세션 8~16. 초과분은 LRU evict.
+_LOAD_CACHE: "OrderedDict[tuple, pl.DataFrame]" = OrderedDict()
+_LOAD_CACHE_MAX = 16
+
+
+def _clearLoadCache() -> None:
+    """BoundedCache EMERGENCY 시 호출 — disk 캐시까지 비운다."""
+    _LOAD_CACHE.clear()
 
 
 def readParquetSafe(path) -> pl.DataFrame:
@@ -333,10 +351,24 @@ def loadData(
     refresh: str = "auto",
     columns: list[str] | None = None,
 ) -> pl.DataFrame:
-    """종목코드 → DataFrame. 로컬에 없으면 릴리즈에서 자동 다운로드."""
+    """종목코드 → DataFrame. 로컬에 없으면 릴리즈에서 자동 다운로드.
+
+    `(stockCode, category, …)` 조합 결과는 프로세스 수명 동안 `_LOAD_CACHE`
+    에 LRU(max 16) 캐시된다. accessor 레벨 캐시가 evict 되어도 disk 재파싱
+    을 면해주어 대기업 + 다축 analysis 호출 시 메모리·시간 누적을 막는다.
+    `refresh="force"` 는 캐시를 우회한다.
+    """
     if _IS_PYODIDE:
         return _loadDataPyodide(stockCode, category, sinceYear=sinceYear, columns=columns)
     from dartlab.core.memory import check_memory_and_gc
+
+    # LRU cache 조회
+    cacheKey = (stockCode, category, sinceYear, tuple(columns or ()), asOf, refresh)
+    if refresh != "force":
+        cached = _LOAD_CACHE.get(cacheKey)
+        if cached is not None:
+            _LOAD_CACHE.move_to_end(cacheKey)
+            return cached
 
     check_memory_and_gc(f"loadData({stockCode},{category})")
     dataDir = _dataDir(category)
@@ -377,7 +409,13 @@ def loadData(
         df = lf.collect()
     else:
         df = pl.read_parquet(str(path))
-    return _normalizeLoadedFrame(df, category)
+    result = _normalizeLoadedFrame(df, category)
+
+    # LRU 저장 (refresh="force" 여도 결과는 캐시에 남김 — 다음 auto 호출 재사용)
+    _LOAD_CACHE[cacheKey] = result
+    while len(_LOAD_CACHE) > _LOAD_CACHE_MAX:
+        _LOAD_CACHE.popitem(last=False)
+    return result
 
 
 def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefresh: bool) -> None:
