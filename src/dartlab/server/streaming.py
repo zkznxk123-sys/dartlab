@@ -24,9 +24,21 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
+import os
+import threading
 from dataclasses import dataclass
 
 from .models import AskRequest
+
+log = logging.getLogger(__name__)
+
+# Streaming 안정성 튜닝 (환경변수 override 가능)
+#   DARTLAB_STREAM_QUEUE_MAX — async bridge 큐 최대 엔트리 (기본 1024).
+#                              64 고정 시 chunk 폭주하면 producer blocking.
+#   DARTLAB_STREAM_PUT_TIMEOUT — queue.put 타임아웃(초). 느린 소비자·disconnect 감지.
+_DEFAULT_QUEUE_MAX = int(os.environ.get("DARTLAB_STREAM_QUEUE_MAX", "1024"))
+_DEFAULT_PUT_TIMEOUT = float(os.environ.get("DARTLAB_STREAM_PUT_TIMEOUT", "30"))
 
 
 @dataclass
@@ -105,29 +117,50 @@ def _sse(event: str, data: dict) -> dict:
 
 
 async def _sync_gen_to_async(gen_fn, *args, **kwargs):
-    """동기 제너레이터 → async 큐 브릿지.
+    """동기 제너레이터 → async 큐 브릿지 (timeout · cancel 대응).
 
-    요청 종료(정상·예외·소비자 break 모두) 시 Polars string cache 를
+    요청 종료(정상·예외·소비자 break·asyncio cancel 모두) 시 Polars string cache 를
     해제하고 GC 를 촉발한다. `/api/ask` 요청마다 AI tool loop 가 만든
     Company 인스턴스·pivot DataFrame 이 쌓여 네이티브 힙이 비대화하는
     문제 방어 — `pl.disable_string_cache()` 는 100~200MB, `gc.collect()`
     는 Python 참조가 해제된 DataFrame 의 Rust 힙 회수를 촉발한다.
     BoundedCache 의 EMERGENCY 임계를 넘지 못한 중간 누적분을 요청 경계
     에서 정리하는 용도.
+
+    안정성 튜닝:
+      - queue maxsize : env `DARTLAB_STREAM_QUEUE_MAX` (기본 1024).
+      - put timeout   : env `DARTLAB_STREAM_PUT_TIMEOUT` (기본 30초).
+      - consumer cancel 시 `cancelled` Event 로 producer thread 조기 종료.
     """
     import queue as _queue_mod
 
-    sync_queue: _queue_mod.Queue = _queue_mod.Queue(maxsize=64)
+    sync_queue: _queue_mod.Queue = _queue_mod.Queue(maxsize=_DEFAULT_QUEUE_MAX)
+    cancelled = threading.Event()
     _SENTINEL = object()
 
     def _run():
         try:
             for item in gen_fn(*args, **kwargs):
-                sync_queue.put(item)
+                if cancelled.is_set():
+                    break
+                try:
+                    sync_queue.put(item, timeout=_DEFAULT_PUT_TIMEOUT)
+                except _queue_mod.Full:
+                    log.warning(
+                        "stream producer: queue put timeout (%.0fs) — slow consumer or disconnect",
+                        _DEFAULT_PUT_TIMEOUT,
+                    )
+                    break
         except Exception as exc:  # noqa: BLE001
-            sync_queue.put(exc)
+            try:
+                sync_queue.put(exc, timeout=_DEFAULT_PUT_TIMEOUT)
+            except _queue_mod.Full:
+                pass
         finally:
-            sync_queue.put(_SENTINEL)
+            try:
+                sync_queue.put(_SENTINEL, timeout=_DEFAULT_PUT_TIMEOUT)
+            except _queue_mod.Full:
+                pass
 
     loop = asyncio.get_event_loop()
     task = loop.run_in_executor(None, _run)
@@ -142,6 +175,10 @@ async def _sync_gen_to_async(gen_fn, *args, **kwargs):
             yield item
 
         await task
+    except asyncio.CancelledError:
+        # ASGI disconnect 또는 상위 task cancel — producer 조기 종료 신호
+        cancelled.set()
+        raise
     finally:
         _releaseRuntimeHeap()
 

@@ -216,9 +216,11 @@ def _buildHandler(name: str, kind: str, target: str) -> Callable[..., Any]:
     if kind == "company":
 
         def _companyHandler(stockCode: str, **kwargs: Any) -> Any:
-            import dartlab
+            # request-scoped Company 캐시 — 같은 요청 안에서 같은 stockCode 는 인스턴스 1개 공유.
+            # ctx 없으면 매번 새 인스턴스 (notebook/CLI 사용자 영향 없음).
+            from dartlab.ai.runtime.companyCache import getOrCreateCompany
 
-            c = dartlab.Company(stockCode)
+            c = getOrCreateCompany(stockCode)
             clean = {k: v for k, v in kwargs.items() if v is not None}
             # show 의 fields 인자 → select 위임 (Read 하나로 단순화)
             if name == "show":
@@ -340,10 +342,21 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
             )
         props.update(
             {
-                "stockCode": {"type": "string", "description": "특정 종목만 필터 (선택). 예: '005930'"},
+                "stockCode": {
+                    "type": "string",
+                    "description": (
+                        "[주의] scan 은 전종목 횡단 비교 전용. 단일 종목 분석이면 이 도구를 호출하지 말고 "
+                        "`analysis` / `credit` / `show` / `quant` / `debt` / `capital` / `governance` 를 사용할 것. "
+                        "정 필요할 때만 전종목 결과에서 특정 종목 1개로 post-filter. 예: '005930'."
+                    ),
+                },
                 "sortBy": {"type": "string", "description": "정렬 컬럼명 (예: '매출CAGR', 'ROE')"},
                 "descending": {"type": "boolean", "description": "내림차순 (기본 true)"},
                 "limit": {"type": "integer", "description": "상위 N개 (기본 20)", "minimum": 1, "maximum": 200},
+                "refresh": {
+                    "type": "boolean",
+                    "description": "axis='valuation' 전용 — true 면 네이버 API 재수집 (~50초). 기본값 false 는 일일 prebuild snapshot 로드 (1초 이내). 장중 급변 질문에만 true.",
+                },
             }
         )
     if name == "search":

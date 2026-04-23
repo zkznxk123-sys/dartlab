@@ -11,6 +11,7 @@ import traceback
 from typing import Any, Generator
 
 from dartlab.ai.runtime.events import AnalysisEvent
+from dartlab.ai.runtime.progressCapture import runToolWithProgress
 from dartlab.ai.tools import buildTools, executeTool, toolsToOpenAiSchemas
 from dartlab.ai.tools.serialize import serializeForLlm, serializeForUi
 from dartlab.core.env import AuthKeyMissing
@@ -138,6 +139,12 @@ def streamWithTools(
                 yield resp.answer
             return
 
+        # 인터리빙 서사 — 한 라운드에 tool 1개만 실행. provider 가 parallel 로 여러 개
+        # 반환해도 첫 번째만 실행하고 종료 → 다음 라운드에서 모델이 짧은 코멘트 먼저 쓰고
+        # 다음 tool 을 호출하도록 유도. oauth_codex/claude/openai 공통 방어선.
+        if len(resp.tool_calls) > 1:
+            resp.tool_calls = resp.tool_calls[:1]
+
         # tool 실행
         for tc in resp.tool_calls:
             callKey = f"{tc.name}:{_hashArgs(tc.arguments)}"
@@ -155,26 +162,43 @@ def streamWithTools(
                 },
             )
 
-            try:
-                raw = executeTool(toolList, tc.name, tc.arguments)
+            raw: Any = None
+            toolExc: BaseException | None = None
+            for kind, payload in runToolWithProgress(executeTool, toolList, tc.name, tc.arguments):
+                if kind == "progress":
+                    yield AnalysisEvent(
+                        "tool_progress",
+                        {
+                            "id": tc.id,
+                            "name": tc.name,
+                            "line": payload,
+                            "round": roundIdx + 1,
+                        },
+                    )
+                elif kind == "done":
+                    raw = payload
+                elif kind == "err":
+                    toolExc = payload
+
+            if toolExc is None:
                 llmText = serializeForLlm(raw, name=tc.name, arguments=tc.arguments)
                 uiText = serializeForUi(raw, name=tc.name)
                 status = "ok"
-            except AuthKeyMissing as e:
+            elif isinstance(toolExc, AuthKeyMissing):
                 # 친절 메시지 (발급 URL + .env 설정법) 이 예외 본문에 이미 포함 — 스택트레이스 불필요.
                 # AI 는 이 메시지를 응답에 그대로 포함해 사용자에게 키 설정 방법을 안내한다.
-                llmText = f"[API 키 필요 — 사용자에게 아래 안내를 그대로 전달하세요]\n{e}"
+                llmText = f"[API 키 필요 — 사용자에게 아래 안내를 그대로 전달하세요]\n{toolExc}"
                 uiText = llmText
                 status = "auth_required"
                 raw = None
-                log.info("tool %s: API key missing (%s)", tc.name, e.envKey)
-            except Exception as e:  # noqa: BLE001
-                tbText = traceback.format_exc(limit=3)
-                llmText = f"[tool error] {type(e).__name__}: {e}\n{tbText}"
+                log.info("tool %s: API key missing (%s)", tc.name, toolExc.envKey)
+            else:
+                tbText = "".join(traceback.format_exception(type(toolExc), toolExc, toolExc.__traceback__, limit=3))
+                llmText = f"[tool error] {type(toolExc).__name__}: {toolExc}\n{tbText}"
                 uiText = llmText
                 status = "error"
                 raw = None
-                log.warning("tool %s failed: %s", tc.name, e)
+                log.warning("tool %s failed: %s", tc.name, toolExc)
 
             yield AnalysisEvent(
                 "tool_result",

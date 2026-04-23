@@ -588,6 +588,13 @@ class OAuthCodexProvider(BaseProvider):
                                 completedAnswer += content.get("text", "")
 
         # ToolCall 객체로 변환
+        # 인터리빙 서사 강제 — 한 라운드에 tool 1개만. 모델이 parallel 로 여러 개 반환해도
+        # 첫 번째만 실행하고 나머지는 다음 라운드에서 모델이 재호출하도록 유도.
+        # (oauth_codex 는 parallel_tool_calls=False 가 OpenAI SDK 레벨로 안 들어가는 경로이므로
+        # runtime 에서 잘라 낸다.)
+        if len(finishedCalls) > 1:
+            finishedCalls = finishedCalls[:1]
+
         toolCalls: list[ToolCall] = []
         for fc in finishedCalls:
             try:
@@ -699,6 +706,13 @@ class OAuthCodexProvider(BaseProvider):
                         for content in output.get("content", []):
                             if content.get("type") == "output_text":
                                 completedAnswer += content.get("text", "")
+
+        # 인터리빙 서사 강제 — 한 라운드에 tool 1개만. 모델이 parallel 로 여러 개 반환해도
+        # 첫 번째만 실행하고 나머지는 다음 라운드에서 모델이 재호출하도록 유도.
+        # (oauth_codex 는 parallel_tool_calls=False 가 OpenAI SDK 레벨로 안 들어가는 경로이므로
+        # runtime 에서 잘라 낸다.)
+        if len(finishedCalls) > 1:
+            finishedCalls = finishedCalls[:1]
 
         toolCalls: list[ToolCall] = []
         for fc in finishedCalls:

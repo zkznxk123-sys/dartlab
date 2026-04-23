@@ -18,6 +18,8 @@ from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 import dartlab
+from dartlab.ai.runtime.progressCapture import installProgressCapture
+from dartlab.core.logger import getLogger as _bootstrapLogger
 
 from .api import (
     ai_router,
@@ -91,6 +93,11 @@ async def lifespan(_: FastAPI):
             if preload_task is not None:
                 await preload_task
 
+
+# dartlab logger 초기화 후 tool 진행 라인을 SSE 로 흘리기 위한 capture 설치.
+# idempotent — 여러 worker / reload 시 안전.
+_bootstrapLogger()
+installProgressCapture()
 
 app = FastAPI(title="DartLab", version=dartlab.__version__, lifespan=lifespan)
 

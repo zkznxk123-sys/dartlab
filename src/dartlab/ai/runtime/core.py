@@ -236,6 +236,12 @@ def runAsk(
                 pass
         return event
 
+    # 요청 수명 동안 Company 인스턴스 재사용 — tool 여러 개가 같은 stockCode 참조 시 finance 매핑 1회.
+    from dartlab.ai.runtime.companyCache import beginRequest as _beginCompanyCache
+    from dartlab.ai.runtime.companyCache import endRequest as _endCompanyCache
+
+    _companyCacheDict = _beginCompanyCache()
+
     try:
         full_response_parts: list[str] = []
         done_payload: dict[str, Any] = {}
@@ -281,6 +287,11 @@ def runAsk(
         # ── Done 이벤트 ──
         yield _emit(AnalysisEvent("done", done_payload))
     finally:
+        # 요청 종료 — Company 캐시 해제 + gc.collect 촉발 (Polars heap 방출 보조).
+        try:
+            _endCompanyCache(_companyCacheDict)
+        except Exception:  # noqa: BLE001
+            pass
         if _logFile is not None:
             _logFile.close()
 
