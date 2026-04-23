@@ -494,7 +494,7 @@ def start_host(bin_path: str, tunnel_id: str, port: int) -> tuple[str, subproces
             if len(captured) > 100:
                 captured.pop(0)
             if line:
-                logger.info(f"  [dt] {line}", flush=True)
+                logger.info(f"  [dt] {line}")
             m = _URL_PATTERN.search(line)
             if m and not url_event.is_set():
                 url_holder.append(m.group(0))
