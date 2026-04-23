@@ -33,6 +33,25 @@ _ROOT_NAME = "dartlab"
 _DEFAULT_CONFIGURED = False
 
 
+def _ensureUtf8Stream() -> None:
+    """Windows 기본 stdout/stderr cp949 인코딩을 UTF-8 로 재구성 (가능한 경우).
+
+    한글·이모지가 포함된 로그·가이드 출력이 Windows 터미널에서 ``UnicodeEncodeError``
+    없이 표시되도록 한다. TextIOWrapper.reconfigure 를 지원하지 않는 환경
+    (Python 3.6 이하, 이미 다른 wrapper) 에서는 조용히 스킵.
+    """
+    if sys.platform != "win32":
+        return
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            enc = (getattr(stream, "encoding", "") or "").lower()
+            if enc and enc not in {"utf-8", "utf8"}:
+                stream.reconfigure(encoding="utf-8", errors="backslashreplace")
+        except (AttributeError, OSError, ValueError):
+            # 리다이렉트된 스트림·서브프로세스 파이프 등 reconfigure 불가 — 무시.
+            pass
+
+
 def _ensureDefaultHandler() -> None:
     """root ``dartlab`` 로거에 기본 stderr 핸들러 부착 (최초 1회).
 
@@ -44,6 +63,7 @@ def _ensureDefaultHandler() -> None:
     global _DEFAULT_CONFIGURED
     if _DEFAULT_CONFIGURED:
         return
+    _ensureUtf8Stream()
     root = logging.getLogger(_ROOT_NAME)
     if root.handlers:
         _DEFAULT_CONFIGURED = True
