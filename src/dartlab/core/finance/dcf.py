@@ -12,7 +12,7 @@ from dartlab.core.finance.extract import (
     getTTM,
 )
 from dartlab.core.finance.fmt import fmtBig, fmtPrice
-from dartlab.industry import SectorParams
+from dartlab.core.sector import SectorParams
 
 # ── 결과 타입 ──────────────────────────────────────────────
 

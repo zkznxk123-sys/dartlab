@@ -1,9 +1,10 @@
-"""섹터별 밸류에이션 파라미터 — industry/compat.py에 위임.
+"""섹터별 밸류에이션 파라미터 — re-export from core.sector.__init__ + 하위 호환 dict 재구성.
 
-하위 호환용 shim. 실제 구현은 dartlab.industry.compat.
+하위 호환: 기존 `from dartlab.core.sector.params import SECTOR_PARAMS, INDUSTRY_GROUP_PARAMS, getParams` 경로 유지.
+실제 정의는 `dartlab.core.sector.__init__`.
 """
 
-from dartlab.industry import (
+from dartlab.core.sector import (
     IndustryGroup,
     Sector,
     SectorParams,

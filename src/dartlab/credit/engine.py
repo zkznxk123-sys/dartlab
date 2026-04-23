@@ -185,17 +185,30 @@ def _isCaptiveByOFS(company, consolidatedBorrowing: float) -> bool:
 # ═══════════════════════════════════════════════════════════
 
 
-def _calcCHSAdjustment(company, baseScore: float) -> dict | None:
+def _chsSkip(reason: str) -> dict:
+    """CHS 보정 스킵 결과 — 호출부가 사유 추적 가능하도록 structured dict 반환."""
+    return {"status": "unavailable", "reason": reason, "adjustedScore": None, "adjustment": 0}
+
+
+def _calcCHSAdjustment(company, baseScore: float) -> dict:
     """CHS 부도확률 모델로 기본 점수를 ±2 notch 범위 보정.
 
-    주가 데이터 없으면 None (보정 스킵).
+    Returns
+    -------
+    dict
+        status : str — "ok" 면 보정 적용, "unavailable" 이면 데이터·계산 실패.
+        reason : str — unavailable 시 사유 (price_insufficient / finance_missing / shares_unknown 등).
+        adjustedScore : float | None — ok 시 보정 후 점수, unavailable 시 None.
+        chsScore : float — ok 시 PD → 점수 환산값.
+        chsPd : float — ok 시 부도확률.
+        adjustment : float — ok 시 적용 조정치 (0 if unavailable).
     """
     try:
         from dartlab.core.finance.chsModel import calcCHS
 
         priceData = company.gather("price") if hasattr(company, "gather") else None
         if priceData is None or len(priceData) < 20:
-            return None
+            return _chsSkip("price_insufficient")
 
         bs = company.select("BS", ["자산총계", "부채총계", "현금및현금성자산", "현금및예치금"])
         is_ = company.select("IS", ["당기순이익"])
@@ -204,7 +217,7 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict | None:
         bsParsed = toDictBySnakeId(bs)
         isParsed = toDictBySnakeId(is_)
         if not bsParsed or not isParsed:
-            return None
+            return _chsSkip("finance_missing")
 
         bsData, periods = bsParsed
         isData, _ = isParsed
@@ -212,7 +225,7 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict | None:
         # 최신 기간
         p = sorted(periods, reverse=True)[0] if periods else None
         if not p:
-            return None
+            return _chsSkip("no_period")
 
         ta = (bsData.get("자산총계", {}) or {}).get(p)
         tl = (bsData.get("부채총계", {}) or {}).get(p)
@@ -220,21 +233,21 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict | None:
         ni = (isData.get("당기순이익", {}) or {}).get(p)
 
         if not all(v is not None and v != 0 for v in [ta, tl]):
-            return None
+            return _chsSkip("assets_or_liabilities_missing")
 
         # 주가 데이터에서 시가총액, 변동성, 수익률 추출
         prices = priceData.sort("date") if "date" in priceData.columns else priceData
         closeCol = "close" if "close" in prices.columns else "종가"
         if closeCol not in prices.columns:
-            return None
+            return _chsSkip("close_column_missing")
 
         closes = prices[closeCol].drop_nulls().to_list()
         if len(closes) < 20:
-            return None
+            return _chsSkip("close_series_too_short")
 
         latestPrice = closes[-1]
         if latestPrice <= 0:
-            return None
+            return _chsSkip("latest_price_nonpositive")
 
         # 주식수 추정: EPS 역산 (가장 신뢰)
         shares = None
@@ -258,14 +271,14 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict | None:
             eq = ta - tl if ta and tl else None
             shares = eq / latestPrice if eq and latestPrice > 0 else None
         if not shares or shares <= 0:
-            return None
+            return _chsSkip("shares_unknown")
 
         marketCap = shares * latestPrice
 
         # 변동성 (연환산 일별 수익률 표준편차)
         returns = [(closes[i] - closes[i - 1]) / closes[i - 1] for i in range(1, len(closes)) if closes[i - 1] != 0]
         if len(returns) < 10:
-            return None
+            return _chsSkip("returns_series_too_short")
         mean_r = sum(returns) / len(returns)
         var_r = sum((r - mean_r) ** 2 for r in returns) / len(returns)
         sigma = (var_r**0.5) * (252**0.5)
@@ -284,7 +297,7 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict | None:
         )
 
         if chsResult is None:
-            return None
+            return _chsSkip("chs_model_returned_none")
 
         # CHS PD → 점수 매핑 (0-100 스케일)
         chsPd = chsResult.probability
@@ -308,13 +321,14 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict | None:
             adj = min(adj, _CONFIG["chs_safe_max_down"])
 
         return {
+            "status": "ok",
             "adjustedScore": round(baseScore + adj, 2),
             "chsScore": chsScore,
             "chsPd": chsPd,
             "adjustment": round(adj, 2),
         }
-    except (ImportError, TypeError, ValueError, KeyError, AttributeError, ZeroDivisionError):
-        return None
+    except (ImportError, TypeError, ValueError, KeyError, AttributeError, ZeroDivisionError) as exc:
+        return _chsSkip(f"calc_error:{type(exc).__name__}")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -472,7 +486,7 @@ def _calcNotchAdjustment(
 
 
 def _explainDivergence(
-    grade: str, score: float, axes: list, latest: dict, chsResult: dict | None, captive: bool, holding: bool
+    grade: str, score: float, axes: list, latest: dict, chsResult: dict, captive: bool, holding: bool
 ) -> list[str]:
     """등급 결정 근거 + 신평사 등급과의 괴리 원인 자동 설명."""
     explanations: list[str] = []
@@ -524,7 +538,7 @@ def _applyPostAdjustments(company, overall, latest, metrics, axes, captive, hold
 
     # CHS 보정
     chsResult = _calcCHSAdjustment(company, overall)
-    if chsResult is not None:
+    if chsResult.get("status") == "ok":
         overall = chsResult["adjustedScore"]
 
     grade, gradeDesc, pdEstimate = mapTo20Grade(overall)

@@ -1,9 +1,10 @@
-"""섹터 분류 데이터 타입 — industry/compat.py에서 re-export.
+"""섹터 분류 데이터 타입 — re-export from core.sector.__init__.
 
-이 모듈은 하위 호환용 shim이다. 실제 구현은 dartlab.industry.compat.
+하위 호환: 기존 `from dartlab.core.sector.types import Sector, SectorParams` 경로 유지.
+실제 정의는 `dartlab.core.sector.__init__`.
 """
 
-from dartlab.industry import (
+from dartlab.core.sector import (
     MARKET_KR,
     MARKET_PARAMS,
     MARKET_US,

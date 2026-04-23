@@ -55,20 +55,15 @@ def calcBottomUpBeta(
 
     if len(peers) < 5:
         # sector_default fallback
-        try:
-            # sectorParams 에서 직접 beta 조회
-            from dartlab.industry.sector_params import get_sector_params_by_name
-        except (ImportError, AttributeError):
-            get_sector_params_by_name = None
+        from dartlab.core.sector import get_sector_params_by_name
 
         sector_beta: float | None = None
-        if get_sector_params_by_name is not None:
-            try:
-                sp = get_sector_params_by_name(sector)
-                if sp and hasattr(sp, "beta") and sp.beta:
-                    sector_beta = float(sp.beta)
-            except (AttributeError, ValueError, TypeError):
-                pass
+        try:
+            sp = get_sector_params_by_name(sector)
+            if sp and hasattr(sp, "beta") and sp.beta:
+                sector_beta = float(sp.beta)
+        except (AttributeError, ValueError, TypeError):
+            pass
 
         if sector_beta is not None:
             return {
@@ -227,12 +222,12 @@ def _extractKrPeers(sector: str, limit: int) -> list[dict[str, Any]]:
 
 def _sectorBetaFallback(sector: str) -> float:
     """sectorParams 에서 섹터 β 조회. 없으면 1.0."""
-    try:
-        from dartlab.industry.sector_params import get_sector_params_by_name
+    from dartlab.core.sector import get_sector_params_by_name
 
+    try:
         sp = get_sector_params_by_name(sector)
         if sp and hasattr(sp, "beta") and sp.beta:
             return float(sp.beta)
-    except (ImportError, AttributeError, ValueError, TypeError):
+    except (AttributeError, ValueError, TypeError):
         pass
     return 1.0

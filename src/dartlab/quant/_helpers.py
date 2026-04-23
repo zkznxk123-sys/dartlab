@@ -359,15 +359,6 @@ _ACCOUNT_SJ: dict[str, list[str]] = {
 }
 
 
-def _parse_amount(val) -> float | None:
-    """문자열/숫자 → float. core.finance.helpers.parseNumStr SSOT."""
-    if isinstance(val, (int, float)):
-        return float(val)
-    from dartlab.core.finance.helpers import parseNumStr
-
-    return parseNumStr(val)
-
-
 def extract_account(df, key: str) -> float | None:
     """단일 종목/단일 기간 DataFrame에서 표준 계정 추출 — DART/EDGAR 자동 분기.
 
@@ -419,8 +410,10 @@ def extract_account(df, key: str) -> float | None:
             if len(rows) == 0:
                 continue
             amounts = rows.get_column("thstrm_amount").to_list()
+            from dartlab.core.finance.helpers import parseNumStr
+
             for amt in amounts:
-                v = _parse_amount(amt)
+                v = parseNumStr(amt) if not isinstance(amt, (int, float)) else float(amt)
                 if v is not None:
                     return v
     return None

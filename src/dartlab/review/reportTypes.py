@@ -299,3 +299,27 @@ def resolveReportType(name: str | None) -> ReportType:
     if low in _ALIASES:
         return REPORT_TYPES[_ALIASES[low]]
     raise ValueError(f"알 수 없는 보고서 타입: {name!r}. 사용 가능: {', '.join(REPORT_TYPES)}")
+
+
+def _validateSectionKeys() -> None:
+    """REPORT_TYPES[*].sectionOrder 섹션 키가 catalog.SECTIONS 에 존재하는지 검증.
+
+    신규 보고서 타입 추가 시 오타·폐기된 섹션 키를 import 시점에 조기 감지.
+    """
+    from dartlab.review.catalog import SECTIONS
+
+    valid_keys = {s.key for s in SECTIONS}
+    missing: list[tuple[str, str]] = []
+    for rt in REPORT_TYPES.values():
+        for sec_key in rt.sectionOrder:
+            if sec_key not in valid_keys:
+                missing.append((rt.key, sec_key))
+    if missing:
+        items = ", ".join(f"{rt}/{sec}" for rt, sec in missing)
+        raise RuntimeError(
+            f"reportTypes sectionOrder 에 catalog.SECTIONS 에 없는 키 발견: {items}. "
+            f"catalog.SECTIONS 에 섹션 등록 또는 reportTypes sectionOrder 에서 제거."
+        )
+
+
+_validateSectionKeys()

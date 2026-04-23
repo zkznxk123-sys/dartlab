@@ -1,11 +1,10 @@
-"""WICS 섹터 분류 — industry/compat.py에 위임.
+"""WICS 섹터 분류 — re-export from core.sector.__init__ + 하위 호환 dict 재구성.
 
-이 모듈은 하위 호환용 shim이다. 실제 구현은 dartlab.industry.compat.
-기존 소비자가 `from dartlab.core.sector.classifier import classify` 등을
-그대로 사용할 수 있도록 인터페이스를 유지한다.
+하위 호환: 기존 `from dartlab.core.sector.classifier import classify, KSIC_TO_SECTOR` 경로 유지.
+실제 `classify` 정의는 `dartlab.core.sector.__init__`.
 """
 
-from dartlab.industry import (
+from dartlab.core.sector import (
     IndustryGroup,
     Sector,
     _byValue,

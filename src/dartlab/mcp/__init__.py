@@ -303,6 +303,30 @@ def _executeTool(name: str, args: dict) -> str:
                 return _fmt(dartlab.listing("topics"))
             return _fmt(dartlab.listing())
 
+        # ── AI 경험 자산 (블로그 insights + sector insights) ──
+        if name == "pastInsight":
+            return _fmt(dartlab.pastInsight(stockCode=code))
+
+        if name == "sectorInsights":
+            return _fmt(dartlab.sectorInsights(sector=args["sector"]))
+
+        # ── 산업지도 직접 조회 ──
+        if name == "industryMap":
+            industry = args.get("industry")
+            stage = args.get("stage")
+            if industry and stage:
+                return _fmt(dartlab.industry(industry, stage))
+            if industry:
+                return _fmt(dartlab.industry(industry))
+            return _fmt(dartlab.industry())
+
+        # ── dartlab 자체 메타 ──
+        if name == "capabilities":
+            path = args.get("path")
+            if path:
+                return _fmt(dartlab.capabilities(path))
+            return _fmt(dartlab.capabilities())
+
         # ── API Discovery Tools (polars 방식 introspection) ──
         if name == "listDartlabApi":
             return _listDartlabApi()
