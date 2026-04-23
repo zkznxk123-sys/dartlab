@@ -503,7 +503,7 @@ button, a, input, textarea {
 .tool-name {
 	font-weight: 600;
 	font-family: var(--font-mono);
-	color: var(--color-dl-primary-light);
+	color: var(--color-dl-text);
 	font-size: 12px;
 }
 .tool-args {
@@ -522,6 +522,109 @@ button, a, input, textarea {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	flex: 1;
+}
+.tool-block-error {
+	border-color: rgba(248, 113, 113, 0.3);
+	background: rgba(248, 113, 113, 0.04);
+}
+.tool-block-error .tool-name { color: var(--color-dl-primary-light); }
+.tool-summary-error { color: var(--color-dl-primary-light); }
+
+/* 전체 확장 시 tool-block 자체 스타일 (선택적 시각화) */
+.tool-block-full {
+	box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.18);
+}
+
+/* 헤더 우측 확장/축소 아이콘 */
+.tool-expand-icon {
+	margin-left: auto;
+	flex-shrink: 0;
+	color: var(--color-dl-text-dim);
+	display: inline-flex;
+	align-items: center;
+}
+.tool-header:hover .tool-expand-icon { color: var(--color-dl-text-muted); }
+
+/* 섹션 컨테이너 — 항상 노출 (Claude Code 스타일) */
+.tool-sections {
+	border-top: 0.5px solid rgba(148, 163, 184, 0.12);
+	padding: 8px 12px 10px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+/* 섹션 제목 */
+.tool-section { display: flex; flex-direction: column; gap: 3px; }
+.tool-section-title {
+	font-size: 10px;
+	font-weight: 600;
+	color: var(--color-dl-text-dim);
+	text-transform: none;
+	letter-spacing: 0.02em;
+	margin: 0;
+	padding: 0;
+}
+.tool-section-title-error { color: var(--color-dl-primary-light); }
+
+/* 섹션 본문 — 기본 적정 높이 프레임. 헤더 클릭 시 max-h 해제로 전체 펼침. */
+.tool-section-body {
+	font-size: 12px;
+	line-height: 1.65;
+	color: var(--color-dl-text);
+}
+
+/* IN 섹션: 자연어 args 요약 — 한 줄 텍스트 */
+.tool-in {
+	color: var(--color-dl-text-muted);
+	font-size: 11px;
+}
+
+/* LOG (progress) 섹션 — 기본 120px scroll, full 시 해제 */
+.tool-log {
+	font-family: var(--font-mono);
+	font-size: 11px;
+	line-height: 1.55;
+	color: var(--color-dl-text-dim);
+	background: rgba(13, 17, 23, 0.35);
+	border-radius: 4px;
+	padding: 4px 8px;
+	max-height: 120px;
+	overflow-y: auto;
+}
+.tool-block-full .tool-log { max-height: none; }
+.tool-progress-line {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.tool-log .tool-progress-line { white-space: pre-wrap; }
+
+/* OUT 섹션 — markdown 렌더. 기본 200px scroll, full 시 해제. */
+.tool-out {
+	font-size: 12px;
+	line-height: 1.7;
+	max-height: 200px;
+	overflow-y: auto;
+	border: 0.5px solid rgba(148, 163, 184, 0.08);
+	border-radius: 4px;
+	padding: 6px 8px;
+	background: rgba(13, 17, 23, 0.25);
+}
+.tool-block-full .tool-out { max-height: none; }
+
+/* OUT 라인수 요약 ("N lines of output") */
+.tool-line-count {
+	color: var(--color-dl-text-dim);
+	font-size: 10px;
+	font-style: italic;
+}
+
+/* ERROR 섹션 */
+.tool-error-body {
+	color: var(--color-dl-primary-light);
+	font-size: 12px;
+	line-height: 1.65;
 }
 .tool-body {
 	border-top: 0.5px solid rgba(148, 163, 184, 0.12);
@@ -690,61 +793,20 @@ button, a, input, textarea {
 	animation: shimmer 1.5s ease-in-out infinite;
 }
 
-/* ── Message timeline (Claude Code 스타일) ── */
+/* ── Message timeline — 점·선 폐기 (segments 시간축이 본 서사 담당) ── */
 .msg-timeline {
 	position: relative;
-	padding: 6px 0 6px 30px;
+	padding: 6px 0;
 }
-.msg-timeline::before {
-	content: "";
-	position: absolute;
-	border-radius: 50%;
-	width: 7px;
-	height: 7px;
-	top: 13px;
-	left: 9px;
-	background-color: var(--color-dl-text-dim);
-	z-index: 1;
-}
-.msg-timeline.tl-success::before { background-color: var(--color-dl-success); }
-.msg-timeline.tl-error::before { background-color: var(--color-dl-primary); }
-.msg-timeline.tl-loading::before {
-	background-color: var(--color-dl-accent);
-	animation: tl-pulse 1.5s ease-in-out infinite;
-}
-@keyframes tl-pulse {
-	0%, 100% { opacity: 0.4; }
-	50% { opacity: 1; }
-}
-/* Timeline vertical line — single continuous line on the container */
-.chat-stream-shell::before {
-	content: "";
-	position: absolute;
-	width: 1px;
-	top: 0;
-	bottom: 0;
-	left: var(--tl-line-left);
-	background-color: rgba(148, 163, 184, 0.12);
-	pointer-events: none;
-}
+.msg-timeline::before { display: none; }
+.chat-stream-shell::before { display: none; }
 
-/* User message — same timeline, hollow dot */
+/* User message — 점 폐기, 들여쓰기만 유지 */
 .msg-user {
 	position: relative;
-	padding: 6px 0 6px 30px;
+	padding: 6px 0;
 }
-.msg-user::before {
-	content: "";
-	position: absolute;
-	border-radius: 50%;
-	width: 7px;
-	height: 7px;
-	top: 13px;
-	left: 9px;
-	background-color: transparent;
-	border: 1.5px solid var(--color-dl-text-dim);
-	z-index: 1;
-}
+.msg-user::before { display: none; }
 
 /* ── Stagger animation ── */
 @keyframes stagger-in {

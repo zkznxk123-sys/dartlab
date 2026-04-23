@@ -13,7 +13,6 @@
 		onSelect,
 		onDelete,
 		onDeleteAll,
-		onOpenSearch,
 		onRename,
 	} = $props();
 

@@ -21,7 +21,7 @@
 	import { summarizeDataReady } from "$lib/ai/dataReady.js";
 	import {
 		Database, Eye, Wrench, Loader2, Brain, FileText,
-		RefreshCw, CheckCircle2,
+		RefreshCw, XCircle,
 	} from "lucide-svelte";
 	import { renderMarkdown } from "$lib/markdown.js";
 	import { estimateTokens, formatTokens } from "$lib/chat/tokenEstimator.js";
@@ -31,6 +31,8 @@
 	import TransparencyBadges from "./TransparencyBadges.svelte";
 	import EvidenceModal from "./EvidenceModal.svelte";
 	import CitationPopover from "./CitationPopover.svelte";
+	import ToolBlock from "./ToolBlock.svelte";
+	import { summarizeResult, isToolError, describeCallArgs, cleanErrorMessage } from "$lib/ai/toolSummary.js";
 
 	import { Pencil, Send, Star } from "lucide-svelte";
 	let {
@@ -78,9 +80,27 @@
 	// 사용자 메시지 인라인 편집
 	let isEditing = $state(false);
 	let editText = $state("");
-	let activeToolCall = $derived.by(() =>
-		[...(message.toolEvents || [])].reverse().find(e => e.type === "call") || null
-	);
+	// 현재 "실행 중" 인 tool — result 가 아직 안 온 가장 최근 call
+	let activeToolCall = $derived.by(() => {
+		const events = message.toolEvents || [];
+		const doneIds = new Set();
+		for (const e of events) {
+			if (e.type === "result" && e.id) doneIds.add(e.id);
+		}
+		for (let i = events.length - 1; i >= 0; i--) {
+			const e = events[i];
+			if (e.type === "call" && (!e.id || !doneIds.has(e.id))) return e;
+		}
+		return null;
+	});
+
+	let activeProgressLines = $derived.by(() => {
+		const id = activeToolCall?.id;
+		if (!id) return [];
+		const lines = message.toolProgress?.[id]?.lines;
+		if (!Array.isArray(lines) || lines.length === 0) return [];
+		return lines.slice(-5);
+	});
 
 	let loadingPhase = $derived.by(() => {
 		if (!message.loading) return "";
@@ -185,7 +205,6 @@
 	}
 
 	let toolCallEvents = $derived((message.toolEvents || []).filter(e => e.type === "call"));
-	let toolResultEvents = $derived((message.toolEvents || []).filter(e => e.type === "result"));
 
 	// ── Tool 접기/펼치기 (Claude Code 스타일) ──
 	const TOOL_LABELS = {
@@ -204,14 +223,6 @@
 		list_filings: "공시 목록", show_topic: "토픽 조회", get_data: "데이터 조회",
 	};
 	function toolLabel(name) { return TOOL_LABELS[name] || name; }
-	function formatToolArg(args) {
-		if (!args) return "";
-		if (typeof args === "string") return args;
-		try {
-			const entries = Object.entries(args);
-			return entries.map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join(", ");
-		} catch { return String(args); }
-	}
 	function truncateStr(s, max) { return s.length > max ? s.slice(0, max) + "..." : s; }
 
 	let toolPairs = $derived.by(() => {
@@ -238,8 +249,7 @@
 		const badges = [];
 		if (message.meta?.includedModules?.length > 0) badges.push({ label: `모듈 ${message.meta.includedModules.length}개`, icon: Database });
 		if (message.contexts?.length > 0) badges.push({ label: `컨텍스트 ${message.contexts.length}건`, icon: Eye });
-		if (toolCallEvents.length > 0) badges.push({ label: `툴 호출 ${toolCallEvents.length}건`, icon: Wrench });
-		if (toolResultEvents.length > 0) badges.push({ label: `툴 결과 ${toolResultEvents.length}건`, icon: CheckCircle2 });
+		if (toolCallEvents.length > 0) badges.push({ label: `툴 ${toolCallEvents.length}건`, icon: Wrench });
 		if (message.systemPrompt) badges.push({ label: "시스템 프롬프트", icon: Brain });
 		if (message.userContent) badges.push({ label: "LLM 입력", icon: FileText });
 		return badges;
@@ -429,8 +439,8 @@
 				</div>
 			{/if}
 
-			<!-- ── 로딩: 진행 단계 표시 ── -->
-			{#if message.loading && !message.text}
+			<!-- ── 로딩: 진행 단계 표시 ── (segments 가 있으면 skip — 시간축 렌더가 본 경로) -->
+			{#if message.loading && !message.text && !(message.segments && message.segments.length > 0)}
 			<div class="animate-fadeIn">
 					<div class="space-y-1 mb-3">
 						{#each loadingSteps as step}
@@ -478,39 +488,69 @@
 							<span class="font-mono text-[10px] text-dl-text-dim/50">{elapsed}초</span>
 						{/if}
 					</div>
-				{/if}
-				<!-- svelte-ignore a11y_click_events_have_key_events -->
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div
-					class={cn("prose-dartlab message-body text-[15px] leading-[1.75]", message.error && "text-dl-primary")}
-					bind:this={contentEl}
-					onclick={handleContentClick}
-				>
-					{#if streamingContent.committed}
-						<div class="message-committed">
-							{@html message.loading ? incRenderer.render(streamingContent.committed) : renderMarkdown(streamingContent.committed)}
+					{#if activeProgressLines.length > 0}
+						<div class="tool-progress-live mb-2">
+							{#each activeProgressLines as ln}
+								<div class="tool-progress-line">{ln}</div>
+							{/each}
 						</div>
 					{/if}
-					{#if streamingContent.draft}
-						{#if streamingContent.draftType === "code"}
-							<!-- Claude Code 패턴: 코드 작성 중엔 스피너만 -->
-							<div class="flex items-center gap-2 py-2 px-1 text-[12px] text-dl-text-dim">
-								<Loader2 size={14} class="animate-spin flex-shrink-0" />
-								<span class="font-mono">코드 작성 중...</span>
-							</div>
-						{:else}
-							<div class={cn(
-								"message-live-tail",
-								streamingContent.draftType === "table" && "message-draft-table",
-							)}>
-								<div class="message-live-label">
-									{streamingContent.draftType === "table" ? "표 구성 중" : "응답 작성 중"}
+				{/if}
+				{#if message.segments && message.segments.length > 0}
+					<!-- ── 새 경로: segments 시간축 인터리빙 (tool + text 혼재) ── -->
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<div
+						class={cn("message-segments", message.error && "text-dl-primary")}
+						bind:this={contentEl}
+						onclick={handleContentClick}
+					>
+						{#each message.segments as seg (seg.id)}
+							{#if seg.kind === "tool"}
+								<div class="my-1.5">
+									<ToolBlock {seg} />
 								</div>
-								<pre>{streamingContent.draft}</pre>
+							{:else if seg.kind === "text" && seg.content}
+								<div class="prose-dartlab text-[15px] leading-[1.75] my-2">
+									{@html renderMarkdown(seg.content)}
+								</div>
+							{/if}
+						{/each}
+					</div>
+				{:else}
+					<!-- ── 기존 경로: 단일 본문 + toolPairs 아코디언 (히스토리 호환) ── -->
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<div
+						class={cn("prose-dartlab message-body text-[15px] leading-[1.75]", message.error && "text-dl-primary")}
+						bind:this={contentEl}
+						onclick={handleContentClick}
+					>
+						{#if streamingContent.committed}
+							<div class="message-committed">
+								{@html message.loading ? incRenderer.render(streamingContent.committed) : renderMarkdown(streamingContent.committed)}
 							</div>
 						{/if}
-					{/if}
-				</div>
+						{#if streamingContent.draft}
+							{#if streamingContent.draftType === "code"}
+								<div class="flex items-center gap-2 py-2 px-1 text-[12px] text-dl-text-dim">
+									<Loader2 size={14} class="animate-spin flex-shrink-0" />
+									<span class="font-mono">코드 작성 중...</span>
+								</div>
+							{:else}
+								<div class={cn(
+									"message-live-tail",
+									streamingContent.draftType === "table" && "message-draft-table",
+								)}>
+									<div class="message-live-label">
+										{streamingContent.draftType === "table" ? "표 구성 중" : "응답 작성 중"}
+									</div>
+									<pre>{streamingContent.draft}</pre>
+								</div>
+							{/if}
+						{/if}
+					</div>
+				{/if}
 
 				<!-- ── 코드 실행 (Claude Code tool-block 패턴: IN/OUT 그리드) ── -->
 				{#if message.codeRounds?.length}
@@ -552,32 +592,60 @@
 					</div>
 				{/if}
 
-				<!-- ── Tool 호출 (Claude Code tool-block 패턴: 로딩 중에도 표시) ── -->
-				{#if toolPairs.length > 0}
+				<!-- ── Tool 호출 아코디언 (히스토리 호환 전용 — segments 가 없는 과거 메시지) ── -->
+				{#if toolPairs.length > 0 && !(message.segments && message.segments.length > 0)}
 					<div class="flex flex-col gap-1 mt-1 mb-1">
 						{#each toolPairs as pair, i}
 							{@const isToolExpanded = collapsedTools[i] === true}
-							<div class="tool-block">
+							{@const hasError = isToolError(pair)}
+							{@const resultSummary = summarizeResult(pair)}
+							{@const inArgs = describeCallArgs(pair.call)}
+							<div class="tool-block" class:tool-block-error={hasError}>
 								<button class="tool-header" onclick={() => toggleTool(i)}>
 									<svg class="tool-chevron" class:open={isToolExpanded} width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M6 4l4 4-4 4"/></svg>
-									{#if pair.result}
-										<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" class="tool-ok"><path d="M6.5 12L2 7.5l1.4-1.4L6.5 9.2l6.1-6.1L14 4.5z"/></svg>
-									{:else}
+									{#if !pair.result}
 										<div class="tool-spinner-sm"></div>
+									{:else if hasError}
+										<XCircle size={12} class="flex-shrink-0 text-dl-primary-light" />
+									{:else}
+										<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" class="tool-ok"><path d="M6.5 12L2 7.5l1.4-1.4L6.5 9.2l6.1-6.1L14 4.5z"/></svg>
 									{/if}
 									<span class="tool-name">{pair.call.label || toolLabel(pair.call.name)}</span>
-									{#if pair.result?.summary}
-										<span class="tool-summary">{truncateStr(pair.result.summary, 80)}</span>
-									{:else}
-										<span class="tool-args">{truncateStr(formatToolArg(pair.call.arguments), 60)}</span>
+									{#if resultSummary}
+										<span class="tool-summary" class:tool-summary-error={hasError}>{truncateStr(resultSummary, 80)}</span>
 									{/if}
 								</button>
-								{#if isToolExpanded && pair.result}
+								{#if isToolExpanded}
+									{@const progressLines = message.toolProgress?.[pair.call.id]?.lines || []}
 									<div class="tool-body">
-										<div class="tool-body-row">
-											<div class="tool-body-label">OUT</div>
-											<div class="tool-body-content prose-dartlab">{@html renderMarkdown(typeof pair.result.result === "string" ? pair.result.result : JSON.stringify(pair.result.result, null, 2))}</div>
-										</div>
+										{#if inArgs}
+											<div class="tool-body-row">
+												<div class="tool-body-label">IN</div>
+												<div class="tool-body-content text-dl-text-muted text-[11px] leading-relaxed">{inArgs}</div>
+											</div>
+										{/if}
+										{#if progressLines.length > 0}
+											<div class="tool-body-row">
+												<div class="tool-body-label">LOG</div>
+												<div class="tool-body-content tool-progress-log">
+													{#each progressLines as ln}
+														<div class="tool-progress-line">{ln}</div>
+													{/each}
+												</div>
+											</div>
+										{/if}
+										{#if pair.result}
+											<div class="tool-body-row">
+												<div class="tool-body-label">OUT</div>
+												{#if hasError}
+													<div class="tool-body-content text-[11px] leading-relaxed text-dl-primary-light/90">
+														{cleanErrorMessage(typeof pair.result.result === "string" ? pair.result.result : "")}
+													</div>
+												{:else}
+													<div class="tool-body-content prose-dartlab">{@html renderMarkdown(typeof pair.result.result === "string" ? pair.result.result : JSON.stringify(pair.result.result, null, 2))}</div>
+												{/if}
+											</div>
+										{/if}
 									</div>
 								{/if}
 							</div>

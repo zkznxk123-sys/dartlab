@@ -3,12 +3,10 @@
 	meta/context/snapshot/tool 뱃지 + 스냅샷 카드 + 도구 이벤트 타임라인.
 -->
 <script>
-	import { cn } from "$lib/utils.js";
-	import { formatEvidenceLabel, formatToolLabel } from "$lib/ai/evidenceLabels.js";
+	import { formatEvidenceLabel } from "$lib/ai/evidenceLabels.js";
 	import { Badge } from "$lib/components/ui/badge/index.js";
 	import {
-		Database, Eye, Wrench, Brain, FileText,
-		AlertTriangle, CheckCircle2, Activity
+		Database, AlertTriangle, Activity
 	} from "lucide-svelte";
 
 	let {
@@ -25,20 +23,6 @@
 		onOpenUserContentModal,
 		onOpenEvidence,
 	} = $props();
-
-	function summarizeToolEvent(ev) {
-		if (!ev) return "";
-		if (ev.type === "call") {
-			if (ev.arguments?.module) return formatEvidenceLabel(ev.arguments.module, "관련 데이터");
-			return ev.arguments?.keyword || ev.arguments?.engine || ev.arguments?.name || "";
-		}
-		if (typeof ev.result === "string") return ev.result.slice(0, 120);
-		if (ev.result && typeof ev.result === "object") {
-			if (ev.result.module) return formatEvidenceLabel(ev.result.module, "관련 데이터");
-			return ev.result.status || ev.result.name || "";
-		}
-		return "";
-	}
 </script>
 
 <!-- ── 상단 메타 뱃지 (데이터 투명성) ── -->
@@ -94,8 +78,7 @@
 				class="inline-flex items-center gap-1 rounded-full border border-dl-border/50 bg-dl-bg-card/35 px-2 py-0.5 text-[10px] text-dl-text-dim transition-colors hover:border-dl-primary/30 hover:text-dl-text"
 				onclick={() => {
 					if (badge.label.startsWith("컨텍스트")) onOpenContextModal?.(0);
-					else if (badge.label.startsWith("툴 호출")) onOpenEvidence ? onOpenEvidence("tool-calls", 0) : onOpenToolEventModal?.(0);
-					else if (badge.label.startsWith("툴 결과")) onOpenEvidence ? onOpenEvidence("tool-results", 0) : onOpenToolEventModal?.((message.toolEvents || []).findIndex((event) => event.type === "result"));
+					else if (badge.label.startsWith("툴 ")) onOpenEvidence ? onOpenEvidence("tool-calls", 0) : onOpenToolEventModal?.(0);
 					else if (badge.label === "시스템 프롬프트") onOpenSystemPromptModal?.();
 					else if (badge.label === "LLM 입력") onOpenUserContentModal?.();
 				}}
@@ -154,35 +137,9 @@
 	</button>
 {/if}
 
-<!-- ── Tool Events 타임라인 ── -->
-{#if message.toolEvents?.length > 0}
-	<div class="message-section-slot mb-3">
-		<div class="rounded-2xl border border-dl-border/40 bg-dl-bg-card/20 p-3">
-			<div class="mb-2 text-[10px] uppercase tracking-[0.18em] text-dl-text-dim">보고 있는 것 / 하고 있는 것</div>
-			<div class="mb-2 text-[11px] leading-relaxed text-dl-text-dim">
-				응답 중에 실제로 호출한 도구와 반환된 결과 흐름입니다. 배지를 누르면 상세 근거로 이동합니다.
-			</div>
-			<div class="flex flex-wrap items-center gap-1.5">
-			{#each message.toolEvents as ev, idx}
-				{@const detail = summarizeToolEvent(ev)}
-				<button
-					class={cn(
-						"flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-all",
-						ev.type === "call"
-							? "border-dl-accent/30 bg-dl-accent/[0.06] text-dl-accent hover:border-dl-accent/50"
-							: "border-dl-success/30 bg-dl-success/[0.06] text-dl-success hover:border-dl-success/50"
-					)}
-					onclick={() => onOpenToolEventModal?.(idx)}
-				>
-					{#if ev.type === "call"}
-						<Wrench size={11} />
-					{:else}
-						<CheckCircle2 size={11} />
-					{/if}
-					{ev.type === "call" ? formatToolLabel(ev.name) : `${formatToolLabel(ev.name)} 결과`}{detail ? `: ${detail}` : ""}
-				</button>
-			{/each}
-			</div>
-		</div>
-	</div>
-{/if}
+<!--
+	Tool Events 타임라인 (기존 "보고 있는 것 / 하고 있는 것") 제거.
+	MessageBubble 의 Claude Code 스타일 아코디언이 상위호환 (헤더 1줄 + summary + IN/OUT expand).
+	투명성 원칙은 상단 activityBadges "툴 N건" + 아코디언 으로 유지.
+-->
+

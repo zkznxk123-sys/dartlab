@@ -25,7 +25,21 @@ function loadFromStorage() {
 	}
 }
 
-const EPHEMERAL_KEYS = ["systemPrompt", "userContent", "contexts", "snapshot", "toolEvents", "startedAt", "loading", "renderViews"];
+// persist 대상에서 제외되는 필드 — 세션 한정.
+// `segments` 는 persist 유지 (시간축 + tool summary/result 재현 필요).
+// 단 segments 내부의 `progressLines` 는 용량 크므로 직렬화 전 strip.
+const EPHEMERAL_KEYS = ["systemPrompt", "userContent", "contexts", "snapshot", "toolEvents", "toolProgress", "startedAt", "loading", "renderViews"];
+
+function stripSegmentEphemeral(segments) {
+	if (!Array.isArray(segments)) return undefined;
+	return segments.map(s => {
+		if (s.kind === "tool") {
+			const { progressLines: _ignored, ...rest } = s;
+			return rest;
+		}
+		return s;
+	});
+}
 
 function stripEphemeral(convs) {
 	return convs.map(c => ({
@@ -34,7 +48,12 @@ function stripEphemeral(convs) {
 			if (m.role !== "assistant") return m;
 			const cleaned = {};
 			for (const [k, v] of Object.entries(m)) {
-				if (!EPHEMERAL_KEYS.includes(k)) cleaned[k] = v;
+				if (EPHEMERAL_KEYS.includes(k)) continue;
+				if (k === "segments") {
+					cleaned.segments = stripSegmentEphemeral(v);
+				} else {
+					cleaned[k] = v;
+				}
 			}
 			return cleaned;
 		}),

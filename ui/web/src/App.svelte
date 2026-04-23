@@ -30,12 +30,11 @@
 	import Sidebar from "$lib/components/Sidebar.svelte";
 	import EmptyState from "$lib/components/EmptyState.svelte";
 	import ChatArea from "$lib/components/ChatArea.svelte";
-	import SearchModal from "$lib/components/SearchModal.svelte";
 	import DeleteDialog from "$lib/components/DeleteDialog.svelte";
 	import ToastNotification from "$lib/components/ToastNotification.svelte";
 	import PanelResizer from "$lib/components/PanelResizer.svelte";
 	import {
-		Menu, PanelLeftClose, Coffee, Github, FileText, Search, Cog,
+		Menu, PanelLeftClose, Coffee, Github, FileText, Cog,
 	} from "lucide-svelte";
 	import ProviderDropdown from "$lib/components/ProviderDropdown.svelte";
 	import { isVSCode } from "$lib/api/transport.js";
@@ -52,7 +51,6 @@
 	let suggestedQuestions = $state([]);
 	let onboardingDataReady = $state(null);
 	let suggestionLoading = $state(false);
-	let showSearchModal = $state(false);
 	let suggestRequestId = 0;
 	const suggestionCache = new Map();
 
@@ -333,10 +331,8 @@
 	// ── Keyboard shortcuts ──
 	function handleGlobalKeydown(e) {
 		if ((e.metaKey || e.ctrlKey) && e.key === 'n') { e.preventDefault(); handleNewChat(); }
-		if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); showSearchModal = true; }
 		if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'S') { e.preventDefault(); ui.toggleSidebar(); }
-		if (e.key === 'Escape' && showSearchModal) { showSearchModal = false; }
-		else if (e.key === 'Escape' && ui.settingsOpen) { ui.settingsOpen = false; }
+		if (e.key === 'Escape' && ui.settingsOpen) { ui.settingsOpen = false; }
 		else if (e.key === 'Escape' && ui.deleteConfirmId) { ui.deleteConfirmId = null; }
 	}
 </script>
@@ -361,7 +357,6 @@
 				onDelete={handleDeleteConversation}
 				onDeleteAll={handleDeleteAllConversations}
 				onRename={(id, title) => { if (title) store.updateTitle(id, title); }}
-				onOpenSearch={() => { showSearchModal = true; }}
 			/>
 			{#if !ui.isMobile && ui.sidebarOpen}
 				<PanelResizer onResize={handleSidebarResize} />
@@ -387,17 +382,8 @@
 			</div>
 		{/if}
 
-		<!-- Top-right controls — 모바일에선 검색만 숨김 (하단 탭바에 있음) -->
+		<!-- Top-right controls — 회사 검색 제거 (AI 채팅이 대체) -->
 		<div class="absolute top-2 right-3 z-20 flex items-center gap-1 pointer-events-auto">
-			{#if !ui.isMobile}
-				<button
-					class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors"
-					onclick={() => { showSearchModal = true; }}
-					title="종목 검색 (Ctrl+K)"
-				>
-					<Search size={14} />
-				</button>
-			{/if}
 			{#if !isVSCode}
 				<a href="https://eddmpython.github.io/dartlab/" target="_blank" rel="noopener noreferrer"
 					class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors" title="Documentation">
@@ -444,16 +430,8 @@
 				{:else}
 					<EmptyState
 						bind:inputText
-						selectedCompany={workspace.selectedCompany}
-						suggestions={suggestedQuestions}
-						dataReady={onboardingDataReady}
-						suggestionLoading={suggestionLoading}
 						onSend={sendMessage}
 						onCompanySelect={handleCompanySelect}
-						{watchlist}
-						onWatchlistClick={(item) => {
-							handleCompanySelect({ stockCode: item.code, corpName: item.name, company: item.name });
-						}}
 						onCommand={handleSlashCommand}
 					/>
 				{/if}
@@ -473,13 +451,6 @@
 			</button>
 			<button
 				class="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-colors text-dl-text-dim"
-				onclick={() => { showSearchModal = true; }}
-			>
-				<Search size={18} />
-				<span class="text-[9px] font-medium">검색</span>
-			</button>
-			<button
-				class="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-colors text-dl-text-dim"
 				onclick={() => ui.openSettings()}
 			>
 				<Cog size={18} />
@@ -495,15 +466,5 @@
 		<SettingsPanel {ui} />
 	{/await}
 {/if}
-<SearchModal
-	bind:open={showSearchModal}
-	recentCompanies={workspace.recentCompanies}
-	onSelect={handleCompanySelect}
-	onAction={(id) => {
-		if (id === "newChat") handleNewChat();
-		else if (id === "openSettings") ui.openSettings();
-		else if (id === "exportChat") handleExport();
-	}}
-/>
 <DeleteDialog {ui} onConfirm={confirmDelete} />
 <ToastNotification {ui} />

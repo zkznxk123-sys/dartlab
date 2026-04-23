@@ -86,6 +86,7 @@ export function createAskStreamCallbacks({
 	// ── chunk 배치 처리: 토큰당 → 프레임당 1회 DOM 업데이트 ──
 	let chunkBuffer = "";
 	let chunkRafId = null;
+	let textSegCounter = 0;
 
 	function flushChunkBuffer() {
 		if (!chunkBuffer) return;
@@ -93,7 +94,25 @@ export function createAskStreamCallbacks({
 		chunkBuffer = "";
 		chunkRafId = null;
 		const last = getLastMessage(store);
-		store.updateLastMessage({ text: `${last?.text || ""}${batch}` });
+		const prevText = last?.text || "";
+		// segments: 마지막 segment 가 text 이면 append, 아니면 새 text segment 생성.
+		// tool_call 이 중간에 들어오면 그 이후 chunk 는 새 text segment 로 분리되어 시간축 반영.
+		const prevSegments = last?.segments || [];
+		const lastSeg = prevSegments.length > 0 ? prevSegments[prevSegments.length - 1] : null;
+		let nextSegments;
+		if (lastSeg && lastSeg.kind === "text") {
+			nextSegments = [
+				...prevSegments.slice(0, -1),
+				{ ...lastSeg, content: lastSeg.content + batch },
+			];
+		} else {
+			textSegCounter += 1;
+			nextSegments = [
+				...prevSegments,
+				{ kind: "text", id: `txt-${Date.now()}-${textSegCounter}`, content: batch, ts: Date.now() },
+			];
+		}
+		store.updateLastMessage({ text: prevText + batch, segments: nextSegments });
 		bumpScroll?.();
 	}
 
@@ -143,21 +162,91 @@ export function createAskStreamCallbacks({
 		},
 		onToolCall(ev) {
 			if (isStale()) return;
-			appendMessageList(store, "toolEvents", {
+			const last = getLastMessage(store);
+			const prevEvents = last?.toolEvents || [];
+			const prevSegments = last?.segments || [];
+			const newEvent = {
 				type: "call",
+				id: ev.id,
 				name: ev.name,
 				label: ev.label,
 				arguments: ev.arguments,
+			};
+			const newSegment = {
+				kind: "tool",
+				id: ev.id,
+				name: ev.name,
+				label: ev.label,
+				args: ev.arguments,
+				status: "running",
+				summary: null,
+				result: null,
+				progressLines: [],
+				startedAt: Date.now(),
+				endedAt: null,
+			};
+			store.updateLastMessage({
+				toolEvents: [...prevEvents, newEvent],
+				segments: [...prevSegments, newSegment],
 			});
+			bumpScroll?.();
+		},
+		onToolProgress(ev) {
+			if (isStale()) return;
+			if (!ev?.id || typeof ev.line !== "string") return;
+			const last = getLastMessage(store);
+			// 기존 toolProgress dict (호환)
+			const progress = { ...(last?.toolProgress || {}) };
+			const entry = progress[ev.id] ? { ...progress[ev.id] } : { lines: [] };
+			const nextLines = entry.lines.length >= 200 ? entry.lines.slice(-199) : entry.lines.slice();
+			nextLines.push(ev.line);
+			entry.lines = nextLines;
+			entry.updatedAt = Date.now();
+			progress[ev.id] = entry;
+			// segments 의 해당 tool segment 에도 직접 append
+			const prevSegments = last?.segments || [];
+			const nextSegments = prevSegments.map(s => {
+				if (s.kind === "tool" && s.id === ev.id) {
+					const lines = s.progressLines || [];
+					const updated = lines.length >= 200 ? lines.slice(-199) : lines.slice();
+					updated.push(ev.line);
+					return { ...s, progressLines: updated };
+				}
+				return s;
+			});
+			store.updateLastMessage({ toolProgress: progress, segments: nextSegments });
+			bumpScroll?.();
 		},
 		onToolResult(ev) {
 			if (isStale()) return;
-			appendMessageList(store, "toolEvents", {
+			const last = getLastMessage(store);
+			const prevEvents = last?.toolEvents || [];
+			const newEvent = {
 				type: "result",
+				id: ev.id,
 				name: ev.name,
 				label: ev.label,
+				status: ev.status,
 				summary: ev.summary,
 				result: ev.result,
+			};
+			// segments 의 해당 tool segment 를 done/error 로 업데이트
+			const prevSegments = last?.segments || [];
+			const nextSegments = prevSegments.map(s => {
+				if (s.kind === "tool" && s.id === ev.id) {
+					return {
+						...s,
+						status: ev.status === "error" ? "error" : ev.status === "auth_required" ? "error" : "done",
+						summary: ev.summary,
+						result: ev.result,
+						endedAt: Date.now(),
+					};
+				}
+				return s;
+			});
+			store.updateLastMessage({
+				toolEvents: [...prevEvents, newEvent],
+				segments: nextSegments,
 			});
 			if (isMissingDartKeyToolResult(ev.name, ev.result)) {
 				showToast?.("OpenDART API 키가 필요합니다. 설정 화면을 엽니다.", "warning", 5000);

@@ -345,6 +345,7 @@ export async function ask(company, question, options = {}) {
  * @param {function} onSnapshot - snapshot 이벤트 콜백 (핵심 수치 즉시 표시)
  * @param {function} onContext - context 이벤트 콜백 (모듈별, 여러 번 호출됨)
  * @param {function} onToolCall - tool_call 이벤트 콜백 (도구 호출)
+ * @param {function} onToolProgress - tool_progress 이벤트 콜백 (도구 실행 중 진행 라인)
  * @param {function} onToolResult - tool_result 이벤트 콜백 (도구 결과)
  * @param {function} onChart - chart 이벤트 콜백 (ChartSpec 배열)
  * @param {function} onChunk - chunk 이벤트 콜백
@@ -352,11 +353,11 @@ export async function ask(company, question, options = {}) {
  * @param {function} onError - error 이벤트 콜백
  * @param {function} onUiAction - ui_action 이벤트 콜백 (canonical action)
  */
-export function askStream(company, question, options = {}, { onMeta, onSnapshot, onContext, onSystemPrompt, onToolCall, onToolResult, onCodeRound, onChart, onChunk, onDone, onError, onUiAction }, history = null) {
+export function askStream(company, question, options = {}, { onMeta, onSnapshot, onContext, onSystemPrompt, onToolCall, onToolProgress, onToolResult, onCodeRound, onChart, onChunk, onDone, onError, onUiAction }, history = null) {
 	// VSCode 환경: postMessage 브릿지 사용
 	if (isVSCode) {
 		return askStreamVSCode(company, question, options,
-			{ onMeta, onSnapshot, onContext, onSystemPrompt, onToolCall, onToolResult, onCodeRound, onChart, onChunk, onDone, onError, onUiAction },
+			{ onMeta, onSnapshot, onContext, onSystemPrompt, onToolCall, onToolProgress, onToolResult, onCodeRound, onChart, onChunk, onDone, onError, onUiAction },
 			history);
 	}
 
@@ -405,6 +406,7 @@ export function askStream(company, question, options = {}, { onMeta, onSnapshot,
 							else if (currentEvent === "context") onContext?.(parsed);
 							else if (currentEvent === "system_prompt") onSystemPrompt?.(parsed);
 							else if (currentEvent === "tool_call") onToolCall?.(parsed);
+							else if (currentEvent === "tool_progress") onToolProgress?.(parsed);
 							else if (currentEvent === "tool_result") onToolResult?.(parsed);
 							else if (currentEvent === "chunk") onChunk?.(parsed.text);
 							else if (currentEvent === "code_round") onCodeRound?.(parsed);
