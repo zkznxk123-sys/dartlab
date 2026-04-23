@@ -10,6 +10,7 @@ exchange: "KRX"
 storyTemplate: "프랜차이즈"
 thumbnail: /avatar-chart.png
 ogImage: "/thumbnails/000270-kia.webp"
+youtubeId: "Q6y_k0UdZ_s"
 description: "매출 114조, 형(현대차) 175조의 60%. 그런데 영업이익은 12.7조 vs 14.2조로 89%. 같은 플랫폼, 같은 연구소인데 영업이익률이 3.7%포인트 높다. 디자인 혁신, 판관비 4배 폭증, 순현금 12조, 시총 역전."
 tags:
   - 기아
@@ -41,8 +42,10 @@ ai:
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
+import YouTube from '$lib/components/YouTube.svelte';
 </script>
 
+<YouTube id="Q6y_k0UdZ_s" title="기아 — 매출은 형의 60%인데 이익은 90%, 왜 동생이 더 잘 버는가" />
 
 > **프랜차이즈** | 자동차 > 완성차 | 2026-04-13 dartlab 실측
 > 같은 시리즈: [SK하이닉스](/blog/000660-skhynix) · [삼양식품](/blog/003230-samyang-foods) · [두산에너빌리티](/blog/034020-doosan-enerbility) · [알테오젠](/blog/196170-alteogen) · [HMM](/blog/011200-hmm) · [셀트리온](/blog/068270-celltrion) · [한화에어로스페이스](/blog/012450-hanwha-aerospace) · [HD현대일렉트릭](/blog/267260-hd-hyundai-electric) · [고려아연](/blog/010130-korea-zinc) · [에이피알](/blog/278470-apr) · [크래프톤](/blog/259960-krafton) · [달바글로벌](/blog/483650-dalba-global) · [경동나비엔](/blog/009450-kyungdong-navien) · [대한조선](/blog/439260-daehan-shipbuilding) · [현대글로비스](/blog/086280-hyundai-glovis) · [농심](/blog/004370-nongshim) · [한온시스템](/blog/018880-hanon-systems) · [LG이노텍](/blog/011070-lg-innotek) · [금호석유화학](/blog/011780-kumho-petrochemical) · [HDC현대산업개발](/blog/294870-hdc-hyundai-dev) · [현대모비스](/blog/012330-hyundai-mobis) · [SKT](/blog/017670-skt) · [GS건설](/blog/006360-gs-engineering) · [현대코퍼레이션](/blog/011760-hyundai-corp) · [한국전력](/blog/015760-kepco) · [에코프로](/blog/086520-ecopro) · [쿠팡](/blog/CPNG-coupang) · [현대자동차](/blog/005380-hyundai-motor) · [나이키](/blog/NKE-nike) · [삼성전자](/blog/005930-samsung) · [오클로](/blog/OKLO-oklo) · [기업이야기 시리즈 전체](/blog/series/company-reports)

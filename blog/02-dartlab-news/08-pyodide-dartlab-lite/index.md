@@ -7,6 +7,7 @@ series: dartlab-news
 seriesOrder: 8
 thumbnail: /avatar-code.png
 ogImage: /thumbnails/news-pyodide-dartlab-lite.webp
+youtubeId: "epzGLIOWLR0"
 keywords:
   - Pyodide
   - xlwings Lite
@@ -18,6 +19,12 @@ keywords:
   - 엑셀 파이썬 함수
   - dartlab-lite
 ---
+
+<script>
+  import YouTube from '$lib/components/YouTube.svelte';
+</script>
+
+<YouTube id="epzGLIOWLR0" title="엑셀·브라우저·노트북에서 설치 없이 dartlab 쓰기 — Pyodide" />
 
 **dartlab은 파이썬 패키지다.** 그런데 파이썬이 설치돼 있지 않은 환경에서도 돌아간다. 엑셀 웹 버전, 사내 웹 주피터, 크롬 탭 하나 — 어디서든 `import dartlab` 한 줄로 삼성전자의 손익계산서가 나온다. 지난 2년 사이 조용히 퍼진 한 인프라, **Pyodide** 덕분이다.
 

@@ -20,7 +20,7 @@ tags:
   - 전자공시
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/011200-hmm.webp
-youtubeId: ""
+youtubeId: "4hXqiwIEh1E"
 ai:
   verdict: "운임 사이클이 주가 90% 결정. 베타 0.37 R² 10%. OPM -18%~53%."
   direction: 유지
@@ -40,7 +40,10 @@ ai:
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
+import YouTube from '$lib/components/YouTube.svelte';
 </script>
+
+<YouTube id="4hXqiwIEh1E" title="HMM (011200) — 시장이 아니라 사이클이 주가를 결정하는 회사" />
 
 > **사이클 + 시장 분리** | 운수창고 > 해상운송 | 2026-04-08 dartlab 실측
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: **analysis + quant + credit** (4개 엔진 동시 사용)
