@@ -11,195 +11,493 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.20] - 2026-04-23
+
+내부 안정화 + 버그 수정.
+
+### Fixed
+
+- **`dartlab.ask()` 가 ECOS / FRED 등 API 키 필요 축을 호출할 때 사용자에게 키 설정 안내가 전달되지 않던 문제** — 이전엔 서버 터미널에만 "키 필요" 로그가 출력돼 landing UI 등에서 호출한 사용자는 원인을 알 수 없었다. 이제 AI 응답 본문에 발급 URL + `.env` 설정법이 직접 포함된다.
+- **Windows 터미널에서 한글 로그·가이드 출력이 깨지던 문제** — 기본 인코딩이 `cp949` 인 환경에서 `UnicodeEncodeError` 또는 가독성 저하. `import dartlab` 시점에 stdout/stderr 를 UTF-8 로 자동 재구성한다.
+- **`dartlab channel` 실행 직후 host 로그 스레드 크래시** — devtunnel stdout 중계 스레드가 `TypeError` 로 즉시 사망해 `[dt] Connect via browser: ...` URL 출력이 끊기던 문제.
+
+### Changed
+
+- **종목 오타 시 유사 종목 제안** — `Company('삼성전제')` 처럼 오타 입력 시 에러 메시지에 KRX 상장 종목 기반 fuzzy 매칭 top-3 을 함께 안내한다 (초성·편집거리·부분일치 지원).
+- **공시 검색 delta 인덱스 · Industry Map · Data Sync 등 일일 데이터 파이프라인 갱신 안정화** — 외부 데이터셋 저장소 업로드 경합으로 간헐적으로 실행이 취소되던 문제 해소. 이제 일일 cron 이 안정적으로 완료된다.
+
+### Added
+
+- **`ops/credit.md`** — 독립 신용등급 엔진 공개 문서. 7축 구조, `override` 키, 실패 시나리오 정리.
+
+## [0.9.19] - 2026-04-22
+
+내부 안정화 + 버그 수정.
+
+### Fixed
+
+- **`c.analysis("예측신호")` 의 구조변화 감지가 이전엔 항상 None 이었음** — 내부 import 경로가 잘못 설정되어 Chow Test 결과가 silent 하게 버려지던 버그. 이제 `structuralBreak` 필드에 감지 결과가 정상 반환된다.
+
+### Changed
+
+- **섹션 분석 반복 호출 속도 개선** — `c.show("businessOverview")` · `c.analysis("가치평가")` 같이 섹션 매핑을 여러 번 쓰는 분석에서 캐시 적용으로 2회째부터 즉시 반환.
+
+### Removed
+
+- **미사용 내부 모듈 정리** — `dartlab.analysis.financial.research` 하위 `generateResearch` · `buildNarrative` · `calcSectorKpis` 등은 공개 API 로 쓰인 적 없어 제거. `from dartlab.analysis.financial.research import calcPiotroski` 는 계속 사용 가능.
+
+## [0.9.18] - 2026-04-21
+
+### Fixed
+
+- **`c.show()` 라우팅 ValueError 제거**: `c.show("bond")` / `show("business")` / `show("fundraising")` / `show("companyOverviewDetail")` 등 registry 에는 등록됐으나 특정 회사에 데이터가 없는 topic 에서 `ValueError: 'topic 을 찾을 수 없습니다'` 로 크래시하던 문제. 이제 **registered-but-empty** 는 `None` 리턴, **truly-unknown** 만 warning + `None`.
+- **`scan("debt")` ComputeError 수정**: polars schema inference 한도(기본 100행)를 넘는 큰 금액 값에서 `could not append value 1.2e11 ... schema mismatch` 로 크래시. `pl.DataFrame(..., infer_schema_length=None)` 로 전체 행 스캔 후 schema 결정.
+
+### Added
+
+- **`tests/test_showRouting.py`** (38 parametrize 테스트): registry 의 report/disclosure topic 전수 iterate 해 `show()` 가 ValueError 없이 DataFrame or None 리턴 확인. `_showImpl` 라우팅 회귀 구조적 차단.
+
+### Changed
+
+- **quality gate baseline**: `ef_count` 196 → 197 (`_showImpl` registered-but-empty 분기 추가로 복잡도 +1, 기능적 가치 대비 수용).
+
+## [0.9.17] - 2026-04-20
+
+### Fixed
+
+- **PyPI wheel 에 `src/dartlab/core/data/` 누락 재발 방지**: `.gitignore` 의 루트-미지정 `data/` 패턴이 `src/dartlab/core/data/` 까지 매치해 `python -m build` 가 해당 디렉토리를 wheel 에서 제외하던 문제. `.gitignore` 를 `/data/` 로 루트-스코프 제한하고, `pyproject.toml` 의 `[tool.hatch.build.targets.wheel]` 에 `include` 명시를 추가해 다중 방어.
+- **wheel-smoke 검증 대상과 publish wheel 일치**: 기존에는 wheel-smoke 가 별도로 빌드한 wheel 을 검증하고 publish 는 재빌드한 wheel 을 올려 둘이 달라질 수 있었음. `publish.yml` 의 `build` 잡이 `python -m build` 직후 생성된 wheel 의 zip 목록과 격리 venv 설치 런타임을 직접 검증하도록 변경.
+
+### Added
+
+- **`tests/test_wheelPackaging.py`** (6 테스트): `python -m build` 로 실제 wheel 을 빌드한 후 git-tracked 번들 리소스가 모두 zip 목록에 존재하는지 전수 대조. 핵심 JSON/parquet 개별 확인. 격리 venv 설치 후 `loadSections()` 런타임 체인까지 실행 (heavy 마커 — wheel-smoke job 에서 실행).
+- **`publish.yml` 내부 검증 단계 2종**: (1) 빌드 직후 wheel zip 에 필수 리소스 13건 포함 확인 (2) 격리 venv 에 방금 빌드된 wheel 설치 후 `loadSections()["chapterByMajor"]` 비어있지 않음 확인. 실패 시 PyPI 업로드 중단.
+
+### Changed
+
+- **`scripts/build/testWheelSmoke.sh` 빌드 도구 통일**: `uv build --wheel` → `python -m build` 로 변경해 publish.yml 과 동일 빌드 경로 사용. CI/publish 환경 간 wheel 차이 제거.
+
+## [0.9.16] - 2026-04-20
+
+### Fixed
+
+- **`Company.sections` 접근 안정화**: `_SectionsSource.raw` 가 None 일 때 `.columns` 속성 접근으로 이어지지 않도록 명시적 가드 추가. 데이터가 비어있는 경우 None 을 그대로 반환.
+- **`c.select(...).render("html")` 기간 컬럼 표시**: HTML 렌더의 Console width 를 고정값(120) 대신 컬럼 수에 비례해 동적으로 계산. 기간 컬럼이 많은 재무제표에서도 모든 컬럼이 표시됨.
+- **`c.facts` 속성 참조 수정**: `_profile_accessor` 에서 내부 `_report` 대신 존재하지 않는 `report` 를 참조하던 부분 교정.
+
+### Changed
+
+- **필수 매핑 JSON 로더 — 조용한 `{}` 대신 명시적 예외**: `parserMapper.loadSections/loadAffiliate/loadCostByNature`, `core/finance/labels._load_account_mappings`, `dart/edgar/edinet` 의 `sections/mapper.loadSectionMappings` 총 5개 로더가 번들 파일 부재 시 `FileNotFoundError` 와 함께 복구 명령(`pip install -U --force-reinstall dartlab`) 을 포함한 메시지를 발생. 기존에는 빈 dict 반환으로 상위 파이프라인이 원인 불명의 동작을 했음.
+
+### Added
+
+- **`tests/test_bundledResources.py`** (20 unit): 패키지에 포함돼야 하는 JSON/parquet 13건 존재 확인 + 핵심 키(`chapterByMajor`, `detailTopicMap`) 내용 계약 + 런타임 로더(`loadSections`, `loadAffiliate`, `loadCostByNature`, `chapterFromMajorNum(1~9)`) 반환값 검증. PR 마다 실행 (~3초).
+- **`tests/realData/` 스위트**: 엔진별 공개 API 를 parametrize 로 전수 iterate. Company 인스턴스 59 공개 속성, analysis 22 axis, scan 20 axis, credit 7 axis, macro 12 axis, gather 8 axis, 최상위 심볼 30+. 각 entry 가 독립 pytest 노드이므로 회귀 시 어떤 항목이 깨졌는지 즉시 특정.
+- **`scripts/build/testWheelSmoke.sh`**: 현재 소스로 wheel 빌드 → 격리 venv 에 설치 → 번들 리소스 존재 + `loadSections()["chapterByMajor"]` 런타임 비어있지 않음 검증. `publish.yml` 의 `build` 잡이 이 스크립트 통과에 의존하도록 wire — wheel 이 비어있는 상태로 PyPI 에 올라가지 않도록 차단.
+- **`scripts/dev/test-realdata.sh`**: realData 스위트를 파일별 독립 pytest 프로세스로 실행 (Polars 네이티브 메모리 격리 목적).
+- **CI 잡 3종**:
+  - `fixture-integration` — `test_fixture_*_real.py` 3건을 단일 worker 로 순차 실행 (메모리 격리)
+  - `realdata-suite` — realData 스위트 실행 (fixture 데이터 사용)
+  - `wheel-smoke` — 격리 venv wheel 설치 스모크
+- **pytest 마커 2종**: `realData` (엔진 공개 API 실데이터 스모크), `freshInstall` (cold 캐시 재현)
+
 ## [0.9.15] - 2026-04-18
 
 ### Changed
 
-- **AI 분석 정확도 향상**: AI 가 각 도구의 반환 구조를 호출 전에 파악. 기존 런타임 에러 해소.
-- **도구 설명 자동화**: docstring Args/Returns → tool schema + 시스템 프롬프트 자동 반영.
-- **내부 모듈 구조 정리**: `memory/` → `persistence/` 통합. 중복 헬퍼 단일 출처화.
+- **AI 분석 정확도 향상**: AI 가 각 도구의 반환 구조(키, 타입, 단위)를 호출 전에 파악. `pastInsight` 빈 인자 호출, `show(scope='annual')` 오용 등 기존 런타임 에러 해소.
+- **도구 설명 자동화**: docstring 의 Args/Returns 섹션이 tool schema 와 시스템 프롬프트에 자동 반영. 새 함수 추가 시 docstring 만 작성하면 AI 가 즉시 인식.
+- **내부 모듈 구조 정리**: `memory/` → `persistence/` 통합. 중복 헬퍼 함수(`_getFirst`, `_get_db`) 단일 출처화. 조건 분기 dict dispatch 로 단순화.
 
 ### Removed
 
-- **미사용 레퍼런스/실험 코드 삭제** (-49파일, -22,828줄)
-- **미사용 모듈 삭제**: `fallback.py`, `readiness.py`, `EDGAR `reviewer()` 메서드`
+- **미사용 레퍼런스/실험 코드 삭제** (-49파일, -22,828줄): `_reference` 폴더 전체. 기존 기능에 영향 없음.
+- **미사용 모듈 삭제**: `fallback.py`(미사용 rate-limit 체인), `readiness.py`(미사용 준비 상태 체크), `EDGAR `reviewer()` 메서드`(폐기된 변종 진입점).
+- **guide 엔진 축소**: `checkReady`/`whatCanIDo`/`listFeatures` 등 미사용 편의 함수 제거. `handleError` 만 유지.
 
 ### Fixed
 
-- **AI 도구 호출 에러 수정**: `pastInsight` 빈 호출 crash, `show` scope/freq 혼동
-- **시스템 프롬프트 과잉 규제 제거**: 숫자 강제("4~7회") 삭제. AI 자율 판단 복원.
-- **중복 함수 통합**: `_getFirst` → `safe.getFirst` SSOT
+- **AI 도구 호출 에러 수정**: `pastInsight(stockCode)` 필수 인자가 스키마에 누락되어 빈 호출 crash → 수정. `show(scope=...)` 파라미터 설명 강화로 `scope`/`freq` 혼동 방지.
+- **시스템 프롬프트 과잉 규제 제거**: "분석당 tool 4~7회", "최소 4개 축" 같은 숫자 강제 제거. AI 자율 판단 복원.
+- **Polars 경고 수정**: `storyValidation.py` None 비교 경고 해소.
+- **중복 함수 통합**: `_getFirst` 2곳 → `safe.getFirst` SSOT.
 
 ## [0.9.14] - 2026-04-16
 
 ### Added
 
-- 가치평가 엔진 고도화 (multi-stage DCF, 청산가치, 상대가치 생존확률 보정)
-- 생애주기 5단계 자동 판정 + 스토리 일관성 검증
-- 국가/섹터 리스크 프리미엄 자동 산출
-- EDGAR bulk 수집 엔진 + freshness 체크
-- AI tool schema enum 자동화 완성 (show.freq / search.scope / review.type)
+- **가치평가 엔진 고도화**: multi-stage DCF, 청산가치 모델, 상대가치 생존확률 보정. 적정가 계산 정교화 + 시나리오 민감도 확장.
+- **생애주기 5단계 자동 판정**: 기업의 현재 생애주기를 데이터 기반으로 자동 판별. 성장/성숙/턴어라운드 등 단계별 가정 차별화.
+- **스토리 일관성 검증**: 가정(성장률 ↔ 재투자율 ↔ 마진) 간 교차 모순 자동 감지. AI 가 비현실적 가정 조합을 식별 가능.
+- **국가/섹터 리스크 프리미엄**: 자동 산출 + 시장 내재 자본비용 역산 (Gordon 역산). peer 기반 beta 보정.
+- **EDGAR bulk 수집 엔진**: companyfacts / dataset 단위 배치 다운로드 + freshness 체크. CI 파이프라인 연동.
+- **AI tool schema enum 자동화 완성**: `show.freq` / `search.scope` / `review.type` 하드코딩 제거 → 엔진 상수에서 자동 수집. 축 추가 시 tool 파일 수정 불필요.
 
 ### Changed
 
-- ai/runtime/core.py 책임 분리 (797→419줄: prompts + postResponse 분할)
-- industry/compat shim → sector.py + __init__ 공개 (25곳 직접 import)
-- assumptions 공통 utility buildAssumptions (4엔진 통합)
-- 랜딩 CTA: Windows 런처 내세움 + Live Demo 제거
+- **`ai/runtime/core.py` 책임 분리** (797 → 419줄): 시스템 프롬프트 → `runtime/prompts.py` (340줄), post-response 훅 → `runtime/postResponse.py` (72줄). orchestrator 만 core 에 유지.
+- **`industry/compat.py` → `industry/sector.py` + `__init__` re-export**: "compat" shim 제거 → 25 소비자 직접 import (`from dartlab.industry import Sector, ...`). 330줄 shim → 0.
+- **assumptions 공통 utility `core/overrides.buildAssumptions`**: 4 엔진 (analysis/credit/macro/quant) 에 흩어진 assumption 수집 로직 단일 함수로 통합. 확장 키 전체 자동 포함.
+- **post-response 훅 playbook 단일화**: `_updateInsightFromResponse` + regex 상수 → `context/playbook.py::saveInsightFromResponse` 이동. curate 와 한 위치 관리.
+- **credit 엔진 4엔진 통일 `_AxisEntry` 패턴 적용**: 기존 plain dict → 구조화 `@dataclass(frozen=True)`. 가이드 DataFrame 표준 컬럼 통일.
+- **랜딩 CTA 재정렬**: "Try in Colab" 메인 → "Windows 런처 — 0 setup" 으로 교체. "Live Demo" 제거 (HF Spaces 미사용). Numbers 카드 숫자 줄바뀜 fix.
 
 ### Removed
 
-- ai/superfeature 전체, _builtin.py, analyze_full, presets.py, _MODULE_CORE 수동 whitelist
+- `ai/superfeature/` 전체 (480줄 dead code — `getSuperMaster` 호출 0건)
+- `ai/runtime/standalone.py::analyze_full` (사용처 0)
+- `ai/tools/_builtin.py` (수동 AITool 생성 → `_autoDiscover` 자동 등록 대체)
+- `review/presets.py` (deprecated re-export shim)
+- `core/engines_DEV.md` (dev 문서 src 안 잔재)
+- pyproject.toml `Demo` URL (HF Spaces → `Desktop` Windows 런처로 교체)
+- `_MODULE_CORE` 수동 whitelist (`_splitKwargs` → 시그니처 자동 추출로 대체)
+- `_aggregateAssumptions` / `_buildCreditAssumptions` 엔진별 중복 (→ `buildAssumptions` 통합)
 
 ### Fixed
 
-- 대형 기업 메모리 보호 (pinned prefix 확장)
-- analyze → runAsk rename 누락 1건
+- **대형 기업 메모리 보호**: `core/memory.py` pinned prefix 확장 — 대형 종목 (한국전력 등) 에서 메모리 압박 시 dualAccess accessor evict → 다음 select/show KeyError 방지.
+- **`analyze` → `runAsk` rename 누락** (`scorecard.py::calcScorecard`) — CI 10건 실패 원인 1곳 수정.
 
 ## [0.9.13] - 2026-04-15
 
 ### Added
 
-- **P8 Tool Zero 응답 금지**: 질문을 META / FINANCE / OUT_OF_SCOPE 3범주로 분류. FINANCE 는 tool 최소 1회 필수 (시스템 프롬프트 + `tool_choice="any"` + 런타임 가드 3중 방어). META 는 즉답, OUT_OF_SCOPE 는 "범위 밖" 명시 후 거절. dartlab 엔진 경유 없이 일반 ChatGPT 답변 생산 불가.
-- **매크로 톱다운 intent 분기**: "최근 경제 어때" 같은 시장 레벨 질문에서 `macro() + gather(axis='news')` 조합 강제.
-- **`pastInsight` / `sectorInsights` 공개 API**: `dartlab.__all__` 노출 → AI tool 자동 등록 + 사용자 직접 호출 가능.
-- **provider `tool_choice` 파라미터**: FINANCE 첫 라운드에 "any" 강제.
+- **P8 Tool Zero 응답 금지** (`ai/context/intent.py::classifyCategory`): 질문을 META / FINANCE / OUT_OF_SCOPE 3범주로 분류. FINANCE 범주는 tool 최소 1회 호출 필수 (시스템 프롬프트 블록 + `tool_choice="any"` 첫 라운드 API 강제 + 런타임 가드 3중 방어). META 는 tool 불필요 (CAPABILITIES 로 즉답), OUT_OF_SCOPE 는 "dartlab 전문 영역 아님" 명시 + 금융 질문 예시 제시 후 종료. dartlab 엔진 경유 없이 일반 ChatGPT 답변 생산 불가.
+- **매크로 톱다운 intent 분기** (`ai/runtime/core.py::_mandatoryForOutlook`): "최근 경제 어때" 같은 시장 레벨 질문에서 `macro() + gather(axis='news')` 조합 강제. 수치 + 최근 이슈 교차 인과 해석. 이전 `act_all` 로 잘못 분류되어 일반론 답변되던 문제 해결.
+- **`pastInsight(stockCode)` / `sectorInsights(sector)` 공개 API**: `dartlab.__all__` 에 노출 → AI tool 자동 등록 경로 (`_autoDiscover`) 진입. 사용자도 `dartlab.pastInsight("005930")` 직접 호출 가능.
+- **`ai/context/intent.py::Category` enum**: META / FINANCE / OUT_OF_SCOPE 상위 범주. 기존 8 intent (act1~6 / compare / concept) 와 병렬.
+- **provider `tool_choice` 파라미터**: `BaseProvider.complete_with_tools/stream_with_tools` 에 `tool_choice: str | None` 추가. "any"/"none"/"auto" 매핑. FINANCE 첫 라운드에만 "any" 강제 후 auto 로 환원.
 
 ### Changed
 
-- **`analyze` → `runAsk`**, **`insight.pipeline.analyze` → `analyzeFinancial`**: 이름 실체 일치.
-- **AI tool 자동 등록 우선순위**: module > Company (같은 이름 시 module 이 시장 전체 의미).
-- **`_splitKwargs` 자동 시그니처**: 기존 수동 `_MODULE_CORE` whitelist 제거.
-- **`Company.gather` 시그니처에 `target` 명시**: AI 가 매크로 뉴스 검색어 전달 가능.
+- **`ai/runtime/core.py::analyze` → `runAsk`** / `_analyze_inner` → `_runAskInner`. 구 "떠먹이기 시대" 이름 제거. `dartlab.ask()` 진입점 단일 (P1) 을 내부 이름으로도 선언.
+- **`analysis/financial/insight/pipeline.py::analyze` → `analyzeFinancial`**: AI 엔진 `runAsk` 와 이름 충돌 해소. 인사이트 엔진 코어 함수 의미 명확화. `analyze` 는 호환 alias 로 1 릴리즈 유지.
+- **AI tool 자동 등록 우선순위**: module-level > Company-bound (이전 반대). 같은 이름 존재 시 `dartlab.search` (시장 전체) 가 `Company.search` (이 회사 공시) 보다 AI tool 로 유용. Company-bound 는 module 에 없는 것만 등록.
+- **`_splitKwargs` 자동 시그니처 추출**: 기존 `_MODULE_CORE` 수동 whitelist (scan/macro/search/searchName) 제거. `inspect.signature(fn)` 으로 자동 추출 → pastInsight/sectorInsights 포함 모든 module-level tool 일관 처리.
+- **`Company.gather` 시그니처 `target: str | None = None` 명시**: 이전 `**kwargs` 에 숨어 tool schema 누락. AI 가 `gather(axis='news', target='한국 경제')` 로 시장 레벨 뉴스 검색 가능해짐.
+- **src/dartlab/ai/README.md P8 섹션 신설**: 3범주 분류 + 3중 방어선 단일 출처.
 
 ### Removed
 
-- `ai/superfeature/` 전체 (480줄 dead code)
-- `ai/runtime/standalone.py::analyze_full` (사용처 0)
-- `ai/tools/_builtin.py` (수동 AITool 생성 → 자동등록으로 대체)
-- `review/presets.py` (deprecated re-export shim)
-- `core/engines_DEV.md` (dev 문서가 src 안에 있던 것)
+- **`ai/superfeature/`** 폴더 전체 (480줄, 4파일) — `getSuperMaster` 호출 0건 (내부 순환만). 완전 dead code.
+- **`ai/runtime/standalone.py::analyze_full`**: `list(analyze(...))` 래퍼, 사용처 0.
+- **`ai/tools/_builtin.py`**: pastInsight/sectorInsights 수동 AITool 생성 파일. `_autoDiscover` 자동 경로로 일원화.
+- **`review/presets.py`**: `reportTypes.py` 로 통합된 deprecated re-export shim, import 0건.
+- **`core/engines_DEV.md`**: dev 문서가 src 안에 있던 것.
+- **`ai/runtime/standalone.py` 에서 `from dartlab.ai.runtime.core import analyze`** 등 낡은 import 15곳 갱신 (CLI, stdio, server/streaming, scripts/audit, scripts/eval).
 
 ### Fixed
 
-- AI 가 매크로 질문에서 tool 0회 일반론 답변하던 사고 (P8 3중 방어선으로 구조적 불가).
-- `Company.gather` target 파라미터 schema 누락 (시그니처 명시로 해결).
-- `_builtin.py` 경로가 `_MODULE_CORE` 밖이라 라이브 호출 시 stockCode 누락 (자동 시그니처로 근본 해결).
+- **AI 가 매크로 질문에서 tool 0회 일반론 답변**: v0.9.12 에서 "최근 경제 어때" 질문에 `macro()` 호출 없이 학습 지식으로 답한 사고 — P8 3중 방어선으로 구조적 불가능화. `dartlab.ask("최근 경제")` 재현 테스트: tool 3회 (macro summary + gather news × 2), CLI/M2/기준금리/공포탐욕/uncertainty 실측 수치 기반 답변 확인.
+- **`Company.gather` `target` 파라미터 AI schema 누락**: `**kwargs` 에 숨어 AI 가 시장 레벨 뉴스 검색 인자 못 넣음. 시그니처 명시로 해결.
+- **`_builtin.py` 가 `_MODULE_CORE` 경로 밖이라 라이브 호출 시 stockCode 누락**: `_splitKwargs` 자동 시그니처로 근본 해결.
 
 ## [0.9.12] - 2026-04-15
 
 ### Added
 
-- **엔진 자가 의심 flags**: WACC/Kd/terminalGrowth/debtRatio/ICR/cycle 극단값 자동 검사 → 구체 재호출 JSON `suggestedRetry` 결과에 박음
-- **autoEnrich `[엔진가정]` 한 줄 자동 주입**: tool_result `_summary` 에 엔진 가정값 + override 권장 JSON
-- **4엔진 표준 `assumptions` 필드**: analysis/credit/macro/quant 결과 통합 표준 키
-- **`pastInsight` / `sectorInsights` AI tool**: KnowledgeDB 경험 자율 조회
-- **AI tool 자동 등록 (`_autoDiscover`)**: `__all__` + Company `_xxxImpl` 순회, 수동 dict 제거
-- **`core/overrides.py` 확장**: ANALYSIS/QUANT KEYS 신설, ENGINE_KEYS, describeOverrides
-- **랜딩 신규 페이지**: `/insights` 5종 랭킹, `/compare?a=X&b=Y`, `/industry/[id]`, `/map/company/[code]` 풀스택
-- **Cosmograph WebGL 산업 지도** + L3 Egograph 공급망 시각화
-- **네이버 글로벌 API** (US 주가): Yahoo 대체
-- **원재료 테이블 파싱**: 공급망 엣지 261건, revenue 2,469사 join
-- **블로그 #34 LG전자**, **#35 Under Armour**
+- **엔진 자가 의심 flags** (`core/overrides.py::detectExtremeFlags`): WACC>15%/<6%, Kd>12%, terminalGrowth>4%/≤0, debtRatio>200%, ICR<1.5, cycle contraction-trough 룰을 엔진이 자동 검사 → `{flag, reason, suggestedRetry}` 리스트로 결과에 박음. AI 가 verbal 시뮬로 도망가지 않고 구체 JSON 복사 수준으로 override 재호출.
+- **autoEnrich `[엔진가정]` 한 줄 자동 주입**: 모든 tool_result `_summary` 끝에 `[엔진가정] WACC=10.4% · g=3.0% · Kd=15.0% ...` 줄 자동 추가. flag 가 있으면 `⚠ {reason} → 다음 호출 실행 권장: overrides={"wacc":9.0}` JSON 동봉.
+- **4엔진 결과 표준 `assumptions` 필드**: analysis (FORECAST + VALUATION + ANALYSIS) / credit / macro / quant 결과에 엔진이 쓴 가정값을 표준 키(`wacc`, `terminalGrowth`, `debtRatio`, `cyclePhase` 등)로 통합. AI 가 흩어진 `discountRate`/`baseWacc`/`assumedWacc` 추측 불필요.
+- **`pastInsight(stockCode)` / `sectorInsights(sector)` AI tool**: KnowledgeDB 경험 조회 — 블로그(검증 프리미엄) 우선, 없으면 AI 축적. 떠먹이기가 아니라 AI 자율 호출. 식품 업종 분석 시 불닭 OPM 21.8% 같은 과거 인사이트 자동 인용.
+- **AI tool 자동 등록 (`_autoDiscover`)**: `dartlab.__all__` + Company `_xxxImpl` / public method 자동 순회 + 블랙리스트. 수동 `_TOOLS` dict 제거. quant 누락 해결, 새 엔진 추가 시 자동 등록.
+- **`core/overrides.py` 확장**: `ANALYSIS_KEYS`/`QUANT_KEYS` 신설, `CREDIT_KEYS`/`MACRO_KEYS` 확장 (currentRatio/quickRatio/ocfToDebt/scenarioStress, rateScenario/fxScenario 등). `ENGINE_KEYS` dict 으로 엔진별 허용 키 명시. `describeOverrides(engine)` — tool schema description 자동 생성.
+- **`/insights` 자동 인사이트 랭킹 페이지** (랜딩): 5종 랭킹 (집중도/분산/허브/다양성/의존도).
+- **`/compare?a=X&b=Y` 2사 비교 페이지**: 공급망/재무/AI verdict 나란히.
+- **`/industry/[id]` 공정 흐름 + 랭킹 + 공급망 엣지** 페이지.
+- **회사 페이지 풀스택** (`/map/company/[code]`): AI 인사이트 + 공급망 + 재무 + 블로그.
+- **Cosmograph WebGL 산업 지도** (`/map`): 살아있는 산업 생태계.
+- **L3 Egograph 공급망 시각화**: 회사별 공급망 그래프.
+- **네이버 글로벌 API 도입** (gather): US 주가 Yahoo → Naver Global 전환, 호출 간 2~4초 강제 딜레이.
+- **원재료 테이블 파싱**: 실제 공급망 엣지 261건 추출, revenue 2,469사 join, edges/summary/timeline API.
+- **DART 데이터셋 자동 수집 구조 블로그**: Actions 리듬 + HF 단일 소스 + 사용자 한 줄 경험.
+- **블로그 #34 LG전자**, **#35 Under Armour**.
+- **빠른 품질 audit 스크립트** (`scripts/audit/quickQualityAudit.py`): tool 다양성 + override 자발 호출 + pastInsight 활용 4 시나리오 검증.
 
 ### Changed
 
-- 모든 엔진 `_Impl` 시그니처 통일 — `overrides: dict | None`
-- src/dartlab/ai/README.md 전면 재작성 — 4축 + 7+1 원칙 단일 출처
-- 시스템 프롬프트 — override 재호출 명시, verbal stress 금지
-- Node.js 24 대응 — actions 메이저 일괄 bump
+- **모든 엔진 `_Impl` 시그니처 통일** — `overrides: dict | None = None` 명시. credit/quant/macro 추가 (이전엔 analysis 만 수용).
+- **src/dartlab/ai/README.md 전면 재작성** (596줄 → ~280줄): 4축 사상 + 7+1 원칙 (P1~P7 + P4.5) + override 매커니즘 + 경험 자산화 순환 단일 출처. 메모리 (MEMORY.md, ai_identity.md) 는 포인터만.
+- **시스템 프롬프트** — override 재호출 예시 명확화, "verbal stress 금지, 반드시 overrides 인자로 재호출" 명시.
+- **macro 모듈 callable 패치** — import 순서 무관 callable 보장.
+- **Node.js 24 대응** — actions 메이저 버전 일괄 bump (checkout@v5, setup-python@v6, setup-node@v5, upload-artifact@v5, attest-build-provenance@v3).
+- **ruff format** 92개 파일 적용.
 
 ### Fixed
 
-- **CRITICAL**: `memoized_calc` 가 override 를 silent drop — 이제 처음으로 실제 작동
-- `calcDcf` `terminalGrowthRate` 키명 오타 → DCF None 반환 버그
-- analysis tool axis enum 22축 누락 → AI 가 가치평가/매출전망 호출 불가
-- 시스템 프롬프트 `{{ }}` 이중중괄호 — AI 가 sub 에 JSON 욱여넣음
-- EDGAR 전면 점검: stmt 분류 + 한국어 100% + CI/IS 분리, 7종목 42케이스 OK
-- review Section UnboundLocalError (pyodide 순환참조)
-- landing basePath/handleHttpError prerender
+- **CRITICAL: `memoized_calc` 가 `overrides` 를 silent drop** — 모든 valuation/credit/quant calc 함수에서 override 가 캐시 래퍼에 의해 무음 무시되던 버그. 이제 override 가 실제 calc 함수에 전달되고, override 있을 때 캐시 우회. **override 매커니즘이 이번 릴리즈부터 처음으로 실제 작동.**
+- **`calcDcf` `terminalGrowthRate` vs `terminalGrowth` 키명 오타** — inner `dcfValuation()` 은 `terminalGrowth` 받는데 래퍼가 `terminalGrowthRate` 로 넘김 → TypeError silent swallow → DCF None 반환되던 버그.
+- **analysis tool axis enum 누락** — docstring 파싱이 14 financial 축만 뽑아 `가치평가`/`매출전망`/`매크로민감도` 등이 enum 에서 빠짐 → AI 가 호출 자체 불가. `_AXIS_REGISTRY` 전체 22축으로 교체.
+- **시스템 프롬프트 `{{"wacc":9.0}}` 이중중괄호** — Python format string 흔적이 AI 에게 그대로 노출 → AI 가 `sub="{...}"` 에 JSON 문자열 욱여넣음. 깔끔한 JSON 예시 + "sub 에 절대 쑤셔 넣지 마라" 지시 추가.
+- **EDGAR 전면 점검**: stmt 분류 + STMT_OVERRIDES 확장, 한국어 100% 로드, analysis/valuation/credit RuntimeError catch, CI 항목 7개 IS→CI stmt 수정, EQ/NT canonStmt 필터, getAccountStmt alias 역참조, dividends_common_stock EQ 수정. 7종목 42케이스 전부 OK.
+- **EDGAR `show()` 항목 한국어 근본 개선** — standardAccounts korName 로딩 + Title Case fallback 제거.
+- **review Section UnboundLocalError** (pyodide 환경 순환 참조).
+- **landing basePath/handleHttpError**: BASE_PATH prefix 고려, peer 링크 prerender 통과.
+- **map 필터 실시간 반영 + 회사명 라벨 + Cosmograph API 정정**.
+- **kindlist 워크플로우 시크릿 이름 불일치** — `DART_API_KEYS` 에서 첫 키 추출.
+- **블로그 데이터셋 글 내부 링크** — slug 번호 없이.
 
 ### Removed
 
-- AI tool 수동 `_TOOLS` dict
-- 폐기 기능 유령 테스트
+- **AI tool 수동 `_TOOLS` dict** — `_autoDiscover()` 자동 등록으로 대체.
+- **폐기 기능 유령 테스트** — sector 호환 partial source / 지주사 skip / repr 정리.
 
 ## [0.9.10] - 2026-04-13
 
 ### Added
 
-- **AI 적극 개입 레이어**: CoT 4단계 + 구조화 판단 + 원본 검증 + override 재계산
-- **analysis() overrides 전파**: calcDcf/dFV에 wacc/terminalGrowth override 지원
-- **블로그 경험 생태계**: frontmatter ai: 블록 → KnowledgeDB(source="blog") 자동 파생
-- **KnowledgeDB get_insight(source=)**: blog source 우선 조회
+- **AI 적극 개입 레이어**: CoT 4단계(추세→비율→근거→판단) + Direction/Magnitude/Confidence 구조화 판단. AI가 엔진 결과를 원본 재무제표로 직접 검증하고, 이상 시 override로 재계산
+- **analysis() overrides 전파**: `c.analysis("가치평가", overrides={"wacc": 9.0})` — calcDcf/dFV에 wacc/terminalGrowth/primaryModel override 지원
+- **블로그 경험 생태계**: frontmatter `ai:` 블록(verdict/strengths/weaknesses/keyMetrics)으로 블로그가 AI 경험 저장소. sync_blog_insights.py로 KnowledgeDB(source="blog") 자동 파생. blog insight 우선 조회
+- **KnowledgeDB get_insight(source=)**: blog source 우선 조회 파라미터 추가
 
 ### Changed
 
-- 시스템 프롬프트 클린코드 (중복 50줄 제거)
-- 엔진/review/AI 역할론 확립 (ops 문서 + README)
+- **시스템 프롬프트 클린코드**: 191줄→172줄, 중복 가이드 50줄 제거. "너는 분석가다" 핵심에 집중
+- **분석 깊이 강제**: 한 축만 보고 끝내지 말고 원인 축(비용구조/수익구조) + 원본 검증 필수
+- **notes 적극 활용**: borrowings/inventory 등 BS/IS 이면의 항목별 분해 가이드
+- **엔진/review/AI 역할론 확립**: ops 문서(architecture/ai/review/analysis) + README 전체 반영
 
 ### Removed
 
-- financials.py, assumptions.py (AI가 직접 하면 되는 보조 레이어)
+- **financials.py**: AI가 `c.select()`로 직접 하면 되므로 보조 레이어 삭제
+- **assumptions.py**: AI가 스스로 판단해야 하므로 시스템 대행 삭제
+
+## [0.9.9] - 2026-04-12
+
+### Added
+
+- **Pyodide 브라우저 실행**: `micropip.install("dartlab")` 한 줄로 브라우저/xlwings lite/JupyterLite에서 dartlab 사용. `sys_platform != 'emscripten'` 환경 마커로 native deps 자동 제외. Company → show → analysis → review 전체 경로 동작 확인
+- **dFV (dartlab Fair Value)**: 4엔진 통합 적정주가 — DCF Anchor + 삼각검증(DDM/상대가치/Residual Income) + Quality WACC. `c.analysis("valuation", "가치평가")` 진입
+- **AI Override 매커니즘**: analysis calc 결과를 AI가 자체 판단으로 보정 — mid-cycle 정규화, 성장률 상한, 할인율 조정 등 4엔진(analysis/macro/quant/credit) 확산
+- **How축 상황별 개선 레버**: 적자/턴어라운드/현금부자/사이클/고성장 5종 분기, 기업 상황에 맞는 재무 개선안 자동 제시
+- **추정재무제표 → DCF 연결**: proforma FCF 우선 사용, 3년이라도 터미널 성장률로 연장
+- **블로그 인터랙티브 차트**: Svelte ComboChart(매출 라인+영업이익 막대) + sync_financials.py 자동 데이터 동기화
+- **블로그 8편 발간**: #21 현대모비스, #22 SK텔레콤, #23 GS건설, #24 현대코퍼레이션, #25 한국전력, #26 에코프로, #27 쿠팡(EDGAR 첫 미국 주식), #28 현대자동차
+- **검색 scope 분리**: `scope="title"` (ngram, 제목형) + `scope="content"` (BM25, 본문형) 독립 엔진. main/delta 세그먼트 증분 전략
+- **EDGAR Phase 4**: treasuryStockStatus XBRL fallback, 매일 2회 수집, sectorKpi EDGAR fallback
+- **업종별 KPI 4모듈**: sectorKpi — 업종 특성에 맞는 핵심 지표 자동 선택
+
+### Changed
+
+- **review reportType 단일축 통합**: perspective/preset/template 3단계 → reportType 1축으로 통합. 11종 보고서 타입 (full/executive/credit/valuation/growth/crisis/audit/dividend/governance/macro/thesis)
+- **review 4종 신규 타입**: dividend(배당 지속성), governance(임원보수 괴리), macro(사이클+역사적 팩트), thesis(가설→증거→판정)
+- **pyproject.toml 환경 마커**: server/AI/viz deps에 `sys_platform != 'emscripten'` — pyodide에서 자동 제외, 일반 환경 영향 없음
+
+### Fixed
+
+- **review Section UnboundLocalError**: pyodide 환경에서 순환 참조로 인한 import 실패 수정
+- **메모리 최적화**: scan lazy 컬럼 선택, macro 실패 방어, improvementLevers BoundedCache 압박 회피
+- **블로그 실측 수치 재검증**: #15/#17/#19/#20/#22/#23 오류 5건 수정, 전 26편 H3 소제목 추가
+
+## [0.9.8] - 2026-04-12
+
+### Added
+
+- **매크로 역사적 팩트 엔진** (`core/finance/historicalContext.py`): HY 스프레드 급등/YC 역전/실업률 반등/CPI 가속 시점별 침체 선행 통계, 호황 신호, 10개 역사적 시대 매칭, 현재와 유사한 과거 시기의 후속 위험 자동 추론
+- **매크로 시나리오 시뮬레이션 110개 프리셋** (`macro/scenarios/`): 역사적 재현 15 (1973 오일쇼크 ~ 2023 SVB), Fed DFAST 3단계, 유형별 × 심각도 24, 현대적 리스크 24 (AI 버블/중국 디플레/일본식 침체/대만 해협/무역전쟁/미국 국채), 구조적 20 (스태그플레이션/디플레이션/골디락스/경착륙/연착륙), 한국 특화 24 — `dartlab.macro("시나리오", "2008 금융위기")` 호출로 baseline 대비 자동 비교
+- **매크로 6막 인과 서사 구조**: "경제는 어디에 있나 → 왜 여기에 있나 → 정책은 → 금융은 → 시장은 → 앞으로는" — FOMC/ECB/Bernanke/Dalio 학술 근거
+- **core SSOT 헬퍼 이동**: `toDictBySnakeId`, `toDict`, `parseNumStr`, `sumBorrowingsKorean` 등 범용 재무 헬퍼를 `core/finance/helpers.py`로 이동. `memoized_calc`를 `core/memory.py`로 통합
+- **analysis 임계값 중앙 관리** (`analysis/financial/_constants.py`): OCF/NI, 발생액, R², FX 민감도 등 6개 임계값 SSOT
+- **core/finance/fmt.fmtBig 확장**: 조/억/만 자동 단위 전환 + None 처리
+
+### Changed
+
+- **엔진 책임 재정의 — 6레이어 구조 확립**: `L0 core ← L1 providers/gather ← L1.5 scan ← L2 analysis/quant/credit/macro ← L3 review ← L4 ai+사람`. L2 엔진 4개는 동등하고 상호 독립, review가 이야기꾼, AI/사람이 소비자
+- **엔진 = 도구, review = 이야기꾼**: L2 엔진은 dict/숫자만 반환. 해석 문장/Block/보고서 생성은 review(L3)의 책임
+- **macro 보고서 조립을 review로 이동**: `macro/narrative.py`, `macro/mbuilders.py`, `macro/mcatalog.py`, `macro/report.py`, `macro/charts.py` → `review/macro/` 하위 패키지로 물리 이동
+- **quant 서사 함수 분리**: `calcXxxNarrative` 6개를 `calcXxxData` (숫자만)로 교체. 서사 생성은 `review/registry.py`가 담당
+- **import 위반 26건 → 0건**: L2↔L2 상호 import 0건, L2→L3 역방향 import 0건 달성 (CI 검증)
+- **macro API 통합**: `macro.report()`, `macro.scenario()` 별도 메서드 제거 → 축 계약 `macro("시나리오", "2008 금융위기")` 로 통일
+- **SSOT 위반 정리**: 숫자 파싱 5곳 중복, `_safe` 나눗셈 2곳 중복, 포맷 함수 3곳 중복, `_memoized_calc` 중복 구현 → 전부 core SSOT 경유
+
+### Removed
+
+- **`macro/narrative.py`, `mbuilders.py`, `mcatalog.py`, `report.py`, `charts.py`**: review/macro/로 이동
+- **`credit/publisher.py`**: deprecated, review.publisher가 단일 진입점
+- **`analysis/financial/creditRating.py`**: deprecated stub, `credit/calcs.py`가 SSOT
+- **quant의 `calcTrendNarrative` 등 6개 함수**: `calcTrendData` 등으로 대체
+
+### Fixed
+
+- **macro `recessionDashboard`** `historicalFacts` 필드 추가 — 규칙 기반 "resembles_2008" → 역사적 팩트 dict 기반 매칭
+- **analysis → quant/credit 교차 의존 제거** (valuation 내 quant 참조, creditRating의 credit 호출)
+- **credit 엔진의 analysis._helpers 의존 제거** → core 경유
+- **macro/\_\_init\_\_.py** _AxisEntry에 `act: int` 필드 추가 — 6막 메타데이터 선언적
 
 ## [0.9.7] - 2026-04-11
 
 ### Added
 
-- **AIView 정량 데이터 보강**: `autoEnrich()` — calc 결과에 5년평균/YoY/백분위 자동 주입
-- **Returns 독스트링 표준화**: analysis 전 calc 함수에 numpydoc 표준 Returns 적용
-- **예측신호 고도화**: 업종별 사전확률 41개 + 베이즈 연속 확률
-- **DART/EDGAR Company**: notes 12항목 동기화
+- **AIView 정량 데이터 보강**: `autoEnrich()` — calc 결과에 5년평균/YoY/백분위 자동 주입. AI가 "영업이익률 13%"만 보던 것에서 "전기비 +2.2pp, 5년평균 위 1.2pp" 맥락까지 이해
+- **Returns 독스트링 표준화**: analysis 전 calc 함수에 numpydoc 표준 Returns (키:타입—설명(단위)) 적용. parseReturnsSchema() → autoEnrich 자동 연결
+- **예측신호 고도화**: 업종별 사전확률 41개 + 베이즈 연속 확률 + 매크로 민감도 매핑
+- **DART/EDGAR Company**: notes 12항목 동기화, show/select 인터페이스 통합
 
 ### Fixed
 
-- predictionSignals: 패키지 설치 환경 경로 호환
+- predictionSignals: 패키지 설치 환경 경로 호환 (parents[4]→parents[2])
 - standalone.py: deprecated `use_tools` 파라미터 제거
 
-## [0.9.4] - 2026-04-09
+## [0.9.6] - 2026-04-10
+
+### Added
+
+- **Context Engineering + ACE Playbook**: `ai/context/` 모듈 — intent 분류(8타입, 100% 정확도), TOON 인코딩(토큰 60% 절감), ACE(ICLR 2026) evolving playbook, analysis calc selector 8개, 인과 그래프 traversal. A/B 검증 +31.6% 응답 풍부도
+- **Causal Graph**: `core/graph/` — 6 노드 + 5 엣지 타입. Company × analysis calc → CompanyGraph. "왜" 질문 시 graph causes 자동 주입
+- **5엔진 review 체계**: quant 5 narration 블록(6막-3 시장분석) + macro 10 블록(6막-4 매크로)
+- **관점별 템플릿**: bottomUp/topDown/cashflow/stability/growth 5개 분석 관점
+- **macro narration**: crisis/cycle/rates/sentiment/summary 블록 함수
+- **FinSLM 파이프라인 스크립트**: extractTraining/extractGraph/formatDataset/evalBaseline/trainLoRA/deploy (인프라)
 
 ### Fixed
 
-- IT/플랫폼 archetype 오분류 (NAVER currentRatio None) 수정 — `_detectArchetype()` IS/BS general signature 강화
-- accountMappings.json `core/data/` SSOT 이동 (L0 ← L1 정합)
-- `_KR_SUPPLEMENTS` 28건 → `core/data/labelSupplements.json` 분리
-- ratios DataFrame 라벨 5건 한국어 병기 (ROE/ROA/FCF/ROIC/Debt-EBITDA)
-- 메모리 한계 1500/1900MB 상향
+- **이벤트성 계정 연간 합산 복원**: Plan v4 "4분기 strict 합산"이 배당금/자사주 등 이벤트성 계정도 잘라버린 문제 근본 fix. `_EVENT_ACCOUNTS` 14개 계정은 있는 분기만 합산
+- **notes 외화 차입금 파싱**: NAVER "합계 128,659조" → 1.7조 정상화. 외화 통화코드 필터(`_hasForeignCurrency`) + 같은 항목명 반복 시 첫 번째 원화 값 우선
+- **notes 비금액 행 필터**: "연이자율 33만" → 제거. `_isNonAmountRow`로 이자율/기술/설명 행 제외
+- **DCF FCF 단위**: "Y1 22만" → "Y1 22(조원)" 정상화
+- **매출품질 총이익률 추세**: 기간 라벨 없는 숫자 나열 제거 → 방향만 표시
+- **지주사 영업이익률 100%+**: "데이터 이상 가능" → "매출 대비 영업이익이 크다 (지주사 구조일 수 있음)"
+- **context 데이터 중복 조회 방지**: `<context>` 태그에 이미 데이터 있으면 코드 재실행 안 함
+- dependencies: openai/genai core에서 optional로 이동
+- provider/CLI/viz 소소 개선
 
 ### Changed
 
-- `scripts/` 폴더 5 카테고리 체계화 — build / audit / eval / data / dev
+- **ContextBuilder 기본 ON**: `DARTLAB_CONTEXT_V2` feature flag 제거. legacy 복원은 `DARTLAB_CONTEXT_V1=1`
+- **축수 자랑 표기 전면 제거**: ops/코드에서 "14축/30축/7축" → 기능 설명으로 변경
+- **audit 체계 통합**: 파편 audit 10개 삭제, review audit 1개로 통합 (src/dartlab/review/README.md)
+- review audit Fix 원칙 명시: 근본 1곳만, 우회로/덕지덕지 금지
+
+## [0.9.5] - 2026-04-09
+
+### Fixed
+
+- ratio label dict 중복 key 정리 (F601) — 카테고리별 재정렬
+- ruff lint 16건 (unused imports, f-string placeholder)
+- qualityGate.py _HISTORY_PATH 새 위치 (`scripts/audit/`) 반영
+
+## [0.9.4] - 2026-04-09
+
+### Fixed — Plan v10 후속 audit fix
+
+- **NAVER 등 IT/플랫폼 archetype 오분류 수정**: `_detectArchetype()` 가
+  `operating_expenses` 단일 사용 + `financial_assets_*` 보유 IT 기업을 `securities`
+  로 잘못 분류 → 유동비율/이자보상배율 등 모두 None 처리되던 버그.
+  - `_GENERAL_IS` 에 `operating_expenses` 추가
+  - BS general signature (재고/매출채권/유형/무형) 추가
+  - max_score 임계값 3 → 4 (금융업 확정 더 보수적)
+  - 결과: NAVER `currentRatio` None → 136.28, `cashRatio` None → 74.62
+
+- **`accountMappings.json` core SSOT 이동**: `providers/dart/finance/mapperData/`
+  → `core/data/`. L0 ← L1 import 방향 정합. `AccountMapper` 가 core 의
+  `_load_account_mappings()` 위임. test_mapping_integrity 경로 갱신.
+
+- **`_KR_SUPPLEMENTS` 데이터 파일 SSOT**: 28건 하드코딩 → `core/data/labelSupplements.json`
+  로 분리. `get_korean_labels()` 가 `_load_label_supplements()` 위임.
+
+- **ratios DataFrame 라벨 5건 보충**: ROE/ROA/FCF/ROIC/Debt/EBITDA 한국어 병기
+  ("자기자본이익률 (ROE %)" 등). 잔존 3건 (ROCE/Piotroski F-Score/Altman Z-Score)
+  은 학술 영문명.
+
+- **메모리 한계 1500/1900MB**: PRESSURE_CRITICAL 1200 → 1500, PRESSURE_FATAL 1600
+  → 1900. CI PYTEST_MEMORY_LIMIT_MB 1500 → 1900.
+
+### Changed — scripts 폴더 체계화
+
+5개 카테고리 분류:
+- `scripts/build/` — 산출물 생성 (buildNotebooks, generateSpec, generateFixtures, ...)
+- `scripts/audit/` — 품질 게이트 (auditBlog, qualityGate, validateNotebooks, check_no_ai_markers, ...)
+- `scripts/eval/` — 평가/예측 (backtestPrediction, evalDiagnose, runEvalBatch, scanInsights, ...)
+- `scripts/data/` — 데이터 수집/복구 (collectIndustryIndicators, repair_cache_with_progress, ...)
+- `scripts/dev/` — 개발자 헬퍼 (test-lock.sh, install_git_hooks.sh, ...)
+
+영향: workflow yml, conftest, ops/*, .claude/audits, .claude/skills, .claude/hooks 모두 경로 갱신.
 
 ## [0.9.3] - 2026-04-09
 
 ### Changed — Plan v10: 1.0.0 전 클린업 (BREAKING)
 
-API contract 단일 진입점 원칙 강제. 사용자 surface 를 `c.show() / c.select() / c.sections / c.diff() / c.filings() / c.facts / c.review() / c.analysis() / c.credit()` 만으로 단일화.
+**API contract 단일 진입점 원칙 강제** — 사용자 surface 를 `c.show() / c.select() / c.sections / c.diff() / c.filings() / c.facts / c.review() / c.analysis() / c.credit()` 만으로 단일화.
 
-- **P0**: `c.IS / c.BS / c.CF / c.CIS` 별도 property 제거 → `c.show("IS")` 등 (DART + EDGAR)
-- **P1**: `c.ratios / c.ratioSeries / c.SCE / c.sceMatrix` 제거 → `c.show("ratios")` 등
-- **P2**: `c.notes.X` 12 sub-property 제거 → `c.show("inventory")` 등
-- **P3**: 4 namespace 전면 제거 — `c.docs / c.finance / c.report / c.profile` (public 접근 0). 내부 compute 는 `c._docs / _finance / _report` private 백엔드. `c.facts` 신설 (이전 `c.profile.facts`).
-- **P4**: Plan v3~v9 / R26 마커 38곳 정리
-- **P5**: finance DataFrame 컬럼 `계정명` → `항목` 단일화 (sections 사상 정합, 197 ref + alias 제거)
-- **P6**: snakeId → 한국어 라벨 SSOT 통합 (`core/finance/labels.py::get_korean_labels()` 단일 함수, `AccountMapper.labelMap()` 한 줄 위임)
+**P0 — finance property 4종 제거**:
+- `c.IS / c.BS / c.CF / c.CIS` (DART + EDGAR) → `c.show("IS")` / `c.show("BS")` / `c.show("CF")` / `c.show("CIS")`
 
-상세 마이그레이션 가이드는 루트 `CHANGELOG.md` 참조.
+**P1 — ratios/SCE property 제거**:
+- `c.ratios / c.ratioSeries / c.SCE / c.sceMatrix` → `c.show("ratios")` / `c.show("ratioSeries")` / `c.show("SCE")` / `c.show("sceMatrix")`
+
+**P2 — notes 12 sub-property 제거**:
+- `c.notes.inventory` / `borrowings` / `tangibleAsset` / `intangibleAsset` / `receivables` / `provisions` / `eps` / `segments` / `costByNature` / `lease` / `affiliates` / `investmentProperty` → `c.show("inventory")` 등 12 topic dispatch
+
+**P3 — 4 namespace 전면 제거**:
+- `c.docs / c.finance / c.report / c.profile` (DART + EDGAR) public 접근 0
+- 사용자 surface 에서 namespace 4종 완전 제거
+- `c.facts` 신설 (이전 `c.profile.facts`)
+- `c.sections / c.diff() / c.trace() / c.filings()` 는 top-level 유지 (sections 사상 핵심)
+- 내부 compute (review/credit/valuation/analysis) 는 `c._docs / _finance / _report` private 백엔드 사용 — 데이터 형식 차이 (RatioResult 객체 vs DataFrame) 로 show() 흡수 불가
+
+**P4 — Plan vN 마커 정리**: Plan v3~v9 / R26 마커 38곳 수동 정리.
+
+**P5 — finance DataFrame 컬럼 단일화**:
+- `계정명` 컬럼 완전 제거 → `항목` 단일화 (sections 사상 정합 — `topic × period × 항목` 3차원)
+- 197 ref 마이그레이션, alias backward-compat 도 제거 (1.0.0 전 breaking 허용)
+
+**P6 — label SSOT 통합**:
+- `core/finance/labels.py::get_korean_labels()` 가 snakeId → 한국어 라벨 단일 진실의 원천
+- `AccountMapper.labelMap()` 은 한 줄 위임으로 축소 (이중 매핑 함수 통합)
+- L0 ← L1 import 방향 유지 (provider → core)
+
+### Migration
+
+```python
+# Old                            # New
+c.IS                              c.show("IS")
+c.BS / c.CF / c.CIS               c.show("BS") / c.show("CF") / c.show("CIS")
+c.IS_annual                       c.show("IS", freq="Y")
+c.timeseries()                    c.show("IS")
+c.annual                          c.show("IS", freq="Y")
+c.cumulative                      c.show("IS", freq="YTD")
+c.ratios                          c.show("ratios")
+c.ratioSeries                     c.show("ratioSeries")
+c.SCE / c.sceMatrix               c.show("SCE") / c.show("sceMatrix")
+c.notes.inventory                 c.show("inventory")
+c.notes.borrowings                c.show("borrowings")
+c.docs.sections                   c.sections
+c.docs.diff()                     c.diff()
+c.docs.filings()                  c.filings()
+c.finance.ratios                  c.show("ratios")
+c.report.dividend                 c.show("dividend")
+c.report.majorHolder              c.show("majorHolder")
+c.profile.facts                   c.facts
+c.profile.trace(topic)            c.trace(topic)
+c.profile.sections                c.sections
+df["계정명"]                       df["항목"]
+```
+
+unit tests: 2065 → 2066 passed (Plan v10 전체).
 
 ### Changed — 헬퍼 단일 진실의 원천 (SSOT) 통합
 
-- `core/finance/flow.py::synthesizeAnnualFromQuarters` 신설 — 분기 → 연간 합성 SSOT
-- `core/finance/labels.py::mergeAliasRows` 신설 — SNAKEID_ALIASES 머지 SSOT
-- `_helpers.py` / `_finance_helpers.py` 인라인 머지 로직 제거 → SSOT 위임
-- 결과: 이중/삼중 매핑 경로 정리
+- **`core/finance/flow.py::synthesizeAnnualFromQuarters`** 신설 — 분기 → 연간 합성 SSOT.
+  `toDict`, `toDictBySnakeId`, `_financeToDataFrame` 모두가 위임.
+- **`core/finance/labels.py::mergeAliasRows`** 신설 — SNAKEID_ALIASES 양방향 row 머지 SSOT.
+  pivot DataFrame 머지와 calc dict 머지 모두 단일 함수 호출.
+- `analysis/financial/_helpers.py` 의 `_synthesizeAnnualInPlace` 인라인 머지 로직 제거 → SSOT 위임.
+- `providers/dart/_finance_helpers.py::_financeToDataFrame` 의 인라인 머지 로직 제거 → SSOT 위임.
+- 결과: 이중/삼중 매핑 경로 정리, 규칙 변경 시 단일 파일만 수정.
 
-### Added — Plan v7 부채 청산 (R0~R8)
+### Added — Plan v7 부채 청산 (5 commit, R0~R8)
 
-- annual 컬럼 옵션화 (`c.IS / c.BS / c.CF / c.CIS` 분기만 노출)
-- CF derived row 통합 (alias 양방향 머지)
-- toDict → toDictBySnakeId 단일 경로 마이그레이션 (14 calc + credit/review)
-- except narrow 11곳, F841 unused 120곳, dict literal `or 0` 정리
-- credit/metrics docstring 보강
+- **annual 컬럼 옵션화**: `c.IS / c.BS / c.CF / c.CIS` 기본 분기만 노출.
+  연간 합성은 `toDictBySnakeId` 가 4분기에서 자동.
+- **CF derived row 통합**: `financing_cashflow` ↔ `cash_flows_from_financing_activities`
+  같은 alias 쌍을 pivot 에서 한 row 로 머지 (SK하이닉스 2025 재무CF 결손 해결).
+- **toDict → toDictBySnakeId 단일 경로 마이그레이션**: 14 calc 파일 + credit/engine + review/narrative.
+  한국어 라벨도 키로 노출하여 양 provider 호환.
+- **except narrow**: 11 곳 `except Exception:` → 구체적 예외로 좁힘.
+- **F841 unused variable**: 120 곳 자동 정리.
+- **dict literal `or 0`**: 결과 dict 노출 위치 None 보존 (scan/macroBeta, scan/network/export).
+- **credit/metrics docstring**: `_div`, `_cv`, `_isQuarterlyFallback` 9 섹션 보강.
 
 ## [0.9.2] - 2026-04-07
 
@@ -219,18 +517,15 @@ API contract 단일 진입점 원칙 강제. 사용자 surface 를 `c.show() / c
 - **Cloudflare Quick/Named Tunnel 백엔드 삭제**: 모바일 fetch hang / 도메인 필수 사유. devtunnel만 정식
 - **ngrok / ssh / Tailscale 백엔드 삭제**
 - **`server/security.py` 삭제**: TokenManager/Whitelist/Ratelimit/AuditLog/AnomalyDetector. devtunnel은 미들웨어 비활성
+- **UI 죽은 코드**: ActivityBar, DebugOverlay, debug.js, token.js, SettingsPanel 채널 탭
 
 ### Fixed
 
-- **모바일 hydration 실패**: lucide-svelte deprecated `<Settings>` → `<Cog>` 일괄 교체
+- **모바일 hydration 실패**: lucide-svelte의 deprecated `<Settings>` 아이콘 → `<Cog>` 일괄 교체. 진짜 원인이 8시간 추적 끝에 발견됨 (상세: ops/channel.md "검증된 진단 사례")
 - **Svelte 5 버전**: `vite-plugin-svelte 5.0 → 6.2.4` + `svelte 5.0 → 5.55.1`
-- **모바일 반응형**: EmptyState/ChatArea 풀너비, 하단 nav fixed
-- **레거시 폴리필**: `@vitejs/plugin-legacy` + es2020 target
-- **dataLoader ETag fresh 판정 P0**: 사이드카 미존재 시 무조건 stale + Content-Length 2단계 검증
-- **collector 88분기 차집합 우회**: list.json 기반 신규 공시만 수집 (`targetPeriodsByCode`)
-- **dataSync 워크플로우 통합**: KST 03:00 + 15:00 매일 2회, 14배 단축
-- **channel/adapters/slack**: send_text → asyncio.to_thread (이벤트 루프 블록 방지)
-- **channel/devtunnel**: Linux curl 자동 설치는 명시 동의(`DARTLAB_DEVTUNNEL_AUTOINSTALL=1`) 필요
+- **Svelte 5 body event delegation**: ProviderDropdown의 `stopPropagation()` 제거, `document.addEventListener` 직접 사용
+- **모바일 반응형**: EmptyState/ChatArea 풀너비, 우상단 검색 모바일에서 숨김, 하단 nav `position: fixed`
+- **레거시 폴리필**: `@vitejs/plugin-legacy` 도입 + es2020 target
 
 ## [0.9.1] - 2026-04-06
 
@@ -251,6 +546,7 @@ API contract 단일 진입점 원칙 강제. 사용자 surface 를 `c.show() / c
 
 #### review 엔진
 - **스토리 템플릿 확장**: keyQuestions, actFocus, detectTemplates 복수 매칭 지원
+- **src/dartlab/review/README.md 전면 업데이트**: 템플릿/narrate/publisher/6막 렌더링 문서화
 
 #### macro 엔진
 - **보고서 서사 엔진**: 숫자 나열에서 경제 해석으로. Goldman/BIS 스타일 전파 경로.
@@ -267,7 +563,7 @@ API contract 단일 진입점 원칙 강제. 사용자 surface 를 `c.show() / c
 
 #### Company (core)
 - **select cascade 재설계**: 인덱스 누적 방식으로 변경. 복합 조회 시 모든 항목이 충족될 때까지 다음 단계 진행.
-- **한국어↔한국어 동의어 bridge 추가**: 회사마다 다른 계정명을 snakeId 통일 변환 → 역변환으로 매칭.
+- **한국어↔한국어 동의어 bridge 추가**: 회사마다 다른 계정명(법인세차감전순이익 vs 법인세비용차감전순이익)을 snakeId 통일 변환 → 역변환으로 매칭.
 - **contains 단계 안전장치**: 여러 후보 중 가장 긴 매칭 우선 (짧은 부분문자열 오매칭 방지).
 - **`_KR_SYNONYMS` 동의어 테이블**: 세전순이익, 법인세차감전순이익 등 줄임말/변형 → snakeId 매핑.
 - **ratios 컬럼명 통일**: `"항목"` → `"계정명"` (IS/BS/CF select와 일치). **⚠ Breaking Change**
@@ -277,7 +573,7 @@ API contract 단일 진입점 원칙 강제. 사용자 surface 를 `c.show() / c
 - **ratios 컬럼명 통일**: `"category"` → `"분류"`, `"metric"` → `"계정명"`. **⚠ Breaking Change**
 
 #### labels (L0)
-- **`SNAKEID_ALIASES`**: `pretax_income` → `profit_before_tax` 등 추가.
+- **`SNAKEID_ALIASES`**: `pretax_income` → `profit_before_tax`, `income_before_income_taxes_expenses` → `profit_before_tax` 추가.
 - **`_KR_SUPPLEMENTS`**: `profit_before_tax` → `"법인세비용차감전순이익"` 추가.
 
 #### review 엔진
@@ -314,147 +610,217 @@ API contract 단일 진입점 원칙 강제. 사용자 surface 를 `c.show() / c
 
 ### Changed
 
-- **UI 구조 전면 재편**: `vscode/` + `ui/` → `ui/vscode/`, `ui/web/`, `ui/shared/` 통합
-- **shared 코드 분리**: chart, api, markdown 렌더러를 `ui/shared/`로 추출
-- **macro 엔진 확장**: 위기감지/재고사이클/교역조건/수익률곡선/기업실적 집계 추가
-- **EDGAR report 14 apiType**: SEC XBRL 기반 구조화 추출
-- **FRED catalog 14그룹**: 7개 그룹 추가
+- **UI 구조 전면 재편**: `vscode/` + `ui/` → `ui/vscode/`, `ui/web/`, `ui/shared/` 통합. 확장 본체와 webview가 `ui/vscode/` 한 곳에.
+- **shared 코드 분리**: chart, api, markdown 렌더러를 `ui/shared/`로 추출. web/vscode 중복 제거.
+- **macro 엔진 확장**: 위기감지/재고사이클/교역조건/수익률곡선/기업실적 집계 모듈 추가.
+- **EDGAR report 14 apiType**: auditOpinion, executive, majorHolder 등 SEC XBRL 기반 구조화 추출.
+- **FRED catalog 14그룹**: commodities, yieldcurve, flowoffunds 등 7개 그룹 추가.
 
 ### Fixed
 
-- CI 워크플로우/서버 SPA 경로 수정
-- 품질 게이트 baseline, test_embed, test_fred 수정
+- **CI 워크플로우 경로**: `vscode/webview` → `ui/vscode/webview` 일괄 수정.
+- **서버 SPA 경로**: `ui/build` → `ui/web/build` 수정 (web.py, embed.py).
+- **품질 게이트 baseline**: macro 확장에 따른 E/F 함수 수, vulture 수 반영.
+- **test_embed**: widget 미구현 상태에서 skip 처리.
+- **test_fred**: FRED catalog 그룹 수 7→14 반영.
 
 ## [0.8.8] - 2026-04-04
 
 ### Added
 
-- credit v3 Notch Adjustment (규모/공기업/캡티브/지주 등급 보정)
-- credit Track B 금융업 5축 전용 모델
-- CHS 부도확률 모델 연동 (주가 기반 시장 보정)
-- 별도재무제표(OFS) 블렌딩 (캡티브/지주 차입금 보정)
-- analysis 14축 TTM 환산 (분기→연환산)
-- macro 엔진 5축 (사이클/금리/자산/심리/유동성)
-- forecast 영업이익/순이익 매출×마진 연동 예측
-- AI 멀티턴 keyMetrics 메모리
-- company-reports 블로그 카테고리
+- **credit v3 Notch Adjustment**: 기업 특성(규모/공기업/캡티브/지주/CAPEX) 기반 등급 보정. 30개사 60% 적중.
+- **credit Track B 금융업**: 은행/보험/증권 전용 5축 (자본적정성/수익성/자산건전성/유동성/사업안정성). 신한지주 AA+ 정확 일치.
+- **CHS 부도확률 모델 연동**: 주가 기반 ±1 notch 시장 보정. EPS 역산 shares 추정.
+- **별도재무제표(OFS) 블렌딩**: 캡티브 금융/지주사에서 연결 50% + 별도 50% 블렌딩. 현대차 별도 차입금 1.9조 vs 연결 58조 자동 감지.
+- **analysis 14축 TTM 환산**: 연간 컬럼 없는 기업(금융지주/일부 대기업) 분기→연환산. KB금융 ROE 0.09%→8.41%.
+- **macro 엔진**: 5축(사이클/금리/자산/심리/유동성) 시장 레벨 매크로 분석. Company 불필요.
+- **forecast 이익 연동**: 영업이익/순이익을 매출전망×마진추세로 연동 예측.
+- **AI 멀티턴 메모리**: keyMetrics 구조화 수치 저장. 3턴 이후 이전 분석 수치 참조 가능.
+- **company-reports 블로그**: 6막 재무 서사 기반 기업분석 보고서 카테고리 (LG화학/KT&G/대한항공).
 
 ### Changed
 
-- 시스템 프롬프트 69% 압축 (333→110줄)
-- credit 업종 기준표 10개 재보정
+- **시스템 프롬프트 69% 압축**: 333→110줄. 도구 나열→라우팅 테이블 전환. 상한 150줄/5,000자.
+- **credit 업종 기준표 10개**: 반도체/비철/항공/지주/통신 D/EBITDA 완화, 유틸 유동비율 완화.
+- **금융업 현금및예치금 fallback**: 금융지주 BS 구조 대응.
 
 ### Fixed
 
-- 금융업 revenue 정의 (이자수익→금융이익)
-- 이자비용 CF fallback
-- FCF 음수 FOCF/Debt 스킵
+- **금융업 revenue 정의**: 이자수익→금융이익 우선 (KB금융 영업이익률 2363%→135.8%).
+- **이자비용 CF fallback**: IS에 이자비용 없는 기업도 ICR 계산 (대한항공 None→1.38).
+- **FCF 음수 FOCF/Debt 스킵**: CAPEX 집약 기업 축1 과대평가 방지.
+- **consensus stale cache**: 전 소스 실패 시 24시간 이전 캐시 반환.
 
 ## [0.8.7] - 2026-04-03
 
 ### Added
-- OAuth 코드 수동 입력 (방화벽 환경), auth URL 화면 표시
+
+- **OAuth 코드 수동 입력**: 방화벽 환경에서 브라우저 주소창 URL을 복사해서 붙여넣기로 인증
+- **OAuth 로그인 시 auth URL 화면 표시**: 브라우저가 안 열릴 때 링크 직접 클릭 가능
 
 ## [0.8.6] - 2026-04-03
 
 ### Added
-- OAuth 수동 토큰 입력 (방화벽 환경용)
+
+- **OAuth 수동 토큰 입력**: 방화벽 환경에서 다른 PC의 토큰을 붙여넣어 ChatGPT 연결 가능
 
 ## [0.8.5] - 2026-04-03
 
 ### Added
-- VSCode 프로바이더 연결 플로우 (API 키 InputBox, OAuth 브라우저 로그인)
-- stdio needCredential/oauthStart 프로토콜
+
+- **VSCode 프로바이더 연결 플로우**: provider 선택 시 바로 연결 시작 (API 키 InputBox, OAuth 브라우저 로그인)
+- **VSCode OAuth 로그인**: ChatGPT 선택 시 PKCE 브라우저 로그인 + callback 자동 처리
+- **stdio needCredential/oauthStart 프로토콜**: extension ↔ Python 백엔드 간 인증 흐름
 
 ### Changed
-- VSCode 웰컴 화면 프로바이더 카드, 입력창 항상 활성, PowerShell 호환
-- 에러 메시지에서 CLI 안내 제거, provider label "무료" 제거
+
+- **VSCode 웰컴 화면**: 프로바이더 설정 카드로 재구성 (키 발급 + 연결 버튼)
+- **입력창 항상 활성**: 서버 상태와 무관하게 입력 가능
+- **자동설치**: Windows PowerShell 5.x 호환 (`;` 구분자)
+- **에러 메시지**: UI에서 `dartlab.setup(...)` CLI 안내 제거, provider 변경 유도
+- **provider label**: "무료" 표현 전체 제거
 
 ### Fixed
-- provider 인증 에러 무시 → 사용자에게 표시
-- fixture integration 테스트 62개 + 노트북 정합성
+
+- **provider 인증 에러 무시**: `except Exception: pass` → ImportError만 무시, 나머지는 사용자에게 표시
+- **fixture integration 테스트**: CI DARTLAB_DATA_DIR 연동, 62개 테스트 추가
+- **노트북 정합성**: c.insights 잔존 참조, corpName→종목명 전수 수정
 
 ## [0.8.4] - 2026-04-02
 
 ### Added
-- ops/architecture.md 청사진 + ops/testing.md 테스트 체계
-- 테스트 1,148개 추가 (843→1,991), numpy 의존성
+
+- **ops/architecture.md**: 전체 청사진 — 레이어, 엔진, 규칙, 데이터 출력, 신규 기능 체크리스트
+- **ops/testing.md**: 테스트 체계 — 마커, 커버리지 목표, CI 규칙
+- **테스트 1,148개 추가**: 843→1,991 passed (20개 신규 테스트 파일, 9개 엔진 전체 커버)
+- **numpy** base 의존성 추가 (quant 엔진 필수)
 
 ### Changed
-- scan 데이터 일관성 통일, c.insights 제거
+
+- **scan 데이터 일관성 통일**: 전 축 종목코드+종목명 첫 2컬럼 (governance/debt/capital/workforce/account/ratio 수정)
+- **c.insights 제거**: analysis("financial", "종합평가")로 통합 — 엔진 내부 기능 Company 직접 노출 금지
 
 ### Fixed
-- annualColsFromPeriods 인자 순서 버그 (8파일 23곳)
+
+- **annualColsFromPeriods 인자 순서 버그**: 8개 파일 23곳에서 _MAX_YEARS가 basePeriod로 잘못 전달
+- **CI --benchmark-disable**: 테스트 타임아웃 방지
 
 ## [0.8.3] - 2026-04-02
 
 ### Changed
-- quant 독립 엔진 격상 (analysis에서 분리, c.quant() 복원, divergence/flags 신규)
-- credit healthScore, viz AI 연동, README 전면 정비, 프롬프트 #29-#30
+
+- **quant 독립 엔진 격상**: analysis 축에서 분리 → `c.quant()`, `dartlab.quant()` 독립 진입점 복원
+- **quant 코드 통합**: analysis/quantCalcs.py, technicalAnalysis.py 삭제 → quant/extended.py로 로직 통합
+- **quant 신규 metric**: `c.quant("divergence")` 재무-기술적 괴리, `c.quant("flags")` 기술적 플래그
+- **credit healthScore**: `cr["healthScore"]` 추가 (100-score, 높을수록 건전)
+- **viz AI 연동**: 도메인 차트(revenue/cashflow/profitability) sandbox import + 프롬프트 유도
+- **README 전면 정비**: credit/viz/extras/아키텍처/안정성 v0.8.2 반영
+- **AI 프롬프트 #29-#30**: credit score 의미 명시, viz 도메인 차트 우선 안내
+- **문서 체계 점검**: ops/ 전체, import 방향, 엔진 일관성 전수조사 통과
 
 ### Removed
-- c.analysis("quant") — c.quant()로 대체
-- analysis/quantCalcs.py, technicalAnalysis.py — quant 엔진으로 통합
+
+- `c.analysis("quant", "기술적분석")` — `c.quant()`로 대체
+- `analysis/financial/quantCalcs.py` — quant 엔진으로 통합
+- `analysis/financial/technicalAnalysis.py` — quant/extended.py로 이동
 
 ## [0.8.2] - 2026-04-02
 
 ### Added
-- credit 독립 엔진 (dCR), quant→analysis 축 통합, 금융업 수익성, AI 6막 서사, 보고서 렌더링 개편
+
+- **credit 독립 엔진**: dartlab 독립 신용평가 체계 (dCR). 7축 가중 + 업종 세분화 + CHS 부도확률. `c.credit()` 진입점
+- **quant → analysis 축 통합**: `c.analysis("quant", "기술적분석")` — 25개 기술 지표 + 9개 매매 신호
+- **금융업 수익성 분석**: 은행/보험 이자수익 기반 marginTrend 지원 (KB금융 등)
+- **AI 종합분석 6막 서사**: 기업 전반 질문에 analysis 3축 자동 실행 + 인과 해석 구성
+- **AI quant+재무 교차 검증**: 기술적 지표와 재무분석 결합 투자 판단
+- **보고서 렌더링 개편**: 게이지바 + 문단서사 + 변화화살표
 
 ### Changed
-- analysis↔credit 상호의존 제거, AI 프롬프트 #26~#28, ops/ 문서 전면 정비
+
+- **analysis↔credit 상호의존 완전 제거**: 같은 L2지만 상호 import 0건. review가 블록식 조합
+- **AI 프롬프트 #26~#28**: 종합분석 섹션, quant 섹션, review 금지 + analysis 기반 서사 해석
+- **ops/ 문서 전면 정비**: analysis 14축 체계, credit 독립 명시, vectorStore/DDG 참조 제거
+- **VSCode 확장 개선**: oauth-codex provider 지원
 
 ### Fixed
-- 금융업 marginTrend=None, 보고서 품질 수정
+
+- **금융업 marginTrend=None**: 은행 IS에 매출액 없는 문제 → 이자수익 기반 분기
+- **test_ai_no_build**: _check_built_ui → _checkBuiltUi camelCase 수정
+- **보고서 품질**: 지주사 모순/트리거 비현실/OCF 비정상 수정
 
 ## [0.8.1] - 2026-04-01
 
 ### Changed
 
-- 엔진 호출방식 2단계 통일 + accessor 패턴 추가
-- 루트 축 함수 14개 + Company 편의 메서드 4개 제거
-- 전체 문서/독스트링/AI 패턴/노트북 신 패턴 일괄 변환
+- **엔진 호출방식 2단계 통일**: `analysis("financial", "수익성")`, `scan("financial", "profitability")` 패턴. 모든 엔진 동일
+- **accessor 패턴 추가**: `c.analysis.financial.profitability()`, `dartlab.scan.financial.growth()` — IDE 자동완성 지원
+- **한글/영문 양방향 alias**: `analysis("financial", "profitability")` = `analysis("financial", "수익성")`
+- **`__init__.py` 700줄 삭제**: 루트에 직접 노출하던 축 함수 14개 제거, 엔진 함수만 유지
+- **전체 문서/독스트링/AI 패턴/노트북** 신 패턴으로 일괄 변환 (20파일 70곳+)
+
+### Removed
+
+- **루트 축 함수**: `dartlab.governance()`, `dartlab.forecast()`, `dartlab.valuation()` 등 14개 — `dartlab.scan("축")` 또는 `c.analysis("그룹", "축")`으로 대체
+- **Company 편의 메서드**: `c.forecast()`, `c.valuation()`, `c.simulation()`, `c.research()` — `c.analysis("그룹", "축")`으로 대체
 
 ## [0.8.0] - 2026-04-01
 
 ### Added
 
-- **UI 엔진 승격 (L4)**: `src/dartlab/ui/` → 루트 `ui/`로 이동. L4 표현 계층으로 정식 승격
-- **scan `extractAccount()` 공통 함수**: 4개 축의 중복 계정추출 로직 통합
+- **UI 엔진 승격 (L4)**: `src/dartlab/ui/` → 루트 `ui/`로 이동. 아키텍처에서 L4 표현 계층으로 정식 승격
+- **scan `extractAccount()` 공통 함수**: 4개 축(profitability/growth/quality/liquidity)의 중복 계정추출 로직 통합
 
 ### Changed
 
-- **7개 엔진 코드 감사**: ~4,100줄 삭제. scan 이중호출 제거, analysis lazy 래퍼 통합, ai _validateCode 통합, review 블록 속성 추출, company 죽은코드 제거
-- **스펙 문서 정리**: generateSpec 출력 7개 → 4개 축소
-- **CI 안정화**: spec-sync non-blocking 전환
-- **성숙도 classifier**: Production/Stable → Beta
+- **7개 엔진 코드 감사**: scan, analysis, search, ai, review, company 전면 정리
+  - scan: `_screenAll()` 이중호출 제거 (성능 2배), 계정추출 4중복 → `_helpers.extractAccount` 통합
+  - analysis: 죽은 `buildTimeline()` 제거, 11개 calc 파일 lazy import 래퍼 → 직접 import (~400줄 삭제)
+  - ai: `_validateCode` 2중복 → 모듈 함수 통합, bare except 정리
+  - review: `FlagBlock.icon`, `HeadingBlock.htmlTag/markdownPrefix` 속성 추출 (렌더링 메타데이터 단일화)
+  - company: 죽은 `_boardTopics()`, `_stripUnitHeader()` 제거
+- **스펙 문서 정리**: generateSpec.py 출력 7개 → 4개 축소
+- **CI 안정화**: spec-sync를 non-blocking (continue-on-error) 전환
+- **성숙도 classifier**: `Production/Stable` → `Beta` (README 메시지와 일치)
+- **서버 UI 경로**: `server/web.py`, `embed.py` 경로를 루트 `ui/build/`로 변경
 
 ### Removed
 
-- vectorStore.py (697줄), _generatedCatalog.py, api-reference.json, generated-reference.md, STRUCTURE_MAP.md
+- **vectorStore.py** (697줄): stemIndex로 완전 대체된 레거시 벡터 검색 모듈 삭제
+- **_generatedCatalog.py**: import 0곳인 죽은 코드
+- **api-reference.json** (131KB): 소비자 없는 자동생성 파일
+- **generated-reference.md** (43KB): CAPABILITIES.md로 대체
+- **STRUCTURE_MAP.md**: 소비자 없는 통계 문서
+- **dataConfig vectorIndex 항목**: 삭제된 vectorStore 참조 제거
 
 ### Fixed
 
-- growthAnalysis.py `hist` 미정의 버그, Benchmark CI gh-pages 브랜치 생성
+- **growthAnalysis.py**: `hist` 변수 미정의 버그 수정 (undefined name)
+- **derived.py**: 미사용 `json` import 제거
+- **Benchmark CI**: gh-pages 브랜치 생성으로 벤치마크 저장소 이슈 해결
 
 ## [0.7.16] - 2026-03-31
 
 ### Added
 
-- **시맨틱 검색 엔진(alpha)**: `dartlab.search("대표이사 변경")` — n-gram + vector hybrid 검색
-- **AI 프롬프트 패턴 3종**: growth, quick_check, value_investor
-- **review 6막 구조 확장**: builders/templates 대폭 강화
-- **analysis predictionSignals 확장**: 12→15축
-- **ops/ 운영문서 체계**: DEV.md → ops/ 통합
-- **실험 105 시맨틱 맵**: 13개 실험 스크립트
+- **시맨틱 검색 엔진(alpha)**: `dartlab.search("대표이사 변경")` — n-gram + vector hybrid 검색. core/search 모듈 신규, ngramIndex 전면 개선
+- **AI 프롬프트 패턴 3종**: growth, quick_check, value_investor 패턴 추가. 기존 패턴(financial, prediction, risk, valuation) 보강
+- **review 6막 구조 확장**: builders/templates 대폭 강화, registry 축-보고서 매핑 보강
+- **analysis predictionSignals 확장**: 예측 신호 12→15축 (consensusDirection, flowDirection, revenueDirection)
+- **ops/ 운영문서 체계**: DEV.md 전면 제거 → 루트 ops/에 엔진별 설계 문서 통합
+- **실험 105 시맨틱 맵**: 13개 실험 스크립트 (taxonomy~reportNmMapping)
+- **VSCode extension**: ChatInput/ChatPanel UX 개선, 메시지 프로토콜 확장
 
 ### Changed
 
-- **analysis 6축 계산 개선**, providers/dart 강화, ai/runtime 확장, core/search 이전
+- **analysis 6축 계산 개선**: asset, capital, costStructure, earningsQuality, stability 보강
+- **providers/dart**: allFilingsCollector 증분 수집/에러 복구 강화, notes 파싱 개선
+- **ai/runtime**: 패턴 매칭 로직 확장, standalone 안정화
+- **core**: vectorStore를 core/search로 이전, exogenousAxes/ols 강화
 
 ### Removed
 
-- **DEV.md 28개 파일**, core/vectorStore.py (search로 이전)
+- **DEV.md 28개 파일**: 모듈별 산재된 개발 메모 → ops/ 통합으로 대체
+- **core/vectorStore.py**: core/search/vectorStore.py로 이전
 
 ## [0.7.15] - 2026-03-30
 
@@ -477,7 +843,7 @@ API contract 단일 진입점 원칙 강제. 사용자 surface 를 `c.show() / c
 
 ### Removed
 
-- **AI 레거시 모듈 60+ 파일**: context/, conversation/(templates 포함), eval/, skills/, tools/(discovery, registry, runtime, selector, superTools/, _helpers), spec.py, metadata.py, reviewer.py, agent.py, aiParser.py
+- **AI 레거시 모듈 60+ 파일**: context/(builder, compactMap, company_adapter, dartOpenapi, finance_context, formatting, pruning), conversation/(dialogue, focus, intent, prompts, suggestions, data_ready, templates/), eval/(diagnoser, scorer, truthHarvester, replayRunner, remediation, batchResults/, diagnosisReports/, reviewLog/), skills/(catalog, registry), tools/(discovery, registry, runtime, selector, superTools/, _helpers), spec.py, metadata.py, reviewer.py, agent.py, aiParser.py
 - **AI 레거시 테스트 13파일**: test_ai_capabilities, test_ai_context_modules, test_ai_parser, test_benchmarks, test_context, test_context_coverage, test_dialogue, test_eval, test_eval_deterministic, test_metadata, test_prompts, test_spec_integrity, test_tools_registry
 - **VSCode 레거시**: SettingsPanel.svelte, WelcomeView.svelte, chatViewProvider.ts, sseProxy.ts, healthCheck.ts, portManager.ts, processManager.ts
 - **deprecated**: `c.sce` (→ `c.SCE`), `c.getRatios()` (→ `c.ratios`), `finance.sce` (→ `finance.SCE`)
@@ -537,21 +903,22 @@ API contract 단일 진입점 원칙 강제. 사용자 surface 를 `c.show() / c
 ### Added
 
 - **scan 3축 신규**: `cashflow` (OCF/ICF/FCF + 8유형 현금흐름 패턴 분류), `audit` (감사의견, 감사인변경, 종합 리스크 플래그), `insider` (최대주주 지분변동, 자기주식 현황, 경영권 안정성). 총 11축 시장 횡단분석
-- **통합 scan 인터페이스**: `dartlab.scan("cashflow")`, `dartlab.scan.topics()` — 11축을 하나의 callable class로 통합. 한글 alias 지원
-- **review narrative 자동생성**: 순환 서사 감지 + 섹션 간 스레드 연결
-- **review 블록 60+개**: 이전 16개에서 확장 (수익성/성장성/안정성/효율성/이익품질/비용구조/자본배분/투자효율/재무정합성)
+- **통합 scan 인터페이스**: `dartlab.scan("cashflow")`, `dartlab.scan.topics()` — 11축을 하나의 callable class로 통합. 한글 alias 지원 (현금흐름, 감사, 내부자 등)
+- **review narrative 자동생성**: `review/narrative.py` — 순환 서사 감지 + 섹션 간 스레드 연결. buildReview에 자동 주입
+- **review 렌더러/포맷 확장**: renderer 고도화 + formats 확장 + registry 블록 60+개 (이전 16개)
 - **TUI 개선**: 커맨드 팔레트, 웰컴 스크린, 채팅 영역 고도화
-- **AI 분석 품질 향상 로드맵**: `TODO_AI_ANALYSIS.md`
+- **AI 분석 품질 향상 로드맵**: `TODO_AI_ANALYSIS.md` — 7 Part 19개 TODO, P0~P1 우선순위
 
 ### Changed
 
-- **scan debt risk 고도화**: 위험등급 판정 세분화, 만기 집중도 분석 강화
-- **scan workforce growth 강화**: 성장률 계산 고도화
-- **README 갱신**: Market Scan 섹션에 통합 scan 인터페이스 + 신규 3축 반영
+- **scan debt risk 고도화**: 위험등급 판정 로직 세분화, 만기 집중도 분석 강화
+- **scan workforce growth 강화**: 성장률 계산 고도화, 인력 구조 분석 확장
+- **README 갱신**: Market Scan 섹션에 통합 scan 인터페이스 + 신규 3축 반영. review 블록 60+개로 정정. ratio 카테고리 valuation 추가
+- **노트북 갱신**: Colab/Marimo scan 노트북에 통합 scan 인터페이스 예제 추가, showcase insight 10영역으로 정정
 
 ### Fixed
 
-- **CircuitBreaker flaky 테스트**: 타이밍 여유 확보 (Windows 간헐 실패 해결)
+- **CircuitBreaker flaky 테스트**: `test_half_open_after_timeout` 타이밍 여유 0.06s → 0.1s (Windows 간헐 실패 해결)
 
 ## [0.7.11] - 2026-03-28
 
@@ -579,47 +946,60 @@ API contract 단일 진입점 원칙 강제. 사용자 surface 를 `c.show() / c
 ### Added
 
 - **review 패키지**: 구조화된 기업 분석 보고서 시스템
-  - `c.review("수익구조")` / `c.review("자금조달")` — 템플릿 기반 분석
-  - `blocks(company)` — 16개 블록 사전, `Review([...])` 자유 조립
-  - `c.reviewer()` — LLM 종합의견 + guide 파라미터
-  - rich/html/markdown/json 4가지 렌더링
-- **analysis/strategy calc-only 패턴**: 15개 calc 함수, import 방향 분리
-- **README Review 섹션** (EN/KR)
-- **sampleReview 노트북**, 블로그 124호
+  - `c.review("수익구조")` / `c.review("자금조달")` — 템플릿 기반 분석 보고서
+  - `blocks(company)` — 분석 블록 사전 (수익구조 + 자금조달 + 자산 + 현금흐름)
+  - `Review([...])` — 블록 자유 조립, SelectResult/DataFrame 혼합 지원
+  - `c.reviewer()` — LLM 종합의견 레이어 (guide 파라미터로 분석 관점 지정)
+  - 4개 렌더링 형식: rich (터미널), html, markdown, json
+  - `dartlab review 005930` CLI 명령
+- **analysis/strategy calc-only 패턴**: revenue/capital 분석 함수가 dict/숫자만 반환, 블록 생성과 분리
+  - `calcSegmentComposition`, `calcSegmentTrend`, `calcBreakdown`, `calcRevenueGrowth` 등 15개 calc 함수
+  - import 방향 엄격 적용: analysis → review 단방향 (역방향 금지)
+- **README Review 섹션**: 템플릿, 블록 자유 조립, 리뷰어, 무료 프로바이더 안내 (EN/KR)
+- **sampleReview 노트북**: 블록 조립, reviewer 사용 예제 (marimo)
+- **블로그 124호**: 수익구조 읽는 법
 
 ### Changed
 
-- sections pipeline, DART/EDGAR Company review 메서드
+- **sections pipeline 개선**: 텍스트 구조 복원, segment matcher 정비
+- **DART Company**: review/reviewer 메서드 추가, select() 지원
+- **EDGAR Company**: review 메서드 추가
 
 ## [0.7.9] - 2026-03-26
 
 ### Added
 
-- **Gemini OAuth 2.0 브라우저 로그인**: API key 없이 Google 계정 로그인으로 Gemini 사용 가능
-- **Gather 엔진 시계열 전면 개선**: `price()`, `flow()`, `macro()` Polars DataFrame 시계열 반환
-- **네이버 차트 API 전환**: 모바일 API(1000일) → 차트 API(6000일, 수정주가, 1회 요청)
-- **Gather 인프라 강화**: circuit breaker, stale-while-revalidate, Yahoo Direct consensus, FMP 확장
-- **AI 도구 아키텍처 재설계**: 101개 → 8개 Super Tool 통합
-- **Insight 10영역 확장**: predictability, uncertainty, coreEarnings 3영역 추가
-- **`scanAccount()` / `scanRatio()`**: 전종목 재무 배치 스크리닝 (2,700+ DART / 500+ EDGAR)
-- **sections Categorical 스키마**: RSS 427MB 절감 (83%)
-- **ECOS gather 엔진**: 한국은행 경제통계 22개 지표 수집
-- **Google Gemini provider**: `google-genai` SDK 기반
-- **Ollama 속도 최적화**: GPU 자동 감지, flash_attn, 스마트 preload
-- **HF Spaces Docker 웹 데모**: Gradio 기반 AI 분석 데모
-- **글로벌 피어 매핑**: WICS→GICS 섹터 기반 자동 매핑
+- **Gemini OAuth 2.0 브라우저 로그인**: API key 없이 Google 계정 로그인으로 Gemini 사용 가능. GPT OAuth와 동일한 GUI 플로우. `google-auth-oauthlib` 제거, 표준 라이브러리 + httpx만 사용
+- **Gather 엔진 시계열 전면 개선**: `price()`, `flow()`, `macro()` 모두 Polars DataFrame 시계열 반환. `macro("KR")`, `macro("US")`, `macro("CPI")` 직관적 호출 지원
+- **네이버 차트 API 전환 (FDR 방식)**: 모바일 페이징 API(1000일) → `fchart.stock.naver.com` 차트 API(6000일, 수정주가). 요청 20회 → 1회
+- **Gather 인프라 강화**: Yahoo Direct consensus, FMP consensus/sector PER, circuit breaker(3회→60초 차단), stale-while-revalidate 캐시, persistent event loop, Yahoo RPM 30→5 조정
+- **`scanAccount()` / `scanRatio()` README 문서화**: 시장 전수 재무 스크리닝 섹션 추가 (EN/KR 양쪽)
+- **AI 도구 아키텍처 전면 재설계**: 101개 세분화 도구 → 8개 Super Tool 통합. LLM 도구 선택 정확도 향상
+- **Insight 10영역 확장**: 기존 7영역에 predictability(예측 가능성), uncertainty(불확실성), coreEarnings(핵심이익 품질) 3영역 추가
+- **`scanAccount()` / `scanRatio()` 구현**: 전종목 단일 계정/비율 시계열 배치 추출 (2,700+ DART / 500+ EDGAR, ~3초)
+- **sections Categorical 스키마**: Polars Categorical 컬럼 적용으로 RSS 427MB 절감 (83%)
+- **ECOS gather 엔진**: 한국은행 경제통계 22개 지표 수집. 국고채 3/5/10년, 회사채 BBB- 5년, CD 91일 금리 확장
+- **Google Gemini provider**: `google-genai` SDK 기반 AI provider 추가
+- **Ollama 속도 최적화**: GPU 자동 감지, flash_attn, VRAM 기반 모델 추천, keep_alive 제어, 스마트 preload
+- **HF Spaces Docker 웹 데모**: Gradio 기반 AI 분석 데모 앱 + GitHub Actions 자동 배포
+- **글로벌 피어 매핑**: `peer/discover.py` — WICS→GICS 섹터 기반 글로벌 피어 자동 매핑
+- **공통 유틸리티**: `core/env.py`(환경 변수 중앙 관리), `common/audit.py`(감사의견 정규화 KR/EN/JP), `common/finance/currency.py`(FRED 기반 환율 변환)
+- **UI 리팩터**: ActivityBar/CompanyContextBar 제거, 사이드바 통합, SettingsPanel Gemini OAuth 설정
 
 ### Fixed
 
-- Gather 코드 감사: 전체 에러 경로 `log.warning` 전환
-- 차트/테이블 기간 컬럼 `2024Q1` 형식 지원
-- EDGAR docs 수집 안정화: filing 파싱 실패 시 개별 스킵
+- **Gather 코드 감사**: 전체 에러 경로 `log.debug` → `log.warning` 전환 (조용한 실패 금지 원칙)
+- **차트/테이블 기간 컬럼 매칭**: 분기 컬럼 `2024Q1` 형식 지원
+- **sections Categorical 호환**: period `.str` 연산에 cast 적용
+- **EDGAR docs 수집 안정화**: filing 파싱 실패 시 개별 스킵 (전체 크래시 방지)
+- **peer consensus**: numpy 의존 제거 → `statistics.median` 사용 (CI 호환)
 
 ### Changed
 
-- `macro()` 시그니처: `macro(market="KR", indicator=None)` 직관적 호출
-- DEV.md 전수 현행화 (analysis 10모듈, insight 10영역, gather 도메인 확장)
-- README EN/KR 동기화: Market Data, scanAccount/scanRatio 섹션
+- **Gather macro() 시그니처**: `macro(indicator, *, market)` → `macro(market="KR", indicator=None)` — 직관적 호출
+- **llm-gemini extras 제거**: `google-genai`를 `llm` extras에 통합
+- **DEV.md 전수 현행화**: analysis(8→10모듈), insight(7→10영역), gather(도메인 확장), CHANGELOG 링크, installation.md 데이터 소스 수정
+- **README EN/KR 동기화**: Market Data Collection 섹션 전면 갱신, scanAccount/scanRatio 섹션 추가, 10-area 반영
 
 ## [0.7.8] - 2026-03-25
 

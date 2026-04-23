@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.20] - 2026-04-23
+
+내부 안정화 + 버그 수정.
+
+### Fixed
+
+- **`dartlab.ask()` 가 ECOS / FRED 등 API 키 필요 축을 호출할 때 사용자에게 키 설정 안내가 전달되지 않던 문제** — 이전엔 서버 터미널에만 "키 필요" 로그가 출력돼 landing UI 등에서 호출한 사용자는 원인을 알 수 없었다. 이제 AI 응답 본문에 발급 URL + `.env` 설정법이 직접 포함된다.
+- **Windows 터미널에서 한글 로그·가이드 출력이 깨지던 문제** — 기본 인코딩이 `cp949` 인 환경에서 `UnicodeEncodeError` 또는 가독성 저하. `import dartlab` 시점에 stdout/stderr 를 UTF-8 로 자동 재구성한다.
+- **`dartlab channel` 실행 직후 host 로그 스레드 크래시** — devtunnel stdout 중계 스레드가 `TypeError` 로 즉시 사망해 `[dt] Connect via browser: ...` URL 출력이 끊기던 문제.
+
+### Changed
+
+- **종목 오타 시 유사 종목 제안** — `Company('삼성전제')` 처럼 오타 입력 시 에러 메시지에 KRX 상장 종목 기반 fuzzy 매칭 top-3 을 함께 안내한다 (초성·편집거리·부분일치 지원).
+- **공시 검색 delta 인덱스 · Industry Map · Data Sync 등 일일 데이터 파이프라인 갱신 안정화** — 외부 데이터셋 저장소 업로드 경합으로 간헐적으로 실행이 취소되던 문제 해소. 이제 일일 cron 이 안정적으로 완료된다.
+
+### Added
+
+- **`ops/credit.md`** — 독립 신용등급 엔진 공개 문서. 7축 구조, `override` 키, 실패 시나리오 정리.
+
 ## [0.9.19] - 2026-04-22
 
 내부 안정화 + 버그 수정.
