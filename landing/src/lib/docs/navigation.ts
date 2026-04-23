@@ -21,10 +21,6 @@ export const navigation: NavItem[] = [
 	{
 		title: 'About',
 		href: '/docs/about'
-	},
-	{
-		title: 'Changelog',
-		href: '/docs/changelog'
 	}
 ];
 

@@ -6,7 +6,7 @@
 		'Product': [
 			{ label: 'Getting Started', href: `${base}/docs/` },
 			{ label: 'API Reference', href: `${base}/docs/api/overview` },
-			{ label: 'Changelog', href: `${base}/docs/changelog` },
+			{ label: 'Releases', href: `${brand.repo}/releases` },
 			{ label: 'PyPI', href: brand.pypi }
 		],
 		'Resources': [

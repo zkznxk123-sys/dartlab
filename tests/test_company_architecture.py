@@ -76,7 +76,6 @@ def test_public_docs_do_not_reference_legacy_company_names():
         "docs/api/overview.md",
         "docs/getting-started/quickstart.md",
         "docs/stability.md",
-        "docs/changelog.md",
     ]
     banned = ["USCompany", "KRCompany", "DartCompany", "EdgarCompany", "c.docs()"]
 

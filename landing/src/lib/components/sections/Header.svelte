@@ -22,8 +22,7 @@
 
 	const navLinks = [
 		{ label: 'Docs', href: `${base}/docs/` },
-		{ label: 'Blog', href: `${base}/blog/` },
-		{ label: 'Changelog', href: `${base}/docs/changelog` }
+		{ label: 'Blog', href: `${base}/blog/` }
 	];
 </script>
 

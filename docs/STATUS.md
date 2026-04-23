@@ -22,8 +22,7 @@ docs/
 ├── tutorials/
 │   ├── 01_quickstart.md             # sections-first 첫 분석
 │   └── 09_edgar.md                  # EDGAR Company / OpenEdgar 흐름
-├── stability.md                     # 현행 안정성 tier
-└── changelog.md                     # 공개 변경 이력
+└── stability.md                     # 현행 안정성 tier
 ```
 
 ## 공개 서사

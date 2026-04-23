@@ -31,8 +31,7 @@
 	const quickLinks: SearchItem[] = [
 		{ title: 'Installation', href: `${base}/docs/getting-started/installation`, category: 'Quick Links' },
 		{ title: 'Quickstart', href: `${base}/docs/getting-started/quickstart`, category: 'Quick Links' },
-		{ title: 'API Overview', href: `${base}/docs/api/overview`, category: 'Quick Links' },
-		{ title: 'Changelog', href: `${base}/docs/changelog`, category: 'Quick Links' }
+		{ title: 'API Overview', href: `${base}/docs/api/overview`, category: 'Quick Links' }
 	];
 
 	const allItems = [...quickLinks, ...docsItems, ...blogItems];

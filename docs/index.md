@@ -47,5 +47,5 @@ dartlab 독립 신용분석(dCR) 보고서가 정기 발간된다. [블로그에
 ## 참고
 
 - [안정성 정책](stability)
-- [변경 이력](changelog)
+- [변경 이력](https://github.com/eddmpython/dartlab/releases)
 - CAPABILITIES.md (GitHub 저장소 루트) — 전체 API 레퍼런스
