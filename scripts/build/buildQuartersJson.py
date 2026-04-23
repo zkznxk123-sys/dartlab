@@ -1,6 +1,6 @@
 """finance.parquet → landing/static/dashboards/quarters.json
 
-대시보드 v19 신규 Tier — 전 2,664사 × 20분기 주요 계정 시계열.
+대시보드 v19 신규 Tier — 전 상장사 × 20분기 주요 계정 시계열.
 
 - IS/CF: YTD(누적) 공시값 → 분기별 파생 (Q2=H1-Q1, Q3=9M-H1, Q4=FY-9M)
 - BS: 기말 point-in-time 그대로
@@ -182,12 +182,10 @@ def main() -> int:
     t0 = time.time()
 
     df = pl.read_parquet(SRC)
-    print(f"  shape: {df.shape}, loaded in {time.time()-t0:.1f}s", flush=True)
+    print(f"  shape: {df.shape}, loaded in {time.time() - t0:.1f}s", flush=True)
 
     df = df.filter(pl.col("stockCode").str.len_chars() == 6)
-    df = df.select(
-        ["stockCode", "bsns_year", "reprt_code", "sj_div", "account_id_std", "fs_div", "thstrm_amount"]
-    )
+    df = df.select(["stockCode", "bsns_year", "reprt_code", "sj_div", "account_id_std", "fs_div", "thstrm_amount"])
     df = df.unique(
         subset=["stockCode", "bsns_year", "reprt_code", "sj_div", "account_id_std", "fs_div"],
         keep="first",

@@ -7,9 +7,9 @@
 	<div class="inner">
 		<div class="left">
 			<div class="kicker">Live Visualization</div>
-			<h2 id="map-cta-title">See how 2,664 listed companies <br />are connected — in 10 seconds</h2>
+			<h2 id="map-cta-title">See how listed companies <br />are connected — in 10 seconds</h2>
 			<p class="lead">
-				2,664 companies · 34 industries · 18,418 supply-chain relationships on one screen.
+				Every listed company · every industry · every supply-chain relationship on one screen.
 				Click a bubble to drill into an industry, select a company for 5-year financials,
 				supply-chain HHI, AI analysis, and deep-dive reports — all in a single card.
 				<strong>Automatic detection of sudden changes this fiscal year.</strong>

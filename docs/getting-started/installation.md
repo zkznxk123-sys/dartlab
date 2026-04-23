@@ -145,7 +145,7 @@ c = dartlab.Company("005930")   # auto-downloads if not local
 ```
 
 1. **Local cache** — instant if already downloaded
-2. **HuggingFace** — pre-built Parquet from [HuggingFace Datasets](https://huggingface.co/datasets/eddmpython/dartlab-data) (fast, covers 2,700+ listed companies)
+2. **HuggingFace** — pre-built Parquet from [HuggingFace Datasets](https://huggingface.co/datasets/eddmpython/dartlab-data) (fast, covers all listed companies)
 3. **DART API** — direct collection via OpenDart API (slow, requires API key)
 
 ### Freshness Detection

@@ -1,6 +1,6 @@
 # dartlab Capabilities
 
-> v0.9.19 기준 자동 생성. 직접 수정 금지.  
+> v0.9.20 기준 자동 생성. 직접 수정 금지.  
 > `uv run python scripts/build/generateSpec.py`로 재생성.
 
 
@@ -141,7 +141,7 @@ downloadAll: HuggingFace 사전구축 데이터 (API 키 불필요, 더 빠름)
 
 #### downloadAll
 **Capabilities:** HuggingFace 사전 구축 데이터 일괄 다운로드
-finance (~600MB, 2700+종목), docs (~8GB, 2500+종목), report (~320MB, 2700+종목)
+finance (~600MB), docs (~8GB), report (~320MB) — 전 상장사 범위
 이어받기/병렬 다운로드 지원 (huggingface_hub)
 전사 분석(scanAccount, governance, digest 등)에 필요한 데이터 사전 준비
 **Requires:** 없음 (HuggingFace 공개 데이터셋)

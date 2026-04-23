@@ -4,9 +4,9 @@
 > 한국 DART 전자공시와 미국 SEC EDGAR 공시를 하나의 회사 맵으로 바꾸는 Python 라이브러리.
 
 DartLab parses corporate disclosure filings — annual reports, 10-K, 10-Q — into structured,
-comparable data. Financial statements (BS/IS/CF), 47 financial ratios, 7-area insight grades,
+comparable data. Financial statements (BS/IS/CF), financial ratios, insight grades,
 narrative text, and structured reports are all accessible with a single stock code.
-Covers 2,700+ Korean listed companies and 970+ US companies.
+Covers Korean DART and US SEC EDGAR listed companies.
 
 ## Install
 

@@ -128,7 +128,7 @@ let llmsTxt = `# DartLab — DART 전자공시 분석 Python 라이브러리
 
 DartLab은 한국 DART 전자공시와 미국 SEC EDGAR 공시 문서를 하나의 회사 맵으로 바꾸는 Python 라이브러리다.
 sections(topic × period 수평화)가 뼈대이고, 그 위에 재무제표(BS/IS/CF), 47개 재무비율, 7영역 인사이트 등급이 올라간다.
-2,700개 이상의 한국 상장기업과 970개 이상의 미국 기업을 종목코드 하나로 분석할 수 있다.
+한국과 미국 상장기업을 종목코드 하나로 분석할 수 있다.
 AI 크롤러와 답변 엔진을 위해 각 페이지의 markdown mirror도 함께 제공한다.
 
 ## Keywords

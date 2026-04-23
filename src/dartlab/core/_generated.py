@@ -640,7 +640,7 @@ CAPABILITIES: dict[str, dict] = {
     "dataDir": {"kind": "module", "summary": "str(object='') -> str"},
     "downloadAll": {
         "args": 'category: "finance" (재무 ~600MB), "docs" (공시 ~8GB), "report" (보고서 ~320MB).\nforceUpdate: True면 이미 있는 파일도 최신으로 갱신.',
-        "capabilities": "HuggingFace 사전 구축 데이터 일괄 다운로드\nfinance (~600MB, 2700+종목), docs (~8GB, 2500+종목), report (~320MB, 2700+종목)\n이어받기/병렬 다운로드 지원 (huggingface_hub)\n전사 분석(scanAccount, governance, digest 등)에 필요한 데이터 사전 준비",
+        "capabilities": "HuggingFace 사전 구축 데이터 일괄 다운로드\nfinance (~600MB), docs (~8GB), report (~320MB) — 전 상장사 범위\n이어받기/병렬 다운로드 지원 (huggingface_hub)\n전사 분석(scanAccount, governance, digest 등)에 필요한 데이터 사전 준비",
         "example": 'import dartlab\ndartlab.downloadAll("finance")   # 재무 전체 — scanAccount/scanRatio 등에 필요\ndartlab.downloadAll("report")    # 보고서 전체 — governance/workforce/capital/debt에 필요\ndartlab.downloadAll("docs")      # 공시 전체 — digest에 필요 (대용량 ~8GB)',
         "guide": '"데이터 어떻게 받아?" -> downloadAll("finance") 안내. API 키 불필요\n"scan 쓰려면?" -> downloadAll("finance") + downloadAll("report") 필요\nfinance 먼저 (600MB), report 다음 (320MB), docs는 대용량 주의 (8GB)',
         "kind": "function",

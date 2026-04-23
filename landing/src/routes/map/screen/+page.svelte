@@ -155,7 +155,7 @@
 	<title>조건 검색 (스크리너) | dartlab 전자공시</title>
 	<meta
 		name="description"
-		content="한국 상장사 2,664사를 ROE·영업이익률·부채·성장률·산업 조건으로 필터링. 결과 공유 URL · CSV export."
+		content="한국 상장사를 ROE·영업이익률·부채·성장률·산업 조건으로 필터링. 결과 공유 URL · CSV export."
 	/>
 	<meta property="og:type" content="website" />
 	<meta property="og:title" content="조건 검색 스크리너 — dartlab" />
@@ -173,7 +173,7 @@
 			<a class="back" href="{base}/map">← 산업지도</a>
 			<h1>조건 검색 (스크리너)</h1>
 			<p class="lead">
-				한국 상장사 2,664사를 <strong>재무 조건 + 산업</strong>으로 필터. URL 복사로 공유 · CSV 로
+				한국 상장사를 <strong>재무 조건 + 산업</strong>으로 필터. URL 복사로 공유 · CSV 로
 				내보내기.
 			</p>
 		</div>

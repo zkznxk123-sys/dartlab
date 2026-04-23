@@ -40,7 +40,7 @@ print(rv)                              # Rich 콘솔
 |------|------|-----------|
 | `peerRanking` | 시장 내 백분위 순위 | scan |
 | `peerPosition` | 전종목 수익성·성장·부채 백분위 | scan |
-| `chainPosition` | **산업 밸류체인 내 위치** — 2,664사 × 34 산업 × 공정·역할·스트림 + 같은 공정 피어 | **industry** |
+| `chainPosition` | **산업 밸류체인 내 위치** — 전 상장사 × 산업 × 공정·역할·스트림 + 같은 공정 피어 | **industry** |
 | `sectorKpi` | 업종 특수 KPI (건설·반도체·게임·제약) | analysis |
 
 ```python

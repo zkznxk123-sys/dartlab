@@ -71,7 +71,7 @@ apple.show("10-K::item1ARiskFactors")
 
 ```python
 dartlab.search("삼성전자")              # find companies
-dartlab.scan("ratio", "roe")           # ROE across 2,700+ companies
+dartlab.scan("ratio", "roe")           # ROE across all listed companies
 dartlab.scan("account", "매출액")       # revenue across all companies
 ```
 

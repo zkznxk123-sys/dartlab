@@ -56,7 +56,7 @@
         계속 만들 수 있게 <span class="grad">도와주세요</span>.
       </h2>
       <p class="cta-desc">
-        dartlab은 1인 개발 프로젝트입니다. 2,664사 상장사 데이터 수집·보관·분석 비용을 후원으로 충당합니다. GitHub Star만 눌러주셔도 큰 힘이 됩니다.
+        dartlab은 1인 개발 프로젝트입니다. 전 상장사 데이터 수집·보관·분석 비용을 후원으로 충당합니다. GitHub Star만 눌러주셔도 큰 힘이 됩니다.
       </p>
       <div class="cta-row">
         <a href="https://www.buymeacoffee.com/" class="btn btn-primary">

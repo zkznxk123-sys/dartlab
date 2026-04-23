@@ -30,7 +30,7 @@
 
 	const DEFAULT_TITLE = 'dartlab은 무료·오픈소스입니다';
 	const DEFAULT_SUB =
-		'DART 공시 2,664사 · 공급망 18,418 links · 블로그 심층분석 65편 — 모두 무료. 후원은 개발 가속에 쓰입니다.';
+		'DART 전 상장사 공시 · 공급망 네트워크 · 블로그 심층분석 — 모두 무료. 후원은 개발 가속에 쓰입니다.';
 
 	const title = $derived(message ?? DEFAULT_TITLE);
 	const sub = $derived(subtitle ?? DEFAULT_SUB);
@@ -44,9 +44,9 @@
 				<h3>{title}</h3>
 				<p>{sub}</p>
 				<div class="dl-donate-pills">
-					<span class="pill">DART 2,664사</span>
-					<span class="pill">공급망 18,418</span>
-					<span class="pill">블로그 65편</span>
+					<span class="pill">DART 전 상장사</span>
+					<span class="pill">공급망 네트워크</span>
+					<span class="pill">블로그 심층분석</span>
 				</div>
 			</div>
 

@@ -75,7 +75,7 @@ ENGINES = [
             "HHI 집중도 + Top N 공급사/고객",
             "업종 내 백분위 (수익성·성장·품질·부채)",
             "crossViews · 회사 narrative",
-            "2,664사 × 18,418 links 네트워크",
+            "산업지도 네트워크 + crossViews",
         ],
         "powers": ["Supply Chain", "Peer Card", "산업지도 링크"],
     },

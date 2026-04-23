@@ -455,6 +455,7 @@ def _computeLayout(nodes, taxonomy, atlasFlows=None, edges=None) -> dict[str, tu
         stockCode → (x, y) 좌표
     """
     import math
+
     import networkx as nx
 
     # 1. 산업별 그룹핑
@@ -637,7 +638,6 @@ def _computeLayout(nodes, taxonomy, atlasFlows=None, edges=None) -> dict[str, tu
 
 def _buildTimeline(outDir, companies):
     """companies/{code}.json의 financials5y에서 연도별 매출/OPM 추출 → timeline.json."""
-    from pathlib import Path
 
     compDir = outDir / "companies"
     timeline: dict[str, dict[str, dict]] = {}  # year → stockCode → {revenue, opMargin}
@@ -705,7 +705,7 @@ def buildEcosystem(
 ) -> dict:
     """전체 생태계 한 파일 — Cosmograph용 (nodes + links).
 
-    2,664 노드 + 18,418 엣지를 flat 배열로. 산업별 색상 + scan 재무 지표 + YoY delta 포함.
+    전 상장사 노드 + 공급망 엣지를 flat 배열로. 산업별 색상 + scan 재무 지표 + YoY delta 포함.
     """
     nodes = loadNodes()
     edges = loadEdges()
@@ -864,7 +864,6 @@ def buildEcosystem(
     # 산업별 convex hull 계산 (클러스터 배경 영역)
     def _convexHull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
         """Graham scan으로 convex hull 계산."""
-        import math as _m
 
         pts = sorted(set(points))
         if len(pts) <= 2:
@@ -1547,7 +1546,6 @@ def _buildMeta() -> dict:
     각 소스(dart / finance / scan / reviews)의 최근 갱신 시각을 포함.
     프런트는 이 값으로 우상단 배지("DART 3h · Finance 2Q25 · Reviews 1d")를 표시.
     """
-    import os
 
     def _mtime_iso(path: Path) -> str | None:
         if not path.exists():

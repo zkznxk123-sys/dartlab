@@ -1065,9 +1065,9 @@ def generateLlmsTxt() -> str:
         "> 한국 DART 전자공시와 미국 SEC EDGAR 공시를 하나의 회사 맵으로 바꾸는 Python 라이브러리.",
         "",
         "DartLab parses corporate disclosure filings — annual reports, 10-K, 10-Q — into structured,",
-        "comparable data. Financial statements (BS/IS/CF), 47 financial ratios, 7-area insight grades,",
+        "comparable data. Financial statements (BS/IS/CF), financial ratios, insight grades,",
         "narrative text, and structured reports are all accessible with a single stock code.",
-        "Covers 2,700+ Korean listed companies and 970+ US companies.",
+        "Covers Korean DART and US SEC EDGAR listed companies.",
         "",
         "## Install",
         "",
@@ -2055,6 +2055,58 @@ def _generateMcpToolsPy() -> str:
                 "corp": {"type": "string", "description": "filings 시 종목코드 필터"},
             },
             ["kind"],
+        )
+    )
+
+    # ── AI 경험 자산 (블로그 + 과거 응답 insights) ──
+    tools.append(
+        _tool(
+            "pastInsight",
+            "종목별 과거 분석 서사 조회 (블로그 + AI 응답 누적). strengths/weaknesses/direction/archetype 포함.",
+            {"stockCode": "_STOCK"},
+            ["stockCode"],
+            "ai",
+        )
+    )
+    tools.append(
+        _tool(
+            "sectorInsights",
+            "섹터/산업 과거 분석 누적 — 산업별 인사이트, peer 비교 단서.",
+            {"sector": {"type": "string", "description": "섹터/산업 이름 (예: 반도체, semiconductor)"}},
+            ["sector"],
+            "ai",
+        )
+    )
+
+    # ── 산업지도 직접 조회 ──
+    tools.append(
+        _tool(
+            "industryMap",
+            "산업지도 조회 — 34개 산업 × 공정 노드/엣지. 종목 없이 산업 단위 분석 가능.",
+            {
+                "industry": {
+                    "type": "string",
+                    "description": "산업 ID (semiconductor, battery, auto 등). 생략 시 전체 가이드",
+                },
+                "stage": {"type": "string", "description": "공정 단계 (design, fab, equipment 등 — 산업별 상이)"},
+            },
+            [],
+        )
+    )
+
+    # ── dartlab 자체 메타 ──
+    tools.append(
+        _tool(
+            "capabilities",
+            "dartlab 자체 기능 안내 — '뭐야', '어떻게 써'. path 주면 특정 API 상세.",
+            {
+                "path": {
+                    "type": "string",
+                    "description": "API 경로 (예: 'Company.show', 'dartlab.scan'). 생략 시 전체 목록",
+                }
+            },
+            [],
+            "meta",
         )
     )
 

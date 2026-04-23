@@ -28,7 +28,7 @@
 	const homepageFaq: FaqItem[] = [
 		{
 			question: 'What is DartLab?',
-			answer: 'DartLab is an open-source Python library that turns corporate disclosure filings into structured, comparable data. It covers 2,700+ Korean companies (DART) and 970+ US companies (EDGAR), giving you financial statements, narrative text, and structured reports in one unified interface — no PDF reading required.'
+			answer: 'DartLab is an open-source Python library that turns corporate disclosure filings into structured, comparable data. It works with Korean DART and US SEC EDGAR — financial statements, narrative text, and structured reports through one unified interface, no PDF reading required.'
 		},
 		{
 			question: 'Who is DartLab for?',
@@ -40,7 +40,7 @@
 		},
 		{
 			question: 'Does it support EDGAR 10-K and 10-Q?',
-			answer: 'Yes. Use a ticker like dartlab.Company("AAPL") to analyze US 10-K/10-Q filings. EDGAR sections mapping rate is 100%, verified across 974 companies. Same interface as DART — sections, show, trace, diff, BS, IS, CF, ratios all work identically.'
+			answer: 'Yes. Use a ticker like dartlab.Company("AAPL") to analyze US 10-K/10-Q filings. Same interface as DART — sections, show, trace, diff, BS, IS, CF, ratios all work identically.'
 		},
 		{
 			question: 'Do I need to write code to use DartLab?',
@@ -48,7 +48,7 @@
 		},
 		{
 			question: '전자공시 분석 도구가 뭔가요?',
-			answer: 'DartLab은 DART 전자공시와 미국 SEC EDGAR 공시 문서를 자동으로 파싱하여 재무제표, 서술형 텍스트, 정형 보고서를 하나의 구조화된 회사 맵으로 만드는 오픈소스 Python 라이브러리입니다. 종목코드 하나면 2,700개 이상의 한국 기업과 970개 이상의 미국 기업 데이터에 접근할 수 있습니다.'
+			answer: 'DartLab은 DART 전자공시와 미국 SEC EDGAR 공시 문서를 자동으로 파싱하여 재무제표, 서술형 텍스트, 정형 보고서를 하나의 구조화된 회사 맵으로 만드는 오픈소스 Python 라이브러리입니다. 종목코드 하나로 한국과 미국 상장기업 데이터에 접근할 수 있습니다.'
 		},
 		{
 			question: '사업보고서를 자동으로 분석할 수 있나요?',
@@ -71,13 +71,13 @@
 
 <svelte:head>
 	<title>DartLab — {brand.description}</title>
-	<meta name="description" content="Every company tells its story in filings. DartLab makes it readable. One stock code turns Korean DART and US EDGAR filings into structured, comparable data — 2,700+ Korean and 970+ US companies, one line of Python." />
+	<meta name="description" content="Every company tells its story in filings. DartLab makes it readable. One stock code turns Korean DART and US EDGAR filings into structured, comparable data — one line of Python." />
 	<meta name="keywords" content="DART, OpenDART, EDGAR, financial analysis, annual report, Python, Korean stocks, disclosure parsing, dartlab, sections, company analysis, financial data, 전자공시, 사업보고서, 재무제표, 공시분석, 다트, DART전자공시, 한국주식분석" />
 	<link rel="canonical" href="https://eddmpython.github.io/dartlab/" />
 
 	<meta property="og:type" content="website" />
 	<meta property="og:title" content="DartLab — {brand.description}" />
-	<meta property="og:description" content="기업의 모든 진실은 공시에 있다. DartLab은 DART 전자공시와 EDGAR 공시를 읽을 수 있게 만든다. 종목코드 하나면 2,700+ 한국 기업과 970+ 미국 기업의 재무제표, 사업보고서를 구조화된 데이터로." />
+	<meta property="og:description" content="기업의 모든 진실은 공시에 있다. DartLab은 DART 전자공시와 EDGAR 공시를 읽을 수 있게 만든다. 종목코드 하나로 한국·미국 상장기업의 재무제표, 사업보고서를 구조화된 데이터로." />
 	<meta property="og:url" content="https://eddmpython.github.io/dartlab/" />
 	<meta property="og:site_name" content="DartLab" />
 	<meta property="og:image" content="https://eddmpython.github.io/dartlab/og-image.png" />
@@ -87,7 +87,7 @@
 
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="DartLab — {brand.description}" />
-	<meta name="twitter:description" content="기업의 모든 진실은 공시에 있다. DartLab은 DART 전자공시와 EDGAR 공시를 읽을 수 있게 만든다. 종목코드 하나면 2,700+ 한국 기업과 970+ 미국 기업의 재무제표, 사업보고서를 구조화된 데이터로." />
+	<meta name="twitter:description" content="기업의 모든 진실은 공시에 있다. DartLab은 DART 전자공시와 EDGAR 공시를 읽을 수 있게 만든다. 종목코드 하나로 한국·미국 상장기업의 재무제표, 사업보고서를 구조화된 데이터로." />
 	<meta name="twitter:image" content="https://eddmpython.github.io/dartlab/og-image.png" />
 
 	{@html `<script type="application/ld+json">${homepageJsonLd}</script>`}

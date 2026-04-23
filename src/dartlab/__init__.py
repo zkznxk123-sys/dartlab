@@ -320,7 +320,7 @@ def downloadAll(category: str = "finance", *, forceUpdate: bool = False) -> None
 
     Capabilities:
         - HuggingFace 사전 구축 데이터 일괄 다운로드
-        - finance (~600MB, 2700+종목), docs (~8GB, 2500+종목), report (~320MB, 2700+종목)
+        - finance (~600MB), docs (~8GB), report (~320MB) — 전 상장사 범위
         - 이어받기/병렬 다운로드 지원 (huggingface_hub)
         - 전사 분석(scanAccount, governance, digest 등)에 필요한 데이터 사전 준비
 

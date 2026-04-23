@@ -1,4 +1,4 @@
-"""finance.parquet → landing/static/dashboards/finance.json (전 2,664사 경량 5Y).
+"""finance.parquet → landing/static/dashboards/finance.json (전 상장사 경량 5Y).
 
 대시보드 v16 Tier 1 — 모든 회사의 IS/BS/CF 를 단일 JSON 으로.
 Company 객체 안 만듬 → Polars lazy 로 직접 변환 → OOM 없음.
@@ -113,9 +113,7 @@ def _to_billion(v: str | None) -> float | None:
 def _extract_annual(df: pl.DataFrame, stockCode: str) -> dict:
     """한 회사의 5년 연간 데이터 추출."""
     # 사업보고서 (11011) = 연간.  연결(CFS) 우선, 별도(OFS) 폴백.
-    c_df = df.filter(
-        (pl.col("stockCode") == stockCode) & (pl.col("reprt_code") == "11011")
-    )
+    c_df = df.filter((pl.col("stockCode") == stockCode) & (pl.col("reprt_code") == "11011"))
     if c_df.is_empty():
         return {}
 
@@ -223,7 +221,7 @@ def main() -> int:
 
     # 전체 parquet 을 한 번에 로드 — 스키마 확인 완료
     df = pl.read_parquet(SRC)
-    print(f"  shape: {df.shape}, loaded in {time.time()-t0:.1f}s", flush=True)
+    print(f"  shape: {df.shape}, loaded in {time.time() - t0:.1f}s", flush=True)
 
     # stockCode 유효 (제로패딩 6자리) 만 필터
     df = df.filter(pl.col("stockCode").str.len_chars() == 6)

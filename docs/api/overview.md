@@ -55,7 +55,7 @@ dartlab.ask("삼성전자 재무 분석해줘")   # AI 분석가
 | [Gather](gather) | `c.gather()` | External data | price/flow/macro/news |
 | [Analysis](analysis) | `c.analysis()` | Deep analysis | 14-axis financial + forecast |
 | [Credit Rating](credit) | `c.credit()` | Credit rating | dCR 20-grade + 7-axis |
-| [Industry](https://github.com/eddmpython/dartlab/blob/master/ops/industry.md) | `c.industry()`, `dartlab.industry()` | Industry atlas | 2,664 companies × 34 industries + supply-chain edges |
+| [Industry](https://github.com/eddmpython/dartlab/blob/master/ops/industry.md) | `c.industry()`, `dartlab.industry()` | Industry atlas | Listed companies × industries + supply-chain edges |
 | [Review](review) | `c.review()` | Report rendering | markdown/HTML/JSON + `chainPosition` block |
 | [AI](ai) | `dartlab.ask()` | AI analyst | 6 providers |
 | [Advanced](advanced) | `c.insights` | Grades/rank/sector | insight/rank/quant |

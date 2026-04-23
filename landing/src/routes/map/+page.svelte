@@ -90,8 +90,8 @@
 	});
 
 	// ── 뷰 모드 ──
-	// atlas: 34개 산업 노드 + 산업간 supplier flow (default)
-	// companies: 기존 ecosystem 전체 2,664사
+	// atlas: 산업 노드 + 산업간 supplier flow (default)
+	// companies: 기존 ecosystem 상장사 전체
 	// industry: 한 산업 내부 drill-down
 	type ViewMode = 'atlas' | 'treemap' | 'companies' | 'industry';
 	let viewMode: ViewMode = $state('atlas');
@@ -741,10 +741,10 @@
 	<title>산업지도 | dartlab 전자공시</title>
 	<meta
 		name="description"
-		content="한국 상장사 2,664사 · 34개 산업 · 공급망 18,418 관계. 10초 안에 보는 산업 생태계 지도."
+		content="한국 상장사 · 34개 산업 · 공급망 네트워크. 산업 생태계 지도를 한 화면에."
 	/>
 	<meta property="og:type" content="website" />
-	<meta property="og:title" content="dartlab 산업지도 — 한국 상장사 2,664사 생태계" />
+	<meta property="og:title" content="dartlab 산업지도 — 한국 상장사 생태계" />
 	<meta
 		property="og:description"
 		content="34 산업 × 공급망 드릴다운 · 변화 감지 · 조건 검색 · 비교. 10초 안에 보는 지도."
@@ -956,7 +956,7 @@
 				>
 					<span class="tab-body">
 						<span class="tab-title">전 회사</span>
-						<span class="hint">2,664사 전체 그래프</span>
+						<span class="hint">상장사 전체 그래프</span>
 					</span>
 				</button>
 				<button

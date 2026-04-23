@@ -34,6 +34,10 @@ TOOLS: list[dict] = [
     {"name": 'topdownScreen', "description": '사이클 → 추천 섹터 → 종목 후보 자동 선별.', "params": {'market': {'type': 'string', 'enum': ['KR', 'US']}, 'topN': {'type': 'integer', 'description': '섹터당 종목 수 (기본 5)'}}, "required": []},
     {"name": 'dartlabSearch', "description": '공시 원문 검색 (stem ID 역인덱스).', "params": {'query': {'type': 'string', 'description': '검색어'}, 'corp': {'type': 'string', 'description': '종목코드 필터'}}, "required": ['query']},
     {"name": 'dartlabListing', "description": '상장 종목, 공시 목록, 토픽 목록 조회.', "params": {'kind': {'type': 'string', 'enum': ['companies', 'filings', 'topics']}, 'corp': {'type': 'string', 'description': 'filings 시 종목코드 필터'}}, "required": ['kind']},
+    {"name": 'pastInsight', "description": '종목별 과거 분석 서사 조회 (블로그 + AI 응답 누적). strengths/weaknesses/direction/archetype 포함.', "params": {'stockCode': '_STOCK'}, "required": ['stockCode']},
+    {"name": 'sectorInsights', "description": '섹터/산업 과거 분석 누적 — 산업별 인사이트, peer 비교 단서.', "params": {'sector': {'type': 'string', 'description': '섹터/산업 이름 (예: 반도체, semiconductor)'}}, "required": ['sector']},
+    {"name": 'industryMap', "description": '산업지도 조회 — 34개 산업 × 공정 노드/엣지. 종목 없이 산업 단위 분석 가능.', "params": {'industry': {'type': 'string', 'description': '산업 ID (semiconductor, battery, auto 등). 생략 시 전체 가이드'}, 'stage': {'type': 'string', 'description': '공정 단계 (design, fab, equipment 등 — 산업별 상이)'}}, "required": []},
+    {"name": 'capabilities', "description": "dartlab 자체 기능 안내 — '뭐야', '어떻게 써'. path 주면 특정 API 상세.", "params": {'path': {'type': 'string', 'description': "API 경로 (예: 'Company.show', 'dartlab.scan'). 생략 시 전체 목록"}}, "required": []},
 ]
 
 TOOL_FEATURE_MAP: dict[str, str] = {
@@ -63,6 +67,10 @@ TOOL_FEATURE_MAP: dict[str, str] = {
     "topdownScreen": "data",
     "dartlabSearch": "data",
     "dartlabListing": "data",
+    "pastInsight": "ai",
+    "sectorInsights": "ai",
+    "industryMap": "data",
+    "capabilities": "meta",
     "listDartlabApi": "meta",
     "searchDartlabApi": "meta",
     "verifyDartlabApi": "meta",

@@ -7,7 +7,7 @@
 
 ```python
 import dartlab
-dartlab.listing()                          # 전체 상장사 목록 (KR 2700+)
+dartlab.listing()                          # 전체 상장사 목록 (KR KRX 전 종목)
 dartlab.listing("dartlist")                # DART 전체 법인 (비상장 포함, corp_code 8자리)
 dartlab.listing("filings", corp="005930")  # 특정 종목 공시 목록
 ```

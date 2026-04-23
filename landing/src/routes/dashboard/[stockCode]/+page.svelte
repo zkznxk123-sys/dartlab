@@ -54,7 +54,7 @@
 	<div class="top-strip container">
 		<span class="chip">FREE</span>
 		<span class="chip">OPEN SOURCE</span>
-		<span class="chip">DART 2,664사</span>
+		<span class="chip">DART 전 상장사</span>
 		<a class="chip chip-link" href={mapLink}>📍 산업지도</a>
 		<a class="chip chip-link" href={brand.coffee} target="_blank" rel="noopener">☕ 후원</a>
 	</div>

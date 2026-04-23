@@ -41,7 +41,7 @@
     <a href="#" class="cta">
       <div>
         <div class="cta-eyebrow">DARTLAB 산업지도</div>
-        <div class="cta-title">이 회사를 중심으로 한 2,664사 네트워크 전체 보기</div>
+        <div class="cta-title">이 회사를 중심으로 한 상장사 네트워크 전체 보기</div>
       </div>
       <div class="cta-btn">
         네트워크 열기
