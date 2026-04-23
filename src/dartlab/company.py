@@ -120,14 +120,27 @@ def Company(codeOrName: str) -> CompanyProtocol:
             firstError = firstError or e
             continue
 
+    # 유사 종목 top-3 제안 (KRX listing 기반 fuzzy — 초성·편집거리·substring 지원)
+    hint = ""
+    try:
+        from dartlab.gather.listing import fuzzySearch
+
+        suggestions = fuzzySearch(codeOrName, maxResults=3)
+        if suggestions.height > 0:
+            rows = [f"    - {r['회사명']} ({r['종목코드']})" for r in suggestions.iter_rows(named=True)]
+            hint = "\n  유사 종목:\n" + "\n".join(rows)
+    except (ImportError, OSError, KeyError, ValueError):
+        pass
+
     cause = f" (원인: {firstError})" if firstError else ""
     try:
         from dartlab.core.messaging import format as gfmt
 
-        raise ValueError(gfmt("error:no_data", stockCode=codeOrName))
+        baseMsg = gfmt("error:no_data", stockCode=codeOrName)
+        raise ValueError(baseMsg + hint)
     except (ImportError, KeyError):
         raise ValueError(
             f"'{codeOrName}'을(를) 찾을 수 없습니다{cause}.\n"
             f"  검색: dartlab.searchName('{codeOrName}')\n"
-            "  전체 목록: dartlab.listing()"
+            f"  전체 목록: dartlab.listing(){hint}"
         )
