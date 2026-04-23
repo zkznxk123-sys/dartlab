@@ -105,7 +105,16 @@ def _sse(event: str, data: dict) -> dict:
 
 
 async def _sync_gen_to_async(gen_fn, *args, **kwargs):
-    """동기 제너레이터 → async 큐 브릿지."""
+    """동기 제너레이터 → async 큐 브릿지.
+
+    요청 종료(정상·예외·소비자 break 모두) 시 Polars string cache 를
+    해제하고 GC 를 촉발한다. `/api/ask` 요청마다 AI tool loop 가 만든
+    Company 인스턴스·pivot DataFrame 이 쌓여 네이티브 힙이 비대화하는
+    문제 방어 — `pl.disable_string_cache()` 는 100~200MB, `gc.collect()`
+    는 Python 참조가 해제된 DataFrame 의 Rust 힙 회수를 촉발한다.
+    BoundedCache 의 EMERGENCY 임계를 넘지 못한 중간 누적분을 요청 경계
+    에서 정리하는 용도.
+    """
     import queue as _queue_mod
 
     sync_queue: _queue_mod.Queue = _queue_mod.Queue(maxsize=64)
@@ -123,12 +132,31 @@ async def _sync_gen_to_async(gen_fn, *args, **kwargs):
     loop = asyncio.get_event_loop()
     task = loop.run_in_executor(None, _run)
 
-    while True:
-        item = await asyncio.to_thread(sync_queue.get)
-        if item is _SENTINEL:
-            break
-        if isinstance(item, Exception):
-            raise item
-        yield item
+    try:
+        while True:
+            item = await asyncio.to_thread(sync_queue.get)
+            if item is _SENTINEL:
+                break
+            if isinstance(item, Exception):
+                raise item
+            yield item
 
-    await task
+        await task
+    finally:
+        _releaseRuntimeHeap()
+
+
+def _releaseRuntimeHeap() -> None:
+    """요청 종료 시 Polars 네이티브 힙 회수 촉발. 실패해도 조용히 넘어간다."""
+    try:
+        import polars as pl
+
+        pl.disable_string_cache()
+    except (ImportError, AttributeError):
+        pass
+    try:
+        import gc
+
+        gc.collect()
+    except Exception:  # noqa: BLE001
+        pass
