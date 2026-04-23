@@ -224,13 +224,22 @@ def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict],
     from dartlab.core.finance.labels import SNAKEID_ALIASES, mergeAliasRows
 
     mergeAliasRows(data, metaCols=set())
-    for alias, canonical in SNAKEID_ALIASES.items():
-        canonRow = data.get(canonical)
-        aliasRow = data.get(alias)
-        if canonRow is not None and aliasRow is None:
-            data[alias] = canonRow
-        elif aliasRow is not None and canonRow is None:
-            data[canonical] = aliasRow
+    # transitive 체인 (A→B, B→C 등) 해소를 위해 fixpoint 반복.
+    # 예: stockholders_equity → total_equity, total_stockholders_equity → total_equity.
+    # 1패스만으론 실행 순서에 따라 total_stockholders_equity 가 미채워질 수 있음.
+    for _ in range(4):
+        changed = False
+        for alias, canonical in SNAKEID_ALIASES.items():
+            canonRow = data.get(canonical)
+            aliasRow = data.get(alias)
+            if canonRow is not None and aliasRow is None:
+                data[alias] = canonRow
+                changed = True
+            elif aliasRow is not None and canonRow is None:
+                data[canonical] = aliasRow
+                changed = True
+        if not changed:
+            break
 
     return (data, periods)
 
