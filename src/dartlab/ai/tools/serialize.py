@@ -83,7 +83,13 @@ def polarsTableToMarkdown(text: str) -> str:
 
 
 def _dfToMarkdown(df: Any, *, maxRows: int) -> str:
-    """Polars DataFrame → 마크다운 테이블 + shape 메타."""
+    """Polars DataFrame → GFM markdown table. 수동 row iter 로 빌드.
+
+    Polars 내장 ``ASCII_MARKDOWN`` + ``fmt_str_lengths=80`` 조합은 셀 폭 초과 시
+    행 안에서 줄바꿈을 삽입해 GFM 구조를 파괴한다 (사용자 보고 2026-04-23).
+    수동 빌드로 교체하고 셀 포맷은 `aiview._formatNum` SSOT 재사용
+    (비율·금액·지수 표기 자동 감지 및 한국어 단위 변환).
+    """
     try:
         import polars as pl
     except ImportError:
@@ -91,6 +97,8 @@ def _dfToMarkdown(df: Any, *, maxRows: int) -> str:
 
     if not isinstance(df, pl.DataFrame):
         return str(df)[:_MAX_LLM_CHARS]
+
+    from dartlab.ai.context.aiview import _formatNum
 
     rows, cols = df.shape
     shapeNote = f"shape: ({rows}, {cols})"
@@ -102,31 +110,100 @@ def _dfToMarkdown(df: Any, *, maxRows: int) -> str:
         shown = df
         truncNote = ""
 
-    with pl.Config(
-        tbl_formatting="ASCII_MARKDOWN",
-        tbl_hide_column_data_types=True,
-        tbl_hide_dataframe_shape=True,
-        fmt_str_lengths=80,
-        tbl_cols=-1,
-        tbl_rows=-1,
-    ):
-        body = str(shown)
+    columns = list(shown.columns)
+    header = "| " + " | ".join(columns) + " |"
+    divider = "| " + " | ".join(["---"] * len(columns)) + " |"
+    bodyLines: list[str] = []
+    for row in shown.iter_rows(named=True):
+        cells: list[str] = []
+        for col in columns:
+            val = row.get(col)
+            if val is None:
+                cells.append("-")
+            elif isinstance(val, bool):
+                cells.append("true" if val else "false")
+            elif isinstance(val, (int, float)):
+                cells.append(_formatNum(val, col))
+            else:
+                s = str(val).replace("|", "\\|").replace("\n", " ")
+                if len(s) > 80:
+                    s = s[:77] + "..."
+                cells.append(s)
+        bodyLines.append("| " + " | ".join(cells) + " |")
 
+    body = "\n".join([header, divider, *bodyLines])
     return f"{shapeNote}{truncNote}\n\n{body}"
 
 
 # ── dict 직렬화 (analysis/credit/gather 반환값) ────────────
 
 
+def _isTabularList(v: Any) -> bool:
+    """list[dict] 이고 모든 원소가 동일 키 집합을 가진 표 스키마인지 판정.
+
+    길이 2+ 필요 (단일 원소는 표 이점 없음). 키 2+ 필요 (단일 컬럼은 리스트로 충분).
+    """
+    if not isinstance(v, list) or len(v) < 2:
+        return False
+    if not all(isinstance(x, dict) for x in v):
+        return False
+    firstKeys = tuple(v[0].keys())
+    if len(firstKeys) < 2:
+        return False
+    return all(tuple(x.keys()) == firstKeys for x in v)
+
+
+def _formatCell(v: Any, field: str = "") -> str:
+    """표 셀 렌더 — SSOT 는 `aiview._formatNum` (한국어 단위 자동 감지).
+
+    숫자 포맷 중복 금지: list[dict] / DataFrame 경로가 같은 엔진 경유.
+    None · bool · dict · list · 긴 문자열은 여기서 처리.
+    """
+    if v is None:
+        return "-"
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        from dartlab.ai.context.aiview import _formatNum
+
+        return _formatNum(v, field)
+    if isinstance(v, str):
+        s = v.strip()
+        if not s:
+            return "-"
+        if len(s) > 60:
+            return s[:57] + "..."
+        return s.replace("|", "\\|").replace("\n", " ")
+    if isinstance(v, (list, tuple)):
+        return f"[{len(v)}개]"
+    if isinstance(v, dict):
+        return f"{{{len(v)}키}}"
+    return str(v)[:60]
+
+
+def _tabularListToMarkdown(rows: list[dict]) -> str:
+    """list[dict] → GFM markdown table. 상위 20행까지."""
+    keys = list(rows[0].keys())
+    shown = rows[:_MAX_DF_ROWS_LLM]
+    header = "| " + " | ".join(keys) + " |"
+    divider = "| " + " | ".join(["---"] * len(keys)) + " |"
+    body = ["| " + " | ".join(_formatCell(r.get(k), k) for k in keys) + " |" for r in shown]
+    truncNote = (
+        f"\n... ({len(rows) - _MAX_DF_ROWS_LLM}행 생략, 전체 {len(rows)}행)" if len(rows) > _MAX_DF_ROWS_LLM else ""
+    )
+    return "\n".join([header, divider, *body]) + truncNote
+
+
 def _dictToSummary(data: dict, *, maxChars: int) -> str:
     """analysis/credit 등 dict 반환값 → 압축 요약.
 
-    - 최상위 키 나열
-    - 숫자값은 그대로
-    - list/dict 는 첫 N개만
-    - history list 는 shape 만 + 첫 행
+    표 스키마 (list[dict] 동일 키) 는 markdown table 로 분리 렌더, 나머지는 JSON indent.
+    이 형태로 LLM 에 들어가면 응답에도 표로 나올 확률이 높음 (행동 프롬프트 + 입력 모양 일치).
     """
     import json
+
+    tabularBlocks: list[str] = []
+    scalarPart: dict[str, Any] = {}
 
     def _compress(v: Any, depth: int = 0) -> Any:
         if depth > 3:
@@ -147,11 +224,21 @@ def _dictToSummary(data: dict, *, maxChars: int) -> str:
             return {k: _compress(val, depth + 1) for k, val in v.items()}
         return str(v)[:200]
 
-    compressed = _compress(data)
-    try:
-        text = json.dumps(compressed, ensure_ascii=False, indent=2, default=str)
-    except (TypeError, ValueError):
-        text = str(compressed)
+    for key, value in data.items():
+        if _isTabularList(value):
+            tabularBlocks.append(f"### {key}\n\n{_tabularListToMarkdown(value)}")
+        else:
+            scalarPart[key] = _compress(value)
+
+    parts: list[str] = []
+    if scalarPart:
+        try:
+            parts.append(json.dumps(scalarPart, ensure_ascii=False, indent=2, default=str))
+        except (TypeError, ValueError):
+            parts.append(str(scalarPart))
+    parts.extend(tabularBlocks)
+
+    text = "\n\n".join(parts) if parts else "{}"
 
     if len(text) > maxChars:
         text = text[:maxChars] + f"\n... (+{len(text) - maxChars} chars 잘림)"

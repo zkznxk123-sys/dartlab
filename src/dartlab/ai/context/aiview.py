@@ -167,9 +167,13 @@ def autoEnrich(data: dict | list | None, *, company: Any = None, calc_fn: Any = 
     # 최상위에 바로 history[]가 있는 경우 (개별 calc 결과: {"history": [...], "displayHints": {...}})
     if "history" in data and isinstance(data["history"], list) and data["history"]:
         summary = _summarizeHistory(data["history"], "data", schema=_schema)
+        yoy = _injectYoy(data["history"])
+        enriched = dict(data)
         if summary:
-            enriched = dict(data)
             enriched["_summary"] = _withAssumptions(summary, data.get("assumptions"))
+        if yoy:
+            enriched["_yoy"] = yoy
+        if summary or yoy:
             return enriched
         return _maybeAddAssumptions(data)
 
@@ -340,7 +344,49 @@ def _enrichDictWithHistory(
 def _enrichHistory(rows: list[dict]) -> dict:
     """history 배열 직접 전달 시."""
     summary = _summarizeHistory(rows, "data")
-    return {"_summary": summary, "history": rows} if summary else {"history": rows}
+    yoy = _injectYoy(rows)
+    result: dict = {"history": rows}
+    if summary:
+        result["_summary"] = summary
+    if yoy:
+        result["_yoy"] = yoy
+    return result
+
+
+def _injectYoy(hist: list[dict]) -> dict[str, str]:
+    """history 배열의 **모든 숫자 필드** 에 대해 직전 기간 대비 YoY 계산.
+
+    SSOT 는 `core.finance.ratios.yoy_pct` 재사용 — 흑자↔적자 부호 전환 시 None.
+
+    hist 가 최신순 (index 0 = 가장 최근) 인 패턴. prev = hist[1], curr = hist[0].
+    AI 응답에서 `_yoy` dict 를 참조해 "매출 -13.9% / 영업이익 -0.6% / ..." 같은 해석을 즉시 인용.
+
+    Returns
+    -------
+    dict[str, str]
+        {"revenue": "-13.9%", "operating_income": "-0.6%", ...}. 계산 불가 필드는 생략.
+    """
+    if not isinstance(hist, list) or len(hist) < 2:
+        return {}
+    curr, prev = hist[0], hist[1]
+    if not isinstance(curr, dict) or not isinstance(prev, dict):
+        return {}
+    try:
+        from dartlab.core.finance.ratios import yoy_pct
+    except ImportError:
+        return {}
+    yoys: dict[str, str] = {}
+    for key, curVal in curr.items():
+        if key == "period" or not isinstance(curVal, (int, float)) or isinstance(curVal, bool):
+            continue
+        prevVal = prev.get(key)
+        if not isinstance(prevVal, (int, float)) or isinstance(prevVal, bool):
+            continue
+        pct = yoy_pct(float(curVal), float(prevVal))
+        if pct is None:
+            continue
+        yoys[key] = f"{pct:+.1f}%"
+    return yoys
 
 
 def _summarizeHistory(hist: list[dict], label: str, *, schema: dict | None = None) -> str:
