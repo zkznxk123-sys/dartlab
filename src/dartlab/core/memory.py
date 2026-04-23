@@ -21,10 +21,15 @@ log = logging.getLogger(__name__)
 
 # ── 메모리 임계값 (MB) ──
 # Polars 네이티브 메모리 포함, 단일 프로세스 기준
+# 2026-04-22 AI audit 관찰: 현대차·삼성전자급 대기업 + 14축 analysis 호출 시
+# peak 13GB 까지 폭증 → EMERGENCY 에서만 pinned 비움. 더 일찍 개입해야 한다.
+# - CRITICAL 1500 은 conftest.PYTEST_MEMORY_LIMIT_MB 기본값이라 유지 (테스트 한계)
+# - FATAL 을 1500 으로 하향: BoundedCache pinned 제외 비우기를 공격적으로
+# - EMERGENCY 를 2500 으로 하향: pinned 비우기 + string cache 회수를 일찍
 PRESSURE_WARNING_MB = 800.0  # 경고: 캐시 절반 축소
 PRESSURE_CRITICAL_MB = 1500.0  # 위험: 캐시 1/4 축소 + GC
-PRESSURE_FATAL_MB = 1900.0  # 치명: 캐시 전체 비우기 + GC
-PRESSURE_EMERGENCY_MB = 3500.0  # 응급: pinned 까지 비우기 + polars string cache 회수
+PRESSURE_FATAL_MB = 1500.0  # 치명: 캐시 전체(pinned 제외) 비우기 + GC
+PRESSURE_EMERGENCY_MB = 2500.0  # 응급: pinned 까지 비우기 + polars string cache 회수
 
 
 def get_memory_mb() -> float:
