@@ -143,17 +143,17 @@ dartlab.quant.verdict("005930")
 | 괴리 | divergence | 재무-기술적 괴리 진단 | 구현 |
 | 퀄리티 | quality | Asness 퀄리티 — 횡단면 z, 금융주 sector skip, CIS+IS 강건 추출 | ✅ Phase 2C 보완 완료 (성공률 6/15 → 10/15) |
 | 가치 | value | book-based 수익성/효율성 횡단면 z (시총 미수집으로 PBR/PER/PSR 미산출) | ✅ 재구현 완료 (Phase 2B). 한계 명시 — Phase 2A1 후 진짜 가치 팩터로 교체 |
-| 이익모멘텀 | earnings | SUE, PEAD, 수정 모멘텀 | stub |
+| 이익모멘텀 | earnings | SUE, PEAD, 수정 모멘텀 | 구현 (외부 호출 ≤1곳) |
 
 ### E. 텍스트/공시 (text) — dartlab 고유
 
 | 축 | key | 설명 | 상태 |
 |---|---|---|---|
-| 공시심리 | sentiment | Loughran-McDonald 감성 스코어링 | stub |
-| 톤변화 | toneChange | 기간별 공시 톤 변화 감지 | stub |
-| 이벤트신호 | eventSignal | allFilings 이벤트 기반 신호 | stub |
-| 리스크텍스트 | riskText | 리스크 팩터 텍스트 델타 | stub |
-| 거버넌스퀀트 | governanceQuant | 지배구조 품질 정량화 | stub |
+| 공시심리 | sentiment | Loughran-McDonald 감성 스코어링 (docs 텍스트 → pos/neg/uncert 집계 + 시계열) | 구현 (외부 호출 ≤1곳) |
+| 톤변화 | toneChange | 기간별 공시 톤 변화 감지 (연속 기간 감성 차 + 신규 부정 단어) | 구현 (외부 호출 ≤1곳) |
+| 이벤트신호 | eventSignal | allFilings 이벤트 기반 신호 (strategy/styles/eventDriven 사용 중) | 구현 |
+| 리스크텍스트 | riskText | 리스크 키워드 밀도·시계열·신규 키워드 탐지 | 구현 (외부 호출 ≤1곳) |
+| 거버넌스퀀트 | governanceQuant | 소유집중·감사의견·이사회·보수 4축 복합 점수 | 구현 (외부 호출 ≤1곳) |
 
 ### F. 횡단면 (crossSection) — 시장 레벨
 

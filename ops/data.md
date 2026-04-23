@@ -196,7 +196,7 @@ workflow_run trigger → Data Prebuild (DART) 자동 실행
 └──────┬───────────────────────────────────────────────────────────────────┘
        │
        ├─► Job: KindList  → updateKindList.py (KRX KIND 크롤링)
-       │                     → metadata/corpList.parquet (상장사 2,700+)
+       │                     → metadata/corpList.parquet (상장사 전체)
        │                     → SHA256 비교 → 변경 시 HF + GH Release
        │
        └─► Job: DartList  → updateDartList.py (OpenDART CORPCODE.xml)
@@ -240,9 +240,9 @@ workflow_run trigger → Data Prebuild (DART) 자동 실행
 
 | 카테고리 | 경로 | 설명 | 자동 수집 |
 |----------|------|------|-----------|
-| docs | dart/docs | 공시 문서 (~8GB, 2500+종목) | dataSync |
-| finance | dart/finance | 재무제표 (~600MB, 2700+종목) | dataSync |
-| report | dart/report | 정기보고서 (~320MB, 2700+종목) | dataSync |
+| docs | dart/docs | 공시 문서 (~8GB) | dataSync |
+| finance | dart/finance | 재무제표 (~600MB) | dataSync |
+| report | dart/report | 정기보고서 (~320MB) | dataSync |
 | scan | dart/scan | 전종목 횡단분석 프리빌드 | dataPrebuild |
 | allFilings | dart/allFilings | 전체 공시 원문 | 로컬 전용 |
 | stemIndex | dart/stemIndex | Ngram+Synonym 역인덱스 | 로컬 전용 |
@@ -301,7 +301,7 @@ workflow_run trigger → Data Prebuild (DART) 자동 실행
 
 - **스케줄**: 매일 UTC 00:00 (KST 09:00)
 - **2가지 수집**:
-  - **KindList**: KRX KIND 크롤링 → `metadata/corpList.parquet` (상장사 2,700+)
+  - **KindList**: KRX KIND 크롤링 → `metadata/corpList.parquet` (상장사 전체)
   - **DartList**: OpenDART CORPCODE.xml → `metadata/dartList.parquet` (전체 법인 115,000+, corp_code 8자리)
 - **흐름**: 각각 SHA256 비교 → 변경 시만 GitHub Release + HuggingFace 업로드
 

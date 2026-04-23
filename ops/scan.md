@@ -6,6 +6,62 @@
 
 전 종목 횡단분석. `scan()` 단일 진입점으로 시장 전체를 한 번에. DART + EDGAR 양쪽 지원.
 
+## 사상 — account / ratio = primitive, 복합 축 = preset
+
+scan 의 핵심 2 축은 `account` (계정 시계열) 와 `ratio` (비율 시계열). 둘 다 prebuild `finance.parquet` 을 lazy scan + pivot 으로 벡터 추출하며, 2664 종목 한 번에 계산된 wide DataFrame 을 반환한다.
+
+| 축 | 함수 | 역할 |
+|---|---|---|
+| **`account`** | [`scanAccount(snakeId)`](../src/dartlab/providers/dart/finance/scanAccount.py) | 전종목 × 시계열 금액 (매출·영업이익·자산·부채 등) |
+| **`ratio`** | [`scanRatio(ratioName)`](../src/dartlab/providers/dart/finance/scanAccount.py) | 전종목 × 시계열 비율 (영업이익률·ROE·부채비율·CCC 등) |
+
+`profitability` · `growth` · `quality` · `liquidity` · `cashflow` · `dividendTrend` 등 복합 축은 자주 쓰는 **preset** 이다. 각 preset 은 `account` + `ratio` 결과를 polars join + with_columns 로 조합한 구조이며, 사용자 질문에 맞는 정확한 preset 이 없을 때도 `account` + `ratio` 두 primitive 를 자유 조합해 즉석 스크리닝을 구성할 수 있다.
+
+scan 의 데이터 경로는 두 단계다. 첫째, prebuild `finance.parquet` 이 있으면 lazy scan + pivot 의 merged 경로로 2664 종목을 한 번에 계산한다. 둘째, prebuild 파일이 없거나 불완전하면 종목별 parquet 을 순회하는 per-file fallback (`_scanPerFile`) 이 동작한다. 두 경로 모두 종목별 최신 연도 필터는 [`filterLatestPerStock`](../src/dartlab/scan/_helpers.py) 공용 유틸을 통해 동일하게 처리된다.
+
+### 질문 유형 → primitive 조합 매핑
+
+| 사용자 질문 | 조합 패턴 |
+|---|---|
+| "요즘 성장세 좋은 회사" | `scanRatio("salesGrowth")` join `scanRatio("opIncomeGrowth")` — 둘 다 상위 교집합 |
+| "돈 잘 버는 회사" | `scanRatio("roe")` + `scanRatio("opMargin")` — 수익성 복합 |
+| "저평가인데 재무 탄탄" | `scan("valuation")` join `scanRatio("debtRatio")` + `scanRatio("currentRatio")` |
+| "턴어라운드 조짐" | `scanRatio("opMargin", annual=False)` 분기 추이 — 4분기 부호 전환 필터 |
+| "업종 평균 뛰어넘는" | scanRatio 결과 + listing 의 섹터 컬럼 join → 섹터별 rank |
+| "매출 늘었는데 이익 줄어든" | `scanAccount("sales")` vs `scanAccount("operating_profit")` YoY diff |
+| "최근 시장 어때" | `scan("valuation")` 상위 분포 + `scanRatio("salesGrowth")` 중앙값 + macro 사이클 |
+| "자산 많은데 수익 못 내는 곳" | `scanAccount("total_assets")` + `scanRatio("roa")` — 자산 상위 & ROA 하위 |
+| "배당 꾸준히 늘리는 곳" | `scan("dividendTrend")` 또는 `scanAccount("dividend")` 증가 패턴 |
+| "FCF 늘고 있는 곳" | `scanAccount("operating_cashflow")` YoY · `scanAccount("capex")` 변화 |
+
+### 관점별 스크리닝 프레임워크
+
+**1. 가치 (Value)**: `scan("valuation")` 하위 (PBR/PER 낮음) × `scanRatio("roe")` 상위 — "싸면서 수익성 있는" 교집합.
+
+**2. 성장 (Growth)**: `scanRatio("salesGrowth")` + `scanRatio("opIncomeGrowth")` + `scanRatio("netIncomeGrowth")` 모두 상위 — 외형·본업·순이익 동반 성장.
+
+**3. 퀄리티 (Quality)**: `scanRatio("roe") > 15` · `scanRatio("accrualRatio") 낮음` · `scanRatio("cfNi") > 1` · `scanRatio("debtRatio") < 100` — 높은 이익률 + 현금창출 + 보수적 재무.
+
+**4. 모멘텀 (Momentum)**: `scanAccount("operating_profit", annual=False)` 분기 개선 추세 — 최근 4분기 QoQ 양수.
+
+**5. 배당 (Income)**: `scan("dividendTrend")` 연속 증가 + `scanRatio("opCfMargin")` 안정 — 현금 배당 지속 가능성.
+
+**6. 턴어라운드 (Recovery)**: `scanRatio("opMargin")` 가 전전기 음수 → 최근 양수 반전 + `scanAccount("sales")` 동반 증가.
+
+**7. 안정 (Defensive)**: `scanRatio("debtRatio") < 50` · `scanRatio("currentRatio") > 150` · `scanRatio("interestCoverage") > 5` — 위기 버티기.
+
+### 기업 발굴 5 단계 워크플로
+
+dartlab scan 이 상정하는 기업 발굴 흐름은 매크로 맥락 → 관점 선택 → primitive 조합 스크린 → 섹터/규모 보정 → 상위 N 종목 심층의 5 단계다.
+
+1. **매크로 맥락**: `macro("사이클")` + `macro("자산배분")` 결과가 현재 어떤 관점을 유리하게 만드는지 제공한다. 회복 국면에서는 성장·모멘텀, 스태그플레이션 국면에서는 안정·배당 관점이 자산배분 시그널과 맞물린다.
+2. **관점별 preset 스크린**: 위 7 관점 중 매크로 판단에 맞는 것을 1~2 개 선택한다. primitive 조합으로 후보 50~100 종목이 추려진다.
+3. **섹터 / 규모 보정**: `listing()` 과 join 하면 섹터별 · 시총별 편중이 드러난다. 한 업종에 몰리는 경우 그 업종 특이 요인인지 전반 시장 패턴인지 구분된다.
+4. **상위 N 심층**: 후보 상위 5~10 종목에 대해 `Company(stockCode).analysis("종합평가")` · `credit` · `show` 가 개별 검증 경로다. scan 은 필터 축, Company 엔진은 개별 종목 판단 축이다.
+5. **과거 서사 확인**: `pastInsight(stockCode)` 는 과거 판단 컨텍스트를 제공한다. 이전 블로그 · analysis 가 남아있으면 현재 판단의 기준점이 된다.
+
+---
+
 ## 호출 계약
 
 ```python
@@ -61,7 +117,7 @@ dartlab.scan("profitability")     # 전종목 수익성 비교
 | efficiency | 자산/재고/매출채권 회전율 + CCC(현금전환주기) + 등급 |
 | quality | Accrual Ratio + CF/NI 비율 — 이익이 현금 뒷받침되는지 |
 | liquidity | 유동비율 + 당좌비율 — 단기 지급능력 |
-| valuation | PER/PBR/PSR + 시가총액 + 등급 (네이버 실시간) |
+| valuation | PER/PBR/PSR + 시가총액 + 등급. 일일 prebuild snapshot (HF `dart/scan/valuation.parquet`, GH Actions cron KST 04:00). 1초 이내 로드. 장중 급변 시 `refresh=True` 로 네이버 재수집 (~50초). |
 | cashflow | OCF/ICF/FCF + 현금흐름 패턴 분류 (8종) |
 | dividendTrend | DPS 3개년 시계열 + 패턴 분류 (연속증가/안정/감소/시작/중단) |
 
@@ -98,7 +154,7 @@ governance/workforce/capital/debt/network 5축이 Company-bound.
 
 ## scan 프리빌드 가속
 
-종목별 parquet 2700+개 순차 스캔 → 수분. 프리빌드 합산 parquet → **17초**.
+종목별 parquet 순차 스캔 → 수분. 프리빌드 합산 parquet → **17초**.
 
 ```
 data/dart/scan/

@@ -12,6 +12,7 @@
 |------|------|----------|
 | [company.md](company.md) | Company facade | 근본 전제, sections 사상, 편의성 3원칙, Dual Access |
 | [ai.md](ai.md) | AI 엔진 | P1~P8 원칙, 3 정보원천, override, tool schema |
+| [mcp.md](mcp.md) | MCP 서버 | 외부 LLM 클라이언트 노출 · 26 도구 · stdio/SSE |
 | [analysis.md](analysis.md) | 재무분석 | 14축, 6막 인과, forecast, valuation |
 | [review.md](review.md) | 보고서 | 11 타입 × 7 템플릿, 블록 카탈로그, narrate |
 | [scan.md](scan.md) | 시장 횡단 | 정식 7축, EDGAR 11축, 프리빌드 |
