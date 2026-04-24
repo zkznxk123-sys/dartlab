@@ -1,56 +1,58 @@
 # dartlab 테스트 · CI 운영 규칙
 
 **주체**: CI · 개발자 (pytest 실행자).
-**현재**: 3-tier CI (ci-fast 3분 / ci-full 10분 / ci-nightly 45분) · 8 marker 직교 체계 · 메모리 한계 매트릭스 · pytest-rerunfailures 자동 부착 · logger/print 경계 문서화.
-**방향**: test-fast 추가 튜닝 (6분 → 3분 이하) · fixture 기반 realData 전환 확대 · flaky 재시도 통계 대시보드.
+**현재**: 3-tier CI (ci-fast 3 분 · ci-full 10 분 · ci-nightly 45 분) · 8 marker 직교 체계 · 메모리 한계 매트릭스 · `pytest-rerunfailures` 자동 부착 · logger · print 경계 문서화.
+**방향**: test-fast 추가 튜닝 (6 분 → 3 분 이하) · fixture 기반 realData 전환 확대 · flaky 재시도 통계 대시보드.
 
-3-tier CI + 직교 marker + 메모리 정책 단일화로 구성된 테스트 운영 체계.
-
-## 핵심 원칙
-
-1. **CI 는 tier 로 분리된다** — 모든 push 마다 전 스위트 돌리지 않음.
-2. **logger 와 print 는 책임이 다르다** — 섞이면 테스트 캡처 설계 연쇄 깨짐.
-3. **Polars 메모리는 프로세스 단위로만 해제된다** — fixture scope, xdist
-   worker, `--forked` 가 전부.
-4. **network 테스트는 자동 재시도** — transient 실패를 진짜 회귀로 오인 금지.
+3-tier CI + 직교 marker + 메모리 정책 단일화로 구성된 테스트 운영 체계. 각 섹션은 **"이렇게 한다"** 명제로 열고, 반복된 실수는 섹션 하단 **"반복 실패"** 에 정리한다.
 
 ---
 
-## 3-Tier CI 구조
+## 1. 핵심 원칙 — 4 개로 간다
 
-### Tier 1 — `ci-fast.yml` (PR + master push, 목표 ≤ 3분)
+1. **CI 는 tier 로 분리한다** — 모든 push 마다 전 스위트 돌리지 않는다.
+2. **logger 와 print 는 책임이 다르다** — 섞이면 테스트 캡처 설계 연쇄 깨짐.
+3. **Polars 메모리는 프로세스 단위로만 해제된다** — fixture scope · xdist worker · `--forked` 가 전부.
+4. **network 테스트는 자동 재시도** — transient 실패를 진짜 회귀로 오인하지 않는다.
+
+---
+
+## 2. 3-Tier CI 구조
+
+### Tier 1 — `ci-fast.yml` (PR + master push, 목표 ≤ 3 분)
 
 즉시 피드백 게이트. 머지 전 blocking.
 
 | Job | 역할 | 실측 목표 |
 |---|---|---|
-| `format` | ruff format --check | < 30s |
-| `lint` | ruff + silent-fail 검사 | < 30s |
-| `typecheck` | pyright (warning-only) | < 2m |
+| `format` | `ruff format --check` | < 30s |
+| `lint` | `ruff` + silent-fail 검사 | < 30s |
+| `typecheck` | `pyright` (warning-only) | < 2m |
 | `smoke` | import smoke | < 30s |
 | `test-fast` | `pytest -m unit -n auto` | < 2m |
-| `wheel-smoke` | python -m build + 번들 검증 | < 1m |
-| `quality-gate` | radon/vulture (warning-only) | < 30s |
-| `security` | pip-audit (warning-only) | < 1m |
-| `deps-check` | deptry (warning-only) | < 1m |
+| `wheel-smoke` | `python -m build` + 번들 검증 | < 1m |
+| `quality-gate` | radon · vulture (warning-only) | < 30s |
+| `security` | `pip-audit` (warning-only) | < 1m |
+| `deps-check` | `deptry` (warning-only) | < 1m |
 | `notebooks` | 문법만 검증 | < 30s |
 
-**제외**: realData · integration · requires_data · cross-os · fixture-
-integration (전부 Tier 2+ 로 이동).
+**제외**: realData · integration · requires_data · cross-os · fixture-integration (전부 Tier 2+ 로 이동).
 
-### Tier 2 — `ci-full.yml` (master push only, 목표 ≤ 10분)
+**반복 실패** — realData 를 ci-fast 에 넣으면 3 분 목표 파괴 + transient 실패로 PR 블로킹. 반드시 ci-full · ci-nightly 로 분리.
+
+### Tier 2 — `ci-full.yml` (master push only, 목표 ≤ 10 분)
 
 머지 후 통합 회귀 검증.
 
 | Job | 역할 | 실측 목표 |
 |---|---|---|
-| `test-full` | 3.12/3.13 matrix, integration + requires_data 포함 | < 10m |
+| `test-full` | 3.12 · 3.13 matrix, integration + requires_data 포함 | < 10m |
 | `fixture-integration` | high-memory 파일 격리 실행 | < 8m |
-| `cross-os-smoke` | ubuntu/windows/macos 3 OS bundle 검증 | < 5m |
+| `cross-os-smoke` | ubuntu · windows · macos 3 OS bundle 검증 | < 5m |
 | `realdata-plan` | git diff → test 파일 리스트 | < 30s |
 | `realdata-suite` | path-filter matrix (변경된 엔진 + facade smoke) | < 20m |
 
-### Tier 3 — `ci-nightly.yml` (cron 15:00 UTC = KST 00:00, 목표 ≤ 45분)
+### Tier 3 — `ci-nightly.yml` (cron 15:00 UTC = KST 00:00, 목표 ≤ 45 분)
 
 환경·데이터·분포 edge 검증.
 
@@ -60,29 +62,28 @@ integration (전부 Tier 2+ 로 이동).
 | `external-venv-smoke` | 최신 PyPI wheel 빈 venv 설치 후 8 엔진 | < 15m |
 | `freshInstall` | 빈 캐시 → HF 자동 다운로드 경로 | < 30m |
 
-### Tier 4 — 수동 dispatch / weekly (on-demand)
+### Tier 4 — 수동 dispatch · weekly
 
-`workflow_dispatch` 로 수동 트리거. bench / coverage-report / pyodide
-smoke 등.
+`workflow_dispatch` 로 수동 트리거. bench · coverage-report · pyodide smoke 등.
 
 ---
 
-## Marker 정책 (직교 체계)
+## 3. Marker 정책 — 직교 8 체계로 간다
 
 `pyproject.toml::tool.pytest.ini_options.markers`:
 
 | Marker | 의미 | 실행 tier |
 |---|---|---|
-| `unit` | 순수 로직, mock 만, 데이터 로드 X, 병렬 안전 | Tier 1 (test-fast) |
-| `integration` | Company 1개 로딩 | Tier 2 (test-full) |
+| `unit` | 순수 로직, mock 만, 데이터 로드 없음, 병렬 안전 | Tier 1 (test-fast) |
+| `integration` | Company 1 개 로딩 | Tier 2 (test-full) |
 | `heavy` | 대량 데이터 로드, 단독 실행 | Tier 3 or manual |
-| `realData` | 엔진별 실제 데이터 스모크 (HF parquet) | Tier 2 (path-filter) / Tier 3 (전수) |
+| `realData` | 엔진별 실제 데이터 스모크 (HF parquet) | Tier 2 (path-filter) · Tier 3 (전수) |
 | `requires_data` | 로컬 parquet 필요 — CI 에서 자동 skip (conftest 자동 부착) | Tier 2 |
 | `freshInstall` | 빈 캐시 → 자동 다운로드 | Tier 3 |
-| `network` | 외부 HTTP 호출 (HF/DART/EDGAR/FRED) — flaky retry 적용 | 직교 (realData 가 자동 부착) |
-| `slow` | 실행 30초 이상 — PR fast path 제외 | 직교 |
+| `network` | 외부 HTTP 호출 (HF · DART · EDGAR · FRED) — flaky retry 적용 | 직교 (realData 가 자동 부착) |
+| `slow` | 실행 30 초 이상 — PR fast path 제외 | 직교 |
 
-### 자동 부착 규칙 (conftest.py `pytest_collection_modifyitems`)
+### 자동 부착 규칙 (`conftest.py::pytest_collection_modifyitems`)
 
 ```
 realData    → network        (자동)
@@ -90,47 +91,45 @@ network     → flaky(reruns=2) (자동, pytest-rerunfailures 설치 시)
 skipif-data → requires_data   (자동)
 ```
 
-**효과**: `@pytest.mark.realData` 만 달면 network + flaky 가 암묵 적용.
-테스트 작성자가 신경 쓸 marker 는 `unit` / `integration` / `realData` 3개.
+**효과**: `@pytest.mark.realData` 만 달면 `network` + `flaky` 가 암묵 적용. 테스트 작성자가 신경 쓸 marker 는 `unit` · `integration` · `realData` 3 개.
 
 ---
 
-## 메모리 정책
+## 4. 메모리 — 프로세스 단위로 해제한다
 
-Polars 는 네이티브 Rust 힙 사용 → Python `gc.collect()` 로 회수 불가 →
-**프로세스 종료가 유일한 완전 해제 방법**.
+Polars 는 네이티브 Rust 힙 사용 → Python `gc.collect()` 로 회수 불가 → **프로세스 종료가 유일한 완전 해제 방법**.
 
 ### 메모리 한계 매트릭스
 
 | 컨텍스트 | `PYTEST_MEMORY_LIMIT_MB` | 이유 |
 |---|---|---|
 | default (unit) | 1500 | Company 로드 없음, 여유 마진 |
-| `test-fast` (Tier 1) | 1900 | xdist -n auto, worker 당 안전 |
-| `test-full` (Tier 2) | 1900 | xdist -n 2, Polars 누적 방지 |
+| `test-fast` (Tier 1) | 1900 | xdist `-n auto`, worker 당 안전 |
+| `test-full` (Tier 2) | 1900 | xdist `-n 2`, Polars 누적 방지 |
 | `fixture-integration` (Tier 2) | 5000 | 파일별 독립 프로세스 |
-| `realdata-suite` (Tier 2/3) | 6000 | scan 20 axes 시 3~4GB 관측 |
+| `realdata-suite` (Tier 2 · 3) | 6000 | scan 20 axes 시 3~4GB 관측 |
 
-환경변수 `PYTEST_MEMORY_LIMIT_MB` 미지정 시 `conftest.py` 가 `PRESSURE_
-CRITICAL_MB=1500` 적용.
+환경변수 `PYTEST_MEMORY_LIMIT_MB` 미지정 시 `conftest.py` 가 `PRESSURE_CRITICAL_MB=1500` 적용.
 
 ### 프로세스 격리 메커니즘
 
-1. **xdist** (`pytest -n N`): N 개 worker 프로세스. worker 간 메모리 격리.
-2. **`test-realdata.sh`**: 파일 단위 독립 pytest 프로세스 — `for f in tests/realData/*.py; do pytest $f; done`. realdata matrix 각 shard 가 이 모드.
-3. **`test-lock.sh`**: `/tmp/dartlab-test.lock` 기반 세션 간 직렬화. 동시
-   pytest 실행 방지.
+1. **xdist** (`pytest -n N`) — N 개 worker 프로세스. worker 간 메모리 격리.
+2. **`test-realdata.sh`** — 파일 단위 독립 pytest 프로세스 — `for f in tests/realData/*.py; do pytest $f; done`. realdata matrix 각 shard 가 이 모드.
+3. **`test-lock.sh`** — `/tmp/dartlab-test.lock` 기반 세션 간 직렬화. 동시 pytest 실행 방지.
 
-### Fixture scope 규칙
+### Fixture scope
 
-- **module scope 권장** — 파일 단위 로드/해제.
+- **module scope 권장** — 파일 단위 로드·해제.
 - **session scope 지양** — Company 여러 개 로드 누적 시 OOM.
-- **function scope**: 필요하면 사용. 단 `gc.collect()` 권장.
+- **function scope** — 필요하면 사용, `gc.collect()` 권장.
+
+**반복 실패** — session scope fixture 에 Company 여러 개 로드 → OOM. module scope + `test-realdata.sh` 파일별 프로세스로 격리.
 
 ---
 
-## logger vs print 경계
+## 5. logger vs print — 섞지 않는다
 
-코드 어디에 무엇을 쓸지 혼동하면 테스트가 깨진다. **섞으면 안 된다**.
+코드 어디에 무엇을 쓸지 혼동하면 테스트가 깨진다.
 
 ### 어떤 출력이 어느 채널인가
 
@@ -138,8 +137,8 @@ CRITICAL_MB=1500` 적용.
 |---|---|---|
 | 라이브러리 내부 진단 (`src/dartlab/**/*.py`) | `logger = getLogger(__name__)` | 사용자 `setLevel(WARNING)` 로 제어 가능 |
 | CLI user-facing (`src/dartlab/cli/**`) | `print()` | 터미널 응답 자체가 사용자 가치 |
-| 사용자 interactive (`setup()`, `ask()` 등) | `print()` | REPL/노트북 직접 반응 |
-| 시각화 marker (`viz.emit_chart` `<!--DARTLAB_VIZ:-->` ) | `print()` | webview/extension 이 stdout 파싱 |
+| 사용자 interactive (`setup()` · `ask()` 등) | `print()` | REPL · 노트북 직접 반응 |
+| 시각화 marker (`viz.emit_chart` `<!--DARTLAB_VIZ:-->` ) | `print()` | webview · extension 이 stdout 파싱 |
 | 서버 부트스트랩 (`server/runtime.py`) | `print()` | logger 초기화 전 가능성 |
 | 테스트 도우미 | `print()` OK | 디버그 편의성 |
 
@@ -148,20 +147,19 @@ CRITICAL_MB=1500` 적용.
 | 대상 | 올바른 fixture | 사례 |
 |---|---|---|
 | logger 출력 (`_log.info(...)` 등) | **`caplog`** | `with caplog.at_level(logging.WARNING, logger="dartlab.viz"): ...; assert "..." in caplog.text` |
-| 사용자 print (CLI, viz marker) | `capsys` | `out = capsys.readouterr().out; assert "..." in out` |
+| 사용자 print (CLI · viz marker) | `capsys` | `out = capsys.readouterr().out; assert "..." in out` |
 | 파일 디스크립터 레벨 (서브프로세스 포함) | `capfd` | 드물게 필요 |
 
-**흔한 실수**: `logger.info` 출력을 `capsys.readouterr().out` 으로 검증
-→ 캡처 실패. 반드시 `caplog.text` 사용.
+**반복 실패** — `logger.info` 출력을 `capsys.readouterr().out` 으로 검증 → 캡처 실패. 반드시 `caplog.text` 사용.
 
 **dartlab logger 설계 (`src/dartlab/core/logger.py`)**:
-- root `dartlab` logger 에 stderr StreamHandler 자동 부착 (최초 1회).
-- `propagate=True` 유지 → pytest caplog 가 dartlab 레코드 캡처 가능.
+- root `dartlab` logger 에 stderr `StreamHandler` 자동 부착 (최초 1 회).
+- `propagate=True` 유지 → pytest `caplog` 가 dartlab 레코드 캡처 가능.
 - 기본 레벨 INFO. 사용자는 `logging.getLogger("dartlab").setLevel(WARNING)` 으로 silence 가능.
 
 ---
 
-## 실행 가이드
+## 6. 실행 가이드
 
 ### 로컬 (개발 중)
 
@@ -179,7 +177,7 @@ bash scripts/dev/test-realdata.sh tests/realData -v
 bash scripts/dev/test-realdata.sh tests/realData/test_analysis.py -v
 ```
 
-### CI 재현 (어느 tier 에서 돌 지 확인)
+### CI 재현
 
 ```bash
 # Tier 1 PR push 재현
@@ -198,72 +196,57 @@ python -m venv /tmp/smoke && /tmp/smoke/bin/pip install dartlab
 
 ---
 
-## 깨지기 쉬운 영역과 회피법
+## 7. 깨지기 쉬운 영역과 회피법
 
-### 1. Logger refactor 후 capsys 테스트 실패
+### 1) Logger refactor 후 capsys 테스트 실패
 
-**증상**: `assert "[dartlab]" in captured.out` → empty.
+- **증상**: `assert "[dartlab]" in captured.out` → empty.
+- **원인**: print → logger 치환 후 출력이 stderr (logger) 로 이동. `capsys` 는 stdout 만 자동 캡처.
+- **회피**: logger 관련 assertion 은 `caplog.text` 사용.
 
-**원인**: print → logger 치환 후 출력이 stderr(logger)로 이동. capsys 는
-stdout 만 자동 캡처.
+### 2) 매 push 마다 realdata 도는 것 같음
 
-**회피**: logger 관련 assertion 은 `caplog.text` 사용. 위 [logger vs print]
-섹션 표 참조.
+- **증상**: PR push 에 `realdata-suite` 실행.
+- **원인**: ci-fast 에 realdata 가 있으면 안 됨. `ci-fast.yml` 체크.
+- **회피**: realdata 는 `ci-full.yml` (master push) 또는 `ci-nightly.yml` 에만.
 
-### 2. 매 push 마다 realdata 도는 것 같음
+### 3) 메모리 초과로 pytest 중단
 
-**증상**: PR push 에 realdata-suite 실행.
+- **증상**: `⚠ 메모리 안전 종료: 1566MB > 1500MB 한계 초과`.
+- **원인**: Polars 누적. 단일 세션에서 Company 여러 개 로드.
+- **회피**: 파일별 독립 pytest (`test-realdata.sh`) 또는 xdist `-n 2+` 로 worker 격리.
 
-**원인**: ci-fast 에 realdata 가 있으면 안 됨. ci-fast.yml 체크.
+### 4) Network 의존 테스트 간헐적 실패
 
-**회피**: realdata 는 ci-full.yml (master push) 또는 ci-nightly.yml 에만.
+- **증상**: HF 429 · DART timeout 등 transient.
+- **원인**: 재시도 없으면 한 번 hiccup → CI red.
+- **회피**: `@pytest.mark.realData` 달면 자동으로 `network` + `flaky(reruns=2)` 부착. 아니면 수동 `@pytest.mark.network`.
 
-### 3. 메모리 초과로 pytest 중단
+### 5) 번들 리소스 누락
 
-**증상**: `⚠ 메모리 안전 종료: 1566MB > 1500MB 한계 초과`.
-
-**원인**: Polars 누적. 단일 세션에서 Company 여러 개 로드.
-
-**회피**: 파일별 독립 pytest (`test-realdata.sh`) 또는 xdist `-n 2+` 로
-worker 격리.
-
-### 4. Network 의존 테스트 간헐적 실패
-
-**증상**: HF 429, DART timeout 등 transient.
-
-**원인**: 재시도 없으면 한 번 hiccup → CI red.
-
-**회피**: `@pytest.mark.realData` 달면 자동으로 `network` + `flaky(reruns=
-2)` 부착. 아니면 수동 `@pytest.mark.network`.
-
-### 5. 번들 리소스 누락
-
-**증상**: wheel 설치 후 런타임에서 `sectionMappings.json` 등 누락 → None
-조용히 반환.
-
-**원인**: `pyproject.toml::[tool.hatch.build.targets.wheel].include` 누락.
-
-**방어**: `wheel-smoke` job (Tier 1) + `test_bundledResources` 유닛 + `test_
-wheelPackaging` heavy 3중 체크.
+- **증상**: wheel 설치 후 런타임에서 `sectionMappings.json` 등 누락 → None 조용히 반환.
+- **원인**: `pyproject.toml::[tool.hatch.build.targets.wheel].include` 누락.
+- **방어**: `wheel-smoke` job (Tier 1) + `test_bundledResources` 유닛 + `test_wheelPackaging` heavy 3 중 체크.
 
 ---
 
-## 품질 게이트 (변동 허용 범위)
+## 8. 품질 게이트 — `qualityGate.py` 가 Tier 1 에서 돌린다
 
 `scripts/audit/qualityGate.py` 가 Tier 1 `quality-gate` 에서 실행:
-- E/F-rank 함수 수 — baseline 기록 대비 증가 시 warning (block 아님).
-- Dead code — vulture 기준 0건 요구.
-- baseline 파일: `scripts/audit/qualityHistory.jsonl` (master push 에서만 기록).
+- E · F-rank 함수 수 — baseline 기록 대비 증가 시 warning (block 아님).
+- Dead code — vulture 기준 0 건 요구.
+- baseline 파일 — `scripts/audit/qualityHistory.jsonl` (master push 에서만 기록).
 
-Coverage ratchet:
+### Coverage ratchet
+
 - 현재 `--cov-fail-under=40` (Tier 2 `test-full`).
-- 상향은 사용자 지시 시에만. 자동 조정 금지.
+- 상향은 사용자 지시 시에만. 자동 조정 없음.
 
 ---
 
 ## 참고 문서
 
-- `ops/code.md` — docstring 9섹션 rule, 릴리즈 절차, 1.0.0 판정 기준.
+- `ops/code.md` — docstring 9 섹션 · 릴리즈 절차 · 1.0.0 판정 기준.
 - `CLAUDE.md` — 메모리 안전 강행 규칙 + 사용자 지시 이행.
 - `.github/scripts/planRealdata.py` — realdata path-filter 매핑 코드.
 - `scripts/dev/test-lock.sh` — 세션 직렬화 스크립트.
@@ -273,4 +256,17 @@ Coverage ratchet:
 
 ## 변경 이력
 
-- 2026-04-22: 3-tier split + 직교 marker + flaky retry 자동화 적용.
+- 2026-04-22 — 3-tier split + 직교 marker + flaky retry 자동화 적용.
+
+---
+
+## 요약 — 명제 8 줄
+
+1. CI 는 3 tier (ci-fast 3 분 · ci-full 10 분 · ci-nightly 45 분) + 수동 tier 로 분리.
+2. marker 는 직교 8 체계, 테스트 작성자가 붙이는 건 `unit` · `integration` · `realData` 3 개.
+3. Polars 메모리는 프로세스 격리로만 해제 — xdist · `test-realdata.sh` · `test-lock.sh` 3 수단.
+4. Fixture scope 는 module 권장, session 지양, Company 누적 로드가 OOM 원인.
+5. logger 는 `caplog`, print 는 `capsys`, 섞으면 테스트 캡처가 깨진다.
+6. `@pytest.mark.realData` 는 자동으로 network + flaky(reruns=2) 부착.
+7. 번들 리소스 누락은 wheel-smoke + test_bundledResources + test_wheelPackaging 3 중 방어.
+8. 품질 게이트는 E·F-rank + vulture dead code + coverage `--cov-fail-under=40`, 상향은 사용자 지시 시에만.
