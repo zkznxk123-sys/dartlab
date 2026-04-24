@@ -91,8 +91,20 @@ def _stockSharesSeries(stockCode: str, market: str) -> pl.DataFrame | None:
     return df.drop_nulls("rcept_date").sort("rcept_date")
 
 
-def marketCap(stockCode: str, *, market: str = "auto") -> pl.DataFrame | None:
+def marketCap(
+    stockCode: str,
+    *,
+    market: str = "auto",
+    start: str | None = None,
+    end: str | None = None,
+) -> pl.DataFrame | None:
     """시가총액 일별 시계열.
+
+    KR (2026-04-24 정정 — Phase A): KRX OpenAPI ``MKTCAP`` + ``LIST_SHRS`` 컬럼 직접 사용.
+    이전엔 DART 분기 sharesOutstanding × 일별 close 합성 (분기-일별 mismatch 로 부정확).
+    이제 KRX 가 일별로 정확히 계산한 시총 그대로 — `gather/_hfBulk.loadFiltered` 경유.
+
+    US: 기존 sharesOutstanding × close 합성 유지 (EDGAR XBRL).
 
     Parameters
     ----------
@@ -109,15 +121,36 @@ def marketCap(stockCode: str, *, market: str = "auto") -> pl.DataFrame | None:
         - date : Date — 거래일
         - close : float — 종가 (원 또는 해당 통화)
         - volume : int — 거래량 (주)
-        - commonOutstanding : float — 보통주 발행주식수 (주)
-        - preferredOutstanding : float — 우선주 발행주식수 (주)
-        - marketCap : float — 보통주 시가총액 (원) = close × commonOutstanding
-        - marketCapTotal : float — 전체 시가총액 (원) = close × (보통주 + 우선주)
+        - commonOutstanding : float — 보통주 발행주식수 (주, KR 은 ``LIST_SHRS``)
+        - preferredOutstanding : float — 우선주 발행주식수 (주, KR 은 별도 ISU_CD 거래)
+        - marketCap : float — 보통주 시가총액 (원, KR 은 ``MKTCAP`` 직접)
+        - marketCapTotal : float — 전체 시가총액 (원). KR 은 marketCap 동일 (우선주 별도 ISU_CD 로 합산 시 별도 호출).
 
-        주가 또는 발행주식수 없으면 None.
+        데이터 없으면 None.
     """
     market = resolve_market(stockCode, market)
 
+    if market == "KR":
+        # KRX 일별 시총 직접 사용 — DART 합성 폐기 (Phase A)
+        from dartlab.gather._hfBulk import loadFiltered
+
+        df = loadFiltered(stockCode=stockCode, start=start, end=end, adjustment="raw")
+        if df is None or df.is_empty():
+            log.warning("marketCap: KR HF 데이터 없음 %s (HF 미빌드 또는 종목 미수집)", stockCode)
+            return None
+        return df.select(
+            [
+                pl.col("BAS_DD").str.to_date("%Y%m%d", strict=False).alias("date"),
+                pl.col("TDD_CLSPRC").cast(pl.Float64).alias("close"),
+                pl.col("ACC_TRDVOL").alias("volume"),
+                pl.col("LIST_SHRS").cast(pl.Float64).alias("commonOutstanding"),
+                pl.lit(0.0).alias("preferredOutstanding"),
+                pl.col("MKTCAP").cast(pl.Float64).alias("marketCap"),
+                pl.col("MKTCAP").cast(pl.Float64).alias("marketCapTotal"),
+            ]
+        ).sort("date")
+
+    # US — 기존 sharesOutstanding × close 합성 (EDGAR XBRL)
     px = fetch_ohlcv(stockCode)
     if px is None or not isinstance(px, pl.DataFrame) or px.is_empty():
         log.warning("marketCap: 주가 없음 %s", stockCode)
@@ -152,7 +185,13 @@ def marketCap(stockCode: str, *, market: str = "auto") -> pl.DataFrame | None:
     return merged.drop("rcept_date") if "rcept_date" in merged.columns else merged
 
 
-def marketCapSnapshot(stockCode: str, *, market: str = "auto") -> dict | None:
+def marketCapSnapshot(
+    stockCode: str,
+    *,
+    market: str = "auto",
+    start: str | None = None,
+    end: str | None = None,
+) -> dict | None:
     """최신 시가총액 한 점.
 
     Parameters
@@ -178,7 +217,15 @@ def marketCapSnapshot(stockCode: str, *, market: str = "auto") -> dict | None:
 
         데이터 없으면 None.
     """
-    df = marketCap(stockCode, market=market)
+    # 디폴트: 최근 30일 (snapshot 은 최신 한 점만 필요 — 전체 연도 fetch 회피)
+    if start is None and end is None:
+        from datetime import date as _d
+        from datetime import timedelta as _td
+
+        end_d = _d.today()
+        start = (end_d - _td(days=30)).strftime("%Y-%m-%d")
+        end = end_d.strftime("%Y-%m-%d")
+    df = marketCap(stockCode, market=market, start=start, end=end)
     if isEmptyDf(df):
         return None
     df = df.drop_nulls("marketCap")
@@ -197,9 +244,39 @@ def marketCapSnapshot(stockCode: str, *, market: str = "auto") -> dict | None:
     }
 
 
-# marketCapAll() 은 의도적으로 제공하지 않는다.
-# 이유: 전 종목 시총 횡단면은 종목별 OHLCV 반복 fetch 가 본질적으로 필요하고,
-#       Yahoo rate limit + KR fallback 비용으로 비현실적 (실측 ~3시간).
-# 시총은 한 종목씩만 합성한다 — `marketCap(stockCode)` / `marketCapSnapshot(stockCode)`.
-# 횡단면 가치 분석이 필요하면 finance.parquet book-based proxy (valueFactor 의
-# 기존 방식) 를 사용한다.
+def marketCapAll(
+    *,
+    start: str | None = None,
+    end: str | None = None,
+    market: str = "ALL",
+) -> pl.DataFrame | None:
+    """일별 전종목 시가총액 — wide pivot (행 = 회사, 열 = 일자, KR 전용).
+
+    Capabilities:
+        - KRX OpenAPI ``MKTCAP`` 컬럼 직접 사용 (DART 합성 폐기 — 분기-일별 mismatch 회피)
+        - dartlab 표준 wide schema: ``stockCode + corpName + 일자들``
+        - quant `factorBuild`, `valueFactor`, scan valuation 의 횡단면 시총 source
+        - `gather("krx", "marketCap", ...)` 와 동등 (별도 진입점이 아니라 marketCap 영역 SSOT)
+
+    AIContext:
+        - Phase A2 — Phase B (FF5 size proxy → 진짜 시총) 의 전제
+        - 호출자: `quant/factorBuild.py`, `quant/valueFactor.py`, `scan/valuation/`
+
+    Args:
+        start: 기간 시작 (YYYY-MM-DD).
+        end: 기간 종료. None 이면 end=start (단일일자).
+        market: ``"KOSPI"`` | ``"KOSDAQ"`` | ``"ALL"`` (기본).
+
+    Returns:
+        pl.DataFrame — wide pivot:
+            stockCode : str
+            corpName : str
+            {YYYYMMDD} : Int64 — 일자별 시총 (원)
+
+        데이터 없으면 None.
+    """
+    if start is None:
+        raise ValueError("marketCapAll: start 필수 (단일일자도 start 만)")
+    from dartlab.gather.krxApi import gatherKrx
+
+    return gatherKrx("marketCap", start=start, end=end, market=market)

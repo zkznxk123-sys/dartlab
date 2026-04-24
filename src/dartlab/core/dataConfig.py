@@ -46,6 +46,11 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "SEC EDGAR 분기 벌크 메타 (sub/pre/tag)",
         "public": True,
     },
+    "krxPrices": {
+        "dir": "krx/prices",
+        "label": "KRX 일별 전종목 OHLCV+시총+발행주식수 (raw, long parquet)",
+        "public": True,
+    },
     # ── generated artifact (landing 빌드 시 HF 에서 fetch) ──
     "industryMap": {
         "dir": "landing/map",

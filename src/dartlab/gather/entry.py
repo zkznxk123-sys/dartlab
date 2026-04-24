@@ -77,6 +77,29 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         description="동종업종 피어 종목 목록 (종목코드+시총). KR: KRX/네이버",
         example='gather("peers", "005930")',
     ),
+    "krx": _GatherAxisEntry(
+        label="KRX 회사별 시계열",
+        description=(
+            "KOSPI/KOSDAQ 전종목 wide pivot — 행=stockCode+corpName, 열=일자. "
+            "target (positional) 으로 raw OHLCV (close/open/high/low/volume/marketCap/...) "
+            "또는 보조지표 (rsi14/ma20/ema60/macd/atr14/obv/...) 28+ 디스패치. "
+            "target='raw' 면 long (KRX 원본 컬럼). "
+            "apiKey 없음 (기본): HF SSOT. apiKey 명시: KRX OpenAPI 직접. 환경변수 자동 read X."
+        ),
+        example='gather("krx", "close", start=, end=) / gather("krx", "rsi14", start=, end=) / gather("krx", "marketCap", date=)',
+        targetRequired=False,
+    ),
+    "krxindex": _GatherAxisEntry(
+        label="KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지)",
+        description=(
+            "KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) "
+            "OHLCV + 거래량 + 시가총액. target=close/open/high/low/volume/marketCap/raw. "
+            "indexFilter=[지수명] 으로 특정 지수 (예: KOSPI200 + 보조지표 자동). "
+            "apiKey 명시 필수 — idx 카테고리 권한 별도 신청 (sto 종목 키와 분리)."
+        ),
+        example='gather("krxIndex", "close", market="KOSPI", start=, end=, apiKey="...")',
+        targetRequired=False,
+    ),
 }
 
 _ALIASES: dict[str, str] = {
@@ -349,6 +372,30 @@ class GatherEntry:
                     f"종목코드/티커를 확인하세요 (market={market}). "
                     f"네트워크 또는 외부 API 일시적 오류일 수도 있습니다."
                 )
+            # indicators 옵션 — 단일 종목/지수 OHLCV 에 보조지표 컬럼 추가
+            #   default "basic": 9 핵심 지표 자동 (사용자 편의 — 호출 한번에 분석 가능)
+            #   False: raw OHLCV 만
+            #   True: 30 표준 지표 모두
+            #   list[str]: 지정한 지표만 (예: ["rsi14", "ma20"])
+            indicators = kwargs.pop("indicators", "basic")
+            if indicators == "basic":
+                indicators = [
+                    "sma5",
+                    "sma20",
+                    "sma60",
+                    "ema12",
+                    "ema26",
+                    "rsi14",
+                    "macd",
+                    "atr14",
+                    "obv",
+                ]
+            elif indicators is False:
+                indicators = None
+            if indicators:
+                from dartlab.gather._indicatorDispatch import addIndicators
+
+                result = addIndicators(result, indicators=indicators)
             return result
         if axis == "flow":
             return g.flow(target, market=market)
@@ -412,6 +459,40 @@ class GatherEntry:
             if not peers:
                 return pl.DataFrame()
             return pl.DataFrame(peers)
+        if axis == "krx":
+            from dartlab.gather.krxApi import gatherKrx
+
+            apiKey = kwargs.pop("apiKey", None)
+            stockCodes = kwargs.pop("stockCodes", None)
+            # date legacy alias — 단일일자 호출의 호환성 (start 로 매핑 후 폐기)
+            legacyDate = kwargs.pop("date", None)
+            if legacyDate is not None and start is None:
+                start = legacyDate
+            return gatherKrx(
+                target or "close",
+                start=start,
+                end=end,
+                market=market,
+                stockCodes=stockCodes,
+                apiKey=apiKey,
+            )
+        if axis == "krxindex":
+            from dartlab.gather.krxIndex import gatherKrxIndex
+
+            apiKey = kwargs.pop("apiKey", None)
+            indexFilter = kwargs.pop("indexFilter", None)
+            indicators = kwargs.pop("indicators", "basic")
+            # market 디폴트는 "KOSPI" — entry 수준 market="KR" 와 별개
+            idx_market = kwargs.pop("indexMarket", None) or ("KOSPI" if market in ("KR", "KOSPI") else market)
+            return gatherKrxIndex(
+                target or "close",
+                market=idx_market,
+                start=start,
+                end=end,
+                apiKey=apiKey,
+                indexFilter=indexFilter,
+                indicators=indicators,
+            )
 
         raise ValueError(f"미지원 gather 축: {axis}")
 
@@ -436,6 +517,7 @@ class GatherEntry:
             "insider": "DART_API_KEY",
             "ownership": "불필요",
             "peers": "불필요",
+            "krx": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX OpenAPI 직접 호출)",
         }
         rows = [
             {
