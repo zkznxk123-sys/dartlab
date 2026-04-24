@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from dartlab.quant.indicators import vema, vrsi
+from dartlab.gather.indicators import vema, vrsi
 from dartlab.quant.regime import _regimeSeries
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal

@@ -1,20 +1,25 @@
-"""횡단면 팩터 시계열 빌드 — Book-based SMB/HML/RMW/CMA.
+"""횡단면 팩터 시계열 빌드 — 진짜 시총 기반 SMB/HML/RMW/CMA (Fama-French 표준).
 
-진짜 시가총액 데이터가 dartlab에 아직 수집돼 있지 않아 (stockTotal apiType 미수집)
-**자본총계(book equity)를 size proxy로 사용한다.**
+KR (2026-04-24 Phase B0 정정): KRX OpenAPI ``MKTCAP`` 컬럼 직접 사용 → 진짜 시총 기반
+SMB (small-minus-big), HML (high-BM-minus-low-BM, BM = equity/marketCap). audit (2026-04-06)
+의 −0.51 상관 폐기 사례 해결.
 
-학술적 정확성:
-- Fama-French 원본은 시총 기반 SMB. 자본총계 size는 differ하지만 한국 중소형주
-  스크리닝에서는 실용적 근사로 사용 가능 (Bali et al. 2016 등 다수 한국 시장
-  연구가 size proxy로 자본총계를 채택).
-- HML은 본래 BM = book/market인데 이번엔 자본/자산 비율(equity/assets)을 사용 →
-  엄밀히는 자본구조 팩터. 시총 데이터가 들어오면 진짜 BM으로 교체.
-- RMW = ROE 5분위 (Asness 정의와 일치)
-- CMA = 전기 대비 자산성장률(ΔAssets/Assets) 5분위 (Fama-French 5 정의)
+US (EDGAR): 시총 데이터 미수집 → fallback book-equity proxy 유지.
 
-이 모듈은 audit에서 발견한 가짜 변동성 합성 프록시를 대체한다 (factor.md 참조).
+학술 정의:
+- SMB = small marketCap 종목 평균 - big marketCap 종목 평균 (Fama-French 1992 원본)
+- HML = high BM (= equity / marketCap) 종목 평균 - low BM 종목 평균
+- RMW = high ROE 종목 평균 - low ROE 종목 평균 (Asness 정의)
+- CMA = conservative (low asset growth) 종목 평균 - aggressive 종목 평균 (Fama-French 2015)
 
-빌드된 시계열은 캐시되며, factor.py의 analyze_factor가 회귀 입력으로 사용한다.
+데이터 흐름 (KR):
+1. `_build_universe_metrics` — DART finance.parquet 단년도 펀더멘털 + KRX 연도말 시총 (`marketCapAll`)
+2. `_quintile_portfolios` — 5분위 상위/하위 (각 ~20%)
+3. `_portfolio_returns` — 동일가중 일별 log return
+4. `build_factors` — SMB/HML/RMW/CMA 시계열
+
+빌드된 시계열은 캐시되며, factor.py 의 decomposeFactor 가 회귀 입력으로 사용한다.
+calcFactorTearSheet 도 이걸 IC/ICIR/분위 평가에 사용.
 """
 
 from __future__ import annotations
@@ -53,11 +58,48 @@ def _latest_year(snap: pl.DataFrame, min_count: int = 1000) -> str | None:
     return None
 
 
-def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float]]:
-    """전종목 단년도 펀더멘털 dict.
+def _fetch_year_end_marketcaps(market: str, year: str) -> dict[str, float]:
+    """연도말 (12월 마지막 거래일) 종목별 시가총액.
+
+    KR: KRX OpenAPI ``MKTCAP`` 컬럼 직접 (gather/_hfBulk.loadFiltered).
+    US: EDGAR 시총 미수집 → 빈 dict (fallback 으로 book equity proxy 사용).
 
     Returns:
-        {stockCode: {bookEquity, totalAssets, netIncome, roe, bookRatio, assetGrowth}}
+        {stockCode: marketCap (원)} — 연도말 마지막 거래일 기준.
+    """
+    if market != "KR":
+        return {}
+    try:
+        from dartlab.gather._hfBulk import loadFiltered
+
+        # 연말 ~6일 (12-25 ~ 12-31) 중 마지막 거래일 시총 사용 (휴일 robust)
+        long_df = loadFiltered(start=f"{year}-12-25", end=f"{year}-12-31", adjustment="raw")
+        if long_df is None or long_df.is_empty():
+            log.info("factorBuild: 연도말 시총 부재 (year=%s) — book proxy fallback", year)
+            return {}
+        # 종목별 마지막 일자 시총 (descending sort 후 첫 row keep)
+        latest = (
+            long_df.sort("BAS_DD", descending=True).unique(subset=["ISU_CD"], keep="first").select(["ISU_CD", "MKTCAP"])
+        )
+        return {
+            row["ISU_CD"]: float(row["MKTCAP"])
+            for row in latest.iter_rows(named=True)
+            if row.get("MKTCAP") is not None and row["MKTCAP"] > 0
+        }
+    except Exception as exc:
+        log.warning("factorBuild: 시총 fetch 실패 (year=%s): %s", year, type(exc).__name__)
+        return {}
+
+
+def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float]]:
+    """전종목 단년도 펀더멘털 + 시총 dict.
+
+    Returns:
+        {stockCode: {bookEquity, marketCap, totalAssets, netIncome, roe, bookRatio,
+                     bookToMarket, assetGrowth}}
+        - marketCap: KRX MKTCAP (KR), None (US — 미수집)
+        - bookToMarket: equity / marketCap (진짜 BM, 시총 있을 때만)
+        - bookRatio: equity / assets (자본구조 — fallback 용)
     """
     lf = load_scan_parquet("finance", market)
     if lf is None:
@@ -81,6 +123,9 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
         prev = snap.filter(pl.col(year_col) == pv)
     else:
         prev = None
+
+    # 연도말 시총 (KR 만 채워짐)
+    market_caps = _fetch_year_end_marketcaps(market, year)
 
     out: dict[str, dict[str, float]] = {}
     codes = cur.get_column("stockCode").unique().to_list()
@@ -108,12 +153,17 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
                 if prev_assets and prev_assets > 0:
                     asset_growth = (assets - prev_assets) / prev_assets
 
+        mc = market_caps.get(code)
+        book_to_market = (equity / mc) if (mc is not None and mc > 0) else None
+
         out[code] = {
             "bookEquity": float(equity),
+            "marketCap": float(mc) if mc is not None else None,
             "totalAssets": float(assets),
             "netIncome": float(ni) if ni is not None else None,
             "roe": float(roe) if roe is not None else None,
             "bookRatio": float(book_ratio),
+            "bookToMarket": float(book_to_market) if book_to_market is not None else None,
             "assetGrowth": float(asset_growth) if asset_growth is not None else None,
         }
     return out
@@ -138,6 +188,11 @@ def _quintile_portfolios(metrics: dict[str, dict[str, float]], key: str, reverse
 def _portfolio_returns(codes: list[str], market: str, year: str, max_n: int = 30) -> np.ndarray | None:
     """종목 리스트의 동일가중 평균 일별 log return 시계열.
 
+    KR (Phase B0 정정): `_hfBulk.loadFiltered` 직접 사용 (Yahoo 우회 + 빠름).
+    한 번에 종목 리스트 long fetch 후 group_by — 메모리 안전 + 1 query.
+
+    US: 기존 fetch_ohlcv (Yahoo) 유지.
+
     캐시: (market, year, hash(codes))
     """
     if not codes:
@@ -147,17 +202,42 @@ def _portfolio_returns(codes: list[str], market: str, year: str, max_n: int = 30
         return _PORTFOLIO_CACHE[key]
 
     rets = []
-    for c in codes[:max_n]:
+    if market == "KR":
+        # KR: _hfBulk 한 번 호출로 종목 리스트 long fetch
         try:
-            o = fetch_ohlcv(c)
-        except (ValueError, KeyError, OSError, AttributeError, RuntimeError):
-            continue
-        if isEmptyDf(o):
-            continue
-        cl = ohlcv_to_arrays(o).get("close")
-        if cl is None or len(cl) < 60:
-            continue
-        rets.append(np.diff(np.log(cl)))
+            from dartlab.gather._hfBulk import loadFiltered
+
+            target_codes = codes[:max_n]
+            long_df = loadFiltered(start=f"{year}-01-01", end=f"{year}-12-31", adjustment="raw")
+            if long_df is None or long_df.is_empty():
+                _PORTFOLIO_CACHE[key] = None
+                return None
+            sub = long_df.filter(pl.col("ISU_CD").is_in(target_codes))
+            for code in target_codes:
+                stock = sub.filter(pl.col("ISU_CD") == code).sort("BAS_DD")
+                if stock.is_empty():
+                    continue
+                cl = stock["TDD_CLSPRC"].to_numpy().astype(np.float64)
+                if len(cl) < 60:
+                    continue
+                rets.append(np.diff(np.log(cl)))
+        except Exception as exc:
+            log.warning("factorBuild _portfolio_returns KR 실패: %s", type(exc).__name__)
+            _PORTFOLIO_CACHE[key] = None
+            return None
+    else:
+        # US: 기존 fetch_ohlcv (Yahoo) 유지
+        for c in codes[:max_n]:
+            try:
+                o = fetch_ohlcv(c)
+            except (ValueError, KeyError, OSError, AttributeError, RuntimeError):
+                continue
+            if isEmptyDf(o):
+                continue
+            cl = ohlcv_to_arrays(o).get("close")
+            if cl is None or len(cl) < 60:
+                continue
+            rets.append(np.diff(np.log(cl)))
 
     if len(rets) < 5:
         _PORTFOLIO_CACHE[key] = None
@@ -193,9 +273,18 @@ def build_factors(market: str = "KR") -> dict | None:
     if len(metrics) < 100:
         return None
 
-    # 5분위 포트폴리오
-    small, big = _quintile_portfolios(metrics, "bookEquity", reverse=False)
-    high_bm, low_bm = _quintile_portfolios(metrics, "bookRatio", reverse=True)
+    # 5분위 포트폴리오 — 시총 있으면 진짜 SMB/HML, 없으면 book proxy fallback
+    has_mcap = sum(1 for m in metrics.values() if m.get("marketCap") is not None) >= 100
+    if has_mcap:
+        small, big = _quintile_portfolios(metrics, "marketCap", reverse=False)
+        high_bm, low_bm = _quintile_portfolios(metrics, "bookToMarket", reverse=True)
+        size_source = "KRX_MKTCAP"
+        bm_source = "equity/marketCap"
+    else:
+        small, big = _quintile_portfolios(metrics, "bookEquity", reverse=False)
+        high_bm, low_bm = _quintile_portfolios(metrics, "bookRatio", reverse=True)
+        size_source = "book_equity_proxy"
+        bm_source = "equity/assets_proxy"
     high_roe, low_roe = _quintile_portfolios(metrics, "roe", reverse=True)
     low_ag, high_ag = _quintile_portfolios(metrics, "assetGrowth", reverse=False)
     # CMA = conservative(low growth) - aggressive(high growth)
@@ -226,6 +315,9 @@ def build_factors(market: str = "KR") -> dict | None:
     rmw = (hr_ret[-ml:] - lr_ret[-ml:]) if (hr_ret is not None and lr_ret is not None) else None
     cma = (cn_ret[-ml:] - ag_ret[-ml:]) if (cn_ret is not None and ag_ret is not None) else None
 
+    notes = f"SIZE = {size_source}, BM = {bm_source}. " + (
+        "진짜 Fama-French 표준 (KRX 시총 직접)." if has_mcap else "fallback proxy (시총 미수집)."
+    )
     result = {
         "year": str(year),
         "market": market,
@@ -239,10 +331,10 @@ def build_factors(market: str = "KR") -> dict | None:
         "bigN": len(big),
         "highBmN": len(high_bm),
         "lowBmN": len(low_bm),
-        "notes": (
-            "SIZE proxy = book equity (시가총액 데이터 미수집). "
-            "BM proxy = equity/assets (시가총액 부재로 진짜 BM 불가)."
-        ),
+        "sizeSource": size_source,
+        "bmSource": bm_source,
+        "isRealFamaFrench": has_mcap,
+        "notes": notes,
     }
     _FACTOR_CACHE[cache_key] = result
     return result

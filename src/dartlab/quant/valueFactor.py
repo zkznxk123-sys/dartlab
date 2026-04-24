@@ -1,20 +1,21 @@
-"""가치/수익성 팩터 — book-based 횡단면 z-score.
+"""가치 팩터 — 진짜 PBR/PER/PSR 횡단면 z-score (Phase B1, 2026-04-24).
 
-⚠️ 한계 명시:
-- 시가총액 데이터가 dartlab에 아직 수집돼 있지 않아 (stockTotal apiType 미수집)
-  진짜 PBR/PER/PSR을 산출하지 못한다.
-- 이 모듈은 시가총액 없이도 만들 수 있는 book-based 지표만 횡단면 z-score로 제공.
-- 따라서 함수명은 "value"이지만 실제로는 **수익성/효율성 복합** 지표에 가깝다.
-- 시총 인프라가 들어오면 진짜 PBR/PER/PSR 추가 예정 (audit factor.md/value.md 참조).
+KR (Phase B1 정정): KRX OpenAPI ``MKTCAP`` 직접 사용 → 진짜 PBR/PER/PSR 산출.
+US: 시총 미수집 → fallback book proxy (earningsToBook/salesToBook/bookToAsset).
 
 학술 근거:
-- Fama & French (1992, 2015): book-equity 기반 BM 팩터
-- Lakonishok et al. (1994): Contrarian Investment, Extrapolation, and Risk
+- Fama & French (1992, 2015): BM (book/market) value factor
+- Lakonishok et al. (1994): Contrarian Investment
 - Asness, Frazzini, Pedersen (2013): Value and Momentum Everywhere
 
-이전 버전(2026-04-06 이전)은 절대값 임계 기반으로 60%가 deep_value로 분류됐고
-한국 대표 가치주(KB금융/신한금융)가 growth로 분류되는 명백한 오분류가 있었다.
-이번 재구현은 횡단면 백분위 z-score로 교체.
+진짜 가치 팩터:
+- PBR (Price-to-Book) = marketCap / equity
+- PER (Price-to-Earnings) = marketCap / netIncome
+- PSR (Price-to-Sales) = marketCap / sales
+- 낮을수록 (역수가 높을수록) value 강함 → earningsYield (=1/PER), bookYield (=1/PBR), salesYield (=1/PSR) z-score
+
+이전 (2026-04-06 ~ 04-24) 은 시총 부재로 book proxy 만 — 이름은 value 지만 실제 수익성/효율성 복합.
+이번 정정으로 KR 시장은 진짜 가치 팩터 작동.
 """
 
 from __future__ import annotations
@@ -39,8 +40,35 @@ log = logging.getLogger(__name__)
 _UNIVERSE_CACHE: dict[tuple[str, str], dict[str, list[float]]] = {}
 
 
+def _fetch_year_end_marketcaps(market: str, year: str) -> dict[str, float]:
+    """연도말 시총 (KR 만 — KRX MKTCAP, US 는 빈 dict). factorBuild 와 동일 SSOT."""
+    if market != "KR":
+        return {}
+    try:
+        from dartlab.gather._hfBulk import loadFiltered
+
+        long_df = loadFiltered(start=f"{year}-12-25", end=f"{year}-12-31", adjustment="raw")
+        if long_df is None or long_df.is_empty():
+            return {}
+        latest = (
+            long_df.sort("BAS_DD", descending=True).unique(subset=["ISU_CD"], keep="first").select(["ISU_CD", "MKTCAP"])
+        )
+        return {
+            row["ISU_CD"]: float(row["MKTCAP"])
+            for row in latest.iter_rows(named=True)
+            if row.get("MKTCAP") and row["MKTCAP"] > 0
+        }
+    except Exception as exc:
+        log.warning("valueFactor: 시총 fetch 실패 (year=%s): %s", year, type(exc).__name__)
+        return {}
+
+
 def _build_universe(market: str, year: str) -> dict[str, list[float]]:
-    """전종목 단년도 value 지표 분포 (횡단면 z용)."""
+    """전종목 단년도 value 지표 분포 (횡단면 z용).
+
+    KR: 진짜 PBR/PER/PSR (시총 + DART 재무) + book proxy.
+    US: book proxy 만 (시총 미수집).
+    """
     cache_key = (market, year)
     if cache_key in _UNIVERSE_CACHE:
         return _UNIVERSE_CACHE[cache_key]
@@ -56,10 +84,16 @@ def _build_universe(market: str, year: str) -> dict[str, list[float]]:
     if snap.is_empty():
         return {}
 
+    market_caps = _fetch_year_end_marketcaps(market, year)
+
     out = {
         "earningsToBook": [],
         "salesToBook": [],
         "bookToAsset": [],
+        # 진짜 가치 yield (낮을수록 좋은 PER/PBR/PSR 의 역수 — 큰 z-score = value)
+        "earningsYield": [],  # = 1/PER = netIncome / marketCap
+        "bookYield": [],  # = 1/PBR = equity / marketCap
+        "salesYield": [],  # = 1/PSR = sales / marketCap
     }
     codes = snap.get_column("stockCode").unique().to_list()
     for code in codes:
@@ -80,6 +114,15 @@ def _build_universe(market: str, year: str) -> dict[str, list[float]]:
             out["salesToBook"].append(sales / equity)
         if assets and assets > 0:
             out["bookToAsset"].append(equity / assets)
+
+        # 진짜 yield (시총 있을 때만)
+        mc = market_caps.get(code)
+        if mc and mc > 0:
+            if ni is not None:
+                out["earningsYield"].append(ni / mc)
+            out["bookYield"].append(equity / mc)
+            if sales is not None:
+                out["salesYield"].append(sales / mc)
 
     _UNIVERSE_CACHE[cache_key] = out
     return out
@@ -174,7 +217,24 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     if assets and assets > 0:
         components["bookToAsset"] = round(equity / assets, 4)
 
-    # 가격은 참고용 (시총 산출 불가하지만 사용자에게 노출)
+    # 시총 fetch (KR 만 — Phase B1)
+    market_caps = _fetch_year_end_marketcaps(market, str(yr))
+    mc = market_caps.get(stockCode)
+    if mc and mc > 0:
+        components["marketCap"] = round(float(mc), 0)
+        components["pbr"] = round(mc / equity, 2) if equity > 0 else None
+        if ni is not None and ni > 0:
+            components["per"] = round(mc / ni, 2)
+        if sales is not None and sales > 0:
+            components["psr"] = round(mc / sales, 2)
+        # yield (역수 — z-score 친화: 높을수록 value)
+        if ni is not None:
+            components["earningsYield"] = round(ni / mc, 4)
+        components["bookYield"] = round(equity / mc, 4)
+        if sales is not None:
+            components["salesYield"] = round(sales / mc, 4)
+
+    # 가격 참고
     try:
         ohlcv = fetch_ohlcv(stockCode)
         if ohlcv is not None and not ohlcv.is_empty():
@@ -189,33 +249,46 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     universe = _build_universe(market, str(yr))
 
     zs: list[float] = []
-    if "earningsToBook" in components:
-        zs.append(_zscore(components["earningsToBook"], universe["earningsToBook"]))
-    if "salesToBook" in components:
-        zs.append(_zscore(components["salesToBook"], universe["salesToBook"]))
-    if "bookToAsset" in components:
-        zs.append(_zscore(components["bookToAsset"], universe["bookToAsset"]))
+    # 진짜 yield 우선 (시총 있을 때) — KR 만
+    has_real = market == "KR" and mc and mc > 0 and universe.get("bookYield")
+    if has_real:
+        if "earningsYield" in components and universe.get("earningsYield"):
+            zs.append(_zscore(components["earningsYield"], universe["earningsYield"]))
+        if "bookYield" in components and universe.get("bookYield"):
+            zs.append(_zscore(components["bookYield"], universe["bookYield"]))
+        if "salesYield" in components and universe.get("salesYield"):
+            zs.append(_zscore(components["salesYield"], universe["salesYield"]))
+    else:
+        # fallback book proxy (US 또는 시총 미가용)
+        if "earningsToBook" in components:
+            zs.append(_zscore(components["earningsToBook"], universe["earningsToBook"]))
+        if "salesToBook" in components:
+            zs.append(_zscore(components["salesToBook"], universe["salesToBook"]))
+        if "bookToAsset" in components:
+            zs.append(_zscore(components["bookToAsset"], universe["bookToAsset"]))
 
     if zs:
         score = sum(zs) / len(zs)
     else:
         score = 0.0
     result["valueScore"] = round(float(score), 4)
+    result["isRealValue"] = bool(has_real)
 
     if score >= 1.5:
-        result["valueGrade"] = "high_yield"
+        result["valueGrade"] = "deep_value"
     elif score >= 0.5:
-        result["valueGrade"] = "above_avg"
+        result["valueGrade"] = "value"
     elif score >= -0.5:
-        result["valueGrade"] = "average"
+        result["valueGrade"] = "neutral"
     elif score >= -1.5:
-        result["valueGrade"] = "below_avg"
+        result["valueGrade"] = "growth"
     else:
-        result["valueGrade"] = "low_yield"
+        result["valueGrade"] = "expensive"
 
-    result["limitation"] = (
-        "PBR/PER/PSR 미산출 — 시가총액 데이터 부재. "
-        "현재는 book-based 수익성/효율성 복합 지표 (이름이 'value'이지만 진짜 가치 팩터 아님)."
+    result["notes"] = (
+        "진짜 가치 팩터 (KRX 시총 기반 PBR/PER/PSR yield z-score)."
+        if has_real
+        else "fallback book proxy (시총 미가용). earningsToBook/salesToBook/bookToAsset z-score."
     )
 
     return result

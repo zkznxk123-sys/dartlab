@@ -151,9 +151,15 @@ def _load_account(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[st
 
 
 def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> dict:
-    """전종목 멀티팩터 복합 순위.
+    """전종목 5-팩터 멀티팩터 복합 순위 (Phase B3 정정).
 
-    영업마진·ROA·부채비율 백분위를 동일 가중 합산해 복합 순위를 매긴다.
+    2026-04-24: size (marketCap) + value (bookYield) 팩터 추가 → 5팩터 (margin/ROA/debt/size/value).
+    KR: KRX 시총 직접 사용. US: size/value 미사용 (시총 미수집) — 기존 3팩터.
+
+    학술 근거:
+    - Asness et al. (2013): Value and Momentum Everywhere
+    - Fama & French (1992): size + BM 팩터
+    - Piotroski (2000): Fundamentals score (ROA, margin, debt)
 
     Parameters
     ----------
@@ -168,10 +174,16 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
         market : str — 시장
         year : str — 기준 연도
         totalStocks : int — 순위 산출 종목 수
+        factorsUsed : list[str] — 사용된 팩터 리스트
         rankings : list[dict] — 상위 종목 리스트 (최대 50개)
-            stockCode : str, opMargin : float (%), ROA : float (%),
-            debtRatio : float (%), compositeScore : float (0~1),
-            rank : int
+            stockCode : str — 6자리 종목코드
+            opMargin : float — 영업이익률 (%)
+            ROA : float — 총자산수익률 (%)
+            debtRatio : float — 부채비율 (%)
+            marketCap : float — 시가총액 (원, KR 만)
+            bookYield : float — equity/marketCap (= 1/PBR, KR 만)
+            compositeScore : float — 복합 백분위 (0~1, 1=top)
+            rank : int — 순위
         target : dict | None — stockCode 지정 시 해당 종목 정보
     """
     result: dict = {"market": market}
@@ -209,6 +221,28 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
     ni = _load_account(lf, "IS", "당기순이익", year)
     assets = _load_account(lf, "BS", "자산총계", year)
     debt = _load_account(lf, "BS", "부채총계", year)
+    equity = _load_account(lf, "BS", "자본총계", year)
+
+    # 시총 (KR 만) — size + bookYield 팩터용
+    market_caps: dict[str, float] = {}
+    if market == "KR":
+        try:
+            from dartlab.gather._hfBulk import loadFiltered
+
+            mc_long = loadFiltered(start=f"{year}-12-25", end=f"{year}-12-31", adjustment="raw")
+            if mc_long is not None and not mc_long.is_empty():
+                latest = (
+                    mc_long.sort("BAS_DD", descending=True)
+                    .unique(subset=["ISU_CD"], keep="first")
+                    .select(["ISU_CD", "MKTCAP"])
+                )
+                market_caps = {
+                    row["ISU_CD"]: float(row["MKTCAP"])
+                    for row in latest.iter_rows(named=True)
+                    if row.get("MKTCAP") and row["MKTCAP"] > 0
+                }
+        except Exception as exc:
+            log.warning("ranking: KR 시총 fetch 실패: %s", type(exc).__name__)
 
     # 공통 종목
     all_codes = set(sales) & set(assets)
@@ -216,6 +250,7 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
         return {**result, "error": "공통 종목 없음"}
 
     # 지표 계산
+    has_size_value = market == "KR" and len(market_caps) >= 100
     ranked = []
     for code in all_codes:
         s = sales.get(code, 0)
@@ -223,10 +258,13 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
         n = ni.get(code)
         a = assets.get(code, 0)
         d = debt.get(code, 0)
+        eq = equity.get(code)
 
         margin = (o / s * 100) if s > 0 and o is not None else None
         roa = (n / a * 100) if a > 0 and n is not None else None
         dr = (d / a * 100) if a > 0 else None
+        mc = market_caps.get(code) if has_size_value else None
+        by = (eq / mc) if (has_size_value and mc and mc > 0 and eq is not None and eq > 0) else None
 
         if margin is not None or roa is not None:
             ranked.append(
@@ -235,6 +273,8 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
                     "opMargin": round(margin, 2) if margin else None,
                     "ROA": round(roa, 2) if roa else None,
                     "debtRatio": round(dr, 2) if dr else None,
+                    "marketCap": round(mc, 0) if mc else None,
+                    "bookYield": round(by, 4) if by else None,
                 }
             )
 
@@ -250,7 +290,22 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
     m_rank = np.argsort(np.argsort(-margins)) / max(n - 1, 1)
     r_rank = np.argsort(np.argsort(-roas)) / max(n - 1, 1)
     d_rank = np.argsort(np.argsort(debts)) / max(n - 1, 1)
-    composites = (m_rank + r_rank + d_rank) / 3
+
+    # 5-factor composite (KR 시총 있을 때) 또는 3-factor (fallback)
+    if has_size_value:
+        # size: 작을수록 top (small premium) — 근데 한국 2025 RMW 검증으로 size 역방향
+        # 실용: 큰 시총 = 안정성 ↑ 가 더 적절. size_rank = 큰 시총 top (역발상 제거)
+        mcaps = np.array([r["marketCap"] or 0 for r in ranked])
+        yields_ = np.array([r["bookYield"] or 0 for r in ranked])
+        # size_rank: 시총 큰 종목이 top (실용적 안정성)
+        s_rank = np.argsort(np.argsort(-mcaps)) / max(n - 1, 1)
+        # value_rank: bookYield 큰 종목 top (= 낮은 PBR = value)
+        v_rank = np.argsort(np.argsort(-yields_)) / max(n - 1, 1)
+        composites = (m_rank + r_rank + d_rank + s_rank + v_rank) / 5
+        factors_used = ["margin", "ROA", "debt", "size", "value"]
+    else:
+        composites = (m_rank + r_rank + d_rank) / 3
+        factors_used = ["margin", "ROA", "debt"]
     order = np.argsort(-composites)
 
     for i, idx in enumerate(order):
@@ -259,6 +314,7 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
 
     sorted_ranked = sorted(ranked, key=lambda x: x.get("rank", 9999))
     result["totalStocks"] = n
+    result["factorsUsed"] = factors_used
 
     if stockCode:
         target = [r for r in sorted_ranked if r["stockCode"] == stockCode]

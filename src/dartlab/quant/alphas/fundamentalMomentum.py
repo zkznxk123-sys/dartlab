@@ -1,0 +1,168 @@
+"""Fundamental Momentum 횡단면 quant factor.
+
+학술: Chordia & Shivakumar (2006, Journal of Financial Economics) — 펀더멘털 모멘텀
+     (earnings momentum) 과 가격 모멘텀 교차가 price momentum 만 쓰는 것보다 우위.
+
+구성:
+    earnings growth = (NI_t − NI_{t-1}) / |NI_{t-1}|
+    price momentum  = 12-1 month return (Jegadeesh-Titman 1993 표준)
+    composite = 0.5 · earnings_rank + 0.5 · price_momentum_rank
+
+Top 10 = earnings 증가 + 가격 상승 종목 = 가장 확신 있는 롱 후보.
+"""
+
+from __future__ import annotations
+
+import logging
+
+import numpy as np
+import polars as pl
+
+from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
+from dartlab.quant._helpers import extract_account, load_scan_parquet
+from dartlab.quant.factorBuild import _latest_year
+
+log = logging.getLogger(__name__)
+
+
+def _rank(values: list[float]) -> list[float]:
+    arr = np.asarray(values, dtype=np.float64)
+    order = arr.argsort()
+    ranks = np.empty_like(order, dtype=np.float64)
+    ranks[order] = np.arange(len(arr))
+    return list(ranks / max(len(arr) - 1, 1))
+
+
+def calcFundamentalMomentum(*, market: str = "KR") -> dict | None:
+    """Chordia-Shivakumar 펀더멘털×가격 composite 모멘텀 — 한국 시장 전종목 랭킹.
+
+    Capabilities:
+        - earnings growth (YoY NI) + 12-1 price momentum composite
+        - Top 10 double-momentum (가장 확신 있는 롱 후보)
+        - Bottom 10 (long/short 혹은 회피)
+
+    AIContext:
+        - Sprint 2 재무 알파 — 단일 price momentum 보다 실증 우위
+        - review `fundMomentumBlock` 시장분석 자동 호출
+
+    Args:
+        market: ``"KR"`` 만 지원 (KRX _hfBulk 필요).
+
+    Returns:
+        dict — market / year / universe / scores / components / topDouble / bottomDouble
+    """
+    if market != "KR":
+        return None
+
+    # ── earnings growth ──
+    try:
+        lf = load_scan_parquet("finance", market)
+        if lf is None:
+            return None
+        snap = extractAnnualConsolidated(lf.collect())
+        year = _latest_year(snap)
+        if year is None:
+            return None
+    except (OSError, ValueError, KeyError, AttributeError):
+        return None
+
+    edgar = isEdgarSchema(snap)
+    year_col = "fy" if edgar else "bsns_year"
+    year_val = int(year) if edgar else year
+    try:
+        prev_year_val = int(year) - 1 if edgar else str(int(year) - 1)
+    except ValueError:
+        return None
+    cur = snap.filter(pl.col(year_col) == year_val)
+    prev = snap.filter(pl.col(year_col) == prev_year_val)
+    if cur.is_empty() or prev.is_empty():
+        return None
+
+    growths: dict[str, float] = {}
+    for code in cur.get_column("stockCode").unique().to_list():
+        if not isinstance(code, str):
+            continue
+        s_cur = cur.filter(pl.col("stockCode") == code)
+        s_prev = prev.filter(pl.col("stockCode") == code)
+        if s_prev.is_empty():
+            continue
+        ni = extract_account(s_cur, "net_income")
+        ni_p = extract_account(s_prev, "net_income")
+        if ni is None or ni_p is None or abs(ni_p) < 1:
+            continue
+        g = (ni - ni_p) / abs(ni_p)
+        growths[code] = max(-5.0, min(5.0, g))
+
+    if len(growths) < 50:
+        return None
+
+    # ── 12-1 price momentum (KRX _hfBulk) ──
+    try:
+        from dartlab.gather._hfBulk import loadFiltered
+
+        long_df = loadFiltered(adjustment="raw")
+    except Exception as exc:  # noqa: BLE001
+        log.warning("fundMomentum price fetch 실패: %s", type(exc).__name__)
+        return None
+    if long_df is None or long_df.is_empty():
+        return None
+
+    # 종목별 12-1 momentum = log(close[t-22]/close[t-252])
+    dates = long_df.get_column("BAS_DD").unique().sort(descending=True).to_list()
+    if len(dates) < 260:
+        return None
+    target_codes = list(growths.keys())
+    sub = long_df.filter(pl.col("ISU_CD").is_in(target_codes)).select(["BAS_DD", "ISU_CD", "TDD_CLSPRC"])
+
+    momentums: dict[str, float] = {}
+    for code in target_codes:
+        stock = sub.filter(pl.col("ISU_CD") == code).sort("BAS_DD")
+        close = stock.get_column("TDD_CLSPRC").to_numpy().astype(np.float64)
+        if len(close) < 260:
+            continue
+        # skip last month (22 일), measure 12m ago = index -252
+        try:
+            ret = float(np.log(close[-22] / close[-252]))
+        except (ValueError, IndexError):
+            continue
+        if not np.isfinite(ret):
+            continue
+        momentums[code] = ret
+
+    common = sorted(set(growths.keys()) & set(momentums.keys()))
+    if len(common) < 50:
+        return None
+
+    g_vals = [growths[c] for c in common]
+    m_vals = [momentums[c] for c in common]
+    g_r = _rank(g_vals)
+    m_r = _rank(m_vals)
+
+    scores = {common[i]: 0.5 * g_r[i] + 0.5 * m_r[i] for i in range(len(common))}
+    components = {
+        common[i]: {
+            "earningsGrowth": round(g_vals[i], 3),
+            "priceMom12_1": round(m_vals[i], 4),
+            "earningsRank": round(g_r[i], 3),
+            "priceRank": round(m_r[i], 3),
+        }
+        for i in range(len(common))
+    }
+
+    sorted_items = sorted(scores.items(), key=lambda x: -x[1])
+    topDouble = [(c, round(s, 3)) for c, s in sorted_items[:10]]
+    bottomDouble = [(c, round(s, 3)) for c, s in sorted_items[-10:]]
+
+    return {
+        "market": market,
+        "year": str(year),
+        "universe": len(scores),
+        "scores": {c: round(s, 3) for c, s in scores.items()},
+        "components": components,
+        "topDouble": topDouble,
+        "bottomDouble": bottomDouble,
+        "interpretation": (
+            f"{market} {year}년 Chordia-Shivakumar 펀더멘털×가격 composite "
+            f"({len(scores)}종목) — top 10 이 가장 확신 있는 롱 후보."
+        ),
+    }

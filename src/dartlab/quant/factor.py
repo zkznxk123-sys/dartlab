@@ -430,3 +430,632 @@ def _interpret(result: dict, names: list[str]) -> list[str]:
             interp.append(pos if ld > 0 else neg)
 
     return interp
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Phase B0 — Alphalens-style Factor Tear Sheet (review 시장분석 섹션)
+# ══════════════════════════════════════════════════════════════════════
+
+
+def calcFactorTearSheet(
+    factorName: str = "smb",
+    *,
+    market: str = "KR",
+) -> dict | None:
+    """팩터 tear sheet — long-short 시계열의 Sharpe / 누적수익 / MDD / Win Rate (Alphalens 표준).
+
+    Capabilities:
+        - 4 표준 Fama-French 팩터 (smb / hml / rmw / cma) 의 정량 평가 metric
+        - Long-short 일별 시계열 (factorBuild.build_factors) 기반
+        - 연환산 수익 / 변동성 / Sharpe / 누적수익 / Win Rate / Max Drawdown
+        - 실/proxy 구분 (isRealFamaFrench) 노출 — KRX 시총 직접 vs book proxy
+
+    AIContext:
+        - review 6막-3 시장분석 섹션이 자동 호출 (`factorTearSheetBlock`)
+        - 4 팩터 동시 평가로 한국 시장 알파 원천 정량화
+        - Sharpe > 1.0 = 강한 alpha, > 0.5 = 약한 alpha, < 0 = 역방향
+
+    Guide:
+        - "size 팩터 평가" → calcFactorTearSheet("smb")
+        - "value 팩터" → calcFactorTearSheet("hml")
+        - "quality 팩터" → calcFactorTearSheet("rmw")
+        - "investment 팩터" → calcFactorTearSheet("cma")
+
+    SeeAlso:
+        - factorBuild.build_factors : SMB/HML/RMW/CMA 시계열 빌드
+        - decomposeFactor : 단일 종목 FF5 회귀 (loadings)
+        - calcStrategySnapshot : 8 검증 스타일 백테스트
+
+    Args:
+        factorName: ``"smb"`` | ``"hml"`` | ``"rmw"`` | ``"cma"`` (대소문자 무관). 기본 ``"smb"``.
+        market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.
+
+    Returns:
+        dict
+            factorName : str — 팩터명 (대문자, 예: "SMB")
+            market : str — "KR" / "US"
+            year : str — fundamental 기준 연도
+            universe : int — 종목 수
+            nObs : int — 일별 시계열 관측 수 (거래일)
+            longShortAnnualReturn : float — Long-short 연환산 수익 (%)
+            longShortAnnualVol : float — 연환산 변동성 (%)
+            longShortSharpe : float — Sharpe ratio (배, mean/std × √252)
+            longShortCumReturn : float — 누적 수익 (%, 전기간)
+            longShortWinRate : float — 양수 일자 비율 (%)
+            maxDrawdown : float — 최대낙폭 (%, 음수)
+            sizeSource : str — "KRX_MKTCAP" 또는 "book_equity_proxy"
+            bmSource : str — "equity/marketCap" 또는 "equity/assets_proxy"
+            isRealFamaFrench : bool — KRX 시총 기반 진짜 FF 인지
+            highN : int | None — Long 종목 수 (HML 의 경우 high-BM, 그 외 N/A)
+            lowN : int | None — Short 종목 수
+            interpretation : str — 정성 평가 ("강한 alpha (소형주 프리미엄)" 등)
+            notes : str — 데이터 source 안내
+
+    Examples:
+        >>> from dartlab.quant.factor import calcFactorTearSheet
+        >>> ts = calcFactorTearSheet("smb")
+        >>> print(ts["longShortSharpe"], ts["interpretation"])
+        0.85 약한 alpha (소형주 프리미엄)
+
+    Notes:
+        - Alphalens-style 표준 metric. 단 Cross-sectional IC (mean / std / IR) 는 별도 트랙
+          (현재는 long-short 기반 단순 metric — 후속 강화).
+        - Sharpe 는 risk-free 0 가정 (한국 시장 단기 RF 무시).
+        - Max Drawdown 은 누적 (1+r) 시계열의 peak-to-trough.
+        - factorBuild.build_factors() 가 캐시 → 같은 세션 재호출 빠름.
+    """
+    fname = factorName.lower().strip()
+    if fname not in {"smb", "hml", "rmw", "cma"}:
+        raise ValueError(f"factorName 알 수 없음: {factorName!r} — 허용: smb, hml, rmw, cma")
+
+    from dartlab.quant.factorBuild import build_factors
+
+    fb = build_factors(market)
+    if fb is None:
+        return None
+    arr = fb.get(fname)
+    if arr is None or len(arr) < 30:
+        return None
+
+    arr = np.asarray(arr, dtype=np.float64)
+    arr = arr[~np.isnan(arr)]
+    if len(arr) < 30:
+        return None
+
+    annualMean = float(np.mean(arr) * 252) * 100
+    annualStd = float(np.std(arr, ddof=1) * np.sqrt(252)) * 100
+    sharpe = annualMean / annualStd if annualStd > 0 else 0.0
+    cumReturn = float(np.exp(np.sum(arr)) - 1) * 100
+    winRate = float(np.mean(arr > 0)) * 100
+
+    # Max Drawdown
+    cum = np.cumprod(1 + arr)
+    peak = np.maximum.accumulate(cum)
+    dd = (cum - peak) / peak
+    maxDD = float(np.min(dd)) * 100
+
+    # 종목 수 — 팩터별 다름
+    longN = lowN = None
+    if fname == "smb":
+        longN, lowN = fb.get("smallN"), fb.get("bigN")
+    elif fname == "hml":
+        longN, lowN = fb.get("highBmN"), fb.get("lowBmN")
+
+    return {
+        "factorName": fname.upper(),
+        "market": market,
+        "year": fb.get("year"),
+        "universe": fb.get("universe"),
+        "nObs": int(len(arr)),
+        "longShortAnnualReturn": round(annualMean, 2),
+        "longShortAnnualVol": round(annualStd, 2),
+        "longShortSharpe": round(sharpe, 2),
+        "longShortCumReturn": round(cumReturn, 2),
+        "longShortWinRate": round(winRate, 2),
+        "maxDrawdown": round(maxDD, 2),
+        "sizeSource": fb.get("sizeSource"),
+        "bmSource": fb.get("bmSource"),
+        "isRealFamaFrench": bool(fb.get("isRealFamaFrench", False)),
+        "highN": longN,
+        "lowN": lowN,
+        "interpretation": _interpretFactorSharpe(sharpe, fname),
+        "notes": fb.get("notes", ""),
+    }
+
+
+def _interpretFactorSharpe(sharpe: float, factor: str) -> str:
+    """Sharpe ratio + 팩터 방향 → 정성 평가 한 줄."""
+    if sharpe > 1.5:
+        level = "매우 강한 alpha"
+    elif sharpe > 1.0:
+        level = "강한 alpha"
+    elif sharpe > 0.5:
+        level = "약한 alpha"
+    elif sharpe > 0:
+        level = "유의미하지 않음"
+    elif sharpe > -0.5:
+        level = "역방향 약함"
+    else:
+        level = "역방향 강함"
+
+    direction_map = {
+        "smb": ("소형주 프리미엄", "대형주 프리미엄"),
+        "hml": ("가치주 프리미엄", "성장주 프리미엄"),
+        "rmw": ("고수익성 프리미엄", "저수익성 프리미엄"),
+        "cma": ("보수적 투자 프리미엄", "공격적 투자 프리미엄"),
+    }
+    pos, neg = direction_map.get(factor, (f"{factor.upper()} 프리미엄", f"{factor.upper()} 역방향"))
+    direction = pos if sharpe > 0 else neg
+    return f"{level} ({direction})"
+
+
+def calcMultiFactorRisk(stockCode: str, *, market: str = "auto") -> dict | None:
+    """Multi-Factor Risk Decomposition (Barra-style B Σ_f Bᵀ + D).
+
+    Capabilities:
+        - 단일 종목의 systematic vs idiosyncratic risk 분해
+        - 4 팩터 (SMB/HML/RMW/CMA) 공분산 + 종목 노출 (B = decomposeFactor loadings)
+        - 팩터별 리스크 기여도 (% of systematic)
+        - 정성 평가 (팩터 의존도 + 최대 기여 팩터)
+
+    AIContext:
+        - review 시장분석 섹션의 ``riskDecompositionBlock`` 가 자동 호출
+        - "총 리스크 30% 중 systematic 22% / idiosyncratic 8%, SMB 기여 +45%" 같은 정량
+        - Barra MSCI 의 multi-factor risk model 표준 (B Σ_f Bᵀ + D)
+
+    SeeAlso:
+        - decomposeFactor : 종목의 팩터 loadings (B)
+        - factorBuild.build_factors : SMB/HML/RMW/CMA 시계열 (Σ_f 원료)
+        - calcFactorTearSheet : 팩터별 long-short Sharpe 평가
+
+    Args:
+        stockCode: 종목코드 또는 ticker.
+        market: ``"KR"`` | ``"US"`` | ``"auto"``.
+
+    Returns:
+        dict
+            stockCode : str
+            market : str
+            model : str — "Barra-style FF4 Multi-Factor"
+            systematicRisk : float — 팩터 기여 리스크 (연환산 %)
+            residualRisk : float — 종목 고유 리스크 (idiosyncratic, 연환산 %)
+            totalRisk : float — 합산 (연환산 %)
+            systematicShare : float — systematic 비중 (% of total variance)
+            factorContributions : dict[str, float] — 팩터별 기여 (% of systematic, SMB/HML/RMW/CMA)
+            loadings : dict[str, float] — B 벡터 (팩터별 노출)
+            interpretation : str — 정성 평가
+
+    Examples:
+        >>> from dartlab.quant.factor import calcMultiFactorRisk
+        >>> r = calcMultiFactorRisk("005930")
+        >>> print(r["systematicShare"], r["interpretation"])
+
+    Notes:
+        - sys_var = B^T Σ_f B  (팩터 공분산 × 노출 quadratic form)
+        - 팩터별 기여 = B_k × (Σ_f B)_k / sys_var (marginal contribution to risk)
+        - residual 은 decomposeFactor 의 residualRisk (이미 annualized) 사용
+    """
+    decomp = decomposeFactor(stockCode, market=market)
+    if not decomp or "error" in decomp:
+        return decomp
+
+    from dartlab.quant.factorBuild import build_factors
+
+    actual_market = decomp.get("market", market)
+    fb = build_factors(actual_market)
+    if fb is None:
+        return None
+
+    # 팩터 시계열 stack (사용 가능한 팩터만)
+    factor_arrays = []
+    factor_names = []
+    for name in ("smb", "hml", "rmw", "cma"):
+        arr = fb.get(name)
+        if arr is not None:
+            factor_arrays.append(np.asarray(arr, dtype=np.float64))
+            factor_names.append(name.upper())
+    if not factor_arrays:
+        return None
+
+    ml = min(len(a) for a in factor_arrays)
+    if ml < 30:
+        return None
+    F = np.column_stack([a[-ml:] for a in factor_arrays])  # T × K
+    Sigma_f = np.cov(F.T, ddof=1) * 252  # K × K (annualized)
+
+    # 종목의 팩터 노출 B (decomposeFactor loadings)
+    loadings = []
+    for name in factor_names:
+        info = decomp.get(name)
+        if isinstance(info, dict):
+            loadings.append(float(info.get("loading", 0.0)))
+        else:
+            loadings.append(0.0)
+    B = np.array(loadings, dtype=np.float64)
+
+    # systematic variance = B^T Σ_f B (연환산)
+    sys_var = float(B @ Sigma_f @ B)
+    sys_var = max(sys_var, 0.0)
+    sys_risk_pct = float(np.sqrt(sys_var)) * 100  # %
+
+    # residual = decomposeFactor 의 residualRisk (이미 annualized 비율)
+    res_risk_raw = float(decomp.get("residualRisk", 0.0))
+    res_var = res_risk_raw**2  # variance
+    res_risk_pct = res_risk_raw * 100  # %
+
+    total_var = sys_var + res_var
+    total_risk_pct = float(np.sqrt(total_var)) * 100  # %
+    sys_share = (sys_var / total_var * 100) if total_var > 0 else 0.0
+
+    # 팩터별 marginal contribution = B_k × (Σ_f B)_k / sys_var
+    Sigma_f_B = Sigma_f @ B
+    factor_contrib: dict[str, float] = {}
+    for i, name in enumerate(factor_names):
+        marginal = float(Sigma_f_B[i]) * float(B[i])
+        contrib = (marginal / sys_var * 100) if sys_var > 0 else 0.0
+        factor_contrib[name] = round(contrib, 1)
+
+    return {
+        "stockCode": stockCode,
+        "market": actual_market,
+        "model": f"Barra-style FF{len(factor_names)} Multi-Factor",
+        "systematicRisk": round(sys_risk_pct, 2),
+        "residualRisk": round(res_risk_pct, 2),
+        "totalRisk": round(total_risk_pct, 2),
+        "systematicShare": round(sys_share, 1),
+        "factorContributions": factor_contrib,
+        "loadings": {n: round(float(B[i]), 3) for i, n in enumerate(factor_names)},
+        "interpretation": _interpretRiskDecomp(sys_share, factor_contrib),
+    }
+
+
+def _interpretRiskDecomp(sys_share: float, factor_contrib: dict) -> str:
+    """systematic 비중 + 최대 기여 팩터 → 정성 평가."""
+    if sys_share > 70:
+        kind = "팩터 의존 (시장 분산효과 큼)"
+    elif sys_share > 50:
+        kind = "팩터 + 고유 균형"
+    elif sys_share > 30:
+        kind = "고유 리스크 우세"
+    else:
+        kind = "거의 idiosyncratic (팩터 노출 작음)"
+    if not factor_contrib:
+        return kind
+    top = max(factor_contrib.items(), key=lambda x: abs(x[1]))
+    return f"{kind} | 최대 팩터 기여: {top[0]} ({top[1]:+.1f}%)"
+
+
+def calcFactorTearSheetAll(*, market: str = "KR") -> dict | None:
+    """4 표준 팩터 (SMB/HML/RMW/CMA) 의 tear sheet 종합 — review 시장분석 섹션 자동 사용.
+
+    Capabilities:
+        - 4 팩터 동시 평가 (한 번 build_factors 호출 후 4개 metric)
+        - 각 팩터의 Sharpe 비교 → 한국 시장 강한 alpha 원천 즉시 식별
+        - review 의 ``factorTearSheetBlock`` 가 직접 호출
+
+    Args:
+        market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.
+
+    Returns:
+        dict
+            market : str
+            year : str
+            universe : int
+            isRealFamaFrench : bool
+            factors : list[dict] — 각 dict 는 calcFactorTearSheet 결과
+            strongest : str | None — 가장 강한 |Sharpe| 팩터명
+            interpretation : str — 종합 정성 평가
+    """
+    factors = []
+    for fname in ("smb", "hml", "rmw", "cma"):
+        ts = calcFactorTearSheet(fname, market=market)
+        if ts is not None:
+            factors.append(ts)
+    if not factors:
+        return None
+
+    strongest = max(factors, key=lambda x: abs(x.get("longShortSharpe", 0)))
+    return {
+        "market": market,
+        "year": factors[0].get("year"),
+        "universe": factors[0].get("universe"),
+        "isRealFamaFrench": factors[0].get("isRealFamaFrench"),
+        "factors": factors,
+        "strongest": strongest.get("factorName"),
+        "interpretation": (
+            f"{market} 시장 가장 강한 팩터: {strongest.get('factorName')} "
+            f"(Sharpe={strongest.get('longShortSharpe')}, "
+            f"{strongest.get('interpretation')})"
+        ),
+    }
+
+
+_FACTOR_KEY_MAP = {
+    "size": ("marketCap", False),
+    "value": ("bookToMarket", True),
+    "quality": ("roe", True),
+    "investment": ("assetGrowth", False),
+    "smb": ("marketCap", False),
+    "hml": ("bookToMarket", True),
+    "rmw": ("roe", True),
+    "cma": ("assetGrowth", False),
+}
+
+
+def calcFactorIC(
+    factorName: str = "value",
+    *,
+    market: str = "KR",
+    horizon: int = 1,
+) -> dict | None:
+    """팩터의 Cross-Sectional Information Coefficient 시계열 — Grinold & Kahn Ch.5 표준.
+
+    Capabilities:
+        - 일별 횡단면 Spearman IC = corr(factor rank, forward return rank) across stocks
+        - IC mean / IC std / ICIR (IC_mean / IC_std × √252) = Fundamental Law breadth 원료
+        - Hit rate (IC>0 일 비율) + 누적 IC 신호 안정성 진단
+        - horizon 옵션으로 1d/5d/20d forward return IC 비교
+
+    AIContext:
+        - review 시장분석 섹션의 ``factorICBlock`` 가 자동 호출 (향후)
+        - Alphalens 표준 metric (팩터 tear sheet 의 long-short Sharpe 와 독립 평가)
+        - ICIR > 0.5 = 강한 예측력, > 0.3 = 중간, < 0.1 = 노이즈
+        - Grinold & Kahn Fundamental Law: IR ≈ IC × √breadth
+
+    Guide:
+        - "value 팩터 예측력" → calcFactorIC("value")
+        - "size 팩터 5일 forward IC" → calcFactorIC("size", horizon=5)
+        - "quality 팩터 월간" → calcFactorIC("quality", horizon=20)
+
+    SeeAlso:
+        - calcFactorTearSheet : long-short portfolio Sharpe (Alphalens 보완)
+        - decomposeFactor : 단일 종목 FF5 loadings
+        - fundamentalLawIR : IC + breadth → IR 공식
+
+    Args:
+        factorName: ``"size" | "value" | "quality" | "investment"``
+            (별칭 ``"smb" | "hml" | "rmw" | "cma"`` 허용). 기본 ``"value"``.
+        market: ``"KR"`` 만 지원 (연말 MKTCAP/펀더멘털 SSOT).
+        horizon: forward return 기간 (일). ``1`` / ``5`` / ``20`` 권장. 기본 ``1``.
+
+    Returns:
+        dict
+            factorName : str — 대문자 팩터명
+            horizon : int — forward return 기간 (일)
+            market : str — "KR"
+            fundYear : str — 펀더멘털 기준 연도 (전년, look-ahead 방지)
+            retYear : str — 수익률 관측 연도 (당해, Q2~Q4)
+            nStocks : int — IC 계산에 포함된 종목 수
+            nDays : int — IC 시계열 관측일 수
+            icMean : float — 평균 Spearman IC (배, -1.0~1.0)
+            icStd : float — IC 표준편차 (배)
+            icir : float — IC Information Ratio (icMean/icStd × √(252/h), 배)
+            hitRate : float — IC > 0 구간 비율 (%)
+            tStat : float — IC mean t-통계량 (= icMean × √nDays / icStd)
+            interpretation : str — 정성 평가 ("강한 예측력" 등)
+            notes : str — 데이터 source
+
+    Examples:
+        >>> from dartlab.quant.factor import calcFactorIC
+        >>> ic = calcFactorIC("value", horizon=5)
+        >>> print(ic["icir"], ic["interpretation"])
+        0.42 중간 예측력 (value)
+
+    Notes:
+        - Spearman (rank 기반) — outlier robust.
+        - forward return = log(close[t+h]/close[t]).
+        - 전년 연말 펀더멘털 snapshot → 당해년도 Q2~Q4 (look-ahead bias 방지).
+        - **non-overlapping h-일 stepping** — 자기상관 제거, ICIR 인플레이션 방지.
+        - 한 시점 cross-section 최소 20 종목 미만은 제외.
+        - ICIR = icMean / icStd × √(252/h) = 연환산.
+    """
+    fname = factorName.lower().strip()
+    if fname not in _FACTOR_KEY_MAP:
+        raise ValueError(
+            f"factorName 알 수 없음: {factorName!r} — 허용: size/value/quality/investment (또는 smb/hml/rmw/cma)"
+        )
+    metric_key, reverse_sign = _FACTOR_KEY_MAP[fname]
+
+    if market != "KR":
+        return None
+
+    try:
+        from dartlab.core.finance.scanBridge import extractAnnualConsolidated
+        from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.quant._helpers import load_scan_parquet
+        from dartlab.quant.factorBuild import _build_universe_metrics, _latest_year
+    except Exception as exc:  # noqa: BLE001
+        log.warning("calcFactorIC import 실패: %s", type(exc).__name__)
+        return None
+
+    try:
+        lf = load_scan_parquet("finance", market)
+        if lf is None:
+            return None
+        snap = extractAnnualConsolidated(lf.collect())
+        year = _latest_year(snap)
+        if year is None:
+            return None
+    except Exception as exc:  # noqa: BLE001
+        log.warning("calcFactorIC year 추출 실패: %s", type(exc).__name__)
+        return None
+
+    # look-ahead bias 방지: 전년도 펀더멘털 → 당해년도 수익률
+    # (전년 12월말 데이터는 당해년도 Q1 이후 공시되므로 실전 예측 가능)
+    try:
+        fund_year = str(int(str(year)) - 1)
+    except ValueError:
+        return None
+    ret_year = str(year)
+
+    metrics = _build_universe_metrics(market, fund_year)
+    if len(metrics) < 50:
+        return None
+
+    scores = {code: m[metric_key] for code, m in metrics.items() if m.get(metric_key) is not None}
+    if len(scores) < 50:
+        return None
+    if reverse_sign:
+        # higher raw = higher factor exposure (good)
+        pass
+
+    try:
+        long_df = loadFiltered(
+            start=f"{ret_year}-04-01",
+            end=f"{ret_year}-12-31",
+            adjustment="raw",
+        )
+    except Exception as exc:  # noqa: BLE001
+        log.warning("calcFactorIC loadFiltered 실패: %s", type(exc).__name__)
+        return None
+    if long_df is None or long_df.is_empty():
+        return None
+
+    import polars as pl
+
+    codes = list(scores.keys())
+    sub = long_df.filter(pl.col("ISU_CD").is_in(codes)).select(["BAS_DD", "ISU_CD", "TDD_CLSPRC"])
+    if sub.is_empty():
+        return None
+
+    wide = sub.pivot(values="TDD_CLSPRC", index="BAS_DD", on="ISU_CD", aggregate_function="first").sort("BAS_DD")
+    date_col = wide.get_column("BAS_DD").to_numpy()
+    stock_cols = [c for c in wide.columns if c != "BAS_DD"]
+    if len(stock_cols) < 20:
+        return None
+
+    px = wide.select(stock_cols).to_numpy().astype(np.float64)
+    # forward log returns horizon h — non-overlapping stepping (자기상관 제거)
+    h = max(1, int(horizon))
+    if px.shape[0] <= h + 1:
+        return None
+    start_indices = np.arange(0, px.shape[0] - h, h)
+    if len(start_indices) < 10:
+        return None
+    with np.errstate(divide="ignore", invalid="ignore"):
+        fwd = np.log(px[start_indices + h] / px[start_indices])
+
+    score_vec = np.array([scores[c] for c in stock_cols], dtype=np.float64)
+
+    ic_series = []
+    for t in range(fwd.shape[0]):
+        row = fwd[t]
+        valid = np.isfinite(row) & np.isfinite(score_vec)
+        if valid.sum() < 20:
+            continue
+        sr = _rank_1d(score_vec[valid])
+        rr = _rank_1d(row[valid])
+        if sr.std() == 0 or rr.std() == 0:
+            continue
+        ic = float(np.corrcoef(sr, rr)[0, 1])
+        if np.isfinite(ic):
+            ic_series.append(ic)
+
+    if len(ic_series) < 10:
+        return None
+
+    # non-overlapping h-일 IC → 연간 관측 수 = 252/h
+    periods_per_year = TRADING_DAYS / h
+    ic_arr = np.asarray(ic_series, dtype=np.float64)
+    ic_mean = float(ic_arr.mean())
+    ic_std = float(ic_arr.std(ddof=1))
+    icir = (ic_mean / ic_std * np.sqrt(periods_per_year)) if ic_std > 0 else 0.0
+    hit_rate = float((ic_arr > 0).mean()) * 100
+    t_stat = ic_mean / (ic_std / np.sqrt(len(ic_arr))) if ic_std > 0 else 0.0
+
+    return {
+        "factorName": fname.upper(),
+        "horizon": h,
+        "market": market,
+        "fundYear": fund_year,
+        "retYear": ret_year,
+        "nStocks": len(stock_cols),
+        "nDays": int(len(ic_arr)),
+        "icMean": round(ic_mean, 4),
+        "icStd": round(ic_std, 4),
+        "icir": round(icir, 3),
+        "hitRate": round(hit_rate, 2),
+        "tStat": round(float(t_stat), 2),
+        "interpretation": _interpretIC(icir, fname, nDays=len(ic_arr)),
+        "notes": (
+            f"Spearman cross-sectional IC. fundYear={fund_year} → retYear={ret_year} Q2~Q4, "
+            f"horizon={h}d non-overlap stepping, score={metric_key}. "
+            "전년 연말 펀더멘털 → 당해 수익률 (look-ahead bias 방지), "
+            "non-overlap 으로 자기상관 제거."
+        ),
+    }
+
+
+def _rank_1d(arr: np.ndarray) -> np.ndarray:
+    """1D array → rank (ties averaged, 1-based normalized to 0..1 scale irrelevant)."""
+    order = arr.argsort()
+    ranks = np.empty_like(order, dtype=np.float64)
+    ranks[order] = np.arange(len(arr), dtype=np.float64)
+    # tie-averaging
+    uniq, inv = np.unique(arr, return_inverse=True)
+    if len(uniq) < len(arr):
+        sums = np.zeros(len(uniq), dtype=np.float64)
+        counts = np.zeros(len(uniq), dtype=np.float64)
+        np.add.at(sums, inv, ranks)
+        np.add.at(counts, inv, 1.0)
+        avg = sums / counts
+        ranks = avg[inv]
+    return ranks
+
+
+def _interpretIC(icir: float, factor: str, *, nDays: int | None = None) -> str:
+    """ICIR + 팩터 → 정성 한 줄. 단년도 sample 한계 caveat 포함."""
+    a = abs(icir)
+    if a > 2.0:
+        level = "매우 강한 예측력 (sample 제한 주의)"
+    elif a > 1.0:
+        level = "강한 예측력"
+    elif a > 0.5:
+        level = "중간 예측력"
+    elif a > 0.2:
+        level = "약한 예측력"
+    else:
+        level = "노이즈 수준"
+    sign = "+" if icir > 0 else "-"
+    suffix = ""
+    if nDays is not None and nDays < 30:
+        suffix = " [단기 sample]"
+    return f"{level} ({sign}{factor}){suffix}"
+
+
+def calcFactorICAll(*, market: str = "KR", horizon: int = 5) -> dict | None:
+    """4 팩터 (size/value/quality/investment) 의 Cross-Sectional IC 종합.
+
+    Args:
+        market: ``"KR"`` 만 지원.
+        horizon: forward return 기간. 기본 ``5`` (주간 시그널).
+
+    Returns:
+        dict
+            market : str
+            year : str
+            horizon : int
+            factors : list[dict] — 각 dict 는 calcFactorIC 결과
+            strongest : str | None — |ICIR| 최대 팩터
+            interpretation : str
+    """
+    rows = []
+    for fname in ("size", "value", "quality", "investment"):
+        ic = calcFactorIC(fname, market=market, horizon=horizon)
+        if ic is not None:
+            rows.append(ic)
+    if not rows:
+        return None
+    strongest = max(rows, key=lambda x: abs(x.get("icir", 0)))
+    return {
+        "market": market,
+        "fundYear": rows[0].get("fundYear"),
+        "retYear": rows[0].get("retYear"),
+        "horizon": horizon,
+        "factors": rows,
+        "strongest": strongest.get("factorName"),
+        "interpretation": (
+            f"{market} 시장 IC 최강 팩터: {strongest.get('factorName')} "
+            f"(ICIR={strongest.get('icir')}, {strongest.get('interpretation')})"
+        ),
+    }

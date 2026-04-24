@@ -1,0 +1,237 @@
+"""Beneish M-Score 횡단면 quant factor — 이익 조작 감지.
+
+학술: Beneish (1999) Financial Analysts Journal — 8변수 probit 모형.
+
+M = -4.84 + 0.920·DSRI + 0.528·GMI + 0.404·AQI + 0.892·SGI + 0.115·DEPI
+    - 0.172·SGAI + 4.679·TATA - 0.327·LVGI
+
+변수 (전년도 비교):
+    DSRI : Days Sales Receivables Index = (AR_t/Sales_t) / (AR_{t-1}/Sales_{t-1})
+    GMI  : Gross Margin Index = GM_{t-1} / GM_t   (마진 악화 시 > 1)
+    AQI  : Asset Quality Index = (1 - CA_t/TA_t) / (1 - CA_{t-1}/TA_{t-1})
+    SGI  : Sales Growth Index = Sales_t / Sales_{t-1}
+    DEPI : Depreciation Index = DepRate_{t-1} / DepRate_t (감가상각 감소 시 > 1)
+    SGAI : SG&A Index = (SGA_t/Sales_t) / (SGA_{t-1}/Sales_{t-1})
+    TATA : Total Accruals to Total Assets = (NI - CFO) / TA
+    LVGI : Leverage Index = (TL_t/TA_t) / (TL_{t-1}/TA_{t-1})
+
+해석:
+    M > -1.78 : 조작 가능 (red flag) — Beneish 원본 임계
+    M ≤ -1.78 : 양호
+
+dartlab 데이터: DART BS/IS/CF (AR, Sales, GM, Depreciation, SG&A, Accruals 모두 계산 가능).
+"""
+
+from __future__ import annotations
+
+import logging
+
+import polars as pl
+
+from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
+from dartlab.quant._helpers import extract_account, load_scan_parquet
+from dartlab.quant.factorBuild import _latest_year
+
+log = logging.getLogger(__name__)
+
+
+def _safeDiv(num: float | None, den: float | None) -> float | None:
+    if num is None or den is None or den == 0:
+        return None
+    return num / den
+
+
+def _computeM(cur: pl.DataFrame, prev: pl.DataFrame) -> float | None:
+    """단일 종목의 Beneish M. prev 없으면 None (변수 대부분이 비율 변화 필요)."""
+    # 현재
+    ta = extract_account(cur, "total_assets")
+    ca = extract_account(cur, "current_assets")
+    tl = extract_account(cur, "total_liabilities")
+    ar = extract_account(cur, "accounts_receivable")
+    sales = extract_account(cur, "sales")
+    gp = extract_account(cur, "gross_profit")
+    dep = extract_account(cur, "depreciation")
+    sga = extract_account(cur, "selling_admin")
+    ni = extract_account(cur, "net_income")
+    ocf = extract_account(cur, "operating_cf")
+    # 전년
+    ta_p = extract_account(prev, "total_assets")
+    ca_p = extract_account(prev, "current_assets")
+    tl_p = extract_account(prev, "total_liabilities")
+    ar_p = extract_account(prev, "accounts_receivable")
+    sales_p = extract_account(prev, "sales")
+    gp_p = extract_account(prev, "gross_profit")
+    dep_p = extract_account(prev, "depreciation")
+    sga_p = extract_account(prev, "selling_admin")
+
+    if not ta or ta <= 0 or not sales or sales <= 0:
+        return None
+    if not ta_p or ta_p <= 0 or not sales_p or sales_p <= 0:
+        return None
+
+    # DSRI
+    dsri_num = _safeDiv(ar, sales)
+    dsri_den = _safeDiv(ar_p, sales_p)
+    dsri = _safeDiv(dsri_num, dsri_den) if (dsri_num and dsri_den) else 1.0
+
+    # GMI — 전년 GM / 현재 GM (악화 시 > 1)
+    gm = _safeDiv(gp, sales)
+    gm_p = _safeDiv(gp_p, sales_p)
+    gmi = _safeDiv(gm_p, gm) if (gm and gm_p and gm > 0) else 1.0
+
+    # AQI — (1 - CA/TA) / prev
+    aqi_num = 1 - _safeDiv(ca, ta) if ca is not None else None
+    aqi_den = 1 - _safeDiv(ca_p, ta_p) if ca_p is not None else None
+    aqi = _safeDiv(aqi_num, aqi_den) if (aqi_num and aqi_den and aqi_den > 0) else 1.0
+
+    # SGI
+    sgi = sales / sales_p if sales_p > 0 else 1.0
+
+    # DEPI — 전년 감가율 / 현재 감가율 (감소 시 > 1)
+    dep_rate = _safeDiv(dep, ta) if dep else None
+    dep_rate_p = _safeDiv(dep_p, ta_p) if dep_p else None
+    depi = _safeDiv(dep_rate_p, dep_rate) if (dep_rate and dep_rate_p and dep_rate > 0) else 1.0
+
+    # SGAI
+    sgai_num = _safeDiv(sga, sales)
+    sgai_den = _safeDiv(sga_p, sales_p)
+    sgai = _safeDiv(sgai_num, sgai_den) if (sgai_num and sgai_den) else 1.0
+
+    # TATA
+    tata = ((ni or 0) - (ocf or 0)) / ta if (ni is not None or ocf is not None) and ta > 0 else 0.0
+
+    # LVGI
+    lvgi_num = _safeDiv(tl, ta) if tl is not None else None
+    lvgi_den = _safeDiv(tl_p, ta_p) if tl_p is not None else None
+    lvgi = _safeDiv(lvgi_num, lvgi_den) if (lvgi_num and lvgi_den and lvgi_den > 0) else 1.0
+
+    m = (
+        -4.84
+        + 0.920 * (dsri or 1.0)
+        + 0.528 * (gmi or 1.0)
+        + 0.404 * (aqi or 1.0)
+        + 0.892 * sgi
+        + 0.115 * (depi or 1.0)
+        - 0.172 * (sgai or 1.0)
+        + 4.679 * tata
+        - 0.327 * (lvgi or 1.0)
+    )
+    return m
+
+
+def calcBeneishFactor(*, market: str = "KR") -> dict | None:
+    """Beneish M-Score 횡단면 quant factor — 한국 전종목 이익 조작 red flag.
+
+    Capabilities:
+        - 전종목 M-Score (8변수) 횡단면 분포
+        - red flag (M > -1.78) 종목 비율 + Top 10
+        - 이익 조작 의심 시장 지도 (회계 품질 관점)
+
+    AIContext:
+        - Sprint 2 재무 알파 — Piotroski (건강) + Altman (부실) + Beneish (조작) 3종 교차
+        - red flag = quant 포트폴리오 자동 제외 후보
+        - review `beneishFactorBlock` 시장분석 자동 호출
+
+    Guide:
+        - 시장 스냅샷 : calcBeneishFactor()
+
+    SeeAlso:
+        - calcPiotroskiFactor : 재무 건강
+        - calcAltmanFactor : 부실 확률
+        - analysis.financial.earningsQuality : 단일 종목 이익 품질
+
+    Args:
+        market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.
+
+    Returns:
+        dict
+            market : str
+            year : str
+            prevYear : str
+            universe : int
+            scores : dict[str, float] — {stockCode: M}
+            flags : dict — {redFlag: {count, pct}, clean: {count, pct}}
+            topFlag : list[tuple[str, float]] — M 상위 10 (가장 의심)
+            topClean : list[tuple[str, float]] — M 하위 10 (가장 투명)
+            interpretation : str
+
+    Examples:
+        >>> from dartlab.quant.alphas.beneish import calcBeneishFactor
+        >>> r = calcBeneishFactor()
+        >>> print(r["flags"]["redFlag"]["pct"], "% red flag")
+        17.2 % red flag
+
+    Notes:
+        - 임계 -1.78 은 Beneish 원본. 한국 시장엔 부분 조정 여지 있으나 일관성 위해 유지.
+        - SGA (판관비) 데이터 없을 시 SGAI = 1 (뉴트럴).
+        - 단일 연도 M 만 신호 아님 — 2~3년 연속 red flag 가 실제 risk.
+    """
+    try:
+        lf = load_scan_parquet("finance", market)
+        if lf is None:
+            return None
+        snap = extractAnnualConsolidated(lf.collect())
+        year = _latest_year(snap)
+        if year is None:
+            return None
+    except (OSError, ValueError, KeyError, AttributeError) as exc:
+        log.warning("calcBeneishFactor year 추출 실패: %s", type(exc).__name__)
+        return None
+
+    edgar = isEdgarSchema(snap)
+    year_col = "fy" if edgar else "bsns_year"
+    year_val = int(year) if edgar else year
+    try:
+        prev_year_val = int(year) - 1 if edgar else str(int(year) - 1)
+    except ValueError:
+        return None
+
+    cur = snap.filter(pl.col(year_col) == year_val)
+    prev = snap.filter(pl.col(year_col) == prev_year_val)
+    if cur.is_empty() or prev.is_empty():
+        return None
+
+    scores: dict[str, float] = {}
+    codes = cur.get_column("stockCode").unique().to_list()
+    for code in codes:
+        if not isinstance(code, str):
+            continue
+        s_cur = cur.filter(pl.col("stockCode") == code)
+        s_prev = prev.filter(pl.col("stockCode") == code)
+        if s_prev.is_empty():
+            continue
+        m = _computeM(s_cur, s_prev)
+        if m is None:
+            continue
+        scores[code] = m
+
+    if not scores:
+        return None
+
+    red_flag = sum(1 for m in scores.values() if m > -1.78)
+    clean = len(scores) - red_flag
+    total = len(scores)
+    flags = {
+        "redFlag": {"count": red_flag, "pct": round(100 * red_flag / total, 1)},
+        "clean": {"count": clean, "pct": round(100 * clean / total, 1)},
+    }
+
+    sorted_items = sorted(scores.items(), key=lambda x: -x[1])
+    topFlag = [(c, round(m, 2)) for c, m in sorted_items[:10]]
+    topClean = [(c, round(m, 2)) for c, m in sorted_items[-10:]]
+
+    return {
+        "market": market,
+        "year": str(year),
+        "prevYear": str(prev_year_val),
+        "universe": total,
+        "scores": {c: round(m, 2) for c, m in scores.items()},
+        "flags": flags,
+        "topFlag": topFlag,
+        "topClean": topClean,
+        "interpretation": (
+            f"{market} {year}년 {total}개 종목 중 red flag "
+            f"{flags['redFlag']['pct']}% ({flags['redFlag']['count']}사). "
+            "M > -1.78 = 이익 조작 의심."
+        ),
+    }

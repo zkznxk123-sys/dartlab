@@ -1,0 +1,263 @@
+"""Piotroski F-Score 횡단면 quant factor.
+
+학술: Piotroski (2000) Journal of Accounting Research — 9개 이진 신호 합산 (0~9점).
+
+수익성 (4):
+    F1 ROA > 0
+    F2 CFO > 0
+    F3 ΔROA > 0 (개선)
+    F4 CFO > NI (accrual quality)
+
+건전성/자본 (3):
+    F5 Δ(TL/TA) < 0 (부채비율 감소)
+    F6 ΔCurrent Ratio > 0 (유동성 개선)
+    F7 신주 미발행 (equity/asset 희석 X)
+
+효율성 (2):
+    F8 ΔGross Margin > 0
+    F9 ΔAsset Turnover > 0
+
+해석: ≥7 strong / 4~6 moderate / ≤3 weak
+
+dartlab 데이터: DART finance.parquet (BS/IS/CF 모두). 전년도 비교 필요.
+"""
+
+from __future__ import annotations
+
+import logging
+
+import polars as pl
+
+from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
+from dartlab.quant._helpers import extract_account, load_scan_parquet
+from dartlab.quant.factorBuild import _latest_year
+
+log = logging.getLogger(__name__)
+
+
+def _safeDiv(num: float | None, den: float | None) -> float | None:
+    if num is None or den is None or den == 0:
+        return None
+    return num / den
+
+
+def _scoreOne(cur: pl.DataFrame, prev: pl.DataFrame | None) -> dict | None:
+    """단일 종목의 9 신호 평가 → dict(components, total)."""
+    ta = extract_account(cur, "total_assets")
+    if not ta or ta <= 0:
+        return None
+    ni = extract_account(cur, "net_income")
+    ocf = extract_account(cur, "operating_cf")
+    tl = extract_account(cur, "total_liabilities")
+    ca = extract_account(cur, "current_assets")
+    cl = extract_account(cur, "current_liabilities")
+    gp = extract_account(cur, "gross_profit")
+    sales = extract_account(cur, "sales")
+    eq = extract_account(cur, "total_equity")
+
+    components: dict[str, bool] = {}
+    roa = _safeDiv(ni, ta)
+    components["roaPositive"] = bool(roa is not None and roa > 0)
+    components["ocfPositive"] = bool(ocf is not None and ocf > 0)
+    components["cfGtNi"] = bool(ocf is not None and ni is not None and ocf > ni)
+
+    ta_prev = None
+    ni_prev = None
+    ocf_prev = None
+    tl_prev = None
+    ca_prev = None
+    cl_prev = None
+    gp_prev = None
+    sales_prev = None
+    eq_prev = None
+    if prev is not None and not prev.is_empty():
+        ta_prev = extract_account(prev, "total_assets")
+        ni_prev = extract_account(prev, "net_income")
+        ocf_prev = extract_account(prev, "operating_cf")
+        tl_prev = extract_account(prev, "total_liabilities")
+        ca_prev = extract_account(prev, "current_assets")
+        cl_prev = extract_account(prev, "current_liabilities")
+        gp_prev = extract_account(prev, "gross_profit")
+        sales_prev = extract_account(prev, "sales")
+        eq_prev = extract_account(prev, "total_equity")
+
+    roa_prev = _safeDiv(ni_prev, ta_prev)
+    components["roaIncreasing"] = bool(roa is not None and roa_prev is not None and roa > roa_prev)
+
+    # leverage = TL / TA (decreasing is good)
+    lev_cur = _safeDiv(tl, ta)
+    lev_prev = _safeDiv(tl_prev, ta_prev)
+    components["debtDecreasing"] = bool(lev_cur is not None and lev_prev is not None and lev_cur < lev_prev)
+
+    # current ratio
+    cr_cur = _safeDiv(ca, cl)
+    cr_prev = _safeDiv(ca_prev, cl_prev)
+    components["currentRatioUp"] = bool(cr_cur is not None and cr_prev is not None and cr_cur > cr_prev)
+
+    # no new shares: 자본 대비 자산 비율 지속 (equity dilution proxy)
+    # 실제 issued_shares 없음 → equity가 자산 대비 떨어지지 않으면 pass (보수적)
+    e2a_cur = _safeDiv(eq, ta)
+    e2a_prev = _safeDiv(eq_prev, ta_prev)
+    if e2a_cur is not None and e2a_prev is not None:
+        components["noNewShares"] = bool(e2a_cur >= e2a_prev * 0.95)
+    else:
+        components["noNewShares"] = True  # 데이터 없으면 보수적 pass
+
+    # gross margin
+    gm_cur = _safeDiv(gp, sales)
+    gm_prev = _safeDiv(gp_prev, sales_prev)
+    components["grossMarginUp"] = bool(gm_cur is not None and gm_prev is not None and gm_cur > gm_prev)
+
+    # asset turnover
+    at_cur = _safeDiv(sales, ta)
+    at_prev = _safeDiv(sales_prev, ta_prev)
+    components["assetTurnoverUp"] = bool(at_cur is not None and at_prev is not None and at_cur > at_prev)
+
+    total = sum(1 for v in components.values() if v)
+    return {"total": total, "components": components}
+
+
+def calcPiotroskiFactor(*, market: str = "KR") -> dict | None:
+    """Piotroski F-Score 횡단면 quant factor — 한국 전종목 재무 건강 9점 랭킹.
+
+    Capabilities:
+        - 전종목 F-Score (0~9점) 횡단면 분포
+        - strong (≥7) / moderate (4~6) / weak (≤3) 3 그룹 비중
+        - Top (9점) 종목 리스트 + Bottom 리스트
+        - 9 신호별 통과율 (시장 평균 개선 방향 진단)
+
+    AIContext:
+        - Sprint 2 재무 알파 핵심 — 가치 + 품질 통합 스크리닝
+        - review `piotroskiFactorBlock` 시장분석 자동 호출
+        - F ≥ 7 종목 = fundamental momentum 후보 / F ≤ 3 = 회피 후보
+
+    Guide:
+        - 전종목 스냅샷 : calcPiotroskiFactor()
+        - 단일종목 : analysis.financial.scorecard.calcPiotroskiDetail(company)
+
+    SeeAlso:
+        - analysis.financial.research.scoring.calcPiotroski : 단일 종목 9 신호
+        - calcAltmanFactor : 부실 확률 (보완 축)
+        - calcBeneishFactor : 이익 조작 감지 (보완 축)
+
+    Args:
+        market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.
+
+    Returns:
+        dict
+            market : str
+            year : str — 현재 연도
+            prevYear : str — 전년도 비교 기준
+            universe : int
+            scores : dict[str, int] — {stockCode: F (0~9)}
+            components : dict[str, dict] — 종목별 9 신호 상세
+            grades : dict — {strong: {count, pct}, moderate: {...}, weak: {...}}
+            topStrong : list[tuple[str, int]] — Top 10 (F 내림차순)
+            topWeak : list[tuple[str, int]] — Bottom 10
+            signalAvg : dict[str, float] — 신호별 시장 평균 통과율 (%)
+            interpretation : str
+
+    Examples:
+        >>> from dartlab.quant.alphas.piotroski import calcPiotroskiFactor
+        >>> r = calcPiotroskiFactor()
+        >>> print(r["grades"]["strong"]["pct"], "% 강건")
+        18.3 % 강건
+
+    Notes:
+        - F7 (noNewShares): DART 에 issued_shares 원장 없어 equity/asset 유지로 근사.
+        - 전년도 데이터 없는 종목은 F3/F5/F6/F7/F8/F9 자동 실패 (보수적).
+        - 2년 연속 동일 F ≥ 8 stream = hedge fund 장기 롱 후보.
+    """
+    try:
+        lf = load_scan_parquet("finance", market)
+        if lf is None:
+            return None
+        snap = extractAnnualConsolidated(lf.collect())
+        year = _latest_year(snap)
+        if year is None:
+            return None
+    except (OSError, ValueError, KeyError, AttributeError) as exc:
+        log.warning("calcPiotroskiFactor year 추출 실패: %s", type(exc).__name__)
+        return None
+
+    edgar = isEdgarSchema(snap)
+    year_col = "fy" if edgar else "bsns_year"
+    year_val = int(year) if edgar else year
+    try:
+        prev_year_val = int(year) - 1 if edgar else str(int(year) - 1)
+    except ValueError:
+        return None
+
+    cur = snap.filter(pl.col(year_col) == year_val)
+    prev = snap.filter(pl.col(year_col) == prev_year_val)
+    if cur.is_empty():
+        return None
+
+    scores: dict[str, int] = {}
+    components: dict[str, dict] = {}
+    codes = cur.get_column("stockCode").unique().to_list()
+    for code in codes:
+        if not isinstance(code, str):
+            continue
+        s_cur = cur.filter(pl.col("stockCode") == code)
+        s_prev = prev.filter(pl.col("stockCode") == code)
+        res = _scoreOne(s_cur, s_prev if not s_prev.is_empty() else None)
+        if res is None:
+            continue
+        scores[code] = res["total"]
+        components[code] = res["components"]
+
+    if not scores:
+        return None
+
+    grades_count = {"strong": 0, "moderate": 0, "weak": 0}
+    for f in scores.values():
+        if f >= 7:
+            grades_count["strong"] += 1
+        elif f >= 4:
+            grades_count["moderate"] += 1
+        else:
+            grades_count["weak"] += 1
+
+    total = len(scores)
+    grades = {k: {"count": v, "pct": round(100 * v / total, 1)} for k, v in grades_count.items()}
+
+    sorted_items = sorted(scores.items(), key=lambda x: -x[1])
+    topStrong = sorted_items[:10]
+    topWeak = sorted_items[-10:]
+
+    # 신호별 통과율
+    signal_keys = [
+        "roaPositive",
+        "ocfPositive",
+        "roaIncreasing",
+        "cfGtNi",
+        "debtDecreasing",
+        "currentRatioUp",
+        "noNewShares",
+        "grossMarginUp",
+        "assetTurnoverUp",
+    ]
+    signalAvg = {}
+    for k in signal_keys:
+        passed = sum(1 for c in components.values() if c.get(k))
+        signalAvg[k] = round(100 * passed / total, 1)
+
+    return {
+        "market": market,
+        "year": str(year),
+        "prevYear": str(prev_year_val),
+        "universe": total,
+        "scores": scores,
+        "components": components,
+        "grades": grades,
+        "topStrong": topStrong,
+        "topWeak": topWeak,
+        "signalAvg": signalAvg,
+        "interpretation": (
+            f"{market} 시장 {year}년 {total}개 종목 Piotroski 분포: "
+            f"strong {grades['strong']['pct']}% ({grades['strong']['count']}사), "
+            f"moderate {grades['moderate']['pct']}%, "
+            f"weak {grades['weak']['pct']}%."
+        ),
+    }

@@ -342,6 +342,31 @@ _ACCOUNT_PATTERNS: dict[str, list[str]] = {
         r"^재무활동현금흐름$",
         r"재무활동.*현금흐름",
     ],
+    "current_assets": [r"^유동자산$", r"유동자산"],
+    "current_liabilities": [r"^유동부채$", r"유동부채"],
+    "retained_earnings": [
+        r"^이익잉여금$",
+        r"^이익잉여금\(결손금\)$",
+        r"이익잉여금",
+    ],
+    "gross_profit": [r"^매출총이익$", r"^매출총손익$", r"매출총이익"],
+    "cost_of_sales": [r"^매출원가$", r"매출원가"],
+    "inventory": [r"^재고자산$", r"재고자산"],
+    "accounts_receivable": [
+        r"^매출채권$",
+        r"^매출채권\s*및?\s*기타채권$",
+        r"매출채권",
+    ],
+    "depreciation": [
+        r"^감가상각비$",
+        r"감가상각비",
+        r"^감가상각및?\s*무형자산상각비$",
+    ],
+    "selling_admin": [
+        r"^판매비와?\s*관리비$",
+        r"^판매관리비$",
+        r"판매비.*관리비",
+    ],
 }
 
 # 표준 키 → 후보 sj_div 리스트
@@ -356,6 +381,15 @@ _ACCOUNT_SJ: dict[str, list[str]] = {
     "operating_cf": ["CF"],
     "investing_cf": ["CF"],
     "financing_cf": ["CF"],
+    "current_assets": ["BS"],
+    "current_liabilities": ["BS"],
+    "retained_earnings": ["BS"],
+    "gross_profit": ["IS", "CIS"],
+    "cost_of_sales": ["IS", "CIS"],
+    "inventory": ["BS"],
+    "accounts_receivable": ["BS"],
+    "depreciation": ["IS", "CIS", "CF"],
+    "selling_admin": ["IS", "CIS"],
 }
 
 

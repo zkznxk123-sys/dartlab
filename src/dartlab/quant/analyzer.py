@@ -11,7 +11,7 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant import indicators as ind
+from dartlab.gather import indicators as ind
 from dartlab.quant import signals as sig
 
 
