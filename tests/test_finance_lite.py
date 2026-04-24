@@ -145,7 +145,7 @@ def test_scanAccount_pyodide_path_uses_pyarrow(tmp_path, monkeypatch):
         filterDivs=["IS", "CIS"],
         fsPref="CFS",
         fastKeys=fastKeys,
-        annual=True,
+        freq="Y",
     )
 
     assert result is not None, "pyodide 경로 결과가 None"

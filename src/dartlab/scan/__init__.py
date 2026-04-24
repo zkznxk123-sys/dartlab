@@ -420,11 +420,11 @@ def _edgarDispatch(axis: str, kwargs: dict) -> pl.DataFrame | None:
     if axis == "account":
         from dartlab.providers.edgar.finance.scanAccount import scanAccount
 
-        return scanAccount(kwargs.get("snakeId", "sales"), annual=kwargs.get("annual", False))
+        return scanAccount(kwargs.get("snakeId", "sales"), freq=kwargs.get("freq", "Q"))
     if axis == "ratio":
         from dartlab.providers.edgar.finance.scanAccount import scanRatio
 
-        return scanRatio(kwargs.get("ratioName", "roe"), annual=kwargs.get("annual", False))
+        return scanRatio(kwargs.get("ratioName", "roe"), freq=kwargs.get("freq", "Q"))
 
     return None  # 아직 EDGAR 구현 없는 축
 
@@ -591,7 +591,7 @@ class Scan:
     Args:
         axis: 축 이름. None이면 13축 가이드 반환.
         target: 축별 대상 (종목코드, 항목, 비율명 등).
-        **kwargs: 축별 옵션 (annual, fsPref, market 등).
+        **kwargs: 축별 옵션 (freq, fsPref, market 등).
 
     Returns
     -------
@@ -612,6 +612,8 @@ class Scan:
         self,
         axis: str | None = None,
         target: str | None = None,
+        *,
+        freq: str = "Q",
         **kwargs: Any,
     ) -> pl.DataFrame | Any:
         """축(axis)별 전종목 횡단분석.
@@ -679,6 +681,9 @@ class Scan:
         callKwargs: dict[str, Any] = dict(kwargs)
         if entry.targetParam and target is not None:
             callKwargs[entry.targetParam] = target
+        # freq 는 account/ratio 등 Company 엔진과 기간 단위를 공유하는 축에만 의미
+        if resolved in ("account", "ratio"):
+            callKwargs["freq"] = freq
 
         # EDGAR market 디스패치 — XBRL 기반 축은 EDGAR 전용 구현으로 분기
         market = callKwargs.pop("market", None)

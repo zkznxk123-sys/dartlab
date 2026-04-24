@@ -108,7 +108,7 @@ class TestScanAccountReal:
                 expected[str(y)] = salesVals[i]
 
         # scanAccount 결과 (연간 모드로 비교)
-        df = scanAccount("sales", annual=True)
+        df = scanAccount("sales", freq="Y")
         row = df.filter(pl.col("stockCode") == "005930")
         assert row.height == 1, "삼성전자가 결과에 없음"
 

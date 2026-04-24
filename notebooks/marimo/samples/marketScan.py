@@ -38,7 +38,7 @@ def _(df):
 @app.cell
 def _():
     # 연간 영업이익
-    dartlab.scan("account", "영업이익", annual=True)
+    dartlab.scan("account", "영업이익", freq="Y")
     return
 
 

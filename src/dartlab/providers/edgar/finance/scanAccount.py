@@ -58,11 +58,11 @@ def _joinCorpName(df: pl.DataFrame) -> pl.DataFrame:
 class _EdgarFileProcessor:
     """EDGAR parquet 파일별 처리."""
 
-    __slots__ = ("tagKeys", "annual", "cikToTicker")
+    __slots__ = ("tagKeys", "freq", "cikToTicker")
 
-    def __init__(self, tagKeys: set[str], *, annual: bool, cikToTicker: dict[str, str]):
+    def __init__(self, tagKeys: set[str], *, freq: str, cikToTicker: dict[str, str]):
         self.tagKeys = list(tagKeys)
-        self.annual = annual
+        self.freq = freq
         self.cikToTicker = cikToTicker
 
     def __call__(self, pf: Path) -> pl.DataFrame | None:
@@ -91,7 +91,7 @@ class _EdgarFileProcessor:
         if df.is_empty():
             return None
 
-        if self.annual:
+        if self.freq == "Y":
             return self._parseAnnual(df, ticker)
         return self._parseQuarterly(df, ticker)
 
@@ -144,12 +144,12 @@ class _EdgarFileProcessor:
             if not fyDf.is_empty():
                 fyVal = fyDf["val"].drop_nulls().to_list()
                 if fyVal:
-                    annual = fyVal[0]
+                    fyAmount = fyVal[0]
                     if len(qVals) == 3:
-                        q4 = annual - sum(qVals.values())
+                        q4 = fyAmount - sum(qVals.values())
                         rows.append({"stockCode": ticker, "period": f"{fy}Q4", "amount": q4})
                     else:
-                        rows.append({"stockCode": ticker, "period": f"{fy}Q4", "amount": annual})
+                        rows.append({"stockCode": ticker, "period": f"{fy}Q4", "amount": fyAmount})
 
         return pl.DataFrame(rows) if rows else None
 
@@ -157,13 +157,13 @@ class _EdgarFileProcessor:
 def scanAccount(
     dartSnakeId: str,
     *,
-    annual: bool = False,
+    freq: str = "Q",
 ) -> pl.DataFrame:
     """전종목 EDGAR 단일 계정 시계열.
 
     Args:
         dartSnakeId: DART canonical snakeId (예: "sales", "total_assets").
-        annual: True면 연간 (기본 False=분기별).
+        freq: "Q" 분기 (기본) · "Y" 연간. Company 엔진과 일치.
 
     Returns:
         stockCode(=ticker) | corpName | 기간컬럼들... (최신 먼저)
@@ -196,9 +196,9 @@ def scanAccount(
         _log.warning("EDGAR에서 '%s'에 매핑되는 tag 없음", dartSnakeId)
         return pl.DataFrame({"stockCode": []})
 
-    processor = _EdgarFileProcessor(tagKeys, annual=annual, cikToTicker=cikToTicker)
+    processor = _EdgarFileProcessor(tagKeys, freq=freq, cikToTicker=cikToTicker)
 
-    _log.info("scanAccount(edgar, '%s', annual=%s): %d 파일 스캔", dartSnakeId, annual, len(parquetFiles))
+    _log.info("scanAccount(edgar, '%s', freq=%s): %d 파일 스캔", dartSnakeId, freq, len(parquetFiles))
 
     with ThreadPoolExecutor(max_workers=min(os.cpu_count() or 4, 8)) as pool:
         chunks = [r for r in pool.map(processor, parquetFiles) if r is not None]
@@ -231,13 +231,13 @@ from dartlab.providers.dart.finance.scanAccount import _RATIO_DEFS
 def scanRatio(
     ratioName: str,
     *,
-    annual: bool = False,
+    freq: str = "Q",
 ) -> pl.DataFrame:
     """전종목 EDGAR 재무비율 시계열.
 
     Args:
         ratioName: 비율 식별자. scanRatioList() 참조.
-        annual: True면 연간 (기본 False=분기별).
+        freq: "Q" 분기 (기본) · "Y" 연간. Company 엔진과 일치.
     """
     if ratioName not in _RATIO_DEFS:
         available = ", ".join(sorted(_RATIO_DEFS))
@@ -247,14 +247,14 @@ def scanRatio(
     defn = _RATIO_DEFS[ratioName]
 
     if defn.get("yoy"):
-        return _calcYoyRatio(defn, annual=annual)
-    return _calcSimpleRatio(defn, annual=annual)
+        return _calcYoyRatio(defn, freq=freq)
+    return _calcSimpleRatio(defn, freq=freq)
 
 
-def _calcSimpleRatio(defn: dict, *, annual: bool = False) -> pl.DataFrame:
+def _calcSimpleRatio(defn: dict, *, freq: str = "Q") -> pl.DataFrame:
     """분자/분모 비율 계산."""
-    numer = scanAccount(defn["numer"], annual=annual)
-    denom = scanAccount(defn["denom"], annual=annual)
+    numer = scanAccount(defn["numer"], freq=freq)
+    denom = scanAccount(defn["denom"], freq=freq)
 
     numerCols = [c for c in numer.columns if c not in ("stockCode", "corpName")]
     denomCols = [c for c in denom.columns if c not in ("stockCode", "corpName")]
@@ -286,9 +286,9 @@ def _calcSimpleRatio(defn: dict, *, annual: bool = False) -> pl.DataFrame:
     return _joinCorpName(result)
 
 
-def _calcYoyRatio(defn: dict, *, annual: bool = False) -> pl.DataFrame:
+def _calcYoyRatio(defn: dict, *, freq: str = "Q") -> pl.DataFrame:
     """YoY 성장률 계산."""
-    base = scanAccount(defn["base"], annual=annual)
+    base = scanAccount(defn["base"], freq=freq)
     periodCols = sorted(c for c in base.columns if c not in ("stockCode", "corpName"))
 
     if len(periodCols) < 2:
