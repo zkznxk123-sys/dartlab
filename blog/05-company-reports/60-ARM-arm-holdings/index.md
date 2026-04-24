@@ -161,6 +161,14 @@ c.select("IS", ["매출액","매출원가","매출총이익","판매비와관리
 
 ## 3막. 매출 $4.01B의 해부 — 모바일·데이터센터·자동차·IoT 4축
 
+```python
+# ARM은 미국 상장사이므로 EDGAR 기반 companyfacts 조회
+import dartlab
+c = dartlab.Company("ARM")          # NASDAQ:ARM — EDGAR 자동 분기
+c.select("IS", ["Revenues", "OperatingIncomeLoss"])  # SEC XBRL 직접
+c.select("BS", ["Assets", "StockholdersEquity"])
+```
+
 **ARM 매출은 제품·시장별로 4개 축으로 공시된다.** FY2025 기준.
 
 ### 4축 매출 구성
@@ -172,7 +180,7 @@ c.select("IS", ["매출액","매출원가","매출총이익","판매비와관리
 | **자동차** | 약 $0.55B | 14% | +25% | 60%+ (ADAS·인포테인먼트) |
 | **IoT·임베디드** (가전·산업·웨어러블) | 약 $0.66B | 16% | +5% | 90%+ |
 
-표시: **데이터센터 매출 FY 기간 +65%** = AI 붐의 직접 반영. 엔비디아 Grace Hopper(2023년 출시), AWS Graviton(2024년 Graviton 4), 구글 Axion(2024년 공개) 등 **AI 서버 CPU가 ARM 기반**으로 전환되는 흐름. 이 흐름이 ARM 매출 성장의 핵심 엔진.
+표시: **데이터센터 매출 FY 기간 +65%** = AI 붐의 직접 반영. 엔비디아 Grace Hopper([2023년 출시 공지](https://nvidianews.nvidia.com/news/nvidia-grace-hopper-superchip-for-giant-scale-ai-and-hpc-applications-enters-full-production)), AWS Graviton([2024년 Graviton 4 발표](https://aws.amazon.com/ec2/graviton/)), 구글 Axion([2024년 공개 블로그](https://cloud.google.com/blog/products/compute/introducing-googles-new-arm-based-cpu)) 등 **AI 서버 CPU가 ARM 기반**으로 전환되는 흐름. 이 흐름이 ARM 매출 성장의 핵심 엔진.
 
 ### 모바일 — 99% 지배의 현금 기계
 
@@ -231,7 +239,7 @@ c.select("IS", ["매출액","매출원가","매출총이익","판매비와관리
 - **EU 경쟁위**: 2021.10 2단계 조사 착수
 - **중국 국가시장감독관리총국**: 비공식 반대 시그널
 
-2022년 2월 7일, **엔비디아와 소프트뱅크가 인수 포기 공식 발표**. 무산의 직접 원인은 "각국 규제 당국의 승인 확보 난망". 엔비디아는 소프트뱅크에 **위약금 $1.25B** 지급.
+2022년 2월 7일, **[엔비디아와 소프트뱅크가 인수 포기 공식 발표](https://nvidianews.nvidia.com/news/nvidia-and-softbank-group-announce-termination-of-nvidias-acquisition-of-arm-limited)**. 무산의 직접 원인은 "각국 규제 당국의 승인 확보 난망". 엔비디아는 소프트뱅크에 **위약금 $1.25B** 지급 ([Reuters 2022.2.8 보도](https://www.reuters.com/technology/nvidia-softbank-scrap-40-bln-deal-buy-chip-designer-arm-2022-02-08/)).
 
 ### 무산이 ARM에 준 의미
 
@@ -375,6 +383,14 @@ ARM의 상위 5개 라이선시(Apple·Qualcomm·Samsung·MediaTek·Nvidia) 가 
 ---
 
 ## 8막. 매출 $4B vs 시가총액 $150B — 37배 간극의 해부
+
+```python
+# 밸류에이션 지표 교차 확인
+import dartlab
+c = dartlab.Company("ARM")
+c.quant("종합")               # PER/PBR/PSR + 시장 베타
+c.credit("등급")               # dCR-AA (비미 개발 영향 경감 판정)
+```
 
 **시장은 ARM을 $150B로 평가한다.** 매출 $4B, 영업이익 $0.83B, 순이익 $0.79B 기업. 주요 밸류에이션 지표:
 
