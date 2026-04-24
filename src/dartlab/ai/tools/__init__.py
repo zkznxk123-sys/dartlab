@@ -162,7 +162,66 @@ def buildTools() -> list[AITool]:
         )
     )
 
+    # Read — 파일 내용을 문자열로 반환. SKILL.md · ops 문서 · blog 포스트 · 코드 열람 전용.
+    # Claude Code Read 와 동일 개념. repo 루트 기준 상대경로 또는 절대경로 허용.
+    tools.append(
+        AITool(
+            name="Read",
+            description=(
+                "파일 내용을 문자열로 반환. 주요 용도: "
+                "(1) `src/dartlab/skills/{name}/SKILL.md` — skill 본문 로드해 How 절차 따르기. "
+                "(2) `src/dartlab/skills/{name}/reference/*.md` — 업종별 임계값 · 실전 예시 등 참고자료. "
+                "(3) `ops/*.md` — 엔진 설계 문서. (4) `blog/**/index.md` — 과거 기업분석 서사. "
+                "(5) 코드 구현 확인용 `src/dartlab/**/*.py`. "
+                "경로는 저장소 루트 기준 상대 또는 절대. UTF-8 텍스트만."
+            ),
+            parameters={
+                "type": "object",
+                "properties": {
+                    "filePath": {"type": "string", "description": "읽을 파일 경로 (상대 또는 절대)."},
+                    "maxBytes": {
+                        "type": "integer",
+                        "description": "최대 바이트 (기본 100000). 큰 파일은 제한.",
+                        "minimum": 1,
+                        "maximum": 1000000,
+                    },
+                },
+                "required": ["filePath"],
+                "additionalProperties": False,
+            },
+            handler=_readFile,
+        )
+    )
+
     return tools
+
+
+def _readFile(args: dict) -> str:
+    """`Read` tool 핸들러 — 파일 UTF-8 텍스트 반환."""
+    from pathlib import Path
+
+    filePath = args.get("filePath") or args.get("path") or ""
+    maxBytes = int(args.get("maxBytes") or 100_000)
+    if not filePath:
+        return "[error] filePath required"
+
+    p = Path(filePath)
+    if not p.is_absolute():
+        # 저장소 루트 기준 — src/dartlab/ai/tools/__init__.py → parents[4]
+        root = Path(__file__).resolve().parents[4]
+        p = root / filePath
+    try:
+        if not p.exists():
+            return f"[error] file not found: {p}"
+        if p.is_dir():
+            return f"[error] path is a directory: {p}"
+        data = p.read_bytes()
+        if len(data) > maxBytes:
+            truncated = data[:maxBytes].decode("utf-8", errors="replace")
+            return f"{truncated}\n\n[... truncated at {maxBytes} bytes / total {len(data)} bytes ...]"
+        return data.decode("utf-8", errors="replace")
+    except OSError as exc:
+        return f"[error] read failed: {exc}"
 
 
 # ── Resolve / Handler ─────────────────────────────────────
@@ -249,6 +308,12 @@ def _buildHandler(name: str, kind: str, target: str) -> Callable[..., Any]:
 
                     clean["market"] = detectMarket(sc)
 
+            # scan axis='ratio' · 'account' 은 기본 freq='Y' (연간) 로 주입 — AI 는 광역 발굴에
+            # 연간 수치를 써야 임계값 필터가 의미 있다. Company.show 와 달리 scan 은 본질적으로
+            # 연간 횡단 비교가 표준 용도. 사용자가 freq='Q' 명시하면 그대로 존중.
+            if target == "scan" and clean.get("axis") in ("ratio", "account") and "freq" not in clean:
+                clean["freq"] = "Y"
+
             fn = getattr(dartlab, target)
             core, post = _splitKwargs(target, clean)
             if target == "search" and clean.get("limit"):
@@ -333,6 +398,18 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
 
     # scan: target 의미 명확화 + 후처리 파라미터
     if name == "scan":
+        # axis 선택 가이드 — 광역 발굴은 primitive 조합 필수.
+        if "axis" in props:
+            base_desc = props["axis"].get("description") or "전종목 횡단 축"
+            props["axis"]["description"] = (
+                f"{base_desc}\n\n"
+                "⛔ 광역 발굴 질문 (투자할만한/좋은/성장세 좋은/배당 좋은/저평가/"
+                "턴어라운드) 은 axis='profitability' 같은 프리셋 한 번만 호출하고 끝내지 말 것. "
+                "axis='ratio' (여러 ratioName) + axis='account' 를 최소 3~4 번 호출해 polars join 으로 "
+                "교집합 낸 뒤 후보 표 출력하고 응답 종료. "
+                "구체 레시피·7 관점 스크리닝·5 단계 발굴 워크플로 SSOT 는 "
+                "scanRatio / scanAccount 의 docstring Guide 섹션."
+            )
         # target 은 account/ratio/screen 축에서만 의미. 다른 축에선 절대 쓰면 안 됨.
         if "target" in props:
             props["target"]["description"] = (
@@ -348,6 +425,18 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
                         "[주의] scan 은 전종목 횡단 비교 전용. 단일 종목 분석이면 이 도구를 호출하지 말고 "
                         "`analysis` / `credit` / `show` / `quant` / `debt` / `capital` / `governance` 를 사용할 것. "
                         "정 필요할 때만 전종목 결과에서 특정 종목 1개로 post-filter. 예: '005930'."
+                    ),
+                },
+                "freq": {
+                    "type": "string",
+                    "enum": ["Q", "Y"],
+                    "description": (
+                        "axis='ratio' / 'account' 전용 기간 단위. "
+                        "`'Q'` 분기 컬럼 (`2025Q4` · `2025Q3` …, 기본). "
+                        "`'Y'` 연간 컬럼 (`2025` · `2024` …, 사업보고서 기준). "
+                        "⛔ 광역 발굴 질문 (투자할만한 / 좋은 회사 / 요즘 투자하기 좋은) 에는 **반드시 `freq='Y'`** — "
+                        "분기값으로 필터하면 ROE 5%대가 정상처럼 보여 임계값 (ROE 12% 이상 등) 적용 불가. "
+                        "분기 추이 · 턴어라운드 조짐 같은 특수 질문에만 `freq='Q'`."
                     ),
                 },
                 "sortBy": {"type": "string", "description": "정렬 컬럼명 (예: '매출CAGR', 'ROE')"},

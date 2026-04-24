@@ -56,15 +56,21 @@ async def stream_ask(req: AskRequest):
     모든 분석 로직은 core.runAsk() 에 위임. 종목 resolve 는 AI 가 자율 판단.
     """
     kwargs = _build_kwargs(req)
-    async for item in stream_analysis(req.question, **kwargs):
-        yield item
+    auditor = _AuditCollector(question=req.question)
+    try:
+        async for item in stream_analysis(req.question, _audit=auditor, **kwargs):
+            yield item
+    finally:
+        auditor.flush()
 
 
-async def stream_analysis(question: str = "", **kwargs):
+async def stream_analysis(question: str = "", *, _audit: "_AuditCollector | None" = None, **kwargs):
     """core.runAsk() → SSE adapter."""
     from dartlab.ai.runtime.core import runAsk
 
     async for event in _sync_gen_to_async(runAsk, question, **kwargs):
+        if _audit is not None:
+            _audit.observe(event.kind, event.data)
         yield _sse(event.kind, event.data)
 
 
@@ -72,17 +78,92 @@ async def collect_analysis_text(question: str = "", **kwargs) -> str:
     """core.runAsk() 실행 후 chunk 텍스트 수집 (non-stream HTTP endpoint 용)."""
     from dartlab.ai.runtime.core import runAsk
 
+    auditor = _AuditCollector(question=question)
     chunks: list[str] = []
-    async for event in _sync_gen_to_async(runAsk, question, **kwargs):
-        if event.kind == "chunk":
-            chunks.append(event.data.get("text", ""))
-        elif event.kind == "error":
-            raise AnalysisStreamError(
-                event.data.get("error", "analysis error"),
-                action=event.data.get("action", ""),
-                detail=event.data.get("detail"),
-            )
+    try:
+        async for event in _sync_gen_to_async(runAsk, question, **kwargs):
+            auditor.observe(event.kind, event.data)
+            if event.kind == "chunk":
+                chunks.append(event.data.get("text", ""))
+            elif event.kind == "error":
+                raise AnalysisStreamError(
+                    event.data.get("error", "analysis error"),
+                    action=event.data.get("action", ""),
+                    detail=event.data.get("detail"),
+                )
+    finally:
+        auditor.flush()
     return "".join(chunks)
+
+
+# ── Audit 로그 수집 ──────────────────────────────────────────────
+#
+# 요청 단위로 tool_call · chunk · error 이벤트를 집계해 JSONL 한 줄로 기록한다.
+# 위치: ``{dataDir}/audit/ai-ask/YYYY-MM-DD.jsonl``. Phase 1 선행 인프라 (ops/skills.md §5).
+# 판정 (P/T/C/V) 은 후속 스크립트가 파일을 읽어 사람이 채움. 여기서는 원재료만.
+
+
+@dataclass
+class _AuditCollector:
+    """요청 내 이벤트를 모아 종료 시 JSONL 한 줄로 flush.
+
+    주의: 다중 요청 동시 처리 안전 — 각 요청이 자기 인스턴스 보유. 로컬 append 만.
+    파일 I/O 실패는 조용히 삼킨다 (audit 기록 실패로 본 응답을 깨지 않음).
+    """
+
+    question: str
+    tool_calls: list[dict] = None  # type: ignore[assignment]
+    chunk_len: int = 0
+    error: str | None = None
+    skill_used: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.tool_calls is None:
+            self.tool_calls = []
+
+    def observe(self, kind: str, data: dict) -> None:
+        if kind == "tool_call":
+            name = data.get("name") or data.get("tool") or ""
+            args = data.get("args") or data.get("arguments") or {}
+            self.tool_calls.append({"name": str(name), "args": args if isinstance(args, dict) else {}})
+            # skill 사용 힌트 — pythonExec 안에서 SKILL.md 를 읽거나 skills 모듈 import 하면 기록
+            if name == "pythonExec" and isinstance(args, dict):
+                code = str(args.get("code", ""))
+                if "src/dartlab/skills/" in code or "from dartlab.skills" in code:
+                    # 간단 휴리스틱 — skill 이름 추출
+                    import re
+
+                    m = re.search(r"skills/([a-z0-9-]+)/", code)
+                    if m:
+                        self.skill_used = m.group(1)
+        elif kind == "chunk":
+            self.chunk_len += len(str(data.get("text", "")))
+        elif kind == "error":
+            self.error = str(data.get("error") or "")
+
+    def flush(self) -> None:
+        try:
+            import datetime as _dt
+
+            from dartlab.core.dataLoader import _getDataRoot
+
+            root = _getDataRoot() / "audit" / "ai-ask"
+            root.mkdir(parents=True, exist_ok=True)
+            day = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d")
+            path = root / f"{day}.jsonl"
+            entry = {
+                "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+                "question": self.question,
+                "tool_calls": self.tool_calls,
+                "chunk_len": self.chunk_len,
+                "error": self.error,
+                "skill_used": self.skill_used,
+            }
+            with path.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        except (OSError, ValueError, TypeError, ImportError):
+            # audit 실패로 응답 경로 깨지지 않음
+            pass
 
 
 def _build_kwargs(req: AskRequest) -> dict:
