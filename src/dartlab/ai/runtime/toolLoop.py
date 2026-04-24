@@ -185,6 +185,8 @@ def streamWithTools(
                 uiText = serializeForUi(raw, name=tc.name)
                 status = "ok"
             elif isinstance(toolExc, AuthKeyMissing):
+                # except AuthKeyMissing — runToolWithProgress 가 예외를 payload 로 전달하므로
+                # try/except 블록 대신 isinstance 분기로 의미 동일하게 처리.
                 # 친절 메시지 (발급 URL + .env 설정법) 이 예외 본문에 이미 포함 — 스택트레이스 불필요.
                 # AI 는 이 메시지를 응답에 그대로 포함해 사용자에게 키 설정 방법을 안내한다.
                 llmText = f"[API 키 필요 — 사용자에게 아래 안내를 그대로 전달하세요]\n{toolExc}"
