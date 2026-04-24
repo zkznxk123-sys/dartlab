@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import Section from '$lib/components/ui/Section.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Eyebrow from '$lib/components/ui/Eyebrow.svelte';
@@ -37,17 +38,17 @@
 <!-- ─── editorial nav ─── -->
 <header class="lab-nav">
 	<div class="nav-inner">
-		<a href="/" class="brand">
+		<a href="{base}/" class="brand">
 			<span class="brand-mark">dartlab</span>
 			<span class="brand-slash">/</span>
 			<span class="brand-ctx">lab</span>
 		</a>
 		<nav class="nav-links">
-			<a href="/lab/dashboard/005930" class="nav-link">/dashboard</a>
-			<a href="/lab/map" class="nav-link">/map</a>
-			<a href="/lab/compare" class="nav-link">/compare</a>
-			<a href="/lab/screener" class="nav-link">/screener</a>
-			<a href="/lab/duckdb" class="nav-link">/duckdb</a>
+			<a href="{base}/lab/dashboard/005930" class="nav-link">/dashboard</a>
+			<a href="{base}/lab/map" class="nav-link">/map</a>
+			<a href="{base}/lab/compare" class="nav-link">/compare</a>
+			<a href="{base}/lab/screener" class="nav-link">/screener</a>
+			<a href="{base}/lab/duckdb" class="nav-link">/duckdb</a>
 		</nav>
 	</div>
 </header>
