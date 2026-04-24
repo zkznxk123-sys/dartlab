@@ -75,7 +75,7 @@
       <span class="mono kbd">⌘K</span>
     </div>
 
-    <a href="https://www.buymeacoffee.com/" class="btn btn-primary">
+    <a href="https://buymeacoffee.com/dartlab" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
       <span>☕</span> Buy Me A Coffee
     </a>
   </div>

@@ -393,7 +393,7 @@
 					class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors" title="GitHub">
 					<Github size={14} />
 				</a>
-				<a href="https://buymeacoffee.com/eddmpython" target="_blank" rel="noopener noreferrer"
+				<a href="https://buymeacoffee.com/dartlab" target="_blank" rel="noopener noreferrer"
 					class="p-1.5 rounded-lg text-[#ffdd00]/60 hover:text-[#ffdd00] hover:bg-white/5 transition-colors" title="Buy me a coffee">
 					<Coffee size={14} />
 				</a>

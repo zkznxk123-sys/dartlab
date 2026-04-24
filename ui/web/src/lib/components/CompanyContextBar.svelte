@@ -105,7 +105,7 @@
 			class="context-bar-icon" title="GitHub">
 			<Github size={14} />
 		</a>
-		<a href="https://buymeacoffee.com/eddmpython" target="_blank" rel="noopener noreferrer"
+		<a href="https://buymeacoffee.com/dartlab" target="_blank" rel="noopener noreferrer"
 			class="context-bar-icon coffee" title="Buy me a coffee">
 			<Coffee size={14} />
 		</a>
