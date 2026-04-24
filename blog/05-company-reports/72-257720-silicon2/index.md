@@ -232,7 +232,7 @@ dartlab `roicTree` 실측:
 | 자산경량도 (고정자산회전율) | 10.14회 |
 | 매출총이익률 | 31.06% |
 | 판관비율 (SGA ratio) | 12.67% |
-| marginDriver | "낮은 판관비 (SGA < 15%)" |
+| marginDriver | "낮은 판관비 (SGA \< 15%)" |
 | turnoverDriver | "자산 경량 모델 (자본회전 > 2회)" |
 
 표시: **ROIC 31.91%는 한국 대기업 평균의 5배**. 공장이 없는 유통 플랫폼이라 **고정자산회전율 10.14회**. 즉 유형자산 1원당 매출 10원. 대형 제조업(SK하이닉스·삼성SDI) 고정자산회전율 0.5~0.7회와 대조. **규모의 경제 × 자산 경량의 결합**이 실리콘투의 수익 모델.
@@ -585,7 +585,7 @@ print(c.credit("등급"))                                                      #
 | Beneish M-Score -0.51 | `c.analysis("financial","이익품질")["qualityAnomalies"]["beneish"]` | ✅ 실측 |
 | 이익품질 경고 4건 | `c.analysis("financial","이익품질")["earningsQualityFlags"]` | ✅ 실측 |
 | ROIC 31.91% / 자본회전 2.23 / 고정자산회전 10.14 | `c.analysis("financial","수익성")["roicTree"]` | ✅ 실측 |
-| marginDriver "낮은 판관비 (SGA < 15%)" | 위 동일 | ✅ 실측 |
+| marginDriver "낮은 판관비 (SGA \< 15%)" | 위 동일 | ✅ 실측 |
 | turnoverDriver "자산 경량 모델 (자본회전 > 2회)" | 위 동일 | ✅ 실측 |
 | 자본총계 4,574억 / 부채총계 2,520억 / 부채비율 55% | `c.analysis("financial","자금조달")["capitalOverview"]` | ✅ 실측 |
 | 현금 773억 (2025Q4) | `c.select("BS",["현금및현금성자산"])` | ✅ 실측 |
