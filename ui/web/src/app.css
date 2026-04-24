@@ -383,7 +383,7 @@ button, a, input, textarea {
 	text-align: left;
 	padding: 0.55rem 0.75rem;
 	border-bottom: 2px solid rgba(148, 163, 184, 0.18);
-	background: rgba(148, 163, 184, 0.10);
+	background: var(--color-dl-bg-card);
 	color: var(--color-dl-text);
 	font-weight: 700;
 	font-size: 0.78rem;
@@ -391,7 +391,7 @@ button, a, input, textarea {
 	letter-spacing: 0.03em;
 	position: sticky;
 	top: 0;
-	z-index: 1;
+	z-index: 2;
 }
 .prose-dartlab td {
 	padding: 0.45rem 0.75rem;
@@ -612,6 +612,15 @@ button, a, input, textarea {
 	background: rgba(13, 17, 23, 0.25);
 }
 .tool-block-full .tool-out { max-height: none; }
+
+/* 표 출력일 때 — 바깥 스크롤 해제. 표 자체 wrapper (.prose-dartlab) 가 스크롤 담당. */
+.tool-out:has(table) {
+	max-height: none;
+	overflow: visible;
+	padding: 0;
+	border: none;
+	background: transparent;
+}
 
 /* OUT 라인수 요약 ("N lines of output") */
 .tool-line-count {
