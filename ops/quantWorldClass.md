@@ -1,303 +1,237 @@
-# dartlab quant 세계 최강 플랜 (2026-04-24)
+# dartlab quant 세계 최강 — 사상 정합 플랜 (2026-04-25 재작성)
 
-## 진행 상태 (2026-04-24 사용자 "전부 다 순서대로" 지시 후)
-
-**완료된 신설 모듈 (22개)**:
-- Sprint 2 재무 알파 9축: `quant/alphas/{altman, piotroski, beneish, accruals, qFactor, qmj, bab, earningsSurprise, fundamentalMomentum}.py` + review (catalog/builders/registry 9개 블록)
-- Sprint 3 ML 인프라 4개: `quant/labels/tripleBarrier.py`, `quant/transforms/{fracDiff, matrixProfile}.py`, `quant/transactionCost.py` (Almgren-Chriss)
-- Sprint 5 Portfolio 4개: `quant/{meanCVaR, blackLitterman, nco, shrinkage}.py`
-- Sprint 6 Risk 3개: `quant/{bubbleTest (SADF/GSADF), structuralBreak (Bai-Perron), johansen (cointegration + VECM)}.py`
-- Sprint 7 거버넌스: `quant/multipleTesting.py` (Harvey-Liu-Zhu Haircut + White Reality Check)
-- Sprint 4 일부: `quant/eventStudy.py` (CAR + BHAR), `quant/textComposite.py` (4 텍스트 축 합성)
-
-**검증 결과**:
-- 신설 21 모듈 import 100% OK
-- Altman: 2080 종목, distress 40.1%, safe 36.7%, 005930 Z=5.39 / 000660 Z=7.63 ✅
-- Piotroski: 2122 종목, strong 25%, 005930 F=7 / 000660 F=8 / 035420 F=5 ✅
-- Beneish: 1846 종목, red flag 14.8%, 005930 M=-2.69 (clean) ✅
-- Cross-Sectional IC (factor.py 추가): KR 2024→2025 fundYear→retYear, look-ahead 방지 + non-overlap stepping ✅
-
-**미구현 (데이터 인프라 부재)**:
-- Sprint 4 KOSPI200 옵션 4축: `quant/options/{ivSurface, putCallSkew, vkospi, rnd}.py` — KRX 옵션 일별 데이터 수집 인프라 필요
-- Sprint 4 Flow factor 5축: `quant/flow/{shortInterest, securitiesLending, investorFlow, programTrade, blockTrade}.py` — KRX/금투협 보조 데이터 수집 필요
-- Sprint 3 WorldQuant Alphas 101: 향후 별도 트랙 (대규모)
-- Sprint 6 EGARCH/GJR/MS-GARCH/DCC-GARCH: likelihood 최적화 별도 구현
-- Sprint 7 Macro Regime × Quant 융합: regime.py + macro.py 통합 작업 필요
-
-## Sprint 8 — 검증 + 개선 트랙 (2026-04-24 사용자 "끝까지 밀어" 지시)
-
-신규 22 모듈 모두 import OK 이지만 실증 미검증 → 통합 검증 러너로 끝까지.
-
-### Phase 1 — 통합 검증 러너 (✅ 완료)
-`scripts/validate/quantValidate.py` — 22 모듈 자동 시험 + 결과 → `data/quantValidation/results_*.json` + 마크다운 리포트.
-
-### Phase 2 — 검증 실행
-- **Phase 2a (12 numpy-only)**: tripleBarrier / fracDiff / matrixProfile / almgrenChriss / meanCVaR / blackLitterman / nco / shrinkage / bubbleTest (SADF+GSADF) / structuralBreak (Bai-Perron) / johansen+VECM / multipleTesting (HLZ+Reality Check) — 합성 데이터로 sanity check
-- **Phase 2b (11 데이터 필요)**: 9 alpha + eventStudy + textComposite — DART finance.parquet + KRX HF dataset 필요
-
-### Phase 3 — 진단 리포트
-- 통과 / 실패 매트릭스
-- 발견된 버그 / 개선점
-
-### Phase 4 — 즉시 fix
-발견된 모듈 버그 즉시 수정 → 재검증.
-
-### Phase 5 — 최종 SSOT 갱신
-- `ops/quantWorldClass.md` 업데이트
-- `memory/quantGap.md` 업데이트 — 진짜 alpha 통과 universe 확정
-
-### 검증 통과 기준
-- Phase 2a: 함수 호출 성공 + 출력 sanity (positive cost / weights sum=1 / cointRank ≥ 1 / break detected 등)
-- Phase 2b: universe ≥ 50 + 005930 점수 합리적 + 분포 비율 (예: distress < 60%, red flag < 30%)
-
-검증 실패 시 즉시 fix 후 재검증, 통과률 100% 목표.
-
-
-
-## 전제 — 세계 최강의 정의
-
-"세계 최강" = 세 축 동시 달성.
-
-1. **학술 완성도**: Fama-French, Grinold & Kahn, Lopez de Prado (AFML), Asness (QMJ/BAB), Sloan (Accruals), Piotroski (F-Score), Beneish (M-Score), Hou-Xue-Zhang (q-factor), Almgren-Chriss, Rockafellar-Uryasev (CVaR), Black-Litterman, Bailey-Lopez (DSR/PBO), Harvey-Liu-Zhu (multiple testing) — 표준 전부 커버.
-2. **데이터 고유성**: DART 전종목 × 9년 정규화 재무 + KRX OpenAPI 25년 가격 + 옵션 + 공시 본문 + 판단 서사. 세계 어떤 퀀트 펀드도 한국 시장에서 이 수준의 통합 SSOT 없음.
-3. **운영 재현성**: NumPy-only (scipy/sklearn/cvxpy 0 의존), 단일 종목코드 호출, 첫 호출 5초 이내, 독스트링 9 섹션, 판단 서사 자동.
-
-## 현재 상태 (2026-04-24 Sprint 1.5/1.6 완료 시점)
-
-**강점 (이미 세계 수준)**:
-- 8 그룹 30 축 + Strategy DSL + 8 검증 스타일 + DSR/PBO/CPCV 거버넌스
-- 진짜 Fama-French (KRX MKTCAP 직접, book proxy 폐기) — Sprint 1.6 B0 완료
-- Barra-style Multi-Factor Risk (B Σ_f Bᵀ + D) — B2 완료
-- Cross-Sectional IC (Grinold Ch.5, look-ahead 방지 + non-overlap) — B3 완료
-- Alphalens-style factor tear sheet (long-short Sharpe + MDD + WinRate)
-- 진짜 PBR/PER/PSR (valueFactor, B1 완료)
-- 5 팩터 ranking (margin/ROA/debt/size/value)
-- Engle-Granger ADF pairs trading
-- Hamilton HMM regime, HAR-RV, GARCH 1종, Ledoit-Wolf 공분산, HRP
-- Lopez 거버넌스: DSR (Deflated Sharpe), PBO (Backtest Overfit Prob), CPCV
-- 45 보조지표 (gather/indicators.py SSOT)
-- 9 텍스트 축 (sentiment/toneChange/riskText/governanceQuant)
-- 강건한 판단 서사 (calcTrendNarrative 등) — OSS 에 없음
-
-**약점 (세계 최강으로 가려면 추가)**:
-- ❌ Accruals Quality · Piotroski F-Score · Altman Z · Beneish M-Score (재무 SSOT 있는데 미활용)
-- ❌ Triple Barrier Labeling + Meta-Labeling (AFML Ch.3)
-- ❌ Fractional Differentiation (AFML Ch.5) — 시계열 stationary 변환
-- ❌ WorldQuant Formulaic Alphas 101 (알파 마이닝)
-- ❌ q-factor (Hou-Xue-Zhang) / QMJ / BAB 공식 축
-- ❌ Almgren-Chriss TC (backtest 현실성)
-- ❌ Mean-CVaR (Rockafellar-Uryasev) + Black-Litterman + NCO
-- ❌ OAS / Constant-correlation shrinkage, RMT denoising (LW 1종만)
-- ❌ EGARCH/GJR/MS-GARCH, Bai-Perron 구조변화, SADF 버블
-- ❌ Johansen 다변량 공적분 + VECM (Engle-Granger 2종만)
-- ❌ Matrix Profile (유사차트 검색 killer)
-- ❌ Event Study CAR/BHAR 정규
-- ❌ KOSPI200 옵션 4 축 (IV surface/put-call skew/VKOSPI/RND) — dartlab 고유 최대 자산 0 활용
-- ❌ 공매도 잔고 / 대차잔고 / 프로그램매매 flow factor
-- ❌ 텍스트 팩터 승격 (sentiment → FF5+TEXT 회귀 축)
-- ❌ Macro regime HMM + quant (regime.py 와 macro.py 분리 상태)
-- ❌ Industry-neutral factor (industry engine 분리 상태)
-- ❌ Harvey-Liu-Zhu multiple testing haircut (DSR 까지만)
-- ❌ Cointegration VECM + Hedging Ratio 최적화
-
-## 스프린트 플랜
-
-### Sprint 2 — dartlab 고유 재무 알파 (2026-05 ~ 2026-06, 4주)
-
-**전제**: dartlab 이 이미 가진 DART 9년 × 전종목 × 정규화 재무 SSOT 를 **재무 알파 factory** 로 쓴다. 이것이 AQR/Two Sigma 와의 차별점 — 그들도 한국 시장에서는 못 한다.
-
-| 축 | 신규 함수 | 학술 근거 | 데이터 SSoT |
-|---|---|---|---|
-| **Accruals Quality** | `quant/accrualsFactor.py::calcAccrualsQuality` | Sloan 1996, Dechow-Dichev 2002 | `analysis/financial/earningsQuality.py` 이미 유사 로직 → calc 로 승격 |
-| **Piotroski F-Score** | `quant/piotroski.py::calcPiotroski` | Piotroski 2000 (9점) | `analysis/financial/scorecard.py` 재무 9 항목 있음 |
-| **Altman Z-Score** | `quant/altman.py::calcAltmanZ` | Altman 1968 (5변수) | credit/engine 이미 z score 있음 → quant 축으로 연결 |
-| **Beneish M-Score** | `quant/beneish.py::calcBeneishM` | Beneish 1999 (8변수) | analysis/financial — 매출증가/매출채권회전/감가상각비/...까지 ≥ 7 변수 즉시 구성 가능 |
-| **q-factor** | `quant/qFactor.py::calcQFactor` | Hou-Xue-Zhang 2015 | 투자(I/A) + 수익성(ROE) 이미 있음 |
-| **QMJ (Quality minus Junk)** | `quant/qmjFactor.py::calcQMJ` | Asness-Frazzini-Pedersen 2019 | profitability + growth + safety + payout 4 축 |
-| **BAB (Betting against Beta)** | `quant/babFactor.py::calcBAB` | Frazzini-Pedersen 2014 | decomposeFactor 의 beta 이미 있음 |
-| **Earnings Surprise Alpha** | `quant/earningsSurprise.py::calcEarningsSurprise` | Bernard-Thomas 1989 (PEAD) | analysis/financial/predictionSignals.py 예측치 + 실측치 diff |
-| **Fundamental Momentum** | `quant/fundamentalMomentum.py::calcFundMomentum` | Chordia-Shivakumar 2006 | 분기 펀더멘털 개선 + 가격 모멘텀 교차 |
-
-- 각 함수는 `{factor, market="KR", universe="ALL"}` 호출 시 횡단면 rank 리턴.
-- 전부 `calcFactorIC` 로 자동 평가 (look-ahead 방지 시계열 IC). 목표: **한국 시장 검증된 alpha 축 9개 수집**.
-- review 블록: `fundamentalAlphaBlock` — 9 축 Sharpe + ICIR 한 눈에.
-
-**검증 기준**: 2020~2024 (5년) 백테스트 Sharpe > 0.8 인 축만 축으로 편입, < 0 이면 역방향 해석 기록.
-
-### Sprint 3 — 세계 표준 ML 알파 (2026-06 ~ 2026-07, 4주)
-
-**AFML + WorldQuant + Grinold 고도화**.
-
-1. **Triple Barrier Labeling + Meta-Labeling** (AFML Ch.3)
-   - `quant/labels/tripleBarrier.py::labelTripleBarrier` — 수직(시간)/상단(익절)/하단(손절) 3 경계
-   - Meta-labeler: primary model (예: trend signal) → size model (confidence) → filter
-   - review: `metaSignalBlock`
-
-2. **Fractional Differentiation** (AFML Ch.5)
-   - `quant/fracDiff.py::fracDiffFFD` — FFD (Fixed-Width Window)
-   - 시계열 memory 유지하면서 stationary — log return 대체
-
-3. **CPCV (Combinatorial Purged Cross-Validation)** 확대
-   - 현재 있지만 strategy 전용 → factor IC 에도 적용
-   - `quant/cpcv.py::combinatorialPurgedCV` (범용화)
-
-4. **WorldQuant Formulaic Alphas 101**
-   - `quant/alphas101/alpha001~101.py` — rank/correlation/ts_rank 조합
-   - 초기: 20 개 대표 알파 (alpha003, alpha012, alpha041, alpha101 등) 선택적 구현
-   - `quant/alphaMine.py::mineAlphas(corpusCode, basePeriod)` — IC 기준 필터
-
-5. **Matrix Profile** (유사 차트 검색)
-   - `quant/matrixProfile.py::computeMP` (stumpy 수식 numpy 포팅)
-   - `searchSimilarPattern(stockCode, window=20)` — 과거 유사 패턴 top-5
-
-6. **Almgren-Chriss TC** (backtest 현실성)
-   - `quant/transactionCost.py::almgrenChriss` — 시장충격 + 시간차비용 분해
-   - `BacktestResult.sharpeNetOfCost` (이미 API 있음, 충실 구현)
-
-7. **Deep Hedging (선택)** — NumPy + gradient descent 로 Black-Scholes 대체 헤지
-
-### Sprint 4 — Korea-Native 엣지 (2026-07 ~ 2026-09, 8주) — **dartlab 최대 차별화 축**
-
-**다른 퀀트가 못 따라오는 영역**.
-
-1. **KOSPI200 옵션 4 축**
-   - `quant/options/ivSurface.py::calcIVSurface` — 만기 × 행사가 3D IV surface
-   - `quant/options/putCallSkew.py::calcPCSkew` — 25-델타 skew
-   - `quant/options/vkospi.py::calcVKOSPI` — 지수 변동성
-   - `quant/options/rnd.py::calcRND` — Risk-Neutral Density (Breeden-Litzenberger)
-   - **forward-looking alpha** — spot 에 없는 미래 불확실성 정보 source
-   - 데이터: KRX OpenAPI 옵션 일별 (시장 최고 유동성)
-
-2. **Flow Factor (한국 시장 고유 공개 데이터)**
-   - `quant/flow/shortInterest.py::calcShortInterest` — 공매도 잔고 (상위 20%)
-   - `quant/flow/securitiesLending.py::calcSecLending` — 대차잔고 추이
-   - `quant/flow/investorFlow.py::calcInvestorFlow` — 외국인/기관/개인 순매수 (60일)
-   - `quant/flow/programTrade.py::calcProgramTrade` — 프로그램매매 (차익/비차익)
-   - `quant/flow/blockTrade.py::calcBlockTrade` — 대량매매 event
-
-3. **텍스트 팩터 승격** (dartlab 9 텍스트 축 → 공식 factor)
-   - `quant/textFactor.py::calcTextFactor(kind="sentiment|toneChange|riskText|governance")`
-   - **FF5+TEXT 다변수 회귀** — text alpha 가 FF5 로 설명되지 않는 residual 알파인지 검증
-   - 학술: Tetlock 2007, Loughran-McDonald 2011
-
-4. **공시 이벤트 스터디** (Event Study 정규)
-   - `quant/eventStudy.py::calcCAR` — Cumulative Abnormal Return
-   - `quant/eventStudy.py::calcBHAR` — Buy-and-Hold Abnormal Return
-   - 이벤트 유형: 공시 유형 × regime × 규모 분해
-   - dartlab 고유: DART 공시 전문 파싱 (analysis/disclosureDelta)
-
-### Sprint 5 — Portfolio & Optimization 최강 (2026-09 ~ 2026-10, 4주)
-
-1. **Mean-CVaR** (Rockafellar-Uryasev 2000)
-   - `quant/portfolio/meanCVaR.py::optimizeMeanCVaR`
-   - Sample tail risk → LP 해결 (NumPy + simplex 직접 구현)
-
-2. **Black-Litterman** (Black-Litterman 1992)
-   - `quant/portfolio/blackLitterman.py::optimizeBL` — prior + view 결합
-   - View source: dartlab 판단 서사 (analysis 판정) → quant 사전 분포
-
-3. **Nested Clustered Optimization** (AFML Ch.16)
-   - `quant/portfolio/nco.py::optimizeNCO` — HRP 계층 + intra-cluster MV
-   - 대안: risk parity + clustering
-
-4. **Robust optimization** (Ben-Tal-Nemirovski)
-   - parameter uncertainty 고려 worst-case 최적화
-
-5. **Shrinkage 3 종 추가**
-   - OAS (Chen 2010), Constant-correlation (Ledoit-Wolf 2003), RMT denoising (Marchenko-Pastur)
-
-### Sprint 6 — Risk Model 심화 (2026-10 ~ 2026-11, 4주)
-
-1. **EGARCH / GJR-GARCH / MS-GARCH**
-   - `quant/garchSuite.py::fitEGARCH/fitGJR/fitMSGARCH`
-   - asymmetric + regime-switching volatility
-
-2. **Bai-Perron 구조변화** 
-   - `quant/structuralBreak.py::baiPerron` — 평균/분산 구조변화 다중 시점 탐지
-
-3. **SADF 버블 테스트** (Phillips-Shi-Yu 2015)
-   - `quant/bubbleTest.py::sadf` — 지수 버블 실시간 탐지
-
-4. **Johansen 다변량 공적분 + VECM**
-   - `quant/johansen.py::johansenTest` + `calcVECM`
-   - 3+ 자산 공적분 (pairsTrading 확장)
-
-5. **DCC-GARCH**
-   - 동적 조건부 상관 — 위기 시 상관 상승 포착
-
-### Sprint 7 — 거버넌스 완성 + dartlab 통합 (2026-11 ~ 2026-12, 4주)
-
-1. **Harvey-Liu-Zhu Haircut Sharpe** (2016)
-   - `quant/strategy/metrics.py::haircutSharpe` — 다중 테스트 보정
-   - multiple testing burden → Sharpe 연장된 α-penalty
-
-2. **White Reality Check / Stepwise SPA** (Hansen 2005)
-   - `quant/strategy/metrics.py::realityCheck/stepwiseSPA`
-   - 여러 전략 동시 testing 우위 검증
-
-3. **Macro Regime × Quant**
-   - `quant/regime.py::calcHMMState(macro_observables=True)` — 매크로 observable 편입
-   - regime 별 factor 성과 분해 (`regimeFactorPerf`)
-   - review: `regimeAwareAlphaBlock`
-
-4. **Industry-Neutral Factor**
-   - `quant/factor.py::calcFactorIC(..., industryNeutral=True)`
-   - 섹터 평균 제거 후 IC (industry engine 연결)
-
-5. **Credit-Quant Integration**
-   - `quant/creditQuant.py::calcDefaultRisk` — credit engine Altman 결과 → quant 부실 회피 필터
-
-6. **6 막 인과 Quant Block 자동화**
-   - review `quantNarrative` 를 6 막 (macro → sector → company → financial → valuation → quant) 인과로 직조
-
-## 단일 종목 호출 편의성 (dartlab 사상 유지)
-
-모든 신규 함수는 **Company.show("quant.{axis}")** 한 줄 경유:
-- `c.show("quant.alpha.piotroski")` — 9 점 + 시계열
-- `c.show("quant.alpha.altman")` — Z score + 부실 probability
-- `c.show("quant.ic.value")` — cross-sectional IC
-- `c.show("quant.options.ivSkew")` — put-call skew (한국시장)
-- `c.show("quant.flow.foreign")` — 외국인 순매수 60일
-
-review 리포트는 위 전부 자동 블록 포함. 사용자 선언 `c.show("reportMarket")` 로 일괄.
-
-## 학술 검증 기준
-
-- 각 신규 alpha 는 **5년 백테스트 Sharpe + DSR + PBO 3 관문 통과**
-- `factorIC` 로 별도 IC 시계열 기록
-- Harvey-Liu-Zhu haircut 적용 후 Sharpe 여전히 > 0 인 축만 default universe 에 포함
-- 역방향 축 ("해당 팩터가 한국에선 반대") 도 정리해 정식 기록 (예: 2025 SMB 역방향 = 대형주 프리미엄 이미 확인)
-
-## 데이터 인프라 선결 조건
-
-| 항목 | 상태 | 차단 |
-|---|---|---|
-| 재무 SSoT (DART 9년) | ✅ | - |
-| 가격 SSoT (KRX 25년 백필) | 진행 중 (chunk 12/13) | Sprint 2 시작 전 publish |
-| 옵션 데이터 | ❌ | KRX OpenAPI 옵션 endpoint 추가 수집 (Sprint 4) |
-| 공매도/대차 | ❌ | 금융투자협회 + KRX 별도 수집 (Sprint 4) |
-| 투자자별 수급 | ❌ | KRX 통계 수집 (Sprint 4) |
-| 공시 본문 파싱 | ✅ (분석 엔진에 있음) | quant 에서 호출만 추가 |
-
-## 우선순위 (사용자 확인용)
-
-1. **최우선** — Sprint 2 (재무 알파 9축): dartlab 고유 강점 극대화. 외부 퀀트 따라올 수 없음.
-2. **세계 표준 필수** — Sprint 3 (AFML + WorldQuant): "진짜 세계 최강" 타이틀 필수 조건.
-3. **차별화 결정타** — Sprint 4 (Korea-Native: 옵션 + flow + text): dartlab 을 완전히 독보적으로 만듦.
-4. **마감재** — Sprint 5/6/7 (최적화 + risk 심화 + 거버넌스): 품질 완성.
-
-## 완료 시 달성 상태
-
-- 퀀트 축 30 → **60+ 축**
-- 학술 근거: FF5/Grinold/AFML/Asness/WQ101/Hou-Xue/Piotroski/Beneish/Altman/Sloan/Rockafellar/Black-Litterman/Almgren-Chriss/Phillips-Shi-Yu/Harvey-Liu-Zhu 전부 커버
-- **한국 시장 독보**: 옵션 4축 + flow 5축 + text 4축 + 재무 9 알파 = 22 Korea-native 축
-- **단일 SSOT** DART + KRX + 옵션 + 공시텍스트 통합 — 세계 어떤 퀀트에도 없음
-- 판단 서사 자동 직조 (6 막 인과) — quant 숫자 → 한국어 해석
+> 이전 버전 (2026-04-24) 은 dartlab 사상 위반 항목 다수 포함 → 전면 재작성. 본 문서가 SSOT.
 
 ---
 
-## 즉시 착수 가능 (Sprint 2 킥오프)
+## 0. 사상 정합 — 모든 작업의 기준
 
-Sprint 2 중 **Piotroski/Altman/Beneish 3축** 은 이미 analysis 엔진에 로직이 있어 `quant/` calc 로 승격만 하면 됨. 1주일 내 완료 가능. review 블록도 3개 추가만.
+ops/architecture.md + ops/api-contract.md + ops/quant.md + ops/skills.md + ops/code.md 정독 결과:
 
-Triple Barrier, WorldQuant Alphas, 옵션 4축은 Sprint 3/4 에서.
+| 원칙 | 출처 | 위반 시 결과 |
+|---|---|---|
+| **L1 quant** (technical 분석, NumPy-only) — analysis L2 import 금지 | architecture.md §4 | 레이어 구조 붕괴 |
+| **L2 review** = analysis + credit + quant + macro + industry **dict 조립자** | architecture.md §2 | 엔진 책임 혼동 |
+| **호출 통일**: `dartlab.quant("축", "종목")` / `c.quant("축")` / attr form `c.quant.축()` | api-contract.md §1 | 다중 진입점 = contract 위반 |
+| **무인자 호출 = 가이드 DataFrame** | api-contract.md §1 / quant.md §1 | 사용자 헤맴 |
+| **`_AXIS_REGISTRY` SSOT** — 새 축은 여기 등록 | quant/__init__.py | 사용자 호출 불가 |
+| **spec.py SPEC dict** — AI tool schema 자동 노출 | spec.py | AI 가 tool 못 봄 |
+| **9 섹션 docstring** — When/How/Verified/Examples 필수 | code.md §2 / skills.md §4 | merge 반려 |
+| **skill = docstring** — 별도 narrative 함수 X | skills.md | 덕지덕지 |
+| **횡단면 vs 단일종목 패턴 양쪽 지원** — `quant("순위")` (전종목) / `quant("모멘텀", "005930")` (단일) | quant.md §1 | 사용자 인터페이스 혼동 |
+| **review = builders + catalog + registry 4 곳** 동시 갱신 | architecture.md §3 | 블록 활성화 X |
+
+---
+
+## 1. 현상태 객관 진단
+
+### ✅ 검증 통과
+- **Phase 2a 12/12 numpy-only 모듈 통과** (tripleBarrier / fracDiff / matrixProfile / almgrenChriss / meanCVaR / blackLitterman / nco / shrinkage / bubbleTest / structuralBreak / johansen / multipleTesting)
+- **review/catalog 10 BlockMeta + builders 10 함수 + registry 10 자동 호출** ✅
+
+### ❌ 사상 위반 항목 (2026-04-25 발견)
+
+| # | 위반 | 위치 | 심각도 |
+|---|---|---|---|
+| **V1** | **신규 22 모듈 모두 `_AXIS_REGISTRY` 미등록** | `quant/__init__.py` | 🚨 critical — 사용자가 `c.quant("altman")` / `c.quant("piotroski")` 호출 못함 |
+| **V2** | **`spec.py` SPEC dict 미반영** | `quant/spec.py` | 🚨 critical — AI 가 tool schema 로 못 봄, dartlab 정체성 미실현 |
+| **V3** | **`alphas/` 별도 디렉터리** | `quant/alphas/` | ⚠️ 나머지 quant 모듈은 평탄 — 일관성 깨짐 (Simple > Complex 위반) |
+| **V4** | **단일 종목 인터페이스 부재** | 9 alpha 함수 | ⚠️ 모두 `(market="KR")` 만 받음 → 단일 종목 호출 X. quant 사상은 단일 + 횡단면 양쪽 |
+| **V5** | **8 그룹 분류 미적용** | 22 신규 모듈 | ⚠️ ops/quant.md §3 의 8 그룹 (technical/risk/microstructure/fundamental/text/crossSection/portfolio/Strategy DSL) 어디 속하는지 미명시 |
+| **V6** | **9 섹션 docstring 일부 누락** | bab/qFactor/qmj/transformer 모듈 | ⚠️ Verified / SeeAlso / When 섹션 부분 누락 |
+| **V7** | **Phase 2b 검증 미완** | 11 데이터 의존 모듈 | ⚠️ 한국 시장 실증 alpha 인지 미증명 |
+| **V8** | **review 시장분석 6막 조립 로직 부재** | `review/registry.py` | ⚠️ 신규 10 블록 등록만 됐을 뿐, macro+quant+credit+analysis dict 한 흐름 직조 X |
+
+### 📊 코드 통계 (현재)
+
+- 기존 quant 모듈 30 + 신규 22 = 52 모듈 (디렉터리 + 평탄 혼재)
+- `_AXIS_REGISTRY` 등록 = 30 (신규 22 미등록)
+- review 블록 = 기존 + 신규 10 = 정상
+- 검증: 12/22 = 54% pass (Phase 2a only, Phase 2b 진행 중)
+
+---
+
+## 2. 사상 정합 플랜 — 8 단계
+
+### Step 1: V3 정정 — 디렉터리 평탄화 (1시간)
+
+`quant/alphas/{altman, piotroski, beneish, accruals, qFactor, qmj, bab, earningsSurprise, fundamentalMomentum}.py` → 기존 quant 모듈처럼 **평탄화**.
+
+**옵션 A** (선택): 평탄으로 이동 — `quant/{altman.py, piotroski.py, beneish.py, ...}` (나머지 quant 모듈과 일관)
+
+**옵션 B**: alphas/ 유지 — 사상 일관성을 위해 8 그룹별 디렉터리화 (technical/risk/fundamental/...) 같이 도입 (큰 리팩토링)
+
+→ **A 채택** (작은 변경, 일관). 9 신규 모듈 → 평탄으로 이동. import path 정정.
+
+### Step 2: V4 정정 — 단일 종목 인터페이스 추가 (2~3시간)
+
+각 9 alpha 함수에 `stockCode` 인자 추가:
+
+```python
+def calcAltman(stockCode: str | None = None, *, market: str = "auto", **kwargs) -> dict:
+    """Altman Z-Score — 단일 종목 또는 시장 횡단면.
+
+    stockCode 있으면: 단일 종목 Z + zone (1968 또는 Z'')
+    stockCode 없으면: 시장 횡단면 (universe 분포 + topSafe/topDistress)
+    """
+```
+
+이게 quant 표준 패턴 (`quant("순위")` 횡단면, `quant("모멘텀", "005930")` 단일).
+
+함수명 변경: `calcAltmanFactor` → `calcAltman` (factor suffix = 시장 횡단면 의미였는데, 단일 + 횡단면 분기로 통합).
+
+### Step 3: V1 정정 — `_AXIS_REGISTRY` 등록 (1시간)
+
+`quant/__init__.py::_AXIS_REGISTRY` 에 신규 9 alpha + 13 utility 모듈 등록. 8 그룹 분류 적용:
+
+| 모듈 | 축 키 | 그룹 | label | 단일/횡단면 |
+|---|---|---|---|---|
+| altman | "altman" | fundamental | "Altman Z" | 둘 다 |
+| piotroski | "piotroski" | fundamental | "Piotroski F" | 둘 다 |
+| beneish | "beneish" | fundamental | "Beneish M" | 둘 다 |
+| accruals | "accruals" | fundamental | "Sloan Accrual" | 둘 다 |
+| qFactor | "qfactor" | fundamental | "q-factor" | 횡단면 |
+| qmj | "qmj" | fundamental | "QMJ" | 횡단면 |
+| bab | "bab" | risk | "BAB 저변동성" | 횡단면 |
+| earningsSurprise | "surprise" | fundamental | "이익서프라이즈" | 둘 다 |
+| fundamentalMomentum | "fundmom" | fundamental | "펀더-가격 모멘텀" | 둘 다 |
+| ─── ML 인프라 (utility, 축 등록 X — 직접 import) ─── | | | | |
+| labels/tripleBarrier | — | utility | — | — |
+| transforms/fracDiff | — | utility | — | — |
+| transforms/matrixProfile | — | utility | — | — |
+| transactionCost | — | utility | — | — |
+| ─── Portfolio (멀티종목) ─── | | | | |
+| meanCVaR | "meancvar" | portfolio | "Mean-CVaR" | 멀티 |
+| blackLitterman | "bl" | portfolio | "Black-Litterman" | 멀티 |
+| nco | "nco" | portfolio | "NCO" | 멀티 |
+| shrinkage | — | utility | — | — (cov 입력 받음) |
+| ─── Risk 통계 ─── | | | | |
+| bubbleTest | "bubble" | risk | "버블 (SADF)" | 단일 |
+| structuralBreak | "break" | risk | "구조변화" | 단일 |
+| johansen | "johansen" | crossSection | "공적분 (k≥3)" | 멀티 |
+| ─── 거버넌스 ─── | | | | |
+| multipleTesting | — | utility | — | — |
+| eventStudy | "event" | text | "Event Study CAR/BHAR" | 단일 |
+| textComposite | "textcomp" | text | "텍스트 합성" | 단일 |
+
+**utility = `_AXIS_REGISTRY` 미등록**, 직접 import 만. (사용자가 `c.quant()` 가이드에서 보지 않을 함수.)
+
+→ **신규 axis 등록 = 12** (9 alpha + meanCVaR + bl + nco + bubble + break + johansen + event + textComp = 14)
+
+### Step 4: V2 정정 — `spec.py` 갱신 (30분)
+
+신규 14 axis 의 SPEC dict 항목 추가 → AI tool schema 자동 수집.
+
+### Step 5: V5 정정 — ops/quant.md 8 그룹 표 갱신 (30분)
+
+§3 의 8 그룹 표에 신규 14 axis 추가. fundamental 9, risk 4, portfolio 3, crossSection 1, text 2 (event + textComp).
+
+### Step 6: V6 정정 — 9 섹션 docstring 완성 (2시간)
+
+22 신규 모듈 전수. 누락된 Verified / SeeAlso / When / How / Examples 보강. AI 가 tool schema 로 정확 narrative 생성하도록.
+
+### Step 7: V8 정정 — review 6막 조립 로직 (3~4시간)
+
+`review/registry.py` 시장분석 섹션에 **6막 인과 조립자 함수** 신설:
+
+```python
+def assemble6막Narrative(
+    macro: dict, sector: dict, fundamentals: dict,
+    quant: dict, distress: dict
+) -> list[Block]:
+    """6막 인과 자동 직조 — macro→sector→company→financial→valuation→quant.
+
+    review (L2) 책임 — 5 dict 받아 한 흐름 narrative 조립.
+    """
+```
+
+distress 필터 (Altman + Beneish red flag 종목 제외 list) 도 review 가 dict 받아 portfolio 블록에서 자동 표시.
+
+### Step 8: V7 정정 — Phase 2b 검증 + universe 확정 (대기 중)
+
+Phase 2b (validatePhase2b.py 격리 subprocess) 결과 → 통과 alpha 만 default universe 편입. 통과 못한 alpha 는 quant 사용은 가능하되 default 추천 X.
+
+---
+
+## 3. Step 별 산출물
+
+| Step | 산출 | 시간 |
+|---|---|---|
+| 1 | 9 alpha 평탄 이동 (alphas/ 폐기), import 정정 | 1h |
+| 2 | 단일/횡단면 양쪽 지원 함수 시그니처 통일 | 2~3h |
+| 3 | `_AXIS_REGISTRY` 등록 14 axis | 1h |
+| 4 | `spec.py` SPEC dict 갱신 | 0.5h |
+| 5 | `ops/quant.md` 8 그룹 표 + §11 review 매핑 갱신 | 0.5h |
+| 6 | docstring 9 섹션 완성 22 모듈 | 2h |
+| 7 | `review/registry.py` 6막 조립자 + distress 필터 | 3~4h |
+| 8 | Phase 2b 결과 → universe 확정 + memory 갱신 | 진행 중 |
+
+**총 10~13 시간** — 사상 정합 + AI 통합 + review 조립 완성.
+
+---
+
+## 4. 8 단계 후 달성 상태
+
+- ✅ `c.quant("altman", "005930")` 단일 종목 호출
+- ✅ `c.quant("altman")` 시장 횡단면 호출
+- ✅ `c.quant.altman("005930")` attr form
+- ✅ `dartlab.quant()` 가이드 DataFrame 에 신규 14 axis 자동 표시
+- ✅ AI 가 tool schema 로 신규 axis 자동 인지 + narrative 자동 생성
+- ✅ review 6막 인과 자동 직조 (macro+quant+credit+analysis 조립)
+- ✅ Phase 2b 검증 통과 alpha 만 default universe (universe 자동 갱신 게이트)
+- ✅ ops/quant.md 8 그룹 30 → 8 그룹 44 axis 갱신
+- ✅ 22 신규 모듈 docstring 9 섹션 완성
+
+---
+
+## 5. 진정 부족한 항목 (Step 1~8 후 남는 갭)
+
+### 데이터 인프라 (사용자 액션 필요)
+- KRX idx 카테고리 키 활성화 → `gather/krxIndex.py` (코드 준비됨)
+- KOSPI200 옵션 endpoint → `quant/options/{ivSurface, putCallSkew, vkospi, rnd}.py` (수집 인프라 신설 필요)
+- 공매도/대차/수급/프로그램매매 → `gather/{shortInterest, secLending, investorFlow, programTrade}.py`
+- 1995~2009 데이터 → 별도 source (KRX 정보데이터시스템 유료)
+
+### 학술 확장 (별도 트랙)
+- WorldQuant Formulaic Alphas 101 (대규모 1~2주, +50축)
+- EGARCH / GJR-GARCH / MS-GARCH / DCC-GARCH (likelihood 최적화 필요, 3일)
+- Deep Hedging (RL portfolio, 별도)
+
+### Live tracking
+- 매월 forward test 자동 누적 → IR 시간 검증 (out-of-sample)
+
+### 글로벌 (US)
+- US 시총/펀더멘털 정합성 추가 → 9 alpha US 적용
+- EDGAR companyfacts 와 KRX 동등 SSOT
+
+---
+
+## 6. 즉시 착수 (Step 1~3 = 4시간)
+
+가장 큰 사상 위반 (V1/V3/V4) 부터 정정. 4시간 작업으로 사용자가 `c.quant("altman", "005930")` 호출 가능 + AI 가 자동 인지하는 상태 도달.
+
+Step 4~7 은 그 다음 세션. Step 8 (Phase 2b) 은 백그라운드 진행 후 결과 받으면 자동 진행.
+
+---
+
+## 7. 관련 문서
+
+- `ops/architecture.md` §2-§4 (L0~L3 레이어 + 6 엔진 + import 방향)
+- `ops/api-contract.md` §1-§3 (Dual Access, 단일 진입점, 파라미터 표준)
+- `ops/quant.md` §1-§3 (호출 계약, 8 그룹 30 axis, numpy-only)
+- `ops/skills.md` (skill = docstring SSOT)
+- `ops/code.md` §2 (9 섹션 docstring, Returns 단위)
+- `ops/review.md` (review 블록 catalog/builders/registry/narrate 4 곳)
+- memory `quantGap.md` (Sprint 1~7 진행 사실)
+
+---
+
+## 명제 7 줄 요약
+
+1. quant 는 **L1** — analysis L2 import 금지, NumPy-only.
+2. 신규 22 모듈 중 14 가 axis (8 그룹 분류) + 8 이 utility (직접 import).
+3. 호출 통일: `c.quant("축")` 가이드 / `c.quant("축", "종목")` 단일 / `c.quant("축")` 횡단면 (인자 없으면).
+4. **`_AXIS_REGISTRY` + `spec.py` 등록이 정체성 표현** — 등록 안 하면 dartlab 사상 미실현.
+5. **review (L2) 가 dict 조립자** — quant 결과 + macro + credit + analysis 받아 6막 인과 직조.
+6. **skill = docstring** — 9 섹션 완성하면 AI 가 자동 narrative.
+7. Phase 2b 결과로 universe 자동 갱신 게이트 — 통과 못한 alpha 는 default 에서 빠짐.
