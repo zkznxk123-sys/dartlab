@@ -84,7 +84,7 @@
 
 <header class="lab-nav">
 	<div class="nav-inner">
-		<a href="/lab" class="brand">
+		<a href="{base}/lab" class="brand">
 			<span class="brand-mark">dartlab</span>
 			<span class="brand-slash">/</span>
 			<span class="brand-ctx">lab · screener</span>
