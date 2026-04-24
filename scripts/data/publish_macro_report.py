@@ -135,7 +135,7 @@ def main():
                 if abs(diff) > 0.5:
                     changes.append(f"종합 점수: {prev_score:+.1f} → {curr_score:+.1f} (변화 {diff:+.1f})")
             if changes:
-                print(f"\n전월 대비 변화 감지:")
+                print("\n전월 대비 변화 감지:")
                 for c in changes:
                     print(f"  ⚠ {c}")
         except Exception as e:

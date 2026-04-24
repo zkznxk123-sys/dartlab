@@ -14,10 +14,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from datetime import date
+
 import numpy as np
 import polars as pl
-
-from datetime import date
 
 # ── NBER 침체 구간 ──
 NBER = [
@@ -337,7 +337,7 @@ out()
 out("### 2.8 기업집계 (DART scan)")
 out()
 try:
-    from dartlab.core.finance.corporateAggregate import aggregateEarningsCycle, ponziRatio, leverageCycle
+    from dartlab.core.finance.corporateAggregate import aggregateEarningsCycle, leverageCycle, ponziRatio
 
     df = pl.read_parquet("data/dart/scan/finance.parquet")
     ec = aggregateEarningsCycle(df)

@@ -12,7 +12,6 @@ Usage:
 from __future__ import annotations
 
 import os
-import sys
 
 # .env 로드
 from pathlib import Path

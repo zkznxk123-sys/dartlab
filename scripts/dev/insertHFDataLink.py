@@ -13,8 +13,8 @@ Actions:
 Idempotent: skips files already containing HFDataLink.
 """
 
-from pathlib import Path
 import re
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2] / "blog" / "05-company-reports"
 
