@@ -150,6 +150,28 @@ def _buildTimeseriesFromFacts(
 
     _computeEquity(result, periods)
     _computeDerived(result, periods)
+
+    # SNAKEID_ALIASES 양방향 확장 — canonical · alias 둘 다 series 에 노출.
+    # `core/finance/helpers.py::toDictBySnakeId` 의 fixpoint 루프와 동일 패턴 (SSOT).
+    # 예: mapper 가 "Assets" → "assets" 로 normalize 해도 소비자 (review · test) 가
+    # "total_assets" 로 접근 가능하도록 복제.
+    from dartlab.core.finance.labels import SNAKEID_ALIASES
+
+    for stmtMap in result.values():
+        for _ in range(4):  # transitive chain (A→B→C) 해소용 fixpoint
+            changed = False
+            for alias, canonical in SNAKEID_ALIASES.items():
+                canonRow = stmtMap.get(canonical)
+                aliasRow = stmtMap.get(alias)
+                if canonRow is not None and aliasRow is None:
+                    stmtMap[alias] = canonRow
+                    changed = True
+                elif aliasRow is not None and canonRow is None:
+                    stmtMap[canonical] = aliasRow
+                    changed = True
+            if not changed:
+                break
+
     sortSeries(result)
 
     return result, periods
