@@ -76,7 +76,7 @@
 		if (e.key === 'ArrowDown') { e.preventDefault(); searchSel = Math.min(searchSel + 1, searchResults.length - 1); }
 		else if (e.key === 'ArrowUp') { e.preventDefault(); searchSel = Math.max(searchSel - 1, 0); }
 		else if (e.key === 'Enter' && searchResults[searchSel]) {
-			window.location.href = `${base}/dashboard/${searchResults[searchSel].id}`;
+			window.location.href = `${base}/lab/dashboard/${searchResults[searchSel].id}`;
 		} else if (e.key === 'Escape') {
 			searchOpen = false;
 			searchQ = '';
@@ -112,8 +112,8 @@
 </script>
 
 <svelte:head>
-	<title>산업지도 · dartlab</title>
-	
+	<title>산업지도 · /lab</title>
+	<meta name="robots" content="noindex" />
 </svelte:head>
 
 <svelte:window onkeydown={onKey} />
@@ -121,19 +121,18 @@
 <!-- nav -->
 <header class="lab-nav">
 	<div class="nav-inner">
-		<a href="/" class="brand">
+		<a href="/lab" class="brand">
 			<span class="brand-mark">dartlab</span>
 			<span class="brand-slash">/</span>
-			<span class="brand-ctx">MAP</span>
+			<span class="brand-ctx">lab · map</span>
 		</a>
 		<div class="nav-actions">
 			<button class="nav-search-btn" onclick={() => (searchOpen = true)}>
 				<span>회사 검색</span>
 				<kbd class="dl-kbd">/</kbd>
 			</button>
-			<Button variant="ghost" size="sm" href="{base}/blog">블로그</Button>
-			<Button variant="ghost" size="sm" href="{base}/docs">문서</Button>
-			<Button variant="ghost" size="sm" href="{base}/dashboard/005930">005930</Button>
+			<Button variant="ghost" size="sm" href="{base}/lab">/lab</Button>
+			<Button variant="ghost" size="sm" href="{base}/lab/dashboard/005930">005930</Button>
 		</div>
 	</div>
 </header>
@@ -167,7 +166,7 @@
 					{#each searchResults as r, i}
 						<li>
 							<a
-								href="{base}/dashboard/{r.id}"
+								href="{base}/lab/dashboard/{r.id}"
 								class="search-item"
 								class:active={i === searchSel}
 								onmouseenter={() => (searchSel = i)}
@@ -263,7 +262,7 @@
 			<ol class="ins-list">
 				{#each selectedEntries.slice(0, 12) as e, i}
 					<li>
-						<a href="{base}/dashboard/{e.stockCode}" class="ins-item">
+						<a href="{base}/lab/dashboard/{e.stockCode}" class="ins-item">
 							<span class="ins-rank dl-mono">{(i + 1).toString().padStart(2, '0')}</span>
 							<span class="ins-name">{e.corpName ?? e.stockCode}</span>
 							<span class="ins-rev dl-mono">{e.revenue ? fmtKrwFromEok(e.revenue / 1e8) : '—'}</span>

@@ -1,0 +1,108 @@
+/* dartlab Design Tokens — Editorial Dark
+ *
+ * 정체성: "1970년대 금융 저널의 지면을 OLED 패널 위에서 다시 읽는다"
+ *
+ * 흡수 출처:
+ *  - 사용자 zip v3 tokens.css (red-orange 4 팔레트)
+ *  - 2026 dark-native (Linear · Vercel · Anthropic Console)
+ *  - 한국 금융 컨벤션 (상승 빨강 / 하락 파랑)
+ *  - 四季報 + 토스 + 에프앤가이드 정보 밀도 절충
+ *
+ * 적용: +layout.svelte 또는 /lab 라우트에서 import.
+ * 단일 원천 (SSOT) — 다른 곳에서 재정의 금지.
+ */
+
+:root {
+	/* ── Surface · 4단계 elevation (+6% luminance) ── */
+	--dl-bg-base: #0f0f10;
+	--dl-bg-raised: #16171a;
+	--dl-bg-overlay: #1d1f23;
+	--dl-bg-modal: #25272d;
+	--dl-bg-deep: #08090b; /* OLED 깊이 (사용 절제) */
+
+	/* ── Border · 매우 절제, shadow 대신 1px ── */
+	--dl-line: rgba(255, 255, 255, 0.06);
+	--dl-line-strong: rgba(255, 255, 255, 0.12);
+	--dl-line-accent: rgba(234, 70, 71, 0.28);
+
+	/* ── Text · 순백 금지, WCAG 4.5:1 ── */
+	--dl-ink: #e8eaef; /* primary, 본문 */
+	--dl-ink-mute: #a3a8b3; /* secondary */
+	--dl-ink-dim: #6b7280; /* tertiary, label */
+	--dl-ink-faint: #4a5160; /* faint, disabled */
+	--dl-ink-print: #f1f3f7; /* 큰 숫자 · 헤드라인만 */
+
+	/* ── Brand · dartlab red→orange ── */
+	--dl-red: #ea4647;
+	--dl-red-deep: #c83232;
+	--dl-orange: #fb923c;
+	--dl-orange-soft: rgba(251, 146, 60, 0.12);
+	--dl-grad-heat: linear-gradient(135deg, #ea4647 0%, #fb923c 100%);
+	--dl-grad-bleed: radial-gradient(
+		ellipse 1200px 600px at top,
+		rgba(234, 70, 71, 0.05),
+		transparent 70%
+	);
+
+	/* ── 한국 금융 컨벤션 (상승 빨강 / 하락 파랑) ──
+	 * brand 의 red 와 의미 충돌 회피 위해 별도 토큰.
+	 * 상승은 한국 표준 양봉 빨강 (#E43F3F)
+	 * 하락은 한국 표준 음봉 파랑 (#1D64DC)
+	 */
+	--dl-up: #e43f3f;
+	--dl-up-soft: rgba(228, 63, 63, 0.1);
+	--dl-down: #1d64dc;
+	--dl-down-soft: rgba(29, 100, 220, 0.1);
+	--dl-flat: var(--dl-ink-dim);
+
+	/* ── Signal · 데이터 색 (절제, 5색 이내) ── */
+	--dl-good: #34d399;
+	--dl-warn: #fbbf24;
+	--dl-bad: #ef4444;
+	--dl-info: #60a5fa;
+
+	/* ── Radius · 4/8/12, 16+ 금지 (신뢰감) ── */
+	--dl-r-sm: 4px;
+	--dl-r-md: 8px;
+	--dl-r-lg: 12px;
+	--dl-r-pill: 999px;
+
+	/* ── Spacing scale · 편집 리듬 ── */
+	--dl-s-1: 4px;
+	--dl-s-2: 8px;
+	--dl-s-3: 12px;
+	--dl-s-4: 16px;
+	--dl-s-5: 24px;
+	--dl-s-6: 32px;
+	--dl-s-7: 48px;
+	--dl-s-8: 64px;
+	--dl-s-9: 96px;
+
+	/* ── Width · 7-column NYT grid ── */
+	--dl-w-article: 720px;
+	--dl-w-wide: 1200px;
+	--dl-w-max: 1440px;
+	--dl-grid-cols: 7;
+	--dl-grid-gap: 24px;
+
+	/* ── Motion · 180/240/320 + spring 20% / ease 80% ── */
+	--dl-ease: cubic-bezier(0.16, 1, 0.3, 1);
+	--dl-ease-soft: cubic-bezier(0.25, 0.1, 0.25, 1);
+	--dl-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+	--dl-dur-hover: 180ms;
+	--dl-dur-state: 240ms;
+	--dl-dur-page: 320ms;
+
+	/* ── Focus ring · 유지 ── */
+	--dl-focus: var(--dl-info);
+	--dl-focus-offset: 2px;
+
+	/* ── Type families ──
+	 * 본문: Pretendard Variable (한글)
+	 * 숫자/코드: JetBrains Mono (tabular-nums 필수)
+	 * 헤드라인: Newsreader (slab, 무료) — 편집 톤
+	 */
+	--dl-font-ui: 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--dl-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+	--dl-font-head: 'Newsreader', 'Tiempos Headline', Georgia, serif;
+}

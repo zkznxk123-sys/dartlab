@@ -114,23 +114,23 @@
 </script>
 
 <svelte:head>
-	<title>{node?.label ?? data.stockCode} 전자공시 대시보드 · dartlab</title>
-	
+	<title>{node?.label ?? data.stockCode} · /lab dashboard</title>
+	<meta name="robots" content="noindex" />
 </svelte:head>
 
 <!-- ── Editorial nav ── -->
 <header class="lab-nav">
 	<div class="nav-inner">
-		<a href="/" class="brand">
+		<a href="/lab" class="brand">
 			<span class="brand-mark">dartlab</span>
 			<span class="brand-slash">/</span>
-			<span class="brand-ctx">DASHBOARD</span>
+			<span class="brand-ctx">lab · dashboard</span>
 		</a>
 		<nav class="nav-actions">
-			<Button variant="ghost" size="sm" href="{base}/map">산업지도</Button>
-			<Button variant="ghost" size="sm" href="{base}/dashboard/005930">005930</Button>
-			<Button variant="ghost" size="sm" href="{base}/dashboard/035420">035420</Button>
-			<Button variant="ghost" size="sm" href="{base}/dashboard/000660">000660</Button>
+			<Button variant="ghost" size="sm" href="{base}/lab">/lab 홈</Button>
+			<Button variant="ghost" size="sm" href="{base}/lab/dashboard/005930">005930</Button>
+			<Button variant="ghost" size="sm" href="{base}/lab/dashboard/035420">035420</Button>
+			<Button variant="ghost" size="sm" href="{base}/lab/dashboard/000660">000660</Button>
 		</nav>
 	</div>
 </header>
@@ -140,7 +140,7 @@
 		<Eyebrow text="NO DATA" />
 		<h1 class="dl-h1-kr">대시보드 데이터 없음</h1>
 		<p class="dl-body">종목코드 <span class="dl-mono">{data.stockCode}</span> 가 ecosystem.json 에 없거나 finance.json prebuild 가 누락됐습니다.</p>
-		<Button href="{base}/map" variant="primary">산업지도로</Button>
+		<Button href="{base}/lab" variant="primary">/lab 홈으로</Button>
 	</div>
 {:else}
 	<!-- ── HERO · Verdict-first ── -->
@@ -741,7 +741,7 @@
 								<td><Tag>{p.stage ?? '—'}</Tag></td>
 								<td style="text-align: right"><MonoNumber value={fmtKrwFromEok(p.revenue)} size="sm" tone="ink" align="right" /></td>
 								<td><Bar value={p.revenue ?? 0} max={maxRev} tone="neutral" /></td>
-								<td><a href="{base}/dashboard/{p.stockCode}" class="peer-link" aria-label="대시보드 이동">→</a></td>
+								<td><a href="{base}/lab/dashboard/{p.stockCode}" class="peer-link" aria-label="대시보드 이동">→</a></td>
 							</tr>
 						{/each}
 					</tbody>
@@ -871,7 +871,7 @@
 
 	<!-- ── footer · 다음 단계 안내 ── -->
 	<footer class="lab-foot">
-		<Eyebrow text="회사 한 페이지 — DART 공시 기반 분석" />
+		<Eyebrow text="END · /lab/dashboard prototype — 다음: IS/BS/CF Sankey · Value 4모델 · Future 시나리오" />
 	</footer>
 {/if}
 
