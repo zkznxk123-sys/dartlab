@@ -1144,6 +1144,73 @@ def buildBlocks(
             )
         if _need("marketAnalysisFlags"):
             b["marketAnalysisFlags"] = _safe(lambda: marketAnalysisFlagsBlock(calcMarketAnalysisFlags(company)))
+        if _need("factorTearSheet"):
+            from dartlab.quant.factor import calcFactorTearSheetAll
+            from dartlab.review.builders import factorTearSheetBlock as _ftsb
+
+            _market = "US" if getattr(company, "currency", "KRW") == "USD" else "KR"
+            b["factorTearSheet"] = _safe(lambda: _ftsb(calcFactorTearSheetAll(market=_market)))
+        if _need("riskDecomposition"):
+            from dartlab.quant.factor import calcMultiFactorRisk
+            from dartlab.review.builders import riskDecompositionBlock as _rdb
+
+            stockCode = getattr(company, "stockCode", None)
+            if stockCode:
+                b["riskDecomposition"] = _safe(lambda: _rdb(calcMultiFactorRisk(stockCode)))
+        if _need("factorIC"):
+            from dartlab.quant.factor import calcFactorICAll
+            from dartlab.review.builders import factorICBlock as _ficb
+
+            _market = "US" if getattr(company, "currency", "KRW") == "USD" else "KR"
+            b["factorIC"] = _safe(lambda: _ficb(calcFactorICAll(market=_market, horizon=5)))
+
+        # Sprint 2 재무 알파 9축
+        _alpha_market = "US" if getattr(company, "currency", "KRW") == "USD" else "KR"
+        if _need("altmanFactor"):
+            from dartlab.quant.alphas.altman import calcAltmanFactor
+            from dartlab.review.builders import altmanFactorBlock as _alfb
+
+            b["altmanFactor"] = _safe(lambda: _alfb(calcAltmanFactor(market=_alpha_market)))
+        if _need("piotroskiFactor"):
+            from dartlab.quant.alphas.piotroski import calcPiotroskiFactor
+            from dartlab.review.builders import piotroskiFactorBlock as _pifb
+
+            b["piotroskiFactor"] = _safe(lambda: _pifb(calcPiotroskiFactor(market=_alpha_market)))
+        if _need("beneishFactor"):
+            from dartlab.quant.alphas.beneish import calcBeneishFactor
+            from dartlab.review.builders import beneishFactorBlock as _befb
+
+            b["beneishFactor"] = _safe(lambda: _befb(calcBeneishFactor(market=_alpha_market)))
+        if _need("accrualsFactor"):
+            from dartlab.quant.alphas.accruals import calcAccrualsFactor
+            from dartlab.review.builders import accrualsFactorBlock as _acfb
+
+            b["accrualsFactor"] = _safe(lambda: _acfb(calcAccrualsFactor(market=_alpha_market)))
+        if _need("qFactor"):
+            from dartlab.quant.alphas.qFactor import calcQFactor
+            from dartlab.review.builders import qFactorBlock as _qfb
+
+            b["qFactor"] = _safe(lambda: _qfb(calcQFactor(market=_alpha_market)))
+        if _need("qmj"):
+            from dartlab.quant.alphas.qmj import calcQMJ
+            from dartlab.review.builders import qmjBlock as _qmjb
+
+            b["qmj"] = _safe(lambda: _qmjb(calcQMJ(market=_alpha_market)))
+        if _need("bab"):
+            from dartlab.quant.alphas.bab import calcBAB
+            from dartlab.review.builders import babBlock as _babb
+
+            b["bab"] = _safe(lambda: _babb(calcBAB(market=_alpha_market)))
+        if _need("earningsSurprise"):
+            from dartlab.quant.alphas.earningsSurprise import calcEarningsSurprise
+            from dartlab.review.builders import earningsSurpriseBlock as _esb
+
+            b["earningsSurprise"] = _safe(lambda: _esb(calcEarningsSurprise(market=_alpha_market)))
+        if _need("fundMomentum"):
+            from dartlab.quant.alphas.fundamentalMomentum import calcFundamentalMomentum
+            from dartlab.review.builders import fundMomentumBlock as _fmb
+
+            b["fundMomentum"] = _safe(lambda: _fmb(calcFundamentalMomentum(market=_alpha_market)))
 
     # ── 매크로 (시장 환경 + 기업-매크로 연결) ──
     _MACRO_KEYS = {

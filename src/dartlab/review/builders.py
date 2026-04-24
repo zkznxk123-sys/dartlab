@@ -4350,6 +4350,361 @@ def marketAnalysisFlagsBlock(data) -> list:
     return _flagsBlock(flags)
 
 
+def riskDecompositionBlock(data) -> list:
+    """calcMultiFactorRisk 결과 → systematic/idiosyncratic + 팩터별 기여 (Barra-style)."""
+    if not data or data.get("error"):
+        return []
+    sysR = data.get("systematicRisk")
+    resR = data.get("residualRisk")
+    totR = data.get("totalRisk")
+    sysShare = data.get("systematicShare")
+    if sysR is None or resR is None:
+        return []
+
+    metrics = [
+        ("총 리스크 (annualized)", f"{totR:.1f}%"),
+        ("Systematic (팩터)", f"{sysR:.1f}% ({sysShare:.0f}%)"),
+        ("Idiosyncratic (고유)", f"{resR:.1f}% ({100 - sysShare:.0f}%)"),
+    ]
+    contribs = data.get("factorContributions") or {}
+    for name, pct in contribs.items():
+        metrics.append((f"  {name} 기여 (% of sys)", f"{pct:+.1f}%"))
+
+    interp = data.get("interpretation", "")
+    helper = (
+        f"{data.get('model', 'Multi-Factor')}: 종목 총 리스크를 systematic (FF 팩터) + idiosyncratic (고유) 로 분해. "
+        f"{interp}"
+    )
+
+    return [
+        HeadingBlock(
+            _meta("riskDecomposition").label,
+            level=2,
+            helper=helper,
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def factorTearSheetBlock(data) -> list:
+    """calcFactorTearSheetAll 결과 → 4 팩터 long-short Sharpe + alpha 원천 (Alphalens 표준)."""
+    if not data:
+        return []
+    factors = data.get("factors") or []
+    if not factors:
+        return []
+
+    # 팩터별 한 줄: "SMB Sharpe = +0.85 (강한 alpha — 소형주 프리미엄)"
+    metrics: list[tuple[str, str]] = []
+    for f in factors:
+        name = f.get("factorName", "")
+        sharpe = f.get("longShortSharpe")
+        interp = f.get("interpretation", "")
+        annR = f.get("longShortAnnualReturn")
+        annV = f.get("longShortAnnualVol")
+        winR = f.get("longShortWinRate")
+        if sharpe is None:
+            continue
+        metrics.append(
+            (
+                f"{name}",
+                f"Sharpe {sharpe:+.2f} · 연수익 {annR:+.1f}% · 변동성 {annV:.1f}% · WinRate {winR:.0f}% — {interp}",
+            )
+        )
+    if not metrics:
+        return []
+
+    strongest = data.get("strongest", "?")
+    universe = data.get("universe", "?")
+    year = data.get("year", "?")
+    isReal = data.get("isRealFamaFrench", False)
+
+    helper = (
+        f"Long-short 일별 시계열 Sharpe ({year}년 fundamental, universe {universe}종목, "
+        f"{'진짜 KRX 시총 기반' if isReal else 'book equity proxy fallback'}). "
+        "Sharpe > 1.0 = 강한 alpha, 0.5~1.0 = 약함, < 0 = 역방향. "
+        f"가장 강한 팩터: {strongest}"
+    )
+
+    return [
+        HeadingBlock(
+            _meta("factorTearSheet").label,
+            level=2,
+            helper=helper,
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def factorICBlock(data) -> list:
+    """calcFactorICAll 결과 → 4 팩터 Cross-Sectional IC / ICIR (Grinold & Kahn Ch.5)."""
+    if not data:
+        return []
+    factors = data.get("factors") or []
+    if not factors:
+        return []
+
+    metrics: list[tuple[str, str]] = []
+    for f in factors:
+        name = f.get("factorName", "")
+        icMean = f.get("icMean")
+        icStd = f.get("icStd")
+        icir = f.get("icir")
+        hit = f.get("hitRate")
+        t = f.get("tStat")
+        interp = f.get("interpretation", "")
+        if icir is None:
+            continue
+        metrics.append(
+            (
+                f"{name}",
+                f"ICIR {icir:+.2f} · IC {icMean:+.4f}±{icStd:.4f} · Hit {hit:.0f}% · t={t:+.2f} — {interp}",
+            )
+        )
+    if not metrics:
+        return []
+
+    strongest = data.get("strongest", "?")
+    horizon = data.get("horizon", "?")
+    fundYear = data.get("fundYear", "?")
+    retYear = data.get("retYear", "?")
+
+    helper = (
+        f"일별 횡단면 Spearman IC (전년 {fundYear} 펀더멘털 → {retYear} Q2~Q4 {horizon}일 forward return). "
+        "ICIR > 0.5 = 강한 예측력, 0.3~0.5 = 중간, < 0.1 = 노이즈. "
+        f"가장 강한 팩터: {strongest}. look-ahead bias 방지."
+    )
+
+    return [
+        HeadingBlock(
+            _meta("factorIC").label,
+            level=2,
+            helper=helper,
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+# ── Sprint 2 재무 알파 9축 블록 ──
+
+
+def altmanFactorBlock(data) -> list:
+    """calcAltmanFactor → safe/grey/distress 3 zone + top 10."""
+    if not data:
+        return []
+    zones = data.get("zones", {})
+    metrics = [
+        ("safe zone (Z > 2.99)", f"{zones.get('safe', {}).get('count', 0)}사 ({zones.get('safe', {}).get('pct', 0)}%)"),
+        ("grey zone", f"{zones.get('grey', {}).get('count', 0)}사 ({zones.get('grey', {}).get('pct', 0)}%)"),
+        (
+            "distress zone (Z < 1.81)",
+            f"{zones.get('distress', {}).get('count', 0)}사 ({zones.get('distress', {}).get('pct', 0)}%)",
+        ),
+    ]
+    return [
+        HeadingBlock(
+            _meta("altmanFactor").label,
+            level=2,
+            helper=f"Altman Z-Score ({data.get('year')}, {data.get('universe')}종목, variant={data.get('variant')}). {data.get('interpretation', '')}",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def piotroskiFactorBlock(data) -> list:
+    """calcPiotroskiFactor → strong/moderate/weak 분포 + 9 신호 평균 통과율."""
+    if not data:
+        return []
+    grades = data.get("grades", {})
+    metrics = [
+        ("strong (F ≥ 7)", f"{grades.get('strong', {}).get('count', 0)}사 ({grades.get('strong', {}).get('pct', 0)}%)"),
+        (
+            "moderate (F 4~6)",
+            f"{grades.get('moderate', {}).get('count', 0)}사 ({grades.get('moderate', {}).get('pct', 0)}%)",
+        ),
+        ("weak (F ≤ 3)", f"{grades.get('weak', {}).get('count', 0)}사 ({grades.get('weak', {}).get('pct', 0)}%)"),
+    ]
+    signalAvg = data.get("signalAvg", {})
+    signal_labels = {
+        "roaPositive": "ROA+",
+        "ocfPositive": "OCF+",
+        "roaIncreasing": "ROA↑",
+        "cfGtNi": "CF>NI",
+        "debtDecreasing": "부채↓",
+        "currentRatioUp": "유동비↑",
+        "noNewShares": "미희석",
+        "grossMarginUp": "GM↑",
+        "assetTurnoverUp": "회전↑",
+    }
+    if signalAvg:
+        sig_str = ", ".join(f"{signal_labels.get(k, k)} {v:.0f}%" for k, v in signalAvg.items())
+        metrics.append(("9 신호 시장 통과율", sig_str))
+    return [
+        HeadingBlock(
+            _meta("piotroskiFactor").label,
+            level=2,
+            helper=f"Piotroski F-Score ({data.get('year')} vs {data.get('prevYear')}, {data.get('universe')}종목). {data.get('interpretation', '')}",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def beneishFactorBlock(data) -> list:
+    """calcBeneishFactor → red flag 비율 + top 의심 10."""
+    if not data:
+        return []
+    flags = data.get("flags", {})
+    metrics = [
+        (
+            "red flag (M > -1.78)",
+            f"{flags.get('redFlag', {}).get('count', 0)}사 ({flags.get('redFlag', {}).get('pct', 0)}%)",
+        ),
+        ("clean", f"{flags.get('clean', {}).get('count', 0)}사 ({flags.get('clean', {}).get('pct', 0)}%)"),
+    ]
+    topFlag = data.get("topFlag") or []
+    if topFlag:
+        metrics.append(("top 5 의심", ", ".join(f"{c}({m})" for c, m in topFlag[:5])))
+    return [
+        HeadingBlock(
+            _meta("beneishFactor").label,
+            level=2,
+            helper=f"Beneish M-Score ({data.get('year')} vs {data.get('prevYear')}, {data.get('universe')}종목). {data.get('interpretation', '')}",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def accrualsFactorBlock(data) -> list:
+    """calcAccrualsFactor → high/neutral/low 분포."""
+    if not data:
+        return []
+    groups = data.get("groups", {})
+    metrics = [
+        (
+            "high accrual (> +5%)",
+            f"{groups.get('high', {}).get('count', 0)}사 ({groups.get('high', {}).get('pct', 0)}%) — reversal risk",
+        ),
+        ("neutral", f"{groups.get('neutral', {}).get('count', 0)}사 ({groups.get('neutral', {}).get('pct', 0)}%)"),
+        (
+            "low (< -5%)",
+            f"{groups.get('low', {}).get('count', 0)}사 ({groups.get('low', {}).get('pct', 0)}%) — cash quality premium",
+        ),
+    ]
+    return [
+        HeadingBlock(
+            _meta("accrualsFactor").label,
+            level=2,
+            helper=f"Sloan Accrual ({data.get('year')}, {data.get('universe')}종목). {data.get('interpretation', '')}",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def qFactorBlock(data) -> list:
+    """calcQFactor → top Q / bottom Q."""
+    if not data:
+        return []
+    topQ = data.get("topQ") or []
+    bottomQ = data.get("bottomQ") or []
+    metrics = []
+    if topQ:
+        metrics.append(("top Q-factor 상위 5", ", ".join(f"{c}({s})" for c, s in topQ[:5])))
+    if bottomQ:
+        metrics.append(("bottom 하위 5", ", ".join(f"{c}({s})" for c, s in bottomQ[:5])))
+    return [
+        HeadingBlock(
+            _meta("qFactor").label,
+            level=2,
+            helper=f"Hou-Xue-Zhang q-factor ({data.get('year')}, {data.get('universe')}종목). {data.get('interpretation', '')}",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def qmjBlock(data) -> list:
+    """calcQMJ → top Quality / top Junk."""
+    if not data:
+        return []
+    topQ = data.get("topQuality") or []
+    topJ = data.get("topJunk") or []
+    metrics = []
+    if topQ:
+        metrics.append(("top Quality 5", ", ".join(f"{c}({s})" for c, s in topQ[:5])))
+    if topJ:
+        metrics.append(("top Junk 5", ", ".join(f"{c}({s})" for c, s in topJ[:5])))
+    return [
+        HeadingBlock(
+            _meta("qmj").label,
+            level=2,
+            helper=f"QMJ composite ({data.get('year')}, {data.get('universe')}종목). {data.get('interpretation', '')}",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def babBlock(data) -> list:
+    """calcBAB → top Low-Vol / top High-Vol."""
+    if not data:
+        return []
+    topLow = data.get("topLow") or []
+    topHigh = data.get("topHigh") or []
+    metrics = []
+    if topLow:
+        metrics.append(("top Low-Vol 5", ", ".join(f"{c}({v}%)" for c, v in topLow[:5])))
+    if topHigh:
+        metrics.append(("top High-Vol 5", ", ".join(f"{c}({v}%)" for c, v in topHigh[:5])))
+    return [
+        HeadingBlock(
+            _meta("bab").label,
+            level=2,
+            helper=f"BAB realized vol ({data.get('window')}일, {data.get('universe')}종목). {data.get('interpretation', '')}",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def earningsSurpriseBlock(data) -> list:
+    """calcEarningsSurprise → top positive/negative SUE."""
+    if not data:
+        return []
+    topPos = data.get("topPos") or []
+    topNeg = data.get("topNeg") or []
+    metrics = []
+    if topPos:
+        metrics.append(("top positive SUE 5", ", ".join(f"{c}(z={z} g={g:+.0%})" for c, z, g in topPos[:5])))
+    if topNeg:
+        metrics.append(("top negative SUE 5", ", ".join(f"{c}(z={z} g={g:+.0%})" for c, z, g in topNeg[:5])))
+    return [
+        HeadingBlock(
+            _meta("earningsSurprise").label,
+            level=2,
+            helper=f"Earnings Surprise ({data.get('year')} vs {data.get('prevYear')}, {data.get('universe')}종목). {data.get('interpretation', '')}",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def fundMomentumBlock(data) -> list:
+    """calcFundamentalMomentum → top double-momentum."""
+    if not data:
+        return []
+    topD = data.get("topDouble") or []
+    botD = data.get("bottomDouble") or []
+    metrics = []
+    if topD:
+        metrics.append(("top double-momentum 5", ", ".join(f"{c}({s})" for c, s in topD[:5])))
+    if botD:
+        metrics.append(("bottom 5", ", ".join(f"{c}({s})" for c, s in botD[:5])))
+    return [
+        HeadingBlock(
+            _meta("fundMomentum").label,
+            level=2,
+            helper=f"Chordia-Shivakumar 펀더멘털×가격 ({data.get('year')}, {data.get('universe')}종목). {data.get('interpretation', '')}",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
 # ── 매크로 블록 ──
 
 
