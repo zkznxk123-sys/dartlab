@@ -57,9 +57,9 @@ def _(b, c, Story):
 
 @app.cell
 def _(c):
-    # reviewer — AI 종합의견 (AI 설정 필요: dartlab setup gemini 등)
+    # AI 종합의견은 dartlab.ask() 로 (AI 설정 필요: dartlab setup gemini 등)
     # guide로 분석 관점 지정 가능
-    c.reviewer("수익구조", guide="반도체 사이클 관점에서 평가해줘")
+    dartlab.ask("삼성전자 수익구조 반도체 사이클 관점에서 평가해줘")
     return
 
 

@@ -13,7 +13,7 @@ L0 (인프라)     Company        종목코드 → 재무/공시/주석 통합
 L1 (데이터)     scan/gather    시장 횡단 + 외부 데이터
 L2 (분석)       analysis       14축 재무분석 + 전망 + 가치평가
                 credit         독립 신용평가 (dCR 20단계)
-                review         블록식 보고서 조합
+                story          블록식 보고서 조합
 L3 (AI)         ask/chat       적극적 분석가
 ```
 
@@ -56,7 +56,7 @@ dartlab.ask("삼성전자 재무 분석해줘")   # AI 분석가
 | [Analysis](analysis) | `c.analysis()` | Deep analysis | 14-axis financial + forecast |
 | [Credit Rating](credit) | `c.credit()` | Credit rating | dCR 20-grade + 7-axis |
 | [Industry](https://github.com/eddmpython/dartlab/blob/master/ops/industry.md) | `c.industry()`, `dartlab.industry()` | Industry atlas | Listed companies × industries + supply-chain edges |
-| [Review](review) | `c.story()` | Report rendering | markdown/HTML/JSON + `chainPosition` block |
+| [Story](story) | `c.story()` | Report rendering | markdown/HTML/JSON + `chainPosition` block |
 | [AI](ai) | `dartlab.ask()` | AI analyst | 6 providers |
 | [Advanced](advanced) | `c.insights` | Grades/rank/sector | insight/rank/quant |
 | [MCP](mcp) | `dartlab mcp` | AI integration | Claude/Cursor |

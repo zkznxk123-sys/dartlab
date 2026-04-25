@@ -47,22 +47,24 @@ print(rv)                              # Rich 콘솔
 c.story(only=["chainPosition"])      # 산업 밸류체인 블록만
 ```
 
-## review vs analysis
+## story vs analysis
 
 - **analysis**: 원본 데이터를 dict로 반환 → AI/코드가 직접 해석
-- **review**: analysis 결과를 렌더링된 보고서로 조합 → 사람이 읽는 형태
+- **story**: analysis 결과를 렌더링된 보고서로 조합 → 사람이 읽는 형태
 
-## reviewer — AI 의견 추가
+## AI 종합의견은 `dartlab.ask()`
 
 ```python
-dartlab.ask()                           # review + AI 종합의견
-dartlab.ask(guide="반도체 관점에서")      # 가이드 지시
+dartlab.ask("삼성전자 분석 해줘")                       # AI 종합 분석
+dartlab.ask("삼성전자 반도체 사이클 관점에서 평가해줘")   # 가이드형
 ```
+
+`c.reviewer()` 는 폐기 — AI 종합의견은 `dartlab.ask()` 로 일원화.
 
 ## 주의
 
 ```python
-# ⚠ 전체 review() 금지 — 83초 타임아웃
+# ⚠ 전체 c.story() 금지 — 83초 타임아웃
 c.story()            # ← 매우 느림 (전체 14섹션)
 
 # ✓ 섹션별로 호출
