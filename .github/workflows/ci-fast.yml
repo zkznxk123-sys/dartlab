@@ -117,7 +117,7 @@ jobs:
             -m "unit and not requires_data" \
             --ignore=tests/test_fixture_analysis_real.py \
             --ignore=tests/test_fixture_credit_real.py \
-            --ignore=tests/test_fixture_review_real.py \
+            --ignore=tests/test_fixture_story_real.py \
             --ignore=tests/realData \
             --benchmark-disable --no-cov
 

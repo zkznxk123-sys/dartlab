@@ -45,7 +45,7 @@ jobs:
             -m "not requires_data and not heavy and not realData and not freshInstall" \
             --ignore=tests/test_fixture_analysis_real.py \
             --ignore=tests/test_fixture_credit_real.py \
-            --ignore=tests/test_fixture_review_real.py \
+            --ignore=tests/test_fixture_story_real.py \
             --ignore=tests/realData \
             --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml \
             --cov-fail-under=40 --benchmark-disable
@@ -84,7 +84,7 @@ jobs:
           PYTEST_MEMORY_LIMIT_MB: "5000"
           DARTLAB_TEST_LOCKED: "1"
         run: |
-          for f in tests/test_fixture_analysis_real.py tests/test_fixture_credit_real.py tests/test_fixture_review_real.py; do
+          for f in tests/test_fixture_analysis_real.py tests/test_fixture_credit_real.py tests/test_fixture_story_real.py; do
             echo "=== $f ==="
             pytest "$f" --tb=short -q --benchmark-disable -p no:cacheprovider || exit 1
           done

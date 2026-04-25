@@ -47,7 +47,7 @@ jobs:
           - test_macro.py
           - test_macroAxes.py
           - test_quant.py
-          - test_review.py
+          - test_story.py
           - test_scan.py
           - test_scanAxes.py
           - test_search.py
