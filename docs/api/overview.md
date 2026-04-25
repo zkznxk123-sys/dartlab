@@ -36,7 +36,7 @@ c.credit()                          # dCR 등급 종합
 c.credit("채무상환")                  # 축별 접근
 
 # 보고서
-c.review("수익성")                   # 보고서 렌더링
+c.story("수익성")                   # 보고서 렌더링
 
 # 시장 횡단
 dartlab.scan("governance")           # 전종목 지배구조
@@ -56,7 +56,7 @@ dartlab.ask("삼성전자 재무 분석해줘")   # AI 분석가
 | [Analysis](analysis) | `c.analysis()` | Deep analysis | 14-axis financial + forecast |
 | [Credit Rating](credit) | `c.credit()` | Credit rating | dCR 20-grade + 7-axis |
 | [Industry](https://github.com/eddmpython/dartlab/blob/master/ops/industry.md) | `c.industry()`, `dartlab.industry()` | Industry atlas | Listed companies × industries + supply-chain edges |
-| [Review](review) | `c.review()` | Report rendering | markdown/HTML/JSON + `chainPosition` block |
+| [Review](review) | `c.story()` | Report rendering | markdown/HTML/JSON + `chainPosition` block |
 | [AI](ai) | `dartlab.ask()` | AI analyst | 6 providers |
 | [Advanced](advanced) | `c.insights` | Grades/rank/sector | insight/rank/quant |
 | [MCP](mcp) | `dartlab mcp` | AI integration | Claude/Cursor |

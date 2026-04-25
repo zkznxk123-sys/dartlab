@@ -22,13 +22,13 @@ module-level 엔진 호출계약 일관화. `dartlab.analysis` 도 이제 `stock
 
 ## [0.9.22] - 2026-04-25
 
-보고서 진입점 이름 변경. `c.review()` → `c.story()` · `c.reviewer()` 제거 (AI 종합의견은 `dartlab.ask()` 사용). Breaking change.
+보고서 진입점 이름 변경. `c.story()` → `c.story()` · `dartlab.ask()` 제거 (AI 종합의견은 `dartlab.ask()` 사용). Breaking change.
 
 ### Breaking Changes
 
-- `c.review()` → `c.story()`
-- `c.reviewer()` 제거 — AI 종합의견은 `dartlab.ask("...")` 로 일원화
-- `dartlab.review` 모듈 → `dartlab.story`
+- `c.story()` → `c.story()`
+- `dartlab.ask()` 제거 — AI 종합의견은 `dartlab.ask("...")` 로 일원화
+- `dartlab.story` 모듈 → `dartlab.story`
 - `Review` 클래스 → `Story`
 - `buildReview` → `buildStory` · `renderReview` → `renderStory` · `ReviewLayout` → `StoryLayout`
 - CLI: `dartlab review` → `dartlab story` · `dartlab reviewer` 제거
@@ -39,8 +39,8 @@ module-level 엔진 호출계약 일관화. `dartlab.analysis` 도 이제 `stock
 ```python
 # 기존 (0.9.21)
 c = dartlab.Company("005930")
-c.review()
-ai = c.reviewer()
+c.story()
+ai = dartlab.ask()
 
 # 신규 (0.9.22)
 c = dartlab.Company("005930")
@@ -482,7 +482,7 @@ quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.
 
 ### Changed — Plan v10: 1.0.0 전 클린업 (BREAKING)
 
-**API contract 단일 진입점 원칙 강제** — 사용자 surface 를 `c.show() / c.select() / c.sections / c.diff() / c.filings() / c.facts / c.review() / c.analysis() / c.credit()` 만으로 단일화.
+**API contract 단일 진입점 원칙 강제** — 사용자 surface 를 `c.show() / c.select() / c.sections / c.diff() / c.filings() / c.facts / c.story() / c.analysis() / c.credit()` 만으로 단일화.
 
 **P0 — finance property 4종 제거**:
 - `c.IS / c.BS / c.CF / c.CIS` (DART + EDGAR) → `c.show("IS")` / `c.show("BS")` / `c.show("CF")` / `c.show("CIS")`
@@ -941,7 +941,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 
 ### Added
 
-- **review 매출전망 섹션 (6부)**: `c.review("매출전망")` — 7-소스 앙상블 매출 예측. revenueForecast, segmentForecast, proFormaHighlights, scenarioImpact, forecastMethodology, historicalRatios, forecastFlags 7개 블록. 업종별 시나리오 분화 지원
+- **review 매출전망 섹션 (6부)**: `c.story("매출전망")` — 7-소스 앙상블 매출 예측. revenueForecast, segmentForecast, proFormaHighlights, scenarioImpact, forecastMethodology, historicalRatios, forecastFlags 7개 블록. 업종별 시나리오 분화 지원
 - **review 선택적 빌드**: `buildBlocks(company, keys=)` — section 지정 시 해당 블록만 빌드. 단일 섹션 0.5초 vs 전체 54초 (108x 속도 향상)
 - **dartlab.askLog**: `dartlab.askLog = True`로 ask/chat 세션의 JSONL 이벤트 로그 토글
 - **gather 확장**: sector, insider, ownership 수집 경로 추가
@@ -1010,10 +1010,10 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 ### Added
 
 - **review 패키지**: 구조화된 기업 분석 보고서 시스템
-  - `c.review("수익구조")` / `c.review("자금조달")` — 템플릿 기반 분석 보고서
+  - `c.story("수익구조")` / `c.story("자금조달")` — 템플릿 기반 분석 보고서
   - `blocks(company)` — 분석 블록 사전 (수익구조 + 자금조달 + 자산 + 현금흐름)
   - `Review([...])` — 블록 자유 조립, SelectResult/DataFrame 혼합 지원
-  - `c.reviewer()` — LLM 종합의견 레이어 (guide 파라미터로 분석 관점 지정)
+  - `dartlab.ask()` — LLM 종합의견 레이어 (guide 파라미터로 분석 관점 지정)
   - 4개 렌더링 형식: rich (터미널), html, markdown, json
   - `dartlab review 005930` CLI 명령
 - **analysis/strategy calc-only 패턴**: revenue/capital 분석 함수가 dict/숫자만 반환, 블록 생성과 분리

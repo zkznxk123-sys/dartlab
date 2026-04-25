@@ -383,7 +383,7 @@ c.analysis("financial", "성장성")
 c.analysis("financial", "수익성")
 c.analysis("financial", "비용구조")
 c.analysis("financial", "종합평가")
-c.review()
+c.story()
 ```
 
 ---

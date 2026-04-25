@@ -460,7 +460,7 @@ c.analysis("financial", "안정성")
 c.analysis("financial", "이익품질")
 c.analysis("financial", "자본배분")
 c.analysis("financial", "종합평가")
-c.review()
+c.story()
 ```
 
 ---

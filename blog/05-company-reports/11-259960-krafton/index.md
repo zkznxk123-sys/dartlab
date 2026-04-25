@@ -402,7 +402,7 @@ c.show("CF", freq="Y")
 c.analysis("financial", "성장성")
 c.analysis("financial", "자본배분")
 c.analysis("financial", "종합평가")
-c.review()
+c.story()
 ```
 
 ---

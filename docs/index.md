@@ -28,7 +28,7 @@ dartlab.ask("삼성전자 분석해줘")           # AI 분석가
 | [Credit](api/credit) | `c.credit()` | 독립 신용평가 (dCR 20단계) |
 | [Scan](api/scan) | `dartlab.scan()` | 전종목 횡단분석 |
 | [Gather](api/gather) | `c.gather()` | 외부 시장 데이터 |
-| [Review](api/review) | `c.review()` | 보고서 렌더링 |
+| [Review](api/review) | `c.story()` | 보고서 렌더링 |
 | [AI](api/ai) | `dartlab.ask()` | 적극적 분석가 |
 
 ## 시작하기

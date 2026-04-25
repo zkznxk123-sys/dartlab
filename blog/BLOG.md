@@ -260,7 +260,7 @@ c.quant("종합"); c.quant("팩터")
 | type | 관통선 | 활용 |
 |---|---|---|
 | `full` | 일반 종합 | 현재 대부분 (기본값) |
-| **`thesis`** | "X 가설이 맞는가?" | `c.review(type="thesis", hypothesis="...")` → 가설·증거·판정 서사 본문 인용. NarrativeSection = 서사 주도 |
+| **`thesis`** | "X 가설이 맞는가?" | `c.story(type="thesis", hypothesis="...")` → 가설·증거·판정 서사 본문 인용. NarrativeSection = 서사 주도 |
 | **`crisis`** | 부실·유동성·적자 | 효성화학·CG인바이츠·에스퓨얼셀 |
 | **`dividend`** | 주주환원 | 오뚜기·KT&G |
 | **`governance`** | 지배구조·임원보수 | 한화오션·효성화학 |
@@ -271,12 +271,12 @@ c.quant("종합"); c.quant("팩터")
 
 **review template 7 종** (자동 감지 또는 frontmatter `storyTemplate` 동기화): 사이클 · 프랜차이즈 · 턴어라운드 · 성장 · 자본집약 · 지주 · 현금부자.
 
-**AI 종합의견** `c.reviewer(guide="...")` — 블로그 도입부에 dartlab AI 의 "3 줄 판단" 을 그대로 인용 박스로.
+**AI 종합의견** `dartlab.ask(guide="...")` — 블로그 도입부에 dartlab AI 의 "3 줄 판단" 을 그대로 인용 박스로.
 
 **규칙**:
-- 관통선 확정 후 **reportType 1 개 + template 1 개** 선택 → `c.review(type=..., template=...)` 를 Phase 0 에 추가.
+- 관통선 확정 후 **reportType 1 개 + template 1 개** 선택 → `c.story(type=..., template=...)` 를 Phase 0 에 추가.
 - valuation·forecast·governance·macro 중 관통선에 맞는 **1 축 이상을 본문 막으로** 편입.
-- `c.review(type="thesis")` 결과의 가설·증거·판정 블록을 **검증표 바로 위** 에 인용.
+- `c.story(type="thesis")` 결과의 가설·증거·판정 블록을 **검증표 바로 위** 에 인용.
 - `summaryFlags` 가 본문과 충돌하면 본문 재검토.
 
 **반복 실패** — 현재 블로그 대다수가 엔진 용량의 15% 만 쓰고 있다 (`c.select("IS/BS/CF")` + `c.analysis("수익성")` 2~3 개). 관통선이 요구하는 축을 골라 본문 구조로 편입한다.

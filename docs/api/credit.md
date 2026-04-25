@@ -75,7 +75,7 @@ dartlab.ask("삼성전자 신용평가 분석해줘")
 **`credit.publisher.publishReport`는 deprecated.** `review.publisher.publishReport`가 단일 진입점이다.
 
 ```python
-from dartlab.review.publisher import publishReport
+from dartlab.story.publisher import publishReport
 publishReport("005930")  # 신용평가 섹션에 7축 서사 + 신평사 대조 자동 포함
 ```
 

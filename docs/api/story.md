@@ -12,11 +12,11 @@ analysis + credit 결과를 블록식으로 조합하여 보고서를 만든다.
 c = dartlab.Company("005930")
 
 # 섹션별 보고서
-c.review("수익성")                      # 수익성 섹션만
-c.review("신용평가")                    # 신용평가 섹션만
+c.story("수익성")                      # 수익성 섹션만
+c.story("신용평가")                    # 신용평가 섹션만
 
 # 출력 형식
-rv = c.review("수익성")
+rv = c.story("수익성")
 rv.toMarkdown()                        # 마크다운
 rv.toHtml()                            # HTML
 rv.toJson()                            # JSON
@@ -44,7 +44,7 @@ print(rv)                              # Rich 콘솔
 | `sectorKpi` | 업종 특수 KPI (건설·반도체·게임·제약) | analysis |
 
 ```python
-c.review(only=["chainPosition"])      # 산업 밸류체인 블록만
+c.story(only=["chainPosition"])      # 산업 밸류체인 블록만
 ```
 
 ## review vs analysis
@@ -55,17 +55,17 @@ c.review(only=["chainPosition"])      # 산업 밸류체인 블록만
 ## reviewer — AI 의견 추가
 
 ```python
-c.reviewer()                           # review + AI 종합의견
-c.reviewer(guide="반도체 관점에서")      # 가이드 지시
+dartlab.ask()                           # review + AI 종합의견
+dartlab.ask(guide="반도체 관점에서")      # 가이드 지시
 ```
 
 ## 주의
 
 ```python
 # ⚠ 전체 review() 금지 — 83초 타임아웃
-c.review()            # ← 매우 느림 (전체 14섹션)
+c.story()            # ← 매우 느림 (전체 14섹션)
 
 # ✓ 섹션별로 호출
-c.review("수익성")     # ← 빠름 (해당 섹션만)
-c.review("안정성")     # ← 빠름
+c.story("수익성")     # ← 빠름 (해당 섹션만)
+c.story("안정성")     # ← 빠름
 ```

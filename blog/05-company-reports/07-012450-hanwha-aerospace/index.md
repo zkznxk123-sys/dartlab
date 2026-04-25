@@ -406,7 +406,7 @@ c.analysis("financial", "성장성")
 c.analysis("financial", "자금조달")
 c.analysis("financial", "현금흐름")
 c.analysis("financial", "종합평가")
-c.review()
+c.story()
 ```
 
 ---

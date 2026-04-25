@@ -88,7 +88,7 @@ c.rank                  # 시장 순위
 ```python
 c.analysis("financial", "수익성")   # 14축 재무분석
 c.credit()                         # dCR 신용평가
-c.review("수익성")                  # 보고서
+c.story("수익성")                  # 보고서
 c.gather("price")                  # 주가
 c.ask("이 회사 분석해줘")            # AI
 ```

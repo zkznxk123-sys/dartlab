@@ -70,7 +70,7 @@ if r:
 			desc: '6막 보고서',
 			code: `import traceback, io
 try:
-    print(c.review("수익성").toMarkdown())
+    print(c.story("수익성").toMarkdown())
 except Exception:
     buf = io.StringIO(); traceback.print_exc(file=buf); print(buf.getvalue())`
 		}

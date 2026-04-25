@@ -37,7 +37,7 @@ thumbnail: /avatar-chart.png
 ```python
 import dartlab
 c = dartlab.Company("005930")  # 종목코드만 바꾸면 어떤 회사든 동일
-c.review("현금흐름")
+c.story("현금흐름")
 ```
 
 위 명령 한 줄이면 CF 3구간 시계열, 잉여현금흐름 추이, 영업CF 마진, 이익의 현금 뒷받침 비율, CF 패턴 판정까지 한 번에 나온다.
@@ -143,7 +143,7 @@ FCF = 영업CF - CAPEX
 ```python
 import dartlab
 c = dartlab.Company("005930")
-c.review("현금흐름")
+c.story("현금흐름")
 ```
 
 이 명령은 세 가지를 보여준다.
@@ -199,7 +199,7 @@ flags = calcCashFlowFlags(c)        # 경고 신호
 ```python
 import dartlab
 c = dartlab.Company("373220")  # 종목코드만 바꾸면 됨
-c.review("현금흐름")
+c.story("현금흐름")
 ```
 
 어떤 상장사든 종목코드만 넣으면 동일한 CF 3구간, 잉여현금흐름, 영업CF 마진, CF 패턴 판정을 볼 수 있다.

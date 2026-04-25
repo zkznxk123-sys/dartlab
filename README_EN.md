@@ -141,7 +141,7 @@ One calling convention. Each engine: `dartlab.engine()` for the guide, `dartlab.
 | L2 | [Macro](ops/macro.md) | Market-level macro (cycle/rates/liquidity/sentiment/assets) | `dartlab.macro("사이클")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/06_macro.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py) |
 | L2 | [Credit](ops/credit.md) | Independent credit rating (dCR grade, default probability, health) | `c.credit("등급")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/07_credit.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/07_credit.py) |
 | L2 | [Industry](ops/industry.md) | Industry mapper — all listed companies × stage/role/stream + supply-chain edges (atlas at `/map`) | `c.industry()`, `dartlab.industry("semiconductor")` | — |
-| L2 | [Review](ops/review.md) | Report builder — 6-engine block composition (analysis/quant/credit/macro/scan/**industry**), 11 types × 7 templates (no interpretation) | `c.review("수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py) |
+| L2 | [Review](ops/review.md) | Report builder — 6-engine block composition (analysis/quant/credit/macro/scan/**industry**), 11 types × 7 templates (no interpretation) | `c.story("수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py) |
 | L3 | [AI](ops/ai.md) | Active analyst — calls engines directly, judges, verifies against raw data | `dartlab.ask()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/09_ai.py) |
 | L4 | [Channel](ops/channel.md) | External sharing — `dartlab channel` brings PC dartlab to your phone | `dartlab channel` | — |
 | core | [Search](ops/search.md) | Semantic filing search *(alpha)* | `dartlab.search()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/10_search.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/10_search.py) |
@@ -252,7 +252,7 @@ print(cr["divergenceExplanation"])  # why it differs from agencies
 Publish reports (credit narrative + audit are auto-included in review's 5막):
 
 ```python
-from dartlab.review.publisher import publishReport
+from dartlab.story.publisher import publishReport
 publishReport("005930")               # 6막 report including credit narrative + audit
 ```
 
@@ -280,8 +280,8 @@ Backtest (2000-2024, FRED): Cleveland Fed probit **detected all 3/3 US recession
 Assembles analysis into a structured report. 4 output formats: rich (terminal), html, markdown, json.
 
 ```python
-c.review()              # full report
-c.reviewer()            # report + AI interpretation
+c.story()              # full report
+dartlab.ask()            # report + AI interpretation
 ```
 
 > Samsung report preview: *"Revenue +23.8%, operating margin 8.6%→21.4%. FCF turned positive, ROIC > WACC — reinvestment is creating value."*
@@ -295,7 +295,7 @@ c.reviewer()            # report + AI interpretation
 Financial analysis isn't ratio tables. DartLab combines 5 engines (analysis, credit, scan, quant, macro) into a **6-act storytelling structure** that auto-generates publishable company stories.
 
 ```python
-from dartlab.review.publisher import publishReport
+from dartlab.story.publisher import publishReport
 publishReport("068270")    # Celltrion — auto-publish 6-act company story
 ```
 

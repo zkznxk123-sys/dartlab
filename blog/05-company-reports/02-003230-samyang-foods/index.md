@@ -60,7 +60,7 @@ import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 ```python
 import dartlab
 c = dartlab.Company("003230")
-c.review()              # 6막 자동 보고서
+c.story()              # 6막 자동 보고서
 c.credit("등급")         # 신용평가
 c.report.dividend       # DPS 9년 시계열 (analysis 결손 우회)
 ```
