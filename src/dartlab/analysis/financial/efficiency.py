@@ -150,10 +150,6 @@ def calcTurnoverTrend(company, *, basePeriod: str | None = None) -> dict | None:
     return {"history": history} if history else None
 
 
-# calcCccTrend는 calcTurnoverTrend에 통합
-calcCccTrend = calcTurnoverTrend
-
-
 # ── 플래그 ──
 
 

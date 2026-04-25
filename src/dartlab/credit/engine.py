@@ -6,8 +6,7 @@ Layer 1 (metrics.py) → Layer 2 (scorecard) → Layer 3 (등급 결정)
 
 from __future__ import annotations
 
-from dartlab.credit.metrics import calcAllMetrics
-from dartlab.credit.scorecard import (
+from dartlab.core.finance.creditScorecard import (
     axisScore,
     cashFlowGrade,
     creditOutlook,
@@ -17,7 +16,8 @@ from dartlab.credit.scorecard import (
     scoreMetric,
     weightedScore,
 )
-from dartlab.credit.thresholds import getSectorLabel, getThresholds
+from dartlab.core.finance.sectorThresholds import getSectorLabel, getThresholds
+from dartlab.credit.metrics import calcAllMetrics
 
 # ═══════════════════════════════════════════════════════════
 # 설정 — 모든 매직 넘버를 여기서 관리

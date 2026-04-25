@@ -22,19 +22,7 @@ from dartlab.analysis.financial._memoize import memoized_calc
 _MAX_SEGMENTS = 8
 _MAX_YEARS = 8
 
-_SECTOR_KR = {
-    "ENERGY": "에너지",
-    "MATERIALS": "소재",
-    "INDUSTRIALS": "산업재",
-    "CONSUMER_DISC": "경기관련소비재",
-    "CONSUMER_STAPLES": "필수소비재",
-    "HEALTHCARE": "건강관리",
-    "FINANCIALS": "금융",
-    "IT": "IT",
-    "COMMUNICATION": "커뮤니케이션서비스",
-    "UTILITIES": "유틸리티",
-    "REAL_ESTATE": "부동산",
-}
+# 섹터 한글명 SSOT: Sector enum 의 value 가 한글 — 별도 dict 불필요.
 
 
 # ── 유틸 ──
@@ -206,7 +194,7 @@ def calcCompanyProfile(company, *, basePeriod: str | None = None) -> dict | None
     try:
         sectorInfo = company.sector
         if sectorInfo:
-            sectorKr = _SECTOR_KR.get(sectorInfo.sector.name, sectorInfo.sector.name)
+            sectorKr = sectorInfo.sector.value
             groupKr = sectorInfo.industryGroup.value
             parts["sector"] = f"섹터: {sectorKr} > {groupKr}"
     except (ValueError, KeyError, AttributeError):

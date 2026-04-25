@@ -157,7 +157,8 @@ def test_analyze_has_summary():
 
 def test_analyze_anomalies_list():
     """anomalies가 리스트 타입."""
-    from dartlab.analysis.financial.insight import Anomaly, analyze
+    from dartlab.analysis.financial.insight import Anomaly
+    from dartlab.analysis.financial.insight import analyzeFinancial as analyze
 
     qSeries, qPeriods, aSeries, aYears = _make_series()
     result = analyze(
@@ -244,7 +245,8 @@ def test_anomaly_dataclass():
 
 def test_analyze_distress_exists():
     """distress 필드가 DistressResult이고 4축(기본)인지 확인."""
-    from dartlab.analysis.financial.insight import DistressResult, analyze
+    from dartlab.analysis.financial.insight import DistressResult
+    from dartlab.analysis.financial.insight import analyzeFinancial as analyze
 
     qSeries, qPeriods, aSeries, aYears = _make_series()
     result = analyze(
@@ -269,7 +271,8 @@ def test_analyze_with_market_data_5axis():
     pytest.importorskip("scipy")
     import random
 
-    from dartlab.analysis.financial.insight import MarketDataForDistress, analyze
+    from dartlab.analysis.financial.insight import MarketDataForDistress
+    from dartlab.analysis.financial.insight import analyzeFinancial as analyze
 
     random.seed(42)
     daily_returns = [random.gauss(0, 0.02) for _ in range(200)]

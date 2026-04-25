@@ -9,15 +9,29 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 
-from dartlab.scan._helpers import scan_finance_parquets
+from dartlab.scan._helpers import (
+    NI_IDS as _NI_IDS,  # noqa: F401 (호환 alias 일부 호출 대비)
+)
+from dartlab.scan._helpers import (
+    OP_IDS as _OP_IDS,  # noqa: F401
+)
+from dartlab.scan._helpers import (
+    REVENUE_IDS as _REVENUE_IDS,
+)
+from dartlab.scan._helpers import (
+    REVENUE_NMS as _REVENUE_NMS,
+)
+from dartlab.scan._helpers import (
+    TA_IDS as _TA_IDS,
+)
+from dartlab.scan._helpers import (
+    TA_NMS as _TA_NMS,
+)
+from dartlab.scan._helpers import (
+    scan_finance_parquets,
+)
 
-# ── 계정 매핑 ──
-
-_REVENUE_IDS = {"Revenue", "revenue", "ifrs-full_Revenue", "dart_Revenue"}
-_REVENUE_NMS = {"매출액", "수익(매출액)", "영업수익"}
-
-_TA_IDS = {"Assets", "totalAssets", "ifrs-full_Assets", "dart_Assets"}
-_TA_NMS = {"자산총계", "자산 총계"}
+# ── 계정 매핑 (모듈 고유) ──
 
 _INV_IDS = {"Inventories", "inventories", "ifrs-full_Inventories", "dart_Inventories"}
 _INV_NMS = {"재고자산"}

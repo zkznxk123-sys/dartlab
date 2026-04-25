@@ -4,19 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-_GRADE_SCORE = {"A": 90, "B": 75, "C": 60, "D": 45, "F": 20}
-_AREA_LABELS = {
-    "performance": "실적",
-    "profitability": "수익성",
-    "health": "건전성",
-    "cashflow": "현금흐름",
-    "governance": "지배구조",
-    "risk": "리스크",
-    "opportunity": "기회",
-    "predictability": "예측성",
-    "uncertainty": "불확실성",
-    "coreEarnings": "핵심이익",
-}
+from dartlab.display._tokens import AREA_LABELS as _AREA_LABELS
+from dartlab.display._tokens import GRADE_SCORE as _GRADE_SCORE
 
 
 def _gradeBar(grade: str, width: int = 20) -> str:

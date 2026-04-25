@@ -151,20 +151,10 @@ def interactiveTable(df: pl.DataFrame, *, pageLength: int = 25) -> Any:
 
 # ── Insight HTML ──
 
-_GRADE_SCORE = {"A": 90, "B": 75, "C": 60, "D": 45, "F": 20}
+from dartlab.display._tokens import AREA_LABELS as _AREA_LABELS  # noqa: E402
+from dartlab.display._tokens import GRADE_SCORE as _GRADE_SCORE
+
 _GRADE_COLOR = {"A": _GREEN, "B": "#0891b2", "C": "#ca8a04", "D": "#ea580c", "F": _RED}
-_AREA_LABELS = {
-    "performance": "실적",
-    "profitability": "수익성",
-    "health": "건전성",
-    "cashflow": "현금흐름",
-    "governance": "지배구조",
-    "risk": "리스크",
-    "opportunity": "기회",
-    "predictability": "예측성",
-    "uncertainty": "불확실성",
-    "coreEarnings": "핵심이익",
-}
 
 
 def htmlInsight(result: Any) -> str:

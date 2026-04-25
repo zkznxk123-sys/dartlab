@@ -302,7 +302,6 @@ def buildBlocks(
         "profitabilityFlags",
     }:
         from dartlab.analysis.financial.profitability import (
-            calcDupont,
             calcMarginTrend,
             calcPenmanDecomposition,
             calcProfitabilityFlags,
@@ -323,7 +322,7 @@ def buildBlocks(
         if _need("returnTrend"):
             b["returnTrend"] = _safe(lambda: returnTrendBlock(calcReturnTrend(company, basePeriod=basePeriod)))
         if _need("dupont"):
-            b["dupont"] = _safe(lambda: dupontBlock(calcDupont(company, basePeriod=basePeriod)))
+            b["dupont"] = _safe(lambda: dupontBlock(calcReturnTrend(company, basePeriod=basePeriod)))
         if _need("penmanDecomposition"):
             b["penmanDecomposition"] = _safe(
                 lambda: penmanDecompositionBlock(calcPenmanDecomposition(company, basePeriod=basePeriod))
@@ -418,7 +417,6 @@ def buildBlocks(
 
     if keys is None or keys & {"turnoverTrend", "cccTrend", "efficiencyFlags"}:
         from dartlab.analysis.financial.efficiency import (
-            calcCccTrend,
             calcEfficiencyFlags,
             calcTurnoverTrend,
         )
@@ -431,7 +429,7 @@ def buildBlocks(
         if _need("turnoverTrend"):
             b["turnoverTrend"] = _safe(lambda: turnoverTrendBlock(calcTurnoverTrend(company, basePeriod=basePeriod)))
         if _need("cccTrend"):
-            b["cccTrend"] = _safe(lambda: cccTrendBlock(calcCccTrend(company, basePeriod=basePeriod)))
+            b["cccTrend"] = _safe(lambda: cccTrendBlock(calcTurnoverTrend(company, basePeriod=basePeriod)))
         if _need("efficiencyFlags"):
             b["efficiencyFlags"] = _safe(
                 lambda: efficiencyFlagsBlock(calcEfficiencyFlags(company, basePeriod=basePeriod))

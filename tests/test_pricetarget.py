@@ -9,7 +9,6 @@ from __future__ import annotations
 import pytest
 
 from dartlab.analysis.forecast.prediction import ContextSignals
-from dartlab.analysis.forecast.proforma import build_proforma
 from dartlab.analysis.forecast.simulation import (
     DEFAULT_ELASTICITY,
     PRESET_SCENARIOS,
@@ -23,6 +22,7 @@ from dartlab.analysis.valuation.pricetarget import (
     _monte_carlo_price_distribution,
     compute_price_target,
 )
+from dartlab.core.finance.proforma import build_proforma
 
 # ── Mock 시계열 (test_proforma와 동일) ──────────────────
 

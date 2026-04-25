@@ -31,7 +31,7 @@ if TYPE_CHECKING:
         SimulationResult,
         StressTestResult,
     )
-    from dartlab.analysis.valuation.valuation import (
+    from dartlab.core.finance.dcf import (
         DCFResult,
         DDMResult,
         RelativeValuationResult,

@@ -35,42 +35,6 @@ def _import_and_call(modulePath: str, funcName: str, stockCode: str, **kwargs) -
     return func(stockCode, **kwargs)
 
 
-def _collectViaApi(stockCode: str, category: str, label: str) -> bool:
-    """DART API로 직접 수집. 단일 종목은 직접 호출, 배치는 batchCollect."""
-    from dartlab.core.guidance import emit
-    from dartlab.providers.dart.openapi.dartKey import resolveDartKeys
-
-    keys = resolveDartKeys()
-    if not keys:
-        return False
-
-    mode = "병렬" if len(keys) >= 2 else "순차"
-    emit("collect:start", stockCode=stockCode, label=label, keyCount=len(keys), mode=mode)
-
-    # 단일 종목 → 직접 호출 (batchCollect 오버헤드 불필요)
-    try:
-        if category == "docs":
-            from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
-
-            collector = ZipDocsCollector(stockCode)
-            return collector.collect() > 0
-        elif category == "finance":
-            from dartlab.providers.dart.openapi.dart import Dart
-
-            d = Dart()
-            d(stockCode).saveFinance(2016)
-            return True
-        elif category == "report":
-            from dartlab.providers.dart.openapi.dart import Dart
-
-            d = Dart()
-            d(stockCode).saveReport(2016)
-            return True
-    except (ValueError, KeyError, RuntimeError, OSError):
-        return False
-    return False
-
-
 def _ensureData(stockCode: str, category: str) -> bool:
     """3단계 폴백: 로컬 → HuggingFace 다운로드 → DART API 자동 수집."""
     from dartlab.core.dataConfig import DATA_RELEASES
@@ -96,17 +60,38 @@ def _ensureData(stockCode: str, category: str) -> bool:
     except (OSError, RuntimeError):
         pass
 
-    # 3단계: DART API 키 있으면 직접 수집
-    from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
+    # 3단계: DART API 키 있으면 직접 수집 (단일 종목 직접 호출, 배치 오버헤드 불필요)
+    from dartlab.providers.dart.openapi.dartKey import hasDartApiKey, resolveDartKeys
 
     hasKey = hasDartApiKey()
     if hasKey:
-        if _collectViaApi(stockCode, category, label):
-            if dest.exists():
-                size = dest.stat().st_size
-                sizeStr = f"{size / 1024:.0f}KB" if size < 1024 * 1024 else f"{size / 1024 / 1024:.1f}MB"
-                emit("collect:done", label=label, sizeStr=sizeStr)
-                return True
+        keys = resolveDartKeys()
+        collected = False
+        if keys:
+            mode = "병렬" if len(keys) >= 2 else "순차"
+            emit("collect:start", stockCode=stockCode, label=label, keyCount=len(keys), mode=mode)
+            try:
+                if category == "docs":
+                    from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
+
+                    collected = ZipDocsCollector(stockCode).collect() > 0
+                elif category == "finance":
+                    from dartlab.providers.dart.openapi.dart import Dart
+
+                    Dart()(stockCode).saveFinance(2016)
+                    collected = True
+                elif category == "report":
+                    from dartlab.providers.dart.openapi.dart import Dart
+
+                    Dart()(stockCode).saveReport(2016)
+                    collected = True
+            except (ValueError, KeyError, RuntimeError, OSError):
+                collected = False
+        if collected and dest.exists():
+            size = dest.stat().st_size
+            sizeStr = f"{size / 1024:.0f}KB" if size < 1024 * 1024 else f"{size / 1024 / 1024:.1f}MB"
+            emit("collect:done", label=label, sizeStr=sizeStr)
+            return True
 
     # 실패: 안내 메시지 (hint:missing_docs/other 모두 API 키 유무 자동 분기)
     if category == "docs":

@@ -282,10 +282,6 @@ def calcReturnTrend(company, *, basePeriod: str | None = None) -> dict | None:
     return {"history": history} if history else None
 
 
-# calcDupont은 calcReturnTrend에 통합
-calcDupont = calcReturnTrend
-
-
 # ── 마진 워터폴 ──
 
 

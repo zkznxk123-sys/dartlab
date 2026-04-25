@@ -8,6 +8,33 @@ from pathlib import Path
 
 import polars as pl
 
+# ── 계정 라벨 SSOT (scan 모듈 공용) ──
+# 같은 회계 개념의 snake_id / 표시명 변형을 한 곳에 통합.
+# 신규 변형 발견 시 여기서만 추가 → scan/{efficiency,growth,profitability,valuation} 자동 반영.
+
+REVENUE_IDS = {"Revenue", "revenue", "ifrs-full_Revenue", "dart_Revenue"}
+REVENUE_NMS = {"매출액", "수익(매출액)", "영업수익"}
+
+OP_IDS = {
+    "ProfitLossFromOperatingActivities",
+    "operatingIncome",
+    "ifrs-full_ProfitLossFromOperatingActivities",
+    "dart_OperatingIncomeLoss",
+}
+OP_NMS = {"영업이익", "영업이익(손실)"}
+
+NI_IDS = {
+    "ProfitLoss",
+    "netIncome",
+    "ifrs-full_ProfitLoss",
+    "dart_ProfitLoss",
+    "ProfitLossAttributableToOwnersOfParent",
+}
+NI_NMS = {"당기순이익", "당기순이익(손실)"}
+
+TA_IDS = {"Assets", "totalAssets", "ifrs-full_Assets", "dart_Assets"}
+TA_NMS = {"자산총계", "자산 총계"}
+
 _scanDownloaded = False
 
 # scan 프리빌드 freshness — HF 수집 주기(일 1회)에 맞춰 24h TTL

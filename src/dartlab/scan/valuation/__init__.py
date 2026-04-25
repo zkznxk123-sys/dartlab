@@ -17,10 +17,16 @@ _log = getLogger(__name__)
 
 import polars as pl
 
-from dartlab.scan._helpers import loadValuationSnapshot, scan_finance_parquets
-
-_REVENUE_IDS = {"Revenue", "revenue", "ifrs-full_Revenue", "dart_Revenue"}
-_REVENUE_NMS = {"매출액", "수익(매출액)", "영업수익"}
+from dartlab.scan._helpers import (
+    REVENUE_IDS as _REVENUE_IDS,
+)
+from dartlab.scan._helpers import (
+    REVENUE_NMS as _REVENUE_NMS,
+)
+from dartlab.scan._helpers import (
+    loadValuationSnapshot,
+    scan_finance_parquets,
+)
 
 _CONCURRENCY = 50  # 동시 요청 제한
 

@@ -1166,7 +1166,7 @@ def returnTrendBlock(data: dict) -> list:
 
 
 def dupontBlock(data: dict) -> list:
-    """calcDupont 결과 → 듀퐁 분해 시계열."""
+    """calcReturnTrend 결과 → 듀퐁 분해 시계열."""
     if not data:
         return []
 
@@ -1521,7 +1521,7 @@ def turnoverTrendBlock(data: dict) -> list:
 
 
 def cccTrendBlock(data: dict) -> list:
-    """calcCccTrend 결과 → CCC 구성요소 시계열."""
+    """calcTurnoverTrend 결과 → CCC 구성요소 시계열."""
     if not data:
         return []
 

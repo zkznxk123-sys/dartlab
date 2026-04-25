@@ -6,32 +6,37 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan._helpers import _ensureScanData, extractAccount, filterLatestPerStock
+from dartlab.scan._helpers import (
+    NI_IDS as _NI_IDS,
+)
+from dartlab.scan._helpers import (
+    NI_NMS as _NI_NMS,
+)
+from dartlab.scan._helpers import (
+    OP_IDS as _OP_IDS,
+)
+from dartlab.scan._helpers import (
+    OP_NMS as _OP_NMS,
+)
+from dartlab.scan._helpers import (
+    REVENUE_IDS as _REVENUE_IDS,
+)
+from dartlab.scan._helpers import (
+    REVENUE_NMS as _REVENUE_NMS,
+)
+from dartlab.scan._helpers import (
+    TA_IDS as _TA_IDS,
+)
+from dartlab.scan._helpers import (
+    TA_NMS as _TA_NMS,
+)
+from dartlab.scan._helpers import (
+    _ensureScanData,
+    extractAccount,
+    filterLatestPerStock,
+)
 
-# ── 계정 매핑 ──
-
-_REVENUE_IDS = {"Revenue", "revenue", "ifrs-full_Revenue", "dart_Revenue"}
-_REVENUE_NMS = {"매출액", "수익(매출액)", "영업수익"}
-
-_OP_IDS = {
-    "ProfitLossFromOperatingActivities",
-    "operatingIncome",
-    "ifrs-full_ProfitLossFromOperatingActivities",
-    "dart_OperatingIncomeLoss",
-}
-_OP_NMS = {"영업이익", "영업이익(손실)"}
-
-_NI_IDS = {
-    "ProfitLoss",
-    "netIncome",
-    "ifrs-full_ProfitLoss",
-    "dart_ProfitLoss",
-    "ProfitLossAttributableToOwnersOfParent",
-}
-_NI_NMS = {"당기순이익", "당기순이익(손실)"}
-
-_TA_IDS = {"Assets", "totalAssets", "ifrs-full_Assets", "dart_Assets"}
-_TA_NMS = {"자산총계", "자산 총계"}
+# ── 계정 매핑 (모듈 고유) ──
 
 _EQ_IDS = {
     "Equity",
