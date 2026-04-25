@@ -9,26 +9,40 @@ __generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    mo.md("""# Quant
+
+주가 기술적 분석 — 25지표 + 9신호.""")
+    return
+
 @app.cell
 def _():
     import dartlab
-
     c = dartlab.Company("005930")
-    # 가이드 — 25지표 + 9신호
     c.quant()
-    return (c,)
+    return (dartlab, c)
 
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    mo.md("""## 종합 판단""")
+    return
 
 @app.cell
 def _(c):
-    # 종합 판단
     c.quant("종합")
     return
 
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    mo.md("""## 모멘텀 / RSI""")
+    return
 
 @app.cell
 def _(c):
-    # 모멘텀 / RSI
     c.quant("모멘텀")
     return
 

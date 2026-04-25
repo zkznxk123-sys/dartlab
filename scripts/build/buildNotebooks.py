@@ -90,15 +90,15 @@ NOTEBOOKS = {
         ("code", 'c.credit("수익성")'),
         ("code", 'c.credit("부채")'),
     ],
-    "08_review": [
+    "08_story": [
         ("md", "# Story\n\n4엔진 조립 보고서 — analysis + credit + macro + quant. 6막 서사."),
         ("code", "%pip install -q dartlab"),
         ("code", 'import dartlab\nc = dartlab.Company("005930")'),
         ("md", "## 단일 섹션 (메모리 안전 — 추천)"),
         ("code", 'print(c.story("수익성").toMarkdown())'),
         ("code", 'print(c.story("성장성").toMarkdown())'),
-        ("md", "## AI 종합의견 포함"),
-        ("code", '# c.reviewer(guide="반도체 사이클 관점에서 평가해줘")'),
+        ("md", "## AI 종합의견은 dartlab.ask() 로"),
+        ("code", '# dartlab.ask("삼성전자 반도체 사이클 관점에서 평가해줘")'),
     ],
     "09_ai": [
         ("md", "# AI\n\nLLM 기반 적극적 분석가. dartlab 엔진을 도구로 호출."),

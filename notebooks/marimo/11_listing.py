@@ -9,24 +9,28 @@ __generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    mo.md("""# Listing
+
+상장 종목 / 공시 메타데이터 카탈로그.""")
+    return
+
 @app.cell
 def _():
     import dartlab
-
     dartlab.listing()
     return (dartlab,)
 
+@app.cell
+def _(dartlab):
+    dartlab.listing("all")
+    return
 
 @app.cell
 def _(dartlab):
     dartlab.listing("filings", corp="005930")
-    return
-
-
-@app.cell
-def _(dartlab):
-    # DART 전체 법인 (비상장 포함, corp_code 8자리)
-    dartlab.listing("dartlist")
     return
 
 

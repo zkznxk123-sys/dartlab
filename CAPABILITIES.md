@@ -1,6 +1,6 @@
 # dartlab Capabilities
 
-> v0.9.20 기준 자동 생성. 직접 수정 금지.  
+> v0.9.23 기준 자동 생성. 직접 수정 금지.  
 > `uv run python scripts/build/generateSpec.py`로 재생성.
 
 
@@ -12,7 +12,7 @@
 
 | 이름 | 종류 | 설명 |
 |------|------|------|
-| `Company` | function | 종목코드/회사명/ticker → 적절한 Company 인스턴스 생성. |
+| `Company` | function | **사람의 최상위 관문** — 종목 하나의 모든 엔진에 접근하는 파사드. |
 | `Fred` | class | FRED 경제지표 facade. |
 | `OpenDart` | class | OpenDART API 통합 클라이언트. |
 | `OpenEdgar` | class | SEC public API facade. |
@@ -39,7 +39,7 @@
 | `searchName` | function | 종목명/코드로 종목 찾기 (KR + US). |
 | `pastInsight` | function | 특정 회사의 과거 분석 서사 조회. |
 | `sectorInsights` | function | 동종 업계 과거 분석 서사 목록 (교차 학습). |
-| `Review` | class | 분석 리뷰 — 14축 전략분석 결과를 구조화 보고서로 렌더링. |
+| `Story` | class | 분석 리뷰 — 14축 전략분석 결과를 구조화 보고서로 렌더링. |
 | `SelectResult` | class | select() 반환 객체 — DataFrame 위임 + 체이닝. |
 | `ChartResult` | class | chart() 반환 객체 — 시각화 + 렌더링. |
 | `capabilities` | function | dartlab 전체 기능 카탈로그 조회. |
@@ -47,7 +47,9 @@
 ### Python API 상세
 
 #### Company
-**Capabilities:** 종목코드 ("005930"), 회사명 ("삼성전자"), 영문 ticker ("AAPL") 모두 지원
+**Capabilities:** 종목 파사드 하나로 엔진 전수 접근: analysis · credit · quant · macro ·
+industry · gather · show. 엔진 이름만 기억하면 됨.
+종목코드 ("005930"), 회사명 ("삼성전자"), 영문 ticker ("AAPL") 모두 지원
 canHandle() 체인: provider priority 순 자동 라우팅 (DART → EDGAR)
 새 국가 추가 시 이 파일 수정 불필요 — provider 패키지만 추가
 핵심 인터페이스: show(topic) / index / trace(topic) / diff()
@@ -56,20 +58,22 @@ namespace: docs (원문) / finance (숫자) / report (정형공시) / profile (m
 메타: sections, topics, filings(), market, currency
 **Requires:** DART: 사전 다운로드 데이터 (dartlab.downloadAll() 또는 자동 다운로드).
 EDGAR: 인터넷 연결 (On-demand 수집).
-**AIContext:** 개별 종목 분석의 시작점. explore/finance/analysis 수퍼툴이 이 객체를 소비.
-"삼성전자 분석해줘" → Company("005930") 생성 → briefing → LLM 해석.
+**AIContext:** AI 는 `dartlab.ask()` 로 접근 (Company 를 직접 생성하지 않음).
+사람은 Company 객체 하나로 노트북·스크립트에서 모든 엔진 호출.
+엔진은 사람의 분석엔진이자 AI 의 skill (docstring SSOT) — 한 파일 두 역할.
 **Guide:** "삼성전자 재무제표" -> c = Company("005930"); c.show("IS")
 "사업 개요 보여줘" -> c.show("businessOverview")
 "어떤 데이터 있어?" -> c.index 또는 c.topics
 "출처 추적" -> c.trace("revenue")
 "기간 변화" -> c.diff()
 "종합평가" -> c.analysis("financial", "종합평가")
-"리뷰 보고서" -> c.review()
+"스토리 보고서" -> c.story()
 "Apple 분석" -> Company("AAPL") (자동 EDGAR 라우팅)
-**SeeAlso:** search: 종목 검색 (종목코드 모를 때)
-scan: 전종목 횡단분석 (기업 비교)
-analysis: 14축 전략분석
-gather: 주가/수급/거시 데이터
+**SeeAlso:** dartlab.ask: AI 대화 (투톱 다른 관문)
+search: 종목 검색 (종목코드 모를 때)
+scan: 전종목 횡단분석 (Company-독립)
+macro: 시장 레벨 거시 (Company-독립)
+industry: 섹터 밸류체인 (Company-독립)
 
 #### ask
 **Capabilities:** 자연어로 기업/시장 분석 (종목은 질문 텍스트에서 AI 가 자동 감지)
@@ -179,24 +183,24 @@ macro: API 키 — ECOS_API_KEY (KR) 또는 FRED_API_KEY (US)
 Company: 개별 종목 공시/재무 데이터
 analysis: 14축 전략분석 (재무비율, 수익구조 등)
 
-#### Review
-**Capabilities:** buildReview(company): 템플릿 기반 전체 리뷰 자동 생성 (2부 14축)
-Review([blocks...]): 블록 자유 조립 (맞춤 보고서)
-Review(stockCode=..., sections=[...]): 직접 구성
+#### Story
+**Capabilities:** buildStory(company): 템플릿 기반 전체 리뷰 자동 생성 (2부 14축)
+Story([blocks...]): 블록 자유 조립 (맞춤 보고서)
+Story(stockCode=..., sections=[...]): 직접 구성
 render(fmt): rich/html/markdown/json 4종 렌더링
 toHtml(), toMarkdown(), toJson() 편의 메서드
 Jupyter/Colab/Marimo 자동 HTML 렌더링 (_repr_html_)
-**Requires:** Company 객체 (buildReview 사용 시) 또는 Block 리스트.
-**AIContext:** review 수퍼툴이 이 클래스의 기능을 AI에게 노출.
+**Requires:** Company 객체 (buildStory 사용 시) 또는 Block 리스트.
+**AIContext:** story 수퍼툴이 이 클래스의 기능을 AI에게 노출.
 blocks action으로 블록 카탈로그, section으로 섹션별 리뷰.
-**Guide:** "분석 보고서 보여줘" -> c.review() 또는 buildReview(company)
-"수익구조만 보고 싶어" -> c.review("수익구조")
-"HTML로 내보내기" -> review.toHtml()
+**Guide:** "분석 보고서 보여줘" -> c.story() 또는 buildStory(company)
+"수익구조만 보고 싶어" -> c.story("수익구조")
+"HTML로 내보내기" -> story.toHtml()
 "블록 목록 보여줘" -> blocks(company) (카탈로그 테이블)
 "매출 성장률 블록만" -> b = blocks(c); b["growth"]
 **SeeAlso:** analysis: 14축 전략분석 엔진 (Review의 데이터 공급원)
 blocks: 블록 사전 (한글/영문/tab-complete)
-Company.review: Company에서 바로 호출
+Company.story: Company에서 바로 호출
 
 #### capabilities
 **Capabilities:** CAPABILITIES dict에서 부분 조회 가능.
@@ -231,7 +235,7 @@ setup: AI provider 설정 (capabilities 확인 후 설정)
 | `ask` | 자연어 원스톱 AI 분석 |
 | `report` | Markdown 분석 보고서 생성 |
 | `excel` | 기업 데이터 Excel 내보내기 |
-| `review` | 기업 분석 검토서 (데이터/AI) |
+| `story` | 기업 분석 스토리 (사람이 읽는 보고서) |
 | `collect` | DART/EDGAR 데이터 수집 |
 | `update` | 로컬 데이터를 HuggingFace 최신으로 갱신 |
 | `ai` | AI 분석 웹 인터페이스 실행 |
@@ -508,7 +512,7 @@ dartlab.scan.topics()                   # 가용 축 목록
 
 ---
 
-## Gather Axis (8개 축)
+## Gather Axis (10개 축)
 
 `dartlab.gather(axis, target)` 형태로 외부 시장 데이터 수집.
 
@@ -522,6 +526,8 @@ dartlab.scan.topics()                   # 가용 축 목록
 | `insider` | 내부자거래 | 임원/주요주주 주식 거래 내역. KR: DART API (API 키: DART_API_KEY) | O |
 | `ownership` | 지분 | 기관/외국인 보유 현황 (비율+주수). KR: 네이버 금융 | O |
 | `peers` | 피어 | 동종업종 피어 종목 목록 (종목코드+시총). KR: KRX/네이버 | O |
+| `krx` | KRX 회사별 시계열 | KOSPI/KOSDAQ 전종목 wide pivot — 행=stockCode+corpName, 열=일자. target (positional) 으로 raw OHLCV (close/open/high/low/volume/marketCap/...) 또는 보조지표 (rsi14/ma20/ema60/macd/atr14/obv/...) 28+ 디스패치. target='raw' 면 long (KRX 원본 컬럼). apiKey 없음 (기본): HF SSOT. apiKey 명시: KRX OpenAPI 직접. 환경변수 자동 read X. | - |
+| `krxindex` | KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지) | KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) OHLCV + 거래량 + 시가총액. target=close/open/high/low/volume/marketCap/raw. indexFilter=[지수명] 으로 특정 지수 (예: KOSPI200 + 보조지표 자동). apiKey 명시 필수 — idx 카테고리 권한 별도 신청 (sto 종목 키와 분리). | - |
 
 **한글 별칭:**
 
@@ -618,7 +624,6 @@ DartCompany에서 동적 추출 (57개).
 | `readFiling` | method | 접수번호 또는 liveFilings row로 공시 원문을 읽는다. |
 | `resolve` | method | 종목코드 또는 회사명 → 종목코드 변환. |
 | `retrievalBlocks` | property | 원문 markdown 보존 retrieval block DataFrame. |
-| `review` | property | 5엔진 결과 조립 보고서 — 11 reportType × 7 template. 느림(60~80초). dual access. |
 | `search` | method | 회사명 부분 검색 (KIND 목록 기준). |
 | `sections` | property | sections — docs + finance + report 통합 지도. |
 | `sector` | property | WICS 투자 섹터 분류 (KIND 업종 + 키워드 기반). |
@@ -627,6 +632,7 @@ DartCompany에서 동적 추출 (57개).
 | `show` | property | 원본 데이터 단일 진입점 — 재무제표(BS/IS/CF/CIS)/주석/공시 DataFrame. analysis 결과 검증용. |
 | `sources` | property | docs/finance/report 3개 source의 가용 현황 요약. |
 | `status` | method | 로컬에 보유한 전체 종목 인덱스. |
+| `story` | property | 5엔진 결과 조립 보고서 — 11 reportType × 7 template. 느림(60~80초). dual access. |
 | `storyTree` | method | Damodaran 3P — possible(낙관)/plausible(중도)/probable(보수) 3 DCF + 민감도. |
 | `table` | method | subtopic wide 셀의 markdown table을 구조화 DataFrame으로 파싱. |
 | `topicSummaries` | method | 토픽별 요약 dict — AI가 경로 탐색에 사용. |
@@ -661,8 +667,8 @@ DartCompany에서 동적 추출 (57개).
 "AI한테 질문하고 싶어" → c.ask("질문")
 "스트리밍으로 답변받기" → c.ask("질문", stream=True)
 **SeeAlso:** chat: 에이전트 모드 (tool calling 기반 심화 분석)
-reviewer: 구조화된 AI 보고서 (자유 질문이 아닌 섹션별)
-review: AI 없는 데이터 검토서
+ask: AI 종합 분석 (자연어 대화)
+story: AI 없는 데이터 검토서
 
 #### Company.audit
 **Capabilities:** 감사의견 추이 (적정/한정/부적정/의견거절)
@@ -678,7 +684,7 @@ review: AI 없는 데이터 검토서
 "계속기업 의문은?" → c.audit()["goingConcern"]
 **SeeAlso:** governance: 지배구조 분석 (감사위원회 구성 포함)
 insights: 종합 등급 (감사 리스크도 반영)
-review: 재무정합성 섹션에서 감사 결과 활용
+story: 재무정합성 섹션에서 감사 결과 활용
 
 #### Company.capital
 **Capabilities:** 배당수익률 + 배당성향 추이
@@ -967,14 +973,6 @@ retrieval 기반 컨텍스트 주입의 원천 데이터
 **SeeAlso:** contextSlices: retrievalBlocks를 LLM 윈도우에 맞게 슬라이싱한 결과
 sections: 구조화된 데이터 지도 (retrievalBlocks의 원본)
 
-#### Company.review
-**Guide:** "보고서" → c.review()
-"신용 보고서" → c.review(type="credit")
-"수익성 블록만" → c.review("수익성")
-"사이클 관점" → c.review(type="full", template="사이클")
-
-실제 동작은 ``_reviewImpl`` 참조.
-
 #### Company.sections
 **Capabilities:** topic × period 수평화 통합 DataFrame
 docs/finance/report 3-source 병합
@@ -1034,6 +1032,14 @@ trace: 특정 topic의 출처 추적
 #### Company.status
 **Capabilities:** 로컬 데이터 현황 (종목별 docs/finance/report 보유 여부)
 최종 업데이트 일시
+
+#### Company.story
+**Guide:** "보고서" → c.story()
+"신용 보고서" → c.story(type="credit")
+"수익성 블록만" → c.story("수익성")
+"사이클 관점" → c.story(type="full", template="사이클")
+
+실제 동작은 ``_storyImpl`` 참조.
 
 #### Company.storyTree
 **Guide:** "3 시나리오 가치" → c.storyTree()
