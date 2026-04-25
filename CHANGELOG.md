@@ -7,9 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.9.24] - 2026-04-26
+## [0.9.25] - 2026-04-26
 
-안정화.
+내부 안정화 작업.
+
+### Changed
+
+- AI 가 한 번에 여러 도구를 동시에 호출할 수 있어 종합 분석 응답 시간 단축. "삼성전자 전체 분석" 같은 다축 질문이 끊김 없이 완료.
+- 같은 종목코드 하나로 ``c.show("BS")`` · ``c.show("IS", freq="Y")`` · ``c.story()`` · ``c.credit()`` · ``c.analysis(...)`` 일관되게 호출되도록 진입점 정리.
+- 동일 보고서 두 진입점 노출 (``c.review`` / ``c.story``) 같은 중복 제거. 이제 ``c.story()`` 가 유일 보고서 빌더.
+
+### Fixed
+
+- 일부 AI 응답에서 다축 분석이 중간에 끊기던 문제 해결.
+- 노트북 가이드 출력에서 안내한 일부 단축 진입점이 실제로는 동작하지 않던 문제 해결 (``c.show("inventory")`` 등 통합 진입점으로 안내 통일).
+
+### Internal
+
+- 같은 데이터에 두 가지 import 경로가 있던 호환 모듈 제거. 사용자 코드 영향 없음 (사용자 진입점은 ``Company`` · ``dartlab.ask`` · 엔진 함수 그대로 유지).
+
+## [0.9.24] - 2026-04-26 (skipped)
+
+publish workflow 가 PyPI 업로드 전 취소됨. 0.9.25 로 재발행.
 
 ## [0.9.23] - 2026-04-25
 
