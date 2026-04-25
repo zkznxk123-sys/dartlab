@@ -96,6 +96,8 @@ import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 
 그리고 차 한 대가 팔리면 AS 수요는 **10~15년** 지속된다. 2024년에 판 차가 2039년까지 부품 수요를 만든다. 글로벌 도로 위에 굴러다니는 현대/기아 차가 1억 대가 넘는다. 이 1억 대가 **10년짜리 복리 마진 기계**로 작동한다.
 
+![별도 vs 연결 — 15%p 갭의 구조](./assets/21-separate-vs-consolidated.svg)
+
 ### 별도 영업이익률 11%→21% — 5년간 10%p 상승의 네 가지 이유
 
 별도 손익계산서 5년을 펼쳐보자.
