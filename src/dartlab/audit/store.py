@@ -1,4 +1,4 @@
-"""감사 결과 저장소 — SQLite 메타 + parquet 결과 + JSON review."""
+"""감사 결과 저장소 — SQLite 메타 + parquet 결과 + JSON story."""
 
 from __future__ import annotations
 
@@ -175,7 +175,7 @@ class AuditStore:
         df.write_parquet(outPath)
         return outPath
 
-    # ── review JSON 저장 ──
+    # ── story JSON 저장 ──
 
     def saveReviewJson(
         self,
@@ -184,7 +184,7 @@ class AuditStore:
         runDate: str,
         reviewJson: str,
     ) -> Path:
-        """review JSON을 저장한다."""
+        """story JSON을 저장한다."""
         if not runDate:
             runDate = date.today().isoformat()
         dayDir = self._dataDir / runDate

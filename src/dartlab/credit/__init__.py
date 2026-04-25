@@ -17,9 +17,9 @@
     c.credit("채무상환")                     # 축별 접근
     c.credit(detail=True)                   # 7축 상세 + 지표 시계열
 
-    # review 경유 보고서
-    c.review("신용분석")                     # 신용분석 전문 보고서
-    c.review("신용분석").toMarkdown()         # 마크다운 출력
+    # story 경유 보고서
+    c.story("신용분석")                     # 신용분석 전문 보고서
+    c.story("신용분석").toMarkdown()         # 마크다운 출력
 
 src/dartlab/analysis/CREDIT.md 참조.
 """

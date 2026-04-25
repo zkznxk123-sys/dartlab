@@ -55,7 +55,7 @@ def calcQMJ(
 
     AIContext:
         - Sprint 2 재무 알파 — FF5 RMW 의 robust 확장
-        - review `qmjBlock` 시장분석 자동 호출
+        - story `qmjBlock` 시장분석 자동 호출
 
     Args:
         market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.

@@ -1,7 +1,7 @@
 """기업 유형 판별 — 스토리 템플릿 자동 감지 (L0).
 
-review/analysis 양쪽에서 사용하는 기업 분류 로직.
-Phase 9 A1: review/templates.py 에서 L0 으로 이동.
+story/analysis 양쪽에서 사용하는 기업 분류 로직.
+Phase 9 A1: story/templates.py 에서 L0 으로 이동.
 """
 
 from __future__ import annotations

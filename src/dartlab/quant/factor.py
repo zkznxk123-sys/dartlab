@@ -433,7 +433,7 @@ def _interpret(result: dict, names: list[str]) -> list[str]:
 
 
 # ══════════════════════════════════════════════════════════════════════
-# Phase B0 — Alphalens-style Factor Tear Sheet (review 시장분석 섹션)
+# Phase B0 — Alphalens-style Factor Tear Sheet (story 시장분석 섹션)
 # ══════════════════════════════════════════════════════════════════════
 
 
@@ -451,7 +451,7 @@ def calcFactorTearSheet(
         - 실/proxy 구분 (isRealFamaFrench) 노출 — KRX 시총 직접 vs book proxy
 
     AIContext:
-        - review 6막-3 시장분석 섹션이 자동 호출 (`factorTearSheetBlock`)
+        - story 6막-3 시장분석 섹션이 자동 호출 (`factorTearSheetBlock`)
         - 4 팩터 동시 평가로 한국 시장 알파 원천 정량화
         - Sharpe > 1.0 = 강한 alpha, > 0.5 = 약한 alpha, < 0 = 역방향
 
@@ -599,7 +599,7 @@ def calcMultiFactorRisk(stockCode: str, *, market: str = "auto") -> dict | None:
         - 정성 평가 (팩터 의존도 + 최대 기여 팩터)
 
     AIContext:
-        - review 시장분석 섹션의 ``riskDecompositionBlock`` 가 자동 호출
+        - story 시장분석 섹션의 ``riskDecompositionBlock`` 가 자동 호출
         - "총 리스크 30% 중 systematic 22% / idiosyncratic 8%, SMB 기여 +45%" 같은 정량
         - Barra MSCI 의 multi-factor risk model 표준 (B Σ_f Bᵀ + D)
 
@@ -726,12 +726,12 @@ def _interpretRiskDecomp(sys_share: float, factor_contrib: dict) -> str:
 
 
 def calcFactorTearSheetAll(*, market: str = "KR") -> dict | None:
-    """4 표준 팩터 (SMB/HML/RMW/CMA) 의 tear sheet 종합 — review 시장분석 섹션 자동 사용.
+    """4 표준 팩터 (SMB/HML/RMW/CMA) 의 tear sheet 종합 — story 시장분석 섹션 자동 사용.
 
     Capabilities:
         - 4 팩터 동시 평가 (한 번 build_factors 호출 후 4개 metric)
         - 각 팩터의 Sharpe 비교 → 한국 시장 강한 alpha 원천 즉시 식별
-        - review 의 ``factorTearSheetBlock`` 가 직접 호출
+        - story 의 ``factorTearSheetBlock`` 가 직접 호출
 
     Args:
         market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.
@@ -797,7 +797,7 @@ def calcFactorIC(
         - horizon 옵션으로 1d/5d/20d forward return IC 비교
 
     AIContext:
-        - review 시장분석 섹션의 ``factorICBlock`` 가 자동 호출 (향후)
+        - story 시장분석 섹션의 ``factorICBlock`` 가 자동 호출 (향후)
         - Alphalens 표준 metric (팩터 tear sheet 의 long-short Sharpe 와 독립 평가)
         - ICIR > 0.5 = 강한 예측력, > 0.3 = 중간, < 0.1 = 노이즈
         - Grinold & Kahn Fundamental Law: IR ≈ IC × √breadth

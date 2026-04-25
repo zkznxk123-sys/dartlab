@@ -24,7 +24,7 @@ TOOL_LABELS = {
     "analysis": "Analysis Engine",
     "scan": "Market Scan",
     "gather": "Market Data",
-    "review": "Review Report",
+    "story": "Story Report",
     "openapi": "OpenDART API",
     "system": "System Info",
     "chart": "Chart",

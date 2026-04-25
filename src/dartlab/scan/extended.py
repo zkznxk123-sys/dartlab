@@ -1,6 +1,6 @@
-"""scan → review 모듈 — 전종목 횡단 데이터로 교차 조합 관점 제공.
+"""scan → story 모듈 — 전종목 횡단 데이터로 교차 조합 관점 제공.
 
-analysis calc 패턴과 동일: calcXxx(company) → dict, review builders 가 블록으로 조립.
+analysis calc 패턴과 동일: calcXxx(company) → dict, story builders 가 블록으로 조립.
 
 scan 의 진짜 힘 — 2~3축 교차 조합으로 단일 종목에서 안 보이는 뷰 생성:
 - 수익성 × 성장성 → "성숙기 캐시카우" / "고성장 고마진"

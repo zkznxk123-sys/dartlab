@@ -1900,7 +1900,7 @@ def _generateMcpToolsPy() -> str:
     )
     tools.append(
         _tool(
-            "companyReview",
+            "companyStory",
             f"정리된 종합 보고서 (11 reportType). 섹션: {', '.join(reviewSections)}",
             {
                 "stockCode": "_STOCK",

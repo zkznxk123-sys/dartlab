@@ -668,29 +668,29 @@ class Company:
 
         return Macro()(axis, target, market="US", overrides=overrides, **kwargs)
 
-    # ── Phase 10 H2: review 2차 가공 직접 노출 ──
+    # ── Phase 10 H2: story 2차 가공 직접 노출 ──
 
     def causalWeights(self) -> list[dict]:
         """6막 인과 가중치 (Phase 9 B2)."""
-        from dartlab.review.narrative import buildCausalWeights
+        from dartlab.story.narrative import buildCausalWeights
 
         return buildCausalWeights(self, {})
 
     def valuationImpact(self) -> dict:
         """인과 체인 → DCF override 힌트 (Phase 9 B3)."""
-        from dartlab.review.narrative import buildCausalWeights, buildValuationImpact
+        from dartlab.story.narrative import buildCausalWeights, buildValuationImpact
 
         return buildValuationImpact(buildCausalWeights(self, {}))
 
     def storyTree(self, *, basePeriod: str | None = None) -> dict:
         """3 trajectory DCF (Phase 10 G2)."""
-        from dartlab.review.storyTree import buildStoryTree
+        from dartlab.story.storyTree import buildStoryTree
 
         return buildStoryTree(self, basePeriod=basePeriod)
 
     def narrativeDiff(self, *, claims: list[str] | None = None) -> list[dict]:
         """claim 제거 시 dFV 변화 (Phase 10 G3)."""
-        from dartlab.review.narrativeDiff import computeImpact
+        from dartlab.story.narrativeDiff import computeImpact
 
         return computeImpact(self, claims=claims)
 
@@ -878,15 +878,15 @@ class Company:
     # insights는 analysis 내부 — c.analysis("financial", "종합평가")로 접근
 
     @property
-    def review(self):
+    def story(self):
         """재무 검토 보고서 — dual access."""
         from dartlab.core.dualAccess import CallableAccessor
 
-        if "_reviewAccessor" not in self._cache:
-            self._cache["_reviewAccessor"] = CallableAccessor(self._reviewImpl, name="review")
-        return self._cache["_reviewAccessor"]
+        if "_storyAccessor" not in self._cache:
+            self._cache["_storyAccessor"] = CallableAccessor(self._storyImpl, name="story")
+        return self._cache["_storyAccessor"]
 
-    def _reviewImpl(
+    def _storyImpl(
         self,
         section: str | None = None,
         layout=None,
@@ -912,13 +912,13 @@ class Company:
             데이터: 없음 (SEC EDGAR 자동 수집)
 
         AIContext:
-            - reviewer()가 이 결과를 소비하여 AI 해석 생성
+            - ask() (dartlab.ask) 가 이 결과를 tool 로 소비해 AI 해석 생성
             - ask()에서 재무분석 컨텍스트로 활용
 
         Guide:
-            - "Review the financials" → c.review()
-            - "Revenue structure" → c.review("수익구조")
-            - "Audit review" → c.review(preset="audit")
+            - "Story the financials" → c.story()
+            - "Revenue structure" → c.story("수익구조")
+            - "Audit story" → c.story(preset="audit")
 
         SeeAlso:
             - analysis: 14축 개별 분석 (review가 내부적으로 소비)
@@ -926,7 +926,7 @@ class Company:
 
         Args:
             section: 섹션명 ("수익구조" 등). None이면 전체.
-            layout: ReviewLayout 커스텀. None이면 기본.
+            layout: StoryLayout 커스텀. None이면 기본.
             helper: True면 해석 힌트 텍스트 포함.
             preset: 프리셋 이름 (executive/audit/credit/growth/valuation).
             template: 스토리 템플릿 이름.
@@ -934,18 +934,18 @@ class Company:
             basePeriod: 기준 기간.
 
         Returns:
-            Review — 구조화 보고서.
+            Story — 구조화 보고서.
 
         Example::
 
             c = Company("AAPL")
-            c.review()                # 전체 검토서
-            c.review("수익성")         # 특정 섹션
-            c.review(preset="audit")  # 감사 검토용
+            c.story()                # 전체 검토서
+            c.story("수익성")         # 특정 섹션
+            c.story(preset="audit")  # 감사 검토용
         """
-        from dartlab.review.registry import buildReview
+        from dartlab.story.registry import buildStory
 
-        return buildReview(
+        return buildStory(
             self,
             section=section,
             layout=layout,
@@ -989,7 +989,7 @@ class Company:
             - "매출전망" → c.analysis("forecast", "매출전망")
 
         SeeAlso:
-            - review: 분석 결과를 보고서로 조합
+            - story: 분석 결과를 보고서로 조합
             - insights: 재무 인사이트 (간편 요약)
             - ask: AI 기반 해석
 

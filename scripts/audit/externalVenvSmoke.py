@@ -73,8 +73,8 @@ def main() -> int:
         lambda: c.analysis("종합평가"),
     )
 
-    # 4. review
-    results["review"] = test("c.review()", lambda: c.review())
+    # 4. story
+    results["story"] = test("c.story()", lambda: c.story())
 
     # 5. sections (docs 파이프라인)
     results["sections"] = test("c.sections", lambda: c.sections)

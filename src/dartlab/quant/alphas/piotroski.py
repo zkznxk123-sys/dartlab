@@ -133,7 +133,7 @@ def calcPiotroskiFactor(
 
     AIContext:
         - Sprint 2 재무 알파 핵심 — 가치 + 품질 통합 스크리닝
-        - review `piotroskiFactorBlock` 시장분석 자동 호출
+        - story `piotroskiFactorBlock` 시장분석 자동 호출
         - F ≥ 7 종목 = fundamental momentum 후보 / F ≤ 3 = 회피 후보
 
     Guide:

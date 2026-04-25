@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.22] - 2026-04-25
+
+보고서 진입점 이름 변경. `c.review()` → `c.story()` · `c.reviewer()` 제거 (AI 종합의견은 `dartlab.ask()` 사용). Breaking change.
+
+### Breaking Changes
+
+- `c.review()` → `c.story()`
+- `c.reviewer()` 제거 — AI 종합의견은 `dartlab.ask("...")` 로 일원화
+- `dartlab.review` 모듈 → `dartlab.story`
+- `Review` 클래스 → `Story`
+- `buildReview` → `buildStory` · `renderReview` → `renderStory` · `ReviewLayout` → `StoryLayout`
+- CLI: `dartlab review` → `dartlab story` · `dartlab reviewer` 제거
+- contextvar: `REVIEW_CURRENCY` → `STORY_CURRENCY`
+
+### Migration Guide
+
+```python
+# 기존 (0.9.21)
+c = dartlab.Company("005930")
+c.review()
+ai = c.reviewer()
+
+# 신규 (0.9.22)
+c = dartlab.Company("005930")
+c.story()
+ai = dartlab.ask("005930 종합 분석해줘")  # reviewer 대체
+```
+
+CLI:
+
+```bash
+# 기존
+dartlab review 005930
+
+# 신규
+dartlab story 005930
+dartlab ask "005930 종합 분석해줘"   # 기존 reviewer 역할
+```
+
 ## [0.9.21] - 2026-04-24
 
 quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.

@@ -38,7 +38,7 @@ def calcBAB(
 
     AIContext:
         - Sprint 2 재무 알파 — 가격 기반 (다른 재무 축과 독립 source)
-        - review `babBlock` 시장분석 자동 호출
+        - story `babBlock` 시장분석 자동 호출
 
     Args:
         market: ``"KR"`` 만 지원 (KRX _hfBulk 경유).

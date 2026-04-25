@@ -43,7 +43,7 @@ def calcAccrualsFactor(
     AIContext:
         - Sprint 2 재무 알파 — 이익 품질 필터
         - accrual 높은 종목 = 장래 실적 실망 risk
-        - review `accrualsFactorBlock` 시장분석 자동 호출
+        - story `accrualsFactorBlock` 시장분석 자동 호출
 
     Guide:
         - 시장 스냅샷 : calcAccrualsFactor()

@@ -14,7 +14,7 @@ def test_mcp_tools_defined():
     names = {t["name"] for t in _TOOLS}
     assert "companyInsights" in names
     assert "searchCompany" in names
-    assert "companyReview" in names
+    assert "companyStory" in names
     assert "marketScan" in names
 
 

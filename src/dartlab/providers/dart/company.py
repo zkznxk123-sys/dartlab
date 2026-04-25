@@ -394,7 +394,7 @@ class Company:
         self._notesAccessor = Notes(self) if self._hasDocs else None
         # public namespace 모두 제거 (P3a/b/c/d)
         self._profileAccessor = _ProfileAccessor(self)
-        # private 백엔드 — 내부 compute 전용 (review/credit/valuation 등)
+        # private 백엔드 — 내부 compute 전용 (story/credit/valuation 등)
         self._docs = _DocsAccessor(self)
         self._finance = _FinanceAccessor(self)
         self._report = _ReportAccessor(self)
@@ -2882,30 +2882,30 @@ class Company:
         return result.to_dataframe()
 
     @property
-    def review(self):
+    def story(self):
         """5엔진 결과 조립 보고서 — 11 reportType × 7 template. 느림(60~80초). dual access.
 
         Guide:
-            - "보고서" → c.review()
-            - "신용 보고서" → c.review(type="credit")
-            - "수익성 블록만" → c.review("수익성")
-            - "사이클 관점" → c.review(type="full", template="사이클")
+            - "보고서" → c.story()
+            - "신용 보고서" → c.story(type="credit")
+            - "수익성 블록만" → c.story("수익성")
+            - "사이클 관점" → c.story(type="full", template="사이클")
 
-        실제 동작은 ``_reviewImpl`` 참조.
+        실제 동작은 ``_storyImpl`` 참조.
 
         Returns
         -------
         CallableAccessor
-            dual-access proxy. 호출 시 ``_reviewImpl`` 이 ``Review`` 객체 반환
-            (blocks / toMarkdown() / toHtml()). 상세는 ``_reviewImpl`` docstring.
+            dual-access proxy. 호출 시 ``_storyImpl`` 이 ``Story`` 객체 반환
+            (blocks / toMarkdown() / toHtml()). 상세는 ``_storyImpl`` docstring.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
-        if "_reviewAccessor" not in self._cache:
-            self._cache["_reviewAccessor"] = CallableAccessor(self._reviewImpl, name="review")
-        return self._cache["_reviewAccessor"]
+        if "_storyAccessor" not in self._cache:
+            self._cache["_storyAccessor"] = CallableAccessor(self._storyImpl, name="story")
+        return self._cache["_storyAccessor"]
 
-    def _reviewImpl(
+    def _storyImpl(
         self,
         section: str | None = None,
         layout=None,
@@ -2932,48 +2932,48 @@ class Company:
             - 레이아웃 커스텀
 
         AIContext:
-            - reviewer()가 이 결과를 소비하여 AI 해석 생성
+            - ask() (dartlab.ask) 가 이 결과를 tool 로 소비해 AI 해석 생성
             - ask()에서 재무분석 컨텍스트로 활용
 
         Args:
             section: 섹션명 ("수익구조" 등). None이면 전체.
-            layout: ReviewLayout 커스텀. None이면 기본.
+            layout: StoryLayout 커스텀. None이면 기본.
             helper: True면 해석 힌트 텍스트 포함. None이면 자동.
             preset: 프리셋명 ("executive"/"audit"/"credit"/"growth"/"valuation"). None이면 전체.
             template: 스토리 템플릿 ("성장"/"자본집약"/"지주" 등). "auto"면 자동 판별.
             detail: True면 전체 블록, False면 섹션 요약만. None이면 preset 기본값 또는 True.
 
         Returns:
-            Review — 구조화 보고서.
+            Story — 구조화 보고서.
 
         Requires:
             데이터: finance + report (자동 다운로드)
 
         Example::
 
-            c.review()                        # 전체 검토서
-            c.review("수익구조")                # 특정 섹션
-            c.review(preset="audit")          # 감사/회계 검토용
-            c.review(template="auto")         # 스토리 자동 판별
-            c.review(template="성장")          # 성장 템플릿 적용
-            c.review(detail=False)            # 전 섹션 요약만
+            c.story()                        # 전체 검토서
+            c.story("수익구조")                # 특정 섹션
+            c.story(preset="audit")          # 감사/회계 검토용
+            c.story(template="auto")         # 스토리 자동 판별
+            c.story(template="성장")          # 성장 템플릿 적용
+            c.story(detail=False)            # 전 섹션 요약만
 
         Guide:
-            - "재무 검토서 만들어줘" -> c.review()
-            - "수익구조 분석" -> c.review("수익구조")
-            - "감사용 리뷰" -> c.review(preset="audit")
-            - "이 회사 스토리는?" -> c.review(template="auto")
-            - "요약만 보여줘" -> c.review(detail=False)
-            - "AI 가 해석한 보고서" -> dartlab.ask("005930 보고서 작성해줘") (AI 가 review tool 호출)
+            - "재무 검토서 만들어줘" -> c.story()
+            - "수익구조 분석" -> c.story("수익구조")
+            - "감사용 리뷰" -> c.story(preset="audit")
+            - "이 회사 스토리는?" -> c.story(template="auto")
+            - "요약만 보여줘" -> c.story(detail=False)
+            - "AI 가 해석한 보고서" -> dartlab.ask("005930 보고서 작성해줘") (AI 가 story tool 호출)
 
         SeeAlso:
             - dartlab.ask: AI 자율 분석 (분석 질문은 여기로)
             - analysis: 14축 개별 분석 (review가 내부적으로 소비)
             - insights: 7영역 등급 + 이상치 요약
         """
-        from dartlab.review.registry import buildReview
+        from dartlab.story.registry import buildStory
 
-        return buildReview(
+        return buildStory(
             self,
             section=section,
             layout=layout,
@@ -3023,7 +3023,7 @@ class Company:
 
         AIContext:
             - ask()/chat()에서 분석 결과를 컨텍스트로 주입
-            - review/reviewer가 내부적으로 analysis 결과를 소비
+            - story/reviewer가 내부적으로 analysis 결과를 소비
 
         Args:
             axis: 그룹 이름 ("financial", "valuation", "forecast") 또는 축 이름. None이면 가이드 반환.
@@ -3061,7 +3061,7 @@ class Company:
             - "매출전망" → c.analysis("forecast", "매출전망")
 
         SeeAlso:
-            - review: 14축 분석을 14개 섹션 보고서로 조합
+            - story: 14축 분석을 14개 섹션 보고서로 조합
             - insights: 7영역 등급 요약 (analysis보다 요약적)
             - ratios: 재무비율 시계열 (analysis의 입력 데이터)
         """
@@ -3183,7 +3183,7 @@ class Company:
             c.credit(overrides={"debtRatio": 150, "interestCoverage": 2.5})  # 스트레스 시나리오
 
         SeeAlso:
-            - review("신용평가"): 보고서 형식으로 렌더링
+            - story("신용평가"): 보고서 형식으로 렌더링
             - analysis("financial", "신용평가"): analysis 축으로 접근
         """
         from dartlab.core.overrides import validateOverrides
@@ -4021,7 +4021,7 @@ class Company:
         사용자는 직접 호출하지 않는다. 사용자 진입점은 ``c.show("IS", freq=, scope=)``
         / ``c.select("IS", [...], freq=, scope=)`` 만이다 (api-contract).
 
-        analysis / forecast / valuation / credit / review 등 calc 모듈이
+        analysis / forecast / valuation / credit / story 등 calc 모듈이
         ``(series, periods)`` 튜플 형태가 필요할 때만 호출한다.
 
         Args:
@@ -4232,7 +4232,7 @@ class Company:
         SeeAlso:
             - governance: 지배구조 분석 (감사위원회 구성 포함)
             - insights: 종합 등급 (감사 리스크도 반영)
-            - review: 재무정합성 섹션에서 감사 결과 활용
+            - story: 재무정합성 섹션에서 감사 결과 활용
         """
         from dartlab.analysis.financial.insight.pipeline import analyzeAudit
 
@@ -4819,7 +4819,7 @@ class Company:
 
         return Macro()(axis, target, market="KR", overrides=overrides, **kwargs)
 
-    # ── Phase 10 H2: review 2차 가공 직접 노출 (AI tool 자동 수집 대상) ──
+    # ── Phase 10 H2: story 2차 가공 직접 노출 (AI tool 자동 수집 대상) ──
 
     def causalWeights(self) -> list[dict]:
         """6막 인과 가중치 — 수익구조→수익성→현금흐름→자금조달→자산배치→가치평가 amplify/dampen/neutral.
@@ -4831,7 +4831,7 @@ class Company:
         Returns:
             list[dict] — from_act/to_act/metric_from/metric_to/delta_from/delta_to/weight/direction
         """
-        from dartlab.review.narrative import buildCausalWeights
+        from dartlab.story.narrative import buildCausalWeights
 
         return buildCausalWeights(self, {})
 
@@ -4845,7 +4845,7 @@ class Company:
         Returns:
             dict — terminalGrowthAdj/waccAdj/narrative/overrides
         """
-        from dartlab.review.narrative import buildCausalWeights, buildValuationImpact
+        from dartlab.story.narrative import buildCausalWeights, buildValuationImpact
 
         chains = buildCausalWeights(self, {})
         return buildValuationImpact(chains)
@@ -4860,7 +4860,7 @@ class Company:
         Returns:
             dict — possible/plausible/probable + summary {min/max/spread/spreadPct/mean}
         """
-        from dartlab.review.storyTree import buildStoryTree
+        from dartlab.story.storyTree import buildStoryTree
 
         return buildStoryTree(self, basePeriod=basePeriod)
 
@@ -4874,7 +4874,7 @@ class Company:
         Returns:
             list[dict] — claim/dFV_neutral/delta_abs/delta_pct/contribution
         """
-        from dartlab.review.narrativeDiff import computeImpact
+        from dartlab.story.narrativeDiff import computeImpact
 
         return computeImpact(self, claims=claims)
 
@@ -4987,8 +4987,8 @@ class Company:
 
         SeeAlso:
             - chat: 에이전트 모드 (tool calling 기반 심화 분석)
-            - reviewer: 구조화된 AI 보고서 (자유 질문이 아닌 섹션별)
-            - review: AI 없는 데이터 검토서
+            - ask: AI 종합 분석 (자연어 대화)
+            - story: AI 없는 데이터 검토서
         """
         from dartlab.ai.runtime.standalone import ask as _ask
 

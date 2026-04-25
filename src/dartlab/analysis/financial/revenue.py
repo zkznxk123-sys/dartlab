@@ -1,6 +1,6 @@
 """1-1 수익 구조 분석 — 계산만 담당.
 
-블록 조립은 review/sections/revenue.py가 한다.
+블록 조립은 story/sections/revenue.py가 한다.
 여기는 company.select() → 계산 → dict/숫자 반환.
 
 데이터 접근: select() 단일 경로.

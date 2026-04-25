@@ -4,7 +4,7 @@
 1. data/dart/auditAnalysis/*.md (170개) → 구조화 QA 페어
 2. blog/05-company-reports/*/index.md (6개) → 6막 서사 QA
 3. KnowledgeDB (executions G등급 + skills + playbook)
-4. (Stage B에서) publishBatch 결과 → review QA
+4. (Stage B에서) publishBatch 결과 → story QA
 
 실행:
     uv run python -X utf8 scripts/finslm/extractTraining.py

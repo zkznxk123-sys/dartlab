@@ -198,7 +198,7 @@ def _build_narrative(cycle: dict, sectors: list[str], screens: dict, market: str
     else:
         parts.append("섹터별 종목 스크리닝 결과 없음 (scan 데이터 미수집 가능).")
 
-    parts.append("이 결과는 출발점이다. 각 종목은 c.review() 또는 c.quant('차트패턴')으로 추가 검증한다.")
+    parts.append("이 결과는 출발점이다. 각 종목은 c.story() 또는 c.quant('차트패턴')으로 추가 검증한다.")
 
     return " ".join(parts)
 
@@ -227,7 +227,7 @@ def _guide() -> dict:
         ],
         "next": [
             "dartlab.topdown('KR') 으로 실행",
-            "결과의 종목 후보 → c.review() 또는 c.quant('차트패턴')으로 검증",
+            "결과의 종목 후보 → c.story() 또는 c.quant('차트패턴')으로 검증",
         ],
     }
 

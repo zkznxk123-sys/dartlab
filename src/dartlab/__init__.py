@@ -20,7 +20,7 @@ if not _IS_PYODIDE:
     from dartlab.providers.dart.company import Company as _DartEngineCompany
     from dartlab.providers.dart.openapi.dart import OpenDart
     from dartlab.providers.edgar.openapi.edgar import OpenEdgar
-    from dartlab.review import Review
+    from dartlab.story import Story
 
     # .env 자동 로드 — API 키 등 환경변수
     _loadEnv()
@@ -936,7 +936,7 @@ __all__ = [
     "searchName",
     "pastInsight",
     "sectorInsights",
-    "Review",
+    "Story",
     "SelectResult",
     "ChartResult",
     "capabilities",

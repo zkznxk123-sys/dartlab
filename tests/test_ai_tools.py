@@ -24,7 +24,7 @@ class TestBuildTools:
 
         tools = buildTools()
         names = {t.name for t in tools}
-        for required in ("show", "analysis", "credit", "gather", "review", "scan", "macro", "search", "pythonExec"):
+        for required in ("show", "analysis", "credit", "gather", "story", "scan", "macro", "search", "pythonExec"):
             assert required in names, f"{required} missing"
 
     def test_show_has_topic_enum(self):

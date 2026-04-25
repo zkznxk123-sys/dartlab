@@ -6,7 +6,7 @@
 2. Plausible (Experience) — 유사 경로에서 실제로 달성된 수치 분포 안에 있는가
 3. Probable (Common Sense) — 수학/경제 첫 원칙에 부합하는가
 
-엔진은 dict 만 반환. 해석 문장은 review narrate 층.
+엔진은 dict 만 반환. 해석 문장은 story narrate 층.
 새 엔진 만들지 않고 scan/KnowledgeDB/consistency 기존 자산 조합.
 """
 

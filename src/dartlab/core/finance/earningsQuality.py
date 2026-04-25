@@ -12,7 +12,7 @@
 4. 자본 우회 (자본거래 vs 영업CF)
 5. 영업권 과대 (Goodwill impairment risk)
 
-L0 순수 계산. dict 반환. narrate 는 review 만.
+L0 순수 계산. dict 반환. narrate 는 story 만.
 """
 
 from __future__ import annotations

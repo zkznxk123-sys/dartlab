@@ -17,7 +17,7 @@ def test_boundedCache_accessor_pinned():
     from dartlab.core.memory import BoundedCache
 
     cache = BoundedCache()
-    for key in ("_showAccessor", "_selectAccessor", "_reviewAccessor", "_creditAccessor", "_analysisAccessor"):
+    for key in ("_showAccessor", "_selectAccessor", "_storyAccessor", "_creditAccessor", "_analysisAccessor"):
         assert cache._is_pinned(key), f"{key} not pinned"
 
 
@@ -27,7 +27,7 @@ def test_boundedCache_accessor_pinned():
 @pytest.mark.unit
 def test_blockMap_suggest_accepts_non_str():
     """_suggest 가 int/float/list 등 비-str 입력도 str 반환."""
-    from dartlab.review.catalog import _suggest
+    from dartlab.story.catalog import _suggest
 
     for q in (123, 4.5, ["a"], None):
         result = _suggest(q)
@@ -106,7 +106,7 @@ def test_override_chain_country_propagates():
 @pytest.mark.unit
 def test_buildBlocks_preset_constants_exist():
     """_MINIMAL_KEYS / _STANDARD_KEYS 정의 + dFV/lifeCycleStage 포함."""
-    from dartlab.review.registry import _MINIMAL_KEYS, _STANDARD_KEYS
+    from dartlab.story.registry import _MINIMAL_KEYS, _STANDARD_KEYS
 
     assert "dFV" in _MINIMAL_KEYS
     assert "lifeCycleStage" in _MINIMAL_KEYS

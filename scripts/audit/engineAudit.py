@@ -139,10 +139,10 @@ def auditCompany(stockCode: str, *, quick: bool = False) -> dict[str, Any]:
         status, detail = _safe_call(c.gather, "price")
         results["gather.price"] = f"{status}{': ' + detail if detail else ''}"
 
-    # 8. review (단일 섹션)
+    # 8. story (단일 섹션)
     if not quick:
-        status, detail = _safe_call(c.review, "수익성")
-        results["review.수익성"] = f"{status}{': ' + detail if detail else ''}"
+        status, detail = _safe_call(c.story, "수익성")
+        results["story.수익성"] = f"{status}{': ' + detail if detail else ''}"
 
     # 9. 집계
     fail_count = sum(1 for v in results.values() if v.startswith("Fail"))

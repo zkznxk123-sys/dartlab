@@ -1,7 +1,7 @@
 """변화점 (Turning Point) 감지 — CUSUM + Rolling Z.
 
 시계열 데이터에서 "언제 무엇이 바뀌었는지" 자동 감지.
-review/narrate 의 "이 분기에 마진이 급변" 자동 표시 base.
+story/narrate 의 "이 분기에 마진이 급변" 자동 표시 base.
 
 순수 알고리즘. dict 반환. SSOT.
 """

@@ -135,7 +135,7 @@ def calcBeneishFactor(
     AIContext:
         - Sprint 2 재무 알파 — Piotroski (건강) + Altman (부실) + Beneish (조작) 3종 교차
         - red flag = quant 포트폴리오 자동 제외 후보
-        - review `beneishFactorBlock` 시장분석 자동 호출
+        - story `beneishFactorBlock` 시장분석 자동 호출
 
     Guide:
         - 시장 스냅샷 : calcBeneishFactor()

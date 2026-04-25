@@ -389,10 +389,10 @@ def test_mcp_instructions_contains_key_info():
     assert "DART" in _MCP_INSTRUCTIONS
     assert "EDGAR" in _MCP_INSTRUCTIONS
     assert "companyInsights" in _MCP_INSTRUCTIONS
-    assert "companyReview" in _MCP_INSTRUCTIONS
+    assert "companyStory" in _MCP_INSTRUCTIONS
 
 
-# ── companyReview tool execution ──
+# ── companyStory tool execution ──
 
 
 def test_execute_tool_company_review_full():
@@ -402,13 +402,13 @@ def test_execute_tool_company_review_full():
     mock_company = MagicMock()
     mock_review = MagicMock()
     mock_review.toMarkdown.return_value = "# 보고서"
-    mock_company.review.return_value = mock_review
+    mock_company.story.return_value = mock_review
 
     with patch("dartlab.Company", return_value=mock_company):
-        result = _executeTool("companyReview", {"stockCode": "005930"})
+        result = _executeTool("companyStory", {"stockCode": "005930"})
 
     assert result == "# 보고서"
-    mock_company.review.assert_called_once_with()
+    mock_company.story.assert_called_once_with()
     _cache.clear()
 
 
@@ -419,10 +419,10 @@ def test_execute_tool_company_review_section():
     mock_company = MagicMock()
     mock_review = MagicMock()
     mock_review.toMarkdown.return_value = "# 수익구조 보고서"
-    mock_company.review.return_value = mock_review
+    mock_company.story.return_value = mock_review
 
     with patch("dartlab.Company", return_value=mock_company):
-        _executeTool("companyReview", {"stockCode": "005930", "section": "수익구조"})
+        _executeTool("companyStory", {"stockCode": "005930", "section": "수익구조"})
 
-    mock_company.review.assert_called_once_with("수익구조")
+    mock_company.story.assert_called_once_with("수익구조")
     _cache.clear()

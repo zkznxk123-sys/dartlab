@@ -33,10 +33,10 @@ def main(argv: list[str] | None = None) -> int:
 
     raw = argv if argv is not None else sys.argv[1:]
 
-    # dartlab 005930 → dartlab review 005930
-    # dartlab 005930 자산구조 → dartlab review 005930 자산구조
+    # dartlab 005930 → dartlab story 005930
+    # dartlab 005930 자산구조 → dartlab story 005930 자산구조
     if raw and _looksLikeCompany(raw[0]):
-        raw = ["review"] + raw
+        raw = ["story"] + raw
 
     parser = build_parser()
     try:

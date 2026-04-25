@@ -4,7 +4,7 @@ credit/ 독립 엔진이 계산의 단일 진실(source of truth)이다.
 이 모듈은 review가 소비할 수 있는 calc 인터페이스를 제공하는 thin wrapper.
 
 직접 접근: dartlab.credit("005930") 또는 c.credit()
-review 경유: c.review("신용분석")
+story 경유: c.story("신용분석")
 
 cross-dependency 방지: analysis ↛ credit, credit ↛ analysis.
 이전에는 analysis/financial/creditRating.py에 있었으나
@@ -27,7 +27,7 @@ def _evaluate(company, basePeriod=None):
 
 # ═══════════════════════════════════════════════════════════
 # calc 함수들 — review가 소비하는 인터페이스
-# credit/ 엔진의 결과를 review 형식으로 변환
+# credit/ 엔진의 결과를 story 형식으로 변환
 # ═══════════════════════════════════════════════════════════
 
 
@@ -396,7 +396,7 @@ def calcCreditFlags(company, *, basePeriod: str | None = None) -> dict | None:
 
 @_memoized_calc
 def calcCreditNarrative(company, *, basePeriod: str | None = None) -> dict | None:
-    """credit publisher의 7축 서사를 review 블록용으로 변환.
+    """credit publisher의 7축 서사를 story 블록용으로 변환.
 
     credit/narrative.py::buildNarratives() 결과를 그대로 반환.
     review가 5-7 신용평가 섹션에서 소비.
@@ -450,7 +450,7 @@ def calcCreditNarrative(company, *, basePeriod: str | None = None) -> dict | Non
 
 @_memoized_calc
 def calcCreditAudit(company, *, basePeriod: str | None = None) -> dict | None:
-    """credit publisher의 외부 신평사 대조를 review 블록용으로 변환.
+    """credit publisher의 외부 신평사 대조를 story 블록용으로 변환.
 
     credit/audit.py::auditCredit() 결과를 그대로 반환.
 

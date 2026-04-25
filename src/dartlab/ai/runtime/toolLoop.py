@@ -257,7 +257,7 @@ _TOOL_LABELS: dict[str, str] = {
     "sectorInsights": "업종 분석 조회",
     "search": "공시 검색",
     "pythonExec": "코드 실행",
-    "review": "보고서 생성",
+    "story": "보고서 생성",
     "validateStory": "스토리 검증",
     "audit": "감사 분석",
     "capital": "주주환원 분석",

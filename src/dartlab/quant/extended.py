@@ -1,7 +1,7 @@
 """확장 기술적 분석 — 신호, 베타, 괴리, 리스크, 플래그.
 
 quant 독립 엔진의 확장 모듈. OHLCV + 재무 등급 교차검증.
-review 6막 서사에서 시장분석 섹션이 이 함수들을 소비한다.
+story 6막 서사에서 시장분석 섹션이 이 함수들을 소비한다.
 """
 
 from __future__ import annotations
@@ -445,7 +445,7 @@ def calcMarketAnalysisFlags(company) -> list[str]:
     return flags
 
 
-# ── Quant 서사 모듈 5개 (analysis calc 패턴 — 각각 독립, review 가 조합) ──
+# ── Quant 서사 모듈 5개 (analysis calc 패턴 — 각각 독립, story 가 조합) ──
 
 
 @_memoized_calc
@@ -643,7 +643,7 @@ def calcQuantConclusionData(company) -> dict | None:
 def calcStrategySnapshot(company) -> dict | None:
     """전략별 진입 진단 — 8 검증된 스타일 일괄 백테스트.
 
-    Strategy DSL 의 review 6막 (전망) 통합 진입점. 시총 의존 0.
+    Strategy DSL 의 story 6막 (전망) 통합 진입점. 시총 의존 0.
 
     Args:
         company: Company 객체.

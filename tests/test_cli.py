@@ -45,7 +45,7 @@ def test_main_without_command_prints_help(capsys):
     assert "show" in captured.out
     assert "search" in captured.out
     assert "ask" in captured.out
-    assert "review" in captured.out
+    assert "story" in captured.out
     assert "setup" in captured.out
     assert "mcp" in captured.out
     assert "plugin" in captured.out

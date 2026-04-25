@@ -266,9 +266,9 @@ NOTEBOOKS: dict[str, list[dict]] = {
     ],
     "08_review.ipynb": [
         md(
-            "# 08 — review: 구조화 보고서",
+            "# 08 — story: 구조화 보고서",
             "",
-            "`c.review(section)` 은 숫자를 서술형 보고서로 조립한다. `toMarkdown()` 으로 문자열 출력.",
+            "`c.story(section)` 은 숫자를 서술형 보고서로 조립한다. `toMarkdown()` 으로 문자열 출력.",
         ),
         install_cell(),
         code(
@@ -279,9 +279,9 @@ NOTEBOOKS: dict[str, list[dict]] = {
         md("## 섹션 단위 호출 — 메모리 안전"),
         code(
             "# 단일 섹션 (메모리 안전 — 추천)",
-            'print(c.review("수익성").toMarkdown())',
+            'print(c.story("수익성").toMarkdown())',
         ),
-        code('print(c.review("성장성").toMarkdown())'),
+        code('print(c.story("성장성").toMarkdown())'),
         md("## AI 종합의견 (reviewer) — provider 키 필요"),
         code(
             "# AI 종합의견 포함",

@@ -59,7 +59,7 @@ def Company(codeOrName: str) -> CompanyProtocol:
         - "출처 추적" -> c.trace("revenue")
         - "기간 변화" -> c.diff()
         - "종합평가" -> c.analysis("financial", "종합평가")
-        - "리뷰 보고서" -> c.review()
+        - "리뷰 보고서" -> c.story()
         - "Apple 분석" -> Company("AAPL") (자동 EDGAR 라우팅)
 
     SeeAlso:
@@ -84,7 +84,7 @@ def Company(codeOrName: str) -> CompanyProtocol:
         c.IS                              # 손익계산서
         c.show("businessOverview")        # 사업 개요
         c.analysis("financial", "종합평가") # 재무 종합평가
-        c.review()                        # 분석 보고서
+        c.story()                        # 분석 보고서
     """
     _discover()
 

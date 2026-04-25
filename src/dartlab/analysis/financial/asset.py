@@ -1,7 +1,7 @@
 """1-3 자산 구조 분석 — 계산만 담당.
 
 BS를 영업/비영업으로 재분류하여 자산 운영 구조를 본다.
-블록 조립은 review/builders.py가 한다.
+블록 조립은 story/builders.py가 한다.
 """
 
 from __future__ import annotations

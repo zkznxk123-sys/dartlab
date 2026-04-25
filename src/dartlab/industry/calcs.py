@@ -1,7 +1,7 @@
 """industry(L2) calc 함수 — 회사·섹터 단위 산업 분석.
 
 nodes.json + scan + macro 데이터를 조합하여 dict/숫자만 반환.
-review(L3)가 블록으로 소비한다. 해석/서사는 하지 않는다.
+story(L3)가 블록으로 소비한다. 해석/서사는 하지 않는다.
 """
 
 from __future__ import annotations

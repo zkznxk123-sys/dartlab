@@ -154,7 +154,7 @@ class BoundedCache:
     주기적으로 프로세스 RSS를 체크하여 메모리 압박 시 용량을 축소한다.
 
     [thread-safety] threading.RLock으로 모든 mutation 보호.
-    review/buildBlocks의 ThreadPoolExecutor 병렬 호출 안전.
+    story/buildBlocks의 ThreadPoolExecutor 병렬 호출 안전.
 
     [pinned] 외부 API 결과(_quant_ohlcv, _quant_benchmark 등)는 evict 면제.
     작은 dict이고 재로드 비용이 크므로 메모리 압박 시에도 보존.
@@ -190,7 +190,7 @@ class BoundedCache:
         self._critical_prefixes: tuple[str, ...] = (
             "_showAccessor",
             "_selectAccessor",
-            "_reviewAccessor",
+            "_storyAccessor",
             "_creditAccessor",
             "_analysisAccessor",
             # 2026-04-20: realdata-suite 에서 `c.quant` / `c.topics` KeyError 검출.
@@ -222,7 +222,7 @@ class BoundedCache:
             "_sceDataFrame",
             "_ratios_",
             "_insights_analyze",
-            # 무거운 calc 결과 (review 안 다중 호출)
+            # 무거운 calc 결과 (story 안 다중 호출)
             "_calcMarketBeta",
             "_calcTechnicalVerdict",
             "_calcTechnicalSignals",

@@ -949,13 +949,13 @@ class Analysis:
         Part 5 — 비재무 심화: 지배구조, 공시변화감지, 비교분석
         Part 6 — 전망분석: 매출전망, 예측신호
         - 각 축은 Company를 받아 dict를 반환하는 순수 함수 집합
-        - review()가 이 결과를 소비하여 구조화 보고서 생성
+        - story()가 이 결과를 소비하여 구조화 보고서 생성
 
     Requires:
         데이터: finance (자동 다운로드)
 
     AIContext:
-        - reviewer()가 analysis 결과를 소비하여 AI 해석 생성
+        - ask() (dartlab.ask) 가 analysis 결과를 tool 로 소비해 AI 해석 생성
         - ask()에서 재무분석 컨텍스트로 활용
         - 70개 calc* 함수의 개별 결과를 LLM에 주입 가능
 
@@ -965,10 +965,10 @@ class Analysis:
         - "이익이 진짜야?" -> analysis("financial", "이익품질") — 발생주의 비율, OCF/NI
         - "적정가치?" -> analysis("valuation", "가치평가") — DCF/DDM/상대/RIM/목표가
         - "전체 종합?" -> analysis("financial", "종합평가") — 15축 통합 스코어
-        - 15축 전부 보고 싶으면 review() 사용 권장
+        - 15축 전부 보고 싶으면 story() 사용 권장
 
     SeeAlso:
-        - review: analysis 결과를 구조화 보고서로 렌더링
+        - story: analysis 결과를 구조화 보고서로 렌더링
         - scan: 전종목 비교 (analysis는 단일 종목 심층)
         - Company.insights: 7영역 인사이트 등급 (빠른 요약)
 
@@ -1206,7 +1206,7 @@ class Analysis:
         lines.append("")
         lines.append("━━━ 데이터 ━━━")
         lines.append("  DART 전자공시 기반 재무제표 — API 키 불필요 (자동 다운로드)")
-        lines.append("  전체 결과를 보고서로 → c.review()")
+        lines.append("  전체 결과를 보고서로 → c.story()")
         lines.append("")
         lines.append(
             "노트북: https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_quickstart.ipynb"

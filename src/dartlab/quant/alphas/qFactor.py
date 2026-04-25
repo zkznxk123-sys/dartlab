@@ -50,7 +50,7 @@ def calcQFactor(
 
     AIContext:
         - Sprint 2 재무 알파 — FF5 RMW + CMA 를 composite 로 재조립
-        - review `qFactorBlock` 시장분석 자동 호출
+        - story `qFactorBlock` 시장분석 자동 호출
 
     Args:
         market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.

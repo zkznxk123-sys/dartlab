@@ -40,7 +40,7 @@ _LAYERS = {
     "Display": ["display"],
     "Tools": ["tools"],
     "Channel": ["channel"],
-    "Review": ["review"],
+    "Story": ["story"],
 }
 
 
@@ -223,7 +223,7 @@ def _buildReport(scan: dict, hotspots: list[dict], registryCount: int) -> str:
         "Display",
         "Tools",
         "Channel",
-        "Review",
+        "Story",
         "Root",
     ]
     for layer in layerOrder:

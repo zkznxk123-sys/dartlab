@@ -45,7 +45,7 @@ def calcEarningsSurprise(
 
     AIContext:
         - Sprint 2 재무 알파 — 펀더멘털 서프라이즈 momentum
-        - review `earningsSurpriseBlock` 시장분석 자동 호출
+        - story `earningsSurpriseBlock` 시장분석 자동 호출
 
     Args:
         market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.

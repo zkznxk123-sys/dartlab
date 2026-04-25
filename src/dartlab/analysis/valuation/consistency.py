@@ -11,7 +11,7 @@
 - detectExtremeFlags : **단일 가정의 극단값** (WACC 15% 초과 등)
 - calcCashFlowConsistency : **가정 간 정합성** (g ≠ reinvestRate × ROIC)
 
-반환은 순수 dict — 해석은 review narrate 층 담당.
+반환은 순수 dict — 해석은 story narrate 층 담당.
 """
 
 from __future__ import annotations

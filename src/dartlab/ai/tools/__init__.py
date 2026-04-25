@@ -39,7 +39,7 @@ _BLACKLIST: set[str] = {
     "OpenEdgar",
     "ChartResult",
     "SelectResult",
-    "Review",
+    "Story",
     # 설정 / 메타
     "config",
     "dataDir",
@@ -96,7 +96,7 @@ def _autoDiscover() -> dict[str, tuple[str, str]]:
             continue
         tools[name] = ("module", name)
 
-    # 2. Company-bound — module 에 없는 것만 (analysis/credit/review/show/... 은 여기서)
+    # 2. Company-bound — module 에 없는 것만 (analysis/credit/story/show/... 은 여기서)
     for attr in dir(_C):
         if attr.startswith("_") or attr in _BLACKLIST or attr in tools:
             continue
@@ -494,8 +494,8 @@ def _resolveCreditAxis() -> list[str]:
     return list(_CREDIT_AXES.keys())
 
 
-def _resolveReviewType() -> list[str]:
-    from dartlab.review.reportTypes import REPORT_TYPES
+def _resolveStoryType() -> list[str]:
+    from dartlab.story.reportTypes import REPORT_TYPES
 
     return sorted(REPORT_TYPES.keys())
 
@@ -566,7 +566,7 @@ _ENUM_RESOLVERS: dict[tuple[str, str], Callable[[], list[str]]] = {
     ("search", "scope"): _resolveSearchScope,
     ("analysis", "axis"): _resolveAnalysisAxis,
     ("credit", "axis"): _resolveCreditAxis,
-    ("review", "type"): _resolveReviewType,
+    ("story", "type"): _resolveStoryType,
 }
 
 

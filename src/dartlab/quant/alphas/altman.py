@@ -70,7 +70,7 @@ def calcAltmanFactor(
 
     AIContext:
         - Sprint 2 재무 알파 9축 중 하나 — credit engine 과 연결
-        - review `altmanFactorBlock` (시장분석 섹션) 자동 호출
+        - story `altmanFactorBlock` (시장분석 섹션) 자동 호출
         - 저 Z-Score 기업은 quant 포트폴리오에서 자동 제외 후보
 
     Guide:

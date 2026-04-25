@@ -254,20 +254,20 @@ class AuditRunner:
                 }
             )
 
-        # ── 6. review ──
+        # ── 6. story ──
         reviewJson = ""
         try:
-            review = c.review()
-            if review is not None:
-                reviewJson = review.toJson()
+            story = c.story()
+            if story is not None:
+                reviewJson = story.toJson()
         except (TypeError, ValueError, KeyError, AttributeError) as e:
             issues.append(
                 {
                     "category": "calcError",
                     "severity": "warning",
-                    "axis": "review",
+                    "axis": "story",
                     "blockKey": "",
-                    "description": f"review() 실패: {e}",
+                    "description": f"story() 실패: {e}",
                 }
             )
 

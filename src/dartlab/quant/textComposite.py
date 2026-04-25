@@ -10,7 +10,7 @@ dartlab 9 텍스트 축 (textSentiment / toneChange / riskText / governanceQuant
 
 음의 가중치 = 부정 톤 / 위험 어휘 / 거버넌스 약화 일 때 점수 ↓.
 
-review 통합 시 single composite metric 으로 5+ 축 동시 표시.
+story 통합 시 single composite metric 으로 5+ 축 동시 표시.
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ def calcTextComposite(
 
     AIContext:
         - Sprint 4 dartlab Korea-Native — 한국어 공시 본문 텍스트 alpha
-        - review `textCompositeBlock` 시장분석 후속
+        - story `textCompositeBlock` 시장분석 후속
 
     Args:
         stockCode: 종목코드.

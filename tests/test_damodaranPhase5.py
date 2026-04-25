@@ -106,7 +106,7 @@ def test_kepco_dFV_no_overshoot():
 @pytest.mark.unit
 def test_valuationSins_narrate_includes_rationale():
     """narrate 에 Damodaran rationale + override 힌트 포함."""
-    from dartlab.review.narrate import narrateValuationSins
+    from dartlab.story.narrate import narrateValuationSins
 
     result = narrateValuationSins(
         {
@@ -121,7 +121,7 @@ def test_valuationSins_narrate_includes_rationale():
 @pytest.mark.unit
 def test_valuationSins_narrate_g_vs_rf():
     """g_vs_rf 위반 시 'Damodaran 상한 권고' 포함."""
-    from dartlab.review.narrate import narrateValuationSins
+    from dartlab.story.narrate import narrateValuationSins
 
     result = narrateValuationSins(
         {

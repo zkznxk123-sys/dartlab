@@ -22,7 +22,7 @@ COMMAND_SPECS = (
     CommandSpec("report", "dartlab.cli.commands.report", "Markdown 분석 보고서 생성"),
     CommandSpec("excel", "dartlab.cli.commands.excel", "기업 데이터 Excel 내보내기"),
     # 분석
-    CommandSpec("review", "dartlab.cli.commands.review", "기업 분석 검토서 (데이터/AI)"),
+    CommandSpec("story", "dartlab.cli.commands.story", "기업 분석 스토리 (사람이 읽는 보고서)"),
     # 수집/갱신
     CommandSpec("collect", "dartlab.cli.commands.collect", "DART/EDGAR 데이터 수집"),
     CommandSpec("update", "dartlab.cli.commands.update", "로컬 데이터를 HuggingFace 최신으로 갱신"),

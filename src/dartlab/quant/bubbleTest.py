@@ -61,7 +61,7 @@ def calcSADF(
     AIContext:
         - Sprint 6 risk — 한국 시장 버블 진단
         - SADF > 1.49 (5% critical, n=400) → 버블 유의
-        - review `bubbleBlock` 후속
+        - story `bubbleBlock` 후속
 
     Args:
         series: 1D 가격 (양수, log scale 권장).

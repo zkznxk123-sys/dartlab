@@ -1,7 +1,7 @@
 """1-4 현금흐름 — 계산만 담당.
 
 CF 3구간(영업/투자/재무) + FCF + 이익의 현금 뒷받침 + CF 패턴.
-블록 조립은 review/builders.py가 한다.
+블록 조립은 story/builders.py가 한다.
 """
 
 from __future__ import annotations

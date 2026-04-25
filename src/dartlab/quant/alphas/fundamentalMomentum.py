@@ -48,7 +48,7 @@ def calcFundamentalMomentum(
 
     AIContext:
         - Sprint 2 재무 알파 — 단일 price momentum 보다 실증 우위
-        - review `fundMomentumBlock` 시장분석 자동 호출
+        - story `fundMomentumBlock` 시장분석 자동 호출
 
     Args:
         market: ``"KR"`` 만 지원 (KRX _hfBulk 필요).

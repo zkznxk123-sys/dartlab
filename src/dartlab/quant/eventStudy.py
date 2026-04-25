@@ -53,7 +53,7 @@ def calcCAR(
 
     AIContext:
         - Sprint 4 dartlab Korea-Native — DART 공시 자동 event study
-        - review `eventStudyBlock` 후속 (공시 유형 × 평균 CAR)
+        - story `eventStudyBlock` 후속 (공시 유형 × 평균 CAR)
 
     Args:
         stockReturns: 일별 종목 수익률 (전체 시계열).

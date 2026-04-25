@@ -93,35 +93,35 @@ def test_ensure_utf8_skips_if_already_utf8():
         sys.stdout = original_stdout
 
 
-# ── main() implicit review routing ──
+# ── main() implicit story routing ──
 
 
 def test_main_routes_stock_code_to_review():
-    """dartlab 005930 → main()이 raw 앞에 'review'를 추가하는지 확인."""
+    """dartlab 005930 → main()이 raw 앞에 'story'를 추가하는지 확인."""
     from dartlab.cli.main import _looksLikeCompany
 
-    # _looksLikeCompany 판별 후 ["review"] + raw 로 변환되는 로직 테스트
+    # _looksLikeCompany 판별 후 ["story"] + raw 로 변환되는 로직 테스트
     assert _looksLikeCompany("005930") is True
-    # main()의 implicit routing: raw = ["005930"] → raw = ["review", "005930"]
-    # build_parser().parse_args(["review", "005930"])로 실행됨
+    # main()의 implicit routing: raw = ["005930"] → raw = ["story", "005930"]
+    # build_parser().parse_args(["story", "005930"])로 실행됨
     from dartlab.cli.parser import build_parser
 
     parser = build_parser()
-    args = parser.parse_args(["review", "005930"])
-    assert args.command == "review"
+    args = parser.parse_args(["story", "005930"])
+    assert args.command == "story"
     assert args.company == "005930"
 
 
 def test_main_routes_korean_name_to_review():
-    """dartlab 삼성전자 → main()이 raw 앞에 'review'를 추가하는지 확인."""
+    """dartlab 삼성전자 → main()이 raw 앞에 'story'를 추가하는지 확인."""
     from dartlab.cli.main import _looksLikeCompany
 
     assert _looksLikeCompany("삼성전자") is True
     from dartlab.cli.parser import build_parser
 
     parser = build_parser()
-    args = parser.parse_args(["review", "삼성전자"])
-    assert args.command == "review"
+    args = parser.parse_args(["story", "삼성전자"])
+    assert args.command == "story"
     assert args.company == "삼성전자"
 
 
@@ -176,7 +176,7 @@ def test_command_specs_covers_expected_commands():
     from dartlab.cli.parser import COMMAND_SPECS
 
     names = {spec.name for spec in COMMAND_SPECS}
-    expected = {"ask", "show", "search", "status", "setup", "ai", "excel", "mcp", "review", "collect", "plugin"}
+    expected = {"ask", "show", "search", "status", "setup", "ai", "excel", "mcp", "story", "collect", "plugin"}
     assert expected.issubset(names)
 
 

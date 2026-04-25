@@ -65,7 +65,7 @@ def nextSteps(company: Any) -> list[str]:
         steps.append("c.show(topic)                공시 원문 조회")
         steps.append("c.sections                   전체 topic × period 지도")
     steps.append("c.analysis('수익성')             14축 분석")
-    steps.append("c.review('수익성')               6막 보고서")
+    steps.append("c.story('수익성')               6막 보고서")
 
     return steps
 

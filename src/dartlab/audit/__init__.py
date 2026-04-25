@@ -39,8 +39,8 @@ def runAudit(
 
     Capabilities:
         - 종목코드 리스트 또는 전 기업 순차 분석
-        - 15축 analysis + insights + valuation + forecast + ratios + review
-        - SQLite 메타 + parquet 결과 + JSON review 자동 저장
+        - 15축 analysis + insights + valuation + forecast + ratios + story
+        - SQLite 메타 + parquet 결과 + JSON story 자동 저장
         - resume=True로 중단된 감사 이어하기
 
     Requires:

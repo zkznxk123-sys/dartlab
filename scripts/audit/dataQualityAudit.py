@@ -255,16 +255,16 @@ def auditAnalysis(stockCode: str) -> list[dict]:
     return results
 
 
-def auditReview(stockCode: str) -> list[dict]:
-    """Review 섹션별 전수조사."""
+def auditStory(stockCode: str) -> list[dict]:
+    """Story 섹션별 전수조사."""
     import dartlab
 
     results = []
     c = dartlab.Company(stockCode)
 
     for section in REVIEW_SECTIONS:
-        r = _callSafe(c.review, section)
-        results.append({"engine": "review", "axis": section, "stockCode": stockCode, **r})
+        r = _callSafe(c.story, section)
+        results.append({"engine": "story", "axis": section, "stockCode": stockCode, **r})
 
     return results
 
@@ -379,7 +379,7 @@ def main():
             ("market", "macro"),
         ]
         for stock in STOCKS:
-            for eng in ["company", "analysis", "review", "credit", "quant", "gather"]:
+            for eng in ["company", "analysis", "story", "credit", "quant", "gather"]:
                 units.append((stock, eng))
 
         allResults: list[dict] = []
@@ -412,8 +412,8 @@ def main():
             results.extend(auditCompany(stockCode))
         if args.engine in ("all", "analysis"):
             results.extend(auditAnalysis(stockCode))
-        if args.engine in ("all", "review"):
-            results.extend(auditReview(stockCode))
+        if args.engine in ("all", "story"):
+            results.extend(auditStory(stockCode))
         if args.engine in ("all", "credit"):
             results.extend(auditCredit(stockCode))
         if args.engine in ("all", "quant"):

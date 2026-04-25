@@ -203,7 +203,7 @@ def print_human(report: dict[str, object]) -> None:
     for item in summary["top_repeated_h2"]:
         print(f"- {item['heading']}: {item['count']}")
 
-    print("\nPriority review")
+    print("\nPriority story")
     for path in summary["low_svg_posts"][:5]:
         print(f"- low svg: {path}")
     for path in summary["svg_parse_errors"][:5]:

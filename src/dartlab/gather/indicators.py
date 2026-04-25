@@ -1,7 +1,7 @@
 """벡터화 기술적 지표 — 순수 NumPy 구현 (SSOT).
 
 dartlab 의 단일 보조지표 SSOT. gather (L1) 영역에 위치 — quant (L2) · scan (L1.5) ·
-review (L3) 등 상위 레이어가 import 해서 사용 (정방향, ops/architecture.md 정합).
+story (L3) 등 상위 레이어가 import 해서 사용 (정방향, ops/architecture.md 정합).
 
 전체 가격 배열을 한 번에 처리하여 초고속 계산. tradix 에서 이식.
 

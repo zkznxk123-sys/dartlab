@@ -5,7 +5,7 @@ McKinsey ROIC Tree + Damodaran *Investment Valuation* Ch.11 표준.
 핵심 원칙: 시계열 데이터의 "왜 변했는가" 자동 분해.
 영업마진 +3%p 변화 → 원가율/판관비/매출 레버리지/환율 driver 별 기여도.
 
-순수 수학 함수. dict 반환. narrate 는 review 만.
+순수 수학 함수. dict 반환. narrate 는 story 만.
 """
 
 from __future__ import annotations

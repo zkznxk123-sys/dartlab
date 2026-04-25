@@ -17,5 +17,5 @@
         market, year, universe, scores: {stockCode: float},
         interpretation: str, topN: list[(stockCode, score)]
 
-review 통합은 각 calc 함수 레벨에서. catalog.py BlockMeta 등록.
+story 통합은 각 calc 함수 레벨에서. catalog.py BlockMeta 등록.
 """

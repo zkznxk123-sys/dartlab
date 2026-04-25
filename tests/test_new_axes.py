@@ -981,12 +981,12 @@ class TestAxisRegistry:
 
 class TestCatalog:
     def test_sections_count(self):
-        from dartlab.review.catalog import SECTIONS
+        from dartlab.story.catalog import SECTIONS
 
         assert len(SECTIONS) >= 20  # 섹션 추가 시 증가
 
     def test_new_sections_exist(self):
-        from dartlab.review.catalog import SECTIONS
+        from dartlab.story.catalog import SECTIONS
 
         keys = [s.key for s in SECTIONS]
         assert "지배구조" in keys
@@ -994,7 +994,7 @@ class TestCatalog:
         assert "비교분석" in keys
 
     def test_new_blocks_exist(self):
-        from dartlab.review.catalog import listBlocks
+        from dartlab.story.catalog import listBlocks
 
         blocks = listBlocks()
         blockKeys = {b.key for b in blocks}

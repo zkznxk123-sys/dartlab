@@ -437,7 +437,7 @@ cr = c.credit(detail=True)  # 7축 상세 + 서사 + 시계열
 
 ```python
 # 권장: review publisher
-from dartlab.review.publisher import publishReport
+from dartlab.story.publisher import publishReport
 publishReport("005930")  # 6막 보고서, 신용평가 섹션에 narrative + audit 자동 포함
 
 # Deprecated (review.publisher로 위임만 함)
@@ -510,7 +510,7 @@ AI는 `useAI=True`일 때만 호출되며, 기본은 재현 가능한 기계 서
 - **이벤트 발간**: 등급 변경 시 즉시
 - **정례 보고서**: 월 1회 전체 등급 변동 요약 (`data/credit/periodic/`)
 - **저장 경로**: `blog/05-company-reports/{순번}-{slug}/index.md` (review publisher)
-- **발간 명령**: `from dartlab.review.publisher import publishReport; publishReport("005930")`
+- **발간 명령**: `from dartlab.story.publisher import publishReport; publishReport("005930")`
 - **레거시**: `blog/04-credit-reports/`는 아카이브로만 보존 (16개 기존 보고서)
 
 ## 코드 구조

@@ -8,7 +8,7 @@
 - (K2) calc 함수의 return dict literal 에서 `... or 0` 금지.
   None 결손과 진짜 0 구분 손실. 분모 가드는 코드 주석으로 표시.
 
-대상 디렉토리: src/dartlab/analysis/, src/dartlab/credit/, src/dartlab/review/narrative.py
+대상 디렉토리: src/dartlab/analysis/, src/dartlab/credit/, src/dartlab/story/narrative.py
 화이트리스트: tests/, _reference/, experiments/
 """
 
@@ -29,7 +29,7 @@ _TARGET_DIRS = [
     _ROOT / "credit",
 ]
 _TARGET_FILES = [
-    _ROOT / "review" / "narrative.py",
+    _ROOT / "story" / "narrative.py",
 ]
 
 _Q4_LITERAL_RE = re.compile(r"^[12]\d{3}Q[1-4]$")

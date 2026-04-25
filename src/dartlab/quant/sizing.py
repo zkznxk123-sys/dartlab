@@ -7,7 +7,7 @@
 - Roncalli (2013): Introduction to Risk Parity and Budgeting
 
 dartlab.quant("켈리", ...) 같은 직접 축으로 노출하지 않고 헬퍼 함수만 제공.
-factor/portfolio 엔진과 review/AI에서 import해서 사용.
+factor/portfolio 엔진과 story/AI에서 import해서 사용.
 """
 
 from __future__ import annotations

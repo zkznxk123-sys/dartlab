@@ -1,6 +1,6 @@
 """1-2 자금 구조 분석 — 계산만 담당.
 
-블록 조립은 review/builders.py가 한다.
+블록 조립은 story/builders.py가 한다.
 여기는 company.select() → 계산 → dict/숫자 반환.
 """
 
@@ -58,7 +58,7 @@ _analysis_currency: contextvars.ContextVar[str] = contextvars.ContextVar("analys
 
 
 def _fmtAmt(value) -> str:
-    """금액을 조/억 또는 B/M 단위로 포맷 (순수 문자열, review import 없이).
+    """금액을 조/억 또는 B/M 단위로 포맷 (순수 문자열, story import 없이).
 
     Parameters
     ----------

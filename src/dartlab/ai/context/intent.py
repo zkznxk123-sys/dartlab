@@ -196,7 +196,7 @@ _KEYWORDS: dict[Intent, tuple[str, ...]] = {
         "show(",
         "select(",
         "analysis(",
-        "review(",
+        "story(",
         "공시 어디",
         "어디서 찾",
     ),
