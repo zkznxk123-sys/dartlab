@@ -1051,9 +1051,9 @@ def buildBlocks(
 
     # ── 비교분석 (scan 교차 조합 관점 → story 통합) ──
     if keys is None or keys & {"peerPosition", "governanceSummary"}:
+        from dartlab.scan.extended import calcGovernanceSummary, calcPeerPosition
         from dartlab.story.builders import peerPositionBlock
         from dartlab.story.builders import quantModuleBlock as _scanBlock
-        from dartlab.scan.extended import calcGovernanceSummary, calcPeerPosition
 
         if _need("peerPosition"):
             b["peerPosition"] = _safe(lambda: peerPositionBlock(calcPeerPosition(company)))
