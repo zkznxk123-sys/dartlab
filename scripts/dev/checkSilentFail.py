@@ -63,6 +63,7 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "scan/builder.py",
         "scan/edgarBuilder.py",
         # AI 런타임 상태 저장 (없으면 첫 실행)
+        "ai/persistence/blog_insights.py",
         "ai/context/playbook.py",
         "ai/persistence/store.py",
         # analysis/forecast/core 런타임 캐시 (HF seed/backtest output)
