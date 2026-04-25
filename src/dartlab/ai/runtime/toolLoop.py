@@ -20,6 +20,7 @@ log = logging.getLogger("dartlab.ai.toolLoop")
 
 _MAX_ROUNDS_DEFAULT = 10
 _MAX_REPEAT_SAME_CALL = 2  # 동일 (name, arguments) 반복 시 강제 stop
+_MAX_PARALLEL_TOOLS = 4  # 한 라운드 최대 tool 호출 수
 
 
 def streamWithTools(
@@ -139,11 +140,8 @@ def streamWithTools(
                 yield resp.answer
             return
 
-        # 인터리빙 서사 — 한 라운드에 tool 1개만 실행. provider 가 parallel 로 여러 개
-        # 반환해도 첫 번째만 실행하고 종료 → 다음 라운드에서 모델이 짧은 코멘트 먼저 쓰고
-        # 다음 tool 을 호출하도록 유도. oauth_codex/claude/openai 공통 방어선.
-        if len(resp.tool_calls) > 1:
-            resp.tool_calls = resp.tool_calls[:1]
+        if len(resp.tool_calls) > _MAX_PARALLEL_TOOLS:
+            resp.tool_calls = resp.tool_calls[:_MAX_PARALLEL_TOOLS]
 
         # tool 실행
         for tc in resp.tool_calls:

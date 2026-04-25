@@ -4,7 +4,7 @@
 
 **주체**: quant 엔진 (`c.quant(axis)` · `dartlab.quant(axis)`).
 **현재**: 8 그룹 30 축 · NumPy 순수 계산 · 기술적 지표 / 팩터 / 밸류에이션 / 시뮬레이션 · 텍스트 감성.
-**방향**: 팩터 백테스트 리포트 블록화 · 포트폴리오 최적화 개선 · quant/review 통합 심화.
+**방향**: 팩터 백테스트 리포트 블록화 · 포트폴리오 최적화 개선 · quant/story 통합 심화.
 
 종목 레벨 정량분석 엔진. 기술적 지표부터 팩터 모델, 텍스트 감성, 포트폴리오 최적화까지. 각 섹션은 **"이렇게 한다"** 명제로 열고, 반복된 실수는 섹션 하단 **"반복 실패"** 에 정리한다.
 
@@ -63,7 +63,7 @@ c.quant("베타")          # 시장 베타 + CAPM (market="US" 자동)
 | 레이어 | L2 |
 | 진입점 | `c.quant()`, `c.quant("종합")`, `dartlab.quant("축", "종목")` |
 | 소비 | gather(price, flow), scan 프리빌드 parquet, docs/changes parquet |
-| 생산 | ai(L3) 가 정량 판단에 소비, review 가 기술적 섹션에 소비 |
+| 생산 | ai(L3) 가 정량 판단에 소비, story 가 기술적 섹션에 소비 |
 | 축 | 8 그룹 — 기존 7 그룹 + Strategy DSL (사용자 컨트롤 백테스트) |
 
 ---
@@ -233,7 +233,7 @@ e = c.quant("진입진단")          # dict[str, EntryVerdict]
 wf = c.quant("워크포워드", style="seasonalKR", train=120, test=30)
 ```
 
-review 6막 시장분석 섹션에 `strategySnapshot` 카드 자동 등장 — 8 스타일 백테스트 매트릭스 (Sharpe/MDD/DSR/오늘진입/오늘청산/Trades/판정).
+story 6막 시장분석 섹션에 `strategySnapshot` 카드 자동 등장 — 8 스타일 백테스트 매트릭스 (Sharpe/MDD/DSR/오늘진입/오늘청산/Trades/판정).
 
 ### 검증 메트릭 (자체 구현, scipy 0)
 
@@ -361,9 +361,9 @@ quant risk/portfolio/fundamental 9 축에 대한 실측 audit 완료. 개별 보
 
 ---
 
-## 11. review 연동 — extended.py 를 import 한다
+## 11. story 연동 — extended.py 를 import 한다
 
-review 는 `extended.py` 의 함수를 직접 import (변경 없음):
+story 는 `extended.py` 의 함수를 직접 import (변경 없음):
 
 ```python
 from dartlab.quant.extended import (
@@ -373,11 +373,11 @@ from dartlab.quant.extended import (
 )
 ```
 
-### quant → review 모듈 매핑 (analysis calc 패턴)
+### quant → story 모듈 매핑 (analysis calc 패턴)
 
-quant 는 review 6막 시장분석 섹션에 독립 calc 모듈로 서사를 제공한다.
+quant 는 story 6막 시장분석 섹션에 독립 calc 모듈로 서사를 제공한다.
 
-| calc 함수 (extended.py) | review 블록 | 서사 내용 |
+| calc 함수 (extended.py) | story 블록 | 서사 내용 |
 |---|---|---|
 | `calcTechnicalVerdict` | technicalVerdict | 종합 판단 (verdict/score) + trend 카테고리 |
 | `calcTechnicalSignals` | technicalSignals | 최근 20 일 매매 신호 집계 |
@@ -396,7 +396,7 @@ quant 는 review 6막 시장분석 섹션에 독립 calc 모듈로 서사를 제
 | **`calcMultiFactorRisk`** (factor.py, Phase B2 신설) | riskDecomposition | **Barra-style risk 분해** (B Σ_f Bᵀ + D) — systematic vs idiosyncratic + 팩터별 기여도 |
 | **`calcFactorIC` / `calcFactorICAll`** (factor.py, Phase B3 신설) | factorIC | **Cross-Sectional IC** — Grinold & Kahn Ch.5 일별 Spearman IC + ICIR + hit rate (look-ahead bias 방지, non-overlap) |
 
-각 calc 함수는 독립 모듈 — `@_memoized_calc` 로 Company 세션 내 캐시. review builders 가 블록으로 변환, narrate 가 한국어 서사 생성. `calcFactorTearSheet` 는 `factorBuild.build_factors()` 의 SMB/HML/RMW/CMA 시계열을 받아 Sharpe/연수익/변동성/Win Rate/MDD 평가 — Phase B0 (2026-04-24) 부터 KRX 시총 직접 사용 (진짜 Fama-French). `calcFactorIC` 는 전년 펀더멘털 → 당해 수익률 (look-ahead 방지), non-overlap h-일 stepping (ICIR 인플레이션 방지).
+각 calc 함수는 독립 모듈 — `@_memoized_calc` 로 Company 세션 내 캐시. story builders 가 블록으로 변환, narrate 가 한국어 서사 생성. `calcFactorTearSheet` 는 `factorBuild.build_factors()` 의 SMB/HML/RMW/CMA 시계열을 받아 Sharpe/연수익/변동성/Win Rate/MDD 평가 — Phase B0 (2026-04-24) 부터 KRX 시총 직접 사용 (진짜 Fama-French). `calcFactorIC` 는 전년 펀더멘털 → 당해 수익률 (look-ahead 방지), non-overlap h-일 stepping (ICIR 인플레이션 방지).
 
 ---
 
@@ -411,7 +411,7 @@ quant 는 review 6막 시장분석 섹션에 독립 calc 모듈로 서사를 제
 | `src/dartlab/gather/indicators.py` | 45개 지표 SSOT (2026-04-24 quant → gather 이전, 정방향 import) |
 | `src/dartlab/quant/signals.py` | 9개 신호 |
 | `src/dartlab/quant/analyzer.py` | verdict + enrichWithIndicators |
-| `src/dartlab/quant/extended.py` | beta, divergence, flags (review 연동) |
+| `src/dartlab/quant/extended.py` | beta, divergence, flags (story 연동) |
 | `src/dartlab/quant/momentum.py` | 모멘텀 분석 |
 | `src/dartlab/quant/tailrisk.py` | 꼬리위험 분석 |
 | `src/dartlab/quant/volatility.py` | GARCH + HAR-RV |
@@ -433,5 +433,5 @@ quant 는 review 6막 시장분석 섹션에 독립 calc 모듈로 서사를 제
 6. 8 스타일 중 KR 전용(`flowFollow`, `seasonalKR`) 은 EDGAR 호출 시 NotApplicable sentinel.
 7. 검증 메트릭 DSR/PBO/CPCV 는 학술 논문 재현. 정규분포 CDF/PPF 자체 구현.
 8. 지표 45 개 + 신호 9 개 + Grinold/Damodaran 공식 수식 재현.
-9. review 6 막 시장분석은 extended.py 의 calc 함수 12 종을 블록으로 변환 + narrate 서사.
+9. story 6 막 시장분석은 extended.py 의 calc 함수 12 종을 블록으로 변환 + narrate 서사.
 10. Phase 1 audit 에서 factor/value/residual 치명 → Phase 2 에서 재구현 완료, 시총 인프라(A1) 만 보류.

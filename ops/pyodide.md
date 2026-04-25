@@ -16,7 +16,7 @@ await dartlab.prefetch("005930")
 c = dartlab.Company("005930")
 c.show("IS")
 c.analysis("financial", "수익성")
-c.review("수익성").toMarkdown()
+c.story("수익성").toMarkdown()
 ```
 
 | 항목 | 내용 |
@@ -88,7 +88,7 @@ if sys.platform == "emscripten":
 | `providers/dart/_utils.py` | `_ensureAllData` 바이패스 + threading 순차 |
 | `providers/dart/company.py` | `codeToName` 바이패스 |
 | `gather/listing.py` | `getKindList` 빈 DataFrame + cache 스킵 |
-| `review/registry.py` | `Section` import 순환 참조 수정 |
+| `story/registry.py` | `Section` import 순환 참조 수정 |
 | `providers/dart/docs/sections/artifacts.py` | `readParquetSafe` 사용 |
 | `core/finance/exogenousAxes.py` | `readParquetSafe` 사용 |
 
@@ -185,7 +185,7 @@ Node.js pyodide 0.27.2, 삼성전자 005930:
 | analysis 성장성 | ✓ 5 키 |
 | analysis 안정성 | ✓ 6 키 |
 | select | ✓ 2x42 |
-| review 수익성 | ✓ 2,771 자 |
+| story 수익성 | ✓ 2,771 자 |
 | `c.index` | ✓ 63 topics |
 | **총** | **13/13** |
 

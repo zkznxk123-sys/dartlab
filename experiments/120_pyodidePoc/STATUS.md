@@ -14,7 +14,7 @@
 | `Company("005930")` | ✅ | corpName은 docs parquet에서 추출 |
 | `c.show("IS")` | ✅ 21행 12컬럼 | |
 | `c.analysis("수익성")` | ✅ dict | marginTrend=None (데이터 정합성, pyodide 무관) |
-| `c.review("수익성")` | ✅ 729자 마크다운 | |
+| `c.story("수익성")` | ✅ 729자 마크다운 | |
 | httpx transport | ✅ JavascriptFetchTransport | 브라우저 자동 |
 | Gemini API | ✅ HTTP 403 (키만 넣으면 동작) | CORS OK |
 | OpenAI API | ✅ HTTP 401 (키만 넣으면 동작) | CORS OK |

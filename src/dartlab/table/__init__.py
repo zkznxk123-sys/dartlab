@@ -4,9 +4,9 @@
 
     import dartlab
 
-    dartlab.table()                              # 가이드 (축 목록 + 사용법)
-    dartlab.table("yoy", c.IS)                   # YoY 변동률
-    dartlab.table("format", c.BS, unit="억원")    # 한국어 단위
+    dartlab.table()                                  # 가이드 (축 목록 + 사용법)
+    dartlab.table("yoy", c.show("IS"))               # YoY 변동률
+    dartlab.table("format", c.show("BS"), unit="억원") # 한국어 단위
 """
 
 from __future__ import annotations
@@ -35,42 +35,42 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         fn="yoy_change",
         label="YoY 변동률",
         description="전년 동기 대비 변동률 컬럼 추가",
-        example='table("yoy", c.IS)',
+        example='table("yoy", c.show("IS"))',
         targetName="df",
     ),
     "summary": _AxisEntry(
         fn="summary_stats",
         label="요약 통계",
         description="평균/최소/최대/표준편차/CAGR/추세",
-        example='table("summary", c.dividend)',
+        example='table("summary", c.show("dividend"))',
         targetName="df",
     ),
     "pivot": _AxisEntry(
         fn="pivot_accounts",
         label="계정 피벗",
         description="행=연도, 열=항목 피벗 테이블",
-        example='table("pivot", c.IS)',
+        example='table("pivot", c.show("IS"))',
         targetName="df",
     ),
     "format": _AxisEntry(
         fn="format_korean",
         label="한국어 단위",
         description="조원/억원/만원 단위 포맷팅",
-        example='table("format", c.BS, unit="억원")',
+        example='table("format", c.show("BS"), unit="억원")',
         targetName="df",
     ),
     "growth": _AxisEntry(
         fn="growth_matrix",
         label="성장률 행렬",
         description="기간별 성장률 매트릭스",
-        example='table("growth", c.IS)',
+        example='table("growth", c.show("IS"))',
         targetName="df",
     ),
     "ratio": _AxisEntry(
         fn="ratio_table",
         label="재무비율",
         description="ROE/ROA/부채비율 등 재무비율 테이블",
-        example='table("ratio", c.IS)',
+        example='table("ratio", c.show("IS"))',
         targetName="df",
     ),
 }
@@ -134,9 +134,9 @@ class Table:
 
         import dartlab
         c = dartlab.Company("005930")
-        dartlab.table()                          # 가이드
-        dartlab.table("yoy", c.IS)               # YoY 변동률
-        dartlab.table("format", c.BS, unit="억원") # 한국어 단위
+        dartlab.table()                                  # 가이드
+        dartlab.table("yoy", c.show("IS"))               # YoY 변동률
+        dartlab.table("format", c.show("BS"), unit="억원") # 한국어 단위
     """
 
     def __call__(

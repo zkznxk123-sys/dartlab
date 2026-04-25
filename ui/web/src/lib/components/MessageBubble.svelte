@@ -216,7 +216,7 @@
 		// 구 MCP/플러그인 tool 이름 (하위 호환)
 		companyInsights: "인사이트", companyFinancials: "재무제표", companyRatios: "재무비율",
 		companyAnalysis: "재무분석", companyValuation: "밸류에이션", companyForecast: "전망",
-		companyReview: "보고서", companyShow: "원본 조회", companyDiff: "변경 비교",
+		companyStory: "보고서", companyShow: "원본 조회", companyDiff: "변경 비교",
 		companyGovernance: "지배구조", companyAudit: "감사", companyProfile: "프로필",
 		companySections: "섹션", companyTopics: "토픽", marketScan: "시장 스캔",
 		searchCompany: "종목 검색", list_live_filings: "실시간 공시", read_filing: "공시 원문",

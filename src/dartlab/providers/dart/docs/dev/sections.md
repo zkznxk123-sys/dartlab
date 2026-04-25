@@ -1,7 +1,7 @@
 # DART Docs Sections Development Guide
 
 본체 위치:
-- `src/dartlab/engines/dart/docs/sections/`
+- `src/dartlab/providers/dart/docs/sections/`
 
 핵심 원칙:
 - `sections`가 docs source of truth다.
@@ -145,16 +145,16 @@
     - `anchorPeriodLane`
     - `isLatest`
     - `isStale`
-- `c.docs.sections`는 raw DataFrame을 감싼 source accessor다.
-  - `c.docs.sections.filter(...)`처럼 DataFrame 연산을 그대로 쓸 수 있다.
-  - 같은 경로에서 `c.docs.sections.raw`, `c.docs.sections.periods()`, `c.docs.sections.ordered()`, `c.docs.sections.coverage()`, `c.docs.sections.freq(...)`, `c.docs.sections.semanticRegistry(...)`, `c.docs.sections.semanticCollisions(...)`, `c.docs.sections.structureRegistry(...)`, `c.docs.sections.structureCollisions(...)`, `c.docs.sections.structureEvents(...)`, `c.docs.sections.structureSummary(...)`, `c.docs.sections.structureChanges(...)`를 쓴다.
-  - `periods()/ordered()/coverage()`는 최신우선 + 연간 `Q4` alias projection이다.
-  - `c.docs.sectionsOrdered()` / `c.docs.sectionsCoverage()` / `c.docs.sectionsFreq()` / `c.docs.sectionsSemanticRegistry()` / `c.docs.sectionsSemanticCollisions()` / `c.docs.sectionsStructureRegistry()` / `c.docs.sectionsStructureCollisions()` / `c.docs.sectionsStructureEvents()` / `c.docs.sectionsStructureSummary()` / `c.docs.sectionsStructureChanges()`는 호환용 wrapper다.
+- 사용자 진입점은 `c.show("sections")` — raw DataFrame 반환. `c.docs` public namespace 는 Plan v10 에서 제거됐다.
+- 분석 메서드는 내부 `_DocsAccessor` (`c._docs`) 또는 `SectionsAnalyzer` (`c._analyzer`) 가 보유:
+  - `c._docs.sectionsOrdered()` / `c._docs.sectionsCoverage()` / `c._docs.sectionsFreq(...)` / `c._docs.sectionsSemanticRegistry()` / `c._docs.sectionsSemanticCollisions()` / `c._docs.sectionsStructureRegistry()` / `c._docs.sectionsStructureCollisions()` / `c._docs.sectionsStructureEvents()` / `c._docs.sectionsStructureSummary()` / `c._docs.sectionsStructureChanges()` — 모두 내부 호출 (사용자 노출 X).
+  - `periods()/ordered()/coverage()` 는 최신우선 + 연간 `Q4` alias projection.
+  - 외부에서 read 만 필요하면 `c.show("sections")` 로 충분. 분석 메서드는 calc 함수가 직접 `c._analyzer` 또는 `c._docs` 를 호출.
 - `show()`, `diff()`, viewer, AI가 같은 text structure를 공유해야 한다.
 
 ## 2026-03-18 현재 기준
 
-- 이번 개선의 정확한 기준은 이 문서와 `src/dartlab/engines/dart/docs/DEV.md`다.
+- 이번 개선의 정확한 기준은 이 문서와 `src/dartlab/providers/dart/docs/DEV.md` (있을 경우)다.
 - 현재 `sections` 텍스트 row 정렬의 핵심은 아래 네 가지다.
   - `textPathKey + occurrence`가 논리 row identity다.
   - `sourceBlockOrder`는 원래 큰 블록 경계 보존용이다.
@@ -167,25 +167,25 @@
   - `freqScope=mixed`: 연간/분기 공용 row
   - `latestAnnualPeriod`, `latestQuarterlyPeriod`: 각 freq에서 마지막 실존 period
 - 현재 공식 period projection helper:
-  - `src/dartlab/engines/dart/docs/sections/_common.py:displayPeriod`
-  - `src/dartlab/engines/dart/docs/sections/_common.py:reorderPeriodColumns`
+  - `src/dartlab/providers/dart/docs/sections/_common.py:displayPeriod`
+  - `src/dartlab/providers/dart/docs/sections/_common.py:reorderPeriodColumns`
 - 현재 공식 freq projection helper:
-  - `src/dartlab/engines/dart/docs/sections/pipeline.py:projectFreqRows`
+  - `src/dartlab/providers/dart/docs/sections/pipeline.py:projectFreqRows`
 - 현재 공식 semantic registry helper:
-  - `src/dartlab/engines/dart/docs/sections/pipeline.py:semanticRegistry`
-  - `src/dartlab/engines/dart/docs/sections/pipeline.py:semanticCollisions`
+  - `src/dartlab/providers/dart/docs/sections/pipeline.py:semanticRegistry`
+  - `src/dartlab/providers/dart/docs/sections/pipeline.py:semanticCollisions`
 - 현재 공식 structure registry helper:
-  - `src/dartlab/engines/dart/docs/sections/pipeline.py:structureRegistry`
-  - `src/dartlab/engines/dart/docs/sections/pipeline.py:structureCollisions`
+  - `src/dartlab/providers/dart/docs/sections/pipeline.py:structureRegistry`
+  - `src/dartlab/providers/dart/docs/sections/pipeline.py:structureCollisions`
 - 현재 공식 structure event helper:
-  - `src/dartlab/engines/dart/docs/sections/pipeline.py:structureEvents`
+  - `src/dartlab/providers/dart/docs/sections/pipeline.py:structureEvents`
 - 현재 공식 structure summary helper:
-  - `src/dartlab/engines/dart/docs/sections/pipeline.py:structureSummary`
+  - `src/dartlab/providers/dart/docs/sections/pipeline.py:structureSummary`
 - 현재 공식 structure changes helper:
-  - `src/dartlab/engines/dart/docs/sections/pipeline.py:structureChanges`
+  - `src/dartlab/providers/dart/docs/sections/pipeline.py:structureChanges`
 - 구현 파일:
-  - `src/dartlab/engines/dart/docs/sections/textStructure.py`
-  - `src/dartlab/engines/dart/docs/sections/pipeline.py`
+  - `src/dartlab/providers/dart/docs/sections/textStructure.py`
+  - `src/dartlab/providers/dart/docs/sections/pipeline.py`
 
 ## 다종목 검증 메모 (2026-03-18)
 

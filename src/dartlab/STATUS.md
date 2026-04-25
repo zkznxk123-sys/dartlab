@@ -59,10 +59,9 @@ import dartlab
 
 c = dartlab.Company("005930")
 c.index                 # 회사 구조 인덱스
-c.show("BS")            # topic payload
-c.trace("dividend")     # source trace
-c.BS                    # 재무상태표 DataFrame
-c.dividend              # 배당 시계열 DataFrame
+c.show("BS")            # 재무상태표 DataFrame
+c.show("dividend")      # 배당 시계열 DataFrame
+c.trace("dividend")     # source provenance
 
 import dartlab
 dartlab.verbose = False  # 진행 표시 끄기

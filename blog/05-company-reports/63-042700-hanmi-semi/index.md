@@ -3,7 +3,7 @@ title: "한미반도체 (042700) — 매출 반토막까지 떨어진 회사가 
 date: 2026-04-21
 description: "2023년 매출 1,590억(-51%)·영업이익 346억(-69%)으로 반도체 사이클 바닥을 찍은 회사가 2024년 매출 5,589억(+251%)·영업이익 2,554억(+638%)으로 영업이익률 46%를 회복했다. HBM TC 본딩 장비 글로벌 독점 구조와 AI 공급망이 중소 장비사에 몰아준 돈의 해부."
 category: company-reports
-series: financial-context
+series: company-reports
 seriesOrder: 63
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/042700-hanmi-semi.webp

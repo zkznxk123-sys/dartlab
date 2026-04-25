@@ -2,10 +2,6 @@
 
 DART Company와 동일한 구조를 제공한다.
 
-- docs: sections 수평화 (topic × period), filings, show
-- finance: BS/IS/CF/CIS/timeseries/annual/ratios
-- 공개 인터페이스: index / show / trace
-
 사용법::
 
     from dartlab import Company
@@ -16,8 +12,6 @@ DART Company와 동일한 구조를 제공한다.
     c.show("BS")           # 재무상태표 DataFrame
     c.show("item1Business")        # docs topic DataFrame
     c.trace("BS")          # source provenance
-    c.docs.sections        # pure docs source (blockType 분리)
-    c.finance.BS           # finance.BS 바로가기
 """
 
 from __future__ import annotations
@@ -380,19 +374,17 @@ def _isPeriodColumn(col: str) -> bool:
 class Company:
     """SEC EDGAR 기반 미국 기업 진입점.
 
-    4-namespace 구조::
+    Example::
 
         c = Company("AAPL")
-        c.docs.sections        # topic × period 수평화 (blockType 분리)
-        c.docs.filings()       # 문서 목록
-        c.show(topic, block)   # blockOrder별 text/table
-        c.finance.BS           # 연도별 재무상태표
-        c.finance.IS           # 연도별 손익계산서
-        c.finance.CF           # 연도별 현금흐름표
-        c.finance.CIS          # 연도별 포괄손익계산서
-        c.finance.ratioSeries  # 재무비율 시계열
+        c.show("BS")           # 연도별 재무상태표
+        c.show("IS")           # 연도별 손익계산서
+        c.show("CF")           # 연도별 현금흐름표
+        c.show("CIS")          # 연도별 포괄손익계산서
+        c.show("ratios")       # 재무비율 시계열
+        c.show("item1Business")  # docs topic
         c.sections             # docs.sections 바로가기
-        c.show(topic)          # 통합 조회 → DataFrame | None (BS/IS/CF/CIS + docs)
+        c.topics               # 전체 topic 목록
     """
 
     @staticmethod

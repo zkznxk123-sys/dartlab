@@ -633,22 +633,69 @@ class Quant:
         stockCode: str | list | None = None,
         **kwargs: Any,
     ) -> pl.DataFrame | dict | Any:
-        """정량분석 실행.
+        """가격 기반 정량 분석 — 8 그룹 30+ 축 (기술·리스크·팩터·백테스트·알파).
 
-        AI 사용 가이드:
-            - axis는 반드시 가용 축 또는 별칭 중 하나. None이면 가이드 반환.
-            - 가치평가는 ``"value"`` 또는 ``"valuation"`` (별칭). ``quant("valuation")`` OK.
-            - 모르는 축이면 ``quant()`` 무인자로 가용 축 목록 확인.
-            - 종목코드는 두 번째 인자: ``quant("모멘텀", "005930")``.
-            - market은 자동 감지 (6자리 숫자→KR, 알파벳→US). 명시 불필요.
+        Parameters
+        ----------
+        axis : str | None
+            분석 축 또는 별칭. None 이면 가이드 DataFrame 반환.
+            주요 축: "판단"(verdict), "모멘텀", "변동성", "시뮬레이션",
+            "가치평가"(valuation), "altman", "piotroski", "bab" 등 30+ 축.
+        stockCode : str | list | None
+            종목코드/ticker. 두 번째 인자: quant("모멘텀", "005930").
+            market 자동 감지 (6자리→KR, 알파벳→US).
+        **kwargs
+            축별 추가 파라미터.
 
-        Args:
-            axis: 분석 축 (None이면 가이드). 별칭 지원 (한글/영문).
-            stockCode: 종목코드/ticker 또는 종목 리스트.
-            **kwargs: 축별 추가 파라미터.
+        Returns
+        -------
+        dict
+            종목 지정 시 축별 분석 결과:
+                verdict(판단): signal, confidence, indicators (매수/매도/중립)
+                momentum(모멘텀): returns, rsi, macd, moving_averages
+                volatility(변동성): realized, garch, regime
+                valuation(가치평가): multiples, peerRank, impliedReturn (배, %)
+                simulation(시뮬레이션): paths, expectedReturn, var (%)
+                altman: zScore, zone (safe/grey/distress)
+                piotroski: fScore (0~9점)
+        pl.DataFrame
+            axis=None: 가이드 — 축 목록 + 설명 + 예시.
+            횡단면 축 (market="KR"): 전종목 DataFrame.
 
-        Returns:
-            가이드 DataFrame, 분석 결과 dict, 또는 DataFrame.
+        Raises
+        ------
+        ValueError
+            축 이름이 등록되지 않은 경우.
+            종목 필수 축에서 stockCode 누락 시.
+        TypeError
+            axis 에 list 전달 시.
+
+        Examples
+        --------
+        >>> c.quant()                          # 가이드
+        >>> c.quant("판단")                     # 종합 매수/매도 판단
+        >>> c.quant("모멘텀")                   # 모멘텀 지표
+        >>> dartlab.quant("altman", "005930")   # Altman Z-Score
+        >>> dartlab.quant("piotroski", "005930")  # Piotroski F-Score
+
+        Notes
+        -----
+        주가 데이터는 gather("price") 경유 자동 수집. API 키 불필요 (Naver/Yahoo).
+
+        Guide
+        -----
+        When: 주가 기반 기술적 신호·팩터·리스크를 정량 분석할 때.
+        How: quant("판단") 으로 종합 신호 확인 → 세부 축으로 근거 파악.
+            analysis(재무) + quant(기술) 조합이 story full/valuation 타입의 핵심.
+            credit 과 함께 사용 시 altman/piotroski 로 부도 위험 교차 검증.
+        Verified:
+            - quant("판단") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+
+        See Also
+        --------
+        analysis : 재무 인과 분석 — quant 기술 + analysis 재무 조합.
+        gather : 주가·수급 데이터 수집 — quant 의 데이터 원천.
+        scan : 전종목 횡단 비교.
         """
         if axis is None and stockCode is None:
             return self._guide()

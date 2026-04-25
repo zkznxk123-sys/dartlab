@@ -64,7 +64,7 @@
 | 05 | analysis — 14 축 + 전망·가치평가 | `marimo/05_analysis.py` | `colab/05_analysis.ipynb` |
 | 06 | macro — 사이클·금리·자산 | `marimo/06_macro.py` | `colab/06_macro.ipynb` |
 | 07 | credit — dCR 7 축 등급 | `marimo/07_credit.py` | `colab/07_credit.ipynb` |
-| 08 | review — 구조화 보고서 | `marimo/08_review.py` | `colab/08_review.ipynb` |
+| 08 | story — 구조화 보고서 | `marimo/08_review.py` | `colab/08_review.ipynb` |
 | 09 | ai — ask · chat | `marimo/09_ai.py` | `colab/09_ai.ipynb` |
 | 10 | search — 공시 검색 | `marimo/10_search.py` | `colab/10_search.ipynb` |
 | 11 | listing — 법인·공시 목록 | `marimo/11_listing.py` | `colab/11_listing.ipynb` |

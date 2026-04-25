@@ -1,14 +1,9 @@
-"""K-IFRS 주석 통합 접근.
+"""K-IFRS 주석 내부 dispatch — Plan v10 P2 에서 ``c.notes`` property 가 제거되어
+사용자 진입점은 ``c.show("inventory")`` · ``c.show("receivables")`` 등 통합.
 
-사용법::
+이 모듈은 show topic 매핑이 호출하는 내부 추출 함수들을 묶는다.
 
-    c = Company("005930")
-    c.notes.inventory           # 재고자산 DataFrame
-    c.notes["재고자산"]          # 동일
-    c.notes.keys()              # 지원 항목 목록
-    c.notes.all()               # 전체 dict
-
-주석 항목 추가 시 `core/_entries.py` 의 notes 카테고리에 DataEntry 한 줄 추가
+주석 항목 추가 시 ``core/_entries.py`` 의 notes 카테고리에 DataEntry 한 줄 추가
 (extractor + notesDispatch 명시) 하면 자동 반영. 별도 하드코딩 dispatch dict 없음.
 """
 
@@ -113,12 +108,10 @@ class Notes:
         return df
 
     def quarterly(self, name: str) -> pl.DataFrame | None:
-        """분기 주석 데이터 반환.
+        """분기 주석 데이터 반환 (내부 dispatch).
 
-        Example::
-
-            c.notes.quarterly("inventory")     # 분기별 재고자산
-            c.notes.quarterly("receivables")   # 분기별 매출채권
+        Company 의 ``_notesAccessor`` 가 호출. 사용자는 ``c.show("inventory")`` 처럼
+        통합 진입점을 사용하고, 분기/연간 토글은 show 의 freq 파라미터로 제어한다.
 
         분기보고서(Q1/Q3) + 반기보고서 + 사업보고서 주석을 모두 파싱.
         """

@@ -114,7 +114,7 @@
     companyAnalysis: "재무분석",
     companyValuation: "밸류에이션",
     companyForecast: "전망",
-    companyReview: "보고서",
+    companyStory: "보고서",
     companyShow: "원본 조회",
     companyDiff: "변경 비교",
     companyGovernance: "지배구조",

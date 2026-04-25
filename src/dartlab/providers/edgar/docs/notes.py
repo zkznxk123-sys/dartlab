@@ -3,11 +3,13 @@
 SEC XBRL companyfacts에서 TextBlock 형태의 주석(Notes) 태그를 추출한다.
 AccountingPoliciesTextBlock, RevenueRecognitionTextBlock 등.
 
-사용법::
+사용법 (모듈 함수 직접 호출 — 내부용)::
 
-    c = Company("AAPL")
-    c.docs.notes()                      # 전체 TextBlock 목록
-    c.docs.notes("AccountingPolicies")  # 특정 주석 검색
+    from dartlab.providers.edgar.docs.notes import notes
+    notes(company)                      # 전체 TextBlock 목록
+    notes(company, "AccountingPolicies")  # 특정 주석 검색
+
+사용자 진입점은 ``c.notes("AccountingPolicies")`` 사용.
 """
 
 from __future__ import annotations
@@ -115,7 +117,7 @@ def notesByCategory(
 ) -> pl.DataFrame | None | dict[str, pl.DataFrame]:
     """카테고리별 구조화된 Notes DataFrame.
 
-    DART의 c.notes.inventory / c.notes.borrowings 등에 대응.
+    DART 의 ``c.show("inventory")`` · ``c.show("borrowings")`` 와 같은 카테고리 분해.
 
     Args:
         cik: SEC CIK 번호.

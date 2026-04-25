@@ -12,7 +12,7 @@ DartCompany ↔ EdgarCompany 인터페이스 동기화의 단일 규칙 문서. 
 - scan EDGAR 11 축·프리빌드 → `ops/scan.md`
 - gather market 분기 → `ops/gather.md`
 - analysis 통화·브릿지 → `ops/analysis.md`
-- review 통화 포맷 → `ops/review.md`
+- story 통화 포맷 → `ops/story.md`
 
 ---
 
@@ -64,9 +64,9 @@ DartCompany ↔ EdgarCompany 인터페이스 동기화의 단일 규칙 문서. 
 
 ### 등록하면 안 되는 경우
 
-- 범용 분석 기능 (analysis · review · forecast · valuation).
+- 범용 분석 기능 (analysis · story · forecast · valuation).
 - CompanyProtocol 필수 메소드.
-- 사용자 대면 메소드 (`ask` · `chat` · `review` · `insights`).
+- 사용자 대면 메소드 (`ask` · `story` · `insights`).
 
 ---
 
@@ -95,7 +95,7 @@ DartCompany ↔ EdgarCompany 인터페이스 동기화의 단일 규칙 문서. 
 
 - `story/builders.py::_STORY_CURRENCY` — story 렌더링 시 KRW·USD 분기.
 - `analysis/financial/capital.py::_ANALYSIS_CURRENCY` — analysis 금액 포맷 분기.
-- `review/registry.py::buildBlocks()` — `company.currency` 에서 자동 설정.
+- `story/registry.py::buildBlocks()` — `company.currency` 에서 자동 설정.
 
 ---
 
@@ -181,6 +181,6 @@ bash scripts/dev/test-lock.sh tests/test_edgarBulk.py -v
 2. DartCompany public 메서드 추가 시 EdgarCompany 동시 구현 또는 `_DART_ONLY_EXEMPT` 사유 주석.
 3. EXEMPT 는 데이터 소스 차이·한국 시장 전용·DART report 전용 구조화 데이터에 한정.
 4. Universal Select Bridge 로 한국어 ↔ snakeId 자동 번역, `toDict` 로 dict 키 변환.
-5. 통화·금액 포맷은 `company.currency` 에서 review · analysis 자동 분기.
+5. 통화·금액 포맷은 `company.currency` 에서 story · analysis 자동 분기.
 6. period 는 `buildFiscalToCalendarMap` SSOT 로 캘린더 앵커링 → DART `2025Q4` ↔ EDGAR `2025Q4` cross-company join.
 7. SEC 구조적 한계 (segmentComposition · rawMaterialBreakdown · investmentInOther) 는 한계 인정, `treasuryStockStatus` 는 XBRL fallback 으로 해결.

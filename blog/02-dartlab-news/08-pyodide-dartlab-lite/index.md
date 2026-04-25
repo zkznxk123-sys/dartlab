@@ -311,7 +311,7 @@ dartlab.ask("삼성전자 수익성 분석해줘", provider="gemini")
 - Pyodide가 CPython·numpy·polars까지 브라우저 WASM 런타임으로 포팅했고, 그 위에 xlwings Lite·Anaconda Code·JupyterLite·Colab·marimo가 올라탔다.
 - dartlab은 v0.9.9부터 Pyodide 전용 wheel을 HF에 올려, **같은 API로 브라우저에서도 동작**한다.
 - xlwings Lite에서는 두 모드를 다 쓸 수 있다. **`@script`는 버튼형, `@func`는 수식형**. 함수형이 dartlab을 엑셀답게 쓰는 방식이다.
-- 제약은 넷 — 스레드 없음, MEMFS 휘발, CORS 미허용 API 불가, AI는 API 키 필요. 그래서 `scan`·`gather` 일부는 빠지지만 **Company 중심 분석 · review · ask는 전부 돈다.**
+- 제약은 넷 — 스레드 없음, MEMFS 휘발, CORS 미허용 API 불가, AI는 API 키 필요. 그래서 `scan`·`gather` 일부는 빠지지만 **Company 중심 분석 · story · ask는 전부 돈다.**
 
 설치 없는 분석이 기본값이 되고 있다. dartlab-lite는 그 흐름에 얹히는 가장 얕은 레이어다. 엑셀 셀에 `=GETFINANCE("005930")`을 쳐 보면 감이 온다.
 

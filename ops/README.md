@@ -27,7 +27,7 @@
 | [ai.md](ai.md) | AI 엔진 | P1~P8 원칙 · 3 정보원천 · override · tool schema |
 | [mcp.md](mcp.md) | MCP 서버 | 외부 LLM 클라이언트 노출 · 26 도구 · stdio·SSE |
 | [analysis.md](analysis.md) | 재무분석 | 14 축 · 6 막 인과 · forecast · valuation |
-| [review.md](review.md) | 보고서 | 11 타입 × 7 템플릿 · 블록 카탈로그 · narrate |
+| [story.md](story.md) | 보고서 | 11 타입 × 7 템플릿 · 블록 카탈로그 · narrate |
 | [skills.md](skills.md) | 스킬 사상 | docstring 이 SSOT · 별도 skill 파일 없음 · 자가 개선 5 Phase · 축 개선 규칙 |
 | [scan.md](scan.md) | 시장 횡단 | 정식 7 축 · EDGAR 11 축 · 프리빌드 |
 | [macro.md](macro.md) | 매크로 | 사이클 · 금리 · 유동성 · 예측 · 기업이익 |

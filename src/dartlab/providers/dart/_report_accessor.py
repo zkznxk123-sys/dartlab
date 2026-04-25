@@ -210,17 +210,14 @@ def reportPivotBySe(df: pl.DataFrame, *, raw: bool = False) -> pl.DataFrame | No
 
 
 class _ReportAccessor:
-    """DART Company.report 네임스페이스 — 28개 apiType 체계 접근.
+    """DART 정형공시 28 apiType 내부 accessor.
+
+    Company 의 ``_report`` 속성으로 내부 보관 (private). 사용자는 ``c.show("dividend")``
+    · ``c.show("treasuryStock")`` 등 공개 진입점을 사용한다 — ``c.report`` 직접 접근은
+    Plan v10 에서 제거됐다.
 
     pivot 함수가 있는 5개(dividend, employee, majorHolder, executive, audit)는
     전용 Result 반환. 나머지는 extractAnnual 기준 DataFrame 반환.
-
-    Example::
-
-        c.report.dividend         # DividendResult (pivot)
-        c.report.treasuryStock    # DataFrame (extractAnnual)
-        c.report.extract("dividend")  # DataFrame (정제 원본)
-        c.report.apiTypes         # 사용 가능한 apiType 목록
     """
 
     _PIVOT_NAMES = frozenset({"dividend", "employee", "majorHolder", "executive", "audit"})

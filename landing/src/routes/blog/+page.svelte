@@ -362,9 +362,10 @@
 		display: block;
 		width: 160px;
 		height: 160px;
-		object-fit: cover;
+		object-fit: contain;
 		object-position: center;
-		border-radius: 8px;
+		border-radius: 10px;
+		background: #0f1219;
 	}
 
 	.latest-title {
@@ -451,6 +452,8 @@
 			max-width: 200px;
 			height: auto;
 			aspect-ratio: 1 / 1;
+			object-fit: contain;
+			background: #0f1219;
 		}
 
 		.blog-hub-title {

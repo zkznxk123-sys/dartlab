@@ -121,14 +121,14 @@ No API key needed. Data auto-downloads from [HuggingFace](https://huggingface.co
 Company prepares data with one stock code. Three layers analyze it.
 
 1. **Analysis engines** — produce numbers. Margin trends, cash flow patterns, default probability, peer comparison, macro cycles. No interpretation — numbers and evidence only.
-2. **review** — assembles engine data into reports by combining blocks. 11 report types × 7 company templates. No interpretation — systematically arranges evidence from diverse perspectives.
+2. **story** — assembles engine data into reports by combining blocks. 11 report types × 7 company templates. No interpretation — systematically arranges evidence from diverse perspectives.
 3. **AI** — calls engines directly and makes judgments. Questions results, verifies against raw data, recalculates with adjusted assumptions when something looks wrong. dartlab's active analyst.
 
 ## What DartLab Is
 
 One calling convention. Each engine: `dartlab.engine()` for the guide, `dartlab.engine("axis")` to run.
 
-> **New here?** Start with `Company` → `Review` → `Ask`. Load data, generate a report, then ask AI.
+> **New here?** Start with `Company` → `Story` → `Ask`. Load data, generate a report, then ask AI.
 
 | Layer | Engine | What it does | Entry point | Notebook |
 |-------|--------|--------------|-------------|:--------:|
@@ -141,7 +141,7 @@ One calling convention. Each engine: `dartlab.engine()` for the guide, `dartlab.
 | L2 | [Macro](ops/macro.md) | Market-level macro (cycle/rates/liquidity/sentiment/assets) | `dartlab.macro("사이클")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/06_macro.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py) |
 | L2 | [Credit](ops/credit.md) | Independent credit rating (dCR grade, default probability, health) | `c.credit("등급")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/07_credit.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/07_credit.py) |
 | L2 | [Industry](ops/industry.md) | Industry mapper — all listed companies × stage/role/stream + supply-chain edges (atlas at `/map`) | `c.industry()`, `dartlab.industry("semiconductor")` | — |
-| L2 | [Review](ops/review.md) | Report builder — 6-engine block composition (analysis/quant/credit/macro/scan/**industry**), 11 types × 7 templates (no interpretation) | `c.story("수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py) |
+| L2 | [Story](ops/story.md) | Report builder — 6-engine block composition (analysis/quant/credit/macro/scan/**industry**), 11 types × 7 templates (no interpretation) | `c.story("수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py) |
 | L3 | [AI](ops/ai.md) | Active analyst — calls engines directly, judges, verifies against raw data | `dartlab.ask()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/09_ai.py) |
 | L4 | [Channel](ops/channel.md) | External sharing — `dartlab channel` brings PC dartlab to your phone | `dartlab channel` | — |
 | core | [Search](ops/search.md) | Semantic filing search *(alpha)* | `dartlab.search()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/10_search.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/10_search.py) |
@@ -249,7 +249,7 @@ cr = c.credit("등급", detail=True)  # grade + narrative + metrics + divergence
 print(cr["divergenceExplanation"])  # why it differs from agencies
 ```
 
-Publish reports (credit narrative + audit are auto-included in review's 5막):
+Publish reports (credit narrative + audit are auto-included in story's 5막):
 
 ```python
 from dartlab.story.publisher import publishReport
@@ -273,9 +273,9 @@ Market cycle, rates, liquidity, sentiment, and asset signals with global macro m
 
 Backtest (2000-2024, FRED): Cleveland Fed probit **detected all 3/3 US recessions 2-16 months ahead**, recall 90%.
 
-### Review — Analysis to Report
+### Story — Analysis to Report
 
-> Design: [ops/review.md](ops/review.md)
+> Design: [ops/story.md](ops/story.md)
 
 Assembles analysis into a structured report. 4 output formats: rich (terminal), html, markdown, json.
 
@@ -290,7 +290,7 @@ dartlab.ask()            # report + AI interpretation
 
 ### Storyteller — Numbers Tell Stories
 
-> Design: [ops/review.md](ops/review.md) · Series: [Company Stories](https://eddmpython.github.io/dartlab/blog/series/company-reports)
+> Design: [ops/story.md](ops/story.md) · Series: [Company Stories](https://eddmpython.github.io/dartlab/blog/series/company-reports)
 
 Financial analysis isn't ratio tables. DartLab combines 5 engines (analysis, credit, scan, quant, macro) into a **6-act storytelling structure** that auto-generates publishable company stories.
 
@@ -374,7 +374,7 @@ L1  providers/   Country-specific data (DART, EDGAR, EDINET)
 L2  analysis/    Financial + forecast + valuation — analysis("group", "axis")
     credit/      Independent credit rating — c.credit()
     macro/       Market-level macro — dartlab.macro()
-    review/      5-engine composition (analysis + credit + scan + quant + macro)
+    story/       5-engine composition (analysis + credit + scan + quant + macro)
 L3  ai/          Active analyst — dartlab.ask()
 L4  vscode/      VSCode extension (dartlab chat --stdio)
     ui/web/      Svelte SPA web interface
@@ -398,7 +398,7 @@ flowchart TB
         ANA["analysis<br/>causal financial + forecast + valuation"]
         CRD["credit<br/>independent rating"]
         MAC["macro<br/>market reading"]
-        REV["review<br/>block-composed report"]
+        REV["story<br/>block-composed report"]
     end
     subgraph L1["L1 · Data ingestion"]
         PRV["providers<br/>DART / EDGAR / EDINET"]
@@ -445,7 +445,7 @@ flowchart TB
 
 **Core rules**:
 - Arrows always flow top → bottom (L4→L3→L2→L1→L0). Reverse imports forbidden (CI-enforced)
-- L2 engines never import each other — analysis ↛ credit, macro ↛ analysis. Composition is review's or ai's job
+- L2 engines never import each other — analysis ↛ credit, macro ↛ analysis. Composition is story's or ai's job
 - When adding a feature, pick the right layer first and let data flow in one direction only
 
 ## EDGAR (US)
@@ -516,7 +516,7 @@ Or auto-generate: `dartlab mcp --config claude-desktop`
 
 | Category | Tools |
 |----------|-------|
-| Analysis | companyInsights, companyAnalysis, companyReview, companyValuation, companyForecast, companyCredit |
+| Analysis | companyInsights, companyAnalysis, companyStory, companyValuation, companyForecast, companyCredit |
 | Data | companyFinancials, companyRatios, companyShow, companyTopics, companyDiff, companyFilings |
 | Company | companyGovernance, companyAudit, companyProfile, companySections, companyGather, companyQuant |
 | Market | macroAnalysis, marketScan, gatherData, quantAnalysis, topdownScreen |
@@ -590,7 +590,7 @@ Or add `dartlab` as a single line to the `requirements.txt` tab in the xlwings L
 
 | Feature | Pyodide | Note |
 |---|:---:|---|
-| `Company()` · `c.show()` · `analysis` · `review` · `credit` | ✅ | HF parquet auto-download |
+| `Company()` · `c.show()` · `analysis` · `story` · `credit` | ✅ | HF parquet auto-download |
 | `dartlab.ask()` | ✅ | Needs API key (gemini·openai CORS-friendly) |
 | `dartlab.scan()` | ❌ | Pre-built parquet 271MB (not practical in browser) |
 | `dartlab.gather()` | ❌ | Naver·Yahoo·Google News block CORS |
@@ -646,7 +646,7 @@ Pipeline: local cache (instant) → HuggingFace (auto-download) → DART API (wi
 ## Try It Now
 
 
-**Notebooks:** [Company](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb) · [Scan](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/02_scan.ipynb) · [Review](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/03_review.ipynb) · [Gather](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/04_gather.ipynb) · [Analysis](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/05_analysis.ipynb) · [Ask (AI)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/06_ask.ipynb)
+**Notebooks:** [Company](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb) · [Scan](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/02_scan.ipynb) · [Story](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/03_review.ipynb) · [Gather](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/04_gather.ipynb) · [Analysis](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/05_analysis.ipynb) · [Ask (AI)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/06_ask.ipynb)
 
 ## Documentation
 

@@ -649,6 +649,40 @@ class Scan:
                 종목명 : str — 회사명
                 2024, 2023, ... : float — 연도별 비율값 (%, 배)
             기타 축: 종목코드 + 종목명 + 축별 지표 컬럼
+
+        Raises
+        ------
+        ValueError
+            axis 또는 target 이 등록되지 않은 경우.
+            그룹 호출 시 target 이 해당 그룹에 속하지 않는 경우.
+
+        Examples
+        --------
+        >>> dartlab.scan()                              # 전체 축 가이드
+        >>> dartlab.scan("profitability")               # 전종목 수익성
+        >>> dartlab.scan("account", "매출액")            # 전종목 매출액 시계열
+        >>> dartlab.scan("ratio", "roe")                # 전종목 ROE 시계열
+        >>> dartlab.scan("financial")                   # 재무 8축 가이드
+        >>> dartlab.scan("financial", "수익성")          # 재무 그룹 내 수익성
+
+        Notes
+        -----
+        사전 빌드 parquet 기반. 첫 호출 시 HuggingFace 에서 자동 다운로드.
+        전종목 데이터를 한 번에 로드하므로 메모리 ~200MB 소비.
+
+        Guide
+        -----
+        When: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.
+        How: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.
+            story credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.
+        Verified:
+            - scan("재무건전성") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)
+
+        See Also
+        --------
+        analysis : 개별 종목 재무 심층 분석.
+        quant : 가격 기반 정량 신호.
+        credit : 개별 종목 신용 분석.
         """
         if axis is None:
             return self._guide()

@@ -6,8 +6,9 @@
 
     c = Company("005930")         # 한국 (DART)
     c = Company("삼성전자")        # 한국 (회사명)
-    c.show("BS")                  # 재무상태표 DataFrame (BS/IS/CF/CIS)
-    c.ratios                      # 재무비율
+    c.show("BS")                  # 재무상태표 DataFrame (분기 연결 기본)
+    c.show("IS", freq="Y")        # 손익계산서 (연간 합산)
+    c.show("ratios")              # 재무비율
     c.insights                    # 인사이트 등급
 """
 
@@ -292,10 +293,10 @@ class Company:
         c.show("salesOrder")             # sections 기반 subtopic DataFrame
         c.show("costByNature")           # sections/detailTopic 우선 + legacy fallback
         c.trace("dividend")              # source provenance
-        c.finance.CIS                    # 포괄손익계산서
-        c.finance.SCE                    # 자본변동표
-        c.report.treasuryStock           # 정형 공시
-        c.docs.sections                  # pure docs source view
+        c.show("CIS")                    # 포괄손익계산서
+        c.show("SCE")                    # 자본변동표
+        c.show("treasuryStock")          # 정형 공시
+        c.show("sections")              # docs source view
 
     Notes
     -----
@@ -2036,9 +2037,8 @@ class Company:
         """topic 의 데이터를 반환 — 내부 구현 (사용자는 ``c.show`` 호출).
 
         ``ops/api-contract.md`` 의 "단일 진입점 + 파라미터 계약" 규칙에 따라
-        모든 topic 접근은 ``c.show(topic, ...)`` 로 통합한다. 별도 property
-        (`c.IS`, `c.BS`, `c.CF`, `c.CIS`, `c.ratios`, `c.SCE`, `c.notes.X`) 는
-        사용 금지 — 모두 ``c.show("...")`` 로 호출.
+        모든 topic 접근은 ``c.show(topic, ...)`` 로 통합한다.
+        ``c.show("BS")``, ``c.show("ratios")``, ``c.show("dividend")`` 등.
 
         Capabilities:
             - 120+ topic 접근 (재무제표, 사업내용, 지배구조, 임원현황 등)
@@ -2959,16 +2959,23 @@ class Company:
             c.story(detail=False)            # 전 섹션 요약만
 
         Guide:
+            When: 구조화된 보고서가 필요할 때. 사용자가 "보고서" 명시 시에만.
+            How: 무인자 = 전체 보고서. section 으로 개별 섹션. type 으로 보고서 타입.
             - "재무 검토서 만들어줘" -> c.story()
             - "수익구조 분석" -> c.story("수익구조")
             - "감사용 리뷰" -> c.story(preset="audit")
             - "이 회사 스토리는?" -> c.story(template="auto")
             - "요약만 보여줘" -> c.story(detail=False)
             - "AI 가 해석한 보고서" -> dartlab.ask("005930 보고서 작성해줘") (AI 가 story tool 호출)
+            Verified:
+                - credit 타입 → 신용 종합 보고서 (observed via credit ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+                - audit 타입 → 분식회계 가능성 판정 보고서 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+                - governance 타입 → 지배구조 점검 보고서 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+                - dividend 타입 → 배당 매력 종합 보고서 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
 
         SeeAlso:
             - dartlab.ask: AI 자율 분석 (분석 질문은 여기로)
-            - analysis: 14축 개별 분석 (review가 내부적으로 소비)
+            - analysis: 14축 개별 분석 (story가 내부적으로 소비)
             - insights: 7영역 등급 + 이상치 요약
         """
         from dartlab.story.registry import buildStory
@@ -3023,7 +3030,7 @@ class Company:
 
         AIContext:
             - ask()/chat()에서 분석 결과를 컨텍스트로 주입
-            - story/reviewer가 내부적으로 analysis 결과를 소비
+            - story가 내부적으로 analysis 결과를 소비
 
         Args:
             axis: 그룹 이름 ("financial", "valuation", "forecast") 또는 축 이름. None이면 가이드 반환.
@@ -3054,11 +3061,19 @@ class Company:
             c.analysis("forecast", "매출전망")        # 매출전망
 
         Guide:
+            When: 특정 종목의 재무 심층 분석이 필요할 때.
+            How: axis 로 분석 영역, sub 로 세부 축 지정.
             - "14축 분석 뭐가 있어?" → c.analysis() (가이드 반환)
             - "수익구조 분석해줘" → c.analysis("financial", "수익구조")
             - "안정성 분석" → c.analysis("financial", "안정성")
             - "가치평가 해줘" → c.analysis("valuation", "가치평가")
             - "매출전망" → c.analysis("forecast", "매출전망")
+            Verified:
+                - 수익성 단독 → 마진 시계열 + 전환점 + 반도체 사이클 인과 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+                - 이익품질 + 재무정합성 → 분식회계 가능성 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+                - 가치평가 → 적정주가 범위 + 현재가 대비 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+                - 자본배분 + 현금흐름 → 배당 매력 종합 판단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+                - 지배구조 → 이사회 독립성 + 지배력 집중 점검 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
 
         SeeAlso:
             - story: 14축 분석을 14개 섹션 보고서로 조합
@@ -3182,6 +3197,13 @@ class Company:
             c.credit(detail=True)   # → 7축 상세 + metricsHistory
             c.credit(overrides={"debtRatio": 150, "interestCoverage": 2.5})  # 스트레스 시나리오
 
+        Guide:
+            When: 부도 위험·신용등급·채무상환능력 판단이 필요할 때.
+            How: 무인자 호출로 종합 등급, axis 로 개별 축, detail=True 로 시계열.
+            Verified:
+                - credit 단독 → dCR 등급 + 7축 위험점수 분해 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+                - credit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+
         SeeAlso:
             - story("신용평가"): 보고서 형식으로 렌더링
             - analysis("financial", "신용평가"): analysis 축으로 접근
@@ -3263,10 +3285,14 @@ class Company:
             c.gather("news")           # 뉴스
 
         Guide:
+            When: 주가·수급·거시지표·뉴스 원본 데이터가 필요할 때.
+            How: axis 로 데이터 종류 지정. 무인자 = 가이드.
             - "주가 데이터" → c.gather("price")
             - "외국인/기관 수급" → c.gather("flow")
             - "거시경제 지표" → c.gather("macro")
             - "뉴스 수집" → c.gather("news") 또는 c.news()
+            Verified:
+                - gather("news") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
 
         SeeAlso:
             - news: 뉴스 전용 단축 메서드
@@ -4689,7 +4715,7 @@ class Company:
 
         Guide:
             - "부채 구조 분석" → c.debt()
-            - "부채비율은?" → c.debt() 또는 c.ratios
+            - "부채비율은?" → c.debt() 또는 c.show("ratios")
             - "전체 상장사 부채 비교" → c.debt("all")
 
         SeeAlso:
@@ -4776,6 +4802,12 @@ class Company:
             axis=None → DataFrame (30축 가이드)
             axis="종합" → dict (verdict, RSI, ADX, SMA 등)
             axis="지표" → DataFrame (45개 지표)
+
+        Guide:
+            When: 주가 기반 기술적 판단이 필요할 때.
+            How: axis 로 분석 영역 지정. 무인자 = 가이드.
+            Verified:
+                - quant("판단") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
         """
         from dartlab.core.overrides import validateOverrides
         from dartlab.quant import Quant
@@ -4810,10 +4842,15 @@ class Company:
             axis 지정: dict — 축별 매크로 분석 결과 (indicators, narrative 포함).
 
         Guide:
+            When: 거시경제 환경·사이클 판단이 필요할 때.
+            How: axis 로 분석 영역 지정. 무인자 = 가이드.
             - "매크로" → c.macro()
             - "경기 사이클" → c.macro("사이클")
             - "위기 진단" → c.macro("위기")
             - "2008 시나리오" → c.macro("시나리오", "2008 금융위기")
+            Verified:
+                - macro("사이클") → CLI + 사분면 + 금리 + 유동성 + 심리 6축 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+                - macro + analysis → 경제 고려한 종목 분석 (observed via thesis ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
         """
         from dartlab.macro import Macro
 

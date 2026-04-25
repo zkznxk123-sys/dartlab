@@ -8,9 +8,9 @@ LLM 의존성 없이 독립 동작. 보고서 생성·차트 데이터 준비에
     from dartlab.tools import table
 
     c = Company("005930")
-    table.yoy_change(c.dividend, value_cols=["dps"])
-    table.ratio_table(c.BS, c.IS)
-    table.summary_stats(c.dividend)
+    table.yoy_change(c.show("dividend"), value_cols=["dps"])
+    table.ratio_table(c.show("BS"), c.show("IS"))
+    table.summary_stats(c.show("dividend"))
 """
 
 from __future__ import annotations

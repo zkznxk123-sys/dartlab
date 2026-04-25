@@ -74,7 +74,7 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
     See Also
     --------
-    review : analysis 결과를 보고서로 조립.
+    story : analysis 결과를 보고서로 조립.
     """
 ```
 

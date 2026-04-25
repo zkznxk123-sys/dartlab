@@ -3,7 +3,7 @@
 > 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
 
 **주체**: Company facade (`dartlab.Company(stockCode)`).
-**현재**: 편의성 3 원칙 (접근성·속도·신뢰성) 확립 · DART / EDGAR 이중 provider · show/select/topics + analysis/credit/review/quant/macro/gather 위임 · lazy load + BoundedCache.
+**현재**: 편의성 3 원칙 (접근성·속도·신뢰성) 확립 · DART / EDGAR 이중 provider · show/select/topics + analysis/credit/story/quant/macro/gather 위임 · lazy load + BoundedCache.
 **방향**: cache freshness 자동 갱신 · 첫 호출 지연 단축 · EDGAR property parity 확대.
 
 Company 는 dartlab 의 facade. 종목코드 하나로 모든 데이터에 접근한다. 각 섹션은 **"이렇게 한다"** 명제로 열고, 반복된 실수는 섹션 하단 **"반복 실패"** 에 정리한다.
@@ -22,7 +22,7 @@ c.select("IS", ["매출액"])         # 행/열 필터
 
 ### facade 고유 메서드 전수 목록
 
-엔진 호출(`analysis/credit/review/quant/macro/gather`)을 제외한 Company facade 고유 메서드.
+엔진 호출(`analysis/credit/story/quant/macro/gather`)을 제외한 Company facade 고유 메서드.
 
 #### 데이터 조회 (핵심)
 | 메서드 | 시그니처 | 설명 |
@@ -134,13 +134,13 @@ c.select("IS", ["매출액"])         # 행/열 필터
 | 레이어 | L0/L1 facade |
 | 진입점 | `dartlab.Company("005930")`, `c.show()`, `c.select()` |
 | 소비 | core/(protocols, finance, docs), providers/(dart, edgar) |
-| 생산 | scan, analysis, review, ai 모두 Company 를 소비 |
+| 생산 | scan, analysis, story, ai 모두 Company 를 소비 |
 | 핵심 | sections 사상 (topic × period), 단일 진입점 (show/select), canHandle 라우팅 |
 
 핵심 철학:
 - 비교 가능성이 모든 분석의 기반.
 - 완벽한 축을 세우는 게 모든 방향성.
-- Company → Analysis → Review → Scan 순서로 계층이 쌓인다.
+- Company → Analysis → Story → Scan 순서로 계층이 쌓인다.
 - 모든 개선은 **DART/EDGAR 양쪽 동시 반영** (protocol 테스트 강제).
 
 ---
@@ -184,13 +184,13 @@ c.facts               # 통합 facts DataFrame
 c.diff()              # 기간간 텍스트 변화
 c.filings()           # 공시 목록
 c.trace(topic)        # 출처 추적
-c.review(...)         # 보고서
+c.story(...)          # 보고서
 c.analysis(...)       # 분석
 c.credit(...)         # 신용평가
 ```
 
 `c.docs / c.finance / c.report / c.profile` 4 개 public namespace 는 **모두 제거됨** (Plan v10 P3).
-내부 compute 레이어 (review/credit/analysis/valuation) 는 `c._docs / _finance / _report` private 백엔드를 사용한다.
+내부 compute 레이어 (story/credit/analysis/valuation) 는 `c._docs / _finance / _report` private 백엔드를 사용한다.
 
 ### DART vs EDGAR 데이터 차이 (백엔드)
 
@@ -262,12 +262,12 @@ c.market / c.currency             # 시장 정보
 | `c.select("IS", [...])` | **0.01초** | (show 캐시) | 행/열 추출 + 차트 |
 | `c.topicSummaries()` | **0.69초** | 경량 | AI 경로 탐색 |
 | `c.sections` | **19초** | **409MB** | 전체 지도 필요 시만 |
-| `c.review("수익성")` 첫 호출 | **25초** | 411MB | Company 초기화 포함 |
-| `c.review()` x3 추가 | **8초** | 367MB | 캐시 재사용 |
-| `c.review()` 전체 | **83초** | 424MB | ⚠ 타임아웃 위험 |
-| `c.analysis("financial", "수익성")` | **0.03초** | 357MB | review 이후 빠름 |
+| `c.story("수익성")` 첫 호출 | **25초** | 411MB | Company 초기화 포함 |
+| `c.story()` x3 추가 | **8초** | 367MB | 캐시 재사용 |
+| `c.story()` 전체 | **83초** | 424MB | ⚠ 타임아웃 위험 |
+| `c.analysis("financial", "수익성")` | **0.03초** | 357MB | story 이후 빠름 |
 
-**규칙**: show/select 로 충분하면 `c.sections` 에 접근하지 않는다. `review()` 전체 호출은 83초 → AI 코드 실행(60초 제한)에서 금지.
+**규칙**: show/select 로 충분하면 `c.sections` 에 접근하지 않는다. `story()` 전체 호출은 83초 → AI 코드 실행(60초 제한)에서 금지.
 
 **반복 실패** — AI tool 경로에서 `c.sections` 로 전체 로드 → 메모리 409MB + 19초 지연. `c.show(topic)` 로 부분 빌드.
 
@@ -369,7 +369,7 @@ dartlab.Company("005930")
 | 통화 | KRW (조/억 포맷) | USD ($B/$M 포맷) |
 | 주가 | Naver → Yahoo fallback | Yahoo → FMP fallback |
 | 계정 브릿지 | `_bridgeKoreanSnakeId()` — 한국어↔snakeId 자동 번역 |
-| 통화 분기 | `company.currency` → analysis/review 자동 적용 |
+| 통화 분기 | `company.currency` → analysis/story 자동 적용 |
 
 **EDGAR report 14 apiType**: dividend, treasuryStock, stockTotal, employee, auditOpinion, corporateBond, executive, majorHolder, executivePay, capitalChange, outsideDirector, minorityHolder, investedCompany, debtSecurities.
 
@@ -412,7 +412,7 @@ DART 28개 중 13개가 DART/EDGAR 공통. 나머지 15개는 SEC 에 동등 구
 
 ## 요약 — 명제 9 줄
 
-1. 종목코드 하나로 끝낸다 (`dartlab.Company("005930")`), 엔진 (analysis/credit/review/quant/macro/gather) 은 위임.
+1. 종목코드 하나로 끝낸다 (`dartlab.Company("005930")`), 엔진 (analysis/credit/story/quant/macro/gather) 은 위임.
 2. Company 는 dartlab 의 진입점 중 하나. 전체 사상은 6막 인과 (macro→scan/industry→Company→analysis→quant).
 3. 모든 기간·모든 회사 비교 가능이 근본 전제. sections (topic × period) 사상 + 계정 표준화가 두 엔진.
 4. 사용자 surface 는 method/property 만. `docs/finance/report/profile` namespace 는 제거됨 (Plan v10 P3).

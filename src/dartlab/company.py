@@ -45,9 +45,12 @@ def Company(codeOrName: str) -> CompanyProtocol:
         - 종목코드 ("005930"), 회사명 ("삼성전자"), 영문 ticker ("AAPL") 모두 지원
         - canHandle() 체인: provider priority 순 자동 라우팅 (DART → EDGAR)
         - 새 국가 추가 시 이 파일 수정 불필요 — provider 패키지만 추가
-        - 핵심 인터페이스: show(topic) / index / trace(topic) / diff()
-        - namespace: docs (원문) / finance (숫자) / report (정형공시) / profile (merge)
-        - 바로가기: BS/IS/CF/CIS, ratios, ratioSeries, timeseries
+        - 핵심 인터페이스: show(topic) / index / trace(topic) / diff() / select()
+        - 모든 데이터 접근은 ``c.show(topic)`` 으로 통합 — finance topic
+          (BS·IS·CF·CIS·SCE·ratios) 도 ``c.show("BS")`` · ``c.show("IS", freq="Y")``
+          처럼 호출. 별도 namespace property 나 바로가기는 사용하지 않는다
+          (``c.docs / c.finance / c.report / c.profile`` · ``c.BS / c.IS / c.CF /
+          c.CIS / c.ratios / c.timeseries`` 는 Plan v10 에서 제거).
         - 메타: sections, topics, filings(), market, currency
 
     Requires:

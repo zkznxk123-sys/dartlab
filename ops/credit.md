@@ -76,7 +76,7 @@ dict
 
 ### `detail=True`
 - 7 축 `metrics` 에 시계열 (YoY · 5 년 평균) 부착.
-- `narrative` 키 추가 — 한국어 인과 문장 (review 블록 재료).
+- `narrative` 키 추가 — 한국어 인과 문장 (story 블록 재료).
 
 ---
 
@@ -104,7 +104,7 @@ dict
 | 업종 차등 | 업종별 threshold 매트릭스 내장 (`thresholds.py`) |
 | EDGAR 커버리지 | 일부 축 (예: 공시리스크) 은 DART 전용 · EDGAR 는 부분 지원 |
 | 시계열 | `basePeriod` 로 특정 시점 재현 가능 |
-| review 통합 | `c.review("신용분석")` 으로 블록식 보고서 |
+| story 통합 | `c.story("신용분석")` 으로 블록식 보고서 |
 
 ---
 
@@ -142,4 +142,4 @@ dict
 3. 결과는 종합(`grade`·`score`·`healthScore`·`axes`·`eCR`·`outlook`) · 축 단일 · `detail=True` 시계열+서사 3 형태.
 4. `overrides` 로 AI 자율 개입 — `debtRatio`·`interestCoverage`·`currentRatio`·`ocfToDebt`·`scenarioStress` 등 재계산.
 5. DART·EDGAR 재무제표만으로 동작 (API 키 불필요), 업종별 차등 + 시계열 안정화.
-6. `c.review("신용분석")` 으로 블록식 보고서에 통합, `narrative` 는 review 블록 재료.
+6. `c.story("신용분석")` 으로 블록식 보고서에 통합, `narrative` 는 story 블록 재료.

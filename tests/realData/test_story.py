@@ -15,7 +15,7 @@ class TestReviewEngine:
         blocks = dartlab.story.blocks(samsungRealData)
         assert blocks is not None
 
-    def test_buildReview_assembles(self, samsungRealData):
+    def test_buildStory_assembles(self, samsungRealData):
         """story.buildStory(c) 가 Story 객체 조립."""
         import dartlab
 

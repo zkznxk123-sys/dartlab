@@ -256,7 +256,7 @@ b                    # 섹션별 카탈로그 테이블
 story 는 Company-bound — DART/EDGAR 자동 분기.
 
 ### 통화 포맷
-- `company.currency` → `_REVIEW_CURRENCY` contextvars 자동 설정.
+- `company.currency` → `_STORY_CURRENCY` contextvars 자동 설정.
 - KRW: 조/억 포맷 (예: "매출 39.2 조원").
 - USD: $B/$M 포맷 (예: "Revenue $394.3B").
 - `story/registry.py::buildBlocks()` 에서 자동 적용.

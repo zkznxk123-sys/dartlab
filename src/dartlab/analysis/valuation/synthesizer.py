@@ -39,9 +39,9 @@ def synthesize(
     """복수 밸류에이션 → 가중평균 목표가 + 종합 의견.
 
     Args:
-        dcf_target: DCF 가중 목표가 (engines/common/finance/pricetarget).
+        dcf_target: DCF 가중 목표가 (analysis.valuation.pricetarget).
         dcf_confidence: DCF 신뢰도 (0~1).
-        market: MarketSnapshot (engines/market/collector).
+        market: MarketSnapshot (gather.types).
         company_financials: {"eps": float, "bps": float, "ebitda": float, ...}
         shares: 발행주식수.
         current_price: 현재 주가.

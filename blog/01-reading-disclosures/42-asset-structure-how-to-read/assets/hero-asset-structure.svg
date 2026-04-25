@@ -75,5 +75,5 @@
   <text x="370" y="420" text-anchor="middle" fill="#94a3b8" font-size="10">CAPEX/감가 1.0 미만 지속</text>
   <text x="560" y="420" text-anchor="middle" fill="#94a3b8" font-size="10">비영업자산 급감 (현금 소진)</text>
 
-  <text x="400" y="445" text-anchor="middle" fill="#475569" font-size="9">Penman Reformulated BS + CCC + CAPEX + Turnover -- dartlab c.review("자산구조")</text>
+  <text x="400" y="445" text-anchor="middle" fill="#475569" font-size="9">Penman Reformulated BS + CCC + CAPEX + Turnover -- dartlab c.story("자산구조")</text>
 </svg>

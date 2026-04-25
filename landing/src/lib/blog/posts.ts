@@ -162,6 +162,14 @@ export const seriesDefinitions = {
 		seoTitle: '기업이야기 | dartlab',
 		seoDescription: 'dartlab 기업이야기. 재무제표의 숫자가 왜 이상한지 파고 들어가면, 그 회사의 이야기가 보입니다.',
 		brandMessage: '숫자 나열이 아니라, "왜?"를 따라가는 기업 이야기.'
+	},
+	'interesting-story': {
+		id: 'interesting-story',
+		label: '흥미로운 이야기',
+		description: '비슷한 테마·업종의 기업들을 묶어 비교하고 발견을 나누는 시리즈입니다.',
+		seoTitle: '흥미로운 이야기 | dartlab',
+		seoDescription: 'dartlab 흥미로운 이야기. 같은 판 위의 기업들을 나란히 놓으면 숫자가 갈리는 이유가 보입니다. 테마별 비교 분석.',
+		brandMessage: '한 기업이 아니라 같은 판 위의 기업들을 나란히 놓으면, 숫자가 갈리는 이유가 보입니다.'
 	}
 } as const;
 

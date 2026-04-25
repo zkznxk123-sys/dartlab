@@ -307,6 +307,41 @@ class Macro:
                 summary: {indicators[], narrative}
                 rates/liquidity/trade/...: {지표별 dict, narrative}
             _summary (autoEnrich 자동) — 핵심 요약 + [엔진가정].
+
+        Raises
+        ------
+        ValueError
+            market 이 "US"/"KR" 이 아닌 경우.
+            축 이름이 등록되지 않은 경우.
+
+        Examples
+        --------
+        >>> dartlab.macro()                          # 가이드
+        >>> dartlab.macro("사이클")                   # 경기 4국면 판별
+        >>> dartlab.macro("금리")                     # 금리 + 수익률곡선
+        >>> dartlab.macro("예측")                     # 침체확률 + GDP Nowcast
+        >>> dartlab.macro("종합")                     # 매크로 종합 + 투자전략
+        >>> dartlab.macro("시나리오", "2008 금융위기")  # 역사적 시나리오
+
+        Notes
+        -----
+        FRED 데이터 기반. API 키 불필요 (공개 API).
+        Hamilton EM, Kalman DFM, Nelson-Siegel, Cleveland Fed 프로빗 등 numpy 직접 구현.
+
+        Guide
+        -----
+        When: 종목 분석 전 경제 환경을 먼저 파악할 때. Company 없이 사용 가능.
+        How: 6막 인과의 최상위 — macro(사이클) → scan(업종) → analysis(기업) 순서.
+            story macro/crisis 타입이 macro 종합 → analysis(안정성, 현금흐름) 순서로 조합.
+        Verified:
+            - macro("사이클") → CLI + 사분면 + 금리 + 유동성 + 심리 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+            - macro + analysis 조합 → 경제 고려한 논제 검증 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+
+        See Also
+        --------
+        scan : 전종목 횡단 — macro 사이클에 따른 업종별 영향 비교.
+        quant : 시장 심리·변동성 — macro 사이클과 교차 분석.
+        analysis : 개별 기업 재무 — macro 환경 하에서 기업 건전성 판단.
         """
         from dartlab.core.overrides import validateOverrides
 

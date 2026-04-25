@@ -3,7 +3,7 @@
 > 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
 
 **주체**: industry 엔진 (`dartlab.industry(industry?, stage?)` · `c.industry()`).
-**현재**: taxonomy.json 단일 원천 · 2,665 사 / 34 산업 분류 · 노드·엣지 JSON (~3,000 건) · review `chainPosition` 블록 활성.
+**현재**: taxonomy.json 단일 원천 · 2,665 사 / 34 산업 분류 · 노드·엣지 JSON (~3,000 건) · story `chainPosition` 블록 활성.
 **방향**: AI 보조 신규 산업 초안 · 밸류체인 엣지 확장 · 산업별 KPI 자동 연동.
 
 산업 매퍼 엔진 — 데이터 주도 산업지도. 전 상장사 2,665 사를 34 개 산업으로 분류하고, 각 산업 내 공정·역할·공급망 관계를 노드-엣지로 데이터베이스화한다. 분류체계 자체가 데이터 (`taxonomy.json`) 이며, 코드는 파이프라인만 고정한다. AI + 사람이 계속 학습하며 유지보수한다.
@@ -57,8 +57,8 @@ c.industry()                                    # 삼성전자의 산업 내 위
 | 레이어 | L2 |
 | 진입점 | `dartlab.industry()`, `c.industry()` |
 | 소비 | core/(docs parquet), scan/(network, finance), gather/(listing) |
-| 생산 | review(chainPosition 블록), ai(산업 분석), 블로그(산업지도 포스트), landing/map |
-| 상태 | stable — review 블록 `chainPosition` 활성 (`c.review(only=['chainPosition'])`) |
+| 생산 | story(chainPosition 블록), ai(산업 분석), 블로그(산업지도 포스트), landing/map |
+| 상태 | stable — story 블록 `chainPosition` 활성 (`c.story(only=['chainPosition'])`) |
 
 ---
 
@@ -292,9 +292,9 @@ taxonomy.json → 사람이 키워드 추가, 공정 재정의
 
 ---
 
-## 8. calcs.py — review 블록용 calc 함수
+## 8. calcs.py — story 블록용 calc 함수
 
-| calc 함수 | review 블록 | 반환 | 설명 |
+| calc 함수 | story 블록 | 반환 | 설명 |
 |---|---|---|---|
 | `calcChainPosition(company)` | chainPosition | dict | 이 회사의 산업 내 위치 + peers |
 | `calcSectorMetrics(company)` | sectorMetrics | dict | 업종 내 OPM/CAGR/ROE 분포 + 백분위 |
@@ -434,7 +434,7 @@ GitHub Pages 배포 (자동)
 | `src/dartlab/industry/build/stage3_docs.py` | docs → 소분류 |
 | `src/dartlab/industry/build/stage4_review.py` | override 적용 |
 | `src/dartlab/industry/build/edges.py` | 엣지 빌더 (network + docs) |
-| `src/dartlab/industry/calcs.py` | review 블록용 calc |
+| `src/dartlab/industry/calcs.py` | story 블록용 calc |
 | `src/dartlab/industry/build/enrichCompany.py` | 회사별 egograph + 5Y 재무 + AI + 블로그 + 공급망 enrich |
 | `src/dartlab/industry/build/hop2.py` | 2홉 공급망 사전 계산 |
 | `src/dartlab/industry/build/delta.py` | YoY 재무 변화 계산 |
@@ -451,6 +451,6 @@ GitHub Pages 배포 (자동)
 4. AI 는 도구로 사용 + `addOverride()` 로 보정 + 신규 산업 초안 제안. taxonomy 는 사람 승인 라인.
 5. stage3 docs 스캔은 Company 로드 금지, Polars lazy frame 으로 메모리 안전 확보.
 6. 엣지는 network (affiliate/investor) + docs rawMaterial/매출처 (supplier/customer) 로 추출.
-7. review 블록 4 종 — chainPosition · sectorMetrics · sectorCycle · sectorDynamics.
+7. story 블록 4 종 — chainPosition · sectorMetrics · sectorCycle · sectorDynamics.
 8. buildIndustryMap.py 가 landing/static/map/ 12 산출물 (ecosystem/atlas/industries/companies/...) 생성.
 9. dataSync → dataPrebuild → mapBuild → GitHub Pages 자동화 체인, 사용자는 TTL 12 시간 자동 갱신.

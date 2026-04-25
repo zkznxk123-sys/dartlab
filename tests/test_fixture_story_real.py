@@ -74,7 +74,7 @@ def test_buildBlocks_selective(samsung):
 # ── buildStory ──
 
 
-def test_buildReview_returns_review(samsung):
+def test_buildStory_returns_story(samsung):
     """buildStory — Story 객체 반환."""
     from dartlab.story.registry import buildStory
 

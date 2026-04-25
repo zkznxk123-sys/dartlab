@@ -241,9 +241,9 @@ c.quant("종합"); c.quant("팩터")
 
 **반복 실패** — 전편에 "시나리오 분석" H2 반복 → 템플릿 복사. 추정 숫자가 검증 없이 본문에 → 정직성 위반. "낙관·기본·비관" 3 열 표 → 리서치 보고서 톤. 한화오션·SK하이닉스 관통선과 무관한 시나리오 나열 피한다.
 
-### analysis 22 축 + review 11 타입 활용 — 블로그 깊이의 원천
+### analysis 22 축 + story 11 타입 활용 — 블로그 깊이의 원천
 
-**analysis 엔진**(5 그룹 22 축) · **review 엔진**(11 reportType × 7 template) 을 관통선에 맞게 최소 **3~4 축** 본문으로 편입한다.
+**analysis 엔진**(5 그룹 22 축) · **story 엔진**(11 reportType × 7 template) 을 관통선에 맞게 최소 **3~4 축** 본문으로 편입한다.
 
 **analysis 5 그룹 22 축** (상세 → `ops/analysis.md`):
 
@@ -283,7 +283,7 @@ c.quant("종합"); c.quant("팩터")
 
 ### Phase 3: SVG · 이미지 · 썸네일
 
-**SVG 규칙 (5~7 개)**: 다크 `#0a0e1a`, 폰트 `-apple-system, 'Segoe UI', sans-serif`, 타이틀 한국어 필수. 텍스트 `fill=#f1f5f9`, 부제 `#64748b`, 강조 `#fbbf24`. A 등급 `#22c55e`, C/D `#f59e0b/#ef4444`.
+**SVG 규칙 (최소 5개, 풍부하게)**: **5개 미만이면 발행 불가**. 다크 `#0a0e1a`, 폰트 `-apple-system, 'Segoe UI', sans-serif`, 타이틀 한국어 필수. 텍스트 `fill=#f1f5f9`, 부제 `#64748b`, 강조 `#fbbf24`. A 등급 `#22c55e`, C/D `#f59e0b/#ef4444`.
 
 **이미지 생성** (FLUX, Replicate 전용): 2~3 개, `black-forest-labs/flux-1.1-pro`, 영문 프롬프트 + "no text", 사실적 장면. 저장: `assets/{nn}-{slug}.webp`. **다른 provider 쓰지 않음**.
 
@@ -315,7 +315,7 @@ c.quant("종합"); c.quant("팩터")
 
 ### Phase 3 실행 순서
 
-SVG 5~7 Write → FLUX 2~3 (12 초 간격) → 본문 참조 → SEO audit → **이미지 0 개면 발행 불가** → FLUX 완료 후 커밋.
+SVG **최소 5개** Write → FLUX 2~3 (12 초 간격) → 본문 참조 → SEO audit → **SVG 5개 미만이면 발행 불가** → **이미지 0 개면 발행 불가** → FLUX 완료 후 커밋.
 
 ### Phase 4: 독자 루프 (95 점까지 반복)
 
@@ -669,7 +669,9 @@ cr["grade"]; cr["score"]; cr["healthScore"]; cr["divergenceExplanation"]
 
 **반복 실패** — 다른 포스트와 같은 파일명 = 빌드 실패.
 
-### SVG 시스템 — 5~7 개, 역할이 분명하게
+### SVG 시스템 — 최소 5개 필수, 역할이 분명하게
+
+> **⛔ 하드 게이트: SVG 5개 미만 = 발행 불가.** 인라인 차트(`ComboChart`, `BarChart`)는 SVG 카운트에 포함하지 않는다. `assets/` 폴더의 `.svg` 파일이 5개 이상이어야 한다.
 
 | 역할 | 설명 |
 |---|---|

@@ -52,7 +52,7 @@ class _DocsAccessor:
         return notes(self._company.cik, query)
 
     def notesByCategory(self, category: str | None = None):
-        """카테고리별 구조화 Notes. DART c.notes.inventory 등에 대응.
+        """카테고리별 구조화 Notes. DART 의 ``c.show("inventory")`` 등에 대응.
 
         category=None이면 데이터 있는 카테고리 dict 반환.
         """

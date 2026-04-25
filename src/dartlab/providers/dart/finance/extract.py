@@ -1,4 +1,4 @@
-"""하위호환 re-export — 실제 구현은 engines.common.finance.extract."""
+"""하위호환 re-export — 실제 구현은 ``dartlab.core.finance.extract``."""
 
 from dartlab.core.finance.extract import (
     getAnnualValues,

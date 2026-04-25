@@ -3,11 +3,11 @@
 DART에 없는 EDGAR 고유 기능. SEC가 제공하는 모든 XBRL 태그의
 전체 보고 이력을 조회할 수 있다.
 
-사용법::
+사용법 (모듈 함수 직접 호출 — 내부용)::
 
-    c = Company("AAPL")
-    c.finance.explore("Revenue")      # Revenue 관련 태그 전체 이력
-    c.finance.explore("StockholdersEquity")  # 자본 관련 태그
+    from dartlab.providers.edgar.finance.explore import explore
+    explore(cik, "Revenue")               # Revenue 관련 태그 전체 이력
+    explore(cik, "StockholdersEquity")    # 자본 관련 태그
 """
 
 from __future__ import annotations

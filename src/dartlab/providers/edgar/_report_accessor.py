@@ -67,7 +67,7 @@ class _ReportAccessor:
         return result
 
     def __getattr__(self, name: str) -> pl.DataFrame | None:
-        """apiType을 속성으로 접근: c.report.dividend"""
+        """내부 attr 접근 — Company 의 ``_report`` 가 사용. 사용자는 ``c.show(name)``."""
         if name.startswith("_"):
             raise AttributeError(name)
         if name in _SUPPORTED:

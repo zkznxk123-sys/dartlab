@@ -148,7 +148,7 @@ def _renderSection(console, section: Section, ly: StoryLayout) -> None:
             if block.level == 1:
                 console.print()
                 console.print(f"{h1}[bold cyan]■ {block.title}[/]")
-                # AI 의견: 대제목 바로 아래 (reviewer가 채움)
+                # AI 의견: 대제목 바로 아래 (story가 채움)
                 if section.aiOpinion:
                     console.print()
                     console.print(f"{h2}[bold cyan]AI 분석 요약[/]")

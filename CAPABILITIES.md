@@ -39,7 +39,7 @@
 | `searchName` | function | 종목명/코드로 종목 찾기 (KR + US). |
 | `pastInsight` | function | 특정 회사의 과거 분석 서사 조회. |
 | `sectorInsights` | function | 동종 업계 과거 분석 서사 목록 (교차 학습). |
-| `Story` | class | 분석 리뷰 — 14축 전략분석 결과를 구조화 보고서로 렌더링. |
+| `Story` | class | 보고서 조합기 — 6 엔진 블록을 조합하여 6막 구조화 보고서 생성. |
 | `SelectResult` | class | select() 반환 객체 — DataFrame 위임 + 체이닝. |
 | `ChartResult` | class | chart() 반환 객체 — 시각화 + 렌더링. |
 | `capabilities` | function | dartlab 전체 기능 카탈로그 조회. |
@@ -52,9 +52,12 @@ industry · gather · show. 엔진 이름만 기억하면 됨.
 종목코드 ("005930"), 회사명 ("삼성전자"), 영문 ticker ("AAPL") 모두 지원
 canHandle() 체인: provider priority 순 자동 라우팅 (DART → EDGAR)
 새 국가 추가 시 이 파일 수정 불필요 — provider 패키지만 추가
-핵심 인터페이스: show(topic) / index / trace(topic) / diff()
-namespace: docs (원문) / finance (숫자) / report (정형공시) / profile (merge)
-바로가기: BS/IS/CF/CIS, ratios, ratioSeries, timeseries
+핵심 인터페이스: show(topic) / index / trace(topic) / diff() / select()
+모든 데이터 접근은 ``c.show(topic)`` 으로 통합 — finance topic
+(BS·IS·CF·CIS·SCE·ratios) 도 ``c.show("BS")`` · ``c.show("IS", freq="Y")``
+처럼 호출. 별도 namespace property 나 바로가기는 사용하지 않는다
+(``c.docs / c.finance / c.report / c.profile`` · ``c.BS / c.IS / c.CF /
+c.CIS / c.ratios / c.timeseries`` 는 Plan v10 에서 제거).
 메타: sections, topics, filings(), market, currency
 **Requires:** DART: 사전 다운로드 데이터 (dartlab.downloadAll() 또는 자동 다운로드).
 EDGAR: 인터넷 연결 (On-demand 수집).
@@ -183,24 +186,37 @@ macro: API 키 — ECOS_API_KEY (KR) 또는 FRED_API_KEY (US)
 Company: 개별 종목 공시/재무 데이터
 analysis: 14축 전략분석 (재무비율, 수익구조 등)
 
+#### credit
+**Guide:** When: 종목의 부도 위험·재무 건전성을 독립 평가할 때.
+How: credit 단독으로 종합 등급 확인 → analysis(안정성, 현금흐름) 와 함께 심층 진단.
+story credit 타입이 credit + analysis(안정성) + analysis(현금흐름) + analysis(자금조달) 순서로 조합.
+Verified:
+credit 단독 → dCR 등급 + 7축 위험점수 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+credit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+
+See Also
+analysis : 재무 심층 분석 — 안정성·현금흐름 축이 credit 과 상호 보완.
+scan : 전종목 재무건전성 비교.
+
 #### Story
-**Capabilities:** buildStory(company): 템플릿 기반 전체 리뷰 자동 생성 (2부 14축)
-Story([blocks...]): 블록 자유 조립 (맞춤 보고서)
-Story(stockCode=..., sections=[...]): 직접 구성
-render(fmt): rich/html/markdown/json 4종 렌더링
-toHtml(), toMarkdown(), toJson() 편의 메서드
-Jupyter/Colab/Marimo 자동 HTML 렌더링 (_repr_html_)
-**Requires:** Company 객체 (buildStory 사용 시) 또는 Block 리스트.
-**AIContext:** story 수퍼툴이 이 클래스의 기능을 AI에게 노출.
-blocks action으로 블록 카탈로그, section으로 섹션별 리뷰.
-**Guide:** "분석 보고서 보여줘" -> c.story() 또는 buildStory(company)
-"수익구조만 보고 싶어" -> c.story("수익구조")
-"HTML로 내보내기" -> story.toHtml()
-"블록 목록 보여줘" -> blocks(company) (카탈로그 테이블)
-"매출 성장률 블록만" -> b = blocks(c); b["growth"]
-**SeeAlso:** analysis: 14축 전략분석 엔진 (Review의 데이터 공급원)
-blocks: 블록 사전 (한글/영문/tab-complete)
-Company.story: Company에서 바로 호출
+**Guide:** When: 종목의 종합 분석 보고서가 필요할 때.
+How: 11 타입 중 선택 — full(전체), executive(경영진 요약), credit(신용),
+valuation(가치평가), growth(성장), crisis(위기), audit(감사),
+dividend(배당), governance(지배구조), macro(매크로), thesis(투자논제).
+Verified:
+credit 타입 → credit + analysis(안정성,현금흐름,자금조달) 조합 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+audit 타입 → analysis(이익품질,재무정합성) + 감사의견 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+governance 타입 → analysis(지배구조,공시변화) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+dividend 타입 → analysis(수익구조,현금흐름,자본배분) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+valuation 타입 → analysis(가치평가) + quant (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+thesis 타입 → macro + analysis 복합 근거 수집 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+
+See Also
+analysis : 재무 심층 분석 — story 의 주요 데이터 공급원.
+credit : 신용 분석 — story credit 타입의 핵심 엔진.
+scan : 전종목 비교 — 동종업계 비교 블록 제공.
+quant : 기술적 분석 — 가격 기반 신호 블록 제공.
+macro : 거시 분석 — 매크로 환경 블록 제공.
 
 #### capabilities
 **Capabilities:** CAPABILITIES dict에서 부분 조회 가능.
@@ -734,7 +750,7 @@ ask: contextSlices를 내부적으로 소비하는 AI 질문 인터페이스
 **AIContext:** 부채 구조/건전성 정량 평가 — 차입금 의존도, 만기 구조
 시장 횡단 비교로 상대적 재무 안정성 판단
 **Guide:** "부채 구조 분석" → c.debt()
-"부채비율은?" → c.debt() 또는 c.ratios
+"부채비율은?" → c.debt() 또는 c.show("ratios")
 "전체 상장사 부채 비교" → c.debt("all")
 **SeeAlso:** BS: 재무상태표 (부채 원본 데이터)
 ratios: 재무비율 (부채비율 포함)
@@ -790,10 +806,14 @@ news: Google News RSS 뉴스 수집
 macro: API 키 -- ECOS_API_KEY (KR) 또는 FRED_API_KEY (US)
 **AIContext:** ask()/chat()에서 주가/수급/거시 데이터를 컨텍스트로 주입
 기업 분석 시 시장 데이터 보충 자료로 활용
-**Guide:** "주가 데이터" → c.gather("price")
+**Guide:** When: 주가·수급·거시지표·뉴스 원본 데이터가 필요할 때.
+How: axis 로 데이터 종류 지정. 무인자 = 가이드.
+"주가 데이터" → c.gather("price")
 "외국인/기관 수급" → c.gather("flow")
 "거시경제 지표" → c.gather("macro")
 "뉴스 수집" → c.gather("news") 또는 c.news()
+Verified:
+gather("news") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
 **SeeAlso:** news: 뉴스 전용 단축 메서드
 ask: gather 데이터를 컨텍스트로 활용한 AI 분석
 
@@ -858,10 +878,15 @@ readFiling: 공시 원문 텍스트 읽기
 watch: 공시 변화 중요도 스코어링
 
 #### Company.macro
-**Guide:** "매크로" → c.macro()
+**Guide:** When: 거시경제 환경·사이클 판단이 필요할 때.
+How: axis 로 분석 영역 지정. 무인자 = 가이드.
+"매크로" → c.macro()
 "경기 사이클" → c.macro("사이클")
 "위기 진단" → c.macro("위기")
 "2008 시나리오" → c.macro("시나리오", "2008 금융위기")
+Verified:
+macro("사이클") → CLI + 사분면 + 금리 + 유동성 + 심리 6축 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+macro + analysis → 경제 고려한 종목 분석 (observed via thesis ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
 
 #### Company.narrativeDiff
 **Guide:** "가치 기여도" → c.narrativeDiff()

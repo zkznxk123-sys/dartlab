@@ -64,5 +64,5 @@
   <text x="500" y="430" text-anchor="middle" fill="#94a3b8" font-size="9">위기형 CF 패턴</text>
   <text x="650" y="430" text-anchor="middle" fill="#94a3b8" font-size="9">OCF/NI 40% 미만</text>
 
-  <text x="400" y="448" text-anchor="middle" fill="#475569" font-size="9">Subramanyam CF 패턴 + FCF + Cash Quality -- dartlab c.review("현금흐름")</text>
+  <text x="400" y="448" text-anchor="middle" fill="#475569" font-size="9">Subramanyam CF 패턴 + FCF + Cash Quality -- dartlab c.story("현금흐름")</text>
 </svg>

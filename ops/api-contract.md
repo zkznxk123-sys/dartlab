@@ -22,7 +22,7 @@ c.show("IS")
 c.show("IS", freq="Y")
 c.analysis("financial", "수익성")
 c.credit("등급")
-c.review("수익성")
+c.story("수익성")
 c.scan("governance")
 c.quant("rsi", "005930")
 
@@ -31,7 +31,7 @@ c.show.IS()                    # → c.show("IS")
 c.show.IS(freq="Y")            # → c.show("IS", freq="Y")
 c.analysis.financial("수익성")  # → c.analysis("financial", "수익성")
 c.credit.등급()                # → c.credit("등급")
-c.review.수익성()              # → c.review("수익성")
+c.story.수익성()              # → c.story("수익성")
 c.scan.governance()            # → c.scan("governance")
 c.quant.rsi("005930")          # → c.quant("rsi", "005930")
 ```
@@ -59,7 +59,7 @@ c.select("IS", ["매출액"], freq="Y")       # 행 필터 + 연간
 
 ### 내부 series-tuple 빌더
 
-calc 모듈 (analysis · forecast · valuation · credit · review · excel) 이 `(series, periods)` 튜플 형태가 필요한 경우 **private 메서드** `c._buildFinanceSeries(freq=, scope=)` 를 호출한다. 사용자 진입점이 아니다.
+calc 모듈 (analysis · forecast · valuation · credit · story · excel) 이 `(series, periods)` 튜플 형태가 필요한 경우 **private 메서드** `c._buildFinanceSeries(freq=, scope=)` 를 호출한다. 사용자 진입점이 아니다.
 
 ### 검증 방법
 
@@ -169,7 +169,7 @@ def f(*, freq: Literal["Q", "Y", "YTD"] = "Q")
 | quant | `c.quant()` · `dartlab.quant()` | `c.quant("rsi")` |
 | macro | `dartlab.macro()` | `dartlab.macro("사이클")` |
 | scan | `dartlab.scan()` | `dartlab.scan("financial", "수익성")` |
-| review | `c.review()` | `c.review("수익성")` |
+| story | `c.story()` | `c.story("수익성")` |
 | gather | `dartlab.gather()` | `dartlab.gather("price", "005930")` |
 | ai | `dartlab.ask()` | `dartlab.ask("...")` |
 | listing | `dartlab.listing()` | `dartlab.listing("filings", corp="005930")` |
@@ -226,7 +226,7 @@ L0    core/                               ← 순수 유틸 + 공통 타입
 L1    providers/ gather/                  ← 데이터 수집
 L1.5  scan/                               ← 전종목 사전 빌드 (parquet)
 L2    analysis/ quant/ credit/ macro/ industry/     ← 5 분석 엔진 (동등, 상호 import 없음)
-L3    review/                             ← 이야기꾼 (보고서 조립)
+L3    story/                              ← 이야기꾼 (보고서 조립)
 L4    ai/ + 사람                          ← 소비자 (해석과 판단)
 교차 관심사: guide/
 ```
@@ -235,12 +235,12 @@ L4    ai/ + 사람                          ← 소비자 (해석과 판단)
 
 - **L2 엔진 간 상호 import 없음** (`analysis ↛ quant` · `macro ↛ credit` 등).
 - **L2 → L1.5 (scan) 하향 참조 허용** (scan 은 순수 데이터 빌더).
-- **L3 (review) 만 L2 를 import** — 모든 엔진 결과를 소비해 보고서 조립.
-- **L4 (ai) → L3·L2 import 허용** — AI 는 review + 엔진 직접 호출 가능.
-- **L2 엔진은 L3 (review) 를 import 하지 않음** — 엔진은 dict·숫자만 반환, 서사 생성 없음.
+- **L3 (story) 만 L2 를 import** — 모든 엔진 결과를 소비해 보고서 조립.
+- **L4 (ai) → L3·L2 import 허용** — AI 는 story + 엔진 직접 호출 가능.
+- **L2 엔진은 L3 (story) 를 import 하지 않음** — 엔진은 dict·숫자만 반환, 서사 생성 없음.
 - 공유 데이터는 L0·L1 (`core/`, `providers/`, `gather/`) 에서 직접 가져온다.
 - 공유 헬퍼는 한 위치에서 import — SSOT 단일 함수 (예: `core/finance/helpers.py::toDictBySnakeId`).
-- 해석의 조합은 review (L3) 또는 AI (L4) 의 몫.
+- 해석의 조합은 story (L3) 또는 AI (L4) 의 몫.
 
 ### import 방향
 
@@ -254,9 +254,9 @@ CI sentinel `tests/test_imports.py` 가 강제.
 
 각 엔진은 **dict · 숫자 · DataFrame** 만 반환한다. 다음은 엔진에서 쓰지 않는다:
 - 해석 문장 (narrative string).
-- Block 객체 (`HeadingBlock` · `TextBlock` 등 — review.blocks).
-- Section · Review 객체 (review 전용).
-- 렌더링 로직 (review · renderer 에서만).
+- Block 객체 (`HeadingBlock` · `TextBlock` 등 — story.blocks).
+- Section · Story 객체 (story 전용).
+- 렌더링 로직 (story · renderer 에서만).
 
 ---
 
@@ -283,7 +283,7 @@ CI sentinel `tests/test_imports.py` 가 강제.
 
 - `DartCompany` 에 public 메서드를 추가하면 **`EdgarCompany` 에도 동일 메서드 추가**.
 - DART 전용은 `tests/test_protocol.py::_DART_ONLY_EXEMPT` 에 **사유 주석과 함께** 등록.
-- analysis 축 · review 블록 · CLI 명령 추가 시 EDGAR Company 에서도 실행하여 crash 없음 확인.
+- analysis 축 · story 블록 · CLI 명령 추가 시 EDGAR Company 에서도 실행하여 crash 없음 확인.
 - 통화 분기는 `company.currency` 참조 (하드코딩 쓰지 않음).
 - 동기화 검증: `bash scripts/dev/test-lock.sh tests/ -k "test_edgar_has_all_dart_public_methods" -v`.
 
@@ -336,7 +336,7 @@ sections 사상 (topic × period 수평화) 과 계정 표준화 (XBRL 정규화
 
 ### 회사는 스토리가 있다
 
-분석은 숫자 나열이 아니라 **6 막 인과 구조의 스토리텔링** 이다 (review 사상). analysis = 도구, review = 사람의 보고서, AI = 적극적 분석가.
+분석은 숫자 나열이 아니라 **6 막 인과 구조의 스토리텔링** 이다 (story 사상). analysis = 도구, story = 사람의 보고서, AI = 적극적 분석가.
 
 ### sections 사상
 
@@ -359,7 +359,7 @@ source 우선순위: **finance > report > docs** (숫자 → 정형 → 서술).
 | 경로 | 트리거 | 소스 | 용도 |
 |---|---|---|---|
 | **자동 파이프라인 (벌크)** | `edgarSync.yml` cron + workflow_run | `Archives/edgar/daily-index/xbrl/companyfacts.zip` + `files/dera/data/financial-statement-data-sets/{Y}q{Q}.zip` | HF 배포, scan 프리빌드, 전 종목 커버 |
-| **사용자 선택 (API)** | `c.finance.refreshFromApi()` 명시 호출 | `data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json` | 공시 당일 최신 분기 즉시 반영 원할 때만 |
+| **사용자 선택 (API)** | `c.refreshFromApi()` 명시 호출 | `data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json` | 공시 당일 최신 분기 즉시 반영 원할 때만 |
 
 ### 검증
 
@@ -401,8 +401,8 @@ grep -n "companyfacts/CIK" src/dartlab/providers/edgar/bulk/
 - **P1** `c.ratios` · `c.ratioSeries` · `c.SCE` · `c.sceMatrix` 별도 property 제거 → `c.show("ratios")` 등.
 - **P2** `c.notes.X` 12 sub-property 제거 → `c.show("inventory")` 등.
 - **P3** 4 namespace 전면 제거 — `c.docs` · `c.finance` · `c.report` · `c.profile` (public 접근 0).
-  - 사용자 surface = `c.show()` · `c.select()` · `c.sections` · `c.diff()` · `c.filings()` · `c.facts` · `c.review()` · `c.analysis()` · `c.credit()`.
-  - 내부 compute (review · credit · valuation · analysis) 는 `c._docs` · `_finance` · `_report` private 백엔드 사용.
+  - 사용자 surface = `c.show()` · `c.select()` · `c.sections` · `c.diff()` · `c.filings()` · `c.facts` · `c.story()` · `c.analysis()` · `c.credit()`.
+  - 내부 compute (story · credit · valuation · analysis) 는 `c._docs` · `_finance` · `_report` private 백엔드 사용.
 - **P4** Plan vN · R26 마커 정리.
 - **P5** finance DataFrame 컬럼 `계정명` → `항목` 단일화 (sections 사상 정합).
 - **P6** snakeId → 한국어 라벨 SSOT 통합 (`core/finance/labels.py::get_korean_labels()`, `AccountMapper.labelMap()` 한 줄 위임).

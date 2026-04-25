@@ -16,7 +16,7 @@ dartlab을 브라우저에서 실행. 설치 없이 재무분석.
 
   await run(`print(c.show("IS"))`);
   await run(`print(c.analysis("financial", "수익성"))`);
-  await run(`print(c.review("수익성").toMarkdown())`);
+  await run(`print(c.story("수익성").toMarkdown())`);
 </script>
 ```
 
@@ -51,7 +51,7 @@ Python: pyarrow.parquet.read_table(BytesIO) → pl.from_arrow()
 | `Company(code)` | ✅ |
 | `c.show("IS"/"BS"/"CF")` | ✅ |
 | `c.analysis("수익성")` | ✅ |
-| `c.review("수익성")` | ✅ |
+| `c.story("수익성")` | ✅ |
 | `dartlab.ask(...)` | ✅ (API 키 필요) |
 | `dartlab.scan(...)` | ❌ (scan 프리빌드 271MB) |
 | `dartlab.gather(...)` | ❌ (외부 API CORS) |

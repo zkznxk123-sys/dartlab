@@ -278,6 +278,30 @@ def credit(
     >>> dartlab.credit("005930")                # 삼성전자 종합
     >>> dartlab.credit("005930", "채무상환")     # 채무상환 축만
     >>> dartlab.credit()                        # 가이드 DataFrame
+
+    Raises
+    ------
+    ValueError
+        축 이름이 등록되지 않은 경우.
+
+    Notes
+    -----
+    3-Track 모델(일반/금융/지주) + Notch Adjustment + CHS 시장 보정.
+    79개사 검증: 대기업 87%, 중대형 82%. DART 공시 기반, API 키 불필요.
+
+    Guide
+    -----
+    When: 종목의 부도 위험·재무 건전성을 독립 평가할 때.
+    How: credit 단독으로 종합 등급 확인 → analysis(안정성, 현금흐름) 와 함께 심층 진단.
+        story credit 타입이 credit + analysis(안정성) + analysis(현금흐름) + analysis(자금조달) 순서로 조합.
+    Verified:
+        - credit 단독 → dCR 등급 + 7축 위험점수 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+        - credit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+
+    See Also
+    --------
+    analysis : 재무 심층 분석 — 안정성·현금흐름 축이 credit 과 상호 보완.
+    scan : 전종목 재무건전성 비교.
     """
     if stockCode is None:
         return guide()

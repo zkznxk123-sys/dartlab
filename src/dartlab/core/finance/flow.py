@@ -1,6 +1,6 @@
 """dartlab flow account 합산 — 단일 진실의 원천 (SSOT).
 
-dartlab finance accessor (``c.IS / c.CIS / c.CF``) 의 컬럼은 분기 단독값.
+dartlab finance (``c.show("IS") / c.show("CIS") / c.show("CF")``) 의 컬럼은 분기 단독값.
 (``pivot.py::_normalizeQ4`` 가 raw 4분기 연간 thstrm_amount 를 standalone 으로 변환.)
 calc 가 연간값을 얻으려면 4분기 합산이 필요. 이 모듈이 그 합산의 단일 출처.
 

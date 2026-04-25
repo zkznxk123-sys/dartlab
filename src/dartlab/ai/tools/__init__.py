@@ -146,7 +146,10 @@ def buildTools() -> list[AITool]:
         AITool(
             name="pythonExec",
             description=(
-                "[escape hatch] 도메인 tool 로 못 풀 때만. 커스텀 비율/override 이외 조합/특이 계산. "
+                "Python 코드 실행. 두 가지 용도: "
+                "(1) 복합 분석 — 여러 엔진을 한 번에 조합할 때 "
+                "(예: analysis + credit + macro 결과를 교차 분석). "
+                "(2) 커스텀 계산 — override 시뮬레이션, 비율 계산, 데이터 가공. "
                 "dartlab · pl (polars) 사용 가능. stockCode 지정 시 c (Company) 바인딩."
             ),
             parameters={

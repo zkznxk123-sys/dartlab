@@ -117,7 +117,7 @@
   <text x="524" y="200" fill="#9d9d9d" font-family="monospace" font-size="10">[1]</text>
   <text x="556" y="202" fill="#86efac" font-family="monospace" font-size="11">import dartlab</text>
   <text x="556" y="220" fill="#86efac" font-family="monospace" font-size="11">c = dartlab.Company("005930")</text>
-  <text x="556" y="240" fill="#86efac" font-family="monospace" font-size="11">c.review()</text>
+  <text x="556" y="240" fill="#86efac" font-family="monospace" font-size="11">c.story()</text>
   <text x="556" y="276" fill="#64748b" font-family="system-ui, sans-serif" font-size="11">↓ 익스텐션이 자동으로 같은 dartlab을 공유</text>
 
   <!-- Result table -->
@@ -158,7 +158,7 @@
   <g font-family="monospace" font-size="11" fill="#cbd5e1">
     <text x="540" y="596">c.select("IS", ["매출액","영업이익"])</text>
     <text x="540" y="616">c.select("ratios", ["영업이익률"])</text>
-    <text x="540" y="636">c.review("수익성")</text>
+    <text x="540" y="636">c.story("수익성")</text>
   </g>
   <text x="540" y="660" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11">→ 모든 수치는 dartlab 함수 호출로 검증 가능</text>
 </svg>

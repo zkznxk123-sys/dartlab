@@ -294,7 +294,7 @@ workflow_run trigger → Data Prebuild (DART) 자동 실행
 
 ### edgarSync.yml — EDGAR 통합 수집 (벌크 기반)
 
-> **dartlab EDGAR finance primary 소스는 SEC 벌크.** `data.sec.gov/api/xbrl/companyfacts` API 는 사용자가 명시적으로 요청할 때 (`c.finance.refreshFromApi()`) 만 호출되는 **선택 경로**. 자동 CI·프리빌드·HF 배포는 전부 벌크를 쓴다. 상세: `ops/edgar.md`.
+> **dartlab EDGAR finance primary 소스는 SEC 벌크.** `data.sec.gov/api/xbrl/companyfacts` API 는 사용자가 명시적으로 요청할 때 (`c.refreshFromApi()`) 만 호출되는 **선택 경로**. 자동 CI·프리빌드·HF 배포는 전부 벌크를 쓴다. 상세: `ops/edgar.md`.
 
 - **스케줄**: 매일 UTC 04:30 (companyfacts.zip 갱신 04:25 직후) + 일요일 전체 정산.
 - **finance (daily 벌크)**:

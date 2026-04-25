@@ -3,7 +3,7 @@ title: "ARM (ARM) — 반도체를 한 개도 직접 만들지 않는 회사가 
 date: 2026-04-20
 description: "매출 $4.01B에 매출총이익률 97%, 영업이익률 20%. 제조 공장 0개, 칩 0개를 만들지 않는 회사가 세계 스마트폰의 99%·데이터센터 CPU의 20%+·자동차 칩의 60%+를 지배한다. 엔비디아 $40B 인수 시도 무산과 2023년 IPO의 셈법."
 category: company-reports
-series: financial-context
+series: company-reports
 seriesOrder: 60
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/ARM-arm-holdings.webp

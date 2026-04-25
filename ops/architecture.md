@@ -3,7 +3,7 @@
 > 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
 
 **주체**: dartlab 전체 (L0~L4 레이어 구성).
-**현재**: L0 core · L1 providers·gather·scan·quant · L2 analysis·credit·macro·industry · L3 review · L4 ai + 사용자. import 하향 방향만 허용.
+**현재**: L0 core · L1 providers·gather·scan·quant · L2 analysis·credit·macro·industry · L3 story · L4 ai + 사용자. import 하향 방향만 허용.
 **방향**: L2 엔진 간 상호 import 자동 탐지 · 레이어 위반 CI 게이트.
 
 이 문서가 dartlab 의 전체 축. 신규 기능·엔진 추가 시 이 문서를 먼저 확인하고 체계를 벗어나지 않게 한다. 각 섹션은 **"이렇게 한다"** 명제로 열고, 반복된 실수는 섹션 하단 **"반복 실패"** 에 정리한다.
@@ -22,7 +22,7 @@ L2 (분석)       analysis/      재무 + 전망 + 가치평가
                 macro/         시장 레벨 매크로 분석 (Company 불필요)
                 credit/        독립 신용평가
                 industry/      산업지도 + 밸류체인 분석
-                review/        블록식 조합 보고서 (analysis + credit + industry)
+                story/         블록식 조합 보고서 (analysis + credit + industry)
 L3 (AI)         ai/            적극적 분석가
 L4 (표현)       vscode/        VSCode 확장
 
@@ -34,29 +34,29 @@ L4 (표현)       vscode/        VSCode 확장
 
 ## 2. 6 분석 엔진 — 두 소비자를 최고로 지원한다
 
-analysis · scan · macro · credit · quant · industry 는 **두 소비자 (review · AI)** 를 모두 최고로 지원한다:
+analysis · scan · macro · credit · quant · industry 는 **두 소비자 (story · AI)** 를 모두 최고로 지원한다:
 
 1. **데이터 소비** — 각자의 데이터 소스에서 원본 수집.
 2. **분석기준 생성** — 학술·실무 검증된 기준으로 평가.
 3. **분석서사 생성** — 숫자를 한국어 인과 문장으로 변환.
 4. **분석관점 생성** — 이 종목에 대한 관점 (강세·약세·위험·기회).
 5. **분석근거 생성** — 관점의 통계적·학술적 근거.
-6. **두 소비자에 도구로 제공** — review 가 블록으로 조합, AI 가 직접 호출하여 판단.
+6. **두 소비자에 도구로 제공** — story 가 블록으로 조합, AI 가 직접 호출하여 판단.
 
 | 엔진 | 데이터 소스 | 서사 | 기여 |
 |---|---|---|---|
-| analysis | 재무제표 (IS·BS·CF) | 수익성·성장성·현금·안정성·효율성·종합 | review 블록 + AI 직접 분석 |
-| scan | 전종목 횡단 (finance·report parquet) | peer 비교·순위·시장 위치 | review 맥락 + AI 업종 검증 |
-| macro | 거시지표 (FRED·ECOS) | 사이클·금리·자산·심리·유동성 | review 매크로 + AI 환경 판단 |
-| credit | 신용등급·재무비율 | 등급·이력·플래그 | review 안정성 + AI 신용 검증 |
-| quant | 주가 OHLCV + 수급 | 추세·리스크·수급·전략검증·재무교차 | review 시장분석 + AI 기술 판단 |
-| industry | docs 텍스트 (사업개요·제품·원재료) | 밸류체인 위치·공급망·산업지도 | review 산업블록 + AI 산업 분석 |
+| analysis | 재무제표 (IS·BS·CF) | 수익성·성장성·현금·안정성·효율성·종합 | story 블록 + AI 직접 분석 |
+| scan | 전종목 횡단 (finance·report parquet) | peer 비교·순위·시장 위치 | story 맥락 + AI 업종 검증 |
+| macro | 거시지표 (FRED·ECOS) | 사이클·금리·자산·심리·유동성 | story 매크로 + AI 환경 판단 |
+| credit | 신용등급·재무비율 | 등급·이력·플래그 | story 안정성 + AI 신용 검증 |
+| quant | 주가 OHLCV + 수급 | 추세·리스크·수급·전략검증·재무교차 | story 시장분석 + AI 기술 판단 |
+| industry | docs 텍스트 (사업개요·제품·원재료) | 밸류체인 위치·공급망·산업지도 | story 산업블록 + AI 산업 분석 |
 
 ### 소비자별 차이
 
-- **review 가 쓸 때** — 엔진의 calc 결과를 블록으로 변환하여 보고서에 배치. 해석 제공 안 함.
+- **story 가 쓸 때** — 엔진의 calc 결과를 블록으로 변환하여 보고서에 배치. 해석 제공 안 함.
 - **AI 가 쓸 때** — AI 가 주체. 엔진 결과를 의심하고, 원본 (`c.show`) 으로 검증하고, override 로 재계산.
-- 엔진은 양쪽 모두에게 최고의 재료를 제공한다. 숫자와 근거를 투명하게 반환하여 review 는 배치하고 AI 는 검증할 수 있게.
+- 엔진은 양쪽 모두에게 최고의 재료를 제공한다. 숫자와 근거를 투명하게 반환하여 story 는 배치하고 AI 는 검증할 수 있게.
 
 ---
 
@@ -68,7 +68,7 @@ analysis · scan · macro · credit · quant · industry 는 **두 소비자 (re
     calcXxx(company) → dict          # 독립 모듈, 서로 호출 X
     calcYyy(company) → dict          # 각각 데이터 소비 + 서사 생성
 
-review/
+story/
   catalog.py    BlockMeta("xxx", label, section, description)
   builders.py   xxxBlock(dict) → list[Block]     # calc dict → 블록 변환
   narrate.py    narrateXxx(dict) → str           # 한국어 인과 문장
@@ -77,10 +77,10 @@ review/
 
 - calc 함수는 **독립 모듈** — 다른 calc 호출 가능하지만 순환 없음.
 - 각 calc 는 `@_memoized_calc` 데코레이터로 Company 세션 내 캐시.
-- review 가 calc 을 **어떤 순서로 · 어떤 섹션에** 조합할지 결정 (엔진이 결정하지 않음).
+- story 가 calc 을 **어떤 순서로 · 어떤 섹션에** 조합할지 결정 (엔진이 결정하지 않음).
 - 새 calc 추가 시: 엔진 `calcs` + catalog `BlockMeta` + builders `xxxBlock` + registry `_need` 4 곳.
 
-**반복 실패** — calc 끼리 순환 호출 / 엔진이 review 섹션을 스스로 결정 / `@_memoized_calc` 누락으로 세션당 중복 계산.
+**반복 실패** — calc 끼리 순환 호출 / 엔진이 story 섹션을 스스로 결정 / `@_memoized_calc` 누락으로 세션당 중복 계산.
 
 ---
 
@@ -90,11 +90,11 @@ review/
 - `gather/` · `scan/` · `quant/` 는 `core/` 만 import.
 - `analysis/` · `credit/` 는 `core/` + L1 만 import.
 - **L2 엔진 간 상호 import 없음** — `analysis ↔ credit` · `macro ↔ analysis` 금지.
-- `review/` 만 `analysis` + `credit` 양쪽 소비.
+- `story/` 만 `analysis` + `credit` 양쪽 소비.
 - `ai/` 는 모든 하위 레이어 소비 가능.
 - `guide/` 는 교차 관심사 — 모든 레이어에서 import 가능 (lazy import).
 
-**반복 실패** — L2 엔진 간 상호 import (analysis 가 credit 을 부르거나) 하면 순환 위험 + 레이어 구조 붕괴. review 만 양쪽 소비하는 유일한 예외.
+**반복 실패** — L2 엔진 간 상호 import (analysis 가 credit 을 부르거나) 하면 순환 위험 + 레이어 구조 붕괴. story 만 양쪽 소비하는 유일한 예외.
 
 ---
 
@@ -110,7 +110,7 @@ review/
 | macro | L2 | `dartlab.macro("축")` | 시장 레벨 매크로 분석 |
 | credit | L2 | `c.credit()` | 독립 신용평가 |
 | industry | L2 | `dartlab.industry("semiconductor")`, `c.industry()` | 산업지도 + 밸류체인 |
-| review | L2 | `c.review()` | 블록식 조합 보고서 |
+| story | L2 | `c.story()` | 블록식 조합 보고서 |
 | search | L0 | `dartlab.search("키워드")` | 공시 원문 검색 |
 | ai | L3 | `dartlab.ask("질문")` | AI 분석가 |
 | viz | 교차 | `dartlab.viz.revenue(c)` | 시각화 |
@@ -211,10 +211,10 @@ c.analysis("financial", "수익성")         # 한글 — 동일 결과
 
 ## 요약 — 명제 7 줄
 
-1. L0 core → L1 providers·gather·scan·quant → L2 analysis·credit·macro·industry·review → L3 ai → L4 vscode 5 층으로 쌓는다.
-2. 6 엔진(analysis·scan·macro·credit·quant·industry) 은 review 와 AI 두 소비자에게 calc 결과·서사·관점·근거를 제공한다.
-3. 엔진은 calc 독립 모듈 + `@_memoized_calc` + review 가 섹션·순서 결정 패턴으로 간다.
-4. import 는 L0←L1←L2←L3 하향만. L2 엔진 간 상호 import 없음 (review 만 양쪽 소비).
+1. L0 core → L1 providers·gather·scan·quant → L2 analysis·credit·macro·industry·story → L3 ai → L4 vscode 5 층으로 쌓는다.
+2. 6 엔진(analysis·scan·macro·credit·quant·industry) 은 story 와 AI 두 소비자에게 calc 결과·서사·관점·근거를 제공한다.
+3. 엔진은 calc 독립 모듈 + `@_memoized_calc` + story 가 섹션·순서 결정 패턴으로 간다.
+4. import 는 L0←L1←L2←L3 하향만. L2 엔진 간 상호 import 없음 (story 만 양쪽 소비).
 5. 진입점은 `dartlab.엔진("축")` 또는 `c.엔진("그룹","축")` 로 통일.
 6. scan 은 `종목코드`·`종목명` 첫 2 컬럼 고정, analysis 는 camelCase dict · 원 단위, credit 는 `healthScore = 100 - score`.
 7. 신규 기능 추가는 10 체크리스트 (위치·레이어·ops·guide·테스트·README·시스템 프롬프트·CAPABILITIES·데이터 일관성·MEMORY) 전수 통과.

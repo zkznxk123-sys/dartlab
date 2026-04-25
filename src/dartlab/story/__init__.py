@@ -1,7 +1,7 @@
-"""dartlab.story — 분석 리뷰 패키지.
+"""dartlab.story — 분석 보고서 패키지.
 
 c.story() 하나로 분석 보고서 생성 + 렌더링.
-AI reviewer는 이 위에 올라간다.
+AI 는 이 위에 올라간다 (L4).
 
 사용법::
 
@@ -124,58 +124,78 @@ def _flattenItems(items) -> list:
 
 @dataclass
 class Story:
-    """분석 리뷰 — 14축 전략분석 결과를 구조화 보고서로 렌더링.
+    """보고서 조합기 — 6 엔진 블록을 조합하여 6막 구조화 보고서 생성.
 
-    Capabilities:
-        - buildStory(company): 템플릿 기반 전체 리뷰 자동 생성 (2부 14축)
-        - Story([blocks...]): 블록 자유 조립 (맞춤 보고서)
-        - Story(stockCode=..., sections=[...]): 직접 구성
-        - render(fmt): rich/html/markdown/json 4종 렌더링
-        - toHtml(), toMarkdown(), toJson() 편의 메서드
-        - Jupyter/Colab/Marimo 자동 HTML 렌더링 (_repr_html_)
+    analysis/credit/scan/quant/macro/industry 엔진의 결과를 블록 단위로 조합.
+    11 보고서 타입 × 7 기업유형 템플릿. 해석하지 않고 다양한 관점의 근거를 배치.
+    buildStory(company) 로 자동 생성, Story([blocks]) 로 자유 조립.
 
-    Requires:
-        Company 객체 (buildStory 사용 시) 또는 Block 리스트.
+    Parameters
+    ----------
+    itemsOrStockCode : list | str, optional
+        Block 리스트 (자유 조립) 또는 종목코드 문자열.
+    stockCode : str
+        종목코드.
+    corpName : str
+        회사명.
+    sections : list[Section], optional
+        Section 리스트 (직접 구성).
+    layout : StoryLayout, optional
+        렌더링 레이아웃 설정.
 
-    AIContext:
-        story 수퍼툴이 이 클래스의 기능을 AI에게 노출.
-        blocks action으로 블록 카탈로그, section으로 섹션별 리뷰.
+    Returns
+    -------
+    Story
+        보고서 인스턴스. 주요 속성/메서드:
+            sections : list[Section] — 6막별 섹션 목록
+            render(fmt) : str — 렌더링 ("rich"/"html"/"markdown"/"json")
+            toHtml() : str — HTML 출력
+            toMarkdown() : str — Markdown 출력
+            summaryCard : SummaryCard — 최상단 요약 카드
 
-    Guide:
-        - "분석 보고서 보여줘" -> c.story() 또는 buildStory(company)
-        - "수익구조만 보고 싶어" -> c.story("수익구조")
-        - "HTML로 내보내기" -> story.toHtml()
-        - "블록 목록 보여줘" -> blocks(company) (카탈로그 테이블)
-        - "매출 성장률 블록만" -> b = blocks(c); b["growth"]
+    Raises
+    ------
+    ValueError
+        보고서 타입이 등록되지 않은 경우.
+    RuntimeError
+        Company 데이터 로드 실패 시.
 
-    SeeAlso:
-        - analysis: 14축 전략분석 엔진 (Review의 데이터 공급원)
-        - blocks: 블록 사전 (한글/영문/tab-complete)
-        - Company.story: Company에서 바로 호출
+    Examples
+    --------
+    >>> c.story()                              # 전체 보고서
+    >>> c.story("수익구조")                     # 수익구조 섹션만
+    >>> c.story(reportType="credit")           # 신용분석 보고서
+    >>> from dartlab.story import blocks, Story
+    >>> b = blocks(c)
+    >>> Story([b["growth"], b["margin"]])       # 자유 조립
 
-    Args:
-        itemsOrStockCode: Block 리스트 (자유 조립) 또는 종목코드 문자열.
-        stockCode: 종목코드.
-        corpName: 회사명.
-        sections: Section 리스트.
-        layout: StoryLayout 설정.
-        aiNote: AI 미설정 시 안내 메시지.
-        circulationSummary: 재무제표 순환 서사 요약.
+    Notes
+    -----
+    사람의 진입점은 c.story() (Company 메서드). AI 는 dartlab.ask() 경유.
+    4 출력 형식: rich(터미널), html, markdown, json.
+    Jupyter/Colab/Marimo 에서 _repr_html_ 자동 렌더링.
 
-    Returns:
-        Story 인스턴스. repr/render 호출 시 보고서 텍스트.
+    Guide
+    -----
+    When: 종목의 종합 분석 보고서가 필요할 때.
+    How: 11 타입 중 선택 — full(전체), executive(경영진 요약), credit(신용),
+        valuation(가치평가), growth(성장), crisis(위기), audit(감사),
+        dividend(배당), governance(지배구조), macro(매크로), thesis(투자논제).
+    Verified:
+        - credit 타입 → credit + analysis(안정성,현금흐름,자금조달) 조합 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+        - audit 타입 → analysis(이익품질,재무정합성) + 감사의견 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+        - governance 타입 → analysis(지배구조,공시변화) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+        - dividend 타입 → analysis(수익구조,현금흐름,자본배분) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+        - valuation 타입 → analysis(가치평가) + quant (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+        - thesis 타입 → macro + analysis 복합 근거 수집 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
 
-    Example::
-
-        import dartlab
-        c = dartlab.Company("005930")
-        c.story()                        # 전체 리뷰
-        c.story("수익구조")               # 수익구조 섹션만
-
-        from dartlab.story import blocks, Story, buildStory
-        b = blocks(c)
-        b["growth"]                       # 매출 성장률 블록
-        Story([b["growth"], b["margin"]])  # 자유 조립
+    See Also
+    --------
+    analysis : 재무 심층 분석 — story 의 주요 데이터 공급원.
+    credit : 신용 분석 — story credit 타입의 핵심 엔진.
+    scan : 전종목 비교 — 동종업계 비교 블록 제공.
+    quant : 기술적 분석 — 가격 기반 신호 블록 제공.
+    macro : 거시 분석 — 매크로 환경 블록 제공.
     """
 
     stockCode: str = ""
@@ -327,7 +347,7 @@ class Story:
         """HTML 형식으로 렌더링한다.
 
         Capabilities:
-            - Review를 완전한 HTML 문자열로 변환
+            - Story를 완전한 HTML 문자열로 변환
             - 인라인 스타일 포함 — 외부 CSS 불필요
             - 웹 페이지 삽입, 이메일 첨부, 파일 저장에 적합
 
@@ -365,7 +385,7 @@ class Story:
         """Markdown 형식으로 렌더링한다.
 
         Capabilities:
-            - Review를 Markdown 문자열로 변환
+            - Story를 Markdown 문자열로 변환
             - GitHub/Notion/문서 시스템에 바로 붙여넣기 가능
             - 테이블, 헤딩, 플래그 등 구조 보존
 
@@ -403,7 +423,7 @@ class Story:
         """JSON 형식으로 렌더링한다.
 
         Capabilities:
-            - Review를 JSON 문자열로 직렬화
+            - Story를 JSON 문자열로 직렬화
             - 프로그래밍 소비, API 응답, 저장/전송에 적합
             - 섹션/블록 구조가 그대로 보존됨
 

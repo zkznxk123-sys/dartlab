@@ -3,7 +3,7 @@ title: "효성화학 (298000) — 팔수록 적자 4년, 그런데 순이익 +3,
 date: 2026-04-18
 description: "매출원가 103% 4년 연속, 금융비용 연 2,650억, 누적 영업적자 8,641억. 자본잠식 문턱에 몰렸던 효성화학이 2025년 순이익 +3,260억으로 돌아선 진짜 이유."
 category: company-reports
-series: financial-context
+series: company-reports
 seriesOrder: 56
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/298000-hyosung-chemical.webp

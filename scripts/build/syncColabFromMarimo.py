@@ -282,10 +282,10 @@ NOTEBOOKS: dict[str, list[dict]] = {
             'print(c.story("수익성").toMarkdown())',
         ),
         code('print(c.story("성장성").toMarkdown())'),
-        md("## AI 종합의견 (reviewer) — provider 키 필요"),
+        md("## AI 종합의견 — provider 키 필요"),
         code(
-            "# AI 종합의견 포함",
-            '# c.reviewer(guide="반도체 사이클 관점에서 평가해줘")',
+            "# AI 종합의견은 ask 로 일원화",
+            '# dartlab.ask("삼성전자 반도체 사이클 관점에서 평가해줘")',
         ),
     ],
     "09_ai.ipynb": [

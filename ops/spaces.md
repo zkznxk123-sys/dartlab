@@ -41,7 +41,7 @@ Claude Desktop `claude_desktop_config.json`:
 ```
 
 25 도구 즉시 사용:
-- 개별 종목 — `companyInsights` · `companyAnalysis` · `companyReview` · `companyValuation` · `companyCredit` · `companyGather` · `companyQuant` …
+- 개별 종목 — `companyInsights` · `companyAnalysis` · `companyStory` · `companyValuation` · `companyCredit` · `companyGather` · `companyQuant` …
 - 시장·거시 — `macroAnalysis` · `marketScan` · `gatherData` · `quantAnalysis` · `topdownScreen`.
 - 검색·목록 — `searchCompany` · `dartlabSearch` · `dartlabListing`.
 
@@ -129,7 +129,7 @@ FastAPI app (src/dartlab/server/__init__.py)
 |---|---|
 | companyInsights | 7 영역 등급 + 프로파일 |
 | companyAnalysis | 14 축 재무 심층분석 |
-| companyReview | 6 막 종합 보고서 |
+| companyStory | 6 막 종합 보고서 |
 | companyValuation | DCF + DDM + 상대가치 |
 | companyForecast | 매출 예측 |
 | companyFinancials | 재무제표 원본 |

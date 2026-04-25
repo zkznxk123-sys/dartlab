@@ -188,16 +188,17 @@ def printGuide(corpName: str, stockCode: str, properties: list, noteKeys: list, 
 
     console.print(Text("\n 주석 (K-IFRS)", style=f"bold {_TX}"))
     for eng, kr in zip(noteKeys, noteKeysKr):
+        topic = f'c.show("{eng}")'
         t = Text("   ")
-        t.append(f"c.notes.{eng}", style=_PR)
-        padding = " " * max(1, 24 - len(f"c.notes.{eng}"))
+        t.append(topic, style=_PR)
+        padding = " " * max(1, 24 - len(topic))
         t.append(padding, style="")
         t.append(kr, style=_TM)
         console.print(t)
 
     t = Text("   ")
-    t.append('c.notes["재고자산"]', style=_PR)
-    t.append("  한글 키도 가능", style=_TM)
+    t.append('c.show("재고자산")', style=_PR)
+    t.append("  한글 topic 도 가능", style=_TM)
     console.print(t)
 
     console.print(Text("\n 기타", style=f"bold {_TX}"))

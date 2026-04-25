@@ -281,7 +281,19 @@ class GatherEntry:
         target: str | None = None,
         **kwargs: Any,
     ) -> pl.DataFrame:
-        """외부 시장 데이터 수집 실행.
+        """외부 시장 데이터 수집 — 주가·수급·거시지표·뉴스 4 축.
+
+        Parameters
+        ----------
+        axis : str, optional
+            수집 축. None 이면 가이드 DataFrame 반환.
+            "price" — OHLCV 주가, "flow" — 투자자별 수급,
+            "macro" — FRED/ECOS 거시지표, "news" — Google News,
+            "sector" — 업종/산업 분류, "insider" — 내부자 거래.
+        target : str, optional
+            종목코드/지표코드/검색어. 축에 따라 필수.
+        **kwargs
+            market ("KR"/"US"), start, end, days 등 축별 옵션.
 
         Returns
         -------
@@ -321,6 +333,39 @@ class GatherEntry:
                 position : str — 직위
                 tradeType : str — 거래유형
                 changeShares : int — 변동 주수
+
+        Raises
+        ------
+        ValueError
+            축 이름이 등록되지 않은 경우.
+            target 필수 축에서 target 누락 시.
+
+        Examples
+        --------
+        >>> dartlab.gather()                              # 가이드
+        >>> dartlab.gather("price", "005930")              # KR OHLCV
+        >>> dartlab.gather("price", "AAPL", market="US")   # US 주가
+        >>> dartlab.gather("macro", "FEDFUNDS")            # 미국 기준금리
+        >>> dartlab.gather("news", "삼성전자")              # Google News
+
+        Notes
+        -----
+        Naver(KR)/Yahoo(US)/FRED/ECOS/Google News 경유. API 키 불필요.
+        결과는 Polars DataFrame — 분석 엔진 입력으로 바로 사용 가능.
+
+        Guide
+        -----
+        When: 분석 엔진에 필요한 외부 데이터를 수집할 때.
+        How: gather → analysis/quant 파이프라인. gather("price") 는 quant 의 데이터 원천.
+            gather("macro") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과).
+        Verified:
+            - gather("news") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+
+        See Also
+        --------
+        quant : 주가 기반 정량 분석 — gather("price") 데이터 소비.
+        macro : 거시 분석 — gather("macro") raw 데이터의 분석 결과.
+        scan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완.
         """
         if axis is None:
             return self._guide()

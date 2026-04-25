@@ -1016,19 +1016,79 @@ class Analysis:
         overrides: dict | None = None,
         **kwargs: Any,
     ) -> pl.DataFrame | dict:
-        """엔진("그룹", "하위") 2단계 호출 패턴.
+        """재무 심층 분석 — 5 그룹 22 축 인과 분석 + 가치평가 + 전망.
 
-        호출::
+        2단계 호출: analysis("그룹", "축") 또는 analysis("축") 단축형.
 
-            # 종목 지정 (일관성 규약: 종목 = stockCode)
-            dartlab.analysis("financial", "수익성", stockCode="005930")
+        Parameters
+        ----------
+        axis : str, optional
+            분석 축 또는 그룹. None 이면 가이드 DataFrame 반환.
+            그룹: "financial", "valuation", "forecast", "opinion", "special".
+            축: "수익구조", "수익성", "성장성", "안정성", "현금흐름", "자본배분",
+            "투자효율", "가치평가", "매출전망", "이익전망" 등 22 축.
+        sub : str, optional
+            그룹 호출 시 하위 축 지정. analysis("financial", "수익성").
+        stockCode : str, optional
+            종목코드. company 없이 단독 호출 시 사용.
+        basePeriod : str, optional
+            기준 기간 (예: "2024Q4"). 생략 시 최신 기간 자동.
+        overrides : dict, optional
+            calc 함수 입력값 재지정 (what-if 시나리오).
 
-            # Company-bound (프로그래밍 경로)
-            c = dartlab.Company("005930")
-            c.analysis("financial", "수익성")
+        Returns
+        -------
+        dict
+            축별 분석 결과. 공통 키:
+                period : str — 기준 기간
+                items : list[dict] — 개별 지표 목록
+                    name : str — 지표명
+                    value : float | str — 값
+                    unit : str — 단위 (%, 원, 배, 일, 점)
+                    trend : str — 추세 (상승/하락/유지)
+            축별 추가 키:
+                marginTrend : list — 마진 시계열 (수익성)
+                debtMetrics : dict — 부채 지표 (안정성)
+                fcfHistory : list — FCF 시계열 (현금흐름)
+                targetPrice : float — 적정 주가 (가치평가, 원)
+                forecastRevenue : list — 매출 전망 (매출전망)
+        pl.DataFrame
+            axis=None: 가이드 — 축 목록 + 설명 + 예시.
+            그룹만 지정 시: 그룹 내 축 목록.
 
-            # 기존 company= 호환 (Company 객체 직접 전달)
-            dartlab.analysis("financial", "수익성", company=c)
+        Raises
+        ------
+        ValueError
+            축이 그룹에 속하지 않는 경우 (예: analysis("valuation", "수익성")).
+            등록되지 않은 축 이름.
+
+        Examples
+        --------
+        >>> c.analysis()                              # 전체 축 가이드
+        >>> c.analysis("financial", "수익성")          # 그룹 + 축
+        >>> c.analysis("수익성")                       # 단축형
+        >>> c.analysis("가치평가")                     # 적정 주가
+        >>> dartlab.analysis("수익성", stockCode="005930")  # 종목코드 단독
+
+        Notes
+        -----
+        DART 공시 재무제표 기반. API 키 불필요.
+        분기별 비교 가능성이 핵심 — 모든 축이 시계열 추이를 포함.
+
+        Guide
+        -----
+        When: 개별 종목의 재무 인과를 심층 분석할 때.
+        How: 6막 인과 순서 — 수익구조 → 수익성 → 성장성 → 안정성 → 현금흐름 → 자본배분.
+            story full/executive 타입이 이 순서로 조합.
+            credit 분석 시 안정성 + 현금흐름 먼저, credit 엔진과 함께 사용.
+            valuation 분석 시 수익성 + 성장성 → 가치평가 + 매출전망 순서.
+
+        See Also
+        --------
+        credit : 독립 신용 분석 — analysis(안정성) 와 함께 사용.
+        scan : 전종목 횡단 비교 — 상대 위치 파악 후 심층 분석.
+        quant : 가격 기반 정량 신호 — analysis 재무 + quant 기술 조합.
+        macro : 거시 환경 — 기업 분석의 매크로 컨텍스트.
         """
         if axis is None:
             return self._guide()

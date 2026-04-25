@@ -2,7 +2,7 @@
 
 [최우선 UX 원칙] 데이터 투명성 — 절대 제거 금지
 
-모든 분석 로직은 engines/ai/core.py가 처리.
+모든 분석 로직은 dartlab.ai.runtime.core 가 처리.
 이 모듈은 이벤트를 SSE dict로 변환하는 thin adapter.
 
 이벤트 흐름:

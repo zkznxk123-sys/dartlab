@@ -29,7 +29,7 @@ viz 는 헬퍼 엔진. 별도 노트북 없이 다른 분석 노트북 내에서
 | 레이어 | 교차 관심사 (guide/ 와 동일 위치) |
 | 진입점 | `dartlab.viz` · `emit_chart()` · `emit_diagram()` |
 | 소비 | Company (finance · docs), analysis (insight), AI runtime |
-| 생산 | review (ChartBlock), AI (CHART 이벤트), Jupyter (Plotly Figure) |
+| 생산 | story (ChartBlock), AI (CHART 이벤트), Jupyter (Plotly Figure) |
 | 프로토콜 | VizSpec (ChartSpec JSON 100% 하위호환) |
 
 ---
@@ -90,9 +90,9 @@ AI 코드 실행 → emit_chart() → stdout 마커 → extract_viz_specs() → 
 | **VSCode Extension** | SSE chart 이벤트 → Svelte ChartRenderer (SVG) |
 | **Web UI (SPA)** | SSE chart 이벤트 → Svelte ChartRenderer (SVG) |
 | **Jupyter · Marimo** | `VizSpec.toPlotly()` → Plotly Figure |
-| **Review (터미널)** | `[chart: title]` 플레이스홀더 |
-| **Review (HTML)** | `<div class="dl-chart" data-spec='...'/>` |
-| **Review (JSON)** | spec dict 그대로 |
+| **Story (터미널)** | `[chart: title]` 플레이스홀더 |
+| **Story (HTML)** | `<div class="dl-chart" data-spec='...'/>` |
+| **Story (JSON)** | spec dict 그대로 |
 
 ---
 
@@ -115,7 +115,7 @@ AI 코드 실행 → emit_chart() → stdout 마커 → extract_viz_specs() → 
 | `src/dartlab/viz/extract.py` | AI stdout 마커 추출 |
 | `src/dartlab/viz/generators.py` | Company → ChartSpec 8 종 |
 | `src/dartlab/viz/charts/` | DataFrame → Plotly Figure (line · bar · pie · waterfall · revenue · …) |
-| `src/dartlab/review/blocks.py` | ChartBlock 타입 |
+| `src/dartlab/story/blocks.py` | ChartBlock 타입 |
 | `ui/shared/chart/` | Svelte SVG 차트 컴포넌트 (source of truth, web · vscode 공유) |
 
 ---
@@ -126,5 +126,5 @@ AI 코드 실행 → emit_chart() → stdout 마커 → extract_viz_specs() → 
 2. VizSpec 프로토콜 (`chartType`/`title`/`series`/`categories`/`options`/`meta`) + diagram 분기.
 3. AI 는 stdout 마커로 전달 — `emit_*` → `extract_viz_specs` → CHART 이벤트 → SSE → 클라이언트.
 4. Company → ChartSpec 자동 생성기 8 종 (revenue · cashflow · BS · profitability · dividend · radar · sparkline · heatmap).
-5. 렌더링은 VSCode · Web SPA · Jupyter · Review (터미널·HTML·JSON) 6 경로.
+5. 렌더링은 VSCode · Web SPA · Jupyter · Story (터미널·HTML·JSON) 6 경로.
 6. 팔레트는 Python `viz/palette.py` + JS `ui/shared/chart/colors.ts` 한 값으로 동기화.

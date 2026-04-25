@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" fill="none">
   <title>수익 구조 분석 순서: 프로필부터 종합 판단까지</title>
-  <desc>c.review("수익구조")가 출력하는 9단계 분석 순서를 시각화</desc>
+  <desc>c.story("수익구조")가 출력하는 9단계 분석 순서를 시각화</desc>
 
   <rect width="1200" height="720" rx="16" fill="#0f172a"/>
 
   <text x="600" y="45" text-anchor="middle" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="20" font-weight="700">수익 구조 분석 순서</text>
-  <text x="600" y="70" text-anchor="middle" fill="#64748b" font-family="system-ui, sans-serif" font-size="13">c.review("수익구조") 실행 시 자동 생성되는 분석 흐름</text>
+  <text x="600" y="70" text-anchor="middle" fill="#64748b" font-family="system-ui, sans-serif" font-size="13">c.story("수익구조") 실행 시 자동 생성되는 분석 흐름</text>
 
   <!-- 단계별 카드 — 2열 배치 -->
   <!-- Row 1 -->
