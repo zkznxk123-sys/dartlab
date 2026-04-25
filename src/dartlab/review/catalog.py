@@ -277,40 +277,41 @@ _BLOCKS: list[BlockMeta] = [
         "시장분석",
         "Grinold & Kahn Ch.5 — 일별 Spearman IC × √252 = ICIR + hit rate (Alphalens 표준)",
     ),
+    # 6막 분산 — 부실(자금조달) / 이익품질(이익품질) / 종합 (종합평가) / 가격기반 (시장분석)
     BlockMeta(
         "altmanFactor",
         "Altman Z-Score 분포",
-        "시장분석",
+        "자금조달",
         "Altman 1968/1995 — 전종목 부실확률 safe/grey/distress 3 zone + top safe/distress 10",
-    ),
-    BlockMeta(
-        "piotroskiFactor",
-        "Piotroski F-Score 분포",
-        "시장분석",
-        "Piotroski 2000 — 9 재무 신호 합 (0~9점), strong/moderate/weak 분포 + 9 신호 시장 통과율",
     ),
     BlockMeta(
         "beneishFactor",
         "Beneish M-Score 분포",
-        "시장분석",
+        "이익품질",
         "Beneish 1999 — 8변수 이익 조작 감지, red flag (M > -1.78) 종목 비율 + top 의심 10",
     ),
     BlockMeta(
         "accrualsFactor",
         "Sloan Accrual Quality 분포",
-        "시장분석",
+        "이익품질",
         "Sloan 1996 — (NI-CFO)/TA, high/low 3 그룹, low accrual = long-short premium 후보",
+    ),
+    BlockMeta(
+        "piotroskiFactor",
+        "Piotroski F-Score 분포",
+        "종합평가",
+        "Piotroski 2000 — 9 재무 신호 합 (0~9점), strong/moderate/weak 분포 + 9 신호 시장 통과율",
     ),
     BlockMeta(
         "qFactor",
         "q-factor (Hou-Xue-Zhang)",
-        "시장분석",
+        "종합평가",
         "Hou-Xue-Zhang 2015 — ROE + (−assetGrowth) composite, 수익성×보수투자 복합 랭킹",
     ),
     BlockMeta(
         "qmj",
         "QMJ (Quality minus Junk)",
-        "시장분석",
+        "종합평가",
         "Asness-Frazzini-Pedersen 2019 — Profitability (ROE/ROA/CFOA) + Safety 합성 품질 랭킹",
     ),
     BlockMeta(

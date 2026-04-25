@@ -41,6 +41,7 @@ _SECTION_CONFIG: dict[str, dict] = {
             "interestBurden",
             "liquidity",
             "capitalFlags",
+            "altmanFactor",  # Sprint 2 — 전종목 부실 분포 (Altman Z 횡단면)
         ],
         "helper": (
             "① 내부유보/주주자본/금융차입/영업조달 4원천 비중을 본다\n"

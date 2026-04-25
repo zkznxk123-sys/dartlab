@@ -14,7 +14,7 @@ SPEC = {
         "risk": {
             "label": "리스크",
             "description": "가격 + 벤치마크 기반 리스크 분석",
-            "axes": ["beta", "factor", "tailrisk", "residual"],
+            "axes": ["beta", "factor", "tailrisk", "residual", "bab"],  # Sprint 2: bab
         },
         "microstructure": {
             "label": "미시구조",
@@ -24,7 +24,21 @@ SPEC = {
         "fundamental": {
             "label": "펀더멘털",
             "description": "재무제표 기반 정량 팩터",
-            "axes": ["divergence", "quality", "value", "earnings"],
+            "axes": [
+                "divergence",
+                "quality",
+                "value",
+                "earnings",
+                # Sprint 2 신규 (2026-04-25)
+                "altman",
+                "piotroski",
+                "beneish",
+                "accruals",
+                "qfactor",
+                "qmj",
+                "surprise",
+                "fundmom",
+            ],
         },
         "text": {
             "label": "텍스트/공시",
@@ -230,6 +244,70 @@ SPEC = {
             "when": "투자자 뷰 반영 자산배분",
             "key_output": "weights, posteriorReturns, riskBudget",
             "method": "Black-Litterman(1992)",
+        },
+        # ── Sprint 2 신규 9 alpha (2026-04-25) ─────────────────
+        "altman": {
+            "label": "Altman Z",
+            "description": "전종목 Z-Score 부실확률 (1968 5변수 / 1995 Z'' 4변수)",
+            "when": "시장 부실위험 분포 + topSafe/topDistress 종목 식별",
+            "key_output": "scores, zones(safe/grey/distress), topSafe, topDistress",
+            "method": "Altman(1968), Altman-Hotchkiss(2006)",
+        },
+        "piotroski": {
+            "label": "Piotroski F",
+            "description": "9 신호 합 (0~9점) 재무건강 횡단면 분포",
+            "when": "재무건강 strong (F≥7) / weak (F≤3) 종목 식별",
+            "key_output": "scores, grades(strong/moderate/weak), topStrong, signalAvg",
+            "method": "Piotroski(2000)",
+        },
+        "beneish": {
+            "label": "Beneish M",
+            "description": "8변수 이익조작 감지 (DSRI/GMI/AQI/SGI/DEPI/SGAI/TATA/LVGI)",
+            "when": "red flag (M > -1.78) 의심 종목 + clean 종목 식별",
+            "key_output": "scores, flags(redFlag/clean), topFlag, topClean",
+            "method": "Beneish(1999)",
+        },
+        "accruals": {
+            "label": "Sloan Accrual",
+            "description": "(NI − CFO) / TA 발생액품질 횡단면",
+            "when": "high accrual (reversal risk) / low accrual (cash quality premium 후보) 식별",
+            "key_output": "scores, groups(high/neutral/low), topHigh, topLow",
+            "method": "Sloan(1996), Dechow-Dichev(2002)",
+        },
+        "qfactor": {
+            "label": "q-factor",
+            "description": "ROE + (−assetGrowth) percentile composite (수익성×보수투자)",
+            "when": "Hou-Xue-Zhang q-premium 후보 식별",
+            "key_output": "scores, components(roe, assetGrowth, ranks), topQ, bottomQ",
+            "method": "Hou-Xue-Zhang(2015)",
+        },
+        "qmj": {
+            "label": "QMJ",
+            "description": "Profitability (ROE/ROA/CFOA) + Safety (-leverage) 합성 품질",
+            "when": "Asness Quality minus Junk premium 후보 식별",
+            "key_output": "scores, components, topQuality, topJunk",
+            "method": "Asness-Frazzini-Pedersen(2019)",
+        },
+        "bab": {
+            "label": "BAB 저변동",
+            "description": "60일 realized vol 저변동성 횡단면 랭킹",
+            "when": "Frazzini-Pedersen BAB long 후보 (Baker-Bradley-Wurgler anomaly)",
+            "key_output": "scores(annualized vol %), topLow, topHigh",
+            "method": "Frazzini-Pedersen(2014), Baker-Bradley-Wurgler(2011)",
+        },
+        "surprise": {
+            "label": "이익서프라이즈",
+            "description": "YoY NI growth 횡단면 z-score (PEAD drift 후보)",
+            "when": "Bernard-Thomas PEAD long-short 후보 식별",
+            "key_output": "scores(z), growths, topPos, topNeg",
+            "method": "Bernard-Thomas(1989), Ball-Brown(1968)",
+        },
+        "fundmom": {
+            "label": "펀더-가격 모멘텀",
+            "description": "earnings growth + 12-1 price momentum 합성 (rank avg)",
+            "when": "Chordia-Shivakumar 펀더멘털×가격 double-momentum long 후보",
+            "key_output": "scores, components(earningsGrowth, priceMom12_1), topDouble",
+            "method": "Chordia-Shivakumar(2006), Jegadeesh-Titman(1993)",
         },
     },
     "markets": ["KR", "US"],

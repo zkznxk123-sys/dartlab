@@ -22,7 +22,13 @@ import polars as pl
 log = logging.getLogger(__name__)
 
 
-def calcBAB(*, market: str = "KR", window: int = 60) -> dict | None:
+def calcBAB(
+    *,
+    market: str = "KR",
+    window: int = 60,
+    stockCode: str | None = None,
+    **kwargs,
+) -> dict | None:
     """BAB (Betting Against Beta) — 저변동성 프리미엄 횡단면 랭킹.
 
     Capabilities:
@@ -87,11 +93,43 @@ def calcBAB(*, market: str = "KR", window: int = 60) -> dict | None:
     sorted_items = sorted(scores.items(), key=lambda x: x[1])  # 낮은 순
     topLow = [(c, round(v, 2)) for c, v in sorted_items[:10]]
     topHigh = [(c, round(v, 2)) for c, v in sorted_items[-10:]]
+    total = len(scores)
+
+    # 단일 종목 분기 (Step 6)
+    if stockCode:
+        v = scores.get(stockCode)
+        if v is None:
+            return {
+                "stockCode": stockCode,
+                "market": market,
+                "error": f"{stockCode} 데이터 없음 (universe {total}개 중 미포함)",
+            }
+        # 저변동성 percentile (낮을수록 BAB long 후보)
+        rank_low = sum(1 for x in scores.values() if x <= v)
+        pct_low = round(100 * rank_low / total, 1)
+        category = (
+            "low-vol (BAB long 후보)"
+            if pct_low <= 30
+            else ("mid-vol" if pct_low <= 70 else "high-vol (BAB short 후보)")
+        )
+        return {
+            "stockCode": stockCode,
+            "market": market,
+            "window": window,
+            "score": round(v, 2),
+            "volPercentile": pct_low,
+            "category": category,
+            "universe": total,
+            "interpretation": (
+                f"{stockCode} {window}일 vol={round(v, 2)}% (저변동 백분위 {pct_low}) — {category}. "
+                "Frazzini-Pedersen BAB."
+            ),
+        }
 
     return {
         "market": market,
         "window": window,
-        "universe": len(scores),
+        "universe": total,
         "scores": {c: round(v, 2) for c, v in scores.items()},
         "topLow": topLow,
         "topHigh": topHigh,

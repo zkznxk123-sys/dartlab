@@ -1126,3 +1126,174 @@ def narrateStoryPrecedents(data: dict | None) -> str | None:
     sample = [p.get("name") or p.get("stockCode") for p in precedents[:3] if p.get("name") or p.get("stockCode")]
     tail = f" (대표: {', '.join(sample)})" if sample else ""
     return f"유사 경로를 걸은 기업 {count}건 발견 (신뢰도 {confidence}){tail}."
+
+
+# ════════════════════════════════════════════════════════════════════
+# Sprint 2~7 신규 alpha narrate 12 함수 (review = 이야기꾼 사상 정합)
+# ════════════════════════════════════════════════════════════════════
+
+
+def narrateAltman(data: dict | None) -> str | None:
+    """calcAltman 결과 → 자연어 (Z-Score 부실 진단)."""
+    if not data:
+        return None
+    zones = data.get("zones") or {}
+    distress = zones.get("distress", {})
+    safe = zones.get("safe", {})
+    universe = data.get("universe", 0)
+    variant = data.get("variant", "z")
+    return (
+        f"{universe}개 종목 중 부실위험 {distress.get('pct', 0)}% ({distress.get('count', 0)}사), "
+        f"안전 {safe.get('pct', 0)}%. Altman {variant.upper()} 모형."
+    )
+
+
+def narratePiotroski(data: dict | None) -> str | None:
+    """calcPiotroski 결과 → 자연어 (F-Score 9점 재무건강)."""
+    if not data:
+        return None
+    grades = data.get("grades") or {}
+    strong = grades.get("strong", {})
+    weak = grades.get("weak", {})
+    universe = data.get("universe", 0)
+    return (
+        f"{universe}개 종목 중 strong (F≥7) {strong.get('pct', 0)}% ({strong.get('count', 0)}사), "
+        f"weak (F≤3) {weak.get('pct', 0)}%. Piotroski 9점 재무건강."
+    )
+
+
+def narrateBeneish(data: dict | None) -> str | None:
+    """calcBeneish 결과 → 자연어 (M-Score 이익조작 감지)."""
+    if not data:
+        return None
+    flags = data.get("flags") or {}
+    red = flags.get("redFlag", {})
+    universe = data.get("universe", 0)
+    return (
+        f"{universe}개 종목 중 red flag (M > -1.78) {red.get('pct', 0)}% ({red.get('count', 0)}사). "
+        "Beneish 8변수 이익조작 감지 모형."
+    )
+
+
+def narrateAccruals(data: dict | None) -> str | None:
+    """calcAccruals 결과 → 자연어 (Sloan 발생액 품질)."""
+    if not data:
+        return None
+    groups = data.get("groups") or {}
+    high = groups.get("high", {})
+    low = groups.get("low", {})
+    universe = data.get("universe", 0)
+    return (
+        f"{universe}개 종목 중 high accrual (>+5%) {high.get('pct', 0)}% (reversal risk), "
+        f"low (<-5%) {low.get('pct', 0)}% (cash quality premium 후보). Sloan 1996."
+    )
+
+
+def narrateQFactor(data: dict | None) -> str | None:
+    """calcQFactor 결과 → 자연어 (Hou-Xue-Zhang q-factor composite)."""
+    if not data:
+        return None
+    universe = data.get("universe", 0)
+    topQ = data.get("topQ") or []
+    sample = ", ".join(c for c, _ in topQ[:3])
+    return f"{universe}개 종목 q-factor composite — 고 ROE + 저 asset growth 조합. top 3: {sample}. Hou-Xue-Zhang 2015."
+
+
+def narrateQMJ(data: dict | None) -> str | None:
+    """calcQMJ 결과 → 자연어 (Asness Quality minus Junk)."""
+    if not data:
+        return None
+    universe = data.get("universe", 0)
+    topQ = data.get("topQuality") or []
+    sample = ", ".join(c for c, _ in topQ[:3])
+    return (
+        f"{universe}개 종목 QMJ composite — 고 수익성 + 저 레버리지 조합. "
+        f"top 3 quality: {sample}. Asness-Frazzini-Pedersen 2019."
+    )
+
+
+def narrateBAB(data: dict | None) -> str | None:
+    """calcBAB 결과 → 자연어 (저변동성 프리미엄)."""
+    if not data:
+        return None
+    universe = data.get("universe", 0)
+    window = data.get("window", 60)
+    topLow = data.get("topLow") or []
+    return (
+        f"{universe}개 종목 {window}일 realized vol — 저변동성 분위가 BAB long 후보. "
+        f"top 3 low-vol: {', '.join(c for c, _ in topLow[:3])}. Frazzini-Pedersen 2014."
+    )
+
+
+def narrateEarningsSurprise(data: dict | None) -> str | None:
+    """calcEarningsSurprise 결과 → 자연어 (PEAD drift)."""
+    if not data:
+        return None
+    universe = data.get("universe", 0)
+    topPos = data.get("topPos") or []
+    return (
+        f"{universe}개 종목 SUE (YoY NI growth z-score) — positive SUE 상위가 PEAD drift long 후보. "
+        f"top 3: {', '.join(t[0] for t in topPos[:3])}. Bernard-Thomas 1989."
+    )
+
+
+def narrateFundMomentum(data: dict | None) -> str | None:
+    """calcFundamentalMomentum 결과 → 자연어 (펀더멘털×가격 모멘텀)."""
+    if not data:
+        return None
+    universe = data.get("universe", 0)
+    topD = data.get("topDouble") or []
+    return (
+        f"{universe}개 종목 펀더멘털×가격 composite — earnings + 12-1 price 모멘텀. "
+        f"top 3 double: {', '.join(c for c, _ in topD[:3])}. Chordia-Shivakumar 2006."
+    )
+
+
+def narrateFactorTearSheet(data: dict | None) -> str | None:
+    """calcFactorTearSheetAll 결과 → 자연어 (FF5 4팩터 long-short Sharpe)."""
+    if not data:
+        return None
+    factors = data.get("factors") or []
+    if not factors:
+        return None
+    strongest = data.get("strongest", "?")
+    universe = data.get("universe", "?")
+    year = data.get("year", "?")
+    sharpes = ", ".join(f"{f.get('factorName')} {f.get('longShortSharpe', 0):+.2f}" for f in factors[:4])
+    return f"{year}년 {universe}종목 Fama-French — {sharpes}. 가장 강한 팩터: {strongest}."
+
+
+def narrateRiskDecomposition(data: dict | None) -> str | None:
+    """calcMultiFactorRisk 결과 → 자연어 (Barra 시스템/고유 리스크 분해)."""
+    if not data:
+        return None
+    sysR = data.get("systematicRisk")
+    resR = data.get("residualRisk")
+    totR = data.get("totalRisk")
+    sysShare = data.get("systematicShare", 0)
+    if sysR is None or resR is None:
+        return None
+    contribs = data.get("factorContributions") or {}
+    top_contrib = ""
+    if contribs:
+        top = max(contribs.items(), key=lambda kv: abs(kv[1]))
+        top_contrib = f", 최대 기여 {top[0]} {top[1]:+.0f}%"
+    return (
+        f"총 리스크 {totR:.1f}% = systematic {sysR:.1f}% ({sysShare:.0f}%) + idiosyncratic {resR:.1f}%. "
+        f"Barra B Σ_f Bᵀ + D 분해{top_contrib}."
+    )
+
+
+def narrateFactorIC(data: dict | None) -> str | None:
+    """calcFactorICAll 결과 → 자연어 (Cross-Sectional IC + ICIR)."""
+    if not data:
+        return None
+    factors = data.get("factors") or []
+    if not factors:
+        return None
+    strongest = data.get("strongest", "?")
+    horizon = data.get("horizon", "?")
+    icirs = ", ".join(f"{f.get('factorName')} ICIR {f.get('icir', 0):+.2f}" for f in factors[:4])
+    return (
+        f"{horizon}일 forward — {icirs}. 최강 예측력: {strongest}. Grinold & Kahn Ch.5 (look-ahead 방지 + non-overlap)."
+    )

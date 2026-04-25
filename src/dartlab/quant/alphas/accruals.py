@@ -27,7 +27,12 @@ from dartlab.quant.factorBuild import _latest_year
 log = logging.getLogger(__name__)
 
 
-def calcAccrualsFactor(*, market: str = "KR") -> dict | None:
+def calcAccrualsFactor(
+    *,
+    market: str = "KR",
+    stockCode: str | None = None,
+    **kwargs,
+) -> dict | None:
     """Sloan Accruals 횡단면 quant factor — 한국 시장 이익 품질 지도.
 
     Capabilities:
@@ -81,12 +86,11 @@ def calcAccrualsFactor(*, market: str = "KR") -> dict | None:
         return None
 
     scores: dict[str, float] = {}
-    codes = cur.get_column("stockCode").unique().to_list()
-    for code in codes:
-        if not isinstance(code, str):
-            continue
-        stock = cur.filter(pl.col("stockCode") == code)
-        if stock.is_empty():
+    # 성능 fix (G5): partition_by 한 번 호출 → O(n) lookup
+    partitions = cur.partition_by("stockCode", as_dict=True)
+    for code_key, stock in partitions.items():
+        code = code_key[0] if isinstance(code_key, tuple) else code_key
+        if not isinstance(code, str) or stock.is_empty():
             continue
         ni = extract_account(stock, "net_income")
         ocf = extract_account(stock, "operating_cf")
@@ -113,6 +117,36 @@ def calcAccrualsFactor(*, market: str = "KR") -> dict | None:
     sorted_items = sorted(scores.items(), key=lambda x: -x[1])
     topHigh = [(c, round(a, 2)) for c, a in sorted_items[:10]]
     topLow = [(c, round(a, 2)) for c, a in sorted_items[-10:]]
+
+    # 단일 종목 분기 (Step 6)
+    if stockCode:
+        a = scores.get(stockCode)
+        if a is None:
+            return {
+                "stockCode": stockCode,
+                "market": market,
+                "year": str(year),
+                "error": f"{stockCode} 데이터 없음 (universe {total}개 중 미포함)",
+            }
+        group = "high" if a > 5.0 else ("low" if a < -5.0 else "neutral")
+        return {
+            "stockCode": stockCode,
+            "market": market,
+            "year": str(year),
+            "score": round(a, 2),
+            "group": group,
+            "universe": total,
+            "interpretation": (
+                f"{stockCode} Sloan Accrual={round(a, 2)}% ({group}) — "
+                + (
+                    "reversal risk (발생주의 이익 큼)."
+                    if group == "high"
+                    else "cash quality premium 후보 (현금 중심)."
+                    if group == "low"
+                    else "중립."
+                )
+            ),
+        }
 
     return {
         "market": market,

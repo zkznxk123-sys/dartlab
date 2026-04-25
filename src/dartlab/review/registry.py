@@ -1144,73 +1144,66 @@ def buildBlocks(
             )
         if _need("marketAnalysisFlags"):
             b["marketAnalysisFlags"] = _safe(lambda: marketAnalysisFlagsBlock(calcMarketAnalysisFlags(company)))
-        if _need("factorTearSheet"):
-            from dartlab.quant.factor import calcFactorTearSheetAll
-            from dartlab.review.builders import factorTearSheetBlock as _ftsb
-
-            _market = "US" if getattr(company, "currency", "KRW") == "USD" else "KR"
-            b["factorTearSheet"] = _safe(lambda: _ftsb(calcFactorTearSheetAll(market=_market)))
-        if _need("riskDecomposition"):
-            from dartlab.quant.factor import calcMultiFactorRisk
-            from dartlab.review.builders import riskDecompositionBlock as _rdb
-
-            stockCode = getattr(company, "stockCode", None)
-            if stockCode:
-                b["riskDecomposition"] = _safe(lambda: _rdb(calcMultiFactorRisk(stockCode)))
-        if _need("factorIC"):
-            from dartlab.quant.factor import calcFactorICAll
-            from dartlab.review.builders import factorICBlock as _ficb
-
-            _market = "US" if getattr(company, "currency", "KRW") == "USD" else "KR"
-            b["factorIC"] = _safe(lambda: _ficb(calcFactorICAll(market=_market, horizon=5)))
-
-        # Sprint 2 재무 알파 9축
+        # Sprint 2~7 신규 12 alpha — 기존 quant 5+1 와 동일 _narrate_map 패턴 (review = 이야기꾼).
+        # calc → narrate → quantModuleBlock(key, {narrative, data}) 통일 흐름.
         _alpha_market = "US" if getattr(company, "currency", "KRW") == "USD" else "KR"
-        if _need("altmanFactor"):
-            from dartlab.quant.alphas.altman import calcAltmanFactor
-            from dartlab.review.builders import altmanFactorBlock as _alfb
+        _stockCode = getattr(company, "stockCode", None)
 
-            b["altmanFactor"] = _safe(lambda: _alfb(calcAltmanFactor(market=_alpha_market)))
-        if _need("piotroskiFactor"):
-            from dartlab.quant.alphas.piotroski import calcPiotroskiFactor
-            from dartlab.review.builders import piotroskiFactorBlock as _pifb
+        from dartlab.quant.alphas.accruals import calcAccrualsFactor
+        from dartlab.quant.alphas.altman import calcAltmanFactor
+        from dartlab.quant.alphas.bab import calcBAB
+        from dartlab.quant.alphas.beneish import calcBeneishFactor
+        from dartlab.quant.alphas.earningsSurprise import calcEarningsSurprise
+        from dartlab.quant.alphas.fundamentalMomentum import calcFundamentalMomentum
+        from dartlab.quant.alphas.piotroski import calcPiotroskiFactor
+        from dartlab.quant.alphas.qFactor import calcQFactor
+        from dartlab.quant.alphas.qmj import calcQMJ
+        from dartlab.quant.factor import calcFactorICAll, calcFactorTearSheetAll, calcMultiFactorRisk
+        from dartlab.review.narrate import (
+            narrateAccruals,
+            narrateAltman,
+            narrateBAB,
+            narrateBeneish,
+            narrateEarningsSurprise,
+            narrateFactorIC,
+            narrateFactorTearSheet,
+            narrateFundMomentum,
+            narratePiotroski,
+            narrateQFactor,
+            narrateQMJ,
+            narrateRiskDecomposition,
+        )
 
-            b["piotroskiFactor"] = _safe(lambda: _pifb(calcPiotroskiFactor(market=_alpha_market)))
-        if _need("beneishFactor"):
-            from dartlab.quant.alphas.beneish import calcBeneishFactor
-            from dartlab.review.builders import beneishFactorBlock as _befb
+        _alpha_map: dict[str, tuple] = {
+            # alpha key : (calc 호출 callable, narrate 함수)
+            "altmanFactor": (lambda: calcAltmanFactor(market=_alpha_market), narrateAltman),
+            "piotroskiFactor": (lambda: calcPiotroskiFactor(market=_alpha_market), narratePiotroski),
+            "beneishFactor": (lambda: calcBeneishFactor(market=_alpha_market), narrateBeneish),
+            "accrualsFactor": (lambda: calcAccrualsFactor(market=_alpha_market), narrateAccruals),
+            "qFactor": (lambda: calcQFactor(market=_alpha_market), narrateQFactor),
+            "qmj": (lambda: calcQMJ(market=_alpha_market), narrateQMJ),
+            "bab": (lambda: calcBAB(market=_alpha_market), narrateBAB),
+            "earningsSurprise": (lambda: calcEarningsSurprise(market=_alpha_market), narrateEarningsSurprise),
+            "fundMomentum": (lambda: calcFundamentalMomentum(market=_alpha_market), narrateFundMomentum),
+            "factorTearSheet": (lambda: calcFactorTearSheetAll(market=_alpha_market), narrateFactorTearSheet),
+            "factorIC": (lambda: calcFactorICAll(market=_alpha_market, horizon=5), narrateFactorIC),
+        }
+        # riskDecomposition 만 stockCode 필수 (단일 종목)
+        if _stockCode:
+            _alpha_map["riskDecomposition"] = (
+                lambda: calcMultiFactorRisk(_stockCode),
+                narrateRiskDecomposition,
+            )
 
-            b["beneishFactor"] = _safe(lambda: _befb(calcBeneishFactor(market=_alpha_market)))
-        if _need("accrualsFactor"):
-            from dartlab.quant.alphas.accruals import calcAccrualsFactor
-            from dartlab.review.builders import accrualsFactorBlock as _acfb
+        for akey, (acalc, anarrate) in _alpha_map.items():
+            if _need(akey):
 
-            b["accrualsFactor"] = _safe(lambda: _acfb(calcAccrualsFactor(market=_alpha_market)))
-        if _need("qFactor"):
-            from dartlab.quant.alphas.qFactor import calcQFactor
-            from dartlab.review.builders import qFactorBlock as _qfb
+                def _build(c=acalc, n=anarrate, k=akey):
+                    data = c()
+                    narrative = n(data) if data else ""
+                    return quantModuleBlock(k, {"narrative": narrative, "data": data})
 
-            b["qFactor"] = _safe(lambda: _qfb(calcQFactor(market=_alpha_market)))
-        if _need("qmj"):
-            from dartlab.quant.alphas.qmj import calcQMJ
-            from dartlab.review.builders import qmjBlock as _qmjb
-
-            b["qmj"] = _safe(lambda: _qmjb(calcQMJ(market=_alpha_market)))
-        if _need("bab"):
-            from dartlab.quant.alphas.bab import calcBAB
-            from dartlab.review.builders import babBlock as _babb
-
-            b["bab"] = _safe(lambda: _babb(calcBAB(market=_alpha_market)))
-        if _need("earningsSurprise"):
-            from dartlab.quant.alphas.earningsSurprise import calcEarningsSurprise
-            from dartlab.review.builders import earningsSurpriseBlock as _esb
-
-            b["earningsSurprise"] = _safe(lambda: _esb(calcEarningsSurprise(market=_alpha_market)))
-        if _need("fundMomentum"):
-            from dartlab.quant.alphas.fundamentalMomentum import calcFundamentalMomentum
-            from dartlab.review.builders import fundMomentumBlock as _fmb
-
-            b["fundMomentum"] = _safe(lambda: _fmb(calcFundamentalMomentum(market=_alpha_market)))
+                b[akey] = _safe(_build)
 
     # ── 매크로 (시장 환경 + 기업-매크로 연결) ──
     _MACRO_KEYS = {

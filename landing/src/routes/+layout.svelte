@@ -1,5 +1,8 @@
 <script lang="ts">
 	import '../app.css';
+	import '$lib/styles/v2-tokens.css';
+	import '$lib/styles/tokens.css';
+	import '$lib/styles/typography.css';
 	import type { Snippet } from 'svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 

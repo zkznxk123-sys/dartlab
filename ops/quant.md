@@ -98,10 +98,11 @@ c.quant("베타")          # 시장 베타 + CAPM (market="US" 자동)
 
 | 축 | key | 설명 | 상태 |
 |---|---|---|---|
-| 베타 | beta | CAPM β + α + R² + t-stat | ✅ OK (Phase 2C 보완 완료) |
-| 팩터 | factor | FF5(MKT+SMB+HML+RMW+CMA) — book-based 진짜 횡단면 회귀 | ✅ 재구현 완료 (Phase 2B). size proxy = bookEquity (시총 미수집), Phase 2A1 후 진짜 시총 교체 |
-| 꼬리위험 | tailrisk | CVaR/MDD/Sortino + riskFree 파라미터 | ✅ OK (Phase 2C 보완 완료) |
-| 잔여수익 | residual | 팩터 제거 후 잔여 모멘텀 | ✅ factor 재구현으로 자동 정상화 |
+| 베타 | beta | CAPM β + α + R² + t-stat | ✅ OK |
+| 팩터 | factor | FF5(MKT+SMB+HML+RMW+CMA) — KRX MKTCAP 진짜 횡단면 | ✅ B0 정정 완료 |
+| 꼬리위험 | tailrisk | CVaR/MDD/Sortino + riskFree 파라미터 | ✅ OK |
+| 잔여수익 | residual | 팩터 제거 후 잔여 모멘텀 | ✅ |
+| **BAB 저변동** | **bab** | Frazzini-Pedersen 2014 — 60일 realized vol 저변동성 랭킹 | ✅ Sprint 2 신규 (107s) |
 
 ### C. 미시구조 (microstructure) — 가격 + 거래량/수급
 
@@ -111,14 +112,22 @@ c.quant("베타")          # 시장 베타 + CAPM (market="US" 자동)
 | 수급 | flow | 기관/외국인 매매 (KR 전용) | 구현 |
 | 거래량 | volume | OBV 추세, 거래량-가격 괴리 | 구현 |
 
-### D. 펀더멘털 퀀트 (fundamental) — scan 프리빌드
+### D. 펀더멘털 퀀트 (fundamental) — scan 프리빌드 + Sprint 2 신규
 
 | 축 | key | 설명 | 상태 |
 |---|---|---|---|
 | 괴리 | divergence | 재무-기술적 괴리 진단 | 구현 |
-| 퀄리티 | quality | Asness 퀄리티 — 횡단면 z, 금융주 sector skip, CIS+IS 강건 추출 | ✅ Phase 2C 보완 완료 (성공률 6/15 → 10/15) |
-| 가치 | value | book-based 수익성/효율성 횡단면 z (시총 미수집으로 PBR/PER/PSR 미산출) | ✅ 재구현 완료 (Phase 2B). 한계 명시 — Phase 2A1 후 진짜 가치 팩터로 교체 |
-| 이익모멘텀 | earnings | SUE, PEAD, 수정 모멘텀 | 구현 (외부 호출 ≤1곳) |
+| 퀄리티 | quality | Asness 퀄리티 — 횡단면 z, 금융주 sector skip, CIS+IS 강건 추출 | ✅ Phase 2C 보완 완료 |
+| 가치 | value | book-based 수익성/효율성 횡단면 z (시총 + KRX 시총 직접) | ✅ B0 정정 완료 |
+| 이익모멘텀 | earnings | SUE, PEAD, 수정 모멘텀 | 구현 |
+| **Altman Z** | **altman** | 전종목 Z-Score 부실확률 (1968 5변수 / 1995 Z'' 4변수) — safe/grey/distress | ✅ Sprint 2 신규 (Phase 2b 통과 25s) |
+| **Piotroski F** | **piotroski** | 9 신호 합 (0~9점) 재무건강 횡단면 분포 + 9 신호 시장 통과율 | ✅ Sprint 2 신규 (48s) |
+| **Beneish M** | **beneish** | 8변수 이익조작 감지, red flag (M > -1.78) | ✅ Sprint 2 신규 (60s) |
+| **Sloan Accrual** | **accruals** | (NI−CFO)/TA 발생액품질 high/neutral/low 3 그룹 | ✅ Sprint 2 신규 (13s) |
+| **q-factor** | **qfactor** | Hou-Xue-Zhang 2015 — ROE + (−assetGrowth) composite | ✅ Sprint 2 신규 (15s) |
+| **QMJ** | **qmj** | Asness-Frazzini-Pedersen 2019 — Profitability + Safety 합성 | ✅ Sprint 2 신규 (24s) |
+| **이익서프라이즈** | **surprise** | Bernard-Thomas 1989 PEAD — YoY NI growth z-score | ✅ Sprint 2 신규 (25s) |
+| **펀더-가격 모멘텀** | **fundmom** | Chordia-Shivakumar 2006 — earnings + 12-1 price 합성 | ✅ Sprint 2 신규 (141s) |
 
 ### E. 텍스트/공시 (text) — dartlab 고유
 

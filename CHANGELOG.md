@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.21] - 2026-04-24
+
+quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.
+
+### Fixed
+
+- **EDGAR 종목에서 일부 L2 분석 축이 None 이던 문제** — snakeId alias 양방향 확장으로 인텔·애플 등 EDGAR 기업에서 이전에 비어있던 재무 지표가 값을 반환하도록 복구.
+- **`/lab` 하위 페이지 내부 링크 깨짐** — GitHub Pages base path prefix 누락으로 배포 prerender 에러가 발생하던 문제. brand href 전수 보정.
+- **블로그 2 편 parse 에러 해소** — `silicon2` · `taihan-cable` 포스트의 `<` · `SGA < 15%` 표현이 mdsvex 에서 HTML 태그로 오인되던 문제.
+
+### Changed
+
+- **quant 엔진 팩터 계산 안정화** — accruals · altman · BAB · beneish · earningsSurprise · fundamentalMomentum · piotroski · qFactor · QMJ 9 개 alpha 정비 + factorBuild · spec 일관화. 팩터 반환값 품질 개선.
+- **대시보드 페이지 재설계** — `/dashboard/{stockCode}` 를 v2 디자인 토큰 기반으로 단순화, 로드 속도·가독성 개선.
+- **review 해석 문장 확장** — narrate 함수가 현금흐름·부채·매출성장 등에서 더 세밀한 조건 분기로 해석 생성.
+
 ## [0.9.20] - 2026-04-23
 
 내부 안정화 + 버그 수정.

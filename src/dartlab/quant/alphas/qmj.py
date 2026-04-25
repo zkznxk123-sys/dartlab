@@ -40,7 +40,12 @@ def _rank(values: list[float]) -> list[float]:
     return list(ranks / max(len(arr) - 1, 1))
 
 
-def calcQMJ(*, market: str = "KR") -> dict | None:
+def calcQMJ(
+    *,
+    market: str = "KR",
+    stockCode: str | None = None,
+    **kwargs,
+) -> dict | None:
     """Asness-Frazzini-Pedersen QMJ composite — 한국 시장 품질주 랭킹.
 
     Capabilities:
@@ -78,12 +83,11 @@ def calcQMJ(*, market: str = "KR") -> dict | None:
         return None
 
     rows = []
-    codes = cur.get_column("stockCode").unique().to_list()
-    for code in codes:
-        if not isinstance(code, str):
-            continue
-        stock = cur.filter(pl.col("stockCode") == code)
-        if stock.is_empty():
+    # 성능 fix (G5): partition_by 한 번 호출 → O(n) lookup
+    partitions = cur.partition_by("stockCode", as_dict=True)
+    for code_key, stock in partitions.items():
+        code = code_key[0] if isinstance(code_key, tuple) else code_key
+        if not isinstance(code, str) or stock.is_empty():
             continue
         ni = extract_account(stock, "net_income")
         eq = extract_account(stock, "total_equity")
@@ -135,16 +139,40 @@ def calcQMJ(*, market: str = "KR") -> dict | None:
     topQuality = [(c, round(s, 3)) for c, s in sorted_items[:10]]
     topJunk = [(c, round(s, 3)) for c, s in sorted_items[-10:]]
 
+    total = len(scores)
+    # 단일 종목 분기 (Step 6)
+    if stockCode:
+        s = scores.get(stockCode)
+        if s is None:
+            return {
+                "stockCode": stockCode,
+                "market": market,
+                "year": str(year),
+                "error": f"{stockCode} 데이터 없음 (universe {total}개 중 미포함)",
+            }
+        return {
+            "stockCode": stockCode,
+            "market": market,
+            "year": str(year),
+            "score": round(s, 3),
+            "percentile": round(100 * s, 1),
+            "components": components.get(stockCode, {}),
+            "universe": total,
+            "interpretation": (
+                f"{stockCode} QMJ={round(s, 3)} (백분위 {round(100 * s, 0):.0f}) — Asness Profitability + Safety 합성."
+            ),
+        }
+
     return {
         "market": market,
         "year": str(year),
-        "universe": len(scores),
+        "universe": total,
         "scores": {c: round(s, 3) for c, s in scores.items()},
         "components": components,
         "topQuality": topQuality,
         "topJunk": topJunk,
         "interpretation": (
-            f"{market} {year}년 QMJ composite ({len(scores)}종목) — "
+            f"{market} {year}년 QMJ composite ({total}종목) — "
             "고 ROE/ROA/CFOA + 저 leverage 조합이 Asness QMJ premium 후보."
         ),
     }

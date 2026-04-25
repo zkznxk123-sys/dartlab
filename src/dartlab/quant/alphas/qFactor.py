@@ -35,7 +35,12 @@ def _percentileRank(values: list[float]) -> list[float]:
     return list(ranks / max(len(arr) - 1, 1))
 
 
-def calcQFactor(*, market: str = "KR") -> dict | None:
+def calcQFactor(
+    *,
+    market: str = "KR",
+    stockCode: str | None = None,
+    **kwargs,
+) -> dict | None:
     """Hou-Xue-Zhang q-factor composite — 한국 시장 수익성+보수투자 복합 랭킹.
 
     Capabilities:
@@ -104,16 +109,41 @@ def calcQFactor(*, market: str = "KR") -> dict | None:
     topQ = [(c, round(s, 3)) for c, s in sorted_items[:10]]
     bottomQ = [(c, round(s, 3)) for c, s in sorted_items[-10:]]
 
+    # 단일 종목 분기 (Step 6)
+    total = len(scores)
+    if stockCode:
+        s = scores.get(stockCode)
+        if s is None:
+            return {
+                "stockCode": stockCode,
+                "market": market,
+                "year": str(year),
+                "error": f"{stockCode} 데이터 없음 (universe {total}개 중 미포함)",
+            }
+        return {
+            "stockCode": stockCode,
+            "market": market,
+            "year": str(year),
+            "score": round(s, 3),
+            "percentile": round(100 * s, 1),
+            "components": components.get(stockCode, {}),
+            "universe": total,
+            "interpretation": (
+                f"{stockCode} q-score={round(s, 3)} (백분위 {round(100 * s, 0):.0f}) — "
+                "Hou-Xue-Zhang ROE + (−assetGrowth) composite."
+            ),
+        }
+
     return {
         "market": market,
         "year": str(year),
-        "universe": len(scores),
+        "universe": total,
         "scores": {c: round(s, 3) for c, s in scores.items()},
         "components": components,
         "topQ": topQ,
         "bottomQ": bottomQ,
         "interpretation": (
-            f"{market} {year}년 q-factor composite ({len(scores)}종목) — "
+            f"{market} {year}년 q-factor composite ({total}종목) — "
             "고 ROE + 저 asset growth 조합이 Hou-Xue-Zhang q-premium 후보."
         ),
     }

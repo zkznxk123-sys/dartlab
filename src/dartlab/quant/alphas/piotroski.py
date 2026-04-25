@@ -117,7 +117,12 @@ def _scoreOne(cur: pl.DataFrame, prev: pl.DataFrame | None) -> dict | None:
     return {"total": total, "components": components}
 
 
-def calcPiotroskiFactor(*, market: str = "KR") -> dict | None:
+def calcPiotroskiFactor(
+    *,
+    market: str = "KR",
+    stockCode: str | None = None,
+    **kwargs,
+) -> dict | None:
     """Piotroski F-Score 횡단면 quant factor — 한국 전종목 재무 건강 9점 랭킹.
 
     Capabilities:
@@ -195,13 +200,15 @@ def calcPiotroskiFactor(*, market: str = "KR") -> dict | None:
 
     scores: dict[str, int] = {}
     components: dict[str, dict] = {}
-    codes = cur.get_column("stockCode").unique().to_list()
-    for code in codes:
+    # 성능 fix (G5): partition_by 한 번 호출 → O(n) lookup
+    cur_parts = cur.partition_by("stockCode", as_dict=True)
+    prev_parts = prev.partition_by("stockCode", as_dict=True)
+    for code_key, s_cur in cur_parts.items():
+        code = code_key[0] if isinstance(code_key, tuple) else code_key
         if not isinstance(code, str):
             continue
-        s_cur = cur.filter(pl.col("stockCode") == code)
-        s_prev = prev.filter(pl.col("stockCode") == code)
-        res = _scoreOne(s_cur, s_prev if not s_prev.is_empty() else None)
+        s_prev = prev_parts.get(code_key)
+        res = _scoreOne(s_cur, s_prev if s_prev is not None and not s_prev.is_empty() else None)
         if res is None:
             continue
         scores[code] = res["total"]
@@ -242,6 +249,32 @@ def calcPiotroskiFactor(*, market: str = "KR") -> dict | None:
     for k in signal_keys:
         passed = sum(1 for c in components.values() if c.get(k))
         signalAvg[k] = round(100 * passed / total, 1)
+
+    # 단일 종목 분기 (Step 6)
+    if stockCode:
+        f = scores.get(stockCode)
+        if f is None:
+            return {
+                "stockCode": stockCode,
+                "market": market,
+                "year": str(year),
+                "error": f"{stockCode} 데이터 없음 (universe {total}개 중 미포함)",
+            }
+        grade = "strong" if f >= 7 else ("moderate" if f >= 4 else "weak")
+        return {
+            "stockCode": stockCode,
+            "market": market,
+            "year": str(year),
+            "prevYear": str(prev_year_val),
+            "score": f,
+            "grade": grade,
+            "components": components.get(stockCode, {}),
+            "universe": total,
+            "interpretation": (
+                f"{stockCode} Piotroski F={f}/9 ({grade}) — "
+                + ("재무 건강 강함." if grade == "strong" else "보통." if grade == "moderate" else "재무 신호 약함.")
+            ),
+        }
 
     return {
         "market": market,

@@ -53,7 +53,13 @@ def _zoneZpp(z: float) -> str:
     return "distress"
 
 
-def calcAltmanFactor(*, market: str = "KR", variant: str = "auto") -> dict | None:
+def calcAltmanFactor(
+    *,
+    market: str = "KR",
+    variant: str = "auto",
+    stockCode: str | None = None,
+    **kwargs,
+) -> dict | None:
     """Altman Z-Score 횡단면 quant factor — 한국 시장 전종목 부실 확률 스코어.
 
     Capabilities:
@@ -126,12 +132,12 @@ def calcAltmanFactor(*, market: str = "KR", variant: str = "auto") -> dict | Non
     market_caps = _fetch_year_end_marketcaps(market, str(year))
 
     scores: dict[str, float] = {}
-    codes = cur.get_column("stockCode").unique().to_list()
-    for code in codes:
-        if not isinstance(code, str):
-            continue
-        stock = cur.filter(pl.col("stockCode") == code)
-        if stock.is_empty():
+    # 성능 fix (G5): partition_by 한 번 호출 → 종목당 O(1) lookup. 기존 filter 는 O(n²).
+    partitions = cur.partition_by("stockCode", as_dict=True)
+    for code_key, stock in partitions.items():
+        # polars partition_by as_dict=True 는 키를 tuple 로 줌
+        code = code_key[0] if isinstance(code_key, tuple) else code_key
+        if not isinstance(code, str) or stock.is_empty():
             continue
 
         ta = extract_account(stock, "total_assets")
@@ -193,6 +199,37 @@ def calcAltmanFactor(*, market: str = "KR", variant: str = "auto") -> dict | Non
     top_distress = [(c, round(z, 2)) for c, z in sorted_items[-10:]]
 
     resolved_variant = "zpp" if variant == "zpp" else ("z" if variant == "z" else "z" if market_caps else "zpp")
+
+    # 단일 종목 분기 (Step 6)
+    if stockCode:
+        z_value = scores.get(stockCode)
+        if z_value is None:
+            return {
+                "stockCode": stockCode,
+                "market": market,
+                "year": str(year),
+                "error": f"{stockCode} 데이터 없음 (universe {total}개 중 미포함)",
+            }
+        zone = zone_fn(z_value)
+        # universe 내 percentile 계산
+        sorted_z = sorted(scores.values())
+        rank = sum(1 for v in sorted_z if v <= z_value)
+        percentile = round(100 * rank / total, 1)
+        return {
+            "stockCode": stockCode,
+            "market": market,
+            "year": str(year),
+            "variant": resolved_variant,
+            "score": round(z_value, 2),
+            "zone": zone,
+            "percentile": percentile,
+            "universe": total,
+            "interpretation": (
+                f"{stockCode} Altman {resolved_variant.upper()}={round(z_value, 2)} ({zone}) — "
+                f"전종목 {total}개 중 {percentile}백분위. "
+                + ("안전 (Z>2.99)." if zone == "safe" else "회색지대." if zone == "grey" else "부실 위험 (Z<1.81).")
+            ),
+        }
 
     return {
         "market": market,

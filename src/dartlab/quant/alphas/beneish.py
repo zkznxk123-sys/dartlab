@@ -119,7 +119,12 @@ def _computeM(cur: pl.DataFrame, prev: pl.DataFrame) -> float | None:
     return m
 
 
-def calcBeneishFactor(*, market: str = "KR") -> dict | None:
+def calcBeneishFactor(
+    *,
+    market: str = "KR",
+    stockCode: str | None = None,
+    **kwargs,
+) -> dict | None:
     """Beneish M-Score 횡단면 quant factor — 한국 전종목 이익 조작 red flag.
 
     Capabilities:
@@ -192,13 +197,15 @@ def calcBeneishFactor(*, market: str = "KR") -> dict | None:
         return None
 
     scores: dict[str, float] = {}
-    codes = cur.get_column("stockCode").unique().to_list()
-    for code in codes:
+    # 성능 fix (G5): partition_by 한 번 호출 → O(n) lookup
+    cur_parts = cur.partition_by("stockCode", as_dict=True)
+    prev_parts = prev.partition_by("stockCode", as_dict=True)
+    for code_key, s_cur in cur_parts.items():
+        code = code_key[0] if isinstance(code_key, tuple) else code_key
         if not isinstance(code, str):
             continue
-        s_cur = cur.filter(pl.col("stockCode") == code)
-        s_prev = prev.filter(pl.col("stockCode") == code)
-        if s_prev.is_empty():
+        s_prev = prev_parts.get(code_key)
+        if s_prev is None or s_prev.is_empty():
             continue
         m = _computeM(s_cur, s_prev)
         if m is None:
@@ -219,6 +226,31 @@ def calcBeneishFactor(*, market: str = "KR") -> dict | None:
     sorted_items = sorted(scores.items(), key=lambda x: -x[1])
     topFlag = [(c, round(m, 2)) for c, m in sorted_items[:10]]
     topClean = [(c, round(m, 2)) for c, m in sorted_items[-10:]]
+
+    # 단일 종목 분기 (Step 6)
+    if stockCode:
+        m = scores.get(stockCode)
+        if m is None:
+            return {
+                "stockCode": stockCode,
+                "market": market,
+                "year": str(year),
+                "error": f"{stockCode} 데이터 없음 (universe {total}개 중 미포함, 전년 비교 필요)",
+            }
+        flag = "redFlag" if m > -1.78 else "clean"
+        return {
+            "stockCode": stockCode,
+            "market": market,
+            "year": str(year),
+            "prevYear": str(prev_year_val),
+            "score": round(m, 2),
+            "flag": flag,
+            "universe": total,
+            "interpretation": (
+                f"{stockCode} Beneish M={round(m, 2)} ({flag}) — "
+                + ("이익 조작 의심 (M > -1.78)." if flag == "redFlag" else "회계 투명 (M ≤ -1.78).")
+            ),
+        }
 
     return {
         "market": market,

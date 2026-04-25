@@ -29,7 +29,12 @@ from dartlab.quant.factorBuild import _latest_year
 log = logging.getLogger(__name__)
 
 
-def calcEarningsSurprise(*, market: str = "KR") -> dict | None:
+def calcEarningsSurprise(
+    *,
+    market: str = "KR",
+    stockCode: str | None = None,
+    **kwargs,
+) -> dict | None:
     """Earnings Surprise (SUE) — 한국 시장 PEAD drift 후보 랭킹.
 
     Capabilities:
@@ -73,13 +78,15 @@ def calcEarningsSurprise(*, market: str = "KR") -> dict | None:
         return None
 
     growths: dict[str, float] = {}
-    codes = cur.get_column("stockCode").unique().to_list()
-    for code in codes:
+    # 성능 fix (G5): partition_by 한 번 호출 → O(n) lookup
+    cur_parts = cur.partition_by("stockCode", as_dict=True)
+    prev_parts = prev.partition_by("stockCode", as_dict=True)
+    for code_key, s_cur in cur_parts.items():
+        code = code_key[0] if isinstance(code_key, tuple) else code_key
         if not isinstance(code, str):
             continue
-        s_cur = cur.filter(pl.col("stockCode") == code)
-        s_prev = prev.filter(pl.col("stockCode") == code)
-        if s_prev.is_empty():
+        s_prev = prev_parts.get(code_key)
+        if s_prev is None or s_prev.is_empty():
             continue
         ni = extract_account(s_cur, "net_income")
         ni_p = extract_account(s_prev, "net_income")
@@ -102,17 +109,48 @@ def calcEarningsSurprise(*, market: str = "KR") -> dict | None:
     topPos = [(c, round(s, 2), round(growths[c], 2)) for c, s in sorted_items[:10]]
     topNeg = [(c, round(s, 2), round(growths[c], 2)) for c, s in sorted_items[-10:]]
 
+    total = len(scores)
+    # 단일 종목 분기 (Step 6)
+    if stockCode:
+        z = scores.get(stockCode)
+        if z is None:
+            return {
+                "stockCode": stockCode,
+                "market": market,
+                "year": str(year),
+                "error": f"{stockCode} 데이터 없음 (universe {total}개 중 미포함, 전년 NI 필요)",
+            }
+        g = growths.get(stockCode, 0)
+        verdict = (
+            "positive SUE (PEAD long 후보)"
+            if z > 0.5
+            else ("negative SUE (drift short 후보)" if z < -0.5 else "neutral")
+        )
+        return {
+            "stockCode": stockCode,
+            "market": market,
+            "year": str(year),
+            "prevYear": str(prev_year_val),
+            "score": round(z, 2),
+            "growth": round(g, 3),
+            "category": verdict,
+            "universe": total,
+            "interpretation": (
+                f"{stockCode} SUE z={round(z, 2)} (YoY NI {g:+.0%}) — {verdict}. Bernard-Thomas 1989 PEAD."
+            ),
+        }
+
     return {
         "market": market,
         "year": str(year),
         "prevYear": str(prev_year_val),
-        "universe": len(scores),
+        "universe": total,
         "scores": {c: round(s, 2) for c, s in scores.items()},
         "growths": {c: round(g, 3) for c, g in growths.items()},
         "topPos": topPos,
         "topNeg": topNeg,
         "interpretation": (
-            f"{market} {year}년 SUE (YoY NI growth z-score, {len(scores)}종목) — "
+            f"{market} {year}년 SUE (YoY NI growth z-score, {total}종목) — "
             "positive SUE 상위가 Bernard-Thomas PEAD drift long 후보."
         ),
     }

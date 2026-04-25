@@ -128,12 +128,13 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
     market_caps = _fetch_year_end_marketcaps(market, year)
 
     out: dict[str, dict[str, float]] = {}
-    codes = cur.get_column("stockCode").unique().to_list()
-    for code in codes:
-        if not isinstance(code, str):
-            continue
-        stock = cur.filter(pl.col("stockCode") == code)
-        if stock.is_empty():
+    # 성능 fix (G5): partition_by 한 번 호출 → O(n) lookup. 기존 filter 는 O(n²) 라
+    # n=2000 종목에서 5분 timeout 유발 (qFactor / qmj 등 _build_universe_metrics 의존 모듈).
+    cur_parts = cur.partition_by("stockCode", as_dict=True)
+    prev_parts = prev.partition_by("stockCode", as_dict=True) if prev is not None else {}
+    for code_key, stock in cur_parts.items():
+        code = code_key[0] if isinstance(code_key, tuple) else code_key
+        if not isinstance(code, str) or stock.is_empty():
             continue
 
         equity = extract_account(stock, "total_equity")
@@ -146,12 +147,11 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
         book_ratio = equity / assets
 
         asset_growth = None
-        if prev is not None:
-            prev_stock = prev.filter(pl.col("stockCode") == code)
-            if not prev_stock.is_empty():
-                prev_assets = extract_account(prev_stock, "total_assets")
-                if prev_assets and prev_assets > 0:
-                    asset_growth = (assets - prev_assets) / prev_assets
+        prev_stock = prev_parts.get(code_key)
+        if prev_stock is not None and not prev_stock.is_empty():
+            prev_assets = extract_account(prev_stock, "total_assets")
+            if prev_assets and prev_assets > 0:
+                asset_growth = (assets - prev_assets) / prev_assets
 
         mc = market_caps.get(code)
         book_to_market = (equity / mc) if (mc is not None and mc > 0) else None

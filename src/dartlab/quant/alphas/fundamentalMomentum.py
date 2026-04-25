@@ -33,7 +33,12 @@ def _rank(values: list[float]) -> list[float]:
     return list(ranks / max(len(arr) - 1, 1))
 
 
-def calcFundamentalMomentum(*, market: str = "KR") -> dict | None:
+def calcFundamentalMomentum(
+    *,
+    market: str = "KR",
+    stockCode: str | None = None,
+    **kwargs,
+) -> dict | None:
     """Chordia-Shivakumar 펀더멘털×가격 composite 모멘텀 — 한국 시장 전종목 랭킹.
 
     Capabilities:
@@ -79,12 +84,15 @@ def calcFundamentalMomentum(*, market: str = "KR") -> dict | None:
         return None
 
     growths: dict[str, float] = {}
-    for code in cur.get_column("stockCode").unique().to_list():
+    # 성능 fix (G5): partition_by 한 번 호출 → O(n) lookup
+    cur_parts = cur.partition_by("stockCode", as_dict=True)
+    prev_parts = prev.partition_by("stockCode", as_dict=True)
+    for code_key, s_cur in cur_parts.items():
+        code = code_key[0] if isinstance(code_key, tuple) else code_key
         if not isinstance(code, str):
             continue
-        s_cur = cur.filter(pl.col("stockCode") == code)
-        s_prev = prev.filter(pl.col("stockCode") == code)
-        if s_prev.is_empty():
+        s_prev = prev_parts.get(code_key)
+        if s_prev is None or s_prev.is_empty():
             continue
         ni = extract_account(s_cur, "net_income")
         ni_p = extract_account(s_prev, "net_income")
@@ -153,16 +161,44 @@ def calcFundamentalMomentum(*, market: str = "KR") -> dict | None:
     topDouble = [(c, round(s, 3)) for c, s in sorted_items[:10]]
     bottomDouble = [(c, round(s, 3)) for c, s in sorted_items[-10:]]
 
+    total = len(scores)
+    # 단일 종목 분기 (Step 6)
+    if stockCode:
+        s = scores.get(stockCode)
+        if s is None:
+            return {
+                "stockCode": stockCode,
+                "market": market,
+                "year": str(year),
+                "error": f"{stockCode} 데이터 없음 (universe {total}개 중 미포함, 가격+재무 모두 필요)",
+            }
+        comp = components.get(stockCode, {})
+        verdict = "double-momentum (long 후보)" if s > 0.7 else ("약한 모멘텀" if s > 0.3 else "역모멘텀 (회피)")
+        return {
+            "stockCode": stockCode,
+            "market": market,
+            "year": str(year),
+            "score": round(s, 3),
+            "percentile": round(100 * s, 1),
+            "components": comp,
+            "category": verdict,
+            "universe": total,
+            "interpretation": (
+                f"{stockCode} fund-momentum={round(s, 3)} (백분위 {round(100 * s, 0):.0f}) "
+                f"— earnings {comp.get('earningsGrowth', 0):+.0%} + price12-1 {comp.get('priceMom12_1', 0):+.0%}. {verdict}."
+            ),
+        }
+
     return {
         "market": market,
         "year": str(year),
-        "universe": len(scores),
+        "universe": total,
         "scores": {c: round(s, 3) for c, s in scores.items()},
         "components": components,
         "topDouble": topDouble,
         "bottomDouble": bottomDouble,
         "interpretation": (
             f"{market} {year}년 Chordia-Shivakumar 펀더멘털×가격 composite "
-            f"({len(scores)}종목) — top 10 이 가장 확신 있는 롱 후보."
+            f"({total}종목) — top 10 이 가장 확신 있는 롱 후보."
         ),
     }
