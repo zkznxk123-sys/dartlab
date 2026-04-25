@@ -1,5 +1,7 @@
 # 코드 규칙
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: 개발자 + AI (dartlab 전 코드베이스).
 **현재**: camelCase 네이밍 · 9 섹션 독스트링 규약 · 1.0.0 선언 체크리스트 · CHANGELOG 사용자 관점 원칙 확립.
 **방향**: 공개 API Returns 단위 보강 · CAPABILITIES 자동 생성 확대 · wheel 검증 강화.

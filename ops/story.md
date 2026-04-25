@@ -1,5 +1,7 @@
 # Story
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: story 엔진 (`c.story(type?, template?)`).
 **현재**: 11 reportType × 7 template 2 축 체계 · 블록 카탈로그 (BlockMap) · NarrativeSection (thesis) · macro/credit/industry 블록 통합.
 **방향**: thesis 서사 품질 고도화 · story audit 루프 확대 · dashboard/HTML 출력 옵션.

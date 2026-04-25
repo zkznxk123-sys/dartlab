@@ -1,5 +1,7 @@
 # Company
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: Company facade (`dartlab.Company(stockCode)`).
 **현재**: 편의성 3 원칙 (접근성·속도·신뢰성) 확립 · DART / EDGAR 이중 provider · show/select/topics + analysis/credit/review/quant/macro/gather 위임 · lazy load + BoundedCache.
 **방향**: cache freshness 자동 갱신 · 첫 호출 지연 단축 · EDGAR property parity 확대.

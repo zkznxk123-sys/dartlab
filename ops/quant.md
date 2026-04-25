@@ -1,5 +1,7 @@
 # Quant
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: quant 엔진 (`c.quant(axis)` · `dartlab.quant(axis)`).
 **현재**: 8 그룹 30 축 · NumPy 순수 계산 · 기술적 지표 / 팩터 / 밸류에이션 / 시뮬레이션 · 텍스트 감성.
 **방향**: 팩터 백테스트 리포트 블록화 · 포트폴리오 최적화 개선 · quant/review 통합 심화.

@@ -10,11 +10,20 @@
 
 ---
 
+## 0. 사상 SSOT · 운영 SSOT
+
+| 문서 | 역할 |
+|---|---|
+| [philosophy.md](philosophy.md) | **사상 SSOT** — AI↔사람 상호 의존 · 시야×관점 격자 · 3 축 행동규약 · 투톱 진입점 · 3 정보층. 모든 ops 문서의 정점 |
+| [coreloop.md](coreloop.md) | **운영 SSOT** — 자가개선 루프 O/P/R/F/A · 스크립트·스키마·PR workflow · RACI |
+
+---
+
 ## 1. 엔진별 문서
 
 | 문서 | 엔진 | 핵심 내용 |
 |---|---|---|
-| [company.md](company.md) | Company facade | 근본 전제 · sections 사상 · 편의성 3 원칙 · Dual Access |
+| [company.md](company.md) | Company facade | 사람의 최상위 관문 · 모든 엔진 접근 · 편의성 3 원칙 · Dual Access |
 | [ai.md](ai.md) | AI 엔진 | P1~P8 원칙 · 3 정보원천 · override · tool schema |
 | [mcp.md](mcp.md) | MCP 서버 | 외부 LLM 클라이언트 노출 · 26 도구 · stdio·SSE |
 | [analysis.md](analysis.md) | 재무분석 | 14 축 · 6 막 인과 · forecast · valuation |

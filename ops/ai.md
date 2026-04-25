@@ -1,5 +1,7 @@
 # AI
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: AI 엔진 (`dartlab.ask` · 서버 `/api/ask` 경유).
 **현재**: 4축 사상 (CAPABILITIES tool · 시스템 프롬프트 · 자율 개입 override · 적극적 분석가) 확립. 8 운영 원칙 (P1~P8) 실행 중.
 **방향**: 엔진 override 키 자동 생성 · 블로그/경험 tool 활용 확대 · 응답 latency 단축.

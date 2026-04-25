@@ -1,5 +1,7 @@
 # Industry
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: industry 엔진 (`dartlab.industry(industry?, stage?)` · `c.industry()`).
 **현재**: taxonomy.json 단일 원천 · 2,665 사 / 34 산업 분류 · 노드·엣지 JSON (~3,000 건) · review `chainPosition` 블록 활성.
 **방향**: AI 보조 신규 산업 초안 · 밸류체인 엣지 확장 · 산업별 KPI 자동 연동.

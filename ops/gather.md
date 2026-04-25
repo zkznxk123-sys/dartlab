@@ -1,5 +1,7 @@
 # Gather
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: gather 엔진 (`dartlab.gather(axis, stockCode?)` · `c.gather(axis)`).
 **현재**: 주가 · 수급 · 뉴스 · ownership 축 · Naver · Yahoo · FMP fallback · 30 분 TTL 뉴스 · 5 분 TTL 주가 (KR).
 **방향**: 미국 실시간성 보강 · news sentiment 정교화 · gather → quant 팩터 직결.

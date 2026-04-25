@@ -1,5 +1,7 @@
 # Skills — 독스트링이 SSOT, 별도 skill 파일 없다
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: 검증된 분석·탐색 방법을 코드화하는 철학.
 **현재**: 별도 `skills/` 디렉토리 폐지. 모든 skill 역할은 **엔진 docstring** 이 담는다 (2026-04-24 확정).
 **방향**: 독스트링 자체 개선 루프로 skill 진화. 개선 과정에서 필요하면 엔진 축도 동반 개선.

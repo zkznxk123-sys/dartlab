@@ -1,5 +1,7 @@
 # dartlab 아키텍처 — 전체 청사진
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: dartlab 전체 (L0~L4 레이어 구성).
 **현재**: L0 core · L1 providers·gather·scan·quant · L2 analysis·credit·macro·industry · L3 review · L4 ai + 사용자. import 하향 방향만 허용.
 **방향**: L2 엔진 간 상호 import 자동 탐지 · 레이어 위반 CI 게이트.

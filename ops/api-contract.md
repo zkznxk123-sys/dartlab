@@ -1,5 +1,7 @@
 # API Contract — dartlab 호출 규칙 단일 진실의 원천
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: dartlab 공개 API 계약 (Company · 모든 엔진 · property).
 **현재**: Dual Access (call form + attr form) 확립 · 무인자 호출 = 가이드 DataFrame · camelCase + snake_case shim · 영문·한글 alias.
 **방향**: guide DataFrame 표준 확산 · override 키 자동 노출 · contract 위반 CI 게이트.

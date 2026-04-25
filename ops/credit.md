@@ -1,5 +1,7 @@
 # Credit (dCR)
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: credit 엔진 (`dartlab.credit(stockCode?, axis?)` · `c.credit(axis?)`).
 **현재**: 7 축 정량 스코어링 (dCR-AAA ~ dCR-D) · 업종별 차등 + 시계열 안정화 · DART·EDGAR 재무제표만으로 재현 — API 키 없이 돌아간다.
 **방향**: override 키 자동 노출 · eCR (현금흐름등급) 고도화 · 신용 이력 narrative 블록화.

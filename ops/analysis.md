@@ -1,5 +1,7 @@
 # Analysis
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: analysis 엔진 (L2) · AI (엔진 결과 소비자).
 **현재**: 22 축 5 그룹 (financial 14 · valuation 1 · governance 3 · forecast 2 · macro 2) · 6 막 인과 구조 · 스토리 템플릿 7 종.
 **방향**: 템플릿 자동 감지 정밀도 · audit 피드백 루프 강화 · override 키 자동 생성.

@@ -1,5 +1,7 @@
 # Macro
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: macro 엔진 (`dartlab.macro(axis, market=?)`).
 **현재**: 12 축 dict 반환 도구화 · 6 막 서사 조립은 review/macro 에 이관 (1.0.0 리팩토링) · FRED + ECOS 이중 공급 · 6h cache.
 **방향**: review/macro 블록 템플릿 완성 · 기업이익 축 고도화 · macro 데이터 신선도 대시보드.

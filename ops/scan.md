@@ -1,5 +1,7 @@
 # Scan
 
+> 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
+
 **주체**: scan 엔진 (`dartlab.scan()` 단일 진입점).
 **현재**: DART 7 축 정식 · EDGAR 11 축 · 프리빌드 parquet (`edgar/scan/finance.parquet`) · 종목코드 + 종목명 첫 2 컬럼 표준 · `_enrichWithKorean` 한글 매핑 경유.
 **방향**: governance·지배구조 축 확대 · scan → review 블록 통합 · realData 스위트 단축.
