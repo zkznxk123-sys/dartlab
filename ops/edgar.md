@@ -93,7 +93,7 @@ DartCompany ↔ EdgarCompany 인터페이스 동기화의 단일 규칙 문서. 
 
 ## 7. 통화 포맷 — `company.currency` 로 자동 분기한다
 
-- `review/builders.py::_REVIEW_CURRENCY` — review 렌더링 시 KRW·USD 분기.
+- `story/builders.py::_STORY_CURRENCY` — story 렌더링 시 KRW·USD 분기.
 - `analysis/financial/capital.py::_ANALYSIS_CURRENCY` — analysis 금액 포맷 분기.
 - `review/registry.py::buildBlocks()` — `company.currency` 에서 자동 설정.
 
