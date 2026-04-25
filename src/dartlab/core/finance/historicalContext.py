@@ -176,7 +176,7 @@ class HistoricalContext:
     hyCompression: HYCompressionHistory | None = None
     # 역사적 사건 매칭
     historicalEvents: list[HistoricalEvent] | None = None
-    # "다음 장" — 역사는 다음 ��이 있다
+    # "다음 장" — 역사는 다음 장이 있다
     suggestedScenario: str | None = None
     suggestedScenarioReason: str | None = None
     # 종합

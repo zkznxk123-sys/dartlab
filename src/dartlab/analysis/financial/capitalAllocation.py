@@ -263,7 +263,7 @@ def calcReinvestment(company, *, basePeriod: str | None = None) -> dict | None:
     return {"history": history} if history else None
 
 
-# ─�� FCF 사용처 분해 ──
+# ── FCF 사용처 분해 ──
 
 
 @memoized_calc
@@ -545,7 +545,7 @@ def calcCapitalAllocationFlags(company, *, basePeriod: str | None = None) -> lis
         h0 = dividend["history"][0]
         pr = h0.get("payoutRatio")
         if pr is not None and pr > 100:
-            flags.append(f"배당���향 {pr:.0f}% — 이익 초과 배당")
+            flags.append(f"배당성향 {pr:.0f}% — 이익 초과 배당")
 
         # 배당 3년 연속 감소
         hist = dividend["history"]

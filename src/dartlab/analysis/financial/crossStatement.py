@@ -225,7 +225,7 @@ def calcAnomalyScore(company, *, basePeriod: str | None = None) -> dict | None:
     accrual = calcAccrualAnalysis(company, basePeriod=basePeriod)
     beneish = calcBeneishTimeline(company, basePeriod=basePeriod)
 
-    # 기간별 데��터 매핑
+    # 기간별 데이터 매핑
     isCfMap = {h["period"]: h for h in isCf["history"]} if isCf else {}
     isBsMap = {h["period"]: h for h in isBs["history"]} if isBs else {}
     accrualMap = {h["period"]: h for h in accrual["history"]} if accrual else {}
@@ -321,7 +321,7 @@ def calcCrossStatementFlags(company, *, basePeriod: str | None = None) -> list[s
         h0 = isBs["history"][0]
         recGap = h0.get("revRecGap")
         if recGap is not None and recGap > 20:
-            flags.append(f"매출채��� 성장이 매출 성장보다 {recGap:.0f}%p 빠름 — 매출 인식 의심")
+            flags.append(f"매출채권 성장이 매출 성장보다 {recGap:.0f}%p 빠름 — 매출 인식 의심")
         invGap = h0.get("revInvGap")
         if invGap is not None and invGap > 20:
             flags.append(f"재고 성장이 매출 성장보다 {invGap:.0f}%p 빠름 — 재고 적체 또는 부풀리기")

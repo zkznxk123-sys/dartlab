@@ -2723,7 +2723,7 @@ class Company:
 
         SeeAlso:
             - watch: 변화 중요도 스코어링 (diff보다 요약적)
-            - keywordTrend: 키워드 ��도 추이 (텍스트 변화의 다른 관점)
+            - keywordTrend: 키워드 빈도 추이 (텍스트 변화의 다른 관점)
             - show: 특정 기간 원문 조회
         """
         if topic is not None:
@@ -2919,7 +2919,7 @@ class Company:
         preset: str | None = None,  # deprecated
         perspective: str | None = None,  # deprecated
     ):
-        """재��제표 구조화 보고서 — 기업이야��꾼의 대본 (내부 구현).
+        """재무제표 구조화 보고서 — 기업이야기꾼의 대본 (내부 구현).
 
         Capabilities:
             - 14개 섹션 전체 보고서 (수익구조~재무정합성)
@@ -4078,8 +4078,8 @@ class Company:
             - "업종 분류" → c.sector
 
         SeeAlso:
-            - sectorParams: 섹터별 밸���에이션 파라미터 (할인율, PER 등)
-            - rank: 섹�� 내 규모 순위
+            - sectorParams: 섹터별 밸류에이션 파라미터 (할인율, PER 등)
+            - rank: 섹터 내 규모 순위
             - insights: 섹터 기준 등급 평가
         """
         cacheKey = "_sector"
@@ -4926,7 +4926,7 @@ class Company:
 
         SeeAlso:
             - index: 뷰어가 소비하는 메타데이터 (프로그래밍 접근)
-            - sections: 뷰어의 원본 데��터
+            - sections: 뷰어의 원본 데이터
         """
         from dartlab.core.viewer import launchViewer
 

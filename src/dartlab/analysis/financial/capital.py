@@ -766,7 +766,7 @@ def calcCashFlowStructure(company, *, basePeriod: str | None = None) -> dict | N
                 freeRow[c] = None
         rawRows.append(freeRow)
 
-    # CF 패턴 분류 (분기 우선, 분기 데이터 ��으면 연간 fallback)
+    # CF 패턴 분류 (분기 우선, 분기 데이터 없으면 연간 fallback)
     latestCol = qCols[0]
     ocfSign = _sign(ocfRow.get(latestCol))
     icfSign = _sign((icfRow or {}).get(latestCol))

@@ -129,7 +129,7 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "method",
         "requires": "데이터: docs (2개 이상 기간 필요)",
         "returns": "pl.DataFrame | None — 변경 요약, 히스토리, 또는 줄 단위 diff.",
-        "seeAlso": "watch: 변화 중요도 스코어링 (diff보다 요약적)\nkeywordTrend: 키워드 ��도 추이 (텍스트 변화의 다른 관점)\nshow: 특정 기간 원문 조회",
+        "seeAlso": "watch: 변화 중요도 스코어링 (diff보다 요약적)\nkeywordTrend: 키워드 빈도 추이 (텍스트 변화의 다른 관점)\nshow: 특정 기간 원문 조회",
         "summary": "기간간 텍스트 변경 비교.",
     },
     "Company.disclosure": {
@@ -389,7 +389,7 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "property",
         "requires": "데이터: KIND 상장사 목록 (자동 로드)",
         "returns": "SectorInfo (sector, industryGroup, confidence, source).",
-        "seeAlso": "sectorParams: 섹터별 밸���에이션 파라미터 (할인율, PER 등)\nrank: 섹�� 내 규모 순위\ninsights: 섹터 기준 등급 평가",
+        "seeAlso": "sectorParams: 섹터별 밸류에이션 파라미터 (할인율, PER 등)\nrank: 섹터 내 규모 순위\ninsights: 섹터 기준 등급 평가",
         "summary": "WICS 투자 섹터 분류 (KIND 업종 + 키워드 기반).",
     },
     "Company.sectorParams": {
@@ -449,7 +449,7 @@ CAPABILITIES: dict[str, dict] = {
         "requires": "데이터: finance + report (자동 다운로드)",
         "returns": "Story — 구조화 보고서.",
         "seeAlso": "dartlab.ask: AI 자율 분석 (분석 질문은 여기로)\nanalysis: 14축 개별 분석 (review가 내부적으로 소비)\ninsights: 7영역 등급 + 이상치 요약",
-        "summary": "재��제표 구조화 보고서 — 기업이야��꾼의 대본 (내부 구현).",
+        "summary": "재무제표 구조화 보고서 — 기업이야기꾼의 대본 (내부 구현).",
     },
     "Company.storyTree": {
         "guide": "\"3 시나리오 가치\" → c.storyTree()\n\"서사 민감도\" → c.storyTree()['summary']['spreadPct']",
@@ -531,7 +531,7 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "method",
         "requires": "데이터: HuggingFace docs parquet (자동 다운로드)",
         "returns": "None",
-        "seeAlso": "index: 뷰어가 소비하는 메타데이터 (프로그래밍 접근)\nsections: 뷰어의 원본 데��터",
+        "seeAlso": "index: 뷰어가 소비하는 메타데이터 (프로그래밍 접근)\nsections: 뷰어의 원본 데이터",
         "summary": "브라우저에서 공시 뷰어를 엽니다.",
     },
     "Company.watch": {
@@ -732,7 +732,7 @@ CAPABILITIES: dict[str, dict] = {
     "macro.corporate": {
         "capabilities": "전종목 이익사이클 + Ponzi비율 + 레버리지",
         "kind": "macro_axis",
-        "summary": "기��집계",
+        "summary": "기업집계",
     },
     "macro.crisis": {
         "capabilities": "Credit-to-GDP gap + GHS + Minsky + 역사적 맥락",
@@ -740,7 +740,7 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "위기",
     },
     "macro.cycle": {
-        "capabilities": "경제 사이클 4국면 ��별 + 전환 시퀀스 감지",
+        "capabilities": "경제 사이클 4국면 식별 + 전환 시퀀스 감지",
         "kind": "macro_axis",
         "summary": "사이클",
     },
@@ -750,11 +750,11 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "예측",
     },
     "macro.inventory": {
-        "capabilities": "ISM 재고순환 4국면 + 자산���분 바로미터",
+        "capabilities": "ISM 재고순환 4국면 + 자산배분 바로미터",
         "kind": "macro_axis",
-        "summary": "��고",
+        "summary": "재고",
     },
-    "macro.liquidity": {"capabilities": "M2 + 연준 B/S + NFCI + 자체 FCI", "kind": "macro_axis", "summary": "��동성"},
+    "macro.liquidity": {"capabilities": "M2 + 연준 B/S + NFCI + 자체 FCI", "kind": "macro_axis", "summary": "유동성"},
     "macro.rates": {
         "capabilities": "금리 방향 + 고용/물가 + 수익률곡선 + 기간프리미엄",
         "kind": "macro_axis",
@@ -763,12 +763,12 @@ CAPABILITIES: dict[str, dict] = {
     "macro.scenario": {
         "capabilities": "역사적 충격 재현 + 유형별 스트레스 (~146개 프리셋)",
         "kind": "macro_axis",
-        "summary": "시��리오",
+        "summary": "시나리오",
     },
     "macro.sentiment": {
-        "capabilities": "공포탐욕 근사 + VIX 구간 + JLN 실물 불확실���",
+        "capabilities": "공포탐욕 근사 + VIX 구간 + JLN 실물 불확실성",
         "kind": "macro_axis",
-        "summary": "심���",
+        "summary": "심리",
     },
     "macro.summary": {
         "capabilities": "6막 전체 종합 — 점수 + 자산배분 + 40개 투자전략",

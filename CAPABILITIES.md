@@ -751,7 +751,7 @@ watch()보다 세밀한 줄 단위 변경 추적
 "사업개요 변경 이력" → c.diff("businessOverview")
 "2023 vs 2024 차이" → c.diff("businessOverview", "2023", "2024")
 **SeeAlso:** watch: 변화 중요도 스코어링 (diff보다 요약적)
-keywordTrend: 키워드 ��도 추이 (텍스트 변화의 다른 관점)
+keywordTrend: 키워드 빈도 추이 (텍스트 변화의 다른 관점)
 show: 특정 기간 원문 조회
 
 #### Company.disclosure
@@ -995,8 +995,8 @@ override 테이블 우선 → 키워드 → 업종명 순 fallback
 analysis/valuation에서 섹터별 벤치마크 기준으로 활용
 **Guide:** "이 회사 어떤 섹터야?" → c.sector
 "업종 분류" → c.sector
-**SeeAlso:** sectorParams: 섹터별 밸���에이션 파라미터 (할인율, PER 등)
-rank: 섹�� 내 규모 순위
+**SeeAlso:** sectorParams: 섹터별 밸류에이션 파라미터 (할인율, PER 등)
+rank: 섹터 내 규모 순위
 insights: 섹터 기준 등급 평가
 
 #### Company.sectorParams
@@ -1111,7 +1111,7 @@ overrides 로 AI 개입 (lifeCyclePhase, terminalGrowth 등)
 **Guide:** "공시 뷰어 열어줘" → c.view()
 "브라우저에서 보기" → c.view()
 **SeeAlso:** index: 뷰어가 소비하는 메타데이터 (프로그래밍 접근)
-sections: 뷰어의 원본 데��터
+sections: 뷰어의 원본 데이터
 
 #### Company.watch
 **Capabilities:** 전체 topic 변화 중요도 스코어링

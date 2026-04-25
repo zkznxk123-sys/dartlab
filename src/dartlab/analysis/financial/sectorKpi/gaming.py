@@ -57,7 +57,7 @@ def calcGamingKpis(company, *, basePeriod: str | None = None) -> dict | None:
                     "topIp": products[0]["name"] if products else "",
                     "topShare": top1_share,
                     "hhi": hhi,
-                    "verdict": "고집중" if hhi > 4000 else "중집중" if hhi > 2500 else "분���",
+                    "verdict": "고집중" if hhi > 4000 else "중집중" if hhi > 2500 else "분산",
                 }
     except (AttributeError, ValueError, TypeError, KeyError):
         pass

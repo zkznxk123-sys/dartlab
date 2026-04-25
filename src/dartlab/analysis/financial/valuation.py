@@ -818,7 +818,7 @@ def _classifyCompanyType(company: Any, series: dict) -> tuple[str, dict[str, flo
                 if cv > 0.5:
                     return "cyclical", {"DCF": 0.25, "DDM": 0.10, "상대가치": 0.40, "RIM": 0.25}
 
-    # 배당주: 안정적 ��당 (DDM 가중 높임)
+    # 배당주: 안정적 배당 (DDM 가중 높임)
     divVals = getAnnualValues(series, "CF", "dividends_paid")
     if divVals and len(divVals) >= 3:
         recentDivs = [abs(v) for v in divVals[-3:] if v is not None and v != 0]

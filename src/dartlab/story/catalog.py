@@ -350,7 +350,7 @@ _BLOCKS: list[BlockMeta] = [
         "매크로",
         "현재 매크로 환경과 유사했던 과거 에포크 + 그 시점의 귀결",
     ),
-    # ── 업종별 KPI (조건부 inject) ─��
+    # ── 업종별 KPI (조건부 inject) ──
     BlockMeta("sectorKpi", "업종 특수 KPI", "종합평가", "업종별 핵심 지표 — 건설/반도체/게임/제약 자동 감지"),
     # ── 산업 밸류체인 (L2 industry 엔진) ──
     BlockMeta(
@@ -367,7 +367,7 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("technicalActionTargets", "기술적 행동 목표", "improvementPlan", "지지/저항 + 진입 트리거"),
     BlockMeta("cyclicalActionPlan", "사이클 대응", "improvementPlan", "사이클 위치 기반 행동 제안"),
     # ── storyValidation (Damodaran 3-test) ──
-    BlockMeta("damodaran3test", "스토리 3-test", "storyValidation", "History/Experience/CommonSense 3단 ��증 결과"),
+    BlockMeta("damodaran3test", "스토리 3-test", "storyValidation", "History/Experience/CommonSense 3단 검증 결과"),
     # ── thesisReport (AI 서사) ──
     BlockMeta("thesisStatement", "가설 선언", "thesisReport", "사용자 가설 + 측정 가능 명제 분해"),
     BlockMeta("evidenceFor", "지지 증거", "thesisReport", "가설을 뒷받침하는 수치/팩트"),

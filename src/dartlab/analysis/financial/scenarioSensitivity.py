@@ -449,7 +449,7 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
                 }
             )
 
-    # ── 고성장 기업: 재투자 ROI ─��
+    # ── 고성장 기업: 재투자 ROI ──
     if opm is not None and opm > 15 and revenue:
         try:
             from dartlab.analysis.financial._helpers import toDictBySnakeId
