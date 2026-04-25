@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.24] - 2026-04-26
+
+안정화.
+
 ## [0.9.23] - 2026-04-25
 
 module-level 엔진 호출계약 일관화. `dartlab.analysis` 도 이제 `stockCode=` 로 종목 지정 가능.
