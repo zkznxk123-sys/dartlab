@@ -78,6 +78,16 @@ def publishReportFromCompany(
     # 레지스트리 업데이트
     _updateRegistry(stockCode, corpName, order, slug, rv, grade)
 
+    # 블로그 frontmatter ai: 블록 → KnowledgeDB.insights(source="blog") 다리
+    # (ops/philosophy.md §6 양방향 루프, 사람 → AI 경로 1)
+    try:
+        from dartlab.ai.persistence.blog_insights import upsert_ai_frontmatter_to_insights
+
+        upsert_ai_frontmatter_to_insights(path)
+    except Exception:
+        # hook 실패가 발간 경로를 깨뜨리지 않도록
+        pass
+
     return path
 
 

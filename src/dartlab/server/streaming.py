@@ -144,6 +144,8 @@ class _AuditCollector:
     def flush(self) -> None:
         try:
             import datetime as _dt
+            import hashlib
+            import uuid
 
             from dartlab.core.dataLoader import _getDataRoot
 
@@ -151,13 +153,44 @@ class _AuditCollector:
             root.mkdir(parents=True, exist_ok=True)
             day = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d")
             path = root / f"{day}.jsonl"
+
+            # v2 스키마 필드 계산
+            def _sha16(text: str) -> str:
+                return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+            # tool_sequence_hash
+            seq_src = ",".join(
+                f"{tc.get('name', '')}:{_sha16(json.dumps(tc.get('args', {}), sort_keys=True, default=str, ensure_ascii=False))}"
+                for tc in self.tool_calls
+            )
+            tool_sequence_hash = "seq:" + hashlib.sha256(seq_src.encode("utf-8")).hexdigest()[:16]
+
+            # question_hash (정규화 후)
+            import re as _re
+
+            q_norm = _re.sub(r"\s+", " ", _re.sub(r"[^\w\s가-힣]", "", self.question.lower().strip()))
+            question_hash = _sha16(q_norm) if self.question else ""
+
             entry = {
+                "schema_version": 2,
                 "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+                "request_id": f"req-{uuid.uuid4().hex[:12]}",
                 "question": self.question,
+                "question_hash": question_hash,
+                "category_hash": "",
+                "stockCode_hint": None,
+                "provider": None,
+                "model": None,
                 "tool_calls": self.tool_calls,
+                "tool_sequence_hash": tool_sequence_hash,
+                "override_calls": [],
+                "rounds": max(1, len(self.tool_calls)),
                 "chunk_len": self.chunk_len,
                 "error": self.error,
+                "violation": None,
                 "skill_used": self.skill_used,
+                "duration_total_ms": None,
+                "judgment": {"verdict": None, "judged_at": None, "judged_by": None, "pr_url": None},
             }
             with path.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(entry, ensure_ascii=False) + "\n")
