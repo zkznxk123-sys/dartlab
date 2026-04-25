@@ -903,9 +903,15 @@ class _GroupAccessor:
         self._analysis = analysis_instance
         self._group = group
 
-    def __call__(self, company=None, *, basePeriod=None, overrides=None):
-        """그룹 가이드 또는 그룹 전체 실행."""
-        return self._analysis(self._group, company=company, basePeriod=basePeriod, overrides=overrides)
+    def __call__(self, company=None, *, stockCode=None, basePeriod=None, overrides=None):
+        """그룹 가이드 또는 그룹 전체 실행. `stockCode` / `company` 호환."""
+        return self._analysis(
+            self._group,
+            company=company,
+            stockCode=stockCode,
+            basePeriod=basePeriod,
+            overrides=overrides,
+        )
 
     def __getattr__(self, name):
         """analysis.financial.profitability() 패턴."""
@@ -917,9 +923,16 @@ class _GroupAccessor:
         if resolved not in _GROUPS.get(self._group, []):
             raise AttributeError(f"'{name}' 축은 '{self._group}' 그룹에 속하지 않습니다")
 
-        def _bound_axis(company=None, *, basePeriod=None, overrides=None):
-            """그룹 내 특정 축 실행 바인딩."""
-            return self._analysis(self._group, resolved, company=company, basePeriod=basePeriod, overrides=overrides)
+        def _bound_axis(company=None, *, stockCode=None, basePeriod=None, overrides=None):
+            """그룹 내 특정 축 실행 바인딩. `stockCode` / `company` 호환."""
+            return self._analysis(
+                self._group,
+                resolved,
+                company=company,
+                stockCode=stockCode,
+                basePeriod=basePeriod,
+                overrides=overrides,
+            )
 
         _bound_axis.__name__ = name
         _bound_axis.__doc__ = f'analysis("{self._group}", "{resolved}")'
@@ -998,6 +1011,7 @@ class Analysis:
         sub: Any | None = None,
         *,
         company: Any | None = None,
+        stockCode: str | None = None,
         basePeriod: str | None = None,
         overrides: dict | None = None,
         **kwargs: Any,
@@ -1006,9 +1020,15 @@ class Analysis:
 
         호출::
 
-            c.analysis("financial", "수익성")   # 그룹 + 하위
-            c.analysis("valuation", "가치평가")  # 그룹 + 하위
-            c.analysis("forecast", "매출전망")   # 그룹 + 하위
+            # 종목 지정 (일관성 규약: 종목 = stockCode)
+            dartlab.analysis("financial", "수익성", stockCode="005930")
+
+            # Company-bound (프로그래밍 경로)
+            c = dartlab.Company("005930")
+            c.analysis("financial", "수익성")
+
+            # 기존 company= 호환 (Company 객체 직접 전달)
+            dartlab.analysis("financial", "수익성", company=c)
         """
         if axis is None:
             return self._guide()
@@ -1017,6 +1037,13 @@ class Analysis:
         if sub is not None and hasattr(sub, "stockCode"):
             company = sub
             sub = None
+
+        # stockCode 인자 수용 — 일관성 규약 (종목 = stockCode).
+        # company 없고 stockCode 있으면 Company 생성.
+        if company is None and stockCode is not None:
+            from dartlab import Company
+
+            company = Company(stockCode)
 
         # 그룹 해석 — 직접 그룹명 또는 한글 그룹 alias
         group = axis if axis in _GROUPS else _ALIASES.get(axis) if _ALIASES.get(axis) in _GROUPS else None

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.23] - 2026-04-25
+
+module-level 엔진 호출계약 일관화. `dartlab.analysis` 도 이제 `stockCode=` 로 종목 지정 가능.
+
+### Added
+
+- `dartlab.analysis.financial("수익성", stockCode="005930")` — 기존 `company=` 외에 `stockCode=` 키워드 수용. `dartlab.credit` · `quant` 와 일관화.
+- `Company` 파사드 docstring 격상 — "사람의 최상위 관문" 로서 역할 명시. `ask` 와 투톱 진입점 맥락 기술.
+
+### Changed
+
+- 일관성 규약: 종목 지정 인자 이름 전수 `stockCode` 로 통일 (섹터=`sector`, 시장=`market`). 기존 `company=` (Company 객체 직접 전달) 도 호환.
+
 ## [0.9.22] - 2026-04-25
 
 보고서 진입점 이름 변경. `c.review()` → `c.story()` · `c.reviewer()` 제거 (AI 종합의견은 `dartlab.ask()` 사용). Breaking change.

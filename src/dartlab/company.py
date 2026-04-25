@@ -33,9 +33,15 @@ def _discover() -> None:
 
 
 def Company(codeOrName: str) -> CompanyProtocol:
-    """종목코드/회사명/ticker → 적절한 Company 인스턴스 생성.
+    """**사람의 최상위 관문** — 종목 하나의 모든 엔진에 접근하는 파사드.
+
+    dartlab 투톱 진입점:
+        - `dartlab.ask(question)` — AI 대화 (일회성 질문 → 답)
+        - `dartlab.Company(code)` — 사람 파사드 (종목 객체 → 모든 엔진)
 
     Capabilities:
+        - 종목 파사드 하나로 엔진 전수 접근: analysis · credit · quant · macro ·
+          industry · gather · show. 엔진 이름만 기억하면 됨.
         - 종목코드 ("005930"), 회사명 ("삼성전자"), 영문 ticker ("AAPL") 모두 지원
         - canHandle() 체인: provider priority 순 자동 라우팅 (DART → EDGAR)
         - 새 국가 추가 시 이 파일 수정 불필요 — provider 패키지만 추가
@@ -49,8 +55,9 @@ def Company(codeOrName: str) -> CompanyProtocol:
         EDGAR: 인터넷 연결 (On-demand 수집).
 
     AIContext:
-        개별 종목 분석의 시작점. explore/finance/analysis 수퍼툴이 이 객체를 소비.
-        "삼성전자 분석해줘" → Company("005930") 생성 → briefing → LLM 해석.
+        AI 는 `dartlab.ask()` 로 접근 (Company 를 직접 생성하지 않음).
+        사람은 Company 객체 하나로 노트북·스크립트에서 모든 엔진 호출.
+        엔진은 사람의 분석엔진이자 AI 의 skill (docstring SSOT) — 한 파일 두 역할.
 
     Guide:
         - "삼성전자 재무제표" -> c = Company("005930"); c.show("IS")
@@ -59,32 +66,41 @@ def Company(codeOrName: str) -> CompanyProtocol:
         - "출처 추적" -> c.trace("revenue")
         - "기간 변화" -> c.diff()
         - "종합평가" -> c.analysis("financial", "종합평가")
-        - "리뷰 보고서" -> c.story()
+        - "스토리 보고서" -> c.story()
         - "Apple 분석" -> Company("AAPL") (자동 EDGAR 라우팅)
 
     SeeAlso:
+        - dartlab.ask: AI 대화 (투톱 다른 관문)
         - search: 종목 검색 (종목코드 모를 때)
-        - scan: 전종목 횡단분석 (기업 비교)
-        - analysis: 14축 전략분석
-        - gather: 주가/수급/거시 데이터
+        - scan: 전종목 횡단분석 (Company-독립)
+        - macro: 시장 레벨 거시 (Company-독립)
+        - industry: 섹터 밸류체인 (Company-독립)
 
     Args:
         codeOrName: 종목코드, 회사명, 또는 영문 ticker.
 
     Returns:
-        CompanyProtocol — DART 또는 EDGAR Company 인스턴스.
+        CompanyProtocol — DART 또는 EDGAR Company 인스턴스 (파사드).
 
     Example::
 
         import dartlab
-        c = dartlab.Company("005930")     # 삼성전자 (DART)
-        c = dartlab.Company("삼성전자")    # 회사명으로도 가능
-        c = dartlab.Company("AAPL")       # Apple (EDGAR)
 
-        c.IS                              # 손익계산서
-        c.show("businessOverview")        # 사업 개요
-        c.analysis("financial", "종합평가") # 재무 종합평가
-        c.story()                        # 분석 보고서
+        # 사람의 만능 관문 — 한 객체로 전 엔진
+        c = dartlab.Company("005930")     # 삼성전자 (DART)
+        c.story()                         # 분석 스토리 (보고서)
+        c.analysis("financial", "수익성") # 재무 분석
+        c.credit()                        # 신용
+        c.quant()                         # 주가
+        c.show("businessOverview")        # 원본 사업 개요
+
+        # 글로벌 (EDGAR 자동 라우팅)
+        c = dartlab.Company("AAPL")
+        c.analysis("financial", "valuation")
+
+        # module-level 엔진도 `stockCode=` 로 호출 가능 (일관성 규약)
+        dartlab.analysis.financial("수익성", stockCode="005930")
+        dartlab.credit(stockCode="005930")
     """
     _discover()
 
