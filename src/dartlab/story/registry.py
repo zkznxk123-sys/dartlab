@@ -64,10 +64,10 @@ def buildBlocks(
             keys = set(_STANDARD_KEYS)
         # "full" 은 keys=None 유지 (기존 동작)
     # builders와 analysis의 금액 포맷을 company.currency에 맞게 설정 (contextvars — 스레드 안전)
-    from dartlab.story.builders import _review_currency
+    from dartlab.story.builders import _story_currency
 
     _currency = getattr(company, "currency", "KRW")
-    _review_currency.set(_currency)
+    _story_currency.set(_currency)
     try:
         from dartlab.analysis.financial.capital import _analysis_currency
 

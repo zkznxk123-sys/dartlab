@@ -11,8 +11,15 @@ permissions:
   attestations: write
 
 jobs:
+  # CI Full 강제 게이트 — tag push 시점에 ci-full.yml 의 모든 잡 (test-full +
+  # fixture-integration + cross-os-smoke + realdata-suite) 통과 후에만 publish 진행.
+  # 2026-04-26 사고 (v0.9.25 ci-full fail 인데 PyPI 업로드됨) 재발 방지.
+  ci-full:
+    uses: ./.github/workflows/ci-full.yml
+
   test:
     runs-on: ubuntu-latest
+    needs: ci-full
     strategy:
       fail-fast: false
       matrix:

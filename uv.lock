@@ -477,7 +477,7 @@ wheels = [
 
 [[package]]
 name = "dartlab"
-version = "0.9.24"
+version = "0.9.25"
 source = { editable = "." }
 dependencies = [
     { name = "anthropic", marker = "sys_platform != 'emscripten'" },

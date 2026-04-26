@@ -26,6 +26,16 @@ GATHER_AXES = _gatherAxes()
 _AXIS_KEY_REQS: dict[str, tuple[str, ...]] = {
     "macro": ("ECOS_API_KEY", "FRED_API_KEY"),
     "insider": ("DART_API_KEY",),
+    "krxindex": ("KRX_API_KEY",),  # idx 카테고리 권한 별도 신청 필요
+}
+
+# axis 별 적절한 target — 모든 axis 가 stockCode 받지 않음.
+# krx/krxindex 는 column 명 (close/open/rsi14/...), macro 는 series id 또는 None,
+# news 는 검색어 (선택). 명시 안 한 axis 는 SAMSUNG 종목코드 사용.
+_AXIS_TARGET: dict[str, str | None] = {
+    "macro": None,
+    "krx": "close",
+    "krxindex": "close",
 }
 
 
@@ -38,14 +48,14 @@ def _hasRealKey(name: str) -> bool:
 @pytest.mark.integration
 @pytest.mark.parametrize("axis", GATHER_AXES)
 def test_gatherAxis_runs(axis):
-    """gather(axis, code) 가 각 축에서 크래시 없이 실행."""
+    """gather(axis, target) 이 각 축에서 크래시 없이 실행. axis-별 적절한 target 사용."""
     import dartlab
 
     reqs = _AXIS_KEY_REQS.get(axis, ())
     if reqs and not any(_hasRealKey(r) for r in reqs):
         pytest.skip(f"gather({axis!r}) API 키 없음: {reqs}")
 
-    target = None if axis == "macro" else SAMSUNG
+    target = _AXIS_TARGET[axis] if axis in _AXIS_TARGET else SAMSUNG
     try:
         result = dartlab.gather(axis, target) if target else dartlab.gather(axis)
     except (TimeoutError, ConnectionError, OSError) as e:

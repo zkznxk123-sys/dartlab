@@ -1,0 +1,201 @@
+# Stale reference 패턴 SSOT — scripts/audit/stale_references.py 가 소비.
+#
+# 패턴 추가 시:
+#   1. 정규식이 false positive 안 내는지 grep 으로 사전 검증
+#   2. 도입 시점에 0건 (또는 화이트리스트 처리) 확인
+#   3. severity: warn → error 점진 승격
+#
+# whitelist_paths: 파일 경로의 substring 매칭. CHANGELOG / migration history /
+# rename note 같은 의도된 잔존은 여기 추가.
+#
+# default_whitelist: 모든 패턴에 공통 적용. (자동 생성물·정의 파일·anti-pattern note·
+# 폐기 검증 테스트 등 — 의미상 잔존 허용 위치)
+
+default_whitelist:
+  # ── 자동 생성물 ──
+  - src/dartlab/core/_generated.py
+  - src/dartlab/core/_generatedCapabilities.py
+  - src/dartlab/mcp/_generated_tools.py
+  - CAPABILITIES.md
+  - landing/static/llms.txt
+  - .claude/skills/dartlab/reference.md
+
+  # ── 패턴 정의 자체 (자기 매칭 차단) ──
+  - scripts/audit/stalePatterns.yaml
+  - scripts/audit/stale_references.py
+
+  # ── Plan v9 historical 설계 문서 ──
+  - src/dartlab/providers/dart/ROLE_ASSIGNMENT.md
+
+  # ── 폐기 명시 anti-pattern note 가 있는 ops 문서 ──
+  - ops/api-contract.md
+  - ops/company.md
+  - ops/code.md
+  - ops/data.md
+  - ops/philosophy.md
+
+  # ── release history ──
+  - CHANGELOG.md
+
+  # ── 폐기 검증 테스트 (의도적으로 옛 API 패턴을 검증) ──
+  - tests/test_cli_commands.py
+  - tests/test_dart_company_methods.py
+  - tests/test_guide_full.py
+  - tests/test_pivot_annual_column.py
+  - tests/test_company_facade.py
+
+  # ── 폐기 명시 코드 주석 (Plan v10 P0 / P1 마킹) ──
+  - src/dartlab/core/protocols.py
+  - src/dartlab/providers/dart/company.py
+  - src/dartlab/providers/edgar/company.py
+  - src/dartlab/company.py
+
+patterns:
+  # ── review → story (v0.9.22 — 2026-04-25 마이그레이션) ────────────
+  - name: review_method_call
+    regex: '\bc\.review\(\)'
+    severity: error
+    message: "v0.9.22: c.review() → c.story() 변경. 이 호출은 더 이상 동작하지 않음."
+    whitelist_paths:
+      - CHANGELOG.md  # historical release note
+      - ops/philosophy.md  # 부록 B 폐기 history
+
+  - name: review_currency_var
+    regex: '_review_currency\b'
+    severity: error
+    message: "v0.9.22: _review_currency → _story_currency rename"
+    whitelist_paths:
+      - CHANGELOG.md
+
+  - name: review_module_import
+    regex: 'from dartlab\.review\b|import dartlab\.review\b'
+    severity: error
+    message: "v0.9.22: dartlab.review 모듈 폐기. dartlab.story 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+
+  - name: reviewer_method
+    regex: '\bc\.reviewer\(\)'
+    severity: error
+    message: "AI 진입점 단일화 (2026-04-06): c.reviewer() 폐기. dartlab.ask() 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/philosophy.md
+
+  - name: company_review_tool_name
+    regex: '\bcompanyReview\b'
+    severity: error
+    message: "MCP tool 이름 변경: companyReview → companyStory"
+    whitelist_paths:
+      - CHANGELOG.md
+
+  # ── Plan v10 — namespace property 폐기 ────────────────────
+  - name: docs_namespace_attr
+    regex: '\bc\.docs\.\w+'
+    severity: error
+    message: "Plan v10: c.docs.X namespace 폐기. c.show(topic) 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md  # anti-pattern 명시
+      - ops/company.md
+      - providers/edgar  # EDGAR 는 c.notes 만 살아있음 — c.docs 와 별개
+
+  - name: finance_namespace_attr
+    regex: '\bc\.finance\.\w+'
+    severity: error
+    message: "Plan v10: c.finance.X namespace 폐기. c.show(topic) 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+      - ops/company.md
+      - ops/data.md
+
+  - name: report_namespace_attr
+    regex: '\bc\.report\.\w+'
+    severity: error
+    message: "Plan v10: c.report.X namespace 폐기. c.show(topic) 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+      - ops/company.md
+
+  - name: profile_namespace_attr
+    regex: '\bc\.profile\.\w+'
+    severity: error
+    message: "Plan v10: c.profile.X namespace 폐기. c.show(topic) 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+      - ops/company.md
+
+  # ── Plan v10 — 재무 property 폐기 ────────────────────────
+  - name: bs_property
+    regex: '\bc\.BS\b'
+    severity: error
+    message: "Plan v10 P0: c.BS property 폐기. c.show('BS') 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md  # anti-pattern 명시
+      - ops/code.md
+
+  - name: is_property
+    regex: '\bc\.IS\b'
+    severity: error
+    message: "Plan v10 P0: c.IS property 폐기. c.show('IS') 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+      - ops/code.md
+
+  - name: cf_property
+    regex: '\bc\.CF\b'
+    severity: error
+    message: "Plan v10 P0: c.CF property 폐기. c.show('CF') 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+      - ops/code.md
+
+  - name: cis_property
+    regex: '\bc\.CIS\b'
+    severity: error
+    message: "Plan v10 P0: c.CIS property 폐기. c.show('CIS') 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+      - ops/code.md
+
+  - name: ratios_property
+    regex: '\bc\.ratios\b'
+    severity: error
+    message: "Plan v10 P1: c.ratios property 폐기. c.show('ratios') 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+      - ops/code.md
+
+  - name: timeseries_property
+    regex: '\bc\.timeseries\b'
+    severity: error
+    message: "Plan v10: c.timeseries property 폐기. c.show(topic) + freq 토글 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+
+  # ── 옛 모듈 경로 ───────────────────────────────────────────
+  - name: engines_module_path
+    regex: '\bdartlab\.engines\.\w+|src/dartlab/engines/'
+    severity: error
+    message: "옛 경로 dartlab.engines.X — providers/X 또는 X (analysis/credit/...) 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/philosophy.md  # history
+      - tests/test_wheelPackaging.py  # gitignore 검증 목적의 명시 잔존
+
+  # ── 옛 테스트 파일명 (workflow / CI 스크립트) ──────────────
+  - name: test_review_filename
+    regex: '\btest_review\.py\b'
+    severity: error
+    message: "v0.9.22: test_review.py → test_story.py 로 rename. CI 스크립트 갱신 필요."
+    whitelist_paths:
+      - CHANGELOG.md

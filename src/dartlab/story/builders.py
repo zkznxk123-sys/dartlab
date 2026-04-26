@@ -502,12 +502,12 @@ def fundingSourcesBlock(data: dict) -> list:
 
 import contextvars
 
-_review_currency: contextvars.ContextVar[str] = contextvars.ContextVar("review_currency", default="KRW")
+_story_currency: contextvars.ContextVar[str] = contextvars.ContextVar("review_currency", default="KRW")
 
 
 def _unitForCurrency() -> str:
     """현재 통화에 맞는 unifyTableScale unit 반환."""
-    return "usd" if _review_currency.get() == "USD" else "won"
+    return "usd" if _story_currency.get() == "USD" else "won"
 
 
 def _fmtAmtShort(value) -> str:
@@ -516,7 +516,7 @@ def _fmtAmtShort(value) -> str:
         return "-"
     absVal = abs(value)
     sign = "-" if value < 0 else ""
-    if _review_currency.get() == "USD":
+    if _story_currency.get() == "USD":
         if absVal >= 1_000_000_000:
             return f"{sign}${absVal / 1_000_000_000:.1f}B"
         if absVal >= 1_000_000:
