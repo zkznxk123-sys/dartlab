@@ -7,6 +7,8 @@
 	import { fmtPct } from '$lib/format/pct';
 	import type { Cond, Op, SortKey, MetricKey, MetricDef, ScreenerNode, PriceSnapshot, QueryPayload } from '$lib/screener/types';
 	import { loadDartDb, type DartDb } from '$lib/data/duckdb';
+	import { PRESETS, PRESETS_BY_ID, PRESET_CATEGORIES, type Preset } from '$lib/screener/presets';
+	import PresetCard from '$lib/screener/PresetCard.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -237,10 +239,28 @@
 		const q = page.url.searchParams.get('q');
 		if (q) decodeQuery(q);
 		const preset = page.url.searchParams.get('preset');
-		if (preset) activePreset = preset;
+		if (preset) {
+			applyPreset(preset);
+		}
 		// DuckDB lazy 로드 — 백그라운드, 비차단
 		void loadPriceTimeSeries();
 	});
+
+	/** 프리셋 클릭 → conds + sorts 자동 입력 + activePreset 표시 + 산업 필터 클리어. */
+	function applyPreset(presetId: string) {
+		const preset = PRESETS_BY_ID.get(presetId);
+		if (!preset) return;
+		// 깊은 복사 (원본 보존)
+		conds = preset.conds.map((c) => ({ ...c }));
+		sorts = preset.sorts.map((s) => ({ ...s }));
+		selectedIndustries = new Set();
+		activePreset = preset.id;
+	}
+
+	/** 사용자가 조건을 직접 변경했을 때 active preset 표시 해제. */
+	function markPresetDirty() {
+		if (activePreset) activePreset = null;
+	}
 
 	/** DuckDB 통한 KRX 일별 가격 시계열 derived 메트릭 로드.
 	 * 매핑: 종목 → {currentPrice, ma20 (20일 이평), high60/low60 (60일 H/L)}.
@@ -435,6 +455,30 @@
 			{/if}
 		</div>
 	</header>
+
+	<!-- 프리셋 라이브러리 — 한 클릭 입력 -->
+	<section class="presets">
+		<div class="presets-head">
+			<span class="presets-title">프리셋</span>
+			<span class="presets-hint">한 클릭으로 조건 자동 입력 · {PRESETS.length} 가지</span>
+			{#if activePreset}
+				<button class="link" onclick={() => (activePreset = null)}>활성 해제</button>
+			{/if}
+		</div>
+		{#each PRESET_CATEGORIES as cat (cat.key)}
+			{@const items = PRESETS.filter((p) => p.category === cat.key)}
+			{#if items.length > 0}
+				<div class="preset-group">
+					<div class="preset-group-label">{cat.label}</div>
+					<div class="preset-grid">
+						{#each items as p (p.id)}
+							<PresetCard preset={p} active={activePreset === p.id} onClick={applyPreset} />
+						{/each}
+					</div>
+				</div>
+			{/if}
+		{/each}
+	</section>
 
 	<section class="builder">
 		<!-- 산업 다중선택 -->
@@ -742,6 +786,49 @@
 	@keyframes pulse {
 		0%, 100% { opacity: 0.4; }
 		50% { opacity: 1; }
+	}
+
+	.presets {
+		margin-bottom: 24px;
+		padding: 16px 18px;
+		background: linear-gradient(180deg, rgba(96, 165, 250, 0.04), transparent 60%);
+		border: 1px solid rgba(96, 165, 250, 0.14);
+		border-radius: 12px;
+	}
+	.presets-head {
+		display: flex;
+		align-items: baseline;
+		gap: 12px;
+		margin-bottom: 14px;
+	}
+	.presets-title {
+		font-size: 13px;
+		font-weight: 700;
+		color: #f1f5f9;
+		letter-spacing: -0.01em;
+	}
+	.presets-hint {
+		font-size: 11px;
+		color: #64748b;
+	}
+	.preset-group {
+		margin-top: 12px;
+	}
+	.preset-group:first-child {
+		margin-top: 0;
+	}
+	.preset-group-label {
+		font-size: 10px;
+		font-weight: 700;
+		color: #94a3b8;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		margin-bottom: 8px;
+	}
+	.preset-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+		gap: 10px;
 	}
 
 	.builder {
