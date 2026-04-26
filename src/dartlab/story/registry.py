@@ -770,6 +770,198 @@ def _buildCrossStatementBlocks(company, keys, basePeriod, safe: Callable, need: 
         )
 
 
+def _buildCreditBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """3-6 — 신용평가 (8+ 블록)."""
+    if keys is not None and not (
+        keys
+        & {
+            "creditMetrics",
+            "creditScore",
+            "creditHistory",
+            "cashFlowGrade",
+            "creditPeerPosition",
+            "creditFlags",
+            "creditNarrative",
+            "creditAudit",
+            "creditScenario",
+        }
+    ):
+        return
+    from dartlab.credit.calcs import (
+        calcCashFlowGrade,
+        calcCreditAudit,
+        calcCreditFlags,
+        calcCreditHistory,
+        calcCreditMetrics,
+        calcCreditNarrative,
+        calcCreditPeerPosition,
+        calcCreditScore,
+    )
+    from dartlab.story.builders import (
+        cashFlowGradeBlock,
+        creditAuditBlock,
+        creditFlagsBlock,
+        creditHistoryBlock,
+        creditMetricsBlock,
+        creditNarrativeBlock,
+        creditPeerPositionBlock,
+        creditScoreBlock,
+    )
+
+    if need("creditMetrics"):
+        out["creditMetrics"] = safe(lambda: creditMetricsBlock(calcCreditMetrics(company, basePeriod=basePeriod)))
+    if need("creditScore"):
+        out["creditScore"] = safe(lambda: creditScoreBlock(calcCreditScore(company, basePeriod=basePeriod)))
+    if need("creditHistory"):
+        out["creditHistory"] = safe(lambda: creditHistoryBlock(calcCreditHistory(company, basePeriod=basePeriod)))
+    if need("cashFlowGrade"):
+        out["cashFlowGrade"] = safe(lambda: cashFlowGradeBlock(calcCashFlowGrade(company, basePeriod=basePeriod)))
+    if need("creditPeerPosition"):
+        out["creditPeerPosition"] = safe(
+            lambda: creditPeerPositionBlock(calcCreditPeerPosition(company, basePeriod=basePeriod))
+        )
+    if need("creditFlags"):
+        out["creditFlags"] = safe(lambda: creditFlagsBlock(calcCreditFlags(company, basePeriod=basePeriod)))
+    if need("creditNarrative"):
+        out["creditNarrative"] = safe(lambda: creditNarrativeBlock(calcCreditNarrative(company, basePeriod=basePeriod)))
+    if need("creditAudit"):
+        out["creditAudit"] = safe(lambda: creditAuditBlock(calcCreditAudit(company, basePeriod=basePeriod)))
+    if need("creditScenario"):
+        from dartlab.story.builders import creditScenarioBlock
+
+        _base_credit = out.get("creditScore")
+        _stress_overrides = {"debtRatio": 80.0, "interestCoverage": 2.0}
+        _stress_credit = safe(lambda: calcCreditScore(company, basePeriod=basePeriod, overrides=_stress_overrides))
+        if _base_credit and _stress_credit:
+            _base_data = calcCreditScore(company, basePeriod=basePeriod)
+            _stress_data = calcCreditScore(company, basePeriod=basePeriod, overrides=_stress_overrides)
+            out["creditScenario"] = safe(lambda: creditScenarioBlock(_base_data, _stress_data, _stress_overrides))
+
+
+def _buildValuationBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """4 부 — 가치평가 (Damodaran 흡수 포함 storyPrecedents/plausibilityBand)."""
+    _CORE_KEYS = {
+        "dcfValuation",
+        "ddmValuation",
+        "relativeValuation",
+        "residualIncome",
+        "priceTarget",
+        "reverseImplied",
+        "sensitivity",
+        "valuationSynthesis",
+        "valuationFlags",
+        "lifeCycleStage",
+        "valuationSins",
+        "dFV",
+        "methodFitness",
+        "qualityFactors",
+    }
+    _DAMODARAN_KEYS = {"storyPrecedents", "plausibilityBand"}
+    if keys is not None and not (keys & (_CORE_KEYS | _DAMODARAN_KEYS)):
+        return
+
+    if keys is None or keys & _CORE_KEYS:
+        from dartlab.analysis.financial.valuation import (
+            calcDcf,
+            calcDdm,
+            calcPriceTarget,
+            calcReverseImplied,
+            calcSensitivity,
+            calcValuationFlags,
+            calcValuationSynthesis,
+        )
+        from dartlab.analysis.financial.valuation import (
+            calcRelativeValuation as calcRelVal,
+        )
+        from dartlab.analysis.financial.valuation import (
+            calcResidualIncome as calcRim,
+        )
+        from dartlab.story.builders import (
+            dcfValuationBlock,
+            ddmValuationBlock,
+            priceTargetBlock,
+            relativeValuationBlock,
+            residualIncomeBlock,
+            reverseImpliedBlock,
+            sensitivityBlock,
+            valuationFlagsBlock,
+            valuationSynthesisBlock,
+        )
+
+        if need("dcfValuation"):
+            out["dcfValuation"] = safe(lambda: dcfValuationBlock(calcDcf(company, basePeriod=basePeriod)))
+        if need("ddmValuation"):
+            out["ddmValuation"] = safe(lambda: ddmValuationBlock(calcDdm(company, basePeriod=basePeriod)))
+        if need("relativeValuation"):
+            out["relativeValuation"] = safe(lambda: relativeValuationBlock(calcRelVal(company, basePeriod=basePeriod)))
+        if need("residualIncome"):
+            out["residualIncome"] = safe(lambda: residualIncomeBlock(calcRim(company, basePeriod=basePeriod)))
+        # priceTarget 결과를 valuationSynthesis 에 전달 — 두 모델 차이 narration 자동 추가
+        _ptCache: dict = {}
+
+        def _getPt():
+            if "v" not in _ptCache:
+                _ptCache["v"] = calcPriceTarget(company, basePeriod=basePeriod)
+            return _ptCache["v"]
+
+        if need("priceTarget"):
+            out["priceTarget"] = safe(lambda: priceTargetBlock(_getPt()))
+        if need("reverseImplied"):
+            out["reverseImplied"] = safe(
+                lambda: reverseImpliedBlock(calcReverseImplied(company, basePeriod=basePeriod))
+            )
+        if need("sensitivity"):
+            out["sensitivity"] = safe(lambda: sensitivityBlock(calcSensitivity(company, basePeriod=basePeriod)))
+        if need("valuationSynthesis"):
+            out["valuationSynthesis"] = safe(
+                lambda: valuationSynthesisBlock(
+                    calcValuationSynthesis(company, basePeriod=basePeriod),
+                    priceTargetData=_getPt(),
+                )
+            )
+        if need("valuationFlags"):
+            out["valuationFlags"] = safe(
+                lambda: valuationFlagsBlock(calcValuationFlags(company, basePeriod=basePeriod))
+            )
+        # dFV (dartlab Fair Value) — 4엔진 통합 적정주가
+        if need("dFV") or need("methodFitness") or need("qualityFactors"):
+            from dartlab.analysis.valuation.dFV import calcDFV
+            from dartlab.story.builders import dFVBlock, methodFitnessBlock, qualityFactorsBlock
+
+            _dfv_data = safe(lambda: calcDFV(company, basePeriod=basePeriod))
+            if need("dFV"):
+                out["dFV"] = dFVBlock(_dfv_data) if _dfv_data else []
+            if need("methodFitness"):
+                out["methodFitness"] = methodFitnessBlock(_dfv_data) if _dfv_data else []
+            if need("qualityFactors"):
+                out["qualityFactors"] = qualityFactorsBlock(_dfv_data) if _dfv_data else []
+        # Damodaran 흡수 — lifeCycle / valuationSins
+        if need("lifeCycleStage"):
+            from dartlab.analysis.financial.lifeCycle import calcLifeCycle
+            from dartlab.story.builders import lifeCycleStageBlock
+
+            out["lifeCycleStage"] = safe(lambda: lifeCycleStageBlock(calcLifeCycle(company, basePeriod=basePeriod)))
+        if need("valuationSins"):
+            from dartlab.analysis.financial.storyValidation import calcValuationSins
+            from dartlab.story.builders import valuationSinsBlock
+
+            out["valuationSins"] = safe(lambda: valuationSinsBlock(calcValuationSins(company, basePeriod=basePeriod)))
+
+    # Damodaran 흡수 — storyPrecedents / plausibilityBand (별도 calc 모듈)
+    if need("storyPrecedents"):
+        from dartlab.analysis.financial.storyValidation import calcStoryPrecedents
+        from dartlab.story.builders import storyPrecedentsBlock
+
+        out["storyPrecedents"] = safe(lambda: storyPrecedentsBlock(calcStoryPrecedents(company, basePeriod=basePeriod)))
+    if need("plausibilityBand"):
+        from dartlab.analysis.financial.storyValidation import calcPlausibilityBand
+        from dartlab.story.builders import plausibilityBandBlock
+
+        out["plausibilityBand"] = safe(
+            lambda: plausibilityBandBlock(calcPlausibilityBand(company, basePeriod=basePeriod))
+        )
+
+
 def buildBlocks(
     company,
     keys: set[str] | None = None,
@@ -815,187 +1007,9 @@ def buildBlocks(
     _buildInvestmentBlocks(company, keys, basePeriod, _safe, _need, b)
     _buildCrossStatementBlocks(company, keys, basePeriod, _safe, _need, b)
 
-    # ── 3-6: 신용평가 ──
-    if keys is None or keys & {
-        "creditMetrics",
-        "creditScore",
-        "creditHistory",
-        "cashFlowGrade",
-        "creditPeerPosition",
-        "creditFlags",
-        "creditNarrative",
-        "creditAudit",
-    }:
-        from dartlab.credit.calcs import (
-            calcCashFlowGrade,
-            calcCreditAudit,
-            calcCreditFlags,
-            calcCreditHistory,
-            calcCreditMetrics,
-            calcCreditNarrative,
-            calcCreditPeerPosition,
-            calcCreditScore,
-        )
-        from dartlab.story.builders import (
-            cashFlowGradeBlock,
-            creditAuditBlock,
-            creditFlagsBlock,
-            creditHistoryBlock,
-            creditMetricsBlock,
-            creditNarrativeBlock,
-            creditPeerPositionBlock,
-            creditScoreBlock,
-        )
-
-        if _need("creditMetrics"):
-            b["creditMetrics"] = _safe(lambda: creditMetricsBlock(calcCreditMetrics(company, basePeriod=basePeriod)))
-        if _need("creditScore"):
-            b["creditScore"] = _safe(lambda: creditScoreBlock(calcCreditScore(company, basePeriod=basePeriod)))
-        if _need("creditHistory"):
-            b["creditHistory"] = _safe(lambda: creditHistoryBlock(calcCreditHistory(company, basePeriod=basePeriod)))
-        if _need("cashFlowGrade"):
-            b["cashFlowGrade"] = _safe(lambda: cashFlowGradeBlock(calcCashFlowGrade(company, basePeriod=basePeriod)))
-        if _need("creditPeerPosition"):
-            b["creditPeerPosition"] = _safe(
-                lambda: creditPeerPositionBlock(calcCreditPeerPosition(company, basePeriod=basePeriod))
-            )
-        if _need("creditFlags"):
-            b["creditFlags"] = _safe(lambda: creditFlagsBlock(calcCreditFlags(company, basePeriod=basePeriod)))
-        if _need("creditNarrative"):
-            b["creditNarrative"] = _safe(
-                lambda: creditNarrativeBlock(calcCreditNarrative(company, basePeriod=basePeriod))
-            )
-        if _need("creditAudit"):
-            b["creditAudit"] = _safe(lambda: creditAuditBlock(calcCreditAudit(company, basePeriod=basePeriod)))
-        if _need("creditScenario"):
-            from dartlab.story.builders import creditScenarioBlock
-
-            _base_credit = b.get("creditScore")
-            _stress_overrides = {"debtRatio": 80.0, "interestCoverage": 2.0}
-            _stress_credit = _safe(lambda: calcCreditScore(company, basePeriod=basePeriod, overrides=_stress_overrides))
-            if _base_credit and _stress_credit:
-                # creditScoreBlock 결과에서 원본 dict 추출
-                _base_data = calcCreditScore(company, basePeriod=basePeriod)
-                _stress_data = calcCreditScore(company, basePeriod=basePeriod, overrides=_stress_overrides)
-                b["creditScenario"] = _safe(lambda: creditScenarioBlock(_base_data, _stress_data, _stress_overrides))
-
-    # ── 4부: 가치평가 ──
-    if keys is None or keys & {
-        "dcfValuation",
-        "ddmValuation",
-        "relativeValuation",
-        "residualIncome",
-        "priceTarget",
-        "reverseImplied",
-        "sensitivity",
-        "valuationSynthesis",
-        "valuationFlags",
-        "lifeCycleStage",
-        "valuationSins",
-        "dFV",
-    }:
-        from dartlab.analysis.financial.valuation import (
-            calcDcf,
-            calcDdm,
-            calcPriceTarget,
-            calcReverseImplied,
-            calcSensitivity,
-            calcValuationFlags,
-            calcValuationSynthesis,
-        )
-        from dartlab.analysis.financial.valuation import (
-            calcRelativeValuation as calcRelVal,
-        )
-        from dartlab.analysis.financial.valuation import (
-            calcResidualIncome as calcRim,
-        )
-        from dartlab.story.builders import (
-            dcfValuationBlock,
-            ddmValuationBlock,
-            priceTargetBlock,
-            relativeValuationBlock,
-            residualIncomeBlock,
-            reverseImpliedBlock,
-            sensitivityBlock,
-            valuationFlagsBlock,
-            valuationSynthesisBlock,
-        )
-
-        if _need("dcfValuation"):
-            b["dcfValuation"] = _safe(lambda: dcfValuationBlock(calcDcf(company, basePeriod=basePeriod)))
-        if _need("ddmValuation"):
-            b["ddmValuation"] = _safe(lambda: ddmValuationBlock(calcDdm(company, basePeriod=basePeriod)))
-        if _need("relativeValuation"):
-            b["relativeValuation"] = _safe(lambda: relativeValuationBlock(calcRelVal(company, basePeriod=basePeriod)))
-        if _need("residualIncome"):
-            b["residualIncome"] = _safe(lambda: residualIncomeBlock(calcRim(company, basePeriod=basePeriod)))
-        # priceTarget 결과를 valuationSynthesis 에 전달 — 두 모델 차이 narration 자동 추가
-        _ptCache: dict = {}
-
-        def _getPt():
-            if "v" not in _ptCache:
-                _ptCache["v"] = calcPriceTarget(company, basePeriod=basePeriod)
-            return _ptCache["v"]
-
-        if _need("priceTarget"):
-            b["priceTarget"] = _safe(lambda: priceTargetBlock(_getPt()))
-        if _need("reverseImplied"):
-            b["reverseImplied"] = _safe(lambda: reverseImpliedBlock(calcReverseImplied(company, basePeriod=basePeriod)))
-        if _need("sensitivity"):
-            b["sensitivity"] = _safe(lambda: sensitivityBlock(calcSensitivity(company, basePeriod=basePeriod)))
-        if _need("valuationSynthesis"):
-            b["valuationSynthesis"] = _safe(
-                lambda: valuationSynthesisBlock(
-                    calcValuationSynthesis(company, basePeriod=basePeriod),
-                    priceTargetData=_getPt(),
-                )
-            )
-        if _need("valuationFlags"):
-            b["valuationFlags"] = _safe(lambda: valuationFlagsBlock(calcValuationFlags(company, basePeriod=basePeriod)))
-        # dFV (dartlab Fair Value) — 4엔진 통합 적정주가
-        if _need("dFV") or _need("methodFitness") or _need("qualityFactors"):
-            from dartlab.analysis.valuation.dFV import calcDFV
-            from dartlab.story.builders import dFVBlock, methodFitnessBlock, qualityFactorsBlock
-
-            _dfv_data = _safe(lambda: calcDFV(company, basePeriod=basePeriod))
-            if _need("dFV"):
-                b["dFV"] = dFVBlock(_dfv_data) if _dfv_data else []
-            if _need("methodFitness"):
-                b["methodFitness"] = methodFitnessBlock(_dfv_data) if _dfv_data else []
-            if _need("qualityFactors"):
-                b["qualityFactors"] = qualityFactorsBlock(_dfv_data) if _dfv_data else []
-
-        # Damodaran 흡수 — lifeCycle / valuationSins
-        if _need("lifeCycleStage"):
-            from dartlab.analysis.financial.lifeCycle import calcLifeCycle
-            from dartlab.story.builders import lifeCycleStageBlock
-
-            b["lifeCycleStage"] = _safe(lambda: lifeCycleStageBlock(calcLifeCycle(company, basePeriod=basePeriod)))
-        if _need("valuationSins"):
-            from dartlab.analysis.financial.storyValidation import calcValuationSins
-            from dartlab.story.builders import valuationSinsBlock
-
-            b["valuationSins"] = _safe(lambda: valuationSinsBlock(calcValuationSins(company, basePeriod=basePeriod)))
-
-    # ── Damodaran 흡수 — 수익구조 storyPrecedents ──
-    if keys is None or "storyPrecedents" in keys:
-        from dartlab.analysis.financial.storyValidation import calcStoryPrecedents
-        from dartlab.story.builders import storyPrecedentsBlock
-
-        if _need("storyPrecedents"):
-            b["storyPrecedents"] = _safe(
-                lambda: storyPrecedentsBlock(calcStoryPrecedents(company, basePeriod=basePeriod))
-            )
-
-    # ── Damodaran 흡수 — 매출전망 plausibilityBand ──
-    if keys is None or "plausibilityBand" in keys:
-        from dartlab.analysis.financial.storyValidation import calcPlausibilityBand
-        from dartlab.story.builders import plausibilityBandBlock
-
-        if _need("plausibilityBand"):
-            b["plausibilityBand"] = _safe(
-                lambda: plausibilityBandBlock(calcPlausibilityBand(company, basePeriod=basePeriod))
-            )
+    # ── 3-6 신용평가 + 4부 가치평가 (Damodaran 흡수 storyPrecedents/plausibilityBand 포함) ──
+    _buildCreditBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildValuationBlocks(company, keys, basePeriod, _safe, _need, b)
 
     # ── 5부: 비재무 심화 ──
     if keys is None or keys & {
