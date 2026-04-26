@@ -400,7 +400,7 @@
 	}
 
 	// 결과 테이블에 표시할 컬럼 (PR-1 기본 셋. PR-9 에서 컬럼 사전셋 도입 예정)
-	const TABLE_COLUMNS: { key: MetricKey | 'label' | 'industryName'; label: string; align?: 'left' | 'right' }[] = [
+	const TABLE_COLUMNS: { key: MetricKey | 'label' | 'industryName'; label: string; align?: 'left' | 'right' | 'center' }[] = [
 		{ key: 'label', label: '회사', align: 'left' },
 		{ key: 'industryName', label: '산업', align: 'left' },
 		{ key: 'revenue', label: '매출', align: 'right' },
@@ -410,10 +410,86 @@
 		{ key: 'revCagr', label: 'CAGR', align: 'right' },
 		{ key: 'marketCap', label: '시총', align: 'right' },
 		{ key: 'return1y', label: '1Y', align: 'right' },
-		{ key: 'volatility1y', label: '변동성', align: 'right' }
+		{ key: 'profGrade', label: '수익', align: 'center' },
+		{ key: 'qualGrade', label: '이익질', align: 'center' },
+		{ key: 'govGrade', label: '거버넌스', align: 'center' }
 	];
 
 	const dataAsOf = $derived((data.meta as any)?.dataAsOf ?? null);
+
+	/** 결과 요약 — 산업 Top3 + 평균 메트릭 (사용자가 결과 분포·집중을 즉시 인지). */
+	const resultSummary = $derived.by(() => {
+		if (results.length === 0) return null;
+		// 산업별 카운트
+		const indCount = new Map<string, number>();
+		let roeSum = 0;
+		let roeN = 0;
+		let opmSum = 0;
+		let opmN = 0;
+		let debtSum = 0;
+		let debtN = 0;
+		for (const n of results) {
+			const ind = String(n.industryName ?? n.industry ?? '미분류');
+			indCount.set(ind, (indCount.get(ind) ?? 0) + 1);
+			if (typeof n.roe === 'number') {
+				roeSum += n.roe;
+				roeN++;
+			}
+			if (typeof n.opMargin === 'number') {
+				opmSum += n.opMargin;
+				opmN++;
+			}
+			if (typeof n.debtRatio === 'number') {
+				debtSum += n.debtRatio;
+				debtN++;
+			}
+		}
+		const top3 = [...indCount.entries()]
+			.sort((a, b) => b[1] - a[1])
+			.slice(0, 3)
+			.map(([name, n]) => `${name} ${n}`);
+		return {
+			top3: top3.join(' · '),
+			avgRoe: roeN > 0 ? roeSum / roeN : null,
+			avgOpm: opmN > 0 ? opmSum / opmN : null,
+			avgDebt: debtN > 0 ? debtSum / debtN : null,
+			indCount: indCount.size
+		};
+	});
+
+	/** 등급 색칩 — 등급 메트릭에 한해 단색 칩 토글 */
+	const GRADE_COLORS: Record<string, { bg: string; fg: string; border: string }> = {
+		// scan 등급 5단계
+		'우수': { bg: 'rgba(16, 185, 129, 0.18)', fg: '#34d399', border: 'rgba(16, 185, 129, 0.4)' },
+		'양호': { bg: 'rgba(132, 204, 22, 0.16)', fg: '#a3e635', border: 'rgba(132, 204, 22, 0.4)' },
+		'보통': { bg: 'rgba(245, 158, 11, 0.14)', fg: '#fbbf24', border: 'rgba(245, 158, 11, 0.4)' },
+		'주의': { bg: 'rgba(239, 68, 68, 0.14)', fg: '#fca5a5', border: 'rgba(239, 68, 68, 0.4)' },
+		'위험': { bg: 'rgba(239, 68, 68, 0.22)', fg: '#f87171', border: 'rgba(239, 68, 68, 0.6)' },
+		// 부채/감사 4단계
+		'안전': { bg: 'rgba(16, 185, 129, 0.18)', fg: '#34d399', border: 'rgba(16, 185, 129, 0.4)' },
+		'관찰': { bg: 'rgba(132, 204, 22, 0.16)', fg: '#a3e635', border: 'rgba(132, 204, 22, 0.4)' },
+		'고위험': { bg: 'rgba(239, 68, 68, 0.22)', fg: '#f87171', border: 'rgba(239, 68, 68, 0.6)' },
+		// 거버넌스 A~E
+		'A': { bg: 'rgba(16, 185, 129, 0.18)', fg: '#34d399', border: 'rgba(16, 185, 129, 0.4)' },
+		'B': { bg: 'rgba(132, 204, 22, 0.16)', fg: '#a3e635', border: 'rgba(132, 204, 22, 0.4)' },
+		'C': { bg: 'rgba(245, 158, 11, 0.14)', fg: '#fbbf24', border: 'rgba(245, 158, 11, 0.4)' },
+		'D': { bg: 'rgba(239, 68, 68, 0.14)', fg: '#fca5a5', border: 'rgba(239, 68, 68, 0.4)' },
+		'E': { bg: 'rgba(239, 68, 68, 0.22)', fg: '#f87171', border: 'rgba(239, 68, 68, 0.6)' },
+		// 성장 등급
+		'고성장': { bg: 'rgba(16, 185, 129, 0.18)', fg: '#34d399', border: 'rgba(16, 185, 129, 0.4)' },
+		'성장': { bg: 'rgba(132, 204, 22, 0.16)', fg: '#a3e635', border: 'rgba(132, 204, 22, 0.4)' },
+		'정체': { bg: 'rgba(148, 163, 184, 0.14)', fg: '#94a3b8', border: 'rgba(148, 163, 184, 0.4)' },
+		'역성장': { bg: 'rgba(239, 68, 68, 0.14)', fg: '#fca5a5', border: 'rgba(239, 68, 68, 0.4)' },
+		'급감': { bg: 'rgba(239, 68, 68, 0.22)', fg: '#f87171', border: 'rgba(239, 68, 68, 0.6)' },
+		// 수익성 등급
+		'저수익': { bg: 'rgba(245, 158, 11, 0.14)', fg: '#fbbf24', border: 'rgba(245, 158, 11, 0.4)' },
+		'적자': { bg: 'rgba(239, 68, 68, 0.22)', fg: '#f87171', border: 'rgba(239, 68, 68, 0.6)' }
+	};
+	const NEUTRAL_GRADE = { bg: 'rgba(148, 163, 184, 0.1)', fg: '#94a3b8', border: 'rgba(148, 163, 184, 0.3)' };
+	function gradeStyle(v: unknown): string {
+		const s = GRADE_COLORS[String(v)] ?? NEUTRAL_GRADE;
+		return `background:${s.bg};color:${s.fg};border:1px solid ${s.border}`;
+	}
 </script>
 
 <svelte:head>
@@ -636,6 +712,33 @@
 		</div>
 	</section>
 
+	<!-- 결과 요약 한 줄 (자동 생성) -->
+	{#if resultSummary}
+		<section class="summary">
+			<span class="sum-icon" aria-hidden="true">✦</span>
+			<span class="sum-text">
+				{results.length.toLocaleString()}사 통과
+				{#if resultSummary.indCount > 0}
+					· <strong>{resultSummary.indCount}</strong>개 산업
+				{/if}
+				{#if resultSummary.top3}
+					· 다수: <strong>{resultSummary.top3}</strong>
+				{/if}
+			</span>
+			<span class="sum-stats">
+				{#if resultSummary.avgRoe != null}
+					평균 ROE <strong>{resultSummary.avgRoe.toFixed(1)}%</strong>
+				{/if}
+				{#if resultSummary.avgOpm != null}
+					· OPM <strong>{resultSummary.avgOpm.toFixed(1)}%</strong>
+				{/if}
+				{#if resultSummary.avgDebt != null}
+					· 부채 <strong>{resultSummary.avgDebt.toFixed(0)}%</strong>
+				{/if}
+			</span>
+		</section>
+	{/if}
+
 	<!-- 결과 액션 바 -->
 	<section class="actions">
 		<div class="result-meta">
@@ -655,7 +758,7 @@
 				<thead>
 					<tr>
 						{#each TABLE_COLUMNS as col}
-							<th class:right={col.align === 'right'}>{col.label}</th>
+							<th class:right={col.align === 'right'} class:center={col.align === 'center'}>{col.label}</th>
 						{/each}
 					</tr>
 				</thead>
@@ -682,7 +785,27 @@
 							</td>
 							<td class="num">{fmtMetricValue('marketCap', n.marketCap)}</td>
 							<td class="num {returnTone(n.return1y)}">{fmtMetricValue('return1y', n.return1y)}</td>
-							<td class="num">{fmtMetricValue('volatility1y', n.volatility1y)}</td>
+							<td class="grade-cell">
+								{#if n.profGrade}
+									<span class="grade-chip" style={gradeStyle(n.profGrade)}>{n.profGrade}</span>
+								{:else}
+									<span class="dim">—</span>
+								{/if}
+							</td>
+							<td class="grade-cell">
+								{#if n.qualGrade}
+									<span class="grade-chip" style={gradeStyle(n.qualGrade)}>{n.qualGrade}</span>
+								{:else}
+									<span class="dim">—</span>
+								{/if}
+							</td>
+							<td class="grade-cell">
+								{#if n.govGrade}
+									<span class="grade-chip" style={gradeStyle(n.govGrade)}>{n.govGrade}</span>
+								{:else}
+									<span class="dim">—</span>
+								{/if}
+							</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -995,6 +1118,44 @@
 	.sort-key { min-width: 160px; }
 	.sort-dir { min-width: 90px; }
 
+	/* 결과 요약 한 줄 */
+	.summary {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 10px 14px;
+		background: linear-gradient(90deg, rgba(96, 165, 250, 0.08), rgba(96, 165, 250, 0.02));
+		border: 1px solid rgba(96, 165, 250, 0.2);
+		border-radius: 10px;
+		margin-bottom: 8px;
+		font-size: 12px;
+		color: #cbd5e1;
+		flex-wrap: wrap;
+	}
+	.sum-icon {
+		color: #60a5fa;
+		font-size: 13px;
+	}
+	.sum-text { flex: 1; min-width: 0; }
+	.sum-text strong { color: #f1f5f9; font-weight: 600; }
+	.sum-stats {
+		font-family: monospace;
+		color: #94a3b8;
+		font-size: 11px;
+	}
+	.sum-stats strong { color: #f1f5f9; }
+
+	/* 등급 색칩 */
+	.grade-chip {
+		display: inline-block;
+		padding: 2px 8px;
+		font-size: 10px;
+		font-weight: 700;
+		border-radius: 4px;
+		font-family: monospace;
+		letter-spacing: 0.02em;
+	}
+
 	/* 액션 */
 	.actions {
 		display: flex;
@@ -1080,6 +1241,9 @@
 		border-bottom: 1px solid #1e2433;
 	}
 	th.right { text-align: right; }
+	th.center { text-align: center; }
+	td.grade-cell { text-align: center; }
+	td.grade-cell .dim { color: #475569; font-size: 11px; }
 	td {
 		padding: 8px 12px;
 		border-bottom: 1px solid rgba(30, 36, 51, 0.5);
