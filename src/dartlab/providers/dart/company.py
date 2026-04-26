@@ -2070,66 +2070,9 @@ class Company:
     # ── docs multi-block select 지원 ──────────────────────────
 
     def _buildDocsItemIndex(self, topic: str) -> dict[str, list[tuple[int, pl.DataFrame]]]:
-        """topic의 모든 테이블 블록을 수평화하고 항목명 역인덱스를 빌드."""
-        from dartlab.core.show import normalizeItemKey
+        from dartlab.providers.dart._selectHelpers import buildDocsItemIndex
 
-        cacheKey = f"_docsItemIdx_{topic}"
-        cached = self._cache.get(cacheKey)
-        if cached is not None:
-            return cached
-
-        # 전체 sections 캐시가 있으면 재사용, 없으면 해당 topic만 부분 빌드
-        if "_sections" in self._cache:
-            sec = self._cache["_sections"]
-        else:
-            docsSections = self._docs.sections
-            sec = docsSections.forTopics({topic}) if docsSections is not None else None
-        if sec is None:
-            self._cache[cacheKey] = {}
-            return {}
-
-        topicRows = sec.filter(pl.col("topic") == topic)
-        if topicRows.is_empty():
-            self._cache[cacheKey] = {}
-            return {}
-
-        blockIndex = self._buildBlockIndex(topicRows)
-        periodCols = [c for c in topicRows.columns if _isPeriodColumn(c)]
-
-        idx: dict[str, list[tuple[int, pl.DataFrame]]] = {}
-
-        for row in blockIndex.iter_rows(named=True):
-            bo = row["block"]
-            bt = row.get("type", "text")
-            src = row.get("source", "docs")
-            if bt != "table" or src != "docs":
-                continue
-
-            from dartlab.providers.dart._table_horizontalizer import (
-                horizontalizeTableBlock,
-            )
-
-            hDf = horizontalizeTableBlock(topicRows, bo, periodCols)
-            if isEmptyDf(hDf):
-                continue
-
-            itemCol = "항목" if "항목" in hDf.columns else None
-            if itemCol is None:
-                for c in hDf.columns:
-                    if not _isPeriodColumn(c):
-                        itemCol = c
-                        break
-            if itemCol is None:
-                continue
-
-            for val in hDf[itemCol].to_list():
-                if val is None:
-                    continue
-                nk = normalizeItemKey(str(val))
-                idx.setdefault(nk, []).append((bo, hDf))
-
-        self._cache[cacheKey] = idx
-        return idx
+        return buildDocsItemIndex(self, topic)
 
     def _selectFromDocsTopic(
         self,
@@ -2137,64 +2080,9 @@ class Company:
         indList: list[str],
         colList: list[str] | None,
     ) -> pl.DataFrame | None:
-        """역인덱스에서 indList 항목을 cascade 매칭으로 찾아 추출."""
-        from dartlab.core.show import normalizeItemKey, selectFromShow
+        from dartlab.providers.dart._selectHelpers import selectFromDocsTopic
 
-        idx = self._buildDocsItemIndex(topic)
-        if not idx:
-            return None
-
-        normQueries = [normalizeItemKey(q) for q in indList]
-        allNormKeys = list(idx.keys())
-
-        # cascade: exact → contains → fuzzy
-        matched: list[tuple[int, pl.DataFrame]] = []
-        matchedKeys: set[str] = set()
-
-        # 1) exact
-        for nq in normQueries:
-            if nq in idx and nq not in matchedKeys:
-                matched.extend(idx[nq])
-                matchedKeys.add(nq)
-
-        # 2) contains
-        if not matched:
-            for nq in normQueries:
-                for nk in allNormKeys:
-                    if (nq in nk or nk in nq) and nk not in matchedKeys:
-                        matched.extend(idx[nk])
-                        matchedKeys.add(nk)
-
-        # 3) fuzzy
-        if not matched:
-            import difflib
-
-            for nq in normQueries:
-                close = difflib.get_close_matches(nq, allNormKeys, n=3, cutoff=0.7)
-                for ck in close:
-                    if ck not in matchedKeys:
-                        matched.extend(idx[ck])
-                        matchedKeys.add(ck)
-
-        if not matched:
-            return None
-
-        # 블록별 DataFrame에서 selectFromShow로 행/열 필터
-        parts: list[pl.DataFrame] = []
-        seenBo: set[int] = set()
-        for bo, hDf in matched:
-            if bo in seenBo:
-                continue
-            seenBo.add(bo)
-            filtered = selectFromShow(hDf, indList, colList)
-            if filtered is not None:
-                parts.append(filtered)
-
-        if not parts:
-            return None
-        if len(parts) == 1:
-            return parts[0]
-        return pl.concat(parts, how="diagonal_relaxed")
+        return selectFromDocsTopic(self, topic, indList, colList)
 
     def _selectFromDocsTopicAll(
         self,
@@ -2202,37 +2090,9 @@ class Company:
         indList: list[str] | None,
         colList: list[str] | None,
     ) -> pl.DataFrame | None:
-        """multi-block docs topic: indList/colList 조합 처리.
+        from dartlab.providers.dart._selectHelpers import selectFromDocsTopicAll
 
-        indList가 있으면 cascade 매칭, None이면 전체 항목.
-        colList는 기간 필터.
-        """
-        from dartlab.core.show import selectFromShow
-
-        if indList is not None:
-            return self._selectFromDocsTopic(topic, indList, colList)
-
-        # indList=None → 전체 테이블 블록 수평화 결과 concat + colList 필터
-        idx = self._buildDocsItemIndex(topic)
-        if not idx:
-            return None
-
-        seenBo: set[int] = set()
-        parts: list[pl.DataFrame] = []
-        for entries in idx.values():
-            for bo, hDf in entries:
-                if bo in seenBo:
-                    continue
-                seenBo.add(bo)
-                filtered = selectFromShow(hDf, None, colList)
-                if filtered is not None:
-                    parts.append(filtered)
-
-        if not parts:
-            return None
-        if len(parts) == 1:
-            return parts[0]
-        return pl.concat(parts, how="diagonal_relaxed")
+        return selectFromDocsTopicAll(self, topic, indList, colList)
 
     @property
     def select(self):
