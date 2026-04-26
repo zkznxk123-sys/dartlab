@@ -1075,6 +1075,368 @@ def _buildPeerBenchmarkBlocks(company, keys, basePeriod, safe: Callable, need: C
         )
 
 
+def _buildForecastBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """6 부 — 전망분석 (8 블록)."""
+    if keys is not None and not (
+        keys
+        & {
+            "revenueForecast",
+            "segmentForecast",
+            "proFormaHighlights",
+            "scenarioImpact",
+            "forecastMethodology",
+            "historicalRatios",
+            "forecastFlags",
+            "calibrationReport",
+        }
+    ):
+        return
+    from dartlab.analysis.financial.forecastCalcs import (
+        calcCalibrationReport,
+        calcForecastFlags,
+        calcForecastMethodology,
+        calcHistoricalRatios,
+        calcProFormaHighlights,
+        calcRevenueForecast,
+        calcScenarioImpact,
+        calcSegmentForecast,
+    )
+    from dartlab.story.builders import (
+        calibrationReportBlock,
+        forecastFlagsBlock,
+        forecastMethodologyBlock,
+        historicalRatiosBlock,
+        proFormaHighlightsBlock,
+        revenueForecastBlock,
+        scenarioImpactBlock,
+        segmentForecastBlock,
+    )
+
+    if need("revenueForecast"):
+        out["revenueForecast"] = safe(lambda: revenueForecastBlock(calcRevenueForecast(company, basePeriod=basePeriod)))
+    if need("segmentForecast"):
+        out["segmentForecast"] = safe(lambda: segmentForecastBlock(calcSegmentForecast(company, basePeriod=basePeriod)))
+    if need("proFormaHighlights"):
+        out["proFormaHighlights"] = safe(
+            lambda: proFormaHighlightsBlock(calcProFormaHighlights(company, basePeriod=basePeriod))
+        )
+    if need("scenarioImpact"):
+        out["scenarioImpact"] = safe(lambda: scenarioImpactBlock(calcScenarioImpact(company, basePeriod=basePeriod)))
+    if need("forecastMethodology"):
+        out["forecastMethodology"] = safe(
+            lambda: forecastMethodologyBlock(calcForecastMethodology(company, basePeriod=basePeriod))
+        )
+    if need("historicalRatios"):
+        out["historicalRatios"] = safe(
+            lambda: historicalRatiosBlock(calcHistoricalRatios(company, basePeriod=basePeriod))
+        )
+    if need("forecastFlags"):
+        out["forecastFlags"] = safe(lambda: forecastFlagsBlock(calcForecastFlags(company, basePeriod=basePeriod)))
+    if need("calibrationReport"):
+        out["calibrationReport"] = safe(
+            lambda: calibrationReportBlock(calcCalibrationReport(company, basePeriod=basePeriod))
+        )
+
+
+def _buildPeerPositionBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """비교분석 — scan 교차 조합 (peerPosition/governanceSummary)."""
+    if keys is not None and not (keys & {"peerPosition", "governanceSummary"}):
+        return
+    from dartlab.scan.extended import calcGovernanceSummary, calcPeerPosition
+    from dartlab.story.builders import peerPositionBlock
+    from dartlab.story.builders import quantModuleBlock as _scanBlock
+
+    if need("peerPosition"):
+        out["peerPosition"] = safe(lambda: peerPositionBlock(calcPeerPosition(company)))
+    if need("governanceSummary"):
+        out["governanceSummary"] = safe(lambda: _scanBlock("governanceSummary", calcGovernanceSummary(company)))
+
+
+def _buildQuantTechnicalBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """시장분석 — quant 기술적 + 알파 12 (story 통합)."""
+    _CORE_KEYS = {
+        "technicalVerdict",
+        "technicalSignals",
+        "strategySnapshot",
+        "marketBeta",
+        "fundamentalDivergence",
+        "marketAnalysisFlags",
+    }
+    _NARRATIVE_KEYS = {
+        "trendNarrative",
+        "riskNarrative",
+        "signalNarrative",
+        "strategyNarrative",
+        "crosscheckNarrative",
+        "quantConclusion",
+    }
+    _ALPHA_KEYS = {
+        "altmanFactor",
+        "piotroskiFactor",
+        "beneishFactor",
+        "accrualsFactor",
+        "qFactor",
+        "qmj",
+        "bab",
+        "earningsSurprise",
+        "fundMomentum",
+        "factorTearSheet",
+        "factorIC",
+        "riskDecomposition",
+    }
+    if keys is not None and not (keys & (_CORE_KEYS | _NARRATIVE_KEYS | _ALPHA_KEYS)):
+        return
+
+    from dartlab.quant.extended import (
+        calcCrosscheckData,
+        calcFundamentalDivergence,
+        calcMarketAnalysisFlags,
+        calcMarketBeta,
+        calcQuantConclusionData,
+        calcRiskData,
+        calcSignalData,
+        calcStrategyData,
+        calcStrategySnapshot,
+        calcTechnicalSignals,
+        calcTechnicalVerdict,
+        calcTrendData,
+    )
+    from dartlab.story.builders import (
+        fundamentalDivergenceBlock,
+        marketAnalysisFlagsBlock,
+        marketBetaBlock,
+        quantModuleBlock,
+        strategySnapshotBlock,
+        technicalSignalsBlock,
+        technicalVerdictBlock,
+    )
+    from dartlab.story.narrate import (
+        narrateCrosscheck,
+        narrateQuantConclusion,
+        narrateQuantRisk,
+        narrateSignals,
+        narrateStrategyVerdict,
+        narrateTrend,
+    )
+
+    if need("technicalVerdict"):
+        out["technicalVerdict"] = safe(lambda: technicalVerdictBlock(calcTechnicalVerdict(company)))
+    if need("technicalSignals"):
+        out["technicalSignals"] = safe(lambda: technicalSignalsBlock(calcTechnicalSignals(company)))
+    # quant 서사 모듈 5+1 — review 가 서사를 생성 (엔진=숫자만, story=이야기꾼)
+    _narrate_map = {
+        "trendNarrative": (calcTrendData, lambda d: narrateTrend(d.get("verdict", {})) if d else ""),
+        "riskNarrative": (calcRiskData, lambda d: narrateQuantRisk(d.get("data"), d.get("verdict")) if d else ""),
+        "signalNarrative": (calcSignalData, lambda d: narrateSignals(d.get("data")) if d else ""),
+        "strategyNarrative": (calcStrategyData, lambda d: narrateStrategyVerdict(d.get("data")) if d else ""),
+        "crosscheckNarrative": (calcCrosscheckData, lambda d: narrateCrosscheck(d.get("data")) if d else ""),
+        "quantConclusion": (
+            calcQuantConclusionData,
+            lambda d: narrateQuantConclusion(
+                d.get("trend_label", ""),
+                d.get("bullish", 0),
+                d.get("bearish", 0),
+                d.get("active_styles", []),
+                d.get("diagnosis", ""),
+            )
+            if d
+            else "",
+        ),
+    }
+    for qkey, (qcalc, qnarrate) in _narrate_map.items():
+        if need(qkey):
+
+            def _build(c=qcalc, n=qnarrate, k=qkey):
+                data = c(company)
+                narrative = n(data) if data else ""
+                return quantModuleBlock(k, {"narrative": narrative, "data": data})
+
+            out[qkey] = safe(_build)
+    if need("strategySnapshot"):
+        out["strategySnapshot"] = safe(lambda: strategySnapshotBlock(calcStrategySnapshot(company)))
+    if need("marketBeta"):
+        out["marketBeta"] = safe(lambda: marketBetaBlock(calcMarketBeta(company)))
+    if need("fundamentalDivergence"):
+        out["fundamentalDivergence"] = safe(
+            lambda: fundamentalDivergenceBlock(calcFundamentalDivergence(company, basePeriod=basePeriod))
+        )
+    if need("marketAnalysisFlags"):
+        out["marketAnalysisFlags"] = safe(lambda: marketAnalysisFlagsBlock(calcMarketAnalysisFlags(company)))
+
+    # Sprint 2~7 신규 12 alpha — 동일 narrative map 패턴.
+    _alpha_market = "US" if getattr(company, "currency", "KRW") == "USD" else "KR"
+    _stockCode = getattr(company, "stockCode", None)
+
+    from dartlab.quant.alphas.accruals import calcAccrualsFactor
+    from dartlab.quant.alphas.altman import calcAltmanFactor
+    from dartlab.quant.alphas.bab import calcBAB
+    from dartlab.quant.alphas.beneish import calcBeneishFactor
+    from dartlab.quant.alphas.earningsSurprise import calcEarningsSurprise
+    from dartlab.quant.alphas.fundamentalMomentum import calcFundamentalMomentum
+    from dartlab.quant.alphas.piotroski import calcPiotroskiFactor
+    from dartlab.quant.alphas.qFactor import calcQFactor
+    from dartlab.quant.alphas.qmj import calcQMJ
+    from dartlab.quant.factor import calcFactorICAll, calcFactorTearSheetAll, calcMultiFactorRisk
+    from dartlab.story.narrate import (
+        narrateAccruals,
+        narrateAltman,
+        narrateBAB,
+        narrateBeneish,
+        narrateEarningsSurprise,
+        narrateFactorIC,
+        narrateFactorTearSheet,
+        narrateFundMomentum,
+        narratePiotroski,
+        narrateQFactor,
+        narrateQMJ,
+        narrateRiskDecomposition,
+    )
+
+    _alpha_map: dict[str, tuple] = {
+        "altmanFactor": (lambda: calcAltmanFactor(market=_alpha_market), narrateAltman),
+        "piotroskiFactor": (lambda: calcPiotroskiFactor(market=_alpha_market), narratePiotroski),
+        "beneishFactor": (lambda: calcBeneishFactor(market=_alpha_market), narrateBeneish),
+        "accrualsFactor": (lambda: calcAccrualsFactor(market=_alpha_market), narrateAccruals),
+        "qFactor": (lambda: calcQFactor(market=_alpha_market), narrateQFactor),
+        "qmj": (lambda: calcQMJ(market=_alpha_market), narrateQMJ),
+        "bab": (lambda: calcBAB(market=_alpha_market), narrateBAB),
+        "earningsSurprise": (lambda: calcEarningsSurprise(market=_alpha_market), narrateEarningsSurprise),
+        "fundMomentum": (lambda: calcFundamentalMomentum(market=_alpha_market), narrateFundMomentum),
+        "factorTearSheet": (lambda: calcFactorTearSheetAll(market=_alpha_market), narrateFactorTearSheet),
+        "factorIC": (lambda: calcFactorICAll(market=_alpha_market, horizon=5), narrateFactorIC),
+    }
+    if _stockCode:
+        _alpha_map["riskDecomposition"] = (lambda: calcMultiFactorRisk(_stockCode), narrateRiskDecomposition)
+
+    for akey, (acalc, anarrate) in _alpha_map.items():
+        if need(akey):
+
+            def _build(c=acalc, n=anarrate, k=akey):
+                data = c()
+                narrative = n(data) if data else ""
+                return quantModuleBlock(k, {"narrative": narrative, "data": data})
+
+            out[akey] = safe(_build)
+
+
+def _buildMacroBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """매크로 — 시장 환경 + 기업-매크로 연결 (12 블록)."""
+    _MACRO_KEYS = {
+        "macroEnvironment",
+        "macroCycle",
+        "macroRates",
+        "macroLiquidity",
+        "macroSentiment",
+        "macroForecast",
+        "macroCorporate",
+        "macroTrade",
+        "macroFlags",
+        "valuationBand",
+        "companyCyclePosition",
+        "macroSensitivity",
+    }
+    if keys is not None and not (keys & _MACRO_KEYS):
+        return
+    from dartlab.analysis.financial.macroExposure import calcValuationBand
+    from dartlab.story.builders import (
+        macroCorporateBlock,
+        macroCycleBlock,
+        macroEnvironmentBlock,
+        macroFlagsBlock,
+        macroForecastBlock,
+        macroLiquidityBlock,
+        macroRatesBlock,
+        macroSensitivityBlock,
+        macroSentimentBlock,
+        macroTradeBlock,
+        valuationBandBlock,
+    )
+
+    # macro("종합") 1회 호출 + 캐시 — 11축 전부 포함
+    _macro_summary: list = [None]
+    _macro_market = getattr(company, "market", "KR")
+
+    def _ensure_summary():
+        if _macro_summary[0] is None:
+            import dartlab as _dl
+
+            try:
+                _macro_summary[0] = _dl.macro("종합", market=_macro_market)
+            except (ValueError, TypeError, KeyError, OSError) as e:
+                _LOG.debug("macro 종합 실패 (market=%s): %s", _macro_market, e)
+                _macro_summary[0] = {}
+        return _macro_summary[0]
+
+    if need("macroEnvironment"):
+        out["macroEnvironment"] = safe(lambda: macroEnvironmentBlock(_ensure_summary()))
+    if need("macroCycle"):
+        out["macroCycle"] = safe(lambda: macroCycleBlock(_ensure_summary().get("cycle", {})))
+    if need("macroRates"):
+        out["macroRates"] = safe(lambda: macroRatesBlock(_ensure_summary().get("rates", {})))
+    if need("macroLiquidity"):
+        out["macroLiquidity"] = safe(lambda: macroLiquidityBlock(_ensure_summary().get("liquidity", {})))
+    if need("macroSentiment"):
+        out["macroSentiment"] = safe(lambda: macroSentimentBlock(_ensure_summary().get("sentiment", {})))
+    if need("macroForecast"):
+        out["macroForecast"] = safe(lambda: macroForecastBlock(_ensure_summary().get("forecast")))
+    if need("macroCorporate"):
+        out["macroCorporate"] = safe(lambda: macroCorporateBlock(_ensure_summary().get("corporate")))
+    if need("macroTrade"):
+        _market = getattr(company, "market", "KR")
+        if _market == "KR":
+            out["macroTrade"] = safe(lambda: macroTradeBlock(_ensure_summary().get("trade")))
+    if need("macroFlags"):
+        out["macroFlags"] = safe(lambda: macroFlagsBlock(_ensure_summary()))
+    if need("macroSensitivity"):
+        from dartlab.analysis.financial.macroExposure import calcMacroSensitivity
+
+        out["macroSensitivity"] = safe(
+            lambda: macroSensitivityBlock(calcMacroSensitivity(company, basePeriod=basePeriod))
+        )
+    if need("valuationBand"):
+        out["valuationBand"] = safe(lambda: valuationBandBlock(calcValuationBand(company, basePeriod=basePeriod)))
+    if need("companyCyclePosition"):
+        from dartlab.story.builders import companyCyclePositionBlock
+
+        out["companyCyclePosition"] = safe(lambda: companyCyclePositionBlock(_ensure_summary().get("crisis", {})))
+
+
+def _buildScenarioBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """개선 시나리오 (How축) + Damodaran 3-test."""
+    if keys is not None and not (
+        keys & {"gradeUpgradePath", "technicalActionTargets", "cyclicalActionPlan", "damodaran3test"}
+    ):
+        return
+
+    if keys is None or keys & {"gradeUpgradePath", "technicalActionTargets", "cyclicalActionPlan"}:
+        from dartlab.story.builders import (
+            cyclicalActionPlanBlock,
+            gradeUpgradePathBlock,
+            technicalActionTargetsBlock,
+        )
+
+        if need("gradeUpgradePath"):
+            from dartlab.credit.calcs import calcGradeImprovement
+
+            out["gradeUpgradePath"] = safe(
+                lambda: gradeUpgradePathBlock(calcGradeImprovement(company, basePeriod=basePeriod))
+            )
+        if need("technicalActionTargets"):
+            from dartlab.quant.extended import calcActionableTargets
+
+            out["technicalActionTargets"] = safe(lambda: technicalActionTargetsBlock(calcActionableTargets(company)))
+        if need("cyclicalActionPlan"):
+            from dartlab.macro.crisis import calcCyclicalAction
+
+            _market = getattr(company, "market", "KR")
+            out["cyclicalActionPlan"] = safe(lambda: cyclicalActionPlanBlock(calcCyclicalAction(market=_market)))
+
+    if need("damodaran3test"):
+        from dartlab.story.builders import damodaran3testBlock
+
+        out["damodaran3test"] = safe(lambda: damodaran3testBlock(company))
+
+
 def buildBlocks(
     company,
     keys: set[str] | None = None,
@@ -1129,342 +1491,19 @@ def buildBlocks(
     _buildDisclosureDeltaBlocks(company, keys, basePeriod, _safe, _need, b)
     _buildPeerBenchmarkBlocks(company, keys, basePeriod, _safe, _need, b)
 
-    # ── 6부: 전망분석 ──
-    if keys is None or keys & {
-        "revenueForecast",
-        "segmentForecast",
-        "proFormaHighlights",
-        "scenarioImpact",
-        "forecastMethodology",
-        "historicalRatios",
-        "forecastFlags",
-        "calibrationReport",
-    }:
-        from dartlab.analysis.financial.forecastCalcs import (
-            calcCalibrationReport,
-            calcForecastFlags,
-            calcForecastMethodology,
-            calcHistoricalRatios,
-            calcProFormaHighlights,
-            calcRevenueForecast,
-            calcScenarioImpact,
-            calcSegmentForecast,
-        )
-        from dartlab.story.builders import (
-            calibrationReportBlock,
-            forecastFlagsBlock,
-            forecastMethodologyBlock,
-            historicalRatiosBlock,
-            proFormaHighlightsBlock,
-            revenueForecastBlock,
-            scenarioImpactBlock,
-            segmentForecastBlock,
-        )
+    # ── 6부: 전망분석 + 비교분석 + 시장분석 + 매크로 + 시나리오 ──
+    _buildForecastBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildPeerPositionBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildQuantTechnicalBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildMacroBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildScenarioBlocks(company, keys, basePeriod, _safe, _need, b)
 
-        if _need("revenueForecast"):
-            b["revenueForecast"] = _safe(
-                lambda: revenueForecastBlock(calcRevenueForecast(company, basePeriod=basePeriod))
-            )
-        if _need("segmentForecast"):
-            b["segmentForecast"] = _safe(
-                lambda: segmentForecastBlock(calcSegmentForecast(company, basePeriod=basePeriod))
-            )
-        if _need("proFormaHighlights"):
-            b["proFormaHighlights"] = _safe(
-                lambda: proFormaHighlightsBlock(calcProFormaHighlights(company, basePeriod=basePeriod))
-            )
-        if _need("scenarioImpact"):
-            b["scenarioImpact"] = _safe(lambda: scenarioImpactBlock(calcScenarioImpact(company, basePeriod=basePeriod)))
-        if _need("forecastMethodology"):
-            b["forecastMethodology"] = _safe(
-                lambda: forecastMethodologyBlock(calcForecastMethodology(company, basePeriod=basePeriod))
-            )
-        if _need("historicalRatios"):
-            b["historicalRatios"] = _safe(
-                lambda: historicalRatiosBlock(calcHistoricalRatios(company, basePeriod=basePeriod))
-            )
-        if _need("forecastFlags"):
-            b["forecastFlags"] = _safe(lambda: forecastFlagsBlock(calcForecastFlags(company, basePeriod=basePeriod)))
-        if _need("calibrationReport"):
-            b["calibrationReport"] = _safe(
-                lambda: calibrationReportBlock(calcCalibrationReport(company, basePeriod=basePeriod))
-            )
-
-    # ── 비교분석 (scan 교차 조합 관점 → story 통합) ──
-    if keys is None or keys & {"peerPosition", "governanceSummary"}:
-        from dartlab.scan.extended import calcGovernanceSummary, calcPeerPosition
-        from dartlab.story.builders import peerPositionBlock
-        from dartlab.story.builders import quantModuleBlock as _scanBlock
-
-        if _need("peerPosition"):
-            b["peerPosition"] = _safe(lambda: peerPositionBlock(calcPeerPosition(company)))
-        if _need("governanceSummary"):
-            b["governanceSummary"] = _safe(lambda: _scanBlock("governanceSummary", calcGovernanceSummary(company)))
-
-    # ── 시장분석 (quant 기술적 분석 → story 통합) ──
-    if keys is None or keys & {
-        "technicalVerdict",
-        "technicalSignals",
-        "strategySnapshot",
-        "marketBeta",
-        "fundamentalDivergence",
-        "marketAnalysisFlags",
-    }:
-        from dartlab.quant.extended import (
-            calcCrosscheckData,
-            calcFundamentalDivergence,
-            calcMarketAnalysisFlags,
-            calcMarketBeta,
-            calcQuantConclusionData,
-            calcRiskData,
-            calcSignalData,
-            calcStrategyData,
-            calcStrategySnapshot,
-            calcTechnicalSignals,
-            calcTechnicalVerdict,
-            calcTrendData,
-        )
-        from dartlab.story.builders import (
-            fundamentalDivergenceBlock,
-            marketAnalysisFlagsBlock,
-            marketBetaBlock,
-            quantModuleBlock,
-            strategySnapshotBlock,
-            technicalSignalsBlock,
-            technicalVerdictBlock,
-        )
-        from dartlab.story.narrate import (
-            narrateCrosscheck,
-            narrateQuantConclusion,
-            narrateQuantRisk,
-            narrateSignals,
-            narrateStrategyVerdict,
-            narrateTrend,
-        )
-
-        if _need("technicalVerdict"):
-            b["technicalVerdict"] = _safe(lambda: technicalVerdictBlock(calcTechnicalVerdict(company)))
-        if _need("technicalSignals"):
-            b["technicalSignals"] = _safe(lambda: technicalSignalsBlock(calcTechnicalSignals(company)))
-        # quant 서사 모듈 5+1 — review가 서사를 생성 (엔진=숫자만, story=이야기꾼)
-        _narrate_map = {
-            "trendNarrative": (calcTrendData, lambda d: narrateTrend(d.get("verdict", {})) if d else ""),
-            "riskNarrative": (calcRiskData, lambda d: narrateQuantRisk(d.get("data"), d.get("verdict")) if d else ""),
-            "signalNarrative": (calcSignalData, lambda d: narrateSignals(d.get("data")) if d else ""),
-            "strategyNarrative": (calcStrategyData, lambda d: narrateStrategyVerdict(d.get("data")) if d else ""),
-            "crosscheckNarrative": (calcCrosscheckData, lambda d: narrateCrosscheck(d.get("data")) if d else ""),
-            "quantConclusion": (
-                calcQuantConclusionData,
-                lambda d: narrateQuantConclusion(
-                    d.get("trend_label", ""),
-                    d.get("bullish", 0),
-                    d.get("bearish", 0),
-                    d.get("active_styles", []),
-                    d.get("diagnosis", ""),
-                )
-                if d
-                else "",
-            ),
-        }
-        for qkey, (qcalc, qnarrate) in _narrate_map.items():
-            if _need(qkey):
-
-                def _build(c=qcalc, n=qnarrate):
-                    data = c(company)
-                    narrative = n(data) if data else ""
-                    return quantModuleBlock(qkey, {"narrative": narrative, "data": data})
-
-                b[qkey] = _safe(_build)
-        if _need("strategySnapshot"):
-            b["strategySnapshot"] = _safe(lambda: strategySnapshotBlock(calcStrategySnapshot(company)))
-        if _need("marketBeta"):
-            b["marketBeta"] = _safe(lambda: marketBetaBlock(calcMarketBeta(company)))
-        if _need("fundamentalDivergence"):
-            b["fundamentalDivergence"] = _safe(
-                lambda: fundamentalDivergenceBlock(calcFundamentalDivergence(company, basePeriod=basePeriod))
-            )
-        if _need("marketAnalysisFlags"):
-            b["marketAnalysisFlags"] = _safe(lambda: marketAnalysisFlagsBlock(calcMarketAnalysisFlags(company)))
-        # Sprint 2~7 신규 12 alpha — 기존 quant 5+1 와 동일 _narrate_map 패턴 (story = 이야기꾼).
-        # calc → narrate → quantModuleBlock(key, {narrative, data}) 통일 흐름.
-        _alpha_market = "US" if getattr(company, "currency", "KRW") == "USD" else "KR"
-        _stockCode = getattr(company, "stockCode", None)
-
-        from dartlab.quant.alphas.accruals import calcAccrualsFactor
-        from dartlab.quant.alphas.altman import calcAltmanFactor
-        from dartlab.quant.alphas.bab import calcBAB
-        from dartlab.quant.alphas.beneish import calcBeneishFactor
-        from dartlab.quant.alphas.earningsSurprise import calcEarningsSurprise
-        from dartlab.quant.alphas.fundamentalMomentum import calcFundamentalMomentum
-        from dartlab.quant.alphas.piotroski import calcPiotroskiFactor
-        from dartlab.quant.alphas.qFactor import calcQFactor
-        from dartlab.quant.alphas.qmj import calcQMJ
-        from dartlab.quant.factor import calcFactorICAll, calcFactorTearSheetAll, calcMultiFactorRisk
-        from dartlab.story.narrate import (
-            narrateAccruals,
-            narrateAltman,
-            narrateBAB,
-            narrateBeneish,
-            narrateEarningsSurprise,
-            narrateFactorIC,
-            narrateFactorTearSheet,
-            narrateFundMomentum,
-            narratePiotroski,
-            narrateQFactor,
-            narrateQMJ,
-            narrateRiskDecomposition,
-        )
-
-        _alpha_map: dict[str, tuple] = {
-            # alpha key : (calc 호출 callable, narrate 함수)
-            "altmanFactor": (lambda: calcAltmanFactor(market=_alpha_market), narrateAltman),
-            "piotroskiFactor": (lambda: calcPiotroskiFactor(market=_alpha_market), narratePiotroski),
-            "beneishFactor": (lambda: calcBeneishFactor(market=_alpha_market), narrateBeneish),
-            "accrualsFactor": (lambda: calcAccrualsFactor(market=_alpha_market), narrateAccruals),
-            "qFactor": (lambda: calcQFactor(market=_alpha_market), narrateQFactor),
-            "qmj": (lambda: calcQMJ(market=_alpha_market), narrateQMJ),
-            "bab": (lambda: calcBAB(market=_alpha_market), narrateBAB),
-            "earningsSurprise": (lambda: calcEarningsSurprise(market=_alpha_market), narrateEarningsSurprise),
-            "fundMomentum": (lambda: calcFundamentalMomentum(market=_alpha_market), narrateFundMomentum),
-            "factorTearSheet": (lambda: calcFactorTearSheetAll(market=_alpha_market), narrateFactorTearSheet),
-            "factorIC": (lambda: calcFactorICAll(market=_alpha_market, horizon=5), narrateFactorIC),
-        }
-        # riskDecomposition 만 stockCode 필수 (단일 종목)
-        if _stockCode:
-            _alpha_map["riskDecomposition"] = (
-                lambda: calcMultiFactorRisk(_stockCode),
-                narrateRiskDecomposition,
-            )
-
-        for akey, (acalc, anarrate) in _alpha_map.items():
-            if _need(akey):
-
-                def _build(c=acalc, n=anarrate, k=akey):
-                    data = c()
-                    narrative = n(data) if data else ""
-                    return quantModuleBlock(k, {"narrative": narrative, "data": data})
-
-                b[akey] = _safe(_build)
-
-    # ── 매크로 (시장 환경 + 기업-매크로 연결) ──
-    _MACRO_KEYS = {
-        "macroEnvironment",
-        "macroCycle",
-        "macroRates",
-        "macroLiquidity",
-        "macroSentiment",
-        "macroForecast",
-        "macroCorporate",
-        "macroTrade",
-        "macroFlags",
-        "valuationBand",
-        "companyCyclePosition",
-        "macroSensitivity",
-    }
-    if keys is None or keys & _MACRO_KEYS:
-        from dartlab.analysis.financial.macroExposure import calcValuationBand
-        from dartlab.story.builders import (
-            macroCorporateBlock,
-            macroCycleBlock,
-            macroEnvironmentBlock,
-            macroFlagsBlock,
-            macroForecastBlock,
-            macroLiquidityBlock,
-            macroRatesBlock,
-            macroSensitivityBlock,
-            macroSentimentBlock,
-            macroTradeBlock,
-            valuationBandBlock,
-        )
-
-        # macro("종합") 1회 호출 + 캐시 — 11축 전부 포함
-        _macro_summary: list = [None]
-        _macro_market = getattr(company, "market", "KR")
-
-        def _ensure_summary():
-            if _macro_summary[0] is None:
-                import dartlab as _dl
-
-                try:
-                    _macro_summary[0] = _dl.macro("종합", market=_macro_market)
-                except (ValueError, TypeError, KeyError, OSError) as e:
-                    import logging
-
-                    logging.getLogger(__name__).debug("macro 종합 실패 (market=%s): %s", _macro_market, e)
-                    _macro_summary[0] = {}
-            return _macro_summary[0]
-
-        if _need("macroEnvironment"):
-            b["macroEnvironment"] = _safe(lambda: macroEnvironmentBlock(_ensure_summary()))
-        if _need("macroCycle"):
-            b["macroCycle"] = _safe(lambda: macroCycleBlock(_ensure_summary().get("cycle", {})))
-        if _need("macroRates"):
-            b["macroRates"] = _safe(lambda: macroRatesBlock(_ensure_summary().get("rates", {})))
-        if _need("macroLiquidity"):
-            b["macroLiquidity"] = _safe(lambda: macroLiquidityBlock(_ensure_summary().get("liquidity", {})))
-        if _need("macroSentiment"):
-            b["macroSentiment"] = _safe(lambda: macroSentimentBlock(_ensure_summary().get("sentiment", {})))
-        if _need("macroForecast"):
-            b["macroForecast"] = _safe(lambda: macroForecastBlock(_ensure_summary().get("forecast")))
-        if _need("macroCorporate"):
-            b["macroCorporate"] = _safe(lambda: macroCorporateBlock(_ensure_summary().get("corporate")))
-        if _need("macroTrade"):
-            _market = getattr(company, "market", "KR")
-            if _market == "KR":
-                b["macroTrade"] = _safe(lambda: macroTradeBlock(_ensure_summary().get("trade")))
-        if _need("macroFlags"):
-            b["macroFlags"] = _safe(lambda: macroFlagsBlock(_ensure_summary()))
-        if _need("macroSensitivity"):
-            from dartlab.analysis.financial.macroExposure import calcMacroSensitivity
-
-            b["macroSensitivity"] = _safe(
-                lambda: macroSensitivityBlock(calcMacroSensitivity(company, basePeriod=basePeriod))
-            )
-        if _need("valuationBand"):
-            b["valuationBand"] = _safe(lambda: valuationBandBlock(calcValuationBand(company, basePeriod=basePeriod)))
-        if _need("companyCyclePosition"):
-            from dartlab.story.builders import companyCyclePositionBlock
-
-            b["companyCyclePosition"] = _safe(lambda: companyCyclePositionBlock(_ensure_summary().get("crisis", {})))
+    # ── 종료 — BlockMap 변환 + 메모리 해제 힌트 ──
+    import gc
 
     from dartlab.story.blockMap import BlockMap
 
-    # ── 개선 시나리오 (How축) — improvementLevers는 안정성 그룹에서 미리 계산됨 ──
-    if keys is None or keys & {"gradeUpgradePath", "technicalActionTargets", "cyclicalActionPlan"}:
-        from dartlab.story.builders import (
-            cyclicalActionPlanBlock,
-            gradeUpgradePathBlock,
-            technicalActionTargetsBlock,
-        )
-
-        if _need("gradeUpgradePath"):
-            from dartlab.credit.calcs import calcGradeImprovement
-
-            b["gradeUpgradePath"] = _safe(
-                lambda: gradeUpgradePathBlock(calcGradeImprovement(company, basePeriod=basePeriod))
-            )
-        if _need("technicalActionTargets"):
-            from dartlab.quant.extended import calcActionableTargets
-
-            b["technicalActionTargets"] = _safe(lambda: technicalActionTargetsBlock(calcActionableTargets(company)))
-        if _need("cyclicalActionPlan"):
-            from dartlab.macro.crisis import calcCyclicalAction
-
-            _market = getattr(company, "market", "KR")
-            b["cyclicalActionPlan"] = _safe(lambda: cyclicalActionPlanBlock(calcCyclicalAction(market=_market)))
-
-    # ── Damodaran 3-test (스토리 검증) ──
-    if keys is None or keys & {"damodaran3test"}:
-        from dartlab.story.builders import damodaran3testBlock
-
-        if _need("damodaran3test"):
-            b["damodaran3test"] = _safe(lambda: damodaran3testBlock(company))
-
-    # ── 메모리 해제 힌트 ──
-    import gc
-
     gc.collect()
-
     return BlockMap(b)
 
 
