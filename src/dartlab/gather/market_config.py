@@ -102,19 +102,36 @@ _CN_SZ_PREFIXES = ("00", "30")
 
 
 def get_market_config(market: str) -> MarketConfig:
-    """시장 코드 → MarketConfig. 없으면 US 기본값.
+    """시장 코드 → MarketConfig.
+
+    consistency_no_alias 원칙: case-insensitive 매칭 (``market.upper()``) 은
+    silent alias 라 인정하지 않는다. 신뢰성 원칙: 미등록 market 을 silent 하게
+    US 로 reroute 하지 않고 ValueError 로 명시 — 사용자 typo 가 잘못된 시장
+    데이터로 흘러가는 사고 차단.
 
     Parameters
     ----------
     market : str
-        시장 코드 (예: "KR", "US", "JP"). 대소문자 무관.
+        시장 코드 정식 표기 (대문자, ISO 3166 alpha-2 스타일). 예: ``"KR"``,
+        ``"US"``, ``"JP"``, ``"HK"``, ``"CN"``, ``"IN"``.
 
     Returns
     -------
     MarketConfig
-        해당 시장의 설정. 미등록 시장이면 US 기본값 반환.
+        해당 시장 설정.
+
+    Raises
+    ------
+    ValueError
+        미등록 시장 또는 case 불일치 (예: ``"kr"``, ``"Us"``).
     """
-    return MARKETS.get(market.upper(), MARKETS["US"])
+    if market not in MARKETS:
+        available = ", ".join(sorted(MARKETS))
+        raise ValueError(
+            f"알 수 없는 시장 코드: '{market}'. 가용 시장: {available}\n"
+            f"  정식 표기 (대문자) 를 사용하세요. 예: market='KR'."
+        )
+    return MARKETS[market]
 
 
 def resolve_ticker(stock_code: str, market: str, source: str) -> str:
@@ -139,7 +156,6 @@ def resolve_ticker(stock_code: str, market: str, source: str) -> str:
         소스에 맞게 변환된 ticker 문자열.
         예: "7203.T" (JP/yahoo_chart), "0293.HK" (HK), "005930" (KR/naver).
     """
-    market = market.upper()
     config = get_market_config(market)
 
     # naver는 KR 종목코드를 그대로 사용

@@ -571,18 +571,17 @@ _OLD_METRICS = {"indicators", "signals", "beta", "divergence", "flags", "verdict
 
 
 def _resolve(axis: str) -> str:
-    """한글/영문 alias → 정규 축 이름으로 변환."""
+    """축 정식 이름 또는 명시 alias → 정규 축 이름.
+
+    consistency_no_alias 원칙: case-insensitive 매칭 (``axis.lower()``) 은 silent
+    alias 라 인정하지 않는다. 사용자는 정식 표기 (camelCase: ``"toneChange"``,
+    ``"eventSignal"``) 또는 ``_ALIASES`` 등록 한글/영문 alias 만 사용한다.
+    """
     stripped = axis.strip()
-    lower = stripped.lower()
-    if lower in _AXIS_REGISTRY:
-        return lower
-    # camelCase 매칭 (toneChange, eventSignal 등)
     if stripped in _AXIS_REGISTRY:
         return stripped
     if stripped in _ALIASES:
         return _ALIASES[stripped]
-    if lower in _ALIASES:
-        return _ALIASES[lower]
     # fuzzy hint
     axis_names = sorted(set(list(_AXIS_REGISTRY.keys()) + list(_ALIASES.keys())))
     hint = ", ".join(axis_names[:20])
@@ -591,15 +590,20 @@ def _resolve(axis: str) -> str:
 
 
 def _is_stock_code(value: str) -> bool:
-    """값이 종목코드처럼 보이는지 판별."""
+    """값이 종목코드처럼 보이는지 판별.
+
+    consistency_no_alias 원칙: case-insensitive lookup 안 함. ``s in _AXIS_REGISTRY``
+    strict 매칭으로 axis 와 ticker 충돌 검사 (예: ``"price"`` 는 axis, ``"PRICE"`` 는
+    ticker 후보 — registry strict 매칭이 ``False`` 라 ticker 로 판정).
+    """
     if not isinstance(value, str):
         return False
     s = value.strip()
     # 6자리 숫자 (한국)
     if re.match(r"^\d{6}$", s):
         return True
-    # 알파벳 1-5자 (미국 ticker)
-    if re.match(r"^[A-Z]{1,5}$", s.upper()) and s.lower() not in _AXIS_REGISTRY and s not in _ALIASES:
+    # 알파벳 1-5자 (미국 ticker, US ticker 표준은 uppercase)
+    if re.match(r"^[A-Z]{1,5}$", s) and s not in _AXIS_REGISTRY and s not in _ALIASES:
         return True
     return False
 
@@ -704,7 +708,7 @@ class Quant:
         # 기존: quant("005930", "indicators") → 새: quant("indicators", "005930")
         if axis is not None and isinstance(axis, str) and _is_stock_code(axis):
             if stockCode is not None and isinstance(stockCode, str):
-                if stockCode.lower() in _AXIS_REGISTRY or stockCode in _ALIASES or stockCode in _OLD_METRICS:
+                if stockCode in _AXIS_REGISTRY or stockCode in _ALIASES or stockCode in _OLD_METRICS:
                     # swap: quant("005930", "indicators") → quant("indicators", "005930")
                     warnings.warn(
                         f'dartlab.quant("{axis}", "{stockCode}") 호출 방식은 deprecated입니다. '

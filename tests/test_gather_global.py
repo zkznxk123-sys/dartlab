@@ -36,13 +36,19 @@ class TestMarketConfig:
         assert config.currency == "KRW"
         assert "naver" in config.fallback_chain
 
-    def test_get_market_config_unknown_returns_us(self):
-        config = get_market_config("XX")
-        assert config.code == "US"
+    def test_get_market_config_unknown_raises(self):
+        """신뢰성 원칙: 미등록 market 을 silent US fallback 하지 않고 ValueError."""
+        import pytest
 
-    def test_get_market_config_case_insensitive(self):
-        config = get_market_config("kr")
-        assert config.code == "KR"
+        with pytest.raises(ValueError, match="알 수 없는 시장"):
+            get_market_config("XX")
+
+    def test_get_market_config_case_strict(self):
+        """consistency_no_alias: 정식 대문자만 인정. 'kr' 은 ValueError."""
+        import pytest
+
+        with pytest.raises(ValueError, match="정식 표기"):
+            get_market_config("kr")
 
     # ticker 변환
 
