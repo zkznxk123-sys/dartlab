@@ -1,6 +1,6 @@
 # dartlab Capabilities
 
-> v0.9.23 기준 자동 생성. 직접 수정 금지.  
+> v0.9.25 기준 자동 생성. 직접 수정 금지.  
 > `uv run python scripts/build/generateSpec.py`로 재생성.
 
 

@@ -45,8 +45,8 @@
 					<pre class="font-mono text-xs text-dl-text-muted leading-relaxed"><code>c = Company(<span class="text-dl-primary">"005930"</span>)
 c.sections
 c.show(<span class="text-dl-primary">"businessOverview"</span>)
-c.BS
-c.ratios
+c.show("BS")
+c.show("ratios")
 c.diff(<span class="text-dl-primary">"businessOverview"</span>)
 c.insights.grades()</code></pre>
 				</div>
@@ -55,8 +55,8 @@ c.insights.grades()</code></pre>
 					<pre class="font-mono text-xs text-dl-text-muted leading-relaxed"><code>c = Company(<span class="text-dl-accent">"AAPL"</span>)
 c.sections
 c.show(<span class="text-dl-accent">"business"</span>)
-c.BS
-c.ratios
+c.show("BS")
+c.show("ratios")
 c.diff(<span class="text-dl-accent">"10-K::item7Mdna"</span>)
 c.insights.grades()</code></pre>
 				</div>

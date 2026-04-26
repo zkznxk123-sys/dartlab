@@ -67,7 +67,7 @@ body:
       placeholder: |
         import dartlab
         c = dartlab.Company("005930")
-        result = c.IS()
+        result = c.show("IS")()
     validations:
       required: true
 

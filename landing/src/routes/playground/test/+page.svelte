@@ -32,7 +32,7 @@
 		<Playground
 			label="samsung-ratios"
 			stockCode="005930"
-			code={`print(c.ratios)`}
+			code={`print(c.show("ratios"))`}
 		/>
 
 		<h2 class="text-sm font-semibold text-dl-text-muted mb-2 mt-8">3) Apple 손익계산서 (다른 종목)</h2>

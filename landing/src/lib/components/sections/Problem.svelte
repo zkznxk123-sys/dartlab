@@ -92,8 +92,8 @@ mapped = manual_map(tables, my_schema)
 				<pre class="p-4 font-mono text-xs text-dl-text leading-relaxed overflow-x-auto"><code><span class="text-cyan-400">import</span> dartlab
 
 c = dartlab.Company(<span class="text-dl-primary">"005930"</span>)
-c.BS       <span class="text-dl-text-dim"># standardized balance sheet</span>
-c.ratios   <span class="text-dl-text-dim"># 47 financial ratios</span>
+c.show("BS")       <span class="text-dl-text-dim"># standardized balance sheet</span>
+c.show("ratios")   <span class="text-dl-text-dim"># 47 financial ratios</span>
 c.diff()   <span class="text-dl-text-dim"># 5 years of changes</span></code></pre>
 			</div>
 		</div>

@@ -480,7 +480,7 @@ dartlab-core/
 try:
     from dartlab_core import split_content_blocks
 except ImportError:
-    from dartlab.engines.dart.docs.sections.pipeline import _splitContentBlocks as split_content_blocks
+    from dartlab.providers.dart.docs.sections.pipeline import _splitContentBlocks as split_content_blocks
 ```
 
 ---

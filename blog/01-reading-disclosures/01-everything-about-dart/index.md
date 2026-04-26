@@ -811,9 +811,9 @@ from dartlab import Company
 c = Company("005930")    # 삼성전자
 
 # 재무제표
-c.BS    # 재무상태표 DataFrame
-c.IS    # 손익계산서 DataFrame
-c.CF    # 현금흐름표 DataFrame
+c.show("BS")    # 재무상태표 DataFrame
+c.show("IS")    # 손익계산서 DataFrame
+c.show("CF")    # 현금흐름표 DataFrame
 
 # 정기보고서
 c.dividend        # 배당 시계열

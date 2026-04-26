@@ -45,6 +45,13 @@ jobs:
       # silent-fail 패턴 lint — 2026-04-19 사고 class 재유입 차단.
       - name: Silent-fail pattern check
         run: python scripts/dev/checkSilentFail.py
+      # stale reference lint — review→story / Plan v10 같은 대규모 rename 후
+      # 잔존 차단. 패턴 SSOT: scripts/audit/stalePatterns.yaml.
+      # PyYAML 필요 (이미 dartlab 의존성).
+      - name: Install PyYAML
+        run: pip install pyyaml
+      - name: Stale references check
+        run: python scripts/audit/stale_references.py
 
   typecheck:
     runs-on: ubuntu-latest

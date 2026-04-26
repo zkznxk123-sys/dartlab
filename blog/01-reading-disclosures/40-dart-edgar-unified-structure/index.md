@@ -88,7 +88,7 @@ EDGAR_TO_DART_ALIASES = {
 }
 ```
 
-이 매핑이 있으면 `c.finance.IS`가 DART든 EDGAR든 `revenue`, `cost_of_sales`, `operating_income` 같은 동일한 행 이름을 쓰게 된다. 사용자가 코드를 바꿀 필요가 없다.
+이 매핑이 있으면 `c.show("IS")`가 DART든 EDGAR든 `revenue`, `cost_of_sales`, `operating_income` 같은 동일한 행 이름을 쓰게 된다. 사용자가 코드를 바꿀 필요가 없다.
 
 ### 1:1 매핑이 불가능한 경우
 

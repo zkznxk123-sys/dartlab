@@ -30,9 +30,9 @@
   <text x="440" y="170" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">재무제표 + 50개 비율을 한 줄로 꺼낸다.</text>
   <text x="440" y="192" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">손익계산서, 재무상태표, 현금흐름표, 비율 분석.</text>
   <rect x="440" y="210" width="320" height="36" rx="6" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-  <text x="452" y="233" fill="#e2e8f0" font-family="monospace" font-size="12">c.finance.IS  # 손익계산서</text>
+  <text x="452" y="233" fill="#e2e8f0" font-family="monospace" font-size="12">c.show("IS")  # 손익계산서</text>
   <rect x="440" y="256" width="320" height="36" rx="6" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-  <text x="452" y="279" fill="#e2e8f0" font-family="monospace" font-size="12">c.finance.ratios  # 50개 비율</text>
+  <text x="452" y="279" fill="#e2e8f0" font-family="monospace" font-size="12">c.show("ratios")  # 50개 비율</text>
 
   <!-- Card 3 -->
   <rect x="800" y="110" width="360" height="210" rx="14" fill="#1e293b" stroke="#4ade80" stroke-width="1.5"/>

@@ -246,8 +246,8 @@ from dartlab import Company
 
 c = Company("005930")
 
-c.IS           # 손익계산서 — 숫자의 출발점
-c.CF           # 현금흐름표 — 실제 현금 흐름
+c.show("IS")           # 손익계산서 — 숫자의 출발점
+c.show("CF")           # 현금흐름표 — 실제 현금 흐름
 
 c.audit        # 감사의견 — 숫자를 신뢰할 수 있는가
 c.majorHolder  # 최대주주 — 누가 회사를 지배하는가

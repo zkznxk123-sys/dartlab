@@ -43,6 +43,13 @@ default_whitelist:
   - tests/test_guide_full.py
   - tests/test_pivot_annual_column.py
   - tests/test_company_facade.py
+  - tests/test_pivot_q4_root_cause.py
+  - tests/test_fixture_company_full.py
+
+  # ── historical SPEC / STATUS / dev 문서 (구현 상태 표시) ──
+  - src/dartlab/providers/dart/finance/STATUS.md
+  - src/dartlab/providers/edgar/docs/SPEC.md
+  - src/dartlab/providers/dart/docs/sections/dev/
 
   # ── 폐기 명시 코드 주석 (Plan v10 P0 / P1 마킹) ──
   - src/dartlab/core/protocols.py

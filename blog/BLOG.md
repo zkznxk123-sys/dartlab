@@ -520,7 +520,7 @@ fund["fundingSources"]["notesDetail"]["borrowings"]  # 차입금 항목별
 ca = c.analysis("financial", "자본배분")
 ca["dividendPolicy"]["history"]  # CF dividendsPaid 1년치 합산
 
-c.report.dividend.dps  # 주당 현금배당금 (DART 정기보고서)
+c.show("dividend").dps  # 주당 현금배당금 (DART 정기보고서)
 ```
 
 ⚠ 두 출처는 다를 수 있음 (CF = 자본 재구성·우선주 포함, report = 보통주만). 어느 출처를 썼는지 검증표에 명시.

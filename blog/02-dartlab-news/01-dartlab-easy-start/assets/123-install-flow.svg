@@ -109,7 +109,7 @@
   <text x="852" y="322" fill="#4ade80" font-family="monospace" font-size="12">    "005930"</text>
   <text x="852" y="340" fill="#e2e8f0" font-family="monospace" font-size="12">)</text>
   <text x="852" y="366" fill="#fbbf24" font-family="monospace" font-size="12">print(c.sections)</text>
-  <text x="852" y="388" fill="#fbbf24" font-family="monospace" font-size="12">print(c.finance.IS)</text>
+  <text x="852" y="388" fill="#fbbf24" font-family="monospace" font-size="12">print(c.show("IS"))</text>
 
   <!-- Run -->
   <rect x="840" y="416" width="300" height="36" rx="8" fill="#0f172a" stroke="#4ade80" stroke-width="1.5"/>

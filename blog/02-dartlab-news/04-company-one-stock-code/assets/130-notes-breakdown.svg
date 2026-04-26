@@ -39,7 +39,7 @@
   <text x="215" y="490" text-anchor="middle" fill="#64748b" font-family="system-ui, sans-serif" font-size="10">원재료/인건비/감가상각 구분 안 됨</text>
 
   <text x="215" y="550" text-anchor="middle" fill="#ef4444" font-family="system-ui, sans-serif" font-size="13" font-weight="600">숫자만 있고, 구성이 없다</text>
-  <text x="215" y="575" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11">c.BS, c.IS만으로는</text>
+  <text x="215" y="575" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11">c.show("BS"), c.IS만으로는</text>
   <text x="215" y="595" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11">기업의 속을 볼 수 없다</text>
 
   <!-- 화살표 -->
