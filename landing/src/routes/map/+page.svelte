@@ -343,7 +343,7 @@
 		const n_open = floatingCards.length;
 		const vw = typeof window !== 'undefined' ? window.innerWidth : 1400;
 		const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
-		const w = 420;
+		const w = 500;
 		const h = Math.min(680, vh - 80);
 		// 첫 카드 우측 상단. 이후 좌측 아래로 계단
 		const x = Math.max(40, vw - w - 20 - n_open * 30);
@@ -472,12 +472,18 @@
 
 	let industryNodes = $derived.by(() => {
 		if (!industryDetail) return [];
+		// 연도 선택 시 — 해당 연도 데이터가 있는 회사만 포함, revenue/opMargin 도 그 해 값으로 덮어쓰기
+		const yearData: Record<string, { revenue?: number; opMargin?: number | null }> | null =
+			selectedYear ? (timelineData[selectedYear] || {}) : null;
 		const out: any[] = [];
 		for (const s of industryDetail.stages || []) {
 			if (!stageFilter.has(s.key)) continue;
 			for (const n of s.nodes || []) {
-				// industries/*.json 의 revenue 는 "억" 단위 (원 단위로 변환)
-				const revWon = (n.revenue || 0) * 1e8;
+				const tl = yearData ? yearData[n.stockCode] : null;
+				if (yearData && !tl) continue; // 해당 연도 데이터 없는 회사 제외
+				// timeline.revenue 는 원 단위, industries/*.json 의 revenue 는 억 단위
+				const revWon = tl ? (tl.revenue || 0) : (n.revenue || 0) * 1e8;
+				const opMargin = tl ? (tl.opMargin ?? null) : n.opMargin;
 				const base: any = {
 					id: n.stockCode,
 					label: n.corpName,
@@ -490,15 +496,15 @@
 					confidence: n.confidence,
 					source: n.source,
 					revenue: revWon,
-					// scan 지표
+					// scan 지표 (roe·debtRatio·revCagr 은 연도별 데이터 없음 → 정적 유지)
 					roe: n.roe,
-					opMargin: n.opMargin,
+					opMargin,
 					debtRatio: n.debtRatio,
 					revCagr: n.revCagr,
 					profGrade: n.profGrade,
 					debtGrade: n.debtGrade,
 					growthGrade: n.growthGrade,
-					size: Math.max(4, Math.min(20, 3 + Math.log2((n.revenue || 0) / 100 + 1)))
+					size: Math.max(4, Math.min(20, 3 + Math.log2(revWon / 1e10 + 1)))
 				};
 				base.color = colorFor(base, colorMetric);
 				out.push(base);
@@ -757,10 +763,10 @@
 
 <div class="map-page" class:sidebar-collapsed={sidebarCollapsed}>
 	<!-- 왼쪽 사이드바 -->
+	<button class="collapse-toggle" onclick={() => (sidebarCollapsed = !sidebarCollapsed)} title={sidebarCollapsed ? '사이드바 열기' : '사이드바 접기'}>
+		{sidebarCollapsed ? '≫' : '≪'}
+	</button>
 	<aside class="sidebar" class:collapsed={sidebarCollapsed}>
-		<button class="collapse-toggle" onclick={() => (sidebarCollapsed = !sidebarCollapsed)} title={sidebarCollapsed ? '사이드바 열기' : '사이드바 접기'}>
-			{sidebarCollapsed ? '≫' : '≪'}
-		</button>
 		<!-- 브랜드 바: 아바타 → GitHub → Coffee → 도움말 (단색 라인 아이콘 일관) -->
 		<div class="brand-bar">
 			<a class="brand-btn avatar" href="{base}/" title="dartlab 홈으로" aria-label="홈">
@@ -1215,7 +1221,12 @@
 				<span class="db-divider">|</span>
 				<div class="db-current" style:color={String((drillIndustry && indColorMap.get(drillIndustry)) || '#fbbf24')}>
 					<span class="db-name">{industryDetail.name}</span>
-					<span class="db-meta">{industryDetail.nodeCount}사{industryDetail.totalRevenue ? ` · ${(industryDetail.totalRevenue / 1e12).toFixed(1)}조` : ''}</span>
+					{#if selectedYear && drillIndustry && timelineIndustryTotals[selectedYear]?.[drillIndustry]}
+						{@const t = timelineIndustryTotals[selectedYear][drillIndustry]}
+						<span class="db-meta">{selectedYear}년 · {t.count}사{t.totalRevenue ? ` · ${(t.totalRevenue / 1e12).toFixed(1)}조` : ''}</span>
+					{:else}
+						<span class="db-meta">{industryNodes.length || industryDetail.nodeCount}사{industryDetail.totalRevenue ? ` · ${(industryDetail.totalRevenue / 1e4).toFixed(1)}조` : ''}</span>
+					{/if}
 				</div>
 			</div>
 			<IndustryDrilldown
@@ -1429,6 +1440,7 @@
 		background: #050811;
 		color: #f1f5f9;
 		transition: grid-template-columns 0.2s;
+		position: relative;
 	}
 	.map-page.sidebar-collapsed {
 		grid-template-columns: 48px 1fr;
@@ -1437,7 +1449,7 @@
 	.collapse-toggle {
 		position: absolute;
 		top: 8px;
-		right: -14px;
+		left: calc(280px - 14px);
 		width: 28px;
 		height: 28px;
 		background: #0f1219;
@@ -1450,6 +1462,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		transition: left 0.2s;
+	}
+	.map-page.sidebar-collapsed .collapse-toggle {
+		left: calc(48px - 14px);
 	}
 	.collapse-toggle:hover {
 		background: #1e2433;
@@ -1460,12 +1476,28 @@
 		display: flex;
 		position: relative;
 		flex-direction: column;
+		overflow-x: hidden;
 		overflow-y: auto;
 		background: #0f1219;
 		border-right: 1px solid #1e2433;
 		padding: 16px 16px 64px;
 		color: #f1f5f9;
 		transition: width 0.2s, padding 0.2s;
+		scrollbar-width: thin;
+		scrollbar-color: #1e2433 transparent;
+	}
+	.sidebar::-webkit-scrollbar {
+		width: 6px;
+	}
+	.sidebar::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	.sidebar::-webkit-scrollbar-thumb {
+		background: #1e2433;
+		border-radius: 3px;
+	}
+	.sidebar::-webkit-scrollbar-thumb:hover {
+		background: #334155;
 	}
 	.sidebar.collapsed {
 		padding: 8px 6px 16px;
@@ -1477,6 +1509,9 @@
 	.sidebar.collapsed .brand-bar {
 		flex-direction: column;
 		gap: 8px;
+	}
+	.sidebar.collapsed .brand-btn.help {
+		margin-left: 0;
 	}
 
 	/* 브랜드 바: 모든 버튼 동일 크기/스타일 단색 라인 아이콘 */
@@ -2316,6 +2351,9 @@
 			grid-template-columns: 1fr;
 		}
 		.sidebar {
+			display: none;
+		}
+		.collapse-toggle {
 			display: none;
 		}
 		.detail {

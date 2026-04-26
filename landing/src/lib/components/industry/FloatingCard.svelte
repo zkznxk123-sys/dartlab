@@ -32,7 +32,7 @@
 		subtitle = '',
 		x = $bindable(),
 		y = $bindable(),
-		w = $bindable(420),
+		w = $bindable(500),
 		h = $bindable(640),
 		z = 1,
 		onClose,
@@ -193,7 +193,7 @@
 	}
 	.fc {
 		position: fixed;
-		min-width: 380px;
+		min-width: 460px;
 		min-height: 280px;
 		max-width: 90vw;
 		max-height: 90vh;

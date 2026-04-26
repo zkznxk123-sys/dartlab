@@ -360,17 +360,18 @@
 							{stroke}
 							stroke-width={1.2}
 						/>
-						{#if n.r > 9 || hovered === n.id || selectedId === n.id}
-							<text
-								class="node-label"
-								text-anchor="middle"
-								dominant-baseline="central"
-								y={n.r + 10}
-								font-size={Math.max(9, Math.min(11, n.r * 0.6))}
-							>
-								{n.label}
-							</text>
-						{/if}
+						<text
+							class="node-label"
+							class:label-emph={hovered === n.id || selectedId === n.id}
+							text-anchor="middle"
+							dominant-baseline="central"
+							y={-(n.r + 9)}
+							font-size={hovered === n.id || selectedId === n.id
+								? Math.max(11, Math.min(13, n.r * 0.7))
+								: Math.max(8, Math.min(11, n.r * 0.6))}
+						>
+							{n.label}
+						</text>
 					</g>
 				{/each}
 			</g>
@@ -440,13 +441,20 @@
 	.node-label {
 		font-family: 'Pretendard Variable', sans-serif;
 		font-weight: 500;
-		fill: #f1f5f9;
+		fill: #cbd5e1;
 		paint-order: stroke fill;
-		stroke: rgba(5, 8, 17, 0.9);
-		stroke-width: 2.5px;
+		stroke: rgba(5, 8, 17, 0.95);
+		stroke-width: 3px;
 		stroke-linejoin: round;
 		pointer-events: none;
 		user-select: none;
+	}
+	.node-label.label-emph {
+		fill: #f8fafc;
+		font-weight: 700;
+	}
+	.node.dim .node-label {
+		opacity: 0.35;
 	}
 
 	.zoom-btn {

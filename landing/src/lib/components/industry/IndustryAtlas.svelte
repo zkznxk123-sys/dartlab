@@ -165,22 +165,18 @@
 		return Math.max(18, Math.min(90, 9 + Math.sqrt(nodeCount) * 4.5));
 	}
 
-	// 산업별 표시용 revenue (timelineYear 있으면 해당 연도, 없으면 현재 revenue)
-	function effectiveRevenueOk(indId: string, fallbackRevOk: number): number {
+	// 산업별 표시용 (timelineYear 있으면 해당 연도, 없으면 현재 정적 값)
+	function effectiveStats(ind: IndustryNode): { count: number; revOk: number } {
 		if (timelineYear && industryTotalsByYear[timelineYear]) {
-			const t = industryTotalsByYear[timelineYear][indId];
-			if (t && t.totalRevenue) {
-				return t.totalRevenue / 1e8; // 원 → 억
+			const t = industryTotalsByYear[timelineYear][ind.id];
+			if (t) {
+				return {
+					count: t.count ?? ind.nodeCount,
+					revOk: t.totalRevenue ? t.totalRevenue / 1e8 : (ind.revenue || 0)
+				};
 			}
 		}
-		return fallbackRevOk;
-	}
-
-	// 매출 기반 반지름 (타임라인 연동)
-	function radiusByRev(revOk: number): number {
-		// 억 단위 매출 → log 스케일
-		const val = Math.max(1, revOk);
-		return Math.max(18, Math.min(100, 8 + Math.log10(val) * 14));
+		return { count: ind.nodeCount, revOk: ind.revenue || 0 };
 	}
 
 	function build() {
@@ -194,11 +190,12 @@
 		const R = Math.min(w, h) * 0.33;
 		simNodes = sorted.map((ind, i) => {
 			const theta = (i / sorted.length) * Math.PI * 2 - Math.PI / 2;
-			const revOk = effectiveRevenueOk(ind.id, ind.revenue || 0);
-			// 타임라인 모드면 매출 기반 반지름, 아니면 기존 nodeCount 기반
-			const r = timelineYear ? radiusByRev(revOk) : radius(ind.nodeCount);
+			const { count, revOk } = effectiveStats(ind);
+			// 반지름은 항상 회사 수 기준 (범례 "원 크기 = 소속 회사 수" 일관)
+			const r = radius(count);
 			return {
 				...ind,
+				effectiveCount: count,
 				effectiveRevenue: revOk,
 				r,
 				x: w / 2 + R * Math.cos(theta),
@@ -459,7 +456,7 @@
 						y={Math.max(11, Math.min(16, n.r * 0.28)) * 0.85 + 2}
 						font-size={Math.max(9, Math.min(12, n.r * 0.2))}
 					>
-						{n.nodeCount}사 · {formatRev(n.revenue)}
+						{n.effectiveCount ?? n.nodeCount}사 · {formatRev(n.effectiveRevenue ?? n.revenue)}
 					</text>
 					<!-- metric 숫자 (colorMetric != industry 일 때) -->
 					{#if colorMetric !== 'industry'}

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import { brand } from '$lib/brand';
 	import Sparkline from './Sparkline.svelte';
 	import RadarChart from './RadarChart.svelte';
 	import FreshnessBadge from './FreshnessBadge.svelte';
@@ -196,24 +195,6 @@
 	}
 
 	let hhiInfo = $derived(hhiBucket(supplyInsights?.hhi));
-
-	async function shareCard() {
-		const url = `${typeof window !== 'undefined' ? window.location.origin : ''}${base}/map?focus=${node.id}`;
-		const text = `${node.label} (${node.id}) | ROE ${node.roe ?? '-'}% · 매출 ${fmtKor(node.revenue)} — dartlab 산업지도`;
-		if (typeof navigator !== 'undefined' && navigator.share) {
-			try { await navigator.share({ title: node.label, text, url }); } catch { /* cancelled */ }
-		} else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-			await navigator.clipboard.writeText(`${text}\n${url}`);
-		}
-	}
-
-	function issueUrl(): string {
-		const title = encodeURIComponent(`[map] ${node?.label || ''} (${node?.id || ''}) 분류 신고`);
-		const body = encodeURIComponent(
-			`회사: ${node?.label || ''}\n종목코드: ${node?.id || ''}\n현재 분류: ${node?.industryName || ''} / ${node?.stageName || node?.stage || ''}\n\n문제:\n\n근거:\n`
-		);
-		return `${brand.repo}/issues/new?title=${title}&body=${body}&labels=industry-map`;
-	}
 </script>
 
 <div class="card">
@@ -808,37 +789,6 @@
 	</div>
 	{/if}
 
-	<!-- 액션 버튼 -->
-	<div class="actions">
-		<a class="action dashboard-btn" href="{base}/dashboard/{node.id}" target="_blank" rel="noopener" title="대시보드 — 회사 종합 분석 (신규 탭)">
-			📊 대시보드
-		</a>
-		{#if node.industry}
-			<a class="action industry-btn" href="{base}/map?industry={node.industry}" title="이 회사가 속한 업종 지도">
-				🏭 업종 전체
-			</a>
-		{/if}
-		<button class="action share-btn" onclick={shareCard} title="이 회사 정보 공유">
-			🔗 공유
-		</button>
-		<button class="action primary" disabled={compareDisabled} onclick={() => onAddCompare?.(node.id)}>
-			+ 비교
-		</button>
-		{#if onDetach && !detached}
-			<button class="action ghost" onclick={() => onDetach?.(node.id)} title="새 창으로 열기">
-				🗔 새 창
-			</button>
-		{/if}
-		{#if onShock}
-			<button class="action ghost shock-btn" onclick={() => onShock?.(node.id)} title="이 회사에 충격 발생 시 영향 범위 시뮬레이션">
-				⚡ 충격
-			</button>
-		{/if}
-		<a class="action ghost" href={issueUrl()} target="_blank" rel="noopener">
-			🐛 신고
-		</a>
-	</div>
-
 	<!-- Disclaimer footer -->
 	<div class="disclaimer">
 		dartlab 은 공시·재무 데이터를 시각화합니다. 투자 자문 아님. 투자 결정은
@@ -855,7 +805,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0;
-		padding: 10px 12px 60px;
+		padding: 10px 12px 16px;
 		color: #f1f5f9;
 		position: relative;
 	}
@@ -1488,65 +1438,6 @@
 		border-radius: 3px;
 	}
 
-	.actions {
-		position: sticky;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		background: linear-gradient(transparent, #0f1219 30%);
-		padding-top: 24px;
-		margin-top: 16px;
-		display: flex;
-		gap: 8px;
-	}
-	.action {
-		flex: 1;
-		padding: 8px 12px;
-		border-radius: 6px;
-		font-size: 12px;
-		font-weight: 600;
-		cursor: pointer;
-		text-align: center;
-		text-decoration: none;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid transparent;
-	}
-	.action.dashboard-btn {
-		background: linear-gradient(135deg, var(--color-dl-primary), var(--color-dl-accent));
-		color: #fff;
-		border-color: transparent;
-		font-weight: 700;
-		text-decoration: none;
-	}
-	.action.dashboard-btn:hover {
-		opacity: 0.9;
-		transform: translateY(-1px);
-	}
-	.action.primary {
-		background: #60a5fa;
-		color: #050811;
-		border-color: #60a5fa;
-	}
-	.action.primary:hover:not(:disabled) {
-		background: #93c5fd;
-	}
-	.action.primary:disabled {
-		background: #1e2433;
-		color: #475569;
-		cursor: not-allowed;
-		border-color: #1e2433;
-	}
-	.action.ghost {
-		background: transparent;
-		color: #94a3b8;
-		border-color: #1e2433;
-	}
-	.action.ghost:hover {
-		color: #f1f5f9;
-		border-color: #334155;
-	}
 	/* 비슷한 회사 추천 */
 	.peers-rec h3 {
 		margin-bottom: 6px;
@@ -1576,17 +1467,6 @@
 		color: #64748b;
 		font-family: monospace;
 		font-size: 10px;
-	}
-
-	/* 공유 */
-	.action.share-btn {
-		background: rgba(96, 165, 250, 0.12);
-		color: #60a5fa;
-		border: 1px solid rgba(96, 165, 250, 0.3);
-	}
-	.action.share-btn:hover {
-		background: rgba(96, 165, 250, 0.22);
-		color: #f1f5f9;
 	}
 
 	.disclaimer {
