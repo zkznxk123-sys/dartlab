@@ -1810,37 +1810,9 @@ class Company:
         return reportFrameInner(self.stockCode, apiType, topic, raw=raw)
 
     def _applyPeriodFilter(self, payload: Any, period: str | None) -> Any:
-        if period is None or not isinstance(payload, pl.DataFrame) or payload.is_empty():
-            return payload
-        from dartlab.providers.dart.docs.sections import rawPeriod
+        from dartlab.providers.dart._showSelectUtils import applyPeriodFilter
 
-        requestedPeriod = str(period)
-        normalizedPeriod = rawPeriod(period)
-
-        # exact match first, then normalized (Q4 → annual alias), then Q4 expansion
-        q4Fallback = f"{requestedPeriod}Q4" if "Q" not in requestedPeriod else None
-        exactPeriod = (
-            normalizedPeriod
-            if normalizedPeriod in payload.columns
-            else (
-                requestedPeriod
-                if requestedPeriod in payload.columns
-                else (q4Fallback if q4Fallback and q4Fallback in payload.columns else None)
-            )
-        )
-        if exactPeriod is not None:
-            keepCols = [c for c in payload.columns if not _isPeriodColumn(c)]
-            keepCols.append(exactPeriod)
-            result = payload.select(keepCols)
-            if exactPeriod != requestedPeriod:
-                result = result.rename({exactPeriod: requestedPeriod})
-            return result
-
-        if "period" in payload.columns:
-            return payload.filter(pl.col("period") == normalizedPeriod)
-        if "year" in payload.columns:
-            return payload.filter(pl.col("year").cast(pl.Utf8) == normalizedPeriod)
-        return payload
+        return applyPeriodFilter(payload, period)
 
     @property
     def show(self):
@@ -2077,54 +2049,21 @@ class Company:
 
     @staticmethod
     def _warnUnknownTopic(topic: str, sec: pl.DataFrame) -> None:
-        import difflib
-        import warnings
+        from dartlab.providers.dart._showSelectUtils import warnUnknownTopic
 
-        all_topics = sec["topic"].unique().sort().to_list() if "topic" in sec.columns else []
-        similar = difflib.get_close_matches(topic, all_topics, n=3, cutoff=0.4)
-        if similar:
-            warnings.warn(
-                f"'{topic}' topic을 찾을 수 없습니다. "
-                f"유사한 topic: {', '.join(similar)}. "
-                f"전체 목록은 c.topics로 확인하세요.",
-                stacklevel=3,
-            )
-        else:
-            warnings.warn(
-                f"'{topic}' topic을 찾을 수 없습니다. 전체 목록은 c.topics 또는 c.index로 확인하세요.",
-                stacklevel=3,
-            )
+        warnUnknownTopic(topic, sec)
 
     @staticmethod
     def _transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame | None:
-        from dartlab.core.show import transposeToVertical
+        from dartlab.providers.dart._showSelectUtils import transposeToVertical
 
         return transposeToVertical(wide, periods)
 
     @staticmethod
     def _cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
-        """재무제표 DataFrame 후처리: all-null 행 제거, CF 고유 정리."""
-        periodCols = [c for c in df.columns if _isPeriodColumn(c)]
-        if not periodCols:
-            return df
-        labelCol = "항목"
-        # CF 고유: 당기순이익 제거 (standalone 차분 오류), 영문 항목 제거
-        if sjDiv == "CF":
-            df = df.filter(~pl.col(labelCol).is_in(["당기순이익", "법인세비용차감전순이익"]))
-            df = df.filter(~pl.col(labelCol).str.contains(r"^[a-z_]+$"))
-        # 공통: all-null 행 제거 (모든 기간이 null 인 행)
-        notAllNull = pl.any_horizontal([pl.col(c).is_not_null() for c in periodCols])
-        df = df.filter(notAllNull)
-        # 공통: 같은 항목 중복행 병합 — mapper 의 한국어 → 여러 snakeId (1:N) 충돌 해결.
-        if df[labelCol].n_unique() < df.height:
-            hasSnakeId = "snakeId" in df.columns
-            aggCols = list(periodCols)
-            extraAgg = [pl.col("snakeId").first().alias("snakeId")] if hasSnakeId else []
-            merged = df.group_by(labelCol, maintain_order=True).agg(
-                extraAgg + [pl.col(c).drop_nulls().first().alias(c) for c in aggCols]
-            )
-            df = merged.select([c for c in df.columns if c in merged.columns])
-        return df
+        from dartlab.providers.dart._showSelectUtils import cleanFinanceDataFrame
+
+        return cleanFinanceDataFrame(df, sjDiv)
 
     _FINANCE_TOPICS = frozenset({"BS", "IS", "CF", "CIS", "SCE"})
 
