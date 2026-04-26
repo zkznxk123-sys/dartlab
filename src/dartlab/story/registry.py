@@ -962,6 +962,119 @@ def _buildValuationBlocks(company, keys, basePeriod, safe: Callable, need: Calla
         )
 
 
+def _buildGovernanceBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """5 부 — 비재무 심화 거버넌스 (6 블록)."""
+    if keys is not None and not (
+        keys
+        & {
+            "ownershipTrend",
+            "boardComposition",
+            "auditOpinionTrend",
+            "governanceFlags",
+            "executivePayDivergence",
+            "independentDirectorQuality",
+        }
+    ):
+        return
+    from dartlab.analysis.financial.governance import (
+        calcAuditOpinionTrend,
+        calcBoardComposition,
+        calcExecutivePayDivergence,
+        calcGovernanceFlags,
+        calcIndependentDirectorQuality,
+        calcOwnershipTrend,
+    )
+    from dartlab.story.builders import (
+        auditOpinionTrendBlock,
+        boardCompositionBlock,
+        executivePayDivergenceBlock,
+        governanceFlagsBlock,
+        independentDirectorQualityBlock,
+        ownershipTrendBlock,
+    )
+
+    if need("ownershipTrend"):
+        out["ownershipTrend"] = safe(lambda: ownershipTrendBlock(calcOwnershipTrend(company, basePeriod=basePeriod)))
+    if need("boardComposition"):
+        out["boardComposition"] = safe(
+            lambda: boardCompositionBlock(calcBoardComposition(company, basePeriod=basePeriod))
+        )
+    if need("auditOpinionTrend"):
+        out["auditOpinionTrend"] = safe(
+            lambda: auditOpinionTrendBlock(calcAuditOpinionTrend(company, basePeriod=basePeriod))
+        )
+    if need("executivePayDivergence"):
+        out["executivePayDivergence"] = safe(
+            lambda: executivePayDivergenceBlock(calcExecutivePayDivergence(company, basePeriod=basePeriod))
+        )
+    if need("independentDirectorQuality"):
+        out["independentDirectorQuality"] = safe(
+            lambda: independentDirectorQualityBlock(calcIndependentDirectorQuality(company, basePeriod=basePeriod))
+        )
+    if need("governanceFlags"):
+        out["governanceFlags"] = safe(lambda: governanceFlagsBlock(calcGovernanceFlags(company, basePeriod=basePeriod)))
+
+
+def _buildDisclosureDeltaBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """5 부 — 공시변화 (4 블록)."""
+    if keys is not None and not (
+        keys & {"disclosureChangeSummary", "keyTopicChanges", "changeIntensity", "disclosureDeltaFlags"}
+    ):
+        return
+    from dartlab.analysis.financial.disclosureDelta import (
+        calcChangeIntensity,
+        calcDisclosureChangeSummary,
+        calcDisclosureDeltaFlags,
+        calcKeyTopicChanges,
+    )
+    from dartlab.story.builders import (
+        changeIntensityBlock,
+        disclosureChangeSummaryBlock,
+        disclosureDeltaFlagsBlock,
+        keyTopicChangesBlock,
+    )
+
+    if need("disclosureChangeSummary"):
+        out["disclosureChangeSummary"] = safe(
+            lambda: disclosureChangeSummaryBlock(calcDisclosureChangeSummary(company, basePeriod=basePeriod))
+        )
+    if need("keyTopicChanges"):
+        out["keyTopicChanges"] = safe(lambda: keyTopicChangesBlock(calcKeyTopicChanges(company, basePeriod=basePeriod)))
+    if need("changeIntensity"):
+        out["changeIntensity"] = safe(lambda: changeIntensityBlock(calcChangeIntensity(company, basePeriod=basePeriod)))
+    if need("disclosureDeltaFlags"):
+        out["disclosureDeltaFlags"] = safe(
+            lambda: disclosureDeltaFlagsBlock(calcDisclosureDeltaFlags(company, basePeriod=basePeriod))
+        )
+
+
+def _buildPeerBenchmarkBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """5 부 — 비교분석 peer benchmark (3 블록)."""
+    if keys is not None and not (keys & {"peerRanking", "riskReturnPosition", "peerBenchmarkFlags"}):
+        return
+    from dartlab.analysis.financial.peerBenchmark import (
+        calcPeerBenchmarkFlags,
+        calcPeerRanking,
+        calcRiskReturnPosition,
+    )
+    from dartlab.story.builders import (
+        peerBenchmarkFlagsBlock,
+        peerRankingBlock,
+        riskReturnPositionBlock,
+    )
+
+    if need("peerRanking"):
+        out["peerRanking"] = safe(lambda: peerRankingBlock(calcPeerRanking(company, basePeriod=basePeriod)))
+    if need("riskReturnPosition"):
+        out["riskReturnPosition"] = safe(
+            lambda: riskReturnPositionBlock(calcRiskReturnPosition(company, basePeriod=basePeriod))
+        )
+    if need("peerBenchmarkFlags"):
+        out["peerBenchmarkFlags"] = safe(
+            lambda: peerBenchmarkFlagsBlock(calcPeerBenchmarkFlags(company, basePeriod=basePeriod))
+        )
+
+
 def buildBlocks(
     company,
     keys: set[str] | None = None,
@@ -1011,113 +1124,10 @@ def buildBlocks(
     _buildCreditBlocks(company, keys, basePeriod, _safe, _need, b)
     _buildValuationBlocks(company, keys, basePeriod, _safe, _need, b)
 
-    # ── 5부: 비재무 심화 ──
-    if keys is None or keys & {
-        "ownershipTrend",
-        "boardComposition",
-        "auditOpinionTrend",
-        "governanceFlags",
-        "executivePayDivergence",
-        "independentDirectorQuality",
-    }:
-        from dartlab.analysis.financial.governance import (
-            calcAuditOpinionTrend,
-            calcBoardComposition,
-            calcExecutivePayDivergence,
-            calcGovernanceFlags,
-            calcIndependentDirectorQuality,
-            calcOwnershipTrend,
-        )
-        from dartlab.story.builders import (
-            auditOpinionTrendBlock,
-            boardCompositionBlock,
-            executivePayDivergenceBlock,
-            governanceFlagsBlock,
-            independentDirectorQualityBlock,
-            ownershipTrendBlock,
-        )
-
-        if _need("ownershipTrend"):
-            b["ownershipTrend"] = _safe(lambda: ownershipTrendBlock(calcOwnershipTrend(company, basePeriod=basePeriod)))
-        if _need("boardComposition"):
-            b["boardComposition"] = _safe(
-                lambda: boardCompositionBlock(calcBoardComposition(company, basePeriod=basePeriod))
-            )
-        if _need("auditOpinionTrend"):
-            b["auditOpinionTrend"] = _safe(
-                lambda: auditOpinionTrendBlock(calcAuditOpinionTrend(company, basePeriod=basePeriod))
-            )
-        if _need("executivePayDivergence"):
-            b["executivePayDivergence"] = _safe(
-                lambda: executivePayDivergenceBlock(calcExecutivePayDivergence(company, basePeriod=basePeriod))
-            )
-        if _need("independentDirectorQuality"):
-            b["independentDirectorQuality"] = _safe(
-                lambda: independentDirectorQualityBlock(calcIndependentDirectorQuality(company, basePeriod=basePeriod))
-            )
-        if _need("governanceFlags"):
-            b["governanceFlags"] = _safe(
-                lambda: governanceFlagsBlock(calcGovernanceFlags(company, basePeriod=basePeriod))
-            )
-
-    if keys is None or keys & {
-        "disclosureChangeSummary",
-        "keyTopicChanges",
-        "changeIntensity",
-        "disclosureDeltaFlags",
-    }:
-        from dartlab.analysis.financial.disclosureDelta import (
-            calcChangeIntensity,
-            calcDisclosureChangeSummary,
-            calcDisclosureDeltaFlags,
-            calcKeyTopicChanges,
-        )
-        from dartlab.story.builders import (
-            changeIntensityBlock,
-            disclosureChangeSummaryBlock,
-            disclosureDeltaFlagsBlock,
-            keyTopicChangesBlock,
-        )
-
-        if _need("disclosureChangeSummary"):
-            b["disclosureChangeSummary"] = _safe(
-                lambda: disclosureChangeSummaryBlock(calcDisclosureChangeSummary(company, basePeriod=basePeriod))
-            )
-        if _need("keyTopicChanges"):
-            b["keyTopicChanges"] = _safe(
-                lambda: keyTopicChangesBlock(calcKeyTopicChanges(company, basePeriod=basePeriod))
-            )
-        if _need("changeIntensity"):
-            b["changeIntensity"] = _safe(
-                lambda: changeIntensityBlock(calcChangeIntensity(company, basePeriod=basePeriod))
-            )
-        if _need("disclosureDeltaFlags"):
-            b["disclosureDeltaFlags"] = _safe(
-                lambda: disclosureDeltaFlagsBlock(calcDisclosureDeltaFlags(company, basePeriod=basePeriod))
-            )
-
-    if keys is None or keys & {"peerRanking", "riskReturnPosition", "peerBenchmarkFlags"}:
-        from dartlab.analysis.financial.peerBenchmark import (
-            calcPeerBenchmarkFlags,
-            calcPeerRanking,
-            calcRiskReturnPosition,
-        )
-        from dartlab.story.builders import (
-            peerBenchmarkFlagsBlock,
-            peerRankingBlock,
-            riskReturnPositionBlock,
-        )
-
-        if _need("peerRanking"):
-            b["peerRanking"] = _safe(lambda: peerRankingBlock(calcPeerRanking(company, basePeriod=basePeriod)))
-        if _need("riskReturnPosition"):
-            b["riskReturnPosition"] = _safe(
-                lambda: riskReturnPositionBlock(calcRiskReturnPosition(company, basePeriod=basePeriod))
-            )
-        if _need("peerBenchmarkFlags"):
-            b["peerBenchmarkFlags"] = _safe(
-                lambda: peerBenchmarkFlagsBlock(calcPeerBenchmarkFlags(company, basePeriod=basePeriod))
-            )
+    # ── 5부: 비재무 심화 (governance + disclosureDelta + peerBenchmark) ──
+    _buildGovernanceBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildDisclosureDeltaBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildPeerBenchmarkBlocks(company, keys, basePeriod, _safe, _need, b)
 
     # ── 6부: 전망분석 ──
     if keys is None or keys & {
