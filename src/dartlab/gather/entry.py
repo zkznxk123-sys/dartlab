@@ -162,16 +162,18 @@ _ALIASES: dict[str, str] = {
 }
 
 
-# 시장 지수 심볼 매핑 (네이버 차트 API 직접 수집)
+# 시장 지수 심볼 매핑 (네이버 차트 API 직접 수집).
+# 정식 표기 = 네이버 fchart 가 받는 외부 API 심볼 (uppercase). 사용자는 정식 표기
+# 또는 명시 한글 alias 만 사용한다. ``"kospi"`` 같은 case alias 는 인정하지 않음
+# (consistency_no_alias 원칙 — silent case-insensitive lookup 은 alias).
 _INDEX_SYMBOLS: dict[str, str] = {
+    # 정식 외부 API 심볼 (self-map — registry 등록 표시)
     "KOSPI": "KOSPI",
-    "kospi": "KOSPI",
-    "코스피": "KOSPI",
     "KOSDAQ": "KOSDAQ",
-    "kosdaq": "KOSDAQ",
-    "코스닥": "KOSDAQ",
     "KPI200": "KPI200",
-    "kpi200": "KPI200",
+    # 명시 한글 alias
+    "코스피": "KOSPI",
+    "코스닥": "KOSDAQ",
     "코스피200": "KPI200",
 }
 
