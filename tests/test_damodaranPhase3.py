@@ -86,7 +86,7 @@ def test_bottomUpBeta_falls_back_when_peerCount_lt_5():
 @pytest.mark.unit
 def test_blackScholesCall_matches_known_value():
     """Hull Ex 15.6: S=42, K=40, T=0.5, r=0.10, σ=0.20 → Call ≈ 4.76."""
-    from dartlab.core.finance.optionValue import blackScholesCall
+    from dartlab.analysis.valuation.optionValue import blackScholesCall
 
     r = blackScholesCall(S=42, K=40, T=0.5, r=0.10, sigma=0.20)
     assert abs(r["call"] - 4.76) < 0.02, f"expected ~4.76, got {r['call']:.3f}"
@@ -99,7 +99,7 @@ def test_blackScholesCall_matches_known_value():
 @pytest.mark.unit
 def test_binomial_converges_to_black_scholes():
     """European call: Binomial (100 steps) ≈ Black-Scholes."""
-    from dartlab.core.finance.optionValue import binomialOption, blackScholesCall
+    from dartlab.analysis.valuation.optionValue import binomialOption, blackScholesCall
 
     bs = blackScholesCall(S=50, K=50, T=1.0, r=0.05, sigma=0.25)
     bn = binomialOption(S=50, K=50, T=1.0, r=0.05, sigma=0.25, steps=100, kind="call", american=False)
@@ -151,7 +151,7 @@ def test_valuationSins_flags_control_synergy_overlap():
 @pytest.mark.unit
 def test_multiStageDcf_single_phase_equals_twoStage():
     """multiStageDcf(growthYears=[n], rates=[r]) 가 기존 twoStageDcf 와 동일."""
-    from dartlab.core.finance.dcf import multiStageDcf, twoStageDcf
+    from dartlab.analysis.valuation.dcf import multiStageDcf, twoStageDcf
 
     args = dict(baseFcf=100_000_000_000, terminalGrowthRate=3.0, wacc=10.0, netDebt=0, shares=1_000_000)
     old = twoStageDcf(growthYears=5, highGrowthRate=10.0, **args)
@@ -165,7 +165,7 @@ def test_multiStageDcf_single_phase_equals_twoStage():
 @pytest.mark.unit
 def test_multiStageDcf_threephase_pv_sum():
     """3-phase DCF: pvExplicit = Σ(phase_pv). phases 구조 검증."""
-    from dartlab.core.finance.dcf import multiStageDcf
+    from dartlab.analysis.valuation.dcf import multiStageDcf
 
     r = multiStageDcf(
         baseFcf=100_000_000_000,
@@ -184,7 +184,7 @@ def test_multiStageDcf_threephase_pv_sum():
 @pytest.mark.unit
 def test_multiStageDcf_tg_auto_correction():
     """영구성장률 ≥ WACC 이면 자동 보정."""
-    from dartlab.core.finance.dcf import multiStageDcf
+    from dartlab.analysis.valuation.dcf import multiStageDcf
 
     r = multiStageDcf(
         baseFcf=100_000_000_000,

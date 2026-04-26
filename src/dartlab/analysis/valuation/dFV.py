@@ -424,7 +424,7 @@ def _getBaseWACC(company: Any) -> float:
         pass
     # 2순위: sectorParams (기존 fallback)
     try:
-        from dartlab.core.finance.dcf import _getSectorParams
+        from dartlab.analysis.valuation.dcf import _getSectorParams
 
         si = getattr(company, "sector", None)
         params = _getSectorParams(si.sector if si else None, si.industryGroup if si else None) if si else None
@@ -567,7 +567,7 @@ def _calcLiquidationDetail(company: Any, overrides: dict) -> dict | None:
     """Damodaran 자산별 회수율 청산가치 (Dark Side Ch.9)."""
     try:
         from dartlab.analysis.financial._helpers import toDictBySnakeId
-        from dartlab.core.finance.dcf import liquidationValuation
+        from dartlab.analysis.valuation.dcf import liquidationValuation
     except ImportError:
         return None
 
@@ -915,7 +915,7 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
         multiStageDcf(...) 결과. 필수 데이터 (positive FCF / BS periods) 없으면 None.
     """
     try:
-        from dartlab.core.finance.dcf import multiStageDcf
+        from dartlab.analysis.valuation.dcf import multiStageDcf
         from dartlab.core.overrides import applyOverride
     except ImportError:
         return None

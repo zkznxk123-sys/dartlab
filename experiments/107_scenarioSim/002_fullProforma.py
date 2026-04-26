@@ -136,7 +136,7 @@ def main():
 
     from dartlab import Company
     from dartlab.core.finance.proforma import build_proforma
-    from dartlab.core.finance.dcf import dcfValuation
+    from dartlab.analysis.valuation.dcf import dcfValuation
 
     print("\n[1/5] 삼성전자 로드...")
     c = Company("005930")

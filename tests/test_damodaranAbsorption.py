@@ -104,7 +104,7 @@ def test_survivalWeight_distress_zone():
 
 @pytest.mark.requires_data
 def test_twoStageDcf_explicit_plus_terminal():
-    from dartlab.core.finance.dcf import twoStageDcf
+    from dartlab.analysis.valuation.dcf import twoStageDcf
 
     r = twoStageDcf(
         baseFcf=100_000_000_000,
@@ -125,7 +125,7 @@ def test_twoStageDcf_explicit_plus_terminal():
 @pytest.mark.requires_data
 def test_twoStageDcf_enforces_tg_lt_wacc():
     """영구성장률이 WACC 이상이면 자동 보정."""
-    from dartlab.core.finance.dcf import twoStageDcf
+    from dartlab.analysis.valuation.dcf import twoStageDcf
 
     r = twoStageDcf(
         baseFcf=100_000_000_000,
@@ -140,7 +140,7 @@ def test_twoStageDcf_enforces_tg_lt_wacc():
 
 @pytest.mark.requires_data
 def test_liquidationValuation_recovery_rates():
-    from dartlab.core.finance.dcf import liquidationValuation
+    from dartlab.analysis.valuation.dcf import liquidationValuation
 
     r = liquidationValuation(
         cash=100_000_000_000,

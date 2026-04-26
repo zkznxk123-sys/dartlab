@@ -193,7 +193,7 @@ def calcDcf(
         currency : str — 통화 (KRW | USD)
         overrideApplied : dict | None — 적용된 override (있으면)
     """
-    from dartlab.core.finance.dcf import dcfValuation
+    from dartlab.analysis.valuation.dcf import dcfValuation
     from dartlab.core.overrides import applyOverride
 
     ov = overrides or {}
@@ -286,7 +286,7 @@ def calcDdm(company: Any, *, basePeriod: str | None = None) -> dict | None:
         currency : str — 통화 (KRW | USD)
     """
     from dartlab.analysis.financial.capitalAllocation import calcDividendPolicy
-    from dartlab.core.finance.dcf import ddmValuation
+    from dartlab.analysis.valuation.dcf import ddmValuation
 
     series, shares, currency = _getSeriesAndShares(company)
     sp = _getSectorParams(company)
@@ -357,7 +357,7 @@ def calcRelativeValuation(company: Any, *, basePeriod: str | None = None) -> dic
         currentPrice : float | None — 현재 주가 (원)
         currency : str — 통화 (KRW | USD)
     """
-    from dartlab.core.finance.dcf import relativeValuation
+    from dartlab.analysis.valuation.dcf import relativeValuation
 
     series, shares, currency = _getSeriesAndShares(company)
     sp = _getSectorParams(company)
@@ -644,7 +644,7 @@ def calcReverseImplied(company: Any, *, basePeriod: str | None = None) -> dict |
         currentPrice : float | None — 현재 주가 (원)
         currency : str — 통화 (KRW | USD)
     """
-    from dartlab.core.finance.priceImplied import reverseImpliedGrowth
+    from dartlab.analysis.valuation.priceImplied import reverseImpliedGrowth
 
     series, shares, currency = _getSeriesAndShares(company)
     price = _fetchPriceContext(company)
@@ -683,7 +683,7 @@ def calcSensitivity(company: Any, *, basePeriod: str | None = None) -> dict | No
         currentPrice : float | None — 현재 주가 (원)
         currency : str — 통화 (KRW | USD)
     """
-    from dartlab.core.finance.dcf import sensitivityAnalysis
+    from dartlab.analysis.valuation.dcf import sensitivityAnalysis
 
     series, shares, currency = _getSeriesAndShares(company)
     sp = _getSectorParams(company)
@@ -848,7 +848,7 @@ def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> di
         warnings : list[str] — 경고 메시지
         technicalContext : dict | None — 기술적 분석 컨텍스트 (verdict, score, rsi)
     """
-    from dartlab.core.finance.dcf import fullValuation
+    from dartlab.analysis.valuation.dcf import fullValuation
 
     series, shares, currency = _getSeriesAndShares(company)
     if series is None:

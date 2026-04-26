@@ -83,7 +83,7 @@ def calcRealOptionsValue(
     S, K, rf, T = sk["S"], sk["K"], sk["rf"], sk["T"]
 
     # Black-Scholes (기본) / Binomial (american 조기행사 가능 시)
-    from dartlab.core.finance.optionValue import binomialOption, blackScholesCall
+    from dartlab.analysis.valuation.optionValue import binomialOption, blackScholesCall
 
     if optionType == "abandon":
         # put option (계속 vs 포기)

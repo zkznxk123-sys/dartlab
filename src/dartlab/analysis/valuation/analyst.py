@@ -31,7 +31,7 @@ if TYPE_CHECKING:
         SimulationResult,
         StressTestResult,
     )
-    from dartlab.core.finance.dcf import (
+    from dartlab.analysis.valuation.dcf import (
         DCFResult,
         DDMResult,
         RelativeValuationResult,
@@ -238,14 +238,14 @@ _LAZY_MAP: dict[str, tuple[str, str]] = {
     "simulateAllScenarios": ("dartlab.analysis.forecast.simulation", "simulateAllScenarios"),
     "monteCarloForecast": ("dartlab.analysis.forecast.simulation", "monteCarloForecast"),
     "stressTest": ("dartlab.analysis.forecast.simulation", "stressTest"),
-    "DCFResult": ("dartlab.core.finance.dcf", "DCFResult"),
-    "DDMResult": ("dartlab.core.finance.dcf", "DDMResult"),
-    "RelativeValuationResult": ("dartlab.core.finance.dcf", "RelativeValuationResult"),
-    "ValuationSummary": ("dartlab.core.finance.dcf", "ValuationSummary"),
-    "dcfValuation": ("dartlab.core.finance.dcf", "dcfValuation"),
-    "ddmValuation": ("dartlab.core.finance.dcf", "ddmValuation"),
-    "fullValuation": ("dartlab.core.finance.dcf", "fullValuation"),
-    "relativeValuation": ("dartlab.core.finance.dcf", "relativeValuation"),
+    "DCFResult": ("dartlab.analysis.valuation.dcf", "DCFResult"),
+    "DDMResult": ("dartlab.analysis.valuation.dcf", "DDMResult"),
+    "RelativeValuationResult": ("dartlab.analysis.valuation.dcf", "RelativeValuationResult"),
+    "ValuationSummary": ("dartlab.analysis.valuation.dcf", "ValuationSummary"),
+    "dcfValuation": ("dartlab.analysis.valuation.dcf", "dcfValuation"),
+    "ddmValuation": ("dartlab.analysis.valuation.dcf", "ddmValuation"),
+    "fullValuation": ("dartlab.analysis.valuation.dcf", "fullValuation"),
+    "relativeValuation": ("dartlab.analysis.valuation.dcf", "relativeValuation"),
 }
 
 

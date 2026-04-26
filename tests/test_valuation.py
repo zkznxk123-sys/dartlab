@@ -125,7 +125,7 @@ def sector_params():
 @pytest.mark.unit
 class TestDCF:
     def test_dcf_basic(self, sector_params):
-        from dartlab.core.finance.dcf import dcfValuation as dcf_valuation
+        from dartlab.analysis.valuation.dcf import dcfValuation as dcf_valuation
 
         result = dcf_valuation(
             HEALTHY_SERIES,
@@ -142,21 +142,21 @@ class TestDCF:
         assert result.discountRate == 10.0
 
     def test_dcf_no_shares(self, sector_params):
-        from dartlab.core.finance.dcf import dcfValuation as dcf_valuation
+        from dartlab.analysis.valuation.dcf import dcfValuation as dcf_valuation
 
         result = dcf_valuation(HEALTHY_SERIES, sectorParams=sector_params)
         assert result.enterpriseValue > 0
         assert result.perShareValue is None
 
     def test_dcf_empty_series(self, sector_params):
-        from dartlab.core.finance.dcf import dcfValuation as dcf_valuation
+        from dartlab.analysis.valuation.dcf import dcfValuation as dcf_valuation
 
         result = dcf_valuation({"IS": {}, "BS": {}, "CF": {}}, sectorParams=sector_params)
         assert len(result.warnings) > 0
         assert result.enterpriseValue == 0
 
     def test_dcf_repr(self, sector_params):
-        from dartlab.core.finance.dcf import dcfValuation as dcf_valuation
+        from dartlab.analysis.valuation.dcf import dcfValuation as dcf_valuation
 
         result = dcf_valuation(HEALTHY_SERIES, shares=1_000_000, sectorParams=sector_params)
         text = repr(result)
@@ -172,7 +172,7 @@ class TestDCF:
 @pytest.mark.unit
 class TestDDM:
     def test_ddm_with_dividends(self, sector_params):
-        from dartlab.core.finance.dcf import ddmValuation as ddm_valuation
+        from dartlab.analysis.valuation.dcf import ddmValuation as ddm_valuation
 
         result = ddm_valuation(
             HEALTHY_SERIES,
@@ -186,7 +186,7 @@ class TestDDM:
         assert result.dividendPerShare is not None
 
     def test_ddm_no_dividends(self, sector_params):
-        from dartlab.core.finance.dcf import ddmValuation as ddm_valuation
+        from dartlab.analysis.valuation.dcf import ddmValuation as ddm_valuation
 
         result = ddm_valuation(
             NO_DIVIDEND_SERIES,
@@ -197,7 +197,7 @@ class TestDDM:
         assert result.intrinsicValue is None
 
     def test_ddm_repr(self, sector_params):
-        from dartlab.core.finance.dcf import ddmValuation as ddm_valuation
+        from dartlab.analysis.valuation.dcf import ddmValuation as ddm_valuation
 
         result = ddm_valuation(HEALTHY_SERIES, shares=1_000_000, sectorParams=sector_params)
         text = repr(result)
@@ -212,7 +212,7 @@ class TestDDM:
 @pytest.mark.unit
 class TestRelativeValuation:
     def test_relative_basic(self, sector_params):
-        from dartlab.core.finance.dcf import relativeValuation as relative_valuation
+        from dartlab.analysis.valuation.dcf import relativeValuation as relative_valuation
 
         result = relative_valuation(
             HEALTHY_SERIES,
@@ -227,7 +227,7 @@ class TestRelativeValuation:
         assert result.consensusValue is not None
 
     def test_relative_no_market_cap(self, sector_params):
-        from dartlab.core.finance.dcf import relativeValuation as relative_valuation
+        from dartlab.analysis.valuation.dcf import relativeValuation as relative_valuation
 
         result = relative_valuation(
             HEALTHY_SERIES,
@@ -245,7 +245,7 @@ class TestRelativeValuation:
 @pytest.mark.unit
 class TestFullValuation:
     def test_full_valuation(self, sector_params):
-        from dartlab.core.finance.dcf import fullValuation as full_valuation
+        from dartlab.analysis.valuation.dcf import fullValuation as full_valuation
 
         result = full_valuation(
             HEALTHY_SERIES,
@@ -446,7 +446,7 @@ US_SERIES = _make_series(
 @pytest.mark.unit
 class TestUSDCurrency:
     def test_dcf_usd_repr(self, sector_params):
-        from dartlab.core.finance.dcf import dcfValuation
+        from dartlab.analysis.valuation.dcf import dcfValuation
 
         result = dcfValuation(US_SERIES, shares=1_000_000_000, sectorParams=sector_params)
         result.currency = "USD"
@@ -456,7 +456,7 @@ class TestUSDCurrency:
         assert "억" not in text
 
     def test_full_valuation_usd(self, sector_params):
-        from dartlab.core.finance.dcf import fullValuation
+        from dartlab.analysis.valuation.dcf import fullValuation
 
         result = fullValuation(US_SERIES, shares=1_000_000_000, sectorParams=sector_params, currency="USD")
         assert result.currency == "USD"
@@ -485,7 +485,7 @@ class TestUSDCurrency:
         assert "$" in text
 
     def test_krw_default(self, sector_params):
-        from dartlab.core.finance.dcf import fullValuation
+        from dartlab.analysis.valuation.dcf import fullValuation
 
         result = fullValuation(HEALTHY_SERIES, shares=1_000_000, sectorParams=sector_params)
         assert result.currency == "KRW"

@@ -440,7 +440,7 @@ def scenarioAnalysis(
         weightedValue : float | None — 확률가중 주당 적정가 (원)
         currentPrice : float | None — 현재 주가 (원)
     """
-    from dartlab.core.finance.dcf import DCFResult, dcfValuation
+    from dartlab.analysis.valuation.dcf import DCFResult, dcfValuation
 
     warnings: list[str] = []
     sp = sectorParams or SectorParams(
@@ -552,7 +552,7 @@ def sensitivityAnalysis(
         baseGrowth : float — 기준 영구성장률 (%)
         baseValue : float — 기준 주당 가치 (원)
     """
-    from dartlab.core.finance.dcf import dcfValuation
+    from dartlab.analysis.valuation.dcf import dcfValuation
 
     sp = sectorParams or SectorParams(
         discountRate=10.0,
