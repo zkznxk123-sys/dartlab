@@ -10,6 +10,7 @@
 	import { PRESETS, PRESETS_BY_ID, PRESET_CATEGORIES, type Preset } from '$lib/screener/presets';
 	import PresetCard from '$lib/screener/PresetCard.svelte';
 	import Sparkline from '$lib/screener/Sparkline.svelte';
+	import TreemapView from '$lib/components/industry/TreemapView.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -96,6 +97,8 @@
 	let sorts = $state<SortKey[]>([{ key: 'revenue', dir: 'desc' }]);
 	let activePreset = $state<string | null>(null);
 	let displayLimit = $state(500);
+	/** 결과 표시 모드 */
+	let viewMode = $state<'table' | 'treemap' | 'both'>('table');
 
 	// 데이터 join — ecosystem.nodes + prices-snapshot.data + priceTimeSeries (DuckDB derived)
 	const joinedNodes = $derived.by(() => {
@@ -457,6 +460,21 @@
 
 	const dataAsOf = $derived((data.meta as any)?.dataAsOf ?? null);
 
+	/** TreemapView colorFor — 산업 팔레트 그대로 사용 (기본 색상). */
+	function treemapColorFor(n: any): string {
+		return n?.color || '#94a3b8';
+	}
+
+	/** 트리맵에 보낼 nodes — 결과 회사들에 산업 색·매출 size 부여. */
+	const treemapNodes = $derived.by(() => {
+		const indColor = new Map<string, string>(industries.map((i) => [i.id, i.color]));
+		return results.map((n) => ({
+			...n,
+			isIndustry: false,
+			color: indColor.get(String(n.industry)) || '#94a3b8'
+		}));
+	});
+
 	/** 결과 요약 — 산업 Top3 + 평균 메트릭 (사용자가 결과 분포·집중을 즉시 인지). */
 	const resultSummary = $derived.by(() => {
 		if (results.length === 0) return null;
@@ -785,13 +803,37 @@
 			<strong class="count">{results.length.toLocaleString()}</strong>
 			<span class="count-sub">사 통과 / {joinedNodes.length.toLocaleString()} 사 중</span>
 		</div>
+		<div class="view-toggle">
+			<button type="button" class="vt-btn" class:on={viewMode === 'table'} onclick={() => (viewMode = 'table')}>테이블</button>
+			<button type="button" class="vt-btn" class:on={viewMode === 'treemap'} onclick={() => (viewMode = 'treemap')}>트리맵</button>
+			<button type="button" class="vt-btn" class:on={viewMode === 'both'} onclick={() => (viewMode = 'both')}>둘 다</button>
+		</div>
 		<div class="action-btns">
 			<button type="button" class="btn ghost" onclick={shareUrl}>URL 복사</button>
 			<button type="button" class="btn primary" onclick={exportCsv}>CSV 다운로드 (전체)</button>
 		</div>
 	</section>
 
+	<!-- 결과 트리맵 (viewMode = treemap | both) -->
+	{#if viewMode !== 'table' && results.length > 0}
+		<section class="result-treemap">
+			<TreemapView
+				nodes={treemapNodes}
+				industries={industries}
+				colorMetric="industry"
+				colorFor={treemapColorFor}
+				sizeMetric="revenue"
+				onNodeClick={(n) => {
+					if (n?.id) {
+						window.open(`${base}/map?focus=${n.id}`, '_blank', 'noopener');
+					}
+				}}
+			/>
+		</section>
+	{/if}
+
 	<!-- 결과 테이블 -->
+	{#if viewMode !== 'treemap'}
 	<section class="result">
 		<div class="table-wrap">
 			<table>
@@ -874,6 +916,7 @@
 			<div class="empty">조건에 부합하는 회사가 없습니다. 조건을 완화해 보세요.</div>
 		{/if}
 	</section>
+	{/if}
 
 	<footer class="foot">
 		<p class="note">
@@ -1232,6 +1275,43 @@
 		margin-left: 6px;
 	}
 	.action-btns { display: flex; gap: 8px; }
+
+	/* 결과 모드 토글 */
+	.view-toggle {
+		display: flex;
+		gap: 0;
+		background: #050811;
+		border: 1px solid #1e2433;
+		border-radius: 6px;
+		padding: 2px;
+	}
+	.vt-btn {
+		padding: 6px 12px;
+		background: transparent;
+		border: none;
+		border-radius: 4px;
+		color: #94a3b8;
+		font-size: 11px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background 0.12s, color 0.12s;
+	}
+	.vt-btn:hover { color: #f1f5f9; }
+	.vt-btn.on {
+		background: rgba(96, 165, 250, 0.18);
+		color: #f1f5f9;
+	}
+
+	/* 결과 트리맵 */
+	.result-treemap {
+		height: 60vh;
+		min-height: 400px;
+		background: #0b1120;
+		border: 1px solid #1e2433;
+		border-radius: 10px;
+		overflow: hidden;
+		margin-bottom: 12px;
+	}
 	.btn {
 		padding: 8px 14px;
 		border-radius: 6px;
