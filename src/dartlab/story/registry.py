@@ -498,6 +498,278 @@ def _buildScorecardBlocks(company, keys, basePeriod, safe: Callable, need: Calla
         out["summaryFlags"] = safe(lambda: summaryFlagsBlock(calcSummaryFlags(company, basePeriod=basePeriod)))
 
 
+def _buildIndustryBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """업종별 KPI + 산업 밸류체인 (4 블록)."""
+    if keys is not None and not (keys & {"sectorKpi", "chainPosition", "sectorMetrics", "sectorOutlook"}):
+        return
+    if need("sectorKpi"):
+        from dartlab.analysis.financial.sectorKpi import sectorKpi as _sectorKpi
+        from dartlab.story.builders import sectorKpiBlock
+
+        out["sectorKpi"] = safe(lambda: sectorKpiBlock(_sectorKpi(company)))
+
+    if keys is None or keys & {"chainPosition", "sectorMetrics", "sectorOutlook"}:
+        from dartlab.industry.calcs import calcChainPosition, calcSectorCycle, calcSectorDynamics, calcSectorMetrics
+        from dartlab.story.builders import chainPositionBlock, sectorMetricsBlock, sectorOutlookBlock
+
+        if need("chainPosition"):
+            out["chainPosition"] = safe(lambda: chainPositionBlock(calcChainPosition(company)))
+        if need("sectorMetrics"):
+            out["sectorMetrics"] = safe(lambda: sectorMetricsBlock(calcSectorMetrics(company)))
+        if need("sectorOutlook"):
+            out["sectorOutlook"] = safe(
+                lambda: sectorOutlookBlock(calcSectorCycle(company), calcSectorDynamics(company))
+            )
+
+
+def _buildEarningsQualityBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """3 부 — 이익품질 (6 블록)."""
+    if keys is not None and not (
+        keys
+        & {
+            "accrualAnalysis",
+            "earningsPersistence",
+            "beneishMScore",
+            "richardsonAccrual",
+            "nonOperatingBreakdown",
+            "earningsQualityFlags",
+        }
+    ):
+        return
+    from dartlab.analysis.financial.earningsQuality import (
+        calcAccrualAnalysis,
+        calcBeneishTimeline,
+        calcEarningsPersistence,
+        calcEarningsQualityFlags,
+        calcNonOperatingBreakdown,
+        calcRichardsonAccrual,
+    )
+    from dartlab.story.builders import (
+        accrualAnalysisBlock,
+        beneishMScoreBlock,
+        earningsPersistenceBlock,
+        earningsQualityFlagsBlock,
+        nonOperatingBreakdownBlock,
+        richardsonAccrualBlock,
+    )
+
+    if need("accrualAnalysis"):
+        out["accrualAnalysis"] = safe(lambda: accrualAnalysisBlock(calcAccrualAnalysis(company, basePeriod=basePeriod)))
+    if need("earningsPersistence"):
+        out["earningsPersistence"] = safe(
+            lambda: earningsPersistenceBlock(calcEarningsPersistence(company, basePeriod=basePeriod))
+        )
+    if need("beneishMScore"):
+        out["beneishMScore"] = safe(lambda: beneishMScoreBlock(calcBeneishTimeline(company, basePeriod=basePeriod)))
+    if need("richardsonAccrual"):
+        out["richardsonAccrual"] = safe(
+            lambda: richardsonAccrualBlock(calcRichardsonAccrual(company, basePeriod=basePeriod))
+        )
+    if need("nonOperatingBreakdown"):
+        out["nonOperatingBreakdown"] = safe(
+            lambda: nonOperatingBreakdownBlock(calcNonOperatingBreakdown(company, basePeriod=basePeriod))
+        )
+    if need("earningsQualityFlags"):
+        out["earningsQualityFlags"] = safe(
+            lambda: earningsQualityFlagsBlock(calcEarningsQualityFlags(company, basePeriod=basePeriod))
+        )
+
+
+def _buildCostStructureBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """3 부 — 비용구조 (4 블록)."""
+    if keys is not None and not (
+        keys & {"costBreakdown", "operatingLeverage", "breakevenEstimate", "costStructureFlags"}
+    ):
+        return
+    from dartlab.analysis.financial.costStructure import (
+        calcBreakevenEstimate,
+        calcCostBreakdown,
+        calcCostStructureFlags,
+        calcOperatingLeverage,
+    )
+    from dartlab.story.builders import (
+        breakevenEstimateBlock,
+        costBreakdownBlock,
+        costStructureFlagsBlock,
+        operatingLeverageBlock,
+    )
+
+    if need("costBreakdown"):
+        out["costBreakdown"] = safe(lambda: costBreakdownBlock(calcCostBreakdown(company, basePeriod=basePeriod)))
+    if need("operatingLeverage"):
+        out["operatingLeverage"] = safe(
+            lambda: operatingLeverageBlock(calcOperatingLeverage(company, basePeriod=basePeriod))
+        )
+    if need("breakevenEstimate"):
+        out["breakevenEstimate"] = safe(
+            lambda: breakevenEstimateBlock(calcBreakevenEstimate(company, basePeriod=basePeriod))
+        )
+    if need("costStructureFlags"):
+        out["costStructureFlags"] = safe(
+            lambda: costStructureFlagsBlock(calcCostStructureFlags(company, basePeriod=basePeriod))
+        )
+
+
+def _buildCapitalAllocationBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """3 부 — 자본배분 (8 블록 — div/sh 결과 캐시 공유)."""
+    if keys is not None and not (
+        keys
+        & {
+            "dividendPolicy",
+            "shareholderReturn",
+            "reinvestment",
+            "fcfUsage",
+            "dividendSustainability",
+            "totalShareholderReturn",
+            "treasuryStockStatus",
+            "capitalAllocationFlags",
+        }
+    ):
+        return
+    from dartlab.analysis.financial.capitalAllocation import (
+        calcCapitalAllocationFlags,
+        calcDividendPolicy,
+        calcFcfUsage,
+        calcReinvestment,
+        calcShareholderReturn,
+        calcTreasuryStockStatus,
+    )
+    from dartlab.story.builders import (
+        capitalAllocationFlagsBlock,
+        dividendPolicyBlock,
+        dividendSustainabilityBlock,
+        fcfUsageBlock,
+        reinvestmentBlock,
+        shareholderReturnBlock,
+        totalShareholderReturnBlock,
+        treasuryStockStatusBlock,
+    )
+
+    _divCache: dict = {}
+    _shCache: dict = {}
+
+    def _getDiv():
+        if "v" not in _divCache:
+            _divCache["v"] = calcDividendPolicy(company, basePeriod=basePeriod)
+        return _divCache["v"]
+
+    def _getSh():
+        if "v" not in _shCache:
+            _shCache["v"] = calcShareholderReturn(company, basePeriod=basePeriod)
+        return _shCache["v"]
+
+    if need("dividendPolicy"):
+        out["dividendPolicy"] = safe(lambda: dividendPolicyBlock(_getDiv()))
+    if need("shareholderReturn"):
+        out["shareholderReturn"] = safe(lambda: shareholderReturnBlock(_getSh()))
+    if need("reinvestment"):
+        out["reinvestment"] = safe(lambda: reinvestmentBlock(calcReinvestment(company, basePeriod=basePeriod)))
+    if need("fcfUsage"):
+        out["fcfUsage"] = safe(lambda: fcfUsageBlock(calcFcfUsage(company, basePeriod=basePeriod)))
+    if need("dividendSustainability"):
+        out["dividendSustainability"] = safe(lambda: dividendSustainabilityBlock(_getDiv(), _getSh()))
+    if need("totalShareholderReturn"):
+        out["totalShareholderReturn"] = safe(lambda: totalShareholderReturnBlock(_getSh()))
+    if need("treasuryStockStatus"):
+        out["treasuryStockStatus"] = safe(
+            lambda: treasuryStockStatusBlock(calcTreasuryStockStatus(company, basePeriod=basePeriod))
+        )
+    if need("capitalAllocationFlags"):
+        out["capitalAllocationFlags"] = safe(
+            lambda: capitalAllocationFlagsBlock(calcCapitalAllocationFlags(company, basePeriod=basePeriod))
+        )
+
+
+def _buildInvestmentBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """3 부 — 투자효율 (4 블록)."""
+    if keys is not None and not (keys & {"roicTimeline", "investmentIntensity", "evaTimeline", "investmentFlags"}):
+        return
+    from dartlab.analysis.financial.investmentAnalysis import (
+        calcEvaTimeline,
+        calcInvestmentFlags,
+        calcInvestmentIntensity,
+        calcRoicTimeline,
+    )
+    from dartlab.story.builders import (
+        evaTimelineBlock,
+        investmentFlagsBlock,
+        investmentIntensityBlock,
+        roicTimelineBlock,
+    )
+
+    if need("roicTimeline"):
+        out["roicTimeline"] = safe(lambda: roicTimelineBlock(calcRoicTimeline(company, basePeriod=basePeriod)))
+    if need("investmentIntensity"):
+        out["investmentIntensity"] = safe(
+            lambda: investmentIntensityBlock(calcInvestmentIntensity(company, basePeriod=basePeriod))
+        )
+    if need("evaTimeline"):
+        out["evaTimeline"] = safe(lambda: evaTimelineBlock(calcEvaTimeline(company, basePeriod=basePeriod)))
+    if need("investmentFlags"):
+        out["investmentFlags"] = safe(lambda: investmentFlagsBlock(calcInvestmentFlags(company, basePeriod=basePeriod)))
+
+
+def _buildCrossStatementBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """3 부 — 재무정합성 + 세무 (7 블록)."""
+    if keys is not None and not (
+        keys
+        & {
+            "isCfDivergence",
+            "isBsDivergence",
+            "anomalyScore",
+            "articulationCheck",
+            "effectiveTaxRate",
+            "deferredTax",
+            "crossStatementFlags",
+        }
+    ):
+        return
+    from dartlab.analysis.financial.crossStatement import (
+        calcAnomalyScore,
+        calcArticulationCheck,
+        calcCrossStatementFlags,
+        calcIsBsDivergence,
+        calcIsCfDivergence,
+    )
+    from dartlab.analysis.financial.taxAnalysis import (
+        calcDeferredTax,
+        calcEffectiveTaxRate,
+        calcTaxFlags,
+    )
+    from dartlab.story.builders import (
+        anomalyScoreBlock,
+        articulationCheckBlock,
+        crossStatementFlagsBlock,
+        deferredTaxBlock,
+        effectiveTaxRateBlock,
+        isBsDivergenceBlock,
+        isCfDivergenceBlock,
+    )
+
+    if need("isCfDivergence"):
+        out["isCfDivergence"] = safe(lambda: isCfDivergenceBlock(calcIsCfDivergence(company, basePeriod=basePeriod)))
+    if need("isBsDivergence"):
+        out["isBsDivergence"] = safe(lambda: isBsDivergenceBlock(calcIsBsDivergence(company, basePeriod=basePeriod)))
+    if need("anomalyScore"):
+        out["anomalyScore"] = safe(lambda: anomalyScoreBlock(calcAnomalyScore(company, basePeriod=basePeriod)))
+    if need("articulationCheck"):
+        out["articulationCheck"] = safe(
+            lambda: articulationCheckBlock(calcArticulationCheck(company, basePeriod=basePeriod))
+        )
+    if need("effectiveTaxRate"):
+        out["effectiveTaxRate"] = safe(
+            lambda: effectiveTaxRateBlock(calcEffectiveTaxRate(company, basePeriod=basePeriod))
+        )
+    if need("deferredTax"):
+        out["deferredTax"] = safe(lambda: deferredTaxBlock(calcDeferredTax(company, basePeriod=basePeriod)))
+    if need("crossStatementFlags"):
+        out["crossStatementFlags"] = safe(
+            lambda: crossStatementFlagsBlock(
+                calcCrossStatementFlags(company, basePeriod=basePeriod) + calcTaxFlags(company, basePeriod=basePeriod)
+            )
+        )
+
+
 def buildBlocks(
     company,
     keys: set[str] | None = None,
@@ -535,247 +807,13 @@ def buildBlocks(
     _buildEfficiencyBlocks(company, keys, basePeriod, _safe, _need, b)
     _buildScorecardBlocks(company, keys, basePeriod, _safe, _need, b)
 
-    # ── 업종별 KPI (독립 조건) ──
-    if keys is None or keys & {"sectorKpi"}:
-        if _need("sectorKpi"):
-            from dartlab.analysis.financial.sectorKpi import sectorKpi as _sectorKpi
-            from dartlab.story.builders import sectorKpiBlock
-
-            b["sectorKpi"] = _safe(lambda: sectorKpiBlock(_sectorKpi(company)))
-
-    # ── 산업 밸류체인 (L2 industry 엔진) ──
-    if keys is None or keys & {"chainPosition", "sectorMetrics", "sectorOutlook"}:
-        from dartlab.industry.calcs import calcChainPosition, calcSectorCycle, calcSectorDynamics, calcSectorMetrics
-        from dartlab.story.builders import chainPositionBlock, sectorMetricsBlock, sectorOutlookBlock
-
-        if _need("chainPosition"):
-            b["chainPosition"] = _safe(lambda: chainPositionBlock(calcChainPosition(company)))
-        if _need("sectorMetrics"):
-            b["sectorMetrics"] = _safe(lambda: sectorMetricsBlock(calcSectorMetrics(company)))
-        if _need("sectorOutlook"):
-            b["sectorOutlook"] = _safe(
-                lambda: sectorOutlookBlock(calcSectorCycle(company), calcSectorDynamics(company))
-            )
-
-    # ── 3부: 심화 분석 ──
-    if keys is None or keys & {
-        "accrualAnalysis",
-        "earningsPersistence",
-        "beneishMScore",
-        "richardsonAccrual",
-        "nonOperatingBreakdown",
-        "earningsQualityFlags",
-    }:
-        from dartlab.analysis.financial.earningsQuality import (
-            calcAccrualAnalysis,
-            calcBeneishTimeline,
-            calcEarningsPersistence,
-            calcEarningsQualityFlags,
-            calcNonOperatingBreakdown,
-            calcRichardsonAccrual,
-        )
-        from dartlab.story.builders import (
-            accrualAnalysisBlock,
-            beneishMScoreBlock,
-            earningsPersistenceBlock,
-            earningsQualityFlagsBlock,
-            nonOperatingBreakdownBlock,
-            richardsonAccrualBlock,
-        )
-
-        if _need("accrualAnalysis"):
-            b["accrualAnalysis"] = _safe(
-                lambda: accrualAnalysisBlock(calcAccrualAnalysis(company, basePeriod=basePeriod))
-            )
-        if _need("earningsPersistence"):
-            b["earningsPersistence"] = _safe(
-                lambda: earningsPersistenceBlock(calcEarningsPersistence(company, basePeriod=basePeriod))
-            )
-        if _need("beneishMScore"):
-            b["beneishMScore"] = _safe(lambda: beneishMScoreBlock(calcBeneishTimeline(company, basePeriod=basePeriod)))
-        if _need("richardsonAccrual"):
-            b["richardsonAccrual"] = _safe(
-                lambda: richardsonAccrualBlock(calcRichardsonAccrual(company, basePeriod=basePeriod))
-            )
-        if _need("nonOperatingBreakdown"):
-            b["nonOperatingBreakdown"] = _safe(
-                lambda: nonOperatingBreakdownBlock(calcNonOperatingBreakdown(company, basePeriod=basePeriod))
-            )
-        if _need("earningsQualityFlags"):
-            b["earningsQualityFlags"] = _safe(
-                lambda: earningsQualityFlagsBlock(calcEarningsQualityFlags(company, basePeriod=basePeriod))
-            )
-
-    if keys is None or keys & {"costBreakdown", "operatingLeverage", "breakevenEstimate", "costStructureFlags"}:
-        from dartlab.analysis.financial.costStructure import (
-            calcBreakevenEstimate,
-            calcCostBreakdown,
-            calcCostStructureFlags,
-            calcOperatingLeverage,
-        )
-        from dartlab.story.builders import (
-            breakevenEstimateBlock,
-            costBreakdownBlock,
-            costStructureFlagsBlock,
-            operatingLeverageBlock,
-        )
-
-        if _need("costBreakdown"):
-            b["costBreakdown"] = _safe(lambda: costBreakdownBlock(calcCostBreakdown(company, basePeriod=basePeriod)))
-        if _need("operatingLeverage"):
-            b["operatingLeverage"] = _safe(
-                lambda: operatingLeverageBlock(calcOperatingLeverage(company, basePeriod=basePeriod))
-            )
-        if _need("breakevenEstimate"):
-            b["breakevenEstimate"] = _safe(
-                lambda: breakevenEstimateBlock(calcBreakevenEstimate(company, basePeriod=basePeriod))
-            )
-        if _need("costStructureFlags"):
-            b["costStructureFlags"] = _safe(
-                lambda: costStructureFlagsBlock(calcCostStructureFlags(company, basePeriod=basePeriod))
-            )
-
-    if keys is None or keys & {
-        "dividendPolicy",
-        "shareholderReturn",
-        "reinvestment",
-        "fcfUsage",
-        "capitalAllocationFlags",
-    }:
-        from dartlab.analysis.financial.capitalAllocation import (
-            calcCapitalAllocationFlags,
-            calcDividendPolicy,
-            calcFcfUsage,
-            calcReinvestment,
-            calcShareholderReturn,
-            calcTreasuryStockStatus,
-        )
-        from dartlab.story.builders import (
-            capitalAllocationFlagsBlock,
-            dividendPolicyBlock,
-            dividendSustainabilityBlock,
-            fcfUsageBlock,
-            reinvestmentBlock,
-            shareholderReturnBlock,
-            totalShareholderReturnBlock,
-            treasuryStockStatusBlock,
-        )
-
-        _divCache: dict = {}
-        _shCache: dict = {}
-
-        def _getDiv():
-            if "v" not in _divCache:
-                _divCache["v"] = calcDividendPolicy(company, basePeriod=basePeriod)
-            return _divCache["v"]
-
-        def _getSh():
-            if "v" not in _shCache:
-                _shCache["v"] = calcShareholderReturn(company, basePeriod=basePeriod)
-            return _shCache["v"]
-
-        if _need("dividendPolicy"):
-            b["dividendPolicy"] = _safe(lambda: dividendPolicyBlock(_getDiv()))
-        if _need("shareholderReturn"):
-            b["shareholderReturn"] = _safe(lambda: shareholderReturnBlock(_getSh()))
-        if _need("reinvestment"):
-            b["reinvestment"] = _safe(lambda: reinvestmentBlock(calcReinvestment(company, basePeriod=basePeriod)))
-        if _need("fcfUsage"):
-            b["fcfUsage"] = _safe(lambda: fcfUsageBlock(calcFcfUsage(company, basePeriod=basePeriod)))
-        if _need("dividendSustainability"):
-            b["dividendSustainability"] = _safe(lambda: dividendSustainabilityBlock(_getDiv(), _getSh()))
-        if _need("totalShareholderReturn"):
-            b["totalShareholderReturn"] = _safe(lambda: totalShareholderReturnBlock(_getSh()))
-        if _need("treasuryStockStatus"):
-            b["treasuryStockStatus"] = _safe(
-                lambda: treasuryStockStatusBlock(calcTreasuryStockStatus(company, basePeriod=basePeriod))
-            )
-        if _need("capitalAllocationFlags"):
-            b["capitalAllocationFlags"] = _safe(
-                lambda: capitalAllocationFlagsBlock(calcCapitalAllocationFlags(company, basePeriod=basePeriod))
-            )
-
-    if keys is None or keys & {"roicTimeline", "investmentIntensity", "evaTimeline", "investmentFlags"}:
-        from dartlab.analysis.financial.investmentAnalysis import (
-            calcEvaTimeline,
-            calcInvestmentFlags,
-            calcInvestmentIntensity,
-            calcRoicTimeline,
-        )
-        from dartlab.story.builders import (
-            evaTimelineBlock,
-            investmentFlagsBlock,
-            investmentIntensityBlock,
-            roicTimelineBlock,
-        )
-
-        if _need("roicTimeline"):
-            b["roicTimeline"] = _safe(lambda: roicTimelineBlock(calcRoicTimeline(company, basePeriod=basePeriod)))
-        if _need("investmentIntensity"):
-            b["investmentIntensity"] = _safe(
-                lambda: investmentIntensityBlock(calcInvestmentIntensity(company, basePeriod=basePeriod))
-            )
-        if _need("evaTimeline"):
-            b["evaTimeline"] = _safe(lambda: evaTimelineBlock(calcEvaTimeline(company, basePeriod=basePeriod)))
-        if _need("investmentFlags"):
-            b["investmentFlags"] = _safe(
-                lambda: investmentFlagsBlock(calcInvestmentFlags(company, basePeriod=basePeriod))
-            )
-
-    if keys is None or keys & {
-        "isCfDivergence",
-        "isBsDivergence",
-        "anomalyScore",
-        "articulationCheck",
-        "effectiveTaxRate",
-        "deferredTax",
-        "crossStatementFlags",
-    }:
-        from dartlab.analysis.financial.crossStatement import (
-            calcAnomalyScore,
-            calcArticulationCheck,
-            calcCrossStatementFlags,
-            calcIsBsDivergence,
-            calcIsCfDivergence,
-        )
-        from dartlab.analysis.financial.taxAnalysis import (
-            calcDeferredTax,
-            calcEffectiveTaxRate,
-            calcTaxFlags,
-        )
-        from dartlab.story.builders import (
-            anomalyScoreBlock,
-            articulationCheckBlock,
-            crossStatementFlagsBlock,
-            deferredTaxBlock,
-            effectiveTaxRateBlock,
-            isBsDivergenceBlock,
-            isCfDivergenceBlock,
-        )
-
-        if _need("isCfDivergence"):
-            b["isCfDivergence"] = _safe(lambda: isCfDivergenceBlock(calcIsCfDivergence(company, basePeriod=basePeriod)))
-        if _need("isBsDivergence"):
-            b["isBsDivergence"] = _safe(lambda: isBsDivergenceBlock(calcIsBsDivergence(company, basePeriod=basePeriod)))
-        if _need("anomalyScore"):
-            b["anomalyScore"] = _safe(lambda: anomalyScoreBlock(calcAnomalyScore(company, basePeriod=basePeriod)))
-        if _need("articulationCheck"):
-            b["articulationCheck"] = _safe(
-                lambda: articulationCheckBlock(calcArticulationCheck(company, basePeriod=basePeriod))
-            )
-        if _need("effectiveTaxRate"):
-            b["effectiveTaxRate"] = _safe(
-                lambda: effectiveTaxRateBlock(calcEffectiveTaxRate(company, basePeriod=basePeriod))
-            )
-        if _need("deferredTax"):
-            b["deferredTax"] = _safe(lambda: deferredTaxBlock(calcDeferredTax(company, basePeriod=basePeriod)))
-        if _need("crossStatementFlags"):
-            b["crossStatementFlags"] = _safe(
-                lambda: crossStatementFlagsBlock(
-                    calcCrossStatementFlags(company, basePeriod=basePeriod)
-                    + calcTaxFlags(company, basePeriod=basePeriod)
-                )
-            )
+    # ── 3부: 산업 + 심화 분석 ──
+    _buildIndustryBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildEarningsQualityBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildCostStructureBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildCapitalAllocationBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildInvestmentBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildCrossStatementBlocks(company, keys, basePeriod, _safe, _need, b)
 
     # ── 3-6: 신용평가 ──
     if keys is None or keys & {
