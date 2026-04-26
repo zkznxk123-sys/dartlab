@@ -1,10 +1,8 @@
 """EDINET 엔진 내부 Company 본체.
 
-DART/EDGAR Company와 동일한 구조를 제공한다.
-
-- docs: sections 수평화 (topic × period), filings
-- finance: BS/IS/CF/timeseries/ratios
-- 공개 인터페이스: index / show / trace
+DART/EDGAR Company 와 동일한 단일 진입 (``c.show(topic)``) 사상.
+``c.BS`` / ``c.finance`` / ``c.timeseries`` 같은 namespace · 단축 property 는
+Plan v10 정합성 위해 제공하지 않는다 — 모든 접근은 ``c.show()`` 경유.
 
 사용법::
 
@@ -14,7 +12,7 @@ DART/EDGAR Company와 동일한 구조를 제공한다.
     c.corpName                      # "トヨタ自動車株式会社"
     c.sections                      # sections 수평화 DataFrame
     c.show("riskFactors")           # 사업等のリスク
-    c.show("BS")                    # 재무상태표
+    c.show("BS")                    # 재무상태표 (XBRL 정규화)
 """
 
 from __future__ import annotations
@@ -84,7 +82,11 @@ _FINANCE_LABELS: dict[str, tuple[str, str]] = {
 
 
 class _DocsNamespace:
-    """docs namespace — pure docs source."""
+    """docs namespace — pure docs source.
+
+    내부 보조 namespace. 외부 사용자는 ``c.docs.X`` 직접 접근 대신
+    ``c.show(topic)`` 또는 ``c.sections`` (merged view) 사용.
+    """
 
     def __init__(self, company: Company):
         self._company = company
@@ -111,42 +113,8 @@ class _DocsNamespace:
         )
 
 
-class _FinanceNamespace:
-    """finance namespace — XBRL 재무 정규화."""
-
-    def __init__(self, company: Company):
-        self._company = company
-        self._timeseries: dict[str, pl.DataFrame] | None = None
-
-    def _loadTimeseries(self) -> dict[str, pl.DataFrame]:
-        # 초기 스캐폴딩: 빈 dict 반환
-        return {}
-
-    @property
-    def timeseries(self) -> dict[str, pl.DataFrame]:
-        """재무제표별 시계열 dict."""
-        if self._timeseries is None:
-            self._timeseries = self._loadTimeseries()
-        return self._timeseries
-
-    @property
-    def BS(self) -> pl.DataFrame | None:
-        """재무상태표."""
-        return self.timeseries.get("BS")
-
-    @property
-    def IS(self) -> pl.DataFrame | None:
-        """손익계산서."""
-        return self.timeseries.get("IS")
-
-    @property
-    def CF(self) -> pl.DataFrame | None:
-        """현금흐름표."""
-        return self.timeseries.get("CF")
-
-
 class Company:
-    """EDINET Company — docs/finance/profile namespace.
+    """EDINET Company — 단일 진입 ``c.show(topic)``.
 
     Args:
         edinetCode: EDINET 코드 (예: "E00001") 또는 증권코드 (예: "7203").
@@ -160,7 +128,7 @@ class Company:
         self._securitiesCode: str | None = None
 
         self.docs = _DocsNamespace(self)
-        self.finance = _FinanceNamespace(self)
+        self._financeTimeseries: dict[str, pl.DataFrame] | None = None
 
     def __repr__(self) -> str:
         name = self._corpName or self.edinetCode
@@ -185,6 +153,16 @@ class Company:
 
     # ── 공개 인터페이스 ──
 
+    def _loadFinanceTimeseries(self) -> dict[str, pl.DataFrame]:
+        """재무제표 시계열 (XBRL 정규화) lazy 로드.
+
+        초기 스캐폴딩: 빈 dict. 데이터 수집 완료 후 ``BS/IS/CF/CIS`` key 의
+        ``pl.DataFrame`` 으로 채움. 외부 사용자는 ``c.show("BS")`` 로 접근.
+        """
+        if self._financeTimeseries is None:
+            self._financeTimeseries = {}
+        return self._financeTimeseries
+
     def show(self, topic: str) -> pl.DataFrame | None:
         """topic별 데이터 표시.
 
@@ -196,9 +174,9 @@ class Company:
         """
         resolved = _TOPIC_ALIASES.get(topic, topic)
 
-        # finance topic
+        # finance topic — XBRL 시계열 dispatch
         if resolved in _FINANCE_TOPICS:
-            return getattr(self.finance, resolved, None)
+            return self._loadFinanceTimeseries().get(resolved)
 
         # docs topic
         secs = self.sections
@@ -254,20 +232,3 @@ class Company:
     def filings(self) -> list[dict[str, Any]]:
         """공시 목록 (초기 스캐폴딩: 빈 리스트)."""
         return []
-
-    # ── finance 바로가기 ──
-
-    @property
-    def BS(self) -> pl.DataFrame | None:
-        """재무상태표."""
-        return self.finance.BS
-
-    @property
-    def IS(self) -> pl.DataFrame | None:
-        """손익계산서."""
-        return self.finance.IS
-
-    @property
-    def CF(self) -> pl.DataFrame | None:
-        """현금흐름표."""
-        return self.finance.CF

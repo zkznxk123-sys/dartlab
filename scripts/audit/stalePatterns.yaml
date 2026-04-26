@@ -58,6 +58,18 @@ default_whitelist:
   - src/dartlab/providers/dart/company.py
   - src/dartlab/providers/edgar/company.py
   - src/dartlab/company.py
+  # EDINET company.py docstring 안에 폐기 안내 (anti-pattern note) — 사용자가
+  # 옛 API 라 오해 안 하도록 모듈 docstring 에 명시.
+  - src/dartlab/providers/edinet/company.py
+
+  # ── internal accessor (외부 노출 X) ──
+  # _finance_accessor.py 의 def BS/IS/CF 는 c.show('BS') 가 내부 호출하는 데이터
+  # 접근 layer. 공개 facade 의 폐기 property 와 다른 등급 — 외부 사용자 노출 X.
+  - src/dartlab/providers/dart/_finance_accessor.py
+  - src/dartlab/providers/edgar/_finance_accessor.py
+
+  # ── fixture mock (테스트 인프라) ──
+  - tests/conftest.py
 
 patterns:
   # ── review → story (v0.9.22 — 2026-04-25 마이그레이션) ────────────
@@ -187,6 +199,44 @@ patterns:
     regex: '\bc\.timeseries\b'
     severity: error
     message: "Plan v10: c.timeseries property 폐기. c.show(topic) + freq 토글 사용."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+
+  # ── Plan v10 — 폐기 property 정의 잔존 (call site 가 아닌 정의) ────
+  # call site (\bc\.BS\b 등) 만 잡으면 정의는 통과 — 미래에 다시 호출될 수 있음.
+  # 정의가 살아있다 = 사상 미적용. property 정의도 0 건이어야 한다.
+  - name: bs_property_def
+    regex: '^\s*def BS\s*\(\s*self'
+    severity: error
+    message: "Plan v10 P0: BS property 정의 폐기. _loadFinanceTimeseries() 내부 + show('BS') 경유."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+      - ops/code.md
+
+  - name: is_property_def
+    regex: '^\s*def IS\s*\(\s*self'
+    severity: error
+    message: "Plan v10 P0: IS property 정의 폐기. show('IS') 경유."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+      - ops/code.md
+
+  - name: cf_property_def
+    regex: '^\s*def CF\s*\(\s*self'
+    severity: error
+    message: "Plan v10 P0: CF property 정의 폐기. show('CF') 경유."
+    whitelist_paths:
+      - CHANGELOG.md
+      - ops/api-contract.md
+      - ops/code.md
+
+  - name: timeseries_property_def
+    regex: '^\s*def timeseries\s*\(\s*self'
+    severity: error
+    message: "Plan v10: timeseries property 정의 폐기. _loadFinanceTimeseries() 내부 호출."
     whitelist_paths:
       - CHANGELOG.md
       - ops/api-contract.md
