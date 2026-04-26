@@ -12,21 +12,21 @@ import numpy as np
 
 class TestClevelandProbit:
     def test_positive_spread_low_prob(self):
-        from dartlab.core.finance.regimeSwitching import clevelandProbit
+        from dartlab.macro.regimeSwitching import clevelandProbit
 
         r = clevelandProbit(2.0)
         assert r.probability < 0.1
         assert r.zone == "low"
 
     def test_negative_spread_high_prob(self):
-        from dartlab.core.finance.regimeSwitching import clevelandProbit
+        from dartlab.macro.regimeSwitching import clevelandProbit
 
         r = clevelandProbit(-0.5)
         assert r.probability > 0.3
         assert r.zone in ("moderate", "elevated")
 
     def test_zero_spread(self):
-        from dartlab.core.finance.regimeSwitching import clevelandProbit
+        from dartlab.macro.regimeSwitching import clevelandProbit
 
         r = clevelandProbit(0.0)
         assert 0.2 < r.probability < 0.4
@@ -34,21 +34,21 @@ class TestClevelandProbit:
 
 class TestSahmRule:
     def test_stable_unemployment(self):
-        from dartlab.core.finance.regimeSwitching import sahmRule
+        from dartlab.macro.regimeSwitching import sahmRule
 
         r = sahmRule([4.0] * 15)
         assert not r.triggered
         assert r.value == 0.0
 
     def test_rising_unemployment(self):
-        from dartlab.core.finance.regimeSwitching import sahmRule
+        from dartlab.macro.regimeSwitching import sahmRule
 
         series = [3.5] * 12 + [4.0, 4.2, 4.5]
         r = sahmRule(series)
         assert r.triggered or r.value >= 0.3
 
     def test_insufficient_data(self):
-        from dartlab.core.finance.regimeSwitching import sahmRule
+        from dartlab.macro.regimeSwitching import sahmRule
 
         r = sahmRule([4.0] * 5)
         assert r.zone == "normal"
@@ -56,14 +56,14 @@ class TestSahmRule:
 
 class TestConferenceBoardLEI:
     def test_basic_lei(self):
-        from dartlab.core.finance.regimeSwitching import conferenceBoardLEI
+        from dartlab.macro.regimeSwitching import conferenceBoardLEI
 
         r = conferenceBoardLEI({"avg_weekly_hours": 0.2, "sp500": 1.5, "term_spread": 1.8})
         assert r.level != 0
         assert r.signal in ("expansion", "caution", "recession_warning")
 
     def test_empty_components(self):
-        from dartlab.core.finance.regimeSwitching import conferenceBoardLEI
+        from dartlab.macro.regimeSwitching import conferenceBoardLEI
 
         r = conferenceBoardLEI({})
         assert r.signal == "caution"
@@ -71,7 +71,7 @@ class TestConferenceBoardLEI:
 
 class TestHamiltonRegime:
     def test_two_regime_separation(self):
-        from dartlab.core.finance.regimeSwitching import hamiltonRegime
+        from dartlab.macro.regimeSwitching import hamiltonRegime
 
         np.random.seed(42)
         y = np.concatenate([np.random.normal(3, 1, 50), np.random.normal(-1, 2, 20), np.random.normal(3, 1, 30)])
@@ -81,7 +81,7 @@ class TestHamiltonRegime:
         assert r.smoothedProbs[60, 1] > 0.7
 
     def test_short_series(self):
-        from dartlab.core.finance.regimeSwitching import hamiltonRegime
+        from dartlab.macro.regimeSwitching import hamiltonRegime
 
         r = hamiltonRegime([1.0, 2.0, 3.0])
         assert not r.converged
@@ -120,7 +120,7 @@ class TestNelsonSiegel:
 
 class TestGdpNowcast:
     def test_factor_extraction(self):
-        from dartlab.core.finance.nowcast import gdpNowcast
+        from dartlab.macro.nowcast import gdpNowcast
 
         np.random.seed(42)
         T = 60
@@ -133,7 +133,7 @@ class TestGdpNowcast:
         assert corr > 0.8
 
     def test_missing_data(self):
-        from dartlab.core.finance.nowcast import gdpNowcast
+        from dartlab.macro.nowcast import gdpNowcast
 
         np.random.seed(42)
         indicators = np.random.normal(0, 1, (40, 4))

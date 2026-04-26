@@ -104,7 +104,7 @@ out()
 out("### 2.1 Cleveland Fed 프로빗")
 out()
 
-from dartlab.core.finance.regimeSwitching import clevelandProbit, sahmRule
+from dartlab.macro.regimeSwitching import clevelandProbit, sahmRule
 
 spread_df = g.macro("T10Y3M")
 monthly = spread_df.group_by(pl.col("date").dt.truncate("1mo")).agg(pl.col("value").mean()).sort("date")
@@ -222,7 +222,7 @@ out()
 out("### 2.4 Hamilton Regime Switching")
 out()
 
-from dartlab.core.finance.regimeSwitching import hamiltonRegime
+from dartlab.macro.regimeSwitching import hamiltonRegime
 
 gdp_df = g.macro("A191RL1Q225SBEA")
 if gdp_df is not None and len(gdp_df) > 0:

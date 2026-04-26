@@ -221,8 +221,8 @@ def _addGrowthAtRisk(forecast_result: dict | None, liquidity: dict, as_of: str |
     if forecast_result is None:
         return
     try:
-        from dartlab.core.finance.growthAtRisk import growthAtRisk as _gar
         from dartlab.macro._helpers import fetch_series_list, get_gather
+        from dartlab.macro.growthAtRisk import growthAtRisk as _gar
 
         fci_data = liquidity.get("fci") if isinstance(liquidity, dict) else None
         fci_series = fci_data.get("history") if isinstance(fci_data, dict) else None

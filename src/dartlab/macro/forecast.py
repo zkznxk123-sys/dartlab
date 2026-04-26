@@ -12,8 +12,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from dartlab.core.finance.nowcast import gdpNowcast
-from dartlab.core.finance.regimeSwitching import clevelandProbit, conferenceBoardLEI, hamiltonRegime, sahmRule
+from dartlab.macro.nowcast import gdpNowcast
+from dartlab.macro.regimeSwitching import clevelandProbit, conferenceBoardLEI, hamiltonRegime, sahmRule
 
 
 def _fetch_forecast_data(market: str, as_of: str | None = None) -> dict[str, float | list | None]:
