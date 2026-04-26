@@ -6,9 +6,20 @@
 	import { fmtKrw, fmtKrwFromEok, fmtPrice } from '$lib/format/krw';
 	import { fmtPct } from '$lib/format/pct';
 	import type { Cond, Op, SortKey, MetricKey, MetricDef, ScreenerNode, PriceSnapshot, QueryPayload } from '$lib/screener/types';
+	import { loadDartDb, type DartDb } from '$lib/data/duckdb';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	// ── DuckDB 통한 KRX 일별 가격 시계열 query (lazy, background) ──
+	// PR-3: mount 시 백그라운드에서 DuckDB 로드 + HF parquet 등록 시작.
+	// ready 되면 currentVsMA20 / drawdown60d 같은 시계열 derived 메트릭 활성.
+	// 미지원 브라우저 (iOS Safari) 또는 미로드 시 메트릭 자동 비활성 — 다른 메트릭 그대로 사용 가능.
+	let dartDb: DartDb | null = $state(null);
+	let dbState: 'idle' | 'loading' | 'ready' | 'error' | 'unsupported' = $state('idle');
+	let dbError = $state('');
+	/** stockCode → { currentPrice, ma20, low60, high60 } from DuckDB */
+	let priceTimeSeries = $state<Map<string, { currentPrice: number; ma20: number | null; high60: number | null; low60: number | null }>>(new Map());
 
 	// 메트릭 정의 — PR-1 은 25 개 (점-시점 + 이미 박힌 시계열 derived).
 	// PR-2 부터 derived/composite/quarterly/timeseries modifier 추가.
@@ -40,6 +51,10 @@
 		{ key: 'return3m', label: '3M 수익률', group: 'price', type: 'number', unit: '%', signed: true, higherBetter: true },
 		{ key: 'return1y', label: '1Y 수익률', group: 'price', type: 'number', unit: '%', signed: true, higherBetter: true },
 		{ key: 'volatility1y', label: '1Y 변동성', group: 'price', type: 'number', unit: '%', higherBetter: false },
+		// 시계열 derived (DuckDB 가 KRX 일별을 query — PR-3 부터 활성)
+		{ key: 'currentVsMA20', label: '현재가 vs MA20', group: 'derived', type: 'number', unit: '%', signed: true, higherBetter: true },
+		{ key: 'drawdown60d', label: '60일 고점 대비', group: 'derived', type: 'number', unit: '%', signed: true, higherBetter: true },
+		{ key: 'recovery60d', label: '60일 저점 대비', group: 'derived', type: 'number', unit: '%', signed: true, higherBetter: true },
 		// 등급 (enum)
 		{ key: 'profGrade', label: '수익성 등급', group: 'income', type: 'enum', values: ['우수', '양호', '보통', '저수익', '적자'] },
 		{ key: 'debtGrade', label: '부채 등급', group: 'health', type: 'enum', values: ['안전', '관찰', '주의', '고위험'] },
@@ -67,14 +82,35 @@
 	let activePreset = $state<string | null>(null);
 	let displayLimit = $state(500);
 
-	// 데이터 join — ecosystem.nodes + prices-snapshot.data (stockCode 키)
+	// 데이터 join — ecosystem.nodes + prices-snapshot.data + priceTimeSeries (DuckDB derived)
 	const joinedNodes = $derived.by(() => {
 		const eco = (data.ecosystem as any)?.nodes ?? [];
 		const prices = ((data.pricesSnapshot as any)?.data ?? {}) as Record<string, PriceSnapshot>;
-		return eco.map((n: any) => ({
-			...n,
-			...(prices[n.id] ?? {})
-		})) as ScreenerNode[];
+		return eco.map((n: any) => {
+			const snap = prices[n.id] ?? {};
+			const ts = priceTimeSeries.get(n.id);
+			let currentVsMA20: number | null = null;
+			let drawdown60d: number | null = null;
+			let recovery60d: number | null = null;
+			if (ts) {
+				if (ts.ma20 && ts.ma20 > 0) {
+					currentVsMA20 = ((ts.currentPrice / ts.ma20) - 1) * 100;
+				}
+				if (ts.high60 && ts.high60 > 0) {
+					drawdown60d = ((ts.currentPrice / ts.high60) - 1) * 100;
+				}
+				if (ts.low60 && ts.low60 > 0) {
+					recovery60d = ((ts.currentPrice / ts.low60) - 1) * 100;
+				}
+			}
+			return {
+				...n,
+				...snap,
+				currentVsMA20,
+				drawdown60d,
+				recovery60d
+			};
+		}) as ScreenerNode[];
 	});
 
 	const industries = $derived(((data.ecosystem as any)?.industries ?? []) as Array<{ id: string; name: string; color: string; count?: number }>);
@@ -202,7 +238,77 @@
 		if (q) decodeQuery(q);
 		const preset = page.url.searchParams.get('preset');
 		if (preset) activePreset = preset;
+		// DuckDB lazy 로드 — 백그라운드, 비차단
+		void loadPriceTimeSeries();
 	});
+
+	/** DuckDB 통한 KRX 일별 가격 시계열 derived 메트릭 로드.
+	 * 매핑: 종목 → {currentPrice, ma20 (20일 이평), high60/low60 (60일 H/L)}.
+	 * 시계열 메트릭 (currentVsMA20, drawdown60d, recovery60d) 가 이 데이터 기반.
+	 */
+	async function loadPriceTimeSeries() {
+		dbState = 'loading';
+		try {
+			const db = await loadDartDb();
+			if (!db) {
+				dbState = 'unsupported';
+				return;
+			}
+			dartDb = db;
+			const year = new Date().getFullYear();
+			// 현재 연도 parquet 한 개만 우선 등록 (1Y 미만이면 last year 도 추후 union)
+			await db.registerHfParquet('krxPrices', `krx/prices/raw-${year}.parquet`);
+			// 종목별 최근 60거래일 종가에서 MA20, 60일 고점·저점 산출
+			const rows = await db.query<{ ISU_CD: string; currentPrice: number; ma20: number | null; high60: number | null; low60: number | null }>(`
+				WITH recent AS (
+					SELECT
+						ISU_CD,
+						BAS_DD,
+						CAST(TDD_CLSPRC AS DOUBLE) AS close,
+						CAST(TDD_HGPRC AS DOUBLE) AS high,
+						CAST(TDD_LWPRC AS DOUBLE) AS low,
+						ROW_NUMBER() OVER (PARTITION BY ISU_CD ORDER BY BAS_DD DESC) AS rn
+					FROM krxPrices
+				),
+				last60 AS (
+					SELECT * FROM recent WHERE rn <= 60
+				),
+				ma20 AS (
+					SELECT ISU_CD, AVG(close) AS ma20 FROM last60 WHERE rn <= 20 GROUP BY ISU_CD
+				),
+				latest AS (
+					SELECT ISU_CD, close AS currentPrice FROM last60 WHERE rn = 1
+				),
+				bounds AS (
+					SELECT ISU_CD, MAX(high) AS high60, MIN(low) AS low60 FROM last60 GROUP BY ISU_CD
+				)
+				SELECT
+					l.ISU_CD,
+					l.currentPrice,
+					m.ma20,
+					b.high60,
+					b.low60
+				FROM latest l
+				LEFT JOIN ma20 m USING (ISU_CD)
+				LEFT JOIN bounds b USING (ISU_CD)
+			`);
+			const map = new Map<string, { currentPrice: number; ma20: number | null; high60: number | null; low60: number | null }>();
+			for (const r of rows) {
+				map.set(r.ISU_CD, {
+					currentPrice: Number(r.currentPrice),
+					ma20: r.ma20 != null ? Number(r.ma20) : null,
+					high60: r.high60 != null ? Number(r.high60) : null,
+					low60: r.low60 != null ? Number(r.low60) : null
+				});
+			}
+			priceTimeSeries = map;
+			dbState = 'ready';
+		} catch (err) {
+			dbState = 'error';
+			dbError = err instanceof Error ? err.message : String(err);
+			console.warn('[screener] DuckDB 시계열 로드 실패', err);
+		}
+	}
 
 	function addCond() {
 		conds = [...conds, { metric: 'opMargin', op: '>=', value: 10 }];
@@ -314,9 +420,20 @@
 				재무 · 등급 · 가격 조건으로 자유롭게 조합 검색.
 			</p>
 		</div>
-		{#if dataAsOf}
-			<FreshnessBadge dataAsOf={dataAsOf} variant="compact" />
-		{/if}
+		<div class="head-right">
+			<span class="db-badge db-{dbState}" title={dbError || ''}>
+				<span class="db-dot"></span>
+				{#if dbState === 'idle'}대기
+				{:else if dbState === 'loading'}DuckDB 로드 중…
+				{:else if dbState === 'ready'}시계열 ON · {priceTimeSeries.size.toLocaleString()}사
+				{:else if dbState === 'unsupported'}시계열 OFF (iOS Safari)
+				{:else if dbState === 'error'}시계열 오류
+				{/if}
+			</span>
+			{#if dataAsOf}
+				<FreshnessBadge dataAsOf={dataAsOf} variant="compact" />
+			{/if}
+		</div>
 	</header>
 
 	<section class="builder">
@@ -377,6 +494,11 @@
 							</optgroup>
 							<optgroup label="가격·시총">
 								{#each METRICS.filter((m) => m.group === 'price') as opt}
+									<option value={opt.key}>{opt.label}</option>
+								{/each}
+							</optgroup>
+							<optgroup label="가격 시계열 (DuckDB)">
+								{#each METRICS.filter((m) => m.group === 'derived') as opt}
 									<option value={opt.key}>{opt.label}</option>
 								{/each}
 							</optgroup>
@@ -583,6 +705,44 @@
 		line-height: 1.5;
 	}
 	.lead strong { color: #f1f5f9; }
+
+	.head-right {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		align-items: flex-end;
+	}
+	.db-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 4px 10px;
+		font-size: 11px;
+		border-radius: 999px;
+		border: 1px solid #1e2433;
+		background: #0b1120;
+		color: #94a3b8;
+		font-family: monospace;
+		white-space: nowrap;
+	}
+	.db-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: #64748b;
+		flex-shrink: 0;
+	}
+	.db-badge.db-loading { color: #fbbf24; border-color: rgba(251, 191, 36, 0.4); }
+	.db-badge.db-loading .db-dot { background: #fbbf24; animation: pulse 1.4s ease-in-out infinite; }
+	.db-badge.db-ready { color: #34d399; border-color: rgba(52, 211, 153, 0.4); }
+	.db-badge.db-ready .db-dot { background: #34d399; }
+	.db-badge.db-unsupported { color: #94a3b8; }
+	.db-badge.db-error { color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+	.db-badge.db-error .db-dot { background: #f87171; }
+	@keyframes pulse {
+		0%, 100% { opacity: 0.4; }
+		50% { opacity: 1; }
+	}
 
 	.builder {
 		display: flex;

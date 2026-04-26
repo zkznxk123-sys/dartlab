@@ -118,6 +118,10 @@ export type MetricKey =
 	| 'fcfYield'
 	| 'ebitYield'
 	| 'roic'
+	// 가격 시계열 derived (DuckDB 가 KRX 일별 query — PR-3)
+	| 'currentVsMA20'
+	| 'drawdown60d'
+	| 'recovery60d'
 	// 분기 derived (frontend, PR-2)
 	| 'qoqRevenueGrowth'
 	| 'qoqOpProfitGrowth'
