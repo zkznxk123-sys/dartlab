@@ -80,10 +80,16 @@ def test_eachAxisFieldsNonEmpty(axis: str):
 
 @pytest.mark.parametrize("axis", sorted(_AXIS_REGISTRY))
 def test_eachAxisExampleMentionsAxisName(axis: str):
-    """example 문자열이 자기 axis 이름을 포함 — 복사붙여넣기 실수 차단."""
+    """example 문자열이 자기 axis 이름과 strict 일치 — 복사붙여넣기 실수 + alias 차단.
+
+    consistency_no_alias 원칙: registry key 와 example 의 axis 이름이 대소문자
+    포함 100% 일치해야 한다. ``krxindex`` registry 인데 example 이 ``krxIndex`` 면
+    같은 것을 두 이름으로 부르는 alias — 사용자가 어느 것이 정식인지 헷갈린다.
+    """
     entry = _AXIS_REGISTRY[axis]
-    # 대소문자 무시 (krxIndex 등 camelCase example 허용)
-    assert axis.lower() in entry.example.lower(), f"axis '{axis}' 의 example 이 자기 이름 미언급: {entry.example!r}"
+    assert axis in entry.example, (
+        f"axis '{axis}' 의 example 이 정식 이름과 strict 일치 안 됨 (대소문자 포함): {entry.example!r}"
+    )
 
 
 def test_aliasesPointToValidAxes():

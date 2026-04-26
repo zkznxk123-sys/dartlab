@@ -116,7 +116,8 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         targetType="columnName",
     ),
     # 미공개 — 데이터 준비 중. _guide() / __repr__ 에서 숨김. 내부 dispatch 는 동작.
-    "krxindex": _GatherAxisEntry(
+    # 정식 표기: krxIndex (camelCase, dartlab 표준 — 모듈/함수명과 일관).
+    "krxIndex": _GatherAxisEntry(
         label="KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지)",
         description=(
             "KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) "
@@ -144,7 +145,7 @@ _API_KEY_INFO: dict[str, str] = {
     "ownership": "불필요",
     "peers": "불필요",
     "krx": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX OpenAPI 직접 호출)",
-    "krxindex": "KRX_API_KEY (idx 카테고리 권한 별도 신청)",
+    "krxIndex": "KRX_API_KEY (idx 카테고리 권한 별도 신청)",
 }
 
 _ALIASES: dict[str, str] = {
@@ -231,30 +232,33 @@ def _fetchNaverIndex(symbol: str, count: int = 500) -> pl.DataFrame:
 
 
 def _resolveAxis(axis: str) -> str:
-    """축 이름/별칭 -> 정규 키.
+    """축 이름/한글 별칭 → 정규 키.
+
+    consistency_no_alias 원칙: registry key 와 ``_ALIASES`` 의 명시적 한글 매핑만
+    유효. case-insensitive lookup (예: ``"PRICE"`` → ``"price"``) 는 silent
+    alias 라 인정하지 않는다 — 사용자가 정식 표기 (``"price"``, ``"krxIndex"``)
+    를 정확히 쓰도록 유도.
 
     Parameters
     ----------
     axis : str
-        축 이름 또는 한글 별칭 (예: ``"price"``, ``"주가"``).
+        축 정식 이름 (registry key) 또는 명시 한글 별칭 (예: ``"price"``,
+        ``"주가"``, ``"krxIndex"``).
 
     Returns
     -------
     str
-        정규 축 키 (예: ``"price"``, ``"flow"``, ``"macro"``).
+        정규 축 키 (예: ``"price"``, ``"krxIndex"``).
 
     Raises
     ------
     ValueError
-        미등록 축 이름일 때.
+        미등록 축 이름 또는 case 불일치 (``"Price"``, ``"krxindex"``) 일 때.
     """
-    lower = axis.lower()
-    if lower in _AXIS_REGISTRY:
-        return lower
+    if axis in _AXIS_REGISTRY:
+        return axis
     if axis in _ALIASES:
         return _ALIASES[axis]
-    if lower in _ALIASES:
-        return _ALIASES[lower]
     available = ", ".join(sorted(_AXIS_REGISTRY))
     raise ValueError(
         f"알 수 없는 gather 축: '{axis}'. 가용 축: {available}\n"
