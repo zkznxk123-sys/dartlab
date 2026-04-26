@@ -47,14 +47,10 @@ from dartlab.providers.dart._docs_accessor import _DocsAccessor
 from dartlab.providers.dart._finance_accessor import _FinanceAccessor
 from dartlab.providers.dart._finance_helpers import (
     _RATIO_TEMPLATE_FIELDS,
-    _financeCisAnnual,
-    _financeCisQuarterly,
-    _financeToDataFrame,
     _ratioArchetypeOverrideForIndustryGroup,
     _ratioResultHasHeadlineSignal,
     _ratioSeriesToDataFrame,
     _ratioTemplateKeyForIndustryGroup,
-    _sceToDataFrame,
     _shouldFallbackToAnnualRatios,
 )
 from dartlab.providers.dart._profile_accessor import _ProfileAccessor
@@ -243,9 +239,6 @@ _TOPIC_LABELS: dict[str, str] = {
     "costByNature": "비용의 성격별 분류",
     "segments": "부문정보",
 }
-
-_RCEPT_NO_PATTERN = re.compile(r"[?&]rcpNo=(\d{14})")
-_QUARTER_COL_RE = re.compile(r"^(\d{4})Q[1-4]$")
 
 
 def listExportModules() -> list[tuple[str, str]]:
@@ -1167,152 +1160,55 @@ class Company:
         return payload if isinstance(payload, pl.DataFrame) else None
 
     def _sceMatrix(self):
-        if not self._hasFinance:
-            return None
-        cacheKey = "_sceMatrix_CFS"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
-        from dartlab.providers.dart.finance.pivot import buildSceMatrix
+        from dartlab.providers.dart._financeBuilders import sceMatrix
 
-        result = buildSceMatrix(self.stockCode)
-        self._cache[cacheKey] = result
-        return result
+        return sceMatrix(self)
 
     def _sceSeriesAnnual(self):
-        if not self._hasFinance:
-            return None
-        cacheKey = "_sceAnnual_CFS"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
-        from dartlab.providers.dart.finance.pivot import buildSceAnnual
+        from dartlab.providers.dart._financeBuilders import sceSeriesAnnual
 
-        result = buildSceAnnual(self.stockCode)
-        self._cache[cacheKey] = result
-        return result
+        return sceSeriesAnnual(self)
 
     def _sce(self) -> pl.DataFrame | None:
-        cacheKey = "_sceDataFrame_CFS"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
-        result = self._sceSeriesAnnual()
-        if result is None:
-            self._cache[cacheKey] = None
-            return None
-        series, years = result
-        df = _sceToDataFrame(series, years)
-        if df is not None:
-            # 컬럼 정렬: 메타 컬럼 + 연도 역순 (최신 → 과거) — IS/BS/CF 와 일관성
-            metaCols = [c for c in df.columns if not (c.isdigit() and len(c) == 4)]
-            yearCols = sorted([c for c in df.columns if c.isdigit() and len(c) == 4], reverse=True)
-            df = df.select(metaCols + yearCols)
-        self._cache[cacheKey] = df
-        return df
+        from dartlab.providers.dart._financeBuilders import sce
+
+        return sce(self)
 
     def _financeCisAnnual(self):
-        if not self._hasFinance:
-            return None
-        cacheKey = "_financeCISAnnual_CFS"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
-        result = _financeCisAnnual(self.stockCode, "CFS")
-        self._cache[cacheKey] = result
-        return result
+        from dartlab.providers.dart._financeBuilders import financeCisAnnual
+
+        return financeCisAnnual(self)
 
     def _financeCisQuarterly(self):
-        """CIS 분기별 시계열 (연간 합산 없이)."""
-        if not self._hasFinance:
-            return None
-        cacheKey = "_financeCISQuarterly_CFS"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
-        result = _financeCisQuarterly(self.stockCode, "CFS")
-        self._cache[cacheKey] = result
-        return result
+        from dartlab.providers.dart._financeBuilders import financeCisQuarterly
+
+        return financeCisQuarterly(self)
 
     def _ratioSeries(self):
-        if not self._hasFinance:
-            return None
-        cacheKey = "_ratioSeries_Q_CFS"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
-        qResult = self._buildFinanceSeries(freq="Q")
-        if qResult is None:
-            return None
-        qSeries, periods = qResult
-        # 2016-Q1 → 2016Q1 포맷 통일
-        normalizedPeriods = [p.replace("-", "") for p in periods]
-        from dartlab.core.finance.ratios import calcRatioSeries, toSeriesDict
+        from dartlab.providers.dart._financeBuilders import ratioSeries
 
-        archetypeOverride = _ratioArchetypeOverrideForIndustryGroup(getattr(self.sector, "industryGroup", None))
-        rs = calcRatioSeries(qSeries, normalizedPeriods, archetypeOverride=archetypeOverride, yoyLag=4)
-        result = toSeriesDict(rs)
-        self._cache[cacheKey] = result
-        return result
+        return ratioSeries(self)
 
     def _financeOrDocsStatement(
         self, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated"
     ) -> pl.DataFrame | None:
-        # CIS 는 별도 quarterly 캐시 — annual 은 4분기 합산 합성
-        if sjDiv == "CIS" and scope == "consolidated":
-            cisQ = self._financeCisQuarterly() if self._hasFinance else None
-            if cisQ is not None:
-                series, periods = cisQ
-                normalizedPeriods = [p.replace("-", "") for p in periods]
-                df = _financeToDataFrame(series, normalizedPeriods, "CIS")
-                if df is not None and freq == "Y":
-                    df = self._aggregateCisAnnual(df)
-                if df is not None:
-                    return df
-        df = self._financeStmt(sjDiv, freq=freq, scope=scope) if self._hasFinance else None
-        if df is not None:
-            return df
-        # docs fallback 은 분기 연결만 지원
-        if freq == "Q" and scope == "consolidated":
-            r = self._call_module("statements")
-            return getattr(r, sjDiv, None) if r else None
-        return None
+        from dartlab.providers.dart._financeBuilders import financeOrDocsStatement
+
+        return financeOrDocsStatement(self, sjDiv, freq=freq, scope=scope)
 
     # ── 재무제표 (property) ──
     # finance(XBRL) 우선 → docs fallback
 
     @staticmethod
     def _aggregateCisAnnual(qDf: pl.DataFrame) -> pl.DataFrame | None:
-        """CIS 분기 DataFrame → 연간 (4분기 합)."""
-        yearGroups: dict[str, list[str]] = {}
-        for col in qDf.columns:
-            m = _QUARTER_COL_RE.match(col)
-            if m:
-                yearGroups.setdefault(m.group(1), []).append(col)
-        if not yearGroups:
-            return None
-        # 4분기 모두 있는 연도만 합산 (strict)
-        years = sorted([y for y, qs in yearGroups.items() if len(qs) == 4], reverse=True)
-        if not years:
-            return None
-        metaCols = [c for c in qDf.columns if not _QUARTER_COL_RE.match(c)]
-        exprs = [pl.col(c) for c in metaCols]
-        for year in years:
-            qs = sorted(yearGroups[year])
-            exprs.append(pl.sum_horizontal([pl.col(q) for q in qs]).alias(year))
-        return qDf.select(exprs)
+        from dartlab.providers.dart._financeBuilders import aggregateCisAnnual
+
+        return aggregateCisAnnual(qDf)
 
     def _financeStmt(self, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated") -> pl.DataFrame | None:
-        """finance 시계열에서 sjDiv DataFrame 생성 (캐싱).
+        from dartlab.providers.dart._financeBuilders import financeStmt
 
-        Internal helper. show("IS", freq=, scope=) 진입점이 호출.
-        """
-        cacheKey = f"_financeStmt_{sjDiv}_{freq}_{scope}"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
-        qResult = self._buildFinanceSeries(freq=freq, scope=scope)
-        if qResult is None:
-            return None
-        series, periods = qResult
-        # 2016-Q1 → 2016Q1 포맷 통일
-        normalizedPeriods = [str(p).replace("-", "") for p in periods]
-        df = _financeToDataFrame(series, normalizedPeriods, sjDiv)
-        self._cache[cacheKey] = df
-        return df
+        return financeStmt(self, sjDiv, freq=freq, scope=scope)
 
     # c.BS / c.IS / c.CF / c.CIS property 제거 (Plan v10 P0 — api-contract).
     # 사용자는 c.show("IS") / c.show.IS() / c.show("IS", freq="Y", scope="separate") 사용.
@@ -3171,17 +3067,9 @@ class Company:
         사용자는 ``c.show("ratios")`` 호출. show() 가 finance topic dispatch 에서
         이 빌더를 호출.
         """
-        rs = self._ratioSeries()
-        if rs is None:
-            return None
-        series, periods = rs
-        df = _ratioSeriesToDataFrame(series, periods)
-        if df is not None:
-            metaCols = [c for c in df.columns if not _isPeriodColumn(c)]
-            periodCols = [c for c in df.columns if _isPeriodColumn(c)]
-            periodCols.sort(key=lambda p: (int(p[:4]), int(p[-1])), reverse=True)
-            df = df.select(metaCols + periodCols)
-        return df
+        from dartlab.providers.dart._financeBuilders import buildRatios
+
+        return buildRatios(self)
 
     def _buildFinanceSeries(self, *, freq: str = "Q", scope: str = "consolidated"):
         """[INTERNAL] finance series-tuple 빌더.
@@ -3199,15 +3087,9 @@ class Company:
         Returns:
             ``(series, periods)`` 또는 None.
         """
-        if freq not in ("Q", "Y", "YTD"):
-            raise ValueError(f"freq 는 'Q' / 'Y' / 'YTD' 중 하나여야 합니다 (받음: {freq!r})")
-        if scope not in ("consolidated", "separate"):
-            raise ValueError(f"scope 는 'consolidated' / 'separate' 중 하나여야 합니다 (받음: {scope!r})")
-        if not self._hasFinance:
-            return None
-        _periodMap = {"Q": "q", "Y": "y", "YTD": "cum"}
-        _scopeMap = {"consolidated": "CFS", "separate": "OFS"}
-        return self._getFinanceBuild(_periodMap[freq], _scopeMap[scope])
+        from dartlab.providers.dart._financeBuilders import buildFinanceSeries
+
+        return buildFinanceSeries(self, freq=freq, scope=scope)
 
     # c.SCE / c.sceMatrix / c.ratios / c.ratioSeries property 제거 (Plan v10 P1).
     # 사용자는 c.show("SCE") / c.show("sceMatrix") / c.show("ratios") /
