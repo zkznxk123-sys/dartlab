@@ -302,7 +302,7 @@
 		return String(a).localeCompare(String(b));
 	}
 
-	function evalCond(n: ScreenerNode, c: Cond): boolean {
+	function evalCondInner(n: ScreenerNode, c: Cond): boolean {
 		const v = (n as any)[c.metric];
 		if (v === null || v === undefined) return false;
 		// 등급/문자열 enum
@@ -327,6 +327,15 @@
 			return num >= lo && num <= hi;
 		}
 		return true;
+	}
+
+	function evalCond(n: ScreenerNode, c: Cond): boolean {
+		const result = evalCondInner(n, c);
+		return c.negate ? !result : result;
+	}
+
+	function toggleCondNegate(i: number) {
+		conds = conds.map((c, idx) => (idx === i ? { ...c, negate: !c.negate } : c));
 	}
 
 	const results = $derived.by(() => {
@@ -956,6 +965,14 @@
 							{/if}
 						{/if}
 
+						<button
+							type="button"
+							class="not-toggle"
+							class:on={c.negate}
+							onclick={() => toggleCondNegate(i)}
+							title="이 조건을 만족하지 않는 회사만 (NOT)"
+							aria-label="NOT 토글"
+						>NOT</button>
 						<button class="del" type="button" onclick={() => removeCond(i)} aria-label="조건 삭제">×</button>
 					</div>
 				{/each}
@@ -1472,6 +1489,28 @@
 	}
 	.del:hover {
 		background: rgba(239, 68, 68, 0.12);
+		color: #f87171;
+	}
+	.not-toggle {
+		padding: 4px 8px;
+		font-size: 10px;
+		font-weight: 700;
+		font-family: monospace;
+		letter-spacing: 0.04em;
+		background: transparent;
+		border: 1px solid #1e2433;
+		border-radius: 4px;
+		color: #64748b;
+		cursor: pointer;
+		transition: all 0.12s;
+	}
+	.not-toggle:hover {
+		border-color: #f87171;
+		color: #f87171;
+	}
+	.not-toggle.on {
+		background: rgba(239, 68, 68, 0.18);
+		border-color: rgba(239, 68, 68, 0.5);
 		color: #f87171;
 	}
 	.add {

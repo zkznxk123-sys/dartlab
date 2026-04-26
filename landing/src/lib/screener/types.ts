@@ -15,6 +15,8 @@ export interface Cond {
 	op: Op;
 	value: number | string;
 	value2?: number | string;
+	/** true 면 조건 결과 반전 (NOT). 기본 false. */
+	negate?: boolean;
 }
 
 /** 정렬 키 + 방향. */
