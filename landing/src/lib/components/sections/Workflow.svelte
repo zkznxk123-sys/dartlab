@@ -5,25 +5,25 @@
 		{
 			icon: Download,
 			step: '01',
-			title: 'Install',
-			desc: 'One line — uv add dartlab. No separate data preparation needed.',
+			title: '설치',
+			desc: '한 줄 — uv add dartlab. 별도 데이터 준비 불필요.',
 			code: '$ uv add dartlab',
 			color: 'text-dl-primary bg-dl-primary/10 border-dl-primary/20'
 		},
 		{
 			icon: Code2,
 			step: '02',
-			title: 'Create Company',
-			desc: 'Start from the public entrypoint. Missing data is auto-downloaded from HuggingFace.',
+			title: 'Company 생성',
+			desc: '공개 진입점에서 시작. 없는 데이터는 HuggingFace 에서 자동 다운로드.',
 			code: 'c = dartlab.Company("005930")',
 			color: 'text-dl-accent bg-dl-accent/10 border-dl-accent/20'
 		},
 		{
 			icon: LineChart,
 			step: '03',
-			title: 'sections = the company',
-			desc: 'One DataFrame with every topic and every period. show, diff, trace are just views on top.',
-			code: 'c.sections  # that\'s it',
+			title: 'sections = 회사',
+			desc: '모든 토픽 × 모든 기간이 담긴 단일 DataFrame. show · diff · trace 는 그 위의 뷰일 뿐.',
+			code: 'c.sections  # 끝',
 			color: 'text-dl-success bg-dl-success/10 border-dl-success/20'
 		}
 	];
@@ -32,9 +32,9 @@
 <section class="py-24 px-6 bg-dl-bg-darker/50">
 	<div class="max-w-5xl mx-auto">
 		<div class="text-center mb-16">
-			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">How it works</span>
-			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-4">From Stock Code to Company Map</h2>
-			<p class="text-dl-text-muted text-lg">No parser inventory first. Start from the company board.</p>
+			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">동작 방식</span>
+			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-4">종목코드에서 회사 지도까지</h2>
+			<p class="text-dl-text-muted text-lg">파서 목록을 먼저 보지 않는다. Company 보드에서 시작한다.</p>
 		</div>
 
 		<div class="grid md:grid-cols-3 gap-6">

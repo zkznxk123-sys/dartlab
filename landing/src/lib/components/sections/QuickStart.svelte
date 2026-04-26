@@ -22,7 +22,7 @@ c.show("CF")                    # 현금흐름표 — 문자열만 바꾸면 끝
 		<div class="text-center mb-12">
 			<span
 				class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block"
-				>Quick Start</span
+				>빠른 시작</span
 			>
 			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-4">3줄이면 끝</h2>
 			<p class="text-dl-text-muted text-lg">

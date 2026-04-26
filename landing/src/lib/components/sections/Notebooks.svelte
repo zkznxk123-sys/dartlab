@@ -16,7 +16,7 @@
 		{ slug: '05_analysis', title: 'analysis', subtitle: '14축 + 전망 · 가치평가' },
 		{ slug: '06_macro', title: 'macro', subtitle: '사이클 · 금리 · 자산' },
 		{ slug: '07_credit', title: 'credit', subtitle: 'dCR 7축 등급' },
-		{ slug: '08_review', title: 'review', subtitle: '구조화 보고서' },
+		{ slug: '08_story', title: 'story', subtitle: '구조화 보고서' },
 		{ slug: '09_ai', title: 'ai', subtitle: 'ask · chat' },
 		{ slug: '10_search', title: 'search', subtitle: '공시 검색' },
 		{ slug: '11_listing', title: 'listing', subtitle: '법인 · 공시 목록' }
@@ -43,7 +43,7 @@
 		<div class="text-center mb-12">
 			<span
 				class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block"
-				>Notebooks</span
+				>노트북</span
 			>
 			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-4">실습 노트북</h2>
 			<p class="text-dl-text-muted text-lg">

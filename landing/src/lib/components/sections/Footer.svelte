@@ -3,23 +3,23 @@
 	import { brand } from '$lib/brand';
 
 	const footerLinks = {
-		'Product': [
-			{ label: 'Getting Started', href: `${base}/docs/` },
-			{ label: 'API Reference', href: `${base}/docs/api/overview` },
-			{ label: 'Releases', href: `${brand.repo}/releases` },
+		'제품': [
+			{ label: '시작하기', href: `${base}/docs/` },
+			{ label: 'API 레퍼런스', href: `${base}/docs/api/overview` },
+			{ label: '릴리즈', href: `${brand.repo}/releases` },
 			{ label: 'PyPI', href: brand.pypi }
 		],
-		'Resources': [
-			{ label: 'Blog', href: `${base}/blog/` },
+		'리소스': [
+			{ label: '블로그', href: `${base}/blog/` },
 			{ label: 'GitHub', href: brand.repo },
-			{ label: 'Issues', href: `${brand.repo}/issues` },
-			{ label: 'Data', href: `${brand.repo}/releases/tag/${brand.data.docs.tag}` }
+			{ label: '이슈', href: `${brand.repo}/issues` },
+			{ label: '데이터셋', href: `https://huggingface.co/datasets/${brand.hfRepo}` }
 		],
-		'Community': [
-			{ label: 'YouTube', href: 'https://www.youtube.com/@eddmpython' },
-			{ label: 'Threads', href: 'https://www.threads.net/@eddmpython' },
-			{ label: 'Tistory', href: 'https://eddm.tistory.com' },
-			{ label: 'Email', href: 'mailto:eddmpython@gmail.com' }
+		'커뮤니티': [
+			{ label: 'YouTube · @eddmpython', href: brand.youtube },
+			{ label: 'Threads · @dartlab.ai', href: brand.threads },
+			{ label: 'Instagram · @dartlab.ai', href: brand.instagram },
+			{ label: '이메일', href: 'mailto:eddmpython@gmail.com' }
 		]
 	};
 </script>

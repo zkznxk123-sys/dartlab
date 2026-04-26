@@ -27,36 +27,36 @@
 
 	const homepageFaq: FaqItem[] = [
 		{
-			question: 'What is DartLab?',
-			answer: 'DartLab is an open-source Python library that turns corporate disclosure filings into structured, comparable data. It works with Korean DART and US SEC EDGAR — financial statements, narrative text, and structured reports through one unified interface, no PDF reading required.'
+			question: 'DartLab 이 무엇인가요?',
+			answer: 'DartLab 은 기업 공시를 구조화·비교 가능한 데이터로 만드는 오픈소스 Python 라이브러리입니다. 한국 DART 와 미국 SEC EDGAR 의 재무제표·서술 텍스트·정형 보고서를 하나의 통합 인터페이스로 다루며, PDF 를 직접 읽을 필요가 없습니다.'
 		},
 		{
-			question: 'Who is DartLab for?',
-			answer: 'Anyone who works with corporate disclosure data — investors comparing companies across periods, quants building financial models, researchers creating NLP datasets from filings, developers building financial applications, and AI builders who need structured company context for LLMs.'
+			question: 'DartLab 은 누구를 위한 도구인가요?',
+			answer: '기업 공시 데이터를 다루는 모든 사람 — 기간별로 회사를 비교하는 투자자, 재무 모델을 만드는 퀀트, 공시에서 NLP 데이터셋을 만드는 연구자, 금융 애플리케이션 개발자, LLM 에 구조화된 회사 컨텍스트가 필요한 AI 빌더.'
 		},
 		{
-			question: 'How is DartLab different from other financial data tools?',
-			answer: 'Most tools give you either financial numbers or document text, for either Korea or the US. DartLab combines all three data sources (docs, finance, reports) into one company map, aligns them across time periods, and works identically for both DART and EDGAR filings. trace() shows exactly where each data point came from.'
+			question: '다른 금융 데이터 도구와 무엇이 다른가요?',
+			answer: '대부분 도구는 재무 숫자 또는 문서 텍스트 중 하나만, 한국 또는 미국 중 한쪽만 다룹니다. DartLab 은 docs · finance · report 세 소스를 하나의 회사 지도로 결합하고, 기간으로 정렬하며, DART 와 EDGAR 모두 동일하게 동작합니다. trace() 로 모든 숫자의 출처가 드러납니다.'
 		},
 		{
-			question: 'Does it support EDGAR 10-K and 10-Q?',
-			answer: 'Yes. Use a ticker like dartlab.Company("AAPL") to analyze US 10-K/10-Q filings. Same interface as DART — sections, show, trace, diff, BS, IS, CF, ratios all work identically.'
+			question: 'EDGAR 10-K · 10-Q 도 지원하나요?',
+			answer: '지원합니다. dartlab.Company("AAPL") 처럼 티커를 넘기면 미국 10-K · 10-Q 분석이 가능합니다. DART 와 동일한 인터페이스 — sections · show · trace · diff · BS · IS · CF · ratios 모두 동일하게 동작합니다.'
 		},
 		{
-			question: 'Do I need to write code to use DartLab?',
-			answer: 'No. The CLI command "dartlab ask" lets you ask questions in natural language — e.g. dartlab ask "삼성전자 재무건전성 분석해줘". DartLab automatically structures company data and feeds it to an LLM. For deeper analysis and custom workflows, Python gives you full control.'
+			question: '코드를 짜야만 쓸 수 있나요?',
+			answer: '아닙니다. CLI 명령 "dartlab ask" 로 자연어 질문이 가능합니다 — 예: dartlab ask "삼성전자 재무건전성 분석해줘". DartLab 이 회사 데이터를 구조화해 자동으로 LLM 에 먹입니다. 심층 분석·커스텀 워크플로우는 Python 으로 가능합니다.'
 		},
 		{
 			question: '전자공시 분석 도구가 뭔가요?',
-			answer: 'DartLab은 DART 전자공시와 미국 SEC EDGAR 공시 문서를 자동으로 파싱하여 재무제표, 서술형 텍스트, 정형 보고서를 하나의 구조화된 회사 맵으로 만드는 오픈소스 Python 라이브러리입니다. 종목코드 하나로 한국과 미국 상장기업 데이터에 접근할 수 있습니다.'
+			answer: 'DartLab 은 DART 전자공시와 미국 SEC EDGAR 공시 문서를 자동 파싱해 재무제표 · 서술형 텍스트 · 정형 보고서를 하나의 구조화된 회사 맵으로 만드는 오픈소스 Python 라이브러리입니다. 종목코드 하나로 한국·미국 상장기업 데이터에 접근합니다.'
 		},
 		{
 			question: '사업보고서를 자동으로 분석할 수 있나요?',
-			answer: '네. DartLab은 사업보고서의 모든 섹션을 topic × period DataFrame으로 자동 구조화합니다. 연간, 반기, 분기 보고서를 기간별로 수평 비교할 수 있고, 재무제표, 배당, 임원현황, 부문정보 등 44개 모듈을 show() 한 줄로 조회합니다.'
+			answer: '네. DartLab 은 사업보고서의 모든 섹션을 topic × period DataFrame 으로 자동 구조화합니다. 연간 · 반기 · 분기 보고서를 기간별 수평 비교할 수 있고, 재무제표 · 배당 · 임원현황 · 부문정보 등 44 개 모듈을 show() 한 줄로 조회합니다.'
 		},
 		{
-			question: '재무제표 데이터를 Python으로 어떻게 가져오나요?',
-			answer: 'pip install dartlab 후 import dartlab; c = dartlab.Company("005930") 한 줄이면 삼성전자 재무제표에 접근할 수 있습니다. c.show("BS") 재무상태표, c.show("IS") 손익계산서, c.show("CF") 현금흐름표로 XBRL 정규화된 재무 데이터를 바로 사용합니다. 데이터는 자동 다운로드됩니다.'
+			question: '재무제표 데이터를 Python 으로 어떻게 가져오나요?',
+			answer: 'pip install dartlab 후 import dartlab; c = dartlab.Company("005930") 한 줄이면 삼성전자 재무제표에 접근할 수 있습니다. c.show("BS") 재무상태표, c.show("IS") 손익계산서, c.show("CF") 현금흐름표로 XBRL 정규화된 재무 데이터를 바로 씁니다. 데이터는 자동 다운로드됩니다.'
 		}
 	];
 
@@ -71,7 +71,7 @@
 
 <svelte:head>
 	<title>DartLab — {brand.description}</title>
-	<meta name="description" content="Every company tells its story in filings. DartLab makes it readable. One stock code turns Korean DART and US EDGAR filings into structured, comparable data — one line of Python." />
+	<meta name="description" content="기업의 이야기는 공시에 있다. DartLab 은 종목코드 하나로 한국 DART 와 미국 SEC EDGAR 공시를 구조화·비교 가능한 데이터로 만든다 — Python 한 줄." />
 	<meta name="keywords" content="DART, OpenDART, EDGAR, financial analysis, annual report, Python, Korean stocks, disclosure parsing, dartlab, sections, company analysis, financial data, 전자공시, 사업보고서, 재무제표, 공시분석, 다트, DART전자공시, 한국주식분석" />
 	<link rel="canonical" href="https://eddmpython.github.io/dartlab/" />
 

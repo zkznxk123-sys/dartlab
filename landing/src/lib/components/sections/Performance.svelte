@@ -3,66 +3,66 @@
 
 	const benchmarks = [
 		{
-			label: 'Company creation',
-			time: '~2s',
+			label: 'Company 생성',
+			time: '~2 초',
 			bar: 25,
-			detail: 'Data load + sections build'
+			detail: '데이터 로드 + sections 빌드'
 		},
 		{
-			label: 'sections query',
+			label: 'sections 쿼리',
 			time: '<100ms',
 			bar: 5,
-			detail: '329 topics × 106 periods instant'
+			detail: '329 토픽 × 106 기간 즉시'
 		},
 		{
 			label: 'show(topic)',
 			time: '<50ms',
 			bar: 3,
-			detail: 'Single topic block extraction'
+			detail: '단일 토픽 블록 추출'
 		},
 		{
 			label: 'BS / IS / CF',
 			time: '<100ms',
 			bar: 5,
-			detail: 'Normalized financial statements'
+			detail: '정규화된 재무제표'
 		},
 		{
-			label: 'ratios series',
+			label: 'ratios 시계열',
 			time: '<200ms',
 			bar: 10,
-			detail: 'TTM-based trailing calculation'
+			detail: 'TTM 기반 trailing 계산'
 		},
 		{
 			label: 'diff(topic)',
 			time: '<300ms',
 			bar: 15,
-			detail: 'Period-over-period text comparison'
+			detail: '기간 대비 텍스트 비교'
 		}
 	];
 
 	const techSpecs = [
-		{ label: 'Runtime', value: 'Polars (not Pandas)' },
-		{ label: 'Data format', value: 'Parquet (columnar)' },
-		{ label: 'Auto download', value: 'HuggingFace Datasets' },
-		{ label: 'Incremental', value: 'mtime-based delta sync' },
-		{ label: 'Cache', value: 'Company object reuse' },
-		{ label: 'Python', value: '3.12+ required' }
+		{ label: '런타임', value: 'Polars (Pandas 아님)' },
+		{ label: '데이터 포맷', value: 'Parquet (컬럼나)' },
+		{ label: '자동 다운로드', value: 'HuggingFace Datasets' },
+		{ label: '증분', value: 'mtime 기반 delta sync' },
+		{ label: '캐시', value: 'Company 객체 재사용' },
+		{ label: 'Python', value: '3.12+ 필요' }
 	];
 </script>
 
 <section class="py-24 px-6">
 	<div class="max-w-5xl mx-auto">
 		<div class="text-center mb-12">
-			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">Performance</span>
-			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-3">Fast Because It's Simple</h2>
-			<p class="text-dl-text-muted text-lg">Polars + Parquet + one structure = no unnecessary conversion</p>
+			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">성능</span>
+			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-3">단순하기 때문에 빠르다</h2>
+			<p class="text-dl-text-muted text-lg">Polars + Parquet + 단일 구조 = 불필요한 변환 0</p>
 		</div>
 
 		<div class="grid lg:grid-cols-5 gap-6">
 			<!-- Benchmark Bars -->
 			<div class="lg:col-span-3">
 				<div class="rounded-lg border border-dl-border bg-dl-bg-card/50 p-6">
-					<div class="text-xs font-mono text-dl-text-dim mb-5 uppercase tracking-wider">Response Time (Samsung Electronics)</div>
+					<div class="text-xs font-mono text-dl-text-dim mb-5 uppercase tracking-wider">응답 시간 (삼성전자)</div>
 					<div class="space-y-4">
 						{#each benchmarks as b}
 							<div>
@@ -86,7 +86,7 @@
 			<!-- Tech Specs -->
 			<div class="lg:col-span-2">
 				<Card hover={false}>
-					<div class="text-xs font-mono text-dl-text-dim mb-5 uppercase tracking-wider">Tech Stack</div>
+					<div class="text-xs font-mono text-dl-text-dim mb-5 uppercase tracking-wider">기술 스택</div>
 					<div class="space-y-3">
 						{#each techSpecs as spec}
 							<div class="flex items-start justify-between gap-3">
@@ -98,11 +98,11 @@
 				</Card>
 
 				<Card hover={false} class="mt-4">
-					<div class="text-xs font-mono text-dl-text-dim mb-3 uppercase tracking-wider">Why It's Fast</div>
+					<div class="text-xs font-mono text-dl-text-dim mb-3 uppercase tracking-wider">왜 빠른가</div>
 					<div class="space-y-2 text-sm text-dl-text-muted leading-relaxed">
-						<p><span class="text-dl-text font-medium">One structure.</span> All queries run on sections — no data conversion needed.</p>
-						<p><span class="text-dl-text font-medium">Polars.</span> 5-10x faster DataFrame operations than Pandas.</p>
-						<p><span class="text-dl-text font-medium">Parquet.</span> Columnar format reads only the columns you need.</p>
+						<p><span class="text-dl-text font-medium">단일 구조.</span> 모든 쿼리가 sections 위에서 실행 — 데이터 변환 불필요.</p>
+						<p><span class="text-dl-text font-medium">Polars.</span> Pandas 대비 5~10 배 빠른 DataFrame 연산.</p>
+						<p><span class="text-dl-text font-medium">Parquet.</span> 컬럼나 포맷 — 필요한 컬럼만 읽는다.</p>
 					</div>
 				</Card>
 			</div>

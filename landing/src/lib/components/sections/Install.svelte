@@ -6,7 +6,7 @@
 
 	const commands = [
 		{ label: 'uv', cmd: 'uv add dartlab', highlight: true },
-		{ label: 'AI analysis', cmd: 'uv add dartlab[ai] && uv run dartlab ai', highlight: false }
+		{ label: 'AI 분석', cmd: 'uv add dartlab[ai] && uv run dartlab ai', highlight: false }
 	];
 
 	async function copy(idx: number) {
@@ -19,9 +19,9 @@
 <section id="install" class="py-24 px-6">
 	<div class="mx-auto max-w-2xl">
 		<div class="text-center mb-12">
-			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">Get Started</span>
-			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-4">Installation</h2>
-			<p class="text-dl-text-muted text-lg">Start analyzing right after install</p>
+			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">시작하기</span>
+			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-4">설치</h2>
+			<p class="text-dl-text-muted text-lg">설치 직후 바로 분석 시작</p>
 		</div>
 
 		<div class="space-y-4">
@@ -58,10 +58,10 @@
 		</div>
 
 		<Card class="mt-8">
-			<div class="text-xs font-mono text-dl-primary mb-3">Auto Download</div>
+			<div class="text-xs font-mono text-dl-primary mb-3">자동 다운로드</div>
 			<p class="text-sm text-dl-text-muted leading-relaxed mb-4">
-				No separate data preparation needed. Pass a stock code and missing data is
-				<span class="text-dl-text">automatically downloaded from HuggingFace</span>.
+				별도 데이터 준비 불필요. 종목코드만 넘기면 없는 데이터는
+				<span class="text-dl-text">HuggingFace 에서 자동 다운로드</span>.
 			</p>
 			<div class="font-mono text-sm leading-7">
 				<div>
@@ -73,7 +73,7 @@
 				<div class="mt-1">
 					<span class="text-dl-text">c = </span>
 					<span class="text-cyan-400">Company</span><span class="text-dl-text-muted">(</span><span class="text-emerald-400">"005930"</span><span class="text-dl-text-muted">)</span>
-					<span class="text-dl-text-dim">&nbsp;&nbsp;# auto-downloads</span>
+					<span class="text-dl-text-dim">&nbsp;&nbsp;# 자동 다운로드</span>
 				</div>
 			</div>
 		</Card>

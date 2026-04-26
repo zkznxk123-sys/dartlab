@@ -6,21 +6,21 @@
 <section class="dl-map-cta" aria-labelledby="map-cta-title">
 	<div class="inner">
 		<div class="left">
-			<div class="kicker">Live Visualization</div>
-			<h2 id="map-cta-title">See how listed companies <br />are connected — in 10 seconds</h2>
+			<div class="kicker">실시간 시각화</div>
+			<h2 id="map-cta-title">전 상장사가 어떻게 <br />연결되는지 — 10초 안에</h2>
 			<p class="lead">
-				Every listed company · every industry · every supply-chain relationship on one screen.
-				Click a bubble to drill into an industry, select a company for 5-year financials,
-				supply-chain HHI, AI analysis, and deep-dive reports — all in a single card.
-				<strong>Automatic detection of sudden changes this fiscal year.</strong>
+				전 상장사 · 모든 산업 · 모든 공급망 관계를 한 화면에.
+				버블을 클릭해 산업으로 드릴다운, 종목을 선택해 5년 재무 ·
+				공급망 HHI · AI 분석 · 심층 보고서까지 카드 하나로.
+				<strong>이번 회계연도 급변동 자동 감지.</strong>
 			</p>
 			<div class="ctas">
-				<Button href="{base}/map">Open Industry Map →</Button>
-				<Button variant="secondary" href="{base}/changes">View Recent Changes</Button>
+				<Button href="{base}/map">산업지도 열기 →</Button>
+				<Button variant="secondary" href="{base}/changes">최근 변화 보기</Button>
 			</div>
 			<p class="disclaimer">
-				dartlab visualizes disclosure and financial data. Not investment advice.
-				Always cross-check with original DART filings and analyst reports.
+				dartlab 은 공시·재무 데이터를 시각화한다. 투자 자문 아님.
+				DART 원본 공시·애널리스트 리포트와 함께 검증할 것.
 			</p>
 		</div>
 		<div class="right">
@@ -49,9 +49,9 @@
 						</svg>
 					</div>
 					<div class="preview-chips">
-						<span class="chip g">● Data 3h ago</span>
-						<span class="chip n">Semiconductor · 348</span>
-						<span class="chip w">⚠ 12 sudden changes</span>
+						<span class="chip g">● 3시간 전 갱신</span>
+						<span class="chip n">반도체 · 348</span>
+						<span class="chip w">⚠ 급변동 12건</span>
 					</div>
 				</div>
 			</div>

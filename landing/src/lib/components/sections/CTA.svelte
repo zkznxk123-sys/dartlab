@@ -27,16 +27,16 @@
 						/>
 					</picture>
 				</div>
-				<h2 class="text-2xl md:text-3xl font-bold text-dl-text mb-3">Start Reading Companies, Not PDFs</h2>
+				<h2 class="text-2xl md:text-3xl font-bold text-dl-text mb-3">PDF 가 아니라 기업을 읽는다</h2>
 				<p class="text-dl-text-muted mb-3 text-lg">
-					One stock code. Every filing structured. Every period comparable.
+					종목코드 하나. 모든 공시 구조화. 모든 기간 비교 가능.
 				</p>
-				<p class="text-sm text-dl-text-dim mb-8">One line of Python gives you what used to take days of PDF reading.</p>
+				<p class="text-sm text-dl-text-dim mb-8">PDF 며칠 분량의 작업이 Python 한 줄로 끝난다.</p>
 
 				<div class="flex flex-wrap items-center justify-center gap-4">
 					<Button href={brand.desktop}>Windows 런처 →</Button>
-					<Button variant="secondary" href="#install">pip install</Button>
-					<Button variant="secondary" href="{base}/docs/">Documentation →</Button>
+					<Button variant="secondary" href={brand.colab}>Colab 열기</Button>
+					<Button variant="secondary" href={brand.molab}>Molab 열기</Button>
 				</div>
 			</div>
 		</div>

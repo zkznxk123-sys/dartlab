@@ -10,18 +10,18 @@
 			color: 'text-dl-accent',
 			bgColor: 'bg-dl-accent/10',
 			borderColor: 'border-dl-accent/30',
-			desc: 'Narrative structure, section boundaries, retrieval blocks',
+			desc: '서술 구조 · 섹션 경계 · retrieval 블록',
 			modules: [
-				{ name: 'sections', desc: 'topic × period horizontalization — the company map' },
-				{ name: 'retrievalBlocks', desc: 'RAG-ready text blocks' },
-				{ name: 'contextSlices', desc: 'Evidence layer slices' },
-				{ name: 'companyOverview', desc: 'Company overview' },
-				{ name: 'businessOverview', desc: 'Business description' },
-				{ name: 'riskManagement', desc: 'Risk management' },
-				{ name: 'auditOpinion', desc: 'Audit opinion' },
-				{ name: 'segments', desc: 'Segment information' },
-				{ name: 'salesOrder', desc: 'Sales performance' },
-				{ name: 'notes', desc: 'K-IFRS notes wrapper' }
+				{ name: 'sections', desc: '토픽 × 기간 수평화 — 회사 지도' },
+				{ name: 'retrievalBlocks', desc: 'RAG 용 텍스트 블록' },
+				{ name: 'contextSlices', desc: '증거 레이어 슬라이스' },
+				{ name: 'companyOverview', desc: '회사 개요' },
+				{ name: 'businessOverview', desc: '사업 내용' },
+				{ name: 'riskManagement', desc: '위험관리' },
+				{ name: 'auditOpinion', desc: '감사 의견' },
+				{ name: 'segments', desc: '부문 정보' },
+				{ name: 'salesOrder', desc: '영업 실적' },
+				{ name: 'notes', desc: 'K-IFRS 주석 래퍼' }
 			]
 		},
 		{
@@ -30,16 +30,16 @@
 			color: 'text-dl-primary',
 			bgColor: 'bg-dl-primary/10',
 			borderColor: 'border-dl-primary/30',
-			desc: 'Normalized statements, ratios, time series',
+			desc: '정규화된 재무제표 · 비율 · 시계열',
 			modules: [
-				{ name: 'BS', desc: 'Balance Sheet' },
-				{ name: 'IS', desc: 'Income Statement' },
-				{ name: 'CF', desc: 'Cash Flow Statement' },
-				{ name: 'CIS', desc: 'Comprehensive Income Statement' },
-				{ name: 'ratios', desc: 'Financial ratios time series' },
-				{ name: 'ratioSeries', desc: 'Individual ratio extraction' },
-				{ name: 'timeseries', desc: 'Single account time series' },
-				{ name: 'statements', desc: 'All statements unified view' }
+				{ name: 'BS', desc: '재무상태표' },
+				{ name: 'IS', desc: '손익계산서' },
+				{ name: 'CF', desc: '현금흐름표' },
+				{ name: 'CIS', desc: '포괄손익계산서' },
+				{ name: 'ratios', desc: '재무비율 시계열' },
+				{ name: 'ratioSeries', desc: '단일 비율 추출' },
+				{ name: 'timeseries', desc: '단일 계정 시계열' },
+				{ name: 'statements', desc: '전 재무제표 통합 뷰' }
 			]
 		},
 		{
@@ -48,18 +48,18 @@
 			color: 'text-dl-success',
 			bgColor: 'bg-dl-success/10',
 			borderColor: 'border-dl-success/30',
-			desc: 'Structured disclosure APIs — DART only',
+			desc: '정형 공시 API — DART 전용',
 			modules: [
-				{ name: 'audit', desc: 'Auditor and audit opinion' },
-				{ name: 'dividend', desc: 'Dividend information' },
-				{ name: 'employee', desc: 'Employee statistics' },
-				{ name: 'executive', desc: 'Executive roster' },
-				{ name: 'compensation', desc: 'Executive compensation' },
-				{ name: 'treasury', desc: 'Treasury shares' },
-				{ name: 'minority', desc: 'Minority shareholders' },
-				{ name: 'largestShareholder', desc: 'Largest shareholder' },
-				{ name: 'majorShareholder', desc: '5%+ shareholders' },
-				{ name: 'capital', desc: 'Capital increase/decrease' }
+				{ name: 'audit', desc: '감사인 · 감사 의견' },
+				{ name: 'dividend', desc: '배당 정보' },
+				{ name: 'employee', desc: '직원 통계' },
+				{ name: 'executive', desc: '임원 명단' },
+				{ name: 'compensation', desc: '임원 보수' },
+				{ name: 'treasury', desc: '자기주식' },
+				{ name: 'minority', desc: '소액주주' },
+				{ name: 'largestShareholder', desc: '최대주주' },
+				{ name: 'majorShareholder', desc: '5% 이상 주주' },
+				{ name: 'capital', desc: '증자 · 감자' }
 			]
 		},
 		{
@@ -68,32 +68,32 @@
 			color: 'text-dl-warning',
 			bgColor: 'bg-dl-warning/10',
 			borderColor: 'border-dl-warning/30',
-			desc: 'Cross-source analysis engines',
+			desc: '소스 횡단 분석 엔진',
 			modules: [
-				{ name: 'show(topic)', desc: 'Block index + data per topic' },
-				{ name: 'trace(topic)', desc: 'Source tracking (docs/finance/report)' },
-				{ name: 'diff(topic)', desc: 'Text change detection across periods' },
-				{ name: 'insights', desc: '7-area grading + outlier detection' },
-				{ name: 'market', desc: 'Market cap ranking' },
-				{ name: 'sector', desc: 'WICS sector classification' },
-				{ name: 'profile', desc: 'Merged company layer' },
-				{ name: 'index', desc: 'Full topic index' }
+				{ name: 'show(topic)', desc: '토픽별 블록 인덱스 + 데이터' },
+				{ name: 'trace(topic)', desc: '소스 추적 (docs/finance/report)' },
+				{ name: 'diff(topic)', desc: '기간 간 텍스트 변화 감지' },
+				{ name: 'insights', desc: '7 영역 등급 + 이상치 감지' },
+				{ name: 'market', desc: '시가총액 순위' },
+				{ name: 'sector', desc: 'WICS 섹터 분류' },
+				{ name: 'profile', desc: '머지된 Company 레이어' },
+				{ name: 'index', desc: '전체 토픽 인덱스' }
 			]
 		},
 		{
 			id: 'ai',
-			label: 'AI + tools',
+			label: 'AI + 도구',
 			color: 'text-purple-400',
 			bgColor: 'bg-purple-500/10',
 			borderColor: 'border-purple-500/30',
-			desc: 'LLM analysis, export, CLI, server',
+			desc: 'LLM 분석 · export · CLI · 서버',
 			modules: [
-				{ name: 'AI Analysis', desc: '7 providers (GPT, Claude, Ollama…)' },
-				{ name: 'Excel export', desc: 'Export all modules to Excel' },
-				{ name: 'Server API', desc: 'FastAPI 40+ endpoints' },
+				{ name: 'AI 분석', desc: '7 개 provider (GPT · Claude · Ollama…)' },
+				{ name: 'Excel export', desc: '전 모듈 Excel 내보내기' },
+				{ name: 'Server API', desc: 'FastAPI 40+ 엔드포인트' },
 				{ name: 'CLI', desc: 'ask · status · ai · excel' },
-				{ name: 'Desktop', desc: 'Windows GUI app' },
-				{ name: 'search', desc: 'Stock search (fuzzy match)' }
+				{ name: 'Desktop', desc: 'Windows GUI 앱' },
+				{ name: 'search', desc: '종목 검색 (퍼지 매칭)' }
 			]
 		}
 	];
@@ -102,9 +102,9 @@
 <section class="py-24 px-6">
 	<div class="max-w-5xl mx-auto">
 		<div class="text-center mb-12">
-			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">Module Catalog</span>
-			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-3">42 Modules, One Structure</h2>
-			<p class="text-dl-text-muted text-lg">All modules sit on the same sections spine. No separate schemas.</p>
+			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">모듈 카탈로그</span>
+			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-3">42 개 모듈, 단일 구조</h2>
+			<p class="text-dl-text-muted text-lg">모든 모듈이 같은 sections spine 위. 별도 스키마 0.</p>
 		</div>
 
 		<!-- Category Tabs -->
@@ -147,11 +147,11 @@
 			{/each}
 		</div>
 
-		<!-- Total Count -->
+		<!-- 총 모듈 수 -->
 		<div class="mt-8 text-center">
 			<Badge variant="success">
 				<span class="w-1.5 h-1.5 rounded-full bg-dl-success animate-pulse"></span>
-				{categories.reduce((sum, c) => sum + c.modules.length, 0)} modules on one sections spine
+				{categories.reduce((sum, c) => sum + c.modules.length, 0)} 개 모듈, 같은 sections spine 위
 			</Badge>
 		</div>
 	</div>

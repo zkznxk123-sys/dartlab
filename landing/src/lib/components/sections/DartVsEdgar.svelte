@@ -3,18 +3,18 @@
 	import { Badge } from '$lib/components/ui/badge';
 
 	const features = [
-		{ feature: 'sections horizontalization', dart: true, edgar: true },
+		{ feature: 'sections 수평화', dart: true, edgar: true },
 		{ feature: 'show(topic)', dart: true, edgar: true },
 		{ feature: 'trace(topic)', dart: true, edgar: true },
 		{ feature: 'diff(topic)', dart: true, edgar: true },
-		{ feature: 'BS · IS · CF normalization', dart: true, edgar: true },
-		{ feature: 'ratios time series', dart: true, edgar: true },
+		{ feature: 'BS · IS · CF 정규화', dart: true, edgar: true },
+		{ feature: '재무비율 시계열', dart: true, edgar: true },
 		{ feature: 'timeseries', dart: true, edgar: true },
-		{ feature: 'report API (28 types)', dart: true, edgar: false },
-		{ feature: 'insights (7-area grading)', dart: true, edgar: false },
-		{ feature: 'sector classification', dart: true, edgar: false },
-		{ feature: 'market ranking', dart: true, edgar: false },
-		{ feature: 'AI company analysis', dart: true, edgar: true },
+		{ feature: 'report API (28 종)', dart: true, edgar: false },
+		{ feature: 'insights (7 영역 등급)', dart: true, edgar: false },
+		{ feature: '섹터 분류', dart: true, edgar: false },
+		{ feature: '시가총액 순위', dart: true, edgar: false },
+		{ feature: 'AI 기업 분석', dart: true, edgar: true },
 		{ feature: 'Excel export', dart: true, edgar: true },
 		{ feature: 'Desktop GUI', dart: true, edgar: true }
 	];
@@ -26,9 +26,9 @@
 <section class="py-24 px-6">
 	<div class="max-w-4xl mx-auto">
 		<div class="text-center mb-12">
-			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">Coverage</span>
-			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-3">DART + EDGAR — Same Interface</h2>
-			<p class="text-dl-text-muted text-lg">Korean DART and US SEC EDGAR through one Company interface</p>
+			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">커버리지</span>
+			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-3">DART + EDGAR — 동일한 인터페이스</h2>
+			<p class="text-dl-text-muted text-lg">한국 DART 와 미국 SEC EDGAR 를 하나의 Company 인터페이스로</p>
 		</div>
 
 		<!-- Side-by-side code comparison -->
@@ -37,11 +37,11 @@
 				<span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
 				<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
 				<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-				<span class="ml-2 text-xs text-dl-text-dim font-mono">Same code, different markets</span>
+				<span class="ml-2 text-xs text-dl-text-dim font-mono">같은 코드, 다른 시장</span>
 			</div>
 			<div class="grid md:grid-cols-2 divide-x divide-dl-border/50">
 				<div class="p-4">
-					<div class="text-[10px] font-mono text-dl-primary uppercase tracking-wider mb-3">Korea (DART)</div>
+					<div class="text-[10px] font-mono text-dl-primary uppercase tracking-wider mb-3">한국 (DART)</div>
 					<pre class="font-mono text-xs text-dl-text-muted leading-relaxed"><code>c = Company(<span class="text-dl-primary">"005930"</span>)
 c.sections
 c.show(<span class="text-dl-primary">"businessOverview"</span>)

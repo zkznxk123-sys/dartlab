@@ -21,12 +21,12 @@
 			badge: 'accent' as const,
 			color: 'border-dl-accent/30',
 			items: [
-				'EDGAR Company (sections, finance)',
-				'insights (7-area grading)',
+				'EDGAR Company (sections · finance)',
+				'insights (7 영역 등급)',
 				'rank / sector',
 				'Excel export',
-				'Server API (FastAPI 40+ endpoints)',
-				'MCP server (60 tools)'
+				'Server API (FastAPI 40+ 엔드포인트)',
+				'MCP 서버 (60 도구)'
 			]
 		},
 		{
@@ -34,26 +34,26 @@
 			badge: 'warning' as const,
 			color: 'border-dl-warning/30',
 			items: [
-				'AI analysis (7 providers)',
+				'AI 분석 (7 provider)',
 				'AI GUI (Desktop)',
-				'Network scanner (new)'
+				'네트워크 스캐너 (신규)'
 			]
 		}
 	];
 
 	const roadmap = [
-		{ quarter: 'Now', label: 'v0.6', items: ['sections text structure', 'EDGAR sections 100%', 'Network scanner'] },
-		{ quarter: 'Next', label: 'v0.7', items: ['profile.sections merged view', 'TopicView implementation', 'show() completion'] },
-		{ quarter: 'Later', label: 'v0.8+', items: ['EDINET engine', 'AI GUI improvements', 'Rust pipeline (sections)'] }
+		{ quarter: '지금', label: 'v0.6', items: ['sections 텍스트 구조', 'EDGAR sections 100%', '네트워크 스캐너'] },
+		{ quarter: '다음', label: 'v0.7', items: ['profile.sections 머지 뷰', 'TopicView 구현', 'show() 완성'] },
+		{ quarter: '이후', label: 'v0.8+', items: ['EDINET 엔진', 'AI GUI 개선', 'Rust 파이프라인 (sections)'] }
 	];
 </script>
 
 <section class="py-24 px-6 bg-dl-bg-darker/50">
 	<div class="max-w-5xl mx-auto">
 		<div class="text-center mb-12">
-			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">Stability & Roadmap</span>
-			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-3">Transparent Stability Tiers</h2>
-			<p class="text-dl-text-muted text-lg">Clear about what's stable and what's experimental</p>
+			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">안정성 & 로드맵</span>
+			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-3">투명한 안정성 등급</h2>
+			<p class="text-dl-text-muted text-lg">무엇이 안정이고 무엇이 실험인지 명확히</p>
 		</div>
 
 		<!-- Stability Tiers -->
@@ -75,9 +75,9 @@
 			{/each}
 		</div>
 
-		<!-- Roadmap -->
+		<!-- 로드맵 -->
 		<div class="text-center mb-8">
-			<h3 class="text-xl font-bold text-dl-text">Roadmap</h3>
+			<h3 class="text-xl font-bold text-dl-text">로드맵</h3>
 		</div>
 
 		<div class="grid md:grid-cols-3 gap-4">
@@ -108,7 +108,7 @@
 
 		<div class="mt-6 text-center">
 			<a href="{base}/docs/stability" class="text-xs text-dl-text-dim hover:text-dl-text transition-colors no-underline">
-				Full stability documentation →
+				안정성 문서 전체 →
 			</a>
 		</div>
 	</div>

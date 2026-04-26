@@ -1,11 +1,11 @@
 <script lang="ts">
 	const features = [
-		{ title: 'Korean DART', desc: 'Every filing pre-structured' },
-		{ title: 'US EDGAR', desc: 'Same interface, different country' },
-		{ title: 'Account resolution', desc: 'One revenue, not dozens of variations' },
-		{ title: 'Section canonicals', desc: 'Every variant mapped to the same topic' },
-		{ title: 'Auto-structuring', desc: 'Raw filings to DataFrame. No cleaning.' },
-		{ title: 'Ratios precomputed', desc: 'Profitability, liquidity, valuation — ready on load' }
+		{ title: '한국 DART', desc: '모든 공시를 미리 구조화' },
+		{ title: '미국 SEC EDGAR', desc: '같은 인터페이스, 다른 나라' },
+		{ title: '계정 정규화', desc: '하나의 매출액, 수십 가지 변형 아님' },
+		{ title: '섹션 표준화', desc: '모든 변형을 같은 토픽으로 매핑' },
+		{ title: '자동 구조화', desc: '원본 공시 → DataFrame. 클렌징 불필요.' },
+		{ title: '비율 사전계산', desc: '수익성·유동성·가치평가 — 로드 시 준비 완료' }
 	];
 </script>
 
@@ -14,8 +14,8 @@
 
 	<div class="relative max-w-5xl mx-auto">
 		<div class="text-center mb-12">
-			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">What's Already Done</span>
-			<h2 class="text-3xl md:text-4xl font-bold text-dl-text">Already Structured, Ready to Use</h2>
+			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">이미 끝나 있는 것</span>
+			<h2 class="text-3xl md:text-4xl font-bold text-dl-text">구조화 완료, 바로 사용</h2>
 		</div>
 
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
