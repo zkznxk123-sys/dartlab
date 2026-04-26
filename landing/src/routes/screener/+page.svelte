@@ -21,7 +21,7 @@
 		newTabId,
 		type Workspace,
 		type ScreenerTab
-	} from '$lib/screener/workspace.ts';
+	} from '$lib/screener/workspace';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -301,6 +301,15 @@
 		} catch {
 			/* ignore bad query */
 		}
+	}
+
+	/** 결과 회사들을 산업지도에 highlight 로 표시 (양방향 링크). */
+	function openOnMap() {
+		if (results.length === 0) return;
+		// 최대 100개 회사 stockCode 를 URL hash 에 박아 /map 으로 보냄
+		const ids = results.slice(0, 100).map((n) => String(n.id)).join(',');
+		const url = `${base}/map?highlight=${ids}`;
+		window.open(url, '_blank', 'noopener');
 	}
 
 	function shareUrl() {
@@ -948,6 +957,7 @@
 		</div>
 		<div class="action-btns">
 			<button type="button" class="btn ghost" onclick={shareUrl}>URL 복사</button>
+			<button type="button" class="btn ghost" onclick={openOnMap} disabled={results.length === 0}>지도에 표시</button>
 			<button type="button" class="btn primary" onclick={exportCsv}>CSV 다운로드 (전체)</button>
 		</div>
 	</section>

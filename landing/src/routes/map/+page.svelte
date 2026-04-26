@@ -103,6 +103,21 @@
 		return m;
 	});
 
+	// 스크리너 → 지도 양방향: highlight 회사들의 산업별 카운트 (atlas 산업 펄스)
+	let highlightByIndustry = $derived.by(() => {
+		const m = new Map<string, number>();
+		if (highlightCompanies.size === 0) return m;
+		const stockToIndustry = new Map<string, string>();
+		for (const n of data.ecosystem?.nodes || []) {
+			if (n.id && n.industry) stockToIndustry.set(n.id, n.industry);
+		}
+		for (const code of highlightCompanies) {
+			const ind = stockToIndustry.get(code);
+			if (ind) m.set(ind, (m.get(ind) || 0) + 1);
+		}
+		return m;
+	});
+
 	// ── 뷰 모드 ──
 	// atlas: 34개 산업 노드 + 산업간 supplier flow (default)
 	// companies: 기존 ecosystem 전체 2,664사
@@ -742,12 +757,18 @@
 		}
 	}
 
-	// ── URL 쿼리 처리 (외부 진입: /map?focus=005930) ──
+	// ── URL 쿼리 처리 (외부 진입: /map?focus=005930, /map?highlight=001830,005930) ──
 	let urlHandled = $state(false);
+	/** /screener → /map 양방향 링크 — 결과 회사 stockCode set */
+	let highlightCompanies = $state<Set<string>>(new Set());
 	onMount(() => {
 		if (urlHandled) return;
 		const focus = page.url.searchParams.get('focus');
 		const cmp = page.url.searchParams.get('compare');
+		const highlight = page.url.searchParams.get('highlight');
+		if (highlight) {
+			highlightCompanies = new Set(highlight.split(',').filter(Boolean));
+		}
 		if (focus) {
 			if (isMobile) {
 				const n = nodeFinderById(focus);
@@ -1347,7 +1368,7 @@
 				{colorMetric}
 				timelineYear={selectedYear}
 				industryTotalsByYear={timelineIndustryTotals}
-				moversByIndustry={lens === 'changes' ? moversByIndustry : new Map()}
+				moversByIndustry={highlightByIndustry.size > 0 ? highlightByIndustry : (lens === 'changes' ? moversByIndustry : new Map())}
 			/>
 		{:else if viewMode === 'industry' && industryDetail}
 			<div class="drill-breadcrumb">
