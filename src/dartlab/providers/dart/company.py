@@ -24,7 +24,6 @@ pl.Config.set_fmt_str_lengths(80)
 pl.Config.set_tbl_width_chars(200)
 
 from dartlab.core.dataLoader import (
-    DART_VIEWER,
     buildIndex,
     extractCorpName,
     loadData,
@@ -69,7 +68,6 @@ from dartlab.providers.dart._utils import (
     _shapeString,
 )
 from dartlab.providers.dart.docs.notes import Notes
-from dartlab.providers.filingHelpers import filingRecord, filterFilingsByKeyword, resolveDateWindow, truncateText
 
 # 플러그인 등록 후 재구축 가능하도록 lazy 초기화
 _MODULE_REGISTRY: list[tuple[str, str, str, Any]] | None = None
@@ -646,36 +644,6 @@ class Company:
         """
         return buildIndex()
 
-    def _filings(self) -> pl.DataFrame:
-        """이 종목의 공시 문서 목록 + DART 뷰어 링크."""
-        if not self._hasDocs:
-            return pl.DataFrame(
-                schema={
-                    "year": pl.Utf8,
-                    "rceptDate": pl.Utf8,
-                    "rceptNo": pl.Utf8,
-                    "reportType": pl.Utf8,
-                    "dartUrl": pl.Utf8,
-                }
-            )
-        df = loadData(self.stockCode)
-        docs = (
-            df.select("year", "rcept_date", "rcept_no", "report_type")
-            .unique(subset=["rcept_no"])
-            .with_columns(
-                pl.lit(DART_VIEWER).add(pl.col("rcept_no")).alias("dartUrl"),
-            )
-            .rename(
-                {
-                    "report_type": "reportType",
-                    "rcept_date": "rceptDate",
-                    "rcept_no": "rceptNo",
-                }
-            )
-            .sort("year", "rceptDate", descending=[True, True])
-        )
-        return docs
-
     def filings(self) -> pl.DataFrame | None:
         """공시 문서 목록 + DART 뷰어 링크.
 
@@ -702,7 +670,9 @@ class Company:
         Requires:
             데이터: docs (자동 다운로드)
         """
-        return self._filings()
+        from dartlab.providers.dart._filings import buildFilings
+
+        return buildFilings(self)
 
     def update(self, *, categories: list[str] | None = None) -> dict[str, int]:
         """누락된 최신 공시를 증분 수집.
@@ -731,9 +701,9 @@ class Company:
         Requires:
             API 키: DART_API_KEY
         """
-        from dartlab.providers.dart.openapi.freshness import collectMissing
+        from dartlab.providers.dart._filings import buildUpdate
 
-        return collectMissing(self.stockCode, categories=categories)
+        return buildUpdate(self, categories=categories)
 
     def _docsTopicManifest(self) -> pl.DataFrame:
         """→ SectionsAnalyzer.topicManifest()."""
@@ -806,16 +776,9 @@ class Company:
             - readFiling: 공시 원문 텍스트 읽기
             - filings: 로컬 보유 공시 목록 (단일 종목)
         """
-        from dartlab.providers.dart.openapi.dart import Dart
+        from dartlab.providers.dart._filings import buildDisclosure
 
-        d = Dart()
-        s = d(self.stockCode)
-        df = s.filings(start, end, type=type, final=finalOnly)
-        if df.is_empty():
-            return df
-        if keyword:
-            df = filterFilingsByKeyword(df, keyword=keyword, columns=["report_nm", "corp_name", "flr_nm"])
-        return df
+        return buildDisclosure(self, start, end, days=days, type=type, keyword=keyword, finalOnly=finalOnly)
 
     def liveFilings(
         self,
@@ -871,84 +834,18 @@ class Company:
             - readFiling: 공시 원문 텍스트 읽기
             - watch: 공시 변화 중요도 스코어링
         """
-        del forms  # DART는 forms 개념이 없다.
+        from dartlab.providers.dart._filings import buildLiveFilings
 
-        startDate, endDate = resolveDateWindow(start, end, days=days)
-        cacheKey = f"liveFilings:{startDate}:{endDate}:{limit}:{keyword}:{finalOnly}"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
-
-        from dartlab.core.guidance import progress
-        from dartlab.providers.dart.openapi.dart import OpenDart
-
-        progress(f"{self.corpName} 최신 공시 목록 조회 중... (OpenDART, {startDate}~{endDate})")
-        df = OpenDart().filings(
-            self.stockCode,
-            startDate,
-            endDate,
-            final=finalOnly,
+        return buildLiveFilings(
+            self,
+            start,
+            end,
+            days=days,
+            limit=limit,
+            keyword=keyword,
+            forms=forms,
+            finalOnly=finalOnly,
         )
-        if isEmptyDf(df):
-            result = pl.DataFrame(
-                schema={
-                    "docId": pl.Utf8,
-                    "filedAt": pl.Utf8,
-                    "title": pl.Utf8,
-                    "formType": pl.Utf8,
-                    "docUrl": pl.Utf8,
-                    "indexUrl": pl.Utf8,
-                    "market": pl.Utf8,
-                    "corpName": pl.Utf8,
-                    "stockCode": pl.Utf8,
-                    "rceptNo": pl.Utf8,
-                    "reportNm": pl.Utf8,
-                    "viewerUrl": pl.Utf8,
-                    "corpCls": pl.Utf8,
-                }
-            )
-            self._cache[cacheKey] = result
-            return result
-
-        normalized = (
-            filterFilingsByKeyword(df, keyword=keyword, columns=["report_nm", "corp_name", "flr_nm"])
-            .with_columns(
-                [
-                    pl.col("rcept_no").cast(pl.Utf8).alias("docId"),
-                    pl.col("rcept_dt").cast(pl.Utf8).alias("filedAt"),
-                    pl.col("report_nm").cast(pl.Utf8).alias("title"),
-                    pl.col("report_nm").cast(pl.Utf8).alias("formType"),
-                    pl.lit(DART_VIEWER).add(pl.col("rcept_no").cast(pl.Utf8)).alias("docUrl"),
-                    pl.lit(DART_VIEWER).add(pl.col("rcept_no").cast(pl.Utf8)).alias("indexUrl"),
-                    pl.lit("KR").alias("market"),
-                    pl.col("corp_name").cast(pl.Utf8).alias("corpName"),
-                    pl.col("stock_code").cast(pl.Utf8).alias("stockCode"),
-                    pl.col("rcept_no").cast(pl.Utf8).alias("rceptNo"),
-                    pl.col("report_nm").cast(pl.Utf8).alias("reportNm"),
-                    pl.lit(DART_VIEWER).add(pl.col("rcept_no").cast(pl.Utf8)).alias("viewerUrl"),
-                    pl.col("corp_cls").cast(pl.Utf8).alias("corpCls"),
-                ]
-            )
-            .select(
-                [
-                    "docId",
-                    "filedAt",
-                    "title",
-                    "formType",
-                    "docUrl",
-                    "indexUrl",
-                    "market",
-                    "corpName",
-                    "stockCode",
-                    "rceptNo",
-                    "reportNm",
-                    "viewerUrl",
-                    "corpCls",
-                ]
-            )
-        )
-        result = normalized.head(limit) if limit > 0 else normalized
-        self._cache[cacheKey] = result
-        return result
 
     def readFiling(
         self,
@@ -993,62 +890,9 @@ class Company:
             - liveFilings: 최신 공시 목록에서 접수번호 확인
             - disclosure: 과거 공시 목록에서 접수번호 확인
         """
-        record = filingRecord(filing) or {}
+        from dartlab.providers.dart._filings import buildReadFiling
 
-        if isinstance(filing, str):
-            text = filing.strip()
-            if text.isdigit():
-                rceptNo = text
-                viewerUrl = f"{DART_VIEWER}{text}"
-            else:
-                match = _RCEPT_NO_PATTERN.search(text)
-                rceptNo = match.group(1) if match else ""
-                viewerUrl = text
-        else:
-            viewerUrl = str(record.get("viewerUrl") or record.get("docUrl") or "")
-            rceptNo = str(record.get("rceptNo") or record.get("docId") or "")
-            if not rceptNo and viewerUrl:
-                match = _RCEPT_NO_PATTERN.search(viewerUrl)
-                if match:
-                    rceptNo = match.group(1)
-
-        if not rceptNo:
-            raise ValueError("DART filing 읽기에는 rceptNo 또는 rcpNo가 포함된 viewer URL이 필요합니다.")
-
-        from dartlab.core.guidance import progress
-
-        if sections:
-            from dartlab.providers.dart.openapi.client import DartClient
-            from dartlab.providers.dart.openapi.zipCollector import _collectOneZip
-
-            progress(f"{self.corpName} 공시 ZIP 다운로드 중... ({rceptNo})")
-            client = DartClient()
-            parsed = _collectOneZip(client, rceptNo)
-            return {
-                "docId": rceptNo,
-                "market": "KR",
-                "title": record.get("title") or record.get("reportNm") or record.get("report_nm") or "",
-                "docUrl": viewerUrl or f"{DART_VIEWER}{rceptNo}",
-                "viewerUrl": viewerUrl or f"{DART_VIEWER}{rceptNo}",
-                "sections": parsed or [],
-            }
-
-        from dartlab.providers.dart.openapi.dart import OpenDart
-
-        progress(f"{self.corpName} 공시 원문 다운로드 중... ({rceptNo})")
-        rawText = OpenDart().documentText(rceptNo)
-        progress(f"{self.corpName} 공시 원문 정리 중... ({rceptNo})")
-        rawPreview, truncated = truncateText(rawText, maxChars=maxChars)
-        return {
-            "docId": rceptNo,
-            "market": "KR",
-            "title": record.get("title") or record.get("reportNm") or "",
-            "docUrl": viewerUrl or f"{DART_VIEWER}{rceptNo}",
-            "viewerUrl": viewerUrl or f"{DART_VIEWER}{rceptNo}",
-            "raw": rawPreview,
-            "text": rawPreview,
-            "truncated": truncated,
-        }
+        return buildReadFiling(self, filing, maxChars=maxChars, sections=sections)
 
     # ── 원본 데이터 (property) ──
 
