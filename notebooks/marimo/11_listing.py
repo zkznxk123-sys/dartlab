@@ -9,27 +9,24 @@ __generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
-@app.cell(hide_code=True)
-def _():
-    import marimo as mo
-    mo.md("""# Listing
-
-상장 종목 / 공시 메타데이터 카탈로그.""")
-    return
-
 @app.cell
 def _():
+    # listing — 종목/공시/topic 카탈로그. 무인자 호출 = 가이드
     import dartlab
     dartlab.listing()
     return (dartlab,)
 
-@app.cell
-def _(dartlab):
-    dartlab.listing("all")
-    return
 
 @app.cell
 def _(dartlab):
+    # 전 상장사 메타 — 코드/이름/섹터/시장
+    dartlab.listing("all")
+    return
+
+
+@app.cell
+def _(dartlab):
+    # 단일 종목의 모든 공시 메타데이터
     dartlab.listing("filings", corp="005930")
     return
 

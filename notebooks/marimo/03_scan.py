@@ -9,51 +9,46 @@ __generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
-@app.cell(hide_code=True)
-def _():
-    import marimo as mo
-    mo.md("""# Scan
-
-전 종목 횡단 분석 — 시장 전체를 한 번에. 13축.""")
-    return
-
 @app.cell
 def _():
+    # scan — 전 종목 횡단 분석. 무인자 호출 = 가이드 (사용 가능한 축 목록)
     import dartlab
     dartlab.scan()
     return (dartlab,)
 
-@app.cell(hide_code=True)
-def _():
-    import marimo as mo
-    mo.md("""## 수익성 횡단""")
-    return
 
 @app.cell
 def _(dartlab):
+    # 수익성 횡단 — 전 상장사 ROE/ROA/영업이익률 한 번에
     dartlab.scan("profitability")
     return
 
-@app.cell(hide_code=True)
-def _():
-    import marimo as mo
-    mo.md("""## 지배구조""")
-    return
 
 @app.cell
 def _(dartlab):
+    # 지배구조 — 최대주주/이사회/감사 등 거버넌스 횡단
     dartlab.scan("governance")
     return
 
-@app.cell(hide_code=True)
-def _():
-    import marimo as mo
-    mo.md("""## 부채/리스크""")
-    return
 
 @app.cell
 def _(dartlab):
+    # 부채/리스크 — 부채비율/이자보상배율 등 안정성 횡단
     dartlab.scan("debt")
+    return
+
+
+@app.cell
+def _(dartlab):
+    # 단일 계정 횡단 — 매출액 시계열을 전 상장사 기준으로
+    dartlab.scan("account", "매출액")
+    return
+
+
+@app.cell
+def _(dartlab):
+    # 단일 비율 횡단 — ROE 만 뽑기
+    dartlab.scan("ratio", "roe")
     return
 
 
