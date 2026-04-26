@@ -46,8 +46,30 @@ def _getKey() -> str:
     return key
 
 
+def _loadExisting(out: Path, year: int) -> pl.DataFrame | None:
+    """기존 데이터 로드 — 로컬 우선, 없으면 HF (캐시 miss 시 사고 방지 SSOT)."""
+    if out.exists():
+        return pl.read_parquet(out)
+    # GitHub Actions cache miss / 첫 run / 캐시 eviction 대비 — HF 의 raw-{year} 다운로드
+    try:
+        from dartlab.gather._hfBulk import _loadYear
+
+        df = _loadYear(year)
+        if df is not None and not df.is_empty():
+            print(f"[krx] {year}: 로컬 캐시 miss → HF 에서 fetch ({df.height} rows) → merge 후 재 push")
+            return df
+    except Exception as exc:
+        print(f"[krx] {year}: HF fallback 실패 ({type(exc).__name__}: {exc}) — 신규 파일로 진행")
+    return None
+
+
 def _appendYearly(df: pl.DataFrame, outDir: Path) -> dict[int, int]:
-    """df 를 연도별로 분리해서 raw-{year}.parquet 에 append (중복 제거)."""
+    """df 를 연도별로 분리해서 raw-{year}.parquet 에 append (중복 제거).
+
+    캐시 miss 시 HF 의 기존 데이터를 fetch-merge 후 push — `upload_folder` 가 무조건
+    덮어쓰기라 로컬 1일치만 있는 상태에서 push 하면 HF 의 16MB 가 1일치로 줄어드는
+    사고 발생 (2026-04-26 회귀). `_loadExisting` 이 단일 SSOT.
+    """
     if df.is_empty():
         return {}
     df2 = df.with_columns(pl.col("BAS_DD").str.slice(0, 4).alias("_year"))
@@ -56,8 +78,8 @@ def _appendYearly(df: pl.DataFrame, outDir: Path) -> dict[int, int]:
         year = int(partKey[0]) if isinstance(partKey, tuple) else int(partKey)
         out = outDir / f"raw-{year}.parquet"
         grp = grp.drop("_year")
-        if out.exists():
-            existing = pl.read_parquet(out)
+        existing = _loadExisting(out, year)
+        if existing is not None and not existing.is_empty():
             grp = pl.concat([existing, grp], how="diagonal_relaxed").unique(subset=["BAS_DD", "ISU_CD"], keep="last")
         grp = grp.sort(["BAS_DD", "ISU_CD"])
         grp.write_parquet(out, compression="zstd")
@@ -66,13 +88,53 @@ def _appendYearly(df: pl.DataFrame, outDir: Path) -> dict[int, int]:
     return counts
 
 
+def _findLastBasDd(outDir: Path) -> date | None:
+    """저장된 raw parquet 들에서 가장 최근 BAS_DD 추출 (로컬 → HF fallback)."""
+    files = sorted(outDir.glob("raw-*.parquet"))
+    if files:
+        df = pl.read_parquet(files[-1], columns=["BAS_DD"])
+        if not df.is_empty():
+            s = df["BAS_DD"].max()
+            return date(int(s[:4]), int(s[4:6]), int(s[6:8]))
+    # 로컬 비어있으면 HF 현재 연도 시도 (캐시 miss 대비)
+    try:
+        from dartlab.gather._hfBulk import _loadYear
+
+        df = _loadYear(date.today().year)
+        if df is not None and not df.is_empty():
+            s = df["BAS_DD"].max()
+            return date(int(s[:4]), int(s[4:6]), int(s[6:8]))
+    except Exception as exc:
+        print(f"[krx] HF last-date 조회 실패: {type(exc).__name__}: {exc}")
+    return None
+
+
 async def buildIncremental(outDir: Path, apiKey: str) -> dict[int, int]:
-    """어제 1일치 (KOSPI + KOSDAQ) → 현재 연도 parquet append."""
-    yest = date.today() - timedelta(days=1)
-    s = e = yest.strftime("%Y-%m-%d")
+    """마지막 저장일 다음날 ~ today (T-0 포함) 자동 fetch — cron 누락·캐시 miss 시 갭 자동 메움.
+
+    cron 은 KST 17:00 평일 (장 마감 15:30 + 정산 ~16:30 후) → 당일 데이터 확정 시점.
+    1일치 fixed 가 아니라 "마지막 저장 ~ today" 가변 윈도로 fetch → 갭 자동 복구.
+    """
+    today = date.today()
+    last = _findLastBasDd(outDir)
+    if last is None:
+        # 빈 상태 (초기) — 어제만 1일치, 본격 backfill 은 별도 dispatch
+        startD = today - timedelta(days=1)
+        print(f"[krx] last-date 없음 → 어제 1일치만 ({startD}). 전체 backfill 은 --mode backfill")
+    else:
+        startD = last + timedelta(days=1)
+        if startD > today:
+            print(f"[krx] up-to-date (last={last}, today={today}) — 추가 fetch 없음")
+            return {}
+        if (today - last).days > 1:
+            print(f"[krx] 갭 감지: last={last}, today={today} ({(today - last).days}일 차) → 자동 메움")
+
+    s = startD.strftime("%Y-%m-%d")
+    e = today.strftime("%Y-%m-%d")
+    print(f"[krx] incremental fetch: {s} ~ {e}")
     df = await fetchKrxRange(s, e, market="ALL", sleepSec=0.5, apiKey=apiKey)
     if df.is_empty():
-        print(f"[krx] {yest}: empty (휴장일 또는 미확정)")
+        print(f"[krx] {s}~{e}: empty (휴장일 / 정산 미확정 / 비거래일 구간)")
         return {}
     return _appendYearly(df, outDir)
 

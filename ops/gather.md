@@ -4,7 +4,8 @@
 
 **주체**: gather 엔진 (`dartlab.gather(axis, stockCode?)` · `c.gather(axis)`).
 **현재**: 주가 · 수급 · 뉴스 · ownership 축 · Naver · Yahoo · FMP fallback · 30 분 TTL 뉴스 · 5 분 TTL 주가 (KR).
-**방향**: 미국 실시간성 보강 · news sentiment 정교화 · gather → quant 팩터 직결.
+**KRX 풀커버**: 전 상장사 일별 OHLCV/시총/발행주식수 1995~ 현재까지 HF dataset (`eddmpython/dartlab-data/krx/prices/`) 으로 사전 빌드. 매 평일 KST 17:00 cron 이 당일 데이터 + 누락 갭 자동 append → 사용자 키 없이 `gather("krx", ...)` 한 줄로 즉시 사용. 수정주가 (split/bonus/rights) 자동 적용.
+**방향**: 미국 실시간성 보강 · news sentiment 정교화 · gather → quant 팩터 직결 · KRX events (배당/분할 공시) Stage 2 트랙으로 TR 모드 활성.
 
 외부 시장 데이터 수집. 공시 데이터와 시장 데이터를 연결한다. 각 섹션은 **"이렇게 한다"** 명제로 열고, 반복된 실수는 섹션 하단 **"반복 실패"** 에 정리한다.
 
@@ -326,10 +327,12 @@ df = dartlab.gather("krxindex", "raw", market="KRX", apiKey=...)
 - **활용**: 섹터 로테이션 alpha, 스타일 팩터 ground truth, 다중 benchmark, macro regime, ESG/테마
 - 키 권한 부재 시 friendly error (HTTP 401 → "idx 카테고리 권한 없음, 마이페이지에서 별도 신청 필요")
 
-### 장 마감 확정 가드
+### 장 마감 확정 가드 + 자동 갭 메움 (T-0 당일 포함)
 
 - KRX OpenAPI 데이터는 KST 15:30 장 마감 후 정산까지 약 1시간 내 확정.
-- 운영자 cron: KST 17:00 평일 (T-1 일자만).
+- 운영자 cron: KST 17:00 평일 — **당일 (T-0) 포함**. 17:00 시점이면 정산 완료라 그날 데이터 즉시 push.
+- `buildIncremental` 은 1일 fixed 가 아니라 **"마지막 저장일 + 1 ~ today" 가변 윈도** fetch — cron 누락 / 캐시 miss / 정산 지연 등으로 갭이 생겨도 다음 cron 이 자동 메움.
+- 마지막 저장일 조회: 로컬 parquet 우선 → HF 현재 연도 fallback (캐시 miss 대비).
 - 사용자 호출도 동일 가드 — 오늘 날짜 호출 시 `"today not finalized — KRX confirms after 17:00 KST"` 경고 + None.
 
 ### 수정주가 — raw 저장 + 시점 계산 (CRSP 표준)
