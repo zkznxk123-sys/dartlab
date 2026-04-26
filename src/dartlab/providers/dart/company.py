@@ -1597,137 +1597,29 @@ class Company:
         freq: str = "Q",
         scope: str = "consolidated",
     ) -> pl.DataFrame | None:
-        """finance source topic 의 실제 데이터 반환 (show 진입점).
+        from dartlab.providers.dart._showDispatch import showFinanceTopic
 
-        ``c.show("IS", freq="Y", scope="separate")`` 같은 사용자 호출이
-        여기로 들어와서 freq/scope 에 따라 빌드.
-        """
-        if topic == "ratios":
-            return self._applyPeriodFilter(self._buildRatios(), period)
-        if topic == "ratioSeries":
-            # dict 구조 — DataFrame 으로 변환 어려움. None 반환 + 사용자 안내.
-            # 사용자는 c.show("ratios") DataFrame 사용 권장.
-            return None
-        if topic in {"BS", "IS", "CF", "CIS"}:
-            df = self._financeOrDocsStatement(topic, freq=freq, scope=scope)
-            return self._applyPeriodFilter(df, period) if df is not None else None
-        if topic == "SCE":
-            return self._applyPeriodFilter(self._sce(), period)
-        if topic == "sceMatrix":
-            # 3차원 dict — DataFrame 변환 X. 사용자는 SCE topic.
-            return None
-        return None
+        return showFinanceTopic(self, topic, period=period, freq=freq, scope=scope)
 
     def _traceFinanceTopic(self, topic: str, *, period: str | None = None) -> dict[str, Any] | None:
-        """finance authoritative topic provenance를 facts 빌드 없이 직접 계산."""
-        from dartlab.providers.dart.docs.sections import rawPeriod
+        from dartlab.providers.dart._showDispatch import traceFinanceTopic
 
-        requestedPeriod = rawPeriod(period) if isinstance(period, str) else period
-        rows: list[tuple[str, str]] = []
-
-        def collect(series: dict[str, list[Any]] | None, years: list[Any], payloadTopic: str) -> None:
-            if not series:
-                return
-            for item, values in series.items():
-                for idx, year in enumerate(years):
-                    if requestedPeriod is not None and str(year) != requestedPeriod:
-                        continue
-                    value = values[idx] if idx < len(values) else None
-                    if value is None:
-                        continue
-                    rows.append((f"finance:{payloadTopic}:{item}", f"{item}={value}"))
-
-        if topic in {"BS", "IS", "CF"}:
-            annual = self._buildFinanceSeries(freq="Y")
-            if annual is None:
-                return None
-            series, years = annual
-            collect(series.get(topic), years, topic)
-        elif topic == "CIS":
-            annual = self._financeCisAnnual()
-            if annual is None:
-                return None
-            series, years = annual
-            collect(series.get("CIS"), years, "CIS")
-        elif topic == "SCE":
-            annual = self._sceSeriesAnnual()
-            if annual is None:
-                return None
-            series, years = annual
-            collect(series.get("SCE"), years, "SCE")
-        else:
-            return None
-
-        if not rows:
-            return None
-
-        payloadRef, summary = rows[0]
-        return {
-            "topic": topic,
-            "period": requestedPeriod,
-            "primarySource": "finance",
-            "fallbackSources": [],
-            "selectedPayloadRef": payloadRef,
-            "availableSources": [
-                {
-                    "source": "finance",
-                    "rows": len(rows),
-                    "payloadRef": payloadRef,
-                    "summary": summary,
-                    "priority": 300,
-                }
-            ],
-            "whySelected": "finance authoritative priority",
-        }
+        return traceFinanceTopic(self, topic, period=period)
 
     def _showReportTopic(self, topic: str, *, period: str | None = None, raw: bool = False) -> pl.DataFrame | None:
-        """report source topic의 실제 데이터 반환."""
-        return self._applyPeriodFilter(self._reportFrame(topic, raw=raw), period)
+        from dartlab.providers.dart._showDispatch import showReportTopic
+
+        return showReportTopic(self, topic, period=period, raw=raw)
 
     def _showSegmentsSub(self, sub: str) -> pl.DataFrame | None:
-        """segments 하위 topic → DataFrame."""
-        segResult = self._call_module("segments")
-        if segResult is None:
-            return None
-        typeMap = {"region": "region", "product": "product", "composition": "segment"}
-        tableType = typeMap.get(sub)
-        if tableType is None:
-            return None
-        table = segResult.latestTable(tableType)
-        if table is None:
-            return None
-        return table.toDataFrame()
+        from dartlab.providers.dart._showDispatch import showSegmentsSub
+
+        return showSegmentsSub(self, sub)
 
     def _showDirectTopic(self, topic: str, *, period: str | None = None, raw: bool = False) -> pl.DataFrame | None:
-        """sections 외 경로에서 직접 회수 가능한 topic fallback."""
-        if self._hasReport:
-            try:
-                report_api_types = set(getattr(self._report, "apiTypes", []) or [])
-            except (AttributeError, TypeError, ValueError):
-                report_api_types = set()
-            if topic in report_api_types:
-                result = self._showReportTopic(topic, period=period, raw=raw)
-                if isinstance(result, pl.DataFrame):
-                    return result
+        from dartlab.providers.dart._showDispatch import showDirectTopic
 
-        notes = self._notesAccessor
-        if notes is not None and hasattr(notes, "keys"):
-            try:
-                note_keys = set(notes.keys())
-            except (AttributeError, TypeError, ValueError):
-                note_keys = set()
-            if topic in note_keys:
-                try:
-                    result = getattr(notes, topic)
-                except (AttributeError, KeyError, RuntimeError, TypeError, ValueError):
-                    result = None
-                if isinstance(result, pl.DataFrame):
-                    return self._applyPeriodFilter(result, period)
-
-        primary = self._safePrimary(topic)
-        if isinstance(primary, pl.DataFrame):
-            return self._applyPeriodFilter(primary, period)
-        return None
+        return showDirectTopic(self, topic, period=period, raw=raw)
 
     def _showSectionBlock(
         self,
@@ -1736,41 +1628,9 @@ class Company:
         block: int | None = None,
         period: str | None = None,
     ) -> pl.DataFrame | None:
-        """sections topicFrame에서 blockOrder별 text/table 반환.
+        from dartlab.providers.dart._showDispatch import showSectionBlock
 
-        block=None → topic 전체 (blockOrder 순서, text는 원문, table은 수평화)
-        block=N → 해당 blockOrder의 블록만 반환
-        """
-        if "blockType" not in topicFrame.columns or "blockOrder" not in topicFrame.columns:
-            return self._applyPeriodFilter(topicFrame, period)
-
-        periodCols = [c for c in topicFrame.columns if _isPeriodColumn(c)]
-
-        if block is not None:
-            # 특정 blockOrder만
-            boRows = topicFrame.filter(pl.col("blockOrder") == block)
-            if boRows.is_empty():
-                return None
-            bt = boRows["blockType"][0]
-            if bt == "text":
-                keepCols = [c for c in periodCols if c in boRows.columns]
-                nonNullCols = [c for c in keepCols if boRows[c].null_count() < boRows.height]
-                if not nonNullCols:
-                    return None
-                return self._applyPeriodFilter(boRows.select(nonNullCols), period)
-            elif bt == "table":
-                result = self._horizontalizeTableBlock(topicFrame, block, periodCols, period)
-                if result is not None:
-                    return result
-                # 수평화 실패(이력형/목록형 등) → 원본 텍스트 fallback
-                keepCols = [c for c in periodCols if c in boRows.columns]
-                nonNullCols = [c for c in keepCols if boRows[c].null_count() < boRows.height]
-                if nonNullCols:
-                    return self._applyPeriodFilter(boRows.select(nonNullCols), period)
-            return None
-
-        # block=None → 전체 topic (text 원문 + table 수평화, blockOrder 순서)
-        return self._applyPeriodFilter(topicFrame, period)
+        return showSectionBlock(self, topicFrame, block=block, period=period)
 
     def _horizontalizeTableBlock(
         self,
@@ -1779,35 +1639,19 @@ class Company:
         periodCols: list[str],
         period: str | None = None,
     ) -> pl.DataFrame | None:
-        """table 블록을 기간 간 수평화 — 항목×기간 매트릭스."""
-        from dartlab.providers.dart._table_horizontalizer import horizontalizeTableBlock
+        from dartlab.providers.dart._showDispatch import horizontalizeTableBlock
 
-        df = horizontalizeTableBlock(topicFrame, blockOrder, periodCols, period)
-        if df is None:
-            return None
-        return self._applyPeriodFilter(df, period)
+        return horizontalizeTableBlock(self, topicFrame, blockOrder, periodCols, period)
 
     def _reportFrame(self, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
-        if self._report is None:
-            return None
-        apiType = _apiTypeForTopic(topic)
-        try:
-            if apiType not in self._report.apiTypes:
-                return None
-            return self._reportFrameInner(apiType, topic, raw=raw)
-        except (
-            pl.exceptions.ColumnNotFoundError,
-            pl.exceptions.InvalidOperationError,
-            pl.exceptions.SchemaError,
-            RuntimeError,
-        ):
-            return None
+        from dartlab.providers.dart._showDispatch import reportFrame
+
+        return reportFrame(self, topic, raw=raw)
 
     def _reportFrameInner(self, apiType: str, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
-        """report apiType의 정제된 DataFrame 반환."""
-        from dartlab.providers.dart._report_accessor import reportFrameInner
+        from dartlab.providers.dart._showDispatch import reportFrameInner
 
-        return reportFrameInner(self.stockCode, apiType, topic, raw=raw)
+        return reportFrameInner(self, apiType, topic, raw=raw)
 
     def _applyPeriodFilter(self, payload: Any, period: str | None) -> Any:
         from dartlab.providers.dart._showSelectUtils import applyPeriodFilter
@@ -1922,30 +1766,9 @@ class Company:
             c.show("IS", period="2023")               # 2023년 필터
             c.show("dividend")                        # 배당
         """
-        # Q1.5 dispatcher: alias 해석 → 5 사례 분기 (list period / segments / finance / notes / sections).
-        # 각 분기는 별도 sub-method 에 위임. 실제 로직은 _showFinanceStatement / _showSectionsTopic.
-        topic = _resolveTopic(topic)
+        from dartlab.providers.dart._showDispatch import showImpl
 
-        if isinstance(period, list):
-            wide = self.show(topic, block, freq=freq, scope=scope, raw=raw)
-            if wide is None or not isinstance(wide, pl.DataFrame):
-                return None
-            return self._transposeToVertical(wide, period)
-
-        if topic.startswith("segments:"):
-            return self._showSegmentsSub(topic.split(":", 1)[1])
-
-        if topic in self._SHOW_FINANCE_TOPICS:
-            return self._showFinanceStatement(topic, block, period=period, freq=freq, scope=scope)
-
-        from dartlab.providers.dart.docs.notes import _NOTES_DISPATCH
-
-        if topic in _NOTES_DISPATCH and self._notesAccessor is not None:
-            return self._notesAccessor._get(topic)
-
-        return self._showSectionsTopic(topic, block, period=period, raw=raw, freq=freq, scope=scope)
-
-    _SHOW_FINANCE_TOPICS = frozenset({"BS", "IS", "CF", "CIS", "SCE", "ratios", "ratioSeries", "sceMatrix"})
+        return showImpl(self, topic, block, period=period, freq=freq, scope=scope, raw=raw)
 
     def _showFinanceStatement(
         self,
@@ -1956,16 +1779,9 @@ class Company:
         freq: str,
         scope: str,
     ) -> pl.DataFrame | None:
-        """finance topic (BS/IS/CF/CIS/SCE/ratios/ratioSeries/sceMatrix) 조회.
+        from dartlab.providers.dart._showDispatch import showFinanceStatement
 
-        block 이 지정되면 (not None and not 0) None. BS/IS/CIS/CF/SCE 는 clean 적용.
-        """
-        if block not in (None, 0):
-            return None
-        result = self._showFinanceTopic(topic, period=period, freq=freq, scope=scope)
-        if topic in {"IS", "BS", "CIS", "CF", "SCE"} and isinstance(result, pl.DataFrame) and result.width > 0:
-            result = self._cleanFinanceDataFrame(result, topic)
-        return result if isinstance(result, pl.DataFrame) else None
+        return showFinanceStatement(self, topic, block, period=period, freq=freq, scope=scope)
 
     def _showSectionsTopic(
         self,
@@ -1977,75 +1793,9 @@ class Company:
         freq: str,
         scope: str,
     ) -> pl.DataFrame | None:
-        """docs/report sections 기반 topic 조회.
+        from dartlab.providers.dart._showDispatch import showSectionsTopic
 
-        sections 캐시 → topic 필터 → block dispatch (finance / report / docs).
-        미등록 topic 은 warning + None. registered-but-empty 는 silent None.
-        """
-        if "_sections" in self._cache:
-            sec = self._cache["_sections"]
-        else:
-            docsSections = self._docs.sections
-            if docsSections is not None:
-                partialDocs = docsSections.forTopics({topic})
-                if partialDocs is not None and "source" not in partialDocs.columns:
-                    partialDocs = partialDocs.with_columns(pl.lit("docs").alias("source"))
-                sec = partialDocs
-            else:
-                sec = None
-
-        if sec is None:
-            if block in (None, 0):
-                direct = self._showDirectTopic(topic, period=period, raw=raw)
-                if direct is not None:
-                    return direct
-            # registry 에 등록된 topic 은 "데이터 없음" 으로 간주해 silent None.
-            # 미등록 topic 만 warning. registered-but-empty vs unknown-topic 구분.
-            if topic not in _get_module_index():
-                import warnings
-
-                warnings.warn(
-                    f"'{topic}' topic 을 찾을 수 없습니다. 전체 목록은 c.topics 또는 c.index 로 확인하세요.",
-                    stacklevel=2,
-                )
-            return None
-
-        topicRows = sec.filter(pl.col("topic") == topic)
-        if topicRows.is_empty():
-            if block in (None, 0):
-                direct = self._showDirectTopic(topic, period=period, raw=raw)
-                if isinstance(direct, pl.DataFrame):
-                    return direct
-            self._warnUnknownTopic(topic, sec)
-            return None
-
-        if block is None:
-            blockIndex = self._buildBlockIndex(topicRows)
-            if blockIndex.height == 1:
-                return self.show(topic, blockIndex["block"][0], period=period, raw=raw)
-            return blockIndex
-
-        boRows = topicRows.filter(pl.col("blockOrder") == block)
-        if boRows.is_empty():
-            return None
-
-        source = boRows["source"][0] if "source" in boRows.columns else "docs"
-
-        if source == "finance":
-            result = self._showFinanceTopic(topic, period=period, freq=freq, scope=scope)
-        elif source == "report":
-            result = self._showReportTopic(topic, period=period, raw=raw)
-        else:
-            result = self._showSectionBlock(
-                sec.filter(pl.col("topic") == topic),
-                block=block,
-                period=period,
-            )
-
-        if topic in {"IS", "BS", "CIS", "CF", "SCE"} and isinstance(result, pl.DataFrame) and "항목" in result.columns:
-            result = self._cleanFinanceDataFrame(result, topic)
-
-        return result if isinstance(result, pl.DataFrame) else None
+        return showSectionsTopic(self, topic, block, period=period, raw=raw, freq=freq, scope=scope)
 
     @staticmethod
     def _warnUnknownTopic(topic: str, sec: pl.DataFrame) -> None:
