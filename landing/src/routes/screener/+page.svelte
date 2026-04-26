@@ -11,6 +11,17 @@
 	import PresetCard from '$lib/screener/PresetCard.svelte';
 	import Sparkline from '$lib/screener/Sparkline.svelte';
 	import TreemapView from '$lib/components/industry/TreemapView.svelte';
+	import {
+		loadWorkspace,
+		saveWorkspace,
+		addTab,
+		removeTab,
+		updateTab,
+		renameTab,
+		newTabId,
+		type Workspace,
+		type ScreenerTab
+	} from '$lib/screener/workspace.ts';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -99,6 +110,86 @@
 	let displayLimit = $state(500);
 	/** 결과 표시 모드 */
 	let viewMode = $state<'table' | 'treemap' | 'both'>('table');
+
+	// ── 워크스페이스 (다중 탭) ──
+	let workspace = $state<Workspace>({ tabs: [], activeTabId: null });
+	let editingTabId = $state<string | null>(null);
+	let editingTabName = $state('');
+
+	function snapshotCurrentTab(name: string): ScreenerTab {
+		return {
+			id: newTabId(),
+			name,
+			conds: conds.map((c) => ({ ...c })),
+			sorts: sorts.map((s) => ({ ...s })),
+			industries: [...selectedIndustries],
+			presetId: activePreset
+		};
+	}
+
+	function applyTab(tab: ScreenerTab) {
+		conds = tab.conds.map((c) => ({ ...c }));
+		sorts = tab.sorts.map((s) => ({ ...s }));
+		selectedIndustries = new Set(tab.industries);
+		activePreset = tab.presetId;
+	}
+
+	function saveCurrentToActiveTab() {
+		if (!workspace.activeTabId) return;
+		workspace = updateTab(workspace, workspace.activeTabId, {
+			conds: conds.map((c) => ({ ...c })),
+			sorts: sorts.map((s) => ({ ...s })),
+			industries: [...selectedIndustries],
+			presetId: activePreset
+		});
+		saveWorkspace(workspace);
+	}
+
+	function addCurrentAsNewTab() {
+		const baseName = activePreset ? PRESETS_BY_ID.get(activePreset)?.title || '새 탭' : '새 탭';
+		const existing = workspace.tabs.filter((t) => t.name.startsWith(baseName)).length;
+		const name = existing > 0 ? `${baseName} ${existing + 1}` : baseName;
+		const tab = snapshotCurrentTab(name);
+		workspace = addTab(workspace, tab);
+		saveWorkspace(workspace);
+	}
+
+	function selectTab(tabId: string) {
+		const tab = workspace.tabs.find((t) => t.id === tabId);
+		if (!tab) return;
+		// 활성 탭 변경 전 현재 상태를 기존 활성 탭에 저장
+		if (workspace.activeTabId && workspace.activeTabId !== tabId) {
+			saveCurrentToActiveTab();
+		}
+		workspace = { ...workspace, activeTabId: tabId };
+		applyTab(tab);
+		saveWorkspace(workspace);
+	}
+
+	function deleteTab(tabId: string) {
+		if (!confirm('이 탭을 삭제할까요?')) return;
+		workspace = removeTab(workspace, tabId);
+		saveWorkspace(workspace);
+		// 활성 탭이 변경됐으면 그 탭 적용
+		if (workspace.activeTabId) {
+			const tab = workspace.tabs.find((t) => t.id === workspace.activeTabId);
+			if (tab) applyTab(tab);
+		}
+	}
+
+	function startEditTab(tabId: string, currentName: string) {
+		editingTabId = tabId;
+		editingTabName = currentName;
+	}
+
+	function commitEditTab() {
+		if (editingTabId) {
+			workspace = renameTab(workspace, editingTabId, editingTabName);
+			saveWorkspace(workspace);
+		}
+		editingTabId = null;
+		editingTabName = '';
+	}
 
 	// 데이터 join — ecosystem.nodes + prices-snapshot.data + priceTimeSeries (DuckDB derived)
 	const joinedNodes = $derived.by(() => {
@@ -252,13 +343,20 @@
 	}
 
 	onMount(() => {
+		// 1. 워크스페이스 LocalStorage 복원
+		workspace = loadWorkspace();
+		// 2. URL 의 ?q= / ?preset= 우선 — 둘 다 없으면 활성 탭 적용
 		const q = page.url.searchParams.get('q');
-		if (q) decodeQuery(q);
 		const preset = page.url.searchParams.get('preset');
-		if (preset) {
+		if (q) {
+			decodeQuery(q);
+		} else if (preset) {
 			applyPreset(preset);
+		} else if (workspace.activeTabId) {
+			const tab = workspace.tabs.find((t) => t.id === workspace.activeTabId);
+			if (tab) applyTab(tab);
 		}
-		// DuckDB lazy 로드 — 백그라운드, 비차단
+		// 3. DuckDB lazy 로드 — 백그라운드, 비차단
 		void loadPriceTimeSeries();
 	});
 
@@ -589,6 +687,46 @@
 			{/if}
 		</div>
 	</header>
+
+	<!-- 워크스페이스 탭 (다중 시나리오 보관) -->
+	{#if workspace.tabs.length > 0 || true}
+		<div class="tab-bar">
+			{#each workspace.tabs as t (t.id)}
+				{#if editingTabId === t.id}
+					<input
+						class="tab tab-edit"
+						bind:value={editingTabName}
+						onblur={commitEditTab}
+						onkeydown={(e) => {
+							if (e.key === 'Enter') commitEditTab();
+							if (e.key === 'Escape') { editingTabId = null; editingTabName = ''; }
+						}}
+						autofocus
+					/>
+				{:else}
+					<button
+						type="button"
+						class="tab"
+						class:on={workspace.activeTabId === t.id}
+						onclick={() => selectTab(t.id)}
+						ondblclick={() => startEditTab(t.id, t.name)}
+						title="더블클릭 — 이름 변경"
+					>
+						<span class="tab-name">{t.name}</span>
+						<span class="tab-x" onclick={(e) => { e.stopPropagation(); deleteTab(t.id); }} aria-label="탭 삭제">×</span>
+					</button>
+				{/if}
+			{/each}
+			<button type="button" class="tab tab-add" onclick={addCurrentAsNewTab} title="현재 조건을 새 탭으로 저장">
+				+ 탭 추가
+			</button>
+			{#if workspace.activeTabId}
+				<button type="button" class="tab tab-save" onclick={saveCurrentToActiveTab} title="현재 조건을 활성 탭에 덮어쓰기">
+					💾 저장
+				</button>
+			{/if}
+		</div>
+	{/if}
 
 	<!-- 프리셋 라이브러리 — 한 클릭 입력 -->
 	<section class="presets">
@@ -1004,6 +1142,80 @@
 	@keyframes pulse {
 		0%, 100% { opacity: 0.4; }
 		50% { opacity: 1; }
+	}
+
+	/* 워크스페이스 탭 바 */
+	.tab-bar {
+		display: flex;
+		gap: 4px;
+		margin-bottom: 12px;
+		padding-bottom: 6px;
+		border-bottom: 1px solid #1e2433;
+		flex-wrap: wrap;
+	}
+	.tab {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 6px 12px;
+		font-size: 12px;
+		font-weight: 500;
+		background: transparent;
+		border: 1px solid #1e2433;
+		border-bottom: none;
+		border-radius: 6px 6px 0 0;
+		color: #94a3b8;
+		cursor: pointer;
+		transition: background 0.12s, color 0.12s, border-color 0.12s;
+		white-space: nowrap;
+	}
+	.tab:hover {
+		background: rgba(96, 165, 250, 0.08);
+		color: #f1f5f9;
+	}
+	.tab.on {
+		background: #0b1120;
+		color: #f1f5f9;
+		border-color: #60a5fa;
+		box-shadow: 0 -2px 0 0 #60a5fa inset;
+	}
+	.tab-name { font-weight: 600; }
+	.tab-x {
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		line-height: 14px;
+		text-align: center;
+		border-radius: 3px;
+		color: #64748b;
+		font-size: 14px;
+	}
+	.tab-x:hover {
+		background: rgba(239, 68, 68, 0.18);
+		color: #f87171;
+	}
+	.tab-add {
+		color: #60a5fa;
+		border-style: dashed;
+	}
+	.tab-add:hover {
+		background: rgba(96, 165, 250, 0.12);
+	}
+	.tab-save {
+		color: #34d399;
+		border-color: rgba(52, 211, 153, 0.35);
+	}
+	.tab-save:hover {
+		background: rgba(52, 211, 153, 0.12);
+	}
+	.tab-edit {
+		min-width: 120px;
+		background: #0b1120;
+		font-family: inherit;
+		outline: none;
+	}
+	.tab-edit:focus {
+		border-color: #60a5fa;
 	}
 
 	.presets {
