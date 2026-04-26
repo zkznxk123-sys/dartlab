@@ -35,7 +35,6 @@ _log = getLogger(__name__)
 # ── 모듈 레지스트리 (core/registry.py에서 자동 생성) ──
 # (모듈 import 경로, 함수명, 한글 라벨, primary DataFrame 추출)
 # fsSummary/statements는 내부 디스패치 전용 (BS/IS/CF property가 statements를 호출)
-from dartlab.core.registry import getEntry as _getEntry
 from dartlab.core.registry import getModuleEntries as _getModuleEntries
 from dartlab.gather.listing import (
     codeToName,
@@ -59,7 +58,6 @@ from dartlab.providers.dart._utils import (
     _checkDartDocsFreshness,
     _ensureAllData,
     _import_and_call,
-    _isPeriodColumn,
     _shapeString,
 )
 from dartlab.providers.dart.docs.notes import Notes
@@ -1253,231 +1251,29 @@ class Company:
             c = Company("005930")
             c.sections  # 전체 sections 지도
         """
-        cacheKey = "_sections"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
+        from dartlab.providers.dart._sectionsBuilder import buildSections
 
-        sectionsSource = self._docs.sections
-        if sectionsSource is None:
-            self._hintOnce("sections", "sections", "docs")
-            self._cache[cacheKey] = None
-            return None
-
-        docsSec = sectionsSource.raw
-        if docsSec is None:
-            self._hintOnce("sections", "sections", "docs")
-            self._cache[cacheKey] = None
-            return None
-        periodCols = [c for c in docsSec.columns if _isPeriodColumn(c)]
-        chapterMap = self._chapterMap()
-
-        if "source" not in docsSec.columns:
-            docsSec = docsSec.with_columns(pl.lit("docs").alias("source"))
-
-        docsSchema = dict(docsSec.schema)
-        if "source" not in docsSchema:
-            docsSchema["source"] = pl.Utf8
-        metaCols = [c for c in docsSec.columns if c not in periodCols]
-
-        # finance/report에서 추가할 행 수집
-        # key: topic → (chapter, source, maxBlockOrder)
-        topicExtras: dict[str, list[dict[str, Any]]] = {}
-
-        def _baseExtraRow(*, chapter: str, topic: str, source: str) -> dict[str, Any]:
-            row = {col: None for col in metaCols}
-            row.update(
-                {
-                    "chapter": chapter,
-                    "topic": topic,
-                    "blockType": "table",
-                    "source": source,
-                }
-            )
-            for p in periodCols:
-                row[p] = None
-            return row
-
-        if self._hasFinance:
-            for ft in ("BS", "IS", "CIS", "CF", "SCE"):
-                if getattr(self._finance, ft, None) is not None:
-                    topicExtras.setdefault(ft, []).append(_baseExtraRow(chapter="III", topic=ft, source="finance"))
-            if self._ratioSeries() is not None:
-                topicExtras.setdefault("ratios", []).append(
-                    _baseExtraRow(chapter="III", topic="ratios", source="finance")
-                )
-
-        if self.rawReport is not None:
-            try:
-                for apiType in self._report.availableApiTypes:
-                    topic = _topicForApiType(apiType)
-                    chapter = chapterMap.get(topic, "X")
-                    topicExtras.setdefault(topic, []).append(
-                        _baseExtraRow(chapter=chapter, topic=topic, source="report")
-                    )
-            except (ValueError, KeyError, AttributeError) as e:
-                import logging
-
-                logging.getLogger(__name__).warning("sections report merge failed for %s: %s", self.stockCode, e)
-
-        if not topicExtras:
-            self._cache[cacheKey] = docsSec
-            return docsSec
-
-        # topic 순서대로 순회하면서 extra 행을 끼워넣기
-        docsTopics = docsSec.get_column("topic").drop_nulls().unique(maintain_order=True).to_list()
-
-        schema = docsSchema
-
-        result_frames: list[pl.DataFrame] = []
-        insertedExtras: set[str] = set()
-
-        for topic in docsTopics:
-            # 이 topic의 docs 행
-            topicDocs = docsSec.filter(pl.col("topic") == topic)
-            result_frames.append(topicDocs)
-
-            # 이 topic에 대응하는 extra 행 → docs 블록 뒤에 append
-            if topic in topicExtras:
-                maxBo = topicDocs["blockOrder"].max()
-                nextBo = (maxBo + 1) if maxBo is not None else 0
-                for extra in topicExtras[topic]:
-                    extra["blockOrder"] = nextBo
-                    nextBo += 1
-                result_frames.append(pl.DataFrame(topicExtras[topic], schema=schema))
-                insertedExtras.add(topic)
-
-        # docs에 없는 extra topic → 해당 chapter 위치에 독립 삽입
-        orphanRows: list[dict[str, Any]] = []
-        for topic, extras in topicExtras.items():
-            if topic in insertedExtras:
-                continue
-            for extra in extras:
-                extra["blockOrder"] = 0
-                orphanRows.append(extra)
-
-        if orphanRows:
-            # chapter별로 그룹핑해서 해당 chapter의 마지막에 삽입
-            orphanDf = pl.DataFrame(orphanRows, schema=schema)
-            # result_frames 끝에 chapter 순서로 삽입
-            for ch in _CHAPTER_TITLES.keys():
-                chOrphans = orphanDf.filter(pl.col("chapter") == ch)
-                if not chOrphans.is_empty():
-                    # 해당 chapter의 마지막 위치 찾기
-                    insertIdx = len(result_frames)
-                    for i, f in enumerate(result_frames):
-                        if "chapter" in f.columns:
-                            chapters = f["chapter"].to_list()
-                            if ch in chapters:
-                                insertIdx = i + 1
-                    result_frames.insert(insertIdx, chOrphans)
-
-        if not result_frames:
-            from dartlab.providers.dart.docs.sections import reorderPeriodColumns
-
-            result = reorderPeriodColumns(docsSec, descending=True, annualAsQ4=True)
-            self._cache[cacheKey] = result
-            return result
-
-        merged = pl.concat(result_frames, how="diagonal_relaxed")
-
-        from dartlab.providers.dart.docs.sections import reorderPeriodColumns
-
-        merged = reorderPeriodColumns(merged, descending=True, annualAsQ4=True)
-        self._cache[cacheKey] = merged
-        return merged
+        return buildSections(self)
 
     def _profileTable(self) -> pl.DataFrame | None:
-        cacheKey = "_sectionProfileTable"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
-        from dartlab.providers.dart.docs.sections.artifacts import loadSectionProfileTable
+        from dartlab.providers.dart._sectionsBuilder import profileTable
 
-        table = loadSectionProfileTable()
-        self._cache[cacheKey] = table
-        return table
+        return profileTable(self)
 
     def _chapterMap(self) -> dict[str, str]:
-        cacheKey = "_chapterMap"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
+        from dartlab.providers.dart._sectionsBuilder import chapterMap
 
-        mapping: dict[str, str] = {
-            "BS": "III",
-            "IS": "III",
-            "CIS": "III",
-            "CF": "III",
-            "SCE": "III",
-            "ratios": "III",
-            "audit": "V",
-            "auditContract": "V",
-            "nonAuditContract": "V",
-            "majorHolder": "VII",
-            "majorHolderChange": "VII",
-            "minorityHolder": "VII",
-            "treasuryStock": "VII",
-            "stockTotal": "VII",
-            "capitalChange": "VII",
-            "shareholderMeeting": "VII",
-            "employee": "VIII",
-            "executive": "VIII",
-            "topPay": "VIII",
-            "unregisteredExecutivePay": "VIII",
-            "executivePayAllTotal": "VIII",
-            "executivePayIndividual": "VIII",
-            "investedCompany": "IX",
-            "relatedPartyTx": "IX",
-            "publicOfferingUsage": "X",
-            "privateOfferingUsage": "X",
-            "corporateBond": "X",
-            "shortTermBond": "X",
-            "auditOpinion": "V",
-            "outsideDirector": "VI",
-            "executivePayByType": "VIII",
-            "executivePayTotal": "VIII",
-        }
-
-        table = self._profileTable()
-        if table is not None and not table.is_empty():
-            canonicalCol = "canonicalTopic" if "canonicalTopic" in table.columns else "topic"
-            grouped = (
-                table.filter(pl.col(canonicalCol).is_not_null(), pl.col("chapter").is_not_null())
-                .group_by([canonicalCol, "chapter"])
-                .agg(pl.len().alias("count"))
-                .sort(["count", canonicalCol], descending=[True, False])
-            )
-            for row in grouped.iter_rows(named=True):
-                topic = row.get(canonicalCol)
-                chapter = row.get("chapter")
-                if isinstance(topic, str) and isinstance(chapter, str) and topic not in mapping:
-                    mapping[topic] = chapter
-
-        self._cache[cacheKey] = mapping
-        return mapping
+        return chapterMap(self)
 
     def _chapterForTopic(self, topic: str) -> str:
-        if topic in self._chapterMap():
-            return self._chapterMap()[topic]
-        if self._notesAccessor is not None:
-            from dartlab.providers.dart.docs.notes import _REGISTRY as _NOTES_REGISTRY
+        from dartlab.providers.dart._sectionsBuilder import chapterForTopic
 
-            if topic in _NOTES_REGISTRY:
-                return "XI"
-        return "XII"
+        return chapterForTopic(self, topic)
 
     def _topicLabel(self, topic: str) -> str:
-        if topic == "CIS":
-            return "포괄손익계산서"
-        if topic == "SCE":
-            return "자본변동표"
-        if topic in _TOPIC_LABELS:
-            return _TOPIC_LABELS[topic]
-        entry = _getEntry(topic)
-        if entry is not None:
-            return entry.label
-        for name, label in _get_all_properties():
-            if name == topic:
-                return label
-        return topic
+        from dartlab.providers.dart._sectionsBuilder import topicLabel
+
+        return topicLabel(self, topic)
 
     def _buildBlockIndex(self, topicRows: pl.DataFrame) -> pl.DataFrame:
         """topic의 블록 목차 DataFrame."""

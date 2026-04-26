@@ -1094,12 +1094,12 @@
 				{/if}
 			</div>
 			<div class="external-links">
-				<a class="ext-link" href="{base}/map/screen">
+				<a class="ext-link" href="{base}/screener">
 					<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<circle cx="11" cy="11" r="7" />
 						<line x1="21" y1="21" x2="16.65" y2="16.65" />
 					</svg>
-					<span>조건 검색 (스크리너)</span>
+					<span>스크리너</span>
 				</a>
 				<a class="ext-link" href="{base}/changes">
 					<span class="ext-emoji" aria-hidden="true">⚡</span>
