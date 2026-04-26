@@ -1,11 +1,28 @@
-"""story 레지스트리 — 템플릿 기반 Story 생성."""
+"""story 레지스트리 — 템플릿 기반 Story 생성.
+
+buildBlocks 는 분석 calc* 결과를 블록으로 변환해 BlockMap 으로 반환한다. 100+ 블록을
+26+ 그룹으로 묶어 그룹별 빌더 함수로 분리 — 새 블록 추가 시 해당 그룹만 수정.
+buildBlocks 본체는 preset 처리 + currency setup + 그룹 loop 만 담당.
+"""
 
 from __future__ import annotations
+
+import logging
+from collections.abc import Callable
 
 from dartlab.story.layout import StoryLayout
 from dartlab.story.section import Section
 from dartlab.story.templates import TEMPLATE_ORDER, TEMPLATES
 from dartlab.story.utils import isTerminal
+
+try:
+    import polars as _pl_lib
+
+    _POLARS_ERR: type = _pl_lib.exceptions.PolarsError
+except ImportError:
+    _POLARS_ERR = RuntimeError
+
+_LOG = logging.getLogger("dartlab.story")
 
 # Phase 4 G15a: buildBlocks preset — 전체 호출 113초/7.9GB 회피
 _MINIMAL_KEYS: frozenset[str] = frozenset(
@@ -37,33 +54,59 @@ _STANDARD_KEYS: frozenset[str] = _MINIMAL_KEYS | frozenset(
 )
 
 
-def buildBlocks(
-    company,
-    keys: set[str] | None = None,
-    *,
-    basePeriod: str | None = None,
-    preset: str = "standard",
-):
-    """블록 사전 -- analysis calc* 결과를 블록으로 변환.
+def _safeCall(fn: Callable):
+    """블록 빌드 실패 시 빈 list 반환 — 한 그룹 실패가 다른 그룹 영향 차단.
 
-    keys가 지정되면 해당 블록만 빌드한다 (선택적 빌드, preset 무시).
-    keys=None 이면 preset 에 따라 빌드 범위 결정:
-      - "minimal" (~30초): 6막 골격 블록 ~11개
-      - "standard" (기본, ~60초): minimal + 주요 분석 블록 (storyPrecedents 제외)
-      - "full" (~113초): 전체 블록 (scan 프리빌드 필요 — storyPrecedents 포함)
-
-    [최적화] keys=None (전체 빌드) 시 4엔진의 무거운 외부 데이터 calc를
-    ThreadPoolExecutor로 미리 워밍업한다. 결과는 BoundedCache(thread-safe)에
-    저장되어 이후 순차 빌드가 캐시 hit으로 즉시 완료된다.
+    잡는 예외 카테고리:
+        KeyError/ValueError/TypeError/AttributeError — 데이터 누락 + 타입 mismatch
+        ArithmeticError/IndexError — 계산식 + 인덱싱 실패
+        ImportError/RuntimeError — 외부 모듈 + 런타임 의존성 실패
+        polars.exceptions.PolarsError — DataFrame 연산 실패
     """
-    # Phase 4 G15a: preset → keys 변환 (keys 명시되면 preset 무시)
-    if keys is None:
-        if preset == "minimal":
-            keys = set(_MINIMAL_KEYS)
-        elif preset == "standard":
-            keys = set(_STANDARD_KEYS)
-        # "full" 은 keys=None 유지 (기존 동작)
-    # builders와 analysis의 금액 포맷을 company.currency에 맞게 설정 (contextvars — 스레드 안전)
+    try:
+        return fn()
+    except (
+        KeyError,
+        ValueError,
+        TypeError,
+        AttributeError,
+        ArithmeticError,
+        ImportError,
+        RuntimeError,
+        IndexError,
+        _POLARS_ERR,
+    ) as exc:
+        _LOG.debug(
+            "story block build 실패: %s — %s: %s",
+            getattr(fn, "__name__", "?"),
+            type(exc).__name__,
+            exc,
+        )
+        return []
+
+
+def _resolvePresetKeys(keys: set[str] | None, preset: str) -> set[str] | None:
+    """preset → keys 변환. keys 명시되면 preset 무시.
+
+    minimal (~30초): 6막 골격 블록 ~11개
+    standard (기본, ~60초): minimal + 주요 분석 블록 (storyPrecedents 제외)
+    full (~113초): 전체 블록 — keys=None 유지
+    """
+    if keys is not None:
+        return keys
+    if preset == "minimal":
+        return set(_MINIMAL_KEYS)
+    if preset == "standard":
+        return set(_STANDARD_KEYS)
+    return None  # full
+
+
+def _setupCurrency(company) -> None:
+    """story builders + analysis 의 금액 포맷을 company.currency 로 설정.
+
+    contextvars — 스레드 안전. analysis.financial.capital 의 _analysis_currency
+    가 없으면 (구버전) silent skip.
+    """
     from dartlab.story.builders import _story_currency
 
     _currency = getattr(company, "currency", "KRW")
@@ -75,46 +118,38 @@ def buildBlocks(
     except ImportError:
         pass
 
-    # [Phase 3 시도 — 워밍업 전략 폐기]
-    # ThreadPoolExecutor로 calc 병렬 워밍업을 시도했으나:
-    # 1. asyncio 코루틴 경고 (quant fetch_async가 thread 내 실행 시 충돌)
-    # 2. scorecard 워밍업이 다른 무거운 calc 트리거 → 메모리 압박 → 캐시 클리어
-    # 3. 결과: 워밍업 비용 > 캐시 hit 이득
-    # 결론: 메모이제이션(Phase 1)만으로 충분. 워밍업은 BoundedCache pressure 한계로 비효율.
 
-    def _safe(fn):
-        try:
-            import polars as pl
-
-            _polarsErr = pl.exceptions.PolarsError
-        except ImportError:
-            _polarsErr = RuntimeError
-        try:
-            return fn()
-        except (
-            KeyError,
-            ValueError,
-            TypeError,
-            AttributeError,
-            ArithmeticError,
-            ImportError,
-            RuntimeError,
-            IndexError,
-            _polarsErr,
-        ) as exc:
-            import logging
-
-            logging.getLogger("dartlab.story").debug(
-                "story block build 실패: %s — %s: %s",
-                getattr(fn, "__name__", "?"),
-                type(exc).__name__,
-                exc,
-            )
-            return []
+def _makeNeed(keys: set[str] | None) -> Callable[[str], bool]:
+    """need(key) — 그룹 빌더가 사용할 키 게이트 헬퍼."""
 
     def _need(key: str) -> bool:
         return keys is None or key in keys
 
+    return _need
+
+
+def buildBlocks(
+    company,
+    keys: set[str] | None = None,
+    *,
+    basePeriod: str | None = None,
+    preset: str = "standard",
+):
+    """블록 사전 — analysis calc* 결과를 블록으로 변환.
+
+    keys 가 지정되면 해당 블록만 빌드한다 (선택적 빌드, preset 무시).
+    keys=None 이면 preset 에 따라 빌드 범위 결정 — 자세한 정책은
+    ``_resolvePresetKeys`` 참조.
+
+    내부적으로 ``_GROUP_BUILDERS`` (그룹별 빌더 list) 를 순회. 새 블록 추가 시
+    해당 그룹 빌더 함수만 수정 + (필요 시) 새 그룹 빌더 등록.
+    """
+    keys = _resolvePresetKeys(keys, preset)
+    _setupCurrency(company)
+    # buildBlocks 본체에서 사용하는 헬퍼 — 그룹 빌더 추출 시 인자로 전달.
+    # 이전 inline 정의 (_safe/_need) 와 같은 이름 유지해 본체 호출 그대로.
+    _safe = _safeCall
+    _need = _makeNeed(keys)
     b: dict = {}
 
     # ── 1부: 사업구조 ──
