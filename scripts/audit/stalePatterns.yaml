@@ -33,6 +33,8 @@ default_whitelist:
   - ops/code.md
   - ops/data.md
   - ops/philosophy.md
+  # refactor-checklist 는 옛 API 예시·사고 사례 SSOT — 의도된 잔존
+  - ops/refactor-checklist.md
 
   # ── release history ──
   - CHANGELOG.md

@@ -53,6 +53,7 @@
 | [mappers.md](mappers.md) | 데이터 변환 | 계정·topic·alias·flow·notes 매퍼 |
 | [experiments.md](experiments.md) | 실험 | 사용자 승인 후 본체 반영 |
 | [engineAudit.md](engineAudit.md) | 엔진 audit | 검증 절차 |
+| [refactor-checklist.md](refactor-checklist.md) | 대규모 rename / API 폐기 | 6 단계 점검 + 자동 게이트 (stale_references) |
 
 ---
 

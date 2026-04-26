@@ -29,6 +29,14 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+# Windows cp949 콘솔에서 한글·em-dash 출력 시 UnicodeEncodeError. CI (Linux) 와 동일
+# 동작 보장 위해 stdout/stderr 를 utf-8 로 재설정. PYTHONIOENCODING 환경변수로도 가능
+# 하지만 사용자가 직접 실행할 때 잊는 사고 방지 — 스크립트 자체 방어.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 try:
     import yaml
 except ImportError:

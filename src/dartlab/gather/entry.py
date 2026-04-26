@@ -11,19 +11,36 @@ dartlab.gather("news", "삼성전자")      -> 뉴스
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
 import polars as pl
+
+# targetType — gather contract 명세 (axis 별 target 의 의미).
+#   stockCode  : 종목코드/티커 (예: "005930", "AAPL")
+#   columnName : OHLCV 또는 보조지표 컬럼 명 (예: "close", "rsi14")
+#   indicator  : 거시지표 코드 (예: "CPI", "FEDFUNDS")
+#   keyword    : 검색어 (자유 문자열)
+#   none       : target 안 받음
+TargetType = Literal["stockCode", "columnName", "indicator", "keyword", "none"]
 
 
 @dataclass(frozen=True)
 class _GatherAxisEntry:
-    """gather 축 메타데이터."""
+    """gather 축 메타데이터.
+
+    targetType 은 axis 가 받는 target 의 의미를 명시 — test_gatherAxisContract 가
+    이 메타데이터로 axis-별 적절 target 을 dispatch.
+
+    hidden=True 인 axis 는 _guide() / __repr__ / 공개 가이드 출력에서 제외.
+    내부 구현·테스트는 가능 (데이터 미준비/베타 axis 용).
+    """
 
     label: str
     description: str
     example: str
     targetRequired: bool = True
+    targetType: TargetType = "stockCode"
+    hidden: bool = False
 
 
 _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
@@ -36,11 +53,13 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
             "시장 지수도 가능: gather('price', 'KOSPI')"
         ),
         example='gather("price", "005930") / gather("price", "AAPL", market="US")',
+        targetType="stockCode",
     ),
     "flow": _GatherAxisEntry(
         label="수급",
         description="외국인/기관 순매수 동향 (KR 전용, 네이버 금융). US는 미지원 → None",
         example='gather("flow", "005930")',
+        targetType="stockCode",
     ),
     "macro": _GatherAxisEntry(
         label="거시지표",
@@ -51,31 +70,37 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         ),
         example='gather("macro") / gather("macro", "FEDFUNDS", market="US")',
         targetRequired=False,
+        targetType="indicator",
     ),
     "news": _GatherAxisEntry(
         label="뉴스",
         description="Google News RSS 최근 30일. API 키 불필요. 한글/영문 검색어 모두 지원",
         example='gather("news", "삼성전자") / gather("news", "AAPL")',
+        targetType="keyword",
     ),
     "sector": _GatherAxisEntry(
         label="업종",
         description="업종 분류 + 동종업종 PER. KR: KRX KIND + 네이버 금융",
         example='gather("sector", "005930")',
+        targetType="stockCode",
     ),
     "insider": _GatherAxisEntry(
         label="내부자거래",
         description="임원/주요주주 주식 거래 내역. KR: DART API (API 키: DART_API_KEY)",
         example='gather("insider", "005930")',
+        targetType="stockCode",
     ),
     "ownership": _GatherAxisEntry(
         label="지분",
         description="기관/외국인 보유 현황 (비율+주수). KR: 네이버 금융",
         example='gather("ownership", "005930")',
+        targetType="stockCode",
     ),
     "peers": _GatherAxisEntry(
         label="피어",
         description="동종업종 피어 종목 목록 (종목코드+시총). KR: KRX/네이버",
         example='gather("peers", "005930")',
+        targetType="stockCode",
     ),
     "krx": _GatherAxisEntry(
         label="KRX 회사별 시계열",
@@ -88,7 +113,9 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         ),
         example='gather("krx", "close", start=, end=) / gather("krx", "rsi14", start=, end=) / gather("krx", "marketCap", date=)',
         targetRequired=False,
+        targetType="columnName",
     ),
+    # 미공개 — 데이터 준비 중. _guide() / __repr__ 에서 숨김. 내부 dispatch 는 동작.
     "krxindex": _GatherAxisEntry(
         label="KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지)",
         description=(
@@ -99,7 +126,25 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         ),
         example='gather("krxIndex", "close", market="KOSPI", start=, end=, apiKey="...")',
         targetRequired=False,
+        targetType="columnName",
+        hidden=True,
     ),
+}
+
+
+# axis 별 필요한 API 키 — _guide() 와 test_gatherAxisContract 가 공통 소비.
+# 값이 "불필요" 가 아니면 환경변수에 키가 설정돼야 axis 호출 가능.
+_API_KEY_INFO: dict[str, str] = {
+    "price": "불필요",
+    "flow": "불필요",
+    "macro": "ECOS_API_KEY (KR) / FRED_API_KEY (US)",
+    "news": "불필요",
+    "sector": "불필요",
+    "insider": "DART_API_KEY",
+    "ownership": "불필요",
+    "peers": "불필요",
+    "krx": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX OpenAPI 직접 호출)",
+    "krxindex": "KRX_API_KEY (idx 카테고리 권한 별도 신청)",
 }
 
 _ALIASES: dict[str, str] = {
@@ -544,6 +589,8 @@ class GatherEntry:
     def _guide(self) -> pl.DataFrame:
         """가이드 DataFrame — 축 목록 + 설명 + 사용 예시 + API 키 안내.
 
+        ``hidden=True`` axis (데이터 준비 중) 는 가이드에서 제외된다.
+
         Returns
         -------
         pl.DataFrame
@@ -553,17 +600,6 @@ class GatherEntry:
             example : str — 사용 예시
             apiKey : str — 필요한 API 키 (없으면 "불필요")
         """
-        _API_KEY_INFO: dict[str, str] = {
-            "price": "불필요",
-            "flow": "불필요",
-            "macro": "ECOS_API_KEY (KR) / FRED_API_KEY (US)",
-            "news": "불필요",
-            "sector": "불필요",
-            "insider": "DART_API_KEY",
-            "ownership": "불필요",
-            "peers": "불필요",
-            "krx": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX OpenAPI 직접 호출)",
-        }
         rows = [
             {
                 "axis": key,
@@ -573,6 +609,7 @@ class GatherEntry:
                 "apiKey": _API_KEY_INFO.get(key, "불필요"),
             }
             for key, entry in _AXIS_REGISTRY.items()
+            if not entry.hidden
         ]
         return pl.DataFrame(rows)
 
@@ -601,12 +638,13 @@ class GatherEntry:
         )
 
     def __repr__(self) -> str:
+        visibleAxes = [(k, e) for k, e in _AXIS_REGISTRY.items() if not e.hidden]
         lines = [
-            f"Gather — {len(_AXIS_REGISTRY)}축 외부 시장 데이터 수집",
+            f"Gather — {len(visibleAxes)}축 외부 시장 데이터 수집",
             "",
             "━━━ 축 목록 ━━━",
         ]
-        for key, entry in _AXIS_REGISTRY.items():
+        for key, entry in visibleAxes:
             lines.append(f"  {key:12s} {entry.label} — {entry.description[:60]}")
         lines.append("")
         lines.append("━━━ 빠른 시작 ━━━")
