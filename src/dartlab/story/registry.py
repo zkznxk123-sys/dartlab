@@ -322,6 +322,182 @@ def _buildCashflowBlocks(company, keys, basePeriod, safe: Callable, need: Callab
         out["cashFlowFlags"] = safe(lambda: cashFlowFlagsBlock(calcCashFlowFlags(company, basePeriod=basePeriod)))
 
 
+def _buildProfitabilityBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """2 부 — 수익성 (6 블록)."""
+    if keys is not None and not (
+        keys & {"marginTrend", "returnTrend", "dupont", "penmanDecomposition", "roicTree", "profitabilityFlags"}
+    ):
+        return
+    from dartlab.analysis.financial.profitability import (
+        calcMarginTrend,
+        calcPenmanDecomposition,
+        calcProfitabilityFlags,
+        calcReturnTrend,
+        calcRoicTree,
+    )
+    from dartlab.story.builders import (
+        dupontBlock,
+        marginTrendBlock,
+        penmanDecompositionBlock,
+        profitabilityFlagsBlock,
+        returnTrendBlock,
+        roicTreeBlock,
+    )
+
+    if need("marginTrend"):
+        out["marginTrend"] = safe(lambda: marginTrendBlock(calcMarginTrend(company, basePeriod=basePeriod)))
+    if need("returnTrend"):
+        out["returnTrend"] = safe(lambda: returnTrendBlock(calcReturnTrend(company, basePeriod=basePeriod)))
+    if need("dupont"):
+        out["dupont"] = safe(lambda: dupontBlock(calcReturnTrend(company, basePeriod=basePeriod)))
+    if need("penmanDecomposition"):
+        out["penmanDecomposition"] = safe(
+            lambda: penmanDecompositionBlock(calcPenmanDecomposition(company, basePeriod=basePeriod))
+        )
+    if need("roicTree"):
+        out["roicTree"] = safe(lambda: roicTreeBlock(calcRoicTree(company, basePeriod=basePeriod)))
+    if need("profitabilityFlags"):
+        out["profitabilityFlags"] = safe(
+            lambda: profitabilityFlagsBlock(calcProfitabilityFlags(company, basePeriod=basePeriod))
+        )
+
+
+def _buildGrowthBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """2 부 — 성장 (4 블록)."""
+    if keys is not None and not (keys & {"growthTrend", "growthQuality", "cagrComparison", "growthFlags"}):
+        return
+    from dartlab.analysis.financial.growthAnalysis import (
+        calcCagrComparison,
+        calcGrowthFlags,
+        calcGrowthQuality,
+        calcGrowthTrend,
+    )
+    from dartlab.story.builders import (
+        cagrComparisonBlock,
+        growthFlagsBlock,
+        growthQualityBlock,
+        growthTrendBlock,
+    )
+
+    if need("growthTrend"):
+        out["growthTrend"] = safe(lambda: growthTrendBlock(calcGrowthTrend(company, basePeriod=basePeriod)))
+    if need("growthQuality"):
+        out["growthQuality"] = safe(lambda: growthQualityBlock(calcGrowthQuality(company, basePeriod=basePeriod)))
+    if need("cagrComparison"):
+        out["cagrComparison"] = safe(lambda: cagrComparisonBlock(calcCagrComparison(company, basePeriod=basePeriod)))
+    if need("growthFlags"):
+        out["growthFlags"] = safe(lambda: growthFlagsBlock(calcGrowthFlags(company, basePeriod=basePeriod)))
+
+
+def _buildStabilityBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """2 부 — 안정성 (5+ 블록 — scenarioSensitivity/criticalAssumptions/improvementLevers/marketRisk 공유)."""
+    if keys is not None and not (
+        keys
+        & {
+            "leverageTrend",
+            "coverageTrend",
+            "distressScore",
+            "stabilityFlags",
+            "marketRisk",
+            "scenarioSensitivity",
+            "criticalAssumptions",
+            "improvementLevers",
+        }
+    ):
+        return
+    from dartlab.analysis.financial.stability import (
+        calcCoverageTrend,
+        calcDistressScore,
+        calcLeverageTrend,
+        calcStabilityFlags,
+    )
+    from dartlab.story.builders import (
+        coverageTrendBlock,
+        distressScoreBlock,
+        leverageTrendBlock,
+        stabilityFlagsBlock,
+    )
+
+    if need("leverageTrend"):
+        out["leverageTrend"] = safe(lambda: leverageTrendBlock(calcLeverageTrend(company, basePeriod=basePeriod)))
+    if need("coverageTrend"):
+        out["coverageTrend"] = safe(lambda: coverageTrendBlock(calcCoverageTrend(company, basePeriod=basePeriod)))
+    if need("distressScore"):
+        out["distressScore"] = safe(lambda: distressScoreBlock(calcDistressScore(company, basePeriod=basePeriod)))
+    if need("stabilityFlags"):
+        out["stabilityFlags"] = safe(lambda: stabilityFlagsBlock(calcStabilityFlags(company, basePeriod=basePeriod)))
+    if need("scenarioSensitivity") or need("criticalAssumptions"):
+        from dartlab.analysis.financial.scenarioSensitivity import calcScenarioSensitivity
+        from dartlab.story.builders import criticalAssumptionsBlock, scenarioSensitivityBlock
+
+        _ss = safe(lambda: calcScenarioSensitivity(company, basePeriod=basePeriod))
+        if need("scenarioSensitivity"):
+            out["scenarioSensitivity"] = safe(lambda: scenarioSensitivityBlock(_ss))
+        if need("criticalAssumptions"):
+            out["criticalAssumptions"] = safe(lambda: criticalAssumptionsBlock(_ss))
+        # improvementLevers — 같은 SS 캐시 시점, 메모리 압박 전
+        if need("improvementLevers") and _ss:
+            from dartlab.analysis.financial.scenarioSensitivity import calcImprovementLevers
+            from dartlab.story.builders import improvementLeversBlock
+
+            try:
+                _il_data = calcImprovementLevers(company, basePeriod=basePeriod)
+                out["improvementLevers"] = improvementLeversBlock(_il_data) if _il_data else []
+            except Exception as _e:
+                _LOG.debug("improvementLevers: %s", _e)
+                out["improvementLevers"] = []
+    if need("marketRisk"):
+        from dartlab.quant.extended import calcMarketRisk
+        from dartlab.story.builders import marketRiskBlock
+
+        out["marketRisk"] = safe(lambda: marketRiskBlock(calcMarketRisk(company)))
+
+
+def _buildEfficiencyBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """2 부 — 효율성 (3 블록)."""
+    if keys is not None and not (keys & {"turnoverTrend", "cccTrend", "efficiencyFlags"}):
+        return
+    from dartlab.analysis.financial.efficiency import (
+        calcEfficiencyFlags,
+        calcTurnoverTrend,
+    )
+    from dartlab.story.builders import (
+        cccTrendBlock,
+        efficiencyFlagsBlock,
+        turnoverTrendBlock,
+    )
+
+    if need("turnoverTrend"):
+        out["turnoverTrend"] = safe(lambda: turnoverTrendBlock(calcTurnoverTrend(company, basePeriod=basePeriod)))
+    if need("cccTrend"):
+        out["cccTrend"] = safe(lambda: cccTrendBlock(calcTurnoverTrend(company, basePeriod=basePeriod)))
+    if need("efficiencyFlags"):
+        out["efficiencyFlags"] = safe(lambda: efficiencyFlagsBlock(calcEfficiencyFlags(company, basePeriod=basePeriod)))
+
+
+def _buildScorecardBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """2 부 — 종합 (3 블록)."""
+    if keys is not None and not (keys & {"scorecard", "piotroski", "summaryFlags"}):
+        return
+    from dartlab.analysis.financial.scorecard import (
+        calcPiotroskiDetail,
+        calcScorecard,
+        calcSummaryFlags,
+    )
+    from dartlab.story.builders import (
+        piotroskiBlock,
+        scorecardBlock,
+        summaryFlagsBlock,
+    )
+
+    if need("scorecard"):
+        out["scorecard"] = safe(lambda: scorecardBlock(calcScorecard(company, basePeriod=basePeriod)))
+    if need("piotroski"):
+        out["piotroski"] = safe(lambda: piotroskiBlock(calcPiotroskiDetail(company, basePeriod=basePeriod)))
+    if need("summaryFlags"):
+        out["summaryFlags"] = safe(lambda: summaryFlagsBlock(calcSummaryFlags(company, basePeriod=basePeriod)))
+
+
 def buildBlocks(
     company,
     keys: set[str] | None = None,
@@ -352,167 +528,12 @@ def buildBlocks(
     _buildAssetBlocks(company, keys, basePeriod, _safe, _need, b)
     _buildCashflowBlocks(company, keys, basePeriod, _safe, _need, b)
 
-    # ── 2부: 재무비율 분석 ──
-    if keys is None or keys & {
-        "marginTrend",
-        "returnTrend",
-        "dupont",
-        "penmanDecomposition",
-        "roicTree",
-        "profitabilityFlags",
-    }:
-        from dartlab.analysis.financial.profitability import (
-            calcMarginTrend,
-            calcPenmanDecomposition,
-            calcProfitabilityFlags,
-            calcReturnTrend,
-            calcRoicTree,
-        )
-        from dartlab.story.builders import (
-            dupontBlock,
-            marginTrendBlock,
-            penmanDecompositionBlock,
-            profitabilityFlagsBlock,
-            returnTrendBlock,
-            roicTreeBlock,
-        )
-
-        if _need("marginTrend"):
-            b["marginTrend"] = _safe(lambda: marginTrendBlock(calcMarginTrend(company, basePeriod=basePeriod)))
-        if _need("returnTrend"):
-            b["returnTrend"] = _safe(lambda: returnTrendBlock(calcReturnTrend(company, basePeriod=basePeriod)))
-        if _need("dupont"):
-            b["dupont"] = _safe(lambda: dupontBlock(calcReturnTrend(company, basePeriod=basePeriod)))
-        if _need("penmanDecomposition"):
-            b["penmanDecomposition"] = _safe(
-                lambda: penmanDecompositionBlock(calcPenmanDecomposition(company, basePeriod=basePeriod))
-            )
-        if _need("roicTree"):
-            b["roicTree"] = _safe(lambda: roicTreeBlock(calcRoicTree(company, basePeriod=basePeriod)))
-        if _need("profitabilityFlags"):
-            b["profitabilityFlags"] = _safe(
-                lambda: profitabilityFlagsBlock(calcProfitabilityFlags(company, basePeriod=basePeriod))
-            )
-
-    if keys is None or keys & {"growthTrend", "growthQuality", "cagrComparison", "growthFlags"}:
-        from dartlab.analysis.financial.growthAnalysis import (
-            calcCagrComparison,
-            calcGrowthFlags,
-            calcGrowthQuality,
-            calcGrowthTrend,
-        )
-        from dartlab.story.builders import (
-            cagrComparisonBlock,
-            growthFlagsBlock,
-            growthQualityBlock,
-            growthTrendBlock,
-        )
-
-        if _need("growthTrend"):
-            b["growthTrend"] = _safe(lambda: growthTrendBlock(calcGrowthTrend(company, basePeriod=basePeriod)))
-        if _need("growthQuality"):
-            b["growthQuality"] = _safe(lambda: growthQualityBlock(calcGrowthQuality(company, basePeriod=basePeriod)))
-        if _need("cagrComparison"):
-            b["cagrComparison"] = _safe(lambda: cagrComparisonBlock(calcCagrComparison(company, basePeriod=basePeriod)))
-        if _need("growthFlags"):
-            b["growthFlags"] = _safe(lambda: growthFlagsBlock(calcGrowthFlags(company, basePeriod=basePeriod)))
-
-    if keys is None or keys & {
-        "leverageTrend",
-        "coverageTrend",
-        "distressScore",
-        "stabilityFlags",
-        "marketRisk",
-        "scenarioSensitivity",
-        "criticalAssumptions",
-    }:
-        from dartlab.analysis.financial.stability import (
-            calcCoverageTrend,
-            calcDistressScore,
-            calcLeverageTrend,
-            calcStabilityFlags,
-        )
-        from dartlab.story.builders import (
-            coverageTrendBlock,
-            distressScoreBlock,
-            leverageTrendBlock,
-            stabilityFlagsBlock,
-        )
-
-        if _need("leverageTrend"):
-            b["leverageTrend"] = _safe(lambda: leverageTrendBlock(calcLeverageTrend(company, basePeriod=basePeriod)))
-        if _need("coverageTrend"):
-            b["coverageTrend"] = _safe(lambda: coverageTrendBlock(calcCoverageTrend(company, basePeriod=basePeriod)))
-        if _need("distressScore"):
-            b["distressScore"] = _safe(lambda: distressScoreBlock(calcDistressScore(company, basePeriod=basePeriod)))
-        if _need("stabilityFlags"):
-            b["stabilityFlags"] = _safe(lambda: stabilityFlagsBlock(calcStabilityFlags(company, basePeriod=basePeriod)))
-        if _need("scenarioSensitivity") or _need("criticalAssumptions"):
-            from dartlab.analysis.financial.scenarioSensitivity import calcScenarioSensitivity
-            from dartlab.story.builders import criticalAssumptionsBlock, scenarioSensitivityBlock
-
-            _ss = _safe(lambda: calcScenarioSensitivity(company, basePeriod=basePeriod))
-            if _need("scenarioSensitivity"):
-                b["scenarioSensitivity"] = _safe(lambda: scenarioSensitivityBlock(_ss))
-            if _need("criticalAssumptions"):
-                b["criticalAssumptions"] = _safe(lambda: criticalAssumptionsBlock(_ss))
-            # improvementLevers를 여기서 즉시 계산 (같은 SS 캐시 시점, 메모리 압박 전)
-            if _need("improvementLevers") and _ss:
-                from dartlab.analysis.financial.scenarioSensitivity import calcImprovementLevers
-                from dartlab.story.builders import improvementLeversBlock
-
-                try:
-                    _il_data = calcImprovementLevers(company, basePeriod=basePeriod)
-                    b["improvementLevers"] = improvementLeversBlock(_il_data) if _il_data else []
-                except Exception as _e:
-                    import logging
-
-                    logging.getLogger("dartlab.story").debug("improvementLevers: %s", _e)
-                    b["improvementLevers"] = []
-        if _need("marketRisk"):
-            from dartlab.quant.extended import calcMarketRisk
-            from dartlab.story.builders import marketRiskBlock
-
-            b["marketRisk"] = _safe(lambda: marketRiskBlock(calcMarketRisk(company)))
-
-    if keys is None or keys & {"turnoverTrend", "cccTrend", "efficiencyFlags"}:
-        from dartlab.analysis.financial.efficiency import (
-            calcEfficiencyFlags,
-            calcTurnoverTrend,
-        )
-        from dartlab.story.builders import (
-            cccTrendBlock,
-            efficiencyFlagsBlock,
-            turnoverTrendBlock,
-        )
-
-        if _need("turnoverTrend"):
-            b["turnoverTrend"] = _safe(lambda: turnoverTrendBlock(calcTurnoverTrend(company, basePeriod=basePeriod)))
-        if _need("cccTrend"):
-            b["cccTrend"] = _safe(lambda: cccTrendBlock(calcTurnoverTrend(company, basePeriod=basePeriod)))
-        if _need("efficiencyFlags"):
-            b["efficiencyFlags"] = _safe(
-                lambda: efficiencyFlagsBlock(calcEfficiencyFlags(company, basePeriod=basePeriod))
-            )
-
-    if keys is None or keys & {"scorecard", "piotroski", "summaryFlags"}:
-        from dartlab.analysis.financial.scorecard import (
-            calcPiotroskiDetail,
-            calcScorecard,
-            calcSummaryFlags,
-        )
-        from dartlab.story.builders import (
-            piotroskiBlock,
-            scorecardBlock,
-            summaryFlagsBlock,
-        )
-
-        if _need("scorecard"):
-            b["scorecard"] = _safe(lambda: scorecardBlock(calcScorecard(company, basePeriod=basePeriod)))
-        if _need("piotroski"):
-            b["piotroski"] = _safe(lambda: piotroskiBlock(calcPiotroskiDetail(company, basePeriod=basePeriod)))
-        if _need("summaryFlags"):
-            b["summaryFlags"] = _safe(lambda: summaryFlagsBlock(calcSummaryFlags(company, basePeriod=basePeriod)))
+    # ── 2부: 재무비율 분석 (수익성 + 성장 + 안정성 + 효율성 + 종합) ──
+    _buildProfitabilityBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildGrowthBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildStabilityBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildEfficiencyBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildScorecardBlocks(company, keys, basePeriod, _safe, _need, b)
 
     # ── 업종별 KPI (독립 조건) ──
     if keys is None or keys & {"sectorKpi"}:
