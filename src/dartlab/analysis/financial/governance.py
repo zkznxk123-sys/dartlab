@@ -203,25 +203,25 @@ def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple
         if len(changes) >= 2:
             flags.append(("감사인 잦은 변경 -- 감사 독립성 점검 필요", "warning"))
 
-    # 대표이사 교체
+    # 대표이사 교체 — 데이터 없으면 플래그 없음 (None safe check, 가짜 0 회피)
     ceo = calcCEOTurnover(company)
     if ceo:
-        cnt = ceo.get("turnoverCount") or 0
+        cnt = ceo.get("turnoverCount")
         n = ceo.get("windowYears", CEO_TURNOVER_WINDOW_YEARS)
-        if cnt >= 2:
+        if cnt is not None and cnt >= 2:
             flags.append((f"최근 {n}년 대표이사 교체 {cnt}회 -- 경영진 불안정", "warning"))
         avgT = ceo.get("avgTenureYears")
         if avgT is not None and avgT < 3:
             flags.append((f"대표이사 평균 재임 {avgT:.1f}년 -- 단기 재임 구간 (crash risk)", "warning"))
 
-    # 오너 집중도 (본인/특수관계 분리)
+    # 오너 집중도 (본인/특수관계 분리) — None 보고 누락 vs 0 진짜 무지분 구분
     owner = calcOwnerConcentration(company)
     if owner and owner.get("latest"):
         lt = owner["latest"]
-        top1 = lt.get("top1Share") or 0.0
-        totalR = lt.get("topHolderRatio") or 0.0
+        top1 = lt.get("top1Share")
+        totalR = lt.get("topHolderRatio")
         # 소유-지배 괴리 패턴: 본인 지분 적은데 특수관계 포함 총합이 큰 경우
-        if top1 < 10 and totalR >= 40:
+        if top1 is not None and totalR is not None and top1 < 10 and totalR >= 40:
             flags.append(
                 (
                     f"본인 지분 {top1:.1f}% vs 특수관계 포함 {totalR:.1f}% -- 소유-지배 괴리 큼",
@@ -229,28 +229,39 @@ def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple
                 )
             )
         # 과소 지배 — 20% 미만 + 특수관계도 낮음
-        if totalR > 0 and totalR < 20:
+        if totalR is not None and 0 < totalR < 20:
             flags.append((f"본인+특수관계 {totalR:.1f}% -- 경영권 방어 취약", "warning"))
         # 본인 지분 5년 급격 희석
         ch = owner.get("top1Change5y")
         if ch is not None and ch <= -5:
             flags.append((f"본인 지분 5년간 {ch:+.1f}%p 희석 -- 승계/상속 이벤트 가능", "warning"))
 
-    # 법적 이벤트 리스크 (제재·소송·채무보증)
+    # 법적 이벤트 리스크 (제재·소송·채무보증) — None 보고 누락 vs 0 무이벤트 구분
     legal = calcLegalEventRisk(company)
     if legal:
         n = legal.get("windowYears", LEGAL_EVENT_WINDOW_YEARS)
-        sanctionCount = legal.get("sanctionCount") or 0
-        if sanctionCount >= 1:
-            amt = legal.get("sanctionAmount") or 0
+        sanctionCount = legal.get("sanctionCount")
+        if sanctionCount is not None and sanctionCount >= 1:
+            amt = legal.get("sanctionAmount")
             # 1억 이상만 금액 표시 — 파서 단위 혼재로 1억 미만은 불확실
-            amtText = f" (누적 {amt / 1e8:.1f}억원)" if amt >= 1_0000_0000 else ""
+            amtText = f" (누적 {amt / 1e8:.1f}억원)" if amt is not None and amt >= 1_0000_0000 else ""
             flags.append((f"최근 {n}년 제재 {sanctionCount}건{amtText} -- 규제 리스크", "warning"))
-        lawsuitCount = legal.get("lawsuitCount") or 0
-        lawsuitAmount = legal.get("lawsuitAmount") or 0
-        if lawsuitCount >= 1 or lawsuitAmount >= 100_0000_0000:
-            amtText = f" (청구금액 {lawsuitAmount / 1e8:.0f}억원)" if lawsuitAmount >= 1_0000_0000 else ""
-            flags.append((f"최근 {n}년 소송 {lawsuitCount}건{amtText} -- 법적 분쟁 진행", "warning"))
+        lawsuitCount = legal.get("lawsuitCount")
+        lawsuitAmount = legal.get("lawsuitAmount")
+        if (lawsuitCount is not None and lawsuitCount >= 1) or (
+            lawsuitAmount is not None and lawsuitAmount >= 100_0000_0000
+        ):
+            amtText = (
+                f" (청구금액 {lawsuitAmount / 1e8:.0f}억원)"
+                if lawsuitAmount is not None and lawsuitAmount >= 1_0000_0000
+                else ""
+            )
+            flags.append(
+                (
+                    f"최근 {n}년 소송 {lawsuitCount if lawsuitCount is not None else 0}건{amtText} -- 법적 분쟁 진행",
+                    "warning",
+                )
+            )
         gRatio = legal.get("guaranteeToEquity")
         if gRatio is not None and gRatio >= 50:
             flags.append((f"채무보증/자기자본 {gRatio:.0f}% -- 우발채무 부담 큼", "warning"))
@@ -408,10 +419,13 @@ def calcIndependentDirectorQuality(company, *, basePeriod: str | None = None) ->
 
     # executivePayAllTotal / boardOfDirectors 등에서 연도별 구성이 제공될 수 있다
     # 간략히 현재 구성만 활용 — 시계열은 report.executive에 있는 경우만
-    total = getattr(exec_, "totalCount", 0) or 0
-    outside = getattr(exec_, "outsideCount", 0) or 0
-    if total == 0:
+    # totalCount/outsideCount 가 None 또는 0 이면 임원 구성 데이터 없음 → 분석 불가
+    total = getattr(exec_, "totalCount", None)
+    outside = getattr(exec_, "outsideCount", None)
+    if not total:
         return None
+    if outside is None:
+        outside = 0  # 사외이사 정보 누락 — 0 가정 후 비율 0% (보수적 신호)
 
     ratio = round(outside / total * 100, 1)
 
