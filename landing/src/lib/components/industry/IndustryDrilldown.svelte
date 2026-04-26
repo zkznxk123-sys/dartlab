@@ -184,6 +184,21 @@
 		}
 	});
 
+	// 색 동기화 — nodes prop 의 color 만 바뀌면 위치/시뮬 유지하고 색만 갱신
+	$effect(() => {
+		const colorById = new Map<string, string>();
+		for (const n of nodes) colorById.set(n.id, n.color);
+		let changed = false;
+		for (const sn of simNodes) {
+			const c = colorById.get(sn.id);
+			if (c && sn.color !== c) {
+				sn.color = c;
+				changed = true;
+			}
+		}
+		if (changed) simNodes = [...simNodes];
+	});
+
 	function isConnected(nodeId: string): boolean {
 		if (!hovered) return true;
 		if (nodeId === hovered) return true;
@@ -429,6 +444,25 @@
 		cursor: pointer;
 		transition: opacity 0.15s;
 	}
+	.node circle {
+		transition:
+			r 400ms cubic-bezier(0.4, 0, 0.2, 1),
+			fill 300ms ease,
+			stroke 300ms ease,
+			fill-opacity 200ms ease;
+	}
+	.edges line {
+		transition:
+			stroke 300ms ease,
+			stroke-width 300ms ease,
+			opacity 250ms ease;
+	}
+	.node-label {
+		transition:
+			font-size 300ms ease,
+			fill 200ms ease,
+			opacity 200ms ease;
+	}
 	.node.dim {
 		opacity: 0.18;
 	}
@@ -437,6 +471,14 @@
 	}
 	.node:hover circle {
 		filter: brightness(1.15);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.node,
+		.node circle,
+		.edges line,
+		.node-label {
+			transition: none !important;
+		}
 	}
 	.node-label {
 		font-family: 'Pretendard Variable', sans-serif;

@@ -32,10 +32,11 @@
 		flows: FlowEdge[];
 		onSelect?: (ind: IndustryNode) => void;
 		colorMetric?: string;
-		industryStats?: Record<string, any>;
 		// 타임라인 — 선택 연도의 산업별 totalRevenue (원 단위)
 		timelineYear?: string;
 		industryTotalsByYear?: Record<string, Record<string, { totalRevenue: number; count: number; avgOpm: number | null }>>;
+		// 변화감지 렌즈 — 산업별 movers 카운트 (>0 면 펄스 링)
+		moversByIndustry?: Map<string, number>;
 	}
 
 	let {
@@ -43,22 +44,29 @@
 		flows,
 		onSelect,
 		colorMetric = 'industry',
-		industryStats = {},
 		timelineYear = '',
-		industryTotalsByYear = {}
+		industryTotalsByYear = {},
+		moversByIndustry = new Map()
 	}: Props = $props();
 
 	function metricLabel(ind: IndustryNode): string {
-		if (colorMetric === 'industry' || !industryStats) return '';
-		const s = industryStats[ind.id];
-		if (!s) return '';
-		const keyMap: Record<string, string> = {
-			roe: 'avgRoe', opMargin: 'avgOpMargin', revCagr: 'avgCagr',
-			debtRatio: '', revenue: '', // atlas 에서 의미 없는 항목
-		};
-		const k = keyMap[colorMetric];
-		if (!k || s[k] === null || s[k] === undefined) return '';
-		return `${Number(s[k]).toFixed(1)}%`;
+		if (colorMetric === 'industry') return '';
+		const v = (ind as any).metricValue;
+		if (v === null || v === undefined || Number.isNaN(v)) return '';
+		if (colorMetric === 'govGrade' || colorMetric === 'qualGrade') {
+			return `${v.toFixed(1)}/4`;
+		}
+		if (colorMetric === 'revenue') {
+			// 원 단위 합 → 억/조 표기
+			const eok = v / 1e8;
+			if (eok >= 10000) return `${(eok / 10000).toFixed(1)}조`;
+			return `${Math.round(eok).toLocaleString()}억`;
+		}
+		if (colorMetric === 'empCount') {
+			return `${Math.round(v).toLocaleString()}명`;
+		}
+		// %
+		return `${v.toFixed(1)}%`;
 	}
 
 	let container: HTMLDivElement | null = $state(null);
@@ -312,6 +320,22 @@
 		}
 	});
 
+	// 색 동기화 — industries prop 의 color 만 바뀌면 위치/시뮬 유지하고 색만 갱신
+	// (signature 가 안 바뀌어 build() 안 도는 케이스 — 예: colorMetric 변경)
+	$effect(() => {
+		const colorById = new Map<string, string>();
+		for (const i of industries) colorById.set(i.id, i.color);
+		let changed = false;
+		for (const n of simNodes) {
+			const c = colorById.get(n.id);
+			if (c && n.color !== c) {
+				n.color = c;
+				changed = true;
+			}
+		}
+		if (changed) simNodes = [...simNodes];
+	});
+
 	function formatRev(amountEok: number): string {
 		// amount is in 억원
 		if (amountEok >= 10000) return `${(amountEok / 10000).toFixed(1)}조`;
@@ -403,6 +427,7 @@
 		<!-- 노드 -->
 		<g class="nodes">
 			{#each simNodes as n (n.id)}
+				{@const moverCount = moversByIndustry.get(n.id) || 0}
 				<g
 					class="node"
 					class:dim={!isConnected(n.id)}
@@ -427,6 +452,17 @@
 							filter="url(#hub-glow)"
 						/>
 					{/if}
+					<!-- 변화 감지 렌즈 — movers 있는 산업에 펄스 링 -->
+					{#if moverCount > 0}
+						<circle
+							class="movers-pulse"
+							r={n.r + 6}
+							fill="none"
+							stroke="#f87171"
+							stroke-width="2"
+							opacity="0.85"
+						/>
+					{/if}
 					<!-- 외곽 링(hover 강조) -->
 					{#if hovered === n.id}
 						<circle r={n.r + 8} fill="none" stroke={n.color} stroke-width="2.5" opacity="0.9" />
@@ -438,6 +474,23 @@
 						stroke={n.isHub ? '#f8fafc' : n.color}
 						stroke-width={n.isHub ? 2.5 : 1.5}
 					/>
+					<!-- 변화 감지 렌즈 — movers 카운트 배지 -->
+					{#if moverCount > 0}
+						<g class="mover-badge" transform="translate({n.r * 0.7}, {-n.r * 0.7})">
+							<circle r="9" fill="#ef4444" stroke="#0f1219" stroke-width="1.5" />
+							<text
+								text-anchor="middle"
+								dominant-baseline="central"
+								y="0.5"
+								font-size="10"
+								font-weight="700"
+								fill="#fff"
+								style="pointer-events: none; user-select: none;"
+							>
+								{moverCount}
+							</text>
+						</g>
+					{/if}
 					<!-- 산업명 -->
 					<text
 						class="ind-label"
@@ -548,6 +601,19 @@
 		cursor: grab;
 		transition: opacity 0.2s;
 	}
+	.node circle {
+		transition:
+			r 400ms cubic-bezier(0.4, 0, 0.2, 1),
+			fill 300ms ease,
+			stroke 300ms ease,
+			stroke-width 300ms ease,
+			fill-opacity 200ms ease;
+	}
+	.flows path {
+		transition:
+			stroke-width 400ms cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 250ms ease;
+	}
 	.node.dim {
 		opacity: 0.25;
 	}
@@ -559,6 +625,34 @@
 	}
 	.node:hover circle {
 		filter: brightness(1.15);
+	}
+	@keyframes movers-pulse {
+		0%, 100% {
+			opacity: 0.3;
+			stroke-width: 1.5;
+		}
+		50% {
+			opacity: 0.95;
+			stroke-width: 3;
+		}
+	}
+	.movers-pulse {
+		animation: movers-pulse 1.6s ease-in-out infinite;
+		pointer-events: none;
+	}
+	.mover-badge {
+		pointer-events: none;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.node,
+		.node circle,
+		.flows path {
+			transition: none !important;
+		}
+		.movers-pulse {
+			animation: none;
+			opacity: 0.7;
+		}
 	}
 	.ind-label {
 		font-family: 'Pretendard Variable', sans-serif;

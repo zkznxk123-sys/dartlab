@@ -89,6 +89,20 @@
 		return (Object.values(cats) as any[]).reduce((s, c: any) => s + (c.entries?.length || 0), 0);
 	});
 
+	// 산업별 movers 카운트 (atlas 뷰 변화감지 렌즈에서 사용)
+	let moversByIndustry = $derived.by(() => {
+		const m = new Map<string, number>();
+		const stockToIndustry = new Map<string, string>();
+		for (const n of data.ecosystem?.nodes || []) {
+			if (n.id && n.industry) stockToIndustry.set(n.id, n.industry);
+		}
+		for (const stockCode of moversSignalMap.keys()) {
+			const ind = stockToIndustry.get(stockCode);
+			if (ind) m.set(ind, (m.get(ind) || 0) + 1);
+		}
+		return m;
+	});
+
 	// ── 뷰 모드 ──
 	// atlas: 34개 산업 노드 + 산업간 supplier flow (default)
 	// companies: 기존 ecosystem 전체 2,664사
@@ -110,6 +124,20 @@
 	type ColorMetric = 'industry' | 'roe' | 'opMargin' | 'debtRatio' | 'revCagr' | 'revenue'
 		| 'govGrade' | 'qualGrade' | 'holderPct' | 'holderChange' | 'marketShare' | 'empCount';
 	let colorMetric: ColorMetric = $state('roe');
+
+	// ── 렌즈 (분석 관점) — 각 렌즈가 색·오버레이 기본값을 한꺼번에 세팅 ──
+	type Lens = 'default' | 'changes';
+	let lens: Lens = $state('default');
+	function applyLens(next: Lens) {
+		lens = next;
+		if (next === 'default') {
+			colorMetric = 'industry';
+			showMoversOverlay = false;
+		} else if (next === 'changes') {
+			colorMetric = 'roe';
+			showMoversOverlay = true;
+		}
+	}
 
 	const GRAY = '#475569';
 	// 재무 스코어 팔레트 (저→고)
@@ -205,6 +233,89 @@
 	let industries = $derived(data.ecosystem.industries);
 
 	let indColorMap = $derived(new Map(industries.map((i: any) => [i.id, i.color])));
+
+	// 산업별 집계 — ecosystem.nodes 에서 모든 메트릭의 평균/합 산출
+	const GRADE_TO_NUM: Record<string, number> = {
+		A: 4, B: 3, C: 2, D: 1, E: 0,
+		'우수': 4, '양호': 3, '보통': 2, '주의': 1, '위험': 0
+	};
+	let industryAggregates = $derived.by(() => {
+		const buckets = new Map<string, any[]>();
+		for (const n of data.ecosystem?.nodes || []) {
+			if (!n.industry) continue;
+			if (!buckets.has(n.industry)) buckets.set(n.industry, []);
+			buckets.get(n.industry)!.push(n);
+		}
+		const out = new Map<string, Record<string, number | null>>();
+		const meanOf = (nodes: any[], k: string): number | null => {
+			const vs = nodes.map((n) => n[k]).filter((v) => v !== null && v !== undefined && !Number.isNaN(v));
+			return vs.length ? vs.reduce((a: number, b: number) => a + b, 0) / vs.length : null;
+		};
+		const meanGrade = (nodes: any[], k: string): number | null => {
+			const vs = nodes.map((n) => GRADE_TO_NUM[n[k]]).filter((v) => v !== undefined);
+			return vs.length ? vs.reduce((a: number, b: number) => a + b, 0) / vs.length : null;
+		};
+		for (const [ind, ns] of buckets) {
+			out.set(ind, {
+				roe: meanOf(ns, 'roe'),
+				opMargin: meanOf(ns, 'opMargin'),
+				debtRatio: meanOf(ns, 'debtRatio'),
+				revCagr: meanOf(ns, 'revCagr'),
+				revenue: ns.reduce((s: number, n: any) => s + (n.revenue || 0), 0),
+				empCount: ns.reduce((s: number, n: any) => s + (n.empCount || 0), 0),
+				holderPct: meanOf(ns, 'holderPct'),
+				holderChange: meanOf(ns, 'holderChange'),
+				govGradeNum: meanGrade(ns, 'govGrade'),
+				qualGradeNum: meanGrade(ns, 'qualGrade')
+			});
+		}
+		return out;
+	});
+
+	// Atlas 산업 노드용 색 + metricValue (라벨 표시용) — colorMetric 에 따라 위 집계로
+	let atlasIndustriesColored = $derived.by(() => {
+		return data.atlas.industries.map((ind: any) => {
+			const baseColor = indColorMap.get(ind.id) || '#9ca3af';
+			if (colorMetric === 'industry') {
+				return { ...ind, color: baseColor, metricValue: null };
+			}
+
+			const a = industryAggregates.get(ind.id);
+			if (!a) return { ...ind, color: baseColor, metricValue: null };
+
+			// 등급 메트릭 — 0~4 numeric 평균을 직접 색 스케일에 매핑
+			if (colorMetric === 'govGrade' || colorMetric === 'qualGrade') {
+				const v = colorMetric === 'govGrade' ? a.govGradeNum : a.qualGradeNum;
+				if (v === null || v === undefined) {
+					return { ...ind, color: baseColor, metricValue: null };
+				}
+				return {
+					...ind,
+					color: _scale(v, [
+						[0, [239, 68, 68]],
+						[2, [245, 158, 11]],
+						[4, [16, 185, 129]]
+					]),
+					metricValue: v
+				};
+			}
+
+			// marketShare 는 산업 단위에서 의미 없음 → 팔레트 폴백
+			if (colorMetric === 'marketShare') {
+				return { ...ind, color: baseColor, metricValue: null };
+			}
+
+			const v = a[colorMetric];
+			if (v === null || v === undefined || Number.isNaN(v)) {
+				return { ...ind, color: baseColor, metricValue: null };
+			}
+			return {
+				...ind,
+				color: colorFor({ [colorMetric]: v }, colorMetric as any),
+				metricValue: v
+			};
+		});
+	});
 
 	// ── 필터 상태 (companies 뷰) ──
 	let enabledIndustries = $state<Set<string>>(new Set());
@@ -842,7 +953,7 @@
 
 		<!-- 색상 기준 셀렉터 -->
 		<div class="section color-switch">
-			<h3>색상 기준</h3>
+			<h3>색상 기준 <span class="lens-hint">렌즈가 자동 세팅 · 직접 변경 가능</span></h3>
 			<select class="metric-select" bind:value={colorMetric}>
 				<optgroup label="기본">
 					<option value="industry">산업 팔레트 (1)</option>
@@ -983,8 +1094,17 @@
 				{/if}
 			</div>
 			<div class="external-links">
-				<a class="ext-link" href="{base}/map/screen">🔍 조건 검색 (스크리너)</a>
-				<a class="ext-link" href="{base}/changes">⚡ 변화 감지</a>
+				<a class="ext-link" href="{base}/map/screen">
+					<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<circle cx="11" cy="11" r="7" />
+						<line x1="21" y1="21" x2="16.65" y2="16.65" />
+					</svg>
+					<span>조건 검색 (스크리너)</span>
+				</a>
+				<a class="ext-link" href="{base}/changes">
+					<span class="ext-emoji" aria-hidden="true">⚡</span>
+					<span>변화 감지</span>
+				</a>
 			</div>
 		</div>
 
@@ -1165,6 +1285,28 @@
 
 	<!-- 메인 지도 -->
 	<main class="map-main">
+		<!-- 렌즈 (분석 관점) — 떠있는 칩 오버레이 -->
+		<div class="lens-overlay">
+			<button
+				class="lens-chip"
+				class:active={lens === 'default'}
+				onclick={() => applyLens('default')}
+				title="산업 팔레트 + 큰 그림"
+			>
+				<span class="lens-icon" aria-hidden="true">●</span>
+				<span class="lens-name">기본</span>
+			</button>
+			<button
+				class="lens-chip"
+				class:active={lens === 'changes'}
+				onclick={() => applyLens('changes')}
+				title="ROE 색 + 이상 신호 오버레이"
+			>
+				<span class="lens-icon" aria-hidden="true">⚡</span>
+				<span class="lens-name">변화 감지</span>
+			</button>
+		</div>
+
 		<!-- 변화 감지 배너 (dismissible) -->
 		{#if moversCount > 0 && !moversDismissed}
 			<div class="movers-banner">
@@ -1199,16 +1341,13 @@
 
 		{#if viewMode === 'atlas'}
 			<IndustryAtlas
-				industries={data.atlas.industries.map((ind: any) => ({
-					...ind,
-					color: indColorMap.get(ind.id) || '#9ca3af'
-				}))}
+				industries={atlasIndustriesColored}
 				flows={data.atlas.flows}
 				onSelect={(ind: any) => enterIndustry(ind.id)}
 				{colorMetric}
-				industryStats={(data as any).industryStats || {}}
 				timelineYear={selectedYear}
 				industryTotalsByYear={timelineIndustryTotals}
+				moversByIndustry={lens === 'changes' ? moversByIndustry : new Map()}
 			/>
 		{:else if viewMode === 'industry' && industryDetail}
 			<div class="drill-breadcrumb">
@@ -1623,6 +1762,67 @@
 		color: #94a3b8;
 	}
 
+	/* 렌즈 (분석 관점) — 떠있는 오버레이 */
+	.lens-overlay {
+		position: absolute;
+		top: 16px;
+		left: 16px;
+		display: flex;
+		gap: 6px;
+		padding: 6px;
+		background: rgba(15, 18, 25, 0.85);
+		border: 1px solid #1e2433;
+		border-radius: 10px;
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		z-index: 5;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+	}
+	.lens-hint {
+		font-size: 9px;
+		color: #64748b;
+		font-weight: 400;
+		text-transform: none;
+		letter-spacing: 0;
+		margin-left: 6px;
+	}
+	.lens-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 7px 12px;
+		background: transparent;
+		border: 1px solid transparent;
+		border-radius: 7px;
+		color: #94a3b8;
+		font-size: 12px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background 0.15s, border-color 0.15s, color 0.15s;
+		white-space: nowrap;
+	}
+	.lens-chip:hover {
+		background: rgba(96, 165, 250, 0.08);
+		color: #f1f5f9;
+	}
+	.lens-chip.active {
+		background: rgba(96, 165, 250, 0.18);
+		border-color: rgba(96, 165, 250, 0.5);
+		color: #f1f5f9;
+		box-shadow: 0 0 12px rgba(96, 165, 250, 0.25);
+	}
+	.lens-icon {
+		font-size: 11px;
+		opacity: 0.9;
+	}
+	.lens-chip.active .lens-icon {
+		color: #60a5fa;
+		opacity: 1;
+	}
+	.lens-name {
+		font-size: 12px;
+	}
+
 	/* 색상 기준 셀렉터 */
 	.color-switch {
 		background: rgba(234, 70, 71, 0.04);
@@ -1748,6 +1948,9 @@
 		border-top: 1px solid rgba(96, 165, 250, 0.15);
 	}
 	.ext-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
 		padding: 6px 10px;
 		font-size: 12px;
 		color: #94a3b8;
@@ -1757,6 +1960,21 @@
 	.ext-link:hover {
 		background: rgba(96, 165, 250, 0.08);
 		color: #f1f5f9;
+	}
+	.ext-link svg {
+		flex-shrink: 0;
+		opacity: 0.75;
+	}
+	.ext-link:hover svg {
+		opacity: 1;
+	}
+	.ext-emoji {
+		font-size: 12px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 14px;
+		height: 14px;
 	}
 
 	.controls button {
