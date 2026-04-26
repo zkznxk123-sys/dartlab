@@ -96,14 +96,15 @@ _ALIASES: dict[str, str] = {
 
 
 def _resolveAxis(axis: str) -> str:
-    """축 이름 또는 alias -> 정규 축 이름."""
-    lower = axis.lower()
-    if lower in _AXIS_REGISTRY:
-        return lower
+    """축 이름 또는 명시 alias → 정규 축 이름.
+
+    consistency_no_alias: silent case-insensitive lookup 인정 안 함. 사용자는
+    정식 lowercase 영어 (``"yoy"``, ``"summary"``) 또는 ``_ALIASES`` 한글 매핑만.
+    """
+    if axis in _AXIS_REGISTRY:
+        return axis
     if axis in _ALIASES:
         return _ALIASES[axis]
-    if lower in _ALIASES:
-        return _ALIASES[lower]
     available = ", ".join(sorted(_AXIS_REGISTRY))
     raise ValueError(f"알 수 없는 table 축: '{axis}'. 가용 축: {available}")
 

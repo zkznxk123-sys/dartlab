@@ -808,14 +808,16 @@ _ALIASES: dict[str, str] = {
 
 
 def _resolveAxis(axis: str) -> str:
-    """축 이름 또는 alias -> 정규 축 이름."""
+    """축 이름 또는 명시 alias → 정규 축 이름.
+
+    consistency_no_alias 원칙: case-insensitive 매칭 ``axis.lower()`` 는 silent
+    alias 라 인정하지 않는다. 사용자는 정식 표기 (한글 정식 또는 _ALIASES 의
+    명시 매핑) 를 정확히 사용해야 한다.
+    """
     if axis in _AXIS_REGISTRY:
         return axis
     if axis in _ALIASES:
         return _ALIASES[axis]
-    lower = axis.lower()
-    if lower in _ALIASES:
-        return _ALIASES[lower]
     available = ", ".join(sorted(_AXIS_REGISTRY))
     raise ValueError(
         f"알 수 없는 분석 축: '{axis}'. 가용 축: {available}\n  사용법: c.analysis() 로 전체 축 가이드를 확인하세요."

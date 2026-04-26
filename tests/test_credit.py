@@ -120,10 +120,12 @@ class TestResolveAxis:
 
         assert _resolveAxis("nonsense") is None
 
-    def test_case_insensitive(self):
+    def test_case_strict(self):
+        """consistency_no_alias: case-insensitive lookup 폐기. 'Repayment' (camelCase
+        잘못 입력) 는 alias 가 아닌 미등록 처리 → None."""
         from dartlab.credit import _resolveAxis
 
-        assert _resolveAxis("Repayment") == "채무상환"
+        assert _resolveAxis("Repayment") is None
 
 
 class TestFilterAxis:

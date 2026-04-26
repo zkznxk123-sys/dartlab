@@ -160,11 +160,14 @@ def test_resolve_axis_english():
     assert _resolveAxis("growth") == "성장성"
 
 
-def test_resolve_axis_case_insensitive():
+def test_resolve_axis_case_strict():
+    """consistency_no_alias: case-insensitive lookup 폐기 — 정식 표기 강제."""
     from dartlab.analysis.financial import _resolveAxis
 
-    assert _resolveAxis("Profitability") == "수익성"
-    assert _resolveAxis("GROWTH") == "성장성"
+    with pytest.raises(ValueError, match="알 수 없는"):
+        _resolveAxis("Profitability")
+    with pytest.raises(ValueError, match="알 수 없는"):
+        _resolveAxis("GROWTH")
 
 
 def test_resolve_axis_unknown_raises():

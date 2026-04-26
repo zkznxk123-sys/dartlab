@@ -197,14 +197,15 @@ def guide():
 
 
 def _resolveAxis(axis: str) -> str | None:
-    """축 이름 또는 alias → 정규 축 이름."""
+    """축 이름 또는 명시 alias → 정규 축 이름.
+
+    consistency_no_alias: case-insensitive (``axis.lower()``) silent alias
+    인정 안 함. 사용자는 한글 정식 또는 ``_ALIASES`` 명시 매핑만 사용.
+    """
     if axis in _CREDIT_AXES:
         return axis
     if axis in _ALIASES:
         return _ALIASES[axis]
-    lower = axis.lower()
-    if lower in _ALIASES:
-        return _ALIASES[lower]
     return None
 
 

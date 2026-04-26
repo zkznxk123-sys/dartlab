@@ -463,43 +463,37 @@ def _resolveGroup(name: str) -> str | None:
     """
     if name in _SCAN_GROUPS:
         return name
-    lower = name.lower()
-    if lower in _SCAN_GROUPS:
-        return lower
     if name in _GROUP_ALIASES:
         return _GROUP_ALIASES[name]
-    if lower in _GROUP_ALIASES:
-        return _GROUP_ALIASES[lower]
     return None
 
 
 def _resolveAxis(axis: str) -> str:
-    """축 이름 또는 alias → 정규 축 이름.
+    """축 이름 또는 명시 alias → 정규 축 이름.
+
+    consistency_no_alias 원칙: case-insensitive 매칭 ``axis.lower()`` 는 silent
+    alias 라 인정하지 않는다. 사용자는 정식 표기 (camelCase: ``"macroBeta"``,
+    ``"disclosureRisk"`` 또는 한글 alias) 를 정확히 사용해야 한다.
 
     Parameters
     ----------
     axis : str
-        축 이름 또는 한글 alias (예: "governance", "지배구조").
+        정식 축 이름 (camelCase) 또는 ``_ALIASES`` 등록 한글 alias.
 
     Returns
     -------
     str
-        정규 축 이름 (예: "governance").
+        정규 축 이름 (예: ``"governance"``, ``"macroBeta"``).
 
     Raises
     ------
     ValueError
-        알 수 없는 축 이름.
+        알 수 없는 축 이름 또는 case 불일치 (예: ``"MacroBeta"``, ``"macrobeta"``).
     """
     if axis in _AXIS_REGISTRY:
         return axis
-    lower = axis.lower()
-    if lower in _AXIS_REGISTRY:
-        return lower
     if axis in _ALIASES:
         return _ALIASES[axis]
-    if lower in _ALIASES:
-        return _ALIASES[lower]
     available = ", ".join(sorted(_AXIS_REGISTRY))
     raise ValueError(
         f"알 수 없는 scan 축: '{axis}'. 가용 축: {available}\n"
