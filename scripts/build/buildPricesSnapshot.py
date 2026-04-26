@@ -77,7 +77,7 @@ def _annualizedVol(closes: list[float]) -> float | None:
         return None
     mean = sum(rets) / len(rets)
     var = sum((r - mean) ** 2 for r in rets) / (len(rets) - 1)
-    return round((var ** 0.5) * (252 ** 0.5) * 100, 2)
+    return round((var**0.5) * (252**0.5) * 100, 2)
 
 
 def _snapshotForGroup(g: pl.DataFrame) -> dict:
