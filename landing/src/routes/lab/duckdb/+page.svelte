@@ -8,11 +8,11 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Bar from '$lib/components/ui/Bar.svelte';
 	import { fmtKrwFromEok } from '$lib/format/krw';
+	import { loadDartDb, type DartDb } from '$lib/data/duckdb';
 
-	// ── DuckDB-WASM 도입 시뮬레이션 ──
-	// 이 페이지는 Phase 0 검증 — 실제 WASM 통합은 사용자가
-	// `cd landing && npm install @duckdb/duckdb-wasm` 후 진행.
-	// 지금은 데이터 fetch + JS 집계로 비교용 mock.
+	// ── DuckDB-WASM 통합 검증 — Phase A ──
+	// $lib/data/duckdb 의 lazy 로더 사용. HF parquet HTTPS query 까지 검증.
+	// 이 페이지는 PoC 가 아니라 진짜 작동 — 다른 라우트 (/screener) 도 동일 모듈 활용.
 
 	let stage: 'idle' | 'loading' | 'ready' | 'error' = $state('idle');
 	let mode: 'js' | 'duckdb' = $state('js');
@@ -22,7 +22,10 @@
 	let loadTime = $state(0);
 	let totalSize = $state(0);
 	let errorMsg = $state('');
-	let duckdbConn: any = $state(null);
+	let dartDb: DartDb | null = $state(null);
+	let hfTestResult: any[] = $state([]);
+	let hfTestTime = $state(0);
+	let hfTestErr = $state('');
 
 	let queryText = $state(`SELECT industry, COUNT(*) AS cnt, SUM(revenue) AS rev
 FROM ecosystem
@@ -53,33 +56,25 @@ LIMIT 10`);
 		errorMsg = '';
 		const t0 = performance.now();
 		try {
-			// CDN dynamic import — npm install 불필요
-			// @ts-expect-error remote URL module
-			const duckdb = await import(/* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm');
-			const CDN = 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/';
-			const bundles = {
-				mvp: { mainModule: `${CDN}duckdb-mvp.wasm`, mainWorker: `${CDN}duckdb-browser-mvp.worker.js` },
-				eh: { mainModule: `${CDN}duckdb-eh.wasm`, mainWorker: `${CDN}duckdb-browser-eh.worker.js` }
-			};
-			const bundle = await (duckdb as any).selectBundle(bundles);
-			const worker = new Worker(bundle.mainWorker!);
-			const logger = new (duckdb as any).ConsoleLogger();
-			const db = new (duckdb as any).AsyncDuckDB(logger, worker);
-			await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-			duckdbConn = await db.connect();
+			const db = await loadDartDb();
+			if (!db) {
+				errorMsg = 'DuckDB-WASM 로드 불가 (iOS Safari 또는 환경 미지원) — JS 모드로 fallback 하세요';
+				stage = 'error';
+				return;
+			}
+			dartDb = db;
 
-			// ecosystem.json 의 nodes 를 DuckDB table 로 register
+			// ecosystem.json 을 nodes 테이블로 등록 (작은 메타 JSON 패턴)
 			const ecoUrl = `${location.origin}${base}/map/ecosystem.json`;
 			const r = await fetch(ecoUrl);
 			const eco = await r.json();
 			nodes = eco.nodes ?? [];
 			totalSize = JSON.stringify(eco).length;
-			// nodes array → DuckDB table
-			await db.registerFileText('ecosystem.json', JSON.stringify(nodes));
-			await duckdbConn.query(`CREATE OR REPLACE TABLE ecosystem AS SELECT * FROM read_json_auto('ecosystem.json')`);
+			await db.registerJson('ecosystem', nodes);
+
 			loadTime = performance.now() - t0;
 			mode = 'duckdb';
-			runQuery();
+			await runQuery();
 			stage = 'ready';
 		} catch (e: any) {
 			errorMsg = `DuckDB-WASM 로드 실패: ${e?.message ?? e}`;
@@ -87,9 +82,30 @@ LIMIT 10`);
 		}
 	}
 
+	/** HF parquet 직접 query 검증 — Phase A 핵심 인프라. */
+	async function testHfParquet() {
+		hfTestErr = '';
+		hfTestResult = [];
+		if (!dartDb) {
+			hfTestErr = '먼저 DuckDB-WASM 로드 필요';
+			return;
+		}
+		const t0 = performance.now();
+		try {
+			const year = new Date().getFullYear();
+			await dartDb.registerHfParquet('hfPrices', `krx/prices/raw-${year}.parquet`);
+			hfTestResult = await dartDb.query<{ BAS_DD: string; TDD_CLSPRC: number; MKTCAP: number }>(
+				`SELECT BAS_DD, TDD_CLSPRC, MKTCAP FROM hfPrices WHERE ISU_CD = '005930' ORDER BY BAS_DD DESC LIMIT 10`
+			);
+			hfTestTime = performance.now() - t0;
+		} catch (e: any) {
+			hfTestErr = `HF parquet query 실패: ${e?.message ?? e}`;
+		}
+	}
+
 	async function runQuery() {
-		if (mode === 'duckdb' && duckdbConn) {
-			runQueryDuckDB();
+		if (mode === 'duckdb' && dartDb) {
+			await runQueryDuckDB();
 		} else {
 			runQueryJS();
 		}
@@ -110,11 +126,11 @@ LIMIT 10`);
 	}
 
 	async function runQueryDuckDB() {
-		if (!duckdbConn) return;
+		if (!dartDb) return;
 		const t0 = performance.now();
 		try {
-			const result = await duckdbConn.query(queryText);
-			queryResult = result.toArray().map((r: any) => ({
+			const rows = await dartDb.query<{ industry: string; cnt: number; rev: number }>(queryText);
+			queryResult = rows.map((r) => ({
 				industry: r.industry,
 				cnt: Number(r.cnt),
 				rev: Number(r.rev)
@@ -198,6 +214,48 @@ LIMIT 10`);
 		</div>
 	{/if}
 </Section>
+
+{#if stage === 'ready' && mode === 'duckdb'}
+	<Section
+		eyebrow="HF PARQUET HTTPS"
+		title="HF dataset 직접 query 검증"
+		subtitle="DuckDB httpfs 가 HF parquet 을 Range request 로 byte 단위 fetch. 이게 작동하면 30년 시계열도 in-browser SQL 가능."
+	>
+		<div class="status-row">
+			<Button variant="primary" onclick={testHfParquet}>HF KRX parquet (삼성전자) query</Button>
+			{#if hfTestTime > 0 && !hfTestErr}
+				<Tag tone="good" filled>{hfTestTime.toFixed(0)} ms</Tag>
+			{/if}
+		</div>
+		{#if hfTestErr}
+			<Card padded>
+				<div class="dl-eyebrow" style="color: var(--dl-bad);">ERROR</div>
+				<p class="dl-body-sm" style="margin-top: var(--dl-s-2); color: var(--dl-bad); white-space: pre-wrap;">{hfTestErr}</p>
+			</Card>
+		{:else if hfTestResult.length > 0}
+			<Card padded>
+				<table class="result-table">
+					<thead>
+						<tr>
+							<th class="dl-label">기준일</th>
+							<th class="dl-label" style="text-align: right">종가</th>
+							<th class="dl-label" style="text-align: right">시가총액</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each hfTestResult as r}
+							<tr>
+								<td><span class="dl-mono">{r.BAS_DD}</span></td>
+								<td style="text-align: right"><MonoNumber value={Number(r.TDD_CLSPRC).toLocaleString('ko-KR')} size="sm" tone="ink" align="right" /></td>
+								<td style="text-align: right"><MonoNumber value={fmtKrwFromEok(Number(r.MKTCAP) / 1e8)} size="sm" tone="ink" align="right" /></td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</Card>
+		{/if}
+	</Section>
+{/if}
 
 {#if stage === 'ready'}
 	<Section
