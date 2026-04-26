@@ -9,6 +9,7 @@
 	import { loadDartDb, type DartDb } from '$lib/data/duckdb';
 	import { PRESETS, PRESETS_BY_ID, PRESET_CATEGORIES, type Preset } from '$lib/screener/presets';
 	import PresetCard from '$lib/screener/PresetCard.svelte';
+	import Sparkline from '$lib/screener/Sparkline.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -20,8 +21,20 @@
 	let dartDb: DartDb | null = $state(null);
 	let dbState: 'idle' | 'loading' | 'ready' | 'error' | 'unsupported' = $state('idle');
 	let dbError = $state('');
-	/** stockCode → { currentPrice, ma20, low60, high60 } from DuckDB */
-	let priceTimeSeries = $state<Map<string, { currentPrice: number; ma20: number | null; high60: number | null; low60: number | null }>>(new Map());
+	/** stockCode → 60일 시계열 derived (DuckDB query 결과). */
+	let priceTimeSeries = $state<
+		Map<
+			string,
+			{
+				currentPrice: number;
+				ma20: number | null;
+				high60: number | null;
+				low60: number | null;
+				/** sparkline 용 다운샘플 종가 (15포인트) */
+				spark: number[];
+			}
+		>
+	>(new Map());
 
 	// 메트릭 정의 — PR-1 은 25 개 (점-시점 + 이미 박힌 시계열 derived).
 	// PR-2 부터 derived/composite/quarterly/timeseries modifier 추가.
@@ -278,8 +291,15 @@
 			const year = new Date().getFullYear();
 			// 현재 연도 parquet 한 개만 우선 등록 (1Y 미만이면 last year 도 추후 union)
 			await db.registerHfParquet('krxPrices', `krx/prices/raw-${year}.parquet`);
-			// 종목별 최근 60거래일 종가에서 MA20, 60일 고점·저점 산출
-			const rows = await db.query<{ ISU_CD: string; currentPrice: number; ma20: number | null; high60: number | null; low60: number | null }>(`
+			// 종목별 최근 60거래일 종가에서 MA20, 60일 고점·저점, sparkline (다운샘플 15포인트) 산출
+			const rows = await db.query<{
+				ISU_CD: string;
+				currentPrice: number;
+				ma20: number | null;
+				high60: number | null;
+				low60: number | null;
+				spark: number[] | null;
+			}>(`
 				WITH recent AS (
 					SELECT
 						ISU_CD,
@@ -301,24 +321,43 @@
 				),
 				bounds AS (
 					SELECT ISU_CD, MAX(high) AS high60, MIN(low) AS low60 FROM last60 GROUP BY ISU_CD
+				),
+				spark AS (
+					-- 60일 종가에서 매 4일 샘플링 (15포인트, 시간 오름차순)
+					SELECT ISU_CD, ARRAY_AGG(close ORDER BY BAS_DD ASC) AS spark
+					FROM last60 WHERE rn % 4 = 0
+					GROUP BY ISU_CD
 				)
 				SELECT
 					l.ISU_CD,
 					l.currentPrice,
 					m.ma20,
 					b.high60,
-					b.low60
+					b.low60,
+					s.spark
 				FROM latest l
 				LEFT JOIN ma20 m USING (ISU_CD)
 				LEFT JOIN bounds b USING (ISU_CD)
+				LEFT JOIN spark s USING (ISU_CD)
 			`);
-			const map = new Map<string, { currentPrice: number; ma20: number | null; high60: number | null; low60: number | null }>();
+			const map = new Map<
+				string,
+				{
+					currentPrice: number;
+					ma20: number | null;
+					high60: number | null;
+					low60: number | null;
+					spark: number[];
+				}
+			>();
 			for (const r of rows) {
+				const sparkArr = Array.isArray(r.spark) ? r.spark.map((v) => Number(v)).filter((v) => Number.isFinite(v)) : [];
 				map.set(r.ISU_CD, {
 					currentPrice: Number(r.currentPrice),
 					ma20: r.ma20 != null ? Number(r.ma20) : null,
 					high60: r.high60 != null ? Number(r.high60) : null,
-					low60: r.low60 != null ? Number(r.low60) : null
+					low60: r.low60 != null ? Number(r.low60) : null,
+					spark: sparkArr
 				});
 			}
 			priceTimeSeries = map;
@@ -400,7 +439,7 @@
 	}
 
 	// 결과 테이블에 표시할 컬럼 (PR-1 기본 셋. PR-9 에서 컬럼 사전셋 도입 예정)
-	const TABLE_COLUMNS: { key: MetricKey | 'label' | 'industryName'; label: string; align?: 'left' | 'right' | 'center' }[] = [
+	const TABLE_COLUMNS: { key: MetricKey | 'label' | 'industryName' | 'spark'; label: string; align?: 'left' | 'right' | 'center' }[] = [
 		{ key: 'label', label: '회사', align: 'left' },
 		{ key: 'industryName', label: '산업', align: 'left' },
 		{ key: 'revenue', label: '매출', align: 'right' },
@@ -410,6 +449,7 @@
 		{ key: 'revCagr', label: 'CAGR', align: 'right' },
 		{ key: 'marketCap', label: '시총', align: 'right' },
 		{ key: 'return1y', label: '1Y', align: 'right' },
+		{ key: 'spark', label: '60d', align: 'center' },
 		{ key: 'profGrade', label: '수익', align: 'center' },
 		{ key: 'qualGrade', label: '이익질', align: 'center' },
 		{ key: 'govGrade', label: '거버넌스', align: 'center' }
@@ -785,6 +825,18 @@
 							</td>
 							<td class="num">{fmtMetricValue('marketCap', n.marketCap)}</td>
 							<td class="num {returnTone(n.return1y)}">{fmtMetricValue('return1y', n.return1y)}</td>
+							<td class="spark-cell">
+								{#if priceTimeSeries.has(String(n.id))}
+									{@const ts = priceTimeSeries.get(String(n.id))}
+									{#if ts && ts.spark.length >= 2}
+										<Sparkline values={ts.spark} />
+									{:else}
+										<span class="dim">—</span>
+									{/if}
+								{:else}
+									<span class="dim">—</span>
+								{/if}
+							</td>
 							<td class="grade-cell">
 								{#if n.profGrade}
 									<span class="grade-chip" style={gradeStyle(n.profGrade)}>{n.profGrade}</span>
@@ -1244,6 +1296,8 @@
 	th.center { text-align: center; }
 	td.grade-cell { text-align: center; }
 	td.grade-cell .dim { color: #475569; font-size: 11px; }
+	td.spark-cell { text-align: center; padding: 4px 8px; }
+	td.spark-cell .dim { color: #475569; font-size: 11px; }
 	td {
 		padding: 8px 12px;
 		border-bottom: 1px solid rgba(30, 36, 51, 0.5);
