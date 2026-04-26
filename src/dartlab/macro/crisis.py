@@ -12,7 +12,8 @@ import logging
 
 log = logging.getLogger(__name__)
 
-from dartlab.core.finance.crisisDetector import (
+from dartlab.core.finance.liquidity import capexPressure
+from dartlab.credit.crisisDetector import (
     creditToGDPGap,
     dalioDebtCyclePhase,
     dalioPolicyLeverStatus,
@@ -23,7 +24,6 @@ from dartlab.core.finance.crisisDetector import (
     minskyPhase,
     recessionDashboard,
 )
-from dartlab.core.finance.liquidity import capexPressure
 from dartlab.macro._helpers import get_gather
 
 
@@ -518,7 +518,7 @@ def _crisisExcessBondPremium(as_of: str | None) -> dict | None:
 def _crisisCreditCycle(as_of: str | None) -> dict | None:
     """Verdad Credit Cycle 4단계 (Greenwood-Hanson-Jin 2019). 반환: classifyCreditCycle dict."""
     try:
-        from dartlab.core.finance.creditCycle import classifyCreditCycle
+        from dartlab.credit.creditCycle import classifyCreditCycle
         from dartlab.macro._helpers import fetch_latest as _fl2
         from dartlab.macro._helpers import get_gather as _gg2
 

@@ -46,7 +46,7 @@
 import sys
 sys.path.insert(0, "src")
 
-from dartlab.core.finance.merton import solveMerton
+from dartlab.credit.merton import solveMerton
 
 
 def run():

@@ -81,7 +81,7 @@ def test_riskPremiums_currency_to_country():
 
 @pytest.mark.requires_data
 def test_survivalWeight_safe_zone():
-    from dartlab.core.finance.survival import applySurvivalWeight, calcSurvivalWeight
+    from dartlab.credit.survival import applySurvivalWeight, calcSurvivalWeight
 
     s = calcSurvivalWeight(zone="safe")
     assert s["pSurvival"] > 0.9  # safe zone 은 장기 생존확률 높음
@@ -93,7 +93,7 @@ def test_survivalWeight_safe_zone():
 
 @pytest.mark.requires_data
 def test_survivalWeight_distress_zone():
-    from dartlab.core.finance.survival import applySurvivalWeight, calcSurvivalWeight
+    from dartlab.credit.survival import applySurvivalWeight, calcSurvivalWeight
 
     s = calcSurvivalWeight(zone="distress")
     assert s["pSurvival"] < 0.5

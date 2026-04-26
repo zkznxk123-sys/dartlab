@@ -6,7 +6,8 @@ Layer 1 (metrics.py) → Layer 2 (scorecard) → Layer 3 (등급 결정)
 
 from __future__ import annotations
 
-from dartlab.core.finance.creditScorecard import (
+from dartlab.core.finance.sectorThresholds import getSectorLabel, getThresholds
+from dartlab.credit.creditScorecard import (
     axisScore,
     cashFlowGrade,
     creditOutlook,
@@ -16,7 +17,6 @@ from dartlab.core.finance.creditScorecard import (
     scoreMetric,
     weightedScore,
 )
-from dartlab.core.finance.sectorThresholds import getSectorLabel, getThresholds
 from dartlab.credit.metrics import calcAllMetrics
 
 # ═══════════════════════════════════════════════════════════
@@ -533,8 +533,8 @@ def _explainDivergence(
 
 def _applyPostAdjustments(company, overall, latest, metrics, axes, captive, holding, sepMetrics):
     """CHS + Notch + divergence — Track A/B 공통 후처리."""
-    from dartlab.core.finance.creditScorecard import estimatePD
-    from dartlab.core.finance.creditScorecard import notchGrade as _notchGrade
+    from dartlab.credit.creditScorecard import estimatePD
+    from dartlab.credit.creditScorecard import notchGrade as _notchGrade
 
     # CHS 보정
     chsResult = _calcCHSAdjustment(company, overall)

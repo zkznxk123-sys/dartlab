@@ -53,7 +53,7 @@ import sys
 sys.path.insert(0, "src")
 
 from dartlab.analysis.financial.insight.distress import calcDistress
-from dartlab.core.finance.merton import MertonResult
+from dartlab.credit.merton import MertonResult
 from dartlab.core.finance.ratios import RatioResult
 
 

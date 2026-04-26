@@ -327,7 +327,7 @@ def test_analyze_market_data_none_backward_compat():
 def test_merton_solver_basic():
     """solveMerton 수렴 + D2D 범위 검증."""
     pytest.importorskip("scipy")
-    from dartlab.core.finance.merton import solveMerton
+    from dartlab.credit.merton import solveMerton
 
     # 건전 기업: E >> D
     result = solveMerton(equityValue=400e12, debtFaceValue=100e12, equityVolatility=0.30)
@@ -351,7 +351,7 @@ def test_equity_volatility_basic():
     import math
     import random
 
-    from dartlab.core.finance.merton import calcEquityVolatility
+    from dartlab.credit.merton import calcEquityVolatility
 
     random.seed(123)
     daily_sigma = 0.02

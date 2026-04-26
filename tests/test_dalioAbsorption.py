@@ -12,7 +12,7 @@ import pytest
 
 @pytest.mark.unit
 def test_dalioDebtCyclePhase_1982_volcker():
-    from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
+    from dartlab.credit.crisisDetector import dalioDebtCyclePhase
 
     r = dalioDebtCyclePhase(totalDebtToGdp=150, debtServiceYoY=4.0, creditGap=-3.0, realRate=6.0, gdpGrowth=-2.0)
     assert r.phase == "deflationaryDepression"
@@ -21,7 +21,7 @@ def test_dalioDebtCyclePhase_1982_volcker():
 
 @pytest.mark.unit
 def test_dalioDebtCyclePhase_2007_housing():
-    from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
+    from dartlab.credit.crisisDetector import dalioDebtCyclePhase
 
     r = dalioDebtCyclePhase(totalDebtToGdp=240, debtServiceYoY=5.0, creditGap=10.0, realRate=0.5, gdpGrowth=2.0)
     assert r.phase == "topBubble"
@@ -29,7 +29,7 @@ def test_dalioDebtCyclePhase_2007_housing():
 
 @pytest.mark.unit
 def test_dalioDebtCyclePhase_2013_beautiful():
-    from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
+    from dartlab.credit.crisisDetector import dalioDebtCyclePhase
 
     r = dalioDebtCyclePhase(totalDebtToGdp=240, debtServiceYoY=-2.0, creditGap=2.0, realRate=-1.0, gdpGrowth=2.0)
     assert r.phase == "beautifulDeleveraging"
@@ -37,7 +37,7 @@ def test_dalioDebtCyclePhase_2013_beautiful():
 
 @pytest.mark.unit
 def test_dalioDebtCyclePhase_1975_reflationary():
-    from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
+    from dartlab.credit.crisisDetector import dalioDebtCyclePhase
 
     r = dalioDebtCyclePhase(totalDebtToGdp=130, debtServiceYoY=2.0, creditGap=5.0, realRate=-3.0, gdpGrowth=-0.5)
     assert r.phase == "reflationary"
@@ -45,7 +45,7 @@ def test_dalioDebtCyclePhase_1975_reflationary():
 
 @pytest.mark.unit
 def test_dalioDebtCyclePhase_missing_inputs_default():
-    from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
+    from dartlab.credit.crisisDetector import dalioDebtCyclePhase
 
     # 결측 → earlyBoom 기본값 (예외 금지)
     r = dalioDebtCyclePhase()
@@ -58,7 +58,7 @@ def test_dalioDebtCyclePhase_missing_inputs_default():
 
 @pytest.mark.unit
 def test_dalioPolicyLeverStatus_all_maxed():
-    from dartlab.core.finance.crisisDetector import dalioPolicyLeverStatus
+    from dartlab.credit.crisisDetector import dalioPolicyLeverStatus
 
     r = dalioPolicyLeverStatus(policyRate=0.1, publicDebtToGdp=150, creditGap=10, fxFlexibility="pegged")
     assert r.monetary == "maxed"
@@ -70,7 +70,7 @@ def test_dalioPolicyLeverStatus_all_maxed():
 
 @pytest.mark.unit
 def test_dalioPolicyLeverStatus_all_spare():
-    from dartlab.core.finance.crisisDetector import dalioPolicyLeverStatus
+    from dartlab.credit.crisisDetector import dalioPolicyLeverStatus
 
     r = dalioPolicyLeverStatus(policyRate=5.0, publicDebtToGdp=50, creditGap=0, fxFlexibility="flexible")
     assert r.monetary == "spare"
@@ -82,7 +82,7 @@ def test_dalioPolicyLeverStatus_all_spare():
 
 @pytest.mark.unit
 def test_dalioPolicyLeverStatus_partial_mix():
-    from dartlab.core.finance.crisisDetector import dalioPolicyLeverStatus
+    from dartlab.credit.crisisDetector import dalioPolicyLeverStatus
 
     r = dalioPolicyLeverStatus(policyRate=1.5, publicDebtToGdp=100, creditGap=5, fxFlexibility="managed")
     assert r.monetary == "partial"
@@ -97,7 +97,7 @@ def test_dalioPolicyLeverStatus_partial_mix():
 
 @pytest.mark.unit
 def test_ghsCrisisScore_deflation_regime():
-    from dartlab.core.finance.crisisDetector import ghsCrisisScore
+    from dartlab.credit.crisisDetector import ghsCrisisScore
 
     r = ghsCrisisScore(creditGrowth3y=-2.0, assetPriceGrowth3y=-10.0, realRate=3.0)
     assert r.regime == "deflation"
@@ -106,7 +106,7 @@ def test_ghsCrisisScore_deflation_regime():
 
 @pytest.mark.unit
 def test_ghsCrisisScore_inflation_regime():
-    from dartlab.core.finance.crisisDetector import ghsCrisisScore
+    from dartlab.credit.crisisDetector import ghsCrisisScore
 
     r = ghsCrisisScore(creditGrowth3y=10.0, assetPriceGrowth3y=60.0, realRate=-1.0)
     assert r.regime == "inflation"
@@ -115,7 +115,7 @@ def test_ghsCrisisScore_inflation_regime():
 
 @pytest.mark.unit
 def test_ghsCrisisScore_no_regime_without_realrate():
-    from dartlab.core.finance.crisisDetector import ghsCrisisScore
+    from dartlab.credit.crisisDetector import ghsCrisisScore
 
     # realRate 미제공 → regime None (후방 호환)
     r = ghsCrisisScore(creditGrowth3y=5.0, assetPriceGrowth3y=20.0)
@@ -126,7 +126,7 @@ def test_ghsCrisisScore_no_regime_without_realrate():
 @pytest.mark.unit
 def test_ghsCrisisScore_legacy_positional_args():
     """기존 코드의 positional 2-arg 호출이 깨지지 않음 (후방 호환)."""
-    from dartlab.core.finance.crisisDetector import ghsCrisisScore
+    from dartlab.credit.crisisDetector import ghsCrisisScore
 
     r = ghsCrisisScore(5.0, 20.0)
     assert r.score >= 0

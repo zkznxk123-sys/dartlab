@@ -19,11 +19,6 @@ from dartlab.core.finance.fmt import (
     fmtPrice,
     fmtUnit,
 )
-from dartlab.core.finance.merton import (
-    MertonResult,
-    calcEquityVolatility,
-    solveMerton,
-)
 from dartlab.core.finance.ols import (
     MultiOlsResult,
     coefficientOfVariation,
@@ -52,6 +47,11 @@ from dartlab.core.finance.scenario import (
     getElasticity,
     getNoiseSigma,
     getPresetScenarios,
+)
+from dartlab.credit.merton import (
+    MertonResult,
+    calcEquityVolatility,
+    solveMerton,
 )
 
 __all__ = [

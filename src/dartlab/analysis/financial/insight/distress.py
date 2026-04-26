@@ -25,8 +25,8 @@ from dartlab.analysis.financial.insight.types import (
     DistressResult,
     ModelScore,
 )
-from dartlab.core.finance.merton import MertonResult
 from dartlab.core.finance.ratios import RatioResult
+from dartlab.credit.merton import MertonResult
 
 # ── 신용등급 매핑 테이블 (S&P PD↔Rating 대응) ──
 
@@ -79,7 +79,7 @@ def _mapCreditGrade20(overall: float) -> tuple[str, str, float]:
         description : str — 등급 설명
         pd : float — 부도 확률 (%)
     """
-    from dartlab.core.finance.creditScorecard import mapTo20Grade
+    from dartlab.credit.creditScorecard import mapTo20Grade
 
     return mapTo20Grade(overall)
 

@@ -48,7 +48,7 @@ sys.path.insert(0, "src")
 
 
 def run():
-    from dartlab.core.finance.merton import calcEquityVolatility, solveMerton
+    from dartlab.credit.merton import calcEquityVolatility, solveMerton
 
     # 1. yahoo 히스토리 수집
     print("=" * 70)

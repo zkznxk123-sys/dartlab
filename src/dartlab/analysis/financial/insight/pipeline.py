@@ -243,7 +243,7 @@ def analyzeFinancial(
     mertonResult = None
     if not isFinancial and marketData is not None:
         try:
-            from dartlab.core.finance.merton import calcEquityVolatility, solveMerton
+            from dartlab.credit.merton import calcEquityVolatility, solveMerton
 
             vol = calcEquityVolatility(marketData.dailyReturns)
             if vol > 0:
