@@ -82,6 +82,12 @@
 		{ key: 'currentVsMA20', label: '현재가 vs MA20', group: 'derived', type: 'number', unit: '%', signed: true, higherBetter: true },
 		{ key: 'drawdown60d', label: '60일 고점 대비', group: 'derived', type: 'number', unit: '%', signed: true, higherBetter: true },
 		{ key: 'recovery60d', label: '60일 저점 대비', group: 'derived', type: 'number', unit: '%', signed: true, higherBetter: true },
+		// 분기 derived (quarters.json — PR-4)
+		{ key: 'qoqRevenueGrowth', label: '매출 QoQ', group: 'quarterly', type: 'number', unit: '%', signed: true, higherBetter: true },
+		{ key: 'qoqOpProfitGrowth', label: '영업이익 QoQ', group: 'quarterly', type: 'number', unit: '%', signed: true, higherBetter: true },
+		{ key: 'yoyRevenueGrowthQ', label: '매출 YoY (분기)', group: 'quarterly', type: 'number', unit: '%', signed: true, higherBetter: true },
+		{ key: 'yoyOpProfitGrowthQ', label: '영업이익 YoY (분기)', group: 'quarterly', type: 'number', unit: '%', signed: true, higherBetter: true },
+		{ key: 'consecutiveProfitableQ', label: '연속 흑자 분기', group: 'quarterly', type: 'number', unit: 'Q', higherBetter: true },
 		// 등급 (enum)
 		{ key: 'profGrade', label: '수익성 등급', group: 'income', type: 'enum', values: ['우수', '양호', '보통', '저수익', '적자'] },
 		{ key: 'debtGrade', label: '부채 등급', group: 'health', type: 'enum', values: ['안전', '관찰', '주의', '고위험'] },
@@ -191,6 +197,63 @@
 		editingTabName = '';
 	}
 
+	// 분기 derived 메트릭 — quarters.json 의 IS/CF/BS 시계열에서 계산
+	const quarterMetrics = $derived.by(() => {
+		const out = new Map<
+			string,
+			{
+				qoqRevenueGrowth: number | null;
+				qoqOpProfitGrowth: number | null;
+				yoyRevenueGrowthQ: number | null;
+				yoyOpProfitGrowthQ: number | null;
+				consecutiveProfitableQ: number;
+				turnaroundFlag: boolean;
+			}
+		>();
+		const companies = (data.quarters as any)?.companies ?? {};
+		// 안전한 percent change — 분모 0/null 처리
+		const pct = (curr: unknown, prev: unknown): number | null => {
+			const a = typeof curr === 'number' ? curr : null;
+			const b = typeof prev === 'number' ? prev : null;
+			if (a == null || b == null || b === 0) return null;
+			return ((a / b) - 1) * 100;
+		};
+		for (const [code, payload] of Object.entries(companies as Record<string, any>)) {
+			const sales: (number | null)[] = payload?.is?.sales ?? [];
+			const op: (number | null)[] = payload?.is?.op ?? [];
+			if (sales.length === 0 && op.length === 0) continue;
+			const last = sales.length - 1;
+			const opLast = op.length - 1;
+			const qoqRevenueGrowth = last >= 1 ? pct(sales[last], sales[last - 1]) : null;
+			const qoqOpProfitGrowth = opLast >= 1 ? pct(op[opLast], op[opLast - 1]) : null;
+			const yoyRevenueGrowthQ = last >= 4 ? pct(sales[last], sales[last - 4]) : null;
+			const yoyOpProfitGrowthQ = opLast >= 4 ? pct(op[opLast], op[opLast - 4]) : null;
+			// 직전 분기 영업적자 → 당분기 흑자 전환
+			const turnaroundFlag =
+				opLast >= 1 &&
+				typeof op[opLast] === 'number' &&
+				typeof op[opLast - 1] === 'number' &&
+				(op[opLast] as number) > 0 &&
+				(op[opLast - 1] as number) <= 0;
+			// 직전부터 거꾸로 — op 가 양수인 분기 연속 카운트
+			let consecutiveProfitableQ = 0;
+			for (let i = opLast; i >= 0; i--) {
+				const v = op[i];
+				if (typeof v === 'number' && v > 0) consecutiveProfitableQ++;
+				else break;
+			}
+			out.set(code, {
+				qoqRevenueGrowth,
+				qoqOpProfitGrowth,
+				yoyRevenueGrowthQ,
+				yoyOpProfitGrowthQ,
+				consecutiveProfitableQ,
+				turnaroundFlag
+			});
+		}
+		return out;
+	});
+
 	// 데이터 join — ecosystem.nodes + prices-snapshot.data + priceTimeSeries (DuckDB derived)
 	const joinedNodes = $derived.by(() => {
 		const eco = (data.ecosystem as any)?.nodes ?? [];
@@ -198,6 +261,7 @@
 		return eco.map((n: any) => {
 			const snap = prices[n.id] ?? {};
 			const ts = priceTimeSeries.get(n.id);
+			const qm = quarterMetrics.get(String(n.id));
 			let currentVsMA20: number | null = null;
 			let drawdown60d: number | null = null;
 			let recovery60d: number | null = null;
@@ -217,7 +281,13 @@
 				...snap,
 				currentVsMA20,
 				drawdown60d,
-				recovery60d
+				recovery60d,
+				qoqRevenueGrowth: qm?.qoqRevenueGrowth ?? null,
+				qoqOpProfitGrowth: qm?.qoqOpProfitGrowth ?? null,
+				yoyRevenueGrowthQ: qm?.yoyRevenueGrowthQ ?? null,
+				yoyOpProfitGrowthQ: qm?.yoyOpProfitGrowthQ ?? null,
+				consecutiveProfitableQ: qm?.consecutiveProfitableQ ?? 0,
+				turnaroundFlag: qm?.turnaroundFlag ?? false
 			};
 		}) as ScreenerNode[];
 	});
@@ -824,6 +894,11 @@
 							</optgroup>
 							<optgroup label="가격 시계열 (DuckDB)">
 								{#each METRICS.filter((m) => m.group === 'derived') as opt}
+									<option value={opt.key}>{opt.label}</option>
+								{/each}
+							</optgroup>
+							<optgroup label="분기 (quarters)">
+								{#each METRICS.filter((m) => m.group === 'quarterly') as opt}
 									<option value={opt.key}>{opt.label}</option>
 								{/each}
 							</optgroup>

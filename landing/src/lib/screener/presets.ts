@@ -86,6 +86,32 @@ export const PRESETS: Preset[] = [
 		sorts: [{ key: 'roeDelta', dir: 'desc' }]
 	},
 	{
+		id: 'qoq-acceleration',
+		title: '분기 가속 회사',
+		subtitle: '직전 분기 → 당분기 가속',
+		desc: '매출 QoQ 10%↑ + 영업이익 QoQ 20%↑ + YoY 매출 양수 — 분기 단위 모멘텀',
+		category: 'theme',
+		conds: [
+			{ metric: 'qoqRevenueGrowth', op: '>=', value: 10 },
+			{ metric: 'qoqOpProfitGrowth', op: '>=', value: 20 },
+			{ metric: 'yoyRevenueGrowthQ', op: '>=', value: 0 }
+		],
+		sorts: [{ key: 'qoqOpProfitGrowth', dir: 'desc' }]
+	},
+	{
+		id: 'consecutive-profit',
+		title: '연속 흑자 8 분기',
+		subtitle: '안정적 영업이익 흐름',
+		desc: '직전 8 분기 연속 영업이익 양수 + 매출 YoY 양수 + 부채 안전권 — 검증된 안정 회사',
+		category: 'theme',
+		conds: [
+			{ metric: 'consecutiveProfitableQ', op: '>=', value: 8 },
+			{ metric: 'revenueYoyPct', op: '>=', value: 0 },
+			{ metric: 'debtRatio', op: '<=', value: 150 }
+		],
+		sorts: [{ key: 'consecutiveProfitableQ', dir: 'desc' }]
+	},
+	{
 		id: 'risk-watch',
 		title: '이상 신호 회사',
 		subtitle: '감사·부채·극단 변화',

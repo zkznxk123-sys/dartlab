@@ -122,9 +122,12 @@ export type MetricKey =
 	| 'currentVsMA20'
 	| 'drawdown60d'
 	| 'recovery60d'
-	// 분기 derived (frontend, PR-2)
+	// 분기 derived (frontend, quarters.json 활용 — PR-4)
 	| 'qoqRevenueGrowth'
 	| 'qoqOpProfitGrowth'
+	| 'yoyRevenueGrowthQ'
+	| 'yoyOpProfitGrowthQ'
+	| 'consecutiveProfitableQ'
 	| 'lastQuartersProfitable'
 	| 'revenueAcceleration'
 	| 'turnaroundFlag'
