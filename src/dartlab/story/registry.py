@@ -128,6 +128,200 @@ def _makeNeed(keys: set[str] | None) -> Callable[[str], bool]:
     return _need
 
 
+# ──────────────────────────────────────────────────────────────────
+# 그룹 빌더 함수 — buildBlocks 가 호출하는 그룹 단위 책임 분해.
+# 각 함수: (company, keys, basePeriod, safe, need, out) -> None.
+# 그룹 게이트 (keys 매칭) + lazy import (calc + builder) + 블록 등록.
+# ──────────────────────────────────────────────────────────────────
+
+
+def _buildRevenueBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """1 부 — 사업구조 (10 블록)."""
+    if keys is not None and not (
+        keys
+        & {
+            "profile",
+            "segmentComposition",
+            "segmentTrend",
+            "region",
+            "product",
+            "growth",
+            "concentration",
+            "revenueQuality",
+            "growthContribution",
+            "revenueFlags",
+        }
+    ):
+        return
+    from dartlab.analysis.financial.revenue import (
+        calcBreakdown,
+        calcCompanyProfile,
+        calcConcentration,
+        calcFlags,
+        calcGrowthContribution,
+        calcRevenueGrowth,
+        calcRevenueQuality,
+        calcSegmentComposition,
+        calcSegmentTrend,
+    )
+    from dartlab.story.builders import (
+        breakdownBlock,
+        concentrationBlock,
+        growthContributionBlock,
+        profileBlock,
+        revenueFlagsBlock,
+        revenueGrowthBlock,
+        revenueQualityBlock,
+        segmentCompositionBlock,
+        segmentTrendBlock,
+    )
+
+    if need("profile"):
+        out["profile"] = safe(lambda: profileBlock(calcCompanyProfile(company, basePeriod=basePeriod)))
+    if need("segmentComposition"):
+        out["segmentComposition"] = safe(
+            lambda: segmentCompositionBlock(calcSegmentComposition(company, basePeriod=basePeriod))
+        )
+    if need("segmentTrend"):
+        out["segmentTrend"] = safe(lambda: segmentTrendBlock(calcSegmentTrend(company, basePeriod=basePeriod)))
+    if need("region"):
+        out["region"] = safe(lambda: breakdownBlock(calcBreakdown(company, "region", basePeriod=basePeriod), "region"))
+    if need("product"):
+        out["product"] = safe(
+            lambda: breakdownBlock(calcBreakdown(company, "product", basePeriod=basePeriod), "product")
+        )
+    if need("growth"):
+        out["growth"] = safe(lambda: revenueGrowthBlock(calcRevenueGrowth(company, basePeriod=basePeriod)))
+    if need("concentration"):
+        out["concentration"] = safe(lambda: concentrationBlock(calcConcentration(company, basePeriod=basePeriod)))
+    if need("revenueQuality"):
+        out["revenueQuality"] = safe(lambda: revenueQualityBlock(calcRevenueQuality(company, basePeriod=basePeriod)))
+    if need("growthContribution"):
+        out["growthContribution"] = safe(
+            lambda: growthContributionBlock(calcGrowthContribution(company, basePeriod=basePeriod))
+        )
+    if need("revenueFlags"):
+        out["revenueFlags"] = safe(lambda: revenueFlagsBlock(calcFlags(company, basePeriod=basePeriod)))
+
+
+def _buildCapitalBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """1 부 — 자본구조 (9 블록)."""
+    if keys is not None and not (
+        keys
+        & {
+            "fundingSources",
+            "capitalOverview",
+            "capitalTimeline",
+            "debtTimeline",
+            "interestBurden",
+            "liquidity",
+            "cashFlowStructure",
+            "distressIndicators",
+            "capitalFlags",
+        }
+    ):
+        return
+    from dartlab.analysis.financial.capital import (
+        calcCapitalFlags,
+        calcCapitalOverview,
+        calcCapitalTimeline,
+        calcCashFlowStructure,
+        calcDebtTimeline,
+        calcDistressIndicators,
+        calcFundingSources,
+        calcInterestBurden,
+        calcLiquidity,
+    )
+    from dartlab.story.builders import (
+        capitalFlagsBlock,
+        capitalOverviewBlock,
+        capitalTimelineBlock,
+        cashFlowBlock,
+        debtTimelineBlock,
+        distressBlock,
+        fundingSourcesBlock,
+        interestBurdenBlock,
+        liquidityBlock,
+    )
+
+    if need("fundingSources"):
+        out["fundingSources"] = safe(lambda: fundingSourcesBlock(calcFundingSources(company, basePeriod=basePeriod)))
+    if need("capitalOverview"):
+        out["capitalOverview"] = safe(lambda: capitalOverviewBlock(calcCapitalOverview(company, basePeriod=basePeriod)))
+    if need("capitalTimeline"):
+        out["capitalTimeline"] = safe(lambda: capitalTimelineBlock(calcCapitalTimeline(company, basePeriod=basePeriod)))
+    if need("debtTimeline"):
+        out["debtTimeline"] = safe(lambda: debtTimelineBlock(calcDebtTimeline(company, basePeriod=basePeriod)))
+    if need("interestBurden"):
+        out["interestBurden"] = safe(lambda: interestBurdenBlock(calcInterestBurden(company, basePeriod=basePeriod)))
+    if need("liquidity"):
+        out["liquidity"] = safe(lambda: liquidityBlock(calcLiquidity(company, basePeriod=basePeriod)))
+    if need("cashFlowStructure"):
+        out["cashFlowStructure"] = safe(lambda: cashFlowBlock(calcCashFlowStructure(company, basePeriod=basePeriod)))
+    if need("distressIndicators"):
+        out["distressIndicators"] = safe(lambda: distressBlock(calcDistressIndicators(company, basePeriod=basePeriod)))
+    if need("capitalFlags"):
+        out["capitalFlags"] = safe(lambda: capitalFlagsBlock(calcCapitalFlags(company, basePeriod=basePeriod)))
+
+
+def _buildAssetBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """1 부 — 자산구조 (4 블록)."""
+    if keys is not None and not (keys & {"assetStructure", "workingCapital", "capexPattern", "assetFlags"}):
+        return
+    from dartlab.analysis.financial.asset import (
+        calcAssetFlags,
+        calcAssetStructure,
+        calcCapexPattern,
+        calcWorkingCapital,
+    )
+    from dartlab.story.builders import (
+        assetFlagsBlock,
+        assetStructureBlock,
+        capexBlock,
+        workingCapitalBlock,
+    )
+
+    if need("assetStructure"):
+        out["assetStructure"] = safe(lambda: assetStructureBlock(calcAssetStructure(company, basePeriod=basePeriod)))
+    if need("workingCapital"):
+        out["workingCapital"] = safe(lambda: workingCapitalBlock(calcWorkingCapital(company, basePeriod=basePeriod)))
+    if need("capexPattern"):
+        out["capexPattern"] = safe(lambda: capexBlock(calcCapexPattern(company, basePeriod=basePeriod)))
+    if need("assetFlags"):
+        out["assetFlags"] = safe(lambda: assetFlagsBlock(calcAssetFlags(company, basePeriod=basePeriod)))
+
+
+def _buildCashflowBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:
+    """1 부 — 현금흐름 (4 블록)."""
+    if keys is not None and not (keys & {"cashFlowOverview", "cashQuality", "ocfDecomposition", "cashFlowFlags"}):
+        return
+    from dartlab.analysis.financial.cashflow import (
+        calcCashFlowFlags,
+        calcCashFlowOverview,
+        calcCashQuality,
+        calcOcfDecomposition,
+    )
+    from dartlab.story.builders import (
+        cashFlowFlagsBlock,
+        cashFlowOverviewBlock,
+        cashQualityBlock,
+        ocfDecompositionBlock,
+    )
+
+    if need("cashFlowOverview"):
+        out["cashFlowOverview"] = safe(
+            lambda: cashFlowOverviewBlock(calcCashFlowOverview(company, basePeriod=basePeriod))
+        )
+    if need("cashQuality"):
+        out["cashQuality"] = safe(lambda: cashQualityBlock(calcCashQuality(company, basePeriod=basePeriod)))
+    if need("ocfDecomposition"):
+        out["ocfDecomposition"] = safe(
+            lambda: ocfDecompositionBlock(calcOcfDecomposition(company, basePeriod=basePeriod))
+        )
+    if need("cashFlowFlags"):
+        out["cashFlowFlags"] = safe(lambda: cashFlowFlagsBlock(calcCashFlowFlags(company, basePeriod=basePeriod)))
+
+
 def buildBlocks(
     company,
     keys: set[str] | None = None,
@@ -152,180 +346,11 @@ def buildBlocks(
     _need = _makeNeed(keys)
     b: dict = {}
 
-    # ── 1부: 사업구조 ──
-    # import는 해당 블록이 필요할 때만 (그룹 단위)
-    if keys is None or keys & {
-        "profile",
-        "segmentComposition",
-        "segmentTrend",
-        "region",
-        "product",
-        "growth",
-        "concentration",
-        "revenueQuality",
-        "growthContribution",
-        "revenueFlags",
-    }:
-        from dartlab.analysis.financial.revenue import (
-            calcBreakdown,
-            calcCompanyProfile,
-            calcConcentration,
-            calcFlags,
-            calcGrowthContribution,
-            calcRevenueGrowth,
-            calcRevenueQuality,
-            calcSegmentComposition,
-            calcSegmentTrend,
-        )
-        from dartlab.story.builders import (
-            breakdownBlock,
-            concentrationBlock,
-            growthContributionBlock,
-            profileBlock,
-            revenueFlagsBlock,
-            revenueGrowthBlock,
-            revenueQualityBlock,
-            segmentCompositionBlock,
-            segmentTrendBlock,
-        )
-
-        if _need("profile"):
-            b["profile"] = _safe(lambda: profileBlock(calcCompanyProfile(company, basePeriod=basePeriod)))
-        if _need("segmentComposition"):
-            b["segmentComposition"] = _safe(
-                lambda: segmentCompositionBlock(calcSegmentComposition(company, basePeriod=basePeriod))
-            )
-        if _need("segmentTrend"):
-            b["segmentTrend"] = _safe(lambda: segmentTrendBlock(calcSegmentTrend(company, basePeriod=basePeriod)))
-        if _need("region"):
-            b["region"] = _safe(
-                lambda: breakdownBlock(calcBreakdown(company, "region", basePeriod=basePeriod), "region")
-            )
-        if _need("product"):
-            b["product"] = _safe(
-                lambda: breakdownBlock(calcBreakdown(company, "product", basePeriod=basePeriod), "product")
-            )
-        if _need("growth"):
-            b["growth"] = _safe(lambda: revenueGrowthBlock(calcRevenueGrowth(company, basePeriod=basePeriod)))
-        if _need("concentration"):
-            b["concentration"] = _safe(lambda: concentrationBlock(calcConcentration(company, basePeriod=basePeriod)))
-        if _need("revenueQuality"):
-            b["revenueQuality"] = _safe(lambda: revenueQualityBlock(calcRevenueQuality(company, basePeriod=basePeriod)))
-        if _need("growthContribution"):
-            b["growthContribution"] = _safe(
-                lambda: growthContributionBlock(calcGrowthContribution(company, basePeriod=basePeriod))
-            )
-        if _need("revenueFlags"):
-            b["revenueFlags"] = _safe(lambda: revenueFlagsBlock(calcFlags(company, basePeriod=basePeriod)))
-
-    if keys is None or keys & {
-        "fundingSources",
-        "capitalOverview",
-        "capitalTimeline",
-        "debtTimeline",
-        "interestBurden",
-        "liquidity",
-        "cashFlowStructure",
-        "distressIndicators",
-        "capitalFlags",
-    }:
-        from dartlab.analysis.financial.capital import (
-            calcCapitalFlags,
-            calcCapitalOverview,
-            calcCapitalTimeline,
-            calcCashFlowStructure,
-            calcDebtTimeline,
-            calcDistressIndicators,
-            calcFundingSources,
-            calcInterestBurden,
-            calcLiquidity,
-        )
-        from dartlab.story.builders import (
-            capitalFlagsBlock,
-            capitalOverviewBlock,
-            capitalTimelineBlock,
-            cashFlowBlock,
-            debtTimelineBlock,
-            distressBlock,
-            fundingSourcesBlock,
-            interestBurdenBlock,
-            liquidityBlock,
-        )
-
-        if _need("fundingSources"):
-            b["fundingSources"] = _safe(lambda: fundingSourcesBlock(calcFundingSources(company, basePeriod=basePeriod)))
-        if _need("capitalOverview"):
-            b["capitalOverview"] = _safe(
-                lambda: capitalOverviewBlock(calcCapitalOverview(company, basePeriod=basePeriod))
-            )
-        if _need("capitalTimeline"):
-            b["capitalTimeline"] = _safe(
-                lambda: capitalTimelineBlock(calcCapitalTimeline(company, basePeriod=basePeriod))
-            )
-        if _need("debtTimeline"):
-            b["debtTimeline"] = _safe(lambda: debtTimelineBlock(calcDebtTimeline(company, basePeriod=basePeriod)))
-        if _need("interestBurden"):
-            b["interestBurden"] = _safe(lambda: interestBurdenBlock(calcInterestBurden(company, basePeriod=basePeriod)))
-        if _need("liquidity"):
-            b["liquidity"] = _safe(lambda: liquidityBlock(calcLiquidity(company, basePeriod=basePeriod)))
-        if _need("cashFlowStructure"):
-            b["cashFlowStructure"] = _safe(lambda: cashFlowBlock(calcCashFlowStructure(company, basePeriod=basePeriod)))
-        if _need("distressIndicators"):
-            b["distressIndicators"] = _safe(
-                lambda: distressBlock(calcDistressIndicators(company, basePeriod=basePeriod))
-            )
-        if _need("capitalFlags"):
-            b["capitalFlags"] = _safe(lambda: capitalFlagsBlock(calcCapitalFlags(company, basePeriod=basePeriod)))
-
-    if keys is None or keys & {"assetStructure", "workingCapital", "capexPattern", "assetFlags"}:
-        from dartlab.analysis.financial.asset import (
-            calcAssetFlags,
-            calcAssetStructure,
-            calcCapexPattern,
-            calcWorkingCapital,
-        )
-        from dartlab.story.builders import (
-            assetFlagsBlock,
-            assetStructureBlock,
-            capexBlock,
-            workingCapitalBlock,
-        )
-
-        if _need("assetStructure"):
-            b["assetStructure"] = _safe(lambda: assetStructureBlock(calcAssetStructure(company, basePeriod=basePeriod)))
-        if _need("workingCapital"):
-            b["workingCapital"] = _safe(lambda: workingCapitalBlock(calcWorkingCapital(company, basePeriod=basePeriod)))
-        if _need("capexPattern"):
-            b["capexPattern"] = _safe(lambda: capexBlock(calcCapexPattern(company, basePeriod=basePeriod)))
-        if _need("assetFlags"):
-            b["assetFlags"] = _safe(lambda: assetFlagsBlock(calcAssetFlags(company, basePeriod=basePeriod)))
-
-    if keys is None or keys & {"cashFlowOverview", "cashQuality", "ocfDecomposition", "cashFlowFlags"}:
-        from dartlab.analysis.financial.cashflow import (
-            calcCashFlowFlags,
-            calcCashFlowOverview,
-            calcCashQuality,
-            calcOcfDecomposition,
-        )
-        from dartlab.story.builders import (
-            cashFlowFlagsBlock,
-            cashFlowOverviewBlock,
-            cashQualityBlock,
-            ocfDecompositionBlock,
-        )
-
-        if _need("cashFlowOverview"):
-            b["cashFlowOverview"] = _safe(
-                lambda: cashFlowOverviewBlock(calcCashFlowOverview(company, basePeriod=basePeriod))
-            )
-        if _need("cashQuality"):
-            b["cashQuality"] = _safe(lambda: cashQualityBlock(calcCashQuality(company, basePeriod=basePeriod)))
-        if _need("ocfDecomposition"):
-            b["ocfDecomposition"] = _safe(
-                lambda: ocfDecompositionBlock(calcOcfDecomposition(company, basePeriod=basePeriod))
-            )
-        if _need("cashFlowFlags"):
-            b["cashFlowFlags"] = _safe(lambda: cashFlowFlagsBlock(calcCashFlowFlags(company, basePeriod=basePeriod)))
+    # ── 1부: 사업구조 + 자본구조 + 자산구조 + 현금흐름 ──
+    _buildRevenueBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildCapitalBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildAssetBlocks(company, keys, basePeriod, _safe, _need, b)
+    _buildCashflowBlocks(company, keys, basePeriod, _safe, _need, b)
 
     # ── 2부: 재무비율 분석 ──
     if keys is None or keys & {
