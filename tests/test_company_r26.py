@@ -57,12 +57,16 @@ def test_dart_company_select_raises_on_unmatched_indlist():
 
 
 def test_edgar_company_show_has_explicit_error_path():
-    """R26-1 EDGAR: edgar company._showImpl 가 ValueError 발생 코드 가짐."""
+    """R26-1 EDGAR: edgar show dispatch 가 ValueError 발생 코드 가짐.
+
+    Stage 2-6 (2026-04-26): _showImpl 본체가 _showDispatch.py::showImpl 로 이전
+    (facade 는 thin delegate). source 검사 대상도 모듈 함수로 변경.
+    """
     import inspect
 
-    from dartlab.providers.edgar.company import Company
+    from dartlab.providers.edgar._showDispatch import showImpl
 
-    src = inspect.getsource(Company._showImpl)
+    src = inspect.getsource(showImpl)
     assert "ValueError" in src
     assert "찾을 수 없" in src
 

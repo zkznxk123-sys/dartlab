@@ -794,25 +794,9 @@ class Company:
         Returns:
             ``(series, periods)`` 또는 None.
         """
-        if freq not in ("Q", "Y", "YTD"):
-            raise ValueError(f"freq 는 'Q' / 'Y' / 'YTD' 중 하나 (받음: {freq!r})")
-        if scope == "separate":
-            raise ValueError("EDGAR 는 scope='separate' 미지원 — SEC 는 연결만 보고")
-        if scope != "consolidated":
-            raise ValueError(f"scope 는 'consolidated' / 'separate' 중 하나 (받음: {scope!r})")
-        # EDGAR _FinanceAccessor 는 freq 옵션 직접 지원
-        if freq == "Q":
-            if "_ts" not in self._cache:
-                from dartlab.providers.edgar.finance.pivot import buildTimeseries
+        from dartlab.providers.edgar._showDispatch import buildFinanceSeries
 
-                self._cache["_ts"] = buildTimeseries(self.cik)
-            return self._cache.get("_ts")
-        # Y / YTD → annual
-        if "_annual" not in self._cache:
-            from dartlab.providers.edgar.finance.pivot import buildAnnual
-
-            self._cache["_annual"] = buildAnnual(self.cik)
-        return self._cache["_annual"]
+        return buildFinanceSeries(self, freq=freq, scope=scope)
 
     # c.BS / c.IS / c.CF / c.CIS property 제거 (Plan v10 P0 — api-contract).
     # 사용자는 c.show("IS") / c.show.IS() / c.show("IS", freq="Y") 사용.
@@ -855,17 +839,9 @@ class Company:
 
     def _buildRatios(self) -> pl.DataFrame | None:
         """[INTERNAL] EDGAR 재무비율 DataFrame 빌더 — show("ratios") 가 호출."""
-        rs = self._finance.ratioSeries
-        if rs is None:
-            return None
-        series, years = rs
-        df = _ratioSeriesToDataFrame(series, years)
-        if df is not None:
-            metaCols = [c for c in df.columns if not _isPeriodColumn(c)]
-            periodCols = [c for c in df.columns if _isPeriodColumn(c)]
-            periodCols.sort(reverse=True)
-            df = df.select(metaCols + periodCols)
-        return df
+        from dartlab.providers.edgar._showDispatch import buildRatios
+
+        return buildRatios(self)
 
     # insights는 analysis 내부 — c.analysis("financial", "종합평가")로 접근
 
@@ -1655,125 +1631,19 @@ class Company:
             c.show("risk")                        # 위와 동일 (alias)
             c.show("IS", period="2024")           # 2024년만 필터
         """
-        # alias 해석 (riskFactors → item1ARiskFactors 등)
-        topic = _TOPIC_ALIASES.get(topic, topic)
+        from dartlab.providers.edgar._showDispatch import showImpl
 
-        # period가 리스트면 세로 뷰
-        if isinstance(period, list):
-            wide = self.show(topic, block)
-            if wide is None or not isinstance(wide, pl.DataFrame):
-                return None
-            return self._transposeToVertical(wide, period)
-
-        # Finance topic(IS/BS/CF/CIS/SCE/ratios) — sections 거치지 않고 직접
-        _FINANCE_TOPICS = {"IS", "BS", "CF", "CIS", "SCE", "ratios"}
-        if topic in _FINANCE_TOPICS:
-            freq = _kw.get("freq", "Q")
-            if topic == "ratios":
-                df = self._buildRatios()
-            elif topic == "SCE":
-                df = self._finance.SCE
-            else:
-                df = self._finance._stmtDf(topic, freq=freq)
-            return self._applyPeriodFilter(df, period) if df is not None else None
-
-        # Notes 12 항목 — DART show("inventory") 와 동일 패턴 (XBRL 수치 태그 기반)
-        try:
-            from dartlab.providers.edgar.docs.notesParsers import availableCategories
-
-            if topic in availableCategories():
-                return self._docs.notesByCategory(topic)
-        except (ImportError, AttributeError):
-            pass
-
-        sec = self.sections
-        if sec is None:
-            # silent None 대신 명시적 ValueError 로 안내
-            raise ValueError(
-                f"sections 데이터를 가져올 수 없습니다 (ticker={getattr(self, 'ticker', '?')}). "
-                f"네트워크 또는 SEC EDGAR API 상태를 확인하세요."
-            )
-
-        topicRows = sec.filter(pl.col("topic") == topic)
-        if topicRows.is_empty():
-            # 가용 topic 일부 안내 (silent None 차단)
-            try:
-                available = sec["topic"].unique().to_list()[:20]
-            except (AttributeError, KeyError):
-                available = []
-            hint = f"\n  사용 가능한 topic 일부: {', '.join(available)}" if available else ""
-            raise ValueError(
-                f"'{topic}' topic 을 찾을 수 없습니다 (EDGAR).{hint}\n  전체 목록: c.topics 또는 c.index 로 확인하세요."
-            )
-
-        if block is None:
-            blockIndex = self._buildBlockIndex(topicRows)
-            if blockIndex.height == 1:
-                return self.show(topic, blockIndex["block"][0], period=period)
-            return blockIndex
-
-        # 특정 block의 실제 데이터
-        source = "docs"
-        if "source" in topicRows.columns:
-            srcRows = (
-                topicRows.filter(pl.col("blockOrder") == block) if "blockOrder" in topicRows.columns else topicRows
-            )
-            if not srcRows.is_empty():
-                source = srcRows["source"][0]
-
-        if source == "finance":
-            freq = _kw.get("freq", "Q")
-            if topic == "ratios":
-                df = self._buildRatios()
-                return self._applyPeriodFilter(df, period) if df is not None else None
-            if topic == "SCE":
-                df = self._finance.SCE
-                return self._applyPeriodFilter(df, period) if df is not None else None
-            df = self._finance._stmtDf(topic, freq=freq)
-            return self._applyPeriodFilter(df, period) if df is not None else None
-
-        # docs — blockType에 따라 text/table 반환
-        periodCols = [c for c in topicRows.columns if _isPeriodColumn(c)]
-        if "blockType" in topicRows.columns:
-            # blockOrder로 필터 (None이면 blockType으로 대체)
-            bt = "text"
-            if "blockOrder" in topicRows.columns:
-                boFiltered = topicRows.filter(pl.col("blockOrder") == block)
-                if not boFiltered.is_empty():
-                    bt = boFiltered["blockType"][0]
-                else:
-                    # blockOrder가 None인 경우 — 인덱스로 접근
-                    btList = topicRows["blockType"].to_list()
-                    bt = btList[block] if block < len(btList) else "text"
-
-            if bt == "text":
-                textRows = topicRows.filter(pl.col("blockType") == "text")
-                if textRows.is_empty():
-                    return None
-                nonNullCols = [c for c in periodCols if textRows[c].null_count() < textRows.height]
-                if not nonNullCols:
-                    return None
-                return self._applyPeriodFilter(textRows.select(nonNullCols), period)
-            else:
-                tableRows = topicRows.filter(pl.col("blockType") == "table")
-                if tableRows.is_empty():
-                    return None
-                nonNullCols = [c for c in periodCols if tableRows[c].null_count() < tableRows.height]
-                if not nonNullCols:
-                    return None
-                return self._applyPeriodFilter(tableRows.select(nonNullCols), period)
-
-        return self._applyPeriodFilter(topicRows, period)
+        return showImpl(self, topic, block, period=period, raw=raw, **_kw)
 
     @staticmethod
     def _transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame | None:
-        from dartlab.core.show import transposeToVertical
+        from dartlab.providers.edgar._showDispatch import transposeToVertical
 
         return transposeToVertical(wide, periods)
 
     def _buildBlockIndex(self, topicRows: pl.DataFrame) -> pl.DataFrame:
         """topic의 블록 목차 DataFrame."""
-        from dartlab.core.show import buildBlockIndex
+        from dartlab.providers.edgar._showDispatch import buildBlockIndex
 
         return buildBlockIndex(topicRows)
 
@@ -2134,54 +2004,33 @@ class Company:
         return df
 
     def _applyPeriodFilter(self, payload: Any, period: str | None) -> Any:
-        if period is None or not isinstance(payload, pl.DataFrame) or payload.is_empty():
-            return payload
-        requestedPeriod = str(period)
-        q4Fallback = f"{requestedPeriod}Q4" if "Q" not in requestedPeriod else None
-        exactPeriod = (
-            requestedPeriod
-            if requestedPeriod in payload.columns
-            else (q4Fallback if q4Fallback and q4Fallback in payload.columns else None)
-        )
-        if exactPeriod is not None:
-            keepCols = [c for c in payload.columns if not _isPeriodColumn(c)]
-            keepCols.append(exactPeriod)
-            result = payload.select(keepCols)
-            if exactPeriod != requestedPeriod:
-                result = result.rename({exactPeriod: requestedPeriod})
-            return result
-        return payload
+        from dartlab.providers.edgar._showDispatch import applyPeriodFilter
+
+        return applyPeriodFilter(payload, period)
 
     @staticmethod
     def _shapeStr(df: pl.DataFrame | None) -> str:
-        if df is None:
-            return "-"
-        return f"{df.height}x{df.width}"
+        from dartlab.providers.edgar._showDispatch import shapeStr
+
+        return shapeStr(df)
 
     @staticmethod
     def _periodsStr(df: pl.DataFrame | None) -> str:
-        if df is None:
-            return "-"
-        periodCols = [c for c in df.columns if _PERIOD_COLUMN_RE.fullmatch(c)]
-        if not periodCols:
-            return "-"
-        return f"{periodCols[0]}..{periodCols[-1]}" if len(periodCols) > 1 else periodCols[0]
+        from dartlab.providers.edgar._showDispatch import periodsStr
+
+        return periodsStr(df)
 
     @staticmethod
     def _previewFinance(df: pl.DataFrame | None) -> str:
-        if isEmptyDf(df):
-            return "-"
-        return f"{df.height} accounts"
+        from dartlab.providers.edgar._showDispatch import previewFinance
+
+        return previewFinance(df)
 
     @staticmethod
     def _previewDocsCell(topicRows: pl.DataFrame, periodCols: list[str]) -> str:
-        for row in topicRows.iter_rows(named=True):
-            for col in periodCols:
-                val = row.get(col)
-                if val is not None:
-                    text = str(val).strip().replace("\n", " ")
-                    return f"{col}: {text[:100]}" if len(text) > 100 else f"{col}: {text[:80]}"
-        return "-"
+        from dartlab.providers.edgar._showDispatch import previewDocsCell
+
+        return previewDocsCell(topicRows, periodCols)
 
     def diff(
         self,
