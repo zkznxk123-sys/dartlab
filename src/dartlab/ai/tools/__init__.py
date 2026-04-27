@@ -299,6 +299,12 @@ def _buildHandler(name: str, kind: str, target: str) -> Callable[..., Any]:
                     topic = clean.pop("topic", None)
                     selectKwargs = {k: v for k, v in clean.items() if k in ("freq", "scope")}
                     return c.select(topic, fields, **selectKwargs)
+            # 시장별 메서드 미지원 graceful 처리 — 예: EDGAR Company 에는 ``topicSummaries``
+            # 미구현 (DART 전용). AttributeError 그대로 raise 하면 AI 가 retry 만 돌리며
+            # round 낭비. 친절한 None 반환 + 메시지로 대체.
+            if not hasattr(c, target):
+                market = getattr(c, "market", "?")
+                return {"info": f"{market} 종목은 '{target}' 미지원 (DART 전용 또는 미구현)."}
             return getattr(c, target)(**clean)
 
         return _companyHandler
