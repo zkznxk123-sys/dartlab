@@ -10,7 +10,7 @@ for line in open(".env", encoding="utf-8"):
         break
 
 README = r"""---
-license: mit
+license: apache-2.0
 task_categories:
   - table-question-answering
   - text-classification
@@ -161,7 +161,7 @@ This dataset is updated automatically via GitHub Actions (daily). Recent filings
 
 ## License
 
-MIT — same as [DartLab](https://github.com/eddmpython/dartlab).
+Apache 2.0 — same as [DartLab](https://github.com/eddmpython/dartlab).
 
 ## Support
 
@@ -179,6 +179,6 @@ api.upload_file(
     repo_type="dataset",
     path_or_fileobj=README.encode("utf-8"),
     path_in_repo="README.md",
-    commit_message="replace code examples with intro blog + demo video + GitHub links",
+    commit_message="align license with GitHub repo (apache-2.0)",
 )
 print("README.md 업로드 완료")

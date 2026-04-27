@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
+from dartlab.gather.listing import getKrxList  # noqa: E402
 from dartlab.industry.build.pipeline import loadEdges, loadNodes  # noqa: E402
 from dartlab.industry.taxonomy import getIndustry, loadTaxonomy  # noqa: E402
 
@@ -787,6 +788,18 @@ def buildEcosystem(
     # 좌표 사전 계산 (관계 기반 — 산업 간 + 산업 내부 force-directed)
     coords = _computeLayout(nodes, taxonomy, atlasFlows=atlasFlows, edges=edges)
 
+    # KRX 시장구분 (KOSPI/KOSDAQ/KONEX) 매핑 — ecosystem.json 노드 보강용
+    try:
+        krxList = getKrxList()
+        marketByCode = {
+            r["short_code"]: r["marketName"]
+            for r in krxList.iter_rows(named=True)
+            if r.get("short_code") and r.get("marketName")
+        }
+    except Exception as exc:  # noqa: BLE001
+        print(f"[map] KRX list 로드 실패 — market 필드 비움: {exc}", file=sys.stderr)
+        marketByCode = {}
+
     # 노드 (Cosmograph 포맷)
     nodeList = []
     for n in nodes:
@@ -799,6 +812,7 @@ def buildEcosystem(
             {
                 "id": n.stockCode,
                 "label": n.corpName,
+                "market": marketByCode.get(n.stockCode, ""),
                 "industry": n.industry,
                 "industryName": taxonomy[n.industry].name if n.industry in taxonomy else n.industry,
                 "stage": n.stage or "",
