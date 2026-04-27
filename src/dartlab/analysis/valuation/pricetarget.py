@@ -13,7 +13,6 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from dartlab.analysis.forecast.prediction import adjustProbabilities
-from dartlab.core.finance.extract import getLatest, getTTM
 from dartlab.core.finance.proforma import (
     build_proforma,
     compute_company_wacc,
@@ -26,6 +25,7 @@ from dartlab.core.finance.scenario import (
     getElasticity,
     getNoiseSigma,
 )
+from dartlab.core.utils.extract import getLatest, getTTM
 
 if TYPE_CHECKING:
     from dartlab.analysis.forecast.prediction import ContextSignals
@@ -512,7 +512,7 @@ def compute_price_target(
     )
 
     # 기준 매출 성장률 (3년 CAGR)
-    from dartlab.core.finance.extract import getRevenueGrowth3Y
+    from dartlab.core.utils.extract import getRevenueGrowth3Y
 
     base_growth = getRevenueGrowth3Y(series)
     if base_growth is None:

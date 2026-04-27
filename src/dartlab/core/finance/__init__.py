@@ -8,12 +8,6 @@ from dartlab.core.finance.currency import (
     convertValue,
     getExchangeRate,
 )
-from dartlab.core.finance.extract import (
-    getAnnualValues,
-    getLatest,
-    getRevenueGrowth3Y,
-    getTTM,
-)
 from dartlab.core.finance.fmt import (
     fmtBig,
     fmtPrice,
@@ -47,6 +41,12 @@ from dartlab.core.finance.scenario import (
     getElasticity,
     getNoiseSigma,
     getPresetScenarios,
+)
+from dartlab.core.utils.extract import (
+    getAnnualValues,
+    getLatest,
+    getRevenueGrowth3Y,
+    getTTM,
 )
 from dartlab.credit.merton import (
     MertonResult,

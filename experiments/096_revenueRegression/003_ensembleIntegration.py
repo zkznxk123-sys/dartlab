@@ -46,7 +46,7 @@ import time
 
 import dartlab
 from dartlab.analysis.forecast.revenueForecast import forecastRevenue
-from dartlab.core.finance.extract import getTTM
+from dartlab.core.utils.extract import getTTM
 
 
 def run():
@@ -132,8 +132,8 @@ def _printResult(f, elapsed):
         print(f"  시장내재 갭: {f.marketImpliedGap:+.1f}%p")
         print(f"  투자신호: {f.investmentSignal}")
     else:
-        print(f"  시장내재 갭: None")
-        print(f"  투자신호: None")
+        print("  시장내재 갭: None")
+        print("  투자신호: None")
     print(f"  시간: {elapsed*1000:.0f}ms")
 
 

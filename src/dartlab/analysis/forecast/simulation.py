@@ -14,11 +14,6 @@ import math
 import random
 from dataclasses import dataclass, field
 
-from dartlab.core.finance.extract import (
-    getAnnualValues,
-    getLatest,
-    getTTM,
-)
 from dartlab.core.finance.fmt import fmtBig, fmtPrice
 from dartlab.core.finance.scenario import (
     BASELINE_FX,
@@ -28,6 +23,11 @@ from dartlab.core.finance.scenario import (
     MacroScenario,
     SectorElasticity,
     getElasticity,
+)
+from dartlab.core.utils.extract import (
+    getAnnualValues,
+    getLatest,
+    getTTM,
 )
 from dartlab.industry import SectorParams
 
@@ -1088,7 +1088,7 @@ def _getActualRevChange(series: dict, historicalKey: str) -> float | None:
 
 def _getRevByYear(series: dict, year: str) -> float | None:
     """특정 연도의 매출 추출."""
-    from dartlab.core.finance.extract import getAnnualValues
+    from dartlab.core.utils.extract import getAnnualValues
 
     revValues = getAnnualValues(series, "IS", "sales") or getAnnualValues(series, "IS", "revenue")
     if not revValues:

@@ -42,7 +42,7 @@ import time
 
 import dartlab
 from dartlab.analysis.valuation.priceImplied import reverseImpliedGrowth
-from dartlab.core.finance.extract import getTTM
+from dartlab.core.utils.extract import getTTM
 
 STOCKS = [
     ("005930", "삼성전자", 1170e12),   # 시가총액 수동 (장 마감 후 null 대비)
@@ -69,7 +69,7 @@ def run():
         tsRaw = c.finance.timeseries
         series = tsRaw[0] if isinstance(tsRaw, tuple) else tsRaw
         if not series:
-            print(f"  ❌ timeseries 없음")
+            print("  ❌ timeseries 없음")
             continue
 
         rev = getTTM(series, "IS", "sales")
@@ -102,7 +102,7 @@ def run():
                         capCount += 1
                     row += f"  {g:+5.1f}%{capHit}"
                 else:
-                    row += f"   FAIL "
+                    row += "   FAIL "
             print(row)
 
         print(f"\n  cap 적용: {capCount}/{totalCells}셀 ({capCount/totalCells*100:.0f}%)")

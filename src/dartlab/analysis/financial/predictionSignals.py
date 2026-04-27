@@ -12,7 +12,7 @@ forecast 엔진(점 추정)과 달리, 방향성과 신뢰도에 집중한다.
 
 from __future__ import annotations
 
-from dartlab.core.finance.safe import get as _get
+from dartlab.core.utils.safe import get as _get
 
 _getF = _getF2 = _getF3 = _getF4 = _get
 

@@ -73,7 +73,7 @@ def _calc(**kwargs):
 
 def test_getTTM_rejects_stale_series_when_max_trailing_nones_zero():
     """오래된 non-null만 남은 시계열은 최신 TTM으로 취급하지 않는다."""
-    from dartlab.core.finance.extract import getTTM
+    from dartlab.core.utils.extract import getTTM
 
     series = {"CF": {"net_profit": [10, 20, 30, 40, None, None, None, None]}}
     assert getTTM(series, "CF", "net_profit") == 100

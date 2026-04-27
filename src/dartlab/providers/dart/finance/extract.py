@@ -1,6 +1,6 @@
-"""하위호환 re-export — 실제 구현은 ``dartlab.core.finance.extract``."""
+"""하위호환 re-export — 실제 구현은 ``dartlab.core.utils.extract``."""
 
-from dartlab.core.finance.extract import (
+from dartlab.core.utils.extract import (
     getAnnualValues,
     getLatest,
     getRevenueGrowth3Y,

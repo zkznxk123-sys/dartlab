@@ -53,10 +53,10 @@
 실험일: 2026-03-25
 """
 
-import sys
 import os
-from datetime import date, timedelta
+import sys
 from dataclasses import dataclass
+from datetime import date, timedelta
 
 import polars as pl
 
@@ -187,7 +187,7 @@ def getMarketHistory(start: str, end: str) -> list[dict]:
 def calcWacc(stockCode: str, name: str, beta: float | None, rf: float | None) -> WaccResult:
     """Company의 재무 데이터로 WACC 산출."""
     import dartlab
-    from dartlab.core.finance.extract import getTTM, getLatest
+    from dartlab.core.utils.extract import getLatest, getTTM
     try:
         c = dartlab.Company(stockCode)
         ts = c.finance.timeseries
@@ -318,7 +318,7 @@ def main():
     print(f"  KOSPI 일별 데이터: {len(marketHistory)}건")
 
     # 3. 종목별 Beta + WACC 산출 (yfinance로 직접 히스토리 수집)
-    print(f"\n[3] 10종목 Beta + WACC 산출...")
+    print("\n[3] 10종목 Beta + WACC 산출...")
     print(f"  ERP = {ERP}%, 세율 = {DEFAULT_TAX_RATE*100}%")
     print()
 

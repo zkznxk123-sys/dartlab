@@ -22,7 +22,7 @@ import math
 from dataclasses import dataclass, field
 from typing import ClassVar
 
-from dartlab.core.finance.extract import getLatest, getRevenueGrowth3Y, getTTM
+from dartlab.core.utils.extract import getLatest, getRevenueGrowth3Y, getTTM
 
 
 @dataclass

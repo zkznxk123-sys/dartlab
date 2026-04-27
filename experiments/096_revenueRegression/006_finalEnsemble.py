@@ -45,12 +45,10 @@
 실험일: 2026-03-25
 """
 
-import time
 
 import dartlab
 from dartlab.analysis.accounting.disclosureSignal import extractSignal
 from dartlab.analysis.forecast.revenueForecast import forecastRevenue
-from dartlab.core.finance.extract import getTTM
 
 STOCKS = [
     ("005930", "삼성전자", 1170e12),

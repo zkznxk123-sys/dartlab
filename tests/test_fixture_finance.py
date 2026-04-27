@@ -145,43 +145,43 @@ class TestPivotWithFixture:
 
 class TestExtractUtils:
     def test_getTTM(self):
-        from dartlab.core.finance.extract import getTTM
+        from dartlab.core.utils.extract import getTTM
 
         series = {"IS": {"sales": [100, 200, 300, 400, 500]}}
         assert getTTM(series, "IS", "sales") == 200 + 300 + 400 + 500
 
     def test_getTTM_insufficientData(self):
-        from dartlab.core.finance.extract import getTTM
+        from dartlab.core.utils.extract import getTTM
 
         series = {"IS": {"sales": [100, None, 300]}}
         assert getTTM(series, "IS", "sales") is None
 
     def test_getLatest(self):
-        from dartlab.core.finance.extract import getLatest
+        from dartlab.core.utils.extract import getLatest
 
         series = {"BS": {"total_assets": [100, 200, None, 400]}}
         assert getLatest(series, "BS", "total_assets") == 400
 
     def test_getLatest_allNone(self):
-        from dartlab.core.finance.extract import getLatest
+        from dartlab.core.utils.extract import getLatest
 
         series = {"BS": {"total_assets": [None, None]}}
         assert getLatest(series, "BS", "total_assets") is None
 
     def test_getAnnualValues(self):
-        from dartlab.core.finance.extract import getAnnualValues
+        from dartlab.core.utils.extract import getAnnualValues
 
         series = {"IS": {"sales": [1, 2, 3]}}
         assert getAnnualValues(series, "IS", "sales") == [1, 2, 3]
 
     def test_getAnnualValues_missing(self):
-        from dartlab.core.finance.extract import getAnnualValues
+        from dartlab.core.utils.extract import getAnnualValues
 
         series = {"IS": {}}
         assert getAnnualValues(series, "IS", "sales") == []
 
     def test_revenueGrowth3Y(self):
-        from dartlab.core.finance.extract import getRevenueGrowth3Y
+        from dartlab.core.utils.extract import getRevenueGrowth3Y
 
         series = {"IS": {"sales": [100, 110, 120, 130]}}
         growth = getRevenueGrowth3Y(series)
@@ -189,7 +189,7 @@ class TestExtractUtils:
         assert 8 < growth < 12
 
     def test_revenueGrowth3Y_insufficient(self):
-        from dartlab.core.finance.extract import getRevenueGrowth3Y
+        from dartlab.core.utils.extract import getRevenueGrowth3Y
 
         series = {"IS": {"sales": [100, 200]}}
         assert getRevenueGrowth3Y(series) is None

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from dartlab.core.finance.extract import getTTM
+from dartlab.core.utils.extract import getTTM
 
 
 @dataclass

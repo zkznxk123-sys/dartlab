@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dartlab.core.finance.extract import getAnnualValues, getLatest
 from dartlab.core.finance.ratios import RatioResult
+from dartlab.core.utils.extract import getAnnualValues, getLatest
 
 
 def _parseYear(period: str) -> str:

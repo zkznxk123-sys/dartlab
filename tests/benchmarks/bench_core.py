@@ -4,8 +4,8 @@ CI에서 자동 추적되며, 30% 이상 성능 저하 시 PR에 경고.
 데이터 없이 실행 가능한 순수 계산 벤치마크만 포함.
 """
 
-from dartlab.core.finance.extract import getLatest, getRevenueGrowth3Y, getTTM
 from dartlab.core.finance.ratios import _safeDiv, _safePct
+from dartlab.core.utils.extract import getLatest, getRevenueGrowth3Y, getTTM
 
 # ── 테스트 데이터 ──
 

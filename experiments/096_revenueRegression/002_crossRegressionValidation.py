@@ -47,7 +47,7 @@ from dartlab.analysis.valuation.crossRegression import (
     fitCrossSection,
     fitPanel,
 )
-from dartlab.core.finance.extract import getAnnualValues, getTTM
+from dartlab.core.utils.extract import getAnnualValues
 
 # 대형주 20개 (메모리 안전: 순차 로드 + 즉시 해제)
 STOCKS = [
@@ -195,7 +195,7 @@ if __name__ == "__main__":
                     print(f"  ⚠️ {w}")
 
             # 개별 예측
-            print(f"\n  [예측 샘플]")
+            print("\n  [예측 샘플]")
             for feat in allFeatures[:5]:
                 pred = csModel.predict(feat.toFeatureDict(), feat.sector)
                 if pred is not None:
@@ -223,14 +223,14 @@ if __name__ == "__main__":
                 print(f"    {name:30s}: {coef:+.4f}")
 
             # 기업별 고정효과 (상위 5개)
-            print(f"\n  [기업 고정효과 — 상위 5개]")
+            print("\n  [기업 고정효과 — 상위 5개]")
             sorted_fi = sorted(panelModel.firmIntercepts.items(), key=lambda x: x[1], reverse=True)
             for code, alpha in sorted_fi[:5]:
                 stockName = next((n for c, n, s in STOCKS if c == code), code)
                 print(f"    {stockName:15s}: {alpha:+.1f}%")
 
             # 예측
-            print(f"\n  [예측 샘플]")
+            print("\n  [예측 샘플]")
             for feat in allFeatures[:5]:
                 pred = panelModel.predict(feat.stockCode, feat.toFeatureDict())
                 if pred is not None:
@@ -239,4 +239,4 @@ if __name__ == "__main__":
         else:
             print("  ❌ 패널 회귀 적합 실패")
 
-    print(f"\n실험 완료.")
+    print("\n실험 완료.")

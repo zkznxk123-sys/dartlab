@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from dartlab.core.finance.extract import getAnnualValues
 from dartlab.core.finance.fmt import fmtBig, fmtPrice
 from dartlab.core.finance.ols import (
     _coefficientOfVariation,
     _detectStructuralBreak,
     _ols,
 )
+from dartlab.core.utils.extract import getAnnualValues
 from dartlab.industry import SectorParams
 
 # ── 결과 타입 ──────────────────────────────────────────────

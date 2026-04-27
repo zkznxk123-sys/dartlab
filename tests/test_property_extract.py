@@ -7,7 +7,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from dartlab.core.finance.extract import getAnnualValues, getLatest, getRevenueGrowth3Y, getTTM
+from dartlab.core.utils.extract import getAnnualValues, getLatest, getRevenueGrowth3Y, getTTM
 
 pytestmark = pytest.mark.unit
 

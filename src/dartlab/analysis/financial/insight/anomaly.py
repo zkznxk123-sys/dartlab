@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 
 from dartlab.analysis.financial.insight.types import Anomaly, AuditDataForAnomaly
-from dartlab.core.finance.extract import getAnnualValues
+from dartlab.core.utils.extract import getAnnualValues
 
 
 def _yoyChange(vals: list[float | None]) -> float | None:

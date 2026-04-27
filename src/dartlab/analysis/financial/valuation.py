@@ -498,7 +498,7 @@ def calcNavValuation(company: Any) -> dict | None:
         return None
 
     # 순차입금
-    from dartlab.core.finance.extract import getLatest
+    from dartlab.core.utils.extract import getLatest
 
     if series:
         stb = getLatest(series, "BS", "shortterm_borrowings") or 0
@@ -717,7 +717,7 @@ def _classifyCompanyType(company: Any, series: dict) -> tuple[str, dict[str, flo
         (companyType, weights) where companyType is one of:
         "financial", "growth", "cyclical", "dividend", "general"
     """
-    from dartlab.core.finance.extract import getAnnualValues, getRevenueGrowth3Y
+    from dartlab.core.utils.extract import getAnnualValues, getRevenueGrowth3Y
 
     sector = getattr(company, "sector", None)
     sectorStr = ""
@@ -914,7 +914,7 @@ def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> di
 
     # Forward BPS × Target PBR — 수주잔고 기반 업종 (조선/건설)
     if companyType == "backlog_cyclical":
-        from dartlab.core.finance.extract import getAnnualValues, getLatest, getRevenueGrowth3Y
+        from dartlab.core.utils.extract import getAnnualValues, getLatest, getRevenueGrowth3Y
 
         eq = getLatest(series, "BS", "total_equity")
         if eq and shares and shares > 0:

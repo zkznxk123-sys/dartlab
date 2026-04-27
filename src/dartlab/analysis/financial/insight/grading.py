@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING
 from dartlab.analysis.financial.insight.benchmark import getBenchmark, sectorAdjustment
 from dartlab.analysis.financial.insight.detector import detectIncompleteYear
 from dartlab.analysis.financial.insight.types import Flag, InsightResult
-from dartlab.core.finance.extract import getAnnualValues, getLatest
 from dartlab.core.finance.ratios import RatioResult
+from dartlab.core.utils.extract import getAnnualValues, getLatest
 from dartlab.industry import Sector
 
 if TYPE_CHECKING:

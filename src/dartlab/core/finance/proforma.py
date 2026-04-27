@@ -12,7 +12,7 @@ import functools
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from dartlab.core.finance.extract import (
+from dartlab.core.utils.extract import (
     getLatest,
     getTTM,
 )

@@ -6,7 +6,7 @@ select()로 IS/BS/CF 원본 계정을 가져와서
 
 from __future__ import annotations
 
-from dartlab.core.finance.safe import get as _get
+from dartlab.core.utils.safe import get as _get
 
 _getF = _getF2 = _getF3 = _getF4 = _get
 

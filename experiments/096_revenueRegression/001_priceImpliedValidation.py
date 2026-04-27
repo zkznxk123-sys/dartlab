@@ -36,13 +36,12 @@
 실험일: 2026-03-25
 """
 
-import sys
 import time
 
 import dartlab
-from dartlab.analysis.valuation.priceImplied import reverseImpliedGrowth, computeGap
 from dartlab.analysis.forecast.revenueForecast import forecastRevenue
-from dartlab.core.finance.extract import getTTM
+from dartlab.analysis.valuation.priceImplied import reverseImpliedGrowth
+from dartlab.core.utils.extract import getTTM
 
 # 테스트 종목
 # (코드, 이름, 섹터, 시가총액_조원_수동)
@@ -111,7 +110,7 @@ def testSingle(code: str, name: str, sectorKey: str, manualMarketCapTril: float 
 
     if result:
         result.currentPrice = curPrice
-        print(f"\n  [주가 내재 매출 역산]")
+        print("\n  [주가 내재 매출 역산]")
         print(f"  내재 성장률: {result.impliedGrowthRate:.1f}%")
         print(f"  가정 영업이익률: {result.assumedMargin:.1f}%")
         print(f"  가정 WACC: {result.assumedWacc:.1f}%")
@@ -133,7 +132,7 @@ def testSingle(code: str, name: str, sectorKey: str, manualMarketCapTril: float 
     )
     tForecast = time.time() - t3
 
-    print(f"\n  [매출 앙상블 예측 (9-소스)]")
+    print("\n  [매출 앙상블 예측 (9-소스)]")
     print(f"  방법: {forecast.method}")
     print(f"  소스: {forecast.sourceWeights}")
     for i, (proj, gr) in enumerate(zip(forecast.projected, forecast.growthRates), 1):

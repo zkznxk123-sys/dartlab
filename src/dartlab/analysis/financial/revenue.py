@@ -511,7 +511,7 @@ def calcRevenueGrowth(company, *, basePeriod: str | None = None) -> dict | None:
     try:
         ann = company._buildFinanceSeries(freq="Y")
         if ann:
-            from dartlab.core.finance.extract import getRevenueGrowth3Y
+            from dartlab.core.utils.extract import getRevenueGrowth3Y
 
             annualCagr = getRevenueGrowth3Y(ann[0])
             if annualCagr is not None:

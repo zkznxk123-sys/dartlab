@@ -70,7 +70,7 @@ def test_annual_sum_flow_cumulative_fallback():
 def test_no_duplicate_get_helpers_in_financial():
     """Phase 16 B2: analysis/financial 하위 `_get`/`_getF*` 정의가 SSOT 로 0 건.
 
-    `from dartlab.core.finance.safe import get as _get` alias 만 허용.
+    `from dartlab.core.utils.safe import get as _get` alias 만 허용.
     `def _get(...)` / `def _getF[0-9]*(...)` 은 복붙 중복 — 금지.
 
     예외: scenarioSensitivity.py `_get(row_key: str)` 는 시그니처가 다름 (1-arg str lookup).
@@ -93,7 +93,7 @@ def test_no_duplicate_get_helpers_in_financial():
 @pytest.mark.unit
 def test_safe_module_is_ssot():
     """Phase 16 B1: core/finance/safe.py 가 3 함수 SSOT 로 노출."""
-    from dartlab.core.finance.safe import get, getFirst, yoy
+    from dartlab.core.utils.safe import get, getFirst, yoy
 
     assert callable(get)
     assert callable(getFirst)

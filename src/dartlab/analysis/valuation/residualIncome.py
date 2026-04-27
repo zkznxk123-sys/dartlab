@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from dartlab.core.finance.extract import getAnnualValues, getLatest
+from dartlab.core.utils.extract import getAnnualValues, getLatest
 
 
 @dataclass
