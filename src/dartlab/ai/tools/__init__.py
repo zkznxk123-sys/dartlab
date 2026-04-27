@@ -287,7 +287,11 @@ def _buildHandler(name: str, kind: str, target: str) -> Callable[..., Any]:
             from dartlab.ai.runtime.companyCache import getOrCreateCompany
 
             c = getOrCreateCompany(stockCode)
-            clean = {k: v for k, v in kwargs.items() if v is not None}
+            # AI 가 default 로 보내는 None 또는 빈 문자열은 "인자 미지정" 으로 취급.
+            # 빈 문자열을 그대로 통과시키면 EDGAR show 의 period 필터 등에서 0 row /
+            # ValueError 가 발생 (R9 인텔 audit 결함). story 의 빈 섹션 fix (bc6e3ada)
+            # 와 일관.
+            clean = {k: v for k, v in kwargs.items() if v is not None and v != ""}
             # show 의 fields 인자 → select 위임 (Read 하나로 단순화)
             if name == "show":
                 fields = clean.pop("fields", None)
@@ -400,7 +404,23 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
         props["fields"] = {
             "type": "array",
             "items": {"type": "string"},
-            "description": "계정명 필터 (선택). 예: ['매출액','영업이익']. 지정 시 해당 행만 반환 (select 위임).",
+            "description": (
+                "계정명 필터 (선택). 지정 시 해당 행만 반환 (select 위임).\n\n"
+                "⛔ 시장별 표기 차이 — 잘못 보내면 0 row 반환 또는 에러:\n"
+                "  • DART (KR 종목코드 6 자리, 예 005930): **한국어** 계정명. "
+                "예 ['매출액', '영업이익', '당기순이익', '자산총계', '부채총계'].\n"
+                "  • EDGAR (US ticker, 예 INTC · AAPL): **영문 XBRL 태그**. "
+                "예 ['Revenues', 'OperatingIncomeLoss', 'NetIncomeLoss', 'Assets', 'Liabilities']. "
+                "한국어 보내면 매핑 실패."
+            ),
+        }
+        # period — 빈 문자열 보내면 EDGAR period filter 가 0 row. None 이거나 생략 권장.
+        props["period"] = {
+            "type": "string",
+            "description": (
+                "기간 필터 (선택). 예: '2024' · '2025Q3'. **빈 문자열 '' 금지** — "
+                "필요 없으면 인자 자체를 생략. 빈 문자열은 EDGAR 에서 0 row 반환."
+            ),
         }
 
     # scan: target 의미 명확화 + 후처리 파라미터
