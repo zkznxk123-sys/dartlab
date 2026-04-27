@@ -83,6 +83,8 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "industry/build/stage4_review.py",
         # artifacts.loadProjectionRules — 알려진 chapter 만 loud-fail, 미등록은 빈 dict (의도적)
         "providers/dart/docs/sections/artifacts.py",
+        # quant bottom-up beta peer 추출 — scan finance parquet 없으면 섹터 기본 beta fallback
+        "quant/bottomUpBeta.py",
     }
 )
 
