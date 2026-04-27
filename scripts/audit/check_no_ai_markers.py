@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Block AI attribution markers in commit messages and staged content."""
+"""Block generated-attribution markers in commit messages and staged content."""
 
 from __future__ import annotations
 
@@ -22,6 +22,48 @@ BANNED_PATTERNS = [
 ]
 
 COMPILED_PATTERNS = [re.compile(pattern, re.IGNORECASE) for pattern in BANNED_PATTERNS]
+COMMIT_MESSAGE_BANNED_PATTERNS = [
+    *BANNED_PATTERNS,
+    r"\b(chatgpt|claude|codex|gpt|gemini|llm|ai)\b",
+    r"생성\s*도구",
+    r"작성\s*도구",
+    r"모델\s*작성",
+]
+COMPILED_COMMIT_MESSAGE_PATTERNS = [re.compile(pattern, re.IGNORECASE) for pattern in COMMIT_MESSAGE_BANNED_PATTERNS]
+COMMIT_TYPES = (
+    "추가",
+    "수정",
+    "개선",
+    "변경",
+    "삭제",
+    "정리",
+    "문서",
+    "테스트",
+    "빌드",
+    "릴리즈",
+    "보안",
+    "성능",
+    "리팩터",
+    "리팩토링",
+    "복구",
+    "설정",
+    "검증",
+)
+GENERIC_COMMIT_DETAILS = {
+    "작업",
+    "수정",
+    "변경",
+    "업데이트",
+    "정리",
+    "개선",
+    "추가",
+    "삭제",
+    "wip",
+    "fix",
+    "update",
+    "changes",
+}
+HANGUL_RE = re.compile(r"[가-힣]")
 ZERO_SHA = "0" * 40
 
 
@@ -54,6 +96,21 @@ def find_matches(text: str) -> list[str]:
     return matches
 
 
+def find_commit_message_matches(text: str) -> list[str]:
+    if not text:
+        return []
+    matches: list[str] = []
+    seen: set[str] = set()
+    for pattern in COMPILED_COMMIT_MESSAGE_PATTERNS:
+        for match in pattern.finditer(text):
+            snippet = match.group(0)
+            key = snippet.lower()
+            if key not in seen:
+                seen.add(key)
+                matches.append(snippet)
+    return matches
+
+
 def report_failure(title: str, details: list[str]) -> int:
     print(f"[ai-policy] {title}", file=sys.stderr)
     for detail in details:
@@ -70,7 +127,41 @@ def check_text(label: str, text: str) -> int:
 
 def check_commit_message(path: str) -> int:
     content = Path(path).read_text(encoding="utf-8", errors="replace")
-    return check_text("커밋 메시지에 AI 흔적이 포함되어 있습니다.", content)
+    failures: list[str] = []
+    matches = find_commit_message_matches(content)
+    if matches:
+        failures.append(f"금지 패턴 발견: {', '.join(matches)}")
+
+    subject = next(
+        (
+            line.strip().lstrip("\ufeff")
+            for line in content.splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        ),
+        "",
+    )
+    if not subject:
+        failures.append("커밋 제목이 비어 있습니다.")
+    elif not HANGUL_RE.search(subject):
+        failures.append("커밋 제목은 한글로 작성해야 합니다.")
+    elif ":" not in subject:
+        failures.append("커밋 제목은 '성격: 변경 내용' 형식이어야 합니다.")
+    else:
+        commit_type, detail = subject.split(":", 1)
+        commit_type = commit_type.strip()
+        detail = detail.strip()
+        if commit_type not in COMMIT_TYPES:
+            failures.append(f"커밋 성격은 다음 중 하나여야 합니다: {', '.join(COMMIT_TYPES)}")
+        if not detail:
+            failures.append("커밋 제목에 실제 변경 내용을 적어야 합니다.")
+        elif len(detail) < 6 or detail.lower() in GENERIC_COMMIT_DETAILS:
+            failures.append("커밋 제목의 변경 내용이 너무 짧거나 일반적입니다.")
+        elif not HANGUL_RE.search(detail):
+            failures.append("커밋 제목의 변경 내용은 한글 설명을 포함해야 합니다.")
+
+    if not failures:
+        return 0
+    return report_failure("커밋 메시지 규칙을 위반했습니다.", failures)
 
 
 def staged_files() -> list[str]:
