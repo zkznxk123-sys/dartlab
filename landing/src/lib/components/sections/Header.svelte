@@ -67,6 +67,17 @@
 				title="GitHub">
 				<Github class="w-[15px] h-[15px]" />
 			</a>
+			<a href={brand.coffee} target="_blank" rel="noopener"
+				class="w-7 h-7 rounded-md flex items-center justify-center text-dl-text-dim hover:text-dl-text hover:bg-white/5 transition-colors no-underline"
+				title="Buy Me a Coffee">
+				<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+					<path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+					<line x1="6" y1="2" x2="6" y2="4" />
+					<line x1="10" y1="2" x2="10" y2="4" />
+					<line x1="14" y1="2" x2="14" y2="4" />
+				</svg>
+			</a>
 			<a href={brand.youtube} target="_blank" rel="noopener"
 				class="w-7 h-7 rounded-md flex items-center justify-center text-dl-text-dim hover:text-dl-text hover:bg-white/5 transition-colors no-underline"
 				title="YouTube · @eddmpython">

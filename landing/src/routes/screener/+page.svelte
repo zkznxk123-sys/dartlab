@@ -3,6 +3,7 @@
 	import { base } from '$app/paths';
 	import { page } from '$app/state';
 	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
+	import Header from '$lib/components/sections/Header.svelte';
 	import { fmtKrw, fmtKrwFromEok, fmtPrice } from '$lib/format/krw';
 	import { fmtPct } from '$lib/format/pct';
 	import type { Cond, Op, SortKey, MetricKey, MetricDef, ScreenerNode, PriceSnapshot, QueryPayload } from '$lib/screener/types';
@@ -750,24 +751,53 @@
 	/>
 </svelte:head>
 
+<Header context="landing" />
+
 <div class="page">
-	<header class="head">
-		<div class="head-left">
+	<header class="hero">
+		<div class="hero-eyebrow">
 			<a class="back" href="{base}/map">← 산업지도</a>
-			<h1>스크리너</h1>
-			<p class="lead">
-				한국 상장사 <strong>{joinedNodes.length.toLocaleString()}사</strong>를
-				재무 · 등급 · 가격 조건으로 자유롭게 조합 검색.
-			</p>
+			<span class="dot-sep">·</span>
+			<a class="back" href="{base}/">홈</a>
 		</div>
-		<div class="head-right">
+		<h1 class="hero-title">
+			스크리너
+			<span class="hero-accent">— 한국 상장사 조건 검색</span>
+		</h1>
+		<p class="hero-lead">
+			DART 회계 + KRX 일별 가격 + dartlab scan 등급을 한 화면에서 조합. 약 50 메트릭 × 다중 조건 ×
+			<strong>{PRESETS.length}</strong> 프리셋 + 워크스페이스 다중 탭.
+		</p>
+		<div class="hero-stats">
+			<div class="hero-stat">
+				<span class="stat-num">{joinedNodes.length.toLocaleString()}</span>
+				<span class="stat-label">상장사 검색 대상</span>
+			</div>
+			<div class="hero-stat">
+				<span class="stat-num">{results.length.toLocaleString()}</span>
+				<span class="stat-label">현재 조건 통과</span>
+			</div>
+			<div class="hero-stat">
+				<span class="stat-num">{priceTimeSeries.size > 0 ? priceTimeSeries.size.toLocaleString() : '—'}</span>
+				<span class="stat-label">가격 시계열 (60d)</span>
+			</div>
+			<div class="hero-stat">
+				<span class="stat-num">20</span>
+				<span class="stat-label">분기 IS·CF·BS</span>
+			</div>
+		</div>
+		<div class="hero-chips">
+			<span class="src-chip"><span class="src-dot src-dart"></span>DART</span>
+			<span class="src-chip"><span class="src-dot src-krx"></span>KRX 일별</span>
+			<span class="src-chip"><span class="src-dot src-scan"></span>scan 등급</span>
+			<span class="src-chip"><span class="src-dot src-quarters"></span>20 분기</span>
 			<span class="db-badge db-{dbState}" title={dbError || ''}>
 				<span class="db-dot"></span>
 				{#if dbState === 'idle'}대기
 				{:else if dbState === 'loading'}DuckDB 로드 중…
-				{:else if dbState === 'ready'}시계열 ON · {priceTimeSeries.size.toLocaleString()}사
-				{:else if dbState === 'unsupported'}시계열 OFF (iOS Safari)
-				{:else if dbState === 'error'}시계열 오류
+				{:else if dbState === 'ready'}DuckDB ON · {priceTimeSeries.size.toLocaleString()}사
+				{:else if dbState === 'unsupported'}DuckDB OFF (iOS)
+				{:else if dbState === 'error'}DuckDB 오류
 				{/if}
 			</span>
 			{#if dataAsOf}
@@ -1170,50 +1200,109 @@
 	.page {
 		max-width: 1400px;
 		margin: 0 auto;
-		padding: 24px 24px 64px;
+		padding: 72px 24px 64px;
 		color: #f1f5f9;
 	}
 
-	.head {
+	.hero {
+		padding: 32px 0 24px;
+		margin-bottom: 24px;
+		border-bottom: 1px solid #1e2433;
+	}
+	.hero-eyebrow {
 		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		gap: 16px;
-		margin-bottom: 28px;
-		flex-wrap: wrap;
+		gap: 8px;
+		align-items: center;
+		font-size: 12px;
+		color: #64748b;
+		margin-bottom: 12px;
 	}
-	.head-left {
-		flex: 1;
-		min-width: 260px;
-	}
+	.dot-sep { color: #1e2433; }
 	.back {
-		display: inline-block;
-		font-size: 13px;
-		color: #94a3b8;
+		color: #60a5fa;
 		text-decoration: none;
-		margin-bottom: 8px;
 	}
-	.back:hover { color: #f1f5f9; }
-	h1 {
-		margin: 0 0 4px;
-		font-size: 28px;
-		font-weight: 800;
-		letter-spacing: -0.02em;
-	}
-	.lead {
-		margin: 0;
-		font-size: 14px;
-		color: #94a3b8;
-		line-height: 1.5;
-	}
-	.lead strong { color: #f1f5f9; }
+	.back:hover { color: #93c5fd; text-decoration: underline; }
 
-	.head-right {
+	.hero-title {
+		margin: 0 0 12px;
+		font-size: 40px;
+		font-weight: 800;
+		letter-spacing: -0.03em;
+		line-height: 1.1;
+	}
+	.hero-accent {
+		color: #60a5fa;
+		font-weight: 600;
+		font-size: 22px;
+		letter-spacing: -0.01em;
+	}
+	.hero-lead {
+		margin: 0 0 24px;
+		font-size: 15px;
+		color: #94a3b8;
+		line-height: 1.6;
+		max-width: 720px;
+	}
+	.hero-lead strong { color: #f1f5f9; font-weight: 700; }
+
+	.hero-stats {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+		gap: 12px;
+		margin-bottom: 16px;
+	}
+	.hero-stat {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
-		align-items: flex-end;
+		gap: 4px;
+		padding: 14px 16px;
+		background: linear-gradient(135deg, rgba(96, 165, 250, 0.06), rgba(96, 165, 250, 0.02));
+		border: 1px solid rgba(96, 165, 250, 0.18);
+		border-radius: 10px;
 	}
+	.stat-num {
+		font-size: 28px;
+		font-weight: 800;
+		font-family: monospace;
+		color: #f1f5f9;
+		letter-spacing: -0.02em;
+		line-height: 1;
+	}
+	.stat-label {
+		font-size: 11px;
+		color: #94a3b8;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+
+	.hero-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		align-items: center;
+	}
+	.src-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 4px 10px;
+		font-size: 11px;
+		color: #cbd5e1;
+		background: #050811;
+		border: 1px solid #1e2433;
+		border-radius: 999px;
+		font-family: monospace;
+	}
+	.src-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+	}
+	.src-dot.src-dart { background: #ea4647; }
+	.src-dot.src-krx { background: #fbbf24; }
+	.src-dot.src-scan { background: #34d399; }
+	.src-dot.src-quarters { background: #a78bfa; }
 	.db-badge {
 		display: inline-flex;
 		align-items: center;
