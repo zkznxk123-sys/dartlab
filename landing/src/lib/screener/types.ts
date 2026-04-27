@@ -111,10 +111,12 @@ export type MetricKey =
 	| 'volumeAvg30d'
 	| 'foreignPct'
 	| 'beta'
-	// derived (frontend 계산, PR-2 에서 활성)
+	// valuation (HF dart/scan/valuation.parquet — PR-14)
 	| 'per'
 	| 'pbr'
 	| 'psr'
+	| 'dividendYield'
+	// derived (frontend 합성 — 후속)
 	| 'ev'
 	| 'earningsYield'
 	| 'fcfYield'

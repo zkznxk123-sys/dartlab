@@ -54,6 +54,15 @@
 	};
 	let priceTimeSeries = $state<Map<string, PriceMetrics>>(new Map());
 
+	/** stockCode → valuation (HF dart/scan/valuation.parquet — Naver API 기반, 매일 KST 04:00 갱신) */
+	type ValuationMetrics = {
+		per: number | null;
+		pbr: number | null;
+		dividendYield: number | null;
+		marketCapNaver: number | null;
+	};
+	let valuationMetrics = $state<Map<string, ValuationMetrics>>(new Map());
+
 	// 메트릭 정의 — PR-1 은 25 개 (점-시점 + 이미 박힌 시계열 derived).
 	// PR-2 부터 derived/composite/quarterly/timeseries modifier 추가.
 	const METRICS: MetricDef[] = [
@@ -88,6 +97,11 @@
 		{ key: 'currentVsMA20', label: '현재가 vs MA20', group: 'derived', type: 'number', unit: '%', signed: true, higherBetter: true },
 		{ key: 'drawdown60d', label: '60일 고점 대비', group: 'derived', type: 'number', unit: '%', signed: true, higherBetter: true },
 		{ key: 'recovery60d', label: '60일 저점 대비', group: 'derived', type: 'number', unit: '%', signed: true, higherBetter: true },
+		// Valuation (HF dart/scan/valuation.parquet — PR-14)
+		{ key: 'per', label: 'PER', group: 'price', type: 'number', unit: '배', higherBetter: false },
+		{ key: 'pbr', label: 'PBR', group: 'price', type: 'number', unit: '배', higherBetter: false },
+		{ key: 'psr', label: 'PSR (시총/매출)', group: 'price', type: 'number', unit: '배', higherBetter: false },
+		{ key: 'dividendYield', label: '배당수익률', group: 'price', type: 'number', unit: '%', higherBetter: true },
 		// 분기 derived (quarters.json — PR-4)
 		{ key: 'qoqRevenueGrowth', label: '매출 QoQ', group: 'quarterly', type: 'number', unit: '%', signed: true, higherBetter: true },
 		{ key: 'qoqOpProfitGrowth', label: '영업이익 QoQ', group: 'quarterly', type: 'number', unit: '%', signed: true, higherBetter: true },
@@ -267,6 +281,7 @@
 		return eco.map((n: any) => {
 			const ts = priceTimeSeries.get(String(n.id));
 			const qm = quarterMetrics.get(String(n.id));
+			const vm = valuationMetrics.get(String(n.id));
 			let currentVsMA20: number | null = null;
 			let drawdown60d: number | null = null;
 			let recovery60d: number | null = null;
@@ -281,11 +296,17 @@
 					recovery60d = ((ts.currentPrice / ts.low60) - 1) * 100;
 				}
 			}
+			// PSR 합성 — marketCap (Naver 우선, 없으면 KRX) / 매출 (원 단위)
+			const mcap = vm?.marketCapNaver ?? ts?.marketCap ?? null;
+			const psr =
+				mcap != null && typeof n.revenue === 'number' && n.revenue > 0
+					? mcap / n.revenue
+					: null;
 			return {
 				...n,
-				// 가격·시총 — DuckDB SQL 결과 직접 머지
+				// 가격·시총 — DuckDB SQL 결과 직접 머지 (Naver 우선)
 				currentPrice: ts?.currentPrice ?? null,
-				marketCap: ts?.marketCap ?? null,
+				marketCap: mcap,
 				week52High: ts?.week52High ?? null,
 				week52Low: ts?.week52Low ?? null,
 				volumeAvg30d: ts?.volumeAvg30d ?? null,
@@ -295,6 +316,11 @@
 				return1y: ts?.return1y ?? null,
 				foreignPct: null, // 별도 gather 미수집
 				beta: null, // KOSPI 시계열 join 시 추가
+				// valuation (Naver API 기반)
+				per: vm?.per ?? null,
+				pbr: vm?.pbr ?? null,
+				dividendYield: vm?.dividendYield ?? null,
+				psr,
 				// 시계열 derived
 				currentVsMA20,
 				drawdown60d,
@@ -629,10 +655,54 @@
 			}
 			priceTimeSeries = map;
 			dbState = 'ready';
+			// valuation.parquet 도 함께 로드 (PER/PBR/배당) — 백그라운드 비차단
+			void loadValuation();
 		} catch (err) {
 			dbState = 'error';
 			dbError = err instanceof Error ? err.message : String(err);
 			console.warn('[screener] DuckDB 시계열 로드 실패', err);
+		}
+	}
+
+	/** HF dart/scan/valuation.parquet → PER/PBR/배당수익률/시총 즉석 query.
+	 * Naver API 기반, 매일 KST 04:00 갱신 (~5MB).
+	 */
+	async function loadValuation() {
+		if (!dartDb) return;
+		try {
+			await dartDb.registerHfParquet('valuation', 'dart/scan/valuation.parquet');
+			const rows = await dartDb.query<{
+				stockCode: string;
+				per: number | null;
+				pbr: number | null;
+				dividendYield: number | null;
+				marketCap: number | null;
+			}>(`
+				SELECT
+					stockCode,
+					CAST(per AS DOUBLE) AS per,
+					CAST(pbr AS DOUBLE) AS pbr,
+					CAST(dividendYield AS DOUBLE) AS dividendYield,
+					CAST(marketCap AS DOUBLE) AS marketCap
+				FROM valuation
+			`);
+			const map = new Map<string, ValuationMetrics>();
+			const num = (v: unknown): number | null => {
+				if (v === null || v === undefined) return null;
+				const n = Number(v);
+				return Number.isFinite(n) ? n : null;
+			};
+			for (const r of rows) {
+				map.set(r.stockCode, {
+					per: num(r.per),
+					pbr: num(r.pbr),
+					dividendYield: num(r.dividendYield),
+					marketCapNaver: num(r.marketCap)
+				});
+			}
+			valuationMetrics = map;
+		} catch (err) {
+			console.warn('[screener] valuation.parquet 로드 실패', err);
 		}
 	}
 
@@ -713,8 +783,10 @@
 		{ key: 'roe', label: 'ROE', align: 'right' },
 		{ key: 'opMargin', label: 'OPM', align: 'right' },
 		{ key: 'debtRatio', label: '부채', align: 'right' },
-		{ key: 'revCagr', label: 'CAGR', align: 'right' },
 		{ key: 'marketCap', label: '시총', align: 'right' },
+		{ key: 'per', label: 'PER', align: 'right' },
+		{ key: 'pbr', label: 'PBR', align: 'right' },
+		{ key: 'dividendYield', label: '배당%', align: 'right' },
 		{ key: 'return1y', label: '1Y', align: 'right' },
 		{ key: 'spark', label: '60d', align: 'center' },
 		{ key: 'profGrade', label: '수익', align: 'center' },
@@ -1209,10 +1281,16 @@
 							<td class="num" class:down={typeof n.debtRatio === 'number' && n.debtRatio >= 200} class:up={typeof n.debtRatio === 'number' && n.debtRatio <= 50}>
 								{fmtMetricValue('debtRatio', n.debtRatio)}
 							</td>
-							<td class="num" class:up={typeof n.revCagr === 'number' && n.revCagr > 10} class:down={typeof n.revCagr === 'number' && n.revCagr < 0}>
-								{fmtMetricValue('revCagr', n.revCagr)}
-							</td>
 							<td class="num">{fmtMetricValue('marketCap', n.marketCap)}</td>
+							<td class="num" class:up={typeof n.per === 'number' && n.per > 0 && n.per <= 10} class:down={typeof n.per === 'number' && n.per > 30}>
+								{fmtMetricValue('per', n.per)}
+							</td>
+							<td class="num" class:up={typeof n.pbr === 'number' && n.pbr > 0 && n.pbr <= 1} class:down={typeof n.pbr === 'number' && n.pbr > 3}>
+								{fmtMetricValue('pbr', n.pbr)}
+							</td>
+							<td class="num" class:up={typeof n.dividendYield === 'number' && n.dividendYield >= 3}>
+								{fmtMetricValue('dividendYield', n.dividendYield)}
+							</td>
 							<td class="num {returnTone(n.return1y)}">{fmtMetricValue('return1y', n.return1y)}</td>
 							<td class="spark-cell">
 								{#if priceTimeSeries.has(String(n.id))}

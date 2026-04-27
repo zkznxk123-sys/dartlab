@@ -189,6 +189,47 @@ export const PRESETS: Preset[] = [
 			{ metric: 'cfPattern', op: '==', value: '건전형' }
 		],
 		sorts: [{ key: 'volatility1y', dir: 'asc' }]
+	},
+	// ── Valuation 프리셋 (PR-14, HF dart/scan/valuation.parquet 활용) ──
+	{
+		id: 'low-per-quality',
+		title: '저PER + Quality',
+		subtitle: 'PER 10배 이하 + 우량 등급',
+		desc: 'PER 10배↓ + ROE 10%↑ + 이익질 양호 이상 — 저평가 우량주 (Naver API 시총)',
+		category: 'price',
+		conds: [
+			{ metric: 'per', op: 'between', value: 0, value2: 10 },
+			{ metric: 'roe', op: '>=', value: 10 },
+			{ metric: 'qualGrade', op: '!=', value: '주의' },
+			{ metric: 'qualGrade', op: '!=', value: '위험' }
+		],
+		sorts: [{ key: 'per', dir: 'asc' }]
+	},
+	{
+		id: 'high-dividend-stable',
+		title: '고배당 + 안정',
+		subtitle: '배당수익률 4%↑ + 부채 안전 + 흑자',
+		desc: '배당수익률 4%↑ + 부채비율 100%↓ + 영업이익률 양수 — 안정 고배당주',
+		category: 'price',
+		conds: [
+			{ metric: 'dividendYield', op: '>=', value: 4 },
+			{ metric: 'debtRatio', op: '<=', value: 100 },
+			{ metric: 'opMargin', op: '>=', value: 0 }
+		],
+		sorts: [{ key: 'dividendYield', dir: 'desc' }]
+	},
+	{
+		id: 'pbr-below-book',
+		title: 'PBR 1배 이하 회사',
+		subtitle: '장부가 미만 + 이익 흑자',
+		desc: 'PBR 1배 이하 + ROE 양수 + 영업이익 양수 — 청산가치 미만 (가치주 후보)',
+		category: 'price',
+		conds: [
+			{ metric: 'pbr', op: 'between', value: 0, value2: 1 },
+			{ metric: 'roe', op: '>=', value: 0 },
+			{ metric: 'opMargin', op: '>=', value: 0 }
+		],
+		sorts: [{ key: 'pbr', dir: 'asc' }]
 	}
 ];
 
