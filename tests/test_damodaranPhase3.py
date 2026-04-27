@@ -16,8 +16,8 @@ import pytest
 @pytest.mark.unit
 def test_impliedERP_returns_loadDamodaranERP_schema():
     """impliedERP 결과는 loadDamodaranERP 와 동일 키 셋을 반환 (proforma 분기 호환)."""
-    from dartlab.core.finance.impliedERP import calcImpliedERP
-    from dartlab.core.finance.riskPremiums import loadDamodaranERP
+    from dartlab.macro.impliedERP import calcImpliedERP
+    from dartlab.macro.riskPremiums import loadDamodaranERP
 
     ref = loadDamodaranERP(countryCode="US")
     r = calcImpliedERP(country="US", useCache=False)
@@ -38,7 +38,7 @@ def test_impliedERP_returns_loadDamodaranERP_schema():
 @pytest.mark.unit
 def test_impliedERP_fallback_when_index_missing():
     """지수/finance.parquet 없는 국가 → source=fallback_historical."""
-    from dartlab.core.finance.impliedERP import calcImpliedERP
+    from dartlab.macro.impliedERP import calcImpliedERP
 
     # 한국/미국 외 국가는 현재 aggregate 경로 없음
     r = calcImpliedERP(country="JP", useCache=False)

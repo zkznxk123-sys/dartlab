@@ -170,7 +170,7 @@ def _computeSK(company: Any, optionType: str) -> dict | None:
     try:
         from dartlab.analysis.financial.valuation import calcDcf
         from dartlab.analysis.valuation.dFV import _calcLiquidationDetail
-        from dartlab.core.finance.riskPremiums import loadDamodaranERP
+        from dartlab.macro.riskPremiums import loadDamodaranERP
     except ImportError:
         return None
 

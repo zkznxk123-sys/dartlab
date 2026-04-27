@@ -305,7 +305,7 @@ def calcValuationBand(company, *, basePeriod: str | None = None) -> dict | None:
         bands : dict — PER/PBR별 밴드 정보 (metric, current, mean, std, percentile, zone, zoneLabel, dataPoints)
         overallZone : str — 종합 판정 ("저평가" | "고평가" | "부분 저평가" | "부분 고평가" | "적정")
     """
-    from dartlab.core.finance.macroCycle import calcMultipleBand
+    from dartlab.macro.macroCycle import calcMultipleBand
 
     # ratioSeries에서 PER/PBR 과거 시계열 추출
     try:

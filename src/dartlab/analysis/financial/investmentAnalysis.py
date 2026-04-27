@@ -282,7 +282,7 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
         pass
 
     # Phase 8 A5
-    from dartlab.core.finance.turningPoint import injectTurningPoints
+    from dartlab.macro.turningPoint import injectTurningPoints
 
     return (
         {"history": history, "turningPoints": injectTurningPoints(history, seriesKey="roic", minDeltaPct=30.0)}

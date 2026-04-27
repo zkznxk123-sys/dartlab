@@ -251,8 +251,8 @@ def _crisisHistoricalContext(market: str, as_of: str | None) -> dict | None:
     if market.upper() != "US":
         return None
     try:
-        from dartlab.core.finance.historicalContext import buildHistoricalContext
         from dartlab.macro._helpers import fetch_monthly_dict
+        from dartlab.macro.historicalContext import buildHistoricalContext
 
         g_hist = get_gather(as_of)
         hist_data: dict = {}
@@ -360,7 +360,7 @@ def _crisisDalio48Match(data: dict, credit_gap_val) -> list | None:
 def _crisisRRTypes(data: dict, hy_current, market: str, kwargs: dict) -> tuple[dict | None, list | None]:
     """R&R 위기 유형 분류 + 역사 매칭. 반환: (crisisType dict, rrMatch list)."""
     try:
-        from dartlab.core.finance.rrCrisisDB import classifyCrisisType, matchRrHistorical
+        from dartlab.macro.rrCrisisDB import classifyCrisisType, matchRrHistorical
 
         ct = classifyCrisisType(
             hySpread=hy_current,

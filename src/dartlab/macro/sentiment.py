@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dartlab.core.finance.macroCycle import classifyVixRegime
 from dartlab.core.finance.sentiment import calcFearGreedProxy
 from dartlab.macro._helpers import (
     apply_overrides,
@@ -12,6 +11,7 @@ from dartlab.macro._helpers import (
     fetch_series_list,
     get_gather,
 )
+from dartlab.macro.macroCycle import classifyVixRegime
 
 
 def _fetch_sentiment_data(market: str, as_of: str | None = None) -> dict[str, float | None]:

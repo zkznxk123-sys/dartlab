@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dartlab.core.finance.macroCycle import classifyCycle, detectTransitionSequence
 from dartlab.macro._helpers import (
     apply_overrides,
     collect_timeseries,
@@ -12,6 +11,7 @@ from dartlab.macro._helpers import (
     get_gather,
     recent_timeseries,
 )
+from dartlab.macro.macroCycle import classifyCycle, detectTransitionSequence
 
 
 def _fetch_indicators(market: str, as_of: str | None = None) -> dict[str, float | None]:

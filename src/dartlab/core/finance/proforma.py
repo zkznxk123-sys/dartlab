@@ -606,7 +606,7 @@ def _fetchBeta(stockCode: str, currency: str = "KRW") -> float | None:
 def _resolveCountryFromCurrency(currency: str) -> str:
     """currency → ISO2 fallback. riskPremiums.resolveCountryCode 재사용."""
     try:
-        from dartlab.core.finance.riskPremiums import resolveCountryCode
+        from dartlab.macro.riskPremiums import resolveCountryCode
 
         return resolveCountryCode(currency=currency)
     except ImportError:
@@ -645,11 +645,11 @@ def compute_company_wacc(
     damodaran = None
     if country or country_risk_premium is not None or implied_erp:
         if implied_erp:
-            from dartlab.core.finance.impliedERP import calcImpliedERP
+            from dartlab.macro.impliedERP import calcImpliedERP
 
             damodaran = calcImpliedERP(country=country or _resolveCountryFromCurrency(currency))
         else:
-            from dartlab.core.finance.riskPremiums import loadDamodaranERP
+            from dartlab.macro.riskPremiums import loadDamodaranERP
 
             damodaran = loadDamodaranERP(countryCode=country, currency=currency)
 

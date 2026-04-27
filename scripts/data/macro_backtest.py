@@ -288,7 +288,7 @@ if ur_df is not None:
 # ── Nelson-Siegel 현재 ──
 out("### 2.6 Nelson-Siegel 현재 상태")
 out()
-from dartlab.core.finance.yieldCurve import nelsonSiegel
+from dartlab.macro.yieldCurve import nelsonSiegel
 
 maturities = [1, 2, 3, 5, 7, 10, 20, 30]
 series_ids = ["DGS1", "DGS2", "DGS3", "DGS5", "DGS7", "DGS10", "DGS20", "DGS30"]
@@ -311,8 +311,8 @@ out()
 # ── FCI 현재 ──
 out("### 2.7 FCI 현재 상태")
 out()
-from dartlab.core.finance.fci import calcFCI
 from dartlab.macro._helpers import fetch_series_list
+from dartlab.macro.fci import calcFCI
 
 fci_vars = {}
 sid_map = {

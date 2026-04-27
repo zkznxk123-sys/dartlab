@@ -314,7 +314,7 @@ def test_rrCrisisDB_loadRrCrises_loudFail_onMissingData(monkeypatch):
     """rrCrisisDB._loadRrCrises 가 파일 부재 시 FileNotFoundError 발생."""
     from importlib import resources
 
-    import dartlab.core.finance.rrCrisisDB as mod
+    import dartlab.macro.rrCrisisDB as mod
 
     crises = mod._loadRrCrises()
     assert isinstance(crises, list)

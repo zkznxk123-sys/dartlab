@@ -199,7 +199,7 @@ def test_match48Cases_hyperinflation_recognized():
 
 @pytest.mark.requires_data
 def test_classifyCrisisType_triple_kr_1997():
-    from dartlab.core.finance.rrCrisisDB import classifyCrisisType
+    from dartlab.macro.rrCrisisDB import classifyCrisisType
 
     r = classifyCrisisType(
         hySpread=1200,
@@ -217,7 +217,7 @@ def test_classifyCrisisType_triple_kr_1997():
 
 @pytest.mark.requires_data
 def test_classifyCrisisType_stagflation():
-    from dartlab.core.finance.rrCrisisDB import classifyCrisisType
+    from dartlab.macro.rrCrisisDB import classifyCrisisType
 
     r = classifyCrisisType(inflationYoy=8, gdpGrowth=0.5)
     assert "stagflation" in r["activeTypes"]
@@ -225,7 +225,7 @@ def test_classifyCrisisType_stagflation():
 
 @pytest.mark.requires_data
 def test_classifyCrisisType_empty_normal():
-    from dartlab.core.finance.rrCrisisDB import classifyCrisisType
+    from dartlab.macro.rrCrisisDB import classifyCrisisType
 
     r = classifyCrisisType(hySpread=300, npl=1, fxDepreciationYoy=2, inflationYoy=2)
     assert r["activeTypes"] == []
@@ -234,7 +234,7 @@ def test_classifyCrisisType_empty_normal():
 
 @pytest.mark.requires_data
 def test_matchRrHistorical_kr_1997_bonus():
-    from dartlab.core.finance.rrCrisisDB import matchRrHistorical
+    from dartlab.macro.rrCrisisDB import matchRrHistorical
 
     r = matchRrHistorical(["banking", "currency", "sovereign_debt"], country="KR")
     assert r["matches"]
@@ -246,7 +246,7 @@ def test_matchRrHistorical_kr_1997_bonus():
 
 @pytest.mark.requires_data
 def test_matchRrHistorical_no_types():
-    from dartlab.core.finance.rrCrisisDB import matchRrHistorical
+    from dartlab.macro.rrCrisisDB import matchRrHistorical
 
     r = matchRrHistorical([])
     assert r["matches"] == []

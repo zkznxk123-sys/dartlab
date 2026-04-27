@@ -181,7 +181,7 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
             pass
 
     # Phase 8 A5: turningPoints 헬퍼 1줄
-    from dartlab.core.finance.turningPoint import injectTurningPoints
+    from dartlab.macro.turningPoint import injectTurningPoints
 
     result["turningPoints"] = injectTurningPoints(history, seriesKey="operatingMargin", minDeltaPct=25.0)
 

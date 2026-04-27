@@ -48,8 +48,8 @@ def calcControlValue(
         from dartlab.analysis.financial.investmentAnalysis import calcRoicTimeline
         from dartlab.analysis.valuation.dcf import multiStageDcf
         from dartlab.analysis.valuation.dFV import calcDFV
-        from dartlab.core.finance.riskPremiums import loadDamodaranERP
         from dartlab.core.overrides import applyOverride
+        from dartlab.macro.riskPremiums import loadDamodaranERP
     except ImportError:
         return None
 

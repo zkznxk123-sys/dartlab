@@ -51,7 +51,7 @@ def test_reinvestmentIdentity():
 
 @pytest.mark.requires_data
 def test_riskPremiums_fallback():
-    from dartlab.core.finance.riskPremiums import listSupportedCountries, loadDamodaranERP
+    from dartlab.macro.riskPremiums import listSupportedCountries, loadDamodaranERP
 
     countries = listSupportedCountries()
     assert "KR" in countries
@@ -70,7 +70,7 @@ def test_riskPremiums_fallback():
 
 @pytest.mark.requires_data
 def test_riskPremiums_currency_to_country():
-    from dartlab.core.finance.riskPremiums import resolveCountryCode
+    from dartlab.macro.riskPremiums import resolveCountryCode
 
     assert resolveCountryCode(currency="KRW") == "KR"
     assert resolveCountryCode(currency="USD") == "US"

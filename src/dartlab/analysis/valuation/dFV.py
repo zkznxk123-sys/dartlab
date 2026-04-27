@@ -750,8 +750,8 @@ def _tsdResolveTerminalGrowth(life_phase: str | None, company: Any, overrides: d
         Damodaran ERP riskFreeRate 기준 phase 별 감쇠값. override 있으면 우선.
     """
     try:
-        from dartlab.core.finance.riskPremiums import loadDamodaranERP
         from dartlab.core.overrides import applyOverride
+        from dartlab.macro.riskPremiums import loadDamodaranERP
     except ImportError:
         return 2.5
 
