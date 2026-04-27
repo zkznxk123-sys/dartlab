@@ -239,8 +239,10 @@ def analyzeFinancial(
     auditData = _extractAuditData(company) if company is not None else None
     anomalies = runAnomalyDetection(aSeries, isFinancial, auditData=auditData)
 
-    # Merton 시장 기반 모델 (비금융 + marketData 제공 시)
-    mertonResult = None
+    # Merton 시장 기반 모델 (비금융 + marketData 제공 시).
+    # credit 의 MertonResult dataclass → dict 로 변환해 distress 에 전달.
+    # distress 는 도메인 결과 dataclass 직접 import 안 함 (옵션 C 사상).
+    mertonDict: dict | None = None
     if not isFinancial and marketData is not None:
         try:
             from dartlab.credit.merton import calcEquityVolatility, solveMerton
@@ -253,10 +255,16 @@ def analyzeFinancial(
                     equityVolatility=vol,
                     riskFreeRate=marketData.riskFreeRate,
                 )
+                if mertonResult is not None:
+                    mertonDict = {
+                        "d2d": mertonResult.d2d,
+                        "pd": mertonResult.pd,
+                        "converged": mertonResult.converged,
+                    }
         except ImportError:
             pass  # scipy 미설치 → Merton 축 제외, 4축으로 동작
 
-    distress = calcDistress(ratios, anomalies, isFinancial, mertonResult=mertonResult)
+    distress = calcDistress(ratios, anomalies, isFinancial, mertonResult=mertonDict)
 
     resolvedName = corpName or (company.corpName if company else stockCode)
     grades = {k: v.grade for k, v in insights.items()}

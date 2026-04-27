@@ -151,15 +151,7 @@ def test_credit_guide_has_group_column():
 #   - 차단: 대문자 시작 + Result/Score/Axis/Grade 접미사 (dataclass), mapTo*/estimateGrade*/notchGrade* (매핑)
 #   - 허용: 그 외 모두 (소문자 함수 + 일반 클래스)
 #
-# S8 진행 후 풀 예정 allowlist:
-#   - distress.py 가 MertonResult / mapTo20Grade 직접 사용 — 호출자 정리 (sig 변경 + review
-#     위임) 후 해제. plan ai-flickering-sparrow.md "S8" 참조.
 import re
-
-_S8_PENDING_DISTRESS_REVIEW: set[tuple[str, str, str, str]] = {
-    ("analysis", "credit", "analysis/financial/insight/distress.py", "MertonResult"),
-    ("analysis", "credit", "analysis/financial/insight/distress.py", "mapTo20Grade"),
-}
 
 # 결과 dataclass = 대문자 시작 + 접미사. 소문자 시작 = 함수 (수학/유틸).
 _BLOCKED_DATACLASS_PATTERNS = [
@@ -226,13 +218,9 @@ def test_no_l2_cross_imports():
                     if mod != f"dartlab.{other}" and not mod.startswith(f"dartlab.{other}."):
                         continue
                     # 모듈 자체 import (`from dartlab.credit import X`) 는 X 명으로 판정
-                    rel_norm = str(py.relative_to(root)).replace("\\", "/")
                     for alias in node.names:
                         sym = alias.name
                         if _classifySymbol(sym) != "blocked":
-                            continue
-                        # S8 pending allowlist (distress.py 호출자 정리 후 해제)
-                        if (src_engine, other, rel_norm, sym) in _S8_PENDING_DISTRESS_REVIEW:
                             continue
                         blocked_imports.append((src_engine, other, str(py.relative_to(root)), node.lineno, sym))
     assert not blocked_imports, "L2 cross-import 결과/매핑 심볼 차단:\n" + "\n".join(

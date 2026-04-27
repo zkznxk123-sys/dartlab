@@ -1,45 +1,21 @@
 """신용등급 산출 순수 로직.
 
 업종별 기준표에서 각 지표를 0-100 위험 점수로 변환하고,
-5축 가중평균으로 종합 점수를 산출한 뒤 20단계 등급(AAA~D)을 매핑한다.
-
-이 모듈은 L0(core)에 위치하며 업종/시장 독립적인 순수 함수만 포함한다.
+5축 가중평균으로 종합 점수를 산출한다. 20단계 등급(AAA~D) 매핑표는
+``core/cross/creditGradeTable`` SSOT 에서 import.
 """
 
 from __future__ import annotations
 
-# ── 20단계 등급 테이블 ──
-#
-# (상한점수, 등급, 설명, 1년PD%)
-# KIS 실측(1998-2025) + S&P 글로벌 PD를 종합.
-
-_GRADE_20_TABLE: list[tuple[float, str, str, float]] = [
-    (3, "AAA", "투자적격 최상위", 0.00),
-    (5, "AA+", "투자적격 상위+", 0.01),
-    (8, "AA", "투자적격 상위", 0.02),
-    (10, "AA-", "투자적격 상위-", 0.03),
-    (13, "A+", "투자적격+", 0.04),
-    (16, "A", "투자적격", 0.06),
-    (19, "A-", "투자적격-", 0.08),
-    (22, "BBB+", "투자적격 하한+", 0.15),
-    (27, "BBB", "투자적격 하한", 0.25),
-    (32, "BBB-", "투자적격 하한-", 0.40),
-    (37, "BB+", "투기등급+", 0.75),
-    (42, "BB", "투기등급", 1.50),
-    (48, "BB-", "투기등급-", 2.50),
-    (55, "B+", "투기등급 하위+", 4.00),
-    (62, "B", "투기등급 하위", 7.00),
-    (70, "B-", "투기등급 하위-", 10.00),
-    (78, "CCC", "상당한 부실 위험", 15.00),
-    (85, "CC", "부실 임박", 25.00),
-    (93, "C", "부도 직전", 40.00),
-    (100, "D", "부도", 100.00),
-]
-
-# ── 등급 순서 인덱스 (notching 계산용) ──
-
-_GRADE_ORDER: list[str] = [row[1] for row in _GRADE_20_TABLE]
-_GRADE_TO_IDX: dict[str, int] = {g: i for i, g in enumerate(_GRADE_ORDER)}
+# 20단계 등급 매핑표 + 변환 함수는 도메인-중립 표준 (S&P/KIS) — core/cross SSOT 사용.
+# distress 분석 등 다른 도메인도 같은 표를 import 하여 cross-domain 일관성 유지.
+from dartlab.core.cross.creditGradeTable import (  # noqa: F401
+    estimatePD,
+    gradeCategory,
+    isInvestmentGrade,
+    mapTo20Grade,
+    notchGrade,
+)
 
 
 def scoreMetric(
@@ -100,59 +76,8 @@ def weightedScore(axes: list[dict]) -> float:
     return round(sum(s * w for s, w in valid) / totalWeight, 2)
 
 
-def mapTo20Grade(score: float) -> tuple[str, str, float]:
-    """종합 점수(0-100) → (등급, 설명, PD추정%).
-
-    점수가 클수록 위험. 0=AAA, 100=D.
-    """
-    score = max(0.0, min(100.0, score))
-    for threshold, grade, desc, pd in _GRADE_20_TABLE:
-        if score < threshold:
-            return grade, desc, pd
-    return "D", "부도", 100.0
-
-
-def estimatePD(grade: str) -> float:
-    """등급 → 1년 부도확률(%) 추정."""
-    for _, g, _, pd in _GRADE_20_TABLE:
-        if g == grade:
-            return pd
-    return 50.0
-
-
-def notchGrade(grade: str, notches: int) -> str:
-    """등급을 n notch 상향(+) 또는 하향(-) 조정."""
-    idx = _GRADE_TO_IDX.get(grade)
-    if idx is None:
-        return grade
-    newIdx = max(0, min(len(_GRADE_ORDER) - 1, idx + notches))
-    return _GRADE_ORDER[newIdx]
-
-
-def isInvestmentGrade(grade: str) -> bool:
-    """투자적격 등급(BBB- 이상) 여부."""
-    idx = _GRADE_TO_IDX.get(grade)
-    if idx is None:
-        return False
-    bbbMinusIdx = _GRADE_TO_IDX.get("BBB-", 9)
-    return idx <= bbbMinusIdx
-
-
-def gradeCategory(grade: str) -> str:
-    """등급 대분류 카테고리."""
-    if isInvestmentGrade(grade):
-        idx = _GRADE_TO_IDX.get(grade, 0)
-        if idx <= 3:
-            return "최우량"
-        if idx <= 6:
-            return "우량"
-        return "적격"
-    idx = _GRADE_TO_IDX.get(grade, 10)
-    if idx <= 12:
-        return "투기"
-    if idx <= 15:
-        return "고위험"
-    return "부실"
+# mapTo20Grade / estimatePD / notchGrade / isInvestmentGrade / gradeCategory:
+# core/cross/creditGradeTable SSOT 에서 import (모듈 상단 from 절). 중복 정의 제거.
 
 
 # ── 현금흐름등급 (eCR) ──

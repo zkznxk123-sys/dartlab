@@ -26,7 +26,10 @@ from dartlab.analysis.financial.insight.types import (
     ModelScore,
 )
 from dartlab.analysis.financial.ratios import RatioResult
-from dartlab.credit.merton import MertonResult
+
+# Merton D2D 입력은 dict 로 받는다 (credit 도메인의 MertonResult dataclass 직접 import 회피).
+# 호출자 (Company facade · review) 가 credit.calcMerton() 결과를 dict 로 변환해 전달.
+# dict 키: d2d (float), pd (float), converged (bool).
 
 # ── 신용등급 매핑 테이블 (S&P PD↔Rating 대응) ──
 
@@ -79,7 +82,7 @@ def _mapCreditGrade20(overall: float) -> tuple[str, str, float]:
         description : str — 등급 설명
         pd : float — 부도 확률 (%)
     """
-    from dartlab.credit.creditScorecard import mapTo20Grade
+    from dartlab.core.cross.creditGradeTable import mapTo20Grade
 
     return mapTo20Grade(overall)
 
@@ -411,9 +414,9 @@ def _normalizeFScore(f: int) -> float:
 # ── Merton D2D 해석 ──
 
 
-def _interpretMerton(result: MertonResult) -> ModelScore:
-    """Merton D2D → ModelScore."""
-    d2d = result.d2d
+def _interpretMerton(result: dict) -> ModelScore:
+    """Merton D2D → ModelScore. ``result`` 는 ``{"d2d", "pd", "converged"}`` 키를 가진 dict."""
+    d2d = result["d2d"]
     if d2d > 4.0:
         zone, interp = "safe", "부도 거리 매우 충분. 시장이 평가하는 신용 건전성 우수."
     elif d2d > 2.0:
@@ -425,7 +428,7 @@ def _interpretMerton(result: MertonResult) -> ModelScore:
     return ModelScore(
         name="Merton D2D",
         rawValue=round(d2d, 3),
-        displayValue=f"D2D = {d2d:.2f}, PD = {result.pd:.2f}%",
+        displayValue=f"D2D = {d2d:.2f}, PD = {result['pd']:.2f}%",
         zone=zone,
         interpretation=interp,
         reference="Merton (1974), 구조 모형. Moody's KMV 글로벌 표준.",
@@ -584,7 +587,7 @@ def calcDistress(
     anomalies: list[Anomaly],
     isFinancial: bool = False,
     *,
-    mertonResult: MertonResult | None = None,
+    mertonResult: dict | None = None,
 ) -> DistressResult:
     """부실 예측 종합 스코어카드 계산.
 
@@ -602,8 +605,9 @@ def calcDistress(
         감지된 이상 신호 목록.
     isFinancial : bool
         금융업 여부.
-    mertonResult : MertonResult | None
-        Merton D2D 모델 결과.
+    mertonResult : dict | None
+        Merton D2D 결과 dict (``{"d2d": float, "pd": float, "converged": bool}``).
+        호출자가 ``credit.calcMerton()`` 결과를 dict 변환해 전달.
 
     Returns
     -------
@@ -611,7 +615,7 @@ def calcDistress(
         종합 부실 점수, zone, 개별 모델 판정, 해석 텍스트.
     """
     # Merton 사용 여부: 비금융 + 수렴된 결과만
-    useMerton = mertonResult is not None and not isFinancial and mertonResult.converged
+    useMerton = mertonResult is not None and not isFinancial and mertonResult.get("converged", False)
 
     # ── 1. 정량 축 ──
     quant_models: list[ModelScore] = []
@@ -752,17 +756,18 @@ def calcDistress(
     if useMerton:
         assert mertonResult is not None  # type narrowing
         merton_model = _interpretMerton(mertonResult)
-        merton_norm = _normalizeMerton(mertonResult.d2d)
+        merton_d2d = mertonResult["d2d"]
+        merton_norm = _normalizeMerton(merton_d2d)
         merton_score = merton_norm
 
-        if mertonResult.d2d > 4:
-            merton_summary = f"D2D {mertonResult.d2d:.2f} — 시장 기반 부도 거리 충분."
-        elif mertonResult.d2d > 2:
-            merton_summary = f"D2D {mertonResult.d2d:.2f} — 모니터링 필요."
-        elif mertonResult.d2d > 1:
-            merton_summary = f"D2D {mertonResult.d2d:.2f} — 부실 위험 영역."
+        if merton_d2d > 4:
+            merton_summary = f"D2D {merton_d2d:.2f} — 시장 기반 부도 거리 충분."
+        elif merton_d2d > 2:
+            merton_summary = f"D2D {merton_d2d:.2f} — 모니터링 필요."
+        elif merton_d2d > 1:
+            merton_summary = f"D2D {merton_d2d:.2f} — 부실 위험 영역."
         else:
-            merton_summary = f"D2D {mertonResult.d2d:.2f} — 부도 임박 영역."
+            merton_summary = f"D2D {merton_d2d:.2f} — 부도 임박 영역."
 
         market_axis = DistressAxis(
             name="시장 기반",
