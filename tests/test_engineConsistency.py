@@ -140,24 +140,73 @@ def test_credit_guide_has_group_column():
 # ── L2 cross-import 회귀 가드 ──────────────────────────────
 
 
-# Stage 3c (2026-04-27) 임시 봉합 — credit math primitive (merton, survival, scorecard,
-# creditCycle, crisisDetector) 가 core/finance → credit/ 로 이동하면서 기존에 잠재 중이던
-# L2↔L2 cross-import 가 표면화. 사용자 토론 후 진짜 근본 정리 (core/finance/ 해체 +
-# L2 룰 재정의) 로 자연 해소 예정. 그때 본 allowlist 풀고 0 건 baseline 회복.
-_PENDING_L2_CROSS_IMPORTS: set[tuple[str, str, str]] = {
-    ("analysis", "credit", "valuation/dFV.py"),
-    ("analysis", "credit", "financial/insight/distress.py"),
-    ("analysis", "credit", "financial/insight/pipeline.py"),
-    ("macro", "credit", "crisis.py"),
+# L2 cross-import 룰 (옵션 C 하이브리드 — 2026-04-27)
+#
+# 큰 레포 표준 (sklearn / pandas / polars / django) 패턴 적용:
+#   - 수학 primitive (dict/숫자 반환 함수) 는 어느 L2 에서나 import 자유
+#   - 도메인 결정 결과 (Result/Score/Axis/Grade dataclass, mapTo* 매핑 함수) 만 import 금지
+#   - 결과 결합은 review/story 위임
+#
+# 심볼명 패턴 검사:
+#   - 차단: 대문자 시작 + Result/Score/Axis/Grade 접미사 (dataclass), mapTo*/estimateGrade*/notchGrade* (매핑)
+#   - 허용: 그 외 모두 (소문자 함수 + 일반 클래스)
+#
+# S8 진행 후 풀 예정 allowlist:
+#   - distress.py 가 MertonResult / mapTo20Grade 직접 사용 — 호출자 정리 (sig 변경 + review
+#     위임) 후 해제. plan ai-flickering-sparrow.md "S8" 참조.
+import re
+
+_S8_PENDING_DISTRESS_REVIEW: set[tuple[str, str, str, str]] = {
+    ("analysis", "credit", "analysis/financial/insight/distress.py", "MertonResult"),
+    ("analysis", "credit", "analysis/financial/insight/distress.py", "mapTo20Grade"),
 }
+
+# 결과 dataclass = 대문자 시작 + 접미사. 소문자 시작 = 함수 (수학/유틸).
+_BLOCKED_DATACLASS_PATTERNS = [
+    re.compile(r"^[A-Z].*Result$"),
+    re.compile(r"^[A-Z].*Score$"),
+    re.compile(r"^[A-Z].*Axis$"),
+    re.compile(r"^[A-Z].*Grade$"),
+]
+# 매핑 함수 (소문자 함수지만 도메인 룰 임)
+_BLOCKED_MAPPING_PATTERNS = [
+    re.compile(r"^mapTo"),
+    re.compile(r"^estimateGrade"),
+    re.compile(r"^notchGrade"),
+]
+
+
+def _classifySymbol(name: str) -> str:
+    """심볼명 → 'blocked' / 'allowed'.
+
+    차단:
+      - 결과 dataclass: ``MertonResult``, ``CreditGapResult``, ``DistressScore`` 등
+      - 매핑 함수: ``mapTo20Grade``, ``estimateGrade``
+    허용 (그 외 모두):
+      - 소문자 시작 함수: ``solveMerton``, ``calcSurvivalWeight``, ``ghsCrisisScore`` 등
+        — 수학 primitive 가정 (dict/숫자 반환). 결과 dataclass 가 함수 시그니처에 들어가
+        있어도 import 형태로 잡지 않음 (review 가 합치는 게 사상)
+      - 대문자 시작인데 Result/Score/Axis/Grade 접미사 없는 클래스: 알 수 없음 → 허용
+    """
+    for p in _BLOCKED_DATACLASS_PATTERNS:
+        if p.match(name):
+            return "blocked"
+    for p in _BLOCKED_MAPPING_PATTERNS:
+        if p.match(name):
+            return "blocked"
+    return "allowed"
 
 
 @pytest.mark.unit
 def test_no_l2_cross_imports():
-    """L2 엔진 간 상호 import 금지 (analysis ↔ credit ↔ quant ↔ macro)."""
+    """L2 엔진 간 상호 import — 심볼명 패턴으로 결과/매핑만 차단, 수학 primitive 는 허용.
+
+    옵션 C 하이브리드 (2026-04-27): 절대 금지 룰 → 결과 dataclass/매핑 함수만 차단.
+    수학 함수 (solve*/calc*/apply*/classify*) 는 자유 import — 결과 결합은 review 일임.
+    """
     root = Path(__file__).resolve().parent.parent / "src" / "dartlab"
     engines = ["analysis", "credit", "quant", "macro"]
-    forbidden_pairs = []
+    blocked_imports = []
     for src_engine in engines:
         src_dir = root / src_engine
         if not src_dir.exists():
@@ -168,15 +217,24 @@ def test_no_l2_cross_imports():
             except (SyntaxError, UnicodeDecodeError):
                 continue
             for node in ast.walk(tree):
-                if isinstance(node, ast.ImportFrom) and node.module:
-                    mod = node.module
-                    for other in engines:
-                        if other == src_engine:
+                if not isinstance(node, ast.ImportFrom) or not node.module:
+                    continue
+                mod = node.module
+                for other in engines:
+                    if other == src_engine:
+                        continue
+                    if mod != f"dartlab.{other}" and not mod.startswith(f"dartlab.{other}."):
+                        continue
+                    # 모듈 자체 import (`from dartlab.credit import X`) 는 X 명으로 판정
+                    rel_norm = str(py.relative_to(root)).replace("\\", "/")
+                    for alias in node.names:
+                        sym = alias.name
+                        if _classifySymbol(sym) != "blocked":
                             continue
-                        if mod == f"dartlab.{other}" or mod.startswith(f"dartlab.{other}."):
-                            rel = str(py.relative_to(root / src_engine)).replace("\\", "/")
-                            if (src_engine, other, rel) in _PENDING_L2_CROSS_IMPORTS:
-                                continue
-                            forbidden_pairs.append((src_engine, other, str(py.relative_to(root)), node.lineno))
-    # Phase 9 A2: baseline 0건 달성. 새 cross-import 즉시 감지.
-    assert not forbidden_pairs, f"L2 cross-import 발견: {forbidden_pairs}"
+                        # S8 pending allowlist (distress.py 호출자 정리 후 해제)
+                        if (src_engine, other, rel_norm, sym) in _S8_PENDING_DISTRESS_REVIEW:
+                            continue
+                        blocked_imports.append((src_engine, other, str(py.relative_to(root)), node.lineno, sym))
+    assert not blocked_imports, "L2 cross-import 결과/매핑 심볼 차단:\n" + "\n".join(
+        f"  {sl}/{p}:{ln} → {oth}.{s}" for sl, oth, p, ln, s in blocked_imports
+    )
