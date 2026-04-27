@@ -172,7 +172,7 @@ def test_loadCostByNature_returnsPopulatedDict():
 
 def test_loadLabelSupplements_returnsPopulatedDict():
     """labelSupplements.json 이 번들되어 정상 로드 + 빈 dict 아님."""
-    from dartlab.core.finance.labels import _load_label_supplements
+    from dartlab.core.utils.labels import _load_label_supplements
 
     result = _load_label_supplements()
     assert isinstance(result, dict)
@@ -181,7 +181,7 @@ def test_loadLabelSupplements_returnsPopulatedDict():
 
 def test_loadEdgarStandardAccounts_returnsPopulatedDict():
     """EDGAR standardAccounts.json 이 번들되어 정상 로드."""
-    from dartlab.core.finance.labels import _load_edgar_standard_accounts
+    from dartlab.core.utils.labels import _load_edgar_standard_accounts
 
     result = _load_edgar_standard_accounts()
     assert isinstance(result, dict)

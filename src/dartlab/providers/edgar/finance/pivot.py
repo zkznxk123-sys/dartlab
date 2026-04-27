@@ -25,8 +25,8 @@ from typing import Optional
 
 import polars as pl
 
-from dartlab.core.finance.ordering import sortSeries
-from dartlab.core.finance.period import (
+from dartlab.core.utils.ordering import sortSeries
+from dartlab.core.utils.period import (
     buildFiscalToCalendarMap,
     extractYear,
     formatPeriod,
@@ -155,7 +155,7 @@ def _buildTimeseriesFromFacts(
     # `core/finance/helpers.py::toDictBySnakeId` 의 fixpoint 루프와 동일 패턴 (SSOT).
     # 예: mapper 가 "Assets" → "assets" 로 normalize 해도 소비자 (story · test) 가
     # "total_assets" 로 접근 가능하도록 복제.
-    from dartlab.core.finance.labels import SNAKEID_ALIASES
+    from dartlab.core.utils.labels import SNAKEID_ALIASES
 
     for stmtMap in result.values():
         for _ in range(4):  # transitive chain (A→B→C) 해소용 fixpoint

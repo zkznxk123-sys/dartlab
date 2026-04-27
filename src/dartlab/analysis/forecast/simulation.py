@@ -14,7 +14,6 @@ import math
 import random
 from dataclasses import dataclass, field
 
-from dartlab.core.finance.fmt import fmtBig, fmtPrice
 from dartlab.core.finance.scenario import (
     BASELINE_FX,
     BASELINE_RATE,
@@ -29,6 +28,7 @@ from dartlab.core.utils.extract import (
     getLatest,
     getTTM,
 )
+from dartlab.core.utils.fmt import fmtBig, fmtPrice
 from dartlab.industry import SectorParams
 
 # ══════════════════════════════════════

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from dartlab.core.finance.fmt import fmtBig, fmtPrice
 from dartlab.core.utils.extract import getAnnualValues
+from dartlab.core.utils.fmt import fmtBig, fmtPrice
 from dartlab.core.utils.ols import (
     _coefficientOfVariation,
     _detectStructuralBreak,

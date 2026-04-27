@@ -16,7 +16,7 @@ import threading
 from pathlib import Path
 from typing import Optional
 
-from dartlab.core.finance.labels import SNAKEID_ALIASES
+from dartlab.core.utils.labels import SNAKEID_ALIASES
 
 _DATA_DIR = Path(__file__).parent / "mapperData"
 

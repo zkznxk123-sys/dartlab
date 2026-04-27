@@ -192,13 +192,13 @@ def _financeToDataFrame(
 
     # 옵션: 분기 → 연간 합성. SSOT 헬퍼 위임 (core/finance/flow.py).
     if includeAnnual:
-        from dartlab.core.finance.flow import synthesizeAnnualFromQuarters
+        from dartlab.core.utils.flow import synthesizeAnnualFromQuarters
 
         rowMap = {r["snakeId"]: r for r in rows}
         synthesizeAnnualFromQuarters(rowMap, list(years), sjDiv)
 
     # SNAKEID_ALIASES 양방향 row 머지 — SSOT 헬퍼 위임 (core/finance/labels.py).
-    from dartlab.core.finance.labels import mergeAliasRows
+    from dartlab.core.utils.labels import mergeAliasRows
 
     snakeToRow = {r["snakeId"]: r for r in rows}
     mergedSnakeIds = mergeAliasRows(snakeToRow)
@@ -390,7 +390,7 @@ def _buildCisSeries(df: pl.DataFrame, periods: list[str], formatPeriod) -> dict[
 
 def _financeCisAnnual(stockCode: str, fsDivPref: str = "CFS") -> tuple[dict[str, dict[str, list]], list[str]] | None:
     """finance 원본에서 CIS 연도별 시계열 생성."""
-    from dartlab.core.finance.period import extractYear, formatPeriod
+    from dartlab.core.utils.period import extractYear, formatPeriod
     from dartlab.providers.dart.finance.pivot import _loadAndNormalize
 
     result = _loadAndNormalize(stockCode, fsDivPref)
@@ -422,7 +422,7 @@ def _financeCisAnnual(stockCode: str, fsDivPref: str = "CFS") -> tuple[dict[str,
 
 def _financeCisQuarterly(stockCode: str, fsDivPref: str = "CFS") -> tuple[dict[str, dict[str, list]], list[str]] | None:
     """finance 원본에서 CIS 분기별 시계열 생성 (연간 합산 없이)."""
-    from dartlab.core.finance.period import formatPeriod
+    from dartlab.core.utils.period import formatPeriod
     from dartlab.providers.dart.finance.pivot import _loadAndNormalize
 
     result = _loadAndNormalize(stockCode, fsDivPref)

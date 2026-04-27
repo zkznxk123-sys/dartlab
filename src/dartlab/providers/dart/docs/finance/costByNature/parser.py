@@ -2,9 +2,9 @@
 
 import re
 
-from dartlab.core.finance.unitNormalize import normalizeFromUnitScale
 from dartlab.core.mappers.parserMapper import loadCostByNature
 from dartlab.core.tableParser import detectUnit, parseAmount
+from dartlab.core.utils.unitNormalize import normalizeFromUnitScale
 
 _CBN = loadCostByNature()
 NORMALIZE_MAP = _CBN.get("normalize", [])

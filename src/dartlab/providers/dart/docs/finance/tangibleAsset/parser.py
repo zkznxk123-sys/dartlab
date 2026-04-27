@@ -8,8 +8,8 @@
 
 import re
 
-from dartlab.core.finance.unitNormalize import normalizeFromUnitScale
 from dartlab.core.tableParser import detectUnit, parseAmount
+from dartlab.core.utils.unitNormalize import normalizeFromUnitScale
 
 LABEL_MAP = {
     "기초 유형자산": "기초",

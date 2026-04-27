@@ -20,7 +20,7 @@ _DATA_FALLBACK = {"2025Q1": None, "2025Q2": None, "2025Q3": None, "2025Q4": 50.0
 
 def test_annualSumFlow_basic():
     """표준 헬퍼: 4분기 단순 합."""
-    from dartlab.core.finance.flow import annualSumFlow
+    from dartlab.core.utils.flow import annualSumFlow
 
     assert annualSumFlow(_DATA_FULL, "2025Q4", set(_PERIODS), withFallback=True) == 52.0
     assert annualSumFlow(_DATA_FULL, "2025Q4", set(_PERIODS), withFallback=False) == 52.0
@@ -28,7 +28,7 @@ def test_annualSumFlow_basic():
 
 def test_annualSumFlow_fallback_pattern():
     """analysis 모드 (withFallback=True) 누적공시 fallback."""
-    from dartlab.core.finance.flow import annualSumFlow
+    from dartlab.core.utils.flow import annualSumFlow
 
     result = annualSumFlow(_DATA_FALLBACK, "2025Q4", set(_PERIODS), withFallback=True)
     assert result == 50.0
@@ -36,7 +36,7 @@ def test_annualSumFlow_fallback_pattern():
 
 def test_annualSumFlow_credit_partial():
     """credit 모드 (withFallback=False): 1~2 분기 부분 합산."""
-    from dartlab.core.finance.flow import annualSumFlow
+    from dartlab.core.utils.flow import annualSumFlow
 
     data = {"2025Q4": 50.0}
     result = annualSumFlow(data, "2025Q4", ["2025Q4"], withFallback=False)
@@ -45,7 +45,7 @@ def test_annualSumFlow_credit_partial():
 
 def test_credit_ttmSum_delegates_to_annualSumFlow():
     """credit `_ttmSum` 가 annualSumFlow 위임."""
-    from dartlab.core.finance.flow import annualSumFlow
+    from dartlab.core.utils.flow import annualSumFlow
     from dartlab.credit.metrics import _ttmSum
 
     a = _ttmSum(_DATA_FULL, "2025Q4", _PERIODS)
@@ -60,7 +60,7 @@ def test_no_legacy_helper_imports():
     - annualizeFlowRows (Plan v5 F)
     """
     import dartlab.analysis.financial._helpers as h
-    import dartlab.core.finance.flow as f
+    import dartlab.core.utils.flow as f
 
     assert not hasattr(h, "ttmSum"), "ttmSum 은 Plan v4 에서 제거됨"
     assert not hasattr(h, "getFlowValue"), "getFlowValue 는 Plan v4 에서 제거됨"

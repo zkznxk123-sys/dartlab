@@ -496,13 +496,13 @@ class TestUSDCurrency:
 @pytest.mark.unit
 class TestFmtHelpers:
     def test_fmtBig(self):
-        from dartlab.core.finance.fmt import fmtBig
+        from dartlab.core.utils.fmt import fmtBig
 
         assert fmtBig(100e8, "KRW") == "100억"
         assert fmtBig(50e6, "USD") == "$50M"
 
     def test_fmtPrice(self):
-        from dartlab.core.finance.fmt import fmtPrice
+        from dartlab.core.utils.fmt import fmtPrice
 
         assert fmtPrice(50000, "KRW") == "50,000원"
         assert fmtPrice(150.5, "USD") == "$150.50"

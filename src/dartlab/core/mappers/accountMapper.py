@@ -17,7 +17,7 @@ class AccountMapper(BaseMapper):
         return "account"
 
     def _data(self) -> dict:
-        from dartlab.core.finance.labels import _load_account_mappings
+        from dartlab.core.utils.labels import _load_account_mappings
 
         return _load_account_mappings()
 

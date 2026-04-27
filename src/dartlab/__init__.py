@@ -187,7 +187,7 @@ def searchName(keyword: str):
         kr_result = _DartEngineCompany.search(keyword)
         # Phase 11 A3: 한글 alias → EDGAR 재검색 (예: "인텔" → "Intel")
         try:
-            from dartlab.core.finance.nameAliases import resolveEnglishAlias
+            from dartlab.core.utils.nameAliases import resolveEnglishAlias
             from dartlab.providers.edgar.company import Company as _US
 
             en = resolveEnglishAlias(keyword)

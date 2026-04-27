@@ -164,7 +164,7 @@ def toDict(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str
     needsBridge = labelCol not in ("항목",)
     krLabels: dict[str, str] | None = None
     if needsBridge:
-        from dartlab.core.finance.labels import get_korean_labels
+        from dartlab.core.utils.labels import get_korean_labels
 
         krLabels = get_korean_labels()
 
@@ -176,7 +176,7 @@ def toDict(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str
     if not data:
         return None
 
-    from dartlab.core.finance.flow import synthesizeAnnualFromQuarters
+    from dartlab.core.utils.flow import synthesizeAnnualFromQuarters
 
     periods = synthesizeAnnualFromQuarters(data, periods, getattr(selectResult, "topic", None))
     return (data, periods)
@@ -217,11 +217,11 @@ def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict],
     if not data:
         return None
 
-    from dartlab.core.finance.flow import synthesizeAnnualFromQuarters
+    from dartlab.core.utils.flow import synthesizeAnnualFromQuarters
 
     periods = synthesizeAnnualFromQuarters(data, periods, getattr(selectResult, "topic", None))
 
-    from dartlab.core.finance.labels import SNAKEID_ALIASES, mergeAliasRows
+    from dartlab.core.utils.labels import SNAKEID_ALIASES, mergeAliasRows
 
     mergeAliasRows(data, metaCols=set())
     # transitive 체인 (A→B, B→C 등) 해소를 위해 fixpoint 반복.

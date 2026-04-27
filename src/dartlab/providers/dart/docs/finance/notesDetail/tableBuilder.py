@@ -91,7 +91,7 @@ def buildTableDf(
     if not itemData:
         return None
 
-    from dartlab.core.finance.unitNormalize import normalizeFromUnitScale
+    from dartlab.core.utils.unitNormalize import normalizeFromUnitScale
 
     rows = []
     nCols = len(colOrder)

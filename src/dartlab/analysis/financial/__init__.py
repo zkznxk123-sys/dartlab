@@ -1237,7 +1237,7 @@ class Analysis:
 
         # Phase 15 B2: dataAsOf 자동 주입 — 각 calc history 의 최신 period + 호출 시각
         try:
-            from dartlab.core.finance.period import resolveLatestPeriod
+            from dartlab.core.utils.period import resolveLatestPeriod
 
             periods_pool: set[str] = set()
             for block in results.values():

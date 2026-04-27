@@ -31,9 +31,9 @@ import logging
 
 import polars as pl
 
-from dartlab.core.finance.ordering import sortSeries
-from dartlab.core.finance.period import extractYear, formatPeriod
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.core.utils.ordering import sortSeries
+from dartlab.core.utils.period import extractYear, formatPeriod
 from dartlab.providers.dart.finance.mapper import AccountMapper
 
 _log = logging.getLogger(__name__)

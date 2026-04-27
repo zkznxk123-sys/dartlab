@@ -4,15 +4,6 @@
 DART, EDGAR 등 어떤 L1 소스의 결과든 동일한 dict 구조면 동작.
 """
 
-from dartlab.core.finance.currency import (
-    convertValue,
-    getExchangeRate,
-)
-from dartlab.core.finance.fmt import (
-    fmtBig,
-    fmtPrice,
-    fmtUnit,
-)
 from dartlab.core.finance.ratios import (
     RATIO_CATEGORIES,
     RatioResult,
@@ -34,11 +25,20 @@ from dartlab.core.finance.scenario import (
     getNoiseSigma,
     getPresetScenarios,
 )
+from dartlab.core.utils.currency import (
+    convertValue,
+    getExchangeRate,
+)
 from dartlab.core.utils.extract import (
     getAnnualValues,
     getLatest,
     getRevenueGrowth3Y,
     getTTM,
+)
+from dartlab.core.utils.fmt import (
+    fmtBig,
+    fmtPrice,
+    fmtUnit,
 )
 from dartlab.core.utils.ols import (
     MultiOlsResult,

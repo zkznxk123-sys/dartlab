@@ -135,7 +135,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
     if len(yCols) < 4:
         return None
     # Phase 15 A1: Q4 함정 제거 — annualSumFlow 로 4분기 합산 (주석과 실제 이행 일치)
-    from dartlab.core.finance.flow import annualSumFlow
+    from dartlab.core.utils.flow import annualSumFlow
 
     allIsPeriods = set(isPeriods)
     rev_data = []

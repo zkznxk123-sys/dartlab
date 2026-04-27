@@ -105,7 +105,7 @@ def _isQuarterlyFallback(cols: list[str]) -> bool:
 # credit 차입금 산출용 TTM 합산 — annualSumFlow credit 모드 alias.
 # 1~2 분기도 부분 데이터로 연환산 (부정확하지만 credit 안정성 보수).
 def _ttmSum(flowData: dict, qCol: str, allPeriods: list[str]) -> float | None:
-    from dartlab.core.finance.flow import annualSumFlow
+    from dartlab.core.utils.flow import annualSumFlow
 
     return annualSumFlow(flowData, qCol, allPeriods, withFallback=False)
 

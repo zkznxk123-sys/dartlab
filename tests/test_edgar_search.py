@@ -61,7 +61,7 @@ def test_korean_alias_routes_to_edgar():
 @pytest.mark.unit
 def test_nameAliases_lookup():
     """KR→EN alias 사전 동작."""
-    from dartlab.core.finance.nameAliases import resolveEnglishAlias
+    from dartlab.core.utils.nameAliases import resolveEnglishAlias
 
     assert resolveEnglishAlias("인텔") == "Intel"
     assert resolveEnglishAlias("애플") == "Apple"

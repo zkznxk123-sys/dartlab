@@ -59,7 +59,7 @@ def calcEffectiveTaxRate(company, *, basePeriod: str | None = None) -> dict | No
     statutoryRate = 24.0  # 과세표준 구간에 따라 다르나 대기업 근사
 
     # Phase 15 A1: Q4 함정 제거 — Q4 fallback 컬럼은 annualSumFlow 로 4분기 합산
-    from dartlab.core.finance.flow import annualSumFlow
+    from dartlab.core.utils.flow import annualSumFlow
 
     allPeriods = set(isPeriods)
     history = []
@@ -129,7 +129,7 @@ def calcTaxCashConversion(company, *, basePeriod: str | None = None) -> dict | N
         return None
 
     # Phase 15 A1: Q4 함정 제거 — annualSumFlow 로 4분기 합산 (Q4 fallback 대응)
-    from dartlab.core.finance.flow import annualSumFlow
+    from dartlab.core.utils.flow import annualSumFlow
 
     allIsPeriods = set(isPeriods)
     cfPeriods = cfParsed[1] if cfParsed else []

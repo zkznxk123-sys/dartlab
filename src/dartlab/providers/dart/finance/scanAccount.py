@@ -44,7 +44,7 @@ _REPRT_TO_Q = {"1분기": "Q1", "2분기": "Q2", "3분기": "Q3", "4분기": "Q4
 
 def _resolveSjDiv(snakeId: str) -> str:
     """sortOrder.json에서 snakeId → sjDiv 자동 결정."""
-    from dartlab.core.finance.ordering import _ensureLoaded
+    from dartlab.core.utils.ordering import _ensureLoaded
 
     data = _ensureLoaded()
     for sjDiv in ("IS", "BS", "CF"):
@@ -842,7 +842,7 @@ def scanRatioList() -> list[dict[str, str]]:
 
 def scanAccountList() -> list[dict[str, str]]:
     """사용 가능한 계정 목록 반환 (sortOrder.json 기준 + 한글 역매핑)."""
-    from dartlab.core.finance.ordering import _ensureLoaded
+    from dartlab.core.utils.ordering import _ensureLoaded
 
     data = _ensureLoaded()
 

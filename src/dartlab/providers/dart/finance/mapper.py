@@ -18,8 +18,8 @@ import re
 from pathlib import Path
 from typing import Optional
 
-from dartlab.core.finance.ordering import levelMap as _commonLevelMap
-from dartlab.core.finance.ordering import sortOrder as _commonSortOrder
+from dartlab.core.utils.ordering import levelMap as _commonLevelMap
+from dartlab.core.utils.ordering import sortOrder as _commonSortOrder
 
 _DATA_DIR = Path(__file__).parent / "mapperData"
 
@@ -227,7 +227,7 @@ class AccountMapper:
 
     def __init__(self):
         if AccountMapper._mappings is None:
-            from dartlab.core.finance.labels import _load_account_mappings
+            from dartlab.core.utils.labels import _load_account_mappings
 
             data = _load_account_mappings()
             AccountMapper._mappings = data.get("mappings", {})
@@ -292,7 +292,7 @@ class AccountMapper:
 
     def labelMap(self) -> dict[str, str]:
         """snakeId → 대표 한글명 매핑. SSOT 위임 (core/finance/labels.py)."""
-        from dartlab.core.finance.labels import get_korean_labels
+        from dartlab.core.utils.labels import get_korean_labels
 
         return get_korean_labels()
 

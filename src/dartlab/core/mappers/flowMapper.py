@@ -20,7 +20,7 @@ class FlowMapper(BaseMapper):
         return "flow"
 
     def _eventAccounts(self) -> frozenset:
-        from dartlab.core.finance.flow import _EVENT_ACCOUNTS
+        from dartlab.core.utils.flow import _EVENT_ACCOUNTS
 
         return _EVENT_ACCOUNTS
 

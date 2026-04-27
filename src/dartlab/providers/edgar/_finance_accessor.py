@@ -33,7 +33,7 @@ class _FinanceAccessor:
             self._company._cache[cacheKey] = None
             return None
 
-        from dartlab.core.finance.labels import get_korean_labels
+        from dartlab.core.utils.labels import get_korean_labels
         from dartlab.providers.edgar.finance.mapper import EdgarMapper
 
         krLabels = get_korean_labels()

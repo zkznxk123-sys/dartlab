@@ -76,7 +76,7 @@ def _bridgeKoreanSnakeId(
     - 쿼리가 snakeId이고 컬럼 값이 한국어 → snakeId→한국어 정조회
     - 혼합 쿼리(한국어+snakeId)도 지원: 각 항목을 개별 번역
     """
-    from dartlab.core.finance.labels import get_korean_labels, get_reverse_korean_labels
+    from dartlab.core.utils.labels import get_korean_labels, get_reverse_korean_labels
 
     hasKoreanQuery = any(_HAS_KOREAN_RE.search(q) for q in indList)
     hasNonKoreanQuery = any(not _HAS_KOREAN_RE.search(q) for q in indList)
@@ -167,7 +167,7 @@ def _expandEdgarAliases(snakeIds: list[str]) -> list[str]:
     SNAKEID_ALIASES: {dartSnakeId: edgarSnakeId}
     예: cash_flows_from_financing → cash_flows_from_financing_activities
     """
-    from dartlab.core.finance.labels import SNAKEID_ALIASES
+    from dartlab.core.utils.labels import SNAKEID_ALIASES
 
     expanded = list(snakeIds)
     for sid in snakeIds:

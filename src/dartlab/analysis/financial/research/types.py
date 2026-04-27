@@ -329,9 +329,9 @@ class NarrativeAnalysis:
 
 
 # core SSOT re-export (하위 호환)
-from dartlab.core.finance.fmt import fmtBig as _fmtBig
-from dartlab.core.finance.fmt import fmtNum as _fmtNum
-from dartlab.core.finance.fmt import fmtPrice as _fmtPrice
+from dartlab.core.utils.fmt import fmtBig as _fmtBig
+from dartlab.core.utils.fmt import fmtNum as _fmtNum
+from dartlab.core.utils.fmt import fmtPrice as _fmtPrice
 
 
 def _opinionColor(opinion: str) -> str:
