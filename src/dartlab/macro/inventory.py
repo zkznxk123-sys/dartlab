@@ -8,8 +8,8 @@
 
 from __future__ import annotations
 
-from dartlab.core.finance.sentiment import ismAssetAllocation
 from dartlab.macro.inventoryCycle import classifyInventoryPhase, ismBarometer
+from dartlab.macro.sentiment import ismAssetAllocation
 
 
 def _fetch_ism_data(market: str, as_of: str | None = None) -> dict[str, float | None]:

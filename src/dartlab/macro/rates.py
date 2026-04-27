@@ -2,11 +2,6 @@
 
 from __future__ import annotations
 
-from dartlab.core.finance.sentiment import (
-    estimateRateExpectation,
-    interpretEmployment,
-    interpretInflation,
-)
 from dartlab.macro._helpers import (
     apply_overrides,
     collect_timeseries,
@@ -15,6 +10,11 @@ from dartlab.macro._helpers import (
     get_gather,
 )
 from dartlab.macro.macroCycle import decomposeLongRate, rateOutlook, realRateRegime
+from dartlab.macro.sentiment import (
+    estimateRateExpectation,
+    interpretEmployment,
+    interpretInflation,
+)
 from dartlab.macro.yieldCurve import nelsonSiegel
 
 

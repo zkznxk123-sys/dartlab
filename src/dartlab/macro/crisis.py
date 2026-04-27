@@ -12,7 +12,6 @@ import logging
 
 log = logging.getLogger(__name__)
 
-from dartlab.core.finance.liquidity import capexPressure
 from dartlab.credit.crisisDetector import (
     creditToGDPGap,
     dalioDebtCyclePhase,
@@ -25,6 +24,7 @@ from dartlab.credit.crisisDetector import (
     recessionDashboard,
 )
 from dartlab.macro._helpers import get_gather
+from dartlab.macro.liquidity import capexPressure
 
 
 def _frozen_to_dict(obj) -> dict | None:
