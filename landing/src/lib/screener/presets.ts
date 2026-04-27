@@ -230,6 +230,30 @@ export const PRESETS: Preset[] = [
 			{ metric: 'opMargin', op: '>=', value: 0 }
 		],
 		sorts: [{ key: 'pbr', dir: 'asc' }]
+	},
+	// ── 공시 변경 감지 프리셋 (PR-15, HF dart/scan/changes.parquet 활용) ──
+	{
+		id: 'finance-revisions-active',
+		title: '재무 수치 변경 많은 회사',
+		subtitle: '1Y 재무 정정·변경 ≥ 5건',
+		desc: '직전 1Y 안에 재무(numeric) 변경 5건 이상 — 회계 활동 활발 (정정/변경 빈번)',
+		category: 'theme',
+		conds: [
+			{ metric: 'numericChanges1y', op: '>=', value: 5 }
+		],
+		sorts: [{ key: 'numericChanges1y', dir: 'desc' }]
+	},
+	{
+		id: 'structural-changes',
+		title: '구조 변경 회사',
+		subtitle: '1Y 사업·구조 변경 ≥ 10건',
+		desc: '직전 1Y 안에 사업구조(structural) 변경 10건 이상 + 흑자 — 사업 재편 중 우량회사',
+		category: 'theme',
+		conds: [
+			{ metric: 'structuralChanges1y', op: '>=', value: 10 },
+			{ metric: 'opMargin', op: '>=', value: 0 }
+		],
+		sorts: [{ key: 'structuralChanges1y', dir: 'desc' }]
 	}
 ];
 

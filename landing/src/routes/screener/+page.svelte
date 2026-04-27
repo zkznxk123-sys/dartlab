@@ -63,6 +63,15 @@
 	};
 	let valuationMetrics = $state<Map<string, ValuationMetrics>>(new Map());
 
+	/** stockCode → 공시 변경 감지 (HF dart/scan/changes.parquet — 매일 갱신) */
+	type ChangeMetrics = {
+		numericChanges1y: number;
+		structuralChanges1y: number;
+		totalChanges1y: number;
+		recentChangeYear: number | null;
+	};
+	let changeMetrics = $state<Map<string, ChangeMetrics>>(new Map());
+
 	// 메트릭 정의 — PR-1 은 25 개 (점-시점 + 이미 박힌 시계열 derived).
 	// PR-2 부터 derived/composite/quarterly/timeseries modifier 추가.
 	const METRICS: MetricDef[] = [
@@ -102,6 +111,11 @@
 		{ key: 'pbr', label: 'PBR', group: 'price', type: 'number', unit: '배', higherBetter: false },
 		{ key: 'psr', label: 'PSR (시총/매출)', group: 'price', type: 'number', unit: '배', higherBetter: false },
 		{ key: 'dividendYield', label: '배당수익률', group: 'price', type: 'number', unit: '%', higherBetter: true },
+		// 공시 변경 감지 (HF dart/scan/changes.parquet — PR-15)
+		{ key: 'numericChanges1y', label: '재무 변경 1Y', group: 'derived', type: 'number', unit: '건', higherBetter: false },
+		{ key: 'structuralChanges1y', label: '구조 변경 1Y', group: 'derived', type: 'number', unit: '건' },
+		{ key: 'totalChanges1y', label: '총 공시 변경 1Y', group: 'derived', type: 'number', unit: '건' },
+		{ key: 'recentChangeYear', label: '최근 변경 연도', group: 'derived', type: 'number' },
 		// 분기 derived (quarters.json — PR-4)
 		{ key: 'qoqRevenueGrowth', label: '매출 QoQ', group: 'quarterly', type: 'number', unit: '%', signed: true, higherBetter: true },
 		{ key: 'qoqOpProfitGrowth', label: '영업이익 QoQ', group: 'quarterly', type: 'number', unit: '%', signed: true, higherBetter: true },
@@ -282,6 +296,7 @@
 			const ts = priceTimeSeries.get(String(n.id));
 			const qm = quarterMetrics.get(String(n.id));
 			const vm = valuationMetrics.get(String(n.id));
+			const cm = changeMetrics.get(String(n.id));
 			let currentVsMA20: number | null = null;
 			let drawdown60d: number | null = null;
 			let recovery60d: number | null = null;
@@ -321,6 +336,11 @@
 				pbr: vm?.pbr ?? null,
 				dividendYield: vm?.dividendYield ?? null,
 				psr,
+				// 공시 변경 감지 (changes.parquet)
+				numericChanges1y: cm?.numericChanges1y ?? null,
+				structuralChanges1y: cm?.structuralChanges1y ?? null,
+				totalChanges1y: cm?.totalChanges1y ?? null,
+				recentChangeYear: cm?.recentChangeYear ?? null,
 				// 시계열 derived
 				currentVsMA20,
 				drawdown60d,
@@ -655,12 +675,52 @@
 			}
 			priceTimeSeries = map;
 			dbState = 'ready';
-			// valuation.parquet 도 함께 로드 (PER/PBR/배당) — 백그라운드 비차단
+			// 추가 parquet 들 백그라운드 비차단 로드 (실패해도 핵심 SQL 작동)
 			void loadValuation();
+			void loadChanges();
 		} catch (err) {
 			dbState = 'error';
 			dbError = err instanceof Error ? err.message : String(err);
 			console.warn('[screener] DuckDB 시계열 로드 실패', err);
+		}
+	}
+
+	/** HF dart/scan/changes.parquet → 종목별 1Y 공시 변경 카운트 (numeric/structural/total) + 최근 변경 연도. */
+	async function loadChanges() {
+		if (!dartDb) return;
+		try {
+			await dartDb.registerHfParquet('changes', 'dart/scan/changes.parquet');
+			const currentYear = new Date().getFullYear();
+			const lastYear = currentYear - 1;
+			const rows = await dartDb.query<{
+				stockCode: string;
+				numericChanges1y: number;
+				structuralChanges1y: number;
+				totalChanges1y: number;
+				recentChangeYear: number | null;
+			}>(`
+				SELECT
+					stockCode,
+					COUNT(*) FILTER (WHERE changeType = 'numeric' AND CAST(toPeriod AS INTEGER) IN (${currentYear}, ${lastYear})) AS numericChanges1y,
+					COUNT(*) FILTER (WHERE changeType = 'structural' AND CAST(toPeriod AS INTEGER) IN (${currentYear}, ${lastYear})) AS structuralChanges1y,
+					COUNT(*) FILTER (WHERE CAST(toPeriod AS INTEGER) IN (${currentYear}, ${lastYear})) AS totalChanges1y,
+					MAX(CAST(toPeriod AS INTEGER)) AS recentChangeYear
+				FROM changes
+				WHERE stockCode IS NOT NULL
+				GROUP BY stockCode
+			`);
+			const map = new Map<string, ChangeMetrics>();
+			for (const r of rows) {
+				map.set(r.stockCode, {
+					numericChanges1y: Number(r.numericChanges1y) || 0,
+					structuralChanges1y: Number(r.structuralChanges1y) || 0,
+					totalChanges1y: Number(r.totalChanges1y) || 0,
+					recentChangeYear: r.recentChangeYear != null ? Number(r.recentChangeYear) : null
+				});
+			}
+			changeMetrics = map;
+		} catch (err) {
+			console.warn('[screener] changes.parquet 로드 실패', err);
 		}
 	}
 

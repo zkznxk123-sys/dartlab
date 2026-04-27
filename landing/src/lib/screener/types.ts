@@ -126,6 +126,11 @@ export type MetricKey =
 	| 'currentVsMA20'
 	| 'drawdown60d'
 	| 'recovery60d'
+	// 공시 변경 감지 (HF dart/scan/changes.parquet — PR-15)
+	| 'numericChanges1y'
+	| 'structuralChanges1y'
+	| 'totalChanges1y'
+	| 'recentChangeYear'
 	// 분기 derived (frontend, quarters.json 활용 — PR-4)
 	| 'qoqRevenueGrowth'
 	| 'qoqOpProfitGrowth'
