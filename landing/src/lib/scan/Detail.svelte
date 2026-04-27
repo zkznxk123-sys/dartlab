@@ -124,7 +124,7 @@
 			{#if loading}
 				<div class="loading">로드 중…</div>
 			{:else if chartData.length === 0}
-				<div class="empty">재무 시계열 데이터 없음 — DuckDB 비활성 또는 finance-lite parquet 미적재</div>
+				<div class="empty">재무 시계열 데이터 없음 — db 비활성 또는 finance 데이터 미적재</div>
 			{:else}
 				<div class="chart-wrap">
 					<LineChart

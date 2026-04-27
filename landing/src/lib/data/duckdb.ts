@@ -26,6 +26,7 @@
  */
 
 import { browser } from '$app/environment';
+import { attachOpfs, OPFS_DB_ALIAS } from './duckdbOpfs';
 
 const DUCKDB_VERSION = '1.29.0';
 const CDN_BASE = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${DUCKDB_VERSION}/dist/`;
@@ -35,8 +36,21 @@ const HF_REPO = 'eddmpython/dartlab-data';
 const HF_RESOLVE = `https://huggingface.co/datasets/${HF_REPO}/resolve/main/`;
 
 export interface DartDb {
+	/** OPFS persistent DB attached 여부. true 면 결과 영속화 가능. */
+	readonly persisted: boolean;
+	/** OPFS DB 의 schema mismatch 로 자동 rebuild 발생했는지 (이번 init). */
+	readonly opfsRebuilt: boolean;
 	/** SQL 실행 → row 배열 (JS 객체). 빈 결과는 빈 배열. */
 	query<T = Record<string, unknown>>(sql: string): Promise<T[]>;
+	/** SQL 실행 → batch 단위 streaming. 첫 batch 가 즉시 도달, 점진 progressive UI 가능.
+	 *
+	 * @example
+	 *   for await (const rows of db.queryStream<MyRow>(sql)) {
+	 *     // rows = up to 2048 records per batch
+	 *     for (const r of rows) map.set(r.id, r);
+	 *   }
+	 */
+	queryStream<T = Record<string, unknown>>(sql: string): AsyncGenerator<T[], void, void>;
 	/** HF parquet 을 view 로 등록. hfPath 는 `krx/prices/raw-2024.parquet` 같은 상대 경로 또는 full URL. */
 	registerHfParquet(viewName: string, hfPath: string): Promise<void>;
 	/** JS 객체 배열을 임시 테이블로 등록 (작은 메타 JSON 용). */
@@ -49,6 +63,8 @@ let _initPromise: Promise<DartDb | null> | null = null;
 let _conn: any = null;
 let _db: any = null;
 let _worker: Worker | null = null;
+let _persisted = false;
+let _opfsRebuilt = false;
 
 /** HF parquet 절대 URL 생성. 상대 경로 (`krx/prices/raw-2024.parquet`) 또는 full URL 모두 받음. */
 export function hfParquetUrl(pathOrUrl: string): string {
@@ -83,7 +99,6 @@ async function _instantiate(): Promise<DartDb | null> {
 
 	try {
 		// Vite/SvelteKit 가 remote URL import 를 번들에 포함 안 하도록 vite-ignore
-		// @ts-expect-error remote URL module
 		const duckdb = await import(/* @vite-ignore */ CDN_ESM);
 
 		const bundles = {
@@ -123,6 +138,13 @@ async function _instantiate(): Promise<DartDb | null> {
 		} catch {
 			// 이미 로드됐거나 빌드에 포함 — 무시
 		}
+
+		// OPFS attach — 임시 비활성. v1.29 의 BROWSER_FSACCESS protocol 작동 검증 후 재활성.
+		// const opfsResult = await attachOpfs(_db, _conn, duckdb);
+		// _persisted = opfsResult.ok;
+		// _opfsRebuilt = opfsResult.rebuilt;
+		_persisted = false;
+		_opfsRebuilt = false;
 	} catch (err) {
 		console.warn('[duckdb] 인스턴스화 실패 — JS fallback', err);
 		await _cleanup();
@@ -130,10 +152,20 @@ async function _instantiate(): Promise<DartDb | null> {
 	}
 
 	const api: DartDb = {
+		get persisted() {
+			return _persisted;
+		},
+		get opfsRebuilt() {
+			return _opfsRebuilt;
+		},
 		async query(sql: string) {
 			if (!_conn) throw new Error('DuckDB 연결이 없습니다');
 			const result = await _conn.query(sql);
 			return _toRowObjects(result);
+		},
+
+		queryStream<T = Record<string, unknown>>(sql: string) {
+			return _streamRows<T>(sql);
 		},
 
 		async registerHfParquet(viewName: string, hfPath: string) {
@@ -181,6 +213,8 @@ async function _cleanup() {
 	_conn = null;
 	_db = null;
 	_worker = null;
+	_persisted = false;
+	_opfsRebuilt = false;
 	_initPromise = null;
 }
 
@@ -188,19 +222,95 @@ function _toRowObjects<T>(arrowResult: any): T[] {
 	// Arrow 결과는 row proxy. JSON-serializable plain object 로 변환.
 	if (!arrowResult || typeof arrowResult.toArray !== 'function') return [];
 	const rows = arrowResult.toArray() as any[];
-	return rows.map((row: any) => {
-		const obj: Record<string, unknown> = {};
-		for (const key of Object.keys(row)) {
-			const v = row[key];
-			// Arrow BigInt → number (KRX 가격·시총은 64bit 안 넘음)
-			if (typeof v === 'bigint') {
-				obj[key] = Number(v);
-			} else {
-				obj[key] = v;
+	return rows.map((row: any) => _normalizeRow<T>(row));
+}
+
+function _normalizeRow<T>(row: any): T {
+	const obj: Record<string, unknown> = {};
+	for (const key of Object.keys(row)) {
+		const v = row[key];
+		if (v == null) {
+			obj[key] = v;
+		} else if (typeof v === 'bigint') {
+			obj[key] = Number(v);
+		} else if (typeof v === 'object') {
+			// Arrow ListVector / Vector — `.toArray()` 로 native 추출 후 Array.from 으로 plain JS 배열
+			let extracted: any = v;
+			if (typeof (v as any).toArray === 'function') {
+				try {
+					extracted = (v as any).toArray();
+				} catch {
+					extracted = v;
+				}
 			}
+			// Float64Array / Int32Array / Array 모두 Array.from 으로 plain Array 로 변환
+			if (extracted && typeof extracted !== 'string' && typeof (extracted as any)[Symbol.iterator] === 'function') {
+				try {
+					obj[key] = Array.from(extracted as Iterable<any>, (x: any) =>
+						typeof x === 'bigint' ? Number(x) : x
+					);
+				} catch {
+					obj[key] = extracted;
+				}
+			} else {
+				obj[key] = extracted;
+			}
+		} else {
+			obj[key] = v;
 		}
-		return obj as T;
-	});
+	}
+	return obj as T;
+}
+
+/** Arrow RecordBatch 또는 Table 을 JS row 배열로. */
+function _batchToRows<T>(batch: any): T[] {
+	if (!batch) return [];
+	// RecordBatch 는 toArray() 또는 Symbol.iterator 지원
+	if (typeof batch.toArray === 'function') {
+		const rows = batch.toArray() as any[];
+		return rows.map((r) => _normalizeRow<T>(r));
+	}
+	// fallback — iterator
+	const out: T[] = [];
+	try {
+		for (const r of batch as Iterable<any>) {
+			out.push(_normalizeRow<T>(r));
+		}
+	} catch {
+		/* ignore */
+	}
+	return out;
+}
+
+/** SQL streaming — connection.send() 시도, 실패 시 query() 로 fallback.
+ *
+ * DuckDB-WASM v1.29 의 send() 가 일부 SQL (특히 GROUP BY · CTE 다단) 에서
+ * reject 하는 경우가 있음. streaming 효과를 잃더라도 정확한 결과 우선.
+ */
+async function* _streamRows<T>(sql: string): AsyncGenerator<T[], void, void> {
+	if (!_conn) throw new Error('DuckDB 연결이 없습니다');
+	// 1) streaming 시도 — 성공하면 batch 단위 yield
+	try {
+		const reader = await _conn.send(sql);
+		if (reader && typeof reader[Symbol.asyncIterator] === 'function') {
+			let yielded = false;
+			for await (const batch of reader as AsyncIterable<any>) {
+				const rows = _batchToRows<T>(batch);
+				if (rows.length > 0) {
+					yielded = true;
+					yield rows;
+				}
+			}
+			if (yielded) return;
+			// streaming 이 0 batch 줬을 수도 — query() 로 재시도
+		}
+	} catch (err) {
+		console.info('[duckdb] streaming 미지원 SQL → query() fallback');
+	}
+	// 2) fallback — non-streaming.
+	const result = await _conn.query(sql);
+	const all = _toRowObjects<T>(result);
+	if (all.length > 0) yield all;
 }
 
 function _safeIdent(name: string): string {

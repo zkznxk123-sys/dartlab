@@ -9,10 +9,18 @@
 	import type { MetricDef } from './types';
 
 	interface Props {
-		metric: MetricDef;
+		/** METRICS catalog 의 정의 — raw 테이블 컬럼처럼 catalog 에 없으면 undefined */
+		metric?: MetricDef;
+		/** metric 없을 때 사용할 컬럼명 fallback */
+		fallbackKey?: string;
 	}
 
-	let { metric }: Props = $props();
+	let { metric, fallbackKey }: Props = $props();
+
+	let label = $derived(metric?.label ?? fallbackKey ?? '');
+	let unit = $derived(metric?.unit);
+	let definition = $derived(metric?.definition);
+	let higherBetter = $derived(metric?.higherBetter);
 
 	let open = $state(false);
 	let dwellTimer: ReturnType<typeof setTimeout> | null = null;
@@ -27,14 +35,14 @@
 	}
 
 	let directionLabel = $derived(
-		metric.higherBetter === true
+		higherBetter === true
 			? '높을수록 좋음'
-			: metric.higherBetter === false
+			: higherBetter === false
 				? '낮을수록 좋음'
 				: ''
 	);
 	let directionTone = $derived(
-		metric.higherBetter === true ? 'good' : metric.higherBetter === false ? 'bad' : 'neutral'
+		higherBetter === true ? 'good' : higherBetter === false ? 'bad' : 'neutral'
 	);
 </script>
 
@@ -42,23 +50,23 @@
 	class="hdr"
 	role="button"
 	tabindex="0"
-	aria-label={metric.label}
+	aria-label={label}
 	onmouseenter={show}
 	onmouseleave={hide}
 	onfocus={show}
 	onblur={hide}
 >
-	<span class="hdr-label">{metric.label}</span>
-	{#if metric.unit}
-		<span class="hdr-unit">({metric.unit})</span>
+	<span class="hdr-label">{label}</span>
+	{#if unit}
+		<span class="hdr-unit">({unit})</span>
 	{/if}
-	{#if open}
+	{#if open && definition}
 		<span class="bubble" role="tooltip">
 			<span class="b-title">
-				{metric.label}
-				{#if metric.unit}<span class="b-unit">· {metric.unit}</span>{/if}
+				{label}
+				{#if unit}<span class="b-unit">· {unit}</span>{/if}
 			</span>
-			<span class="b-def">{metric.definition}</span>
+			<span class="b-def">{definition}</span>
 			{#if directionLabel}
 				<span class="b-dir tone-{directionTone}">{directionLabel}</span>
 			{/if}

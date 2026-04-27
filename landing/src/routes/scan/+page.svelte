@@ -9,7 +9,10 @@
 	import CellTooltip from '$lib/scan/CellTooltip.svelte';
 	import Distribution from '$lib/scan/Distribution.svelte';
 	import Detail from '$lib/scan/Detail.svelte';
+	import InsightsFeed from '$lib/scan/InsightsFeed.svelte';
 	import SavedSets from '$lib/scan/SavedSets.svelte';
+	import DataExplorer from '$lib/scan/DataExplorer.svelte';
+	import { Search } from 'lucide-svelte';
 	import { encodeScanPayload, decodeScanPayload } from '$lib/scan/url';
 	import type { SavedColumnSet } from '$lib/scan/types';
 	import { DEFAULT_COLUMNS, METRICS_BY_KEY, PINNED_COLUMNS } from '$lib/scan/metrics';
@@ -17,20 +20,35 @@
 	import type { Preset } from '$lib/scan/presets';
 	import { PRESETS_BY_ID } from '$lib/scan/presets';
 	import {
+		ensureDuckDb,
+		loadPriceSnapshot,
 		loadPriceMetrics,
-		loadValuation,
-		loadChanges,
+		loadValuationStream,
+		loadChangesStream,
 		type PriceMetrics,
 		type ValuationMetrics,
 		type ChangeMetrics,
 		type DbState
 	} from '$lib/scan/duckSql';
+	import { readCachedMap, writeCachedMap, CACHE_KEYS } from '$lib/scan/cache';
 	import type { DartDb } from '$lib/data/duckdb';
 
 	let { data } = $props();
 
 	// ── State ──────────────────────────────────────────
-	let baseNodes = $derived((data.ecosystem?.nodes || []) as ScanNode[]);
+	let baseNodes = $derived.by(() => {
+		const nodes = (data.ecosystem?.nodes || []) as ScanNode[];
+		const markets = (data.markets || {}) as Record<string, string>;
+		// ecosystem.json 에 market 필드 없으면 markets.json 으로 보강
+		if (Object.keys(markets).length === 0) return nodes;
+		return nodes.map((n) => {
+			const m = (n as any).market;
+			if (m) return n;
+			const code = n.id || (n as any).stockCode;
+			const market = markets[code];
+			return market ? ({ ...n, market } as ScanNode) : n;
+		});
+	});
 	let industries = $derived(
 		(data.ecosystem?.industries || []) as Array<{
 			id: string;
@@ -42,6 +60,7 @@
 
 	let activeColumns = $state<string[]>([...DEFAULT_COLUMNS]);
 	let sort = $state<SortKey | null>({ key: 'marketCap', dir: 'desc' });
+	let dataExplorerOpen = $state(false);
 	let conds = $state<FilterCond[]>([]);
 	let selectedIndustries = $state<Set<string>>(new Set());
 	let selectedRow = $state<string | null>(null);
@@ -70,6 +89,54 @@
 
 	// ── Distribution panel: bin highlight (양방향) ────
 	let highlightBin = $state<{ x0: number; x1: number } | null>(null);
+
+	// ── Percentiles (활성 컬럼별 p10/p90) — 셀 분위 색상용 ─
+	let percentiles = $derived.by(() => {
+		const map = new Map<string, { p10: number; p90: number; higherBetter?: boolean }>();
+		for (const key of activeColumns) {
+			const def = METRICS_BY_KEY[key];
+			if (!def || def.type !== 'number') continue;
+			const values: number[] = [];
+			for (const n of allNodes) {
+				const v = (n as Record<string, unknown>)[key];
+				if (typeof v === 'number' && Number.isFinite(v)) values.push(v);
+			}
+			if (values.length < 10) continue;
+			values.sort((a, b) => a - b);
+			map.set(key, {
+				p10: values[Math.floor(values.length * 0.1)],
+				p90: values[Math.floor(values.length * 0.9)],
+				higherBetter: def.higherBetter
+			});
+		}
+		return map;
+	});
+
+	// ── DB badge — Phase 별 진행 상황 표시 ─────────────
+	// loading: DuckDB 로드 중 / phase1: 스냅샷 + valuation 일부 / phase2: KRX timeseries 진행 / ready: spark 채워짐 / unsupported / error
+	let priceTimeseriesReady = $state(false);
+	let valuationStreamReady = $state(false);
+	let changesStreamReady = $state(false);
+	let dbBadgeKind = $derived.by(() => {
+		if (dbState === 'unsupported') return 'unsupported';
+		if (dbState === 'error') return 'error';
+		if (dbState === 'idle' || dbState === 'loading') return 'loading';
+		// dbState === 'ready' (DuckDB 인스턴스만 ready). 여기서부터 phase 단계별로.
+		if (priceTimeseriesReady && valuationStreamReady && changesStreamReady) return 'ready';
+		return 'phase';
+	});
+	let dbBadgeText = $derived.by(() => {
+		if (dbBadgeKind === 'unsupported') return '모바일 — 가격·비율 비활성';
+		if (dbBadgeKind === 'error') return '데이터 로드 실패';
+		if (dbBadgeKind === 'loading') return 'db 초기화 중';
+		if (dbBadgeKind === 'ready') return '전체 데이터 활성';
+		// 진행 중 — 어떤 phase 까지 왔는지 텍스트
+		const parts: string[] = [];
+		if (!priceTimeseriesReady) parts.push('주가 1Y');
+		if (!valuationStreamReady) parts.push('밸류에이션');
+		if (!changesStreamReady) parts.push('변화율');
+		return `로드 중 · ${parts.join(' · ')}`;
+	});
 
 	// ── Merge ecosystem with parquet maps ─────────────
 	let allNodes = $derived.by(() => {
@@ -197,6 +264,7 @@
 	// ── onMount: URL ?q= 우선, ?preset= fallback, then DuckDB ─
 	onMount(() => {
 		const url = new URL(page.url);
+		if (url.searchParams.get('explore') === '1') dataExplorerOpen = true;
 		const q = url.searchParams.get('q');
 		const presetId = url.searchParams.get('preset');
 		if (q) {
@@ -250,21 +318,92 @@
 	}
 
 	async function bootDuckDb() {
+		// Phase 0 — IndexedDB 캐시 hit (재방문 즉시 채움). 6h TTL.
+		void readCachedMap<PriceMetrics>(CACHE_KEYS.prices).then((m) => {
+			if (m && priceMap.size === 0) priceMap = m;
+		});
+		void readCachedMap<ValuationMetrics>(CACHE_KEYS.valuation).then((m) => {
+			if (m && valuationMap.size === 0) valuationMap = m;
+		});
+		void readCachedMap<ChangeMetrics>(CACHE_KEYS.changes).then((m) => {
+			if (m && changesMap.size === 0) changesMap = m;
+		});
+
 		dbState = 'loading';
-		const result = await loadPriceMetrics();
-		if (result.error) dbError = result.error;
-		dbState = result.state;
-		if (result.metrics.size > 0) priceMap = result.metrics;
-		if (result.db) {
-			dartDb = result.db;
-			// 백그라운드 비차단 — 가격 query 가 끝났으니 valuation/changes 는 둘이 병렬로 OK
-			void loadValuation(result.db).then((m) => {
-				if (m.size > 0) valuationMap = m;
-			});
-			void loadChanges(result.db).then((m) => {
-				if (m.size > 0) changesMap = m;
-			});
+		const ensure = await ensureDuckDb();
+		if (ensure.error) dbError = ensure.error;
+		dbState = ensure.state;
+		if (!ensure.db) {
+			// unsupported / error — 더 이상 진행할 phase 없음. badge 가 멈추지 않게 ready flag 모두 set.
+			priceTimeseriesReady = true;
+			valuationStreamReady = true;
+			changesStreamReady = true;
+			return;
 		}
+		dartDb = ensure.db;
+		const db = ensure.db;
+
+		// Phase 1 — valuation (streaming) + prices snapshot (latest only). 둘 다 가벼움.
+		void streamValuation(db);
+		void loadPriceSnapshot(db).then((snap) => {
+			if (snap.size > 0 && (priceMap.size === 0 || !hasTimeseries(priceMap))) priceMap = snap;
+			// Phase 2 — 252-day window streaming. 첫 batch 가 즉시 fade-in.
+			void streamPriceTimeseries(db);
+		});
+		// 가장 무거움 — 마지막. streaming 으로 점진 fade-in.
+		void streamChanges(db);
+	}
+
+	async function streamValuation(db: ReturnType<typeof Object> & DartDb) {
+		const accumulated = new Map<string, ValuationMetrics>();
+		for await (const chunk of loadValuationStream(db as DartDb)) {
+			for (const [k, v] of chunk) accumulated.set(k, v);
+			valuationMap = new Map(accumulated);
+		}
+		if (accumulated.size > 0) void writeCachedMap(CACHE_KEYS.valuation, accumulated);
+		valuationStreamReady = true;
+	}
+
+	async function streamPriceTimeseries(db: ReturnType<typeof Object> & DartDb) {
+		console.info('[scan] Phase 2 prices timeseries 시작');
+		try {
+			const t0 = performance.now();
+			const full = await loadPriceMetrics(db as DartDb);
+			const dt = performance.now() - t0;
+			if (full.size > 0) {
+				const sampleSpark = [...full.values()].find((p) => p.spark.length > 0)?.spark ?? [];
+				console.info(
+					`[scan] ✅ Phase 2 prices timeseries — ${full.size}사 (${dt.toFixed(0)}ms), ` +
+						`sample spark length=${sampleSpark.length}`
+				);
+				priceMap = full;
+				void writeCachedMap(CACHE_KEYS.prices, full);
+			} else {
+				console.warn(`[scan] ⚠ Phase 2 prices timeseries — 빈 결과 (${dt.toFixed(0)}ms)`);
+			}
+		} catch (err) {
+			console.error('[scan] ❌ Phase 2 prices timeseries 실패', err);
+		} finally {
+			priceTimeseriesReady = true;
+		}
+	}
+
+	async function streamChanges(db: ReturnType<typeof Object> & DartDb) {
+		const accumulated = new Map<string, ChangeMetrics>();
+		for await (const chunk of loadChangesStream(db as DartDb)) {
+			for (const [k, v] of chunk) accumulated.set(k, v);
+			changesMap = new Map(accumulated);
+		}
+		if (accumulated.size > 0) void writeCachedMap(CACHE_KEYS.changes, accumulated);
+		changesStreamReady = true;
+	}
+
+	/** snapshot 만 들어있는지 (return1y 가 모두 null) vs timeseries (return1y 채워짐) 구분. */
+	function hasTimeseries(m: Map<string, PriceMetrics>): boolean {
+		for (const v of m.values()) {
+			if (v.return1y !== null || v.spark.length > 0) return true;
+		}
+		return false;
 	}
 
 	// ── Column toggle ─────────────────────────────────
@@ -297,10 +436,10 @@
 </script>
 
 <svelte:head>
-	<title>Scan Studio — 횡단조회 판떼기 | 전자공시 dartlab</title>
+	<title>Scan Studio | 전자공시 dartlab</title>
 	<meta
 		name="description"
-		content="dartlab 의 회사 2,664 사를 한 화면 그리드로. 매출·영업이익률·ROE·부채·등급 + DuckDB-WASM 으로 HF parquet 직접 query."
+		content="dartlab 의 회사를 한 화면 그리드로. 매출·영업이익률·ROE·부채·등급 + 브라우저 SQL 로 데이터 직접 조회."
 	/>
 </svelte:head>
 
@@ -311,19 +450,19 @@
 	<header class="page-head">
 		<div class="page-head-left">
 			<h1 class="page-title">Scan Studio</h1>
-			<span class="page-sub">횡단조회 판떼기 — 회사 {allNodes.length.toLocaleString('ko-KR')} 사</span>
 		</div>
 		<div class="page-head-right">
-			<span class="db-badge db-{dbState}" title={dbError ?? ''}>
-				{#if dbState === 'idle' || dbState === 'loading'}
-					<span class="db-dot"></span> 가격·재무비율 로드 중
-				{:else if dbState === 'ready'}
-					<span class="db-dot"></span> 전체 데이터 활성
-				{:else if dbState === 'unsupported'}
-					<span class="db-dot"></span> 모바일 — 가격·비율 비활성
-				{:else if dbState === 'error'}
-					<span class="db-dot"></span> 데이터 로드 실패
-				{/if}
+			<button
+				type="button"
+				class="explorer-btn"
+				onclick={() => (dataExplorerOpen = true)}
+				title="모든 prebuild raw 테이블 + SQL Notebook"
+			>
+				<Search size={14} />
+				<span>데이터 탐색</span>
+			</button>
+			<span class="db-badge db-{dbBadgeKind}" title={dbError ?? ''}>
+				<span class="db-dot"></span> {dbBadgeText}
 			</span>
 			<input
 				type="text"
@@ -390,7 +529,9 @@
 				nodes={sortedNodes}
 				columns={activeColumns}
 				{sort}
+				{percentiles}
 				selectedId={selectedRow}
+				markets={data.markets}
 				onSort={handleSort}
 				onSelect={handleSelect}
 				onCellHover={handleCellHover}
@@ -402,8 +543,10 @@
 					nodes={allNodes}
 					filteredNodes={sortedNodes}
 					metricKey={sort.key}
+					sortDir={sort.dir}
 					{highlightBin}
 					onBinHover={(b) => (highlightBin = b)}
+					onCompanyClick={handleSelect}
 				/>
 			{:else}
 				<div class="placeholder">
@@ -414,15 +557,57 @@
 		</aside>
 	</div>
 
-	<!-- Detail panel -->
+	<!-- Detail panel (행 선택 시) 또는 Insights Feed -->
 	{#if selectedRow}
 		{@const node = allNodes.find((n) => n.id === selectedRow)}
 		{#if node}
 			<Detail {node} db={dartDb} onClose={() => (selectedRow = null)} />
+		{:else}
+			<InsightsFeed
+				nodes={allNodes}
+				onApply={(p) => {
+					conds = p.conds;
+					sort = p.sort;
+					if (p.cols) {
+						const next = new Set(activeColumns);
+						for (const c of p.cols) next.add(c);
+						activeColumns = Array.from(next);
+					}
+					selectedIndustries = new Set();
+					activePresetId = null;
+				}}
+				onCompanyClick={handleSelect}
+			/>
 		{/if}
+	{:else}
+		<InsightsFeed
+			nodes={allNodes}
+			onApply={(p) => {
+				conds = p.conds;
+				sort = p.sort;
+				if (p.cols) {
+					const next = new Set(activeColumns);
+					for (const c of p.cols) next.add(c);
+					activeColumns = Array.from(next);
+				}
+				selectedIndustries = new Set();
+				activePresetId = null;
+			}}
+			onCompanyClick={handleSelect}
+		/>
 	{/if}
 
 	<PresetModal bind:open={presetOpen} nodes={allNodes} onClose={() => (presetOpen = false)} onApplyPreset={applyPreset} />
+
+	<DataExplorer
+		open={dataExplorerOpen}
+		onClose={() => (dataExplorerOpen = false)}
+		ecosystem={baseNodes as Array<Record<string, unknown>>}
+		{priceMap}
+		{valuationMap}
+		{changesMap}
+		db={dartDb}
+	/>
 
 	{#if cellHover}
 		<CellTooltip
@@ -440,11 +625,12 @@
 <style>
 	.scan-page {
 		max-width: 100%;
-		padding: 16px 20px 20px;
+		padding: 64px 20px 20px;
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
-		min-height: calc(100vh - 64px);
+		height: 100vh;
+		overflow: hidden;
 	}
 
 	.page-head {
@@ -478,26 +664,50 @@
 	}
 	.search-input {
 		width: 260px;
-		padding: 7px 12px;
+		height: 32px;
+		padding: 0 12px;
 		background: #050811;
 		border: 1px solid #1e2433;
 		border-radius: 5px;
 		color: #f1f5f9;
 		font-size: 12px;
 		font-family: inherit;
+		line-height: 1;
 	}
+	.explorer-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		height: 32px;
+		padding: 0 12px;
+		font-size: 12px;
+		font-weight: 500;
+		background: rgba(251, 146, 60, 0.08);
+		border: 1px solid rgba(251, 146, 60, 0.4);
+		border-radius: 5px;
+		color: #fb923c;
+		cursor: pointer;
+		font-family: inherit;
+		line-height: 1;
+	}
+	.explorer-btn:hover {
+		background: rgba(251, 146, 60, 0.16);
+	}
+
 	.db-badge {
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		padding: 5px 10px;
-		font-size: 10px;
+		height: 32px;
+		padding: 0 12px;
+		font-size: 11px;
 		font-family: monospace;
 		border: 1px solid #1e2433;
-		border-radius: 4px;
+		border-radius: 5px;
 		color: #94a3b8;
 		background: #050811;
 		white-space: nowrap;
+		line-height: 1;
 	}
 	.db-dot {
 		width: 6px;
@@ -505,8 +715,8 @@
 		border-radius: 50%;
 		background: currentColor;
 	}
-	.db-idle, .db-loading { color: #fbbf24; }
-	.db-loading .db-dot {
+	.db-idle, .db-loading, .db-phase { color: #fbbf24; }
+	.db-loading .db-dot, .db-phase .db-dot {
 		animation: pulse 1.4s ease-in-out infinite;
 	}
 	.db-ready { color: #22c55e; border-color: rgba(34, 197, 94, 0.3); }
@@ -524,7 +734,8 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		padding: 6px 12px;
+		height: 32px;
+		padding: 0 12px;
 		background: #050811;
 		border: 1px solid #334155;
 		border-radius: 5px;
@@ -532,6 +743,7 @@
 		font-size: 12px;
 		cursor: pointer;
 		font-family: inherit;
+		line-height: 1;
 	}
 	.cmdk-btn:hover {
 		border-color: #fb923c;
@@ -648,21 +860,24 @@
 	}
 
 	.studio {
-		flex: 1;
+		flex: 1 1 auto;
 		min-height: 0;
 		display: grid;
 		grid-template-columns: 1fr 320px;
 		gap: 10px;
+		overflow: hidden;
 	}
 	.grid-area {
 		min-width: 0;
 		min-height: 0;
 		display: flex;
 		flex-direction: column;
+		overflow: hidden;
 	}
 	.distribution-area {
 		min-width: 0;
 		min-height: 0;
+		overflow-y: auto;
 	}
 	.placeholder {
 		height: 100%;

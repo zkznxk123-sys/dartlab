@@ -15,6 +15,35 @@
 
 import { loadDartDb, type DartDb } from '$lib/data/duckdb';
 
+/** persisted DB 의 특정 테이블 존재 여부. db.persisted 가 true 일 때만 의미. */
+async function persistedHas(db: DartDb, tableName: string): Promise<boolean> {
+	if (!db.persisted) return false;
+	try {
+		const r = await db.query<{ n: number }>(
+			`SELECT COUNT(*) AS n FROM information_schema.tables
+			 WHERE table_schema = 'persisted' AND table_name = '${tableName}'`
+		);
+		return Number(r[0]?.n ?? 0) > 0;
+	} catch {
+		return false;
+	}
+}
+
+/** KRX prices 1Y window view 등록 (krxPrices 라는 이름으로). */
+async function setupKrxPricesView(db: DartDb): Promise<void> {
+	const year = new Date().getFullYear();
+	await db.registerHfParquet('krxPricesCurr', `krx/prices/raw-${year}.parquet`);
+	try {
+		await db.registerHfParquet('krxPricesPrev', `krx/prices/raw-${year - 1}.parquet`);
+		await db.query(
+			`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr UNION ALL SELECT * FROM krxPricesPrev`
+		);
+	} catch (errPrev) {
+		console.warn(`[scan] 직전 연도 parquet 등록 실패 — 현재 연도만`, errPrev);
+		await db.query(`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr`);
+	}
+}
+
 export type DbState = 'idle' | 'loading' | 'ready' | 'unsupported' | 'error';
 
 export interface PriceMetrics {
@@ -30,7 +59,7 @@ export interface PriceMetrics {
 	return1m: number | null;
 	return3m: number | null;
 	return1y: number | null;
-	/** 60거래일 종가 (4일 다운샘플 ≈ 15포인트). cell sparkline + 1Y 컬럼 sparkline 동시 사용 */
+	/** 1년(252거래일) 종가 (5일 다운샘플 ≈ 50포인트). cell sparkline + hover 차트 공용. */
 	spark: number[];
 }
 
@@ -65,133 +94,218 @@ export function isuCdToStockCode(isuCd: string): string {
 	return isuCd.startsWith('A') ? isuCd.slice(1) : isuCd;
 }
 
-/** DuckDB 인스턴스화 + 1Y window prices view 등록. 결과는 stockCode 기반 Map. */
-export async function loadPriceMetrics(): Promise<{
-	db: DartDb | null;
-	state: DbState;
-	metrics: Map<string, PriceMetrics>;
-	error?: string;
-}> {
-	console.info('[scan] DuckDB 로드 시작 — HF KRX parquet');
+/** DuckDB 인스턴스화만. parquet 등록·SQL 은 호출자가 단계별로 진행. */
+export async function ensureDuckDb(): Promise<{ db: DartDb | null; state: DbState; error?: string }> {
+	console.info('[scan] DuckDB 인스턴스 시작');
 	const t0 = performance.now();
-	let db: DartDb | null = null;
 	try {
-		db = await loadDartDb();
+		const db = await loadDartDb();
+		if (!db) {
+			console.warn('[scan] DuckDB 사용 불가 (iOS Safari 또는 환경 미지원)');
+			return { db: null, state: 'unsupported' };
+		}
+		console.info(`[scan] DuckDB ready (${(performance.now() - t0).toFixed(0)}ms)`);
+		return { db, state: 'ready' };
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
 		console.error('[scan] DuckDB 인스턴스화 예외', err);
-		return { db: null, state: 'error', metrics: new Map(), error: message };
+		return { db: null, state: 'error', error: message };
 	}
-	if (!db) {
-		console.warn('[scan] DuckDB 사용 불가 (iOS Safari 또는 환경 미지원) → 가격·시총 컬럼 비활성');
-		return { db: null, state: 'unsupported', metrics: new Map() };
-	}
+}
 
+/** Phase 1 — latest snapshot 만. 현재가 + 시총만. 매우 가볍.
+ *
+ *  - 한 raw-{year}.parquet 만 등록 (직전 연도 X)
+ *  - WINDOW + LAG + 252-day aggregate 모두 X
+ *  - 회사당 마지막 거래일 row 1개만 read
+ *
+ * 결과: PriceMetrics 의 currentPrice + marketCap 만 채움. 나머지 null.
+ */
+export async function loadPriceSnapshot(db: DartDb): Promise<Map<string, PriceMetrics>> {
+	const t0 = performance.now();
 	const year = new Date().getFullYear();
 	try {
 		await db.registerHfParquet('krxPricesCurr', `krx/prices/raw-${year}.parquet`);
-		try {
-			await db.registerHfParquet('krxPricesPrev', `krx/prices/raw-${year - 1}.parquet`);
-			await db.query(
-				`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr UNION ALL SELECT * FROM krxPricesPrev`
-			);
-		} catch (errPrev) {
-			console.warn(`[scan] 직전 연도 parquet 등록 실패 (현재 연도만 사용)`, errPrev);
-			await db.query(`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr`);
-		}
-
 		const rows = await db.query<{
 			ISU_CD: string;
 			currentPrice: number | null;
 			marketCap: number | null;
-			ma20: number | null;
-			high60: number | null;
-			low60: number | null;
-			week52High: number | null;
-			week52Low: number | null;
-			volumeAvg30d: number | null;
-			volatility1y: number | null;
-			prev21: number | null;
-			prev63: number | null;
-			prev252: number | null;
-			spark: number[] | null;
 		}>(`
 			WITH ranked AS (
 				SELECT
 					ISU_CD,
-					BAS_DD,
 					CAST(TDD_CLSPRC AS DOUBLE) AS close,
-					CAST(TDD_HGPRC AS DOUBLE) AS high,
-					CAST(TDD_LWPRC AS DOUBLE) AS low,
-					CAST(ACC_TRDVOL AS DOUBLE) AS volume,
 					CAST(MKTCAP AS DOUBLE) AS mktcap,
 					ROW_NUMBER() OVER (PARTITION BY ISU_CD ORDER BY BAS_DD DESC) AS rn
-				FROM krxPrices
-			),
-			last252 AS (SELECT * FROM ranked WHERE rn <= 252),
-			latest AS (SELECT ISU_CD, close AS currentPrice, mktcap AS marketCap FROM last252 WHERE rn = 1),
-			ma20 AS (SELECT ISU_CD, AVG(close) AS ma20 FROM last252 WHERE rn <= 20 GROUP BY ISU_CD),
-			bounds60 AS (
-				SELECT ISU_CD, MAX(high) AS high60, MIN(low) AS low60
-				FROM last252 WHERE rn <= 60 GROUP BY ISU_CD
-			),
-			bounds252 AS (
-				SELECT ISU_CD, MAX(high) AS week52High, MIN(low) AS week52Low
-				FROM last252 GROUP BY ISU_CD
-			),
-			volavg30 AS (
-				SELECT ISU_CD, AVG(volume) AS volumeAvg30d
-				FROM last252 WHERE rn <= 30 GROUP BY ISU_CD
-			),
-			prev21 AS (SELECT ISU_CD, close AS prev21 FROM last252 WHERE rn = 21),
-			prev63 AS (SELECT ISU_CD, close AS prev63 FROM last252 WHERE rn = 63),
-			prev252 AS (SELECT ISU_CD, close AS prev252 FROM last252 WHERE rn = 252),
-			logret AS (
-				SELECT ISU_CD,
-					CASE WHEN close > 0 AND LAG(close) OVER (PARTITION BY ISU_CD ORDER BY BAS_DD) > 0
-						THEN LN(close / LAG(close) OVER (PARTITION BY ISU_CD ORDER BY BAS_DD))
-						ELSE NULL END AS lnret
-				FROM last252
-			),
-			vol AS (
-				SELECT ISU_CD, STDDEV_SAMP(lnret) * SQRT(252) * 100 AS volatility1y
-				FROM logret WHERE lnret IS NOT NULL GROUP BY ISU_CD
-			),
-			spark AS (
-				SELECT ISU_CD, ARRAY_AGG(close ORDER BY BAS_DD ASC) AS spark
-				FROM last252 WHERE rn <= 60 AND rn % 4 = 0
-				GROUP BY ISU_CD
+				FROM krxPricesCurr
 			)
-			SELECT
-				l.ISU_CD,
-				l.currentPrice, l.marketCap,
-				m.ma20,
-				b60.high60, b60.low60,
-				b252.week52High, b252.week52Low,
-				va.volumeAvg30d,
-				v.volatility1y,
-				p21.prev21, p63.prev63, p252.prev252,
-				s.spark
-			FROM latest l
-			LEFT JOIN ma20 m USING (ISU_CD)
-			LEFT JOIN bounds60 b60 USING (ISU_CD)
-			LEFT JOIN bounds252 b252 USING (ISU_CD)
-			LEFT JOIN volavg30 va USING (ISU_CD)
-			LEFT JOIN vol v USING (ISU_CD)
-			LEFT JOIN prev21 p21 USING (ISU_CD)
-			LEFT JOIN prev63 p63 USING (ISU_CD)
-			LEFT JOIN prev252 p252 USING (ISU_CD)
-			LEFT JOIN spark s USING (ISU_CD)
+			SELECT ISU_CD, close AS currentPrice, mktcap AS marketCap
+			FROM ranked WHERE rn = 1
 		`);
-
 		const map = new Map<string, PriceMetrics>();
 		for (const r of rows) {
 			const code = isuCdToStockCode(r.ISU_CD);
 			if (!code) continue;
+			map.set(code, {
+				currentPrice: num(r.currentPrice),
+				marketCap: num(r.marketCap),
+				ma20: null,
+				high60: null,
+				low60: null,
+				week52High: null,
+				week52Low: null,
+				volumeAvg30d: null,
+				volatility1y: null,
+				return1m: null,
+				return3m: null,
+				return1y: null,
+				spark: []
+			});
+		}
+		console.info(
+			`[scan] ✅ Phase 1 snapshot — ${map.size}사 (${(performance.now() - t0).toFixed(0)}ms)`
+		);
+		return map;
+	} catch (err) {
+		console.error('[scan] ❌ Phase 1 snapshot SQL 실패', err);
+		return new Map();
+	}
+}
+
+/** PRICES_MAIN_SQL — main aggregate (spark 제외, 빠름). */
+const PRICES_MAIN_SQL = `
+	WITH ranked AS (
+		SELECT
+			ISU_CD,
+			BAS_DD,
+			CAST(TDD_CLSPRC AS DOUBLE) AS close,
+			CAST(TDD_HGPRC AS DOUBLE) AS high,
+			CAST(TDD_LWPRC AS DOUBLE) AS low,
+			CAST(ACC_TRDVOL AS DOUBLE) AS volume,
+			CAST(MKTCAP AS DOUBLE) AS mktcap,
+			ROW_NUMBER() OVER (PARTITION BY ISU_CD ORDER BY BAS_DD DESC) AS rn
+		FROM krxPrices
+	),
+	last252 AS (SELECT * FROM ranked WHERE rn <= 252),
+	latest AS (SELECT ISU_CD, close AS currentPrice, mktcap AS marketCap FROM last252 WHERE rn = 1),
+	ma20 AS (SELECT ISU_CD, AVG(close) AS ma20 FROM last252 WHERE rn <= 20 GROUP BY ISU_CD),
+	bounds60 AS (
+		SELECT ISU_CD, MAX(high) AS high60, MIN(low) AS low60
+		FROM last252 WHERE rn <= 60 GROUP BY ISU_CD
+	),
+	bounds252 AS (
+		SELECT ISU_CD, MAX(high) AS week52High, MIN(low) AS week52Low
+		FROM last252 GROUP BY ISU_CD
+	),
+	volavg30 AS (
+		SELECT ISU_CD, AVG(volume) AS volumeAvg30d
+		FROM last252 WHERE rn <= 30 GROUP BY ISU_CD
+	),
+	prev21 AS (SELECT ISU_CD, close AS prev21 FROM last252 WHERE rn = 21),
+	prev63 AS (SELECT ISU_CD, close AS prev63 FROM last252 WHERE rn = 63),
+	prev252 AS (SELECT ISU_CD, close AS prev252 FROM last252 WHERE rn = 252),
+	logret AS (
+		SELECT ISU_CD,
+			CASE WHEN close > 0 AND LAG(close) OVER (PARTITION BY ISU_CD ORDER BY BAS_DD) > 0
+				THEN LN(close / LAG(close) OVER (PARTITION BY ISU_CD ORDER BY BAS_DD))
+				ELSE NULL END AS lnret
+		FROM last252
+	),
+	vol AS (
+		SELECT ISU_CD, STDDEV_SAMP(lnret) * SQRT(252) * 100 AS volatility1y
+		FROM logret WHERE lnret IS NOT NULL GROUP BY ISU_CD
+	)
+	SELECT
+		l.ISU_CD,
+		l.currentPrice, l.marketCap,
+		m.ma20,
+		b60.high60, b60.low60,
+		b252.week52High, b252.week52Low,
+		va.volumeAvg30d,
+		v.volatility1y,
+		p21.prev21, p63.prev63, p252.prev252
+	FROM latest l
+	LEFT JOIN ma20 m USING (ISU_CD)
+	LEFT JOIN bounds60 b60 USING (ISU_CD)
+	LEFT JOIN bounds252 b252 USING (ISU_CD)
+	LEFT JOIN volavg30 va USING (ISU_CD)
+	LEFT JOIN vol v USING (ISU_CD)
+	LEFT JOIN prev21 p21 USING (ISU_CD)
+	LEFT JOIN prev63 p63 USING (ISU_CD)
+	LEFT JOIN prev252 p252 USING (ISU_CD)
+`;
+
+/** SPARK_SQL — 1Y(252거래일) 종가 array, 5일 다운샘플 ≈ 50포인트. cell sparkline + hover 차트 공용. */
+const SPARK_SQL = `
+	WITH ranked AS (
+		SELECT
+			ISU_CD,
+			BAS_DD,
+			CAST(TDD_CLSPRC AS DOUBLE) AS close,
+			ROW_NUMBER() OVER (PARTITION BY ISU_CD ORDER BY BAS_DD DESC) AS rn
+		FROM krxPrices
+	)
+	SELECT ISU_CD, LIST(close ORDER BY BAS_DD ASC) AS spark
+	FROM ranked
+	WHERE rn <= 252 AND rn % 5 = 0
+	GROUP BY ISU_CD
+`;
+
+interface PriceRow {
+	ISU_CD: string;
+	currentPrice: number | null;
+	marketCap: number | null;
+	ma20: number | null;
+	high60: number | null;
+	low60: number | null;
+	week52High: number | null;
+	week52Low: number | null;
+	volumeAvg30d: number | null;
+	volatility1y: number | null;
+	prev21: number | null;
+	prev63: number | null;
+	prev252: number | null;
+	spark: number[] | null;
+}
+
+/** Promise + timeout — N초 안에 안 끝나면 throw. */
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+	return Promise.race([
+		p,
+		new Promise<T>((_, reject) =>
+			setTimeout(() => reject(new Error(`${label} timeout ${ms}ms`)), ms)
+		)
+	]);
+}
+
+/** Phase 2 — main aggregate (가벼운 SQL) + spark 별도 query. spark 가 hang 해도 main 은 결과 나옴. */
+export async function loadPriceMetrics(db: DartDb): Promise<Map<string, PriceMetrics>> {
+	const t0 = performance.now();
+	const map = new Map<string, PriceMetrics>();
+
+	// 1. parquet view 등록 (10초 timeout)
+	try {
+		console.info('[scan] KRX parquet 등록 시작…');
+		await withTimeout(setupKrxPricesView(db), 30_000, 'KRX parquet 등록');
+		console.info(`[scan] ✅ KRX parquet 등록 완료 (${(performance.now() - t0).toFixed(0)}ms)`);
+	} catch (err) {
+		console.error('[scan] ❌ KRX parquet 등록 실패', err);
+		return map;
+	}
+
+	// 2. main aggregate SQL (currentPrice, marketCap, return, vol, week52 등) — spark 제외, 가벼움
+	const tMain = performance.now();
+	try {
+		console.info('[scan] KRX main aggregate SQL 시작…');
+		const rows = await withTimeout(
+			db.query<Omit<PriceRow, 'spark'>>(PRICES_MAIN_SQL),
+			60_000,
+			'KRX main aggregate'
+		);
+		for (const r of rows) {
+			const code = isuCdToStockCode(r.ISU_CD);
+			if (!code) continue;
 			const currentPrice = num(r.currentPrice);
-			const sparkArr = Array.isArray(r.spark)
-				? r.spark.map((v) => Number(v)).filter((v) => Number.isFinite(v))
-				: [];
 			map.set(code, {
 				currentPrice,
 				marketCap: num(r.marketCap),
@@ -205,23 +319,62 @@ export async function loadPriceMetrics(): Promise<{
 				return1m: pctReturn(currentPrice, num(r.prev21)),
 				return3m: pctReturn(currentPrice, num(r.prev63)),
 				return1y: pctReturn(currentPrice, num(r.prev252)),
-				spark: sparkArr
+				spark: []
 			});
 		}
 		console.info(
-			`[scan] ✅ KRX 가격 메트릭 — ${map.size}사 (${(performance.now() - t0).toFixed(0)}ms)`
+			`[scan] ✅ KRX main aggregate — ${map.size}사 (${(performance.now() - tMain).toFixed(0)}ms)`
 		);
-		return { db, state: 'ready', metrics: map };
 	} catch (err) {
-		const message = err instanceof Error ? err.message : String(err);
-		console.error('[scan] ❌ DuckDB SQL 실패', err);
-		console.info(
-			'[scan] HF parquet URL: https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main/krx/prices/raw-' +
-				new Date().getFullYear() +
-				'.parquet'
-		);
-		return { db, state: 'error', metrics: new Map(), error: message };
+		console.error('[scan] ❌ KRX main aggregate SQL 실패', err);
+		return map;
 	}
+
+	// 3. spark 별도 query — hang 해도 main 결과는 보존 (30초 timeout)
+	try {
+		const tSpark = performance.now();
+		console.info('[scan] KRX spark 1Y SQL 시작…');
+		const sparkRows = await withTimeout(
+			db.query<{ ISU_CD: string; spark: number[] | null }>(SPARK_SQL),
+			30_000,
+			'KRX spark'
+		);
+		let merged = 0;
+		// 디버그 — 첫 row 의 spark 컬럼 타입 확인
+		if (sparkRows.length > 0) {
+			const first = sparkRows[0];
+			console.info(
+				`[scan] spark sample — type=${typeof first.spark}, isArray=${Array.isArray(first.spark)}, ctor=${first.spark?.constructor?.name}, len=${(first.spark as any)?.length}`
+			);
+		}
+		for (const r of sparkRows) {
+			const code = isuCdToStockCode(r.ISU_CD);
+			if (!code) continue;
+			// Array, Float64Array, Iterable 모두 안전하게 plain array 로
+			let sparkArr: number[] = [];
+			if (r.spark != null) {
+				try {
+					sparkArr = Array.from(r.spark as Iterable<number>, (v) => Number(v)).filter((v) =>
+						Number.isFinite(v)
+					);
+				} catch {
+					sparkArr = [];
+				}
+			}
+			const existing = map.get(code);
+			if (existing) {
+				existing.spark = sparkArr;
+				merged++;
+			}
+		}
+		console.info(
+			`[scan] ✅ KRX spark 1Y — ${merged}사 (${(performance.now() - tSpark).toFixed(0)}ms)`
+		);
+	} catch (err) {
+		console.warn('[scan] ⚠ KRX spark 별도 query 실패 — main 결과만 반환', err);
+	}
+
+	return map;
 }
 
 /** valuation.parquet → PER/PBR/배당수익률/시총 (Naver, 매일 KST 04:00 갱신). */
@@ -313,6 +466,240 @@ export function getSparkForCompany(
 	stockCode: string
 ): number[] {
 	return priceMap.get(stockCode)?.spark ?? [];
+}
+
+// ── Streaming variants (PR-β) ────────────────────────
+//
+// generator 가 chunk 단위 (2048 row 까지) Map 으로 yield.
+// caller 가 progressive 하게 main map 에 merge — 첫 batch 가 < 1초 안에 시각화.
+
+const PRICES_SQL = `
+	WITH ranked AS (
+		SELECT
+			ISU_CD,
+			BAS_DD,
+			CAST(TDD_CLSPRC AS DOUBLE) AS close,
+			CAST(TDD_HGPRC AS DOUBLE) AS high,
+			CAST(TDD_LWPRC AS DOUBLE) AS low,
+			CAST(ACC_TRDVOL AS DOUBLE) AS volume,
+			CAST(MKTCAP AS DOUBLE) AS mktcap,
+			ROW_NUMBER() OVER (PARTITION BY ISU_CD ORDER BY BAS_DD DESC) AS rn
+		FROM krxPrices
+	),
+	last252 AS (SELECT * FROM ranked WHERE rn <= 252),
+	latest AS (SELECT ISU_CD, close AS currentPrice, mktcap AS marketCap FROM last252 WHERE rn = 1),
+	ma20 AS (SELECT ISU_CD, AVG(close) AS ma20 FROM last252 WHERE rn <= 20 GROUP BY ISU_CD),
+	bounds60 AS (
+		SELECT ISU_CD, MAX(high) AS high60, MIN(low) AS low60
+		FROM last252 WHERE rn <= 60 GROUP BY ISU_CD
+	),
+	bounds252 AS (
+		SELECT ISU_CD, MAX(high) AS week52High, MIN(low) AS week52Low
+		FROM last252 GROUP BY ISU_CD
+	),
+	volavg30 AS (
+		SELECT ISU_CD, AVG(volume) AS volumeAvg30d
+		FROM last252 WHERE rn <= 30 GROUP BY ISU_CD
+	),
+	prev21 AS (SELECT ISU_CD, close AS prev21 FROM last252 WHERE rn = 21),
+	prev63 AS (SELECT ISU_CD, close AS prev63 FROM last252 WHERE rn = 63),
+	prev252 AS (SELECT ISU_CD, close AS prev252 FROM last252 WHERE rn = 252),
+	logret AS (
+		SELECT ISU_CD,
+			CASE WHEN close > 0 AND LAG(close) OVER (PARTITION BY ISU_CD ORDER BY BAS_DD) > 0
+				THEN LN(close / LAG(close) OVER (PARTITION BY ISU_CD ORDER BY BAS_DD))
+				ELSE NULL END AS lnret
+		FROM last252
+	),
+	vol AS (
+		SELECT ISU_CD, STDDEV_SAMP(lnret) * SQRT(252) * 100 AS volatility1y
+		FROM logret WHERE lnret IS NOT NULL GROUP BY ISU_CD
+	),
+	spark AS (
+		SELECT ISU_CD, ARRAY_AGG(close ORDER BY BAS_DD ASC) AS spark
+		FROM last252 WHERE rn <= 60 AND rn % 4 = 0
+		GROUP BY ISU_CD
+	)
+	SELECT
+		l.ISU_CD,
+		l.currentPrice, l.marketCap,
+		m.ma20,
+		b60.high60, b60.low60,
+		b252.week52High, b252.week52Low,
+		va.volumeAvg30d,
+		v.volatility1y,
+		p21.prev21, p63.prev63, p252.prev252,
+		s.spark
+	FROM latest l
+	LEFT JOIN ma20 m USING (ISU_CD)
+	LEFT JOIN bounds60 b60 USING (ISU_CD)
+	LEFT JOIN bounds252 b252 USING (ISU_CD)
+	LEFT JOIN volavg30 va USING (ISU_CD)
+	LEFT JOIN vol v USING (ISU_CD)
+	LEFT JOIN prev21 p21 USING (ISU_CD)
+	LEFT JOIN prev63 p63 USING (ISU_CD)
+	LEFT JOIN prev252 p252 USING (ISU_CD)
+	LEFT JOIN spark s USING (ISU_CD)
+`;
+
+/** PR-β — KRX prices SQL 결과를 batch 단위 yield. caller 가 main map 에 merge. */
+export async function* loadPriceMetricsStream(
+	db: DartDb
+): AsyncGenerator<Map<string, PriceMetrics>, void, void> {
+	const t0 = performance.now();
+	const year = new Date().getFullYear();
+	try {
+		await db.registerHfParquet('krxPricesCurr', `krx/prices/raw-${year}.parquet`);
+		try {
+			await db.registerHfParquet('krxPricesPrev', `krx/prices/raw-${year - 1}.parquet`);
+			await db.query(
+				`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr UNION ALL SELECT * FROM krxPricesPrev`
+			);
+		} catch (errPrev) {
+			console.warn(`[scan] 직전 연도 parquet 등록 실패 — 현재 연도만`, errPrev);
+			await db.query(`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr`);
+		}
+		let totalRows = 0;
+		for await (const rows of db.queryStream<{
+			ISU_CD: string;
+			currentPrice: number | null;
+			marketCap: number | null;
+			ma20: number | null;
+			high60: number | null;
+			low60: number | null;
+			week52High: number | null;
+			week52Low: number | null;
+			volumeAvg30d: number | null;
+			volatility1y: number | null;
+			prev21: number | null;
+			prev63: number | null;
+			prev252: number | null;
+			spark: number[] | null;
+		}>(PRICES_SQL)) {
+			const chunk = new Map<string, PriceMetrics>();
+			for (const r of rows) {
+				const code = isuCdToStockCode(r.ISU_CD);
+				if (!code) continue;
+				const currentPrice = num(r.currentPrice);
+				const sparkArr = Array.isArray(r.spark)
+					? r.spark.map((v) => Number(v)).filter((v) => Number.isFinite(v))
+					: [];
+				chunk.set(code, {
+					currentPrice,
+					marketCap: num(r.marketCap),
+					ma20: num(r.ma20),
+					high60: num(r.high60),
+					low60: num(r.low60),
+					week52High: num(r.week52High),
+					week52Low: num(r.week52Low),
+					volumeAvg30d: num(r.volumeAvg30d),
+					volatility1y: num(r.volatility1y),
+					return1m: pctReturn(currentPrice, num(r.prev21)),
+					return3m: pctReturn(currentPrice, num(r.prev63)),
+					return1y: pctReturn(currentPrice, num(r.prev252)),
+					spark: sparkArr
+				});
+			}
+			totalRows += chunk.size;
+			if (chunk.size > 0) yield chunk;
+		}
+		console.info(
+			`[scan] ✅ Streaming KRX prices — ${totalRows}사 (${(performance.now() - t0).toFixed(0)}ms)`
+		);
+	} catch (err) {
+		console.error('[scan] ❌ Streaming prices SQL 실패', err);
+	}
+}
+
+/** PR-β — valuation streaming. */
+export async function* loadValuationStream(
+	db: DartDb
+): AsyncGenerator<Map<string, ValuationMetrics>, void, void> {
+	const t0 = performance.now();
+	try {
+		await db.registerHfParquet('valuation', 'dart/scan/valuation.parquet');
+		let totalRows = 0;
+		for await (const rows of db.queryStream<{
+			stockCode: string;
+			per: number | null;
+			pbr: number | null;
+			dividendYield: number | null;
+			marketCap: number | null;
+		}>(`
+			SELECT
+				stockCode,
+				CAST(per AS DOUBLE) AS per,
+				CAST(pbr AS DOUBLE) AS pbr,
+				CAST(dividendYield AS DOUBLE) AS dividendYield,
+				CAST(marketCap AS DOUBLE) AS marketCap
+			FROM valuation
+		`)) {
+			const chunk = new Map<string, ValuationMetrics>();
+			for (const r of rows) {
+				if (!r.stockCode) continue;
+				chunk.set(r.stockCode, {
+					per: num(r.per),
+					pbr: num(r.pbr),
+					dividendYield: num(r.dividendYield),
+					marketCap: num(r.marketCap)
+				});
+			}
+			totalRows += chunk.size;
+			if (chunk.size > 0) yield chunk;
+		}
+		console.info(
+			`[scan] ✅ Streaming valuation — ${totalRows}사 (${(performance.now() - t0).toFixed(0)}ms)`
+		);
+	} catch (err) {
+		console.warn('[scan] valuation streaming 실패', err);
+	}
+}
+
+/** PR-β — changes streaming. */
+export async function* loadChangesStream(
+	db: DartDb
+): AsyncGenerator<Map<string, ChangeMetrics>, void, void> {
+	const t0 = performance.now();
+	const currentYear = new Date().getFullYear();
+	const lastYear = currentYear - 1;
+	try {
+		await db.registerHfParquet('changes', 'dart/scan/changes.parquet');
+		let totalRows = 0;
+		for await (const rows of db.queryStream<{
+			stockCode: string;
+			numericChanges1y: number;
+			structuralChanges1y: number;
+			totalChanges1y: number;
+			recentChangeYear: number | null;
+		}>(`
+			SELECT
+				stockCode,
+				COUNT(*) FILTER (WHERE changeType = 'numeric' AND CAST(toPeriod AS INTEGER) IN (${currentYear}, ${lastYear})) AS numericChanges1y,
+				COUNT(*) FILTER (WHERE changeType = 'structural' AND CAST(toPeriod AS INTEGER) IN (${currentYear}, ${lastYear})) AS structuralChanges1y,
+				COUNT(*) FILTER (WHERE CAST(toPeriod AS INTEGER) IN (${currentYear}, ${lastYear})) AS totalChanges1y,
+				MAX(CAST(toPeriod AS INTEGER)) AS recentChangeYear
+			FROM changes
+			WHERE stockCode IS NOT NULL
+			GROUP BY stockCode
+		`)) {
+			const chunk = new Map<string, ChangeMetrics>();
+			for (const r of rows) {
+				chunk.set(r.stockCode, {
+					numericChanges1y: Number(r.numericChanges1y) || 0,
+					structuralChanges1y: Number(r.structuralChanges1y) || 0,
+					totalChanges1y: Number(r.totalChanges1y) || 0,
+					recentChangeYear: r.recentChangeYear != null ? Number(r.recentChangeYear) : null
+				});
+			}
+			totalRows += chunk.size;
+			if (chunk.size > 0) yield chunk;
+		}
+		console.info(
+			`[scan] ✅ Streaming changes — ${totalRows}사 (${(performance.now() - t0).toFixed(0)}ms)`
+		);
+	} catch (err) {
+		console.warn('[scan] changes streaming 실패', err);
+	}
 }
 
 // ── Per-company loaders (Detail 패널용) ───────────────

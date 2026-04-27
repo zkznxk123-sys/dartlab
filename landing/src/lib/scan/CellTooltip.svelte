@@ -1,6 +1,6 @@
 <script lang="ts">
 	/**
-	 * 셀 hover 시 60일 sparkline + 회사명·메트릭값 popover.
+	 * 셀 hover 시 1년 sparkline + 회사명·메트릭값 popover.
 	 *
 	 * Grid.svelte 가 마우스 dwell 200ms 후 이 컴포넌트 렌더. position 은 호버한 셀의
 	 * bounding rect 기준 (top/left absolute).
@@ -29,13 +29,16 @@
 		if (last < first * 0.995) return 'down';
 		return 'flat';
 	});
+	// 한국 증시 정서 — 상승 빨강, 하락 파랑
 	let trendColor = $derived(
-		trend === 'up' ? '#22c55e' : trend === 'down' ? '#ef4444' : '#94a3b8'
+		trend === 'up' ? '#ef4444' : trend === 'down' ? '#3b82f6' : '#94a3b8'
 	);
 	let trendPct = $derived.by(() => {
 		if (spark.length < 2 || spark[0] === 0) return null;
-		return ((spark[spark.length - 1] / spark[0] - 1) * 100).toFixed(1);
+		const v = (spark[spark.length - 1] / spark[0] - 1) * 100;
+		return v.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 	});
+	let isSparkCell = $derived(metricKey === 'spark');
 </script>
 
 <div class="cell-tooltip" style:left="{x}px" style:top="{y}px" role="tooltip">
@@ -43,16 +46,18 @@
 		<span class="t-label">{label}</span>
 		<span class="t-code">{stockCode}</span>
 	</div>
-	<div class="t-metric">
-		<span class="t-mlbl">{metric?.label ?? metricKey}</span>
-		<span class="t-mval">{formattedValue}</span>
-	</div>
+	{#if !isSparkCell}
+		<div class="t-metric">
+			<span class="t-mlbl">{metric?.label ?? metricKey}</span>
+			<span class="t-mval">{formattedValue}</span>
+		</div>
+	{/if}
 	{#if spark.length >= 2}
 		<div class="t-spark" style:color={trendColor}>
-			<Sparkline data={spark} width={180} height={36} stroke="currentColor" smooth />
+			<Sparkline data={spark} width={220} height={56} stroke="currentColor" smooth />
 		</div>
 		<div class="t-foot">
-			<span class="t-period">60일 종가</span>
+			<span class="t-period">1년 종가 추이</span>
 			{#if trendPct !== null}
 				<span class="t-trend" style:color={trendColor}>
 					{trend === 'up' ? '+' : ''}{trendPct}%

@@ -18,11 +18,13 @@
 		nodes: ScanNode[];
 		filteredNodes: ScanNode[];
 		metricKey: string;
+		sortDir?: 'asc' | 'desc';
 		highlightBin: { x0: number; x1: number } | null;
 		onBinHover: (bin: { x0: number; x1: number } | null) => void;
+		onCompanyClick?: (id: string) => void;
 	}
 
-	let { nodes, filteredNodes, metricKey, highlightBin, onBinHover }: Props = $props();
+	let { nodes, filteredNodes, metricKey, sortDir = 'desc', highlightBin, onBinHover, onCompanyClick }: Props = $props();
 
 	let metric = $derived(METRICS_BY_KEY[metricKey]);
 	let scale = $state<'linear' | 'log'>('linear');
@@ -68,6 +70,27 @@
 	});
 
 	let filteredMeanBin = $derived(filteredMean !== null ? findBinIndex(dist, filteredMean) : -1);
+	let p10Bin = $derived(findBinIndex(dist, dist.p10));
+	let p90Bin = $derived(findBinIndex(dist, dist.p90));
+
+	// TOP / BOTTOM 5 회사 (현재 컬럼 기준)
+	let ranked = $derived.by(() => {
+		if (!metric || metric.type !== 'number') return { top: [], bottom: [] };
+		const list = filteredNodes
+			.map((n) => {
+				const v = (n as Record<string, unknown>)[metricKey];
+				return typeof v === 'number' && Number.isFinite(v) ? { n, v } : null;
+			})
+			.filter((x): x is { n: ScanNode; v: number } => x !== null);
+		if (list.length === 0) return { top: [], bottom: [] };
+		const desc = list.slice().sort((a, b) => b.v - a.v);
+		const asc = list.slice().sort((a, b) => a.v - b.v);
+		const goodFirst = sortDir === 'desc' || metric.higherBetter !== false;
+		return {
+			top: (goodFirst ? desc : asc).slice(0, 5),
+			bottom: (goodFirst ? asc : desc).slice(0, 5)
+		};
+	});
 
 	const W = 280;
 	const H = 140;
@@ -85,7 +108,7 @@
 		if (metric.unit === '명') return Math.round(v).toLocaleString('ko-KR') + '명';
 		if (metric.unit === '위') return Math.round(v) + '위';
 		if (metric.unit === '건') return Math.round(v) + '건';
-		return v.toFixed(1);
+		return v.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 	}
 
 	function isBinHighlighted(b: { x0: number; x1: number }): boolean {
@@ -154,6 +177,17 @@
 					onmouseleave={handleBinLeave}
 				></rect>
 			{/each}
+			<!-- p10 / p90 vertical lines -->
+			{#if p10Bin >= 0}
+				{@const lx = 8 + p10Bin * (barWidth + 1) + barWidth / 2}
+				<line x1={lx} x2={lx} y1={PAD_T} y2={H - PAD_B} class="quantile-line p10" />
+				<text x={lx + 2} y={PAD_T + 7} class="quantile-label" text-anchor="start">p10</text>
+			{/if}
+			{#if p90Bin >= 0}
+				{@const lx = 8 + p90Bin * (barWidth + 1) + barWidth / 2}
+				<line x1={lx} x2={lx} y1={PAD_T} y2={H - PAD_B} class="quantile-line p90" />
+				<text x={lx - 2} y={PAD_T + 7} class="quantile-label" text-anchor="end">p90</text>
+			{/if}
 			<!-- 필터된 평균 line -->
 			{#if filteredMeanBin >= 0 && filteredNodes.length < nodes.length}
 				{@const lx = 8 + filteredMeanBin * (barWidth + 1) + barWidth / 2}
@@ -197,6 +231,46 @@
 			<span>{fmtVal(dist.min)}</span>
 			<span>{fmtVal(dist.max)}</span>
 		</div>
+
+		<!-- TOP / BOTTOM 5 회사 -->
+		{#if ranked.top.length > 0}
+			<div class="ranked-grid">
+				<div class="ranked-col">
+					<div class="ranked-title">TOP 5 ({metric?.higherBetter === false ? '낮은 순' : '높은 순'})</div>
+					<ul class="ranked-list">
+						{#each ranked.top as r (r.n.id)}
+							<button
+								type="button"
+								class="ranked-item top"
+								onclick={() => onCompanyClick?.(r.n.id)}
+								title="{r.n.label} ({r.n.id}) — 클릭 시 디테일"
+							>
+								<span class="r-dot" style:background={(r.n.color as string) || '#475569'}></span>
+								<span class="r-label">{r.n.label}</span>
+								<span class="r-val">{fmtVal(r.v)}</span>
+							</button>
+						{/each}
+					</ul>
+				</div>
+				<div class="ranked-col">
+					<div class="ranked-title">BOTTOM 5</div>
+					<ul class="ranked-list">
+						{#each ranked.bottom as r (r.n.id)}
+							<button
+								type="button"
+								class="ranked-item bottom"
+								onclick={() => onCompanyClick?.(r.n.id)}
+								title="{r.n.label} ({r.n.id}) — 클릭 시 디테일"
+							>
+								<span class="r-dot" style:background={(r.n.color as string) || '#475569'}></span>
+								<span class="r-label">{r.n.label}</span>
+								<span class="r-val">{fmtVal(r.v)}</span>
+							</button>
+						{/each}
+					</ul>
+				</div>
+			</div>
+		{/if}
 	{/if}
 </div>
 
@@ -294,6 +368,24 @@
 		font-size: 8px;
 		font-family: monospace;
 	}
+	.quantile-line {
+		stroke-width: 1;
+		stroke-dasharray: 1 2;
+	}
+	.quantile-line.p10 {
+		stroke: #ef4444;
+		opacity: 0.5;
+	}
+	.quantile-line.p90 {
+		stroke: #22c55e;
+		opacity: 0.5;
+	}
+	.quantile-label {
+		fill: #64748b;
+		font-size: 7px;
+		font-family: monospace;
+		opacity: 0.7;
+	}
 	.axis {
 		stroke: #1e2433;
 		stroke-width: 1;
@@ -328,5 +420,81 @@
 		font-size: 9px;
 		color: #475569;
 		padding: 0 8px;
+	}
+
+	.ranked-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		margin-top: 8px;
+		padding-top: 8px;
+		border-top: 1px solid #1e2433;
+	}
+	.ranked-col {
+		min-width: 0;
+	}
+	.ranked-title {
+		font-size: 9px;
+		color: #64748b;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		margin-bottom: 4px;
+	}
+	.ranked-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 1px;
+	}
+	.ranked-item {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		padding: 3px 4px;
+		background: transparent;
+		border: none;
+		border-radius: 3px;
+		cursor: pointer;
+		text-align: left;
+		font-family: inherit;
+		color: inherit;
+		width: 100%;
+	}
+	.ranked-item:hover {
+		background: rgba(251, 146, 60, 0.08);
+	}
+	.ranked-item.top:hover {
+		background: rgba(34, 197, 94, 0.06);
+	}
+	.ranked-item.bottom:hover {
+		background: rgba(239, 68, 68, 0.06);
+	}
+	.r-dot {
+		width: 5px;
+		height: 5px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+	.r-label {
+		flex: 1;
+		font-size: 10px;
+		color: #cbd5e1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.r-val {
+		font-family: monospace;
+		font-size: 9px;
+		color: #94a3b8;
+		font-variant-numeric: tabular-nums;
+	}
+	.ranked-item.top .r-val {
+		color: #22c55e;
+	}
+	.ranked-item.bottom .r-val {
+		color: #ef4444;
 	}
 </style>

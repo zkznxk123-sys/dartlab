@@ -17,13 +17,15 @@ export const ssr = false;
  * HF parquet 을 직접 query 하여 progressive populate (PR-B 이후 활성).
  */
 export const load: PageLoad = async ({ fetch }) => {
-	const [ecoRes, metaRes] = await Promise.all([
+	const [ecoRes, metaRes, marketsRes] = await Promise.all([
 		fetch(`${base}/map/ecosystem.json`),
-		fetch(`${base}/map/meta.json`)
+		fetch(`${base}/map/meta.json`),
+		fetch(`${base}/map/markets.json`)
 	]);
 
 	const ecosystem = ecoRes.ok ? await ecoRes.json() : { nodes: [], industries: [] };
 	const meta = metaRes.ok ? await metaRes.json() : null;
+	const markets: Record<string, string> = marketsRes.ok ? await marketsRes.json() : {};
 
-	return { ecosystem, meta };
+	return { ecosystem, meta, markets };
 };

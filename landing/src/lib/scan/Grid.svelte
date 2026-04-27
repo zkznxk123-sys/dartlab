@@ -21,6 +21,7 @@
 	import { METRICS_BY_KEY, PINNED_COLUMNS } from './metrics';
 	import type { ScanNode, SortKey } from './types';
 	import { gradeTone, rowTintColor, toneColor } from './grade';
+	import { marketColor, marketLabel, normalizeMarket } from './marketChip';
 
 	interface CellHoverInfo {
 		stockCode: string;
@@ -32,17 +33,70 @@
 		y: number;
 	}
 
+	interface Percentile {
+		p10: number;
+		p90: number;
+		higherBetter?: boolean;
+	}
+
 	interface Props {
-		nodes: ScanNode[];
+		nodes: ScanNode[] | Record<string, unknown>[];
 		columns: string[];
 		sort: SortKey | null;
+		percentiles?: Map<string, Percentile>;
 		selectedId: string | null;
+		/** 'screener' = 메인 그리드 (heatmap·hover·등급칩 활성)
+		 *  'table'   = 단순 raw 테이블 (모달 내 — 모두 비활성, 동적 컬럼 width) */
+		mode?: 'screener' | 'table';
+		/** stockCode → 'KOSPI'/'KOSDAQ'/'KONEX' 같은 market 라벨. 노드 자체 market 없을 때 fallback. */
+		markets?: Record<string, string>;
 		onSort: (s: SortKey) => void;
 		onSelect: (id: string) => void;
 		onCellHover?: (info: CellHoverInfo | null) => void;
 	}
 
-	let { nodes, columns, sort, selectedId, onSort, onSelect, onCellHover }: Props = $props();
+	let {
+		nodes,
+		columns,
+		sort,
+		percentiles,
+		selectedId,
+		mode = 'screener',
+		markets,
+		onSort,
+		onSelect,
+		onCellHover
+	}: Props = $props();
+
+	function rowMarket(rd: Record<string, unknown>, id: string): unknown {
+		const m = (rd as any).market;
+		if (m) return m;
+		if (markets && id) return markets[id];
+		return undefined;
+	}
+	let isTable = $derived(mode === 'table');
+
+	/** 셀 분위 배경색 — p10 이하 / p90 이상 강조 (subtle 12%). */
+	function cellHeatmapBg(key: string, v: unknown): string {
+		if (typeof v !== 'number' || !Number.isFinite(v)) return 'transparent';
+		const p = percentiles?.get(key);
+		if (!p || p.p90 <= p.p10) return 'transparent';
+		const ratio = Math.max(0, Math.min(1, (v - p.p10) / (p.p90 - p.p10)));
+		const inverted = p.higherBetter === false;
+		// 0~1 ratio. higherBetter true: 1 = good 녹, 0 = bad 적. inverted 면 반전.
+		let color = '';
+		let strength = 0;
+		if (ratio >= 0.7) {
+			strength = (ratio - 0.7) / 0.3;
+			color = inverted ? '#ef4444' : '#22c55e';
+		} else if (ratio <= 0.3) {
+			strength = (0.3 - ratio) / 0.3;
+			color = inverted ? '#22c55e' : '#ef4444';
+		}
+		if (strength === 0) return 'transparent';
+		const pct = Math.round(strength * 14);
+		return `color-mix(in srgb, ${color} ${pct}%, transparent)`;
+	}
 
 	const ROW_H = 36;
 	const OVERSCAN = 6;
@@ -90,8 +144,29 @@
 		goto(`${base}/dashboard/${id}`);
 	}
 
-	function cellValue(node: ScanNode, key: string): unknown {
-		return (node as Record<string, unknown>)[key];
+	type RowData = Record<string, unknown>;
+
+	function cellValue(node: RowData, key: string): unknown {
+		return node[key];
+	}
+
+	function rowId(node: RowData, idx: number): string {
+		const id = node['id'];
+		return typeof id === 'string' ? id : String(idx);
+	}
+
+	function rowLabel(node: RowData): string {
+		const lbl = node['label'];
+		return typeof lbl === 'string' ? lbl : '';
+	}
+
+	function rowColor(node: RowData): string {
+		const c = node['color'];
+		return typeof c === 'string' ? c : '#475569';
+	}
+
+	function rowQualGrade(node: RowData): unknown {
+		return node['qualGrade'];
 	}
 
 	function isPinned(key: string): boolean {
@@ -126,7 +201,7 @@
 
 	// ── Cell hover dwell ──────────────────────────────
 	let hoverTimer: ReturnType<typeof setTimeout> | null = null;
-	function onCellMouseEnter(e: MouseEvent, node: ScanNode, key: string, formatted: string) {
+	function onCellMouseEnter(e: MouseEvent, node: RowData, key: string, formatted: string) {
 		if (!onCellHover) return;
 		if (isPinned(key)) return;
 		if (hoverTimer) clearTimeout(hoverTimer);
@@ -134,11 +209,11 @@
 		const rect = target.getBoundingClientRect();
 		hoverTimer = setTimeout(() => {
 			onCellHover?.({
-				stockCode: node.id,
-				label: node.label,
+				stockCode: rowId(node, 0),
+				label: rowLabel(node),
 				metricKey: key,
 				formattedValue: formatted,
-				spark: Array.isArray((node as any).spark) ? ((node as any).spark as number[]) : [],
+				spark: Array.isArray(node.spark) ? (node.spark as number[]) : [],
 				x: Math.min(window.innerWidth - 260, rect.left + rect.width / 2 - 100),
 				y: rect.top - 180
 			});
@@ -152,33 +227,7 @@
 </script>
 
 <div class="grid-wrap">
-	<!-- header row (sticky) -->
-	<div class="grid-header" style:grid-template-columns={colWidthCss()}>
-		{#each columns as key (key)}
-			{@const def = METRICS_BY_KEY[key]}
-			{@const sortDir = sort && sort.key === key ? sort.dir : null}
-			<div
-				class="hcell"
-				class:pinned={isPinned(key)}
-				class:numeric={def.type === 'number'}
-				style:left={isPinned(key) ? `${stickyOffsets[key]}px` : ''}
-			>
-				<button
-					type="button"
-					class="hbtn"
-					onclick={() => handleSortClick(key)}
-					aria-label="{def.label} 정렬"
-				>
-					<HeaderTooltip metric={def} />
-					{#if sortDir}
-						<span class="sort-arr" aria-hidden="true">{sortDir === 'asc' ? '▲' : '▼'}</span>
-					{/if}
-				</button>
-			</div>
-		{/each}
-	</div>
-
-	<!-- viewport (scrollable) -->
+	<!-- viewport (scrollable) — header 도 안에 두고 sticky-top 처리 -->
 	<div
 		class="viewport"
 		bind:this={viewport}
@@ -186,12 +235,39 @@
 		role="grid"
 		aria-rowcount={totalRows}
 	>
+		<!-- header row (sticky top + scrolls horizontally with rows) -->
+		<div class="grid-header" style:grid-template-columns={colWidthCss()}>
+			{#each columns as key (key)}
+				{@const def = METRICS_BY_KEY[key]}
+				{@const sortDir = sort && sort.key === key ? sort.dir : null}
+				<div
+					class="hcell"
+					class:pinned={isPinned(key)}
+					class:numeric={def?.type === 'number'}
+					style:left={isPinned(key) ? `${stickyOffsets[key]}px` : ''}
+				>
+					<button
+						type="button"
+						class="hbtn"
+						onclick={() => handleSortClick(key)}
+						aria-label="{def?.label ?? key} 정렬"
+					>
+						<HeaderTooltip metric={def} fallbackKey={key} />
+						{#if sortDir}
+							<span class="sort-arr" aria-hidden="true">{sortDir === 'asc' ? '▲' : '▼'}</span>
+						{/if}
+					</button>
+				</div>
+			{/each}
+		</div>
 		{#if topPad > 0}<div style:height="{topPad}px" aria-hidden="true"></div>{/if}
 
-		{#each visibleRows as node, i (node.id)}
+		{#each visibleRows as node, i (rowId(node as RowData, startIdx + i))}
 			{@const idx = startIdx + i}
-			{@const tint = rowTintColor(node.qualGrade)}
-			{@const isSel = node.id === selectedId}
+			{@const rd = node as RowData}
+			{@const id = rowId(rd, idx)}
+			{@const tint = isTable ? 'transparent' : rowTintColor(rowQualGrade(rd))}
+			{@const isSel = id === selectedId}
 			<div
 				class="row"
 				class:selected={isSel}
@@ -200,50 +276,62 @@
 				aria-selected={isSel}
 				style:grid-template-columns={colWidthCss()}
 				style:--row-tint={tint}
-				onclick={() => onSelect(node.id)}
+				onclick={() => onSelect(id)}
 				onkeydown={(e) => {
-					if (e.key === 'Enter') onSelect(node.id);
+					if (e.key === 'Enter') onSelect(id);
 				}}
 				tabindex="0"
 			>
 				{#each columns as key (key)}
 					{@const def = METRICS_BY_KEY[key]}
-					{@const v = cellValue(node, key)}
+					{@const v = cellValue(rd, key)}
 					{@const formatted = def?.format
 						? def.format(v)
 						: v == null || v === ''
 							? '—'
 							: String(v)}
+					{@const heatBg = !isTable && def?.type === 'number' && !isPinned(key) ? cellHeatmapBg(key, v) : 'transparent'}
 					<div
 						class="cell"
 						class:pinned={isPinned(key)}
 						class:numeric={def?.type === 'number'}
-						class:enum={def?.type === 'enum'}
+						class:enum={!isTable && def?.type === 'enum'}
 						class:spark-cell={key === 'spark'}
 						style:left={isPinned(key) ? `${stickyOffsets[key]}px` : ''}
+						style:background={heatBg}
 						role="gridcell"
 						tabindex="-1"
-						onmouseenter={(e) => onCellMouseEnter(e, node, key, formatted)}
+						onmouseenter={(e) => !isTable && onCellMouseEnter(e, rd, key, formatted)}
 						onmouseleave={onCellMouseLeave}
 					>
 						{#if key === 'label'}
+							{@const rawMarket = rowMarket(rd, id)}
+							{@const market = normalizeMarket(rawMarket)}
 							<button
 								type="button"
 								class="company-link"
-								onclick={(e) => handleCompanyClick(e, node.id)}
-								title="{node.label} ({node.id}) — 대시보드 진입"
+								onclick={(e) => handleCompanyClick(e, id)}
+								title="{rowLabel(rd)} ({id}) · {marketLabel(rawMarket)}"
 							>
-								<span class="ind-dot" style:background={node.color || '#475569'}></span>
-								<span class="company-name">{node.label}</span>
+								{#if market !== 'UNKNOWN'}
+									<span
+										class="market-tag market-{market.toLowerCase()}"
+										style:color={marketColor(rawMarket)}
+										style:border-color={marketColor(rawMarket) + '55'}
+										style:background={marketColor(rawMarket) + '14'}
+									>{marketLabel(rawMarket)}</span>
+								{/if}
+								<span class="ind-dot" style:background={rowColor(rd)}></span>
+								<span class="company-name">{rowLabel(rd)}</span>
 							</button>
 						{:else if key === 'spark'}
-							{@const sparkData = (node as any).spark}
+							{@const sparkData = rd.spark}
 							{#if Array.isArray(sparkData) && sparkData.length >= 2}
 								{@const trend =
 									sparkData[sparkData.length - 1] > sparkData[0] * 1.005
-										? '#22c55e'
+										? '#ef4444'
 										: sparkData[sparkData.length - 1] < sparkData[0] * 0.995
-											? '#ef4444'
+											? '#3b82f6'
 											: '#94a3b8'}
 								<span class="spark-wrap" style:color={trend}>
 									<Sparkline data={sparkData} width={88} height={24} stroke="currentColor" smooth />
@@ -305,12 +393,13 @@
 
 	.grid-header {
 		display: grid;
-		position: relative;
+		position: sticky;
+		top: 0;
 		height: 40px;
 		flex-shrink: 0;
 		background: #0a0e18;
 		border-bottom: 1px solid #1e2433;
-		z-index: 2;
+		z-index: 10;
 	}
 	.hcell {
 		display: flex;
@@ -449,6 +538,20 @@
 	.company-link:hover .company-name {
 		color: #fb923c;
 		text-decoration: underline;
+	}
+	.market-tag {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0 5px;
+		height: 16px;
+		min-width: 46px;
+		border-radius: 3px;
+		border: 1px solid;
+		font-size: 9px;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		flex-shrink: 0;
 	}
 	.ind-dot {
 		width: 6px;

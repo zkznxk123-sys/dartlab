@@ -187,13 +187,15 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
-		padding: 6px 10px;
+		height: 32px;
+		padding: 0 12px;
 		background: #050811;
 		border: 1px solid #1e2433;
 		border-radius: 5px;
 		color: #cbd5e1;
-		font-size: 11px;
+		font-size: 12px;
 		cursor: pointer;
+		line-height: 1;
 		font-family: inherit;
 	}
 	.ss-btn:hover {

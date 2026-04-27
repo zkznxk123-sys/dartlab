@@ -353,7 +353,7 @@ export const METRICS_DEF = [
 		group: 'price',
 		type: 'number',
 		unit: '원',
-		definition: '직전 거래일 종가 (KRX). PR-B 에서 DuckDB lazy 활성.',
+		definition: '직전 거래일 종가 (KRX).',
 		source: 'prices',
 		format: (v: unknown) => (typeof v === 'number' ? fmtPrice(v) : '—')
 	},
@@ -363,7 +363,7 @@ export const METRICS_DEF = [
 		group: 'price',
 		type: 'number',
 		unit: '원',
-		definition: '직전 거래일 시가총액 (KRX). PR-B 에서 DuckDB lazy 활성.',
+		definition: '직전 거래일 시가총액 (KRX).',
 		higherBetter: true,
 		source: 'prices',
 		format: (v: unknown) => (typeof v === 'number' ? fmtKrw(v) : '—'),
@@ -375,7 +375,7 @@ export const METRICS_DEF = [
 		group: 'price',
 		type: 'number',
 		unit: '%',
-		definition: '직전 1년 주가 수익률. PR-B 에서 활성.',
+		definition: '직전 1년 주가 수익률.',
 		higherBetter: true,
 		source: 'prices',
 		format: (v: unknown) => (typeof v === 'number' ? fmtPct(v, { withSign: true }) : '—')
@@ -386,17 +386,17 @@ export const METRICS_DEF = [
 		group: 'price',
 		type: 'number',
 		unit: '%',
-		definition: '직전 1년 일별 수익률 연환산 표준편차. PR-B 활성.',
+		definition: '직전 1년 일별 수익률 연환산 표준편차.',
 		higherBetter: false,
 		source: 'prices',
 		format: (v: unknown) => (typeof v === 'number' ? fmtPct(v) : '—')
 	},
 	{
 		key: 'spark',
-		label: '60일 차트',
+		label: '1Y 추세',
 		group: 'price',
 		type: 'text',
-		definition: '직전 60거래일 종가 추이 (4일 다운샘플). 셀 hover 시 큰 차트.',
+		definition: '직전 1년(252거래일) 종가 추이 (5일 다운샘플 ≈ 50포인트). 셀 hover 시 큰 차트.',
 		source: 'prices'
 	},
 
@@ -407,7 +407,7 @@ export const METRICS_DEF = [
 		group: 'valuation',
 		type: 'number',
 		unit: '배',
-		definition: '주가 ÷ 주당순이익. 낮을수록 저평가. PR-B 활성.',
+		definition: '주가 ÷ 주당순이익. 낮을수록 저평가.',
 		higherBetter: false,
 		source: 'valuation',
 		format: (v: unknown) => (typeof v === 'number' ? fmtMul(v, 1) : '—')
@@ -418,7 +418,7 @@ export const METRICS_DEF = [
 		group: 'valuation',
 		type: 'number',
 		unit: '배',
-		definition: '주가 ÷ 주당순자산. 1↓ = 청산가치 미만. PR-B 활성.',
+		definition: '주가 ÷ 주당순자산. 1↓ = 청산가치 미만.',
 		higherBetter: false,
 		source: 'valuation',
 		format: (v: unknown) => (typeof v === 'number' ? fmtMul(v, 2) : '—')
@@ -429,7 +429,7 @@ export const METRICS_DEF = [
 		group: 'valuation',
 		type: 'number',
 		unit: '%',
-		definition: '주당 배당금 ÷ 주가. PR-B 에서 활성.',
+		definition: '주당 배당금 ÷ 주가.',
 		higherBetter: true,
 		source: 'valuation',
 		format: (v: unknown) => (typeof v === 'number' ? fmtPct(v) : '—')
@@ -442,7 +442,7 @@ export const METRICS_DEF = [
 		group: 'disclosure',
 		type: 'number',
 		unit: '건',
-		definition: '직전 1년 재무 정정·변경 건수. 활발할수록 회계 활동 큼. PR-B 활성.',
+		definition: '직전 1년 재무 정정·변경 건수. 활발할수록 회계 활동 큼.',
 		source: 'changes',
 		format: (v: unknown) => (typeof v === 'number' ? `${v}건` : '—')
 	},
@@ -452,7 +452,7 @@ export const METRICS_DEF = [
 		group: 'disclosure',
 		type: 'number',
 		unit: '건',
-		definition: '직전 1년 사업구조 변경 건수. PR-B 활성.',
+		definition: '직전 1년 사업구조 변경 건수.',
 		source: 'changes',
 		format: (v: unknown) => (typeof v === 'number' ? `${v}건` : '—')
 	}
