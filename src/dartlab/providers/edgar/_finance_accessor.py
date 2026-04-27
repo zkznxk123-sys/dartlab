@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
+from dartlab.core.memory import _CACHE_MISSING
+
 if TYPE_CHECKING:
     from dartlab.providers.edgar.company import Company
 
@@ -88,16 +90,18 @@ class _FinanceAccessor:
 
     @property
     def ratios(self):
-        if "_ratios" not in self._company._cache:
+        val = self._company._cache.get("_ratios", _CACHE_MISSING)
+        if val is _CACHE_MISSING:
             from dartlab.analysis.financial.ratios import calcRatios
 
             annual = self._company._buildFinanceSeries(freq="Y")
             if annual is None:
-                self._company._cache["_ratios"] = None
+                val = None
             else:
                 aSeries, _ = annual
-                self._company._cache["_ratios"] = calcRatios(aSeries, annual=True)
-        return self._company._cache["_ratios"]
+                val = calcRatios(aSeries, annual=True)
+            self._company._cache["_ratios"] = val
+        return val
 
     @property
     def ratioSeries(self):

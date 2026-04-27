@@ -2319,9 +2319,13 @@ class Company:
     @property
     def notes(self):
         """주석 접근자 — EDGAR docs.notes를 래핑하여 DART Notes와 동일 인터페이스 제공."""
-        if "_notes_wrapper" not in self._cache:
-            self._cache["_notes_wrapper"] = _EdgarNotesWrapper(self)
-        return self._cache["_notes_wrapper"]
+        from dartlab.core.memory import _CACHE_MISSING
+
+        val = self._cache.get("_notes_wrapper", _CACHE_MISSING)
+        if val is _CACHE_MISSING:
+            val = _EdgarNotesWrapper(self)
+            self._cache["_notes_wrapper"] = val
+        return val
 
     @property
     def facts(self) -> pl.DataFrame | None:

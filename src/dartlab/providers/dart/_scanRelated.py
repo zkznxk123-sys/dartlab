@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
+from dartlab.core.memory import _CACHE_MISSING
 from dartlab.core.polarsUtil import isEmptyDf
 
 if TYPE_CHECKING:
@@ -29,49 +30,63 @@ if TYPE_CHECKING:
 
 
 # ── ensure helpers (Company._cache lazy 저장) ──────────────────────
+# atomic lazy build — cache.get + 로컬 var. set 직후 BoundedCache 의 FATAL 분기
+# (just_set_key 보존 없음) 가 unpinned 전부 evict 해도 로컬 var 영향 없음.
+# 5 질문 batch audit 의 ``tool debt failed: '_debt'`` race window fix.
 
 
 def _ensureNetwork(company: Company) -> tuple[dict, dict] | None:
     """network 파이프라인 캐싱 → (data, full)."""
-    if "_network_data" not in company._cache:
+    data = company._cache.get("_network_data", _CACHE_MISSING)
+    full = company._cache.get("_network_full", _CACHE_MISSING)
+    if data is _CACHE_MISSING or full is _CACHE_MISSING:
         from dartlab.scan.network import build_graph, export_full
 
         data = build_graph(verbose=False)
+        full = export_full(data)
         company._cache["_network_data"] = data
-        company._cache["_network_full"] = export_full(data)
-    return company._cache["_network_data"], company._cache["_network_full"]
+        company._cache["_network_full"] = full
+    return data, full
 
 
 def _ensureGovernance(company: Company) -> pl.DataFrame | None:
-    if "_governance" not in company._cache:
+    val = company._cache.get("_governance", _CACHE_MISSING)
+    if val is _CACHE_MISSING:
         from dartlab.scan.governance import scan_governance
 
-        company._cache["_governance"] = scan_governance(verbose=False)
-    return company._cache["_governance"]
+        val = scan_governance(verbose=False)
+        company._cache["_governance"] = val
+    return val
 
 
 def _ensureWorkforce(company: Company) -> pl.DataFrame | None:
-    if "_workforce" not in company._cache:
+    val = company._cache.get("_workforce", _CACHE_MISSING)
+    if val is _CACHE_MISSING:
         from dartlab.scan.workforce import scan_workforce
 
-        company._cache["_workforce"] = scan_workforce(verbose=False)
-    return company._cache["_workforce"]
+        val = scan_workforce(verbose=False)
+        company._cache["_workforce"] = val
+    return val
 
 
 def _ensureCapital(company: Company) -> pl.DataFrame | None:
-    if "_capital" not in company._cache:
+    val = company._cache.get("_capital", _CACHE_MISSING)
+    if val is _CACHE_MISSING:
         from dartlab.scan.capital import scan_capital
 
-        company._cache["_capital"] = scan_capital(verbose=False)
-    return company._cache["_capital"]
+        val = scan_capital(verbose=False)
+        company._cache["_capital"] = val
+    return val
 
 
 def _ensureDebt(company: Company) -> pl.DataFrame | None:
-    if "_debt" not in company._cache:
+    val = company._cache.get("_debt", _CACHE_MISSING)
+    if val is _CACHE_MISSING:
         from dartlab.scan.debt import scan_debt
 
-        company._cache["_debt"] = scan_debt(verbose=False)
-    return company._cache["_debt"]
+        val = scan_debt(verbose=False)
+        company._cache["_debt"] = val
+    return val
 
 
 # ── view 공통 헬퍼 ─────────────────────────────────────────────────
