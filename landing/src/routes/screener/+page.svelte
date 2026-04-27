@@ -847,6 +847,7 @@
 		{ key: 'per', label: 'PER', align: 'right' },
 		{ key: 'pbr', label: 'PBR', align: 'right' },
 		{ key: 'dividendYield', label: '배당%', align: 'right' },
+		{ key: 'numericChanges1y', label: '변경1Y', align: 'right' },
 		{ key: 'return1y', label: '1Y', align: 'right' },
 		{ key: 'spark', label: '60d', align: 'center' },
 		{ key: 'profGrade', label: '수익', align: 'center' },
@@ -997,6 +998,10 @@
 			<div class="hero-stat">
 				<span class="stat-num">{(((data.quarters as any)?.periods ?? []).length || 20).toLocaleString()}</span>
 				<span class="stat-label">분기 IS·CF·BS</span>
+			</div>
+			<div class="hero-stat">
+				<span class="stat-num">{changeMetrics.size > 0 ? changeMetrics.size.toLocaleString() : '—'}</span>
+				<span class="stat-label">공시 변경 추적</span>
 			</div>
 		</div>
 		<div class="hero-chips">
@@ -1355,6 +1360,9 @@
 							</td>
 							<td class="num" class:up={typeof n.dividendYield === 'number' && n.dividendYield >= 3}>
 								{fmtMetricValue('dividendYield', n.dividendYield)}
+							</td>
+							<td class="num" class:down={typeof n.numericChanges1y === 'number' && n.numericChanges1y >= 10}>
+								{n.numericChanges1y != null ? `${n.numericChanges1y}` : '—'}
 							</td>
 							<td class="num {returnTone(n.return1y)}">{fmtMetricValue('return1y', n.return1y)}</td>
 							<td class="spark-cell">
