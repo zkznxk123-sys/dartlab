@@ -149,31 +149,6 @@ export interface ScreenerNode {
 	[key: string]: unknown;
 }
 
-/** 가격 스냅샷 (prices-snapshot.json 의 회사별 항목). */
-export interface PriceSnapshot {
-	currentPrice: number | null;
-	marketCap: number | null;
-	return1m: number | null;
-	return3m: number | null;
-	return1y: number | null;
-	volatility1y: number | null;
-	week52High: number | null;
-	week52Low: number | null;
-	volumeAvg30d: number | null;
-	foreignPct: number | null;
-	beta: number | null;
-	priceUpdated: string | null;
-}
-
-/** prices-snapshot.json 의 최상위 구조. */
-export interface PricesSnapshotFile {
-	schemaVersion: number;
-	builtAt: string;
-	lookbackDays: number;
-	count: number;
-	data: Record<string, PriceSnapshot>;
-}
-
 /** URL 쿼리 직렬화 페이로드. */
 export interface QueryPayload {
 	/** 산업 ID 다중선택 (OR). */

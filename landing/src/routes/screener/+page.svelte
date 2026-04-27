@@ -6,7 +6,7 @@
 	import Header from '$lib/components/sections/Header.svelte';
 	import { fmtKrw, fmtKrwFromEok, fmtPrice } from '$lib/format/krw';
 	import { fmtPct } from '$lib/format/pct';
-	import type { Cond, Op, SortKey, MetricKey, MetricDef, ScreenerNode, PriceSnapshot, QueryPayload } from '$lib/screener/types';
+	import type { Cond, Op, SortKey, MetricKey, MetricDef, ScreenerNode, QueryPayload } from '$lib/screener/types';
 	import { loadDartDb, type DartDb } from '$lib/data/duckdb';
 	import { PRESETS, PRESETS_BY_ID, PRESET_CATEGORIES, type Preset } from '$lib/screener/presets';
 	import PresetCard from '$lib/screener/PresetCard.svelte';
@@ -34,20 +34,25 @@
 	let dartDb: DartDb | null = $state(null);
 	let dbState: 'idle' | 'loading' | 'ready' | 'error' | 'unsupported' = $state('idle');
 	let dbError = $state('');
-	/** stockCode → 60일 시계열 derived (DuckDB query 결과). */
-	let priceTimeSeries = $state<
-		Map<
-			string,
-			{
-				currentPrice: number;
-				ma20: number | null;
-				high60: number | null;
-				low60: number | null;
-				/** sparkline 용 다운샘플 종가 (15포인트) */
-				spark: number[];
-			}
-		>
-	>(new Map());
+	/** stockCode → 가격·시총·시계열 derived (DuckDB query 결과).
+	 * HF KRX parquet (raw-{year}.parquet, 매일 갱신) 직접 query — 별도 prebuild 없음.
+	 */
+	type PriceMetrics = {
+		currentPrice: number | null;
+		marketCap: number | null;
+		ma20: number | null;
+		high60: number | null;
+		low60: number | null;
+		week52High: number | null;
+		week52Low: number | null;
+		volumeAvg30d: number | null;
+		volatility1y: number | null;
+		return1m: number | null;
+		return3m: number | null;
+		return1y: number | null;
+		spark: number[];
+	};
+	let priceTimeSeries = $state<Map<string, PriceMetrics>>(new Map());
 
 	// 메트릭 정의 — PR-1 은 25 개 (점-시점 + 이미 박힌 시계열 derived).
 	// PR-2 부터 derived/composite/quarterly/timeseries modifier 추가.
@@ -255,18 +260,17 @@
 		return out;
 	});
 
-	// 데이터 join — ecosystem.nodes + prices-snapshot.data + priceTimeSeries (DuckDB derived)
+	// 데이터 join — ecosystem.nodes + priceTimeSeries (DuckDB-derived) + quarterMetrics
+	// (prices-snapshot.json 의존 제거됨 — HF KRX parquet 을 frontend 가 직접 query)
 	const joinedNodes = $derived.by(() => {
 		const eco = (data.ecosystem as any)?.nodes ?? [];
-		const prices = ((data.pricesSnapshot as any)?.data ?? {}) as Record<string, PriceSnapshot>;
 		return eco.map((n: any) => {
-			const snap = prices[n.id] ?? {};
-			const ts = priceTimeSeries.get(n.id);
+			const ts = priceTimeSeries.get(String(n.id));
 			const qm = quarterMetrics.get(String(n.id));
 			let currentVsMA20: number | null = null;
 			let drawdown60d: number | null = null;
 			let recovery60d: number | null = null;
-			if (ts) {
+			if (ts && ts.currentPrice != null) {
 				if (ts.ma20 && ts.ma20 > 0) {
 					currentVsMA20 = ((ts.currentPrice / ts.ma20) - 1) * 100;
 				}
@@ -279,10 +283,23 @@
 			}
 			return {
 				...n,
-				...snap,
+				// 가격·시총 — DuckDB SQL 결과 직접 머지
+				currentPrice: ts?.currentPrice ?? null,
+				marketCap: ts?.marketCap ?? null,
+				week52High: ts?.week52High ?? null,
+				week52Low: ts?.week52Low ?? null,
+				volumeAvg30d: ts?.volumeAvg30d ?? null,
+				volatility1y: ts?.volatility1y ?? null,
+				return1m: ts?.return1m ?? null,
+				return3m: ts?.return3m ?? null,
+				return1y: ts?.return1y ?? null,
+				foreignPct: null, // 별도 gather 미수집
+				beta: null, // KOSPI 시계열 join 시 추가
+				// 시계열 derived
 				currentVsMA20,
 				drawdown60d,
 				recovery60d,
+				// 분기 derived (quarters.json)
 				qoqRevenueGrowth: qm?.qoqRevenueGrowth ?? null,
 				qoqOpProfitGrowth: qm?.qoqOpProfitGrowth ?? null,
 				yoyRevenueGrowthQ: qm?.yoyRevenueGrowthQ ?? null,
@@ -434,7 +451,8 @@
 	onMount(() => {
 		// 1. 워크스페이스 LocalStorage 복원
 		workspace = loadWorkspace();
-		// 2. URL 의 ?q= / ?preset= 우선 — 둘 다 없으면 활성 탭 적용
+		// 2. 진입 우선순위: URL ?q= → URL ?preset= → 활성 탭 → 기본 프리셋
+		// 빈 화면 금지 — 첫 방문자도 즉시 결과 보임
 		const q = page.url.searchParams.get('q');
 		const preset = page.url.searchParams.get('preset');
 		if (q) {
@@ -444,6 +462,9 @@
 		} else if (workspace.activeTabId) {
 			const tab = workspace.tabs.find((t) => t.id === workspace.activeTabId);
 			if (tab) applyTab(tab);
+		} else {
+			// 첫 방문 — "진짜 돈 버는 회사" 자동 적용
+			applyPreset('real-money-makers');
 		}
 		// 3. DuckDB lazy 로드 — 백그라운드, 비차단
 		void loadPriceTimeSeries();
@@ -465,9 +486,8 @@
 		if (activePreset) activePreset = null;
 	}
 
-	/** DuckDB 통한 KRX 일별 가격 시계열 derived 메트릭 로드.
-	 * 매핑: 종목 → {currentPrice, ma20 (20일 이평), high60/low60 (60일 H/L)}.
-	 * 시계열 메트릭 (currentVsMA20, drawdown60d, recovery60d) 가 이 데이터 기반.
+	/** DuckDB 통한 HF KRX parquet 직접 query — 모든 가격·시총·수익률·변동성·52주H/L·평균거래량 즉석 계산.
+	 * 별도 prebuild snapshot 없음. HF 에 매일 갱신되는 raw OHLCV parquet 이 SSOT.
 	 */
 	async function loadPriceTimeSeries() {
 		dbState = 'loading';
@@ -479,74 +499,131 @@
 			}
 			dartDb = db;
 			const year = new Date().getFullYear();
-			// 현재 연도 parquet 한 개만 우선 등록 (1Y 미만이면 last year 도 추후 union)
-			await db.registerHfParquet('krxPrices', `krx/prices/raw-${year}.parquet`);
-			// 종목별 최근 60거래일 종가에서 MA20, 60일 고점·저점, sparkline (다운샘플 15포인트) 산출
+			// 1Y 시계열 보장 위해 현재 연도 + 직전 연도 parquet 둘 다 등록 → UNION view
+			await db.registerHfParquet('krxPricesCurr', `krx/prices/raw-${year}.parquet`);
+			try {
+				await db.registerHfParquet('krxPricesPrev', `krx/prices/raw-${year - 1}.parquet`);
+				await db.query(
+					`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr UNION ALL SELECT * FROM krxPricesPrev`
+				);
+			} catch {
+				// 직전 연도 parquet 없거나 실패 — 현재 연도만으로 진행 (1Y 일부 메트릭은 null)
+				await db.query(`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr`);
+			}
+			// 종목별 1Y(252거래일) 시계열에서 모든 가격·시총·수익률·변동성 메트릭 즉석 계산.
+			// LAG 로 과거 시점 종가 가져와 수익률, STDDEV_SAMP × √252 로 연환산 변동성.
 			const rows = await db.query<{
 				ISU_CD: string;
-				currentPrice: number;
+				currentPrice: number | null;
+				marketCap: number | null;
 				ma20: number | null;
 				high60: number | null;
 				low60: number | null;
+				week52High: number | null;
+				week52Low: number | null;
+				volumeAvg30d: number | null;
+				volatility1y: number | null;
+				prev21: number | null;
+				prev63: number | null;
+				prev252: number | null;
 				spark: number[] | null;
 			}>(`
-				WITH recent AS (
+				WITH ranked AS (
 					SELECT
 						ISU_CD,
 						BAS_DD,
 						CAST(TDD_CLSPRC AS DOUBLE) AS close,
 						CAST(TDD_HGPRC AS DOUBLE) AS high,
 						CAST(TDD_LWPRC AS DOUBLE) AS low,
+						CAST(ACC_TRDVOL AS DOUBLE) AS volume,
+						CAST(MKTCAP AS DOUBLE) AS mktcap,
 						ROW_NUMBER() OVER (PARTITION BY ISU_CD ORDER BY BAS_DD DESC) AS rn
 					FROM krxPrices
 				),
-				last60 AS (
-					SELECT * FROM recent WHERE rn <= 60
+				last252 AS (SELECT * FROM ranked WHERE rn <= 252),
+				latest AS (SELECT ISU_CD, close AS currentPrice, mktcap AS marketCap FROM last252 WHERE rn = 1),
+				ma20 AS (SELECT ISU_CD, AVG(close) AS ma20 FROM last252 WHERE rn <= 20 GROUP BY ISU_CD),
+				bounds60 AS (
+					SELECT ISU_CD, MAX(high) AS high60, MIN(low) AS low60
+					FROM last252 WHERE rn <= 60 GROUP BY ISU_CD
 				),
-				ma20 AS (
-					SELECT ISU_CD, AVG(close) AS ma20 FROM last60 WHERE rn <= 20 GROUP BY ISU_CD
+				bounds252 AS (
+					SELECT ISU_CD, MAX(high) AS week52High, MIN(low) AS week52Low
+					FROM last252 GROUP BY ISU_CD
 				),
-				latest AS (
-					SELECT ISU_CD, close AS currentPrice FROM last60 WHERE rn = 1
+				volavg30 AS (
+					SELECT ISU_CD, AVG(volume) AS volumeAvg30d
+					FROM last252 WHERE rn <= 30 GROUP BY ISU_CD
 				),
-				bounds AS (
-					SELECT ISU_CD, MAX(high) AS high60, MIN(low) AS low60 FROM last60 GROUP BY ISU_CD
+				prev21 AS (SELECT ISU_CD, close AS prev21 FROM last252 WHERE rn = 21),
+				prev63 AS (SELECT ISU_CD, close AS prev63 FROM last252 WHERE rn = 63),
+				prev252 AS (SELECT ISU_CD, close AS prev252 FROM last252 WHERE rn = 252),
+				logret AS (
+					SELECT ISU_CD,
+						CASE WHEN close > 0 AND LAG(close) OVER (PARTITION BY ISU_CD ORDER BY BAS_DD) > 0
+							THEN LN(close / LAG(close) OVER (PARTITION BY ISU_CD ORDER BY BAS_DD))
+							ELSE NULL END AS lnret
+					FROM last252
+				),
+				vol AS (
+					SELECT ISU_CD, STDDEV_SAMP(lnret) * SQRT(252) * 100 AS volatility1y
+					FROM logret WHERE lnret IS NOT NULL GROUP BY ISU_CD
 				),
 				spark AS (
-					-- 60일 종가에서 매 4일 샘플링 (15포인트, 시간 오름차순)
+					-- 60일 종가에서 매 4일 다운샘플 (15포인트, 시간 오름차순)
 					SELECT ISU_CD, ARRAY_AGG(close ORDER BY BAS_DD ASC) AS spark
-					FROM last60 WHERE rn % 4 = 0
+					FROM last252 WHERE rn <= 60 AND rn % 4 = 0
 					GROUP BY ISU_CD
 				)
 				SELECT
 					l.ISU_CD,
-					l.currentPrice,
+					l.currentPrice, l.marketCap,
 					m.ma20,
-					b.high60,
-					b.low60,
+					b60.high60, b60.low60,
+					b252.week52High, b252.week52Low,
+					va.volumeAvg30d,
+					v.volatility1y,
+					p21.prev21, p63.prev63, p252.prev252,
 					s.spark
 				FROM latest l
 				LEFT JOIN ma20 m USING (ISU_CD)
-				LEFT JOIN bounds b USING (ISU_CD)
+				LEFT JOIN bounds60 b60 USING (ISU_CD)
+				LEFT JOIN bounds252 b252 USING (ISU_CD)
+				LEFT JOIN volavg30 va USING (ISU_CD)
+				LEFT JOIN vol v USING (ISU_CD)
+				LEFT JOIN prev21 p21 USING (ISU_CD)
+				LEFT JOIN prev63 p63 USING (ISU_CD)
+				LEFT JOIN prev252 p252 USING (ISU_CD)
 				LEFT JOIN spark s USING (ISU_CD)
 			`);
-			const map = new Map<
-				string,
-				{
-					currentPrice: number;
-					ma20: number | null;
-					high60: number | null;
-					low60: number | null;
-					spark: number[];
-				}
-			>();
+			const num = (v: unknown): number | null => {
+				if (v === null || v === undefined) return null;
+				const n = Number(v);
+				return Number.isFinite(n) ? n : null;
+			};
+			const pctReturn = (curr: number | null, past: number | null): number | null => {
+				if (curr == null || past == null || past === 0) return null;
+				return ((curr / past) - 1) * 100;
+			};
+			const map = new Map<string, PriceMetrics>();
 			for (const r of rows) {
-				const sparkArr = Array.isArray(r.spark) ? r.spark.map((v) => Number(v)).filter((v) => Number.isFinite(v)) : [];
+				const currentPrice = num(r.currentPrice);
+				const sparkArr = Array.isArray(r.spark)
+					? r.spark.map((v) => Number(v)).filter((v) => Number.isFinite(v))
+					: [];
 				map.set(r.ISU_CD, {
-					currentPrice: Number(r.currentPrice),
-					ma20: r.ma20 != null ? Number(r.ma20) : null,
-					high60: r.high60 != null ? Number(r.high60) : null,
-					low60: r.low60 != null ? Number(r.low60) : null,
+					currentPrice,
+					marketCap: num(r.marketCap),
+					ma20: num(r.ma20),
+					high60: num(r.high60),
+					low60: num(r.low60),
+					week52High: num(r.week52High),
+					week52Low: num(r.week52Low),
+					volumeAvg30d: num(r.volumeAvg30d),
+					volatility1y: num(r.volatility1y),
+					return1m: pctReturn(currentPrice, num(r.prev21)),
+					return3m: pctReturn(currentPrice, num(r.prev63)),
+					return1y: pctReturn(currentPrice, num(r.prev252)),
 					spark: sparkArr
 				});
 			}
