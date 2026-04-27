@@ -31,6 +31,14 @@ PRESSURE_CRITICAL_MB = 1500.0  # 위험: 캐시 1/4 축소 + GC
 PRESSURE_FATAL_MB = 1500.0  # 치명: 캐시 전체(pinned 제외) 비우기 + GC
 PRESSURE_EMERGENCY_MB = 2500.0  # 응급: pinned 까지 비우기 + polars string cache 회수
 
+# ── lazy-build atomic sentinel ──
+# `if key not in cache: cache[key] = build(...); return cache[key]` 패턴은 atomic 이
+# 아니다 — set 단계의 ``__setitem__`` 가 ``_check_pressure`` 를 호출해 FATAL 분기
+# (line 318-325) 에서 just_set_key 보존 없이 unpinned 전부 evict 시키면 직후 read 가
+# KeyError. atomic 패턴은 ``cache.get(key, _CACHE_MISSING)`` 으로 한 번만 cache 접근
+# + 결과는 로컬 var 에 저장 → cache 에서 evict 되어도 영향 없음.
+_CACHE_MISSING: Any = object()
+
 
 def get_memory_mb() -> float:
     """현재 프로세스 RSS(Resident Set Size)를 MB로 반환.
@@ -197,6 +205,14 @@ class BoundedCache:
             # 동일한 CallableAccessor 패턴인데 critical_prefixes 에서 누락됐었음.
             "_quantAccessor",
             "_sectionsAnalyzer",
+            # 2026-04-27: R9 인텔 audit 에서 `_docs_sections` KeyError 검출.
+            # `_DocsAccessor.sections` (EDGAR) 의 lazy build 가 FATAL/EMERGENCY clear 와
+            # race — pinned 도 critical 도 아니라 unpinned evict 에 휩쓸려 line `return
+            # cache[key]` 가 KeyError. _docs prefix 는 _docs_sections · _docs_retrievalBlocks
+            # · _docs_contextSlices · _docs_freq · _docs_coverage 공통 부모.
+            "_docs",
+            # _sections (DART) 도 동일 — _showDispatch 가 의존, evict 시 KeyError.
+            "_sections",
         )
         # pinned: 이 prefix로 시작하는 키는 evict하지 않음 (외부 API + 무거운 계산 결과 보호)
         # review에서 여러 calc가 공유하는 핵심 캐시. 작은 dict이고 재로드 비용 큼.

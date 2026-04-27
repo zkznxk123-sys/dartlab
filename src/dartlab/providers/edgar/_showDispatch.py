@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
+from dartlab.core.memory import _CACHE_MISSING
 from dartlab.core.polarsUtil import isEmptyDf
 
 if TYPE_CHECKING:
@@ -49,19 +50,25 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
         raise ValueError("EDGAR 는 scope='separate' 미지원 — SEC 는 연결만 보고")
     if scope != "consolidated":
         raise ValueError(f"scope 는 'consolidated' / 'separate' 중 하나 (받음: {scope!r})")
-    # EDGAR _FinanceAccessor 는 freq 옵션 직접 지원
+    # EDGAR _FinanceAccessor 는 freq 옵션 직접 지원.
+    # atomic lazy build (cache.get + 로컬 var) — set 직후 EMERGENCY clear 가 evict 해도
+    # 로컬 var 는 영향 없음. R9 audit 의 race window fix.
     if freq == "Q":
-        if "_ts" not in company._cache:
+        val = company._cache.get("_ts", _CACHE_MISSING)
+        if val is _CACHE_MISSING:
             from dartlab.providers.edgar.finance.pivot import buildTimeseries
 
-            company._cache["_ts"] = buildTimeseries(company.cik)
-        return company._cache.get("_ts")
+            val = buildTimeseries(company.cik)
+            company._cache["_ts"] = val
+        return val
     # Y / YTD → annual
-    if "_annual" not in company._cache:
+    val = company._cache.get("_annual", _CACHE_MISSING)
+    if val is _CACHE_MISSING:
         from dartlab.providers.edgar.finance.pivot import buildAnnual
 
-        company._cache["_annual"] = buildAnnual(company.cik)
-    return company._cache["_annual"]
+        val = buildAnnual(company.cik)
+        company._cache["_annual"] = val
+    return val
 
 
 def buildRatios(company: Company) -> pl.DataFrame | None:
