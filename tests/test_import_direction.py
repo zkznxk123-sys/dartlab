@@ -110,6 +110,24 @@ _KNOWN_VIOLATIONS = {
     ("dartlab.core.credentials", "dartlab.providers"),
     # core/messaging → providers (L0→L1) — hasDartApiKey 확인 lazy import
     ("dartlab.core.messaging", "dartlab.providers"),
+    # providers/dart/finance/{ratios,spec} → analysis/financial/ratios (L1→L2)
+    # — S5a 에서 ratios 가 analysis/financial/ 로 이주된 후 잠재 위반 표면화.
+    # 두 파일은 backward-compat re-export wrapper 라 호출처 정리 후 다음 메이저에서 제거 예정.
+    ("dartlab.providers.dart.finance.ratios", "dartlab.analysis"),
+    ("dartlab.providers.dart.finance.spec", "dartlab.analysis"),
+    # core/finance shim → analysis/financial (L0 shim → L2 새 위치)
+    # 본질이 deprecation wrapper. 다음 메이저에서 shim 자체 제거 예정.
+    ("dartlab.core.finance", "dartlab.analysis"),
+    ("dartlab.core.finance.ratios", "dartlab.analysis"),
+    ("dartlab.core.finance.earningsQuality", "dartlab.analysis"),
+    # providers/dart/{_docsIndex,_financeBuilders} + providers/edgar/_finance_accessor →
+    # analysis/financial/ratios (L1→L2). ratios 가 L2 로 이주됐는데 L1 facade backend
+    # 가 그 결과 타입 (RatioResult dataclass) 을 import — 큰 레포 표준상 결과 dataclass
+    # 는 review 통과해야 하지만 facade backend 의 cache/render 보조라 호출처 정리는
+    # S8 으로 미룸. 그때 풀 예정.
+    ("dartlab.providers.dart._docsIndex", "dartlab.analysis"),
+    ("dartlab.providers.dart._financeBuilders", "dartlab.analysis"),
+    ("dartlab.providers.edgar._finance_accessor", "dartlab.analysis"),
 }
 
 
