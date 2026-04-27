@@ -922,16 +922,20 @@
 				<span class="stat-num">{joinedNodes.length.toLocaleString()}</span>
 				<span class="stat-label">상장사 검색 대상</span>
 			</div>
-			<div class="hero-stat">
+			<div class="hero-stat hero-stat-result">
 				<span class="stat-num">{results.length.toLocaleString()}</span>
 				<span class="stat-label">현재 조건 통과</span>
 			</div>
 			<div class="hero-stat">
 				<span class="stat-num">{priceTimeSeries.size > 0 ? priceTimeSeries.size.toLocaleString() : '—'}</span>
-				<span class="stat-label">가격 시계열 (60d)</span>
+				<span class="stat-label">가격·시총 (KRX 1Y)</span>
 			</div>
 			<div class="hero-stat">
-				<span class="stat-num">20</span>
+				<span class="stat-num">{valuationMetrics.size > 0 ? valuationMetrics.size.toLocaleString() : '—'}</span>
+				<span class="stat-label">PER · PBR · 배당</span>
+			</div>
+			<div class="hero-stat">
+				<span class="stat-num">{(((data.quarters as any)?.periods ?? []).length || 20).toLocaleString()}</span>
 				<span class="stat-label">분기 IS·CF·BS</span>
 			</div>
 		</div>
@@ -1338,7 +1342,18 @@
 			</div>
 		{/if}
 		{#if results.length === 0}
-			<div class="empty">조건에 부합하는 회사가 없습니다. 조건을 완화해 보세요.</div>
+			<div class="empty">
+				<div class="empty-title">조건에 부합하는 회사가 없습니다</div>
+				<div class="empty-hint">
+					조건이 너무 엄격합니다. 다음 중 하나를 시도하세요:
+				</div>
+				<ul class="empty-suggestions">
+					<li>슬라이더·값을 한 단계 완화 (예: ROE ≥ 15% → 10%)</li>
+					<li>산업 필터 해제</li>
+					<li>NOT 조건 일시 비활성화</li>
+					<li>또는 <button class="link-inline" onclick={() => applyPreset('real-money-makers')}>"진짜 돈 버는 회사"</button> 프리셋부터 시작</li>
+				</ul>
+			</div>
 		{/if}
 	</section>
 	{/if}
@@ -1416,6 +1431,11 @@
 		border: 1px solid rgba(96, 165, 250, 0.18);
 		border-radius: 10px;
 	}
+	.hero-stat-result {
+		background: linear-gradient(135deg, rgba(52, 211, 153, 0.10), rgba(52, 211, 153, 0.03));
+		border-color: rgba(52, 211, 153, 0.35);
+	}
+	.hero-stat-result .stat-num { color: #34d399; }
 	.stat-num {
 		font-size: 28px;
 		font-weight: 800;
@@ -2003,11 +2023,46 @@
 		flex-wrap: wrap;
 	}
 	.empty {
-		padding: 36px 16px;
+		padding: 36px 24px;
 		text-align: center;
-		font-size: 13px;
-		color: #64748b;
+		color: #94a3b8;
 	}
+	.empty-title {
+		font-size: 14px;
+		font-weight: 700;
+		color: #cbd5e1;
+		margin-bottom: 6px;
+	}
+	.empty-hint {
+		font-size: 12px;
+		color: #64748b;
+		margin-bottom: 12px;
+	}
+	.empty-suggestions {
+		list-style: none;
+		padding: 0;
+		margin: 0 auto;
+		max-width: 400px;
+		text-align: left;
+		font-size: 12px;
+		line-height: 1.8;
+		color: #94a3b8;
+	}
+	.empty-suggestions li::before {
+		content: '→ ';
+		color: #60a5fa;
+		font-weight: 600;
+	}
+	.link-inline {
+		background: none;
+		border: none;
+		padding: 0;
+		color: #60a5fa;
+		font-size: inherit;
+		cursor: pointer;
+		font-weight: 600;
+	}
+	.link-inline:hover { text-decoration: underline; }
 
 	.foot {
 		margin-top: 24px;
@@ -2021,4 +2076,40 @@
 	}
 	.note a { color: #60a5fa; text-decoration: none; }
 	.note a:hover { text-decoration: underline; }
+
+	/* 모바일 반응형 — 768px↓ */
+	@media (max-width: 768px) {
+		.page { padding: 56px 12px 48px; }
+		.hero { padding: 16px 0; }
+		.hero-title { font-size: 28px; }
+		.hero-accent { font-size: 16px; display: block; }
+		.hero-lead { font-size: 13px; }
+		.hero-stats {
+			grid-template-columns: 1fr 1fr;
+			gap: 8px;
+		}
+		.stat-num { font-size: 22px; }
+		.preset-grid {
+			grid-template-columns: 1fr;
+		}
+		.builder { gap: 12px; }
+		.cond-row {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 4px;
+		}
+		.cond-metric, .cond-op, .cond-val, .sort-key, .sort-dir {
+			width: 100%;
+		}
+		.actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
+		.action-btns { flex-wrap: wrap; }
+		.btn { flex: 1; min-width: 90px; }
+		.tab-bar { overflow-x: auto; flex-wrap: nowrap; }
+		.tab { flex-shrink: 0; }
+		.table-wrap { max-height: 60vh; }
+		th, td { font-size: 11px; padding: 6px 8px; }
+	}
 </style>
