@@ -183,15 +183,21 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
         if ta is None or ta <= 0:
             continue
 
-        retained = reRow.get(col) or 0
+        # 핵심 자본구조 항목은 모든 회사가 보유 — None = 미수집. 가짜 0 출력 회피 위해 skip.
+        retained = reRow.get(col)
+        equity = eqRow.get(col)
+        liab = liabRow.get(col)
+        if retained is None or equity is None or liab is None:
+            continue
+
+        # 합산 항목 (자본잉여금/자본금, 영업관련 부채) 의 개별 component 는 0 fallback OK
+        # — 그 항목이 회사에 없을 수 있음 (선택적 항목)
         paidIn = (pcRow.get(col) or 0) + (csRow.get(col) or 0)
         # 차입금: 회사 키 패턴 무관 헬퍼 (분리/통합/언더스코어/noncurrent 변형 모두 처리)
         finDebt = sumBorrowings(data, col)
         opFunding = (apRow.get(col) or 0) + (advRow.get(col) or 0) + (clRow.get(col) or 0) + (diRow.get(col) or 0)
 
-        equity = eqRow.get(col) or 0
         otherEquity = max(0, equity - retained - paidIn)
-        liab = liabRow.get(col) or 0
         otherLiab = max(0, liab - finDebt - opFunding)
 
         entry = {
@@ -324,7 +330,10 @@ def _calcNetDebtEbitda(company, finDebt: float) -> float | None:
     float | None
         순차입금/영업이익 (배). 순현금이면 0.0, 영업이익 없으면 None.
     """
-    cash = _latestAnnualVal(company, "BS", "현금및현금성자산") or 0
+    # 현금 미수집 (None) → finDebt 만으로 netDebt 추정. 진짜 0 (현금 0) 은 사실상 없음.
+    cash = _latestAnnualVal(company, "BS", "현금및현금성자산")
+    if cash is None:
+        return None  # 현금 미수집 시 netDebt 정확도 낮음 → None 으로 정직 표시
     netDebt = finDebt - cash
     if netDebt <= 0:
         return 0.0  # 순현금

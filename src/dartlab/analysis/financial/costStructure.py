@@ -58,7 +58,11 @@ def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
 
     history = []
     for col in yCols:
-        rev = revRow.get(col) or 0
+        # 매출 미수집 (None) 인 period 는 분석 skip — 매출 0 회사 사실상 없음 (None = 미수집).
+        # 가짜 0 출력 회피 (신뢰성 원칙).
+        rev = revRow.get(col)
+        if rev is None or rev <= 0:
+            continue
         cogs = sumCostOfSales(isData, col)  # 분리/통합 키 fallback
         sga = sumSGA(isData, col)  # 판매비/관리비 분리 키 fallback
 
