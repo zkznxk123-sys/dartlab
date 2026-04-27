@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.core.finance.chsModel import CHSResult, calcCHS
+from dartlab.credit.chsModel import CHSResult, calcCHS
 
 # Damodaran 권고 — 청산 시 공정가치 할인
 _DEFAULT_LIQUIDATION_DISCOUNT = 0.25

@@ -957,8 +957,8 @@ def _applySurvivalAdjustment(company: Any, primary_value: float, overrides: dict
     CHS 부도확률 (12M PD) 을 chsFeatures 경로로 실제 추출. 실패 시 safe_default 폴백.
     """
     try:
-        from dartlab.core.finance.chsFeatures import computeChsProbability
         from dartlab.core.overrides import applyOverride
+        from dartlab.credit.chsFeatures import computeChsProbability
         from dartlab.credit.survival import applySurvivalWeight, calcSurvivalWeight
     except ImportError:
         return None

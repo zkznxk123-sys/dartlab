@@ -498,7 +498,7 @@ def _crisisKrCreditRisk(data: dict) -> dict | None:
 def _crisisExcessBondPremium(as_of: str | None) -> dict | None:
     """Gilchrist-Zakrajšek EBP. 반환: classifyEBP dict or None."""
     try:
-        from dartlab.core.finance.excessBondPremium import approximateEBP, classifyEBP
+        from dartlab.credit.excessBondPremium import approximateEBP, classifyEBP
         from dartlab.macro._helpers import fetch_latest as _fl
         from dartlab.macro._helpers import get_gather as _gg
 

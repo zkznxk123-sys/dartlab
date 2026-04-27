@@ -6,7 +6,6 @@ Layer 1 (metrics.py) → Layer 2 (scorecard) → Layer 3 (등급 결정)
 
 from __future__ import annotations
 
-from dartlab.core.finance.sectorThresholds import getSectorLabel, getThresholds
 from dartlab.credit.creditScorecard import (
     axisScore,
     cashFlowGrade,
@@ -18,6 +17,7 @@ from dartlab.credit.creditScorecard import (
     weightedScore,
 )
 from dartlab.credit.metrics import calcAllMetrics
+from dartlab.credit.sectorThresholds import getSectorLabel, getThresholds
 
 # ═══════════════════════════════════════════════════════════
 # 설정 — 모든 매직 넘버를 여기서 관리
@@ -204,7 +204,7 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict:
         adjustment : float — ok 시 적용 조정치 (0 if unavailable).
     """
     try:
-        from dartlab.core.finance.chsModel import calcCHS
+        from dartlab.credit.chsModel import calcCHS
 
         priceData = company.gather("price") if hasattr(company, "gather") else None
         if priceData is None or len(priceData) < 20:
@@ -732,12 +732,12 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
 
     # 기준표 선택 (캡티브 > 지주 > 업종별 > 기본)
     if captive:
-        from dartlab.core.finance.sectorThresholds import _airlineThresholds
+        from dartlab.credit.sectorThresholds import _airlineThresholds
 
         thresholds = _airlineThresholds()
         sectorLabel = f"{getSectorLabel(sector)} (캡티브금융조정)"
     elif holding:
-        from dartlab.core.finance.sectorThresholds import _holdingThresholds
+        from dartlab.credit.sectorThresholds import _holdingThresholds
 
         thresholds = _holdingThresholds()
         sectorLabel = f"{getSectorLabel(sector)} (지주사조정)"
@@ -1188,7 +1188,7 @@ def _evaluateFinancial(company, *, detail: bool = False, basePeriod: str | None 
     if metrics is None or not metrics.get("history"):
         return None
 
-    from dartlab.core.finance.sectorThresholds import financialTrackBThresholds
+    from dartlab.credit.sectorThresholds import financialTrackBThresholds
 
     thresholds = financialTrackBThresholds()
     latest = metrics["history"][0]
