@@ -1010,9 +1010,10 @@
 		</div>
 		{#each PRESET_CATEGORIES as cat (cat.key)}
 			{@const items = PRESETS.filter((p) => p.category === cat.key)}
+			{@const labelColor = cat.key === 'theme' ? '#ea4647' : cat.key === 'price' ? '#fb923c' : '#a78bfa'}
 			{#if items.length > 0}
 				<div class="preset-group">
-					<div class="preset-group-label">{cat.label}</div>
+					<div class="preset-group-label" style:--label-color={labelColor}>{cat.label}</div>
 					<div class="preset-grid">
 						{#each items as p (p.id)}
 							<PresetCard preset={p} active={activePreset === p.id} onClick={applyPreset} />
@@ -1432,10 +1433,16 @@
 		border-radius: 10px;
 	}
 	.hero-stat-result {
-		background: linear-gradient(135deg, rgba(52, 211, 153, 0.10), rgba(52, 211, 153, 0.03));
-		border-color: rgba(52, 211, 153, 0.35);
+		background: linear-gradient(135deg, rgba(234, 70, 71, 0.14), rgba(251, 146, 60, 0.06));
+		border-color: rgba(234, 70, 71, 0.42);
+		box-shadow: 0 4px 14px rgba(234, 70, 71, 0.15);
 	}
-	.hero-stat-result .stat-num { color: #34d399; }
+	.hero-stat-result .stat-num {
+		background: linear-gradient(135deg, #ea4647, #fb923c);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
 	.stat-num {
 		font-size: 28px;
 		font-weight: 800;
@@ -1614,12 +1621,20 @@
 		margin-top: 0;
 	}
 	.preset-group-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
 		font-size: 10px;
-		font-weight: 700;
-		color: #94a3b8;
+		font-weight: 800;
+		color: #cbd5e1;
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		margin-bottom: 8px;
+		letter-spacing: 0.1em;
+		margin-bottom: 10px;
+		padding: 3px 10px;
+		background: rgba(234, 70, 71, 0.08);
+		border-left: 2px solid;
+		border-color: var(--label-color, #ea4647);
+		border-radius: 0 4px 4px 0;
 	}
 	.preset-grid {
 		display: grid;
@@ -1840,15 +1855,16 @@
 	}
 	.sum-stats strong { color: #f1f5f9; }
 
-	/* 등급 색칩 */
+	/* 등급 색칩 — 진한 그라디언트 톤 */
 	.grade-chip {
 		display: inline-block;
-		padding: 2px 8px;
+		padding: 3px 10px;
 		font-size: 10px;
-		font-weight: 700;
-		border-radius: 4px;
+		font-weight: 800;
+		border-radius: 999px;
 		font-family: monospace;
-		letter-spacing: 0.02em;
+		letter-spacing: 0.05em;
+		box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2) inset;
 	}
 
 	/* 액션 */
@@ -1983,7 +1999,9 @@
 		border-bottom: 1px solid rgba(30, 36, 51, 0.5);
 		color: #cbd5e1;
 	}
-	tr:hover td { background: rgba(96, 165, 250, 0.04); }
+	tr:hover td {
+		background: linear-gradient(90deg, rgba(234, 70, 71, 0.05), rgba(251, 146, 60, 0.02));
+	}
 	td.num {
 		text-align: right;
 		font-family: monospace;
