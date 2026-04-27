@@ -132,6 +132,12 @@ def fetch_multi(
     if not series_ids:
         return pl.DataFrame()
 
+    # 메모리 spike 방어 (5 질문 batch 매크로 7771 MB 경험):
+    # - join 누적은 immutable polars 라 어쩔 수 없지만 forward_fill 을 컬럼별 30 회
+    #   immutable copy 하던 것을 with_columns 한 번으로 묶음 (이전: 30 시리즈 → 30 회
+    #   새 DataFrame, 메모리 spike 직접 원인).
+    # - frames 리스트는 join 누적 후 명시적 del + gc.collect 로 Polars Rust 힙 회수
+    #   유도 (Python GC 만으로는 회수 불가 — CLAUDE.md "[최우선] 메모리 안전 규칙").
     frames: list[pl.DataFrame] = []
     for sid in series_ids:
         df = fetch_series(client, sid, start=start, end=end, frequency=frequency)
@@ -142,11 +148,18 @@ def fetch_multi(
     for df in frames[1:]:
         result = result.join(df, on="date", how="full", coalesce=True)
 
-    result = result.sort("date")
-    # forward-fill로 주파수 차이 보정
-    for col in result.columns:
-        if col != "date":
-            result = result.with_columns(pl.col(col).forward_fill())
+    # frames 의 개별 DataFrame 들은 join 으로 흡수됐으므로 즉시 해제
+    del frames
+    import gc
+
+    gc.collect()
+
+    # forward_fill 일괄 — 30 시리즈도 한 번의 with_columns 로 (이전 30 회 → 1 회)
+    fill_cols = [c for c in result.columns if c != "date"]
+    if fill_cols:
+        result = result.sort("date").with_columns([pl.col(c).forward_fill() for c in fill_cols])
+    else:
+        result = result.sort("date")
 
     return result
 
