@@ -15,7 +15,7 @@ from dartlab.analysis.financial._memoize import memoized_calc
 _MAX_YEARS = 8
 
 
-from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
+from dartlab.core.utils.calc import safePct as _pct  # noqa: E402
 
 # ── 유효세율 ──
 

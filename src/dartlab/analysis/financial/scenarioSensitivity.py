@@ -39,7 +39,7 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
         breakdownPoint : dict | None
     """
     from dartlab.analysis.financial._helpers import toDictBySnakeId
-    from dartlab.core.finance.helpers import annualColsFromPeriods
+    from dartlab.core.utils.helpers import annualColsFromPeriods
 
     parsed = toDictBySnakeId(
         company.select(
@@ -409,7 +409,7 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
         if cash is None:
             try:
                 from dartlab.analysis.financial._helpers import toDictBySnakeId
-                from dartlab.core.finance.helpers import annualColsFromPeriods
+                from dartlab.core.utils.helpers import annualColsFromPeriods
 
                 bs_p = toDictBySnakeId(company.select("BS", ["cash_and_cash_equivalents"]))
                 if bs_p:
@@ -453,7 +453,7 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
     if opm is not None and opm > 15 and revenue:
         try:
             from dartlab.analysis.financial._helpers import toDictBySnakeId
-            from dartlab.core.finance.helpers import annualColsFromPeriods
+            from dartlab.core.utils.helpers import annualColsFromPeriods
 
             cf_p = toDictBySnakeId(company.select("CF", ["purchase_of_property_plant_and_equipment"]))
             if cf_p:

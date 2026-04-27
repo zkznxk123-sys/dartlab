@@ -21,7 +21,7 @@ _MAX_YEARS = 8
 
 
 from dartlab.analysis.financial._constants import ACCRUAL_RATIO_WARNING
-from dartlab.core.finance.calc import safeDiv as _safe
+from dartlab.core.utils.calc import safeDiv as _safe
 
 # ── 발생액 분석 ──
 

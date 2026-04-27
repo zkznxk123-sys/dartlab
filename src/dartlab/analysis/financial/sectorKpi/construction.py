@@ -20,7 +20,7 @@ def calcConstructionKpis(company, *, basePeriod: str | None = None) -> dict | No
         pfExposure : dict | None — PF 보증·채무 노출
     """
     from dartlab.analysis.financial._helpers import toDictBySnakeId
-    from dartlab.core.finance.helpers import annualColsFromPeriods
+    from dartlab.core.utils.helpers import annualColsFromPeriods
 
     result: dict = {}
 

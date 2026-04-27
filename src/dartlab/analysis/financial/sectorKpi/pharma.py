@@ -77,7 +77,7 @@ def calcPharmaKpis(company, *, basePeriod: str | None = None) -> dict | None:
     # ── R&D/매출 비율 ──
     try:
         from dartlab.analysis.financial._helpers import toDictBySnakeId
-        from dartlab.core.finance.helpers import annualColsFromPeriods
+        from dartlab.core.utils.helpers import annualColsFromPeriods
 
         parsed = toDictBySnakeId(company.select("IS", ["sales", "research_and_development"]))
         if parsed:

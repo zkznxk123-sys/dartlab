@@ -345,7 +345,7 @@ def calcGrowthFlags(company, *, basePeriod: str | None = None) -> list[str]:
 # ── 계정별 CAGR 비교 ──
 
 
-from dartlab.core.finance.calc import cagr as _cagr  # noqa: E402
+from dartlab.core.utils.calc import cagr as _cagr  # noqa: E402
 
 
 @memoized_calc

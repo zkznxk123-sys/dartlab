@@ -118,7 +118,7 @@ def _isHolding(company) -> bool:
     try:
         bs = company.select("BS", ["종속기업,관계기업및공동기업투자", "관계기업등지분관련투자자산", "자산총계"])
         if bs is not None and len(bs) > 0:
-            from dartlab.core.finance.helpers import toDictBySnakeId
+            from dartlab.core.utils.helpers import toDictBySnakeId
 
             parsed = toDictBySnakeId(bs)
             if parsed:
@@ -212,7 +212,7 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict:
 
         bs = company.select("BS", ["자산총계", "부채총계", "현금및현금성자산", "현금및예치금"])
         is_ = company.select("IS", ["당기순이익"])
-        from dartlab.core.finance.helpers import toDictBySnakeId
+        from dartlab.core.utils.helpers import toDictBySnakeId
 
         bsParsed = toDictBySnakeId(bs)
         isParsed = toDictBySnakeId(is_)
@@ -254,7 +254,7 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict:
         try:
             epsData = company.select("IS", ["기본주당이익", "당기순이익"])
             if epsData is not None:
-                from dartlab.core.finance.helpers import toDictBySnakeId
+                from dartlab.core.utils.helpers import toDictBySnakeId
 
                 epsParsed = toDictBySnakeId(epsData)
                 if epsParsed:
@@ -388,7 +388,7 @@ def _notchForMarketCap(company, **_) -> list[tuple[int, str]]:
         if priceData is None or len(priceData) == 0:
             return []
         epsResult = company.select("IS", ["기본주당이익", "당기순이익"])
-        from dartlab.core.finance.helpers import toDict as _tdNotch
+        from dartlab.core.utils.helpers import toDict as _tdNotch
 
         epsParsed = _tdNotch(epsResult)
         if not epsParsed:

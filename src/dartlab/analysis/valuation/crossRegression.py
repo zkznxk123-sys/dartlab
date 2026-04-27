@@ -14,7 +14,7 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from dartlab.core.finance.ols import olsMulti as _olsMulti
+from dartlab.core.utils.ols import olsMulti as _olsMulti
 
 log = logging.getLogger(__name__)
 

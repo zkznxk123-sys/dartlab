@@ -444,7 +444,7 @@ def extract_account(df, key: str) -> float | None:
             if len(rows) == 0:
                 continue
             amounts = rows.get_column("thstrm_amount").to_list()
-            from dartlab.core.finance.helpers import parseNumStr
+            from dartlab.core.utils.helpers import parseNumStr
 
             for amt in amounts:
                 v = parseNumStr(amt) if not isinstance(amt, (int, float)) else float(amt)

@@ -260,7 +260,7 @@ def scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
     return pl.concat(unified).collect()
 
 
-from dartlab.core.finance.helpers import parseNumStr as parse_num  # noqa: E402 — SSOT re-export
+from dartlab.core.utils.helpers import parseNumStr as parse_num  # noqa: E402 — SSOT re-export
 
 
 def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_amount") -> float | None:

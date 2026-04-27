@@ -21,7 +21,7 @@ _MAX_YEARS = 8
 # ── 유틸 ──
 
 
-from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
+from dartlab.core.utils.calc import safePct as _pct  # noqa: E402
 
 # ── 배당 정책 ──
 
@@ -497,7 +497,7 @@ def _edgarTreasuryStockFallback(company) -> dict | None:
     """
     try:
         from dartlab.analysis.financial._helpers import toDictBySnakeId
-        from dartlab.core.finance.helpers import annualColsFromPeriods
+        from dartlab.core.utils.helpers import annualColsFromPeriods
 
         # CF에서 자사주 매입 금액 추출
         parsed = toDictBySnakeId(company.select("CF", ["purchase_of_treasury_stock", "share_repurchase"]))

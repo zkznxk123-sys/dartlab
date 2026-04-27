@@ -6,7 +6,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.core.finance.calc import cagr as _cagr  # noqa: E402
+from dartlab.core.utils.calc import cagr as _cagr  # noqa: E402
 from dartlab.scan._helpers import (
     NI_IDS as _NI_IDS,
 )

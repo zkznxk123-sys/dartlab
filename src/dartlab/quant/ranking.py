@@ -133,7 +133,7 @@ def _parse(val) -> float | None:
     """문자열/숫자 → float. core SSOT 사용."""
     if isinstance(val, (int, float)):
         return float(val)
-    from dartlab.core.finance.helpers import parseNumStr
+    from dartlab.core.utils.helpers import parseNumStr
 
     return parseNumStr(val)
 

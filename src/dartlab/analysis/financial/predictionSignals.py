@@ -53,8 +53,8 @@ from dartlab.analysis.financial._constants import (
     TREND_RSQUARED_HIGH,
     TREND_RSQUARED_MEDIUM,
 )
-from dartlab.core.finance.calc import safeDiv as _safe
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.core.utils.calc import safeDiv as _safe
 
 
 def _getStockCode(company) -> str | None:
@@ -390,7 +390,7 @@ def calcStructuralBreak(company, *, basePeriod: str | None = None) -> dict | Non
             nObservations : int — 관측치 수
         overallStability : str — 전체 안정성 ("stable" | "transitioning" | "volatile")
     """
-    from dartlab.core.finance.ols import detectStructuralBreak, ols
+    from dartlab.core.utils.ols import detectStructuralBreak, ols
 
     isResult = company.select("IS", ["매출액", "영업이익"])
     isParsed = toDictBySnakeId(isResult)

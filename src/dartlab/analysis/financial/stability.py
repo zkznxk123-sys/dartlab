@@ -49,7 +49,7 @@ def _yoy(cur, prev) -> float | None:
     return round((cur - prev) / abs(prev) * 100, 2)
 
 
-from dartlab.core.finance.calc import safePct as _pctOf  # noqa: E402
+from dartlab.core.utils.calc import safePct as _pctOf  # noqa: E402
 
 # ── 레버리지 구조 시계열 ──
 

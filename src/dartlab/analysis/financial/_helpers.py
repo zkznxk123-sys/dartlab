@@ -1,14 +1,14 @@
 """analysis 재무분석 헬퍼 — 범용 함수는 core/finance/helpers.py로 이동됨.
 
 이 파일은 하위호환을 위한 re-export + Company 전용 함수만 포함.
-신규 코드는 dartlab.core.finance.helpers를 직접 import할 것.
+신규 코드는 dartlab.core.utils.helpers를 직접 import할 것.
 """
 
 from __future__ import annotations
 
 # ── re-export: core/finance/helpers.py에서 이동된 범용 함수 ──
 # 기존 `from dartlab.analysis.financial._helpers import toDict` 호환
-from dartlab.core.finance.helpers import (  # noqa: F401
+from dartlab.core.utils.helpers import (  # noqa: F401
     MAX_RATIO_YEARS,
     PeriodRange,
     annualCols,

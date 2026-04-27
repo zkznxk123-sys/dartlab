@@ -12,8 +12,8 @@ from __future__ import annotations
 
 from dartlab.analysis.financial._helpers import MAX_RATIO_YEARS
 from dartlab.analysis.financial._memoize import memoized_calc
-from dartlab.core.finance.helpers import annualColsFromPeriods, toDictBySnakeId
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 # ── 최대주주 지분 시계열 ──
 
@@ -337,7 +337,7 @@ def calcExecutivePayDivergence(company, *, basePeriod: str | None = None) -> dic
 
     # 매출/순이익 매핑
     from dartlab.analysis.financial._helpers import toDictBySnakeId
-    from dartlab.core.finance.helpers import annualColsFromPeriods
+    from dartlab.core.utils.helpers import annualColsFromPeriods
 
     parsed = toDictBySnakeId(company.select("IS", ["sales", "net_profit"]))
     if parsed is None:
@@ -411,7 +411,7 @@ def calcIndependentDirectorQuality(company, *, basePeriod: str | None = None) ->
         latest : dict — 최신 구성
         flags : list[str] — 독립성 우려 신호
     """
-    from dartlab.core.finance.helpers import parseNumStr  # noqa: F401 (consistency)
+    from dartlab.core.utils.helpers import parseNumStr  # noqa: F401 (consistency)
 
     exec_ = _safePivotExecutive(company)
     if exec_ is None:

@@ -20,7 +20,7 @@ def calcSemiconductorKpis(company, *, basePeriod: str | None = None) -> dict | N
         utilizationProxy : dict | None — 가동률 추정
     """
     from dartlab.analysis.financial._helpers import toDictBySnakeId
-    from dartlab.core.finance.helpers import annualColsFromPeriods
+    from dartlab.core.utils.helpers import annualColsFromPeriods
 
     result: dict = {}
 

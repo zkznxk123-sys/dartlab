@@ -170,7 +170,7 @@ class ValuationSummary:
 # ── 내부 유틸 ──────────────────────────────────────────────
 
 
-from dartlab.core.finance.calc import cagr as _cagr  # noqa: E402
+from dartlab.core.utils.calc import cagr as _cagr  # noqa: E402
 
 
 def _getFcfFromSeries(series: dict, annual: bool = False) -> Optional[float]:

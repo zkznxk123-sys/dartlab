@@ -13,7 +13,7 @@ import pytest
 @pytest.mark.requires_data
 def test_decomposeRoic_identity():
     """ROIC = margin × turnover × (1-tax) — 재구성 일치."""
-    from dartlab.core.finance.calc import decomposeRoic
+    from dartlab.core.utils.calc import decomposeRoic
 
     r = decomposeRoic(
         operatingIncome=10_000_000_000,
@@ -33,7 +33,7 @@ def test_decomposeRoic_identity():
 
 @pytest.mark.requires_data
 def test_decomposeRoic_rejects_bad_input():
-    from dartlab.core.finance.calc import decomposeRoic
+    from dartlab.core.utils.calc import decomposeRoic
 
     assert decomposeRoic(None, 100, 50, 0.2, 10) is None
     assert decomposeRoic(10, 0, 50, 0.2, 10) is None
@@ -42,7 +42,7 @@ def test_decomposeRoic_rejects_bad_input():
 
 @pytest.mark.requires_data
 def test_reinvestmentIdentity():
-    from dartlab.core.finance.calc import reinvestmentIdentity
+    from dartlab.core.utils.calc import reinvestmentIdentity
 
     # g=6%, ROIC=12% → reinvestRate=0.5
     r = reinvestmentIdentity(6.0, 12.0)

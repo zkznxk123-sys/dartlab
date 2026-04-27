@@ -13,14 +13,6 @@ from dartlab.core.finance.fmt import (
     fmtPrice,
     fmtUnit,
 )
-from dartlab.core.finance.ols import (
-    MultiOlsResult,
-    coefficientOfVariation,
-    detectStructuralBreak,
-    invertMatrix,
-    ols,
-    olsMulti,
-)
 from dartlab.core.finance.ratios import (
     RATIO_CATEGORIES,
     RatioResult,
@@ -47,6 +39,14 @@ from dartlab.core.utils.extract import (
     getLatest,
     getRevenueGrowth3Y,
     getTTM,
+)
+from dartlab.core.utils.ols import (
+    MultiOlsResult,
+    coefficientOfVariation,
+    detectStructuralBreak,
+    invertMatrix,
+    ols,
+    olsMulti,
 )
 from dartlab.credit.merton import (
     MertonResult,

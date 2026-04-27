@@ -147,7 +147,7 @@ def _getAccountEdgar(df: pl.DataFrame, account: str, *, year: str | None = None)
 
 def _getAccountDart(df: pl.DataFrame, account: str, *, year: str | None = None) -> dict[str, float]:
     """DART: account_nm 매칭으로 추출."""
-    from dartlab.core.finance.helpers import parseNumStr as parse_num
+    from dartlab.core.utils.helpers import parseNumStr as parse_num
 
     # 영문이면 한글 목록으로 변환
     if account in _REVERSE_MAP:

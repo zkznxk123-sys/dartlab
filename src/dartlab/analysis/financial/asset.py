@@ -19,7 +19,7 @@ _MAX_YEARS = 8
 _MAX_QUARTERS = 5
 
 
-from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
+from dartlab.core.utils.calc import safePct as _pct  # noqa: E402
 from dartlab.core.utils.safe import getFirst as _getFirst  # noqa: E402
 
 # ── 영업/비영업 분류 매핑 ──

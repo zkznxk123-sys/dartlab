@@ -20,7 +20,7 @@ from dartlab.analysis.financial._memoize import memoized_calc
 _MAX_YEARS = 8
 
 
-from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
+from dartlab.core.utils.calc import safePct as _pct  # noqa: E402
 
 
 def _yoy(cur, prev) -> float | None:
@@ -227,7 +227,7 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
             h["spread"] = round(roic - waccEstimate, 2) if roic is not None else None
 
     # Damodaran Excess Return 분해 주입
-    from dartlab.core.finance.calc import decomposeRoic
+    from dartlab.core.utils.calc import decomposeRoic
 
     for h in history:
         op = h.get("operatingIncome")

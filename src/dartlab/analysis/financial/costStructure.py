@@ -20,7 +20,7 @@ _MAX_YEARS = 8
 # ── 유틸 ──
 
 
-from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
+from dartlab.core.utils.calc import safePct as _pct  # noqa: E402
 
 # ── 비용 비중 분해 ──
 

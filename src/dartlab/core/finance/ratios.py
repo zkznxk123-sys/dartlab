@@ -458,9 +458,9 @@ class RatioSeriesResult:
     operatingCashflow: list[float | None] = field(default_factory=list)
 
 
-from dartlab.core.finance.calc import safeDiv as _safeDiv  # noqa: E402
-from dartlab.core.finance.calc import safePct as _safePct  # noqa: E402
-from dartlab.core.finance.calc import safePctPositive as _safePctPositive  # noqa: E402
+from dartlab.core.utils.calc import safeDiv as _safeDiv  # noqa: E402
+from dartlab.core.utils.calc import safePct as _safePct  # noqa: E402
+from dartlab.core.utils.calc import safePctPositive as _safePctPositive  # noqa: E402
 
 
 def _safeRound(v: float | None, n: int = 2) -> float | None:
