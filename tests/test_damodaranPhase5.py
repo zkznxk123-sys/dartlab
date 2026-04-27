@@ -13,7 +13,7 @@ import pytest
 @pytest.mark.unit
 def test_normalizedFcf_cyclical_recovery():
     """적자 시계열에서 양수 마진 중앙값 사용."""
-    from dartlab.core.finance.normalized import calcNormalizedFcf
+    from dartlab.analysis.financial.normalized import calcNormalizedFcf
 
     r = calcNormalizedFcf(
         revenueHistory=[110, 95, 85, 90, 100],
@@ -27,7 +27,7 @@ def test_normalizedFcf_cyclical_recovery():
 @pytest.mark.unit
 def test_normalizedFcf_skip_when_no_positive_margin():
     """양수 마진 0건 → skip."""
-    from dartlab.core.finance.normalized import calcNormalizedFcf
+    from dartlab.analysis.financial.normalized import calcNormalizedFcf
 
     r = calcNormalizedFcf(
         revenueHistory=[100, 90, 80],
@@ -40,7 +40,7 @@ def test_normalizedFcf_skip_when_no_positive_margin():
 @pytest.mark.unit
 def test_needsNormalized_decline_phase():
     """decline / turnaround phase → True."""
-    from dartlab.core.finance.normalized import needsNormalized
+    from dartlab.analysis.financial.normalized import needsNormalized
 
     assert needsNormalized("decline", []) is True
     assert needsNormalized("turnaround", []) is True
@@ -49,7 +49,7 @@ def test_needsNormalized_decline_phase():
 @pytest.mark.unit
 def test_needsNormalized_roic_loss_history():
     """ROIC 적자 이력 1회 이상 → True (matureStable 도)."""
-    from dartlab.core.finance.normalized import needsNormalized
+    from dartlab.analysis.financial.normalized import needsNormalized
 
     history = [
         {"period": "2025", "roic": 21.43},

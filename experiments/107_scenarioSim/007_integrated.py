@@ -107,7 +107,7 @@ def _scenarioDCF(projections, wacc_pct, netDebt=0, shares=1):
 
 def _analyzeOne(comp: dict) -> dict | None:
     from dartlab import Company
-    from dartlab.core.finance.proforma import build_proforma, extract_historical_ratios
+    from dartlab.analysis.financial.proforma import build_proforma, extract_historical_ratios
 
     code = comp["code"]
     try:

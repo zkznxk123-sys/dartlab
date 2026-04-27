@@ -135,7 +135,7 @@ def main():
     print("=" * 70)
 
     from dartlab import Company
-    from dartlab.core.finance.proforma import build_proforma
+    from dartlab.analysis.financial.proforma import build_proforma
     from dartlab.analysis.valuation.dcf import dcfValuation
 
     print("\n[1/5] 삼성전자 로드...")
@@ -176,7 +176,7 @@ def main():
     print(f"  2024 실제: 매출 {sum(rev2024)/1e12:.1f}조, 영업이익 {sum(oi2024)/1e12:.1f}조")
 
     # 과거 비율 확인
-    from dartlab.core.finance.proforma import extract_historical_ratios
+    from dartlab.analysis.financial.proforma import extract_historical_ratios
     ratios = extract_historical_ratios(series)
     print(f"\n  과거 비율:")
     print(f"    매출총이익률: {ratios.gross_margin:.1f}%")

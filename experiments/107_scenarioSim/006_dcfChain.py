@@ -76,7 +76,7 @@ def main():
     print("=" * 70)
 
     from dartlab import Company
-    from dartlab.core.finance.proforma import build_proforma, extract_historical_ratios
+    from dartlab.analysis.financial.proforma import build_proforma, extract_historical_ratios
 
     c = Company("005930")
     ts = c.finance.timeseries

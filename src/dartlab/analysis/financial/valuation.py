@@ -204,7 +204,7 @@ def calcDcf(
     currentPrice = price["currentPrice"] if price else None
     marketCap = price["marketCap"] if price else None
 
-    from dartlab.core.finance.proforma import compute_company_wacc
+    from dartlab.analysis.financial.proforma import compute_company_wacc
 
     wacc, _ = compute_company_wacc(
         series,
@@ -862,7 +862,7 @@ def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> di
     companyType, weights = _classifyCompanyType(company, series)
 
     # 개별 beta (수익률 회귀) + CAPM 기반 동적 WACC
-    from dartlab.core.finance.proforma import _fetchBeta, compute_company_wacc
+    from dartlab.analysis.financial.proforma import _fetchBeta, compute_company_wacc
 
     stockCode = getattr(company, "stockCode", "")
     betaCalc = _fetchBeta(stockCode, currency) if stockCode else None

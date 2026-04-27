@@ -130,7 +130,7 @@ def _judge(actual: float, bull: float, base: float, bear: float, tol: float = 0.
 def _analyzeOne(compInfo: dict) -> dict | None:
     """기업 1개 분석 → 결과 dict."""
     from dartlab import Company
-    from dartlab.core.finance.proforma import build_proforma
+    from dartlab.analysis.financial.proforma import build_proforma
 
     code = compInfo["code"]
     try:

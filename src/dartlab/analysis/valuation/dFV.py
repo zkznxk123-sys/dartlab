@@ -650,7 +650,7 @@ def _tsdResolveWacc(company: Any, overrides: dict) -> float:
 
     if implied_flag or bottom_up_flag or country_code:
         try:
-            from dartlab.core.finance.proforma import compute_company_wacc
+            from dartlab.analysis.financial.proforma import compute_company_wacc
 
             series = None
             try:
@@ -817,7 +817,7 @@ def _tsdMaybeNormalizeFcf(base_fcf: float, life_phase: str | None, company: Any)
     try:
         from dartlab.analysis.financial._helpers import toDictBySnakeId
         from dartlab.analysis.financial.investmentAnalysis import calcRoicTimeline
-        from dartlab.core.finance.normalized import calcNormalizedFcf, needsNormalized
+        from dartlab.analysis.financial.normalized import calcNormalizedFcf, needsNormalized
     except ImportError:
         return base_fcf
 

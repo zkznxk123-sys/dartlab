@@ -12,12 +12,12 @@ import random
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from dartlab.analysis.forecast.prediction import adjustProbabilities
-from dartlab.core.finance.proforma import (
+from dartlab.analysis.financial.proforma import (
     build_proforma,
     compute_company_wacc,
     extract_historical_ratios,
 )
+from dartlab.analysis.forecast.prediction import adjustProbabilities
 from dartlab.core.finance.scenario import (
     PRESET_SCENARIOS,
     MacroScenario,
@@ -28,8 +28,8 @@ from dartlab.core.finance.scenario import (
 from dartlab.core.utils.extract import getLatest, getTTM
 
 if TYPE_CHECKING:
+    from dartlab.analysis.financial.proforma import ProFormaResult
     from dartlab.analysis.forecast.prediction import ContextSignals
-    from dartlab.core.finance.proforma import ProFormaResult
 
 
 # ══════════════════════════════════════

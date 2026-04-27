@@ -277,7 +277,7 @@ def calcProFormaHighlights(company: Any, *, basePeriod: str | None = None) -> di
     if not growthPath:
         return None
 
-    from dartlab.core.finance.proforma import build_proforma
+    from dartlab.analysis.financial.proforma import build_proforma
 
     try:
         pf = build_proforma(
@@ -423,7 +423,7 @@ def calcHistoricalRatios(company: Any, *, basePeriod: str | None = None) -> dict
     """
     series, _, _, _, _ = _getSeriesAndMeta(company)
 
-    from dartlab.core.finance.proforma import extract_historical_ratios
+    from dartlab.analysis.financial.proforma import extract_historical_ratios
 
     try:
         ratios = extract_historical_ratios(series)

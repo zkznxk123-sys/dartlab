@@ -51,7 +51,7 @@ def main():
     print("=" * 70)
 
     from dartlab import Company
-    from dartlab.core.finance.proforma import build_proforma, extract_historical_ratios
+    from dartlab.analysis.financial.proforma import build_proforma, extract_historical_ratios
 
     targets = [
         {"code": "000660", "name": "SK하이닉스", "growth": [30.0, 20.0, 12.0]},

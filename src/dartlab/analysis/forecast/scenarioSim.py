@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
-from dartlab.core.finance.proforma import (
+from dartlab.analysis.financial.proforma import (
     ProFormaResult,
     ProFormaYear,
     build_proforma,

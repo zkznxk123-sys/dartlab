@@ -53,7 +53,7 @@ def _estimateWacc(company) -> float | None:
 
     result: float | None = None
     try:
-        from dartlab.core.finance.proforma import compute_company_wacc
+        from dartlab.analysis.financial.proforma import compute_company_wacc
 
         annual = company._buildFinanceSeries(freq="Y")
         if annual is not None:
@@ -74,7 +74,7 @@ def _estimateWacc(company) -> float | None:
             # 개별 beta
             betaCalc = None
             try:
-                from dartlab.core.finance.proforma import _fetchBeta
+                from dartlab.analysis.financial.proforma import _fetchBeta
 
                 betaCalc = _fetchBeta(getattr(company, "stockCode", ""), getattr(company, "currency", "KRW"))
             except (ImportError, OSError, RuntimeError):
