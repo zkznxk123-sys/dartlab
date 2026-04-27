@@ -98,11 +98,22 @@ async function _instantiate(): Promise<DartDb | null> {
 		};
 
 		const bundle = await (duckdb as any).selectBundle(bundles);
-		_worker = new Worker(bundle.mainWorker as string);
+
+		// GitHub Pages 같은 cross-origin 환경에서 Worker 직접 생성 불가 (SecurityError).
+		// jsdelivr 의 worker script 를 fetch → Blob URL 로 same-origin 처럼 wrap → Worker 생성.
+		const workerScriptText = await (await fetch(bundle.mainWorker as string)).text();
+		const workerBlobUrl = URL.createObjectURL(
+			new Blob([workerScriptText], { type: 'application/javascript' })
+		);
+		_worker = new Worker(workerBlobUrl);
+
 		const logger = new (duckdb as any).ConsoleLogger();
 		_db = new (duckdb as any).AsyncDuckDB(logger, _worker);
 		await _db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 		_conn = await _db.connect();
+
+		// Blob URL revoke (worker 가 이미 인스턴스화됐으니 해제 가능)
+		URL.revokeObjectURL(workerBlobUrl);
 
 		// httpfs 활성 — HF parquet HTTPS query 핵심
 		// (DuckDB-WASM 표준 빌드는 httpfs 가 자동 포함되지만 명시적 LOAD 안전)
