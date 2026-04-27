@@ -20,7 +20,7 @@ import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from dartlab.core.finance.exogenousAxes import (  # noqa: E402
+from dartlab.core.cross.exogenousAxes import (  # noqa: E402
     ExogenousIndicator,
     getExogenousIndicators,
 )

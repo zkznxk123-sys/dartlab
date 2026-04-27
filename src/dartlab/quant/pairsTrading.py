@@ -9,7 +9,7 @@ import logging
 
 import numpy as np
 
-from dartlab.core.finance.scanBridge import extractAnnualConsolidated, getAccountValue, isEdgarSchema
+from dartlab.core.cross.scanBridge import extractAnnualConsolidated, getAccountValue, isEdgarSchema
 from dartlab.quant._helpers import fetch_ohlcv, load_scan_parquet, ohlcv_to_arrays
 
 log = logging.getLogger(__name__)

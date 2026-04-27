@@ -14,7 +14,7 @@ import math
 import random
 from dataclasses import dataclass, field
 
-from dartlab.core.finance.scenario import (
+from dartlab.core.cross.scenario import (
     BASELINE_FX,
     BASELINE_RATE,
     DEFAULT_ELASTICITY,

@@ -26,7 +26,7 @@ if env_path.exists():
 
 
 def main():
-    from dartlab.core.finance.productIndicators import PRODUCT_INDICATOR_MAP
+    from dartlab.core.cross.productIndicators import PRODUCT_INDICATOR_MAP
     from dartlab.gather.fred import Fred
     from dartlab.gather.macro import enrichAndCache
 

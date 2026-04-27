@@ -10,7 +10,7 @@ import logging
 import numpy as np
 import polars as pl
 
-from dartlab.core.finance.scanBridge import (
+from dartlab.core.cross.scanBridge import (
     extractAnnualConsolidated,
     getAccountValue,
     isEdgarSchema,

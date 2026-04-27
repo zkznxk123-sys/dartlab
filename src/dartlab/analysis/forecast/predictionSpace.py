@@ -71,7 +71,7 @@ class PredictionSpace:
         dict[str, float]
             축 이름 → 매출 영향 추정치 (%).
         """
-        from dartlab.core.finance.scenario import getElasticity
+        from dartlab.core.cross.scenario import getElasticity
 
         e = getElasticity(sectorKey)
         impacts: dict[str, float] = {}

@@ -18,7 +18,7 @@ from dartlab.analysis.financial.proforma import (
     extract_historical_ratios,
 )
 from dartlab.analysis.forecast.prediction import adjustProbabilities
-from dartlab.core.finance.scenario import (
+from dartlab.core.cross.scenario import (
     PRESET_SCENARIOS,
     MacroScenario,
     SectorElasticity,

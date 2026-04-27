@@ -328,14 +328,14 @@ class TestTermsOfTrade:
 
 class TestPortfolioMapping:
     def test_favorable_expansion(self):
-        from dartlab.core.finance.portfolioMapping import regimeToAllocation
+        from dartlab.core.cross.portfolioMapping import regimeToAllocation
 
         r = regimeToAllocation({"overall": "favorable", "cycle": {"phase": "expansion"}})
         assert r.equity >= 60
         assert r.equity + r.bond + r.gold + r.cash == 100
 
     def test_unfavorable_contraction(self):
-        from dartlab.core.finance.portfolioMapping import regimeToAllocation
+        from dartlab.core.cross.portfolioMapping import regimeToAllocation
 
         r = regimeToAllocation({"overall": "unfavorable", "cycle": {"phase": "contraction"}})
         assert r.equity <= 30
@@ -349,7 +349,7 @@ class TestPortfolioMapping:
 
 class TestStrategyRules:
     def test_40_strategies(self):
-        from dartlab.core.finance.strategyRules import evaluateStrategies
+        from dartlab.core.cross.strategyRules import evaluateStrategies
 
         mock = {
             "cycle": {"phase": "expansion", "phaseLabel": "확장"},

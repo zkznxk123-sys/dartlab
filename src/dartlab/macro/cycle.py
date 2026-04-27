@@ -183,7 +183,7 @@ def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: di
 
     # ── Bridgewater 4 Quadrant (Growth × Inflation) ──
     try:
-        from dartlab.core.finance.quadrant import classifyQuadrant
+        from dartlab.core.cross.quadrant import classifyQuadrant
 
         if market.upper() == "US":
             # ISM PMI - 50 (성장 신호)

@@ -24,7 +24,7 @@ import logging
 
 import polars as pl
 
-from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
+from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import (
     extract_account,
     fetch_ohlcv,

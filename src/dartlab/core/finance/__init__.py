@@ -13,7 +13,7 @@ from dartlab.analysis.financial.ratios import (
     toSeriesDict,
     yoy_pct,
 )
-from dartlab.core.finance.scenario import (
+from dartlab.core.cross.scenario import (
     DEFAULT_ELASTICITY,
     PRESET_SCENARIOS,
     PRESET_SCENARIOS_KR,

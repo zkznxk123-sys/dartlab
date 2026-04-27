@@ -85,7 +85,7 @@ def _dfvEarlyDispatch(company: Any, basePeriod: str | None, ov: dict) -> dict | 
         pass
     try:
         from dartlab.analysis.valuation.sotp import calcHoldingDFV
-        from dartlab.core.finance.companyType import _checkHolding
+        from dartlab.core.cross.companyType import _checkHolding
 
         if _checkHolding(company):
             sotp_result = calcHoldingDFV(company, basePeriod=basePeriod, overrides=ov)

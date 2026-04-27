@@ -337,7 +337,7 @@ out()
 out("### 2.8 기업집계 (DART scan)")
 out()
 try:
-    from dartlab.core.finance.corporateAggregate import aggregateEarningsCycle, leverageCycle, ponziRatio
+    from dartlab.core.cross.corporateAggregate import aggregateEarningsCycle, leverageCycle, ponziRatio
 
     df = pl.read_parquet("data/dart/scan/finance.parquet")
     ec = aggregateEarningsCycle(df)

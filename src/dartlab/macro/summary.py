@@ -139,7 +139,7 @@ def _buildAllocation(
 ) -> dict | None:
     """포트폴리오 매핑 — regimeToAllocation → equity/bond/gold/cash 비중 dict."""
     try:
-        from dartlab.core.finance.portfolioMapping import regimeToAllocation
+        from dartlab.core.cross.portfolioMapping import regimeToAllocation
 
         alloc = regimeToAllocation(
             {
@@ -178,7 +178,7 @@ def _buildStrategiesDashboard(
 ) -> dict | None:
     """40개 투자전략 대시보드 — evaluateStrategies → signals list."""
     try:
-        from dartlab.core.finance.strategyRules import evaluateStrategies
+        from dartlab.core.cross.strategyRules import evaluateStrategies
 
         signals = evaluateStrategies(
             {

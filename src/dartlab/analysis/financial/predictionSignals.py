@@ -551,7 +551,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
         axisImpact : dict | None — 업종별 축 영향도
         netMacroEffect : float | None — 순 매크로 효과 합산
     """
-    from dartlab.core.finance.scenario import getElasticity
+    from dartlab.core.cross.scenario import getElasticity
 
     sectorKey = _getSectorKey(company)
     elasticity = getElasticity(sectorKey)
@@ -724,7 +724,7 @@ def calcMacroRegression(company, *, basePeriod: str | None = None) -> dict | Non
     marginBetas, marginR2, _ = _fitOLS(marginChange, macroData, cols)
 
     # 정적 탄성치 비교
-    from dartlab.core.finance.scenario import getElasticity
+    from dartlab.core.cross.scenario import getElasticity
 
     sectorKey = _getSectorKey(company)
     staticEl = getElasticity(sectorKey)
@@ -794,7 +794,7 @@ def _loadAdaptive(
 
     # 매핑 후보
     try:
-        from dartlab.core.finance.exogenousAxes import getExogenousSeriesIds
+        from dartlab.core.cross.exogenousAxes import getExogenousSeriesIds
 
         mapped = getExogenousSeriesIds(stockCode=stockCode)
     except (ImportError, KeyError):
@@ -893,7 +893,7 @@ def _loadMacroAligned(periodCols: list[str], stockCode: str | None = None) -> di
     from dartlab.gather.macro import alignToFinancialPeriods, loadMacroParquet
 
     try:
-        from dartlab.core.finance.exogenousAxes import getExogenousSeriesIds
+        from dartlab.core.cross.exogenousAxes import getExogenousSeriesIds
 
         seriesPairs = getExogenousSeriesIds(stockCode=stockCode)
     except (ImportError, KeyError):
@@ -2156,7 +2156,7 @@ def calcRevenueDirection(company, *, basePeriod: str | None = None) -> dict | No
     _getSectorKey(company)
     industry = None
     try:
-        from dartlab.core.finance.exogenousAxes import _lookupFromKindList
+        from dartlab.core.cross.exogenousAxes import _lookupFromKindList
 
         industry, _ = _lookupFromKindList(_getStockCode(company) or "")
     except (ImportError, TypeError):

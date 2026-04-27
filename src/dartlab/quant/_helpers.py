@@ -410,7 +410,7 @@ def extract_account(df, key: str) -> float | None:
 
     # EDGAR 스키마 — fy 컬럼 + sj_div 없음 → 직접 컬럼 read
     if "fy" in df.columns and "sj_div" not in df.columns:
-        from dartlab.core.finance.scanBridge import ACCOUNT_MAP
+        from dartlab.core.cross.scanBridge import ACCOUNT_MAP
 
         # key 가 EDGAR snake_case 면 그대로, 한글이면 매핑
         col = ACCOUNT_MAP.get(key, key)

@@ -117,7 +117,7 @@ def test_dalioDebtCyclePhase_no_subphase_outside_deleveraging():
 
 @pytest.mark.requires_data
 def test_matchDalioDetailCase_2008_matches_subprime():
-    from dartlab.core.finance.dalioCaseMatch import matchDalioDetailCase
+    from dartlab.core.cross.dalioCaseMatch import matchDalioDetailCase
 
     r = matchDalioDetailCase(
         {
@@ -134,7 +134,7 @@ def test_matchDalioDetailCase_2008_matches_subprime():
 
 @pytest.mark.requires_data
 def test_matchDalioDetailCase_empty_state():
-    from dartlab.core.finance.dalioCaseMatch import matchDalioDetailCase
+    from dartlab.core.cross.dalioCaseMatch import matchDalioDetailCase
 
     r = matchDalioDetailCase({})
     # 공통 축 < 2 → 모든 유사도 0. 여전히 matches 반환.
@@ -143,7 +143,7 @@ def test_matchDalioDetailCase_empty_state():
 
 @pytest.mark.requires_data
 def test_matchDalioDetailCase_returns_nextStage():
-    from dartlab.core.finance.dalioCaseMatch import matchDalioDetailCase
+    from dartlab.core.cross.dalioCaseMatch import matchDalioDetailCase
 
     r = matchDalioDetailCase(
         {
@@ -164,7 +164,7 @@ def test_matchDalioDetailCase_returns_nextStage():
 
 @pytest.mark.requires_data
 def test_match48Cases_dominant_deflationary():
-    from dartlab.core.finance.dalio48Match import match48Cases
+    from dartlab.core.cross.dalio48Match import match48Cases
 
     r = match48Cases(
         {
@@ -180,7 +180,7 @@ def test_match48Cases_dominant_deflationary():
 
 @pytest.mark.requires_data
 def test_match48Cases_hyperinflation_recognized():
-    from dartlab.core.finance.dalio48Match import match48Cases
+    from dartlab.core.cross.dalio48Match import match48Cases
 
     r = match48Cases(
         {

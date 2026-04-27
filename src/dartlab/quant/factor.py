@@ -860,7 +860,7 @@ def calcFactorIC(
         return None
 
     try:
-        from dartlab.core.finance.scanBridge import extractAnnualConsolidated
+        from dartlab.core.cross.scanBridge import extractAnnualConsolidated
         from dartlab.gather._hfBulk import loadFiltered
         from dartlab.quant._helpers import load_scan_parquet
         from dartlab.quant.factorBuild import _build_universe_metrics, _latest_year

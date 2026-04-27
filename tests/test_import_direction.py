@@ -101,7 +101,7 @@ _KNOWN_VIOLATIONS = {
     ("dartlab.macro.impliedERP", "dartlab.scan"),
     # core/finance → analysis (L0→L2) — lazy import (함수 내부, calc 함수에서 분석 호출)
     ("dartlab.credit.chsFeatures", "dartlab.analysis"),
-    ("dartlab.core.finance.companyType", "dartlab.analysis"),
+    ("dartlab.core.cross.companyType", "dartlab.analysis"),
     # analysis → ai (L2→L3) — lazy import (storyValidation → KnowledgeDB 조회)
     ("dartlab.analysis.financial.storyValidation", "dartlab.ai"),
     # core/_generated → analysis (L0→L2) — generateSpec 자동 생성 참조

@@ -23,7 +23,7 @@ import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from dartlab.core.finance.scenario import SECTOR_ELASTICITY, SectorElasticity  # noqa: E402
+from dartlab.core.cross.scenario import SECTOR_ELASTICITY, SectorElasticity  # noqa: E402
 from dartlab.gather import getDefaultGather  # noqa: E402
 
 

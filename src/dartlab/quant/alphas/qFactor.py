@@ -20,7 +20,7 @@ import logging
 
 import numpy as np
 
-from dartlab.core.finance.scanBridge import extractAnnualConsolidated
+from dartlab.core.cross.scanBridge import extractAnnualConsolidated
 from dartlab.quant._helpers import load_scan_parquet
 from dartlab.quant.factorBuild import _build_universe_metrics, _latest_year
 

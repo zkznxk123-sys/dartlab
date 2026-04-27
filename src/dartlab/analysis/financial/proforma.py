@@ -18,7 +18,7 @@ from dartlab.core.utils.extract import (
 )
 
 if TYPE_CHECKING:
-    from dartlab.core.finance.scenario import SectorElasticity
+    from dartlab.core.cross.scenario import SectorElasticity
 
 # ══════════════════════════════════════
 # 데이터 구조

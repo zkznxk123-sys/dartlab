@@ -287,7 +287,7 @@ def test_dalio48Match_loadCases_loudFail_onMissingData(monkeypatch):
     """dalio48Match._loadCases 가 파일 부재 시 FileNotFoundError 발생."""
     from importlib import resources
 
-    import dartlab.core.finance.dalio48Match as mod
+    import dartlab.core.cross.dalio48Match as mod
 
     # 실제 파일이 있는 상태 기준선: 정상 로드
     cases = mod._loadCases()

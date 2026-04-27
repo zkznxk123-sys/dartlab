@@ -22,7 +22,7 @@ import logging
 import numpy as np
 import polars as pl
 
-from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
+from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import extract_account, load_scan_parquet
 from dartlab.quant.factorBuild import _latest_year
 
