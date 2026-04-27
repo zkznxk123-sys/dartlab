@@ -1114,19 +1114,6 @@
 				</button>
 				{/if}
 			</div>
-			<div class="external-links">
-				<a class="ext-link" href="{base}/screener">
-					<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-						<circle cx="11" cy="11" r="7" />
-						<line x1="21" y1="21" x2="16.65" y2="16.65" />
-					</svg>
-					<span>스크리너</span>
-				</a>
-				<a class="ext-link" href="{base}/changes">
-					<span class="ext-emoji" aria-hidden="true">⚡</span>
-					<span>변화 감지</span>
-				</a>
-			</div>
 		</div>
 
 		<!-- 검색 -->
@@ -1958,44 +1945,6 @@
 		font-size: 10px;
 		color: #64748b;
 		font-weight: 400;
-	}
-
-	.external-links {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		margin-top: 10px;
-		padding-top: 10px;
-		border-top: 1px solid rgba(96, 165, 250, 0.15);
-	}
-	.ext-link {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		padding: 6px 10px;
-		font-size: 12px;
-		color: #94a3b8;
-		text-decoration: none;
-		border-radius: 4px;
-	}
-	.ext-link:hover {
-		background: rgba(96, 165, 250, 0.08);
-		color: #f1f5f9;
-	}
-	.ext-link svg {
-		flex-shrink: 0;
-		opacity: 0.75;
-	}
-	.ext-link:hover svg {
-		opacity: 1;
-	}
-	.ext-emoji {
-		font-size: 12px;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 14px;
-		height: 14px;
 	}
 
 	.controls button {

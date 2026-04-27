@@ -7,7 +7,7 @@
 	// /map/screen 은 v1 부터 /screener 로 통합 — base64 ?q= 쿼리 그대로 호환.
 	onMount(() => {
 		const q = page.url.searchParams.get('q');
-		const next = q ? `${base}/screener?q=${q}` : `${base}/screener`;
+		const next = q ? `${base}/scan?q=${q}` : `${base}/scan`;
 		goto(next, { replaceState: true });
 	});
 </script>
@@ -15,12 +15,12 @@
 <svelte:head>
 	<title>스크리너로 이동 중… | dartlab</title>
 	<meta name="robots" content="noindex" />
-	<meta http-equiv="refresh" content="0; url={base}/screener" />
+	<meta http-equiv="refresh" content="0; url={base}/scan" />
 </svelte:head>
 
 <main class="redirect">
 	<p>
-		스크리너가 <a href="{base}/screener">/screener</a> 로 이동했습니다. 자동 이동되지 않으면
+		스크리너가 <a href="{base}/scan">/screener</a> 로 이동했습니다. 자동 이동되지 않으면
 		클릭해 주세요.
 	</p>
 </main>

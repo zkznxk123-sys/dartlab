@@ -76,12 +76,12 @@
 	<span class="dot" style:background={representative?.color || '#64748b'} title={title || tooltip} aria-label="데이터 신선도">●</span>
 {:else if variant === 'compact'}
 	<div class="compact" title={title || tooltip}>
-		{#each sources as s (s.key)}
+		{#if representative}
 			<span class="chip">
-				<span class="chip-k">{s.label}</span>
-				<span class="chip-v" style:color={s.color}>{s.ageStr}</span>
+				<span class="chip-k">데이터 업데이트</span>
+				<span class="chip-v" style:color={representative.color}>{representative.ageStr}</span>
 			</span>
-		{/each}
+		{/if}
 	</div>
 {:else}
 	<div class="full">

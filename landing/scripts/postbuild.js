@@ -8,7 +8,10 @@ const projectRoot = resolve(__dirname, '..', '..');
 const basePath = process.env.BASE_PATH || '';
 const siteUrl = 'https://eddmpython.github.io/dartlab';
 const target = `${basePath}/docs/getting-started/installation`;
-const extraPages = [];
+const extraPages = [
+	{ loc: `${siteUrl}/scan`, changefreq: 'daily', priority: 0.95 },
+	{ loc: `${siteUrl}/map`, changefreq: 'daily', priority: 0.92 }
+];
 
 const docsDir = resolve(buildDir, 'docs');
 

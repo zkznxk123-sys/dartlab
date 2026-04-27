@@ -3,21 +3,21 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 
-	// /lab/screener 는 /screener 로 통합 — lab 단순 버전 폐기.
+	// /lab/screener → /scan 으로 통합 (Scan Studio).
 	onMount(() => {
-		goto(`${base}/screener`, { replaceState: true });
+		goto(`${base}/scan`, { replaceState: true });
 	});
 </script>
 
 <svelte:head>
 	<title>스크리너로 이동 중… | dartlab</title>
 	<meta name="robots" content="noindex" />
-	<meta http-equiv="refresh" content="0; url={base}/screener" />
+	<meta http-equiv="refresh" content="0; url={base}/scan" />
 </svelte:head>
 
 <main class="redirect">
 	<p>
-		스크리너가 <a href="{base}/screener">/screener</a> 로 이동했습니다. 자동 이동되지 않으면
+		Scan Studio (<a href="{base}/scan">/scan</a>) 로 이동했습니다. 자동 이동되지 않으면
 		클릭해 주세요.
 	</p>
 </main>
