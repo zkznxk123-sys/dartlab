@@ -2837,7 +2837,7 @@ class Company:
         cacheKey = f"_ratios_{fsDivPref}"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        from dartlab.core.finance.ratios import calcRatios
+        from dartlab.analysis.financial.ratios import calcRatios
 
         archetypeOverride = _ratioArchetypeOverrideForIndustryGroup(getattr(self.sector, "industryGroup", None))
         ts = self._getFinanceBuild("q", fsDivPref)

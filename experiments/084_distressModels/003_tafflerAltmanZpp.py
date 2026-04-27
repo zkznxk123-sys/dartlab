@@ -48,7 +48,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from dartlab import Company
-from dartlab.core.finance.ratios import calcRatios
+from dartlab.analysis.financial.ratios import calcRatios
 
 
 def calc_taffler(ratios) -> dict | None:

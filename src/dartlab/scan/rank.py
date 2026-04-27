@@ -129,7 +129,7 @@ def buildSnapshot(*, verbose: bool = True) -> dict[str, RankInfo]:
     dict[str, RankInfo]
         {종목코드: RankInfo} — 매출/자산/성장 순위 + 섹터 내 순위 + sizeClass.
     """
-    from dartlab.core.finance.ratios import calcRatios
+    from dartlab.analysis.financial.ratios import calcRatios
     from dartlab.gather.listing import getKindList
     from dartlab.industry import classify
     from dartlab.providers.dart.finance.pivot import buildAnnual

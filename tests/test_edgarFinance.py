@@ -361,7 +361,7 @@ class TestEdgarPivotEdgeCases:
 @_skipNoData
 class TestCalcRatiosCompat:
     def test_ratiosWithEdgarData(self):
-        from dartlab.core.finance.ratios import calcRatios
+        from dartlab.analysis.financial.ratios import calcRatios
         from dartlab.providers.edgar.finance.pivot import buildAnnual
 
         result = buildAnnual(NVDA_CIK, edgarDir=EDGAR_DIR)

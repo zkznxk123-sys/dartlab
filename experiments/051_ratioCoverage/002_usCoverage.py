@@ -40,7 +40,7 @@ SEED = 42
 
 def main():
     from dartlab import config
-    from dartlab.core.finance.ratios import RatioResult, calcRatios
+    from dartlab.analysis.financial.ratios import RatioResult, calcRatios
     from dartlab.providers.edgar.finance.pivot import buildAnnual
 
     edgarDir = Path(config.dataDir) / "edgar" / "finance"

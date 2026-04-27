@@ -25,7 +25,7 @@ from dartlab.analysis.financial.insight.types import (
     DistressResult,
     ModelScore,
 )
-from dartlab.core.finance.ratios import RatioResult
+from dartlab.analysis.financial.ratios import RatioResult
 from dartlab.credit.merton import MertonResult
 
 # ── 신용등급 매핑 테이블 (S&P PD↔Rating 대응) ──

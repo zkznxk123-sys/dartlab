@@ -65,7 +65,7 @@ def loadDartSnapshot() -> pl.DataFrame:
 def collectEdgarSnapshot(*, maxCompanies: int = 500, verbose: bool = True) -> pl.DataFrame:
     """EDGAR finance에서 랜덤 종목 ratios 수집."""
     from dartlab import config
-    from dartlab.core.finance.ratios import calcRatios
+    from dartlab.analysis.financial.ratios import calcRatios
     from dartlab.providers.edgar.finance.pivot import buildTimeseries
 
     edgarDir = Path(config.dataDir) / "edgar" / "finance"

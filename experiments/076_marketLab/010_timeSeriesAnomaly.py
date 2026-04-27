@@ -55,7 +55,7 @@ def collectRatioTimeSeries(*, maxCompanies: int | None = None, verbose: bool = T
     """전체 종목의 연도별 핵심 비율 시계열 수집."""
     import dartlab
     from dartlab.core.sector.classifier import classify
-    from dartlab.core.finance.ratios import calcRatios
+    from dartlab.analysis.financial.ratios import calcRatios
     from dartlab.providers.dart.finance.pivot import buildTimeseries
 
     kindDf = dartlab.listing()

@@ -1001,7 +1001,7 @@ def _dataclassesSection() -> str:
     """주요 dataclass 스키마."""
     lines = ["## 주요 데이터 타입\n"]
 
-    from dartlab.core.finance.ratios import RatioResult
+    from dartlab.analysis.financial.ratios import RatioResult
 
     lines.append(_dataclassTable(RatioResult, "RatioResult"))
 

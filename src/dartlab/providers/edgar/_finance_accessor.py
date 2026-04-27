@@ -89,7 +89,7 @@ class _FinanceAccessor:
     @property
     def ratios(self):
         if "_ratios" not in self._company._cache:
-            from dartlab.core.finance.ratios import calcRatios
+            from dartlab.analysis.financial.ratios import calcRatios
 
             annual = self._company._buildFinanceSeries(freq="Y")
             if annual is None:
@@ -108,7 +108,7 @@ class _FinanceAccessor:
         if annual is None:
             return None
         aSeries, years = annual
-        from dartlab.core.finance.ratios import calcRatioSeries, toSeriesDict
+        from dartlab.analysis.financial.ratios import calcRatioSeries, toSeriesDict
 
         rs = calcRatioSeries(aSeries, years)
         result = toSeriesDict(rs)

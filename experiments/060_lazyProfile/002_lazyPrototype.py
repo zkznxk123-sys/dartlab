@@ -54,7 +54,7 @@ def lazyIndex(c):
 
     rs = c.finance.ratioSeries
     if rs is not None:
-        from dartlab.core.finance.ratios import RATIO_CATEGORIES
+        from dartlab.analysis.financial.ratios import RATIO_CATEGORIES
         series, years = rs
         ratioData = series.get("RATIO", {})
         metricCount = sum(1 for _, fields in RATIO_CATEGORIES for f in fields if ratioData.get(f) and any(v is not None for v in ratioData[f]))

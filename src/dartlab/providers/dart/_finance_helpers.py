@@ -288,7 +288,7 @@ def _ratioSeriesToDataFrame(
     if not ratioData:
         return None
 
-    from dartlab.core.finance.ratios import RATIO_CATEGORIES
+    from dartlab.analysis.financial.ratios import RATIO_CATEGORIES
 
     fieldFilter = set(fieldNames) if fieldNames is not None else None
     rows: list[dict[str, Any]] = []

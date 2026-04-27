@@ -103,7 +103,7 @@ class TestPivotWithFixture:
         assert "IS" in aSeries
 
     def test_ratiosFromFixture(self, financeDf):
-        from dartlab.core.finance.ratios import calcRatios
+        from dartlab.analysis.financial.ratios import calcRatios
         from dartlab.providers.dart.finance.pivot import buildAnnual
 
         with patch("dartlab.core.dataLoader.loadData", return_value=financeDf):
@@ -302,7 +302,7 @@ class TestRatioQuality:
         assert df["항목"].to_list() == ["자기자본이익률 (ROE %)", "총자산이익률 (ROA %)"]
 
     def test_yoy_sign_change_returns_none(self):
-        from dartlab.core.finance.ratios import _yoy
+        from dartlab.analysis.financial.ratios import _yoy
 
         assert _yoy([100, -50], 1) is None
         assert _yoy([-50, 100], 1) is None
@@ -310,7 +310,7 @@ class TestRatioQuality:
         assert _yoy([-50, -100], 1) == -100.0
 
     def test_total_equity_uses_consolidated_and_roe_uses_owners(self):
-        from dartlab.core.finance.ratios import calcRatios
+        from dartlab.analysis.financial.ratios import calcRatios
 
         series = {
             "IS": {"sales": [1000], "operating_profit": [100], "net_profit": [80]},
@@ -331,7 +331,7 @@ class TestRatioQuality:
         assert ratios.debtRatio == 100.0
 
     def test_ebitda_prefers_cf_depreciation(self):
-        from dartlab.core.finance.ratios import calcRatios
+        from dartlab.analysis.financial.ratios import calcRatios
 
         series = {
             "IS": {"sales": [1000], "operating_profit": [100], "net_profit": [80]},
@@ -352,7 +352,7 @@ class TestRatioQuality:
         assert ratios.ebitdaMargin == 12.0
 
     def test_financial_alias_accounts_are_used_for_ratio_calculation(self):
-        from dartlab.core.finance.ratios import calcRatios, calcRatioSeries
+        from dartlab.analysis.financial.ratios import calcRatios, calcRatioSeries
 
         series = {
             "IS": {
@@ -381,7 +381,7 @@ class TestRatioQuality:
         assert ratioSeries.netMargin[-1] == 8.0
 
     def test_bank_like_series_nulls_misleading_liquidity_ratios(self):
-        from dartlab.core.finance.ratios import calcRatios, calcRatioSeries
+        from dartlab.analysis.financial.ratios import calcRatios, calcRatioSeries
 
         series = {
             "IS": {
@@ -422,7 +422,7 @@ class TestRatioQuality:
         assert all(v is None for v in ratioSeries.operatingMargin)
 
     def test_archetype_override_can_force_bank_policy(self):
-        from dartlab.core.finance.ratios import calcRatios, calcRatioSeries
+        from dartlab.analysis.financial.ratios import calcRatios, calcRatioSeries
 
         series = {
             "IS": {
@@ -456,7 +456,7 @@ class TestRatioQuality:
         assert all(v is None for v in ratioSeries.operatingMargin)
 
     def test_securities_like_series_keeps_margins_but_drops_debt_metrics(self):
-        from dartlab.core.finance.ratios import calcRatios
+        from dartlab.analysis.financial.ratios import calcRatios
 
         series = {
             "IS": {

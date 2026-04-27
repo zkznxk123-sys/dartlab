@@ -41,7 +41,7 @@ def main():
     import polars as pl
 
     from dartlab import config
-    from dartlab.core.finance.ratios import RatioResult, calcRatios
+    from dartlab.analysis.financial.ratios import RatioResult, calcRatios
     from dartlab.providers.edgar.finance.pivot import buildTimeseries
 
     edgarDir = Path(config.dataDir) / "edgar" / "finance"

@@ -22,7 +22,7 @@ from dartlab.analysis.financial.insight.grading import (
 )
 from dartlab.analysis.financial.insight.summary import classifyProfile, generateSummary
 from dartlab.analysis.financial.insight.types import AnalysisResult, Anomaly, AuditDataForAnomaly, MarketDataForDistress
-from dartlab.core.finance.ratios import calcRatios
+from dartlab.analysis.financial.ratios import calcRatios
 from dartlab.industry import Sector
 
 if TYPE_CHECKING:

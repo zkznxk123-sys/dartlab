@@ -402,7 +402,7 @@ class TestOLS:
 @pytest.mark.unit
 class TestPerShareMetrics:
     def test_eps_bps_dps(self):
-        from dartlab.core.finance.ratios import calcRatios
+        from dartlab.analysis.financial.ratios import calcRatios
 
         result = calcRatios(HEALTHY_SERIES, shares=1_000_000)
         assert result.eps is not None
@@ -411,7 +411,7 @@ class TestPerShareMetrics:
         assert result.sharesOutstanding == 1_000_000
 
     def test_no_shares(self):
-        from dartlab.core.finance.ratios import calcRatios
+        from dartlab.analysis.financial.ratios import calcRatios
 
         result = calcRatios(HEALTHY_SERIES)
         assert result.eps is None

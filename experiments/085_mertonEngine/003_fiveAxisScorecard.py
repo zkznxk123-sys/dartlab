@@ -54,7 +54,7 @@ sys.path.insert(0, "src")
 
 from dartlab.analysis.financial.insight.distress import calcDistress
 from dartlab.credit.merton import MertonResult
-from dartlab.core.finance.ratios import RatioResult
+from dartlab.analysis.financial.ratios import RatioResult
 
 
 def make_merton(d2d: float, pd: float) -> MertonResult:

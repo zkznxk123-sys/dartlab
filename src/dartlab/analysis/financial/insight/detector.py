@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dartlab.core.finance.ratios import RatioResult
+from dartlab.analysis.financial.ratios import RatioResult
 from dartlab.core.utils.extract import getAnnualValues, getLatest
 
 

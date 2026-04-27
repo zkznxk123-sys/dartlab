@@ -21,7 +21,7 @@ def _yoyChange(vals: list[float | None]) -> float | None:
     float | None
         yoyPct : float | None — YoY 변화율 (%). 유효값 2개 미만이면 None.
     """
-    from dartlab.core.finance.ratios import yoy_pct
+    from dartlab.analysis.financial.ratios import yoy_pct
 
     valid = [(i, v) for i, v in enumerate(vals) if v is not None]
     if len(valid) < 2:

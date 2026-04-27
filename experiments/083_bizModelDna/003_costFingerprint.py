@@ -169,7 +169,7 @@ def _extractEmployeeCost(stockCode: str) -> dict:
 
 def runCostFingerprint(*, verbose: bool = True) -> pl.DataFrame:
     """비용 구조 핑거프린팅 실행."""
-    from dartlab.core.finance.ratios import calcRatios
+    from dartlab.analysis.financial.ratios import calcRatios
     from dartlab.providers.dart.finance.pivot import buildTimeseries
 
     rows = []

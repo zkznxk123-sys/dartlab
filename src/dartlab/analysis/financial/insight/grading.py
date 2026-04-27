@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from dartlab.analysis.financial.insight.benchmark import getBenchmark, sectorAdjustment
 from dartlab.analysis.financial.insight.detector import detectIncompleteYear
 from dartlab.analysis.financial.insight.types import Flag, InsightResult
-from dartlab.core.finance.ratios import RatioResult
+from dartlab.analysis.financial.ratios import RatioResult
 from dartlab.core.utils.extract import getAnnualValues, getLatest
 from dartlab.industry import Sector
 
@@ -59,7 +59,7 @@ def _getGrowthYoY(annualVals: list[float | None]) -> float | None:
     float | None
         yoyPct : float | None — YoY 변화율 (%). 유효값 2개 미만이면 None.
     """
-    from dartlab.core.finance.ratios import yoy_pct
+    from dartlab.analysis.financial.ratios import yoy_pct
 
     valid = [(i, v) for i, v in enumerate(annualVals) if v is not None]
     if len(valid) < 2:

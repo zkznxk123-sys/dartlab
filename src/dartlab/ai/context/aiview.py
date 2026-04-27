@@ -372,7 +372,7 @@ def _injectYoy(hist: list[dict]) -> dict[str, str]:
     if not isinstance(curr, dict) or not isinstance(prev, dict):
         return {}
     try:
-        from dartlab.core.finance.ratios import yoy_pct
+        from dartlab.analysis.financial.ratios import yoy_pct
     except ImportError:
         return {}
     yoys: dict[str, str] = {}

@@ -7,7 +7,7 @@ def buildSpec() -> dict:
     """dart/finance 엔진 스펙 반환."""
     import dataclasses
 
-    from dartlab.core.finance.ratios import RatioResult
+    from dartlab.analysis.financial.ratios import RatioResult
 
     ratioFields = [f.name for f in dataclasses.fields(RatioResult) if f.name != "warnings"]
 

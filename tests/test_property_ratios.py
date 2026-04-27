@@ -10,7 +10,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from dartlab.core.finance.ratios import _safeDiv, _safePct
+from dartlab.analysis.financial.ratios import _safeDiv, _safePct
 
 pytestmark = pytest.mark.unit
 

@@ -1,6 +1,6 @@
-"""하위호환 re-export — 실제 구현은 ``dartlab.core.finance.ratios``."""
+"""하위호환 re-export — 실제 구현은 ``dartlab.analysis.financial.ratios``."""
 
-from dartlab.core.finance.ratios import (
+from dartlab.analysis.financial.ratios import (
     RATIO_CATEGORIES,
     RatioResult,
     RatioSeriesResult,

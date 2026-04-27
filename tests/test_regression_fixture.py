@@ -101,7 +101,7 @@ class TestRegressionFixture:
         assert val > 0, f"CF.operating_cashflow 2023 = {val:,.0f} (expected positive)"
 
     def test_ratiosFromAnnual(self, samsungAnnual):
-        from dartlab.core.finance.ratios import calcRatios
+        from dartlab.analysis.financial.ratios import calcRatios
 
         series, _ = samsungAnnual
         ratios = calcRatios(series, annual=True)

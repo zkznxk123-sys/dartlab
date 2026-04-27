@@ -82,7 +82,7 @@ def collectMarketSnapshot(*, maxCompanies: int | None = None, verbose: bool = Tr
     """
     import dartlab
     from dartlab.core.sector.classifier import classify
-    from dartlab.core.finance.ratios import calcRatios
+    from dartlab.analysis.financial.ratios import calcRatios
     from dartlab.providers.dart.finance.pivot import buildTimeseries
 
     kindDf = dartlab.listing()

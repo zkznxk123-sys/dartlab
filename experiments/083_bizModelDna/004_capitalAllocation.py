@@ -240,7 +240,7 @@ def _extractCapexAndDividend(series: dict) -> dict:
 
 def runCapitalAllocation(*, verbose: bool = True) -> pl.DataFrame:
     """자본배분 프로파일 분류 실행."""
-    from dartlab.core.finance.ratios import calcRatios
+    from dartlab.analysis.financial.ratios import calcRatios
     from dartlab.providers.dart.finance.pivot import buildTimeseries
 
     rows = []

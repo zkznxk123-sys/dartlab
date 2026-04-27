@@ -4,7 +4,7 @@
 DART, EDGAR 등 어떤 L1 소스의 결과든 동일한 dict 구조면 동작.
 """
 
-from dartlab.core.finance.ratios import (
+from dartlab.analysis.financial.ratios import (
     RATIO_CATEGORIES,
     RatioResult,
     RatioSeriesResult,

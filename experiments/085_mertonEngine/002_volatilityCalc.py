@@ -102,7 +102,7 @@ def run():
         print("-" * 70)
         try:
             from dartlab.providers.dart.finance.pivot import buildAnnual
-            from dartlab.core.finance.ratios import calcRatios
+            from dartlab.analysis.financial.ratios import calcRatios
 
             aResult = buildAnnual("005930")
             if aResult:

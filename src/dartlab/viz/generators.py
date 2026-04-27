@@ -294,7 +294,7 @@ def spec_insight_radar(company: Any) -> dict | None:
 
 def spec_ratio_sparklines(company: Any) -> dict | None:
     """비율 스파크라인 배열 ChartSpec."""
-    from dartlab.core.finance.ratios import RATIO_CATEGORIES
+    from dartlab.analysis.financial.ratios import RATIO_CATEGORIES
 
     rs = getattr(company, "ratioSeries", None)
     if rs is None:
