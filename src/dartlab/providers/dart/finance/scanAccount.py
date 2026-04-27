@@ -492,6 +492,20 @@ def scanAccount(
     "R&D 비중 높은데 성장 느림"                 research_expenses / sales 상위 ∩ scanRatio("revenueGrowth") 하위
     ========================================  ======================================================
 
+    Verified
+    --------
+    아래는 2026-04-27 시점 실데이터로 검증한 account ⨝ ratio 조합 한 예 ::
+
+        # "자산 많은데 수익 못 내는" — total_assets 상위 200 ∩ ROA < 1% (2024)
+        #    → 후보 77 종목. 상위 (roa asc):
+        #      034220 LG디스플레이   (총자산 32.9 조 / ROA -7.3 %)
+        #      011790 SKC            (총자산  6.7 조 / ROA -6.7 %)
+        #      035760 CJ ENM         (총자산  9.3 조 / ROA -6.2 %)
+        #      361610 SK아이이테크놀로지 (총자산 4.2 조 / ROA -5.9 %)
+        #      011170 롯데케미칼    (총자산 34.5 조 / ROA -5.3 %)
+        #    → 화학·디스플레이 시클리컬 적자 사이클 (단순 음수 ROA 가 아닌 자산 거인의
+        #       구조적 비효율 vs 사이클 일시 적자 구분은 macro · scan("debt") 와 엮어 판단)
+
     See Also
     --------
     scanRatio : 비율 시계열 (primitive 2/2) — 발굴 레시피·7 관점 SSOT
@@ -681,10 +695,11 @@ def scanRatio(
         - 효율성: ``"totalAssetTurnover"``
         - 현금흐름: ``"operatingCfMargin"``
 
-        **범위 밖** — ``"pbr"`` · ``"per"`` · ``"psr"`` 등 시가총액 기반 밸류에이션
-        비율은 ``scan("valuation")`` 전용 경로 (네이버 시총 snapshot 필요). 이자보상
-        배율 · CCC · accrual ratio 같은 품질 지표는 현재 미구현, 필요 시 primitive
-        조합으로 ``pythonExec`` 에서 직접 계산.
+        ⛔ **호출 금지** — ``"pbr"`` · ``"per"`` · ``"psr"`` · ``"dividendYield"`` ·
+        ``"evEbitda"`` 등 시가총액·배당 기반 밸류에이션 비율은 finance.parquet 으로
+        계산 불가 → ``ValueError`` 즉시 raise. **반드시 ``scan("valuation")``** 사용
+        (네이버 시총 snapshot 경로). 이자보상배율 · CCC · accrual ratio 등 미구현
+        지표는 ``pythonExec`` 에서 primitive (``scanAccount``) 조합으로 직접 계산.
     fsPref : {"CFS", "OFS"}, default "CFS"
         연결(CFS) 우선 · 별도(OFS) 우선.
     freq : {"Q", "Y"}, default "Q"
@@ -739,6 +754,13 @@ def scanRatio(
     - prebuild finance.parquet 기반. Python loop 없음. 2664 종목 한 번에 계산.
     - 부호 전환 (흑자 ↔ 적자) YoY 는 None 반환 (``yoy_pct`` 정책).
     - 섹터 평균 대비는 이 함수 + listing 의 섹터 컬럼 join 으로.
+    - **지주사 · 금융업 · 라이센싱사 비정상치** — 지분법이익이 매출보다 큰 구조 (지주사) ·
+      보험료/이자수익이 별도 영업수익으로 분류 (금융업) · 로열티가 영업이익으로만
+      잡히는 구조 (라이센싱) 등은 ``operatingMargin`` · ``netMargin`` 이 100 % 초과
+      비정상치로 raw 반환된다. **후보 표에 그대로 인용 금지** — ``listing()`` 의
+      시장구분·업종으로 1차 필터, 또는 의심 종목은 ``c.show("IS")`` 로 매출·영업
+      이익 구조 직접 확인. 실측 예 (2024 raw): 한솔케미칼 233.8 % · 파마리서치 379.0 % ·
+      LG 161.3 % · 대성홀딩스 69.1 % — 모두 지주사·라이센싱 구조라 비교 무의미.
 
     Guide
     -----
@@ -809,6 +831,34 @@ def scanRatio(
 
     **복합 축 프리셋**: ``scan("profitability")`` 같은 프리셋은 이 함수 + ``scanAccount``
     의 자주 쓰는 조합. primitive 조합으로 직접 만들면 필터 자유도가 훨씬 높다.
+
+    Verified
+    --------
+    아래는 2026-04-27 시점 ``finance.parquet`` 프리빌드로 직접 실행한 결과. ratioName
+    조합 → 실제로 잡히는 종목 패턴 감각용 ::
+
+        # 1. "투자할만한 회사" 기본 레시피 (퀄리티 + 안정 융합, 2024 baseline)
+        #    operatingMargin >= 10 & roe >= 12 & debtRatio < 100 & revenueGrowth > 0
+        #    → 후보 103 종목, 상위 5 (roe desc):
+        #      257720 실리콘투 (opm 19.9 / roe 46.2 / dbt 75.0 / grw 101.7)
+        #      018290 브이티   (opm 25.7 / roe 43.2 / dbt 49.4 / grw 46.1)
+        #      326030 에스케이바이오팜 (opm 17.6 / roe 39.5 / dbt 80.6 / grw 94.0)
+        #      123330 제닉     (opm 12.1 / roe 34.1 / dbt 72.2 / grw 77.8)
+        #      278470 에이피알 (opm 17.0 / roe 33.3 / dbt 74.7 / grw 38.0)
+        #    → 화장품·바이오·소비재 비중 높음 (섹터 편중 점검 필수, 5 단계 3 번)
+
+        # 2. 분기 턴어라운드 (operatingMargin Q 부호 반전)
+        #    2024Q3 < 0 & 2024Q4 < 0 & 2025Q2 > 0 & 2025Q3 > 0
+        #    → 후보 79 종목, 상위 5 (2025Q3 desc):
+        #      102940 코오롱생명과학 (24Q3 -37372 → 25Q3 +3989, 일회성 변동성 큼)
+        #      006380 카프로         (24Q4 -889   → 25Q3 +85)
+        #      052710 아모텍         (24Q4 -1637  → 25Q3 +81)
+        #      127710 아시아경제     (24Q4 -97    → 25Q3 +45)
+        #      230980 비유테크놀러지 (24Q3 -81    → 25Q3 +38)
+        #    → opm 절대값 큰 종목은 매출 급변/일회성 의심, account 으로 검증
+
+    한 분기 후 (사업보고서 추가 입수) 같은 레시피 재실행 시 후보가 바뀌는 정도로 본
+    레시피의 시점 민감도를 가늠한다.
 
     See Also
     --------

@@ -199,12 +199,16 @@ def buildTools() -> list[AITool]:
     return tools
 
 
-def _readFile(args: dict) -> str:
-    """`Read` tool 핸들러 — 파일 UTF-8 텍스트 반환."""
+def _readFile(filePath: str = "", maxBytes: int = 100_000, **_: Any) -> str:
+    """`Read` tool 핸들러 — 파일 UTF-8 텍스트 반환.
+
+    Tool dispatch 는 keyword args 로 unwrap 하므로 ``filePath`` / ``maxBytes`` 를
+    직접 받는다 (이전 ``args: dict`` 시그니처는 OpenAI tool calling 과 호환되지 않아
+    ``unexpected keyword argument 'filePath'`` 로 fail 했다).
+    """
     from pathlib import Path
 
-    filePath = args.get("filePath") or args.get("path") or ""
-    maxBytes = int(args.get("maxBytes") or 100_000)
+    maxBytes = int(maxBytes or 100_000)
     if not filePath:
         return "[error] filePath required"
 
@@ -418,7 +422,16 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
             props["target"]["description"] = (
                 "axis='account' 일 때 계정명(예: '매출액'), axis='ratio' 일 때 비율명(예: 'roe'), "
                 "axis='screen' 일 때 프리셋(예: 'value'). **그 외 축에서는 생략**. "
-                "종목 필터는 stockCode 파라미터를 쓸 것."
+                "종목 필터는 stockCode 파라미터를 쓸 것.\n\n"
+                "⛔ axis='ratio' 가용 비율 (정확히 이 13 개만): "
+                "roe, roa, operatingMargin, netMargin, grossMargin, debtRatio, currentRatio, equityRatio, "
+                "revenueGrowth, operatingProfitGrowth, netProfitGrowth, totalAssetTurnover, operatingCfMargin. "
+                "⛔ pbr · per · psr · dividendYield · evEbitda · debt_to_equity (= debtRatio) 등은 호출 금지 → ValueError. "
+                "시가총액 기반 밸류에이션은 **반드시** axis='valuation' (target 생략). "
+                "이자보상배율 · CCC · accrual 등 미구현 지표는 pythonExec 에서 axis='account' 결과 조합으로 계산.\n\n"
+                "⛔ operatingMargin · netMargin 결과 해석 — 지주사·금융업·라이센싱사는 매출 정의 차이로 100 % 초과 비정상치 raw 반환 "
+                "(예 2024: LG 161 %, 한솔케미칼 234 %, 파마리서치 379 %, 대성홀딩스 69 %). "
+                "후보 표에 그대로 인용 금지 — listing() 의 시장구분/업종으로 1차 필터 또는 분석 대상에서 제외."
             )
         props.update(
             {
@@ -652,16 +665,37 @@ def _firstDocLine(obj: Any) -> str:
 
 
 _DOCSTRING_SECTIONS = {
+    # google-style (콜론 포함)
     "Args:",
     "Parameters:",
     "Returns:",
     "Raises:",
     "Notes:",
     "Examples:",
+    "Example:",
     "See Also:",
+    "Guide:",
+    "Verified:",
     "반환:",
     "인자:",
+    # numpy-style (헤더 단독줄, 콜론 없음 — 다음 줄 underline 으로 식별)
+    "Args",
+    "Parameters",
+    "Returns",
+    "Raises",
+    "Notes",
+    "Examples",
+    "Example",
+    "See Also",
+    "Guide",
+    "Verified",
 }
+
+
+def _isUnderline(line: str) -> bool:
+    """numpy-style ``-----`` underline 여부."""
+    s = line.strip()
+    return bool(s) and set(s) <= {"-"}
 
 
 def _mergeDescWithReturns(summary: str, callable_: Any, fallback_name: str) -> str:
@@ -676,60 +710,151 @@ def _mergeDescWithReturns(summary: str, callable_: Any, fallback_name: str) -> s
 
 
 def _toolDescription(obj: Any) -> str:
-    """docstring summary + Returns 추출. AI 가 tool 결과 구조를 아는 것이 핵심."""
+    """docstring 핵심 본문 추출 — Summary + Returns + Notes + Guide + Verified.
+
+    AI 가 tool 호출 시 보는 description. summary 만으로는 호출 결정에 정보 부족 →
+    Returns (결과 구조) · Notes (제약·예외) · Guide (관점·워크플로) · Verified (audit
+    P 통과 조합 누적) 까지 합쳐 skill-grade docstring 의 본문이 AI 에 도달하게 한다.
+    numpy-style (헤더 단독줄 + ``-----`` underline) 과 google-style (``Returns:``)
+    모두 인식.
+    """
     doc = inspect.getdoc(obj)
     if not doc:
         return ""
     lines = doc.strip().split("\n")
     summary = lines[0].strip()
-    returns_lines: list[str] = []
-    in_returns = False
-    for line in lines[1:]:
-        stripped = line.strip()
-        if stripped.startswith("Returns") or stripped.startswith("반환"):
-            in_returns = True
+
+    # 섹션별 라인 누적 (Returns/Notes/Guide/Verified 만 — Examples/See Also 등은 schema 에 무게)
+    sections: dict[str, list[str]] = {"Returns": [], "Notes": [], "Guide": [], "Verified": []}
+    current: str | None = None
+    # 라인 cap (token 폭주 방지). Verified 누적 정책은 ops/code.md 운영 룰에서 별도 결정.
+    cap = {"Returns": 12, "Notes": 16, "Guide": 40, "Verified": 16}
+
+    i = 1
+    while i < len(lines):
+        stripped = lines[i].strip()
+
+        # numpy-style 헤더: "Returns" 단독 + 다음줄 underline
+        if (
+            stripped in ("Returns", "Notes", "Guide", "Verified", "반환")
+            and i + 1 < len(lines)
+            and _isUnderline(lines[i + 1])
+        ):
+            current = "Returns" if stripped == "반환" else stripped
+            i += 2
             continue
-        if in_returns:
-            if stripped in _DOCSTRING_SECTIONS:
-                break
-            if stripped:
-                returns_lines.append(stripped)
-    if returns_lines:
-        returns_text = " ".join(returns_lines[:8])
-        return f"{summary}\n\nReturns: {returns_text}"
-    return summary
+        # google-style 헤더: "Returns:"
+        if stripped in ("Returns:", "Notes:", "Guide:", "Verified:", "반환:"):
+            key = stripped.rstrip(":").strip()
+            current = "Returns" if key == "반환" else key
+            i += 1
+            continue
+        # 다른 섹션 진입 → current 종료
+        if stripped in _DOCSTRING_SECTIONS:
+            current = None
+            i += 1
+            continue
+        # numpy-style header underline 단독줄 (이미 처리된 경우 외)
+        if _isUnderline(stripped):
+            i += 1
+            continue
+        if current and stripped and len(sections[current]) < cap[current]:
+            sections[current].append(stripped)
+        i += 1
+
+    parts = [summary]
+    if sections["Returns"]:
+        parts.append("Returns: " + " ".join(sections["Returns"]))
+    if sections["Notes"]:
+        parts.append("Notes: " + " ".join(sections["Notes"]))
+    if sections["Guide"]:
+        parts.append("Guide: " + " ".join(sections["Guide"]))
+    if sections["Verified"]:
+        parts.append("Verified: " + " ".join(sections["Verified"]))
+    return "\n\n".join(parts)
 
 
 def _parseDocstringArgs(obj: Any) -> dict[str, str]:
-    """docstring Args/Parameters 섹션에서 파라미터별 설명 추출."""
+    """docstring Args/Parameters 섹션에서 파라미터별 설명 추출.
+
+    google-style (``param: type, desc``) + numpy-style (``param : type`` 헤더 +
+    indent desc 줄) 둘 다 인식. desc 가 여러 줄이면 누적.
+    """
     doc = inspect.getdoc(obj)
     if not doc:
         return {}
     result: dict[str, str] = {}
     in_args = False
     current_param: str | None = None
-    for line in doc.split("\n"):
-        stripped = line.strip()
+
+    lines = doc.split("\n")
+    i = 0
+    while i < len(lines):
+        stripped = lines[i].strip()
+
+        # google-style 진입
         if stripped in ("Args:", "Parameters:", "인자:"):
             in_args = True
+            current_param = None
+            i += 1
             continue
+        # numpy-style 진입: "Parameters" 단독 + 다음줄 underline
+        if stripped in ("Args", "Parameters", "인자") and i + 1 < len(lines) and _isUnderline(lines[i + 1]):
+            in_args = True
+            current_param = None
+            i += 2
+            continue
+
         if not in_args:
+            i += 1
             continue
-        if stripped and stripped[0].isalpha() and stripped.endswith(":") and " " not in stripped.rstrip(":"):
-            break
-        if stripped.startswith("Returns") or stripped.startswith("Raises") or stripped.startswith("반환"):
-            break
-        if ":" in stripped and not stripped.startswith("-") and not stripped.startswith("*"):
-            parts = stripped.split(":", 1)
-            param_name = parts[0].strip().split("(")[0].strip()
-            desc = parts[1].strip() if len(parts) > 1 else ""
-            if param_name and param_name.isidentifier():
-                result[param_name] = desc
-                current_param = param_name
-            elif current_param and stripped:
-                result[current_param] += " " + stripped
-        elif current_param and stripped:
-            result[current_param] += " " + stripped
+
+        # 다른 섹션 진입 → in_args 종료
+        if stripped in _DOCSTRING_SECTIONS and stripped not in (
+            "Args:",
+            "Parameters:",
+            "인자:",
+            "Args",
+            "Parameters",
+            "인자",
+        ):
+            in_args = False
+            current_param = None
+            i += 1
+            continue
+        # underline 단독줄
+        if _isUnderline(stripped):
+            i += 1
+            continue
+        if not stripped:
+            i += 1
+            continue
+
+        # numpy-style 파라미터 헤더: "ratioName : str" 또는 "ratioName : {'a','b'}, default 'a'"
+        if " : " in stripped and not stripped.startswith(("-", "*")):
+            head, _ = stripped.split(" : ", 1)
+            head = head.strip()
+            if head.isidentifier():
+                result[head] = ""
+                current_param = head
+                i += 1
+                continue
+        # google-style: "param: desc" 또는 "param (type): desc"
+        if ":" in stripped and not stripped.startswith(("-", "*")):
+            head, rest = stripped.split(":", 1)
+            head = head.strip().split("(")[0].strip()
+            if head.isidentifier():
+                result[head] = rest.strip()
+                current_param = head
+                i += 1
+                continue
+
+        # indent 줄 — current_param desc 누적
+        if current_param:
+            sep = " " if result[current_param] else ""
+            result[current_param] += sep + stripped
+        i += 1
+
     return result
 
 
