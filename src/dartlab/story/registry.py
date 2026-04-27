@@ -1659,8 +1659,10 @@ def buildStory(
 
             live.update(Spinner("dots", text="블록 사전 생성 중..."))
 
-        # 템플릿 순서 결정 (블록 빌드 전에 필요한 keys 산출)
-        if section is not None:
+        # 템플릿 순서 결정 (블록 빌드 전에 필요한 keys 산출).
+        # section 이 빈 문자열 / None 이면 전체 보고서 (AI dispatch 가 default 로 ""
+        # 보내는 경우 ValueError 대신 무인자 호출과 동등 처리).
+        if section:
             if section not in TEMPLATES:
                 available = ", ".join(sorted(TEMPLATES.keys()))
                 raise ValueError(
@@ -1675,7 +1677,7 @@ def buildStory(
             templateKeys = list(TEMPLATE_ORDER)
 
         # 필요한 블록 keys만 산출 → 선택적 빌드
-        if section is not None and templateKeys:
+        if section and templateKeys:
             neededKeys: set[str] | None = set()
             for tk in templateKeys:
                 neededKeys.update(TEMPLATES[tk]["keys"])
