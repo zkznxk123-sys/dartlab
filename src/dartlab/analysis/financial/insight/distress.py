@@ -801,8 +801,8 @@ def calcDistress(
 
     # 위험 요인
     riskFactors = _extractRiskFactors(anomalies, ratios)
-    if useMerton and mertonResult is not None and mertonResult.d2d < 2.0:
-        riskFactors.append(f"Merton D2D {mertonResult.d2d:.2f} (부실 영역, PD={mertonResult.pd:.1f}%)")
+    if useMerton and mertonResult is not None and mertonResult["d2d"] < 2.0:
+        riskFactors.append(f"Merton D2D {mertonResult['d2d']:.2f} (부실 영역, PD={mertonResult['pd']:.1f}%)")
 
     # 모델 수 / 데이터 품질
     modelCount = len(quant_models) + len(eq_models) + (1 if useMerton else 0)
