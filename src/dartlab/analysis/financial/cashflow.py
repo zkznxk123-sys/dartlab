@@ -122,7 +122,7 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
 
     # Phase 7 G24: FCF 변화 driver 분해
     try:
-        from dartlab.core.finance.attribution import decomposeFcfChange
+        from dartlab.analysis.financial.attribution import decomposeFcfChange
 
         for i in range(len(history) - 1):
             cur = history[i]

@@ -248,7 +248,7 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 
     # Phase 7 G24: ROIC 변화 driver 분해 (Margin × Turnover × Tax)
     try:
-        from dartlab.core.finance.attribution import decomposeRoicChange
+        from dartlab.analysis.financial.attribution import decomposeRoicChange
 
         for i in range(len(history) - 1):
             cur = history[i]

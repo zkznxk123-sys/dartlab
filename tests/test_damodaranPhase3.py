@@ -57,7 +57,7 @@ def test_bottomUpBeta_hamada_unlever_relever():
     peer β=1.0, D/E=0.5, t=0.2 → β_U = 1.0/(1+0.8×0.5) = 1.0/1.4 = 0.714
     자기 D/E=0.3 → β_L = 0.714 × (1+0.8×0.3) = 0.714 × 1.24 = 0.886
     """
-    from dartlab.core.finance.bottomUpBeta import calcBottomUpBeta
+    from dartlab.quant.bottomUpBeta import calcBottomUpBeta
 
     # 실제 scan/finance.parquet 호출 → peer 추출 → Hamada
     r = calcBottomUpBeta(sector="IT", debtToEquity=0.3, taxRate=0.22, peerLimit=20)
@@ -70,7 +70,7 @@ def test_bottomUpBeta_hamada_unlever_relever():
 @pytest.mark.unit
 def test_bottomUpBeta_falls_back_when_peerCount_lt_5():
     """peer 추출 실패 시 fallback_one 또는 sector_default."""
-    from dartlab.core.finance.bottomUpBeta import calcBottomUpBeta
+    from dartlab.quant.bottomUpBeta import calcBottomUpBeta
 
     # 존재하지 않는 섹터 → peer 0
     r = calcBottomUpBeta(sector="__NONEXISTENT_SECTOR__", debtToEquity=0.5, taxRate=0.22, peerLimit=20)

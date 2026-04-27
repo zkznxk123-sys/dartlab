@@ -97,7 +97,7 @@ _KNOWN_VIOLATIONS = {
     # core/search → providers (L0→L1) — 수집 디렉토리/파일 참조
     ("dartlab.core.search", "dartlab.providers"),
     # core/finance → scan (L0→L1) — lazy import (함수 내부)
-    ("dartlab.core.finance.bottomUpBeta", "dartlab.scan"),
+    ("dartlab.quant.bottomUpBeta", "dartlab.scan"),
     ("dartlab.macro.impliedERP", "dartlab.scan"),
     # core/finance → analysis (L0→L2) — lazy import (함수 내부, calc 함수에서 분석 호출)
     ("dartlab.credit.chsFeatures", "dartlab.analysis"),

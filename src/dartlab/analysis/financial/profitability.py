@@ -155,7 +155,7 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
     # 이전기 대비 원가율/판관비/환율 driver 자동 분해 (McKinsey + Damodaran Ch.11)
     if not isFinancial:
         try:
-            from dartlab.core.finance.attribution import decomposeMarginChange
+            from dartlab.analysis.financial.attribution import decomposeMarginChange
 
             for i in range(len(history) - 1):
                 cur = history[i]
