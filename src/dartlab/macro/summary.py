@@ -2,9 +2,29 @@
 
 from __future__ import annotations
 
+import gc
 import logging
 
 log = logging.getLogger(__name__)
+
+
+def _gcAfterAxis() -> None:
+    """11 axis sequential 호출 사이의 메모리 압박 완화.
+
+    각 axis (analyze_cycle/rates/assets/...) 가 fetch_multi · regime model · OLS 등
+    polars 큰 transient 를 만든다. Python ref 는 axis 함수 return 후 풀리지만
+    polars Rust 힙은 즉시 회수 안 됨. ``gc.collect()`` 와 폴라스의 string cache
+    회수를 명시 호출해 다음 axis 진입 전 RSS 정리.
+
+    R5 매크로 종합 호출 7632 MB peak 의 직접 fix (5 질문 batch v2 측정).
+    """
+    gc.collect()
+    try:
+        import polars as pl
+
+        pl.disable_string_cache()
+    except (ImportError, AttributeError):
+        pass
 
 
 def _scoreCycle(cycle: dict) -> tuple[float, list[str]]:
@@ -323,10 +343,15 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
     _ax = {"market": market, "as_of": as_of, "overrides": overrides}
 
     cycle = analyze_cycle(**_ax)
+    _gcAfterAxis()
     rates = analyze_rates(**_ax)
+    _gcAfterAxis()
     assets = analyze_assets(**_ax)
+    _gcAfterAxis()
     sentiment = calcSentiment(**_ax)
+    _gcAfterAxis()
     liquidity = calcLiquidity(**_ax)
+    _gcAfterAxis()
 
     # 신규 축 (실패해도 종합 판정은 계속)
     forecast_result = None
@@ -338,6 +363,7 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
         from dartlab.macro.forecast import analyze_forecast
 
         forecast_result = analyze_forecast(**_ax)
+        _gcAfterAxis()
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
@@ -354,6 +380,7 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
             if lei and isinstance(lei, dict) and "signal" in lei:
                 crisis_kwargs["leiSignal"] = lei.get("signal")
         crisis_result = analyze_crisis(**_ax, **crisis_kwargs)
+        _gcAfterAxis()
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
@@ -361,6 +388,7 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
         from dartlab.macro.inventory import analyze_inventory
 
         inventory_result = analyze_inventory(**_ax)
+        _gcAfterAxis()
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
@@ -368,6 +396,7 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
         from dartlab.macro.trade import analyze_trade
 
         trade_result = analyze_trade(**_ax)
+        _gcAfterAxis()
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
@@ -376,6 +405,7 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
         from dartlab.macro.corporate import analyze_corporate
 
         corporate_result = analyze_corporate(**_ax)
+        _gcAfterAxis()
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
