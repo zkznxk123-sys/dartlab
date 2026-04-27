@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { brand } from '$lib/brand';
-	import { Github, Search, Menu, X } from 'lucide-svelte';
+	import { Github, Search, Menu, X, Construction } from 'lucide-svelte';
+	import { page } from '$app/state';
 
 	interface Props {
 		context?: 'landing' | 'docs' | 'blog';
@@ -24,6 +25,14 @@
 		{ label: 'Blog', href: `${base}/blog/` },
 		{ label: 'Map', href: `${base}/map` }
 	];
+
+	const DASHBOARD_PATHS = ['/dashboard'];
+
+	let isDashboard = $derived.by(() => {
+		const path = page.url.pathname;
+		const stripped = base && path.startsWith(base) ? path.slice(base.length) : path;
+		return DASHBOARD_PATHS.some((p) => stripped === p || stripped.startsWith(`${p}/`));
+	});
 </script>
 
 <svelte:window onscroll={handleScroll} />
@@ -41,6 +50,16 @@
 			{#if context !== 'landing'}
 				<span class="text-dl-border text-sm font-light">/</span>
 				<span class="text-sm text-dl-text-muted font-medium">{context === 'docs' ? 'Docs' : 'Blog'}</span>
+			{/if}
+			{#if isDashboard}
+				<span
+					class="inline-flex items-center gap-1.5 ml-2 px-3 h-6 rounded-md text-[11px] font-semibold tracking-tight"
+					style="background: rgba(251,146,60,.12); color: #fb923c; border: 1px solid rgba(251,146,60,.4);"
+					title="이 페이지는 개발 중 — 데이터·기능 검증 중, 정확성 보장 안 함"
+				>
+					<Construction class="w-3 h-3" />
+					<span>개발중 · 데이터 검증 중, 정확성 보장 안 함</span>
+				</span>
 			{/if}
 		</div>
 

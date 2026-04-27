@@ -34,7 +34,12 @@ export function fmtKrw(value: number | null | undefined, opts: KrwOptions = {}):
 	// 1조 이상
 	if (abs >= 1e12) {
 		const v = abs / 1e12;
-		return `${sign}${trimZero(v.toFixed(digits))}조${won}`;
+		// toFixed 후 trimZero — 그 다음 정수부에 천단위 콤마 (1283.3조 → 1,283.3조)
+		const fixed = trimZero(v.toFixed(digits));
+		const [intPart, decPart] = fixed.split('.');
+		const intWithComma = Number(intPart).toLocaleString('ko-KR');
+		const formatted = decPart ? `${intWithComma}.${decPart}` : intWithComma;
+		return `${sign}${formatted}조${won}`;
 	}
 	// 1억 이상 — "0.X 조" 대신 "X,XXX억" 으로 (한국 직관)
 	if (abs >= 1e8) {

@@ -111,13 +111,15 @@
 	.chip {
 		display: inline-flex;
 		align-items: center;
-		gap: 3px;
-		font-size: 10px;
-		background: rgba(5, 8, 17, 0.6);
+		gap: 5px;
+		height: 32px;
+		padding: 0 12px;
+		font-size: 11px;
+		background: #050811;
 		border: 1px solid #1e2433;
-		border-radius: 4px;
-		padding: 2px 6px;
+		border-radius: 5px;
 		font-family: monospace;
+		line-height: 1;
 	}
 	.chip-k {
 		color: #64748b;

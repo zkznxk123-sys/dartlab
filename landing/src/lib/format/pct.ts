@@ -13,7 +13,11 @@ export function fmtPct(value: number | null | undefined, opts: PctOptions = {}):
 	if (value == null || !Number.isFinite(value)) return '—';
 	const { digits = 1, withSign = false, suffix = '%' } = opts;
 	const sign = withSign && value > 0 ? '+' : '';
-	return `${sign}${value.toFixed(digits)}${suffix}`;
+	const formatted = value.toLocaleString('ko-KR', {
+		minimumFractionDigits: digits,
+		maximumFractionDigits: digits
+	});
+	return `${sign}${formatted}${suffix}`;
 }
 
 /** 등락률 — 부호 + 색 toned, 0 이면 flat */
@@ -27,5 +31,9 @@ export function pctTone(value: number | null | undefined): 'up' | 'down' | 'flat
 /** 배수 (X.Xx) — Altman Z, 이자보상배율 등 */
 export function fmtMul(value: number | null | undefined, digits = 2): string {
 	if (value == null || !Number.isFinite(value)) return '—';
-	return `${value.toFixed(digits)}x`;
+	const formatted = value.toLocaleString('ko-KR', {
+		minimumFractionDigits: digits,
+		maximumFractionDigits: digits
+	});
+	return `${formatted}x`;
 }

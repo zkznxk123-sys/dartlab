@@ -2,7 +2,9 @@
   // @ts-nocheck
   /** @type {{ data: any }} */
   let { data: h } = $props();
-  const zPct = $derived(Math.min(100, (h.altmanZ.value / 6) * 100));
+  const zPct = $derived(
+    h?.altmanZ?.value != null ? Math.min(100, (h.altmanZ.value / 6) * 100) : 0
+  );
 </script>
 
 <div class="card" id="health">
@@ -11,40 +13,62 @@
   <div class="sub">Altman Z와 Beneish M 스코어로 재무 이상 징후 탐지.</div>
 
   <div class="grid">
-    <div class="score safe">
-      <div class="sh">
-        <span class="slab">ALTMAN Z-SCORE</span>
-        <span class="pill green">SAFE</span>
+    {#if h?.altmanZ}
+      <div class="score safe">
+        <div class="sh">
+          <span class="slab">ALTMAN Z-SCORE</span>
+          <span class="pill green">SAFE</span>
+        </div>
+        <div class="mono sv">{h.altmanZ.value}</div>
+        <div class="z-track"></div>
+        <div class="z-marker-wrap">
+          <div class="z-marker" style:left="{zPct}%"></div>
+        </div>
+        <div class="z-labels mono">
+          <span>Distress 1.81</span><span>Grey 2.99</span><span>Safe</span>
+        </div>
       </div>
-      <div class="mono sv">{h.altmanZ.value}</div>
-      <div class="z-track"></div>
-      <div class="z-marker-wrap">
-        <div class="z-marker" style:left="{zPct}%"></div>
+    {:else}
+      <div class="score na">
+        <div class="sh">
+          <span class="slab">ALTMAN Z-SCORE</span>
+          <span class="pill grey">N/A</span>
+        </div>
+        <div class="mono sv">—</div>
+        <div class="sflag">데이터 부족</div>
       </div>
-      <div class="z-labels mono">
-        <span>Distress 1.81</span><span>Grey 2.99</span><span>Safe</span>
-      </div>
-    </div>
+    {/if}
 
-    <div class="score">
-      <div class="sh">
-        <span class="slab">BENEISH M-SCORE</span>
-        <span class="pill green">CLEAN</span>
+    {#if h?.beneishM}
+      <div class="score">
+        <div class="sh">
+          <span class="slab">BENEISH M-SCORE</span>
+          <span class="pill green">CLEAN</span>
+        </div>
+        <div class="mono sv">{h.beneishM.value}</div>
+        <div class="sflag">{h.beneishM.flag}</div>
+        <div class="m-threshold-label">THRESHOLD · &gt; -1.78 = 높음</div>
+        <div class="m-track">
+          <div class="m-fill"></div>
+          <div class="m-mark"></div>
+        </div>
       </div>
-      <div class="mono sv">{h.beneishM.value}</div>
-      <div class="sflag">{h.beneishM.flag}</div>
-      <div class="m-threshold-label">THRESHOLD · &gt; -1.78 = 높음</div>
-      <div class="m-track">
-        <div class="m-fill"></div>
-        <div class="m-mark"></div>
+    {:else}
+      <div class="score na">
+        <div class="sh">
+          <span class="slab">BENEISH M-SCORE</span>
+          <span class="pill grey">N/A</span>
+        </div>
+        <div class="mono sv">—</div>
+        <div class="sflag">데이터 부족</div>
       </div>
-    </div>
+    {/if}
   </div>
 
   <div class="flags">
-    <div class="flags-head">경고 플래그 · {h.flags.length}건</div>
+    <div class="flags-head">경고 플래그 · {h?.flags?.length ?? 0}건</div>
     <div class="flags-list">
-      {#each h.flags as f}
+      {#each h?.flags ?? [] as f}
         {@const color = f.level === 'warn' ? '#fbbf24' : f.level === 'alert' ? '#ef4444' : '#a6adbb'}
         <div class="flag"
           style:background={f.level === 'info' ? 'rgba(255,255,255,0.02)' : `${color}14`}
@@ -80,6 +104,8 @@
     border: 1px solid;
   }
   .pill.green { color: #bbf7d0; background: rgba(52,211,153,0.08); border-color: rgba(52,211,153,0.25); }
+  .pill.grey { color: var(--text-faint); background: rgba(148,163,184,0.06); border-color: rgba(148,163,184,0.2); }
+  .score.na { opacity: 0.6; }
   .sv { font-size: 36px; font-weight: 700; margin-top: 6px; letter-spacing: -0.02em; color: var(--text); }
   .sflag { font-size: 12px; color: var(--text-mid); margin-top: 4px; }
 
