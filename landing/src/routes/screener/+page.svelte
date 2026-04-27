@@ -537,23 +537,29 @@
 	 */
 	async function loadPriceTimeSeries() {
 		dbState = 'loading';
+		console.info('[screener] DuckDB 로드 시작 — HF KRX parquet 직접 query');
 		try {
+			const t0 = performance.now();
 			const db = await loadDartDb();
+			console.info(`[screener] DuckDB-WASM 인스턴스: ${(performance.now() - t0).toFixed(0)}ms`);
 			if (!db) {
 				dbState = 'unsupported';
+				console.warn('[screener] DuckDB 사용 불가 (iOS Safari 또는 환경 미지원) → 시총/가격 메트릭 비활성');
 				return;
 			}
 			dartDb = db;
 			const year = new Date().getFullYear();
 			// 1Y 시계열 보장 위해 현재 연도 + 직전 연도 parquet 둘 다 등록 → UNION view
+			const tParquet = performance.now();
 			await db.registerHfParquet('krxPricesCurr', `krx/prices/raw-${year}.parquet`);
+			console.info(`[screener] HF krx/prices/raw-${year}.parquet 등록: ${(performance.now() - tParquet).toFixed(0)}ms`);
 			try {
 				await db.registerHfParquet('krxPricesPrev', `krx/prices/raw-${year - 1}.parquet`);
 				await db.query(
 					`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr UNION ALL SELECT * FROM krxPricesPrev`
 				);
-			} catch {
-				// 직전 연도 parquet 없거나 실패 — 현재 연도만으로 진행 (1Y 일부 메트릭은 null)
+			} catch (errPrev) {
+				console.warn(`[screener] 직전 연도 parquet 등록 실패 (현재 연도만 사용)`, errPrev);
 				await db.query(`CREATE OR REPLACE VIEW krxPrices AS SELECT * FROM krxPricesCurr`);
 			}
 			// 종목별 1Y(252거래일) 시계열에서 모든 가격·시총·수익률·변동성 메트릭 즉석 계산.
@@ -675,13 +681,16 @@
 			}
 			priceTimeSeries = map;
 			dbState = 'ready';
+			console.info(`[screener] ✅ KRX 가격·시총 query 완료 — ${map.size}사 (총 ${(performance.now() - t0).toFixed(0)}ms)`);
 			// 추가 parquet 들 백그라운드 비차단 로드 (실패해도 핵심 SQL 작동)
 			void loadValuation();
 			void loadChanges();
 		} catch (err) {
 			dbState = 'error';
 			dbError = err instanceof Error ? err.message : String(err);
-			console.warn('[screener] DuckDB 시계열 로드 실패', err);
+			console.error('[screener] ❌ DuckDB SQL 실패', err);
+			console.info('[screener] HF parquet URL: https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main/krx/prices/raw-' + new Date().getFullYear() + '.parquet');
+			console.info('[screener] /lab/duckdb 페이지에서 인프라 단독 검증 가능');
 		}
 	}
 
@@ -804,8 +813,20 @@
 		}
 	}
 
+	/** DuckDB 로 가져오는 메트릭 — 로딩 중일 땐 "—" 대신 "…" 표시 */
+	const PRICE_METRICS_LOADING_FLAG = new Set<MetricKey>([
+		'currentPrice', 'marketCap', 'return1m', 'return3m', 'return1y',
+		'volatility1y', 'week52High', 'week52Low', 'volumeAvg30d',
+		'currentVsMA20', 'drawdown60d', 'recovery60d',
+		'per', 'pbr', 'psr', 'dividendYield',
+		'numericChanges1y', 'structuralChanges1y', 'totalChanges1y', 'recentChangeYear'
+	]);
 	function fmtMetricValue(key: MetricKey, v: unknown): string {
-		if (v === null || v === undefined) return '—';
+		if (v === null || v === undefined) {
+			// DuckDB 로 가져오는 메트릭 + 아직 로딩 중 — placeholder
+			if (dbState === 'loading' && PRICE_METRICS_LOADING_FLAG.has(key)) return '…';
+			return '—';
+		}
 		const m = METRIC_BY_KEY.get(key);
 		if (!m) return String(v);
 		if (m.type !== 'number') return String(v);
@@ -1009,13 +1030,13 @@
 			<span class="src-chip"><span class="src-dot src-krx"></span>KRX 일별</span>
 			<span class="src-chip"><span class="src-dot src-scan"></span>scan 등급</span>
 			<span class="src-chip"><span class="src-dot src-quarters"></span>20 분기</span>
-			<span class="db-badge db-{dbState}" title={dbError || ''}>
+			<span class="db-badge db-{dbState}" title={dbError || 'DuckDB-WASM 으로 HF KRX parquet 직접 query'}>
 				<span class="db-dot"></span>
 				{#if dbState === 'idle'}대기
-				{:else if dbState === 'loading'}DuckDB 로드 중…
-				{:else if dbState === 'ready'}DuckDB ON · {priceTimeSeries.size.toLocaleString()}사
-				{:else if dbState === 'unsupported'}DuckDB OFF (iOS)
-				{:else if dbState === 'error'}DuckDB 오류
+				{:else if dbState === 'loading'}KRX 가격 로드 중 (~10초, HF parquet 직접 fetch)
+				{:else if dbState === 'ready'}가격·시총 ON · {priceTimeSeries.size.toLocaleString()}사
+				{:else if dbState === 'unsupported'}가격 데이터 OFF (iOS Safari 메모리 한계)
+				{:else if dbState === 'error'}가격 로드 실패 — F12 콘솔 확인
 				{/if}
 			</span>
 			{#if dataAsOf}
@@ -1557,8 +1578,9 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		padding: 4px 10px;
-		font-size: 11px;
+		padding: 6px 12px;
+		font-size: 12px;
+		font-weight: 600;
 		border-radius: 999px;
 		border: 1px solid #1e2433;
 		background: #0b1120;
