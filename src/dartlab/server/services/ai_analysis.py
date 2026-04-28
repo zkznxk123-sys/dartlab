@@ -10,7 +10,7 @@ from dartlab import Company
 from dartlab.core.ai import normalize_provider
 from dartlab.server.chat import build_topic_summary_question
 from dartlab.server.models import AskRequest
-from dartlab.server.streaming import AnalysisStreamError, collect_analysis_text, stream_analysis
+from dartlab.server.streaming import AnalysisStreamError, collect_analysis_result, stream_analysis
 
 
 def build_topic_summary_view_context(company: Company, topic: str) -> dict:
@@ -59,14 +59,14 @@ async def stream_topic_summary(
     yield {"event": "done", "data": "{}"}
 
 
-async def run_plain_chat(req: AskRequest) -> dict[str, str]:
+async def run_plain_chat(req: AskRequest) -> dict:
     """회사 컨텍스트 없이 일반 AI 채팅을 실행한다."""
     try:
         hintCode = req.company
         if not hintCode and req.viewContext and req.viewContext.company:
             vc = req.viewContext.company
             hintCode = vc.stockCode or vc.corpName or vc.company
-        answer = await collect_analysis_text(
+        result = await collect_analysis_result(
             req.question,
             provider=normalize_provider(req.provider) or req.provider,
             role=req.role or "summary",
@@ -81,7 +81,7 @@ async def run_plain_chat(req: AskRequest) -> dict[str, str]:
             detect_navigate=False,
             emit_system_prompt=False,
         )
-        return {"answer": answer}
+        return result
     except AnalysisStreamError as e:
         if e.action == "login":
             raise HTTPException(status_code=401, detail="Codex CLI 로그인이 필요합니다. `codex login`을 실행하세요.")

@@ -707,9 +707,9 @@ class TestAsk:
         async def _fake_collect(question="", **kwargs):
             captured["question"] = question
             captured["kwargs"] = kwargs
-            return "core-answer"
+            return {"answer": "core-answer", "artifacts": [{"format": "csv", "url": "/api/ask/artifacts/x/y.csv"}]}
 
-        monkeypatch.setattr("dartlab.server.services.ai_analysis.collect_analysis_text", _fake_collect)
+        monkeypatch.setattr("dartlab.server.services.ai_analysis.collect_analysis_result", _fake_collect)
 
         resp = client.post(
             "/api/ask",
@@ -717,6 +717,7 @@ class TestAsk:
         )
         assert resp.status_code == 200
         assert resp.json()["answer"] == "core-answer"
+        assert resp.json()["artifacts"][0]["format"] == "csv"
         assert captured["question"] == "안녕하세요"
         assert captured["kwargs"]["provider"] == "openai"
         assert captured["kwargs"]["model"] == "gpt-5.4"
@@ -728,9 +729,9 @@ class TestAsk:
         async def _fake_collect(question="", **kwargs):
             captured["question"] = question
             captured["kwargs"] = kwargs
-            return "core-answer"
+            return {"answer": "core-answer", "artifacts": []}
 
-        monkeypatch.setattr("dartlab.server.services.ai_analysis.collect_analysis_text", _fake_collect)
+        monkeypatch.setattr("dartlab.server.services.ai_analysis.collect_analysis_result", _fake_collect)
 
         resp = client.post(
             "/api/ask",
@@ -738,6 +739,27 @@ class TestAsk:
         )
         assert resp.status_code == 200
         assert captured["kwargs"]["stockCode"] == "005930"
+
+    def test_ask_artifact_download(self, client, tmp_path, monkeypatch):
+        from dartlab import config
+
+        monkeypatch.setattr(config, "dataDir", str(tmp_path))
+        day = "2026-04-28"
+        artifact_dir = tmp_path / "ai-artifacts" / day
+        artifact_dir.mkdir(parents=True)
+        path = artifact_dir / "scan_result_test.csv"
+        path.write_text("a,b\n1,2\n", encoding="utf-8")
+
+        resp = client.get(f"/api/ask/artifacts/{day}/{path.name}")
+
+        assert resp.status_code == 200
+        assert "text/csv" in resp.headers["content-type"]
+        assert resp.text.startswith("a,b")
+
+    def test_ask_artifact_download_rejects_path_traversal(self, client):
+        resp = client.get("/api/ask/artifacts/2026-04-28/..%5Csecret.csv")
+
+        assert resp.status_code == 404
 
     def test_topic_summary_uses_core_stream_path(self, client, monkeypatch):
         class DummyCompany:

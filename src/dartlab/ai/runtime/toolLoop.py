@@ -10,6 +10,7 @@ import logging
 import traceback
 from typing import Any, Generator
 
+from dartlab.ai.runtime.artifacts import csvArtifactsForToolResult
 from dartlab.ai.runtime.contracts import sanitizeToolArguments
 from dartlab.ai.runtime.events import AnalysisEvent
 from dartlab.ai.runtime.progressCapture import runToolWithProgress
@@ -190,10 +191,12 @@ def streamWithTools(
                             llm=llm,
                         )
                         uiText = serializeForUi(raw, name="pythonExec")
+                        artifacts = csvArtifactsForToolResult(raw, name="pythonExec", arguments=autoArgs)
                         status = "ok"
                     except Exception as exc:  # noqa: BLE001 - 자동 보강 실패도 audit 에 남기고 재작성으로 진행
                         llmText = f"[tool error] {type(exc).__name__}: {exc}"
                         uiText = llmText
+                        artifacts = []
                         status = "error"
                     yield AnalysisEvent(
                         "tool_result",
@@ -203,6 +206,7 @@ def streamWithTools(
                             "label": "코드 실행 — KRX 기간 수익률 계산",
                             "summary": None,
                             "result": uiText,
+                            "artifacts": artifacts,
                             "status": status,
                             "round": roundIdx + 1,
                         },
@@ -239,10 +243,12 @@ def streamWithTools(
                             llm=llm,
                         )
                         uiText = serializeForUi(raw, name="gather")
+                        artifacts = csvArtifactsForToolResult(raw, name="gather", arguments=fxArgs)
                         status = "ok"
                     except Exception as exc:  # noqa: BLE001
                         llmText = f"[tool error] {type(exc).__name__}: {exc}"
                         uiText = llmText
+                        artifacts = []
                         status = "error"
                     yield AnalysisEvent(
                         "tool_result",
@@ -252,6 +258,7 @@ def streamWithTools(
                             "label": "시장 데이터 수집 — macro — USDKRW",
                             "summary": None,
                             "result": uiText,
+                            "artifacts": artifacts,
                             "status": status,
                             "round": roundIdx + 1,
                         },
@@ -333,6 +340,7 @@ def streamWithTools(
                     llm=llm,
                 )
                 uiText = serializeForUi(raw, name=tc.name)
+                artifacts = csvArtifactsForToolResult(raw, name=tc.name, arguments=tc.arguments)
                 status = "ok"
             elif isinstance(toolExc, AuthKeyMissing):
                 # except AuthKeyMissing — runToolWithProgress 가 예외를 payload 로 전달하므로
@@ -341,6 +349,7 @@ def streamWithTools(
                 # AI 는 이 메시지를 응답에 그대로 포함해 사용자에게 키 설정 방법을 안내한다.
                 llmText = f"[API 키 필요 — 사용자에게 아래 안내를 그대로 전달하세요]\n{toolExc}"
                 uiText = llmText
+                artifacts = []
                 status = "auth_required"
                 raw = None
                 log.info("tool %s: API key missing (%s)", tc.name, toolExc.envKey)
@@ -348,6 +357,7 @@ def streamWithTools(
                 tbText = "".join(traceback.format_exception(type(toolExc), toolExc, toolExc.__traceback__, limit=3))
                 llmText = f"[tool error] {type(toolExc).__name__}: {toolExc}\n{tbText}"
                 uiText = llmText
+                artifacts = []
                 status = "error"
                 raw = None
                 log.warning("tool %s failed: %s", tc.name, toolExc)
@@ -360,6 +370,7 @@ def streamWithTools(
                     "label": label,
                     "summary": _extractToolSummary(raw) if raw is not None else None,
                     "result": uiText,
+                    "artifacts": artifacts,
                     "status": status,
                     "round": roundIdx + 1,
                 },

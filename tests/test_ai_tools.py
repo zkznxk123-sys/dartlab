@@ -365,6 +365,60 @@ class TestSerialize:
         assert "최신" in out
         assert "2026-01-30" in out
 
+    def test_csv_artifact_for_dataframe_tool_result(self, tmp_path, monkeypatch):
+        import polars as pl
+
+        from dartlab import config
+        from dartlab.ai.runtime.artifacts import csvArtifactsForToolResult
+
+        monkeypatch.setattr(config, "dataDir", str(tmp_path))
+        df = pl.DataFrame({"stockCode": ["005930"], "returnPct": [12.34]})
+
+        artifacts = csvArtifactsForToolResult(df, name="pythonExec", arguments={"target": "movers"})
+
+        assert len(artifacts) == 1
+        artifact = artifacts[0]
+        assert artifact["format"] == "csv"
+        assert artifact["rows"] == 1
+        assert artifact["columns"] == 2
+        assert artifact["url"].startswith("/api/ask/artifacts/")
+        csv_path = tmp_path / "ai-artifacts" / artifact["day"] / artifact["fileName"]
+        assert csv_path.is_file()
+        assert "005930" in csv_path.read_text(encoding="utf-8")
+
+    def test_csv_artifact_for_tabular_dict_block(self, tmp_path, monkeypatch):
+        from dartlab import config
+        from dartlab.ai.runtime.artifacts import csvArtifactsForToolResult
+
+        monkeypatch.setattr(config, "dataDir", str(tmp_path))
+        result = {"rows": [{"종목": "A", "수익률": 10.0}, {"종목": "B", "수익률": 8.5}], "_summary": "rank"}
+
+        artifacts = csvArtifactsForToolResult(result, name="scan", arguments={"axis": "growth"})
+
+        assert len(artifacts) == 1
+        assert artifacts[0]["label"] == "rows"
+        assert artifacts[0]["rows"] == 2
+
+    def test_csv_artifact_for_python_stdout_table(self, tmp_path, monkeypatch):
+        from dartlab import config
+        from dartlab.ai.runtime.artifacts import csvArtifactsForToolResult
+
+        monkeypatch.setattr(config, "dataDir", str(tmp_path))
+        stdout = (
+            "period: 2026-03-16~2026-04-27\n"
+            "rank\tstockCode\tcorpName\treturnPct\n"
+            "1\t005930\t삼성전자\t12.3\n"
+            "2\t000660\tSK하이닉스\t8.7\n"
+        )
+
+        artifacts = csvArtifactsForToolResult(stdout, name="pythonExec", arguments={})
+
+        assert len(artifacts) == 1
+        path = tmp_path / "ai-artifacts" / artifacts[0]["day"] / artifacts[0]["fileName"]
+        text = path.read_text(encoding="utf-8")
+        assert "stockCode" in text
+        assert "005930" in text
+
 
 # ══════════════════════════════════════
 # toolLoop — mock provider
@@ -466,6 +520,37 @@ class TestToolLoop:
         # META 범주 — tool 0회 허용 (FINANCE 면 재질문 가드 발동)
         out = list(streamWithTools(llm, [{"role": "user", "content": "q"}], category="meta"))
         assert any(isinstance(item, str) and "짧은 답" in item for item in out)
+
+    def test_tool_result_event_includes_csv_artifact(self, tmp_path, monkeypatch):
+        import polars as pl
+
+        from dartlab import config
+        from dartlab.ai.runtime.toolLoop import streamWithTools
+        from dartlab.ai.types import ToolCall
+
+        monkeypatch.setattr(config, "dataDir", str(tmp_path))
+
+        def fake_execute(_tools, _name, _arguments):
+            return pl.DataFrame({"종목": ["A"], "수익률": [10.0]})
+
+        monkeypatch.setattr("dartlab.ai.runtime.toolLoop.executeTool", fake_execute)
+        llm = _MockProvider(
+            [
+                {
+                    "answer": "",
+                    "tool_calls": [ToolCall(id="call_1", name="scan", arguments={"axis": "growth"})],
+                },
+                {"answer": "최종 답변", "tool_calls": [], "finish_reason": "stop"},
+            ]
+        )
+
+        out = list(streamWithTools(llm, [{"role": "user", "content": "q"}], category="meta"))
+        tool_results = [ev for ev in out if getattr(ev, "kind", None) == "tool_result"]
+
+        assert tool_results
+        artifacts = tool_results[0].data["artifacts"]
+        assert artifacts[0]["format"] == "csv"
+        assert (tmp_path / "ai-artifacts" / artifacts[0]["day"] / artifacts[0]["fileName"]).is_file()
 
     def test_macro_fx_auto_args_for_exchange_rate_question(self):
         from dartlab.ai.runtime.toolLoop import _macroFxAutoArgs

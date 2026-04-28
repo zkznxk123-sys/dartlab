@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 from sse_starlette.sse import EventSourceResponse
 
 import dartlab
+from dartlab.ai.runtime.artifacts import artifactPath
 
 from ..models import AskRequest
 from ..services.ai_analysis import run_plain_chat
@@ -26,3 +28,12 @@ async def api_ask(req: AskRequest):
         )
 
     return await run_plain_chat(req)
+
+
+@router.get("/api/ask/artifacts/{day}/{filename}")
+async def download_ask_artifact(day: str, filename: str):
+    """AI tool_result 에서 생성된 CSV 아티팩트를 내려준다."""
+    path = artifactPath(day, filename)
+    if path is None or not path.is_file():
+        raise HTTPException(status_code=404, detail="artifact not found")
+    return FileResponse(path, media_type="text/csv; charset=utf-8", filename=filename)

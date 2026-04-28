@@ -84,6 +84,12 @@ async def stream_analysis(question: str = "", *, _audit: AuditCollector | None =
 
 async def collect_analysis_text(question: str = "", **kwargs) -> str:
     """core.runAsk() 실행 후 chunk 텍스트 수집 (non-stream HTTP endpoint 용)."""
+    result = await collect_analysis_result(question, **kwargs)
+    return result["answer"]
+
+
+async def collect_analysis_result(question: str = "", **kwargs) -> dict:
+    """core.runAsk() 실행 후 답변과 tool CSV 아티팩트를 함께 수집한다."""
     from dartlab.ai.runtime.core import runAsk
 
     auditor = AuditCollector(
@@ -93,11 +99,14 @@ async def collect_analysis_text(question: str = "", **kwargs) -> str:
         model=kwargs.get("model"),
     )
     chunks: list[str] = []
+    artifacts: list[dict] = []
     try:
         async for event in _sync_gen_to_async(runAsk, question, **kwargs):
             auditor.observe(event.kind, event.data)
             if event.kind == "chunk":
                 chunks.append(event.data.get("text", ""))
+            elif event.kind == "tool_result":
+                artifacts.extend(event.data.get("artifacts") or [])
             elif event.kind == "error":
                 raise AnalysisStreamError(
                     event.data.get("error", "analysis error"),
@@ -106,7 +115,7 @@ async def collect_analysis_text(question: str = "", **kwargs) -> str:
                 )
     finally:
         auditor.flush()
-    return "".join(chunks)
+    return {"answer": "".join(chunks), "artifacts": _dedupeArtifacts(artifacts)}
 
 
 def _build_kwargs(req: AskRequest) -> dict:
@@ -133,6 +142,18 @@ def _build_kwargs(req: AskRequest) -> dict:
         kwargs["stockCode"] = hintCode
 
     return kwargs
+
+
+def _dedupeArtifacts(artifacts: list[dict]) -> list[dict]:
+    seen: set[str] = set()
+    out: list[dict] = []
+    for artifact in artifacts:
+        key = str(artifact.get("url") or artifact.get("id") or "")
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(artifact)
+    return out
 
 
 def _sse(event: str, data: dict) -> dict:
