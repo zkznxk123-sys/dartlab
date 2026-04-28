@@ -251,6 +251,10 @@ class CapabilitySpec:
     category: str = "general"
     priority: int = 50
     dependsOn: tuple[str, ...] = ()
+    freshness: dict[str, Any] = field(default_factory=dict)
+    comparisonCompleteness: dict[str, Any] = field(default_factory=dict)
+    requiredEvidence: tuple[str, ...] = ()
+    toolArgPolicy: tuple[str, ...] = ()
 
     def to_dict(self, *, detail: bool = False) -> dict[str, Any]:
         """capability 정보를 dict로 변환. detail=True이면 전체 필드 포함."""
@@ -327,6 +331,10 @@ def register_tool_capability(
     category: str = "general",
     priority: int = 50,
     dependsOn: tuple[str, ...] = (),
+    freshness: dict[str, Any] | None = None,
+    comparisonCompleteness: dict[str, Any] | None = None,
+    requiredEvidence: tuple[str, ...] = (),
+    toolArgPolicy: tuple[str, ...] = (),
 ) -> CapabilitySpec:
     """도구 capability를 전역 registry에 등록하고 CapabilitySpec을 반환."""
     spec = CapabilitySpec(
@@ -346,6 +354,10 @@ def register_tool_capability(
         category=category,
         priority=priority,
         dependsOn=dependsOn,
+        freshness=freshness or {},
+        comparisonCompleteness=comparisonCompleteness or {},
+        requiredEvidence=requiredEvidence,
+        toolArgPolicy=toolArgPolicy,
     )
     _DEFAULT_REGISTRY.register(spec)
     return spec

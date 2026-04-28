@@ -49,6 +49,7 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = 2
+MANUAL_JUDGMENT_SCHEMA_VERSION = 1
 
 
 def _sha16(text: str) -> str:
@@ -247,6 +248,48 @@ class AuditCollector:
 
 # Backward-compat alias — 기존 `_AuditCollector` import 호환.
 _AuditCollector = AuditCollector
+
+
+def writeManualJudgment(
+    *,
+    request_id: str,
+    verdict: str,
+    reason: str,
+    issue_code: str | None = None,
+    suggested_fix: str | None = None,
+    accepted_by: str | None = None,
+    question: str | None = None,
+    data_dir: Path | str | None = None,
+) -> Path | None:
+    """직접 P/T/C/V 판정을 UTF-8 JSONL 로 남긴다.
+
+    자동 violation 이 아니라 사람이 답변 원문을 읽고 확정한 품질 개선 루프의
+    원천 로그다.
+    """
+    if verdict not in {"P", "T", "C", "V"}:
+        raise ValueError("verdict must be one of P/T/C/V")
+    root = Path(data_dir) if data_dir else _resolve_data_dir()
+    entry = {
+        "schema_version": MANUAL_JUDGMENT_SCHEMA_VERSION,
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "request_id": request_id,
+        "question": question,
+        "verdict": verdict,
+        "reason": reason,
+        "issue_code": issue_code,
+        "suggested_fix": suggested_fix,
+        "accepted_by": accepted_by,
+    }
+    try:
+        day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        out_dir = root / "audit" / "ai-judgment"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        path = out_dir / f"{day}.jsonl"
+        with path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False, default=str) + "\n")
+        return path
+    except OSError:
+        return None
 
 
 # ─────────────────────────────────────────────────────────────────

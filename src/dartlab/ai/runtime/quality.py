@@ -8,7 +8,15 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from datetime import date
 from typing import Any
+
+from dartlab.ai.runtime.contracts import (
+    latestDateFromToolArgs,
+    resolveAnswerContracts,
+    staleCutoff,
+    validateToolArguments,
+)
 
 QUALITY_ISSUES = (
     "missing_tool_evidence",
@@ -16,6 +24,12 @@ QUALITY_ISSUES = (
     "missing_reading_notes",
     "missing_judgment",
     "company_mismatch_risk",
+    "stale_date_risk",
+    "partial_comparison",
+    "unsupported_claim",
+    "answer_table_conflict",
+    "bad_tool_args",
+    "weak_disclosure_analysis",
 )
 
 _ENGINE_TOOLS = {
@@ -87,6 +101,30 @@ _ANALYTIC_WORDS = (
 
 _TABLE_RE = re.compile(r"^\|.+\|\s*$", re.MULTILINE)
 _NUMBER_RE = re.compile(r"\d")
+_DATE_RE = re.compile(r"(20\d{2})[-./년\s]*(\d{1,2})[-./월\s]*(\d{1,2})")
+_PERCENT_RE = re.compile(r"[-+]?\d+(?:\.\d+)?\s*%")
+_NEGATIVE_FCF_RE = re.compile(r"(FCF|잉여현금흐름)[^\n|]*(?:-\s*\d|적자)", re.IGNORECASE)
+_POSITIVE_FCF_MARGIN_RE = re.compile(r"(FCF|잉여현금흐름)\s*/\s*매출[^\n-]*\d+(?:\.\d+)?\s*%", re.IGNORECASE)
+_STRONG_COMPARISON_WORDS = (
+    "우위",
+    "더 좋",
+    "더 낫",
+    "선호",
+    "매력",
+    "앞섭",
+    "강합니다",
+    "뛰어납니다",
+)
+_MISSING_DATA_WORDS = ("데이터 미제공", "데이터 없음", "확인 불가", "미확인", "누락")
+_UNSUPPORTED_CLAIM_HINTS = (
+    "점유율",
+    "nvidia",
+    "엔비디아",
+    "hbm3e",
+    "수율",
+    "고객사",
+    "수주",
+)
 
 
 @dataclass(frozen=True)
@@ -134,11 +172,16 @@ def evaluateFinalAnswer(
     text = answer.strip()
     q = question or ""
     issues: list[str] = []
+    contracts = resolveAnswerContracts(q, toolCalls)
+    isMetaHelp = _isMetaHelpQuestion(q, toolCalls)
 
-    if not _hasEngineEvidence(toolCalls):
+    if not isMetaHelp and not _hasEngineEvidence(toolCalls):
         issues.append("missing_tool_evidence")
 
-    if _requiresAnalyticShape(q, toolCalls):
+    if validateToolArguments(question=q, toolCalls=toolCalls):
+        issues.append("bad_tool_args")
+
+    if not isMetaHelp and _requiresAnalyticShape(q, toolCalls):
         if not _hasNumericTable(text):
             issues.append("missing_numeric_table")
         if "이 표에서 읽을 포인트" not in text:
@@ -153,9 +196,24 @@ def evaluateFinalAnswer(
     if stockCode and _hasCompanyMismatchRisk(toolCalls, stockCode):
         issues.append("company_mismatch_risk")
 
+    if "recent" in contracts and _hasStaleDateRisk(q, text, toolCalls):
+        issues.append("stale_date_risk")
+
+    if "comparison" in contracts and _hasPartialComparison(q, text, toolCalls):
+        issues.append("partial_comparison")
+
+    if _hasAnswerTableConflict(text):
+        issues.append("answer_table_conflict")
+
+    if _hasUnsupportedClaim(text, toolCalls):
+        issues.append("unsupported_claim")
+
+    if "disclosure" in contracts and _hasWeakDisclosureAnalysis(q, text, toolCalls):
+        issues.append("weak_disclosure_analysis")
+
     if not issues:
         return QualityResult(True, [], "")
-    return QualityResult(False, issues, buildRepairPrompt(issues))
+    return QualityResult(False, _dedupe(issues), buildRepairPrompt(_dedupe(issues)))
 
 
 def buildRepairPrompt(issues: list[str]) -> str:
@@ -172,12 +230,38 @@ def buildRepairPrompt(issues: list[str]) -> str:
         "4. tool_result 에 없는 숫자는 만들지 말고, 데이터가 없으면 없다고 말하세요.\n"
         "5. 종목 후보가 애매하면 임의로 분석하지 말고 후보 표를 먼저 제시하세요.\n"
         "6. 시장 전체 최근 상승 종목 질문은 gather('krx','close') 원본 head 표본으로 답하지 말고 "
-        "pythonExec 에서 전체 DataFrame 의 첫/마지막 거래일 수익률을 계산해 정렬하세요."
+        "pythonExec 에서 전체 DataFrame 의 첫/마지막 거래일 수익률을 계산해 정렬하세요.\n"
+        "7. 최근/현재 질문은 asOf, 기간, universe, metric 을 명시하고 낡은 기준일이면 한계로 고지하세요.\n"
+        "8. 비교 질문은 각 대상에 같은 축의 수치가 있을 때만 강한 결론을 내리세요.\n"
+        "9. 공시는 제목만 본 경우 제목 기준이라고 쓰고, 중요한 내용/영향을 단정하지 마세요."
     )
 
 
 def _hasEngineEvidence(toolCalls: list[dict[str, Any]]) -> bool:
     return any(str(call.get("name", "")) in _ENGINE_TOOLS for call in toolCalls)
+
+
+def _isMetaHelpQuestion(question: str, toolCalls: list[dict[str, Any]]) -> bool:
+    if not any(str(call.get("name", "")) == "capabilities" for call in toolCalls):
+        return False
+    q = question.lower()
+    return any(
+        word in q
+        for word in (
+            "dartlab",
+            "capabilities",
+            "company.",
+            "show",
+            "analysis",
+            "scan",
+            "gather",
+            "함수",
+            "어떻게 써",
+            "사용법",
+            "기능",
+            "할 수 있어",
+        )
+    )
 
 
 def _requiresAnalyticShape(question: str, toolCalls: list[dict[str, Any]]) -> bool:
@@ -226,3 +310,142 @@ def _hasCompanyMismatchRisk(toolCalls: list[dict[str, Any]], stockCode: str) -> 
         if isinstance(args, dict) and args.get("stockCode") and str(args["stockCode"]) != stockCode:
             return True
     return False
+
+
+def _hasStaleDateRisk(question: str, text: str, toolCalls: list[dict[str, Any]]) -> bool:
+    if _declaresDataLimit(text):
+        return False
+    latest = _latestDateInText(text) or latestDateFromToolArgs(toolCalls)
+    if latest is None:
+        return _requiresFreshStructuredData(question, toolCalls)
+    if latest < staleCutoff():
+        return True
+    required = ("asof", "as of", "기준", "기간", "universe", "metric", "대상")
+    lowered = text.lower()
+    if _requiresFreshStructuredData(question, toolCalls) and not any(word in lowered for word in required):
+        return True
+    return False
+
+
+def _hasPartialComparison(question: str, text: str, toolCalls: list[dict[str, Any]]) -> bool:
+    lowered = text.lower()
+    hasMissing = any(word in text for word in _MISSING_DATA_WORDS)
+    hasStrongConclusion = any(word in text for word in _STRONG_COMPARISON_WORDS)
+    if hasMissing and hasStrongConclusion:
+        return True
+
+    searched = 0
+    companyEvidence: set[str] = set()
+    for call in toolCalls:
+        name = str(call.get("name", ""))
+        args = call.get("arguments") or call.get("args") or {}
+        if name == "searchCompany":
+            searched += 1
+        if isinstance(args, dict) and args.get("stockCode") and name in _ENGINE_TOOLS - {"searchCompany"}:
+            companyEvidence.add(str(args["stockCode"]))
+    if searched >= 2 and len(companyEvidence) == 1 and hasStrongConclusion:
+        return True
+    return any(word in lowered for word in ("only one side", "single target only")) and hasStrongConclusion
+
+
+def _hasUnsupportedClaim(text: str, toolCalls: list[dict[str, Any]]) -> bool:
+    lowered = text.lower()
+    if not any(hint in lowered for hint in _UNSUPPORTED_CLAIM_HINTS):
+        return False
+    evidenceTools = {
+        "pastInsight",
+        "sectorInsights",
+        "story",
+        "search",
+        "filings",
+        "liveFilings",
+        "disclosure",
+        "gather",
+        "pythonExec",
+    }
+    return not any(str(call.get("name", "")) in evidenceTools for call in toolCalls)
+
+
+def _hasAnswerTableConflict(text: str) -> bool:
+    if _NEGATIVE_FCF_RE.search(text) and _POSITIVE_FCF_MARGIN_RE.search(text):
+        return True
+
+    tableValues: dict[str, set[str]] = {}
+    nonTableLines: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if _TABLE_RE.match(stripped):
+            cells = [c.strip() for c in stripped.strip("|").split("|")]
+            if len(cells) >= 2 and not all(set(c) <= {"-", ":", " "} for c in cells):
+                label = cells[0]
+                values = {v.replace(" ", "") for cell in cells[1:] for v in _PERCENT_RE.findall(cell)}
+                if values and label and label != "---":
+                    tableValues.setdefault(label, set()).update(values)
+        else:
+            nonTableLines.append(line)
+
+    for label, values in tableValues.items():
+        if len(label) < 2:
+            continue
+        for line in nonTableLines:
+            if label not in line:
+                continue
+            bodyValues = {v.replace(" ", "") for v in _PERCENT_RE.findall(line)}
+            if bodyValues and not bodyValues.issubset(values):
+                return True
+    return False
+
+
+def _hasWeakDisclosureAnalysis(question: str, text: str, toolCalls: list[dict[str, Any]]) -> bool:
+    if not any(word in question for word in ("중요", "내용", "영향", "리스크", "호재", "악재")):
+        return False
+    hasDisclosureTool = any(
+        str(call.get("name", "")) in {"search", "filings", "liveFilings", "disclosure"} for call in toolCalls
+    )
+    if not hasDisclosureTool:
+        return False
+    if "제목 기준" in text and not any(word in text for word in ("본문", "원문", "영향", "유형", "내용 확인")):
+        return True
+    if "중요" in text and not any(word in text for word in ("본문", "원문", "영향", "유형", "한계")):
+        return True
+    return False
+
+
+def _latestDateInText(text: str) -> date | None:
+    latest: date | None = None
+    for match in _DATE_RE.finditer(text):
+        try:
+            parsed = date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        except ValueError:
+            continue
+        if latest is None or parsed > latest:
+            latest = parsed
+    return latest
+
+
+def _declaresDataLimit(text: str) -> bool:
+    return any(word in text for word in ("데이터 한계", "최신 데이터가 없습니다", "기준일 한계", "확인 불가"))
+
+
+def _requiresFreshStructuredData(question: str, toolCalls: list[dict[str, Any]]) -> bool:
+    if not any(word in question for word in ("최근", "현재", "어제", "오늘", "latest", "recent")):
+        return False
+    for call in toolCalls:
+        name = str(call.get("name", ""))
+        args = call.get("arguments") or call.get("args") or {}
+        axis = str(args.get("axis") or "").lower() if isinstance(args, dict) else ""
+        if name in {"macro", "scan", "pythonExec"}:
+            return True
+        if name == "gather" and axis in {"krx", "macro", "price"}:
+            return True
+    return False
+
+
+def _dedupe(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if item not in seen:
+            seen.add(item)
+            out.append(item)
+    return out

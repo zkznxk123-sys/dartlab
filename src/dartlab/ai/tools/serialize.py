@@ -278,6 +278,8 @@ def serializeForLlm(result: Any, *, name: str, arguments: dict) -> str:
 
 def _evidenceHeader(result: Any, *, name: str, arguments: dict) -> str:
     """LLM 에 전달할 공통 증거 헤더."""
+    from dartlab.ai.runtime.contracts import contractMetadataForTool
+
     target = (
         arguments.get("stockCode")
         or arguments.get("target")
@@ -292,6 +294,12 @@ def _evidenceHeader(result: Any, *, name: str, arguments: dict) -> str:
         f"- 대상: {target}",
         "- 데이터 기준: tool_result 원본",
     ]
+    contract = contractMetadataForTool(name, arguments)
+    if contract:
+        lines.append(f"- 계약 키: {contract.get('contractKey')}")
+        required = contract.get("requiredEvidence")
+        if required:
+            lines.append(f"- 필수 증거: {', '.join(str(x) for x in required)}")
     if isinstance(result, dict):
         summary = result.get("_summary")
         if summary:

@@ -271,6 +271,13 @@ class TestSerialize:
         assert "grade" in out
         assert "85" in out
 
+    def test_serializeForLlm_contract_header(self):
+        from dartlab.ai.tools.serialize import serializeForLlm
+
+        out = serializeForLlm({"rows": []}, name="gather", arguments={"axis": "krx", "target": "close"})
+        assert "계약 키: gather.krx.close" in out
+        assert "필수 증거: asOf, 기간, universe, metric" in out
+
     def test_serializeForLlm_none(self):
         from dartlab.ai.tools.serialize import serializeForLlm
 
@@ -477,3 +484,180 @@ class TestQualityGate:
         )
         assert not result.passed
         assert "missing_numeric_table" in result.issues
+
+    def test_quality_detects_stale_recent_date(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "현재 금리 환경은 2020-01-01 기준으로 안정적이라고 판단합니다.\n\n"
+            "| 지표 | 값 |\n| --- | --- |\n| 기준일 | 2020-01-01 |\n\n"
+            "이 표에서 읽을 포인트\n- 기준일이 오래됐지만 현재 판단처럼 썼습니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="최근 한국 금리 상황 어때?",
+            answer=answer,
+            toolCalls=[{"name": "macro", "arguments": {"axis": "rates", "end": "2020-01-01"}}],
+        )
+        assert not result.passed
+        assert "stale_date_risk" in result.issues
+
+    def test_quality_detects_partial_comparison(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "비교하면 SK하이닉스가 더 매력적이라고 판단합니다.\n\n"
+            "| 회사 | 영업이익률 |\n| --- | --- |\n| 삼성전자 | 13.0% |\n| SK하이닉스 | 데이터 미제공 |\n\n"
+            "이 표에서 읽을 포인트\n- 한쪽 데이터가 없어도 SK하이닉스 우위입니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="삼성전자와 SK하이닉스 수익성을 비교해줘",
+            answer=answer,
+            toolCalls=[{"name": "analysis", "arguments": {"stockCode": "005930"}}],
+        )
+        assert not result.passed
+        assert "partial_comparison" in result.issues
+
+    def test_quality_detects_answer_table_conflict(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "삼성전자는 수익성이 양호하다고 판단합니다. 영업이익률은 10.0%입니다.\n\n"
+            "| 지표 | 값 |\n| --- | --- |\n| 영업이익률 | 13.0% |\n\n"
+            "이 표에서 읽을 포인트\n- 표와 본문 숫자가 충돌합니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="삼성전자 수익성 분석해줘",
+            answer=answer,
+            toolCalls=[{"name": "analysis", "arguments": {"stockCode": "005930"}}],
+        )
+        assert not result.passed
+        assert "answer_table_conflict" in result.issues
+
+    def test_quality_detects_fcf_sign_conflict(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "삼양식품은 FCF 적자지만 현금흐름은 양호하다고 판단합니다.\n\n"
+            "| 지표 | 값 |\n| --- | --- |\n| FCF | -1,521억 |\n\n"
+            "이 표에서 읽을 포인트\n- FCF는 적자입니다.\n\n"
+            "다만 세부 metric을 보면 FCF/매출 40.9%입니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="삼양식품 현금흐름 분석해줘",
+            answer=answer,
+            toolCalls=[{"name": "analysis", "arguments": {"stockCode": "003230"}}],
+        )
+        assert not result.passed
+        assert "answer_table_conflict" in result.issues
+
+    def test_quality_detects_unsupported_claim(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "삼성전자는 HBM3E 고객사 점유율이 높아 양호하다고 판단합니다.\n\n"
+            "| 지표 | 값 |\n| --- | --- |\n| ROE | 12.0% |\n\n"
+            "이 표에서 읽을 포인트\n- 점유율 claim 은 tool 근거에 없습니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="삼성전자 AI 반도체 전망 분석해줘",
+            answer=answer,
+            toolCalls=[{"name": "analysis", "arguments": {"stockCode": "005930"}}],
+        )
+        assert not result.passed
+        assert "unsupported_claim" in result.issues
+
+    def test_quality_detects_bad_capabilities_args(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "dartlab 기능은 capabilities로 확인할 수 있습니다.\n\n"
+            "| 기능 | 값 |\n| --- | --- |\n| analysis | 가능 |\n\n"
+            "이 표에서 읽을 포인트\n- 기능 조회 결과입니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="분석 기능 알려줘",
+            answer=answer,
+            toolCalls=[{"name": "capabilities", "arguments": {"key": "analysis'}] to=functions.capabilities"}}],
+        )
+        assert not result.passed
+        assert "bad_tool_args" in result.issues
+
+    def test_quality_allows_meta_help_with_capabilities(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = "show 함수는 Company 데이터를 topic 기준으로 보여줍니다. 예: c.show('IS')"
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="show 함수 어떻게 써?",
+            answer=answer,
+            toolCalls=[{"name": "capabilities", "arguments": {"key": "Company.show"}}],
+        )
+        assert result.passed
+
+    def test_quality_detects_bad_date_args(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "최근 상승 종목은 기간 수익률 기준으로 판단합니다.\n\n"
+            "| 종목 | 수익률 |\n| --- | --- |\n| A | 12.0% |\n\n"
+            "이 표에서 읽을 포인트\n- 날짜 인자가 역주행했습니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="최근 주가가 많이 오른 종목을 찾아줘",
+            answer=answer,
+            toolCalls=[
+                {
+                    "name": "gather",
+                    "arguments": {"axis": "krx", "target": "close", "start": "2026-04-27", "end": "2026-03-16"},
+                },
+                {"name": "pythonExec", "arguments": {"code": "print('ok')"}},
+            ],
+        )
+        assert not result.passed
+        assert "bad_tool_args" in result.issues
+
+    def test_quality_detects_weak_disclosure_analysis(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "가장 중요한 공시는 투자 판단에 긍정적이라고 판단합니다.\n\n"
+            "| 접수일 | 제목 |\n| --- | --- |\n| 2026-04-27 | 단일판매 공급계약 |\n\n"
+            "이 표에서 읽을 포인트\n- 제목 기준으로 중요한 내용입니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="삼성전자 최근 공시에서 중요한 내용 찾아줘",
+            answer=answer,
+            toolCalls=[{"name": "search", "arguments": {"keyword": "삼성전자", "limit": 5}}],
+        )
+        assert not result.passed
+        assert "weak_disclosure_analysis" in result.issues
+
+
+class TestAuditJudgment:
+    def test_write_manual_judgment_utf8_jsonl(self, tmp_path):
+        import json
+
+        from dartlab.ai.runtime.audit import writeManualJudgment
+
+        path = writeManualJudgment(
+            request_id="req-test",
+            verdict="T",
+            reason="데이터 기준일 한계",
+            issue_code="stale_date_risk",
+            suggested_fix="최신 거래일 고지",
+            accepted_by="manual",
+            question="최근 주가?",
+            data_dir=tmp_path,
+        )
+        assert path is not None
+        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+        assert rows[0]["verdict"] == "T"
+        assert rows[0]["reason"] == "데이터 기준일 한계"
