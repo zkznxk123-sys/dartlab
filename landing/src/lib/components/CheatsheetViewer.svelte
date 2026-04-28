@@ -1,5 +1,8 @@
 <script lang="ts">
-	const pdfUrl = '/cheatsheet.pdf#page=1&view=Fit&toolbar=0&navpanes=0&scrollbar=0';
+	import { base } from '$app/paths';
+
+	const pdfPath = `${base}/cheatsheet.pdf`;
+	const pdfUrl = `${pdfPath}#page=1&view=Fit&toolbar=0&navpanes=0&scrollbar=0`;
 </script>
 
 <svelte:head>
@@ -21,7 +24,7 @@
 	<object class="sheet" data={pdfUrl} type="application/pdf" aria-label="DartLab cheatsheet PDF">
 		<iframe class="sheet" src={pdfUrl} title="DartLab cheatsheet PDF"></iframe>
 	</object>
-	<a class="pdf-link" href="/cheatsheet.pdf" aria-label="Open PDF">PDF</a>
+	<a class="pdf-link" href={pdfPath} aria-label="Open PDF">PDF</a>
 </main>
 
 <style>
