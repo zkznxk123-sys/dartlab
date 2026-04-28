@@ -313,6 +313,8 @@ def _hasCompanyMismatchRisk(toolCalls: list[dict[str, Any]], stockCode: str) -> 
 
 
 def _hasStaleDateRisk(question: str, text: str, toolCalls: list[dict[str, Any]]) -> bool:
+    if _requiresFxEvidence(question) and not _hasFxEvidence(toolCalls):
+        return True
     if _declaresDataLimit(text):
         return False
     latest = _latestDateInText(text) or latestDateFromToolArgs(toolCalls)
@@ -331,6 +333,10 @@ def _hasPartialComparison(question: str, text: str, toolCalls: list[dict[str, An
     lowered = text.lower()
     hasMissing = any(word in text for word in _MISSING_DATA_WORDS)
     hasStrongConclusion = any(word in text for word in _STRONG_COMPARISON_WORDS)
+    if hasMissing and _declaresComparisonLimit(text):
+        return False
+    if hasMissing and hasStrongConclusion and _hasSameAxisComparisonEvidence(text, toolCalls):
+        return False
     if hasMissing and hasStrongConclusion:
         return True
 
@@ -346,6 +352,29 @@ def _hasPartialComparison(question: str, text: str, toolCalls: list[dict[str, An
     if searched >= 2 and len(companyEvidence) == 1 and hasStrongConclusion:
         return True
     return any(word in lowered for word in ("only one side", "single target only")) and hasStrongConclusion
+
+
+def _hasSameAxisComparisonEvidence(text: str, toolCalls: list[dict[str, Any]]) -> bool:
+    companyEvidence: set[str] = set()
+    for call in toolCalls:
+        name = str(call.get("name", ""))
+        args = call.get("arguments") or call.get("args") or {}
+        if isinstance(args, dict) and args.get("stockCode") and name in _ENGINE_TOOLS - {"searchCompany"}:
+            companyEvidence.add(str(args["stockCode"]))
+    if len(companyEvidence) < 2:
+        return False
+
+    for line in text.splitlines():
+        if not _TABLE_RE.match(line.strip()):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) < 3:
+            continue
+        numericCells = [cell for cell in cells[1:] if _PERCENT_RE.search(cell) or re.search(r"\d", cell)]
+        missingCells = [cell for cell in cells[1:] if any(word in cell for word in _MISSING_DATA_WORDS)]
+        if len(numericCells) >= 2 and not missingCells:
+            return True
+    return False
 
 
 def _hasUnsupportedClaim(text: str, toolCalls: list[dict[str, Any]]) -> bool:
@@ -391,7 +420,7 @@ def _hasAnswerTableConflict(text: str) -> bool:
             if label not in line:
                 continue
             bodyValues = {v.replace(" ", "") for v in _PERCENT_RE.findall(line)}
-            if bodyValues and not bodyValues.issubset(values):
+            if len(bodyValues) == 1 and not bodyValues.issubset(values):
                 return True
     return False
 
@@ -424,7 +453,25 @@ def _latestDateInText(text: str) -> date | None:
 
 
 def _declaresDataLimit(text: str) -> bool:
-    return any(word in text for word in ("데이터 한계", "최신 데이터가 없습니다", "기준일 한계", "확인 불가"))
+    return any(
+        word in text
+        for word in (
+            "데이터 한계",
+            "최신 데이터가 없습니다",
+            "기준일 한계",
+            "확인 불가",
+            "최신 시점 단정에는 한계",
+            "최신 환율 수준은 여기서 확인되지 않았습니다",
+            "최근 확인 가능한 기준일 기준",
+            "현재라기보다",
+        )
+    )
+
+
+def _declaresComparisonLimit(text: str) -> bool:
+    return any(
+        word in text for word in ("강한 결론을 일부 유보", "결론은 보류", "한계", "데이터 미수신", "데이터 미확보")
+    )
 
 
 def _requiresFreshStructuredData(question: str, toolCalls: list[dict[str, Any]]) -> bool:
@@ -438,6 +485,30 @@ def _requiresFreshStructuredData(question: str, toolCalls: list[dict[str, Any]])
             return True
         if name == "gather" and axis in {"krx", "macro", "price"}:
             return True
+    return False
+
+
+def _requiresFxEvidence(question: str) -> bool:
+    q = question.lower()
+    return any(word in q for word in ("환율", "원달러", "원/달러", "usdkrw", "krwusd", "fx", "exchange"))
+
+
+def _hasFxEvidence(toolCalls: list[dict[str, Any]]) -> bool:
+    try:
+        from dartlab.gather.ecos.catalog import resolveId
+    except Exception:  # pragma: no cover
+
+        def resolveId(value: str) -> str:
+            return value
+
+    for call in toolCalls:
+        name = str(call.get("name", ""))
+        args = call.get("arguments") or call.get("args") or {}
+        if not isinstance(args, dict):
+            continue
+        if name == "gather" and str(args.get("axis") or "").lower() == "macro":
+            if resolveId(str(args.get("target") or "")) == "USDKRW":
+                return True
     return False
 
 

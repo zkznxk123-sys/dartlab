@@ -104,8 +104,14 @@ def _dfToMarkdown(df: Any, *, maxRows: int) -> str:
     shapeNote = f"shape: ({rows}, {cols})"
 
     if rows > maxRows:
-        shown = df.head(maxRows)
-        truncNote = f" — 상위 {maxRows}개 (전체 {rows}개)"
+        if "date" in df.columns and maxRows >= 10:
+            headRows = min(5, maxRows // 2)
+            tailRows = maxRows - headRows
+            shown = pl.concat([df.head(headRows), df.tail(tailRows)], how="vertical")
+            truncNote = f" — 상위 {headRows}개 + 최신 {tailRows}개 (전체 {rows}개)"
+        else:
+            shown = df.head(maxRows)
+            truncNote = f" — 상위 {maxRows}개 (전체 {rows}개)"
     else:
         shown = df
         truncNote = ""

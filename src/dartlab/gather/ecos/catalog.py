@@ -514,6 +514,15 @@ _INDICATORS: dict[str, dict] = {
 # 빌드 캐시
 _entries: dict[str, CatalogEntry] = {}
 _groups: dict[str, list[CatalogEntry]] = {}
+_INDICATOR_ALIASES: dict[str, str] = {
+    "DEXKOUS": "USDKRW",
+    "KRWUSD": "USDKRW",
+    "USD/KRW": "USDKRW",
+    "KRW/USD": "USDKRW",
+    "DOLLARKRW": "USDKRW",
+    "원달러": "USDKRW",
+    "원/달러": "USDKRW",
+}
 
 
 def _build() -> None:
@@ -555,7 +564,8 @@ def getEntry(indicatorId: str) -> CatalogEntry | None:
         매칭된 카탈로그 엔트리. 없으면 None.
     """
     _build()
-    hit = _entries.get(indicatorId)
+    canonical = resolveId(indicatorId)
+    hit = _entries.get(canonical)
     if hit is not None:
         return hit
     # 한글 레이블로도 매칭 (AI 가 "기준금리" 같은 레이블을 전달할 때)
@@ -563,6 +573,17 @@ def getEntry(indicatorId: str) -> CatalogEntry | None:
         if entry.label == indicatorId:
             return entry
     return None
+
+
+def resolveId(indicatorId: str | None) -> str | None:
+    """사용자/AI 표기 지표명을 ECOS 정식 ID 로 정규화한다."""
+    if indicatorId is None:
+        return None
+    key = str(indicatorId).strip()
+    if not key:
+        return key
+    aliasKey = key.upper().replace(" ", "")
+    return _INDICATOR_ALIASES.get(aliasKey, key)
 
 
 def getGroups() -> list[str]:

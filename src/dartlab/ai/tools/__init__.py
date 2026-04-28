@@ -65,6 +65,20 @@ _BLACKLIST: set[str] = {
     "update",
     # 인터랙티브 (AI runtime 에 부적합)
     "view",
+    # AI runtime 에서 sections 직접 접근은 메모리 비용이 커서 금지.
+    # 필요한 요약은 analysis/story/disclosure/show(topic) 같은 가벼운 계약 도구를 우선한다.
+    "sections",
+    "sectionsFreq",
+    "sectionsOrdered",
+    "sectionsCoverage",
+    "sectionsSemanticRegistry",
+    "sectionsStructureRegistry",
+    "sectionsStructureEvents",
+    "sectionsStructureSummary",
+    "sectionsStructureChanges",
+    "retrievalBlocks",
+    "contextSlices",
+    "topicSummaries",
     # Low-level parser helper
     "table",
 }
@@ -243,7 +257,7 @@ def selectToolsForQuestion(
         add(["scan", "gather", "macro", "industry", "topdown"])
 
     intentMap = {
-        "act1_business": ["show", "industry", "topicSummaries", "story", "pastInsight"],
+        "act1_business": ["show", "industry", "story", "pastInsight"],
         "act2_profit": ["analysis", "show", "industry", "pastInsight"],
         "act3_cash": ["analysis", "show", "credit"],
         "act4_stability": ["credit", "analysis", "debt", "show"],
@@ -256,6 +270,10 @@ def selectToolsForQuestion(
     add(intentMap.get(intent or "", []))
 
     q = (question or "").lower()
+    isCompanyPairCompare = intent == "compare" and _looksLikeCompanyPairQuestion(q)
+    if isCompanyPairCompare:
+        add(["analysis", "credit", "quant", "show", "pastInsight"])
+
     keywordMap: list[tuple[tuple[str, ...], list[str]]] = [
         (
             ("공시", "사업보고서", "분기보고서", "filing", "dart"),
@@ -287,8 +305,33 @@ def selectToolsForQuestion(
         selected = [name for name in selected if name not in {"disclosure", "liveFilings", "filings", "readFiling"}]
     if not any(k in q for k in ("검색", "찾아", "키워드")):
         selected = [name for name in selected if name not in {"search", "keywordTrend"}]
+    if isCompanyPairCompare:
+        priority = [
+            "searchCompany",
+            "capabilities",
+            "analysis",
+            "credit",
+            "quant",
+            "show",
+            "pastInsight",
+            "scan",
+            "gather",
+            "macro",
+            "industry",
+            "pythonExec",
+            "topdown",
+        ]
+        selected = [name for name in priority if name in selected] + [name for name in selected if name not in priority]
 
     return _pickTools(byName, selected, maxTools=maxTools)
+
+
+def _looksLikeCompanyPairQuestion(q: str) -> bool:
+    if not q:
+        return False
+    if any(sep in q for sep in (" vs ", " versus ", "와", "과", "랑", "하고")):
+        return any(word in q for word in ("비교", "대비", "경쟁력", "누가", "어느"))
+    return False
 
 
 def _pickTools(byName: dict[str, AITool], names: list[str], *, maxTools: int) -> list[AITool]:
@@ -426,10 +469,22 @@ def _buildHandler(name: str, kind: str, target: str) -> Callable[..., Any]:
             # show 의 fields 인자 → select 위임 (Read 하나로 단순화)
             if name == "show":
                 fields = clean.pop("fields", None)
+                topic = clean.get("topic")
+                if _isHighMemorySectionsAccess(topic):
+                    return {
+                        "info": (
+                            "AI runtime 에서는 메모리 보호를 위해 sections 직접 조회를 차단합니다. "
+                            "필요한 경우 show('IS'/'BS'/'CF'), analysis, disclosure, readFiling(sections=False) "
+                            "같은 좁은 근거 도구를 사용하세요."
+                        )
+                    }
                 if fields:
                     topic = clean.pop("topic", None)
                     selectKwargs = {k: v for k, v in clean.items() if k in ("freq", "scope")}
                     return c.select(topic, fields, **selectKwargs)
+            if target == "readFiling" and clean.get("sections") is True:
+                clean["sections"] = False
+                clean["maxChars"] = min(int(clean.get("maxChars") or 8000), 8000)
             # 시장별 메서드 미지원 graceful 처리 — 예: EDGAR Company 에는 ``topicSummaries``
             # 미구현 (DART 전용). AttributeError 그대로 raise 하면 AI 가 retry 만 돌리며
             # round 낭비. 친절한 None 반환 + 메시지로 대체.
@@ -481,6 +536,13 @@ def _buildHandler(name: str, kind: str, target: str) -> Callable[..., Any]:
         return _moduleHandler
 
     raise ValueError(f"unknown kind: {kind}")
+
+
+def _isHighMemorySectionsAccess(topic: Any) -> bool:
+    if topic is None:
+        return False
+    normalized = str(topic).strip().lower()
+    return normalized in {"sections", "section", "docs.sections", "rawsections", "retrievalblocks", "contextslices"}
 
 
 # ── Schema 자동 생성 ──────────────────────────────────────

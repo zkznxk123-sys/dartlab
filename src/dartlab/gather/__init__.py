@@ -864,6 +864,7 @@ class Gather:
                 from dartlab.gather import _macroHf
                 from dartlab.gather.ecos import catalog as ecos_catalog
 
+                indicator = ecos_catalog.resolveId(indicator)
                 ids = ecos_catalog.getAllIds() if scope == "catalog" else self._MACRO_KR
                 if indicator:
                     return _macroHf.fetchSeries("ecos", indicator, start=start, end=end)
@@ -901,6 +902,9 @@ class Gather:
             kwargs["end"] = end
         try:
             if indicator:
+                from dartlab.gather.ecos import catalog as ecos_catalog
+
+                indicator = ecos_catalog.resolveId(indicator)
                 return ecos.series(indicator, **kwargs)
             return ecos.compare(self._MACRO_KR, **kwargs)
         except (KeyError, ValueError, OSError, EcosError) as exc:

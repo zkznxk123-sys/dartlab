@@ -114,6 +114,37 @@ def validateToolArguments(
     return issues
 
 
+def sanitizeToolArguments(
+    name: str,
+    arguments: dict[str, Any] | None,
+    *,
+    today: date | None = None,
+) -> dict[str, Any]:
+    """runtime 실행 전 명백히 깨진 tool 인자를 1회 보정한다."""
+    today = today or date.today()
+    clean = dict(arguments or {})
+    if name == "capabilities":
+        clean = sanitizeCapabilitiesArgs(clean)
+    if name == "gather" and str(clean.get("axis") or "").lower() == "macro":
+        target = clean.get("target")
+        if isinstance(target, str):
+            try:
+                from dartlab.gather.ecos.catalog import resolveId
+
+                clean["target"] = resolveId(target) or target
+            except Exception:
+                pass
+    for key in _DATE_KEYS:
+        parsed = _parseDate(clean.get(key))
+        if parsed and parsed > today:
+            clean[key] = today.isoformat()
+    start = _parseDate(clean.get("start") or clean.get("from"))
+    end = _parseDate(clean.get("end") or clean.get("to"))
+    if start and end and start > end:
+        clean["start"] = end.isoformat()
+    return clean
+
+
 def latestDateFromToolArgs(toolCalls: list[dict[str, Any]]) -> date | None:
     """tool 인자에 명시된 날짜 중 가장 최신일."""
     latest: date | None = None

@@ -114,6 +114,32 @@ class TestBuildTools:
         assert "industry" in names
         assert "analysis" not in names
 
+    def test_select_tools_for_company_pair_compare_exposes_company_evidence_tools(self):
+        from dartlab.ai.tools import buildTools, selectToolsForQuestion
+
+        selected = selectToolsForQuestion(
+            buildTools(),
+            question="삼성전자와 SK하이닉스 반도체 업종 경쟁력을 비교해줘",
+            category="finance",
+            intent="compare",
+            hasCompany=False,
+        )
+        names = {t.name for t in selected}
+        assert "searchCompany" in names
+        assert "analysis" in names
+        assert "quant" in names
+        assert "scan" in names
+        ordered = [t.name for t in selected]
+        assert ordered.index("analysis") < ordered.index("scan")
+
+    def test_ai_tool_surface_blocks_sections_tools(self):
+        from dartlab.ai.tools import buildTools
+
+        names = {t.name for t in buildTools()}
+        assert "sections" not in names
+        assert "topicSummaries" not in names
+        assert "sectionsCoverage" not in names
+
     def test_select_tools_for_recent_price_movers_exposes_krx_path(self):
         from dartlab.ai.tools import buildTools, selectToolsForQuestion
 
@@ -166,6 +192,35 @@ class TestBuildTools:
         assert result["start"] == "2026-03-15"
         assert result["end"] == "2026-04-28"
         assert result["market"] == "KR"
+
+    def test_show_handler_blocks_direct_sections_access(self):
+        from dartlab.ai.tools import buildTools, executeTool
+
+        result = executeTool(buildTools(), "show", {"stockCode": "005930", "topic": "sections"})
+        assert "메모리 보호" in result["info"]
+        assert "sections 직접 조회를 차단" in result["info"]
+
+    def test_ecos_catalog_resolves_fx_alias(self):
+        from dartlab.gather.ecos.catalog import getEntry, resolveId
+
+        assert resolveId("KRWUSD") == "USDKRW"
+        assert resolveId("DEXKOUS") == "USDKRW"
+        entry = getEntry("KRWUSD")
+        assert entry is not None
+        assert entry.id == "USDKRW"
+
+    def test_runtime_sanitizes_macro_fx_alias_and_future_end_date(self):
+        from datetime import date
+
+        from dartlab.ai.runtime.contracts import sanitizeToolArguments
+
+        args = sanitizeToolArguments(
+            "gather",
+            {"axis": "macro", "target": "KRWUSD", "start": "2026-01-01", "end": "2026-12-31"},
+            today=date(2026, 4, 28),
+        )
+        assert args["target"] == "USDKRW"
+        assert args["end"] == "2026-04-28"
 
     def test_read_tool_description_points_to_docstring_skills(self):
         from dartlab.ai.tools import buildTools
@@ -295,6 +350,21 @@ class TestSerialize:
         assert "상위 20개" in out or "100" in out
         assert len(out) < 8500
 
+    def test_serializeForLlm_time_series_includes_latest_tail(self):
+        import polars as pl
+
+        from dartlab.ai.tools.serialize import serializeForLlm
+
+        df = pl.DataFrame(
+            {
+                "date": [f"2026-01-{i:02d}" for i in range(1, 31)],
+                "value": list(range(30)),
+            }
+        )
+        out = serializeForLlm(df, name="gather", arguments={"axis": "macro", "target": "USDKRW"})
+        assert "최신" in out
+        assert "2026-01-30" in out
+
 
 # ══════════════════════════════════════
 # toolLoop — mock provider
@@ -396,6 +466,25 @@ class TestToolLoop:
         # META 범주 — tool 0회 허용 (FINANCE 면 재질문 가드 발동)
         out = list(streamWithTools(llm, [{"role": "user", "content": "q"}], category="meta"))
         assert any(isinstance(item, str) and "짧은 답" in item for item in out)
+
+    def test_macro_fx_auto_args_for_exchange_rate_question(self):
+        from dartlab.ai.runtime.toolLoop import _macroFxAutoArgs
+
+        args = _macroFxAutoArgs("최근 한국 금리와 환율 상황 어때?", [{"name": "macro", "arguments": {"axis": "rates"}}])
+
+        assert args is not None
+        assert args["axis"] == "macro"
+        assert args["target"] == "USDKRW"
+
+    def test_macro_fx_auto_args_skips_existing_fx_evidence(self):
+        from dartlab.ai.runtime.toolLoop import _macroFxAutoArgs
+
+        args = _macroFxAutoArgs(
+            "최근 한국 금리와 환율 상황 어때?",
+            [{"name": "gather", "arguments": {"axis": "macro", "target": "KRWUSD"}}],
+        )
+
+        assert args is None
 
 
 class TestQualityGate:
@@ -502,6 +591,55 @@ class TestQualityGate:
         assert not result.passed
         assert "stale_date_risk" in result.issues
 
+    def test_quality_allows_disclosed_stale_recent_limit(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "최근 확인 가능한 기준일 기준으로 금리는 동결입니다.\n\n"
+            "| 지표 | asOf | 값 |\n| --- | --- | ---: |\n| 기준금리 | 2025-08-31 | 2.5% |\n\n"
+            "이 표에서 읽을 포인트\n- 현재라기보다 확인 가능한 기준일 기준입니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="최근 한국 금리 상황 어때?",
+            answer=answer,
+            toolCalls=[{"name": "macro", "arguments": {"axis": "rates", "end": "2025-08-31"}}],
+        )
+        assert result.passed
+
+    def test_quality_requires_fx_evidence_for_exchange_rate_question(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "최근 한국 금리는 동결이고 환율은 데이터가 없어 단정하지 않겠습니다.\n\n"
+            "| 지표 | 값 |\n| --- | ---: |\n| 기준금리 | 2.5% |\n\n"
+            "이 표에서 읽을 포인트\n- 환율은 데이터 한계가 있습니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="최근 한국 금리와 환율 상황 어때?",
+            answer=answer,
+            toolCalls=[{"name": "macro", "arguments": {"axis": "rates", "market": "KR"}}],
+        )
+        assert not result.passed
+        assert "stale_date_risk" in result.issues
+
+    def test_quality_accepts_fx_alias_evidence_for_exchange_rate_question(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "2026-04-27 기준 금리와 환율은 안정으로 판단합니다.\n\n"
+            "| 지표 | asOf | 값 |\n| --- | --- | ---: |\n| USD/KRW | 2026-04-27 | 1472.5 |\n\n"
+            "이 표에서 읽을 포인트\n- 환율은 최신 확인 기준입니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="최근 한국 금리와 환율 상황 어때?",
+            answer=answer,
+            toolCalls=[{"name": "gather", "arguments": {"axis": "macro", "target": "DEXKOUS"}}],
+        )
+        assert result.passed
+
     def test_quality_detects_partial_comparison(self):
         from dartlab.ai.runtime.quality import evaluateFinalAnswer
 
@@ -519,6 +657,48 @@ class TestQualityGate:
         assert not result.passed
         assert "partial_comparison" in result.issues
 
+    def test_quality_allows_disclosed_partial_comparison_limit(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "수익성 기준으로는 SK하이닉스가 우세하지만, 일부 축은 데이터 미수신이라 강한 결론을 일부 유보합니다.\n\n"
+            "| 회사 | 영업이익률 | 신용등급 |\n| --- | ---: | --- |\n| 삼성전자 | 13.07% | dCR-AA |\n"
+            "| SK하이닉스 | 48.59% | 데이터 미수신 |\n\n"
+            "이 표에서 읽을 포인트\n- 수익성 동일 축은 SK하이닉스가 앞섭니다.\n- 신용 축은 한계가 있습니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="삼성전자와 SK하이닉스 수익성을 비교해줘",
+            answer=answer,
+            toolCalls=[
+                {"name": "analysis", "arguments": {"stockCode": "005930"}},
+                {"name": "analysis", "arguments": {"stockCode": "000660"}},
+            ],
+        )
+        assert result.passed
+
+    def test_quality_allows_auxiliary_missing_when_same_axis_evidence_exists(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "실측치 기준으로는 SK하이닉스가 수익성 우위라고 판단합니다.\n\n"
+            "| 구분 | 삼성전자 | SK하이닉스 |\n| --- | ---: | ---: |\n"
+            "| 2025 매출 YoY | 10.88% | 46.76% |\n"
+            "| 2025 영업이익 YoY | 33.23% | 101.16% |\n"
+            "| 매출 현금전환율 | 데이터 미확인 | 124.27 |\n\n"
+            "이 표에서 읽을 포인트\n- 핵심 성장성 동일 축은 양쪽 모두 확인됩니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="삼성전자와 SK하이닉스 반도체 업종 경쟁력을 비교해줘",
+            answer=answer,
+            toolCalls=[
+                {"name": "analysis", "arguments": {"stockCode": "005930"}},
+                {"name": "analysis", "arguments": {"stockCode": "000660"}},
+            ],
+        )
+        assert result.passed
+
     def test_quality_detects_answer_table_conflict(self):
         from dartlab.ai.runtime.quality import evaluateFinalAnswer
 
@@ -535,6 +715,23 @@ class TestQualityGate:
         )
         assert not result.passed
         assert "answer_table_conflict" in result.issues
+
+    def test_quality_allows_reading_note_with_multiple_table_values(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "2026-04-27 기준 금리와 물가는 중립으로 판단합니다.\n\n"
+            "| 지표 | asOf | 값 |\n| --- | --- | ---: |\n"
+            "| 기준금리 | 2026-04-27 | 2.5% |\n| CPI | 2026-04-27 | 2.2% |\n\n"
+            "이 표에서 읽을 포인트\n- 금리는 2.5%이고 CPI는 2.2%입니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="최근 한국 금리 상황 어때?",
+            answer=answer,
+            toolCalls=[{"name": "macro", "arguments": {"axis": "rates"}}],
+        )
+        assert result.passed
 
     def test_quality_detects_fcf_sign_conflict(self):
         from dartlab.ai.runtime.quality import evaluateFinalAnswer

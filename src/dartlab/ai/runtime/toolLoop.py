@@ -10,6 +10,7 @@ import logging
 import traceback
 from typing import Any, Generator
 
+from dartlab.ai.runtime.contracts import sanitizeToolArguments
 from dartlab.ai.runtime.events import AnalysisEvent
 from dartlab.ai.runtime.progressCapture import runToolWithProgress
 from dartlab.ai.runtime.quality import evaluateFinalAnswer
@@ -217,6 +218,55 @@ def streamWithTools(
                             ),
                         }
                     )
+                fxArgs = _macroFxAutoArgs(question, observedToolCalls)
+                if fxArgs:
+                    observedToolCalls.append({"name": "gather", "arguments": fxArgs})
+                    yield AnalysisEvent(
+                        "tool_call",
+                        {
+                            "id": "auto_macro_fx",
+                            "name": "gather",
+                            "label": "시장 데이터 수집 — macro — USDKRW",
+                            "arguments": fxArgs,
+                            "round": roundIdx + 1,
+                        },
+                    )
+                    execTools = toolList if any(t.name == "gather" for t in toolList) else allTools
+                    try:
+                        raw = executeTool(execTools, "gather", fxArgs)
+                        llmText = _capToolResultForProvider(
+                            serializeForLlm(raw, name="gather", arguments=fxArgs),
+                            llm=llm,
+                        )
+                        uiText = serializeForUi(raw, name="gather")
+                        status = "ok"
+                    except Exception as exc:  # noqa: BLE001
+                        llmText = f"[tool error] {type(exc).__name__}: {exc}"
+                        uiText = llmText
+                        status = "error"
+                    yield AnalysisEvent(
+                        "tool_result",
+                        {
+                            "id": "auto_macro_fx",
+                            "name": "gather",
+                            "label": "시장 데이터 수집 — macro — USDKRW",
+                            "summary": None,
+                            "result": uiText,
+                            "status": status,
+                            "round": roundIdx + 1,
+                        },
+                    )
+                    messages.append(
+                        {
+                            "role": "user",
+                            "content": (
+                                "[시스템 추가 환율 데이터]\n"
+                                "질문에 환율이 포함됐지만 최종 답변 근거에 USD/KRW 시계열이 부족했습니다. "
+                                "아래 tool_result 의 최신 기준일, 기간, 값으로 환율 판단을 보강하세요.\n\n"
+                                f"{llmText}"
+                            ),
+                        }
+                    )
                 messages.append({"role": "user", "content": quality.repairPrompt})
                 continue
             if not quality.passed:
@@ -238,6 +288,8 @@ def streamWithTools(
         maxParallelTools = _maxParallelToolsForProvider(llm)
         if len(resp.tool_calls) > maxParallelTools:
             resp.tool_calls = resp.tool_calls[:maxParallelTools]
+        for tc in resp.tool_calls:
+            tc.arguments = sanitizeToolArguments(tc.name, tc.arguments)
 
         # tool 실행
         for tc in resp.tool_calls:
@@ -474,6 +526,40 @@ def _krxPriceMoverAutoCode(question: str | None, toolCalls: list[dict[str, Any]]
 
 def _hasObservedPythonExec(toolCalls: list[dict[str, Any]]) -> bool:
     return any(str(call.get("name", "")) == "pythonExec" for call in toolCalls)
+
+
+def _macroFxAutoArgs(question: str | None, toolCalls: list[dict[str, Any]]) -> dict[str, Any] | None:
+    q = (question or "").lower()
+    if not any(word in q for word in ("환율", "원달러", "원/달러", "usdkrw", "krwusd", "fx", "exchange")):
+        return None
+
+    try:
+        from dartlab.gather.ecos.catalog import resolveId
+    except Exception:  # pragma: no cover - catalog import failure is non-critical here
+
+        def resolveId(value: str) -> str:
+            return value
+
+    for call in toolCalls:
+        if str(call.get("name", "")) != "gather":
+            continue
+        args = call.get("arguments") or call.get("args") or {}
+        if not isinstance(args, dict) or str(args.get("axis") or "").lower() != "macro":
+            continue
+        target = str(args.get("target") or "")
+        if resolveId(target) == "USDKRW":
+            return None
+
+    from datetime import date, timedelta
+
+    today = date.today()
+    return {
+        "axis": "macro",
+        "target": "USDKRW",
+        "start": (today - timedelta(days=120)).isoformat(),
+        "end": today.isoformat(),
+        "market": "KR",
+    }
 
 
 def _capToolResultForProvider(text: str, *, llm: Any) -> str:
