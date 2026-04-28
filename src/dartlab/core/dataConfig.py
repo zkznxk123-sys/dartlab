@@ -51,6 +51,16 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "KRX 일별 전종목 OHLCV+시총+발행주식수 (raw, long parquet)",
         "public": True,
     },
+    "macroFred": {
+        "dir": "macro/fred",
+        "label": "FRED 거시경제 시계열 (HF 벌크, latest-revised)",
+        "public": True,
+    },
+    "macroEcos": {
+        "dir": "macro/ecos",
+        "label": "ECOS 한국은행 거시경제 시계열 (HF 벌크, latest-revised)",
+        "public": True,
+    },
     # ── generated artifact (landing 빌드 시 HF 에서 fetch) ──
     "industryMap": {
         "dir": "landing/map",

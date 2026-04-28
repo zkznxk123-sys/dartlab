@@ -2316,7 +2316,7 @@ class Company:
         Capabilities:
             - price: OHLCV 주가 시계열 (KR Naver / US Yahoo)
             - flow: 외국인/기관 수급 동향 (KR 전용)
-            - macro: ECOS(KR) / FRED(US) 거시지표 시계열
+            - macro: ECOS(KR) / FRED(US) 거시지표 시계열 (기본 HF 벌크)
             - news: Google News RSS 뉴스 수집
             - 자동 fallback 체인, circuit breaker, TTL 캐시
 
@@ -2359,7 +2359,7 @@ class Company:
 
         Requires:
             price/flow/news: 없음 (공개 API)
-            macro: API 키 -- ECOS_API_KEY (KR) 또는 FRED_API_KEY (US)
+            macro: 불필요 -- apiKey 명시 시 ECOS/FRED 직접 API 호출
 
         Example::
 

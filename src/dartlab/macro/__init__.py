@@ -416,7 +416,7 @@ class Macro:
         return buildAxisGuideDataFrame(
             _AXIS_REGISTRY,
             groupExtractor=_group,
-            apiKey="ECOS_API_KEY (KR) / FRED_API_KEY (US)",
+            apiKey="불필요 (기본 HF SSOT, 직접 API 선택 시 ECOS/FRED apiKey)",
         )
 
     def __repr__(self) -> str:
@@ -443,9 +443,9 @@ class Macro:
         lines.append('  dartlab.macro("종합")                         # 전체 종합 판정')
         lines.append('  dartlab.macro("시나리오", "2008 금융위기")     # 6막: 시나리오')
         lines.append("")
-        lines.append("━━━ API 키 필요 ━━━")
-        lines.append("  KR: ECOS_API_KEY  (한국은행 → https://ecos.bok.or.kr/api/)")
-        lines.append("  US: FRED_API_KEY  (연준    → https://fred.stlouisfed.org/docs/api/api_key.html)")
+        lines.append("━━━ API 키 ━━━")
+        lines.append("  기본: 불필요 (HF 벌크 데이터셋)")
+        lines.append("  직접 API: gather('macro', ..., apiKey=...) 로 ECOS/FRED 키 명시")
         lines.append("")
         lines.append(
             "노트북: https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py"

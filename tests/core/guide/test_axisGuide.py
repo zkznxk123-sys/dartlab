@@ -130,7 +130,7 @@ class Test5EngineGuideRegression:
         row0 = df.row(0, named=True)
         assert row0["axis"] == "cycle"
         assert "제" in row0["group"] and "막" in row0["group"]
-        assert "ECOS_API_KEY" in row0["apiKey"]
+        assert "불필요" in row0["apiKey"]
 
     def test_credit_engine(self):
         import dartlab

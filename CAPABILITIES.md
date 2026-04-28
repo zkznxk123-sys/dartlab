@@ -1,6 +1,6 @@
 # dartlab Capabilities
 
-> v0.9.25 기준 자동 생성. 직접 수정 금지.  
+> v0.9.26 기준 자동 생성. 직접 수정 금지.  
 > `uv run python scripts/build/generateSpec.py`로 재생성.
 
 
@@ -161,7 +161,7 @@ collect: DART API로 직접 수집 (최신 데이터, API 키 필요)
 #### gather
 **Capabilities:** price: OHLCV 시계열 (KR Naver/US Yahoo, 기본 1년, 최대 6000거래일)
 flow: 외국인/기관 수급 동향 (KR 전용, Naver)
-macro: ECOS(KR 12개) / FRED(US 25개) 거시지표 시계열
+macro: ECOS(KR) / FRED(US) 거시지표 시계열 (기본 HF 벌크)
 news: Google News RSS 뉴스 수집 (최근 30일)
 sector: 업종 분류 (KR KIND+Naver)
 insider: 내부자 거래 (KR DART)
@@ -169,7 +169,7 @@ ownership: 기관/외국인 지분 보유 (KR Naver)
 peers: 동종업종 피어 종목 (시총 포함, KR Naver)
 자동 fallback 체인, circuit breaker, TTL 캐시
 **Requires:** price/flow/news: 없음 (공개 API)
-macro: API 키 — ECOS_API_KEY (KR) 또는 FRED_API_KEY (US)
+macro: 불필요 — apiKey 명시 시 ECOS/FRED 직접 API 호출
 **AIContext:** ask()/chat()에서 주가/수급/거시 데이터를 컨텍스트로 주입 가능
 기업 분석 시 시장 데이터 보충 자료로 활용
 **Guide:** "주가 추이 보여줘" -> gather("price", "005930")
@@ -536,14 +536,14 @@ dartlab.scan.topics()                   # 가용 축 목록
 |----|------|------|------------|
 | `price` | 주가 | OHLCV 시계열 (수정주가). KR: 네이버 차트 API (최대 12년 일봉, API 키 불필요). US/해외: Yahoo v8 → 네이버 글로벌 자동 fallback. 시장 지수도 가능: gather('price', 'KOSPI') | O |
 | `flow` | 수급 | 외국인/기관 순매수 동향 (KR 전용, 네이버 금융). US는 미지원 → None | O |
-| `macro` | 거시지표 | KR: ECOS 한국은행 12개 지표 (API 키: ECOS_API_KEY). US: FRED 연준 25개 지표 (API 키: FRED_API_KEY). 지표 미지정 시 전체 반환. 단일 지표: gather('macro', 'CPI') | - |
+| `macro` | 거시지표 | KR: ECOS 한국은행, US: FRED 거시지표. 기본은 HF 벌크 데이터셋이라 API 키 불필요. apiKey 명시 시 직접 API 호출. 지표 미지정 시 전체 반환. | - |
 | `news` | 뉴스 | Google News RSS 최근 30일. API 키 불필요. 한글/영문 검색어 모두 지원 | O |
 | `sector` | 업종 | 업종 분류 + 동종업종 PER. KR: KRX KIND + 네이버 금융 | O |
 | `insider` | 내부자거래 | 임원/주요주주 주식 거래 내역. KR: DART API (API 키: DART_API_KEY) | O |
 | `ownership` | 지분 | 기관/외국인 보유 현황 (비율+주수). KR: 네이버 금융 | O |
 | `peers` | 피어 | 동종업종 피어 종목 목록 (종목코드+시총). KR: KRX/네이버 | O |
 | `krx` | KRX 회사별 시계열 | KOSPI/KOSDAQ 전종목 wide pivot — 행=stockCode+corpName, 열=일자. target (positional) 으로 raw OHLCV (close/open/high/low/volume/marketCap/...) 또는 보조지표 (rsi14/ma20/ema60/macd/atr14/obv/...) 28+ 디스패치. target='raw' 면 long (KRX 원본 컬럼). apiKey 없음 (기본): HF SSOT. apiKey 명시: KRX OpenAPI 직접. 환경변수 자동 read X. | - |
-| `krxindex` | KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지) | KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) OHLCV + 거래량 + 시가총액. target=close/open/high/low/volume/marketCap/raw. indexFilter=[지수명] 으로 특정 지수 (예: KOSPI200 + 보조지표 자동). apiKey 명시 필수 — idx 카테고리 권한 별도 신청 (sto 종목 키와 분리). | - |
+| `krxIndex` | KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지) | KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) OHLCV + 거래량 + 시가총액. target=close/open/high/low/volume/marketCap/raw. indexFilter=[지수명] 으로 특정 지수 (예: KOSPI200 + 보조지표 자동). apiKey 명시 필수 — idx 카테고리 권한 별도 신청 (sto 종목 키와 분리). | - |
 
 **한글 별칭:**
 
@@ -799,11 +799,11 @@ update: 누락 공시 증분 수집
 #### Company.gather
 **Capabilities:** price: OHLCV 주가 시계열 (KR Naver / US Yahoo)
 flow: 외국인/기관 수급 동향 (KR 전용)
-macro: ECOS(KR) / FRED(US) 거시지표 시계열
+macro: ECOS(KR) / FRED(US) 거시지표 시계열 (기본 HF 벌크)
 news: Google News RSS 뉴스 수집
 자동 fallback 체인, circuit breaker, TTL 캐시
 **Requires:** price/flow/news: 없음 (공개 API)
-macro: API 키 -- ECOS_API_KEY (KR) 또는 FRED_API_KEY (US)
+macro: 불필요 -- apiKey 명시 시 ECOS/FRED 직접 API 호출
 **AIContext:** ask()/chat()에서 주가/수급/거시 데이터를 컨텍스트로 주입
 기업 분석 시 시장 데이터 보충 자료로 활용
 **Guide:** When: 주가·수급·거시지표·뉴스 원본 데이터가 필요할 때.

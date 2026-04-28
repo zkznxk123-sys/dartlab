@@ -3,7 +3,7 @@
 > 상위 사상: [philosophy.md](philosophy.md) · 자가개선 루프: [coreloop.md](coreloop.md)
 
 **주체**: macro 엔진 (`dartlab.macro(axis, market=?)`).
-**현재**: 12 축 dict 반환 도구화 · 6 막 서사 조립은 story/macro 에 이관 (1.0.0 리팩토링) · FRED + ECOS 이중 공급 · 6h cache.
+**현재**: 12 축 dict 반환 도구화 · 6 막 서사 조립은 story/macro 에 이관 (1.0.0 리팩토링) · FRED + ECOS HF 벌크 기본 공급 · 직접 API 선택 · 6h cache.
 **방향**: story/macro 블록 템플릿 완성 · 기업이익 축 고도화 · macro 데이터 신선도 대시보드.
 
 시장 레벨 매크로 분석 엔진 — **L2 분석 엔진**. Company 없이 경제 환경을 해석한다.
@@ -83,7 +83,7 @@ Company-bound `c.macro()` 는 내부적으로 `dartlab.macro()` 를 호출. Comp
 |------|------|
 | 레이어 | L2 |
 | 진입점 | `dartlab.macro()`, `dartlab.macro("사이클")` |
-| 소비 | gather(L1) — FRED/ECOS, scan finance.parquet |
+| 소비 | gather(L1) — HF 벌크 FRED/ECOS, scan finance.parquet |
 | 생산 | ai(L3) 가 매크로 환경 판단에 소비, story 6 막에 macroCycle 블록으로 소비 |
 | 구조 | **6 막 인과 서사** + 12 축 (사이클/재고, 기업집계/교역, 금리, 유동성/위기, 자산/심리, 예측/시나리오, 종합) |
 

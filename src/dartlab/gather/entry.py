@@ -64,9 +64,9 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
     "macro": _GatherAxisEntry(
         label="거시지표",
         description=(
-            "KR: ECOS 한국은행 12개 지표 (API 키: ECOS_API_KEY). "
-            "US: FRED 연준 25개 지표 (API 키: FRED_API_KEY). "
-            "지표 미지정 시 전체 반환. 단일 지표: gather('macro', 'CPI')"
+            "KR: ECOS 한국은행, US: FRED 거시지표. "
+            "기본은 HF 벌크 데이터셋이라 API 키 불필요. "
+            "apiKey 명시 시 직접 API 호출. 지표 미지정 시 전체 반환."
         ),
         example='gather("macro") / gather("macro", "FEDFUNDS", market="US")',
         targetRequired=False,
@@ -138,7 +138,7 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
 _API_KEY_INFO: dict[str, str] = {
     "price": "불필요",
     "flow": "불필요",
-    "macro": "ECOS_API_KEY (KR) / FRED_API_KEY (US)",
+    "macro": "불필요 (기본 HF SSOT, apiKey 명시 시 ECOS/FRED 직접 호출)",
     "news": "불필요",
     "sector": "불필요",
     "insider": "DART_API_KEY",
@@ -274,7 +274,7 @@ class GatherEntry:
     Capabilities:
         - price: OHLCV 시계열 (KR Naver/US Yahoo, 기본 1년, 최대 6000거래일)
         - flow: 외국인/기관 수급 동향 (KR 전용, Naver)
-        - macro: ECOS(KR 12개) / FRED(US 25개) 거시지표 시계열
+        - macro: ECOS(KR) / FRED(US) 거시지표 시계열 (기본 HF 벌크)
         - news: Google News RSS 뉴스 수집 (최근 30일)
         - sector: 업종 분류 (KR KIND+Naver)
         - insider: 내부자 거래 (KR DART)
@@ -313,7 +313,7 @@ class GatherEntry:
 
     Requires:
         price/flow/news: 없음 (공개 API)
-        macro: API 키 — ECOS_API_KEY (KR) 또는 FRED_API_KEY (US)
+        macro: 불필요 — apiKey 명시 시 ECOS/FRED 직접 API 호출
 
     Example::
 
@@ -496,11 +496,13 @@ class GatherEntry:
         if axis == "flow":
             return g.flow(target, market=market)
         if axis == "macro":
+            apiKey = kwargs.pop("apiKey", None)
+            scope = kwargs.pop("scope", "default")
             if target is None:
-                return g.macro(market, start=start, end=end)
+                return g.macro(market, start=start, end=end, apiKey=apiKey, scope=scope)
             if _marketExplicit:
-                return g.macro(market, target, start=start, end=end)
-            return g.macro(target, start=start, end=end)
+                return g.macro(market, target, start=start, end=end, apiKey=apiKey, scope=scope)
+            return g.macro(target, start=start, end=end, apiKey=apiKey, scope=scope)
         if axis == "news":
             days = kwargs.pop("days", 30)
             return g.news(target, market=market, days=days)
@@ -630,8 +632,8 @@ class GatherEntry:
         return (
             "━━━ API 키 설정 안내 ━━━\n"
             "\n"
-            "거시지표(macro)와 내부자거래(insider)는 API 키가 필요합니다.\n"
-            ".env 파일에 아래 키를 추가하세요:\n"
+            "거시지표(macro)는 기본 HF 데이터셋 경로에서 API 키가 필요 없습니다.\n"
+            "직접 API 호출이나 내부자거래(insider)를 쓸 때는 .env 파일에 아래 키를 추가하세요:\n"
             "\n"
             "  ECOS_API_KEY=발급키     # 한국은행 ECOS (KR 거시지표)\n"
             "  FRED_API_KEY=발급키     # 미국 연준 FRED (US 거시지표)\n"
@@ -664,8 +666,8 @@ class GatherEntry:
         lines.append('  dartlab.gather("price", "KOSPI")        # 코스피 지수')
         lines.append('  dartlab.gather("price", "KOSDAQ")       # 코스닥 지수')
         lines.append("")
-        lines.append("━━━ API 키 필요 ━━━")
-        lines.append("  macro: ECOS_API_KEY (KR) / FRED_API_KEY (US)")
+        lines.append("━━━ API 키 ━━━")
+        lines.append("  macro: 기본 불필요 (apiKey 명시 시 ECOS/FRED 직접 호출)")
         lines.append("  insider: DART_API_KEY")
         lines.append("  → dartlab.gather._apiKeyGuide() 로 발급 링크 확인")
         lines.append("")

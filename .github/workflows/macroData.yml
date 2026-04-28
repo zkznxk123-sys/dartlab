@@ -1,0 +1,80 @@
+name: Macro Data Sync (Bulk)
+
+# 운영자 cron 벌크 (FRED/ECOS API) → HF dataset publish.
+# 사용자 기본 gather("macro") 는 이 결과를 HF 에서 소비한다.
+
+on:
+  schedule:
+    - cron: '30 21 * * *'   # KST 06:30 daily
+  workflow_dispatch:
+    inputs:
+      source:
+        description: 'fred | ecos | all'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - fred
+          - ecos
+          - all
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hf-dataset-push
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Restore macro parquet cache
+        uses: actions/cache/restore@v5
+        with:
+          path: data/macro
+          key: dartlab-macro-${{ github.run_id }}
+          restore-keys: dartlab-macro-
+
+      - name: Build FRED/ECOS parquet + push to HF
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          SOURCE="${{ github.event.inputs.source || 'all' }}"
+          uv run python -X utf8 scripts/build/buildMacroData.py \
+            --source "$SOURCE" \
+            --push
+
+      - name: Save macro parquet cache
+        uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: data/macro
+          key: dartlab-macro-${{ github.run_id }}
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Macro Data Sync (Bulk)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 항목 | 값 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | ${{ github.event_name }} ${{ github.event.schedule }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source | ${{ github.event.inputs.source || 'all' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| HF dataset | \`eddmpython/dartlab-data\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 출력 | \`macro/fred/*.parquet\`, \`macro/ecos/*.parquet\` |" >> $GITHUB_STEP_SUMMARY

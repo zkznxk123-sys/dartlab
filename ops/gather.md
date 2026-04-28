@@ -5,6 +5,7 @@
 **주체**: gather 엔진 (`dartlab.gather(axis, stockCode?)` · `c.gather(axis)`).
 **현재**: 주가 · 수급 · 뉴스 · ownership 축 · Naver · Yahoo · FMP fallback · 30 분 TTL 뉴스 · 5 분 TTL 주가 (KR).
 **KRX 풀커버**: 전 상장사 일별 OHLCV/시총/발행주식수 1995~ 현재까지 HF dataset (`eddmpython/dartlab-data/krx/prices/`) 으로 사전 빌드. 매 평일 KST 17:00 cron 이 당일 데이터 + 누락 갭 자동 append → 사용자 키 없이 `gather("krx", ...)` 한 줄로 즉시 사용. 수정주가 (split/bonus/rights) 자동 적용.
+**Macro 벌크**: FRED 전체 카탈로그 81개 + ECOS 전체 카탈로그 53개를 HF dataset (`macro/fred`, `macro/ecos`) 으로 사전 빌드. 매일 cron 이 갱신 → 사용자 키 없이 `gather("macro", ...)` 와 `dartlab.macro(...)` 가 즉시 사용.
 **방향**: 미국 실시간성 보강 · news sentiment 정교화 · gather → quant 팩터 직결 · KRX events (배당/분할 공시) Stage 2 트랙으로 TR 모드 활성.
 
 외부 시장 데이터 수집. 공시 데이터와 시장 데이터를 연결한다. 각 섹션은 **"이렇게 한다"** 명제로 열고, 반복된 실수는 섹션 하단 **"반복 실패"** 에 정리한다.
@@ -102,7 +103,7 @@ c.gather("news")                              # Google News RSS
 |---|---|---|---|
 | price | Naver 차트 → Naver Global | Naver Global → FMP | 메모리 TTL |
 | flow | Naver · KRX | — (KR 전용) | 메모리 TTL |
-| macro | ECOS + FRED | FRED | Parquet + 30 분 TTL |
+| macro | HF 벌크 ECOS + 직접 ECOS 선택 | HF 벌크 FRED + 직접 FRED 선택 | HF Parquet + ETag |
 | news | Google News RSS | Google News RSS | GatherCache |
 
 **반복 실패** — `flow` 는 KR 전용. 외국인·기관 수급 데이터는 KRX 에서만 제공되므로 EDGAR ticker 에서 `c.gather("flow")` 는 `None`. 미국 종목에 대한 flow 기대 금지.
@@ -131,6 +132,31 @@ gather 매크로 데이터를 두 엔진이 소비한다:
 
 - **macro (L2)** — `dartlab.macro()` — 시장 레벨 매크로 해석 (사이클 · 금리 · 자산 · 심리 · 유동성). Company 불필요. → `src/dartlab/macro/README.md`.
 - **analysis (L2)** — `c.analysis("financial", "매크로민감도")` — 기업별 외생변수 회귀. Company-bound.
+
+---
+
+## 8-A. FRED/ECOS 벌크 수집 경로 — KRX 와 동일하게 운영자 cron + 사용자 HF 기본으로 간다
+
+FRED/ECOS 는 KRX 와 같은 Mode A/B/C 분리 패턴을 따른다. **엔진 내부 기본은 무조건 HF 데이터셋**이며, 사용자 직접 API 호출은 `apiKey` 명시 경로에서만 발생한다.
+
+| 경로 | 트리거 | 키 | 소스 | 출력 |
+|---|---|---|---|---|
+| **A. 운영자 cron (벌크)** | `.github/workflows/macroData.yml` daily | `FRED_API_KEY`, `ECOS_API_KEY` (GitHub secret) | FRED/ECOS 직접 | HF dataset `macro/fred`, `macro/ecos` |
+| **B. 사용자 + apiKey 명시** | `gather("macro", ..., apiKey="...")` | 인자 명시 | FRED/ECOS 직접 | 기존 단일 `(date,value)` 또는 wide DataFrame |
+| **C. 사용자 기본** | `gather("macro", ...)` | 키 불필요 | HF dataset 자동 | 기존 단일 `(date,value)` 또는 wide DataFrame |
+
+### 저장 vs view
+
+- **저장 (HF parquet)**: long format.
+  - `observations.parquet`: `seriesId`, `date`, `value`
+  - `manifest.parquet`: `source`, `seriesId`, `label`, `group`, `frequency`, `unit`, `description`, `rowCount`, `startDate`, `latestDate`, `updatedAtUtc`, `status`, `error`
+- **사용자 view**:
+  - 단일 지표: `gather("macro", "FEDFUNDS")` → `(date, value)`
+  - 기본 전체: `gather("macro", market="US")` → 기존 핵심 지표 wide
+  - 전체 카탈로그: `gather("macro", market="US", scope="catalog")` → 전체 카탈로그 wide
+- **카탈로그 밖 지표**: 기본 HF 경로에서 자동 API fallback 하지 않는다. 직접 API 조회가 필요하면 `apiKey=` 를 명시한다.
+
+**반복 실패** — 엔진 내부가 사용자 환경변수 `FRED_API_KEY` / `ECOS_API_KEY` 를 직접 읽으면 키 없는 사용자가 macro 를 못 쓰고 재현성이 깨진다. 엔진 기본은 HF, 직접 API 는 명시 인자만.
 
 ---
 

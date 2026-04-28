@@ -265,6 +265,8 @@ workflow_run trigger → Data Prebuild (DART) 자동 실행
 | edinetDocs | edinet/docs | EDINET 공시 (일본) | 로컬 전용 |
 | edinet | edinet/finance | EDINET 재무 (일본) | 로컬 전용 |
 | krxPrices | krx/prices | KRX 일별 전종목 OHLCV+시총+발행주식수 (raw long) | buildKrxData (cron KST 17:00 평일 incremental) |
+| macroFred | macro/fred | FRED 거시경제 시계열 (observations + manifest) | macroData (daily) |
+| macroEcos | macro/ecos | ECOS 한국은행 거시경제 시계열 (observations + manifest) | macroData (daily) |
 
 새 카테고리 추가: `DATA_RELEASES` 에 한 줄 + `brand.ts` data 블록 추가.
 

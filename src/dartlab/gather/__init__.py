@@ -755,28 +755,34 @@ class Gather:
         *,
         start: str | None = None,
         end: str | None = None,
+        apiKey: str | None = None,
+        scope: str = "default",
     ) -> "pl.DataFrame | None":
         """거시경제 지표 시계열 조회.
 
         Capabilities:
+            - 기본: HuggingFace 벌크 데이터셋 — API 키 불필요
             - KR: ECOS (한국은행) — CPI, 기준금리, 환율 등 12개 핵심 지표
             - US: FRED — GDP, CPI, 실업률, 연방기금금리 등 24개 핵심 지표
             - 스마트 라우팅: 지표 코드만으로 KR/US 자동 감지
             - 전체 지표: wide DataFrame (date + 각 지표 컬럼)
             - 단일 지표: (date, value) DataFrame
+            - 직접 API: apiKey 명시 시만 ECOS/FRED API 호출
 
         Args:
             market: "KR" 또는 "US". 지표 코드 직접 전달도 가능 (자동 감지).
             indicator: 지표 코드 ("CPI", "FEDFUNDS" 등). None이면 전체 지표.
             start: 시작일 (YYYY-MM-DD). None이면 기본 기간.
             end: 종료일. None이면 오늘.
+            apiKey: ECOS/FRED 직접 API 키. None이면 HF 벌크 데이터셋 사용.
+            scope: "default" (기존 핵심 지표) 또는 "catalog" (전체 카탈로그).
 
         Returns:
             pl.DataFrame | None — wide DataFrame (전체) 또는 (date, value) (단일).
 
         Requires:
-            KR: ECOS_API_KEY (한국은행 무료 발급).
-            US: FRED_API_KEY (FRED 무료 발급).
+            기본 HF 경로: 불필요.
+            직접 API 경로: KR ECOS_API_KEY, US FRED_API_KEY 값을 apiKey 로 명시 전달.
 
         Example::
 
@@ -788,13 +794,15 @@ class Gather:
             g.macro("KR", "CPI")      # 명시적 KR + CPI
             g.macro("US", "SP500")    # 명시적 US + S&P500
         """
+        if scope not in {"default", "catalog"}:
+            raise ValueError("scope 는 'default' 또는 'catalog' 여야 합니다.")
         # 스마트 라우팅: market 위치에 지표 코드가 온 경우
         if market not in self._KNOWN_MARKETS:
             indicator = market
             market = self._detectMarket(indicator)
         if market == "KR":
-            return self._macroKR(indicator, start=start, end=end)
-        return self._macroUS(indicator, start=start, end=end)
+            return self._macroKR(indicator, start=start, end=end, apiKey=apiKey, scope=scope)
+        return self._macroUS(indicator, start=start, end=end, apiKey=apiKey, scope=scope)
 
     def _detectMarket(self, indicator: str) -> str:
         """지표 코드로 market 자동 감지 — ECOS 카탈로그에 있으면 KR, 없으면 US.
@@ -819,7 +827,15 @@ class Gather:
             pass
         return "US"
 
-    def _macroKR(self, indicator: str | None, *, start: str | None, end: str | None):
+    def _macroKR(
+        self,
+        indicator: str | None,
+        *,
+        start: str | None,
+        end: str | None,
+        apiKey: str | None = None,
+        scope: str = "default",
+    ):
         """KR 거시지표 — ECOS (한국은행) API 조회.
 
         Parameters
@@ -836,14 +852,28 @@ class Gather:
         pl.DataFrame | None
             단일 지표: date (Date), value (Float64) 컬럼.
             전체 지표: date + 각 지표명 컬럼 (wide DataFrame).
-            None — ECOS 모듈 미설치. CLI 대화형에서 사용자가 키 입력을 건너뛴 경우.
+            None — HF 데이터셋/ECOS 모듈 미가용 또는 직접 API 실패 시.
 
         Raises
         ------
-        AuthKeyMissing
-            서버·백그라운드 등 TTY 가 없는 환경에서 ECOS_API_KEY 미설정 시.
-            예외 본문에 발급 URL + `.env` 설정법 포함 — AI tool 이 그대로 사용자 응답에 전달.
+        ValueError
+            HF 카탈로그 밖 지표를 apiKey 없이 요청한 경우.
         """
+        if apiKey is None:
+            try:
+                from dartlab.gather import _macroHf
+                from dartlab.gather.ecos import catalog as ecos_catalog
+
+                ids = ecos_catalog.getAllIds() if scope == "catalog" else self._MACRO_KR
+                if indicator:
+                    return _macroHf.fetchSeries("ecos", indicator, start=start, end=end)
+                return _macroHf.fetchMulti("ecos", ids, start=start, end=end)
+            except Exception as exc:
+                if isinstance(exc, ValueError):
+                    raise
+                log.warning("macro KR HF 실패: %s", exc)
+                return None
+
         try:
             from dartlab.gather.ecos import Ecos
             from dartlab.gather.ecos.types import EcosError
@@ -851,7 +881,7 @@ class Gather:
             log.debug("ecos 모듈 없음 — KR macro 수집 생략")
             return None
         try:
-            ecos = Ecos()
+            ecos = Ecos(apiKey=apiKey)
         except EcosError:
             from dartlab.core.env import promptAndSave
 
@@ -877,7 +907,15 @@ class Gather:
             log.warning("macro KR 실패: %s", exc)
             return None
 
-    def _macroUS(self, indicator: str | None, *, start: str | None, end: str | None):
+    def _macroUS(
+        self,
+        indicator: str | None,
+        *,
+        start: str | None,
+        end: str | None,
+        apiKey: str | None = None,
+        scope: str = "default",
+    ):
         """US 거시지표 — FRED API 조회.
 
         Parameters
@@ -894,14 +932,28 @@ class Gather:
         pl.DataFrame | None
             단일 지표: date (Date), value (Float64) 컬럼.
             전체 지표: date + 각 지표명 컬럼 (wide DataFrame).
-            None — FRED 모듈 미설치. CLI 대화형에서 사용자가 키 입력을 건너뛴 경우.
+            None — HF 데이터셋/FRED 모듈 미가용 또는 직접 API 실패 시.
 
         Raises
         ------
-        AuthKeyMissing
-            서버·백그라운드 등 TTY 가 없는 환경에서 FRED_API_KEY 미설정 시.
-            예외 본문에 발급 URL + `.env` 설정법 포함 — AI tool 이 그대로 사용자 응답에 전달.
+        ValueError
+            HF 카탈로그 밖 지표를 apiKey 없이 요청한 경우.
         """
+        if apiKey is None:
+            try:
+                from dartlab.gather import _macroHf
+                from dartlab.gather.fred import catalog as fred_catalog
+
+                ids = fred_catalog.get_all_ids() if scope == "catalog" else self._MACRO_US
+                if indicator:
+                    return _macroHf.fetchSeries("fred", indicator, start=start, end=end)
+                return _macroHf.fetchMulti("fred", ids, start=start, end=end)
+            except Exception as exc:
+                if isinstance(exc, ValueError):
+                    raise
+                log.warning("macro US HF 실패 (indicator=%s): %s", indicator or "ALL", exc)
+                return None
+
         try:
             from dartlab.gather.fred import Fred
             from dartlab.gather.fred.types import FredError
@@ -909,7 +961,7 @@ class Gather:
             log.debug("fred 모듈 없음 — US macro 수집 생략")
             return None
         try:
-            fred = Fred()
+            fred = Fred(api_key=apiKey)
         except FredError:
             from dartlab.core.env import promptAndSave
 

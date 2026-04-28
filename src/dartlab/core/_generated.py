@@ -168,11 +168,11 @@ CAPABILITIES: dict[str, dict] = {
     "Company.gather": {
         "aicontext": "ask()/chat()에서 주가/수급/거시 데이터를 컨텍스트로 주입\n기업 분석 시 시장 데이터 보충 자료로 활용",
         "args": 'axis: 축 이름 ("price", "flow", "macro", "news"). None이면 가이드 반환.\n**kwargs: market, start, end, days 등 축별 옵션.',
-        "capabilities": "price: OHLCV 주가 시계열 (KR Naver / US Yahoo)\nflow: 외국인/기관 수급 동향 (KR 전용)\nmacro: ECOS(KR) / FRED(US) 거시지표 시계열\nnews: Google News RSS 뉴스 수집\n자동 fallback 체인, circuit breaker, TTL 캐시",
+        "capabilities": "price: OHLCV 주가 시계열 (KR Naver / US Yahoo)\nflow: 외국인/기관 수급 동향 (KR 전용)\nmacro: ECOS(KR) / FRED(US) 거시지표 시계열 (기본 HF 벌크)\nnews: Google News RSS 뉴스 수집\n자동 fallback 체인, circuit breaker, TTL 캐시",
         "example": 'c = Company("005930")\nc.gather()                 # 4축 가이드\nc.gather("price")          # 주가 시계열\nc.gather("news")           # 뉴스',
         "guide": 'When: 주가·수급·거시지표·뉴스 원본 데이터가 필요할 때.\nHow: axis 로 데이터 종류 지정. 무인자 = 가이드.\n"주가 데이터" → c.gather("price")\n"외국인/기관 수급" → c.gather("flow")\n"거시경제 지표" → c.gather("macro")\n"뉴스 수집" → c.gather("news") 또는 c.news()\nVerified:\ngather("news") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)',
         "kind": "method",
-        "requires": "price/flow/news: 없음 (공개 API)\nmacro: API 키 -- ECOS_API_KEY (KR) 또는 FRED_API_KEY (US)",
+        "requires": "price/flow/news: 없음 (공개 API)\nmacro: 불필요 -- apiKey 명시 시 ECOS/FRED 직접 API 호출",
         "returns": 'pl.DataFrame | None\naxis=None (가이드):\naxis : str — 축 이름\nlabel : str — 한글 레이블\ndescription : str — 설명\nexample : str — 사용 예시\naxis="price":\ndate : date — 날짜\nopen : float — 시가 (원)\nhigh : float — 고가 (원)\nlow : float — 저가 (원)\nclose : float — 종가 (원)\nvolume : int — 거래량\naxis="flow":\ndate : date — 날짜\n외국인순매수 : int — 외국인 순매수량\n기관순매수 : int — 기관 순매수량\n(KR 전용. EDGAR ticker는 None 반환)\naxis="macro":\ndate : date — 날짜\n지표별 컬럼 : float — ECOS/FRED 거시지표 값\naxis="news":\ntitle : str — 뉴스 제목\nlink : str — 기사 URL\npubDate : str — 발행일\n데이터 없으면 None.',
         "seeAlso": "news: 뉴스 전용 단축 메서드\nask: gather 데이터를 컨텍스트로 활용한 AI 분석",
         "summary": "외부 시장 데이터 수집 — 4축 (price/flow/macro/news).",
@@ -667,13 +667,13 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "gather_axis",
         "summary": "KRX 회사별 시계열",
     },
-    "gather.krxindex": {
+    "gather.krxIndex": {
         "capabilities": "KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) OHLCV + 거래량 + 시가총액. target=close/open/high/low/volume/marketCap/raw. indexFilter=[지수명] 으로 특정 지수 (예: KOSPI200 + 보조지표 자동). apiKey 명시 필수 — idx 카테고리 권한 별도 신청 (sto 종목 키와 분리).",
         "kind": "gather_axis",
         "summary": "KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지)",
     },
     "gather.macro": {
-        "capabilities": "KR: ECOS 한국은행 12개 지표 (API 키: ECOS_API_KEY). US: FRED 연준 25개 지표 (API 키: FRED_API_KEY). 지표 미지정 시 전체 반환. 단일 지표: gather('macro', 'CPI')",
+        "capabilities": "KR: ECOS 한국은행, US: FRED 거시지표. 기본은 HF 벌크 데이터셋이라 API 키 불필요. apiKey 명시 시 직접 API 호출. 지표 미지정 시 전체 반환.",
         "kind": "gather_axis",
         "summary": "거시지표",
     },
