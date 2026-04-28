@@ -191,7 +191,9 @@ class AuditCollector:
             issues = data.get("issues") or []
             if isinstance(issues, list):
                 self.quality_issues = [str(i) for i in issues]
-            if not data.get("passed", True) and self.quality_issues:
+            if data.get("passed", True):
+                self.quality_issues = []
+            elif data.get("action") == "record_violation" and self.quality_issues:
                 self.observe_violation(",".join(self.quality_issues))
 
     # ── flush ─────────────────────────────────────────────────────

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from typing import Generator
 
 import httpx
@@ -250,6 +251,19 @@ class OAuthCodexProvider(BaseProvider):
                 headers = self._build_headers(refreshed["access_token"])
                 resp = _do_request(headers)
 
+        if resp.status_code in {502, 503, 504}:
+            if stream:
+                resp.read()
+                resp.close()
+            for attempt in range(2):
+                time.sleep(1.5 * (attempt + 1))
+                resp = _do_request(headers)
+                if resp.status_code not in {502, 503, 504}:
+                    break
+                if stream:
+                    resp.read()
+                    resp.close()
+
         if resp.status_code != 200:
             if stream:
                 resp.read()
@@ -296,23 +310,23 @@ class OAuthCodexProvider(BaseProvider):
             elif role == "assistant":
                 # tool_calls가 포함된 assistant 메시지
                 if "_oauth_tool_calls" in m:
+                    tool_call_lines = []
                     for tc in m["_oauth_tool_calls"]:
-                        input_items.append(
-                            {
-                                "type": "function_call",
-                                "call_id": tc["id"],
-                                "name": tc["name"],
-                                "arguments": tc["arguments"],
-                            }
+                        tool_call_lines.append(
+                            f"- {tc.get('name', '')} call_id={tc.get('id', '')} args={tc.get('arguments', '')}"
                         )
-                    if text_content:
-                        input_items.append(
-                            {
-                                "type": "message",
-                                "role": "assistant",
-                                "content": [{"type": "output_text", "text": text_content}],
-                            }
+                    assistant_text = text_content
+                    if tool_call_lines:
+                        assistant_text = (assistant_text + "\n\n" if assistant_text else "") + (
+                            "[tool_calls]\n" + "\n".join(tool_call_lines)
                         )
+                    input_items.append(
+                        {
+                            "type": "message",
+                            "role": "assistant",
+                            "content": [{"type": "output_text", "text": assistant_text}],
+                        }
+                    )
                 else:
                     input_items.append(
                         {
@@ -322,12 +336,19 @@ class OAuthCodexProvider(BaseProvider):
                         }
                     )
             elif role == "tool":
-                # tool result → function_call_output
+                # Codex OAuth backend accepts current-turn tool calls, but it is stricter
+                # than the public Responses API when replaying prior function_call_output
+                # items. Feed prior tool evidence back as normal user text instead.
                 input_items.append(
                     {
-                        "type": "function_call_output",
-                        "call_id": m.get("tool_call_id", ""),
-                        "output": text_content,
+                        "type": "message",
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "input_text",
+                                "text": f"[tool_result call_id={m.get('tool_call_id', '')}]\n{text_content}",
+                            }
+                        ],
                     }
                 )
             else:

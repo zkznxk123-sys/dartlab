@@ -184,7 +184,10 @@ def streamWithTools(
                     execTools = toolList if any(t.name == "pythonExec" for t in toolList) else allTools
                     try:
                         raw = executeTool(execTools, "pythonExec", autoArgs)
-                        llmText = serializeForLlm(raw, name="pythonExec", arguments=autoArgs)
+                        llmText = _capToolResultForProvider(
+                            serializeForLlm(raw, name="pythonExec", arguments=autoArgs),
+                            llm=llm,
+                        )
                         uiText = serializeForUi(raw, name="pythonExec")
                         status = "ok"
                     except Exception as exc:  # noqa: BLE001 - 자동 보강 실패도 audit 에 남기고 재작성으로 진행
@@ -232,8 +235,9 @@ def streamWithTools(
                 yield finalText
             return
 
-        if len(resp.tool_calls) > _MAX_PARALLEL_TOOLS:
-            resp.tool_calls = resp.tool_calls[:_MAX_PARALLEL_TOOLS]
+        maxParallelTools = _maxParallelToolsForProvider(llm)
+        if len(resp.tool_calls) > maxParallelTools:
+            resp.tool_calls = resp.tool_calls[:maxParallelTools]
 
         # tool 실행
         for tc in resp.tool_calls:
@@ -272,7 +276,10 @@ def streamWithTools(
                     toolExc = payload
 
             if toolExc is None:
-                llmText = serializeForLlm(raw, name=tc.name, arguments=tc.arguments)
+                llmText = _capToolResultForProvider(
+                    serializeForLlm(raw, name=tc.name, arguments=tc.arguments),
+                    llm=llm,
+                )
                 uiText = serializeForUi(raw, name=tc.name)
                 status = "ok"
             elif isinstance(toolExc, AuthKeyMissing):
@@ -467,6 +474,22 @@ def _krxPriceMoverAutoCode(question: str | None, toolCalls: list[dict[str, Any]]
 
 def _hasObservedPythonExec(toolCalls: list[dict[str, Any]]) -> bool:
     return any(str(call.get("name", "")) == "pythonExec" for call in toolCalls)
+
+
+def _capToolResultForProvider(text: str, *, llm: Any) -> str:
+    """Provider별 backend 한도를 피하기 위해 LLM용 tool_result만 압축한다."""
+    provider = str(getattr(getattr(llm, "config", None), "provider", "") or "")
+    limit = 1800 if provider == "oauth-codex" else 8000
+    if len(text) <= limit:
+        return text
+    return text[:limit] + f"\n... (+{len(text) - limit} chars 잘림; 필요한 값은 추가 tool 호출로 조회)"
+
+
+def _maxParallelToolsForProvider(llm: Any) -> int:
+    provider = str(getattr(getattr(llm, "config", None), "provider", "") or "")
+    if provider == "oauth-codex":
+        return 2
+    return _MAX_PARALLEL_TOOLS
 
 
 def _hashArgs(args: dict) -> str:
