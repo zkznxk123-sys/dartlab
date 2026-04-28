@@ -32,12 +32,13 @@ from pathlib import Path
 
 
 def _download(url: str, dest: Path, token: str | None, timeout: int = 60) -> int:
-    """단일 파일 HTTP GET. 429 Too Many Requests 시 Retry-After 따라 대기 후 재시도.
+    """단일 파일 HTTP GET. 429/5xx/일시 네트워크 오류는 대기 후 재시도.
 
     반환: 다운로드 바이트 수.
 
     HF 제한: 5000 resolvers / 5분 / account. cold seed 로 3 카테고리 풀다운로드하면
-    ~8800 요청 → 도중 429 히트. 429 응답의 Retry-After (보통 60~300s) 존중 + 지수 백오프.
+    ~8800 요청 → 도중 429 히트. 429 응답의 Retry-After (보통 60~300s) 존중.
+    502/503/504 같은 resolver 일시 장애는 짧은 지수 백오프로 복구한다.
     """
     import urllib.error
     import urllib.request
@@ -45,9 +46,10 @@ def _download(url: str, dest: Path, token: str | None, timeout: int = 60) -> int
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".tmp")
 
-    maxRetries = 4
+    maxRetries = 5
     # HF rate limit window = 5분. 첫 retry 부터 window 완전 재설정 + 10초 버퍼.
     baseWait = 310.0
+    transientCodes = {500, 502, 503, 504}
 
     for attempt in range(maxRetries):
         try:
@@ -62,14 +64,35 @@ def _download(url: str, dest: Path, token: str | None, timeout: int = 60) -> int
             tmp.replace(dest)
             return bytesWritten
         except urllib.error.HTTPError as e:
-            if e.code != 429 or attempt == maxRetries - 1:
+            if e.code == 429 and attempt < maxRetries - 1:
+                retryAfter = e.headers.get("Retry-After")
+                try:
+                    wait = max(float(retryAfter), baseWait) if retryAfter else baseWait * (1 + attempt * 0.5)
+                except ValueError:
+                    wait = baseWait * (1 + attempt * 0.5)
+                print(
+                    f"[seed] 429 rate limit ({dest.name}) — {wait:.0f}s 대기 후 재시도 {attempt + 1}/{maxRetries}",
+                    flush=True,
+                )
+                time.sleep(wait)
+                continue
+            if e.code in transientCodes and attempt < maxRetries - 1:
+                wait = min(30.0 * (2**attempt), 180.0)
+                print(
+                    f"[seed] HTTP {e.code} transient ({dest.name}) — {wait:.0f}s 대기 후 재시도 {attempt + 1}/{maxRetries}",
+                    flush=True,
+                )
+                time.sleep(wait)
+                continue
+            raise
+        except (urllib.error.URLError, TimeoutError) as e:
+            if attempt == maxRetries - 1:
                 raise
-            retryAfter = e.headers.get("Retry-After")
-            try:
-                wait = max(float(retryAfter), baseWait) if retryAfter else baseWait * (1 + attempt * 0.5)
-            except ValueError:
-                wait = baseWait * (1 + attempt * 0.5)
-            print(f"[seed] 429 rate limit ({dest.name}) — {wait:.0f}s 대기 후 재시도 {attempt+1}/{maxRetries}", flush=True)
+            wait = min(15.0 * (2**attempt), 120.0)
+            print(
+                f"[seed] network transient ({dest.name}) — {wait:.0f}s 대기 후 재시도 {attempt + 1}/{maxRetries}: {e}",
+                flush=True,
+            )
             time.sleep(wait)
 
 
@@ -120,10 +143,7 @@ def seedCategory(cat: str, dataDir: Path) -> tuple[int, int, float]:
         started = time.time()
 
         with ThreadPoolExecutor(max_workers=4) as pool:
-            futures = {
-                pool.submit(_download, f"{baseUrl}/{rel}", dataDir / rel, token): rel
-                for rel, _ in missing
-            }
+            futures = {pool.submit(_download, f"{baseUrl}/{rel}", dataDir / rel, token): rel for rel, _ in missing}
             done = 0
             for fut in as_completed(futures):
                 rel = futures[fut]
