@@ -27,7 +27,7 @@ KRX OpenAPI 키 발급 (Mode B 사용 시):
 
 키 없이 쓰려면 (Mode C, 권장 — 모든 사용자 사용 가능):
     https://huggingface.co/datasets/eddmpython/krx-prices 데이터셋이 자동으로 받아짐
-    (KST 17:00 이후 운영자 cron 으로 매일 갱신)
+    (KST 20:00 운영자 cron 이 직전 거래 가능 평일(T-1)까지 갱신)
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from datetime import date as _date
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Literal
 
 import httpx
@@ -46,7 +46,6 @@ log = logging.getLogger(__name__)
 _BASE_URL = "https://data-dbg.krx.co.kr/svc/apis/sto"
 _ENDPOINT = {"STK": "stk_bydd_trd", "KSQ": "ksq_bydd_trd"}
 _KST = timezone(timedelta(hours=9))
-_MARKET_CLOSE_KST = time(17, 0)
 
 # KRX 응답 schema cast — SSOT (운영자 cron · 사용자 직접 호출 모두 이 캐스트 통과)
 _INT_COLS = (
@@ -115,15 +114,10 @@ def _normalizeDate(d: str | _date) -> str:
 
 
 def _isFinalized(basDd: str) -> bool:
-    """장 마감 확정 가드 — 오늘 자료는 KST 17:00 이후만 확정."""
+    """확정 가드 — sto 일별 API 는 당일(T-0)을 안정적으로 제공하지 않는다."""
     target = datetime.strptime(basDd, "%Y%m%d").date()
-    nowKst = datetime.now(_KST)
-    today = nowKst.date()
-    if target < today:
-        return True
-    if target > today:
-        return False
-    return nowKst.time() >= _MARKET_CLOSE_KST
+    today = datetime.now(_KST).date()
+    return target < today
 
 
 async def fetchKrxBydd(
@@ -153,14 +147,14 @@ async def fetchKrxBydd(
     -------
     pl.DataFrame
         그 날 시장 전종목 OHLCV + 시총 + 발행주식수. 컬럼은 KRX 응답 그대로.
-        장 마감 미확정 또는 거래일 아니면 빈 DataFrame.
+        확정 전 일자 또는 거래일 아니면 빈 DataFrame.
     """
     if not apiKey:
         raise ValueError("apiKey 필수 — KRX OpenAPI 호출에는 키가 필요합니다")
     basDd = _normalizeDate(basDd)
     if not _isFinalized(basDd):
         log.warning(
-            "KRX %s: today not finalized — KRX confirms after 17:00 KST",
+            "KRX %s: not finalized for sto by-day API — use T+1 or later",
             basDd,
         )
         return pl.DataFrame()
@@ -199,7 +193,16 @@ def _parseKrxResponse(data: dict, *, market: str, basDd: str) -> pl.DataFrame:
     """
     rows = data.get("OutBlock_1") or []
     if not rows:
-        log.info("KRX %s %s: 빈 응답 (휴장일 또는 자료 없음)", market, basDd)
+        detailKeys = sorted(str(k) for k in data.keys())
+        statusHints = {
+            k: data.get(k)
+            for k in ("status_code", "status", "code", "message", "msg", "error", "error_code", "error_message")
+            if k in data
+        }
+        if statusHints:
+            log.info("KRX %s %s: 빈 응답 keys=%s hints=%s", market, basDd, detailKeys, statusHints)
+        else:
+            log.info("KRX %s %s: 빈 응답 (휴장일 또는 자료 없음) keys=%s", market, basDd, detailKeys)
         return pl.DataFrame()
 
     df = pl.DataFrame(rows)
@@ -276,11 +279,11 @@ def gatherKrx(
         - **target = 보조지표** → `gather/indicators.py` SSOT 의 28+ 지표를 종목별 group 동시 계산 후 wide
             (rsi14, ma20, ema60, macd, bbUpper20, atr14, obv, mfi14, adx14, ...)
         - **target = "raw"** → long DataFrame escape hatch (KRX 원본 컬럼 그대로, events join 자유)
-        - apiKey 명시: KRX OpenAPI POST 직접 호출 (본인 키, 최신 즉시)
+        - apiKey 명시: KRX OpenAPI POST 직접 호출 (본인 키, 확정 일자)
         - apiKey 없음 (기본): HF dataset 자동 — 모든 사용자 동일 SSOT, 재현성 보장
         - 단일일자 또는 기간 (역방향 일별 루프, 휴장일 자동 skip)
         - 시장 필터 (KOSPI / KOSDAQ / ALL), 종목 필터 (stockCodes)
-        - 장 마감 확정 가드 (오늘 자료는 KST 17:00 이후만)
+        - 확정 가드 (오늘 T-0 자료는 직접 호출도 제외)
         - **환경변수 KRX_API_KEY 보지 않음** — 운영자 cron 빌드 스크립트만 read
 
     AIContext:
@@ -300,7 +303,7 @@ def gatherKrx(
         - "특정 종목만" → gather("krx", ..., stockCodes=["005930", "000660"])
         - "코스닥만" → gather("krx", ..., market="KOSDAQ")
         - "long raw" → gather("krx", "raw", date=)
-        - "본인 키로 최신 즉시" → gather("krx", ..., apiKey="...")
+        - "본인 키로 확정 일자 직접 조회" → gather("krx", ..., apiKey="...")
 
     SeeAlso:
         - gather/indicators.py — 45개 보조지표 SSOT (vsma/vrsi/vmacd/...)
@@ -355,7 +358,7 @@ def gatherKrx(
         - **apiKey 미명시 (기본, 권장)**: 키 불필요. 인터넷 연결만 필요.
             HF dataset: https://huggingface.co/datasets/eddmpython/dartlab-data
             카테고리: ``krx/prices/raw-{YYYY}.parquet``
-            (KST 17:00 이후 운영자 cron 으로 매일 갱신)
+            (KST 20:00 운영자 cron 이 직전 거래 가능 평일(T-1)까지 갱신)
         - **apiKey 명시**: KRX OpenAPI 인증키.
             발급: https://openapi.krx.co.kr → 회원가입 → "API 인증키 신청" (무료, 즉시)
             전달 방법 3 가지:
@@ -395,7 +398,7 @@ def gatherKrx(
         # 6. long raw (events join 등 자유 가공)
         raw = dartlab.gather("krx", "raw", date="2025-06-30")
 
-        # 7. 본인 키로 직접 (장 마감 직후 즉시)
+        # 7. 본인 키로 직접 (확정 일자 조회)
         df = dartlab.gather("krx", "close", date="2025-06-30", apiKey="MY_KEY")
 
         # 8. .env 의 키 사용

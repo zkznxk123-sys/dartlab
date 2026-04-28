@@ -4,7 +4,7 @@ GitHub Actions workflow (`.github/workflows/buildKrxData.yml`) 가 호출.
 로컬에서도 ``uv run python -X utf8 scripts/build/buildKrxData.py ...`` 로 실행 가능.
 
 모드:
-    incremental — 어제 (T-1) 1일치 → 현재 연도 parquet append
+    incremental — 직전 거래 가능 평일(T-1)까지 → 현재 연도 parquet append
     backfill    — ``--start ~ --end`` 기간 → 연도별 parquet 통합/append
 
 요구사항:
@@ -123,20 +123,31 @@ def _previousWeekday(d: date) -> date:
     return cur
 
 
+def _latestFetchableDate(today: date | None = None) -> date:
+    """KRX sto 일별 OpenAPI에서 안정적으로 기대할 수 있는 최신 일자.
+
+    KRX sto by-day endpoint 는 당일(T-0) 장마감 후에도 빈 응답이 나오는 경우가
+    확인됐다. 운영자 cron 은 HF SSOT 를 오염시키지 않기 위해 T-1 평일까지만
+    자동 수집 대상으로 삼고, 당일 긴급 반영은 수동 backfill 로 처리한다.
+    """
+    base = today or _todayKst()
+    return _previousWeekday(base - timedelta(days=1))
+
+
 def _requiredLatestDate(requestedEnd: date) -> date | None:
     """현 시점에 최소 확보돼야 하는 최신 KRX 일자.
 
-    평일 장마감 이후에는 당일 데이터까지 기대한다. 장마감 전에는 전 거래 가능
-    평일까지 기대한다. 공휴일 캘린더는 별도 SSOT 가 없으므로 주말만 제외한다.
-    공휴일이면 workflow 가 fail 하며 사람이 확인한다.
+    자동 cron 은 KRX sto 당일 빈 응답을 피하기 위해 직전 거래 가능 평일(T-1)
+    까지만 기대한다. 공휴일 캘린더는 별도 SSOT 가 없으므로 주말만 제외한다.
+    평일 휴장일이면 workflow 가 fail 하며 사람이 확인한다.
     """
     now = datetime.now(_KST)
     today = now.date()
     if requestedEnd < today:
         return _previousWeekday(requestedEnd)
     if now.time() >= _KRX_READY_KST:
-        return _previousWeekday(today)
-    return _previousWeekday(today - timedelta(days=1))
+        return min(_latestFetchableDate(today), _previousWeekday(requestedEnd))
+    return _previousWeekday(min(today - timedelta(days=1), requestedEnd))
 
 
 def _validateFreshFetch(df: pl.DataFrame, *, startD: date, endD: date, context: str) -> None:
@@ -156,30 +167,32 @@ def _validateFreshFetch(df: pl.DataFrame, *, startD: date, endD: date, context: 
 
 
 async def buildIncremental(outDir: Path, apiKey: str) -> dict[int, int]:
-    """마지막 저장일 다음날 ~ today (T-0 포함) 자동 fetch — cron 누락·캐시 miss 시 갭 자동 메움.
+    """마지막 저장일 다음날 ~ T-1 자동 fetch — cron 누락·캐시 miss 시 갭 자동 메움.
 
-    cron 은 KST 17:00 평일 (장 마감 15:30 + 정산 ~16:30 후) → 당일 데이터 확정 시점.
-    1일치 fixed 가 아니라 "마지막 저장 ~ today" 가변 윈도로 fetch → 갭 자동 복구.
+    KRX sto by-day API 는 당일(T-0) 장마감 이후에도 빈 응답이 나오는 사례가
+    있어 자동 cron 은 직전 거래 가능 평일까지만 수집한다. 1일치 fixed 가 아니라
+    "마지막 저장 다음날 ~ T-1" 가변 윈도로 fetch → 갭 자동 복구.
     """
     today = _todayKst()
+    targetEnd = _latestFetchableDate(today)
     last = _findLastBasDd(outDir)
     if last is None:
         # 빈 상태 (초기) — 어제만 1일치, 본격 backfill 은 별도 dispatch
-        startD = today - timedelta(days=1)
-        print(f"[krx] last-date 없음 → 어제 1일치만 ({startD}). 전체 backfill 은 --mode backfill")
+        startD = targetEnd
+        print(f"[krx] last-date 없음 → T-1 1일치만 ({startD}). 전체 backfill 은 --mode backfill")
     else:
         startD = last + timedelta(days=1)
-        if startD > today:
-            print(f"[krx] up-to-date (last={last}, today={today}) — 추가 fetch 없음")
+        if startD > targetEnd:
+            print(f"[krx] up-to-date (last={last}, targetEnd={targetEnd}, today={today}) — 추가 fetch 없음")
             return {}
-        if (today - last).days > 1:
-            print(f"[krx] 갭 감지: last={last}, today={today} ({(today - last).days}일 차) → 자동 메움")
+        if (targetEnd - last).days > 1:
+            print(f"[krx] 갭 감지: last={last}, targetEnd={targetEnd} ({(targetEnd - last).days}일 차) → 자동 메움")
 
     s = startD.strftime("%Y-%m-%d")
-    e = today.strftime("%Y-%m-%d")
+    e = targetEnd.strftime("%Y-%m-%d")
     print(f"[krx] incremental fetch: {s} ~ {e}")
     df = await fetchKrxRange(s, e, market="ALL", sleepSec=0.5, apiKey=apiKey)
-    _validateFreshFetch(df, startD=startD, endD=today, context="incremental")
+    _validateFreshFetch(df, startD=startD, endD=targetEnd, context="incremental")
     if df.is_empty():
         print(f"[krx] {s}~{e}: empty (휴장일 / 정산 미확정 / 비거래일 구간)")
         return {}
