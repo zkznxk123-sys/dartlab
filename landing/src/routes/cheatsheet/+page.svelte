@@ -7,20 +7,17 @@
 
 	const siteUrl = `${brand.url.replace(/\/$/, '')}`;
 	const landscapePdf = `${base}/cheatsheets/dartlab-cheatsheet-landscape.pdf`;
-	const portraitPdf = `${base}/cheatsheets/dartlab-cheatsheet-portrait.pdf`;
 	const landscapeImage = `${base}/cheatsheets/dartlab-cheatsheet-landscape.webp`;
-	const portraitPreview = `${base}/cheatsheets/dartlab-cheatsheet-portrait-preview.webp`;
 	const absoluteLandscapePdf = `${siteUrl}/cheatsheets/dartlab-cheatsheet-landscape.pdf`;
-	const absolutePortraitPdf = `${siteUrl}/cheatsheets/dartlab-cheatsheet-portrait.pdf`;
 </script>
 
 <svelte:head>
 	<title>DartLab Cheatsheet — PDF 다운로드</title>
-	<meta name="description" content="DartLab 사용법을 한 장으로 정리한 cheatsheet. 가로형 PDF와 세로형 PDF를 바로 열고 내려받을 수 있다." />
+	<meta name="description" content="DartLab 사용법을 가로형 합본 cheatsheet 한 장으로 정리했다." />
 	<link rel="canonical" href="{siteUrl}/cheatsheet" />
 	<meta property="og:type" content="website" />
 	<meta property="og:title" content="DartLab Cheatsheet" />
-	<meta property="og:description" content="DartLab 사용법을 한 장으로 정리한 가로형·세로형 PDF cheatsheet." />
+	<meta property="og:description" content="DartLab 사용법을 가로형 합본 PDF cheatsheet로 바로 열고 내려받을 수 있다." />
 	<meta property="og:url" content="{siteUrl}/cheatsheet" />
 	<meta property="og:image" content="{siteUrl}/cheatsheets/dartlab-cheatsheet-landscape.webp" />
 </svelte:head>
@@ -32,26 +29,18 @@
 		<div class="hero-copy">
 			<p class="eyebrow">DartLab Cheatsheet</p>
 			<h1>한 장으로 보는 DartLab</h1>
-			<p class="lead">웹 공유용 가로형과 인쇄·보관용 세로형을 같은 주소 체계로 제공한다.</p>
+			<p class="lead">DartLab 3·4를 좌우로 합친 가로형 cheatsheet를 메인으로 제공한다.</p>
 			<div class="actions">
 				<a class="primary-action" href={landscapePdf} target="_blank" rel="noopener">
 					<FileText size={17} />
-					<span>가로형 PDF 열기</span>
-				</a>
-				<a class="secondary-action" href={portraitPdf} target="_blank" rel="noopener">
-					<FileText size={17} />
-					<span>세로형 PDF 열기</span>
+					<span>합본 PDF 열기</span>
 				</a>
 			</div>
 		</div>
 		<div class="url-panel" aria-label="public urls">
 			<div>
-				<span>가로형</span>
+				<span>메인 가로형</span>
 				<a href={absoluteLandscapePdf} target="_blank" rel="noopener">{absoluteLandscapePdf}</a>
-			</div>
-			<div>
-				<span>세로형</span>
-				<a href={absolutePortraitPdf} target="_blank" rel="noopener">{absolutePortraitPdf}</a>
 			</div>
 		</div>
 	</section>
@@ -60,8 +49,8 @@
 		<article class="asset-block landscape-block">
 			<div class="asset-head">
 				<div>
-					<p class="asset-kicker">Landscape</p>
-					<h2>웹 공유용 가로형</h2>
+					<p class="asset-kicker">Main Landscape</p>
+					<h2>DartLab 3·4 합본 가로형</h2>
 				</div>
 				<div class="asset-actions">
 					<a href={landscapePdf} target="_blank" rel="noopener" title="PDF 열기">
@@ -76,30 +65,7 @@
 				</div>
 			</div>
 			<a class="preview landscape-preview" href={landscapePdf} target="_blank" rel="noopener">
-				<img src={landscapeImage} alt="DartLab cheatsheet landscape preview" loading="eager" width="2436" height="1530" />
-			</a>
-		</article>
-
-		<article class="asset-block portrait-block">
-			<div class="asset-head">
-				<div>
-					<p class="asset-kicker">Portrait</p>
-					<h2>인쇄·보관용 세로형</h2>
-				</div>
-				<div class="asset-actions">
-					<a href={portraitPdf} target="_blank" rel="noopener" title="PDF 열기">
-						<ExternalLink size={16} />
-					</a>
-					<a href={portraitPdf} download title="PDF 다운로드">
-						<Download size={16} />
-					</a>
-					<a href={portraitPreview} target="_blank" rel="noopener" title="이미지 열기">
-						<ImageIcon size={16} />
-					</a>
-				</div>
-			</div>
-			<a class="preview portrait-preview" href={portraitPdf} target="_blank" rel="noopener">
-				<img src={portraitPreview} alt="DartLab cheatsheet portrait preview" loading="lazy" width="1122" height="2852" />
+				<img src={landscapeImage} alt="DartLab 3 and 4 combined landscape cheatsheet" loading="eager" width="2436" height="1530" />
 			</a>
 		</article>
 	</section>
@@ -164,7 +130,6 @@
 	}
 
 	.primary-action,
-	.secondary-action,
 	.asset-actions a {
 		display: inline-flex;
 		align-items: center;
@@ -174,8 +139,7 @@
 		transition: transform 0.15s, border-color 0.15s, background 0.15s;
 	}
 
-	.primary-action,
-	.secondary-action {
+	.primary-action {
 		gap: 0.5rem;
 		min-height: 42px;
 		padding: 0 1rem;
@@ -187,14 +151,7 @@
 		color: #fff;
 	}
 
-	.secondary-action {
-		border: 1px solid rgba(148, 163, 184, 0.28);
-		background: rgba(15, 18, 25, 0.78);
-		color: #e2e8f0;
-	}
-
 	.primary-action:hover,
-	.secondary-action:hover,
 	.asset-actions a:hover {
 		transform: translateY(-1px);
 	}
@@ -234,6 +191,7 @@
 		margin: 0 auto;
 		display: grid;
 		gap: 1.25rem;
+		justify-items: center;
 	}
 
 	.asset-block {
@@ -286,15 +244,8 @@
 		border: 1px solid rgba(148, 163, 184, 0.16);
 	}
 
-	.portrait-block {
-		max-width: 760px;
-	}
-
-	.portrait-preview img {
-		max-height: 900px;
-		object-fit: contain;
-		object-position: top;
-		background: #050811;
+	.landscape-block {
+		width: 100%;
 	}
 
 	@media (max-width: 820px) {
