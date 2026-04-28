@@ -35,6 +35,7 @@ def csvArtifactsForToolResult(result: Any, *, name: str, arguments: dict[str, An
                 "id": path.stem,
                 "kind": "table",
                 "format": "csv",
+                "primary": _isPrimaryArtifact(name=name, label=label, rows=rows, columns=cols),
                 "mimeType": "text/csv; charset=utf-8",
                 "name": name,
                 "label": label,
@@ -47,6 +48,12 @@ def csvArtifactsForToolResult(result: Any, *, name: str, arguments: dict[str, An
             }
         )
     return out
+
+
+def _isPrimaryArtifact(*, name: str, label: str, rows: int, columns: int) -> bool:
+    if name == "pythonExec" and label == "stdout":
+        return True
+    return 0 < rows <= 100 and columns >= 2
 
 
 def artifactPath(day: str, filename: str) -> Path | None:

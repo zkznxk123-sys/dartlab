@@ -59,6 +59,87 @@ def _runStream(client: httpx.Client, url: str, payload: dict[str, Any]) -> tuple
     return status, "".join(chunks), events
 
 
+def _artifactsFromEvents(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    artifacts: list[dict[str, Any]] = []
+    for event in events:
+        data = event.get("data")
+        if not isinstance(data, dict):
+            continue
+        if event.get("event") != "tool_result":
+            continue
+        for artifact in data.get("artifacts") or []:
+            if isinstance(artifact, dict):
+                artifacts.append(artifact)
+    return _dedupeArtifacts(artifacts)
+
+
+def _dedupeArtifacts(artifacts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for artifact in artifacts:
+        key = str(artifact.get("url") or artifact.get("id") or "")
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(artifact)
+    return out
+
+
+def _latestAuditEntry(day: str, question: str) -> dict[str, Any] | None:
+    path = Path("data") / "audit" / "ai-ask" / f"{day}.jsonl"
+    if not path.exists():
+        return None
+    for line in reversed(path.read_text(encoding="utf-8").splitlines()):
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if row.get("question") == question:
+            return row
+    return None
+
+
+def _requiresCsvArtifact(qid: str, question: str) -> bool:
+    q = question.lower()
+    if qid in {"q11_krx_movers", "q12_krx_movers_stream"}:
+        return True
+    return any(word in q for word in ("찾아줘", "랭킹", "순위", "많이 오른", "top", "rank"))
+
+
+def _compactEvents(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    compact: list[dict[str, Any]] = []
+    for event in events:
+        name = str(event.get("event") or "")
+        data = event.get("data")
+        if name == "system_prompt":
+            continue
+        if not isinstance(data, dict):
+            compact.append(event)
+            continue
+        if name == "tool_result":
+            artifacts = [a for a in data.get("artifacts") or [] if isinstance(a, dict)]
+            compact.append(
+                {
+                    "event": name,
+                    "data": {
+                        "id": data.get("id"),
+                        "name": data.get("name"),
+                        "label": data.get("label"),
+                        "summary": data.get("summary"),
+                        "status": data.get("status"),
+                        "round": data.get("round"),
+                        "resultChars": len(str(data.get("result") or "")),
+                        "artifacts": artifacts,
+                    },
+                }
+            )
+            continue
+        compact.append({"event": name, "data": data})
+    return compact
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://127.0.0.1:8400/api/ask")
@@ -83,19 +164,28 @@ def main() -> int:
             status: int | None = None
             answer = ""
             events: list[dict[str, Any]] = []
+            artifacts: list[dict[str, Any]] = []
             error: str | None = None
             try:
                 if stream:
                     status, answer, events = _runStream(client, args.url, payload)
+                    artifacts = _artifactsFromEvents(events)
                 else:
                     response = client.post(args.url, json=payload, timeout=args.timeout)
                     status = response.status_code
                     body = response.json()
                     answer = str(body.get("answer") or body)
+                    artifacts = _dedupeArtifacts([a for a in body.get("artifacts", []) if isinstance(a, dict)])
             except Exception as exc:  # noqa: BLE001
                 error = f"{type(exc).__name__}: {exc}"
 
             elapsed = round(time.time() - started, 1)
+            audit = _latestAuditEntry(args.day, question) or {}
+            failed_tools = [t for t in audit.get("tool_calls", []) if t.get("error") or t.get("ok") is False]
+            csv_artifacts = [a for a in artifacts if a.get("format") == "csv"]
+            primary_csv_artifacts = [a for a in csv_artifacts if a.get("primary")]
+            requires_artifact = _requiresCsvArtifact(qid, question)
+            artifact_violation = bool(requires_artifact and not csv_artifacts)
             meta = {
                 "id": qid,
                 "question": question,
@@ -106,17 +196,40 @@ def main() -> int:
                 "elapsedSec": elapsed,
                 "answerLen": len(answer),
                 "error": error,
-                "events": events[-30:] if stream else [],
+                "requestId": audit.get("request_id"),
+                "qualityIssues": audit.get("quality_issues") or [],
+                "toolFailed": len(failed_tools),
+                "artifacts": artifacts,
+                "csvArtifactCount": len(csv_artifacts),
+                "primaryCsvArtifactCount": len(primary_csv_artifacts),
+                "requiresArtifact": requires_artifact,
+                "artifactViolation": artifact_violation,
+                "events": _compactEvents(events[-30:]) if stream else [],
             }
             (out / f"{qid}.txt").write_text(answer, encoding="utf-8")
             (out / f"{qid}.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-            row = {k: meta[k] for k in ("id", "ok", "status", "elapsedSec", "answerLen", "error")}
+            row = {
+                k: meta[k]
+                for k in (
+                    "id",
+                    "ok",
+                    "status",
+                    "elapsedSec",
+                    "answerLen",
+                    "error",
+                    "qualityIssues",
+                    "toolFailed",
+                    "csvArtifactCount",
+                    "primaryCsvArtifactCount",
+                    "artifactViolation",
+                )
+            }
             summary.append(row)
             print(json.dumps(row, ensure_ascii=False), flush=True)
 
     (out / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"OUT {out}")
-    return 0 if all(row["ok"] for row in summary) else 1
+    return 0 if all(row["ok"] and not row["artifactViolation"] for row in summary) else 1
 
 
 if __name__ == "__main__":

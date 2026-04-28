@@ -379,6 +379,7 @@ class TestSerialize:
         assert len(artifacts) == 1
         artifact = artifacts[0]
         assert artifact["format"] == "csv"
+        assert artifact["primary"] is True
         assert artifact["rows"] == 1
         assert artifact["columns"] == 2
         assert artifact["url"].startswith("/api/ask/artifacts/")
@@ -416,6 +417,7 @@ class TestSerialize:
         assert len(artifacts) == 1
         path = tmp_path / "ai-artifacts" / artifacts[0]["day"] / artifacts[0]["fileName"]
         text = path.read_text(encoding="utf-8")
+        assert artifacts[0]["primary"] is True
         assert "stockCode" in text
         assert "005930" in text
 
