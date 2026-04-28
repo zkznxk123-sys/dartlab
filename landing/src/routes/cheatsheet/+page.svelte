@@ -65,7 +65,7 @@
 				</div>
 			</div>
 			<a class="preview landscape-preview" href={landscapePdf} target="_blank" rel="noopener">
-				<img src={landscapeImage} alt="DartLab 3 and 4 combined landscape cheatsheet" loading="eager" width="2436" height="1530" />
+				<img src={landscapeImage} alt="DartLab 3 and 4 combined landscape cheatsheet" loading="eager" width="3384" height="941" />
 			</a>
 		</article>
 	</section>
