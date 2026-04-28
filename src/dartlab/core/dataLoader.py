@@ -75,6 +75,7 @@ _MAX_RETRIES = 3
 _EDGAR_UNIVERSE_TTL_HOURS = 24
 _EDGAR_DOCS_FRESHNESS_TTL_HOURS = 24
 _DART_FRESHNESS_TTL_HOURS = 12  # 일일 HF 수집 주기(03:00 KST)에 맞춰 12h — 최대 stale 윈도우 반감
+_KRX_FRESHNESS_TTL_HOURS = 1  # 장마감 후 일별 갱신 데이터라 stale 허용폭을 짧게 둔다
 _SEC_HEADERS = {"User-Agent": "DartLab eddmpython@gmail.com"}
 _LISTED_EXCHANGES = {"Nasdaq", "NYSE", "CBOE"}
 
@@ -256,6 +257,24 @@ def _shouldRefreshDart(path: Path, refresh: str) -> bool:
         return False
 
 
+def _shouldRefreshHfCategory(path: Path, category: str, refresh: str) -> bool:
+    """HF 공개 parquet 카테고리별 freshness 정책."""
+    if category != "krxPrices":
+        return _shouldRefreshDart(path, refresh)
+    if refresh == "local_only":
+        return False
+    if refresh == "force_check":
+        return True
+    etagPath = path.with_suffix(".parquet.etag")
+    if not etagPath.exists():
+        return True
+    try:
+        age = time.time() - etagPath.stat().st_mtime
+        return age > _KRX_FRESHNESS_TTL_HOURS * 3600
+    except OSError:
+        return True
+
+
 def _refreshFromHf(stockCode: str, path: Path, category: str) -> None:
     """ETag 비교 후 HF가 최신이면 다운로드로 갱신. 실패 시 기존 파일 유지."""
     stale = _checkRemoteFreshness(stockCode, path, category)
@@ -385,7 +404,7 @@ def loadData(
             refresh=refresh,
         )
     else:
-        _ensureLocalParquet(stockCode, path, category, shouldRefresh=_shouldRefreshDart(path, refresh))
+        _ensureLocalParquet(stockCode, path, category, shouldRefresh=_shouldRefreshHfCategory(path, category, refresh))
     # lazy scan: sinceYear 필터 또는 컬럼 프로젝션이 있으면 scan_parquet 사용
     yearColCandidates = ("year", "bsns_year")
     useLazy = sinceYear is not None or columns is not None

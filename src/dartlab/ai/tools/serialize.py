@@ -250,29 +250,63 @@ def _dictToSummary(data: dict, *, maxChars: int) -> str:
 
 def serializeForLlm(result: Any, *, name: str, arguments: dict) -> str:
     """Tool 반환값 → LLM 메시지 문자열. 8KB 상한."""
+    header = _evidenceHeader(result, name=name, arguments=arguments)
     try:
         import polars as pl
 
         if isinstance(result, pl.DataFrame):
-            return _dfToMarkdown(result, maxRows=_MAX_DF_ROWS_LLM)
+            return header + "\n\n" + _dfToMarkdown(result, maxRows=_MAX_DF_ROWS_LLM)
     except ImportError:
         pass
 
     if isinstance(result, dict):
-        return _dictToSummary(result, maxChars=_MAX_LLM_CHARS)
+        return header + "\n\n" + _dictToSummary(result, maxChars=_MAX_LLM_CHARS)
 
     if isinstance(result, (list, tuple)):
         preview = result[:10]
         suffix = f"\n... (총 {len(result)}개)" if len(result) > 10 else ""
-        return "\n".join(str(x)[:200] for x in preview) + suffix
+        return header + "\n\n" + "\n".join(str(x)[:200] for x in preview) + suffix
 
     if result is None:
-        return "(None 반환 — 해당 데이터 없음)"
+        return header + "\n\n(None 반환 — 해당 데이터 없음)"
 
     text = str(result)
     if len(text) > _MAX_LLM_CHARS:
         text = text[:_MAX_LLM_CHARS] + f"\n... (+{len(text) - _MAX_LLM_CHARS} chars 잘림)"
-    return text
+    return header + "\n\n" + text
+
+
+def _evidenceHeader(result: Any, *, name: str, arguments: dict) -> str:
+    """LLM 에 전달할 공통 증거 헤더."""
+    target = (
+        arguments.get("stockCode")
+        or arguments.get("target")
+        or arguments.get("keyword")
+        or arguments.get("query")
+        or arguments.get("axis")
+        or "-"
+    )
+    lines = [
+        "## Evidence",
+        f"- 도구명: {name}",
+        f"- 대상: {target}",
+        "- 데이터 기준: tool_result 원본",
+    ]
+    if isinstance(result, dict):
+        summary = result.get("_summary")
+        if summary:
+            lines.append(f"- _summary: {summary}")
+        yoy = result.get("_yoy")
+        if yoy:
+            lines.append(f"- _yoy: {yoy}")
+        assumptions = result.get("assumptions")
+        if assumptions:
+            lines.append(f"- assumptions: {assumptions}")
+        keys = ", ".join(str(k) for k in list(result.keys())[:20])
+        lines.append(f"- 결과 구조: dict keys = {keys}")
+    else:
+        lines.append(f"- 결과 구조: {type(result).__name__}")
+    return "\n".join(lines)
 
 
 def serializeForUi(result: Any, *, name: str) -> str:

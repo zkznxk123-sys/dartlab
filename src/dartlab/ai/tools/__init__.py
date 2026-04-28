@@ -5,7 +5,8 @@
     - registry/bootstrap 수동 등록 없음. CAPABILITIES 가 단일 원천.
     - 축은 CAPABILITIES 안의 `{engine}.{axis}` entry 로 자동 수집됨.
 
-소비자 (runtime/toolLoop.py) 는 `buildTools()` 한 번 호출 → [AITool] 리스트 획득.
+소비자 (runtime/toolLoop.py) 는 `buildTools()` 로 전체 목록을 만들고
+`selectToolsForQuestion()` 으로 요청별 subset 을 LLM 에 노출한다.
 """
 
 from __future__ import annotations
@@ -150,6 +151,9 @@ def buildTools() -> list[AITool]:
                 "(1) 복합 분석 — 여러 엔진을 한 번에 조합할 때 "
                 "(예: analysis + credit + macro 결과를 교차 분석). "
                 "(2) 커스텀 계산 — override 시뮬레이션, 비율 계산, 데이터 가공. "
+                "시장 전체 최근 상승 종목/price movers 질문은 "
+                "dartlab.gather('krx', 'close', start=..., end=...) 결과를 polars 로 "
+                "첫 거래일 대비 마지막 거래일 수익률로 계산해 정렬한다. "
                 "dartlab · pl (polars) 사용 가능. stockCode 지정 시 c (Company) 바인딩."
             ),
             parameters={
@@ -165,15 +169,15 @@ def buildTools() -> list[AITool]:
         )
     )
 
-    # Read — 파일 내용을 문자열로 반환. SKILL.md · ops 문서 · blog 포스트 · 코드 열람 전용.
+    # Read — 파일 내용을 문자열로 반환. 엔진 docstring · ops 문서 · blog 포스트 · 코드 열람 전용.
     # Claude Code Read 와 동일 개념. repo 루트 기준 상대경로 또는 절대경로 허용.
     tools.append(
         AITool(
             name="Read",
             description=(
                 "파일 내용을 문자열로 반환. 주요 용도: "
-                "(1) `src/dartlab/skills/{name}/SKILL.md` — skill 본문 로드해 How 절차 따르기. "
-                "(2) `src/dartlab/skills/{name}/reference/*.md` — 업종별 임계값 · 실전 예시 등 참고자료. "
+                "(1) `src/dartlab/{engine}/__init__.py` — 엔진 docstring skill 본문. "
+                "(2) 공개 함수 구현 파일 — 함수 docstring 의 Guide/Returns/Notes 확인. "
                 "(3) `ops/*.md` — 엔진 설계 문서. (4) `blog/**/index.md` — 과거 기업분석 서사. "
                 "(5) 코드 구현 확인용 `src/dartlab/**/*.py`. "
                 "경로는 저장소 루트 기준 상대 또는 절대. UTF-8 텍스트만."
@@ -197,6 +201,133 @@ def buildTools() -> list[AITool]:
     )
 
     return tools
+
+
+def selectToolsForQuestion(
+    tools: list[AITool],
+    *,
+    question: str | None = None,
+    category: str = "finance",
+    intent: str | None = None,
+    hasCompany: bool = False,
+    stockCode: str | None = None,
+    maxTools: int = 12,
+) -> list[AITool]:
+    """질문별 LLM 노출 tool subset 선택.
+
+    전체 tool schema 를 매 요청 주입하면 선택 정확도와 latency 가 같이 나빠진다.
+    CAPABILITIES/docstring 은 SSOT 로 유지하되, 런타임에는 질문 범주와 intent 에 맞는
+    작은 도구판만 LLM 에 제공한다.
+    """
+    byName = {t.name: t for t in tools}
+
+    if category == "out_of_scope":
+        return []
+
+    if category == "meta":
+        return _pickTools(byName, ["capabilities", "Read"], maxTools=4)
+
+    selected: list[str] = []
+
+    def add(names: list[str]) -> None:
+        for name in names:
+            if name in byName and name not in selected:
+                selected.append(name)
+
+    # 공통 discovery / 실행 보조. stockCode 가 없으면 종목명→코드 탐색이 먼저 필요하다.
+    add(["searchCompany", "capabilities"])
+
+    if hasCompany or stockCode:
+        add(["analysis", "show", "credit", "quant", "gather", "pastInsight", "sectorInsights"])
+    else:
+        add(["scan", "gather", "macro", "industry", "topdown"])
+
+    intentMap = {
+        "act1_business": ["show", "industry", "topicSummaries", "story", "pastInsight"],
+        "act2_profit": ["analysis", "show", "industry", "pastInsight"],
+        "act3_cash": ["analysis", "show", "credit"],
+        "act4_stability": ["credit", "analysis", "debt", "show"],
+        "act5_capital": ["capital", "analysis", "show", "quant"],
+        "act6_outlook": ["analysis", "quant", "macro", "gather", "valuationImpact"],
+        "compare": ["scan", "industry", "macro", "topdown", "pythonExec"],
+        "concept": ["capabilities", "Read"],
+        "act_all": ["analysis", "show", "credit", "macro", "industry", "pastInsight"],
+    }
+    add(intentMap.get(intent or "", []))
+
+    q = (question or "").lower()
+    keywordMap: list[tuple[tuple[str, ...], list[str]]] = [
+        (
+            ("공시", "사업보고서", "분기보고서", "filing", "dart"),
+            ["disclosure", "liveFilings", "filings", "readFiling"],
+        ),
+        (("뉴스", "최근", "이슈", "속보"), ["gather", "news"]),
+        (("검색", "찾아", "키워드"), ["search", "keywordTrend"]),
+        (("가치", "dcf", "wacc", "목표가", "적정가", "저평가", "고평가"), ["analysis", "quant", "valuationImpact"]),
+        (("이야기", "보고서", "story", "서사"), ["story", "validateStory", "storyTree", "narrativeDiff"]),
+        (("직원", "인력", "고용"), ["workforce"]),
+        (("지배구조", "이사회", "감사"), ["governance", "audit"]),
+        (("거래처", "네트워크", "관계사"), ["network"]),
+    ]
+    for keywords, names in keywordMap:
+        if any(k in q for k in keywords):
+            add(names)
+
+    add(_toolNamesFromCapabilitySearch(question))
+
+    # 복합 계산 escape hatch 는 마지막에 둔다. maxTools 에 밀리면 복잡 질문에서만 keyword/intent 로 유지된다.
+    if len(selected) < maxTools:
+        add(["pythonExec"])
+
+    # 단일 종목 질문에서 CAPABILITIES 검색이 scan 계열을 끌고 오더라도 최종 노출에서 제거한다.
+    # scan 은 전종목 횡단 전용이고, 이 제약은 시스템 프롬프트보다 tool surface 에서 막는 편이 정확하다.
+    if (hasCompany or stockCode) and intent != "compare":
+        selected = [name for name in selected if name not in {"scan", "topdown"}]
+    if not any(k in q for k in ("공시", "사업보고서", "분기보고서", "filing", "dart")):
+        selected = [name for name in selected if name not in {"disclosure", "liveFilings", "filings", "readFiling"}]
+    if not any(k in q for k in ("검색", "찾아", "키워드")):
+        selected = [name for name in selected if name not in {"search", "keywordTrend"}]
+
+    return _pickTools(byName, selected, maxTools=maxTools)
+
+
+def _pickTools(byName: dict[str, AITool], names: list[str], *, maxTools: int) -> list[AITool]:
+    picked: list[AITool] = []
+    for name in names:
+        tool = byName.get(name)
+        if tool is not None and tool not in picked:
+            picked.append(tool)
+        if len(picked) >= maxTools:
+            break
+    return picked
+
+
+def _toolNamesFromCapabilitySearch(question: str | None) -> list[str]:
+    """CAPABILITIES 자연어 검색 결과를 tool 이름 후보로 변환."""
+    if not question:
+        return []
+    try:
+        from dartlab.core._capabilitySearch import searchCapabilities
+
+        results = searchCapabilities(question, topK=6, minScore=0.5)
+    except Exception:  # noqa: BLE001 - discovery 실패가 본 분석을 막으면 안 됨
+        return []
+
+    names: list[str] = []
+    for key, _entry, _score in results:
+        toolName = _capabilityKeyToToolName(key)
+        if toolName and toolName not in names:
+            names.append(toolName)
+    return names
+
+
+def _capabilityKeyToToolName(key: str) -> str | None:
+    if key.startswith("Company."):
+        name = key.split(".", 1)[1]
+        return "searchCompany" if name == "searchName" else name
+    if "." in key:
+        return key.split(".", 1)[0]
+    return key
 
 
 def _readFile(filePath: str = "", maxBytes: int = 100_000, **_: Any) -> str:
@@ -332,10 +463,15 @@ def _buildHandler(name: str, kind: str, target: str) -> Callable[..., Any]:
                 clean["freq"] = "Y"
 
             fn = getattr(dartlab, target)
+            if target == "gather":
+                return fn(**clean)
             core, post = _splitKwargs(target, clean)
             if target == "search" and clean.get("limit"):
                 core["topK"] = clean["limit"]
             result = fn(**core)
+            if target == "searchName":
+                keyword = str(clean.get("keyword") or clean.get("query") or clean.get("corpName") or "")
+                return _rankCompanySearchResult(result, keyword)
             return _scanPostProcess(result, post) if target == "scan" else result
 
         return _moduleHandler
@@ -487,6 +623,47 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
                 "refresh": {
                     "type": "boolean",
                     "description": "axis='valuation' 전용 — true 면 네이버 API 재수집 (~50초). 기본값 false 는 일일 prebuild snapshot 로드 (1초 이내). 장중 급변 질문에만 true.",
+                },
+            }
+        )
+    if name == "gather":
+        if "axis" in props:
+            base_desc = props["axis"].get("description") or "수집 축"
+            props["axis"]["description"] = (
+                f"{base_desc}\n\n"
+                "시장 전체 최근 상승 종목/많이 오른 종목/price movers/모멘텀 랭킹 질문은 "
+                "반드시 axis='krx' 를 사용한다. 단일 종목 주가는 axis='price', 전종목 가격 "
+                "스크리닝은 axis='krx' 다."
+            )
+        if "target" in props:
+            props["target"]["description"] = (
+                "axis='krx' 에서는 컬럼명. 기간 수익률 계산은 target='close' 를 사용한다. "
+                "단일일자 등락률은 target='fluctuationRate', 시가총액은 target='marketCap'. "
+                "axis='price' 에서는 종목코드/티커."
+            )
+        props.update(
+            {
+                "start": {
+                    "type": "string",
+                    "description": (
+                        "시작일 YYYY-MM-DD. '최근 많이 오른 종목'처럼 기간이 모호하면 오늘 기준 "
+                        "최근 30~45일 전을 넣고, pythonExec 에서 실제 첫/마지막 거래일 컬럼으로 "
+                        "수익률을 계산한다."
+                    ),
+                },
+                "end": {
+                    "type": "string",
+                    "description": "종료일 YYYY-MM-DD. 생략하면 최신 가용일. 미래일을 만들지 말 것.",
+                },
+                "market": {
+                    "type": "string",
+                    "enum": ["KR", "KOSPI", "KOSDAQ", "US"],
+                    "description": "시장. axis='krx' 기본은 KR 전체, 필요 시 KOSPI/KOSDAQ.",
+                },
+                "stockCodes": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "axis='krx' 선택 종목 필터. 시장 전체 랭킹 질문에서는 생략.",
                 },
             }
         )
@@ -654,6 +831,58 @@ def _splitKwargs(target: str, kwargs: dict) -> tuple[dict, dict]:
     core = {k: v for k, v in kwargs.items() if k in core_keys and v is not None}
     post = {k: v for k, v in kwargs.items() if k not in core_keys and v is not None}
     return core, post
+
+
+def _rankCompanySearchResult(df: Any, keyword: str) -> Any:
+    """searchCompany 결과 정렬 — alias/exact/prefix/contains 순서."""
+    if df is None or not keyword:
+        return df
+    try:
+        import polars as pl
+    except ImportError:
+        return df
+    if not isinstance(df, pl.DataFrame) or df.height == 0:
+        return df
+
+    nameCol = "회사명" if "회사명" in df.columns else "corpName" if "corpName" in df.columns else None
+    codeCol = "종목코드" if "종목코드" in df.columns else "stockCode" if "stockCode" in df.columns else None
+    if not nameCol:
+        return df
+
+    try:
+        from dartlab.core.resolve import resolve_alias
+
+        canonical = resolve_alias(keyword) or keyword
+    except ImportError:
+        canonical = keyword
+
+    kw = keyword.strip().lower()
+    canon = canonical.strip().lower()
+
+    rows: list[dict[str, Any]] = []
+    for row in df.to_dicts():
+        name = str(row.get(nameCol) or "")
+        code = str(row.get(codeCol) or "") if codeCol else ""
+        lowered = name.lower()
+        if code and code.lower() == kw:
+            rank, kind, confidence = 0, "code_exact", 1.0
+        elif lowered in {kw, canon}:
+            rank, kind, confidence = 0, "exact", 1.0
+        elif lowered.startswith(canon) or lowered.startswith(kw):
+            rank, kind, confidence = 1, "prefix", 0.85
+        elif canon and canon in lowered or kw and kw in lowered:
+            rank, kind, confidence = 2, "contains", 0.65
+        else:
+            rank, kind, confidence = 9, "weak", 0.2
+        row["_matchRank"] = rank
+        row["_matchKind"] = kind
+        row["_matchConfidence"] = confidence
+        rows.append(row)
+
+    ranked = pl.DataFrame(rows).sort(["_matchRank", "_matchConfidence", nameCol], descending=[False, True, False])
+    ranks = ranked["_matchRank"].to_list()
+    ambiguous = bool(len(ranks) > 1 and ranks[0] == ranks[1])
+    return ranked.with_columns(pl.lit(ambiguous).alias("_ambiguous"))
 
 
 def _scanPostProcess(df: Any, post: dict) -> Any:

@@ -402,7 +402,15 @@ def _runAskInner(
     # legacy exec 루프 대체 — 스키마 enum 으로 KeyError 구조적 제거.
     from dartlab.ai.runtime.toolLoop import streamWithTools
 
-    for item in streamWithTools(llm, messages, category=category):
+    for item in streamWithTools(
+        llm,
+        messages,
+        category=category,
+        question=question,
+        intent=intent,
+        hasCompany=company is not None,
+        stockCode=stockCode,
+    ):
         if isinstance(item, AnalysisEvent):
             yield item
         else:

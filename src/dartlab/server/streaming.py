@@ -16,6 +16,7 @@
   ui_action     → canonical UI action
   chunk         → LLM 응답 텍스트 (실시간 스트리밍)
   validation    → 숫자 검증 결과
+  quality_check → AI 최종 응답 품질 계약 검사 결과
   done          → 완료 (responseMeta 포함)
   error         → 에러 + 사용자 행동 힌트
 """
@@ -28,6 +29,8 @@ import logging
 import os
 import threading
 from dataclasses import dataclass
+
+from dartlab.ai.runtime.audit import AuditCollector
 
 from .models import AskRequest
 
@@ -56,7 +59,12 @@ async def stream_ask(req: AskRequest):
     모든 분석 로직은 core.runAsk() 에 위임. 종목 resolve 는 AI 가 자율 판단.
     """
     kwargs = _build_kwargs(req)
-    auditor = _AuditCollector(question=req.question)
+    auditor = AuditCollector(
+        question=req.question,
+        stockCode_hint=kwargs.get("stockCode"),
+        provider=kwargs.get("provider"),
+        model=kwargs.get("model"),
+    )
     try:
         async for item in stream_analysis(req.question, _audit=auditor, **kwargs):
             yield item
@@ -64,7 +72,7 @@ async def stream_ask(req: AskRequest):
         auditor.flush()
 
 
-async def stream_analysis(question: str = "", *, _audit: "_AuditCollector | None" = None, **kwargs):
+async def stream_analysis(question: str = "", *, _audit: AuditCollector | None = None, **kwargs):
     """core.runAsk() → SSE adapter."""
     from dartlab.ai.runtime.core import runAsk
 
@@ -78,7 +86,12 @@ async def collect_analysis_text(question: str = "", **kwargs) -> str:
     """core.runAsk() 실행 후 chunk 텍스트 수집 (non-stream HTTP endpoint 용)."""
     from dartlab.ai.runtime.core import runAsk
 
-    auditor = _AuditCollector(question=question)
+    auditor = AuditCollector(
+        question=question,
+        stockCode_hint=kwargs.get("stockCode"),
+        provider=kwargs.get("provider"),
+        model=kwargs.get("model"),
+    )
     chunks: list[str] = []
     try:
         async for event in _sync_gen_to_async(runAsk, question, **kwargs):
@@ -94,109 +107,6 @@ async def collect_analysis_text(question: str = "", **kwargs) -> str:
     finally:
         auditor.flush()
     return "".join(chunks)
-
-
-# ── Audit 로그 수집 ──────────────────────────────────────────────
-#
-# 요청 단위로 tool_call · chunk · error 이벤트를 집계해 JSONL 한 줄로 기록한다.
-# 위치: ``{dataDir}/audit/ai-ask/YYYY-MM-DD.jsonl``. Phase 1 선행 인프라 (ops/skills.md §5).
-# 판정 (P/T/C/V) 은 후속 스크립트가 파일을 읽어 사람이 채움. 여기서는 원재료만.
-
-
-@dataclass
-class _AuditCollector:
-    """요청 내 이벤트를 모아 종료 시 JSONL 한 줄로 flush.
-
-    주의: 다중 요청 동시 처리 안전 — 각 요청이 자기 인스턴스 보유. 로컬 append 만.
-    파일 I/O 실패는 조용히 삼킨다 (audit 기록 실패로 본 응답을 깨지 않음).
-    """
-
-    question: str
-    tool_calls: list[dict] = None  # type: ignore[assignment]
-    chunk_len: int = 0
-    error: str | None = None
-    skill_used: str | None = None
-
-    def __post_init__(self) -> None:
-        if self.tool_calls is None:
-            self.tool_calls = []
-
-    def observe(self, kind: str, data: dict) -> None:
-        if kind == "tool_call":
-            name = data.get("name") or data.get("tool") or ""
-            args = data.get("args") or data.get("arguments") or {}
-            self.tool_calls.append({"name": str(name), "args": args if isinstance(args, dict) else {}})
-            # skill 사용 힌트 — pythonExec 안에서 SKILL.md 를 읽거나 skills 모듈 import 하면 기록
-            if name == "pythonExec" and isinstance(args, dict):
-                code = str(args.get("code", ""))
-                if "src/dartlab/skills/" in code or "from dartlab.skills" in code:
-                    # 간단 휴리스틱 — skill 이름 추출
-                    import re
-
-                    m = re.search(r"skills/([a-z0-9-]+)/", code)
-                    if m:
-                        self.skill_used = m.group(1)
-        elif kind == "chunk":
-            self.chunk_len += len(str(data.get("text", "")))
-        elif kind == "error":
-            self.error = str(data.get("error") or "")
-
-    def flush(self) -> None:
-        try:
-            import datetime as _dt
-            import hashlib
-            import uuid
-
-            from dartlab.core.dataLoader import _getDataRoot
-
-            root = _getDataRoot() / "audit" / "ai-ask"
-            root.mkdir(parents=True, exist_ok=True)
-            day = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d")
-            path = root / f"{day}.jsonl"
-
-            # v2 스키마 필드 계산
-            def _sha16(text: str) -> str:
-                return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
-
-            # tool_sequence_hash
-            seq_src = ",".join(
-                f"{tc.get('name', '')}:{_sha16(json.dumps(tc.get('args', {}), sort_keys=True, default=str, ensure_ascii=False))}"
-                for tc in self.tool_calls
-            )
-            tool_sequence_hash = "seq:" + hashlib.sha256(seq_src.encode("utf-8")).hexdigest()[:16]
-
-            # question_hash (정규화 후)
-            import re as _re
-
-            q_norm = _re.sub(r"\s+", " ", _re.sub(r"[^\w\s가-힣]", "", self.question.lower().strip()))
-            question_hash = _sha16(q_norm) if self.question else ""
-
-            entry = {
-                "schema_version": 2,
-                "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(),
-                "request_id": f"req-{uuid.uuid4().hex[:12]}",
-                "question": self.question,
-                "question_hash": question_hash,
-                "category_hash": "",
-                "stockCode_hint": None,
-                "provider": None,
-                "model": None,
-                "tool_calls": self.tool_calls,
-                "tool_sequence_hash": tool_sequence_hash,
-                "override_calls": [],
-                "rounds": max(1, len(self.tool_calls)),
-                "chunk_len": self.chunk_len,
-                "error": self.error,
-                "violation": None,
-                "skill_used": self.skill_used,
-                "duration_total_ms": None,
-                "judgment": {"verdict": None, "judged_at": None, "judged_by": None, "pr_url": None},
-            }
-            with path.open("a", encoding="utf-8") as f:
-                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-        except (OSError, ValueError, TypeError, ImportError):
-            # audit 실패로 응답 경로 깨지지 않음
-            pass
 
 
 def _build_kwargs(req: AskRequest) -> dict:

@@ -12,7 +12,8 @@ from typing import Any, Generator
 
 from dartlab.ai.runtime.events import AnalysisEvent
 from dartlab.ai.runtime.progressCapture import runToolWithProgress
-from dartlab.ai.tools import buildTools, executeTool, toolsToOpenAiSchemas
+from dartlab.ai.runtime.quality import evaluateFinalAnswer
+from dartlab.ai.tools import buildTools, executeTool, selectToolsForQuestion, toolsToOpenAiSchemas
 from dartlab.ai.tools.serialize import serializeForLlm, serializeForUi
 from dartlab.core.env import AuthKeyMissing
 
@@ -29,6 +30,10 @@ def streamWithTools(
     *,
     maxRounds: int = _MAX_ROUNDS_DEFAULT,
     category: str = "finance",
+    question: str | None = None,
+    intent: str | None = None,
+    hasCompany: bool = False,
+    stockCode: str | None = None,
 ) -> Generator[str | AnalysisEvent, None, None]:
     """Tool calling 루프.
 
@@ -53,17 +58,27 @@ def streamWithTools(
             "claude / openai / gemini / groq / cerebras / mistral 중 선택하세요."
         )
 
-    toolList = buildTools()
+    allTools = buildTools()
+    toolList = selectToolsForQuestion(
+        allTools,
+        question=question,
+        category=category,
+        intent=intent,
+        hasCompany=hasCompany,
+        stockCode=stockCode,
+    )
     tools = toolsToOpenAiSchemas(toolList)
 
     from dartlab.ai.types import ToolResponse
 
     seenCalls: dict[str, int] = {}
     retriggered = False  # FINANCE 가드 1회 제한
+    qualityRetried = False
+    observedToolCalls: list[dict[str, Any]] = []
 
     for roundIdx in range(maxRounds):
         resp: ToolResponse | None = None
-        streamedText = False
+        roundTextParts: list[str] = []
 
         # category → tool_choice 매핑 (첫 라운드만 강제, 이후 auto)
         tool_choice = _resolveToolChoice(category, roundIdx)
@@ -79,8 +94,7 @@ def streamWithTools(
                 if isinstance(item, ToolResponse):
                     resp = item
                 elif isinstance(item, str):
-                    streamedText = True
-                    yield item  # 실시간 text chunk
+                    roundTextParts.append(item)
         except Exception as e:  # noqa: BLE001
             yield AnalysisEvent(
                 "error",
@@ -108,6 +122,7 @@ def streamWithTools(
 
         # 종료: tool_calls 없음 → 최종 답변
         if not resp.tool_calls:
+            finalText = "".join(roundTextParts) or (resp.answer or "")
             # FINANCE 범주 + 첫 라운드 + tool 0회 → dartlab 정체성 훼손 → 1회 재질문
             if category == "finance" and roundIdx == 0 and not retriggered:
                 retriggered = True
@@ -135,9 +150,86 @@ def streamWithTools(
                     }
                 )
                 continue  # 다음 라운드로
+            quality = evaluateFinalAnswer(
+                category=category,
+                question=question,
+                answer=finalText,
+                toolCalls=observedToolCalls,
+                stockCode=stockCode,
+            )
+            if not quality.passed and not qualityRetried:
+                qualityRetried = True
+                yield AnalysisEvent(
+                    "quality_check",
+                    {
+                        "passed": False,
+                        "issues": quality.issues,
+                        "action": "rewrite_once",
+                    },
+                )
+                autoCode = _krxPriceMoverAutoCode(question, observedToolCalls)
+                if autoCode and not _hasObservedPythonExec(observedToolCalls):
+                    autoArgs = {"code": autoCode}
+                    observedToolCalls.append({"name": "pythonExec", "arguments": autoArgs})
+                    yield AnalysisEvent(
+                        "tool_call",
+                        {
+                            "id": "auto_krx_price_movers",
+                            "name": "pythonExec",
+                            "label": "코드 실행 — KRX 기간 수익률 계산",
+                            "arguments": autoArgs,
+                            "round": roundIdx + 1,
+                        },
+                    )
+                    execTools = toolList if any(t.name == "pythonExec" for t in toolList) else allTools
+                    try:
+                        raw = executeTool(execTools, "pythonExec", autoArgs)
+                        llmText = serializeForLlm(raw, name="pythonExec", arguments=autoArgs)
+                        uiText = serializeForUi(raw, name="pythonExec")
+                        status = "ok"
+                    except Exception as exc:  # noqa: BLE001 - 자동 보강 실패도 audit 에 남기고 재작성으로 진행
+                        llmText = f"[tool error] {type(exc).__name__}: {exc}"
+                        uiText = llmText
+                        status = "error"
+                    yield AnalysisEvent(
+                        "tool_result",
+                        {
+                            "id": "auto_krx_price_movers",
+                            "name": "pythonExec",
+                            "label": "코드 실행 — KRX 기간 수익률 계산",
+                            "summary": None,
+                            "result": uiText,
+                            "status": status,
+                            "round": roundIdx + 1,
+                        },
+                    )
+                    messages.append(
+                        {
+                            "role": "user",
+                            "content": (
+                                "[시스템 추가 계산 결과]\n"
+                                "아래는 전체 KRX DataFrame 기준 기간 수익률 계산 결과입니다. "
+                                "최종 답변은 이 계산 결과를 근거로 작성하세요.\n\n"
+                                f"{llmText}"
+                            ),
+                        }
+                    )
+                messages.append({"role": "user", "content": quality.repairPrompt})
+                continue
+            if not quality.passed:
+                yield AnalysisEvent(
+                    "quality_check",
+                    {
+                        "passed": False,
+                        "issues": quality.issues,
+                        "action": "record_violation",
+                    },
+                )
+            elif category == "finance":
+                yield AnalysisEvent("quality_check", {"passed": True, "issues": []})
             # META/OUT_OF_SCOPE 이거나 이미 재질문 1회 한 뒤 → 그대로 종료
-            if not streamedText and resp.answer:
-                yield resp.answer
+            if finalText:
+                yield finalText
             return
 
         if len(resp.tool_calls) > _MAX_PARALLEL_TOOLS:
@@ -148,6 +240,7 @@ def streamWithTools(
             callKey = f"{tc.name}:{_hashArgs(tc.arguments)}"
             seenCalls[callKey] = seenCalls.get(callKey, 0) + 1
             label = _toolLabel(tc.name, tc.arguments)
+            observedToolCalls.append({"name": tc.name, "arguments": dict(tc.arguments or {})})
 
             yield AnalysisEvent(
                 "tool_call",
@@ -315,6 +408,65 @@ def _resolveToolChoice(category: str, roundIdx: int) -> str | None:
     if category == "out_of_scope":
         return "none"
     return None
+
+
+def _krxPriceMoverAutoCode(question: str | None, toolCalls: list[dict[str, Any]]) -> str | None:
+    """KRX 가격 모멘텀 질문에서 원본 head 표본 답변을 막기 위한 자동 계산 코드."""
+    q = (question or "").lower()
+    if not any(word in q for word in ("주가", "가격", "종목", "price", "stock")):
+        return None
+    if not any(word in q for word in ("오른", "상승", "급등", "수익률", "모멘텀", "mover", "return")):
+        return None
+
+    gatherCall = None
+    for call in reversed(toolCalls):
+        if str(call.get("name", "")) != "gather":
+            continue
+        args = call.get("arguments") or call.get("args") or {}
+        if isinstance(args, dict) and str(args.get("axis", "")).lower() == "krx":
+            gatherCall = args
+            break
+    if not gatherCall:
+        return None
+
+    import json
+    import re
+    from datetime import date, timedelta
+
+    startValue = gatherCall.get("start")
+    endValue = gatherCall.get("end")
+    if "최근" in q and not re.search(r"(19|20)\d{2}", q):
+        endValue = date.today().isoformat()
+        startValue = (date.today() - timedelta(days=45)).isoformat()
+
+    start = json.dumps(startValue, ensure_ascii=False)
+    end = json.dumps(endValue, ensure_ascii=False)
+    market = json.dumps(gatherCall.get("market") or "KR", ensure_ascii=False)
+    return (
+        "import dartlab, polars as pl\n"
+        f"df = dartlab.gather('krx', 'close', start={start}, end={end}, market={market})\n"
+        "date_cols = sorted([c for c in df.columns if c not in ('stockCode', 'corpName')])\n"
+        "if len(date_cols) < 2:\n"
+        "    print('계산 불가: KRX 가격 날짜 컬럼이 2개 미만입니다.')\n"
+        "else:\n"
+        "    first, last = date_cols[0], date_cols[-1]\n"
+        "    df = df.with_columns([pl.col(c).cast(pl.Float64, strict=False) for c in date_cols])\n"
+        "    out = (\n"
+        "        df.select(['stockCode', 'corpName', first, last])\n"
+        "        .filter(pl.col(first).is_not_null() & pl.col(last).is_not_null() & (pl.col(first) > 0))\n"
+        "        .with_columns((((pl.col(last) / pl.col(first)) - 1) * 100).round(2).alias('returnPct'))\n"
+        "        .sort('returnPct', descending=True)\n"
+        "        .head(20)\n"
+        "    )\n"
+        "    print(f'period: {first}~{last}, universe={df.height}, metric=close_return_pct')\n"
+        "    print('rank\\tstockCode\\tcorpName\\tstartClose\\tendClose\\treturnPct')\n"
+        "    for idx, row in enumerate(out.to_dicts(), start=1):\n"
+        "        print(f\"{idx}\\t{row['stockCode']}\\t{row['corpName']}\\t{row[first]:.0f}\\t{row[last]:.0f}\\t{row['returnPct']:.2f}\")\n"
+    )
+
+
+def _hasObservedPythonExec(toolCalls: list[dict[str, Any]]) -> bool:
+    return any(str(call.get("name", "")) == "pythonExec" for call in toolCalls)
 
 
 def _hashArgs(args: dict) -> str:

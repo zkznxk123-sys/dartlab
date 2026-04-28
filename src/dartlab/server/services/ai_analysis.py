@@ -62,6 +62,10 @@ async def stream_topic_summary(
 async def run_plain_chat(req: AskRequest) -> dict[str, str]:
     """회사 컨텍스트 없이 일반 AI 채팅을 실행한다."""
     try:
+        hintCode = req.company
+        if not hintCode and req.viewContext and req.viewContext.company:
+            vc = req.viewContext.company
+            hintCode = vc.stockCode or vc.corpName or vc.company
         answer = await collect_analysis_text(
             req.question,
             provider=normalize_provider(req.provider) or req.provider,
@@ -69,6 +73,7 @@ async def run_plain_chat(req: AskRequest) -> dict[str, str]:
             model=req.model,
             api_key=req.api_key,
             base_url=req.base_url,
+            stockCode=hintCode,
             history=[h.model_dump() for h in req.history] if req.history else None,
             view_context=req.viewContext.model_dump() if req.viewContext else None,
             use_tools=True,

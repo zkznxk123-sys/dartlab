@@ -25,12 +25,15 @@ import argparse
 import asyncio
 import os
 import sys
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 
 import polars as pl
 
 from dartlab.gather.krxApi import _normalizeDate, fetchKrxRange
+
+_KST = timezone(timedelta(hours=9))
+_KRX_READY_KST = time(18, 30)
 
 
 def _getKey() -> str:
@@ -109,13 +112,56 @@ def _findLastBasDd(outDir: Path) -> date | None:
     return None
 
 
+def _todayKst() -> date:
+    return datetime.now(_KST).date()
+
+
+def _previousWeekday(d: date) -> date:
+    cur = d
+    while cur.weekday() >= 5:
+        cur -= timedelta(days=1)
+    return cur
+
+
+def _requiredLatestDate(requestedEnd: date) -> date | None:
+    """현 시점에 최소 확보돼야 하는 최신 KRX 일자.
+
+    평일 장마감 이후에는 당일 데이터까지 기대한다. 장마감 전에는 전 거래 가능
+    평일까지 기대한다. 공휴일 캘린더는 별도 SSOT 가 없으므로 주말만 제외한다.
+    공휴일이면 workflow 가 fail 하며 사람이 확인한다.
+    """
+    now = datetime.now(_KST)
+    today = now.date()
+    if requestedEnd < today:
+        return _previousWeekday(requestedEnd)
+    if now.time() >= _KRX_READY_KST:
+        return _previousWeekday(today)
+    return _previousWeekday(today - timedelta(days=1))
+
+
+def _validateFreshFetch(df: pl.DataFrame, *, startD: date, endD: date, context: str) -> None:
+    required = _requiredLatestDate(endD)
+    if required is None or required < startD:
+        return
+    latest = None
+    if not df.is_empty() and "BAS_DD" in df.columns:
+        s = df["BAS_DD"].max()
+        latest = date(int(s[:4]), int(s[4:6]), int(s[6:8])) if s else None
+    if latest is None or latest < required:
+        raise RuntimeError(
+            f"KRX fresh 데이터 누락: context={context}, required>={required}, "
+            f"latest={latest}, range={startD}~{endD}. "
+            "이 상태를 success 로 처리하면 HF 가 오래된 raw parquet 으로 남습니다."
+        )
+
+
 async def buildIncremental(outDir: Path, apiKey: str) -> dict[int, int]:
     """마지막 저장일 다음날 ~ today (T-0 포함) 자동 fetch — cron 누락·캐시 miss 시 갭 자동 메움.
 
     cron 은 KST 17:00 평일 (장 마감 15:30 + 정산 ~16:30 후) → 당일 데이터 확정 시점.
     1일치 fixed 가 아니라 "마지막 저장 ~ today" 가변 윈도로 fetch → 갭 자동 복구.
     """
-    today = date.today()
+    today = _todayKst()
     last = _findLastBasDd(outDir)
     if last is None:
         # 빈 상태 (초기) — 어제만 1일치, 본격 backfill 은 별도 dispatch
@@ -133,6 +179,7 @@ async def buildIncremental(outDir: Path, apiKey: str) -> dict[int, int]:
     e = today.strftime("%Y-%m-%d")
     print(f"[krx] incremental fetch: {s} ~ {e}")
     df = await fetchKrxRange(s, e, market="ALL", sleepSec=0.5, apiKey=apiKey)
+    _validateFreshFetch(df, startD=startD, endD=today, context="incremental")
     if df.is_empty():
         print(f"[krx] {s}~{e}: empty (휴장일 / 정산 미확정 / 비거래일 구간)")
         return {}
@@ -214,8 +261,11 @@ def main() -> int:
     if args.push:
         from dartlab.gather._hfDeploy import deployKrxToHF
 
-        result = deployKrxToHF(outDir, repoId=args.repo_id)
-        print(f"[hf] {result}")
+        if counts:
+            result = deployKrxToHF(outDir, repoId=args.repo_id)
+            print(f"[hf] {result}")
+        else:
+            print("[hf] 변경된 KRX 데이터 없음 — HF push skip")
 
     return 0 if counts or args.mode == "incremental" else 1
 

@@ -722,6 +722,23 @@ class TestAsk:
         assert captured["kwargs"]["model"] == "gpt-5.4"
         assert captured["kwargs"]["use_tools"] is True
 
+    def test_plain_chat_passes_company_as_stock_code_hint(self, client, monkeypatch):
+        captured = {}
+
+        async def _fake_collect(question="", **kwargs):
+            captured["question"] = question
+            captured["kwargs"] = kwargs
+            return "core-answer"
+
+        monkeypatch.setattr("dartlab.server.services.ai_analysis.collect_analysis_text", _fake_collect)
+
+        resp = client.post(
+            "/api/ask",
+            json={"company": "005930", "question": "수익성 분석", "stream": False},
+        )
+        assert resp.status_code == 200
+        assert captured["kwargs"]["stockCode"] == "005930"
+
     def test_topic_summary_uses_core_stream_path(self, client, monkeypatch):
         class DummyCompany:
             corpName = "테스트기업"

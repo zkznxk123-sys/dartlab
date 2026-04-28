@@ -81,6 +81,139 @@ class TestBuildTools:
             assert "properties" in params
             assert "required" in params
 
+    def test_select_tools_for_question_limits_schema_surface(self):
+        from dartlab.ai.tools import buildTools, selectToolsForQuestion
+
+        tools = buildTools()
+        selected = selectToolsForQuestion(
+            tools,
+            question="삼성전자 수익성 분석해줘",
+            category="finance",
+            intent="act2_profit",
+            hasCompany=True,
+            stockCode="005930",
+        )
+        names = {t.name for t in selected}
+        assert len(selected) < len(tools)
+        assert "analysis" in names
+        assert "show" in names
+        assert "scan" not in names
+
+    def test_select_tools_for_compare_prefers_market_tools(self):
+        from dartlab.ai.tools import buildTools, selectToolsForQuestion
+
+        selected = selectToolsForQuestion(
+            buildTools(),
+            question="반도체 업종 비교해줘",
+            category="finance",
+            intent="compare",
+            hasCompany=False,
+        )
+        names = {t.name for t in selected}
+        assert "scan" in names
+        assert "industry" in names
+        assert "analysis" not in names
+
+    def test_select_tools_for_recent_price_movers_exposes_krx_path(self):
+        from dartlab.ai.tools import buildTools, selectToolsForQuestion
+
+        selected = selectToolsForQuestion(
+            buildTools(),
+            question="최근 주가가 많이 오른 종목을 찾아줘",
+            category="finance",
+            intent="compare",
+            hasCompany=False,
+        )
+        names = [t.name for t in selected]
+        assert "gather" in names
+        assert "pythonExec" in names
+        assert names.index("gather") < names.index("macro")
+
+    def test_gather_schema_documents_krx_price_mover_contract(self):
+        from dartlab.ai.tools import buildTools
+
+        gather = next(t for t in buildTools() if t.name == "gather")
+        props = gather.parameters["properties"]
+        assert "krx" in props["axis"]["enum"]
+        assert "price movers" in props["axis"]["description"]
+        assert "target='close'" in props["target"]["description"]
+        assert {"start", "end", "market", "stockCodes"} <= set(props)
+
+    def test_gather_handler_forwards_kwargs(self, monkeypatch):
+        import dartlab
+        from dartlab.ai.tools import buildTools, executeTool
+
+        received = {}
+
+        def fake_gather(axis=None, target=None, **kwargs):
+            received.update({"axis": axis, "target": target, **kwargs})
+            return received
+
+        monkeypatch.setattr(dartlab, "gather", fake_gather)
+        result = executeTool(
+            buildTools(),
+            "gather",
+            {
+                "axis": "krx",
+                "target": "close",
+                "start": "2026-03-15",
+                "end": "2026-04-28",
+                "market": "KR",
+            },
+        )
+        assert result["axis"] == "krx"
+        assert result["target"] == "close"
+        assert result["start"] == "2026-03-15"
+        assert result["end"] == "2026-04-28"
+        assert result["market"] == "KR"
+
+    def test_read_tool_description_points_to_docstring_skills(self):
+        from dartlab.ai.tools import buildTools
+
+        read = next(t for t in buildTools() if t.name == "Read")
+        assert "src/dartlab/{engine}/__init__.py" in read.description
+        assert "src/dartlab/skills" not in read.description
+
+    def test_search_company_alias_ranks_hyundai_motor_first(self, monkeypatch):
+        import polars as pl
+
+        import dartlab
+        from dartlab.ai.tools import buildTools, executeTool
+
+        monkeypatch.setattr(
+            dartlab,
+            "searchName",
+            lambda keyword: pl.DataFrame(
+                {
+                    "회사명": ["현대차증권", "현대자동차", "현대차"],
+                    "종목코드": ["001500", "005380", "TEST00"],
+                }
+            ),
+        )
+        result = executeTool(buildTools(), "searchCompany", {"keyword": "현대차"})
+        assert result["종목코드"][0] == "005380"
+        assert result["_matchKind"][0] == "exact"
+
+    def test_search_company_marks_ambiguous_candidates(self, monkeypatch):
+        import polars as pl
+
+        import dartlab
+        from dartlab.ai.tools import buildTools, executeTool
+
+        monkeypatch.setattr(
+            dartlab,
+            "searchName",
+            lambda keyword: pl.DataFrame(
+                {
+                    "회사명": ["삼성전자", "삼성전기"],
+                    "종목코드": ["005930", "009150"],
+                }
+            ),
+        )
+        result = executeTool(buildTools(), "searchCompany", {"keyword": "삼성"})
+        assert "_ambiguous" in result.columns
+        assert result["_ambiguous"][0] is True
+
     def test_executeTool_unknown(self):
         from dartlab.ai.tools import buildTools, executeTool
 
@@ -130,8 +263,11 @@ class TestSerialize:
     def test_serializeForLlm_dict(self):
         from dartlab.ai.tools.serialize import serializeForLlm
 
-        data = {"grade": "A", "score": 85, "history": [{"period": "2024", "roe": 12.5}]}
+        data = {"_summary": "ROE 양호", "grade": "A", "score": 85, "history": [{"period": "2024", "roe": 12.5}]}
         out = serializeForLlm(data, name="test", arguments={})
+        assert "## Evidence" in out
+        assert "도구명: test" in out
+        assert "_summary: ROE 양호" in out
         assert "grade" in out
         assert "85" in out
 
@@ -139,6 +275,7 @@ class TestSerialize:
         from dartlab.ai.tools.serialize import serializeForLlm
 
         out = serializeForLlm(None, name="test", arguments={})
+        assert "## Evidence" in out
         assert "None" in out
 
     def test_serializeForLlm_large_df_head_only(self):
@@ -218,13 +355,15 @@ class TestToolLoop:
             [
                 {"answer": "첫 시도 일반론", "tool_calls": [], "finish_reason": "stop"},
                 {"answer": "재시도 답변", "tool_calls": [], "finish_reason": "stop"},
+                {"answer": "품질 재작성 답변", "tool_calls": [], "finish_reason": "stop"},
             ]
         )
         out = list(streamWithTools(llm, [{"role": "user", "content": "q"}], category="finance"))
         # VIOLATION 이벤트 있어야 함
         assert any(getattr(ev, "kind", None) == "error" and "VIOLATION" in str(ev.data) for ev in out)
         # 재시도 응답이 최종 yield
-        assert any(isinstance(item, str) and "재시도 답변" in item for item in out)
+        assert any(getattr(ev, "kind", None) == "quality_check" and not ev.data["passed"] for ev in out)
+        assert any(isinstance(item, str) and "품질 재작성 답변" in item for item in out)
 
     def test_rejects_provider_without_tools(self):
         from dartlab.ai.runtime.toolLoop import streamWithTools
@@ -250,3 +389,91 @@ class TestToolLoop:
         # META 범주 — tool 0회 허용 (FINANCE 면 재질문 가드 발동)
         out = list(streamWithTools(llm, [{"role": "user", "content": "q"}], category="meta"))
         assert any(isinstance(item, str) and "짧은 답" in item for item in out)
+
+
+class TestQualityGate:
+    def test_quality_missing_parts(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="삼성전자 수익성 분석해줘",
+            answer="좋아 보입니다.",
+            toolCalls=[],
+            stockCode="005930",
+        )
+        assert not result.passed
+        assert "missing_tool_evidence" in result.issues
+        assert "missing_numeric_table" in result.issues
+        assert "missing_reading_notes" in result.issues
+
+    def test_quality_passes_analyst_shape(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "삼성전자는 수익성 방어가 양호해 보입니다.\n\n"
+            "| 지표 | 값 |\n"
+            "| --- | --- |\n"
+            "| ROE | 12.0% |\n\n"
+            "이 표에서 읽을 포인트\n"
+            "- ROE가 두 자릿수라 자본효율이 양호합니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="삼성전자 수익성 분석해줘",
+            answer=answer,
+            toolCalls=[{"name": "analysis", "arguments": {"stockCode": "005930"}}],
+            stockCode="005930",
+        )
+        assert result.passed
+
+    def test_quality_detects_company_mismatch(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "현대차는 안정성 점검이 필요합니다.\n\n"
+            "| 지표 | 값 |\n| --- | --- |\n| 부채비율 | 120% |\n\n"
+            "이 표에서 읽을 포인트\n- 부채비율은 보통권입니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="현대차 안정성 분석",
+            answer=answer,
+            toolCalls=[{"name": "analysis", "arguments": {"stockCode": "001500"}}],
+            stockCode="005380",
+        )
+        assert not result.passed
+        assert "company_mismatch_risk" in result.issues
+
+    def test_quality_requires_table_for_price_mover_questions(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="최근 주가가 많이 오른 종목을 찾아줘",
+            answer="최근 오른 종목 후보입니다.",
+            toolCalls=[{"name": "gather", "arguments": {"axis": "krx", "target": "close"}}],
+        )
+        assert not result.passed
+        assert "missing_numeric_table" in result.issues
+        assert "missing_reading_notes" in result.issues
+
+    def test_quality_rejects_krx_price_mover_without_python_computation(self):
+        from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+        answer = (
+            "최근 오른 종목 후보입니다.\n\n"
+            "| 종목 | 시작 | 종료 |\n"
+            "| --- | ---: | ---: |\n"
+            "| KR모터스 | 428 | 593 |\n\n"
+            "이 표에서 읽을 포인트\n"
+            "- 원본 표본에서 상승했습니다."
+        )
+        result = evaluateFinalAnswer(
+            category="finance",
+            question="최근 주가가 많이 오른 종목을 찾아줘",
+            answer=answer,
+            toolCalls=[{"name": "gather", "arguments": {"axis": "krx", "target": "close"}}],
+        )
+        assert not result.passed
+        assert "missing_numeric_table" in result.issues

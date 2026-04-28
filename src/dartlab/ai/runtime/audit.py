@@ -116,7 +116,10 @@ class AuditCollector:
         self.tool_calls: list[dict[str, Any]] = []
         self.override_calls: list[dict[str, Any]] = []
         self.violation: str | None = None
+        self.quality_issues: list[str] = []
         self.skill_used: str | None = None
+        self.chunk_len = 0
+        self.error: str | None = None
         self._start_mono = time.monotonic()
         self._data_dir = Path(data_dir) if data_dir else _resolve_data_dir()
 
@@ -172,11 +175,32 @@ class AuditCollector:
     def set_category_hash(self, value: str) -> None:
         self.category_hash = value
 
+    def observe(self, kind: str, data: dict[str, Any]) -> None:
+        """core.runAsk 이벤트를 audit 스키마로 누적한다."""
+        if kind == "tool_call":
+            name = str(data.get("name") or data.get("tool") or "")
+            args = data.get("arguments") or data.get("args") or {}
+            self.observe_tool_call(name, args if isinstance(args, dict) else {})
+        elif kind == "chunk":
+            self.chunk_len += len(str(data.get("text", "")))
+        elif kind == "error":
+            self.error = str(data.get("error") or "")
+            if "VIOLATION" in self.error:
+                self.observe_violation(self.error)
+        elif kind == "quality_check":
+            issues = data.get("issues") or []
+            if isinstance(issues, list):
+                self.quality_issues = [str(i) for i in issues]
+            if not data.get("passed", True) and self.quality_issues:
+                self.observe_violation(",".join(self.quality_issues))
+
     # ── flush ─────────────────────────────────────────────────────
 
-    def flush(self, *, chunk_len: int = 0, error: str | None = None) -> None:
+    def flush(self, *, chunk_len: int | None = None, error: str | None = None) -> None:
         if os.environ.get("DARTLAB_AUDIT_DISABLE") == "1":
             return
+        final_chunk_len = self.chunk_len if chunk_len is None else chunk_len
+        final_error = self.error if error is None else error
         rounds = max(1, len(self.tool_calls))
         entry = {
             "schema_version": self.schema_version,
@@ -192,9 +216,10 @@ class AuditCollector:
             "tool_sequence_hash": _seq_hash(self.tool_calls),
             "override_calls": self.override_calls,
             "rounds": rounds,
-            "chunk_len": int(chunk_len),
-            "error": (error[:200] if error else None),
+            "chunk_len": int(final_chunk_len),
+            "error": (final_error[:200] if final_error else None),
             "violation": self.violation,
+            "quality_issues": self.quality_issues,
             "skill_used": self.skill_used,
             "duration_total_ms": int((time.monotonic() - self._start_mono) * 1000),
             "judgment": {"verdict": None, "judged_at": None, "judged_by": None, "pr_url": None},
