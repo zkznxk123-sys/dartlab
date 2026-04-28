@@ -10,8 +10,7 @@ const siteUrl = 'https://eddmpython.github.io/dartlab';
 const target = `${basePath}/docs/getting-started/installation`;
 const extraPages = [
 	{ loc: `${siteUrl}/scan`, changefreq: 'daily', priority: 0.95 },
-	{ loc: `${siteUrl}/map`, changefreq: 'daily', priority: 0.92 },
-	{ loc: `${siteUrl}/cheatsheet`, changefreq: 'monthly', priority: 0.82 }
+	{ loc: `${siteUrl}/map`, changefreq: 'daily', priority: 0.92 }
 ];
 
 const docsDir = resolve(buildDir, 'docs');
@@ -45,17 +44,6 @@ if (existsSync(blogHtml) && !existsSync(blogIndex)) {
 	mkdirSync(blogDir, { recursive: true });
 	copyFileSync(blogHtml, blogIndex);
 	console.log('  -> blog/index.html copied from blog.html');
-}
-
-// cheatsheet/index.html — keep extensionless GitHub Pages access stable
-const cheatsheetHtml = resolve(buildDir, 'cheatsheet.html');
-const cheatsheetDir = resolve(buildDir, 'cheatsheet');
-const cheatsheetIndex = resolve(cheatsheetDir, 'index.html');
-
-if (existsSync(cheatsheetHtml) && !existsSync(cheatsheetIndex)) {
-	mkdirSync(cheatsheetDir, { recursive: true });
-	copyFileSync(cheatsheetHtml, cheatsheetIndex);
-	console.log('  -> cheatsheet/index.html copied from cheatsheet.html');
 }
 
 // llms.txt + llms-full.txt — auto-generate from docs/ and blog/ markdown
