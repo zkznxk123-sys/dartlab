@@ -13,12 +13,12 @@
 	interface Props {
 		cols: string[];
 		conds: FilterCond[];
-		sort: SortKey | null;
+		sorts: SortKey[];
 		shareUrl: string;
 		onLoad: (set: SavedColumnSet) => void;
 	}
 
-	let { cols, conds, sort, shareUrl, onLoad }: Props = $props();
+	let { cols, conds, sorts, shareUrl, onLoad }: Props = $props();
 
 	let open = $state(false);
 	let sets = $state<SavedColumnSet[]>([]);
@@ -46,7 +46,7 @@
 			name,
 			cols: cols.slice(),
 			conds: conds.slice(),
-			sort: sort ? [sort] : []
+			sort: sorts.slice()
 		});
 		saveName = '';
 		refresh();

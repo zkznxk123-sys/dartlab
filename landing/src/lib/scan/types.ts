@@ -5,13 +5,13 @@
  * 본 파일은 그것에 의존 안 하는 generic 타입만 둔다 (순환 import 방지).
  */
 
-export type Op = '>=' | '<=' | '==' | '!=' | 'between';
+export type Op = '>=' | '<=' | '==' | '!=' | 'between' | 'contains' | 'in' | 'exists';
 
 /** 단일 필터 조건. between 일 때는 value2 도 사용. */
 export interface FilterCond {
 	metric: string;
 	op: Op;
-	value: number | string;
+	value?: number | string | string[];
 	value2?: number | string;
 	/** true 면 조건 결과 반전 (NOT). 기본 false. */
 	negate?: boolean;

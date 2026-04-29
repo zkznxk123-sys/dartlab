@@ -68,7 +68,8 @@
 	});
 
 	let activeColumns = $state<string[]>([...DEFAULT_COLUMNS]);
-	let sort = $state<SortKey | null>({ key: 'marketCap', dir: 'desc' });
+	let sorts = $state<SortKey[]>([{ key: 'marketCap', dir: 'desc' }]);
+	let sort = $derived(sorts[0] ?? null);
 	let dataExplorerOpen = $state(false);
 	let conds = $state<FilterCond[]>([]);
 	let selectedIndustries = $state<Set<string>>(new Set());
@@ -220,22 +221,47 @@
 		return value;
 	}
 
+	function numericFilterValue(node: ScanNode, metricKey: string): number | null {
+		const raw = comparableValue((node as Record<string, unknown>)[metricKey]);
+		const num = typeof raw === 'number' ? raw : Number(raw);
+		if (!Number.isFinite(num)) return null;
+		const unit = METRICS_BY_KEY[metricKey]?.unit;
+		// 그리드 표시가 억원인 컬럼은 필터 입력도 억원으로 받는다.
+		return unit === '억원' ? num / 1e8 : num;
+	}
+
+	function hasComparableValue(value: unknown): boolean {
+		if (value == null) return false;
+		if (typeof value === 'string') return value.trim().length > 0;
+		if (Array.isArray(value)) return value.length > 0;
+		if (typeof value === 'number') return Number.isFinite(value);
+		return true;
+	}
+
 	function evalCond(node: ScanNode, c: FilterCond): boolean {
 		const v = comparableValue((node as any)[c.metric]);
 		let result: boolean;
-		if (c.op === 'between') {
+		if (c.op === 'exists') {
+			result = hasComparableValue(v);
+		} else if (c.op === 'contains') {
+			const query = String(c.value ?? '').trim().toLowerCase();
+			result = query.length > 0 && String(v ?? '').toLowerCase().includes(query);
+		} else if (c.op === 'in') {
+			const values = Array.isArray(c.value) ? c.value.map(String) : [];
+			result = values.includes(String(v ?? ''));
+		} else if (c.op === 'between') {
 			const a = typeof c.value === 'number' ? c.value : Number(c.value);
 			const b = typeof c.value2 === 'number' ? c.value2 : Number(c.value2);
-			const num = typeof v === 'number' ? v : Number(v);
-			result = !Number.isNaN(num) && num >= a && num <= b;
+			const num = numericFilterValue(node, c.metric);
+			result = num !== null && !Number.isNaN(a) && !Number.isNaN(b) && num >= a && num <= b;
 		} else {
 			const expected = c.value;
 			if (c.op === '==') result = v == expected;
 			else if (c.op === '!=') result = v != expected;
 			else {
-				const num = typeof v === 'number' ? v : Number(v);
+				const num = numericFilterValue(node, c.metric);
 				const target = typeof expected === 'number' ? expected : Number(expected);
-				if (Number.isNaN(num) || Number.isNaN(target)) result = false;
+				if (num === null || Number.isNaN(target)) result = false;
 				else if (c.op === '>=') result = num >= target;
 				else if (c.op === '<=') result = num <= target;
 				else result = false;
@@ -266,22 +292,42 @@
 
 	let sortedNodes = $derived.by(() => {
 		const list = filteredNodes.slice();
-		if (sort) {
-			const key = sort.key;
-			const dir = sort.dir === 'asc' ? 1 : -1;
+		if (sorts.length > 0) {
 			list.sort((a, b) => {
-				const va = (a as any)[key];
-				const vb = (b as any)[key];
-				const ca = comparableValue(va);
-				const cb = comparableValue(vb);
-				if (ca == null && cb == null) return 0;
-				if (ca == null) return 1;
-				if (cb == null) return -1;
-				if (typeof ca === 'number' && typeof cb === 'number') return (ca - cb) * dir;
-				return String(ca).localeCompare(String(cb), 'ko-KR') * dir;
+				for (const s of sorts) {
+					const key = s.key;
+					const dir = s.dir === 'asc' ? 1 : -1;
+					const va = (a as any)[key];
+					const vb = (b as any)[key];
+					const ca = comparableValue(va);
+					const cb = comparableValue(vb);
+					if (ca == null && cb == null) continue;
+					if (ca == null) return 1;
+					if (cb == null) return -1;
+					let cmp = 0;
+					if (typeof ca === 'number' && typeof cb === 'number') cmp = ca - cb;
+					else cmp = String(ca).localeCompare(String(cb), 'ko-KR', { numeric: true });
+					if (cmp !== 0) return cmp * dir;
+				}
+				return String(a.label).localeCompare(String(b.label), 'ko-KR');
 			});
 		}
 		return list;
+	});
+
+	let filterOptions = $derived.by(() => {
+		const map: Record<string, string[]> = {};
+		for (const key of activeColumns) {
+			const def = METRICS_BY_KEY[key];
+			if (!def || def.type !== 'enum') continue;
+			const values = new Set<string>();
+			for (const node of allNodes) {
+				const value = (node as Record<string, unknown>)[key];
+				if (value != null && String(value).trim()) values.add(String(value));
+			}
+			map[key] = Array.from(values).sort((a, b) => a.localeCompare(b, 'ko-KR'));
+		}
+		return map;
 	});
 
 	// ── Industry chip bar ──────────────────────────────
@@ -302,7 +348,7 @@
 	// ── Preset ─────────────────────────────────────────
 	function applyPreset(p: Preset) {
 		conds = [...p.conds];
-		if (p.sorts.length > 0) sort = p.sorts[0];
+		if (p.sorts.length > 0) sorts = p.sorts.slice();
 		if (p.cols && p.cols.length > 0) {
 			const next = new Set(activeColumns);
 			for (const c of p.cols) next.add(c);
@@ -402,7 +448,7 @@
 			if (payload) {
 				selectedIndustries = new Set(payload.i);
 				conds = payload.c;
-				if (payload.s.length > 0) sort = payload.s[0];
+				if (payload.s.length > 0) sorts = payload.s.slice();
 				if (payload.cols.length > 0) {
 					// PINNED 항상 보존 + payload cols
 					const pinned = PINNED_COLUMNS;
@@ -441,7 +487,7 @@
 			v: 2 as const,
 			i: Array.from(selectedIndustries),
 			c: conds,
-			s: sort ? [sort] : [],
+			s: sorts,
 			cols: activeColumns,
 			p: activePresetId ?? undefined,
 			sel: selectedRow ?? undefined
@@ -459,7 +505,7 @@
 		const rest = s.cols.filter((k) => !pinned.includes(k));
 		activeColumns = [...pinned, ...rest];
 		conds = s.conds.slice();
-		if (s.sort.length > 0) sort = s.sort[0];
+		if (s.sort.length > 0) sorts = s.sort.slice();
 		activePresetId = null;
 		void ensureLoaders(inferLoaders(activeColumns));
 	}
@@ -933,8 +979,49 @@
 	}
 
 	// ── Sort handler ──────────────────────────────────
-	function handleSort(s: SortKey) {
-		sort = s;
+	function handleSort(s: SortKey, append: boolean) {
+		if (!append) {
+			sorts = [s];
+			return;
+		}
+		const idx = sorts.findIndex((item) => item.key === s.key);
+		if (idx >= 0) {
+			const next = sorts.slice();
+			next[idx] = s;
+			sorts = next;
+		} else {
+			sorts = [...sorts, s];
+		}
+	}
+
+	function setColumnFilters(metric: string, nextConds: FilterCond[]) {
+		conds = [...conds.filter((c) => c.metric !== metric), ...nextConds];
+		activePresetId = null;
+	}
+
+	function removeCond(index: number) {
+		conds = conds.filter((_, i) => i !== index);
+		activePresetId = null;
+	}
+
+	function condLabel(cond: FilterCond): string {
+		const def = METRICS_BY_KEY[cond.metric];
+		const label = def?.label ?? cond.metric;
+		const unit = def?.unit ? def.unit : '';
+		const fmt = (value: unknown) => {
+			if (typeof value !== 'number') return String(value ?? '');
+			const formatted = value.toLocaleString('ko-KR', { maximumFractionDigits: 2 });
+			return unit ? `${formatted}${unit}` : formatted;
+		};
+		const prefix = cond.negate ? '제외 ' : '';
+		if (cond.op === 'between') return `${prefix}${label} ${fmt(cond.value)}~${fmt(cond.value2)}`;
+		if (cond.op === 'contains') return `${prefix}${label} 포함: ${cond.value ?? ''}`;
+		if (cond.op === 'in') {
+			const values = Array.isArray(cond.value) ? cond.value.join(', ') : String(cond.value ?? '');
+			return `${prefix}${label}: ${values}`;
+		}
+		if (cond.op === 'exists') return `${prefix}${label} 값 있음`;
+		return `${prefix}${label} ${cond.op} ${fmt(cond.value)}`;
 	}
 
 	function handleSelect(id: string) {
@@ -984,7 +1071,7 @@
 				<span>⌘K</span>
 				<span class="cmdk-lbl">프리셋</span>
 			</button>
-			<SavedSets cols={activeColumns} {conds} {sort} {shareUrl} onLoad={loadSavedSet} />
+			<SavedSets cols={activeColumns} {conds} {sorts} {shareUrl} onLoad={loadSavedSet} />
 			{#if runtimeMeta?.dataAsOf}
 				<FreshnessBadge dataAsOf={runtimeMeta.dataAsOf} variant="compact" />
 			{/if}
@@ -1028,6 +1115,17 @@
 		{/if}
 	{/if}
 
+	{#if conds.length > 0}
+		<div class="filter-strip" aria-label="적용된 컬럼 필터">
+			<span class="filter-strip-label">필터</span>
+			{#each conds as cond, i (`${cond.metric}-${cond.op}-${i}`)}
+				<button type="button" class="filter-chip" onclick={() => removeCond(i)} title="필터 제거">
+					{condLabel(cond)} <span>×</span>
+				</button>
+			{/each}
+		</div>
+	{/if}
+
 	<!-- Column group toggle -->
 	<ColumnGroupBar
 		activeColumns={activeColumns}
@@ -1041,11 +1139,14 @@
 			<Grid
 				nodes={sortedNodes}
 				columns={activeColumns}
-				{sort}
+				{sorts}
+				filters={conds}
+				{filterOptions}
 				{percentiles}
 				selectedId={selectedRow}
 				markets={data.markets}
 				onSort={handleSort}
+				onFilterChange={setColumnFilters}
 				onSelect={handleSelect}
 				onCellHover={handleCellHover}
 			/>
@@ -1089,7 +1190,7 @@
 				nodes={allNodes}
 				onApply={(p) => {
 					conds = p.conds;
-					sort = p.sort;
+					sorts = [p.sort];
 					if (p.cols) {
 						const next = new Set(activeColumns);
 						for (const c of p.cols) next.add(c);
@@ -1107,7 +1208,7 @@
 			nodes={allNodes}
 			onApply={(p) => {
 				conds = p.conds;
-				sort = p.sort;
+				sorts = [p.sort];
 				if (p.cols) {
 					const next = new Set(activeColumns);
 					for (const c of p.cols) next.add(c);
@@ -1368,6 +1469,45 @@
 		font-size: 11px;
 	}
 	.ap-x:hover {
+		color: #fb923c;
+	}
+
+	.filter-strip {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 28px;
+		overflow-x: auto;
+		padding-bottom: 2px;
+	}
+	.filter-strip-label {
+		flex-shrink: 0;
+		color: #64748b;
+		font-size: 10px;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+	.filter-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		height: 24px;
+		padding: 0 8px;
+		border: 1px solid rgba(251, 146, 60, 0.35);
+		border-radius: 4px;
+		background: rgba(251, 146, 60, 0.08);
+		color: #cbd5e1;
+		font-size: 11px;
+		font-family: inherit;
+		white-space: nowrap;
+		cursor: pointer;
+	}
+	.filter-chip:hover {
+		border-color: rgba(251, 146, 60, 0.7);
+		color: #fb923c;
+	}
+	.filter-chip span {
 		color: #fb923c;
 	}
 

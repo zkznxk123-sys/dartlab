@@ -15,9 +15,10 @@
 	 *  - placeholder = `—`
 	 */
 	import HeaderTooltip from './HeaderTooltip.svelte';
+	import HeaderFilterPopover from './HeaderFilterPopover.svelte';
 	import Sparkline from '$lib/components/ui/Sparkline.svelte';
 	import { METRICS_BY_KEY, PINNED_COLUMNS } from './metrics';
-	import type { ScanNode, SeriesMetric, SortKey } from './types';
+	import type { FilterCond, ScanNode, SeriesMetric, SortKey } from './types';
 	import { gradeTone, rowTintColor, toneColor } from './grade';
 	import { marketColor, marketLabel, normalizeMarket } from './marketChip';
 
@@ -40,7 +41,9 @@
 	interface Props {
 		nodes: ScanNode[] | Record<string, unknown>[];
 		columns: string[];
-		sort: SortKey | null;
+		sorts?: SortKey[];
+		filters?: FilterCond[];
+		filterOptions?: Record<string, string[]>;
 		percentiles?: Map<string, Percentile>;
 		selectedId: string | null;
 		/** 'screener' = 메인 그리드 (heatmap·hover·등급칩 활성)
@@ -48,7 +51,8 @@
 		mode?: 'screener' | 'table';
 		/** stockCode → 'KOSPI'/'KOSDAQ'/'KONEX' 같은 market 라벨. 노드 자체 market 없을 때 fallback. */
 		markets?: Record<string, string>;
-		onSort: (s: SortKey) => void;
+		onSort: (s: SortKey, append: boolean) => void;
+		onFilterChange?: (metric: string, conds: FilterCond[]) => void;
 		onSelect: (id: string) => void;
 		onCellHover?: (info: CellHoverInfo | null) => void;
 	}
@@ -56,12 +60,15 @@
 	let {
 		nodes,
 		columns,
-		sort,
+		sorts = [],
+		filters = [],
+		filterOptions,
 		percentiles,
 		selectedId,
 		mode = 'screener',
 		markets,
 		onSort,
+		onFilterChange,
 		onSelect,
 		onCellHover
 	}: Props = $props();
@@ -128,13 +135,25 @@
 		scrollTop = el.scrollTop;
 	}
 
-	function handleSortClick(key: string) {
-		const cur = sort;
-		if (cur && cur.key === key) {
-			onSort({ key, dir: cur.dir === 'asc' ? 'desc' : 'asc' });
+	function sortEntry(key: string): SortKey | null {
+		return sorts.find((s) => s.key === key) ?? null;
+	}
+
+	function sortIndex(key: string): number {
+		return sorts.findIndex((s) => s.key === key);
+	}
+
+	function filtersForMetric(key: string): FilterCond[] {
+		return filters.filter((c) => c.metric === key);
+	}
+
+	function handleSortClick(e: MouseEvent, key: string) {
+		const cur = sortEntry(key);
+		if (cur) {
+			onSort({ key, dir: cur.dir === 'asc' ? 'desc' : 'asc' }, e.shiftKey);
 		} else {
 			const def = METRICS_BY_KEY[key];
-			onSort({ key, dir: def?.higherBetter === false ? 'asc' : 'desc' });
+			onSort({ key, dir: def?.higherBetter === false ? 'asc' : 'desc' }, e.shiftKey);
 		}
 	}
 
@@ -174,6 +193,8 @@
 		if (key === 'market') return 82;
 		if (key === 'industryName') return 124;
 		if (key === 'product') return 220;
+		if (key === 'currentPrice') return 120;
+		if (key === 'marketCap') return 124;
 		if (key === 'spark' || key === 'spark30' || key === 'spark60') return 110;
 		if (def?.type === 'series') return 132;
 		if (!def) return 110;
@@ -259,7 +280,9 @@
 		<div class="grid-header" style:grid-template-columns={colWidthCss()}>
 			{#each columns as key (key)}
 				{@const def = METRICS_BY_KEY[key]}
-				{@const sortDir = sort && sort.key === key ? sort.dir : null}
+				{@const sortState = sortEntry(key)}
+				{@const sortDir = sortState?.dir ?? null}
+				{@const sortRank = sortIndex(key)}
 				<div
 					class="hcell"
 					class:pinned={isPinned(key)}
@@ -269,14 +292,25 @@
 					<button
 						type="button"
 						class="hbtn"
-						onclick={() => handleSortClick(key)}
+						onclick={(e) => handleSortClick(e, key)}
 						aria-label="{def?.label ?? key} 정렬"
 					>
 						<HeaderTooltip metric={def} fallbackKey={key} />
 						{#if sortDir}
 							<span class="sort-arr" aria-hidden="true">{sortDir === 'asc' ? '▲' : '▼'}</span>
+							<span class="sort-rank" aria-hidden="true">{sortRank + 1}</span>
 						{/if}
 					</button>
+					{#if onFilterChange && def && def.type !== 'series'}
+						<HeaderFilterPopover
+							metric={def}
+							fallbackKey={key}
+							activeConds={filtersForMetric(key)}
+							values={filterOptions?.[key] ?? []}
+							onApply={onFilterChange}
+							onClear={(metric) => onFilterChange?.(metric, [])}
+						/>
+					{/if}
 				</div>
 			{/each}
 		</div>
@@ -407,8 +441,13 @@
 	<!-- footer count -->
 	<div class="grid-footer">
 		<span class="count">{totalRows.toLocaleString('ko-KR')} 사</span>
-		{#if sort}
-			<span class="sort-hint">정렬: {METRICS_BY_KEY[sort.key].label} ({sort.dir === 'asc' ? '오름' : '내림'})</span>
+		{#if sorts.length > 0}
+			<span class="sort-hint">
+				정렬:
+				{#each sorts as s, i (s.key)}
+					{#if i > 0} › {/if}{METRICS_BY_KEY[s.key]?.label ?? s.key} {s.dir === 'asc' ? '↑' : '↓'}
+				{/each}
+			</span>
 		{/if}
 	</div>
 </div>
@@ -440,7 +479,8 @@
 	.hcell {
 		display: flex;
 		align-items: center;
-		padding: 0 10px;
+		gap: 4px;
+		padding: 0 8px;
 		border-right: 1px solid #1e2433;
 		overflow: visible;
 		position: relative;
@@ -458,6 +498,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
+		min-width: 0;
 		background: transparent;
 		border: none;
 		color: inherit;
@@ -465,11 +506,23 @@
 		padding: 0;
 		font-family: inherit;
 		line-height: 1.15;
-		white-space: pre-line;
+		white-space: pre;
 	}
 	.sort-arr {
 		font-size: 9px;
 		color: #fb923c;
+	}
+	.sort-rank {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 14px;
+		height: 14px;
+		border: 1px solid rgba(251, 146, 60, 0.5);
+		border-radius: 50%;
+		color: #fb923c;
+		font-size: 9px;
+		font-weight: 700;
 	}
 
 	.viewport {
