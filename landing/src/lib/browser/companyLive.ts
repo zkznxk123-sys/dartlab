@@ -481,9 +481,15 @@ const ACCOUNTS = {
 	tangible: { key: 'tangible', label: '유형자산', unit: 'KRW', match: ['PropertyPlantAndEquipment', 'tangible', '유형자산'] },
 	intangible: { key: 'intangible', label: '무형자산', unit: 'KRW', match: ['IntangibleAssets', 'intangible', '무형자산'] },
 	assets: { key: 'assets', label: '총자산', unit: 'KRW', match: ['ifrs-full_Assets', 'Assets', 'total_assets', 'totalAsset', '자산총계', '총자산'] },
+	tradePayables: { key: 'tradePayables', label: '매입채무/영업부채', unit: 'KRW', match: ['TradeAndOtherCurrentPayables', 'TradePayables', 'trade_payables', '매입채무', '매입채무및기타채무', '영업부채'] },
 	borrowings: { key: 'borrowings', label: '차입금', unit: 'KRW', match: ['Borrowings', 'ShorttermBorrowings', 'LongtermBorrowings', '차입금'] },
 	bonds: { key: 'bonds', label: '사채', unit: 'KRW', match: ['BondsIssued', 'Debentures', '사채'] },
 	liabilities: { key: 'liabilities', label: '총부채', unit: 'KRW', match: ['ifrs-full_Liabilities', 'Liabilities', 'totalLiab', '부채총계', '총부채'] },
+	capitalStock: { key: 'capitalStock', label: '자본금', unit: 'KRW', match: ['IssuedCapital', 'CapitalStock', '자본금'] },
+	capitalSurplus: { key: 'capitalSurplus', label: '자본잉여금', unit: 'KRW', match: ['SharePremium', 'CapitalSurplus', '자본잉여금'] },
+	retainedEarnings: { key: 'retainedEarnings', label: '이익잉여금', unit: 'KRW', match: ['RetainedEarnings', 'retained_earnings', '이익잉여금', '결손금'] },
+	treasuryStock: { key: 'treasuryStock', label: '자기주식', unit: 'KRW', match: ['TreasuryShares', 'treasuryStock', '자기주식'] },
+	otherEquity: { key: 'otherEquity', label: '기타자본', unit: 'KRW', match: ['OtherComponentsOfEquity', 'other_equity', '기타자본', '기타포괄손익누계액'] },
 	equity: { key: 'equity', label: '총자본', unit: 'KRW', match: ['ifrs-full_Equity', 'Equity', 'totalEquity', '자본총계', '총자본'] },
 	ocf: { key: 'ocf', label: '영업활동현금흐름', unit: 'KRW', match: ['CashFlowsFromUsedInOperatingActivities', '영업활동현금흐름', '영업CF', 'op'] },
 	icf: { key: 'icf', label: '투자활동현금흐름', unit: 'KRW', match: ['CashFlowsFromUsedInInvestingActivities', '투자활동현금흐름', '투자CF', 'inv'] },
@@ -538,8 +544,8 @@ const STATEMENT_SPECS: Record<StatementDashboardTopic, StatementSpec> = {
 		],
 		groups: [
 			{ key: 'assets', label: '자산', accounts: [ACCOUNTS.cash, ACCOUNTS.receivables, ACCOUNTS.inventory, ACCOUNTS.tangible, ACCOUNTS.intangible, ACCOUNTS.assets] },
-			{ key: 'liabilities', label: '부채', accounts: [ACCOUNTS.borrowings, ACCOUNTS.bonds, ACCOUNTS.liabilities] },
-			{ key: 'equity', label: '자본', accounts: [ACCOUNTS.equity] }
+			{ key: 'liabilities', label: '부채', accounts: [ACCOUNTS.tradePayables, ACCOUNTS.borrowings, ACCOUNTS.bonds, ACCOUNTS.liabilities] },
+			{ key: 'equity', label: '자본', accounts: [ACCOUNTS.capitalStock, ACCOUNTS.capitalSurplus, ACCOUNTS.retainedEarnings, ACCOUNTS.treasuryStock, ACCOUNTS.otherEquity, ACCOUNTS.equity] }
 		]
 	},
 	CF: {

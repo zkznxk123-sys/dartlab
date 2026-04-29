@@ -284,7 +284,7 @@ function buildVizSpec(
 	if (key === 'cf_waterfall') return attach(buildCfWaterfall(input.dashboards.CF, context));
 	if (key === 'valuation_multiples') return attach(buildValuationMultiples(input.company, context));
 	if (key === 'peer_position_radar') return attach(buildPeerRadar(input.company, context));
-	if (key === 'report_evidence_heatmap') return attach(buildReportEvidenceHeatmap(input, context));
+	if (key === 'report_evidence_matrix') return attach(buildReportEvidenceCoverage(input, context));
 	return null;
 }
 
@@ -615,7 +615,7 @@ function buildPeerRadar(
 	};
 }
 
-function buildReportEvidenceHeatmap(
+function buildReportEvidenceCoverage(
 	input: { facts: LiveCompanyReportFact[]; docs: LiveCompanyDocExcerpt[]; changes: LiveCompanyChange[] },
 	context: { stockCode?: string; corpName?: string }
 ): StoryVizSpec | null {
@@ -626,11 +626,11 @@ function buildReportEvidenceHeatmap(
 	];
 	if (!data.some((item) => item.value > 0)) return null;
 	return {
-		chartType: 'heatmap',
-		title: '보고서/원문 근거 밀도',
+		chartType: 'bar',
+		title: '보고서/원문 근거 연결',
 		series: [{ name: '근거', data }],
 		categories: data.map((item) => item.topic),
-		options: { colorScale: { low: '#263145', medium: '#fb923c', high: '#ea4647' } },
+		options: { unit: '연결 상태' },
 		purpose: 'evidence',
 		evidenceIds: ['report:facts', 'docs:excerpts'],
 		meta: baseMeta('report', 'REPORT', context)

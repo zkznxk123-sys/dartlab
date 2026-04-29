@@ -91,19 +91,38 @@
 	async function loadSecondaryData() {
 		secondaryLoading = true;
 		try {
-			const [nextChanges, nextFacts, nextDocs] = await Promise.all([
+			const [nextChanges, nextFacts, nextDocs, isY, bsY, cfY] = await Promise.all([
 				loadLiveCompanyChanges(data.stockCode, 12),
 				loadLiveCompanyReportFacts(data.stockCode),
-				loadLiveCompanyDocs(data.stockCode, 16)
+				loadLiveCompanyDocs(data.stockCode, 16),
+				loadLiveCompanyStatement(data.stockCode, 'IS', 'Y'),
+				loadLiveCompanyStatement(data.stockCode, 'BS', 'Y'),
+				loadLiveCompanyStatement(data.stockCode, 'CF', 'Y')
 			]);
 			changes = nextChanges;
 			reportFacts = nextFacts;
 			docs = nextDocs;
+			mergeAnnualDetails({ IS: isY, BS: bsY, CF: cfY });
 			await tick();
 			observeSections();
 		} finally {
 			secondaryLoading = false;
 		}
+	}
+
+	function mergeAnnualDetails(annual: Record<StatementKey, BrowserTable | null>) {
+		if (!statements) return;
+		statements = {
+			IS: { ...statements.IS, annual: betterTable(annual.IS, statements.IS.annual) },
+			BS: { ...statements.BS, annual: betterTable(annual.BS, statements.BS.annual) },
+			CF: { ...statements.CF, annual: betterTable(annual.CF, statements.CF.annual) }
+		};
+	}
+
+	function betterTable(next: BrowserTable | null, current: BrowserTable | null): BrowserTable | null {
+		if (!next) return current;
+		if (!current) return next;
+		return next.rows.length >= current.rows.length ? next : current;
 	}
 
 	function mergeQuarterly(
@@ -195,8 +214,13 @@
 		BS: buildStatementDashboard('BS', tableFor('BS')),
 		CF: buildStatementDashboard('CF', tableFor('CF'))
 	});
+	let annualDashboards = $derived({
+		IS: buildStatementDashboard('IS', statements?.IS.annual ?? null),
+		BS: buildStatementDashboard('BS', statements?.BS.annual ?? null),
+		CF: buildStatementDashboard('CF', statements?.CF.annual ?? null)
+	});
 	let view = $derived(
-		buildCompanyDashboardView({ manifest, company, dashboards, facts: reportFacts, docs, changes, periodMode })
+		buildCompanyDashboardView({ manifest, company, dashboards, annualDashboards, facts: reportFacts, docs, changes, periodMode })
 	);
 	let evidence = $derived(buildEvidenceForAccount(selectedRow, selectedPeriods, reportFacts, docs, changes));
 	let tocItems = $derived([

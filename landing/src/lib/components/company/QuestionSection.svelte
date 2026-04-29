@@ -4,8 +4,12 @@
 		FinancialTableGroup,
 		FinancialTableRow
 	} from '$lib/browser/companyDashboardModel';
+	import BalanceStructureChart from './BalanceStructureChart.svelte';
+	import CashflowBridgeChart from './CashflowBridgeChart.svelte';
+	import EvidenceCoverageChart from './EvidenceCoverageChart.svelte';
 	import FinancialChart from './FinancialChart.svelte';
 	import FinancialTable from './FinancialTable.svelte';
+	import IncomeConversionChart from './IncomeConversionChart.svelte';
 
 	let {
 		section,
@@ -47,9 +51,33 @@
 		</div>
 	{/if}
 
-	{#if section.charts.length}
-		<div class="chart-grid">
-			{#each section.charts as chart}
+	{#if section.coverageNotes.length}
+		<div class="coverage-notes">
+			{#each section.coverageNotes as note}
+				<span class={note.tone}>{note.label}</span>
+			{/each}
+		</div>
+	{/if}
+
+	{#if section.visuals.length}
+		<div class="visual-stack">
+			{#each section.visuals as visual}
+				{#if visual.type === 'income-conversion'}
+					<IncomeConversionChart view={visual.view} />
+				{:else if visual.type === 'balance-structure'}
+					<BalanceStructureChart view={visual.view} />
+				{:else if visual.type === 'cashflow-bridge'}
+					<CashflowBridgeChart view={visual.view} />
+				{:else if visual.type === 'evidence-coverage'}
+					<EvidenceCoverageChart view={visual.view} {onOpenEvidence} />
+				{:else}
+					<FinancialChart chart={visual.chart} />
+				{/if}
+			{/each}
+		</div>
+	{:else if section.charts.length}
+		<div class="visual-stack">
+			{#each section.charts.slice(0, 1) as chart}
 				<FinancialChart {chart} />
 			{/each}
 		</div>
@@ -170,10 +198,27 @@
 	.metric-row .missing strong {
 		color: #64748b;
 	}
-	.chart-grid {
+	.coverage-notes {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 7px;
+	}
+	.coverage-notes span {
+		border: 1px solid #263145;
+		border-radius: 5px;
+		background: #070c15;
+		color: #94a3b8;
+		font-size: 11px;
+		padding: 6px 8px;
+	}
+	.coverage-notes .watch {
+		border-color: rgba(251, 191, 36, 0.45);
+		color: #fbbf24;
+	}
+	.visual-stack {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 10px;
+		grid-template-columns: 1fr;
+		gap: 12px;
 	}
 	@media (max-width: 1120px) {
 		.metric-row {
@@ -181,8 +226,7 @@
 		}
 	}
 	@media (max-width: 840px) {
-		.section-head,
-		.chart-grid {
+		.section-head {
 			grid-template-columns: 1fr;
 		}
 		.evidence-links {

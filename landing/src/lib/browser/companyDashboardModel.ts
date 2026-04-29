@@ -13,6 +13,7 @@ import type { StoryManifest, StoryManifestDashboardQuestion } from './storyDashb
 
 export type PeriodMode = 'Q' | 'TTM' | 'Y';
 export type Tone = 'good' | 'bad' | 'neutral' | 'watch' | 'missing';
+export type CoverageTone = 'neutral' | 'watch' | 'missing';
 export type FinancialChartKind =
 	| 'small-multiples'
 	| 'lines'
@@ -21,6 +22,13 @@ export type FinancialChartKind =
 	| 'waterfall'
 	| 'matrix'
 	| 'valuation';
+
+export type CompanyVisual =
+	| { type: 'income-conversion'; view: IncomeConversionView }
+	| { type: 'balance-structure'; view: BalanceStructureView }
+	| { type: 'cashflow-bridge'; view: CashflowBridgeView }
+	| { type: 'evidence-coverage'; view: EvidenceCoverageView }
+	| { type: 'legacy-chart'; chart: FinancialChart };
 
 export interface DashboardSeries {
 	id: string;
@@ -57,6 +65,91 @@ export interface FinancialChart {
 	emptyLabel?: string;
 }
 
+export interface ChartPointSeries {
+	id: string;
+	label: string;
+	values: Array<number | null>;
+	unit: string;
+	tone?: Tone;
+}
+
+export interface IncomeConversionView {
+	id: string;
+	title: string;
+	subtitle: string;
+	periods: string[];
+	sourceLabel: string;
+	sourceMode: string;
+	revenue: ChartPointSeries;
+	op: ChartPointSeries;
+	net: ChartPointSeries;
+	opMargin: ChartPointSeries;
+	netMargin: ChartPointSeries;
+	latestPeriod: string | null;
+	watch: boolean;
+	coverageNotes: CoverageNote[];
+}
+
+export interface StructurePart {
+	id: string;
+	label: string;
+	value: number | null;
+	share: number | null;
+	unit: string;
+	tone: Tone;
+	missing?: boolean;
+}
+
+export interface BalanceStructureView {
+	id: string;
+	title: string;
+	subtitle: string;
+	period: string | null;
+	sourceLabel: string;
+	sourceMode: string;
+	totalAssets: number | null;
+	totalFunding: number | null;
+	assetParts: StructurePart[];
+	fundingParts: StructurePart[];
+	equityParts: StructurePart[];
+	debtRatio: number | null;
+	coverageNotes: CoverageNote[];
+}
+
+export interface CashflowBridgeView {
+	id: string;
+	title: string;
+	subtitle: string;
+	periods: string[];
+	sourceLabel: string;
+	sourceMode: string;
+	series: ChartPointSeries[];
+	latest: StructurePart[];
+	coverageNotes: CoverageNote[];
+}
+
+export interface EvidenceCoverageItem {
+	id: string;
+	label: string;
+	status: 'ready' | 'waiting' | 'missing';
+	value: string;
+	detail: string;
+}
+
+export interface EvidenceCoverageView {
+	id: string;
+	title: string;
+	subtitle: string;
+	items: EvidenceCoverageItem[];
+	links: EvidenceLink[];
+	coverageNotes: CoverageNote[];
+}
+
+export interface CoverageNote {
+	label: string;
+	tone: CoverageTone;
+}
+
 export interface FinancialTableRow {
 	key: string;
 	label: string;
@@ -73,6 +166,7 @@ export interface FinancialTableGroup {
 	periods: string[];
 	rows: FinancialTableRow[];
 	statement: StatementKey;
+	coverageNotes?: CoverageNote[];
 }
 
 export interface EvidenceLink {
@@ -87,9 +181,11 @@ export interface DashboardQuestionView {
 	tocLabel: string;
 	answer: string;
 	metrics: DashboardMetric[];
+	visuals: CompanyVisual[];
 	charts: FinancialChart[];
 	tableGroups: FinancialTableGroup[];
 	evidenceLinks: EvidenceLink[];
+	coverageNotes: CoverageNote[];
 	statementKeys: StatementKey[];
 }
 
@@ -109,6 +205,7 @@ interface BuildCompanyDashboardInput {
 	manifest: StoryManifest | null;
 	company: LiveCompanyBundle | null;
 	dashboards: Record<StatementKey, StatementDashboard>;
+	annualDashboards?: Record<StatementKey, StatementDashboard>;
 	facts: LiveCompanyReportFact[];
 	docs: LiveCompanyDocExcerpt[];
 	changes: LiveCompanyChange[];
@@ -198,26 +295,28 @@ const DEFAULT_QUESTIONS: StoryManifestDashboardQuestion[] = [
 	}
 ];
 
-const COLORS = {
+export const COMPANY_CHART_COLORS = {
 	revenue: '#60a5fa',
 	op: '#fb923c',
 	net: '#34d399',
 	margin: '#fbbf24',
-	bad: '#ea4647',
-	cash: '#38bdf8',
-	receivables: '#818cf8',
+	bad: '#ef4444',
+	cash: '#34d399',
+	receivables: '#64748b',
 	inventory: '#fbbf24',
 	tangible: '#fb923c',
-	intangible: '#c084fc',
+	intangible: '#64748b',
 	other: '#64748b',
-	liabilities: '#ea4647',
+	liabilities: '#ef4444',
 	equity: '#34d399',
 	ocf: '#34d399',
 	icf: '#60a5fa',
-	financing: '#c084fc',
+	financing: '#64748b',
 	fcf: '#fb923c',
 	price: '#f8fafc'
 };
+
+const COLORS = COMPANY_CHART_COLORS;
 
 export function buildCompanyDashboardView(input: BuildCompanyDashboardInput): CompanyDashboardView {
 	const questions = dashboardQuestions(input.manifest);
@@ -251,6 +350,7 @@ function dashboardQuestions(manifest: StoryManifest | null): StoryManifestDashbo
 function makeContext(input: BuildCompanyDashboardInput) {
 	return {
 		...input,
+		annualDashboards: input.annualDashboards ?? input.dashboards,
 		price: input.company?.price ?? null,
 		ego: input.company?.companyMeta?.ego ?? null
 	};
@@ -299,8 +399,13 @@ function buildQuestionView(
 	ctx: ReturnType<typeof makeContext>
 ): DashboardQuestionView {
 	const charts = chartsForQuestion(question.id, ctx);
+	const visuals = visualsForQuestion(question.id, ctx);
 	const metrics = metricsForQuestion(question.id, ctx);
 	const tableGroups = tableGroupsForQuestion(question.id, ctx.dashboards);
+	const coverageNotes = uniqueCoverageNotes([
+		...coverageNotesForQuestion(question.id, ctx),
+		...visuals.flatMap((visual) => visualCoverageNotes(visual))
+	]);
 	const evidenceLinks = evidenceLinksForQuestion(question, ctx);
 
 	return {
@@ -309,9 +414,11 @@ function buildQuestionView(
 		tocLabel: question.tocLabel,
 		answer: answerForQuestion(question.id, metrics, ctx),
 		metrics,
+		visuals,
 		charts,
 		tableGroups,
 		evidenceLinks,
+		coverageNotes,
 		statementKeys: question.statementKeys
 	};
 }
@@ -333,6 +440,250 @@ function metricsForQuestion(id: string, ctx: ReturnType<typeof makeContext>): Da
 	];
 }
 
+function visualsForQuestion(id: string, ctx: ReturnType<typeof makeContext>): CompanyVisual[] {
+	const income = incomeConversionView(ctx);
+	const balance = balanceStructureView(ctx);
+	const cashflow = cashflowBridgeView(ctx);
+	const evidence = evidenceCoverageView(ctx);
+	const valuation = valuationChart(ctx);
+
+	if (id === 'overview') return [income, balance].filter(isVisual);
+	if (id === 'business' || id === 'profit') return [income].filter(isVisual);
+	if (id === 'cash') return [cashflow].filter(isVisual);
+	if (id === 'stability' || id === 'allocation') return [balance, id === 'allocation' ? cashflow : null].filter(isVisual);
+	if (id === 'valuation') {
+		return [valuation ? ({ type: 'legacy-chart', chart: valuation } as CompanyVisual) : null, income].filter(isVisual);
+	}
+	if (id === 'evidence') return [evidence].filter(isVisual);
+	return [];
+}
+
+function isVisual(item: CompanyVisual | null): item is CompanyVisual {
+	return item != null;
+}
+
+function incomeConversionView(ctx: ReturnType<typeof makeContext>): CompanyVisual | null {
+	const revenue = normalizedSeries(ctx.dashboards.IS, 'revenue', ctx.periodMode, 'flow');
+	const op = normalizedSeries(ctx.dashboards.IS, 'op', ctx.periodMode, 'flow');
+	const net = normalizedSeries(ctx.dashboards.IS, 'net', ctx.periodMode, 'flow');
+	const opMargin = ratioSeries(op.values, revenue.values);
+	const netMargin = ratioSeries(net.values, revenue.values);
+	if (!hasAny([revenue.values, op.values, net.values, opMargin, netMargin])) return null;
+	const missing = missingAccounts(ctx.dashboards.IS, [
+		['revenue', '매출액'],
+		['op', '영업이익'],
+		['net', '순이익']
+	]);
+	const watch = [...opMargin, ...netMargin].some((value) => isFiniteNumber(value) && Math.abs(value) > 100);
+	const notes: CoverageNote[] = [
+		...coverageFromMissing(missing),
+		...(watch ? [{ label: '마진 100% 초과: 구조 확인', tone: 'watch' as const }] : [])
+	];
+	return {
+		type: 'income-conversion',
+		view: {
+			id: 'income-conversion',
+			title: '매출이 이익으로 바뀌는 구조',
+			subtitle: '매출 규모, 영업이익/순이익, 마진을 한 화면에서 분리된 scale로 비교한다.',
+			periods: revenue.categories,
+			sourceLabel: ctx.dashboards.IS.quality.sourceLabel,
+			sourceMode: ctx.periodMode === 'TTM' ? 'TTM 기준' : ctx.periodMode === 'Y' ? '연간 기준' : '분기 기준',
+			revenue: pointSeries('revenue', '매출', revenue.values, 'KRW', 'neutral'),
+			op: pointSeries('op', '영업이익', op.values, 'KRW', 'neutral'),
+			net: pointSeries('net', '순이익', net.values, 'KRW', 'neutral'),
+			opMargin: pointSeries('opMargin', '영업이익률', opMargin, '%', watch ? 'watch' : 'neutral'),
+			netMargin: pointSeries('netMargin', '순이익률', netMargin, '%', watch ? 'watch' : 'neutral'),
+			latestPeriod: latestCategory(revenue.categories, revenue.values),
+			watch,
+			coverageNotes: notes
+		}
+	};
+}
+
+function balanceStructureView(ctx: ReturnType<typeof makeContext>): CompanyVisual | null {
+	const source = balanceStructureSource(ctx);
+	const bs = source.dashboard;
+	const totalAssets = latestFrom(bs, 'assets');
+	const liabilities = latestFrom(bs, 'liabilities');
+	const equity = latestFrom(bs, 'equity');
+	if (![totalAssets, liabilities, equity].some(isFiniteNumber)) return null;
+
+	const cash = latestFrom(bs, 'cash');
+	const receivables = latestFrom(bs, 'receivables');
+	const inventory = latestFrom(bs, 'inventory');
+	const tangible = latestFrom(bs, 'tangible');
+	const intangible = latestFrom(bs, 'intangible');
+	const otherAssets = residualValue(totalAssets, [cash, receivables, inventory, tangible, intangible]);
+
+	const tradePayables = latestFrom(bs, 'tradePayables');
+	const borrowings = latestFrom(bs, 'borrowings');
+	const bonds = latestFrom(bs, 'bonds');
+	const interestDebt = sumValues([borrowings, bonds]);
+	const otherLiabilities = residualValue(liabilities, [tradePayables, interestDebt]);
+	const totalFunding = sumValues([liabilities, equity]);
+
+	const capitalStock = latestFrom(bs, 'capitalStock');
+	const capitalSurplus = latestFrom(bs, 'capitalSurplus');
+	const retainedEarnings = latestFrom(bs, 'retainedEarnings');
+	const treasuryStock = latestFrom(bs, 'treasuryStock');
+	const otherEquity = residualValue(equity, [capitalStock, capitalSurplus, retainedEarnings, treasuryStock]);
+
+	const assetMissing = missingAccounts(bs, [
+		['cash', '현금'],
+		['receivables', '매출채권'],
+		['inventory', '재고'],
+		['tangible', '유형자산'],
+		['intangible', '무형자산']
+	]);
+	const fundingMissing = missingAccounts(bs, [
+		['tradePayables', '영업부채'],
+		['borrowings', '차입금'],
+		['bonds', '사채'],
+		['capitalStock', '자본금'],
+		['retainedEarnings', '이익잉여금']
+	]);
+	const sourceNote = source.fallback
+		? [{ label: '구조 기준: 연간 상세 / KPI 기준: 최신 분기', tone: 'watch' as const }]
+		: [];
+	const coverageNotes = [...sourceNote, ...coverageFromMissing([...assetMissing, ...fundingMissing])];
+
+	return {
+		type: 'balance-structure',
+		view: {
+			id: 'balance-structure',
+			title: '자산 배치와 조달 구조',
+			subtitle: '총자산을 어디에 묶었고, 그 자산을 부채와 자본으로 어떻게 조달했는지 같이 본다.',
+			period: latestCategory(bs.periods, rowValues(bs, 'assets')),
+			sourceLabel: bs.quality.sourceLabel,
+			sourceMode: source.fallback ? '연간 상세 기준' : ctx.periodMode === 'Y' ? '연간 기준' : '최신 분기 기준',
+			totalAssets,
+			totalFunding,
+			assetParts: [
+				part('cash', '현금', cash, totalAssets, 'good'),
+				part('receivables', '매출채권', receivables, totalAssets, 'neutral'),
+				part('inventory', '재고', inventory, totalAssets, 'watch'),
+				part('tangible', '유형자산', tangible, totalAssets, 'neutral'),
+				part('intangible', '무형자산', intangible, totalAssets, 'neutral'),
+				part('otherAssets', '기타/비영업', otherAssets, totalAssets, 'neutral')
+			],
+			fundingParts: [
+				part('tradePayables', '영업부채', tradePayables, totalAssets, 'neutral'),
+				part('interestDebt', '차입금/사채', interestDebt, totalAssets, 'bad'),
+				part('otherLiabilities', '기타부채', otherLiabilities, totalAssets, 'bad'),
+				part('equity', '자본', equity, totalAssets, 'good')
+			],
+			equityParts: [
+				part('capitalStock', '자본금', capitalStock, equity, 'neutral'),
+				part('capitalSurplus', '자본잉여금', capitalSurplus, equity, 'neutral'),
+				part('retainedEarnings', '이익잉여금', retainedEarnings, equity, 'good'),
+				part('treasuryStock', '자기주식', treasuryStock, equity, 'watch'),
+				part('otherEquity', '기타자본', otherEquity, equity, 'neutral')
+			],
+			debtRatio: ratio(liabilities, equity),
+			coverageNotes
+		}
+	};
+}
+
+function cashflowBridgeView(ctx: ReturnType<typeof makeContext>): CompanyVisual | null {
+	const cf = ctx.dashboards.CF;
+	const ocf = normalizedSeries(cf, 'ocf', ctx.periodMode, 'flow');
+	const icf = normalizedSeries(cf, 'icf', ctx.periodMode, 'flow');
+	const financing = normalizedSeries(cf, 'financingCf', ctx.periodMode, 'flow');
+	const fcf = fcfSeries(cf, ctx.periodMode);
+	if (!hasAny([ocf.values, icf.values, financing.values, fcf.values])) return null;
+	const missing = missingAccounts(cf, [
+		['ocf', '영업CF'],
+		['icf', '투자CF'],
+		['financingCf', '재무CF'],
+		['fcf', 'FCF']
+	]);
+	return {
+		type: 'cashflow-bridge',
+		view: {
+			id: 'cashflow-bridge',
+			title: '현금 창출, 투자, 잔여, 조달',
+			subtitle: 'OCF, ICF, FCF, 재무CF를 같은 0축 scale에서 비교해 현금의 방향을 본다.',
+			periods: ocf.categories,
+			sourceLabel: cf.quality.sourceLabel,
+			sourceMode: ctx.periodMode === 'TTM' ? 'TTM 기준' : ctx.periodMode === 'Y' ? '연간 기준' : '분기 기준',
+			series: [
+				pointSeries('ocf', '영업CF', ocf.values, 'KRW', 'good'),
+				pointSeries('icf', '투자CF', icf.values, 'KRW', 'neutral'),
+				pointSeries('fcf', 'FCF', fcf.values, 'KRW', 'watch'),
+				pointSeries('financingCf', '재무CF', financing.values, 'KRW', 'neutral')
+			],
+			latest: [
+				part('ocf', '영업CF', latestValue(ocf.values), null, 'good'),
+				part('icf', '투자CF', latestValue(icf.values), null, 'neutral'),
+				part('fcf', 'FCF', latestValue(fcf.values), null, 'watch'),
+				part('financingCf', '재무CF', latestValue(financing.values), null, 'neutral')
+			],
+			coverageNotes: coverageFromMissing(missing)
+		}
+	};
+}
+
+function evidenceCoverageView(ctx: ReturnType<typeof makeContext>): CompanyVisual | null {
+	const financeReady = Object.values(ctx.dashboards).some((dashboard) => dashboard.periods.length > 0);
+	const items: EvidenceCoverageItem[] = [
+		{
+			id: 'finance',
+			label: '재무제표',
+			status: financeReady ? 'ready' : 'missing',
+			value: financeReady ? 'IS/BS/CF 연결' : '데이터 없음',
+			detail: financeReady ? '핵심 표와 차트에 연결됨' : '재무제표 로드 실패'
+		},
+		{
+			id: 'report',
+			label: '정기보고서',
+			status: ctx.facts.length ? 'ready' : 'waiting',
+			value: ctx.facts.length ? `${ctx.facts.length}개 연결` : '근거 대기',
+			detail: ctx.facts.length ? ctx.facts.slice(0, 2).map((fact) => fact.label).join(' · ') : 'lazy load 또는 해당 항목 없음'
+		},
+		{
+			id: 'docs',
+			label: '사업보고서 원문',
+			status: ctx.docs.length ? 'ready' : 'waiting',
+			value: ctx.docs.length ? `${ctx.docs.length}개 발췌` : '근거 대기',
+			detail: ctx.docs.length ? ctx.docs[0]?.title ?? '원문 발췌' : '원문 섹션 연결 대기'
+		},
+		{
+			id: 'changes',
+			label: '공시 변화',
+			status: ctx.changes.length ? 'ready' : 'waiting',
+			value: ctx.changes.length ? `${ctx.changes.length}건 변화` : '연결 없음',
+			detail: ctx.changes.length ? ctx.changes[0]?.sectionTitle ?? '공시 변화' : '감지된 변화 없음 또는 로드 대기'
+		}
+	];
+	const links = evidenceLinksForQuestion(
+		{
+			id: 'evidence',
+			question: '',
+			tocLabel: '',
+			sectionKeys: [],
+			blockKeys: [],
+			statementKeys: ['IS', 'BS', 'CF'],
+			evidenceTopics: ['finance', 'report', 'docs'],
+			vizKeys: []
+		},
+		ctx
+	);
+	return {
+		type: 'evidence-coverage',
+		view: {
+			id: 'evidence-coverage',
+			title: '숫자 근거 연결 상태',
+			subtitle: '재무제표 숫자와 정기보고서, 원문, 공시 변화가 어디까지 연결됐는지 확인한다.',
+			items,
+			links,
+			coverageNotes: items.some((item) => item.status !== 'ready')
+				? [{ label: '근거 대기 항목은 값이 아니라 연결 상태로 표시', tone: 'neutral' }]
+				: []
+		}
+	};
+}
+
 function allocationMetrics(ctx: ReturnType<typeof makeContext>): DashboardMetric[] {
 	const assets = latestValue(normalizedSeries(ctx.dashboards.BS, 'assets', ctx.periodMode, 'stock').values);
 	const cash = latestValue(normalizedSeries(ctx.dashboards.BS, 'cash', ctx.periodMode, 'stock').values);
@@ -345,6 +696,80 @@ function allocationMetrics(ctx: ReturnType<typeof makeContext>): DashboardMetric
 		singleMetric('tangibleShare', '유형자산/자산', ratio(tangible, assets), '%'),
 		singleMetric('fcfLatest', 'FCF', fcf, 'KRW')
 	];
+}
+
+function pointSeries(id: string, label: string, values: Array<number | null>, unit: string, tone: Tone): ChartPointSeries {
+	return { id, label, values, unit, tone };
+}
+
+function balanceStructureSource(ctx: ReturnType<typeof makeContext>): {
+	dashboard: StatementDashboard;
+	fallback: boolean;
+} {
+	const current = ctx.dashboards.BS;
+	const annual = ctx.annualDashboards.BS;
+	const currentScore = structureCoverageScore(current);
+	const annualScore = structureCoverageScore(annual);
+	if (ctx.periodMode !== 'Y' && annualScore > currentScore + 1) {
+		return { dashboard: annual, fallback: true };
+	}
+	return { dashboard: current, fallback: false };
+}
+
+function structureCoverageScore(dashboard: StatementDashboard): number {
+	return [
+		'cash',
+		'receivables',
+		'inventory',
+		'tangible',
+		'intangible',
+		'tradePayables',
+		'borrowings',
+		'bonds',
+		'capitalStock',
+		'capitalSurplus',
+		'retainedEarnings',
+		'treasuryStock'
+	].reduce((score, key) => score + (hasFinite(rowValues(dashboard, key)) ? 1 : 0), 0);
+}
+
+function latestFrom(dashboard: StatementDashboard, key: string): number | null {
+	return latestValue(rowValues(dashboard, key));
+}
+
+function residualValue(total: number | null, parts: Array<number | null>): number | null {
+	if (!isFiniteNumber(total)) return null;
+	const known = parts.filter(isFiniteNumber);
+	if (!known.length) return null;
+	const value = total - known.reduce((sum, item) => sum + item, 0);
+	return Math.abs(value) < Math.abs(total) * 0.0001 ? 0 : value;
+}
+
+function sumValues(values: Array<number | null>): number | null {
+	const nums = values.filter(isFiniteNumber);
+	if (!nums.length) return null;
+	return nums.reduce((sum, value) => sum + value, 0);
+}
+
+function part(id: string, label: string, value: number | null, denominator: number | null, tone: Tone): StructurePart {
+	return {
+		id,
+		label,
+		value,
+		share: ratio(value, denominator),
+		unit: 'KRW',
+		tone: value == null ? 'missing' : tone,
+		missing: value == null
+	};
+}
+
+function missingAccounts(dashboard: StatementDashboard, items: Array<[string, string]>): string[] {
+	return items.filter(([key]) => !hasFinite(rowValues(dashboard, key))).map(([, label]) => label);
+}
+
+function coverageFromMissing(labels: string[]): CoverageNote[] {
+	if (!labels.length) return [];
+	return [{ label: `상세 계정 없음: ${labels.join(', ')}`, tone: 'missing' }];
 }
 
 function chartsForQuestion(id: string, ctx: ReturnType<typeof makeContext>): FinancialChart[] {
@@ -586,26 +1011,35 @@ function tableGroupsForQuestion(
 
 function statementTableGroups(dashboards: Record<StatementKey, StatementDashboard>): FinancialTableGroup[] {
 	return [dashboards.IS, dashboards.BS, dashboards.CF].flatMap((dashboard) =>
-		dashboard.groups.map((group) => ({
-			key: `${dashboard.topic}-${group.key}`,
-			label: `${dashboard.topic} · ${group.label}`,
-			periods: dashboard.periods,
-			statement: dashboard.topic,
-			rows: group.rows.map(toFinancialRow)
-		}))
+		dashboard.groups
+			.map((group) => tableGroup(dashboard, group))
+			.filter((group): group is FinancialTableGroup => group != null)
 	);
 }
 
 function groupsFor(dashboard: StatementDashboard, keys: string[]): FinancialTableGroup[] {
 	return dashboard.groups
 		.filter((group) => keys.includes(group.key) && group.rows.length)
-		.map((group) => ({
-			key: `${dashboard.topic}-${group.key}`,
-			label: `${dashboard.topic} · ${group.label}`,
-			periods: dashboard.periods,
-			statement: dashboard.topic,
-			rows: group.rows.map(toFinancialRow)
-		}));
+		.map((group) => tableGroup(dashboard, group))
+		.filter((group): group is FinancialTableGroup => group != null);
+}
+
+function tableGroup(
+	dashboard: StatementDashboard,
+	group: StatementDashboard['groups'][number]
+): FinancialTableGroup | null {
+	const rawRows = group.rows.map(toFinancialRow);
+	const rows = rawRows.filter(isDisplayRow);
+	if (!rows.length) return null;
+	const hidden = rawRows.length - rows.length;
+	return {
+		key: `${dashboard.topic}-${group.key}`,
+		label: `${dashboard.topic} · ${group.label}`,
+		periods: dashboard.periods,
+		statement: dashboard.topic,
+		rows,
+		coverageNotes: hidden ? [{ label: `빈 행 ${hidden}개 숨김`, tone: 'neutral' }] : undefined
+	};
 }
 
 function toFinancialRow(row: StatementGroupRow): FinancialTableRow {
@@ -618,6 +1052,47 @@ function toFinancialRow(row: StatementGroupRow): FinancialTableRow {
 		source: row.source,
 		raw: row
 	};
+}
+
+function isDisplayRow(row: FinancialTableRow): boolean {
+	const nums = row.values.map(numberOrNull).filter(isFiniteNumber);
+	if (!nums.length) return row.values.some(isMeaningfulTextValue);
+	return !nums.every((value) => Math.abs(value) < 1e-9);
+}
+
+function isMeaningfulTextValue(value: unknown): boolean {
+	if (typeof value !== 'string') return false;
+	const text = value.trim();
+	return Boolean(text && text !== '—' && text !== '-' && text !== '--' && text.toLowerCase() !== 'nan');
+}
+
+function coverageNotesForQuestion(id: string, ctx: ReturnType<typeof makeContext>): CoverageNote[] {
+	if (id === 'business' || id === 'profit') return coverageFromMissing(missingAccounts(ctx.dashboards.IS, [['revenue', '매출액'], ['op', '영업이익'], ['net', '순이익']]));
+	if (id === 'cash') return coverageFromMissing(missingAccounts(ctx.dashboards.CF, [['ocf', '영업CF'], ['icf', '투자CF'], ['financingCf', '재무CF']]));
+	if (id === 'stability' || id === 'allocation') {
+		return coverageFromMissing(missingAccounts(ctx.dashboards.BS, [['assets', '총자산'], ['liabilities', '총부채'], ['equity', '총자본']]));
+	}
+	if (id === 'evidence' && !ctx.facts.length && !ctx.docs.length) return [{ label: '보고서/원문 근거 대기', tone: 'neutral' }];
+	return [];
+}
+
+function visualCoverageNotes(visual: CompanyVisual): CoverageNote[] {
+	if (visual.type === 'income-conversion') return visual.view.coverageNotes;
+	if (visual.type === 'balance-structure') return visual.view.coverageNotes;
+	if (visual.type === 'cashflow-bridge') return visual.view.coverageNotes;
+	if (visual.type === 'evidence-coverage') return visual.view.coverageNotes;
+	return [];
+}
+
+function uniqueCoverageNotes(notes: CoverageNote[]): CoverageNote[] {
+	const seen = new Set<string>();
+	const out: CoverageNote[] = [];
+	for (const note of notes) {
+		if (seen.has(note.label)) continue;
+		seen.add(note.label);
+		out.push(note);
+	}
+	return out;
 }
 
 function evidenceLinksForQuestion(
@@ -881,6 +1356,10 @@ function series(
 
 function hasAny(groups: Array<Array<number | null>>): boolean {
 	return groups.some((group) => group.some(isFiniteNumber));
+}
+
+function hasFinite(values: Array<number | null>): boolean {
+	return values.some(isFiniteNumber);
 }
 
 function formatValue(value: number | null | undefined, unit: string): string {

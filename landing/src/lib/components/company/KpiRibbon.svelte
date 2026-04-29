@@ -7,14 +7,23 @@
 		return metric.series.slice(-8);
 	}
 
+	function metricColor(metric: DashboardMetric): string {
+		if (metric.id === 'revenue') return '#60a5fa';
+		if (metric.id === 'op' || metric.id === 'opMargin') return '#fb923c';
+		if (metric.id === 'net' || metric.id === 'roe' || metric.id === 'cashflow') return '#34d399';
+		if (metric.id === 'debtRatio') return '#ef4444';
+		return '#64748b';
+	}
+
 	function barStyle(metric: DashboardMetric, value: number | null): string {
 		const nums = values(metric).filter((item): item is number => item != null && Number.isFinite(item));
-		if (!nums.length || value == null || !Number.isFinite(value)) return 'height: 2px; opacity: 0.18;';
+		if (!nums.length || value == null || !Number.isFinite(value)) return 'height: 2px; opacity: 0.18; background: #64748b;';
 		const min = Math.min(0, ...nums);
 		const max = Math.max(...nums);
 		const span = max - min || 1;
 		const height = Math.max(3, ((value - min) / span) * 28 + 3);
-		return `height: ${height.toFixed(1)}px;`;
+		const color = value < 0 ? '#ef4444' : metricColor(metric);
+		return `height: ${height.toFixed(1)}px; background: ${color};`;
 	}
 </script>
 
@@ -86,7 +95,6 @@
 		overflow-wrap: anywhere;
 		white-space: normal;
 	}
-	.good strong,
 	small.good {
 		color: #34d399;
 	}

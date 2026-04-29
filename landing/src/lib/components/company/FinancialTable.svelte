@@ -13,14 +13,28 @@
 		onSelect?: (row: FinancialTableRow, group: FinancialTableGroup) => void;
 	} = $props();
 
+	let mode = $state<'core' | 'detail'>('core');
+
 	function yoyText(value: number | null): string {
 		if (value == null || !Number.isFinite(value)) return '—';
 		return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
 	}
+
+	function visibleRows(group: FinancialTableGroup): FinancialTableRow[] {
+		return mode === 'detail' ? group.rows : group.rows.slice(0, 6);
+	}
+
+	let hasDetail = $derived(groups.some((group) => group.rows.length > 6));
 </script>
 
 {#if groups.length}
 	<div class="table-stack">
+		{#if hasDetail}
+			<div class="table-toggle" aria-label="표 표시 범위">
+				<button type="button" class:active={mode === 'core'} onclick={() => (mode = 'core')}>핵심</button>
+				<button type="button" class:active={mode === 'detail'} onclick={() => (mode = 'detail')}>상세</button>
+			</div>
+		{/if}
 		{#each groups as group}
 			<section class="table-group">
 				<header>
@@ -39,7 +53,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each group.rows as row}
+							{#each visibleRows(group) as row}
 								<tr
 									role="button"
 									tabindex="0"
@@ -61,6 +75,16 @@
 						</tbody>
 					</table>
 				</div>
+				{#if group.coverageNotes?.length || (mode === 'core' && group.rows.length > visibleRows(group).length)}
+					<div class="table-notes">
+						{#if mode === 'core' && group.rows.length > visibleRows(group).length}
+							<span>상세 행 {group.rows.length - visibleRows(group).length}개 접힘</span>
+						{/if}
+						{#each group.coverageNotes ?? [] as note}
+							<span class={note.tone}>{note.label}</span>
+						{/each}
+					</div>
+				{/if}
 			</section>
 		{/each}
 	</div>
@@ -70,6 +94,29 @@
 	.table-stack {
 		display: grid;
 		gap: 10px;
+	}
+	.table-toggle {
+		display: inline-flex;
+		width: max-content;
+		border: 1px solid #263145;
+		border-radius: 6px;
+		background: #070c15;
+		padding: 2px;
+	}
+	.table-toggle button {
+		border: 0;
+		border-radius: 4px;
+		background: transparent;
+		color: #94a3b8;
+		cursor: pointer;
+		font: inherit;
+		font-size: 11px;
+		font-weight: 800;
+		padding: 5px 9px;
+	}
+	.table-toggle button.active {
+		background: #1e2433;
+		color: #f8fafc;
 	}
 	.table-group {
 		min-width: 0;
@@ -153,5 +200,22 @@
 	}
 	td.down {
 		color: #f87171;
+	}
+	.table-notes {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		border-top: 1px solid #172033;
+		padding: 8px 10px;
+	}
+	.table-notes span {
+		color: #94a3b8;
+		font-size: 11px;
+	}
+	.table-notes .missing {
+		color: #64748b;
+	}
+	.table-notes .watch {
+		color: #fbbf24;
 	}
 </style>

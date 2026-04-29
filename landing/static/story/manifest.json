@@ -1352,7 +1352,7 @@
       "key": "bab",
       "label": "BAB (저변동성 프리미엄)",
       "section": "시장분석",
-      "description": "Frazzini-Pedersen 2014 — 60일 realized vol 저변동성 랭킹 (Baker-Bradley-Wurgler anomaly)"
+      "description": "Frazzini-Pedersen 2014 — 252일 beta 저베타 랭킹 + 60일 realized vol 보조"
     },
     {
       "key": "earningsSurprise",
@@ -2290,7 +2290,7 @@
       "title": "매출과 이익 흐름",
       "purpose": "trend",
       "statement": "IS",
-      "component": "small_multiples",
+      "component": "income_conversion",
       "periodMode": "Q",
       "compareMode": "yoy",
       "requiredMetricIds": [
@@ -2314,7 +2314,7 @@
       "title": "영업이익률과 순이익률",
       "purpose": "trend",
       "statement": "IS",
-      "component": "margin_lines",
+      "component": "income_conversion",
       "periodMode": "Q",
       "compareMode": "yoy",
       "requiredMetricIds": [
@@ -2334,7 +2334,7 @@
       "title": "자산 = 부채 + 자본",
       "purpose": "composition",
       "statement": "BS",
-      "component": "stacked_composition",
+      "component": "balance_structure",
       "periodMode": "Q",
       "compareMode": "latest",
       "requiredMetricIds": [
@@ -2356,7 +2356,7 @@
       "title": "자산 구성과 묶인 돈",
       "purpose": "composition",
       "statement": "BS",
-      "component": "asset_mix",
+      "component": "balance_structure",
       "periodMode": "Q",
       "compareMode": "latest",
       "requiredMetricIds": [
@@ -2381,7 +2381,7 @@
       "title": "부채비율 추이",
       "purpose": "risk",
       "statement": "BS",
-      "component": "ratio_lines",
+      "component": "balance_structure",
       "periodMode": "Q",
       "compareMode": "yoy",
       "requiredMetricIds": [
@@ -2401,7 +2401,7 @@
       "title": "영업/투자/재무/FCF 흐름",
       "purpose": "bridge",
       "statement": "CF",
-      "component": "signed_bars",
+      "component": "cashflow_bridge",
       "periodMode": "Q",
       "compareMode": "yoy",
       "requiredMetricIds": [
@@ -2424,7 +2424,7 @@
       "title": "최신 현금흐름 브릿지",
       "purpose": "bridge",
       "statement": "CF",
-      "component": "waterfall",
+      "component": "cashflow_bridge",
       "periodMode": "Q",
       "compareMode": "latest",
       "requiredMetricIds": [
@@ -2446,7 +2446,7 @@
       "title": "FCF 이후 자본배분",
       "purpose": "bridge",
       "statement": "CF",
-      "component": "signed_bars",
+      "component": "cashflow_bridge",
       "periodMode": "Q",
       "compareMode": "latest",
       "requiredMetricIds": [
@@ -2516,11 +2516,11 @@
     },
     {
       "key": "report_evidence_matrix",
-      "chartType": "heatmap",
+      "chartType": "bar",
       "title": "보고서/원문 근거 연결",
       "purpose": "evidence",
       "statement": "REPORT",
-      "component": "evidence_matrix",
+      "component": "evidence_coverage",
       "periodMode": "Q",
       "compareMode": "topic",
       "requiredMetricIds": [

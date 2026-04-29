@@ -106,11 +106,11 @@ uv run python -X utf8 scripts/build/mergeChunks.py {valuation|credit|peers}
 
 ## 5. 드롭인 컴포넌트 — `sections/*.svelte` 14 개는 손대지 않는다
 
-`sections/*.svelte` 14 개는 Claude Design drop-in.
+`sections/*.svelte` 14 개는 design drop-in.
 
 - **건드리지 않는다** — 구조·로직·스타일 계약.
 - **예외** — Svelte 5 컴파일 에러 (`{@const a, b}` 등) 또는 `// @ts-nocheck` 도입.
-- **재디자인 필요 시** — Claude Design 에 재요청. 계약 (`data` prop 단일) 유지.
+- **재디자인 필요 시** — 같은 drop-in 계약으로 다시 생성. 계약 (`data` prop 단일) 유지.
 - **데이터 shape 이 안 맞으면** — 컴포넌트 건드리지 말고 `assembleCompany.ts` 수정.
 
 **반복 실패** — 섹션 컴포넌트를 직접 고쳐서 계약 깨짐 → 다음 재디자인 시 merge 충돌. shape 불일치는 항상 `assembleCompany.ts` 에서 조립 단계에 맞춘다.

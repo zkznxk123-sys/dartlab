@@ -4,7 +4,11 @@
 
 1차 공식 visual type 은 `chart` 와 `diagram` 이다. `emit_chart()` 와 `emit_diagram()` 이 stdout marker 를 만들고, AI runtime 이 `extract_viz_specs()` 로 이를 `chart` event 와 Workspace Visual Ledger 로 승격한다.
 
-AI 응답에서 visual 은 장식이 아니다. visual 필요 여부는 `Analysis Graph` 의 `visualPolicy` 가 정하고, 각 visual spec 은 `evidenceIds` 를 가져야 한다. 질문 유형별 목적은 분명해야 한다: 시계열은 변화, 비교는 차이, 랭킹은 순위, 다이어그램은 인과·구조를 설명한다. evidence 와 연결되지 않은 visual 은 `unsupported_visual` 이다.
+AI 응답에서 visual 은 장식이 아니다. visual 필요 여부는 `Analysis Graph` 의 `visualPolicy` 와 generated `Process Map.requiredVisuals` 가 정하고, 각 visual spec 은 `evidenceIds` 를 가져야 한다. 질문 유형별 목적은 분명해야 한다: 시계열은 변화, 비교는 차이, 랭킹은 순위, 다이어그램은 인과·구조를 설명한다. evidence 와 연결되지 않은 visual 은 `unsupported_visual` 이다.
+
+visual 생성 여부는 수동 체크리스트가 아니다. docstring/capabilities 의 `visualPolicy` 가 `Analysis Graph` 와 Process Map 으로 컴파일되고, runtime 이 질문 유형과 Workspace evidence 를 보고 자동으로 `chart` 또는 `diagram` 후보를 만든다. 사람이 손으로 관리하는 것은 visualPolicy 와 VizSpec 프로토콜뿐이다.
+
+랭킹·시계열·비교 질문은 primary evidence 와 visual 이 함께 있어야 한다. 예: KRX 급등주 질문은 `pythonExec` 결과에서 ranking evidence 20개와 primary CSV artifact 를 만들고, 같은 evidenceIds 에 연결된 chart visual 을 만든다. CSV/visual 은 부가 장식이 아니라 UI 와 사용자가 같은 계산 결과를 재사용하게 하는 Result Bundle 의 일부다.
 
 Remotion/영상형 설명은 다음 단계다. 현재 구현 계약은 chart/diagram spec 까지이며, 영상형 visual 도 같은 원칙을 따른다: 장식이 아니라 판단 근거를 사용자가 더 빨리 이해하게 하는 설명 도구다.
 
