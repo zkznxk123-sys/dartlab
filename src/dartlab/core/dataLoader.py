@@ -259,7 +259,7 @@ def _shouldRefreshDart(path: Path, refresh: str) -> bool:
 
 def _shouldRefreshHfCategory(path: Path, category: str, refresh: str) -> bool:
     """HF 공개 parquet 카테고리별 freshness 정책."""
-    if category != "krxPrices":
+    if category not in {"krxPrices", "krxIndices"}:
         return _shouldRefreshDart(path, refresh)
     if refresh == "local_only":
         return False

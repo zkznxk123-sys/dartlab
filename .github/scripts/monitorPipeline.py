@@ -18,6 +18,7 @@ MONITORED_WORKFLOWS = [
     "Data Prebuild (DART)",
     "EDGAR Data Sync (Bulk)",
     "KRX Data Sync (Bulk)",
+    "KRX Index Data Sync (Bulk)",
     "Update KindList",
 ]
 

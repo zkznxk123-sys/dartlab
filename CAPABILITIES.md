@@ -547,7 +547,7 @@ dartlab.scan.topics()                   # 가용 축 목록
 | `ownership` | 지분 | 기관/외국인 보유 현황 (비율+주수). KR: 네이버 금융 | O |
 | `peers` | 피어 | 동종업종 피어 종목 목록 (종목코드+시총). KR: KRX/네이버 | O |
 | `krx` | KRX 회사별 시계열 | KOSPI/KOSDAQ 전종목 wide pivot — 행=stockCode+corpName, 열=일자. target (positional) 으로 raw OHLCV (close/open/high/low/volume/marketCap/...) 또는 보조지표 (rsi14/ma20/ema60/macd/atr14/obv/...) 28+ 디스패치. target='raw' 면 long (KRX 원본 컬럼). apiKey 없음 (기본): HF SSOT. apiKey 명시: KRX OpenAPI 직접. 환경변수 자동 read X. | - |
-| `krxIndex` | KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지) | KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) OHLCV + 거래량 + 시가총액. target=close/open/high/low/volume/marketCap/raw. indexFilter=[지수명] 으로 특정 지수 (예: KOSPI200 + 보조지표 자동). apiKey 명시 필수 — idx 카테고리 권한 별도 신청 (sto 종목 키와 분리). | - |
+| `krxIndex` | KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지) | KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) OHLCV + 거래량 + 시가총액. target=close/open/high/low/volume/marketCap/raw. indexFilter=[지수명] 으로 특정 지수 (예: 코스피 200 + 보조지표 자동). apiKey 없음 (기본): HF SSOT. apiKey 명시: KRX idx OpenAPI 직접. 직접 호출 시 idx 카테고리 권한 별도 신청 (sto 종목 키와 분리). | - |
 
 **한글 별칭:**
 

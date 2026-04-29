@@ -51,6 +51,11 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "KRX 일별 전종목 OHLCV+시총+발행주식수 (raw, long parquet)",
         "public": True,
     },
+    "krxIndices": {
+        "dir": "krx/indices",
+        "label": "KRX 시장군별 지수 일별 OHLCV+거래대금+시가총액 (raw, long parquet)",
+        "public": True,
+    },
     "macroFred": {
         "dir": "macro/fred",
         "label": "FRED 거시경제 시계열 (HF 벌크, latest-revised)",

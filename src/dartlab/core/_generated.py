@@ -1009,7 +1009,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         }
     },
     "gather.krxIndex": {
-        "capabilities": "KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) OHLCV + 거래량 + 시가총액. target=close/open/high/low/volume/marketCap/raw. indexFilter=[지수명] 으로 특정 지수 (예: KOSPI200 + 보조지표 자동). apiKey 명시 필수 — idx 카테고리 권한 별도 신청 (sto 종목 키와 분리).",
+        "capabilities": "KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) OHLCV + 거래량 + 시가총액. target=close/open/high/low/volume/marketCap/raw. indexFilter=[지수명] 으로 특정 지수 (예: 코스피 200 + 보조지표 자동). apiKey 없음 (기본): HF SSOT. apiKey 명시: KRX idx OpenAPI 직접. 직접 호출 시 idx 카테고리 권한 별도 신청 (sto 종목 키와 분리).",
         "kind": "gather_axis",
         "summary": "KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지)"
     },

@@ -122,13 +122,13 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         description=(
             "KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) "
             "OHLCV + 거래량 + 시가총액. target=close/open/high/low/volume/marketCap/raw. "
-            "indexFilter=[지수명] 으로 특정 지수 (예: KOSPI200 + 보조지표 자동). "
-            "apiKey 명시 필수 — idx 카테고리 권한 별도 신청 (sto 종목 키와 분리)."
+            "indexFilter=[지수명] 으로 특정 지수 (예: 코스피 200 + 보조지표 자동). "
+            "apiKey 없음 (기본): HF SSOT. apiKey 명시: KRX idx OpenAPI 직접. "
+            "직접 호출 시 idx 카테고리 권한 별도 신청 (sto 종목 키와 분리)."
         ),
-        example='gather("krxIndex", "close", market="KOSPI", start=, end=, apiKey="...")',
+        example='gather("krxIndex", "close", market="KOSPI", start=, end=)',
         targetRequired=False,
         targetType="columnName",
-        hidden=True,
     ),
 }
 
@@ -145,7 +145,7 @@ _API_KEY_INFO: dict[str, str] = {
     "ownership": "불필요",
     "peers": "불필요",
     "krx": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX OpenAPI 직접 호출)",
-    "krxIndex": "KRX_API_KEY (idx 카테고리 권한 별도 신청)",
+    "krxIndex": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX idx OpenAPI 직접 호출)",
 }
 
 _ALIASES: dict[str, str] = {
@@ -574,7 +574,7 @@ class GatherEntry:
                 stockCodes=stockCodes,
                 apiKey=apiKey,
             )
-        if axis == "krxindex":
+        if axis == "krxIndex":
             from dartlab.gather.krxIndex import gatherKrxIndex
 
             apiKey = kwargs.pop("apiKey", None)

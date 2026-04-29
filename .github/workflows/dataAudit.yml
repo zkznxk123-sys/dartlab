@@ -3,7 +3,8 @@ name: Data Audit
 # ──────────────────────────────────────────────────────────────
 # 매일 1회 데이터 파이프라인 감사 — 실패 시 Issue 자동 알림.
 #
-# 감사 대상: Data Sync / Data Prebuild / EDGAR Data Sync / Update KindList.
+# 감사 대상: Data Sync / Data Prebuild / EDGAR Data Sync / KRX Data Sync /
+#          KRX Index Data Sync / Update KindList.
 #
 # 수동 (workflow_dispatch):
 #   - 즉시 감사 실행 (실패 Issue 갱신 포함)

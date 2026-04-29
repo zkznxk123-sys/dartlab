@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 # dartlab 표준 단일 dataset (`core/dataConfig.HF_REPO`) — DATA_RELEASES["krxPrices"] SSOT.
 DEFAULT_REPO_ID = "eddmpython/dartlab-data"
 DEFAULT_PATH_IN_REPO = "krx/prices"
+DEFAULT_INDEX_PATH_IN_REPO = "krx/indices"
 
 
 def deployKrxToHF(
@@ -94,3 +95,14 @@ def deployKrxToHF(
         "files": len(files),
         "commitUrl": getattr(commit, "commit_url", None),
     }
+
+
+def deployKrxIndexToHF(
+    localDir: str | Path,
+    *,
+    repoId: str = DEFAULT_REPO_ID,
+    pathInRepo: str = DEFAULT_INDEX_PATH_IN_REPO,
+    token: str | None = None,
+) -> dict:
+    """KRX 지수 raw parquet 을 HF dataset ``krx/indices`` 로 업로드."""
+    return deployKrxToHF(localDir, repoId=repoId, pathInRepo=pathInRepo, token=token)

@@ -5,6 +5,7 @@
 **주체**: gather 엔진 (`dartlab.gather(axis, stockCode?)` · `c.gather(axis)`).
 **현재**: 주가 · 수급 · 뉴스 · ownership 축 · Naver · Yahoo · FMP fallback · 30 분 TTL 뉴스 · 5 분 TTL 주가 (KR).
 **KRX 풀커버**: 전 상장사 일별 OHLCV/시총/발행주식수 1995~ 현재까지 HF dataset (`eddmpython/dartlab-data/krx/prices/`) 으로 사전 빌드. 매 평일 KST 20:00 cron 이 직전 거래 가능 평일(T-1) 데이터 + 누락 갭 자동 append → 사용자 키 없이 `gather("krx", ...)` 한 줄로 즉시 사용. 수정주가 (split/bonus/rights) 자동 적용.
+**KRX 지수 풀커버**: KRX/KOSPI/KOSDAQ 시장군별 전체 지수 일별 OHLCV/거래대금/시가총액 2010~ 현재까지 HF dataset (`eddmpython/dartlab-data/krx/indices/`) 으로 사전 빌드. 매 평일 KST 20:20 cron 이 T-1 데이터 + 누락 갭 자동 append → 사용자 키 없이 `gather("krxIndex", ...)` 한 줄로 즉시 사용.
 **Macro 벌크**: FRED 전체 카탈로그 81개 + ECOS 전체 카탈로그 53개를 HF dataset (`macro/fred`, `macro/ecos`) 으로 사전 빌드. 매일 cron 이 갱신 → 사용자 키 없이 `gather("macro", ...)` 와 `dartlab.macro(...)` 가 즉시 사용.
 **방향**: 미국 실시간성 보강 · news sentiment 정교화 · gather → quant 팩터 직결 · KRX events (배당/분할 공시) Stage 2 트랙으로 TR 모드 활성.
 
@@ -333,25 +334,63 @@ df = dartlab.gather("price", "005930", indicators=["ma20","rsi14"]) # 일부만
 
 `KRX_API_KEY` 미설정 시 `core.env.AuthKeyMissing` (CLI 는 `promptAndSave`, 서버는 발급 URL + .env 안내 — §2 참조).
 
-### gather("krxindex", ...) — KRX 시장군별 전체 지수 일별 매매현황
+### gather("krxIndex", ...) — KRX 시장군별 전체 지수 일별 매매현황
 
 ```python
-df = dartlab.gather("krxindex", "close", market="KOSPI", apiKey=os.environ["KRX_API_KEY"])
+df = dartlab.gather("krxIndex", "close", market="KOSPI")
 # → KOSPI 시장 모든 지수 (KOSPI 종합/200/100/섹터/스타일/사이즈) 일별 종가 wide
 
-df = dartlab.gather("krxindex", "close", market="KOSDAQ",
-                    indexFilter=["KOSDAQ150"], apiKey=...)
+df = dartlab.gather("krxIndex", "close", market="KOSDAQ", indexFilter=["코스닥 150"])
 # → 단일 지수 + basic 9 보조지표 자동 (rsi14/sma20/macd/...)
 
-df = dartlab.gather("krxindex", "raw", market="KRX", apiKey=...)
+df = dartlab.gather("krxIndex", "raw", market="KRX")
 # → KRX 통합 지수 (KRX300, ESG, ...) long DataFrame (원본 컬럼)
+
+df = dartlab.gather("krxIndex", "close", market="KOSPI", apiKey=os.environ["KRX_API_KEY"])
+# → HF 가 아닌 KRX idx OpenAPI 직접 호출 (검증/긴급 수집용)
 ```
+
+#### 경로 분리 — krx 와 동일한 3 모드
+
+| 경로 | 트리거 | 키 | 소스 | 출력 |
+|---|---|---|---|---|
+| **A. 운영자 cron (벌크)** | `.github/workflows/buildKrxIndexData.yml` cron (KST 20:20 평일) | `KRX_API_KEY`, `HF_TOKEN` (GitHub secret) | KRX idx OpenAPI 직접 | HF dataset `krx/indices/raw-{YYYY}.parquet` |
+| **B. 사용자 + apiKey 명시** | `gather("krxIndex", target, ..., apiKey="...")` | 인자 명시 | KRX idx OpenAPI 직접 | wide pivot 또는 raw long |
+| **C. 사용자 기본** | `gather("krxIndex", target, ...)` | 키 불필요 | HF dataset 자동 | wide pivot 또는 raw long |
 
 - **endpoint**: `data-dbg.krx.co.kr/svc/apis/idx/{krx,kospi,kosdaq}_dd_trd` POST + JSON `{"basDd": "YYYYMMDD"}` + `AUTH_KEY` 헤더
 - **카테고리 권한 별도** — sto (종목) 키와 분리. `https://openapi.krx.co.kr` 마이페이지에서 idx 카테고리 별도 신청 필수
 - **한 호출 = 시장군 내 수십 개 지수** (종합/사이즈/섹터/스타일/ESG/테마)
+- **저장**: HF `krx/indices/raw-{YYYY}.parquet`, long schema (`BAS_DD`, `MARKET_GROUP`, `IDX_CLSS`, `IDX_NM`, `CLSPRC_IDX`, `OPNPRC_IDX`, `HGPRC_IDX`, `LWPRC_IDX`, `CMPPREVDD_IDX`, `FLUC_RT`, `ACC_TRDVOL`, `ACC_TRDVAL`, `MKTCAP`)
+- **기본 호출**: apiKey 없으면 HF dataset. apiKey 명시 시 KRX idx API 직접 호출.
+- **중복 키**: `BAS_DD + MARKET_GROUP + IDX_CLSS + IDX_NM`
+- **연도 파티션**: `raw-2010.parquet` 부터 현재 연도까지. 2010-01-01~2026-04-28 backfill 완료 (17 files, 474,882 rows, HF commit `14869474a55e6e4aaa17c687b993c6c768feff38`).
 - **활용**: 섹터 로테이션 alpha, 스타일 팩터 ground truth, 다중 benchmark, macro regime, ESG/테마
 - 키 권한 부재 시 friendly error (HTTP 401 → "idx 카테고리 권한 없음, 마이페이지에서 별도 신청 필요")
+
+#### 호출 계약
+
+| target | raw 컬럼 | wide value 단위 |
+|---|---|---|
+| `close` (기본) | CLSPRC_IDX | 포인트 |
+| `open` | OPNPRC_IDX | 포인트 |
+| `high` | HGPRC_IDX | 포인트 |
+| `low` | LWPRC_IDX | 포인트 |
+| `volume` | ACC_TRDVOL | 주 |
+| `amount` | ACC_TRDVAL | 원 |
+| `marketCap` | MKTCAP | 원 |
+| `raw` | KRX 원본 long + MARKET_GROUP | — |
+
+wide 모드는 행=`indexName`, 열=`YYYYMMDD` 이다. `krx` wide 모드가 행=`stockCode+corpName` 인 것과 같은 정신모델이며, 행의 주체만 종목에서 지수로 바뀐다.
+
+#### 운영 검증
+
+```bash
+uv run python -X utf8 scripts/build/buildKrxIndexData.py --mode incremental --push
+uv run python -X utf8 scripts/build/buildKrxIndexData.py --mode backfill --start 2010-01-01 --end 2026-04-28 --push
+```
+
+`fetchKrxIndexRange` 는 403/429/5xx 를 재시도하고, 재시도 후에도 실패하면 예외를 올린다. HTTP 오류를 warning 으로 삼키면 HF parquet 에 날짜 결측이 고정되므로 금지한다.
 
 ### 장 마감 확정 가드 + 자동 갭 메움 (자동 cron 은 T-1)
 

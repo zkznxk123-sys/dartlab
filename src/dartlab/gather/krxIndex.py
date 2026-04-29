@@ -1,29 +1,63 @@
-"""KRX OpenAPI - 지수 일별 매매현황 (KRX/KOSPI/KOSDAQ 시장군별 전체 지수 패키지).
+"""KRX 시장군별 지수 일별 매매현황.
 
-종목 (`krxApi.py`) 와 동일 패턴, endpoint 만 ``idx`` 카테고리.
+Summary
+-------
+``gather("krxIndex", ...)`` 의 구현 모듈. KRX/KOSPI/KOSDAQ 시장군에 속한
+공식 지수의 일별 OHLCV, 거래량, 거래대금, 시가총액을 제공한다.
 
-Endpoint :
-    POST https://data-dbg.krx.co.kr/svc/apis/idx/{krx|kospi|kosdaq}_dd_trd
-    Headers : AUTH_KEY: <키>, Content-Type: application/json
-    Body    : {"basDd": "YYYYMMDD"}
+Description
+-----------
+종목 가격 축인 ``gather("krx", ...)`` 와 같은 3모드 계약을 따른다.
+사용자 기본 호출은 HuggingFace 데이터셋 ``krx/indices/raw-{YYYY}.parquet`` 를
+읽고, ``apiKey`` 를 명시한 호출만 KRX OpenAPI ``idx`` endpoint 를 직접 친다.
+운영자 cron 은 ``scripts/build/buildKrxIndexData.py`` 가 담당한다.
 
-각 호출은 시장군 내 **수십 개 지수** 일별 OHLCV/거래량/시가총액 동시 반환 :
-    KRX 통합   : KRX300, ESG, KRX-K (코리아밸류) 등
-    KOSPI      : KOSPI 종합, KOSPI200, KOSPI100, 섹터 (자동차/반도체/금융/...),
-                 스타일 (가치/성장/배당/모멘텀), 사이즈 (대형/중형/소형)
-    KOSDAQ     : KOSDAQ 종합, KOSDAQ150, KOSDAQ TOP30, 섹터, 글로벌
+시장군 의미:
+    - ``KRX``: KRX300, 코리아 밸류업, ESG, 테마/전략 지수.
+    - ``KOSPI``: 코스피, 코스피 200/100/50, 섹터, 스타일, 사이즈 지수.
+    - ``KOSDAQ``: 코스닥, 코스닥 150, 코스닥 글로벌, 코스닥 섹터 지수.
 
-활용 :
-    - 섹터 로테이션 alpha (KOSPI 자동차 vs 반도체 vs 금융)
-    - 스타일 팩터 검증 (KRX 공식 가치/성장/배당 = FF5 ground truth)
-    - 다중 benchmark 회귀 (decomposeFactor)
-    - Macro regime (섹터 분포 → 시장 regime)
-    - ESG / 테마 지수
+Endpoint
+--------
+POST ``https://data-dbg.krx.co.kr/svc/apis/idx/{krx|kospi|kosdaq}_dd_trd``
+with header ``AUTH_KEY`` and JSON body ``{"basDd": "YYYYMMDD"}``.
 
-────────────────────────────────────────────────────────────
-키 신청 (sto 종목 키와 별개 — KRX OpenAPI 카테고리별) :
-    https://openapi.krx.co.kr → 마이페이지 → 인증키 신청
-    "지수 (idx)" 카테고리 별도 체크 필수.
+Data Contract
+-------------
+Raw long schema:
+    ``BAS_DD`` : str — 기준일 (YYYYMMDD)
+    ``MARKET_GROUP`` : str — 시장군 (KRX/KOSPI/KOSDAQ)
+    ``IDX_CLSS`` : str — KRX 지수 분류
+    ``IDX_NM`` : str — 지수명
+    ``CLSPRC_IDX`` : float — 종가지수 (포인트)
+    ``OPNPRC_IDX`` : float — 시가지수 (포인트)
+    ``HGPRC_IDX`` : float — 고가지수 (포인트)
+    ``LWPRC_IDX`` : float — 저가지수 (포인트)
+    ``CMPPREVDD_IDX`` : float — 전일대비 (포인트)
+    ``FLUC_RT`` : float — 등락률 (%)
+    ``ACC_TRDVOL`` : int — 누적 거래량 (주)
+    ``ACC_TRDVAL`` : int — 누적 거래대금 (원)
+    ``MKTCAP`` : int — 시가총액 (원)
+
+Guide
+-----
+Use ``gather("krxIndex", "close", market="KOSPI")`` for benchmark, sector
+rotation, style index, and macro regime analysis. Use ``target="raw"`` when
+joining or validating exact KRX columns. Use ``apiKey=...`` only for immediate
+direct API verification or operator backfill.
+
+Notes
+-----
+KRX OpenAPI 인증키는 카테고리별 권한이 분리되어 있다. 종목(``sto``) 권한만
+있는 키로는 ``idx`` endpoint 가 401을 반환할 수 있다. 이 경우
+https://openapi.krx.co.kr 마이페이지에서 지수(``idx``) 카테고리를 별도 신청한다.
+
+See Also
+--------
+``dartlab.gather.krxApi`` — 전종목 주식 가격/시총/발행주식수.
+``dartlab.gather._hfIndexBulk`` — 사용자 기본 HF 로더.
+``scripts/build/buildKrxIndexData.py`` — 운영자 bulk 수집 + HF push.
+``ops/gather.md`` — gather 엔진 수집 계약 SSOT.
 """
 
 from __future__ import annotations
@@ -67,7 +101,7 @@ _FLOAT_COLS = (
 # KRX raw 컬럼 → 표준 컬럼 rename (wide 모드 normalize 용)
 _KRX_TO_STD = {
     "BAS_DD": "date",
-    "IDX_CLSS": "indexClass",  # 지수 분류 (KOSPI / KOSPI200 / KOSPI 자동차 등)
+    "IDX_CLSS": "indexClass",  # 지수 분류 (KOSPI / 코스피 200 / KOSPI 자동차 등)
     "IDX_NM": "indexName",
     "OPNPRC_IDX": "open",
     "HGPRC_IDX": "high",
@@ -155,13 +189,35 @@ async def fetchKrxIndexBydd(
 
 
 def _parseKrxIndexResponse(data: dict, *, market: str, basDd: str) -> pl.DataFrame:
-    """KRX OpenAPI idx JSON 응답 → Polars DataFrame (schema cast SSOT)."""
+    """KRX OpenAPI idx JSON 응답을 raw long Polars DataFrame 으로 변환한다.
+
+    Parameters
+    ----------
+    data : dict
+        KRX OpenAPI JSON 응답. 정상 응답은 ``OutBlock_1`` list 를 포함한다.
+    market : str
+        요청한 시장군. 반환 데이터에 ``MARKET_GROUP`` 으로 보강된다.
+    basDd : str
+        요청 기준일. 빈 응답 로그의 맥락으로 사용한다.
+
+    Returns
+    -------
+    pl.DataFrame
+        KRX 원본 컬럼 + ``MARKET_GROUP``. 숫자 컬럼은 Int64/Float64 로 cast.
+        휴장일 또는 자료 없음이면 빈 DataFrame.
+
+    Notes
+    -----
+    ``MARKET_GROUP`` 은 ``IDX_CLSS`` 와 다르다. ``IDX_CLSS`` 는 KRX가 붙인
+    지수 분류이고, ``MARKET_GROUP`` 은 어느 endpoint(KRX/KOSPI/KOSDAQ)에서
+    온 row 인지 보존하는 dartlab 저장 계약이다.
+    """
     rows = data.get("OutBlock_1") or []
     if not rows:
         log.info("KRX idx %s %s: 빈 응답 (휴장일 또는 자료 없음)", market, basDd)
         return pl.DataFrame()
 
-    df = pl.DataFrame(rows)
+    df = pl.DataFrame(rows).with_columns(pl.lit(market).alias("MARKET_GROUP"))
     casts = []
     for col in _INT_COLS:
         if col in df.columns:
@@ -181,8 +237,45 @@ async def fetchKrxIndexRange(
     market: Literal["KRX", "KOSPI", "KOSDAQ"] = "KOSPI",
     apiKey: str,
     concurrency: int = 5,
+    retries: int = 3,
+    sleepSec: float = 0.0,
 ) -> pl.DataFrame:
-    """KRX 지수 일자 범위 일괄 fetch (concat). 평일만 실제 호출."""
+    """KRX 지수 범위를 일자별로 직접 수집한다.
+
+    Parameters
+    ----------
+    start : str
+        시작일 (YYYY-MM-DD 또는 YYYYMMDD).
+    end : str
+        종료일 (YYYY-MM-DD 또는 YYYYMMDD).
+    market : {"KRX", "KOSPI", "KOSDAQ"}
+        수집할 지수 시장군.
+    apiKey : str
+        KRX OpenAPI 인증키. idx 카테고리 권한이 필요하다.
+    concurrency : int
+        동시 요청 수. 운영자 bulk 수집은 KRX 차단을 피하기 위해 1을 권장한다.
+    retries : int
+        403/429/5xx 재시도 횟수. 최종 실패는 예외로 올려 결측 저장을 막는다.
+    sleepSec : float
+        성공 요청 뒤 대기 시간(초).
+
+    Returns
+    -------
+    pl.DataFrame
+        기간 내 raw long DataFrame. 평일만 호출하며 휴장일 row 는 제외된다.
+
+    Raises
+    ------
+    ValueError
+        start > end 또는 날짜 포맷 오류.
+    httpx.HTTPStatusError
+        인증/권한 오류 또는 재시도 후에도 남은 HTTP 오류.
+
+    Notes
+    -----
+    HTTP 오류를 warning 으로 삼키지 않는다. bulk parquet 은 한 날짜 결측이
+    누적되면 HF SSOT 자체가 오염되므로, retry 이후 실패는 작업 전체 실패로 둔다.
+    """
     startD = datetime.strptime(_normalizeDate(start), "%Y%m%d").date()
     endD = datetime.strptime(_normalizeDate(end), "%Y%m%d").date()
     if startD > endD:
@@ -197,17 +290,26 @@ async def fetchKrxIndexRange(
             if d.weekday() >= 5:  # 토/일 skip
                 return
             async with sem:
-                try:
-                    df = await fetchKrxIndexBydd(
-                        d.strftime("%Y%m%d"),
-                        market=market,
-                        apiKey=apiKey,
-                        client=client,
-                    )
-                    if not df.is_empty():
-                        out.append(df)
-                except httpx.HTTPStatusError as e:
-                    log.warning("KRX idx %s %s: %s", market, d, e)
+                for attempt in range(retries + 1):
+                    try:
+                        df = await fetchKrxIndexBydd(
+                            d.strftime("%Y%m%d"),
+                            market=market,
+                            apiKey=apiKey,
+                            client=client,
+                        )
+                        if not df.is_empty():
+                            out.append(df)
+                        if sleepSec > 0:
+                            await asyncio.sleep(sleepSec)
+                        return
+                    except httpx.HTTPStatusError as e:
+                        status = e.response.status_code if e.response is not None else None
+                        retryable = status in {403, 429} or (status is not None and status >= 500)
+                        if attempt < retries and retryable:
+                            await asyncio.sleep(min(30.0, 2.0 * (attempt + 1)))
+                            continue
+                        raise
 
         tasks = []
         cur = startD
@@ -231,56 +333,96 @@ def gatherKrxIndex(
     indexFilter: list[str] | None = None,
     indicators: list[str] | bool | str | None = "basic",
 ) -> pl.DataFrame:
-    """KRX 지수 일별 매매현황 — 사용자 직접 호출 (Mode B).
+    """KRX 시장군별 전체 지수 일별 매매현황을 반환한다.
 
-    Capabilities:
-        - 시장군 (KRX/KOSPI/KOSDAQ) 의 모든 지수 OHLCV + 거래량 + 시총
-        - target 으로 단일 컬럼 wide pivot (행=지수, 열=일자) 또는 raw long
-        - indicators 옵션 — 지수별 보조지표 자동 (기본 basic 9개)
-        - indexFilter 로 특정 지수만 (예: ["KOSPI200", "KOSPI 자동차"])
+    Summary
+    -------
+    ``dartlab.gather("krxIndex", target, ...)`` 의 축 구현. KRX/KOSPI/KOSDAQ
+    시장군의 공식 지수를 지수명 x 날짜 wide matrix 또는 raw long DataFrame 으로
+    반환한다.
 
-    AIContext:
-        - Mode A 운영자 cron 은 별도 (`scripts/build/buildKrxIndexData.py` 후속)
-        - Mode C HF 자동 fallback 은 backfill HF publish 후
-        - 현재는 Mode B (apiKey 명시) 만 동작
+    Description
+    -----------
+    기본 경로는 HF 데이터셋이다. ``apiKey`` 가 없으면
+    ``DATA_RELEASES["krxIndices"]`` 의 ``krx/indices/raw-{YYYY}.parquet`` 를
+    읽는다. ``apiKey`` 를 명시하면 KRX OpenAPI idx endpoint 를 직접 호출한다.
+    호출 정신모델은 ``gather("krx", ...)`` 와 같다.
 
-    Args:
-        target: ``"close"`` / ``"volume"`` / ``"marketCap"`` / ``"raw"`` /
-                보조지표 ("rsi14", "ma20", ...) 중 택1. 기본 ``"close"``.
-        market: ``"KRX"`` | ``"KOSPI"`` | ``"KOSDAQ"``. 기본 ``"KOSPI"``.
-        start: 시작일 (YYYY-MM-DD or YYYYMMDD). None 이면 최근 1년.
-        end: 종료일. None 이면 today.
-        apiKey: KRX OpenAPI 키 (idx 카테고리 권한 필수).
-        indexFilter: 특정 indexName 만 (None 이면 시장군 전체).
-        indicators: target=보조지표일 때만 (기본 "basic" 9개).
+    Parameters
+    ----------
+    target : str | None
+        반환할 값. ``"close"``, ``"open"``, ``"high"``, ``"low"``,
+        ``"volume"``, ``"amount"``, ``"marketCap"``, ``"raw"`` 를 지원한다.
+        특정 지수의 보조지표는 ``indexFilter`` 1개와 함께 지정한다.
+    market : {"KRX", "KOSPI", "KOSDAQ"}
+        지수 시장군. 기본 ``"KOSPI"``.
+    start : str | None
+        시작일. None 이면 최근 1년.
+    end : str | None
+        종료일. None 이면 오늘. KRX 확정 전 당일은 빈 응답일 수 있다.
+    apiKey : str | None
+        직접 API 호출용 KRX OpenAPI 키. None 이면 HF 데이터셋 사용.
+    indexFilter : list[str] | None
+        특정 지수명 필터. 예: ``["코스피 200"]``, ``["코스닥 150"]``.
+    indicators : list[str] | bool | str | None
+        ``indexFilter`` 가 단일 지수일 때 보조지표 추가. ``"basic"`` 은
+        sma5/sma20/sma60/ema12/ema26/rsi14/macd/atr14/obv.
 
-    Returns:
-        pl.DataFrame
-            wide: 행 = indexName, 열 = 일자, value = 지정 target
-            raw : long DataFrame (원본 컬럼 보존)
+    Returns
+    -------
+    pl.DataFrame
+        target != ``"raw"``:
+            ``indexName`` : str — 지수명
+            ``YYYYMMDD`` : float|int — 날짜별 target 값 (포인트, 주, 원)
+        target == ``"raw"``:
+            ``BAS_DD`` : str — 기준일 (YYYYMMDD)
+            ``MARKET_GROUP`` : str — 시장군 (KRX/KOSPI/KOSDAQ)
+            ``IDX_CLSS`` : str — KRX 지수 분류
+            ``IDX_NM`` : str — 지수명
+            ``CLSPRC_IDX`` : float — 종가지수 (포인트)
+            ``OPNPRC_IDX`` : float — 시가지수 (포인트)
+            ``HGPRC_IDX`` : float — 고가지수 (포인트)
+            ``LWPRC_IDX`` : float — 저가지수 (포인트)
+            ``ACC_TRDVOL`` : int — 누적 거래량 (주)
+            ``ACC_TRDVAL`` : int — 누적 거래대금 (원)
+            ``MKTCAP`` : int — 시가총액 (원)
 
-    Raises:
-        ValueError : apiKey 없음
-        httpx.HTTPStatusError : 401 (idx 카테고리 권한 없음 — 신청 필요)
+    Raises
+    ------
+    ValueError
+        market 이 KRX/KOSPI/KOSDAQ 가 아니거나 날짜 포맷이 잘못된 경우.
+    httpx.HTTPStatusError
+        apiKey 직접 호출에서 인증/권한/HTTP 오류가 발생한 경우.
 
-    Examples:
-        >>> import dartlab, os
-        >>> df = dartlab.gather("krxIndex", "close", market="KOSPI",
-        ...                     start="2024-01-01", apiKey=os.environ["KRX_API_KEY"])
-        >>> # KOSPI 시장 모든 지수 (KOSPI/KOSPI200/섹터/스타일/...) 일별 종가 wide
+    Examples
+    --------
+    >>> import dartlab
+    >>> dartlab.gather("krxIndex", "close", market="KOSPI", start="2026-04-28", end="2026-04-28")
+    >>> dartlab.gather("krxIndex", "raw", market="KRX", start="2020-01-01", end="2020-12-31")
+    >>> dartlab.gather("krxIndex", "close", market="KOSPI", indexFilter=["코스피 200"])
 
-    Notes:
-        - 키 활성화 전: HTTP 401 → friendly error message + 신청 안내
-        - 단일 호출 응답에 수십 개 지수 → 시계열 빌드 시 1 호출 = 1일 분량
-        - HF 자동 backfill (Mode C) 은 후속 트랙 (krxApi 와 동일 패턴 — 운영자 cron)
+    Notes
+    -----
+    ``market`` 의 의미는 ``gather("krx", ...)`` 와 다르다. ``krx`` 는 종목시장
+    필터이고, ``krxIndex`` 는 지수 endpoint 시장군이다. 직접 API 호출에서
+    HTTP 401 이 나면 KRX OpenAPI 마이페이지에서 idx 카테고리 권한을 신청한다.
+
+    Guide
+    -----
+    When: 시장 벤치마크, 섹터 로테이션, 스타일 지수, 테마/ESG 지수, macro regime
+    분석에 사용한다.
+    How: 기본은 HF 데이터셋으로 재현 가능한 결과를 읽고, 당일 검증이나 운영자
+    backfill 때만 ``apiKey`` 를 명시한다.
+    Verified:
+        - 2010-01-01~2026-04-28 KRX/KOSPI/KOSDAQ backfill 완료.
+        - HF ``krx/indices`` 17개 parquet, 474,882 rows push 완료.
+
+    See Also
+    --------
+    dartlab.gather.krxApi.gatherKrx : 전종목 가격/시총/발행주식수.
+    dartlab.gather._hfIndexBulk.loadFiltered : HF 기본 로더.
+    scripts/build/buildKrxIndexData.py : 운영자 bulk 수집 스크립트.
     """
-    if not apiKey:
-        raise ValueError(
-            "apiKey 필수 — gather('krxIndex', ..., apiKey=...) 명시 또는 "
-            "os.environ['KRX_API_KEY'] 사용. idx 카테고리 권한 별도 신청 필요 "
-            "(https://openapi.krx.co.kr 마이페이지)."
-        )
-
     # 일자 디폴트
     if start is None:
         startD = datetime.now().date() - timedelta(days=365)
@@ -291,14 +433,23 @@ def gatherKrxIndex(
     else:
         endD = datetime.strptime(_normalizeDate(end), "%Y%m%d").date()
 
-    long_df = asyncio.run(
-        fetchKrxIndexRange(
-            startD.strftime("%Y%m%d"),
-            endD.strftime("%Y%m%d"),
-            market=market,
-            apiKey=apiKey,
+    if apiKey:
+        long_df = asyncio.run(
+            fetchKrxIndexRange(
+                startD.strftime("%Y%m%d"),
+                endD.strftime("%Y%m%d"),
+                market=market,
+                apiKey=apiKey,
+            )
         )
-    )
+    else:
+        from dartlab.gather._hfIndexBulk import loadFiltered
+
+        long_df = loadFiltered(
+            market=market,
+            start=startD.strftime("%Y%m%d"),
+            end=endD.strftime("%Y%m%d"),
+        )
     if long_df.is_empty():
         return pl.DataFrame()
 
