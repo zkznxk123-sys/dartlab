@@ -81,7 +81,7 @@ const config = {
 			strict: false
 		}),
 		prerender: {
-			entries: ['*', '/docs/', '/blog/', ...companyEntries, ...industryEntries],
+			entries: ['*', '/docs/', '/blog/', '/cheatsheet', '/cheatseet', ...companyEntries, ...industryEntries],
 			handleHttpError: ({ path, referrer, message }) => {
 				// basePath prefix 제거 후 검사 (CI에서 path는 /dartlab/... 형태)
 				const stripped = basePath && path.startsWith(basePath) ? path.slice(basePath.length) : path;
