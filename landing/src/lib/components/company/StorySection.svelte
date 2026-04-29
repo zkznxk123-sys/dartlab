@@ -115,7 +115,6 @@
 	}
 	header p,
 	header aside,
-	.block-head span,
 	article p {
 		color: #94a3b8;
 		font-size: 12px;
