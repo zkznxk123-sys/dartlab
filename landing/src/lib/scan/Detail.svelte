@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fmtPct } from '$lib/format/pct';
-	import { loadHfCompanyChanges, type CompanyChange } from '$lib/data/changesRuntime';
 	import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
 	import type { DartDb } from '$lib/data/duckdb';
 	import { FINANCE_COMPLETED_YEARS, financeMetricKey } from './financeAccounts';
@@ -18,30 +17,19 @@
 	type Point = { year: string; label: string; [key: string]: number | string | null };
 	type ChartHover = { title: string; x: number; y: number; lines: string[] };
 
+	const DETAIL_PERIOD_LIMIT = 12;
+
 	let { node, db: _db, financeLoading = false, onClose }: Props = $props();
-	let changes = $state<CompanyChange[]>([]);
 	let filings = $state<RegularFiling[]>([]);
 	let financePeriods = $state<CompanyFinancePeriodRow[]>([]);
-	let changesLoading = $state(false);
 	let filingsLoading = $state(false);
 	let periodsLoading = $state(false);
 	let chartHover = $state<ChartHover | null>(null);
 
 	$effect(() => {
 		const code = node.id;
-		changesLoading = true;
-		void loadHfCompanyChanges(code, 3)
-			.then((c) => {
-				if (node.id === code) changes = c;
-			})
-			.catch(() => {
-				if (node.id === code) changes = [];
-			})
-			.finally(() => {
-				if (node.id === code) changesLoading = false;
-			});
 		filingsLoading = true;
-		void loadCompanyRegularFilings(code, 5)
+		void loadCompanyRegularFilings(code, 40)
 			.then((rows) => {
 				if (node.id === code) filings = rows;
 			})
@@ -52,7 +40,7 @@
 				if (node.id === code) filingsLoading = false;
 			});
 		periodsLoading = true;
-		void loadCompanyFinanceLitePeriods(code, fetch, 8)
+		void loadCompanyFinanceLitePeriods(code, fetch, DETAIL_PERIOD_LIMIT)
 			.then((rows) => {
 				if (node.id === code) financePeriods = rows;
 			})
@@ -69,8 +57,8 @@
 		return typeof value === 'number' && Number.isFinite(value) ? value : null;
 	}
 
-	function wonToT(value: number | null): number | null {
-		return value == null ? null : value / 1e12;
+	function wonToEok(value: number | null): number | null {
+		return value == null ? null : value / 1e8;
 	}
 
 	function periodValueAt(period: CompanyFinancePeriodRow, accountId: string): number | null {
@@ -83,27 +71,27 @@
 			? financePeriods.map((period) => ({
 					year: period.period,
 					label: period.label,
-					sales: wonToT(periodValueAt(period, 'sales')),
-					op: wonToT(periodValueAt(period, 'operating_profit')),
-					net: wonToT(periodValueAt(period, 'net_income'))
+					sales: wonToEok(periodValueAt(period, 'sales')),
+					op: wonToEok(periodValueAt(period, 'operating_profit')),
+					net: wonToEok(periodValueAt(period, 'net_income'))
 				}))
 			: FINANCE_COMPLETED_YEARS.map((year) => ({
 					year,
 					label: year.slice(2),
-					sales: wonToT(valueAt('sales', year)),
-					op: wonToT(valueAt('operating_profit', year)),
-					net: wonToT(valueAt('net_income', year))
+					sales: wonToEok(valueAt('sales', year)),
+					op: wonToEok(valueAt('operating_profit', year)),
+					net: wonToEok(valueAt('net_income', year))
 				}))
 	);
 	let bsData = $derived.by<Point[]>(() =>
 		financePeriods.length
 			? financePeriods.map((period) => {
-					const currentLiabilities = wonToT(periodValueAt(period, 'current_liabilities'));
-					const noncurrentLiabilities = wonToT(periodValueAt(period, 'noncurrent_liabilities'));
+					const currentLiabilities = wonToEok(periodValueAt(period, 'current_liabilities'));
+					const noncurrentLiabilities = wonToEok(periodValueAt(period, 'noncurrent_liabilities'));
 					const totalLiabilities = sumNullable(currentLiabilities, noncurrentLiabilities);
-					const operatingLiabilities = wonToT(periodValueAt(period, 'trade_payables'));
-					const equity = wonToT(periodValueAt(period, 'total_stockholders_equity'));
-					const retainedEarnings = wonToT(periodValueAt(period, 'retained_earnings'));
+					const operatingLiabilities = wonToEok(periodValueAt(period, 'trade_payables'));
+					const equity = wonToEok(periodValueAt(period, 'total_stockholders_equity'));
+					const retainedEarnings = wonToEok(periodValueAt(period, 'retained_earnings'));
 					return {
 						year: period.period,
 						label: period.label,
@@ -116,12 +104,12 @@
 					};
 				})
 			: FINANCE_COMPLETED_YEARS.map((year) => {
-					const currentLiabilities = wonToT(valueAt('current_liabilities', year));
-					const noncurrentLiabilities = wonToT(valueAt('noncurrent_liabilities', year));
+					const currentLiabilities = wonToEok(valueAt('current_liabilities', year));
+					const noncurrentLiabilities = wonToEok(valueAt('noncurrent_liabilities', year));
 					const totalLiabilities = sumNullable(currentLiabilities, noncurrentLiabilities);
-					const operatingLiabilities = wonToT(valueAt('trade_payables', year));
-					const equity = wonToT(valueAt('total_stockholders_equity', year));
-					const retainedEarnings = wonToT(valueAt('retained_earnings', year));
+					const operatingLiabilities = wonToEok(valueAt('trade_payables', year));
+					const equity = wonToEok(valueAt('total_stockholders_equity', year));
+					const retainedEarnings = wonToEok(valueAt('retained_earnings', year));
 					return {
 						year,
 						label: year.slice(2),
@@ -139,16 +127,16 @@
 			? financePeriods.map((period) => ({
 					year: period.period,
 					label: period.label,
-					ocf: wonToT(periodValueAt(period, 'operating_cashflow')),
-					icf: wonToT(periodValueAt(period, 'investing_cashflow')),
-					fcf: wonToT(periodValueAt(period, 'financing_cashflow'))
+					ocf: wonToEok(periodValueAt(period, 'operating_cashflow')),
+					icf: wonToEok(periodValueAt(period, 'investing_cashflow')),
+					fcf: wonToEok(periodValueAt(period, 'financing_cashflow'))
 				}))
 			: FINANCE_COMPLETED_YEARS.map((year) => ({
 					year,
 					label: year.slice(2),
-					ocf: wonToT(valueAt('operating_cashflow', year)),
-					icf: wonToT(valueAt('investing_cashflow', year)),
-					fcf: wonToT(valueAt('financing_cashflow', year))
+					ocf: wonToEok(valueAt('operating_cashflow', year)),
+					icf: wonToEok(valueAt('investing_cashflow', year)),
+					fcf: wonToEok(valueAt('financing_cashflow', year))
 				}))
 	);
 
@@ -159,6 +147,9 @@
 	let isNetPath = $derived(linePath(isData, 'net', profitMax));
 	let bsMax = $derived(maxStack(bsData, ['operatingLiabilities', 'nonOperatingLiabilities', 'retainedEarnings', 'otherEquity']));
 	let cfMax = $derived(maxAbs(cfData, ['ocf', 'icf', 'fcf']));
+	let cfOcfPath = $derived(linePath(cfData, 'ocf', cfMax));
+	let cfIcfPath = $derived(linePath(cfData, 'icf', cfMax));
+	let cfFcfPath = $derived(linePath(cfData, 'fcf', cfMax));
 
 	const GRADE_COLS = [
 		{ key: 'profGrade', label: '수익성' },
@@ -178,24 +169,13 @@
 		return `${value.slice(0, 4)}.${value.slice(4, 6)}.${value.slice(6, 8)}`;
 	}
 
-	function fmtChange(c: CompanyChange): string {
-		const types: Record<string, string> = {
-			numeric: '재무 정정',
-			structural: '구조 변경',
-			wording: '문구 수정',
-			appeared: '신설',
-			disappeared: '삭제'
-		};
-		return types[c.changeType] || c.changeType;
-	}
-
 	function handleKey(e: KeyboardEvent) {
 		if (e.key === 'Escape') onClose();
 	}
 
-	const W = 380;
+	const W = 420;
 	const H = 174;
-	const PAD = { top: 18, right: 40, bottom: 24, left: 40 };
+	const PAD = { top: 18, right: 28, bottom: 24, left: 28 };
 	const plotW = W - PAD.left - PAD.right;
 	const plotH = H - PAD.top - PAD.bottom;
 
@@ -245,10 +225,9 @@
 	}
 	function fmtAmount(v: number | null): string {
 		if (v == null) return '—';
-		const scaled = v * 10000;
-		const abs = Math.abs(scaled);
+		const abs = Math.abs(v);
 		const maximumFractionDigits = abs >= 100 ? 0 : 1;
-		return `${scaled.toLocaleString('ko-KR', { maximumFractionDigits })}억`;
+		return `${v.toLocaleString('ko-KR', { maximumFractionDigits })}억원`;
 	}
 	function numAt(row: Point, key: string): number | null {
 		const v = row?.[key];
@@ -279,14 +258,13 @@
 	</header>
 
 	<div class="d-body">
-		<section class="d-section charts">
-			<div class="sec-title">재무 그래프</div>
-			{#if (financeLoading || periodsLoading) && !hasFinance}
+		{#if (financeLoading || periodsLoading) && !hasFinance}
+			<section class="d-section chart-loading">
 				<div class="loading">로드 중...</div>
-			{:else}
-				<div class="chart-grid">
-					<div class="mini-chart">
-						<div class="mini-title">IS</div>
+			</section>
+		{:else}
+			<section class="d-section mini-chart">
+				<div class="mini-title">IS</div>
 						<svg viewBox="0 0 {W} {H}">
 							<line x1={PAD.left} x2={W - PAD.right} y1={PAD.top + plotH} y2={PAD.top + plotH} stroke="#334155" />
 							<line x1={W - PAD.right} x2={W - PAD.right} y1={PAD.top} y2={PAD.top + plotH} stroke="#334155" stroke-dasharray="2 3" />
@@ -364,13 +342,13 @@
 									onmouseleave={hideHover}
 								/>
 							{/each}
-							<text x="6" y="14" fill="#64748b" font-size="10">단위 억</text>
+							<text x="6" y="14" fill="#64748b" font-size="10">단위 억원</text>
 							<text x={W - 6} y="14" text-anchor="end" fill="#64748b" font-size="10">매출/이익 별도축</text>
 						</svg>
 						<div class="legend"><span class="b"></span>매출액 <span class="g"></span>영업이익 <span class="o"></span>당기순이익</div>
-					</div>
-					<div class="mini-chart">
-						<div class="mini-title">BS</div>
+			</section>
+			<section class="d-section mini-chart">
+				<div class="mini-title">BS</div>
 						<svg viewBox="0 0 {W} {H}">
 							{#each bsData as d, i}
 								{@const bw = barWidth(bsData.length, 28)}
@@ -400,29 +378,32 @@
 								</g>
 								<text x={x(i, bsData.length)} y={H - 5} text-anchor="middle" fill="#64748b" font-size="9">{d.label}</text>
 							{/each}
-							<text x="6" y="14" fill="#64748b" font-size="10">단위 억</text>
+							<text x="6" y="14" fill="#64748b" font-size="10">단위 억원</text>
 						</svg>
 						<div class="legend"><span class="r"></span>영업부채 <span class="o"></span>비영업부채 <span class="g"></span>이익잉여금 <span class="t"></span>기타자본</div>
-					</div>
-					<div class="mini-chart">
-						<div class="mini-title">CF</div>
+			</section>
+			<section class="d-section mini-chart">
+				<div class="mini-title">CF</div>
 						<svg viewBox="0 0 {W} {H}">
 							<line x1={PAD.left} x2={W - PAD.right} y1={PAD.top + plotH / 2} y2={PAD.top + plotH / 2} stroke="#334155" />
+							{#if cfOcfPath}<path d={cfOcfPath} fill="none" stroke="#22c55e" stroke-width="2.2" />{/if}
+							{#if cfIcfPath}<path d={cfIcfPath} fill="none" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4 3" />{/if}
+							{#if cfFcfPath}<path d={cfFcfPath} fill="none" stroke="#a78bfa" stroke-width="2" stroke-dasharray="2 3" />{/if}
 							{#each cfData as d, i}
-								{@const groupW = barWidth(cfData.length, 30)}
-								{@const sw = Math.max(4, Math.min(8, (groupW - 4) / 3))}
-								{@const startX = x(i, cfData.length) - (sw * 3 + 4) / 2}
-								{#each ['ocf', 'icf', 'fcf'] as key, j}
-									{@const raw = d[key]}
-									{@const v = typeof raw === 'number' ? raw : 0}
-									{@const h = Math.abs(v / cfMax) * (plotH / 2)}
-									<rect x={startX + j * (sw + 2)} y={v >= 0 ? PAD.top + plotH / 2 - h : PAD.top + plotH / 2} width={sw} height={h} rx="1" fill={j === 0 ? '#22c55e' : j === 1 ? '#3b82f6' : '#a78bfa'} opacity="0.78" />
-								{/each}
+								{#if typeof d.ocf === 'number'}
+									<circle cx={x(i, cfData.length)} cy={ySigned(d.ocf, cfMax)} r="2.6" fill="#22c55e" />
+								{/if}
+								{#if typeof d.icf === 'number'}
+									<circle cx={x(i, cfData.length)} cy={ySigned(d.icf, cfMax)} r="2.4" fill="#3b82f6" />
+								{/if}
+								{#if typeof d.fcf === 'number'}
+									<circle cx={x(i, cfData.length)} cy={ySigned(d.fcf, cfMax)} r="2.4" fill="#a78bfa" />
+								{/if}
 								<rect
 									role="presentation"
-									x={startX - 3}
+									x={x(i, cfData.length) - plotW / Math.max(cfData.length, 1) / 2}
 									y={PAD.top}
-									width={sw * 3 + 10}
+									width={plotW / Math.max(cfData.length, 1)}
 									height={plotH}
 									fill="transparent"
 									onmouseenter={(e) =>
@@ -435,13 +416,11 @@
 								/>
 								<text x={x(i, cfData.length)} y={H - 5} text-anchor="middle" fill="#64748b" font-size="9">{d.label}</text>
 							{/each}
-							<text x="6" y="14" fill="#64748b" font-size="10">단위 억</text>
+							<text x="6" y="14" fill="#64748b" font-size="10">단위 억원</text>
 						</svg>
 						<div class="legend"><span class="g"></span>영업CF <span class="b"></span>투자CF <span class="p"></span>재무CF</div>
-					</div>
-				</div>
-			{/if}
-		</section>
+			</section>
+		{/if}
 
 		<section class="d-section grades">
 			<div class="sec-title">scan 등급</div>
@@ -478,13 +457,6 @@
 							<span class="filing-title">{filing.reportType}</span>
 							<span class="filing-date">{formatDate(filing.rceptDate)}</span>
 						</a>
-					{/each}
-				</div>
-			{/if}
-			{#if !changesLoading && changes.length > 0}
-				<div class="change-strip">
-					{#each changes.slice(0, 3) as c, i (i)}
-						<span>{fmtChange(c)} · {c.sectionTitle}</span>
 					{/each}
 				</div>
 			{/if}
@@ -557,7 +529,7 @@
 		flex: 1;
 		min-height: 0;
 		display: grid;
-		grid-template-columns: minmax(0, 1.8fr) minmax(210px, 0.72fr) minmax(300px, 0.9fr);
+		grid-template-columns: repeat(3, minmax(230px, 1fr)) repeat(2, minmax(170px, 0.62fr));
 		gap: 6px;
 		padding: 6px;
 		overflow: hidden;
@@ -573,6 +545,11 @@
 		display: flex;
 		flex-direction: column;
 	}
+	.chart-loading {
+		grid-column: span 3;
+		align-items: center;
+		justify-content: center;
+	}
 	.sec-title {
 		font-size: 10px;
 		color: #64748b;
@@ -580,22 +557,10 @@
 		letter-spacing: 0.05em;
 		margin-bottom: 4px;
 	}
-	.chart-grid {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 6px;
-		flex: 1;
-		min-height: 0;
-	}
 	.mini-chart {
 		min-width: 0;
 		min-height: 0;
-		border: 1px solid #1e2433;
-		border-radius: 4px;
-		padding: 4px;
 		background: #070b14;
-		display: flex;
-		flex-direction: column;
 	}
 	.mini-title {
 		color: #cbd5e1;
@@ -657,9 +622,11 @@
 		font-family: inherit;
 	}
 	.grade-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 2px 4px;
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		min-height: 0;
+		overflow: visible;
 	}
 	.grade-cell, .delta-row {
 		display: flex;
@@ -671,8 +638,13 @@
 		min-width: 0;
 	}
 	.grade-cell {
-		min-height: 18px;
+		min-height: 21px;
 		border-bottom: 1px solid rgba(30, 36, 51, 0.5);
+	}
+	.grade-cell > span:first-child {
+		min-width: 0;
+		overflow: visible;
+		white-space: nowrap;
 	}
 	.delta-row {
 		margin-top: 5px;
@@ -700,19 +672,24 @@
 		color: #475569;
 		border-color: #1e2433;
 	}
+	.grades, .filings {
+		overflow-y: auto;
+	}
 	.filing-list {
 		display: flex;
 		flex-direction: column;
 		gap: 0;
 		min-height: 0;
 		flex: 1;
+		overflow-y: auto;
+		padding-right: 2px;
 	}
 	.filing-row {
 		min-width: 0;
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 78px;
+		grid-template-columns: minmax(0, 1fr) 70px;
 		align-items: center;
-		gap: 8px;
+		gap: 6px;
 		padding: 4px 2px;
 		border-bottom: 1px solid #1e2433;
 		text-decoration: none;
@@ -734,20 +711,6 @@
 		font-family: monospace;
 		text-align: right;
 	}
-	.change-strip {
-		margin-top: 5px;
-		display: flex;
-		flex-direction: column;
-		gap: 3px;
-		color: #64748b;
-		font-size: 9px;
-		overflow: hidden;
-	}
-	.change-strip span {
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
 	.loading, .empty {
 		padding: 20px 8px;
 		text-align: center;
@@ -763,9 +726,6 @@
 			height: 42vh;
 			min-height: var(--scan-detail-panel-height, 340px);
 			max-height: 42vh;
-		}
-		.chart-grid {
-			grid-template-columns: 1fr;
 		}
 	}
 </style>

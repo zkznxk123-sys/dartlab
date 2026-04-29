@@ -13,7 +13,7 @@
 	interface Props {
 		activeColumns: MetricKey[];
 		loadingGroups?: Set<MetricGroup>;
-		onToggle: (next: MetricKey[]) => void;
+		onToggle: (next: MetricKey[], group: MetricGroup) => void;
 	}
 
 	let { activeColumns, loadingGroups = new Set<MetricGroup>(), onToggle }: Props = $props();
@@ -60,7 +60,7 @@
 			// 모두 추가
 			for (const m of cols) next.add(m.key);
 		}
-		onToggle(Array.from(next));
+		onToggle(Array.from(next), g);
 	}
 </script>
 

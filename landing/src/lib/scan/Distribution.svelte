@@ -119,6 +119,7 @@
 
 	function fmtVal(v: number): string {
 		if (!metric) return String(v);
+		if (metric.unit === '억원') return fmtWonAsEok(v);
 		if (metric.unit === '원') return fmtKrw(v);
 		if (metric.unit === '%' || metric.unit === '%p') return fmtPct(v);
 		if (metric.unit === '배') return fmtMul(v, 1);
@@ -126,6 +127,13 @@
 		if (metric.unit === '위') return Math.round(v) + '위';
 		if (metric.unit === '건') return Math.round(v) + '건';
 		return v.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+	}
+
+	function fmtWonAsEok(v: number): string {
+		const eok = v / 1e8;
+		const abs = Math.abs(eok);
+		const maximumFractionDigits = abs >= 100 ? 0 : 1;
+		return `${eok.toLocaleString('ko-KR', { maximumFractionDigits })}억원`;
 	}
 
 	function isBinHighlighted(b: { x0: number; x1: number }): boolean {
@@ -512,7 +520,8 @@
 		gap: 1px;
 	}
 	.ranked-item {
-		display: flex;
+		display: grid;
+		grid-template-columns: 5px minmax(0, 1fr) max-content;
 		align-items: center;
 		gap: 5px;
 		padding: 3px 4px;
@@ -553,6 +562,7 @@
 		font-size: 9px;
 		color: #94a3b8;
 		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
 	}
 	.ranked-item.top .r-val {
 		color: #22c55e;

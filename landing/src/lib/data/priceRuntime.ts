@@ -13,6 +13,7 @@ export interface PriceRuntimeMetrics {
 	return1m: number | null;
 	return3m: number | null;
 	return1y: number | null;
+	spark30: number[];
 	spark60: number[];
 	spark: number[];
 }
@@ -175,6 +176,7 @@ function buildMetrics(rows: NormalizedPriceRow[], partial: boolean): PriceRuntim
 		return1m: pctReturn(currentPrice, nthFromEnd(closes, 21)),
 		return3m: pctReturn(currentPrice, nthFromEnd(closes, 63)),
 		return1y: partial ? null : pctReturn(currentPrice, nthFromEnd(closes, 252)),
+		spark30: rows.slice(-30).map((row) => row.close),
 		spark60: last60.map((row) => row.close),
 		spark: partial ? [] : downsample(last252.map((row) => row.close), 50)
 	};

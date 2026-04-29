@@ -29,6 +29,7 @@ export type MetricSource =
 	| 'valuation'
 	| 'prices'
 	| 'changes'
+	| 'productIndex'
 	| 'finance5y'
 	| 'priceTrend'
 	| 'report';

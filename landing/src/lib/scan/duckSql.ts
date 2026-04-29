@@ -59,6 +59,8 @@ export interface PriceMetrics {
 	return1m: number | null;
 	return3m: number | null;
 	return1y: number | null;
+	/** 30거래일 종가 (초단기 추세). */
+	spark30: number[];
 	/** 60거래일 종가 (단기 추세). */
 	spark60: number[];
 	/** 1년(252거래일) 종가 (5일 다운샘플 ≈ 50포인트). cell sparkline + hover 차트 공용. */
@@ -186,6 +188,7 @@ export async function loadPriceSnapshot(db: DartDb): Promise<Map<string, PriceMe
 				return1m: null,
 				return3m: null,
 				return1y: null,
+				spark30: [],
 				spark60: [],
 				spark: []
 			});
@@ -512,6 +515,7 @@ export async function loadPriceMetrics(db: DartDb): Promise<Map<string, PriceMet
 				return1m: pctReturn(currentPrice, num(r.prev21)),
 				return3m: pctReturn(currentPrice, num(r.prev63)),
 				return1y: pctReturn(currentPrice, num(r.prev252)),
+				spark30: [],
 				spark60: [],
 				spark: []
 			});
@@ -540,6 +544,7 @@ export async function loadPriceMetrics(db: DartDb): Promise<Map<string, PriceMet
 			const existing = map.get(code);
 			if (existing) {
 				existing.spark60 = toPlainNumberArray(r.spark60);
+				existing.spark30 = existing.spark60.slice(-30);
 				merged++;
 			}
 		}
@@ -815,6 +820,7 @@ export async function* loadPriceMetricsStream(
 					return1m: pctReturn(currentPrice, num(r.prev21)),
 					return3m: pctReturn(currentPrice, num(r.prev63)),
 					return1y: pctReturn(currentPrice, num(r.prev252)),
+					spark30: sparkArr.slice(-30),
 					spark60: sparkArr.slice(-60),
 					spark: sparkArr
 				});

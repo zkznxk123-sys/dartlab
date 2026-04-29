@@ -173,7 +173,8 @@
 		if (key === 'id') return 86;
 		if (key === 'market') return 82;
 		if (key === 'industryName') return 124;
-		if (key === 'spark' || key === 'spark60') return 110;
+		if (key === 'product') return 220;
+		if (key === 'spark' || key === 'spark30' || key === 'spark60') return 110;
 		if (def?.type === 'series') return 132;
 		if (!def) return 110;
 		if (def.type === 'enum' || def.type === 'text') return 110;
@@ -223,7 +224,7 @@
 	}
 
 	function sparkForCell(node: RowData, key: string): number[] {
-		const value = key === 'spark60' ? node.spark60 : node.spark;
+		const value = key === 'spark30' ? node.spark30 : key === 'spark60' ? node.spark60 : node.spark;
 		return Array.isArray(value) ? (value as number[]) : [];
 	}
 
@@ -315,11 +316,12 @@
 						class:pinned={isPinned(key)}
 						class:numeric={def?.type === 'number'}
 						class:enum={!isTable && def?.type === 'enum'}
-						class:spark-cell={key === 'spark'}
+						class:spark-cell={key === 'spark' || key === 'spark30' || key === 'spark60'}
 						style:left={isPinned(key) ? `${stickyOffsets[key]}px` : ''}
 						style:background={isPinned(key) ? undefined : heatBg}
 						role="gridcell"
 						tabindex="-1"
+						title={key === 'product' && typeof rd.productRaw === 'string' ? rd.productRaw : typeof formatted === 'string' ? formatted : undefined}
 						onmouseenter={(e) => !isTable && onCellMouseEnter(e, rd, key, formatted)}
 						onmouseleave={onCellMouseLeave}
 					>
@@ -346,7 +348,7 @@
 							{:else}
 								<span class="dim">—</span>
 							{/if}
-						{:else if key === 'spark' || key === 'spark60'}
+						{:else if key === 'spark' || key === 'spark30' || key === 'spark60'}
 							{@const sparkData = sparkForCell(rd, key)}
 							{#if Array.isArray(sparkData) && sparkData.length >= 2}
 								{@const trend =
@@ -427,6 +429,8 @@
 		display: grid;
 		position: sticky;
 		top: 0;
+		width: max-content;
+		min-width: 100%;
 		height: 40px;
 		flex-shrink: 0;
 		background: #0a0e18;
@@ -478,6 +482,8 @@
 
 	.row {
 		display: grid;
+		width: max-content;
+		min-width: 100%;
 		height: 36px;
 		border-bottom: 1px solid rgba(30, 36, 51, 0.5);
 		position: relative;

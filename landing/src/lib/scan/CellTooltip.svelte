@@ -38,8 +38,14 @@
 		const v = (spark[spark.length - 1] / spark[0] - 1) * 100;
 		return v.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 	});
-	let isSparkCell = $derived(metricKey === 'spark' || metricKey === 'spark60');
-	let periodLabel = $derived(metricKey === 'spark60' ? '60거래일 종가 추이' : '1년 종가 추이');
+	let isSparkCell = $derived(metricKey === 'spark' || metricKey === 'spark30' || metricKey === 'spark60');
+	let periodLabel = $derived(
+		metricKey === 'spark30'
+			? '30거래일 종가 추이'
+			: metricKey === 'spark60'
+				? '60거래일 종가 추이'
+				: '1년 종가 추이'
+	);
 </script>
 
 <div class="cell-tooltip" style:left="{x}px" style:top="{y}px" role="tooltip">
@@ -66,7 +72,7 @@
 			{/if}
 		</div>
 	{:else}
-		<div class="t-noprice">가격 데이터 미적재</div>
+		<div class="t-noprice">1Y 추세 로딩/없음</div>
 	{/if}
 </div>
 

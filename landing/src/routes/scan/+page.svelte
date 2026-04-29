@@ -18,6 +18,7 @@
 	import type { Preset, RuntimeLoader } from '$lib/scan/presets';
 	import { PRESETS_BY_ID } from '$lib/scan/presets';
 	import { HF_RESOLVE, loadJson } from '$lib/data/dartlabData';
+	import type { ProductIndexItem } from '$lib/data/productIndexRuntime';
 	import type { ValuationRuntimeMetrics } from '$lib/data/valuationRuntime';
 	import type { ChangeMetrics } from '$lib/data/changesRuntime';
 	import type { PriceMetrics, ValuationMetrics, DbState } from '$lib/scan/duckSql';
@@ -97,23 +98,16 @@
 	let valuationMap = $state.raw<Map<string, ValuationMetrics>>(new Map());
 	let changesMap = $state.raw<Map<string, ChangeMetrics>>(new Map());
 	let financeMap = $state.raw<Map<string, Partial<ScanNode>>>(new Map());
+	let productMap = $state.raw<Map<string, ProductIndexItem>>(new Map());
 	let loaderLoading = $state<Set<RuntimeLoader>>(new Set());
 	let loaderReady = $state<Set<RuntimeLoader>>(new Set());
 	let loaderError = $state<Map<RuntimeLoader, string>>(new Map());
+	let pendingColumnGroups = $state<Set<MetricGroup>>(new Set());
 	let loadingColumnGroups = $derived.by(() => {
 		const groups = new Set<MetricGroup>();
-		if (loaderLoading.has('finance5y')) {
-			groups.add('financeIncome');
-			groups.add('financeBalance');
-			groups.add('financeCashflow');
-			groups.add('financeRatio');
-			groups.add('financeGrowth');
-		}
-		if (loaderLoading.has('priceTrend')) groups.add('price');
-		if (loaderLoading.has('valuation')) groups.add('valuation');
-		if (loaderLoading.has('report')) {
-			groups.add('changes');
-			groups.add('disclosure');
+		for (const group of pendingColumnGroups) {
+			const loader = loaderForGroup(group);
+			if (loader && loaderLoading.has(loader)) groups.add(group);
 		}
 		return groups;
 	});
@@ -174,7 +168,13 @@
 
 	// ── Merge ecosystem with parquet maps ─────────────
 	let allNodes = $derived.by(() => {
-		if (priceMap.size === 0 && valuationMap.size === 0 && changesMap.size === 0 && financeMap.size === 0) {
+		if (
+			priceMap.size === 0 &&
+			valuationMap.size === 0 &&
+			changesMap.size === 0 &&
+			financeMap.size === 0 &&
+			productMap.size === 0
+		) {
 			return baseNodes;
 		}
 		return baseNodes.map((n) => {
@@ -182,9 +182,13 @@
 			const val = valuationMap.get(n.id);
 			const chg = changesMap.get(n.id);
 			const fin = financeMap.get(n.id);
+			const prod = productMap.get(n.id);
 			return {
 				...n,
 				...fin,
+				product: prod?.product ?? (n.product as string | null | undefined) ?? null,
+				productRaw: prod?.productRaw ?? (n.productRaw as string | null | undefined) ?? null,
+				productPeriod: prod?.latestPeriod ?? (n.productPeriod as string | null | undefined) ?? null,
 				// price (KRX)
 				currentPrice: p?.currentPrice ?? (n.currentPrice as number | null | undefined) ?? null,
 				return1m: p?.return1m ?? (n.return1m as number | null | undefined) ?? null,
@@ -194,6 +198,7 @@
 				week52High: p?.week52High ?? (n.week52High as number | null | undefined) ?? null,
 				week52Low: p?.week52Low ?? (n.week52Low as number | null | undefined) ?? null,
 				volumeAvg30d: p?.volumeAvg30d ?? (n.volumeAvg30d as number | null | undefined) ?? null,
+				spark30: p?.spark30 ?? (n.spark30 as number[] | undefined) ?? [],
 				spark60: p?.spark60 ?? (n.spark60 as number[] | undefined) ?? [],
 				spark: p?.spark ?? (n.spark as number[] | undefined) ?? [],
 				// valuation (Naver) — marketCap 우선 valuation, fallback KRX
@@ -249,7 +254,8 @@
 				const lblOk = node.label.toLowerCase().includes(q);
 				const codeOk = node.id.includes(q);
 				const indOk = (node.industryName as string)?.toLowerCase().includes(q);
-				if (!lblOk && !codeOk && !indOk) return false;
+				const productOk = String((node as Record<string, unknown>).product ?? '').toLowerCase().includes(q);
+				if (!lblOk && !codeOk && !indOk && !productOk) return false;
 			}
 			for (const c of conds) {
 				if (!evalCond(node, c)) return false;
@@ -319,6 +325,34 @@
 		return Array.from(loaders);
 	}
 
+	function loaderForGroup(group: MetricGroup): RuntimeLoader | null {
+		if (
+			group === 'financeIncome' ||
+			group === 'financeBalance' ||
+			group === 'financeCashflow' ||
+			group === 'financeRatio' ||
+			group === 'financeGrowth'
+		) {
+			return 'finance5y';
+		}
+		if (group === 'price') return 'priceTrend';
+		if (group === 'valuation') return 'valuation';
+		if (group === 'changes' || group === 'disclosure') return 'report';
+		return null;
+	}
+
+	function markColumnGroupPending(group: MetricGroup, pending: boolean) {
+		const next = new Set(pendingColumnGroups);
+		if (pending) next.add(group);
+		else next.delete(group);
+		pendingColumnGroups = next;
+	}
+
+	function clearPendingGroupsForLoader(loader: RuntimeLoader) {
+		const next = new Set([...pendingColumnGroups].filter((group) => loaderForGroup(group) !== loader));
+		pendingColumnGroups = next;
+	}
+
 	function markLoaderLoading(loader: RuntimeLoader, loading: boolean) {
 		const next = new Set(loaderLoading);
 		if (loading) next.add(loader);
@@ -331,6 +365,7 @@
 		ready.add(loader);
 		loaderReady = ready;
 		markLoaderLoading(loader, false);
+		clearPendingGroupsForLoader(loader);
 	}
 
 	function markLoaderError(loader: RuntimeLoader, error: string) {
@@ -338,6 +373,7 @@
 		errors.set(loader, error);
 		loaderError = errors;
 		markLoaderLoading(loader, false);
+		clearPendingGroupsForLoader(loader);
 	}
 
 	async function ensureLoaders(loaders: RuntimeLoader[]) {
@@ -382,6 +418,8 @@
 			if (preset) applyPreset(preset);
 		}
 		void bootRuntime();
+		void bootProductIndexRuntime();
+		void ensureLoaders(inferLoaders(activeColumns));
 		return () => {
 			runtimeWorker?.terminate();
 			runtimeWorker = null;
@@ -708,6 +746,15 @@
 		}
 	}
 
+	async function bootProductIndexRuntime() {
+		try {
+			const { loadHfProductIndexMap } = await import('$lib/data/productIndexRuntime');
+			productMap = await loadHfProductIndexMap(fetch);
+		} catch {
+			productMap = new Map();
+		}
+	}
+
 	interface PriceSnapshotFile {
 		builtAt?: string;
 		data?: Record<string, PriceSnapshotItem>;
@@ -805,6 +852,7 @@
 				return1m: numberOrNull(node.return1m),
 				return3m: numberOrNull(node.return3m),
 				return1y: numberOrNull(node.return1y),
+				spark30: Array.isArray(node.spark30) ? (node.spark30 as number[]) : [],
 				spark60: Array.isArray(node.spark60) ? (node.spark60 as number[]) : [],
 				spark: Array.isArray(node.spark) ? (node.spark as number[]) : []
 			});
@@ -869,14 +917,19 @@
 	}
 
 	// ── Column toggle ─────────────────────────────────
-	function handleColumnsChange(next: string[]) {
+	function handleColumnsChange(next: string[], group?: MetricGroup) {
 		// PINNED 는 항상 맨 앞 + 보존
 		const pinned = activeColumns.filter((k) => PINNED_COLUMNS.includes(k));
 		const rest = next.filter((k) => !PINNED_COLUMNS.includes(k));
 		const before = new Set(activeColumns);
 		activeColumns = [...pinned, ...rest];
 		const added = activeColumns.filter((k) => !before.has(k));
-		void ensureLoaders(inferLoaders(added.length > 0 ? added : activeColumns));
+		const loaders = inferLoaders(added.length > 0 ? added : activeColumns);
+		if (group) {
+			const loader = loaderForGroup(group);
+			markColumnGroupPending(group, Boolean(added.length > 0 && loader && loaders.includes(loader) && !loaderReady.has(loader)));
+		}
+		void ensureLoaders(loaders);
 	}
 
 	// ── Sort handler ──────────────────────────────────

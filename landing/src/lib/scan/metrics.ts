@@ -4,7 +4,7 @@
  * 기본 ecosystem 지표와 런타임 parquet 지표를 한 곳에서 정의한다.
  */
 
-import { fmtKrw, fmtPrice } from '$lib/format/krw';
+import { fmtPrice } from '$lib/format/krw';
 import { fmtPct, fmtMul } from '$lib/format/pct';
 import type { MetricDef } from './types';
 import { buildFinanceMetricDefs, type FinanceMetricGroup } from './financeAccounts';
@@ -43,6 +43,14 @@ export const GROUP_META: Record<MetricGroup, { label: string; color: string }> =
 const pct = (withSign = false) => (v: unknown) =>
 	typeof v === 'number' ? fmtPct(v, { withSign }) : '—';
 
+const wonAsEok = (v: unknown) => {
+	if (typeof v !== 'number' || !Number.isFinite(v)) return '—';
+	const eok = v / 1e8;
+	const abs = Math.abs(eok);
+	const maximumFractionDigits = abs >= 100 ? 0 : 1;
+	return `${eok.toLocaleString('ko-KR', { maximumFractionDigits })}억원`;
+};
+
 const baseMetrics: MetricDef[] = [
 	{
 		key: 'label',
@@ -75,6 +83,14 @@ const baseMetrics: MetricDef[] = [
 		type: 'enum',
 		definition: 'dartlab 산업 분류.',
 		source: 'ecosystem'
+	},
+	{
+		key: 'product',
+		label: '제품',
+		group: 'identity',
+		type: 'text',
+		definition: '최신 주요 제품 및 서비스 공시 preview.',
+		source: 'productIndex'
 	},
 	{
 		key: 'stageName',
@@ -119,11 +135,11 @@ const baseMetrics: MetricDef[] = [
 		label: '매출액',
 		group: 'income',
 		type: 'number',
-		unit: '원',
-		definition: '직전 사업연도 매출액.',
+		unit: '억원',
+		definition: '직전 사업연도 매출액. 표시는 억원 단위로 고정.',
 		higherBetter: true,
 		source: 'ecosystem',
-		format: (v) => (typeof v === 'number' ? fmtKrw(v) : '—'),
+		format: wonAsEok,
 		distribution: 'log'
 	},
 	{
@@ -367,11 +383,11 @@ const baseMetrics: MetricDef[] = [
 		label: '시가총액',
 		group: 'price',
 		type: 'number',
-		unit: '원',
-		definition: '직전 거래일 시가총액.',
+		unit: '억원',
+		definition: '직전 거래일 시가총액. 표시는 억원 단위로 고정.',
 		higherBetter: true,
 		source: 'prices',
-		format: (v) => (typeof v === 'number' ? fmtKrw(v) : '—'),
+		format: wonAsEok,
 		distribution: 'log'
 	},
 	{
@@ -451,6 +467,14 @@ const baseMetrics: MetricDef[] = [
 		source: 'prices',
 		format: (v) => (typeof v === 'number' ? v.toLocaleString('ko-KR') : '—'),
 		distribution: 'log'
+	},
+	{
+		key: 'spark30',
+		label: '30D 추세',
+		group: 'price',
+		type: 'text',
+		definition: '직전 30거래일 종가 추이.',
+		source: 'prices'
 	},
 	{
 		key: 'spark60',
@@ -565,8 +589,11 @@ export const DEFAULT_COLUMNS: string[] = [
 	'id',
 	'market',
 	'industryName',
+	'product',
 	'currentPrice',
 	'marketCap',
+	'spark30',
+	'spark',
 	'per',
 	'pbr',
 	'roe',

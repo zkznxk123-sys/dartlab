@@ -1,5 +1,4 @@
 import type { MetricDef } from './types';
-import { fmtKrw } from '$lib/format/krw';
 import { fmtPct } from '$lib/format/pct';
 
 export type FinanceMetricGroup =
@@ -321,6 +320,14 @@ function pctFormat(withSign = false) {
 	return (v: unknown) => (typeof v === 'number' ? fmtPct(v, { withSign }) : '—');
 }
 
+function fmtWonAsEok(v: unknown): string {
+	if (typeof v !== 'number' || !Number.isFinite(v)) return '—';
+	const eok = v / 1e8;
+	const abs = Math.abs(eok);
+	const maximumFractionDigits = abs >= 100 ? 0 : 1;
+	return `${eok.toLocaleString('ko-KR', { maximumFractionDigits })}억원`;
+}
+
 export function buildFinanceMetricDefs(): MetricDef[] {
 	const accountDefs = FINANCE_ACCOUNTS.flatMap((account) =>
 		FINANCE_COMPLETED_YEARS.map(
@@ -329,11 +336,11 @@ export function buildFinanceMetricDefs(): MetricDef[] {
 				label: `${year}년\n${account.label}`,
 				group: account.group,
 				type: 'number',
-				unit: '원',
-				definition: `${year}년 ${account.label}. 기존 finance-lite 연간값을 런타임에 펼친 정렬 가능 숫자 컬럼.`,
+				unit: '억원',
+				definition: `${year}년 ${account.label}. 기존 finance-lite 연간값을 런타임에 펼친 정렬 가능 숫자 컬럼. 표시는 억원 단위로 고정.`,
 				higherBetter: account.higherBetter,
 				source: 'finance5y',
-				format: (v: unknown) => (typeof v === 'number' ? fmtKrw(v) : '—'),
+				format: fmtWonAsEok,
 				distribution: account.id === 'sales' || account.group === 'financeBalance' ? 'log' : 'linear'
 			})
 		)
