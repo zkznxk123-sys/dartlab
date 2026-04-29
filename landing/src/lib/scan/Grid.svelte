@@ -244,9 +244,29 @@
 		onCellHover?.(null);
 	}
 
+	function numberArray(value: unknown): number[] {
+		return Array.isArray(value)
+			? value.map((v) => Number(v)).filter((v) => Number.isFinite(v))
+			: [];
+	}
+
 	function sparkForCell(node: RowData, key: string): number[] {
-		const value = key === 'spark30' ? node.spark30 : key === 'spark60' ? node.spark60 : node.spark;
-		return Array.isArray(value) ? (value as number[]) : [];
+		const spark = numberArray(node.spark);
+		const spark60 = numberArray(node.spark60);
+		const spark30 = numberArray(node.spark30);
+		if (key === 'spark30') {
+			if (spark30.length >= 2) return spark30;
+			if (spark60.length >= 2) return spark60.slice(-30);
+			return spark.slice(-30);
+		}
+		if (key === 'spark60') {
+			if (spark60.length >= 2) return spark60;
+			if (spark.length >= 2) return spark.slice(-60);
+			return spark30;
+		}
+		if (spark.length >= 2) return spark;
+		if (spark60.length >= 2) return spark60;
+		return spark30;
 	}
 
 	function seriesForCell(value: unknown): SeriesMetric | null {

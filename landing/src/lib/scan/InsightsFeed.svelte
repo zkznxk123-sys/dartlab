@@ -1,11 +1,12 @@
 <script lang="ts">
 	/**
-	 * 자동 발굴 신호 카드 4종 — 행 미선택 시 디테일 자리에 표시.
+	 * 자동 발굴 신호 카드 5종 — 행 미선택 시 디테일 자리에 표시.
 	 *
 	 *  1. ROE 급상승 TOP  — roeDelta desc, top 10
 	 *  2. 영업이익률 급상승 — opMarginDelta desc, top 10
 	 *  3. 부채비율 급증 위험 — debtRatioDelta desc, top 10
-	 *  4. 우량주 (qualGrade 우수 + roe 15+ + 부채 100-)
+	 *  4. 매출액 증가 — revenueYoyPct desc, top 10
+	 *  5. 우량주 (qualGrade 우수 + roe 15+ + 부채 100-)
 	 *
 	 * 카드 → 클릭 = 자동 필터 + 정렬 적용 (onApply).
 	 */
@@ -22,11 +23,13 @@
 	let { nodes, onApply, onCompanyClick }: Props = $props();
 
 	type Ranked = { n: ScanNode; v: number; metric: string };
+	const SIGNAL_LIMIT = 10;
+	const MIN_PRIMARY_SIGNAL_COUNT = 5;
 
 	function topByMetric(
 		key: string,
 		dir: 'desc' | 'asc' = 'desc',
-		limit = 5,
+		limit = SIGNAL_LIMIT,
 		guard?: (n: ScanNode, v: number) => boolean
 	) {
 		const list = nodes
@@ -40,7 +43,7 @@
 		return list.sort((a, b) => (dir === 'desc' ? b.v - a.v : a.v - b.v)).slice(0, limit);
 	}
 
-	function fillSignals(primary: Ranked[], fallbacks: Ranked[], limit = 5): Ranked[] {
+	function fillSignals(primary: Ranked[], fallbacks: Ranked[], limit = SIGNAL_LIMIT): Ranked[] {
 		const out: Ranked[] = [];
 		const seen = new Set<string>();
 		for (const item of [...primary, ...fallbacks]) {
@@ -52,50 +55,66 @@
 		return out;
 	}
 
+	function usePrimaryOrFallback(primary: Ranked[], fallbacks: Ranked[]): Ranked[] {
+		if (primary.length >= MIN_PRIMARY_SIGNAL_COUNT) return fillSignals(primary, fallbacks);
+		return fillSignals(fallbacks, []);
+	}
+
 	function fallbackUniverse(): Ranked[] {
-		return topByMetric('revenue', 'desc', 5, (_n, v) => v > 0);
+		return topByMetric('revenue', 'desc', SIGNAL_LIMIT, (_n, v) => v > 0);
 	}
 
 	function formatRanked(r: Ranked): string {
 		if (r.metric === 'revenue' || r.metric === 'marketCap') return fmtKrw(r.v);
 		if (r.metric === 'industryRank') return `${r.v}위`;
-		return fmtPct(r.v, { withSign: r.metric.endsWith('Delta') });
+		return fmtPct(r.v, {
+			withSign: r.metric.endsWith('Delta') || r.metric === 'revenueYoyPct' || r.metric === 'revCagr'
+		});
 	}
 
 	// 극단치 noise 필터. 조건이 빡빡해도 현재 지표와 매출 규모로 채워 항상 후보가 보이게 한다.
 	let roeRising = $derived.by(() =>
-		fillSignals(
-			topByMetric('roeDelta', 'desc', 5, (n, v) => {
+		usePrimaryOrFallback(
+			topByMetric('roeDelta', 'desc', SIGNAL_LIMIT, (n, v) => {
 				const cur = n.roe as number | undefined;
-				return v > 0 && v <= 300 && (typeof cur !== 'number' || cur >= 0);
+				return v >= 3 && v <= 300 && (typeof cur !== 'number' || cur >= 0);
 			}),
 			[
-				...topByMetric('roe', 'desc', 5, (_n, v) => v >= 5 && v <= 120),
+				...topByMetric('roe', 'desc', SIGNAL_LIMIT, (_n, v) => v >= 5 && v <= 120),
 				...fallbackUniverse()
 			]
 		)
 	);
 	let marginRising = $derived.by(() =>
-		fillSignals(
-			topByMetric('opMarginDelta', 'desc', 5, (n, v) => {
+		usePrimaryOrFallback(
+			topByMetric('opMarginDelta', 'desc', SIGNAL_LIMIT, (n, v) => {
 				const cur = n.opMargin as number | undefined;
-				return v > 0 && v <= 120 && (typeof cur !== 'number' || cur >= -20);
+				return v >= 3 && v <= 120 && (typeof cur !== 'number' || cur >= -20);
 			}),
 			[
-				...topByMetric('opMargin', 'desc', 5, (_n, v) => v > 0 && v <= 120),
+				...topByMetric('opMargin', 'desc', SIGNAL_LIMIT, (_n, v) => v > 0 && v <= 120),
 				...fallbackUniverse()
 			]
 		)
 	);
 	let debtSurge = $derived.by(() =>
-		fillSignals(
-			topByMetric('debtRatioDelta', 'desc', 5, (n, v) => {
+		usePrimaryOrFallback(
+			topByMetric('debtRatioDelta', 'desc', SIGNAL_LIMIT, (n, v) => {
 				const cur = n.debtRatio as number | undefined;
 				return v >= 10 && v <= 500 && typeof cur === 'number' && cur > 0 && cur <= 500;
 			}),
 			[
-				...topByMetric('debtRatio', 'desc', 5, (_n, v) => v >= 100 && v <= 500),
-				...topByMetric('revenue', 'desc', 5, (_n, v) => v > 0)
+				...topByMetric('debtRatio', 'desc', SIGNAL_LIMIT, (_n, v) => v >= 100 && v <= 500),
+				...fallbackUniverse()
+			]
+		)
+	);
+	let revenueRising = $derived.by(() =>
+		usePrimaryOrFallback(
+			topByMetric('revenueYoyPct', 'desc', SIGNAL_LIMIT, (_n, v) => v >= 5 && v <= 500),
+			[
+				...topByMetric('revCagr', 'desc', SIGNAL_LIMIT, (_n, v) => v > 0 && v <= 300),
+				...fallbackUniverse()
 			]
 		)
 	);
@@ -117,9 +136,9 @@
 			})
 			.map((n) => ({ n, v: n.roe as number, metric: 'roe' }))
 			.sort((a, b) => b.v - a.v)
-			.slice(0, 5);
+			.slice(0, SIGNAL_LIMIT);
 		return fillSignals(strict, [
-			...topByMetric('roe', 'desc', 5, (n, v) => {
+			...topByMetric('roe', 'desc', SIGNAL_LIMIT, (n, v) => {
 				const debt = n.debtRatio as number | undefined;
 				return v >= 10 && v <= 120 && (typeof debt !== 'number' || debt <= 200);
 			}),
@@ -128,24 +147,36 @@
 	});
 
 	function applyRoeRising() {
+		const primary = roeRising[0]?.metric === 'roeDelta';
 		onApply({
-			conds: [],
-			sort: { key: 'roeDelta', dir: 'desc' },
+			conds: primary ? [] : [{ metric: 'roe', op: '>=', value: 5 }],
+			sort: { key: primary ? 'roeDelta' : 'roe', dir: 'desc' },
 			cols: ['roeDelta', 'roe', 'opMargin', 'profGrade']
 		});
 	}
 	function applyMarginRising() {
+		const primary = marginRising[0]?.metric === 'opMarginDelta';
 		onApply({
 			conds: [{ metric: 'opMargin', op: '>=', value: 0 }],
-			sort: { key: 'opMargin', dir: 'desc' },
+			sort: { key: primary ? 'opMarginDelta' : 'opMargin', dir: 'desc' },
 			cols: ['opMarginDelta', 'opMargin', 'revenueYoyPct']
 		});
 	}
 	function applyDebtSurge() {
+		const primary = debtSurge[0]?.metric === 'debtRatioDelta';
 		onApply({
 			conds: [],
-			sort: { key: 'debtRatioDelta', dir: 'desc' },
+			sort: { key: primary ? 'debtRatioDelta' : 'debtRatio', dir: 'desc' },
 			cols: ['debtRatioDelta', 'debtRatio', 'icr', 'debtGrade']
+		});
+	}
+	function applyRevenueRising() {
+		const metric = revenueRising[0]?.metric;
+		const sortKey = metric === 'revenueYoyPct' || metric === 'revCagr' ? metric : 'revenue';
+		onApply({
+			conds: sortKey === 'revenue' ? [{ metric: 'revenue', op: '>=', value: 0 }] : [{ metric: sortKey, op: '>=', value: 0 }],
+			sort: { key: sortKey, dir: 'desc' },
+			cols: ['revenueYoyPct', 'revCagr', 'revenue', 'opMargin']
 		});
 	}
 	function applyQuality() {
@@ -238,6 +269,29 @@
 			</ul>
 		</div>
 
+		<!-- 매출액 증가 -->
+		<div class="card good">
+			<div class="card-head">
+				<span class="card-title">매출액 증가 회사</span>
+				<button type="button" class="card-cta" onclick={applyRevenueRising}>전체 보기 →</button>
+			</div>
+			<div class="card-desc">매출 YoY 증가 상위. 없으면 CAGR·매출 규모 기준 폴백</div>
+			<ul class="card-list">
+				{#each revenueRising as r (r.n.id)}
+					<li>
+						<button type="button" class="r-row" onclick={() => onCompanyClick(r.n.id)}>
+							<span class="r-dot" style:background={(r.n.color as string) || '#475569'}></span>
+							<span class="r-label">{r.n.label}</span>
+							<span class="r-val good">{formatRanked(r)}</span>
+						</button>
+					</li>
+				{/each}
+				{#if revenueRising.length === 0}
+					<li class="empty-row">조건에 맞는 회사 없음</li>
+				{/if}
+			</ul>
+		</div>
+
 		<!-- 우량주 (Quality Compounder) -->
 		<div class="card good">
 			<div class="card-head">
@@ -297,7 +351,7 @@
 	}
 	.i-grid {
 		display: grid;
-		grid-template-columns: repeat(4, 1fr);
+		grid-template-columns: repeat(5, minmax(0, 1fr));
 		gap: 6px;
 		flex: 1;
 		min-height: 0;
@@ -317,7 +371,7 @@
 		background: #050811;
 		border: 1px solid #1e2433;
 		border-radius: 5px;
-		padding: 8px 10px;
+		padding: 7px 8px;
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
@@ -351,10 +405,11 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: baseline;
-		padding-left: 8px;
+		padding-left: 7px;
+		gap: 5px;
 	}
 	.card-title {
-		font-size: 11px;
+		font-size: 10.5px;
 		font-weight: 600;
 		color: #f1f5f9;
 		letter-spacing: -0.01em;
@@ -375,7 +430,7 @@
 		font-size: 9px;
 		color: #64748b;
 		line-height: 1.35;
-		padding-left: 8px;
+		padding-left: 7px;
 	}
 
 	.card-list {
@@ -392,7 +447,7 @@
 		display: flex;
 		align-items: center;
 		gap: 5px;
-		padding: 2px 4px 2px 8px;
+		padding: 1px 3px 1px 7px;
 		background: transparent;
 		border: none;
 		border-radius: 3px;
@@ -413,7 +468,7 @@
 	}
 	.r-label {
 		flex: 1;
-		font-size: 9.5px;
+		font-size: 9px;
 		color: #cbd5e1;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -421,7 +476,7 @@
 	}
 	.r-val {
 		font-family: monospace;
-		font-size: 9px;
+		font-size: 8.5px;
 		font-variant-numeric: tabular-nums;
 	}
 	.r-val.good {

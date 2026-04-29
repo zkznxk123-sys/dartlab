@@ -1255,7 +1255,7 @@
 
 <style>
 	.scan-page {
-		--scan-bottom-panel-height: clamp(214px, 24vh, 248px);
+		--scan-bottom-panel-height: clamp(244px, 27vh, 278px);
 		--scan-detail-panel-height: clamp(260px, 28vh, 280px);
 		max-width: 100%;
 		padding: 64px 20px 8px;
