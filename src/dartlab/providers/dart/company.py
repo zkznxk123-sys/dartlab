@@ -1360,6 +1360,7 @@ class Company:
             - "현금흐름" → c.show("CF")
             - "사업 개요" → c.show("businessOverview")
             - "주요 제품" → c.show("mainProduct")
+            - "주요주주/최대주주" → c.show("majorHolder")  # majorShareholder 아님
             - "차입금" → c.show("borrowings")
 
         Returns
@@ -1399,7 +1400,8 @@ class Company:
         Args:
             topic: topic 이름. ``"BS"`` ``"IS"`` ``"CF"`` ``"CIS"`` ``"SCE"`` ``"ratios"``
                 같은 finance topic 또는 ``"dividend"`` ``"companyOverview"`` 같은 docs/report
-                topic. 전체 목록은 ``c.topics``.
+                topic. 주요주주/최대주주 topic은 ``"majorHolder"`` 이며
+                ``"majorShareholder"`` 가 아니다. 전체 목록은 ``c.topics``.
             block: 블록 인덱스. None 이면 블록 목차 (1개면 바로 데이터).
             period: 단일 기간 필터 (``"2023"``, ``"2024Q2"``) 또는 리스트 (세로 비교 뷰).
             freq: 시계열 주기 — ``"Q"`` (분기, 기본) / ``"Y"`` (연간 strict 합) /
@@ -1442,6 +1444,7 @@ class Company:
             - "별도 재무상태표" → ``c.show("BS", scope="separate")``
             - "2023년 손익" → ``c.show("IS", period="2023")``
             - "배당 정보" → ``c.show("dividend")``
+            - "주요주주/최대주주" → ``c.show("majorHolder")``
 
         SeeAlso:
             - select: show() 결과에서 행/열 필터 + 차트
@@ -1457,6 +1460,7 @@ class Company:
             c.show("IS", freq="Y", scope="separate")  # 연간 별도
             c.show("IS", period="2023")               # 2023년 필터
             c.show("dividend")                        # 배당
+            c.show("majorHolder")                     # 주요주주/최대주주
         """
         from dartlab.providers.dart._showDispatch import showImpl
 
@@ -3377,13 +3381,14 @@ class Company:
 
     @property
     def quant(self):
-        """주가 기술적 분석 (30축). 기술지표/팩터/감성/최적화. dual access.
+        """주가 기술적 분석 (31축). 기술지표/벤치마크/팩터/감성/최적화. dual access.
 
         Guide:
             - "차트 판단" → c.quant("판단")
             - "모멘텀" → c.quant("모멘텀")
             - "지표 DF" → c.quant("지표")
             - "베타" → c.quant("베타")
+            - "섹터 베타" → c.quant("베타", benchmarkMode="sector")
 
         실제 동작은 ``_quantImpl`` 참조.
 

@@ -31,7 +31,7 @@ from typing import Any
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_benchmark, fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 from dartlab.quant.strategy.metrics import TRADING_DAYS, calcIR, fundamentalLawIR
 
 log = logging.getLogger(__name__)
@@ -50,6 +50,8 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
         expectedIR via Fundamental Law).
     """
     market = resolve_market(stockCode, market)
+    benchmark = kwargs.pop("benchmark", None)
+    benchmarkMode = kwargs.pop("benchmarkMode", "market")
 
     ohlcv = fetch_ohlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
@@ -60,7 +62,17 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
         return {"error": f"{stockCode} 데이터 부족 (최소 60일)"}
     stock_ret = np.diff(np.log(close))
 
-    bench = fetch_benchmark(market)
+    from dartlab.quant.benchmark import fetch_benchmark_ohlcv
+
+    bench, benchmark_meta = fetch_benchmark_ohlcv(
+        stockCode,
+        market=market,
+        benchmark=benchmark,
+        benchmarkMode=benchmarkMode,
+        start=kwargs.get("start"),
+        end=kwargs.get("end"),
+        return_meta=True,
+    )
     if isEmptyDf(bench):
         return {"error": "벤치마크 데이터 없음"}
     bench_close = ohlcv_to_arrays(bench).get("close")
@@ -78,7 +90,10 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
 
     if factors is None:
         # fallback: 1-factor CAPM (MKT만)
-        return _capm_fallback(stockCode, market, stock_ret, bench_ret)
+        out = _capm_fallback(stockCode, market, stock_ret, bench_ret)
+        if "error" not in out:
+            out["benchmarkUsed"] = benchmark_meta
+        return out
 
     smb = factors["smb"]
     hml = factors["hml"]
@@ -147,6 +162,7 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
         "factorYear": factors["year"],
         "factorUniverse": factors["universe"],
         "factorNotes": factors.get("notes"),
+        "benchmarkUsed": benchmark_meta,
     }
 
     for i, name in enumerate(names):

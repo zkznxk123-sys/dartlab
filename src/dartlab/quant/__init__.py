@@ -1,4 +1,4 @@
-"""종목 레벨 정량분석 엔진 — 30축 7그룹.
+"""종목 레벨 정량분석 엔진 — 31축 7그룹.
 
 기술적 지표부터 팩터 모델, 텍스트 감성, 포트폴리오 최적화까지.
 dartlab.quant("축명", "종목코드") 로 접근.
@@ -120,8 +120,16 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         module="dartlab.quant._ax_technical",
         fn="calcBeta",
         label="베타",
-        description="시장 베타 + CAPM + 알파 + R²",
-        example='quant("베타", "005930")',
+        description="시장/섹터/스타일 벤치마크 선택형 베타 + CAPM + 알파 + R²",
+        example='quant("베타", "005930", benchmarkMode="sector")',
+        group="risk",
+    ),
+    "benchmark": _AxisEntry(
+        module="dartlab.quant.benchmark",
+        fn="calcBenchmark",
+        label="벤치마크",
+        description="종목별 시장·섹터·스타일 KRX 벤치마크 스택과 기간 수익률",
+        example='quant("벤치마크", "005930")',
         group="risk",
     ),
     "factor": _AxisEntry(
@@ -333,8 +341,8 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     "bab": _AxisEntry(
         module="dartlab.quant.alphas.bab",
         fn="calcBAB",
-        label="BAB 저변동",
-        description="Frazzini-Pedersen 2014 — 60일 realized vol 저변동성 랭킹 (BAB long 후보)",
+        label="BAB 저베타",
+        description="Frazzini-Pedersen 2014 — 252일 beta 저베타 랭킹 + 60일 realized vol 보조",
         example='quant("bab")',
         group="risk",
         stockRequired=False,
@@ -467,6 +475,9 @@ _ALIASES: dict[str, str] = {
     # B: 리스크
     "베타": "beta",
     "시장베타": "beta",
+    "벤치마크": "benchmark",
+    "시장지수": "benchmark",
+    "benchmarkIndex": "benchmark",
     "팩터": "factor",
     "팩터분해": "factor",
     "꼬리위험": "tailrisk",
@@ -626,7 +637,7 @@ _GROUPS = {
 
 
 class Quant:
-    """종목 레벨 정량분석 엔진 — 30축 7그룹.
+    """종목 레벨 정량분석 엔진 — 31축 7그룹.
 
     dartlab.quant("축명", "종목코드") 로 접근.
     """
@@ -649,7 +660,8 @@ class Quant:
             종목코드/ticker. 두 번째 인자: quant("모멘텀", "005930").
             market 자동 감지 (6자리→KR, 알파벳→US).
         **kwargs
-            축별 추가 파라미터.
+            축별 추가 파라미터. 리스크 축은 ``benchmarkMode="market"|"sector"|"style"|"auto"``
+            와 ``benchmark="코스피 200"`` 명시 override를 받는다.
 
         Returns
         -------
@@ -658,7 +670,7 @@ class Quant:
                 verdict(판단): signal, confidence, indicators (매수/매도/중립)
                 momentum(모멘텀): returns, rsi, macd, moving_averages
                 volatility(변동성): realized, garch, regime
-                valuation(가치평가): multiples, peerRank, impliedReturn (배, %)
+                benchmark(벤치마크): benchmarkUsed, benchmarkStack, 기간 수익률 (%)
                 simulation(시뮬레이션): paths, expectedReturn, var (%)
                 altman: zScore, zone (safe/grey/distress)
                 piotroski: fScore (0~9점)
@@ -690,10 +702,14 @@ class Quant:
         -----
         When: 주가 기반 기술적 신호·팩터·리스크를 정량 분석할 때.
         How: quant("판단") 으로 종합 신호 확인 → 세부 축으로 근거 파악.
+            quant("벤치마크") 로 시장·섹터·스타일 benchmarkStack 을 확인한다.
+            beta/residual/factor/BAB 는 기본 market mode를 유지하고,
+            benchmarkMode="sector" 또는 "style" 로 상대 기준을 명시 전환한다.
             analysis(재무) + quant(기술) 조합이 story full/valuation 타입의 핵심.
             credit 과 함께 사용 시 altman/piotroski 로 부도 위험 교차 검증.
         Verified:
             - quant("판단") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+            - quant("베타", benchmarkMode="sector") → KRX 섹터 지수 대비 beta.
 
         See Also
         --------

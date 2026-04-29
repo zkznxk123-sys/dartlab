@@ -4643,21 +4643,27 @@ def qmjBlock(data) -> list:
 
 
 def babBlock(data) -> list:
-    """calcBAB → top Low-Vol / top High-Vol."""
+    """calcBAB → top Low-Beta / top High-Beta + low-vol 보조."""
     if not data:
         return []
     topLow = data.get("topLow") or []
     topHigh = data.get("topHigh") or []
     metrics = []
     if topLow:
-        metrics.append(("top Low-Vol 5", ", ".join(f"{c}({v}%)" for c, v in topLow[:5])))
+        metrics.append(("top Low-Beta 5", ", ".join(f"{c}(β={v})" for c, v in topLow[:5])))
     if topHigh:
-        metrics.append(("top High-Vol 5", ", ".join(f"{c}({v}%)" for c, v in topHigh[:5])))
+        metrics.append(("top High-Beta 5", ", ".join(f"{c}(β={v})" for c, v in topHigh[:5])))
+    topLowVol = data.get("topLowVol") or []
+    if topLowVol:
+        metrics.append(("top Low-Vol 5", ", ".join(f"{c}({v}%)" for c, v in topLowVol[:5])))
     return [
         HeadingBlock(
             _meta("bab").label,
             level=2,
-            helper=f"BAB realized vol ({data.get('window')}일, {data.get('universe')}종목). {data.get('interpretation', '')}",
+            helper=(
+                f"BAB beta ({data.get('betaWindow', 252)}일, {data.get('universe')}종목). "
+                f"{data.get('interpretation', '')}"
+            ),
         ),
         MetricBlock(metrics),
     ]

@@ -45,7 +45,6 @@ us.sections                          # 10-K sections map
 - **Financial statements**: BS, IS, CF, CIS, SCE — XBRL-normalized, quarterly standalone
 - **47 financial ratios**: ROE, ROA, operating margin, debt ratio, PER, PBR, FCF, etc.
 - **7-area insight grades**: Performance, profitability, stability, cash flow, governance, risk, opportunity
-- **Quant engine**: `quant("benchmark")`, beta/factor/residual/BAB use KRX index HF data as the KR benchmark source of truth
 - **AI analysis**: `dartlab ask '삼성전자 분석해줘'` — natural language company analysis
 - **MCP server**: Expose company data as MCP tools for Claude Desktop, ChatGPT, Cursor
 - **329 topics per company**: From dividend policy to segment breakdown

@@ -103,7 +103,14 @@ def enrichWithIndicators(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def technicalVerdict(df: pl.DataFrame) -> dict[str, Any]:
+def technicalVerdict(
+    df: pl.DataFrame,
+    *,
+    stockCode: str | None = None,
+    market: str = "auto",
+    benchmark: str | None = None,
+    benchmarkMode: str = "market",
+) -> dict[str, Any]:
     """OHLCV → 종합 기술적 판단.
 
     Returns:
@@ -183,12 +190,24 @@ def technicalVerdict(df: pl.DataFrame) -> dict[str, Any]:
 
     # 시장 대비 상대강도 + 베타 (가능하면)
     try:
-        market = _fetchBenchmark()
-        if market is not None and not market.is_empty():
-            rs = _relativeStrength(df, market)
-            beta = _calcBeta(df, market)
+        bench_result = _fetchBenchmark(
+            benchmark or "KOSPI",
+            stockCode=stockCode,
+            market=market,
+            benchmarkMode=benchmarkMode,
+            return_meta=True,
+        )
+        if isinstance(bench_result, tuple):
+            market_df, benchmark_meta = bench_result
+        else:
+            market_df, benchmark_meta = bench_result, None
+        if market_df is not None and not market_df.is_empty():
+            rs = _relativeStrength(df, market_df)
+            beta = _calcBeta(df, market_df)
             result["relativeStrength"] = rs
             result["beta"] = beta
+            if benchmark_meta:
+                result["benchmarkUsed"] = benchmark_meta
     except (ValueError, KeyError, AttributeError, ZeroDivisionError):
         pass
 
@@ -693,13 +712,36 @@ def _categoryEdgeAudit(
     return result
 
 
-def _fetchBenchmark(benchmark: str = "KOSPI") -> pl.DataFrame | None:
-    """시장 지수 OHLCV 수집."""
-    from dartlab.gather.entry import _INDEX_SYMBOLS, _fetchNaverIndex
+def _fetchBenchmark(
+    benchmark: str = "KOSPI",
+    *,
+    stockCode: str | None = None,
+    market: str = "auto",
+    benchmarkMode: str = "market",
+    start: str | None = None,
+    end: str | None = None,
+    return_meta: bool = False,
+) -> pl.DataFrame | tuple[pl.DataFrame | None, dict] | None:
+    """시장 지수 OHLCV 수집.
 
-    sym = _INDEX_SYMBOLS.get(benchmark, benchmark)
-    df = _fetchNaverIndex(sym, 300)
-    return df if not df.is_empty() else None
+    KR은 ``quant.benchmark`` SSOT를 통해 KRX 지수 HF 데이터셋을 사용한다.
+    기존 테스트와 내부 호출 호환을 위해 기본 반환은 DataFrame 그대로 유지하고,
+    ``return_meta=True`` 때만 ``(df, benchmarkUsed)`` 를 반환한다.
+    """
+    from dartlab.quant.benchmark import fetch_benchmark_ohlcv
+
+    explicit = None if benchmark in {"KOSPI", "KR"} else benchmark
+    if benchmark in {"S&P500", "^GSPC"} and market == "auto":
+        market = "US"
+    return fetch_benchmark_ohlcv(
+        stockCode,
+        market=market,
+        benchmark=explicit,
+        benchmarkMode=benchmarkMode,
+        start=start,
+        end=end,
+        return_meta=return_meta,
+    )
 
 
 def _relativeStrength(stock_df: pl.DataFrame, market_df: pl.DataFrame) -> float | None:
@@ -769,10 +811,10 @@ def _calcBeta(stock_df: pl.DataFrame, market_df: pl.DataFrame) -> dict | None:
     capm = round((rf + beta * mrp) * 100, 1)
 
     return {
-        "value": round(beta, 3),
-        "alpha": round(alpha * 252 * 100, 2),
-        "rSquared": round(r_sq, 4),
-        "tStat": round(t_beta, 2) if t_beta is not None else None,
+        "value": float(round(beta, 3)),
+        "alpha": float(round(alpha * 252 * 100, 2)),
+        "rSquared": float(round(r_sq, 4)),
+        "tStat": float(round(t_beta, 2)) if t_beta is not None else None,
         "nObs": len(sr),
-        "capm": capm,
+        "capm": float(capm),
     }

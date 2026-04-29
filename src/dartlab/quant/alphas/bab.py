@@ -1,20 +1,18 @@
 """Frazzini-Pedersen BAB (Betting Against Beta) 횡단면 quant factor.
 
 학술: Frazzini & Pedersen (2014, Journal of Financial Economics) — 저베타 프리미엄.
-     BAB = (Low-Beta long leveraged) − (High-Beta short delevereaged)
+     BAB = (Low-Beta long leveraged) − (High-Beta short deleveraged)
 
-한계: 실제 beta 추정은 종목별 OLS 필요 (분석 비쌈).
-
-dartlab 단순화 (realized volatility proxy):
-    Low-Vol premium ≈ BAB (Baker-Bradley-Wurgler 2011)
-    rank(-vol_60d) → 저변동성 분위 = BAB long 후보
-
-일별 close (KRX _hfBulk) 60일 실현변동성, 횡단면 rank.
+dartlab 구현:
+    - 기본 점수: 상장시장 벤치마크(KOSPI/KOSDAQ) 대비 252일 OLS beta
+    - 보조 점수: 60일 realized volatility (기존 low-vol 프록시 하위호환)
+    - 데이터: KRX 종목 HF + KRX 지수 HF (quant.benchmark SSOT)
 """
 
 from __future__ import annotations
 
 import logging
+from datetime import date, timedelta
 
 import numpy as np
 import polars as pl
@@ -22,119 +20,216 @@ import polars as pl
 log = logging.getLogger(__name__)
 
 
+def _dateStart(window: int) -> str:
+    return (date.today() - timedelta(days=max(window * 3, 420))).isoformat()
+
+
+def _benchmarkReturns(indexMarket: str, start: str, *, indexName: str | None = None) -> dict[str, float]:
+    """벤치마크 로그수익률 맵: return-date(YYYY-MM-DD) -> log return."""
+    from dartlab.quant.benchmark import fetch_benchmark_ohlcv
+
+    bench = fetch_benchmark_ohlcv(market=indexMarket, benchmark=indexName, start=start)
+    if bench is None or bench.is_empty() or "close" not in bench.columns:
+        return {}
+    b = bench.sort("date")
+    dates = [str(d) for d in b["date"].to_list()]
+    close = b["close"].to_numpy().astype(np.float64)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        ret = np.diff(np.log(close))
+    return {dates[i + 1]: float(ret[i]) for i in range(len(ret)) if np.isfinite(ret[i])}
+
+
+def _olsBeta(stock_dates: list[str], stock_ret: np.ndarray, bench_ret: dict[str, float]) -> tuple[float | None, int]:
+    pairs = [(float(r), bench_ret[d]) for d, r in zip(stock_dates, stock_ret) if d in bench_ret and np.isfinite(r)]
+    if len(pairs) < 60:
+        return None, len(pairs)
+    y = np.asarray([p[0] for p in pairs], dtype=np.float64)
+    x = np.asarray([p[1] for p in pairs], dtype=np.float64)
+    var = float(np.var(x, ddof=1))
+    if var <= 0:
+        return None, len(pairs)
+    cov = float(np.cov(y, x, ddof=1)[0, 1])
+    return cov / var, len(pairs)
+
+
 def calcBAB(
     *,
     market: str = "KR",
-    window: int = 60,
+    betaWindow: int = 252,
+    volWindow: int = 60,
+    window: int | None = None,
     stockCode: str | None = None,
+    benchmark: str | None = None,
+    benchmarkMode: str = "market",
     **kwargs,
 ) -> dict | None:
-    """BAB (Betting Against Beta) — 저변동성 프리미엄 횡단면 랭킹.
+    """BAB (Betting Against Beta) — 실제 beta 기반 횡단면 랭킹.
 
     Capabilities:
-        - 전종목 realized volatility (60일 기본) → 저변동성 rank
-        - Top 10 low-vol (BAB long 후보) / Top 10 high-vol (BAB short 후보)
-        - Baker-Bradley-Wurgler 저변동성 anomaly
-
-    AIContext:
-        - Sprint 2 재무 알파 — 가격 기반 (다른 재무 축과 독립 source)
-        - story `babBlock` 시장분석 자동 호출
+        - 전종목 OLS beta (기본 252일) → low-beta / high-beta 후보
+        - 60일 realized volatility 보조 랭킹 동시 반환 (기존 low-vol 해석 유지)
+        - KOSPI 종목은 코스피, KOSDAQ 종목은 코스닥 지수를 자동 벤치마크로 사용
 
     Args:
-        market: ``"KR"`` 만 지원 (KRX _hfBulk 경유).
-        window: realized vol 관측 창 (일). 기본 ``60``.
+        market: ``"KR"`` 만 지원.
+        betaWindow: beta 추정 관측 창. 기본 ``252``.
+        volWindow: realized vol 관측 창. 기본 ``60``.
+        window: 하위호환 별칭. 전달 시 ``volWindow`` 로 사용.
+        stockCode: 단일 종목 조회 시 해당 종목의 beta/vol percentile 반환.
+        benchmark: 명시 벤치마크. 지정하면 모든 종목에 같은 지수를 사용.
+        benchmarkMode: ``"market"`` | ``"sector"`` | ``"style"``. 기본 ``"market"``.
 
     Returns:
-        dict — market / window / universe / scores / topLow / topHigh / interpretation
+        dict — market / betaWindow / volWindow / universe / scores / topLow / topHigh
+        / volScores / topLowVol / topHighVol / interpretation.
     """
     if market != "KR":
         return None
+    if window is not None:
+        volWindow = int(window)
 
     try:
         from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.quant.benchmark import resolve_benchmark
     except ImportError:
         return None
 
-    # 최근 6개월 데이터 (window + buffer)
+    start = kwargs.get("start") or _dateStart(max(betaWindow, volWindow))
     try:
-        long_df = loadFiltered(adjustment="raw")
+        long_df = loadFiltered(start=start, adjustment="raw")
     except Exception as exc:  # noqa: BLE001
         log.warning("BAB loadFiltered 실패: %s", type(exc).__name__)
         return None
     if long_df is None or long_df.is_empty():
         return None
 
-    # 일별 close 정렬 후 종목별 log return + vol
-    lf = long_df.lazy().select(["BAS_DD", "ISU_CD", "TDD_CLSPRC"]).sort(["ISU_CD", "BAS_DD"], descending=[False, True])
-    # 최근 window+1 일만 취함 (효율)
-    latest_dates = long_df.get_column("BAS_DD").unique().sort(descending=True).to_list()[: window + 5]
-    if len(latest_dates) < window + 1:
+    latest_dates = (
+        long_df.get_column("BAS_DD").unique().sort(descending=True).to_list()[: max(betaWindow, volWindow) + 5]
+    )
+    if len(latest_dates) < min(60, betaWindow):
         return None
-    sub = lf.filter(pl.col("BAS_DD").is_in(latest_dates)).collect()
+    sub = (
+        long_df.filter(pl.col("BAS_DD").is_in(latest_dates))
+        .select(["BAS_DD", "ISU_CD", "MKT_NM", "TDD_CLSPRC"])
+        .sort(["ISU_CD", "BAS_DD"])
+    )
 
-    scores: dict[str, float] = {}
-    for code in sub.get_column("ISU_CD").unique().to_list():
-        stock = sub.filter(pl.col("ISU_CD") == code).sort("BAS_DD")
-        close = stock.get_column("TDD_CLSPRC").to_numpy().astype(np.float64)
-        if len(close) < window:
+    bench_maps = {
+        ("KOSPI", "코스피"): _benchmarkReturns("KOSPI", start),
+        ("KOSDAQ", "코스닥"): _benchmarkReturns("KOSDAQ", start),
+    }
+    if benchmark:
+        bm = resolve_benchmark(None, market="KR", benchmark=benchmark)
+        bench_maps[(bm["indexMarket"], bm["indexName"])] = _benchmarkReturns(
+            bm["indexMarket"],
+            start,
+            indexName=bm["indexName"],
+        )
+
+    beta_scores: dict[str, float] = {}
+    vol_scores: dict[str, float] = {}
+    obs: dict[str, int] = {}
+    benchmark_used: dict[str, dict] = {}
+
+    for part in sub.partition_by("ISU_CD", as_dict=False):
+        if part.height < min(61, max(betaWindow, volWindow)):
             continue
-        close = close[-window:]
+        code = part["ISU_CD"][0]
+        close = part["TDD_CLSPRC"].to_numpy().astype(np.float64)
+        dates = part["BAS_DD"].to_list()
         with np.errstate(divide="ignore", invalid="ignore"):
-            r = np.diff(np.log(close))
-        r = r[np.isfinite(r)]
-        if len(r) < 30:
-            continue
-        vol = float(np.std(r, ddof=1) * np.sqrt(252)) * 100
-        scores[code] = vol
+            ret = np.diff(np.log(close))
+        ret_dates = [f"{d[:4]}-{d[4:6]}-{d[6:8]}" for d in dates[1:]]
 
-    if not scores:
+        r_beta = ret[-betaWindow:] if len(ret) >= betaWindow else ret
+        d_beta = ret_dates[-len(r_beta) :]
+        if benchmark:
+            bm_meta = resolve_benchmark(code, market="KR", benchmark=benchmark)
+        elif benchmarkMode == "market":
+            bm_meta = resolve_benchmark(code, market="KR")
+        else:
+            bm_meta = resolve_benchmark(code, market="KR", benchmarkMode=benchmarkMode)
+        bm_key = (bm_meta["indexMarket"], bm_meta["indexName"])
+        if bm_key not in bench_maps:
+            bench_maps[bm_key] = _benchmarkReturns(bm_key[0], start, indexName=bm_key[1])
+        bench_ret = bench_maps.get(bm_key, {})
+        beta, n_obs = _olsBeta(d_beta, r_beta, bench_ret or {})
+        if beta is not None and np.isfinite(beta):
+            beta_scores[code] = float(beta)
+            obs[code] = int(n_obs)
+            benchmark_used[code] = bm_meta
+
+        if len(ret) >= min(30, volWindow):
+            r_vol = ret[-volWindow:]
+            r_vol = r_vol[np.isfinite(r_vol)]
+            if len(r_vol) >= 30:
+                vol_scores[code] = float(np.std(r_vol, ddof=1) * np.sqrt(252)) * 100
+
+    if not beta_scores:
         return None
 
-    sorted_items = sorted(scores.items(), key=lambda x: x[1])  # 낮은 순
-    topLow = [(c, round(v, 2)) for c, v in sorted_items[:10]]
-    topHigh = [(c, round(v, 2)) for c, v in sorted_items[-10:]]
-    total = len(scores)
+    beta_items = sorted(beta_scores.items(), key=lambda x: x[1])
+    vol_items = sorted(vol_scores.items(), key=lambda x: x[1])
+    total = len(beta_scores)
 
-    # 단일 종목 분기 (Step 6)
     if stockCode:
-        v = scores.get(stockCode)
-        if v is None:
+        b = beta_scores.get(stockCode)
+        v = vol_scores.get(stockCode)
+        if b is None:
             return {
                 "stockCode": stockCode,
                 "market": market,
-                "error": f"{stockCode} 데이터 없음 (universe {total}개 중 미포함)",
+                "error": f"{stockCode} beta 데이터 없음 (universe {total}개 중 미포함)",
             }
-        # 저변동성 percentile (낮을수록 BAB long 후보)
-        rank_low = sum(1 for x in scores.values() if x <= v)
+        rank_low = sum(1 for x in beta_scores.values() if x <= b)
         pct_low = round(100 * rank_low / total, 1)
-        category = (
-            "low-vol (BAB long 후보)"
-            if pct_low <= 30
-            else ("mid-vol" if pct_low <= 70 else "high-vol (BAB short 후보)")
-        )
+        vol_pct = None
+        if v is not None and vol_scores:
+            vol_pct = round(100 * sum(1 for x in vol_scores.values() if x <= v) / len(vol_scores), 1)
+        category = "low-beta (BAB long 후보)" if pct_low <= 30 else ("mid-beta" if pct_low <= 70 else "high-beta")
         return {
             "stockCode": stockCode,
             "market": market,
-            "window": window,
-            "score": round(v, 2),
-            "volPercentile": pct_low,
+            "betaWindow": betaWindow,
+            "volWindow": volWindow,
+            "score": round(b, 4),
+            "beta": round(b, 4),
+            "betaPercentile": pct_low,
+            "vol": round(v, 2) if v is not None else None,
+            "volPercentile": vol_pct,
             "category": category,
+            "nObs": obs.get(stockCode),
+            "benchmarkUsed": benchmark_used.get(stockCode),
+            "benchmarkMode": benchmarkMode,
             "universe": total,
             "interpretation": (
-                f"{stockCode} {window}일 vol={round(v, 2)}% (저변동 백분위 {pct_low}) — {category}. "
-                "Frazzini-Pedersen BAB."
+                f"{stockCode} beta={round(b, 3)} ({betaWindow}일, 저베타 백분위 {pct_low}) — {category}. "
+                f"60일 realized vol={round(v, 2) if v is not None else 'N/A'}%."
             ),
         }
 
+    topLow = [(c, round(v, 4)) for c, v in beta_items[:10]]
+    topHigh = [(c, round(v, 4)) for c, v in beta_items[-10:]]
+    topLowVol = [(c, round(v, 2)) for c, v in vol_items[:10]]
+    topHighVol = [(c, round(v, 2)) for c, v in vol_items[-10:]]
+
     return {
         "market": market,
-        "window": window,
+        "betaWindow": betaWindow,
+        "volWindow": volWindow,
+        "window": volWindow,
         "universe": total,
-        "scores": {c: round(v, 2) for c, v in scores.items()},
+        "scores": {c: round(v, 4) for c, v in beta_scores.items()},
+        "volScores": {c: round(v, 2) for c, v in vol_scores.items()},
         "topLow": topLow,
         "topHigh": topHigh,
+        "topLowVol": topLowVol,
+        "topHighVol": topHighVol,
+        "method": "OLS beta vs KRX index; realized vol retained as secondary signal",
+        "benchmarkMode": benchmarkMode,
         "interpretation": (
-            f"{market} BAB ({window}일 realized vol, {len(scores)}종목) — "
-            "저변동성 분위가 Frazzini-Pedersen BAB long 후보 (Baker-Bradley-Wurgler 2011 anomaly)."
+            f"{market} BAB ({betaWindow}일 beta, {total}종목) — "
+            "저베타 분위가 Frazzini-Pedersen BAB long 후보. "
+            f"{volWindow}일 realized vol은 보조 저변동성 신호로 함께 제공."
         ),
     }

@@ -76,7 +76,8 @@ catalog.py → BlockMeta (section 막 분류, act 1~6)
 ## 3. 진짜 부족 (Step 8 후 남는 갭)
 
 ### 데이터 인프라 (사용자 액션)
-- KRX idx 카테고리 키 활성화 → `gather/krxIndex.py` (코드 준비됨)
+- ✅ KRX idx 카테고리 활성화 + 2010~현재 HF backfill 완료 → `gather("krxIndex")`
+- ✅ quant 벤치마크 SSOT 연결 → beta/factor/residual/BAB 가 KRX 시장·섹터·스타일 benchmarkMode 사용
 - KOSPI200 옵션 endpoint → `quant/options/{ivSurface, putCallSkew, vkospi, rnd}.py`
 - 공매도/대차/수급/프로그램매매 → `gather/{shortInterest, secLending, investorFlow, programTrade}.py`
 - 1995~2009 데이터 → 별도 source

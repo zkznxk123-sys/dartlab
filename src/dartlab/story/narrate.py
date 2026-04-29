@@ -1213,15 +1213,15 @@ def narrateQMJ(data: dict | None) -> str | None:
 
 
 def narrateBAB(data: dict | None) -> str | None:
-    """calcBAB 결과 → 자연어 (저변동성 프리미엄)."""
+    """calcBAB 결과 → 자연어 (저베타 프리미엄)."""
     if not data:
         return None
     universe = data.get("universe", 0)
-    window = data.get("window", 60)
+    betaWindow = data.get("betaWindow", 252)
     topLow = data.get("topLow") or []
     return (
-        f"{universe}개 종목 {window}일 realized vol — 저변동성 분위가 BAB long 후보. "
-        f"top 3 low-vol: {', '.join(c for c, _ in topLow[:3])}. Frazzini-Pedersen 2014."
+        f"{universe}개 종목 {betaWindow}일 beta — 저베타 분위가 BAB long 후보. "
+        f"top 3 low-beta: {', '.join(c for c, _ in topLow[:3])}. Frazzini-Pedersen 2014."
     )
 
 

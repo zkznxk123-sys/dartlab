@@ -318,7 +318,7 @@ _BLOCKS: list[BlockMeta] = [
         "bab",
         "BAB (저변동성 프리미엄)",
         "시장분석",
-        "Frazzini-Pedersen 2014 — 60일 realized vol 저변동성 랭킹 (Baker-Bradley-Wurgler anomaly)",
+        "Frazzini-Pedersen 2014 — 252일 beta 저베타 랭킹 + 60일 realized vol 보조",
     ),
     BlockMeta(
         "earningsSurprise",

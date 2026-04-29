@@ -1,4 +1,4 @@
-"""멀티팩터 스크리닝 -- 여러 축 조합으로 종목 필터링.
+"""멀티팩터 스크리닝 -- 프리셋 또는 spec 조건으로 종목 필터링.
 
 프리셋:
     value       -- 가치투자 후보 (저PBR + 이익 양호 + 부채 안전)
@@ -14,6 +14,12 @@
     dartlab.scan("screen", "value")     # 가치투자 후보
     dartlab.scan("screen", "risk")      # 위험 기업
     dartlab.scan("screen", "all")       # 전체 플래그 통합
+    dartlab.scan("screen", spec={
+        "where": [{"field": "finance.ratio.roe", "op": ">", "value": 10}],
+        "select": ["valuation.pbr", "krx.marketCap"],
+        "sort": {"field": "finance.ratio.roe", "desc": True},
+        "limit": 30,
+    })
 """
 
 from __future__ import annotations
@@ -260,11 +266,95 @@ _DISPATCH = {
 }
 
 
-def scanScreen(target: str | None = None, *, verbose: bool = True) -> pl.DataFrame:
-    """멀티팩터 스크리닝.
+def scanScreen(target: str | None = None, *, spec: dict | None = None, verbose: bool = True) -> pl.DataFrame:
+    """멀티팩터 스크리닝을 실행한다.
 
-    target 없으면 프리셋 목록 반환. target 지정하면 해당 프리셋 실행.
+    Summary
+    -------
+    target 프리셋 또는 spec 조건으로 전종목 후보를 반환한다.
+
+    Description
+    -----------
+    target 이 있으면 기존 value/dividend/growth/risk/quality 프리셋을 그대로
+    실행한다. spec 이 있으면 `scan("fields")` 카탈로그의 field 키를 사용해
+    where/select/sort/limit 조건을 실행한다. 두 경로는 분리되어 기존 프리셋
+    동작을 바꾸지 않는다.
+
+    Parameters
+    ----------
+    target : str | None
+        프리셋 이름. None 이고 spec 도 None 이면 프리셋 목록을 반환한다.
+    spec : dict | None
+        조건형 스크리닝 명세. 예:
+        ``{"where": [{"field": "finance.ratio.roe", "op": ">", "value": 10}]}``.
+    verbose : bool
+        True 면 실행 로그를 logger.info 로 출력한다.
+
+    Returns
+    -------
+    pl.DataFrame
+        preset 목록 호출:
+            preset : str — 프리셋 키.
+            description : str — 프리셋 설명.
+        preset 실행:
+            stockCode/종목코드 : str — 후보 종목코드.
+            축별 지표 컬럼 : object — 프리셋이 반환하는 지표.
+        spec 실행:
+            stockCode : str — 후보 종목코드.
+            <field> : object — where/select/sort 에서 요청한 필드 값.
+            docsHitCount : int — docs 조건 hit 수 (건), docs 조건 사용 시.
+            docsBestScore : float — docs 최고 검색 점수 (점), docs 조건 사용 시.
+            docsSnippet : str — 대표 공시 snippet (텍스트), docs 조건 사용 시.
+
+    Raises
+    ------
+    ValueError
+        알 수 없는 프리셋, 잘못된 spec, 지원하지 않는 field/op/unit 인 경우.
+
+    Examples
+    --------
+    >>> dartlab.scan("screen")
+    >>> dartlab.scan("screen", "value")
+    >>> dartlab.scan("screen", spec={
+    ...     "where": [
+    ...         {"field": "finance.ratio.roe", "op": ">", "value": 10},
+    ...         {"field": "valuation.pbr", "op": "<", "value": 1},
+    ...     ],
+    ...     "select": ["krx.marketCap"],
+    ...     "limit": 20,
+    ... })
+
+    Notes
+    -----
+    docs 조건은 검색 인덱스 hit 기반 후보 생성이다. 원문 전체 boolean scan 으로
+    해석하지 않는다. krxIndex 필드는 종목별 값이 아니라 시장 컨텍스트라 select
+    전용이다.
+
+    Guide
+    -----
+    When: 시장 전체에서 후보 종목을 줄일 때.
+    How: `scan("fields")` 로 필드를 찾고, 최소 3개 관점(finance/report/docs/krx
+    등)을 조합한 뒤, 후보만 Company/analysis 로 심층 검증한다.
+    Verified: 기존 프리셋 경로와 spec 경로가 같은 `scan("screen")` 진입점을 공유한다.
+
+    See Also
+    --------
+    dartlab.scan("fields") : 조건에 사용할 field 검색.
+    dartlab.scan("ratio") : 재무비율 primitive.
+    dartlab.search : docs 텍스트 조건의 검색 인덱스.
     """
+    if spec is not None:
+        from dartlab.scan.fields import executeScreenSpec
+
+        if target is not None:
+            raise ValueError("screen 은 target 프리셋과 spec 을 동시에 받을 수 없습니다.")
+        if verbose:
+            _log.info("screen(spec): 실행 중...")
+        result = executeScreenSpec(spec)
+        if verbose:
+            _log.info(f"screen(spec): {result.shape[0]}종목")
+        return result
+
     if target is None:
         rows = [{"preset": k, "description": v} for k, v in _PRESETS.items()]
         return pl.DataFrame(rows)

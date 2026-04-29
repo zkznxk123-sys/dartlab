@@ -139,12 +139,22 @@ def calcVerdict(stockCode: str, **kwargs: Any) -> dict:
     Examples
     --------
     >>> c.quant("verdict")"""
+    benchmark = kwargs.pop("benchmark", None)
+    benchmarkMode = kwargs.pop("benchmarkMode", "market")
     ohlcv, err = _get_ohlcv(stockCode, **kwargs)
     if err:
         return err
+    from dartlab.quant._helpers import resolve_market
     from dartlab.quant.analyzer import technicalVerdict
 
-    return technicalVerdict(ohlcv)
+    market = resolve_market(stockCode, kwargs.pop("market", "auto"))
+    return technicalVerdict(
+        ohlcv,
+        stockCode=stockCode,
+        market=market,
+        benchmark=benchmark,
+        benchmarkMode=benchmarkMode,
+    )
 
 
 def calcBeta(stockCode: str, **kwargs: Any) -> dict:
@@ -171,6 +181,8 @@ def calcBeta(stockCode: str, **kwargs: Any) -> dict:
     Examples
     --------
     >>> c.quant("beta")"""
+    benchmark = kwargs.pop("benchmark", None)
+    benchmarkMode = kwargs.pop("benchmarkMode", "market")
     ohlcv, err = _get_ohlcv(stockCode, **kwargs)
     if err:
         return err
@@ -179,6 +191,9 @@ def calcBeta(stockCode: str, **kwargs: Any) -> dict:
 
     market = resolve_market(stockCode, kwargs.pop("market", "auto"))
     wrapper = _OHLCVWrapper(stockCode, ohlcv, market)
+    if benchmark:
+        wrapper.benchmark = benchmark
+    wrapper.benchmarkMode = benchmarkMode
     return calcMarketBeta(wrapper)
 
 

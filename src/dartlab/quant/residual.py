@@ -8,7 +8,7 @@ from __future__ import annotations
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_benchmark, fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
 def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
@@ -37,11 +37,13 @@ def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         residualVerdict : str — "positive_alpha" | "negative_alpha" | "neutral"
     """
     market = resolve_market(stockCode, market)
+    benchmark = kwargs.pop("benchmark", None)
+    benchmarkMode = kwargs.pop("benchmarkMode", "market")
     result: dict = {"stockCode": stockCode, "market": market}
 
     from dartlab.quant.factor import decomposeFactor
 
-    fr = decomposeFactor(stockCode, market=market)
+    fr = decomposeFactor(stockCode, market=market, benchmark=benchmark, benchmarkMode=benchmarkMode)
     if "error" in fr:
         return {**result, "error": fr["error"]}
 
@@ -55,7 +57,17 @@ def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
 
     sr = np.diff(np.log(close))
 
-    bench = fetch_benchmark(market)
+    from dartlab.quant.benchmark import fetch_benchmark_ohlcv
+
+    bench, benchmark_meta = fetch_benchmark_ohlcv(
+        stockCode,
+        market=market,
+        benchmark=benchmark,
+        benchmarkMode=benchmarkMode,
+        start=kwargs.get("start"),
+        end=kwargs.get("end"),
+        return_meta=True,
+    )
     if bench is None:
         return {**result, "error": "벤치마크 없음"}
     bc = ohlcv_to_arrays(bench).get("close")
@@ -82,5 +94,6 @@ def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     result["residualAlpha"] = round(ra, 4)
     result["residualSharpe"] = round(float(rs), 4)
     result["factorRSquared"] = fr.get("rSquared", 0)
+    result["benchmarkUsed"] = benchmark_meta
     result["residualVerdict"] = "positive_alpha" if ra > 0.05 else "negative_alpha" if ra < -0.05 else "neutral"
     return result

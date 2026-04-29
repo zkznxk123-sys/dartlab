@@ -61,24 +61,43 @@ def _fetchOHLCV(company: Any) -> pl.DataFrame | None:
 
 
 def _fetchBenchmarkForCompany(company: Any) -> pl.DataFrame | None:
-    """시장 벤치마크 OHLCV — currency 기반 분기."""
+    """시장 벤치마크 OHLCV — KRX 지수 SSOT."""
     cache = getattr(company, "_cache", None)
-    _KEY = "_quant_benchmark"
-    if cache is not None and _KEY in cache:
-        return cache[_KEY]
+    stockCode = getattr(company, "stockCode", None)
+    benchmark = getattr(company, "benchmark", None)
+    benchmarkMode = getattr(company, "benchmarkMode", "market")
+    cacheKey = f"_quant_benchmark:{benchmark or ''}:{benchmarkMode}"
+    metaKey = f"{cacheKey}:meta"
+    if cache is not None and cacheKey in cache:
+        return cache[cacheKey]
 
-    benchmark = "S&P500" if _isUSD(company) else "KOSPI"
     result = None
+    meta = None
     try:
-        from dartlab.quant.analyzer import _fetchBenchmark as _qfb
+        from dartlab.quant.benchmark import fetch_benchmark_ohlcv
 
-        result = _qfb(benchmark)
+        result, meta = fetch_benchmark_ohlcv(
+            stockCode,
+            market=_detectMarket(company),
+            benchmark=benchmark,
+            benchmarkMode=benchmarkMode,
+            return_meta=True,
+        )
     except (ImportError, ValueError, TypeError, RuntimeError):
         pass
 
     if cache is not None:
-        cache[_KEY] = result
+        cache[cacheKey] = result
+        cache[metaKey] = meta
+        cache["_quant_benchmark_meta"] = meta
     return result
+
+
+def _benchmarkMetaForCompany(company: Any) -> dict | None:
+    cache = getattr(company, "_cache", None)
+    if cache is not None:
+        return cache.get("_quant_benchmark_meta")
+    return None
 
 
 def _detectMarket(company: Any) -> str:
@@ -109,7 +128,13 @@ def calcTechnicalVerdict(company) -> dict | None:
 
     from dartlab.quant.analyzer import technicalVerdict
 
-    verdict = technicalVerdict(ohlcv)
+    verdict = technicalVerdict(
+        ohlcv,
+        stockCode=getattr(company, "stockCode", None),
+        market=_detectMarket(company),
+        benchmark=getattr(company, "benchmark", None),
+        benchmarkMode=getattr(company, "benchmarkMode", "market"),
+    )
     if not verdict:
         return None
 
@@ -225,6 +250,7 @@ def calcMarketBeta(company) -> dict | None:
     return {
         **beta_data,
         "relativeStrength": rs,
+        "benchmarkUsed": _benchmarkMetaForCompany(company),
         "interpretation": interp,
     }
 
@@ -259,7 +285,13 @@ def calcFundamentalDivergence(company, *, basePeriod: str | None = None) -> dict
     ohlcv = _fetchOHLCV(company)
     tv = None
     if ohlcv is not None and not ohlcv.is_empty() and len(ohlcv) >= 30:
-        tv = technicalVerdict(ohlcv)
+        tv = technicalVerdict(
+            ohlcv,
+            stockCode=getattr(company, "stockCode", None),
+            market=_detectMarket(company),
+            benchmark=getattr(company, "benchmark", None),
+            benchmarkMode=getattr(company, "benchmarkMode", "market"),
+        )
 
     if financialGrade is None and tv is None:
         return None
@@ -384,7 +416,13 @@ def calcMarketAnalysisFlags(company) -> list[str]:
     if isEmptyDf(ohlcv) or len(ohlcv) < 30:
         return flags
 
-    tv = technicalVerdict(ohlcv)
+    tv = technicalVerdict(
+        ohlcv,
+        stockCode=getattr(company, "stockCode", None),
+        market=_detectMarket(company),
+        benchmark=getattr(company, "benchmark", None),
+        benchmarkMode=getattr(company, "benchmarkMode", "market"),
+    )
     if not tv:
         return flags
 

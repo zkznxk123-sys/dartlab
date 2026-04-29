@@ -49,14 +49,14 @@ def fetch_ohlcv(stockCode: str, **kwargs: Any):
 
 
 def fetch_benchmark(market: str = "KR", **kwargs: Any):
-    """벤치마크 OHLCV 수집 — KR=KOSPI, US=S&P500.
+    """벤치마크 OHLCV 수집 — KR=KRX 지수, US=S&P500.
 
     Parameters
     ----------
     market : str
-        "KR" (KOSPI) 또는 "US" (S&P500).
+        "KR" / "KOSPI" / "KOSDAQ" 또는 "US".
     **kwargs
-        GatherEntry 전달 인자 (start 등).
+        ``stockCode``, ``benchmark``, ``start``, ``end`` 등.
 
     Returns
     -------
@@ -68,14 +68,21 @@ def fetch_benchmark(market: str = "KR", **kwargs: Any):
         close : float — 종가
         volume : int — 거래량
         수집 실패 시 None."""
-    symbol = "KOSPI" if market == "KR" else "^GSPC"
     try:
-        from dartlab.gather.entry import GatherEntry
+        from dartlab.quant.benchmark import fetch_benchmark_ohlcv
 
-        g = GatherEntry()
-        return g("price", symbol, **kwargs)
+        stockCode = kwargs.pop("stockCode", None)
+        benchmark = kwargs.pop("benchmark", None)
+        benchmarkMode = kwargs.pop("benchmarkMode", "market")
+        return fetch_benchmark_ohlcv(
+            stockCode,
+            market=market,
+            benchmark=benchmark,
+            benchmarkMode=benchmarkMode,
+            **kwargs,
+        )
     except (ImportError, ValueError, TypeError, RuntimeError):
-        log.warning("벤치마크 fetch 실패: %s", symbol)
+        log.warning("벤치마크 fetch 실패: %s", market)
         return None
 
 

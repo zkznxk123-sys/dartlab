@@ -13,8 +13,8 @@ SPEC = {
         },
         "risk": {
             "label": "리스크",
-            "description": "가격 + 벤치마크 기반 리스크 분석",
-            "axes": ["beta", "factor", "tailrisk", "residual", "bab"],  # Sprint 2: bab
+            "description": "가격 + KRX 시장·섹터·스타일 벤치마크 기반 리스크 분석",
+            "axes": ["beta", "benchmark", "factor", "tailrisk", "residual", "bab"],
         },
         "microstructure": {
             "label": "미시구조",
@@ -104,9 +104,15 @@ SPEC = {
         },
         "beta": {
             "label": "베타",
-            "description": "시장 베타 + CAPM + 알파 + R²",
-            "when": "시장 민감도 판단",
+            "description": "시장/섹터/스타일 벤치마크 선택형 베타 + CAPM + 알파 + R²",
+            "when": "시장 또는 업종 대비 민감도 판단",
             "key_output": "beta, alpha, rSquared, capmExpectedReturn",
+        },
+        "benchmark": {
+            "label": "벤치마크",
+            "description": "종목별 시장·섹터·스타일 KRX benchmarkStack",
+            "when": "beta/factor/residual/BAB의 상대 기준 확인",
+            "key_output": "benchmarkUsed, benchmarkStack, return1m/3m/6m/1y",
         },
         "factor": {
             "label": "팩터",
@@ -289,11 +295,11 @@ SPEC = {
             "method": "Asness-Frazzini-Pedersen(2019)",
         },
         "bab": {
-            "label": "BAB 저변동",
-            "description": "60일 realized vol 저변동성 횡단면 랭킹",
-            "when": "Frazzini-Pedersen BAB long 후보 (Baker-Bradley-Wurgler anomaly)",
-            "key_output": "scores(annualized vol %), topLow, topHigh",
-            "method": "Frazzini-Pedersen(2014), Baker-Bradley-Wurgler(2011)",
+            "label": "BAB 저베타",
+            "description": "252일 OLS beta 저베타 랭킹 + 60일 realized vol 보조",
+            "when": "Frazzini-Pedersen BAB long 후보 식별",
+            "key_output": "scores(beta), topLow, topHigh, volScores, topLowVol",
+            "method": "Frazzini-Pedersen(2014)",
         },
         "surprise": {
             "label": "이익서프라이즈",

@@ -12,6 +12,8 @@ Company = 기업 하나. Scan = 기업 밖 전부.
     dartlab.scan("ratio")                   # 가용 비율 목록
     dartlab.scan("ratio", "roe")            # 전종목 ROE
     dartlab.scan("account", "매출액")       # 전종목 매출액 시계열
+    dartlab.scan("fields", "roe")           # 조건형 스크리닝 필드 검색
+    dartlab.scan("screen", spec={...})       # field 조건 조합으로 후보 추출
     dartlab.scan("financial")               # 재무 8축 가이드
     dartlab.scan("financial", "수익성")      # 2-level: financial 그룹 내 수익성
 """
@@ -293,12 +295,21 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         description="전종목 GDP/금리/환율 베타 횡단면 (OLS 회귀). 사전 수집: Ecos().series('GDP', enrich=True)",
         example='scan("macroBeta")',
     ),
+    "fields": _AxisEntry(
+        module="dartlab.scan.fields",
+        fn="scanFields",
+        label="필드카탈로그",
+        description="조건형 스크리닝용 필드 검색 (finance/report/docs/krx/krxIndex)",
+        example='scan("fields", "roe")',
+        targetParam="query",
+        targetRequired=False,
+    ),
     "screen": _AxisEntry(
         module="dartlab.scan.screen",
         fn="scanScreen",
         label="스크리닝",
-        description="멀티팩터 스크리닝 (value/dividend/growth/risk/quality 프리셋)",
-        example='scan("screen", "value")',
+        description="멀티팩터 프리셋 + spec 기반 조건형 스크리닝",
+        example='scan("screen", "value") 또는 scan("screen", spec={...})',
         targetParam="target",
         targetRequired=False,
     ),
@@ -370,6 +381,10 @@ _ALIASES: dict[str, str] = {
     # valuation
     "밸류에이션": "valuation",
     "밸류": "valuation",
+    # fields
+    "필드": "fields",
+    "필드카탈로그": "fields",
+    "필드검색": "fields",
     # dividendTrend
     "배당추이": "dividendTrend",
     "배당시계열": "dividendTrend",
@@ -550,6 +565,7 @@ class Scan:
         - debt: 사채만기, 부채비율, ICR, 위험등급
         - account: 전종목 단일 계정 시계열 (매출액, 영업이익 등)
         - ratio: 전종목 단일 재무비율 시계열 (ROE, 부채비율 등)
+        - fields: 조건형 스크리닝 필드 카탈로그
         - cashflow: OCF/ICF/FCF + 현금흐름 패턴 분류
         - audit: 감사의견, 감사인변경, 특기사항, 감사독립성
         - insider: 최대주주 지분변동, 자기주식, 경영권 안정성
@@ -574,6 +590,7 @@ class Scan:
         - "거버넌스 좋은 회사?" -> scan("governance")로 등급 A 필터
         - "배당 많이 주는 회사?" -> scan("capital")로 배당수익률 정렬
         - "ROE 높은 회사?" -> scan("ratio", "roe")로 전종목 비교
+        - "조건으로 종목 찾아줘" -> scan("fields")로 필드 확인 후 scan("screen", spec=...)
         - "삼성전자랑 SK하이닉스 비교" -> scan("account", "sales", code="005930,000660")
         - API 키 불필요. 사전 다운로드 데이터만으로 동작.
 
@@ -600,6 +617,8 @@ class Scan:
         dartlab.scan("governance")               # 전종목 지배구조
         dartlab.scan("account", "매출액")          # 전종목 매출액
         dartlab.scan("ratio", "roe")             # 전종목 ROE
+        dartlab.scan("fields", "roe")            # 조건형 스크리닝 필드 검색
+        dartlab.scan("screen", spec={"where": [{"field": "finance.ratio.roe", "op": ">", "value": 10}]})
     """
 
     def __call__(
@@ -642,6 +661,14 @@ class Scan:
                 종목코드 : str — 6자리 종목코드
                 종목명 : str — 회사명
                 2024, 2023, ... : float — 연도별 비율값 (%, 배)
+            axis="fields":
+                field : str — screen spec 에 넣는 정규 필드 키
+                label : str — 표시명
+                source : str — finance/report/docs/krx/krxIndex 등 원천
+                kind : str — number/text/boolean/context
+                unit : str — 원/%/배/건/일/점/주/텍스트/없음
+                operatorSet : str — 허용 연산자 목록
+                coverage : str — 로컬 prebuild 기준 커버리지
             기타 축: 종목코드 + 종목명 + 축별 지표 컬럼
 
         Raises
@@ -656,6 +683,8 @@ class Scan:
         >>> dartlab.scan("profitability")               # 전종목 수익성
         >>> dartlab.scan("account", "매출액")            # 전종목 매출액 시계열
         >>> dartlab.scan("ratio", "roe")                # 전종목 ROE 시계열
+        >>> dartlab.scan("fields", "매출")               # 스크리닝 필드 검색
+        >>> dartlab.scan("screen", spec={"where": [{"field": "finance.ratio.roe", "op": ">", "value": 10}]})
         >>> dartlab.scan("financial")                   # 재무 8축 가이드
         >>> dartlab.scan("financial", "수익성")          # 재무 그룹 내 수익성
 
@@ -669,6 +698,8 @@ class Scan:
         When: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.
         How: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.
             story credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.
+            조건형 종목 발굴은 scan("fields") → scan("screen", spec=...) → Company/analysis 순서.
+            단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.
         Verified:
             - scan("재무건전성") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)
 

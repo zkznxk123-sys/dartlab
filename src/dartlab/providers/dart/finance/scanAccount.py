@@ -918,12 +918,106 @@ def scanRatio(
 
 
 def scanRatioList() -> list[dict[str, str]]:
-    """사용 가능한 비율 목록 반환."""
-    return [{"name": k, "label": v["label"]} for k, v in _RATIO_DEFS.items()]
+    """사용 가능한 scanRatio 비율 목록을 반환한다.
+
+    Summary
+    -------
+    `scan("ratio")` 와 `scan("fields")` 가 공유하는 비율 카탈로그.
+
+    Description
+    -----------
+    `_RATIO_DEFS` 를 단일 원천으로 사용해 비율 키, 표시명, 단위를 반환한다.
+    새 비율을 추가할 때는 `_RATIO_DEFS` 에만 정의하면 목록·필드 카탈로그·AI
+    tool description 이 같은 원천을 소비한다.
+
+    Parameters
+    ----------
+    없음.
+
+    Returns
+    -------
+    list[dict[str, str]]
+        name : str — `scanRatio(ratioName=...)` 에 넣는 정규 비율 키 (단위 없음).
+        label : str — 사용자 표시명 (단위 없음).
+        unit : str — 비율 단위. `%` 또는 `배`.
+
+    Raises
+    ------
+    없음.
+
+    Examples
+    --------
+    >>> dartlab.scan("ratio")
+    >>> dartlab.scan("fields", "roe")
+
+    Notes
+    -----
+    PER/PBR/PSR 같은 시가총액 기반 밸류에이션은 이 목록이 아니라
+    `scan("valuation")` 및 `scan("fields", source="valuation")` 에 있다.
+
+    Guide
+    -----
+    When: AI 또는 사용자가 먼저 가용 비율을 확인할 때.
+    How: `name` 을 `scan("ratio", name)` 또는 `finance.ratio.{name}` 필드로 사용한다.
+    Verified: `scan("fields")` 의 finance ratio 행이 이 목록에서 생성된다.
+
+    See Also
+    --------
+    scanRatio : 전종목 비율 시계열.
+    scanFields : 조건형 스크리닝 필드 카탈로그.
+    """
+    return [{"name": k, "label": v["label"], "unit": "%" if v.get("pct") else "배"} for k, v in _RATIO_DEFS.items()]
 
 
 def scanAccountList() -> list[dict[str, str]]:
-    """사용 가능한 계정 목록 반환 (sortOrder.json 기준 + 한글 역매핑)."""
+    """사용 가능한 scanAccount 계정 목록을 반환한다.
+
+    Summary
+    -------
+    `sortOrder.json` 기준 재무제표 계정 카탈로그.
+
+    Description
+    -----------
+    재무제표 계정의 단일 원천은 `sortOrder.json` 과 `AccountMapper` 이다.
+    이 함수는 IS/BS/CF 계정 키와 한글 라벨을 반환하며, `scan("account")` 와
+    `scan("fields")` 가 같은 목록을 소비한다.
+
+    Parameters
+    ----------
+    없음.
+
+    Returns
+    -------
+    list[dict[str, str]]
+        name : str — `scanAccount(snakeId=...)` 에 넣는 정규 계정 키 (단위 없음).
+        label : str — 한글 계정명 또는 snakeId fallback (단위 없음).
+        statement : str — 재무제표 구분. `IS`, `BS`, `CF` 중 하나.
+
+    Raises
+    ------
+    없음.
+
+    Examples
+    --------
+    >>> dartlab.scan("account")
+    >>> dartlab.scan("fields", "매출")
+
+    Notes
+    -----
+    금액 단위는 원이다. 기간별 값은 `scanAccount` 가 wide DataFrame 으로 반환하고,
+    조건형 screen 은 종목별 최신 기간 값을 비교한다.
+
+    Guide
+    -----
+    When: 매출액·영업이익·자산·현금흐름 같은 원자 계정으로 후보를 찾을 때.
+    How: `name` 을 `scan("account", name)` 또는 `finance.account.{name}` 필드로 사용한다.
+    Verified: `scan("fields")` 의 finance account 행이 이 목록에서 생성된다.
+
+    See Also
+    --------
+    scanAccount : 전종목 계정 시계열.
+    scanFields : 조건형 스크리닝 필드 카탈로그.
+    """
     from dartlab.core.utils.ordering import _ensureLoaded
 
     data = _ensureLoaded()
