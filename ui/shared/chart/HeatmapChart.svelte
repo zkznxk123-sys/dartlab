@@ -1,4 +1,5 @@
 <script>
+  // @ts-nocheck
   /**
    * heatmap ChartSpec → SVG 히트맵 차트.
    * diff 밀도(1-row 객체배열) + 일반 matrix(숫자 2D) 양쪽 지원.

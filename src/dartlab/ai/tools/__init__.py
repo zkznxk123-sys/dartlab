@@ -15,7 +15,7 @@ import inspect
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from dartlab.ai.runtime.contract_graph import allContracts, contractsForQuestion, inferQuestionProfile
+from dartlab.ai.runtime.contract_graph import allContracts, inferQuestionProfile, routeQuestion
 
 
 @dataclass
@@ -258,6 +258,9 @@ def selectToolsForQuestion(
     else:
         add(["scan", "gather", "macro", "industry", "topdown"])
 
+    route = routeQuestion(question, category=category, intent=intent, stockCode=stockCode)
+    add([str(name) for name in route.get("toolNames") or []])
+
     intentMap = {
         "act1_business": ["show", "industry", "story", "pastInsight"],
         "act2_profit": ["analysis", "show", "industry", "pastInsight"],
@@ -273,7 +276,6 @@ def selectToolsForQuestion(
 
     q = (question or "").lower()
     profile = inferQuestionProfile(question)
-    contractIds = {contract.contractId for contract in contractsForQuestion(question)}
     if profile.has("recent_price_mover"):
         return _pickTools(byName, ["pythonExec", "capabilities"], maxTools=2)
     if any(word in q for word in ("기업이야기", "스토리", "story")) and intent != "compare":
@@ -298,32 +300,6 @@ def selectToolsForQuestion(
     isCompanyPairCompare = (intent == "compare" or profile.has("company_compare")) and _looksLikeCompanyPairQuestion(q)
     if isCompanyPairCompare:
         add(["analysis", "credit", "quant", "show", "pastInsight"])
-
-    contractToolHints: list[str] = []
-    if "disclosure.importance" in contractIds:
-        contractToolHints.extend(["disclosure", "liveFilings", "filings", "readFiling"])
-    if "macro.recent" in contractIds:
-        contractToolHints.extend(["gather", "macro"])
-    if "cashflow.primary" in contractIds:
-        contractToolHints.extend(["analysis", "show"])
-    add(contractToolHints)
-
-    keywordMap: list[tuple[tuple[str, ...], list[str]]] = [
-        (
-            ("공시", "사업보고서", "분기보고서", "filing", "dart"),
-            ["disclosure", "liveFilings", "filings", "readFiling"],
-        ),
-        (("뉴스", "최근", "이슈", "속보"), ["gather", "news"]),
-        (("검색", "찾아", "키워드"), ["search", "keywordTrend"]),
-        (("가치", "dcf", "wacc", "목표가", "적정가", "저평가", "고평가"), ["analysis", "quant", "valuationImpact"]),
-        (("이야기", "보고서", "story", "서사"), ["story", "validateStory", "storyTree", "narrativeDiff"]),
-        (("직원", "인력", "고용"), ["workforce"]),
-        (("지배구조", "이사회", "감사"), ["governance", "audit"]),
-        (("거래처", "네트워크", "관계사"), ["network"]),
-    ]
-    for keywords, names in keywordMap:
-        if any(k in q for k in keywords):
-            add(names)
 
     add(_toolNamesFromCapabilitySearch(question))
 
@@ -356,6 +332,12 @@ def selectToolsForQuestion(
             "topdown",
         ]
         selected = [name for name in priority if name in selected] + [name for name in selected if name not in priority]
+    elif intent == "compare" and not (hasCompany or stockCode):
+        selected = [
+            name
+            for name in selected
+            if name not in {"analysis", "credit", "quant", "show", "pastInsight", "sectorInsights"}
+        ]
 
     if stockCode and not str(stockCode).isdigit():
         selected = [name for name in selected if name not in {"analysis", "credit", "quant"}]
@@ -373,26 +355,6 @@ def _looksLikeCompanyPairQuestion(q: str) -> bool:
     if any(sep in q for sep in (" vs ", " versus ", "와", "과", "랑", "하고")):
         return any(word in q for word in ("비교", "대비", "경쟁력", "누가", "어느"))
     return False
-
-
-def _looksLikePriceMoverQuestion(q: str) -> bool:
-    hasStock = any(word in q for word in ("주가", "가격", "종목", "stock", "price", "醫낅ぉ", "二쇨?"))
-    hasMove = any(
-        word in q
-        for word in (
-            "오른",
-            "상승",
-            "수익률",
-            "랭킹",
-            "순위",
-            "mover",
-            "return",
-            "?ㅻⅨ",
-            "?곸듅",
-            "?섏씡瑜?",
-        )
-    )
-    return hasStock and hasMove
 
 
 def _pickTools(byName: dict[str, AITool], names: list[str], *, maxTools: int) -> list[AITool]:

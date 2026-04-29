@@ -11,6 +11,7 @@
 	 */
 	import type { ScanNode, FilterCond, SortKey } from './types';
 	import { fmtPct } from '$lib/format/pct';
+	import { fmtKrw } from '$lib/format/krw';
 
 	interface Props {
 		nodes: ScanNode[];
@@ -19,6 +20,8 @@
 	}
 
 	let { nodes, onApply, onCompanyClick }: Props = $props();
+
+	type Ranked = { n: ScanNode; v: number; metric: string };
 
 	function topByMetric(
 		key: string,
@@ -31,42 +34,70 @@
 				const v = (n as Record<string, unknown>)[key];
 				if (typeof v !== 'number' || !Number.isFinite(v)) return null;
 				if (guard && !guard(n, v)) return null;
-				return { n, v };
+				return { n, v, metric: key };
 			})
-			.filter((x): x is { n: ScanNode; v: number } => x !== null);
+			.filter((x): x is Ranked => x !== null);
 		return list.sort((a, b) => (dir === 'desc' ? b.v - a.v : a.v - b.v)).slice(0, limit);
 	}
 
-	// 극단치 noise 필터. 조건이 너무 빡빡해 카드가 비면 현재 ROE 상위로 폴백한다.
-	let roeRising = $derived.by(() => {
-		const delta = topByMetric('roeDelta', 'desc', 5, (n, v) => {
-			const cur = n.roe as number | undefined;
-			return v > 0 && v <= 300 && (typeof cur !== 'number' || cur >= 0);
-		});
-		return delta.length > 0 ? delta : topByMetric('roe', 'desc', 5, (_n, v) => v >= 5 && v <= 80);
-	});
-	let marginRising = $derived(
-		topByMetric('opMarginDelta', 'desc', 5, (n, v) => {
-			const cur = n.opMargin as number | undefined;
-			return v > 0 && v <= 120 && (typeof cur !== 'number' || cur >= -20);
-		}).length > 0
-			? topByMetric('opMarginDelta', 'desc', 5, (n, v) => {
-					const cur = n.opMargin as number | undefined;
-					return v > 0 && v <= 120 && (typeof cur !== 'number' || cur >= -20);
-				})
-			: topByMetric('opMargin', 'desc', 5, (_n, v) => v > 0 && v <= 80)
+	function fillSignals(primary: Ranked[], fallbacks: Ranked[], limit = 5): Ranked[] {
+		const out: Ranked[] = [];
+		const seen = new Set<string>();
+		for (const item of [...primary, ...fallbacks]) {
+			if (seen.has(item.n.id)) continue;
+			seen.add(item.n.id);
+			out.push(item);
+			if (out.length >= limit) break;
+		}
+		return out;
+	}
+
+	function fallbackUniverse(): Ranked[] {
+		return topByMetric('revenue', 'desc', 5, (_n, v) => v > 0);
+	}
+
+	function formatRanked(r: Ranked): string {
+		if (r.metric === 'revenue' || r.metric === 'marketCap') return fmtKrw(r.v);
+		if (r.metric === 'industryRank') return `${r.v}위`;
+		return fmtPct(r.v, { withSign: r.metric.endsWith('Delta') });
+	}
+
+	// 극단치 noise 필터. 조건이 빡빡해도 현재 지표와 매출 규모로 채워 항상 후보가 보이게 한다.
+	let roeRising = $derived.by(() =>
+		fillSignals(
+			topByMetric('roeDelta', 'desc', 5, (n, v) => {
+				const cur = n.roe as number | undefined;
+				return v > 0 && v <= 300 && (typeof cur !== 'number' || cur >= 0);
+			}),
+			[
+				...topByMetric('roe', 'desc', 5, (_n, v) => v >= 5 && v <= 120),
+				...fallbackUniverse()
+			]
+		)
 	);
-	let debtSurge = $derived(
-		topByMetric('debtRatioDelta', 'desc', 5, (n, v) => {
-			const cur = n.debtRatio as number | undefined;
-			// 부채비율 delta 는 절댓값 폭이 크지만 500% 이상 회사는 이미 자본잠식 — 신호로 의미 없음
-			return v >= 10 && v <= 500 && typeof cur === 'number' && cur > 0 && cur <= 500;
-		}).length > 0
-			? topByMetric('debtRatioDelta', 'desc', 5, (n, v) => {
-					const cur = n.debtRatio as number | undefined;
-					return v >= 10 && v <= 500 && typeof cur === 'number' && cur > 0 && cur <= 500;
-				})
-			: topByMetric('debtRatio', 'desc', 5, (_n, v) => v >= 100 && v <= 500)
+	let marginRising = $derived.by(() =>
+		fillSignals(
+			topByMetric('opMarginDelta', 'desc', 5, (n, v) => {
+				const cur = n.opMargin as number | undefined;
+				return v > 0 && v <= 120 && (typeof cur !== 'number' || cur >= -20);
+			}),
+			[
+				...topByMetric('opMargin', 'desc', 5, (_n, v) => v > 0 && v <= 120),
+				...fallbackUniverse()
+			]
+		)
+	);
+	let debtSurge = $derived.by(() =>
+		fillSignals(
+			topByMetric('debtRatioDelta', 'desc', 5, (n, v) => {
+				const cur = n.debtRatio as number | undefined;
+				return v >= 10 && v <= 500 && typeof cur === 'number' && cur > 0 && cur <= 500;
+			}),
+			[
+				...topByMetric('debtRatio', 'desc', 5, (_n, v) => v >= 100 && v <= 500),
+				...topByMetric('revenue', 'desc', 5, (_n, v) => v > 0)
+			]
+		)
 	);
 
 	let qualityCompounders = $derived.by(() => {
@@ -84,42 +115,35 @@
 					debt <= 100
 				);
 			})
-			.map((n) => ({ n, v: n.roe as number }))
+			.map((n) => ({ n, v: n.roe as number, metric: 'roe' }))
 			.sort((a, b) => b.v - a.v)
 			.slice(0, 5);
-		if (strict.length > 0) return strict;
-		return topByMetric('roe', 'desc', 5, (n, v) => {
-			const debt = n.debtRatio as number | undefined;
-			return v >= 10 && v <= 120 && (typeof debt !== 'number' || debt <= 200);
-		});
+		return fillSignals(strict, [
+			...topByMetric('roe', 'desc', 5, (n, v) => {
+				const debt = n.debtRatio as number | undefined;
+				return v >= 10 && v <= 120 && (typeof debt !== 'number' || debt <= 200);
+			}),
+			...fallbackUniverse()
+		]);
 	});
 
 	function applyRoeRising() {
 		onApply({
-			conds: [
-				{ metric: 'roeDelta', op: 'between', value: 3, value2: 60 },
-				{ metric: 'roe', op: '>=', value: 5 }
-			],
+			conds: [],
 			sort: { key: 'roeDelta', dir: 'desc' },
 			cols: ['roeDelta', 'roe', 'opMargin', 'profGrade']
 		});
 	}
 	function applyMarginRising() {
 		onApply({
-			conds: [
-				{ metric: 'opMarginDelta', op: 'between', value: 2, value2: 40 },
-				{ metric: 'opMargin', op: '>=', value: 0 }
-			],
-			sort: { key: 'opMarginDelta', dir: 'desc' },
+			conds: [{ metric: 'opMargin', op: '>=', value: 0 }],
+			sort: { key: 'opMargin', dir: 'desc' },
 			cols: ['opMarginDelta', 'opMargin', 'revenueYoyPct']
 		});
 	}
 	function applyDebtSurge() {
 		onApply({
-			conds: [
-				{ metric: 'debtRatioDelta', op: 'between', value: 10, value2: 500 },
-				{ metric: 'debtRatio', op: '<=', value: 500 }
-			],
+			conds: [],
 			sort: { key: 'debtRatioDelta', dir: 'desc' },
 			cols: ['debtRatioDelta', 'debtRatio', 'icr', 'debtGrade']
 		});
@@ -158,7 +182,7 @@
 						<button type="button" class="r-row" onclick={() => onCompanyClick(r.n.id)}>
 							<span class="r-dot" style:background={(r.n.color as string) || '#475569'}></span>
 							<span class="r-label">{r.n.label}</span>
-							<span class="r-val good">{fmtPct(r.v, { withSign: true })}</span>
+							<span class="r-val good">{formatRanked(r)}</span>
 						</button>
 					</li>
 				{/each}
@@ -181,7 +205,7 @@
 						<button type="button" class="r-row" onclick={() => onCompanyClick(r.n.id)}>
 							<span class="r-dot" style:background={(r.n.color as string) || '#475569'}></span>
 							<span class="r-label">{r.n.label}</span>
-							<span class="r-val good">{fmtPct(r.v, { withSign: true })}</span>
+							<span class="r-val good">{formatRanked(r)}</span>
 						</button>
 					</li>
 				{/each}
@@ -204,7 +228,7 @@
 						<button type="button" class="r-row" onclick={() => onCompanyClick(r.n.id)}>
 							<span class="r-dot" style:background={(r.n.color as string) || '#475569'}></span>
 							<span class="r-label">{r.n.label}</span>
-							<span class="r-val bad">{fmtPct(r.v, { withSign: true })}</span>
+							<span class="r-val bad">{formatRanked(r)}</span>
 						</button>
 					</li>
 				{/each}
@@ -227,7 +251,7 @@
 						<button type="button" class="r-row" onclick={() => onCompanyClick(r.n.id)}>
 							<span class="r-dot" style:background={(r.n.color as string) || '#475569'}></span>
 							<span class="r-label">{r.n.label}</span>
-							<span class="r-val good">{fmtPct(r.v)}</span>
+							<span class="r-val good">{formatRanked(r)}</span>
 						</button>
 					</li>
 				{/each}
@@ -245,13 +269,13 @@
 		background: #0a0e18;
 		border: 1px solid #1e2433;
 		border-radius: 6px;
-		padding: 12px;
+		padding: 8px 10px;
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
-		height: 294px;
-		max-height: 32vh;
-		min-height: 294px;
+		gap: 6px;
+		height: var(--scan-bottom-panel-height, 258px);
+		max-height: var(--scan-bottom-panel-height, 258px);
+		min-height: var(--scan-bottom-panel-height, 258px);
 		overflow-y: auto;
 	}
 	.i-head {
@@ -274,7 +298,9 @@
 	.i-grid {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
-		gap: 8px;
+		gap: 6px;
+		flex: 1;
+		min-height: 0;
 	}
 	@media (max-width: 1280px) {
 		.i-grid {
@@ -291,11 +317,12 @@
 		background: #050811;
 		border: 1px solid #1e2433;
 		border-radius: 5px;
-		padding: 10px 12px;
+		padding: 8px 10px;
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
+		gap: 4px;
 		min-width: 0;
+		min-height: 0;
 		position: relative;
 	}
 	.card.good::before {
@@ -327,7 +354,7 @@
 		padding-left: 8px;
 	}
 	.card-title {
-		font-size: 12px;
+		font-size: 11px;
 		font-weight: 600;
 		color: #f1f5f9;
 		letter-spacing: -0.01em;
@@ -345,9 +372,9 @@
 		text-decoration: underline;
 	}
 	.card-desc {
-		font-size: 10px;
+		font-size: 9px;
 		color: #64748b;
-		line-height: 1.5;
+		line-height: 1.35;
 		padding-left: 8px;
 	}
 
@@ -358,12 +385,14 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1px;
+		flex: 1;
+		justify-content: flex-start;
 	}
 	.r-row {
 		display: flex;
 		align-items: center;
 		gap: 5px;
-		padding: 3px 4px 3px 8px;
+		padding: 2px 4px 2px 8px;
 		background: transparent;
 		border: none;
 		border-radius: 3px;
@@ -384,7 +413,7 @@
 	}
 	.r-label {
 		flex: 1;
-		font-size: 10px;
+		font-size: 9.5px;
 		color: #cbd5e1;
 		overflow: hidden;
 		text-overflow: ellipsis;

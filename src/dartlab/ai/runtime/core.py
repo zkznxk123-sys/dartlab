@@ -271,22 +271,6 @@ def runAsk(
         except Exception as e:  # noqa: BLE001 — top-level error boundary for the entire AI pipeline (LLM network/auth/parse/provider errors are unpredictable)
             yield _emit(AnalysisEvent("error", _enrich_with_guide(_classify_error(e), error=e)))
 
-        # ── 후처리: plugin hints ──
-        if question:
-            from dartlab.ai.runtime.plugin_hints import (
-                detect_plugin_hints,
-                format_plugin_hints,
-            )
-            from dartlab.core.plugins import get_loaded_plugins
-
-            loaded_names = [p.name for p in get_loaded_plugins()]
-            hints = detect_plugin_hints(question, loaded_names)
-            if hints:
-                done_payload["pluginHints"] = hints
-                hint_text = format_plugin_hints(hints)
-                if hint_text:
-                    done_payload["pluginHintsText"] = hint_text
-
         # ── Done 이벤트 ──
         bundle = workspace.resultBundle()
         for key, value in bundle.items():

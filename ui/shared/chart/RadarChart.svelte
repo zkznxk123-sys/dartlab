@@ -1,4 +1,5 @@
 <script>
+  // @ts-nocheck
   /**
    * radar ChartSpec → SVG 7축 레이더 차트.
    * d3-scale 없이 순수 삼각함수로 극좌표 계산.

@@ -1,4 +1,5 @@
 <script>
+  // @ts-nocheck
   /**
    * combo/bar/line ChartSpec → 반응형 인터랙티브 SVG 차트.
    * d3-scale 기반 렌더링 + 호버 툴팁 + 크로스헤어 + ResizeObserver 반응형.

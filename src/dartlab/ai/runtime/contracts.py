@@ -12,8 +12,8 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 from dartlab.ai.runtime.contract_graph import (
+    answerContractNames,
     contractForTool,
-    legacyAnswerContractNames,
 )
 
 
@@ -35,7 +35,7 @@ def contractMetadataForTool(name: str, arguments: dict[str, Any] | None = None) 
 
 def resolveAnswerContracts(question: str | None, toolCalls: list[dict[str, Any]]) -> set[str]:
     """질문과 호출 도구에서 검사해야 할 얇은 계약 이름을 찾는다."""
-    return legacyAnswerContractNames(question, toolCalls)
+    return answerContractNames(question, toolCalls)
 
 
 def validateToolArguments(

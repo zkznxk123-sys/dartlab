@@ -77,6 +77,9 @@ from dartlab.viz.generators import (  # noqa: F401
     spec_revenue_trend,
 )
 
+# ── Dashboard visual intent catalog ──
+from dartlab.viz.intents import VIZ_INTENTS, VizIntent, listVizIntents  # noqa: F401
+
 # ── 팔레트 ──
 from dartlab.viz.palette import COLORS  # noqa: F401
 
@@ -221,6 +224,9 @@ __all__ = [
     "COLORS",
     # spec
     "VizSpec",
+    "VizIntent",
+    "VIZ_INTENTS",
+    "listVizIntents",
     # generators
     "auto_chart",
     "spec_revenue_trend",

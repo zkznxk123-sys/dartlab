@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
 
+from dartlab.ai.runtime.contract_graph import requiresVisualExplanation
 from dartlab.ai.runtime.contracts import (
     latestDateFromToolArgs,
     resolveAnswerContracts,
@@ -191,6 +192,7 @@ def evaluateFinalAnswer(
     q = question or ""
     issues: list[str] = []
     contracts = resolveAnswerContracts(q, toolCalls)
+    isComparisonQuestion = "comparison" in contracts or _looksLikeComparisonQuestion(q)
     isMetaHelp = _isMetaHelpQuestion(q, toolCalls)
 
     if not isMetaHelp and not _hasEngineEvidence(toolCalls):
@@ -217,7 +219,7 @@ def evaluateFinalAnswer(
     if "recent" in contracts and _hasStaleDateRisk(q, text, toolCalls):
         issues.append("stale_date_risk")
 
-    if "comparison" in contracts and _hasPartialComparison(q, text, toolCalls):
+    if isComparisonQuestion and _hasPartialComparison(q, text, toolCalls):
         issues.append("partial_comparison")
 
     if _hasAnswerTableConflict(text):
@@ -230,7 +232,7 @@ def evaluateFinalAnswer(
         issues.append("weak_disclosure_analysis")
 
     if workspace is not None:
-        if _requiresVisualExplanation(q) and not _hasVisualExplanation(text, workspace):
+        if requiresVisualExplanation(q) and not _hasVisualExplanation(text, workspace):
             issues.append("missing_visual_explanation")
         if _hasUnsupportedVisual(workspace):
             issues.append("unsupported_visual")
@@ -238,7 +240,7 @@ def evaluateFinalAnswer(
             issues.append("stale_date_risk")
         if "disclosure" in contracts and _workspaceDisclosureDepthRisk(workspace, text):
             issues.append("weak_disclosure_analysis")
-        if "comparison" in contracts and _workspacePartialComparison(workspace, text):
+        if isComparisonQuestion and _workspacePartialComparison(workspace, text):
             issues.append("partial_comparison")
         if _workspaceUnsupportedClaim(workspace):
             issues.append("unsupported_claim")
@@ -294,6 +296,13 @@ def _isMetaHelpQuestion(question: str, toolCalls: list[dict[str, Any]]) -> bool:
             "할 수 있어",
         )
     )
+
+
+def _looksLikeComparisonQuestion(question: str) -> bool:
+    q = question.lower()
+    if not any(word in q for word in ("비교", "대비", " vs ", "versus")):
+        return False
+    return any(word in q for word in ("와", "과", "랑", "하고", " vs ", "versus", "업종", "섹터"))
 
 
 def _requiresAnalyticShape(question: str, toolCalls: list[dict[str, Any]]) -> bool:
@@ -576,59 +585,6 @@ def _hasFxEvidence(toolCalls: list[dict[str, Any]]) -> bool:
             if resolveId(str(args.get("target") or "")) == "USDKRW":
                 return True
     return False
-
-
-def _requiresVisualExplanation(question: str) -> bool:
-    q = question.lower()
-    if any(
-        word in q
-        for word in (
-            "추이",
-            "시계열",
-            "기간",
-            "비교",
-            "랭킹",
-            "순위",
-            "상승",
-            "오른",
-            "수익률",
-            "인과",
-            "구조",
-            "흐름",
-            "영향",
-            "경쟁력",
-            "trend",
-            "compare",
-            "ranking",
-            "rank",
-            "mover",
-            "return",
-        )
-    ):
-        return True
-    return any(
-        word in q
-        for word in (
-            "추이",
-            "시계열",
-            "기간",
-            "비교",
-            "랭킹",
-            "순위",
-            "상승",
-            "오른",
-            "수익률",
-            "인과",
-            "구조",
-            "흐름",
-            "trend",
-            "compare",
-            "ranking",
-            "rank",
-            "mover",
-            "return",
-        )
-    )
 
 
 def _hasVisualExplanation(text: str, workspace: Any) -> bool:

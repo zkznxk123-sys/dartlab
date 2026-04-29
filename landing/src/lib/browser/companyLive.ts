@@ -615,13 +615,23 @@ function toGroupRow(table: BrowserTable | null, spec: AccountSpec): StatementGro
 
 function findAccountRow(table: BrowserTable | null | undefined, matches: string[]): BrowserTable['rows'][number] | null {
 	if (!table) return null;
+	const normalizedMatches = matches.map((match) => match.toLowerCase());
+	const exact =
+		table.rows.find((row) => {
+			const key = String(row.key ?? '').toLowerCase();
+			const label = String(row.label ?? '').toLowerCase();
+			return normalizedMatches.some((match) => key === match || label === match);
+		}) ?? null;
+	if (exact) return exact;
+
+	const broadUnsafe = new Set(['assets', 'liabilities', 'equity']);
 	return (
 		table.rows.find((row) => {
 			const key = String(row.key ?? '').toLowerCase();
 			const label = String(row.label ?? '').toLowerCase();
-			return matches.some((match) => {
-				const m = match.toLowerCase();
-				return key === m || label === m || key.includes(m) || label.includes(m);
+			return normalizedMatches.some((match) => {
+				if (broadUnsafe.has(match)) return false;
+				return key.includes(match) || label.includes(match);
 			});
 		}) ?? null
 	);
@@ -688,6 +698,7 @@ function metricTone(key: string, value: number | null, delta: number | null): 'g
 function sourceLabel(source: string | undefined | null): string {
 	if (!source) return '출처 대기';
 	if (source.includes('dart/finance')) return '재무제표';
+	if (source.includes('dashboards/finance') || source.includes('dashboards/quarters')) return '재무제표';
 	if (source.includes('dart/docs')) return '사업보고서 원문';
 	if (source.includes('report')) return '정기보고서';
 	if (source.includes('map') || source.includes('dashboard')) return '산업지도';

@@ -16,6 +16,9 @@ def test_mcp_tools_defined():
     assert "searchCompany" in names
     assert "companyStory" in names
     assert "marketScan" in names
+    assert "contextForQuestion" in names
+    assert "queryAnalysisGraph" in names
+    assert "companySections" not in names
 
 
 def test_mcp_tool_schema_valid():
@@ -28,6 +31,17 @@ def test_mcp_tool_schema_valid():
         assert "required" in tool
         assert isinstance(tool["params"], dict)
         assert isinstance(tool["required"], list)
+        assert "_STOCK" not in str(tool["params"])
+
+
+def test_mcp_graph_tools_execute():
+    from dartlab.mcp import _executeTool
+
+    context = _executeTool("contextForQuestion", {"question": "최근 주가가 많이 오른 종목을 찾아줘"})
+    assert "gather.krx.close" in context
+
+    found = _executeTool("queryAnalysisGraph", {"query": "gather.krx.close"})
+    assert "contract:gather.krx.close" in found
 
 
 def test_fmt_none():

@@ -11,10 +11,9 @@
 	import Distribution from '$lib/scan/Distribution.svelte';
 	import InsightsFeed from '$lib/scan/InsightsFeed.svelte';
 	import SavedSets from '$lib/scan/SavedSets.svelte';
-	import { Search } from 'lucide-svelte';
 	import { encodeScanPayload, decodeScanPayload } from '$lib/scan/url';
 	import type { SavedColumnSet } from '$lib/scan/types';
-	import { DEFAULT_COLUMNS, METRICS_BY_KEY, PINNED_COLUMNS } from '$lib/scan/metrics';
+	import { DEFAULT_COLUMNS, METRICS_BY_KEY, PINNED_COLUMNS, type MetricGroup } from '$lib/scan/metrics';
 	import type { ScanNode, FilterCond, SortKey } from '$lib/scan/types';
 	import type { Preset, RuntimeLoader } from '$lib/scan/presets';
 	import { PRESETS_BY_ID } from '$lib/scan/presets';
@@ -101,6 +100,23 @@
 	let loaderLoading = $state<Set<RuntimeLoader>>(new Set());
 	let loaderReady = $state<Set<RuntimeLoader>>(new Set());
 	let loaderError = $state<Map<RuntimeLoader, string>>(new Map());
+	let loadingColumnGroups = $derived.by(() => {
+		const groups = new Set<MetricGroup>();
+		if (loaderLoading.has('finance5y')) {
+			groups.add('financeIncome');
+			groups.add('financeBalance');
+			groups.add('financeCashflow');
+			groups.add('financeRatio');
+			groups.add('financeGrowth');
+		}
+		if (loaderLoading.has('priceTrend')) groups.add('price');
+		if (loaderLoading.has('valuation')) groups.add('valuation');
+		if (loaderLoading.has('report')) {
+			groups.add('changes');
+			groups.add('disclosure');
+		}
+		return groups;
+	});
 
 	// ── Cell hover tooltip ────────────────────────────
 	let cellHover = $state<{
@@ -148,14 +164,12 @@
 		return 'ready';
 	});
 	let dbBadgeText = $derived.by(() => {
-		if (dbBadgeKind === 'unsupported') return '실시간 데이터 활성 · SQL 비활성';
+		if (dbBadgeKind === 'unsupported') return '데이터 활성';
 		if (dbBadgeKind === 'error') return runtimeError ?? dbError ?? '데이터 로드 실패';
-		if (runtimeState === 'loading') return '실시간 데이터 로드 중';
-		if (dbState === 'loading') return 'SQL 탐색 준비 중';
-		if (trendState === 'loading') return '실시간 데이터 활성 · 추세 계산 중';
-		if (trendState === 'ready') return '실시간 데이터 + 추세 활성';
-		if (dartDb) return '실시간 데이터 + SQL 활성';
-		return '실시간 데이터 활성 · 추세 수동';
+		if (runtimeState === 'loading') return '데이터 로드 중';
+		if (dbState === 'loading') return '데이터 준비 중';
+		if (trendState === 'loading') return '데이터 계산 중';
+		return '데이터 활성';
 	});
 
 	// ── Merge ecosystem with parquet maps ─────────────
@@ -903,15 +917,6 @@
 			<h1 class="page-title">Scan Studio</h1>
 		</div>
 		<div class="page-head-right">
-			<button
-				type="button"
-				class="explorer-btn"
-				onclick={openDataExplorer}
-				title="모든 prebuild raw 테이블 + SQL Notebook"
-			>
-				<Search size={14} />
-				<span>데이터 탐색</span>
-			</button>
 			<span class="db-badge db-{dbBadgeKind}" title={dbError ?? trendError ?? ''}>
 				<span class="db-dot"></span> {dbBadgeText}
 			</span>
@@ -971,7 +976,11 @@
 	{/if}
 
 	<!-- Column group toggle -->
-	<ColumnGroupBar activeColumns={activeColumns} onToggle={handleColumnsChange} />
+	<ColumnGroupBar
+		activeColumns={activeColumns}
+		loadingGroups={loadingColumnGroups}
+		onToggle={handleColumnsChange}
+	/>
 
 	<!-- Main grid + side panels -->
 	<div class="studio">
@@ -1092,8 +1101,10 @@
 
 <style>
 	.scan-page {
+		--scan-bottom-panel-height: clamp(214px, 24vh, 248px);
+		--scan-detail-panel-height: clamp(260px, 28vh, 280px);
 		max-width: 100%;
-		padding: 64px 20px 20px;
+		padding: 64px 20px 8px;
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
@@ -1142,35 +1153,6 @@
 		font-family: inherit;
 		line-height: 1;
 	}
-	.explorer-btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 5px;
-		height: 32px;
-		padding: 0 12px;
-		font-size: 12px;
-		font-weight: 500;
-		background: rgba(251, 146, 60, 0.08);
-		border: 1px solid rgba(251, 146, 60, 0.4);
-		border-radius: 5px;
-		color: #fb923c;
-		cursor: pointer;
-		font-family: inherit;
-		line-height: 1;
-	}
-	.explorer-btn:hover {
-		background: rgba(251, 146, 60, 0.16);
-	}
-	.explorer-btn:disabled {
-		cursor: default;
-		opacity: 0.62;
-	}
-	.explorer-btn.loading {
-		border-color: rgba(96, 165, 250, 0.45);
-		background: rgba(96, 165, 250, 0.1);
-		color: #93c5fd;
-	}
-
 	.db-badge {
 		display: inline-flex;
 		align-items: center;
@@ -1415,21 +1397,6 @@
 	.d-ind {
 		font-size: 11px;
 		color: #94a3b8;
-	}
-	.d-cta {
-		margin-left: auto;
-		padding: 4px 10px;
-		font-size: 11px;
-		color: #fb923c;
-		background: rgba(251, 146, 60, 0.08);
-		border: 1px solid rgba(251, 146, 60, 0.3);
-		border-radius: 4px;
-		text-decoration: none;
-		font-weight: 500;
-	}
-	.d-cta:hover {
-		background: rgba(251, 146, 60, 0.16);
-		color: #f1f5f9;
 	}
 	.d-close {
 		background: transparent;

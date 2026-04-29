@@ -50,6 +50,14 @@ def _meta(company: Any, source: str) -> dict:
     }
 
 
+def _with_visual_context(spec: dict, *, purpose: str, evidenceIds: list[str] | None = None) -> dict:
+    """Add optional visual-policy fields while preserving ChartSpec compatibility."""
+    spec["purpose"] = purpose
+    if evidenceIds:
+        spec["evidenceIds"] = evidenceIds
+    return spec
+
+
 # ── spec 생성기 8종 ──
 
 
@@ -90,14 +98,18 @@ def spec_revenue_trend(company: Any, *, n_years: int = 5) -> dict | None:
 
     if not series:
         return None
-    return {
-        "chartType": "combo",
-        "title": f"{company.corpName} 손익 추이",
-        "series": series,
-        "categories": ann_years[-n_years:],
-        "options": {"unit": "백만원"},
-        "meta": _meta(company, "finance"),
-    }
+    return _with_visual_context(
+        {
+            "chartType": "combo",
+            "title": f"{company.corpName} 손익 추이",
+            "series": series,
+            "categories": ann_years[-n_years:],
+            "options": {"unit": "백만원"},
+            "meta": _meta(company, "finance"),
+        },
+        purpose="trend",
+        evidenceIds=["finance:IS"],
+    )
 
 
 def spec_cashflow_waterfall(company: Any) -> dict | None:
@@ -126,14 +138,18 @@ def spec_cashflow_waterfall(company: Any) -> dict | None:
     labels = ["기초현금", "영업활동", "투자활동", "재무활동", "기말현금"]
     data = [vals[lb] for lb in labels]
 
-    return {
-        "chartType": "waterfall",
-        "title": f"{company.corpName} 현금흐름 브릿지 ({ann_years[-1]})",
-        "series": [{"name": "현금흐름", "data": data, "color": COLORS[2]}],
-        "categories": labels,
-        "options": {"unit": "백만원"},
-        "meta": _meta(company, "finance"),
-    }
+    return _with_visual_context(
+        {
+            "chartType": "waterfall",
+            "title": f"{company.corpName} 현금흐름 브릿지 ({ann_years[-1]})",
+            "series": [{"name": "현금흐름", "data": data, "color": COLORS[2]}],
+            "categories": labels,
+            "options": {"unit": "백만원"},
+            "meta": _meta(company, "finance"),
+        },
+        purpose="bridge",
+        evidenceIds=["finance:CF"],
+    )
 
 
 def spec_balance_sheet(company: Any, *, n_years: int = 5) -> dict | None:
@@ -166,14 +182,18 @@ def spec_balance_sheet(company: Any, *, n_years: int = 5) -> dict | None:
 
     if not series:
         return None
-    return {
-        "chartType": "bar",
-        "title": f"{company.corpName} 자산 구성",
-        "series": series,
-        "categories": ann_years[-n_years:],
-        "options": {"unit": "백만원", "stacked": True},
-        "meta": _meta(company, "finance"),
-    }
+    return _with_visual_context(
+        {
+            "chartType": "bar",
+            "title": f"{company.corpName} 자산 구성",
+            "series": series,
+            "categories": ann_years[-n_years:],
+            "options": {"unit": "백만원", "stacked": True},
+            "meta": _meta(company, "finance"),
+        },
+        purpose="composition",
+        evidenceIds=["finance:BS"],
+    )
 
 
 def spec_profitability(company: Any, *, n_years: int = 5) -> dict | None:
@@ -209,14 +229,18 @@ def spec_profitability(company: Any, *, n_years: int = 5) -> dict | None:
 
     if not series:
         return None
-    return {
-        "chartType": "line",
-        "title": f"{company.corpName} 수익성 추이",
-        "series": series,
-        "categories": periods[-len(series[0]["data"]) :],
-        "options": {"unit": "%"},
-        "meta": _meta(company, "finance"),
-    }
+    return _with_visual_context(
+        {
+            "chartType": "line",
+            "title": f"{company.corpName} 수익성 추이",
+            "series": series,
+            "categories": periods[-len(series[0]["data"]) :],
+            "options": {"unit": "%"},
+            "meta": _meta(company, "finance"),
+        },
+        purpose="trend",
+        evidenceIds=["finance:ratioSeries"],
+    )
 
 
 def spec_dividend(company: Any) -> dict | None:
@@ -258,14 +282,18 @@ def spec_dividend(company: Any) -> dict | None:
             }
         )
 
-    return {
-        "chartType": "combo",
-        "title": f"{company.corpName} 배당 분석",
-        "series": series,
-        "categories": years,
-        "options": {"unit": "원", "secondaryY": ["배당수익률(%)"]},
-        "meta": _meta(company, "finance"),
-    }
+    return _with_visual_context(
+        {
+            "chartType": "combo",
+            "title": f"{company.corpName} 배당 분석",
+            "series": series,
+            "categories": years,
+            "options": {"unit": "원", "secondaryY": ["배당수익률(%)"]},
+            "meta": _meta(company, "finance"),
+        },
+        purpose="trend",
+        evidenceIds=["report:dividend"],
+    )
 
 
 def spec_insight_radar(company: Any) -> dict | None:
@@ -282,14 +310,18 @@ def spec_insight_radar(company: Any) -> dict | None:
     categories = [_AREA_LABELS.get(n, n) for n in _AREA_NAMES]
     data = [_GRADE_MAP.get(grades[n], 0) for n in _AREA_NAMES]
 
-    return {
-        "chartType": "radar",
-        "title": f"{company.corpName} 투자 인사이트",
-        "series": [{"name": company.corpName, "data": data, "color": COLORS[0]}],
-        "categories": categories,
-        "options": {"maxValue": 5},
-        "meta": _meta(company, "insight"),
-    }
+    return _with_visual_context(
+        {
+            "chartType": "radar",
+            "title": f"{company.corpName} 투자 인사이트",
+            "series": [{"name": company.corpName, "data": data, "color": COLORS[0]}],
+            "categories": categories,
+            "options": {"maxValue": 5},
+            "meta": _meta(company, "insight"),
+        },
+        purpose="comparison",
+        evidenceIds=["insight:grades"],
+    )
 
 
 def spec_ratio_sparklines(company: Any) -> dict | None:
@@ -335,14 +367,18 @@ def spec_ratio_sparklines(company: Any) -> dict | None:
 
     if not sparklines:
         return None
-    return {
-        "chartType": "sparkline",
-        "title": f"{company.corpName} 비율 스파크라인",
-        "series": sparklines,
-        "categories": periods[-20:],
-        "options": {},
-        "meta": _meta(company, "finance"),
-    }
+    return _with_visual_context(
+        {
+            "chartType": "sparkline",
+            "title": f"{company.corpName} 비율 스파크라인",
+            "series": sparklines,
+            "categories": periods[-20:],
+            "options": {},
+            "meta": _meta(company, "finance"),
+        },
+        purpose="trend",
+        evidenceIds=["finance:ratioSeries"],
+    )
 
 
 def spec_diff_heatmap(company: Any) -> dict | None:
@@ -366,14 +402,18 @@ def spec_diff_heatmap(company: Any) -> dict | None:
         intensity = "high" if rate >= 0.5 else ("medium" if rate >= 0.2 else "low")
         heatmap_data.append({"topic": topic, "changeRate": round(rate, 4), "intensity": intensity})
 
-    return {
-        "chartType": "heatmap",
-        "title": f"{company.corpName} 공시 변화 밀도",
-        "series": [{"name": "변화율", "data": heatmap_data}],
-        "categories": [d["topic"] for d in heatmap_data],
-        "options": {"colorScale": {"low": "#22c55e", "medium": "#f59e0b", "high": "#ea4647"}},
-        "meta": _meta(company, "docs"),
-    }
+    return _with_visual_context(
+        {
+            "chartType": "heatmap",
+            "title": f"{company.corpName} 공시 변화 밀도",
+            "series": [{"name": "변화율", "data": heatmap_data}],
+            "categories": [d["topic"] for d in heatmap_data],
+            "options": {"colorScale": {"low": "#22c55e", "medium": "#f59e0b", "high": "#ea4647"}},
+            "meta": _meta(company, "docs"),
+        },
+        purpose="evidence",
+        evidenceIds=["docs:diff"],
+    )
 
 
 # ── 레지스트리 ──
@@ -396,10 +436,18 @@ def spec_peer_radar(peer_data: dict) -> dict | None:
     labels = [a[0] for a in axes]
 
     return {
-        "type": "radar",
+        "chartType": "radar",
         "title": "시장 내 위치 (백분위)",
-        "data": {"labels": labels, "values": vals, "fill": True},
-        "meta": {"source": "scan/extended::calcPeerPosition", "total_stocks": peer_data.get("total_stocks")},
+        "series": [{"name": "백분위", "data": vals, "color": COLORS[0]}],
+        "categories": labels,
+        "options": {"unit": "%", "maxValue": 100},
+        "purpose": "comparison",
+        "evidenceIds": ["scan:peerPosition"],
+        "meta": {
+            "source": "scan/extended::calcPeerPosition",
+            "statement": "PEER",
+            "total_stocks": peer_data.get("total_stocks"),
+        },
     }
 
 
@@ -421,10 +469,14 @@ def spec_sensitivity_heatmap(grid: list[dict]) -> dict | None:
         matrix.append(row)
 
     return {
-        "type": "heatmap",
+        "chartType": "heatmap",
         "title": "DCF 민감도 (WACC × 성장률)",
-        "data": {"x_labels": [f"{w:.1f}%" for w in waccs], "y_labels": [f"{g:.1f}%" for g in gs], "matrix": matrix},
-        "meta": {"source": "core/finance/dcf::sensitivityAnalysis"},
+        "series": [{"name": f"{g:.1f}%", "data": row} for g, row in zip(gs, matrix, strict=False)],
+        "categories": [f"{w:.1f}%" for w in waccs],
+        "options": {"unit": "원", "yLabels": [f"{g:.1f}%" for g in gs]},
+        "purpose": "valuation",
+        "evidenceIds": ["valuation:sensitivity"],
+        "meta": {"source": "core/finance/dcf::sensitivityAnalysis", "statement": "PRICE"},
     }
 
 
@@ -434,16 +486,28 @@ def spec_margin_trend(history: list[dict]) -> dict | None:
         return None
     periods = [h.get("period", "") for h in history]
     return {
-        "type": "line",
+        "chartType": "line",
         "title": "마진 추이",
-        "data": {
-            "x": periods,
-            "series": [
-                {"name": "매출총이익률", "values": [h.get("grossMargin") for h in history], "color": COLORS[0]},
-                {"name": "영업이익률", "values": [h.get("operatingMargin") for h in history], "color": COLORS[1]},
-                {"name": "순이익률", "values": [h.get("netMargin") for h in history], "color": COLORS[2]},
-            ],
-        },
+        "series": [
+            {
+                "name": "매출총이익률",
+                "data": [h.get("grossMargin") for h in history],
+                "color": COLORS[0],
+                "type": "line",
+            },
+            {
+                "name": "영업이익률",
+                "data": [h.get("operatingMargin") for h in history],
+                "color": COLORS[1],
+                "type": "line",
+            },
+            {"name": "순이익률", "data": [h.get("netMargin") for h in history], "color": COLORS[2], "type": "line"},
+        ],
+        "categories": periods,
+        "options": {"unit": "%"},
+        "purpose": "trend",
+        "evidenceIds": ["finance:IS"],
+        "meta": {"source": "analysis/financial::calcMarginTrend", "statement": "IS"},
     }
 
 
@@ -452,14 +516,16 @@ def spec_leverage_trend(history: list[dict]) -> dict | None:
     if not history:
         return None
     return {
-        "type": "line",
+        "chartType": "line",
         "title": "레버리지 추이",
-        "data": {
-            "x": [h.get("period", "") for h in history],
-            "series": [
-                {"name": "부채비율", "values": [h.get("debtRatio") for h in history], "color": COLORS[3]},
-            ],
-        },
+        "series": [
+            {"name": "부채비율", "data": [h.get("debtRatio") for h in history], "color": COLORS[3], "type": "line"}
+        ],
+        "categories": [h.get("period", "") for h in history],
+        "options": {"unit": "%"},
+        "purpose": "risk",
+        "evidenceIds": ["finance:BS"],
+        "meta": {"source": "analysis/financial::calcLeverage", "statement": "BS"},
     }
 
 
@@ -468,15 +534,17 @@ def spec_growth_yoy_bar(history: list[dict]) -> dict | None:
     if not history:
         return None
     return {
-        "type": "bar",
+        "chartType": "bar",
         "title": "성장률 YoY",
-        "data": {
-            "x": [h.get("period", "") for h in history],
-            "series": [
-                {"name": "매출 YoY", "values": [h.get("revenueYoY") for h in history], "color": COLORS[0]},
-                {"name": "영업이익 YoY", "values": [h.get("opYoY") for h in history], "color": COLORS[1]},
-            ],
-        },
+        "series": [
+            {"name": "매출 YoY", "data": [h.get("revenueYoY") for h in history], "color": COLORS[0], "type": "bar"},
+            {"name": "영업이익 YoY", "data": [h.get("opYoY") for h in history], "color": COLORS[1], "type": "bar"},
+        ],
+        "categories": [h.get("period", "") for h in history],
+        "options": {"unit": "%"},
+        "purpose": "trend",
+        "evidenceIds": ["finance:IS"],
+        "meta": {"source": "analysis/financial::calcRevenueGrowth", "statement": "IS"},
     }
 
 
@@ -487,13 +555,14 @@ def spec_revenue_scenario_band(history: list[dict], forecasts: dict | None) -> d
     periods = [h.get("period", "") for h in history]
     actuals = [h.get("revenue") for h in history]
 
-    data: dict = {"x": periods, "series": [{"name": "실적", "values": actuals, "color": COLORS[0]}]}
+    series: list[dict] = [{"name": "실적", "data": actuals, "color": COLORS[0], "type": "line"}]
+    categories = periods
 
     if forecasts:
         fwd_periods = forecasts.get("periods", [])
-        data["x"] = periods + fwd_periods
+        categories = periods + fwd_periods
         actuals_ext = actuals + [None] * len(fwd_periods)
-        data["series"][0]["values"] = actuals_ext
+        series[0]["data"] = actuals_ext
 
         for key, label, color in [
             ("base", "Base", COLORS[1]),
@@ -502,9 +571,18 @@ def spec_revenue_scenario_band(history: list[dict], forecasts: dict | None) -> d
         ]:
             vals = forecasts.get(key, [])
             if vals:
-                data["series"].append({"name": label, "values": [None] * len(periods) + vals, "color": color})
+                series.append({"name": label, "data": [None] * len(periods) + vals, "color": color, "type": "line"})
 
-    return {"type": "line", "title": "매출 전망 시나리오 밴드", "data": data}
+    return {
+        "chartType": "line",
+        "title": "매출 전망 시나리오 밴드",
+        "series": series,
+        "categories": categories,
+        "options": {"unit": "원"},
+        "purpose": "valuation",
+        "evidenceIds": ["forecast:revenue"],
+        "meta": {"source": "analysis/forecast", "statement": "IS"},
+    }
 
 
 SPEC_GENERATORS = {

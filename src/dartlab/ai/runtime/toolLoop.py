@@ -12,7 +12,12 @@ import traceback
 from typing import Any, Generator
 
 from dartlab.ai.runtime.artifacts import csvArtifactsForToolResult
-from dartlab.ai.runtime.contract_graph import contractIdsForQuestion, preflightActionsForQuestion, toolBudgetForQuestion
+from dartlab.ai.runtime.contract_graph import (
+    contractIdsForQuestion,
+    preflightActionsForQuestion,
+    routeQuestion,
+    toolBudgetForQuestion,
+)
 from dartlab.ai.runtime.contracts import sanitizeToolArguments
 from dartlab.ai.runtime.events import AnalysisEvent
 from dartlab.ai.runtime.progressCapture import runToolWithProgress
@@ -82,10 +87,9 @@ def streamWithTools(
     qualityRetried = False
     observedToolCalls: list[dict[str, Any]] = []
     workspace = workspace or AnalysisWorkspace(question=question)
-    workspace.coverage["contractIds"] = contractIdsForQuestion(question)
+    workspace.coverage.setdefault("contractIds", contractIdsForQuestion(question))
 
-    preflightQuestion = "stock return movers" if _isNormalizedPriceMoverQuestion(question) else question
-    preflightCode = _krxPriceMoverAutoCode(preflightQuestion, observedToolCalls)
+    preflightCode = _krxPriceMoverAutoCode(question, observedToolCalls)
     if category == "finance" and preflightCode:
         preflightArgs = {"code": preflightCode}
         observedToolCalls.append({"name": "pythonExec", "arguments": preflightArgs})
@@ -404,8 +408,7 @@ def streamWithTools(
                         "action": "rewrite_once",
                     },
                 )
-                autoQuestion = "stock return movers" if _isNormalizedPriceMoverQuestion(question) else question
-                autoCode = _krxPriceMoverAutoCode(autoQuestion, observedToolCalls)
+                autoCode = _krxPriceMoverAutoCode(question, observedToolCalls)
                 if autoCode and not _hasObservedPythonExec(observedToolCalls):
                     autoArgs = {"code": autoCode}
                     observedToolCalls.append({"name": "pythonExec", "arguments": autoArgs})
@@ -1080,16 +1083,6 @@ def _resolveToolChoice(category: str, roundIdx: int) -> str | None:
 
 def _krxPriceMoverAutoCode(question: str | None, toolCalls: list[dict[str, Any]]) -> str | None:
     """KRX 가격 모멘텀 질문에서 원본 head 표본 답변을 막기 위한 자동 계산 코드."""
-    q = (question or "").lower()
-    if any(word in q for word in ("주가", "가격", "종목", "stock", "price")) and any(
-        word in q for word in ("오른", "상승", "수익률", "랭킹", "순위", "mover", "return")
-    ):
-        q += " price return"
-    if not any(word in q for word in ("주가", "가격", "종목", "price", "stock")):
-        return None
-    if not any(word in q for word in ("오른", "상승", "급등", "수익률", "모멘텀", "mover", "return")):
-        return None
-
     gatherCall = None
     for call in reversed(toolCalls):
         if str(call.get("name", "")) != "gather":
@@ -1098,10 +1091,14 @@ def _krxPriceMoverAutoCode(question: str | None, toolCalls: list[dict[str, Any]]
         if isinstance(args, dict) and str(args.get("axis", "")).lower() == "krx":
             gatherCall = args
             break
+    if gatherCall is None and "gather.krx.close" not in routeQuestion(question).get("contractIds", []):
+        return None
+
     import json
     import re
     from datetime import date, timedelta
 
+    q = (question or "").lower()
     startValue = gatherCall.get("start") if gatherCall else None
     endValue = gatherCall.get("end") if gatherCall else None
     if "최근" in q and not re.search(r"(19|20)\d{2}", q):
@@ -1141,13 +1138,6 @@ def _krxPriceMoverAutoCode(question: str | None, toolCalls: list[dict[str, Any]]
 
 def _hasObservedPythonExec(toolCalls: list[dict[str, Any]]) -> bool:
     return any(str(call.get("name", "")) == "pythonExec" for call in toolCalls)
-
-
-def _isNormalizedPriceMoverQuestion(question: str | None) -> bool:
-    q = (question or "").lower()
-    hasStock = any(word in q for word in ("주가", "가격", "종목", "stock", "price"))
-    hasMove = any(word in q for word in ("오른", "상승", "수익률", "랭킹", "순위", "mover", "return"))
-    return hasStock and hasMove
 
 
 def _macroFxAutoArgs(question: str | None, toolCalls: list[dict[str, Any]]) -> dict[str, Any] | None:

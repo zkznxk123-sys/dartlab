@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { base } from '$app/paths';
 	import { fmtPct } from '$lib/format/pct';
 	import { loadHfCompanyChanges, type CompanyChange } from '$lib/data/changesRuntime';
 	import { loadCompanyRegularFilings, type RegularFiling } from '$lib/data/companyFilingsRuntime';
 	import type { DartDb } from '$lib/data/duckdb';
 	import { FINANCE_COMPLETED_YEARS, financeMetricKey } from './financeAccounts';
+	import { loadCompanyFinanceLitePeriods, type CompanyFinancePeriodRow } from './financeLiteRuntime';
 	import { gradeTone, toneColor } from './grade';
 	import type { ScanNode } from './types';
 
@@ -15,13 +15,17 @@
 		onClose: () => void;
 	}
 
-	type Point = { year: string; [key: string]: number | string | null };
+	type Point = { year: string; label: string; [key: string]: number | string | null };
+	type ChartHover = { title: string; x: number; y: number; lines: string[] };
 
 	let { node, db: _db, financeLoading = false, onClose }: Props = $props();
 	let changes = $state<CompanyChange[]>([]);
 	let filings = $state<RegularFiling[]>([]);
+	let financePeriods = $state<CompanyFinancePeriodRow[]>([]);
 	let changesLoading = $state(false);
 	let filingsLoading = $state(false);
+	let periodsLoading = $state(false);
+	let chartHover = $state<ChartHover | null>(null);
 
 	$effect(() => {
 		const code = node.id;
@@ -47,6 +51,17 @@
 			.finally(() => {
 				if (node.id === code) filingsLoading = false;
 			});
+		periodsLoading = true;
+		void loadCompanyFinanceLitePeriods(code, fetch, 8)
+			.then((rows) => {
+				if (node.id === code) financePeriods = rows;
+			})
+			.catch(() => {
+				if (node.id === code) financePeriods = [];
+			})
+			.finally(() => {
+				if (node.id === code) periodsLoading = false;
+			});
 	});
 
 	function valueAt(accountId: string, year: string): number | null {
@@ -58,31 +73,83 @@
 		return value == null ? null : value / 1e12;
 	}
 
+	function periodValueAt(period: CompanyFinancePeriodRow, accountId: string): number | null {
+		const value = period.values[accountId];
+		return typeof value === 'number' && Number.isFinite(value) ? value : null;
+	}
+
 	let isData = $derived.by<Point[]>(() =>
-		FINANCE_COMPLETED_YEARS.map((year) => ({
-			year,
-			sales: wonToT(valueAt('sales', year)),
-			op: wonToT(valueAt('operating_profit', year)),
-			net: wonToT(valueAt('net_income', year))
-		}))
+		financePeriods.length
+			? financePeriods.map((period) => ({
+					year: period.period,
+					label: period.label,
+					sales: wonToT(periodValueAt(period, 'sales')),
+					op: wonToT(periodValueAt(period, 'operating_profit')),
+					net: wonToT(periodValueAt(period, 'net_income'))
+				}))
+			: FINANCE_COMPLETED_YEARS.map((year) => ({
+					year,
+					label: year.slice(2),
+					sales: wonToT(valueAt('sales', year)),
+					op: wonToT(valueAt('operating_profit', year)),
+					net: wonToT(valueAt('net_income', year))
+				}))
 	);
 	let bsData = $derived.by<Point[]>(() =>
-		FINANCE_COMPLETED_YEARS.map((year) => ({
-			year,
-			currentAssets: wonToT(valueAt('current_assets', year)),
-			noncurrentAssets: wonToT(valueAt('noncurrent_assets', year)),
-			currentLiabilities: wonToT(valueAt('current_liabilities', year)),
-			noncurrentLiabilities: wonToT(valueAt('noncurrent_liabilities', year)),
-			equity: wonToT(valueAt('total_stockholders_equity', year))
-		}))
+		financePeriods.length
+			? financePeriods.map((period) => {
+					const currentLiabilities = wonToT(periodValueAt(period, 'current_liabilities'));
+					const noncurrentLiabilities = wonToT(periodValueAt(period, 'noncurrent_liabilities'));
+					const totalLiabilities = sumNullable(currentLiabilities, noncurrentLiabilities);
+					const operatingLiabilities = wonToT(periodValueAt(period, 'trade_payables'));
+					const equity = wonToT(periodValueAt(period, 'total_stockholders_equity'));
+					const retainedEarnings = wonToT(periodValueAt(period, 'retained_earnings'));
+					return {
+						year: period.period,
+						label: period.label,
+						operatingLiabilities,
+						nonOperatingLiabilities: remainder(totalLiabilities, operatingLiabilities),
+						retainedEarnings,
+						otherEquity: remainder(equity, retainedEarnings),
+						totalLiabilities,
+						equity
+					};
+				})
+			: FINANCE_COMPLETED_YEARS.map((year) => {
+					const currentLiabilities = wonToT(valueAt('current_liabilities', year));
+					const noncurrentLiabilities = wonToT(valueAt('noncurrent_liabilities', year));
+					const totalLiabilities = sumNullable(currentLiabilities, noncurrentLiabilities);
+					const operatingLiabilities = wonToT(valueAt('trade_payables', year));
+					const equity = wonToT(valueAt('total_stockholders_equity', year));
+					const retainedEarnings = wonToT(valueAt('retained_earnings', year));
+					return {
+						year,
+						label: year.slice(2),
+						operatingLiabilities,
+						nonOperatingLiabilities: remainder(totalLiabilities, operatingLiabilities),
+						retainedEarnings,
+						otherEquity: remainder(equity, retainedEarnings),
+						totalLiabilities,
+						equity
+					};
+				})
 	);
 	let cfData = $derived.by<Point[]>(() =>
-		FINANCE_COMPLETED_YEARS.map((year) => ({
-			year,
-			ocf: wonToT(valueAt('operating_cashflow', year)),
-			icf: wonToT(valueAt('investing_cashflow', year)),
-			fcf: wonToT(valueAt('financing_cashflow', year))
-		}))
+		financePeriods.length
+			? financePeriods.map((period) => ({
+					year: period.period,
+					label: period.label,
+					ocf: wonToT(periodValueAt(period, 'operating_cashflow')),
+					icf: wonToT(periodValueAt(period, 'investing_cashflow')),
+					fcf: wonToT(periodValueAt(period, 'financing_cashflow'))
+				}))
+			: FINANCE_COMPLETED_YEARS.map((year) => ({
+					year,
+					label: year.slice(2),
+					ocf: wonToT(valueAt('operating_cashflow', year)),
+					icf: wonToT(valueAt('investing_cashflow', year)),
+					fcf: wonToT(valueAt('financing_cashflow', year))
+				}))
 	);
 
 	let hasFinance = $derived([...isData, ...bsData, ...cfData].some((row) => hasNumber(row)));
@@ -90,11 +157,8 @@
 	let profitMax = $derived(maxAbs(isData, ['op', 'net']));
 	let isOpPath = $derived(linePath(isData, 'op', profitMax));
 	let isNetPath = $derived(linePath(isData, 'net', profitMax));
-	let bsMax = $derived(maxStack(bsData, ['currentLiabilities', 'noncurrentLiabilities', 'equity']));
+	let bsMax = $derived(maxStack(bsData, ['operatingLiabilities', 'nonOperatingLiabilities', 'retainedEarnings', 'otherEquity']));
 	let cfMax = $derived(maxAbs(cfData, ['ocf', 'icf', 'fcf']));
-	let latestIs = $derived(isData[isData.length - 1]);
-	let latestBs = $derived(bsData[bsData.length - 1]);
-	let latestCf = $derived(cfData[cfData.length - 1]);
 
 	const GRADE_COLS = [
 		{ key: 'profGrade', label: '수익성' },
@@ -129,9 +193,9 @@
 		if (e.key === 'Escape') onClose();
 	}
 
-	const W = 360;
-	const H = 126;
-	const PAD = { top: 10, right: 14, bottom: 22, left: 38 };
+	const W = 380;
+	const H = 174;
+	const PAD = { top: 18, right: 40, bottom: 24, left: 40 };
 	const plotW = W - PAD.left - PAD.right;
 	const plotH = H - PAD.top - PAD.bottom;
 
@@ -141,16 +205,31 @@
 		);
 	}
 	function maxAbs(data: Point[], keys: string[]): number {
-		return Math.max(1, ...chartValues(data, keys).map((v) => Math.abs(v)));
+		const values = chartValues(data, keys).map((v) => Math.abs(v));
+		if (values.length === 0) return 1;
+		const max = Math.max(...values);
+		return max > 0 ? max : 1;
 	}
 	function maxStack(data: Point[], keys: string[]): number {
-		return Math.max(
-			1,
-			...data.map((d) => keys.reduce((sum, k) => sum + Math.max(0, Number(d[k]) || 0), 0))
-		);
+		const values = data.map((d) => keys.reduce((sum, k) => sum + Math.max(0, Number(d[k]) || 0), 0));
+		if (values.length === 0) return 1;
+		const max = Math.max(...values);
+		return max > 0 ? max : 1;
+	}
+	function sumNullable(...values: Array<number | null>): number | null {
+		const nums = values.filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+		if (nums.length === 0) return null;
+		return nums.reduce((sum, value) => sum + value, 0);
+	}
+	function remainder(total: number | null, part: number | null): number | null {
+		if (total == null) return null;
+		return Math.max(0, total - (part ?? 0));
 	}
 	function x(i: number, count: number): number {
 		return PAD.left + (i + 0.5) * (plotW / Math.max(count, 1));
+	}
+	function barWidth(count: number, maxWidth: number): number {
+		return Math.max(6, Math.min(maxWidth, (plotW / Math.max(count, 1)) * 0.58));
 	}
 	function ySigned(v: number, max: number): number {
 		return PAD.top + plotH / 2 - (v / max) * (plotH / 2);
@@ -164,13 +243,23 @@
 			.filter(Boolean);
 		return pts.length >= 2 ? `M${pts.join('L')}` : '';
 	}
-	function fmtT(v: number | null): string {
+	function fmtAmount(v: number | null): string {
 		if (v == null) return '—';
-		return `${v.toLocaleString('ko-KR', { maximumFractionDigits: 1 })}조`;
+		const scaled = v * 10000;
+		const abs = Math.abs(scaled);
+		const maximumFractionDigits = abs >= 100 ? 0 : 1;
+		return `${scaled.toLocaleString('ko-KR', { maximumFractionDigits })}억`;
 	}
 	function numAt(row: Point, key: string): number | null {
 		const v = row?.[key];
 		return typeof v === 'number' && Number.isFinite(v) ? v : null;
+	}
+	function showHover(e: MouseEvent, title: string, lines: string[]) {
+		const rect = (e.currentTarget as SVGElement).getBoundingClientRect();
+		chartHover = { title, lines, x: rect.left + rect.width / 2, y: rect.top + 8 };
+	}
+	function hideHover() {
+		chartHover = null;
 	}
 </script>
 
@@ -185,7 +274,6 @@
 			<span class="d-ind">{node.industryName}</span>
 		</div>
 		<div class="d-head-right">
-			<a href="{base}/company/{node.id}" class="d-cta">Company 보기</a>
 			<button type="button" class="d-close" onclick={onClose} aria-label="닫기 (Esc)">X</button>
 		</div>
 	</header>
@@ -193,7 +281,7 @@
 	<div class="d-body">
 		<section class="d-section charts">
 			<div class="sec-title">재무 그래프</div>
-			{#if financeLoading && !hasFinance}
+			{#if (financeLoading || periodsLoading) && !hasFinance}
 				<div class="loading">로드 중...</div>
 			{:else}
 				<div class="chart-grid">
@@ -201,69 +289,155 @@
 						<div class="mini-title">IS</div>
 						<svg viewBox="0 0 {W} {H}">
 							<line x1={PAD.left} x2={W - PAD.right} y1={PAD.top + plotH} y2={PAD.top + plotH} stroke="#334155" />
+							<line x1={W - PAD.right} x2={W - PAD.right} y1={PAD.top} y2={PAD.top + plotH} stroke="#334155" stroke-dasharray="2 3" />
 							{#each isData as d, i}
 								{@const sales = typeof d.sales === 'number' ? d.sales : 0}
 								{@const barH = (Math.max(0, sales) / isMax) * plotH}
-								<rect x={x(i, isData.length) - 16} y={PAD.top + plotH - barH} width="32" height={barH} rx="2" fill="#2563eb" opacity="0.72" />
-								<text x={x(i, isData.length)} y={H - 5} text-anchor="middle" fill="#64748b" font-size="10">{d.year.slice(2)}</text>
+								{@const bw = barWidth(isData.length, 30)}
+								<rect
+									role="presentation"
+									x={x(i, isData.length) - bw / 2}
+									y={PAD.top + plotH - barH}
+									width={bw}
+									height={barH}
+									rx="2"
+									fill="#2563eb"
+									opacity="0.72"
+									onmouseenter={(e) =>
+										showHover(e, `IS ${d.label}`, [
+											`매출 ${fmtAmount(numAt(d, 'sales'))}`,
+											`영업이익 ${fmtAmount(numAt(d, 'op'))}`,
+											`당기순이익 ${fmtAmount(numAt(d, 'net'))}`
+										])}
+									onmouseleave={hideHover}
+								/>
+								<text x={x(i, isData.length)} y={H - 5} text-anchor="middle" fill="#64748b" font-size="9">{d.label}</text>
 							{/each}
-							{#if isOpPath}<path d={isOpPath} fill="none" stroke="#22c55e" stroke-width="2" />{/if}
-							{#if isNetPath}<path d={isNetPath} fill="none" stroke="#fb923c" stroke-width="2" />{/if}
-							<text x="6" y="14" fill="#64748b" font-size="10">매출 {fmtT(isMax)}</text>
-							<text x={W - 6} y="14" text-anchor="end" fill="#64748b" font-size="10">이익 {fmtT(profitMax)}</text>
+							{#if isOpPath}<path d={isOpPath} fill="none" stroke="#22c55e" stroke-width="2.2" />{/if}
+							{#if isNetPath}<path d={isNetPath} fill="none" stroke="#fb923c" stroke-width="2" stroke-dasharray="4 3" />{/if}
+							{#each isData as d, i}
+								{#if typeof d.op === 'number'}
+									<circle
+										role="presentation"
+										cx={x(i, isData.length)}
+										cy={ySigned(d.op, profitMax)}
+										r="2.7"
+										fill="#22c55e"
+										onmouseenter={(e) =>
+											showHover(e, `IS ${d.label}`, [
+												`매출 ${fmtAmount(numAt(d, 'sales'))}`,
+												`영업이익 ${fmtAmount(numAt(d, 'op'))}`,
+												`당기순이익 ${fmtAmount(numAt(d, 'net'))}`
+											])}
+										onmouseleave={hideHover}
+									/>
+								{/if}
+								{#if typeof d.net === 'number'}
+									<circle
+										role="presentation"
+										cx={x(i, isData.length)}
+										cy={ySigned(d.net, profitMax)}
+										r="2.7"
+										fill="#fb923c"
+										onmouseenter={(e) =>
+											showHover(e, `IS ${d.label}`, [
+												`매출 ${fmtAmount(numAt(d, 'sales'))}`,
+												`영업이익 ${fmtAmount(numAt(d, 'op'))}`,
+												`당기순이익 ${fmtAmount(numAt(d, 'net'))}`
+											])}
+										onmouseleave={hideHover}
+									/>
+								{/if}
+								<rect
+									role="presentation"
+									x={x(i, isData.length) - plotW / Math.max(isData.length, 1) / 2}
+									y={PAD.top}
+									width={plotW / Math.max(isData.length, 1)}
+									height={plotH}
+									fill="transparent"
+									onmouseenter={(e) =>
+										showHover(e, `IS ${d.label}`, [
+											`매출 ${fmtAmount(numAt(d, 'sales'))}`,
+											`영업이익 ${fmtAmount(numAt(d, 'op'))}`,
+											`당기순이익 ${fmtAmount(numAt(d, 'net'))}`
+										])}
+									onmouseleave={hideHover}
+								/>
+							{/each}
+							<text x="6" y="14" fill="#64748b" font-size="10">단위 억</text>
+							<text x={W - 6} y="14" text-anchor="end" fill="#64748b" font-size="10">매출/이익 별도축</text>
 						</svg>
 						<div class="legend"><span class="b"></span>매출액 <span class="g"></span>영업이익 <span class="o"></span>당기순이익</div>
-						<div class="amount-row">
-							<span>매출 {fmtT(numAt(latestIs, 'sales'))}</span>
-							<span>영업 {fmtT(numAt(latestIs, 'op'))}</span>
-							<span>순익 {fmtT(numAt(latestIs, 'net'))}</span>
-						</div>
 					</div>
 					<div class="mini-chart">
 						<div class="mini-title">BS</div>
 						<svg viewBox="0 0 {W} {H}">
 							{#each bsData as d, i}
-								{@const ca = typeof d.currentLiabilities === 'number' ? Math.max(0, d.currentLiabilities) : 0}
-								{@const na = typeof d.noncurrentLiabilities === 'number' ? Math.max(0, d.noncurrentLiabilities) : 0}
-								{@const eq = typeof d.equity === 'number' ? Math.max(0, d.equity) : 0}
-								{@const h1 = (ca / bsMax) * plotH}
-								{@const h2 = (na / bsMax) * plotH}
-								{@const h3 = (eq / bsMax) * plotH}
-								<rect x={x(i, bsData.length) - 18} y={PAD.top + plotH - h1} width="36" height={h1} fill="#ef4444" opacity="0.72" />
-								<rect x={x(i, bsData.length) - 18} y={PAD.top + plotH - h1 - h2} width="36" height={h2} fill="#f97316" opacity="0.72" />
-								<rect x={x(i, bsData.length) - 18} y={PAD.top + plotH - h1 - h2 - h3} width="36" height={h3} fill="#22c55e" opacity="0.72" />
-								<text x={x(i, bsData.length)} y={H - 5} text-anchor="middle" fill="#64748b" font-size="10">{d.year.slice(2)}</text>
+								{@const bw = barWidth(bsData.length, 28)}
+								{@const opLiab = typeof d.operatingLiabilities === 'number' ? Math.max(0, d.operatingLiabilities) : 0}
+								{@const nonOpLiab = typeof d.nonOperatingLiabilities === 'number' ? Math.max(0, d.nonOperatingLiabilities) : 0}
+								{@const retained = typeof d.retainedEarnings === 'number' ? Math.max(0, d.retainedEarnings) : 0}
+								{@const otherEq = typeof d.otherEquity === 'number' ? Math.max(0, d.otherEquity) : 0}
+								{@const h1 = (opLiab / bsMax) * plotH}
+								{@const h2 = (nonOpLiab / bsMax) * plotH}
+								{@const h3 = (retained / bsMax) * plotH}
+								{@const h4 = (otherEq / bsMax) * plotH}
+								<g
+									role="presentation"
+									onmouseenter={(e) =>
+										showHover(e, `BS ${d.label}`, [
+											`영업부채 ${fmtAmount(numAt(d, 'operatingLiabilities'))}`,
+											`비영업부채 ${fmtAmount(numAt(d, 'nonOperatingLiabilities'))}`,
+											`이익잉여금 ${fmtAmount(numAt(d, 'retainedEarnings'))}`,
+											`기타자본 ${fmtAmount(numAt(d, 'otherEquity'))}`
+										])}
+									onmouseleave={hideHover}
+								>
+									<rect x={x(i, bsData.length) - bw / 2} y={PAD.top + plotH - h1} width={bw} height={h1} fill="#ef4444" opacity="0.76" />
+									<rect x={x(i, bsData.length) - bw / 2} y={PAD.top + plotH - h1 - h2} width={bw} height={h2} fill="#f97316" opacity="0.74" />
+									<rect x={x(i, bsData.length) - bw / 2} y={PAD.top + plotH - h1 - h2 - h3} width={bw} height={h3} fill="#22c55e" opacity="0.76" />
+									<rect x={x(i, bsData.length) - bw / 2} y={PAD.top + plotH - h1 - h2 - h3 - h4} width={bw} height={h4} fill="#14b8a6" opacity="0.76" />
+								</g>
+								<text x={x(i, bsData.length)} y={H - 5} text-anchor="middle" fill="#64748b" font-size="9">{d.label}</text>
 							{/each}
-							<text x="6" y="14" fill="#64748b" font-size="10">{fmtT(bsMax)}</text>
+							<text x="6" y="14" fill="#64748b" font-size="10">단위 억</text>
 						</svg>
-						<div class="legend"><span class="r"></span>유동부채 <span class="o"></span>비유동부채 <span class="g"></span>자본</div>
-						<div class="amount-row">
-							<span>유동부채 {fmtT(numAt(latestBs, 'currentLiabilities'))}</span>
-							<span>비유동 {fmtT(numAt(latestBs, 'noncurrentLiabilities'))}</span>
-							<span>자본 {fmtT(numAt(latestBs, 'equity'))}</span>
-						</div>
+						<div class="legend"><span class="r"></span>영업부채 <span class="o"></span>비영업부채 <span class="g"></span>이익잉여금 <span class="t"></span>기타자본</div>
 					</div>
 					<div class="mini-chart">
 						<div class="mini-title">CF</div>
 						<svg viewBox="0 0 {W} {H}">
 							<line x1={PAD.left} x2={W - PAD.right} y1={PAD.top + plotH / 2} y2={PAD.top + plotH / 2} stroke="#334155" />
 							{#each cfData as d, i}
+								{@const groupW = barWidth(cfData.length, 30)}
+								{@const sw = Math.max(4, Math.min(8, (groupW - 4) / 3))}
+								{@const startX = x(i, cfData.length) - (sw * 3 + 4) / 2}
 								{#each ['ocf', 'icf', 'fcf'] as key, j}
 									{@const raw = d[key]}
 									{@const v = typeof raw === 'number' ? raw : 0}
 									{@const h = Math.abs(v / cfMax) * (plotH / 2)}
-									<rect x={x(i, cfData.length) - 18 + j * 12} y={v >= 0 ? PAD.top + plotH / 2 - h : PAD.top + plotH / 2} width="10" height={h} rx="1" fill={j === 0 ? '#22c55e' : j === 1 ? '#3b82f6' : '#a78bfa'} opacity="0.78" />
+									<rect x={startX + j * (sw + 2)} y={v >= 0 ? PAD.top + plotH / 2 - h : PAD.top + plotH / 2} width={sw} height={h} rx="1" fill={j === 0 ? '#22c55e' : j === 1 ? '#3b82f6' : '#a78bfa'} opacity="0.78" />
 								{/each}
-								<text x={x(i, cfData.length)} y={H - 5} text-anchor="middle" fill="#64748b" font-size="10">{d.year.slice(2)}</text>
+								<rect
+									role="presentation"
+									x={startX - 3}
+									y={PAD.top}
+									width={sw * 3 + 10}
+									height={plotH}
+									fill="transparent"
+									onmouseenter={(e) =>
+										showHover(e, `CF ${d.label}`, [
+											`영업CF ${fmtAmount(numAt(d, 'ocf'))}`,
+											`투자CF ${fmtAmount(numAt(d, 'icf'))}`,
+											`재무CF ${fmtAmount(numAt(d, 'fcf'))}`
+										])}
+									onmouseleave={hideHover}
+								/>
+								<text x={x(i, cfData.length)} y={H - 5} text-anchor="middle" fill="#64748b" font-size="9">{d.label}</text>
 							{/each}
-							<text x="6" y="14" fill="#64748b" font-size="10">{fmtT(cfMax)}</text>
+							<text x="6" y="14" fill="#64748b" font-size="10">단위 억</text>
 						</svg>
 						<div class="legend"><span class="g"></span>영업CF <span class="b"></span>투자CF <span class="p"></span>재무CF</div>
-						<div class="amount-row">
-							<span>영업 {fmtT(numAt(latestCf, 'ocf'))}</span>
-							<span>투자 {fmtT(numAt(latestCf, 'icf'))}</span>
-							<span>재무 {fmtT(numAt(latestCf, 'fcf'))}</span>
-						</div>
 					</div>
 				</div>
 			{/if}
@@ -301,7 +475,7 @@
 				<div class="filing-list">
 					{#each filings as filing (filing.rceptNo)}
 						<a class="filing-row" href={filing.url} target="_blank" rel="noreferrer">
-							<span class="filing-type">{filing.reportType}</span>
+							<span class="filing-title">{filing.reportType}</span>
 							<span class="filing-date">{formatDate(filing.rceptDate)}</span>
 						</a>
 					{/each}
@@ -318,6 +492,15 @@
 	</div>
 </aside>
 
+{#if chartHover}
+	<div class="chart-tip" style:left={`${chartHover.x}px`} style:top={`${chartHover.y}px`}>
+		<div class="tip-title">{chartHover.title}</div>
+		{#each chartHover.lines as line}
+			<div>{line}</div>
+		{/each}
+	</div>
+{/if}
+
 <style>
 	.detail {
 		flex-shrink: 0;
@@ -327,19 +510,20 @@
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
-		height: 294px;
-		max-height: 32vh;
-		min-height: 294px;
+		height: var(--scan-detail-panel-height, 340px);
+		max-height: var(--scan-detail-panel-height, 340px);
+		min-height: var(--scan-detail-panel-height, 340px);
 	}
 	.d-head {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		gap: 12px;
-		padding: 8px 12px;
+		padding: 4px 10px;
 		background: #0f172a;
 		border-bottom: 1px solid #1e2433;
 		flex-shrink: 0;
+		min-height: 30px;
 	}
 	.d-head-left, .d-head-right {
 		display: flex;
@@ -354,21 +538,13 @@
 		flex-shrink: 0;
 	}
 	.d-label {
-		font-size: 13px;
+		font-size: 12px;
 		font-weight: 700;
 		color: #f1f5f9;
 	}
 	.d-id, .d-ind {
-		font-size: 11px;
+		font-size: 10px;
 		color: #64748b;
-	}
-	.d-cta {
-		padding: 4px 9px;
-		font-size: 11px;
-		color: #fb923c;
-		border: 1px solid rgba(251, 146, 60, 0.3);
-		border-radius: 4px;
-		text-decoration: none;
 	}
 	.d-close {
 		background: transparent;
@@ -382,8 +558,8 @@
 		min-height: 0;
 		display: grid;
 		grid-template-columns: minmax(0, 1.8fr) minmax(210px, 0.72fr) minmax(300px, 0.9fr);
-		gap: 8px;
-		padding: 8px;
+		gap: 6px;
+		padding: 6px;
 		overflow: hidden;
 	}
 	.d-section {
@@ -392,27 +568,34 @@
 		background: #050811;
 		border: 1px solid #1e2433;
 		border-radius: 5px;
-		padding: 8px;
+		padding: 6px;
 		overflow: hidden;
+		display: flex;
+		flex-direction: column;
 	}
 	.sec-title {
 		font-size: 10px;
 		color: #64748b;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		margin-bottom: 6px;
+		margin-bottom: 4px;
 	}
 	.chart-grid {
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 6px;
+		flex: 1;
+		min-height: 0;
 	}
 	.mini-chart {
 		min-width: 0;
+		min-height: 0;
 		border: 1px solid #1e2433;
 		border-radius: 4px;
-		padding: 5px;
+		padding: 4px;
 		background: #070b14;
+		display: flex;
+		flex-direction: column;
 	}
 	.mini-title {
 		color: #cbd5e1;
@@ -422,16 +605,21 @@
 	}
 	svg {
 		width: 100%;
-		height: 132px;
+		height: auto;
+		min-height: 128px;
 		display: block;
+		flex: 1;
 	}
 	.legend {
 		display: flex;
 		align-items: center;
+		justify-content: center;
 		gap: 4px;
 		color: #94a3b8;
-		font-size: 9px;
-		white-space: nowrap;
+		font-size: 8.5px;
+		line-height: 1.1;
+		text-align: center;
+		flex-wrap: wrap;
 		overflow: hidden;
 	}
 	.legend span {
@@ -445,26 +633,33 @@
 	.o { background: #fb923c; }
 	.r { background: #ef4444; }
 	.p { background: #a78bfa; }
-	.amount-row {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 4px;
-		margin-top: 5px;
+	.t { background: #14b8a6; }
+	.chart-tip {
+		position: fixed;
+		z-index: 2000;
+		transform: translate(-50%, calc(-100% - 8px));
+		padding: 6px 8px;
+		background: #020617;
+		border: 1px solid #334155;
+		border-radius: 4px;
 		color: #cbd5e1;
-		font-size: 9px;
+		font-size: 10px;
+		line-height: 1.45;
 		font-family: 'JetBrains Mono', 'Fira Code', monospace;
 		font-variant-numeric: tabular-nums;
+		pointer-events: none;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 	}
-	.amount-row span {
-		min-width: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+	.tip-title {
+		margin-bottom: 3px;
+		color: #f8fafc;
+		font-weight: 700;
+		font-family: inherit;
 	}
 	.grade-grid {
 		display: grid;
-		grid-template-columns: 1fr;
-		gap: 4px;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 2px 4px;
 	}
 	.grade-cell, .delta-row {
 		display: flex;
@@ -472,12 +667,23 @@
 		align-items: center;
 		gap: 6px;
 		color: #94a3b8;
-		font-size: 11px;
+		font-size: 10px;
 		min-width: 0;
 	}
+	.grade-cell {
+		min-height: 18px;
+		border-bottom: 1px solid rgba(30, 36, 51, 0.5);
+	}
 	.delta-row {
-		margin-top: 8px;
-		flex-direction: column;
+		margin-top: 5px;
+		display: grid;
+		grid-template-columns: 1fr;
+		align-items: start;
+	}
+	.delta-row span {
+		min-width: 0;
+		overflow: visible;
+		white-space: nowrap;
 	}
 	.g-chip {
 		padding: 1px 6px;
@@ -487,6 +693,8 @@
 		border-radius: 3px;
 		white-space: nowrap;
 		flex-shrink: 0;
+		min-width: 38px;
+		text-align: center;
 	}
 	.g-chip.dim {
 		color: #475569;
@@ -495,27 +703,26 @@
 	.filing-list {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
+		gap: 0;
 		min-height: 0;
+		flex: 1;
 	}
 	.filing-row {
 		min-width: 0;
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 70px;
+		grid-template-columns: minmax(0, 1fr) 78px;
 		align-items: center;
 		gap: 8px;
-		padding: 5px 7px;
-		background: #0f172a;
-		border: 1px solid #1e2433;
-		border-radius: 4px;
+		padding: 4px 2px;
+		border-bottom: 1px solid #1e2433;
 		text-decoration: none;
 	}
 	.filing-row:hover {
-		border-color: #fb923c;
+		background: rgba(251, 146, 60, 0.06);
 	}
-	.filing-type {
+	.filing-title {
 		color: #f1f5f9;
-		font-size: 10px;
+		font-size: 11px;
 		font-weight: 700;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -523,12 +730,12 @@
 	}
 	.filing-date {
 		color: #64748b;
-		font-size: 9px;
+		font-size: 10px;
 		font-family: monospace;
 		text-align: right;
 	}
 	.change-strip {
-		margin-top: 7px;
+		margin-top: 5px;
 		display: flex;
 		flex-direction: column;
 		gap: 3px;
@@ -554,7 +761,7 @@
 		}
 		.detail {
 			height: 42vh;
-			min-height: 294px;
+			min-height: var(--scan-detail-panel-height, 340px);
 			max-height: 42vh;
 		}
 		.chart-grid {

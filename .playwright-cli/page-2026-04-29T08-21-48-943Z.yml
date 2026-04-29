@@ -1,0 +1,40 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - link "DartLab DartLab" [ref=e6] [cursor=pointer]:
+          - /url: ../
+          - img "DartLab" [ref=e8]
+          - generic [ref=e9]: DartLab
+        - generic "이 페이지는 개발 중 — 데이터·기능 검증 중, 정확성 보장 안 함" [ref=e10]:
+          - img [ref=e11]
+          - generic [ref=e16]: 개발중 · 데이터 검증 중, 정확성 보장 안 함
+      - generic [ref=e17]:
+        - link "Docs" [ref=e18] [cursor=pointer]:
+          - /url: ../docs/
+        - link "Blog" [ref=e19] [cursor=pointer]:
+          - /url: ../blog/
+        - link "Map" [ref=e20] [cursor=pointer]:
+          - /url: ../map
+      - generic [ref=e21]:
+        - button "검색... ⌘K" [ref=e22] [cursor=pointer]:
+          - img [ref=e23]
+          - generic [ref=e26]: 검색...
+          - generic [ref=e27]: ⌘K
+        - link "GitHub" [ref=e28] [cursor=pointer]:
+          - /url: https://github.com/eddmpython/dartlab
+          - img [ref=e29]
+        - link "Buy Me a Coffee" [ref=e32] [cursor=pointer]:
+          - /url: https://buymeacoffee.com/dartlab
+          - img [ref=e33]
+        - link "YouTube · @eddmpython" [ref=e36] [cursor=pointer]:
+          - /url: https://www.youtube.com/@eddmpython
+          - img [ref=e37]
+        - link "Threads · @dartlab.ai" [ref=e39] [cursor=pointer]:
+          - /url: https://www.threads.net/@dartlab.ai
+          - img [ref=e40]
+        - link "Instagram · @dartlab.ai" [ref=e42] [cursor=pointer]:
+          - /url: https://www.instagram.com/dartlab.ai/
+          - img [ref=e43]
+  - main [ref=e45]:
+    - paragraph [ref=e48]: 회사 재무제표와 근거 데이터를 여는 중

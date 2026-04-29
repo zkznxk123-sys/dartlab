@@ -107,12 +107,20 @@ function normalizeTopic(topic: string): BrowserShowTopic {
 	throw new Error(`지원하지 않는 browser show topic: ${topic}`);
 }
 
-function arr(values: unknown, len: number): Array<number | null> {
+function arr(values: unknown, len: number, options: { zeroSeriesAsMissing?: boolean } = {}): Array<number | null> {
 	const source = Array.isArray(values) ? values : [];
-	return Array.from({ length: len }, (_, i) => {
+	const result = Array.from({ length: len }, (_, i) => {
 		const value = source[i];
 		return typeof value === 'number' && Number.isFinite(value) ? value : null;
 	});
+	if (
+		options.zeroSeriesAsMissing &&
+		result.some((value) => value === 0) &&
+		result.every((value) => value == null || value === 0)
+	) {
+		return Array.from({ length: len }, () => null);
+	}
+	return result;
 }
 
 function table(
@@ -151,9 +159,9 @@ function buildIsTable(bundle: DashboardBundle, freq: 'Y' | 'Q'): BrowserTable {
 			'IS',
 			columns,
 			[
-				{ key: 'sales', label: '매출액', unit: '조원', values: arr(q?.is?.sales, len) },
-				{ key: 'op', label: '영업이익', unit: '조원', values: arr(q?.is?.op, len) },
-				{ key: 'net', label: '순이익', unit: '조원', values: arr(q?.is?.net, len) }
+				{ key: 'sales', label: '매출액', unit: '조원', values: arr(q?.is?.sales, len, { zeroSeriesAsMissing: true }) },
+				{ key: 'op', label: '영업이익', unit: '조원', values: arr(q?.is?.op, len, { zeroSeriesAsMissing: true }) },
+				{ key: 'net', label: '순이익', unit: '조원', values: arr(q?.is?.net, len, { zeroSeriesAsMissing: true }) }
 			],
 			'dashboards/quarters.json'
 		);
@@ -186,10 +194,10 @@ function buildBsTable(bundle: DashboardBundle, freq: 'Y' | 'Q'): BrowserTable {
 			'BS',
 			columns,
 			[
-				{ key: 'totalAsset', label: '총자산', unit: '조원', values: arr(q?.bs?.totalAsset, len) },
-				{ key: 'totalLiab', label: '총부채', unit: '조원', values: arr(q?.bs?.totalLiab, len) },
-				{ key: 'totalEquity', label: '총자본', unit: '조원', values: arr(q?.bs?.totalEquity, len) },
-				{ key: 'cash', label: '현금성자산', unit: '조원', values: arr(q?.bs?.cash, len) }
+				{ key: 'totalAsset', label: '총자산', unit: '조원', values: arr(q?.bs?.totalAsset, len, { zeroSeriesAsMissing: true }) },
+				{ key: 'totalLiab', label: '총부채', unit: '조원', values: arr(q?.bs?.totalLiab, len, { zeroSeriesAsMissing: true }) },
+				{ key: 'totalEquity', label: '총자본', unit: '조원', values: arr(q?.bs?.totalEquity, len, { zeroSeriesAsMissing: true }) },
+				{ key: 'cash', label: '현금성자산', unit: '조원', values: arr(q?.bs?.cash, len, { zeroSeriesAsMissing: true }) }
 			],
 			'dashboards/quarters.json'
 		);
@@ -230,8 +238,8 @@ function buildCfTable(bundle: DashboardBundle, freq: 'Y' | 'Q'): BrowserTable {
 			'CF',
 			columns,
 			[
-				{ key: 'ocf', label: '영업CF', unit: '조원', values: arr(q?.cf?.ocf, len) },
-				{ key: 'icf', label: '투자CF', unit: '조원', values: arr(q?.cf?.icf, len) }
+				{ key: 'ocf', label: '영업CF', unit: '조원', values: arr(q?.cf?.ocf, len, { zeroSeriesAsMissing: true }) },
+				{ key: 'icf', label: '투자CF', unit: '조원', values: arr(q?.cf?.icf, len, { zeroSeriesAsMissing: true }) }
 			],
 			'dashboards/quarters.json'
 		);

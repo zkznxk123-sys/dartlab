@@ -72,6 +72,23 @@
 	let filteredMeanBin = $derived(filteredMean !== null ? findBinIndex(dist, filteredMean) : -1);
 	let p10Bin = $derived(findBinIndex(dist, dist.p10));
 	let p90Bin = $derived(findBinIndex(dist, dist.p90));
+	let valueStats = $derived.by(() => {
+		if (!metric || metric.type !== 'number') return { valid: 0, missing: nodes.length, unique: 0, activeBins: 0 };
+		const values = nodes
+			.map((n) => (n as Record<string, unknown>)[metricKey])
+			.filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+		const unique = new Set(values.map((v) => v.toFixed(6))).size;
+		const activeBins = dist.bins.filter((b) => b.count > 0).length;
+		return { valid: values.length, missing: nodes.length - values.length, unique, activeBins };
+	});
+	let histogramUsable = $derived(
+		dist.count >= 20 &&
+			valueStats.unique >= 4 &&
+			valueStats.activeBins >= 3 &&
+			Number.isFinite(dist.p10) &&
+			Number.isFinite(dist.p90) &&
+			Math.abs(dist.p90 - dist.p10) > 1e-9
+	);
 
 	// TOP / BOTTOM 5 회사 (현재 컬럼 기준)
 	let ranked = $derived.by(() => {
@@ -149,6 +166,7 @@
 	{:else if dist.count === 0}
 		<div class="dist-empty">데이터 없음</div>
 	{:else}
+		{#if histogramUsable}
 		<svg viewBox="0 0 {W} {H}" class="dist-svg" role="img" aria-label="히스토그램">
 			<!-- bars -->
 			{#each dist.bins as b, i (i)}
@@ -197,6 +215,17 @@
 			<!-- baseline -->
 			<line x1="0" x2={W} y1={H - PAD_B} y2={H - PAD_B} class="axis" />
 		</svg>
+		{:else}
+			<div class="dist-summary">
+				<div class="summary-title">분포 대신 랭킹 표시</div>
+				<div class="summary-desc">값이 비어 있거나 한 구간에 몰려 히스토그램 해석이 어렵습니다.</div>
+				<div class="summary-grid">
+					<span>유효값</span><strong>{valueStats.valid.toLocaleString('ko-KR')}</strong>
+					<span>결측</span><strong>{valueStats.missing.toLocaleString('ko-KR')}</strong>
+					<span>고유값</span><strong>{valueStats.unique.toLocaleString('ko-KR')}</strong>
+				</div>
+			</div>
+		{/if}
 
 		<div class="stats">
 			<div class="stat">
@@ -227,10 +256,12 @@
 			{/if}
 		</div>
 
-		<div class="range">
-			<span>{fmtVal(dist.min)}</span>
-			<span>{fmtVal(dist.max)}</span>
-		</div>
+		{#if histogramUsable}
+			<div class="range">
+				<span>{fmtVal(dist.min)}</span>
+				<span>{fmtVal(dist.max)}</span>
+			</div>
+		{/if}
 
 		<!-- TOP / BOTTOM 5 회사 -->
 		{#if ranked.top.length > 0}
@@ -337,6 +368,38 @@
 		font-size: 11px;
 		text-align: center;
 		padding: 20px 8px;
+	}
+	.dist-summary {
+		padding: 12px;
+		border: 1px solid #1e2433;
+		border-radius: 5px;
+		background: #0a0e18;
+	}
+	.summary-title {
+		font-size: 12px;
+		font-weight: 700;
+		color: #f1f5f9;
+	}
+	.summary-desc {
+		margin-top: 4px;
+		font-size: 10px;
+		line-height: 1.4;
+		color: #64748b;
+	}
+	.summary-grid {
+		margin-top: 10px;
+		display: grid;
+		grid-template-columns: 1fr auto;
+		gap: 4px 10px;
+		font-family: monospace;
+		font-size: 10px;
+	}
+	.summary-grid span {
+		color: #64748b;
+	}
+	.summary-grid strong {
+		color: #cbd5e1;
+		font-weight: 700;
 	}
 
 	.dist-svg {

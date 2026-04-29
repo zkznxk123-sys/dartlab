@@ -1,244 +1,235 @@
 <script lang="ts">
-	import type { StoryDashboardBlock, StoryDashboardSectionView, StoryMetric } from '$lib/browser/storyDashboard';
+	import ChartRenderer from '$chart/ChartRenderer.svelte';
+	import type { StoryDashboardSectionView, StoryMetric } from '$lib/browser/storyDashboard';
 
 	let { section }: { section: StoryDashboardSectionView } = $props();
 
-	function metrics(section: StoryDashboardSectionView): StoryMetric[] {
-		const seen = new Set<string>();
-		return section.blocks
-			.flatMap((block) => block.metrics)
-			.filter((metric) => {
-				const key = `${metric.label}:${metric.value}`;
-				if (seen.has(key)) return false;
-				seen.add(key);
-				return true;
+	function sparkPath(values: Array<number | null> | undefined): string {
+		const nums = (values ?? []).filter((value): value is number => value != null && Number.isFinite(value));
+		if (nums.length < 2) return '';
+		const min = Math.min(...nums);
+		const max = Math.max(...nums);
+		const span = max - min || 1;
+		const width = 72;
+		const height = 22;
+		return nums
+			.map((value, index) => {
+				const x = (index / Math.max(1, nums.length - 1)) * width;
+				const y = height - ((value - min) / span) * height;
+				return `${index === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
 			})
-			.slice(0, 6);
+			.join(' ');
 	}
 
-	function insightBlocks(section: StoryDashboardSectionView): StoryDashboardBlock[] {
-		return section.blocks.filter((block) => block.flags.length || block.text).slice(0, 4);
-	}
-
-	function evidenceTotal(section: StoryDashboardSectionView): number {
-		return section.blocks.reduce((total, block) => total + block.evidenceCount, 0);
+	function metricClass(metric: StoryMetric): string {
+		return `metric ${metric.tone ?? 'neutral'}`;
 	}
 </script>
 
-<section class="story-section" id={section.id} data-section>
+<section class="question-section" id={section.id} data-section>
 	<header>
 		<div>
-			<div class="eyebrow">{section.actTitle || 'Story'}</div>
-			<h2>{section.title}</h2>
+			<div class="eyebrow">{section.tocLabel}</div>
+			<h2>{section.question}</h2>
 			<p>{section.summary}</p>
 		</div>
-		{#if section.question}
-			<aside>{section.question}</aside>
-		{/if}
+		<div class="badges">
+			{#each section.sectionKeys as key}
+				<span>{key}</span>
+			{/each}
+		</div>
 	</header>
 
-	<div class="decision-grid">
-		<article class="metric-panel">
-			<div class="panel-title">
-				<strong>핵심 수치</strong>
-				<span>{section.key}</span>
-			</div>
-			<div class="metrics">
-				{#each metrics(section) as metric}
-					<div class={metric.tone ?? 'neutral'}>
-						<span>{metric.label}</span>
-						<strong>{metric.value}</strong>
-					</div>
-				{:else}
-					<p>연결된 핵심 수치를 불러오는 중입니다.</p>
-				{/each}
-			</div>
-		</article>
+	<div class="metric-grid">
+		{#each section.metrics as metric}
+			<article class={metricClass(metric)}>
+				<span>{metric.label}</span>
+				<strong>{metric.value}</strong>
+				{#if sparkPath(metric.sparkValues)}
+					<svg viewBox="0 0 72 22" aria-hidden="true">
+						<path d={sparkPath(metric.sparkValues)} />
+					</svg>
+				{/if}
+			</article>
+		{:else}
+			<p class="empty">연결된 핵심 수치가 없습니다.</p>
+		{/each}
+	</div>
 
-		<article class="insight-panel">
-			<div class="panel-title">
-				<strong>판단 근거</strong>
-				<span>{evidenceTotal(section) ? `${evidenceTotal(section)}개 근거` : '재무제표 우선'}</span>
-			</div>
-			<div class="insights">
-				{#each insightBlocks(section) as block}
-					<section class:emphasized={block.emphasized}>
-						<div>
-							<b>{block.label}</b>
-							<small>{block.description}</small>
-						</div>
-						{#if block.flags.length}
-							<ul>
-								{#each block.flags.slice(0, 2) as flag}
-									<li>{flag}</li>
-								{/each}
-							</ul>
-						{:else}
-							<p>{block.text}</p>
-						{/if}
-					</section>
-				{/each}
-			</div>
-		</article>
+	{#if section.charts.length}
+		<div class="chart-grid">
+			{#each section.charts as chart}
+				<article class="chart-card">
+					<ChartRenderer spec={chart} />
+				</article>
+			{/each}
+		</div>
+	{/if}
+
+	<div class="block-grid">
+		{#each section.blocks as block}
+			<article class:emphasized={block.emphasized}>
+				<strong>{block.label}</strong>
+				<p>{block.description}</p>
+			</article>
+		{/each}
 	</div>
 </section>
 
 <style>
-	.story-section {
+	.question-section {
 		border: 1px solid #1e2433;
 		border-radius: 8px;
-		background: linear-gradient(180deg, rgba(10, 15, 27, 0.96), rgba(5, 8, 17, 0.96));
+		background: rgba(8, 13, 23, 0.96);
 		padding: 16px;
 	}
 	header {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 280px;
-		gap: 18px;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 16px;
 		align-items: start;
-		margin-bottom: 14px;
 	}
 	.eyebrow {
 		color: #fb923c;
 		font-size: 11px;
 		font-weight: 800;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
+		letter-spacing: 0;
 	}
 	h2,
 	p {
 		margin: 0;
 	}
 	h2 {
-		margin-top: 5px;
-		font-size: 25px;
+		margin-top: 4px;
+		color: #f8fafc;
+		font-size: 24px;
+		font-weight: 800;
 		letter-spacing: 0;
-	}
-	header p,
-	header aside,
-	article p {
-		color: #94a3b8;
-		font-size: 12px;
-		line-height: 1.5;
+		line-height: 1.24;
 	}
 	header p {
-		margin-top: 6px;
+		margin-top: 8px;
+		color: #94a3b8;
+		font-size: 12px;
+		line-height: 1.45;
 	}
-	header aside {
-		border-left: 2px solid #ea4647;
+	.badges {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		gap: 6px;
+		max-width: 300px;
+	}
+	.badges span {
+		border: 1px solid #263145;
+		border-radius: 4px;
 		background: #070c15;
-		padding: 10px 12px;
+		color: #bfdbfe;
+		font-size: 11px;
+		padding: 5px 7px;
 	}
-	.decision-grid {
+	.metric-grid {
 		display: grid;
-		grid-template-columns: 0.92fr 1.08fr;
+		grid-template-columns: repeat(5, minmax(0, 1fr));
 		gap: 8px;
+		margin-top: 14px;
 	}
-	.metric-panel,
-	.insight-panel {
+	.metric {
+		min-width: 0;
+		border: 1px solid #172033;
+		border-radius: 6px;
+		background: #070c15;
+		padding: 10px;
+	}
+	.metric span {
+		display: block;
+		color: #94a3b8;
+		font-size: 11px;
+	}
+	.metric strong {
+		display: block;
+		margin-top: 5px;
+		overflow: hidden;
+		color: #f8fafc;
+		font-size: 18px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.metric.good strong {
+		color: #34d399;
+	}
+	.metric.bad strong {
+		color: #f87171;
+	}
+	.metric svg {
+		display: block;
+		width: 72px;
+		height: 22px;
+		margin-top: 8px;
+	}
+	.metric path {
+		fill: none;
+		stroke: #fb923c;
+		stroke-width: 2;
+		stroke-linecap: round;
+	}
+	.chart-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+		margin-top: 12px;
+	}
+	.chart-card {
+		min-width: 0;
 		border: 1px solid #172033;
 		border-radius: 7px;
 		background: #070c15;
-		padding: 14px;
+		padding: 12px;
 	}
-	.panel-title {
-		display: flex;
-		justify-content: space-between;
-		gap: 12px;
-		align-items: center;
-	}
-	.panel-title strong {
-		color: #f8fafc;
-		font-size: 14px;
-	}
-	.panel-title span {
-		color: #fb923c;
-		font-size: 11px;
-		font-weight: 800;
-	}
-	.metrics {
+	.block-grid {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 6px;
-		margin-top: 12px;
-	}
-	.metrics div {
-		border: 1px solid #1e2433;
-		border-radius: 6px;
-		background: #0b111e;
-		padding: 8px;
-		min-width: 0;
-	}
-	.metrics div.good {
-		border-color: rgba(34, 197, 94, 0.5);
-	}
-	.metrics div.bad {
-		border-color: rgba(234, 70, 71, 0.65);
-	}
-	.metrics span {
-		display: block;
-		color: #7dd3fc;
-		font-size: 11px;
-	}
-	.metrics strong {
-		display: block;
-		margin-top: 5px;
-		color: #f8fafc;
-		font-size: 17px;
-	}
-	.insights {
-		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: 8px;
 		margin-top: 12px;
 	}
-	.insights section {
+	.block-grid article {
 		border-left: 2px solid #263145;
 		background: #0b111e;
 		padding: 9px 10px;
 	}
-	.insights section.emphasized {
+	.block-grid article.emphasized {
 		border-left-color: #ea4647;
 	}
-	.insights b,
-	.insights small {
+	.block-grid strong {
 		display: block;
-	}
-	.insights b {
-		color: #f8fafc;
-		font-size: 13px;
-	}
-	.insights small {
-		margin-top: 2px;
-		color: #94a3b8;
-		font-size: 11px;
-		line-height: 1.4;
-	}
-	ul {
-		display: grid;
-		gap: 6px;
-		margin: 8px 0 0;
-		padding: 0;
-		list-style: none;
-	}
-	li {
 		color: #f8fafc;
 		font-size: 12px;
+	}
+	.block-grid p,
+	.empty {
+		margin-top: 4px;
+		color: #94a3b8;
+		font-size: 11px;
 		line-height: 1.45;
 	}
-	.insights p,
-	.metric-panel p {
-		margin-top: 8px;
+	@media (max-width: 1180px) {
+		.metric-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+		.block-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
 	}
-	@media (max-width: 980px) {
+	@media (max-width: 820px) {
 		header,
-		.decision-grid {
+		.chart-grid {
 			grid-template-columns: 1fr;
 		}
-	}
-	@media (max-width: 520px) {
-		.story-section {
-			padding: 12px;
+		.badges {
+			justify-content: flex-start;
 		}
-		.metrics {
+		.metric-grid,
+		.block-grid {
 			grid-template-columns: 1fr;
 		}
 	}

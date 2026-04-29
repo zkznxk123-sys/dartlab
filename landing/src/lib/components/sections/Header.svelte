@@ -23,6 +23,7 @@
 	const navLinks = [
 		{ label: 'Docs', href: `${base}/docs/` },
 		{ label: 'Blog', href: `${base}/blog/` },
+		{ label: 'Scan', href: `${base}/scan` },
 		{ label: 'Map', href: `${base}/map` }
 	];
 
@@ -39,8 +40,8 @@
 
 <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-200 border-b {scrolled ? 'bg-dl-bg-darker/95 backdrop-blur-xl border-dl-border/60' : 'bg-transparent border-transparent'}">
 	<nav class="max-w-6xl mx-auto flex items-center justify-between px-4 h-12">
-		<div class="flex items-center gap-2">
-			<a href="{base}/" class="flex items-center gap-1.5 no-underline group">
+		<div class="flex items-center gap-2 min-w-0">
+			<a href="{base}/" class="flex shrink-0 items-center gap-1.5 no-underline group whitespace-nowrap">
 				<picture>
 					<source srcset="{base}/avatar.webp" type="image/webp" />
 					<img src="{base}/avatar.png" alt="DartLab" width="24" height="24" class="rounded-full" />
@@ -53,7 +54,7 @@
 			{/if}
 			{#if isDashboard}
 				<span
-					class="inline-flex items-center gap-1.5 ml-2 px-3 h-6 rounded-md text-[11px] font-semibold tracking-tight"
+					class="hidden sm:inline-flex items-center gap-1.5 ml-2 px-3 h-6 rounded-md text-[11px] font-semibold tracking-tight whitespace-nowrap"
 					style="background: rgba(251,146,60,.12); color: #fb923c; border: 1px solid rgba(251,146,60,.4);"
 					title="이 페이지는 개발 중 — 데이터·기능 검증 중, 정확성 보장 안 함"
 				>

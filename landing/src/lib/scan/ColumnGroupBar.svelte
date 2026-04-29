@@ -12,10 +12,11 @@
 
 	interface Props {
 		activeColumns: MetricKey[];
+		loadingGroups?: Set<MetricGroup>;
 		onToggle: (next: MetricKey[]) => void;
 	}
 
-	let { activeColumns, onToggle }: Props = $props();
+	let { activeColumns, loadingGroups = new Set<MetricGroup>(), onToggle }: Props = $props();
 
 	let activeSet = $derived(new Set(activeColumns));
 
@@ -68,17 +69,24 @@
 		{@const meta = GROUP_META[g]}
 		{@const state = groupState(g)}
 		{@const cols = METRICS_BY_GROUP[g] || []}
+		{@const loading = loadingGroups.has(g)}
 		{#if cols.length > 0}
 			<button
 				type="button"
 				class="grp"
 				class:on={state === 'all'}
 				class:partial={state === 'partial'}
+				class:loading
 				style:--cg={meta.color}
 				onclick={() => toggleGroup(g)}
+				aria-busy={loading}
 				title="{meta.label} ({cols.length}개)"
 			>
-				<span class="dot" aria-hidden="true"></span>
+				{#if loading}
+					<span class="spinner" aria-hidden="true"></span>
+				{:else}
+					<span class="dot" aria-hidden="true"></span>
+				{/if}
 				<span class="lbl">{meta.label}</span>
 				<span class="cnt">{cols.filter((m) => activeSet.has(m.key)).length}/{cols.length}</span>
 			</button>
@@ -121,12 +129,25 @@
 		border-color: var(--cg);
 		color: #f1f5f9;
 	}
+	.grp.loading {
+		border-color: color-mix(in srgb, var(--cg) 70%, #1e2433);
+		color: #f1f5f9;
+	}
 	.dot {
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
 		background: var(--cg);
 		opacity: 0.5;
+	}
+	.spinner {
+		width: 9px;
+		height: 9px;
+		flex: 0 0 auto;
+		border-radius: 50%;
+		border: 1.5px solid color-mix(in srgb, var(--cg) 24%, #334155);
+		border-top-color: var(--cg);
+		animation: spin 0.75s linear infinite;
 	}
 	.grp.partial .dot,
 	.grp.on .dot {
@@ -142,5 +163,15 @@
 	}
 	.grp.on .cnt {
 		color: var(--cg);
+	}
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.spinner {
+			animation: none;
+		}
 	}
 </style>

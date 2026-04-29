@@ -6,8 +6,6 @@
 	 * 위→아래 list 단일 흐름 — 카테고리 색칩 + 한국어 자연어.
 	 */
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
 	import { PRESETS, PRESET_CATEGORIES } from './presets';
 	import type { Preset } from './presets';
 	import type { ScanNode } from './types';
@@ -19,7 +17,7 @@
 		onApplyPreset: (preset: Preset) => void;
 	}
 
-	let { open = $bindable(false), nodes, onClose, onApplyPreset }: Props = $props();
+	let { open = $bindable(false), onClose, onApplyPreset }: Props = $props();
 
 	let query = $state('');
 	let active = $state(0);
@@ -44,21 +42,7 @@
 		);
 	});
 
-	let companyMatches = $derived.by(() => {
-		const q = query.trim();
-		if (q.length < 1) return [];
-		const lower = q.toLowerCase();
-		return nodes
-			.filter(
-				(n) =>
-					n.label.toLowerCase().includes(lower) ||
-					n.id.includes(q) ||
-					(n.industryName as string)?.toLowerCase().includes(lower)
-			)
-			.slice(0, 8);
-	});
-
-	let totalItems = $derived(presetMatches.length + companyMatches.length);
+	let totalItems = $derived(presetMatches.length);
 
 	function handleKey(e: KeyboardEvent) {
 		if (!open) return;
@@ -82,12 +66,6 @@
 			const p = presetMatches[active];
 			if (p) {
 				onApplyPreset(p);
-				onClose();
-			}
-		} else {
-			const node = companyMatches[active - presetMatches.length];
-			if (node) {
-				goto(`${base}/company/${node.id}`);
 				onClose();
 			}
 		}
@@ -135,7 +113,7 @@
 					type="text"
 					bind:this={inputEl}
 					bind:value={query}
-					placeholder="프리셋 / 회사명 / 종목코드 검색…"
+					placeholder="프리셋 검색…"
 					class="search-input"
 					id="cmdk-title"
 				/>
@@ -166,32 +144,7 @@
 					{/each}
 				{/if}
 
-				{#if companyMatches.length > 0}
-					<div class="section-label">회사 ({companyMatches.length})</div>
-					{#each companyMatches as node, i (node.id)}
-						{@const idx = presetMatches.length + i}
-						<button
-							type="button"
-							class="item company-item"
-							class:active={active === idx}
-							onmouseenter={() => (active = idx)}
-							onclick={() => {
-								goto(`${base}/company/${node.id}`);
-								onClose();
-							}}
-						>
-							<span class="ind-dot" style:background={(node.color as string) || '#475569'}></span>
-							<div class="item-body">
-								<div class="item-title">{node.label}</div>
-								<div class="item-sub">
-									{node.industryName} · {node.id}
-								</div>
-							</div>
-						</button>
-					{/each}
-				{/if}
-
-				{#if presetMatches.length === 0 && companyMatches.length === 0}
+				{#if presetMatches.length === 0}
 					<div class="empty">검색 결과가 없습니다.</div>
 				{/if}
 			</div>
@@ -287,13 +240,6 @@
 		width: 3px;
 		border-radius: 2px;
 		flex-shrink: 0;
-	}
-	.ind-dot {
-		width: 8px;
-		height: 8px;
-		border-radius: 50%;
-		flex-shrink: 0;
-		margin-top: 6px;
 	}
 	.item-body {
 		flex: 1;

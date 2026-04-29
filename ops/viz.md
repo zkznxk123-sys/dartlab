@@ -4,7 +4,7 @@
 
 1차 공식 visual type 은 `chart` 와 `diagram` 이다. `emit_chart()` 와 `emit_diagram()` 이 stdout marker 를 만들고, AI runtime 이 `extract_viz_specs()` 로 이를 `chart` event 와 Workspace Visual Ledger 로 승격한다.
 
-AI 응답에서 visual 은 장식이 아니다. visual 필요 여부는 `Capability Contract Graph` 의 `visualPolicy` 가 정하고, 각 visual spec 은 `evidenceIds` 를 가져야 한다. 질문 유형별 목적은 분명해야 한다: 시계열은 변화, 비교는 차이, 랭킹은 순위, 다이어그램은 인과·구조를 설명한다. evidence 와 연결되지 않은 visual 은 `unsupported_visual` 이다.
+AI 응답에서 visual 은 장식이 아니다. visual 필요 여부는 `Analysis Graph` 의 `visualPolicy` 가 정하고, 각 visual spec 은 `evidenceIds` 를 가져야 한다. 질문 유형별 목적은 분명해야 한다: 시계열은 변화, 비교는 차이, 랭킹은 순위, 다이어그램은 인과·구조를 설명한다. evidence 와 연결되지 않은 visual 은 `unsupported_visual` 이다.
 
 Remotion/영상형 설명은 다음 단계다. 현재 구현 계약은 chart/diagram spec 까지이며, 영상형 visual 도 같은 원칙을 따른다: 장식이 아니라 판단 근거를 사용자가 더 빨리 이해하게 하는 설명 도구다.
 

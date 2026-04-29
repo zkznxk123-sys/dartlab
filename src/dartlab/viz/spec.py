@@ -44,6 +44,8 @@ class VizSpec:
     categories: list[str] = field(default_factory=list)
     options: dict[str, Any] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
+    purpose: str = ""
+    evidenceIds: list[str] = field(default_factory=list)
 
     # ── diagram ──
     diagramType: str = ""
@@ -58,14 +60,19 @@ class VizSpec:
         vizType=diagram → vizType, diagramType, source, title, meta.
         """
         if self.vizType == "diagram":
-            return {
+            out = {
                 "vizType": "diagram",
                 "diagramType": self.diagramType,
                 "source": self.source,
                 "title": self.title,
                 "meta": self.meta,
             }
-        return {
+            if self.purpose:
+                out["purpose"] = self.purpose
+            if self.evidenceIds:
+                out["evidenceIds"] = self.evidenceIds
+            return out
+        out = {
             "chartType": self.chartType,
             "title": self.title,
             "series": self.series,
@@ -73,6 +80,11 @@ class VizSpec:
             "options": self.options,
             "meta": self.meta,
         }
+        if self.purpose:
+            out["purpose"] = self.purpose
+        if self.evidenceIds:
+            out["evidenceIds"] = self.evidenceIds
+        return out
 
     def toJson(self) -> str:
         """JSON 문자열."""
@@ -154,6 +166,8 @@ class VizSpec:
                 source=d.get("source", ""),
                 title=d.get("title", ""),
                 meta=d.get("meta", {}),
+                purpose=d.get("purpose", ""),
+                evidenceIds=d.get("evidenceIds", []),
             )
         return VizSpec(
             vizType="chart",
@@ -163,4 +177,6 @@ class VizSpec:
             categories=d.get("categories", []),
             options=d.get("options", {}),
             meta=d.get("meta", {}),
+            purpose=d.get("purpose", ""),
+            evidenceIds=d.get("evidenceIds", []),
         )

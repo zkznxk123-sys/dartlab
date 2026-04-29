@@ -4,6 +4,7 @@
 	import Hero from '$lib/components/sections/Hero.svelte';
 	import Numbers from '$lib/components/sections/Numbers.svelte';
 	import IndustryMapCta from '$lib/components/sections/IndustryMapCta.svelte';
+	import ScanStudioCta from '$lib/components/sections/ScanStudioCta.svelte';
 	import Problem from '$lib/components/sections/Problem.svelte';
 	import AccountPipeline from '$lib/components/sections/AccountPipeline.svelte';
 	import Alignment from '$lib/components/sections/Alignment.svelte';
@@ -99,6 +100,7 @@
 	<Hero />
 	<Numbers />
 	<IndustryMapCta />
+	<ScanStudioCta />
 
 	<!-- 2. Problem → Solution -->
 	<Problem />

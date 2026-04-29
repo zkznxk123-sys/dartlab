@@ -3,19 +3,17 @@
 	 * Scan Studio 메인 그리드 — 가상 스크롤.
 	 *
 	 * 2,664 row × N 컬럼을 한 화면에. 자체 구현 가상 스크롤 (~120 LOC core)
-	 * — 단축 axis 수직, 고정 row height, sticky 첫 2 컬럼.
+	 * — 단축 axis 수직, 고정 row height, sticky 회사명 컬럼.
 	 *
 	 * 책임:
 	 *  - 헤더 클릭 = 정렬 토글 (1차 정렬)
 	 *  - 헤더 hover = HeaderTooltip (메트릭 정의)
 	 *  - 행 click = onSelect (Detail 패널 — PR-D)
-	 *  - 회사명 click = /company/[id] 진입
+	 *  - 회사명 click = 행 선택
 	 *  - 행 색 = qualGrade 톤 (subtle 6%)
 	 *  - 등급 셀 = 색칩
 	 *  - placeholder = `—`
 	 */
-	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
 	import HeaderTooltip from './HeaderTooltip.svelte';
 	import Sparkline from '$lib/components/ui/Sparkline.svelte';
 	import { METRICS_BY_KEY, PINNED_COLUMNS } from './metrics';
@@ -126,7 +124,8 @@
 	let bottomPad = $derived((totalRows - endIdx) * ROW_H);
 
 	function handleScroll(e: Event) {
-		scrollTop = (e.target as HTMLDivElement).scrollTop;
+		const el = e.target as HTMLDivElement;
+		scrollTop = el.scrollTop;
 	}
 
 	function handleSortClick(key: string) {
@@ -137,11 +136,6 @@
 			const def = METRICS_BY_KEY[key];
 			onSort({ key, dir: def?.higherBetter === false ? 'asc' : 'desc' });
 		}
-	}
-
-	function handleCompanyClick(e: MouseEvent, id: string) {
-		e.stopPropagation();
-		goto(`${base}/company/${id}`);
 	}
 
 	type RowData = Record<string, unknown>;
@@ -323,22 +317,20 @@
 						class:enum={!isTable && def?.type === 'enum'}
 						class:spark-cell={key === 'spark'}
 						style:left={isPinned(key) ? `${stickyOffsets[key]}px` : ''}
-						style:background={heatBg}
+						style:background={isPinned(key) ? undefined : heatBg}
 						role="gridcell"
 						tabindex="-1"
 						onmouseenter={(e) => !isTable && onCellMouseEnter(e, rd, key, formatted)}
 						onmouseleave={onCellMouseLeave}
 					>
 						{#if key === 'label'}
-							<button
-								type="button"
+							<span
 								class="company-link"
-								onclick={(e) => handleCompanyClick(e, id)}
 								title="{rowLabel(rd)} ({id})"
 							>
 								<span class="ind-dot" style:background={rowColor(rd)}></span>
 								<span class="company-name">{rowLabel(rd)}</span>
-							</button>
+							</span>
 						{:else if key === 'id'}
 							<span class="code-cell">{id}</span>
 						{:else if key === 'market'}
@@ -454,8 +446,9 @@
 	}
 	.hcell.pinned {
 		position: sticky;
-		z-index: 3;
+		z-index: 30;
 		background: #0a0e18;
+		box-shadow: 1px 0 0 #1e2433;
 	}
 	.hbtn {
 		display: inline-flex;
@@ -481,7 +474,6 @@
 		overflow-y: auto;
 		overflow-x: auto;
 		position: relative;
-		contain: strict;
 	}
 
 	.row {
@@ -550,18 +542,15 @@
 	}
 	.cell.pinned {
 		position: sticky;
-		z-index: 1;
-		background: inherit;
-	}
-	.cell.pinned::before {
-		content: '';
-		position: absolute;
-		inset: 0;
+		z-index: 20;
 		background: #050811;
-		z-index: -1;
+		box-shadow: 1px 0 0 rgba(30, 36, 51, 0.8);
 	}
-	.row:hover .cell.pinned::before {
+	.row:hover .cell.pinned {
 		background: #0b1120;
+	}
+	.row.selected .cell.pinned {
+		background: #101827;
 	}
 
 	.dim {

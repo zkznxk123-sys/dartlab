@@ -34,6 +34,7 @@ def test_workspace_extracts_evidence_from_dataframe_and_artifact(tmp_path, monke
 def test_contract_graph_is_runtime_ssot_for_price_mover_contract():
     from dartlab.ai.runtime.contract_graph import contractForTool, contractsForQuestion
     from dartlab.ai.runtime.contracts import contractMetadataForTool
+    from dartlab.core.analysisGraph import contextForQuestion, graphStatus
 
     contract = contractForTool("gather", {"axis": "krx", "target": "close"})
     assert contract is not None
@@ -43,6 +44,8 @@ def test_contract_graph_is_runtime_ssot_for_price_mover_contract():
     question_contracts = contractsForQuestion("최근 주가가 많이 오른 종목을 찾아줘")
     assert [item.contractId for item in question_contracts] == ["gather.krx.close"]
     assert contractMetadataForTool("gather", {"axis": "krx", "target": "close"})["contractId"] == "gather.krx.close"
+    assert graphStatus()["contractCount"] >= 5
+    assert "gather.krx.close" in contextForQuestion("최근 주가가 많이 오른 종목을 찾아줘")["route"]["contractIds"]
 
 
 def test_workspace_uses_contract_evidence_schema_for_krx_ranking():

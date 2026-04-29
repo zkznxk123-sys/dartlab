@@ -108,7 +108,8 @@ const config = {
 			base: process.env.BASE_PATH || ''
 		},
 		alias: {
-			$pyodide: '../pyodide'
+			$pyodide: '../pyodide',
+			$chart: '../ui/shared/chart'
 		}
 	}
 };

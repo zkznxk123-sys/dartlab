@@ -1,4 +1,5 @@
 <script>
+  // @ts-nocheck
   /**
    * pie ChartSpec → SVG 도넛/파이 차트.
    * series[0].data = 값 배열, categories = 라벨.

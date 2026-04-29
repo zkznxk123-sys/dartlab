@@ -19,6 +19,7 @@ type FinanceLiteRow = Record<string, unknown> & {
 	account_id?: unknown;
 	account_nm?: unknown;
 	thstrm_amount?: unknown;
+	thstrm_add_amount?: unknown;
 };
 
 export interface FinanceLiteRuntimeResult {
@@ -26,6 +27,14 @@ export interface FinanceLiteRuntimeResult {
 	years: string[];
 	requests: RangeRequestStat[];
 	sourcePath: string;
+}
+
+export interface CompanyFinancePeriodRow {
+	period: string;
+	label: string;
+	year: string;
+	quarter: number;
+	values: Record<string, number>;
 }
 
 const ACCOUNT_BY_ID = new Map<string, FinanceAccountSpec>();
@@ -42,6 +51,8 @@ for (const account of FINANCE_ACCOUNTS) {
 }
 
 let financePromise: Promise<FinanceLiteRuntimeResult> | null = null;
+const companyFinancePromises = new Map<string, Promise<CompanyFinancePeriodRow[]>>();
+const MAX_COMPANY_FINANCE_CACHE = 24;
 
 export async function loadFinanceLiteRuntime(
 	fetchFn: FetchLike = fetch
@@ -63,7 +74,8 @@ async function readFinanceLite(fetchFn: FetchLike): Promise<FinanceLiteRuntimeRe
 			'fs_nm',
 			'account_id',
 			'account_nm',
-			'thstrm_amount'
+			'thstrm_amount',
+			'thstrm_add_amount'
 		],
 		filter: { reprt_nm: { $eq: '4분기' } },
 		fetchFn
@@ -74,6 +86,111 @@ async function readFinanceLite(fetchFn: FetchLike): Promise<FinanceLiteRuntimeRe
 		requests: data.requests,
 		sourcePath: FINANCE_LITE_PATH
 	};
+}
+
+export async function loadCompanyFinanceLitePeriods(
+	stockCode: string,
+	fetchFn: FetchLike = fetch,
+	limit = 8
+): Promise<CompanyFinancePeriodRow[]> {
+	const code = stockCode.trim();
+	if (!code) return [];
+	if (fetchFn === fetch) {
+		const key = `${code}:${limit}`;
+		let promise = companyFinancePromises.get(key);
+		if (!promise) {
+			promise = readCompanyFinanceLitePeriods(code, fetchFn, limit);
+			rememberCompanyFinancePromise(key, promise);
+		}
+		return promise;
+	}
+	return readCompanyFinanceLitePeriods(code, fetchFn, limit);
+}
+
+function rememberCompanyFinancePromise(key: string, promise: Promise<CompanyFinancePeriodRow[]>): void {
+	if (companyFinancePromises.size >= MAX_COMPANY_FINANCE_CACHE) {
+		const oldestKey = companyFinancePromises.keys().next().value;
+		if (oldestKey) companyFinancePromises.delete(oldestKey);
+	}
+	companyFinancePromises.set(key, promise);
+}
+
+async function readCompanyFinanceLitePeriods(
+	stockCode: string,
+	fetchFn: FetchLike,
+	limit: number
+): Promise<CompanyFinancePeriodRow[]> {
+	const data = await readParquetRows<FinanceLiteRow>(FINANCE_LITE_PATH, {
+		columns: [
+			'stockCode',
+			'bsns_year',
+			'reprt_nm',
+			'sj_div',
+			'fs_nm',
+			'account_id',
+			'account_nm',
+			'thstrm_amount',
+			'thstrm_add_amount'
+		],
+		filter: { stockCode: { $eq: stockCode } },
+		fetchFn
+	});
+	return buildCompanyFinancePeriods(data.rows, limit);
+}
+
+type CompanyFinancePeriodWork = CompanyFinancePeriodRow & {
+	cumulativeValues: Record<string, number>;
+};
+
+export function buildCompanyFinancePeriods(rows: FinanceLiteRow[], limit = 8): CompanyFinancePeriodRow[] {
+	const byPeriod = new Map<string, CompanyFinancePeriodWork>();
+	const seenPriority = new Map<string, number>();
+	for (const row of rows) {
+		const year = String(row.bsns_year ?? '');
+		const quarter = quarterOf(row.reprt_nm);
+		if (!year || quarter == null) continue;
+		const account = matchAccount(row);
+		if (!account) continue;
+		const amount = numberOrNull(row.thstrm_amount);
+		if (amount == null) continue;
+		const cumulativeAmount = numberOrNull(row.thstrm_add_amount);
+		const period = `${year}Q${quarter}`;
+		const priority = rowPriority(account, row);
+		const priorityKey = `${period}:${account.id}`;
+		if ((seenPriority.get(priorityKey) ?? 0) >= priority) continue;
+		seenPriority.set(priorityKey, priority);
+		const out =
+			byPeriod.get(period) ??
+			({
+				period,
+				label: `${year.slice(2)}.${quarter}Q`,
+				year,
+				quarter,
+				values: {},
+				cumulativeValues: {}
+			} satisfies CompanyFinancePeriodWork);
+		out.values[account.id] = amount;
+		if (cumulativeAmount != null) out.cumulativeValues[account.id] = cumulativeAmount;
+		else if (quarter === 4 && account.statement !== 'BS') out.cumulativeValues[account.id] = amount;
+		byPeriod.set(period, out);
+	}
+	for (const period of byPeriod.values()) {
+		if (period.quarter !== 4) continue;
+		const q3 = byPeriod.get(`${period.year}Q3`);
+		if (!q3) continue;
+		for (const account of FINANCE_ACCOUNTS) {
+			if (account.statement === 'BS') continue;
+			const fullYear = period.cumulativeValues[account.id];
+			const throughQ3 = q3.cumulativeValues[account.id];
+			if (typeof fullYear === 'number' && typeof throughQ3 === 'number') {
+				period.values[account.id] = fullYear - throughQ3;
+			}
+		}
+	}
+	return Array.from(byPeriod.values())
+		.sort((a, b) => Number(a.year) * 4 + a.quarter - (Number(b.year) * 4 + b.quarter))
+		.slice(-limit)
+		.map(({ period, label, year, quarter, values }) => ({ period, label, year, quarter, values }));
 }
 
 export function buildFinanceRows(rows: FinanceLiteRow[]): Array<Record<string, unknown> & { id: string }> {
@@ -90,9 +207,9 @@ export function buildFinanceRows(rows: FinanceLiteRow[]): Array<Record<string, u
 		const amount = numberOrNull(row.thstrm_amount);
 		if (amount == null) continue;
 		const metricKey = financeMetricKey(account.id, year);
-		const priority = String(row.fs_nm ?? '').includes('연결') ? 2 : 1;
+		const priority = rowPriority(account, row);
 		const priorityKey = `${stockCode}:${metricKey}`;
-		if ((seenPriority.get(priorityKey) ?? 0) > priority) continue;
+		if ((seenPriority.get(priorityKey) ?? 0) >= priority) continue;
 		seenPriority.set(priorityKey, priority);
 		const out = byStock.get(stockCode) ?? ({ id: stockCode } as Record<string, unknown> & { id: string });
 		out[metricKey] = amount;
@@ -104,17 +221,53 @@ export function buildFinanceRows(rows: FinanceLiteRow[]): Array<Record<string, u
 
 function matchAccount(row: FinanceLiteRow): FinanceAccountSpec | null {
 	const accountId = String(row.account_id ?? '').trim();
-	const direct = ACCOUNT_BY_ID.get(accountId);
-	if (direct && statementMatches(direct, row)) return direct;
 	const nameMatches = ACCOUNT_BY_NAME.get(normalizeName(row.account_nm));
-	if (!nameMatches) return null;
-	return nameMatches.find((account) => statementMatches(account, row)) ?? null;
+	const named = nameMatches?.find((account) => statementMatches(account, row)) ?? null;
+	if (named) return named;
+	const direct = ACCOUNT_BY_ID.get(accountId);
+	if (direct && statementMatches(direct, row) && directAccountNameCompatible(direct, row)) return direct;
+	return null;
+}
+
+function directAccountNameCompatible(account: FinanceAccountSpec, row: FinanceLiteRow): boolean {
+	if (account.id !== 'net_income') return true;
+	const name = normalizeName(row.account_nm);
+	if (!name) return true;
+	return name.includes('순이익') || name.includes('순손익') || name.includes('순손실');
+}
+
+function rowPriority(account: FinanceAccountSpec, row: FinanceLiteRow): number {
+	const fsName = String(row.fs_nm ?? '');
+	const sjDiv = String(row.sj_div ?? '').toUpperCase();
+	const accountName = normalizeName(row.account_nm);
+	let priority = fsName.includes('연결') ? 100 : 0;
+	if (account.statement === 'IS') priority += sjDiv === 'IS' ? 20 : sjDiv === 'CIS' ? 10 : 0;
+	else priority += sjDiv === account.statement ? 20 : 0;
+	if (account.id === 'net_income') {
+		if (accountName.includes('지배') || accountName.includes('비지배') || accountName.includes('귀속')) priority -= 30;
+		if (
+			accountName.startsWith('당기순') ||
+			accountName.startsWith('분기순') ||
+			accountName.startsWith('반기순') ||
+			accountName.startsWith('당분기순')
+		) {
+			priority += 5;
+		}
+	}
+	return priority;
 }
 
 function statementMatches(account: FinanceAccountSpec, row: FinanceLiteRow): boolean {
 	const sjDiv = String(row.sj_div ?? '').toUpperCase();
 	if (account.statement === 'IS') return sjDiv === 'IS' || sjDiv === 'CIS';
 	return sjDiv === account.statement;
+}
+
+function quarterOf(value: unknown): number | null {
+	const text = String(value ?? '');
+	const match = text.match(/^([1-4])분기$/);
+	if (!match) return null;
+	return Number(match[1]);
 }
 
 function addDerivedMetrics(row: Record<string, unknown>) {
@@ -126,6 +279,11 @@ function addDerivedMetrics(row: Record<string, unknown>) {
 		const currentAssets = num(row[financeMetricKey('current_assets', year)]);
 		const currentLiabilities = num(row[financeMetricKey('current_liabilities', year)]);
 		const noncurrentLiabilities = num(row[financeMetricKey('noncurrent_liabilities', year)]);
+		const opexKey = financeMetricKey('operating_expenses', year);
+		const opex = num(row[opexKey]);
+		const gross = num(row[financeMetricKey('gross_profit', year)]);
+		const derivedOpex = gross != null && op != null ? gross - op : null;
+		if (opex == null && derivedOpex != null && derivedOpex >= 0) row[opexKey] = derivedOpex;
 
 		row[financeRatioKey('op_margin', year)] = ratio(op, sales);
 		row[financeRatioKey('net_margin', year)] = ratio(net, sales);
@@ -144,7 +302,8 @@ function addDerivedMetrics(row: Record<string, unknown>) {
 function normalizeName(value: unknown): string {
 	return String(value ?? '')
 		.toLowerCase()
-		.replace(/[\s()[\]{}·ㆍ,./\\_-]/g, '');
+		.replace(/[\s()[\]{}·ㆍ,./\\_-]/g, '')
+		.replace(/^[0-9ivxlcdmⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅰⅱⅲⅳⅴⅵⅶⅷⅸⅹ]+/i, '');
 }
 
 function numberOrNull(value: unknown): number | null {

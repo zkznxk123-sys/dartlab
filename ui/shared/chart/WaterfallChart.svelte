@@ -1,4 +1,5 @@
 <script>
+  // @ts-nocheck
   /**
    * waterfall ChartSpec → 반응형 인터랙티브 SVG 워터폴 차트.
    * 현금흐름 브릿지 등에 사용. ResizeObserver 반응형 + 호버 하이라이트.

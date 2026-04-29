@@ -11,11 +11,24 @@ import json
 from pathlib import Path
 
 from dartlab.story.catalog import ACT_HEADERS, listBlocks, listSections
+from dartlab.story.dashboard import listDashboardQuestions
 from dartlab.story.reportTypes import REPORT_TYPES
 from dartlab.story.templates import STORY_TEMPLATES, TEMPLATES
+from dartlab.viz.intents import listVizIntents
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "landing" / "static" / "story" / "manifest.json"
+
+EXPECTED_DASHBOARD_QUESTIONS = (
+    "한눈에 결론은 무엇인가?",
+    "이 회사는 무엇으로 돈을 버나?",
+    "번 돈은 얼마나 남나?",
+    "이익은 현금으로 바뀌나?",
+    "자산과 부채 구조는 안전한가?",
+    "번 돈은 어디에 묶이고 어디에 재투자되나?",
+    "현재 가격은 무엇을 반영하나?",
+    "보고서와 원문은 숫자를 뒷받침하나?",
+)
 
 
 def _section_config(section_key: str) -> dict:
@@ -25,6 +38,43 @@ def _section_config(section_key: str) -> dict:
         "helper": cfg.get("helper", ""),
         "aiGuide": cfg.get("aiGuide", ""),
     }
+
+
+def _validate_dashboard_manifest(
+    dashboard_questions: list[dict],
+    viz_intents: list[dict],
+    valid_sections: set[str],
+    valid_blocks: set[str],
+) -> None:
+    questions = [q.get("question") for q in dashboard_questions]
+    if tuple(questions) != EXPECTED_DASHBOARD_QUESTIONS:
+        raise RuntimeError(f"dashboardQuestions must be the fixed 8-question company dashboard pack. got={questions!r}")
+
+    valid_viz = {v.get("key") for v in viz_intents}
+    errors: list[str] = []
+    for q in dashboard_questions:
+        qid = q.get("id", "?")
+        for section_key in q.get("sectionKeys", []):
+            if section_key not in valid_sections:
+                errors.append(f"{qid}: unknown sectionKey {section_key!r}")
+        for block_key in q.get("blockKeys", []):
+            if block_key not in valid_blocks:
+                errors.append(f"{qid}: unknown blockKey {block_key!r}")
+        for viz_key in q.get("vizKeys", []):
+            if viz_key not in valid_viz:
+                errors.append(f"{qid}: unknown vizKey {viz_key!r}")
+
+    required_intent_fields = {"component", "periodMode", "compareMode", "requiredMetricIds"}
+    for intent in viz_intents:
+        missing = sorted(field for field in required_intent_fields if field not in intent)
+        if missing:
+            errors.append(f"{intent.get('key', '?')}: missing intent fields {missing}")
+        for block_key in intent.get("blockKeys", []):
+            if block_key not in valid_blocks:
+                errors.append(f"{intent.get('key', '?')}: unknown blockKey {block_key!r}")
+
+    if errors:
+        raise RuntimeError("Invalid dashboard manifest:\n- " + "\n- ".join(errors))
 
 
 def main() -> int:
@@ -73,14 +123,25 @@ def main() -> int:
         for key, value in STORY_TEMPLATES.items()
     }
 
+    dashboard_questions = listDashboardQuestions()
+    viz_intents = listVizIntents()
+    _validate_dashboard_manifest(
+        dashboard_questions,
+        viz_intents,
+        {section["key"] for section in sections},
+        {block["key"] for block in blocks},
+    )
+
     manifest = {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "source": "dartlab.story",
         "actHeaders": {key: {"title": v[0], "question": v[1]} for key, v in ACT_HEADERS.items()},
         "sections": sections,
         "blocks": blocks,
         "reportTypes": report_types,
         "templates": templates,
+        "dashboardQuestions": dashboard_questions,
+        "vizIntents": viz_intents,
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

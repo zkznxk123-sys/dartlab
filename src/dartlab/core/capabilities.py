@@ -394,3 +394,192 @@ def build_capability_summary(specs: list[CapabilitySpec] | None = None) -> dict[
         "byKind": by_kind,
         "byChannel": by_channel,
     }
+
+
+# Analysis Graph contract SSOT.
+#
+# 이 dict는 런타임 분기용 임시 키워드 뭉치가 아니라, docstring/CAPABILITIES 위에
+# 얹히는 최소 기계 검증 계약이다. scripts/build/generateSpec.py가 이 값을
+# CAPABILITIES 및 generated Analysis Graph로 컴파일한다.
+ANALYSIS_CONTRACTS: dict[str, dict[str, Any]] = {
+    "gather.krx": {
+        "contractId": "gather.krx.close",
+        "tool": "gather",
+        "questionTypes": ["recent_price_mover"],
+        "questionTriggers": {
+            "allAny": [
+                ["주가", "가격", "종목", "stock", "price"],
+                ["오른", "상승", "급등", "수익률", "모멘텀", "랭킹", "순위", "mover", "return", "ranking", "rank"],
+            ]
+        },
+        "toolMatch": [{"tool": "gather", "args": {"axis": "krx", "targetIn": ["", "close", "raw"]}}],
+        "toolNames": ["pythonExec", "gather", "capabilities"],
+        "requiredEvidence": ["asOf", "period", "universe", "metric"],
+        "evidenceSchema": {
+            "targetKeys": ["stockCode", "code"],
+            "metricKeys": ["returnPct", "close_return_pct"],
+            "periodKeys": ["period", "date"],
+            "asOfKeys": ["asOf", "end", "date"],
+            "valueKeys": ["returnPct", "value"],
+            "unit": "%",
+            "basisKeys": ["rank", "corpName", "stockCode"],
+        },
+        "freshness": {"cadence": "daily", "maxStaleBusinessDays": 10},
+        "comparisonCompleteness": {"mode": "full_universe_ranking"},
+        "visualPolicy": {"requiredFor": ["recent_price_mover"], "preferredType": "chart"},
+        "artifactPolicy": {"primaryCsv": True},
+        "toolArgPolicy": ["start_lte_end", "end_not_future", "target_close_for_price_returns"],
+        "preflightActions": [
+            {"tool": "pythonExec", "argsTemplate": {"kind": "krx_price_mover"}, "primaryEvidence": True}
+        ],
+        "priority": 100,
+    },
+    "gather.macro": {
+        "contractId": "macro.recent",
+        "tool": "gather",
+        "questionTypes": ["macro_recent"],
+        "questionTriggers": {
+            "allAny": [
+                ["최근", "현재", "오늘", "어제", "latest", "recent", "지금"],
+                ["금리", "환율", "fx", "rate", "macro", "원달러", "usdkrw"],
+            ]
+        },
+        "toolMatch": [{"tool": "gather", "args": {"axis": "macro"}}],
+        "toolNames": ["gather", "macro", "capabilities"],
+        "requiredEvidence": ["asOf", "metric", "value"],
+        "evidenceSchema": {
+            "targetKeys": ["target", "metric"],
+            "metricKeys": ["metric", "target"],
+            "periodKeys": ["date", "period"],
+            "asOfKeys": ["date", "asOf"],
+            "valueKeys": ["value", "close"],
+        },
+        "freshness": {"cadence": "daily_or_policy", "maxStaleBusinessDays": 10, "discloseMixedAsOf": True},
+        "visualPolicy": {"requiredFor": ["macro_recent"], "preferredType": "chart"},
+        "priority": 75,
+    },
+    "Company.analysis": {
+        "contractId": "company.analysis",
+        "tool": "analysis",
+        "questionTypes": ["company_compare", "cashflow"],
+        "toolMatch": [{"tool": "analysis"}],
+        "toolNames": ["analysis", "show", "credit", "pastInsight", "capabilities"],
+        "requiredEvidence": ["target", "metric", "period", "value"],
+        "evidenceSchema": {
+            "targetKeys": ["stockCode", "target", "code"],
+            "metricKeys": ["metric", "axis", "score", "value"],
+            "periodKeys": ["period", "basePeriod", "year"],
+            "valueKeys": ["value", "score"],
+        },
+        "artifactPolicy": {"primaryCsv": True},
+        "priority": 90,
+    },
+    "aiContract.comparison.same_axis": {
+        "kind": "ai_contract",
+        "summary": "회사 비교 동일 축 evidence 계약",
+        "contractId": "comparison.same_axis",
+        "questionTypes": ["company_compare"],
+        "questionTriggers": {"any": ["비교", "대비", "vs", " versus ", "둘 중", "어느 쪽", "누가", "경쟁력"]},
+        "toolNames": [
+            "searchCompany",
+            "analysis",
+            "credit",
+            "show",
+            "pastInsight",
+            "scan",
+            "gather",
+            "macro",
+            "industry",
+            "pythonExec",
+        ],
+        "requiredEvidence": ["target", "metric", "period", "value"],
+        "evidenceSchema": {
+            "targetKeys": ["stockCode", "target", "code"],
+            "metricKeys": ["metric", "axis", "score", "value"],
+            "periodKeys": ["period", "basePeriod", "year"],
+            "valueKeys": ["value", "score"],
+        },
+        "comparisonCompleteness": {"mode": "same_metric_each_target", "minTargets": 2},
+        "visualPolicy": {"requiredFor": ["company_compare"], "preferredType": "chart_or_diagram"},
+        "artifactPolicy": {"primaryCsv": True},
+        "toolArgPolicy": ["no_missing_side_in_comparison"],
+        "toolBudget": {"skipTools": ["quant"], "maxHeavyCallsPerTargetTool": 1},
+        "preflightActions": [{"tool": "analysis", "argsTemplate": {"axis": "종합평가"}, "primaryEvidence": True}],
+        "priority": 90,
+    },
+    "aiContract.disclosure.importance": {
+        "kind": "ai_contract",
+        "summary": "공시 중요도 분석 근거 깊이 계약",
+        "contractId": "disclosure.importance",
+        "tool": "disclosure",
+        "questionTypes": ["disclosure_importance"],
+        "questionTriggers": {"any": ["공시", "filing", "dart", "보고서"]},
+        "toolMatch": [
+            {"tool": "disclosure"},
+            {"tool": "filings"},
+            {"tool": "liveFilings"},
+            {"tool": "search"},
+        ],
+        "toolNames": ["disclosure", "liveFilings", "filings", "readFiling", "search", "capabilities"],
+        "requiredEvidence": ["filedAt", "title", "formType", "basis"],
+        "evidenceSchema": {
+            "targetKeys": ["stockCode", "corpCode"],
+            "metricKeys": ["formType", "reportName", "title"],
+            "periodKeys": ["filedAt", "date", "rceptDt"],
+            "asOfKeys": ["filedAt", "date", "rceptDt"],
+            "basisKeys": ["basis", "title", "reportName"],
+        },
+        "freshness": {"cadence": "filing_date", "disclosureRequired": True},
+        "visualPolicy": {"requiredFor": ["disclosure_importance"], "preferredType": "diagram"},
+        "artifactPolicy": {"primaryCsv": True},
+        "toolArgPolicy": [
+            "title_only_scope_must_not_be_presented_as_body_analysis",
+            "sections_false",
+            "max_chars_4000",
+        ],
+        "priority": 80,
+    },
+    "aiContract.cashflow.primary": {
+        "kind": "ai_contract",
+        "summary": "현금흐름 질문 primary evidence 계약",
+        "contractId": "cashflow.primary",
+        "questionTypes": ["cashflow"],
+        "questionTriggers": {"any": ["현금흐름", "cashflow", "cash flow", "fcf", "ocf"]},
+        "toolNames": ["analysis", "show", "credit", "capabilities"],
+        "requiredEvidence": ["target", "metric", "period", "value"],
+        "evidenceSchema": {
+            "targetKeys": ["stockCode", "target"],
+            "metricKeys": ["OCF", "FCF", "CAPEX", "metric", "axis"],
+            "periodKeys": ["period", "year"],
+            "valueKeys": ["value", "OCF", "FCF", "CAPEX"],
+        },
+        "visualPolicy": {"requiredFor": ["cashflow"], "preferredType": "chart"},
+        "preflightActions": [
+            {"tool": "analysis", "argsTemplate": {"axis": "현금흐름"}, "primaryEvidence": True},
+            {
+                "tool": "show",
+                "argsTemplate": {"topic": "CF", "freq": "Y", "scope": "consolidated", "raw": False},
+                "primaryEvidence": True,
+            },
+        ],
+        "priority": 85,
+    },
+    "aiContract.capabilities.valid_key": {
+        "kind": "ai_contract",
+        "summary": "capabilities key 오염 방지 계약",
+        "contractId": "capabilities.valid_key",
+        "tool": "capabilities",
+        "questionTypes": ["meta_help"],
+        "questionTriggers": {"any": ["뭐 할 수", "어떻게 써", "사용법", "help", "capabilities"]},
+        "toolMatch": [{"tool": "capabilities"}],
+        "toolNames": ["capabilities", "Read"],
+        "requiredEvidence": ["valid_key_or_search"],
+        "toolArgPolicy": ["reject_polluted_capabilities_key"],
+        "priority": 70,
+    },
+}
+
+
+def get_analysis_contract_specs() -> dict[str, dict[str, Any]]:
+    """Analysis Graph 계약 원천을 반환한다."""
+    return ANALYSIS_CONTRACTS

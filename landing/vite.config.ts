@@ -9,6 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const docsDir = path.resolve(__dirname, '..', 'docs');
 const blogDir = path.resolve(__dirname, '..', 'blog');
 const pyodideDir = path.resolve(__dirname, '..', 'pyodide');
+const sharedChartDir = path.resolve(__dirname, '..', 'ui', 'shared', 'chart');
 
 function contentType(filePath: string): string {
 	const ext = path.extname(filePath).toLowerCase();
@@ -72,15 +73,20 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'@docs': docsDir,
-			'@blog': blogDir
+			'@blog': blogDir,
+			'$chart': sharedChartDir
 		}
 	},
 	server: {
+		host: '127.0.0.1',
+		port: 5173,
+		strictPort: true,
 		fs: {
 			allow: [
 				docsDir,
 				blogDir,
-				pyodideDir
+				pyodideDir,
+				sharedChartDir
 			]
 		}
 	}

@@ -1,4 +1,5 @@
 <script>
+  // @ts-nocheck
   /**
    * sparkline ChartSpec → CSS grid 스파크라인 배열.
    * spec_ratio_sparklines() 출력용.

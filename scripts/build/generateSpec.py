@@ -1410,148 +1410,99 @@ def _parseAxisRegistry(entries: dict[str, dict[str, str]], path: Path, *, prefix
 
 
 def _applyAiContractMetadata(entries: dict[str, dict[str, Any]]) -> None:
-    """Attach generated AI contract metadata.
+    """Attach generated AI contract metadata from core Capability SSOT."""
+    from dartlab.core.capabilities import get_analysis_contract_specs
 
-    Runtime must not keep a second copy of these contracts.  This generator is
-    the bridge from docstrings/axis metadata to `_generated.py::CAPABILITIES`.
-    """
-    contracts: dict[str, dict[str, Any]] = {
-        "gather.krx": {
-            "contractId": "gather.krx.close",
-            "tool": "gather",
-            "questionTypes": ["recent_price_mover"],
-            "requiredEvidence": ["asOf", "period", "universe", "metric"],
-            "evidenceSchema": {
-                "targetKeys": ["stockCode", "code"],
-                "metricKeys": ["returnPct", "close_return_pct"],
-                "periodKeys": ["period", "date"],
-                "asOfKeys": ["asOf", "end", "date"],
-                "valueKeys": ["returnPct", "value"],
-                "unit": "%",
-                "basisKeys": ["rank", "corpName", "stockCode"],
-            },
-            "freshness": {"cadence": "daily", "maxStaleBusinessDays": 10},
-            "comparisonCompleteness": {"mode": "full_universe_ranking"},
-            "visualPolicy": {"requiredFor": ["recent_price_mover"], "preferredType": "chart"},
-            "artifactPolicy": {"primaryCsv": True},
-            "toolArgPolicy": ["start_lte_end", "end_not_future", "target_close_for_price_returns"],
-            "preflightActions": [
-                {"tool": "pythonExec", "argsTemplate": {"kind": "krx_price_mover"}, "primaryEvidence": True}
-            ],
-            "priority": 100,
-        },
-        "gather.macro": {
-            "contractId": "macro.recent",
-            "tool": "gather",
-            "questionTypes": ["macro_recent"],
-            "requiredEvidence": ["asOf", "metric", "value"],
-            "evidenceSchema": {
-                "targetKeys": ["target", "metric"],
-                "metricKeys": ["metric", "target"],
-                "periodKeys": ["date", "period"],
-                "asOfKeys": ["date", "asOf"],
-                "valueKeys": ["value", "close"],
-            },
-            "freshness": {"cadence": "daily_or_policy", "maxStaleBusinessDays": 10, "discloseMixedAsOf": True},
-            "visualPolicy": {"requiredFor": ["macro_recent"], "preferredType": "chart"},
-            "priority": 75,
-        },
-        "Company.analysis": {
-            "contractId": "company.analysis",
-            "tool": "analysis",
-            "questionTypes": ["company_compare", "cashflow"],
-            "requiredEvidence": ["target", "metric", "period", "value"],
-            "evidenceSchema": {
-                "targetKeys": ["stockCode", "target", "code"],
-                "metricKeys": ["metric", "axis", "score", "value"],
-                "periodKeys": ["period", "basePeriod", "year"],
-                "valueKeys": ["value", "score"],
-            },
-            "artifactPolicy": {"primaryCsv": True},
-            "priority": 90,
-        },
-        "aiContract.comparison.same_axis": {
-            "kind": "ai_contract",
-            "summary": "회사 비교 동일 축 evidence 계약",
-            "contractId": "comparison.same_axis",
-            "questionTypes": ["company_compare"],
-            "requiredEvidence": ["target", "metric", "period", "value"],
-            "evidenceSchema": {
-                "targetKeys": ["stockCode", "target", "code"],
-                "metricKeys": ["metric", "axis", "score", "value"],
-                "periodKeys": ["period", "basePeriod", "year"],
-                "valueKeys": ["value", "score"],
-            },
-            "comparisonCompleteness": {"mode": "same_metric_each_target", "minTargets": 2},
-            "visualPolicy": {"requiredFor": ["company_compare"], "preferredType": "chart_or_diagram"},
-            "artifactPolicy": {"primaryCsv": True},
-            "toolArgPolicy": ["no_missing_side_in_comparison"],
-            "toolBudget": {"skipTools": ["quant"], "maxHeavyCallsPerTargetTool": 1},
-            "preflightActions": [{"tool": "analysis", "argsTemplate": {"axis": "종합평가"}, "primaryEvidence": True}],
-            "priority": 90,
-        },
-        "aiContract.disclosure.importance": {
-            "kind": "ai_contract",
-            "summary": "공시 중요도 분석 근거 깊이 계약",
-            "contractId": "disclosure.importance",
-            "tool": "disclosure",
-            "questionTypes": ["disclosure_importance"],
-            "requiredEvidence": ["filedAt", "title", "formType", "basis"],
-            "evidenceSchema": {
-                "targetKeys": ["stockCode", "corpCode"],
-                "metricKeys": ["formType", "reportName", "title"],
-                "periodKeys": ["filedAt", "date", "rceptDt"],
-                "asOfKeys": ["filedAt", "date", "rceptDt"],
-                "basisKeys": ["basis", "title", "reportName"],
-            },
-            "freshness": {"cadence": "filing_date", "disclosureRequired": True},
-            "visualPolicy": {"requiredFor": ["disclosure_importance"], "preferredType": "diagram"},
-            "artifactPolicy": {"primaryCsv": True},
-            "toolArgPolicy": [
-                "title_only_scope_must_not_be_presented_as_body_analysis",
-                "sections_false",
-                "max_chars_4000",
-            ],
-            "priority": 80,
-        },
-        "aiContract.cashflow.primary": {
-            "kind": "ai_contract",
-            "summary": "현금흐름 질문 primary evidence 계약",
-            "contractId": "cashflow.primary",
-            "questionTypes": ["cashflow"],
-            "requiredEvidence": ["target", "metric", "period", "value"],
-            "evidenceSchema": {
-                "targetKeys": ["stockCode", "target"],
-                "metricKeys": ["OCF", "FCF", "CAPEX", "metric", "axis"],
-                "periodKeys": ["period", "year"],
-                "valueKeys": ["value", "OCF", "FCF", "CAPEX"],
-            },
-            "visualPolicy": {"requiredFor": ["cashflow"], "preferredType": "chart"},
-            "preflightActions": [
-                {"tool": "analysis", "argsTemplate": {"axis": "현금흐름"}, "primaryEvidence": True},
-                {
-                    "tool": "show",
-                    "argsTemplate": {"topic": "CF", "freq": "Y", "scope": "consolidated", "raw": False},
-                    "primaryEvidence": True,
-                },
-            ],
-            "priority": 85,
-        },
-        "aiContract.capabilities.valid_key": {
-            "kind": "ai_contract",
-            "summary": "capabilities key 오염 방지 계약",
-            "contractId": "capabilities.valid_key",
-            "tool": "capabilities",
-            "questionTypes": ["meta_help"],
-            "requiredEvidence": ["valid_key_or_search"],
-            "toolArgPolicy": ["reject_polluted_capabilities_key"],
-            "priority": 70,
-        },
-    }
-    for key, contract in contracts.items():
+    for key, contract in get_analysis_contract_specs().items():
         entries.setdefault(key, {})
         for field, value in contract.items():
             entries[key].setdefault(field, value)
+
+
+def _buildAnalysisGraph(entries: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """CAPABILITIES entries를 Analysis Graph JSON payload로 컴파일."""
+    import hashlib
+
+    contracts: dict[str, dict[str, Any]] = {}
+    routes: list[dict[str, Any]] = []
+    nodes: list[dict[str, Any]] = []
+    edges: list[dict[str, Any]] = []
+
+    for key, entry in sorted(entries.items()):
+        contract_id = entry.get("contractId")
+        if not contract_id:
+            continue
+        contract = {k: v for k, v in entry.items() if k not in {"args", "example", "guide", "returns", "seeAlso"}}
+        contract["sourceKey"] = key
+        contracts[str(contract_id)] = contract
+        nodes.append(
+            {
+                "id": f"contract:{contract_id}",
+                "kind": "contract",
+                "label": entry.get("summary") or contract_id,
+                "source": key,
+            }
+        )
+        if tool := entry.get("tool"):
+            nodes.append({"id": f"tool:{tool}", "kind": "tool", "label": tool, "source": key})
+            edges.append({"from": f"contract:{contract_id}", "to": f"tool:{tool}", "kind": "usesTool"})
+        for question_type in entry.get("questionTypes") or []:
+            route_id = f"route:{question_type}"
+            if not any(route["id"] == route_id for route in routes):
+                routes.append(
+                    {
+                        "id": route_id,
+                        "questionType": question_type,
+                        "triggers": entry.get("questionTriggers") or {},
+                        "contractIds": [],
+                        "toolNames": [],
+                    }
+                )
+            route = next(route for route in routes if route["id"] == route_id)
+            route["contractIds"].append(str(contract_id))
+            for tool_name in entry.get("toolNames") or ([entry.get("tool")] if entry.get("tool") else []):
+                if tool_name and tool_name not in route["toolNames"]:
+                    route["toolNames"].append(str(tool_name))
+            edges.append({"from": route_id, "to": f"contract:{contract_id}", "kind": "requiresContract"})
+
+    payload = {
+        "graphVersion": 1,
+        "sourceHash": hashlib.sha256(
+            json.dumps(contracts, ensure_ascii=False, sort_keys=True).encode("utf-8")
+        ).hexdigest()[:16],
+        "nodes": nodes,
+        "edges": edges,
+        "contracts": contracts,
+        "routes": routes,
+    }
+    return payload
+
+
+def _generateAnalysisGraphPy(entries: dict[str, dict[str, Any]]) -> str:
+    graphJson = json.dumps(_buildAnalysisGraph(entries), ensure_ascii=False, indent=4, sort_keys=True)
+    return (
+        '"""Analysis Graph generated from CAPABILITIES.\n'
+        "\n"
+        "수정하지 마세요. scripts/build/generateSpec.py 를 실행하세요.\n"
+        '"""\n'
+        "\n"
+        "import json\n"
+        "\n"
+        "ANALYSIS_GRAPH: dict = json.loads(\n"
+        "    r'''\n"
+        f"{graphJson}\n"
+        "'''\n"
+        ")\n"
+    )
+
+
+def _capabilitiesEntriesFromGeneratedPy(content: str) -> dict[str, dict[str, Any]]:
+    """_generateCapabilitiesPy 출력 문자열에서 CAPABILITIES JSON payload를 복원."""
+    marker = "r'''\n"
+    start = content.index(marker) + len(marker)
+    end = content.index("\n'''", start)
+    parsed = json.loads(content[start:end])
+    return parsed if isinstance(parsed, dict) else {}
 
 
 def _generateCapabilitiesPy() -> str:
@@ -2017,6 +1968,7 @@ def _generateMcpToolsPy() -> str:
     def _tool(name, desc, params, required, feature="data"):
         """도구 하나를 문자열로."""
         toolDefs.append((name, feature))
+        params = _resolveMcpSchemaPlaceholders(params)
         return f'    {{"name": {name!r}, "description": {desc!r}, "params": {params!r}, "required": {required!r}}},'
 
     # ── 정적 도구 (Company-bound) ──
@@ -2115,9 +2067,6 @@ def _generateMcpToolsPy() -> str:
     )
     tools.append(
         _tool("companyProfile", "기업 기본 정보 (회사명, 업종, 시장, 대표자).", {"stockCode": "_STOCK"}, ["stockCode"])
-    )
-    tools.append(
-        _tool("companySections", "전체 데이터 구조 지도 (topic x period).", {"stockCode": "_STOCK"}, ["stockCode"])
     )
     tools.append(
         _tool(
@@ -2330,6 +2279,40 @@ def _generateMcpToolsPy() -> str:
             "meta",
         )
     )
+    tools.append(
+        _tool(
+            "contextForQuestion",
+            "Analysis Graph 기준 질문 컨텍스트. route/contracts/tools/evidence/visual 요구사항 반환.",
+            {
+                "question": {"type": "string", "description": "사용자 질문"},
+                "stockCode": {"type": "string", "description": "선택 종목 힌트"},
+            },
+            ["question"],
+            "meta",
+        )
+    )
+    tools.append(
+        _tool(
+            "queryAnalysisGraph",
+            "Analysis Graph 검색. tool/capability/contract/route 노드를 찾는다.",
+            {
+                "query": {"type": "string", "description": "검색어"},
+                "kind": {"type": "string", "description": "선택 필터: tool, contract, route 등"},
+                "topK": {"type": "integer", "description": "최대 결과 수"},
+            },
+            ["query"],
+            "meta",
+        )
+    )
+    tools.append(
+        _tool(
+            "impactForGraphNode",
+            "Analysis Graph 노드 변경 영향 조회. 예: contract:gather.krx.close",
+            {"nodeId": {"type": "string", "description": "노드 ID"}},
+            ["nodeId"],
+            "meta",
+        )
+    )
 
     for t in tools:
         lines.append(t)
@@ -2350,9 +2333,19 @@ def _generateMcpToolsPy() -> str:
     lines.append("")
 
     content = "\n".join(lines)
-    # _STOCK 참조를 실제 dict으로 치환
-    content = content.replace('"_STOCK"', _S)
     return content
+
+
+def _resolveMcpSchemaPlaceholders(value: Any) -> Any:
+    """MCP generated schema에서 placeholder를 실제 JSON schema로 치환."""
+    stock_schema = {"type": "string", "description": "종목코드 (005930) 또는 회사명 (삼성전자)"}
+    if value == "_STOCK":
+        return stock_schema
+    if isinstance(value, dict):
+        return {k: _resolveMcpSchemaPlaceholders(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_resolveMcpSchemaPlaceholders(v) for v in value]
+    return value
 
 
 # ─── main ───────────────────────────────────────────────────────
@@ -2363,6 +2356,7 @@ def main():
     llmsTxtPath = ROOT / "landing" / "static" / "llms.txt"
     skillRefPath = ROOT / ".claude" / "skills" / "dartlab" / "reference.md"
     capabilitiesPyPath = SRC / "dartlab" / "core" / "_generated.py"
+    analysisGraphPyPath = SRC / "dartlab" / "core" / "_generated_analysis_graph.py"
 
     skillRefPath.parent.mkdir(parents=True, exist_ok=True)
 
@@ -2382,13 +2376,17 @@ def main():
     capabilitiesPyPath.write_text(capabilitiesPy, encoding="utf-8")
     print(f"  _generated.py ({len(capabilitiesPy):,} chars) -> {capabilitiesPyPath}")
 
+    analysisGraphPy = _generateAnalysisGraphPy(_capabilitiesEntriesFromGeneratedPy(capabilitiesPy))
+    analysisGraphPyPath.write_text(analysisGraphPy, encoding="utf-8")
+    print(f"  _generated_analysis_graph.py ({len(analysisGraphPy):,} chars) -> {analysisGraphPyPath}")
+
     mcpToolsPyPath = SRC / "dartlab" / "mcp" / "_generated_tools.py"
     mcpToolsPy = _generateMcpToolsPy()
     mcpToolsPyPath.write_text(mcpToolsPy, encoding="utf-8")
     print(f"  _generated_tools.py ({len(mcpToolsPy):,} chars) -> {mcpToolsPyPath}")
 
     # 생성된 파이썬 파일은 raw 출력이므로 CI `ruff format --check` 통과를 위해 재포맷.
-    for pyPath in (capabilitiesPyPath, mcpToolsPyPath):
+    for pyPath in (capabilitiesPyPath, analysisGraphPyPath, mcpToolsPyPath):
         subprocess.run(
             ["uv", "run", "ruff", "format", str(pyPath)],
             check=False,

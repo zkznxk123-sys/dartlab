@@ -216,15 +216,17 @@ REPORT_TYPES: dict[str, ReportType] = {
     # ── P6: 대시보드 ── (2026-Q2)
     "dashboard": ReportType(
         key="dashboard",
-        label="대시보드",
-        description="한 페이지 회사 스냅샷 — 스코어/재무/리스크/가치/매크로/AI논제 집약",
+        label="질문형 대시보드",
+        description="질문 중심 회사 스냅샷 — 재무제표·정기보고서·원문 근거 집약",
         sectionOrder=(
-            "종합평가",  # 스코어카드 + 신용등급 + 가치평가 verdict + peer rank
-            "수익구조",  # 매출·영업이익·ROE·부채 5년 sparkline
-            "안정성",  # distress/leverage 경고
-            "가치평가",  # DCF/DDM/상대가치 통합
-            "매크로",  # 사이클 + 순풍/역풍
-            "storyValidation",  # AI 논제 요약
+            "종합평가",
+            "수익구조",
+            "수익성",
+            "현금흐름",
+            "안정성",
+            "자본배분",
+            "가치평가",
+            "storyValidation",
         ),
         emphasize=frozenset(
             {
@@ -233,18 +235,23 @@ REPORT_TYPES: dict[str, ReportType] = {
                 "valuationSynthesis",
                 "peerPosition",
                 "marginTrend",
+                "cashFlowOverview",
+                "cashQuality",
                 "leverageTrend",
                 "distressScore",
-                "macroCycle",
-                "companyCyclePosition",
+                "dividendPolicy",
+                "storyPrecedents",
             }
         ),
         focusQuestions=(
-            "한 눈에 보는 스코어는?",
-            "5년 재무 추이는?",
-            "가장 큰 리스크는?",
-            "현재가 대비 적정가는?",
-            "매크로 순풍/역풍은?",
+            "한눈에 결론은 무엇인가?",
+            "이 회사는 무엇으로 돈을 버나?",
+            "번 돈은 얼마나 남나?",
+            "이익은 현금으로 바뀌나?",
+            "자산과 부채 구조는 안전한가?",
+            "번 돈은 어디에 묶이고 어디에 재투자되나?",
+            "현재 가격은 무엇을 반영하나?",
+            "보고서와 원문은 숫자를 뒷받침하나?",
         ),
         detail=False,  # executive처럼 간결
     ),

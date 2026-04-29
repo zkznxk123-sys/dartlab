@@ -12,7 +12,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import date, timedelta
 from typing import Any
 
-from dartlab.ai.runtime.contract_graph import contractForTool
+from dartlab.ai.runtime.contract_graph import contractForTool, requiresVisualExplanation, routeQuestion
 
 
 @dataclass
@@ -65,11 +65,16 @@ class AnalysisWorkspace:
 
     def __init__(self, *, question: str | None = None):
         self.question = question or ""
+        self.route: dict[str, Any] = routeQuestion(self.question)
         self.evidence: list[EvidenceItem] = []
         self.claims: list[ClaimItem] = []
         self.visuals: list[VisualItem] = []
         self.limits: list[str] = []
-        self.coverage: dict[str, Any] = {}
+        self.coverage: dict[str, Any] = {
+            "routeIds": list(self.route.get("routeIds") or []),
+            "contractIds": list(self.route.get("contractIds") or []),
+            "graph": dict(self.route.get("graph") or {}),
+        }
         self.freshness: dict[str, Any] = {}
         self.latency: dict[str, Any] = {
             "llmRoundMs": [],
@@ -511,6 +516,10 @@ def _unit_from_metric(metric: str) -> str | None:
 
 
 def _visual_requirement(question: str) -> tuple[bool, str | None]:
+    if requiresVisualExplanation(question):
+        route = routeQuestion(question)
+        profile = route.get("profileTypes") or []
+        return True, str(profile[0]) if profile else "graph_contract"
     q = question.lower()
     if any(word in q for word in ("비교", "compare", "vs", "경쟁력")):
         return True, "comparison"

@@ -443,9 +443,9 @@ grep -n "companyfacts/CIK" src/dartlab/providers/edgar/bulk/
 
 ## Appendix. AI Contract Metadata
 
-공개 API docstring 은 사용법뿐 아니라 AI runtime 이 검증할 최소 계약도 담을 수 있다. 섹션 이름은 `AIContract` 이며, `scripts/build/generateSpec.py` 가 이를 파싱해 `_generated.py::CAPABILITIES` 에 구조화한다.
+공개 API docstring 은 사용법뿐 아니라 AI runtime 이 검증할 최소 계약도 담을 수 있다. 섹션 이름은 `AIContract` 이며, `scripts/build/generateSpec.py` 가 이를 파싱해 `_generated.py::CAPABILITIES` 와 `_generated_analysis_graph.py::ANALYSIS_GRAPH` 에 구조화한다.
 
-허용 필드는 `contractId`, `questionTypes`, `requiredEvidence`, `evidenceSchema`, `freshness`, `comparisonCompleteness`, `visualPolicy`, `artifactPolicy`, `toolArgPolicy`, `toolBudget`, `preflightActions`, `priority` 다. 같은 의미의 계약을 runtime dict 에 다시 만들지 않는다.
+허용 필드는 `contractId`, `questionTypes`, `questionTriggers`, `toolMatch`, `toolNames`, `requiredEvidence`, `evidenceSchema`, `freshness`, `comparisonCompleteness`, `visualPolicy`, `artifactPolicy`, `toolArgPolicy`, `toolBudget`, `preflightActions`, `priority` 다. 같은 의미의 계약을 runtime dict 에 다시 만들지 않는다.
 
 ```text
 AIContract:
@@ -455,7 +455,7 @@ AIContract:
     freshness: {"cadence": "daily", "maxStaleBusinessDays": 10}
 ```
 
-**반복 실패** → docstring/capabilities 에 없는 질문별 규칙을 `quality.py`, `toolLoop.py`, `selectToolsForQuestion()` 에 다시 하드코딩하는 것. runtime 은 Contract Graph 를 조회한다.
+**반복 실패** → docstring/capabilities 에 없는 질문별 규칙을 `quality.py`, `toolLoop.py`, `selectToolsForQuestion()` 에 다시 하드코딩하는 것. runtime 은 Analysis Graph 를 조회한다.
 
 ## Appendix. `/api/ask` Result Bundle
 
@@ -474,7 +474,7 @@ AIContract:
     "claimCount": 0,
     "visualCount": 0,
     "limitCount": 0,
-    "coverage": {"contractIds": []},
+    "coverage": {"routeIds": [], "contractIds": [], "graph": {"graphVersion": 1, "sourceHash": "..."}},
     "llmRoundMs": 0,
     "toolTotalMs": 0,
     "rewriteCount": 0,
