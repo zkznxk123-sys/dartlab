@@ -121,6 +121,14 @@ src/dartlab/industry/
 - `primary=true` 하나만 (매출 집계 중복 방지).
 - source: kindlist / product / docs / ai / manual.
 
+### 3-2a. quant 벤치마크 소비
+
+quant 엔진은 `nodes.json` 의 primary 산업을 읽어 KRX 섹터 벤치마크 후보를 만든다. 함수 의존은 만들지 않고 패키지 데이터만 소비한다.
+
+- 매핑 SSOT: `quant/benchmarkMap.py`.
+- 호출 계약: `quant("beta", "005930", benchmarkMode="sector")`, `quant("benchmark", "005930")`.
+- `nodes.json` 에 primary 산업이 없거나 매핑 지수가 로컬 `krxIndex` 에 없으면 시장 벤치마크로 fallback한다.
+
 ### 3-3. edges.json — 공급-수요·계열 관계
 
 ```json

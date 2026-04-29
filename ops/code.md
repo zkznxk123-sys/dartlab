@@ -131,7 +131,7 @@ pl.DataFrame
     ↓ scripts/build/generateSpec.py (코드에서 자동 수집)
     ├── CAPABILITIES.md                  (루트 총괄 스펙맵)
     ├── landing/static/llms.txt          (AI 크롤러용)
-    └── .claude/skills/dartlab/reference.md (Claude Code 스킬)
+    └── 로컬 에이전트 reference          (workspace 전용 생성물)
 ```
 
 - `CAPABILITIES.md` · `llms.txt` · `reference.md` 는 **직접 수정하지 않는다** → `scripts/build/generateSpec.py` 로만 생성.
@@ -161,7 +161,7 @@ pl.DataFrame
 ## 6. 테스트 — lock wrapper 로 그룹별 분리 실행한다
 
 - `test-lock.sh` 필수, 그룹별 분리 실행 (unit → integration → heavy).
-- GPU · Ollama 의존 테스트는 mock.
+- GPU · 로컬 런타임 의존 테스트는 mock.
 - fixture scope 는 `module` (session scope 사용하지 않음).
 - 전 기간 데이터로 테스트한다.
 
@@ -184,13 +184,13 @@ pl.DataFrame
 
 ---
 
-## 8. 검증 엄격성 — 사람 판정 + 고정 provider 로 간다
+## 8. 검증 엄격성 — 사람 판정 + 고정 audit profile 로 간다
 
-- **AI provider = oauth-codex** — AI 테스트·검증·audit 시 oauth-codex 사용 (gemini 아님).
-- **벤치마킹 필수** — UI·AI·에이전트 작업 시 Claude Code 벤치마킹 강제.
-- **이미지 생성 = Replicate 전용** — `black-forest-labs/flux-1.1-pro`, TTS 는 `minimax/speech-02-hd`.
+- **AI audit profile 고정** — AI 테스트·검증·audit 시 표준 profile 을 사용한다.
+- **벤치마킹 필수** — UI·AI·에이전트 작업 시 DartLab 표준 audit 으로 비교한다.
+- **이미지 생성 경로 고정** — 승인된 이미지 생성 backend 만 사용한다.
 
-**반복 실패** — 자동 메트릭만으로 ACE 효과 주장. 사람 판정 기반 비교가 필수. OpenAI · DALL-E · 기타 provider 는 이미지 생성에 쓰지 않는다.
+**반복 실패** — 자동 메트릭만으로 ACE 효과 주장. 사람 판정 기반 비교가 필수. 승인되지 않은 provider 는 이미지 생성에 쓰지 않는다.
 
 ---
 
@@ -215,5 +215,5 @@ pl.DataFrame
 5. 예외는 구체적 타입으로 잡고 삼키지 않는다.
 6. 테스트는 `test-lock.sh` 로 unit → integration → heavy 그룹 분리 실행.
 7. 릴리즈는 semver + GitHub Actions trusted publishing + wheel 번들 전수 검증.
-8. AI provider 는 oauth-codex · 이미지는 Replicate 전용 · 사람 판정 기반 검증.
+8. AI 는 표준 audit profile · 이미지는 승인 backend · 사람 판정 기반 검증.
 9. 근본 원인 1 곳만 고친다 — 우회 레이어·덕지덕지 패치는 쓰지 않는다.

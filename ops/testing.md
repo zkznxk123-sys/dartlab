@@ -247,7 +247,7 @@ python -m venv /tmp/smoke && /tmp/smoke/bin/pip install dartlab
 ## 참고 문서
 
 - `ops/code.md` — docstring 9 섹션 · 릴리즈 절차 · 1.0.0 판정 기준.
-- `CLAUDE.md` — 메모리 안전 강행 규칙 + 사용자 지시 이행.
+- 프로젝트 최상위 로컬 규칙 — 메모리 안전 강행 규칙 + 사용자 지시 이행.
 - `.github/scripts/planRealdata.py` — realdata path-filter 매핑 코드.
 - `scripts/dev/test-lock.sh` — 세션 직렬화 스크립트.
 - `scripts/dev/test-realdata.sh` — realData 파일별 프로세스 분리.

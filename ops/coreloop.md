@@ -44,8 +44,8 @@
   "question_hash": "sha256:a1b2c3d4e5f6...",
   "category_hash": "FIN-profitability-KR-tech",
   "stockCode_hint": "005930",
-  "provider": "oauth-codex",
-  "model": "gpt-5-codex",
+  "provider": "standard-audit-profile",
+  "model": "audit-model-id",
   "tool_calls": [
     {"name": "analysis", "args": {...}, "args_hash": "...",
      "ok": true, "error": null, "duration_ms": 1823,
@@ -61,10 +61,30 @@
   "chunk_len": 1823,
   "error": null,
   "violation": null,
+  "trace": {
+    "selectedTools": ["analysis"],
+    "skippedCandidateTools": [],
+    "toolArgs": [],
+    "sanitizedArgs": [],
+    "evidenceIds": [],
+    "claimIds": [],
+    "visualIds": [],
+    "processMapIds": []
+  },
+  "quality": {
+    "qualityIssues": [],
+    "processMapSatisfied": true,
+    "claimSupportRate": 1.0,
+    "toolArgValidRate": 1.0,
+    "freshnessSatisfied": true,
+    "visualSatisfied": true
+  },
   "skill_used": null,
   "duration_total_ms": 4521,
   "judgment": {"verdict": null, "judged_at": null,
-               "judged_by": null, "pr_url": null}
+               "judged_by": null, "issue_code": null,
+               "root_cause": null, "ssot_fix_target": null,
+               "suggested_contract_delta": null, "pr_url": null}
 }
 ```
 
@@ -73,6 +93,12 @@
 - I/O 실패 조용 무시 (응답 경로 보호).
 - `args` 값 500 자 cap + 라인 4 KB 초과 시 요약본.
 - `DARTLAB_AUDIT_DISABLE=1` 환경변수 시 비활성.
+
+### 수동 판정 환류
+
+자동 gate 는 구조 위반을 잡는 보조 장치다. 최종 품질 판정은 서버 경유 응답 원문을 사람이 읽고 P/T/C/V 로 기록한다.
+
+수동 T/C/V 는 `issue_code`, `root_cause`, `ssot_fix_target`, `suggested_contract_delta` 를 함께 남긴다. 같은 root cause 가 반복될 때만 Phase P/R 의 docstring/capabilities 수정 후보가 된다. 자동 violation 하나만으로 SSOT 를 바꾸지 않는다.
 
 ---
 

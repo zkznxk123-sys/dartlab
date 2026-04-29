@@ -149,7 +149,7 @@ AI 종합의견은 `dartlab.ask()` 일원화. `c.reviewer()` · `c.review()` · 
 
 상세: [`ops/skills.md`](skills.md) · [`ops/code.md`](code.md).
 
-**반복 실패** — `.claude/skills/*/SKILL.md` 같은 이중 파일 잔존. docstring 과 SKILL.md 가 나뉘어 있으면 곧 불일치. dartlab 에서 skill 은 오직 docstring.
+**반복 실패** — 로컬 에이전트 skill 파일 같은 이중 파일 잔존. docstring 과 별도 skill 문서가 나뉘어 있으면 곧 불일치. dartlab 에서 skill 은 오직 docstring.
 
 ---
 
@@ -232,7 +232,7 @@ dartlab 의 정보는 **3 층** 에 배치된다. 중복 금지.
 | 층 | 위치 | 공개 | 내용 |
 |---|---|---|---|
 | **L-public** | `ops/*.md` · `src/` · `README.md` · `blog/` · `landing/` · `notebooks/` · `docs/` · `sns/` | GitHub 공개 | 사상 · 설계 · 계약 · 코드 (재현 가능한 원본) |
-| **L-local** | `CLAUDE.md` · `AGENTS.md` · `PLAN.md` · `TODO.md` · `.claude/` · `.agent/` | gitignored, 로컬만 | 강행규칙 · 세션 규약 · 환경 (운영자 작업 상태) |
+| **L-local** | 로컬 agent 규칙 · 세션 계획 · 작업 메모 · agent 전용 디렉토리 | gitignored, 로컬만 | 강행규칙 · 세션 규약 · 환경 (운영자 작업 상태) |
 | **L-memory** | 프로젝트 디렉토리 외부 (운영자 홈) | 프로젝트 외부 | 운영자 ↔ AI 약속 · 세션 간 사실 |
 
 ### 판정 규칙
@@ -245,7 +245,7 @@ dartlab 의 정보는 **3 층** 에 배치된다. 중복 금지.
 
 동일 내용 두 곳 발견 시 **즉시 SSOT 한 곳에만 두고 나머지는 포인터 (한 줄 링크)** 로 교체.
 
-**반복 실패** — L-local 파일을 git 에 섞어 커밋 (CLAUDE.md 가 공개되면 운영자의 작업 메모가 노출됨). L-memory 를 repo 내부로 당김. L-public 문서에 운영자↔AI 인용 ("사용자 원문: > ...") 을 박음 — 이건 L-memory 내용.
+**반복 실패** — L-local 파일을 git 에 섞어 커밋하면 운영자의 작업 메모가 노출됨. L-memory 를 repo 내부로 당김. L-public 문서에 운영자↔AI 인용 ("사용자 원문: > ...") 을 박음 — 이건 L-memory 내용.
 
 ---
 

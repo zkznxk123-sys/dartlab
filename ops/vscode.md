@@ -97,10 +97,10 @@ provider 선택하면 바로 연결까지 끝난다. 추가 설정 페이지 없
 
 | provider 종류 | 플로우 |
 |---|---|
-| API 키 (Gemini · Groq 등) | 선택 → signupUrl 브라우저 → InputBox 키 입력 → 저장 → 연결 |
-| OAuth (ChatGPT) | 선택 → 브라우저 PKCE 로그인 → callback → 토큰 저장 → 연결 |
+| API 키 provider | 선택 → signupUrl 브라우저 → InputBox 키 입력 → 저장 → 연결 |
+| OAuth provider | 선택 → 브라우저 PKCE 로그인 → callback → 토큰 저장 → 연결 |
 | OAuth 토큰 입력 (방화벽) | "토큰 입력" → InputBox 에 JSON 붙여넣기 → 저장 → 연결 |
-| 로컬 (Ollama) | 선택 → 바로 연결 |
+| 로컬 runtime | 선택 → 바로 연결 |
 
 연결 완료 시 "연결 완료" 메시지 표시.
 
@@ -143,7 +143,7 @@ cd ui/vscode/webview && npm run build  # webview만
 ## 9. MCP 자동 등록 — extension 활성화 시 자동으로 꽂는다
 
 extension 활성화 시 `.mcp.json` + `.vscode/mcp.json` 에 dartlab MCP 서버 자동 등록.
-Claude Code · Copilot 등에서 `@dartlab` 도구를 바로 사용 가능.
+같은 workspace 를 쓰는 MCP 호환 실행 환경에서 `dartlab` 도구를 바로 사용 가능.
 
 ---
 

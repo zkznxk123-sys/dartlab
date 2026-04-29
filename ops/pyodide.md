@@ -102,8 +102,8 @@ if sys.platform == "emscripten":
 | `dartlab.scan("governance"/"audit"/…)` | ❌ `report/*.parquet` 미전송 (필요 시 추가 경량본 설계 필요) |
 | `dartlab.gather()` | ❌ 외부 API CORS 차단 |
 | `dartlab.collect()` | ❌ DART OpenAPI CORS 차단 |
-| `dartlab.ask()` (oauth-codex) | ❌ `chatgpt.com` CORS 차단 |
-| `dartlab.ask()` (gemini · openai) | ✓ API 키 방식으로 가능 (CORS OK) |
+| `dartlab.ask()` (OAuth profile) | ❌ 외부 인증 도메인 CORS 차단 |
+| `dartlab.ask()` (API key profile) | ✓ API 키 방식으로 가능 (CORS OK) |
 | KRX 상장법인 목록 | ❌ KRX API CORS 차단 → 빈 DataFrame |
 | threading | ❌ WASM 단일 스레드 |
 
@@ -114,7 +114,7 @@ if sys.platform == "emscripten":
 - 내부 구현 — `scanAccount._scanAccountFromMerged` 가 `_IS_PYODIDE` 분기에서 `pyarrow.parquet.read_table` + `pl.from_arrow` 로 전환 (polars `scan_parquet` 미지원 우회).
 - SSOT 계정 리스트 — `src/dartlab/scan/_helpers.py::LITE_ACCOUNTS`.
 
-**반복 실패** — 외부 API 필요한 기능 (gather · collect · oauth-codex · KRX) 은 CORS 차단으로 불가. pyodide 대상 기능 설계 시 이 제약 먼저 확인.
+**반복 실패** — 외부 API 필요한 기능 (gather · collect · OAuth profile · KRX) 은 CORS 차단으로 불가. pyodide 대상 기능 설계 시 이 제약 먼저 확인.
 
 ---
 
@@ -210,6 +210,6 @@ Node.js pyodide 0.27.2, 삼성전자 005930:
 2. 설치는 `micropip.install("dartlab")`, 이중 환경 마커로 pyodide 빌트인·PyPI 분기.
 3. polars parquet I/O 는 WASM 에서 비활성 → `readParquetSafe()` 로 pyarrow 경유 우회.
 4. pyodide 분기는 `sys.platform == "emscripten"` 체크, 10 여 파일에 `_IS_PYODIDE` 가드.
-5. CORS 로 외부 API (gather · collect · oauth-codex · KRX) 는 불가, API 키 방식 ask 만 가능.
+5. CORS 로 외부 API (gather · collect · OAuth profile · KRX) 는 불가, API 키 방식 ask 만 가능.
 6. scan 은 `finance-lite.parquet` (18MB 30 계정 5 년) 로 지원, report 기반 축은 미지원.
 7. 빌드는 `pyodide/build.py` (pyodide deps 제거 + HF 업로드), Node.js 테스트 13/13 통과가 게이트.

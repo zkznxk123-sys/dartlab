@@ -113,14 +113,14 @@ grep -rn "옛이름" .github/ scripts/
 마지막에 한 번. 이전 단계의 변경이 모두 src 에 들어간 후.
 
 - `python -X utf8 scripts/build/generateSpec.py` — `CAPABILITIES.md`,
-  `landing/static/llms.txt`, `.claude/skills/dartlab/reference.md`,
+  `landing/static/llms.txt`, 로컬 에이전트 reference,
   `src/dartlab/core/_generated.py`, `_generatedCapabilities.py` 재빌드
 - `pyodide` 번들이 영향받으면 `pyodide/build.sh`
 - 노트북 동기화 영향이면 `python scripts/build/syncColabFromMarimo.py`
 
 ```bash
 # 자동 생성물에 옛 이름이 남았다면 generateSpec 누락
-grep -n "옛이름" CAPABILITIES.md landing/static/llms.txt .claude/skills/dartlab/reference.md
+grep -n "옛이름" CAPABILITIES.md landing/static/llms.txt
 ```
 
 ## 종합 검증

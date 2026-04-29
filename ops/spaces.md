@@ -16,7 +16,7 @@
 |---|---|
 | URL | `https://eddmpython-dartlab.hf.space` |
 | 인프라 | HuggingFace Spaces (CPU 2 코어 · 16GB · 무료) |
-| MCP | `/mcp/sse` — 25 도구 (전체 엔진 커버) |
+| MCP | `/mcp/sse` — 자동 생성 도구 + API discovery + Analysis Graph/Process Map |
 | REST API | `/api/dart/*` — 공시·재무·보고서 프록시 |
 | DART 키 | 서버 측 Secret 으로 관리, 사용자 불필요 |
 | 자동 배포 | `v*` 릴리즈 시 GitHub Actions → HF push |
@@ -28,7 +28,7 @@
 
 ### 1) MCP (설치 없이 AI 에서 직접)
 
-Claude Desktop `claude_desktop_config.json`:
+MCP 호환 실행 환경 설정:
 
 ```json
 {
@@ -40,7 +40,7 @@ Claude Desktop `claude_desktop_config.json`:
 }
 ```
 
-25 도구 즉시 사용:
+자동 생성 도구 즉시 사용:
 - 개별 종목 — `companyInsights` · `companyAnalysis` · `companyStory` · `companyValuation` · `companyCredit` · `companyGather` · `companyQuant` …
 - 시장·거시 — `macroAnalysis` · `marketScan` · `gatherData` · `quantAnalysis` · `topdownScreen`.
 - 검색·목록 — `searchCompany` · `dartlabSearch` · `dartlabListing`.
@@ -75,7 +75,7 @@ d.filings("삼성전자", start="20260101")
 
 ```
 사용자
- ├─ MCP 클라이언트 → /mcp/sse → MCP Server (25 tools) → dartlab 엔진 전체
+ ├─ MCP 실행 환경 → /mcp/sse → MCP Server (generated tools) → dartlab 엔진 전체
  ├─ curl/브라우저  → /api/dart/* → DART 프록시 → OpenDART API (서버 키)
  └─ dartlab 패키지 → RemoteDartClient → /api/dart/* (키 없을 때 fallback)
 ```
@@ -95,10 +95,10 @@ FastAPI app (src/dartlab/server/__init__.py)
 
 | 모드 | 전송 | 용도 |
 |---|---|---|
-| stdio | stdin · stdout | 로컬 (Claude Code · Cursor) |
+| stdio | stdin · stdout | 로컬 workspace |
 | SSE | HTTP `/mcp/sse` | 원격 (HF Spaces · 설치 없이) |
 
-두 모드 모두 같은 `create_server()` → 같은 25 도구. 코드 공유.
+두 모드 모두 같은 `create_server()` → 같은 자동 생성 도구. 코드 공유.
 
 ---
 
@@ -121,9 +121,11 @@ FastAPI app (src/dartlab/server/__init__.py)
 
 ---
 
-## 5. MCP 도구 25 개
+## 5. MCP 도구 — 자동 생성으로 간다
 
-### 개별 종목 (기존 15 + 신규 4)
+MCP 도구 목록은 이 문서에서 수동 관리하지 않는다. Python API docstring/capabilities/Analysis Graph 를 `scripts/build/generateSpec.py` 가 읽어 `src/dartlab/mcp/_generated_tools.py` 로 생성한다.
+
+### 개별 종목
 
 | 도구 | 설명 |
 |---|---|
@@ -147,7 +149,7 @@ FastAPI app (src/dartlab/server/__init__.py)
 | **companyFilings** | 공시 목록 |
 | searchCompany | 종목 검색 |
 
-### 시장·거시 (신규 6)
+### 시장·거시
 
 | 도구 | 설명 |
 |---|---|
@@ -217,7 +219,7 @@ HF 무료 티어 16GB 에서:
 
 | 파일 | 역할 |
 |---|---|
-| `src/dartlab/mcp/__init__.py` | MCP 서버 (25 도구 + SSE 전송) |
+| `src/dartlab/mcp/__init__.py` | MCP 서버 (자동 생성 도구 + SSE 전송) |
 | `src/dartlab/server/__init__.py` | FastAPI 앱 + MCP SSE 마운트 |
 | `src/dartlab/server/api/dart.py` | DART 프록시 라우터 |
 | `src/dartlab/providers/dart/openapi/remote.py` | RemoteDartClient |
@@ -230,9 +232,9 @@ HF 무료 티어 16GB 에서:
 ## 요약 — 명제 7 줄
 
 1. HF Space 는 `/mcp/sse` + `/api/dart/*` 동시 제공하는 원격 서버, 설치 없이 dartlab 전체 엔진 사용.
-2. 접근 3 경로 — MCP (Claude Desktop) · REST (curl · 브라우저) · dartlab 패키지 fallback.
-3. MCP 는 stdio·SSE 두 전송 모두 같은 25 도구 공유, 코드 한 곳.
+2. 접근 3 경로 — MCP · REST (curl · 브라우저) · dartlab 패키지 fallback.
+3. MCP 는 stdio·SSE 두 전송 모두 같은 자동 생성 도구 공유, 코드 한 곳.
 4. DART 프록시는 4 엔드포인트 (filings · company · finance · report), `crtfc_key` 제거 + 100 행 제한.
-5. MCP 도구 25 개 — 개별 종목 19 + 시장·거시 6.
+5. MCP 도구는 Python API docstring/capabilities/Analysis Graph 에서 자동 생성한다.
 6. `RemoteDartClient` 가 키 없을 때 자동 fallback, `DARTLAB_SERVER_URL` 환경변수로 오버라이드.
 7. HF 배포는 `deploySpaces.yml` 자동, 16GB 무료 티어에서 캐시 `MAX_SIZE=3 · TTL=300`.
