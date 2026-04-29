@@ -68,6 +68,23 @@ class TestLoadDataCache:
             loadData("005930", "finance", refresh="force")
         assert readParquet.call_count == 2
 
+    def test_krx_auto_bypasses_memory_cache_when_freshness_expired(self):
+        """KRX daily 데이터는 TTL 만료 시 프로세스 LRU보다 HF freshness를 우선한다."""
+        with (
+            patch("dartlab.core.dataLoader._shouldRefreshHfCategory", side_effect=[False, True]) as shouldRefresh,
+            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
+            patch(
+                "dartlab.core.dataLoader.pl.read_parquet", side_effect=lambda p: _fakeLoadedDataFrame(str(p))
+            ) as readParquet,
+            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
+        ):
+            first = loadData("raw-2026", "krxPrices")
+            second = loadData("raw-2026", "krxPrices")
+
+        assert shouldRefresh.call_count == 2
+        assert readParquet.call_count == 2
+        assert first is not second
+
     def test_clear_cache_empties_store(self):
         """_clearLoadCache 가 LRU 를 완전히 비운다."""
         with (

@@ -381,17 +381,25 @@ def loadData(
         return _loadDataPyodide(stockCode, category, sinceYear=sinceYear, columns=columns)
     from dartlab.core.memory import check_memory_and_gc
 
+    dataDir = _dataDir(category)
+    path = dataDir / f"{stockCode}.parquet"
+
+    # KRX daily bulk data is updated after market close. In long-lived server
+    # processes, the in-memory LRU must not pin yesterday's parquet after the
+    # short KRX freshness TTL expires.
+    krxShouldRefresh: bool | None = None
+    if category in {"krxPrices", "krxIndices"} and refresh == "auto":
+        krxShouldRefresh = _shouldRefreshHfCategory(path, category, refresh)
+
     # LRU cache 조회
     cacheKey = (stockCode, category, sinceYear, tuple(columns or ()), asOf, refresh)
-    if refresh != "force":
+    if refresh != "force" and krxShouldRefresh is not True:
         cached = _LOAD_CACHE.get(cacheKey)
         if cached is not None:
             _LOAD_CACHE.move_to_end(cacheKey)
             return cached
 
     check_memory_and_gc(f"loadData({stockCode},{category})")
-    dataDir = _dataDir(category)
-    path = dataDir / f"{stockCode}.parquet"
     effectiveSinceYear = sinceYear
     if category == "edgarDocs" and effectiveSinceYear is None:
         effectiveSinceYear = 2009
@@ -404,7 +412,10 @@ def loadData(
             refresh=refresh,
         )
     else:
-        _ensureLocalParquet(stockCode, path, category, shouldRefresh=_shouldRefreshHfCategory(path, category, refresh))
+        shouldRefresh = (
+            krxShouldRefresh if krxShouldRefresh is not None else _shouldRefreshHfCategory(path, category, refresh)
+        )
+        _ensureLocalParquet(stockCode, path, category, shouldRefresh=shouldRefresh)
     # lazy scan: sinceYear 필터 또는 컬럼 프로젝션이 있으면 scan_parquet 사용
     yearColCandidates = ("year", "bsns_year")
     useLazy = sinceYear is not None or columns is not None

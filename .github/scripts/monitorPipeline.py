@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 
 MONITORED_WORKFLOWS = [
     "Data Sync",
+    "DART New Stocks Sync",
     "Data Prebuild (DART)",
     "EDGAR Data Sync (Bulk)",
     "KRX Data Sync (Bulk)",

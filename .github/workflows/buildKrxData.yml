@@ -6,7 +6,7 @@ name: KRX Data Sync (Bulk)
 
 on:
   schedule:
-    - cron: '0 11 * * 1-5'  # KST 20:00 평일 (UTC 11:00) — 직전 거래 가능 평일(T-1)까지 반영
+    - cron: '0 11 * * 1-5'  # KST 20:00 평일 (UTC 11:00) — 장마감 후 당일(T-0)까지 반영
   workflow_dispatch:
     inputs:
       mode:

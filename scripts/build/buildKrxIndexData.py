@@ -15,8 +15,9 @@ Description
 Modes
 -----
 ``incremental``:
-    마지막 저장일 다음날부터 직전 거래 가능 평일(T-1)까지 수집한다. 캐시 miss
-    또는 cron 누락으로 생긴 gap 을 자동으로 메운다.
+    장마감 데이터 준비 이후에는 마지막 저장일 다음날부터 당일(T-0)까지 수집한다.
+    준비시각 전 수동 실행은 직전 평일까지만 보고, 캐시 miss 또는 cron 누락으로
+    생긴 gap 을 자동으로 메운다.
 ``backfill``:
     ``--start`` 와 ``--end`` 사이를 최근 연도부터 과거 연도 순으로 수집한다.
 
@@ -53,7 +54,7 @@ import argparse
 import asyncio
 import os
 import sys
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 
 import polars as pl
@@ -62,6 +63,7 @@ from dartlab.gather.krxApi import _normalizeDate
 from dartlab.gather.krxIndex import fetchKrxIndexRange
 
 _KST = timezone(timedelta(hours=9))
+_KRX_READY_KST = time(18, 30)
 _MARKETS = ("KRX", "KOSPI", "KOSDAQ")
 
 
@@ -100,9 +102,44 @@ def _previousWeekday(d: date) -> date:
 
 
 def _latestFetchableDate(today: date | None = None) -> date:
-    """자동 수집 최신일 — T-1 평일."""
-    base = today or _todayKst()
-    return _previousWeekday(base - timedelta(days=1))
+    """자동 수집 최신일.
+
+    KST 20:20 cron 에서는 당일 장마감 지수를 기대한다. 준비시각 전 수동 실행은
+    직전 평일까지만 대상으로 잡는다.
+    """
+    if today is None:
+        now = datetime.now(_KST)
+        base = now.date()
+        if now.time() >= _KRX_READY_KST:
+            return _previousWeekday(base)
+        return _previousWeekday(base - timedelta(days=1))
+    return _previousWeekday(today)
+
+
+def _requiredLatestDate(requestedEnd: date) -> date:
+    now = datetime.now(_KST)
+    today = now.date()
+    if requestedEnd < today:
+        return _previousWeekday(requestedEnd)
+    if now.time() >= _KRX_READY_KST:
+        return min(_previousWeekday(today), _previousWeekday(requestedEnd))
+    return _previousWeekday(min(today - timedelta(days=1), requestedEnd))
+
+
+def _validateFreshFetch(df: pl.DataFrame, *, startD: date, endD: date, context: str) -> None:
+    required = _requiredLatestDate(endD)
+    if required < startD:
+        return
+    latest = None
+    if not df.is_empty() and "BAS_DD" in df.columns:
+        s = df["BAS_DD"].max()
+        latest = date(int(s[:4]), int(s[4:6]), int(s[6:8])) if s else None
+    if latest is None or latest < required:
+        raise RuntimeError(
+            f"KRX index fresh 데이터 누락: context={context}, required>={required}, "
+            f"latest={latest}, range={startD}~{endD}. "
+            "이 상태를 success 로 처리하면 HF 가 오래된 raw parquet 으로 남습니다."
+        )
 
 
 def _loadExisting(out: Path, year: int) -> pl.DataFrame | None:
@@ -165,7 +202,7 @@ def _findLastBasDd(outDir: Path) -> date | None:
     """저장된 raw parquet 에서 가장 최근 ``BAS_DD`` 를 찾는다.
 
     로컬 파일이 없으면 HF 현재 연도 파일을 시도한다. incremental 모드의 gap
-    계산 기준이며, None 이면 T-1 하루치만 수집한다.
+    계산 기준이며, None 이면 최신 가능일 하루치만 수집한다.
     """
     files = sorted(outDir.glob("raw-*.parquet"))
     if files:
@@ -225,7 +262,7 @@ async def _fetchAllMarkets(
 
 
 async def buildIncremental(outDir: Path, apiKey: str) -> dict[int, int]:
-    """마지막 저장일 다음날부터 T-1까지 자동 수집한다.
+    """마지막 저장일 다음날부터 최신 fetch 가능 거래일까지 자동 수집한다.
 
     Returns
     -------
@@ -236,7 +273,7 @@ async def buildIncremental(outDir: Path, apiKey: str) -> dict[int, int]:
     last = _findLastBasDd(outDir)
     if last is None:
         startD = targetEnd
-        print(f"[krxIndex] last-date 없음 → T-1 1일치만 ({startD}). 전체 backfill 은 --mode backfill")
+        print(f"[krxIndex] last-date 없음 → 최신 가능일 1일치만 ({startD}). 전체 backfill 은 --mode backfill")
     else:
         startD = last + timedelta(days=1)
         if startD > targetEnd:
@@ -246,6 +283,7 @@ async def buildIncremental(outDir: Path, apiKey: str) -> dict[int, int]:
     s = startD.strftime("%Y-%m-%d")
     e = targetEnd.strftime("%Y-%m-%d")
     df = await _fetchAllMarkets(s, e, apiKey)
+    _validateFreshFetch(df, startD=startD, endD=targetEnd, context="incremental")
     if df.is_empty():
         print(f"[krxIndex] {s}~{e}: empty")
         return {}
