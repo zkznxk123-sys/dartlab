@@ -470,13 +470,13 @@ DartLab은 한국 DART 분석 도구로 시작했지만, 지금은 미국 EDGAR 
 from dartlab import Company
 
 apple = Company("AAPL")
-apple.BS       # 재무상태표 (분기별 시계열)
-apple.IS       # 손익계산서
-apple.CF       # 현금흐름표
-apple.ratios   # 재무비율 (ROE, 부채비율 등)
+apple.show("BS")       # 재무상태표 (분기별 시계열)
+apple.show("IS")       # 손익계산서
+apple.show("CF")       # 현금흐름표
+apple.show("ratios")   # 재무비율 (ROE, 부채비율 등)
 ```
 
-DART 분석과 코드가 완전히 같다. `Company("005930")`이든 `Company("AAPL")`이든, 같은 property에서 같은 구조의 DataFrame이 나온다.
+DART 분석과 코드가 완전히 같다. `Company("005930")`이든 `Company("AAPL")`이든, `show(topic)`에서 같은 구조의 DataFrame이 나온다.
 
 ### 지금 되는 것
 

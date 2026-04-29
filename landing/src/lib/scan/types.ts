@@ -23,8 +23,23 @@ export interface SortKey {
 	dir: 'asc' | 'desc';
 }
 
-/** 메트릭 데이터 소스 — DuckDB SQL projection 단위. */
-export type MetricSource = 'ecosystem' | 'valuation' | 'prices' | 'changes';
+/** 메트릭 데이터 소스 — 런타임 projection 단위. */
+export type MetricSource =
+	| 'ecosystem'
+	| 'valuation'
+	| 'prices'
+	| 'changes'
+	| 'finance5y'
+	| 'priceTrend'
+	| 'report';
+
+/** 표 셀에 직접 그리는 짧은 시계열. */
+export interface SeriesMetric {
+	labels: string[];
+	values: Array<number | null>;
+	unit: string;
+	source: string;
+}
 
 /** 메트릭 정의 — UI 헤더 툴팁 + 포맷터 + 그리드 정렬 보조.
  *
@@ -36,8 +51,8 @@ export interface MetricDef {
 	label: string;
 	/** 그룹 — 컬럼 그룹 toggle 단위 */
 	group: string;
-	/** 'number' = 정렬·필터 가능, 'text' = 검색만, 'enum' = 칩 선택 */
-	type: 'number' | 'text' | 'enum';
+	/** 'number' = 정렬·필터 가능, 'text' = 검색만, 'enum' = 칩 선택, 'series' = sparkline */
+	type: 'number' | 'text' | 'enum' | 'series';
 	/** 단위 (% · 원 · 배 · 명 · 점 등). type=number 한정 */
 	unit?: string;
 	/** 한국어 설명 (컬럼 헤더 hover 툴팁 + 정의 + 좋은 방향) */

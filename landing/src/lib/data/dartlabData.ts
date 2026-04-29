@@ -1,0 +1,134 @@
+import { base } from '$app/paths';
+import { readJsonCache, writeJsonCache } from './cacheStore';
+
+const DEFAULT_HF_RESOLVE = 'https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main';
+export const HF_RESOLVE = (import.meta.env.VITE_DARTLAB_HF_RESOLVE ?? DEFAULT_HF_RESOLVE).replace(
+	/\/+$/,
+	''
+);
+const DEFAULT_TTL_MS = 6 * 60 * 60 * 1000;
+
+export type FetchLike = typeof fetch;
+
+export interface LoadJsonOptions {
+	fetchFn: FetchLike;
+	ttlMs?: number;
+	required?: boolean;
+	preferLocal?: boolean;
+}
+
+function normalizePath(path: string): string {
+	return path.replace(/^\/+/, '');
+}
+
+function hasHfLandingJson(path: string): boolean {
+	return (
+		path === 'map/atlas.json' ||
+		path === 'map/ecosystem.json' ||
+		path === 'map/industryStats.json' ||
+		path === 'map/insights.json' ||
+		path === 'map/meta.json' ||
+		path === 'map/movers.json' ||
+		path === 'map/prices-snapshot.json' ||
+		path === 'map/search-index.json' ||
+		path === 'map/timeline.json' ||
+		path.startsWith('map/companies/') ||
+		path.startsWith('map/industries/')
+	);
+}
+
+function shouldCacheJson(path: string): boolean {
+	return (
+		path !== 'map/ecosystem.json' &&
+		path !== 'map/prices-snapshot.json' &&
+		path !== 'landing/map/ecosystem.json' &&
+		path !== 'landing/map/prices-snapshot.json'
+	);
+}
+
+async function fetchJson<T>(url: string, fetchFn: FetchLike): Promise<T | null> {
+	try {
+		const resp = await fetchFn(url);
+		if (!resp.ok) return null;
+		return (await resp.json()) as T;
+	} catch {
+		return null;
+	}
+}
+
+export async function loadJson<T>(
+	path: string,
+	{ fetchFn, ttlMs = DEFAULT_TTL_MS, required = false, preferLocal = false }: LoadJsonOptions
+): Promise<T | null> {
+	const normalized = normalizePath(path);
+	const cacheable = shouldCacheJson(normalized);
+	const cached = cacheable ? await readJsonCache<T>(normalized, ttlMs) : null;
+	if (cached != null) return cached;
+
+	if (preferLocal) {
+		const local = await fetchJson<T>(`${base}/${normalized}`, fetchFn);
+		if (local != null) {
+			if (cacheable) void writeJsonCache(normalized, local);
+			return local;
+		}
+	}
+
+	if (hasHfLandingJson(normalized)) {
+		const hf = await fetchJson<T>(`${HF_RESOLVE}/landing/${normalized}`, fetchFn);
+		if (hf != null) {
+			if (cacheable) void writeJsonCache(normalized, hf);
+			return hf;
+		}
+	}
+
+	if (!preferLocal) {
+		const local = await fetchJson<T>(`${base}/${normalized}`, fetchFn);
+		if (local != null) {
+			if (cacheable) void writeJsonCache(normalized, local);
+			return local;
+		}
+	}
+
+	if (!hasHfLandingJson(normalized)) {
+		const hf = await fetchJson<T>(`${HF_RESOLVE}/landing/${normalized}`, fetchFn);
+		if (hf != null) {
+			if (cacheable) void writeJsonCache(normalized, hf);
+			return hf;
+		}
+	}
+
+	const stale = cacheable ? await readJsonCache<T>(normalized, ttlMs, { allowStale: true }) : null;
+	if (stale != null) return stale;
+
+	if (required) throw new Error(`${normalized} 로드 실패`);
+	return null;
+}
+
+export async function loadHfJson<T>(
+	path: string,
+	{ fetchFn, ttlMs = DEFAULT_TTL_MS, required = false }: LoadJsonOptions
+): Promise<T | null> {
+	const normalized = normalizePath(path);
+	const cacheKey = `hf/${normalized}`;
+	const cacheable = shouldCacheJson(normalized);
+	const cached = cacheable ? await readJsonCache<T>(cacheKey, ttlMs) : null;
+	if (cached != null) return cached;
+
+	const hf = await fetchJson<T>(`${HF_RESOLVE}/${normalized}`, fetchFn);
+	if (hf != null) {
+		if (cacheable) void writeJsonCache(cacheKey, hf);
+		return hf;
+	}
+
+	const stale = cacheable ? await readJsonCache<T>(cacheKey, ttlMs, { allowStale: true }) : null;
+	if (stale != null) return stale;
+
+	if (required) throw new Error(`${normalized} HF 로드 실패`);
+	return null;
+}
+
+export function prewarmJson(paths: string[], fetchFn: FetchLike, ttlMs = DEFAULT_TTL_MS): void {
+	for (const path of paths) {
+		void loadJson(path, { fetchFn, ttlMs, required: false });
+	}
+}

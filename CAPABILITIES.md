@@ -263,7 +263,7 @@ setup: AI provider 설정 (capabilities 확인 후 설정)
 
 ---
 
-## Server API (81개 엔드포인트)
+## Server API (85개 엔드포인트)
 
 FastAPI `/api/*` 엔드포인트. 모든 클라이언트의 단일 소비 경로.
 
@@ -281,6 +281,9 @@ FastAPI `/api/*` 엔드포인트. 모든 클라이언트의 단일 소비 경로
 | DELETE | `/api/openapi/dart-key` | 프로젝트 .env의 OpenDART API 키를 제거한다. |
 | POST | `/api/channels/{platform}/start` | 외부 채널 어댑터 시작. |
 | POST | `/api/channels/{platform}/stop` | 외부 채널 어댑터 정지. |
+| GET | `/api/channel` | DevTunnels 모바일 접속 채널 상태를 반환한다. |
+| POST | `/api/channel/start` | 현재 Web UI를 모바일에서 열 수 있는 DevTunnels 채널을 시작한다. |
+| POST | `/api/channel/stop` | DevTunnels 채널을 종료한다. |
 | GET | `/api/ai/profile/events` | profile 변경 SSE 스트림. |
 | GET | `/api/models/{provider}` | Provider별 사용 가능한 모델 목록 — SDK/API 자동 조회, 실패시 fallback. |
 | POST | `/api/codex/logout` | Codex CLI에 저장된 계정 인증을 제거한다. |
@@ -298,6 +301,7 @@ FastAPI `/api/*` 엔드포인트. 모든 클라이언트의 단일 소비 경로
 | GET | `/api/company/{code}/searchIndex` | MiniSearch 인덱스용 flat document list. |
 | GET | `/api/company/{code}/modules` | 기업의 사용 가능한 데이터 모듈 목록. |
 | POST | `/api/ask` | LLM 질문 — AI가 질문 의도를 자율 판단하고 종목/매크로/비교를 결정한다. |
+| GET | `/api/ask/artifacts/{day}/{filename}` | AI tool_result 에서 생성된 CSV 아티팩트를 내려준다. |
 | GET | `/api/search` | 종목 검색 — substring 우선, 결과 없으면 fuzzy(초성/Levenshtein) fallback. |
 | GET | `/api/company/{code}` | 종목 기본 정보 + 사용 가능 API surface 목록. |
 | GET | `/api/company/{code}/index` | 회사 데이터 구조 인덱스 DataFrame. |

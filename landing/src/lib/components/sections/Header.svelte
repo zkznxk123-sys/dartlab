@@ -26,7 +26,7 @@
 		{ label: 'Map', href: `${base}/map` }
 	];
 
-	const DASHBOARD_PATHS = ['/dashboard'];
+	const DASHBOARD_PATHS = ['/dashboard', '/company'];
 
 	let isDashboard = $derived.by(() => {
 		const path = page.url.pathname;

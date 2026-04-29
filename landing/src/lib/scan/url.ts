@@ -9,50 +9,9 @@
  */
 
 import type { ScanPayload, FilterCond, SortKey } from './types';
+import { METRICS_BY_KEY } from './metrics';
 
-const VALID_METRIC_KEYS = new Set([
-	'label',
-	'industryName',
-	'stageName',
-	'role',
-	'marketShare',
-	'industryRank',
-	'revenue',
-	'opMargin',
-	'roe',
-	'revenueYoyPct',
-	'revCagr',
-	'debtRatio',
-	'icr',
-	'profGrade',
-	'debtGrade',
-	'growthGrade',
-	'govGrade',
-	'holderPct',
-	'holderChange',
-	'stability',
-	'qualGrade',
-	'liqGrade',
-	'cfPattern',
-	'auditRisk',
-	'capClass',
-	'empCount',
-	'roeDelta',
-	'opMarginDelta',
-	'debtRatioDelta',
-	'currentPrice',
-	'marketCap',
-	'return1m',
-	'return3m',
-	'return1y',
-	'volatility1y',
-	'spark',
-	'per',
-	'pbr',
-	'dividendYield',
-	'numericChanges1y',
-	'structuralChanges1y'
-]);
+const VALID_METRIC_KEYS = new Set(Object.keys(METRICS_BY_KEY));
 
 function b64encode(s: string): string {
 	if (typeof window === 'undefined') return '';

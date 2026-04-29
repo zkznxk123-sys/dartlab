@@ -11,6 +11,9 @@ from typing import Any
 _MAX_LLM_CHARS = 8000
 _MAX_DF_ROWS_LLM = 20
 _MAX_DF_ROWS_UI = 100
+_EVIDENCE_LABELS = {
+    "period": "기간",
+}
 
 
 # ── Polars 유니코드 박스 → GFM 마크다운 테이블 변환 ────────
@@ -302,10 +305,14 @@ def _evidenceHeader(result: Any, *, name: str, arguments: dict) -> str:
     ]
     contract = contractMetadataForTool(name, arguments)
     if contract:
-        lines.append(f"- 계약 키: {contract.get('contractKey')}")
+        lines.append(f"- 계약 키: {contract.get('contractId') or contract.get('contractKey')}")
         required = contract.get("requiredEvidence")
         if required:
-            lines.append(f"- 필수 증거: {', '.join(str(x) for x in required)}")
+            labels = [_EVIDENCE_LABELS.get(str(x), str(x)) for x in required]
+            lines.append(f"- 필수 증거: {', '.join(labels)}")
+        schema = contract.get("evidenceSchema")
+        if isinstance(schema, dict) and schema:
+            lines.append(f"- 증거 스키마: {', '.join(str(k) for k in schema.keys())}")
     if isinstance(result, dict):
         summary = result.get("_summary")
         if summary:

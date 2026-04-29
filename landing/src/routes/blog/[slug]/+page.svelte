@@ -119,14 +119,15 @@
 
 	const Component = $derived(data.component);
 	const meta = $derived(data.metadata ?? {});
-	const postInfo = $derived(getPost(data.slug));
-	const prevNext = $derived(findPrevNext(data.slug));
-	const seriesPrevNext = $derived(findSeriesPrevNext(data.slug));
-	const relatedCategoryPosts = $derived(getRelatedPostsByCategory(data.slug, 3));
+	const slug = $derived(data.slug ?? '');
+	const postInfo = $derived(getPost(slug));
+	const prevNext = $derived(findPrevNext(slug));
+	const seriesPrevNext = $derived(findSeriesPrevNext(slug));
+	const relatedCategoryPosts = $derived(getRelatedPostsByCategory(slug, 3));
 
 	const pageTitle = $derived(`${meta?.title ?? 'Blog'} — DartLab 전자공시 분석`);
 	const pageDesc = $derived(meta?.description ?? `DartLab Blog — ${meta?.title ?? ''}`);
-	const pageUrl = $derived(`${brand.url}blog/${data.slug}`);
+	const pageUrl = $derived(`${brand.url}blog/${slug}`);
 	const pageImage = $derived(
 		postInfo?.ogImage ? `${brand.url}${postInfo.ogImage.replace(/^\//, '')}` :
 		postInfo?.thumbnail ? `${brand.url}${postInfo.thumbnail.replace(/^\//, '')}` :
@@ -290,9 +291,9 @@
 				{#if postInfo}
 					<div class="post-meta-row">
 						<a href="{base}{getCategoryPath(postInfo.category)}" class="post-badge">{postInfo.categoryLabel}</a>
-						{#if postInfo.seriesLabel}
+						{#if postInfo.series}
 							<a href="{base}{getSeriesPath(postInfo.series)}" class="post-series">
-								{postInfo.seriesLabel}
+								{postInfo.seriesLabel ?? postInfo.series}
 								{#if postInfo.seriesOrder}
 									<span class="post-series-order">#{postInfo.seriesOrder}</span>
 								{/if}

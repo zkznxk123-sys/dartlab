@@ -44,8 +44,11 @@
 	});
 
 	const path = $derived.by(() => {
-		const valid = points.filter((p): p is [number, number] => p != null);
-		if (valid.length === 0) return '';
+		const valid = points.filter(
+			(p): p is [number, number] =>
+				p != null && Number.isFinite(p[0]) && Number.isFinite(p[1])
+		);
+		if (valid.length < 2) return '';
 		if (!smooth || valid.length < 3) {
 			return valid.map(([x, y], i) => (i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`)).join(' ');
 		}

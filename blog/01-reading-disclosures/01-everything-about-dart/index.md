@@ -828,12 +828,12 @@ c.relatedPartyTx       # 특수관계자 거래
 c.sanction             # 제재 현황
 
 # K-IFRS 주석
-c.notes.inventory          # 재고자산
-c.notes.tangibleAsset      # 유형자산
-c.notes.borrowings         # 차입금
-c.notes.provisions         # 충당부채
-c.notes.segments           # 부문정보
-c.notes["매출채권"]         # 한글 키도 가능
+c.show("inventory")        # 재고자산
+c.show("tangibleAsset")    # 유형자산
+c.show("borrowings")       # 차입금
+c.show("provisions")       # 충당부채
+c.show("segments")         # 부문정보
+c.show("receivables")      # 매출채권
 
 # 공시 텍스트
 c.business        # 사업의 내용
@@ -850,7 +850,7 @@ d = c.all()       # 40개 모듈 전체를 dict로
 
 ### K-IFRS 주석 통합
 
-12개 주요 주석 항목을 `c.notes`로 통합 접근하고, 추가 키워드는 `c.get("notesDetail", keyword="법인세")` 패턴으로 조회한다.
+12개 주요 주석 항목을 `c.show(topic)`으로 통합 접근한다.
 
 ---
 

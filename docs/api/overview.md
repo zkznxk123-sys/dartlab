@@ -91,8 +91,8 @@ kr = dartlab.Company("005930")      # 한국 DART
 us = dartlab.Company("AAPL")        # 미국 EDGAR
 
 # 동일한 메서드
-kr.BS                               # K-IFRS 재무상태표
-us.BS                               # US-GAAP Balance Sheet
+kr.show("BS")                       # K-IFRS 재무상태표
+us.show("BS")                       # US-GAAP Balance Sheet
 
 kr.analysis("financial", "수익성")    # 한국어 계정
 us.analysis("financial", "수익성")    # 자동 번역

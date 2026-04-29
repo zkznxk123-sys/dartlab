@@ -37,7 +37,7 @@
     <line x1="100" y1="487" x2="490" y2="487" stroke="#1e2433"/>
     <text x="100" y="513" font-size="12" fill="#22c55e">▲ 80% 돌파 → 베팅 성공</text>
     <text x="100" y="533" font-size="12" fill="#ec4899">▼ 50% 이하 → 감가상각 부담</text>
-    <text x="100" y="567" font-size="10" fill="#64748b">c.notes.tangibleAsset (CAPEX 추적)</text>
+    <text x="100" y="567" font-size="10" fill="#64748b">c.show("tangibleAsset") (CAPEX 추적)</text>
 
     <rect x="540" y="370" width="430" height="220" rx="12" fill="rgba(236,72,153,0.06)" stroke="rgba(236,72,153,0.4)" stroke-width="1.5"/>
     <text x="560" y="405" font-size="13" font-weight="700" fill="#ec4899">④ TikTok "buldak" 검색량</text>

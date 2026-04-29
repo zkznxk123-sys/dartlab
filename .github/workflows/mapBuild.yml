@@ -58,6 +58,9 @@ jobs:
       - name: Build dashboard macro.json
         run: uv run python -X utf8 scripts/build/buildMacroJson.py
 
+      - name: Build story manifest
+        run: uv run python -X utf8 scripts/build/buildStoryManifest.py
+
       - name: Validate map output
         run: |
           set -euo pipefail
@@ -82,4 +85,5 @@ jobs:
             echo "ERROR: atlas.json 크기 $atlas_size < 1024 바이트"
             exit 1
           fi
+          jq empty landing/static/story/manifest.json
           echo "validation OK: companies=$count atlas=${atlas_size}B"

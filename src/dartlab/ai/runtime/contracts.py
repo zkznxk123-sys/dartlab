@@ -11,6 +11,11 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import Any
 
+from dartlab.ai.runtime.contract_graph import (
+    contractForTool,
+    legacyAnswerContractNames,
+)
+
 
 @dataclass(frozen=True)
 class ContractIssue:
@@ -18,69 +23,19 @@ class ContractIssue:
     detail: str = ""
 
 
-CAPABILITY_CONTRACTS: dict[str, dict[str, Any]] = {
-    "gather.krx.close": {
-        "freshness": "recent_price_questions_require_latest_trade_date",
-        "comparisonCompleteness": "market_rankings_require_full_universe_computation",
-        "requiredEvidence": ("asOf", "기간", "universe", "metric"),
-        "toolArgPolicy": ("start_lte_end", "end_not_future", "target_close_for_price_returns"),
-    },
-    "comparison": {
-        "comparisonCompleteness": "same_axis_evidence_for_each_target",
-        "requiredEvidence": ("target", "metric", "period", "value"),
-        "toolArgPolicy": ("no_missing_side_in_comparison",),
-    },
-    "disclosure": {
-        "freshness": "filing_date_or_title_scope_must_be_explicit",
-        "requiredEvidence": ("filedAt", "title", "formType", "basis"),
-        "toolArgPolicy": ("title_only_scope_must_not_be_presented_as_body_analysis",),
-    },
-    "capabilities": {
-        "requiredEvidence": ("valid_key_or_search",),
-        "toolArgPolicy": ("reject_polluted_capabilities_key",),
-    },
-}
-
-_RECENT_WORDS = ("최근", "현재", "오늘", "어제", "latest", "recent", "지금")
-_COMPARISON_WORDS = ("비교", "대비", "vs", " versus ", "둘 중", "어느 쪽", "누가")
-_DISCLOSURE_WORDS = ("공시", "filing", "dart", "보고서")
 _DATE_KEYS = ("start", "end", "from", "to", "date", "asOf", "asof")
 _POLLUTED_KEY_RE = re.compile(r"[\[\]{}]|to=|functions\.|tool_calls|arguments|role=", re.IGNORECASE)
 
 
 def contractMetadataForTool(name: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
     """tool 출력 Evidence Header 에 붙일 capabilities 계약 메타."""
-    args = arguments or {}
-    key = _contractKeyForTool(name, args)
-    if not key:
-        return {}
-    meta = CAPABILITY_CONTRACTS.get(key)
-    if meta:
-        return {"contractKey": key, **meta}
-    return {}
+    contract = contractForTool(name, arguments or {})
+    return contract.toDict() if contract is not None else {}
 
 
 def resolveAnswerContracts(question: str | None, toolCalls: list[dict[str, Any]]) -> set[str]:
     """질문과 호출 도구에서 검사해야 할 얇은 계약 이름을 찾는다."""
-    q = (question or "").lower()
-    contracts: set[str] = set()
-    if any(word in q for word in _RECENT_WORDS):
-        contracts.add("recent")
-    if any(word in q for word in _COMPARISON_WORDS):
-        contracts.add("comparison")
-    if any(word in q for word in _DISCLOSURE_WORDS):
-        contracts.add("disclosure")
-
-    for call in toolCalls:
-        name = str(call.get("name", ""))
-        args = _callArgs(call)
-        if _contractKeyForTool(name, args) == "gather.krx.close":
-            contracts.add("recent")
-        if name in {"search", "filings", "liveFilings", "disclosure"}:
-            contracts.add("disclosure")
-        if name == "capabilities":
-            contracts.add("capabilities")
-    return contracts
+    return legacyAnswerContractNames(question, toolCalls)
 
 
 def validateToolArguments(
@@ -107,7 +62,8 @@ def validateToolArguments(
         if any(d > today + timedelta(days=1) for d in parsed.values()):
             issues.append(ContractIssue("bad_tool_args", "future_date"))
 
-        if _contractKeyForTool(name, args) == "gather.krx.close":
+        contract = contractForTool(name, args)
+        if contract is not None and contract.contractId == "gather.krx.close":
             target = str(args.get("target") or "").lower()
             if target and target not in {"close", "raw"}:
                 issues.append(ContractIssue("bad_tool_args", "krx_price_target_not_close"))
@@ -134,6 +90,16 @@ def sanitizeToolArguments(
                 clean["target"] = resolveId(target) or target
             except Exception:
                 pass
+        if str(clean.get("target") or "").upper() == "USDKRW":
+            clean["market"] = "KR"
+    if name == "show" and _looks_like_foreign_ticker(clean.get("stockCode")):
+        topic = clean.get("topic")
+        if isinstance(topic, str):
+            normalized = topic.strip()
+            if normalized == "ratioSeries":
+                clean["topic"] = "ratios"
+            elif normalized.lower() in {"dividend", "dividends", "payout", "shareholder_return"}:
+                clean["topic"] = "ratios"
     for key in _DATE_KEYS:
         parsed = _parseDate(clean.get(key))
         if parsed and parsed > today:
@@ -162,19 +128,6 @@ def staleCutoff(today: date | None = None) -> date:
     return (today or date.today()) - timedelta(days=120)
 
 
-def _contractKeyForTool(name: str, args: dict[str, Any]) -> str | None:
-    if name == "gather":
-        axis = str(args.get("axis") or "").lower()
-        target = str(args.get("target") or "").lower()
-        if axis == "krx" and target in {"", "close", "raw"}:
-            return "gather.krx.close"
-    if name in {"search", "filings", "liveFilings", "disclosure"}:
-        return "disclosure"
-    if name == "capabilities":
-        return "capabilities"
-    return None
-
-
 def _hasPollutedCapabilitiesKey(args: dict[str, Any]) -> bool:
     key = args.get("key")
     if key is None:
@@ -196,6 +149,11 @@ def sanitizeCapabilitiesArgs(args: dict[str, Any]) -> dict[str, Any]:
                 return clean
         clean.pop("key", None)
     return clean
+
+
+def _looks_like_foreign_ticker(value: Any) -> bool:
+    text = str(value or "").strip()
+    return bool(text) and not text.isdigit()
 
 
 def _callArgs(call: dict[str, Any]) -> dict[str, Any]:

@@ -87,7 +87,7 @@
 		} else {
 			const node = companyMatches[active - presetMatches.length];
 			if (node) {
-				goto(`${base}/dashboard/${node.id}`);
+				goto(`${base}/company/${node.id}`);
 				onClose();
 			}
 		}
@@ -176,7 +176,7 @@
 							class:active={active === idx}
 							onmouseenter={() => (active = idx)}
 							onclick={() => {
-								goto(`${base}/dashboard/${node.id}`);
+								goto(`${base}/company/${node.id}`);
 								onClose();
 							}}
 						>

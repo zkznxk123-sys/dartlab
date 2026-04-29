@@ -253,9 +253,9 @@ c.audit        # 감사의견 — 숫자를 신뢰할 수 있는가
 c.majorHolder  # 최대주주 — 누가 회사를 지배하는가
 c.executivePay # 임원 보수 — 경영진 인센티브 구조
 
-c.notes.borrowings   # 차입금 주석 — 금리, 만기, 담보
-c.notes.inventory    # 재고자산 주석 — 구성, 평가손실
-c.notes.provisions   # 충당부채 주석 — 소송, 보증
+c.show("borrowings")   # 차입금 주석 — 금리, 만기, 담보
+c.show("inventory")    # 재고자산 주석 — 구성, 평가손실
+c.show("provisions")   # 충당부채 주석 — 소송, 보증
 
 c.mdna         # 경영진단의견 — 경영진이 실적을 어떻게 설명하는가
 c.business     # 사업의 내용 — 시장 환경, 경쟁, 원재료

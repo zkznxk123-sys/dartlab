@@ -97,6 +97,10 @@ const config = {
 				if (stripped.startsWith('/feed/')) {
 					return;
 				}
+				// app.html icon 링크. static/favicon.ico 는 build assets 로 복사되므로 prerender 방문 불필요.
+				if (stripped === '/favicon.ico') {
+					return;
+				}
 				throw new Error(`${message} (linked from ${referrer})`);
 			}
 		},

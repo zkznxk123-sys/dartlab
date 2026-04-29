@@ -3,7 +3,7 @@
 	meta/context/snapshot/tool 뱃지 + 스냅샷 카드 + 도구 이벤트 타임라인.
 -->
 <script>
-	import { formatEvidenceLabel } from "$lib/ai/evidenceLabels.js";
+	import { formatEvidenceLabel, formatToolLabel } from "$lib/ai/evidenceLabels.js";
 	import { Badge } from "$lib/components/ui/badge/index.js";
 	import {
 		Database, AlertTriangle, Activity
@@ -84,7 +84,7 @@
 				}}
 			>
 				<badge.icon size={10} class="flex-shrink-0" />
-				{badge.label}
+				{badge.name ? formatToolLabel(badge.name, badge.label) : badge.label}
 			</button>
 		{/each}
 		</div>

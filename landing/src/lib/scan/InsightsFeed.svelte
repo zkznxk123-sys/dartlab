@@ -37,31 +37,40 @@
 		return list.sort((a, b) => (dir === 'desc' ? b.v - a.v : a.v - b.v)).slice(0, limit);
 	}
 
-	// 극단치 noise 필터:
-	//  · base 임계 — 이전 값이 0 근처면 % 변화 폭발하므로 현재값으로 base sanity 검증
-	//  · delta cap — 60 %p 이상 ROE/opMargin 변화는 데이터 이상 (자본잠식·일시 비용 등)
-	let roeRising = $derived(
-		topByMetric('roeDelta', 'desc', 5, (n, v) => {
+	// 극단치 noise 필터. 조건이 너무 빡빡해 카드가 비면 현재 ROE 상위로 폴백한다.
+	let roeRising = $derived.by(() => {
+		const delta = topByMetric('roeDelta', 'desc', 5, (n, v) => {
 			const cur = n.roe as number | undefined;
-			return v >= 3 && v <= 60 && typeof cur === 'number' && cur >= 5;
-		})
-	);
+			return v > 0 && v <= 300 && (typeof cur !== 'number' || cur >= 0);
+		});
+		return delta.length > 0 ? delta : topByMetric('roe', 'desc', 5, (_n, v) => v >= 5 && v <= 80);
+	});
 	let marginRising = $derived(
 		topByMetric('opMarginDelta', 'desc', 5, (n, v) => {
 			const cur = n.opMargin as number | undefined;
-			return v >= 2 && v <= 40 && typeof cur === 'number' && cur >= 0;
-		})
+			return v > 0 && v <= 120 && (typeof cur !== 'number' || cur >= -20);
+		}).length > 0
+			? topByMetric('opMarginDelta', 'desc', 5, (n, v) => {
+					const cur = n.opMargin as number | undefined;
+					return v > 0 && v <= 120 && (typeof cur !== 'number' || cur >= -20);
+				})
+			: topByMetric('opMargin', 'desc', 5, (_n, v) => v > 0 && v <= 80)
 	);
 	let debtSurge = $derived(
 		topByMetric('debtRatioDelta', 'desc', 5, (n, v) => {
 			const cur = n.debtRatio as number | undefined;
 			// 부채비율 delta 는 절댓값 폭이 크지만 500% 이상 회사는 이미 자본잠식 — 신호로 의미 없음
 			return v >= 10 && v <= 500 && typeof cur === 'number' && cur > 0 && cur <= 500;
-		})
+		}).length > 0
+			? topByMetric('debtRatioDelta', 'desc', 5, (n, v) => {
+					const cur = n.debtRatio as number | undefined;
+					return v >= 10 && v <= 500 && typeof cur === 'number' && cur > 0 && cur <= 500;
+				})
+			: topByMetric('debtRatio', 'desc', 5, (_n, v) => v >= 100 && v <= 500)
 	);
 
 	let qualityCompounders = $derived.by(() => {
-		const list = nodes
+		const strict = nodes
 			.filter((n) => {
 				const q = n.qualGrade as string | undefined;
 				const roe = n.roe as number | undefined;
@@ -70,6 +79,7 @@
 					(q === '우수' || q === '양호') &&
 					typeof roe === 'number' &&
 					roe >= 15 &&
+					roe <= 80 &&
 					typeof debt === 'number' &&
 					debt <= 100
 				);
@@ -77,7 +87,11 @@
 			.map((n) => ({ n, v: n.roe as number }))
 			.sort((a, b) => b.v - a.v)
 			.slice(0, 5);
-		return list;
+		if (strict.length > 0) return strict;
+		return topByMetric('roe', 'desc', 5, (n, v) => {
+			const debt = n.debtRatio as number | undefined;
+			return v >= 10 && v <= 120 && (typeof debt !== 'number' || debt <= 200);
+		});
 	});
 
 	function applyRoeRising() {
@@ -137,17 +151,20 @@
 				<span class="card-title">ROE 급상승 회사</span>
 				<button type="button" class="card-cta" onclick={applyRoeRising}>전체 보기 →</button>
 			</div>
-			<div class="card-desc">전기 대비 ROE 가장 많이 개선 (현재 5%↑ · +3~60%p 범위)</div>
+			<div class="card-desc">전기 대비 ROE 개선. 없으면 현재 ROE 상위 표시</div>
 			<ul class="card-list">
 				{#each roeRising as r (r.n.id)}
 					<li>
 						<button type="button" class="r-row" onclick={() => onCompanyClick(r.n.id)}>
 							<span class="r-dot" style:background={(r.n.color as string) || '#475569'}></span>
 							<span class="r-label">{r.n.label}</span>
-							<span class="r-val good">{fmtPct(r.v, { withSign: true, suffix: '%p' })}</span>
+							<span class="r-val good">{fmtPct(r.v, { withSign: true })}</span>
 						</button>
 					</li>
 				{/each}
+				{#if roeRising.length === 0}
+					<li class="empty-row">조건에 맞는 회사 없음</li>
+				{/if}
 			</ul>
 		</div>
 
@@ -157,17 +174,20 @@
 				<span class="card-title">영업이익률 개선</span>
 				<button type="button" class="card-cta" onclick={applyMarginRising}>전체 보기 →</button>
 			</div>
-			<div class="card-desc">전기 대비 영업이익률 가장 많이 개선 (흑자 유지 · +2~40%p)</div>
+			<div class="card-desc">영업이익률 개선. 없으면 현재 영업이익률 상위 표시</div>
 			<ul class="card-list">
 				{#each marginRising as r (r.n.id)}
 					<li>
 						<button type="button" class="r-row" onclick={() => onCompanyClick(r.n.id)}>
 							<span class="r-dot" style:background={(r.n.color as string) || '#475569'}></span>
 							<span class="r-label">{r.n.label}</span>
-							<span class="r-val good">{fmtPct(r.v, { withSign: true, suffix: '%p' })}</span>
+							<span class="r-val good">{fmtPct(r.v, { withSign: true })}</span>
 						</button>
 					</li>
 				{/each}
+				{#if marginRising.length === 0}
+					<li class="empty-row">조건에 맞는 회사 없음</li>
+				{/if}
 			</ul>
 		</div>
 
@@ -177,17 +197,20 @@
 				<span class="card-title">부채비율 급증 위험</span>
 				<button type="button" class="card-cta" onclick={applyDebtSurge}>전체 보기 →</button>
 			</div>
-			<div class="card-desc">전기 대비 부채비율 급등 (현재 부채 500%↓ · +10~500%p)</div>
+			<div class="card-desc">부채비율 급등 위험. 없으면 현재 부채비율 상위 표시</div>
 			<ul class="card-list">
 				{#each debtSurge as r (r.n.id)}
 					<li>
 						<button type="button" class="r-row" onclick={() => onCompanyClick(r.n.id)}>
 							<span class="r-dot" style:background={(r.n.color as string) || '#475569'}></span>
 							<span class="r-label">{r.n.label}</span>
-							<span class="r-val bad">{fmtPct(r.v, { withSign: true, suffix: '%p' })}</span>
+							<span class="r-val bad">{fmtPct(r.v, { withSign: true })}</span>
 						</button>
 					</li>
 				{/each}
+				{#if debtSurge.length === 0}
+					<li class="empty-row">조건에 맞는 회사 없음</li>
+				{/if}
 			</ul>
 		</div>
 
@@ -197,7 +220,7 @@
 				<span class="card-title">Quality Compounder</span>
 				<button type="button" class="card-cta" onclick={applyQuality}>전체 보기 →</button>
 			</div>
-			<div class="card-desc">ROE 15%↑ + 부채 100%↓ + 이익질 양호↑ — 장기 우량주</div>
+			<div class="card-desc">ROE 15%↑ + 부채 100%↓. 없으면 ROE·부채 기준 폴백</div>
 			<ul class="card-list">
 				{#each qualityCompounders as r (r.n.id)}
 					<li>
@@ -208,6 +231,9 @@
 						</button>
 					</li>
 				{/each}
+				{#if qualityCompounders.length === 0}
+					<li class="empty-row">조건에 맞는 회사 없음</li>
+				{/if}
 			</ul>
 		</div>
 	</div>
@@ -223,7 +249,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
+		height: 294px;
 		max-height: 32vh;
+		min-height: 294px;
 		overflow-y: auto;
 	}
 	.i-head {
@@ -372,5 +400,10 @@
 	}
 	.r-val.bad {
 		color: #ef4444;
+	}
+	.empty-row {
+		padding: 8px 4px 4px 8px;
+		color: #475569;
+		font-size: 10px;
 	}
 </style>

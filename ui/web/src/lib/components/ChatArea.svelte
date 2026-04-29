@@ -221,7 +221,7 @@
 						message={msg}
 						staggerIndex={staggerReady && i < 15 ? i : 0}
 						onRegenerate={isLastAssistant(msg) ? onRegenerate : undefined}
-						onOpenEvidence={onOpenData ? bridgeEvidence(msg) : undefined}
+						onOpenEvidence={onOpenEvidence ? bridgeEvidence(msg) : undefined}
 						{onOpenArtifact}
 						onEditResend={msg.role === "user" ? onEditResend : undefined}
 						{onAddWatch}

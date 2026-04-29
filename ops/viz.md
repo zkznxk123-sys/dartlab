@@ -1,3 +1,17 @@
+## Appendix. Visual Explanation Engine
+
+`dartlab.viz` 는 차트를 그리는 보조 기능이 아니라 시각적 설명 엔진이다. AI 는 숫자 변화·비교·랭킹은 chart 로 설명하고, 인과·사업구조·재무흐름은 diagram 으로 설명한다.
+
+1차 공식 visual type 은 `chart` 와 `diagram` 이다. `emit_chart()` 와 `emit_diagram()` 이 stdout marker 를 만들고, AI runtime 이 `extract_viz_specs()` 로 이를 `chart` event 와 Workspace Visual Ledger 로 승격한다.
+
+AI 응답에서 visual 은 장식이 아니다. visual 필요 여부는 `Capability Contract Graph` 의 `visualPolicy` 가 정하고, 각 visual spec 은 `evidenceIds` 를 가져야 한다. 질문 유형별 목적은 분명해야 한다: 시계열은 변화, 비교는 차이, 랭킹은 순위, 다이어그램은 인과·구조를 설명한다. evidence 와 연결되지 않은 visual 은 `unsupported_visual` 이다.
+
+Remotion/영상형 설명은 다음 단계다. 현재 구현 계약은 chart/diagram spec 까지이며, 영상형 visual 도 같은 원칙을 따른다: 장식이 아니라 판단 근거를 사용자가 더 빨리 이해하게 하는 설명 도구다.
+
+**반복 실패** → visual 을 “보기 좋은 차트”로만 취급하거나 evidence 와 연결하지 않는 것. visual spec 은 근거와 연결되어야 하며, 연결되지 않은 visual 은 품질 게이트에서 `unsupported_visual` 로 본다.
+
+---
+
 # Viz
 
 **주체**: viz 패키지 (`dartlab.viz` — `emit_chart` · `emit_diagram`).

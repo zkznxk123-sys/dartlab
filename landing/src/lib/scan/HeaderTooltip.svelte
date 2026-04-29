@@ -85,7 +85,8 @@
 		font-size: 11px;
 		color: #cbd5e1;
 		letter-spacing: -0.01em;
-		white-space: nowrap;
+		white-space: pre-line;
+		line-height: 1.15;
 	}
 	.hdr-label {
 		color: #f1f5f9;

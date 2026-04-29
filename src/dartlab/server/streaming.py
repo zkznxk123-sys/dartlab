@@ -100,6 +100,11 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
     )
     chunks: list[str] = []
     artifacts: list[dict] = []
+    evidence: list[dict] = []
+    claims: list[dict] = []
+    visuals: list[dict] = []
+    limits: list[str] = []
+    responseMeta: dict = {}
     try:
         async for event in _sync_gen_to_async(runAsk, question, **kwargs):
             auditor.observe(event.kind, event.data)
@@ -107,6 +112,18 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
                 chunks.append(event.data.get("text", ""))
             elif event.kind == "tool_result":
                 artifacts.extend(event.data.get("artifacts") or [])
+            elif event.kind == "evidence":
+                evidence.append(event.data)
+            elif event.kind == "claim":
+                claims.append(event.data)
+            elif event.kind == "chart":
+                visuals.extend([v for v in event.data.get("visuals") or [] if isinstance(v, dict)])
+            elif event.kind == "done":
+                evidence = _dedupeById(evidence + [v for v in event.data.get("evidence") or [] if isinstance(v, dict)])
+                claims = _dedupeById(claims + [v for v in event.data.get("claims") or [] if isinstance(v, dict)])
+                visuals = _dedupeById(visuals + [v for v in event.data.get("visuals") or [] if isinstance(v, dict)])
+                limits.extend(str(v) for v in event.data.get("limits") or [])
+                responseMeta = event.data.get("responseMeta") or {}
             elif event.kind == "error":
                 raise AnalysisStreamError(
                     event.data.get("error", "analysis error"),
@@ -115,7 +132,15 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
                 )
     finally:
         auditor.flush()
-    return {"answer": "".join(chunks), "artifacts": _dedupeArtifacts(artifacts)}
+    return {
+        "answer": "".join(chunks),
+        "artifacts": _dedupeArtifacts(artifacts),
+        "evidence": _dedupeById(evidence),
+        "claims": _dedupeById(claims),
+        "visuals": _dedupeById(visuals),
+        "limits": _dedupeStrings(limits),
+        "responseMeta": responseMeta,
+    }
 
 
 def _build_kwargs(req: AskRequest) -> dict:
@@ -153,6 +178,28 @@ def _dedupeArtifacts(artifacts: list[dict]) -> list[dict]:
             continue
         seen.add(key)
         out.append(artifact)
+    return out
+
+
+def _dedupeById(items: list[dict]) -> list[dict]:
+    seen: set[str] = set()
+    out: list[dict] = []
+    for item in items:
+        key = str(item.get("id") or item.get("url") or item)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(item)
+    return out
+
+
+def _dedupeStrings(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if item and item not in seen:
+            seen.add(item)
+            out.append(item)
     return out
 
 

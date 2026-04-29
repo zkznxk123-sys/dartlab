@@ -61,7 +61,7 @@ c.show("CF")   # 현금흐름표 — 영업/투자/재무 현금흐름
 ...
 ```
 
-포괄손익계산서(`c.show("CIS")`)와 자본변동표(`c.SCE`)도 같은 방식으로 접근한다.
+포괄손익계산서(`c.show("CIS")`)와 자본변동표(`c.show("SCE")`)도 같은 방식으로 접근한다.
 
 ![재무제표 3줄 — IS, BS, CF가 각각 계정 × 기간 테이블로](./assets/130-financial-statements.svg)
 
@@ -147,22 +147,22 @@ c.diff("businessOverview")        # 사업 개요의 변경 이력
 재무제표의 총액만으로는 안 보이는 것이 있다. "재고자산 1조"라고 적혀 있어도, 그게 상품인지 원재료인지 미착품인지 모른다. 이 분해가 K-IFRS 주석에 있다.
 
 ```python
-c.notes.inventory          # 재고자산 분해 (상품/제품/원재료/미착품)
-c.notes.borrowings         # 차입금 분해 (단기/장기, 이자율)
-c.notes.tangibleAsset      # 유형자산 변동 (카테고리별 기초/기말)
-c.notes.segments           # 부문정보 (부문별 매출/이익)
-c.notes.receivables        # 매출채권 (대손충당금 포함)
-c.notes.costByNature       # 비용 성격별 분류 (원재료/급여/감가상각)
+c.show("inventory")        # 재고자산 분해 (상품/제품/원재료/미착품)
+c.show("borrowings")       # 차입금 분해 (단기/장기, 이자율)
+c.show("tangibleAsset")    # 유형자산 변동 (카테고리별 기초/기말)
+c.show("segments")         # 부문정보 (부문별 매출/이익)
+c.show("receivables")      # 매출채권 (대손충당금 포함)
+c.show("costByNature")     # 비용 성격별 분류 (원재료/급여/감가상각)
 ```
 
 한글로도 접근 가능하다.
 
 ```python
-c.notes["재고자산"]         # c.notes.inventory와 동일
-c.notes["차입금"]           # c.notes.borrowings와 동일
+c.show("inventory")        # 재고자산
+c.show("borrowings")       # 차입금
 ```
 
-뭐가 있는지 모르겠으면 `c.notes.keys()`를 호출한다.
+뭐가 있는지 모르겠으면 `c.topics`에서 topic 목록을 확인한다.
 
 ---
 
@@ -217,7 +217,7 @@ AI가 뒤에서 하는 일:
 1. `dartlab.Company("005930")` — 삼성전자 Company 객체 생성
 2. `c.show("IS")`, `c.show("BS")`, `c.show("CF")` — 재무제표 꺼내기
 3. `c.show("ratios")` — 비율 계산
-4. `c.notes.borrowings` — 차입금 주석 확인
+4. `c.show("borrowings")` — 차입금 주석 확인
 5. 전부 종합해서 재무건전성을 판단하고 돌려준다
 
 ```bash
@@ -230,7 +230,7 @@ uv run dartlab ask "삼성전자 사업보고서에서 바뀐 부분 알려줘"
 uv run dartlab ask "삼성전자 재고자산 구성이 어떻게 되어 있어?"
 ```
 
-→ AI가 `c.notes.inventory`를 호출해서 분해 결과를 설명한다.
+→ AI가 `c.show("inventory")`를 호출해서 분해 결과를 설명한다.
 
 [scan 글](/blog/scan-market-finance)에서 본 것처럼, 코드가 편하면 코드를 쓰고, 질문이 편하면 질문을 하면 된다. Company도 scan도 AI의 도구다.
 

@@ -13,7 +13,7 @@
  * 시계열은 PR-D 디테일 패널에서. PR-B 는 60일 sparkline 만 활용.
  */
 
-import { loadDartDb, type DartDb } from '$lib/data/duckdb';
+import { loadDartDb, sqlEscape, type DartDb } from '$lib/data/duckdb';
 
 /** persisted DB 의 특정 테이블 존재 여부. db.persisted 가 true 일 때만 의미. */
 async function persistedHas(db: DartDb, tableName: string): Promise<boolean> {
@@ -59,6 +59,8 @@ export interface PriceMetrics {
 	return1m: number | null;
 	return3m: number | null;
 	return1y: number | null;
+	/** 60거래일 종가 (단기 추세). */
+	spark60: number[];
 	/** 1년(252거래일) 종가 (5일 다운샘플 ≈ 50포인트). cell sparkline + hover 차트 공용. */
 	spark: number[];
 }
@@ -75,6 +77,31 @@ export interface ChangeMetrics {
 	structuralChanges1y: number;
 	totalChanges1y: number;
 	recentChangeYear: number | null;
+}
+
+export interface FinanceLiteMetrics {
+	revenue: number | null;
+	opMargin: number | null;
+	roe: number | null;
+	debtRatio: number | null;
+}
+
+export interface UniverseNode {
+	id: string;
+	label: string;
+	industry: string;
+	industryName: string;
+	market: string;
+	currentPrice: number | null;
+	marketCap: number | null;
+	per: number | null;
+	pbr: number | null;
+	dividendYield: number | null;
+	revenue: number | null;
+	opMargin: number | null;
+	roe: number | null;
+	debtRatio: number | null;
+	color: string;
 }
 
 const num = (v: unknown): number | null => {
@@ -159,6 +186,7 @@ export async function loadPriceSnapshot(db: DartDb): Promise<Map<string, PriceMe
 				return1m: null,
 				return3m: null,
 				return1y: null,
+				spark60: [],
 				spark: []
 			});
 		}
@@ -168,6 +196,154 @@ export async function loadPriceSnapshot(db: DartDb): Promise<Map<string, PriceMe
 		return map;
 	} catch (err) {
 		console.error('[scan] ❌ Phase 1 snapshot SQL 실패', err);
+		return new Map();
+	}
+}
+
+/** HF parquet 만으로 /scan 초기 유니버스를 구성한다. 로컬 ecosystem 집계 JSON 을 쓰지 않는다.
+ *
+ * 첫 화면 속도를 위해 scan universe 는 KRX latest row + valuation 만 읽는다.
+ * finance-lite, 1Y prices, changes 는 사용자가 해당 컬럼을 켤 때 lazy 로드한다.
+ */
+export async function loadUniverseSnapshot(db: DartDb): Promise<UniverseNode[]> {
+	const year = new Date().getFullYear();
+	try {
+		await db.registerHfParquet('scanPricesCurr', `krx/prices/raw-${year}.parquet`);
+		await db.registerHfParquet('scanValuation', 'dart/scan/valuation.parquet');
+
+		const rows = await db.query<{
+			stockCode: string;
+			corpName: string;
+			market: string;
+			currentPrice: number | null;
+			marketCap: number | null;
+			per: number | null;
+			pbr: number | null;
+			dividendYield: number | null;
+		}>(`
+			WITH latest_price AS (
+				SELECT
+					ISU_CD AS stockCode,
+					ISU_NM AS corpName,
+					MKT_NM AS market,
+					CAST(TDD_CLSPRC AS DOUBLE) AS currentPrice,
+					CAST(MKTCAP AS DOUBLE) AS marketCap,
+					ROW_NUMBER() OVER (PARTITION BY ISU_CD ORDER BY BAS_DD DESC) AS rn
+				FROM scanPricesCurr
+			)
+			SELECT
+				p.stockCode,
+				p.corpName,
+				p.market,
+				p.currentPrice,
+				COALESCE(v.marketCap, p.marketCap) AS marketCap,
+				v.per,
+				v.pbr,
+				v.dividendYield
+			FROM latest_price p
+			LEFT JOIN scanValuation v ON v.stockCode = p.stockCode
+			WHERE p.rn = 1
+		`);
+
+		return rows
+			.filter((r) => r.stockCode && r.corpName)
+			.map((r) => {
+				return {
+					id: r.stockCode,
+					label: r.corpName,
+					industry: r.market || 'KRX',
+					industryName: r.market || 'KRX',
+					market: r.market || 'KRX',
+					currentPrice: num(r.currentPrice),
+					marketCap: num(r.marketCap),
+					per: num(r.per),
+					pbr: num(r.pbr),
+					dividendYield: num(r.dividendYield),
+					revenue: null,
+					opMargin: null,
+					roe: null,
+					debtRatio: null,
+					color: marketColorForNode(r.market)
+				};
+			});
+	} catch (err) {
+		console.warn('[scan] HF universe parquet 로드 실패', err);
+		return [];
+	}
+}
+
+function marketColorForNode(market: string | null | undefined): string {
+	if (market === 'KOSPI') return '#60a5fa';
+	if (market === 'KOSDAQ') return '#22c55e';
+	if (market === 'KONEX') return '#f59e0b';
+	return '#94a3b8';
+}
+
+/** finance-lite.parquet 에서 전종목 핵심 재무비율을 lazy 로드한다. */
+export async function loadFinanceLiteMetrics(db: DartDb): Promise<Map<string, FinanceLiteMetrics>> {
+	const t0 = performance.now();
+	try {
+		await db.registerHfParquet('scanFinanceLite', 'dart/scan/finance-lite.parquet');
+		const rows = await db.query<{
+			stockCode: string;
+			revenue: number | null;
+			op: number | null;
+			net: number | null;
+			equity: number | null;
+			currentLiab: number | null;
+			noncurrentLiab: number | null;
+		}>(`
+			WITH latest_fin_year AS (
+				SELECT stockCode, MAX(TRY_CAST(bsns_year AS INTEGER)) AS y
+				FROM scanFinanceLite
+				WHERE fs_nm = '연결재무제표'
+				  AND reprt_nm = '4분기'
+				  AND stockCode IS NOT NULL
+				GROUP BY stockCode
+			)
+			SELECT
+				f.stockCode,
+				MAX(CASE WHEN account_id = 'ifrs-full_Revenue'
+					THEN TRY_CAST(REPLACE(thstrm_amount, ',', '') AS DOUBLE) END) AS revenue,
+				MAX(CASE WHEN account_id = 'dart_OperatingIncomeLoss'
+					THEN TRY_CAST(REPLACE(thstrm_amount, ',', '') AS DOUBLE) END) AS op,
+				MAX(CASE WHEN account_id = 'ifrs-full_ProfitLoss'
+					THEN TRY_CAST(REPLACE(thstrm_amount, ',', '') AS DOUBLE) END) AS net,
+				MAX(CASE WHEN account_id = 'ifrs-full_Equity'
+					THEN TRY_CAST(REPLACE(thstrm_amount, ',', '') AS DOUBLE) END) AS equity,
+				MAX(CASE WHEN account_id = 'ifrs-full_CurrentLiabilities'
+					THEN TRY_CAST(REPLACE(thstrm_amount, ',', '') AS DOUBLE) END) AS currentLiab,
+				MAX(CASE WHEN account_id = 'ifrs-full_NoncurrentLiabilities'
+					THEN TRY_CAST(REPLACE(thstrm_amount, ',', '') AS DOUBLE) END) AS noncurrentLiab
+			FROM scanFinanceLite f
+			JOIN latest_fin_year y
+			  ON y.stockCode = f.stockCode
+			 AND y.y = TRY_CAST(f.bsns_year AS INTEGER)
+			WHERE f.fs_nm = '연결재무제표'
+			  AND f.reprt_nm = '4분기'
+			GROUP BY f.stockCode
+		`);
+		const map = new Map<string, FinanceLiteMetrics>();
+		for (const r of rows) {
+			if (!r.stockCode) continue;
+			const revenue = num(r.revenue);
+			const op = num(r.op);
+			const net = num(r.net);
+			const equity = num(r.equity);
+			const liabilities = (num(r.currentLiab) ?? 0) + (num(r.noncurrentLiab) ?? 0);
+			map.set(r.stockCode, {
+				revenue,
+				opMargin: revenue && op != null ? (op / revenue) * 100 : null,
+				roe: equity && net != null ? (net / equity) * 100 : null,
+				debtRatio: equity ? (liabilities / equity) * 100 : null
+			});
+		}
+		console.info(
+			`[scan] ✅ finance-lite metrics — ${map.size}사 (${(performance.now() - t0).toFixed(0)}ms)`
+		);
+		return map;
+	} catch (err) {
+		console.warn('[scan] finance-lite metrics 로드 실패', err);
 		return new Map();
 	}
 }
@@ -235,6 +411,22 @@ const PRICES_MAIN_SQL = `
 	LEFT JOIN prev252 p252 USING (ISU_CD)
 `;
 
+/** SPARK60_SQL — 60거래일 종가 array. 단기 모멘텀 column. */
+const SPARK60_SQL = `
+	WITH ranked AS (
+		SELECT
+			ISU_CD,
+			BAS_DD,
+			CAST(TDD_CLSPRC AS DOUBLE) AS close,
+			ROW_NUMBER() OVER (PARTITION BY ISU_CD ORDER BY BAS_DD DESC) AS rn
+		FROM krxPrices
+	)
+	SELECT ISU_CD, LIST(close ORDER BY BAS_DD ASC) AS spark60
+	FROM ranked
+	WHERE rn <= 60
+	GROUP BY ISU_CD
+`;
+
 /** SPARK_SQL — 1Y(252거래일) 종가 array, 5일 다운샘플 ≈ 50포인트. cell sparkline + hover 차트 공용. */
 const SPARK_SQL = `
 	WITH ranked AS (
@@ -265,6 +457,7 @@ interface PriceRow {
 	prev21: number | null;
 	prev63: number | null;
 	prev252: number | null;
+	spark60: number[] | null;
 	spark: number[] | null;
 }
 
@@ -319,6 +512,7 @@ export async function loadPriceMetrics(db: DartDb): Promise<Map<string, PriceMet
 				return1m: pctReturn(currentPrice, num(r.prev21)),
 				return3m: pctReturn(currentPrice, num(r.prev63)),
 				return1y: pctReturn(currentPrice, num(r.prev252)),
+				spark60: [],
 				spark: []
 			});
 		}
@@ -330,7 +524,33 @@ export async function loadPriceMetrics(db: DartDb): Promise<Map<string, PriceMet
 		return map;
 	}
 
-	// 3. spark 별도 query — hang 해도 main 결과는 보존 (30초 timeout)
+	// 3. 60D spark 별도 query — hang 해도 main 결과는 보존 (20초 timeout)
+	try {
+		const tSpark60 = performance.now();
+		console.info('[scan] KRX spark 60D SQL 시작…');
+		const spark60Rows = await withTimeout(
+			db.query<{ ISU_CD: string; spark60: number[] | null }>(SPARK60_SQL),
+			20_000,
+			'KRX spark 60D'
+		);
+		let merged = 0;
+		for (const r of spark60Rows) {
+			const code = isuCdToStockCode(r.ISU_CD);
+			if (!code) continue;
+			const existing = map.get(code);
+			if (existing) {
+				existing.spark60 = toPlainNumberArray(r.spark60);
+				merged++;
+			}
+		}
+		console.info(
+			`[scan] ✅ KRX spark 60D — ${merged}사 (${(performance.now() - tSpark60).toFixed(0)}ms)`
+		);
+	} catch (err) {
+		console.warn('[scan] ⚠ KRX spark 60D 별도 query 실패 — main 결과만 반환', err);
+	}
+
+	// 4. 1Y spark 별도 query — hang 해도 main 결과는 보존 (30초 timeout)
 	try {
 		const tSpark = performance.now();
 		console.info('[scan] KRX spark 1Y SQL 시작…');
@@ -350,20 +570,9 @@ export async function loadPriceMetrics(db: DartDb): Promise<Map<string, PriceMet
 		for (const r of sparkRows) {
 			const code = isuCdToStockCode(r.ISU_CD);
 			if (!code) continue;
-			// Array, Float64Array, Iterable 모두 안전하게 plain array 로
-			let sparkArr: number[] = [];
-			if (r.spark != null) {
-				try {
-					sparkArr = Array.from(r.spark as Iterable<number>, (v) => Number(v)).filter((v) =>
-						Number.isFinite(v)
-					);
-				} catch {
-					sparkArr = [];
-				}
-			}
 			const existing = map.get(code);
 			if (existing) {
-				existing.spark = sparkArr;
+				existing.spark = toPlainNumberArray(r.spark);
 				merged++;
 			}
 		}
@@ -375,6 +584,15 @@ export async function loadPriceMetrics(db: DartDb): Promise<Map<string, PriceMet
 	}
 
 	return map;
+}
+
+function toPlainNumberArray(value: Iterable<number> | null | undefined): number[] {
+	if (value == null) return [];
+	try {
+		return Array.from(value, (v) => Number(v)).filter((v) => Number.isFinite(v));
+	} catch {
+		return [];
+	}
 }
 
 /** valuation.parquet → PER/PBR/배당수익률/시총 (Naver, 매일 KST 04:00 갱신). */
@@ -597,6 +815,7 @@ export async function* loadPriceMetricsStream(
 					return1m: pctReturn(currentPrice, num(r.prev21)),
 					return3m: pctReturn(currentPrice, num(r.prev63)),
 					return1y: pctReturn(currentPrice, num(r.prev252)),
+					spark60: sparkArr.slice(-60),
 					spark: sparkArr
 				});
 			}
@@ -741,7 +960,7 @@ export async function loadFinanceTimeseries(
 				account_id,
 				CAST(thstrm_amount AS DOUBLE) AS thstrm_amount
 			FROM financeLite
-			WHERE stockCode = '${stockCode}'
+			WHERE stockCode = '${sqlEscape(stockCode)}'
 			  AND account_id IN ('sales', 'operating_profit', 'net_income', 'assets', 'liabilities')
 			  AND reprt_nm IN ('연간', '4분기', '사업보고서')
 		`);
@@ -806,7 +1025,7 @@ export async function loadCompanyChanges(
 				changeType,
 				preview
 			FROM changes
-			WHERE stockCode = '${stockCode}'
+			WHERE stockCode = '${sqlEscape(stockCode)}'
 			ORDER BY toPeriod DESC, sectionTitle
 			LIMIT ${limit}
 		`);

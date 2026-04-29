@@ -99,6 +99,46 @@ class TestBuildTools:
         assert "show" in names
         assert "scan" not in names
 
+    def test_select_tools_for_foreign_ticker_removes_domestic_analysis(self):
+        from dartlab.ai.tools import buildTools, selectToolsForQuestion
+
+        selected = selectToolsForQuestion(
+            buildTools(),
+            question="인텔 분석해줘",
+            category="finance",
+            hasCompany=True,
+            stockCode="INTC",
+        )
+        names = {t.name for t in selected}
+        assert "analysis" not in names
+        assert "credit" not in names
+        assert "quant" not in names
+        assert "show" in names
+
+    def test_select_tools_for_cash_and_stability_keeps_budget_tight(self):
+        from dartlab.ai.tools import buildTools, selectToolsForQuestion
+
+        cash = selectToolsForQuestion(
+            buildTools(),
+            question="삼성전자 현금흐름 분석",
+            category="finance",
+            intent="act3_cash",
+            hasCompany=True,
+            stockCode="005930",
+        )
+        stability = selectToolsForQuestion(
+            buildTools(),
+            question="삼성전자 안정성 분석",
+            category="finance",
+            intent="act4_stability",
+            hasCompany=True,
+            stockCode="005930",
+        )
+        assert "quant" not in {t.name for t in cash}
+        stability_names = {t.name for t in stability}
+        assert "debt" not in stability_names
+        assert "quant" not in stability_names
+
     def test_select_tools_for_compare_prefers_market_tools(self):
         from dartlab.ai.tools import buildTools, selectToolsForQuestion
 
@@ -151,9 +191,7 @@ class TestBuildTools:
             hasCompany=False,
         )
         names = [t.name for t in selected]
-        assert "gather" in names
-        assert "pythonExec" in names
-        assert names.index("gather") < names.index("macro")
+        assert names == ["pythonExec", "capabilities"]
 
     def test_gather_schema_documents_krx_price_mover_contract(self):
         from dartlab.ai.tools import buildTools
@@ -221,6 +259,26 @@ class TestBuildTools:
         )
         assert args["target"] == "USDKRW"
         assert args["end"] == "2026-04-28"
+
+    def test_runtime_sanitizes_macro_fx_market_to_kr(self):
+        from dartlab.ai.runtime.contracts import sanitizeToolArguments
+
+        args = sanitizeToolArguments(
+            "gather",
+            {"axis": "macro", "target": "USDKRW", "market": "US"},
+        )
+
+        assert args["target"] == "USDKRW"
+        assert args["market"] == "KR"
+
+    def test_runtime_sanitizes_foreign_show_topics(self):
+        from dartlab.ai.runtime.contracts import sanitizeToolArguments
+
+        args = sanitizeToolArguments("show", {"stockCode": "INTC", "topic": "ratioSeries"})
+        assert args["topic"] == "ratios"
+
+        args = sanitizeToolArguments("show", {"stockCode": "INTC", "topic": "dividend"})
+        assert args["topic"] == "ratios"
 
     def test_read_tool_description_points_to_docstring_skills(self):
         from dartlab.ai.tools import buildTools
@@ -400,6 +458,34 @@ class TestSerialize:
         assert artifacts[0]["label"] == "rows"
         assert artifacts[0]["rows"] == 2
 
+    def test_csv_artifact_allows_mixed_int_float_columns(self, tmp_path, monkeypatch):
+        from dartlab import config
+        from dartlab.ai.runtime.artifacts import csvArtifactsForToolResult
+
+        monkeypatch.setattr(config, "dataDir", str(tmp_path))
+        result = {"rows": [{"score": 95}, {"score": 90.0}, {"score": 0}]}
+
+        artifacts = csvArtifactsForToolResult(result, name="analysis", arguments={"stockCode": "005930"})
+
+        assert len(artifacts) == 1
+        path = tmp_path / "ai-artifacts" / artifacts[0]["day"] / artifacts[0]["fileName"]
+        assert path.is_file()
+
+    def test_csv_artifact_flattens_nested_columns(self, tmp_path, monkeypatch):
+        from dartlab import config
+        from dartlab.ai.runtime.artifacts import csvArtifactsForToolResult
+
+        monkeypatch.setattr(config, "dataDir", str(tmp_path))
+        result = {"rows": [{"score": 95, "detail": {"a": 1}}, {"score": 90.0, "detail": {"a": 2}}]}
+
+        artifacts = csvArtifactsForToolResult(result, name="analysis", arguments={"stockCode": "005930"})
+
+        assert len(artifacts) == 1
+        path = tmp_path / "ai-artifacts" / artifacts[0]["day"] / artifacts[0]["fileName"]
+        text = path.read_text(encoding="utf-8")
+        assert "a" in text
+        assert "1" in text
+
     def test_csv_artifact_for_python_stdout_table(self, tmp_path, monkeypatch):
         from dartlab import config
         from dartlab.ai.runtime.artifacts import csvArtifactsForToolResult
@@ -471,6 +557,30 @@ class _MockProvider:
 
 
 class TestToolLoop:
+    def test_read_filing_sections_true_is_sanitized(self, monkeypatch):
+        from dartlab.ai.tools import buildTools, executeTool
+
+        captured = {}
+
+        class Company:
+            market = "KR"
+
+            def readFiling(self, **kwargs):
+                captured.update(kwargs)
+                return {"ok": True}
+
+        monkeypatch.setattr("dartlab.ai.runtime.companyCache.getOrCreateCompany", lambda _stock_code: Company())
+
+        result = executeTool(
+            buildTools(),
+            "readFiling",
+            {"stockCode": "005930", "filing": "20260424000123", "sections": True, "maxChars": 100_000},
+        )
+
+        assert result == {"ok": True}
+        assert captured["sections"] is False
+        assert captured["maxChars"] == 8000
+
     def test_stop_immediately(self):
         from dartlab.ai.runtime.toolLoop import streamWithTools
 
@@ -945,3 +1055,13 @@ class TestAuditJudgment:
         rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
         assert rows[0]["verdict"] == "T"
         assert rows[0]["reason"] == "데이터 기준일 한계"
+
+
+class TestPluginHints:
+    def test_does_not_recommend_unverified_plugin_packages(self):
+        from dartlab.ai.runtime.plugin_hints import detect_plugin_hints, format_plugin_hints
+
+        hints = detect_plugin_hints("AAPL momentum volatility", loaded_plugin_names=[])
+
+        assert hints == []
+        assert format_plugin_hints(hints) is None

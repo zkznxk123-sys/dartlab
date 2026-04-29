@@ -118,6 +118,17 @@ class AuditCollector:
         self.override_calls: list[dict[str, Any]] = []
         self.violation: str | None = None
         self.quality_issues: list[str] = []
+        self.evidence_count = 0
+        self.claim_count = 0
+        self.visual_count = 0
+        self.primary_csv_count = 0
+        self.contract_ids: list[str] = []
+        self.contract_violations: list[str] = []
+        self.llm_round_ms = 0
+        self.tool_total_ms = 0
+        self.rewrite_count = 0
+        self.max_rounds_reached = False
+        self.slow_reason: list[str] = []
         self.skill_used: str | None = None
         self.chunk_len = 0
         self.error: str | None = None
@@ -196,6 +207,54 @@ class AuditCollector:
                 self.quality_issues = []
             elif data.get("action") == "record_violation" and self.quality_issues:
                 self.observe_violation(",".join(self.quality_issues))
+        elif kind == "evidence":
+            self.evidence_count += 1
+        elif kind == "claim":
+            self.claim_count += 1
+        elif kind == "chart":
+            visuals = data.get("visuals") or data.get("charts") or []
+            if isinstance(visuals, list):
+                self.visual_count += len(visuals)
+        elif kind == "tool_result":
+            artifacts = data.get("artifacts") or []
+            if isinstance(artifacts, list):
+                self.primary_csv_count += sum(
+                    1 for a in artifacts if isinstance(a, dict) and a.get("format") == "csv" and a.get("primary")
+                )
+            duration = int(data.get("durationMs") or 0)
+            size = int(data.get("resultSizeBytes") or 0)
+            self.tool_total_ms += duration
+            for call in reversed(self.tool_calls):
+                if call.get("name") == data.get("name") and call.get("duration_ms") is None:
+                    call["duration_ms"] = duration
+                    call["result_size_bytes"] = size
+                    call["ok"] = data.get("status") not in {"error", "auth_required"}
+                    if data.get("status") in {"error", "auth_required"}:
+                        call["error"] = str(data.get("result") or "")[:200]
+                    break
+        elif kind == "done":
+            meta = data.get("responseMeta") or {}
+            if isinstance(meta, dict):
+                self.evidence_count = max(self.evidence_count, int(meta.get("evidenceCount") or 0))
+                self.claim_count = max(self.claim_count, int(meta.get("claimCount") or 0))
+                self.visual_count = max(self.visual_count, int(meta.get("visualCount") or 0))
+                self.llm_round_ms = max(self.llm_round_ms, int(meta.get("llmRoundMs") or 0))
+                self.tool_total_ms = max(self.tool_total_ms, int(meta.get("toolTotalMs") or 0))
+                self.rewrite_count = max(self.rewrite_count, int(meta.get("rewriteCount") or 0))
+                self.max_rounds_reached = bool(meta.get("maxRoundsReached") or self.max_rounds_reached)
+                coverage = meta.get("coverage") or {}
+                if isinstance(coverage, dict):
+                    contract_ids = coverage.get("contractIds") or []
+                    if isinstance(contract_ids, list):
+                        self.contract_ids = [str(v) for v in contract_ids]
+                contract_violations = meta.get("contractViolations") or (
+                    coverage.get("contractViolations") if isinstance(coverage, dict) else []
+                )
+                if isinstance(contract_violations, list):
+                    self.contract_violations = [str(v) for v in contract_violations]
+                slow = meta.get("slowReason") or []
+                if isinstance(slow, list):
+                    self.slow_reason = [str(v) for v in slow]
 
     # ── flush ─────────────────────────────────────────────────────
 
@@ -223,6 +282,18 @@ class AuditCollector:
             "error": (final_error[:200] if final_error else None),
             "violation": self.violation,
             "quality_issues": self.quality_issues,
+            "evidence_count": self.evidence_count,
+            "claim_count": self.claim_count,
+            "visual_count": self.visual_count,
+            "primary_csv_count": self.primary_csv_count,
+            "contract_ids": self.contract_ids,
+            "contract_violations": self.contract_violations,
+            "missing_visual_explanation": "missing_visual_explanation" in self.quality_issues,
+            "llm_round_ms": self.llm_round_ms,
+            "tool_total_ms": self.tool_total_ms,
+            "rewrite_count": self.rewrite_count,
+            "max_rounds_reached": self.max_rounds_reached,
+            "slow_reason": self.slow_reason,
             "skill_used": self.skill_used,
             "duration_total_ms": int((time.monotonic() - self._start_mono) * 1000),
             "judgment": {"verdict": None, "judged_at": None, "judged_by": None, "pr_url": None},

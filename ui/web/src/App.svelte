@@ -270,7 +270,7 @@
 			appendRenderViews,
 			onStreamSettled: handleStreamSettled,
 			bumpScroll: null,
-			onCompanySelect: handleCompanySelect,
+			onCompanySelect: handleCompanySelectForChat,
 		});
 
 		const stream = askStream(companyHint, question, requestOptions, callbacks, history);
@@ -324,8 +324,17 @@
 		ui.showToast("대화가 마크다운으로 내보내졌습니다", "success");
 	}
 
-	function handleCompanySelect(company) {
+	function handleOpenEvidence(section, index = null) {
+		workspace.openEvidence(section, index);
+	}
+
+	function handleCompanySelectForChat(company) {
 		workspace.selectCompany(company);
+		workspace.switchView("chat");
+	}
+
+	function handleCompanySelectForViewer(company) {
+		workspace.openViewer(company);
 	}
 
 	// ── Keyboard shortcuts ──
@@ -398,7 +407,7 @@
 					<Coffee size={14} />
 				</a>
 			{/if}
-			<ProviderDropdown {ui} onOpenSettings={() => ui.openSettings()} />
+			<ProviderDropdown {ui} onOpenSettings={(section) => ui.openSettings(section)} />
 		</div>
 
 		<!-- Content: Chat only -->
@@ -420,7 +429,8 @@
 						onRegenerate={handleRegenerate}
 						onExport={handleExport}
 						onEditResend={handleEditResend}
-						onCompanySelect={handleCompanySelect}
+						onCompanySelect={handleCompanySelectForChat}
+						onOpenEvidence={handleOpenEvidence}
 						{watchlist}
 						onAddWatch={addToWatchlist}
 						onRemoveWatch={removeFromWatchlist}
@@ -431,7 +441,7 @@
 					<EmptyState
 						bind:inputText
 						onSend={sendMessage}
-						onCompanySelect={handleCompanySelect}
+						onCompanySelect={handleCompanySelectForChat}
 						onCommand={handleSlashCommand}
 					/>
 				{/if}

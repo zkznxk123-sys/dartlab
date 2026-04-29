@@ -11,6 +11,7 @@ from starlette.testclient import TestClient  # noqa: E402
 
 from dartlab.server import app  # noqa: E402
 from dartlab.server.services.channel_runtime import channel_runtime  # noqa: E402
+from dartlab.server.services.dev_channel_runtime import dev_channel_runtime  # noqa: E402
 
 pytestmark = pytest.mark.unit
 
@@ -29,12 +30,25 @@ class _FakeAdapter:
         return None
 
 
+class _FakeProcess:
+    def __init__(self):
+        self._terminated = False
+
+    def poll(self):
+        return 0 if self._terminated else None
+
+    def terminate(self):
+        self._terminated = True
+
+
 @pytest.fixture()
 def client():
     channel_runtime.shutdown_all()
+    dev_channel_runtime.shutdown()
     with TestClient(app, raise_server_exceptions=False) as c:
         yield c
     channel_runtime.shutdown_all()
+    dev_channel_runtime.shutdown()
 
 
 def test_status_includes_channels(client):
@@ -68,3 +82,26 @@ def test_channel_start_validates_required_fields(client):
     resp = client.post("/api/channels/slack/start", json={"botToken": "xoxb-only"})
     assert resp.status_code == 400
     assert "app token" in resp.json()["detail"]
+
+
+def test_dev_channel_status_and_start(client, monkeypatch):
+    monkeypatch.setattr(
+        "dartlab.server.services.dev_channel_runtime.setup_devtunnel",
+        lambda *, port, auto_yes: ("https://dartlab-8400.jpe1.devtunnels.ms/", _FakeProcess()),
+    )
+
+    before = client.get("/api/channel")
+    assert before.status_code == 200
+    assert before.json()["kind"] == "devtunnel"
+    assert before.json()["running"] is False
+
+    started = client.post("/api/channel/start")
+    assert started.status_code == 200
+    body = started.json()
+    assert body["running"] is True
+    assert body["url"] == "https://dartlab-8400.jpe1.devtunnels.ms/"
+    assert body["qrDataUrl"].startswith("data:image/svg+xml;base64,")
+
+    stopped = client.post("/api/channel/stop")
+    assert stopped.status_code == 200
+    assert stopped.json()["running"] is False

@@ -73,6 +73,37 @@ def _artifactsFromEvents(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return _dedupeArtifacts(artifacts)
 
 
+def _countEvents(events: list[dict[str, Any]], event_name: str) -> int:
+    count = 0
+    for event in events:
+        if event.get("event") != event_name:
+            continue
+        data = event.get("data")
+        if event_name == "chart" and isinstance(data, dict):
+            count += len([v for v in data.get("visuals") or data.get("charts") or [] if isinstance(v, dict)])
+        else:
+            count += 1
+    return count
+
+
+def _doneMeta(events: list[dict[str, Any]]) -> dict[str, Any]:
+    for event in reversed(events):
+        if event.get("event") != "done":
+            continue
+        data = event.get("data")
+        if isinstance(data, dict) and isinstance(data.get("responseMeta"), dict):
+            return data["responseMeta"]
+    return {}
+
+
+def _p95(values: list[float]) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    idx = min(len(ordered) - 1, int(round((len(ordered) - 1) * 0.95)))
+    return round(float(ordered[idx]), 1)
+
+
 def _dedupeArtifacts(artifacts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     seen: set[str] = set()
     out: list[dict[str, Any]] = []
@@ -130,6 +161,8 @@ def _compactEvents(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
                         "summary": data.get("summary"),
                         "status": data.get("status"),
                         "round": data.get("round"),
+                        "durationMs": data.get("durationMs"),
+                        "resultSizeBytes": data.get("resultSizeBytes"),
                         "resultChars": len(str(data.get("result") or "")),
                         "artifacts": artifacts,
                     },
@@ -165,6 +198,7 @@ def main() -> int:
             answer = ""
             events: list[dict[str, Any]] = []
             artifacts: list[dict[str, Any]] = []
+            body: dict[str, Any] = {}
             error: str | None = None
             try:
                 if stream:
@@ -173,8 +207,9 @@ def main() -> int:
                 else:
                     response = client.post(args.url, json=payload, timeout=args.timeout)
                     status = response.status_code
-                    body = response.json()
-                    answer = str(body.get("answer") or body)
+                    parsed = response.json()
+                    body = parsed if isinstance(parsed, dict) else {}
+                    answer = str(body.get("answer") or parsed)
                     artifacts = _dedupeArtifacts([a for a in body.get("artifacts", []) if isinstance(a, dict)])
             except Exception as exc:  # noqa: BLE001
                 error = f"{type(exc).__name__}: {exc}"
@@ -184,6 +219,19 @@ def main() -> int:
             failed_tools = [t for t in audit.get("tool_calls", []) if t.get("error") or t.get("ok") is False]
             csv_artifacts = [a for a in artifacts if a.get("format") == "csv"]
             primary_csv_artifacts = [a for a in csv_artifacts if a.get("primary")]
+            response_evidence = body.get("evidence", []) if not stream and isinstance(body, dict) else []
+            response_claims = body.get("claims", []) if not stream and isinstance(body, dict) else []
+            response_visuals = body.get("visuals", []) if not stream and isinstance(body, dict) else []
+            response_meta = (body.get("responseMeta") if not stream and isinstance(body, dict) else None) or _doneMeta(
+                events
+            )
+            evidence_count = max(
+                int(audit.get("evidence_count") or 0), len(response_evidence), _countEvents(events, "evidence")
+            )
+            claim_count = max(int(audit.get("claim_count") or 0), len(response_claims), _countEvents(events, "claim"))
+            visual_count = max(
+                int(audit.get("visual_count") or 0), len(response_visuals), _countEvents(events, "chart")
+            )
             requires_artifact = _requiresCsvArtifact(qid, question)
             artifact_violation = bool(requires_artifact and not csv_artifacts)
             meta = {
@@ -202,6 +250,15 @@ def main() -> int:
                 "artifacts": artifacts,
                 "csvArtifactCount": len(csv_artifacts),
                 "primaryCsvArtifactCount": len(primary_csv_artifacts),
+                "evidenceCount": evidence_count,
+                "claimCount": claim_count,
+                "visualCount": visual_count,
+                "missingVisualExplanation": "missing_visual_explanation" in (audit.get("quality_issues") or []),
+                "llmRoundMs": max(int(audit.get("llm_round_ms") or 0), int(response_meta.get("llmRoundMs") or 0)),
+                "toolTotalMs": max(int(audit.get("tool_total_ms") or 0), int(response_meta.get("toolTotalMs") or 0)),
+                "rewriteCount": max(int(audit.get("rewrite_count") or 0), int(response_meta.get("rewriteCount") or 0)),
+                "maxRoundsReached": bool(audit.get("max_rounds_reached") or response_meta.get("maxRoundsReached")),
+                "slowReason": audit.get("slow_reason") or response_meta.get("slowReason") or [],
                 "requiresArtifact": requires_artifact,
                 "artifactViolation": artifact_violation,
                 "events": _compactEvents(events[-30:]) if stream else [],
@@ -221,6 +278,15 @@ def main() -> int:
                     "toolFailed",
                     "csvArtifactCount",
                     "primaryCsvArtifactCount",
+                    "evidenceCount",
+                    "claimCount",
+                    "visualCount",
+                    "missingVisualExplanation",
+                    "llmRoundMs",
+                    "toolTotalMs",
+                    "rewriteCount",
+                    "maxRoundsReached",
+                    "slowReason",
                     "artifactViolation",
                 )
             }
@@ -228,6 +294,11 @@ def main() -> int:
             print(json.dumps(row, ensure_ascii=False), flush=True)
 
     (out / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    latency_p95 = _p95([float(row.get("elapsedSec") or 0) for row in summary])
+    (out / "summary_meta.json").write_text(
+        json.dumps({"latencyP95": latency_p95, "count": len(summary)}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
     print(f"OUT {out}")
     return 0 if all(row["ok"] and not row["artifactViolation"] for row in summary) else 1
 

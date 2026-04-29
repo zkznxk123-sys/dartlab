@@ -8,7 +8,7 @@
 	import {
 		X, Loader2, Check, ExternalLink,
 		Key, AlertCircle, CheckCircle2, Terminal, LogOut,
-		Download, Radio
+		Download, Radio, Smartphone, QrCode, Copy
 	} from "lucide-svelte";
 
 	const { ui } = $props();
@@ -36,8 +36,10 @@
 
 	const TABS = [
 		{ id: "providers", label: "AI 모델", icon: Radio },
+		{ id: "channels", label: "Channel", icon: Smartphone },
 		{ id: "openDart", label: "공시 API", icon: Key },
 	];
+
 </script>
 
 {#if ui.settingsOpen}
@@ -84,11 +86,17 @@
 									? "bg-dl-primary/10 text-dl-primary-light font-medium border border-dl-primary/20"
 									: "text-dl-text-dim hover:text-dl-text hover:bg-white/5 border border-transparent"
 							)}
-							onclick={() => ui.settingsSection = tab.id}
+							onclick={() => {
+								ui.settingsSection = tab.id;
+								if (tab.id === "channels") ui.refreshDevChannel();
+							}}
 						>
 							<tab.icon size={14} class={isActive ? "text-dl-primary-light" : "text-dl-text-dim"} />
 							<span class="flex-1">{tab.label}</span>
 							{#if tab.id === "openDart" && ui.openDart.configured}
+								<span class="w-1.5 h-1.5 rounded-full bg-dl-success flex-shrink-0"></span>
+							{/if}
+							{#if tab.id === "channels" && ui.channel?.running}
 								<span class="w-1.5 h-1.5 rounded-full bg-dl-success flex-shrink-0"></span>
 							{/if}
 						</button>
@@ -648,6 +656,106 @@
 									<div>`이번 주 삼성전자 공시 뭐 있었어`</div>
 									<div>`최근 2주 단일판매공급계약 공시 요약해줘`</div>
 								</div>
+							</div>
+						</div>
+
+					{:else if ui.settingsSection === "channels"}
+						<div class="space-y-4">
+							<div class="flex items-start justify-between gap-3">
+								<div>
+									<div class="flex items-center gap-2 text-[13px] font-medium text-dl-text">
+										<QrCode size={15} class="text-dl-primary-light" />
+										모바일 Channel
+									</div>
+									<div class="mt-1 text-[11px] leading-relaxed text-dl-text-dim">
+										휴대폰 카메라로 QR을 스캔하면 지금 PC에서 실행 중인 DartLab UI가 그대로 열립니다.
+									</div>
+								</div>
+								<span class={cn(
+									"mt-0.5 h-2.5 w-2.5 rounded-full flex-shrink-0",
+									ui.channel?.running ? "bg-dl-success" : "bg-dl-text-dim/40"
+								)}></span>
+							</div>
+
+							<div class="rounded-xl border border-dl-border bg-dl-bg-darker/40 px-4 py-4">
+								{#if ui.channel?.running && ui.channel?.url}
+									<div class="grid gap-4 sm:grid-cols-[180px_1fr] sm:items-center">
+										<div class="aspect-square w-full max-w-[180px] rounded-xl border border-dl-border bg-white p-2">
+											{#if ui.channel.qrDataUrl}
+												<img src={ui.channel.qrDataUrl} alt="DartLab Channel QR" class="h-full w-full" />
+											{:else}
+												<div class="flex h-full items-center justify-center text-center text-[11px] text-dl-bg-darker">
+													QR 생성 실패<br />아래 URL을 여세요.
+												</div>
+											{/if}
+										</div>
+										<div class="min-w-0 space-y-3">
+											<div>
+												<div class="text-[11px] text-dl-text-dim">접속 URL</div>
+												<div class="mt-1 break-all rounded-lg border border-dl-border bg-dl-bg-card px-3 py-2 text-[12px] text-dl-text">
+													{ui.channel.url}
+												</div>
+											</div>
+											<div class="flex flex-wrap gap-2">
+												<a
+													class="inline-flex items-center gap-1.5 rounded-lg bg-dl-primary/20 px-3 py-2 text-[12px] font-medium text-dl-primary-light hover:bg-dl-primary/30 transition-colors"
+													href={ui.channel.url}
+													target="_blank"
+													rel="noreferrer"
+												>
+													<ExternalLink size={13} />
+													열기
+												</a>
+												<button
+													class="inline-flex items-center gap-1.5 rounded-lg border border-dl-border px-3 py-2 text-[12px] text-dl-text-dim hover:text-dl-text hover:border-dl-primary/30 transition-colors"
+													onclick={() => {
+														navigator.clipboard?.writeText(ui.channel.url);
+														ui.showToast("Channel URL을 복사했습니다", "success");
+													}}
+												>
+													<Copy size={13} />
+													복사
+												</button>
+												<button
+													class="inline-flex items-center gap-1.5 rounded-lg border border-dl-border px-3 py-2 text-[12px] text-dl-text-dim hover:text-dl-primary-light hover:border-dl-primary/30 transition-colors disabled:opacity-40"
+													onclick={() => ui.stopDevChannel()}
+													disabled={ui.channelBusy}
+												>
+													{#if ui.channelBusy}<Loader2 size={13} class="animate-spin" />{/if}
+													종료
+												</button>
+											</div>
+										</div>
+									</div>
+								{:else}
+									<div class="flex items-center justify-between gap-4">
+										<div class="min-w-0">
+											<div class="text-[12px] font-medium text-dl-text">Channel이 꺼져 있습니다</div>
+											<div class="mt-1 text-[11px] text-dl-text-dim">
+												처음 한 번은 DevTunnels 로그인 창이 열릴 수 있습니다.
+											</div>
+										</div>
+										<button
+											class="inline-flex items-center gap-1.5 rounded-lg bg-dl-primary/20 px-3 py-2 text-[12px] font-medium text-dl-primary-light hover:bg-dl-primary/30 transition-colors disabled:opacity-40"
+											onclick={() => ui.startDevChannel()}
+											disabled={ui.channelBusy}
+										>
+											{#if ui.channelBusy}
+												<Loader2 size={13} class="animate-spin" />
+											{:else}
+												<QrCode size={13} />
+											{/if}
+											QR 열기
+										</button>
+									</div>
+								{/if}
+
+								{#if ui.channel?.error}
+									<div class="mt-3 flex items-start gap-1.5 rounded-lg border border-dl-primary/20 bg-dl-primary/5 px-3 py-2 text-[11px] text-dl-primary-light">
+										<AlertCircle size={12} class="mt-0.5 flex-shrink-0" />
+										<span>{ui.channel.error}</span>
+									</div>
+								{/if}
 							</div>
 						</div>
 

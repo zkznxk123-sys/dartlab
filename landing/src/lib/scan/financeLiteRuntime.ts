@@ -1,0 +1,213 @@
+import { readParquetRows, type FetchLike, type RangeRequestStat } from '$lib/data/hfRange';
+import {
+	FINANCE_ACCOUNTS,
+	FINANCE_COMPLETED_YEARS,
+	financeGrowthKey,
+	financeMetricKey,
+	financeRatioKey,
+	type FinanceAccountSpec
+} from './financeAccounts';
+
+const FINANCE_LITE_PATH = 'dart/scan/finance-lite.parquet';
+
+type FinanceLiteRow = Record<string, unknown> & {
+	stockCode?: unknown;
+	bsns_year?: unknown;
+	reprt_nm?: unknown;
+	sj_div?: unknown;
+	fs_nm?: unknown;
+	account_id?: unknown;
+	account_nm?: unknown;
+	thstrm_amount?: unknown;
+};
+
+export interface FinanceLiteRuntimeResult {
+	rows: Array<Record<string, unknown> & { id: string }>;
+	years: string[];
+	requests: RangeRequestStat[];
+	sourcePath: string;
+}
+
+const ACCOUNT_BY_ID = new Map<string, FinanceAccountSpec>();
+const ACCOUNT_BY_NAME = new Map<string, FinanceAccountSpec[]>();
+
+for (const account of FINANCE_ACCOUNTS) {
+	for (const id of account.ids) ACCOUNT_BY_ID.set(id, account);
+	for (const name of account.names) {
+		const key = normalizeName(name);
+		const list = ACCOUNT_BY_NAME.get(key) ?? [];
+		list.push(account);
+		ACCOUNT_BY_NAME.set(key, list);
+	}
+}
+
+let financePromise: Promise<FinanceLiteRuntimeResult> | null = null;
+
+export async function loadFinanceLiteRuntime(
+	fetchFn: FetchLike = fetch
+): Promise<FinanceLiteRuntimeResult> {
+	if (fetchFn === fetch) {
+		financePromise ??= readFinanceLite(fetchFn);
+		return financePromise;
+	}
+	return readFinanceLite(fetchFn);
+}
+
+async function readFinanceLite(fetchFn: FetchLike): Promise<FinanceLiteRuntimeResult> {
+	const data = await readParquetRows<FinanceLiteRow>(FINANCE_LITE_PATH, {
+		columns: [
+			'stockCode',
+			'bsns_year',
+			'reprt_nm',
+			'sj_div',
+			'fs_nm',
+			'account_id',
+			'account_nm',
+			'thstrm_amount'
+		],
+		filter: { reprt_nm: { $eq: '4분기' } },
+		fetchFn
+	});
+	return {
+		rows: buildFinanceRows(data.rows),
+		years: [...FINANCE_COMPLETED_YEARS],
+		requests: data.requests,
+		sourcePath: FINANCE_LITE_PATH
+	};
+}
+
+export function buildFinanceRows(rows: FinanceLiteRow[]): Array<Record<string, unknown> & { id: string }> {
+	const byStock = new Map<string, Record<string, unknown> & { id: string }>();
+	const seenPriority = new Map<string, number>();
+	for (const row of rows) {
+		if (String(row.reprt_nm ?? '') !== '4분기') continue;
+		const year = String(row.bsns_year ?? '');
+		if (!(FINANCE_COMPLETED_YEARS as readonly string[]).includes(year)) continue;
+		const stockCode = String(row.stockCode ?? '').trim();
+		if (!stockCode) continue;
+		const account = matchAccount(row);
+		if (!account) continue;
+		const amount = numberOrNull(row.thstrm_amount);
+		if (amount == null) continue;
+		const metricKey = financeMetricKey(account.id, year);
+		const priority = String(row.fs_nm ?? '').includes('연결') ? 2 : 1;
+		const priorityKey = `${stockCode}:${metricKey}`;
+		if ((seenPriority.get(priorityKey) ?? 0) > priority) continue;
+		seenPriority.set(priorityKey, priority);
+		const out = byStock.get(stockCode) ?? ({ id: stockCode } as Record<string, unknown> & { id: string });
+		out[metricKey] = amount;
+		byStock.set(stockCode, out);
+	}
+	for (const row of byStock.values()) addDerivedMetrics(row);
+	return Array.from(byStock.values());
+}
+
+function matchAccount(row: FinanceLiteRow): FinanceAccountSpec | null {
+	const accountId = String(row.account_id ?? '').trim();
+	const direct = ACCOUNT_BY_ID.get(accountId);
+	if (direct && statementMatches(direct, row)) return direct;
+	const nameMatches = ACCOUNT_BY_NAME.get(normalizeName(row.account_nm));
+	if (!nameMatches) return null;
+	return nameMatches.find((account) => statementMatches(account, row)) ?? null;
+}
+
+function statementMatches(account: FinanceAccountSpec, row: FinanceLiteRow): boolean {
+	const sjDiv = String(row.sj_div ?? '').toUpperCase();
+	if (account.statement === 'IS') return sjDiv === 'IS' || sjDiv === 'CIS';
+	return sjDiv === account.statement;
+}
+
+function addDerivedMetrics(row: Record<string, unknown>) {
+	for (const year of FINANCE_COMPLETED_YEARS) {
+		const sales = num(row[financeMetricKey('sales', year)]);
+		const op = num(row[financeMetricKey('operating_profit', year)]);
+		const net = num(row[financeMetricKey('net_income', year)]);
+		const equity = num(row[financeMetricKey('total_stockholders_equity', year)]);
+		const currentAssets = num(row[financeMetricKey('current_assets', year)]);
+		const currentLiabilities = num(row[financeMetricKey('current_liabilities', year)]);
+		const noncurrentLiabilities = num(row[financeMetricKey('noncurrent_liabilities', year)]);
+
+		row[financeRatioKey('op_margin', year)] = ratio(op, sales);
+		row[financeRatioKey('net_margin', year)] = ratio(net, sales);
+		row[financeRatioKey('roe', year)] = ratio(net, equity);
+		row[financeRatioKey('debt_ratio', year)] = ratio(sum(currentLiabilities, noncurrentLiabilities), equity);
+		row[financeRatioKey('current_ratio', year)] = ratio(currentAssets, currentLiabilities);
+	}
+	row[financeGrowthKey('sales_cagr')] = cagr(row, 'sales');
+	row[financeGrowthKey('operating_profit_cagr')] = cagr(row, 'operating_profit');
+	row[financeGrowthKey('net_income_cagr')] = cagr(row, 'net_income');
+	row[financeGrowthKey('sales_yoy_latest')] = yoyLatest(row, 'sales');
+	row[financeGrowthKey('operating_profit_yoy_latest')] = yoyLatest(row, 'operating_profit');
+	row[financeGrowthKey('net_income_yoy_latest')] = yoyLatest(row, 'net_income');
+}
+
+function normalizeName(value: unknown): string {
+	return String(value ?? '')
+		.toLowerCase()
+		.replace(/[\s()[\]{}·ㆍ,./\\_-]/g, '');
+}
+
+function numberOrNull(value: unknown): number | null {
+	if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+	if (typeof value === 'bigint') {
+		const n = Number(value);
+		return Number.isFinite(n) ? n : null;
+	}
+	if (typeof value === 'string' && value.trim()) {
+		const n = Number(value.replace(/,/g, ''));
+		return Number.isFinite(n) ? n : null;
+	}
+	return null;
+}
+
+function num(value: unknown): number | null {
+	return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function sum(a: number | null, b: number | null): number | null {
+	if (a == null && b == null) return null;
+	return (a ?? 0) + (b ?? 0);
+}
+
+function ratio(numerator: number | null, denominator: number | null): number | null {
+	if (numerator == null || denominator == null || denominator === 0) return null;
+	return (numerator / denominator) * 100;
+}
+
+function seriesValues(row: Record<string, unknown>, accountId: string): Array<number | null> {
+	return FINANCE_COMPLETED_YEARS.map((year) => num(row[financeMetricKey(accountId, year)]));
+}
+
+function cagr(row: Record<string, unknown>, accountId: string): number | null {
+	const values = seriesValues(row, accountId);
+	const firstIdx = values.findIndex((v) => v != null && v > 0);
+	let lastIdx = -1;
+	for (let i = values.length - 1; i >= 0; i -= 1) {
+		const v = values[i];
+		if (v != null && v > 0) {
+			lastIdx = i;
+			break;
+		}
+	}
+	if (firstIdx < 0 || lastIdx <= firstIdx) return null;
+	const first = values[firstIdx] as number;
+	const last = values[lastIdx] as number;
+	const periods = lastIdx - firstIdx;
+	return (Math.pow(last / first, 1 / periods) - 1) * 100;
+}
+
+function yoyLatest(row: Record<string, unknown>, accountId: string): number | null {
+	const values = seriesValues(row, accountId);
+	let lastIdx = -1;
+	for (let i = values.length - 1; i >= 0; i -= 1) {
+		if (values[i] != null) {
+			lastIdx = i;
+			break;
+		}
+	}
+	if (lastIdx <= 0) return null;
+	const curr = values[lastIdx];
+	const prev = values[lastIdx - 1];
+	if (curr == null || prev == null || prev === 0) return null;
+	return (curr / prev - 1) * 100;
+}

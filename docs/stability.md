@@ -21,15 +21,12 @@ Changes include a deprecation period with a migration guide.
 | `Company.trace()` | Source provenance query |
 | `Company.diff()` | Cross-period text change detection |
 | `Company.topics` | Available topic list |
-| `Company.docs` | Docs source namespace |
-| `Company.finance` | Financial statement time-series and statement namespace |
-| `Company.report` | Structured disclosure namespace (28 API types) |
 | `dartlab.listing()` | Full listed company directory |
-| `Company.IS/BS/CF` | Authoritative statement shortcuts |
-| `Company.CIS` | Comprehensive income statement shortcut |
+| `Company.show("BS"|"IS"|"CF"|"CIS")` | Financial statement query |
+| `Company.show("ratios")` | Financial ratio query |
+| `Company.select(topic, accounts)` | Row/column selection from a topic |
 | `Company.index` | Canonical topic × period board DataFrame |
 | `Company.filings()` | Filing document list |
-| `Company.profile` | Merged canonical company namespace |
 | `dartlab` CLI entrypoint | Public CLI command entry point |
 | `dartlab.Company("AAPL")` | EDGAR Company facade (US stocks) |
 | `engines.edgar.docs` | EDGAR 10-K/10-Q/20-F sections horizontalization |
@@ -56,18 +53,12 @@ May change after a warning. Recorded in CHANGELOG.
 | `Company.insights` | Insight grading (7 areas) |
 | `Company.insights.distress` | Distress prediction scorecard (4-axis, credit grade, cash runway) |
 | `Company.rank` | Market size ranking |
-| `Company.docs.retrievalBlocks` | Original block retrieval |
-| `Company.docs.contextSlices` | LLM/context slice view |
 | `Company.ask()` | LLM-based analysis |
 | `dartlab` subcommands/options | `ask`, `status`, `setup`, `ai`, `excel` command UX |
 | Server API `/api/*` | Web server endpoints |
 | `engines.ai.*` | AI/LLM engines |
-| `Company.SCE` | Statement of changes in equity (DART) |
-| `Company.sceMatrix` | SCE matrix view (DART) |
-| `Company.timeseries` | Quarterly standalone time-series |
-| `Company.annual` | Annual time-series |
-| `Company.ratios` | Financial ratio calculation |
-| `Company.ratioSeries` | Ratio time-series |
+| `Company.show("SCE")` | Statement of changes in equity (DART) |
+| `Company.show("ratioSeries")` | Ratio time-series |
 | `Company.network()` | Affiliate network graph |
 | `Company.governance()` | Corporate governance data |
 | `Company.workforce()` | Workforce data |
@@ -136,7 +127,7 @@ DART core stable criteria:
 - **semver compliant**: major = breaking, minor = feature, patch = bugfix
 - DART core stable scope prioritizes compatibility within minor versions
 - EDGAR and some AI features may change faster per their tier policy
-- `Company.profile` is a merge layer on top of docs spine, used internally. `c.sections` and `c.show()` are the official consumption paths
+- The internal profile merge layer sits on top of the docs spine. `c.sections` and `c.show()` are the official consumption paths
 
 ## CLI Compatibility Rules
 

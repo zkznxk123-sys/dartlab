@@ -187,7 +187,7 @@ prof = dartlab.scan("profitability")
 c = dartlab.Company("002380")
 c.show("IS")    # 손익 5년 분기 시계열
 c.show("ratios") # 비율 50개
-c.notes.borrowings  # 차입금 분해
+c.show("borrowings")  # 차입금 분해
 c.story("수익성")  # 사업·마진·현금·안정성을 인과로 잇는 보고서
 
 # 3. 발견한 함정으로 스크리너를 즉시 보정한다

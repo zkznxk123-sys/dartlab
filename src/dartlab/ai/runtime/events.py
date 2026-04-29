@@ -24,6 +24,8 @@ class EventKind:
     CHUNK = "chunk"
     TOOL_CALL = "tool_call"
     TOOL_RESULT = "tool_result"
+    EVIDENCE = "evidence"
+    CLAIM = "claim"
     CHART = "chart"
     DONE = "done"
     ERROR = "error"

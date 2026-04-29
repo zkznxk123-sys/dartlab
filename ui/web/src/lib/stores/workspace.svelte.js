@@ -24,6 +24,9 @@ export function createWorkspaceStore() {
 	// Company state (persisted)
 	let selectedCompany = $state(stored.selectedCompany || null);
 	let recentCompanies = $state(stored.recentCompanies || []);
+	let activeTab = $state("explore");
+	let activeEvidenceSection = $state(null);
+	let selectedEvidenceIndex = $state(null);
 
 	function persist() {
 		saveState({ selectedCompany, recentCompanies });
@@ -55,6 +58,30 @@ export function createWorkspaceStore() {
 		persist();
 	}
 
+	function switchView(tab) {
+		activeTab = tab || "explore";
+	}
+
+	function setTab(tab) {
+		switchView(tab);
+	}
+
+	function openViewer(company) {
+		if (company) selectCompany(company);
+		switchView("sections");
+	}
+
+	function openEvidence(section, index = null) {
+		activeEvidenceSection = section;
+		selectedEvidenceIndex = Number.isInteger(index) ? index : null;
+		if (activeTab !== "evidence") activeTab = "evidence";
+	}
+
+	function clearEvidenceSelection() {
+		activeEvidenceSection = null;
+		selectedEvidenceIndex = null;
+	}
+
 	// Called from SSE onMeta when AI detects a company
 	function syncCompanyFromMessage(meta, fallback) {
 		if (!meta?.company && !meta?.stockCode) return;
@@ -73,9 +100,17 @@ export function createWorkspaceStore() {
 	return {
 		get selectedCompany() { return selectedCompany; },
 		get recentCompanies() { return recentCompanies; },
+		get activeTab() { return activeTab; },
+		get activeEvidenceSection() { return activeEvidenceSection; },
+		get selectedEvidenceIndex() { return selectedEvidenceIndex; },
 		resetChatContext,
 		selectCompany,
 		clearSelectedCompany,
 		syncCompanyFromMessage,
+		switchView,
+		setTab,
+		openViewer,
+		openEvidence,
+		clearEvidenceSelection,
 	};
 }

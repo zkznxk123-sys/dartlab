@@ -1,0 +1,204 @@
+import { loadFinanceLiteRuntime } from './financeLiteRuntime';
+
+const DEFAULT_HF_RESOLVE = 'https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main';
+
+type BootMessage = {
+	type: 'boot';
+	basePath: string;
+	hfResolve?: string;
+};
+
+type FinanceMessage = {
+	type: 'finance5y';
+};
+
+type WorkerMessage = BootMessage | FinanceMessage;
+
+type RuntimeContext = {
+	basePath: string;
+	hfResolve: string;
+};
+
+type PriceSnapshotFile = {
+	builtAt?: string;
+	data?: Record<string, PriceSnapshotItem>;
+};
+
+type PriceSnapshotItem = {
+	currentPrice?: number | null;
+	marketCap?: number | null;
+	return1m?: number | null;
+	return3m?: number | null;
+	return1y?: number | null;
+	volatility1y?: number | null;
+	week52High?: number | null;
+	week52Low?: number | null;
+	volumeAvg30d?: number | null;
+	foreignPct?: number | null;
+	beta?: number | null;
+	priceUpdated?: string | null;
+};
+
+type NodeRow = Record<string, unknown> & {
+	id: string;
+	industry?: string;
+	industryName?: string;
+	color?: string;
+};
+
+let context: RuntimeContext | null = null;
+
+self.onmessage = (event: MessageEvent<WorkerMessage>) => {
+	const msg = event.data;
+	if (msg.type === 'boot') {
+		context = {
+			basePath: msg.basePath,
+			hfResolve: (msg.hfResolve || DEFAULT_HF_RESOLVE).replace(/\/+$/, '')
+		};
+		void boot(context);
+		return;
+	}
+	if (msg.type === 'finance5y') {
+		void loadFinance5y();
+	}
+};
+
+async function boot(ctx: RuntimeContext) {
+	try {
+		const ecosystem = await loadLocalJson<any>('map/ecosystem.json', ctx.basePath, true);
+		const nodes = ((ecosystem?.nodes ?? []) as NodeRow[]).map(normalizeNode);
+		postMessage({ type: 'ecosystem', nodes, industries: buildIndustries(nodes) });
+
+		const [prices, meta] = await Promise.all([
+			loadLocalJson<PriceSnapshotFile>('map/prices-snapshot.json', ctx.basePath, false),
+			loadLocalJson<any>('map/meta.json', ctx.basePath, false)
+		]);
+		const mergedNodes = mergePriceSnapshot(nodes, prices);
+		postMessage({
+			type: 'sidecars',
+			nodes: mergedNodes,
+			meta,
+			industries: buildIndustries(mergedNodes)
+		});
+		void refreshFromHf(ctx, mergedNodes, meta);
+	} catch (err) {
+		postMessage({ type: 'error', error: err instanceof Error ? err.message : String(err) });
+	}
+}
+
+async function refreshFromHf(ctx: RuntimeContext, fallbackNodes: NodeRow[], fallbackMeta: unknown) {
+	try {
+		const [ecosystem, prices, meta] = await Promise.all([
+			loadHfJson<any>('map/ecosystem.json', ctx.hfResolve, false),
+			loadHfJson<PriceSnapshotFile>('map/prices-snapshot.json', ctx.hfResolve, false),
+			loadHfJson<any>('map/meta.json', ctx.hfResolve, false)
+		]);
+		const nodes = ((ecosystem?.nodes ?? fallbackNodes) as NodeRow[]).map(normalizeNode);
+		const mergedNodes = mergePriceSnapshot(nodes, prices);
+		postMessage({
+			type: 'sidecars',
+			nodes: mergedNodes,
+			meta: meta ?? fallbackMeta,
+			industries: buildIndustries(mergedNodes)
+		});
+	} catch {
+		// Local snapshot is already rendered. HF freshness must not block scan.
+	}
+}
+
+async function loadFinance5y() {
+	try {
+		const ctx = context;
+		if (!ctx) throw new Error('scan runtime context 없음');
+		const result = await loadFinanceLiteRuntime(fetch);
+		postMessage({ type: 'finance5y', rows: result.rows, years: result.years });
+	} catch (err) {
+		postMessage({ type: 'finance5y-error', error: err instanceof Error ? err.message : String(err) });
+	}
+}
+
+async function loadLocalJson<T>(path: string, basePath: string, required: boolean): Promise<T | null> {
+	const normalized = path.replace(/^\/+/, '');
+	const local = await fetchJson<T>(`${basePath}/${normalized}`);
+	if (local != null) return local;
+	if (required) throw new Error(`${normalized} 로드 실패`);
+	return null;
+}
+
+async function loadHfJson<T>(
+	path: string,
+	hfResolve: string,
+	required: boolean
+): Promise<T | null> {
+	const normalized = path.replace(/^\/+/, '');
+	const hf = await fetchJson<T>(`${hfResolve}/landing/${normalized}`);
+	if (hf != null) return hf;
+	if (required) throw new Error(`${normalized} HF 로드 실패`);
+	return null;
+}
+
+async function fetchJson<T>(url: string): Promise<T | null> {
+	try {
+		const resp = await fetch(url);
+		if (!resp.ok) return null;
+		return (await resp.json()) as T;
+	} catch {
+		return null;
+	}
+}
+
+function normalizeNode(node: NodeRow): NodeRow {
+	return node;
+}
+
+function buildIndustries(nodes: NodeRow[]) {
+	const groups = new Map<string, { id: string; name: string; color: string; count: number }>();
+	for (const node of nodes) {
+		const id = String(node.industry || node.market || 'KRX');
+		const item = groups.get(id) ?? {
+			id,
+			name: String(node.industryName || id),
+			color: String(node.color || '#94a3b8'),
+			count: 0
+		};
+		item.count += 1;
+		groups.set(id, item);
+	}
+	return Array.from(groups.values());
+}
+
+function mergePriceSnapshot(nodes: NodeRow[], snapshot: PriceSnapshotFile | null): NodeRow[] {
+	const prices = snapshot?.data ?? {};
+	if (Object.keys(prices).length === 0) return nodes;
+	return nodes.map((node) => {
+		const p = prices[node.id];
+		if (!p) return node;
+		return {
+			...node,
+			currentPrice: numberOrNull(p.currentPrice),
+			marketCap: numberOrNull(p.marketCap) ?? node.marketCap ?? null,
+			return1m: numberOrNull(p.return1m),
+			return3m: numberOrNull(p.return3m),
+			return1y: numberOrNull(p.return1y),
+			volatility1y: numberOrNull(p.volatility1y),
+			week52High: numberOrNull(p.week52High),
+			week52Low: numberOrNull(p.week52Low),
+			volumeAvg30d: numberOrNull(p.volumeAvg30d),
+			foreignPct: numberOrNull(p.foreignPct),
+			beta: numberOrNull(p.beta)
+		};
+	});
+}
+
+function numberOrNull(value: unknown): number | null {
+	if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+	if (typeof value === 'bigint') {
+		const n = Number(value);
+		return Number.isFinite(n) ? n : null;
+	}
+	if (typeof value === 'string' && value.trim()) {
+		const n = Number(value.replace(/,/g, ''));
+		return Number.isFinite(n) ? n : null;
+	}
+	return null;
+}

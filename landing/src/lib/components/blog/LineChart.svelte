@@ -63,10 +63,11 @@
 		const pts = data
 			.map((d, i) => {
 				const val = d[key] as number | null;
-				if (val == null) return null;
+				if (typeof val !== 'number' || !Number.isFinite(val)) return null;
 				return `${x(i)},${y(val)}`;
 			})
 			.filter(Boolean);
+		if (pts.length < 2) return '';
 		return 'M' + pts.join('L');
 	}
 
@@ -124,7 +125,10 @@
 
 		<!-- lines -->
 		{#each resolvedKeys as key, ki}
-			<path d={pathD(key)} fill="none" stroke={colors[ki % colors.length]} stroke-width="2.5" />
+			{@const linePath = pathD(key)}
+			{#if linePath}
+				<path d={linePath} fill="none" stroke={colors[ki % colors.length]} stroke-width="2.5" />
+			{/if}
 			{#each data as d, i}
 				{#if d[key] != null}
 					<circle

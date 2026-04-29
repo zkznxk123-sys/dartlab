@@ -86,7 +86,17 @@ def _parseDocstringSections(doc: str | None) -> dict[str, str]:
         return {}
 
     result: dict[str, str] = {}
-    knownSections = {"capabilities", "requires", "aicontext", "guide", "seealso", "args", "returns", "example"}
+    knownSections = {
+        "capabilities",
+        "requires",
+        "aicontext",
+        "aicontract",
+        "guide",
+        "seealso",
+        "args",
+        "returns",
+        "example",
+    }
     currentKey: str | None = None
     currentLines: list[str] = []
 
@@ -120,6 +130,63 @@ def _parseDocstringSections(doc: str | None) -> dict[str, str]:
         result[currentKey] = "\n".join(currentLines).strip()
 
     return result
+
+
+def _parseAiContract(value: str | None) -> dict[str, Any]:
+    """Parse an AI Contract docstring block into generated metadata."""
+    if not value:
+        return {}
+    text = value.strip()
+    if not text:
+        return {}
+    try:
+        parsed = json.loads(text)
+        return parsed if isinstance(parsed, dict) else {}
+    except json.JSONDecodeError:
+        pass
+
+    out: dict[str, Any] = {}
+    for line in text.splitlines():
+        if ":" not in line:
+            continue
+        key, raw = line.split(":", 1)
+        key = key.strip()
+        raw = raw.strip()
+        if not key:
+            continue
+        if raw.startswith("[") or raw.startswith("{"):
+            try:
+                out[key] = json.loads(raw)
+                continue
+            except json.JSONDecodeError:
+                pass
+        if "," in raw:
+            out[key] = [part.strip() for part in raw.split(",") if part.strip()]
+        else:
+            out[key] = raw
+    return out
+
+
+def _applyAiContract(entry: dict[str, Any], sections: dict[str, str]) -> None:
+    contract = _parseAiContract(sections.get("aicontract"))
+    if not contract:
+        return
+    for key in (
+        "contractId",
+        "questionTypes",
+        "requiredEvidence",
+        "evidenceSchema",
+        "freshness",
+        "comparisonCompleteness",
+        "visualPolicy",
+        "artifactPolicy",
+        "toolArgPolicy",
+        "toolBudget",
+        "preflightActions",
+        "priority",
+    ):
+        if key in contract:
+            entry[key] = contract[key]
 
 
 # ─── Surface 1: Python API (__init__.py __all__) ────────────────
@@ -1342,6 +1409,151 @@ def _parseAxisRegistry(entries: dict[str, dict[str, str]], path: Path, *, prefix
             entries[f"{prefix}.{axisName}"] = axisEntry
 
 
+def _applyAiContractMetadata(entries: dict[str, dict[str, Any]]) -> None:
+    """Attach generated AI contract metadata.
+
+    Runtime must not keep a second copy of these contracts.  This generator is
+    the bridge from docstrings/axis metadata to `_generated.py::CAPABILITIES`.
+    """
+    contracts: dict[str, dict[str, Any]] = {
+        "gather.krx": {
+            "contractId": "gather.krx.close",
+            "tool": "gather",
+            "questionTypes": ["recent_price_mover"],
+            "requiredEvidence": ["asOf", "period", "universe", "metric"],
+            "evidenceSchema": {
+                "targetKeys": ["stockCode", "code"],
+                "metricKeys": ["returnPct", "close_return_pct"],
+                "periodKeys": ["period", "date"],
+                "asOfKeys": ["asOf", "end", "date"],
+                "valueKeys": ["returnPct", "value"],
+                "unit": "%",
+                "basisKeys": ["rank", "corpName", "stockCode"],
+            },
+            "freshness": {"cadence": "daily", "maxStaleBusinessDays": 10},
+            "comparisonCompleteness": {"mode": "full_universe_ranking"},
+            "visualPolicy": {"requiredFor": ["recent_price_mover"], "preferredType": "chart"},
+            "artifactPolicy": {"primaryCsv": True},
+            "toolArgPolicy": ["start_lte_end", "end_not_future", "target_close_for_price_returns"],
+            "preflightActions": [
+                {"tool": "pythonExec", "argsTemplate": {"kind": "krx_price_mover"}, "primaryEvidence": True}
+            ],
+            "priority": 100,
+        },
+        "gather.macro": {
+            "contractId": "macro.recent",
+            "tool": "gather",
+            "questionTypes": ["macro_recent"],
+            "requiredEvidence": ["asOf", "metric", "value"],
+            "evidenceSchema": {
+                "targetKeys": ["target", "metric"],
+                "metricKeys": ["metric", "target"],
+                "periodKeys": ["date", "period"],
+                "asOfKeys": ["date", "asOf"],
+                "valueKeys": ["value", "close"],
+            },
+            "freshness": {"cadence": "daily_or_policy", "maxStaleBusinessDays": 10, "discloseMixedAsOf": True},
+            "visualPolicy": {"requiredFor": ["macro_recent"], "preferredType": "chart"},
+            "priority": 75,
+        },
+        "Company.analysis": {
+            "contractId": "company.analysis",
+            "tool": "analysis",
+            "questionTypes": ["company_compare", "cashflow"],
+            "requiredEvidence": ["target", "metric", "period", "value"],
+            "evidenceSchema": {
+                "targetKeys": ["stockCode", "target", "code"],
+                "metricKeys": ["metric", "axis", "score", "value"],
+                "periodKeys": ["period", "basePeriod", "year"],
+                "valueKeys": ["value", "score"],
+            },
+            "artifactPolicy": {"primaryCsv": True},
+            "priority": 90,
+        },
+        "aiContract.comparison.same_axis": {
+            "kind": "ai_contract",
+            "summary": "회사 비교 동일 축 evidence 계약",
+            "contractId": "comparison.same_axis",
+            "questionTypes": ["company_compare"],
+            "requiredEvidence": ["target", "metric", "period", "value"],
+            "evidenceSchema": {
+                "targetKeys": ["stockCode", "target", "code"],
+                "metricKeys": ["metric", "axis", "score", "value"],
+                "periodKeys": ["period", "basePeriod", "year"],
+                "valueKeys": ["value", "score"],
+            },
+            "comparisonCompleteness": {"mode": "same_metric_each_target", "minTargets": 2},
+            "visualPolicy": {"requiredFor": ["company_compare"], "preferredType": "chart_or_diagram"},
+            "artifactPolicy": {"primaryCsv": True},
+            "toolArgPolicy": ["no_missing_side_in_comparison"],
+            "toolBudget": {"skipTools": ["quant"], "maxHeavyCallsPerTargetTool": 1},
+            "preflightActions": [{"tool": "analysis", "argsTemplate": {"axis": "종합평가"}, "primaryEvidence": True}],
+            "priority": 90,
+        },
+        "aiContract.disclosure.importance": {
+            "kind": "ai_contract",
+            "summary": "공시 중요도 분석 근거 깊이 계약",
+            "contractId": "disclosure.importance",
+            "tool": "disclosure",
+            "questionTypes": ["disclosure_importance"],
+            "requiredEvidence": ["filedAt", "title", "formType", "basis"],
+            "evidenceSchema": {
+                "targetKeys": ["stockCode", "corpCode"],
+                "metricKeys": ["formType", "reportName", "title"],
+                "periodKeys": ["filedAt", "date", "rceptDt"],
+                "asOfKeys": ["filedAt", "date", "rceptDt"],
+                "basisKeys": ["basis", "title", "reportName"],
+            },
+            "freshness": {"cadence": "filing_date", "disclosureRequired": True},
+            "visualPolicy": {"requiredFor": ["disclosure_importance"], "preferredType": "diagram"},
+            "artifactPolicy": {"primaryCsv": True},
+            "toolArgPolicy": [
+                "title_only_scope_must_not_be_presented_as_body_analysis",
+                "sections_false",
+                "max_chars_4000",
+            ],
+            "priority": 80,
+        },
+        "aiContract.cashflow.primary": {
+            "kind": "ai_contract",
+            "summary": "현금흐름 질문 primary evidence 계약",
+            "contractId": "cashflow.primary",
+            "questionTypes": ["cashflow"],
+            "requiredEvidence": ["target", "metric", "period", "value"],
+            "evidenceSchema": {
+                "targetKeys": ["stockCode", "target"],
+                "metricKeys": ["OCF", "FCF", "CAPEX", "metric", "axis"],
+                "periodKeys": ["period", "year"],
+                "valueKeys": ["value", "OCF", "FCF", "CAPEX"],
+            },
+            "visualPolicy": {"requiredFor": ["cashflow"], "preferredType": "chart"},
+            "preflightActions": [
+                {"tool": "analysis", "argsTemplate": {"axis": "현금흐름"}, "primaryEvidence": True},
+                {
+                    "tool": "show",
+                    "argsTemplate": {"topic": "CF", "freq": "Y", "scope": "consolidated", "raw": False},
+                    "primaryEvidence": True,
+                },
+            ],
+            "priority": 85,
+        },
+        "aiContract.capabilities.valid_key": {
+            "kind": "ai_contract",
+            "summary": "capabilities key 오염 방지 계약",
+            "contractId": "capabilities.valid_key",
+            "tool": "capabilities",
+            "questionTypes": ["meta_help"],
+            "requiredEvidence": ["valid_key_or_search"],
+            "toolArgPolicy": ["reject_polluted_capabilities_key"],
+            "priority": 70,
+        },
+    }
+    for key, contract in contracts.items():
+        entries.setdefault(key, {})
+        for field, value in contract.items():
+            entries[key].setdefault(field, value)
+
+
 def _generateCapabilitiesPy() -> str:
     """런타임 capabilities 카탈로그 Python 파일 생성.
 
@@ -1403,10 +1615,11 @@ def _generateCapabilitiesPy() -> str:
                     doc = callDoc
         summary = doc.split("\n")[0].strip() if doc else ""
         sections = _parseDocstringSections(doc)
-        entry: dict[str, str] = {"summary": summary, "kind": kind}
+        entry: dict[str, Any] = {"summary": summary, "kind": kind}
         for key in ("capabilities", "requires", "aicontext", "guide", "seealso", "returns", "args", "example"):
             if val := sections.get(key):
                 entry[key if key != "seealso" else "seeAlso"] = val
+        _applyAiContract(entry, sections)
         entries[name] = entry
 
     # 2) Company 공개 메서드/프로퍼티
@@ -1440,6 +1653,7 @@ def _generateCapabilitiesPy() -> str:
         for key in ("capabilities", "requires", "aicontext", "guide", "seealso", "returns", "args", "example"):
             if val := sections.get(key):
                 entry[key if key != "seealso" else "seeAlso"] = val
+        _applyAiContract(entry, sections)
         entries[f"Company.{memberName}"] = entry
 
     # 3~6) 각 엔진의 _AXIS_REGISTRY AST 파싱 — scan/macro/gather 통합
@@ -1448,7 +1662,8 @@ def _generateCapabilitiesPy() -> str:
     _parseAxisRegistry(entries, SRC / "dartlab" / "macro" / "__init__.py", prefix="macro")
     _parseAxisRegistry(entries, SRC / "dartlab" / "gather" / "entry.py", prefix="gather")
 
-    dictRepr = json.dumps(entries, ensure_ascii=False, indent=4, sort_keys=True)
+    _applyAiContractMetadata(entries)
+    dictJson = json.dumps(entries, ensure_ascii=False, indent=4, sort_keys=True)
 
     return (
         '"""런타임 capabilities 카탈로그 (자동 생성).\n'
@@ -1456,7 +1671,13 @@ def _generateCapabilitiesPy() -> str:
         "이 파일은 scripts/build/generateSpec.py가 자동 생성합니다. 직접 수정 금지.\n"
         '"""\n'
         "\n"
-        f"CAPABILITIES: dict[str, dict] = {dictRepr}\n"
+        "import json\n"
+        "\n"
+        "CAPABILITIES: dict[str, dict] = json.loads(\n"
+        "    r'''\n"
+        f"{dictJson}\n"
+        "'''\n"
+        ")\n"
     )
 
 

@@ -440,3 +440,52 @@ grep -n "companyfacts/CIK" src/dartlab/providers/edgar/bulk/
 11. 근본 전제 4 비교 가능성 (회사 내 · 회사 간 · 시장 내 · 시장 간) 이 dartlab 존재 이유.
 12. period 라벨은 캘린더 기준 (`{calYear}Q{calQ}`, `buildFiscalToCalendarMap` SSOT).
 13. EDGAR 자동 파이프라인은 벌크, 사용자 API 호출은 `refreshFromApi` 에서만.
+
+## Appendix. AI Contract Metadata
+
+공개 API docstring 은 사용법뿐 아니라 AI runtime 이 검증할 최소 계약도 담을 수 있다. 섹션 이름은 `AIContract` 이며, `scripts/build/generateSpec.py` 가 이를 파싱해 `_generated.py::CAPABILITIES` 에 구조화한다.
+
+허용 필드는 `contractId`, `questionTypes`, `requiredEvidence`, `evidenceSchema`, `freshness`, `comparisonCompleteness`, `visualPolicy`, `artifactPolicy`, `toolArgPolicy`, `toolBudget`, `preflightActions`, `priority` 다. 같은 의미의 계약을 runtime dict 에 다시 만들지 않는다.
+
+```text
+AIContract:
+    contractId: gather.krx.close
+    questionTypes: recent_price_mover
+    requiredEvidence: ["asOf", "period", "universe", "metric"]
+    freshness: {"cadence": "daily", "maxStaleBusinessDays": 10}
+```
+
+**반복 실패** → docstring/capabilities 에 없는 질문별 규칙을 `quality.py`, `toolLoop.py`, `selectToolsForQuestion()` 에 다시 하드코딩하는 것. runtime 은 Contract Graph 를 조회한다.
+
+## Appendix. `/api/ask` Result Bundle
+
+`/api/ask` 응답은 호환 확장만 허용한다. 기존 소비자가 읽는 `answer` 와 `artifacts` 는 유지하고, AI 분석 작업공간 산출물은 선택 필드로 추가한다.
+
+```json
+{
+  "answer": "...",
+  "artifacts": [],
+  "evidence": [],
+  "claims": [],
+  "visuals": [],
+  "limits": [],
+  "responseMeta": {
+    "evidenceCount": 0,
+    "claimCount": 0,
+    "visualCount": 0,
+    "limitCount": 0,
+    "coverage": {"contractIds": []},
+    "llmRoundMs": 0,
+    "toolTotalMs": 0,
+    "rewriteCount": 0,
+    "maxRoundsReached": false,
+    "slowReason": []
+  }
+}
+```
+
+`stream=true` 에서는 기존 이벤트를 유지하면서 `evidence`, `claim`, `chart` 이벤트를 추가할 수 있다. `done.responseMeta` 는 evidence/claim/visual/limit count 와 latency 요약을 담는다.
+
+**반복 실패** → 기존 `answer` 계약을 깨거나, 필수 필드로 바꿔 오래된 UI/SDK 를 깨는 것. 새 필드는 additive optional 이다.
+
+---

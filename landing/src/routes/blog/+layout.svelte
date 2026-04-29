@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { base } from '$app/paths';
-	import { Github, Search } from 'lucide-svelte';
+	import Header from '$lib/components/sections/Header.svelte';
 	import Footer from '$lib/components/sections/Footer.svelte';
 	import { categoryDefinitions, getCategoryPath } from '$lib/blog/posts';
 
@@ -9,38 +9,10 @@
 
 	let currentPath = $derived(page.url.pathname.replace(base, ''));
 	let currentCategory = $derived(page.data.currentCategory);
-
-	function openSearch() {
-		window.dispatchEvent(new CustomEvent('open-command-palette'));
-	}
 </script>
 
 <div class="dl-blog">
-	<header class="dl-blog-header">
-		<div class="dl-blog-header-inner">
-			<div class="dl-blog-header-left">
-				<a href="{base}/" class="dl-blog-logo">
-					<picture>
-						<source srcset="{base}/avatar.webp" type="image/webp" />
-						<img src="{base}/avatar.png" alt="DartLab" width="24" height="24" class="dl-blog-logo-img" />
-					</picture>
-					<span class="dl-blog-logo-text">DartLab</span>
-				</a>
-				<span class="dl-blog-divider">/</span>
-				<a href="{base}/blog/" class="dl-blog-link">Blog</a>
-			</div>
-			<div class="dl-blog-header-right">
-				<button class="dl-blog-search-btn" onclick={openSearch}>
-					<Search size={14} />
-					<span>Search...</span>
-					<kbd>⌘K</kbd>
-				</button>
-				<a href="https://github.com/eddmpython/dartlab" target="_blank" rel="noopener" class="dl-blog-icon-link">
-					<Github size={16} />
-				</a>
-			</div>
-		</div>
-	</header>
+	<Header context="blog" />
 
 	<div class="dl-blog-body">
 		<aside class="dl-blog-sidebar">
@@ -84,101 +56,8 @@
 		--sidebar-width: 220px;
 		--page-gutter: 1.5rem;
 		--rail-gap: 2rem;
+		padding-top: 48px;
 	}
-
-	.dl-blog-header {
-		position: sticky;
-		top: 0;
-		z-index: 50;
-		background: rgba(3, 5, 9, 0.92);
-		backdrop-filter: blur(12px);
-		border-bottom: 1px solid rgba(30, 36, 51, 0.6);
-	}
-
-	.dl-blog-header-inner {
-		max-width: var(--shell-max-width);
-		margin: 0 auto;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0 1rem;
-		height: 48px;
-	}
-
-	.dl-blog-header-left {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.dl-blog-logo {
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		text-decoration: none;
-		color: #f1f5f9;
-		font-weight: 600;
-		font-size: 0.875rem;
-	}
-
-	.dl-blog-logo-img { border-radius: 50%; }
-
-	.dl-blog-divider {
-		color: #1e2433;
-		font-size: 1rem;
-		font-weight: 300;
-	}
-
-	.dl-blog-link {
-		color: #94a3b8;
-		text-decoration: none;
-		font-size: 0.8125rem;
-		font-weight: 500;
-	}
-	.dl-blog-link:hover { color: #f1f5f9; }
-
-	.dl-blog-header-right {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.dl-blog-search-btn {
-		display: none;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.25rem 0.625rem;
-		border-radius: 6px;
-		border: 1px solid rgba(30, 36, 51, 0.8);
-		background: rgba(15, 18, 25, 0.5);
-		color: #64748b;
-		font-size: 0.75rem;
-		cursor: pointer;
-		height: 28px;
-		transition: border-color 0.15s, color 0.15s;
-	}
-	.dl-blog-search-btn:hover {
-		border-color: rgba(30, 36, 51, 1);
-		color: #94a3b8;
-	}
-	.dl-blog-search-btn kbd {
-		padding: 0.1rem 0.3rem;
-		border-radius: 4px;
-		background: rgba(5, 8, 17, 0.8);
-		border: 1px solid rgba(30, 36, 51, 0.8);
-		font-size: 0.625rem;
-		font-family: inherit;
-		line-height: 1;
-		color: #64748b;
-	}
-
-	.dl-blog-icon-link {
-		color: #64748b;
-		display: flex;
-		padding: 0.25rem;
-		transition: color 0.15s;
-	}
-	.dl-blog-icon-link:hover { color: #f1f5f9; }
 
 	.dl-blog-body {
 		max-width: var(--shell-max-width);
@@ -249,10 +128,6 @@
 		min-width: 0;
 	}
 
-	@media (min-width: 768px) {
-		.dl-blog-search-btn { display: flex; }
-	}
-
 	@media (max-width: 960px) {
 		.dl-blog-body {
 			grid-template-columns: 1fr;
@@ -303,8 +178,6 @@
 	}
 
 	@media (max-width: 480px) {
-		.dl-blog-logo-text { display: none; }
-		.dl-blog-divider { display: none; }
 		.dl-blog-body {
 			padding: 1rem 0.5rem 3rem;
 			gap: 0.75rem;

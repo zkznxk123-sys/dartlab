@@ -15,6 +15,8 @@ import inspect
 from dataclasses import dataclass
 from typing import Any, Callable
 
+from dartlab.ai.runtime.contract_graph import allContracts, contractsForQuestion, inferQuestionProfile
+
 
 @dataclass
 class AITool:
@@ -260,7 +262,7 @@ def selectToolsForQuestion(
         "act1_business": ["show", "industry", "story", "pastInsight"],
         "act2_profit": ["analysis", "show", "industry", "pastInsight"],
         "act3_cash": ["analysis", "show", "credit"],
-        "act4_stability": ["credit", "analysis", "debt", "show"],
+        "act4_stability": ["credit", "analysis", "show"],
         "act5_capital": ["capital", "analysis", "show", "quant"],
         "act6_outlook": ["analysis", "quant", "macro", "gather", "valuationImpact"],
         "compare": ["scan", "industry", "macro", "topdown", "pythonExec"],
@@ -270,9 +272,41 @@ def selectToolsForQuestion(
     add(intentMap.get(intent or "", []))
 
     q = (question or "").lower()
-    isCompanyPairCompare = intent == "compare" and _looksLikeCompanyPairQuestion(q)
+    profile = inferQuestionProfile(question)
+    contractIds = {contract.contractId for contract in contractsForQuestion(question)}
+    if profile.has("recent_price_mover"):
+        return _pickTools(byName, ["pythonExec", "capabilities"], maxTools=2)
+    if any(word in q for word in ("기업이야기", "스토리", "story")) and intent != "compare":
+        storyPriority = [
+            "searchCompany",
+            "capabilities",
+            "pastInsight",
+            "credit",
+            "analysis",
+            "quant",
+            "show",
+            "pythonExec",
+        ]
+        selected = [name for name in storyPriority if name in selected or name in byName]
+        return _pickTools(byName, selected, maxTools=min(maxTools, 9))
+    if stockCode and not str(stockCode).isdigit():
+        selected = [name for name in selected if name not in {"analysis", "credit", "quant"}]
+    if intent == "act3_cash":
+        selected = [name for name in selected if name != "quant"]
+    if intent == "act4_stability":
+        selected = [name for name in selected if name not in {"debt", "quant"}]
+    isCompanyPairCompare = (intent == "compare" or profile.has("company_compare")) and _looksLikeCompanyPairQuestion(q)
     if isCompanyPairCompare:
         add(["analysis", "credit", "quant", "show", "pastInsight"])
+
+    contractToolHints: list[str] = []
+    if "disclosure.importance" in contractIds:
+        contractToolHints.extend(["disclosure", "liveFilings", "filings", "readFiling"])
+    if "macro.recent" in contractIds:
+        contractToolHints.extend(["gather", "macro"])
+    if "cashflow.primary" in contractIds:
+        contractToolHints.extend(["analysis", "show"])
+    add(contractToolHints)
 
     keywordMap: list[tuple[tuple[str, ...], list[str]]] = [
         (
@@ -323,6 +357,13 @@ def selectToolsForQuestion(
         ]
         selected = [name for name in priority if name in selected] + [name for name in selected if name not in priority]
 
+    if stockCode and not str(stockCode).isdigit():
+        selected = [name for name in selected if name not in {"analysis", "credit", "quant"}]
+    if intent == "act3_cash":
+        selected = [name for name in selected if name != "quant"]
+    if intent == "act4_stability":
+        selected = [name for name in selected if name not in {"debt", "quant"}]
+
     return _pickTools(byName, selected, maxTools=maxTools)
 
 
@@ -332,6 +373,26 @@ def _looksLikeCompanyPairQuestion(q: str) -> bool:
     if any(sep in q for sep in (" vs ", " versus ", "와", "과", "랑", "하고")):
         return any(word in q for word in ("비교", "대비", "경쟁력", "누가", "어느"))
     return False
+
+
+def _looksLikePriceMoverQuestion(q: str) -> bool:
+    hasStock = any(word in q for word in ("주가", "가격", "종목", "stock", "price", "醫낅ぉ", "二쇨?"))
+    hasMove = any(
+        word in q
+        for word in (
+            "오른",
+            "상승",
+            "수익률",
+            "랭킹",
+            "순위",
+            "mover",
+            "return",
+            "?ㅻⅨ",
+            "?곸듅",
+            "?섏씡瑜?",
+        )
+    )
+    return hasStock and hasMove
 
 
 def _pickTools(byName: dict[str, AITool], names: list[str], *, maxTools: int) -> list[AITool]:
@@ -736,7 +797,14 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
     if name == "search":
         props["limit"] = {"type": "integer", "description": "상위 N개 (기본 10)", "minimum": 1, "maximum": 50}
 
-    return {"type": "object", "properties": props, "required": required, "additionalProperties": False}
+    schema = {"type": "object", "properties": props, "required": required, "additionalProperties": False}
+    contract_entries = [contract.toDict() for contract in allContracts().values() if contract.tool == name]
+    cap_contract = caps.get(name, {}).get("contractId") or caps.get(f"Company.{name}", {}).get("contractId")
+    if cap_contract:
+        schema["x-dartlab-contractId"] = cap_contract
+    elif contract_entries:
+        schema["x-dartlab-contractId"] = contract_entries[0]["contractId"]
+    return schema
 
 
 def _enumFromCapabilities(toolName: str, paramName: str, caps: dict) -> list[str]:

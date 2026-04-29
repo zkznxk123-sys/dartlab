@@ -63,7 +63,7 @@ c.diff("businessOverview")  # drill into one topic
 
 ```python
 apple = dartlab.Company("AAPL")
-apple.IS
+apple.show("IS")
 apple.show("10-K::item1ARiskFactors")
 ```
 

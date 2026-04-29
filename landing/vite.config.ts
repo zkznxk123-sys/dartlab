@@ -1,9 +1,11 @@
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
-import path from 'path';
-import fs from 'fs';
+import { defineConfig, type ViteDevServer } from 'vite';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const docsDir = path.resolve(__dirname, '..', 'docs');
 const blogDir = path.resolve(__dirname, '..', 'blog');
 const pyodideDir = path.resolve(__dirname, '..', 'pyodide');
@@ -42,7 +44,7 @@ function collectBlogAssets(dir: string, result = new Map<string, string>()) {
 function blogAssetsPlugin() {
 	return {
 		name: 'blog-assets-plugin',
-		configureServer(server) {
+		configureServer(server: ViteDevServer) {
 			const assetMap = collectBlogAssets(blogDir);
 			server.middlewares.use('/blog/assets', (req, res, next) => {
 				const rawPath = req.url?.split('?')[0] ?? '/';
@@ -61,6 +63,12 @@ function blogAssetsPlugin() {
 
 export default defineConfig({
 	plugins: [tailwindcss(), blogAssetsPlugin(), sveltekit()],
+	worker: {
+		format: 'es'
+	},
+	build: {
+		emptyOutDir: false
+	},
 	resolve: {
 		alias: {
 			'@docs': docsDir,

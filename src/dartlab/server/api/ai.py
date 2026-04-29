@@ -182,6 +182,12 @@ def api_status(
         resp["channels"] = channel_runtime.status()
     except ImportError:
         resp["channels"] = {}
+    try:
+        from ..services.dev_channel_runtime import dev_channel_runtime
+
+        resp["channel"] = dev_channel_runtime.status()
+    except ImportError:
+        resp["channel"] = {"kind": "devtunnel", "running": False, "url": None, "qrDataUrl": None, "error": None}
     return resp
 
 
@@ -331,6 +337,45 @@ def api_channel_stop(platform: str):
         raise HTTPException(status_code=500, detail=_guideDetail(e)) from e
 
 
+def _request_port(request: Request) -> int:
+    if request.url.port:
+        return int(request.url.port)
+    return 8400
+
+
+@router.get("/api/channel")
+def api_dev_channel_status():
+    """DevTunnels 모바일 접속 채널 상태를 반환한다."""
+    try:
+        from ..services.dev_channel_runtime import dev_channel_runtime
+
+        return dev_channel_runtime.status()
+    except _HANDLED_API_ERRORS as e:
+        raise HTTPException(status_code=500, detail=_guideDetail(e)) from e
+
+
+@router.post("/api/channel/start")
+def api_dev_channel_start(request: Request):
+    """현재 Web UI를 모바일에서 열 수 있는 DevTunnels 채널을 시작한다."""
+    try:
+        from ..services.dev_channel_runtime import dev_channel_runtime
+
+        return dev_channel_runtime.start(port=_request_port(request), auto_yes=True)
+    except _HANDLED_API_ERRORS as e:
+        raise HTTPException(status_code=500, detail=_guideDetail(e)) from e
+
+
+@router.post("/api/channel/stop")
+def api_dev_channel_stop():
+    """DevTunnels 채널을 종료한다."""
+    try:
+        from ..services.dev_channel_runtime import dev_channel_runtime
+
+        return dev_channel_runtime.stop()
+    except _HANDLED_API_ERRORS as e:
+        raise HTTPException(status_code=500, detail=_guideDetail(e)) from e
+
+
 @router.get("/api/ai/profile/events")
 async def api_ai_profile_events(request: Request):
     """profile 변경 SSE 스트림."""
@@ -368,9 +413,9 @@ def api_models(provider: str):
         return {"models": get_codex_model_catalog()}
 
     if provider == "oauth-codex":
-        from dartlab.ai.providers.oauth_codex import AVAILABLE_MODELS
+        from dartlab.ai.providers.oauth_codex import availableModels
 
-        return {"models": AVAILABLE_MODELS}
+        return {"models": availableModels()}
 
     if provider in STATIC_MODELS:
         return {"models": STATIC_MODELS[provider]}
@@ -446,6 +491,7 @@ def _fetch_openai_models() -> list[str]:
                 if not any(excluded in mid for excluded in exclude):
                     models.append(mid)
         priority = [
+            "gpt-5.2",
             "gpt-5.4",
             "gpt-5.4-pro",
             "gpt-5.3-codex",

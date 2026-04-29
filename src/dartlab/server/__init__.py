@@ -82,7 +82,9 @@ async def lifespan(_: FastAPI):
         yield
     finally:
         from .services.channel_runtime import channel_runtime
+        from .services.dev_channel_runtime import dev_channel_runtime
 
+        dev_channel_runtime.shutdown()
         channel_runtime.shutdown_all()
         room_manager.stop_background_cleanup()
         room_manager.destroy_room()

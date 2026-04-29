@@ -64,7 +64,7 @@ export const categoryDefinitions = [
 ] as const;
 
 export type CategoryId = (typeof categoryDefinitions)[number]['id'];
-export type CategoryDefinition = (typeof categoryDefinitions)[number];
+export type CategoryDefinition = (typeof categoryDefinitions)[number] & { hidden?: boolean };
 
 export const seriesDefinitions = {
 	'dart-foundations': {
@@ -356,7 +356,7 @@ export function getCategoryGroups(): Array<CategoryDefinition & { posts: PostMet
 				seriesLabels
 			};
 		})
-		.filter((category) => category.posts.length > 0 && !category.hidden);
+		.filter((category) => category.posts.length > 0 && !('hidden' in category && category.hidden));
 }
 
 export function getLatestPosts(limit = 6): PostMeta[] {

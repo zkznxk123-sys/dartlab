@@ -161,6 +161,30 @@ export function pullOllamaModel(modelName, { onProgress, onDone, onError }) {
 	return { abort: () => controller.abort() };
 }
 
+export async function fetchDevChannelStatus() {
+	const res = await fetch(`${BASE}/api/channel`);
+	if (!res.ok) throw new Error("Channel 상태 확인 실패");
+	return res.json();
+}
+
+export async function startDevChannel() {
+	const res = await fetch(`${BASE}/api/channel/start`, { method: "POST" });
+	if (!res.ok) {
+		const err = await res.json().catch(() => ({}));
+		throw new Error(err.detail || "Channel 시작 실패");
+	}
+	return res.json();
+}
+
+export async function stopDevChannel() {
+	const res = await fetch(`${BASE}/api/channel/stop`, { method: "POST" });
+	if (!res.ok) {
+		const err = await res.json().catch(() => ({}));
+		throw new Error(err.detail || "Channel 종료 실패");
+	}
+	return res.json();
+}
+
 export async function codexLogout() {
 	const res = await fetch(`${BASE}/api/codex/logout`, { method: "POST" });
 	if (!res.ok) throw new Error("Codex 로그아웃 실패");

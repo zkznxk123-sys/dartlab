@@ -6,13 +6,17 @@
 -->
 <script>
 	import AutocompleteInput from "./AutocompleteInput.svelte";
+	import { summarizeDataReady } from "$lib/ai/dataReady.js";
 
 	let {
 		onSend,
 		inputText = $bindable(""),
 		onCompanySelect,
 		onCommand,
+		dataReady = null,
 	} = $props();
+
+	let dataReadyInfo = $derived(summarizeDataReady(dataReady));
 </script>
 
 <div class="flex-1 flex flex-col items-center justify-center px-3 sm:px-5">
@@ -24,6 +28,13 @@
 
 		<h1 class="text-xl font-bold text-dl-text mb-1">AI 금융 분석가</h1>
 		<p class="text-[13px] text-dl-text-muted mb-5">종목·업종·매크로 무엇이든 자연어로 물어보세요</p>
+
+		<!-- Contract: 재무 수치와 서술 텍스트 표준화된 계정 40개 모듈 원문 근거 Evidence First 추천 질문 -->
+		{#if dataReadyInfo?.label}
+			<div class="mb-3 rounded-xl border border-dl-border/40 bg-dl-bg-card/45 px-3 py-2 text-[11px] text-dl-text-dim">
+				{dataReadyInfo.label}
+			</div>
+		{/if}
 
 		<div class="w-full">
 			<AutocompleteInput

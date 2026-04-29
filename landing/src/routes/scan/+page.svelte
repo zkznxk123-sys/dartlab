@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { base } from '$app/paths';
 	import Header from '$lib/components/sections/Header.svelte';
 	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
 	import Grid from '$lib/scan/Grid.svelte';
@@ -8,36 +9,29 @@
 	import PresetModal from '$lib/scan/PresetModal.svelte';
 	import CellTooltip from '$lib/scan/CellTooltip.svelte';
 	import Distribution from '$lib/scan/Distribution.svelte';
-	import Detail from '$lib/scan/Detail.svelte';
 	import InsightsFeed from '$lib/scan/InsightsFeed.svelte';
 	import SavedSets from '$lib/scan/SavedSets.svelte';
-	import DataExplorer from '$lib/scan/DataExplorer.svelte';
 	import { Search } from 'lucide-svelte';
 	import { encodeScanPayload, decodeScanPayload } from '$lib/scan/url';
 	import type { SavedColumnSet } from '$lib/scan/types';
 	import { DEFAULT_COLUMNS, METRICS_BY_KEY, PINNED_COLUMNS } from '$lib/scan/metrics';
 	import type { ScanNode, FilterCond, SortKey } from '$lib/scan/types';
-	import type { Preset } from '$lib/scan/presets';
+	import type { Preset, RuntimeLoader } from '$lib/scan/presets';
 	import { PRESETS_BY_ID } from '$lib/scan/presets';
-	import {
-		ensureDuckDb,
-		loadPriceSnapshot,
-		loadPriceMetrics,
-		loadValuationStream,
-		loadChangesStream,
-		type PriceMetrics,
-		type ValuationMetrics,
-		type ChangeMetrics,
-		type DbState
-	} from '$lib/scan/duckSql';
-	import { readCachedMap, writeCachedMap, CACHE_KEYS } from '$lib/scan/cache';
+	import { HF_RESOLVE, loadJson } from '$lib/data/dartlabData';
+	import type { ValuationRuntimeMetrics } from '$lib/data/valuationRuntime';
+	import type { ChangeMetrics } from '$lib/data/changesRuntime';
+	import type { PriceMetrics, ValuationMetrics, DbState } from '$lib/scan/duckSql';
 	import type { DartDb } from '$lib/data/duckdb';
 
 	let { data } = $props();
 
 	// ── State ──────────────────────────────────────────
+	let hfNodes = $state.raw<ScanNode[]>([]);
+	let runtimeIndustries = $state.raw<Array<{ id: string; name: string; color: string; count: number }>>([]);
+	let runtimeMeta = $state<any>(null);
 	let baseNodes = $derived.by(() => {
-		const nodes = (data.ecosystem?.nodes || []) as ScanNode[];
+		const nodes = hfNodes.length > 0 ? hfNodes : ((data.ecosystem?.nodes || []) as ScanNode[]);
 		const markets = (data.markets || {}) as Record<string, string>;
 		// ecosystem.json 에 market 필드 없으면 markets.json 으로 보강
 		if (Object.keys(markets).length === 0) return nodes;
@@ -49,14 +43,29 @@
 			return market ? ({ ...n, market } as ScanNode) : n;
 		});
 	});
-	let industries = $derived(
-		(data.ecosystem?.industries || []) as Array<{
+	let industries = $derived.by(() => {
+		const existing = (data.ecosystem?.industries || []) as Array<{
 			id: string;
 			name: string;
 			color: string;
 			count: number;
-		}>
-	);
+		}>;
+		if (existing.length > 0 && hfNodes.length === 0) return existing;
+		if (runtimeIndustries.length > 0) return runtimeIndustries;
+		const groups = new Map<string, { id: string; name: string; color: string; count: number }>();
+		for (const node of hfNodes) {
+			const id = String(node.industry || node.market || 'KRX');
+			const item = groups.get(id) ?? {
+				id,
+				name: String(node.industryName || id),
+				color: String(node.color || '#94a3b8'),
+				count: 0
+			};
+			item.count += 1;
+			groups.set(id, item);
+		}
+		return Array.from(groups.values());
+	});
 
 	let activeColumns = $state<string[]>([...DEFAULT_COLUMNS]);
 	let sort = $state<SortKey | null>({ key: 'marketCap', dir: 'desc' });
@@ -67,14 +76,31 @@
 	let searchQuery = $state('');
 	let presetOpen = $state(false);
 	let activePresetId = $state<string | null>(null);
+	let runtimeState = $state<'loading' | 'ready' | 'error'>('loading');
+	let runtimeError = $state<string | null>(null);
+	let trendState = $state<'idle' | 'loading' | 'ready' | 'error'>('idle');
+	let trendError = $state<string | null>(null);
+	let DetailComponent = $state<any>(null);
+	let DataExplorerComponent = $state<any>(null);
 
-	// ── DuckDB lifecycle ──────────────────────────────
+	// ── Runtime data + opt-in DuckDB lifecycle ────────
 	let dbState = $state<DbState>('idle');
 	let dbError = $state<string | null>(null);
 	let dartDb = $state<DartDb | null>(null);
-	let priceMap = $state<Map<string, PriceMetrics>>(new Map());
-	let valuationMap = $state<Map<string, ValuationMetrics>>(new Map());
-	let changesMap = $state<Map<string, ChangeMetrics>>(new Map());
+	let dbBootStarted = false;
+	let priceMetricsStarted = false;
+	let valuationStarted = false;
+	let priceOneYearScheduled = false;
+	let runtimeWorker: Worker | null = null;
+	let priceWorker: Worker | null = null;
+	let changesWorker: Worker | null = null;
+	let priceMap = $state.raw<Map<string, PriceMetrics>>(new Map());
+	let valuationMap = $state.raw<Map<string, ValuationMetrics>>(new Map());
+	let changesMap = $state.raw<Map<string, ChangeMetrics>>(new Map());
+	let financeMap = $state.raw<Map<string, Partial<ScanNode>>>(new Map());
+	let loaderLoading = $state<Set<RuntimeLoader>>(new Set());
+	let loaderReady = $state<Set<RuntimeLoader>>(new Set());
+	let loaderError = $state<Map<RuntimeLoader, string>>(new Map());
 
 	// ── Cell hover tooltip ────────────────────────────
 	let cellHover = $state<{
@@ -112,68 +138,71 @@
 		return map;
 	});
 
-	// ── DB badge — Phase 별 진행 상황 표시 ─────────────
-	// loading: DuckDB 로드 중 / phase1: 스냅샷 + valuation 일부 / phase2: KRX timeseries 진행 / ready: spark 채워짐 / unsupported / error
-	let priceTimeseriesReady = $state(false);
-	let valuationStreamReady = $state(false);
-	let changesStreamReady = $state(false);
+	// ── Data badge — keep infrastructure names out of the user-facing UI ─
 	let dbBadgeKind = $derived.by(() => {
+		if (runtimeState === 'error') return 'error';
+		if (runtimeState === 'loading') return 'loading';
 		if (dbState === 'unsupported') return 'unsupported';
 		if (dbState === 'error') return 'error';
-		if (dbState === 'idle' || dbState === 'loading') return 'loading';
-		// dbState === 'ready' (DuckDB 인스턴스만 ready). 여기서부터 phase 단계별로.
-		if (priceTimeseriesReady && valuationStreamReady && changesStreamReady) return 'ready';
-		return 'phase';
+		if (dbState === 'loading') return 'phase';
+		return 'ready';
 	});
 	let dbBadgeText = $derived.by(() => {
-		if (dbBadgeKind === 'unsupported') return '모바일 — 가격·비율 비활성';
-		if (dbBadgeKind === 'error') return '데이터 로드 실패';
-		if (dbBadgeKind === 'loading') return 'db 초기화 중';
-		if (dbBadgeKind === 'ready') return '전체 데이터 활성';
-		// 진행 중 — 어떤 phase 까지 왔는지 텍스트
-		const parts: string[] = [];
-		if (!priceTimeseriesReady) parts.push('주가 1Y');
-		if (!valuationStreamReady) parts.push('밸류에이션');
-		if (!changesStreamReady) parts.push('변화율');
-		return `로드 중 · ${parts.join(' · ')}`;
+		if (dbBadgeKind === 'unsupported') return '실시간 데이터 활성 · SQL 비활성';
+		if (dbBadgeKind === 'error') return runtimeError ?? dbError ?? '데이터 로드 실패';
+		if (runtimeState === 'loading') return '실시간 데이터 로드 중';
+		if (dbState === 'loading') return 'SQL 탐색 준비 중';
+		if (trendState === 'loading') return '실시간 데이터 활성 · 추세 계산 중';
+		if (trendState === 'ready') return '실시간 데이터 + 추세 활성';
+		if (dartDb) return '실시간 데이터 + SQL 활성';
+		return '실시간 데이터 활성 · 추세 수동';
 	});
 
 	// ── Merge ecosystem with parquet maps ─────────────
 	let allNodes = $derived.by(() => {
-		if (priceMap.size === 0 && valuationMap.size === 0 && changesMap.size === 0) {
+		if (priceMap.size === 0 && valuationMap.size === 0 && changesMap.size === 0 && financeMap.size === 0) {
 			return baseNodes;
 		}
 		return baseNodes.map((n) => {
 			const p = priceMap.get(n.id);
 			const val = valuationMap.get(n.id);
 			const chg = changesMap.get(n.id);
+			const fin = financeMap.get(n.id);
 			return {
 				...n,
+				...fin,
 				// price (KRX)
-				currentPrice: p?.currentPrice ?? null,
-				return1m: p?.return1m ?? null,
-				return3m: p?.return3m ?? null,
-				return1y: p?.return1y ?? null,
-				volatility1y: p?.volatility1y ?? null,
-				week52High: p?.week52High ?? null,
-				week52Low: p?.week52Low ?? null,
-				volumeAvg30d: p?.volumeAvg30d ?? null,
-				spark: p?.spark ?? [],
+				currentPrice: p?.currentPrice ?? (n.currentPrice as number | null | undefined) ?? null,
+				return1m: p?.return1m ?? (n.return1m as number | null | undefined) ?? null,
+				return3m: p?.return3m ?? (n.return3m as number | null | undefined) ?? null,
+				return1y: p?.return1y ?? (n.return1y as number | null | undefined) ?? null,
+				volatility1y: p?.volatility1y ?? (n.volatility1y as number | null | undefined) ?? null,
+				week52High: p?.week52High ?? (n.week52High as number | null | undefined) ?? null,
+				week52Low: p?.week52Low ?? (n.week52Low as number | null | undefined) ?? null,
+				volumeAvg30d: p?.volumeAvg30d ?? (n.volumeAvg30d as number | null | undefined) ?? null,
+				spark60: p?.spark60 ?? (n.spark60 as number[] | undefined) ?? [],
+				spark: p?.spark ?? (n.spark as number[] | undefined) ?? [],
 				// valuation (Naver) — marketCap 우선 valuation, fallback KRX
-				marketCap: val?.marketCap ?? p?.marketCap ?? null,
-				per: val?.per ?? null,
-				pbr: val?.pbr ?? null,
-				dividendYield: val?.dividendYield ?? null,
+				marketCap: val?.marketCap ?? p?.marketCap ?? (n.marketCap as number | null | undefined) ?? null,
+				per: val?.per ?? (n.per as number | null | undefined) ?? null,
+				pbr: val?.pbr ?? (n.pbr as number | null | undefined) ?? null,
+				dividendYield: val?.dividendYield ?? (n.dividendYield as number | null | undefined) ?? null,
 				// changes
 				numericChanges1y: chg?.numericChanges1y ?? null,
-				structuralChanges1y: chg?.structuralChanges1y ?? null
+				structuralChanges1y: chg?.structuralChanges1y ?? null,
+				totalChanges1y: chg?.totalChanges1y ?? null,
+				recentChangeYear: chg?.recentChangeYear ?? null
 			} as ScanNode;
 		});
 	});
 
 	// ── Filter / sort ──────────────────────────────────
+	function comparableValue(value: unknown): unknown {
+		return value;
+	}
+
 	function evalCond(node: ScanNode, c: FilterCond): boolean {
-		const v = (node as any)[c.metric];
+		const v = comparableValue((node as any)[c.metric]);
 		let result: boolean;
 		if (c.op === 'between') {
 			const a = typeof c.value === 'number' ? c.value : Number(c.value);
@@ -223,11 +252,13 @@
 			list.sort((a, b) => {
 				const va = (a as any)[key];
 				const vb = (b as any)[key];
-				if (va == null && vb == null) return 0;
-				if (va == null) return 1;
-				if (vb == null) return -1;
-				if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir;
-				return String(va).localeCompare(String(vb), 'ko-KR') * dir;
+				const ca = comparableValue(va);
+				const cb = comparableValue(vb);
+				if (ca == null && cb == null) return 0;
+				if (ca == null) return 1;
+				if (cb == null) return -1;
+				if (typeof ca === 'number' && typeof cb === 'number') return (ca - cb) * dir;
+				return String(ca).localeCompare(String(cb), 'ko-KR') * dir;
 			});
 		}
 		return list;
@@ -257,14 +288,63 @@
 			for (const c of p.cols) next.add(c);
 			activeColumns = Array.from(next);
 		}
+		void ensureLoaders(p.loaders ?? inferLoaders(p.cols ?? []));
 		activePresetId = p.id;
 		selectedIndustries = new Set();
+	}
+
+	function inferLoaders(cols: string[]): RuntimeLoader[] {
+		const loaders = new Set<RuntimeLoader>();
+		for (const col of cols) {
+			const source = METRICS_BY_KEY[col]?.source;
+			if (source === 'finance5y') loaders.add('finance5y');
+			if (source === 'prices' || source === 'priceTrend') loaders.add('priceTrend');
+			if (source === 'valuation') loaders.add('valuation');
+			if (source === 'changes' || source === 'report') loaders.add('report');
+		}
+		return Array.from(loaders);
+	}
+
+	function markLoaderLoading(loader: RuntimeLoader, loading: boolean) {
+		const next = new Set(loaderLoading);
+		if (loading) next.add(loader);
+		else next.delete(loader);
+		loaderLoading = next;
+	}
+
+	function markLoaderReady(loader: RuntimeLoader) {
+		const ready = new Set(loaderReady);
+		ready.add(loader);
+		loaderReady = ready;
+		markLoaderLoading(loader, false);
+	}
+
+	function markLoaderError(loader: RuntimeLoader, error: string) {
+		const errors = new Map(loaderError);
+		errors.set(loader, error);
+		loaderError = errors;
+		markLoaderLoading(loader, false);
+	}
+
+	async function ensureLoaders(loaders: RuntimeLoader[]) {
+		for (const loader of loaders) {
+			if (loaderReady.has(loader) || loaderLoading.has(loader)) continue;
+			if (loader === 'valuation') {
+				void bootValuationRuntime();
+			} else if (loader === 'priceTrend') {
+				void bootPriceMetrics();
+			} else if (loader === 'finance5y') {
+				void bootFinance5yRuntime();
+			} else if (loader === 'report') {
+				void bootReportRuntime();
+			}
+		}
 	}
 
 	// ── onMount: URL ?q= 우선, ?preset= fallback, then DuckDB ─
 	onMount(() => {
 		const url = new URL(page.url);
-		if (url.searchParams.get('explore') === '1') dataExplorerOpen = true;
+		if (url.searchParams.get('explore') === '1') openDataExplorer();
 		const q = url.searchParams.get('q');
 		const presetId = url.searchParams.get('preset');
 		if (q) {
@@ -278,6 +358,7 @@
 					const pinned = PINNED_COLUMNS;
 					const rest = payload.cols.filter((k) => !pinned.includes(k));
 					activeColumns = [...pinned, ...rest];
+					void ensureLoaders(inferLoaders(activeColumns));
 				}
 				if (payload.p) activePresetId = payload.p;
 				if (payload.sel) selectedRow = payload.sel;
@@ -286,7 +367,20 @@
 			const preset = PRESETS_BY_ID.get(presetId);
 			if (preset) applyPreset(preset);
 		}
-		void bootDuckDb();
+		void bootRuntime();
+		return () => {
+			runtimeWorker?.terminate();
+			runtimeWorker = null;
+			priceWorker?.terminate();
+			priceWorker = null;
+			changesWorker?.terminate();
+			changesWorker = null;
+		};
+	});
+
+	$effect(() => {
+		if (selectedRow && !DetailComponent) void loadDetailComponent();
+		if (selectedRow) void ensureLoaders(['finance5y']);
 	});
 
 	// ── URL share encode (현재 상태 → ?q=) ────────────
@@ -315,95 +409,449 @@
 		conds = s.conds.slice();
 		if (s.sort.length > 0) sort = s.sort[0];
 		activePresetId = null;
+		void ensureLoaders(inferLoaders(activeColumns));
 	}
 
-	async function bootDuckDb() {
-		// Phase 0 — IndexedDB 캐시 hit (재방문 즉시 채움). 6h TTL.
-		void readCachedMap<PriceMetrics>(CACHE_KEYS.prices).then((m) => {
-			if (m && priceMap.size === 0) priceMap = m;
-		});
-		void readCachedMap<ValuationMetrics>(CACHE_KEYS.valuation).then((m) => {
-			if (m && valuationMap.size === 0) valuationMap = m;
-		});
-		void readCachedMap<ChangeMetrics>(CACHE_KEYS.changes).then((m) => {
-			if (m && changesMap.size === 0) changesMap = m;
-		});
+	async function bootRuntime() {
+		runtimeState = 'loading';
+		runtimeError = null;
+		if (typeof Worker !== 'undefined') {
+			try {
+				bootRuntimeWorker();
+				return;
+			} catch {
+				runtimeWorker?.terminate();
+				runtimeWorker = null;
+			}
+		}
+		await bootRuntimeFallback();
+	}
 
+	async function bootRuntimeFallback() {
+		runtimeState = 'loading';
+		runtimeError = null;
+		try {
+			const ecosystem = await loadJson<any>('map/ecosystem.json', {
+				fetchFn: fetch,
+				required: true,
+				preferLocal: true
+			});
+			hfNodes = (ecosystem?.nodes ?? []) as ScanNode[];
+			runtimeState = 'ready';
+			void bootRuntimeSidecars();
+		} catch (err) {
+			runtimeError = err instanceof Error ? err.message : String(err);
+			runtimeState = 'error';
+		}
+	}
+
+	function bootRuntimeWorker() {
+		runtimeWorker?.terminate();
+		runtimeWorker = new Worker(new URL('../../lib/scan/scanRuntime.worker.ts', import.meta.url), {
+			type: 'module'
+		});
+		runtimeWorker.onmessage = (event: MessageEvent<any>) => {
+			const msg = event.data;
+			if (msg.type === 'ecosystem') {
+				hfNodes = msg.nodes ?? [];
+				runtimeIndustries = msg.industries ?? [];
+				runtimeState = 'ready';
+				return;
+			}
+			if (msg.type === 'sidecars') {
+				hfNodes = msg.nodes ?? hfNodes;
+				runtimeIndustries = msg.industries ?? runtimeIndustries;
+				runtimeMeta = msg.meta ?? runtimeMeta;
+				window.setTimeout(() => {
+					if (!loaderReady.has('valuation') && !loaderLoading.has('valuation')) void bootValuationRuntime();
+				}, 0);
+				return;
+			}
+			if (msg.type === 'finance5y') {
+				financeMap = financeRowsToMap(msg.rows ?? []);
+				markLoaderReady('finance5y');
+				return;
+			}
+			if (msg.type === 'finance5y-error') {
+				markLoaderError('finance5y', msg.error ?? '재무 5Y 로드 실패');
+				return;
+			}
+			if (msg.type === 'error') {
+				runtimeError = msg.error ?? '데이터 로드 실패';
+				runtimeState = 'error';
+				if (hfNodes.length === 0) void bootRuntimeFallback();
+			}
+		};
+		runtimeWorker.onerror = () => {
+			runtimeError = 'scan worker 로드 실패';
+			runtimeState = 'error';
+			runtimeWorker?.terminate();
+			runtimeWorker = null;
+			void bootRuntimeFallback();
+		};
+		runtimeWorker.postMessage({ type: 'boot', basePath: base, hfResolve: HF_RESOLVE });
+	}
+
+	async function bootRuntimeSidecars() {
+		const [prices, meta] = await Promise.all([
+			loadJson<PriceSnapshotFile>('map/prices-snapshot.json', { fetchFn: fetch, preferLocal: true }),
+			loadJson<any>('map/meta.json', { fetchFn: fetch, preferLocal: true })
+		]);
+		hfNodes = mergePriceSnapshot(hfNodes, prices);
+		runtimeMeta = meta ?? runtimeMeta;
+		window.setTimeout(() => {
+			if (!loaderReady.has('valuation') && !loaderLoading.has('valuation')) void bootValuationRuntime();
+		}, 0);
+	}
+
+	function bootValuationRuntime() {
+		if (valuationStarted || loaderReady.has('valuation') || loaderLoading.has('valuation')) return;
+		valuationStarted = true;
+		markLoaderLoading('valuation', true);
+		window.setTimeout(() => {
+			void import('$lib/data/valuationRuntime')
+				.then(({ loadHfValuationMap }) => loadHfValuationMap(fetch))
+				.then((valuations) => {
+					hfNodes = mergeValuationRuntime(hfNodes, valuations);
+					valuationMap = valuationRuntimeToScanMap(valuations);
+					markLoaderReady('valuation');
+				})
+				.catch((err) => {
+					valuationStarted = false;
+					markLoaderError('valuation', err instanceof Error ? err.message : String(err));
+				});
+		}, 0);
+	}
+
+	function openDataExplorer() {
+		dataExplorerOpen = true;
+		void loadDataExplorerComponent();
+		void bootDuckDbForExplorer();
+	}
+
+	async function loadDetailComponent() {
+		DetailComponent = (await import('$lib/scan/Detail.svelte')).default;
+	}
+
+	async function loadDataExplorerComponent() {
+		DataExplorerComponent = (await import('$lib/scan/DataExplorer.svelte')).default;
+	}
+
+	async function bootDuckDbForExplorer() {
+		if (dbBootStarted || dartDb) return;
+		dbBootStarted = true;
 		dbState = 'loading';
+		const { ensureDuckDb } = await import('$lib/scan/duckSql');
 		const ensure = await ensureDuckDb();
 		if (ensure.error) dbError = ensure.error;
 		dbState = ensure.state;
-		if (!ensure.db) {
-			// unsupported / error — 더 이상 진행할 phase 없음. badge 가 멈추지 않게 ready flag 모두 set.
-			priceTimeseriesReady = true;
-			valuationStreamReady = true;
-			changesStreamReady = true;
+		if (ensure.db) dartDb = ensure.db;
+	}
+
+	async function bootPriceMetrics() {
+		if (priceMetricsStarted || trendState === 'loading') return;
+		priceMetricsStarted = true;
+		markLoaderLoading('priceTrend', true);
+		trendState = 'loading';
+		trendError = null;
+		if (typeof Worker === 'undefined') {
+			await bootPriceMetricsFallback();
 			return;
 		}
-		dartDb = ensure.db;
-		const db = ensure.db;
-
-		// Phase 1 — valuation (streaming) + prices snapshot (latest only). 둘 다 가벼움.
-		void streamValuation(db);
-		void loadPriceSnapshot(db).then((snap) => {
-			if (snap.size > 0 && (priceMap.size === 0 || !hasTimeseries(priceMap))) priceMap = snap;
-			// Phase 2 — 252-day window streaming. 첫 batch 가 즉시 fade-in.
-			void streamPriceTimeseries(db);
+		priceWorker?.terminate();
+		priceWorker = new Worker(new URL('../../lib/data/priceRuntime.worker.ts', import.meta.url), {
+			type: 'module'
 		});
-		// 가장 무거움 — 마지막. streaming 으로 점진 fade-in.
-		void streamChanges(db);
-	}
-
-	async function streamValuation(db: ReturnType<typeof Object> & DartDb) {
-		const accumulated = new Map<string, ValuationMetrics>();
-		for await (const chunk of loadValuationStream(db as DartDb)) {
-			for (const [k, v] of chunk) accumulated.set(k, v);
-			valuationMap = new Map(accumulated);
-		}
-		if (accumulated.size > 0) void writeCachedMap(CACHE_KEYS.valuation, accumulated);
-		valuationStreamReady = true;
-	}
-
-	async function streamPriceTimeseries(db: ReturnType<typeof Object> & DartDb) {
-		console.info('[scan] Phase 2 prices timeseries 시작');
-		try {
-			const t0 = performance.now();
-			const full = await loadPriceMetrics(db as DartDb);
-			const dt = performance.now() - t0;
-			if (full.size > 0) {
-				const sampleSpark = [...full.values()].find((p) => p.spark.length > 0)?.spark ?? [];
-				console.info(
-					`[scan] ✅ Phase 2 prices timeseries — ${full.size}사 (${dt.toFixed(0)}ms), ` +
-						`sample spark length=${sampleSpark.length}`
-				);
-				priceMap = full;
-				void writeCachedMap(CACHE_KEYS.prices, full);
-			} else {
-				console.warn(`[scan] ⚠ Phase 2 prices timeseries — 빈 결과 (${dt.toFixed(0)}ms)`);
+		priceWorker.onmessage = (event: MessageEvent<any>) => {
+			const msg = event.data;
+			if (msg.type === 'priceTrend') {
+				const metrics = priceRecordToMap(msg.metrics ?? {});
+				if (metrics.size === 0) return;
+				priceMap = mergePriceMaps(priceMap, metrics);
+				trendState = 'ready';
+				markLoaderReady('priceTrend');
+				if (msg.partial) {
+					scheduleOneYearPriceTrend();
+				} else {
+					priceWorker?.terminate();
+					priceWorker = null;
+				}
+				return;
 			}
+			if (msg.type === 'priceTrend-error') {
+				trendState = 'error';
+				const error = msg.error ?? '추세 데이터 로드 실패';
+				trendError = error;
+				priceMetricsStarted = false;
+				markLoaderError('priceTrend', error);
+				priceWorker?.terminate();
+				priceWorker = null;
+			}
+		};
+		priceWorker.onerror = () => {
+			trendState = 'error';
+			trendError = '주가 런타임 worker 로드 실패';
+			priceMetricsStarted = false;
+			markLoaderError('priceTrend', trendError);
+			priceWorker?.terminate();
+			priceWorker = null;
+		};
+		priceWorker.postMessage({ type: 'priceTrend', currentTailRows: 140_000, previousTailRows: 420_000 });
+	}
+
+	function scheduleOneYearPriceTrend() {
+		if (priceOneYearScheduled) return;
+		priceOneYearScheduled = true;
+		const run = () => priceWorker?.postMessage({ type: 'priceTrend1y' });
+		if ('requestIdleCallback' in window) {
+			(window as any).requestIdleCallback(run, { timeout: 2500 });
+		} else {
+			setTimeout(run, 1800);
+		}
+	}
+
+	async function bootPriceMetricsFallback() {
+		try {
+			const { loadCurrentPriceTail, loadOneYearPriceTail } = await import('$lib/data/priceRuntime');
+			const current = await loadCurrentPriceTail({ currentTailRows: 140_000 });
+			priceMap = mergePriceMaps(priceMap, priceRecordToMap(current.metrics));
+			trendState = 'ready';
+			markLoaderReady('priceTrend');
+			window.setTimeout(() => {
+				void loadOneYearPriceTail(current.rows, { previousTailRows: 420_000 }).then((oneYear) => {
+					priceMap = mergePriceMaps(priceMap, priceRecordToMap(oneYear.metrics));
+				});
+			}, 1800);
 		} catch (err) {
-			console.error('[scan] ❌ Phase 2 prices timeseries 실패', err);
-		} finally {
-			priceTimeseriesReady = true;
+			trendState = 'error';
+			trendError = err instanceof Error ? err.message : String(err);
+			priceMetricsStarted = false;
+			markLoaderError('priceTrend', trendError);
 		}
 	}
 
-	async function streamChanges(db: ReturnType<typeof Object> & DartDb) {
-		const accumulated = new Map<string, ChangeMetrics>();
-		for await (const chunk of loadChangesStream(db as DartDb)) {
-			for (const [k, v] of chunk) accumulated.set(k, v);
-			changesMap = new Map(accumulated);
+	async function bootFinance5yRuntime() {
+		if (loaderReady.has('finance5y') || loaderLoading.has('finance5y')) return;
+		markLoaderLoading('finance5y', true);
+		if (runtimeWorker) {
+			runtimeWorker.postMessage({ type: 'finance5y' });
+			return;
 		}
-		if (accumulated.size > 0) void writeCachedMap(CACHE_KEYS.changes, accumulated);
-		changesStreamReady = true;
+		try {
+			const { loadFinanceLiteRuntime } = await import('$lib/scan/financeLiteRuntime');
+			const result = await loadFinanceLiteRuntime(fetch);
+			financeMap = financeRowsToMap(result.rows);
+			markLoaderReady('finance5y');
+		} catch (err) {
+			markLoaderError('finance5y', err instanceof Error ? err.message : String(err));
+		}
 	}
 
-	/** snapshot 만 들어있는지 (return1y 가 모두 null) vs timeseries (return1y 채워짐) 구분. */
-	function hasTimeseries(m: Map<string, PriceMetrics>): boolean {
-		for (const v of m.values()) {
-			if (v.return1y !== null || v.spark.length > 0) return true;
+	async function bootReportRuntime() {
+		if (loaderReady.has('report') || loaderLoading.has('report')) return;
+		markLoaderLoading('report', true);
+		if (typeof Worker === 'undefined') {
+			await bootReportRuntimeFallback();
+			return;
 		}
-		return false;
+		changesWorker?.terminate();
+		changesWorker = new Worker(new URL('../../lib/data/changesRuntime.worker.ts', import.meta.url), {
+			type: 'module'
+		});
+		changesWorker.onmessage = (event: MessageEvent<any>) => {
+			const msg = event.data;
+			if (msg.type === 'changes') {
+				changesMap = changeRecordToMap(msg.metrics ?? {});
+				markLoaderReady('report');
+				window.setTimeout(() => {
+					changesWorker?.terminate();
+					changesWorker = null;
+				}, 1000);
+				return;
+			}
+			if (msg.type === 'changes-error') {
+				markLoaderError('report', msg.error ?? 'Report 데이터 로드 실패');
+				changesWorker?.terminate();
+				changesWorker = null;
+			}
+		};
+		changesWorker.onerror = () => {
+			markLoaderError('report', 'Report 런타임 worker 로드 실패');
+			changesWorker?.terminate();
+			changesWorker = null;
+		};
+		changesWorker.postMessage({ type: 'changes' });
+	}
+
+	async function bootReportRuntimeFallback() {
+		try {
+			const { loadHfChangesMap } = await import('$lib/data/changesRuntime');
+			const result = await loadHfChangesMap({ fetchFn: fetch });
+			changesMap = changeRecordToMap(result.metrics);
+			markLoaderReady('report');
+		} catch (err) {
+			markLoaderError('report', err instanceof Error ? err.message : String(err));
+		}
+	}
+
+	interface PriceSnapshotFile {
+		builtAt?: string;
+		data?: Record<string, PriceSnapshotItem>;
+	}
+
+	interface PriceSnapshotItem {
+		currentPrice?: number | null;
+		marketCap?: number | null;
+		return1m?: number | null;
+		return3m?: number | null;
+		return1y?: number | null;
+		volatility1y?: number | null;
+		week52High?: number | null;
+		week52Low?: number | null;
+		volumeAvg30d?: number | null;
+		foreignPct?: number | null;
+		beta?: number | null;
+		priceUpdated?: string | null;
+	}
+
+	function financeRowsToMap(rows: Array<Record<string, unknown> & { id?: string }>): Map<string, Partial<ScanNode>> {
+		const map = new Map<string, Partial<ScanNode>>();
+		for (const row of rows) {
+			const id = String(row.id ?? '').trim();
+			if (!id) continue;
+			const { id: _id, ...rest } = row;
+			map.set(id, rest as Partial<ScanNode>);
+		}
+		return map;
+	}
+
+	function mergePriceSnapshot(nodes: ScanNode[], snapshot: PriceSnapshotFile | null): ScanNode[] {
+		const prices = snapshot?.data ?? {};
+		if (Object.keys(prices).length === 0) return nodes;
+		return nodes.map((node) => {
+			const p = prices[node.id];
+			if (!p) return node;
+			return {
+				...node,
+				currentPrice: numberOrNull(p.currentPrice),
+				marketCap: numberOrNull(p.marketCap) ?? node.marketCap ?? null,
+				return1m: numberOrNull(p.return1m),
+				return3m: numberOrNull(p.return3m),
+				return1y: numberOrNull(p.return1y),
+				volatility1y: numberOrNull(p.volatility1y),
+				week52High: numberOrNull(p.week52High),
+				week52Low: numberOrNull(p.week52Low),
+				volumeAvg30d: numberOrNull(p.volumeAvg30d),
+				foreignPct: numberOrNull(p.foreignPct),
+				beta: numberOrNull(p.beta)
+			} as ScanNode;
+		});
+	}
+
+	function mergeValuationRuntime(
+		nodes: ScanNode[],
+		values: Map<string, ValuationRuntimeMetrics>
+	): ScanNode[] {
+		if (values.size === 0) return nodes;
+		return nodes.map((node) => {
+			const v = values.get(node.id);
+			if (!v) return node;
+			return {
+				...node,
+				currentPrice: node.currentPrice ?? v.currentPrice ?? null,
+				marketCap: v.marketCap ?? node.marketCap ?? null,
+				per: v.per,
+				pbr: v.pbr,
+				dividendYield: v.dividendYield
+			} as ScanNode;
+		});
+	}
+
+	function priceNodesToMap(nodes: ScanNode[]): Map<string, PriceMetrics> {
+		const map = new Map<string, PriceMetrics>();
+		for (const node of nodes) {
+			if (
+				node.currentPrice == null &&
+				node.marketCap == null &&
+				node.return1y == null &&
+				node.volumeAvg30d == null
+			) {
+				continue;
+			}
+			map.set(node.id, {
+				currentPrice: numberOrNull(node.currentPrice),
+				marketCap: numberOrNull(node.marketCap),
+				ma20: null,
+				high60: null,
+				low60: null,
+				week52High: numberOrNull(node.week52High),
+				week52Low: numberOrNull(node.week52Low),
+				volumeAvg30d: numberOrNull(node.volumeAvg30d),
+				volatility1y: numberOrNull(node.volatility1y),
+				return1m: numberOrNull(node.return1m),
+				return3m: numberOrNull(node.return3m),
+				return1y: numberOrNull(node.return1y),
+				spark60: Array.isArray(node.spark60) ? (node.spark60 as number[]) : [],
+				spark: Array.isArray(node.spark) ? (node.spark as number[]) : []
+			});
+		}
+		return map;
+	}
+
+	function mergePriceMaps(
+		base: Map<string, PriceMetrics>,
+		next: Map<string, PriceMetrics>
+	): Map<string, PriceMetrics> {
+		const merged = new Map(base);
+		for (const [stockCode, metrics] of next.entries()) {
+			const prev = merged.get(stockCode);
+			merged.set(stockCode, prev ? { ...prev, ...metrics } : metrics);
+		}
+		return merged;
+	}
+
+	function priceRecordToMap(record: Record<string, PriceMetrics>): Map<string, PriceMetrics> {
+		const map = new Map<string, PriceMetrics>();
+		for (const [stockCode, metrics] of Object.entries(record)) {
+			map.set(stockCode, metrics);
+		}
+		return map;
+	}
+
+	function changeRecordToMap(record: Record<string, ChangeMetrics>): Map<string, ChangeMetrics> {
+		const map = new Map<string, ChangeMetrics>();
+		for (const [stockCode, metrics] of Object.entries(record)) {
+			map.set(stockCode, metrics);
+		}
+		return map;
+	}
+
+	function valuationRuntimeToScanMap(
+		values: Map<string, ValuationRuntimeMetrics>
+	): Map<string, ValuationMetrics> {
+		const map = new Map<string, ValuationMetrics>();
+		for (const [stockCode, v] of values.entries()) {
+			map.set(stockCode, {
+				per: v.per,
+				pbr: v.pbr,
+				dividendYield: v.dividendYield,
+				marketCap: v.marketCap
+			});
+		}
+		return map;
+	}
+
+	function numberOrNull(value: unknown): number | null {
+		if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+		if (typeof value === 'bigint') {
+			const n = Number(value);
+			return Number.isFinite(n) ? n : null;
+		}
+		if (typeof value === 'string' && value.trim()) {
+			const n = Number(value.replace(/,/g, ''));
+			return Number.isFinite(n) ? n : null;
+		}
+		return null;
 	}
 
 	// ── Column toggle ─────────────────────────────────
@@ -411,7 +859,10 @@
 		// PINNED 는 항상 맨 앞 + 보존
 		const pinned = activeColumns.filter((k) => PINNED_COLUMNS.includes(k));
 		const rest = next.filter((k) => !PINNED_COLUMNS.includes(k));
+		const before = new Set(activeColumns);
 		activeColumns = [...pinned, ...rest];
+		const added = activeColumns.filter((k) => !before.has(k));
+		void ensureLoaders(inferLoaders(added.length > 0 ? added : activeColumns));
 	}
 
 	// ── Sort handler ──────────────────────────────────
@@ -455,13 +906,13 @@
 			<button
 				type="button"
 				class="explorer-btn"
-				onclick={() => (dataExplorerOpen = true)}
+				onclick={openDataExplorer}
 				title="모든 prebuild raw 테이블 + SQL Notebook"
 			>
 				<Search size={14} />
 				<span>데이터 탐색</span>
 			</button>
-			<span class="db-badge db-{dbBadgeKind}" title={dbError ?? ''}>
+			<span class="db-badge db-{dbBadgeKind}" title={dbError ?? trendError ?? ''}>
 				<span class="db-dot"></span> {dbBadgeText}
 			</span>
 			<input
@@ -476,8 +927,8 @@
 				<span class="cmdk-lbl">프리셋</span>
 			</button>
 			<SavedSets cols={activeColumns} {conds} {sort} {shareUrl} onLoad={loadSavedSet} />
-			{#if data.meta?.dataAsOf}
-				<FreshnessBadge dataAsOf={data.meta.dataAsOf} variant="compact" />
+			{#if runtimeMeta?.dataAsOf}
+				<FreshnessBadge dataAsOf={runtimeMeta.dataAsOf} variant="compact" />
 			{/if}
 		</div>
 	</header>
@@ -561,7 +1012,16 @@
 	{#if selectedRow}
 		{@const node = allNodes.find((n) => n.id === selectedRow)}
 		{#if node}
-			<Detail {node} db={dartDb} onClose={() => (selectedRow = null)} />
+			{#if DetailComponent}
+				<DetailComponent
+					{node}
+					db={dartDb}
+					financeLoading={loaderLoading.has('finance5y')}
+					onClose={() => (selectedRow = null)}
+				/>
+			{:else}
+				<div class="panel-loading">상세 패널 로드 중…</div>
+			{/if}
 		{:else}
 			<InsightsFeed
 				nodes={allNodes}
@@ -572,6 +1032,7 @@
 						const next = new Set(activeColumns);
 						for (const c of p.cols) next.add(c);
 						activeColumns = Array.from(next);
+						void ensureLoaders(inferLoaders(p.cols));
 					}
 					selectedIndustries = new Set();
 					activePresetId = null;
@@ -589,6 +1050,7 @@
 					const next = new Set(activeColumns);
 					for (const c of p.cols) next.add(c);
 					activeColumns = Array.from(next);
+					void ensureLoaders(inferLoaders(p.cols));
 				}
 				selectedIndustries = new Set();
 				activePresetId = null;
@@ -599,15 +1061,21 @@
 
 	<PresetModal bind:open={presetOpen} nodes={allNodes} onClose={() => (presetOpen = false)} onApplyPreset={applyPreset} />
 
-	<DataExplorer
-		open={dataExplorerOpen}
-		onClose={() => (dataExplorerOpen = false)}
-		ecosystem={baseNodes as Array<Record<string, unknown>>}
-		{priceMap}
-		{valuationMap}
-		{changesMap}
-		db={dartDb}
-	/>
+	{#if dataExplorerOpen}
+		{#if DataExplorerComponent}
+			<DataExplorerComponent
+				open={dataExplorerOpen}
+				onClose={() => (dataExplorerOpen = false)}
+				ecosystem={baseNodes as Array<Record<string, unknown>>}
+				priceMap={priceMap.size > 0 ? priceMap : priceNodesToMap(baseNodes)}
+				{valuationMap}
+				{changesMap}
+				db={dartDb}
+			/>
+		{:else}
+			<div class="de-loading" role="status">데이터 탐색 로드 중…</div>
+		{/if}
+	{/if}
 
 	{#if cellHover}
 		<CellTooltip
@@ -692,6 +1160,15 @@
 	}
 	.explorer-btn:hover {
 		background: rgba(251, 146, 60, 0.16);
+	}
+	.explorer-btn:disabled {
+		cursor: default;
+		opacity: 0.62;
+	}
+	.explorer-btn.loading {
+		border-color: rgba(96, 165, 250, 0.45);
+		background: rgba(96, 165, 250, 0.1);
+		color: #93c5fd;
 	}
 
 	.db-badge {
@@ -968,6 +1445,27 @@
 	.detail-body {
 		padding: 24px;
 		text-align: center;
+	}
+	.panel-loading {
+		flex-shrink: 0;
+		padding: 18px;
+		background: #0a0e18;
+		border: 1px solid #1e2433;
+		border-radius: 6px;
+		color: #64748b;
+		font-size: 12px;
+		text-align: center;
+	}
+	.de-loading {
+		position: fixed;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(0, 0, 0, 0.55);
+		color: #cbd5e1;
+		font-size: 12px;
+		z-index: 1000;
 	}
 
 	@media (max-width: 1024px) {

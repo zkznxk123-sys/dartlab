@@ -1,5 +1,4 @@
 import { browser } from '$app/environment';
-// @ts-expect-error — JS module with JSDoc, resolved via $pyodide alias
 import { initDartlab, loadCompany, loadScanLite, setApiKey } from '$pyodide/loader.js';
 
 type Status = 'idle' | 'loading' | 'ready' | 'error';

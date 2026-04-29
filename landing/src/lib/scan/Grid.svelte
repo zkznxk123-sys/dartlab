@@ -9,7 +9,7 @@
 	 *  - 헤더 클릭 = 정렬 토글 (1차 정렬)
 	 *  - 헤더 hover = HeaderTooltip (메트릭 정의)
 	 *  - 행 click = onSelect (Detail 패널 — PR-D)
-	 *  - 회사명 click = /dashboard/[id] 진입
+	 *  - 회사명 click = /company/[id] 진입
 	 *  - 행 색 = qualGrade 톤 (subtle 6%)
 	 *  - 등급 셀 = 색칩
 	 *  - placeholder = `—`
@@ -19,7 +19,7 @@
 	import HeaderTooltip from './HeaderTooltip.svelte';
 	import Sparkline from '$lib/components/ui/Sparkline.svelte';
 	import { METRICS_BY_KEY, PINNED_COLUMNS } from './metrics';
-	import type { ScanNode, SortKey } from './types';
+	import type { ScanNode, SeriesMetric, SortKey } from './types';
 	import { gradeTone, rowTintColor, toneColor } from './grade';
 	import { marketColor, marketLabel, normalizeMarket } from './marketChip';
 
@@ -141,7 +141,7 @@
 
 	function handleCompanyClick(e: MouseEvent, id: string) {
 		e.stopPropagation();
-		goto(`${base}/dashboard/${id}`);
+		goto(`${base}/company/${id}`);
 	}
 
 	type RowData = Record<string, unknown>;
@@ -175,9 +175,12 @@
 
 	function colWidth(key: string): number {
 		const def = METRICS_BY_KEY[key];
-		if (key === 'label') return 180;
-		if (key === 'industryName') return 130;
-		if (key === 'spark') return 110;
+		if (key === 'label') return 168;
+		if (key === 'id') return 86;
+		if (key === 'market') return 82;
+		if (key === 'industryName') return 124;
+		if (key === 'spark' || key === 'spark60') return 110;
+		if (def?.type === 'series') return 132;
 		if (!def) return 110;
 		if (def.type === 'enum' || def.type === 'text') return 110;
 		return 110;
@@ -213,7 +216,7 @@
 				label: rowLabel(node),
 				metricKey: key,
 				formattedValue: formatted,
-				spark: Array.isArray(node.spark) ? (node.spark as number[]) : [],
+				spark: sparkForCell(node, key),
 				x: Math.min(window.innerWidth - 260, rect.left + rect.width / 2 - 100),
 				y: rect.top - 180
 			});
@@ -223,6 +226,28 @@
 		if (hoverTimer) clearTimeout(hoverTimer);
 		hoverTimer = null;
 		onCellHover?.(null);
+	}
+
+	function sparkForCell(node: RowData, key: string): number[] {
+		const value = key === 'spark60' ? node.spark60 : node.spark;
+		return Array.isArray(value) ? (value as number[]) : [];
+	}
+
+	function seriesForCell(value: unknown): SeriesMetric | null {
+		if (!value || typeof value !== 'object') return null;
+		const series = value as SeriesMetric;
+		return Array.isArray(series.values) ? series : null;
+	}
+
+	function seriesTrend(series: SeriesMetric): string {
+		const values = series.values.filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+		if (values.length < 2) return '#94a3b8';
+		const first = values[0];
+		const last = values[values.length - 1];
+		if (first === 0) return last >= 0 ? '#ef4444' : '#3b82f6';
+		if (last > first * 1.005) return '#ef4444';
+		if (last < first * 0.995) return '#3b82f6';
+		return '#94a3b8';
 	}
 </script>
 
@@ -305,27 +330,32 @@
 						onmouseleave={onCellMouseLeave}
 					>
 						{#if key === 'label'}
-							{@const rawMarket = rowMarket(rd, id)}
-							{@const market = normalizeMarket(rawMarket)}
 							<button
 								type="button"
 								class="company-link"
 								onclick={(e) => handleCompanyClick(e, id)}
-								title="{rowLabel(rd)} ({id}) · {marketLabel(rawMarket)}"
+								title="{rowLabel(rd)} ({id})"
 							>
-								{#if market !== 'UNKNOWN'}
-									<span
-										class="market-tag market-{market.toLowerCase()}"
-										style:color={marketColor(rawMarket)}
-										style:border-color={marketColor(rawMarket) + '55'}
-										style:background={marketColor(rawMarket) + '14'}
-									>{marketLabel(rawMarket)}</span>
-								{/if}
 								<span class="ind-dot" style:background={rowColor(rd)}></span>
 								<span class="company-name">{rowLabel(rd)}</span>
 							</button>
-						{:else if key === 'spark'}
-							{@const sparkData = rd.spark}
+						{:else if key === 'id'}
+							<span class="code-cell">{id}</span>
+						{:else if key === 'market'}
+							{@const rawMarket = rowMarket(rd, id)}
+							{@const market = normalizeMarket(rawMarket)}
+							{#if market !== 'UNKNOWN'}
+								<span
+									class="market-tag market-{market.toLowerCase()}"
+									style:color={marketColor(rawMarket)}
+									style:border-color={marketColor(rawMarket) + '55'}
+									style:background={marketColor(rawMarket) + '14'}
+								>{marketLabel(rawMarket)}</span>
+							{:else}
+								<span class="dim">—</span>
+							{/if}
+						{:else if key === 'spark' || key === 'spark60'}
+							{@const sparkData = sparkForCell(rd, key)}
 							{#if Array.isArray(sparkData) && sparkData.length >= 2}
 								{@const trend =
 									sparkData[sparkData.length - 1] > sparkData[0] * 1.005
@@ -335,6 +365,16 @@
 											: '#94a3b8'}
 								<span class="spark-wrap" style:color={trend}>
 									<Sparkline data={sparkData} width={88} height={24} stroke="currentColor" smooth />
+								</span>
+							{:else}
+								<span class="dim">—</span>
+							{/if}
+						{:else if def?.type === 'series'}
+							{@const series = seriesForCell(v)}
+							{#if series && series.values.filter((x) => typeof x === 'number' && Number.isFinite(x)).length >= 2}
+								<span class="series-wrap" style:color={seriesTrend(series)} title={formatted}>
+									<Sparkline data={series.values} width={82} height={22} stroke="currentColor" smooth />
+									<span class="series-latest">{formatted}</span>
 								</span>
 							{:else}
 								<span class="dim">—</span>
@@ -427,6 +467,8 @@
 		cursor: pointer;
 		padding: 0;
 		font-family: inherit;
+		line-height: 1.15;
+		white-space: pre-line;
 	}
 	.sort-arr {
 		font-size: 9px;
@@ -490,6 +532,22 @@
 		align-items: center;
 		justify-content: center;
 	}
+	.series-wrap {
+		display: inline-grid;
+		grid-template-columns: 82px minmax(0, 1fr);
+		align-items: center;
+		gap: 4px;
+		width: 120px;
+		min-width: 0;
+	}
+	.series-latest {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-size: 10px;
+		color: #cbd5e1;
+	}
 	.cell.pinned {
 		position: sticky;
 		z-index: 1;
@@ -552,6 +610,10 @@
 		font-weight: 600;
 		letter-spacing: 0.04em;
 		flex-shrink: 0;
+	}
+	.code-cell {
+		font-family: 'JetBrains Mono', 'Fira Code', monospace;
+		color: #cbd5e1;
 	}
 	.ind-dot {
 		width: 6px;

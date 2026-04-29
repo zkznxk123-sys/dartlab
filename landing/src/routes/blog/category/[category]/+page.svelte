@@ -6,7 +6,8 @@
 
 	let { data } = $props();
 
-	const category = $derived(getCategory(data.category));
+	const categorySlug = $derived(data.category ?? '');
+	const category = $derived(getCategory(categorySlug));
 	const posts = $derived(category ? getPostsByCategory(category.id) : []);
 	const seriesGroups = $derived(category ? getSeriesGroupsByCategory(category.id) : []);
 	const pageTitle = $derived(category ? `${category.seoTitle} — DartLab 전자공시 분석` : 'Blog Category — DartLab 전자공시 분석');

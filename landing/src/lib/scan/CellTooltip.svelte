@@ -38,7 +38,8 @@
 		const v = (spark[spark.length - 1] / spark[0] - 1) * 100;
 		return v.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 	});
-	let isSparkCell = $derived(metricKey === 'spark');
+	let isSparkCell = $derived(metricKey === 'spark' || metricKey === 'spark60');
+	let periodLabel = $derived(metricKey === 'spark60' ? '60거래일 종가 추이' : '1년 종가 추이');
 </script>
 
 <div class="cell-tooltip" style:left="{x}px" style:top="{y}px" role="tooltip">
@@ -57,7 +58,7 @@
 			<Sparkline data={spark} width={220} height={56} stroke="currentColor" smooth />
 		</div>
 		<div class="t-foot">
-			<span class="t-period">1년 종가 추이</span>
+			<span class="t-period">{periodLabel}</span>
 			{#if trendPct !== null}
 				<span class="t-trend" style:color={trendColor}>
 					{trend === 'up' ? '+' : ''}{trendPct}%

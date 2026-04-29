@@ -14,6 +14,8 @@
 import type { FilterCond, SortKey } from './types';
 import type { MetricKey } from './metrics';
 
+export type RuntimeLoader = 'finance5y' | 'priceTrend' | 'report' | 'valuation';
+
 export interface Preset {
 	id: string;
 	title: string;
@@ -24,6 +26,8 @@ export interface Preset {
 	sorts: SortKey[];
 	/** 적용 시 추가로 보일 컬럼 (기본 컬럼셋 위에 union) */
 	cols?: MetricKey[];
+	/** 적용 시 필요한 런타임 데이터 로더. */
+	loaders?: RuntimeLoader[];
 }
 
 export const PRESETS: Preset[] = [
@@ -43,7 +47,15 @@ export const PRESETS: Preset[] = [
 			{ key: 'roe', dir: 'desc' },
 			{ key: 'opMargin', dir: 'desc' }
 		],
-		cols: ['profGrade', 'revenue']
+		cols: [
+			'profGrade',
+			'revenue',
+			'fin_sales_2025',
+			'fin_operating_profit_2025',
+			'fin_ratio_op_margin_2025',
+			'fin_growth_sales_cagr'
+		],
+		loaders: ['finance5y']
 	},
 	{
 		id: 'quality-compounder',
@@ -58,7 +70,14 @@ export const PRESETS: Preset[] = [
 			{ metric: 'qualGrade', op: '!=', value: '위험' }
 		],
 		sorts: [{ key: 'roe', dir: 'desc' }],
-		cols: ['qualGrade', 'icr']
+		cols: [
+			'qualGrade',
+			'icr',
+			'fin_ratio_roe_2025',
+			'fin_ratio_debt_ratio_2025',
+			'fin_ratio_current_ratio_2025'
+		],
+		loaders: ['finance5y']
 	},
 	{
 		id: 'growth-and-safety',
@@ -72,7 +91,16 @@ export const PRESETS: Preset[] = [
 			{ metric: 'revenueYoyPct', op: '>=', value: 10 }
 		],
 		sorts: [{ key: 'revCagr', dir: 'desc' }],
-		cols: ['revCagr', 'growthGrade']
+		cols: [
+			'revCagr',
+			'growthGrade',
+			'fin_sales_2025',
+			'fin_operating_profit_2025',
+			'fin_growth_sales_cagr',
+			'fin_growth_operating_profit_cagr',
+			'fin_growth_sales_yoy_latest'
+		],
+		loaders: ['finance5y']
 	},
 	{
 		id: 'low-debt-high-icr',
@@ -85,7 +113,15 @@ export const PRESETS: Preset[] = [
 			{ metric: 'icr', op: '>=', value: 5 }
 		],
 		sorts: [{ key: 'icr', dir: 'desc' }],
-		cols: ['debtGrade', 'icr']
+		cols: [
+			'debtGrade',
+			'icr',
+			'fin_ratio_debt_ratio_2025',
+			'fin_ratio_current_ratio_2025',
+			'fin_current_liabilities_2025',
+			'fin_noncurrent_liabilities_2025'
+		],
+		loaders: ['finance5y']
 	},
 	{
 		id: 'high-roe-strong-margin',
@@ -98,7 +134,8 @@ export const PRESETS: Preset[] = [
 			{ metric: 'opMargin', op: '>=', value: 10 }
 		],
 		sorts: [{ key: 'roe', dir: 'desc' }],
-		cols: ['profGrade']
+		cols: ['profGrade', 'fin_ratio_op_margin_2025', 'fin_ratio_roe_2025', 'fin_growth_operating_profit_cagr'],
+		loaders: ['finance5y']
 	},
 	{
 		id: 'industry-leader',
@@ -115,7 +152,8 @@ export const PRESETS: Preset[] = [
 			{ key: 'marketShare', dir: 'desc' },
 			{ key: 'revenue', dir: 'desc' }
 		],
-		cols: ['marketShare', 'industryRank']
+		cols: ['marketShare', 'industryRank', 'fin_sales_2025', 'fin_growth_sales_cagr'],
+		loaders: ['finance5y']
 	},
 	{
 		id: 'risk-watch',
@@ -125,7 +163,8 @@ export const PRESETS: Preset[] = [
 		category: 'risk',
 		conds: [{ metric: 'auditRisk', op: '==', value: '고위험' }],
 		sorts: [{ key: 'roeDelta', dir: 'asc' }],
-		cols: ['auditRisk', 'debtGrade', 'roeDelta']
+		cols: ['auditRisk', 'debtGrade', 'roeDelta', 'numericChanges1y', 'structuralChanges1y', 'totalChanges1y'],
+		loaders: ['report']
 	}
 ];
 

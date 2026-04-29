@@ -27,6 +27,11 @@
 		'quality',
 		'workforce',
 		'changes',
+		'financeIncome',
+		'financeBalance',
+		'financeCashflow',
+		'financeRatio',
+		'financeGrowth',
 		'price',
 		'valuation',
 		'disclosure'

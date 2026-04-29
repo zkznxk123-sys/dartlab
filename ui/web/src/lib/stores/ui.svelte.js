@@ -20,8 +20,9 @@ import {
 	oauthLogout,
 	oauthStatus,
 	pullOllamaModel,
-	startChannelConnection,
-	stopChannelConnection,
+	fetchDevChannelStatus,
+	startDevChannel as startDevChannelApi,
+	stopDevChannel as stopDevChannelApi,
 } from "$lib/api/ai.js";
 import {
 	applyProfileSnapshot,
@@ -99,6 +100,7 @@ export function createUiStore() {
 	let appVersion = $state("");
 	let openDart = $state({});
 	let channels = $state({});
+	let channel = $state({ kind: "devtunnel", running: false, url: null, qrDataUrl: null, error: null });
 
 	// API key
 	let apiKeyInput = $state("");
@@ -116,12 +118,7 @@ export function createUiStore() {
 	let codexDetail = $state({});
 	let oauthCodexDetail = $state({});
 	let oauthLoginPending = $state(false);
-	let channelBusy = $state({});
-	let channelInputs = $state({
-		telegram: { token: "" },
-		slack: { botToken: "", appToken: "" },
-		discord: { token: "" },
-	});
+	let channelBusy = $state(false);
 
 	// Ollama pull
 	let pullModelName = $state("");
@@ -166,6 +163,7 @@ export function createUiStore() {
 		if (data.oauthCodex) oauthCodexDetail = mergeProviderDetail(oauthCodexDetail, data.oauthCodex, { preserveChecked: true });
 		if (data.openDart) openDart = { ...openDart, ...data.openDart };
 		if (data.channels) channels = data.channels;
+		if (data.channel) channel = data.channel;
 		if (data.version) appVersion = data.version;
 		return data;
 	}
@@ -492,12 +490,12 @@ export function createUiStore() {
 	}
 
 	// ── Settings open ──
-	function openSettings(section = "_core.providers") {
+	function openSettings(section = "providers") {
 		apiKeyInput = "";
 		apiKeyResult = null;
 		dartKeyInput = "";
 		dartKeyResult = null;
-		settingsSection = section || "_core.providers";
+		settingsSection = section || "providers";
 		if (_core.activeProvider) {
 			_core.expandedProvider = _core.activeProvider;
 		} else {
@@ -506,45 +504,40 @@ export function createUiStore() {
 		}
 		settingsOpen = true;
 		if (_core.expandedProvider) loadModelsFor(_core.expandedProvider);
+		if (settingsSection === "channels") refreshDevChannel();
 	}
 
-	function setChannelInput(platform, key, value) {
-		channelInputs = {
-			...channelInputs,
-			[platform]: {
-				...(channelInputs[platform] || {}),
-				[key]: value,
-			},
-		};
-	}
-
-	async function startChannel(platform) {
-		const payload = channelInputs[platform] || {};
-		channelBusy = { ...channelBusy, [platform]: true };
+	async function refreshDevChannel() {
 		try {
-			const result = await startChannelConnection(platform, payload);
-			await refreshProviderStatus(null, false);
-			if (result?.error) {
-				showToast(result.error);
-			} else {
-				showToast(`${channels[platform]?.label || platform} 채널 연결 완료`, "success");
-			}
+			channel = await fetchDevChannelStatus();
 		} catch (e) {
-			showToast(e?.message || `${platform} 채널 연결 실패`);
+			channel = { ...channel, error: e?.message || "Channel 상태 확인 실패" };
 		}
-		channelBusy = { ...channelBusy, [platform]: false };
 	}
 
-	async function stopChannel(platform) {
-		channelBusy = { ...channelBusy, [platform]: true };
+	async function startDevChannel() {
+		if (channelBusy) return;
+		channelBusy = true;
 		try {
-			await stopChannelConnection(platform);
-			await refreshProviderStatus(null, false);
-			showToast(`${channels[platform]?.label || platform} 채널 종료`, "success");
+			channel = await startDevChannelApi();
+			if (channel?.error) showToast(channel.error);
+			else showToast("모바일 Channel QR을 준비했습니다", "success");
 		} catch (e) {
-			showToast(e?.message || `${platform} 채널 종료 실패`);
+			showToast(e?.message || "Channel 시작 실패");
 		}
-		channelBusy = { ...channelBusy, [platform]: false };
+		channelBusy = false;
+	}
+
+	async function stopDevChannel() {
+		if (channelBusy) return;
+		channelBusy = true;
+		try {
+			channel = await stopDevChannelApi();
+			showToast("Channel을 종료했습니다", "success");
+		} catch (e) {
+			showToast(e?.message || "Channel 종료 실패");
+		}
+		channelBusy = false;
 	}
 
 	async function validateDartKey() {
@@ -614,7 +607,7 @@ export function createUiStore() {
 			showToast(action.message || action.text || "", action.level || "info");
 		} else if (name === "update" && action.target === "settings") {
 			if (action.message) showToast(action.message, "info", 4500);
-			openSettings(action.section || "_core.providers");
+			openSettings(action.section || "providers");
 			if (action.open === false) settingsOpen = false;
 		}
 	}
@@ -661,8 +654,8 @@ export function createUiStore() {
 		get appVersion() { return appVersion; },
 		get openDart() { return openDart; },
 		get channels() { return channels; },
+		get channel() { return channel; },
 		get channelBusy() { return channelBusy; },
-		get channelInputs() { return channelInputs; },
 
 		// api key
 		get apiKeyInput() { return apiKeyInput; },
@@ -698,9 +691,9 @@ export function createUiStore() {
 		validateDartKey,
 		submitDartKey,
 		removeDartKey,
-		setChannelInput,
-		startChannel,
-		stopChannel,
+		refreshDevChannel,
+		startDevChannel,
+		stopDevChannel,
 		handleCodexLogout,
 		handleOauthCodexLogin,
 		handleOauthCodexLogout,

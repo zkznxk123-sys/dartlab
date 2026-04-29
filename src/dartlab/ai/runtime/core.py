@@ -20,6 +20,7 @@ log = logging.getLogger(__name__)
 from dartlab.ai.runtime.events import AnalysisEvent
 from dartlab.ai.runtime.postResponse import runPostResponse
 from dartlab.ai.runtime.prompts import buildSystemPromptParts
+from dartlab.ai.runtime.workspace import AnalysisWorkspace
 
 # ── 데이터 신선도 추출 ────────────────────────────────────
 
@@ -245,6 +246,7 @@ def runAsk(
     try:
         full_response_parts: list[str] = []
         done_payload: dict[str, Any] = {}
+        workspace = AnalysisWorkspace(question=question)
 
         try:
             for ev in _runAskInner(
@@ -262,6 +264,7 @@ def runAsk(
                 _full_response_parts=full_response_parts,
                 _templateName=_templateName,
                 _templateText=_templateText,
+                workspace=workspace,
                 **kwargs,
             ):
                 yield _emit(ev)
@@ -285,6 +288,11 @@ def runAsk(
                     done_payload["pluginHintsText"] = hint_text
 
         # ── Done 이벤트 ──
+        bundle = workspace.resultBundle()
+        for key, value in bundle.items():
+            if value:
+                done_payload[key] = value
+        done_payload["responseMeta"] = workspace.summary()
         yield _emit(AnalysisEvent("done", done_payload))
     finally:
         # 요청 종료 — Company 캐시 해제 + gc.collect 촉발 (Polars heap 방출 보조).
@@ -312,6 +320,7 @@ def _runAskInner(
     _full_response_parts: list[str],
     _templateName: str | None = None,
     _templateText: str | None = None,
+    workspace: AnalysisWorkspace | None = None,
     **kwargs: Any,
 ) -> Generator[AnalysisEvent, None, None]:
     """runAsk() 본체 — tool calling 단일 경로.
@@ -410,6 +419,7 @@ def _runAskInner(
         intent=intent,
         hasCompany=company is not None,
         stockCode=stockCode,
+        workspace=workspace,
     ):
         if isinstance(item, AnalysisEvent):
             yield item

@@ -30,6 +30,8 @@ QUALITY_ISSUES = (
     "answer_table_conflict",
     "bad_tool_args",
     "weak_disclosure_analysis",
+    "missing_visual_explanation",
+    "unsupported_visual",
 )
 
 _ENGINE_TOOLS = {
@@ -56,6 +58,21 @@ _ENGINE_TOOLS = {
 }
 
 _JUDGMENT_WORDS = (
+    "판단",
+    "결론",
+    "봅니다",
+    "보입니다",
+    "해석",
+    "우위",
+    "열위",
+    "강합니다",
+    "약합니다",
+    "중립",
+    "긍정",
+    "부정",
+    "위험",
+    "필요",
+    "맞습니다",
     "판단",
     "결론",
     "결과",
@@ -143,6 +160,7 @@ def evaluateFinalAnswer(
     answer: str,
     toolCalls: list[dict[str, Any]],
     stockCode: str | None = None,
+    workspace: Any | None = None,
 ) -> QualityResult:
     """FINANCE 최종 답변의 최소 계약을 검사한다.
 
@@ -210,6 +228,20 @@ def evaluateFinalAnswer(
 
     if "disclosure" in contracts and _hasWeakDisclosureAnalysis(q, text, toolCalls):
         issues.append("weak_disclosure_analysis")
+
+    if workspace is not None:
+        if _requiresVisualExplanation(q) and not _hasVisualExplanation(text, workspace):
+            issues.append("missing_visual_explanation")
+        if _hasUnsupportedVisual(workspace):
+            issues.append("unsupported_visual")
+        if _workspaceStaleFreshness(workspace, text):
+            issues.append("stale_date_risk")
+        if "disclosure" in contracts and _workspaceDisclosureDepthRisk(workspace, text):
+            issues.append("weak_disclosure_analysis")
+        if "comparison" in contracts and _workspacePartialComparison(workspace, text):
+            issues.append("partial_comparison")
+        if _workspaceUnsupportedClaim(workspace):
+            issues.append("unsupported_claim")
 
     if not issues:
         return QualityResult(True, [], "")
@@ -407,7 +439,11 @@ def _hasAnswerTableConflict(text: str) -> bool:
             cells = [c.strip() for c in stripped.strip("|").split("|")]
             if len(cells) >= 2 and not all(set(c) <= {"-", ":", " "} for c in cells):
                 label = cells[0]
-                values = {v.replace(" ", "") for cell in cells[1:] for v in _PERCENT_RE.findall(cell)}
+                if label.isdigit():
+                    continue
+                if label in {"구분", "항목", "지표"} or "플래그" in label:
+                    continue
+                values = {_percentKey(v) for cell in cells[1:] for v in _PERCENT_RE.findall(cell)}
                 if values and label and label != "---":
                     tableValues.setdefault(label, set()).update(values)
         else:
@@ -419,10 +455,40 @@ def _hasAnswerTableConflict(text: str) -> bool:
         for line in nonTableLines:
             if label not in line:
                 continue
-            bodyValues = {v.replace(" ", "") for v in _PERCENT_RE.findall(line)}
-            if len(bodyValues) == 1 and not bodyValues.issubset(values):
+            bodyValues = {_percentKey(v) for v in _PERCENT_RE.findall(line)}
+            if len(bodyValues) == 1 and not _percentValuesCovered(bodyValues, values):
                 return True
     return False
+
+
+def _percentKey(value: str) -> str:
+    text = value.replace(" ", "").replace("%", "")
+    try:
+        return f"{float(text):.1f}%"
+    except ValueError:
+        return value.replace(" ", "")
+
+
+def _percentValuesCovered(bodyValues: set[str], tableValues: set[str]) -> bool:
+    if bodyValues.issubset(tableValues):
+        return True
+    tableNums = [_percentFloat(v) for v in tableValues]
+    for body in bodyValues:
+        bodyNum = _percentFloat(body)
+        if bodyNum is None:
+            if body not in tableValues:
+                return False
+            continue
+        if not any(tableNum is not None and abs(bodyNum - tableNum) <= 0.15 for tableNum in tableNums):
+            return False
+    return True
+
+
+def _percentFloat(value: str) -> float | None:
+    try:
+        return float(str(value).replace("%", ""))
+    except ValueError:
+        return None
 
 
 def _hasWeakDisclosureAnalysis(question: str, text: str, toolCalls: list[dict[str, Any]]) -> bool:
@@ -510,6 +576,134 @@ def _hasFxEvidence(toolCalls: list[dict[str, Any]]) -> bool:
             if resolveId(str(args.get("target") or "")) == "USDKRW":
                 return True
     return False
+
+
+def _requiresVisualExplanation(question: str) -> bool:
+    q = question.lower()
+    if any(
+        word in q
+        for word in (
+            "추이",
+            "시계열",
+            "기간",
+            "비교",
+            "랭킹",
+            "순위",
+            "상승",
+            "오른",
+            "수익률",
+            "인과",
+            "구조",
+            "흐름",
+            "영향",
+            "경쟁력",
+            "trend",
+            "compare",
+            "ranking",
+            "rank",
+            "mover",
+            "return",
+        )
+    ):
+        return True
+    return any(
+        word in q
+        for word in (
+            "추이",
+            "시계열",
+            "기간",
+            "비교",
+            "랭킹",
+            "순위",
+            "상승",
+            "오른",
+            "수익률",
+            "인과",
+            "구조",
+            "흐름",
+            "trend",
+            "compare",
+            "ranking",
+            "rank",
+            "mover",
+            "return",
+        )
+    )
+
+
+def _hasVisualExplanation(text: str, workspace: Any) -> bool:
+    visuals = getattr(workspace, "visuals", []) or []
+    if visuals:
+        return True
+    lowered = text.lower()
+    return "visualplan" in lowered or "visual plan" in lowered or "시각 설명" in text
+
+
+def _hasUnsupportedVisual(workspace: Any) -> bool:
+    visuals = getattr(workspace, "visuals", []) or []
+    evidence = getattr(workspace, "evidence", []) or []
+    if not visuals:
+        return False
+    return any(not getattr(visual, "evidenceIds", []) for visual in visuals) and bool(evidence)
+
+
+def _workspaceStaleFreshness(workspace: Any, text: str) -> bool:
+    freshness = getattr(workspace, "freshness", {}) or {}
+    stale = any(isinstance(v, dict) and v.get("staleDaily") for v in freshness.values())
+    if not stale:
+        return False
+    lowered = text.lower()
+    disclosureWords = (
+        "가용 데이터",
+        "데이터 한계",
+        "최신 데이터",
+        "기준일",
+        "기준",
+        "같은 시점",
+        "서로 다르",
+        "단정",
+        "한계",
+        "가용 데이터",
+        "데이터 한계",
+        "최신 데이터",
+        "snapshot",
+        "available through",
+        "available data",
+        "freshness",
+        "한계",
+    )
+    return not any(word in lowered or word in text for word in disclosureWords)
+
+
+def _workspaceDisclosureDepthRisk(workspace: Any, text: str) -> bool:
+    limits = getattr(workspace, "limits", []) or []
+    titleListOnly = any("basis=title_list" in str(limit) for limit in limits)
+    if not titleListOnly:
+        return False
+    disclosureWords = ("제목 기준", "목록 기준", "본문", "원문", "title", "list basis", "body")
+    return not any(word in text.lower() or word in text for word in disclosureWords)
+
+
+def _workspacePartialComparison(workspace: Any, text: str) -> bool:
+    evidence = getattr(workspace, "evidence", []) or []
+    targets = {getattr(item, "target", None) for item in evidence if getattr(item, "target", None)}
+    if len(targets) >= 2:
+        return False
+    if _declaresComparisonLimit(text):
+        return False
+    return any(word in text for word in _STRONG_COMPARISON_WORDS)
+
+
+def _workspaceUnsupportedClaim(workspace: Any) -> bool:
+    claims = getattr(workspace, "claims", []) or []
+    if not claims:
+        return False
+    return any(
+        getattr(claim, "kind", "") == "judgment"
+        and getattr(claim, "status", "") != "supported"
+        and not getattr(claim, "evidenceIds", [])
+        for claim in claims
+    )
 
 
 def _dedupe(items: list[str]) -> list[str]:

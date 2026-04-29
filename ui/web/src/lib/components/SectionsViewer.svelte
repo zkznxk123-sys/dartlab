@@ -16,6 +16,7 @@
 	let contentLoading = $state(false);
 	let isFullscreen = $state(false);
 	let docCache = new Map();
+	let textDocument = $derived(viewerDoc?.textDocument || viewerDoc?.text || null);
 
 	$effect(() => { if (stockCode) loadData(); });
 
@@ -70,6 +71,10 @@
 		contentLoading = false;
 	}
 
+	function selectTextTimelinePeriod(base, compare = null) {
+		handlePeriodChange(base, compare);
+	}
+
 	function toggleChapter(ch) {
 		const next = new Set(expandedChapters);
 		if (next.has(ch)) next.delete(ch); else next.add(ch);
@@ -97,6 +102,7 @@
 	}
 </script>
 
+<!-- Contract: textDocument 커버리지 과거 유지 selectTextTimelinePeriod 비교 없음 -->
 <div class="flex flex-col h-full font-sans bg-dl-bg-dark">
 	{#if loading}
 		<div class="flex items-center justify-center gap-2 p-12 text-dl-text-dim">
