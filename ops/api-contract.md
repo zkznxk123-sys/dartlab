@@ -445,7 +445,13 @@ grep -n "companyfacts/CIK" src/dartlab/providers/edgar/bulk/
 
 공개 API docstring 은 사용법뿐 아니라 AI runtime 이 검증할 최소 계약도 담을 수 있다. 섹션 이름은 `AIContract` 이며, `scripts/build/generateSpec.py` 가 이를 파싱해 `_generated.py::CAPABILITIES` 와 `_generated_analysis_graph.py::ANALYSIS_GRAPH` 에 구조화한다.
 
-허용 필드는 `contractId`, `questionTypes`, `questionTriggers`, `toolMatch`, `toolNames`, `requiredEvidence`, `evidenceSchema`, `freshness`, `comparisonCompleteness`, `visualPolicy`, `artifactPolicy`, `toolArgPolicy`, `toolBudget`, `preflightActions`, `priority` 다. 같은 의미의 계약을 runtime dict 에 다시 만들지 않는다.
+허용 필드는 `contractId`, `questionTypes`, `questionTriggers`, `toolMatch`, `toolNames`, `requiredEvidence`, `evidenceSchema`, `freshness`, `comparisonCompleteness`, `visualPolicy`, `artifactPolicy`, `toolArgPolicy`, `toolBudget`, `preflightActions`, `acceptanceCriteria`, `failurePolicy`, `priority` 다. 같은 의미의 계약을 runtime dict 에 다시 만들지 않는다.
+
+`processMap` 은 사람이 docstring 에 직접 쓰는 새 필드가 아니다. `scripts/build/generateSpec.py` 가 위 계약 필드와 capability metadata 를 읽어 Analysis Graph 의 `processMaps` 를 자동 생성한다. 질문별 실행 절차가 필요하면 원천 docstring/capabilities 를 고치고 generated graph 를 재생성한다.
+
+`acceptanceCriteria` 는 generated Process Map 의 최종 충족 조건이다. 직접 입력이 필요한 특수 계약만 docstring 에 둔다. 보통은 `requiredEvidence`, `artifactPolicy`, `visualPolicy`, `comparisonCompleteness` 에서 자동 파생된다.
+
+`failurePolicy` 는 계약 미충족 시 답변 강도를 낮추는 규칙이다. 예: evidence 가 부족하면 강한 판단 금지, freshness 가 낡으면 “가용 데이터 기준”으로 제한, visual evidence 가 없으면 visual 을 만들지 않는다.
 
 ```text
 AIContract:
@@ -474,7 +480,33 @@ AIContract:
     "claimCount": 0,
     "visualCount": 0,
     "limitCount": 0,
-    "coverage": {"routeIds": [], "contractIds": [], "graph": {"graphVersion": 1, "sourceHash": "..."}},
+    "coverage": {"routeIds": [], "contractIds": [], "processMapIds": [], "graph": {"graphVersion": 1, "sourceHash": "..."}},
+    "graph": {
+      "routeHit": false,
+      "contractHit": false,
+      "processMapUsed": false,
+      "processMapSatisfied": false,
+      "requiredEvidenceSatisfied": false,
+      "artifactSatisfied": false,
+      "visualSatisfied": false,
+      "acceptanceCriteria": {}
+    },
+    "trace": {
+      "selectedTools": [],
+      "skippedCandidateTools": [],
+      "toolArgs": [],
+      "sanitizedArgs": [],
+      "evidenceIds": [],
+      "claimIds": [],
+      "visualIds": []
+    },
+    "quality": {
+      "processMapSatisfied": false,
+      "claimSupportRate": 0.0,
+      "toolArgValidRate": 1.0,
+      "freshnessSatisfied": true,
+      "visualSatisfied": false
+    },
     "llmRoundMs": 0,
     "toolTotalMs": 0,
     "rewriteCount": 0,
@@ -485,6 +517,10 @@ AIContract:
 ```
 
 `stream=true` 에서는 기존 이벤트를 유지하면서 `evidence`, `claim`, `chart` 이벤트를 추가할 수 있다. `done.responseMeta` 는 evidence/claim/visual/limit count 와 latency 요약을 담는다.
+
+artifact 는 answer 의 부속 문자열이 아니라 재사용 가능한 산출물이다. 랭킹·스크리닝·표 계산 질문은 가능한 경우 primary CSV artifact 를 만든다. 서버 응답의 `artifacts[]` 와 stream `tool_result.artifacts[]` 는 같은 artifact contract 를 따른다: `format`, `mimeType`, `fileName`, `url`, `rows`, `columns`, `primary` 를 포함할 수 있다.
+
+`evidence`, `claims`, `visuals`, `responseMeta.graph` 는 사람이 직접 입력하는 필드가 아니다. runtime `AnalysisWorkspace` 가 tool_result, stdout marker, quality gate 를 통해 자동 생성한다. 원천 규칙은 docstring/capabilities 이며, generated Analysis Graph 와 Process Map 을 통한다.
 
 **반복 실패** → 기존 `answer` 계약을 깨거나, 필수 필드로 바꿔 오래된 UI/SDK 를 깨는 것. 새 필드는 additive optional 이다.
 

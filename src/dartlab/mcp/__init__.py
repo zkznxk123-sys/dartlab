@@ -367,6 +367,30 @@ def _executeTool(name: str, args: dict) -> str:
             from dartlab.core.analysisGraph import impactForGraphNode
 
             return json.dumps(impactForGraphNode(str(args.get("nodeId") or "")), ensure_ascii=False, indent=2)
+        if name == "explainDartlabTool":
+            from dartlab.core.analysisGraph import explainDartlabTool
+
+            return json.dumps(explainDartlabTool(str(args.get("toolName") or "")), ensure_ascii=False, indent=2)
+        if name == "planDartlabQuestion":
+            from dartlab.core.analysisGraph import planDartlabQuestion
+
+            return json.dumps(
+                planDartlabQuestion(str(args.get("question") or ""), stockCode=args.get("stockCode")),
+                ensure_ascii=False,
+                indent=2,
+            )
+        if name == "validateDartlabPlan":
+            from dartlab.core.analysisGraph import validateDartlabPlan
+
+            return json.dumps(
+                validateDartlabPlan(str(args.get("question") or ""), args.get("proposedTools") or []),
+                ensure_ascii=False,
+                indent=2,
+            )
+        if name == "listDartlabProcesses":
+            from dartlab.core.analysisGraph import listDartlabProcesses
+
+            return json.dumps(listDartlabProcesses(), ensure_ascii=False, indent=2)
 
         return f"Unknown tool: {name}"
 

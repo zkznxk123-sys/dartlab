@@ -72,7 +72,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "returns": "pl.DataFrame | dict — axis=None이면 가이드 DataFrame (axis/label/description/example/group/items).\naxis 지정 시 dict:\n{calcName} : dict — 축별 계산 결과\nhistory : list[dict] — 시계열 ({period, ...지표})\ndisplayHints : dict — core 컬럼 목록\nturningPoints : list — 전환점 (있으면)\n{calcName}Flags : list[str] — 경고 플래그\ndataAsOf : dict — latestPeriod, retrievedAt\n_summary (autoEnrich 자동 주입) — 핵심 지표 요약 + [엔진가정] 블록.\nassumptions — 엔진 가정 (overrides 재호출용).",
         "seeAlso": "story: 14축 분석을 14개 섹션 보고서로 조합\ninsights: 7영역 등급 요약 (analysis보다 요약적)\nratios: 재무비율 시계열 (analysis의 입력 데이터)",
         "summary": "재무제표 완전 분석 — 14축, 단일 종목 심층 (내부 구현).",
-        "tool": "analysis"
+        "tool": "analysis",
+        "toolMatch": [
+            {
+                "tool": "analysis"
+            }
+        ],
+        "toolNames": [
+            "analysis",
+            "show",
+            "credit",
+            "pastInsight",
+            "capabilities"
+        ]
     },
     "Company.ask": {
         "aicontext": "AI가 분석 전 과정을 주도. dartlab 엔진(analysis, scan, gather 등)을\n도구로 호출하여 데이터 수집, 계산, 판단, 해석을 수행.",
@@ -459,10 +471,10 @@ CAPABILITIES: dict[str, dict] = json.loads(
     },
     "Company.show": {
         "aicontext": "120+ topic 단일 접근점 — LLM 이 데이터 조회 핵심 도구\nfinance topic 은 freq/scope 토글로 분기/연간/연결/별도 자유 전환",
-        "args": "topic: topic 이름. ``\"BS\"`` ``\"IS\"`` ``\"CF\"`` ``\"CIS\"`` ``\"SCE\"`` ``\"ratios\"``\n같은 finance topic 또는 ``\"dividend\"`` ``\"companyOverview\"`` 같은 docs/report\ntopic. 전체 목록은 ``c.topics``.\nblock: 블록 인덱스. None 이면 블록 목차 (1개면 바로 데이터).\nperiod: 단일 기간 필터 (``\"2023\"``, ``\"2024Q2\"``) 또는 리스트 (세로 비교 뷰).\nfreq: 시계열 주기 — ``\"Q\"`` (분기, 기본) / ``\"Y\"`` (연간 strict 합) /\n``\"YTD\"`` (year-to-date 누적). pandas 관용 코드. **finance topic 한정**.\nscope: 재무제표 범위 — ``\"consolidated\"`` (연결, 기본) / ``\"separate\"`` (별도).\n**finance topic 한정**.\nraw: True 면 원본 그대로 (정제 없이).",
+        "args": "topic: topic 이름. ``\"BS\"`` ``\"IS\"`` ``\"CF\"`` ``\"CIS\"`` ``\"SCE\"`` ``\"ratios\"``\n같은 finance topic 또는 ``\"dividend\"`` ``\"companyOverview\"`` 같은 docs/report\ntopic. 주요주주/최대주주 topic은 ``\"majorHolder\"`` 이며\n``\"majorShareholder\"`` 가 아니다. 전체 목록은 ``c.topics``.\nblock: 블록 인덱스. None 이면 블록 목차 (1개면 바로 데이터).\nperiod: 단일 기간 필터 (``\"2023\"``, ``\"2024Q2\"``) 또는 리스트 (세로 비교 뷰).\nfreq: 시계열 주기 — ``\"Q\"`` (분기, 기본) / ``\"Y\"`` (연간 strict 합) /\n``\"YTD\"`` (year-to-date 누적). pandas 관용 코드. **finance topic 한정**.\nscope: 재무제표 범위 — ``\"consolidated\"`` (연결, 기본) / ``\"separate\"`` (별도).\n**finance topic 한정**.\nraw: True 면 원본 그대로 (정제 없이).",
         "capabilities": "120+ topic 접근 (재무제표, 사업내용, 지배구조, 임원현황 등)\n기간 / 주기 / 범위 / 블록 / 세로뷰 모두 파라미터 토글\ndocs / finance / report 3 source 자동 통합",
-        "example": "c = dartlab.Company(\"005930\")\nc.show(\"IS\")                              # 분기 연결 (기본)\nc.show(\"IS\", freq=\"Y\")                    # 연간 연결\nc.show(\"IS\", scope=\"separate\")            # 분기 별도\nc.show(\"IS\", freq=\"Y\", scope=\"separate\")  # 연간 별도\nc.show(\"IS\", period=\"2023\")               # 2023년 필터\nc.show(\"dividend\")                        # 배당",
-        "guide": "\"분기 손익\" → ``c.show(\"IS\")``\n\"연간 손익\" → ``c.show(\"IS\", freq=\"Y\")``\n\"별도 재무상태표\" → ``c.show(\"BS\", scope=\"separate\")``\n\"2023년 손익\" → ``c.show(\"IS\", period=\"2023\")``\n\"배당 정보\" → ``c.show(\"dividend\")``",
+        "example": "c = dartlab.Company(\"005930\")\nc.show(\"IS\")                              # 분기 연결 (기본)\nc.show(\"IS\", freq=\"Y\")                    # 연간 연결\nc.show(\"IS\", scope=\"separate\")            # 분기 별도\nc.show(\"IS\", freq=\"Y\", scope=\"separate\")  # 연간 별도\nc.show(\"IS\", period=\"2023\")               # 2023년 필터\nc.show(\"dividend\")                        # 배당\nc.show(\"majorHolder\")                     # 주요주주/최대주주",
+        "guide": "\"분기 손익\" → ``c.show(\"IS\")``\n\"연간 손익\" → ``c.show(\"IS\", freq=\"Y\")``\n\"별도 재무상태표\" → ``c.show(\"BS\", scope=\"separate\")``\n\"2023년 손익\" → ``c.show(\"IS\", period=\"2023\")``\n\"배당 정보\" → ``c.show(\"dividend\")``\n\"주요주주/최대주주\" → ``c.show(\"majorHolder\")``",
         "kind": "property",
         "requires": "데이터: docs (자동 다운로드). finance topic 은 finance parquet 도 필요.",
         "returns": "pl.DataFrame | None\nfinance topic (IS/BS/CF/CIS/SCE):\nsnakeId : str — 계정 식별자 (영문 snake_case)\n항목 : str — 계정명 (한글)\n2025Q4, 2025Q3, ... : float — 분기별 값 (원 단위, freq=\"Q\" 기본)\n2025, 2024, ... : float — 연간 합산 값 (원 단위, freq=\"Y\")\nratios topic:\n항목 : str — 비율명\n2025Q4, 2025Q3, ... : float — 비율값 (%, 배)\nnotes topic (inventory, borrowings 등):\n항목 : str — 세부 항목명\n당기, 전기 또는 연도 컬럼 : float — 금액 (원 단위)\ndocs/report topic (dividend, employee 등):\ntopic별 컬럼 구조 — c.show(topic) 실행으로 확인\n블록 미지정 + 멀티블록 topic:\nblock : int — 블록 번호\ntitle : str — 블록 제목\n데이터 없으면 None.",
@@ -633,6 +645,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "contractId": "capabilities.valid_key",
         "kind": "ai_contract",
         "priority": 70,
+        "questionTriggers": {
+            "any": [
+                "뭐 할 수",
+                "어떻게 써",
+                "사용법",
+                "help",
+                "capabilities"
+            ]
+        },
         "questionTypes": [
             "meta_help"
         ],
@@ -643,6 +664,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "tool": "capabilities",
         "toolArgPolicy": [
             "reject_polluted_capabilities_key"
+        ],
+        "toolMatch": [
+            {
+                "tool": "capabilities"
+            }
+        ],
+        "toolNames": [
+            "capabilities",
+            "Read"
         ]
     },
     "aiContract.cashflow.primary": {
@@ -691,6 +721,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "priority": 85,
+        "questionTriggers": {
+            "any": [
+                "현금흐름",
+                "cashflow",
+                "cash flow",
+                "fcf",
+                "ocf"
+            ]
+        },
         "questionTypes": [
             "cashflow"
         ],
@@ -701,6 +740,12 @@ CAPABILITIES: dict[str, dict] = json.loads(
             "value"
         ],
         "summary": "현금흐름 질문 primary evidence 계약",
+        "toolNames": [
+            "analysis",
+            "show",
+            "credit",
+            "capabilities"
+        ],
         "visualPolicy": {
             "preferredType": "chart",
             "requiredFor": [
@@ -747,9 +792,35 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 },
                 "primaryEvidence": true,
                 "tool": "analysis"
+            },
+            {
+                "argsTemplate": {
+                    "fields": [
+                        "매출액",
+                        "영업이익"
+                    ],
+                    "freq": "Y",
+                    "raw": false,
+                    "scope": "consolidated",
+                    "topic": "IS"
+                },
+                "primaryEvidence": true,
+                "tool": "show"
             }
         ],
         "priority": 90,
+        "questionTriggers": {
+            "any": [
+                "비교",
+                "대비",
+                "vs",
+                " versus ",
+                "둘 중",
+                "어느 쪽",
+                "누가",
+                "경쟁력"
+            ]
+        },
         "questionTypes": [
             "company_compare"
         ],
@@ -766,9 +837,22 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "toolBudget": {
             "maxHeavyCallsPerTargetTool": 1,
             "skipTools": [
-                "quant"
+                "quant",
+                "credit"
             ]
         },
+        "toolNames": [
+            "searchCompany",
+            "analysis",
+            "credit",
+            "show",
+            "pastInsight",
+            "scan",
+            "gather",
+            "macro",
+            "industry",
+            "pythonExec"
+        ],
         "visualPolicy": {
             "preferredType": "chart_or_diagram",
             "requiredFor": [
@@ -813,6 +897,14 @@ CAPABILITIES: dict[str, dict] = json.loads(
         },
         "kind": "ai_contract",
         "priority": 80,
+        "questionTriggers": {
+            "any": [
+                "공시",
+                "filing",
+                "dart",
+                "보고서"
+            ]
+        },
         "questionTypes": [
             "disclosure_importance"
         ],
@@ -828,6 +920,28 @@ CAPABILITIES: dict[str, dict] = json.loads(
             "title_only_scope_must_not_be_presented_as_body_analysis",
             "sections_false",
             "max_chars_4000"
+        ],
+        "toolMatch": [
+            {
+                "tool": "disclosure"
+            },
+            {
+                "tool": "filings"
+            },
+            {
+                "tool": "liveFilings"
+            },
+            {
+                "tool": "search"
+            }
+        ],
+        "toolNames": [
+            "disclosure",
+            "liveFilings",
+            "filings",
+            "readFiling",
+            "search",
+            "capabilities"
         ],
         "visualPolicy": {
             "preferredType": "diagram",
@@ -985,6 +1099,35 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "priority": 100,
+        "questionTriggers": {
+            "allAny": [
+                [
+                    "주가",
+                    "가격",
+                    "종목",
+                    "stock",
+                    "price"
+                ],
+                [
+                    "오른",
+                    "상승",
+                    "급등",
+                    "수익률",
+                    "모멘텀",
+                    "랭킹",
+                    "순위",
+                    "mover",
+                    "return",
+                    "ranking",
+                    "rank",
+                    "rose",
+                    "risen",
+                    "gainer",
+                    "gainers",
+                    "recently"
+                ]
+            ]
+        },
         "questionTypes": [
             "recent_price_mover"
         ],
@@ -1000,6 +1143,24 @@ CAPABILITIES: dict[str, dict] = json.loads(
             "start_lte_end",
             "end_not_future",
             "target_close_for_price_returns"
+        ],
+        "toolMatch": [
+            {
+                "args": {
+                    "axis": "krx",
+                    "targetIn": [
+                        "",
+                        "close",
+                        "raw"
+                    ]
+                },
+                "tool": "gather"
+            }
+        ],
+        "toolNames": [
+            "pythonExec",
+            "gather",
+            "capabilities"
         ],
         "visualPolicy": {
             "preferredType": "chart",
@@ -1045,6 +1206,28 @@ CAPABILITIES: dict[str, dict] = json.loads(
         },
         "kind": "gather_axis",
         "priority": 75,
+        "questionTriggers": {
+            "allAny": [
+                [
+                    "최근",
+                    "현재",
+                    "오늘",
+                    "어제",
+                    "latest",
+                    "recent",
+                    "지금"
+                ],
+                [
+                    "금리",
+                    "환율",
+                    "fx",
+                    "rate",
+                    "macro",
+                    "원달러",
+                    "usdkrw"
+                ]
+            ]
+        },
         "questionTypes": [
             "macro_recent"
         ],
@@ -1055,6 +1238,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
         ],
         "summary": "거시지표",
         "tool": "gather",
+        "toolMatch": [
+            {
+                "args": {
+                    "axis": "macro"
+                },
+                "tool": "gather"
+            }
+        ],
+        "toolNames": [
+            "gather",
+            "macro",
+            "capabilities"
+        ],
         "visualPolicy": {
             "preferredType": "chart",
             "requiredFor": [
@@ -1177,15 +1373,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "특정 회사의 과거 분석 서사 조회."
     },
     "quant": {
-        "guide": "When: 주가 기반 기술적 신호·팩터·리스크를 정량 분석할 때.\nHow: quant(\"판단\") 으로 종합 신호 확인 → 세부 축으로 근거 파악.\nanalysis(재무) + quant(기술) 조합이 story full/valuation 타입의 핵심.\ncredit 과 함께 사용 시 altman/piotroski 로 부도 위험 교차 검증.\nVerified:\nquant(\"판단\") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nanalysis : 재무 인과 분석 — quant 기술 + analysis 재무 조합.\ngather : 주가·수급 데이터 수집 — quant 의 데이터 원천.\nscan : 전종목 횡단 비교.",
+        "guide": "When: 주가 기반 기술적 신호·팩터·리스크를 정량 분석할 때.\nHow: quant(\"판단\") 으로 종합 신호 확인 → 세부 축으로 근거 파악.\nquant(\"벤치마크\") 로 시장·섹터·스타일 benchmarkStack 을 확인한다.\nbeta/residual/factor/BAB 는 기본 market mode를 유지하고,\nbenchmarkMode=\"sector\" 또는 \"style\" 로 상대 기준을 명시 전환한다.\nanalysis(재무) + quant(기술) 조합이 story full/valuation 타입의 핵심.\ncredit 과 함께 사용 시 altman/piotroski 로 부도 위험 교차 검증.\nVerified:\nquant(\"판단\") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nquant(\"베타\", benchmarkMode=\"sector\") → KRX 섹터 지수 대비 beta.\n\nSee Also\nanalysis : 재무 인과 분석 — quant 기술 + analysis 재무 조합.\ngather : 주가·수급 데이터 수집 — quant 의 데이터 원천.\nscan : 전종목 횡단 비교.",
         "kind": "function",
-        "returns": "dict\n종목 지정 시 축별 분석 결과:\nverdict(판단): signal, confidence, indicators (매수/매도/중립)\nmomentum(모멘텀): returns, rsi, macd, moving_averages\nvolatility(변동성): realized, garch, regime\nvaluation(가치평가): multiples, peerRank, impliedReturn (배, %)\nsimulation(시뮬레이션): paths, expectedReturn, var (%)\naltman: zScore, zone (safe/grey/distress)\npiotroski: fScore (0~9점)\npl.DataFrame\naxis=None: 가이드 — 축 목록 + 설명 + 예시.\n횡단면 축 (market=\"KR\"): 전종목 DataFrame.\n\nRaises\nValueError\n축 이름이 등록되지 않은 경우.\n종목 필수 축에서 stockCode 누락 시.\nTypeError\naxis 에 list 전달 시.\n\nExamples\n>>> c.quant()                          # 가이드\n>>> c.quant(\"판단\")                     # 종합 매수/매도 판단\n>>> c.quant(\"모멘텀\")                   # 모멘텀 지표\n>>> dartlab.quant(\"altman\", \"005930\")   # Altman Z-Score\n>>> dartlab.quant(\"piotroski\", \"005930\")  # Piotroski F-Score\n\nNotes\n주가 데이터는 gather(\"price\") 경유 자동 수집. API 키 불필요 (Naver/Yahoo).",
+        "returns": "dict\n종목 지정 시 축별 분석 결과:\nverdict(판단): signal, confidence, indicators (매수/매도/중립)\nmomentum(모멘텀): returns, rsi, macd, moving_averages\nvolatility(변동성): realized, garch, regime\nbenchmark(벤치마크): benchmarkUsed, benchmarkStack, 기간 수익률 (%)\nsimulation(시뮬레이션): paths, expectedReturn, var (%)\naltman: zScore, zone (safe/grey/distress)\npiotroski: fScore (0~9점)\npl.DataFrame\naxis=None: 가이드 — 축 목록 + 설명 + 예시.\n횡단면 축 (market=\"KR\"): 전종목 DataFrame.\n\nRaises\nValueError\n축 이름이 등록되지 않은 경우.\n종목 필수 축에서 stockCode 누락 시.\nTypeError\naxis 에 list 전달 시.\n\nExamples\n>>> c.quant()                          # 가이드\n>>> c.quant(\"판단\")                     # 종합 매수/매도 판단\n>>> c.quant(\"모멘텀\")                   # 모멘텀 지표\n>>> dartlab.quant(\"altman\", \"005930\")   # Altman Z-Score\n>>> dartlab.quant(\"piotroski\", \"005930\")  # Piotroski F-Score\n\nNotes\n주가 데이터는 gather(\"price\") 경유 자동 수집. API 키 불필요 (Naver/Yahoo).",
         "summary": "가격 기반 정량 분석 — 8 그룹 30+ 축 (기술·리스크·팩터·백테스트·알파)."
     },
     "scan": {
-        "guide": "When: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.\nHow: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.\nstory credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.\nVerified:\nscan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)\n\nSee Also\nanalysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석.",
+        "guide": "When: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.\nHow: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.\nstory credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.\n조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서.\n단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.\nVerified:\nscan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)\n\nSee Also\nanalysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석.",
         "kind": "function",
-        "returns": "pl.DataFrame\naxis=None (가이드):\naxis : str — 축 이름\nlabel : str — 한글 레이블\ndescription : str — 설명\nexample : str — 사용 예시\naxis=\"profitability\":\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n영업이익률 : float — 영업이익률 (%)\n순이익률 : float — 순이익률 (%)\nROE : float — 자기자본이익률 (%)\nROA : float — 총자산이익률 (%)\n등급 : str — 수익성 등급\naxis=\"account\" (target=\"매출액\"):\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n2024, 2023, ... : float — 연도별 값 (원 단위)\naxis=\"ratio\" (target=\"roe\"):\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n2024, 2023, ... : float — 연도별 비율값 (%, 배)\n기타 축: 종목코드 + 종목명 + 축별 지표 컬럼\n\nRaises\nValueError\naxis 또는 target 이 등록되지 않은 경우.\n그룹 호출 시 target 이 해당 그룹에 속하지 않는 경우.\n\nExamples\n>>> dartlab.scan()                              # 전체 축 가이드\n>>> dartlab.scan(\"profitability\")               # 전종목 수익성\n>>> dartlab.scan(\"account\", \"매출액\")            # 전종목 매출액 시계열\n>>> dartlab.scan(\"ratio\", \"roe\")                # 전종목 ROE 시계열\n>>> dartlab.scan(\"financial\")                   # 재무 8축 가이드\n>>> dartlab.scan(\"financial\", \"수익성\")          # 재무 그룹 내 수익성\n\nNotes\n사전 빌드 parquet 기반. 첫 호출 시 HuggingFace 에서 자동 다운로드.\n전종목 데이터를 한 번에 로드하므로 메모리 ~200MB 소비.",
+        "returns": "pl.DataFrame\naxis=None (가이드):\naxis : str — 축 이름\nlabel : str — 한글 레이블\ndescription : str — 설명\nexample : str — 사용 예시\naxis=\"profitability\":\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n영업이익률 : float — 영업이익률 (%)\n순이익률 : float — 순이익률 (%)\nROE : float — 자기자본이익률 (%)\nROA : float — 총자산이익률 (%)\n등급 : str — 수익성 등급\naxis=\"account\" (target=\"매출액\"):\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n2024, 2023, ... : float — 연도별 값 (원 단위)\naxis=\"ratio\" (target=\"roe\"):\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n2024, 2023, ... : float — 연도별 비율값 (%, 배)\naxis=\"fields\":\nfield : str — screen spec 에 넣는 정규 필드 키\nlabel : str — 표시명\nsource : str — finance/report/docs/krx/krxIndex 등 원천\nkind : str — number/text/boolean/context\nunit : str — 원/%/배/건/일/점/주/텍스트/없음\noperatorSet : str — 허용 연산자 목록\ncoverage : str — 로컬 prebuild 기준 커버리지\n기타 축: 종목코드 + 종목명 + 축별 지표 컬럼\n\nRaises\nValueError\naxis 또는 target 이 등록되지 않은 경우.\n그룹 호출 시 target 이 해당 그룹에 속하지 않는 경우.\n\nExamples\n>>> dartlab.scan()                              # 전체 축 가이드\n>>> dartlab.scan(\"profitability\")               # 전종목 수익성\n>>> dartlab.scan(\"account\", \"매출액\")            # 전종목 매출액 시계열\n>>> dartlab.scan(\"ratio\", \"roe\")                # 전종목 ROE 시계열\n>>> dartlab.scan(\"fields\", \"매출\")               # 스크리닝 필드 검색\n>>> dartlab.scan(\"screen\", spec={\"where\": [{\"field\": \"finance.ratio.roe\", \"op\": \">\", \"value\": 10}]})\n>>> dartlab.scan(\"financial\")                   # 재무 8축 가이드\n>>> dartlab.scan(\"financial\", \"수익성\")          # 재무 그룹 내 수익성\n\nNotes\n사전 빌드 parquet 기반. 첫 호출 시 HuggingFace 에서 자동 다운로드.\n전종목 데이터를 한 번에 로드하므로 메모리 ~200MB 소비.",
         "summary": "축(axis)별 전종목 횡단분석."
     },
     "scan.account": {
@@ -1228,6 +1424,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "kind": "scan_axis",
         "summary": "효율성"
     },
+    "scan.fields": {
+        "capabilities": "조건형 스크리닝용 필드 검색 (finance/report/docs/krx/krxIndex)",
+        "kind": "scan_axis",
+        "summary": "필드카탈로그"
+    },
     "scan.governance": {
         "capabilities": "지배구조 (지분율, 사외이사, 보수비율, 감사의견, 소액주주 분산)",
         "kind": "scan_axis",
@@ -1237,6 +1438,148 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "capabilities": "매출/영업이익/순이익 CAGR + 성장 패턴 분류 (6종)",
         "kind": "scan_axis",
         "summary": "성장성"
+    },
+    "scan.industry": {
+        "acceptanceCriteria": {
+            "industryUniverse": true,
+            "primaryCsv": true,
+            "visual": true
+        },
+        "artifactPolicy": {
+            "primaryCsv": true
+        },
+        "comparisonCompleteness": {
+            "mode": "industry_universe_screening"
+        },
+        "contractId": "scan.industry_screen",
+        "evidenceSchema": {
+            "basisKeys": [
+                "종목명",
+                "corpName",
+                "공정명",
+                "역할",
+                "위치",
+                "등급"
+            ],
+            "metricKeys": [
+                "ROE",
+                "ROA",
+                "영업이익률",
+                "순이익률",
+                "공정",
+                "공정명",
+                "등급",
+                "metric"
+            ],
+            "targetKeys": [
+                "종목코드",
+                "stockCode",
+                "code"
+            ],
+            "valueKeys": [
+                "ROE",
+                "ROA",
+                "영업이익률",
+                "순이익률",
+                "신뢰도",
+                "value"
+            ]
+        },
+        "kind": "ai_contract",
+        "preflightActions": [
+            {
+                "argsTemplate": {
+                    "industryId": "{industryId}"
+                },
+                "primaryEvidence": true,
+                "tool": "industry"
+            },
+            {
+                "argsTemplate": {
+                    "axis": "profitability",
+                    "descending": true,
+                    "limit": 50,
+                    "sortBy": "ROE"
+                },
+                "primaryEvidence": true,
+                "tool": "scan"
+            },
+            {
+                "argsTemplate": {
+                    "industryId": "{industryId}",
+                    "kind": "industry_scan"
+                },
+                "primaryEvidence": true,
+                "tool": "pythonExec"
+            }
+        ],
+        "priority": 97,
+        "questionTriggers": {
+            "allAny": [
+                [
+                    "scan",
+                    "screen",
+                    "screening",
+                    "compare",
+                    "comparison",
+                    "비교",
+                    "스크리닝",
+                    "찾아",
+                    "좋은",
+                    "수익성"
+                ],
+                [
+                    "industry",
+                    "sector",
+                    "업종",
+                    "산업",
+                    "반도체",
+                    "semiconductor"
+                ]
+            ]
+        },
+        "questionTypes": [
+            "industry_scan"
+        ],
+        "requiredEvidence": [
+            "industry",
+            "universe",
+            "target",
+            "metric",
+            "value"
+        ],
+        "summary": "산업 taxonomy universe를 먼저 고정한 뒤 scan으로 같은 축 수익성 evidence를 만든다",
+        "tool": "scan",
+        "toolArgPolicy": [
+            "industry_universe_required",
+            "scan_required_for_market_screening"
+        ],
+        "toolMatch": [
+            {
+                "tool": "industry"
+            },
+            {
+                "tool": "scan"
+            },
+            {
+                "args": {
+                    "kind": "industry_scan"
+                },
+                "tool": "pythonExec"
+            }
+        ],
+        "toolNames": [
+            "industry",
+            "scan",
+            "pythonExec",
+            "capabilities"
+        ],
+        "visualPolicy": {
+            "preferredType": "chart",
+            "requiredFor": [
+                "industry_scan"
+            ]
+        }
     },
     "scan.insider": {
         "capabilities": "최대주주 지분변동, 자기주식 현황, 경영권 안정성",
@@ -1252,6 +1595,103 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "capabilities": "전종목 GDP/금리/환율 베타 횡단면 (OLS 회귀). 사전 수집: Ecos().series('GDP', enrich=True)",
         "kind": "scan_axis",
         "summary": "거시베타"
+    },
+    "scan.market": {
+        "artifactPolicy": {
+            "primaryCsv": true
+        },
+        "comparisonCompleteness": {
+            "mode": "full_universe_screening"
+        },
+        "contractId": "scan.market_screen",
+        "evidenceSchema": {
+            "basisKeys": [
+                "종목명",
+                "corpName",
+                "등급"
+            ],
+            "metricKeys": [
+                "ROE",
+                "ROA",
+                "영업이익률",
+                "순이익률",
+                "등급",
+                "metric"
+            ],
+            "targetKeys": [
+                "종목코드",
+                "stockCode",
+                "code"
+            ],
+            "valueKeys": [
+                "ROE",
+                "ROA",
+                "영업이익률",
+                "순이익률",
+                "value"
+            ]
+        },
+        "kind": "ai_contract",
+        "preflightActions": [
+            {
+                "argsTemplate": {
+                    "axis": "profitability",
+                    "descending": true,
+                    "limit": 20,
+                    "sortBy": "ROE"
+                },
+                "primaryEvidence": true,
+                "tool": "scan"
+            }
+        ],
+        "priority": 92,
+        "questionTriggers": {
+            "any": [
+                "scan",
+                "screen",
+                "screening",
+                "profitable stocks",
+                "profitability",
+                "industry",
+                "sector",
+                "업종",
+                "산업",
+                "스크리닝",
+                "종목 발굴",
+                "좋은 종목",
+                "수익성 좋은"
+            ]
+        },
+        "questionTypes": [
+            "market_scan"
+        ],
+        "requiredEvidence": [
+            "target",
+            "metric",
+            "value"
+        ],
+        "summary": "시장/업종/스크리닝 질문 scan primary evidence 계약",
+        "tool": "scan",
+        "toolArgPolicy": [
+            "scan_required_for_market_screening",
+            "no_company_pair_preflight_for_industry_scan"
+        ],
+        "toolMatch": [
+            {
+                "tool": "scan"
+            }
+        ],
+        "toolNames": [
+            "scan",
+            "pythonExec",
+            "capabilities"
+        ],
+        "visualPolicy": {
+            "preferredType": "chart",
+            "requiredFor": [
+                "market_scan"
+            ]
+        }
     },
     "scan.network": {
         "capabilities": "상장사 관계 네트워크 (출자/지분/계열)",
@@ -1274,7 +1714,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "비율"
     },
     "scan.screen": {
-        "capabilities": "멀티팩터 스크리닝 (value/dividend/growth/risk/quality 프리셋)",
+        "capabilities": "멀티팩터 프리셋 + spec 기반 조건형 스크리닝",
         "kind": "scan_axis",
         "summary": "스크리닝"
     },

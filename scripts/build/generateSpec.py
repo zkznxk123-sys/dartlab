@@ -183,6 +183,8 @@ def _applyAiContract(entry: dict[str, Any], sections: dict[str, str]) -> None:
         "toolArgPolicy",
         "toolBudget",
         "preflightActions",
+        "acceptanceCriteria",
+        "failurePolicy",
         "priority",
     ):
         if key in contract:
@@ -1427,6 +1429,7 @@ def _buildAnalysisGraph(entries: dict[str, dict[str, Any]]) -> dict[str, Any]:
     routes: list[dict[str, Any]] = []
     nodes: list[dict[str, Any]] = []
     edges: list[dict[str, Any]] = []
+    processMaps: dict[str, dict[str, Any]] = {}
 
     for key, entry in sorted(entries.items()):
         contract_id = entry.get("contractId")
@@ -1456,26 +1459,240 @@ def _buildAnalysisGraph(entries: dict[str, dict[str, Any]]) -> dict[str, Any]:
                         "triggers": entry.get("questionTriggers") or {},
                         "contractIds": [],
                         "toolNames": [],
+                        "processMapIds": [],
                     }
                 )
             route = next(route for route in routes if route["id"] == route_id)
+            route["triggers"] = _mergeQuestionTriggers(route.get("triggers") or {}, entry.get("questionTriggers") or {})
             route["contractIds"].append(str(contract_id))
             for tool_name in entry.get("toolNames") or ([entry.get("tool")] if entry.get("tool") else []):
                 if tool_name and tool_name not in route["toolNames"]:
                     route["toolNames"].append(str(tool_name))
             edges.append({"from": route_id, "to": f"contract:{contract_id}", "kind": "requiresContract"})
 
+    processMaps = _buildProcessMaps(contracts, routes)
+    for process_id, process in processMaps.items():
+        nodes.append(
+            {
+                "id": f"process:{process_id}",
+                "kind": "process",
+                "label": process.get("summary") or process_id,
+                "source": process.get("questionType"),
+            }
+        )
+        route_id = f"route:{process.get('questionType')}"
+        edges.append({"from": route_id, "to": f"process:{process_id}", "kind": "usesProcess"})
+        for contract_id in process.get("contractIds") or []:
+            edges.append({"from": f"process:{process_id}", "to": f"contract:{contract_id}", "kind": "requiresContract"})
+        for step in process.get("steps") or []:
+            tool = step.get("tool")
+            if tool:
+                edges.append({"from": f"process:{process_id}", "to": f"tool:{tool}", "kind": "usesTool"})
+            if step.get("produces") == "evidence":
+                evidence_id = f"evidence:{process_id}:{step.get('id')}"
+                nodes.append({"id": evidence_id, "kind": "evidence", "label": step.get("purpose") or "evidence"})
+                edges.append({"from": f"process:{process_id}", "to": evidence_id, "kind": "producesEvidence"})
+        if process.get("artifactPolicy", {}).get("primaryCsv"):
+            artifact_id = f"artifact:{process_id}:primary_csv"
+            nodes.append({"id": artifact_id, "kind": "artifact", "label": "primary CSV"})
+            edges.append({"from": f"process:{process_id}", "to": artifact_id, "kind": "producesArtifact"})
+        if process.get("visualPolicy", {}).get("requiredFor"):
+            visual_id = f"visual:{process_id}:primary"
+            nodes.append(
+                {"id": visual_id, "kind": "visual", "label": process.get("visualPolicy", {}).get("preferredType")}
+            )
+            edges.append({"from": f"process:{process_id}", "to": visual_id, "kind": "requiresVisual"})
+        edges.append({"from": f"process:{process_id}", "to": "workspace:analysis", "kind": "feedsWorkspace"})
+
+    for route in routes:
+        question_type = route.get("questionType")
+        process_id = f"{question_type}.default"
+        if process_id in processMaps and process_id not in route["processMapIds"]:
+            route["processMapIds"].append(process_id)
+
     payload = {
-        "graphVersion": 1,
+        "graphVersion": 2,
         "sourceHash": hashlib.sha256(
-            json.dumps(contracts, ensure_ascii=False, sort_keys=True).encode("utf-8")
+            json.dumps({"contracts": contracts, "processMaps": processMaps}, ensure_ascii=False, sort_keys=True).encode(
+                "utf-8"
+            )
         ).hexdigest()[:16],
         "nodes": nodes,
         "edges": edges,
         "contracts": contracts,
         "routes": routes,
+        "processMaps": processMaps,
     }
     return payload
+
+
+def _buildProcessMaps(contracts: dict[str, dict[str, Any]], routes: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Build generated process maps from route contracts.
+
+    This is not a new SSOT. It derives an LLM-facing execution map from contract
+    metadata already compiled into the Analysis Graph.
+    """
+    out: dict[str, dict[str, Any]] = {}
+    for route in routes:
+        question_type = str(route.get("questionType") or "")
+        if not question_type:
+            continue
+        route_contracts = [contracts[cid] for cid in route.get("contractIds") or [] if cid in contracts]
+        if not route_contracts:
+            continue
+        steps: list[dict[str, Any]] = []
+        for contract in route_contracts:
+            contract_id = str(contract.get("contractId") or "")
+            for idx, action in enumerate(contract.get("preflightActions") or []):
+                if not isinstance(action, dict) or not action.get("tool"):
+                    continue
+                steps.append(
+                    {
+                        "id": f"{contract_id}.preflight.{idx + 1}",
+                        "tool": action.get("tool"),
+                        "argsTemplate": action.get("argsTemplate") or {},
+                        "contractId": contract_id,
+                        "primaryEvidence": bool(action.get("primaryEvidence")),
+                        "produces": "evidence",
+                        "purpose": f"{contract_id} primary evidence",
+                    }
+                )
+            if not any(step.get("contractId") == contract_id for step in steps):
+                for tool in contract.get("toolNames") or ([contract.get("tool")] if contract.get("tool") else []):
+                    if not tool:
+                        continue
+                    steps.append(
+                        {
+                            "id": f"{contract_id}.{tool}",
+                            "tool": tool,
+                            "contractId": contract_id,
+                            "primaryEvidence": False,
+                            "produces": "evidence",
+                            "purpose": f"{contract_id} evidence candidate",
+                        }
+                    )
+        required_evidence = _unique(v for c in route_contracts for v in c.get("requiredEvidence") or [])
+        artifact_policy = _merge_dicts(c.get("artifactPolicy") for c in route_contracts)
+        visual_policy = _merge_dicts(c.get("visualPolicy") for c in route_contracts)
+        freshness = _merge_dicts(c.get("freshness") for c in route_contracts)
+        acceptance_criteria = _buildAcceptanceCriteria(
+            route_contracts,
+            required_evidence=required_evidence,
+            artifact_policy=artifact_policy,
+            visual_policy=visual_policy,
+        )
+        failure_policy = _merge_dicts(c.get("failurePolicy") for c in route_contracts) or {
+            "onMissingEvidence": "repair_once",
+            "onUnsupportedClaim": "disclose_or_repair",
+        }
+        primary_tools = _unique(step.get("tool") for step in steps if step.get("primaryEvidence"))
+        required_artifacts = ["primary_csv"] if artifact_policy.get("primaryCsv") else []
+        required_visuals = (
+            [str(visual_policy.get("preferredType") or "visual")] if visual_policy.get("requiredFor") else []
+        )
+        out[f"{question_type}.default"] = {
+            "id": f"{question_type}.default",
+            "questionType": question_type,
+            "summary": f"{question_type} analysis process",
+            "routeId": route.get("id"),
+            "contractIds": list(route.get("contractIds") or []),
+            "toolNames": list(route.get("toolNames") or []),
+            "requiredTools": primary_tools,
+            "requiredEvidence": required_evidence,
+            "requiredArtifacts": required_artifacts,
+            "requiredVisuals": required_visuals,
+            "freshness": freshness,
+            "artifactPolicy": artifact_policy,
+            "visualPolicy": visual_policy,
+            "acceptanceCriteria": acceptance_criteria,
+            "failurePolicy": failure_policy,
+            "steps": _dedupe_steps(steps),
+        }
+    return out
+
+
+def _buildAcceptanceCriteria(
+    contracts: list[dict[str, Any]],
+    *,
+    required_evidence: list[str],
+    artifact_policy: dict[str, Any],
+    visual_policy: dict[str, Any],
+) -> dict[str, Any]:
+    """Derive process acceptance criteria from contract metadata only."""
+    out = _merge_dicts(c.get("acceptanceCriteria") for c in contracts)
+    if required_evidence:
+        out.setdefault("requiredEvidence", list(required_evidence))
+    if artifact_policy.get("primaryCsv"):
+        out.setdefault("primaryCsv", True)
+    if visual_policy.get("requiredFor"):
+        out.setdefault("visual", True)
+    if any(c.get("comparisonCompleteness") for c in contracts):
+        out.setdefault("sameAxisComparison", True)
+    out.setdefault("claimSupportRateMin", 0.9)
+    return out
+
+
+def _unique(values: Any) -> list[str]:
+    out: list[str] = []
+    for value in values:
+        text = str(value)
+        if text and text not in out:
+            out.append(text)
+    return out
+
+
+def _merge_dicts(values: Any) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for value in values:
+        if isinstance(value, dict):
+            out.update(value)
+    return out
+
+
+def _dedupe_steps(steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for step in steps:
+        key = json.dumps(
+            {k: step.get(k) for k in ("tool", "argsTemplate", "contractId", "primaryEvidence")},
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(step)
+    return out[:12]
+
+
+def _mergeQuestionTriggers(left: dict[str, Any], right: dict[str, Any]) -> dict[str, Any]:
+    """Merge route trigger specs from contracts sharing the same questionType."""
+    if not left:
+        return dict(right)
+    if not right:
+        return dict(left)
+    merged = dict(left)
+    for key, value in right.items():
+        current = merged.get(key)
+        if current is None:
+            merged[key] = value
+            continue
+        if isinstance(current, list) and isinstance(value, list):
+            for item in value:
+                if item not in current:
+                    current.append(item)
+            continue
+        if current != value:
+            merged.setdefault("any", [])
+            if isinstance(merged["any"], list):
+                for item in (current, value):
+                    if isinstance(item, list):
+                        for inner in item:
+                            if inner not in merged["any"]:
+                                merged["any"].append(inner)
+                    elif item not in merged["any"]:
+                        merged["any"].append(item)
+    return merged
 
 
 def _generateAnalysisGraphPy(entries: dict[str, dict[str, Any]]) -> str:
@@ -2310,6 +2527,52 @@ def _generateMcpToolsPy() -> str:
             "Analysis Graph 노드 변경 영향 조회. 예: contract:gather.krx.close",
             {"nodeId": {"type": "string", "description": "노드 ID"}},
             ["nodeId"],
+            "meta",
+        )
+    )
+    tools.append(
+        _tool(
+            "explainDartlabTool",
+            "Analysis Graph 기준 tool 설명. 관련 contract, evidence schema, artifact/visual 정책 반환.",
+            {"toolName": {"type": "string", "description": "DartLab tool 이름 (예: analysis, pythonExec, gather)"}},
+            ["toolName"],
+            "meta",
+        )
+    )
+    tools.append(
+        _tool(
+            "planDartlabQuestion",
+            "질문을 DartLab Analysis Graph processMap으로 계획. 외부 LLM agent가 도구 선택 전 호출.",
+            {
+                "question": {"type": "string", "description": "사용자 질문"},
+                "stockCode": {"type": "string", "description": "선택 종목 힌트"},
+            },
+            ["question"],
+            "meta",
+        )
+    )
+    tools.append(
+        _tool(
+            "validateDartlabPlan",
+            "외부 LLM agent가 제안한 tool 순서가 DartLab contract/processMap을 만족하는지 검증.",
+            {
+                "question": {"type": "string", "description": "사용자 질문"},
+                "proposedTools": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "제안 tool 이름 목록",
+                },
+            },
+            ["question", "proposedTools"],
+            "meta",
+        )
+    )
+    tools.append(
+        _tool(
+            "listDartlabProcesses",
+            "Analysis Graph가 생성한 표준 질문 처리 processMap 목록.",
+            {},
+            [],
             "meta",
         )
     )

@@ -225,6 +225,9 @@ def main() -> int:
             response_meta = (body.get("responseMeta") if not stream and isinstance(body, dict) else None) or _doneMeta(
                 events
             )
+            response_graph = response_meta.get("graph") if isinstance(response_meta, dict) else {}
+            if not isinstance(response_graph, dict):
+                response_graph = {}
             evidence_count = max(
                 int(audit.get("evidence_count") or 0), len(response_evidence), _countEvents(events, "evidence")
             )
@@ -259,6 +262,33 @@ def main() -> int:
                 "rewriteCount": max(int(audit.get("rewrite_count") or 0), int(response_meta.get("rewriteCount") or 0)),
                 "maxRoundsReached": bool(audit.get("max_rounds_reached") or response_meta.get("maxRoundsReached")),
                 "slowReason": audit.get("slow_reason") or response_meta.get("slowReason") or [],
+                "routeHit": bool(audit.get("route_hit") or response_graph.get("routeHit")),
+                "contractHit": bool(audit.get("contract_hit") or response_graph.get("contractHit")),
+                "processMapUsed": bool(audit.get("process_map_used") or response_graph.get("processMapUsed")),
+                "processMapSatisfied": bool(
+                    audit.get("process_map_satisfied")
+                    or response_graph.get("processMapSatisfied")
+                    or response_meta.get("processMapSatisfied")
+                ),
+                "claimSupportRate": max(
+                    float(audit.get("claim_support_rate") or 0),
+                    float(response_meta.get("claimSupportRate") or 0),
+                ),
+                "toolArgValidRate": max(
+                    float(audit.get("tool_arg_valid_rate") or 0),
+                    float(response_meta.get("toolArgValidRate") or 0),
+                ),
+                "freshnessSatisfied": bool(
+                    audit.get("freshness_satisfied", True) and response_meta.get("freshnessSatisfied", True)
+                ),
+                "processMapIds": audit.get("process_map_ids") or response_graph.get("processMapIds") or [],
+                "selectedTools": audit.get("selected_tools") or [],
+                "skippedCandidateTools": audit.get("skipped_candidate_tools") or [],
+                "requiredEvidenceSatisfied": bool(
+                    audit.get("required_evidence_satisfied") or response_graph.get("requiredEvidenceSatisfied")
+                ),
+                "artifactSatisfied": bool(audit.get("artifact_satisfied") or response_graph.get("artifactSatisfied")),
+                "visualSatisfied": bool(audit.get("visual_satisfied") or response_graph.get("visualSatisfied")),
                 "requiresArtifact": requires_artifact,
                 "artifactViolation": artifact_violation,
                 "events": _compactEvents(events[-30:]) if stream else [],
@@ -287,6 +317,16 @@ def main() -> int:
                     "rewriteCount",
                     "maxRoundsReached",
                     "slowReason",
+                    "routeHit",
+                    "contractHit",
+                    "processMapUsed",
+                    "processMapSatisfied",
+                    "claimSupportRate",
+                    "toolArgValidRate",
+                    "freshnessSatisfied",
+                    "requiredEvidenceSatisfied",
+                    "artifactSatisfied",
+                    "visualSatisfied",
                     "artifactViolation",
                 )
             }

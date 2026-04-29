@@ -32,9 +32,15 @@ def test_workspace_extracts_evidence_from_dataframe_and_artifact(tmp_path, monke
 
 
 def test_contract_graph_is_runtime_ssot_for_price_mover_contract():
-    from dartlab.ai.runtime.contract_graph import contractForTool, contractsForQuestion
+    from dartlab.ai.runtime.contract_graph import (
+        contractForTool,
+        contractsForQuestion,
+        planDartlabQuestion,
+        understandingPacketForQuestion,
+        validateDartlabPlan,
+    )
     from dartlab.ai.runtime.contracts import contractMetadataForTool
-    from dartlab.core.analysisGraph import contextForQuestion, graphStatus
+    from dartlab.core.analysisGraph import contextForQuestion, graphStatus, requiresVisualExplanation
 
     contract = contractForTool("gather", {"axis": "krx", "target": "close"})
     assert contract is not None
@@ -46,6 +52,26 @@ def test_contract_graph_is_runtime_ssot_for_price_mover_contract():
     assert contractMetadataForTool("gather", {"axis": "krx", "target": "close"})["contractId"] == "gather.krx.close"
     assert graphStatus()["contractCount"] >= 5
     assert "gather.krx.close" in contextForQuestion("최근 주가가 많이 오른 종목을 찾아줘")["route"]["contractIds"]
+    comparison_context = contextForQuestion("삼성전자와 SK하이닉스를 비교해줘")
+    assert comparison_context["route"]["profileTypes"] == ["company_compare"]
+    assert "comparison.same_axis" in comparison_context["route"]["contractIds"]
+    assert "company_compare.default" in comparison_context["route"]["processMapIds"]
+    assert requiresVisualExplanation("삼성전자와 SK하이닉스를 비교해줘")
+    packet = understandingPacketForQuestion("최근 주가가 많이 오른 종목을 찾아줘")
+    assert "recent_price_mover.default" in packet["processMapIds"]
+    assert packet["artifactPolicy"]["primaryCsv"] is True
+    assert packet["visualPolicy"]["preferredType"] == "chart"
+    assert packet["acceptanceCriteria"]["primaryCsv"] is True
+    assert packet["acceptanceCriteria"]["claimSupportRateMin"] == 0.9
+    plan = planDartlabQuestion("최근 주가가 많이 오른 종목을 찾아줘")
+    assert plan["processMaps"][0]["steps"][0]["tool"] == "pythonExec"
+    assert plan["processMaps"][0]["requiredTools"] == ["pythonExec"]
+    assert plan["processMaps"][0]["requiredArtifacts"] == ["primary_csv"]
+    validated = validateDartlabPlan("최근 주가가 많이 오른 종목을 찾아줘", ["pythonExec"])
+    assert validated["ok"] is True
+    assert validated["acceptanceCriteria"]["primaryCsv"] is True
+    invalid = validateDartlabPlan("최근 주가가 많이 오른 종목을 찾아줘", ["companyStory"])
+    assert invalid["ok"] is False
 
 
 def test_workspace_uses_contract_evidence_schema_for_krx_ranking():
@@ -55,14 +81,28 @@ def test_workspace_uses_contract_evidence_schema_for_krx_ranking():
     evidence = workspace.recordToolResult(
         sourceTool="gather",
         arguments={"axis": "krx", "target": "close"},
-        result=[{"rank": 1, "stockCode": "215790", "corpName": "이노인스트루먼트", "returnPct": 493.42}],
+        result=[
+            {
+                "rank": idx,
+                "stockCode": f"{idx:06d}",
+                "corpName": f"종목{idx}",
+                "returnPct": 493.42 - idx,
+                "period": "2026-03-16~2026-04-28",
+                "asOf": "2026-04-28",
+            }
+            for idx in range(1, 11)
+        ],
         artifacts=[],
     )
 
-    assert evidence[0].target == "215790"
+    assert evidence[0].target == "000001"
     assert evidence[0].metric == "returnPct"
-    assert evidence[0].value == 493.42
+    assert evidence[0].value == 492.42
     assert evidence[0].unit == "%"
+    graph = workspace.summary()["graph"]
+    assert graph["processMapUsed"] is True
+    assert graph["requiredEvidenceSatisfied"] is True
+    assert graph["visualRequired"] is True
 
 
 def test_tool_loop_promotes_viz_marker_to_visual_and_chart_event(monkeypatch):
@@ -225,6 +265,30 @@ def test_tool_loop_removes_empty_markdown_heading_lines():
     assert _cleanFinalText("A\n\n##\n\nB") == "A\n\nB"
 
 
+def test_tool_loop_removes_trailing_followup_menu():
+    from dartlab.ai.runtime.toolLoop import _cleanFinalText
+
+    text = (
+        "판단: SK하이닉스는 성장 탄력, 삼성전자는 안정성이 강합니다.\n\n"
+        "| 축 | 삼성전자 | SK하이닉스 |\n| --- | ---: | ---: |\n| 점수 | 7 | 9 |\n\n"
+        "이 표에서 읽을 포인트\n- 같은 축 기준 비교입니다.\n\n"
+        "원하시면 다음 단계로 밸류에이션 비교도 해드릴게요.\n"
+        "1. 밸류에이션\n2. 현금흐름"
+    )
+
+    cleaned = _cleanFinalText(text)
+
+    assert "원하시면" not in cleaned
+    assert "밸류에이션 비교도" not in cleaned
+
+
+def test_finance_tool_choice_allows_answer_after_preflight_evidence():
+    from dartlab.ai.runtime.toolLoop import _resolveToolChoice
+
+    assert _resolveToolChoice("finance", 0, hasToolEvidence=False) == "any"
+    assert _resolveToolChoice("finance", 0, hasToolEvidence=True) == "none"
+
+
 def test_tool_loop_compiles_workspace_answer_when_max_rounds_exhausted(monkeypatch):
     from dartlab.ai.runtime.toolLoop import streamWithTools
     from dartlab.ai.runtime.workspace import AnalysisWorkspace
@@ -316,8 +380,62 @@ def test_comparison_preflight_extracts_two_targets():
         question="삼성전자와 SK하이닉스 반도체 업종 경쟁력을 비교해줘",
     )
 
-    assert [args["stockCode"] for _name, args in calls] == ["005930", "000660"]
-    assert all(name == "analysis" for name, _args in calls)
+    assert [(name, args["stockCode"]) for name, args in calls] == [
+        ("analysis", "005930"),
+        ("analysis", "000660"),
+        ("show", "005930"),
+        ("show", "000660"),
+    ]
+    assert calls[2][1]["topic"] == "IS"
+    assert calls[2][1]["fields"] == ["매출액", "영업이익"]
+
+
+def test_comparison_preflight_does_not_resolve_scan_question_common_words():
+    from dartlab.ai.runtime.toolLoop import _comparisonPreflightCalls
+
+    calls = _comparisonPreflightCalls(
+        category="finance",
+        intent="compare",
+        question=(
+            "Answer in Korean. Compare the Korean semiconductor industry using the scan engine. "
+            "Use same-axis numeric evidence."
+        ),
+    )
+
+    assert calls == []
+
+
+def test_scan_preflight_uses_scan_contract_for_market_screening_question():
+    from dartlab.ai.runtime.contract_graph import understandingPacketForQuestion
+    from dartlab.ai.runtime.toolLoop import _scanPreflightCalls
+
+    question = "Use the scan engine to find profitable Korean stocks."
+    calls = _scanPreflightCalls(category="finance", intent="compare", question=question)
+    packet = understandingPacketForQuestion(question)
+
+    assert calls == [
+        (
+            "scan",
+            {"axis": "profitability", "sortBy": "ROE", "descending": True, "limit": 20},
+        )
+    ]
+    assert "scan.market_screen" in packet["contractIds"]
+    assert packet["acceptanceCriteria"]["primaryCsv"] is True
+
+
+def test_scan_preflight_adds_industry_universe_for_sector_question():
+    from dartlab.ai.runtime.contract_graph import understandingPacketForQuestion
+    from dartlab.ai.runtime.toolLoop import _scanPreflightCalls
+
+    question = "Compare the Korean semiconductor industry using the scan engine."
+    calls = _scanPreflightCalls(category="finance", intent="compare", question=question)
+    packet = understandingPacketForQuestion(question)
+
+    assert ("industry", {"industryId": "semiconductor"}) in calls
+    assert ("scan", {"axis": "profitability", "sortBy": "ROE", "descending": True, "limit": 50}) in calls
+    assert "scan.industry_screen" in packet["contractIds"]
+    assert "industry" in packet["requiredEvidence"]
+    assert "industry_scan.default" in packet["processMapIds"]
 
 
 def test_quality_requires_visual_when_workspace_has_visual_policy_question():
@@ -388,6 +506,74 @@ def test_quality_rejects_visual_without_evidence_link():
     assert "unsupported_visual" in result.issues
 
 
+def test_quality_allows_unsupported_topic_disclosure_as_limitation():
+    from dartlab.ai.runtime.quality import evaluateFinalAnswer
+    from dartlab.ai.runtime.workspace import AnalysisWorkspace
+
+    answer = (
+        "판단: 같은 축 수치 기준으로 제한적 비교가 맞습니다.\n\n"
+        "| 축 | 삼성전자 | SK하이닉스 |\n| --- | ---: | ---: |\n| 점수 | 7 | 9 |\n\n"
+        "이 표에서 읽을 포인트\n- 동일 축 근거만 사용했습니다.\n\n"
+        "한계: HBM/파운드리/낸드 세부 경쟁력 수치는 현재 tool_result 원문 숫자가 없어 포함하지 않았습니다."
+    )
+    workspace = AnalysisWorkspace(question="삼성전자와 SK하이닉스 경쟁력 비교")
+    workspace.recordToolResult(
+        sourceTool="analysis",
+        arguments={"stockCode": "005930", "axis": "종합평가"},
+        result=[{"stockCode": "005930", "score": 7}],
+        artifacts=[],
+    )
+    workspace.recordToolResult(
+        sourceTool="analysis",
+        arguments={"stockCode": "000660", "axis": "종합평가"},
+        result=[{"stockCode": "000660", "score": 9}],
+        artifacts=[],
+    )
+    workspace.ensureRequiredVisuals(answer=answer)
+
+    result = evaluateFinalAnswer(
+        category="finance",
+        question="삼성전자와 SK하이닉스 경쟁력 비교",
+        answer=answer,
+        toolCalls=[
+            {"name": "analysis", "arguments": {"stockCode": "005930", "axis": "종합평가"}},
+            {"name": "analysis", "arguments": {"stockCode": "000660", "axis": "종합평가"}},
+        ],
+        workspace=workspace,
+    )
+
+    assert "unsupported_claim" not in result.issues
+
+
+def test_quality_accepts_ranking_market_judgment_wording():
+    from dartlab.ai.runtime.quality import evaluateFinalAnswer
+    from dartlab.ai.runtime.workspace import AnalysisWorkspace
+
+    answer = (
+        "최근 KRX 시장에서는 일부 종목에 수익률이 강하게 집중된 급등 장세가 나타났습니다.\n\n"
+        "| 순위 | 종목코드 | 수익률 |\n| ---: | --- | ---: |\n| 1 | 046970 | 433.54% |\n\n"
+        "이 표에서 읽을 포인트\n- 상위 종목에 수익률이 집중됐습니다."
+    )
+    workspace = AnalysisWorkspace(question="최근 주가가 많이 오른 종목을 찾아줘")
+    workspace.recordToolResult(
+        sourceTool="pythonExec",
+        arguments={"target": "movers"},
+        result="rank\tstockCode\treturnPct\n1\t046970\t433.54\n2\t017900\t416.10",
+        artifacts=[],
+    )
+    workspace.ensureRequiredVisuals(answer=answer)
+
+    result = evaluateFinalAnswer(
+        category="finance",
+        question="최근 주가가 많이 오른 종목을 찾아줘",
+        answer=answer,
+        toolCalls=[{"name": "pythonExec", "arguments": {"code": "rank"}}],
+        workspace=workspace,
+    )
+
+    assert "missing_judgment" not in result.issues
+
+
 def test_workspace_bundle_handles_array_values():
     import numpy as np
 
@@ -439,6 +625,31 @@ def test_workspace_compiles_visual_from_request_level_comparison_evidence():
     assert visuals[0].evidenceIds
     assert visuals[0].spec["vizType"] == "chart"
     assert workspace.summary()["visualRequirement"]["satisfied"] is True
+
+
+def test_workspace_compiles_same_axis_comparison_brief():
+    from dartlab.ai.runtime.workspace import AnalysisWorkspace
+
+    workspace = AnalysisWorkspace(question="삼성전자와 SK하이닉스 경쟁력 비교")
+    workspace.recordToolResult(
+        sourceTool="analysis",
+        arguments={"stockCode": "005930", "axis": "profitability"},
+        result=[{"stockCode": "005930", "score": 7}],
+        artifacts=[],
+    )
+    workspace.recordToolResult(
+        sourceTool="analysis",
+        arguments={"stockCode": "000660", "axis": "profitability"},
+        result=[{"stockCode": "000660", "score": 9}],
+        artifacts=[],
+    )
+
+    brief = workspace.compileComparisonBrief()
+
+    assert "workspace comparison evidence" in brief
+    assert "005930" in brief
+    assert "000660" in brief
+    assert "tool 근거" in brief
 
 
 def test_quality_detects_stale_daily_workspace_freshness_without_disclosure():
@@ -563,6 +774,26 @@ def test_quality_allows_percent_rounding_between_table_and_text():
     assert "answer_table_conflict" not in result.issues
 
 
+def test_quality_does_not_match_short_row_label_inside_longer_korean_term():
+    from dartlab.ai.runtime.quality import evaluateFinalAnswer
+
+    result = evaluateFinalAnswer(
+        category="finance",
+        question="대우건설 안정성 분석해줘",
+        answer=(
+            "판단: 안정성은 주의가 필요합니다.\n\n"
+            "| 항목 | 기간 | 값 |\n|---|---|---:|\n"
+            "| 자본 | 2025 | -19.83% |\n"
+            "| 자기자본비율 | 2025 | 26.01% |\n\n"
+            "이 표에서 읽을 포인트\n"
+            "- 자기자본비율은 26.01%라 완충력이 충분하다고 보긴 어렵습니다."
+        ),
+        toolCalls=[{"name": "credit", "arguments": {"stockCode": "047040"}}],
+    )
+
+    assert "answer_table_conflict" not in result.issues
+
+
 def test_disclosure_list_only_requires_title_or_body_basis():
     from dartlab.ai.runtime.quality import evaluateFinalAnswer
     from dartlab.ai.runtime.workspace import AnalysisWorkspace
@@ -660,3 +891,75 @@ def test_audit_collector_records_contract_ids(tmp_path):
 
     assert row["contract_ids"] == ["gather.krx.close"]
     assert row["contract_violations"] == ["stale_date_risk"]
+
+
+def test_workspace_trace_and_quality_summary_records_process_map_satisfaction():
+    from dartlab.ai.runtime.workspace import AnalysisWorkspace
+
+    workspace = AnalysisWorkspace(question="최근 주가가 많이 오른 종목을 찾아줘")
+    workspace.recordToolCall(name="pythonExec", arguments={"code": "print('x')"}, round=0)
+    workspace.recordToolResult(
+        sourceTool="pythonExec",
+        arguments={"target": "movers"},
+        result=[
+            {
+                "rank": idx,
+                "stockCode": f"{idx:06d}",
+                "returnPct": 10.0 + idx,
+                "period": "2026-04-01~2026-04-28",
+                "asOf": "2026-04-28",
+            }
+            for idx in range(1, 11)
+        ],
+        artifacts=[{"id": "csv_1", "format": "csv", "primary": True}],
+    )
+    workspace.ensureRequiredVisuals(answer="랭킹 판단입니다.")
+    workspace.recordFinalAnswer("판단: 이 종목군은 단기 상승률이 높습니다.")
+
+    summary = workspace.summary()
+
+    assert summary["processMapSatisfied"] is True
+    assert summary["claimSupportRate"] == 1.0
+    assert summary["toolArgValidRate"] == 1.0
+    assert summary["freshnessSatisfied"] is True
+    assert summary["trace"]["selectedTools"] == ["pythonExec"]
+    assert summary["trace"]["evidenceIds"]
+    assert summary["trace"]["claimIds"]
+    assert summary["trace"]["visualIds"]
+
+
+def test_audit_collector_records_trace_quality_metrics(tmp_path):
+    import json
+
+    from dartlab.ai.runtime.audit import AuditCollector
+
+    audit = AuditCollector(question="q", data_dir=tmp_path)
+    audit.observe(
+        "done",
+        {
+            "responseMeta": {
+                "processMapSatisfied": True,
+                "claimSupportRate": 0.95,
+                "toolArgValidRate": 1.0,
+                "freshnessSatisfied": True,
+                "trace": {
+                    "selectedTools": ["pythonExec"],
+                    "skippedCandidateTools": ["companyStory"],
+                    "evidenceIds": ["ev_0001"],
+                    "claimIds": ["claim_0002"],
+                    "visualIds": ["viz_0003"],
+                },
+            }
+        },
+    )
+    audit.flush()
+
+    path = next((tmp_path / "audit" / "ai-ask").glob("*.jsonl"))
+    row = json.loads(path.read_text(encoding="utf-8").splitlines()[0])
+
+    assert row["process_map_satisfied"] is True
+    assert row["claim_support_rate"] == 0.95
+    assert row["tool_arg_valid_rate"] == 1.0
+    assert row["freshness_satisfied"] is True
+    assert row["selected_tools"] == ["pythonExec"]
+    assert row["skipped_candidate_tools"] == ["companyStory"]

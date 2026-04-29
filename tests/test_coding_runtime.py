@@ -74,3 +74,16 @@ def test_coding_runtime_unknown_backend():
         assert "등록되지 않은 coding backend" in str(error)
     else:
         raise AssertionError("KeyError가 발생해야 합니다.")
+
+
+def test_runtime_python_prefers_virtualenv_python(monkeypatch, tmp_path):
+    from dartlab.ai.tools import coding
+
+    venv = tmp_path / ".venv"
+    scripts = venv / "Scripts"
+    scripts.mkdir(parents=True)
+    python = scripts / "python.exe"
+    python.write_text("", encoding="utf-8")
+    monkeypatch.setenv("VIRTUAL_ENV", str(venv))
+
+    assert coding._runtimePythonExecutable() == str(python)

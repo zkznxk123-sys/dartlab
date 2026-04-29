@@ -124,6 +124,22 @@ class AuditCollector:
         self.primary_csv_count = 0
         self.contract_ids: list[str] = []
         self.contract_violations: list[str] = []
+        self.process_map_ids: list[str] = []
+        self.route_hit = False
+        self.contract_hit = False
+        self.process_map_used = False
+        self.required_evidence_satisfied = False
+        self.artifact_satisfied = False
+        self.visual_satisfied = False
+        self.process_map_satisfied = False
+        self.claim_support_rate = 0.0
+        self.tool_arg_valid_rate = 1.0
+        self.freshness_satisfied = True
+        self.selected_tools: list[str] = []
+        self.skipped_candidate_tools: list[str] = []
+        self.evidence_ids: list[str] = []
+        self.claim_ids: list[str] = []
+        self.visual_ids: list[str] = []
         self.llm_round_ms = 0
         self.tool_total_ms = 0
         self.rewrite_count = 0
@@ -247,6 +263,37 @@ class AuditCollector:
                     contract_ids = coverage.get("contractIds") or []
                     if isinstance(contract_ids, list):
                         self.contract_ids = [str(v) for v in contract_ids]
+                    process_map_ids = coverage.get("processMapIds") or []
+                    if isinstance(process_map_ids, list):
+                        self.process_map_ids = [str(v) for v in process_map_ids]
+                graph = meta.get("graph") or {}
+                if isinstance(graph, dict):
+                    self.route_hit = bool(graph.get("routeHit"))
+                    self.contract_hit = bool(graph.get("contractHit"))
+                    self.process_map_used = bool(graph.get("processMapUsed"))
+                    self.required_evidence_satisfied = bool(graph.get("requiredEvidenceSatisfied"))
+                    self.artifact_satisfied = bool(graph.get("artifactSatisfied"))
+                    self.visual_satisfied = bool(graph.get("visualSatisfied"))
+                    self.process_map_satisfied = bool(graph.get("processMapSatisfied"))
+                    if not self.process_map_ids and isinstance(graph.get("processMapIds"), list):
+                        self.process_map_ids = [str(v) for v in graph.get("processMapIds") or []]
+                quality = meta.get("quality") or {}
+                if isinstance(quality, dict):
+                    self.process_map_satisfied = bool(quality.get("processMapSatisfied", self.process_map_satisfied))
+                    self.claim_support_rate = float(quality.get("claimSupportRate") or self.claim_support_rate)
+                    self.tool_arg_valid_rate = float(quality.get("toolArgValidRate") or self.tool_arg_valid_rate)
+                    self.freshness_satisfied = bool(quality.get("freshnessSatisfied", self.freshness_satisfied))
+                self.process_map_satisfied = bool(meta.get("processMapSatisfied", self.process_map_satisfied))
+                self.claim_support_rate = float(meta.get("claimSupportRate") or self.claim_support_rate)
+                self.tool_arg_valid_rate = float(meta.get("toolArgValidRate") or self.tool_arg_valid_rate)
+                self.freshness_satisfied = bool(meta.get("freshnessSatisfied", self.freshness_satisfied))
+                trace = meta.get("trace") or {}
+                if isinstance(trace, dict):
+                    self.selected_tools = [str(v) for v in trace.get("selectedTools") or []]
+                    self.skipped_candidate_tools = [str(v) for v in trace.get("skippedCandidateTools") or []]
+                    self.evidence_ids = [str(v) for v in trace.get("evidenceIds") or []]
+                    self.claim_ids = [str(v) for v in trace.get("claimIds") or []]
+                    self.visual_ids = [str(v) for v in trace.get("visualIds") or []]
                 contract_violations = meta.get("contractViolations") or (
                     coverage.get("contractViolations") if isinstance(coverage, dict) else []
                 )
@@ -288,6 +335,22 @@ class AuditCollector:
             "primary_csv_count": self.primary_csv_count,
             "contract_ids": self.contract_ids,
             "contract_violations": self.contract_violations,
+            "process_map_ids": self.process_map_ids,
+            "route_hit": self.route_hit,
+            "contract_hit": self.contract_hit,
+            "process_map_used": self.process_map_used,
+            "required_evidence_satisfied": self.required_evidence_satisfied,
+            "artifact_satisfied": self.artifact_satisfied,
+            "visual_satisfied": self.visual_satisfied,
+            "process_map_satisfied": self.process_map_satisfied,
+            "claim_support_rate": self.claim_support_rate,
+            "tool_arg_valid_rate": self.tool_arg_valid_rate,
+            "freshness_satisfied": self.freshness_satisfied,
+            "selected_tools": self.selected_tools,
+            "skipped_candidate_tools": self.skipped_candidate_tools,
+            "evidence_ids": self.evidence_ids[:50],
+            "claim_ids": self.claim_ids[:30],
+            "visual_ids": self.visual_ids[:20],
             "missing_visual_explanation": "missing_visual_explanation" in self.quality_issues,
             "llm_round_ms": self.llm_round_ms,
             "tool_total_ms": self.tool_total_ms,
@@ -327,6 +390,9 @@ def writeManualJudgment(
     verdict: str,
     reason: str,
     issue_code: str | None = None,
+    root_cause: str | None = None,
+    ssot_fix_target: str | None = None,
+    suggested_contract_delta: dict[str, Any] | None = None,
     suggested_fix: str | None = None,
     accepted_by: str | None = None,
     question: str | None = None,
@@ -348,6 +414,9 @@ def writeManualJudgment(
         "verdict": verdict,
         "reason": reason,
         "issue_code": issue_code,
+        "root_cause": root_cause,
+        "ssot_fix_target": ssot_fix_target,
+        "suggested_contract_delta": suggested_contract_delta or {},
         "suggested_fix": suggested_fix,
         "accepted_by": accepted_by,
     }

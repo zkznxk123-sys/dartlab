@@ -409,7 +409,24 @@ ANALYSIS_CONTRACTS: dict[str, dict[str, Any]] = {
         "questionTriggers": {
             "allAny": [
                 ["주가", "가격", "종목", "stock", "price"],
-                ["오른", "상승", "급등", "수익률", "모멘텀", "랭킹", "순위", "mover", "return", "ranking", "rank"],
+                [
+                    "오른",
+                    "상승",
+                    "급등",
+                    "수익률",
+                    "모멘텀",
+                    "랭킹",
+                    "순위",
+                    "mover",
+                    "return",
+                    "ranking",
+                    "rank",
+                    "rose",
+                    "risen",
+                    "gainer",
+                    "gainers",
+                    "recently",
+                ],
             ]
         },
         "toolMatch": [{"tool": "gather", "args": {"axis": "krx", "targetIn": ["", "close", "raw"]}}],
@@ -458,6 +475,100 @@ ANALYSIS_CONTRACTS: dict[str, dict[str, Any]] = {
         "visualPolicy": {"requiredFor": ["macro_recent"], "preferredType": "chart"},
         "priority": 75,
     },
+    "scan.market": {
+        "kind": "ai_contract",
+        "summary": "시장/업종/스크리닝 질문 scan primary evidence 계약",
+        "contractId": "scan.market_screen",
+        "tool": "scan",
+        "questionTypes": ["market_scan"],
+        "questionTriggers": {
+            "any": [
+                "scan",
+                "screen",
+                "screening",
+                "profitable stocks",
+                "profitability",
+                "industry",
+                "sector",
+                "업종",
+                "산업",
+                "스크리닝",
+                "종목 발굴",
+                "좋은 종목",
+                "수익성 좋은",
+            ]
+        },
+        "toolMatch": [{"tool": "scan"}],
+        "toolNames": ["scan", "pythonExec", "capabilities"],
+        "requiredEvidence": ["target", "metric", "value"],
+        "evidenceSchema": {
+            "targetKeys": ["종목코드", "stockCode", "code"],
+            "metricKeys": ["ROE", "ROA", "영업이익률", "순이익률", "등급", "metric"],
+            "valueKeys": ["ROE", "ROA", "영업이익률", "순이익률", "value"],
+            "basisKeys": ["종목명", "corpName", "등급"],
+        },
+        "comparisonCompleteness": {"mode": "full_universe_screening"},
+        "visualPolicy": {"requiredFor": ["market_scan"], "preferredType": "chart"},
+        "artifactPolicy": {"primaryCsv": True},
+        "toolArgPolicy": ["scan_required_for_market_screening", "no_company_pair_preflight_for_industry_scan"],
+        "preflightActions": [
+            {
+                "tool": "scan",
+                "argsTemplate": {"axis": "profitability", "sortBy": "ROE", "descending": True, "limit": 20},
+                "primaryEvidence": True,
+            }
+        ],
+        "priority": 92,
+    },
+    "scan.industry": {
+        "kind": "ai_contract",
+        "summary": "산업 taxonomy universe를 먼저 고정한 뒤 scan으로 같은 축 수익성 evidence를 만든다",
+        "contractId": "scan.industry_screen",
+        "tool": "scan",
+        "questionTypes": ["industry_scan"],
+        "questionTriggers": {
+            "allAny": [
+                ["scan", "screen", "screening", "compare", "comparison", "비교", "스크리닝", "찾아", "좋은", "수익성"],
+                ["industry", "sector", "업종", "산업", "반도체", "semiconductor"],
+            ]
+        },
+        "toolMatch": [
+            {"tool": "industry"},
+            {"tool": "scan"},
+            {"tool": "pythonExec", "args": {"kind": "industry_scan"}},
+        ],
+        "toolNames": ["industry", "scan", "pythonExec", "capabilities"],
+        "requiredEvidence": ["industry", "universe", "target", "metric", "value"],
+        "evidenceSchema": {
+            "targetKeys": ["종목코드", "stockCode", "code"],
+            "metricKeys": ["ROE", "ROA", "영업이익률", "순이익률", "공정", "공정명", "등급", "metric"],
+            "valueKeys": ["ROE", "ROA", "영업이익률", "순이익률", "신뢰도", "value"],
+            "basisKeys": ["종목명", "corpName", "공정명", "역할", "위치", "등급"],
+        },
+        "comparisonCompleteness": {"mode": "industry_universe_screening"},
+        "visualPolicy": {"requiredFor": ["industry_scan"], "preferredType": "chart"},
+        "artifactPolicy": {"primaryCsv": True},
+        "toolArgPolicy": ["industry_universe_required", "scan_required_for_market_screening"],
+        "preflightActions": [
+            {
+                "tool": "industry",
+                "argsTemplate": {"industryId": "{industryId}"},
+                "primaryEvidence": True,
+            },
+            {
+                "tool": "scan",
+                "argsTemplate": {"axis": "profitability", "sortBy": "ROE", "descending": True, "limit": 50},
+                "primaryEvidence": True,
+            },
+            {
+                "tool": "pythonExec",
+                "argsTemplate": {"kind": "industry_scan", "industryId": "{industryId}"},
+                "primaryEvidence": True,
+            },
+        ],
+        "acceptanceCriteria": {"industryUniverse": True, "primaryCsv": True, "visual": True},
+        "priority": 97,
+    },
     "Company.analysis": {
         "contractId": "company.analysis",
         "tool": "analysis",
@@ -503,8 +614,21 @@ ANALYSIS_CONTRACTS: dict[str, dict[str, Any]] = {
         "visualPolicy": {"requiredFor": ["company_compare"], "preferredType": "chart_or_diagram"},
         "artifactPolicy": {"primaryCsv": True},
         "toolArgPolicy": ["no_missing_side_in_comparison"],
-        "toolBudget": {"skipTools": ["quant"], "maxHeavyCallsPerTargetTool": 1},
-        "preflightActions": [{"tool": "analysis", "argsTemplate": {"axis": "종합평가"}, "primaryEvidence": True}],
+        "toolBudget": {"skipTools": ["quant", "credit"], "maxHeavyCallsPerTargetTool": 1},
+        "preflightActions": [
+            {"tool": "analysis", "argsTemplate": {"axis": "종합평가"}, "primaryEvidence": True},
+            {
+                "tool": "show",
+                "argsTemplate": {
+                    "topic": "IS",
+                    "freq": "Y",
+                    "scope": "consolidated",
+                    "raw": False,
+                    "fields": ["매출액", "영업이익"],
+                },
+                "primaryEvidence": True,
+            },
+        ],
         "priority": 90,
     },
     "aiContract.disclosure.importance": {

@@ -12,7 +12,12 @@ from dataclasses import asdict, dataclass, field
 from datetime import date, timedelta
 from typing import Any
 
-from dartlab.ai.runtime.contract_graph import contractForTool, requiresVisualExplanation, routeQuestion
+from dartlab.ai.runtime.contract_graph import (
+    contractForTool,
+    requiresVisualExplanation,
+    routeQuestion,
+    understandingPacketForQuestion,
+)
 
 
 @dataclass
@@ -66,6 +71,7 @@ class AnalysisWorkspace:
     def __init__(self, *, question: str | None = None):
         self.question = question or ""
         self.route: dict[str, Any] = routeQuestion(self.question)
+        self.understandingPacket: dict[str, Any] = understandingPacketForQuestion(self.question)
         self.evidence: list[EvidenceItem] = []
         self.claims: list[ClaimItem] = []
         self.visuals: list[VisualItem] = []
@@ -73,6 +79,7 @@ class AnalysisWorkspace:
         self.coverage: dict[str, Any] = {
             "routeIds": list(self.route.get("routeIds") or []),
             "contractIds": list(self.route.get("contractIds") or []),
+            "processMapIds": list(self.route.get("processMapIds") or []),
             "graph": dict(self.route.get("graph") or {}),
         }
         self.freshness: dict[str, Any] = {}
@@ -83,9 +90,59 @@ class AnalysisWorkspace:
             "rewriteCount": 0,
             "maxRoundsReached": False,
         }
+        self.trace: dict[str, Any] = {
+            "selectedTools": [],
+            "skippedCandidateTools": [],
+            "toolArgs": [],
+            "sanitizedArgs": [],
+            "evidenceIds": [],
+            "claimIds": [],
+            "visualIds": [],
+        }
         self.visualRequirement: dict[str, Any] = {"required": False, "satisfied": False}
         self._seq = 0
         self._claimRecorded = False
+
+    def recordToolCall(
+        self,
+        *,
+        name: str,
+        arguments: dict[str, Any] | None = None,
+        sanitizedArguments: dict[str, Any] | None = None,
+        round: int | None = None,
+    ) -> None:
+        """Record the selected tool and argument trace for audit summaries."""
+        if name and name not in self.trace["selectedTools"]:
+            self.trace["selectedTools"].append(name)
+        row = _drop_empty(
+            {
+                "name": name,
+                "args": _compact_args(arguments or {}),
+                "round": round,
+            }
+        )
+        if row:
+            self.trace["toolArgs"].append(row)
+        if sanitizedArguments is not None and sanitizedArguments != (arguments or {}):
+            self.trace["sanitizedArgs"].append(
+                _drop_empty(
+                    {
+                        "name": name,
+                        "before": _compact_args(arguments or {}),
+                        "after": _compact_args(sanitizedArguments),
+                        "round": round,
+                    }
+                )
+            )
+
+    def finalizeTrace(self) -> None:
+        """Fill trace fields derived from candidate tools and ledgers."""
+        candidates = [str(v) for v in self.understandingPacket.get("candidateTools") or []]
+        selected = set(str(v) for v in self.trace.get("selectedTools") or [])
+        self.trace["skippedCandidateTools"] = [name for name in candidates if name not in selected][:20]
+        self.trace["evidenceIds"] = [item.id for item in self.evidence[:50]]
+        self.trace["claimIds"] = [item.id for item in self.claims[:30]]
+        self.trace["visualIds"] = [item.id for item in self.visuals[:20]]
 
     def recordToolResult(
         self,
@@ -112,6 +169,7 @@ class AnalysisWorkspace:
             item = self._evidenceFromRow(sourceTool, args, row, artifactIds, evidenceSchema=evidenceSchema)
             if item is not None:
                 self.evidence.append(item)
+                self.trace["evidenceIds"].append(item.id)
                 self._observeEvidence(args, item)
                 if len(self.evidence) - before >= 30:
                     self.addLimit(f"{sourceTool}: evidence truncated to 30 rows")
@@ -129,6 +187,7 @@ class AnalysisWorkspace:
                     artifactIds=artifactIds,
                 )
                 self.evidence.append(item)
+                self.trace["evidenceIds"].append(item.id)
                 self._observeEvidence(args, item)
 
         return self.evidence[before:]
@@ -140,17 +199,19 @@ class AnalysisWorkspace:
         purpose: str = "explain",
         evidenceIds: list[str] | None = None,
     ) -> VisualItem:
-        vizType = str(spec.get("vizType") or ("diagram" if spec.get("diagramType") else "chart"))
+        normalized = _normalize_visual_spec(spec)
+        vizType = str(normalized.get("vizType") or ("diagram" if normalized.get("diagramType") else "chart"))
         linked = list(evidenceIds or [e.id for e in self.evidence[-30:]])
         item = VisualItem(
             id=self._next_id("viz"),
             vizType=vizType,
             purpose=purpose,
-            spec=_json_safe(spec),
+            spec=_json_safe(normalized),
             evidenceIds=linked,
             primary=not self.visuals,
         )
         self.visuals.append(item)
+        self.trace["visualIds"].append(item.id)
         return item
 
     def recordFinalAnswer(self, answer: str) -> list[ClaimItem]:
@@ -174,6 +235,7 @@ class AnalysisWorkspace:
                     status="supported" if evidenceIds else "unverified",
                 )
             )
+            self.trace["claimIds"].append(self.claims[-1].id)
             if len(self.claims) - before >= 12:
                 self.addLimit("claims truncated to 12 items")
                 break
@@ -198,6 +260,57 @@ class AnalysisWorkspace:
         self.visualRequirement["satisfied"] = True
         self.visualRequirement["generated"] = "workspace"
         return [visual]
+
+    def compileComparisonBrief(self) -> str:
+        """Return a compact same-axis evidence brief for comparison questions."""
+        if "comparison.same_axis" not in set(self.coverage.get("contractIds") or []):
+            required, reason = _visual_requirement(self.question)
+            if not required or reason not in {"company_compare", "comparison"}:
+                return ""
+        targets = sorted({str(item.target) for item in self.evidence if item.target})
+        if len(targets) < 2:
+            return ""
+
+        matrix: dict[str, dict[str, EvidenceItem]] = {}
+        for item in self.evidence:
+            if not item.target or not item.metric:
+                continue
+            if _numeric_value(item.value) is None and not item.basis:
+                continue
+            metric = str(item.metric)
+            target = str(item.target)
+            matrix.setdefault(metric, {})
+            matrix[metric].setdefault(target, item)
+
+        sameAxis = [(metric, values) for metric, values in matrix.items() if len(values) >= 2]
+        partial = [(metric, values) for metric, values in matrix.items() if len(values) == 1]
+        rows = sameAxis[:8] + partial[: max(0, 8 - len(sameAxis))]
+        if not rows:
+            return ""
+
+        lines = [
+            "[workspace comparison evidence]",
+            "아래 표는 runtime Workspace가 tool_result evidence를 같은 축으로 압축한 것입니다. 답변에서는 '사용자 제공 근거'가 아니라 'tool 근거' 또는 'Workspace 근거'라고 표현하세요.",
+            "",
+            "| metric | " + " | ".join(targets[:4]) + " |",
+            "| --- | " + " | ".join("---:" for _ in targets[:4]) + " |",
+        ]
+        for metric, values in rows:
+            cells = []
+            for target in targets[:4]:
+                item = values.get(target)
+                if item is None:
+                    cells.append("데이터 미제공")
+                    continue
+                cells.append(_format_brief_value(item.value, item.unit, item.basis))
+            lines.append("| " + " | ".join([metric, *cells]) + " |")
+        lines.extend(
+            [
+                "",
+                "사용 원칙: 같은 metric이 양쪽에 있을 때만 강한 비교 결론을 내리고, 한쪽만 있는 축은 한계로 표시하세요.",
+            ]
+        )
+        return "\n".join(lines)
 
     def recordLlmRound(self, durationMs: int) -> None:
         self.latency.setdefault("llmRoundMs", []).append(max(0, int(durationMs)))
@@ -254,6 +367,7 @@ class AnalysisWorkspace:
             self.limits.append(message)
 
     def resultBundle(self) -> dict[str, Any]:
+        self.finalizeTrace()
         return {
             "evidence": [e.toDict() for e in self.evidence],
             "claims": [c.toDict() for c in self.claims],
@@ -262,16 +376,116 @@ class AnalysisWorkspace:
         }
 
     def summary(self) -> dict[str, Any]:
+        self.finalizeTrace()
+        quality = self.qualitySummary()
         return {
             "evidenceCount": len(self.evidence),
             "claimCount": len(self.claims),
             "visualCount": len(self.visuals),
             "limitCount": len(self.limits),
             "coverage": _drop_empty(_json_safe(self.coverage)),
+            "graph": _drop_empty(_json_safe(self.graphSummary())),
+            "trace": _drop_empty(_json_safe(self.traceSummary())),
+            "quality": _drop_empty(_json_safe(quality)),
+            "processMapSatisfied": bool(quality.get("processMapSatisfied")),
+            "claimSupportRate": quality.get("claimSupportRate"),
+            "toolArgValidRate": quality.get("toolArgValidRate"),
+            "freshnessSatisfied": quality.get("freshnessSatisfied"),
+            "visualSatisfied": quality.get("visualSatisfied"),
             "freshness": _drop_empty(_json_safe(self.freshness)),
             "visualRequirement": _drop_empty(_json_safe(self.visualRequirement)),
             **self.latencySummary(),
         }
+
+    def traceSummary(self) -> dict[str, Any]:
+        tool_args = [v for v in self.trace.get("toolArgs") or [] if isinstance(v, dict)]
+        sanitized = [v for v in self.trace.get("sanitizedArgs") or [] if isinstance(v, dict)]
+        return {
+            "selectedTools": list(self.trace.get("selectedTools") or []),
+            "skippedCandidateTools": list(self.trace.get("skippedCandidateTools") or []),
+            "toolArgs": tool_args[:30],
+            "sanitizedArgs": sanitized[:20],
+            "toolArgValidRate": _ratio(max(0, len(tool_args) - len(sanitized)), len(tool_args)),
+            "evidenceIds": list(dict.fromkeys(self.trace.get("evidenceIds") or []))[:50],
+            "claimIds": list(dict.fromkeys(self.trace.get("claimIds") or []))[:30],
+            "visualIds": list(dict.fromkeys(self.trace.get("visualIds") or []))[:20],
+        }
+
+    def qualitySummary(self) -> dict[str, Any]:
+        graph = self.graphSummary()
+        claims = [c for c in self.claims if c.kind == "judgment"] or list(self.claims)
+        supported = [c for c in claims if c.status == "supported" and c.evidenceIds]
+        stale = any(isinstance(v, dict) and v.get("staleDaily") for v in self.freshness.values())
+        trace = self.traceSummary()
+        return {
+            "processMapSatisfied": bool(
+                graph.get("requiredEvidenceSatisfied")
+                and graph.get("artifactSatisfied")
+                and graph.get("visualSatisfied")
+            ),
+            "claimSupportRate": _ratio(len(supported), len(claims)),
+            "requiredEvidenceCoverage": graph.get("requiredEvidenceCoverage"),
+            "freshnessSatisfied": not stale,
+            "visualSatisfied": bool(graph.get("visualSatisfied")),
+            "visualCoverage": 1.0 if graph.get("visualSatisfied") else 0.0,
+            "toolArgValidRate": trace.get("toolArgValidRate"),
+        }
+
+    def graphSummary(self) -> dict[str, Any]:
+        """Return contract/process satisfaction summary for audit and API metadata."""
+        packet = self.understandingPacket
+        required = [str(v) for v in packet.get("requiredEvidence") or []]
+        observed = self._observedEvidenceKeys()
+        artifact_required = _artifact_required(packet)
+        visual_required = bool(packet.get("visualPolicy", {}).get("requiredFor"))
+        artifact_satisfied = not artifact_required or any(item.artifactIds for item in self.evidence)
+        visual_satisfied = not visual_required or bool(self.visuals)
+        evidence_coverage = _required_evidence_coverage(required, observed, self)
+        process_satisfied = bool(evidence_coverage >= 1 and artifact_satisfied and visual_satisfied)
+        return {
+            "routeHit": bool(self.coverage.get("routeIds")),
+            "contractHit": bool(self.coverage.get("contractIds")),
+            "processMapUsed": bool(self.coverage.get("processMapIds")),
+            "routeIds": list(self.coverage.get("routeIds") or []),
+            "contractIds": list(self.coverage.get("contractIds") or []),
+            "processMapIds": list(self.coverage.get("processMapIds") or []),
+            "requiredEvidence": required,
+            "observedEvidence": sorted(observed),
+            "requiredEvidenceSatisfied": evidence_coverage >= 1,
+            "requiredEvidenceCoverage": evidence_coverage,
+            "artifactRequired": artifact_required,
+            "artifactSatisfied": artifact_satisfied,
+            "visualRequired": visual_required,
+            "visualSatisfied": visual_satisfied,
+            "processMapSatisfied": process_satisfied,
+            "acceptanceCriteria": _merge_process_values(packet.get("processMaps") or [], "acceptanceCriteria"),
+        }
+
+    def _observedEvidenceKeys(self) -> set[str]:
+        observed: set[str] = set()
+        if self.evidence:
+            observed.add("evidence")
+        for item in self.evidence:
+            if item.target:
+                observed.add("target")
+            if item.metric:
+                observed.add("metric")
+            if item.period:
+                observed.add("period")
+            if item.asOf:
+                observed.add("asOf")
+            if item.value not in (None, ""):
+                observed.add("value")
+            if item.artifactIds:
+                observed.add("artifact")
+            if item.sourceTool == "industry":
+                observed.add("industry")
+                observed.add("universe")
+            if item.sourceTool == "pythonExec" and len(self.evidence) >= 10:
+                observed.add("universe")
+        if len(self.evidence) >= 10:
+            observed.add("universe")
+        return observed
 
     def _next_id(self, prefix: str) -> str:
         self._seq += 1
@@ -375,6 +589,7 @@ def _parse_delimited_rows(text: str) -> list[dict[str, str]]:
             headers = [cell.strip() for cell in line.split(delimiter)]
             if len(headers) < 2 or len(set(headers)) != len(headers):
                 continue
+            metadata = _parse_result_metadata(lines[:idx])
             rows: list[dict[str, str]] = []
             for body in lines[idx + 1 :]:
                 if delimiter not in body:
@@ -386,10 +601,31 @@ def _parse_delimited_rows(text: str) -> list[dict[str, str]]:
                     if rows:
                         break
                     continue
-                rows.append(dict(zip(headers, cells, strict=True)))
+                rows.append({**metadata, **dict(zip(headers, cells, strict=True))})
             if rows:
                 return rows
     return []
+
+
+def _parse_result_metadata(lines: list[str]) -> dict[str, str]:
+    metadata: dict[str, str] = {}
+    for line in lines:
+        if line.lower().startswith("period:"):
+            payload = line.split(":", 1)[1].strip()
+            parts = [part.strip() for part in payload.split(",") if part.strip()]
+            if parts:
+                metadata["period"] = parts[0]
+                if "~" in parts[0]:
+                    metadata["asOf"] = parts[0].split("~")[-1].strip()
+            for part in parts[1:]:
+                if "=" not in part:
+                    continue
+                key, value = [piece.strip() for piece in part.split("=", 1)]
+                if key == "universe":
+                    metadata["universe"] = value
+                elif key == "metric":
+                    metadata.setdefault("metric", value)
+    return metadata
 
 
 def _summary_from_result(result: Any) -> str | None:
@@ -586,6 +822,101 @@ def _numeric_value(value: Any) -> float | int | None:
         except ValueError:
             return None
     return None
+
+
+def _required_evidence_satisfied(required: list[str], observed: set[str], workspace: AnalysisWorkspace) -> bool:
+    return _required_evidence_coverage(required, observed, workspace) >= 1
+
+
+def _required_evidence_coverage(required: list[str], observed: set[str], workspace: AnalysisWorkspace) -> float:
+    if not required:
+        return 1.0
+    contracts = set(workspace.coverage.get("contractIds") or [])
+    if "comparison.same_axis" in contracts:
+        matrix = workspace.coverage.get("matrix") or {}
+        if isinstance(matrix, dict) and len(matrix) >= 2 and "metric" in observed:
+            return 1.0
+    normalized = {key.lower(): key for key in observed}
+    satisfied = 0
+    for key in required:
+        lowered = key.lower()
+        if lowered in normalized:
+            satisfied += 1
+            continue
+        if lowered == "asof" and (workspace.freshness or "period" in observed):
+            satisfied += 1
+            continue
+        if lowered == "universe" and len(workspace.evidence) >= 10:
+            satisfied += 1
+            continue
+        if lowered == "period" and workspace.freshness:
+            satisfied += 1
+            continue
+    return _ratio(satisfied, len(required))
+
+
+def _artifact_required(packet: dict[str, Any]) -> bool:
+    return bool(packet.get("artifactPolicy", {}).get("primaryCsv"))
+
+
+def _merge_process_values(process_maps: list[dict[str, Any]], key: str) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for process in process_maps:
+        value = process.get(key) if isinstance(process, dict) else None
+        if isinstance(value, dict):
+            out.update(value)
+    return out
+
+
+def _compact_args(args: dict[str, Any]) -> dict[str, Any]:
+    safe: dict[str, Any] = {}
+    for key, value in (args or {}).items():
+        if key in {"api_key", "apiKey", "password", "token", "secret"}:
+            safe[str(key)] = "<redacted>"
+            continue
+        if key == "code":
+            text = str(value)
+            safe[str(key)] = {"chars": len(text), "preview": text[:120]}
+            continue
+        safe[str(key)] = _json_safe(value)
+    return safe
+
+
+def _ratio(numerator: int, denominator: int) -> float:
+    if denominator <= 0:
+        return 1.0
+    return round(max(0.0, min(1.0, float(numerator) / float(denominator))), 4)
+
+
+def _format_brief_value(value: Any, unit: str | None, basis: str | None) -> str:
+    numeric = _numeric_value(value)
+    if numeric is not None:
+        if abs(float(numeric)) >= 1_000_000_000_000:
+            text = f"{float(numeric) / 1_000_000_000_000:.2f}조"
+        elif abs(float(numeric)) >= 100_000_000:
+            text = f"{float(numeric) / 100_000_000:.2f}억"
+        elif isinstance(numeric, float):
+            text = f"{numeric:.4g}"
+        else:
+            text = str(numeric)
+        if unit and unit not in {"price"} and not text.endswith(str(unit)):
+            text += str(unit)
+        return text
+    if value not in (None, ""):
+        return str(value)[:80]
+    return str(basis or "근거 있음")[:80]
+
+
+def _normalize_visual_spec(spec: dict[str, Any]) -> dict[str, Any]:
+    """Normalize visual specs through dartlab.viz while preserving SSE compatibility."""
+    try:
+        from dartlab.viz import VizSpec
+
+        normalized = VizSpec.fromDict(spec).toDict()
+    except Exception:  # noqa: BLE001 - visual normalization must not break answer generation
+        normalized = dict(spec)
+    normalized.setdefault("vizType", spec.get("vizType") or ("diagram" if normalized.get("diagramType") else "chart"))
+    return normalized
 
 
 def _cadence(args: dict[str, Any], item: EvidenceItem) -> str:

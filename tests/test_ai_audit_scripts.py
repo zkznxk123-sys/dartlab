@@ -102,6 +102,8 @@ def test_generate_spec_parses_ai_contract_block():
             questionTypes: recent_price_mover, company_compare
             requiredEvidence: ["target", "metric"]
             freshness: {"cadence": "daily"}
+            acceptanceCriteria: {"claimSupportRateMin": 0.9}
+            failurePolicy: {"onMissingEvidence": "repair_once"}
         """
     )
     entry = {}
@@ -111,3 +113,22 @@ def test_generate_spec_parses_ai_contract_block():
     assert entry["questionTypes"] == ["recent_price_mover", "company_compare"]
     assert entry["requiredEvidence"] == ["target", "metric"]
     assert entry["freshness"] == {"cadence": "daily"}
+    assert entry["acceptanceCriteria"] == {"claimSupportRateMin": 0.9}
+    assert entry["failurePolicy"] == {"onMissingEvidence": "repair_once"}
+
+
+def test_analysis_graph_does_not_fallback_specific_gather_contract_to_any_gather():
+    from dartlab.core.analysisGraph import contractForTool
+
+    contract = contractForTool(
+        "gather",
+        {
+            "axis": "sector",
+            "target": "005930",
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "stockCodes": [],
+        },
+    )
+
+    assert contract is None or contract.contractId != "gather.krx.close"

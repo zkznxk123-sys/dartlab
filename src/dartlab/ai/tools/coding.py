@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import logging
+import os
 import subprocess
 import sys
 import tempfile
@@ -134,6 +135,20 @@ def _validateCode(code: str) -> None:
     ast.parse(code)
 
 
+def _runtimePythonExecutable() -> str:
+    """Return the project runtime Python, not a uv console-script wrapper Python."""
+    venv = os.environ.get("VIRTUAL_ENV")
+    if venv:
+        candidates = (
+            Path(venv) / "Scripts" / "python.exe",
+            Path(venv) / "bin" / "python",
+        )
+        for candidate in candidates:
+            if candidate.exists():
+                return str(candidate)
+    return sys.executable
+
+
 class LocalPythonBackend(CodingBackend):
     """로컬 subprocess 기반 Python 코드 실행 -- AST 검증 + 격리."""
 
@@ -218,7 +233,7 @@ class LocalPythonBackend(CodingBackend):
 
             try:
                 result = subprocess.run(
-                    [sys.executable, "-X", "utf8", str(scriptPath)],
+                    [_runtimePythonExecutable(), "-X", "utf8", str(scriptPath)],
                     capture_output=True,
                     text=True,
                     encoding="utf-8",
@@ -418,8 +433,6 @@ class DartlabCodeExecutor(LocalPythonBackend):
             scriptPath.write_text(code, encoding="utf-8")
 
             # dartlab이 import 가능하도록 PYTHONPATH 설정
-            import os
-
             pythonPath = os.pathsep.join(sys.path)
 
             env = os.environ.copy()
@@ -429,7 +442,7 @@ class DartlabCodeExecutor(LocalPythonBackend):
 
             try:
                 result = subprocess.run(
-                    [sys.executable, "-X", "utf8", str(scriptPath)],
+                    [_runtimePythonExecutable(), "-X", "utf8", str(scriptPath)],
                     capture_output=True,
                     text=True,
                     encoding="utf-8",

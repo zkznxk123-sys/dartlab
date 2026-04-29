@@ -91,6 +91,10 @@ _JUDGMENT_WORDS = (
     "경계",
     "중립",
     "매력",
+    "장세",
+    "집중",
+    "흐름",
+    "급등",
 )
 
 _ANALYTIC_WORDS = (
@@ -232,6 +236,13 @@ def evaluateFinalAnswer(
         issues.append("weak_disclosure_analysis")
 
     if workspace is not None:
+        graph = workspace.graphSummary() if hasattr(workspace, "graphSummary") else {}
+        if graph and not graph.get("requiredEvidenceSatisfied", True):
+            issues.append("missing_tool_evidence")
+        if graph and graph.get("artifactRequired") and not graph.get("artifactSatisfied", True):
+            issues.append("missing_numeric_table")
+        if graph and graph.get("visualRequired") and not graph.get("visualSatisfied", True):
+            issues.append("missing_visual_explanation")
         if requiresVisualExplanation(q) and not _hasVisualExplanation(text, workspace):
             issues.append("missing_visual_explanation")
         if _hasUnsupportedVisual(workspace):
@@ -422,6 +433,8 @@ def _hasUnsupportedClaim(text: str, toolCalls: list[dict[str, Any]]) -> bool:
     lowered = text.lower()
     if not any(hint in lowered for hint in _UNSUPPORTED_CLAIM_HINTS):
         return False
+    if not _hasUnsupportedClaimAssertion(text):
+        return False
     evidenceTools = {
         "pastInsight",
         "sectorInsights",
@@ -434,6 +447,30 @@ def _hasUnsupportedClaim(text: str, toolCalls: list[dict[str, Any]]) -> bool:
         "pythonExec",
     }
     return not any(str(call.get("name", "")) in evidenceTools for call in toolCalls)
+
+
+def _hasUnsupportedClaimAssertion(text: str) -> bool:
+    """Return True when unsupported-claim hints are asserted, not disclosed as missing."""
+    limit_terms = (
+        "없어",
+        "없습니다",
+        "미제공",
+        "미확인",
+        "확인 불가",
+        "포함하지 않았",
+        "한계",
+        "데이터가 없",
+        "원문 숫자가 없어",
+    )
+    assertion_found = False
+    for line in text.splitlines():
+        lowered = line.lower()
+        if not any(hint in lowered for hint in _UNSUPPORTED_CLAIM_HINTS):
+            continue
+        if any(term in line for term in limit_terms):
+            continue
+        assertion_found = True
+    return assertion_found
 
 
 def _hasAnswerTableConflict(text: str) -> bool:
@@ -462,12 +499,28 @@ def _hasAnswerTableConflict(text: str) -> bool:
         if len(label) < 2:
             continue
         for line in nonTableLines:
-            if label not in line:
+            if not _lineMentionsTableLabel(line, label):
                 continue
             bodyValues = {_percentKey(v) for v in _PERCENT_RE.findall(line)}
             if len(bodyValues) == 1 and not _percentValuesCovered(bodyValues, values):
                 return True
     return False
+
+
+def _lineMentionsTableLabel(line: str, label: str) -> bool:
+    """Return True when a prose line mentions the table row label as a term.
+
+    Korean financial labels are often short (for example "자본"). Plain substring
+    matching incorrectly treats "자기자본비율" as a mention of the separate "자본"
+    row, so require a non-word prefix and either a boundary or common particle
+    suffix.
+    """
+    import re
+
+    escaped = re.escape(label)
+    particle = "은는이가을를도와과에의로"
+    pattern = rf"(?<![0-9A-Za-z가-힣]){escaped}(?=$|[^0-9A-Za-z가-힣]|[{particle}](?:$|[^0-9A-Za-z가-힣]))"
+    return re.search(pattern, line) is not None
 
 
 def _percentKey(value: str) -> str:

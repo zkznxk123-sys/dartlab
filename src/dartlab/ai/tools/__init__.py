@@ -177,6 +177,10 @@ def buildTools() -> list[AITool]:
                 "properties": {
                     "code": {"type": "string", "description": "실행할 Python 코드. print() 로 결과 출력."},
                     "stockCode": {"type": "string", "description": "Company 바인딩용 종목코드 (선택)."},
+                    "kind": {
+                        "type": "string",
+                        "description": "runtime preflight 식별자. 일반 LLM 호출에서는 생략.",
+                    },
                 },
                 "required": ["code"],
                 "additionalProperties": False,
@@ -1004,9 +1008,10 @@ def _scanPostProcess(df: Any, post: dict) -> Any:
     return df
 
 
-def _pythonExec(code: str, stockCode: str | None = None) -> str:
+def _pythonExec(code: str, stockCode: str | None = None, kind: str | None = None) -> str:
     from dartlab.ai.tools.coding import DartlabCodeExecutor
 
+    _ = kind
     return DartlabCodeExecutor().execute(code, stockCode=stockCode, timeout=60)
 
 

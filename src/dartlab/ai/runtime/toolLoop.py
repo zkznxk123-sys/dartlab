@@ -6,6 +6,7 @@ Claude Code 방식: LLM 이 JSON tool call 생성 → 런타임이 실행 → �
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 import traceback
@@ -88,11 +89,25 @@ def streamWithTools(
     observedToolCalls: list[dict[str, Any]] = []
     workspace = workspace or AnalysisWorkspace(question=question)
     workspace.coverage.setdefault("contractIds", contractIdsForQuestion(question))
+    packet = _understandingPacketForLlm(workspace)
+    if category == "finance" and packet:
+        messages.append(
+            {
+                "role": "user",
+                "content": (
+                    "[dartlab understanding packet]\n"
+                    "This compact packet is generated from DartLab Analysis Graph. Use it to choose tools, evidence, "
+                    "artifacts, visuals, and limits. Do not invent tools outside candidateTools unless necessary.\n\n"
+                    f"{packet}"
+                ),
+            }
+        )
 
     preflightCode = _krxPriceMoverAutoCode(question, observedToolCalls)
     if category == "finance" and preflightCode:
         preflightArgs = {"code": preflightCode}
         observedToolCalls.append({"name": "pythonExec", "arguments": preflightArgs})
+        workspace.recordToolCall(name="pythonExec", arguments=preflightArgs, round=0)
         yield AnalysisEvent(
             "tool_call",
             {
@@ -166,6 +181,7 @@ def streamWithTools(
     ):
         preflightId = f"preflight_cashflow_{preflightName}"
         observedToolCalls.append({"name": preflightName, "arguments": dict(preflightArgs)})
+        workspace.recordToolCall(name=preflightName, arguments=dict(preflightArgs), round=0)
         yield AnalysisEvent(
             "tool_call",
             {
@@ -232,6 +248,82 @@ def streamWithTools(
             }
         )
 
+    for preflightName, preflightArgs in _scanPreflightCalls(
+        category=category,
+        intent=intent,
+        question=question,
+    ):
+        preflightId = f"preflight_scan_{preflightName}"
+        observedToolCalls.append({"name": preflightName, "arguments": dict(preflightArgs)})
+        workspace.recordToolCall(name=preflightName, arguments=dict(preflightArgs), round=0)
+        yield AnalysisEvent(
+            "tool_call",
+            {
+                "id": preflightId,
+                "name": preflightName,
+                "label": _toolLabel(preflightName, preflightArgs),
+                "arguments": preflightArgs,
+                "round": 0,
+            },
+        )
+        toolStart = time.perf_counter()
+        try:
+            raw = executeTool(allTools, preflightName, preflightArgs)
+            output = _buildSuccessfulToolOutput(
+                raw,
+                name=preflightName,
+                arguments=preflightArgs,
+                llm=llm,
+                workspace=workspace,
+            )
+            llmText = output["llmText"]
+            uiText = output["uiText"]
+            artifacts = output["artifacts"]
+            for event in output["events"]:
+                yield event
+            status = "ok"
+        except Exception as exc:  # noqa: BLE001
+            raw = None
+            llmText = f"[tool error] {type(exc).__name__}: {exc}"
+            uiText = llmText
+            artifacts = []
+            status = "error"
+        durationMs = int((time.perf_counter() - toolStart) * 1000)
+        resultSizeBytes = _resultSizeBytes(uiText)
+        workspace.recordToolLatency(
+            name=preflightName,
+            durationMs=durationMs,
+            resultSizeBytes=resultSizeBytes,
+            round=0,
+        )
+        yield AnalysisEvent(
+            "tool_result",
+            {
+                "id": preflightId,
+                "name": preflightName,
+                "label": _toolLabel(preflightName, preflightArgs),
+                "summary": _extractToolSummary(raw) if raw is not None else None,
+                "result": uiText,
+                "artifacts": artifacts,
+                "status": status,
+                "round": 0,
+                "durationMs": durationMs,
+                "resultSizeBytes": resultSizeBytes,
+            },
+        )
+        messages.append(
+            {
+                "role": "user",
+                "content": (
+                    "[system preflight]\n"
+                    "Market screening and scan-explicit questions must treat this scan evidence as primary. "
+                    "When industry evidence is present, restrict conclusions to stocks inside that industry universe "
+                    "or explicitly disclose that the scan table is market-wide. "
+                    "Do not replace it with random company-pair analysis.\n\n" + llmText
+                ),
+            }
+        )
+
     for preflightName, preflightArgs in _comparisonPreflightCalls(
         category=category,
         intent=intent,
@@ -239,6 +331,7 @@ def streamWithTools(
     ):
         preflightId = f"preflight_compare_{preflightArgs.get('stockCode')}_{preflightName}"
         observedToolCalls.append({"name": preflightName, "arguments": dict(preflightArgs)})
+        workspace.recordToolCall(name=preflightName, arguments=dict(preflightArgs), round=0)
         yield AnalysisEvent(
             "tool_call",
             {
@@ -305,13 +398,17 @@ def streamWithTools(
             }
         )
 
+    comparisonBrief = workspace.compileComparisonBrief()
+    if comparisonBrief:
+        messages.append({"role": "user", "content": comparisonBrief})
+
     for roundIdx in range(maxRounds):
         resp: ToolResponse | None = None
         roundTextParts: list[str] = []
         roundStart = time.perf_counter()
 
         # category → tool_choice 매핑 (첫 라운드만 강제, 이후 auto)
-        tool_choice = _resolveToolChoice(category, roundIdx)
+        tool_choice = _resolveToolChoice(category, roundIdx, hasToolEvidence=bool(observedToolCalls))
 
         try:
             # stream_with_tools: text delta → str 실시간 yield, 라운드 종료 → ToolResponse
@@ -356,7 +453,7 @@ def streamWithTools(
             finalText = "".join(roundTextParts) or (resp.answer or "")
             finalText = _cleanFinalText(finalText)
             # FINANCE 범주 + 첫 라운드 + tool 0회 → dartlab 정체성 훼손 → 1회 재질문
-            if category == "finance" and roundIdx == 0 and not retriggered:
+            if category == "finance" and roundIdx == 0 and not observedToolCalls and not retriggered:
                 retriggered = True
                 yield AnalysisEvent(
                     "error",
@@ -412,6 +509,7 @@ def streamWithTools(
                 if autoCode and not _hasObservedPythonExec(observedToolCalls):
                     autoArgs = {"code": autoCode}
                     observedToolCalls.append({"name": "pythonExec", "arguments": autoArgs})
+                    workspace.recordToolCall(name="pythonExec", arguments=autoArgs, round=roundIdx + 1)
                     yield AnalysisEvent(
                         "tool_call",
                         {
@@ -482,6 +580,7 @@ def streamWithTools(
                 fxArgs = _macroFxAutoArgs(question, observedToolCalls)
                 if fxArgs:
                     observedToolCalls.append({"name": "gather", "arguments": fxArgs})
+                    workspace.recordToolCall(name="gather", arguments=fxArgs, round=roundIdx + 1)
                     yield AnalysisEvent(
                         "tool_call",
                         {
@@ -571,7 +670,15 @@ def streamWithTools(
         if len(resp.tool_calls) > maxParallelTools:
             resp.tool_calls = resp.tool_calls[:maxParallelTools]
         for tc in resp.tool_calls:
-            tc.arguments = sanitizeToolArguments(tc.name, tc.arguments)
+            originalArgs = dict(tc.arguments or {})
+            sanitizedArgs = sanitizeToolArguments(tc.name, tc.arguments)
+            workspace.recordToolCall(
+                name=tc.name,
+                arguments=originalArgs,
+                sanitizedArguments=sanitizedArgs,
+                round=roundIdx + 1,
+            )
+            tc.arguments = sanitizedArgs
 
         # tool 실행
         for tc in resp.tool_calls:
@@ -793,7 +900,49 @@ def _cleanFinalText(text: str) -> str:
     import re
 
     lines = [line for line in text.splitlines() if line.strip() not in {"#", "##", "###", "####"}]
+    lines = _stripTrailingFollowupMenu(lines)
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
+
+
+def _understandingPacketForLlm(workspace: AnalysisWorkspace) -> str:
+    packet = workspace.understandingPacket
+    if not packet.get("contractIds"):
+        return ""
+    compact = {
+        "routeIds": packet.get("routeIds") or [],
+        "contractIds": packet.get("contractIds") or [],
+        "processMapIds": packet.get("processMapIds") or [],
+        "candidateTools": packet.get("candidateTools") or [],
+        "requiredEvidence": packet.get("requiredEvidence") or [],
+        "artifactPolicy": packet.get("artifactPolicy") or {},
+        "visualPolicy": packet.get("visualPolicy") or {},
+        "freshness": packet.get("freshness") or {},
+        "toolArgPolicy": packet.get("toolArgPolicy") or [],
+        "processMaps": packet.get("processMaps") or [],
+    }
+    return json.dumps(compact, ensure_ascii=False, separators=(",", ":"))
+
+
+def _stripTrailingFollowupMenu(lines: list[str]) -> list[str]:
+    """Remove assistant-style follow-up menus from final financial answers."""
+    if not lines:
+        return lines
+    patterns = (
+        "원하시면",
+        "원하면",
+        "다음 단계로",
+        "다음 중",
+        "더 깊게",
+        "이어서 해드릴",
+    )
+    floor = max(0, len(lines) // 2)
+    for idx in range(len(lines) - 1, floor - 1, -1):
+        stripped = lines[idx].strip()
+        if not stripped:
+            continue
+        if any(stripped.startswith(pattern) for pattern in patterns):
+            return lines[:idx]
+    return lines
 
 
 def _cashflowPreflightCalls(
@@ -819,10 +968,164 @@ def _comparisonPreflightCalls(
 ) -> list[tuple[str, dict[str, Any]]]:
     if category != "finance" or intent != "compare" or not question:
         return []
+    if _looksLikeMarketScanQuestion(question):
+        return []
     targets = _comparisonTargetsFromQuestion(question)
     if len(targets) < 2:
         return []
-    return [("analysis", {"stockCode": code, "axis": "종합평가"}) for code in targets[:2]]
+    actions = preflightActionsForQuestion(
+        question=question,
+        category=category,
+        intent=intent,
+    )
+    calls: list[tuple[str, dict[str, Any]]] = []
+    for tool, template, contract in actions:
+        if contract.contractId != "comparison.same_axis":
+            continue
+        for code in targets[:2]:
+            args = dict(template)
+            args["stockCode"] = code
+            calls.append((tool, args))
+    return calls
+
+
+def _scanPreflightCalls(
+    *,
+    category: str,
+    intent: str | None,
+    question: str | None,
+) -> list[tuple[str, dict[str, Any]]]:
+    if category != "finance" or not question or not _looksLikeMarketScanQuestion(question):
+        return []
+    industry_id = _industryIdFromQuestion(question)
+    actions = preflightActionsForQuestion(
+        question=question,
+        category=category,
+        intent=intent,
+    )
+    contract_ids = {contract.contractId for _, _, contract in actions}
+    allowed_contracts = {"scan.industry_screen"} if "scan.industry_screen" in contract_ids else {"scan.market_screen"}
+    calls: list[tuple[str, dict[str, Any]]] = []
+    seen: set[tuple[str, str]] = set()
+    for tool, args, contract in actions:
+        if contract.contractId not in allowed_contracts:
+            continue
+        resolved = _resolveScanPreflightArgs(tool, args, industryId=industry_id)
+        if resolved is None:
+            continue
+        key = (tool, json.dumps(resolved, ensure_ascii=False, sort_keys=True, default=str))
+        if key in seen:
+            continue
+        seen.add(key)
+        calls.append((tool, resolved))
+    return calls
+
+
+def _resolveScanPreflightArgs(tool: str, args: dict[str, Any], *, industryId: str | None) -> dict[str, Any] | None:
+    resolved: dict[str, Any] = {}
+    for key, value in args.items():
+        if value == "{industryId}":
+            if not industryId:
+                return None
+            resolved[key] = industryId
+            continue
+        resolved[key] = value
+    if tool == "pythonExec" and resolved.get("kind") == "industry_scan":
+        industry = str(resolved.get("industryId") or "").strip()
+        if not industry:
+            return None
+        resolved["code"] = _industryScanCode(industry)
+        resolved.pop("industryId", None)
+    return resolved
+
+
+def _industryScanCode(industryId: str) -> str:
+    return f"""
+industry_id = {industryId!r}
+industry_df = dartlab.industry(industry_id)
+scan_df = dartlab.scan("profitability")
+join_cols = ["종목코드", "공정", "공정명", "역할", "위치", "신뢰도"]
+joined = scan_df.join(industry_df.select(join_cols), on="종목코드", how="inner")
+if "비경상" in joined.columns:
+    joined = joined.with_columns(pl.col("비경상").cast(pl.Int8).alias("_비경상순위"))
+    joined = joined.sort(["_비경상순위", "ROE"], descending=[False, True], nulls_last=True)
+else:
+    joined = joined.sort("ROE", descending=True, nulls_last=True)
+out = joined.head(20).select([
+    pl.lit(industry_id).alias("industry"),
+    "종목코드",
+    "종목명",
+    "공정명",
+    "영업이익률",
+    "순이익률",
+    "ROE",
+    "ROA",
+    "등급",
+    "비경상",
+    "신뢰도",
+])
+print(f"period: latest, universe=industry:{{industry_id}}, metric=ROE")
+print(f"basis: dartlab.industry({{industry_id!r}}) intersection dartlab.scan('profitability')")
+print(out.write_csv())
+emit_chart({{
+    "chartType": "bar",
+    "title": f"{{industry_id}} industry profitability scan",
+    "categories": out["종목명"].to_list()[:10],
+    "series": [
+        {{"name": "ROE", "data": [float(v) if v is not None else None for v in out["ROE"].to_list()[:10]]}},
+        {{"name": "영업이익률", "data": [float(v) if v is not None else None for v in out["영업이익률"].to_list()[:10]]}},
+    ],
+}})
+""".strip()
+
+
+def _industryIdFromQuestion(question: str) -> str | None:
+    q = (question or "").lower()
+    try:
+        from dartlab.industry.taxonomy import loadTaxonomy
+    except Exception:  # noqa: BLE001
+        return None
+
+    best: tuple[int, str] | None = None
+    for industry_id, definition in loadTaxonomy().items():
+        candidates = [industry_id, getattr(definition, "name", "")]
+        candidates.extend(getattr(definition, "ksicCodes", []) or [])
+        for stage in getattr(definition, "stages", []) or []:
+            candidates.append(getattr(stage, "name", ""))
+        score = 0
+        for candidate in candidates:
+            text = str(candidate or "").strip().lower()
+            if not text:
+                continue
+            if text == q:
+                score = max(score, 100)
+            elif text in q:
+                score = max(score, 80 if text == str(industry_id).lower() else 70)
+        if score and (best is None or score > best[0]):
+            best = (score, str(industry_id))
+    return best[1] if best is not None else None
+
+
+def _looksLikeMarketScanQuestion(question: str) -> bool:
+    q = question.lower()
+    return any(
+        token in q
+        for token in (
+            "scan",
+            "screen",
+            "screening",
+            "profitable stocks",
+            "profitability",
+            "industry",
+            "sector",
+            "업종",
+            "산업",
+            "스크리닝",
+            "종목 발굴",
+            "좋은 종목",
+            "수익성 좋은",
+        )
+    )
 
 
 def _comparisonTargetsFromQuestion(question: str) -> list[str]:
@@ -836,6 +1139,8 @@ def _comparisonTargetsFromQuestion(question: str) -> list[str]:
     targets: list[str] = []
     for token in re.findall(r"[0-9A-Za-z가-힣]+", question):
         if len(token) < 2:
+            continue
+        if token.isascii() and not (token.isdigit() or token.isupper()):
             continue
         keyword = resolve_alias(token) or resolve_alias(strip_particles(token)) or strip_particles(token)
         try:
@@ -969,7 +1274,7 @@ def _toolBudgetBypass(
     question: str | None = None,
 ) -> dict[str, Any] | None:
     budget = toolBudgetForQuestion(question, intent)
-    if intent != "compare" or name not in {"analysis", "quant", "credit"}:
+    if intent != "compare" or name not in {"analysis", "show", "quant", "credit"}:
         return None
     args = arguments or {}
     stockCode = str(args.get("stockCode") or "").strip()
@@ -984,7 +1289,7 @@ def _toolBudgetBypass(
             ),
             "stockCode": stockCode,
             "basis": "runtime_tool_budget",
-            "limitations": ["comparison runtime skips quant to avoid unbalanced slow axes"],
+            "limitations": ["comparison runtime skips slow or unbalanced axes"],
         }
     previous = 0
     for call in observedToolCalls:
@@ -1067,14 +1372,16 @@ def _extractToolSummary(raw: Any) -> str | None:
     return None
 
 
-def _resolveToolChoice(category: str, roundIdx: int) -> str | None:
+def _resolveToolChoice(category: str, roundIdx: int, *, hasToolEvidence: bool = False) -> str | None:
     """category + round → tool_choice 매핑.
 
-    - finance 첫 라운드: "any" (tool 호출 강제) — API 레벨 방어선
+    - finance 첫 라운드: "any" (tool 호출 강제) — 단, runtime preflight evidence가 이미 있으면 "none"
     - out_of_scope: "none" (tool 호출 금지)
     - meta / 나머지: None/"auto" (자율)
     """
-    if category == "finance" and roundIdx == 0:
+    if category == "finance" and roundIdx == 0 and hasToolEvidence:
+        return "none"
+    if category == "finance" and roundIdx == 0 and not hasToolEvidence:
         return "any"
     if category == "out_of_scope":
         return "none"
@@ -1121,6 +1428,12 @@ def _krxPriceMoverAutoCode(question: str | None, toolCalls: list[dict[str, Any]]
         "    print('계산 불가: KRX 가격 날짜 컬럼이 2개 미만입니다.')\n"
         "else:\n"
         "    first, last = date_cols[0], date_cols[-1]\n"
+        "    requested_end = str("
+        f"{end}"
+        ").replace('-', '')\n"
+        "    if requested_end and last < requested_end:\n"
+        "        print(f'data_limit: requested_end={requested_end}, latest_available={last}. '\n"
+        "              '가용 KRX 종가 기준으로 계산했으며 최신 거래일 누락 가능성을 답변 한계에 명시하세요.')\n"
         "    df = df.with_columns([pl.col(c).cast(pl.Float64, strict=False) for c in date_cols])\n"
         "    out = (\n"
         "        df.select(['stockCode', 'corpName', first, last])\n"

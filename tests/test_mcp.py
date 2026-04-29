@@ -18,6 +18,9 @@ def test_mcp_tools_defined():
     assert "marketScan" in names
     assert "contextForQuestion" in names
     assert "queryAnalysisGraph" in names
+    assert "planDartlabQuestion" in names
+    assert "validateDartlabPlan" in names
+    assert "explainDartlabTool" in names
     assert "companySections" not in names
 
 
@@ -42,6 +45,19 @@ def test_mcp_graph_tools_execute():
 
     found = _executeTool("queryAnalysisGraph", {"query": "gather.krx.close"})
     assert "contract:gather.krx.close" in found
+
+    plan = _executeTool("planDartlabQuestion", {"question": "최근 주가가 많이 오른 종목을 찾아줘"})
+    assert "recent_price_mover.default" in plan
+    assert "primaryCsv" in plan
+    assert "acceptanceCriteria" in plan
+    assert "failurePolicy" in plan
+
+    validated = _executeTool(
+        "validateDartlabPlan",
+        {"question": "최근 주가가 많이 오른 종목을 찾아줘", "proposedTools": ["pythonExec"]},
+    )
+    assert '"ok": true' in validated
+    assert "acceptanceCriteria" in validated
 
 
 def test_fmt_none():
