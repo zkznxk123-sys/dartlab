@@ -319,7 +319,7 @@ def build_auto_section(data: dict) -> str:
 
     # --- Filings ---
     if data.get("filings"):
-        parts.append("## 공시 / Filings\n")
+        parts.append("## 공시 자료\n")
         parts.append("| 기간 | 보고서 | 링크 |")
         parts.append("|------|--------|------|")
         for f in data["filings"]:
