@@ -6,7 +6,7 @@ category: company-reports
 series: company-reports
 seriesOrder: 84
 thumbnail: /avatar-chart.png
-ogImage: /thumbnails/003670-posco-future-m.svg
+ogImage: /thumbnails/003670-posco-future-m.webp
 tags: ["포스코퓨처엠", "003670", "POSCO Future M", "양극재", "음극재", "배터리소재", "EV캐즘", "CAPEX", "FCF", "POSCO홀딩스"]
 stockCode: "003670"
 corpName: "포스코퓨처엠"

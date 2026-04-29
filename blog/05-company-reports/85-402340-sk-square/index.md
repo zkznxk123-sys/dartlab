@@ -6,7 +6,7 @@ category: company-reports
 series: company-reports
 seriesOrder: 85
 thumbnail: /avatar-chart.png
-ogImage: /thumbnails/402340-sk-square.svg
+ogImage: /thumbnails/402340-sk-square.webp
 tags: ["SK스퀘어", "402340", "SK Square", "SK하이닉스", "지분법이익", "HBM", "지주회사", "NAV", "자사주", "포트폴리오"]
 stockCode: "402340"
 corpName: "SK스퀘어"
