@@ -75,20 +75,17 @@ def availableIndexNames() -> set[tuple[str, str]]:
         indexMarket : str — "KOSPI" | "KOSDAQ" | "KRX"
         indexName : str — KRX 지수명
     """
-    try:
-        import polars as pl
+    import polars as pl
 
-        from dartlab.core.dataLoader import _getDataRoot
+    from dartlab.core.dataLoader import _getDataRoot
 
-        root = Path(_getDataRoot()) / "krx" / "indices"
-        files = sorted(root.glob("raw-*.parquet"), reverse=True)
-        names: set[tuple[str, str]] = set()
-        for path in files[:2]:
-            df = pl.read_parquet(path, columns=["MARKET_GROUP", "IDX_NM"])
-            names.update((str(m), str(n)) for m, n in df.unique().iter_rows())
-        return names
-    except (ImportError, OSError, ValueError):
-        return set()
+    root = Path(_getDataRoot()) / "krx" / "indices"
+    files = sorted(root.glob("raw-*.parquet"), reverse=True)
+    names: set[tuple[str, str]] = set()
+    for path in files[:2]:
+        df = pl.read_parquet(path, columns=["MARKET_GROUP", "IDX_NM"])
+        names.update((str(m), str(n)) for m, n in df.unique().iter_rows())
+    return names
 
 
 def indexExists(indexMarket: str, indexName: str) -> bool:
@@ -131,10 +128,7 @@ def loadIndustryNodes() -> list[dict[str, Any]]:
     간 함수 의존을 만들지 않기 위한 경계다.
     """
     path = Path(__file__).resolve().parents[1] / "industry" / "nodes.json"
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return []
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def primaryIndustryNode(stockCode: str | None) -> dict[str, Any] | None:
