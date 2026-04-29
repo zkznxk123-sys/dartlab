@@ -968,10 +968,10 @@ def _comparisonPreflightCalls(
 ) -> list[tuple[str, dict[str, Any]]]:
     if category != "finance" or intent != "compare" or not question:
         return []
-    if _looksLikeMarketScanQuestion(question):
-        return []
     targets = _comparisonTargetsFromQuestion(question)
     if len(targets) < 2:
+        if _looksLikeMarketScanQuestion(question):
+            return []
         return []
     actions = preflightActionsForQuestion(
         question=question,
