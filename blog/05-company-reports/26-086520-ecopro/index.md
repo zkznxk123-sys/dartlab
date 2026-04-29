@@ -1,5 +1,5 @@
 ---
-title: "에코프로 — 시총 78조를 찍은 회사의 영업이익은 864억이었다"
+title: "에코프로 (086520) — 시총 78조를 찍은 회사의 영업이익은 864억이었다"
 date: 2026-04-12
 category: company-reports
 series: company-reports

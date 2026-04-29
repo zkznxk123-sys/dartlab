@@ -1,5 +1,5 @@
 ---
-title: "Intel — 파운드리 적자 100억달러인데 주가 213% 급등, 반도체를 발명한 회사의 마지막 베팅"
+title: "Intel (INTC) — 파운드리 적자 100억달러인데 주가 213% 급등, 반도체를 발명한 회사의 마지막 베팅"
 date: 2026-04-13
 category: company-reports
 series: company-reports

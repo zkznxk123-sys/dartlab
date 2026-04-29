@@ -1,5 +1,5 @@
 ---
-title: "Oklo — 매출 0원, 직원 120명, 시총 18조원의 원자력 유니콘"
+title: "Oklo (OKLO) — 매출 0원, 직원 120명, 시총 18조원의 원자력 유니콘"
 date: 2026-04-13
 category: company-reports
 series: company-reports

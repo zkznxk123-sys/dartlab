@@ -1,5 +1,5 @@
 ---
-title: "현대자동차 — 매출 186조, 세계 3위인데 왜 BYD보다 싼가"
+title: "현대자동차 (005380) — 매출 186조, 세계 3위인데 왜 BYD보다 싼가"
 date: 2026-04-13
 category: company-reports
 series: company-reports

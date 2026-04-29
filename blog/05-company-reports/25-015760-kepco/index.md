@@ -1,5 +1,5 @@
 ---
-title: "한국전력 — 전기요금 1원이 5,600억을 만드는 회사"
+title: "한국전력 (015760) — 전기요금 1원이 5,600억을 만드는 회사"
 date: 2026-04-12
 category: company-reports
 series: company-reports

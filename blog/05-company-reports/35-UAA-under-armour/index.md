@@ -1,5 +1,5 @@
 ---
-title: "Under Armour — CEO 3명이 바뀌는 동안 매출이 줄었다, 할머니 지하실의 창업자가 돌아온 이유"
+title: "Under Armour (UAA) — CEO 3명이 바뀌는 동안 매출이 줄었다, 할머니 지하실의 창업자가 돌아온 이유"
 date: 2026-04-13
 category: company-reports
 series: company-reports

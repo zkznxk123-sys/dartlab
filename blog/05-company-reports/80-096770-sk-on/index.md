@@ -1,5 +1,5 @@
 ---
-title: "SK온 — 11조 합작공장을 접자 5.6조 순손실이 찍혔다"
+title: "SK온 (096770) — 11조 합작공장을 접자 5.6조 순손실이 찍혔다"
 date: 2026-04-28
 description: "SK온은 2025년 매출 6.98조·영업손실 9,319억을 냈고, 모회사 SK이노베이션은 BlueOval SK 구조조정으로 순손실 5.54조를 기록했다. Ford 합작공장이 어떻게 배터리 성장주의 회계 손실로 바뀌었는지 추적한다."
 category: company-reports
@@ -393,17 +393,7 @@ SK온은 아직 답이 아니라 관찰 대상이다. 그러나 이제 무엇을
 
 ---
 
-## 공시 / Filings
-
-| 기간 | 보고서 | 링크 |
-|------|--------|------|
-| 2025 | 사업보고서 (2025.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260316000827) |
-| 2025 | 분기보고서 (2025.09) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20251114002766) |
-| 2025 | 반기보고서 (2025.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814004447) |
-| 2025 | 분기보고서 (2025.03) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250514001177) |
-| 2024 | 사업보고서 (2024.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250318000862) |
-
-외부 출처:
+## 외부 출처
 
 - [AJU Press — SK On 2025 실적과 BlueOval SK 구조조정](https://www.ajupress.com/view/20260128171570001)
 - [Korea JoongAng Daily — SK On·Ford BlueOval SK 해체](https://koreajoongangdaily.joins.com/news/2025-12-11/business/industry/SK-On-Ford-agree-to-dissolve-11B-battery-joint-venture-across-3-US-factories/2475633)

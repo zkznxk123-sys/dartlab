@@ -1,5 +1,5 @@
 ---
-title: "쿠팡 — 매출 49조인데 이익 $208M, 마진 0.6%의 비밀"
+title: "쿠팡 (CPNG) — 매출 49조인데 이익 $208M, 마진 0.6%의 비밀"
 date: 2026-04-13
 category: company-reports
 series: company-reports

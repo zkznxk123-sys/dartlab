@@ -1,5 +1,5 @@
 ---
-title: "삼성전자 — 매출 334조, 반도체 빼면 영업이익률 7%"
+title: "삼성전자 (005930) — 매출 334조, 반도체 빼면 영업이익률 7%"
 date: 2026-04-13
 category: company-reports
 series: company-reports

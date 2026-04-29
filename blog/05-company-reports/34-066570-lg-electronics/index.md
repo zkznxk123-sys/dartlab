@@ -1,5 +1,5 @@
 ---
-title: "LG전자 — 매출 89조, 영업이익률 2.8%, 스마트폰을 버리고 전장을 얻은 대가"
+title: "LG전자 (066570) — 매출 89조, 영업이익률 2.8%, 스마트폰을 버리고 전장을 얻은 대가"
 date: 2026-04-13
 category: company-reports
 series: company-reports

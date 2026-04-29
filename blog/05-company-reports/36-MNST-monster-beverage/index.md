@@ -1,5 +1,5 @@
 ---
-title: "Monster Beverage — 매출 2.5배인데 CAPEX는 그대로, 코카콜라가 지분 산 회사"
+title: "Monster Beverage (MNST) — 매출 2.5배인데 CAPEX는 그대로, 코카콜라가 지분 산 회사"
 date: 2026-04-15
 category: company-reports
 series: company-reports

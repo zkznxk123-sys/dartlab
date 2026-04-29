@@ -1,5 +1,5 @@
 ---
-title: "기아 — 매출은 형의 60%인데 이익은 90%, 왜 동생이 더 잘 버는가"
+title: "기아 (000270) — 매출은 형의 60%인데 이익은 90%, 왜 동생이 더 잘 버는가"
 date: 2026-04-13
 category: company-reports
 series: company-reports

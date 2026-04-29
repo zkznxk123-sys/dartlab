@@ -1,5 +1,5 @@
 ---
-title: "Nike — 세계 1위가 매출 -10%, 주가 -55%, CEO가 버린 선반의 대가"
+title: "Nike (NKE) — 세계 1위가 매출 -10%, 주가 -55%, CEO가 버린 선반의 대가"
 date: 2026-04-13
 category: company-reports
 series: company-reports
