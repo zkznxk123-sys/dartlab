@@ -112,6 +112,8 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
                 chunks.append(event.data.get("text", ""))
             elif event.kind == "tool_result":
                 artifacts.extend(event.data.get("artifacts") or [])
+            elif event.kind == "artifact":
+                artifacts.extend(event.data.get("artifacts") or [])
             elif event.kind == "evidence":
                 evidence.append(event.data)
             elif event.kind == "claim":
@@ -121,7 +123,7 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
             elif event.kind == "done":
                 evidence = _dedupeById(evidence + [v for v in event.data.get("evidence") or [] if isinstance(v, dict)])
                 claims = _dedupeById(claims + [v for v in event.data.get("claims") or [] if isinstance(v, dict)])
-                visuals = _dedupeById(visuals + [v for v in event.data.get("visuals") or [] if isinstance(v, dict)])
+                visuals = _dedupeVisuals(visuals + [v for v in event.data.get("visuals") or [] if isinstance(v, dict)])
                 limits.extend(str(v) for v in event.data.get("limits") or [])
                 responseMeta = event.data.get("responseMeta") or {}
             elif event.kind == "error":
@@ -137,7 +139,7 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
         "artifacts": _dedupeArtifacts(artifacts),
         "evidence": _dedupeById(evidence),
         "claims": _dedupeById(claims),
-        "visuals": _dedupeById(visuals),
+        "visuals": _dedupeVisuals(visuals),
         "limits": _dedupeStrings(limits),
         "responseMeta": responseMeta,
     }
@@ -191,6 +193,43 @@ def _dedupeById(items: list[dict]) -> list[dict]:
         seen.add(key)
         out.append(item)
     return out
+
+
+def _dedupeVisuals(items: list[dict]) -> list[dict]:
+    seen: set[str] = set()
+    out: list[dict] = []
+    for item in items:
+        key = _visualDedupeKey(item)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(item)
+    return out
+
+
+def _visualDedupeKey(item: dict) -> str:
+    spec = item.get("spec") if isinstance(item, dict) else None
+    if not isinstance(spec, dict):
+        return str(item.get("id") or item.get("url") or item)
+    series = spec.get("series")
+    categories = spec.get("categories")
+    if isinstance(series, list) and isinstance(categories, list):
+        compact_series = []
+        for row in series:
+            if not isinstance(row, dict):
+                continue
+            compact_series.append({"name": row.get("name"), "data": row.get("data")})
+        return json.dumps(
+            {
+                "vizType": spec.get("vizType") or "chart",
+                "chartType": spec.get("chartType"),
+                "categories": categories,
+                "series": compact_series,
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+    return json.dumps(spec, ensure_ascii=False, sort_keys=True)
 
 
 def _dedupeStrings(items: list[str]) -> list[str]:

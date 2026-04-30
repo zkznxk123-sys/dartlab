@@ -5,8 +5,13 @@
 <nav class="toc-rail" aria-label="Company 목차">
 	<div class="track" aria-hidden="true"></div>
 	<div class="toc-links">
-		{#each items as item}
-			<a class:active={activeSection === item.id} href="#{item.id}" aria-label={item.label}>
+		{#each items as item, i}
+			<a
+				class:active={activeSection === item.id}
+				href="#{item.id}"
+				aria-label={item.label}
+				style:top={`${(i / Math.max(1, items.length - 1)) * 100}%`}
+			>
 				<i></i>
 			</a>
 		{/each}
@@ -29,73 +34,74 @@
 <style>
 	.toc-rail {
 		position: fixed;
-		top: 196px;
-		right: 10px;
+		top: 170px;
+		right: 12px;
 		z-index: 40;
-		width: 26px;
-		max-height: calc(100vh - 228px);
-		padding: 10px 0;
+		width: 18px;
+		height: min(420px, calc(100vh - 220px));
 		pointer-events: auto;
 	}
 	.track {
 		position: absolute;
-		top: 14px;
-		right: 10px;
-		bottom: 14px;
-		width: 2px;
+		top: 0;
+		right: 6px;
+		bottom: 0;
+		width: 1px;
 		border-radius: 999px;
 		background: #1e2433;
 	}
 	.toc-links {
-		position: relative;
-		display: grid;
-		gap: 4px;
+		position: absolute;
+		inset: 0;
 	}
 	.toc-links a {
-		position: relative;
-		display: grid;
-		align-items: center;
-		width: 26px;
-		min-height: 24px;
-		border-radius: 6px;
+		position: absolute;
+		right: 0;
+		display: block;
+		width: 18px;
+		height: 24px;
 		color: #94a3b8;
 		text-decoration: none;
-		transition: background 0.15s ease, color 0.15s ease;
+		transform: translateY(-50%);
 	}
 	i {
-		justify-self: end;
+		position: absolute;
+		top: 50%;
+		right: 3px;
 		width: 7px;
-		height: 7px;
-		border: 1px solid #64748b;
+		height: 1px;
 		border-radius: 999px;
-		background: #050811;
-		transition: width 0.15s ease, height 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+		background: #334155;
+		transform: translateY(-50%);
+		transition: width 0.15s ease, height 0.15s ease, background 0.15s ease;
 	}
 	.toc-panel {
 		position: absolute;
-		top: 10px;
-		right: 30px;
+		top: -8px;
+		right: 22px;
 		display: grid;
-		width: 194px;
-		gap: 4px;
+		width: 220px;
+		gap: 3px;
+		border: 1px solid rgba(30, 36, 51, 0.92);
+		border-radius: 7px;
+		background: rgba(5, 8, 17, 0.96);
+		padding: 6px;
 		opacity: 0;
 		pointer-events: none;
 		transform: translateX(6px);
 		transition: opacity 0.14s ease, transform 0.14s ease;
+		backdrop-filter: blur(14px);
+		box-shadow: 0 18px 42px rgba(0, 0, 0, 0.3);
 	}
 	.toc-panel div {
 		display: flex;
 		align-items: center;
-		min-height: 24px;
-		border: 1px solid rgba(30, 36, 51, 0.92);
-		border-radius: 6px;
-		background: rgba(5, 8, 17, 0.94);
-		box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+		min-height: 25px;
+		border-radius: 5px;
 		color: #94a3b8;
 		font-size: 12px;
 		line-height: 1.2;
-		padding: 0 10px;
-		backdrop-filter: blur(14px);
+		padding: 0 8px;
 	}
 	.toc-panel span {
 		min-width: 0;
@@ -112,17 +118,13 @@
 		color: #f8fafc;
 	}
 	.toc-links a.active i {
-		width: 8px;
+		right: 0;
+		width: 13px;
 		height: 22px;
-		border-color: #fb923c;
 		background: #fb923c;
 	}
-	.toc-links a:hover {
-		background: rgba(7, 12, 21, 0.82);
-		color: #f8fafc;
-	}
 	.toc-panel div.active {
-		border-color: rgba(251, 146, 60, 0.5);
+		background: #0d1422;
 		color: #f8fafc;
 	}
 	.mobile-toc {

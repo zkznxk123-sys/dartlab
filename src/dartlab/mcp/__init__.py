@@ -59,6 +59,16 @@ def _getCompany(stockCode: str) -> Any:
 
 
 _MCP_MAX_RESULT_CHARS = 12000  # MCP 도구 결과 상한 (외부 AI 컨텍스트 절약)
+_MCP_WORKSPACE_AGENT_TOOL_NAMES = {
+    "workspace_status",
+    "read_text",
+    "inspect_data",
+    "run_python",
+    "search_workspace",
+    "create_artifact",
+    "finalize_answer",
+}
+_mcp_workspace_session: Any | None = None
 
 
 def _fmt(obj) -> str:
@@ -76,6 +86,24 @@ def _fmt(obj) -> str:
     if len(result) > _MCP_MAX_RESULT_CHARS:
         return result[:_MCP_MAX_RESULT_CHARS] + f"\n\n...(결과 잘림, 전체 {len(result)}자. 범위를 좁혀 재조회하세요)"
     return result
+
+
+def _executeWorkspaceAgentTool(name: str, args: dict[str, Any]) -> str:
+    """MCP에서도 같은 workspace-native 7개 도구를 실행한다."""
+    global _mcp_workspace_session
+
+    from dartlab.ai.runtime.workspace_agent import AgentSession, _data_root, _repo_root, _workspace_tools
+
+    if _mcp_workspace_session is None:
+        _mcp_workspace_session = AgentSession(
+            question=str(args.get("question") or "MCP workspace session"),
+            workspaceRoot=_repo_root(),
+            dataRoot=_data_root(),
+        )
+    for tool in _workspace_tools(_mcp_workspace_session):
+        if tool.name == name:
+            return json.dumps(tool.handler(**args), ensure_ascii=False, indent=2, default=str)
+    return f"Unknown workspace-agent tool: {name}"
 
 
 def _fmtDict(d: dict, depth: int = 0) -> str:
@@ -175,6 +203,9 @@ def _executeTool(name: str, args: dict) -> str:
     code = args.get("stockCode")
 
     try:
+        if name in _MCP_WORKSPACE_AGENT_TOOL_NAMES:
+            return _executeWorkspaceAgentTool(name, args)
+
         if name == "companyStory":
             c = _getCompany(code)
             section = args.get("section")
@@ -391,6 +422,23 @@ def _executeTool(name: str, args: dict) -> str:
             from dartlab.core.analysisGraph import listDartlabProcesses
 
             return json.dumps(listDartlabProcesses(), ensure_ascii=False, indent=2)
+        if name == "describeDartlabIntelligenceMap":
+            from dartlab.ai.runtime.intelligence_map import buildIntelligenceMap
+            from dartlab.ai.runtime.workspace_agent import _data_root, _repo_root
+
+            return json.dumps(
+                buildIntelligenceMap(
+                    workspaceRoot=_repo_root(),
+                    dataRoot=_data_root(),
+                    question=str(args.get("question") or ""),
+                ),
+                ensure_ascii=False,
+                indent=2,
+            )
+        if name == "describeDartlabIntelligencePack":
+            from dartlab.ai.runtime.intelligence_pack import loadIntelligencePack
+
+            return json.dumps(loadIntelligencePack(), ensure_ascii=False, indent=2)
 
         return f"Unknown tool: {name}"
 
@@ -543,9 +591,100 @@ _DISCOVERY_TOOLS = [
         },
         "required": ["apiRef"],
     },
+    {
+        "name": "describeDartlabIntelligenceMap",
+        "description": "DartLab Financial Workspace Agent가 보는 Intelligence Map(API/Data/Graph/Process/Recipe 요약)을 반환.",
+        "params": {
+            "question": {"type": "string", "description": "선택 질문. 있으면 질문별 graph/process 계약까지 포함."},
+        },
+        "required": [],
+    },
+    {
+        "name": "describeDartlabIntelligencePack",
+        "description": "DartLab Financial Workspace Agent가 우선 소비하는 generated Intelligence Pack을 반환.",
+        "params": {},
+        "required": [],
+    },
 ]
 
 _TOOLS.extend(_DISCOVERY_TOOLS)
+_TOOL_FEATURE_MAP.update(
+    {
+        "describeDartlabIntelligenceMap": "meta",
+        "describeDartlabIntelligencePack": "meta",
+    }
+)
+
+_WORKSPACE_AGENT_TOOLS = [
+    {
+        "name": "workspace_status",
+        "description": "Financial Workspace Agent 상태와 Intelligence Map, 현재 날짜, 데이터 루트, 엔진 라이브러리 확인.",
+        "params": {},
+        "required": [],
+    },
+    {
+        "name": "read_text",
+        "description": "DartLab workspace 내부의 ops 문서, 소스, docstring 텍스트를 읽는다. 대량 sections 경로는 차단된다.",
+        "params": {
+            "path": {"type": "string", "description": "workspace 상대경로 또는 허용된 절대경로"},
+            "max_chars": {"type": "integer", "description": "최대 문자 수", "minimum": 1, "maximum": 200000},
+        },
+        "required": ["path"],
+    },
+    {
+        "name": "inspect_data",
+        "description": "parquet/csv/tsv 데이터의 schema, head/tail, row count, latest/asOf, column role, metric 후보를 확인한다.",
+        "params": {
+            "path_or_query": {"type": "string", "description": "데이터 파일 경로 또는 검색어"},
+            "sample": {"type": "integer", "description": "head/tail 샘플 행 수", "minimum": 1, "maximum": 20},
+            "columns": {"type": "array", "items": {"type": "string"}, "description": "선택 컬럼"},
+        },
+        "required": ["path_or_query"],
+    },
+    {
+        "name": "run_python",
+        "description": "DartLab workspace root에서 dartlab/polars 사용 Python 코드를 실행해 계산한다.",
+        "params": {
+            "code": {"type": "string", "description": "실행할 Python 코드. 결과는 print로 작게 출력"},
+            "timeout": {"type": "integer", "description": "초 단위 제한 시간", "minimum": 5, "maximum": 120},
+        },
+        "required": ["code"],
+    },
+    {
+        "name": "search_workspace",
+        "description": "Intelligence Map을 먼저 검색한 뒤 workspace 문서, 소스, capabilities, 데이터 파일명을 검색한다.",
+        "params": {
+            "query": {"type": "string", "description": "검색어"},
+            "kind": {"type": "string", "enum": ["any", "docs", "source", "data", "capabilities"]},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 50},
+        },
+        "required": ["query"],
+    },
+    {
+        "name": "create_artifact",
+        "description": "계산 결과를 CSV/JSON/visual artifact로 만든다. visual은 2개 이상 category/value가 있어야 한다.",
+        "params": {
+            "kind": {"type": "string", "enum": ["csv", "json", "visual"]},
+            "name": {"type": "string", "description": "artifact 이름"},
+            "data": {"type": "object", "description": "CSV/JSON/visual에 사용할 JSON 데이터"},
+        },
+        "required": ["kind", "data"],
+    },
+    {
+        "name": "finalize_answer",
+        "description": "관찰·계산·검산 후 최종 답변을 제출한다. 검증 실패 시 issues를 반환한다.",
+        "params": {
+            "answer": {"type": "string", "description": "최종 답변"},
+            "evidence_refs": {"type": "array", "items": {"type": "string"}},
+            "artifact_refs": {"type": "array", "items": {"type": "string"}},
+            "limits": {"type": "array", "items": {"type": "string"}},
+        },
+        "required": ["answer"],
+    },
+]
+
+_TOOLS.extend(_WORKSPACE_AGENT_TOOLS)
+_TOOL_FEATURE_MAP.update({tool["name"]: "ai" for tool in _WORKSPACE_AGENT_TOOLS})
 
 
 def _advertisedTools() -> list[dict[str, Any]]:
@@ -643,6 +782,18 @@ def create_server():
                 description="graphVersion/sourceHash/node/edge/contract/route 요약",
                 mimeType="application/json",
             ),
+            Resource(
+                uri="dartlab://intelligence-map",
+                name="DartLab Intelligence Map",
+                description="Financial Workspace Agent가 소비하는 API/Data/Graph/Process/Recipe 요약",
+                mimeType="application/json",
+            ),
+            Resource(
+                uri="dartlab://intelligence-pack",
+                name="DartLab Intelligence Pack",
+                description="Financial Workspace Agent가 우선 소비하는 generated 지식 팩",
+                mimeType="application/json",
+            ),
         ]
         for code in _cache:
             resources.append(
@@ -690,6 +841,29 @@ def create_server():
             return [
                 ReadResourceContents(
                     content=json.dumps(graphStatus(), ensure_ascii=False, indent=2),
+                    mime_type="application/json",
+                )
+            ]
+        if uri_str == "dartlab://intelligence-map":
+            from dartlab.ai.runtime.intelligence_map import buildIntelligenceMap
+            from dartlab.ai.runtime.workspace_agent import _data_root, _repo_root
+
+            return [
+                ReadResourceContents(
+                    content=json.dumps(
+                        buildIntelligenceMap(workspaceRoot=_repo_root(), dataRoot=_data_root()),
+                        ensure_ascii=False,
+                        indent=2,
+                    ),
+                    mime_type="application/json",
+                )
+            ]
+        if uri_str == "dartlab://intelligence-pack":
+            from dartlab.ai.runtime.intelligence_pack import loadIntelligencePack
+
+            return [
+                ReadResourceContents(
+                    content=json.dumps(loadIntelligencePack(), ensure_ascii=False, indent=2),
                     mime_type="application/json",
                 )
             ]

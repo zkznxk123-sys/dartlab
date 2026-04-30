@@ -58,12 +58,12 @@ def _isPrimaryArtifact(*, name: str, label: str, rows: int, columns: int) -> boo
 
 
 def artifactPath(day: str, filename: str) -> Path | None:
-    """다운로드 요청의 day/filename 을 dataDir 내부 CSV 경로로 해석한다."""
+    """다운로드 요청의 day/filename 을 dataDir 내부 artifact 경로로 해석한다."""
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
         return None
-    if "/" in filename or "\\" in filename or not filename.endswith(".csv"):
+    if "/" in filename or "\\" in filename or not filename.endswith((".csv", ".json")):
         return None
-    if not re.fullmatch(r"[A-Za-z0-9_.-]+\.csv", filename):
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+\.(csv|json)", filename):
         return None
     path = (_artifactRoot() / day / filename).resolve()
     root = _artifactRoot().resolve()

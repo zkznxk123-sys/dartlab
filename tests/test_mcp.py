@@ -21,6 +21,12 @@ def test_mcp_tools_defined():
     assert "planDartlabQuestion" in names
     assert "validateDartlabPlan" in names
     assert "explainDartlabTool" in names
+    assert "describeDartlabIntelligenceMap" in names
+    assert "describeDartlabIntelligencePack" in names
+    assert "workspace_status" in names
+    assert "inspect_data" in names
+    assert "run_python" in names
+    assert "finalize_answer" in names
     assert "companySections" not in names
 
 
@@ -58,6 +64,26 @@ def test_mcp_graph_tools_execute():
     )
     assert '"ok": true' in validated
     assert "acceptanceCriteria" in validated
+
+    intelligence = _executeTool("describeDartlabIntelligenceMap", {"question": "최근 주가가 많이 오른 종목을 찾아줘"})
+    assert "DartLab Financial Workspace Agent" in intelligence
+    assert "recipeMap" in intelligence
+
+    pack = _executeTool("describeDartlabIntelligencePack", {})
+    assert '"schemaVersion": 1' in pack
+    assert "capabilitySkillMap" in pack
+
+
+def test_mcp_workspace_agent_tools_execute():
+    from dartlab.mcp import _executeTool
+
+    status = _executeTool("workspace_status", {})
+    assert "workspaceRoot" in status
+    assert "dataRoot" in status
+    assert "intelligenceMap" in status
+
+    found = _executeTool("search_workspace", {"query": "ops ai", "kind": "docs", "limit": 3})
+    assert "results" in found
 
 
 def test_fmt_none():

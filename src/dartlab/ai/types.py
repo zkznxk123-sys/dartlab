@@ -23,7 +23,7 @@ ProviderName = Literal[
 class LLMConfig:
     """LLM 연결 설정."""
 
-    provider: ProviderName = "codex"
+    provider: ProviderName = "oauth-codex"
     model: str | None = None
     api_key: str | None = None
     base_url: str | None = None

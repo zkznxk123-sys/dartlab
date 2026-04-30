@@ -71,7 +71,7 @@
 		grid-template-columns: minmax(0, 1fr) auto;
 		gap: 24px;
 		align-items: end;
-		max-width: 1480px;
+		max-width: var(--company-shell-width, 1320px);
 		margin: 0 auto;
 		border-bottom: 1px solid #1e2433;
 		padding: 18px 0 16px;

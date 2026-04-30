@@ -84,10 +84,18 @@ dartlab 의 1 순위 UI surface. AI 채팅 + 프로바이더 연결 + MCP 자동
                                           ← {"event":"providerChanged","data":{...}}
 → {"id":"1","type":"ask","question":"..."}
    ← {"id":"1","event":"meta","data":{company, stockCode}}
+   ← {"id":"1","event":"observe","data":{...}}
+   ← {"id":"1","event":"inspect","data":{...}}
+   ← {"id":"1","event":"compute","data":{...}}
+   ← {"id":"1","event":"verify","data":{...}}
+   ← {"id":"1","event":"artifact","data":{...}}
+   ← {"id":"1","event":"chart","data":{charts:[...]}}
    ← {"id":"1","event":"chunk","data":{text}} × N
    ← {"id":"1","event":"done","data":{}}
 → {"type":"exit"}
 ```
+
+workspace-native 이벤트는 장식 로그가 아니다. VSCode webview 는 web UI 와 동일하게 Financial Workspace Agent Trace 로 표시하고, chart 는 `ui/shared/api/visualContract.ts` 를 통과한 spec 만 렌더링한다.
 
 ---
 
@@ -153,6 +161,8 @@ extension 활성화 시 `.mcp.json` + `.vscode/mcp.json` 에 dartlab MCP 서버 
 |---|---|
 | `ui/vscode/src/` | TypeScript extension |
 | `ui/vscode/webview/src/` | Svelte webview |
+| `ui/shared/api/visualContract.ts` | webview 와 web 의 공통 visual 의미 판정 |
+| `ui/shared/chart/` | webview 와 web 의 공통 차트 렌더링 |
 | `src/dartlab/cli/stdio.py` | Python backend 프로토콜 |
 | `src/dartlab/guide/providers.py` | provider 카탈로그 |
 | `src/dartlab/guide/credentials.py` | 자격증명 관리 |

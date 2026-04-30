@@ -13,6 +13,20 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+def test_oauth_codex_default_model_uses_latest_fallback(monkeypatch):
+    from dartlab.ai.providers import oauth_codex
+    from dartlab.ai.providers.oauth_codex import OAuthCodexProvider
+    from dartlab.ai.types import LLMConfig
+
+    monkeypatch.setattr(oauth_codex.oauthToken, "get_valid_token", lambda: (_ for _ in ()).throw(OSError("no token")))
+    monkeypatch.setattr(oauth_codex, "_MODELS_CACHE", None)
+    monkeypatch.setattr(oauth_codex, "_MODELS_CACHE_TS", 0.0)
+
+    provider = OAuthCodexProvider(LLMConfig(provider="oauth-codex"))
+
+    assert provider.default_model == "gpt-5.4"
+
+
 # ══════════════════════════════════════
 # 4. _polarsTableToMarkdown
 # ══════════════════════════════════════

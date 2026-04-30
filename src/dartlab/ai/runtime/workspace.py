@@ -476,11 +476,20 @@ class AnalysisWorkspace:
                 observed.add("asOf")
             if item.value not in (None, ""):
                 observed.add("value")
+            if item.basis:
+                observed.add("basis")
             if item.artifactIds:
                 observed.add("artifact")
             if item.sourceTool == "industry":
                 observed.add("industry")
                 observed.add("universe")
+            if item.sourceTool in {"disclosure", "filings", "liveFilings", "search"}:
+                if item.period or item.asOf:
+                    observed.add("filedAt")
+                if item.basis or item.metric:
+                    observed.add("title")
+                if item.metric:
+                    observed.add("formType")
             if item.sourceTool == "pythonExec" and len(self.evidence) >= 10:
                 observed.add("universe")
         if len(self.evidence) >= 10:
@@ -534,6 +543,8 @@ class AnalysisWorkspace:
             return
         metricKey = ":".join(str(v) for v in (target, metric) if v) or item.sourceTool
         current = self.freshness.get(metricKey)
+        if current and str(asOf) < str(current.get("latestAsOf", "")):
+            return
         if not current or str(asOf) > str(current.get("latestAsOf", "")):
             self.freshness[metricKey] = {
                 "latestAsOf": asOf.isoformat(),
@@ -551,7 +562,8 @@ def _rows_from_result(result: Any) -> list[dict[str, Any]]:
         import polars as pl
 
         if isinstance(result, pl.DataFrame):
-            return [_json_safe(r) for r in result.head(30).to_dicts()]
+            frame = result.tail(30).reverse() if _has_time_axis(result.columns) else result.head(30)
+            return [_json_safe(r) for r in frame.to_dicts()]
     except ImportError:
         pass
 
@@ -605,6 +617,13 @@ def _parse_delimited_rows(text: str) -> list[dict[str, str]]:
             if rows:
                 return rows
     return []
+
+
+def _has_time_axis(columns: Any) -> bool:
+    for column in columns or []:
+        if str(column).lower() in {"date", "asof", "as_of", "enddate", "latestdate", "period"}:
+            return True
+    return False
 
 
 def _parse_result_metadata(lines: list[str]) -> dict[str, str]:
@@ -794,8 +813,10 @@ def _comparison_chart_spec(evidence: list[EvidenceItem]) -> dict[str, Any] | Non
 
 
 def _diagram_spec(evidence: list[EvidenceItem], title: str) -> dict[str, Any] | None:
-    targets = [str(v) for v in sorted({item.target for item in evidence if item.target})[:8]]
-    if not targets:
+    targets = [
+        str(v) for v in sorted({item.target for item in evidence if item.target}) if _meaningful_diagram_target(str(v))
+    ][:8]
+    if len(targets) < 2:
         return None
     lines = ["graph LR"]
     for target in targets:
@@ -808,6 +829,18 @@ def _diagram_spec(evidence: list[EvidenceItem], title: str) -> dict[str, Any] | 
         "source": "\n".join(lines),
         "meta": {"generated": "workspace", "basis": "evidence_map"},
     }
+
+
+def _meaningful_diagram_target(value: str) -> bool:
+    text = value.strip()
+    if len(text) < 2:
+        return False
+    lowered = text.lower()
+    if lowered in {"int64", "float64", "str", "string", "object", "none", "true", "false"}:
+        return False
+    if re.fullmatch(r"\d+(?:\.\d+)?", text):
+        return False
+    return True
 
 
 def _numeric_value(value: Any) -> float | int | None:

@@ -255,7 +255,9 @@ def buildReadFiling(
     progress(f"{company.corpName} 공시 원문 다운로드 중... ({rceptNo})")
     rawText = OpenDart().documentText(rceptNo)
     progress(f"{company.corpName} 공시 원문 정리 중... ({rceptNo})")
-    rawPreview, truncated = truncateText(rawText, maxChars=maxChars)
+    normalizedText = _normalizeDocumentText(rawText)
+    textPreview, truncated = truncateText(normalizedText, maxChars=maxChars)
+    rawPreview, _ = truncateText(rawText, maxChars=maxChars)
     return {
         "docId": rceptNo,
         "market": "KR",
@@ -263,6 +265,18 @@ def buildReadFiling(
         "docUrl": viewerUrl or f"{DART_VIEWER}{rceptNo}",
         "viewerUrl": viewerUrl or f"{DART_VIEWER}{rceptNo}",
         "raw": rawPreview,
-        "text": rawPreview,
+        "text": textPreview,
         "truncated": truncated,
     }
+
+
+def _normalizeDocumentText(rawText: str) -> str:
+    if "<" not in rawText or ">" not in rawText:
+        return rawText
+    try:
+        from dartlab.providers.dart.openapi.collector import _htmlToText
+
+        normalized = _htmlToText(rawText)
+    except Exception:
+        normalized = ""
+    return normalized or rawText

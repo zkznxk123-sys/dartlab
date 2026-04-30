@@ -1,14 +1,18 @@
 ## Appendix. Visual Explanation Engine
 
-`dartlab.viz` 는 차트를 그리는 보조 기능이 아니라 시각적 설명 엔진이다. AI 는 숫자 변화·비교·랭킹은 chart 로 설명하고, 인과·사업구조·재무흐름은 diagram 으로 설명한다.
+`dartlab.viz` 는 차트를 그리는 보조 기능이 아니라 시각적 설명 엔진이다. Financial Workspace Agent 는 숫자 변화·비교·랭킹은 chart 로 설명하고, 인과·사업구조·재무흐름은 diagram 으로 설명한다.
 
-1차 공식 visual type 은 `chart` 와 `diagram` 이다. `emit_chart()` 와 `emit_diagram()` 이 stdout marker 를 만들고, AI runtime 이 `extract_viz_specs()` 로 이를 `chart` event 와 Workspace Visual Ledger 로 승격한다.
+1차 공식 visual type 은 `chart` 와 `diagram` 이다. Workspace agent 는 계산표에서 만든 visual spec 만 `chart` event 와 Workspace Visual Ledger 로 승격한다. legacy 실행 경로의 `emit_chart()` / `emit_diagram()` stdout marker 는 호환으로 유지한다.
 
-AI 응답에서 visual 은 장식이 아니다. visual 필요 여부는 `Analysis Graph` 의 `visualPolicy` 와 generated `Process Map.requiredVisuals` 가 정하고, 각 visual spec 은 `evidenceIds` 를 가져야 한다. 질문 유형별 목적은 분명해야 한다: 시계열은 변화, 비교는 차이, 랭킹은 순위, 다이어그램은 인과·구조를 설명한다. evidence 와 연결되지 않은 visual 은 `unsupported_visual` 이다.
+AI 응답에서 visual 은 장식이 아니다. visual 필요 여부는 Intelligence Map 이 노출하는 generated `Process Map.requiredVisuals` 와 workspace 질문 유형이 정하고, 각 visual spec 은 계산표나 observation 에서 컴파일되어야 한다. 질문 유형별 목적은 분명해야 한다: 시계열은 변화, 비교는 차이, 랭킹은 순위, 다이어그램은 인과·구조를 설명한다. evidence 와 연결되지 않은 visual 은 만들지 않는다.
 
-visual 생성 여부는 수동 체크리스트가 아니다. docstring/capabilities 의 `visualPolicy` 가 `Analysis Graph` 와 Process Map 으로 컴파일되고, runtime 이 질문 유형과 Workspace evidence 를 보고 자동으로 `chart` 또는 `diagram` 후보를 만든다. 사람이 손으로 관리하는 것은 visualPolicy 와 VizSpec 프로토콜뿐이다.
+차트는 최소한의 해석 가능한 축을 가져야 한다. `bar`/`line`/`combo`/`pie`/`waterfall` 은 서로 다른 category 2개 이상과 숫자값 2개 이상이 없으면 visual 로 승격하지 않는다. 단일 `summary` 막대, 단일 종목 현재값 막대, evidence 축을 설명하지 못하는 spec 은 runtime 과 UI 양쪽에서 버린다. 단일 값은 차트가 아니라 표·문장·limit 로 설명한다.
 
-랭킹·시계열·비교 질문은 primary evidence 와 visual 이 함께 있어야 한다. 예: KRX 급등주 질문은 `pythonExec` 결과에서 ranking evidence 20개와 primary CSV artifact 를 만들고, 같은 evidenceIds 에 연결된 chart visual 을 만든다. CSV/visual 은 부가 장식이 아니라 UI 와 사용자가 같은 계산 결과를 재사용하게 하는 Result Bundle 의 일부다.
+visual 의미 판정의 SSOT 는 runtime 과 UI 의 공유 contract 다. Python 쪽은 workspace visual contract 가 `isMeaningfulVisualSpec` 과 CSV 기반 auto visual compiler 를 제공하고, web/VSCode 는 `ui/shared/api/visualContract.ts` 를 사용한다. 같은 규칙을 각 surface 에 다시 복붙하지 않는다.
+
+visual 생성 여부는 수동 체크리스트가 아니다. docstring/capabilities 의 visual 계약이 Analysis Graph 와 Process Map 으로 컴파일되고, runtime 이 질문 유형과 Workspace evidence 를 보고 자동으로 `chart` 또는 `diagram` 후보를 만든다. 사람이 손으로 관리하는 것은 visual 계약과 VizSpec 프로토콜뿐이다.
+
+랭킹·시계열·비교 질문은 primary evidence 와 visual 이 함께 있어야 한다. 예: KRX 급등주 질문은 `run_python` 계산 결과에서 ranking evidence 20개와 primary CSV artifact 를 만들고, 같은 evidenceIds 에 연결된 chart visual 을 만든다. CSV/visual 은 부가 장식이 아니라 UI 와 사용자가 같은 계산 결과를 재사용하게 하는 Result Bundle 의 일부다.
 
 Remotion/영상형 설명은 다음 단계다. 현재 구현 계약은 chart/diagram spec 까지이며, 영상형 visual 도 같은 원칙을 따른다: 장식이 아니라 판단 근거를 사용자가 더 빨리 이해하게 하는 설명 도구다.
 
@@ -130,11 +134,13 @@ AI 코드 실행 → emit_chart() → stdout 마커 → extract_viz_specs() → 
 | `src/dartlab/viz/spec.py` | VizSpec dataclass |
 | `src/dartlab/viz/palette.py` | COLORS 단일 원천 |
 | `src/dartlab/viz/plotly.py` | ChartSpec → Plotly Figure 변환 |
-| `src/dartlab/viz/extract.py` | AI stdout 마커 추출 |
+| `src/dartlab/viz/extract.py` | legacy stdout 마커 추출 |
 | `src/dartlab/viz/generators.py` | Company → ChartSpec 8 종 |
 | `src/dartlab/viz/charts/` | DataFrame → Plotly Figure (line · bar · pie · waterfall · revenue · …) |
 | `src/dartlab/story/blocks.py` | ChartBlock 타입 |
-| `ui/shared/chart/` | Svelte SVG 차트 컴포넌트 (source of truth, web · vscode 공유) |
+| `src/dartlab/ai/runtime/workspace_visual.py` | workspace agent visual 의미 판정 + CSV 기반 visual compiler |
+| `ui/shared/api/visualContract.ts` | web · VSCode 공통 visual 의미 판정 |
+| `ui/shared/chart/` | Svelte SVG 차트 컴포넌트 (web · vscode 공유) |
 
 ---
 

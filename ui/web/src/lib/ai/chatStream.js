@@ -268,6 +268,14 @@ export function createAskStreamCallbacks({
 			if (isStale()) return;
 			appendRenderViews(collectViewsFromChartPayload(data));
 		},
+		onAgentTrace(phase, data) {
+			if (isStale()) return;
+			const last = getLastMessage(store);
+			const prev = last?.agentTrace || [];
+			store.updateLastMessage({
+				agentTrace: [...prev, { phase, data, ts: Date.now() }],
+			});
+		},
 		onChunk(text) {
 			if (isStale()) return;
 			chunkBuffer += text;
@@ -290,9 +298,6 @@ export function createAskStreamCallbacks({
 				updates.text = "응답을 받지 못했습니다. AI 서버가 일시적으로 응답하지 않았을 수 있습니다.";
 				updates.error = true;
 				updates.retryable = true;
-			}
-			if (data?.pluginHints?.length) {
-				updates.pluginHints = data.pluginHints;
 			}
 			store.updateLastMessage(updates);
 			store.flush();

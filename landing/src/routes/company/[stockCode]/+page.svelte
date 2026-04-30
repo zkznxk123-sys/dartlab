@@ -4,8 +4,8 @@
 	import CompanyHeader from '$lib/components/company/CompanyHeader.svelte';
 	import EvidencePanel from '$lib/components/company/EvidencePanel.svelte';
 	import KpiRibbon from '$lib/components/company/KpiRibbon.svelte';
-	import QuestionSection from '$lib/components/company/QuestionSection.svelte';
 	import StatementSection from '$lib/components/company/StatementSection.svelte';
+	import StoryReportSection from '$lib/components/company/StoryReportSection.svelte';
 	import TocRail from '$lib/components/company/TocRail.svelte';
 	import {
 		buildEvidenceForAccount,
@@ -241,10 +241,6 @@
 <Header context="landing" />
 
 <main class="company-page">
-	{#if !loading && company}
-		<TocRail activeSection={activeSection} items={tocItems} />
-	{/if}
-
 	{#if loading}
 		<section class="state">
 			<div class="spinner"></div>
@@ -268,6 +264,8 @@
 			onOpenEvidence={openEvidence}
 		/>
 
+		<TocRail activeSection={activeSection} items={tocItems} />
+
 		<KpiRibbon metrics={view.kpis} />
 
 		{#if busyStatements || secondaryLoading}
@@ -278,7 +276,7 @@
 
 		<div class="report-grid">
 			{#each view.questions as section}
-				<QuestionSection {section} onOpenEvidence={openEvidence} onSelectRow={selectTableRow} />
+				<StoryReportSection {section} onOpenEvidence={openEvidence} onSelectRow={selectTableRow} />
 			{/each}
 
 			<section class="statement-band">
@@ -307,6 +305,7 @@
 
 <style>
 	.company-page {
+		--company-shell-width: 72rem;
 		min-height: 100vh;
 		overflow-x: hidden;
 		background:
@@ -319,10 +318,10 @@
 		display: grid;
 		grid-template-columns: repeat(12, minmax(0, 1fr));
 		gap: 12px;
-		max-width: 1480px;
+		max-width: var(--company-shell-width);
 		margin: 12px auto 0;
 	}
-	.report-grid > :global(.question-section),
+	.report-grid > :global(.story-report-section),
 	.report-grid > :global(.statement),
 	.statement-band {
 		grid-column: 1 / -1;

@@ -1,6 +1,6 @@
 # dartlab Capabilities
 
-> v0.9.26 기준 자동 생성. 직접 수정 금지.  
+> v0.9.27 기준 자동 생성. 직접 수정 금지.  
 > `uv run python scripts/build/generateSpec.py`로 재생성.
 
 
@@ -301,7 +301,7 @@ FastAPI `/api/*` 엔드포인트. 모든 클라이언트의 단일 소비 경로
 | GET | `/api/company/{code}/searchIndex` | MiniSearch 인덱스용 flat document list. |
 | GET | `/api/company/{code}/modules` | 기업의 사용 가능한 데이터 모듈 목록. |
 | POST | `/api/ask` | LLM 질문 — AI가 질문 의도를 자율 판단하고 종목/매크로/비교를 결정한다. |
-| GET | `/api/ask/artifacts/{day}/{filename}` | AI tool_result 에서 생성된 CSV 아티팩트를 내려준다. |
+| GET | `/api/ask/artifacts/{day}/{filename}` | AI tool_result 에서 생성된 CSV/JSON 아티팩트를 내려준다. |
 | GET | `/api/search` | 종목 검색 — substring 우선, 결과 없으면 fuzzy(초성/Levenshtein) fallback. |
 | GET | `/api/company/{code}` | 종목 기본 정보 + 사용 가능 API surface 목록. |
 | GET | `/api/company/{code}/index` | 회사 데이터 구조 인덱스 DataFrame. |

@@ -10,6 +10,11 @@ interface FinanceRow {
 	ord: number | null;
 }
 
+interface DuckColumnInfo {
+	name?: string;
+	column_name?: string;
+}
+
 const STATEMENT_BY_TOPIC: Partial<Record<BrowserShowTopic, string>> = {
 	IS: 'IS',
 	BS: 'BS',
@@ -29,27 +34,33 @@ export async function tryBuildLiveFinanceTable(
 		if (!db) return null;
 
 		await db.registerHfParquet('companyFinance', `dart/finance/${stockCode}.parquet`);
-		const rows = await db.query<FinanceRow>(liveFinanceSql(stockCode, statement, freq));
+		const schema = await db.query<DuckColumnInfo>("PRAGMA table_info('companyFinance')");
+		const columns = new Set(
+			schema.map((col) => String(col.name ?? col.column_name ?? '').toLowerCase()).filter(Boolean)
+		);
+		const rows = await db.query<FinanceRow>(liveFinanceSql(stockCode, statement, freq, columns));
 		if (rows.length === 0) return null;
 
 		return toTable(stockCode, topic, rows);
 	} catch (err) {
-		console.warn(`[dartlab-browser] HF finance parquet fallback: ${stockCode}/${topic}`, err);
+		console.warn(`[dartlab-browser] finance parquet fallback: ${stockCode}/${topic}`, err);
 		return null;
 	}
 }
 
-function liveFinanceSql(stockCode: string, statement: string, freq: BrowserShowFreq): string {
+function liveFinanceSql(
+	stockCode: string,
+	statement: string,
+	freq: BrowserShowFreq,
+	columns: Set<string>
+): string {
 	const reportCodes =
 		freq === 'Y'
 			? "'11011'"
 			: statement === 'BS'
 				? "'11013','11012','11014'"
 				: "'11013','11012','11014'";
-	const amountExpr =
-		freq === 'Y' || statement === 'BS'
-			? "TRY_CAST(REPLACE(thstrm_amount, ',', '') AS DOUBLE)"
-			: "TRY_CAST(REPLACE(COALESCE(thstrm_q_amount, thstrm_amount), ',', '') AS DOUBLE)";
+	const amountExpr = liveAmountExpr(statement, freq, columns);
 	const periodExpr =
 		freq === 'Y'
 			? 'bsns_year'
@@ -94,6 +105,17 @@ function liveFinanceSql(stockCode: string, statement: string, freq: BrowserShowF
 		WHERE f.rn = 1
 		ORDER BY f.ord NULLS LAST, f.accountKey, f.period
 	`;
+}
+
+function liveAmountExpr(statement: string, freq: BrowserShowFreq, columns: Set<string>): string {
+	const cast = (column: string) => `TRY_CAST(REPLACE(${column}, ',', '') AS DOUBLE)`;
+	if (freq === 'Y' || statement === 'BS') return cast('thstrm_amount');
+	if (columns.has('thstrm_q_amount')) {
+		return "TRY_CAST(REPLACE(COALESCE(thstrm_q_amount, thstrm_amount), ',', '') AS DOUBLE)";
+	}
+	if (columns.has('thstrm_amount')) return cast('thstrm_amount');
+	if (columns.has('thstrm_add_amount')) return cast('thstrm_add_amount');
+	return 'NULL';
 }
 
 function toTable(stockCode: string, topic: BrowserShowTopic, rows: FinanceRow[]): BrowserTable {

@@ -101,6 +101,10 @@ dartlab.scan("screen", spec={...}) # 조건 조합 후보 추출
 [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/03_scan.py)
 [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/03_scan.ipynb)
 
+`03_scan` 노트북은 마지막 코드 셀에서 `scan("fields", "roe")` 로 필드 키를
+확인한 뒤 `scan("screen", spec=...)` 으로 ROE·부채비율 조건 후보를 좁히는
+예시를 제공한다. 설명은 마크다운 셀이 아니라 코드 주석으로 둔다.
+
 | 항목 | 내용 |
 |---|---|
 | 레이어 | L1 |

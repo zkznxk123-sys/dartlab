@@ -1,12 +1,11 @@
-"""AI 분석 통합 오케스트레이터 — tool calling 기반 순수 스트리밍.
+"""AI 분석 통합 오케스트레이터 — workspace-native agent 스트리밍.
 
 dartlab.ask(), server UI, CLI가 모두 이 코어를 소비한다.
 동기 제너레이터로 AnalysisEvent를 생산하며, 소비자가 형식(SSE/텍스트/제너레이터)을 결정.
 
 구조::
 
-    질문 → ContextBuilder → 시스템 프롬프트 조립
-         → streamWithTools (LLM tool call ↔ 엔진 실행 루프) → 최종 텍스트
+    질문 → AgentSession → workspace tool 관찰/계산/검산 → 최종 텍스트
 """
 
 from __future__ import annotations
@@ -19,8 +18,8 @@ log = logging.getLogger(__name__)
 
 from dartlab.ai.runtime.events import AnalysisEvent
 from dartlab.ai.runtime.postResponse import runPostResponse
-from dartlab.ai.runtime.prompts import buildSystemPromptParts
 from dartlab.ai.runtime.workspace import AnalysisWorkspace
+from dartlab.ai.runtime.workspace_agent import buildWorkspaceAgentSystemPrompt, runWorkspaceAgent
 
 # ── 데이터 신선도 추출 ────────────────────────────────────
 
@@ -205,7 +204,7 @@ def runAsk(
     # 추가 LLMConfig overrides (kwargs 로 흡수)
     **kwargs: Any,
 ) -> Generator[AnalysisEvent, None, None]:
-    """AI 분석 이벤트 스트림. AI 가 모든 엔진을 tool 로 자율 호출 (src/dartlab/ai/README.md)."""
+    """AI 분석 이벤트 스트림. AI가 workspace를 관찰·계산·검산한 뒤 답한다."""
     _logFile = None
     try:
         from dartlab import config as _cfg
@@ -307,11 +306,7 @@ def _runAskInner(
     workspace: AnalysisWorkspace | None = None,
     **kwargs: Any,
 ) -> Generator[AnalysisEvent, None, None]:
-    """runAsk() 본체 — tool calling 단일 경로.
-
-    사상 (src/dartlab/ai/README.md): AI 가 모든 엔진을 tool 로 자율 호출. 종목 감지 · 원본 검증 · override 전부 AI 판단.
-    사용자 API 에 Company 파라미터 노출 안 함. Pre-grounding · ContextBuilder 떠먹이기 전부 제거.
-    """
+    """runAsk() 본체 — workspace-native agent 단일 경로."""
     config_ = _resolveAnalysisConfig(provider, role, model, api_key, base_url, **kwargs)
 
     corp_name: str | None = None
@@ -340,43 +335,30 @@ def _runAskInner(
 
     llm = create_provider(config_)
 
-    company_market = getattr(company, "market", "KR") if company else "KR"
     if _templateText is None and _templateName:
         from dartlab.ai.patterns import get_template
 
         _templateText = get_template(_templateName)
 
-    # category + intent 산출 — 시스템 프롬프트와 toolLoop 가드 모두에 전달
-    from dartlab.ai.context.intent import classifyCategory, classifyIntent
-
-    category = classifyCategory(question, stockCode=stockCode).value
-    intent = classifyIntent(question, hasCompany=company is not None).intent.value
-
-    static_prompt, dynamic_prompt = buildSystemPromptParts(
-        config_,
+    agent_prompt = buildWorkspaceAgentSystemPrompt(
         question=question,
-        category=category,
-        intent=intent,
-        market=company_market,
-        hasCompany=company is not None,
         stockCode=stockCode,
         corpName=corp_name,
-        templateText=_templateText,
     )
+    if _templateText:
+        agent_prompt += "\n\n요청 템플릿:\n" + _templateText
+    if config_.system_prompt:
+        agent_prompt = config_.system_prompt.rstrip() + "\n\n" + agent_prompt
 
-    if llm.supports_cache_control and static_prompt:
+    if llm.supports_cache_control:
         system_content: str | list[dict] = [
-            {"type": "text", "text": static_prompt, "cache_control": {"type": "ephemeral"}},
+            {"type": "text", "text": agent_prompt, "cache_control": {"type": "ephemeral"}},
         ]
-        if dynamic_prompt:
-            system_content.append({"type": "text", "text": dynamic_prompt})
     else:
-        system_content = static_prompt + dynamic_prompt
-
-    system_prompt = static_prompt + dynamic_prompt
+        system_content = agent_prompt
 
     if emit_system_prompt:
-        yield AnalysisEvent("system_prompt", {"text": system_prompt})
+        yield AnalysisEvent("system_prompt", {"text": agent_prompt})
 
     messages: list[dict] = [{"role": "system", "content": system_content}]
 
@@ -391,17 +373,10 @@ def _runAskInner(
     userParts.append(f"질문: {question}")
     messages.append({"role": "user", "content": "\n\n---\n\n".join(userParts)})
 
-    # ── 4. LLM tool calling 루프 (Claude Code 방식) ──
-    # legacy exec 루프 대체 — 스키마 enum 으로 KeyError 구조적 제거.
-    from dartlab.ai.runtime.toolLoop import streamWithTools
-
-    for item in streamWithTools(
+    for item in runWorkspaceAgent(
         llm,
         messages,
-        category=category,
         question=question,
-        intent=intent,
-        hasCompany=company is not None,
         stockCode=stockCode,
         workspace=workspace,
     ):

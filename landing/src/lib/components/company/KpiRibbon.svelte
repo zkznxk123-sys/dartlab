@@ -55,7 +55,7 @@
 		display: grid;
 		grid-template-columns: repeat(8, minmax(0, 1fr));
 		gap: 8px;
-		max-width: 1480px;
+		max-width: var(--company-shell-width, 1320px);
 		margin: 12px auto 0;
 	}
 	.kpi {
@@ -135,7 +135,28 @@
 	}
 	@media (max-width: 700px) {
 		.kpi-ribbon {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
+			display: flex;
+			gap: 8px;
+			overflow-x: auto;
+			overscroll-behavior-x: contain;
+			padding-bottom: 6px;
+			scroll-snap-type: x proximity;
+			scrollbar-width: thin;
+		}
+		.kpi {
+			flex: 0 0 142px;
+			height: 112px;
+			padding: 9px;
+			scroll-snap-align: start;
+		}
+		strong {
+			margin-top: 6px;
+			min-height: 31px;
+			font-size: 16px;
+		}
+		.spark {
+			height: 22px;
+			margin-top: 4px;
 		}
 	}
 </style>

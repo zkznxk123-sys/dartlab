@@ -173,11 +173,17 @@ def _applyAiContract(entry: dict[str, Any], sections: dict[str, str]) -> None:
         return
     for key in (
         "contractId",
+        "whenToUse",
         "questionTypes",
+        "requiredInputs",
         "requiredEvidence",
         "evidenceSchema",
+        "outputShape",
+        "dataColumns",
         "freshness",
         "comparisonCompleteness",
+        "commonCalculations",
+        "verification",
         "visualPolicy",
         "artifactPolicy",
         "toolArgPolicy",
@@ -185,6 +191,8 @@ def _applyAiContract(entry: dict[str, Any], sections: dict[str, str]) -> None:
         "preflightActions",
         "acceptanceCriteria",
         "failurePolicy",
+        "failureModes",
+        "badUses",
         "priority",
     ):
         if key in contract:
@@ -1713,6 +1721,179 @@ def _generateAnalysisGraphPy(entries: dict[str, dict[str, Any]]) -> str:
     )
 
 
+def generateIntelligencePack(entries: dict[str, dict[str, Any]] | None = None) -> str:
+    """Generate the installable DartLab Intelligence Pack JSON."""
+    import hashlib
+    from datetime import UTC, datetime
+
+    if entries is None:
+        entries = _capabilitiesEntriesFromGeneratedPy(_generateCapabilitiesPy())
+    graph = _buildAnalysisGraph(entries)
+    data_catalog = _packDataCatalog()
+    visual_contract = _packVisualContract()
+    safety_policy = _packSafetyPolicy()
+    payload_without_hash = {
+        "name": "DartLab Financial Workspace Agent",
+        "schemaVersion": 1,
+        "loop": ["observe", "inspect", "compute", "verify", "answer"],
+        "officialAgentTools": [
+            "workspace_status",
+            "read_text",
+            "inspect_data",
+            "run_python",
+            "search_workspace",
+            "create_artifact",
+            "finalize_answer",
+        ],
+        "engineLibraries": ["Company", "gather", "scan", "macro", "industry", "analysis", "credit", "quant", "viz"],
+        "apiMap": _packApiMap(entries),
+        "capabilitySkillMap": _packCapabilitySkillMap(entries),
+        "analysisGraph": {
+            "graphVersion": graph.get("graphVersion"),
+            "nodeCount": len(graph.get("nodes") or []),
+            "edgeCount": len(graph.get("edges") or []),
+            "contractCount": len(graph.get("contracts") or {}),
+            "routeCount": len(graph.get("routes") or []),
+            "sourceHash": graph.get("sourceHash"),
+        },
+        "processMap": graph.get("processMaps") or {},
+        "dataCatalog": data_catalog,
+        "recipeMap": {"source": "approved_audit_trace", "recipes": []},
+        "visualContract": visual_contract,
+        "safetyPolicy": safety_policy,
+    }
+    source_blob = json.dumps(payload_without_hash, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    payload = {
+        **payload_without_hash,
+        "generatedAt": datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "sourceHash": hashlib.sha256(source_blob).hexdigest()[:16],
+    }
+    return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _packApiMap(entries: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for key, entry in sorted(entries.items()):
+        if key.startswith("Company.") or key.startswith("scan.") or key.startswith("gather."):
+            continue
+        rows.append(
+            _dropEmpty(
+                {
+                    "name": key,
+                    "apiRef": entry.get("apiRef") or key,
+                    "kind": entry.get("kind") or entry.get("type"),
+                    "summary": entry.get("summary") or entry.get("description"),
+                    "guide": entry.get("guide"),
+                    "requires": entry.get("requires"),
+                    "contractId": entry.get("contractId"),
+                    "questionTypes": entry.get("questionTypes"),
+                }
+            )
+        )
+    return rows
+
+
+def _packCapabilitySkillMap(entries: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for key, entry in sorted(entries.items()):
+        rows.append(
+            {
+                "key": key,
+                "apiRef": entry.get("apiRef") or key,
+                "contractId": entry.get("contractId"),
+                "summary": entry.get("summary") or entry.get("description"),
+                "whenToUse": entry.get("whenToUse") or entry.get("guide") or entry.get("capabilities"),
+                "questionTypes": entry.get("questionTypes") or [],
+                "requiredInputs": entry.get("requiredInputs") or entry.get("args") or entry.get("requires"),
+                "outputShape": entry.get("outputShape") or entry.get("returns"),
+                "dataColumns": entry.get("dataColumns") or entry.get("evidenceSchema"),
+                "freshness": entry.get("freshness"),
+                "commonCalculations": entry.get("commonCalculations") or [],
+                "verification": entry.get("verification") or entry.get("acceptanceCriteria"),
+                "visualPolicy": entry.get("visualPolicy"),
+                "failureModes": entry.get("failureModes") or entry.get("failurePolicy"),
+                "badUses": entry.get("badUses") or [],
+            }
+        )
+    return rows
+
+
+def _packDataCatalog() -> list[dict[str, Any]]:
+    return [
+        {
+            "datasetId": "krx.indices",
+            "path": "data/krx/indices",
+            "latestDateColumn": "BAS_DD",
+            "latestAsOf": None,
+            "entityColumns": ["IDX_NM", "IDX_CD"],
+            "metricCandidates": ["CLSPRC_IDX", "FLUC_RT", "CMPPREVDD_IDX", "MKTCAP"],
+            "universe": "KRX index series",
+            "freshness": {"cadence": "daily", "staleAfterBusinessDays": 10},
+        },
+        {
+            "datasetId": "krx.prices",
+            "path": "data/krx/prices",
+            "latestDateColumn": "BAS_DD",
+            "latestAsOf": None,
+            "entityColumns": ["ISU_SRT_CD", "ISU_ABBRV"],
+            "metricCandidates": ["TDD_CLSPRC", "FLUC_RT", "ACC_TRDVOL", "ACC_TRDVAL", "MKTCAP"],
+            "universe": "KRX listed equities",
+            "freshness": {"cadence": "daily", "staleAfterBusinessDays": 10},
+        },
+        {
+            "datasetId": "dart.filings",
+            "path": "data/dart",
+            "latestDateColumn": "rcept_dt",
+            "latestAsOf": None,
+            "entityColumns": ["corp_code", "corp_name", "stock_code"],
+            "metricCandidates": [],
+            "universe": "DART disclosure records",
+            "freshness": {"cadence": "daily"},
+        },
+        {
+            "datasetId": "macro.series",
+            "path": "data/macro",
+            "latestDateColumn": "date",
+            "latestAsOf": None,
+            "entityColumns": ["series", "symbol"],
+            "metricCandidates": ["value", "close", "rate"],
+            "universe": "macro and market series",
+            "freshness": {"cadence": "mixed"},
+        },
+    ]
+
+
+def _packVisualContract() -> dict[str, Any]:
+    return {
+        "visualTypes": ["chart", "diagram"],
+        "chart": {
+            "requires": ["purpose", "sourceArtifact", "metric", "categories", "series", "asOf"],
+            "minCategories": 2,
+            "minNumericValues": 2,
+            "rejectSingleValue": True,
+            "allowedPurposes": ["change", "comparison", "ranking", "distribution"],
+        },
+        "diagram": {
+            "requires": ["purpose", "nodes", "edges", "evidenceIds"],
+            "allowedPurposes": ["structure", "flow", "causality"],
+            "requiresEvidence": True,
+        },
+    }
+
+
+def _packSafetyPolicy() -> dict[str, Any]:
+    return {
+        "blockedHighMemoryPatterns": ["sections", "rawSections", "retrievalBlocks", "contextSlices"],
+        "runPythonTimeoutMaxSec": 120,
+        "finalizeRequiresVerification": True,
+        "datePolicy": "currentDate and data asOf must remain distinct",
+    }
+
+
+def _dropEmpty(data: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in data.items() if value not in (None, "", [], {})}
+
+
 def _capabilitiesEntriesFromGeneratedPy(content: str) -> dict[str, dict[str, Any]]:
     """_generateCapabilitiesPy 출력 문자열에서 CAPABILITIES JSON payload를 복원."""
     marker = "r'''\n"
@@ -2620,6 +2801,7 @@ def main():
     skillRefPath = ROOT / ".claude" / "skills" / "dartlab" / "reference.md"
     capabilitiesPyPath = SRC / "dartlab" / "core" / "_generated.py"
     analysisGraphPyPath = SRC / "dartlab" / "core" / "_generated_analysis_graph.py"
+    intelligencePackPath = SRC / "dartlab" / "ai" / "intelligence" / "pack.json"
 
     skillRefPath.parent.mkdir(parents=True, exist_ok=True)
 
@@ -2639,9 +2821,16 @@ def main():
     capabilitiesPyPath.write_text(capabilitiesPy, encoding="utf-8")
     print(f"  _generated.py ({len(capabilitiesPy):,} chars) -> {capabilitiesPyPath}")
 
-    analysisGraphPy = _generateAnalysisGraphPy(_capabilitiesEntriesFromGeneratedPy(capabilitiesPy))
+    capabilityEntries = _capabilitiesEntriesFromGeneratedPy(capabilitiesPy)
+
+    analysisGraphPy = _generateAnalysisGraphPy(capabilityEntries)
     analysisGraphPyPath.write_text(analysisGraphPy, encoding="utf-8")
     print(f"  _generated_analysis_graph.py ({len(analysisGraphPy):,} chars) -> {analysisGraphPyPath}")
+
+    intelligencePackPath.parent.mkdir(parents=True, exist_ok=True)
+    intelligencePack = generateIntelligencePack(entries=capabilityEntries)
+    intelligencePackPath.write_text(intelligencePack, encoding="utf-8")
+    print(f"  pack.json ({len(intelligencePack):,} chars) -> {intelligencePackPath}")
 
     mcpToolsPyPath = SRC / "dartlab" / "mcp" / "_generated_tools.py"
     mcpToolsPy = _generateMcpToolsPy()

@@ -1,7 +1,8 @@
 /** SSE event handler — content blocks 구조 (Claude Code 패턴 벤치마킹) */
+import { isMeaningfulVisualSpec } from "$shared/api/visualContract";
 
 export interface ContentBlock {
-  type: "text" | "code_execution" | "tool_call" | "chart";
+  type: "text" | "code_execution" | "tool_call" | "chart" | "agent_trace";
   // text
   text?: string;
   // code_execution
@@ -16,6 +17,9 @@ export interface ContentBlock {
   toolResult?: unknown;
   // chart
   spec?: unknown;
+  // agent_trace
+  phase?: string;
+  data?: unknown;
   _ts?: number;
   _resultTs?: number;
 }
@@ -188,8 +192,21 @@ export function createSseHandler(
           const blocks = [...(msg.blocks ?? [])];
           const charts = (d as { charts?: unknown[] }).charts ?? [];
           for (const spec of charts) {
+            if (!isMeaningfulVisualSpec(spec)) continue;
             blocks.push({ type: "chart", spec, _ts: Date.now() });
           }
+          updateMessage({ blocks });
+          break;
+        }
+
+        case "observe":
+        case "inspect":
+        case "compute":
+        case "verify":
+        case "artifact": {
+          const msg = getMessage();
+          const blocks = [...(msg.blocks ?? [])];
+          blocks.push({ type: "agent_trace", phase: event, data: d, _ts: Date.now() });
           updateMessage({ blocks });
           break;
         }

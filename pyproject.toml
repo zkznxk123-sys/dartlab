@@ -82,6 +82,7 @@ dependencies = [
     # viz
     "plotly>=5.0.0,<6; sys_platform != 'emscripten'",
     "plotext>=5.2.8,<6; sys_platform != 'emscripten'",  # 터미널 ASCII 차트 (toAscii)
+    "marimo>=0.23.4",
 ]
 
 [project.scripts]

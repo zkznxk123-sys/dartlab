@@ -2290,7 +2290,7 @@
       "title": "매출과 이익 흐름",
       "purpose": "trend",
       "statement": "IS",
-      "component": "income_conversion",
+      "component": "income_trend_matrix",
       "periodMode": "Q",
       "compareMode": "yoy",
       "requiredMetricIds": [
@@ -2314,7 +2314,7 @@
       "title": "영업이익률과 순이익률",
       "purpose": "trend",
       "statement": "IS",
-      "component": "income_conversion",
+      "component": "income_trend_matrix",
       "periodMode": "Q",
       "compareMode": "yoy",
       "requiredMetricIds": [
@@ -2334,7 +2334,7 @@
       "title": "자산 = 부채 + 자본",
       "purpose": "composition",
       "statement": "BS",
-      "component": "balance_structure",
+      "component": "balance_structure_trend",
       "periodMode": "Q",
       "compareMode": "latest",
       "requiredMetricIds": [
@@ -2356,7 +2356,7 @@
       "title": "자산 구성과 묶인 돈",
       "purpose": "composition",
       "statement": "BS",
-      "component": "balance_structure",
+      "component": "balance_structure_trend",
       "periodMode": "Q",
       "compareMode": "latest",
       "requiredMetricIds": [
@@ -2381,7 +2381,7 @@
       "title": "부채비율 추이",
       "purpose": "risk",
       "statement": "BS",
-      "component": "balance_structure",
+      "component": "balance_structure_trend",
       "periodMode": "Q",
       "compareMode": "yoy",
       "requiredMetricIds": [
@@ -2401,7 +2401,7 @@
       "title": "영업/투자/재무/FCF 흐름",
       "purpose": "bridge",
       "statement": "CF",
-      "component": "cashflow_bridge",
+      "component": "cashflow_signed_matrix",
       "periodMode": "Q",
       "compareMode": "yoy",
       "requiredMetricIds": [
@@ -2424,7 +2424,7 @@
       "title": "최신 현금흐름 브릿지",
       "purpose": "bridge",
       "statement": "CF",
-      "component": "cashflow_bridge",
+      "component": "cashflow_signed_matrix",
       "periodMode": "Q",
       "compareMode": "latest",
       "requiredMetricIds": [
@@ -2446,7 +2446,7 @@
       "title": "FCF 이후 자본배분",
       "purpose": "bridge",
       "statement": "CF",
-      "component": "cashflow_bridge",
+      "component": "capital_allocation_bridge",
       "periodMode": "Q",
       "compareMode": "latest",
       "requiredMetricIds": [
@@ -2520,7 +2520,7 @@
       "title": "보고서/원문 근거 연결",
       "purpose": "evidence",
       "statement": "REPORT",
-      "component": "evidence_coverage",
+      "component": "evidence_link_strip",
       "periodMode": "Q",
       "compareMode": "topic",
       "requiredMetricIds": [

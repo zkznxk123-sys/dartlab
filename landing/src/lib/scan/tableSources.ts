@@ -19,6 +19,7 @@ import {
 	Vault,
 	Users,
 	Notebook,
+	SlidersHorizontal,
 	type Icon as LucideIcon
 } from 'lucide-svelte';
 
@@ -26,7 +27,7 @@ export interface TableSource {
 	id: string;
 	label: string;
 	icon?: typeof LucideIcon;
-	source: 'memory' | 'parquet' | 'notebook';
+	source: 'screen' | 'memory' | 'parquet' | 'notebook';
 	hfPath?: string;
 	viewName?: string;
 	defaultLimit?: number;
@@ -35,6 +36,13 @@ export interface TableSource {
 }
 
 export const TABLE_SOURCES: TableSource[] = [
+	{
+		id: 'screen',
+		label: 'screen',
+		icon: SlidersHorizontal,
+		source: 'screen',
+		desc: '조건형 스크리닝 — 필드 검색, 조건 조합, 그리드 필터 적용'
+	},
 	{
 		id: 'ecosystem',
 		label: 'ecosystem',

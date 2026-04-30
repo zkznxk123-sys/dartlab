@@ -26,8 +26,8 @@
 			<img src="/avatar.png" alt="DartLab" class="relative w-14 h-14 rounded-full" />
 		</div>
 
-		<h1 class="text-xl font-bold text-dl-text mb-1">AI 금융 분석가</h1>
-		<p class="text-[13px] text-dl-text-muted mb-5">종목·업종·매크로 무엇이든 자연어로 물어보세요</p>
+		<h1 class="text-xl font-bold text-dl-text mb-1">dartlab ai</h1>
+		<p class="text-[13px] text-dl-text-muted mb-5">무엇이든 물어보세요</p>
 
 		<!-- Contract: 재무 수치와 서술 텍스트 표준화된 계정 40개 모듈 원문 근거 Evidence First 추천 질문 -->
 		{#if dataReadyInfo?.label}
@@ -41,7 +41,7 @@
 				bind:inputText
 				large={true}
 				enableCompanyAutocomplete={false}
-				placeholder="예: '두산밥캣 요즘 어떤가', '반도체 업종 비교해줘'"
+				placeholder="무엇이든 물어보세요"
 				{onSend}
 				{onCompanySelect}
 				{onCommand}

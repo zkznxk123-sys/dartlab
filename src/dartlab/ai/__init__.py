@@ -14,7 +14,7 @@ from dartlab.core.ai import (
 
 
 def configure(
-    provider: str = "codex",
+    provider: str = "oauth-codex",
     model: str | None = None,
     api_key: str | None = None,
     base_url: str | None = None,

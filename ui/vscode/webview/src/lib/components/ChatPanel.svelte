@@ -439,7 +439,7 @@
       {#if avatarSrc}
         <img src={avatarSrc} alt="DartLab" width="56" height="56" class="welcome-avatar" />
       {/if}
-      <h2 class="welcome-title">DartLab</h2>
+      <h2 class="welcome-title">dartlab ai</h2>
 
       {#if noProvider}
         <p class="welcome-text">프로바이더를 연결하세요</p>
@@ -471,8 +471,7 @@
           {/if}
         </div>
       {:else}
-        <p class="welcome-text">종목코드 또는 회사명을 입력하세요</p>
-        <p class="welcome-sub">예: 005930, 삼성전자, AAPL</p>
+        <p class="welcome-text">무엇이든 물어보세요</p>
         {#if watchlist.length > 0}
           <div class="watchlist">
             <span class="watchlist-label">관심종목</span>

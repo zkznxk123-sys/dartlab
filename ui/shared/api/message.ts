@@ -1,7 +1,7 @@
 /** Shared message types — Claude Code ContentBlock 패턴 */
 
 export interface ContentBlock {
-  type: "text" | "code_execution" | "tool_call" | "chart";
+  type: "text" | "code_execution" | "tool_call" | "chart" | "agent_trace";
   // text
   text?: string;
   // code_execution
@@ -16,6 +16,9 @@ export interface ContentBlock {
   toolResult?: unknown;
   // chart
   spec?: unknown;
+  // agent_trace
+  phase?: string;
+  data?: unknown;
   _ts?: number;
   _resultTs?: number;
 }

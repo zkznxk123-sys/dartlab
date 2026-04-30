@@ -47,6 +47,13 @@ export function askStreamVSCode(company, question, options = {}, callbacks, hist
 				case "chunk": callbacks.onChunk?.(data?.text); break;
 				case "code_round": callbacks.onCodeRound?.(data); break;
 				case "chart": callbacks.onChart?.(data); break;
+				case "observe":
+				case "inspect":
+				case "compute":
+				case "verify":
+				case "artifact":
+					callbacks.onAgentTrace?.(event, data);
+					break;
 				case "ui_action": callbacks.onUiAction?.(data); break;
 				case "error": callbacks.onError?.(data?.error, data?.action, data?.detail); break;
 				case "done":

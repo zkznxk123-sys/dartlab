@@ -75,6 +75,7 @@ def sanitizeToolArguments(
     arguments: dict[str, Any] | None,
     *,
     today: date | None = None,
+    question: str | None = None,
 ) -> dict[str, Any]:
     """runtime 실행 전 명백히 깨진 tool 인자를 1회 보정한다."""
     today = today or date.today()
@@ -92,6 +93,10 @@ def sanitizeToolArguments(
                 pass
         if str(clean.get("target") or "").upper() == "USDKRW":
             clean["market"] = "KR"
+    if _needsCurrentData(question) and name == "gather":
+        _sanitizeRecentGatherWindow(clean, today=today)
+    if _needsCurrentData(question) and name in {"liveFilings", "disclosure", "filings"}:
+        _sanitizeRecentDisclosureWindow(clean, today=today)
     if name == "show" and _looks_like_foreign_ticker(clean.get("stockCode")):
         topic = clean.get("topic")
         if isinstance(topic, str):
@@ -154,6 +159,40 @@ def sanitizeCapabilitiesArgs(args: dict[str, Any]) -> dict[str, Any]:
 def _looks_like_foreign_ticker(value: Any) -> bool:
     text = str(value or "").strip()
     return bool(text) and not text.isdigit()
+
+
+def _needsCurrentData(question: str | None) -> bool:
+    if not question:
+        return False
+    lowered = question.lower()
+    if not any(word in lowered for word in ("최근", "현재", "오늘", "어제", "latest", "recent")):
+        return False
+    return _parseDate(question) is None
+
+
+def _sanitizeRecentGatherWindow(clean: dict[str, Any], *, today: date) -> None:
+    axis = str(clean.get("axis") or "").lower()
+    if axis not in {"macro", "krx", "price"}:
+        return
+    end = _parseDate(clean.get("end") or clean.get("to") or clean.get("asOf") or clean.get("date"))
+    stale_cutoff = today - timedelta(days=10)
+    if end is not None and end >= stale_cutoff:
+        return
+    clean["end"] = today.isoformat()
+    if axis == "macro":
+        clean["start"] = (today - timedelta(days=120)).isoformat()
+    elif axis in {"krx", "price"}:
+        clean["start"] = (today - timedelta(days=45)).isoformat()
+
+
+def _sanitizeRecentDisclosureWindow(clean: dict[str, Any], *, today: date) -> None:
+    end = _parseDate(clean.get("end") or clean.get("to") or clean.get("date"))
+    stale_cutoff = today - timedelta(days=10)
+    if end is not None and end >= stale_cutoff:
+        return
+    clean["end"] = today.isoformat()
+    clean["start"] = (today - timedelta(days=30)).isoformat()
+    clean["days"] = 30
 
 
 def _callArgs(call: dict[str, Any]) -> dict[str, Any]:

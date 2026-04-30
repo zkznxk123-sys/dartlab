@@ -31,8 +31,8 @@ CODEX_API_BASE = "https://chatgpt.com/backend-api"
 CODEX_RESPONSES_PATH = "/codex/responses"
 
 _BUNDLED_MODELS = [
-    "gpt-5.2",
     "gpt-5.4",
+    "gpt-5.2",
     "gpt-5.3-codex",
     "gpt-5.2-codex",
     "gpt-5.1-codex-max",
@@ -180,8 +180,9 @@ class OAuthCodexProvider(BaseProvider):
 
     @property
     def default_model(self) -> str:
-        """기본 모델 — 현재 bundled 최신 모델."""
-        return _BUNDLED_MODELS[0]
+        """기본 모델 — 원격 모델 목록 우선, 실패 시 bundled 최신 fallback."""
+        models = availableModels()
+        return models[0] if models else _BUNDLED_MODELS[0]
 
     @property
     def supports_native_tools(self) -> bool:

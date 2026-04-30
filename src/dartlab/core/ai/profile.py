@@ -55,7 +55,7 @@ class AiProfile:
 
     version: int = 2
     revision: int = 0
-    default_provider: str = "codex"
+    default_provider: str = "oauth-codex"
     providers: dict[str, ProviderProfile] = field(default_factory=dict)
     roles: dict[str, RoleBinding] = field(default_factory=dict)
     temperature: float = 0.3
@@ -79,8 +79,8 @@ class AiProfileManager:
 
     def _bootstrap(self) -> AiProfile:
         return AiProfile(
-            default_provider="codex",
-            roles=_default_roles("codex", {}),
+            default_provider="oauth-codex",
+            roles=_default_roles("oauth-codex", {}),
             updated_at=_utc_now(),
             updated_by="bootstrap",
         )
@@ -108,10 +108,11 @@ class AiProfileManager:
                 )
 
         default_provider = (
-            normalize_provider(data.get("defaultProvider")) or normalize_provider(data.get("provider")) or "codex"
+            normalize_provider(data.get("defaultProvider")) or normalize_provider(data.get("provider")) or "oauth-codex"
         )
-        if get_provider_spec(default_provider) is None:
-            default_provider = "codex"
+        default_spec = get_provider_spec(default_provider)
+        if default_spec is None or DEFAULT_ROLE not in default_spec.supported_roles:
+            default_provider = "oauth-codex"
 
         roles: dict[str, RoleBinding] = {}
         roles_raw = data.get("roles", {})
@@ -121,7 +122,8 @@ class AiProfileManager:
                 if normalized_role is None or not isinstance(binding, dict):
                     continue
                 bound_provider = normalize_provider(binding.get("provider")) or default_provider
-                if get_provider_spec(bound_provider) is None:
+                bound_spec = get_provider_spec(bound_provider)
+                if bound_spec is None or normalized_role not in bound_spec.supported_roles:
                     bound_provider = default_provider
                 roles[normalized_role] = RoleBinding(
                     provider=bound_provider,

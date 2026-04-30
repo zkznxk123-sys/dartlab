@@ -82,6 +82,10 @@ cd ui/vscode/webview && npm install && npm run build
 
 **원칙**: VSCode 확장에 있는 기능은 Svelte 에도 있어야 하고, VSCode 에 없는 기능은 Svelte 에서 숨긴다.
 
+AI 채팅 surface 는 Financial Workspace Agent 의 같은 event contract 를 소비한다. 서버/stdio 가 내보내는 `meta`, `tool_call`, `tool_result`, `chunk`, `chart`, `done` 과 workspace-native 이벤트 `observe`, `inspect`, `compute`, `verify`, `artifact` 는 web 과 VSCode 에서 모두 처리해야 한다. 새 이벤트는 한쪽 surface 에만 붙이지 않고 `ui/shared` 의 parser/contract 를 먼저 갱신한다.
+
+차트는 검증된 visual 만 렌더링한다. web 과 VSCode 는 `ui/shared/api/visualContract.ts` 를 통해 단일 값·단일 막대·축 없는 spec 을 버리고, 렌더링은 `ui/shared/chart/` 컴포넌트를 재사용한다. visual 은 계산표/observation 에서 컴파일된 설명 산출물이어야 하며 placeholder 차트는 UI 에서도 숨긴다.
+
 ### 기능 대조표
 
 | 기능 | VSCode 확장 | Svelte UI | 상태 |
@@ -90,6 +94,8 @@ cd ui/vscode/webview && npm install && npm run build
 | 대화 관리 (목록·생성·삭제·이름변경) | sidebar | Sidebar | 동기 |
 | 대화 검색 | sidebar 필터 | SearchModal | 동기 |
 | 스트리밍 응답 | SSE | SSE | 동기 |
+| Agent Trace | observe/inspect/compute/verify/artifact | observe/inspect/compute/verify/artifact | 동기 |
+| Visual 검증 | shared visual contract | shared visual contract | 동기 |
 | Provider · Model 선택 | 드롭다운 | 설정 패널 | 동기 |
 | Slash 명령어 | `/new` · `/clear` · `/model` 등 | — | Svelte 미구현 |
 | 상태표시줄 | 하단 서버 상태 | 상단 연결 상태 | 동기 |

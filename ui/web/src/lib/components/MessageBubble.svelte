@@ -49,6 +49,13 @@
 		show_topic: "공시 topic 확인 중",
 		get_data: "재무 데이터 조회 중",
 	};
+	const AGENT_TRACE_LABELS = {
+		observe: "관찰",
+		inspect: "데이터 확인",
+		compute: "계산",
+		verify: "검산",
+		artifact: "산출물",
+	};
 
 	function getToolStringArg(call, key) {
 		const value = call?.arguments?.[key];
@@ -676,18 +683,20 @@
 					</div>
 				{/if}
 
-				<!-- ── 플러그인 추천 카드 ── -->
-				{#if message.pluginHints?.length}
-					<div class="mt-3 p-3 rounded-lg border border-dl-accent/20 bg-dl-accent/5">
-						<p class="text-xs font-medium text-dl-accent mb-2">확장 플러그인 추천</p>
-						{#each message.pluginHints as hint}
-							<div class="flex flex-col gap-0.5 mb-2 last:mb-0">
-								<span class="text-sm font-medium text-dl-text">{hint.name}</span>
-								<span class="text-xs text-dl-text-dim">{hint.description}</span>
-								<code class="text-[11px] text-dl-accent/80 bg-dl-bg-alt px-1.5 py-0.5 rounded w-fit mt-0.5">{hint.install}</code>
-							</div>
-						{/each}
-					</div>
+				{#if message.agentTrace?.length}
+					<details class="mt-3 rounded-lg border border-dl-border/30 bg-dl-bg-card/35 px-3 py-2 text-[11px] text-dl-text-dim">
+						<summary class="cursor-pointer select-none font-medium text-dl-text-muted">Agent Trace</summary>
+						<div class="mt-2 space-y-1.5">
+							{#each message.agentTrace.slice(-12) as item}
+								<div class="flex items-start gap-2 rounded bg-dl-bg-darker/45 px-2 py-1.5">
+									<span class="w-16 shrink-0 text-dl-accent-light">{AGENT_TRACE_LABELS[item.phase] || item.phase}</span>
+									<code class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[10px] text-dl-text-dim">
+										{JSON.stringify(item.data)}
+									</code>
+								</div>
+							{/each}
+						</div>
+					</details>
 				{/if}
 
 				<!-- ── 하단 메타 (Claude Code 스타일: 왼쪽 메타 · 오른쪽 액션) ── -->

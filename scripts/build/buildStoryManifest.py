@@ -65,7 +65,13 @@ def _validate_dashboard_manifest(
                 errors.append(f"{qid}: unknown vizKey {viz_key!r}")
 
     required_intent_fields = {"component", "periodMode", "compareMode", "requiredMetricIds"}
-    required_components = {"income_conversion", "balance_structure", "cashflow_bridge", "evidence_coverage"}
+    required_components = {
+        "income_trend_matrix",
+        "balance_structure_trend",
+        "cashflow_signed_matrix",
+        "capital_allocation_bridge",
+        "evidence_link_strip",
+    }
     component_keys = {intent.get("component") for intent in viz_intents}
     missing_components = sorted(required_components - component_keys)
     if missing_components:

@@ -52,11 +52,16 @@ trap cleanup EXIT INT TERM
 
 echo "[test-lock] lock 획득 (PID $$). pytest 시작."
 export DARTLAB_TEST_LOCKED=1
-# uv 가 있으면 uv run, 없으면 pytest 직접 호출 (CI 환경 대응).
-if command -v uv >/dev/null 2>&1; then
-    uv run pytest "$@"
+# repo venv가 있으면 우선 사용한다. Windows bash에서 `uv run`을 먼저 타면
+# pytest 쪽 환경변수 감지가 깨지는 경우가 있어 lock 경고가 잘못 출력된다.
+if [ -x ".venv/Scripts/python.exe" ]; then
+    DARTLAB_TEST_LOCKED=1 .venv/Scripts/python.exe -X utf8 -m pytest "$@"
+elif [ -x ".venv/bin/python" ]; then
+    DARTLAB_TEST_LOCKED=1 .venv/bin/python -X utf8 -m pytest "$@"
+elif command -v uv >/dev/null 2>&1; then
+    DARTLAB_TEST_LOCKED=1 uv run pytest "$@"
 else
-    pytest "$@"
+    DARTLAB_TEST_LOCKED=1 python -X utf8 -m pytest "$@"
 fi
 EXIT_CODE=$?
 

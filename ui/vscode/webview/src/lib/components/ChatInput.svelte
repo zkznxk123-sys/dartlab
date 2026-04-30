@@ -204,7 +204,7 @@
         bind:value={inputText}
         onkeydown={handleKeydown}
         oninput={handleInput}
-        placeholder="종목코드 또는 회사명 (005930, 삼성전자)"
+        placeholder="무엇이든 물어보세요"
         rows="1"
         disabled={disabled && !streaming}
       ></textarea>

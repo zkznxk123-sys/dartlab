@@ -70,7 +70,7 @@
 					<CashflowBridgeChart view={visual.view} />
 				{:else if visual.type === 'evidence-coverage'}
 					<EvidenceCoverageChart view={visual.view} {onOpenEvidence} />
-				{:else}
+				{:else if visual.type === 'legacy-chart'}
 					<FinancialChart chart={visual.chart} />
 				{/if}
 			{/each}

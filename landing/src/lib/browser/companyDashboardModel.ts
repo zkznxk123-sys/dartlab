@@ -24,6 +24,11 @@ export type FinancialChartKind =
 	| 'valuation';
 
 export type CompanyVisual =
+	| { type: 'income-trend-matrix'; view: IncomeConversionView }
+	| { type: 'balance-structure-trend'; view: BalanceStructureView }
+	| { type: 'cashflow-signed-matrix'; view: CashflowBridgeView }
+	| { type: 'capital-allocation-bridge'; view: CashflowBridgeView }
+	| { type: 'evidence-link-strip'; view: EvidenceCoverageView }
 	| { type: 'income-conversion'; view: IncomeConversionView }
 	| { type: 'balance-structure'; view: BalanceStructureView }
 	| { type: 'cashflow-bridge'; view: CashflowBridgeView }
@@ -100,6 +105,27 @@ export interface StructurePart {
 	missing?: boolean;
 }
 
+export interface StructureTrendPart {
+	id: string;
+	label: string;
+	values: Array<number | null>;
+	shares: Array<number | null>;
+	unit: string;
+	tone: Tone;
+	color: string;
+	missing?: boolean;
+}
+
+export interface StructureDeltaPart {
+	id: string;
+	label: string;
+	value: number | null;
+	unit: string;
+	tone: Tone;
+	color: string;
+	missing?: boolean;
+}
+
 export interface BalanceStructureView {
 	id: string;
 	title: string;
@@ -112,6 +138,13 @@ export interface BalanceStructureView {
 	assetParts: StructurePart[];
 	fundingParts: StructurePart[];
 	equityParts: StructurePart[];
+	periods: string[];
+	totalAssetsSeries: Array<number | null>;
+	totalFundingSeries: Array<number | null>;
+	assetTrendParts: StructureTrendPart[];
+	fundingTrendParts: StructureTrendPart[];
+	equityTrendParts: StructureTrendPart[];
+	assetDeltaParts: StructureDeltaPart[];
 	debtRatio: number | null;
 	coverageNotes: CoverageNote[];
 }
@@ -444,17 +477,31 @@ function visualsForQuestion(id: string, ctx: ReturnType<typeof makeContext>): Co
 	const income = incomeConversionView(ctx);
 	const balance = balanceStructureView(ctx);
 	const cashflow = cashflowBridgeView(ctx);
+	const allocation = capitalAllocationBridgeView(ctx);
 	const evidence = evidenceCoverageView(ctx);
 	const valuation = valuationChart(ctx);
 
-	if (id === 'overview') return [income, balance].filter(isVisual);
-	if (id === 'business' || id === 'profit') return [income].filter(isVisual);
-	if (id === 'cash') return [cashflow].filter(isVisual);
-	if (id === 'stability' || id === 'allocation') return [balance, id === 'allocation' ? cashflow : null].filter(isVisual);
+	const incomeView = income?.type === 'income-conversion' ? income.view : null;
+	const balanceView = balance?.type === 'balance-structure' ? balance.view : null;
+	const cashflowView = cashflow?.type === 'cashflow-bridge' ? cashflow.view : null;
+	const allocationView = allocation?.type === 'capital-allocation-bridge' ? allocation.view : null;
+	const evidenceView = evidence?.type === 'evidence-coverage' ? evidence.view : null;
+
+	const asIncome = incomeView ? ({ type: 'income-trend-matrix', view: incomeView } as CompanyVisual) : null;
+	const asBalance = balanceView ? ({ type: 'balance-structure-trend', view: balanceView } as CompanyVisual) : null;
+	const asCashflow = cashflowView ? ({ type: 'cashflow-signed-matrix', view: cashflowView } as CompanyVisual) : null;
+	const asAllocation = allocationView ? ({ type: 'capital-allocation-bridge', view: allocationView } as CompanyVisual) : null;
+	const asEvidence = evidenceView ? ({ type: 'evidence-link-strip', view: evidenceView } as CompanyVisual) : null;
+
+	if (id === 'overview') return [asIncome, asBalance, asCashflow].filter(isVisual);
+	if (id === 'business' || id === 'profit') return [asIncome].filter(isVisual);
+	if (id === 'cash') return [asCashflow].filter(isVisual);
+	if (id === 'stability') return [asBalance].filter(isVisual);
+	if (id === 'allocation') return [asBalance, asAllocation].filter(isVisual);
 	if (id === 'valuation') {
-		return [valuation ? ({ type: 'legacy-chart', chart: valuation } as CompanyVisual) : null, income].filter(isVisual);
+		return [valuation ? ({ type: 'legacy-chart', chart: valuation } as CompanyVisual) : null, asIncome].filter(isVisual);
 	}
-	if (id === 'evidence') return [evidence].filter(isVisual);
+	if (id === 'evidence') return [asEvidence].filter(isVisual);
 	return [];
 }
 
@@ -503,30 +550,65 @@ function incomeConversionView(ctx: ReturnType<typeof makeContext>): CompanyVisua
 function balanceStructureView(ctx: ReturnType<typeof makeContext>): CompanyVisual | null {
 	const source = balanceStructureSource(ctx);
 	const bs = source.dashboard;
-	const totalAssets = latestFrom(bs, 'assets');
-	const liabilities = latestFrom(bs, 'liabilities');
-	const equity = latestFrom(bs, 'equity');
+	const assetsSeries = normalizedSeries(bs, 'assets', ctx.periodMode, 'stock');
+	const liabilitiesSeries = normalizedSeries(bs, 'liabilities', ctx.periodMode, 'stock');
+	const equitySeries = normalizedSeries(bs, 'equity', ctx.periodMode, 'stock');
+	const cashSeries = normalizedSeries(bs, 'cash', ctx.periodMode, 'stock');
+	const receivablesSeries = normalizedSeries(bs, 'receivables', ctx.periodMode, 'stock');
+	const inventorySeries = normalizedSeries(bs, 'inventory', ctx.periodMode, 'stock');
+	const tangibleSeries = normalizedSeries(bs, 'tangible', ctx.periodMode, 'stock');
+	const intangibleSeries = normalizedSeries(bs, 'intangible', ctx.periodMode, 'stock');
+	const otherAssetsSeries = residualSeries(assetsSeries.values, [
+		cashSeries.values,
+		receivablesSeries.values,
+		inventorySeries.values,
+		tangibleSeries.values,
+		intangibleSeries.values
+	]);
+
+	const tradePayablesSeries = normalizedSeries(bs, 'tradePayables', ctx.periodMode, 'stock');
+	const borrowingsSeries = normalizedSeries(bs, 'borrowings', ctx.periodMode, 'stock');
+	const bondsSeries = normalizedSeries(bs, 'bonds', ctx.periodMode, 'stock');
+	const interestDebtSeries = combineSeries([borrowingsSeries.values, bondsSeries.values]);
+	const otherLiabilitiesSeries = residualSeries(liabilitiesSeries.values, [
+		tradePayablesSeries.values,
+		interestDebtSeries
+	]);
+	const totalFundingSeries = combineSeries([liabilitiesSeries.values, equitySeries.values]);
+
+	const capitalStockSeries = normalizedSeries(bs, 'capitalStock', ctx.periodMode, 'stock');
+	const capitalSurplusSeries = normalizedSeries(bs, 'capitalSurplus', ctx.periodMode, 'stock');
+	const retainedEarningsSeries = normalizedSeries(bs, 'retainedEarnings', ctx.periodMode, 'stock');
+	const treasuryStockSeries = normalizedSeries(bs, 'treasuryStock', ctx.periodMode, 'stock');
+	const otherEquitySeries = residualSeries(equitySeries.values, [
+		capitalStockSeries.values,
+		capitalSurplusSeries.values,
+		retainedEarningsSeries.values,
+		treasuryStockSeries.values
+	]);
+
+	const totalAssets = latestValue(assetsSeries.values);
+	const liabilities = latestValue(liabilitiesSeries.values);
+	const equity = latestValue(equitySeries.values);
 	if (![totalAssets, liabilities, equity].some(isFiniteNumber)) return null;
 
-	const cash = latestFrom(bs, 'cash');
-	const receivables = latestFrom(bs, 'receivables');
-	const inventory = latestFrom(bs, 'inventory');
-	const tangible = latestFrom(bs, 'tangible');
-	const intangible = latestFrom(bs, 'intangible');
-	const otherAssets = residualValue(totalAssets, [cash, receivables, inventory, tangible, intangible]);
+	const cash = latestValue(cashSeries.values);
+	const receivables = latestValue(receivablesSeries.values);
+	const inventory = latestValue(inventorySeries.values);
+	const tangible = latestValue(tangibleSeries.values);
+	const intangible = latestValue(intangibleSeries.values);
+	const otherAssets = latestValue(otherAssetsSeries);
 
-	const tradePayables = latestFrom(bs, 'tradePayables');
-	const borrowings = latestFrom(bs, 'borrowings');
-	const bonds = latestFrom(bs, 'bonds');
-	const interestDebt = sumValues([borrowings, bonds]);
-	const otherLiabilities = residualValue(liabilities, [tradePayables, interestDebt]);
-	const totalFunding = sumValues([liabilities, equity]);
+	const tradePayables = latestValue(tradePayablesSeries.values);
+	const interestDebt = latestValue(interestDebtSeries);
+	const otherLiabilities = latestValue(otherLiabilitiesSeries);
+	const totalFunding = latestValue(totalFundingSeries);
 
-	const capitalStock = latestFrom(bs, 'capitalStock');
-	const capitalSurplus = latestFrom(bs, 'capitalSurplus');
-	const retainedEarnings = latestFrom(bs, 'retainedEarnings');
-	const treasuryStock = latestFrom(bs, 'treasuryStock');
-	const otherEquity = residualValue(equity, [capitalStock, capitalSurplus, retainedEarnings, treasuryStock]);
+	const capitalStock = latestValue(capitalStockSeries.values);
+	const capitalSurplus = latestValue(capitalSurplusSeries.values);
+	const retainedEarnings = latestValue(retainedEarningsSeries.values);
+	const treasuryStock = latestValue(treasuryStockSeries.values);
+	const otherEquity = latestValue(otherEquitySeries);
 
 	const assetMissing = missingAccounts(bs, [
 		['cash', '현금'],
@@ -546,6 +628,27 @@ function balanceStructureView(ctx: ReturnType<typeof makeContext>): CompanyVisua
 		? [{ label: '구조 기준: 연간 상세 / KPI 기준: 최신 분기', tone: 'watch' as const }]
 		: [];
 	const coverageNotes = [...sourceNote, ...coverageFromMissing([...assetMissing, ...fundingMissing])];
+	const assetTrendParts = [
+		trendPart('cash', '현금', cashSeries.values, assetsSeries.values, 'good', COLORS.cash),
+		trendPart('receivables', '매출채권', receivablesSeries.values, assetsSeries.values, 'neutral', COLORS.receivables),
+		trendPart('inventory', '재고', inventorySeries.values, assetsSeries.values, 'watch', COLORS.inventory),
+		trendPart('tangible', '유형자산', tangibleSeries.values, assetsSeries.values, 'neutral', COLORS.tangible),
+		trendPart('intangible', '무형자산', intangibleSeries.values, assetsSeries.values, 'neutral', '#7dd3fc'),
+		trendPart('otherAssets', '기타/비영업', otherAssetsSeries, assetsSeries.values, 'neutral', COLORS.other)
+	];
+	const fundingTrendParts = [
+		trendPart('tradePayables', '영업부채', tradePayablesSeries.values, assetsSeries.values, 'neutral', '#94a3b8'),
+		trendPart('interestDebt', '차입금/사채', interestDebtSeries, assetsSeries.values, 'bad', COLORS.liabilities),
+		trendPart('otherLiabilities', '기타부채', otherLiabilitiesSeries, assetsSeries.values, 'bad', '#991b1b'),
+		trendPart('equity', '자본', equitySeries.values, assetsSeries.values, 'good', COLORS.equity)
+	];
+	const equityTrendParts = [
+		trendPart('capitalStock', '자본금', capitalStockSeries.values, equitySeries.values, 'neutral', '#94a3b8'),
+		trendPart('capitalSurplus', '자본잉여금', capitalSurplusSeries.values, equitySeries.values, 'neutral', '#64748b'),
+		trendPart('retainedEarnings', '이익잉여금', retainedEarningsSeries.values, equitySeries.values, 'good', COLORS.equity),
+		trendPart('treasuryStock', '자기주식', treasuryStockSeries.values, equitySeries.values, 'watch', COLORS.inventory),
+		trendPart('otherEquity', '기타자본', otherEquitySeries, equitySeries.values, 'neutral', COLORS.other)
+	];
 
 	return {
 		type: 'balance-structure',
@@ -579,6 +682,13 @@ function balanceStructureView(ctx: ReturnType<typeof makeContext>): CompanyVisua
 				part('treasuryStock', '자기주식', treasuryStock, equity, 'watch'),
 				part('otherEquity', '기타자본', otherEquity, equity, 'neutral')
 			],
+			periods: bs.periods,
+			totalAssetsSeries: assetsSeries.values,
+			totalFundingSeries,
+			assetTrendParts,
+			fundingTrendParts,
+			equityTrendParts,
+			assetDeltaParts: deltaPartsFromTrend(assetTrendParts),
 			debtRatio: ratio(liabilities, equity),
 			coverageNotes
 		}
@@ -617,6 +727,45 @@ function cashflowBridgeView(ctx: ReturnType<typeof makeContext>): CompanyVisual 
 				part('ocf', '영업CF', latestValue(ocf.values), null, 'good'),
 				part('icf', '투자CF', latestValue(icf.values), null, 'neutral'),
 				part('fcf', 'FCF', latestValue(fcf.values), null, 'watch'),
+				part('financingCf', '재무CF', latestValue(financing.values), null, 'neutral')
+			],
+			coverageNotes: coverageFromMissing(missing)
+		}
+	};
+}
+
+function capitalAllocationBridgeView(ctx: ReturnType<typeof makeContext>): CompanyVisual | null {
+	const cf = ctx.dashboards.CF;
+	const fcf = fcfSeries(cf, ctx.periodMode);
+	const capex = normalizedSeries(cf, 'capex', ctx.periodMode, 'flow');
+	const dividend = normalizedSeries(cf, 'dividendPaid', ctx.periodMode, 'flow');
+	const financing = normalizedSeries(cf, 'financingCf', ctx.periodMode, 'flow');
+	if (!hasAny([fcf.values, capex.values, dividend.values, financing.values])) return null;
+	const missing = missingAccounts(cf, [
+		['fcf', 'FCF'],
+		['capex', 'CAPEX'],
+		['dividendPaid', '배당'],
+		['financingCf', '재무CF']
+	]);
+	return {
+		type: 'capital-allocation-bridge',
+		view: {
+			id: 'capital-allocation-bridge',
+			title: 'FCF 이후 자본배분',
+			subtitle: '남은 현금이 재투자, 배당, 조달/상환으로 어떻게 움직였는지 분기별로 비교한다.',
+			periods: fcf.categories,
+			sourceLabel: cf.quality.sourceLabel,
+			sourceMode: ctx.periodMode === 'TTM' ? 'TTM 기준' : ctx.periodMode === 'Y' ? '연간 기준' : '분기 기준',
+			series: [
+				pointSeries('fcf', 'FCF', fcf.values, 'KRW', 'watch'),
+				pointSeries('capex', 'CAPEX', capex.values, 'KRW', 'neutral'),
+				pointSeries('dividendPaid', '배당', dividend.values, 'KRW', 'good'),
+				pointSeries('financingCf', '재무CF', financing.values, 'KRW', 'neutral')
+			],
+			latest: [
+				part('fcf', 'FCF', latestValue(fcf.values), null, 'watch'),
+				part('capex', 'CAPEX', latestValue(capex.values), null, 'neutral'),
+				part('dividendPaid', '배당', latestValue(dividend.values), null, 'good'),
 				part('financingCf', '재무CF', latestValue(financing.values), null, 'neutral')
 			],
 			coverageNotes: coverageFromMissing(missing)
@@ -761,6 +910,67 @@ function part(id: string, label: string, value: number | null, denominator: numb
 		tone: value == null ? 'missing' : tone,
 		missing: value == null
 	};
+}
+
+function trendPart(
+	id: string,
+	label: string,
+	values: Array<number | null>,
+	denominator: Array<number | null>,
+	tone: Tone,
+	color: string
+): StructureTrendPart {
+	return {
+		id,
+		label,
+		values,
+		shares: ratioSeries(values, denominator),
+		unit: 'KRW',
+		tone: hasFinite(values) ? tone : 'missing',
+		color,
+		missing: !hasFinite(values)
+	};
+}
+
+function deltaPartsFromTrend(parts: StructureTrendPart[]): StructureDeltaPart[] {
+	return parts.map((part) => {
+		const latestIndex = lastFiniteIndex(part.values);
+		const prevIndex = latestIndex > 0 ? previousFiniteIndex(part.values, latestIndex) : -1;
+		const latest = latestIndex >= 0 ? part.values[latestIndex] : null;
+		const prev = prevIndex >= 0 ? part.values[prevIndex] : null;
+		const value = isFiniteNumber(latest) && isFiniteNumber(prev) ? latest - prev : null;
+		return {
+			id: part.id,
+			label: part.label,
+			value,
+			unit: part.unit,
+			tone: value == null ? 'missing' : value < 0 ? 'bad' : part.tone,
+			color: part.color,
+			missing: value == null
+		};
+	});
+}
+
+function previousFiniteIndex(values: Array<number | null>, before: number): number {
+	for (let i = before - 1; i >= 0; i -= 1) {
+		if (isFiniteNumber(values[i])) return i;
+	}
+	return -1;
+}
+
+function combineSeries(groups: Array<Array<number | null>>): Array<number | null> {
+	const len = Math.max(0, ...groups.map((group) => group.length));
+	return Array.from({ length: len }, (_, i) => {
+		let sum = 0;
+		let hasValue = false;
+		for (const group of groups) {
+			if (isFiniteNumber(group[i])) {
+				sum += group[i]!;
+				hasValue = true;
+			}
+		}
+		return hasValue ? sum : null;
+	});
 }
 
 function missingAccounts(dashboard: StatementDashboard, items: Array<[string, string]>): string[] {

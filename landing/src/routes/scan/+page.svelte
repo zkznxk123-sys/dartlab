@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { base } from '$app/paths';
+	import { SlidersHorizontal } from 'lucide-svelte';
 	import Header from '$lib/components/sections/Header.svelte';
 	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
 	import Grid from '$lib/scan/Grid.svelte';
@@ -999,6 +1000,24 @@
 		activePresetId = null;
 	}
 
+	function applyScreen(payload: { conds: FilterCond[]; sorts: SortKey[]; cols: string[] }) {
+		const nextCols = Array.from(new Set([...PINNED_COLUMNS, ...DEFAULT_COLUMNS, ...payload.cols]));
+		activeColumns = nextCols;
+		conds = payload.conds;
+		if (payload.sorts.length > 0) sorts = payload.sorts;
+		selectedIndustries = new Set();
+		searchQuery = '';
+		selectedRow = null;
+		activePresetId = null;
+		dataExplorerOpen = false;
+		const loaderKeys = [
+			...nextCols,
+			...payload.conds.map((cond) => cond.metric),
+			...payload.sorts.map((item) => item.key)
+		];
+		void ensureLoaders(inferLoaders(loaderKeys));
+	}
+
 	function removeCond(index: number) {
 		conds = conds.filter((_, i) => i !== index);
 		activePresetId = null;
@@ -1057,6 +1076,10 @@
 			<h1 class="page-title">Scan Studio</h1>
 		</div>
 		<div class="page-head-right">
+			<button type="button" class="explore-btn" onclick={openDataExplorer}>
+				<SlidersHorizontal size={14} />
+				<span>데이터 탐색</span>
+			</button>
 			<span class="db-badge db-{dbBadgeKind}" title={dbError ?? trendError ?? ''}>
 				<span class="db-dot"></span> {dbBadgeText}
 			</span>
@@ -1229,11 +1252,13 @@
 			<DataExplorerComponent
 				open={dataExplorerOpen}
 				onClose={() => (dataExplorerOpen = false)}
+				nodes={allNodes}
 				ecosystem={baseNodes as Array<Record<string, unknown>>}
 				priceMap={priceMap.size > 0 ? priceMap : priceNodesToMap(baseNodes)}
 				{valuationMap}
 				{changesMap}
 				db={dartDb}
+				onApplyScreen={applyScreen}
 			/>
 		{:else}
 			<div class="de-loading" role="status">데이터 탐색 로드 중…</div>
@@ -1294,6 +1319,27 @@
 		display: flex;
 		align-items: center;
 		gap: 10px;
+	}
+	.explore-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		height: 32px;
+		padding: 0 12px;
+		border: 1px solid rgba(251, 146, 60, 0.45);
+		border-radius: 5px;
+		background: rgba(251, 146, 60, 0.08);
+		color: #fb923c;
+		font-size: 12px;
+		font-weight: 600;
+		font-family: inherit;
+		line-height: 1;
+		cursor: pointer;
+		white-space: nowrap;
+	}
+	.explore-btn:hover {
+		border-color: rgba(251, 146, 60, 0.85);
+		background: rgba(251, 146, 60, 0.13);
 	}
 	.search-input {
 		width: 260px;

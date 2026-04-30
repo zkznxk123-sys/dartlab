@@ -1,6 +1,6 @@
 <script lang="ts">
 	/**
-	 * 데이터 탐색 모달 — 9 탭 좌측 list + 우측 테이블/노트북.
+	 * 데이터 탐색 모달 — screen builder + raw 테이블/노트북.
 	 *
 	 *   탭 1~8 = TableView (raw 테이블)
 	 *   탭 9   = SQL Notebook (PR-η — 일단 placeholder, PR-η 에서 SqlNotebook 으로 교체)
@@ -13,24 +13,38 @@
 	import TableView from './TableView.svelte';
 	import RowJsonModal from './RowJsonModal.svelte';
 	import SqlNotebook from './SqlNotebook.svelte';
+	import ScreenBuilder from './ScreenBuilder.svelte';
 	import { TABLE_SOURCES, TABLE_SOURCES_BY_ID, resolveHfPath } from './tableSources';
 	import type { TableSource } from './tableSources';
 	import type { DartDb } from '$lib/data/duckdb';
 	import type { PriceMetrics, ValuationMetrics, ChangeMetrics } from './duckSql';
+	import type { FilterCond, ScanNode, SortKey } from './types';
 
 	interface Props {
 		open: boolean;
 		onClose: () => void;
+		nodes: ScanNode[];
 		ecosystem: Array<Record<string, unknown>>;
 		priceMap: Map<string, PriceMetrics>;
 		valuationMap: Map<string, ValuationMetrics>;
 		changesMap: Map<string, ChangeMetrics>;
 		db: DartDb | null;
+		onApplyScreen: (payload: { conds: FilterCond[]; sorts: SortKey[]; cols: string[] }) => void;
 	}
 
-	let { open, onClose, ecosystem, priceMap, valuationMap, changesMap, db }: Props = $props();
+	let {
+		open,
+		onClose,
+		nodes,
+		ecosystem,
+		priceMap,
+		valuationMap,
+		changesMap,
+		db,
+		onApplyScreen
+	}: Props = $props();
 
-	let activeTabId = $state<string>('ecosystem');
+	let activeTabId = $state<string>('screen');
 	let activeTab = $derived(TABLE_SOURCES_BY_ID.get(activeTabId) ?? TABLE_SOURCES[0]);
 
 	// 각 탭의 row state
@@ -148,7 +162,7 @@
 					<Search size={14} />
 					데이터 탐색
 				</span>
-				<span class="de-sub">8 prebuild raw 테이블 + SQL Notebook · 검색·정렬·CSV</span>
+				<span class="de-sub">스크린 빌더 + prebuild raw 테이블 + SQL Notebook</span>
 				<button type="button" class="de-close" onclick={onClose} aria-label="닫기 (Esc)">
 					<X size={16} />
 				</button>
@@ -185,7 +199,9 @@
 
 				<!-- 우측 테이블 -->
 				<section class="de-main">
-					{#if activeTab.source === 'notebook'}
+					{#if activeTab.source === 'screen'}
+						<ScreenBuilder {nodes} onApply={onApplyScreen} />
+					{:else if activeTab.source === 'notebook'}
 						<SqlNotebook {db} {ecosystem} />
 					{:else}
 						<TableView

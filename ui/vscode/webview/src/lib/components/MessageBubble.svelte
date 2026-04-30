@@ -129,6 +129,14 @@
   function toolLabel(name: string): string {
     return TOOL_LABELS[name] || name;
   }
+
+  const AGENT_TRACE_LABELS: Record<string, string> = {
+    observe: "관찰",
+    inspect: "데이터 확인",
+    compute: "계산",
+    verify: "검산",
+    artifact: "산출물",
+  };
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -324,6 +332,13 @@
         <div class="chart-block">
           <ChartRenderer spec={block.spec} />
         </div>
+      {/if}
+
+      {#if block.type === "agent_trace"}
+        <details class="agent-trace">
+          <summary>{AGENT_TRACE_LABELS[block.phase ?? ""] ?? block.phase}</summary>
+          <pre>{JSON.stringify(block.data, null, 2)}</pre>
+        </details>
       {/if}
 
       <!-- TOOL CALL BLOCK -->
@@ -1178,6 +1193,27 @@
   .error-icon {
     color: var(--dl-primary);
     flex-shrink: 0;
+  }
+
+  .agent-trace {
+    margin: 6px 0;
+    padding: 6px 8px;
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: var(--corner-radius-medium);
+    background: var(--vscode-textCodeBlock-background);
+    color: var(--vscode-descriptionForeground);
+    font-size: 11px;
+  }
+  .agent-trace summary {
+    cursor: pointer;
+    color: var(--vscode-foreground);
+  }
+  .agent-trace pre {
+    margin: 6px 0 0;
+    max-height: 220px;
+    overflow: auto;
+    white-space: pre-wrap;
+    font-size: 10px;
   }
 
   /* === Footer meta === */
