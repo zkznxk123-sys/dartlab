@@ -56,6 +56,12 @@ ui/screenshots/
 ui/vscode/webview/screenshots/
 ui/.svelte-kit/
 
+# Playwright local artifacts (repo-root)
+/.playwright-cli/
+/playwright-report/
+/test-results/
+/output/playwright/
+
 # Landing page build artifacts
 landing/build/
 landing/.svelte-kit/
