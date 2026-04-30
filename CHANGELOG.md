@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.27] - 2026-04-30
+
+AI 품질 루프와 데이터 파이프라인 안정화.
+
+### Added
+
+- 신규 상장 종목을 KindList와 HuggingFace parquet 목록 기준으로 bootstrap 하는 DART 수집 workflow 추가.
+- 분석 계약 그래프, Workspace ledger, trace summary를 확장해 tool 근거·claim·visual·품질 위반을 더 명확히 기록.
+- scan 필드 SSOT와 KRX 벤치마크 기반 quant 비교 축 추가.
+- 회사 대시보드에 손익 전환, 재무상태 구조, 현금흐름 브릿지, 근거 커버리지 시각 컴포넌트 추가.
+
+### Changed
+
+- KRX 가격·지수 수집 기준을 장마감 후 당일(T-0) 데이터까지 반영하도록 조정.
+- 비교 질문에서 동일 축 근거와 visual 설명을 더 안정적으로 만들도록 runtime preflight 순서를 보정.
+- 운영 문서에서 외부 브랜드 의존 표현을 줄이고 DartLab 계약/프로세스 중심으로 정리.
+
+### Fixed
+
+- KRX 일별 데이터의 HF freshness 만료 후에도 서버 프로세스 LRU가 오래된 parquet을 계속 반환할 수 있던 문제 수정.
+- 벤치마크 매핑 리소스 로딩 실패가 빈 결과로 조용히 처리되지 않도록 명확한 실패로 전환.
+
 ## [0.9.26] - 2026-04-27
 
 스캔 화면과 분석 실행 안정화.
