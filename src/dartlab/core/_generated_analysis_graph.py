@@ -165,6 +165,50 @@ ANALYSIS_GRAPH: dict = json.loads(
                 "value"
             ],
             "requires": "데이터: finance (자동 다운로드)",
+            "returnSchema": [
+                {
+                    "depth": 0,
+                    "description": "축별 계산 결과",
+                    "name": "{calcName}",
+                    "type": "dict",
+                    "unit": null
+                },
+                {
+                    "depth": 0,
+                    "description": "시계열 ({period, ...지표})",
+                    "name": "history",
+                    "type": "list[dict]",
+                    "unit": null
+                },
+                {
+                    "depth": 0,
+                    "description": "core 컬럼 목록",
+                    "name": "displayHints",
+                    "type": "dict",
+                    "unit": null
+                },
+                {
+                    "depth": 0,
+                    "description": "전환점 (있으면)",
+                    "name": "turningPoints",
+                    "type": "list",
+                    "unit": null
+                },
+                {
+                    "depth": 0,
+                    "description": "경고 플래그",
+                    "name": "{calcName}Flags",
+                    "type": "list[str]",
+                    "unit": null
+                },
+                {
+                    "depth": 0,
+                    "description": "latestPeriod, retrievedAt",
+                    "name": "dataAsOf",
+                    "type": "dict",
+                    "unit": null
+                }
+            ],
             "sourceKey": "Company.analysis",
             "summary": "재무제표 완전 분석 — 14축, 단일 종목 심층 (내부 구현).",
             "tool": "analysis",
@@ -2778,7 +2822,7 @@ ANALYSIS_GRAPH: dict = json.loads(
             }
         }
     ],
-    "sourceHash": "0d64880ea92f9266"
+    "sourceHash": "fefb8d52339c8141"
 }
 """
 )

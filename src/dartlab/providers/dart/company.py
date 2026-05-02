@@ -3297,7 +3297,7 @@ class Company:
             종목명 : str — 회사명
             배당수익률 : float — 배당수익률 (%)
             배당성향 : float — 배당성향 (%)
-            자사주매입 : int — 자사주 매입 주수
+            자사주매입 : int — 자사주 매입 주수 (주)
             총환원율 : float — (배당 + 자사주) / 시가총액 (%)
             분류 : str — 환원형/중립/희석형
             데이터 없으면 None.
@@ -3643,7 +3643,7 @@ class Company:
             - ask: AI 종합 분석 (자연어 대화)
             - story: AI 없는 데이터 검토서
         """
-        from dartlab.ai.runtime.standalone import ask as _ask
+        from dartlab.ai.kernel import ask as _ask
 
         return _ask(
             question,

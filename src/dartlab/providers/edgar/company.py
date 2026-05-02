@@ -2268,7 +2268,7 @@ class Company:
             include: 포함할 컨텍스트 키 리스트.
             exclude: 제외할 컨텍스트 키 리스트.
             provider: LLM provider 이름 (예: "openai", "ollama").
-            model: 모델명 (예: "gpt-4o").
+            model: 모델명. None이면 provider 최신 기본값.
             stream: 스트리밍 출력 여부.
             reflect: 자기 반성 모드 (답변 품질 자가 검증).
 
@@ -2281,7 +2281,7 @@ class Company:
             c.ask("What are the key risks?")
             c.ask("Revenue trend analysis", provider="openai")
         """
-        from dartlab.ai.runtime.standalone import ask as _ask
+        from dartlab.ai.kernel import ask as _ask
 
         return _ask(
             question,

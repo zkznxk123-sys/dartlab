@@ -17,7 +17,7 @@
 | `OpenDart` | class | OpenDART API 통합 클라이언트. |
 | `OpenEdgar` | class | SEC public API facade. |
 | `config` | module | dartlab 전역 설정. |
-| `ask` | function | AI 에게 질문. AI 가 모든 엔진(analysis/scan/macro/credit/gather/search)을 tool 로 다룬다. |
+| `ask` | function | AI 에게 질문. LLM 이 DartLab 을 읽고 실행한 뒤 검산해 답한다. |
 | `setup` | function | AI provider 설정 안내 + 인터랙티브 설정. |
 | `search` | function | 공시 검색. **⚠ BETA — AI 사용 비권장**. |
 | `listing` | function | 목록 조회 단일 진입점. |
@@ -37,8 +37,8 @@
 | `codeToName` | function | 종목코드 → 회사명. |
 | `nameToCode` | function | 회사명 → 종목코드. 정확히 일치하는 첫 번째 결과. |
 | `searchName` | function | 종목명/코드로 종목 찾기 (KR + US). |
-| `pastInsight` | function | 특정 회사의 과거 분석 서사 조회. |
-| `sectorInsights` | function | 동종 업계 과거 분석 서사 목록 (교차 학습). |
+| `pastInsight` | function | - |
+| `sectorInsights` | function | - |
 | `Story` | class | 보고서 조합기 — 6 엔진 블록을 조합하여 6막 구조화 보고서 생성. |
 | `SelectResult` | class | select() 반환 객체 — DataFrame 위임 + 체이닝. |
 | `ChartResult` | class | chart() 반환 객체 — 시각화 + 렌더링. |
@@ -79,15 +79,16 @@ macro: 시장 레벨 거시 (Company-독립)
 industry: 섹터 밸류체인 (Company-독립)
 
 #### ask
-**Capabilities:** 자연어로 기업/시장 분석 (종목은 질문 텍스트에서 AI 가 자동 감지)
+**Capabilities:** 자연어로 기업/시장 분석 (DartLab API·데이터셋·skills 를 검색 후 실행)
 스트리밍 출력 (기본) / 배치 반환 / Generator 직접 제어
-원본 검증 · 가정 조정 · 업종 비교 전부 AI 자율
+원본 검증 · 가정 조정 · 업종 비교는 run_python 결과와 ref 로 검산
 **Requires:** AI: provider 설정 (dartlab.setup() 참조)
 **Guide:** "삼성전자 수익성 분석" -> dartlab.ask("삼성전자 수익성 분석해줘")
 "삼성 vs SK하이닉스" -> dartlab.ask("삼성전자와 SK하이닉스 비교")
 "반도체 업황" -> dartlab.ask("반도체 업황 어때")  (종목 불필요)
 **SeeAlso:** Company: 원본 데이터 조회 (show/select)
 scan: 전종목 비교 (프로그래밍)
+skills: 공용 분석 절차 검색
 
 #### setup
 **Capabilities:** 전체 AI provider 설정 현황 테이블 표시

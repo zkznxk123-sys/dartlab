@@ -19,6 +19,7 @@ import ast
 import dataclasses
 import inspect
 import json
+import re
 import subprocess
 import sys
 import textwrap
@@ -165,6 +166,44 @@ def _parseAiContract(value: str | None) -> dict[str, Any]:
         else:
             out[key] = raw
     return out
+
+
+_RETURN_FIELD_RE = re.compile(r"^(?P<indent>\s*)(?P<name>[^:\n]{1,120})\s*:\s*(?P<type>[^—\-\n]+)(?:[—-]\s*(?P<desc>.*))?$")
+_RETURN_UNIT_RE = re.compile(r"\((?P<unit>%|원|백만원|천원|달러|USD|KRW|일|배|점|건|주|명|개|회|년|월|분기|bps|pp)\)")
+
+
+def _parseReturnsSchema(value: str | None) -> list[dict[str, Any]]:
+    """Parse Returns text into a machine-readable field schema.
+
+    The docstring remains the SSOT. This parser only compiles the existing
+    `key : type — description (unit)` convention into generated metadata.
+    """
+    if not value:
+        return []
+    rows: list[dict[str, Any]] = []
+    for raw_line in value.splitlines():
+        line = raw_line.rstrip()
+        if not line.strip() or ":" not in line:
+            continue
+        match = _RETURN_FIELD_RE.match(line)
+        if not match:
+            continue
+        name = match.group("name").strip()
+        type_name = match.group("type").strip()
+        if not name or not type_name:
+            continue
+        description = (match.group("desc") or "").strip()
+        unit_match = _RETURN_UNIT_RE.search(description)
+        rows.append(
+            {
+                "name": name,
+                "type": type_name,
+                "description": description,
+                "unit": unit_match.group("unit") if unit_match else None,
+                "depth": len(match.group("indent").replace("\t", "    ")) // 4,
+            }
+        )
+    return rows
 
 
 def _applyAiContract(entry: dict[str, Any], sections: dict[str, str]) -> None:
@@ -1806,6 +1845,7 @@ def _packCapabilitySkillMap(entries: dict[str, dict[str, Any]]) -> list[dict[str
                 "questionTypes": entry.get("questionTypes") or [],
                 "requiredInputs": entry.get("requiredInputs") or entry.get("args") or entry.get("requires"),
                 "outputShape": entry.get("outputShape") or entry.get("returns"),
+                "outputSchema": entry.get("returnSchema") or [],
                 "dataColumns": entry.get("dataColumns") or entry.get("evidenceSchema"),
                 "freshness": entry.get("freshness"),
                 "commonCalculations": entry.get("commonCalculations") or [],
@@ -1968,6 +2008,8 @@ def _generateCapabilitiesPy() -> str:
         for key in ("capabilities", "requires", "aicontext", "guide", "seealso", "returns", "args", "example"):
             if val := sections.get(key):
                 entry[key if key != "seealso" else "seeAlso"] = val
+        if return_schema := _parseReturnsSchema(sections.get("returns")):
+            entry["returnSchema"] = return_schema
         _applyAiContract(entry, sections)
         entries[name] = entry
 
@@ -2002,6 +2044,8 @@ def _generateCapabilitiesPy() -> str:
         for key in ("capabilities", "requires", "aicontext", "guide", "seealso", "returns", "args", "example"):
             if val := sections.get(key):
                 entry[key if key != "seealso" else "seeAlso"] = val
+        if return_schema := _parseReturnsSchema(sections.get("returns")):
+            entry["returnSchema"] = return_schema
         _applyAiContract(entry, sections)
         entries[f"Company.{memberName}"] = entry
 

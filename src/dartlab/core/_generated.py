@@ -69,6 +69,50 @@ CAPABILITIES: dict[str, dict] = json.loads(
             "value"
         ],
         "requires": "데이터: finance (자동 다운로드)",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "축별 계산 결과",
+                "name": "{calcName}",
+                "type": "dict",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "시계열 ({period, ...지표})",
+                "name": "history",
+                "type": "list[dict]",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "core 컬럼 목록",
+                "name": "displayHints",
+                "type": "dict",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "전환점 (있으면)",
+                "name": "turningPoints",
+                "type": "list",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "경고 플래그",
+                "name": "{calcName}Flags",
+                "type": "list[str]",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "latestPeriod, retrievedAt",
+                "name": "dataAsOf",
+                "type": "dict",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame | dict — axis=None이면 가이드 DataFrame (axis/label/description/example/group/items).\naxis 지정 시 dict:\n{calcName} : dict — 축별 계산 결과\nhistory : list[dict] — 시계열 ({period, ...지표})\ndisplayHints : dict — core 컬럼 목록\nturningPoints : list — 전환점 (있으면)\n{calcName}Flags : list[str] — 경고 플래그\ndataAsOf : dict — latestPeriod, retrievedAt\n_summary (autoEnrich 자동 주입) — 핵심 지표 요약 + [엔진가정] 블록.\nassumptions — 엔진 가정 (overrides 재호출용).",
         "seeAlso": "story: 14축 분석을 14개 섹션 보고서로 조합\ninsights: 7영역 등급 요약 (analysis보다 요약적)\nratios: 재무비율 시계열 (analysis의 입력 데이터)",
         "summary": "재무제표 완전 분석 — 14축, 단일 종목 심층 (내부 구현).",
@@ -106,6 +150,43 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "\"감사의견 확인\" → c.audit()\n\"감사인 바뀌었어?\" → c.audit()[\"auditorChanges\"]\n\"계속기업 의문은?\" → c.audit()[\"goingConcern\"]",
         "kind": "method",
         "requires": "데이터: docs + report (자동 다운로드)",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "감사의견 (\"적정\", \"한정\", \"부적정\", \"의견거절\")",
+                "name": "opinion",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "감사인 변경 이력 (year, from, to, reason)",
+                "name": "auditorChanges",
+                "type": "list[dict]",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "계속기업 불확실성 존재 여부",
+                "name": "goingConcern",
+                "type": "bool",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "핵심감사사항 목록",
+                "name": "kam",
+                "type": "list[str]",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "내부회계관리제도 검토의견",
+                "name": "internalControl",
+                "type": "str",
+                "unit": null
+            }
+        ],
         "returns": "dict\nopinion : str — 감사의견 (\"적정\", \"한정\", \"부적정\", \"의견거절\")\nauditorChanges : list[dict] — 감사인 변경 이력 (year, from, to, reason)\ngoingConcern : bool — 계속기업 불확실성 존재 여부\nkam : list[str] — 핵심감사사항 목록\ninternalControl : str — 내부회계관리제도 검토의견",
         "seeAlso": "governance: 지배구조 분석 (감사위원회 구성 포함)\ninsights: 종합 등급 (감사 리스크도 반영)\nstory: 재무정합성 섹션에서 감사 결과 활용",
         "summary": "감사 리스크 종합 분석."
@@ -123,7 +204,58 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "\"배당 정보\" → c.capital() 또는 c.show(\"dividend\")\n\"주주환원율은?\" → c.capital()\n\"전체 상장사 배당 비교\" → c.capital(\"all\")",
         "kind": "method",
         "requires": "데이터: DART 정기보고서 (자동 수집)",
-        "returns": "pl.DataFrame | None\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n배당수익률 : float — 배당수익률 (%)\n배당성향 : float — 배당성향 (%)\n자사주매입 : int — 자사주 매입 주수\n총환원율 : float — (배당 + 자사주) / 시가총액 (%)\n분류 : str — 환원형/중립/희석형\n데이터 없으면 None.",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "6자리 종목코드",
+                "name": "종목코드",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "회사명",
+                "name": "종목명",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "배당수익률 (%)",
+                "name": "배당수익률",
+                "type": "float",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "배당성향 (%)",
+                "name": "배당성향",
+                "type": "float",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "자사주 매입 주수 (주)",
+                "name": "자사주매입",
+                "type": "int",
+                "unit": "주"
+            },
+            {
+                "depth": 0,
+                "description": "(배당 + 자사주) / 시가총액 (%)",
+                "name": "총환원율",
+                "type": "float",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "환원형/중립/희석형",
+                "name": "분류",
+                "type": "str",
+                "unit": null
+            }
+        ],
+        "returns": "pl.DataFrame | None\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n배당수익률 : float — 배당수익률 (%)\n배당성향 : float — 배당성향 (%)\n자사주매입 : int — 자사주 매입 주수 (주)\n총환원율 : float — (배당 + 자사주) / 시가총액 (%)\n분류 : str — 환원형/중립/희석형\n데이터 없으면 None.",
         "seeAlso": "show: c.show(\"dividend\")로 docs 기반 배당 상세\nsceMatrix: 자본변동표 (배당/자사주가 자본에 미치는 영향)\ndebt: 부채 구조 (자본 정책의 다른 면)",
         "summary": "주주환원 분석 (배당, 자사주, 총환원율)."
     },
@@ -155,6 +287,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c.credit()              # → {\"grade\": \"dCR-AA\", \"score\": 6.6, ...}\nc.credit(\"채무상환\")     # → {\"axis\": \"채무상환능력\", \"score\": 2.7, ...}\nc.credit(detail=True)   # → 7축 상세 + metricsHistory\nc.credit(overrides={\"debtRatio\": 150, \"interestCoverage\": 2.5})  # 스트레스 시나리오",
         "guide": "When: 부도 위험·신용등급·채무상환능력 판단이 필요할 때.\nHow: 무인자 호출로 종합 등급, axis 로 개별 축, detail=True 로 시계열.\nVerified:\ncredit 단독 → dCR 등급 + 7축 위험점수 분해 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ncredit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "property",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "dict | None",
+                "type": "등급 결과. axis 지정 시 해당 축만.",
+                "unit": null
+            }
+        ],
         "returns": "dict | None: 등급 결과. axis 지정 시 해당 축만.",
         "seeAlso": "story(\"신용평가\"): 보고서 형식으로 렌더링\nanalysis(\"financial\", \"신용평가\"): analysis 축으로 접근",
         "summary": "독립 신용평가 — dCR 20단계 등급 (내부 구현)."
@@ -174,6 +315,50 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "\"부채 구조 분석\" → c.debt()\n\"부채비율은?\" → c.debt() 또는 c.show(\"ratios\")\n\"전체 상장사 부채 비교\" → c.debt(\"all\")",
         "kind": "method",
         "requires": "데이터: DART 정기보고서 (자동 수집)",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "6자리 종목코드",
+                "name": "종목코드",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "회사명",
+                "name": "종목명",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "부채비율 (%)",
+                "name": "부채비율",
+                "type": "float",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "차입금의존도 (%)",
+                "name": "차입금의존도",
+                "type": "float",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "이자보상배율 (배)",
+                "name": "ICR",
+                "type": "float",
+                "unit": "배"
+            },
+            {
+                "depth": 0,
+                "description": "안전/주의/경고/위험",
+                "name": "위험등급",
+                "type": "str",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame | None\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n부채비율 : float — 부채비율 (%)\n차입금의존도 : float — 차입금의존도 (%)\nICR : float — 이자보상배율 (배)\n위험등급 : str — 안전/주의/경고/위험\n데이터 없으면 None.",
         "seeAlso": "BS: 재무상태표 (부채 원본 데이터)\nratios: 재무비율 (부채비율 포함)\ncapital: 주주환원 (자본 정책의 다른 면)",
         "summary": "부채 구조 분석 (차입금, 부채비율, 만기 구조)."
@@ -204,6 +389,29 @@ CAPABILITIES: dict[str, dict] = json.loads(
     },
     "Company.facts": {
         "kind": "property",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "데이터 소스 topic",
+                "name": "topic",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "기간 (예: \"2025Q4\")",
+                "name": "period",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "해당 topic/period 의 텍스트 또는 숫자 요약",
+                "name": "value",
+                "type": "str",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame | None\ntopic : str — 데이터 소스 topic\nperiod : str — 기간 (예: \"2025Q4\")\nvalue : str — 해당 topic/period 의 텍스트 또는 숫자 요약\n데이터 없으면 None.",
         "summary": "topic × period 형태의 통합 facts 테이블 (sections + finance + report merge)."
     },
@@ -230,6 +438,134 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "When: 주가·수급·거시지표·뉴스 원본 데이터가 필요할 때.\nHow: axis 로 데이터 종류 지정. 무인자 = 가이드.\n\"주가 데이터\" → c.gather(\"price\")\n\"외국인/기관 수급\" → c.gather(\"flow\")\n\"거시경제 지표\" → c.gather(\"macro\")\n\"뉴스 수집\" → c.gather(\"news\") 또는 c.news()\nVerified:\ngather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "method",
         "requires": "price/flow/news: 없음 (공개 API)\nmacro: 불필요 -- apiKey 명시 시 ECOS/FRED 직접 API 호출",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "축 이름",
+                "name": "axis",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "한글 레이블",
+                "name": "label",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "설명",
+                "name": "description",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "사용 예시",
+                "name": "example",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "날짜",
+                "name": "date",
+                "type": "date",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "시가 (원)",
+                "name": "open",
+                "type": "float",
+                "unit": "원"
+            },
+            {
+                "depth": 0,
+                "description": "고가 (원)",
+                "name": "high",
+                "type": "float",
+                "unit": "원"
+            },
+            {
+                "depth": 0,
+                "description": "저가 (원)",
+                "name": "low",
+                "type": "float",
+                "unit": "원"
+            },
+            {
+                "depth": 0,
+                "description": "종가 (원)",
+                "name": "close",
+                "type": "float",
+                "unit": "원"
+            },
+            {
+                "depth": 0,
+                "description": "거래량",
+                "name": "volume",
+                "type": "int",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "날짜",
+                "name": "date",
+                "type": "date",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "외국인 순매수량",
+                "name": "외국인순매수",
+                "type": "int",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "기관 순매수량",
+                "name": "기관순매수",
+                "type": "int",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "날짜",
+                "name": "date",
+                "type": "date",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "ECOS/FRED 거시지표 값",
+                "name": "지표별 컬럼",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "뉴스 제목",
+                "name": "title",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "기사 URL",
+                "name": "link",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "발행일",
+                "name": "pubDate",
+                "type": "str",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame | None\naxis=None (가이드):\naxis : str — 축 이름\nlabel : str — 한글 레이블\ndescription : str — 설명\nexample : str — 사용 예시\naxis=\"price\":\ndate : date — 날짜\nopen : float — 시가 (원)\nhigh : float — 고가 (원)\nlow : float — 저가 (원)\nclose : float — 종가 (원)\nvolume : int — 거래량\naxis=\"flow\":\ndate : date — 날짜\n외국인순매수 : int — 외국인 순매수량\n기관순매수 : int — 기관 순매수량\n(KR 전용. EDGAR ticker는 None 반환)\naxis=\"macro\":\ndate : date — 날짜\n지표별 컬럼 : float — ECOS/FRED 거시지표 값\naxis=\"news\":\ntitle : str — 뉴스 제목\nlink : str — 기사 URL\npubDate : str — 발행일\n데이터 없으면 None.",
         "seeAlso": "news: 뉴스 전용 단축 메서드\nask: gather 데이터를 컨텍스트로 활용한 AI 분석",
         "summary": "외부 시장 데이터 수집 — 4축 (price/flow/macro/news)."
@@ -242,6 +578,57 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "\"지배구조 분석\" → c.governance()\n\"사외이사 비율은?\" → c.governance()\n\"전체 상장사 거버넌스 비교\" → c.governance(\"all\")",
         "kind": "method",
         "requires": "데이터: DART 정기보고서 (자동 수집)",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "6자리 종목코드",
+                "name": "종목코드",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "회사명",
+                "name": "종목명",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "최대주주 + 특수관계인 지분율 (%)",
+                "name": "최대주주지분율",
+                "type": "float",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "사외이사 비율 (%)",
+                "name": "사외이사비율",
+                "type": "float",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "감사위원회 설치 여부",
+                "name": "감사위원회",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "거버넌스 종합 점수 (100점 만점)",
+                "name": "종합점수",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "A/B/C/D/E 등급",
+                "name": "등급",
+                "type": "str",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame | None\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n최대주주지분율 : float — 최대주주 + 특수관계인 지분율 (%)\n사외이사비율 : float — 사외이사 비율 (%)\n감사위원회 : str — 감사위원회 설치 여부\n종합점수 : float — 거버넌스 종합 점수 (100점 만점)\n등급 : str — A/B/C/D/E 등급\n데이터 없으면 None.",
         "seeAlso": "network: 출자/계열사 관계 (거버넌스의 다른 관점)\naudit: 감사 리스크 (감사위원회와 연관)",
         "summary": "지배구조 분석 (이사회, 감사위원, 최대주주)."
@@ -253,6 +640,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "\"전체 목차 보여줘\" → c.index\n\"어떤 데이터가 있는지 구조적으로\" → c.index",
         "kind": "property",
         "requires": "데이터: docs/finance/report 중 하나 이상 (자동 다운로드)",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "pl.DataFrame -- 컬럼",
+                "type": "chapter, topic, label, kind, source, periods, shape, preview",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame -- 컬럼: chapter, topic, label, kind, source, periods, shape, preview",
         "seeAlso": "topics: topic 단위 요약 (index보다 간결)\nsections: 전체 sections 지도 (index의 원본)\nprofile: 통합 프로필 접근자",
         "summary": "현재 공개 Company 구조 인덱스 DataFrame -- 전체 데이터 목차."
@@ -260,6 +656,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
     "Company.industry": {
         "example": "c = Company(\"005930\")\npos = c.industry()\n# {'chainId': 'semiconductor', 'stage': 'fab', 'stageLabel': '전공정(FAB)', ...}",
         "kind": "method",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "dict | None",
+                "type": "산업 내 위치 정보.",
+                "unit": null
+            }
+        ],
         "returns": "dict | None: 산업 내 위치 정보.\nchainId, chainName, stage, stageLabel, confidence, matches, products, peers.\n매칭 실패 시 None.",
         "summary": "이 회사의 밸류체인 산업 내 위치를 분석한다."
     },
@@ -298,6 +703,22 @@ CAPABILITIES: dict[str, dict] = json.loads(
     "Company.macro": {
         "guide": "When: 거시경제 환경·사이클 판단이 필요할 때.\nHow: axis 로 분석 영역 지정. 무인자 = 가이드.\n\"매크로\" → c.macro()\n\"경기 사이클\" → c.macro(\"사이클\")\n\"위기 진단\" → c.macro(\"위기\")\n\"2008 시나리오\" → c.macro(\"시나리오\", \"2008 금융위기\")\nVerified:\nmacro(\"사이클\") → CLI + 사분면 + 금리 + 유동성 + 심리 6축 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nmacro + analysis → 경제 고려한 종목 분석 (observed via thesis ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "method",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "axis=None",
+                "type": "가이드 DataFrame (axis/label/description/example/group).",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "축별 매크로 분석 결과 (indicators, narrative 포함).",
+                "name": "axis 지정",
+                "type": "dict",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame | dict\naxis=None: 가이드 DataFrame (axis/label/description/example/group).\naxis 지정: dict — 축별 매크로 분석 결과 (indicators, narrative 포함).",
         "summary": "시장 매크로 (6막 인과 — 사이클/재고/기업/정책/유동성/심리/시나리오). KR 자동 위임."
     },
@@ -419,6 +840,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "\"원문 검색용 블록\" → c.retrievalBlocks\n\"RAG용 데이터\" → c.retrievalBlocks",
         "kind": "property",
         "requires": "데이터: docs (자동 다운로드)",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "pl.DataFrame | None -- 컬럼",
+                "type": "topic, subtopic, period, content 등. docs 없으면 None.",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame | None -- 컬럼: topic, subtopic, period, content 등. docs 없으면 None.",
         "seeAlso": "contextSlices: retrievalBlocks를 LLM 윈도우에 맞게 슬라이싱한 결과\nsections: 구조화된 데이터 지도 (retrievalBlocks의 원본)",
         "summary": "원문 markdown 보존 retrieval block DataFrame."
@@ -466,6 +896,36 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "args": "topic: IS, BS, CF, CIS, SCE 또는 docs topic.\nindList: 행 필터. 한글 항목/snakeId/항목명. 단일 str 도 가능.\ncolList: 열(기간) 필터. 단일 str 도 가능.\nfreq: 시계열 주기 — ``\"Q\"`` (분기, 기본) / ``\"Y\"`` (연간) / ``\"YTD\"`` (누적).\nscope: 재무제표 범위 — ``\"consolidated\"`` (연결, 기본) / ``\"separate\"`` (별도).",
         "example": "c.select(\"IS\", [\"매출액\", \"영업이익\"])\nc.select(\"IS\", [\"매출액\"], freq=\"Y\")              # 연간 매출\nc.select(\"BS\", [\"자본총계\"], scope=\"separate\")    # 별도 자본\nc.select(\"IS\", [\"매출액\"]).chart()",
         "kind": "property",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "내부 DataFrame 접근",
+                "type": "result.df (pl.DataFrame).",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "계정 식별자",
+                "name": "snakeId",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "계정명",
+                "name": "항목",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "분기별 값 (원 단위)",
+                "name": "2025Q4, 2025Q3, ...",
+                "type": "float",
+                "unit": null
+            }
+        ],
         "returns": "SelectResult\nshow()와 동일 컬럼 구조에서 indList/colList로 필터된 행/열.\n.chart() 체이닝으로 시각화 가능.\n내부 DataFrame 접근: result.df (pl.DataFrame).\nfinance topic 예시 (c.select(\"IS\", [\"매출액\"])):\nsnakeId : str — 계정 식별자\n항목 : str — 계정명\n2025Q4, 2025Q3, ... : float — 분기별 값 (원 단위)\n행 매칭 실패 시 ValueError.",
         "summary": "show() 결과에서 행(indList) + 열(colList) 필터 — 내부 구현."
     },
@@ -477,6 +937,78 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "\"분기 손익\" → ``c.show(\"IS\")``\n\"연간 손익\" → ``c.show(\"IS\", freq=\"Y\")``\n\"별도 재무상태표\" → ``c.show(\"BS\", scope=\"separate\")``\n\"2023년 손익\" → ``c.show(\"IS\", period=\"2023\")``\n\"배당 정보\" → ``c.show(\"dividend\")``\n\"주요주주/최대주주\" → ``c.show(\"majorHolder\")``",
         "kind": "property",
         "requires": "데이터: docs (자동 다운로드). finance topic 은 finance parquet 도 필요.",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "계정 식별자 (영문 snake_case)",
+                "name": "snakeId",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "계정명 (한글)",
+                "name": "항목",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "분기별 값 (원 단위, freq=\"Q\" 기본)",
+                "name": "2025Q4, 2025Q3, ...",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "연간 합산 값 (원 단위, freq=\"Y\")",
+                "name": "2025, 2024, ...",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "비율명",
+                "name": "항목",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "비율값 (%, 배)",
+                "name": "2025Q4, 2025Q3, ...",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "세부 항목명",
+                "name": "항목",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "금액 (원 단위)",
+                "name": "당기, 전기 또는 연도 컬럼",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "블록 번호",
+                "name": "block",
+                "type": "int",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "블록 제목",
+                "name": "title",
+                "type": "str",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame | None\nfinance topic (IS/BS/CF/CIS/SCE):\nsnakeId : str — 계정 식별자 (영문 snake_case)\n항목 : str — 계정명 (한글)\n2025Q4, 2025Q3, ... : float — 분기별 값 (원 단위, freq=\"Q\" 기본)\n2025, 2024, ... : float — 연간 합산 값 (원 단위, freq=\"Y\")\nratios topic:\n항목 : str — 비율명\n2025Q4, 2025Q3, ... : float — 비율값 (%, 배)\nnotes topic (inventory, borrowings 등):\n항목 : str — 세부 항목명\n당기, 전기 또는 연도 컬럼 : float — 금액 (원 단위)\ndocs/report topic (dividend, employee 등):\ntopic별 컬럼 구조 — c.show(topic) 실행으로 확인\n블록 미지정 + 멀티블록 topic:\nblock : int — 블록 번호\ntitle : str — 블록 제목\n데이터 없으면 None.",
         "seeAlso": "select: show() 결과에서 행/열 필터 + 차트\ntrace: 데이터 출처 추적\ntopics: 사용 가능한 topic 전체 목록",
         "summary": "topic 의 데이터를 반환 — 내부 구현 (사용자는 ``c.show`` 호출)."
@@ -488,6 +1020,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "\"데이터 뭐가 있어?\" → c.sources\n\"docs/finance/report 상태\" → c.sources",
         "kind": "property",
         "requires": "없음 (메타데이터만 조회, 데이터 파싱 불필요)",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "pl.DataFrame -- 컬럼",
+                "type": "source, available, rows, cols, shape",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame -- 컬럼: source, available, rows, cols, shape",
         "seeAlso": "topics: topic 단위 상세 데이터 지도\ntrace: 특정 topic의 출처 추적",
         "summary": "docs/finance/report 3개 source의 가용 현황 요약."
@@ -530,6 +1071,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
     },
     "Company.topicSummaries": {
         "kind": "method",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "키 = topic 이름 (예",
+                "type": "\"BS\", \"IS\", \"dividend\", \"companyOverview\")",
+                "unit": null
+            }
+        ],
         "returns": "dict[str, str]\n키 = topic 이름 (예: \"BS\", \"IS\", \"dividend\", \"companyOverview\")\n값 = 200자 요약 텍스트",
         "summary": "토픽별 요약 dict — AI가 경로 탐색에 사용."
     },
@@ -540,6 +1090,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "\"어떤 데이터가 있어?\" → c.topics\n\"topic 목록\" → c.topics",
         "kind": "property",
         "requires": "데이터: docs/finance/report 중 하나 이상 (자동 다운로드)",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "pl.DataFrame -- 컬럼",
+                "type": "order, chapter, topic, source, blocks, periods, latestPeriod",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame -- 컬럼: order, chapter, topic, source, blocks, periods, latestPeriod",
         "seeAlso": "show: 특정 topic 데이터 조회\nsections: topic x period 전체 지도 (topics보다 상세)\nindex: 전체 구조 메타데이터 목차",
         "summary": "topic별 요약 DataFrame -- 전체 데이터 지도."
@@ -563,6 +1122,15 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "\"최신 공시 반영해줘\" → c.update()\n\"데이터 업데이트\" → c.update()로 증분 수집",
         "kind": "method",
         "requires": "API 키: DART_API_KEY",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "dict — {카테고리",
+                "type": "수집 건수}.",
+                "unit": null
+            }
+        ],
         "returns": "dict — {카테고리: 수집 건수}.",
         "seeAlso": "filings: 현재 보유 공시 목록 확인\ndisclosure: OpenDART 전체 공시 조회",
         "summary": "누락된 최신 공시를 증분 수집."
@@ -572,6 +1140,36 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "capabilities": "calcStoryPrecedents (scan peer + KnowledgeDB insights)\ncalcPlausibilityBand (섹터 피어 분포 percentile)\ncalcValuationSins (정합성 규칙 위반)\noverrides 로 AI 개입 (lifeCyclePhase, terminalGrowth 등)",
         "example": "c = Company(\"005930\")\nr = c.validateStory()\nfor f in r[\"rules\"][\"flags\"]:\nprint(f['severity'], f['reason'])",
         "kind": "method",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "Possible Test 결과",
+                "name": "precedents",
+                "type": "dict",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "Plausible Test 결과",
+                "name": "plausibility",
+                "type": "dict",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "Probable Test 결과",
+                "name": "rules",
+                "type": "dict",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "\"info\" | \"warn\" | \"critical\"",
+                "name": "overall",
+                "type": "str",
+                "unit": null
+            }
+        ],
         "returns": "dict\nprecedents : dict — Possible Test 결과\nplausibility : dict — Plausible Test 결과\nrules : dict — Probable Test 결과\noverall : str — \"info\" | \"warn\" | \"critical\"",
         "summary": "Damodaran 스토리 검증 — Possible / Plausible / Probable 3 테스트 통합."
     },
@@ -638,6 +1236,50 @@ CAPABILITIES: dict[str, dict] = json.loads(
     "Story": {
         "guide": "When: 종목의 종합 분석 보고서가 필요할 때.\nHow: 11 타입 중 선택 — full(전체), executive(경영진 요약), credit(신용),\nvaluation(가치평가), growth(성장), crisis(위기), audit(감사),\ndividend(배당), governance(지배구조), macro(매크로), thesis(투자논제).\nVerified:\ncredit 타입 → credit + analysis(안정성,현금흐름,자금조달) 조합 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\naudit 타입 → analysis(이익품질,재무정합성) + 감사의견 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ngovernance 타입 → analysis(지배구조,공시변화) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ndividend 타입 → analysis(수익구조,현금흐름,자본배분) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nvaluation 타입 → analysis(가치평가) + quant (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nthesis 타입 → macro + analysis 복합 근거 수집 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nanalysis : 재무 심층 분석 — story 의 주요 데이터 공급원.\ncredit : 신용 분석 — story credit 타입의 핵심 엔진.\nscan : 전종목 비교 — 동종업계 비교 블록 제공.\nquant : 기술적 분석 — 가격 기반 신호 블록 제공.\nmacro : 거시 분석 — 매크로 환경 블록 제공.",
         "kind": "class",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "6막별 섹션 목록",
+                "name": "sections",
+                "type": "list[Section]",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "렌더링 (\"rich\"/\"html\"/\"markdown\"/\"json\")",
+                "name": "render(fmt)",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "HTML 출력",
+                "name": "toHtml()",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "Markdown 출력",
+                "name": "toMarkdown()",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "최상단 요약 카드",
+                "name": "summaryCard",
+                "type": "SummaryCard",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "4 출력 형식",
+                "type": "rich(터미널), html, markdown, json.",
+                "unit": null
+            }
+        ],
         "returns": "Story\n보고서 인스턴스. 주요 속성/메서드:\nsections : list[Section] — 6막별 섹션 목록\nrender(fmt) : str — 렌더링 (\"rich\"/\"html\"/\"markdown\"/\"json\")\ntoHtml() : str — HTML 출력\ntoMarkdown() : str — Markdown 출력\nsummaryCard : SummaryCard — 최상단 요약 카드\n\nRaises\nValueError\n보고서 타입이 등록되지 않은 경우.\nRuntimeError\nCompany 데이터 로드 실패 시.\n\nExamples\n>>> c.story()                              # 전체 보고서\n>>> c.story(\"수익구조\")                     # 수익구조 섹션만\n>>> c.story(reportType=\"credit\")           # 신용분석 보고서\n>>> from dartlab.story import blocks, Story\n>>> b = blocks(c)\n>>> Story([b[\"growth\"], b[\"margin\"]])       # 자유 조립\n\nNotes\n사람의 진입점은 c.story() (Company 메서드). AI 는 dartlab.ask() 경유.\n4 출력 형식: rich(터미널), html, markdown, json.\nJupyter/Colab/Marimo 에서 _repr_html_ 자동 렌더링.",
         "summary": "보고서 조합기 — 6 엔진 블록을 조합하여 6막 구조화 보고서 생성."
     },
@@ -956,14 +1598,23 @@ CAPABILITIES: dict[str, dict] = json.loads(
     },
     "ask": {
         "args": "question: 자연어 질문.\nstockCode: UI/서버가 현재 화면 종목코드를 힌트로 전달 (선택).\nprovider: LLM provider.\nstream: True 면 실시간 스트리밍 출력 (기본). False 면 조용히 전체 텍스트 반환.\nraw: True 면 Generator 를 직접 반환 (커스텀 UI 용).",
-        "capabilities": "자연어로 기업/시장 분석 (종목은 질문 텍스트에서 AI 가 자동 감지)\n스트리밍 출력 (기본) / 배치 반환 / Generator 직접 제어\n원본 검증 · 가정 조정 · 업종 비교 전부 AI 자율",
+        "capabilities": "자연어로 기업/시장 분석 (DartLab API·데이터셋·skills 를 검색 후 실행)\n스트리밍 출력 (기본) / 배치 반환 / Generator 직접 제어\n원본 검증 · 가정 조정 · 업종 비교는 run_python 결과와 ref 로 검산",
         "example": "import dartlab\ndartlab.ask(\"삼성전자 수익성 분석해줘\")\ndartlab.ask(\"삼성전자 분석\", stream=False)  # 조용히 전체 텍스트",
         "guide": "\"삼성전자 수익성 분석\" -> dartlab.ask(\"삼성전자 수익성 분석해줘\")\n\"삼성 vs SK하이닉스\" -> dartlab.ask(\"삼성전자와 SK하이닉스 비교\")\n\"반도체 업황\" -> dartlab.ask(\"반도체 업황 어때\")  (종목 불필요)",
         "kind": "function",
         "requires": "AI: provider 설정 (dartlab.setup() 참조)",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "str | None",
+                "type": "전체 답변 텍스트. 설정 오류 시 None. (raw=True 일 때만 Generator[str])",
+                "unit": null
+            }
+        ],
         "returns": "str | None: 전체 답변 텍스트. 설정 오류 시 None. (raw=True 일 때만 Generator[str])",
-        "seeAlso": "Company: 원본 데이터 조회 (show/select)\nscan: 전종목 비교 (프로그래밍)",
-        "summary": "AI 에게 질문. AI 가 모든 엔진(analysis/scan/macro/credit/gather/search)을 tool 로 다룬다."
+        "seeAlso": "Company: 원본 데이터 조회 (show/select)\nscan: 전종목 비교 (프로그래밍)\nskills: 공용 분석 절차 검색",
+        "summary": "AI 에게 질문. LLM 이 DartLab 을 읽고 실행한 뒤 검산해 답한다."
     },
     "capabilities": {
         "aicontext": "AI가 \"dartlab에 뭐가 있는지\" 모를 때 탐색용.\ncapabilities() → 목차 확인 → capabilities(\"analysis\") → 상세 확인 → execute_code.\ncapabilities(search=\"재무건전성\") → 질문 관련 API 검색 → 코드 생성.",
@@ -1012,6 +1663,85 @@ CAPABILITIES: dict[str, dict] = json.loads(
     "credit": {
         "guide": "When: 종목의 부도 위험·재무 건전성을 독립 평가할 때.\nHow: credit 단독으로 종합 등급 확인 → analysis(안정성, 현금흐름) 와 함께 심층 진단.\nstory credit 타입이 credit + analysis(안정성) + analysis(현금흐름) + analysis(자금조달) 순서로 조합.\nVerified:\ncredit 단독 → dCR 등급 + 7축 위험점수 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ncredit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nanalysis : 재무 심층 분석 — 안정성·현금흐름 축이 credit 과 상호 보완.\nscan : 전종목 재무건전성 비교.",
         "kind": "function",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "dCR 등급 (예: \"dCR-AA+\")",
+                "name": "grade",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "위험 점수 (0=최우량, 100=최위험) (점)",
+                "name": "score",
+                "type": "float",
+                "unit": "점"
+            },
+            {
+                "depth": 0,
+                "description": "건전성 점수 (100-score) (점)",
+                "name": "healthScore",
+                "type": "float",
+                "unit": "점"
+            },
+            {
+                "depth": 0,
+                "description": "7축 상세 (name, score, weight, metrics)",
+                "name": "axes",
+                "type": "list[dict]",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "현금흐름등급",
+                "name": "eCR",
+                "type": "str | None",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "전망 (\"안정적\"/\"긍정적\"/\"부정적\")",
+                "name": "outlook",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "축 풀네임",
+                "name": "axis",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "해당 축 위험 점수 (점)",
+                "name": "score",
+                "type": "float",
+                "unit": "점"
+            },
+            {
+                "depth": 0,
+                "description": "가중치 (%)",
+                "name": "weight",
+                "type": "int",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "개별 지표 (name, value, score)",
+                "name": "metrics",
+                "type": "list[dict]",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "79개사 검증",
+                "type": "대기업 87%, 중대형 82%. DART 공시 기반, API 키 불필요.",
+                "unit": null
+            }
+        ],
         "returns": "DataFrame | dict | None\nstockCode=None → 가이드 DataFrame (axis, label, description, example, group)\naxis=\"등급\" 또는 None+stockCode → 종합 등급 dict\n\ngrade : str — dCR 등급 (예: \"dCR-AA+\")\nscore : float — 위험 점수 (0=최우량, 100=최위험) (점)\nhealthScore : float — 건전성 점수 (100-score) (점)\naxes : list[dict] — 7축 상세 (name, score, weight, metrics)\neCR : str | None — 현금흐름등급\noutlook : str — 전망 (\"안정적\"/\"긍정적\"/\"부정적\")\n\naxis=축이름 → 해당 축 dict\n\naxis : str — 축 풀네임\nscore : float — 해당 축 위험 점수 (점)\nweight : int — 가중치 (%)\nmetrics : list[dict] — 개별 지표 (name, value, score)\n\nExamples\n>>> import dartlab\n>>> dartlab.credit(\"005930\")                # 삼성전자 종합\n>>> dartlab.credit(\"005930\", \"채무상환\")     # 채무상환 축만\n>>> dartlab.credit()                        # 가이드 DataFrame\n\nRaises\nValueError\n축 이름이 등록되지 않은 경우.\n\nNotes\n3-Track 모델(일반/금융/지주) + Notch Adjustment + CHS 시장 보정.\n79개사 검증: 대기업 87%, 중대형 82%. DART 공시 기반, API 키 불필요.",
         "summary": "신용등급 산출 단일 진입점."
     },
@@ -1033,6 +1763,204 @@ CAPABILITIES: dict[str, dict] = json.loads(
     "gather": {
         "guide": "When: 분석 엔진에 필요한 외부 데이터를 수집할 때.\nHow: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천.\ngather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과).\nVerified:\ngather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nquant : 주가 기반 정량 분석 — gather(\"price\") 데이터 소비.\nmacro : 거시 분석 — gather(\"macro\") raw 데이터의 분석 결과.\nscan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완.",
         "kind": "function",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "축 이름",
+                "name": "axis",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "한글 레이블",
+                "name": "label",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "설명",
+                "name": "description",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "사용 예시",
+                "name": "example",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "날짜",
+                "name": "date",
+                "type": "date",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "시가",
+                "name": "open",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "고가",
+                "name": "high",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "저가",
+                "name": "low",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "종가",
+                "name": "close",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "거래량",
+                "name": "volume",
+                "type": "int",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "날짜",
+                "name": "date",
+                "type": "date",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "외국인 순매수량",
+                "name": "외국인순매수",
+                "type": "int",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "기관 순매수량",
+                "name": "기관순매수",
+                "type": "int",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "날짜",
+                "name": "date",
+                "type": "date",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "ECOS/FRED 거시지표 값",
+                "name": "지표별 컬럼",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "뉴스 제목",
+                "name": "title",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "기사 URL",
+                "name": "link",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "발행일",
+                "name": "pubDate",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "업종코드",
+                "name": "sectorCode",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "업종명",
+                "name": "sectorName",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "산업코드",
+                "name": "industryCode",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "산업명",
+                "name": "industryName",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "시장 (KR/US)",
+                "name": "market",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "거래일",
+                "name": "date",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "거래자명",
+                "name": "name",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "직위",
+                "name": "position",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "거래유형",
+                "name": "tradeType",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "변동 주수",
+                "name": "changeShares",
+                "type": "int",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame\naxis=None (가이드):\naxis : str — 축 이름\nlabel : str — 한글 레이블\ndescription : str — 설명\nexample : str — 사용 예시\naxis=\"price\":\ndate : date — 날짜\nopen : float — 시가\nhigh : float — 고가\nlow : float — 저가\nclose : float — 종가\nvolume : int — 거래량\naxis=\"flow\":\ndate : date — 날짜\n외국인순매수 : int — 외국인 순매수량\n기관순매수 : int — 기관 순매수량\naxis=\"macro\":\ndate : date — 날짜\n지표별 컬럼 : float — ECOS/FRED 거시지표 값\naxis=\"news\":\ntitle : str — 뉴스 제목\nlink : str — 기사 URL\npubDate : str — 발행일\naxis=\"sector\":\nsectorCode : str — 업종코드\nsectorName : str — 업종명\nindustryCode : str — 산업코드\nindustryName : str — 산업명\nmarket : str — 시장 (KR/US)\naxis=\"insider\":\ndate : str — 거래일\nname : str — 거래자명\nposition : str — 직위\ntradeType : str — 거래유형\nchangeShares : int — 변동 주수\n\nRaises\nValueError\n축 이름이 등록되지 않은 경우.\ntarget 필수 축에서 target 누락 시.\n\nExamples\n>>> dartlab.gather()                              # 가이드\n>>> dartlab.gather(\"price\", \"005930\")              # KR OHLCV\n>>> dartlab.gather(\"price\", \"AAPL\", market=\"US\")   # US 주가\n>>> dartlab.gather(\"macro\", \"FEDFUNDS\")            # 미국 기준금리\n>>> dartlab.gather(\"news\", \"삼성전자\")              # Google News\n\nNotes\nNaver(KR)/Yahoo(US)/FRED/ECOS/Google News 경유. API 키 불필요.\n결과는 Polars DataFrame — 분석 엔진 입력으로 바로 사용 가능.",
         "summary": "외부 시장 데이터 수집 — 주가·수급·거시지표·뉴스 4 축."
     },
@@ -1285,6 +2213,71 @@ CAPABILITIES: dict[str, dict] = json.loads(
     },
     "industry": {
         "kind": "function",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "산업 식별자",
+                "name": "산업ID",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "한글 산업명",
+                "name": "산업명",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "해당 산업의 공정 단계 수",
+                "name": "공정수",
+                "type": "int",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "공정 단계명",
+                "name": "공정",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "6자리 코드",
+                "name": "종목코드",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "회사명",
+                "name": "종목명",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "공정명",
+                "name": "공정",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "공정별 매출 합산 (원)",
+                "name": "매출합계",
+                "type": "float",
+                "unit": "원"
+            },
+            {
+                "depth": 0,
+                "description": "공정별 영업이익 합산 (원)",
+                "name": "영업이익합계",
+                "type": "float",
+                "unit": "원"
+            }
+        ],
         "returns": "pl.DataFrame\nindustryId=None (가이드):\n산업ID : str — 산업 식별자\n산업명 : str — 한글 산업명\n공정수 : int — 해당 산업의 공정 단계 수\nindustryId 지정:\n공정 : str — 공정 단계명\n종목코드 : str — 6자리 코드\n종목명 : str — 회사명\nsummary=True:\n공정 : str — 공정명\n매출합계 : float — 공정별 매출 합산 (원)\n영업이익합계 : float — 공정별 영업이익 합산 (원)",
         "summary": "산업지도를 조회한다."
     },
@@ -1292,12 +2285,156 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "args": "kind: 조회 종류. \"companies\"(기본), \"filings\", \"topics\", \"dartlist\".\n한글 alias 지원: \"기업\", \"공시\", \"토픽\", \"법인\", \"dart\".\ncorp: 종목코드 또는 ticker. filings/topics에 필수.\nmarket: \"KR\" 또는 \"US\". companies에서만 사용.",
         "example": "import dartlab\ndartlab.listing()                              # 전 종목 (기존 호환)\ndartlab.listing(\"dartlist\")                    # DART 전체 법인 (비상장 포함, corp_code)\ndartlab.listing(market=\"US\")                   # EDGAR 종목\ndartlab.listing(\"filings\", corp=\"005930\")      # DART 공시 메타\ndartlab.listing(\"filings\", corp=\"AAPL\")        # EDGAR 공시 메타\ndartlab.listing(\"topics\", corp=\"005930\")       # 토픽 목록",
         "kind": "function",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "6자리 종목코드",
+                "name": "종목코드",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "회사명",
+                "name": "종목명",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "유가/코스닥/코넥스",
+                "name": "시장",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "업종명",
+                "name": "업종",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "공시 접수번호",
+                "name": "id",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "접수일",
+                "name": "date",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "공시 제목",
+                "name": "title",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "공시 URL",
+                "name": "url",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "topic 이름",
+                "name": "topic",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "데이터 출처 (docs/finance/report)",
+                "name": "source",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "사용 가능 기간",
+                "name": "periods",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "DART 법인코드 (8자리)",
+                "name": "corp_code",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "법인명",
+                "name": "corp_name",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "종목코드 (비상장이면 None)",
+                "name": "stock_code",
+                "type": "str | None",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "ValueError",
+                "type": "지원하지 않는 kind, 또는 필수 인자 누락.",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame\nkind=\"companies\" (기본):\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n시장 : str — 유가/코스닥/코넥스\n업종 : str — 업종명\nkind=\"filings\":\nid : str — 공시 접수번호\ndate : str — 접수일\ntitle : str — 공시 제목\nurl : str — 공시 URL\nkind=\"topics\":\ntopic : str — topic 이름\nsource : str — 데이터 출처 (docs/finance/report)\nperiods : str — 사용 가능 기간\nkind=\"dartlist\":\ncorp_code : str — DART 법인코드 (8자리)\ncorp_name : str — 법인명\nstock_code : str | None — 종목코드 (비상장이면 None)\n\nRaises:\nValueError: 지원하지 않는 kind, 또는 필수 인자 누락.",
         "summary": "목록 조회 단일 진입점."
     },
     "macro": {
         "guide": "When: 종목 분석 전 경제 환경을 먼저 파악할 때. Company 없이 사용 가능.\nHow: 6막 인과의 최상위 — macro(사이클) → scan(업종) → analysis(기업) 순서.\nstory macro/crisis 타입이 macro 종합 → analysis(안정성, 현금흐름) 순서로 조합.\nVerified:\nmacro(\"사이클\") → CLI + 사분면 + 금리 + 유동성 + 심리 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nmacro + analysis 조합 → 경제 고려한 논제 검증 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nscan : 전종목 횡단 — macro 사이클에 따른 업종별 영향 비교.\nquant : 시장 심리·변동성 — macro 사이클과 교차 분석.\nanalysis : 개별 기업 재무 — macro 환경 하에서 기업 건전성 판단.",
         "kind": "function",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "axis=None (가이드)",
+                "type": "DataFrame (axis/label/description/example/group 컬럼)",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "축별 분석 결과.",
+                "name": "axis 지정",
+                "type": "dict",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "cycle",
+                "type": "{phase, label, confidence, indicators[{name, value, signal}]}",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "summary",
+                "type": "{indicators[], narrative}",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "rates/liquidity/trade/...",
+                "type": "{지표별 dict, narrative}",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame | dict\naxis=None (가이드): DataFrame (axis/label/description/example/group 컬럼)\naxis 지정: dict — 축별 분석 결과.\ncycle: {phase, label, confidence, indicators[{name, value, signal}]}\nsummary: {indicators[], narrative}\nrates/liquidity/trade/...: {지표별 dict, narrative}\n_summary (autoEnrich 자동) — 핵심 요약 + [엔진가정].\n\nRaises\nValueError\nmarket 이 \"US\"/\"KR\" 이 아닌 경우.\n축 이름이 등록되지 않은 경우.\n\nExamples\n>>> dartlab.macro()                          # 가이드\n>>> dartlab.macro(\"사이클\")                   # 경기 4국면 판별\n>>> dartlab.macro(\"금리\")                     # 금리 + 수익률곡선\n>>> dartlab.macro(\"예측\")                     # 침체확률 + GDP Nowcast\n>>> dartlab.macro(\"종합\")                     # 매크로 종합 + 투자전략\n>>> dartlab.macro(\"시나리오\", \"2008 금융위기\")  # 역사적 시나리오\n\nNotes\nFRED 데이터 기반. API 키 불필요 (공개 API).\nHamilton EM, Kalman DFM, Nelson-Siegel, Cleveland Fed 프로빗 등 numpy 직접 구현.",
         "summary": "매크로 분석 실행."
     },
@@ -1367,20 +2504,267 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "회사명 → 종목코드. 정확히 일치하는 첫 번째 결과."
     },
     "pastInsight": {
-        "args": "stockCode: 종목코드 (예: '005930', 'AAPL')",
         "kind": "function",
-        "returns": "dict — narrative / strengths / weaknesses / keyMetrics / dataAsOf / source.\nNone — 과거 분석 없음.",
-        "summary": "특정 회사의 과거 분석 서사 조회."
+        "summary": ""
     },
     "quant": {
         "guide": "When: 주가 기반 기술적 신호·팩터·리스크를 정량 분석할 때.\nHow: quant(\"판단\") 으로 종합 신호 확인 → 세부 축으로 근거 파악.\nquant(\"벤치마크\") 로 시장·섹터·스타일 benchmarkStack 을 확인한다.\nbeta/residual/factor/BAB 는 기본 market mode를 유지하고,\nbenchmarkMode=\"sector\" 또는 \"style\" 로 상대 기준을 명시 전환한다.\nanalysis(재무) + quant(기술) 조합이 story full/valuation 타입의 핵심.\ncredit 과 함께 사용 시 altman/piotroski 로 부도 위험 교차 검증.\nVerified:\nquant(\"판단\") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nquant(\"베타\", benchmarkMode=\"sector\") → KRX 섹터 지수 대비 beta.\n\nSee Also\nanalysis : 재무 인과 분석 — quant 기술 + analysis 재무 조합.\ngather : 주가·수급 데이터 수집 — quant 의 데이터 원천.\nscan : 전종목 횡단 비교.",
         "kind": "function",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "verdict(판단)",
+                "type": "signal, confidence, indicators (매수/매도/중립)",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "momentum(모멘텀)",
+                "type": "returns, rsi, macd, moving_averages",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "volatility(변동성)",
+                "type": "realized, garch, regime",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "benchmark(벤치마크)",
+                "type": "benchmarkUsed, benchmarkStack, 기간 수익률 (%)",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "simulation(시뮬레이션)",
+                "type": "paths, expectedReturn, var (%)",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "altman",
+                "type": "zScore, zone (safe/grey/distress)",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "piotroski",
+                "type": "fScore (0~9점)",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "축 목록 + 설명 + 예시.",
+                "name": "axis=None",
+                "type": "가이드",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "횡단면 축 (market=\"KR\")",
+                "type": "전종목 DataFrame.",
+                "unit": null
+            }
+        ],
         "returns": "dict\n종목 지정 시 축별 분석 결과:\nverdict(판단): signal, confidence, indicators (매수/매도/중립)\nmomentum(모멘텀): returns, rsi, macd, moving_averages\nvolatility(변동성): realized, garch, regime\nbenchmark(벤치마크): benchmarkUsed, benchmarkStack, 기간 수익률 (%)\nsimulation(시뮬레이션): paths, expectedReturn, var (%)\naltman: zScore, zone (safe/grey/distress)\npiotroski: fScore (0~9점)\npl.DataFrame\naxis=None: 가이드 — 축 목록 + 설명 + 예시.\n횡단면 축 (market=\"KR\"): 전종목 DataFrame.\n\nRaises\nValueError\n축 이름이 등록되지 않은 경우.\n종목 필수 축에서 stockCode 누락 시.\nTypeError\naxis 에 list 전달 시.\n\nExamples\n>>> c.quant()                          # 가이드\n>>> c.quant(\"판단\")                     # 종합 매수/매도 판단\n>>> c.quant(\"모멘텀\")                   # 모멘텀 지표\n>>> dartlab.quant(\"altman\", \"005930\")   # Altman Z-Score\n>>> dartlab.quant(\"piotroski\", \"005930\")  # Piotroski F-Score\n\nNotes\n주가 데이터는 gather(\"price\") 경유 자동 수집. API 키 불필요 (Naver/Yahoo).",
         "summary": "가격 기반 정량 분석 — 8 그룹 30+ 축 (기술·리스크·팩터·백테스트·알파)."
     },
     "scan": {
         "guide": "When: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.\nHow: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.\nstory credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.\n조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서.\n단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.\nVerified:\nscan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)\n\nSee Also\nanalysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석.",
         "kind": "function",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "축 이름",
+                "name": "axis",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "한글 레이블",
+                "name": "label",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "설명",
+                "name": "description",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "사용 예시",
+                "name": "example",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "6자리 종목코드",
+                "name": "종목코드",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "회사명",
+                "name": "종목명",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "영업이익률 (%)",
+                "name": "영업이익률",
+                "type": "float",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "순이익률 (%)",
+                "name": "순이익률",
+                "type": "float",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "자기자본이익률 (%)",
+                "name": "ROE",
+                "type": "float",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "총자산이익률 (%)",
+                "name": "ROA",
+                "type": "float",
+                "unit": "%"
+            },
+            {
+                "depth": 0,
+                "description": "수익성 등급",
+                "name": "등급",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "6자리 종목코드",
+                "name": "종목코드",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "회사명",
+                "name": "종목명",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "연도별 값 (원 단위)",
+                "name": "2024, 2023, ...",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "6자리 종목코드",
+                "name": "종목코드",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "회사명",
+                "name": "종목명",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "연도별 비율값 (%, 배)",
+                "name": "2024, 2023, ...",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "screen spec 에 넣는 정규 필드 키",
+                "name": "field",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "표시명",
+                "name": "label",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "finance/report/docs/krx/krxIndex 등 원천",
+                "name": "source",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "number/text/boolean/context",
+                "name": "kind",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "원/%/배/건/일/점/주/텍스트/없음",
+                "name": "unit",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "허용 연산자 목록",
+                "name": "operatorSet",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "로컬 prebuild 기준 커버리지",
+                "name": "coverage",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "기타 축",
+                "type": "종목코드 + 종목명 + 축별 지표 컬럼",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": ">>> dartlab.scan(\"screen\", spec={\"where\"",
+                "type": "[{\"field\": \"finance.ratio.roe\", \"op\": \">\", \"value\": 10}]})",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame\naxis=None (가이드):\naxis : str — 축 이름\nlabel : str — 한글 레이블\ndescription : str — 설명\nexample : str — 사용 예시\naxis=\"profitability\":\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n영업이익률 : float — 영업이익률 (%)\n순이익률 : float — 순이익률 (%)\nROE : float — 자기자본이익률 (%)\nROA : float — 총자산이익률 (%)\n등급 : str — 수익성 등급\naxis=\"account\" (target=\"매출액\"):\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n2024, 2023, ... : float — 연도별 값 (원 단위)\naxis=\"ratio\" (target=\"roe\"):\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n2024, 2023, ... : float — 연도별 비율값 (%, 배)\naxis=\"fields\":\nfield : str — screen spec 에 넣는 정규 필드 키\nlabel : str — 표시명\nsource : str — finance/report/docs/krx/krxIndex 등 원천\nkind : str — number/text/boolean/context\nunit : str — 원/%/배/건/일/점/주/텍스트/없음\noperatorSet : str — 허용 연산자 목록\ncoverage : str — 로컬 prebuild 기준 커버리지\n기타 축: 종목코드 + 종목명 + 축별 지표 컬럼\n\nRaises\nValueError\naxis 또는 target 이 등록되지 않은 경우.\n그룹 호출 시 target 이 해당 그룹에 속하지 않는 경우.\n\nExamples\n>>> dartlab.scan()                              # 전체 축 가이드\n>>> dartlab.scan(\"profitability\")               # 전종목 수익성\n>>> dartlab.scan(\"account\", \"매출액\")            # 전종목 매출액 시계열\n>>> dartlab.scan(\"ratio\", \"roe\")                # 전종목 ROE 시계열\n>>> dartlab.scan(\"fields\", \"매출\")               # 스크리닝 필드 검색\n>>> dartlab.scan(\"screen\", spec={\"where\": [{\"field\": \"finance.ratio.roe\", \"op\": \">\", \"value\": 10}]})\n>>> dartlab.scan(\"financial\")                   # 재무 8축 가이드\n>>> dartlab.scan(\"financial\", \"수익성\")          # 재무 그룹 내 수익성\n\nNotes\n사전 빌드 parquet 기반. 첫 호출 시 HuggingFace 에서 자동 다운로드.\n전종목 데이터를 한 번에 로드하므로 메모리 ~200MB 소비.",
         "summary": "축(axis)별 전종목 횡단분석."
     },
@@ -1736,6 +3120,50 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "guide": "\"유상증자 한 회사?\" -> search(\"유상증자\") [BETA, 0건이면 stop]\n\"반도체 투자 트렌드?\" -> search(\"반도체 HBM 투자\") [BETA, 0건이면 stop]\n\"삼성전자 최근 공시\" -> Company(\"005930\").disclosure() (search 아님)",
         "kind": "function",
         "requires": "데이터: stemIndex (scope=title) + contentIndex (scope=content)",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "매칭 점수",
+                "name": "score",
+                "type": "float",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "접수번호 (DART 고유 ID)",
+                "name": "rcept_no",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "회사명",
+                "name": "corp_name",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "공시 유형명",
+                "name": "report_nm",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "검색 소스 (\"title\" 또는 \"content\", auto/both 모드)",
+                "name": "scope",
+                "type": "str",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "DART 공시 뷰어 URL",
+                "name": "dartUrl",
+                "type": "str",
+                "unit": null
+            }
+        ],
         "returns": "pl.DataFrame\nscore : float — 매칭 점수\nrcept_no : str — 접수번호 (DART 고유 ID)\ncorp_name : str — 회사명\nreport_nm : str — 공시 유형명\nscope : str — 검색 소스 (\"title\" 또는 \"content\", auto/both 모드)\ndartUrl : str — DART 공시 뷰어 URL",
         "seeAlso": "Company: 종목코드/회사명으로 Company 생성\nlisting: 전체 상장법인 목록",
         "summary": "공시 검색. **⚠ BETA — AI 사용 비권장**."
@@ -1748,10 +3176,8 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "종목명/코드로 종목 찾기 (KR + US)."
     },
     "sectorInsights": {
-        "args": "sector: 업종명 (예: '반도체', '식품')\nlimit: 상위 N개 (기본 3)",
         "kind": "function",
-        "returns": "list — 각 항목: narrative / strengths / weaknesses / keyMetrics / stockCode / corpName.",
-        "summary": "동종 업계 과거 분석 서사 목록 (교차 학습)."
+        "summary": ""
     },
     "setup": {
         "aicontext": "AI 분석 기능 사용 전 provider 설정 상태 확인\n미설정 provider 감지 시 setup() 안내로 연결\n설정 완료 여부를 프로그래밍 방식으로 체크 가능",
@@ -1768,6 +3194,50 @@ CAPABILITIES: dict[str, dict] = json.loads(
     "topdown": {
         "args": "market: \"KR\" | \"US\"\nsectors: 특정 섹터만 지정. None이면 사이클 국면 자동 매핑.\ntopN: 섹터당 추천 종목 수\nas_of: 백테스트용 기준일",
         "kind": "function",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "dict",
+                "type": "{",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "\"cycle\"",
+                "type": "{phase, label, confidence, ...},",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "\"transition\"",
+                "type": "{...} | None,",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "\"recommendedSectors\"",
+                "type": "[...],",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "\"screens\"",
+                "type": "{sector: [{stockCode, name, signals, ...}, ...]},",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "\"narrative\"",
+                "type": "\"사이클 → 섹터 → 종목 인과 사슬 문장\"",
+                "unit": null
+            }
+        ],
         "returns": "dict: {\n\"cycle\": {phase, label, confidence, ...},\n\"transition\": {...} | None,\n\"recommendedSectors\": [...],\n\"screens\": {sector: [{stockCode, name, signals, ...}, ...]},\n\"narrative\": \"사이클 → 섹터 → 종목 인과 사슬 문장\"\n}",
         "summary": "탑다운 분석 — 시장 → 섹터 → 종목."
     },
