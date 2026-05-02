@@ -4,7 +4,7 @@ GitHub Actions workflow (`.github/workflows/buildKrxData.yml`) 가 호출.
 로컬에서도 ``uv run python -X utf8 scripts/build/buildKrxData.py ...`` 로 실행 가능.
 
 모드:
-    incremental — 장마감 데이터 준비 이후 당일(T-0)까지 → 현재 연도 parquet append
+    incremental — 장중은 직전 거래 가능 평일(T-1), 장마감 이후 평일은 당일(T-0)까지 → 현재 연도 parquet append
     backfill    — ``--start ~ --end`` 기간 → 연도별 parquet 통합/append
 
 요구사항:
@@ -33,7 +33,7 @@ import polars as pl
 from dartlab.gather.krxApi import _normalizeDate, fetchKrxRange
 
 _KST = timezone(timedelta(hours=9))
-_KRX_READY_KST = time(18, 30)
+_KRX_READY_KST = time(17, 0)
 
 
 def _getKey() -> str:
@@ -123,36 +123,39 @@ def _previousWeekday(d: date) -> date:
     return cur
 
 
-def _latestFetchableDate(today: date | None = None) -> date:
+def _latestFetchableDate(today: date | None = None, currentTime: time | None = None) -> date:
     """KRX sto 일별 OpenAPI에서 안정적으로 기대할 수 있는 최신 일자.
 
-    운영자 cron 은 KST 20:00에 실행되므로 장마감 데이터 준비시각 이후에는
-    당일(T-0) 거래일을 자동 수집한다. 준비시각 전 수동 실행은 직전 평일까지만
-    대상으로 삼아 빈 응답으로 HF SSOT를 오염시키지 않는다.
+    장중에는 직전 거래 가능 평일(T-1)을 대상으로 잡고, 평일 장마감 확정시각
+    이후에는 당일(T-0)을 대상으로 잡는다. 주말은 새 거래일이 아니므로 직전
+    평일을 유지한다.
     """
-    if today is None:
+    if today is None or currentTime is None:
         now = datetime.now(_KST)
-        base = now.date()
-        if now.time() >= _KRX_READY_KST:
-            return _previousWeekday(base)
-        return _previousWeekday(base - timedelta(days=1))
-    return _previousWeekday(today)
+        base = now.date() if today is None else today
+        clock = now.time() if currentTime is None else currentTime
+    else:
+        base = today
+        clock = currentTime
+    if base.weekday() < 5 and clock >= _KRX_READY_KST:
+        return base
+    return _previousWeekday(base - timedelta(days=1))
 
 
-def _requiredLatestDate(requestedEnd: date) -> date | None:
+def _requiredLatestDate(
+    requestedEnd: date,
+    today: date | None = None,
+    currentTime: time | None = None,
+) -> date:
     """현 시점에 최소 확보돼야 하는 최신 KRX 일자.
 
-    장마감 데이터 준비시각 이후에는 당일 거래일을 기대한다. 공휴일 캘린더는
-    별도 SSOT가 없으므로 주말만 제외한다. 평일 휴장일이나 KRX 지연이면
-    workflow가 fail 하며 사람이 확인한다.
+    검증 기준은 fetch target 과 같아야 한다. 장중에는 전일을 요구하고, 장마감
+    이후에는 당일을 요구한다. HTTP 오류나 장마감 이후 빈 응답은 success 로
+    삼키지 않고 ``_validateFreshFetch`` 에서 실패시킨다.
     """
-    now = datetime.now(_KST)
-    today = now.date()
-    if requestedEnd < today:
-        return _previousWeekday(requestedEnd)
-    if now.time() >= _KRX_READY_KST:
-        return min(_previousWeekday(today), _previousWeekday(requestedEnd))
-    return _previousWeekday(min(today - timedelta(days=1), requestedEnd))
+    stableLatest = _latestFetchableDate(today, currentTime)
+    requestedLatest = _previousWeekday(requestedEnd)
+    return min(stableLatest, requestedLatest)
 
 
 def _validateFreshFetch(df: pl.DataFrame, *, startD: date, endD: date, context: str) -> None:
@@ -174,9 +177,9 @@ def _validateFreshFetch(df: pl.DataFrame, *, startD: date, endD: date, context: 
 async def buildIncremental(outDir: Path, apiKey: str) -> dict[int, int]:
     """마지막 저장일 다음날 ~ 최신 fetch 가능 거래일 자동 fetch.
 
-    KST 20:00 cron 에서는 당일 장마감 데이터까지 수집한다. 준비시각 전 수동
-    실행은 직전 평일까지만 보고, 1일치 fixed 가 아니라 "마지막 저장 다음날 ~
-    최신 가능일" 가변 윈도로 fetch → 갭 자동 복구.
+    KST 20:00 cron 에서는 당일(T-0)까지 수집한다. 장중 수동 실행이면 전일(T-1)을
+    대상으로 잡는다. 1일치 fixed 가 아니라 "마지막 저장 다음날 ~ 최신 가능일"
+    가변 윈도로 fetch → 갭 자동 복구.
     """
     today = _todayKst()
     targetEnd = _latestFetchableDate()

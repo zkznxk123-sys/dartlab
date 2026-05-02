@@ -107,6 +107,19 @@ if sys.platform == "emscripten":
 | KRX 상장법인 목록 | ❌ KRX API CORS 차단 → 빈 DataFrame |
 | threading | ❌ WASM 단일 스레드 |
 
+### Skill runtimeCompatibility
+
+`src/dartlab/skills` 의 SkillSpec 은 Pyodide 실행 가능성을 `runtimeCompatibility.pyodide` 로 표시한다.
+
+| status | 의미 |
+|---|---|
+| `supported` | HF parquet/prefetch 만으로 브라우저에서 절차 수행 가능 |
+| `limited` | 일부 근거만 가능. live API, OAuth, 전체 prebuild 부재 등 한계를 답변에 명시 |
+| `unsupported` | 브라우저에서 실행하지 말고 서버/MCP 경로 사용 |
+| `unknown` | generated capability view 등 환경 검증 전 |
+
+웹 AI 는 이 필드를 보고 브라우저에서 가능한 skill 을 우선 고르고, `limited` 는 한계를 먼저 표시한다. 예: `krxIndexStrengthReview` 는 HF `krx/indices` parquet 를 Pyodide FS 에 내려받으면 계산 가능하지만, KRX API 실시간 호출은 하지 않는다.
+
 ### scan 지원 경로
 
 - 프리빌드 — `dart/scan/finance-lite.parquet` (~18MB, 30 계정, 2022 년 ~ 분기).

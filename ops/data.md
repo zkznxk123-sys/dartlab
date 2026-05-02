@@ -29,8 +29,8 @@ cron (UTC)  KST       Workflow               역할
 18:00       03:00+1   dataSync.yml (#2)  ┴── DART list.json 신규 공시 (12h 주기)
 [workflow_run (completed+success)]
                       dataPrebuild.yml       DART scan 프리빌드 → HF
-11:00       20:00     buildKrxData.yml       KRX OpenAPI 일별 전종목 T-0 incremental → HF (krx/prices)
-11:20       20:20     buildKrxIndexData.yml  KRX OpenAPI idx 시장군별 지수 T-0 incremental → HF (krx/indices)
+11:00       20:00     buildKrxData.yml       KRX OpenAPI 일별 전종목 장마감 후 T-0 incremental → HF (krx/prices)
+11:20       20:20     buildKrxIndexData.yml  KRX OpenAPI idx 시장군별 지수 장마감 후 T-0 incremental → HF (krx/indices)
 20:00       05:00+1   dataAudit.yml          핵심 워크플로우 health check → Issue
 일요일 03:00 12:00    edgarSync.yml (full)   EDGAR 주간 정산 (docs 포함)
 ```
@@ -300,8 +300,8 @@ workflow_run trigger → Data Prebuild (DART) 자동 실행
 | edgarScan | edgar/scan | EDGAR 전종목 scan 프리빌드 | edgar-collect --scan |
 | edinetDocs | edinet/docs | EDINET 공시 (일본) | 로컬 전용 |
 | edinet | edinet/finance | EDINET 재무 (일본) | 로컬 전용 |
-| krxPrices | krx/prices | KRX 일별 전종목 OHLCV+시총+발행주식수 (raw long) | buildKrxData (cron KST 20:00 평일 T-0 incremental) |
-| krxIndices | krx/indices | KRX/KOSPI/KOSDAQ 시장군별 지수 OHLCV+거래대금+시가총액 (raw long) | buildKrxIndexData (cron KST 20:20 평일 T-0 incremental) |
+| krxPrices | krx/prices | KRX 일별 전종목 OHLCV+시총+발행주식수 (raw long) | buildKrxData (cron KST 20:00 평일 T-0 incremental, 장중 수동 실행은 T-1) |
+| krxIndices | krx/indices | KRX/KOSPI/KOSDAQ 시장군별 지수 OHLCV+거래대금+시가총액 (raw long) | buildKrxIndexData (cron KST 20:20 평일 T-0 incremental, 장중 수동 실행은 T-1) |
 | macroFred | macro/fred | FRED 거시경제 시계열 (observations + manifest) | macroData (daily) |
 | macroEcos | macro/ecos | ECOS 한국은행 거시경제 시계열 (observations + manifest) | macroData (daily) |
 

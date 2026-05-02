@@ -150,7 +150,7 @@ async def fetchKrxIndexBydd(
     basDd = _normalizeDate(basDd)
     if not _isFinalized(basDd):
         log.warning(
-            "KRX idx %s: today not finalized — KRX confirms after 17:00 KST",
+            "KRX idx %s: not finalized — use after market close or a prior trading day",
             basDd,
         )
         return pl.DataFrame()

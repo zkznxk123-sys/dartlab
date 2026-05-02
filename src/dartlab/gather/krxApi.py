@@ -35,7 +35,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from datetime import date as _date
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 from typing import Literal
 
 import httpx
@@ -46,6 +46,7 @@ log = logging.getLogger(__name__)
 _BASE_URL = "https://data-dbg.krx.co.kr/svc/apis/sto"
 _ENDPOINT = {"STK": "stk_bydd_trd", "KSQ": "ksq_bydd_trd"}
 _KST = timezone(timedelta(hours=9))
+_KRX_READY_KST = time(17, 0)
 
 # KRX 응답 schema cast — SSOT (운영자 cron · 사용자 직접 호출 모두 이 캐스트 통과)
 _INT_COLS = (
@@ -113,11 +114,18 @@ def _normalizeDate(d: str | _date) -> str:
     return s
 
 
-def _isFinalized(basDd: str) -> bool:
-    """확정 가드 — sto 일별 API 는 당일(T-0)을 안정적으로 제공하지 않는다."""
+def _isFinalized(basDd: str, *, now: datetime | None = None) -> bool:
+    """확정 가드 — 장중은 전일, 장마감 이후 평일 당일(T-0)은 허용한다."""
     target = datetime.strptime(basDd, "%Y%m%d").date()
-    today = datetime.now(_KST).date()
-    return target < today
+    current = now.astimezone(_KST) if now is not None else datetime.now(_KST)
+    today = current.date()
+    if target < today:
+        return True
+    if target > today:
+        return False
+    if target.weekday() >= 5:
+        return False
+    return current.time() >= _KRX_READY_KST
 
 
 async def fetchKrxBydd(
@@ -154,7 +162,7 @@ async def fetchKrxBydd(
     basDd = _normalizeDate(basDd)
     if not _isFinalized(basDd):
         log.warning(
-            "KRX %s: not finalized for sto by-day API — use T+1 or later",
+            "KRX %s: not finalized for sto by-day API — use after market close or a prior trading day",
             basDd,
         )
         return pl.DataFrame()
@@ -243,6 +251,9 @@ async def fetchKrxRange(
     async with httpx.AsyncClient(timeout=30.0) as client:
         cur = endD
         while cur >= startD:
+            if cur.weekday() >= 5:
+                cur -= timedelta(days=1)
+                continue
             basDd = cur.strftime("%Y%m%d")
             for mkt in markets:
                 try:
@@ -251,6 +262,7 @@ async def fetchKrxRange(
                         frames.append(df)
                 except (httpx.HTTPError, ValueError) as exc:
                     log.warning("KRX %s %s 실패: %s", mkt, basDd, exc)
+                    raise
                 if sleepSec > 0:
                     await asyncio.sleep(sleepSec)
             cur -= timedelta(days=1)
