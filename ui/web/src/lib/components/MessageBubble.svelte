@@ -1,26 +1,27 @@
 <!--
-	[최우선 UX 원칙] 데이터 투명성 — 절대 제거 금지
+	[최우선 UX 원칙] 실행 투명성 — 절대 제거 금지
 
-	LLM이 보는 모든 데이터는 UI에서 실시간으로 뱃지/태그로 표시해야 한다.
-	시스템이 LLM에 제공하는 데이터(컨텍스트, 모듈, 시스템프롬프트)는 반드시 사용자에게 보여야 한다.
+	사용자가 확인해야 하는 것은 원시 프롬프트가 아니라 실제 참조·데이터 확인·실행·검산이다.
+	Ask Workbench 이벤트는 Agent Trace와 Ref 기반 산출물로 표시한다.
 
 	SSE 이벤트 흐름과 UI 표시:
 	  meta          → 회사 뱃지, 연도 범위 뱃지, includedModules
 	  snapshot      → 핵심 수치 카드 (클릭 시 원본 JSON)
 	  context       → 모듈별 데이터 뱃지 (클릭 시 원문/렌더링 모달)
-	  system_prompt → "시스템 프롬프트" 버튼 (클릭 시 전문 확인)
-	  tool_call     → 도구 호출 뱃지
-	  tool_result   → 도구 결과 (toolEvents에 누적)
+	  reference     → 참조 검색 trace
+	  inspect       → 데이터셋 확인 trace
+	  execute       → 실행 trace
+	  verify        → 검산 trace
+	  tool_call     → legacy 호환 이벤트
+	  tool_result   → legacy 호환 이벤트
 	  chunk         → 응답 텍스트 스트리밍
 	  done          → 완료 (duration, 토큰 추정, 재생성 버튼)
-
-	하단 메타: 응답 시간, 추정 토큰(입력↑/출력↓), 시스템 프롬프트, LLM 입력 전문
 -->
 <script>
 	import { cn } from "$lib/utils.js";
 	import { summarizeDataReady } from "$lib/ai/dataReady.js";
 	import {
-		Database, Eye, Wrench, Loader2, Brain, FileText,
+		Database, Eye, Wrench, Loader2,
 		RefreshCw, XCircle,
 	} from "lucide-svelte";
 	import { renderMarkdown } from "$lib/markdown.js";
@@ -143,9 +144,7 @@
 
 	let inputTokens = $derived.by(() => {
 		let total = 0;
-		if (message.systemPrompt) total += estimateTokens(message.systemPrompt);
-		if (message.userContent) total += estimateTokens(message.userContent);
-		else if (message.contexts?.length > 0) {
+		if (message.contexts?.length > 0) {
 			for (const ctx of message.contexts) total += estimateTokens(ctx.text);
 		}
 		return total;
@@ -190,10 +189,6 @@
 		if (onOpenEvidence) { onOpenEvidence("contexts", idx); return; }
 		openModal = idx; modalType = "context";
 	}
-	function openSystemPromptModal() {
-		if (onOpenEvidence) { onOpenEvidence("system"); return; }
-		openModal = 0; modalType = "system";
-	}
 	function openSnapshotModal() {
 		if (onOpenEvidence) { onOpenEvidence("snapshot"); return; }
 		openModal = 0; modalType = "snapshot";
@@ -206,16 +201,11 @@
 		}
 		openModal = idx; modalType = "tool";
 	}
-	function openUserContentModal() {
-		if (onOpenEvidence) { onOpenEvidence("input"); return; }
-		openModal = 0; modalType = "userContent";
-	}
-
 	let toolCallEvents = $derived((message.toolEvents || []).filter(e => e.type === "call"));
 
-	// ── Tool 접기/펼치기 (Claude Code 스타일) ──
+	// ── Tool 접기/펼치기 (legacy 호환) ──
 	const TOOL_LABELS = {
-		// 신규 tool calling registry (ai/tools/schemas.py 10종)
+		// legacy tool calling registry
 		show: "원본 조회", select: "계정 필터", analysis: "재무분석",
 		scan: "시장 스캔", macro: "매크로", credit: "신용평가",
 		gather: "외부 데이터", search: "공시 검색", review: "보고서",
@@ -257,8 +247,6 @@
 		if (message.meta?.includedModules?.length > 0) badges.push({ label: `모듈 ${message.meta.includedModules.length}개`, icon: Database });
 		if (message.contexts?.length > 0) badges.push({ label: `컨텍스트 ${message.contexts.length}건`, icon: Eye });
 		if (toolCallEvents.length > 0) badges.push({ label: `툴 ${toolCallEvents.length}건`, icon: Wrench });
-		if (message.systemPrompt) badges.push({ label: "시스템 프롬프트", icon: Brain });
-		if (message.userContent) badges.push({ label: "LLM 입력", icon: FileText });
 		return badges;
 	});
 
@@ -309,7 +297,6 @@
 		if (message.snapshot) steps.push({ label: "핵심 수치 확인", done: true });
 		if (message.meta?.includedModules) steps.push({ label: `모듈 ${message.meta.includedModules.length}개 선택`, done: true });
 		if (message.contexts?.length > 0) steps.push({ label: `데이터 ${message.contexts.length}건 로드`, done: true });
-		if (message.systemPrompt) steps.push({ label: "프롬프트 조립", done: true });
 		if (message.text) steps.push({ label: "응답 작성 중", done: false });
 		else steps.push({ label: loadingPhase || "준비 중", done: false });
 		return steps;
@@ -381,8 +368,6 @@
 				onOpenContextModal={openContextModal}
 				onOpenSnapshotModal={openSnapshotModal}
 				onOpenToolEventModal={openToolEventModal}
-				onOpenSystemPromptModal={openSystemPromptModal}
-				onOpenUserContentModal={openUserContentModal}
 				{onOpenEvidence}
 			/>
 
@@ -559,7 +544,7 @@
 					</div>
 				{/if}
 
-				<!-- ── 코드 실행 (Claude Code tool-block 패턴: IN/OUT 그리드) ── -->
+				<!-- ── 코드 실행 (Ask Workbench 실행 Ref) ── -->
 				{#if message.codeRounds?.length}
 					<div class="flex flex-col gap-1 mt-2 mb-1">
 						{#each message.codeRounds as cr, crIdx}
@@ -599,7 +584,7 @@
 					</div>
 				{/if}
 
-				<!-- ── Tool 호출 아코디언 (히스토리 호환 전용 — segments 가 없는 과거 메시지) ── -->
+				<!-- ── Tool 호출 아코디언 (legacy 히스토리 호환 전용 — segments 가 없는 과거 메시지) ── -->
 				{#if toolPairs.length > 0 && !(message.segments && message.segments.length > 0)}
 					<div class="flex flex-col gap-1 mt-1 mb-1">
 						{#each toolPairs as pair, i}
@@ -699,7 +684,7 @@
 					</details>
 				{/if}
 
-				<!-- ── 하단 메타 (Claude Code 스타일: 왼쪽 메타 · 오른쪽 액션) ── -->
+				<!-- ── 하단 메타 (왼쪽 메타 · 오른쪽 액션) ── -->
 				{#if !message.loading && (message.duration || message.text || onRegenerate)}
 					<div class="flex items-center gap-1.5 mt-2 pt-1.5 text-[10px] text-dl-text-dim/70">
 						<!-- 왼쪽: 메타 정보 -->
@@ -714,20 +699,6 @@
 							<span>·</span>
 							<span class="font-mono">~{formatTokens(inputTokens + outputTokens)} tok</span>
 						{/if}
-
-						<!-- 투명성 버튼 -->
-						{#if message.systemPrompt}
-							<span>·</span>
-							<button class="hover:text-dl-text-muted transition-colors" onclick={openSystemPromptModal} title="시스템 프롬프트">
-								<Brain size={10} />
-							</button>
-						{/if}
-						{#if message.userContent}
-							<button class="hover:text-dl-text-muted transition-colors" onclick={openUserContentModal} title="LLM 입력 전문">
-								<FileText size={10} />
-							</button>
-						{/if}
-
 						<!-- 오른쪽: 액션 -->
 						<span class="flex-1"></span>
 						{#if message.text}

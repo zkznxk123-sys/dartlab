@@ -142,7 +142,7 @@
       <span class="status-text">Connecting...</span>
     {/if}
 
-    <!-- Session dropdown (Claude Code pattern: past conversations) -->
+    <!-- Session dropdown -->
     <div class="session-area">
       <button class="session-btn" onclick={() => showSessionDropdown = !showSessionDropdown}>
         <span class="session-title">{activeTitle.length > 28 ? activeTitle.slice(0, 26) + "..." : activeTitle}</span>

@@ -720,7 +720,7 @@
     background: var(--vscode-list-hoverBackground);
   }
 
-  /* Claude Code: 150px gradient — on chat-panel level, above messages, below floating input */
+  /* bottom readability gradient — above messages, below floating input */
   .chat-panel::before {
     content: "";
     position: absolute;
@@ -733,7 +733,7 @@
     z-index: 15; /* above messages (0), below input-float (20) */
   }
 
-  /* Claude Code: input floats above messages (absolute bottom:16px) */
+  /* input floats above messages */
   .input-float {
     position: absolute;
     bottom: 16px;

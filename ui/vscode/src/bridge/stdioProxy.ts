@@ -1,6 +1,6 @@
 /**
  * StdioProxy -- dartlab CLI child process + JSON Lines protocol.
- * Claude Code / Codex pattern: spawn + stdin/stdout.
+ * Spawn + stdin/stdout bridge.
  * Auto-restart with exponential backoff + healthcheck.
  * Fallback chain: uv run → python -m dartlab → dartlab CLI.
  */

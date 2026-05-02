@@ -1,6 +1,6 @@
 /**
  * Tool section titles — IN/OUT 레이블 대신 tool 성격에 맞는 한국어 제목.
- * Claude Code 스타일 — 각 블록 상단에 "무엇을 했는가" 표시.
+ * 각 블록 상단에 "무엇을 했는가" 표시.
  */
 const TOOL_TITLES = {
 	analysis:      { in: "분석 조건",    out: "재무 분석 결과" },

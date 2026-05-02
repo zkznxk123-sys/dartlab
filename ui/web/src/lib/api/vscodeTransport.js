@@ -41,14 +41,20 @@ export function askStreamVSCode(company, question, options = {}, callbacks, hist
 				case "meta": callbacks.onMeta?.(data); break;
 				case "snapshot": callbacks.onSnapshot?.(data); break;
 				case "context": callbacks.onContext?.(data); break;
-				case "system_prompt": callbacks.onSystemPrompt?.(data); break;
+				case "system_prompt": break;
 				case "tool_call": callbacks.onToolCall?.(data); break;
 				case "tool_result": callbacks.onToolResult?.(data); break;
 				case "chunk": callbacks.onChunk?.(data?.text); break;
 				case "code_round": callbacks.onCodeRound?.(data); break;
-				case "chart": callbacks.onChart?.(data); break;
+				case "chart":
+				case "visual":
+					callbacks.onChart?.(data);
+					break;
+				case "task":
+				case "reference":
 				case "observe":
 				case "inspect":
+				case "execute":
 				case "compute":
 				case "verify":
 				case "artifact":

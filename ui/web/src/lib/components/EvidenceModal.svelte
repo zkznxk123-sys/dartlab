@@ -1,5 +1,5 @@
 <!--
-	근거 모달 — Context / System Prompt / User Content / Snapshot / Tool Event 상세 보기.
+	근거 모달 — Context / Snapshot / Tool Event 상세 보기.
 -->
 <script>
 	import { cn } from "$lib/utils.js";
@@ -51,8 +51,8 @@
 
 	let modalTitle = $derived(
 		isSnapshot ? "핵심 수치 (원본 데이터)" :
-		isSystemPrompt ? "시스템 프롬프트" :
-		isUserContent ? "LLM에 전달된 입력" :
+		isSystemPrompt ? "레거시 런타임 입력" :
+		isUserContent ? "레거시 사용자 입력" :
 		isTool ? toolHeaderLabel :
 		formatEvidenceLabel(ctx?.label || ctx?.module, ctx?.label || "")
 	);
@@ -163,7 +163,7 @@
 									)}
 									onclick={() => { modalType = "system"; }}
 								>
-									시스템 프롬프트
+									레거시 런타임 입력
 								</button>
 							{/if}
 							{#if message.userContent}
@@ -176,7 +176,7 @@
 									)}
 									onclick={() => { modalType = "userContent"; }}
 								>
-									LLM 입력
+									레거시 사용자 입력
 								</button>
 							{/if}
 						</div>

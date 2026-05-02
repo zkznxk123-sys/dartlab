@@ -56,8 +56,6 @@
 			let data;
 			if (type === "contexts") data = msg.contexts?.[idx];
 			else if (type === "snapshot") data = { label: "핵심 수치", module: "snapshot", text: JSON.stringify(msg.snapshot, null, 2) };
-			else if (type === "system") data = { label: "시스템 프롬프트", module: "system", text: msg.systemPrompt };
-			else if (type === "input") data = { label: "LLM 입력", module: "input", text: msg.userContent };
 			else if (type === "tool-calls" || type === "tool-results") {
 				const ev = msg.toolEvents?.[idx];
 				const isResult = ev?.type === "result";

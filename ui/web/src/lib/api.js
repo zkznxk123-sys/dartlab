@@ -344,11 +344,11 @@ export async function ask(company, question, options = {}) {
  * @param {function} onMeta - meta 이벤트 콜백
  * @param {function} onSnapshot - snapshot 이벤트 콜백 (핵심 수치 즉시 표시)
  * @param {function} onContext - context 이벤트 콜백 (모듈별, 여러 번 호출됨)
- * @param {function} onToolCall - tool_call 이벤트 콜백 (도구 호출)
- * @param {function} onToolProgress - tool_progress 이벤트 콜백 (도구 실행 중 진행 라인)
- * @param {function} onToolResult - tool_result 이벤트 콜백 (도구 결과)
+ * @param {function} onToolCall - legacy tool_call 이벤트 콜백
+ * @param {function} onToolProgress - legacy tool_progress 이벤트 콜백
+ * @param {function} onToolResult - legacy tool_result 이벤트 콜백
  * @param {function} onChart - chart 이벤트 콜백 (ChartSpec 배열)
- * @param {function} onAgentTrace - observe/inspect/compute/verify/artifact 이벤트 콜백
+ * @param {function} onAgentTrace - task/reference/inspect/execute/verify/artifact 이벤트 콜백
  * @param {function} onChunk - chunk 이벤트 콜백
  * @param {function} onDone - done 이벤트 콜백
  * @param {function} onError - error 이벤트 콜백
@@ -405,14 +405,16 @@ export function askStream(company, question, options = {}, { onMeta, onSnapshot,
 							if (currentEvent === "meta") onMeta?.(parsed);
 							else if (currentEvent === "snapshot") onSnapshot?.(parsed);
 							else if (currentEvent === "context") onContext?.(parsed);
-							else if (currentEvent === "system_prompt") onSystemPrompt?.(parsed);
+							else if (currentEvent === "system_prompt") {
+								// Legacy event: ignored by the workbench UI.
+							}
 							else if (currentEvent === "tool_call") onToolCall?.(parsed);
 							else if (currentEvent === "tool_progress") onToolProgress?.(parsed);
 							else if (currentEvent === "tool_result") onToolResult?.(parsed);
 							else if (currentEvent === "chunk") onChunk?.(parsed.text);
 							else if (currentEvent === "code_round") onCodeRound?.(parsed);
-							else if (currentEvent === "chart") onChart?.(parsed);
-							else if (["observe", "inspect", "compute", "verify", "artifact"].includes(currentEvent)) onAgentTrace?.(currentEvent, parsed);
+							else if (currentEvent === "chart" || currentEvent === "visual") onChart?.(parsed);
+							else if (["task", "reference", "observe", "inspect", "execute", "compute", "verify", "artifact"].includes(currentEvent)) onAgentTrace?.(currentEvent, parsed);
 							else if (currentEvent === "ui_action") onUiAction?.(parsed);
 							else if (currentEvent === "error") onError?.(parsed.error, parsed.action, parsed.detail);
 							else if (currentEvent === "done") { if (!doneFired) { doneFired = true; onDone?.(parsed); } }

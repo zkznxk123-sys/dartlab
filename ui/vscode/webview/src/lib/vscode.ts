@@ -55,7 +55,7 @@ function createMockBridge(): Bridge {
           return;
         }
 
-        // "분석" → code_round 시나리오 (Claude Code 패턴 테스트)
+        // "분석" → code_round 시나리오 테스트
         if (q.includes("분석")) {
           setTimeout(() => dispatch({ type: "sseEvent", event: "meta", data: { company: "SK하이닉스", stockCode: "000660", market: "KOSPI" } }), 100);
           setTimeout(() => dispatch({ type: "sseEvent", event: "snapshot", data: { items: [{ label: "시가총액", value: "180.5조", status: "good" }, { label: "PER", value: "8.2x", status: "good" }, { label: "부채비율", value: "72.3%", status: "caution" }], grades: { 수익성: "A", 안정성: "B", 성장성: "A" } } }), 150);

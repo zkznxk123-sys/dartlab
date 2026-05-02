@@ -1,6 +1,6 @@
 <!--
-	데이터 투명성 뱃지 — LLM이 보는 모든 데이터를 사용자에게 표시.
-	meta/context/snapshot/tool 뱃지 + 스냅샷 카드 + 도구 이벤트 타임라인.
+	실행 투명성 뱃지 — 사용자가 확인해야 하는 참조·데이터셋·실행·검산 표면.
+	meta/context/snapshot/tool 뱃지 + 스냅샷 카드 + legacy 도구 이벤트 요약.
 -->
 <script>
 	import { formatEvidenceLabel, formatToolLabel } from "$lib/ai/evidenceLabels.js";
@@ -19,8 +19,6 @@
 		onOpenContextModal,
 		onOpenSnapshotModal,
 		onOpenToolEventModal,
-		onOpenSystemPromptModal,
-		onOpenUserContentModal,
 		onOpenEvidence,
 	} = $props();
 </script>
@@ -33,7 +31,7 @@
 			투명성
 		</div>
 		<div class="mb-2 text-[11px] leading-relaxed text-dl-text-dim">
-			이 응답을 만들 때 실제로 참조한 회사, 기간, 컨텍스트, 툴 활동을 바로 열어볼 수 있습니다.
+			이 응답을 만들 때 실제로 참조한 회사, 기간, 데이터셋 확인, 실행 활동을 바로 열어볼 수 있습니다.
 		</div>
 		{#if dataReadyInfo}
 			<div class="mb-2 rounded-xl border px-2.5 py-2 text-[11px] leading-relaxed {dataReadyInfo.allReady ? 'border-emerald-500/20 bg-emerald-500/[0.06] text-emerald-300' : 'border-amber-500/20 bg-amber-500/[0.06] text-amber-200'}">
@@ -79,8 +77,6 @@
 				onclick={() => {
 					if (badge.label.startsWith("컨텍스트")) onOpenContextModal?.(0);
 					else if (badge.label.startsWith("툴 ")) onOpenEvidence ? onOpenEvidence("tool-calls", 0) : onOpenToolEventModal?.(0);
-					else if (badge.label === "시스템 프롬프트") onOpenSystemPromptModal?.();
-					else if (badge.label === "LLM 입력") onOpenUserContentModal?.();
 				}}
 			>
 				<badge.icon size={10} class="flex-shrink-0" />
@@ -139,7 +135,7 @@
 
 <!--
 	Tool Events 타임라인 (기존 "보고 있는 것 / 하고 있는 것") 제거.
-	MessageBubble 의 Claude Code 스타일 아코디언이 상위호환 (헤더 1줄 + summary + IN/OUT expand).
+	MessageBubble 의 실행 아코디언이 상위호환 (헤더 1줄 + summary + IN/OUT expand).
 	투명성 원칙은 상단 activityBadges "툴 N건" + 아코디언 으로 유지.
 -->
 

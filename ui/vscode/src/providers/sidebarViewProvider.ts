@@ -12,7 +12,7 @@ interface StoredState {
   activeConversationId: string | null;
 }
 
-/** Sidebar WebView showing session list (Claude Code style). */
+/** Sidebar WebView showing session list. */
 export class SidebarViewProvider implements vscode.WebviewViewProvider {
   private view?: vscode.WebviewView;
   private onOpenCallback?: (id?: string) => void;
@@ -94,7 +94,7 @@ export class SidebarViewProvider implements vscode.WebviewViewProvider {
     if (state.conversations.length === 0) {
       sessionsHtml = `<div class="empty">No conversations yet</div>`;
     } else {
-      // Group by time (Claude Code style)
+      // Group by time.
       const now = Date.now();
       const DAY = 86400000;
       const groups: Record<string, StoredConversation[]> = {};

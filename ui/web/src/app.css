@@ -461,7 +461,7 @@ button, a, input, textarea {
 .code-block-wrap:hover .code-copy-btn { opacity: 1; }
 .code-copy-btn:hover { color: var(--color-dl-text); background: rgba(30, 36, 51, 0.9); }
 
-/* ── Tool block (Claude Code 패턴: 코드실행/도구호출 IN/OUT 그리드) ── */
+/* ── Tool block (코드실행/도구호출 IN/OUT 그리드) ── */
 .tool-block {
 	border: 0.5px solid rgba(148, 163, 184, 0.15);
 	border-radius: 5px;
@@ -545,7 +545,7 @@ button, a, input, textarea {
 }
 .tool-header:hover .tool-expand-icon { color: var(--color-dl-text-muted); }
 
-/* 섹션 컨테이너 — 항상 노출 (Claude Code 스타일) */
+/* 섹션 컨테이너 — 항상 노출 */
 .tool-sections {
 	border-top: 0.5px solid rgba(148, 163, 184, 0.12);
 	padding: 8px 12px 10px 12px;

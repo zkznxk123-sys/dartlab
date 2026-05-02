@@ -18,7 +18,7 @@
   let editText = $state("");
   const render = createIncrementalRenderer();
 
-  // blocks 기반 렌더링 — displayText/split/toolPairs 불필요 (Claude Code 패턴)
+  // blocks 기반 렌더링 — displayText/split/toolPairs 불필요
 
   // Loading phase
   let loadingPhase = $derived.by(() => {
@@ -46,7 +46,7 @@
     }
   });
 
-  // Block expand/collapse (기본 접힘 — Claude Code 패턴)
+  // Block expand/collapse (기본 접힘)
   let expandedBlocks: Record<number, boolean> = $state({});
   function toggleBlock(idx: number) {
     expandedBlocks[idx] = !expandedBlocks[idx];
@@ -96,7 +96,7 @@
   }
 
   const TOOL_LABELS: Record<string, string> = {
-    // 신규 tool calling registry (ai/tools/schemas.py 10종)
+    // legacy tool calling registry
     show: "원본 조회",
     select: "계정 필터",
     analysis: "재무분석",
@@ -131,10 +131,14 @@
   }
 
   const AGENT_TRACE_LABELS: Record<string, string> = {
+    task: "작업",
+    reference: "참조",
     observe: "관찰",
     inspect: "데이터 확인",
+    execute: "실행",
     compute: "계산",
     verify: "검산",
+    visual: "시각화",
     artifact: "산출물",
   };
 </script>
@@ -254,7 +258,7 @@
       </div>
     {/if}
 
-    <!-- ═══ Content Blocks 순회 렌더링 (Claude Code FO0 패턴) ═══ -->
+    <!-- ═══ Content Blocks 순회 렌더링 ═══ -->
     <!-- Fallback: blocks가 없으면 기존 text 렌더링 -->
     {#if (!message.blocks || message.blocks.length === 0) && message.text}
       <div class="content" onclick={copyCode}>{@html wrapCodeBlocks(render(message.text))}</div>
@@ -282,7 +286,7 @@
         {/if}
       {/if}
 
-      <!-- CODE EXECUTION BLOCK (Claude Code 패턴: 코드 접힘, 결과 테이블은 바로 표시) -->
+      <!-- CODE EXECUTION BLOCK: 코드 접힘, 결과 테이블은 바로 표시 -->
       {#if block.type === "code_execution"}
         {@const codeExpanded = expandedBlocks[blockIdx] === true}
         {@const firstLine = block.code?.split('\n').find((l: string) => l.trim() && !l.trim().startsWith('#') && !l.trim().startsWith('import')) || block.code?.split('\n')[0] || ''}
@@ -484,7 +488,7 @@
 </div>
 
 <style>
-  /* === Message container (Claude Code timeline 정밀 벤치마킹) === */
+  /* === Message container timeline === */
   .msg {
     color: var(--vscode-foreground);
     display: flex;
@@ -500,7 +504,7 @@
   .msg:first-child { padding-top: 0; }
   .msg.user { padding-left: 0; }
 
-  /* Timeline 세로선 (Claude Code: 1px, left:12px) */
+  /* Timeline 세로선 */
   .msg:not(.user)::after {
     content: "";
     position: absolute;
@@ -514,7 +518,7 @@
   .msg:not(.user):first-of-type::after { top: 0; }
   .msg:not(.user):last-of-type::after { bottom: 8px; }
 
-  /* 블록별 timeline dot (Claude Code 패턴: 각 블록마다 dot) */
+  /* 블록별 timeline dot */
   .msg:not(.user) > :global(.content),
   .msg:not(.user) > :global(.exec-result),
   .msg:not(.user) > .tool-block,
@@ -551,7 +555,7 @@
   .msg:not(.user) > .loading-block::before { animation: blink 1s linear infinite; }
   .msg:not(.user).dot-progress > :global(.content)::before { animation: blink 1s linear infinite; }
 
-  /* === User message (Claude Code exact) === */
+  /* === User message === */
   .user-wrap {
     display: inline-block;
     position: relative;
@@ -756,7 +760,7 @@
     opacity: 0.7;
   }
 
-  /* === Loading block (Claude Code spinner style) === */
+  /* === Loading block === */
   .loading-block {
     padding: 4px 0;
   }
@@ -785,7 +789,7 @@
     margin-left: auto;
   }
 
-  /* === Tool events (Claude Code .toolItem pattern) === */
+  /* === Tool events === */
   .tool-section {
     display: flex;
     flex-direction: column;
@@ -834,7 +838,7 @@
   .tool-err {
     color: #c74e39;
   }
-  /* Claude Code .toolAnnotation 패턴 */
+  /* tool annotation */
   .tool-annotation {
     color: #74c991;
     background-color: #74c99133;
@@ -864,7 +868,7 @@
     flex-shrink: 0;
     font-family: var(--vscode-editor-font-family, monospace);
   }
-  /* Claude Code .toolBody 패턴 */
+  /* tool body */
   .tool-body {
     border-top: 0.5px solid var(--vscode-widget-border, rgba(128,128,128,0.15));
     display: grid;

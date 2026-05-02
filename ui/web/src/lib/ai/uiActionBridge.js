@@ -2,11 +2,11 @@ import { buildChartView, normalizeViewSpec } from "./viewSpec.js";
 import { isMeaningfulVisualSpec } from "$shared/api/visualContract";
 
 export function collectViewsFromChartPayload(data) {
-	const charts = (data?.charts || []).filter(isMeaningfulVisualSpec);
+	const charts = (data?.charts || data?.visuals || []).filter(isMeaningfulVisualSpec);
 	const view = buildChartView(charts, {
 		title: data?.title || "AI 생성 차트",
 		subtitle: data?.subtitle || null,
-		source: { event: "chart", ...(data?.source || {}) },
+		source: { event: data?.visuals ? "visual" : "chart", ...(data?.source || {}) },
 	});
 	return view ? [view] : [];
 }

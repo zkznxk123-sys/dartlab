@@ -41,7 +41,7 @@ function codeSummary(text: string): string {
   return first.length > 60 ? first.slice(0, 57) + "..." : first;
 }
 
-// Code blocks -- collapsed by default (Claude Code style)
+// Code blocks -- collapsed by default
 renderer.code = function ({ text, lang }: { text: string; lang?: string }) {
   let highlighted: string;
   if (lang && hljs.getLanguage(lang)) {

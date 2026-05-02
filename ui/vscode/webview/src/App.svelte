@@ -6,12 +6,12 @@
 
 <style>
   :global(:root) {
-    /* DartLab brand (replaces Claude orange) */
+    /* DartLab brand */
     --dl-primary: #ea4647;
     --dl-primary-dark: #c83232;
     --dl-primary-light: #f87171;
     --dl-accent: #fb923c;
-    /* Claude Code layout tokens */
+    /* layout tokens */
     --corner-radius-small: 4px;
     --corner-radius-medium: 6px;
     --corner-radius-large: 8px;

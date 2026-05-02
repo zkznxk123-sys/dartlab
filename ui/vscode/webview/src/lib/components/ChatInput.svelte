@@ -195,10 +195,8 @@
     </div>
   {/if}
 
-  <!-- exact Claude Code: .inputContainer_cKsPxg -->
   <div class="input-box" style="--focus-ring-color: {MODE_COLORS[analysisMode]}">
     <div class="input-row">
-      <!-- exact Claude Code: .messageInput_cKsPxg -->
       <textarea
         bind:this={textareaEl}
         bind:value={inputText}
@@ -209,7 +207,6 @@
         disabled={disabled && !streaming}
       ></textarea>
     </div>
-    <!-- exact Claude Code: .inputFooter_gGYT1w -->
     <div class="input-footer">
       <div class="footer-left">
         <button class="mode-pill" style="--mode-color: {MODE_COLORS[analysisMode]}" onclick={cycleMode} title="분석 모드 전환">
@@ -236,7 +233,6 @@
           {/if}
         {/if}
       </div>
-      <!-- exact Claude Code: .sendButton_gGYT1w -->
       <button class="send-btn" class:streaming onclick={btnClick} disabled={disabled && !streaming} aria-label={streaming ? "Stop" : "Send"} style="background-color: {streaming ? 'var(--dl-primary)' : MODE_COLORS[analysisMode]}">
         {#if streaming}
           <svg class="stop-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="3" width="10" height="10" rx="2"/></svg>
@@ -256,7 +252,6 @@
     max-width: 100%;
   }
 
-  /* exact Claude Code: .inputContainer_cKsPxg */
   .input-box {
     background: var(--vscode-menu-background, var(--vscode-input-background));
     border: 1px solid var(--vscode-inlineChatInput-border, var(--vscode-input-border));
@@ -280,7 +275,6 @@
     display: flex;
   }
 
-  /* exact Claude Code: .messageInput_cKsPxg */
   textarea {
     outline: none;
     overflow-y: auto;
@@ -309,7 +303,6 @@
   }
   textarea:focus { outline: none; }
 
-  /* exact Claude Code: .inputFooter_gGYT1w */
   .input-footer {
     display: flex;
     color: var(--vscode-descriptionForeground);
@@ -347,7 +340,7 @@
     border-color: var(--dl-primary);
   }
 
-  /* Claude Code: .sendButton_gGYT1w — round circle + up arrow */
+  /* round circle + up arrow */
   .send-btn {
     cursor: pointer;
     display: flex;
@@ -386,7 +379,7 @@
   .slash-name { font-weight: 600; font-family: var(--vscode-editor-font-family); min-width: 80px; color: var(--dl-primary-light); }
   .slash-desc { color: var(--vscode-descriptionForeground); }
 
-  /* Claude Code: footerButton mode pill */
+  /* footer mode pill */
   .mode-pill {
     appearance: none;
     display: flex;

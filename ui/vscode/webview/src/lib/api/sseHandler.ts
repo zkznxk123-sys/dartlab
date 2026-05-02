@@ -1,4 +1,4 @@
-/** SSE event handler — content blocks 구조 (Claude Code 패턴 벤치마킹) */
+/** SSE event handler — Ask Workbench trace/content blocks. */
 import { isMeaningfulVisualSpec } from "$shared/api/visualContract";
 
 export interface ContentBlock {
@@ -28,7 +28,7 @@ export interface Message {
   id: string;
   role: "user" | "assistant";
   text: string;             // 호환용 — 모든 text block의 합
-  blocks: ContentBlock[];   // Claude Code 패턴 — 핵심 렌더링 대상
+  blocks: ContentBlock[];   // 핵심 렌더링 대상
   loading: boolean;
   error: boolean;
   meta?: Record<string, unknown>;
@@ -107,10 +107,8 @@ export function createSseHandler(
         }
 
         case "system_prompt":
-          updateMessage({
-            systemPrompt: (d as { text?: string }).text ?? undefined,
-            userContent: (d as { userContent?: string }).userContent ?? undefined,
-          });
+          // Legacy event. The workbench UI exposes reference/inspect/execute/verify
+          // trace instead of rendering raw prompt payloads as evidence.
           break;
 
         case "chunk":
@@ -187,10 +185,11 @@ export function createSseHandler(
           break;
         }
 
-        case "chart": {
+        case "chart":
+        case "visual": {
           const msg = getMessage();
           const blocks = [...(msg.blocks ?? [])];
-          const charts = (d as { charts?: unknown[] }).charts ?? [];
+          const charts = (d as { charts?: unknown[]; visuals?: unknown[] }).charts ?? (d as { visuals?: unknown[] }).visuals ?? [];
           for (const spec of charts) {
             if (!isMeaningfulVisualSpec(spec)) continue;
             blocks.push({ type: "chart", spec, _ts: Date.now() });
@@ -199,8 +198,11 @@ export function createSseHandler(
           break;
         }
 
+        case "task":
+        case "reference":
         case "observe":
         case "inspect":
+        case "execute":
         case "compute":
         case "verify":
         case "artifact": {

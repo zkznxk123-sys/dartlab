@@ -155,10 +155,8 @@ export function createAskStreamCallbacks({
 		},
 		onSystemPrompt(data) {
 			if (isStale()) return;
-			store.updateLastMessage({
-				systemPrompt: data.text,
-				userContent: data.userContent || null,
-			});
+			// Legacy event: the workbench UI shows reference/inspect/execute/verify
+			// trace instead of exposing raw prompt payloads as first-class evidence.
 		},
 		onToolCall(ev) {
 			if (isStale()) return;

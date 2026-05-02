@@ -1,5 +1,5 @@
 <!--
-	ToolBlock — Claude Code 스타일 카드.
+	ToolBlock — Ask Workbench 실행 카드.
 
 	- 헤더 + IN + OUT 박스 **항상 보임** (접기/펴기 토글 없음)
 	- OUT 은 적정 높이 프레임 (max-h 200px) + 스크롤 — 긴 내용도 레이아웃 깨짐 없음
@@ -39,7 +39,7 @@
 		if (isDone && typeof seg.summary === "string" && seg.summary.trim()) return seg.summary.trim();
 		return "";
 	});
-	// OUT 크기 요약 (Claude Code 의 "N lines of output" 같은 힌트)
+	// OUT 크기 요약
 	let outLineCount = $derived(outText ? outText.split("\n").length : 0);
 
 	function toggleFull() { fullExpanded = !fullExpanded; }

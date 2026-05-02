@@ -18,7 +18,7 @@
 		<Database size={28} class="mx-auto mb-3 text-dl-text-dim/50" />
 		<div class="text-[13px] font-medium text-dl-text">아직 연결된 응답이 없습니다</div>
 		<div class="mt-1 text-[11px] leading-relaxed text-dl-text-dim">
-			채팅을 시작하면 이 패널에서 스냅샷, 사용한 모듈, 도구 호출, 시스템 프롬프트 요약을 함께 확인할 수 있습니다.
+			채팅을 시작하면 이 패널에서 스냅샷, 사용한 모듈, 도구 호출, 실행 근거를 함께 확인할 수 있습니다.
 		</div>
 	</div>
 {:else}
