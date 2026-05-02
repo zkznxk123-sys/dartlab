@@ -37,7 +37,8 @@ from dartlab.core.memory import PRESSURE_CRITICAL_MB, get_memory_mb
 def pytest_configure(config):
     """테스트 시작 전 안전 검사."""
     # test-lock.sh 없이 직접 pytest를 호출한 경우 경고
-    if not os.environ.get("DARTLAB_TEST_LOCKED"):
+    lock_marker = Path(".pytest_cache/dartlab-test.locked")
+    if not os.environ.get("DARTLAB_TEST_LOCKED") and not lock_marker.exists():
         import warnings
 
         warnings.warn(

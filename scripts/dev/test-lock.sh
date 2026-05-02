@@ -8,11 +8,13 @@
 
 LOCK_DIR="/tmp/dartlab-test.lock"
 PID_FILE="$LOCK_DIR/pid"
+REPO_LOCK_MARKER=".pytest_cache/dartlab-test.locked"
 MAX_WAIT=300
 WAIT=0
 
 cleanup() {
     rm -rf "$LOCK_DIR" 2>/dev/null
+    rm -f "$REPO_LOCK_MARKER" 2>/dev/null
 }
 
 # stale lock 감지: lock 폴더 있고 PID 파일의 프로세스가 죽었으면 제거
@@ -48,6 +50,8 @@ done
 
 # lock 획득 성공 — PID 기록 + 종료 시 반드시 해제
 echo $$ > "$PID_FILE"
+mkdir -p "$(dirname "$REPO_LOCK_MARKER")"
+echo $$ > "$REPO_LOCK_MARKER"
 trap cleanup EXIT INT TERM
 
 echo "[test-lock] lock 획득 (PID $$). pytest 시작."
