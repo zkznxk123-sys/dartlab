@@ -73,7 +73,7 @@ def run(args) -> int:
         session_id, history = _loadHistory(company.stockCode, console)
 
     # ── runAsk() 직접 호출 (이벤트 스트림) ──
-    from dartlab.ai.runtime.core import runAsk
+    from dartlab.ai.kernel import runAsk
 
     events = runAsk(
         company,
@@ -152,6 +152,12 @@ def run(args) -> int:
                         )
                     )
 
+                elif ev.kind in {"task", "reference", "inspect", "execute", "visual", "verify"}:
+                    line = _kernelEventLine(ev.kind, ev.data)
+                    if line:
+                        toolLines.append(line)
+                        live.update(Markdown("\n".join(toolLines)))
+
                 elif ev.kind == "error":
                     errorMsg = ev.data.get("error", "Unknown error")
                     guideMsg = ev.data.get("guide")
@@ -207,6 +213,35 @@ def _resolveCompany(full_query: str, args, dartlab):
             raise CLIError(wrapError(exc, stockCode=args.company)) from exc
         return company, full_query
     return None, full_query
+
+
+def _kernelEventLine(kind: str, data: dict) -> str:
+    """Ask Workbench canonical event를 CLI 상태 라인으로 변환."""
+    if kind == "task":
+        task = data.get("task") or {}
+        actions = task.get("actions") if isinstance(task, dict) else None
+        suffix = f" ({len(actions)} actions)" if isinstance(actions, list) else ""
+        return f"> task: ask workbench{suffix}"
+    if kind == "reference":
+        return f"> reference: {len(data.get('refs') or [])} refs"
+    if kind == "inspect":
+        target = data.get("target") or data.get("action") or "dataset"
+        result = data.get("result") or {}
+        latest = result.get("latest") if isinstance(result, dict) else None
+        suffix = f" latest={latest.get('value')}" if isinstance(latest, dict) and latest.get("value") else ""
+        return f"> inspect: {target}{suffix}"
+    if kind == "execute":
+        result = data.get("result") or {}
+        ok = "ok" if result.get("ok") else "failed"
+        return f"> execute: {ok} ({result.get('duration_ms') or result.get('durationMs') or '?'}ms)"
+    if kind == "visual":
+        return f"> visual: {len(data.get('visuals') or [])} spec"
+    if kind == "verify":
+        result = data.get("result") or {}
+        ok = "ok" if result.get("ok") else "failed"
+        issues = result.get("issues") or []
+        return f"> verify: {ok}" + (f" ({len(issues)} issues)" if issues else "")
+    return ""
 
 
 def _loadHistory(stockCode: str, console):

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from sse_starlette.sse import EventSourceResponse
 
 import dartlab
-from dartlab.ai.runtime.artifacts import artifactPath
+from dartlab import config as dartlab_config
 
 from ..models import AskRequest
 from ..services.ai_analysis import run_plain_chat
@@ -33,8 +35,31 @@ async def api_ask(req: AskRequest):
 @router.get("/api/ask/artifacts/{day}/{filename}")
 async def download_ask_artifact(day: str, filename: str):
     """AI tool_result 에서 생성된 CSV/JSON 아티팩트를 내려준다."""
-    path = artifactPath(day, filename)
+    path = _artifactPath(day, filename)
     if path is None or not path.is_file():
         raise HTTPException(status_code=404, detail="artifact not found")
     media_type = "application/json; charset=utf-8" if filename.endswith(".json") else "text/csv; charset=utf-8"
     return FileResponse(path, media_type=media_type, filename=filename)
+
+
+def _artifactPath(day: str, filename: str) -> Path | None:
+    normalized_day = day.replace("-", "")
+    if not normalized_day.isdigit() or len(normalized_day) != 8:
+        return None
+    if Path(filename).name != filename:
+        return None
+    roots = [
+        Path.home() / ".dartlab" / "ask_artifacts",
+        Path(dartlab_config.dataDir) / "ai-artifacts",
+    ]
+    day_candidates = [normalized_day, day]
+    for root in roots:
+        for day_part in day_candidates:
+            path = (root / day_part / filename).resolve()
+            try:
+                path.relative_to(root.resolve())
+            except ValueError:
+                continue
+            if path.exists():
+                return path
+    return (roots[0] / normalized_day / filename).resolve()

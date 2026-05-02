@@ -254,6 +254,7 @@ class TestAiProfile:
 
     def test_put_ai_profile_updates_shared_config(self, client):
         from dartlab.ai import get_config
+        from dartlab.core.ai.model_resolver import latest_openai_model
 
         resp = client.put(
             "/api/ai/profile",
@@ -262,7 +263,8 @@ class TestAiProfile:
         assert resp.status_code == 200
         config = get_config()
         assert config.provider == "openai"
-        assert config.model == "gpt-5.4"
+        assert config.model == latest_openai_model()
+        assert get_config(provider="openai", model="gpt-5.4").model == "gpt-5.4"
 
     def test_post_ai_profile_secret_updates_shared_secret(self, client):
         from dartlab.ai import get_config

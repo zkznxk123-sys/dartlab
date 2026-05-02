@@ -18,6 +18,7 @@ from dartlab.core.ai.providers import (
     oauth_secret_name,
     public_provider_ids,
 )
+from dartlab.core.ai.model_resolver import resolve_default_model
 from dartlab.core.ai.routing import AI_ROLES, DEFAULT_ROLE, normalize_role
 from dartlab.core.ai.secrets import SecretStore, get_secret_store
 
@@ -340,8 +341,9 @@ class AiProfileManager:
                 secret_configured = self.secret_store.has(api_key_secret_name(provider_id))
             elif spec and spec.auth_kind == "oauth":
                 secret_configured = self.secret_store.has(oauth_secret_name(provider_id))
+            effective_model = resolve_default_model(provider_id, configured_model=settings.model)
             provider_settings[provider_id] = {
-                "model": settings.model,
+                "model": effective_model,
                 "baseUrl": settings.base_url,
                 "secretConfigured": secret_configured,
             }
@@ -357,7 +359,7 @@ class AiProfileManager:
             "roles": {
                 role: {
                     "provider": binding.provider,
-                    "model": binding.model,
+                    "model": resolve_default_model(binding.provider, configured_model=binding.model),
                 }
                 for role, binding in profile.roles.items()
             },

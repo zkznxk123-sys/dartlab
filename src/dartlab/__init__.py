@@ -6,7 +6,7 @@ from importlib.metadata import version as _pkg_version
 
 _IS_PYODIDE = sys.platform == "emscripten"
 
-from dartlab import config, core  # noqa: F401 — 하위호환
+from dartlab import config, core, skills  # noqa: F401 — 하위호환/공용 분석 절차
 from dartlab.company import Company
 from dartlab.core.select import ChartResult, SelectResult
 
@@ -532,12 +532,12 @@ def ask(
     modules: list[str] | None = None,
     **kwargs,
 ):
-    """AI 에게 질문. AI 가 모든 엔진(analysis/scan/macro/credit/gather/search)을 tool 로 다룬다.
+    """AI 에게 질문. LLM 이 DartLab 을 읽고 실행한 뒤 검산해 답한다.
 
     Capabilities:
-        - 자연어로 기업/시장 분석 (종목은 질문 텍스트에서 AI 가 자동 감지)
+        - 자연어로 기업/시장 분석 (DartLab API·데이터셋·skills 를 검색 후 실행)
         - 스트리밍 출력 (기본) / 배치 반환 / Generator 직접 제어
-        - 원본 검증 · 가정 조정 · 업종 비교 전부 AI 자율
+        - 원본 검증 · 가정 조정 · 업종 비교는 run_python 결과와 ref 로 검산
 
     Requires:
         AI: provider 설정 (dartlab.setup() 참조)
@@ -550,6 +550,7 @@ def ask(
     SeeAlso:
         - Company: 원본 데이터 조회 (show/select)
         - scan: 전종목 비교 (프로그래밍)
+        - skills: 공용 분석 절차 검색
 
     Args:
         question: 자연어 질문.
@@ -567,23 +568,12 @@ def ask(
         dartlab.ask("삼성전자 수익성 분석해줘")
         dartlab.ask("삼성전자 분석", stream=False)  # 조용히 전체 텍스트
     """
-    from dartlab.ai.runtime.standalone import ask as _ask
+    from dartlab.ai.kernel import ask as _ask
 
     if not question or not question.strip():
         print("\n  질문을 입력해 주세요.")
         print("  예: dartlab.ask('삼성전자 재무건전성 분석해줘')\n")
         return None
-
-    if provider is None:
-        from dartlab.core.ai.detect import auto_detect_provider
-
-        detected = auto_detect_provider()
-        if detected is None:
-            from dartlab.core.ai.guide import no_provider_message
-
-            print(no_provider_message())
-            return None
-        provider = detected
 
     _call_kwargs = dict(
         stockCode=stockCode,

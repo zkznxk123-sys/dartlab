@@ -63,7 +63,7 @@ _PROVIDERS: dict[str, ProviderSpec] = {
     "openai": ProviderSpec(
         id="openai",
         label="OpenAI API",
-        description="GPT-5.4, o4 등 전체 모델",
+        description="최신 GPT/Reasoning 모델",
         auth_kind="api_key",
         setup_kind="api_key",
         env_key="OPENAI_API_KEY",

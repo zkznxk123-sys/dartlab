@@ -48,7 +48,7 @@ def _emit(obj: dict[str, Any]) -> None:
 
 def _handleAsk(msg: dict[str, Any]) -> None:
     """Process ask message -- stream core.runAsk() events as JSON lines."""
-    from dartlab.ai.runtime.core import runAsk
+    from dartlab.ai.kernel import runAsk
 
     reqId = msg.get("id", "")
     question = msg.get("question", "")
@@ -76,17 +76,14 @@ def _handleAsk(msg: dict[str, Any]) -> None:
     modules = msg.get("modules")  # list[str] | None
     template = msg.get("template")  # str | None (하위호환)
     if modules:
-        from dartlab.ai.patterns import get_modules
-
-        _tmplText = get_modules(modules)
-        if _tmplText:
-            kwargs["_templateText"] = _tmplText
+        kwargs["_templateText"] = "\n\n".join(str(item) for item in modules)
     elif template:
-        from dartlab.ai.patterns import get_template
+        try:
+            from dartlab.ai import templates
 
-        _tmplText = get_template(template)
-        if _tmplText:
-            kwargs["_templateText"] = _tmplText
+            kwargs["_templateText"] = templates(template)
+        except (FileNotFoundError, ValueError):
+            kwargs["_templateText"] = str(template)
 
     emittedDone = False
     try:
@@ -110,10 +107,8 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
     """첫 ask 의 cold-start 비용을 사전 지불.
 
     extension activate 직후 호출되도록 설계. 다음을 미리 수행:
-    - dartlab.ai.runtime.core 모듈 import (lazy 비용)
+    - dartlab.ai.kernel 모듈 import (lazy 비용)
     - dartlab.ai.providers 모듈 import
-    - KnowledgeDB 싱글톤 init + migrate_from_legacy + auto_pull (150~500ms)
-    - few_shot 모듈 import (skill DB connect)
     - dartlab.viz.extract import
 
     실패 항목은 무시 — 워밍업은 best-effort.
@@ -127,16 +122,9 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
         except (ImportError, OSError, RuntimeError) as exc:
             diag["skipped"].append(f"{name}: {exc.__class__.__name__}")
 
-    _try("core", lambda: __import__("dartlab.ai.runtime.core", fromlist=["runAsk"]))
+    _try("kernel", lambda: __import__("dartlab.ai.kernel", fromlist=["runAsk"]))
     _try("providers", lambda: __import__("dartlab.ai.providers", fromlist=["create_provider"]))
     _try("viz_extract", lambda: __import__("dartlab.viz.extract", fromlist=["extract_viz_specs"]))
-
-    def _initKnowledgeDb() -> None:
-        from dartlab.ai.persistence import KnowledgeDB
-
-        KnowledgeDB.get()  # 싱글톤 init + migrate + auto_pull
-
-    _try("knowledge_db", _initKnowledgeDb)
 
     _emit({"event": "warmup_done", "data": diag})
 

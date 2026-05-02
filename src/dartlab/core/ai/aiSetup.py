@@ -54,7 +54,7 @@ _SETUP_GUIDES: dict[str, dict[str, str]] = {
     },
     "openai": {
         "name": "OpenAI API",
-        "short": "API 키 필요 (GPT-5.4, o4 등)",
+        "short": "API 키 필요 (최신 GPT/Reasoning 모델)",
         "setup_notebook": 'dartlab.llm.configure(provider="openai", api_key="sk-...")',
         "setup_cli": "dartlab setup openai",
         "detail": ("OpenAI API 키가 필요합니다.\nhttps://platform.openai.com/api-keys 에서 발급받으세요."),

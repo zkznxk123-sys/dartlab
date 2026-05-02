@@ -10,6 +10,7 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from sse_starlette.sse import EventSourceResponse
 
 import dartlab
+from dartlab.core.ai.model_resolver import fallback_models, is_openai_chat_model, sort_openai_models
 from dartlab.core.ai import (
     build_provider_catalog,
     get_profile_manager,
@@ -433,18 +434,7 @@ def api_models(provider: str):
         models = _fetch_openai_models()
         if models:
             return {"models": models}
-        return {
-            "models": [
-                "o3",
-                "gpt-4.1",
-                "gpt-4.1-mini",
-                "gpt-4.1-nano",
-                "o4-mini",
-                "o3-mini",
-                "gpt-4o",
-                "gpt-4o-mini",
-            ]
-        }
+        return {"models": fallback_models("openai")}
 
     return {"models": []}
 
@@ -470,57 +460,12 @@ def _fetch_openai_models() -> list[str]:
 
         client = OpenAI(api_key=api_key)
         raw = client.models.list()
-        chat_prefixes = ("gpt-5", "gpt-4", "gpt-3.5", "o1", "o3", "o4")
-        exclude = (
-            "realtime",
-            "audio",
-            "search",
-            "instruct",
-            "embedding",
-            "tts",
-            "whisper",
-            "dall-e",
-            "davinci",
-            "babbage",
-            "transcribe",
-        )
         models = []
         for model in raw:
             mid = model.id
-            if any(mid.startswith(prefix) for prefix in chat_prefixes):
-                if not any(excluded in mid for excluded in exclude):
-                    models.append(mid)
-        priority = [
-            "gpt-5.2",
-            "gpt-5.4",
-            "gpt-5.4-pro",
-            "gpt-5.3-codex",
-            "gpt-5.2",
-            "gpt-5.2-pro",
-            "gpt-5.2-codex",
-            "gpt-5.1",
-            "gpt-5",
-            "gpt-5-mini",
-            "gpt-4.1",
-            "gpt-4.1-mini",
-            "gpt-4.1-nano",
-            "gpt-4o",
-            "gpt-4o-mini",
-            "o4-mini",
-            "o3",
-            "o3-mini",
-            "o1",
-            "o1-mini",
-        ]
-
-        def sort_key(name: str):
-            for idx, prefix in enumerate(priority):
-                if name == prefix or name.startswith(prefix + "-"):
-                    return (idx, name)
-            return (100, name)
-
-        models.sort(key=sort_key)
-        return models
+            if is_openai_chat_model(mid):
+                models.append(mid)
+        return sort_openai_models(models)
     except (ImportError, OSError, RuntimeError, ValueError):
         return []
 

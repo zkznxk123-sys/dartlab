@@ -79,6 +79,7 @@ dependencies = [
     "sse-starlette>=2.0.0,<3; sys_platform != 'emscripten'",
     "mcp[cli]>=1.0; sys_platform != 'emscripten'",
     "qrcode>=7.0,<9; sys_platform != 'emscripten'",
+    "PyYAML>=6.0.0,<7; sys_platform != 'emscripten'",
     # viz
     "plotly>=5.0.0,<6; sys_platform != 'emscripten'",
     "plotext>=5.2.8,<6; sys_platform != 'emscripten'",  # 터미널 ASCII 차트 (toAscii)

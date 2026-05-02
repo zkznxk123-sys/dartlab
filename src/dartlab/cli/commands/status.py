@@ -90,6 +90,7 @@ def _print_detail(provider_name: str, status: dict) -> None:
         info = status["oauth-codex"]
         print(f"  token:     {info['tokenStored']}")
         print(f"  auth:      {info['authenticated']}")
+        print(f"  base url:  {info.get('baseUrlConfigured', False)}")
         if info.get("accountId"):
             print(f"  account:   {info['accountId']}")
         if not info["authenticated"]:

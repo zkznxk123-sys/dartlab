@@ -98,6 +98,6 @@ class ChannelAdapter(ABC):
     @staticmethod
     def _run_analysis(company, question: str) -> str:
         """AI 분석을 실행하고 텍스트를 반환한다 (동기)."""
-        from dartlab.ai.runtime.standalone import ask
+        from dartlab.ai.kernel import ask
 
         return ask(question, company=company, stream=False)

@@ -1,757 +1,405 @@
-"""ChatGPT OAuth 기반 Codex provider — 진짜 SSE 스트리밍.
-
-ChatGPT Plus/Pro 구독 계정의 OAuth 토큰으로
-chatgpt.com/backend-api 엔드포인트에 직접 SSE 스트리밍 요청.
-Codex CLI 없이 동작하며, 토큰 단위 실시간 스트리밍을 지원한다.
-
-비공식 API이므로 예고 없이 변경될 수 있다.
-에러 발생 시 구체적 사유를 분류하여 사용자에게 안내한다.
-STATUS.md의 "브레이킹 체인지 대응 순서" 참조.
-
-참고: opencode-openai-codex-auth 프로젝트의 접근법.
-"""
+"""ChatGPT OAuth transport for Ask Workbench providers."""
 
 from __future__ import annotations
 
 import json
-import logging
+import os
 import time
-from typing import Generator
+from typing import Any
 
 import httpx
 
-from dartlab.ai.providers.base import BaseProvider
-from dartlab.ai.providers.support import oauth_token as oauthToken
-from dartlab.ai.providers.support.oauth_token import TokenRefreshError
-from dartlab.ai.types import LLMResponse, ToolCall, ToolResponse
+from dartlab.core.ai.model_resolver import fallback_models, sort_openai_models
 
-log = logging.getLogger(__name__)
+from . import ProviderConfig, ProviderTurn, ToolCall
+from .support import oauth_token as oauthToken
+from .support.oauth_token import TokenRefreshError
+
 
 CODEX_API_BASE = "https://chatgpt.com/backend-api"
 CODEX_RESPONSES_PATH = "/codex/responses"
-
-_BUNDLED_MODELS = [
-    "gpt-5.4",
-    "gpt-5.2",
-    "gpt-5.3-codex",
-    "gpt-5.2-codex",
-    "gpt-5.1-codex-max",
-]
-
-AVAILABLE_MODELS = list(_BUNDLED_MODELS)
-
 _MODELS_CACHE: list[str] | None = None
-_MODELS_CACHE_TS: float = 0.0
-_MODELS_CACHE_TTL = 300.0  # 5분
+_MODELS_CACHE_TS = 0.0
+_MODELS_CACHE_TTL = 300.0
 
 
-def _fetchRemoteModels(token: str) -> list[str] | None:
-    """원격 /models API에서 사용 가능한 모델 목록 조회 (Codex CLI 동일 방식)."""
-    url = f"{CODEX_API_BASE}/codex/models"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "originator": "codex_cli_rs",
-    }
-    accountId = oauthToken.get_account_id()
-    if accountId:
-        headers["chatgpt-account-id"] = accountId
-    try:
-        resp = httpx.get(url, headers=headers, timeout=10)
-        if resp.status_code != 200:
-            return None
-        data = resp.json()
-        models = []
-        for item in data if isinstance(data, list) else data.get("models", data.get("data", [])):
-            modelId = item.get("id") or item.get("model") if isinstance(item, dict) else str(item)
-            if modelId:
-                models.append(modelId)
-        return models if models else None
-    except (httpx.HTTPError, json.JSONDecodeError, ValueError):
-        return None
+class OAuthCodexError(RuntimeError):
+    """OAuth transport error with a stable action code."""
 
-
-def availableModels() -> list[str]:
-    """사용 가능한 모델 목록 — 원격 조회 + 캐시 + 번들 fallback."""
-    import time
-
-    global _MODELS_CACHE, _MODELS_CACHE_TS
-    now = time.time()
-    if _MODELS_CACHE and (now - _MODELS_CACHE_TS) < _MODELS_CACHE_TTL:
-        return _MODELS_CACHE
-
-    try:
-        token = oauthToken.get_valid_token()
-    except (TokenRefreshError, OSError):
-        token = None
-
-    if token:
-        remote = _fetchRemoteModels(token)
-        if remote:
-            _MODELS_CACHE = remote
-            _MODELS_CACHE_TS = now
-            return remote
-
-    _MODELS_CACHE = list(_BUNDLED_MODELS)
-    _MODELS_CACHE_TS = now
-    return _MODELS_CACHE
-
-
-class ChatGPTOAuthError(Exception):
-    """ChatGPT OAuth provider 에러 — action 필드로 사용자 대응 안내."""
-
-    def __init__(self, action: str, message: str, *, detail: str = ""):
+    def __init__(self, action: str, message: str, *, detail: str = "") -> None:
         self.action = action
-        self.message = message
         self.detail = detail
         super().__init__(message)
 
 
-def _raise_http_error(status: int, body: str) -> None:
-    """HTTP 상태코드별 구체적 에러."""
-    if status == 401:
-        raise ChatGPTOAuthError(
-            "relogin",
-            "ChatGPT 인증이 만료되었습니다. 설정에서 재로그인하세요.",
-            detail=f"HTTP 401: {body[:200]}",
-        )
-    if status == 403:
-        raise ChatGPTOAuthError(
-            "check_headers",
-            "ChatGPT API 접근이 거부되었습니다. "
-            "OpenAI가 요청 헤더 검증을 변경했을 수 있습니다. "
-            "openai/codex 레포에서 최신 헤더를 확인하세요.",
-            detail=f"HTTP 403: {body[:200]}",
-        )
-    if status == 404:
-        raise ChatGPTOAuthError(
-            "check_endpoint",
-            "ChatGPT API 엔드포인트를 찾을 수 없습니다. "
-            "OpenAI가 URL을 변경했을 수 있습니다. "
-            "openai/codex 레포에서 최신 엔드포인트를 확인하세요.",
-            detail=f"HTTP 404: {body[:200]}",
-        )
-    if status == 429:
-        reset_msg = ""
-        try:
-            err = json.loads(body)
-            secs = err.get("error", {}).get("resets_in_seconds")
-            if secs:
-                hours = secs / 3600
-                reset_msg = f" (약 {hours:.1f}시간 후 리셋)"
-        except (json.JSONDecodeError, ValueError, TypeError):
-            pass
-        raise ChatGPTOAuthError(
-            "rate_limit",
-            f"ChatGPT API 요청 한도를 초과했습니다.{reset_msg} 잠시 후 다시 시도하세요.",
-            detail=f"HTTP 429: {body[:200]}",
-        )
-    raise ChatGPTOAuthError(
-        "unknown",
-        f"ChatGPT API 오류가 발생했습니다 (HTTP {status}).",
-        detail=body[:300],
-    )
+def availableModels() -> list[str]:
+    """사용 가능한 OAuth 모델 목록 — 원격 모델 우선, 공식 fallback 사용.
+
+    Description
+    -----------
+    ChatGPT OAuth backend 의 모델 목록을 조회하고 짧게 캐시한다. 토큰이 없거나
+    원격 조회가 실패하면 중앙 모델 resolver 의 OpenAI-family fallback 만 반환한다.
+
+    Parameters
+    ----------
+    없음
+        환경변수 `DARTLAB_OAUTH_MODELS`가 있으면 해당 목록을 우선 사용한다.
+
+    Returns
+    -------
+    list[str]
+        model_id : str — provider 에 전달할 모델 식별자
+
+    Raises
+    ------
+    없음
+        원격 조회 실패는 fallback 으로 처리한다.
+
+    Examples
+    --------
+    >>> availableModels()[0]
+    'gpt-5.2'
+
+    Notes
+    -----
+    이 함수는 모델 선택 SSOT 가 아니라 provider runtime discovery 다.
+
+    Guide
+    -----
+    UI 는 저장된 profile 모델보다 이 함수와 중앙 resolver 의 최신값을 우선 표시한다.
+
+    See Also
+    --------
+    OAuthCodexProvider : OAuth workbench provider.
+    """
+
+    configured = os.environ.get("DARTLAB_OAUTH_MODELS")
+    if configured:
+        return sort_openai_models([item.strip() for item in configured.split(",") if item.strip()])
+
+    global _MODELS_CACHE, _MODELS_CACHE_TS
+    now = time.time()
+    if _MODELS_CACHE and (now - _MODELS_CACHE_TS) < _MODELS_CACHE_TTL:
+        return _MODELS_CACHE.copy()
+
+    token = _valid_token_or_none()
+    if os.environ.get("DARTLAB_OAUTH_TOKEN") and os.environ.get("DARTLAB_OAUTH_FETCH_MODELS") != "1":
+        token = None
+    remote = _fetch_remote_models(token) if token else None
+    _MODELS_CACHE = sort_openai_models(remote) if remote else fallback_models("oauth-codex")
+    _MODELS_CACHE_TS = now
+    return _MODELS_CACHE.copy()
 
 
-def _detect_plan_type() -> str:
-    """JWT에서 ChatGPT plan_type 추출. 실패 시 'plus' 반환."""
-    import base64
+class OAuthCodexProvider:
+    """ChatGPT OAuth provider for the Ask Workbench tool loop."""
 
-    token_data = oauthToken.load_token()
-    if not token_data:
-        return "plus"
-    access = token_data.get("access_token", "")
-    parts = access.split(".")
-    if len(parts) != 3:
-        return "plus"
-    payload_b64 = parts[1]
-    padding = 4 - len(payload_b64) % 4
-    if padding != 4:
-        payload_b64 += "=" * padding
-    try:
-        payload = json.loads(base64.urlsafe_b64decode(payload_b64).decode("utf-8"))
-    except (json.JSONDecodeError, ValueError):
-        return "plus"
-    auth_claim = payload.get("https://api.openai.com/auth", {})
-    return auth_claim.get("chatgpt_plan_type", "plus") if isinstance(auth_claim, dict) else "plus"
-
-
-class OAuthCodexProvider(BaseProvider):
-    """ChatGPT OAuth 기반 Codex provider."""
+    def __init__(self, config: ProviderConfig | Any) -> None:
+        self.config = _normalize_config(config)
+        self.resolved_model = self.config.model or self.default_model
 
     @property
     def default_model(self) -> str:
-        """기본 모델 — 원격 모델 목록 우선, 실패 시 bundled 최신 fallback."""
         models = availableModels()
-        return models[0] if models else _BUNDLED_MODELS[0]
-
-    @property
-    def supports_native_tools(self) -> bool:
-        """네이티브 tool calling 지원 여부."""
-        return True
+        return models[0] if models else (fallback_models("oauth-codex")[0] if fallback_models("oauth-codex") else "gpt-5.2")
 
     def check_available(self) -> bool:
-        """provider 사용 가능 여부 확인."""
         try:
-            return oauthToken.is_authenticated()
-        except TokenRefreshError:
+            return bool(oauthToken.is_authenticated())
+        except (OSError, RuntimeError, TokenRefreshError, ValueError):
             return False
 
-    def _get_token_or_raise(self) -> str:
-        """유효한 토큰 반환. 실패 시 구체적 에러."""
+    def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn:
+        token = _valid_token_or_raise()
+        body = _build_body(messages, tools, model=self.resolved_model)
+        response_text = _request_with_retry(token, body)
+        return _parse_sse_response(response_text)
+
+
+def _normalize_config(config: ProviderConfig | Any) -> ProviderConfig:
+    if isinstance(config, ProviderConfig):
+        return config
+    return ProviderConfig(
+        provider=getattr(config, "provider", None) or "oauth-codex",
+        model=getattr(config, "model", None),
+        base_url=getattr(config, "base_url", None) or getattr(config, "baseUrl", None),
+        api_key=getattr(config, "api_key", None) or getattr(config, "apiKey", None),
+        temperature=getattr(config, "temperature", None),
+    )
+
+
+def _valid_token_or_none() -> str | None:
+    try:
+        return oauthToken.get_valid_token()
+    except (OSError, RuntimeError, TokenRefreshError, ValueError):
+        return None
+
+
+def _valid_token_or_raise() -> str:
+    try:
+        token = oauthToken.get_valid_token()
+    except TokenRefreshError as exc:
+        raise OAuthCodexError("relogin", f"ChatGPT OAuth 토큰 갱신 실패: {exc}") from exc
+    except (OSError, RuntimeError, ValueError) as exc:
+        raise OAuthCodexError("login", f"ChatGPT OAuth 토큰을 읽지 못했습니다: {exc}") from exc
+    if not token:
+        raise OAuthCodexError("login", "ChatGPT OAuth 인증이 필요합니다.")
+    return token
+
+
+def _fetch_remote_models(token: str) -> list[str] | None:
+    headers = _headers(token, accept_json=True)
+    try:
+        response = httpx.get(f"{CODEX_API_BASE}/codex/models", headers=headers, timeout=10)
+        if response.status_code != 200:
+            return None
+        payload = response.json()
+    except (httpx.HTTPError, json.JSONDecodeError, ValueError):
+        return None
+    raw_items = payload if isinstance(payload, list) else payload.get("models") or payload.get("data") or []
+    models: list[str] = []
+    for item in raw_items:
+        if isinstance(item, dict):
+            model_id = item.get("id") or item.get("model")
+        else:
+            model_id = str(item)
+        if isinstance(model_id, str) and model_id:
+            models.append(model_id)
+    return models or None
+
+
+def _request_with_retry(token: str, body: dict[str, Any]) -> str:
+    headers = _headers(token)
+
+    def post(active_headers: dict[str, str]) -> httpx.Response:
+        return httpx.post(f"{CODEX_API_BASE}{CODEX_RESPONSES_PATH}", headers=active_headers, json=body, timeout=90)
+
+    try:
+        response = post(headers)
+    except httpx.TimeoutException as exc:
+        raise OAuthCodexError("network", "ChatGPT OAuth backend 응답 시간이 초과되었습니다.") from exc
+    except httpx.HTTPError as exc:
+        raise OAuthCodexError("network", f"ChatGPT OAuth backend 연결 실패: {exc}") from exc
+
+    if response.status_code == 401:
         try:
-            token = oauthToken.get_valid_token()
-        except TokenRefreshError as e:
-            if e.reason == "client_changed":
-                raise ChatGPTOAuthError("check_client_id", e.detail) from e
-            raise ChatGPTOAuthError(
-                "relogin",
-                f"ChatGPT 토큰 갱신 실패: {e.detail}",
-            ) from e
-        if not token:
-            raise ChatGPTOAuthError(
-                "login",
-                "ChatGPT OAuth 인증이 필요합니다. 설정에서 로그인하세요.",
-            )
-        return token
+            refreshed = oauthToken.refresh_access_token()
+        except (OSError, RuntimeError, TokenRefreshError, ValueError) as exc:
+            raise OAuthCodexError("relogin", f"ChatGPT OAuth 재인증이 필요합니다: {exc}") from exc
+        token = refreshed.get("access_token") if isinstance(refreshed, dict) else None
+        if token:
+            response = post(_headers(token))
 
-    def _request_with_retry(self, token: str, body: dict, *, stream: bool = False):
-        """요청 + 401 시 refresh 재시도. 실패 시 구체적 에러."""
-        url = f"{CODEX_API_BASE}{CODEX_RESPONSES_PATH}"
-        headers = self._build_headers(token)
-
-        def _do_request(hdrs: dict[str, str]) -> httpx.Response:
-            if stream:
-                client = httpx.Client(timeout=90)
-                req = client.build_request("POST", url, headers=hdrs, json=body)
-                return client.send(req, stream=True)
-            return httpx.post(url, headers=hdrs, json=body, timeout=90)
-
-        try:
-            resp = _do_request(headers)
-        except httpx.ConnectError:
-            raise ChatGPTOAuthError(
-                "network",
-                "ChatGPT 서버에 연결할 수 없습니다. 네트워크를 확인하세요.",
-            )
-        except httpx.TimeoutException:
-            raise ChatGPTOAuthError(
-                "network",
-                "ChatGPT 서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도하세요.",
-            )
-
-        if resp.status_code == 401:
-            if stream:
-                resp.close()
-            try:
-                refreshed = oauthToken.refresh_access_token()
-            except TokenRefreshError as e:
-                raise ChatGPTOAuthError(
-                    "relogin",
-                    f"토큰 갱신 실패 ({e.reason}): {e.detail}",
-                ) from e
-            if refreshed:
-                headers = self._build_headers(refreshed["access_token"])
-                resp = _do_request(headers)
-
-        if resp.status_code in {502, 503, 504}:
-            if stream:
-                resp.read()
-                resp.close()
-            for attempt in range(2):
-                time.sleep(1.5 * (attempt + 1))
-                resp = _do_request(headers)
-                if resp.status_code not in {502, 503, 504}:
-                    break
-                if stream:
-                    resp.read()
-                    resp.close()
-
-        if resp.status_code != 200:
-            if stream:
-                resp.read()
-            _raise_http_error(resp.status_code, resp.text[:500])
-
-        return resp
-
-    def _build_headers(self, token: str) -> dict[str, str]:
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-            "originator": "codex_cli_rs",
-            "accept": "text/event-stream",
-        }
-        account_id = oauthToken.get_account_id()
-        if account_id:
-            headers["chatgpt-account-id"] = account_id
-        return headers
-
-    def _build_body(
-        self,
-        messages: list[dict],
-        *,
-        tools: list[dict] | None = None,
-        tool_choice: str | None = None,
-    ) -> dict:
-        system_parts = []
-        input_items = []
-
-        for m in messages:
-            role = m["role"]
-            raw_content = m.get("content", "")
-
-            # content가 list(Claude cache_control 등)이면 텍스트만 결합
-            if isinstance(raw_content, list):
-                text_content = "\n\n".join(
-                    block.get("text", "") for block in raw_content if isinstance(block, dict) and block.get("text")
-                )
-            else:
-                text_content = raw_content or ""
-
-            if role == "system":
-                system_parts.append(text_content)
-            elif role == "assistant":
-                # tool_calls가 포함된 assistant 메시지
-                if "_oauth_tool_calls" in m:
-                    tool_call_lines = []
-                    for tc in m["_oauth_tool_calls"]:
-                        tool_call_lines.append(
-                            f"- {tc.get('name', '')} call_id={tc.get('id', '')} args={tc.get('arguments', '')}"
-                        )
-                    assistant_text = text_content
-                    if tool_call_lines:
-                        assistant_text = (assistant_text + "\n\n" if assistant_text else "") + (
-                            "[tool_calls]\n" + "\n".join(tool_call_lines)
-                        )
-                    input_items.append(
-                        {
-                            "type": "message",
-                            "role": "assistant",
-                            "content": [{"type": "output_text", "text": assistant_text}],
-                        }
-                    )
-                else:
-                    input_items.append(
-                        {
-                            "type": "message",
-                            "role": "assistant",
-                            "content": [{"type": "output_text", "text": text_content}],
-                        }
-                    )
-            elif role == "tool":
-                # Codex OAuth backend accepts current-turn tool calls, but it is stricter
-                # than the public Responses API when replaying prior function_call_output
-                # items. Feed prior tool evidence back as normal user text instead.
-                input_items.append(
-                    {
-                        "type": "message",
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "input_text",
-                                "text": f"[tool_result call_id={m.get('tool_call_id', '')}]\n{text_content}",
-                            }
-                        ],
-                    }
-                )
-            else:
-                input_items.append(
-                    {
-                        "type": "message",
-                        "role": "user",
-                        "content": [{"type": "input_text", "text": text_content}],
-                    }
-                )
-
-        body: dict = {
-            "model": self.resolved_model,
-            "stream": True,
-            "store": False,
-            "input": input_items,
-            "include": ["reasoning.encrypted_content"],
-        }
-
-        if system_parts:
-            body["instructions"] = "\n\n".join(system_parts)
-
-        if tools:
-            responsesTools = []
-            for t in tools:
-                if t.get("type") != "function":
-                    continue
-                func = t["function"]
-                responsesTools.append(
-                    {
-                        "type": "function",
-                        "name": func["name"],
-                        "description": func.get("description", ""),
-                        "parameters": func.get("parameters", {}),
-                    }
-                )
-            if responsesTools:
-                body["tools"] = responsesTools
-
-            # Responses API tool_choice: "auto"(기본), "required"(=any), "none"
-            if tool_choice and tool_choice != "auto":
-                if tool_choice == "any":
-                    body["tool_choice"] = "required"
-                else:
-                    body["tool_choice"] = tool_choice
-
-        return body
-
-    def complete(self, messages: list[dict[str, str]]) -> LLMResponse:
-        """동기 완료 요청."""
-        token = self._get_token_or_raise()
-        body = self._build_body(messages)
-        resp = self._request_with_retry(token, body)
-
-        answer = self._parse_sse_response(resp.text)
-        if not answer:
-            log.warning("SSE 응답에서 텍스트를 추출하지 못함 — 이벤트 포맷 변경 의심")
-            raise ChatGPTOAuthError(
-                "check_sse",
-                "ChatGPT 응답은 수신되었지만 텍스트를 추출할 수 없습니다. "
-                "OpenAI가 SSE 이벤트 포맷을 변경했을 수 있습니다. "
-                "openai/codex 레포에서 최신 이벤트 타입을 확인하세요.",
-            )
-
-        return LLMResponse(
-            answer=answer,
-            provider="oauth-codex",
-            model=self.resolved_model,
-        )
-
-    def stream(self, messages: list[dict[str, str]]) -> Generator[str, None, None]:
-        """스트리밍 응답 생성."""
-        token = self._get_token_or_raise()
-        body = self._build_body(messages)
-        resp = self._request_with_retry(token, body, stream=True)
-
-        has_content = False
-        yielded_final_message = False
-        event_types_seen: set[str] = set()
-
-        for raw_line in resp.iter_lines():
-            if not raw_line:
-                continue
-            line = raw_line if isinstance(raw_line, str) else raw_line.decode("utf-8")
-            if not line.startswith("data: "):
-                continue
-
-            data_str = line[6:]
-            if data_str == "[DONE]":
+    if response.status_code in {502, 503, 504}:
+        for attempt in range(2):
+            time.sleep(1.5 * (attempt + 1))
+            response = post(headers)
+            if response.status_code not in {502, 503, 504}:
                 break
 
-            try:
-                event = json.loads(data_str)
-            except json.JSONDecodeError:
-                continue
+    if response.status_code != 200:
+        _raise_http_error(response.status_code, response.text)
+    return response.text
 
-            event_type = event.get("type", "")
-            if event_type:
-                event_types_seen.add(event_type)
 
-            if event_type == "response.output_text.delta":
-                delta = event.get("delta", "")
-                if delta:
-                    has_content = True
-                    yield delta
+def _headers(token: str, *, accept_json: bool = False) -> dict[str, str]:
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+        "originator": "codex_cli_rs",
+        "accept": "application/json" if accept_json else "text/event-stream",
+    }
+    account_id = oauthToken.get_account_id()
+    if account_id:
+        headers["chatgpt-account-id"] = account_id
+    return headers
 
-            elif event_type == "response.content_part.delta":
-                delta = event.get("delta", {})
-                text = delta.get("text", "") if isinstance(delta, dict) else ""
-                if text:
-                    has_content = True
-                    yield text
 
-            elif event_type == "response.output_item.done":
-                if has_content:
+def _raise_http_error(status: int, body: str) -> None:
+    detail = body[:500]
+    if status == 401:
+        raise OAuthCodexError("relogin", "ChatGPT OAuth 인증이 만료되었습니다.", detail=detail)
+    if status == 403:
+        raise OAuthCodexError("forbidden", "ChatGPT OAuth backend 접근이 거부되었습니다.", detail=detail)
+    if status == 404:
+        raise OAuthCodexError("endpoint", "ChatGPT OAuth backend 엔드포인트를 찾지 못했습니다.", detail=detail)
+    if status == 429:
+        raise OAuthCodexError("rate_limit", "ChatGPT OAuth backend 요청 한도를 초과했습니다.", detail=detail)
+    raise OAuthCodexError("http_error", f"ChatGPT OAuth backend 오류입니다. HTTP {status}", detail=detail)
+
+
+def _build_body(messages: list[dict[str, Any]], tools: list[dict[str, Any]], *, model: str) -> dict[str, Any]:
+    instructions: list[str] = []
+    input_items: list[dict[str, Any]] = []
+    for message in messages:
+        role = str(message.get("role") or "user")
+        content = _message_text(message.get("content"))
+        if role == "system":
+            if content:
+                instructions.append(content)
+            continue
+        if role == "tool":
+            input_items.append(
+                {
+                    "type": "message",
+                    "role": "user",
+                    "content": [{"type": "input_text", "text": f"[tool_result id={message.get('tool_call_id', '')}]\n{content}"}],
+                }
+            )
+            continue
+        if role == "assistant":
+            tool_calls = message.get("tool_calls") or []
+            if content:
+                input_items.append({"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": content}]})
+            continue
+        input_items.append({"type": "message", "role": "user", "content": [{"type": "input_text", "text": content}]})
+
+    body: dict[str, Any] = {
+        "model": model,
+        "stream": True,
+        "store": False,
+        "input": input_items,
+        "include": ["reasoning.encrypted_content"],
+    }
+    if instructions:
+        body["instructions"] = "\n\n".join(instructions)
+    response_tools = _response_tools(tools)
+    if response_tools:
+        body["tools"] = response_tools
+    return body
+
+
+def _message_text(content: Any) -> str:
+    if isinstance(content, list):
+        parts = []
+        for item in content:
+            if isinstance(item, dict):
+                parts.append(str(item.get("text") or ""))
+            elif item is not None:
+                parts.append(str(item))
+        return "\n\n".join(part for part in parts if part)
+    return "" if content is None else str(content)
+
+
+def _append_tool_calls(content: str, tool_calls: list[Any]) -> str:
+    lines = []
+    for call in tool_calls:
+        if not isinstance(call, dict):
+            continue
+        function = call.get("function") if isinstance(call.get("function"), dict) else {}
+        lines.append(f"- {function.get('name', '')} id={call.get('id', '')} args={function.get('arguments', '')}")
+    if not lines:
+        return content
+    return (content + "\n\n" if content else "") + "[tool_calls]\n" + "\n".join(lines)
+
+
+def _response_tools(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    response_tools: list[dict[str, Any]] = []
+    for tool in tools:
+        function = tool.get("function") if isinstance(tool, dict) else None
+        if not isinstance(function, dict):
+            continue
+        response_tools.append(
+            {
+                "type": "function",
+                "name": function.get("name"),
+                "description": function.get("description", ""),
+                "parameters": function.get("parameters", {"type": "object", "properties": {}}),
+            }
+        )
+    return response_tools
+
+
+def _parse_sse_response(raw: str) -> ProviderTurn:
+    text_parts: list[str] = []
+    completed_text: list[str] = []
+    buffers: dict[str, dict[str, str]] = {}
+    finished: list[dict[str, str]] = []
+
+    for line in raw.splitlines():
+        if not line.startswith("data: "):
+            continue
+        data = line[6:]
+        if data == "[DONE]":
+            break
+        try:
+            event = json.loads(data)
+        except json.JSONDecodeError:
+            continue
+        event_type = event.get("type")
+        if event_type == "response.output_text.delta":
+            delta = event.get("delta")
+            if isinstance(delta, str):
+                text_parts.append(delta)
+        elif event_type == "response.output_item.added":
+            item = event.get("item") if isinstance(event.get("item"), dict) else {}
+            if item.get("type") == "function_call":
+                item_id = str(item.get("id") or f"fc_{len(buffers)}")
+                buffers[item_id] = {"id": str(item.get("call_id") or item_id), "name": str(item.get("name") or ""), "args": ""}
+        elif event_type == "response.function_call_arguments.delta":
+            item_id = str(event.get("item_id") or "")
+            if item_id in buffers:
+                buffers[item_id]["args"] += str(event.get("delta") or "")
+        elif event_type == "response.function_call_arguments.done":
+            item_id = str(event.get("item_id") or "")
+            buffer = buffers.pop(item_id, None)
+            if buffer is not None:
+                final_args = event.get("arguments") if isinstance(event.get("arguments"), str) else None
+                if final_args is not None:
+                    buffer["args"] = final_args
+                finished.append(buffer)
+        elif event_type == "response.output_item.done":
+            item = event.get("item") if isinstance(event.get("item"), dict) else {}
+            if item.get("type") == "function_call":
+                item_id = str(item.get("id") or "")
+                buffer = buffers.pop(item_id, None)
+                if buffer is not None:
+                    final_args = item.get("arguments") if isinstance(item.get("arguments"), str) else None
+                    if final_args is not None:
+                        buffer["args"] = final_args
+                    finished.append(buffer)
+            elif item.get("type") == "message":
+                completed_text.extend(_text_from_message_item(item))
+        elif event_type == "response.completed":
+            response = event.get("response") if isinstance(event.get("response"), dict) else {}
+            for item in response.get("output") or []:
+                if not isinstance(item, dict):
                     continue
-                item = event.get("item", {})
                 if item.get("type") == "message":
-                    for content in item.get("content", []):
-                        if content.get("type") == "output_text":
-                            text = content.get("text", "")
-                            if text and not yielded_final_message:
-                                has_content = True
-                                yielded_final_message = True
-                                yield text
-
-        if not has_content and event_types_seen:
-            log.warning(
-                "SSE 스트림에서 텍스트 없음 — 수신된 이벤트 타입: %s",
-                ", ".join(sorted(event_types_seen)),
-            )
-            yield (
-                "\n\n---\n"
-                "[ChatGPT 응답 수신 실패] SSE 이벤트는 도착했지만 텍스트를 추출하지 못했습니다. "
-                f"수신된 이벤트 타입: {', '.join(sorted(event_types_seen))}. "
-                "OpenAI가 SSE 포맷을 변경했을 수 있습니다."
-            )
-
-    def _parse_sse_response(self, raw: str) -> str:
-        """완료된 SSE 응답에서 최종 텍스트 추출."""
-        answer = ""
-        for line in raw.split("\n"):
-            if not line.startswith("data: "):
-                continue
-            data_str = line[6:]
-            if data_str == "[DONE]":
-                break
-            try:
-                event = json.loads(data_str)
-            except json.JSONDecodeError:
-                continue
-
-            if event.get("type") == "response.completed":
-                resp_obj = event.get("response", {})
-                for output in resp_obj.get("output", []):
-                    if output.get("type") == "message":
-                        for content in output.get("content", []):
-                            if content.get("type") == "output_text":
-                                answer = content.get("text", "")
-            elif event.get("type") == "response.output_text.delta":
-                answer += event.get("delta", "")
-
-        return answer
-
-    def complete_with_tools(
-        self,
-        messages: list[dict],
-        tools: list[dict],
-        *,
-        tool_choice: str | None = None,
-    ) -> ToolResponse:
-        """Responses API tool calling.
-
-        store=False 모드에서는 `response.completed.output[]` 이 항상 빈 배열이라
-        function_call 은 스트리밍 이벤트(`response.output_item.added` +
-        `response.function_call_arguments.delta/done`)로 조립해야 한다.
-        """
-        token = self._get_token_or_raise()
-        body = self._build_body(messages, tools=tools, tool_choice=tool_choice)
-        resp = self._request_with_retry(token, body)
-
-        deltaAnswer = ""
-        completedAnswer = ""
-
-        # item_id → 진행 중 function_call 버퍼
-        fcBuffers: dict[str, dict] = {}
-        # 완료된 함수 호출 리스트 (순서 보존)
-        finishedCalls: list[dict] = []
-
-        for line in resp.text.split("\n"):
-            if not line.startswith("data: "):
-                continue
-            data_str = line[6:]
-            if data_str == "[DONE]":
-                break
-            try:
-                event = json.loads(data_str)
-            except json.JSONDecodeError:
-                continue
-
-            etype = event.get("type")
-
-            # function_call item 시작
-            if etype == "response.output_item.added":
-                item = event.get("item", {})
-                if item.get("type") == "function_call":
-                    itemId = item.get("id") or f"fc_{len(fcBuffers)}"
-                    fcBuffers[itemId] = {
-                        "id": item.get("call_id") or itemId,
-                        "name": item.get("name", ""),
-                        "args": "",
-                    }
-            # arguments 점진 누적
-            elif etype == "response.function_call_arguments.delta":
-                itemId = event.get("item_id", "")
-                buf = fcBuffers.get(itemId)
-                if buf is not None:
-                    buf["args"] += event.get("delta", "")
-            # arguments 완성 → ToolCall 확정
-            elif etype == "response.function_call_arguments.done":
-                itemId = event.get("item_id", "")
-                buf = fcBuffers.pop(itemId, None)
-                # done 이벤트에 최종 arguments 가 실려 올 수도 있음 (안전 우선)
-                finalArgs = event.get("arguments") if isinstance(event.get("arguments"), str) else None
-                if buf is not None:
-                    finishedCalls.append(
+                    completed_text.extend(_text_from_message_item(item))
+                elif item.get("type") == "function_call":
+                    finished.append(
                         {
-                            "id": buf["id"],
-                            "name": buf["name"],
-                            "args": finalArgs or buf["args"],
+                            "id": str(item.get("call_id") or item.get("id") or f"fc_{len(finished)}"),
+                            "name": str(item.get("name") or ""),
+                            "args": str(item.get("arguments") or "{}"),
                         }
                     )
-            # output_item.done — function_call 마감 백업 경로
-            elif etype == "response.output_item.done":
-                item = event.get("item", {})
-                if item.get("type") == "function_call":
-                    itemId = item.get("id", "")
-                    buf = fcBuffers.pop(itemId, None)
-                    if buf is not None:
-                        # done 이벤트에서 최종 arguments 를 덮어쓸 수도 있음
-                        finalArgs = item.get("arguments")
-                        finishedCalls.append(
-                            {
-                                "id": buf["id"],
-                                "name": buf["name"],
-                                "args": finalArgs if isinstance(finalArgs, str) else buf["args"],
-                            }
-                        )
-            elif etype == "response.output_text.delta":
-                deltaAnswer += event.get("delta", "")
-            elif etype == "response.completed":
-                # 일부 구현에서는 completed.output[] 에도 있음 (store=True 모드)
-                resp_obj = event.get("response", {})
-                for output in resp_obj.get("output", []):
-                    if output.get("type") == "message":
-                        for content in output.get("content", []):
-                            if content.get("type") == "output_text":
-                                completedAnswer += content.get("text", "")
 
-        toolCalls: list[ToolCall] = []
-        for fc in finishedCalls:
-            try:
-                args = json.loads(fc["args"]) if fc["args"] else {}
-            except json.JSONDecodeError:
-                args = {}
-            toolCalls.append(ToolCall(id=fc["id"], name=fc["name"], arguments=args))
+    calls: list[ToolCall] = []
+    seen: set[tuple[str, str]] = set()
+    for item in finished:
+        if not item.get("name"):
+            continue
+        key = (item.get("id") or "", item.get("name") or "")
+        if key in seen:
+            continue
+        seen.add(key)
+        calls.append(ToolCall(id=item["id"], name=item["name"], args=_parse_args(item.get("args") or "{}")))
+    return ProviderTurn(content="".join(completed_text) or "".join(text_parts), tool_calls=calls)
 
-        answer = completedAnswer or deltaAnswer
 
-        finishReason = "tool_calls" if toolCalls else "stop"
-        return ToolResponse(
-            answer=answer,
-            provider="oauth-codex",
-            model=self.resolved_model,
-            tool_calls=toolCalls,
-            finish_reason=finishReason,
-        )
+def _text_from_message_item(item: dict[str, Any]) -> list[str]:
+    out: list[str] = []
+    for content in item.get("content") or []:
+        if isinstance(content, dict) and content.get("type") == "output_text" and isinstance(content.get("text"), str):
+            out.append(content["text"])
+    return out
 
-    def stream_with_tools(
-        self,
-        messages: list[dict],
-        tools: list[dict],
-        *,
-        tool_choice: str | None = None,
-    ):
-        """Responses API 스트리밍 tool calling — **실시간 SSE**.
 
-        SSE delta 를 즉시 yield (str), 라운드 종료 시 ToolResponse 1회 yield.
-        `_request_with_retry(stream=True)` 로 httpx streaming 응답 획득 → iter_lines 로 실시간 파싱.
-        """
-        token = self._get_token_or_raise()
-        body = self._build_body(messages, tools=tools, tool_choice=tool_choice)
-        resp = self._request_with_retry(token, body, stream=True)
-
-        deltaAnswer = ""
-        completedAnswer = ""
-        fcBuffers: dict[str, dict] = {}
-        finishedCalls: list[dict] = []
-
-        try:
-            lines_iter = resp.iter_lines()
-        except AttributeError:
-            # fallback: non-stream response
-            lines_iter = resp.text.split("\n")
-
-        for line in lines_iter:
-            if not line or not line.startswith("data: "):
-                continue
-            data_str = line[6:]
-            if data_str == "[DONE]":
-                break
-            try:
-                event = json.loads(data_str)
-            except json.JSONDecodeError:
-                continue
-
-            etype = event.get("type")
-
-            if etype == "response.output_item.added":
-                item = event.get("item", {})
-                if item.get("type") == "function_call":
-                    itemId = item.get("id") or f"fc_{len(fcBuffers)}"
-                    fcBuffers[itemId] = {
-                        "id": item.get("call_id") or itemId,
-                        "name": item.get("name", ""),
-                        "args": "",
-                    }
-            elif etype == "response.function_call_arguments.delta":
-                itemId = event.get("item_id", "")
-                buf = fcBuffers.get(itemId)
-                if buf is not None:
-                    buf["args"] += event.get("delta", "")
-            elif etype == "response.function_call_arguments.done":
-                itemId = event.get("item_id", "")
-                buf = fcBuffers.pop(itemId, None)
-                finalArgs = event.get("arguments") if isinstance(event.get("arguments"), str) else None
-                if buf is not None:
-                    finishedCalls.append(
-                        {
-                            "id": buf["id"],
-                            "name": buf["name"],
-                            "args": finalArgs or buf["args"],
-                        }
-                    )
-            elif etype == "response.output_item.done":
-                item = event.get("item", {})
-                if item.get("type") == "function_call":
-                    itemId = item.get("id", "")
-                    buf = fcBuffers.pop(itemId, None)
-                    if buf is not None:
-                        finalArgs = item.get("arguments")
-                        finishedCalls.append(
-                            {
-                                "id": buf["id"],
-                                "name": buf["name"],
-                                "args": finalArgs if isinstance(finalArgs, str) else buf["args"],
-                            }
-                        )
-            elif etype == "response.output_text.delta":
-                delta = event.get("delta", "")
-                if delta:
-                    deltaAnswer += delta
-                    yield delta  # ← 실시간 text chunk
-            elif etype == "response.completed":
-                resp_obj = event.get("response", {})
-                for output in resp_obj.get("output", []):
-                    if output.get("type") == "message":
-                        for content in output.get("content", []):
-                            if content.get("type") == "output_text":
-                                completedAnswer += content.get("text", "")
-
-        toolCalls: list[ToolCall] = []
-        for fc in finishedCalls:
-            try:
-                args = json.loads(fc["args"]) if fc["args"] else {}
-            except json.JSONDecodeError:
-                args = {}
-            toolCalls.append(ToolCall(id=fc["id"], name=fc["name"], arguments=args))
-
-        # streaming 응답 자원 정리
-        try:
-            resp.close()
-        except (AttributeError, RuntimeError):
-            pass
-
-        yield ToolResponse(
-            answer=completedAnswer or deltaAnswer,
-            provider="oauth-codex",
-            model=self.resolved_model,
-            tool_calls=toolCalls,
-            finish_reason="tool_calls" if toolCalls else "stop",
-        )
-
-    def format_assistant_tool_calls(self, answer: str | None, tool_calls: list) -> dict:
-        """assistant 메시지에 tool_calls 정보 포함."""
-        serialized = []
-        for tc in tool_calls:
-            rawArgs = json.dumps(tc.arguments, ensure_ascii=False) if isinstance(tc.arguments, dict) else tc.arguments
-            serialized.append({"id": tc.id, "name": tc.name, "arguments": rawArgs})
-        return {"role": "assistant", "content": answer or "", "_oauth_tool_calls": serialized}
-
-    def format_tool_result(self, tool_call_id: str, result: str) -> dict:
-        """tool result -> Responses API function_call_output."""
-        return {"role": "tool", "tool_call_id": tool_call_id, "content": result}
+def _parse_args(raw: str) -> dict[str, Any]:
+    try:
+        parsed = json.loads(raw or "{}")
+    except json.JSONDecodeError:
+        return {"_raw": raw}
+    return parsed if isinstance(parsed, dict) else {}

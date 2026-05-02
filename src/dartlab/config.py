@@ -15,7 +15,7 @@
     # .dartlab.yml — cwd → parent → home 순으로 탐색
     company: 005930           # 기본 종목
     provider: openai          # 기본 LLM provider
-    model: gpt-4o             # 기본 모델
+    model: latest             # 기본 모델 (provider 최신값 사용)
     verbose: false
     data_dir: /my/data
 """

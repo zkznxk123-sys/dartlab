@@ -18,7 +18,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 import dartlab
-from dartlab.ai.runtime.progressCapture import installProgressCapture
+from dartlab.ai.trace import installProgressCapture
 from dartlab.core.logger import getLogger as _bootstrapLogger
 
 from .api import (

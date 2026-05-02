@@ -39,7 +39,7 @@ def run(args) -> int:
         print("  dartlab setup mistral      Mistral AI — 다양한 모델\n")
         print("[ AI 분석 — 기타 ]\n")
         print("  dartlab setup oauth-codex  ChatGPT 구독 계정 — 브라우저 OAuth")
-        print("  dartlab setup openai       OpenAI API — GPT-4o 등 (API 키 필요)")
+        print("  dartlab setup openai       OpenAI API — 최신 GPT 모델 (API 키 필요)")
         print("  dartlab setup ollama       로컬 LLM (오프라인)")
         print("  dartlab setup codex        Codex CLI — 코딩 에이전트용")
         print("  dartlab setup custom       OpenAI 호환 API — vLLM, Together 등\n")
@@ -295,7 +295,7 @@ def _setup_ollama() -> None:
 
 
 def _setup_openai() -> None:
-    print("\n[ OpenAI API 설정 — GPT-4o 등 ]\n")
+    print("\n[ OpenAI API 설정 — 최신 GPT 모델 ]\n")
 
     print("  1. API 키 발급")
     print("     https://platform.openai.com/api-keys\n")
@@ -310,7 +310,7 @@ def _setup_openai() -> None:
 
     print("  4. 사용")
     print('     dartlab ask 005930 "재무 건전성 분석" -p openai')
-    print('     dartlab ask 005930 "분석" -p openai -m gpt-4o')
+    print('     dartlab ask 005930 "분석" -p openai')
     print()
 
 

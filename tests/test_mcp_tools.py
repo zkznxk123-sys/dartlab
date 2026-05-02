@@ -15,6 +15,11 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def legacy_mcp_compat(monkeypatch):
+    monkeypatch.setenv("DARTLAB_MCP_COMPAT", "1")
+
+
 # ── _TOOLS 구조 검증 ──
 
 
@@ -346,7 +351,7 @@ def test_install_mcp_config_creates_file(tmp_path):
     assert mcp_file.exists()
     config = json.loads(mcp_file.read_text(encoding="utf-8"))
     assert "dartlab" in config["mcpServers"]
-    assert config["mcpServers"]["dartlab"]["command"] == "uv"
+    assert config["mcpServers"]["dartlab"]["command"] == "python"
 
 
 def test_install_mcp_config_skips_if_exists(tmp_path):
@@ -386,10 +391,10 @@ def test_install_mcp_config_merges_with_existing(tmp_path):
 def test_mcp_instructions_contains_key_info():
     from dartlab.mcp import _MCP_INSTRUCTIONS
 
-    assert "DART" in _MCP_INSTRUCTIONS
-    assert "EDGAR" in _MCP_INSTRUCTIONS
-    assert "companyInsights" in _MCP_INSTRUCTIONS
-    assert "companyStory" in _MCP_INSTRUCTIONS
+    assert "Ask Workbench" in _MCP_INSTRUCTIONS
+    assert "run_python" in _MCP_INSTRUCTIONS
+    assert "inspect_dataset" in _MCP_INSTRUCTIONS
+    assert "Company" in _MCP_INSTRUCTIONS
 
 
 # ── companyStory tool execution ──

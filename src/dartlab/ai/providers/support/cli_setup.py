@@ -1,26 +1,37 @@
-"""CLI 기반 LLM 도구 (Codex) 설치 감지 및 안내."""
+"""CLI environment probes for Ask Workbench provider setup."""
 
 from __future__ import annotations
 
-import platform
+import shutil
+import subprocess
+from typing import Any
 
-_IS_WINDOWS = platform.system() == "Windows"
-
-
-def detect_codex() -> dict:
-    """OpenAI Codex CLI 상태 감지.
-
-    Returns:
-            {"installed": bool, "version": str | None}
-    """
-    from dartlab.ai.providers.support.codex_cli import inspect_codex_cli
-
-    return inspect_codex_cli()
+from .oauth_token import get_account_id, is_authenticated
 
 
-def get_codex_install_guide() -> str:
-    """OS별 Codex CLI 설치 안내."""
-    guide = "[ OpenAI Codex CLI 설치 안내 ]\n\n"
-    guide += "1. npm install -g @openai/codex\n2. 처음 실행 시 로그인: codex\n3. 확인: codex --version\n"
-    guide += "\nChatGPT Plus/Pro 구독이 필요합니다.\n문서: https://developers.openai.com/codex/cli/\n"
-    return guide
+def detect_codex() -> dict[str, Any]:
+    """Return local CLI availability without importing legacy AI code."""
+    executable = shutil.which("codex")
+    version: str | None = None
+    if executable:
+        try:
+            result = subprocess.run(
+                [executable, "--version"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=False,
+            )
+            version = (result.stdout or result.stderr).strip() or None
+        except (OSError, subprocess.SubprocessError):
+            version = None
+    authenticated = is_authenticated()
+    return {
+        "installed": executable is not None,
+        "path": executable,
+        "version": version,
+        "authenticated": authenticated,
+        "authMode": "oauth" if authenticated else None,
+        "loginStatus": "authenticated" if authenticated else "not_authenticated",
+        "accountId": get_account_id() if authenticated else None,
+    }

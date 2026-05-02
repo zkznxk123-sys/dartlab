@@ -8,25 +8,25 @@ pytestmark = pytest.mark.unit
 
 
 def test_mcp_tools_defined():
-    from dartlab.mcp import _TOOLS
+    from dartlab.mcp import _advertisedTools
 
-    assert len(_TOOLS) > 10
-    names = {t["name"] for t in _TOOLS}
-    assert "companyInsights" in names
-    assert "searchCompany" in names
-    assert "companyStory" in names
-    assert "marketScan" in names
-    assert "contextForQuestion" in names
-    assert "queryAnalysisGraph" in names
-    assert "planDartlabQuestion" in names
-    assert "validateDartlabPlan" in names
-    assert "explainDartlabTool" in names
-    assert "describeDartlabIntelligenceMap" in names
-    assert "describeDartlabIntelligencePack" in names
-    assert "workspace_status" in names
-    assert "inspect_data" in names
-    assert "run_python" in names
-    assert "finalize_answer" in names
+    names = {t["name"] for t in _advertisedTools()}
+    assert names == {
+        "start_ask_session",
+        "ask_kernel_status",
+        "search_reference",
+        "read_context",
+        "inspect_dataset",
+        "run_python",
+        "compile_visual",
+        "finalize_answer",
+        "listDartlabSkills",
+        "searchDartlabSkills",
+        "explainDartlabSkill",
+        "checkDartlabSkillEvidence",
+    }
+    assert "companyInsights" not in names
+    assert "searchCompany" not in names
     assert "companySections" not in names
 
 
@@ -43,47 +43,53 @@ def test_mcp_tool_schema_valid():
         assert "_STOCK" not in str(tool["params"])
 
 
-def test_mcp_graph_tools_execute():
+def test_mcp_workbench_tools_execute():
     from dartlab.mcp import _executeTool
 
-    context = _executeTool("contextForQuestion", {"question": "최근 주가가 많이 오른 종목을 찾아줘"})
-    assert "gather.krx.close" in context
+    status = _executeTool("ask_kernel_status", {})
+    assert "Ask Workbench Kernel" in status
+    assert "datasetRoots" in status
 
-    found = _executeTool("queryAnalysisGraph", {"query": "gather.krx.close"})
-    assert "contract:gather.krx.close" in found
+    found = _executeTool("search_reference", {"query": "Ask Workbench", "limit": 3})
+    assert "refs" in found
 
-    plan = _executeTool("planDartlabQuestion", {"question": "최근 주가가 많이 오른 종목을 찾아줘"})
-    assert "recent_price_mover.default" in plan
-    assert "primaryCsv" in plan
-    assert "acceptanceCriteria" in plan
-    assert "failurePolicy" in plan
+    executed = _executeTool("run_python", {"code": "emit_result(values={'x': 1})"})
+    assert "DARTLAB_RESULT_JSON" in executed
 
-    validated = _executeTool(
-        "validateDartlabPlan",
-        {"question": "최근 주가가 많이 오른 종목을 찾아줘", "proposedTools": ["pythonExec"]},
+    skills = _executeTool("searchDartlabSkills", {"query": "주가지수 강세"})
+    assert "krxIndexStrengthReview" in skills
+
+
+def test_mcp_workbench_session_keeps_refs_between_tools():
+    import json
+
+    from dartlab.mcp import _executeTool
+
+    session = json.loads(_executeTool("start_ask_session", {"question": "세션 ref 검산"}))
+    session_id = session["sessionId"]
+
+    executed = json.loads(
+        _executeTool(
+            "run_python",
+            {
+                "sessionId": session_id,
+                "code": "emit_result(values={'sample_value': 42}, units={'sample_value': '점'})",
+            },
+        )
     )
-    assert '"ok": true' in validated
-    assert "acceptanceCriteria" in validated
+    assert executed["refCount"] >= 2
 
-    intelligence = _executeTool("describeDartlabIntelligenceMap", {"question": "최근 주가가 많이 오른 종목을 찾아줘"})
-    assert "DartLab Financial Workspace Agent" in intelligence
-    assert "recipeMap" in intelligence
-
-    pack = _executeTool("describeDartlabIntelligencePack", {})
-    assert '"schemaVersion": 1' in pack
-    assert "capabilitySkillMap" in pack
-
-
-def test_mcp_workspace_agent_tools_execute():
-    from dartlab.mcp import _executeTool
-
-    status = _executeTool("workspace_status", {})
-    assert "workspaceRoot" in status
-    assert "dataRoot" in status
-    assert "intelligenceMap" in status
-
-    found = _executeTool("search_workspace", {"query": "ops ai", "kind": "docs", "limit": 3})
-    assert "results" in found
+    finalized = json.loads(
+        _executeTool(
+            "finalize_answer",
+            {
+                "sessionId": session_id,
+                "answer": "sample_value는 42점입니다.",
+            },
+        )
+    )
+    assert finalized["ok"] is True
+    assert finalized["session"]["refs"]
 
 
 def test_fmt_none():

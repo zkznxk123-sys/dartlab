@@ -2,23 +2,19 @@
 
 [최우선 UX 원칙] 데이터 투명성 — 절대 제거 금지
 
-모든 분석 로직은 dartlab.ai.runtime.core 가 처리.
+모든 분석 로직은 dartlab.ai.kernel 이 처리.
 이 모듈은 이벤트를 SSE dict로 변환하는 thin adapter.
 
 이벤트 흐름:
-  meta          → 회사, 종목코드, 포함 모듈, 연도 범위
-  snapshot      → 핵심 수치 (주가, 시총, PER 등)
-  context       → 모듈별 데이터 (IS, BS, CF, ratios, dividend 등)
-  system_prompt → 시스템 프롬프트 + LLM에 전달되는 전체 user content
-  tool_call     → 에이전트 도구 호출
-  tool_result   → 도구 실행 결과
-  chart         → 차트 스펙
-  ui_action     → canonical UI action
-  chunk         → LLM 응답 텍스트 (실시간 스트리밍)
-  validation    → 숫자 검증 결과
-  quality_check → AI 최종 응답 품질 계약 검사 결과
-  done          → 완료 (responseMeta 포함)
-  error         → 에러 + 사용자 행동 힌트
+  task      → Ask Workbench 세션과 release policy
+  reference → 문서/docstring/capability snippet
+  inspect   → runtime dataset schema/latest/entity/metric 확인
+  execute   → bounded Python 실행 결과
+  visual    → table-backed visual spec
+  verify    → ref 기반 검산 결과
+  chunk     → 응답 텍스트
+  done      → ResultBundle
+  error     → 실행 오류
 """
 
 from __future__ import annotations
@@ -30,7 +26,7 @@ import os
 import threading
 from dataclasses import dataclass
 
-from dartlab.ai.runtime.audit import AuditCollector
+from dartlab.ai.trace import AuditCollector
 
 from .models import AskRequest
 
@@ -74,7 +70,7 @@ async def stream_ask(req: AskRequest):
 
 async def stream_analysis(question: str = "", *, _audit: AuditCollector | None = None, **kwargs):
     """core.runAsk() → SSE adapter."""
-    from dartlab.ai.runtime.core import runAsk
+    from dartlab.ai.kernel import runAsk
 
     async for event in _sync_gen_to_async(runAsk, question, **kwargs):
         if _audit is not None:
@@ -90,7 +86,7 @@ async def collect_analysis_text(question: str = "", **kwargs) -> str:
 
 async def collect_analysis_result(question: str = "", **kwargs) -> dict:
     """core.runAsk() 실행 후 답변과 tool CSV 아티팩트를 함께 수집한다."""
-    from dartlab.ai.runtime.core import runAsk
+    from dartlab.ai.kernel import runAsk
 
     auditor = AuditCollector(
         question=question,
@@ -104,6 +100,9 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
     claims: list[dict] = []
     visuals: list[dict] = []
     limits: list[str] = []
+    refs: list[dict] = []
+    trace: list[dict] = []
+    verification: dict = {}
     responseMeta: dict = {}
     try:
         async for event in _sync_gen_to_async(runAsk, question, **kwargs):
@@ -118,17 +117,24 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
                 evidence.append(event.data)
             elif event.kind == "claim":
                 claims.append(event.data)
-            elif event.kind == "chart":
+            elif event.kind in {"chart", "visual"}:
                 visuals.extend([v for v in event.data.get("visuals") or [] if isinstance(v, dict)])
             elif event.kind == "done":
                 evidence = _dedupeById(evidence + [v for v in event.data.get("evidence") or [] if isinstance(v, dict)])
                 claims = _dedupeById(claims + [v for v in event.data.get("claims") or [] if isinstance(v, dict)])
                 visuals = _dedupeVisuals(visuals + [v for v in event.data.get("visuals") or [] if isinstance(v, dict)])
                 limits.extend(str(v) for v in event.data.get("limits") or [])
+                refs = _dedupeById([v for v in event.data.get("refs") or [] if isinstance(v, dict)])
+                trace = [v for v in event.data.get("trace") or [] if isinstance(v, dict)]
+                verification = event.data.get("verification") or {}
                 responseMeta = event.data.get("responseMeta") or {}
             elif event.kind == "error":
+                error_code = event.data.get("error", "analysis error")
+                if error_code in {"provider_create_failed", "provider_transport_failed", "tool_failed"}:
+                    limits.append(f"{error_code}: {event.data.get('detail') or event.data.get('action') or ''}".strip())
+                    continue
                 raise AnalysisStreamError(
-                    event.data.get("error", "analysis error"),
+                    error_code,
                     action=event.data.get("action", ""),
                     detail=event.data.get("detail"),
                 )
@@ -141,6 +147,9 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
         "claims": _dedupeById(claims),
         "visuals": _dedupeVisuals(visuals),
         "limits": _dedupeStrings(limits),
+        "refs": refs,
+        "trace": trace,
+        "verification": verification,
         "responseMeta": responseMeta,
     }
 
