@@ -48,8 +48,16 @@ def new_id(prefix: str) -> str:
 class WorkbenchTask:
     id: str
     question: str
+    hints: dict[str, Any] = field(default_factory=dict)
     actions: list[ActionName] = field(
-        default_factory=lambda: ["search_reference", "read_context", "inspect_dataset", "run_python", "compile_visual", "finalize_answer"]
+        default_factory=lambda: [
+            "search_reference",
+            "read_context",
+            "inspect_dataset",
+            "run_python",
+            "compile_visual",
+            "finalize_answer",
+        ]
     )
     release_policy: dict[str, Any] = field(
         default_factory=lambda: {

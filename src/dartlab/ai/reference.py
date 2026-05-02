@@ -63,18 +63,28 @@ def search_reference(query: str, *, limit: int = 8) -> list[Ref]:
     terms = [t.lower() for t in query.split() if len(t) >= 2]
     refs: list[Ref] = []
 
+    if _prefer_skill_first(query, terms):
+        refs.extend(_skill_refs(query, min(4, limit - len(refs))))
+        if len(refs) >= limit:
+            return refs[:limit]
+        preferred_capabilities = _capability_ids_from_refs(refs)
+        refs.extend(_capability_refs_for_ids(preferred_capabilities, min(2, limit - len(refs))))
+        if len(refs) >= limit:
+            return refs[:limit]
+
     refs.extend(_dataset_refs(terms, limit - len(refs)))
     if len(refs) >= limit:
         return refs[:limit]
 
-    refs.extend(_skill_refs(query, min(4, limit - len(refs))))
-    if len(refs) >= limit:
-        return refs[:limit]
+    if not _prefer_skill_first(query, terms):
+        refs.extend(_skill_refs(query, min(4, limit - len(refs))))
+        if len(refs) >= limit:
+            return refs[:limit]
 
-    preferred_capabilities = _capability_ids_from_refs(refs)
-    refs.extend(_capability_refs_for_ids(preferred_capabilities, min(2, limit - len(refs))))
-    if len(refs) >= limit:
-        return refs[:limit]
+        preferred_capabilities = _capability_ids_from_refs(refs)
+        refs.extend(_capability_refs_for_ids(preferred_capabilities, min(2, limit - len(refs))))
+        if len(refs) >= limit:
+            return refs[:limit]
 
     refs.extend(_knowledge_refs(query, limit - len(refs)))
     if len(refs) >= limit:
@@ -84,7 +94,7 @@ def search_reference(query: str, *, limit: int = 8) -> list[Ref]:
     if len(refs) >= limit:
         return refs[:limit]
 
-    candidates = [root / "ASK_WORKBENCH_KERNEL.md", root / "ops", root / "src" / "dartlab"]
+    candidates = [root / "ops", root / "src" / "dartlab"]
     for candidate in candidates:
         if candidate.is_file():
             refs.extend(_search_file(candidate, terms, root=root, limit=limit - len(refs)))
@@ -95,6 +105,30 @@ def search_reference(query: str, *, limit: int = 8) -> list[Ref]:
                 if path.is_file() and _is_searchable_reference_file(path, root):
                     refs.extend(_search_file(path, terms, root=root, limit=limit - len(refs)))
     return refs[:limit]
+
+
+def _prefer_skill_first(query: str, terms: list[str]) -> bool:
+    lowered = query.lower()
+    markers = (
+        "skill",
+        "skills",
+        "스킬",
+        "스킬스",
+        "capability",
+        "사용법",
+        "어떻게",
+        "함수",
+        "show",
+        "뭐 할 수",
+        "할 수 있어",
+        "할수",
+        "기능",
+        "가능",
+        "엔진",
+        "조합",
+        "응용",
+    )
+    return any(marker in lowered for marker in markers) or any(term in {"help", "usage"} for term in terms)
 
 
 def _dataset_refs(terms: list[str], limit: int) -> list[Ref]:
@@ -170,7 +204,9 @@ def _capability_refs(query: str, terms: list[str], limit: int) -> list[Ref]:
                     "summary": value.get("summary"),
                     "whenToUse": _line_limited_snippet(str(value.get("guide") or ""), max_lines=12, max_chars=900),
                     "parameters": value.get("args") or value.get("requiredInputs"),
-                    "returns": _line_limited_snippet(str(value.get("returns") or value.get("outputShape") or ""), max_lines=14, max_chars=1200),
+                    "returns": _line_limited_snippet(
+                        str(value.get("returns") or value.get("outputShape") or ""), max_lines=14, max_chars=1200
+                    ),
                     "returnSchema": _compact_return_schema(value.get("returnSchema")),
                     "requires": value.get("requires"),
                     "examples": value.get("example"),
@@ -210,7 +246,9 @@ def _capability_refs_for_ids(capability_ids: list[str], limit: int) -> list[Ref]
                     "summary": value.get("summary"),
                     "whenToUse": _line_limited_snippet(str(value.get("guide") or ""), max_lines=10, max_chars=800),
                     "parameters": value.get("args") or value.get("requiredInputs"),
-                    "returns": _line_limited_snippet(str(value.get("returns") or value.get("outputShape") or ""), max_lines=12, max_chars=1000),
+                    "returns": _line_limited_snippet(
+                        str(value.get("returns") or value.get("outputShape") or ""), max_lines=12, max_chars=1000
+                    ),
                     "returnSchema": _compact_return_schema(value.get("returnSchema")),
                     "requires": value.get("requires"),
                     "examples": value.get("example"),
@@ -261,6 +299,7 @@ def _skill_refs(query: str, limit: int) -> list[Ref]:
         return []
     try:
         from dartlab.skills import searchSkills
+
         matches = searchSkills(query, limit=limit)
     except Exception as exc:
         return [
@@ -289,15 +328,21 @@ def _skill_refs(query: str, limit: int) -> list[Ref]:
                     "category": spec.category,
                     "purpose": spec.purpose,
                     "whenToUse": spec.whenToUse,
+                    "inputs": spec.inputs,
+                    "outputs": spec.outputs,
                     "capabilityRefs": spec.capabilityRefs,
+                    "datasetRefs": spec.datasetRefs,
                     "toolRefs": spec.toolRefs,
                     "knowledgeRefs": spec.knowledgeRefs,
+                    "visualRefs": spec.visualRefs,
                     "procedure": spec.procedure[:8],
                     "requiredEvidence": spec.requiredEvidence,
                     "expectedOutputs": spec.expectedOutputs,
                     "visualGuidance": spec.visualGuidance[:4],
                     "failureModes": spec.failureModes[:6],
                     "runtimeCompatibility": spec.runtimeCompatibility,
+                    "docs": spec.docs,
+                    "quality": spec.quality,
                     "forbidden": spec.forbidden,
                     "skillSource": spec.source,
                     "score": match.score,
@@ -365,7 +410,7 @@ def read_context(path: str, *, start_line: int = 1, max_chars: int = 4000) -> Re
 
     Examples
     --------
-    >>> read_context("ASK_WORKBENCH_KERNEL.md", max_chars=1000)
+    >>> read_context("ops/skills.md", max_chars=1000)
     Ref(...)
 
     Notes

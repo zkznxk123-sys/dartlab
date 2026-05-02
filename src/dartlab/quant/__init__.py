@@ -700,6 +700,7 @@ class Quant:
 
         Guide
         -----
+        AI 역할: AI는 quant를 가격·팩터·시계열 신호 엔진으로 보고 기간, benchmark, 수익률/변동성 근거를 분리한다.
         When: 주가 기반 기술적 신호·팩터·리스크를 정량 분석할 때.
         How: quant("판단") 으로 종합 신호 확인 → 세부 축으로 근거 파악.
             quant("벤치마크") 로 시장·섹터·스타일 benchmarkStack 을 확인한다.

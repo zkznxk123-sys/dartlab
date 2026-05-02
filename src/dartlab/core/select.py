@@ -295,7 +295,13 @@ class SelectResult:
 
 
 class ChartResult:
-    """chart() 반환 객체 — 시각화 + 렌더링."""
+    """chart() 반환 객체 — 시각화 + 렌더링.
+
+    Guide:
+        AI 역할: AI는 ChartResult/viz를 이미 검증된 표를 시각 설명으로 바꾸는 엔진으로 보고 단일값·무근거 차트를 만들지 않는다.
+        When: SelectResult나 DataFrame 기반 근거를 차트로 설명해야 할 때.
+        How: 표의 기간/series/value 근거가 충분한지 먼저 확인하고, chart() 결과의 spec을 최종 답변 ref와 연결한다.
+    """
 
     __slots__ = ("_select", "_kind", "_spec")
 

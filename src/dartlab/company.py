@@ -63,6 +63,7 @@ def Company(codeOrName: str) -> CompanyProtocol:
         엔진은 사람의 분석엔진이자 AI 의 skill (docstring SSOT) — 한 파일 두 역할.
 
     Guide:
+        - AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다.
         - "삼성전자 재무제표" -> c = Company("005930"); c.show("IS")
         - "사업 개요 보여줘" -> c.show("businessOverview")
         - "어떤 데이터 있어?" -> c.index 또는 c.topics

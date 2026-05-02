@@ -13,7 +13,17 @@ from typing import Any, Literal
 SkillKind = Literal["generated", "curated", "user"]
 SkillScope = Literal["builtin", "project", "user"]
 SkillStatus = Literal["unverified", "observed", "auditP", "official", "deprecated"]
-SkillCategory = Literal["basic", "domain", "user", "capability"]
+SkillCategory = Literal[
+    "start",
+    "runtime",
+    "engines",
+    "screens",
+    "finance",
+    "visuals",
+    "basic",
+    "user",
+    "capability",
+]
 
 
 @dataclass(frozen=True)
@@ -22,9 +32,9 @@ class SkillSpec:
 
     Description
     -----------
-    DartLab AI, MCP, story, UI, audit 가 함께 읽는 분석 절차 명세다. 이
-    객체는 실행 코드를 포함하지 않고, 필요한 capability/tool/knowledge 와
-    evidence 계약을 설명한다.
+    DartLab AI, MCP, story, UI, audit, GitHub Pages 가 함께 읽는 분석 절차
+    명세다. 이 객체는 실행 코드를 포함하지 않고, 필요한
+    capability/tool/knowledge 와 evidence 계약을 설명한다.
 
     Parameters
     ----------
@@ -39,14 +49,15 @@ class SkillSpec:
     status : SkillStatus
         검증 상태.
     category : SkillCategory
-        basic/domain/user/capability 검색 계층.
+        start/runtime/engines/screens/finance/visuals/basic/user/capability 검색 계층.
 
     Returns
     -------
     SkillSpec
         id : str — skill 식별자
-        category : str — basic/domain/user/capability 검색 계층
+        category : str — 검색/문서 렌더링 카테고리
         capabilityRefs : list[str] — 참조 capability id 목록
+        runtimeCompatibility : dict — server/localPython/pyodide/webAi/mcp 지원 상태
         requiredEvidence : list[str] — 필요한 evidence 이름 목록
 
     Raises
@@ -80,16 +91,23 @@ class SkillSpec:
     kind: SkillKind = "curated"
     scope: SkillScope = "builtin"
     status: SkillStatus = "unverified"
-    category: SkillCategory = "domain"
+    category: SkillCategory = "finance"
+    inputs: list[str] = field(default_factory=list)
+    outputs: list[str] = field(default_factory=list)
     requiredInputs: list[str] = field(default_factory=list)
     capabilityRefs: list[str] = field(default_factory=list)
+    datasetRefs: list[str] = field(default_factory=list)
     toolRefs: list[str] = field(default_factory=list)
     knowledgeRefs: list[str] = field(default_factory=list)
+    visualRefs: list[str] = field(default_factory=list)
     procedure: list[str] = field(default_factory=list)
     requiredEvidence: list[str] = field(default_factory=list)
     expectedOutputs: list[str] = field(default_factory=list)
     visualGuidance: list[str] = field(default_factory=list)
     runtimeCompatibility: dict[str, Any] = field(default_factory=dict)
+    pyodide: dict[str, Any] = field(default_factory=dict)
+    docs: dict[str, Any] = field(default_factory=dict)
+    quality: dict[str, Any] = field(default_factory=dict)
     failureModes: list[str] = field(default_factory=list)
     forbidden: list[str] = field(default_factory=list)
     examples: list[str] = field(default_factory=list)

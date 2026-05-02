@@ -71,6 +71,7 @@ class Gather:
         - 시장 지원: KR (Naver/ECOS), US (Yahoo/FRED/FMP)
 
     Guide:
+        - AI 역할: AI는 Gather를 외부 데이터 수집 실행 엔진으로 보고 축별 수집 가능성, 시장, 캐시/네트워크 한계를 먼저 확인한다.
         - "주가 보여줘" -> g.price("005930")
         - "현재가 알려줘" -> g.price("005930", snapshot=True)
         - "외국인 매매 동향" -> g.flow("005930")

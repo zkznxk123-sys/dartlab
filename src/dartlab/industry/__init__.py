@@ -67,7 +67,11 @@ _DATA_DIR = Path(__file__).parent
 
 
 class Industry:
-    """산업 매퍼엔진 진입점."""
+    """산업 매퍼엔진 진입점.
+
+    Guide:
+        AI 역할: AI는 industry를 섹터/밸류체인 맥락 엔진으로 보고 기업 지표와 산업 driver를 분리해 연결한다.
+    """
 
     def __call__(
         self,
@@ -108,6 +112,12 @@ class Industry:
                 공정 : str — 공정명
                 매출합계 : float — 공정별 매출 합산 (원)
                 영업이익합계 : float — 공정별 영업이익 합산 (원)
+
+        Guide
+        -----
+        AI 역할: AI는 industry를 섹터/밸류체인 맥락 엔진으로 보고 기업 지표와 산업 driver를 분리해 연결한다.
+        When: 개별 기업 지표를 산업 공정, 밸류체인, peer 맥락으로 해석할 때.
+        How: industry() 로 산업 목록 확인 → industry(industryId) 로 공정별 기업 위치 확인 → analysis/scan 근거와 연결.
         """
         if industryId is None:
             return self._guide()

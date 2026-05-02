@@ -1,4 +1,10 @@
-"""Deterministic verification for Ask Workbench answer release."""
+"""Deterministic verification for Ask Workbench answer release.
+
+Hardcoding rule: verifier code must not contain question-, company-, market-,
+dataset-, engine-, or skill-specific gates.  It may only check general release
+contracts such as supported numbers, dates, tables, visuals, execution success,
+and disclosed limits.
+"""
 
 from __future__ import annotations
 
@@ -10,7 +16,9 @@ from .contracts import AnswerDraft, Ref, VerificationResult, WorkbenchTask
 _DATE_LIKE = re.compile(r"\b20\d{2}[-./]?\d{2}[-./]?\d{2}\b|\b20\d{6}\b")
 _NUMBER_LIKE = re.compile(r"(?<![A-Za-z])[-+]?\d+(?:,\d{3})*(?:\.\d+)?%?")
 _PERCENT_LIKE = re.compile(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?%")
-_EXECUTION_SUCCESS_LIKE = re.compile(r"(실행|계산|조회|분석|수집).{0,12}(성공|완료|했다|했습니다)|successfully|succeeded", re.IGNORECASE)
+_EXECUTION_SUCCESS_LIKE = re.compile(
+    r"(실행|계산|조회|분석|수집).{0,12}(성공|완료|했다|했습니다)|successfully|succeeded", re.IGNORECASE
+)
 
 
 def verify_answer(task: WorkbenchTask, refs: list[Ref], draft: AnswerDraft) -> VerificationResult:
@@ -51,7 +59,8 @@ def verify_answer(task: WorkbenchTask, refs: list[Ref], draft: AnswerDraft) -> V
     Notes
     -----
     질문 단어 기반 실행 요구는 금지한다. 숫자를 말하면 숫자 근거를,
-    날짜를 말하면 날짜 근거를 요구한다.
+    날짜를 말하면 날짜 근거를 요구한다. 검증기는 질문 intent 를 맞히거나
+    특정 엔진/시장/종목을 판별하지 않는다. 공통 release 계약만 검사한다.
 
     Guide
     -----
@@ -71,25 +80,42 @@ def verify_answer(task: WorkbenchTask, refs: list[Ref], draft: AnswerDraft) -> V
     successful_executions = [ref for ref in executions if ref.payload.get("ok")]
 
     if _looks_like_tool_transcript(draft.answer):
-        issues.append({"code": "tool_transcript_released", "message": "tool call transcript is not a user-facing answer"})
+        issues.append(
+            {"code": "tool_transcript_released", "message": "tool call transcript is not a user-facing answer"}
+        )
     else:
         passed.append("no_tool_transcript_leak")
 
     if _claims_execution_success(draft.answer):
         if not successful_executions:
-            issues.append({"code": "unsupported_execution_success", "message": "execution success claim needs a successful execution ref"})
+            issues.append(
+                {
+                    "code": "unsupported_execution_success",
+                    "message": "execution success claim needs a successful execution ref",
+                }
+            )
         else:
             passed.append("execution_success_supported")
     else:
         passed.append("no_execution_success_claim")
 
     if failed_executions and not successful_executions and _hides_failed_execution(draft.answer, draft.limits):
-        issues.append({"code": "failed_execution_hidden", "message": "failed execution exists but answer does not disclose the limitation"})
+        issues.append(
+            {
+                "code": "failed_execution_hidden",
+                "message": "failed execution exists but answer does not disclose the limitation",
+            }
+        )
     else:
         passed.append("failed_execution_not_hidden")
 
     if _claims_dataset_unavailable(draft.answer) and _has_available_dataset_ref(refs):
-        issues.append({"code": "dataset_availability_conflict", "message": "answer claims datasets are unavailable while dataset refs exist"})
+        issues.append(
+            {
+                "code": "dataset_availability_conflict",
+                "message": "answer claims datasets are unavailable while dataset refs exist",
+            }
+        )
     else:
         passed.append("dataset_availability_consistent")
 
@@ -100,7 +126,9 @@ def verify_answer(task: WorkbenchTask, refs: list[Ref], draft: AnswerDraft) -> V
         elif any(_is_single_value_visual(ref) for ref in visuals):
             issues.append({"code": "single_value_visual", "message": "single-value chart is not valid visual evidence"})
         elif any(_unsupported_visual(ref, refs) for ref in visuals):
-            issues.append({"code": "unsupported_visual", "message": "visual must be linked to a table or execution ref"})
+            issues.append(
+                {"code": "unsupported_visual", "message": "visual must be linked to a table or execution ref"}
+            )
         else:
             passed.append("visual_valid")
 
@@ -117,13 +145,20 @@ def verify_answer(task: WorkbenchTask, refs: list[Ref], draft: AnswerDraft) -> V
         passed.append("table_dates_consistent")
 
     if _has_material_numbers(draft.answer) and not _numeric_claims_supported(refs, draft):
-        issues.append({"code": "unsupported_numeric_claim", "message": "numeric prose needs matching value/table evidence"})
+        issues.append(
+            {"code": "unsupported_numeric_claim", "message": "numeric prose needs matching value/table evidence"}
+        )
     else:
         passed.append("numeric_claims_supported")
 
     outlier = _implausible_percentage_claim(draft.answer, draft.limits)
     if outlier:
-        issues.append({"code": "implausible_percentage_claim", "message": f"percentage claim is implausibly large without outlier disclosure: {outlier}"})
+        issues.append(
+            {
+                "code": "implausible_percentage_claim",
+                "message": f"percentage claim is implausibly large without outlier disclosure: {outlier}",
+            }
+        )
     else:
         passed.append("percentage_outliers_checked")
 
@@ -142,7 +177,7 @@ def verification_to_ref(result: VerificationResult) -> Ref:
 
 
 def _has_material_numbers(answer: str) -> bool:
-    without_dates = _DATE_LIKE.sub("", answer)
+    without_dates = _DATE_LIKE.sub("", _strip_non_claim_numbers(answer))
     tokens = [m.group(0) for m in _NUMBER_LIKE.finditer(without_dates)]
     return any(len(token.strip("%").replace(",", "").replace(".", "")) >= 2 for token in tokens)
 
@@ -166,7 +201,7 @@ def _looks_like_tool_transcript(answer: str) -> bool:
         "tool_calls",
         "args={",
         "call_id=",
-        "\"code\":",
+        '"code":',
         "'code':",
     )
     return any(marker in text for marker in markers)
@@ -201,7 +236,9 @@ def _numeric_claims_supported(refs: list[Ref], draft: AnswerDraft) -> bool:
         claim_refs = claim.get("refIds") or claim.get("refs") or claim.get("evidenceRefs") or []
         scoped = [ref for ref in refs if ref.id in set(claim_refs)] if claim_refs else evidence_scope
         scoped_values = _numeric_values_from_refs(scoped)
-        if not _number_in_values(numeric, scoped_values) and not _number_in_values(numeric, _numeric_values_from_refs(_fallback_numeric_refs(refs, draft))):
+        if not _number_in_values(numeric, scoped_values) and not _number_in_values(
+            numeric, _numeric_values_from_refs(_fallback_numeric_refs(refs, draft))
+        ):
             return False
     return True
 
@@ -230,7 +267,10 @@ def _numbers_from_answer(answer: str) -> list[float]:
 
 
 def _strip_non_claim_numbers(answer: str) -> str:
-    text = re.sub(r"(?im)^(\|\s*)\d+(\s*\|)", r"\1rank\2", answer)
+    text = re.sub(r"```.*?```", " codeblock ", answer, flags=re.DOTALL)
+    text = re.sub(r"`[^`\n]+`", " inlinecode ", text)
+    text = re.sub(r"(?m)^\s*\d+[\.)]\s+", " item ", text)
+    text = re.sub(r"(?im)^(\|\s*)\d+(\s*\|)", r"\1rank\2", text)
     text = re.sub(r"(?m)(\|\s*)\d{5,6}(\s*\|)", r"\1identifier\2", text)
     text = re.sub(r"(?i)([×x*]\s*)100\b", r"\1formula", text)
     text = re.sub(r"(?i)\b[a-z_][a-z0-9_]*[a-z_][a-z0-9_]*\b", "identifier", text)
@@ -364,7 +404,10 @@ def _number_in_values(number: float, values: list[float]) -> bool:
 
 def _has_visual_language(answer: str) -> bool:
     text = answer.lower()
-    if any(marker in text for marker in ("차트는 아직", "차트 없음", "차트를 생성하지", "visual not", "no visual", "no chart")):
+    if any(
+        marker in text
+        for marker in ("차트는 아직", "차트 없음", "차트를 생성하지", "visual not", "no visual", "no chart")
+    ):
         return False
     capability_markers = (
         "차트도 만들 수",
@@ -514,7 +557,9 @@ def _is_end_date_key(key: str) -> bool:
     lowered = key.lower()
     if any(token in lowered for token in ("start", "begin", "시작")):
         return False
-    return any(token in lowered for token in ("end", "asof", "as_of", "latest", "observed", "종료", "기준일", "관측일", "최신"))
+    return any(
+        token in lowered for token in ("end", "asof", "as_of", "latest", "observed", "종료", "기준일", "관측일", "최신")
+    )
 
 
 def _normalize_date_value(value: Any) -> str | None:
@@ -532,4 +577,7 @@ def _normalize_date_text(value: str) -> str:
 
 def _metric_is_ratio_like(metric: str) -> bool:
     lowered = metric.lower()
-    return any(token in lowered for token in ("%", "rate", "ratio", "return", "ret", "fluc", "change", "pct", "수익률", "등락률", "비율"))
+    return any(
+        token in lowered
+        for token in ("%", "rate", "ratio", "return", "ret", "fluc", "change", "pct", "수익률", "등락률", "비율")
+    )

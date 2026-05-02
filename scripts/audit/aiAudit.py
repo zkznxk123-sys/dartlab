@@ -25,7 +25,7 @@ from typing import Any
 
 logging.getLogger().setLevel(logging.ERROR)
 
-# 표준 질문 세트 (ops/ai.md §10 — dartlab 사상 전체 커버)
+# 표준 질문 세트 (ops/skills.md — skills 기반 AI/MCP 경로 커버)
 # (stockCode | None, corpName, question_or_axis)
 _STANDARD_SET = [
     # KR 종목

@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import json
 import builtins
+import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -28,14 +29,182 @@ _BASIC_ENGINE_CAPABILITY_SELECTORS: dict[str, dict[str, Any]] = {
     "company": {"exact": ("Company",), "prefix": ("Company.",), "title": "Company 기업 분석 엔진"},
     "gather": {"exact": ("gather",), "prefix": ("gather.",), "title": "gather 데이터 수집 엔진"},
     "scan": {"exact": ("scan",), "prefix": ("scan.",), "title": "scan 횡단 분석 엔진"},
-    "analysis": {"exact": ("analysis", "Company.analysis"), "prefix": ("analysis.",), "title": "analysis 재무 분석 엔진"},
+    "analysis": {
+        "exact": ("analysis", "Company.analysis"),
+        "prefix": ("analysis.",),
+        "title": "analysis 재무 분석 엔진",
+    },
     "quant": {"exact": ("quant", "Company.quant"), "prefix": ("quant.",), "title": "quant 가격·팩터 분석 엔진"},
     "macro": {"exact": ("macro", "Company.macro"), "prefix": ("macro.",), "title": "macro 거시 분석 엔진"},
-    "story": {"exact": ("Story", "Company.story"), "prefix": ("Story.", "Company.story"), "title": "story 보고서 조합 엔진"},
+    "story": {
+        "exact": ("Story", "Company.story"),
+        "prefix": ("Story.", "Company.story"),
+        "title": "story 보고서 조합 엔진",
+    },
     "credit": {"exact": ("credit", "Company.credit"), "prefix": ("credit.",), "title": "credit 신용 분석 엔진"},
-    "industry": {"exact": ("industry", "Company.industry"), "prefix": ("industry.", "scan.industry"), "title": "industry 산업 분석 엔진"},
+    "industry": {
+        "exact": ("industry", "Company.industry"),
+        "prefix": ("industry.", "scan.industry"),
+        "title": "industry 산업 분석 엔진",
+    },
     "viz": {"exact": ("ChartResult",), "prefix": ("chart.", "viz.", "visual."), "title": "viz 시각 설명 엔진"},
 }
+_INTENT_SKILL_BOOSTS: tuple[dict[str, Any], ...] = (
+    {
+        "skillIds": ("start.useSkillsCatalog",),
+        "terms": (
+            "skills",
+            "skill",
+            "스킬",
+            "스킬스",
+            "catalog",
+            "카탈로그",
+            "어떻게 써",
+            "사용법",
+            "뭐 할 수",
+            "할 수 있어",
+            "할수",
+            "기능",
+            "뭘 분석",
+        ),
+        "boost": 16.0,
+    },
+    {
+        "skillIds": ("runtime.skillDevelopmentLoop",),
+        "terms": (
+            "스킬 개발",
+            "skill 개발",
+            "엔진 조합",
+            "엔진에 없는",
+            "정의되지 않은",
+            "응용",
+            "조합",
+            "새 분석",
+            "audit 반영",
+            "독스트링 보강",
+        ),
+        "boost": 15.0,
+    },
+    {
+        "skillIds": ("runtime.workbenchEvidenceFlow",),
+        "terms": ("근거", "검산", "마무리", "evidence", "ref", "refs", "finalize", "실행하고", "답변"),
+        "boost": 15.0,
+    },
+    {
+        "skillIds": ("runtime.dataAvailabilityCheck",),
+        "terms": ("데이터가", "데이터", "dataset", "있는지", "가용", "최신", "기준일", "확인"),
+        "boost": 14.0,
+    },
+    {
+        "skillIds": ("companyResearchStarter",),
+        "terms": ("종목 분석", "기업 분석", "분석 시작", "첫 단계", "시작", "company research"),
+        "boost": 13.0,
+    },
+    {
+        "skillIds": ("engines.companyRouterUsage",),
+        "terms": (
+            "company 엔진",
+            "company 라우터",
+            "company 사용",
+            "종목 라우터",
+            "하위 엔진 선택",
+            "엔진 선택",
+            "대상 식별",
+        ),
+        "boost": 13.0,
+    },
+    {
+        "skillIds": ("engines.analysisUsage",),
+        "terms": (
+            "analysis 엔진",
+            "analysis 사용",
+            "재무 인과",
+            "재무 엔진",
+            "분석 엔진",
+            "수익성 엔진",
+            "가치평가 엔진",
+        ),
+        "boost": 13.0,
+    },
+    {
+        "skillIds": ("engines.gatherUsage",),
+        "terms": ("gather 엔진", "gather 사용", "수집 엔진", "주가 수집", "뉴스 수집", "금리 원자료"),
+        "boost": 13.0,
+    },
+    {
+        "skillIds": ("engines.quantUsage",),
+        "terms": ("quant 엔진", "quant 사용", "가격 엔진", "모멘텀 엔진", "베타", "benchmark", "벤치마크"),
+        "boost": 13.0,
+    },
+    {
+        "skillIds": ("engines.macroUsage",),
+        "terms": ("macro 엔진", "macro 사용", "거시 엔진", "매크로 엔진", "top-down", "탑다운"),
+        "boost": 13.0,
+    },
+    {
+        "skillIds": ("engines.creditUsage",),
+        "terms": ("credit 엔진", "credit 사용", "신용 엔진", "상환능력 엔진", "부도위험 엔진"),
+        "boost": 13.0,
+    },
+    {
+        "skillIds": ("engines.storyUsage",),
+        "terms": ("story 엔진", "story 사용", "보고서 엔진", "보고서 조합", "리포트 조합", "report type"),
+        "boost": 13.0,
+    },
+    {
+        "skillIds": ("engines.industryUsage",),
+        "terms": ("industry 엔진", "industry 사용", "산업 엔진", "밸류체인", "공정 위치", "peer 맥락"),
+        "boost": 13.0,
+    },
+    {
+        "skillIds": ("engines.visualUsage",),
+        "terms": ("viz 엔진", "visual 엔진", "시각화 엔진", "chartresult", "표 기반 시각화", "차트 엔진"),
+        "boost": 13.0,
+    },
+    {
+        "skillIds": ("visuals.tableBackedChart",),
+        "terms": ("차트", "시각화", "그래프", "랭킹 차트", "비교 차트", "chart", "visual"),
+        "boost": 14.0,
+    },
+    {
+        "skillIds": ("usEdgarCompanyReview",),
+        "terms": ("미국", "미장", "edgar", "filings", "filing", "10-k", "10-q", "ticker", "티커"),
+        "boost": 13.0,
+    },
+    {
+        "skillIds": ("macroMarketReview",),
+        "terms": ("금리", "환율", "매크로", "거시", "경기", "유동성", "macro", "rates", "fx"),
+        "boost": 12.0,
+    },
+    {
+        "skillIds": ("creditRiskReview",),
+        "terms": ("신용", "위험", "안정성", "부채", "이자보상", "credit", "risk"),
+        "boost": 11.0,
+    },
+    {
+        "skillIds": ("profitabilityReview",),
+        "terms": ("수익성", "이익률", "마진", "영업이익", "profitability", "margin"),
+        "boost": 10.0,
+    },
+    {
+        "skillIds": ("cashflowReview",),
+        "terms": ("현금흐름", "영업현금", "fcf", "cashflow", "cash flow"),
+        "boost": 10.0,
+    },
+    {
+        "skillIds": ("dividendCapitalReturnReview",),
+        "terms": ("배당", "주주환원", "자사주", "dividend", "buyback"),
+        "boost": 10.0,
+    },
+    {
+        "skillIds": ("governanceAuditReview",),
+        "terms": ("지배구조", "감사", "내부통제", "분식", "governance", "audit"),
+        "boost": 10.0,
+    },
+)
+_TICKER_QUERY_RE = re.compile(r"\b[A-Z]{1,5}\b")
+
+_MANUAL_SKILL_CATEGORIES = {"start", "runtime", "engines", "screens", "finance", "visuals", "user"}
 
 
 def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
@@ -44,8 +213,8 @@ def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
     Description
     -----------
     DartLab 공용 분석 절차 명세를 로드한다. basic 엔진 skill 과 capability
-    view 는 generated output 이고, builtin 수기 skill 은 `specs/domain/`만
-    읽는다. user skill 은 project-local `.dartlab/skills`에서 읽는다.
+    view 는 generated output 이고, builtin 수기 skill 은 `specs/**` Markdown
+    source 를 읽는다. user skill 은 project-local `.dartlab/skills`에서 읽는다.
 
     Parameters
     ----------
@@ -76,7 +245,7 @@ def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
 
     Guide
     -----
-    사용자 확장은 `.dartlab/skills/*.yaml`에 두되 API details 를 중복하지 않는다.
+    사용자 확장은 `.dartlab/skills/**/*.md`에 두되 API details 를 중복하지 않는다.
 
     See Also
     --------
@@ -111,10 +280,12 @@ def searchSkills(query: str, *, limit: int = 8, includeUser: bool = True) -> lis
     terms = _terms(query)
     matches: list[SkillMatch] = []
     for spec in listSkills(includeUser=includeUser):
-        score, reasons = _score(spec, terms)
+        score, reasons = _score(spec, terms, query=query)
         if score > 0 or not terms:
             matches.append(SkillMatch(skill=spec, score=score, reasons=reasons))
-    return sorted(matches, key=lambda item: (item.score, item.skill.status == "official", item.skill.id), reverse=True)[:limit]
+    return sorted(matches, key=lambda item: (item.score, item.skill.status == "official", item.skill.id), reverse=True)[
+        :limit
+    ]
 
 
 def describeSkill(skillId: str, *, includeUser: bool = True) -> dict[str, Any]:
@@ -123,7 +294,9 @@ def describeSkill(skillId: str, *, includeUser: bool = True) -> dict[str, Any]:
     return getSkill(skillId, includeUser=includeUser).to_dict()
 
 
-def checkEvidence(skillId: str, refs: list[dict[str, Any]] | list[Any], *, includeUser: bool = True) -> EvidenceCheckResult:
+def checkEvidence(
+    skillId: str, refs: list[dict[str, Any]] | list[Any], *, includeUser: bool = True
+) -> EvidenceCheckResult:
     """Skill evidence 충족도 확인.
 
     Notes
@@ -158,26 +331,30 @@ def lintSkill(spec: SkillSpec) -> None:
         if any(marker in lowered for marker in _FORBIDDEN_TEMPLATE_MARKERS):
             raise ValueError(f"skill {spec.id} contains a final-answer template marker")
     _validate_runtime_compatibility(spec)
+    _validate_status_evidence(spec)
+    if spec.kind == "curated" and "pyodide" not in spec.runtimeCompatibility:
+        raise ValueError(f"curated skill {spec.id} must declare runtimeCompatibility.pyodide")
     _validate_capability_refs(spec)
 
 
 def _builtin_spec_paths() -> list[Path]:
     root = Path(__file__).resolve().parent / "specs"
-    domain = root / "domain"
-    if not domain.exists():
+    if not root.exists():
         return []
-    return sorted([*domain.rglob("*.yaml"), *domain.rglob("*.yml"), *domain.rglob("*.json")])
+    return sorted([*root.rglob("*.md"), *root.rglob("*.yaml"), *root.rglob("*.yml"), *root.rglob("*.json")])
 
 
 def _user_spec_paths() -> list[Path]:
     root = _repo_root() / ".dartlab" / "skills"
     if not root.exists():
         return []
-    return sorted([*root.glob("*.yaml"), *root.glob("*.yml"), *root.glob("*.json")])
+    return sorted([*root.rglob("*.md"), *root.rglob("*.yaml"), *root.rglob("*.yml"), *root.rglob("*.json")])
 
 
 def _load_spec(path: Path, *, default_scope: str, force_user: bool = False) -> SkillSpec:
     data = _read_mapping(path)
+    if _contains_forbidden_api_schema(data):
+        raise ValueError(f"skill {data.get('id') or path} duplicates API schema in source")
     if force_user:
         data["kind"] = "user"
         data["scope"] = "user"
@@ -186,7 +363,7 @@ def _load_spec(path: Path, *, default_scope: str, force_user: bool = False) -> S
     else:
         data.setdefault("kind", "curated")
         data.setdefault("scope", default_scope)
-        data.setdefault("category", "domain")
+        data.setdefault("category", _category_from_path(path))
     data.setdefault("source", {})
     data["source"].setdefault("path", str(path))
     return SkillSpec(**_normalize_spec_data(data))
@@ -194,7 +371,10 @@ def _load_spec(path: Path, *, default_scope: str, force_user: bool = False) -> S
 
 def _read_mapping(path: Path) -> dict[str, Any]:
     text = path.read_text(encoding="utf-8")
-    if path.suffix.lower() == ".json":
+    suffix = path.suffix.lower()
+    if suffix == ".md":
+        data = _read_markdown_skill(text, path)
+    elif suffix == ".json":
         data = json.loads(text)
     else:
         try:
@@ -208,13 +388,57 @@ def _read_mapping(path: Path) -> dict[str, Any]:
     return data
 
 
+def _read_markdown_skill(text: str, path: Path) -> dict[str, Any]:
+    text = text.lstrip()
+    if not text.startswith("---"):
+        raise ValueError(f"markdown skill requires frontmatter: {path}")
+    parts = text.split("---", 2)
+    if len(parts) < 3:
+        raise ValueError(f"markdown skill frontmatter is not closed: {path}")
+    raw_meta = parts[1].strip()
+    body = parts[2].strip()
+    try:
+        import yaml
+    except ImportError:
+        data = _read_simple_yaml(raw_meta)
+    else:
+        data = yaml.safe_load(raw_meta)
+    if not isinstance(data, dict):
+        raise ValueError(f"markdown skill frontmatter must be a mapping: {path}")
+    data.setdefault("source", {})
+    data["source"]["format"] = "markdown"
+    data["source"]["body"] = body
+    if body and not data.get("procedure"):
+        data["procedure"] = _procedure_from_markdown_body(body)
+    if body and not data.get("purpose"):
+        data["purpose"] = _short_text(body, limit=220)
+    return data
+
+
+def _procedure_from_markdown_body(body: str) -> list[str]:
+    items: list[str] = []
+    for raw in body.splitlines():
+        line = raw.strip()
+        if line.startswith("- "):
+            item = line[2:].strip()
+            if item:
+                items.append(item)
+        if len(items) >= 12:
+            break
+    return items
+
+
 def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
     list_fields = {
+        "inputs",
+        "outputs",
         "whenToUse",
         "requiredInputs",
         "capabilityRefs",
+        "datasetRefs",
         "toolRefs",
         "knowledgeRefs",
+        "visualRefs",
         "procedure",
         "requiredEvidence",
         "expectedOutputs",
@@ -232,7 +456,29 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
             data[field] = [value]
         else:
             data[field] = builtins.list(value)
+    for field in ("runtimeCompatibility", "pyodide", "docs", "quality", "source"):
+        value = data.get(field)
+        if value is None:
+            data[field] = {}
+        elif not isinstance(value, dict):
+            raise ValueError(f"skill field must be a mapping: {field}")
+    if data.get("pyodide") and not data["runtimeCompatibility"].get("pyodide"):
+        data["runtimeCompatibility"]["pyodide"] = data["pyodide"]
     return data
+
+
+def _category_from_path(path: Path) -> str:
+    specs = Path(__file__).resolve().parent / "specs"
+    try:
+        relative = path.relative_to(specs)
+    except ValueError:
+        return "finance"
+    first = relative.parts[0] if relative.parts else "finance"
+    if first == "domain":
+        return "finance"
+    if first in _MANUAL_SKILL_CATEGORIES:
+        return first
+    return "finance"
 
 
 def _validate_unique_ids(specs: list[SkillSpec]) -> None:
@@ -252,6 +498,25 @@ def _validate_capability_refs(spec: SkillSpec) -> None:
         raise ValueError(f"skill {spec.id} references unknown capabilities: {', '.join(missing)}")
 
 
+def _extract_ai_role(capabilities: dict[str, Any], capability_refs: list[str]) -> str:
+    """Capability Guide의 `AI 역할:` 줄에서 generated basic skill 역할을 만든다."""
+    pattern = re.compile(r"^(?:AI\s*role|AI\s*역할)\s*:\s*(.+)$", re.IGNORECASE)
+    for ref in capability_refs:
+        entry = capabilities.get(ref)
+        if not isinstance(entry, dict):
+            continue
+        for field in ("guide", "aicontext"):
+            value = entry.get(field)
+            if not isinstance(value, str):
+                continue
+            for raw in value.splitlines():
+                line = raw.strip()
+                match = pattern.match(line)
+                if match:
+                    return match.group(1).strip()
+    return "AI는 이 엔진을 capabilityRefs와 requiredEvidence를 찾는 절차 지도처럼 사용한다."
+
+
 def _generated_basic_engine_skill_specs() -> list[SkillSpec]:
     try:
         from dartlab.core._generated import CAPABILITIES
@@ -264,7 +529,10 @@ def _generated_basic_engine_skill_specs() -> list[SkillSpec]:
         capability_refs = _engine_capability_refs(CAPABILITIES, selector)
         if not capability_refs:
             continue
-        snippets = [_capability_snippet(CAPABILITIES[ref]) for ref in capability_refs if isinstance(CAPABILITIES.get(ref), dict)]
+        snippets = [
+            _capability_snippet(CAPABILITIES[ref]) for ref in capability_refs if isinstance(CAPABILITIES.get(ref), dict)
+        ]
+        ai_role = _extract_ai_role(CAPABILITIES, capability_refs)
         evidence = _aggregate_capability_list(CAPABILITIES, capability_refs, "requiredEvidence", limit=8)
         failure_modes = _aggregate_capability_list(CAPABILITIES, capability_refs, "failureModes", limit=8)
         examples = _aggregate_examples(CAPABILITIES, capability_refs, limit=5)
@@ -277,23 +545,44 @@ def _generated_basic_engine_skill_specs() -> list[SkillSpec]:
                 status="observed",
                 category="basic",
                 purpose=f"DartLab `{engine}` 엔진의 역할과 capability 묶음을 찾기 위한 generated basic engine skill.",
-                whenToUse=[item for item in snippets[:8] if item],
+                whenToUse=[ai_role, *[item for item in snippets[:7] if item]],
                 capabilityRefs=capability_refs,
                 toolRefs=[],
                 procedure=[
+                    f"AI 역할: {ai_role}",
                     "이 skill은 엔진 능력 지도다. API 상세는 capabilityRefs의 docstring/generated capability에서 확인한다.",
                     "필요 입력, 반환 형태, 단위, 실제 반환 키를 이 skill에 중복하지 않는다.",
                     "분석 중 생성한 숫자·날짜·표·한계는 ref로 남겨 최종 답변 검산에 연결한다.",
                 ],
                 requiredEvidence=evidence,
-                expectedOutputs=["engine capability map", "capability-backed evidence refs"],
+                expectedOutputs=["engine AI role", "engine capability map", "capability-backed evidence refs"],
+                runtimeCompatibility={
+                    "server": {"status": "supported"},
+                    "localPython": {"status": "supported"},
+                    "mcp": {"status": "supported"},
+                    "webAi": {
+                        "status": "limited",
+                        "notes": ["실제 실행 가능 여부는 연결된 capability와 dataset skill을 함께 확인한다."],
+                    },
+                    "pyodide": {
+                        "status": "unknown",
+                        "notes": [
+                            "엔진 지도 자체는 조회 가능하다. 실행 가능 여부는 조합되는 skill과 capability별 runtimeCompatibility를 따른다."
+                        ],
+                    },
+                },
                 failureModes=failure_modes,
                 forbidden=[
                     "API parameters/returns/unit/actual return keys를 SkillSpec에 중복하지 않는다.",
                     "workbench tool 사용법을 basic engine skill에 넣지 않는다.",
                 ],
                 examples=examples,
-                source={"type": "generated_basic_engine", "engine": engine, "capabilityRefs": capability_refs},
+                source={
+                    "type": "generated_basic_engine",
+                    "engine": engine,
+                    "aiRole": ai_role,
+                    "capabilityRefs": capability_refs,
+                },
             )
         )
     return specs
@@ -431,10 +720,24 @@ def _validate_runtime_compatibility(spec: SkillSpec) -> None:
             raise ValueError(f"skill {spec.id} runtimeCompatibility.{runtime}.status is invalid: {status}")
 
 
+def _validate_status_evidence(spec: SkillSpec) -> None:
+    if spec.status == "auditP":
+        count = int(spec.quality.get("serverAuditPCount") or 0)
+        if count < 2 or not spec.verifiedBy:
+            raise ValueError(f"skill {spec.id} auditP requires two server audit P records and verifiedBy")
+    if spec.status == "official":
+        if not spec.verifiedBy:
+            raise ValueError(f"skill {spec.id} official requires verifiedBy")
+        if not spec.quality.get("serverAuditP") or not spec.quality.get("userConfirmed"):
+            raise ValueError(f"skill {spec.id} official requires serverAuditP and userConfirmed quality evidence")
+
+
 def _generated_runtime_compatibility(capability_ref: str) -> dict[str, Any]:
     return {
         "server": {"status": "supported"},
+        "localPython": {"status": "supported"},
         "mcp": {"status": "supported"},
+        "webAi": {"status": "limited", "notes": ["웹 AI는 Pyodide/HF snapshot 가능 범위에 따른다."]},
         "pyodide": {
             "status": "unknown",
             "notes": [
@@ -563,22 +866,29 @@ def _skip_yaml_blank(lines: list[str], start: int) -> int:
 
 def _contains_forbidden_api_schema(value: Any) -> bool:
     if isinstance(value, dict):
-        return any(key in _FORBIDDEN_DUPLICATE_KEYS for key in value) or any(_contains_forbidden_api_schema(v) for v in value.values())
+        return any(key in _FORBIDDEN_DUPLICATE_KEYS for key in value) or any(
+            _contains_forbidden_api_schema(v) for v in value.values()
+        )
     if isinstance(value, list):
         return any(_contains_forbidden_api_schema(item) for item in value)
     return False
 
 
-def _score(spec: SkillSpec, terms: list[str]) -> tuple[float, list[str]]:
+def _score(spec: SkillSpec, terms: list[str], *, query: str = "") -> tuple[float, list[str]]:
     haystacks = {
         "id": spec.id,
         "title": spec.title,
         "category": spec.category,
         "purpose": spec.purpose,
         "whenToUse": " ".join(spec.whenToUse),
+        "inputs": " ".join(spec.inputs),
+        "outputs": " ".join(spec.outputs),
         "capabilityRefs": " ".join(spec.capabilityRefs),
+        "datasetRefs": " ".join(spec.datasetRefs),
+        "visualRefs": " ".join(spec.visualRefs),
         "knowledgeRefs": " ".join(spec.knowledgeRefs),
         "runtimeCompatibility": json.dumps(spec.runtimeCompatibility, ensure_ascii=False),
+        "docs": json.dumps(spec.docs, ensure_ascii=False),
     }
     score = 0.0
     reasons: list[str] = []
@@ -586,14 +896,34 @@ def _score(spec: SkillSpec, terms: list[str]) -> tuple[float, list[str]]:
         for name, hay in haystacks.items():
             if term in hay.lower():
                 weight = 2.0 if name in {"id", "title", "whenToUse"} else 1.0
-                if spec.category == "basic":
-                    weight += 0.5
-                elif spec.category == "domain":
-                    weight += 0.25
+                if spec.category in {"screens", "finance", "engines", "runtime", "start", "visuals"}:
+                    weight += 0.75
                 score += weight
                 reasons.append(f"{name}:{term}")
+    boost, boost_reasons = _intent_boost(spec, query)
+    if boost:
+        score += boost
+        reasons.extend(boost_reasons)
     if spec.status in {"auditP", "official"}:
         score += 0.5
+    return score, reasons
+
+
+def _intent_boost(spec: SkillSpec, query: str) -> tuple[float, list[str]]:
+    query_text = query.lower()
+    score = 0.0
+    reasons: list[str] = []
+    for entry in _INTENT_SKILL_BOOSTS:
+        if spec.id not in entry["skillIds"]:
+            continue
+        matched = [term for term in entry["terms"] if term.lower() in query_text]
+        if not matched:
+            continue
+        score += float(entry["boost"])
+        reasons.append(f"intent:{matched[0]}")
+    if spec.id == "usEdgarCompanyReview" and _TICKER_QUERY_RE.search(query):
+        score += 8.0
+        reasons.append("intent:ticker")
     return score, reasons
 
 

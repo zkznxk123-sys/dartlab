@@ -4,6 +4,11 @@ The kernel is not a collection of financial answer scripts.  It only owns the
 request session, workbench action dispatch, refs, verification, and answer
 release. Financial analysis must be performed through provider-selected
 workbench actions such as `inspect_dataset` and `run_python`.
+
+Hardcoding rule: kernel code must not contain question-, company-, market-,
+dataset-, engine-, or skill-specific runners or answer branches.  Only shared
+workbench rules are allowed here.  New analysis behavior belongs in public
+docstrings/capabilities, skills, or executable DartLab APIs.
 """
 
 from __future__ import annotations
@@ -84,7 +89,10 @@ def runAsk(question: Any, *args: Any, stream: bool = True, **kwargs: Any) -> Ite
 
     Notes
     -----
-    Kernel 은 질문별 Python 코드나 답변 템플릿을 갖지 않는다.
+    Kernel 은 질문별 Python 코드나 답변 템플릿을 갖지 않는다. 회사·ticker
+    값은 식별 힌트로만 전달하고, 특정 질문/시장/데이터셋 전용 분기를 만들지
+    않는다. 허용되는 것은 ref ledger, tool dispatch, finalize, verification
+    같은 공통 workbench 규칙뿐이다.
 
     Guide
     -----
@@ -102,7 +110,7 @@ def runAsk(question: Any, *args: Any, stream: bool = True, **kwargs: Any) -> Ite
     task = create_task(question_text, kwargs)
     yield session.add_event("task", {"task": task.to_dict()})
 
-    refs = search_reference(question_text, limit=5)
+    refs = search_reference(_reference_query(question_text, kwargs), limit=5)
     for ref in refs:
         session.add_ref(ref)
     yield session.add_event("reference", _reference_event_payload(refs))
@@ -197,11 +205,13 @@ def create_task(question: str, kwargs: dict[str, Any] | None = None) -> Workbenc
     return WorkbenchTask(
         id=new_id("task"),
         question=question,
+        hints=_analysis_hints(kwargs or {}),
     )
 
 
-
-def _run_provider_workbench(session: AskSession, task: WorkbenchTask, provider: WorkbenchProvider) -> Iterable[TraceEvent]:
+def _run_provider_workbench(
+    session: AskSession, task: WorkbenchTask, provider: WorkbenchProvider
+) -> Iterable[TraceEvent]:
     messages = _initial_provider_messages(session, task)
     tools = _provider_tool_specs()
     repair_count = 0
@@ -213,7 +223,8 @@ def _run_provider_workbench(session: AskSession, task: WorkbenchTask, provider: 
                 draft = AnswerDraft(
                     answer=turn.content.strip(),
                     evidence_refs=[ref.id for ref in session.refs],
-                    limits=session.limits + ["provider returned prose without finalize_answer; kernel verified it as a draft"],
+                    limits=session.limits
+                    + ["provider returned prose without finalize_answer; kernel verified it as a draft"],
                 )
                 verification = verify_answer(task, session.refs, draft)
                 if not verification.ok and repair_count < _MAX_REPAIR_ROUNDS:
@@ -245,10 +256,15 @@ def _run_provider_workbench(session: AskSession, task: WorkbenchTask, provider: 
     yield from _force_finalize(session, task, provider, messages)
 
 
-def _execute_workbench_action(session: AskSession, name: str, args: dict[str, Any]) -> tuple[dict[str, Any], list[TraceEvent]]:
+def _execute_workbench_action(
+    session: AskSession, name: str, args: dict[str, Any]
+) -> tuple[dict[str, Any], list[TraceEvent]]:
     events: list[TraceEvent] = []
     if name == "search_reference":
-        refs = search_reference(str(args.get("query") or session.question), limit=int(args.get("limit") or 5))
+        refs = search_reference(
+            _reference_query(str(args.get("query") or session.question), session.kwargs),
+            limit=int(args.get("limit") or 5),
+        )
         for ref in refs:
             session.add_ref(ref)
         events.append(session.add_event("reference", {"action": name, **_reference_event_payload(refs)}))
@@ -263,11 +279,15 @@ def _execute_workbench_action(session: AskSession, name: str, args: dict[str, An
         events.append(session.add_event("reference", {"action": name, "ref": ref.to_dict()}))
         return {"ref": ref.to_dict()}, events
     if name == "inspect_dataset":
-        inspection = inspect_dataset(str(args.get("target") or ""), sample=int(args.get("sample") or 5), columns=args.get("columns"))
+        inspection = inspect_dataset(
+            str(args.get("target") or ""), sample=int(args.get("sample") or 5), columns=args.get("columns")
+        )
         refs = inspection_to_refs(inspection)
         for ref in refs:
             session.add_ref(ref)
-        events.append(session.add_event("inspect", {"action": name, "target": args.get("target"), "result": inspection.to_dict()}))
+        events.append(
+            session.add_event("inspect", {"action": name, "target": args.get("target"), "result": inspection.to_dict()})
+        )
         return {"inspection": inspection.to_dict(), "refs": [ref.to_dict() for ref in refs]}, events
     if name == "run_python":
         execution = run_python(str(args.get("code") or ""), timeout=int(args.get("timeout") or 60))
@@ -277,7 +297,11 @@ def _execute_workbench_action(session: AskSession, name: str, args: dict[str, An
         for derived_ref in derived_refs:
             session.add_ref(derived_ref)
         events.append(session.add_event("execute", {"action": name, "refId": ref.id, "result": execution.to_dict()}))
-        return {"execution": execution.to_dict(), "ref": ref.to_dict(), "derivedRefs": [r.to_dict() for r in derived_refs]}, events
+        return {
+            "execution": execution.to_dict(),
+            "ref": ref.to_dict(),
+            "derivedRefs": [r.to_dict() for r in derived_refs],
+        }, events
     if name == "compile_visual":
         source_ref = str(args.get("source_ref") or args.get("sourceRef") or "")
         source_ref, rows, category, metric = _visual_inputs_from_refs(
@@ -307,15 +331,17 @@ def _initial_provider_messages(session: AskSession, task: WorkbenchTask) -> list
     task_capsule = {
         "kernel": "Ask Workbench Kernel",
         "question": session.question,
+        "hints": task.hints,
         "task": task.to_dict(),
         "basicSkills": _basic_skill_capsule(),
         "rules": [
             "Search references for relevant tools, capabilities, skills, knowledge, and runtime datasets.",
             "When search_reference returns skill refs, use them as reusable procedures: collect their requiredEvidence before strong judgment.",
+            "Treat task.hints/company/stockCode/ticker as target identifiers; include them in search queries before guessing entities.",
             "Use inspect_dataset before making dataset/date claims.",
             "Use run_python when your answer depends on computed DartLab results.",
             "Inside run_python, use Polars (`pl`) for parquet/csv work; `pl` is pre-imported.",
-            "When run_python produces answer evidence, call emit_result(rows=..., values=..., units=..., formulas=..., inputs=..., meta=..., limits=...).",
+            "When run_python produces answer evidence, call the preloaded emit_result(...); never define or overwrite emit_result.",
             "Use compile_visual only for table-backed visuals.",
             "Call finalize_answer only after refs support material claims.",
             "Never say current date when you mean dataset asOf.",
@@ -395,8 +421,39 @@ def _candidate_summary(refs: list[Ref], *, kind: str, limit: int = 5) -> list[di
     return out
 
 
+def _analysis_hints(kwargs: dict[str, Any]) -> dict[str, Any]:
+    allowed = ("company", "stockCode", "stock_code", "ticker", "corpName", "symbol", "view_context")
+    hints: dict[str, Any] = {}
+    for key in allowed:
+        value = kwargs.get(key)
+        if value in (None, "", [], {}):
+            continue
+        if key == "view_context" and isinstance(value, dict):
+            company = value.get("company")
+            if isinstance(company, dict):
+                for nested_key in ("stockCode", "ticker", "corpName", "symbol"):
+                    nested_value = company.get(nested_key)
+                    if nested_value not in (None, ""):
+                        hints.setdefault(nested_key, nested_value)
+            continue
+        hints[key] = value
+    return hints
+
+
+def _reference_query(question: str, kwargs: dict[str, Any]) -> str:
+    hints = _analysis_hints(kwargs)
+    tokens = [question]
+    for key in ("company", "stockCode", "stock_code", "ticker", "symbol", "corpName"):
+        value = hints.get(key)
+        if value is not None:
+            tokens.append(f"{key}:{value}")
+    return " ".join(str(token) for token in tokens if str(token).strip())
+
+
 def _provider_tool_specs(*, finalize_only: bool = False) -> list[dict[str, Any]]:
-    def tool(name: str, description: str, properties: dict[str, Any], required: list[str] | None = None) -> dict[str, Any]:
+    def tool(
+        name: str, description: str, properties: dict[str, Any], required: list[str] | None = None
+    ) -> dict[str, Any]:
         return {
             "type": "function",
             "function": {
@@ -426,12 +483,31 @@ def _provider_tool_specs(*, finalize_only: bool = False) -> list[dict[str, Any]]
     if finalize_only:
         return [finalize_tool]
     return [
-        tool("search_reference", "Search DartLab tools, capabilities, skills, knowledge, docs, and runtime dataset catalog; returns short refs.", {"query": {"type": "string"}, "limit": {"type": "integer"}}, ["query"]),
-        tool("read_context", "Read a bounded source text window inside the workspace.", {"path": {"type": "string"}, "start_line": {"type": "integer"}, "max_chars": {"type": "integer"}}, ["path"]),
-        tool("inspect_dataset", "Inspect runtime dataset id or parquet/csv path.", {"target": {"type": "string"}, "sample": {"type": "integer"}, "columns": {"type": "array", "items": {"type": "string"}}}, ["target"]),
+        tool(
+            "search_reference",
+            "Search DartLab tools, capabilities, skills, knowledge, docs, and runtime dataset catalog; returns short refs.",
+            {"query": {"type": "string"}, "limit": {"type": "integer"}},
+            ["query"],
+        ),
+        tool(
+            "read_context",
+            "Read a bounded source text window inside the workspace.",
+            {"path": {"type": "string"}, "start_line": {"type": "integer"}, "max_chars": {"type": "integer"}},
+            ["path"],
+        ),
+        tool(
+            "inspect_dataset",
+            "Inspect runtime dataset id or parquet/csv path.",
+            {
+                "target": {"type": "string"},
+                "sample": {"type": "integer"},
+                "columns": {"type": "array", "items": {"type": "string"}},
+            },
+            ["target"],
+        ),
         tool(
             "run_python",
-            "Run bounded Python code in the DartLab workspace. Polars is available as `pl`; use emit_result(...) for evidence refs.",
+            "Run bounded Python code in the DartLab workspace. Polars is available as `pl`; call the preloaded emit_result(...) for evidence refs; do not define or assign emit_result.",
             {"code": {"type": "string"}, "timeout": {"type": "integer"}},
             ["code"],
         ),
@@ -457,7 +533,11 @@ def _assistant_message(content: str, tool_calls: list[ToolCall]) -> dict[str, An
     message: dict[str, Any] = {"role": "assistant", "content": content or None}
     if tool_calls:
         message["tool_calls"] = [
-            {"id": call.id, "type": "function", "function": {"name": call.name, "arguments": json.dumps(call.args, ensure_ascii=False)}}
+            {
+                "id": call.id,
+                "type": "function",
+                "function": {"name": call.name, "arguments": json.dumps(call.args, ensure_ascii=False)},
+            }
             for call in tool_calls
         ]
     return message
@@ -687,10 +767,7 @@ def _finalize_provider_unavailable(session: AskSession, *, reason: str) -> Itera
     verify_ref = verification_to_ref(result)
     session.add_ref(verify_ref)
     yield session.add_event("verify", {"refId": verify_ref.id, "result": result.to_dict()})
-    answer = (
-        "AI provider가 현재 workbench 실행을 완료하지 못했습니다. "
-        "답변을 추정하지 않고 중단합니다."
-    )
+    answer = "AI provider가 현재 workbench 실행을 완료하지 못했습니다. 답변을 추정하지 않고 중단합니다."
     for chunk in _stream_chunks(answer):
         yield session.add_event("chunk", {"text": chunk})
     bundle = ResultBundle(
@@ -806,31 +883,42 @@ def _refs_from_execution(execution: Any, execution_ref_id: str) -> list[Ref]:
     units = payload.get("units") if isinstance(payload.get("units"), dict) else {}
     formulas = payload.get("formulas") if isinstance(payload.get("formulas"), dict) else {}
     inputs = payload.get("inputs") if isinstance(payload.get("inputs"), list) else []
-    if isinstance(rows, list) and rows and all(isinstance(row, dict) for row in rows):
-        metric = _table_metric_from_payload(rows, payload, meta)
+    for table_rows, table_meta in _iter_result_tables(rows, payload, meta):
+        metric = _table_metric_from_payload(table_rows, payload, table_meta)
         table_ref = Ref(
             id=new_id("table"),
             kind="table",
             source="run_python",
             payload={
                 "executionRef": execution_ref_id,
-                "rows": rows,
+                "rows": table_rows,
                 "metric": metric,
                 "unit": units.get(metric) if metric else None,
                 "formula": formulas.get(metric) if metric else None,
                 "inputRefs": inputs,
-                "meta": meta,
+                "meta": table_meta,
             },
         )
         refs.append(table_ref)
-    as_of = payload.get("asOf") or payload.get("as_of") or payload.get("observedDate") or meta.get("asOf") or meta.get("as_of") or meta.get("observedDate")
+    as_of = (
+        payload.get("asOf")
+        or payload.get("as_of")
+        or payload.get("observedDate")
+        or meta.get("asOf")
+        or meta.get("as_of")
+        or meta.get("observedDate")
+    )
     if as_of:
         refs.append(
             Ref(
                 id=new_id("date"),
                 kind="date",
                 source="run_python",
-                payload={"executionRef": execution_ref_id, "observedDate": str(as_of), "basis": "execution result meta"},
+                payload={
+                    "executionRef": execution_ref_id,
+                    "observedDate": str(as_of),
+                    "basis": "execution result meta",
+                },
             )
         )
     values = payload.get("values")
@@ -909,8 +997,38 @@ def _extract_result_json(stdout: str) -> dict[str, Any] | None:
                 parsed = ast.literal_eval(raw)
             except (SyntaxError, ValueError):
                 return None
-        return parsed if isinstance(parsed, dict) else None
+        return _normalize_result_payload(parsed) if isinstance(parsed, dict) else None
     return None
+
+
+def _normalize_result_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    rows = payload.get("rows")
+    values = payload.get("values")
+    if isinstance(rows, str) and isinstance(values, list) and all(isinstance(row, dict) for row in values):
+        meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+        meta.setdefault("label", rows)
+        normalized = dict(payload)
+        normalized["rows"] = values
+        normalized["meta"] = meta
+        normalized.pop("values", None)
+        return normalized
+    return payload
+
+
+def _iter_result_tables(
+    rows: Any, payload: dict[str, Any], meta: dict[str, Any]
+) -> list[tuple[list[dict[str, Any]], dict[str, Any]]]:
+    if isinstance(rows, list) and rows and all(isinstance(row, dict) for row in rows):
+        return [(rows, meta)]
+    if not isinstance(rows, dict):
+        return []
+    tables: list[tuple[list[dict[str, Any]], dict[str, Any]]] = []
+    for label, candidate in rows.items():
+        if isinstance(candidate, list) and candidate and all(isinstance(row, dict) for row in candidate):
+            table_meta = dict(meta)
+            table_meta.setdefault("label", str(label))
+            tables.append((candidate, table_meta))
+    return tables
 
 
 def _first_numeric_key(rows: list[dict[str, Any]]) -> str | None:
@@ -946,16 +1064,54 @@ def _table_metric_from_payload(rows: list[dict[str, Any]], payload: dict[str, An
 
 def _is_identifier_or_rank_key(key: str) -> bool:
     lowered = key.lower()
-    identifier_tokens = ("code", "cd", "id", "corp", "isu", "ticker", "symbol", "rank", "순위", "코드")
+    identifier_tokens = (
+        "code",
+        "cd",
+        "id",
+        "corp",
+        "isu",
+        "ticker",
+        "symbol",
+        "rank",
+        "fy",
+        "year",
+        "period",
+        "순위",
+        "코드",
+        "연도",
+        "기간",
+    )
     return any(token in lowered for token in identifier_tokens)
 
 
 def _metric_key_score(key: str) -> int:
     lowered = key.lower()
     score = 0
-    if any(token in lowered for token in ("return", "ret", "pct", "rate", "ratio", "fluc", "change", "수익률", "등락률", "비율")):
+    if any(
+        token in lowered
+        for token in ("return", "ret", "pct", "rate", "ratio", "fluc", "change", "수익률", "등락률", "비율")
+    ):
         score += 30
-    if any(token in lowered for token in ("score", "value", "close", "price", "amount", "sales", "profit", "margin", "idx", "점수", "값", "종가", "가격", "이익", "매출")):
+    if any(
+        token in lowered
+        for token in (
+            "score",
+            "value",
+            "close",
+            "price",
+            "amount",
+            "sales",
+            "profit",
+            "margin",
+            "idx",
+            "점수",
+            "값",
+            "종가",
+            "가격",
+            "이익",
+            "매출",
+        )
+    ):
         score += 10
     if any(token in lowered for token in ("start", "begin", "end", "base", "기준", "시작", "종료")):
         score -= 3

@@ -2149,6 +2149,7 @@ class Company:
             c.analysis("forecast", "매출전망")        # 매출전망
 
         Guide:
+            AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.
             When: 특정 종목의 재무 심층 분석이 필요할 때.
             How: axis 로 분석 영역, sub 로 세부 축 지정.
             - "14축 분석 뭐가 있어?" → c.analysis() (가이드 반환)

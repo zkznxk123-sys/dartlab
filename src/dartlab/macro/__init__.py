@@ -330,6 +330,7 @@ class Macro:
 
         Guide
         -----
+        AI 역할: AI는 macro를 시장 환경과 기업/섹터 해석을 연결하는 엔진으로 보고 asOf, 지표, 방향성 근거를 고정한다.
         When: 종목 분석 전 경제 환경을 먼저 파악할 때. Company 없이 사용 가능.
         How: 6막 인과의 최상위 — macro(사이클) → scan(업종) → analysis(기업) 순서.
             story macro/crisis 타입이 macro 종합 → analysis(안정성, 현금흐름) 순서로 조합.

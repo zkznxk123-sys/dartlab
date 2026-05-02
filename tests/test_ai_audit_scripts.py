@@ -85,6 +85,30 @@ def test_server_ask_audit_reads_done_response_meta_and_p95():
     assert mod._p95([1.0, 2.0, 100.0]) == 100.0
 
 
+def test_server_ask_audit_compacts_refs_and_selected_skills():
+    mod = _load_server_ask_audit()
+
+    refs = [
+        {
+            "id": "skill:1",
+            "kind": "skill",
+            "source": "DartLabSkills",
+            "payload": {"skillId": "profitabilityReview", "score": 42.0},
+        },
+        {
+            "id": "table:1",
+            "kind": "table",
+            "source": "run_python",
+            "payload": {"metric": "op_margin", "rows": [{"year": "2025", "op_margin": 12.3}]},
+        },
+    ]
+
+    assert mod._selectedSkillIds(refs) == ["profitabilityReview"]
+    compact = mod._compactRefs(refs)
+    assert compact[1]["metric"] == "op_margin"
+    assert compact[1]["rows"] == 1
+
+
 def test_generate_spec_parses_ai_contract_block():
     path = Path("scripts/build/generateSpec.py")
     spec = importlib.util.spec_from_file_location("generateSpec", path)

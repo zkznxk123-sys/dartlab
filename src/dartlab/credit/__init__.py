@@ -292,6 +292,7 @@ def credit(
 
     Guide
     -----
+    AI 역할: AI는 credit을 상환능력·재무건전성 판단 엔진으로 보고 부채, 현금흐름, 이자보상, 만기 근거를 요구한다.
     When: 종목의 부도 위험·재무 건전성을 독립 평가할 때.
     How: credit 단독으로 종합 등급 확인 → analysis(안정성, 현금흐름) 와 함께 심층 진단.
         story credit 타입이 credit + analysis(안정성) + analysis(현금흐름) + analysis(자금조달) 순서로 조합.

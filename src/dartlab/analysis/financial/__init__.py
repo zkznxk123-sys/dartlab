@@ -975,6 +975,7 @@ class Analysis:
         - 70개 calc* 함수의 개별 결과를 LLM에 주입 가능
 
     Guide:
+        - AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.
         - "이 회사 수익구조?" -> analysis("financial", "수익구조") — 매출원가율, 판관비율 등
         - "재무 건전한가?" -> analysis("financial", "안정성") — 부채비율, 유동비율, ICR
         - "이익이 진짜야?" -> analysis("financial", "이익품질") — 발생주의 비율, OCF/NI

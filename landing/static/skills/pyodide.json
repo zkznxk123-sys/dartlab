@@ -1,0 +1,478 @@
+{
+  "skills": [
+    {
+      "id": "cashflowReview",
+      "title": "현금흐름 분석",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet",
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "현금흐름표가 포함된 Company finance snapshot을 확인한다."
+      ],
+      "limitations": [
+        "세부 운전자본 주석이 없는 snapshot에서는 원인 판단을 제한한다."
+      ]
+    },
+    {
+      "id": "companyCausalReview",
+      "title": "기업 6막 인과 분석",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
+      ],
+      "requiredSetup": [
+        "await dartlab.prefetch(stockCode) 후 Company(stockCode)를 생성한다."
+      ],
+      "limitations": [
+        "live gather, 외부 macro API, OAuth ask는 브라우저 CORS/인증 제약으로 제외한다."
+      ]
+    },
+    {
+      "id": "companyResearchStarter",
+      "title": "기업 분석 시작 라우터",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet"
+      ],
+      "requiredSetup": [],
+      "limitations": [
+        "live filings, macro 보강, 신규 수집은 서버 또는 로컬 Python 경로에서 수행한다."
+      ]
+    },
+    {
+      "id": "creditRiskReview",
+      "title": "신용 위험 분석",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet"
+      ],
+      "requiredSetup": [
+        "Company 재무 snapshot을 먼저 prefetch한다."
+      ],
+      "limitations": [
+        "신용등급 외부 실시간 조회는 서버 또는 로컬 Python 환경에서만 가능하다."
+      ]
+    },
+    {
+      "id": "crossSectionStockScreen",
+      "title": "전종목 횡단면 주가 스크리닝",
+      "category": "screens",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data krx/prices parquet",
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "가격 랭킹은 HF KRX 가격 parquet를 /data/krx/prices에 내려받아 계산한다.",
+        "재무 조건형 스크리닝은 finance-lite prebuild로 제한한다."
+      ],
+      "limitations": [
+        "KRX API 실시간 호출은 CORS 때문에 사용하지 않는다.",
+        "finance-lite에는 주요 계정만 있어 전체 scan과 동일하지 않다."
+      ]
+    },
+    {
+      "id": "damodaranValuationReview",
+      "title": "가치평가 가정 분해 검토",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
+      ],
+      "requiredSetup": [
+        "await dartlab.prefetch(stockCode) 후 재무/보고서 근거로 가정을 만든다."
+      ],
+      "limitations": [
+        "할인율, 금리, 시장가격 등 live macro/price 보강은 서버 환경에서 수행한다."
+      ]
+    },
+    {
+      "id": "dartlabStoryReview",
+      "title": "DartLab 스토리형 분석",
+      "category": "finance",
+      "status": "supported",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
+      ],
+      "requiredSetup": [
+        "await dartlab.prefetch(stockCode) 후 Company(stockCode)를 생성한다."
+      ],
+      "limitations": [
+        "브라우저에서는 외부 API를 추가 호출하지 않고 prefetched parquet 기준으로만 작성한다."
+      ]
+    },
+    {
+      "id": "disclosureEventReview",
+      "title": "공시 이벤트 중요도 검토",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
+      ],
+      "requiredSetup": [
+        "await dartlab.prefetch(stockCode) 후 prefetched 공시/보고서 데이터만 사용한다."
+      ],
+      "limitations": [
+        "liveFilings와 DART OpenAPI 직접 호출은 CORS 때문에 사용하지 않는다.",
+        "본문 미조회 상태에서는 제목/프리빌드 기준 한계로 표시한다."
+      ]
+    },
+    {
+      "id": "dividendCapitalReturnReview",
+      "title": "배당과 주주환원 분석",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "배당/자본 관련 Company snapshot 또는 scan prebuild를 확인한다."
+      ],
+      "limitations": [
+        "공시 당일 신규 주주환원 이벤트는 live filings가 가능한 서버 경로에서 보강한다."
+      ]
+    },
+    {
+      "id": "engines.analysisUsage",
+      "title": "analysis 엔진 재무 인과 사용 지도",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data finance-lite"
+      ],
+      "requiredSetup": [],
+      "limitations": [
+        "전체 서버 finance 축과 동일한 coverage를 보장하지 않는다."
+      ]
+    },
+    {
+      "id": "engines.companyRouterUsage",
+      "title": "Company 엔진 라우터 사용 지도",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data snapshot"
+      ],
+      "requiredSetup": [],
+      "limitations": [
+        "EDGAR live filing과 일부 네트워크 수집은 서버 경유가 필요할 수 있다."
+      ]
+    },
+    {
+      "id": "engines.creditUsage",
+      "title": "credit 엔진 신용위험 사용 지도",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data finance-lite"
+      ],
+      "requiredSetup": [],
+      "limitations": [
+        "full DART report 기반 공시 리스크는 서버 coverage와 다를 수 있다."
+      ]
+    },
+    {
+      "id": "engines.gatherUsage",
+      "title": "gather 엔진 데이터 수집 사용 지도",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "외부 네트워크 provider와 CORS 제약이 있을 수 있다.",
+        "서버 snapshot이 없는 최신 데이터는 unavailable 처리한다."
+      ]
+    },
+    {
+      "id": "engines.industryUsage",
+      "title": "industry 엔진 산업맥락 사용 지도",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "packaged taxonomy snapshot"
+      ],
+      "requiredSetup": [],
+      "limitations": [
+        "공정별 재무 summary는 finance snapshot coverage를 따른다."
+      ]
+    },
+    {
+      "id": "engines.macroUsage",
+      "title": "macro 엔진 거시 환경 사용 지도",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "실시간 FRED/ECOS 접근과 장기 시계열은 서버 경유가 필요할 수 있다."
+      ]
+    },
+    {
+      "id": "engines.quantUsage",
+      "title": "quant 엔진 가격·팩터 사용 지도",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "최신 price provider 접근과 긴 시계열 수집은 서버 경유가 필요할 수 있다."
+      ]
+    },
+    {
+      "id": "engines.scanUsage",
+      "title": "scan 엔진 사용 지도",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [],
+      "limitations": [
+        "전체 서버 scan과 동일한 축을 보장하지 않는다."
+      ]
+    },
+    {
+      "id": "engines.storyUsage",
+      "title": "story 엔진 보고서 조합 사용 지도",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "HTML/rich 렌더링과 full source engine 실행은 환경별로 다르다."
+      ]
+    },
+    {
+      "id": "engines.visualUsage",
+      "title": "viz 엔진 표 기반 시각화 사용 지도",
+      "category": "engines",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "chart source table이 브라우저 메모리에 있어야 한다."
+      ]
+    },
+    {
+      "id": "governanceAuditReview",
+      "title": "지배구조와 감사 리스크 점검",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "감사/공시 snapshot 또는 scan prebuild를 먼저 확인한다."
+      ],
+      "limitations": [
+        "본문 미조회 상태에서는 제목/프리빌드 기준 위험 신호로만 제한한다."
+      ]
+    },
+    {
+      "id": "krxIndexStrengthReview",
+      "title": "KRX 지수 강세 분석",
+      "category": "screens",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data krx/indices parquet"
+      ],
+      "requiredSetup": [
+        "HF parquet를 Pyodide FS의 /data/krx/indices에 내려받은 뒤 inspect_dataset과 run_python으로 계산한다."
+      ],
+      "limitations": [
+        "KRX API 실시간 호출은 CORS 때문에 사용하지 않는다.",
+        "최신성은 HF에 업로드된 parquet의 BAS_DD 기준으로만 말한다."
+      ]
+    },
+    {
+      "id": "macroMarketReview",
+      "title": "거시 시장 환경 점검",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data macro snapshot",
+        "HuggingFace dartlab-data krx/indices parquet"
+      ],
+      "requiredSetup": [
+        "사용 가능한 macro 또는 index snapshot을 RuntimeDatasetCatalog에서 먼저 확인한다."
+      ],
+      "limitations": [
+        "live FRED, 환율, 금리 API 호출은 브라우저 CORS/인증 제약으로 제외한다."
+      ]
+    },
+    {
+      "id": "peerComparisonReview",
+      "title": "동종 기업 비교 분석",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
+      ],
+      "requiredSetup": [
+        "비교 대상별로 await dartlab.prefetch(stockCode)를 먼저 수행한다."
+      ],
+      "limitations": [
+        "여러 종목 parquet를 브라우저 메모리에 올리므로 대상 수를 작게 유지한다.",
+        "live market/macro 보강은 서버 환경에서만 한다."
+      ]
+    },
+    {
+      "id": "profitabilityReview",
+      "title": "수익성 분석",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet",
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "Company 재무 snapshot 또는 finance-lite prebuild를 먼저 확인한다."
+      ],
+      "limitations": [
+        "live macro 보강은 서버 환경에서 수행한다."
+      ]
+    },
+    {
+      "id": "quantSignalReview",
+      "title": "퀀트 신호 교차검토",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data krx/prices parquet",
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "가격 신호는 HF 가격 parquet 또는 이미 prefetched 데이터가 있을 때만 계산한다."
+      ],
+      "limitations": [
+        "gather(\"price\") 같은 외부 가격 API 호출은 브라우저 CORS 때문에 사용하지 않는다.",
+        "가격 데이터가 없으면 재무/valuation-lite 기반 보조 신호로 제한한다."
+      ]
+    },
+    {
+      "id": "runtime.dataAvailabilityCheck",
+      "title": "데이터 가용성 확인",
+      "category": "runtime",
+      "status": "supported",
+      "dataSources": [
+        "HuggingFace dartlab-data snapshot",
+        "browser uploaded parquet/csv"
+      ],
+      "requiredSetup": [],
+      "limitations": [
+        "live API 최신성은 서버 또는 로컬 Python 경로에서 확인한다."
+      ]
+    },
+    {
+      "id": "runtime.pyodideBrowser",
+      "title": "Pyodide / Web AI 실행 범위",
+      "category": "runtime",
+      "status": "supported",
+      "dataSources": [
+        "HuggingFace dartlab-data snapshot",
+        "browser uploaded parquet/csv"
+      ],
+      "requiredSetup": [],
+      "limitations": [
+        "live KRX/DART/OpenAI OAuth 호출은 브라우저에서 제한된다."
+      ]
+    },
+    {
+      "id": "runtime.skillDevelopmentLoop",
+      "title": "Skill 개발과 엔진 조합 루프",
+      "category": "runtime",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "Pyodide에서는 live API가 필요한 조합을 서버 audit 없이 official로 승격하지 않는다."
+      ]
+    },
+    {
+      "id": "runtime.workbenchEvidenceFlow",
+      "title": "Workbench 근거 생성과 검산 흐름",
+      "category": "runtime",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저에서는 선택한 skill과 dataset snapshot 범위 안에서만 실행한다."
+      ]
+    },
+    {
+      "id": "screens.findUndervaluedQualityStocks",
+      "title": "저평가·수익성 종목 후보 찾기",
+      "category": "screens",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "finance-lite prebuild를 브라우저 런타임에 로드한다."
+      ],
+      "limitations": [
+        "full scan 축 전체가 아니라 prebuild에 포함된 지표 기준 후보만 만든다."
+      ]
+    },
+    {
+      "id": "start.useSkillsCatalog",
+      "title": "Skill catalog 기반 작업 시작",
+      "category": "start",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "실제 분석 실행 가능 여부는 선택한 skill의 runtimeCompatibility를 따른다."
+      ]
+    },
+    {
+      "id": "usEdgarCompanyReview",
+      "title": "미국 기업 EDGAR 분석",
+      "category": "finance",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet",
+        "HuggingFace dartlab-data edgar/docs/{ticker}.parquet"
+      ],
+      "requiredSetup": [
+        "ticker별 prefetched EDGAR snapshot이 있는지 먼저 확인한다."
+      ],
+      "limitations": [
+        "SEC live API와 신규 filings 조회는 서버 또는 로컬 Python 경로에서 수행한다."
+      ]
+    },
+    {
+      "id": "visuals.tableBackedChart",
+      "title": "표 기반 시각 설명",
+      "category": "visuals",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "시각화는 브라우저 renderer가 지원하는 chart spec 범위로 제한한다."
+      ]
+    }
+  ]
+}

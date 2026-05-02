@@ -177,6 +177,7 @@ class Story:
 
     Guide
     -----
+    AI 역할: AI는 story를 검증된 engine output을 보고서 섹션으로 조립하는 엔진으로 보고 원자료 없이 새 claim을 만들지 않는다.
     When: 종목의 종합 분석 보고서가 필요할 때.
     How: 11 타입 중 선택 — full(전체), executive(경영진 요약), credit(신용),
         valuation(가치평가), growth(성장), crisis(위기), audit(감사),

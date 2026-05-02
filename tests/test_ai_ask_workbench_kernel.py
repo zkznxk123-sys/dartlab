@@ -9,7 +9,6 @@ from dartlab.ai.datasets import RuntimeDatasetCatalog
 from dartlab.ai.verify import verify_answer
 from dartlab.ai.visuals import compile_visual
 
-
 pytestmark = pytest.mark.unit
 
 
@@ -241,6 +240,17 @@ def test_verifier_ignores_markdown_identifier_code_numbers() -> None:
     assert result.ok
 
 
+def test_verifier_ignores_usage_example_numbers_in_code() -> None:
+    task = WorkbenchTask(id="task:test", question="show 함수 어떻게 써?")
+    draft = AnswerDraft(
+        answer='사용법 예시는 `Company("005930").show("is")`처럼 씁니다.\n\n```python\nCompany("005930").show("is", years=3)\n```'
+    )
+
+    result = verify_answer(task, [], draft)
+
+    assert result.ok
+
+
 def test_verifier_allows_numeric_claim_from_visual_or_limit_ref() -> None:
     from dartlab.ai.contracts import Ref
 
@@ -250,10 +260,17 @@ def test_verifier_allows_numeric_claim_from_visual_or_limit_ref() -> None:
             id="visual:test",
             kind="visual",
             source="compile_visual",
-            payload={"title": "시총 500억 이상", "series": [{"data": [1, 2]}], "categories": ["A", "B"], "sourceRef": "table:test"},
+            payload={
+                "title": "시총 500억 이상",
+                "series": [{"data": [1, 2]}],
+                "categories": ["A", "B"],
+                "sourceRef": "table:test",
+            },
         )
     ]
-    draft = AnswerDraft(answer="시총 500억 이상 기준입니다.", evidence_refs=["visual:test"], limits=["시총 500억 이상 필터"])
+    draft = AnswerDraft(
+        answer="시총 500억 이상 기준입니다.", evidence_refs=["visual:test"], limits=["시총 500억 이상 필터"]
+    )
 
     result = verify_answer(task, refs, draft)
 
@@ -388,7 +405,9 @@ def test_verifier_blocks_implausible_ratio_table_even_with_disclosure() -> None:
             payload={"rows": [{"name": "A", "ret_21d": 4583.67}], "metric": "ret_21d"},
         )
     ]
-    draft = AnswerDraft(answer="A는 +4583.67%입니다.", evidence_refs=["table:test"], limits=["비정상 수익률 가능성 고지"])
+    draft = AnswerDraft(
+        answer="A는 +4583.67%입니다.", evidence_refs=["table:test"], limits=["비정상 수익률 가능성 고지"]
+    )
 
     result = verify_answer(task, refs, draft)
 
@@ -414,7 +433,9 @@ def test_verifier_blocks_answer_table_anchor_date_conflict() -> None:
             },
         )
     ]
-    draft = AnswerDraft(answer="기준일 20260428 수익률 상위입니다. A는 10%, B는 20%입니다.", evidence_refs=["table:test"])
+    draft = AnswerDraft(
+        answer="기준일 20260428 수익률 상위입니다. A는 10%, B는 20%입니다.", evidence_refs=["table:test"]
+    )
 
     result = verify_answer(task, refs, draft)
 
@@ -470,8 +491,9 @@ def test_search_reference_returns_skill_capability_and_knowledge_refs() -> None:
     assert "krxIndexStrengthReview" in skill_ids
     skill_ref = next(ref for ref in refs if ref.payload.get("skillId") == "krxIndexStrengthReview")
     assert skill_ref.payload["runtimeCompatibility"]["pyodide"]["status"] == "limited"
-    assert skill_ref.payload["category"] == "domain"
+    assert skill_ref.payload["category"] == "screens"
     assert skill_ref.payload["procedure"]
+    assert "datasetRefs" in skill_ref.payload
 
 
 def test_search_reference_can_return_generated_basic_engine_skills() -> None:
@@ -499,7 +521,9 @@ def test_search_reference_exposes_capability_return_schema_units() -> None:
     from dartlab.ai.reference import search_reference
 
     refs = search_reference("배당수익률 자사주매입 주주환원 Company.capital", limit=10)
-    capital_ref = next(ref for ref in refs if ref.kind == "capability" and ref.payload.get("apiRef") == "Company.capital")
+    capital_ref = next(
+        ref for ref in refs if ref.kind == "capability" and ref.payload.get("apiRef") == "Company.capital"
+    )
     by_name = {item["name"]: item for item in capital_ref.payload["returnSchema"]}
 
     assert by_name["배당수익률"]["unit"] == "%"
@@ -515,6 +539,15 @@ def test_kernel_task_does_not_classify_questions() -> None:
     assert first["actions"] == second["actions"]
     assert "question_class" not in first
     assert "candidate_datasets" not in first
+
+
+def test_kernel_task_preserves_target_hints_without_classification() -> None:
+    from dartlab.ai.kernel import create_task
+
+    task = create_task("인텔 분석해줘", {"company": "INTC"}).to_dict()
+
+    assert task["hints"]["company"] == "INTC"
+    assert "question_class" not in task
 
 
 def test_kernel_task_capsule_includes_basic_skill_floor() -> None:
@@ -550,7 +583,13 @@ def test_provider_workbench_loop_executes_actions_and_verifies(monkeypatch) -> N
                 return ProviderTurn(
                     content="",
                     tool_calls=[
-                        ToolCall(id="call-1", name="run_python", args={"code": 'print("ok")\nprint("DARTLAB_RESULT_JSON=" + __import__("json").dumps({"rows": [{"name": "A", "value": 2}, {"name": "B", "value": 1}], "meta": {"asOf": "20260102"}}))'})
+                        ToolCall(
+                            id="call-1",
+                            name="run_python",
+                            args={
+                                "code": 'print("ok")\nprint("DARTLAB_RESULT_JSON=" + __import__("json").dumps({"rows": [{"name": "A", "value": 2}, {"name": "B", "value": 1}], "meta": {"asOf": "20260102"}}))'
+                            },
+                        )
                     ],
                 )
             if self.round == 2:
@@ -638,6 +677,15 @@ def test_search_reference_returns_short_dataset_resource_first() -> None:
     assert all(len(str(ref.payload.get("snippet") or "")) <= 2200 for ref in refs)
 
 
+def test_search_reference_prioritizes_skill_for_capability_help() -> None:
+    from dartlab.ai.reference import search_reference
+
+    refs = search_reference("dartlab 뭐 할 수 있어", limit=5)
+
+    assert refs[0].kind == "skill"
+    assert refs[0].payload.get("skillId") == "start.useSkillsCatalog"
+
+
 def test_run_python_emit_result_creates_refs() -> None:
     from dartlab.ai.kernel import _limits_from_execution, _refs_from_execution
     from dartlab.ai.notebook import run_python
@@ -652,12 +700,51 @@ def test_run_python_emit_result_creates_refs() -> None:
     assert _limits_from_execution(execution) == ["sample limit"]
 
 
+def test_run_python_emit_result_accepts_label_positional_rows() -> None:
+    from dartlab.ai.kernel import _refs_from_execution
+    from dartlab.ai.notebook import run_python
+
+    execution = run_python("emit_result('scores', [{'name':'A','score':2.0},{'name':'B','score':1.0}])")
+    refs = _refs_from_execution(execution, "execution:test")
+    table = next(ref for ref in refs if ref.kind == "table")
+
+    assert execution.ok
+    assert table.payload["metric"] == "score"
+    assert table.payload["meta"]["label"] == "scores"
+
+
+def test_run_python_emit_result_accepts_named_table_rows() -> None:
+    from dartlab.ai.kernel import _refs_from_execution
+    from dartlab.ai.notebook import run_python
+
+    execution = run_python(
+        "emit_result(rows={'snapshot': [{'fy': 2025, 'revenue': 10.0}, {'fy': 2026, 'revenue': 12.0}]})"
+    )
+    refs = _refs_from_execution(execution, "execution:test")
+    table = next(ref for ref in refs if ref.kind == "table")
+
+    assert execution.ok
+    assert table.payload["metric"] == "revenue"
+    assert table.payload["meta"]["label"] == "snapshot"
+
+
+def test_run_python_rejects_emit_result_redefinition() -> None:
+    from dartlab.ai.notebook import run_python
+
+    execution = run_python("def emit_result(**kwargs):\n    return kwargs\nemit_result(values={'x': 1})")
+
+    assert not execution.ok
+    assert "Do not define or assign emit_result" in execution.stderr
+
+
 def test_kernel_does_not_release_calculation_answer_without_provider() -> None:
     from dartlab.ai import kernel
     from dartlab.ai.providers import ProviderConfig, UnavailableProvider
 
     monkeypatch = pytest.MonkeyPatch()
-    monkeypatch.setattr(kernel, "create_provider", lambda **_kwargs: UnavailableProvider(ProviderConfig(provider="missing")))
+    monkeypatch.setattr(
+        kernel, "create_provider", lambda **_kwargs: UnavailableProvider(ProviderConfig(provider="missing"))
+    )
     try:
         events = list(kernel.runAsk("최근 주가지수를 보고 강세 지수를 찾아봐라"))
     finally:
@@ -710,7 +797,9 @@ def test_kernel_uses_provider_loop_without_explicit_provider(monkeypatch) -> Non
             )
 
     called = {}
-    monkeypatch.setattr(kernel, "create_provider", lambda **kwargs: called.setdefault("kwargs", kwargs) or FakeProvider())
+    monkeypatch.setattr(
+        kernel, "create_provider", lambda **kwargs: called.setdefault("kwargs", kwargs) or FakeProvider()
+    )
 
     events = list(kernel.runAsk("너 뭐 분석할수있나"))
 
@@ -721,6 +810,7 @@ def test_kernel_uses_provider_loop_without_explicit_provider(monkeypatch) -> Non
 
 def test_kernel_has_no_question_specific_runner_names() -> None:
     import inspect
+
     import dartlab.ai.kernel as kernel
 
     source = inspect.getsource(kernel)
@@ -735,8 +825,32 @@ def test_kernel_has_no_question_specific_runner_names() -> None:
     assert "krx.indices" not in source
 
 
+def test_kernel_and_verifier_have_no_domain_specific_hardcoding() -> None:
+    import inspect
+
+    import dartlab.ai.kernel as kernel
+    import dartlab.ai.verify as verify
+
+    source = inspect.getsource(kernel) + "\n" + inspect.getsource(verify)
+    forbidden = [
+        "삼성전자",
+        "인텔",
+        "005930",
+        "INTC",
+        "AAPL",
+        "edgar.finance",
+        "finance-lite",
+        "profitabilityReview",
+        "macroMarketReview",
+        "usEdgarCompanyReview",
+    ]
+
+    assert not any(token in source for token in forbidden)
+
+
 def test_verifier_has_no_question_word_execution_gate() -> None:
     import inspect
+
     import dartlab.ai.verify as verify
 
     source = inspect.getsource(verify)
@@ -748,13 +862,14 @@ def test_verifier_has_no_question_word_execution_gate() -> None:
 
 def test_ai_public_surface_has_code_standard_docstrings() -> None:
     import inspect
-    from dartlab.ai.kernel import ask, runAsk
-    from dartlab.ai.reference import read_context, search_reference
+
     from dartlab.ai.datasets import inspect_dataset
-    from dartlab.ai.notebook import run_python
-    from dartlab.ai.visuals import compile_visual
-    from dartlab.ai.verify import verify_answer
+    from dartlab.ai.kernel import ask, runAsk
     from dartlab.ai.mcp import execute_tool, tool_specs
+    from dartlab.ai.notebook import run_python
+    from dartlab.ai.reference import read_context, search_reference
+    from dartlab.ai.verify import verify_answer
+    from dartlab.ai.visuals import compile_visual
 
     required = ["Parameters", "Returns", "Raises", "Examples", "Notes", "Guide", "See Also"]
     for fn in [
@@ -789,10 +904,10 @@ def test_mcp_default_tools_are_canonical_workbench_only() -> None:
 
 
 def test_provider_support_imports_without_legacy_ai(monkeypatch) -> None:
-    from dartlab.core.ai.model_resolver import latest_openai_model
     from dartlab.ai.providers.oauth_codex import availableModels
     from dartlab.ai.providers.support.cli_setup import detect_codex
     from dartlab.ai.providers.support.oauth_token import load_token, revoke_token
+    from dartlab.core.ai.model_resolver import latest_openai_model
 
     monkeypatch.delenv("DARTLAB_OAUTH_MODELS", raising=False)
 

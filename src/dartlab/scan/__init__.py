@@ -695,6 +695,7 @@ class Scan:
 
         Guide
         -----
+        AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다.
         When: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.
         How: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.
             story credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.

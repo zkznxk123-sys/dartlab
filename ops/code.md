@@ -80,6 +80,15 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
 9 섹션: Summary · Description · Parameters · Returns · Raises · Examples · Notes · Guide · See Also.
 
+### AI 역할 — Guide 에 명시한다
+
+엔진 공개 API docstring 의 `Guide` 는 사람 사용법만이 아니라 AI 역할도 포함한다. 이 문장은 generated capabilities 를 거쳐 `basic.*` SkillSpec 자동 생성에 반영된다.
+
+- `AI role:` 또는 `AI 역할:` 로 시작하는 짧은 문장을 둔다.
+- 역할은 “이 엔진을 언제 선택하고 어떤 evidence 를 먼저 확정하는가”를 말한다.
+- API parameters/returns/schema 는 여전히 각 섹션에만 두고, Guide 에 중복하지 않는다.
+- 질문별 runner, 답변 템플릿, 특정 종목/시장 전용 처방은 금지한다.
+
 ### Returns 작성 규칙 — 키 + 타입 + 단위를 명시한다
 
 **모든 공개 함수 + 모든 calc 함수**에 Returns 를 반드시 작성한다. AI 가 이 스키마를 읽어서 반환값의 구조·단위·의미를 확정한다.
@@ -192,6 +201,14 @@ pl.DataFrame
 
 **반복 실패** — 자동 메트릭만으로 ACE 효과 주장. 사람 판정 기반 비교가 필수. 승인되지 않은 provider 는 이미지 생성에 쓰지 않는다.
 
+### AI kernel/verifier 하드코딩 금지
+
+`src/dartlab/ai/kernel.py` 와 `src/dartlab/ai/verify.py` 는 공통 workbench/release 계약만 가진다.
+
+- 절대 금지: 질문별 runner, 종목·시장·데이터셋·엔진·skill 전용 분기, 답변 템플릿.
+- 허용: ref ledger, tool dispatch, `emit_result` 정규화, 숫자/날짜/표/시각화/실행 성공/한계 disclosure 같은 공통 검증 규칙.
+- 새 분석 행동은 kernel/verifier 가 아니라 docstring/generated capability, SkillSpec, 또는 실행 가능한 DartLab API 로 추가한다.
+
 ---
 
 ## 9. 코드 품질 — 근본 원인 한 곳에서 고친다
@@ -215,5 +232,5 @@ pl.DataFrame
 5. 예외는 구체적 타입으로 잡고 삼키지 않는다.
 6. 테스트는 `test-lock.sh` 로 unit → integration → heavy 그룹 분리 실행.
 7. 릴리즈는 semver + GitHub Actions trusted publishing + wheel 번들 전수 검증.
-8. AI 는 표준 audit profile · 이미지는 승인 backend · 사람 판정 기반 검증.
+8. AI 는 표준 audit profile · 이미지는 승인 backend · 사람 판정 기반 검증. kernel/verifier 하드코딩은 금지한다.
 9. 근본 원인 1 곳만 고친다 — 우회 레이어·덕지덕지 패치는 쓰지 않는다.

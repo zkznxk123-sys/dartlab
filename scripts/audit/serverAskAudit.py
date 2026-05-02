@@ -96,6 +96,16 @@ def _doneMeta(events: list[dict[str, Any]]) -> dict[str, Any]:
     return {}
 
 
+def _donePayload(events: list[dict[str, Any]]) -> dict[str, Any]:
+    for event in reversed(events):
+        if event.get("event") != "done":
+            continue
+        data = event.get("data")
+        if isinstance(data, dict):
+            return data
+    return {}
+
+
 def _p95(values: list[float]) -> float:
     if not values:
         return 0.0
@@ -173,6 +183,38 @@ def _compactEvents(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return compact
 
 
+def _compactRefs(refs: list[dict[str, Any]], *, limit: int = 20) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for ref in refs[-limit:]:
+        if not isinstance(ref, dict):
+            continue
+        payload = ref.get("payload") if isinstance(ref.get("payload"), dict) else {}
+        item = {"id": ref.get("id"), "kind": ref.get("kind"), "source": ref.get("source")}
+        for key in ("skillId", "apiRef", "title", "dataset_id", "datasetId", "path", "score"):
+            value = payload.get(key)
+            if value not in (None, "", [], {}):
+                item[key] = value
+        if ref.get("kind") == "table":
+            rows = payload.get("rows")
+            item["rows"] = len(rows) if isinstance(rows, list) else None
+            item["metric"] = payload.get("metric")
+            item["executionRef"] = payload.get("executionRef")
+        out.append(item)
+    return out
+
+
+def _selectedSkillIds(refs: list[dict[str, Any]]) -> list[str]:
+    ids: list[str] = []
+    for ref in refs:
+        if not isinstance(ref, dict) or ref.get("kind") != "skill":
+            continue
+        payload = ref.get("payload") if isinstance(ref.get("payload"), dict) else {}
+        skill_id = payload.get("skillId")
+        if isinstance(skill_id, str) and skill_id not in ids:
+            ids.append(skill_id)
+    return ids
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://127.0.0.1:8400/api/ask")
@@ -225,6 +267,22 @@ def main() -> int:
             response_meta = (body.get("responseMeta") if not stream and isinstance(body, dict) else None) or _doneMeta(
                 events
             )
+            done_payload = _donePayload(events)
+            response_refs = body.get("refs") if not stream and isinstance(body, dict) else done_payload.get("refs", [])
+            if not isinstance(response_refs, list):
+                response_refs = []
+            response_trace = (
+                body.get("trace") if not stream and isinstance(body, dict) else done_payload.get("trace", [])
+            )
+            if not isinstance(response_trace, list):
+                response_trace = []
+            response_verification = (
+                body.get("verification")
+                if not stream and isinstance(body, dict)
+                else done_payload.get("verification", {})
+            )
+            if not isinstance(response_verification, dict):
+                response_verification = {}
             response_graph = response_meta.get("graph") if isinstance(response_meta, dict) else {}
             if not isinstance(response_graph, dict):
                 response_graph = {}
@@ -282,6 +340,9 @@ def main() -> int:
                     audit.get("freshness_satisfied", True) and response_meta.get("freshnessSatisfied", True)
                 ),
                 "processMapIds": audit.get("process_map_ids") or response_graph.get("processMapIds") or [],
+                "selectedSkills": _selectedSkillIds(response_refs),
+                "responseRefs": _compactRefs(response_refs),
+                "verification": response_verification,
                 "selectedTools": audit.get("selected_tools") or [],
                 "skippedCandidateTools": audit.get("skipped_candidate_tools") or [],
                 "requiredEvidenceSatisfied": bool(
@@ -291,7 +352,7 @@ def main() -> int:
                 "visualSatisfied": bool(audit.get("visual_satisfied") or response_graph.get("visualSatisfied")),
                 "requiresArtifact": requires_artifact,
                 "artifactViolation": artifact_violation,
-                "events": _compactEvents(events[-30:]) if stream else [],
+                "events": _compactEvents(events[-30:]) if stream else _compactEvents(response_trace[-30:]),
             }
             (out / f"{qid}.txt").write_text(answer, encoding="utf-8")
             (out / f"{qid}.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")

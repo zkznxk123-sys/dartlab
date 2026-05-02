@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -15,6 +16,7 @@ from .datasets import RuntimeDatasetCatalog
 
 _STDOUT_CAP = 60_000
 _STDERR_CAP = 20_000
+_RESERVED_HELPER_RE = re.compile(r"(?m)^\s*(def\s+emit_result\b|emit_result\s*=)")
 
 
 @dataclass(frozen=True)
@@ -86,6 +88,15 @@ def run_python(code: str, *, timeout: int = 60, cwd: str | None = None) -> Execu
     import time
 
     timeout = max(1, min(int(timeout), 120))
+    if _redefines_reserved_helper(code):
+        return ExecutionResult(
+            ok=False,
+            code=code,
+            returncode=2,
+            stdout="",
+            stderr="Do not define or assign emit_result; call the workbench-provided emit_result(...) helper.",
+            duration_ms=0,
+        )
     workdir = Path(cwd or _repo_root())
     env = _execution_env(workdir)
     start = time.monotonic()
@@ -141,6 +152,10 @@ def execution_to_ref(result: ExecutionResult) -> Ref:
 runPython = run_python
 
 
+def _redefines_reserved_helper(code: str) -> bool:
+    return bool(_RESERVED_HELPER_RE.search(code))
+
+
 def _execution_env(workdir: Path) -> dict[str, str]:
     env = os.environ.copy()
     src = workdir / "src"
@@ -163,6 +178,16 @@ def _script_prelude(workdir: Path) -> str:
         "DATASET_ROOTS = [Path(p) for p in __import__('os').environ.get('DARTLAB_DATA_DIR', '').split(';') if p]\n"
         "\n"
         "def emit_result(rows=None, values=None, meta=None, limits=None, units=None, formulas=None, inputs=None, **extra):\n"
+        "    if isinstance(rows, str) and isinstance(values, list):\n"
+        "        meta = dict(meta or {})\n"
+        "        meta.setdefault('label', rows)\n"
+        "        rows, values = values, None\n"
+        "    if isinstance(rows, dict):\n"
+        "        named = [(k, v) for k, v in rows.items() if isinstance(v, list) and v and all(isinstance(r, dict) for r in v)]\n"
+        "        if len(named) == 1:\n"
+        "            meta = dict(meta or {})\n"
+        "            meta.setdefault('label', named[0][0])\n"
+        "            rows = named[0][1]\n"
         "    payload = {}\n"
         "    if rows is not None:\n"
         "        payload['rows'] = rows\n"

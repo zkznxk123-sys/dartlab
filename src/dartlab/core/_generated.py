@@ -9,6 +9,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
     r"""
 {
     "ChartResult": {
+        "guide": "AI 역할: AI는 ChartResult/viz를 이미 검증된 표를 시각 설명으로 바꾸는 엔진으로 보고 단일값·무근거 차트를 만들지 않는다.\nWhen: SelectResult나 DataFrame 기반 근거를 차트로 설명해야 할 때.\nHow: 표의 기간/series/value 근거가 충분한지 먼저 확인하고, chart() 결과의 spec을 최종 답변 ref와 연결한다.",
         "kind": "class",
         "summary": "chart() 반환 객체 — 시각화 + 렌더링."
     },
@@ -17,7 +18,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "args": "codeOrName: 종목코드, 회사명, 또는 영문 ticker.",
         "capabilities": "종목 파사드 하나로 엔진 전수 접근: analysis · credit · quant · macro ·\nindustry · gather · show. 엔진 이름만 기억하면 됨.\n종목코드 (\"005930\"), 회사명 (\"삼성전자\"), 영문 ticker (\"AAPL\") 모두 지원\ncanHandle() 체인: provider priority 순 자동 라우팅 (DART → EDGAR)\n새 국가 추가 시 이 파일 수정 불필요 — provider 패키지만 추가\n핵심 인터페이스: show(topic) / index / trace(topic) / diff() / select()\n모든 데이터 접근은 ``c.show(topic)`` 으로 통합 — finance topic\n(BS·IS·CF·CIS·SCE·ratios) 도 ``c.show(\"BS\")`` · ``c.show(\"IS\", freq=\"Y\")``\n처럼 호출. 별도 namespace property 나 바로가기는 사용하지 않는다\n(``c.docs / c.finance / c.report / c.profile`` · ``c.BS / c.IS / c.CF /\nc.CIS / c.ratios / c.timeseries`` 는 Plan v10 에서 제거).\n메타: sections, topics, filings(), market, currency",
         "example": "import dartlab\n\n# 사람의 만능 관문 — 한 객체로 전 엔진\nc = dartlab.Company(\"005930\")     # 삼성전자 (DART)\nc.story()                         # 분석 스토리 (보고서)\nc.analysis(\"financial\", \"수익성\") # 재무 분석\nc.credit()                        # 신용\nc.quant()                         # 주가\nc.show(\"businessOverview\")        # 원본 사업 개요\n\n# 글로벌 (EDGAR 자동 라우팅)\nc = dartlab.Company(\"AAPL\")\nc.analysis(\"financial\", \"valuation\")\n\n# module-level 엔진도 `stockCode=` 로 호출 가능 (일관성 규약)\ndartlab.analysis.financial(\"수익성\", stockCode=\"005930\")\ndartlab.credit(stockCode=\"005930\")",
-        "guide": "\"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\")\n\"사업 개요 보여줘\" -> c.show(\"businessOverview\")\n\"어떤 데이터 있어?\" -> c.index 또는 c.topics\n\"출처 추적\" -> c.trace(\"revenue\")\n\"기간 변화\" -> c.diff()\n\"종합평가\" -> c.analysis(\"financial\", \"종합평가\")\n\"스토리 보고서\" -> c.story()\n\"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)",
+        "guide": "AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다.\n\"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\")\n\"사업 개요 보여줘\" -> c.show(\"businessOverview\")\n\"어떤 데이터 있어?\" -> c.index 또는 c.topics\n\"출처 추적\" -> c.trace(\"revenue\")\n\"기간 변화\" -> c.diff()\n\"종합평가\" -> c.analysis(\"financial\", \"종합평가\")\n\"스토리 보고서\" -> c.story()\n\"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)",
         "kind": "function",
         "requires": "DART: 사전 다운로드 데이터 (dartlab.downloadAll() 또는 자동 다운로드).\nEDGAR: 인터넷 연결 (On-demand 수집).",
         "returns": "CompanyProtocol — DART 또는 EDGAR Company 인스턴스 (파사드).",
@@ -55,7 +56,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
             ]
         },
         "example": "c = Company(\"005930\")\nc.analysis()                            # 전체 가이드\nc.analysis(\"financial\", \"수익구조\")       # 수익구조 분석\nc.analysis(\"valuation\", \"가치평가\")       # 가치평가\nc.analysis(\"forecast\", \"매출전망\")        # 매출전망",
-        "guide": "When: 특정 종목의 재무 심층 분석이 필요할 때.\nHow: axis 로 분석 영역, sub 로 세부 축 지정.\n\"14축 분석 뭐가 있어?\" → c.analysis() (가이드 반환)\n\"수익구조 분석해줘\" → c.analysis(\"financial\", \"수익구조\")\n\"안정성 분석\" → c.analysis(\"financial\", \"안정성\")\n\"가치평가 해줘\" → c.analysis(\"valuation\", \"가치평가\")\n\"매출전망\" → c.analysis(\"forecast\", \"매출전망\")\nVerified:\n수익성 단독 → 마진 시계열 + 전환점 + 반도체 사이클 인과 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n이익품질 + 재무정합성 → 분식회계 가능성 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n가치평가 → 적정주가 범위 + 현재가 대비 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n자본배분 + 현금흐름 → 배당 매력 종합 판단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n지배구조 → 이사회 독립성 + 지배력 집중 점검 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
+        "guide": "AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.\nWhen: 특정 종목의 재무 심층 분석이 필요할 때.\nHow: axis 로 분석 영역, sub 로 세부 축 지정.\n\"14축 분석 뭐가 있어?\" → c.analysis() (가이드 반환)\n\"수익구조 분석해줘\" → c.analysis(\"financial\", \"수익구조\")\n\"안정성 분석\" → c.analysis(\"financial\", \"안정성\")\n\"가치평가 해줘\" → c.analysis(\"valuation\", \"가치평가\")\n\"매출전망\" → c.analysis(\"forecast\", \"매출전망\")\nVerified:\n수익성 단독 → 마진 시계열 + 전환점 + 반도체 사이클 인과 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n이익품질 + 재무정합성 → 분식회계 가능성 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n가치평가 → 적정주가 범위 + 현재가 대비 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n자본배분 + 현금흐름 → 배당 매력 종합 판단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n지배구조 → 이사회 독립성 + 지배력 집중 점검 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "property",
         "priority": 90,
         "questionTypes": [
@@ -1234,7 +1235,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "select() 반환 객체 — DataFrame 위임 + 체이닝."
     },
     "Story": {
-        "guide": "When: 종목의 종합 분석 보고서가 필요할 때.\nHow: 11 타입 중 선택 — full(전체), executive(경영진 요약), credit(신용),\nvaluation(가치평가), growth(성장), crisis(위기), audit(감사),\ndividend(배당), governance(지배구조), macro(매크로), thesis(투자논제).\nVerified:\ncredit 타입 → credit + analysis(안정성,현금흐름,자금조달) 조합 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\naudit 타입 → analysis(이익품질,재무정합성) + 감사의견 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ngovernance 타입 → analysis(지배구조,공시변화) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ndividend 타입 → analysis(수익구조,현금흐름,자본배분) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nvaluation 타입 → analysis(가치평가) + quant (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nthesis 타입 → macro + analysis 복합 근거 수집 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nanalysis : 재무 심층 분석 — story 의 주요 데이터 공급원.\ncredit : 신용 분석 — story credit 타입의 핵심 엔진.\nscan : 전종목 비교 — 동종업계 비교 블록 제공.\nquant : 기술적 분석 — 가격 기반 신호 블록 제공.\nmacro : 거시 분석 — 매크로 환경 블록 제공.",
+        "guide": "AI 역할: AI는 story를 검증된 engine output을 보고서 섹션으로 조립하는 엔진으로 보고 원자료 없이 새 claim을 만들지 않는다.\nWhen: 종목의 종합 분석 보고서가 필요할 때.\nHow: 11 타입 중 선택 — full(전체), executive(경영진 요약), credit(신용),\nvaluation(가치평가), growth(성장), crisis(위기), audit(감사),\ndividend(배당), governance(지배구조), macro(매크로), thesis(투자논제).\nVerified:\ncredit 타입 → credit + analysis(안정성,현금흐름,자금조달) 조합 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\naudit 타입 → analysis(이익품질,재무정합성) + 감사의견 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ngovernance 타입 → analysis(지배구조,공시변화) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ndividend 타입 → analysis(수익구조,현금흐름,자본배분) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nvaluation 타입 → analysis(가치평가) + quant (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nthesis 타입 → macro + analysis 복합 근거 수집 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nanalysis : 재무 심층 분석 — story 의 주요 데이터 공급원.\ncredit : 신용 분석 — story credit 타입의 핵심 엔진.\nscan : 전종목 비교 — 동종업계 비교 블록 제공.\nquant : 기술적 분석 — 가격 기반 신호 블록 제공.\nmacro : 거시 분석 — 매크로 환경 블록 제공.",
         "kind": "class",
         "returnSchema": [
             {
@@ -1593,6 +1594,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         }
     },
     "analysis": {
+        "guide": "AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.",
         "kind": "module",
         "summary": "Analysis 엔진 — L2 분석 모듈 통합."
     },
@@ -1661,7 +1663,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "dartlab 전역 설정."
     },
     "credit": {
-        "guide": "When: 종목의 부도 위험·재무 건전성을 독립 평가할 때.\nHow: credit 단독으로 종합 등급 확인 → analysis(안정성, 현금흐름) 와 함께 심층 진단.\nstory credit 타입이 credit + analysis(안정성) + analysis(현금흐름) + analysis(자금조달) 순서로 조합.\nVerified:\ncredit 단독 → dCR 등급 + 7축 위험점수 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ncredit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nanalysis : 재무 심층 분석 — 안정성·현금흐름 축이 credit 과 상호 보완.\nscan : 전종목 재무건전성 비교.",
+        "guide": "AI 역할: AI는 credit을 상환능력·재무건전성 판단 엔진으로 보고 부채, 현금흐름, 이자보상, 만기 근거를 요구한다.\nWhen: 종목의 부도 위험·재무 건전성을 독립 평가할 때.\nHow: credit 단독으로 종합 등급 확인 → analysis(안정성, 현금흐름) 와 함께 심층 진단.\nstory credit 타입이 credit + analysis(안정성) + analysis(현금흐름) + analysis(자금조달) 순서로 조합.\nVerified:\ncredit 단독 → dCR 등급 + 7축 위험점수 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ncredit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nanalysis : 재무 심층 분석 — 안정성·현금흐름 축이 credit 과 상호 보완.\nscan : 전종목 재무건전성 비교.",
         "kind": "function",
         "returnSchema": [
             {
@@ -1761,7 +1763,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "HuggingFace에서 전체 시장 데이터 다운로드."
     },
     "gather": {
-        "guide": "When: 분석 엔진에 필요한 외부 데이터를 수집할 때.\nHow: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천.\ngather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과).\nVerified:\ngather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nquant : 주가 기반 정량 분석 — gather(\"price\") 데이터 소비.\nmacro : 거시 분석 — gather(\"macro\") raw 데이터의 분석 결과.\nscan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완.",
+        "guide": "AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다.\nWhen: 분석 엔진에 필요한 외부 데이터를 수집할 때.\nHow: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천.\ngather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과).\nVerified:\ngather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nquant : 주가 기반 정량 분석 — gather(\"price\") 데이터 소비.\nmacro : 거시 분석 — gather(\"macro\") raw 데이터의 분석 결과.\nscan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완.",
         "kind": "function",
         "returnSchema": [
             {
@@ -2212,6 +2214,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "업종"
     },
     "industry": {
+        "guide": "AI 역할: AI는 industry를 섹터/밸류체인 맥락 엔진으로 보고 기업 지표와 산업 driver를 분리해 연결한다.\nWhen: 개별 기업 지표를 산업 공정, 밸류체인, peer 맥락으로 해석할 때.\nHow: industry() 로 산업 목록 확인 → industry(industryId) 로 공정별 기업 위치 확인 → analysis/scan 근거와 연결.",
         "kind": "function",
         "returnSchema": [
             {
@@ -2396,7 +2399,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "목록 조회 단일 진입점."
     },
     "macro": {
-        "guide": "When: 종목 분석 전 경제 환경을 먼저 파악할 때. Company 없이 사용 가능.\nHow: 6막 인과의 최상위 — macro(사이클) → scan(업종) → analysis(기업) 순서.\nstory macro/crisis 타입이 macro 종합 → analysis(안정성, 현금흐름) 순서로 조합.\nVerified:\nmacro(\"사이클\") → CLI + 사분면 + 금리 + 유동성 + 심리 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nmacro + analysis 조합 → 경제 고려한 논제 검증 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nscan : 전종목 횡단 — macro 사이클에 따른 업종별 영향 비교.\nquant : 시장 심리·변동성 — macro 사이클과 교차 분석.\nanalysis : 개별 기업 재무 — macro 환경 하에서 기업 건전성 판단.",
+        "guide": "AI 역할: AI는 macro를 시장 환경과 기업/섹터 해석을 연결하는 엔진으로 보고 asOf, 지표, 방향성 근거를 고정한다.\nWhen: 종목 분석 전 경제 환경을 먼저 파악할 때. Company 없이 사용 가능.\nHow: 6막 인과의 최상위 — macro(사이클) → scan(업종) → analysis(기업) 순서.\nstory macro/crisis 타입이 macro 종합 → analysis(안정성, 현금흐름) 순서로 조합.\nVerified:\nmacro(\"사이클\") → CLI + 사분면 + 금리 + 유동성 + 심리 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nmacro + analysis 조합 → 경제 고려한 논제 검증 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nscan : 전종목 횡단 — macro 사이클에 따른 업종별 영향 비교.\nquant : 시장 심리·변동성 — macro 사이클과 교차 분석.\nanalysis : 개별 기업 재무 — macro 환경 하에서 기업 건전성 판단.",
         "kind": "function",
         "returnSchema": [
             {
@@ -2508,7 +2511,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": ""
     },
     "quant": {
-        "guide": "When: 주가 기반 기술적 신호·팩터·리스크를 정량 분석할 때.\nHow: quant(\"판단\") 으로 종합 신호 확인 → 세부 축으로 근거 파악.\nquant(\"벤치마크\") 로 시장·섹터·스타일 benchmarkStack 을 확인한다.\nbeta/residual/factor/BAB 는 기본 market mode를 유지하고,\nbenchmarkMode=\"sector\" 또는 \"style\" 로 상대 기준을 명시 전환한다.\nanalysis(재무) + quant(기술) 조합이 story full/valuation 타입의 핵심.\ncredit 과 함께 사용 시 altman/piotroski 로 부도 위험 교차 검증.\nVerified:\nquant(\"판단\") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nquant(\"베타\", benchmarkMode=\"sector\") → KRX 섹터 지수 대비 beta.\n\nSee Also\nanalysis : 재무 인과 분석 — quant 기술 + analysis 재무 조합.\ngather : 주가·수급 데이터 수집 — quant 의 데이터 원천.\nscan : 전종목 횡단 비교.",
+        "guide": "AI 역할: AI는 quant를 가격·팩터·시계열 신호 엔진으로 보고 기간, benchmark, 수익률/변동성 근거를 분리한다.\nWhen: 주가 기반 기술적 신호·팩터·리스크를 정량 분석할 때.\nHow: quant(\"판단\") 으로 종합 신호 확인 → 세부 축으로 근거 파악.\nquant(\"벤치마크\") 로 시장·섹터·스타일 benchmarkStack 을 확인한다.\nbeta/residual/factor/BAB 는 기본 market mode를 유지하고,\nbenchmarkMode=\"sector\" 또는 \"style\" 로 상대 기준을 명시 전환한다.\nanalysis(재무) + quant(기술) 조합이 story full/valuation 타입의 핵심.\ncredit 과 함께 사용 시 altman/piotroski 로 부도 위험 교차 검증.\nVerified:\nquant(\"판단\") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nquant(\"베타\", benchmarkMode=\"sector\") → KRX 섹터 지수 대비 beta.\n\nSee Also\nanalysis : 재무 인과 분석 — quant 기술 + analysis 재무 조합.\ngather : 주가·수급 데이터 수집 — quant 의 데이터 원천.\nscan : 전종목 횡단 비교.",
         "kind": "function",
         "returnSchema": [
             {
@@ -2579,7 +2582,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "가격 기반 정량 분석 — 8 그룹 30+ 축 (기술·리스크·팩터·백테스트·알파)."
     },
     "scan": {
-        "guide": "When: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.\nHow: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.\nstory credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.\n조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서.\n단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.\nVerified:\nscan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)\n\nSee Also\nanalysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석.",
+        "guide": "AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다.\nWhen: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.\nHow: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.\nstory credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.\n조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서.\n단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.\nVerified:\nscan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)\n\nSee Also\nanalysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석.",
         "kind": "function",
         "returnSchema": [
             {
