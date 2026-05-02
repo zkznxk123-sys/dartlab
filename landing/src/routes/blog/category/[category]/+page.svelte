@@ -126,7 +126,7 @@
 			<div class="category-footer-actions">
 				<a href="{base}/docs/getting-started/quickstart" class="category-footer-link">Quickstart 보기</a>
 				<a href="{base}/docs/getting-started/installation" class="category-footer-link muted">설치 가이드</a>
-				<a href="{base}/docs/api/overview" class="category-footer-link muted">API Overview</a>
+				<a href="https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md" target="_blank" rel="noopener" class="category-footer-link muted">Capability Reference</a>
 				<a href="{base}/blog/" class="category-footer-link muted">블로그 허브</a>
 			</div>
 		</section>

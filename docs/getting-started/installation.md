@@ -235,5 +235,5 @@ Data is downloaded from HuggingFace, so speed depends on your network connection
 ## Next Steps
 
 - [Quick Start](./quickstart) — Full feature walkthrough
-- [API Overview](../api/overview) — Complete property list
-
+- [Skill Catalog](/skills) — searchable procedures, runtime notes, and capability links
+- [Capability Reference](https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md) — generated API capability map

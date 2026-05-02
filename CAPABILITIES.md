@@ -65,6 +65,11 @@ EDGAR: 인터넷 연결 (On-demand 수집).
 사람은 Company 객체 하나로 노트북·스크립트에서 모든 엔진 호출.
 엔진은 사람의 분석엔진이자 AI 의 skill (docstring SSOT) — 한 파일 두 역할.
 **Guide:** AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다.
+데이터 기본기: Company 경로는 target, provider(DART/EDGAR), topic,
+source, period 를 먼저 고정하고, 이 원자료 ref 를 analysis · credit ·
+story 같은 응용 엔진으로 넘긴다.
+Handoff: 최신 주가/뉴스/거시 원자료가 필요하면 gather 로 보강하고,
+peer/rank/universe 비교가 필요하면 scan 으로 넘어간다.
 "삼성전자 재무제표" -> c = Company("005930"); c.show("IS")
 "사업 개요 보여줘" -> c.show("businessOverview")
 "어떤 데이터 있어?" -> c.index 또는 c.topics

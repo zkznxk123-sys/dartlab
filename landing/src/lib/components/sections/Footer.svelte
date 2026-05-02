@@ -5,7 +5,8 @@
 	const footerLinks = {
 		'제품': [
 			{ label: '시작하기', href: `${base}/docs/` },
-			{ label: 'API 레퍼런스', href: `${base}/docs/api/overview` },
+			{ label: 'Skill Catalog', href: `${base}/skills` },
+			{ label: 'Capability Reference', href: `${brand.repo}/blob/master/CAPABILITIES.md` },
 			{ label: '릴리즈', href: `${brand.repo}/releases` },
 			{ label: 'PyPI', href: brand.pypi }
 		],

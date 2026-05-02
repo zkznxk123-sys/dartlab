@@ -150,124 +150,17 @@
       ]
     },
     {
-      "id": "engines.analysisUsage",
-      "title": "analysis 엔진 재무 인과 사용 지도",
+      "id": "engines.dataEngineFoundation",
+      "title": "데이터 엔진 기본기",
       "category": "engines",
       "status": "limited",
       "dataSources": [
-        "HuggingFace dartlab-data finance-lite"
+        "HuggingFace dartlab-data snapshot",
+        "packaged scan finance-lite snapshot"
       ],
       "requiredSetup": [],
       "limitations": [
-        "전체 서버 finance 축과 동일한 coverage를 보장하지 않는다."
-      ]
-    },
-    {
-      "id": "engines.companyRouterUsage",
-      "title": "Company 엔진 라우터 사용 지도",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data snapshot"
-      ],
-      "requiredSetup": [],
-      "limitations": [
-        "EDGAR live filing과 일부 네트워크 수집은 서버 경유가 필요할 수 있다."
-      ]
-    },
-    {
-      "id": "engines.creditUsage",
-      "title": "credit 엔진 신용위험 사용 지도",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data finance-lite"
-      ],
-      "requiredSetup": [],
-      "limitations": [
-        "full DART report 기반 공시 리스크는 서버 coverage와 다를 수 있다."
-      ]
-    },
-    {
-      "id": "engines.gatherUsage",
-      "title": "gather 엔진 데이터 수집 사용 지도",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "외부 네트워크 provider와 CORS 제약이 있을 수 있다.",
-        "서버 snapshot이 없는 최신 데이터는 unavailable 처리한다."
-      ]
-    },
-    {
-      "id": "engines.industryUsage",
-      "title": "industry 엔진 산업맥락 사용 지도",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [
-        "packaged taxonomy snapshot"
-      ],
-      "requiredSetup": [],
-      "limitations": [
-        "공정별 재무 summary는 finance snapshot coverage를 따른다."
-      ]
-    },
-    {
-      "id": "engines.macroUsage",
-      "title": "macro 엔진 거시 환경 사용 지도",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "실시간 FRED/ECOS 접근과 장기 시계열은 서버 경유가 필요할 수 있다."
-      ]
-    },
-    {
-      "id": "engines.quantUsage",
-      "title": "quant 엔진 가격·팩터 사용 지도",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "최신 price provider 접근과 긴 시계열 수집은 서버 경유가 필요할 수 있다."
-      ]
-    },
-    {
-      "id": "engines.scanUsage",
-      "title": "scan 엔진 사용 지도",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
-      ],
-      "requiredSetup": [],
-      "limitations": [
-        "전체 서버 scan과 동일한 축을 보장하지 않는다."
-      ]
-    },
-    {
-      "id": "engines.storyUsage",
-      "title": "story 엔진 보고서 조합 사용 지도",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "HTML/rich 렌더링과 full source engine 실행은 환경별로 다르다."
-      ]
-    },
-    {
-      "id": "engines.visualUsage",
-      "title": "viz 엔진 표 기반 시각화 사용 지도",
-      "category": "engines",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "chart source table이 브라우저 메모리에 있어야 한다."
+        "live EDGAR, 외부 market provider, full scan 축은 서버와 coverage가 다를 수 있다."
       ]
     },
     {

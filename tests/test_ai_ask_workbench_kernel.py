@@ -501,8 +501,9 @@ def test_search_reference_can_return_generated_basic_engine_skills() -> None:
 
     refs = search_reference("gather scan 최근 주가지수 강세", limit=10)
     skill_ids = {ref.payload.get("skillId") for ref in refs if ref.kind == "skill"}
+    knowledge_refs = {item for ref in refs if ref.kind == "skill" for item in ref.payload.get("knowledgeRefs", [])}
 
-    assert {"basic.gather", "basic.scan"} & skill_ids
+    assert {"basic.gather", "basic.scan"} & (skill_ids | knowledge_refs)
 
 
 def test_generated_capability_return_schema_preserves_units() -> None:

@@ -17,6 +17,7 @@
         "Company.analysis"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -40,7 +41,7 @@
           ]
         }
       },
-      "url": "/docs/skills/basic/basic-analysis"
+      "sourcePath": "generated:basic.analysis"
     },
     {
       "id": "basic.company",
@@ -51,7 +52,7 @@
       "purpose": "DartLab `company` 엔진의 역할과 capability 묶음을 찾기 위한 generated basic engine skill.",
       "whenToUse": [
         "AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다.",
-        "**사람의 최상위 관문** — 종목 하나의 모든 엔진에 접근하는 파사드. / AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다. \"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\") \"사업 개요 보여줘\" -> c.show(\"businessOverview\") \"어떤 데이터 있어?\" -> c.index 또는 c.topics \"출처 추적\" -> c.trac",
+        "**사람의 최상위 관문** — 종목 하나의 모든 엔진에 접근하는 파사드. / AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다. 데이터 기본기: Company 경로는 target, provider(DART/EDGAR), topic, source, period 를 먼저 고정하고, 이 원자료 ref 를 analysis · credit · story 같은 응용 엔진으로 넘긴다. Handoff:",
         "재무제표 완전 분석 — 14축, 단일 종목 심층 (내부 구현). / AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다. When: 특정 종목의 재무 심층 분석이 필요할 때. How: axis 로 분석 영역, sub 로 세부 축 지정. \"14축 분석 뭐가 있어?\" → c.analysis() (가이드 반환) \"수익구조 분석해줘\" → c.analysis(\"finan",
         "LLM에게 이 기업에 대해 질문. / \"영업이익률 분석해줘\" → c.ask(\"영업이익률 추세는?\") \"AI한테 질문하고 싶어\" → c.ask(\"질문\") \"스트리밍으로 답변받기\" → c.ask(\"질문\", stream=True)",
         "감사 리스크 종합 분석. / \"감사의견 확인\" → c.audit() \"감사인 바뀌었어?\" → c.audit()[\"auditorChanges\"] \"계속기업 의문은?\" → c.audit()[\"goingConcern\"]",
@@ -120,6 +121,7 @@
         "Company.workforce"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -143,7 +145,7 @@
           ]
         }
       },
-      "url": "/docs/skills/basic/basic-company"
+      "sourcePath": "generated:basic.company"
     },
     {
       "id": "basic.credit",
@@ -162,6 +164,7 @@
         "Company.credit"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -185,7 +188,7 @@
           ]
         }
       },
-      "url": "/docs/skills/basic/basic-credit"
+      "sourcePath": "generated:basic.credit"
     },
     {
       "id": "basic.gather",
@@ -196,7 +199,7 @@
       "purpose": "DartLab `gather` 엔진의 역할과 capability 묶음을 찾기 위한 generated basic engine skill.",
       "whenToUse": [
         "AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다.",
-        "외부 시장 데이터 수집 — 주가·수급·거시지표·뉴스 4 축. / AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다. When: 분석 엔진에 필요한 외부 데이터를 수집할 때. How: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천. gather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석",
+        "외부 시장 데이터 수집 — 주가·수급·거시지표·뉴스 4 축. / AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다. 데이터 기본기: gather 경로는 provider, latestAsOf, metric, period, raw table 을 먼저 evidence 로 남긴다. 수집 실패나 빈 결과는 unavailable 로 공개하고 추정값으로 채우지 않는다. When: 분석 엔진에 필",
         "수급",
         "내부자거래",
         "KRX 회사별 시계열",
@@ -218,6 +221,7 @@
         "gather.sector"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -241,7 +245,7 @@
           ]
         }
       },
-      "url": "/docs/skills/basic/basic-gather"
+      "sourcePath": "generated:basic.gather"
     },
     {
       "id": "basic.industry",
@@ -262,6 +266,7 @@
         "scan.industry"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -285,7 +290,7 @@
           ]
         }
       },
-      "url": "/docs/skills/basic/basic-industry"
+      "sourcePath": "generated:basic.industry"
     },
     {
       "id": "basic.macro",
@@ -321,6 +326,7 @@
         "macro.trade"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -344,7 +350,7 @@
           ]
         }
       },
-      "url": "/docs/skills/basic/basic-macro"
+      "sourcePath": "generated:basic.macro"
     },
     {
       "id": "basic.quant",
@@ -363,6 +369,7 @@
         "Company.quant"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -386,7 +393,7 @@
           ]
         }
       },
-      "url": "/docs/skills/basic/basic-quant"
+      "sourcePath": "generated:basic.quant"
     },
     {
       "id": "basic.scan",
@@ -397,7 +404,7 @@
       "purpose": "DartLab `scan` 엔진의 역할과 capability 묶음을 찾기 위한 generated basic engine skill.",
       "whenToUse": [
         "AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다.",
-        "축(axis)별 전종목 횡단분석. / AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다. When: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때. How: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석. story credit/governance/audit 타입에서 scan 데이터를 동종업계 비",
+        "축(axis)별 전종목 횡단분석. / AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다. 데이터 기본기: scan 경로는 universe, metric, period, rank, table 을 먼저 evidence 로 남긴다. 조건 검색은 scan(\"fields\") 로 가능한 field 를 확인한 뒤 scan(\"screen\") 으로 구성한다. ",
         "계정",
         "감사리스크",
         "주주환원",
@@ -432,6 +439,7 @@
         "scan.workforce"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -455,7 +463,7 @@
           ]
         }
       },
-      "url": "/docs/skills/basic/basic-scan"
+      "sourcePath": "generated:basic.scan"
     },
     {
       "id": "basic.story",
@@ -476,6 +484,7 @@
         "Company.storyTree"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -499,7 +508,7 @@
           ]
         }
       },
-      "url": "/docs/skills/basic/basic-story"
+      "sourcePath": "generated:basic.story"
     },
     {
       "id": "basic.viz",
@@ -516,6 +525,7 @@
         "ChartResult"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -539,7 +549,7 @@
           ]
         }
       },
-      "url": "/docs/skills/basic/basic-viz"
+      "sourcePath": "generated:basic.viz"
     },
     {
       "id": "capability:ChartResult",
@@ -556,6 +566,7 @@
         "ChartResult"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -581,7 +592,7 @@
           "capabilityRef": "ChartResult"
         }
       },
-      "url": "/docs/skills/capability/capability-ChartResult"
+      "sourcePath": "generated:capability:ChartResult"
     },
     {
       "id": "capability:Company",
@@ -592,12 +603,13 @@
       "purpose": "공개 capability `Company`를 찾고 실행에 연결하기 위한 generated skill view.",
       "whenToUse": [
         "**사람의 최상위 관문** — 종목 하나의 모든 엔진에 접근하는 파사드.",
-        "AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다. \"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\") \"사업 개요 보여줘\" -> c.show(\"businessOverview\") \"어떤 데이터 있어?\" -> c.index 또는 c.topics \"출처 추적\" -> c.trace(\"revenue\") \"기간 변화\" -> c.diff() \"종합평가\" -> c.analysis(\"financial\", \"종합평가\") \"스토리 보고서\" -> c.story() \"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)"
+        "AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다. 데이터 기본기: Company 경로는 target, provider(DART/EDGAR), topic, source, period 를 먼저 고정하고, 이 원자료 ref 를 analysis · credit · story 같은 응용 엔진으로 넘긴다. Handoff: 최신 주가/뉴스/거시 원자료가 필요하면 gather 로 보강하고, peer/rank/universe 비교가 필요하면 scan 으로 넘어간다. \"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\") \"사업 개요 보여줘\" -> c.show(\"businessOverview\") \"어떤 데이터 있어?\" -> c.index 또는 c.topics \"출처 추적\" -> c.trace(\"revenue\") \"기간 변화\" -> c.diff() \"종합평가\" -> c.analysis("
       ],
       "capabilityRefs": [
         "Company"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -623,7 +635,7 @@
           "capabilityRef": "Company"
         }
       },
-      "url": "/docs/skills/capability/capability-Company"
+      "sourcePath": "generated:capability:Company"
     },
     {
       "id": "capability:Company.analysis",
@@ -640,6 +652,7 @@
         "Company.analysis"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -665,7 +678,7 @@
           "capabilityRef": "Company.analysis"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-analysis"
+      "sourcePath": "generated:capability:Company.analysis"
     },
     {
       "id": "capability:Company.ask",
@@ -682,6 +695,7 @@
         "Company.ask"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -707,7 +721,7 @@
           "capabilityRef": "Company.ask"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-ask"
+      "sourcePath": "generated:capability:Company.ask"
     },
     {
       "id": "capability:Company.audit",
@@ -724,6 +738,7 @@
         "Company.audit"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -749,7 +764,7 @@
           "capabilityRef": "Company.audit"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-audit"
+      "sourcePath": "generated:capability:Company.audit"
     },
     {
       "id": "capability:Company.canHandle",
@@ -765,6 +780,7 @@
         "Company.canHandle"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -790,7 +806,7 @@
           "capabilityRef": "Company.canHandle"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-canHandle"
+      "sourcePath": "generated:capability:Company.canHandle"
     },
     {
       "id": "capability:Company.capital",
@@ -807,6 +823,7 @@
         "Company.capital"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -832,7 +849,7 @@
           "capabilityRef": "Company.capital"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-capital"
+      "sourcePath": "generated:capability:Company.capital"
     },
     {
       "id": "capability:Company.causalWeights",
@@ -849,6 +866,7 @@
         "Company.causalWeights"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -874,7 +892,7 @@
           "capabilityRef": "Company.causalWeights"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-causalWeights"
+      "sourcePath": "generated:capability:Company.causalWeights"
     },
     {
       "id": "capability:Company.codeName",
@@ -890,6 +908,7 @@
         "Company.codeName"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -915,7 +934,7 @@
           "capabilityRef": "Company.codeName"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-codeName"
+      "sourcePath": "generated:capability:Company.codeName"
     },
     {
       "id": "capability:Company.contextSlices",
@@ -932,6 +951,7 @@
         "Company.contextSlices"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -957,7 +977,7 @@
           "capabilityRef": "Company.contextSlices"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-contextSlices"
+      "sourcePath": "generated:capability:Company.contextSlices"
     },
     {
       "id": "capability:Company.credit",
@@ -974,6 +994,7 @@
         "Company.credit"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -999,7 +1020,7 @@
           "capabilityRef": "Company.credit"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-credit"
+      "sourcePath": "generated:capability:Company.credit"
     },
     {
       "id": "capability:Company.currency",
@@ -1015,6 +1036,7 @@
         "Company.currency"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1040,7 +1062,7 @@
           "capabilityRef": "Company.currency"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-currency"
+      "sourcePath": "generated:capability:Company.currency"
     },
     {
       "id": "capability:Company.debt",
@@ -1057,6 +1079,7 @@
         "Company.debt"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1082,7 +1105,7 @@
           "capabilityRef": "Company.debt"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-debt"
+      "sourcePath": "generated:capability:Company.debt"
     },
     {
       "id": "capability:Company.diff",
@@ -1099,6 +1122,7 @@
         "Company.diff"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1124,7 +1148,7 @@
           "capabilityRef": "Company.diff"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-diff"
+      "sourcePath": "generated:capability:Company.diff"
     },
     {
       "id": "capability:Company.disclosure",
@@ -1141,6 +1165,7 @@
         "Company.disclosure"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1166,7 +1191,7 @@
           "capabilityRef": "Company.disclosure"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-disclosure"
+      "sourcePath": "generated:capability:Company.disclosure"
     },
     {
       "id": "capability:Company.facts",
@@ -1182,6 +1207,7 @@
         "Company.facts"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1207,7 +1233,7 @@
           "capabilityRef": "Company.facts"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-facts"
+      "sourcePath": "generated:capability:Company.facts"
     },
     {
       "id": "capability:Company.filings",
@@ -1224,6 +1250,7 @@
         "Company.filings"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1249,7 +1276,7 @@
           "capabilityRef": "Company.filings"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-filings"
+      "sourcePath": "generated:capability:Company.filings"
     },
     {
       "id": "capability:Company.fiscalYearEnd",
@@ -1265,6 +1292,7 @@
         "Company.fiscalYearEnd"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1290,7 +1318,7 @@
           "capabilityRef": "Company.fiscalYearEnd"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-fiscalYearEnd"
+      "sourcePath": "generated:capability:Company.fiscalYearEnd"
     },
     {
       "id": "capability:Company.gather",
@@ -1307,6 +1335,7 @@
         "Company.gather"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1332,7 +1361,7 @@
           "capabilityRef": "Company.gather"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-gather"
+      "sourcePath": "generated:capability:Company.gather"
     },
     {
       "id": "capability:Company.governance",
@@ -1349,6 +1378,7 @@
         "Company.governance"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1374,7 +1404,7 @@
           "capabilityRef": "Company.governance"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-governance"
+      "sourcePath": "generated:capability:Company.governance"
     },
     {
       "id": "capability:Company.index",
@@ -1391,6 +1421,7 @@
         "Company.index"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1416,7 +1447,7 @@
           "capabilityRef": "Company.index"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-index"
+      "sourcePath": "generated:capability:Company.index"
     },
     {
       "id": "capability:Company.industry",
@@ -1432,6 +1463,7 @@
         "Company.industry"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1457,7 +1489,7 @@
           "capabilityRef": "Company.industry"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-industry"
+      "sourcePath": "generated:capability:Company.industry"
     },
     {
       "id": "capability:Company.keywordTrend",
@@ -1474,6 +1506,7 @@
         "Company.keywordTrend"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1499,7 +1532,7 @@
           "capabilityRef": "Company.keywordTrend"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-keywordTrend"
+      "sourcePath": "generated:capability:Company.keywordTrend"
     },
     {
       "id": "capability:Company.listing",
@@ -1515,6 +1548,7 @@
         "Company.listing"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1540,7 +1574,7 @@
           "capabilityRef": "Company.listing"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-listing"
+      "sourcePath": "generated:capability:Company.listing"
     },
     {
       "id": "capability:Company.liveFilings",
@@ -1557,6 +1591,7 @@
         "Company.liveFilings"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1582,7 +1617,7 @@
           "capabilityRef": "Company.liveFilings"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-liveFilings"
+      "sourcePath": "generated:capability:Company.liveFilings"
     },
     {
       "id": "capability:Company.macro",
@@ -1599,6 +1634,7 @@
         "Company.macro"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1624,7 +1660,7 @@
           "capabilityRef": "Company.macro"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-macro"
+      "sourcePath": "generated:capability:Company.macro"
     },
     {
       "id": "capability:Company.market",
@@ -1640,6 +1676,7 @@
         "Company.market"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1665,7 +1702,7 @@
           "capabilityRef": "Company.market"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-market"
+      "sourcePath": "generated:capability:Company.market"
     },
     {
       "id": "capability:Company.narrativeDiff",
@@ -1682,6 +1719,7 @@
         "Company.narrativeDiff"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1707,7 +1745,7 @@
           "capabilityRef": "Company.narrativeDiff"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-narrativeDiff"
+      "sourcePath": "generated:capability:Company.narrativeDiff"
     },
     {
       "id": "capability:Company.network",
@@ -1724,6 +1762,7 @@
         "Company.network"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1749,7 +1788,7 @@
           "capabilityRef": "Company.network"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-network"
+      "sourcePath": "generated:capability:Company.network"
     },
     {
       "id": "capability:Company.news",
@@ -1766,6 +1805,7 @@
         "Company.news"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1791,7 +1831,7 @@
           "capabilityRef": "Company.news"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-news"
+      "sourcePath": "generated:capability:Company.news"
     },
     {
       "id": "capability:Company.priority",
@@ -1807,6 +1847,7 @@
         "Company.priority"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1832,7 +1873,7 @@
           "capabilityRef": "Company.priority"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-priority"
+      "sourcePath": "generated:capability:Company.priority"
     },
     {
       "id": "capability:Company.quant",
@@ -1849,6 +1890,7 @@
         "Company.quant"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1874,7 +1916,7 @@
           "capabilityRef": "Company.quant"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-quant"
+      "sourcePath": "generated:capability:Company.quant"
     },
     {
       "id": "capability:Company.rank",
@@ -1891,6 +1933,7 @@
         "Company.rank"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1916,7 +1959,7 @@
           "capabilityRef": "Company.rank"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-rank"
+      "sourcePath": "generated:capability:Company.rank"
     },
     {
       "id": "capability:Company.rawDocs",
@@ -1933,6 +1976,7 @@
         "Company.rawDocs"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -1958,7 +2002,7 @@
           "capabilityRef": "Company.rawDocs"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-rawDocs"
+      "sourcePath": "generated:capability:Company.rawDocs"
     },
     {
       "id": "capability:Company.rawFinance",
@@ -1975,6 +2019,7 @@
         "Company.rawFinance"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2000,7 +2045,7 @@
           "capabilityRef": "Company.rawFinance"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-rawFinance"
+      "sourcePath": "generated:capability:Company.rawFinance"
     },
     {
       "id": "capability:Company.rawReport",
@@ -2017,6 +2062,7 @@
         "Company.rawReport"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2042,7 +2088,7 @@
           "capabilityRef": "Company.rawReport"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-rawReport"
+      "sourcePath": "generated:capability:Company.rawReport"
     },
     {
       "id": "capability:Company.readFiling",
@@ -2059,6 +2105,7 @@
         "Company.readFiling"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2084,7 +2131,7 @@
           "capabilityRef": "Company.readFiling"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-readFiling"
+      "sourcePath": "generated:capability:Company.readFiling"
     },
     {
       "id": "capability:Company.resolve",
@@ -2100,6 +2147,7 @@
         "Company.resolve"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2125,7 +2173,7 @@
           "capabilityRef": "Company.resolve"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-resolve"
+      "sourcePath": "generated:capability:Company.resolve"
     },
     {
       "id": "capability:Company.retrievalBlocks",
@@ -2142,6 +2190,7 @@
         "Company.retrievalBlocks"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2167,7 +2216,7 @@
           "capabilityRef": "Company.retrievalBlocks"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-retrievalBlocks"
+      "sourcePath": "generated:capability:Company.retrievalBlocks"
     },
     {
       "id": "capability:Company.search",
@@ -2183,6 +2232,7 @@
         "Company.search"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2208,7 +2258,7 @@
           "capabilityRef": "Company.search"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-search"
+      "sourcePath": "generated:capability:Company.search"
     },
     {
       "id": "capability:Company.sections",
@@ -2225,6 +2275,7 @@
         "Company.sections"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2250,7 +2301,7 @@
           "capabilityRef": "Company.sections"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-sections"
+      "sourcePath": "generated:capability:Company.sections"
     },
     {
       "id": "capability:Company.sector",
@@ -2267,6 +2318,7 @@
         "Company.sector"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2292,7 +2344,7 @@
           "capabilityRef": "Company.sector"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-sector"
+      "sourcePath": "generated:capability:Company.sector"
     },
     {
       "id": "capability:Company.sectorParams",
@@ -2309,6 +2361,7 @@
         "Company.sectorParams"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2334,7 +2387,7 @@
           "capabilityRef": "Company.sectorParams"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-sectorParams"
+      "sourcePath": "generated:capability:Company.sectorParams"
     },
     {
       "id": "capability:Company.select",
@@ -2350,6 +2403,7 @@
         "Company.select"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2375,7 +2429,7 @@
           "capabilityRef": "Company.select"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-select"
+      "sourcePath": "generated:capability:Company.select"
     },
     {
       "id": "capability:Company.show",
@@ -2392,6 +2446,7 @@
         "Company.show"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2417,7 +2472,7 @@
           "capabilityRef": "Company.show"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-show"
+      "sourcePath": "generated:capability:Company.show"
     },
     {
       "id": "capability:Company.sources",
@@ -2434,6 +2489,7 @@
         "Company.sources"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2459,7 +2515,7 @@
           "capabilityRef": "Company.sources"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-sources"
+      "sourcePath": "generated:capability:Company.sources"
     },
     {
       "id": "capability:Company.status",
@@ -2475,6 +2531,7 @@
         "Company.status"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2500,7 +2557,7 @@
           "capabilityRef": "Company.status"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-status"
+      "sourcePath": "generated:capability:Company.status"
     },
     {
       "id": "capability:Company.story",
@@ -2517,6 +2574,7 @@
         "Company.story"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2542,7 +2600,7 @@
           "capabilityRef": "Company.story"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-story"
+      "sourcePath": "generated:capability:Company.story"
     },
     {
       "id": "capability:Company.storyTree",
@@ -2559,6 +2617,7 @@
         "Company.storyTree"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2584,7 +2643,7 @@
           "capabilityRef": "Company.storyTree"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-storyTree"
+      "sourcePath": "generated:capability:Company.storyTree"
     },
     {
       "id": "capability:Company.table",
@@ -2601,6 +2660,7 @@
         "Company.table"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2626,7 +2686,7 @@
           "capabilityRef": "Company.table"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-table"
+      "sourcePath": "generated:capability:Company.table"
     },
     {
       "id": "capability:Company.topicSummaries",
@@ -2642,6 +2702,7 @@
         "Company.topicSummaries"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2667,7 +2728,7 @@
           "capabilityRef": "Company.topicSummaries"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-topicSummaries"
+      "sourcePath": "generated:capability:Company.topicSummaries"
     },
     {
       "id": "capability:Company.topics",
@@ -2684,6 +2745,7 @@
         "Company.topics"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2709,7 +2771,7 @@
           "capabilityRef": "Company.topics"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-topics"
+      "sourcePath": "generated:capability:Company.topics"
     },
     {
       "id": "capability:Company.trace",
@@ -2726,6 +2788,7 @@
         "Company.trace"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2751,7 +2814,7 @@
           "capabilityRef": "Company.trace"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-trace"
+      "sourcePath": "generated:capability:Company.trace"
     },
     {
       "id": "capability:Company.update",
@@ -2768,6 +2831,7 @@
         "Company.update"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2793,7 +2857,7 @@
           "capabilityRef": "Company.update"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-update"
+      "sourcePath": "generated:capability:Company.update"
     },
     {
       "id": "capability:Company.validateStory",
@@ -2809,6 +2873,7 @@
         "Company.validateStory"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2834,7 +2899,7 @@
           "capabilityRef": "Company.validateStory"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-validateStory"
+      "sourcePath": "generated:capability:Company.validateStory"
     },
     {
       "id": "capability:Company.valuationImpact",
@@ -2851,6 +2916,7 @@
         "Company.valuationImpact"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2876,7 +2942,7 @@
           "capabilityRef": "Company.valuationImpact"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-valuationImpact"
+      "sourcePath": "generated:capability:Company.valuationImpact"
     },
     {
       "id": "capability:Company.view",
@@ -2893,6 +2959,7 @@
         "Company.view"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2918,7 +2985,7 @@
           "capabilityRef": "Company.view"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-view"
+      "sourcePath": "generated:capability:Company.view"
     },
     {
       "id": "capability:Company.watch",
@@ -2935,6 +3002,7 @@
         "Company.watch"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -2960,7 +3028,7 @@
           "capabilityRef": "Company.watch"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-watch"
+      "sourcePath": "generated:capability:Company.watch"
     },
     {
       "id": "capability:Company.workforce",
@@ -2977,6 +3045,7 @@
         "Company.workforce"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3002,7 +3071,7 @@
           "capabilityRef": "Company.workforce"
         }
       },
-      "url": "/docs/skills/capability/capability-Company-workforce"
+      "sourcePath": "generated:capability:Company.workforce"
     },
     {
       "id": "capability:Fred",
@@ -3018,6 +3087,7 @@
         "Fred"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3043,7 +3113,7 @@
           "capabilityRef": "Fred"
         }
       },
-      "url": "/docs/skills/capability/capability-Fred"
+      "sourcePath": "generated:capability:Fred"
     },
     {
       "id": "capability:OpenDart",
@@ -3059,6 +3129,7 @@
         "OpenDart"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3084,7 +3155,7 @@
           "capabilityRef": "OpenDart"
         }
       },
-      "url": "/docs/skills/capability/capability-OpenDart"
+      "sourcePath": "generated:capability:OpenDart"
     },
     {
       "id": "capability:OpenEdgar",
@@ -3100,6 +3171,7 @@
         "OpenEdgar"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3125,7 +3197,7 @@
           "capabilityRef": "OpenEdgar"
         }
       },
-      "url": "/docs/skills/capability/capability-OpenEdgar"
+      "sourcePath": "generated:capability:OpenEdgar"
     },
     {
       "id": "capability:SelectResult",
@@ -3141,6 +3213,7 @@
         "SelectResult"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3166,7 +3239,7 @@
           "capabilityRef": "SelectResult"
         }
       },
-      "url": "/docs/skills/capability/capability-SelectResult"
+      "sourcePath": "generated:capability:SelectResult"
     },
     {
       "id": "capability:Story",
@@ -3183,6 +3256,7 @@
         "Story"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3208,7 +3282,7 @@
           "capabilityRef": "Story"
         }
       },
-      "url": "/docs/skills/capability/capability-Story"
+      "sourcePath": "generated:capability:Story"
     },
     {
       "id": "capability:aiContract.capabilities.valid_key",
@@ -3224,6 +3298,7 @@
         "aiContract.capabilities.valid_key"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3249,7 +3324,7 @@
           "capabilityRef": "aiContract.capabilities.valid_key"
         }
       },
-      "url": "/docs/skills/capability/capability-aiContract-capabilities-valid_key"
+      "sourcePath": "generated:capability:aiContract.capabilities.valid_key"
     },
     {
       "id": "capability:aiContract.cashflow.primary",
@@ -3265,6 +3340,7 @@
         "aiContract.cashflow.primary"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3290,7 +3366,7 @@
           "capabilityRef": "aiContract.cashflow.primary"
         }
       },
-      "url": "/docs/skills/capability/capability-aiContract-cashflow-primary"
+      "sourcePath": "generated:capability:aiContract.cashflow.primary"
     },
     {
       "id": "capability:aiContract.comparison.same_axis",
@@ -3306,6 +3382,7 @@
         "aiContract.comparison.same_axis"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3331,7 +3408,7 @@
           "capabilityRef": "aiContract.comparison.same_axis"
         }
       },
-      "url": "/docs/skills/capability/capability-aiContract-comparison-same_axis"
+      "sourcePath": "generated:capability:aiContract.comparison.same_axis"
     },
     {
       "id": "capability:aiContract.disclosure.importance",
@@ -3347,6 +3424,7 @@
         "aiContract.disclosure.importance"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3372,7 +3450,7 @@
           "capabilityRef": "aiContract.disclosure.importance"
         }
       },
-      "url": "/docs/skills/capability/capability-aiContract-disclosure-importance"
+      "sourcePath": "generated:capability:aiContract.disclosure.importance"
     },
     {
       "id": "capability:analysis",
@@ -3389,6 +3467,7 @@
         "analysis"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3414,7 +3493,7 @@
           "capabilityRef": "analysis"
         }
       },
-      "url": "/docs/skills/capability/capability-analysis"
+      "sourcePath": "generated:capability:analysis"
     },
     {
       "id": "capability:ask",
@@ -3431,6 +3510,7 @@
         "ask"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3456,7 +3536,7 @@
           "capabilityRef": "ask"
         }
       },
-      "url": "/docs/skills/capability/capability-ask"
+      "sourcePath": "generated:capability:ask"
     },
     {
       "id": "capability:capabilities",
@@ -3473,6 +3553,7 @@
         "capabilities"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3498,7 +3579,7 @@
           "capabilityRef": "capabilities"
         }
       },
-      "url": "/docs/skills/capability/capability-capabilities"
+      "sourcePath": "generated:capability:capabilities"
     },
     {
       "id": "capability:codeToName",
@@ -3514,6 +3595,7 @@
         "codeToName"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3539,7 +3621,7 @@
           "capabilityRef": "codeToName"
         }
       },
-      "url": "/docs/skills/capability/capability-codeToName"
+      "sourcePath": "generated:capability:codeToName"
     },
     {
       "id": "capability:collect",
@@ -3556,6 +3638,7 @@
         "collect"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3581,7 +3664,7 @@
           "capabilityRef": "collect"
         }
       },
-      "url": "/docs/skills/capability/capability-collect"
+      "sourcePath": "generated:capability:collect"
     },
     {
       "id": "capability:collectAll",
@@ -3598,6 +3681,7 @@
         "collectAll"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3623,7 +3707,7 @@
           "capabilityRef": "collectAll"
         }
       },
-      "url": "/docs/skills/capability/capability-collectAll"
+      "sourcePath": "generated:capability:collectAll"
     },
     {
       "id": "capability:config",
@@ -3639,6 +3723,7 @@
         "config"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3664,7 +3749,7 @@
           "capabilityRef": "config"
         }
       },
-      "url": "/docs/skills/capability/capability-config"
+      "sourcePath": "generated:capability:config"
     },
     {
       "id": "capability:credit",
@@ -3681,6 +3766,7 @@
         "credit"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3706,7 +3792,7 @@
           "capabilityRef": "credit"
         }
       },
-      "url": "/docs/skills/capability/capability-credit"
+      "sourcePath": "generated:capability:credit"
     },
     {
       "id": "capability:dataDir",
@@ -3722,6 +3808,7 @@
         "dataDir"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3747,7 +3834,7 @@
           "capabilityRef": "dataDir"
         }
       },
-      "url": "/docs/skills/capability/capability-dataDir"
+      "sourcePath": "generated:capability:dataDir"
     },
     {
       "id": "capability:downloadAll",
@@ -3764,6 +3851,7 @@
         "downloadAll"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3789,7 +3877,7 @@
           "capabilityRef": "downloadAll"
         }
       },
-      "url": "/docs/skills/capability/capability-downloadAll"
+      "sourcePath": "generated:capability:downloadAll"
     },
     {
       "id": "capability:gather",
@@ -3800,12 +3888,13 @@
       "purpose": "공개 capability `gather`를 찾고 실행에 연결하기 위한 generated skill view.",
       "whenToUse": [
         "외부 시장 데이터 수집 — 주가·수급·거시지표·뉴스 4 축.",
-        "AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다. When: 분석 엔진에 필요한 외부 데이터를 수집할 때. How: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천. gather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과). Verified: gather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님) See Also quant : 주가 기반 정량 분석 — gather(\"price\") 데이터 소비. macro : 거시 분석 — gather(\"macro\") raw 데이터의 분석 결과. scan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완."
+        "AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다. 데이터 기본기: gather 경로는 provider, latestAsOf, metric, period, raw table 을 먼저 evidence 로 남긴다. 수집 실패나 빈 결과는 unavailable 로 공개하고 추정값으로 채우지 않는다. When: 분석 엔진에 필요한 외부 데이터를 수집할 때. How: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천. gather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과). 단일 종목 맥락은 Company 로 target/topic/source 를 고정한 뒤 gather 로 보강하고, 횡단 비교는 scan 결과와 분리해서 연결한다. Verified: gather(\"news\") → 뉴스 목록 + 헤드라인 해석 (obse"
       ],
       "capabilityRefs": [
         "gather"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3831,7 +3920,7 @@
           "capabilityRef": "gather"
         }
       },
-      "url": "/docs/skills/capability/capability-gather"
+      "sourcePath": "generated:capability:gather"
     },
     {
       "id": "capability:gather.flow",
@@ -3847,6 +3936,7 @@
         "gather.flow"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3872,7 +3962,7 @@
           "capabilityRef": "gather.flow"
         }
       },
-      "url": "/docs/skills/capability/capability-gather-flow"
+      "sourcePath": "generated:capability:gather.flow"
     },
     {
       "id": "capability:gather.insider",
@@ -3888,6 +3978,7 @@
         "gather.insider"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3913,7 +4004,7 @@
           "capabilityRef": "gather.insider"
         }
       },
-      "url": "/docs/skills/capability/capability-gather-insider"
+      "sourcePath": "generated:capability:gather.insider"
     },
     {
       "id": "capability:gather.krx",
@@ -3929,6 +4020,7 @@
         "gather.krx"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3954,7 +4046,7 @@
           "capabilityRef": "gather.krx"
         }
       },
-      "url": "/docs/skills/capability/capability-gather-krx"
+      "sourcePath": "generated:capability:gather.krx"
     },
     {
       "id": "capability:gather.krxIndex",
@@ -3970,6 +4062,7 @@
         "gather.krxIndex"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -3995,7 +4088,7 @@
           "capabilityRef": "gather.krxIndex"
         }
       },
-      "url": "/docs/skills/capability/capability-gather-krxIndex"
+      "sourcePath": "generated:capability:gather.krxIndex"
     },
     {
       "id": "capability:gather.macro",
@@ -4011,6 +4104,7 @@
         "gather.macro"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4036,7 +4130,7 @@
           "capabilityRef": "gather.macro"
         }
       },
-      "url": "/docs/skills/capability/capability-gather-macro"
+      "sourcePath": "generated:capability:gather.macro"
     },
     {
       "id": "capability:gather.news",
@@ -4052,6 +4146,7 @@
         "gather.news"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4077,7 +4172,7 @@
           "capabilityRef": "gather.news"
         }
       },
-      "url": "/docs/skills/capability/capability-gather-news"
+      "sourcePath": "generated:capability:gather.news"
     },
     {
       "id": "capability:gather.ownership",
@@ -4093,6 +4188,7 @@
         "gather.ownership"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4118,7 +4214,7 @@
           "capabilityRef": "gather.ownership"
         }
       },
-      "url": "/docs/skills/capability/capability-gather-ownership"
+      "sourcePath": "generated:capability:gather.ownership"
     },
     {
       "id": "capability:gather.peers",
@@ -4134,6 +4230,7 @@
         "gather.peers"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4159,7 +4256,7 @@
           "capabilityRef": "gather.peers"
         }
       },
-      "url": "/docs/skills/capability/capability-gather-peers"
+      "sourcePath": "generated:capability:gather.peers"
     },
     {
       "id": "capability:gather.price",
@@ -4175,6 +4272,7 @@
         "gather.price"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4200,7 +4298,7 @@
           "capabilityRef": "gather.price"
         }
       },
-      "url": "/docs/skills/capability/capability-gather-price"
+      "sourcePath": "generated:capability:gather.price"
     },
     {
       "id": "capability:gather.sector",
@@ -4216,6 +4314,7 @@
         "gather.sector"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4241,7 +4340,7 @@
           "capabilityRef": "gather.sector"
         }
       },
-      "url": "/docs/skills/capability/capability-gather-sector"
+      "sourcePath": "generated:capability:gather.sector"
     },
     {
       "id": "capability:industry",
@@ -4258,6 +4357,7 @@
         "industry"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4283,7 +4383,7 @@
           "capabilityRef": "industry"
         }
       },
-      "url": "/docs/skills/capability/capability-industry"
+      "sourcePath": "generated:capability:industry"
     },
     {
       "id": "capability:listing",
@@ -4299,6 +4399,7 @@
         "listing"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4324,7 +4425,7 @@
           "capabilityRef": "listing"
         }
       },
-      "url": "/docs/skills/capability/capability-listing"
+      "sourcePath": "generated:capability:listing"
     },
     {
       "id": "capability:macro",
@@ -4341,6 +4442,7 @@
         "macro"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4366,7 +4468,7 @@
           "capabilityRef": "macro"
         }
       },
-      "url": "/docs/skills/capability/capability-macro"
+      "sourcePath": "generated:capability:macro"
     },
     {
       "id": "capability:macro.assets",
@@ -4382,6 +4484,7 @@
         "macro.assets"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4407,7 +4510,7 @@
           "capabilityRef": "macro.assets"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-assets"
+      "sourcePath": "generated:capability:macro.assets"
     },
     {
       "id": "capability:macro.corporate",
@@ -4423,6 +4526,7 @@
         "macro.corporate"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4448,7 +4552,7 @@
           "capabilityRef": "macro.corporate"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-corporate"
+      "sourcePath": "generated:capability:macro.corporate"
     },
     {
       "id": "capability:macro.crisis",
@@ -4464,6 +4568,7 @@
         "macro.crisis"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4489,7 +4594,7 @@
           "capabilityRef": "macro.crisis"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-crisis"
+      "sourcePath": "generated:capability:macro.crisis"
     },
     {
       "id": "capability:macro.cycle",
@@ -4505,6 +4610,7 @@
         "macro.cycle"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4530,7 +4636,7 @@
           "capabilityRef": "macro.cycle"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-cycle"
+      "sourcePath": "generated:capability:macro.cycle"
     },
     {
       "id": "capability:macro.forecast",
@@ -4546,6 +4652,7 @@
         "macro.forecast"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4571,7 +4678,7 @@
           "capabilityRef": "macro.forecast"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-forecast"
+      "sourcePath": "generated:capability:macro.forecast"
     },
     {
       "id": "capability:macro.inventory",
@@ -4587,6 +4694,7 @@
         "macro.inventory"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4612,7 +4720,7 @@
           "capabilityRef": "macro.inventory"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-inventory"
+      "sourcePath": "generated:capability:macro.inventory"
     },
     {
       "id": "capability:macro.liquidity",
@@ -4628,6 +4736,7 @@
         "macro.liquidity"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4653,7 +4762,7 @@
           "capabilityRef": "macro.liquidity"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-liquidity"
+      "sourcePath": "generated:capability:macro.liquidity"
     },
     {
       "id": "capability:macro.rates",
@@ -4669,6 +4778,7 @@
         "macro.rates"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4694,7 +4804,7 @@
           "capabilityRef": "macro.rates"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-rates"
+      "sourcePath": "generated:capability:macro.rates"
     },
     {
       "id": "capability:macro.scenario",
@@ -4710,6 +4820,7 @@
         "macro.scenario"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4735,7 +4846,7 @@
           "capabilityRef": "macro.scenario"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-scenario"
+      "sourcePath": "generated:capability:macro.scenario"
     },
     {
       "id": "capability:macro.sentiment",
@@ -4751,6 +4862,7 @@
         "macro.sentiment"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4776,7 +4888,7 @@
           "capabilityRef": "macro.sentiment"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-sentiment"
+      "sourcePath": "generated:capability:macro.sentiment"
     },
     {
       "id": "capability:macro.summary",
@@ -4792,6 +4904,7 @@
         "macro.summary"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4817,7 +4930,7 @@
           "capabilityRef": "macro.summary"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-summary"
+      "sourcePath": "generated:capability:macro.summary"
     },
     {
       "id": "capability:macro.trade",
@@ -4833,6 +4946,7 @@
         "macro.trade"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4858,7 +4972,7 @@
           "capabilityRef": "macro.trade"
         }
       },
-      "url": "/docs/skills/capability/capability-macro-trade"
+      "sourcePath": "generated:capability:macro.trade"
     },
     {
       "id": "capability:nameToCode",
@@ -4874,6 +4988,7 @@
         "nameToCode"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4899,7 +5014,7 @@
           "capabilityRef": "nameToCode"
         }
       },
-      "url": "/docs/skills/capability/capability-nameToCode"
+      "sourcePath": "generated:capability:nameToCode"
     },
     {
       "id": "capability:pastInsight",
@@ -4915,6 +5030,7 @@
         "pastInsight"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4940,7 +5056,7 @@
           "capabilityRef": "pastInsight"
         }
       },
-      "url": "/docs/skills/capability/capability-pastInsight"
+      "sourcePath": "generated:capability:pastInsight"
     },
     {
       "id": "capability:quant",
@@ -4957,6 +5073,7 @@
         "quant"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -4982,7 +5099,7 @@
           "capabilityRef": "quant"
         }
       },
-      "url": "/docs/skills/capability/capability-quant"
+      "sourcePath": "generated:capability:quant"
     },
     {
       "id": "capability:scan",
@@ -4993,12 +5110,13 @@
       "purpose": "공개 capability `scan`를 찾고 실행에 연결하기 위한 generated skill view.",
       "whenToUse": [
         "축(axis)별 전종목 횡단분석.",
-        "AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다. When: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때. How: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석. story credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용. 조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서. 단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증. Verified: scan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님) See Also analysis : 개별 종목 재무 "
+        "AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다. 데이터 기본기: scan 경로는 universe, metric, period, rank, table 을 먼저 evidence 로 남긴다. 조건 검색은 scan(\"fields\") 로 가능한 field 를 확인한 뒤 scan(\"screen\") 으로 구성한다. When: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때. How: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석. story credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용. 조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서. 단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소"
       ],
       "capabilityRefs": [
         "scan"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5024,7 +5142,7 @@
           "capabilityRef": "scan"
         }
       },
-      "url": "/docs/skills/capability/capability-scan"
+      "sourcePath": "generated:capability:scan"
     },
     {
       "id": "capability:scan.account",
@@ -5040,6 +5158,7 @@
         "scan.account"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5065,7 +5184,7 @@
           "capabilityRef": "scan.account"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-account"
+      "sourcePath": "generated:capability:scan.account"
     },
     {
       "id": "capability:scan.audit",
@@ -5081,6 +5200,7 @@
         "scan.audit"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5106,7 +5226,7 @@
           "capabilityRef": "scan.audit"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-audit"
+      "sourcePath": "generated:capability:scan.audit"
     },
     {
       "id": "capability:scan.capital",
@@ -5122,6 +5242,7 @@
         "scan.capital"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5147,7 +5268,7 @@
           "capabilityRef": "scan.capital"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-capital"
+      "sourcePath": "generated:capability:scan.capital"
     },
     {
       "id": "capability:scan.cashflow",
@@ -5163,6 +5284,7 @@
         "scan.cashflow"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5188,7 +5310,7 @@
           "capabilityRef": "scan.cashflow"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-cashflow"
+      "sourcePath": "generated:capability:scan.cashflow"
     },
     {
       "id": "capability:scan.debt",
@@ -5204,6 +5326,7 @@
         "scan.debt"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5229,7 +5352,7 @@
           "capabilityRef": "scan.debt"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-debt"
+      "sourcePath": "generated:capability:scan.debt"
     },
     {
       "id": "capability:scan.disclosureRisk",
@@ -5245,6 +5368,7 @@
         "scan.disclosureRisk"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5270,7 +5394,7 @@
           "capabilityRef": "scan.disclosureRisk"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-disclosureRisk"
+      "sourcePath": "generated:capability:scan.disclosureRisk"
     },
     {
       "id": "capability:scan.dividendTrend",
@@ -5286,6 +5410,7 @@
         "scan.dividendTrend"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5311,7 +5436,7 @@
           "capabilityRef": "scan.dividendTrend"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-dividendTrend"
+      "sourcePath": "generated:capability:scan.dividendTrend"
     },
     {
       "id": "capability:scan.efficiency",
@@ -5327,6 +5452,7 @@
         "scan.efficiency"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5352,7 +5478,7 @@
           "capabilityRef": "scan.efficiency"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-efficiency"
+      "sourcePath": "generated:capability:scan.efficiency"
     },
     {
       "id": "capability:scan.fields",
@@ -5368,6 +5494,7 @@
         "scan.fields"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5393,7 +5520,7 @@
           "capabilityRef": "scan.fields"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-fields"
+      "sourcePath": "generated:capability:scan.fields"
     },
     {
       "id": "capability:scan.governance",
@@ -5409,6 +5536,7 @@
         "scan.governance"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5434,7 +5562,7 @@
           "capabilityRef": "scan.governance"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-governance"
+      "sourcePath": "generated:capability:scan.governance"
     },
     {
       "id": "capability:scan.growth",
@@ -5450,6 +5578,7 @@
         "scan.growth"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5475,7 +5604,7 @@
           "capabilityRef": "scan.growth"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-growth"
+      "sourcePath": "generated:capability:scan.growth"
     },
     {
       "id": "capability:scan.industry",
@@ -5491,6 +5620,7 @@
         "scan.industry"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5516,7 +5646,7 @@
           "capabilityRef": "scan.industry"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-industry"
+      "sourcePath": "generated:capability:scan.industry"
     },
     {
       "id": "capability:scan.insider",
@@ -5532,6 +5662,7 @@
         "scan.insider"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5557,7 +5688,7 @@
           "capabilityRef": "scan.insider"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-insider"
+      "sourcePath": "generated:capability:scan.insider"
     },
     {
       "id": "capability:scan.liquidity",
@@ -5573,6 +5704,7 @@
         "scan.liquidity"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5598,7 +5730,7 @@
           "capabilityRef": "scan.liquidity"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-liquidity"
+      "sourcePath": "generated:capability:scan.liquidity"
     },
     {
       "id": "capability:scan.macroBeta",
@@ -5614,6 +5746,7 @@
         "scan.macroBeta"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5639,7 +5772,7 @@
           "capabilityRef": "scan.macroBeta"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-macroBeta"
+      "sourcePath": "generated:capability:scan.macroBeta"
     },
     {
       "id": "capability:scan.market",
@@ -5655,6 +5788,7 @@
         "scan.market"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5680,7 +5814,7 @@
           "capabilityRef": "scan.market"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-market"
+      "sourcePath": "generated:capability:scan.market"
     },
     {
       "id": "capability:scan.network",
@@ -5696,6 +5830,7 @@
         "scan.network"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5721,7 +5856,7 @@
           "capabilityRef": "scan.network"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-network"
+      "sourcePath": "generated:capability:scan.network"
     },
     {
       "id": "capability:scan.profitability",
@@ -5737,6 +5872,7 @@
         "scan.profitability"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5762,7 +5898,7 @@
           "capabilityRef": "scan.profitability"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-profitability"
+      "sourcePath": "generated:capability:scan.profitability"
     },
     {
       "id": "capability:scan.quality",
@@ -5778,6 +5914,7 @@
         "scan.quality"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5803,7 +5940,7 @@
           "capabilityRef": "scan.quality"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-quality"
+      "sourcePath": "generated:capability:scan.quality"
     },
     {
       "id": "capability:scan.ratio",
@@ -5819,6 +5956,7 @@
         "scan.ratio"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5844,7 +5982,7 @@
           "capabilityRef": "scan.ratio"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-ratio"
+      "sourcePath": "generated:capability:scan.ratio"
     },
     {
       "id": "capability:scan.screen",
@@ -5860,6 +5998,7 @@
         "scan.screen"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5885,7 +6024,7 @@
           "capabilityRef": "scan.screen"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-screen"
+      "sourcePath": "generated:capability:scan.screen"
     },
     {
       "id": "capability:scan.valuation",
@@ -5901,6 +6040,7 @@
         "scan.valuation"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5926,7 +6066,7 @@
           "capabilityRef": "scan.valuation"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-valuation"
+      "sourcePath": "generated:capability:scan.valuation"
     },
     {
       "id": "capability:scan.workforce",
@@ -5942,6 +6082,7 @@
         "scan.workforce"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -5967,7 +6108,7 @@
           "capabilityRef": "scan.workforce"
         }
       },
-      "url": "/docs/skills/capability/capability-scan-workforce"
+      "sourcePath": "generated:capability:scan.workforce"
     },
     {
       "id": "capability:search",
@@ -5984,6 +6125,7 @@
         "search"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6009,7 +6151,7 @@
           "capabilityRef": "search"
         }
       },
-      "url": "/docs/skills/capability/capability-search"
+      "sourcePath": "generated:capability:search"
     },
     {
       "id": "capability:searchName",
@@ -6025,6 +6167,7 @@
         "searchName"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6050,7 +6193,7 @@
           "capabilityRef": "searchName"
         }
       },
-      "url": "/docs/skills/capability/capability-searchName"
+      "sourcePath": "generated:capability:searchName"
     },
     {
       "id": "capability:sectorInsights",
@@ -6066,6 +6209,7 @@
         "sectorInsights"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6091,7 +6235,7 @@
           "capabilityRef": "sectorInsights"
         }
       },
-      "url": "/docs/skills/capability/capability-sectorInsights"
+      "sourcePath": "generated:capability:sectorInsights"
     },
     {
       "id": "capability:setup",
@@ -6108,6 +6252,7 @@
         "setup"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6133,7 +6278,7 @@
           "capabilityRef": "setup"
         }
       },
-      "url": "/docs/skills/capability/capability-setup"
+      "sourcePath": "generated:capability:setup"
     },
     {
       "id": "capability:topdown",
@@ -6149,6 +6294,7 @@
         "topdown"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6174,7 +6320,7 @@
           "capabilityRef": "topdown"
         }
       },
-      "url": "/docs/skills/capability/capability-topdown"
+      "sourcePath": "generated:capability:topdown"
     },
     {
       "id": "capability:verbose",
@@ -6190,6 +6336,7 @@
         "verbose"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6215,7 +6362,7 @@
           "capabilityRef": "verbose"
         }
       },
-      "url": "/docs/skills/capability/capability-verbose"
+      "sourcePath": "generated:capability:verbose"
     },
     {
       "id": "cashflowReview",
@@ -6237,6 +6384,10 @@
         "Company.credit"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "cashflowConcepts",
+        "financialStatementConcepts"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6265,7 +6416,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/cashflowReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/cashflowReview.md"
     },
     {
       "id": "companyCausalReview",
@@ -6287,6 +6438,10 @@
         "macro"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "dartlabCausalSixActs",
+        "financialStatementConcepts"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6315,7 +6470,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/companyCausalReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/companyCausalReview.md"
     },
     {
       "id": "companyResearchStarter",
@@ -6341,6 +6496,7 @@
         "industry"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6365,7 +6521,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/companyResearchStarter"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/companyResearchStarter.md"
     },
     {
       "id": "creditRiskReview",
@@ -6388,6 +6544,9 @@
         "scan.cashflow"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "creditRiskConcepts"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6415,7 +6574,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/creditRiskReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/creditRiskReview.md"
     },
     {
       "id": "crossSectionStockScreen",
@@ -6434,6 +6593,9 @@
       ],
       "datasetRefs": [
         "krx.prices"
+      ],
+      "knowledgeRefs": [
+        "krxDatasetStructure"
       ],
       "runtimeCompatibility": {
         "server": {
@@ -6464,7 +6626,7 @@
           ]
         }
       },
-      "url": "/docs/skills/screens/crossSectionStockScreen"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/screens/crossSectionStockScreen.md"
     },
     {
       "id": "damodaranValuationReview",
@@ -6484,6 +6646,9 @@
         "macro"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "valuationPrinciples"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6511,7 +6676,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/damodaranValuationReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/damodaranValuationReview.md"
     },
     {
       "id": "dartlabStoryReview",
@@ -6531,6 +6696,9 @@
         "Company.quant"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "dartlabCausalSixActs"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6559,7 +6727,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/dartlabStoryReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/dartlabStoryReview.md"
     },
     {
       "id": "disclosureEventReview",
@@ -6578,6 +6746,9 @@
         "Company.readFiling"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "dartDisclosureStructure"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6606,7 +6777,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/disclosureEventReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/disclosureEventReview.md"
     },
     {
       "id": "dividendCapitalReturnReview",
@@ -6628,6 +6799,9 @@
         "scan.cashflow"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "capitalAllocationConcepts"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -6656,237 +6830,39 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/dividendCapitalReturnReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/dividendCapitalReturnReview.md"
     },
     {
-      "id": "engines.analysisUsage",
-      "title": "analysis 엔진 재무 인과 사용 지도",
+      "id": "engines.dataEngineFoundation",
+      "title": "데이터 엔진 기본기",
       "category": "engines",
       "categoryTitle": "Engines",
       "status": "unverified",
-      "purpose": "단일 기업의 재무 원인, 가치, 전망, 리스크를 analysis 축 조합으로 해석하는 절차를 설명한다.",
+      "purpose": "응용 분석 skill이 시작 전에 참조할 Company, gather, scan 데이터 엔진의 기본 선택 순서와 evidence 계약을 정의한다.",
       "whenToUse": [
-        "수익성, 성장성, 안정성, 현금흐름, 가치평가를 원인까지 분석할 때",
-        "기업 재무제표의 변화 원인을 축별로 분해할 때",
-        "story나 credit의 근거를 재무 축으로 보강할 때"
-      ],
-      "capabilityRefs": [
-        "analysis",
-        "Company.analysis",
-        "Company.show",
-        "Company.trace",
-        "scan"
-      ],
-      "datasetRefs": [
-        "dart.finance"
-      ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "limited",
-          "notes": [
-            "Web AI는 finance-lite snapshot에서 가능한 축 위주로 실행한다."
-          ]
-        },
-        "pyodide": {
-          "status": "limited",
-          "dataSources": [
-            "HuggingFace dartlab-data finance-lite"
-          ],
-          "limitations": [
-            "전체 서버 finance 축과 동일한 coverage를 보장하지 않는다."
-          ]
-        }
-      },
-      "url": "/docs/skills/engines/engines-analysisUsage"
-    },
-    {
-      "id": "engines.companyRouterUsage",
-      "title": "Company 엔진 라우터 사용 지도",
-      "category": "engines",
-      "categoryTitle": "Engines",
-      "status": "unverified",
-      "purpose": "단일 종목 질문에서 Company를 대상 식별과 하위 엔진 선택 라우터로 쓰는 절차를 설명한다.",
-      "whenToUse": [
-        "종목 하나를 분석할 때 어떤 엔진부터 써야 하는지 모를 때",
-        "회사명, 종목코드, ticker를 Company 기준으로 정규화해야 할 때",
-        "사업/재무/공시/주가/신용/산업 근거를 한 종목에 묶어야 할 때"
+        "응용 분석 skill을 만들기 전에 데이터 확보 순서를 정할 때",
+        "Company, gather, scan 중 어떤 데이터 엔진을 먼저 써야 하는지 판단할 때",
+        "단일 종목, 원자료 수집, 횡단 비교를 한 질문 안에서 조합해야 할 때"
       ],
       "capabilityRefs": [
         "Company",
         "Company.index",
         "Company.show",
         "Company.trace",
-        "Company.diff",
-        "Company.analysis",
-        "Company.credit",
-        "Company.quant",
-        "Company.story",
-        "Company.industry"
-      ],
-      "datasetRefs": [
-        "dart.finance",
-        "dart.docs",
-        "edgar.filings"
-      ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "limited",
-          "notes": [
-            "Web AI는 연결된 dataset snapshot과 provider 범위에 따른다."
-          ]
-        },
-        "pyodide": {
-          "status": "limited",
-          "dataSources": [
-            "HuggingFace dartlab-data snapshot"
-          ],
-          "limitations": [
-            "EDGAR live filing과 일부 네트워크 수집은 서버 경유가 필요할 수 있다."
-          ]
-        }
-      },
-      "url": "/docs/skills/engines/engines-companyRouterUsage"
-    },
-    {
-      "id": "engines.creditUsage",
-      "title": "credit 엔진 신용위험 사용 지도",
-      "category": "engines",
-      "categoryTitle": "Engines",
-      "status": "unverified",
-      "purpose": "상환능력, 부채 부담, 유동성, 현금흐름, 공시 리스크를 credit 중심으로 검토하는 절차를 설명한다.",
-      "whenToUse": [
-        "기업 신용 위험, 부도 위험, 재무 건전성을 평가할 때",
-        "안정성 질문을 analysis보다 신용 관점으로 엄격히 보고 싶을 때",
-        "story credit 또는 crisis 보고서의 핵심 근거가 필요할 때"
-      ],
-      "capabilityRefs": [
-        "credit",
-        "Company.credit",
-        "analysis",
-        "Company.analysis",
+        "gather",
         "scan"
       ],
       "datasetRefs": [
         "dart.finance",
-        "dart.report"
-      ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "limited",
-          "notes": [
-            "finance-lite 범위에서는 일부 상세 축이 제한될 수 있다."
-          ]
-        },
-        "pyodide": {
-          "status": "limited",
-          "dataSources": [
-            "HuggingFace dartlab-data finance-lite"
-          ],
-          "limitations": [
-            "full DART report 기반 공시 리스크는 서버 coverage와 다를 수 있다."
-          ]
-        }
-      },
-      "url": "/docs/skills/engines/engines-creditUsage"
-    },
-    {
-      "id": "engines.gatherUsage",
-      "title": "gather 엔진 데이터 수집 사용 지도",
-      "category": "engines",
-      "categoryTitle": "Engines",
-      "status": "unverified",
-      "purpose": "주가, 수급, 뉴스, 거시 원자료가 필요할 때 gather를 분석 엔진의 evidence 공급원으로 쓰는 절차를 설명한다.",
-      "whenToUse": [
-        "주가 추이, 수급, 뉴스, 금리 원자료가 필요할 때",
-        "quant나 macro 해석 전에 raw data 기준일을 확인해야 할 때",
-        "분석 결과에 최신 시장 데이터 보강이 필요할 때"
-      ],
-      "capabilityRefs": [
-        "gather",
-        "Company.gather",
-        "quant",
-        "macro"
-      ],
-      "datasetRefs": [
+        "dart.docs",
         "market.price",
         "market.flow",
         "macro.raw"
       ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "limited",
-          "notes": [
-            "웹에서는 네트워크와 provider 허용 범위에 따라 일부 축만 가능하다."
-          ]
-        },
-        "pyodide": {
-          "status": "limited",
-          "limitations": [
-            "외부 네트워크 provider와 CORS 제약이 있을 수 있다.",
-            "서버 snapshot이 없는 최신 데이터는 unavailable 처리한다."
-          ]
-        }
-      },
-      "url": "/docs/skills/engines/engines-gatherUsage"
-    },
-    {
-      "id": "engines.industryUsage",
-      "title": "industry 엔진 산업맥락 사용 지도",
-      "category": "engines",
-      "categoryTitle": "Engines",
-      "status": "unverified",
-      "purpose": "기업 지표를 산업 공정, 밸류체인, peer 맥락과 연결하는 절차를 설명한다.",
-      "whenToUse": [
-        "기업을 산업 밸류체인 안에서 해석해야 할 때",
-        "같은 업종 peer나 공정별 위치가 필요한 때",
-        "macro나 scan 결과를 산업 driver와 연결해야 할 때"
-      ],
-      "capabilityRefs": [
-        "industry",
-        "Company.industry",
-        "scan",
-        "analysis",
-        "macro"
-      ],
-      "datasetRefs": [
-        "industry.taxonomy",
-        "dart.finance"
+      "knowledgeRefs": [
+        "basic.company",
+        "basic.gather",
+        "basic.scan"
       ],
       "runtimeCompatibility": {
         "server": {
@@ -6901,260 +6877,21 @@
         "webAi": {
           "status": "limited",
           "notes": [
-            "taxonomy 조회는 가능하나 summary/timeline은 finance coverage에 좌우된다."
+            "Web AI는 snapshot과 provider 접근 범위 안에서 Company/gather/scan을 조합한다."
           ]
         },
         "pyodide": {
           "status": "limited",
           "dataSources": [
-            "packaged taxonomy snapshot"
+            "HuggingFace dartlab-data snapshot",
+            "packaged scan finance-lite snapshot"
           ],
           "limitations": [
-            "공정별 재무 summary는 finance snapshot coverage를 따른다."
+            "live EDGAR, 외부 market provider, full scan 축은 서버와 coverage가 다를 수 있다."
           ]
         }
       },
-      "url": "/docs/skills/engines/engines-industryUsage"
-    },
-    {
-      "id": "engines.macroUsage",
-      "title": "macro 엔진 거시 환경 사용 지도",
-      "category": "engines",
-      "categoryTitle": "Engines",
-      "status": "unverified",
-      "purpose": "금리, 환율, 경기, 유동성 환경을 macro로 해석하고 기업/섹터 분석에 연결하는 절차를 설명한다.",
-      "whenToUse": [
-        "금리, 환율, 경기, 유동성, 침체확률이 분석에 필요한 때",
-        "기업 분석 전에 시장 환경을 먼저 고정해야 할 때",
-        "top-down 논제를 scan, analysis, credit로 이어갈 때"
-      ],
-      "capabilityRefs": [
-        "macro",
-        "gather",
-        "scan",
-        "analysis",
-        "credit"
-      ],
-      "datasetRefs": [
-        "macro.raw"
-      ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "limited",
-          "notes": [
-            "Web AI는 snapshot과 public macro provider 접근 가능성에 따른다."
-          ]
-        },
-        "pyodide": {
-          "status": "limited",
-          "limitations": [
-            "실시간 FRED/ECOS 접근과 장기 시계열은 서버 경유가 필요할 수 있다."
-          ]
-        }
-      },
-      "url": "/docs/skills/engines/engines-macroUsage"
-    },
-    {
-      "id": "engines.quantUsage",
-      "title": "quant 엔진 가격·팩터 사용 지도",
-      "category": "engines",
-      "categoryTitle": "Engines",
-      "status": "unverified",
-      "purpose": "가격, 모멘텀, 변동성, benchmark, factor 신호를 quant로 분리해 해석하는 절차를 설명한다.",
-      "whenToUse": [
-        "주가 모멘텀, 변동성, 베타, benchmark 대비 성과가 궁금할 때",
-        "재무 분석과 가격 신호를 분리해서 투자 논제를 만들 때",
-        "credit이나 analysis 결과를 시장 가격 신호로 교차 검증할 때"
-      ],
-      "capabilityRefs": [
-        "quant",
-        "Company.quant",
-        "gather",
-        "analysis",
-        "credit"
-      ],
-      "datasetRefs": [
-        "market.price"
-      ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "limited",
-          "notes": [
-            "Web AI는 사용 가능한 price snapshot과 브라우저 런타임 범위에 따른다."
-          ]
-        },
-        "pyodide": {
-          "status": "limited",
-          "limitations": [
-            "최신 price provider 접근과 긴 시계열 수집은 서버 경유가 필요할 수 있다."
-          ]
-        }
-      },
-      "url": "/docs/skills/engines/engines-quantUsage"
-    },
-    {
-      "id": "engines.scanUsage",
-      "title": "scan 엔진 사용 지도",
-      "category": "engines",
-      "categoryTitle": "Engines",
-      "status": "unverified",
-      "purpose": "전종목 횡단면 분석에서 scan 엔진으로 후보 발굴, peer 비교, 시장 분포 확인을 수행하는 절차를 설명한다.",
-      "whenToUse": [
-        "스캔엔진으로 어떤 종목을 찾을 수 있나",
-        "횡단면 조건 검색",
-        "시장 전체에서 rank, percentile, peer 위치를 확인할 때"
-      ],
-      "capabilityRefs": [
-        "scan",
-        "Company.analysis",
-        "Company.credit",
-        "Company.industry"
-      ],
-      "datasetRefs": [],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "limited",
-          "notes": [
-            "finance-lite prebuild와 Web scan runtime 범위에서 가능하다."
-          ]
-        },
-        "pyodide": {
-          "status": "limited",
-          "dataSources": [
-            "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
-          ],
-          "limitations": [
-            "전체 서버 scan과 동일한 축을 보장하지 않는다."
-          ]
-        }
-      },
-      "url": "/docs/skills/engines/engines-scanUsage"
-    },
-    {
-      "id": "engines.storyUsage",
-      "title": "story 엔진 보고서 조합 사용 지도",
-      "category": "engines",
-      "categoryTitle": "Engines",
-      "status": "unverified",
-      "purpose": "여러 엔진 결과를 story 보고서 타입으로 조합하되 새 claim을 만들지 않는 절차를 설명한다.",
-      "whenToUse": [
-        "종합 보고서, executive summary, credit, valuation, crisis, governance 보고서가 필요할 때",
-        "analysis, credit, quant, macro 결과를 섹션별로 묶어야 할 때",
-        "엔진 output을 사람이 읽기 좋은 보고서 구조로 바꿀 때"
-      ],
-      "capabilityRefs": [
-        "Story",
-        "Company.story",
-        "analysis",
-        "credit",
-        "quant",
-        "macro",
-        "industry"
-      ],
-      "datasetRefs": [
-        "dart.finance",
-        "dart.report",
-        "macro.raw"
-      ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "limited",
-          "notes": [
-            "보고서 조합은 가능하나 source engine 실행 범위에 좌우된다."
-          ]
-        },
-        "pyodide": {
-          "status": "limited",
-          "limitations": [
-            "HTML/rich 렌더링과 full source engine 실행은 환경별로 다르다."
-          ]
-        }
-      },
-      "url": "/docs/skills/engines/engines-storyUsage"
-    },
-    {
-      "id": "engines.visualUsage",
-      "title": "viz 엔진 표 기반 시각화 사용 지도",
-      "category": "engines",
-      "categoryTitle": "Engines",
-      "status": "unverified",
-      "purpose": "검증된 표 evidence를 차트나 시각 설명으로 변환하는 절차를 설명한다.",
-      "whenToUse": [
-        "표 기반 차트, 시계열 그래프, 비교 차트가 필요할 때",
-        "analysis, scan, gather 결과를 시각화해야 할 때",
-        "AI 답변에 chart ref와 table ref를 함께 남겨야 할 때"
-      ],
-      "capabilityRefs": [
-        "ChartResult",
-        "Company.select",
-        "Company.show",
-        "scan",
-        "gather",
-        "analysis"
-      ],
-      "datasetRefs": [
-        "table.evidence"
-      ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "limited",
-          "notes": [
-            "렌더링 대상 UI가 chart event를 지원해야 한다."
-          ]
-        },
-        "pyodide": {
-          "status": "supported",
-          "limitations": [
-            "chart source table이 브라우저 메모리에 있어야 한다."
-          ]
-        }
-      },
-      "url": "/docs/skills/engines/engines-visualUsage"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/engines/dataEngineFoundation.md"
     },
     {
       "id": "governanceAuditReview",
@@ -7177,6 +6914,10 @@
         "scan.governance"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "auditRiskConcepts",
+        "governanceConcepts"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7205,7 +6946,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/governanceAuditReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/governanceAuditReview.md"
     },
     {
       "id": "krxIndexStrengthReview",
@@ -7223,6 +6964,9 @@
       ],
       "datasetRefs": [
         "krx.indices"
+      ],
+      "knowledgeRefs": [
+        "krxDatasetStructure"
       ],
       "runtimeCompatibility": {
         "server": {
@@ -7251,7 +6995,7 @@
           ]
         }
       },
-      "url": "/docs/skills/screens/krxIndexStrengthReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/screens/krxIndexStrengthReview.md"
     },
     {
       "id": "macroMarketReview",
@@ -7272,6 +7016,10 @@
         "gather.macro"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "dartlabCausalSixActs",
+        "macroCycleConcepts"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7299,7 +7047,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/macroMarketReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/macroMarketReview.md"
     },
     {
       "id": "peerComparisonReview",
@@ -7319,6 +7067,9 @@
         "scan"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "financialStatementConcepts"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7348,7 +7099,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/peerComparisonReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/peerComparisonReview.md"
     },
     {
       "id": "profitabilityReview",
@@ -7373,6 +7124,10 @@
         "dart.scan",
         "dart.scan.finance-lite",
         "edgar.finance"
+      ],
+      "knowledgeRefs": [
+        "financialStatementConcepts",
+        "dartlabCausalSixActs"
       ],
       "runtimeCompatibility": {
         "server": {
@@ -7402,7 +7157,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/profitabilityReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/profitabilityReview.md"
     },
     {
       "id": "quantSignalReview",
@@ -7420,6 +7175,9 @@
         "quant"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "quantSignalConcepts"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7448,7 +7206,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/quantSignalReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/quantSignalReview.md"
     },
     {
       "id": "runtime.dataAvailabilityCheck",
@@ -7470,6 +7228,7 @@
         "scan"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7494,7 +7253,7 @@
           ]
         }
       },
-      "url": "/docs/skills/runtime/runtime-dataAvailabilityCheck"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/runtime/dataAvailabilityCheck.md"
     },
     {
       "id": "runtime.mcpWorkbench",
@@ -7509,6 +7268,7 @@
       ],
       "capabilityRefs": [],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7529,7 +7289,7 @@
           ]
         }
       },
-      "url": "/docs/skills/runtime/runtime-mcpWorkbench"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/runtime/mcpWorkbench.md"
     },
     {
       "id": "runtime.pyodideBrowser",
@@ -7545,6 +7305,7 @@
       ],
       "capabilityRefs": [],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7569,7 +7330,7 @@
           ]
         }
       },
-      "url": "/docs/skills/runtime/runtime-pyodideBrowser"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/runtime/pyodideBrowser.md"
     },
     {
       "id": "runtime.skillDevelopmentLoop",
@@ -7598,6 +7359,9 @@
         "ChartResult"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "dartlabCausalSixActs"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7618,7 +7382,7 @@
           ]
         }
       },
-      "url": "/docs/skills/runtime/runtime-skillDevelopmentLoop"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/runtime/skillDevelopmentLoop.md"
     },
     {
       "id": "runtime.workbenchEvidenceFlow",
@@ -7635,6 +7399,7 @@
       ],
       "capabilityRefs": [],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7655,7 +7420,7 @@
           ]
         }
       },
-      "url": "/docs/skills/runtime/runtime-workbenchEvidenceFlow"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/runtime/workbenchEvidenceFlow.md"
     },
     {
       "id": "screens.findUndervaluedQualityStocks",
@@ -7675,6 +7440,10 @@
       ],
       "datasetRefs": [
         "dart.scan.financeLite"
+      ],
+      "knowledgeRefs": [
+        "valuationPrinciples",
+        "financialStatementConcepts"
       ],
       "runtimeCompatibility": {
         "server": {
@@ -7702,7 +7471,7 @@
           ]
         }
       },
-      "url": "/docs/skills/screens/screens-findUndervaluedQualityStocks"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/screens/findUndervaluedQualityStocks.md"
     },
     {
       "id": "start.installUv",
@@ -7718,6 +7487,7 @@
       ],
       "capabilityRefs": [],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7741,7 +7511,7 @@
           ]
         }
       },
-      "url": "/docs/skills/start/start-installUv"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/start/installUv.md"
     },
     {
       "id": "start.useSkillsCatalog",
@@ -7771,6 +7541,7 @@
         "ask"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7791,7 +7562,7 @@
           ]
         }
       },
-      "url": "/docs/skills/start/start-useSkillsCatalog"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/start/useSkillsCatalog.md"
     },
     {
       "id": "usEdgarCompanyReview",
@@ -7816,6 +7587,10 @@
         "Company.quant"
       ],
       "datasetRefs": [],
+      "knowledgeRefs": [
+        "edgarFilingConcepts",
+        "dartlabCausalSixActs"
+      ],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7843,7 +7618,7 @@
           ]
         }
       },
-      "url": "/docs/skills/finance/usEdgarCompanyReview"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/finance/usEdgarCompanyReview.md"
     },
     {
       "id": "visuals.tableBackedChart",
@@ -7859,6 +7634,7 @@
       ],
       "capabilityRefs": [],
       "datasetRefs": [],
+      "knowledgeRefs": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
@@ -7879,7 +7655,7 @@
           ]
         }
       },
-      "url": "/docs/skills/visuals/visuals-tableBackedChart"
+      "sourcePath": "C:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src/dartlab/skills/specs/visuals/tableBackedChart.md"
     }
   ]
 }

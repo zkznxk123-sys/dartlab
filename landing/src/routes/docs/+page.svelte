@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>DartLab 문서 — DART 전자공시 분석 가이드</title>
-	<meta name="description" content="DartLab 설치부터 API 레퍼런스까지. DART 전자공시 문서를 파싱하고 재무제표를 시계열로 정렬하는 방법을 안내한다." />
+	<title>DartLab Docs — 빠른 시작</title>
+	<meta name="description" content="DartLab 설치와 빠른 시작 문서." />
 	<meta http-equiv="refresh" content="0;url={base}/docs/getting-started/quickstart" />
 </svelte:head>

@@ -17,7 +17,7 @@
     },
     {
       "apiRef": "Company",
-      "guide": "AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다.\n\"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\")\n\"사업 개요 보여줘\" -> c.show(\"businessOverview\")\n\"어떤 데이터 있어?\" -> c.index 또는 c.topics\n\"출처 추적\" -> c.trace(\"revenue\")\n\"기간 변화\" -> c.diff()\n\"종합평가\" -> c.analysis(\"financial\", \"종합평가\")\n\"스토리 보고서\" -> c.story()\n\"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)",
+      "guide": "AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다.\n데이터 기본기: Company 경로는 target, provider(DART/EDGAR), topic,\nsource, period 를 먼저 고정하고, 이 원자료 ref 를 analysis · credit ·\nstory 같은 응용 엔진으로 넘긴다.\nHandoff: 최신 주가/뉴스/거시 원자료가 필요하면 gather 로 보강하고,\npeer/rank/universe 비교가 필요하면 scan 으로 넘어간다.\n\"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\")\n\"사업 개요 보여줘\" -> c.show(\"businessOverview\")\n\"어떤 데이터 있어?\" -> c.index 또는 c.topics\n\"출처 추적\" -> c.trace(\"revenue\")\n\"기간 변화\" -> c.diff()\n\"종합평가\" -> c.analysis(\"financial\", \"종합평가\")\n\"스토리 보고서\" -> c.story()\n\"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)",
       "kind": "function",
       "name": "Company",
       "requires": "DART: 사전 다운로드 데이터 (dartlab.downloadAll() 또는 자동 다운로드).\nEDGAR: 인터넷 연결 (On-demand 수집).",
@@ -168,7 +168,7 @@
     },
     {
       "apiRef": "gather",
-      "guide": "AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다.\nWhen: 분석 엔진에 필요한 외부 데이터를 수집할 때.\nHow: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천.\ngather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과).\nVerified:\ngather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nquant : 주가 기반 정량 분석 — gather(\"price\") 데이터 소비.\nmacro : 거시 분석 — gather(\"macro\") raw 데이터의 분석 결과.\nscan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완.",
+      "guide": "AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다.\n데이터 기본기: gather 경로는 provider, latestAsOf, metric, period,\nraw table 을 먼저 evidence 로 남긴다. 수집 실패나 빈 결과는\nunavailable 로 공개하고 추정값으로 채우지 않는다.\nWhen: 분석 엔진에 필요한 외부 데이터를 수집할 때.\nHow: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천.\ngather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과).\n단일 종목 맥락은 Company 로 target/topic/source 를 고정한 뒤 gather 로 보강하고,\n횡단 비교는 scan 결과와 분리해서 연결한다.\nVerified:\ngather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nquant : 주가 기반 정량 분석 — gather(\"price\") 데이터 소비.\nmacro : 거시 분석 — gather(\"macro\") raw 데이터의 분석 결과.\nscan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완.",
       "kind": "function",
       "name": "gather",
       "summary": "외부 시장 데이터 수집 — 주가·수급·거시지표·뉴스 4 축."
@@ -285,7 +285,7 @@
     },
     {
       "apiRef": "scan",
-      "guide": "AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다.\nWhen: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.\nHow: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.\nstory credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.\n조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서.\n단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.\nVerified:\nscan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)\n\nSee Also\nanalysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석.",
+      "guide": "AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다.\n데이터 기본기: scan 경로는 universe, metric, period, rank, table 을 먼저\nevidence 로 남긴다. 조건 검색은 scan(\"fields\") 로 가능한 field 를\n확인한 뒤 scan(\"screen\") 으로 구성한다.\nWhen: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.\nHow: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.\nstory credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.\n조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서.\n단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.\n단일 종목 결론은 scan 후보/rank 에서 끝내지 말고 Company 원자료와\nanalysis/credit 로 후속 검증한다.\nVerified:\nscan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)\n\nSee Also\nanalysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석.",
       "kind": "function",
       "name": "scan",
       "summary": "축(axis)별 전종목 횡단분석."
@@ -365,7 +365,7 @@
       "summary": "**사람의 최상위 관문** — 종목 하나의 모든 엔진에 접근하는 파사드.",
       "verification": null,
       "visualPolicy": null,
-      "whenToUse": "AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다.\n\"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\")\n\"사업 개요 보여줘\" -> c.show(\"businessOverview\")\n\"어떤 데이터 있어?\" -> c.index 또는 c.topics\n\"출처 추적\" -> c.trace(\"revenue\")\n\"기간 변화\" -> c.diff()\n\"종합평가\" -> c.analysis(\"financial\", \"종합평가\")\n\"스토리 보고서\" -> c.story()\n\"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)"
+      "whenToUse": "AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다.\n데이터 기본기: Company 경로는 target, provider(DART/EDGAR), topic,\nsource, period 를 먼저 고정하고, 이 원자료 ref 를 analysis · credit ·\nstory 같은 응용 엔진으로 넘긴다.\nHandoff: 최신 주가/뉴스/거시 원자료가 필요하면 gather 로 보강하고,\npeer/rank/universe 비교가 필요하면 scan 으로 넘어간다.\n\"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\")\n\"사업 개요 보여줘\" -> c.show(\"businessOverview\")\n\"어떤 데이터 있어?\" -> c.index 또는 c.topics\n\"출처 추적\" -> c.trace(\"revenue\")\n\"기간 변화\" -> c.diff()\n\"종합평가\" -> c.analysis(\"financial\", \"종합평가\")\n\"스토리 보고서\" -> c.story()\n\"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)"
     },
     {
       "apiRef": "Company.analysis",
@@ -2774,7 +2774,7 @@
       "summary": "외부 시장 데이터 수집 — 주가·수급·거시지표·뉴스 4 축.",
       "verification": null,
       "visualPolicy": null,
-      "whenToUse": "AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다.\nWhen: 분석 엔진에 필요한 외부 데이터를 수집할 때.\nHow: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천.\ngather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과).\nVerified:\ngather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nquant : 주가 기반 정량 분석 — gather(\"price\") 데이터 소비.\nmacro : 거시 분석 — gather(\"macro\") raw 데이터의 분석 결과.\nscan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완."
+      "whenToUse": "AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다.\n데이터 기본기: gather 경로는 provider, latestAsOf, metric, period,\nraw table 을 먼저 evidence 로 남긴다. 수집 실패나 빈 결과는\nunavailable 로 공개하고 추정값으로 채우지 않는다.\nWhen: 분석 엔진에 필요한 외부 데이터를 수집할 때.\nHow: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천.\ngather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과).\n단일 종목 맥락은 Company 로 target/topic/source 를 고정한 뒤 gather 로 보강하고,\n횡단 비교는 scan 결과와 분리해서 연결한다.\nVerified:\ngather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nquant : 주가 기반 정량 분석 — gather(\"price\") 데이터 소비.\nmacro : 거시 분석 — gather(\"macro\") raw 데이터의 분석 결과.\nscan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완."
     },
     {
       "apiRef": "gather.flow",
@@ -3819,7 +3819,7 @@
       "summary": "축(axis)별 전종목 횡단분석.",
       "verification": null,
       "visualPolicy": null,
-      "whenToUse": "AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다.\nWhen: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.\nHow: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.\nstory credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.\n조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서.\n단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.\nVerified:\nscan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)\n\nSee Also\nanalysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석."
+      "whenToUse": "AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다.\n데이터 기본기: scan 경로는 universe, metric, period, rank, table 을 먼저\nevidence 로 남긴다. 조건 검색은 scan(\"fields\") 로 가능한 field 를\n확인한 뒤 scan(\"screen\") 으로 구성한다.\nWhen: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.\nHow: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.\nstory credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.\n조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서.\n단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.\n단일 종목 결론은 scan 후보/rank 에서 끝내지 말고 Company 원자료와\nanalysis/credit 로 후속 검증한다.\nVerified:\nscan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)\n\nSee Also\nanalysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석."
     },
     {
       "apiRef": "scan.account",
@@ -4597,7 +4597,7 @@
     "quant",
     "viz"
   ],
-  "generatedAt": "2026-05-02T06:22:43Z",
+  "generatedAt": "2026-05-02T07:44:56Z",
   "loop": [
     "observe",
     "inspect",
@@ -5367,7 +5367,7 @@
     "runPythonTimeoutMaxSec": 120
   },
   "schemaVersion": 1,
-  "sourceHash": "0a60894aad036b8c",
+  "sourceHash": "5654e92aecc49ce8",
   "visualContract": {
     "chart": {
       "allowedPurposes": [

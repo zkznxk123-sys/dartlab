@@ -5,7 +5,7 @@
 	import { page } from '$app/state';
 
 	interface Props {
-		context?: 'landing' | 'docs' | 'blog';
+		context?: 'landing' | 'docs' | 'blog' | 'skills';
 	}
 
 	let { context = 'landing' }: Props = $props();
@@ -22,6 +22,7 @@
 
 	const navLinks = [
 		{ label: 'Docs', href: `${base}/docs/` },
+		{ label: 'Skills', href: `${base}/skills` },
 		{ label: 'Blog', href: `${base}/blog/` },
 		{ label: 'Scan', href: `${base}/scan` },
 		{ label: 'Map', href: `${base}/map` }
@@ -50,7 +51,7 @@
 			</a>
 			{#if context !== 'landing'}
 				<span class="text-dl-border text-sm font-light">/</span>
-				<span class="text-sm text-dl-text-muted font-medium">{context === 'docs' ? 'Docs' : 'Blog'}</span>
+				<span class="text-sm text-dl-text-muted font-medium">{context === 'docs' ? 'Docs' : context === 'skills' ? 'Skills' : 'Blog'}</span>
 			{/if}
 			{#if isDashboard}
 				<span

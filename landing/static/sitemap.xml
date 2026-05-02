@@ -121,66 +121,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/advanced</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/ai</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/analysis</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/company</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/credit</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/export</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/finance</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/gather</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/mcp</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/overview</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/scan</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/api/story</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://eddmpython.github.io/dartlab/docs/getting-started/cli-maintenance</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

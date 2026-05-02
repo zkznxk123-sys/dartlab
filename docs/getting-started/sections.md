@@ -135,6 +135,7 @@ Only the topic names differ, following SEC form conventions. 10-K Item 1 is `10-
 ## Next Steps
 
 - [Quick Start](./quickstart) — From Company creation to show() in one go
-- [API Overview](../api/overview) — Full API reference
+- [Skill Catalog](/skills) — searchable procedures and runtime notes
+- [Capability Reference](https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md) — generated API capability map
 - [Disclosure Text Tutorial](../tutorials/06_disclosure) — Working with narrative disclosure data
 - [EDGAR Tutorial](../tutorials/09_edgar) — US company analysis

@@ -407,9 +407,14 @@ class GatherEntry:
         Guide
         -----
         AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다.
+        데이터 기본기: gather 경로는 provider, latestAsOf, metric, period,
+            raw table 을 먼저 evidence 로 남긴다. 수집 실패나 빈 결과는
+            unavailable 로 공개하고 추정값으로 채우지 않는다.
         When: 분석 엔진에 필요한 외부 데이터를 수집할 때.
         How: gather → analysis/quant 파이프라인. gather("price") 는 quant 의 데이터 원천.
             gather("macro") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과).
+            단일 종목 맥락은 Company 로 target/topic/source 를 고정한 뒤 gather 로 보강하고,
+            횡단 비교는 scan 결과와 분리해서 연결한다.
         Verified:
             - gather("news") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
 

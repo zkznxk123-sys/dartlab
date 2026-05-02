@@ -142,7 +142,7 @@ One calling convention. Each engine: `dartlab.engine()` for the guide, `dartlab.
 | L2 | [Credit](ops/credit.md) | Independent credit rating (dCR grade, default probability, health) | `c.credit("등급")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/07_credit.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/07_credit.py) |
 | L2 | [Industry](ops/industry.md) | Industry mapper — all listed companies × stage/role/stream + supply-chain edges (atlas at `/map`) | `c.industry()`, `dartlab.industry("semiconductor")` | — |
 | L2 | [Story](ops/story.md) | Report builder — 6-engine block composition (analysis/quant/credit/macro/scan/**industry**), 11 types × 7 templates (no interpretation) | `c.story("수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py) |
-| L3 | [AI](ops/ai.md) | Active analyst — calls engines directly, judges, verifies against raw data | `dartlab.ask()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/09_ai.py) |
+| L3 | [AI/Skills](ops/skills.md) | Skill search + DartLab execution + ref verification workbench | `dartlab.ask()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/09_ai.py) |
 | L4 | [Channel](ops/channel.md) | External sharing — `dartlab channel` brings PC dartlab to your phone | `dartlab channel` | — |
 | core | [Search](ops/search.md) | Semantic filing search *(alpha)* | `dartlab.search()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/10_search.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/10_search.py) |
 | facade | [Listing](ops/listing.md) | Catalog API (companies, filings, topics) | `dartlab.listing()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/11_listing.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/11_listing.py) |
@@ -332,11 +332,11 @@ dartlab.search("대표이사 변경", corp="005930")       # filter by company
 dartlab.search("회사가 돈을 빌렸다")                 # natural language works too
 ```
 
-### AI — Active Analyst
+### AI — Skills-Based Workbench
 
-> Design: [ops/ai.md](ops/ai.md)
+> Design: [ops/skills.md](ops/skills.md)
 
-The AI writes and executes Python code using dartlab's full API. You see every line of code it runs. 60+ questions validated, 95%+ first-try success. See [methodology](docs/methodology.md) for validation scope and limits.
+The AI searches skills and capabilities, executes DartLab APIs, and verifies final answers against result refs. Quality is judged through direct server-side audit, not by a blanket claim.
 
 ```python
 dartlab.ask("Analyze Samsung Electronics financial health")
@@ -650,7 +650,7 @@ Pipeline: local cache (instant) → HuggingFace (auto-download) → DART API (wi
 
 ## Documentation
 
-[Docs](https://eddmpython.github.io/dartlab/) · [Quick Start](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [API Overview](https://eddmpython.github.io/dartlab/docs/api/overview)
+[Docs](https://eddmpython.github.io/dartlab/) · [Quick Start](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [Skill Catalog](https://eddmpython.github.io/dartlab/skills) · [Capability Reference](https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md)
 
 **Blog:** [All](https://eddmpython.github.io/dartlab/blog/) · [Company Stories](https://eddmpython.github.io/dartlab/blog/series/company-reports) · [Credit Reports](https://eddmpython.github.io/dartlab/blog/credit-reports) · [Macro Reports](https://eddmpython.github.io/dartlab/blog/macro-reports)
 

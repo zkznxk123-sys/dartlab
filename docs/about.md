@@ -53,12 +53,12 @@ The project author and maintainer is `eddmpython`. Tools and articles are contin
 
 If you're visiting for the first time, this order is most efficient:
 
-1. Installation guide
-2. Quick Start
-3. API Overview
+1. Skill Catalog
+2. Installation guide
+3. Quick Start
 4. Introductory blog posts
 
-Documentation covers usage and structure; the blog covers interpretation frameworks for actually reading disclosures. Reading both together is faster.
+Skill Catalog is the primary catalog for usage procedures, AI workflows, runtime constraints, and capability links. Its source is `src/dartlab/skills`; generated capability details come from public docstrings. The blog covers interpretation frameworks for actually reading disclosures. Reading both together is faster.
 
 ## Citations and Sources
 
@@ -66,7 +66,8 @@ DartLab documentation and blog posts include official sources wherever possible.
 
 When citing this project, these pages serve as good starting points:
 
-- Documentation: `/docs/api/overview`
+- Skill Catalog: `/skills`
+- Capability reference: `https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md`
 - Installation: `/docs/getting-started/installation`
 - Blog hub: `/blog/`
 - GitHub repository: `https://github.com/eddmpython/dartlab`

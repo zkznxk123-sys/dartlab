@@ -17,7 +17,6 @@ def test_builtin_skills_are_searchable() -> None:
     assert "damodaranValuationReview" in ids
     assert "start.installUv" in ids
     assert "runtime.pyodideBrowser" in ids
-    assert "engines.scanUsage" in ids
     assert "screens.findUndervaluedQualityStocks" in ids
     assert "visuals.tableBackedChart" in ids
     assert "start.useSkillsCatalog" in ids
@@ -26,15 +25,7 @@ def test_builtin_skills_are_searchable() -> None:
     assert "runtime.skillDevelopmentLoop" in ids
     assert "companyResearchStarter" in ids
     assert {
-        "engines.companyRouterUsage",
-        "engines.gatherUsage",
-        "engines.analysisUsage",
-        "engines.quantUsage",
-        "engines.macroUsage",
-        "engines.creditUsage",
-        "engines.storyUsage",
-        "engines.industryUsage",
-        "engines.visualUsage",
+        "engines.dataEngineFoundation",
     } <= ids
     assert "macroMarketReview" in ids
     assert "usEdgarCompanyReview" in ids
@@ -72,37 +63,57 @@ def test_skill_search_finds_scan_screen_use_case() -> None:
     ids = [match.skill.id for match in matches]
 
     assert ids[0] == "screens.findUndervaluedQualityStocks"
-    assert "engines.scanUsage" in ids
+    assert {"basic.scan", "engines.dataEngineFoundation"} & set(ids)
 
 
 @pytest.mark.parametrize(
     ("query", "expected"),
     [
-        ("Company 엔진으로 하위 엔진 선택", "engines.companyRouterUsage"),
-        ("analysis 엔진 재무 인과 어떻게 써", "engines.analysisUsage"),
-        ("gather 엔진 주가 수집", "engines.gatherUsage"),
-        ("quant 엔진 모멘텀 베타 benchmark", "engines.quantUsage"),
-        ("macro 엔진 top-down 분석", "engines.macroUsage"),
-        ("credit 엔진 상환능력", "engines.creditUsage"),
-        ("story 엔진 보고서 조합", "engines.storyUsage"),
-        ("industry 엔진 밸류체인 peer 맥락", "engines.industryUsage"),
-        ("viz 엔진 표 기반 시각화", "engines.visualUsage"),
+        ("데이터 엔진 기본기 Company gather scan", "engines.dataEngineFoundation"),
     ],
 )
-def test_skill_search_prioritizes_engine_usage_playbooks(query: str, expected: str) -> None:
+def test_skill_search_prioritizes_curated_engine_composition_playbooks(query: str, expected: str) -> None:
     matches = skills.search(query, includeUser=False)
 
     assert matches[0].skill.id == expected
 
 
-def test_engine_usage_skills_are_procedure_not_api_schema() -> None:
+def test_single_engine_usage_is_generated_not_curated() -> None:
+    ids = {item.id for item in skills.list(includeUser=False)}
+
+    assert "engines.companyRouterUsage" not in ids
+    assert "engines.gatherUsage" not in ids
+    assert "engines.scanUsage" not in ids
+    assert {"basic.company", "basic.gather", "basic.scan"} <= ids
+
+
+def test_curated_engine_skills_are_composition_not_single_engine_usage() -> None:
     specs = [item for item in skills.list(includeUser=False) if item.id.startswith("engines.")]
 
-    assert specs
+    assert {item.id for item in specs} == {"engines.dataEngineFoundation"}
     assert all(item.runtimeCompatibility.get("pyodide") for item in specs)
     assert all(item.capabilityRefs for item in specs)
     assert all("parameters" not in item.to_dict() for item in specs)
     assert all("returns" not in item.to_dict() for item in specs)
+
+
+def test_data_engine_foundation_references_basic_data_skills() -> None:
+    spec = skills.get("engines.dataEngineFoundation", includeUser=False)
+
+    assert {"Company", "gather", "scan"} <= set(spec.capabilityRefs)
+    assert {"basic.company", "basic.gather", "basic.scan"} <= set(spec.knowledgeRefs)
+    assert {"target", "universe", "latestAsOf", "rank"} <= set(spec.requiredEvidence)
+
+
+def test_data_engine_docstrings_feed_generated_capabilities() -> None:
+    from dartlab.core._generated import CAPABILITIES
+
+    for ref in ("Company", "gather", "scan"):
+        guide = str(CAPABILITIES[ref].get("guide") or "")
+        assert "데이터 기본기" in guide
+
+    assert "Handoff" in str(CAPABILITIES["Company"].get("guide") or "")
+    assert 'scan("fields")' in str(CAPABILITIES["scan"].get("guide") or "")
 
 
 def test_skill_search_prioritizes_skills_catalog_start() -> None:
@@ -423,11 +434,11 @@ def test_skill_evidence_check_reports_missing() -> None:
     assert "table" in result.missing
 
 
-def test_skill_compiler_builds_docs_and_web_index(tmp_path: Path) -> None:
-    result = skills.buildSkillArtifacts(docsDir=tmp_path / "docs", webDir=tmp_path / "web")
+def test_skill_compiler_builds_web_index_without_docs_markdown(tmp_path: Path) -> None:
+    result = skills.buildSkillArtifacts(webDir=tmp_path / "web")
 
     assert result["skillCount"] > 0
-    assert (tmp_path / "docs" / "index.md").exists()
-    assert (tmp_path / "docs" / "runtime" / "runtime-pyodideBrowser.md").exists()
+    assert "docsDir" not in result
+    assert not (tmp_path / "docs").exists()
     assert (tmp_path / "web" / "index.json").exists()
     assert (tmp_path / "web" / "pyodide.json").exists()

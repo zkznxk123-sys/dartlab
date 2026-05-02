@@ -7,7 +7,7 @@ const buildDir = resolve(__dirname, '..', 'build');
 const projectRoot = resolve(__dirname, '..', '..');
 const basePath = process.env.BASE_PATH || '';
 const siteUrl = 'https://eddmpython.github.io/dartlab';
-const target = `${basePath}/docs/getting-started/installation`;
+const target = `${basePath}/docs/getting-started/quickstart`;
 const extraPages = [
 	{ loc: `${siteUrl}/scan`, changefreq: 'daily', priority: 0.95 },
 	{ loc: `${siteUrl}/map`, changefreq: 'daily', priority: 0.92 }
@@ -102,7 +102,7 @@ const blogFiles = collectMdFiles(blogRoot, '', { includeIndex: true }).filter((f
 const sections = [
 	{
 		heading: 'Docs',
-		description: '설치, quickstart, API reference, 튜토리얼. DartLab을 실제 코드와 데이터 흐름으로 사용하는 문서.',
+		description: '설치, quickstart, 튜토리얼. DartLab을 실제 코드와 데이터 흐름으로 사용하는 문서.',
 		files: docFiles,
 		urlPrefix: `${siteUrl}/docs/`,
 		pathToUrl: (rel) => {

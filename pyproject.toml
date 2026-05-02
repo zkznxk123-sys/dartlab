@@ -111,6 +111,9 @@ packages = ["src/dartlab"]
 # packaging 사고 방어. artifacts 만으로는 불충분함이 실증됨 (2026-04-19).
 include = [
     "src/dartlab/**/*.py",
+    "src/dartlab/**/*.md",
+    "src/dartlab/**/*.yaml",
+    "src/dartlab/**/*.yml",
     "src/dartlab/**/*.json",
     "src/dartlab/**/*.parquet",
     "src/dartlab/**/py.typed",
@@ -135,6 +138,9 @@ exclude = [
 # wheel include 와 동일 패턴으로 맞춰 산출물 drift 방지
 include = [
     "src/dartlab/**/*.py",
+    "src/dartlab/**/*.md",
+    "src/dartlab/**/*.yaml",
+    "src/dartlab/**/*.yml",
     "src/dartlab/**/*.json",
     "src/dartlab/**/*.parquet",
     "src/dartlab/**/py.typed",

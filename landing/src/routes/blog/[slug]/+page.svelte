@@ -390,7 +390,7 @@
 				<div class="product-bridge-links">
 					<a href="{base}/docs/getting-started/quickstart" class="product-bridge-link primary">Quickstart</a>
 					<a href="{base}/docs/getting-started/installation" class="product-bridge-link">설치 가이드</a>
-					<a href="{base}/docs/api/overview" class="product-bridge-link">API Overview</a>
+					<a href="https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md" target="_blank" rel="noopener" class="product-bridge-link">Capability Reference</a>
 					<a href="{base}/docs/tutorials/disclosure" class="product-bridge-link">공시 텍스트 튜토리얼</a>
 				</div>
 			</section>

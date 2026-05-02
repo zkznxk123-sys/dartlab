@@ -50,7 +50,7 @@ docs/
 ## 현재 상태
 
 - [x] README / README_KR sections 중심 재작성
-- [x] docs/index, quickstart, api/overview 재정렬
+- [x] docs/index, quickstart, Skill Catalog 링크 재정렬
 - [x] tutorials/01_quickstart, tutorials/09_edgar 현행화
 - [x] stability 문서에서 `index`, legacy 비교 surface 공개 노출 정리
 - [x] 랜딩 hero / architecture / workflow / CTA 메시지 재작성

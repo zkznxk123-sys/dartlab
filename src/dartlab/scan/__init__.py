@@ -696,11 +696,16 @@ class Scan:
         Guide
         -----
         AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다.
+        데이터 기본기: scan 경로는 universe, metric, period, rank, table 을 먼저
+            evidence 로 남긴다. 조건 검색은 scan("fields") 로 가능한 field 를
+            확인한 뒤 scan("screen") 으로 구성한다.
         When: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.
         How: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.
             story credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.
             조건형 종목 발굴은 scan("fields") → scan("screen", spec=...) → Company/analysis 순서.
             단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.
+            단일 종목 결론은 scan 후보/rank 에서 끝내지 말고 Company 원자료와
+            analysis/credit 로 후속 검증한다.
         Verified:
             - scan("재무건전성") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)
 

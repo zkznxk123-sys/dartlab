@@ -14,6 +14,7 @@
 	import AskDemo from '$lib/components/sections/AskDemo.svelte';
 	import DataShowcase from '$lib/components/sections/DataShowcase.svelte';
 	import ModuleCatalog from '$lib/components/sections/ModuleCatalog.svelte';
+	import SkillDocsCta from '$lib/components/sections/SkillDocsCta.svelte';
 	import DartVsEdgar from '$lib/components/sections/DartVsEdgar.svelte';
 	import Performance from '$lib/components/sections/Performance.svelte';
 	import Stability from '$lib/components/sections/Stability.svelte';
@@ -116,6 +117,7 @@
 
 	<!-- 4. What -->
 	<ModuleCatalog />
+	<SkillDocsCta />
 	<DartVsEdgar />
 	<Performance />
 
