@@ -667,6 +667,41 @@ def test_kernel_table_metric_inference_skips_identifier_columns() -> None:
     assert table.payload["metric"] == "ret_1m"
 
 
+def test_kernel_ignores_invalid_emit_result_metric_hint() -> None:
+    from dartlab.ai.kernel import _refs_from_execution
+    from dartlab.ai.notebook import ExecutionResult
+
+    stdout = (
+        "DARTLAB_RESULT_JSON="
+        '{"rows": [{"stockCode": "005930", "corp_name": "삼성전자", "op_margin_pct": 13.1}], '
+        '"meta": {"metric": "target_id"}}'
+    )
+    refs = _refs_from_execution(
+        ExecutionResult(ok=True, code="", returncode=0, stdout=stdout, stderr="", duration_ms=1, timeout=False),
+        "execution:test",
+    )
+    table = next(ref for ref in refs if ref.kind == "table")
+
+    assert table.payload["metric"] == "op_margin_pct"
+
+
+def test_kernel_drops_non_numeric_emit_result_metric_hint() -> None:
+    from dartlab.ai.kernel import _refs_from_execution
+    from dartlab.ai.notebook import ExecutionResult
+
+    stdout = (
+        "DARTLAB_RESULT_JSON="
+        '{"rows": [{"stockCode": "005930", "corp_name": "삼성전자"}], "meta": {"metric": "target_id"}}'
+    )
+    refs = _refs_from_execution(
+        ExecutionResult(ok=True, code="", returncode=0, stdout=stdout, stderr="", duration_ms=1, timeout=False),
+        "execution:test",
+    )
+    table = next(ref for ref in refs if ref.kind == "table")
+
+    assert table.payload["metric"] is None
+
+
 def test_search_reference_returns_short_dataset_resource_first() -> None:
     from dartlab.ai.reference import search_reference
 

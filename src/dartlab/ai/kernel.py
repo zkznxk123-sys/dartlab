@@ -1052,12 +1052,12 @@ def _first_numeric_key(rows: list[dict[str, Any]]) -> str | None:
 
 def _table_metric_from_payload(rows: list[dict[str, Any]], payload: dict[str, Any], meta: dict[str, Any]) -> str | None:
     metric = payload.get("metric") or meta.get("metric")
-    if isinstance(metric, str) and metric:
+    if isinstance(metric, str) and metric and _has_numeric_key(rows, metric):
         return metric
     values = payload.get("values")
     if isinstance(values, dict):
         for key in values:
-            if any(key in row for row in rows):
+            if _has_numeric_key(rows, str(key)):
                 return str(key)
     return _first_numeric_key(rows)
 

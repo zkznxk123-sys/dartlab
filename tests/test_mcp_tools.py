@@ -352,6 +352,7 @@ def test_install_mcp_config_creates_file(tmp_path):
     config = json.loads(mcp_file.read_text(encoding="utf-8"))
     assert "dartlab" in config["mcpServers"]
     assert config["mcpServers"]["dartlab"]["command"] == "python"
+    assert config["mcpServers"]["dartlab"]["args"] == ["-X", "utf8", "-m", "dartlab.mcp"]
 
 
 def test_install_mcp_config_skips_if_exists(tmp_path):
@@ -383,6 +384,18 @@ def test_install_mcp_config_merges_with_existing(tmp_path):
     config = json.loads(mcp_file.read_text(encoding="utf-8"))
     assert "other" in config["mcpServers"]
     assert "dartlab" in config["mcpServers"]
+
+
+def test_cli_mcp_config_uses_installed_python_module_path(capsys):
+    from dartlab.cli.commands.mcp import _print_config
+
+    _print_config("claude-code")
+    out = capsys.readouterr().out
+
+    assert '"command": "python"' in out
+    assert '"-m"' in out
+    assert '"dartlab.mcp"' in out
+    assert "uv" not in out
 
 
 # ── _MCP_INSTRUCTIONS ──
