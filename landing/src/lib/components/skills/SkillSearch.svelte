@@ -18,19 +18,26 @@
 		status: string;
 		purpose: string;
 		whenToUse?: string[];
-		capabilityRefs?: string[];
 		datasetRefs?: string[];
+		knowledgeRefs?: string[];
+		procedure?: string[];
+		requiredEvidence?: string[];
+		expectedOutputs?: string[];
+		visualGuidance?: string[];
+		failureModes?: string[];
+		forbidden?: string[];
+		examples?: string[];
 		runtimeCompatibility?: Record<string, RuntimeEntry>;
-		sourcePath?: string;
 	}
 
 	let skills = $state<SkillDoc[]>([]);
 	let query = $state('');
 	let activeCategory = $state('all');
 	let activeRuntime = $state('all');
+	let selectedSkill = $state<SkillDoc | null>(null);
 	let loadError = $state('');
 
-	const categoryOrder = ['start', 'runtime', 'engines', 'screens', 'finance', 'visuals', 'basic', 'capability'];
+	const categoryOrder = ['start', 'runtime', 'engines', 'screens', 'finance', 'visuals', 'basic'];
 	const runtimeOptions = [
 		{ id: 'all', label: 'All runtimes' },
 		{ id: 'pyodide', label: 'Pyodide' },
@@ -39,9 +46,11 @@
 		{ id: 'localPython', label: 'Local Python' }
 	];
 
+	const publicSkills = $derived(skills.filter((skill) => skill.category !== 'capability'));
+
 	const categories = $derived.by(() => {
 		const grouped = new Map<string, { id: string; title: string; count: number }>();
-		for (const skill of skills) {
+		for (const skill of publicSkills) {
 			const item = grouped.get(skill.category) ?? {
 				id: skill.category,
 				title: skill.categoryTitle ?? skill.category,
@@ -62,7 +71,7 @@
 
 	const filtered = $derived.by(() => {
 		const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-		return skills
+		return publicSkills
 			.filter((skill) => activeCategory === 'all' || skill.category === activeCategory)
 			.filter((skill) => {
 				if (activeRuntime === 'all') return true;
@@ -73,6 +82,17 @@
 			.filter((item) => tokens.length === 0 || item.score > 0)
 			.sort((a, b) => b.score - a.score || a.skill.category.localeCompare(b.skill.category) || a.skill.id.localeCompare(b.skill.id))
 			.slice(0, 18);
+	});
+
+	$effect(() => {
+		const first = filtered[0]?.skill ?? null;
+		if (!first) {
+			selectedSkill = null;
+			return;
+		}
+		if (!selectedSkill || !filtered.some((item) => item.skill.id === selectedSkill?.id)) {
+			selectedSkill = first;
+		}
 	});
 
 	onMount(async () => {
@@ -96,31 +116,33 @@
 			skill.status,
 			skill.purpose,
 			...(skill.whenToUse ?? []),
-			...(skill.capabilityRefs ?? []),
 			...(skill.datasetRefs ?? [])
 		].join(' ').toLowerCase();
 		let score = 0;
 		for (const token of tokens) {
 			if (skill.id.toLowerCase().includes(token)) score += 10;
 			if (skill.title.toLowerCase().includes(token)) score += 8;
-			if ((skill.capabilityRefs ?? []).some((ref) => ref.toLowerCase().includes(token))) score += 5;
 			if (haystack.includes(token)) score += 2;
 		}
 		return score;
 	}
 
-	function skillHref(skill: SkillDoc) {
-		if (skill.sourcePath?.startsWith('src/')) {
-			return `https://github.com/eddmpython/dartlab/blob/master/${skill.sourcePath}`;
-		}
-		if (skill.id.startsWith('capability:')) {
-			return 'https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md';
-		}
-		return 'https://github.com/eddmpython/dartlab/tree/master/src/dartlab/skills';
+	function selectSkill(skill: SkillDoc) {
+		selectedSkill = skill;
 	}
 
-	function isExternalHref(href: string) {
-		return href.startsWith('http');
+	function runtimeRows(skill: SkillDoc) {
+		return Object.entries(skill.runtimeCompatibility ?? {})
+			.filter(([name]) => ['localPython', 'pyodide', 'webAi', 'mcp', 'server'].includes(name))
+			.map(([name, value]) => ({
+				name,
+				status: value?.status ?? 'unknown',
+				notes: [...(value?.notes ?? []), ...(value?.limitations ?? [])].slice(0, 2)
+			}));
+	}
+
+	function limited(items: string[] | undefined, count = 5) {
+		return (items ?? []).filter(Boolean).slice(0, count);
 	}
 </script>
 
@@ -130,13 +152,13 @@
 			<span class="kicker">Skill resolver</span>
 			<h2>분석 목적을 먼저 검색한다</h2>
 			<p>
-				모든 절차 문서는 SkillSpec에서 생성된다. 자체 AI, 외부 AI, MCP, Web UI는 이 catalog에서
-				절차를 찾고 capability ref와 runtime compatibility를 확인한다.
+				목적에 맞는 skill을 고르면 필요한 데이터, 실행 순서, 검산 기준을 바로 읽을 수 있다.
+				내부 API 참조 링크가 아니라 실제 분석 절차를 문서처럼 보여준다.
 			</p>
 		</div>
 		<div class="search-count">
 			<BookOpen size={18} />
-			<strong>{skills.length}</strong>
+			<strong>{publicSkills.length}</strong>
 			<span>skills</span>
 		</div>
 	</div>
@@ -158,7 +180,7 @@
 
 	<div class="category-strip" aria-label="Skill category filter">
 		<button class:active={activeCategory === 'all'} onclick={() => (activeCategory = 'all')}>
-			All <span>{skills.length}</span>
+			All <span>{publicSkills.length}</span>
 		</button>
 		{#each categories as category}
 			<button class:active={activeCategory === category.id} onclick={() => (activeCategory = category.id)}>
@@ -170,31 +192,127 @@
 	{#if loadError}
 		<p class="empty">Skill index를 불러오지 못했다: {loadError}</p>
 	{:else if filtered.length === 0}
-		<p class="empty">검색 결과가 없다. 더 넓은 목적어나 capability 이름으로 다시 검색한다.</p>
+		<p class="empty">검색 결과가 없다. 더 넓은 목적어나 분석 주제로 다시 검색한다.</p>
 	{:else}
-		<div class="result-grid">
-			{#each filtered as item}
-				{@const href = skillHref(item.skill)}
-				<a
-					class="result-card"
-					href={href}
-					target={isExternalHref(href) ? '_blank' : undefined}
-					rel={isExternalHref(href) ? 'noopener' : undefined}
-				>
-					<div class="result-topline">
-						<span>{item.skill.categoryTitle ?? item.skill.category}</span>
-						<span class="status">{item.skill.status}</span>
+		<div class="skill-reader">
+			<div class="result-list" aria-label="Skill 목록">
+				{#each filtered as item}
+					<button
+						class="result-card"
+						class:active={selectedSkill?.id === item.skill.id}
+						onclick={() => selectSkill(item.skill)}
+					>
+						<div class="result-topline">
+							<span>{item.skill.categoryTitle ?? item.skill.category}</span>
+							<span class="status">{item.skill.status}</span>
+						</div>
+						<h3>{item.skill.title}</h3>
+						<p>{item.skill.purpose}</p>
+						<div class="result-meta">
+							<span>{item.skill.id}</span>
+							{#if item.skill.runtimeCompatibility?.pyodide?.status === 'supported' || item.skill.runtimeCompatibility?.pyodide?.status === 'limited'}
+								<span class="runtime"><CheckCircle2 size={12} /> Pyodide</span>
+							{/if}
+						</div>
+					</button>
+				{/each}
+			</div>
+
+			{#if selectedSkill}
+				<article class="skill-detail" aria-label="선택한 Skill 문서">
+					<div class="detail-head">
+						<div>
+							<span class="detail-kicker">{selectedSkill.categoryTitle ?? selectedSkill.category}</span>
+							<h3>{selectedSkill.title}</h3>
+						</div>
+						<span class="detail-status">{selectedSkill.status}</span>
 					</div>
-					<h3>{item.skill.title}</h3>
-					<p>{item.skill.purpose}</p>
-					<div class="result-meta">
-						<span>{item.skill.id}</span>
-						{#if item.skill.runtimeCompatibility?.pyodide?.status === 'supported' || item.skill.runtimeCompatibility?.pyodide?.status === 'limited'}
-							<span class="runtime"><CheckCircle2 size={12} /> Pyodide</span>
-						{/if}
-					</div>
-				</a>
-			{/each}
+					<p class="detail-purpose">{selectedSkill.purpose}</p>
+
+					{#if limited(selectedSkill.whenToUse, 6).length > 0}
+						<section>
+							<h4>언제 쓰나</h4>
+							<ul>
+								{#each limited(selectedSkill.whenToUse, 6) as item}
+									<li>{item}</li>
+								{/each}
+							</ul>
+						</section>
+					{/if}
+
+					{#if limited(selectedSkill.requiredEvidence, 8).length > 0}
+						<section>
+							<h4>필요한 근거</h4>
+							<div class="chip-row">
+								{#each limited(selectedSkill.requiredEvidence, 8) as item}
+									<span>{item}</span>
+								{/each}
+							</div>
+						</section>
+					{/if}
+
+					{#if limited(selectedSkill.procedure, 8).length > 0}
+						<section>
+							<h4>실행 순서</h4>
+							<ol>
+								{#each limited(selectedSkill.procedure, 8) as item}
+									<li>{item}</li>
+								{/each}
+							</ol>
+						</section>
+					{/if}
+
+					{#if limited(selectedSkill.expectedOutputs, 6).length > 0}
+						<section>
+							<h4>결과물</h4>
+							<ul>
+								{#each limited(selectedSkill.expectedOutputs, 6) as item}
+									<li>{item}</li>
+								{/each}
+							</ul>
+						</section>
+					{/if}
+
+					{#if limited(selectedSkill.visualGuidance, 5).length > 0}
+						<section>
+							<h4>시각화 기준</h4>
+							<ul>
+								{#each limited(selectedSkill.visualGuidance, 5) as item}
+									<li>{item}</li>
+								{/each}
+							</ul>
+						</section>
+					{/if}
+
+					{#if runtimeRows(selectedSkill).length > 0}
+						<section>
+							<h4>실행 환경</h4>
+							<div class="runtime-grid">
+								{#each runtimeRows(selectedSkill) as runtime}
+									<div>
+										<strong>{runtime.name}</strong>
+										<span>{runtime.status}</span>
+										{#if runtime.notes.length > 0}
+											<p>{runtime.notes.join(' ')}</p>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						</section>
+					{/if}
+
+					{#if limited(selectedSkill.failureModes, 5).length > 0 || limited(selectedSkill.forbidden, 5).length > 0}
+						<section>
+							<h4>주의할 점</h4>
+							<ul>
+								{#each [...limited(selectedSkill.failureModes, 5), ...limited(selectedSkill.forbidden, 5)] as item}
+									<li>{item}</li>
+								{/each}
+							</ul>
+						</section>
+					{/if}
+				</article>
+			{/if}
 		</div>
 	{/if}
 </section>
@@ -341,26 +459,38 @@
 		font-size: 0.68rem;
 	}
 
-	.result-grid {
+	.skill-reader {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.7rem;
+		grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.18fr);
+		gap: 0.85rem;
+		align-items: start;
+	}
+
+	.result-list {
+		display: grid;
+		gap: 0.6rem;
+		max-height: 820px;
+		overflow: auto;
+		padding-right: 0.25rem;
 	}
 
 	.result-card {
 		display: flex;
 		flex-direction: column;
+		width: 100%;
 		gap: 0.45rem;
-		min-height: 154px;
+		min-height: 142px;
 		padding: 0.85rem;
 		border: 1px solid rgba(30, 36, 51, 0.72);
 		border-radius: 8px;
 		background: rgba(15, 18, 25, 0.52);
-		text-decoration: none !important;
+		text-align: left;
+		cursor: pointer;
 		transition: border-color 0.14s, transform 0.14s, background 0.14s;
 	}
 
-	.result-card:hover {
+	.result-card:hover,
+	.result-card.active {
 		border-color: rgba(234, 70, 71, 0.45);
 		background: rgba(15, 18, 25, 0.86);
 		transform: translateY(-1px);
@@ -411,6 +541,121 @@
 		color: #86efac;
 	}
 
+	.skill-detail {
+		position: sticky;
+		top: 4.5rem;
+		padding: 1.1rem;
+		border: 1px solid rgba(30, 36, 51, 0.82);
+		border-radius: 8px;
+		background: rgba(3, 5, 9, 0.76);
+		box-shadow: 0 18px 48px rgba(0, 0, 0, 0.2);
+	}
+
+	.detail-head {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 0.6rem;
+	}
+
+	.detail-kicker,
+	.detail-status {
+		color: #fb923c;
+		font-family: 'JetBrains Mono', monospace;
+		font-size: 0.7rem;
+	}
+
+	.skill-detail h3 {
+		margin: 0.2rem 0 0 !important;
+		color: #f8fafc !important;
+		font-size: 1.35rem !important;
+		line-height: 1.28;
+	}
+
+	.detail-purpose {
+		margin: 0 0 1rem !important;
+		color: #cbd5e1;
+		line-height: 1.65;
+	}
+
+	.skill-detail section {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid rgba(30, 36, 51, 0.72);
+	}
+
+	.skill-detail h4 {
+		margin: 0 0 0.55rem !important;
+		color: #f1f5f9 !important;
+		font-size: 0.9rem !important;
+	}
+
+	.skill-detail ul,
+	.skill-detail ol {
+		margin: 0 !important;
+		padding-left: 1.1rem;
+		color: #94a3b8;
+		font-size: 0.86rem;
+		line-height: 1.65;
+	}
+
+	.skill-detail li + li {
+		margin-top: 0.32rem;
+	}
+
+	.chip-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+
+	.chip-row span {
+		display: inline-flex;
+		align-items: center;
+		min-height: 1.65rem;
+		padding: 0.2rem 0.55rem;
+		border: 1px solid rgba(30, 36, 51, 0.9);
+		border-radius: 6px;
+		background: rgba(15, 18, 25, 0.68);
+		color: #cbd5e1;
+		font-size: 0.75rem;
+	}
+
+	.runtime-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.55rem;
+	}
+
+	.runtime-grid div {
+		padding: 0.65rem;
+		border: 1px solid rgba(30, 36, 51, 0.78);
+		border-radius: 7px;
+		background: rgba(15, 18, 25, 0.45);
+	}
+
+	.runtime-grid strong,
+	.runtime-grid span {
+		display: inline-block;
+		margin-right: 0.4rem;
+		font-size: 0.75rem;
+	}
+
+	.runtime-grid strong {
+		color: #f8fafc;
+	}
+
+	.runtime-grid span {
+		color: #86efac;
+	}
+
+	.runtime-grid p {
+		margin: 0.35rem 0 0 !important;
+		color: #94a3b8;
+		font-size: 0.76rem;
+		line-height: 1.5;
+	}
+
 	.empty {
 		margin: 1rem 0 0 !important;
 		padding: 1rem;
@@ -434,7 +679,21 @@
 			width: fit-content;
 		}
 
-		.result-grid {
+		.skill-reader {
+			grid-template-columns: 1fr;
+		}
+
+		.result-list {
+			max-height: none;
+			overflow: visible;
+			padding-right: 0;
+		}
+
+		.skill-detail {
+			position: static;
+		}
+
+		.runtime-grid {
 			grid-template-columns: 1fr;
 		}
 	}

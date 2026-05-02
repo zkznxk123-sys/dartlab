@@ -110,9 +110,10 @@ def buildSkillArtifacts(
     _reset_generated_dir(web_path)
 
     categories = _ordered_categories({skill.category for skill in skills})
-    search_index = [_search_doc(skill) for skill in skills]
+    public_skills = [skill for skill in skills if skill.category != "capability"]
+    search_index = [_search_doc(skill) for skill in public_skills]
     pyodide_manifest = [
-        _pyodide_doc(skill) for skill in skills if _runtime_status(skill, "pyodide") in {"supported", "limited"}
+        _pyodide_doc(skill) for skill in public_skills if _runtime_status(skill, "pyodide") in {"supported", "limited"}
     ]
     _write_json(web_path / "index.json", {"skills": search_index})
     _write_json(web_path / "pyodide.json", {"skills": pyodide_manifest})
@@ -127,17 +128,22 @@ def buildSkillArtifacts(
 def _search_doc(skill: Any) -> dict[str, Any]:
     return {
         "id": skill.id,
-        "title": skill.title,
+        "title": _public_text(skill.title),
         "category": skill.category,
         "categoryTitle": _category_meta(skill.category)["title"],
         "status": skill.status,
-        "purpose": skill.purpose,
-        "whenToUse": skill.whenToUse,
-        "capabilityRefs": skill.capabilityRefs,
-        "datasetRefs": skill.datasetRefs,
-        "knowledgeRefs": skill.knowledgeRefs,
+        "purpose": _public_text(skill.purpose),
+        "whenToUse": _public_list(skill.whenToUse),
+        "datasetRefs": _public_list(skill.datasetRefs),
+        "knowledgeRefs": _public_list(skill.knowledgeRefs),
+        "procedure": _public_list(skill.procedure),
+        "requiredEvidence": _public_list(skill.requiredEvidence),
+        "expectedOutputs": _public_list(skill.expectedOutputs),
+        "visualGuidance": _public_list(skill.visualGuidance),
+        "failureModes": _public_list(skill.failureModes),
+        "forbidden": _public_list(skill.forbidden),
+        "examples": _public_list(skill.examples),
         "runtimeCompatibility": skill.runtimeCompatibility,
-        "sourcePath": _skill_source_path(skill),
     }
 
 
@@ -157,6 +163,36 @@ def _pyodide_doc(skill: Any) -> dict[str, Any]:
 def _runtime_status(skill: Any, runtime: str) -> str:
     value = skill.runtimeCompatibility.get(runtime, {})
     return str(value.get("status", "unknown")) if isinstance(value, dict) else "unknown"
+
+
+def _public_list(values: list[Any]) -> list[str]:
+    items: list[str] = []
+    for value in values:
+        text = _public_text(str(value))
+        if text:
+            items.append(text)
+    return items
+
+
+def _public_text(value: str) -> str:
+    text = value.strip()
+    if not text:
+        return ""
+    replacements = (
+        ("docstring/generated capability", "엔진 기능 설명"),
+        ("generated capability", "엔진 기능 설명"),
+        ("capability-backed", "근거 기반"),
+        ("skill/capability ref", "skill 문서"),
+        ("capabilityRefs", "사용 기능"),
+        ("capabilityRef", "사용 기능"),
+        ("capability ref", "기능 참조"),
+        ("capability view", "기능 설명"),
+        ("capability schema", "API schema"),
+        ("capability", "기능"),
+    )
+    for before, after in replacements:
+        text = text.replace(before, after)
+    return text
 
 
 def _ordered_categories(categories: set[str]) -> list[str]:

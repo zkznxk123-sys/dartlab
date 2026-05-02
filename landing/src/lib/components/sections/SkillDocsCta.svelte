@@ -27,13 +27,13 @@
 	<div class="max-w-6xl mx-auto">
 		<div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-10 items-start">
 			<div>
-				<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">Skill Catalog</span>
+				<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">Skills</span>
 				<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-4 leading-tight">
-					분석 절차의 기준은 src/dartlab/skills다
+					분석 절차는 Skills에서 바로 읽는다
 				</h2>
 				<p class="text-dl-text-muted text-base leading-relaxed mb-6 max-w-xl">
-					DartLab의 API 설명은 docstring에서 나오고, 분석 절차는 SkillSpec에서 나온다.
-					사용자 문서, 자체 AI, 외부 AI, MCP, Web UI는 같은 skill resolver를 읽는다.
+					종목 분석, 공시 검토, 신용 위험, 매크로, 차트까지 목적별로 필요한 데이터와 실행 순서를
+					한 화면에서 확인한다.
 				</p>
 				<div class="flex flex-wrap gap-2 mb-7">
 					{#each surfaces as surface}
@@ -49,16 +49,7 @@
 						class="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-dl-primary text-white text-sm font-semibold no-underline hover:bg-dl-primary/90 transition-colors"
 					>
 						<BookOpenCheck class="w-4 h-4" />
-						Skill Catalog 열기
-					</a>
-					<a
-						href="https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md"
-						target="_blank"
-						rel="noopener"
-						class="inline-flex items-center gap-2 h-10 px-4 rounded-md border border-dl-border text-dl-text-muted text-sm font-semibold no-underline hover:text-dl-text hover:border-dl-primary/40 transition-colors"
-					>
-						<Network class="w-4 h-4" />
-						Capability 보기
+						Skills 열기
 					</a>
 				</div>
 			</div>

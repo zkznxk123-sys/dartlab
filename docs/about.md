@@ -58,7 +58,7 @@ If you're visiting for the first time, this order is most efficient:
 3. Quick Start
 4. Introductory blog posts
 
-Skill Catalog is the primary catalog for usage procedures, AI workflows, runtime constraints, and capability links. Its source is `src/dartlab/skills`; generated capability details come from public docstrings. The blog covers interpretation frameworks for actually reading disclosures. Reading both together is faster.
+Skills is the primary catalog for usage procedures, AI workflows, and runtime constraints. The blog covers interpretation frameworks for actually reading disclosures. Reading both together is faster.
 
 ## Citations and Sources
 
@@ -66,8 +66,7 @@ DartLab documentation and blog posts include official sources wherever possible.
 
 When citing this project, these pages serve as good starting points:
 
-- Skill Catalog: `/skills`
-- Capability reference: `https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md`
+- Skills: `/skills`
 - Installation: `/docs/getting-started/installation`
 - Blog hub: `/blog/`
 - GitHub repository: `https://github.com/eddmpython/dartlab`

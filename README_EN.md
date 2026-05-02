@@ -650,7 +650,7 @@ Pipeline: local cache (instant) → HuggingFace (auto-download) → DART API (wi
 
 ## Documentation
 
-[Docs](https://eddmpython.github.io/dartlab/) · [Quick Start](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [Skill Catalog](https://eddmpython.github.io/dartlab/skills) · [Capability Reference](https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md)
+[Docs](https://eddmpython.github.io/dartlab/) · [Quick Start](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [Skills](https://eddmpython.github.io/dartlab/skills)
 
 **Blog:** [All](https://eddmpython.github.io/dartlab/blog/) · [Company Stories](https://eddmpython.github.io/dartlab/blog/series/company-reports) · [Credit Reports](https://eddmpython.github.io/dartlab/blog/credit-reports) · [Macro Reports](https://eddmpython.github.io/dartlab/blog/macro-reports)
 

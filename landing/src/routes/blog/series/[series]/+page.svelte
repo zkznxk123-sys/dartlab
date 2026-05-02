@@ -110,7 +110,7 @@
 			<div class="series-product-links">
 				<a href="{base}/docs/getting-started/quickstart" class="series-product-link primary">Quickstart</a>
 				<a href="{base}/docs/getting-started/installation" class="series-product-link">설치 가이드</a>
-				<a href="https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md" target="_blank" rel="noopener" class="series-product-link">Capability Reference</a>
+				<a href="{base}/skills" class="series-product-link">Skills</a>
 				<a href="{brand.repo}" target="_blank" rel="noopener" class="series-product-link">GitHub</a>
 			</div>
 		</section>

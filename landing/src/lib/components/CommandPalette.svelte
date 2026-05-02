@@ -31,8 +31,7 @@
 	const quickLinks: SearchItem[] = [
 		{ title: 'Installation', href: `${base}/docs/getting-started/installation`, category: 'Quick Links' },
 		{ title: 'Quickstart', href: `${base}/docs/getting-started/quickstart`, category: 'Quick Links' },
-		{ title: 'Skill Catalog', href: `${base}/skills`, category: 'Quick Links' },
-		{ title: 'Capability Reference', href: 'https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md', category: 'Quick Links' }
+		{ title: 'Skills', href: `${base}/skills`, category: 'Quick Links' }
 	];
 
 	const allItems = [...quickLinks, ...docsItems, ...blogItems];

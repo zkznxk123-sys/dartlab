@@ -497,30 +497,30 @@ def _generated_basic_engine_skill_specs() -> list[SkillSpec]:
                 scope="builtin",
                 status="observed",
                 category="basic",
-                purpose=f"DartLab `{engine}` 엔진의 역할과 capability 묶음을 찾기 위한 generated basic engine skill.",
+                purpose=f"DartLab `{engine}` 엔진의 역할과 사용 가능한 기능 묶음을 찾기 위한 generated basic engine skill.",
                 whenToUse=[ai_role, *[item for item in snippets[:7] if item]],
                 capabilityRefs=capability_refs,
                 toolRefs=[],
                 procedure=[
                     f"AI 역할: {ai_role}",
-                    "이 skill은 엔진 능력 지도다. API 상세는 capabilityRefs의 docstring/generated capability에서 확인한다.",
+                    "이 skill은 엔진 능력 지도다. API 세부보다 목적, 근거, 실행 환경을 먼저 확인한다.",
                     "필요 입력, 반환 형태, 단위, 실제 반환 키를 이 skill에 중복하지 않는다.",
                     "분석 중 생성한 숫자·날짜·표·한계는 ref로 남겨 최종 답변 검산에 연결한다.",
                 ],
                 requiredEvidence=evidence,
-                expectedOutputs=["engine AI role", "engine capability map", "capability-backed evidence refs"],
+                expectedOutputs=["engine AI role", "engine feature map", "evidence-backed analysis refs"],
                 runtimeCompatibility={
                     "server": {"status": "supported"},
                     "localPython": {"status": "supported"},
                     "mcp": {"status": "supported"},
                     "webAi": {
                         "status": "limited",
-                        "notes": ["실제 실행 가능 여부는 연결된 capability와 dataset skill을 함께 확인한다."],
+                        "notes": ["실제 실행 가능 여부는 필요한 데이터와 실행 환경 제한을 함께 확인한다."],
                     },
                     "pyodide": {
                         "status": "unknown",
                         "notes": [
-                            "엔진 지도 자체는 조회 가능하다. 실행 가능 여부는 조합되는 skill과 capability별 runtimeCompatibility를 따른다."
+                            "엔진 지도 자체는 조회 가능하다. 실제 실행 가능 여부는 조합되는 skill과 runtimeCompatibility를 따른다."
                         ],
                     },
                 },

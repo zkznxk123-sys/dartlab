@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -442,3 +443,12 @@ def test_skill_compiler_builds_web_index_without_docs_markdown(tmp_path: Path) -
     assert not (tmp_path / "docs").exists()
     assert (tmp_path / "web" / "index.json").exists()
     assert (tmp_path / "web" / "pyodide.json").exists()
+
+    payload = json.loads((tmp_path / "web" / "index.json").read_text(encoding="utf-8"))
+    public_items = payload["skills"]
+    assert public_items
+    assert all(item["category"] != "capability" for item in public_items)
+    assert all("capabilityRefs" not in item for item in public_items)
+    assert all("sourcePath" not in item for item in public_items)
+    assert "Capability Reference" not in json.dumps(payload, ensure_ascii=False)
+    assert "capability ref" not in json.dumps(payload, ensure_ascii=False)

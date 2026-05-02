@@ -5,9 +5,9 @@
 	import { buildAbsoluteUrl, buildBreadcrumbJsonLd, buildWebsiteJsonLd } from '$lib/seo';
 	import { brand } from '$lib/brand';
 
-	const pageTitle = 'DartLab Skill Catalog — 분석 절차 검색';
+	const pageTitle = 'DartLab Skills — 분석 절차 문서';
 	const pageDesc =
-		'Generated capability와 src/dartlab/skills SkillSpec에서 만든 DartLab 분석 절차 검색 화면.';
+		'DartLab 엔진과 분석 절차를 목적별로 검색하고 바로 실행 순서로 읽는 문서형 skill catalog.';
 	const pageUrl = buildAbsoluteUrl('skills');
 	const jsonLd = JSON.stringify([
 		buildWebsiteJsonLd(),
@@ -32,21 +32,12 @@
 <Header context="skills" />
 <main class="skill-page">
 	<section class="skill-hero">
-		<p class="kicker">Skill Catalog</p>
-		<h1>DartLab 분석 절차 검색</h1>
+		<p class="kicker">Skills</p>
+		<h1>DartLab 분석 절차 문서</h1>
 		<p>
-			API 능력은 docstring/generated capability가 기준이고, 분석 절차는
-			<code>src/dartlab/skills</code> SkillSpec이 기준이다. 이 화면은 generated JSON index를 읽어
-			목적별 skill과 capability ref를 찾는다.
+			무엇을 분석하려는지 먼저 고르고, 필요한 데이터·실행 순서·검산 기준을 한 화면에서 읽는다.
+			개별 API 내부 참조가 아니라 사용자가 실제로 따라갈 수 있는 절차를 기준으로 정리했다.
 		</p>
-		<div class="hero-links">
-			<a href="https://github.com/eddmpython/dartlab/tree/master/src/dartlab/skills" target="_blank" rel="noopener">
-				src/dartlab/skills
-			</a>
-			<a href="https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md" target="_blank" rel="noopener">
-				CAPABILITIES.md
-			</a>
-		</div>
 	</section>
 	<SkillSearch />
 </main>
@@ -93,35 +84,4 @@
 		line-height: 1.75;
 	}
 
-	code {
-		padding: 0.1rem 0.25rem;
-		border: 1px solid #1e2433;
-		border-radius: 4px;
-		background: #0f1219;
-		color: #fdba74;
-	}
-
-	.hero-links {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-		margin-top: 1.25rem;
-	}
-
-	.hero-links a {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.25rem;
-		padding: 0.45rem 0.75rem;
-		border: 1px solid #1e2433;
-		border-radius: 6px;
-		color: #f1f5f9;
-		text-decoration: none;
-		background: #0f1219;
-	}
-
-	.hero-links a:hover {
-		border-color: rgba(251, 146, 60, 0.55);
-		color: #fdba74;
-	}
 </style>

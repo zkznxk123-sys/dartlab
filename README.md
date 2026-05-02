@@ -680,7 +680,7 @@ e.filings("AAPL", forms=["10-K", "10-Q"])
 
 ## 문서
 
-[문서](https://eddmpython.github.io/dartlab/) · [빠른 시작](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [Skill Catalog](https://eddmpython.github.io/dartlab/skills) · [Capability Reference](https://github.com/eddmpython/dartlab/blob/master/CAPABILITIES.md)
+[문서](https://eddmpython.github.io/dartlab/) · [빠른 시작](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [Skills](https://eddmpython.github.io/dartlab/skills)
 
 **블로그 (120+ 글):** [전체](https://eddmpython.github.io/dartlab/blog/) · [기업이야기](https://eddmpython.github.io/dartlab/blog/series/company-reports) · [신용평가 보고서](https://eddmpython.github.io/dartlab/blog/credit-reports) · [매크로 보고서](https://eddmpython.github.io/dartlab/blog/macro-reports)
 
