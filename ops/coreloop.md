@@ -1,16 +1,32 @@
 # Core Loop — 자가개선 루프 운영 SSOT
 
 **주체**: dartlab 자가개선 루프 (Observe·Pattern·Promote·Refine·Axis).
-**현재**: Phase O 자동 기록 + Phase P/R/F/A 스크립트 + CLI (`dartlab-coreloop`) 구현. 초기 수동 운영.
-**방향**: 3 개월 안정화 후 Phase P/R 점진 자동화. Phase A 는 영구 수동.
+**현재**: legacy Phase O/P/R/F/A 문서. 새 AI 엔진의 상위 자가개선 계약은 루트 `ASK_WORKBENCH_KERNEL.md` 의 Direct Audit Learning Loop, ImprovementCandidate, RecipeBank, RegressionBank다.
+**방향**: 이 문서는 `ASK_WORKBENCH_KERNEL.md` 를 소비하는 운영 포인터로 축소한다. Phase 이름은 compatibility 용어이며 새 구현의 원천이 아니다.
 
 > 상위 사상: [philosophy.md](philosophy.md) §6.
 
-사람과 AI 가 서로 개선하는 **양방향 루프**. 사람이 엔진·블로그·지식을 만들면 AI 자산이 되고, AI 가 실행 중 발견한 개선이 엔진 docstring·블로그 frontmatter 로 사람 자산에 환류한다. 엔진 docstring 파일 하나가 다리. SSOT 단일.
+사람과 AI 가 서로 개선하는 **양방향 루프**. 새 AI 경로에서는 자동 로그가 곧바로 지식이 되지 않는다. `AuditPacket` 을 사람이 P/T/C/V로 판정하고, 그 결과가 `ImprovementCandidate`, `RegressionBank`, `RecipeBank` 로 들어간 뒤에만 docstring/capabilities/protocol/tool 개선 후보가 된다.
+
+Mapping:
+
+| Legacy phase | 새 계약 |
+|---|---|
+| O Observe | TraceEvent + AuditPacket 생성 |
+| P Pattern | P verdict 기반 Recipe candidate |
+| R Promote | human accepted Recipe/SSOT change |
+| F Refine | C/V 기반 RegressionBank + ImprovementCandidate |
+| A Axis | 수동 engine/protocol proposal |
+ 
+새 구현은 `src/dartlab/ai/runtime/*` 를 기준으로 하지 않는다. AI production 경로는 `src/dartlab/ai` 새 Ask Workbench Kernel 이며, `ai_backup` 또는 old runtime import 는 금지한다.
 
 ---
 
-## 1. 5 Phase — O · P · R · F · A
+## 1. Legacy 5 Phase — O · P · R · F · A
+
+아래 Phase P/R/F 스크립트와 절차는 compatibility-only다.
+어떤 legacy 스크립트도 `ASK_WORKBENCH_KERNEL.md` 의 `AuditPacket` verdict 와 accepted `ImprovementCandidate` 없이 docstring, recipe, protocol, tool schema 변경을 승격할 수 없다.
+새 AI 구현에서는 Phase 이름을 내부 상태로 쓰지 않는다.
 
 | Phase | 이름 | 한 줄 명제 |
 |---|---|---|
@@ -24,10 +40,11 @@
 
 ## 2. Phase O — 기록 인프라
 
-### 구현 위치
+### legacy 구현 위치
 
-- `src/dartlab/ai/runtime/audit.py::AuditCollector` — v2 스키마 수집기 (신설 표준).
-- `src/dartlab/server/streaming.py::_AuditCollector` — 서버 경로 (v2 필드 확장 호환 유지).
+- 아래 경로는 old AI runtime 기준이며 새 Ask Workbench Kernel 의 production 표준이 아니다.
+- 새 구현 위치는 `ASK_WORKBENCH_KERNEL.md` 의 `trace`, `verify`, `answer`, `providers`, `mcp` 계약을 따른다.
+- compatibility 코드가 필요하면 새 `AuditPacket`/`ImprovementCandidate` 스키마로 어댑트한다.
 
 ### 출력
 

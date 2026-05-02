@@ -84,18 +84,17 @@ dartlab 의 1 순위 UI surface. AI 채팅 + 프로바이더 연결 + MCP 자동
                                           ← {"event":"providerChanged","data":{...}}
 → {"id":"1","type":"ask","question":"..."}
    ← {"id":"1","event":"meta","data":{company, stockCode}}
-   ← {"id":"1","event":"observe","data":{...}}
+   ← {"id":"1","event":"reference","data":{...}}
    ← {"id":"1","event":"inspect","data":{...}}
-   ← {"id":"1","event":"compute","data":{...}}
+   ← {"id":"1","event":"execute","data":{...}}
    ← {"id":"1","event":"verify","data":{...}}
-   ← {"id":"1","event":"artifact","data":{...}}
-   ← {"id":"1","event":"chart","data":{charts:[...]}}
+   ← {"id":"1","event":"visual","data":{visuals:[...]}}
    ← {"id":"1","event":"chunk","data":{text}} × N
    ← {"id":"1","event":"done","data":{}}
 → {"type":"exit"}
 ```
 
-workspace-native 이벤트는 장식 로그가 아니다. VSCode webview 는 web UI 와 동일하게 Financial Workspace Agent Trace 로 표시하고, chart 는 `ui/shared/api/visualContract.ts` 를 통과한 spec 만 렌더링한다.
+Ask Workbench 이벤트는 장식 로그가 아니다. VSCode webview 는 web UI 와 동일하게 Kernel Trace 로 표시하고, visual 은 `ui/shared/api/visualContract.ts` 를 통과한 spec 만 렌더링한다. Legacy `observe/compute/chart/artifact` 이벤트는 adapter alias 로만 허용한다.
 
 ---
 

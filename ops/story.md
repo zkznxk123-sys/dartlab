@@ -589,7 +589,7 @@ story 블록 조립 (builders.py)
   ↓
 AI Self-Description 자동 반영 (tool schema 자동)
   ↓
-AI audit 10 개 질문 검증 (ops/ai.md §11)
+AI audit 질문 검증 (ASK_WORKBENCH_KERNEL.md)
   ↓
 사람이 직접 읽고 품질 판단
 ```
@@ -657,4 +657,5 @@ AI audit 10 개 질문 검증 (ops/ai.md §11)
 8. dashboard type 은 한 페이지 스냅샷 (웹/Jupyter/Marimo/CLI 4 채널).
 9. story audit 는 story 보면서 근본 1 곳 수정. 학습은 accountMappings/topicGraph/labels 경로.
 10. AI 는 story 직접 호출 안 함 (83 초), 엔진을 직접 호출. story 는 사람용 + 블로그 파이프.
-11. 개선 파이프라인 — 관점 → 재료 → 블록 → AI audit → 사람 판단. 프롬프트만 고치기는 덕지덕지.
+11. `dartlab.skills` 는 story 가 공유할 수 있는 분석 절차 reference 다. story 는 skill 을 runner 로 쓰지 않고 reportType/엔진 승격 후보 판단에 참고한다.
+12. 개선 파이프라인 — 관점 → 재료 → 블록 → AI audit → 사람 판단. 프롬프트만 고치기는 덕지덕지.

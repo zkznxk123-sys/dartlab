@@ -138,7 +138,7 @@ AI 코드 실행 → emit_chart() → stdout 마커 → extract_viz_specs() → 
 | `src/dartlab/viz/generators.py` | Company → ChartSpec 8 종 |
 | `src/dartlab/viz/charts/` | DataFrame → Plotly Figure (line · bar · pie · waterfall · revenue · …) |
 | `src/dartlab/story/blocks.py` | ChartBlock 타입 |
-| `src/dartlab/ai/runtime/workspace_visual.py` | workspace agent visual 의미 판정 + CSV 기반 visual compiler |
+| `src/dartlab/ai/visuals.py` | Ask Workbench table/execution 기반 visual compiler |
 | `ui/shared/api/visualContract.ts` | web · VSCode 공통 visual 의미 판정 |
 | `ui/shared/chart/` | Svelte SVG 차트 컴포넌트 (web · vscode 공유) |
 
@@ -148,7 +148,7 @@ AI 코드 실행 → emit_chart() → stdout 마커 → extract_viz_specs() → 
 
 1. `emit_chart` · `emit_diagram` 두 헬퍼로 시각화를 시작한다.
 2. VizSpec 프로토콜 (`chartType`/`title`/`series`/`categories`/`options`/`meta`) + diagram 분기.
-3. AI 는 stdout 마커로 전달 — `emit_*` → `extract_viz_specs` → CHART 이벤트 → SSE → 클라이언트.
+3. AI 는 tableRef/executionRef 에 연결된 visual 만 생성한다. SkillSpec 의 visualGuidance 는 목적을 설명하고, 실행은 `compile_visual` 이 검증한다.
 4. Company → ChartSpec 자동 생성기 8 종 (revenue · cashflow · BS · profitability · dividend · radar · sparkline · heatmap).
 5. 렌더링은 VSCode · Web SPA · Jupyter · Story (터미널·HTML·JSON) 6 경로.
 6. 팔레트는 Python `viz/palette.py` + JS `ui/shared/chart/colors.ts` 한 값으로 동기화.
