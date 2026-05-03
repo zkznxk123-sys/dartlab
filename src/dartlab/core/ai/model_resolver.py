@@ -11,7 +11,7 @@ from __future__ import annotations
 import os
 import re
 
-LATEST_OPENAI_MODEL = "gpt-5.2"
+LATEST_OPENAI_MODEL = "gpt-5.4"
 
 _OPENAI_FAMILY_PROVIDERS = {
     "openai",
