@@ -4,8 +4,8 @@
 - 서버 (uvicorn) 환경은 TTY 없음 → ``promptAndSave()`` 의 ``input()`` 이 EOFError.
 - 과거 동작: except 에서 ``None`` 반환 → 상위에서 데이터 없음으로 오해 →
   AI 응답 본문에 "키가 필요합니다" 안내가 전혀 담기지 않음.
-- 개선 동작: TTY 없으면 ``AuthKeyMissing`` 예외 raise → 상위로 전파 →
-  ``toolLoop`` 이 예외 본문을 그대로 AI 응답에 담아 사용자에게 안내.
+- 개선 동작: TTY 없으면 ``AuthKeyMissing`` 예외 raise → 상위로 전파.
+  예외 본문이 서비스명, 발급 URL, `.env` 설정법을 포함해 상위 런타임이 그대로 안내할 수 있다.
 """
 
 from __future__ import annotations
@@ -68,17 +68,9 @@ def test_promptAndSave_returns_existing_env_value(monkeypatch):
     assert result == "already-set-value"
 
 
-def test_toolLoop_maps_AuthKeyMissing_to_auth_required_status():
-    """toolLoop 의 except 분기가 AuthKeyMissing 을 status='auth_required' 로 변환.
+def test_retired_toolLoop_does_not_swallow_auth_guidance():
+    """퇴역한 toolLoop 경로가 AuthKeyMissing 안내를 우회하지 않도록 크게 실패한다."""
+    from dartlab.ai.runtime.toolLoop import streamWithTools
 
-    실제 AI provider 호출 없이 예외 분기 동작만 검증.
-    """
-    from dartlab.ai.runtime import toolLoop as toolLoopMod
-
-    # 소스 레벨 검증 — 분기가 존재하고 올바른 키워드로 태깅돼 있는지
-    src = toolLoopMod.__file__
-    with open(src, encoding="utf-8") as fh:
-        code = fh.read()
-    assert "except AuthKeyMissing" in code
-    assert 'status = "auth_required"' in code
-    assert "API 키 필요" in code
+    with pytest.raises(RuntimeError, match="retired"):
+        streamWithTools()

@@ -39,7 +39,7 @@ procedure:
   - 4. 4 축 — price · flow · macro · news 기준을 확인한다.
   - '**대화형 CLI (TTY)** — `promptAndSave` 가 입력을 받아 `.env` 에 저장하고 계속 실행. 사용자가 건너뛰면 `None` 반환.'
   - '**서버·백그라운드 (TTY 없음)** — `core.env.AuthKeyMissing` 예외를 raise. 예외 본문에 서비스명 · 발급 URL · `.env` 설정법 포함.'
-  - '**AI tool 경유** — `ai/runtime/toolLoop.py` 가 `AuthKeyMissing` 을 `status="auth_required"` 로 태깅하고 사용자 응답에 안내 그대로 전달.'
+  - '**AI 런타임 경유** — `core.env.AuthKeyMissing` 예외 본문을 상위 ask/runtime 경로가 사용자 안내로 전달한다.'
   - '**macro (L2)** — `dartlab.macro()` — 시장 레벨 매크로 해석 (사이클 · 금리 · 자산 · 심리 · 유동성). Company 불필요. → `src/dartlab/macro/README.md`.'
 requiredEvidence:
   - skillRef
@@ -92,5 +92,5 @@ lastUpdated: '2026-05-03'
 - 4. 4 축 — price · flow · macro · news 기준을 확인한다.
 - **대화형 CLI (TTY)** — `promptAndSave` 가 입력을 받아 `.env` 에 저장하고 계속 실행. 사용자가 건너뛰면 `None` 반환.
 - **서버·백그라운드 (TTY 없음)** — `core.env.AuthKeyMissing` 예외를 raise. 예외 본문에 서비스명 · 발급 URL · `.env` 설정법 포함.
-- **AI tool 경유** — `ai/runtime/toolLoop.py` 가 `AuthKeyMissing` 을 `status="auth_required"` 로 태깅하고 사용자 응답에 안내 그대로 전달.
+- **AI 런타임 경유** — `core.env.AuthKeyMissing` 예외 본문을 상위 ask/runtime 경로가 사용자 안내로 전달한다.
 - **macro (L2)** — `dartlab.macro()` — 시장 레벨 매크로 해석 (사이클 · 금리 · 자산 · 심리 · 유동성). Company 불필요. → `src/dartlab/macro/README.md`.

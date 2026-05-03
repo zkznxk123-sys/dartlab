@@ -107,6 +107,7 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
     """첫 ask 의 cold-start 비용을 사전 지불.
 
     extension activate 직후 호출되도록 설계. 다음을 미리 수행:
+    - dartlab.ai.runtime.core 호환 모듈 import
     - dartlab.ai.kernel 모듈 import (lazy 비용)
     - dartlab.ai.providers 모듈 import
     - dartlab.viz.extract import
@@ -122,6 +123,7 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
         except (ImportError, OSError, RuntimeError) as exc:
             diag["skipped"].append(f"{name}: {exc.__class__.__name__}")
 
+    _try("core", lambda: __import__("dartlab.ai.runtime.core", fromlist=["runAsk"]))
     _try("kernel", lambda: __import__("dartlab.ai.kernel", fromlist=["runAsk"]))
     _try("providers", lambda: __import__("dartlab.ai.providers", fromlist=["create_provider"]))
     _try("viz_extract", lambda: __import__("dartlab.viz.extract", fromlist=["extract_viz_specs"]))

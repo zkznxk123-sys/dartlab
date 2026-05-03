@@ -56,7 +56,7 @@ class TestDartCompanyLiveFilings:
         class FakeOpenDart:
             def documentText(self, rceptNo):
                 assert rceptNo == "20240312000736"
-                return "<html><body>단일판매공급계약 본문</body></html>"
+                return "<html><body>단일판매공급계약 본문 " + ("추가 내용 " * 10) + "</body></html>"
 
         monkeypatch.setattr("dartlab.providers.dart.openapi.dart.OpenDart", FakeOpenDart)
 

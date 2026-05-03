@@ -16,6 +16,7 @@ __all__ = [
     "ask",
     "runAsk",
     "create_task",
+    "create_provider",
     "get_config",
     "configure",
     "status",
@@ -51,7 +52,9 @@ def status(provider: str | None = None, **kwargs: Any) -> dict[str, Any]:
     """Return provider availability for CLI/UI compatibility."""
 
     config = get_config(provider=provider, **kwargs)
-    prov = create_provider(config)
+    from . import providers as _providers
+
+    prov = _providers.create_provider(config)
     available = bool(getattr(prov, "check_available", lambda: False)())
     result: dict[str, Any] = {
         "provider": config.provider,
