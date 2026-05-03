@@ -236,7 +236,7 @@ omit = [
 
     # 얕은 display/AI helper 래퍼 — great_tables/IPython 옵셔널.
     "src/dartlab/viz/display/*",
-    "src/dartlab/ai/tools/network.py",
+    "src/dartlab/viz/network.py",
 
     # 실험/레거시 — 사용 여부 재평가 필요, 현재 0% 모듈.
     "src/dartlab/analysis/financial/research/*",
