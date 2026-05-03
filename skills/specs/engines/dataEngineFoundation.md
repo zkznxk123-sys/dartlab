@@ -73,6 +73,7 @@ failureModes:
 forbidden:
   - API parameters/returns를 SkillSpec에 중복하지 않는다.
   - source table 없이 응용 엔진 결론을 먼저 만들지 않는다.
+  - 후보·상위·랭킹 산출물은 입력/유니버스, 필터, 계산식/지표, 결과 evidence table 없이 완료하지 않는다.
   - Company, gather, scan 결과를 서로 같은 의미의 데이터로 합치지 않는다.
 examples:
   - 종목 분석은 Company로 target/topic을 확정하고, 필요한 최신 시장 데이터만 gather로 보강한다.
@@ -106,4 +107,5 @@ lastUpdated: "2026-05-02"
 - gather 경로는 provider, latestAsOf, metric, table을 남긴다.
 - scan 경로는 universe, metric, period, rank, table을 남긴다.
 - table/value/date ref를 만든 뒤에는 최종 답변의 material claim마다 해당 ref를 직접 연결한다. evidence refs 전체 목록만 제출하는 것은 숫자 claim 근거가 아니다.
+- 후보·상위·랭킹 산출물은 입력/유니버스, 필터, 계산식/지표, 결과 evidence table이 있어야 재현 가능한 데이터 결론으로 취급한다.
 - 최종 답변 전에 데이터 한계와 후속 분석 엔진으로 넘긴 근거 ref를 확인한다.

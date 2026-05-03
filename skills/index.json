@@ -1327,18 +1327,26 @@
         "`inspect_dataset`으로 종목코드, 종목명, 날짜, 가격/거래대금/등락률 컬럼을 확인한다.",
         "`run_python`으로 동일 기준의 횡단면 ranking 표를 만든다. 표에는 종목 식별자, 종목명, 기준일, 비교 시작일 또는 기간, ranking metric, rank가 있어야 한다.",
         "ranking 또는 “찾아줘” 유형의 결과는 답변 prose보다 table ref와 필요 시 CSV artifact가 우선이다. 산출물 ref가 없으면 후보 발굴을 완료한 것으로 보지 않는다.",
+        "최종 답변 본문에는 입력/유니버스, 필터, 계산식/지표, 결과 섹션을 두고 markdown evidence table을 렌더링한다.",
         "상위 N개 숫자 claim은 ranking table/value ref에 직접 묶고, 기준일·기간·universe·metric을 답변에 함께 밝힌다.",
         "후보 표가 2개 이상이고 동일 metric이 있으면 compile_visual로 요약 차트를 만들 수 있지만, chart는 table ref 이후에만 만든다."
       ],
       "requiredEvidence": [
         "latestAsOf",
         "universe",
+        "input",
+        "filters",
+        "formula",
         "metric",
-        "table"
+        "table",
+        "executionRef"
       ],
       "expectedOutputs": [
         "후보 종목 표",
         "기준일/기간/metric",
+        "입력/유니버스",
+        "필터",
+        "계산식/지표",
         "한계"
       ],
       "visualGuidance": [
@@ -1348,12 +1356,14 @@
         "종목명/코드 오매칭",
         "기간 없는 급등 단정",
         "ranking 표를 만들었지만 artifact/table ref를 남기지 않아 서버 audit에서 산출물 누락",
-        "숫자 ranking claim을 table/value ref에 직접 묶지 않아 최종 검산 실패"
+        "숫자 ranking claim을 table/value ref에 직접 묶지 않아 최종 검산 실패",
+        "최종 답변이 bullet 나열이고 evidence table, 입력, 필터, 계산식이 없음"
       ],
       "forbidden": [
         "데이터 기준일 없이 최근이라고 말하기",
         "단일 종목만 보고 전종목 결론 내기",
-        "table 없이 상위 종목명만 prose로 나열하기"
+        "table 없이 상위 종목명만 prose로 나열하기",
+        "입력/유니버스, 필터, 계산식/지표 없이 후보 표를 결론으로 제시하기"
       ],
       "examples": [
         "최근 주가가 많이 오른 종목 찾아줘"
@@ -2315,6 +2325,7 @@
       "forbidden": [
         "API parameters/returns를 SkillSpec에 중복하지 않는다.",
         "source table 없이 응용 엔진 결론을 먼저 만들지 않는다.",
+        "후보·상위·랭킹 산출물은 입력/유니버스, 필터, 계산식/지표, 결과 evidence table 없이 완료하지 않는다.",
         "Company, gather, scan 결과를 서로 같은 의미의 데이터로 합치지 않는다."
       ],
       "examples": [
@@ -3068,22 +3079,34 @@
         "`c.governance()` 등은 scan 내부 view — 별도 전역 함수가 아니다."
       ],
       "requiredEvidence": [
-        "skillRef"
+        "skillRef",
+        "universe",
+        "datasetAsOf",
+        "filter",
+        "formula",
+        "table",
+        "executionRef"
       ],
       "expectedOutputs": [
         "작업 경로",
         "확인한 근거",
-        "검증 결과"
+        "검증 결과",
+        "입력/유니버스",
+        "필터",
+        "계산식/지표",
+        "후보 evidence table"
       ],
       "visualGuidance": [],
       "failureModes": [
         "Skill OS 검색 없이 과거 문서 경로를 직접 찾음",
         "API schema를 skill 본문에 중복해 docstring/기능와 어긋남",
-        "검증 게이트 없이 변경 또는 답변을 완료 처리함"
+        "검증 게이트 없이 변경 또는 답변을 완료 처리함",
+        "후보·상위·랭킹 결과를 table 없이 회사명과 퍼센트 bullet로만 나열함"
       ],
       "forbidden": [
         "삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.",
-        "API parameters/returns를 SkillSpec에 복사하지 않는다."
+        "API parameters/returns를 SkillSpec에 복사하지 않는다.",
+        "universe, 필터, 계산식, 기준일, table ref 없이 후보 발굴을 완료했다고 말하지 않는다."
       ],
       "examples": [
         "Scan 규칙 확인",
@@ -6093,6 +6116,7 @@
         "기능 설명이나 API 사용법처럼 계산이 필요 없는 질문은 run_python으로 가짜 evidence table을 만들지 않는다. skill 문서를 근거로 좁은 설명을 제출한다.",
         "시각화는 table ref가 있고 2개 이상 비교 가능한 값이 있을 때만 만든다.",
         "최종 답변은 evidence refs와 limits만 제출해서 끝내지 않는다. 숫자·날짜·ranking 같은 material claim은 각 claim 안에서 supporting table/value/date ref를 직접 가리켜야 한다.",
+        "후보·상위·랭킹 최종 답변은 `입력/유니버스`, `필터`, `계산식/지표`, `결과`를 포함하고, 회사/식별자, 기준 기간, 원값, metric, rank가 들어간 markdown evidence table을 본문에 렌더링한다.",
         "검산 실패 후 재시도할 때는 실패한 초안의 숫자 문장을 그대로 유지하지 말고, ref로 뒷받침되는 claim만 남긴다."
       ],
       "requiredEvidence": [
@@ -6111,6 +6135,8 @@
         "실패한 실행을 숨김",
         "date ref 없이 최신성 주장",
         "table ref 없이 ranking 또는 chart 주장",
+        "ranking/candidate 최종 답변에 table ref만 제출하고 사람이 읽을 evidence table을 쓰지 않음",
+        "입력/유니버스, 필터, 계산식/지표, 결과를 답변에 명시하지 않아 재현 불가능함",
         "문자열 날짜/라벨 컬럼을 table metric으로 지정해 검증 실패",
         "사용법 답변의 코드 예시 숫자를 근거 없는 재무 claim처럼 제출",
         "evidence refs는 제출했지만 material claim별 refs가 비어 있어 숫자 검산 실패",
@@ -6120,7 +6146,8 @@
         "tool call transcript를 최종 답변으로 노출",
         "근거 없는 숫자 claim",
         "단일값 chart",
-        "run_python 코드 안에서 emit_result를 재정의"
+        "run_python 코드 안에서 emit_result를 재정의",
+        "후보·상위·랭킹 답변을 bullet 나열로만 마무리"
       ],
       "examples": [
         "실행하고 근거 남기는 순서 알려줘",
@@ -6191,16 +6218,24 @@
         "`engines.scanUsage`와 `basic.scan`으로 가능한 횡단면 축을 확인한다.",
         "valuation metric과 profitability metric이 같은 universe와 기준일에서 있는지 확인한다.",
         "`run_python`으로 후보 표를 만들고 value metric만 아니라 profitability 보조 지표를 같이 둔다.",
+        "최종 답변은 입력/유니버스, 필터, 계산식/지표, 결과를 명시하고 후보별 valuation/profitability evidence table을 본문에 렌더링한다.",
         "낮은 valuation은 후보 조건이지 최종 투자 판단이 아니라고 한계를 남긴다."
       ],
       "requiredEvidence": [
         "universe",
+        "input",
+        "filters",
         "metric",
+        "formula",
         "table",
-        "basis"
+        "basis",
+        "executionRef"
       ],
       "expectedOutputs": [
         "저평가 후보 표",
+        "입력/유니버스",
+        "필터",
+        "계산식/지표",
         "수익성 보조 지표",
         "한계"
       ],
@@ -6209,11 +6244,13 @@
       ],
       "failureModes": [
         "낮은 PER/PBR만 보고 저평가 단정",
-        "수익성 또는 재무 안정성 확인 없이 후보를 결론으로 포장"
+        "수익성 또는 재무 안정성 확인 없이 후보를 결론으로 포장",
+        "후보를 bullet 나열로만 내고 valuation/profitability evidence table을 빠뜨림"
       ],
       "forbidden": [
         "후보 종목을 매수 추천으로 단정",
-        "universe와 기준일 없는 ranking"
+        "universe와 기준일 없는 ranking",
+        "입력/필터/계산식/표 근거 없는 후보 발굴 답변"
       ],
       "examples": [
         "스캔엔진으로 저평가 종목 찾아줘"
@@ -6291,6 +6328,7 @@
         "엔진이 무엇을 할 수 있는지 확인하려면 `basic.*` generated skill을 읽고, 상세 API는 기능/docstring으로 내려간다.",
         "테스트, 릴리즈, 문서, 아키텍처, UI, 데이터, MCP 같은 운영 규칙은 `operation.*` 또는 `runtime.*` skill에서 찾는다.",
         "각 skill의 `sourceRefs`는 삭제된 문서 경로가 아니라 `dartlab://skills/{skillId}` 리소스를 가리킨다.",
+        "후보·상위·랭킹 결과는 사람과 LLM이 재검산할 수 있게 입력/유니버스, 필터, 계산식/지표, 결과 evidence table을 함께 낸다.",
         "새 절차가 반복되면 user skill로 시작하고, audit과 사용자 확인을 거쳐 curated 또는 엔진 docstring으로 승격한다."
       ],
       "requiredEvidence": [
@@ -6307,7 +6345,8 @@
         "삭제된 운영 문서 경로를 직접 순회하다가 적용 규칙을 놓침",
         "basic engine skill과 operation skill을 구분하지 못함",
         "sourceRef 없이 규칙을 요약함",
-        "API 세부 schema를 SkillSpec에 복사함"
+        "API 세부 schema를 SkillSpec에 복사함",
+        "후보·상위·랭킹 답변을 bullet 나열로만 내고 입력/필터/계산식/표 근거를 빠뜨림"
       ],
       "forbidden": [
         "Skills 검색 없이 임의 문서를 시작점으로 삼지 않는다.",

@@ -43,10 +43,20 @@ procedure:
   - '`c.governance()` 등은 scan 내부 view — 별도 전역 함수가 아니다.'
 requiredEvidence:
   - skillRef
+  - universe
+  - datasetAsOf
+  - filter
+  - formula
+  - table
+  - executionRef
 expectedOutputs:
   - 작업 경로
   - 확인한 근거
   - 검증 결과
+  - 입력/유니버스
+  - 필터
+  - 계산식/지표
+  - 후보 evidence table
 runtimeCompatibility:
   server:
     status: supported
@@ -64,9 +74,11 @@ failureModes:
   - Skill OS 검색 없이 과거 문서 경로를 직접 찾음
   - API schema를 skill 본문에 중복해 docstring/capability와 어긋남
   - 검증 게이트 없이 변경 또는 답변을 완료 처리함
+  - 후보·상위·랭킹 결과를 table 없이 회사명과 퍼센트 bullet로만 나열함
 forbidden:
   - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.
   - API parameters/returns를 SkillSpec에 복사하지 않는다.
+  - universe, 필터, 계산식, 기준일, table ref 없이 후보 발굴을 완료했다고 말하지 않는다.
 examples:
   - Scan 규칙 확인
   - scan 작업을 Skill OS에서 시작
@@ -94,3 +106,4 @@ lastUpdated: '2026-05-03'
 - **[`scanAccount` docstring Guide](../src/dartlab/providers/dart/finance/scanAccount.py)** — 계정 원자의 4 사용 패턴과 scanRatio 와의 join 예시.
 - `dartlab.scan()` 하나로 모든 축에 접근.
 - `c.governance()` 등은 scan 내부 view — 별도 전역 함수가 아니다.
+- 후보·상위·랭킹 답변은 `입력/유니버스`, `필터`, `계산식/지표`, `결과`를 먼저 밝히고, 회사/식별자, 기준 기간, 원값, metric, rank가 들어간 markdown evidence table을 포함한다.

@@ -52,6 +52,8 @@ failureModes:
   - 실패한 실행을 숨김
   - date ref 없이 최신성 주장
   - table ref 없이 ranking 또는 chart 주장
+  - ranking/candidate 최종 답변에 table ref만 제출하고 사람이 읽을 evidence table을 쓰지 않음
+  - 입력/유니버스, 필터, 계산식/지표, 결과를 답변에 명시하지 않아 재현 불가능함
   - 문자열 날짜/라벨 컬럼을 table metric으로 지정해 검증 실패
   - 사용법 답변의 코드 예시 숫자를 근거 없는 재무 claim처럼 제출
   - evidence refs는 제출했지만 material claim별 refs가 비어 있어 숫자 검산 실패
@@ -61,6 +63,7 @@ forbidden:
   - 근거 없는 숫자 claim
   - 단일값 chart
   - run_python 코드 안에서 emit_result를 재정의
+  - 후보·상위·랭킹 답변을 bullet 나열로만 마무리
 examples:
   - 실행하고 근거 남기는 순서 알려줘
   - 검산하고 답변을 마무리하려면?
@@ -79,4 +82,5 @@ lastUpdated: "2026-05-02"
 - 기능 설명이나 API 사용법처럼 계산이 필요 없는 질문은 run_python으로 가짜 evidence table을 만들지 않는다. skill/capability ref를 근거로 좁은 설명을 제출한다.
 - 시각화는 table ref가 있고 2개 이상 비교 가능한 값이 있을 때만 만든다.
 - 최종 답변은 evidence refs와 limits만 제출해서 끝내지 않는다. 숫자·날짜·ranking 같은 material claim은 각 claim 안에서 supporting table/value/date ref를 직접 가리켜야 한다.
+- 후보·상위·랭킹 최종 답변은 `입력/유니버스`, `필터`, `계산식/지표`, `결과`를 포함하고, 회사/식별자, 기준 기간, 원값, metric, rank가 들어간 markdown evidence table을 본문에 렌더링한다.
 - 검산 실패 후 재시도할 때는 실패한 초안의 숫자 문장을 그대로 유지하지 말고, ref로 뒷받침되는 claim만 남긴다.

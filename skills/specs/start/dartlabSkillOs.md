@@ -53,6 +53,7 @@ failureModes:
   - basic engine skill과 operation skill을 구분하지 못함
   - sourceRef 없이 규칙을 요약함
   - API 세부 schema를 SkillSpec에 복사함
+  - 후보·상위·랭킹 답변을 bullet 나열로만 내고 입력/필터/계산식/표 근거를 빠뜨림
 forbidden:
   - Skills 검색 없이 임의 문서를 시작점으로 삼지 않는다.
   - 운영 규칙과 엔진 API schema를 같은 skill에 중복하지 않는다.
@@ -73,4 +74,5 @@ lastUpdated: "2026-05-03"
 - 엔진이 무엇을 할 수 있는지 확인하려면 `basic.*` generated skill을 읽고, 상세 API는 capability/docstring으로 내려간다.
 - 테스트, 릴리즈, 문서, 아키텍처, UI, 데이터, MCP 같은 운영 규칙은 `operation.*` 또는 `runtime.*` skill에서 찾는다.
 - 각 skill의 `sourceRefs`는 삭제된 문서 경로가 아니라 `dartlab://skills/{skillId}` 리소스를 가리킨다.
+- 후보·상위·랭킹 결과는 사람과 LLM이 재검산할 수 있게 입력/유니버스, 필터, 계산식/지표, 결과 evidence table을 함께 낸다.
 - 새 절차가 반복되면 user skill로 시작하고, audit과 사용자 확인을 거쳐 curated 또는 엔진 docstring으로 승격한다.
