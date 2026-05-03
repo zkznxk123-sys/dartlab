@@ -635,6 +635,32 @@ def test_provider_workbench_loop_executes_actions_and_verifies(monkeypatch) -> N
     assert done.data["verification"]["ok"] is True
 
 
+def test_kernel_traces_rejected_draft_for_audit(monkeypatch) -> None:
+    from dartlab.ai import kernel
+    from dartlab.ai.providers import ProviderTurn
+
+    class FakeProvider:
+        config = None
+
+        def __init__(self) -> None:
+            self.round = 0
+
+        def generate(self, messages, tools):
+            self.round += 1
+            if self.round == 1:
+                return ProviderTurn(content="근거 없는 숫자 12345", tool_calls=[])
+            return ProviderTurn(content="근거 없는 숫자 없음", tool_calls=[])
+
+    monkeypatch.setattr(kernel, "create_provider", lambda **_kwargs: FakeProvider())
+    events = list(kernel.runAsk("기능 설명", provider="openai"))
+    rejected = [event for event in events if event.kind == "draft_rejected"]
+
+    assert rejected
+    assert rejected[0].data["reason"] == "prose_without_finalize"
+    assert "근거 없는 숫자" in rejected[0].data["answerPreview"]
+    assert rejected[0].data["verification"]["issues"]
+
+
 def test_kernel_extracts_python_literal_result_json() -> None:
     from dartlab.ai.kernel import _extract_result_json, _refs_from_execution
     from dartlab.ai.notebook import ExecutionResult

@@ -45,7 +45,16 @@ def test_tool_feature_map_covers_all_tools():
 
     tool_names = {t["name"] for t in _TOOLS}
     mapped_names = set(_TOOL_FEATURE_MAP.keys())
-    assert tool_names == mapped_names, f"Missing in feature map: {tool_names - mapped_names}"
+    assert tool_names <= mapped_names, f"Missing in feature map: {tool_names - mapped_names}"
+
+
+def test_discovery_tools_do_not_mutate_generated_tools():
+    from dartlab.mcp import _TOOLS, _advertisedTools
+
+    generated_names = {tool["name"] for tool in _TOOLS}
+
+    assert "listDartlabApi" not in generated_names
+    assert "searchDartlabApi" in {tool["name"] for tool in _advertisedTools()}
 
 
 def test_tool_descriptions_nonempty():

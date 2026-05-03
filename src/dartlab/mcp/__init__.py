@@ -512,7 +512,7 @@ def _verifyDartlabApi(apiRef: str) -> str:
     return f"✓ dartlab.{name}\n\n{doc[:1000]}"
 
 
-# Discovery tool 정의 (TOOLS 에 추가)
+# Discovery tool 정의. generated _TOOLS 는 직접 변경하지 않는다.
 _DISCOVERY_TOOLS = [
     {
         "name": "listDartlabApi",
@@ -540,8 +540,7 @@ _DISCOVERY_TOOLS = [
         "required": ["apiRef"],
     },
 ]
-
-_TOOLS.extend(_DISCOVERY_TOOLS)
+_COMPAT_TOOLS = [*_TOOLS, *_DISCOVERY_TOOLS]
 
 
 def _canonicalTools() -> list[dict[str, Any]]:
@@ -562,7 +561,7 @@ def _canonicalTools() -> list[dict[str, Any]]:
 def _advertisedTools() -> list[dict[str, Any]]:
     """MCP list_tools에 노출할 도구 목록."""
     if os.environ.get("DARTLAB_MCP_COMPAT") == "1":
-        legacy = [tool for tool in _TOOLS if tool.get("name") != "companySections"]
+        legacy = [tool for tool in _COMPAT_TOOLS if tool.get("name") != "companySections"]
         seen = {tool["name"] for tool in _canonicalTools()}
         return _canonicalTools() + [tool for tool in legacy if tool.get("name") not in seen]
     return _canonicalTools()
@@ -717,21 +716,33 @@ def create_server():
         if uri_str == "dartlab://datasets":
             return [
                 ReadResourceContents(
-                    content=json.dumps(_executeAskWorkbenchTool("ask_kernel_status", {}).get("datasets", []), ensure_ascii=False, indent=2),
+                    content=json.dumps(
+                        _executeAskWorkbenchTool("ask_kernel_status", {}).get("datasets", []),
+                        ensure_ascii=False,
+                        indent=2,
+                    ),
                     mime_type="application/json",
                 )
             ]
         if uri_str == "dartlab://reference":
             return [
                 ReadResourceContents(
-                    content=json.dumps(_executeAskWorkbenchTool("search_reference", {"query": "DartLab Ask Workbench", "limit": 5}), ensure_ascii=False, indent=2),
+                    content=json.dumps(
+                        _executeAskWorkbenchTool("search_reference", {"query": "DartLab Ask Workbench", "limit": 5}),
+                        ensure_ascii=False,
+                        indent=2,
+                    ),
                     mime_type="application/json",
                 )
             ]
         if uri_str == "dartlab://skills":
             return [
                 ReadResourceContents(
-                    content=json.dumps(_executeAskWorkbenchTool("listDartlabSkills", {"includeUser": False}), ensure_ascii=False, indent=2),
+                    content=json.dumps(
+                        _executeAskWorkbenchTool("listDartlabSkills", {"includeUser": False}),
+                        ensure_ascii=False,
+                        indent=2,
+                    ),
                     mime_type="application/json",
                 )
             ]

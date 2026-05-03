@@ -228,6 +228,7 @@ def _run_provider_workbench(
                 )
                 verification = verify_answer(task, session.refs, draft)
                 if not verification.ok and repair_count < _MAX_REPAIR_ROUNDS:
+                    yield _rejected_draft_event(session, draft, verification, reason="prose_without_finalize")
                     repair_count += 1
                     messages.append(_repair_message(verification, "prose_without_finalize"))
                     continue
@@ -239,6 +240,7 @@ def _run_provider_workbench(
                 draft = _draft_from_tool_args(call.args, session)
                 verification = verify_answer(task, session.refs, draft)
                 if not verification.ok and repair_count < _MAX_REPAIR_ROUNDS:
+                    yield _rejected_draft_event(session, draft, verification, reason="finalize_answer_failed")
                     repair_count += 1
                     messages.append(_repair_message(verification, "finalize_answer_failed"))
                     continue
@@ -563,6 +565,23 @@ def _repair_message(verification: VerificationResult, reason: str) -> dict[str, 
     }
 
 
+def _rejected_draft_event(
+    session: AskSession, draft: AnswerDraft, verification: VerificationResult, *, reason: str
+) -> TraceEvent:
+    return session.add_event(
+        "draft_rejected",
+        {
+            "reason": reason,
+            "answerPreview": draft.answer[:1200],
+            "answerLength": len(draft.answer),
+            "evidenceRefs": draft.evidence_refs[:20],
+            "visualRefs": draft.visual_refs[:20],
+            "limits": draft.limits[-10:],
+            "verification": verification.to_dict(),
+        },
+    )
+
+
 def _force_finalize(
     session: AskSession,
     task: WorkbenchTask,
@@ -580,6 +599,7 @@ def _force_finalize(
             draft = _draft_from_tool_args(call.args, session)
             verification = verify_answer(task, session.refs, draft)
             if not verification.ok:
+                yield _rejected_draft_event(session, draft, verification, reason="forced_finalize_failed")
                 messages.append(_repair_message(verification, "forced_finalize_failed"))
                 break
             yield from _finalize(session, task, draft)
@@ -595,6 +615,7 @@ def _force_finalize(
             if verification.ok:
                 yield from _finalize(session, task, draft)
                 return
+            yield _rejected_draft_event(session, draft, verification, reason="forced_finalize_prose_failed")
             messages.append(_repair_message(verification, "forced_finalize_prose_failed"))
     yield from _finalize_unable_to_finalize(session, reason="provider could not submit a verified finalize_answer")
 
