@@ -92,6 +92,105 @@ def _executeWorkspaceAgentTool(name: str, args: dict[str, Any]) -> str:
     return json.dumps(_executeAskWorkbenchTool(name, args), ensure_ascii=False, indent=2, default=str)
 
 
+def _resourcePayload(uri_str: str) -> tuple[str, str]:
+    if uri_str == "dartlab://info":
+        import dartlab
+
+        return (
+            json.dumps(
+                {
+                    "version": getattr(dartlab, "__version__", "unknown"),
+                    "tools": len(_advertisedTools()),
+                    "cached": list(_cache.keys()),
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            "application/json",
+        )
+    if uri_str == "dartlab://ask-workbench":
+        return (
+            json.dumps(_executeAskWorkbenchTool("ask_kernel_status", {}), ensure_ascii=False, indent=2),
+            "application/json",
+        )
+    if uri_str == "dartlab://datasets":
+        return (
+            json.dumps(
+                _executeAskWorkbenchTool("ask_kernel_status", {}).get("datasets", []),
+                ensure_ascii=False,
+                indent=2,
+            ),
+            "application/json",
+        )
+    if uri_str == "dartlab://reference":
+        return (
+            json.dumps(
+                _executeAskWorkbenchTool("search_reference", {"query": "DartLab Ask Workbench", "limit": 5}),
+                ensure_ascii=False,
+                indent=2,
+            ),
+            "application/json",
+        )
+    if uri_str == "dartlab://skills":
+        return (
+            json.dumps(
+                _executeAskWorkbenchTool("listDartlabSkills", {"includeUser": False}),
+                ensure_ascii=False,
+                indent=2,
+            ),
+            "application/json",
+        )
+    if uri_str.startswith("dartlab://skills/"):
+        skill_id = uri_str.replace("dartlab://skills/", "", 1)
+        return (
+            json.dumps(
+                _executeAskWorkbenchTool(
+                    "explainDartlabSkill",
+                    {"skillId": skill_id, "includeUser": False},
+                ),
+                ensure_ascii=False,
+                indent=2,
+            ),
+            "application/json",
+        )
+    if os.environ.get("DARTLAB_MCP_COMPAT") != "1":
+        return ("Unknown resource", "text/plain")
+    if uri_str == "dartlab://graph":
+        from dartlab.core.analysisGraph import loadAnalysisGraph
+
+        return (json.dumps(loadAnalysisGraph(), ensure_ascii=False, indent=2), "application/json")
+    if uri_str == "dartlab://graph/status":
+        from dartlab.core.analysisGraph import graphStatus
+
+        return (json.dumps(graphStatus(), ensure_ascii=False, indent=2), "application/json")
+    if uri_str.startswith("dartlab://graph/"):
+        from dartlab.core.analysisGraph import impactForGraphNode, loadAnalysisGraph
+
+        tail = uri_str.replace("dartlab://graph/", "", 1)
+        if "/" in tail:
+            kind, raw_id = tail.split("/", 1)
+            node_id = f"{kind}:{raw_id}"
+            graph = loadAnalysisGraph()
+            nodes = [node for node in graph.get("nodes") or [] if node.get("id") == node_id]
+            payload = {"nodes": nodes, "impact": impactForGraphNode(node_id)}
+            return (json.dumps(payload, ensure_ascii=False, indent=2), "application/json")
+    if uri_str.startswith("dartlab://company/"):
+        parts = uri_str.replace("dartlab://company/", "").split("/", 1)
+        if len(parts) == 2 and parts[1] == "topics":
+            return (json.dumps(_getCompany(parts[0]).topics, ensure_ascii=False, indent=2), "application/json")
+    if uri_str.startswith("dartlab://scan/"):
+        axis = uri_str.replace("dartlab://scan/", "")
+        import dartlab
+
+        return (_fmt(dartlab.scan(axis)), "application/json")
+    if uri_str.startswith("dartlab://macro/"):
+        axis = uri_str.replace("dartlab://macro/", "")
+        import dartlab
+
+        return (_fmt(dartlab.macro(axis)), "application/json")
+    return ("Unknown resource", "text/plain")
+
+
 def _fmtDict(d: dict, depth: int = 0) -> str:
     """dict를 마크다운 텍스트로 변환. analysis 결과용."""
     parts: list[str] = []
@@ -692,146 +791,8 @@ def create_server():
     @app.read_resource()
     async def read_resource(uri: str) -> list[ReadResourceContents]:
         uri_str = str(uri)
-        if uri_str == "dartlab://info":
-            import dartlab
-
-            return [
-                ReadResourceContents(
-                    content=json.dumps(
-                        {
-                            "version": getattr(dartlab, "__version__", "unknown"),
-                            "tools": len(_advertisedTools()),
-                            "cached": list(_cache.keys()),
-                        },
-                        ensure_ascii=False,
-                        indent=2,
-                    ),
-                    mime_type="application/json",
-                )
-            ]
-        if uri_str == "dartlab://ask-workbench":
-            return [
-                ReadResourceContents(
-                    content=json.dumps(_executeAskWorkbenchTool("ask_kernel_status", {}), ensure_ascii=False, indent=2),
-                    mime_type="application/json",
-                )
-            ]
-        if uri_str == "dartlab://datasets":
-            return [
-                ReadResourceContents(
-                    content=json.dumps(
-                        _executeAskWorkbenchTool("ask_kernel_status", {}).get("datasets", []),
-                        ensure_ascii=False,
-                        indent=2,
-                    ),
-                    mime_type="application/json",
-                )
-            ]
-        if uri_str == "dartlab://reference":
-            return [
-                ReadResourceContents(
-                    content=json.dumps(
-                        _executeAskWorkbenchTool("search_reference", {"query": "DartLab Ask Workbench", "limit": 5}),
-                        ensure_ascii=False,
-                        indent=2,
-                    ),
-                    mime_type="application/json",
-                )
-            ]
-        if uri_str == "dartlab://skills":
-            return [
-                ReadResourceContents(
-                    content=json.dumps(
-                        _executeAskWorkbenchTool("listDartlabSkills", {"includeUser": False}),
-                        ensure_ascii=False,
-                        indent=2,
-                    ),
-                    mime_type="application/json",
-                )
-            ]
-        if uri_str.startswith("dartlab://skills/"):
-            skill_id = uri_str.replace("dartlab://skills/", "", 1)
-            return [
-                ReadResourceContents(
-                    content=json.dumps(
-                        _executeAskWorkbenchTool(
-                            "explainDartlabSkill",
-                            {"skillId": skill_id, "includeUser": False},
-                        ),
-                        ensure_ascii=False,
-                        indent=2,
-                    ),
-                    mime_type="application/json",
-                )
-            ]
-        if os.environ.get("DARTLAB_MCP_COMPAT") != "1":
-            return [ReadResourceContents(content="Unknown resource", mime_type="text/plain")]
-        if uri_str == "dartlab://graph":
-            from dartlab.core.analysisGraph import loadAnalysisGraph
-
-            return [
-                ReadResourceContents(
-                    content=json.dumps(loadAnalysisGraph(), ensure_ascii=False, indent=2),
-                    mime_type="application/json",
-                )
-            ]
-        if uri_str == "dartlab://graph/status":
-            from dartlab.core.analysisGraph import graphStatus
-
-            return [
-                ReadResourceContents(
-                    content=json.dumps(graphStatus(), ensure_ascii=False, indent=2),
-                    mime_type="application/json",
-                )
-            ]
-        if uri_str.startswith("dartlab://graph/"):
-            from dartlab.core.analysisGraph import impactForGraphNode, loadAnalysisGraph
-
-            tail = uri_str.replace("dartlab://graph/", "", 1)
-            if "/" in tail:
-                kind, raw_id = tail.split("/", 1)
-                node_id = f"{kind}:{raw_id}"
-                graph = loadAnalysisGraph()
-                nodes = [node for node in graph.get("nodes") or [] if node.get("id") == node_id]
-                payload = {"nodes": nodes, "impact": impactForGraphNode(node_id)}
-                return [
-                    ReadResourceContents(
-                        content=json.dumps(payload, ensure_ascii=False, indent=2),
-                        mime_type="application/json",
-                    )
-                ]
-        if uri_str.startswith("dartlab://company/"):
-            parts = uri_str.replace("dartlab://company/", "").split("/", 1)
-            if len(parts) == 2 and parts[1] == "topics":
-                return [
-                    ReadResourceContents(
-                        content=json.dumps(_getCompany(parts[0]).topics, ensure_ascii=False, indent=2),
-                        mime_type="application/json",
-                    )
-                ]
-        if uri_str.startswith("dartlab://scan/"):
-            axis = uri_str.replace("dartlab://scan/", "")
-            import dartlab
-
-            result = dartlab.scan(axis)
-            return [
-                ReadResourceContents(
-                    content=_fmt(result),
-                    mime_type="application/json",
-                )
-            ]
-        if uri_str.startswith("dartlab://macro/"):
-            axis = uri_str.replace("dartlab://macro/", "")
-            import dartlab
-
-            result = dartlab.macro(axis)
-            return [
-                ReadResourceContents(
-                    content=_fmt(result),
-                    mime_type="application/json",
-                )
-            ]
-        return [ReadResourceContents(content="Unknown resource", mime_type="text/plain")]
+        content, mime_type = _resourcePayload(uri_str)
+        return [ReadResourceContents(content=content, mime_type=mime_type)]
 
     return app
 

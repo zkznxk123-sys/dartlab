@@ -376,7 +376,7 @@ def read_context(path: str, *, start_line: int = 1, max_chars: int = 4000) -> Re
 
     Examples
     --------
-    >>> read_context("src/dartlab/skills/specs/start/dartlabSkillOs.md", max_chars=1000)
+    >>> read_context("skills/specs/start/dartlabSkillOs.md", max_chars=1000)
     Ref(...)
 
     Notes

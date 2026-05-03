@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 from pathlib import Path
 from typing import Any
 
@@ -74,10 +73,9 @@ def buildSkillArtifacts(
 
     Description
     -----------
-    `src/dartlab/skills` SkillSpec을 읽어 repo-root `skills/` 검색 JSON 과
-    Pyodide compatibility manifest를 생성한다. 문서 SSOT는 생성 Markdown 이
-    아니라 `src/dartlab/skills` SkillSpec 자체다. generated JSON 은 직접
-    수정하지 않는다.
+    repo-root `skills/specs` SkillSpec을 읽어 repo-root `skills/` 검색 JSON 과
+    Pyodide compatibility manifest를 생성한다. 문서 SSOT는 생성 JSON 이 아니라
+    `skills/specs` SkillSpec 자체다. generated JSON 은 직접 수정하지 않는다.
 
     Parameters
     ----------
@@ -107,9 +105,9 @@ def buildSkillArtifacts(
 
     Notes
     -----
-    `src/dartlab/skills` 가 SkillSpec 원천이고, repo-root `skills/` 가 공개
-    catalog 산출물이다. landing은 이 산출물을 읽어 렌더링할 뿐 소유하지
-    않는다.
+    repo-root `skills/specs` 가 SkillSpec 원천이고, repo-root `skills/` 의
+    JSON 은 공개 catalog 산출물이다. landing은 이 산출물을 읽어 렌더링할 뿐
+    소유하지 않는다.
 
     Guide
     -----
@@ -123,7 +121,7 @@ def buildSkillArtifacts(
 
     skills = listSkills(includeUser=includeUser)
     web_path = Path(webDir)
-    _reset_generated_dir(web_path)
+    _prepare_generated_dir(web_path)
 
     categories = _ordered_categories({skill.category for skill in skills})
     public_skills = [skill for skill in skills if skill.category != "capability"]
@@ -260,11 +258,9 @@ def _write_json(path: Path, data: dict[str, Any]) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def _reset_generated_dir(path: Path) -> None:
-    if path.exists():
-        for child in path.iterdir():
-            if child.is_dir():
-                shutil.rmtree(child)
-            else:
-                child.unlink()
+def _prepare_generated_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
+    for file_name in ("index.json", "pyodide.json"):
+        target = path / file_name
+        if target.exists():
+            target.unlink()

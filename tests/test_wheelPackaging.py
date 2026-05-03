@@ -152,6 +152,22 @@ def test_sectionProfileTable_parquet_inWheel(builtWheel: Path):
     )
 
 
+def test_skillSpecs_inWheel(builtWheel: Path):
+    """루트 Skill OS 원본이 wheel 런타임 package data로 포함되는지 검증."""
+    with zipfile.ZipFile(builtWheel) as zf:
+        names = set(zf.namelist())
+
+    required = [
+        "dartlab/skills/specs/start/dartlabSkillOs.md",
+        "dartlab/skills/specs/operation/apiContract.md",
+        "dartlab/skills/specs/runtime/mcp.md",
+        "dartlab/skills/index.json",
+        "dartlab/skills/pyodide.json",
+    ]
+    for req in required:
+        assert req in names, f"wheel 에 Skill OS 리소스 누락: {req}"
+
+
 @pytest.mark.heavy
 def test_installedWheel_importAndSectionsLoad(builtWheel: Path, tmp_path):
     """빌드된 wheel 을 격리 venv 에 설치하고 실제로 loadSections() 호출.

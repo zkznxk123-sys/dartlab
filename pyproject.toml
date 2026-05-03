@@ -118,6 +118,7 @@ include = [
     "src/dartlab/**/*.parquet",
     "src/dartlab/**/py.typed",
 ]
+force-include = { "skills/specs" = "dartlab/skills/specs", "skills/index.json" = "dartlab/skills/index.json", "skills/pyodide.json" = "dartlab/skills/pyodide.json" }
 artifacts = [
     "src/dartlab/ui/build/**",
     "src/dartlab/**/*.json",
@@ -144,6 +145,9 @@ include = [
     "src/dartlab/**/*.json",
     "src/dartlab/**/*.parquet",
     "src/dartlab/**/py.typed",
+    "skills/specs/**",
+    "skills/index.json",
+    "skills/pyodide.json",
     "src/dartlab/ui/build/**",
     "README.md",
     "LICENSE",

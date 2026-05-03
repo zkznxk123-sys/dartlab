@@ -76,8 +76,8 @@ def test_public_docs_do_not_reference_legacy_company_names():
         "docs/index.md",
         "docs/getting-started/quickstart.md",
         "docs/stability.md",
-        "src/dartlab/skills/specs/start/dartlabSkillOs.md",
-        "src/dartlab/skills/specs/operation/apiContract.md",
+        "skills/specs/start/dartlabSkillOs.md",
+        "skills/specs/operation/apiContract.md",
     ]
     banned = ["USCompany", "KRCompany", "DartCompany", "EdgarCompany", "c.docs()"]
 

@@ -67,6 +67,24 @@ def test_mcp_workbench_tools_execute():
     assert "DartLab Skill OS" in "".join(t["description"] for t in _advertisedTools())
 
 
+def test_mcp_skill_os_resources_are_readable():
+    import json
+
+    from dartlab.mcp import _resourcePayload
+
+    listing, listing_mime = _resourcePayload("dartlab://skills")
+    detail, detail_mime = _resourcePayload("dartlab://skills/start.dartlabSkillOs")
+
+    listing_payload = json.loads(listing)
+    detail_payload = json.loads(detail)
+
+    assert listing_mime == "application/json"
+    assert detail_mime == "application/json"
+    assert any(item["id"] == "start.dartlabSkillOs" for item in listing_payload["skills"])
+    assert detail_payload["id"] == "start.dartlabSkillOs"
+    assert detail_payload["source"]["path"].replace("\\", "/").endswith("/skills/specs/start/dartlabSkillOs.md")
+
+
 def test_mcp_workbench_session_keeps_refs_between_tools():
     import json
 

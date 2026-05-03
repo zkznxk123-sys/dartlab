@@ -542,6 +542,20 @@ def test_skill_compiler_default_catalog_is_repo_root_skills(tmp_path: Path, monk
     assert not (tmp_path / "landing" / "static" / "skills").exists()
 
 
+def test_builtin_skill_specs_are_root_skill_os_sources() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    specs_root = repo_root / "skills" / "specs"
+
+    assert specs_root.exists()
+    assert not (repo_root / "src" / "dartlab" / "skills" / "specs").exists()
+
+    start = skills.get("start.dartlabSkillOs", includeUser=False)
+    source_path = str(start.source.get("path", "")).replace("\\", "/")
+
+    assert "/skills/specs/start/dartlabSkillOs.md" in source_path
+    assert "/src/dartlab/skills/specs/" not in source_path
+
+
 def test_landing_skill_reader_references_repo_catalog_without_static_copy() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     component = repo_root / "landing" / "src" / "lib" / "components" / "skills" / "SkillSearch.svelte"

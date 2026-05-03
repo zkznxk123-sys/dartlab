@@ -214,8 +214,9 @@ def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
     Description
     -----------
     DartLab 공용 분석 절차 명세를 로드한다. basic 엔진 skill 과 capability
-    view 는 generated output 이고, builtin 수기 skill 은 `specs/**` Markdown
-    source 를 읽는다. user skill 은 project-local `.dartlab/skills`에서 읽는다.
+    view 는 generated output 이고, builtin 수기 skill 은 repo-root
+    `skills/specs/**` Markdown source 를 읽는다. user skill 은 project-local
+    `.dartlab/skills`에서 읽는다.
 
     Parameters
     ----------
@@ -339,7 +340,7 @@ def lintSkill(spec: SkillSpec) -> None:
 
 
 def _builtin_spec_paths() -> list[Path]:
-    root = Path(__file__).resolve().parent / "specs"
+    root = _builtin_specs_root()
     if not root.exists():
         return []
     return sorted([*root.rglob("*.md"), *root.rglob("*.yaml"), *root.rglob("*.yml"), *root.rglob("*.json")])
@@ -470,7 +471,7 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def _category_from_path(path: Path) -> str:
-    specs = Path(__file__).resolve().parent / "specs"
+    specs = _builtin_specs_root()
     try:
         relative = path.relative_to(specs)
     except ValueError:
@@ -481,6 +482,20 @@ def _category_from_path(path: Path) -> str:
     if first in _MANUAL_SKILL_CATEGORIES:
         return first
     return "finance"
+
+
+def _builtin_specs_root() -> Path:
+    """Builtin SkillSpec root.
+
+    Repo checkout 에서는 루트 `skills/specs`가 공식 Skill OS 원본이다. 설치된
+    wheel 에서는 빌드 시 포함된 package data(`dartlab/skills/specs`)를 fallback
+    으로 읽는다.
+    """
+
+    repo_specs = _repo_root() / "skills" / "specs"
+    if repo_specs.exists():
+        return repo_specs
+    return Path(__file__).resolve().parent / "specs"
 
 
 def _validate_unique_ids(specs: list[SkillSpec]) -> None:
@@ -964,7 +979,8 @@ def _evidence_names(refs: list[dict[str, Any]] | list[Any]) -> set[str]:
 
 def _repo_root() -> Path:
     here = Path.cwd()
-    for base in [here, *here.parents]:
+    module_path = Path(__file__).resolve()
+    for base in [here, *here.parents, *module_path.parents]:
         if (base / "pyproject.toml").exists() and (base / "src" / "dartlab").exists():
             return base
     return here
