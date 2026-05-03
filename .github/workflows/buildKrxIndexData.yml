@@ -5,7 +5,7 @@ name: KRX Index Data Sync (Bulk)
 
 on:
   schedule:
-    - cron: '20 11 * * 1-5'  # KST 20:20 평일 — 장마감 후 당일(T-0)까지 반영
+    - cron: '20 11 * * 1-5'  # KST 20:20 평일 — 어제~오늘 재조회 후 upsert
   workflow_dispatch:
     inputs:
       mode:

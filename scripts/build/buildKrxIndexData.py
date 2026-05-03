@@ -15,8 +15,8 @@ Description
 Modes
 -----
 ``incremental``:
-    장중은 직전 거래 가능 평일(T-1), 장마감 이후 평일은 당일(T-0)까지 수집한다.
-    캐시 miss 또는 cron 누락으로 생긴 gap 을 자동으로 메운다.
+    매 실행마다 어제~오늘 2일을 재조회해 기존 parquet 에 upsert 한다.
+    휴장일/미확정일 빈 응답은 실패로 보지 않는다.
 ``backfill``:
     ``--start`` 와 ``--end`` 사이를 최근 연도부터 과거 연도 순으로 수집한다.
 
@@ -101,37 +101,30 @@ def _previousWeekday(d: date) -> date:
 
 
 def _latestFetchableDate(today: date | None = None, currentTime: time | None = None) -> date:
-    """자동 수집 최신일.
+    """호환용 최신 조회 대상 — incremental 은 항상 오늘까지 직접 확인한다."""
+    _ = currentTime
+    return today or _todayKst()
 
-    장중에는 직전 거래 가능 평일(T-1)을 대상으로 잡고, 평일 장마감 확정시각
-    이후에는 당일(T-0)을 대상으로 잡는다. 주말은 새 거래일이 아니므로 직전
-    평일을 유지한다.
-    """
-    if today is None or currentTime is None:
-        now = datetime.now(_KST)
-        base = now.date() if today is None else today
-        clock = now.time() if currentTime is None else currentTime
-    else:
-        base = today
-        clock = currentTime
-    if base.weekday() < 5 and clock >= _KRX_READY_KST:
-        return base
-    return _previousWeekday(base - timedelta(days=1))
+
+def _incrementalRange(today: date | None = None) -> tuple[date, date]:
+    """운영자 incremental 재조회 범위."""
+    endD = today or _todayKst()
+    return endD - timedelta(days=1), endD
 
 
 def _requiredLatestDate(
     requestedEnd: date,
     today: date | None = None,
     currentTime: time | None = None,
-) -> date:
-    stableLatest = _latestFetchableDate(today, currentTime)
-    requestedLatest = _previousWeekday(requestedEnd)
-    return min(stableLatest, requestedLatest)
+) -> date | None:
+    """자동 incremental 은 빈 응답 일자를 최신 필수값으로 강제하지 않는다."""
+    _ = (requestedEnd, today, currentTime)
+    return None
 
 
 def _validateFreshFetch(df: pl.DataFrame, *, startD: date, endD: date, context: str) -> None:
     required = _requiredLatestDate(endD)
-    if required < startD:
+    if required is None or required < startD:
         return
     latest = None
     if not df.is_empty() and "BAS_DD" in df.columns:
@@ -204,8 +197,8 @@ def _appendYearly(df: pl.DataFrame, outDir: Path) -> dict[int, int]:
 def _findLastBasDd(outDir: Path) -> date | None:
     """저장된 raw parquet 에서 가장 최근 ``BAS_DD`` 를 찾는다.
 
-    로컬 파일이 없으면 HF 현재 연도 파일을 시도한다. incremental 모드의 gap
-    계산 기준이며, None 이면 최신 가능일 하루치만 수집한다.
+    로컬 파일이 없으면 HF 현재 연도 파일을 시도한다. incremental 모드의 로그
+    맥락으로 사용하며, None 이면 어제~오늘 재조회로 시작한다.
     """
     files = sorted(outDir.glob("raw-*.parquet"))
     if files:
@@ -265,30 +258,26 @@ async def _fetchAllMarkets(
 
 
 async def buildIncremental(outDir: Path, apiKey: str) -> dict[int, int]:
-    """마지막 저장일 다음날부터 최신 fetch 가능 거래일까지 자동 수집한다.
+    """어제~오늘 2일을 매번 재조회해 기존 parquet 에 upsert 한다.
 
     Returns
     -------
     dict[int, int]
-        변경된 연도별 row 수. up-to-date 이면 빈 dict.
+        변경된 연도별 row 수. 두 날짜 모두 빈 응답이면 빈 dict.
     """
-    targetEnd = _latestFetchableDate()
+    today = _todayKst()
+    startD, targetEnd = _incrementalRange(today)
     last = _findLastBasDd(outDir)
     if last is None:
-        startD = targetEnd
-        print(f"[krxIndex] last-date 없음 → 최신 가능일 1일치만 ({startD}). 전체 backfill 은 --mode backfill")
+        print(f"[krxIndex] last-date 없음 → 어제~오늘 재조회 ({startD}~{targetEnd}). 전체 backfill 은 --mode backfill")
     else:
-        startD = last + timedelta(days=1)
-        if startD > targetEnd:
-            print(f"[krxIndex] up-to-date (last={last}, targetEnd={targetEnd})")
-            return {}
+        print(f"[krxIndex] 어제~오늘 강제 재조회: last={last}, range={startD}~{targetEnd}")
 
     s = startD.strftime("%Y-%m-%d")
     e = targetEnd.strftime("%Y-%m-%d")
     df = await _fetchAllMarkets(s, e, apiKey)
-    _validateFreshFetch(df, startD=startD, endD=targetEnd, context="incremental")
     if df.is_empty():
-        print(f"[krxIndex] {s}~{e}: empty")
+        print(f"[krxIndex] {s}~{e}: empty (휴장일 / 미확정 / 비거래일 구간)")
         return {}
     return _appendYearly(df, outDir)
 

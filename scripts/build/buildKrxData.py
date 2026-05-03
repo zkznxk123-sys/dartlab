@@ -4,7 +4,7 @@ GitHub Actions workflow (`.github/workflows/buildKrxData.yml`) 가 호출.
 로컬에서도 ``uv run python -X utf8 scripts/build/buildKrxData.py ...`` 로 실행 가능.
 
 모드:
-    incremental — 장중은 직전 거래 가능 평일(T-1), 장마감 이후 평일은 당일(T-0)까지 → 현재 연도 parquet append
+    incremental — 매 실행마다 어제~오늘 2일을 재조회 → 현재 연도 parquet upsert
     backfill    — ``--start ~ --end`` 기간 → 연도별 parquet 통합/append
 
 요구사항:
@@ -123,39 +123,31 @@ def _previousWeekday(d: date) -> date:
     return cur
 
 
-def _latestFetchableDate(today: date | None = None, currentTime: time | None = None) -> date:
-    """KRX sto 일별 OpenAPI에서 안정적으로 기대할 수 있는 최신 일자.
+def _incrementalRange(today: date | None = None) -> tuple[date, date]:
+    """운영자 incremental 재조회 범위.
 
-    장중에는 직전 거래 가능 평일(T-1)을 대상으로 잡고, 평일 장마감 확정시각
-    이후에는 당일(T-0)을 대상으로 잡는다. 주말은 새 거래일이 아니므로 직전
-    평일을 유지한다.
+    KRX 일별 API 는 휴장일/미확정일에 빈 응답을 정상적으로 반환할 수 있다.
+    자동 수집은 최신일 추정으로 실패시키지 않고, 매번 어제와 오늘을 실제로
+    호출한 뒤 응답이 있는 일자만 기존 parquet 에 upsert 한다.
     """
-    if today is None or currentTime is None:
-        now = datetime.now(_KST)
-        base = now.date() if today is None else today
-        clock = now.time() if currentTime is None else currentTime
-    else:
-        base = today
-        clock = currentTime
-    if base.weekday() < 5 and clock >= _KRX_READY_KST:
-        return base
-    return _previousWeekday(base - timedelta(days=1))
+    endD = today or _todayKst()
+    return endD - timedelta(days=1), endD
+
+
+def _latestFetchableDate(today: date | None = None, currentTime: time | None = None) -> date:
+    """호환용 최신 조회 대상 — incremental 은 항상 오늘까지 직접 확인한다."""
+    _ = currentTime
+    return today or _todayKst()
 
 
 def _requiredLatestDate(
     requestedEnd: date,
     today: date | None = None,
     currentTime: time | None = None,
-) -> date:
-    """현 시점에 최소 확보돼야 하는 최신 KRX 일자.
-
-    검증 기준은 fetch target 과 같아야 한다. 장중에는 전일을 요구하고, 장마감
-    이후에는 당일을 요구한다. HTTP 오류나 장마감 이후 빈 응답은 success 로
-    삼키지 않고 ``_validateFreshFetch`` 에서 실패시킨다.
-    """
-    stableLatest = _latestFetchableDate(today, currentTime)
-    requestedLatest = _previousWeekday(requestedEnd)
-    return min(stableLatest, requestedLatest)
+) -> date | None:
+    """자동 incremental 은 빈 응답 일자를 최신 필수값으로 강제하지 않는다."""
+    _ = (requestedEnd, today, currentTime)
+    return None
 
 
 def _validateFreshFetch(df: pl.DataFrame, *, startD: date, endD: date, context: str) -> None:
@@ -175,34 +167,25 @@ def _validateFreshFetch(df: pl.DataFrame, *, startD: date, endD: date, context: 
 
 
 async def buildIncremental(outDir: Path, apiKey: str) -> dict[int, int]:
-    """마지막 저장일 다음날 ~ 최신 fetch 가능 거래일 자동 fetch.
+    """어제~오늘 2일을 매번 재조회해 기존 parquet 에 upsert 한다.
 
-    KST 20:00 cron 에서는 당일(T-0)까지 수집한다. 장중 수동 실행이면 전일(T-1)을
-    대상으로 잡는다. 1일치 fixed 가 아니라 "마지막 저장 다음날 ~ 최신 가능일"
-    가변 윈도로 fetch → 갭 자동 복구.
+    이미 저장된 일자도 다시 호출한다. KRX 가 휴장일/미확정일을 빈 응답으로
+    반환하면 실패시키지 않고, 응답이 있는 일자만 ``unique(..., keep="last")`` 로
+    최신 값으로 교체한다.
     """
     today = _todayKst()
-    targetEnd = _latestFetchableDate()
+    startD, targetEnd = _incrementalRange(today)
     last = _findLastBasDd(outDir)
     if last is None:
-        # 빈 상태 (초기) — 최신 가능일 1일치, 본격 backfill 은 별도 dispatch
-        startD = targetEnd
-        print(f"[krx] last-date 없음 → 최신 가능일 1일치만 ({startD}). 전체 backfill 은 --mode backfill")
+        print(f"[krx] last-date 없음 → 어제~오늘 재조회 ({startD}~{targetEnd}). 전체 backfill 은 --mode backfill")
     else:
-        startD = last + timedelta(days=1)
-        if startD > targetEnd:
-            print(f"[krx] up-to-date (last={last}, targetEnd={targetEnd}, today={today}) — 추가 fetch 없음")
-            return {}
-        if (targetEnd - last).days > 1:
-            print(f"[krx] 갭 감지: last={last}, targetEnd={targetEnd} ({(targetEnd - last).days}일 차) → 자동 메움")
-
+        print(f"[krx] 어제~오늘 강제 재조회: last={last}, range={startD}~{targetEnd}")
     s = startD.strftime("%Y-%m-%d")
     e = targetEnd.strftime("%Y-%m-%d")
     print(f"[krx] incremental fetch: {s} ~ {e}")
     df = await fetchKrxRange(s, e, market="ALL", sleepSec=0.5, apiKey=apiKey)
-    _validateFreshFetch(df, startD=startD, endD=targetEnd, context="incremental")
     if df.is_empty():
-        print(f"[krx] {s}~{e}: empty (휴장일 / 정산 미확정 / 비거래일 구간)")
+        print(f"[krx] {s}~{e}: empty (휴장일 / 미확정 / 비거래일 구간)")
         return {}
     return _appendYearly(df, outDir)
 

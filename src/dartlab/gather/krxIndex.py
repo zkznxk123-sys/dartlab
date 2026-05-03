@@ -150,7 +150,7 @@ async def fetchKrxIndexBydd(
     basDd = _normalizeDate(basDd)
     if not _isFinalized(basDd):
         log.warning(
-            "KRX idx %s: not finalized — use after market close or a prior trading day",
+            "KRX idx %s: future date — use today or a prior date",
             basDd,
         )
         return pl.DataFrame()
@@ -262,7 +262,7 @@ async def fetchKrxIndexRange(
     Returns
     -------
     pl.DataFrame
-        기간 내 raw long DataFrame. 평일만 호출하며 휴장일 row 는 제외된다.
+        기간 내 raw long DataFrame. 휴장일/미확정일은 직접 호출 후 빈 응답으로 제외된다.
 
     Raises
     ------
@@ -287,8 +287,6 @@ async def fetchKrxIndexRange(
     async with httpx.AsyncClient(timeout=30.0) as client:
 
         async def _one(d: _date):
-            if d.weekday() >= 5:  # 토/일 skip
-                return
             async with sem:
                 for attempt in range(retries + 1):
                     try:
