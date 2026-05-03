@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { base } from '$app/paths';
+	import { dev } from '$app/environment';
 	import { BookOpen, CheckCircle2, Search, SlidersHorizontal } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
@@ -51,6 +51,9 @@
 	let loadError = $state('');
 
 	const categoryOrder = ['start', 'runtime', 'operation', 'engines', 'screens', 'finance', 'visuals', 'basic'];
+	const skillIndexUrl = dev
+		? '/__dartlab_skills/index.json'
+		: 'https://raw.githubusercontent.com/eddmpython/dartlab/master/skills/index.json';
 	const runtimeOptions = [
 		{ id: 'all', label: 'All runtimes' },
 		{ id: 'pyodide', label: 'Pyodide' },
@@ -116,7 +119,7 @@
 
 	onMount(async () => {
 		try {
-			const response = await fetch(`${base}/skills/index.json`);
+			const response = await fetch(skillIndexUrl);
 			if (!response.ok) throw new Error(`HTTP ${response.status}`);
 			const payload = await response.json();
 			meta = payload.meta ?? {};

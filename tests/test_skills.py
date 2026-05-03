@@ -540,3 +540,17 @@ def test_skill_compiler_default_catalog_is_repo_root_skills(tmp_path: Path, monk
     assert (tmp_path / "skills" / "index.json").exists()
     assert (tmp_path / "skills" / "pyodide.json").exists()
     assert not (tmp_path / "landing" / "static" / "skills").exists()
+
+
+def test_landing_skill_reader_references_repo_catalog_without_static_copy() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    component = repo_root / "landing" / "src" / "lib" / "components" / "skills" / "SkillSearch.svelte"
+
+    source = component.read_text(encoding="utf-8")
+
+    assert "https://raw.githubusercontent.com/eddmpython/dartlab/master/skills/index.json" in source
+    assert "/__dartlab_skills/index.json" in source
+    assert "fetch(`${base}/skills/index.json`)" not in source
+    assert not (repo_root / "landing" / "src" / "routes" / "skills" / "index.json" / "+server.ts").exists()
+    assert not (repo_root / "landing" / "src" / "routes" / "skills" / "pyodide.json" / "+server.ts").exists()
+    assert not (repo_root / "landing" / "static" / "skills").exists()

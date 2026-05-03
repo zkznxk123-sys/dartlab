@@ -63,13 +63,36 @@ function blogAssetsPlugin() {
 	};
 }
 
+function skillCatalogPlugin() {
+	return {
+		name: 'skill-catalog-plugin',
+		configureServer(server: ViteDevServer) {
+			server.middlewares.use('/__dartlab_skills', (req, res, next) => {
+				const rawPath = req.url?.split('?')[0] ?? '/';
+				const fileName = path.basename(rawPath);
+				if (!['index.json', 'pyodide.json'].includes(fileName)) {
+					next();
+					return;
+				}
+				const filePath = path.resolve(skillsDir, fileName);
+				if (!filePath.startsWith(skillsDir + path.sep) || !fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+					next();
+					return;
+				}
+				res.setHeader('Content-Type', 'application/json; charset=utf-8');
+				fs.createReadStream(filePath).pipe(res);
+			});
+		}
+	};
+}
+
 export default defineConfig({
-	plugins: [tailwindcss(), blogAssetsPlugin(), sveltekit()],
+	plugins: [tailwindcss(), blogAssetsPlugin(), skillCatalogPlugin(), sveltekit()],
 	worker: {
 		format: 'es'
 	},
 	build: {
-		emptyOutDir: false
+		emptyOutDir: true
 	},
 	resolve: {
 		alias: {
@@ -86,7 +109,6 @@ export default defineConfig({
 			allow: [
 				docsDir,
 				blogDir,
-				skillsDir,
 				pyodideDir,
 				sharedChartDir
 			]
