@@ -67,22 +67,22 @@ _CATEGORY_ORDER = (
 
 def buildSkillArtifacts(
     *,
-    webDir: str | Path = "landing/static/skills",
+    webDir: str | Path = "skills",
     includeUser: bool = False,
 ) -> dict[str, Any]:
     """Skill JSON 산출물 생성.
 
     Description
     -----------
-    `src/dartlab/skills` SkillSpec을 읽어 landing/Web 검색 JSON 과 Pyodide
-    compatibility manifest를 생성한다. 문서 SSOT는 생성 Markdown 이 아니라
-    `src/dartlab/skills` SkillSpec 자체다. generated JSON 은 직접 수정하지
-    않는다.
+    `src/dartlab/skills` SkillSpec을 읽어 repo-root `skills/` 검색 JSON 과
+    Pyodide compatibility manifest를 생성한다. 문서 SSOT는 생성 Markdown 이
+    아니라 `src/dartlab/skills` SkillSpec 자체다. generated JSON 은 직접
+    수정하지 않는다.
 
     Parameters
     ----------
     webDir : str | Path, optional
-        landing static 검색 index 디렉터리.
+        repo-root skill catalog 산출물 디렉터리.
     includeUser : bool, optional
         True면 project-local user skill까지 포함한다. 배포 산출물은 기본 False.
 
@@ -90,7 +90,7 @@ def buildSkillArtifacts(
     -------
     dict
         skillCount : int — 생성에 포함한 skill 수 (건)
-        webDir : str — web/runtime index 산출물 디렉터리
+        webDir : str — skill catalog 산출물 디렉터리
         categories : list[str] — 포함한 category 목록
 
     Raises
@@ -107,8 +107,9 @@ def buildSkillArtifacts(
 
     Notes
     -----
-    `src/dartlab/skills` 가 skill/procedure 루트다. 이 compiler는 검색과
-    런타임 호환성 JSON 만 만든다.
+    `src/dartlab/skills` 가 SkillSpec 원천이고, repo-root `skills/` 가 공개
+    catalog 산출물이다. landing은 이 산출물을 읽어 렌더링할 뿐 소유하지
+    않는다.
 
     Guide
     -----

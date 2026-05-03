@@ -529,3 +529,14 @@ def test_skill_compiler_builds_web_index_without_docs_markdown(tmp_path: Path) -
     assert payload["meta"]["entrySkillId"] == "start.dartlabSkillOs"
     assert "Capability Reference" not in json.dumps(payload, ensure_ascii=False)
     assert "capability ref" not in json.dumps(payload, ensure_ascii=False)
+
+
+def test_skill_compiler_default_catalog_is_repo_root_skills(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    result = skills.buildSkillArtifacts()
+
+    assert result["webDir"] == "skills"
+    assert (tmp_path / "skills" / "index.json").exists()
+    assert (tmp_path / "skills" / "pyodide.json").exists()
+    assert not (tmp_path / "landing" / "static" / "skills").exists()
