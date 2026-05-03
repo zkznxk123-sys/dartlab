@@ -118,6 +118,37 @@ class OAuthCodexProvider:
         response_text = _request_with_retry(token, body)
         return _parse_sse_response(response_text)
 
+    def _get_token_or_raise(self) -> str:
+        return _valid_token_or_raise()
+
+    def _build_body(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
+        return _build_body(messages, [], model=self.resolved_model)
+
+    def _request_with_retry(self, token: str, body: dict[str, Any], stream: bool = False) -> Any:
+        if stream:
+            headers = _headers(token)
+            return httpx.post(f"{CODEX_API_BASE}{CODEX_RESPONSES_PATH}", headers=headers, json=body, timeout=90)
+        return _request_with_retry(token, body)
+
+    def stream(self, messages: list[dict[str, Any]]):
+        token = self._get_token_or_raise()
+        body = self._build_body(messages)
+        response = self._request_with_retry(token, body, stream=True)
+        for line in response.iter_lines(decode_unicode=True):
+            if not isinstance(line, str) or not line.startswith("data: "):
+                continue
+            data = line[6:]
+            if data == "[DONE]":
+                break
+            try:
+                event = json.loads(data)
+            except json.JSONDecodeError:
+                continue
+            if event.get("type") == "response.output_text.delta":
+                delta = event.get("delta")
+                if isinstance(delta, str):
+                    yield delta
+
 
 def _normalize_config(config: ProviderConfig | Any) -> ProviderConfig:
     if isinstance(config, ProviderConfig):

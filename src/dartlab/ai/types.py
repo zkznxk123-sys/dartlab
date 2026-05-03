@@ -17,8 +17,19 @@ class LLMConfig:
 
 @dataclass(frozen=True)
 class LLMResponse:
-    content: str
+    content: str = ""
     raw: dict[str, Any] | None = None
+    answer: str = ""
+    provider: str = ""
+    model: str = ""
+    context_tables: list[str] | None = None
+    usage: dict[str, int] | None = None
+
+    def __post_init__(self) -> None:
+        if self.answer and not self.content:
+            object.__setattr__(self, "content", self.answer)
+        elif self.content and not self.answer:
+            object.__setattr__(self, "answer", self.content)
 
 
 @dataclass(frozen=True)

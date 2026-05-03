@@ -38,9 +38,10 @@ def configure(
         from dartlab.core.ai.profile import get_profile_manager
 
         profile = get_profile_manager()
+        role = _kwargs.get("role")
         if api_key and provider:
             profile.save_api_key(provider, api_key, updated_by="api")
-        updated = profile.update(provider=provider, model=model, base_url=base_url, updated_by="api")
+        updated = profile.update(provider=provider, model=model, role=role, base_url=base_url, updated_by="api")
         return {"ok": True, "defaultProvider": updated.default_provider}
     except Exception as exc:
         return {"ok": False, "error": str(exc)}

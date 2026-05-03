@@ -23,6 +23,12 @@ def get_codex_model_catalog() -> list[str]:
     return fallback_models("oauth-codex")
 
 
+def get_codex_configured_model() -> str | None:
+    if _BACKUP_MODULE is None:
+        return None
+    return _BACKUP_MODULE.get_codex_configured_model()
+
+
 def inspect_codex_cli() -> dict[str, Any]:
     if _BACKUP_MODULE is None:
         return {
@@ -46,6 +52,49 @@ def run_codex_exec(
     if _BACKUP_MODULE is None:
         raise FileNotFoundError("codex CLI helper source is unavailable")
     return _BACKUP_MODULE.run_codex_exec(prompt, model=model, sandbox=sandbox, cwd=cwd, timeout=timeout)
+
+
+def infer_codex_sandbox(messages: list[dict[str, str]], override: str | None = None) -> str:
+    if override:
+        return override
+    text = "\n".join(str(message.get("content", "")) for message in messages).lower()
+    code_markers = (
+        "src/",
+        ".py",
+        ".ts",
+        ".js",
+        ".svelte",
+        "버그",
+        "수정",
+        "구현",
+        "패치",
+        "fix",
+        "implement",
+        "refactor",
+    )
+    if any(marker in text for marker in code_markers):
+        return "workspace-write"
+    if _BACKUP_MODULE is None:
+        return "read-only"
+    return _BACKUP_MODULE.infer_codex_sandbox(messages, override=override)
+
+
+def build_codex_exec_command(*, model: str | None = None, sandbox: str = "read-only") -> list[str]:
+    if _BACKUP_MODULE is None:
+        executable = shutil.which("codex")
+        if not executable:
+            raise FileNotFoundError("codex CLI is not installed")
+        cmd = [executable, "exec", "--json", "--sandbox", sandbox]
+        if model:
+            cmd.extend(["--model", model])
+        return cmd
+    return _BACKUP_MODULE.build_codex_exec_command(model=model, sandbox=sandbox)
+
+
+def __getattr__(name: str) -> Any:
+    if _BACKUP_MODULE is not None and hasattr(_BACKUP_MODULE, name):
+        return getattr(_BACKUP_MODULE, name)
+    raise AttributeError(name)
 
 
 def logout_codex_cli() -> None:

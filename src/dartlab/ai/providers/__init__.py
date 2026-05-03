@@ -8,9 +8,14 @@ from __future__ import annotations
 
 import os
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any, Protocol
 
 from dartlab.core.ai.model_resolver import resolve_default_model
+
+_BACKUP_PROVIDERS = Path(__file__).resolve().parents[2] / "ai_backup" / "providers"
+if _BACKUP_PROVIDERS.exists():
+    __path__.append(str(_BACKUP_PROVIDERS))
 
 
 @dataclass(frozen=True)
@@ -351,6 +356,11 @@ def _is_responses_unsupported(exc: Exception) -> bool:
 
 
 def create_provider(*args: Any, **kwargs: Any) -> WorkbenchProvider:
+    raw_provider = (
+        getattr(args[0], "provider", None) if args and hasattr(args[0], "provider") else kwargs.get("provider")
+    )
+    if isinstance(raw_provider, str) and raw_provider.strip().lower() == "chatgpt":
+        raise ValueError("지원하지 않는 provider: chatgpt")
     if args and isinstance(args[0], ProviderConfig):
         config = args[0]
     elif args and hasattr(args[0], "provider"):
@@ -369,9 +379,28 @@ def create_provider(*args: Any, **kwargs: Any) -> WorkbenchProvider:
         from .oauth_codex import OAuthCodexProvider
 
         return OAuthCodexProvider(config)
+    if provider == "codex":
+        from .codex import CodexProvider
+
+        return CodexProvider(config)
     if provider in {"openai", "custom", "openai-compatible", "openai_compat", "groq", "cerebras", "mistral", "ollama"}:
         return OpenAICompatibleProvider(config)
     return UnavailableProvider(config)
+
+
+def available_providers() -> list[str]:
+    return [
+        "openai",
+        "claude",
+        "ollama",
+        "custom",
+        "codex",
+        "oauth-codex",
+        "gemini",
+        "groq",
+        "cerebras",
+        "mistral",
+    ]
 
 
 __all__ = [
@@ -381,4 +410,5 @@ __all__ = [
     "WorkbenchProvider",
     "create_provider",
     "get_config",
+    "available_providers",
 ]
