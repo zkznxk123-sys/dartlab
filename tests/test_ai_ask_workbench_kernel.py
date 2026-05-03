@@ -240,6 +240,178 @@ def test_verifier_ignores_markdown_identifier_code_numbers() -> None:
     assert result.ok
 
 
+def test_verifier_blocks_ranked_candidates_without_answer_evidence_table() -> None:
+    from dartlab.ai.contracts import Ref
+
+    task = WorkbenchTask(id="task:test", question="anything")
+    refs = [
+        Ref(
+            id="skill:scan",
+            kind="skill",
+            source="search_reference",
+            payload={"skillId": "engines.scan"},
+        ),
+        Ref(
+            id="dataset:scan",
+            kind="dataset",
+            source="inspect_dataset",
+            payload={"ok": True, "latest": {"value": "20260430"}},
+        ),
+        Ref(
+            id="date:asof",
+            kind="date",
+            source="run_python",
+            payload={"observedDate": "20260430"},
+        ),
+        Ref(
+            id="execution:ok",
+            kind="execution",
+            source="run_python",
+            payload={"ok": True, "stdout": "", "stderr": "", "returncode": 0},
+        ),
+        Ref(
+            id="table:growth",
+            kind="table",
+            source="run_python",
+            payload={
+                "executionRef": "execution:ok",
+                "rows": [
+                    {
+                        "rank": 1,
+                        "company": "A",
+                        "base_year": 2024,
+                        "current_year": 2025,
+                        "base_revenue": 100.0,
+                        "current_revenue": 896.9,
+                        "growth_pct": 796.9,
+                    },
+                    {
+                        "rank": 2,
+                        "company": "B",
+                        "base_year": 2024,
+                        "current_year": 2025,
+                        "base_revenue": 100.0,
+                        "current_revenue": 456.7,
+                        "growth_pct": 356.7,
+                    },
+                ],
+                "metric": "growth_pct",
+            },
+        ),
+    ]
+    draft = AnswerDraft(
+        answer=(
+            "기준일 2026-04-30입니다.\n\n상위 회사 후보:\n- A: 796.9%\n- B: 356.7%\n\n해석: 매출 성장률 기준입니다."
+        ),
+        evidence_refs=["skill:scan", "dataset:scan", "date:asof", "execution:ok", "table:growth"],
+    )
+
+    result = verify_answer(task, refs, draft)
+
+    assert not result.ok
+    codes = {issue["code"] for issue in result.issues}
+    assert "missing_answer_evidence_table" in codes
+    assert "incomplete_answer_contract" in codes
+
+
+def test_verifier_accepts_ranked_candidates_with_answer_contract_table() -> None:
+    from dartlab.ai.contracts import Ref
+
+    task = WorkbenchTask(id="task:test", question="anything")
+    refs = [
+        Ref(
+            id="skill:scan",
+            kind="skill",
+            source="search_reference",
+            payload={"skillId": "engines.scan"},
+        ),
+        Ref(
+            id="dataset:scan",
+            kind="dataset",
+            source="inspect_dataset",
+            payload={"ok": True, "latest": {"value": "20260430"}},
+        ),
+        Ref(
+            id="date:asof",
+            kind="date",
+            source="run_python",
+            payload={"observedDate": "20260430"},
+        ),
+        Ref(
+            id="execution:ok",
+            kind="execution",
+            source="run_python",
+            payload={"ok": True, "stdout": "", "stderr": "", "returncode": 0},
+        ),
+        Ref(
+            id="table:growth",
+            kind="table",
+            source="run_python",
+            payload={
+                "executionRef": "execution:ok",
+                "rows": [
+                    {
+                        "rank": 1,
+                        "company": "A",
+                        "base_year": 2024,
+                        "current_year": 2025,
+                        "base_revenue": 100.0,
+                        "current_revenue": 896.9,
+                        "growth_pct": 796.9,
+                    },
+                    {
+                        "rank": 2,
+                        "company": "B",
+                        "base_year": 2024,
+                        "current_year": 2025,
+                        "base_revenue": 100.0,
+                        "current_revenue": 456.7,
+                        "growth_pct": 356.7,
+                    },
+                ],
+                "metric": "growth_pct",
+            },
+        ),
+    ]
+    draft = AnswerDraft(
+        answer=(
+            "입력/유니버스: dart.scan snapshot 기업 집합, 기준일 2026-04-30.\n"
+            "필터: 2024→2025 연결 4분기 연간 매출이 모두 있고, 2024년 매출 1,000억원 이상인 회사.\n"
+            "계산식/지표: 성장률 = (2025 매출 / 2024 매출 - 1) * 100.\n"
+            "결과/출력: 매출 성장률 상위 10개 후보 표입니다.\n\n"
+            "| 순위 | 회사 | 기준 연도 | 비교 연도 | 2024 매출 | 2025 매출 | 성장률 | 근거 |\n"
+            "|---:|---|---:|---:|---:|---:|---:|---|\n"
+            "| 1 | A | 2024 | 2025 | 100.0 | 896.9 | 796.9% | execution:ok |\n"
+            "| 2 | B | 2024 | 2025 | 100.0 | 456.7 | 356.7% | execution:ok |"
+        ),
+        evidence_refs=["skill:scan", "dataset:scan", "date:asof", "execution:ok", "table:growth"],
+    )
+
+    result = verify_answer(task, refs, draft)
+
+    assert result.ok
+
+
+def test_verifier_reports_unsupported_numeric_values() -> None:
+    from dartlab.ai.contracts import Ref
+
+    task = WorkbenchTask(id="task:test", question="anything")
+    refs = [
+        Ref(
+            id="table:test",
+            kind="table",
+            source="run_python",
+            payload={"rows": [{"name": "A", "ret": 47.6}], "metric": "ret"},
+        )
+    ]
+    draft = AnswerDraft(answer="A의 수익률은 99.9%입니다.", evidence_refs=["table:test"])
+
+    result = verify_answer(task, refs, draft)
+
+    issue = next(item for item in result.issues if item["code"] == "unsupported_numeric_claim")
+    assert issue["values"] == [99.9]
+
+
 def test_verifier_ignores_usage_example_numbers_in_code() -> None:
     task = WorkbenchTask(id="task:test", question="show 함수 어떻게 써?")
     draft = AnswerDraft(
@@ -631,6 +803,9 @@ def test_provider_workbench_loop_executes_actions_and_verifies(monkeypatch) -> N
     monkeypatch.setattr(kernel, "create_provider", lambda **_kwargs: FakeProvider())
     events = list(kernel.runAsk("삼성전자와 SK하이닉스 경쟁력 비교", provider="openai"))
 
+    assert any(event.kind == "tool_call" for event in events)
+    run_call = next(event for event in events if event.kind == "tool_call" and event.data["name"] == "run_python")
+    assert "codePreview" in run_call.data
     assert any(event.kind == "execute" for event in events)
     assert any(event.kind == "visual" for event in events)
     done = [event for event in events if event.kind == "done"][-1]
@@ -661,6 +836,25 @@ def test_kernel_traces_rejected_draft_for_audit(monkeypatch) -> None:
     assert rejected[0].data["reason"] == "prose_without_finalize"
     assert "근거 없는 숫자" in rejected[0].data["answerPreview"]
     assert rejected[0].data["verification"]["issues"]
+
+
+def test_cli_kernel_event_lines_show_refs_and_execution_preview() -> None:
+    from dartlab.cli.commands.ask import _kernelEventLine
+
+    ref_line = _kernelEventLine(
+        "reference",
+        {
+            "refs": [{"id": "skill:a"}, {"id": "dataset:b"}],
+            "selectedSkillCandidates": [{"id": "engines.scan"}, {"id": "runtime.workbenchEvidenceFlow"}],
+        },
+    )
+    execute_line = _kernelEventLine(
+        "execute",
+        {"result": {"ok": True, "duration_ms": 12, "stdout": 'DARTLAB_RESULT_JSON={"rows":[{"a":1}]}'}},
+    )
+
+    assert "engines.scan" in ref_line
+    assert "DARTLAB_RESULT_JSON" in execute_line
 
 
 def test_kernel_extracts_python_literal_result_json() -> None:

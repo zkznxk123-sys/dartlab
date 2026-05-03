@@ -32,6 +32,12 @@ TOOL_LABELS = {
     "macro": "Macro",
     "company": "Company",
     "ui": "UI",
+    "search_reference": "Skill/Reference Search",
+    "read_context": "Context Read",
+    "inspect_dataset": "Dataset Inspect",
+    "run_python": "Python Execution",
+    "compile_visual": "Visual Compile",
+    "finalize_answer": "Answer Verification",
     # legacy
     "analyze": "Analysis Engine",
     "market": "Market Data",

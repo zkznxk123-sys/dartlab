@@ -254,6 +254,7 @@ def _run_provider_workbench(
                     continue
                 yield from _finalize(session, task, draft)
                 return
+            yield session.add_event("tool_call", _tool_call_event_payload(call, round_index=_round + 1))
             try:
                 result, events = _execute_workbench_action(session, call.name, call.args)
             except Exception as exc:
@@ -262,7 +263,9 @@ def _run_provider_workbench(
                 events = [session.add_event("error", {"error": "tool_failed", "action": call.name, "detail": str(exc)})]
             for event in events:
                 yield event
-            messages.append({"role": "tool", "tool_call_id": call.id, "content": _tool_result_content(session, result)})
+            tool_content = _tool_result_content(session, result)
+            yield session.add_event("tool_result", _tool_result_event_payload(call, result, tool_content))
+            messages.append({"role": "tool", "tool_call_id": call.id, "content": tool_content})
     yield from _force_finalize(session, task, provider, messages)
 
 
@@ -356,6 +359,7 @@ def _initial_provider_messages(session: AskSession, task: WorkbenchTask) -> list
             "When run_python produces answer evidence, call the preloaded emit_result(...); never define or overwrite emit_result.",
             "Use compile_visual only for table-backed visuals.",
             "Call finalize_answer only after refs support material claims.",
+            "Ranked candidate or screening answers must not be bullet-only. Include input/universe, filters, formula/metric, and a markdown evidence table with entity, basis/period, metric, and output rows.",
             "Never say current date when you mean dataset asOf.",
         ],
         "availableRefs": [ref.to_dict() for ref in session.refs],
@@ -451,6 +455,102 @@ def _candidate_summary(refs: list[Ref], *, kind: str, limit: int = 5) -> list[di
     return out
 
 
+def _tool_call_event_payload(call: ToolCall, *, round_index: int) -> dict[str, Any]:
+    args = dict(call.args or {})
+    payload: dict[str, Any] = {
+        "id": call.id,
+        "name": call.name,
+        "round": round_index,
+        "arguments": _compact_tool_args(args),
+    }
+    if call.name == "run_python":
+        code = str(args.get("code") or "")
+        payload["codePreview"] = _preview_text(code, limit=900)
+    elif call.name == "search_reference":
+        payload["query"] = str(args.get("query") or "")
+    elif call.name == "inspect_dataset":
+        payload["target"] = str(args.get("target") or "")
+    elif call.name == "read_context":
+        payload["path"] = str(args.get("path") or "")
+    return payload
+
+
+def _tool_result_event_payload(call: ToolCall, result: dict[str, Any], content: str) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "id": call.id,
+        "name": call.name,
+        "status": _tool_result_status(result),
+        "summary": _tool_result_summary(call.name, result),
+        "result": _preview_text(content, limit=8000),
+    }
+    refs = result.get("refs")
+    if isinstance(refs, list):
+        payload["refCount"] = len(refs)
+    derived = result.get("derivedRefs")
+    if isinstance(derived, list):
+        payload["derivedRefCount"] = len(derived)
+    return payload
+
+
+def _tool_result_status(result: dict[str, Any]) -> str:
+    if result.get("ok") is False or result.get("error"):
+        return "error"
+    execution = result.get("execution")
+    if isinstance(execution, dict) and execution.get("ok") is False:
+        return "error"
+    inspection = result.get("inspection")
+    if isinstance(inspection, dict) and inspection.get("ok") is False:
+        return "error"
+    return "ok"
+
+
+def _tool_result_summary(name: str, result: dict[str, Any]) -> str:
+    if result.get("error"):
+        return str(result.get("error"))
+    if name == "search_reference":
+        refs = result.get("refs") if isinstance(result.get("refs"), list) else []
+        skills = [
+            str(ref.get("payload", {}).get("skillId"))
+            for ref in refs
+            if isinstance(ref, dict) and ref.get("kind") == "skill" and ref.get("payload")
+        ]
+        return f"{len(refs)} refs" + (f"; skills: {', '.join(skills[:3])}" if skills else "")
+    if name == "inspect_dataset":
+        inspection = result.get("inspection") if isinstance(result.get("inspection"), dict) else {}
+        latest = inspection.get("latest") if isinstance(inspection, dict) else None
+        rows = inspection.get("row_count") or inspection.get("rowCount")
+        suffix = f"; latest={latest.get('value')}" if isinstance(latest, dict) and latest.get("value") else ""
+        return f"dataset ok={bool(inspection.get('ok'))}; rows={rows}{suffix}"
+    if name == "run_python":
+        execution = result.get("execution") if isinstance(result.get("execution"), dict) else {}
+        refs = result.get("derivedRefs") if isinstance(result.get("derivedRefs"), list) else []
+        return f"python ok={bool(execution.get('ok'))}; refs={len(refs)}; {execution.get('duration_ms') or execution.get('durationMs') or '?'}ms"
+    if name == "compile_visual":
+        return "visual compiled"
+    return "done"
+
+
+def _compact_tool_args(args: dict[str, Any]) -> dict[str, Any]:
+    compact: dict[str, Any] = {}
+    for key, value in args.items():
+        if isinstance(value, str):
+            compact[key] = _preview_text(value, limit=240)
+        elif isinstance(value, list):
+            compact[key] = value[:5] + ([f"... +{len(value) - 5}"] if len(value) > 5 else [])
+        elif isinstance(value, dict):
+            compact[key] = {str(k): v for k, v in list(value.items())[:8]}
+        else:
+            compact[key] = value
+    return compact
+
+
+def _preview_text(text: str, *, limit: int) -> str:
+    clean = text.strip()
+    if len(clean) <= limit:
+        return clean
+    return clean[:limit].rstrip() + f"\n... (+{len(clean) - limit} chars)"
+
+
 def _analysis_hints(kwargs: dict[str, Any]) -> dict[str, Any]:
     allowed = ("company", "stockCode", "stock_code", "ticker", "corpName", "symbol", "view_context")
     hints: dict[str, Any] = {}
@@ -500,7 +600,7 @@ def _provider_tool_specs(*, finalize_only: bool = False) -> list[dict[str, Any]]
 
     finalize_tool = tool(
         "finalize_answer",
-        "Submit the final answer draft for deterministic verification and release.",
+        "Submit the final answer draft for deterministic verification and release. Ranked candidate answers require input/filter/formula/output text plus a markdown evidence table.",
         {
             "answer": {"type": "string"},
             "evidence_refs": {"type": "array", "items": {"type": "string"}},
@@ -584,7 +684,8 @@ def _repair_message(verification: VerificationResult, reason: str) -> dict[str, 
                 "instruction": (
                     "Do not repeat unsupported prose or tool-call transcripts. Use workbench actions to create refs, "
                     "call emit_result(...) from run_python when needed, or submit a narrower finalize_answer "
-                    "whose numeric/date/visual claims are supported."
+                    "whose numeric/date/visual claims are supported. If the answer ranks candidates, include "
+                    "input/universe, filters, formula/metric, output, and a markdown evidence table."
                 ),
             },
             ensure_ascii=False,
@@ -659,7 +760,10 @@ def _finalize_request_message(session: AskSession) -> dict[str, Any]:
         "content": json.dumps(
             {
                 "type": "finalize_required",
-                "instruction": "Stop calling analysis tools. Use finalize_answer now with only claims supported by these refs.",
+                "instruction": (
+                    "Stop calling analysis tools. Use finalize_answer now with only claims supported by these refs. "
+                    "Ranked candidate answers must include input/universe, filters, formula/metric, output, and a markdown evidence table."
+                ),
                 "refs": compact_refs,
                 "limits": session.limits,
             },

@@ -180,7 +180,7 @@ def tool_specs() -> list[dict[str, Any]]:
         },
         {
             "name": "finalize_answer",
-            "description": "Finalize a session answer through claim/ref verification.",
+            "description": "Finalize a session answer through claim/ref verification. Ranked candidate answers require input/filter/formula/output text plus a markdown evidence table.",
             "inputSchema": {
                 "type": "object",
                 "properties": {

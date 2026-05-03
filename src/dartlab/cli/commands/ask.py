@@ -113,10 +113,11 @@ def run(args) -> int:
                 elif ev.kind == "tool_call":
                     toolCount += 1
                     label = toolLabel(ev.data.get("name", ""))
+                    argText = _eventArgsPreview(ev.data)
                     toolStartTime = time.monotonic()
                     toolSpinner = Spinner(
                         "dots",
-                        text=f"[{CLR_MUTED}][{toolCount}] {label}...[/]",
+                        text=f"[{CLR_MUTED}][{toolCount}] {label}{argText}[/]",
                         style=CLR_MUTED,
                     )
                     statusBlock = "\n".join(toolLines)
@@ -223,7 +224,12 @@ def _kernelEventLine(kind: str, data: dict) -> str:
         suffix = f" ({len(actions)} actions)" if isinstance(actions, list) else ""
         return f"> task: ask workbench{suffix}"
     if kind == "reference":
-        return f"> reference: {len(data.get('refs') or [])} refs"
+        refs = data.get("refs") or []
+        selected = data.get("selectedSkillCandidates") or []
+        if selected:
+            names = ", ".join(str(item.get("id") or "?") for item in selected[:3])
+            return f"> reference: {len(refs)} refs | skills: {names}"
+        return f"> reference: {len(refs)} refs"
     if kind == "inspect":
         target = data.get("target") or data.get("action") or "dataset"
         result = data.get("result") or {}
@@ -233,7 +239,9 @@ def _kernelEventLine(kind: str, data: dict) -> str:
     if kind == "execute":
         result = data.get("result") or {}
         ok = "ok" if result.get("ok") else "failed"
-        return f"> execute: {ok} ({result.get('duration_ms') or result.get('durationMs') or '?'}ms)"
+        output = _shortPreview(result.get("stdout") or result.get("stderr") or "", 90)
+        suffix = f" | {output}" if output else ""
+        return f"> execute: {ok} ({result.get('duration_ms') or result.get('durationMs') or '?'}ms){suffix}"
     if kind == "visual":
         return f"> visual: {len(data.get('visuals') or [])} spec"
     if kind == "verify":
@@ -242,6 +250,31 @@ def _kernelEventLine(kind: str, data: dict) -> str:
         issues = result.get("issues") or []
         return f"> verify: {ok}" + (f" ({len(issues)} issues)" if issues else "")
     return ""
+
+
+def _eventArgsPreview(data: dict) -> str:
+    if data.get("query"):
+        return f": {_shortPreview(data['query'], 72)}"
+    if data.get("target"):
+        return f": {_shortPreview(data['target'], 72)}"
+    if data.get("path"):
+        return f": {_shortPreview(data['path'], 72)}"
+    if data.get("codePreview"):
+        return f": {_shortPreview(data['codePreview'], 72)}"
+    args = data.get("arguments")
+    if isinstance(args, dict) and args:
+        from dartlab.cli.constants import formatToolArgs
+
+        preview = formatToolArgs(args)
+        return f": {preview}" if preview else ""
+    return ""
+
+
+def _shortPreview(value: object, limit: int) -> str:
+    text = " ".join(str(value).strip().split())
+    if len(text) <= limit:
+        return text
+    return text[: max(0, limit - 3)].rstrip() + "..."
 
 
 def _loadHistory(stockCode: str, console):

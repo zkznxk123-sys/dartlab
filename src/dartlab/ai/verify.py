@@ -19,6 +19,40 @@ _PERCENT_LIKE = re.compile(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?%")
 _EXECUTION_SUCCESS_LIKE = re.compile(
     r"(실행|계산|조회|분석|수집).{0,12}(성공|완료|했다|했습니다)|successfully|succeeded", re.IGNORECASE
 )
+_MARKDOWN_TABLE_LIKE = re.compile(r"(?m)^\s*\|.+\|\s*$\n^\s*\|(?:\s*:?-{3,}:?\s*\|)+\s*$")
+_RANKING_RESULT_MARKERS = (
+    "상위",
+    "후보",
+    "랭킹",
+    "ranking",
+    "ranked",
+    "candidate",
+    "candidates",
+    "top ",
+)
+_SCREENING_ENTITY_MARKERS = (
+    "회사",
+    "기업",
+    "종목",
+    "티커",
+    "ticker",
+    "company",
+    "corp",
+    "stock",
+)
+_SCREENING_METRIC_MARKERS = (
+    "성장률",
+    "수익률",
+    "증가율",
+    "등락률",
+    "매출",
+    "이익",
+    "metric",
+    "rate",
+    "growth",
+    "return",
+    "%",
+)
 
 
 def verify_answer(task: WorkbenchTask, refs: list[Ref], draft: AnswerDraft) -> VerificationResult:
@@ -154,9 +188,14 @@ def verify_answer(task: WorkbenchTask, refs: list[Ref], draft: AnswerDraft) -> V
     else:
         passed.append("table_dates_consistent")
 
-    if _has_material_numbers(draft.answer) and not _numeric_claims_supported(refs, draft):
+    unsupported_numbers = _unsupported_numeric_claims(refs, draft) if _has_material_numbers(draft.answer) else []
+    if unsupported_numbers:
         issues.append(
-            {"code": "unsupported_numeric_claim", "message": "numeric prose needs matching value/table evidence"}
+            {
+                "code": "unsupported_numeric_claim",
+                "message": "numeric prose needs matching value/table evidence",
+                "values": unsupported_numbers[:8],
+            }
         )
     else:
         passed.append("numeric_claims_supported")
@@ -177,6 +216,12 @@ def verify_answer(task: WorkbenchTask, refs: list[Ref], draft: AnswerDraft) -> V
     else:
         passed.append("date_claims_supported")
 
+    screening_issues = _screening_contract_issues(refs, draft)
+    if screening_issues:
+        issues.extend(screening_issues)
+    else:
+        passed.append("screening_output_contract_checked")
+
     return VerificationResult(ok=not issues, issues=issues, passed_checks=passed)
 
 
@@ -188,6 +233,111 @@ def _non_trivial_answer(answer: str) -> bool:
         return True
     markers = ("분석", "계산", "검산", "규칙", "사용", "데이터", "엔진", "skill", "스킬")
     return any(marker in text.lower() for marker in markers)
+
+
+def _screening_contract_issues(refs: list[Ref], draft: AnswerDraft) -> list[dict[str, Any]]:
+    if not _claims_ranked_candidate_result(draft.answer):
+        return []
+    scoped_refs = _linked_refs(refs, _evidence_scope(refs, draft))
+    if not scoped_refs:
+        scoped_refs = refs
+    kinds = {ref.kind for ref in scoped_refs}
+    issues: list[dict[str, Any]] = []
+    if "execution" not in kinds or not any(ref.kind == "execution" and ref.payload.get("ok") for ref in scoped_refs):
+        issues.append(
+            {
+                "code": "missing_screening_execution_ref",
+                "message": "ranked candidate answers need a successful execution ref",
+            }
+        )
+    if "table" not in kinds:
+        issues.append({"code": "missing_screening_table_ref", "message": "ranked candidate answers need a table ref"})
+    if not ({"dataset", "date"} & kinds):
+        issues.append(
+            {
+                "code": "missing_screening_basis_ref",
+                "message": "ranked candidate answers need a dataset or date ref for universe/as-of basis",
+            }
+        )
+    if not _has_markdown_table(draft.answer):
+        issues.append(
+            {
+                "code": "missing_answer_evidence_table",
+                "message": "ranked candidate answers must include a markdown evidence table in the final answer",
+            }
+        )
+    elif not _answer_table_has_screening_columns(draft.answer):
+        issues.append(
+            {
+                "code": "incomplete_answer_evidence_table",
+                "message": "answer evidence table needs entity, period/basis, and metric columns",
+            }
+        )
+    if not _has_screening_contract_text(draft.answer):
+        issues.append(
+            {
+                "code": "incomplete_answer_contract",
+                "message": "ranked candidate answers must disclose input/universe, filters, formula/metric, and output",
+            }
+        )
+    return issues
+
+
+def _claims_ranked_candidate_result(answer: str) -> bool:
+    lowered = answer.lower()
+    if not any(marker in lowered for marker in _RANKING_RESULT_MARKERS):
+        return False
+    if not any(marker in lowered for marker in _SCREENING_METRIC_MARKERS):
+        return False
+    return _has_material_numbers(answer) or bool(_MARKDOWN_TABLE_LIKE.search(answer))
+
+
+def _has_markdown_table(answer: str) -> bool:
+    return bool(_MARKDOWN_TABLE_LIKE.search(answer))
+
+
+def _answer_table_has_screening_columns(answer: str) -> bool:
+    lines = answer.splitlines()
+    for idx, line in enumerate(lines[:-1]):
+        if not line.strip().startswith("|"):
+            continue
+        if not re.match(r"^\s*\|(?:\s*:?-{3,}:?\s*\|)+\s*$", lines[idx + 1]):
+            continue
+        header = line.lower()
+        has_entity = any(marker in header for marker in _SCREENING_ENTITY_MARKERS)
+        has_metric = any(marker in header for marker in _SCREENING_METRIC_MARKERS)
+        has_basis = any(
+            marker in header
+            for marker in (
+                "기준",
+                "기간",
+                "시작",
+                "종료",
+                "연도",
+                "base",
+                "current",
+                "period",
+                "asof",
+                "as_of",
+                "fy",
+                "year",
+                "20",
+            )
+        )
+        if has_entity and has_metric and has_basis:
+            return True
+    return False
+
+
+def _has_screening_contract_text(answer: str) -> bool:
+    lowered = answer.lower()
+    groups = (
+        ("입력", "input", "유니버스", "universe", "대상"),
+        ("필터", "filter", "조건", "제외"),
+        ("계산식", "formula", "metric", "지표", "산식"),
+        ("결과", "output", "출력", "산출물"),
+    )
+    return all(any(marker in lowered for marker in group) for group in groups)
 
 
 def verification_to_ref(result: VerificationResult) -> Ref:
@@ -228,6 +378,10 @@ def _looks_like_tool_transcript(answer: str) -> bool:
 
 
 def _numeric_claims_supported(refs: list[Ref], draft: AnswerDraft) -> bool:
+    return not _unsupported_numeric_claims(refs, draft)
+
+
+def _unsupported_numeric_claims(refs: list[Ref], draft: AnswerDraft) -> list[float]:
     evidence_scope = _evidence_scope(refs, draft)
     numeric_values = _numeric_values_from_refs(evidence_scope)
     for limit in draft.limits:
@@ -238,13 +392,15 @@ def _numeric_claims_supported(refs: list[Ref], draft: AnswerDraft) -> bool:
         for limit in draft.limits:
             _append_payload_numbers(numeric_values, limit)
     if not numeric_values:
-        return False
-    if answer_numbers and not all(_number_in_values(number, numeric_values) for number in answer_numbers):
+        return answer_numbers
+    unsupported = [number for number in answer_numbers if not _number_in_values(number, numeric_values)]
+    if unsupported:
         fallback_values = _numeric_values_from_refs(_fallback_numeric_refs(refs, draft))
         for limit in draft.limits:
             _append_payload_numbers(fallback_values, limit)
-        if not fallback_values or not all(_number_in_values(number, fallback_values) for number in answer_numbers):
-            return False
+        unsupported = [number for number in answer_numbers if not _number_in_values(number, fallback_values)]
+        if unsupported:
+            return unsupported
     for claim in draft.material_claims:
         value = claim.get("value")
         if value is None:
@@ -259,8 +415,8 @@ def _numeric_claims_supported(refs: list[Ref], draft: AnswerDraft) -> bool:
         if not _number_in_values(numeric, scoped_values) and not _number_in_values(
             numeric, _numeric_values_from_refs(_fallback_numeric_refs(refs, draft))
         ):
-            return False
-    return True
+            return [numeric]
+    return []
 
 
 def _evidence_scope(refs: list[Ref], draft: AnswerDraft) -> list[Ref]:
@@ -292,6 +448,13 @@ def _strip_non_claim_numbers(answer: str) -> str:
     text = re.sub(r"(?m)^\s*\d+[\.)]\s+", " item ", text)
     text = re.sub(r"(?im)^(\|\s*)\d+(\s*\|)", r"\1rank\2", text)
     text = re.sub(r"(?m)(\|\s*)\d{5,6}(\s*\|)", r"\1identifier\2", text)
+    text = re.sub(r"(?i)\btop\s*\d+\b", "top count", text)
+    text = re.sub(r"(상위|하위)\s*\d+\s*(?:개|곳|종목|회사|위)?", r"\1 count", text)
+    text = re.sub(r"\d+\s*(?:개|곳)\s*(?:후보|종목|회사)", "count candidate", text)
+    text = re.sub(r"\b20\d{2}\s*(?:년|연도|fy)?\s*(?:[→~\-/]\s*20\d{2}\s*(?:년|연도|fy)?)?", "period", text)
+    text = re.sub(r"\d+\s*(?:분기|개월|월|일|년|개년)", "period", text)
+    text = re.sub(r"(?i)\b(?:q[1-4]|[1-4]q)\b", "period", text)
+    text = re.sub(r"\d+(?:,\d{3})*(?:\.\d+)?\s*(?:조원|억원|만원|원)\s*(?:이상|초과|미만|이하)", "filter", text)
     text = re.sub(r"(?i)([×x*]\s*)100\b", r"\1formula", text)
     text = re.sub(r"(?i)\b[a-z_][a-z0-9_]*[a-z_][a-z0-9_]*\b", "identifier", text)
     return text
