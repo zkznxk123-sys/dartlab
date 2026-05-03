@@ -23,7 +23,7 @@ _BUILTINS = [
         title="DartLab 6막 인과",
         summary="경제 -> 섹터 -> 기업 -> 재무 -> 가치 신호를 연결해 판단한다.",
         tags=["macro", "sector", "company", "analysis", "valuation", "story", "6막"],
-        source="CLAUDE.md / ops/philosophy.md",
+        source="CLAUDE.md / operation.philosophy",
     ),
     KnowledgeRef(
         id="krxDatasetStructure",
@@ -37,28 +37,28 @@ _BUILTINS = [
         title="DART 공시 구조",
         summary="공시 판단은 접수일, 제목, 유형, 가능한 경량 본문 근거를 구분한다.",
         tags=["dart", "disclosure", "filing", "readFiling", "rcept_dt"],
-        source="ops/company.md / Company.disclosure docstring",
+        source="engines.company / Company.disclosure docstring",
     ),
     KnowledgeRef(
         id="financialStatementConcepts",
         title="재무제표 항목 의미",
         summary="재무 판단은 대상, 기간, metric, 단위가 있는 원본 또는 계산 ref에 연결한다.",
         tags=["financial", "statement", "revenue", "margin", "cashflow", "ratio"],
-        source="ops/analysis.md / public docstrings",
+        source="engines.analysis / public docstrings",
     ),
     KnowledgeRef(
         id="valuationPrinciples",
         title="가치평가 가정 원칙",
         summary="가치평가는 성장, 마진, 재투자, 할인율, 터미널 가정과 민감도 한계를 함께 본다.",
         tags=["valuation", "dcf", "discount", "sensitivity", "terminal"],
-        source="ops/quant.md / valuation docstrings",
+        source="engines.quant / valuation docstrings",
     ),
     KnowledgeRef(
         id="quantSignalConcepts",
         title="퀀트 신호 해석 원칙",
         summary="모멘텀, 변동성, 밸류에이션 신호는 기준일과 metric이 맞을 때만 비교한다.",
         tags=["quant", "momentum", "volatility", "valuation", "signal"],
-        source="ops/quant.md",
+        source="engines.quant",
     ),
 ]
 

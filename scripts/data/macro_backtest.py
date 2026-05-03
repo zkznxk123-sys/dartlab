@@ -375,4 +375,4 @@ out()
 
 # ── 파일 출력 ──
 print()
-print("=== 벤치마크 완료. 결과는 ops/macro.md 백테스트 섹션에 기록 ===")
+print("=== 벤치마크 완료. 결과는 engines.macro 백테스트 섹션에 기록 ===")

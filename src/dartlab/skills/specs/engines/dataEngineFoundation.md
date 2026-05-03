@@ -68,6 +68,8 @@ failureModes:
   - 단일 종목 질문에 scan만 쓰고 Company 원자료를 확인하지 않음
   - 최신 원자료 질문에 gather latestAsOf를 남기지 않음
   - 횡단 비교에서 universe와 rank 기준을 숨김
+  - 실행 ref는 만들었지만 claim refs를 연결하지 않아 Workbench 검산 실패
+  - scan finance-lite의 부분 계정 커버리지를 단일 기업 재무제표 전체로 오해
 forbidden:
   - API parameters/returns를 SkillSpec에 중복하지 않는다.
   - source table 없이 응용 엔진 결론을 먼저 만들지 않는다.
@@ -84,7 +86,7 @@ lastUpdated: "2026-05-02"
 
 ## 기본 판단
 
-- 단일 종목의 재무, 공시, 사업, 하위 엔진 라우팅은 `Company`가 먼저다.
+- 단일 종목의 재무, 공시, 사업, 하위 엔진 라우팅은 `Company`가 먼저다. scan prebuild는 peer 위치, universe ranking, Company 원자료 부재 시의 보조 경로다.
 - 최신 주가, 수급, 뉴스, 거시 원자료처럼 외부 데이터 신선도가 핵심이면 `gather`가 먼저다.
 - 후보 발굴, 순위, peer 위치, 시장 전체 분포가 핵심이면 `scan`이 먼저다.
 - 질문이 섞여 있으면 `Company`로 target을 고정하고, `gather`로 최신 raw data를 보강하고, `scan`으로 상대 위치를 확인한다.
@@ -103,4 +105,5 @@ lastUpdated: "2026-05-02"
 - Company 경로는 target, topic, source, period를 남긴다.
 - gather 경로는 provider, latestAsOf, metric, table을 남긴다.
 - scan 경로는 universe, metric, period, rank, table을 남긴다.
+- table/value/date ref를 만든 뒤에는 최종 답변의 material claim마다 해당 ref를 직접 연결한다. evidence refs 전체 목록만 제출하는 것은 숫자 claim 근거가 아니다.
 - 최종 답변 전에 데이터 한계와 후속 분석 엔진으로 넘긴 근거 ref를 확인한다.

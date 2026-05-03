@@ -67,9 +67,13 @@ failureModes:
   - DART 전용 절차를 미국 ticker에 적용
   - filing 본문 없이 공시 영향 단정
   - fiscal period와 calendar period 혼동
+  - EDGAR table/value ref 없이 매출, 마진, 현금흐름 같은 숫자 claim을 제출
+  - ticker snapshot이 없는데 한국 Company/DART 경로로 우회
+  - 검산 실패 후 같은 숫자 문장을 반복해 unable_to_finalize로 종료
 forbidden:
   - ticker 식별 없이 미국 기업 분석 시작
   - EDGAR 근거 없는 10-K/10-Q 판단
+  - numeric ref가 없을 때 정량 재무 결론을 단정
 examples:
   - AAPL 분석해줘
   - NVDA 최근 EDGAR filings에서 중요한 내용 찾아줘
@@ -82,6 +86,9 @@ lastUpdated: "2026-05-02"
 ## 절차
 
 - ticker를 식별하고 EDGAR Company 경로가 가능한지 확인한다.
-- Company.analysis, show, filings capability를 찾아 재무와 공시 근거를 분리한다.
+- EDGAR prefetched finance/docs snapshot 또는 OpenEdgar/Company.liveFilings 경로가 있는지 먼저 확인한다. 없으면 데이터 부재를 한계로 좁혀 말하고 DART 전용 경로로 대체하지 않는다.
+- Company.analysis, Company.show, Company.filings/readFiling capability를 찾아 재무와 공시 근거를 분리한다.
+- 재무 숫자는 EDGAR finance table/value ref가 있을 때만 말한다. 숫자 claim은 period, metric, value가 들어간 supporting ref에 직접 묶는다.
 - filing claim은 접수일, form, 제목 또는 본문 ref에 묶는다.
 - fiscal period가 있는 경우 calendar period와 혼동하지 않도록 기준을 밝힌다.
+- 검산이 숫자 claim을 거절하면, ref로 뒷받침되는 filing/데이터 가용성 중심의 좁은 답변으로 줄인다.

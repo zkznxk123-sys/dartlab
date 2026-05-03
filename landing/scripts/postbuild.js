@@ -7,7 +7,7 @@ const buildDir = resolve(__dirname, '..', 'build');
 const projectRoot = resolve(__dirname, '..', '..');
 const basePath = process.env.BASE_PATH || '';
 const siteUrl = 'https://eddmpython.github.io/dartlab';
-const target = `${basePath}/docs/getting-started/quickstart`;
+	const target = `${basePath}/skills`;
 const extraPages = [
 	{ loc: `${siteUrl}/scan`, changefreq: 'daily', priority: 0.95 },
 	{ loc: `${siteUrl}/map`, changefreq: 'daily', priority: 0.92 }
@@ -15,7 +15,7 @@ const extraPages = [
 
 const docsDir = resolve(buildDir, 'docs');
 
-// docs/index.html — redirect to quickstart
+// docs/index.html — redirect to Skill OS
 const docsIndex = resolve(docsDir, 'index.html');
 if (!existsSync(docsIndex)) {
 	mkdirSync(docsDir, { recursive: true });

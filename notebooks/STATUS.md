@@ -1,6 +1,6 @@
 # Notebooks
 
-**정책 SSOT**: `ops/notebooks.md`
+**정책 SSOT**: `runtime.notebooks`
 - Colab (`.ipynb`) — 마크다운 설명 셀 조금 + 코드 셀
 - Marimo (`.py`) — 코드 셀만 (마리모 UI 에서 마크다운 가독성 낮음 → 쓰지 않는다)
 - 두 포맷은 **코드 셀이 1:1 동일**해야 한다.
@@ -17,7 +17,7 @@ notebooks/
 └── STATUS.md
 ```
 
-매핑표(각 노트북의 주제) 는 `ops/notebooks.md` 참고.
+매핑표(각 노트북의 주제) 는 `runtime.notebooks` 참고.
 
 ## Links
 

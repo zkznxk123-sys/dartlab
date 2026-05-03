@@ -18,9 +18,9 @@ dartlab.scan("governance")               # 전종목 지배구조
 dartlab.ask("삼성전자 분석해줘")           # AI 분석가
 ```
 
-## Skills 중심 체계
+## Skill OS 중심 체계
 
-모든 사용법과 분석 절차는 [Skills](/skills)에서 먼저 찾는다. 자체 AI, 외부 AI, MCP, Web UI도 같은 skill resolver를 읽고, 사용자는 목적별 절차·필요 근거·실행 환경을 한 화면에서 확인한다.
+모든 사용법과 분석 절차는 [Skills](/skills)에서 먼저 찾는다. 자체 AI, 외부 AI, MCP, Web UI, Notebook도 같은 Skill OS를 읽고, 사용자는 목적별 절차·필요 근거·실행 환경을 한 화면에서 확인한다.
 
 ## 엔진 체계
 
@@ -37,9 +37,9 @@ dartlab.ask("삼성전자 분석해줘")           # AI 분석가
 
 ## 시작하기
 
+- [Skills](/skills) — AI와 사람이 함께 쓰는 검색 가능한 사용법·분석절차 카탈로그
 - [설치](getting-started/installation)
 - [빠른 시작](getting-started/quickstart)
-- [Skills](/skills) — AI와 사람이 함께 쓰는 검색 가능한 사용법·분석절차 카탈로그
 
 ## 신용분석 보고서
 

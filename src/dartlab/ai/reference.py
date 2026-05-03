@@ -13,13 +13,13 @@ _TEXT_EXTS = {".md", ".py", ".toml", ".json", ".yaml", ".yml", ".txt"}
 
 
 def search_reference(query: str, *, limit: int = 8) -> list[Ref]:
-    """Reference 검색 — DartLab 문서·소스·데이터셋 context 찾기.
+    """Reference 검색 — Skill OS 우선 DartLab context 찾기.
 
     Description
     -----------
     LLM 이 DartLab 사용법을 스스로 찾기 위한 짧은 resource-style snippet 을
-    반환한다. 거대한 status dump 대신 workspace 문서, docstring, ops 문서,
-    RuntimeDatasetCatalog 요약을 검색한다.
+    반환한다. 모든 질문은 먼저 목적 skill 을 선택하고, 그 다음 capability,
+    dataset, knowledge, bounded source context 로 내려간다.
 
     Parameters
     ----------
@@ -63,28 +63,17 @@ def search_reference(query: str, *, limit: int = 8) -> list[Ref]:
     terms = [t.lower() for t in query.split() if len(t) >= 2]
     refs: list[Ref] = []
 
-    if _prefer_skill_first(query, terms):
-        refs.extend(_skill_refs(query, min(4, limit - len(refs))))
-        if len(refs) >= limit:
-            return refs[:limit]
-        preferred_capabilities = _capability_ids_from_refs(refs)
-        refs.extend(_capability_refs_for_ids(preferred_capabilities, min(2, limit - len(refs))))
-        if len(refs) >= limit:
-            return refs[:limit]
+    refs.extend(_skill_refs(query, min(4, limit - len(refs))))
+    if len(refs) >= limit:
+        return refs[:limit]
+    preferred_capabilities = _capability_ids_from_refs(refs)
+    refs.extend(_capability_refs_for_ids(preferred_capabilities, min(2, limit - len(refs))))
+    if len(refs) >= limit:
+        return refs[:limit]
 
     refs.extend(_dataset_refs(terms, limit - len(refs)))
     if len(refs) >= limit:
         return refs[:limit]
-
-    if not _prefer_skill_first(query, terms):
-        refs.extend(_skill_refs(query, min(4, limit - len(refs))))
-        if len(refs) >= limit:
-            return refs[:limit]
-
-        preferred_capabilities = _capability_ids_from_refs(refs)
-        refs.extend(_capability_refs_for_ids(preferred_capabilities, min(2, limit - len(refs))))
-        if len(refs) >= limit:
-            return refs[:limit]
 
     refs.extend(_knowledge_refs(query, limit - len(refs)))
     if len(refs) >= limit:
@@ -105,30 +94,6 @@ def search_reference(query: str, *, limit: int = 8) -> list[Ref]:
                 if path.is_file() and _is_searchable_reference_file(path, root):
                     refs.extend(_search_file(path, terms, root=root, limit=limit - len(refs)))
     return refs[:limit]
-
-
-def _prefer_skill_first(query: str, terms: list[str]) -> bool:
-    lowered = query.lower()
-    markers = (
-        "skill",
-        "skills",
-        "스킬",
-        "스킬스",
-        "capability",
-        "사용법",
-        "어떻게",
-        "함수",
-        "show",
-        "뭐 할 수",
-        "할 수 있어",
-        "할수",
-        "기능",
-        "가능",
-        "엔진",
-        "조합",
-        "응용",
-    )
-    return any(marker in lowered for marker in markers) or any(term in {"help", "usage"} for term in terms)
 
 
 def _dataset_refs(terms: list[str], limit: int) -> list[Ref]:
@@ -334,6 +299,7 @@ def _skill_refs(query: str, limit: int) -> list[Ref]:
                     "datasetRefs": spec.datasetRefs,
                     "toolRefs": spec.toolRefs,
                     "knowledgeRefs": spec.knowledgeRefs,
+                    "sourceRefs": spec.sourceRefs,
                     "visualRefs": spec.visualRefs,
                     "procedure": spec.procedure[:8],
                     "requiredEvidence": spec.requiredEvidence,
@@ -410,7 +376,7 @@ def read_context(path: str, *, start_line: int = 1, max_chars: int = 4000) -> Re
 
     Examples
     --------
-    >>> read_context("ops/skills.md", max_chars=1000)
+    >>> read_context("src/dartlab/skills/specs/start/dartlabSkillOs.md", max_chars=1000)
     Ref(...)
 
     Notes

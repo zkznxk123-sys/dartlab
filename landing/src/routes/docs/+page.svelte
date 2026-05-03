@@ -4,12 +4,12 @@
 	import { onMount } from 'svelte';
 
 	onMount(() => {
-		goto(`${base}/docs/getting-started/quickstart`, { replaceState: true });
+		goto(`${base}/skills`, { replaceState: true });
 	});
 </script>
 
 <svelte:head>
-	<title>DartLab Docs — 빠른 시작</title>
-	<meta name="description" content="DartLab 설치와 빠른 시작 문서." />
-	<meta http-equiv="refresh" content="0;url={base}/docs/getting-started/quickstart" />
+	<title>DartLab Docs — Skills</title>
+	<meta name="description" content="DartLab의 공식 문서와 절차 진입점은 Skill OS입니다." />
+	<meta http-equiv="refresh" content="0;url={base}/skills" />
 </svelte:head>

@@ -57,7 +57,7 @@ See Also
 ``dartlab.gather.krxApi`` — 전종목 주식 가격/시총/발행주식수.
 ``dartlab.gather._hfIndexBulk`` — 사용자 기본 HF 로더.
 ``scripts/build/buildKrxIndexData.py`` — 운영자 bulk 수집 + HF push.
-``ops/gather.md`` — gather 엔진 수집 계약 SSOT.
+``engines.gather`` — gather 엔진 수집 계약 SSOT.
 """
 
 from __future__ import annotations

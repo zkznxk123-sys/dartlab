@@ -3,9 +3,9 @@
 개요
 ====
 
-공개 함수·메서드의 docstring 이 `ops/code.md` 규격 (9 섹션) 을 충족하는지
+공개 함수·메서드의 docstring 이 `operation.code` 규격 (9 섹션) 을 충족하는지
 측정한다. skill 급 docstring 은 AI tool schema description 자동 변환의 근거
-(ops/skills.md) 이므로 충족률이 엔진별 운영 건전성 지표.
+(operation.opsAsSkills) 이므로 충족률이 엔진별 운영 건전성 지표.
 
 9 섹션
 ------
@@ -48,7 +48,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-# 엔진별 코드 루트 매핑 (ops/architecture.md 기준)
+# 엔진별 코드 루트 매핑 (operation.architecture 기준)
 ENGINES: dict[str, list[str]] = {
     "scan": ["src/dartlab/scan"],
     "analysis": ["src/dartlab/analysis"],

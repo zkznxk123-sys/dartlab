@@ -31,7 +31,7 @@ See Also
 --------
 ``dartlab.gather.krxIndex`` — 공개 gather 축.
 ``scripts/build/buildKrxIndexData.py`` — 운영자 수집/배포.
-``ops/gather.md`` — gather KRX 지수 계약.
+``engines.gather`` — gather KRX 지수 계약.
 """
 
 from __future__ import annotations

@@ -15,7 +15,6 @@ from . import ProviderConfig, ProviderTurn, ToolCall
 from .support import oauth_token as oauthToken
 from .support.oauth_token import TokenRefreshError
 
-
 CODEX_API_BASE = "https://chatgpt.com/backend-api"
 CODEX_RESPONSES_PATH = "/codex/responses"
 _MODELS_CACHE: list[str] | None = None
@@ -101,7 +100,11 @@ class OAuthCodexProvider:
     @property
     def default_model(self) -> str:
         models = availableModels()
-        return models[0] if models else (fallback_models("oauth-codex")[0] if fallback_models("oauth-codex") else "gpt-5.2")
+        return (
+            models[0]
+            if models
+            else (fallback_models("oauth-codex")[0] if fallback_models("oauth-codex") else "gpt-5.2")
+        )
 
     def check_available(self) -> bool:
         try:
@@ -243,14 +246,18 @@ def _build_body(messages: list[dict[str, Any]], tools: list[dict[str, Any]], *, 
                 {
                     "type": "message",
                     "role": "user",
-                    "content": [{"type": "input_text", "text": f"[tool_result id={message.get('tool_call_id', '')}]\n{content}"}],
+                    "content": [
+                        {"type": "input_text", "text": f"[tool_result id={message.get('tool_call_id', '')}]\n{content}"}
+                    ],
                 }
             )
             continue
         if role == "assistant":
             tool_calls = message.get("tool_calls") or []
             if content:
-                input_items.append({"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": content}]})
+                input_items.append(
+                    {"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": content}]}
+                )
             continue
         input_items.append({"type": "message", "role": "user", "content": [{"type": "input_text", "text": content}]})
 
@@ -335,7 +342,11 @@ def _parse_sse_response(raw: str) -> ProviderTurn:
             item = event.get("item") if isinstance(event.get("item"), dict) else {}
             if item.get("type") == "function_call":
                 item_id = str(item.get("id") or f"fc_{len(buffers)}")
-                buffers[item_id] = {"id": str(item.get("call_id") or item_id), "name": str(item.get("name") or ""), "args": ""}
+                buffers[item_id] = {
+                    "id": str(item.get("call_id") or item_id),
+                    "name": str(item.get("name") or ""),
+                    "args": "",
+                }
         elif event_type == "response.function_call_arguments.delta":
             item_id = str(event.get("item_id") or "")
             if item_id in buffers:

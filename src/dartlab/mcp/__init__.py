@@ -128,23 +128,26 @@ def _fmtDict(d: dict, depth: int = 0) -> str:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _MCP_INSTRUCTIONS = """\
-DartLab MCP의 기본 표면은 Ask Workbench다. 목적은 LLM이 DartLab을
-프롬프트 지식으로 외우게 하는 것이 아니라, 질문마다 참조를 찾고,
-런타임 데이터셋을 검사하고, Python으로 계산하고, 검산한 뒤 답하게 하는 것이다.
+DartLab MCP의 기본 표면은 Ask Workbench와 DartLab Skill OS다. 목적은 LLM이
+DartLab을 프롬프트 지식으로 외우게 하는 것이 아니라, 질문마다 먼저 skill을
+고르고, 필요한 capability와 런타임 데이터셋을 검사하고, Python으로 계산하고,
+검산한 뒤 답하게 하는 것이다.
 
 ## 기본 흐름
 1. start_ask_session으로 Ask Workbench task를 만든다.
-2. search_reference/read_context로 필요한 문서, 공개 API, 런타임 카탈로그를 짧게 확인한다.
-3. 필요하면 searchDartlabSkills/explainDartlabSkill로 공용 분석 절차를 확인한다.
-4. inspect_dataset으로 데이터셋의 schema/latest/entity/metric을 확인한다.
-5. run_python으로 DartLab 라이브러리와 Polars를 사용해 계산한다.
-6. compile_visual은 계산표가 있을 때만 사용한다.
-7. finalize_answer는 검산을 거친 최종 답변 표면이다.
+2. search_reference 또는 searchDartlabSkills로 목적 skill을 먼저 선택한다.
+3. explainDartlabSkill 또는 dartlab://skills/{skillId}로 절차, 근거, 실행 환경을 확인한다.
+4. 필요한 API 세부는 skill의 capabilityRefs/docstring으로 확인한다.
+5. inspect_dataset으로 데이터셋의 schema/latest/entity/metric을 확인한다.
+6. run_python으로 DartLab 라이브러리와 Polars를 사용해 계산한다.
+7. compile_visual은 계산표가 있을 때만 사용한다.
+8. finalize_answer는 skill ref와 검산 ref를 거친 최종 답변 표면이다.
 
 ## 경계
 - Company, gather, scan, macro, analysis, quant, viz는 MCP 직접 도구가 아니라
   run_python 안에서 사용하는 DartLab 라이브러리다.
-- skills는 MCP 전용 규칙이 아니라 dartlab.skills 공용 resolver를 그대로 노출한다.
+- Skills는 MCP 전용 규칙이 아니라 dartlab.skills 공용 resolver를 그대로 노출한다.
+- 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다. 모든 절차는 Skill OS에서 찾는다.
 - inspect_data는 외부 호환 alias일 뿐 기본 도구 목록에 노출하지 않는다.
 - companySections 같은 전체 sections 지도는 메모리 부담이 커서 기본 경로에서 쓰지 않는다.
 - 도구로 확인되지 않은 수치, 날짜, 실행 성공 여부를 단정하지 않는다.
@@ -648,7 +651,7 @@ def create_server():
             Resource(
                 uri="dartlab://skills",
                 name="DartLab Skills",
-                description="공용 SkillSpec 목록. AI, MCP, story, UI, audit가 같은 resolver를 사용",
+                description="DartLab Skill OS 목록. AI, MCP, story, UI, audit가 같은 resolver를 사용",
                 mimeType="application/json",
             ),
         ]
@@ -740,6 +743,21 @@ def create_server():
                 ReadResourceContents(
                     content=json.dumps(
                         _executeAskWorkbenchTool("listDartlabSkills", {"includeUser": False}),
+                        ensure_ascii=False,
+                        indent=2,
+                    ),
+                    mime_type="application/json",
+                )
+            ]
+        if uri_str.startswith("dartlab://skills/"):
+            skill_id = uri_str.replace("dartlab://skills/", "", 1)
+            return [
+                ReadResourceContents(
+                    content=json.dumps(
+                        _executeAskWorkbenchTool(
+                            "explainDartlabSkill",
+                            {"skillId": skill_id, "includeUser": False},
+                        ),
                         ensure_ascii=False,
                         indent=2,
                     ),

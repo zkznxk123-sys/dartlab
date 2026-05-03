@@ -558,14 +558,16 @@ def test_kernel_task_capsule_includes_basic_skill_floor() -> None:
 
     messages = _initial_provider_messages(AskSession(question="뭘 분석할 수 있나"), create_task("뭘 분석할 수 있나"))
     capsule = json.loads(messages[1]["content"])
-    basic_ids = {item["id"] for item in capsule["basicSkills"]}
+    assert capsule["skillOs"]["entrySkillId"] == "start.dartlabSkillOs"
+    assert capsule["skillOs"]["requiredRefKind"] == "skill"
+    basic_ids = {item["id"] for item in capsule["skillOs"]["basicSkills"]}
 
     assert "basic.company" in basic_ids
     assert "basic.gather" in basic_ids
     assert "basic.scan" in basic_ids
     assert "basic.viz" in basic_ids
     assert "basicPythonExecution" not in basic_ids
-    assert all("toolRefs" not in item for item in capsule["basicSkills"])
+    assert all("toolRefs" not in item for item in capsule["skillOs"]["basicSkills"])
 
 
 def test_provider_workbench_loop_executes_actions_and_verifies(monkeypatch) -> None:
@@ -734,7 +736,8 @@ def test_search_reference_returns_short_dataset_resource_first() -> None:
     refs = search_reference("최근 주가지수 강세", limit=3)
 
     assert refs
-    assert refs[0].payload.get("resourceUri") == "dartlab://datasets"
+    assert refs[0].kind == "skill"
+    assert refs[0].payload.get("skillId") == "krxIndexStrengthReview"
     assert all("src/dartlab/ai/kernel.py" not in str(ref.payload.get("path") or "") for ref in refs)
     assert all(len(str(ref.payload.get("snippet") or "")) <= 2200 for ref in refs)
 
@@ -746,6 +749,34 @@ def test_search_reference_prioritizes_skill_for_capability_help() -> None:
 
     assert refs[0].kind == "skill"
     assert refs[0].payload.get("skillId") == "start.useSkillsCatalog"
+
+
+def test_search_reference_prioritizes_operation_and_start_skills() -> None:
+    from dartlab.ai.reference import search_reference
+
+    cases = {
+        "테스트 규칙 확인": "operation.testing",
+        "api contract 규칙": "operation.apiContract",
+        "처음 온 외부 AI가 어디서 시작해야 해": "start.dartlabSkillOs",
+    }
+
+    for query, expected in cases.items():
+        refs = search_reference(query, limit=5)
+        assert refs[0].kind == "skill"
+        assert refs[0].payload.get("skillId") == expected
+        assert "sourceRefs" in refs[0].payload
+
+
+def test_ask_workbench_release_policy_requires_skill_ref() -> None:
+    from dartlab.ai.contracts import AnswerDraft
+    from dartlab.ai.kernel import create_task
+    from dartlab.ai.verify import verify_answer
+
+    task = create_task("테스트 규칙 알려줘")
+    result = verify_answer(task, [], AnswerDraft(answer="테스트 규칙은 Skill OS에서 확인합니다."))
+
+    assert not result.ok
+    assert any(issue["code"] == "missing_skill_ref" for issue in result.issues)
 
 
 def test_run_python_emit_result_creates_refs() -> None:

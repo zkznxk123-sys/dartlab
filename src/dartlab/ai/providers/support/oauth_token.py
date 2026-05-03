@@ -17,13 +17,14 @@ from urllib.request import Request, urlopen
 from dartlab.core.ai.providers import oauth_secret_name
 from dartlab.core.ai.secrets import get_secret_store
 
-
 CHATGPT_AUTH_URL = "https://auth.openai.com/oauth/authorize"
 CHATGPT_TOKEN_URL = "https://auth.openai.com/oauth/token"
 CHATGPT_CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann"
 CHATGPT_SCOPE = "openid profile email offline_access api.connectors.read api.connectors.invoke"
 OAUTH_REDIRECT_PORT = int(os.environ.get("DARTLAB_OAUTH_REDIRECT_PORT", "1455"))
-OAUTH_REDIRECT_URI = os.environ.get("DARTLAB_OAUTH_REDIRECT_URI", f"http://localhost:{OAUTH_REDIRECT_PORT}/auth/callback")
+OAUTH_REDIRECT_URI = os.environ.get(
+    "DARTLAB_OAUTH_REDIRECT_URI", f"http://localhost:{OAUTH_REDIRECT_PORT}/auth/callback"
+)
 TOKEN_PATH = Path(os.environ.get("DARTLAB_OAUTH_TOKEN_PATH", str(Path.home() / ".dartlab" / "oauth_token.json")))
 _TOKEN_SECRET_NAME = oauth_secret_name("oauth-codex")
 

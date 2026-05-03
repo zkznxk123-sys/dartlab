@@ -1,7 +1,8 @@
-"""Shared DartLab analysis skills.
+"""DartLab Skill OS.
 
-Skills are reusable analysis procedure specs for AI, MCP, story, UI, and audit.
-They do not duplicate public API schemas; API details stay in docstrings and
+Skills are reusable analysis, engine, runtime, and operation procedure specs
+for humans, internal AI, external AI, MCP, Web UI, notebooks, and audit. They
+do not duplicate public API schemas; API details stay in docstrings and
 generated capabilities.
 """
 

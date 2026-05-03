@@ -65,9 +65,12 @@ runtimeCompatibility:
 failureModes:
   - 종목명/코드 오매칭
   - 기간 없는 급등 단정
+  - ranking 표를 만들었지만 artifact/table ref를 남기지 않아 서버 audit에서 산출물 누락
+  - 숫자 ranking claim을 table/value ref에 직접 묶지 않아 최종 검산 실패
 forbidden:
   - 데이터 기준일 없이 최근이라고 말하기
   - 단일 종목만 보고 전종목 결론 내기
+  - table 없이 상위 종목명만 prose로 나열하기
 examples:
   - 최근 주가가 많이 오른 종목 찾아줘
 source:
@@ -80,5 +83,7 @@ lastUpdated: "2026-05-02"
 
 - RuntimeDatasetCatalog에서 KRX 가격 또는 종목 데이터셋 후보를 찾는다.
 - `inspect_dataset`으로 종목코드, 종목명, 날짜, 가격/거래대금/등락률 컬럼을 확인한다.
-- `run_python`으로 동일 기준의 횡단면 표를 만든다.
-- 표의 기준일, 기간, universe, metric을 답변에 함께 밝힌다.
+- `run_python`으로 동일 기준의 횡단면 ranking 표를 만든다. 표에는 종목 식별자, 종목명, 기준일, 비교 시작일 또는 기간, ranking metric, rank가 있어야 한다.
+- ranking 또는 “찾아줘” 유형의 결과는 답변 prose보다 table ref와 필요 시 CSV artifact가 우선이다. 산출물 ref가 없으면 후보 발굴을 완료한 것으로 보지 않는다.
+- 상위 N개 숫자 claim은 ranking table/value ref에 직접 묶고, 기준일·기간·universe·metric을 답변에 함께 밝힌다.
+- 후보 표가 2개 이상이고 동일 metric이 있으면 compile_visual로 요약 차트를 만들 수 있지만, chart는 table ref 이후에만 만든다.

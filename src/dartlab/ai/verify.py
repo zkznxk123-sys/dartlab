@@ -79,6 +79,16 @@ def verify_answer(task: WorkbenchTask, refs: list[Ref], draft: AnswerDraft) -> V
     failed_executions = [ref for ref in executions if not ref.payload.get("ok")]
     successful_executions = [ref for ref in executions if ref.payload.get("ok")]
 
+    if task.release_policy.get("skillRefsRequired") and _non_trivial_answer(draft.answer) and "skill" not in kinds:
+        issues.append(
+            {
+                "code": "missing_skill_ref",
+                "message": "non-trivial Ask Workbench answers must cite at least one selected DartLab skill ref",
+            }
+        )
+    else:
+        passed.append("skill_ref_present_or_not_required")
+
     if _looks_like_tool_transcript(draft.answer):
         issues.append(
             {"code": "tool_transcript_released", "message": "tool call transcript is not a user-facing answer"}
@@ -168,6 +178,16 @@ def verify_answer(task: WorkbenchTask, refs: list[Ref], draft: AnswerDraft) -> V
         passed.append("date_claims_supported")
 
     return VerificationResult(ok=not issues, issues=issues, passed_checks=passed)
+
+
+def _non_trivial_answer(answer: str) -> bool:
+    text = answer.strip()
+    if not text:
+        return False
+    if len(text) >= 80:
+        return True
+    markers = ("분석", "계산", "검산", "규칙", "사용", "데이터", "엔진", "skill", "스킬")
+    return any(marker in text.lower() for marker in markers)
 
 
 def verification_to_ref(result: VerificationResult) -> Ref:

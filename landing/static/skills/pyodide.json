@@ -150,6 +150,51 @@
       ]
     },
     {
+      "id": "engines.analysis",
+      "title": "Analysis",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.company",
+      "title": "Company",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.credit",
+      "title": "Credit (dCR)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.dashboard",
+      "title": "대시보드 — 회사 종합 스냅샷 (v19 · 정보 깊이 확장)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.data",
+      "title": "Data",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.dataEngineFoundation",
       "title": "데이터 엔진 기본기",
       "category": "engines",
@@ -162,6 +207,105 @@
       "limitations": [
         "live EDGAR, 외부 market provider, full scan 축은 서버와 coverage가 다를 수 있다."
       ]
+    },
+    {
+      "id": "engines.edgar",
+      "title": "EDGAR 동기화 규칙",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather",
+      "title": "Gather",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.industry",
+      "title": "Industry",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro",
+      "title": "Macro",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.mappers",
+      "title": "Mappers",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant",
+      "title": "Quant",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quantWorldClass",
+      "title": "dartlab quant 세계 최강 — 사상 정합 + 성능 fix 플랜 (2026-04-25 v3)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan",
+      "title": "Scan",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.search",
+      "title": "Search *(beta — AI 사용 비권장)*",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.story",
+      "title": "Story",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.viz",
+      "title": "Viz",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "governanceAuditReview",
@@ -211,6 +355,123 @@
       "limitations": [
         "live FRED, 환율, 금리 API 호출은 브라우저 CORS/인증 제약으로 제외한다."
       ]
+    },
+    {
+      "id": "operation.apiContract",
+      "title": "API Contract — dartlab 호출 규칙 단일 진실의 원천",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.architecture",
+      "title": "dartlab 아키텍처 — 전체 청사진",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.code",
+      "title": "코드 규칙",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.coreloop",
+      "title": "Core Loop — 자가개선 루프 운영 SSOT",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.engineAudit",
+      "title": "Engine Audit — 엔진 기능 점검 규격",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.experiments",
+      "title": "Experiments",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.extendSkills",
+      "title": "Skill 확장과 공식 승격 규칙",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.issues",
+      "title": "이슈 관리",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.opsAsSkills",
+      "title": "운영 문서를 Skills 체계로 흡수",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.philosophy",
+      "title": "Philosophy — dartlab 사상 SSOT",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.refactorChecklist",
+      "title": "Refactor Checklist — 대규모 rename / API 변경 6 단계",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.testing",
+      "title": "dartlab 테스트 · CI 운영 규칙",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.ui",
+      "title": "UI 엔진 (L4 표현 계층)",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "peerComparisonReview",
@@ -265,6 +526,15 @@
       ]
     },
     {
+      "id": "runtime.channel",
+      "title": "Channel",
+      "category": "runtime",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "runtime.dataAvailabilityCheck",
       "title": "데이터 가용성 확인",
       "category": "runtime",
@@ -277,6 +547,33 @@
       "limitations": [
         "live API 최신성은 서버 또는 로컬 Python 경로에서 확인한다."
       ]
+    },
+    {
+      "id": "runtime.mcp",
+      "title": "MCP",
+      "category": "runtime",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "runtime.notebooks",
+      "title": "notebooks 정책 — Colab vs Marimo",
+      "category": "runtime",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "runtime.pyodide",
+      "title": "Pyodide",
+      "category": "runtime",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "runtime.pyodideBrowser",
@@ -304,6 +601,24 @@
       ]
     },
     {
+      "id": "runtime.spaces",
+      "title": "HuggingFace Spaces — API + MCP 서버",
+      "category": "runtime",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "runtime.vscode",
+      "title": "VSCode Extension",
+      "category": "runtime",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "runtime.workbenchEvidenceFlow",
       "title": "Workbench 근거 생성과 검산 흐름",
       "category": "runtime",
@@ -328,6 +643,15 @@
       "limitations": [
         "full scan 축 전체가 아니라 prebuild에 포함된 지표 기준 후보만 만든다."
       ]
+    },
+    {
+      "id": "start.dartlabSkillOs",
+      "title": "DartLab Skill OS 최초 진입",
+      "category": "start",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "start.useSkillsCatalog",

@@ -198,7 +198,7 @@ def buildTools() -> list[AITool]:
                 "파일 내용을 문자열로 반환. 주요 용도: "
                 "(1) `src/dartlab/{engine}/__init__.py` — 엔진 docstring skill 본문. "
                 "(2) 공개 함수 구현 파일 — 함수 docstring 의 Guide/Returns/Notes 확인. "
-                "(3) `ops/*.md` — 엔진 설계 문서. (4) `blog/**/index.md` — 과거 기업분석 서사. "
+                "(3) `Skill OS` — 엔진 설계 문서. (4) `blog/**/index.md` — 과거 기업분석 서사. "
                 "(5) 코드 구현 확인용 `src/dartlab/**/*.py`. "
                 "경로는 저장소 루트 기준 상대 또는 절대. UTF-8 텍스트만."
             ),
@@ -1083,7 +1083,7 @@ def _toolDescription(obj: Any) -> str:
     # 섹션별 라인 누적 (Returns/Notes/Guide/Verified 만 — Examples/See Also 등은 schema 에 무게)
     sections: dict[str, list[str]] = {"Returns": [], "Notes": [], "Guide": [], "Verified": []}
     current: str | None = None
-    # 라인 cap (token 폭주 방지). Verified 누적 정책은 ops/code.md 운영 룰에서 별도 결정.
+    # 라인 cap (token 폭주 방지). Verified 누적 정책은 operation.code 운영 룰에서 별도 결정.
     cap = {"Returns": 12, "Notes": 16, "Guide": 40, "Verified": 16}
 
     i = 1

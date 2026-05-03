@@ -1,6 +1,6 @@
 """dual access pattern — single 진입점에 call form + attr form 둘 다 허용.
 
-``ops/api-contract.md`` 의 "단일 진입점 + 파라미터 계약" 사상은 진입점을 늘리는
+``operation.apiContract`` 의 "단일 진입점 + 파라미터 계약" 사상은 진입점을 늘리는
 것이 아니라 같은 진입점에서 두 가지 access form 을 모두 허용한다는 의미.
 pandas 가 ``df["col"]`` 와 ``df.col`` 둘 다 허용하는 것과 같다.
 

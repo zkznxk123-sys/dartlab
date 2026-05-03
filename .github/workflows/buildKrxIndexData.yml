@@ -1,6 +1,6 @@
 name: KRX Index Data Sync (Bulk)
 
-# ops/gather.md §9 — KRX idx 시장군별 지수 일별 매매현황 → HF dataset publish.
+# engines.gather §9 — KRX idx 시장군별 지수 일별 매매현황 → HF dataset publish.
 # 사용자 기본 호출 (`dartlab.gather('krxIndex', ...)`) 은 이 결과를 HF 에서 읽는다.
 
 on:

@@ -1,6 +1,6 @@
 name: EDGAR Data Sync (Bulk)
 
-# ⛔ dartlab EDGAR finance = SEC 벌크 primary (ops/edgar.md).
+# ⛔ dartlab EDGAR finance = SEC 벌크 primary (engines.edgar).
 # companyfacts API per-ticker 경로는 사용자 선택 (`c.refreshFromApi()`) 만 사용 — CI 비사용.
 
 on:

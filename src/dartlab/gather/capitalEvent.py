@@ -6,7 +6,7 @@ Stage 1 (`_adjustPrice.detectEventsFromPrices`) 가 가격 점프로 split/bonus
 
 이 모듈이 DART 공시 기반 정확 events 를 수집해 Stage 1 결과를 검증 + 보정.
 
-PLAN (ops/gather.md §9 Stage 2):
+PLAN (engines.gather §9 Stage 2):
     1. DART listJson 으로 다음 보고서 rcept_no 수집:
        - "주식분할결정" / "주식병합결정"
        - "무상증자결정"

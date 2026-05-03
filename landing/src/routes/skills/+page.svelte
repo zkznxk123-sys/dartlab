@@ -5,9 +5,9 @@
 	import { buildAbsoluteUrl, buildBreadcrumbJsonLd, buildWebsiteJsonLd } from '$lib/seo';
 	import { brand } from '$lib/brand';
 
-	const pageTitle = 'DartLab Skills — 분석 절차 문서';
+	const pageTitle = 'DartLab Skills — 작업 체계 문서';
 	const pageDesc =
-		'DartLab 엔진과 분석 절차를 목적별로 검색하고 바로 실행 순서로 읽는 문서형 skill catalog.';
+		'DartLab 분석 절차, 엔진 능력, 운영 규칙, 확장 절차를 목적별로 검색하고 바로 실행 순서로 읽는 문서형 skill catalog.';
 	const pageUrl = buildAbsoluteUrl('skills');
 	const jsonLd = JSON.stringify([
 		buildWebsiteJsonLd(),
@@ -33,10 +33,10 @@
 <main class="skill-page">
 	<section class="skill-hero">
 		<p class="kicker">Skills</p>
-		<h1>DartLab 분석 절차 문서</h1>
+		<h1>DartLab Skills 작업 체계</h1>
 		<p>
-			무엇을 분석하려는지 먼저 고르고, 필요한 데이터·실행 순서·검산 기준을 한 화면에서 읽는다.
-			개별 API 내부 참조가 아니라 사용자가 실제로 따라갈 수 있는 절차를 기준으로 정리했다.
+			무엇을 분석하거나 운영하려는지 먼저 고르고, 필요한 데이터·실행 순서·검산 기준·원문 위치를 한 화면에서 읽는다.
+			개별 API 문서와 흩어진 운영 문서를 직접 뒤지는 대신 사람과 LLM이 같은 skill을 기준으로 작업한다.
 		</p>
 	</section>
 	<SkillSearch />

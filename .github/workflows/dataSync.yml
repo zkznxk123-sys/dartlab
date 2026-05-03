@@ -14,7 +14,7 @@ name: Data Sync
 #   - mode=recent (기본): list.json 기반 경량 수집 (~30분)
 #   - mode=full: 88분기 차집합 수집 (~5시간, 이전 dataPipeline full 모드 대체)
 #
-# 파이프라인 상세: ops/data.md
+# 파이프라인 상세: engines.data
 # ──────────────────────────────────────────────────────────────
 
 on:

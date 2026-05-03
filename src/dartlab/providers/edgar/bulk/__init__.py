@@ -9,7 +9,7 @@ dartlab의 EDGAR finance primary 소스는 SEC 벌크다:
 
 num.tsv는 받지 않는다 — companyfacts.zip이 같은 값의 더 신선한 번들.
 
-상세: `ops/edgar.md`.
+상세: `engines.edgar`.
 """
 
 from dartlab.providers.edgar.bulk.companyfactsBulk import (

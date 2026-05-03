@@ -70,6 +70,54 @@ _INTENT_SKILL_BOOSTS: tuple[dict[str, Any], ...] = (
         "boost": 16.0,
     },
     {
+        "skillIds": ("start.dartlabSkillOs",),
+        "terms": (
+            "처음",
+            "최초",
+            "진입점",
+            "입문",
+            "전체 체계",
+            "문서 체계",
+            "skill os",
+            "스킬 os",
+            "어디서 시작",
+            "llm이 와도",
+            "외부 ai",
+            "운영 문서",
+            "ops",
+        ),
+        "boost": 18.0,
+    },
+    {
+        "skillIds": ("operation.opsAsSkills",),
+        "terms": (
+            "ops를 스킬",
+            "ops 문서",
+            "운영 규칙",
+            "규칙 통합",
+            "문서 중복",
+            "ssot",
+            "sourceRefs",
+            "문서 정리",
+            "체계 단순화",
+        ),
+        "boost": 17.0,
+    },
+    {
+        "skillIds": ("operation.extendSkills",),
+        "terms": (
+            "스킬 추가",
+            "스킬 확장",
+            "확장 규칙",
+            "새 skill",
+            "user skill",
+            "curated skill",
+            "공식 승격",
+            "독스트링 승격",
+        ),
+        "boost": 16.0,
+    },
+    {
         "skillIds": ("runtime.skillDevelopmentLoop",),
         "terms": (
             "스킬 개발",
@@ -157,7 +205,7 @@ _INTENT_SKILL_BOOSTS: tuple[dict[str, Any], ...] = (
 )
 _TICKER_QUERY_RE = re.compile(r"\b[A-Z]{1,5}\b")
 
-_MANUAL_SKILL_CATEGORIES = {"start", "runtime", "engines", "screens", "finance", "visuals", "user"}
+_MANUAL_SKILL_CATEGORIES = {"start", "runtime", "operation", "engines", "screens", "finance", "visuals", "user"}
 
 
 def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
@@ -391,6 +439,7 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
         "datasetRefs",
         "toolRefs",
         "knowledgeRefs",
+        "sourceRefs",
         "visualRefs",
         "procedure",
         "requiredEvidence",
@@ -695,7 +744,7 @@ def _generated_runtime_compatibility(capability_ref: str) -> dict[str, Any]:
             "status": "unknown",
             "notes": [
                 "Generated capability view는 API 사용법만 나타낸다.",
-                "Pyodide 가능 여부는 curated/user SkillSpec 또는 ops/pyodide.md를 확인한다.",
+                "Pyodide 가능 여부는 curated/user SkillSpec 또는 runtime.pyodide skill을 확인한다.",
             ],
             "capabilityRef": capability_ref,
         },
@@ -840,6 +889,7 @@ def _score(spec: SkillSpec, terms: list[str], *, query: str = "") -> tuple[float
         "datasetRefs": " ".join(spec.datasetRefs),
         "visualRefs": " ".join(spec.visualRefs),
         "knowledgeRefs": " ".join(spec.knowledgeRefs),
+        "sourceRefs": " ".join(spec.sourceRefs),
         "runtimeCompatibility": json.dumps(spec.runtimeCompatibility, ensure_ascii=False),
         "docs": json.dumps(spec.docs, ensure_ascii=False),
     }
@@ -849,7 +899,7 @@ def _score(spec: SkillSpec, terms: list[str], *, query: str = "") -> tuple[float
         for name, hay in haystacks.items():
             if term in hay.lower():
                 weight = 2.0 if name in {"id", "title", "whenToUse"} else 1.0
-                if spec.category in {"screens", "finance", "engines", "runtime", "start", "visuals"}:
+                if spec.category in {"screens", "finance", "engines", "runtime", "operation", "start", "visuals"}:
                     weight += 0.75
                 score += weight
                 reasons.append(f"{name}:{term}")

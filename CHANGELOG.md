@@ -171,7 +171,7 @@ quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.
 
 ### Added
 
-- **`ops/credit.md`** — 독립 신용등급 엔진 공개 문서. 7축 구조, `override` 키, 실패 시나리오 정리.
+- **`engines.credit`** — 독립 신용등급 엔진 공개 문서. 7축 구조, `override` 키, 실패 시나리오 정리.
 
 ## [0.9.19] - 2026-04-22
 
@@ -508,7 +508,7 @@ quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.
 ### Changed
 
 - **ContextBuilder 기본 ON**: `DARTLAB_CONTEXT_V2` feature flag 제거. legacy 복원은 `DARTLAB_CONTEXT_V1=1`
-- **축수 자랑 표기 전면 제거**: ops/코드에서 "14축/30축/7축" → 기능 설명으로 변경
+- **축수 자랑 표기 전면 제거**: Skill OS코드에서 "14축/30축/7축" → 기능 설명으로 변경
 - **audit 체계 통합**: 파편 audit 10개 삭제, review audit 1개로 통합 (src/dartlab/review/README.md)
 - review audit Fix 원칙 명시: 근본 1곳만, 우회로/덕지덕지 금지
 
@@ -555,7 +555,7 @@ quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.
 - `scripts/data/` — 데이터 수집/복구 (collectIndustryIndicators, repair_cache_with_progress, ...)
 - `scripts/dev/` — 개발자 헬퍼 (test-lock.sh, install_git_hooks.sh, ...)
 
-영향: workflow yml, conftest, ops/*, .claude/audits, .claude/skills, .claude/hooks 모두 경로 갱신.
+영향: workflow yml, conftest, Skill OS*, .claude/audits, .claude/skills, .claude/hooks 모두 경로 갱신.
 
 ## [0.9.3] - 2026-04-09
 
@@ -652,7 +652,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 - **영구 URL**: `https://<id>-8400.<region>.devtunnels.ms` — 재실행해도 동일
 - **모바일 호환 검증**: Android Chrome (2026-04-07)
 - **메시징 봇 옵션**: `--telegram/slack/discord` (channel/adapters/)
-- **ops/channel.md**: 기술 스택, 자동화 파이프라인, 검증된 진단 사례 전부 문서화
+- **runtime.channel**: 기술 스택, 자동화 파이프라인, 검증된 진단 사례 전부 문서화
 
 ### Removed
 
@@ -664,7 +664,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 
 ### Fixed
 
-- **모바일 hydration 실패**: lucide-svelte의 deprecated `<Settings>` 아이콘 → `<Cog>` 일괄 교체. 진짜 원인이 8시간 추적 끝에 발견됨 (상세: ops/channel.md "검증된 진단 사례")
+- **모바일 hydration 실패**: lucide-svelte의 deprecated `<Settings>` 아이콘 → `<Cog>` 일괄 교체. 진짜 원인이 8시간 추적 끝에 발견됨 (상세: runtime.channel "검증된 진단 사례")
 - **Svelte 5 버전**: `vite-plugin-svelte 5.0 → 6.2.4` + `svelte 5.0 → 5.55.1`
 - **Svelte 5 body event delegation**: ProviderDropdown의 `stopPropagation()` 제거, `document.addEventListener` 직접 사용
 - **모바일 반응형**: EmptyState/ChatArea 풀너비, 우상단 검색 모바일에서 숨김, 하단 nav `position: fixed`
@@ -699,7 +699,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 - **Phase 3**: 도구 라우터 + APIGen 파이프라인 + QLoRA 학습 스크립트
 
 #### 운영
-- **`ops/issues.md`**: 이슈 관리 체계 (GitHub Issue + 기능별 테스트 + 커밋 연결)
+- **`operation.issues`**: 이슈 관리 체계 (GitHub Issue + 기능별 테스트 + 커밋 연결)
 - **`src/dartlab/quant/README.md`**: quant 엔진 운영문서 신규
 
 ### Changed
@@ -833,8 +833,8 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 
 ### Added
 
-- **ops/architecture.md**: 전체 청사진 — 레이어, 엔진, 규칙, 데이터 출력, 신규 기능 체크리스트
-- **ops/testing.md**: 테스트 체계 — 마커, 커버리지 목표, CI 규칙
+- **operation.architecture**: 전체 청사진 — 레이어, 엔진, 규칙, 데이터 출력, 신규 기능 체크리스트
+- **operation.testing**: 테스트 체계 — 마커, 커버리지 목표, CI 규칙
 - **테스트 1,148개 추가**: 843→1,991 passed (20개 신규 테스트 파일, 9개 엔진 전체 커버)
 - **numpy** base 의존성 추가 (quant 엔진 필수)
 
@@ -859,7 +859,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 - **viz AI 연동**: 도메인 차트(revenue/cashflow/profitability) sandbox import + 프롬프트 유도
 - **README 전면 정비**: credit/viz/extras/아키텍처/안정성 v0.8.2 반영
 - **AI 프롬프트 #29-#30**: credit score 의미 명시, viz 도메인 차트 우선 안내
-- **문서 체계 점검**: ops/ 전체, import 방향, 엔진 일관성 전수조사 통과
+- **문서 체계 점검**: Skill OS 전체, import 방향, 엔진 일관성 전수조사 통과
 
 ### Removed
 
@@ -882,7 +882,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 
 - **analysis↔credit 상호의존 완전 제거**: 같은 L2지만 상호 import 0건. review가 블록식 조합
 - **AI 프롬프트 #26~#28**: 종합분석 섹션, quant 섹션, review 금지 + analysis 기반 서사 해석
-- **ops/ 문서 전면 정비**: analysis 14축 체계, credit 독립 명시, vectorStore/DDG 참조 제거
+- **Skill OS 문서 전면 정비**: analysis 14축 체계, credit 독립 명시, vectorStore/DDG 참조 제거
 - **VSCode 확장 개선**: oauth-codex provider 지원
 
 ### Fixed
@@ -949,7 +949,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 - **AI 프롬프트 패턴 3종**: growth, quick_check, value_investor 패턴 추가. 기존 패턴(financial, prediction, risk, valuation) 보강
 - **review 6막 구조 확장**: builders/templates 대폭 강화, registry 축-보고서 매핑 보강
 - **analysis predictionSignals 확장**: 예측 신호 12→15축 (consensusDirection, flowDirection, revenueDirection)
-- **ops/ 운영문서 체계**: DEV.md 전면 제거 → 루트 ops/에 엔진별 설계 문서 통합
+- **Skill OS 운영문서 체계**: DEV.md 전면 제거 → 루트 Skills에 엔진별 설계 문서 통합
 - **실험 105 시맨틱 맵**: 13개 실험 스크립트 (taxonomy~reportNmMapping)
 - **VSCode extension**: ChatInput/ChatPanel UX 개선, 메시지 프로토콜 확장
 
@@ -962,7 +962,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 
 ### Removed
 
-- **DEV.md 28개 파일**: 모듈별 산재된 개발 메모 → ops/ 통합으로 대체
+- **DEV.md 28개 파일**: 모듈별 산재된 개발 메모 → Skill OS 통합으로 대체
 - **core/vectorStore.py**: core/search/vectorStore.py로 이전
 
 ## [0.7.15] - 2026-03-30

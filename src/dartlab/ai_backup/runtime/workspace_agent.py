@@ -281,7 +281,7 @@ def _workspace_tools(session: AgentSession) -> list[AITool]:
         ),
         AITool(
             name="read_text",
-            description="Read UTF-8 text from ops/docs/source/docstring files inside the DartLab workspace.",
+            description="Read UTF-8 text from Skill OSdocs/source/docstring files inside the DartLab workspace.",
             parameters={
                 "type": "object",
                 "properties": {

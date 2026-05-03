@@ -3,12 +3,12 @@
 엔진 (quant/scan/analysis) 이 KR OHLCV/시총/발행주식수가 필요할 때 호출하는 단일 진입점.
 **사용자 KRX_API_KEY 환경변수 보지 않음.** HuggingFace 데이터셋이 SSOT.
 
-사용자 직접 호출 (Mode 1) 은 `gather/krxApi.py` 참조 — `ops/gather.md §9`.
+사용자 직접 호출 (Mode 1) 은 `gather/krxApi.py` 참조 — `engines.gather §9`.
 
 데이터 흐름 (dartlab 표준 — `core/dataLoader.loadData`):
     1. 로컬 `data/krx/prices/raw-{YYYY}.parquet` 확인
     2. 없으면 HF (`eddmpython/dartlab-data` / `krx/prices/raw-{YYYY}.parquet`) 다운로드
-    3. 있으면 ETag + Content-Length 검증 → stale 시 재다운로드 (3-Layer Freshness, ops/data.md §13)
+    3. 있으면 ETag + Content-Length 검증 → stale 시 재다운로드 (3-Layer Freshness, engines.data §13)
     4. LRU 캐시 (16개) — 같은 세션 재호출 시 메모리 hit
 
 기타 dartlab 카테고리 (finance · report · scan · edgar · ...) 와 완전 동일 패턴.
@@ -136,8 +136,8 @@ def loadFiltered(
     SeeAlso:
         - gather/krxApi.py — 사용자 직접 호출 (Mode 1, 자기 KRX_API_KEY)
         - gather/_adjustPrice.py — 수정주가 알고리즘 (CRSP backward chaining)
-        - ops/gather.md §9 — KRX 수집 경로 SSOT
-        - ops/api-contract.md §12 — EDGAR 와 동일한 벌크/API 분리 패턴
+        - engines.gather §9 — KRX 수집 경로 SSOT
+        - operation.apiContract §12 — EDGAR 와 동일한 벌크/API 분리 패턴
 
     Args:
         stockCode: 단일 종목 필터 (None 이면 전종목).

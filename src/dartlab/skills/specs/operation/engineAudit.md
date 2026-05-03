@@ -1,0 +1,93 @@
+---
+id: operation.engineAudit
+title: Engine Audit — 엔진 기능 점검 규격
+kind: curated
+scope: builtin
+status: observed
+category: operation
+purpose: Engine Audit — 엔진 기능 점검 규격 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.
+whenToUse:
+  - Engine Audit — 엔진 기능 점검 규격
+  - engineAudit
+  - 1. 목적 — 엔진 end-to-end 통로를 점검한다
+  - 2. 점검 범위 — 체크리스트로 간다
+  - Company facade
+  - show · select
+  - analysis (L2)
+inputs:
+  - 작업 목적
+  - 대상 엔진 또는 실행 환경
+  - 검증 범위
+outputs:
+  - selected skill
+  - capability/docstring handoff
+  - verification gate
+capabilityRefs: []
+toolRefs:
+  - search_reference
+knowledgeRefs:
+  - start.dartlabSkillOs
+sourceRefs:
+  - dartlab://skills/operation.engineAudit
+procedure:
+  - 1. 목적 — 엔진 end-to-end 통로를 점검한다 기준을 확인한다.
+  - 2. 점검 범위 — 체크리스트로 간다 기준을 확인한다.
+  - Company facade 기준을 확인한다.
+  - show · select 기준을 확인한다.
+  - analysis (L2) 기준을 확인한다.
+  - Company 생성 → show · select · analysis · credit · scan · story · macro · gather · quant 전체 통로 작동 확인.
+  - 주요 종목 (KR + US) 에서 반환값이 기대 형식인지.
+  - 새 기능 추가·데이터 갱신·리팩토링 후 회귀 감지.
+  - AI audit 전에 선행 점검 (엔진 깨진 채 AI 돌리면 무의미).
+requiredEvidence:
+  - skillRef
+expectedOutputs:
+  - 작업 경로
+  - 확인한 근거
+  - 검증 결과
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+  pyodide:
+    status: supported
+    notes: []
+failureModes:
+  - Skill OS 검색 없이 과거 문서 경로를 직접 찾음
+  - API schema를 skill 본문에 중복해 docstring/capability와 어긋남
+  - 검증 게이트 없이 변경 또는 답변을 완료 처리함
+forbidden:
+  - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.
+  - API parameters/returns를 SkillSpec에 복사하지 않는다.
+examples:
+  - Engine Audit — 엔진 기능 점검 규격 규칙 확인
+  - engineAudit 작업을 Skill OS에서 시작
+source:
+  type: absorbed_skill_os
+  absorbedKey: engineAudit
+  format: markdown
+lastUpdated: '2026-05-03'
+---
+
+## Skill OS 흡수 규칙
+
+- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.
+- API 세부 인자와 반환 구조는 capability/docstring을 확인한다.
+- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.
+
+## 실행 순서
+
+- 1. 목적 — 엔진 end-to-end 통로를 점검한다 기준을 확인한다.
+- 2. 점검 범위 — 체크리스트로 간다 기준을 확인한다.
+- Company facade 기준을 확인한다.
+- show · select 기준을 확인한다.
+- analysis (L2) 기준을 확인한다.
+- Company 생성 → show · select · analysis · credit · scan · story · macro · gather · quant 전체 통로 작동 확인.
+- 주요 종목 (KR + US) 에서 반환값이 기대 형식인지.
+- 새 기능 추가·데이터 갱신·리팩토링 후 회귀 감지.
+- AI audit 전에 선행 점검 (엔진 깨진 채 AI 돌리면 무의미).

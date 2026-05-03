@@ -26,7 +26,13 @@ def detect_ollama() -> dict[str, Any]:
                 models = [line.split()[0] for line in lines if line.strip()]
         except (OSError, subprocess.SubprocessError):
             running = False
-    return {"installed": executable is not None, "path": executable, "version": version, "running": running, "models": models}
+    return {
+        "installed": executable is not None,
+        "path": executable,
+        "version": version,
+        "running": running,
+        "models": models,
+    }
 
 
 def get_install_guide() -> str:

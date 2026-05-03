@@ -28,13 +28,13 @@ default_whitelist:
   - src/dartlab/providers/dart/ROLE_ASSIGNMENT.md
 
   # ── 폐기 명시 anti-pattern note 가 있는 ops 문서 ──
-  - ops/api-contract.md
-  - ops/company.md
-  - ops/code.md
-  - ops/data.md
-  - ops/philosophy.md
+  - operation.apiContract
+  - engines.company
+  - operation.code
+  - engines.data
+  - operation.philosophy
   # refactor-checklist 는 옛 API 예시·사고 사례 SSOT — 의도된 잔존
-  - ops/refactor-checklist.md
+  - operation.refactorChecklist
 
   # ── release history ──
   - CHANGELOG.md
@@ -79,7 +79,7 @@ patterns:
     message: "v0.9.22: c.review() → c.story() 변경. 이 호출은 더 이상 동작하지 않음."
     whitelist_paths:
       - CHANGELOG.md  # historical release note
-      - ops/philosophy.md  # 부록 B 폐기 history
+      - operation.philosophy  # 부록 B 폐기 history
 
   - name: review_currency_var
     regex: '_review_currency\b'
@@ -101,7 +101,7 @@ patterns:
     message: "AI 진입점 단일화 (2026-04-06): c.reviewer() 폐기. dartlab.ask() 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/philosophy.md
+      - operation.philosophy
 
   - name: company_review_tool_name
     regex: '\bcompanyReview\b'
@@ -117,8 +117,8 @@ patterns:
     message: "Plan v10: c.docs.X namespace 폐기. c.show(topic) 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md  # anti-pattern 명시
-      - ops/company.md
+      - operation.apiContract  # anti-pattern 명시
+      - engines.company
       - providers/edgar  # EDGAR 는 c.notes 만 살아있음 — c.docs 와 별개
 
   - name: finance_namespace_attr
@@ -127,9 +127,9 @@ patterns:
     message: "Plan v10: c.finance.X namespace 폐기. c.show(topic) 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
-      - ops/company.md
-      - ops/data.md
+      - operation.apiContract
+      - engines.company
+      - engines.data
 
   - name: report_namespace_attr
     regex: '\bc\.report\.\w+'
@@ -137,8 +137,8 @@ patterns:
     message: "Plan v10: c.report.X namespace 폐기. c.show(topic) 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
-      - ops/company.md
+      - operation.apiContract
+      - engines.company
 
   - name: profile_namespace_attr
     regex: '\bc\.profile\.\w+'
@@ -146,8 +146,8 @@ patterns:
     message: "Plan v10: c.profile.X namespace 폐기. c.show(topic) 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
-      - ops/company.md
+      - operation.apiContract
+      - engines.company
 
   # ── Plan v10 — 재무 property 폐기 ────────────────────────
   - name: bs_property
@@ -156,8 +156,8 @@ patterns:
     message: "Plan v10 P0: c.BS property 폐기. c.show('BS') 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md  # anti-pattern 명시
-      - ops/code.md
+      - operation.apiContract  # anti-pattern 명시
+      - operation.code
 
   - name: is_property
     regex: '\bc\.IS\b'
@@ -165,8 +165,8 @@ patterns:
     message: "Plan v10 P0: c.IS property 폐기. c.show('IS') 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
-      - ops/code.md
+      - operation.apiContract
+      - operation.code
 
   - name: cf_property
     regex: '\bc\.CF\b'
@@ -174,8 +174,8 @@ patterns:
     message: "Plan v10 P0: c.CF property 폐기. c.show('CF') 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
-      - ops/code.md
+      - operation.apiContract
+      - operation.code
 
   - name: cis_property
     regex: '\bc\.CIS\b'
@@ -183,8 +183,8 @@ patterns:
     message: "Plan v10 P0: c.CIS property 폐기. c.show('CIS') 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
-      - ops/code.md
+      - operation.apiContract
+      - operation.code
 
   - name: ratios_property
     regex: '\bc\.ratios\b'
@@ -192,8 +192,8 @@ patterns:
     message: "Plan v10 P1: c.ratios property 폐기. c.show('ratios') 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
-      - ops/code.md
+      - operation.apiContract
+      - operation.code
 
   - name: timeseries_property
     regex: '\bc\.timeseries\b'
@@ -201,7 +201,7 @@ patterns:
     message: "Plan v10: c.timeseries property 폐기. c.show(topic) + freq 토글 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
+      - operation.apiContract
 
   # ── Plan v10 — 폐기 property 정의 잔존 (call site 가 아닌 정의) ────
   # call site (\bc\.BS\b 등) 만 잡으면 정의는 통과 — 미래에 다시 호출될 수 있음.
@@ -212,8 +212,8 @@ patterns:
     message: "Plan v10 P0: BS property 정의 폐기. _loadFinanceTimeseries() 내부 + show('BS') 경유."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
-      - ops/code.md
+      - operation.apiContract
+      - operation.code
 
   - name: is_property_def
     regex: '^\s*def IS\s*\(\s*self'
@@ -221,8 +221,8 @@ patterns:
     message: "Plan v10 P0: IS property 정의 폐기. show('IS') 경유."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
-      - ops/code.md
+      - operation.apiContract
+      - operation.code
 
   - name: cf_property_def
     regex: '^\s*def CF\s*\(\s*self'
@@ -230,8 +230,8 @@ patterns:
     message: "Plan v10 P0: CF property 정의 폐기. show('CF') 경유."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
-      - ops/code.md
+      - operation.apiContract
+      - operation.code
 
   - name: timeseries_property_def
     regex: '^\s*def timeseries\s*\(\s*self'
@@ -239,7 +239,7 @@ patterns:
     message: "Plan v10: timeseries property 정의 폐기. _loadFinanceTimeseries() 내부 호출."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/api-contract.md
+      - operation.apiContract
 
   # ── 옛 모듈 경로 ───────────────────────────────────────────
   - name: engines_module_path
@@ -248,7 +248,7 @@ patterns:
     message: "옛 경로 dartlab.engines.X — providers/X 또는 X (analysis/credit/...) 사용."
     whitelist_paths:
       - CHANGELOG.md
-      - ops/philosophy.md  # history
+      - operation.philosophy  # history
       - tests/test_wheelPackaging.py  # gitignore 검증 목적의 명시 잔존
 
   # ── 옛 테스트 파일명 (workflow / CI 스크립트) ──────────────

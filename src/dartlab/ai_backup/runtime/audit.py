@@ -4,7 +4,7 @@
 `{dataDir}/audit/ai-ask/YYYY-MM-DD.jsonl` 에 한 줄씩 append 한다.
 자가개선 루프 (Phase P/R/F/A) 의 원천 데이터.
 
-jsonl v2 스키마 (ops/coreloop.md §B.3)
+jsonl v2 스키마 (operation.coreloop §B.3)
 =====================================
 
 한 줄 = 1 요청::

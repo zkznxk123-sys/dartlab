@@ -4,7 +4,7 @@
 > `c.BS / c.IS / c.CF / c.CIS / c.ratios / c.docs.X / c.finance.X / c.report.X / c.profile.X`
 > 등 namespace property 가 **모두 제거**되고 단일 진입점 `c.show(topic)` 로 통합됐다.
 > 본 문서는 finance/docs/report 소스 라우팅 의사결정 history 로만 유효. 현재 API 는
-> `ops/api-contract.md` 와 `ops/company.md` 참조.
+> `operation.apiContract` 와 `engines.company` 참조.
 
 ## 원칙
 

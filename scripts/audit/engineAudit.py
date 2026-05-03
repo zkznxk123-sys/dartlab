@@ -6,7 +6,7 @@
     uv run python -X utf8 scripts/audit/engineAudit.py --stock 005930
     uv run python -X utf8 scripts/audit/engineAudit.py --quick      # 핵심만
 
-규격: ops/engineAudit.md
+규격: operation.engineAudit
 결과: data/audit/engine/{YYYY-MM-DD}/{stockCode}.json + report.md
 """
 
@@ -23,7 +23,7 @@ from typing import Any
 
 logging.getLogger().setLevel(logging.ERROR)
 
-# 표준 종목 세트 (ops/engineAudit.md 규격)
+# 표준 종목 세트 (operation.engineAudit 규격)
 _STOCKS = [
     ("005930", "삼성전자", "KR"),
     ("047040", "대우건설", "KR"),

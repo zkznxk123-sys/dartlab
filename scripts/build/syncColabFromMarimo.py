@@ -1,6 +1,6 @@
 """Generate all Colab notebooks from a single source-of-truth spec.
 
-Rule (ops/notebooks.md):
+Rule (runtime.notebooks):
   - Colab cells mirror Marimo cell *code* 1:1
   - Colab adds a small number of concise markdown cells (intro + section dividers)
   - Marimo notebooks are hand-written and left untouched here

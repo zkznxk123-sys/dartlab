@@ -6,17 +6,17 @@
 		{
 			icon: Search,
 			title: '목적 검색',
-			desc: '질문을 skill catalog에서 먼저 찾고 절차를 고른다.'
+			desc: '분석과 운영 질문을 skill catalog에서 먼저 찾고 절차를 고른다.'
 		},
 		{
 			icon: Network,
-			title: 'Capability 연결',
-			desc: 'skill이 참조하는 공개 API docstring과 근거 요구사항을 확인한다.'
+			title: '원천 연결',
+			desc: '엔진 능력은 capability, 운영 규칙은 sourceRef로 연결한다.'
 		},
 		{
 			icon: ShieldCheck,
-			title: 'Runtime 검증',
-			desc: 'Local Python, Pyodide, MCP, Web AI에서 실행 가능한 범위를 분리한다.'
+			title: '검증 게이트',
+			desc: '실행 환경, 근거 요구사항, 작업별 검증 기준을 함께 확인한다.'
 		}
 	];
 
@@ -29,11 +29,11 @@
 			<div>
 				<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">Skills</span>
 				<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-4 leading-tight">
-					분석 절차는 Skills에서 바로 읽는다
+					분석과 운영은 Skills에서 시작한다
 				</h2>
 				<p class="text-dl-text-muted text-base leading-relaxed mb-6 max-w-xl">
-					종목 분석, 공시 검토, 신용 위험, 매크로, 차트까지 목적별로 필요한 데이터와 실행 순서를
-					한 화면에서 확인한다.
+					종목 분석, 공시 검토, 신용 위험, 매크로, 차트뿐 아니라 테스트, 릴리즈, 아키텍처,
+					UI 같은 운영 규칙까지 같은 skill resolver에서 확인한다.
 				</p>
 				<div class="flex flex-wrap gap-2 mb-7">
 					{#each surfaces as surface}

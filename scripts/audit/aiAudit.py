@@ -7,7 +7,7 @@
     uv run python -X utf8 scripts/audit/aiAudit.py --stock 005930
     uv run python -X utf8 scripts/audit/aiAudit.py --provider gemini
 
-규격: src/dartlab/ai/README.md "AI Audit 체계"
+규격: operation.coreloop "수동 판정 환류" 및 operation.opsAsSkills "검증 게이트"
 결과: data/audit/ai/{YYYY-MM-DD}/results.json + report.md
 """
 
@@ -25,7 +25,7 @@ from typing import Any
 
 logging.getLogger().setLevel(logging.ERROR)
 
-# 표준 질문 세트 (ops/skills.md — skills 기반 AI/MCP 경로 커버)
+# 표준 질문 세트 (operation.opsAsSkills — skills 기반 AI/MCP 경로 커버)
 # (stockCode | None, corpName, question_or_axis)
 _STANDARD_SET = [
     # KR 종목
@@ -86,7 +86,8 @@ def _count_dash_cells(response: str) -> int:
 def _grade(response: str) -> tuple[str, list[str]]:
     """등급 판정 + 이슈 목록.
 
-    P/T/C/V 규격은 src/dartlab/ai/README.md 참조.
+    이 함수는 자동 보조 판정만 수행한다. 최종 P/T/C/V 품질 판정은
+    서버 경유 응답 원문을 사람이 읽고 operation.coreloop 규칙에 따라 기록한다.
     """
     issues: list[str] = []
     length = len(response)

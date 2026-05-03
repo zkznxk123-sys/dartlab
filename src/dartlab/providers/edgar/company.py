@@ -1137,7 +1137,7 @@ class Company:
             + 분기 ``financial-statement-data-sets``) 를 primary 소스로 사용한다.
             이 메서드는 **자동 파이프라인·프리빌드·HF 배포가 사용하지 않는다** —
             사용자가 공시 당일 최신 분기를 즉시 반영하고 싶을 때만 명시적으로 호출.
-            상세: ``ops/edgar.md`` 및 ``ops/api-contract.md`` "EDGAR 수집 경로".
+            상세: ``engines.edgar`` 및 ``operation.apiContract`` "EDGAR 수집 경로".
 
         Requires:
             인터넷 연결 (data.sec.gov). User-Agent 헤더.

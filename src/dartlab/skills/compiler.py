@@ -18,6 +18,10 @@ _CATEGORY_META: dict[str, dict[str, str]] = {
         "title": "Runtime",
         "description": "Local Python, Pyodide, Web AI, MCP, VSCode 같은 실행 환경별 제약과 근거 흐름.",
     },
+    "operation": {
+        "title": "Operation",
+        "description": "ops 원문을 skill 절차로 묶어 테스트, 문서, 릴리즈, 확장 규칙을 찾는 운영 지도.",
+    },
     "engines": {
         "title": "Engines",
         "description": "DartLab 엔진을 어떤 목적에 연결할지 알려주는 조합 원칙.",
@@ -47,7 +51,18 @@ _CATEGORY_META: dict[str, dict[str, str]] = {
         "description": "프로젝트 또는 사용자 확장 skill. 배포 산출물에는 기본 포함하지 않는다.",
     },
 }
-_CATEGORY_ORDER = ("start", "runtime", "engines", "screens", "finance", "visuals", "basic", "capability", "user")
+_CATEGORY_ORDER = (
+    "start",
+    "runtime",
+    "operation",
+    "engines",
+    "screens",
+    "finance",
+    "visuals",
+    "basic",
+    "capability",
+    "user",
+)
 
 
 def buildSkillArtifacts(
@@ -112,10 +127,25 @@ def buildSkillArtifacts(
     categories = _ordered_categories({skill.category for skill in skills})
     public_skills = [skill for skill in skills if skill.category != "capability"]
     search_index = [_search_doc(skill) for skill in public_skills]
+    meta = {
+        "entrySkillId": "start.dartlabSkillOs",
+        "canonicalSurface": "DartLab Skill OS",
+        "skillCount": len(public_skills),
+        "categories": [
+            {
+                "id": category,
+                **_category_meta(category),
+                "count": sum(1 for skill in public_skills if skill.category == category),
+            }
+            for category in categories
+            if category != "capability"
+        ],
+        "sourcePolicy": "Deleted operation docs are absorbed into engine, runtime, and operation skills.",
+    }
     pyodide_manifest = [
         _pyodide_doc(skill) for skill in public_skills if _runtime_status(skill, "pyodide") in {"supported", "limited"}
     ]
-    _write_json(web_path / "index.json", {"skills": search_index})
+    _write_json(web_path / "index.json", {"meta": meta, "skills": search_index})
     _write_json(web_path / "pyodide.json", {"skills": pyodide_manifest})
 
     return {
@@ -134,8 +164,14 @@ def _search_doc(skill: Any) -> dict[str, Any]:
         "status": skill.status,
         "purpose": _public_text(skill.purpose),
         "whenToUse": _public_list(skill.whenToUse),
+        "inputs": _public_list(skill.inputs),
+        "requiredInputs": _public_list(skill.requiredInputs),
+        "outputs": _public_list(skill.outputs),
+        "apiRefs": _public_list(skill.capabilityRefs),
+        "toolRefs": _public_list(skill.toolRefs),
         "datasetRefs": _public_list(skill.datasetRefs),
         "knowledgeRefs": _public_list(skill.knowledgeRefs),
+        "sourceRefs": _public_list(skill.sourceRefs),
         "procedure": _public_list(skill.procedure),
         "requiredEvidence": _public_list(skill.requiredEvidence),
         "expectedOutputs": _public_list(skill.expectedOutputs),

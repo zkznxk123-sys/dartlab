@@ -44,7 +44,7 @@ def test_mcp_tool_schema_valid():
 
 
 def test_mcp_workbench_tools_execute():
-    from dartlab.mcp import _executeTool
+    from dartlab.mcp import _advertisedTools, _executeTool
 
     status = _executeTool("ask_kernel_status", {})
     assert "Ask Workbench Kernel" in status
@@ -58,6 +58,13 @@ def test_mcp_workbench_tools_execute():
 
     skills = _executeTool("searchDartlabSkills", {"query": "주가지수 강세"})
     assert "krxIndexStrengthReview" in skills
+
+    operation = _executeTool("searchDartlabSkills", {"query": "테스트 규칙"})
+    assert "operation.testing" in operation
+
+    explained = _executeTool("explainDartlabSkill", {"skillId": "operation.testing", "includeUser": False})
+    assert "operation.testing" in explained
+    assert "DartLab Skill OS" in "".join(t["description"] for t in _advertisedTools())
 
 
 def test_mcp_workbench_session_keeps_refs_between_tools():

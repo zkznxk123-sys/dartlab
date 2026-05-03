@@ -18,8 +18,14 @@
 		status: string;
 		purpose: string;
 		whenToUse?: string[];
+		inputs?: string[];
+		requiredInputs?: string[];
+		outputs?: string[];
+		apiRefs?: string[];
+		toolRefs?: string[];
 		datasetRefs?: string[];
 		knowledgeRefs?: string[];
+		sourceRefs?: string[];
 		procedure?: string[];
 		requiredEvidence?: string[];
 		expectedOutputs?: string[];
@@ -30,14 +36,21 @@
 		runtimeCompatibility?: Record<string, RuntimeEntry>;
 	}
 
+	interface SkillIndexMeta {
+		entrySkillId?: string;
+		canonicalSurface?: string;
+		skillCount?: number;
+	}
+
 	let skills = $state<SkillDoc[]>([]);
+	let meta = $state<SkillIndexMeta>({});
 	let query = $state('');
 	let activeCategory = $state('all');
 	let activeRuntime = $state('all');
 	let selectedSkill = $state<SkillDoc | null>(null);
 	let loadError = $state('');
 
-	const categoryOrder = ['start', 'runtime', 'engines', 'screens', 'finance', 'visuals', 'basic'];
+	const categoryOrder = ['start', 'runtime', 'operation', 'engines', 'screens', 'finance', 'visuals', 'basic'];
 	const runtimeOptions = [
 		{ id: 'all', label: 'All runtimes' },
 		{ id: 'pyodide', label: 'Pyodide' },
@@ -80,7 +93,13 @@
 			})
 			.map((skill) => ({ skill, score: scoreSkill(skill, tokens) }))
 			.filter((item) => tokens.length === 0 || item.score > 0)
-			.sort((a, b) => b.score - a.score || a.skill.category.localeCompare(b.skill.category) || a.skill.id.localeCompare(b.skill.id))
+			.sort((a, b) => {
+				if (tokens.length === 0) {
+					if (a.skill.id === meta.entrySkillId) return -1;
+					if (b.skill.id === meta.entrySkillId) return 1;
+				}
+				return b.score - a.score || a.skill.category.localeCompare(b.skill.category) || a.skill.id.localeCompare(b.skill.id);
+			})
 			.slice(0, 18);
 	});
 
@@ -100,6 +119,7 @@
 			const response = await fetch(`${base}/skills/index.json`);
 			if (!response.ok) throw new Error(`HTTP ${response.status}`);
 			const payload = await response.json();
+			meta = payload.meta ?? {};
 			skills = Array.isArray(payload.skills) ? payload.skills : [];
 		} catch (error) {
 			loadError = error instanceof Error ? error.message : 'unknown error';
@@ -116,7 +136,16 @@
 			skill.status,
 			skill.purpose,
 			...(skill.whenToUse ?? []),
-			...(skill.datasetRefs ?? [])
+			...(skill.inputs ?? []),
+			...(skill.requiredInputs ?? []),
+			...(skill.outputs ?? []),
+			...(skill.procedure ?? []),
+			...(skill.examples ?? []),
+			...(skill.apiRefs ?? []),
+			...(skill.toolRefs ?? []),
+			...(skill.datasetRefs ?? []),
+			...(skill.knowledgeRefs ?? []),
+			...(skill.sourceRefs ?? [])
 		].join(' ').toLowerCase();
 		let score = 0;
 		for (const token of tokens) {
@@ -144,16 +173,30 @@
 	function limited(items: string[] | undefined, count = 5) {
 		return (items ?? []).filter(Boolean).slice(0, count);
 	}
+
+	function combinedInputs(skill: SkillDoc) {
+		return [...(skill.requiredInputs ?? []), ...(skill.inputs ?? [])].filter(Boolean);
+	}
+
+	function combinedOutputs(skill: SkillDoc) {
+		return [...(skill.expectedOutputs ?? []), ...(skill.outputs ?? [])].filter(Boolean);
+	}
+
+	function formatExample(example: string) {
+		const text = example.trim();
+		if (!/[=()#]|(^|\s)(import|from|await|for)\b/.test(text)) return text;
+		return text.replace(/\s+(?=(c|dartlab|import|from|await|for)\b)/g, '\n');
+	}
 </script>
 
 <section class="skill-search" aria-label="Skill 검색">
 	<div class="search-head">
 		<div>
 			<span class="kicker">Skill resolver</span>
-			<h2>분석 목적을 먼저 검색한다</h2>
+			<h2>작업 목적을 먼저 검색한다</h2>
 			<p>
-				목적에 맞는 skill을 고르면 필요한 데이터, 실행 순서, 검산 기준을 바로 읽을 수 있다.
-				내부 API 참조 링크가 아니라 실제 분석 절차를 문서처럼 보여준다.
+				{meta.canonicalSurface ?? 'DartLab Skill OS'}는 분석, 엔진, 런타임, 운영 절차의 공식 진입점이다.
+				목적에 맞는 skill을 고르면 필요한 입력, 실행 순서, 검산 기준, API 연결을 바로 읽을 수 있다.
 			</p>
 		</div>
 		<div class="search-count">
@@ -166,7 +209,7 @@
 	<div class="search-controls">
 		<label class="search-input">
 			<Search size={16} />
-			<input bind:value={query} placeholder="예: 미국 주식 분석, 차트, MCP, 수익성, Pyodide" />
+			<input bind:value={query} placeholder="예: 미국 주식 분석, 테스트 규칙, MCP, 수익성, Pyodide" />
 		</label>
 		<label class="runtime-filter">
 			<SlidersHorizontal size={15} />
@@ -229,6 +272,26 @@
 					</div>
 					<p class="detail-purpose">{selectedSkill.purpose}</p>
 
+					{#if limited(selectedSkill.examples, 3).length > 0}
+						<section class="start-here">
+							<h4>바로 써보기</h4>
+							{#each limited(selectedSkill.examples, 3) as item}
+								<pre>{formatExample(item)}</pre>
+							{/each}
+						</section>
+					{/if}
+
+					{#if limited(combinedInputs(selectedSkill), 8).length > 0}
+						<section>
+							<h4>필요 입력</h4>
+							<div class="chip-row">
+								{#each limited(combinedInputs(selectedSkill), 8) as item}
+									<span>{item}</span>
+								{/each}
+							</div>
+						</section>
+					{/if}
+
 					{#if limited(selectedSkill.whenToUse, 6).length > 0}
 						<section>
 							<h4>언제 쓰나</h4>
@@ -251,22 +314,36 @@
 						</section>
 					{/if}
 
-					{#if limited(selectedSkill.procedure, 8).length > 0}
+					{#if limited([...(selectedSkill.apiRefs ?? []), ...(selectedSkill.toolRefs ?? [])], 10).length > 0}
 						<section>
-							<h4>실행 순서</h4>
-							<ol>
-								{#each limited(selectedSkill.procedure, 8) as item}
-									<li>{item}</li>
+							<h4>API와 도구</h4>
+							<div class="chip-row">
+								{#each limited([...(selectedSkill.apiRefs ?? []), ...(selectedSkill.toolRefs ?? [])], 10) as item}
+									<span>{item}</span>
 								{/each}
-							</ol>
+							</div>
 						</section>
 					{/if}
 
-					{#if limited(selectedSkill.expectedOutputs, 6).length > 0}
+					{#if limited(selectedSkill.procedure, 8).length > 0}
+						<section>
+							<h4>실행 순서</h4>
+							<div class="step-list">
+								{#each limited(selectedSkill.procedure, 8) as item, i}
+									<div class="step-item">
+										<span>{i + 1}</span>
+										<p>{item}</p>
+									</div>
+								{/each}
+							</div>
+						</section>
+					{/if}
+
+					{#if limited(combinedOutputs(selectedSkill), 8).length > 0}
 						<section>
 							<h4>결과물</h4>
 							<ul>
-								{#each limited(selectedSkill.expectedOutputs, 6) as item}
+								{#each limited(combinedOutputs(selectedSkill), 8) as item}
 									<li>{item}</li>
 								{/each}
 							</ul>
@@ -509,6 +586,8 @@
 
 	.status {
 		color: #fb923c;
+		flex: 0 0 auto;
+		white-space: nowrap;
 	}
 
 	.result-card h3 {
@@ -553,16 +632,23 @@
 
 	.detail-head {
 		display: flex;
+		align-items: flex-start;
 		justify-content: space-between;
 		gap: 1rem;
 		margin-bottom: 0.6rem;
 	}
 
+	.detail-head > div {
+		min-width: 0;
+	}
+
 	.detail-kicker,
 	.detail-status {
 		color: #fb923c;
+		flex: 0 0 auto;
 		font-family: 'JetBrains Mono', monospace;
 		font-size: 0.7rem;
+		white-space: nowrap;
 	}
 
 	.skill-detail h3 {
@@ -584,14 +670,72 @@
 		border-top: 1px solid rgba(30, 36, 51, 0.72);
 	}
 
+	.skill-detail section.start-here {
+		margin-top: 0.9rem;
+		padding: 0.9rem;
+		border: 1px solid rgba(234, 70, 71, 0.22);
+		border-radius: 8px;
+		background: rgba(234, 70, 71, 0.055);
+	}
+
 	.skill-detail h4 {
 		margin: 0 0 0.55rem !important;
 		color: #f1f5f9 !important;
 		font-size: 0.9rem !important;
 	}
 
-	.skill-detail ul,
-	.skill-detail ol {
+	.start-here pre {
+		margin: 0.55rem 0 0 !important;
+		padding: 0.75rem 0.85rem;
+		border: 1px solid rgba(30, 36, 51, 0.9);
+		border-radius: 7px;
+		background: rgba(3, 5, 9, 0.72);
+		color: #e2e8f0;
+		font-family: 'JetBrains Mono', monospace;
+		font-size: 0.76rem;
+		line-height: 1.6;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+	}
+
+	.step-list {
+		display: grid;
+		gap: 0.55rem;
+	}
+
+	.step-item {
+		display: grid;
+		grid-template-columns: 1.55rem minmax(0, 1fr);
+		gap: 0.65rem;
+		align-items: start;
+		padding: 0.65rem;
+		border: 1px solid rgba(30, 36, 51, 0.78);
+		border-radius: 7px;
+		background: rgba(15, 18, 25, 0.42);
+	}
+
+	.step-item span {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.55rem;
+		height: 1.55rem;
+		border-radius: 6px;
+		background: rgba(234, 70, 71, 0.12);
+		color: #fca5a5;
+		font-family: 'JetBrains Mono', monospace;
+		font-size: 0.72rem;
+		font-weight: 700;
+	}
+
+	.step-item p {
+		margin: 0 !important;
+		color: #94a3b8;
+		font-size: 0.84rem;
+		line-height: 1.62;
+	}
+
+	.skill-detail ul {
 		margin: 0 !important;
 		padding-left: 1.1rem;
 		color: #94a3b8;
@@ -691,6 +835,7 @@
 
 		.skill-detail {
 			position: static;
+			order: -1;
 		}
 
 		.runtime-grid {

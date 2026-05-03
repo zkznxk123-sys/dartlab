@@ -16,6 +16,7 @@ SkillStatus = Literal["unverified", "observed", "auditP", "official", "deprecate
 SkillCategory = Literal[
     "start",
     "runtime",
+    "operation",
     "engines",
     "screens",
     "finance",
@@ -99,6 +100,7 @@ class SkillSpec:
     datasetRefs: list[str] = field(default_factory=list)
     toolRefs: list[str] = field(default_factory=list)
     knowledgeRefs: list[str] = field(default_factory=list)
+    sourceRefs: list[str] = field(default_factory=list)
     visualRefs: list[str] = field(default_factory=list)
     procedure: list[str] = field(default_factory=list)
     requiredEvidence: list[str] = field(default_factory=list)

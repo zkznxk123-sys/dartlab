@@ -206,6 +206,14 @@ def create_task(question: str, kwargs: dict[str, Any] | None = None) -> Workbenc
         id=new_id("task"),
         question=question,
         hints=_analysis_hints(kwargs or {}),
+        release_policy={
+            "numbersRequireRefs": True,
+            "datesRequireRefs": True,
+            "answerClaimsRequireRefs": True,
+            "visualsRequireEvidence": True,
+            "failedExecutionCannotBeHidden": True,
+            "skillRefsRequired": True,
+        },
     )
 
 
@@ -335,10 +343,12 @@ def _initial_provider_messages(session: AskSession, task: WorkbenchTask) -> list
         "question": session.question,
         "hints": task.hints,
         "task": task.to_dict(),
-        "basicSkills": _basic_skill_capsule(),
+        "skillOs": _skill_os_capsule(),
         "rules": [
-            "Search references for relevant tools, capabilities, skills, knowledge, and runtime datasets.",
-            "When search_reference returns skill refs, use them as reusable procedures: collect their requiredEvidence before strong judgment.",
+            "Every non-trivial task starts by selecting a DartLab skillRef. Use start.dartlabSkillOs as the entry skill when the route is unclear.",
+            "search_reference is skill-first: inspect selected skill refs before datasets, capabilities, knowledge, or source snippets.",
+            "When no selected skill fits, call search_reference again with the user's purpose and target identifiers before answering.",
+            "Use selected skill refs as reusable procedures: collect their requiredEvidence before strong judgment.",
             "Treat task.hints/company/stockCode/ticker as target identifiers; include them in search queries before guessing entities.",
             "Use inspect_dataset before making dataset/date claims.",
             "Use run_python when your answer depends on computed DartLab results.",
@@ -362,6 +372,21 @@ def _initial_provider_messages(session: AskSession, task: WorkbenchTask) -> list
         },
         {"role": "user", "content": json.dumps(task_capsule, ensure_ascii=False, default=str)},
     ]
+
+
+def _skill_os_capsule() -> dict[str, Any]:
+    basic_skills = _basic_skill_capsule()
+    return {
+        "entrySkillId": "start.dartlabSkillOs",
+        "canonicalSurface": "DartLab Skill OS",
+        "rules": [
+            "모든 작업은 목적 skill 선택 후 실행한다.",
+            "엔진 API 세부 인자와 반환은 SkillSpec이 아니라 capability/docstring에서 확인한다.",
+            "운영, 런타임, 확장 규칙도 Skills에서 검색한다.",
+        ],
+        "basicSkills": basic_skills,
+        "requiredRefKind": "skill",
+    }
 
 
 def _basic_skill_capsule() -> list[dict[str, Any]]:
@@ -410,6 +435,9 @@ def _candidate_summary(refs: list[Ref], *, kind: str, limit: int = 5) -> list[di
                 "score": payload.get("score"),
                 "reasons": payload.get("reasons", []),
                 "capabilityRefs": payload.get("capabilityRefs", [])[:8],
+                "sourceRefs": payload.get("sourceRefs", [])[:8],
+                "requiredEvidence": payload.get("requiredEvidence", [])[:8],
+                "procedure": payload.get("procedure", [])[:4],
             }
         else:
             item = {

@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from dartlab.core.ai.model_resolver import resolve_default_model
 from dartlab.core.ai.providers import (
     api_key_secret_name,
     build_provider_catalog,
@@ -18,7 +19,6 @@ from dartlab.core.ai.providers import (
     oauth_secret_name,
     public_provider_ids,
 )
-from dartlab.core.ai.model_resolver import resolve_default_model
 from dartlab.core.ai.routing import AI_ROLES, DEFAULT_ROLE, normalize_role
 from dartlab.core.ai.secrets import SecretStore, get_secret_store
 

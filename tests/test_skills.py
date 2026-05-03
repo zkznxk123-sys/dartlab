@@ -24,9 +24,26 @@ def test_builtin_skills_are_searchable() -> None:
     assert "runtime.workbenchEvidenceFlow" in ids
     assert "runtime.dataAvailabilityCheck" in ids
     assert "runtime.skillDevelopmentLoop" in ids
+    assert "start.dartlabSkillOs" in ids
+    assert "operation.opsAsSkills" in ids
+    assert "operation.extendSkills" in ids
+    assert "operation.apiContract" in ids
+    assert "operation.architecture" in ids
+    assert "operation.testing" in ids
+    assert "operation.code" in ids
+    assert "operation.refactorChecklist" in ids
+    assert "runtime.mcp" in ids
+    assert "runtime.pyodide" in ids
     assert "companyResearchStarter" in ids
     assert {
         "engines.dataEngineFoundation",
+        "engines.company",
+        "engines.analysis",
+        "engines.scan",
+        "engines.gather",
+        "engines.macro",
+        "engines.quant",
+        "engines.story",
     } <= ids
     assert "macroMarketReview" in ids
     assert "usEdgarCompanyReview" in ids
@@ -91,9 +108,10 @@ def test_single_engine_usage_is_generated_not_curated() -> None:
 def test_curated_engine_skills_are_composition_not_single_engine_usage() -> None:
     specs = [item for item in skills.list(includeUser=False) if item.id.startswith("engines.")]
 
-    assert {item.id for item in specs} == {"engines.dataEngineFoundation"}
+    assert {"engines.dataEngineFoundation", "engines.company", "engines.analysis", "engines.scan"} <= {
+        item.id for item in specs
+    }
     assert all(item.runtimeCompatibility.get("pyodide") for item in specs)
-    assert all(item.capabilityRefs for item in specs)
     assert all("parameters" not in item.to_dict() for item in specs)
     assert all("returns" not in item.to_dict() for item in specs)
 
@@ -133,6 +151,64 @@ def test_skill_search_prioritizes_skill_development_loop() -> None:
     matches = skills.search("엔진에 없는 분석을 조합해서 스킬 개발", includeUser=False)
 
     assert matches[0].skill.id == "runtime.skillDevelopmentLoop"
+
+
+def test_skill_search_prioritizes_skill_os_start() -> None:
+    matches = skills.search("처음 온 외부 AI가 어디서 시작해야 해", includeUser=False)
+
+    assert matches[0].skill.id == "start.dartlabSkillOs"
+
+
+def test_skill_search_prioritizes_operation_rules() -> None:
+    matches = skills.search("ops 문서를 스킬 체계로 통합", includeUser=False)
+
+    assert matches[0].skill.id == "operation.opsAsSkills"
+
+
+def test_absorbed_operating_topics_are_exposed_as_skills() -> None:
+    specs = {item.id: item for item in skills.list(includeUser=False)}
+    absorbed = {
+        "README": "start.dartlabSkillOs",
+        "skills": "operation.opsAsSkills",
+        "analysis": "engines.analysis",
+        "api-contract": "operation.apiContract",
+        "architecture": "operation.architecture",
+        "channel": "runtime.channel",
+        "code": "operation.code",
+        "company": "engines.company",
+        "coreloop": "operation.coreloop",
+        "credit": "engines.credit",
+        "dashboard": "engines.dashboard",
+        "data": "engines.data",
+        "edgar": "engines.edgar",
+        "engineAudit": "operation.engineAudit",
+        "experiments": "operation.experiments",
+        "gather": "engines.gather",
+        "industry": "engines.industry",
+        "issues": "operation.issues",
+        "macro": "engines.macro",
+        "mappers": "engines.mappers",
+        "mcp": "runtime.mcp",
+        "notebooks": "runtime.notebooks",
+        "philosophy": "operation.philosophy",
+        "pyodide": "runtime.pyodide",
+        "quant": "engines.quant",
+        "quantWorldClass": "engines.quantWorldClass",
+        "refactor-checklist": "operation.refactorChecklist",
+        "scan": "engines.scan",
+        "search": "engines.search",
+        "spaces": "runtime.spaces",
+        "story": "engines.story",
+        "testing": "operation.testing",
+        "ui": "operation.ui",
+        "viz": "engines.viz",
+        "vscode": "runtime.vscode",
+    }
+
+    assert absorbed
+    for skill_id in absorbed.values():
+        assert skill_id in specs
+    assert not Path("ops").exists()
 
 
 def test_skill_search_prioritizes_company_research_start() -> None:
@@ -450,5 +526,6 @@ def test_skill_compiler_builds_web_index_without_docs_markdown(tmp_path: Path) -
     assert all(item["category"] != "capability" for item in public_items)
     assert all("capabilityRefs" not in item for item in public_items)
     assert all("sourcePath" not in item for item in public_items)
+    assert payload["meta"]["entrySkillId"] == "start.dartlabSkillOs"
     assert "Capability Reference" not in json.dumps(payload, ensure_ascii=False)
     assert "capability ref" not in json.dumps(payload, ensure_ascii=False)

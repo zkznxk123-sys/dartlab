@@ -10,13 +10,13 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from sse_starlette.sse import EventSourceResponse
 
 import dartlab
-from dartlab.core.ai.model_resolver import fallback_models, is_openai_chat_model, sort_openai_models
 from dartlab.core.ai import (
     build_provider_catalog,
     get_profile_manager,
     get_provider_spec,
     public_provider_ids,
 )
+from dartlab.core.ai.model_resolver import fallback_models, is_openai_chat_model, sort_openai_models
 
 from ..chat import OLLAMA_MODEL_GUIDE
 from ..models import (

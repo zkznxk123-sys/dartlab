@@ -1,7 +1,7 @@
 """HuggingFace 데이터셋 업로드 — KRX raw parquet (Mode 2 SSOT 의 publish 단).
 
 운영자 cron (`.github/workflows/buildKrxData.yml`) 만 호출.
-사용자 직접 호출 (`gather/krxApi.py`) 은 이 모듈 사용 안 함 — `ops/gather.md §9`.
+사용자 직접 호출 (`gather/krxApi.py`) 은 이 모듈 사용 안 함 — `engines.gather §9`.
 
 EDGAR 의 `providers/edgar/openapi/deploy.deployEdgarToHF` 와 시그니처 일관.
 """
@@ -45,7 +45,7 @@ def deployKrxToHF(
     SeeAlso:
         - gather/krxApi.py — KRX OpenAPI 수집 (Mode 1)
         - gather/_hfBulk.py — 엔진 내부 HF 소비 (Mode 2)
-        - ops/gather.md §9 — KRX 수집 경로 SSOT
+        - engines.gather §9 — KRX 수집 경로 SSOT
 
     Args:
         localDir: 업로드할 로컬 디렉토리 (예: ``data/market/prices/kr``).

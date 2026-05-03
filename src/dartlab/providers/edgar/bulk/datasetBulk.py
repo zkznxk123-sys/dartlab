@@ -47,7 +47,7 @@ _UA = "dartlab eddmpython@gmail.com"
 
 _DEFAULT_TIMEOUT = httpx.Timeout(60.0, read=None, write=60.0, connect=30.0)
 
-# num 은 받지 않는다 — companyfacts.zip 이 원본 (ops/edgar.md 원칙)
+# num 은 받지 않는다 — companyfacts.zip 이 원본 (engines.edgar 원칙)
 DATASET_FILES = ("sub", "pre", "tag")
 
 

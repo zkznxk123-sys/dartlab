@@ -5,16 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from .contracts import AnswerDraft, Ref, TraceEvent, WorkbenchTask, new_id
-from .datasets import RuntimeDatasetCatalog, inspect_dataset
-from .datasets import inspection_to_refs
+from .contracts import AnswerDraft, Ref, TraceEvent, WorkbenchTask
+from .datasets import RuntimeDatasetCatalog, inspect_dataset, inspection_to_refs
 from .kernel import _limits_from_execution, _refs_from_execution, create_task, runAsk
 from .notebook import execution_to_ref, run_python
 from .reference import read_context, search_reference
 from .verify import verification_to_ref, verify_answer
-from .visuals import compile_visual
-from .visuals import visual_to_ref
-
+from .visuals import compile_visual, visual_to_ref
 
 CANONICAL_TOOL_NAMES = [
     "start_ask_session",
@@ -108,18 +105,135 @@ def tool_specs() -> list[dict[str, Any]]:
     """
 
     return [
-        {"name": "start_ask_session", "description": "Create an Ask Workbench task for a DartLab ask question.", "inputSchema": {"type": "object", "properties": {"question": {"type": "string"}}}},
-        {"name": "ask_kernel_status", "description": "Return Ask Workbench Kernel status and runtime dataset roots.", "inputSchema": {"type": "object", "properties": {}}},
-        {"name": "search_reference", "description": "Search DartLab tools/capabilities/skills/knowledge/docs/runtime dataset catalog for short snippets.", "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}, "sessionId": {"type": "string"}, "limit": {"type": "integer"}}}},
-        {"name": "read_context", "description": "Read a bounded source-addressed text window.", "inputSchema": {"type": "object", "properties": {"path": {"type": "string"}, "start_line": {"type": "integer"}, "max_chars": {"type": "integer"}, "sessionId": {"type": "string"}}}},
-        {"name": "inspect_dataset", "description": "Inspect a runtime dataset id or parquet/csv path.", "inputSchema": {"type": "object", "properties": {"target": {"type": "string"}, "sample": {"type": "integer"}, "sessionId": {"type": "string"}}}},
-        {"name": "run_python", "description": "Run bounded Python code in the DartLab workspace.", "inputSchema": {"type": "object", "properties": {"code": {"type": "string"}, "timeout": {"type": "integer"}, "sessionId": {"type": "string"}}}},
-        {"name": "compile_visual", "description": "Compile a validated chart spec from table rows.", "inputSchema": {"type": "object", "properties": {"source_ref": {"type": "string"}, "rows": {"type": "array"}, "category": {"type": "string"}, "metric": {"type": "string"}, "sessionId": {"type": "string"}}}},
-        {"name": "finalize_answer", "description": "Finalize a session answer through claim/ref verification.", "inputSchema": {"type": "object", "properties": {"sessionId": {"type": "string"}, "question": {"type": "string"}, "answer": {"type": "string"}, "evidence_refs": {"type": "array"}, "material_claims": {"type": "array"}, "visual_refs": {"type": "array"}, "limits": {"type": "array"}}}},
-        {"name": "listDartlabSkills", "description": "List shared DartLab analysis skills.", "inputSchema": {"type": "object", "properties": {"includeUser": {"type": "boolean"}}}},
-        {"name": "searchDartlabSkills", "description": "Search shared DartLab analysis skills.", "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}, "includeUser": {"type": "boolean"}}, "required": ["query"]}},
-        {"name": "explainDartlabSkill", "description": "Return one shared DartLab SkillSpec.", "inputSchema": {"type": "object", "properties": {"skillId": {"type": "string"}, "includeUser": {"type": "boolean"}}, "required": ["skillId"]}},
-        {"name": "checkDartlabSkillEvidence", "description": "Check whether refs satisfy a DartLab skill evidence contract.", "inputSchema": {"type": "object", "properties": {"skillId": {"type": "string"}, "refs": {"type": "array"}, "includeUser": {"type": "boolean"}}, "required": ["skillId"]}},
+        {
+            "name": "start_ask_session",
+            "description": "Create an Ask Workbench task for a DartLab ask question.",
+            "inputSchema": {"type": "object", "properties": {"question": {"type": "string"}}},
+        },
+        {
+            "name": "ask_kernel_status",
+            "description": "Return Ask Workbench Kernel status and runtime dataset roots.",
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "search_reference",
+            "description": "Search DartLab Skill OS first, then capabilities, knowledge, docs, and runtime dataset catalog for short refs.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"},
+                    "sessionId": {"type": "string"},
+                    "limit": {"type": "integer"},
+                },
+            },
+        },
+        {
+            "name": "read_context",
+            "description": "Read a bounded source-addressed text window.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string"},
+                    "start_line": {"type": "integer"},
+                    "max_chars": {"type": "integer"},
+                    "sessionId": {"type": "string"},
+                },
+            },
+        },
+        {
+            "name": "inspect_dataset",
+            "description": "Inspect a runtime dataset id or parquet/csv path.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "target": {"type": "string"},
+                    "sample": {"type": "integer"},
+                    "sessionId": {"type": "string"},
+                },
+            },
+        },
+        {
+            "name": "run_python",
+            "description": "Run bounded Python code in the DartLab workspace.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "code": {"type": "string"},
+                    "timeout": {"type": "integer"},
+                    "sessionId": {"type": "string"},
+                },
+            },
+        },
+        {
+            "name": "compile_visual",
+            "description": "Compile a validated chart spec from table rows.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "source_ref": {"type": "string"},
+                    "rows": {"type": "array"},
+                    "category": {"type": "string"},
+                    "metric": {"type": "string"},
+                    "sessionId": {"type": "string"},
+                },
+            },
+        },
+        {
+            "name": "finalize_answer",
+            "description": "Finalize a session answer through claim/ref verification.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "sessionId": {"type": "string"},
+                    "question": {"type": "string"},
+                    "answer": {"type": "string"},
+                    "evidence_refs": {"type": "array"},
+                    "material_claims": {"type": "array"},
+                    "visual_refs": {"type": "array"},
+                    "limits": {"type": "array"},
+                },
+            },
+        },
+        {
+            "name": "listDartlabSkills",
+            "description": "List DartLab Skill OS entries for humans, internal AI, external AI, MCP, Web UI, and notebooks.",
+            "inputSchema": {"type": "object", "properties": {"includeUser": {"type": "boolean"}}},
+        },
+        {
+            "name": "searchDartlabSkills",
+            "description": "Search DartLab Skill OS. Use this as the official route for analysis, engine, runtime, and operation procedures.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"},
+                    "limit": {"type": "integer"},
+                    "includeUser": {"type": "boolean"},
+                },
+                "required": ["query"],
+            },
+        },
+        {
+            "name": "explainDartlabSkill",
+            "description": "Return one DartLab Skill OS SkillSpec.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {"skillId": {"type": "string"}, "includeUser": {"type": "boolean"}},
+                "required": ["skillId"],
+            },
+        },
+        {
+            "name": "checkDartlabSkillEvidence",
+            "description": "Check whether refs satisfy a DartLab skill evidence contract.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "skillId": {"type": "string"},
+                    "refs": {"type": "array"},
+                    "includeUser": {"type": "boolean"},
+                },
+                "required": ["skillId"],
+            },
+        },
     ]
 
 
@@ -177,7 +291,11 @@ def execute_tool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any
         return session.to_dict()
     if name == "ask_kernel_status":
         catalog = RuntimeDatasetCatalog()
-        return {"kernel": "Ask Workbench Kernel", "datasetRoots": [str(p) for p in catalog.roots], "datasets": [d.to_dict() for d in catalog.list()]}
+        return {
+            "kernel": "Ask Workbench Kernel",
+            "datasetRoots": [str(p) for p in catalog.roots],
+            "datasets": [d.to_dict() for d in catalog.list()],
+        }
     if name == "search_reference":
         session = _get_session(args)
         refs = search_reference(str(args.get("query") or ""), limit=int(args.get("limit") or 8))
@@ -188,7 +306,11 @@ def execute_tool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any
         return _with_session({"refs": [ref.to_dict() for ref in refs]}, session)
     if name == "read_context":
         session = _get_session(args)
-        ref = read_context(str(args.get("path") or ""), start_line=int(args.get("start_line") or 1), max_chars=int(args.get("max_chars") or 4000))
+        ref = read_context(
+            str(args.get("path") or ""),
+            start_line=int(args.get("start_line") or 1),
+            max_chars=int(args.get("max_chars") or 4000),
+        )
         if session:
             session.add_ref(ref)
             session.add_event("reference", {"ref": ref.to_dict()})
@@ -201,7 +323,9 @@ def execute_tool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any
             for ref in refs:
                 session.add_ref(ref)
             session.add_event("inspect", {"result": inspection.to_dict(), "refs": [ref.to_dict() for ref in refs]})
-        return _with_session({"ok": inspection.ok, "inspection": inspection.to_dict(), "refs": [ref.to_dict() for ref in refs]}, session)
+        return _with_session(
+            {"ok": inspection.ok, "inspection": inspection.to_dict(), "refs": [ref.to_dict() for ref in refs]}, session
+        )
     if name == "run_python":
         session = _get_session(args)
         execution = run_python(str(args.get("code") or ""), timeout=int(args.get("timeout") or 60))
@@ -215,7 +339,11 @@ def execute_tool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any
             session.limits.extend(limits)
             session.add_event(
                 "execute",
-                {"refId": execution_ref.id, "result": execution.to_dict(), "derivedRefs": [ref.to_dict() for ref in derived_refs]},
+                {
+                    "refId": execution_ref.id,
+                    "result": execution.to_dict(),
+                    "derivedRefs": [ref.to_dict() for ref in derived_refs],
+                },
             )
         return _with_session(
             {
@@ -255,7 +383,9 @@ def execute_tool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any
         return {
             "matches": [
                 item.to_dict()
-                for item in searchSkills(str(args.get("query") or ""), limit=int(args.get("limit") or 8), includeUser=include_user)
+                for item in searchSkills(
+                    str(args.get("query") or ""), limit=int(args.get("limit") or 8), includeUser=include_user
+                )
             ]
         }
     if name == "explainDartlabSkill":
@@ -267,12 +397,16 @@ def execute_tool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any
         from dartlab.skills import checkEvidence
 
         include_user = bool(args.get("includeUser", args.get("include_user", True)))
-        return checkEvidence(str(args.get("skillId") or ""), list(args.get("refs") or []), includeUser=include_user).to_dict()
+        return checkEvidence(
+            str(args.get("skillId") or ""), list(args.get("refs") or []), includeUser=include_user
+        ).to_dict()
     if name == "inspect_visual":
         spec = args.get("spec") or {}
         categories = spec.get("categories") if isinstance(spec, dict) else None
         series = spec.get("series") if isinstance(spec, dict) else None
-        return {"ok": isinstance(categories, list) and len(categories) >= 2 and isinstance(series, list) and bool(series)}
+        return {
+            "ok": isinstance(categories, list) and len(categories) >= 2 and isinstance(series, list) and bool(series)
+        }
     if name == "finalize_answer":
         session = _get_session(args)
         if session:

@@ -141,7 +141,9 @@ class RuntimeDatasetCatalog:
                     latest_as_of=_latest_as_of(files),
                 )
         fallback = self.roots[0].joinpath(*normalized.split(".")) if self.roots else Path(*normalized.split("."))
-        return DatasetLocation(dataset_id=normalized, root=str(self.roots[0]) if self.roots else "", path=str(fallback), exists=False)
+        return DatasetLocation(
+            dataset_id=normalized, root=str(self.roots[0]) if self.roots else "", path=str(fallback), exists=False
+        )
 
     def inspect(self, target: str, *, sample: int = 5, columns: list[str] | None = None) -> DatasetInspection:
         target = _normalize_dataset_target(target)
@@ -185,7 +187,9 @@ class RuntimeDatasetCatalog:
                 if path.is_file():
                     location = _location_for_path(self.roots, path.parent, [path])
 
-        return _inspect_file(path, dataset_id=location.dataset_id if location else None, sample=sample, requested_columns=columns)
+        return _inspect_file(
+            path, dataset_id=location.dataset_id if location else None, sample=sample, requested_columns=columns
+        )
 
 
 def inspect_dataset(target: str, *, sample: int = 5, columns: list[str] | None = None) -> DatasetInspection:
@@ -308,12 +312,7 @@ def _unique_paths(paths: list[Path]) -> list[Path]:
 
 def _looks_like_path(target: str) -> bool:
     lowered = target.lower()
-    return (
-        "/" in target
-        or "\\" in target
-        or lowered.endswith((".parquet", ".csv"))
-        or ":" in target
-    )
+    return "/" in target or "\\" in target or lowered.endswith((".parquet", ".csv")) or ":" in target
 
 
 def _normalize_dataset_target(target: str) -> str:
@@ -336,7 +335,11 @@ def _resolve_path_target(target: str, roots: list[Path]) -> Path | None:
     if path.is_absolute():
         return path
     for root in roots:
-        candidate = root.parent / target if root.name == "data" and target.replace("\\", "/").startswith("data/") else root / target
+        candidate = (
+            root.parent / target
+            if root.name == "data" and target.replace("\\", "/").startswith("data/")
+            else root / target
+        )
         if candidate.exists():
             return candidate
     return path
@@ -444,7 +447,9 @@ def _file_latest(path: Path) -> str | None:
     return None
 
 
-def _inspect_file(path: Path, *, dataset_id: str | None, sample: int, requested_columns: list[str] | None) -> DatasetInspection:
+def _inspect_file(
+    path: Path, *, dataset_id: str | None, sample: int, requested_columns: list[str] | None
+) -> DatasetInspection:
     try:
         import polars as pl
 
@@ -485,7 +490,9 @@ def _inspect_file(path: Path, *, dataset_id: str | None, sample: int, requested_
         return _inspection_error(str(path), str(exc))
 
 
-def _semantic_profile(path: str, dataset_id: str | None, columns: list[str], dtypes: dict[str, str], lazy: Any) -> dict[str, Any]:
+def _semantic_profile(
+    path: str, dataset_id: str | None, columns: list[str], dtypes: dict[str, str], lazy: Any
+) -> dict[str, Any]:
     date_cols = _infer_date_columns(columns, dtypes)
     target_cols = _infer_entity_columns(columns)
     metric_cols = _infer_metric_columns(columns, dtypes)
@@ -501,7 +508,10 @@ def _semantic_profile(path: str, dataset_id: str | None, columns: list[str], dty
     if target_cols:
         try:
             pl = __import__("polars")
-            universe = {"column": target_cols[0], "uniqueCount": int(lazy.select(pl.col(target_cols[0]).n_unique()).collect().item())}
+            universe = {
+                "column": target_cols[0],
+                "uniqueCount": int(lazy.select(pl.col(target_cols[0]).n_unique()).collect().item()),
+            }
         except Exception:
             universe = {"column": target_cols[0], "uniqueCount": None}
     return {
@@ -537,14 +547,28 @@ def _infer_date_columns(columns: list[str], dtypes: dict[str, str] | None = None
 
 
 def _infer_entity_columns(columns: list[str]) -> list[str]:
-    candidates = ["IDX_NM", "IDX_CD", "ISU_CD", "ISU_NM", "ISU_SRT_CD", "ISU_ABBRV", "corp_name", "corp_code", "stock_code", "symbol", "series"]
+    candidates = [
+        "IDX_NM",
+        "IDX_CD",
+        "ISU_CD",
+        "ISU_NM",
+        "ISU_SRT_CD",
+        "ISU_ABBRV",
+        "corp_name",
+        "corp_code",
+        "stock_code",
+        "symbol",
+        "series",
+    ]
     return [c for c in candidates if c in columns]
 
 
 def _infer_metric_columns(columns: list[str], dtypes: dict[str, str]) -> list[str]:
     numeric_markers = ("Int", "Float", "Decimal", "UInt")
     date_columns = set(_infer_date_columns(columns, dtypes))
-    return [c for c in columns if any(marker in dtypes.get(c, "") for marker in numeric_markers) and c not in date_columns]
+    return [
+        c for c in columns if any(marker in dtypes.get(c, "") for marker in numeric_markers) and c not in date_columns
+    ]
 
 
 def _role_for(column: str, dtype: str) -> str:

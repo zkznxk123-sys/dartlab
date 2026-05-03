@@ -1388,7 +1388,7 @@ class Company:
     ) -> pl.DataFrame | None:
         """topic 의 데이터를 반환 — 내부 구현 (사용자는 ``c.show`` 호출).
 
-        ``ops/api-contract.md`` 의 "단일 진입점 + 파라미터 계약" 규칙에 따라
+        ``operation.apiContract`` 의 "단일 진입점 + 파라미터 계약" 규칙에 따라
         모든 topic 접근은 ``c.show(topic, ...)`` 로 통합한다.
         ``c.show("BS")``, ``c.show("ratios")``, ``c.show("dividend")`` 등.
 

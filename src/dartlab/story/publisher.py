@@ -79,7 +79,7 @@ def publishReportFromCompany(
     _updateRegistry(stockCode, corpName, order, slug, rv, grade)
 
     # 블로그 frontmatter ai: 블록 → KnowledgeDB.insights(source="blog") 다리
-    # (ops/philosophy.md §6 양방향 루프, 사람 → AI 경로 1)
+    # (operation.philosophy §6 양방향 루프, 사람 → AI 경로 1)
     try:
         from dartlab.ai.persistence.blog_insights import upsert_ai_frontmatter_to_insights
 

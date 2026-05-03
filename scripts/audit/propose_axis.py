@@ -115,7 +115,7 @@ def main() -> int:
             "",
             "1. `src/dartlab/core/overrides.py` 에 override key 추가 (필요 시)",
             f"2. `src/dartlab/{args.engine}/__init__.py` 에 새 axis enum 또는 공개 함수",
-            "3. docstring 9 섹션 전부 채움 (ops/code.md 규격)",
+            "3. docstring 9 섹션 전부 채움 (operation.code 규격)",
             f"4. `tests/unit/{args.engine}/test_axis_{slug}.py` 추가",
             "5. 일반 engine PR workflow 진입 ([CORELOOP-R] 마킹 없음)",
             "6. CODEOWNERS 리뷰 → merge",

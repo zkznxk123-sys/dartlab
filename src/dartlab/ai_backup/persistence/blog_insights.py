@@ -1,6 +1,6 @@
 """블로그 frontmatter `ai:` 블록 → `KnowledgeDB.insights(source="blog")` 다리.
 
-사상 (ops/philosophy.md §6): 사람이 만든 블로그 서사가 자동으로 AI 자산이 되는
+사상 (operation.philosophy §6): 사람이 만든 블로그 서사가 자동으로 AI 자산이 되는
 경로 1. 기존 `pastInsight(stockCode)` 가 `source="blog"` 우선 조회하지만
 변환 경로가 없어 레코드 0 건이었음 — 이 파일이 그 끊김을 복구한다.
 

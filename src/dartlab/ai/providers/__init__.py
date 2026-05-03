@@ -101,7 +101,9 @@ def _base_url_for(provider: str | None) -> str | None:
             or "https://chatgpt.com/backend-api"
         )
     if provider == "ollama":
-        return os.environ.get("OLLAMA_OPENAI_BASE_URL") or os.environ.get("OLLAMA_BASE_URL") or "http://127.0.0.1:11434/v1"
+        return (
+            os.environ.get("OLLAMA_OPENAI_BASE_URL") or os.environ.get("OLLAMA_BASE_URL") or "http://127.0.0.1:11434/v1"
+        )
     return os.environ.get("OPENAI_BASE_URL") if provider == "openai" else None
 
 
@@ -170,8 +172,7 @@ class ProviderTurn:
 class WorkbenchProvider(Protocol):
     config: ProviderConfig
 
-    def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn:
-        ...
+    def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn: ...
 
 
 class UnavailableProvider:
@@ -227,7 +228,9 @@ class OpenAICompatibleProvider:
             client_kwargs["base_url"] = self.config.base_url
         return client_cls(**client_kwargs)
 
-    def _generate_responses(self, client: Any, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn:
+    def _generate_responses(
+        self, client: Any, messages: list[dict[str, Any]], tools: list[dict[str, Any]]
+    ) -> ProviderTurn:
         response = client.responses.create(
             model=self.resolved_model,
             input=_responses_input(messages),
@@ -241,7 +244,11 @@ class OpenAICompatibleProvider:
             if item_type != "function_call":
                 continue
             name = getattr(item, "name", None) or (item.get("name") if isinstance(item, dict) else "")
-            call_id = getattr(item, "call_id", None) or getattr(item, "id", None) or (item.get("call_id") or item.get("id") if isinstance(item, dict) else "")
+            call_id = (
+                getattr(item, "call_id", None)
+                or getattr(item, "id", None)
+                or (item.get("call_id") or item.get("id") if isinstance(item, dict) else "")
+            )
             raw_args = getattr(item, "arguments", None) or (item.get("arguments") if isinstance(item, dict) else "{}")
             tool_calls.append(ToolCall(id=str(call_id), name=str(name), args=_parse_tool_args(raw_args)))
         raw: dict[str, Any] | None = None
@@ -251,7 +258,9 @@ class OpenAICompatibleProvider:
             raw = None
         return ProviderTurn(content=getattr(response, "output_text", "") or "", tool_calls=tool_calls, raw=raw)
 
-    def _generate_chat_completions(self, client: Any, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn:
+    def _generate_chat_completions(
+        self, client: Any, messages: list[dict[str, Any]], tools: list[dict[str, Any]]
+    ) -> ProviderTurn:
         response = client.chat.completions.create(
             model=self.resolved_model,
             messages=messages,
@@ -328,7 +337,9 @@ def _is_responses_unsupported(exc: Exception) -> bool:
     status_code = getattr(exc, "status_code", None)
     if status_code in {400, 404, 405}:
         text = str(exc).lower()
-        return any(marker in text for marker in ("responses", "unknown", "unsupported", "not found", "invalid endpoint"))
+        return any(
+            marker in text for marker in ("responses", "unknown", "unsupported", "not found", "invalid endpoint")
+        )
     return isinstance(exc, (AttributeError, TypeError, ValueError))
 
 

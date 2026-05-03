@@ -15,7 +15,7 @@ GitHub Actions workflow (`.github/workflows/buildKrxData.yml`) 가 호출.
     HF_TOKEN 환경변수 — ``--push`` 옵션 사용 시. https://huggingface.co/settings/tokens
         Write 권한 필요.
 
-이 스크립트가 환경변수 read 하는 **유일한 경로** (`ops/gather.md §9` Mode A).
+이 스크립트가 환경변수 read 하는 **유일한 경로** (`engines.gather §9` Mode A).
 라이브러리 (`gather/krxApi.py::gatherKrx`) 는 환경변수 자동 read 안 함 — 명시 전달만.
 """
 

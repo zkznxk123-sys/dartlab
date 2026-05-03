@@ -146,7 +146,7 @@ def _requiresCsvArtifact(qid: str, question: str) -> bool:
     q = question.lower()
     if qid in {"q11_krx_movers", "q12_krx_movers_stream"}:
         return True
-    return any(word in q for word in ("찾아줘", "랭킹", "순위", "많이 오른", "top", "rank"))
+    return any(word in q for word in ("랭킹", "순위", "많이 오른", "top", "rank", "ranking"))
 
 
 def _compactEvents(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -283,6 +283,9 @@ def main() -> int:
             )
             if not isinstance(response_verification, dict):
                 response_verification = {}
+            verification_ok = response_verification.get("ok")
+            if verification_ok is None:
+                verification_ok = "검증 실패:" not in answer and "검증을 통과한 답변을 만들지 못했습니다" not in answer
             response_graph = response_meta.get("graph") if isinstance(response_meta, dict) else {}
             if not isinstance(response_graph, dict):
                 response_graph = {}
@@ -301,7 +304,7 @@ def main() -> int:
                 "company": company,
                 "stream": stream,
                 "status": status,
-                "ok": status == 200 and error is None,
+                "ok": status == 200 and error is None and bool(verification_ok),
                 "elapsedSec": elapsed,
                 "answerLen": len(answer),
                 "error": error,
@@ -314,6 +317,7 @@ def main() -> int:
                 "evidenceCount": evidence_count,
                 "claimCount": claim_count,
                 "visualCount": visual_count,
+                "verificationOk": bool(verification_ok),
                 "missingVisualExplanation": "missing_visual_explanation" in (audit.get("quality_issues") or []),
                 "llmRoundMs": max(int(audit.get("llm_round_ms") or 0), int(response_meta.get("llmRoundMs") or 0)),
                 "toolTotalMs": max(int(audit.get("tool_total_ms") or 0), int(response_meta.get("toolTotalMs") or 0)),
@@ -372,6 +376,7 @@ def main() -> int:
                     "evidenceCount",
                     "claimCount",
                     "visualCount",
+                    "verificationOk",
                     "missingVisualExplanation",
                     "llmRoundMs",
                     "toolTotalMs",

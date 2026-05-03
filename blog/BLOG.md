@@ -245,7 +245,7 @@ c.quant("종합"); c.quant("팩터")
 
 **analysis 엔진**(5 그룹 22 축) · **story 엔진**(11 reportType × 7 template) 을 관통선에 맞게 최소 **3~4 축** 본문으로 편입한다.
 
-**analysis 5 그룹 22 축** (상세 → `ops/analysis.md`):
+**analysis 5 그룹 22 축** (상세 → `engines.analysis`):
 
 | 그룹 | 축 | 블로그 활용 |
 |---|---|---|
@@ -255,7 +255,7 @@ c.quant("종합"); c.quant("팩터")
 | **forecast 2 축** | **매출전망**·**예측신호** | 6 막 체크포인트를 예측신호 15 calc 결과로 대체 |
 | **macro 2 축** | 매크로민감도·**밸류에이션밴드** | "외생변수 6 축 회귀 + 매출 방향" — 사이클 회사 산업 지형 막 |
 
-**review 11 reportType** (상세 → `ops/review.md`):
+**review 11 reportType** (상세 → `engines.story`):
 
 | type | 관통선 | 활용 |
 |---|---|---|

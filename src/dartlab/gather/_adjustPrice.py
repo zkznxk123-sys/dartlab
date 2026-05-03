@@ -86,7 +86,7 @@ def detectEventsFromPrices(
     SeeAlso:
         - applyAdjustment — events DataFrame 받아서 raw → adjusted
         - gather/_hfBulk.py::_loadEvents — Stage 1/2 디스패치 (HF events 있으면 우선, 없으면 auto)
-        - ops/gather.md §9 — 수정주가 PLAN 7-step
+        - engines.gather §9 — 수정주가 PLAN 7-step
 
     Algorithm:
         implied_ratio  = TDD_CLSPRC[t] / TDD_CLSPRC[t-1]    # raw 가격 차이
@@ -175,7 +175,7 @@ def applyAdjustment(
     SeeAlso:
         - `gather/_hfBulk.py::loadFiltered` — 엔진 진입점 (이 함수 호출)
         - `gather/krxApi.py` — raw 수집 (사용자 직접 호출)
-        - `ops/gather.md §9` — KRX 수집 + 수정주가 사상
+        - `engines.gather §9` — KRX 수집 + 수정주가 사상
 
     Args:
         raw: KRX OpenAPI 응답 형식 DataFrame (``BAS_DD``, ``ISU_CD``, ``TDD_*PRC`` ...).

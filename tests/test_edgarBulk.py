@@ -215,7 +215,7 @@ def test_quarterly_convert(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
 
 
 def test_dataset_files_excludes_num() -> None:
-    """num.tsv 는 받지 않는다 — companyfacts.zip 이 원본 (ops/edgar.md 원칙)."""
+    """num.tsv 는 받지 않는다 — companyfacts.zip 이 원본 (engines.edgar 원칙)."""
     from dartlab.providers.edgar.bulk import DATASET_FILES
 
     assert "num" not in DATASET_FILES

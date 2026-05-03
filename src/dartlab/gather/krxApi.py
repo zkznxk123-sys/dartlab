@@ -1,6 +1,6 @@
 """KRX OpenAPI - 사용자 직접 호출 + HF 자동 fallback (3 모드 통합).
 
-`ops/gather.md §9` 의 3 경로 분기:
+`engines.gather §9` 의 3 경로 분기:
     Mode A (운영자 cron) — `scripts/build/buildKrxData.py` 가 환경변수 ``KRX_API_KEY``
                           read 후 ``fetchKrxBydd(..., apiKey=key)`` 명시 전달.
                           이 모듈은 환경변수 자동 read 없음 (운영자 빌드 스크립트만).
@@ -322,7 +322,7 @@ def gatherKrx(
         - gather/_indicatorDispatch.py — target 문자열 → 함수 디스패치
         - gather/_hfBulk.py — 엔진 내부 long SSOT (loadFiltered)
         - scripts/build/buildKrxData.py — 운영자 cron 빌드 (환경변수 사용)
-        - ops/gather.md §9 — KRX 수집 경로 SSOT (3 모드)
+        - engines.gather §9 — KRX 수집 경로 SSOT (3 모드)
 
     Args:
         target: pivot 대상 (positional). 기본 ``"close"``.
