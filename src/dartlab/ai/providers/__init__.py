@@ -7,7 +7,7 @@ next action or final draft by using a small tool-calling surface.
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, Protocol
 
 from dartlab.core.ai.model_resolver import resolve_default_model
@@ -20,6 +20,13 @@ class ProviderConfig:
     base_url: str | None = None
     api_key: str | None = None
     temperature: float | None = None
+    max_tokens: int | None = None
+    system_prompt: str | None = None
+
+    def merge(self, overrides: dict[str, Any]) -> ProviderConfig:
+        values = asdict(self)
+        values.update({key: value for key, value in overrides.items() if key in values and value is not None})
+        return ProviderConfig(**values)
 
 
 def get_config(provider: str | None = None, **kwargs: Any) -> ProviderConfig:

@@ -19,3 +19,21 @@ class LLMConfig:
 class LLMResponse:
     content: str
     raw: dict[str, Any] | None = None
+
+
+@dataclass(frozen=True)
+class ToolCall:
+    id: str
+    name: str
+    arguments: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class ToolResponse:
+    answer: str
+    provider: str
+    model: str
+    tool_calls: list[ToolCall]
+    context_tables: list[str] | None = None
+    usage: dict[str, int] | None = None
+    finish_reason: str = "stop"

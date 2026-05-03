@@ -66,6 +66,12 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "ai/persistence/blog_insights.py",
         "ai/context/playbook.py",
         "ai/persistence/store.py",
+        "ai/reference.py",
+        "ai/__init__.py",
+        "skills/registry.py",
+        "ai_backup/persistence/blog_insights.py",
+        "ai_backup/context/playbook.py",
+        "ai_backup/persistence/store.py",
         # analysis/forecast/core 런타임 캐시 (HF seed/backtest output)
         "analysis/forecast/forwardTest.py",
         "core/finance/bottomUpBeta.py",
@@ -73,6 +79,8 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "core/mappers/scanner.py",
         # AI provider 옵셔널 (Ollama 등 로컬 LLM)
         "ai/providers/ollama.py",
+        "ai_backup/providers/ollama.py",
+        "ai_backup/providers/support/codex_cli.py",
         # analysis runtime 결과 (이전 스토리 캐시)
         "analysis/financial/storyValidation.py",
         # industry build pipeline — 단계별 중간 산출물 (없으면 이전 단계 재실행)

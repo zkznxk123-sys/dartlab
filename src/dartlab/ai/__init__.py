@@ -5,6 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+_BACKUP_AI = Path(__file__).resolve().parent.parent / "ai_backup"
+if _BACKUP_AI.exists():
+    __path__.append(str(_BACKUP_AI))
+
 from .kernel import ask, create_task, runAsk
 from .providers import create_provider, get_config
 

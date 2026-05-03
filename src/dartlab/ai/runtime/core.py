@@ -2,7 +2,19 @@
 
 from __future__ import annotations
 
+import importlib.util
+import sys
+from pathlib import Path
 from typing import Any
+
+_BACKUP_CORE = Path(__file__).resolve().parents[2] / "ai_backup" / "runtime" / "core.py"
+_BACKUP_MODULE = None
+if _BACKUP_CORE.exists():
+    _spec = importlib.util.spec_from_file_location("_dartlab_ai_backup_runtime_core", _BACKUP_CORE)
+    if _spec is not None and _spec.loader is not None:
+        _BACKUP_MODULE = importlib.util.module_from_spec(_spec)
+        sys.modules[_spec.name] = _BACKUP_MODULE
+        _spec.loader.exec_module(_BACKUP_MODULE)
 
 
 def _extract_data_date(company: Any) -> str | None:
@@ -58,3 +70,10 @@ def _classify_error(error: Exception) -> dict[str, str]:
             "action": "retry",
         }
     return {"error": err_str, "action": ""}
+
+
+if _BACKUP_MODULE is not None:
+    runAsk = _BACKUP_MODULE.runAsk
+    runPostResponse = _BACKUP_MODULE.runPostResponse
+    if hasattr(_BACKUP_MODULE, "analyze"):
+        analyze = _BACKUP_MODULE.analyze
