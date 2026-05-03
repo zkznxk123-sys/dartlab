@@ -320,7 +320,7 @@ class RatioResult:
         try:
             from rich.console import Console
 
-            from dartlab.display.richRatio import renderRatio
+            from dartlab.viz.display.richRatio import renderRatio
 
             console = Console(record=True, width=70)
             console.print(renderRatio(self))

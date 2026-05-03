@@ -263,7 +263,7 @@ def _skill_refs(query: str, limit: int) -> list[Ref]:
     if limit <= 0:
         return []
     try:
-        from dartlab.skills import searchSkills
+        from dartlab.skill_os import getSkill, searchSkills
 
         matches = searchSkills(query, limit=limit)
     except Exception as exc:
@@ -275,55 +275,88 @@ def _skill_refs(query: str, limit: int) -> list[Ref]:
                 payload={"resourceUri": "dartlab://skills", "error": str(exc)},
             )
         ][:limit]
+    seen: set[str] = set()
     refs: list[Ref] = []
+    for skill_id in _alias_skill_ids(query):
+        try:
+            refs.append(_skill_ref_from_spec(getSkill(skill_id), score=1.0, reasons=["query-alias"]))
+            seen.add(skill_id)
+        except KeyError:
+            continue
+        if len(refs) >= limit:
+            return refs
     for match in matches:
-        spec = match.skill
-        refs.append(
-            Ref(
-                id=new_id("skill"),
-                kind="skill",
-                source="DartLabSkills",
-                payload={
-                    "resourceUri": f"dartlab://skills/{spec.id}",
-                    "skillId": spec.id,
-                    "title": spec.title,
-                    "kind": spec.kind,
-                    "scope": spec.scope,
-                    "status": spec.status,
-                    "category": spec.category,
-                    "purpose": spec.purpose,
-                    "whenToUse": spec.whenToUse,
-                    "inputs": spec.inputs,
-                    "outputs": spec.outputs,
-                    "capabilityRefs": spec.capabilityRefs,
-                    "datasetRefs": spec.datasetRefs,
-                    "toolRefs": spec.toolRefs,
-                    "knowledgeRefs": spec.knowledgeRefs,
-                    "sourceRefs": spec.sourceRefs,
-                    "visualRefs": spec.visualRefs,
-                    "procedure": spec.procedure[:8],
-                    "requiredEvidence": spec.requiredEvidence,
-                    "expectedOutputs": spec.expectedOutputs,
-                    "visualGuidance": spec.visualGuidance[:4],
-                    "failureModes": spec.failureModes[:6],
-                    "runtimeCompatibility": spec.runtimeCompatibility,
-                    "docs": spec.docs,
-                    "quality": spec.quality,
-                    "forbidden": spec.forbidden,
-                    "skillSource": spec.source,
-                    "score": match.score,
-                    "reasons": match.reasons,
-                },
-            )
-        )
+        if match.skill.id in seen:
+            continue
+        refs.append(_skill_ref_from_spec(match.skill, score=match.score, reasons=match.reasons))
+        seen.add(match.skill.id)
+        if len(refs) >= limit:
+            return refs
+    if not refs:
+        for skill_id in ["start.dartlabSkillOs"][:limit]:
+            try:
+                refs.append(_skill_ref_from_spec(getSkill(skill_id), score=0.1, reasons=["fallback-alias"]))
+            except KeyError:
+                continue
     return refs
+
+
+def _alias_skill_ids(query: str) -> list[str]:
+    text = query.lower()
+    aliases: list[tuple[set[str], str]] = [
+        ({"test", "testing", "pytest", "테스트", "검증", "ci"}, "operation.testing"),
+        ({"api", "contract", "계약", "api계약"}, "operation.apiContract"),
+        ({"외부", "external", "처음", "onboarding", "진입", "bootstrap"}, "start.dartlabSkillOs"),
+        ({"architecture", "아키텍처", "구조"}, "operation.architecture"),
+        ({"refactor", "리팩터", "정리"}, "operation.refactorChecklist"),
+    ]
+    return [skill_id for terms, skill_id in aliases if any(term in text for term in terms)]
+
+
+def _skill_ref_from_spec(spec: Any, *, score: float, reasons: list[str]) -> Ref:
+    return Ref(
+        id=new_id("skill"),
+        kind="skill",
+        source="DartLabSkills",
+        payload={
+            "resourceUri": f"dartlab://skills/{spec.id}",
+            "skillId": spec.id,
+            "title": spec.title,
+            "kind": spec.kind,
+            "scope": spec.scope,
+            "status": spec.status,
+            "category": spec.category,
+            "purpose": spec.purpose,
+            "whenToUse": spec.whenToUse,
+            "inputs": spec.inputs,
+            "outputs": spec.outputs,
+            "capabilityRefs": spec.capabilityRefs,
+            "datasetRefs": spec.datasetRefs,
+            "toolRefs": spec.toolRefs,
+            "knowledgeRefs": spec.knowledgeRefs,
+            "sourceRefs": spec.sourceRefs,
+            "visualRefs": spec.visualRefs,
+            "procedure": spec.procedure[:8],
+            "requiredEvidence": spec.requiredEvidence,
+            "expectedOutputs": spec.expectedOutputs,
+            "visualGuidance": spec.visualGuidance[:4],
+            "failureModes": spec.failureModes[:6],
+            "runtimeCompatibility": spec.runtimeCompatibility,
+            "docs": spec.docs,
+            "quality": spec.quality,
+            "forbidden": spec.forbidden,
+            "skillSource": spec.source,
+            "score": score,
+            "reasons": reasons,
+        },
+    )
 
 
 def _knowledge_refs(query: str, limit: int) -> list[Ref]:
     if limit <= 0:
         return []
     try:
-        from dartlab.knowledge import searchKnowledge
+        from dartlab.ai.knowledge import searchKnowledge
     except Exception:
         return []
     return [
@@ -488,7 +521,7 @@ def _is_searchable_reference_file(path: Path, root: Path) -> bool:
         parts = path.relative_to(root).parts
     except ValueError:
         parts = path.parts
-    blocked_parts = {"ai_backup", "__pycache__", ".git", ".venv", "server", "mcp"}
+    blocked_parts = {"__pycache__", ".git", ".venv", "server", "mcp"}
     if any(part in blocked_parts for part in parts):
         return False
     if len(parts) >= 3 and parts[0] == "src" and parts[1] == "dartlab" and parts[2] == "ai":

@@ -48,6 +48,8 @@ def _gitTrackedBundleFiles() -> set[str]:
     for line in result.stdout.splitlines():
         if not line:
             continue
+        if not (_REPO_ROOT / line).exists():
+            continue
         # wheel 에 들어가면 안 되는 경로
         if "/_reference/" in line or "/_backup/" in line:
             continue
@@ -158,11 +160,11 @@ def test_skillSpecs_inWheel(builtWheel: Path):
         names = set(zf.namelist())
 
     required = [
-        "dartlab/skills/specs/start/dartlabSkillOs.md",
-        "dartlab/skills/specs/operation/apiContract.md",
-        "dartlab/skills/specs/runtime/mcp.md",
-        "dartlab/skills/index.json",
-        "dartlab/skills/pyodide.json",
+        "dartlab/skill_os/specs/start/dartlabSkillOs.md",
+        "dartlab/skill_os/specs/operation/apiContract.md",
+        "dartlab/skill_os/specs/runtime/mcp.md",
+        "dartlab/skill_os/index.json",
+        "dartlab/skill_os/pyodide.json",
     ]
     for req in required:
         assert req in names, f"wheel 에 Skill OS 리소스 누락: {req}"

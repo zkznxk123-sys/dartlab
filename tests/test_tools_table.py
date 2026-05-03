@@ -6,7 +6,7 @@ pytestmark = pytest.mark.unit
 
 import polars as pl
 
-from dartlab.tools.table import (
+from dartlab.ai.tools.table import (
     format_korean,
     growth_matrix,
     pivot_accounts,

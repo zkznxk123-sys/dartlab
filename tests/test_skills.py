@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-import dartlab.skills as skills
+import dartlab.skill_os as skills
 
 pytestmark = pytest.mark.unit
 

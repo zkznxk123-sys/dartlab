@@ -148,8 +148,8 @@ def buildScanNetwork(company: Company, view: str | None = None, *, hops: int = 1
     group = data["code_to_group"].get(code, company.corpName or code)
 
     if view is None:
+        from dartlab.ai.tools.network import render_network
         from dartlab.scan.network import export_ego
-        from dartlab.tools.network import render_network
 
         ego = export_ego(data, full, code, hops=hops)
         center_name = data["code_to_name"].get(code, code)

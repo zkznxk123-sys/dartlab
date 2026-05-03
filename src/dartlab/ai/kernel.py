@@ -391,7 +391,7 @@ def _skill_os_capsule() -> dict[str, Any]:
 
 def _basic_skill_capsule() -> list[dict[str, Any]]:
     try:
-        from dartlab.skills import listSkills
+        from dartlab.skill_os import listSkills
     except Exception:
         return []
     out: list[dict[str, Any]] = []

@@ -470,7 +470,7 @@ class Company:
 
     def __repr__(self):
         try:
-            from dartlab.display.richCompany import renderCompany
+            from dartlab.viz.display.richCompany import renderCompany
 
             return renderCompany(self)
         except ImportError:

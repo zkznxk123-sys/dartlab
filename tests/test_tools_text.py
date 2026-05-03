@@ -4,7 +4,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-from dartlab.tools.text import (
+from dartlab.ai.tools.text import (
     extract_keywords,
     extract_numbers,
     section_diff,

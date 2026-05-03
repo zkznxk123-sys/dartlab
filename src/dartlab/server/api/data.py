@@ -201,7 +201,7 @@ async def api_export_modules(code: str):
     except (ValueError, OSError) as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))
 
-    from dartlab.export.excel import listAvailableModules
+    from dartlab.viz.export.excel import listAvailableModules
 
     modules = await asyncio.to_thread(listAvailableModules, c)
     return {
@@ -219,7 +219,7 @@ async def api_export_sources(code: str):
     except (ValueError, OSError) as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))
 
-    from dartlab.export.sources import discoverSources
+    from dartlab.viz.export.sources import discoverSources
 
     tree = await asyncio.to_thread(discoverSources, c)
     return tree.toDict()
@@ -228,7 +228,7 @@ async def api_export_sources(code: str):
 @router.get("/api/export/templates")
 def api_export_templates():
     """저장된 템플릿 목록 (프리셋 포함)."""
-    from dartlab.export.store import TemplateStore
+    from dartlab.viz.export.store import TemplateStore
 
     store = TemplateStore()
     templates = store.list()
@@ -240,7 +240,7 @@ def api_export_templates():
 @router.get("/api/export/templates/{template_id}")
 def api_export_template_get(template_id: str):
     """단일 템플릿 조회."""
-    from dartlab.export.store import TemplateStore
+    from dartlab.viz.export.store import TemplateStore
 
     store = TemplateStore()
     t = store.get(template_id)
@@ -252,8 +252,8 @@ def api_export_template_get(template_id: str):
 @router.post("/api/export/templates")
 def api_export_template_save(req: dict):
     """템플릿 저장 (신규 or 업데이트)."""
-    from dartlab.export.store import TemplateStore
-    from dartlab.export.template import ExcelTemplate
+    from dartlab.viz.export.store import TemplateStore
+    from dartlab.viz.export.template import ExcelTemplate
 
     store = TemplateStore()
     t = ExcelTemplate.fromDict(req)
@@ -264,7 +264,7 @@ def api_export_template_save(req: dict):
 @router.delete("/api/export/templates/{template_id}")
 def api_export_template_delete(template_id: str):
     """템플릿 삭제."""
-    from dartlab.export.store import TemplateStore
+    from dartlab.viz.export.store import TemplateStore
 
     store = TemplateStore()
     deleted = store.delete(template_id)
@@ -291,8 +291,8 @@ async def api_export_excel(
     safeName = c.corpName.replace("/", "_").replace("\\", "_")
 
     if template_id:
-        from dartlab.export.excel import exportWithTemplate
-        from dartlab.export.store import TemplateStore
+        from dartlab.viz.export.excel import exportWithTemplate
+        from dartlab.viz.export.store import TemplateStore
 
         store = TemplateStore()
         tmpl = store.get(template_id)
@@ -314,7 +314,7 @@ async def api_export_excel(
     outPath = tmpDir / f"{c.stockCode}_{safeName}.xlsx"
 
     try:
-        from dartlab.export.excel import exportToExcel
+        from dartlab.viz.export.excel import exportToExcel
 
         await asyncio.to_thread(exportToExcel, c, outputPath=outPath, modules=modList)
     except ValueError as e:

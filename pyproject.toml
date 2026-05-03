@@ -118,7 +118,7 @@ include = [
     "src/dartlab/**/*.parquet",
     "src/dartlab/**/py.typed",
 ]
-force-include = { "skills/specs" = "dartlab/skills/specs", "skills/index.json" = "dartlab/skills/index.json", "skills/pyodide.json" = "dartlab/skills/pyodide.json" }
+force-include = { "skills/specs" = "dartlab/skill_os/specs", "skills/index.json" = "dartlab/skill_os/index.json", "skills/pyodide.json" = "dartlab/skill_os/pyodide.json" }
 artifacts = [
     "src/dartlab/ui/build/**",
     "src/dartlab/**/*.json",
@@ -231,13 +231,12 @@ omit = [
     "src/dartlab/viz/plotly.py",
 
     # 개발자 전용 — 사용자 미접근.
-    "src/dartlab/audit/*",
+    "src/dartlab/ai/audit/*",
     "src/dartlab/mcp/*",
 
-    # 얕은 display/table 래퍼 — great_tables/IPython 옵셔널.
-    "src/dartlab/display/*",
-    "src/dartlab/table/*",
-    "src/dartlab/tools/network.py",
+    # 얕은 display/AI helper 래퍼 — great_tables/IPython 옵셔널.
+    "src/dartlab/viz/display/*",
+    "src/dartlab/ai/tools/network.py",
 
     # 실험/레거시 — 사용 여부 재평가 필요, 현재 0% 모듈.
     "src/dartlab/analysis/financial/research/*",

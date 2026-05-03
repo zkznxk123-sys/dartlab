@@ -166,7 +166,7 @@ class DistressResult:
     def _repr_html_(self) -> str:
         """Jupyter/Marimo용 HTML."""
         try:
-            from dartlab.display.notebook import htmlDistress
+            from dartlab.viz.display.notebook import htmlDistress
 
             return htmlDistress(self)
         except ImportError:
@@ -225,7 +225,7 @@ class AnalysisResult:
 
     def __repr__(self):
         try:
-            from dartlab.display.richInsight import renderInsight
+            from dartlab.viz.display.richInsight import renderInsight
 
             return renderInsight(self)
         except ImportError:
@@ -237,7 +237,7 @@ class AnalysisResult:
     def _repr_html_(self) -> str:
         """Jupyter/Marimo용 HTML."""
         try:
-            from dartlab.display.notebook import htmlInsight
+            from dartlab.viz.display.notebook import htmlInsight
 
             return htmlInsight(self)
         except ImportError:

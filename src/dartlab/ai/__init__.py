@@ -2,12 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any
-
-_BACKUP_AI = Path(__file__).resolve().parent.parent / "ai_backup"
-if _BACKUP_AI.exists():
-    __path__.append(str(_BACKUP_AI))
 
 from .kernel import ask, create_task, runAsk
 from .providers import create_provider, get_config
@@ -91,6 +86,8 @@ def status(provider: str | None = None, **kwargs: Any) -> dict[str, Any]:
 
 
 def templates(name: str | None = None):
+    from pathlib import Path
+
     base = Path.home() / ".dartlab" / "templates"
     if name is None:
         if not base.exists():
@@ -103,6 +100,8 @@ def templates(name: str | None = None):
 
 
 def saveTemplate(name: str, *, content: str | None = None, file: str | None = None):
+    from pathlib import Path
+
     if not content and not file:
         raise ValueError("content or file is required")
     base = Path.home() / ".dartlab" / "templates"

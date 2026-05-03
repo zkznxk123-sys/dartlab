@@ -26,7 +26,7 @@ def run(args) -> int:
 
         raise CLIError(wrapError(exc, stockCode=args.company)) from exc
 
-    from dartlab.export.excel import exportToExcel
+    from dartlab.viz.export.excel import exportToExcel
 
     try:
         path = exportToExcel(company, outputPath=args.output, modules=args.modules)

@@ -8,7 +8,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 from dartlab import viz
-from dartlab.tools import table, text
+from dartlab.ai.tools import table, text
 
 # ── table ──
 

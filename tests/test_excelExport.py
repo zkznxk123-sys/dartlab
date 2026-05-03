@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import polars as pl
 import pytest
 
-from dartlab.export.excel import exportToExcel, listAvailableModules
+from dartlab.viz.export.excel import exportToExcel, listAvailableModules
 
 pytestmark = pytest.mark.integration
 

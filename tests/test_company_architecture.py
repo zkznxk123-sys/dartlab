@@ -88,6 +88,33 @@ def test_public_docs_do_not_reference_legacy_company_names():
 
 
 def test_export_module_does_not_depend_on_root_company_internals():
-    text = _read("src/dartlab/export/excel.py")
+    text = _read("src/dartlab/viz/export/excel.py")
     assert "from dartlab.company import _ALL_PROPERTIES" not in text
     assert "from dartlab.providers.dart.company import listExportModules" in text
+
+
+def test_ai_owned_helpers_do_not_live_in_src_root():
+    repo_root = Path(__file__).resolve().parents[1]
+    forbidden = [
+        "src/dartlab/" + "ai_" + "backup",
+        "src/dartlab/skills",
+        "src/dartlab/tools",
+        "src/dartlab/table",
+        "src/dartlab/knowledge",
+        "src/dartlab/audit",
+        "src/dartlab/display",
+        "src/dartlab/export",
+    ]
+    for rel in forbidden:
+        assert not (repo_root / rel).exists(), f"retired root package still exists: {rel}"
+
+    expected = [
+        "src/dartlab/skill_os",
+        "src/dartlab/ai/tools",
+        "src/dartlab/ai/knowledge",
+        "src/dartlab/ai/audit",
+        "src/dartlab/viz/display",
+        "src/dartlab/viz/export",
+    ]
+    for rel in expected:
+        assert (repo_root / rel).exists(), f"canonical package missing: {rel}"

@@ -12,24 +12,24 @@ pytestmark = pytest.mark.unit
 
 
 def test_export_module_loads():
-    """dartlab.export import + 핵심 함수."""
-    from dartlab import export
+    """dartlab.viz.export import + 핵심 함수."""
+    from dartlab.viz import export
 
     assert hasattr(export, "exportToExcel")
     assert hasattr(export, "excel")
 
 
 def test_display_module_loads():
-    """dartlab.display import + 핵심 함수."""
-    from dartlab import display
+    """dartlab.viz.display import + 핵심 함수."""
+    from dartlab.viz import display
 
     assert hasattr(display, "renderCompany")
     assert hasattr(display, "renderFinance")
 
 
 def test_audit_module_loads():
-    """dartlab.audit import + 핵심 함수."""
-    from dartlab import audit
+    """dartlab.ai.audit import + 핵심 함수."""
+    from dartlab.ai import audit
 
     assert hasattr(audit, "runAudit")
     assert hasattr(audit, "queryAudit")

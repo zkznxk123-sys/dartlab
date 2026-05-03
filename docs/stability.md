@@ -66,7 +66,7 @@ May change after a warning. Recorded in CHANGELOG.
 | `Company.debt()` | Debt details |
 | `Company.table()` | Inline table extraction |
 | `dartlab.chart` | Chart tool module |
-| `dartlab.table` | Table tool module |
+| `dartlab.ai.tools.table` | Table tool module |
 | `dartlab.text` | Text tool module |
 | MCP server | MCP protocol server (60 tools, stdio) |
 | `dartlab mcp` | MCP CLI command |

@@ -372,12 +372,12 @@ def execute_tool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any
             session.add_event("visual", {"visual": spec.to_dict(), "refId": ref.id})
         return _with_session({"visual": spec.to_dict(), "ref": ref.to_dict()}, session)
     if name == "listDartlabSkills":
-        from dartlab.skills import listSkills
+        from dartlab.skill_os import listSkills
 
         include_user = bool(args.get("includeUser", args.get("include_user", True)))
         return {"skills": [item.to_dict() for item in listSkills(includeUser=include_user)]}
     if name == "searchDartlabSkills":
-        from dartlab.skills import searchSkills
+        from dartlab.skill_os import searchSkills
 
         include_user = bool(args.get("includeUser", args.get("include_user", True)))
         return {
@@ -389,12 +389,12 @@ def execute_tool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any
             ]
         }
     if name == "explainDartlabSkill":
-        from dartlab.skills import describeSkill
+        from dartlab.skill_os import describeSkill
 
         include_user = bool(args.get("includeUser", args.get("include_user", True)))
         return describeSkill(str(args.get("skillId") or ""), includeUser=include_user)
     if name == "checkDartlabSkillEvidence":
-        from dartlab.skills import checkEvidence
+        from dartlab.skill_os import checkEvidence
 
         include_user = bool(args.get("includeUser", args.get("include_user", True)))
         return checkEvidence(

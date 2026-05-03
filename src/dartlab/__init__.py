@@ -6,13 +6,13 @@ from importlib.metadata import version as _pkg_version
 
 _IS_PYODIDE = sys.platform == "emscripten"
 
-from dartlab import config, core, skills  # noqa: F401 — 하위호환/공용 분석 절차
+from dartlab import config, core, skill_os  # noqa: F401 — 공용 분석 절차 런타임
 from dartlab.company import Company
 from dartlab.core.select import ChartResult, SelectResult
 
 if not _IS_PYODIDE:
     from dartlab import ai as llm  # noqa: F401 — 하위호환
-    from dartlab.audit import queryAudit, runAudit  # noqa: F401 — 하위호환
+    from dartlab.ai.audit import queryAudit, runAudit  # noqa: F401 — 하위호환
     from dartlab.core.env import loadEnv as _loadEnv
     from dartlab.gather.fred import Fred
     from dartlab.gather.listing import codeToName, fuzzySearch, getKindList, nameToCode  # noqa: F401
@@ -707,7 +707,7 @@ def reload_plugins():
 
 
 class _Module(sys.modules[__name__].__class__):
-    """dartlab.verbose / dartlab.dataDir / dartlab.chart|table|text 프록시."""
+    """dartlab.verbose / dartlab.dataDir / dartlab.chart 프록시."""
 
     @property
     def verbose(self):
@@ -789,18 +789,6 @@ class _Module(sys.modules[__name__].__class__):
 
             setattr(self, name, _viz)
             return _viz
-        if name == "table":
-            from dartlab.table import Table
-
-            instance = Table()
-            setattr(self, name, instance)
-            return instance
-        if name == "text":
-            import importlib
-
-            mod = importlib.import_module("dartlab.tools.text")
-            setattr(self, name, mod)
-            return mod
         raise AttributeError(f"module 'dartlab' has no attribute {name!r}")
 
 

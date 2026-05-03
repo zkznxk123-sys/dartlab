@@ -8,14 +8,9 @@ from __future__ import annotations
 
 import os
 from dataclasses import asdict, dataclass
-from pathlib import Path
 from typing import Any, Protocol
 
 from dartlab.core.ai.model_resolver import resolve_default_model
-
-_BACKUP_PROVIDERS = Path(__file__).resolve().parents[2] / "ai_backup" / "providers"
-if _BACKUP_PROVIDERS.exists():
-    __path__.append(str(_BACKUP_PROVIDERS))
 
 
 @dataclass(frozen=True)

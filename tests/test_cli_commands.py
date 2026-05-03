@@ -199,7 +199,7 @@ def test_sections_basic(monkeypatch, mock_output):
 def test_excel_export(monkeypatch, mock_output):
     _patch_dartlab(monkeypatch)
     monkeypatch.setattr(
-        "dartlab.export.excel.exportToExcel",
+        "dartlab.viz.export.excel.exportToExcel",
         lambda *a, **kw: "/tmp/test.xlsx",
     )
     from dartlab.cli.commands.excel import run

@@ -437,7 +437,7 @@ def profitability(company: Any, *, n_years: int = 5) -> Any:
     """영업이익률·순이익률·ROE 추세 라인 차트."""
     go = _ensure_plotly()
 
-    from dartlab.tools.table import ratio_table as _ratio_table
+    from dartlab.ai.tools.table import ratio_table as _ratio_table
 
     bs_df = getattr(company, "BS", None)
     is_df = getattr(company, "IS", None)
