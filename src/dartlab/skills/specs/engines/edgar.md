@@ -38,10 +38,10 @@ procedure:
   - 3. DartCompany ↔ EdgarCompany 동기화 — Public 메서드 양쪽 같게 간다 기준을 확인한다.
   - 4. EXEMPT 등록 기준 기준을 확인한다.
   - 등록할 수 있는 경우 기준을 확인한다.
-  - 데이터 수집·배포·freshness → `Skill OS · `Skill OS
-  - Company namespace·notes·데이터 소스 차이 → `Skill OS
-  - scan EDGAR 11 축·프리빌드 → `Skill OS
-  - gather market 분기 → `Skill OS
+  - 데이터 수집·배포·freshness는 `engines.data`, `engines.gather`, `operation.testing` skill에서 확인한다.
+  - Company namespace·notes·데이터 소스 차이는 `engines.company`와 `engines.edgar` skill에서 확인한다.
+  - scan EDGAR 11 축·프리빌드는 `engines.scan` skill에서 확인한다.
+  - gather market 분기는 `engines.gather` skill에서 확인한다.
 requiredEvidence:
   - skillRef
 expectedOutputs:
@@ -91,7 +91,7 @@ lastUpdated: '2026-05-03'
 - 3. DartCompany ↔ EdgarCompany 동기화 — Public 메서드 양쪽 같게 간다 기준을 확인한다.
 - 4. EXEMPT 등록 기준 기준을 확인한다.
 - 등록할 수 있는 경우 기준을 확인한다.
-- 데이터 수집·배포·freshness → `Skill OS · `Skill OS
-- Company namespace·notes·데이터 소스 차이 → `Skill OS
-- scan EDGAR 11 축·프리빌드 → `Skill OS
-- gather market 분기 → `Skill OS
+- 데이터 수집·배포·freshness는 `engines.data`, `engines.gather`, `operation.testing` skill에서 확인한다.
+- Company namespace·notes·데이터 소스 차이는 `engines.company`와 `engines.edgar` skill에서 확인한다.
+- scan EDGAR 11 축·프리빌드는 `engines.scan` skill에서 확인한다.
+- gather market 분기는 `engines.gather` skill에서 확인한다.

@@ -39,7 +39,7 @@ procedure:
   - 3. 6 막 인과 — 스토리 구조로 재무제표를 읽는다 기준을 확인한다.
   - 6 막 기준을 확인한다.
   - '**analysis ↛ credit, credit ↛ analysis** — 같은 L2 지만 상호 import 금지.'
-  - '**macro ↛ analysis, analysis ↛ macro** — 같은 L2 지만 상호 import 금지. 시장 레벨 매크로 해석은 `dartlab.macro()` 엔진이 담당 (→ `Skill OS).'
+  - '**macro ↛ analysis, analysis ↛ macro** — 같은 L2 지만 상호 import 금지. 시장 레벨 매크로 해석은 `dartlab.macro()` 엔진이 담당한다.'
   - 각 엔진이 데이터 필요하면 Company/core(L0/L1) 에서 직접 가져온다.
   - '**story 가 조합한다.** story 에서 analysis 블록과 credit 블록을 성격별로 블록식으로 조합하여 보고서를 구성한다.'
 requiredEvidence:
@@ -92,6 +92,6 @@ lastUpdated: '2026-05-03'
 - 3. 6 막 인과 — 스토리 구조로 재무제표를 읽는다 기준을 확인한다.
 - 6 막 기준을 확인한다.
 - **analysis ↛ credit, credit ↛ analysis** — 같은 L2 지만 상호 import 금지.
-- **macro ↛ analysis, analysis ↛ macro** — 같은 L2 지만 상호 import 금지. 시장 레벨 매크로 해석은 `dartlab.macro()` 엔진이 담당 (→ `Skill OS).
+- **macro ↛ analysis, analysis ↛ macro** — 같은 L2 지만 상호 import 금지. 시장 레벨 매크로 해석은 `dartlab.macro()` 엔진이 담당한다.
 - 각 엔진이 데이터 필요하면 Company/core(L0/L1) 에서 직접 가져온다.
 - **story 가 조합한다.** story 에서 analysis 블록과 credit 블록을 성격별로 블록식으로 조합하여 보고서를 구성한다.
