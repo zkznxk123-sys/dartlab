@@ -35,6 +35,7 @@ default_whitelist:
   - operation.philosophy
   # refactor-checklist 는 옛 API 예시·사고 사례 SSOT — 의도된 잔존
   - operation.refactorChecklist
+  - src/dartlab/skills/specs/operation/refactorChecklist.md
 
   # ── release history ──
   - CHANGELOG.md

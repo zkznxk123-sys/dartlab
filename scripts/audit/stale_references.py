@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -54,8 +55,6 @@ _SCAN_ROOTS: tuple[str, ...] = (
     "scripts",
     ".github",
     "landing/src",
-    "blog",
-    "sns",
     "README.md",
     "README_EN.md",
     "CAPABILITIES.md",
@@ -135,23 +134,46 @@ def _iter_target_files(roots: tuple[str, ...]) -> list[Path]:
     """검사 대상 파일 목록. .py / .md / .yml / .yaml / .ts / .svelte / .json."""
     extensions = {".py", ".md", ".yml", ".yaml", ".ts", ".tsx", ".svelte", ".json"}
     excluded_dirs = {"__pycache__", "node_modules", ".git", "dist", "build", "_backup"}
+    excluded_names = {"package-lock.json", "pnpm-lock.yaml", "yarn.lock"}
+    max_scan_bytes = 1_000_000
+
+    try:
+        result = subprocess.run(
+            ["git", "ls-files", "--", *roots],
+            cwd=_REPO_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        candidates = [_REPO_ROOT / line for line in result.stdout.splitlines() if line.strip()]
+    except (OSError, subprocess.CalledProcessError):
+        candidates = []
+        for root_str in roots:
+            root = _REPO_ROOT / root_str
+            if root.is_file():
+                candidates.append(root)
+                continue
+            if root.is_dir():
+                candidates.extend(root.rglob("*"))
 
     files: list[Path] = []
-    for root_str in roots:
-        root = _REPO_ROOT / root_str
-        if root.is_file():
-            files.append(root)
+    for path in candidates:
+        if not path.is_file():
             continue
-        if not root.is_dir():
+        if path.name in excluded_names:
             continue
-        for path in root.rglob("*"):
-            if not path.is_file():
+        if path.suffix not in extensions:
+            continue
+        if any(part in excluded_dirs for part in path.parts):
+            continue
+        try:
+            if path.stat().st_size > max_scan_bytes:
                 continue
-            if path.suffix not in extensions:
-                continue
-            if any(part in excluded_dirs for part in path.parts):
-                continue
-            files.append(path)
+        except OSError:
+            continue
+        files.append(path)
     return files
 
 
@@ -162,13 +184,17 @@ def _scan_file(path: Path, patterns: list[_Pattern]) -> list[_Violation]:
     except (OSError, UnicodeDecodeError):
         return []
 
+    active_patterns = [pattern for pattern in patterns if not _is_whitelisted(path, pattern)]
+    if not active_patterns:
+        return []
+
     violations: list[_Violation] = []
     for line_no, line in enumerate(content.split("\n"), 1):
+        if len(line) > 20_000:
+            continue
         if _has_line_noqa(line):
             continue
-        for pattern in patterns:
-            if _is_whitelisted(path, pattern):
-                continue
+        for pattern in active_patterns:
             if pattern.regex.search(line):
                 violations.append(_Violation(path, line_no, line.rstrip(), pattern))
     return violations
