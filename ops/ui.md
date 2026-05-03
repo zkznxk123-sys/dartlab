@@ -82,7 +82,7 @@ cd ui/vscode/webview && npm install && npm run build
 
 **원칙**: VSCode 확장에 있는 기능은 Svelte 에도 있어야 하고, VSCode 에 없는 기능은 Svelte 에서 숨긴다.
 
-AI 채팅 surface 는 `ASK_WORKBENCH_KERNEL.md` 의 같은 event contract 를 소비한다. 서버/stdio 가 내보내는 canonical 이벤트는 `reference`, `inspect`, `execute`, `visual`, `review`, `verify`, `chunk`, `done`, `error` 이다. Legacy `observe`, `compute`, `chart`, `artifact`, `tool_call`, `tool_result` 는 adapter alias 로만 처리한다. 새 이벤트는 한쪽 surface 에만 붙이지 않고 `ui/shared` 의 parser/contract 를 먼저 갱신한다.
+AI 채팅 surface 는 `src/dartlab/ai` 와 `src/dartlab/skills` 의 같은 trace/result contract 를 소비한다. 서버/stdio 가 내보내는 canonical 이벤트는 `reference`, `inspect`, `execute`, `visual`, `review`, `verify`, `chunk`, `done`, `error` 이다. Legacy `observe`, `compute`, `chart`, `artifact`, `tool_call`, `tool_result` 는 adapter alias 로만 처리한다. 새 이벤트는 한쪽 surface 에만 붙이지 않고 `ui/shared` 의 parser/contract 를 먼저 갱신한다.
 
 차트는 검증된 visual 만 렌더링한다. web 과 VSCode 는 `ui/shared/api/visualContract.ts` 를 통해 단일 값·단일 막대·축 없는 spec 을 버리고, 렌더링은 `ui/shared/chart/` 컴포넌트를 재사용한다. visual 은 계산표/observation 에서 컴파일된 설명 산출물이어야 하며 placeholder 차트는 UI 에서도 숨긴다.
 

@@ -1,8 +1,8 @@
 # Core Loop — 자가개선 루프 운영 SSOT
 
 **주체**: dartlab 자가개선 루프 (Observe·Pattern·Promote·Refine·Axis).
-**현재**: legacy Phase O/P/R/F/A 문서. 새 AI 엔진의 상위 자가개선 계약은 루트 `ASK_WORKBENCH_KERNEL.md` 의 Direct Audit Learning Loop, ImprovementCandidate, RecipeBank, RegressionBank다.
-**방향**: 이 문서는 `ASK_WORKBENCH_KERNEL.md` 를 소비하는 운영 포인터로 축소한다. Phase 이름은 compatibility 용어이며 새 구현의 원천이 아니다.
+**현재**: legacy Phase O/P/R/F/A 문서. 새 AI/skills 경로의 자가개선 계약은 직접 audit 판정과 `src/dartlab/skills` 승격 상태가 기준이다.
+**방향**: 이 문서는 skill promotion 과 직접 audit 운영 포인터로 축소한다. Phase 이름은 compatibility 용어이며 새 구현의 원천이 아니다.
 
 > 상위 사상: [philosophy.md](philosophy.md) §6.
 
@@ -25,7 +25,7 @@ Mapping:
 ## 1. Legacy 5 Phase — O · P · R · F · A
 
 아래 Phase P/R/F 스크립트와 절차는 compatibility-only다.
-어떤 legacy 스크립트도 `ASK_WORKBENCH_KERNEL.md` 의 `AuditPacket` verdict 와 accepted `ImprovementCandidate` 없이 docstring, recipe, protocol, tool schema 변경을 승격할 수 없다.
+어떤 legacy 스크립트도 직접 audit verdict 와 accepted skill/docstring 개선 후보 없이 docstring, skill, protocol, tool schema 변경을 승격할 수 없다.
 새 AI 구현에서는 Phase 이름을 내부 상태로 쓰지 않는다.
 
 | Phase | 이름 | 한 줄 명제 |
@@ -42,8 +42,8 @@ Mapping:
 
 ### legacy 구현 위치
 
-- 아래 경로는 old AI runtime 기준이며 새 Ask Workbench Kernel 의 production 표준이 아니다.
-- 새 구현 위치는 `ASK_WORKBENCH_KERNEL.md` 의 `trace`, `verify`, `answer`, `providers`, `mcp` 계약을 따른다.
+- 아래 경로는 old AI runtime 기준이며 새 AI/skills 경로의 production 표준이 아니다.
+- 새 구현 위치는 `src/dartlab/ai` 와 `src/dartlab/skills` 의 trace, verify, provider, MCP 계약을 따른다.
 - compatibility 코드가 필요하면 새 `AuditPacket`/`ImprovementCandidate` 스키마로 어댑트한다.
 
 ### 출력

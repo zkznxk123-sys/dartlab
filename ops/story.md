@@ -589,7 +589,7 @@ story 블록 조립 (builders.py)
   ↓
 AI Self-Description 자동 반영 (tool schema 자동)
   ↓
-AI audit 질문 검증 (ASK_WORKBENCH_KERNEL.md)
+AI audit 질문 검증 (skills + ref 검산)
   ↓
 사람이 직접 읽고 품질 판단
 ```
