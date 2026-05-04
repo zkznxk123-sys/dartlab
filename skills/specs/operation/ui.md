@@ -27,8 +27,10 @@ toolRefs:
   - search_reference
 knowledgeRefs:
   - start.dartlabSkillOs
+  - operation.aiProductReplatform
 sourceRefs:
   - dartlab://skills/operation.ui
+  - dartlab://skills/operation.aiProductReplatform
 procedure:
   - 1. 한눈에 보기 기준을 확인한다.
   - 2. 디렉토리 구조 기준을 확인한다.
@@ -82,6 +84,13 @@ lastUpdated: '2026-05-03'
 
 ## AI 채팅 UI 계약
 
+- AI 제품 바탕 교체의 상세 SSOT는 `operation.aiProductReplatform`이다. `operation.ui`는 UI 표현 계층 규칙만 보완한다.
+- 공식 제품 경로는 `DartLab App → Agent Gateway(/api/agent/runs) → DartLabResearchGraph → Skill OS/Data/Verifier/Evidence`다.
+- UI 표면은 LibreChat식 conversation/message parts 모델을 따른다. DartLab 브랜드, workspace, evidence, artifact viewer는 유지하되 채팅 본문은 message parts만 렌더한다.
+- UI와 엔진 사이의 공개 stream은 AG-UI compatible event allowlist만 허용한다. 내부 kernel trace는 Agent Gateway에서 public event로 변환하고, raw trace는 Evidence/journal에만 저장한다.
+- 허용 public event는 `TEXT_MESSAGE_*`, `TOOL_CALL_*`, `STATE_*`, `ACTIVITY_*`, `RUN_FINISHED`, `RUN_ERROR`다. 이 목록 밖 이벤트가 채팅 UI로 직접 들어오면 계약 위반이다.
+- `/api/ask`는 하위호환 경로이며 새 web chat product path는 `/api/agent/runs`를 사용한다.
+- AI 실행 루프의 공식 교체 지점은 `DartLabResearchGraph`다. 현재 호환 구현이 내부 Ask Workbench를 호출하더라도 제품 경계명과 node 계약은 `route_intent → select_skill → plan_evidence → execute_tool → observe_result → verify_claims → compose_answer → repair_or_fail`로 고정한다.
 - 채팅 본문은 최종 답변, 짧은 activity 로그, 실제 코드/시각화 실행 카드, 실패 notice, source 요약만 렌더한다.
 - raw prompt, raw tool args/result JSON, 내부 trace JSON, `Agent Trace`, `투명성` 박스는 채팅 본문에 렌더하지 않는다.
 - Evidence 패널은 source refs, datasets, raw tool input/output, verification, artifact를 분리해서 보관한다.

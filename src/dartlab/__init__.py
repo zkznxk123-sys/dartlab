@@ -3,6 +3,7 @@
 import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
+from typing import Any
 
 _IS_PYODIDE = sys.platform == "emscripten"
 
@@ -12,7 +13,6 @@ from dartlab.core.select import ChartResult, SelectResult
 
 if not _IS_PYODIDE:
     from dartlab import ai as llm  # noqa: F401 — 하위호환
-    from dartlab.ai.audit import queryAudit, runAudit  # noqa: F401 — 하위호환
     from dartlab.core.env import loadEnv as _loadEnv
     from dartlab.gather.fred import Fred
     from dartlab.gather.listing import codeToName, fuzzySearch, getKindList, nameToCode  # noqa: F401
@@ -82,6 +82,86 @@ try:
     __version__ = _pkg_version("dartlab")
 except PackageNotFoundError:
     __version__ = "0.0.0"
+
+
+def pastInsight(*_: Any, **__: Any) -> list[dict[str, Any]]:
+    """종목별 과거 분석 인사이트 조회.
+
+    Summary:
+        과거 분석 서사 저장소의 공개 조회 API 자리다.
+
+    Description:
+        현재 패키지에는 공개 인사이트 저장소가 연결되어 있지 않아 빈 목록을
+        반환한다. AI 엔진 내부 스텁이 아니라 dartlab 공개 API 표면에서
+        하위호환 이름만 유지한다.
+
+    Parameters:
+        *_: 하위호환 위치 인자.
+        **__: 하위호환 키워드 인자.
+
+    Returns:
+        list[dict[str, Any]]: 저장된 인사이트가 없으면 빈 목록.
+
+    Raises:
+        없음.
+
+    Examples:
+        >>> import dartlab
+        >>> dartlab.pastInsight(stockCode="005930")
+        []
+
+    Notes:
+        새 저장소가 붙으면 이 함수가 공개 조회 계약의 단일 진입점이다.
+
+    Guide:
+        AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.
+
+    See Also:
+        sectorInsights
+        capabilities
+    """
+
+    return []
+
+
+def sectorInsights(*_: Any, **__: Any) -> list[dict[str, Any]]:
+    """섹터별 과거 분석 인사이트 조회.
+
+    Summary:
+        산업/섹터 단위 과거 분석 서사 저장소의 공개 조회 API 자리다.
+
+    Description:
+        현재 패키지에는 공개 섹터 인사이트 저장소가 연결되어 있지 않아 빈
+        목록을 반환한다. 구현 위치는 AI 엔진이 아니라 dartlab 공개 API
+        표면이다.
+
+    Parameters:
+        *_: 하위호환 위치 인자.
+        **__: 하위호환 키워드 인자.
+
+    Returns:
+        list[dict[str, Any]]: 저장된 인사이트가 없으면 빈 목록.
+
+    Raises:
+        없음.
+
+    Examples:
+        >>> import dartlab
+        >>> dartlab.sectorInsights(sector="반도체")
+        []
+
+    Notes:
+        새 저장소가 붙으면 이 함수가 공개 조회 계약의 단일 진입점이다.
+
+    Guide:
+        AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.
+
+    See Also:
+        pastInsight
+        capabilities
+    """
+
+    return []
 
 
 def search(
@@ -446,7 +526,7 @@ def setup(provider: str | None = None):
         dartlab.setup("openai")      # OpenAI API 키 설정
         dartlab.setup("ollama")      # Ollama 설치 안내
     """
-    from dartlab.core.ai.guide import (
+    from dartlab.core.ai.aiSetup import (
         providers_status,
         resolve_alias,
     )
@@ -490,7 +570,7 @@ def _setup_apikey_interactive(provider: str):
 
     spec = _PROVIDERS.get(provider)
     if spec is None or not spec.env_key:
-        from dartlab.core.ai.guide import provider_guide
+        from dartlab.core.ai.aiSetup import provider_guide
 
         print(provider_guide(provider))
         return
@@ -884,8 +964,6 @@ if not _IS_PYODIDE:
     sys.modules[__name__].credit = _credit_callable
 
 
-from dartlab.ai.insights import pastInsight, sectorInsights  # noqa: E402
-
 __all__ = [
     "Company",
     "Fred",
@@ -964,12 +1042,12 @@ def capabilities(key: str | None = None, *, search: str | None = None) -> dict |
         dartlab.capabilities(search="재무건전성")     # 질문 기반 검색 → 상위 10개
     """
     if search is not None:
-        from dartlab.core._capabilitySearch import searchCapabilities
+        from dartlab.core.search_capabilities import searchCapabilities
 
         results = searchCapabilities(search)
         return {key: entry for key, entry, _score in results}
 
-    from dartlab.core._generatedCapabilities import CAPABILITIES
+    from dartlab.core._generated import CAPABILITIES
 
     if key is None:
         return {k: v.get("summary", "") for k, v in CAPABILITIES.items()}

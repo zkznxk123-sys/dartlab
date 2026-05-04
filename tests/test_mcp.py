@@ -1,6 +1,8 @@
-"""MCP 서버 기본 테스트 — 도구 정의, 실행, 캐싱."""
+"""MCP 서버 기본 테스트 — canonical tools, resources, compat gating."""
 
 from __future__ import annotations
+
+import json
 
 import pytest
 
@@ -10,66 +12,44 @@ pytestmark = pytest.mark.unit
 def test_mcp_tools_defined():
     from dartlab.mcp import _advertisedTools
 
-    names = {t["name"] for t in _advertisedTools()}
-    assert names == {
-        "start_ask_session",
-        "ask_kernel_status",
-        "search_reference",
-        "read_context",
-        "inspect_dataset",
-        "run_python",
-        "compile_visual",
-        "finalize_answer",
-        "listDartlabSkills",
-        "searchDartlabSkills",
-        "explainDartlabSkill",
-        "checkDartlabSkillEvidence",
-    }
+    names = {tool["name"] for tool in _advertisedTools()}
+    assert names == {"ask", "skill_search", "generated_spec_search", "engine_call", "run_python", "read"}
     assert "companyInsights" not in names
-    assert "searchCompany" not in names
-    assert "companySections" not in names
+    assert "search_reference" not in names
+    assert "finalize_answer" not in names
 
 
 def test_mcp_tool_schema_valid():
-    from dartlab.mcp import _TOOLS
+    from dartlab.mcp import _advertisedTools
 
-    for tool in _TOOLS:
+    for tool in _advertisedTools():
         assert "name" in tool
         assert "description" in tool
         assert "params" in tool
         assert "required" in tool
         assert isinstance(tool["params"], dict)
         assert isinstance(tool["required"], list)
-        assert "_STOCK" not in str(tool["params"])
 
 
-def test_mcp_workbench_tools_execute():
-    from dartlab.mcp import _advertisedTools, _executeTool
+def test_mcp_canonical_tools_execute():
+    from dartlab.mcp import _executeTool
 
-    status = _executeTool("ask_kernel_status", {})
-    assert "Ask Workbench Kernel" in status
-    assert "datasetRoots" in status
+    found = json.loads(_executeTool("skill_search", {"query": "테스트 규칙", "limit": 3}))
+    assert found["refs"][0]["id"] == "skill:operation.testing"
 
-    found = _executeTool("search_reference", {"query": "Ask Workbench", "limit": 3})
-    assert "refs" in found
+    spec = json.loads(_executeTool("generated_spec_search", {"query": "재무상태표", "limit": 5}))
+    assert spec["refs"]
 
-    executed = _executeTool("run_python", {"code": "emit_result(values={'x': 1})"})
-    assert "DARTLAB_RESULT_JSON" in executed
+    private = json.loads(_executeTool("engine_call", {"plan": {"apiRef": "Company._private", "target": "005930"}}))
+    assert private["ok"] is False
+    assert private["error"] == "private_api_blocked"
 
-    skills = _executeTool("searchDartlabSkills", {"query": "주가지수 강세"})
-    assert "engines.scan.krxIndexStrength" in skills
-
-    operation = _executeTool("searchDartlabSkills", {"query": "테스트 규칙"})
-    assert "operation.testing" in operation
-
-    explained = _executeTool("explainDartlabSkill", {"skillId": "operation.testing", "includeUser": False})
-    assert "operation.testing" in explained
-    assert "DartLab Skill OS" in "".join(t["description"] for t in _advertisedTools())
+    executed = json.loads(_executeTool("run_python", {"code": "emit_result(values={'x': 1})"}))
+    assert executed["ok"] is True
+    assert any(ref["kind"] == "executionRef" for ref in executed["refs"])
 
 
-def test_mcp_skill_os_resources_are_readable():
-    import json
-
+def test_mcp_skill_resources_are_readable():
     from dartlab.mcp import _resourcePayload
 
     listing, listing_mime = _resourcePayload("dartlab://skills")
@@ -85,36 +65,10 @@ def test_mcp_skill_os_resources_are_readable():
     assert detail_payload["source"]["path"].replace("\\", "/").endswith("/skills/specs/start/dartlabSkillOs.md")
 
 
-def test_mcp_workbench_session_keeps_refs_between_tools():
-    import json
-
+def test_mcp_legacy_generated_tools_hidden_by_default():
     from dartlab.mcp import _executeTool
 
-    session = json.loads(_executeTool("start_ask_session", {"question": "세션 ref 검산"}))
-    session_id = session["sessionId"]
-
-    executed = json.loads(
-        _executeTool(
-            "run_python",
-            {
-                "sessionId": session_id,
-                "code": "emit_result(values={'sample_value': 42}, units={'sample_value': '점'})",
-            },
-        )
-    )
-    assert executed["refCount"] >= 2
-
-    finalized = json.loads(
-        _executeTool(
-            "finalize_answer",
-            {
-                "sessionId": session_id,
-                "answer": "sample_value는 42점입니다.",
-            },
-        )
-    )
-    assert finalized["ok"] is True
-    assert finalized["session"]["refs"]
+    assert _executeTool("companyInsights", {"stockCode": "005930"}).startswith("Unknown tool")
 
 
 def test_fmt_none():

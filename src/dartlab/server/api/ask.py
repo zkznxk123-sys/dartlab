@@ -11,9 +11,9 @@ from sse_starlette.sse import EventSourceResponse
 import dartlab
 from dartlab import config as dartlab_config
 
-from ..models import AskRequest
+from ..agent_gateway import stream_agent_run
+from ..models import AgentRunMessage, AgentRunRequest, AskRequest
 from ..services.ai_analysis import run_plain_chat
-from ..streaming import stream_ask
 
 router = APIRouter()
 
@@ -25,11 +25,34 @@ async def api_ask(req: AskRequest):
 
     if req.stream:
         return EventSourceResponse(
-            stream_ask(req),
+            _streamPublicAsk(req),
             media_type="text/event-stream",
         )
 
     return await run_plain_chat(req)
+
+
+async def _streamPublicAsk(req: AskRequest):
+    context = {}
+    if req.company:
+        context["company"] = {"stockCode": req.company, "company": req.company}
+    elif req.viewContext and req.viewContext.company:
+        company = req.viewContext.company
+        context["company"] = {
+            "stockCode": company.stockCode,
+            "corpName": company.corpName,
+            "company": company.company,
+        }
+    agent_req = AgentRunRequest(
+        messages=[AgentRunMessage(role="user", content=req.question)],
+        provider=req.provider,
+        role=req.role,
+        model=req.model,
+        workspaceContext=context,
+        stream=True,
+    )
+    async for event in stream_agent_run(agent_req):
+        yield event
 
 
 @router.get("/api/ask/artifacts/{day}/{filename}")

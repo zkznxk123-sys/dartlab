@@ -7,7 +7,6 @@ import json
 from fastapi import HTTPException
 
 from dartlab import Company
-from dartlab.core.ai import normalize_provider
 from dartlab.server.chat import build_topic_summary_question
 from dartlab.server.models import AskRequest
 from dartlab.server.streaming import AnalysisStreamError, collect_analysis_result, stream_analysis
@@ -38,9 +37,7 @@ async def stream_topic_summary(
     try:
         async for event in stream_analysis(
             build_topic_summary_question(topic),
-            provider=normalize_provider(provider) or provider,
             role="summary",
-            model=model,
             use_tools=False,
             validate=False,
             detect_navigate=False,
@@ -68,11 +65,7 @@ async def run_plain_chat(req: AskRequest) -> dict:
             hintCode = vc.stockCode or vc.corpName or vc.company
         result = await collect_analysis_result(
             req.question,
-            provider=normalize_provider(req.provider) or req.provider,
             role=req.role or "summary",
-            model=req.model,
-            api_key=req.api_key,
-            base_url=req.base_url,
             stockCode=hintCode,
             history=[h.model_dump() for h in req.history] if req.history else None,
             view_context=req.viewContext.model_dump() if req.viewContext else None,

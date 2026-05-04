@@ -1,16 +1,24 @@
-"""Trace and audit utilities for Ask Workbench."""
+"""Audit and progress capture hooks for AI streams."""
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
+
+
+def installProgressCapture() -> None:
+    """Install progress capture hooks.
+
+    The new engine exposes progress through Agent Gateway events, so the server
+    bootstrap hook is intentionally idempotent and side-effect free.
+    """
+
+    return None
 
 
 @dataclass
 class AuditCollector:
-    """Small server-side audit collector for kernel events."""
+    """In-memory audit collector used by server streaming adapters."""
 
     question: str = ""
     stockCode_hint: str | None = None
@@ -18,36 +26,8 @@ class AuditCollector:
     model: str | None = None
     events: list[dict[str, Any]] = field(default_factory=list)
 
-    def observe(self, kind: str, data: dict[str, Any]) -> None:
-        self.events.append({"kind": kind, "data": data})
+    def observe(self, kind: str, data: dict[str, Any] | None = None) -> None:
+        self.events.append({"kind": kind, "data": dict(data or {})})
 
     def flush(self) -> None:
-        path = _audit_path()
-        if path is None:
-            return
-        try:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            packet = {
-                "question": self.question,
-                "stockCodeHint": self.stockCode_hint,
-                "provider": self.provider,
-                "model": self.model,
-                "events": self.events,
-            }
-            with path.open("a", encoding="utf-8") as handle:
-                handle.write(json.dumps(packet, ensure_ascii=False) + "\n")
-        except OSError:
-            return
-
-
-def installProgressCapture() -> None:
-    """Compatibility no-op; progress is now emitted as kernel trace events."""
-
-
-def _audit_path() -> Path | None:
-    import os
-
-    raw = os.environ.get("DARTLAB_AI_AUDIT_JSONL")
-    if not raw:
         return None
-    return Path(raw)

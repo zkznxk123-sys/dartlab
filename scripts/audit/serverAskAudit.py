@@ -57,6 +57,8 @@ def _runStream(client: httpx.Client, url: str, payload: dict[str, Any]) -> tuple
             events.append({"event": event, "data": data})
             if event == "chunk" and isinstance(data, dict):
                 chunks.append(str(data.get("text", "")))
+            elif event == "TEXT_MESSAGE_CONTENT" and isinstance(data, dict):
+                chunks.append(str(data.get("delta", "")))
     return status, "".join(chunks), events
 
 
@@ -200,18 +202,11 @@ def _stateContract(events: list[dict[str, Any]]) -> dict[str, Any]:
     first_tool = names.index("tool_start") if "tool_start" in names else -1
     final_events = [name for name in names if name in {"answer", "unable"}]
     tool_transactions_closed = True
-    tool_progress_visible = True
     for idx, event in enumerate(events):
         if _eventName(event) != "tool_start":
             continue
         data = event.get("data") if isinstance(event.get("data"), dict) else {}
         tool_id = data.get("id")
-        progressed = any(
-            _eventName(candidate) == "tool_progress"
-            and isinstance(candidate.get("data"), dict)
-            and candidate["data"].get("id") == tool_id
-            for candidate in events[idx + 1 :]
-        )
         closed = any(
             _eventName(candidate) == "tool_result"
             and isinstance(candidate.get("data"), dict)
@@ -219,11 +214,9 @@ def _stateContract(events: list[dict[str, Any]]) -> dict[str, Any]:
             for candidate in events[idx + 1 :]
         )
         tool_transactions_closed = tool_transactions_closed and closed
-        tool_progress_visible = tool_progress_visible and progressed
     return {
         "planFirst": first_plan >= 0 and (first_tool < 0 or first_plan < first_tool),
         "toolTransactionsClosed": tool_transactions_closed,
-        "toolProgressVisible": tool_progress_visible,
         "finalEvent": final_events[-1] if final_events else "",
         "hasAnswerOrUnable": bool(final_events),
         "noEmptyVerifierFailure": not any(
@@ -258,13 +251,37 @@ def _compactRefs(refs: list[dict[str, Any]], *, limit: int = 20) -> list[dict[st
 def _selectedSkillIds(refs: list[dict[str, Any]]) -> list[str]:
     ids: list[str] = []
     for ref in refs:
-        if not isinstance(ref, dict) or ref.get("kind") != "skill":
+        if not isinstance(ref, dict) or ref.get("kind") not in {"skill", "skillRef"}:
             continue
         payload = ref.get("payload") if isinstance(ref.get("payload"), dict) else {}
-        skill_id = payload.get("skillId")
+        skill_id = payload.get("skillId") or payload.get("id") or str(ref.get("id") or "").removeprefix("skill:")
         if isinstance(skill_id, str) and skill_id not in ids:
             ids.append(skill_id)
     return ids
+
+
+def _manualReviewTemplate(summary: list[dict[str, Any]]) -> str:
+    lines = [
+        "# Manual AI Quality Review",
+        "",
+        "이 파일은 자동 채점 결과가 아니다. 각 답변 txt/json 원문을 직접 읽고 사람이 판정한다.",
+        "",
+        "판정 기준: answer correctness, skill 선택, capability 선택, 실제 tool 실행, ref 연결, 내부명 미노출, 실패 정직성.",
+        "",
+    ]
+    for row in summary:
+        lines.extend(
+            [
+                f"## {row['id']}",
+                "",
+                "- verdict: TODO",
+                "- rootCause: TODO",
+                "- issues: TODO",
+                "- retestRequired: TODO",
+                "",
+            ]
+        )
+    return "\n".join(lines)
 
 
 def main() -> int:
@@ -340,7 +357,6 @@ def main() -> int:
             state_contract_ok = bool(
                 state_contract["planFirst"]
                 and state_contract["toolTransactionsClosed"]
-                and state_contract["toolProgressVisible"]
                 and state_contract["hasAnswerOrUnable"]
                 and state_contract["noEmptyVerifierFailure"]
             )
@@ -408,7 +424,7 @@ def main() -> int:
                 "finalEvent": final_event,
                 "planFirst": bool(state_contract["planFirst"]),
                 "toolTransactionsClosed": bool(state_contract["toolTransactionsClosed"]),
-                "toolProgressVisible": bool(state_contract["toolProgressVisible"]),
+                "toolProgressVisible": None,
                 "hasAnswerOrUnable": bool(state_contract["hasAnswerOrUnable"]),
                 "noEmptyVerifierFailure": bool(state_contract["noEmptyVerifierFailure"]),
                 "freshnessSatisfied": bool(
@@ -465,7 +481,6 @@ def main() -> int:
                     "finalEvent",
                     "planFirst",
                     "toolTransactionsClosed",
-                    "toolProgressVisible",
                     "hasAnswerOrUnable",
                     "noEmptyVerifierFailure",
                     "freshnessSatisfied",
@@ -479,6 +494,7 @@ def main() -> int:
             print(json.dumps(row, ensure_ascii=False), flush=True)
 
     (out / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    (out / "manual_review.md").write_text(_manualReviewTemplate(summary), encoding="utf-8")
     latency_p95 = _p95([float(row.get("elapsedSec") or 0) for row in summary])
     (out / "summary_meta.json").write_text(
         json.dumps({"latencyP95": latency_p95, "count": len(summary)}, ensure_ascii=False, indent=2),

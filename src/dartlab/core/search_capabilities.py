@@ -114,19 +114,23 @@ def _buildIndex() -> None:
             tokenSet.add(t)
             inverted.setdefault(t, []).append((idx, 2.0))
 
-        # summary + aicontext (가중치 1.5x)
-        highText = " ".join(filter(None, [entry.get("summary", ""), entry.get("aicontext", "")]))
+        # summary + aicontext + call args (가중치 1.5x)
+        highText = " ".join(filter(None, [entry.get("summary", ""), entry.get("aicontext", ""), entry.get("args", "")]))
         for t in _tokenize(highText):
             tokenSet.add(t)
             inverted.setdefault(t, []).append((idx, 1.5))
 
-        # guide + capabilities + seeAlso (가중치 1.0x)
+        # guide + capabilities + returns + examples + seeAlso (가중치 1.0x)
         lowText = " ".join(
             filter(
                 None,
                 [
                     entry.get("guide", ""),
                     entry.get("capabilities", ""),
+                    entry.get("returns", ""),
+                    entry.get("example", ""),
+                    jsonish(entry.get("returnSchema")),
+                    jsonish(entry.get("evidenceSchema")),
                     entry.get("seeAlso", ""),
                 ],
             )
@@ -205,6 +209,14 @@ def searchCapabilities(
         results.append((key, CAPABILITIES[key], score))
 
     return results
+
+
+def jsonish(value) -> str:
+    """Index structured generated spec fields without adding another source."""
+
+    if value in (None, "", [], {}):
+        return ""
+    return str(value)
 
 
 def formatSearchResults(results: list[tuple[str, dict, float]]) -> str:

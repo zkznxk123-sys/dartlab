@@ -67,6 +67,30 @@ class AskRequest(BaseModel):
     viewContext: ViewContext | None = None
 
 
+class AgentRunMessage(BaseModel):
+    """Agent Gateway 대화 메시지."""
+
+    id: str | None = Field(None, max_length=120)
+    role: str = Field(..., max_length=30)
+    content: str = Field("", max_length=20000)
+    parts: list[dict[str, Any]] | None = None
+    metadata: dict[str, Any] | None = None
+
+
+class AgentRunRequest(BaseModel):
+    """DartLab Agent Gateway 실행 요청."""
+
+    threadId: str | None = Field(None, max_length=120)
+    messages: list[AgentRunMessage] = Field(default_factory=list, max_length=80)
+    agentId: str | None = Field("dartlab-research", max_length=100)
+    model: str | None = Field(None, max_length=100)
+    provider: str | None = Field(None, max_length=50)
+    role: str | None = Field(None, max_length=50)
+    attachments: list[dict[str, Any]] | None = None
+    workspaceContext: dict[str, Any] | None = None
+    stream: bool = True
+
+
 class ConfigureRequest(BaseModel):
     """LLM provider 설정/검증 요청."""
 

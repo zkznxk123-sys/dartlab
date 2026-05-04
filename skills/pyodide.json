@@ -1468,6 +1468,15 @@
       ]
     },
     {
+      "id": "operation.aiProductReplatform",
+      "title": "DartLab AI 제품 바탕 교체",
+      "category": "operation",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "operation.apiContract",
       "title": "API Contract — dartlab 호출 규칙 단일 진실의 원천",
       "category": "operation",

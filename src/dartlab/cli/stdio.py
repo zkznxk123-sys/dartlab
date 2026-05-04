@@ -47,15 +47,13 @@ def _emit(obj: dict[str, Any]) -> None:
 
 
 def _handleAsk(msg: dict[str, Any]) -> None:
-    """Process ask message -- stream core.runAsk() events as JSON lines."""
-    from dartlab.ai.kernel import runAsk
+    """Process ask message -- stream ask events as JSON lines."""
+    from dartlab.ai.kernel import _ask_events
 
     reqId = msg.get("id", "")
     question = msg.get("question", "")
     company = msg.get("company")
     history = msg.get("history")
-    provider = msg.get("provider") or _sessionProvider
-    model = msg.get("model") or _sessionModel
 
     if not question:
         _emit({"id": reqId, "event": "error", "data": {"error": "No question provided"}})
@@ -65,10 +63,6 @@ def _handleAsk(msg: dict[str, Any]) -> None:
     kwargs: dict[str, Any] = {}
     if company:
         kwargs["stockCode"] = company
-    if provider:
-        kwargs["provider"] = provider
-    if model:
-        kwargs["model"] = model
     if history:
         kwargs["history"] = history
 
@@ -87,7 +81,7 @@ def _handleAsk(msg: dict[str, Any]) -> None:
 
     emittedDone = False
     try:
-        for event in runAsk(question, **kwargs):
+        for event in _ask_events(question, **kwargs):
             if event.kind == "error" and isinstance(event.data, dict):
                 _emit({"id": reqId, "event": "error", "data": _sanitizeErrorForUi(event.data)})
             else:
@@ -107,9 +101,7 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
     """첫 ask 의 cold-start 비용을 사전 지불.
 
     extension activate 직후 호출되도록 설계. 다음을 미리 수행:
-    - dartlab.ai.runtime.core 호환 모듈 import
     - dartlab.ai.kernel 모듈 import (lazy 비용)
-    - dartlab.ai.providers 모듈 import
     - dartlab.viz.extract import
 
     실패 항목은 무시 — 워밍업은 best-effort.
@@ -123,9 +115,7 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
         except (ImportError, OSError, RuntimeError) as exc:
             diag["skipped"].append(f"{name}: {exc.__class__.__name__}")
 
-    _try("core", lambda: __import__("dartlab.ai.runtime.core", fromlist=["runAsk"]))
-    _try("kernel", lambda: __import__("dartlab.ai.kernel", fromlist=["runAsk"]))
-    _try("providers", lambda: __import__("dartlab.ai.providers", fromlist=["create_provider"]))
+    _try("kernel", lambda: __import__("dartlab.ai.kernel", fromlist=["ask"]))
     _try("viz_extract", lambda: __import__("dartlab.viz.extract", fromlist=["extract_viz_specs"]))
 
     _emit({"event": "warmup_done", "data": diag})

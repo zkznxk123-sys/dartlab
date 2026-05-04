@@ -1,3 +1,4 @@
+from .agent import router as agent_router
 from .ai import router as ai_router
 from .analysis import router as analysis_router
 from .ask import router as ask_router
@@ -9,6 +10,7 @@ from .room import router as room_router
 
 __all__ = [
     "ai_router",
+    "agent_router",
     "analysis_router",
     "ask_router",
     "company_router",

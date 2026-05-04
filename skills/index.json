@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 175,
+    "skillCount": 176,
     "categories": [
       {
         "id": "start",
@@ -20,7 +20,7 @@
         "id": "operation",
         "title": "Operation",
         "description": "ops 원문을 skill 절차로 묶어 테스트, 문서, 릴리즈, 확장 규칙을 찾는 운영 지도.",
-        "count": 13
+        "count": 14
       },
       {
         "id": "engines",
@@ -12460,6 +12460,109 @@
       }
     },
     {
+      "id": "operation.aiProductReplatform",
+      "title": "DartLab AI 제품 바탕 교체",
+      "category": "operation",
+      "categoryTitle": "Operation",
+      "status": "observed",
+      "purpose": "기존 DartLab web chat과 AI 엔진을 백업으로 분리하고, LibreChat UI 바탕과 AG-UI 공개 이벤트, LangGraph/Dexter식 금융 research loop로 제품 경계를 재설계하는 공식 전환 계약이다.",
+      "whenToUse": [
+        "AI 채팅 표면을 구현할 때",
+        "Agent Gateway 이벤트 계약을 바꿀 때",
+        "Research Graph 노드와 검증 게이트를 바꿀 때",
+        "LibreChat-derived UI를 DartLab shell에 연결할 때"
+      ],
+      "inputs": [
+        "user question",
+        "thread messages",
+        "workspace context",
+        "DartLab Skill OS and data refs"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "AG-UI public stream",
+        "assistant response",
+        "concise activity",
+        "evidence refs",
+        "artifacts"
+      ],
+      "apiRefs": [],
+      "toolRefs": [
+        "dartlab.skills.search",
+        "dartlab.skills.get"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "sourceRefs": [
+        "dartlab://skills/operation.aiProductReplatform",
+        "dartlab://skills/operation.ui"
+      ],
+      "procedure": [
+        "DartLab 제품은 유지한다. 교체 대상은 기존 `ui/web` 채팅 표면과 기존 `src/dartlab/ai` 엔진 구현이다.",
+        "기존 구현은 백업으로 분리한다.",
+        "UI 백업: `ui/web_legacy_backup_20260504`",
+        "AI 백업: `src/dartlab/ai_legacy_backup_20260504`",
+        "새 UI 바탕은 LibreChat repository를 `ui/web`에 vendoring한다. DartLab은 LibreChat 서버/auth/provider stack을 그대로 운영하지 않고, client data model과 ChatGPT-like surface를 DartLab shell에 붙인다.",
+        "공개 AI 답변 진입점은 `dartlab.ask(...)`와 `/api/ask`다. `/api/agent/runs`는 UI transport가 필요할 때만 public event adapter로 둔다.",
+        "새 production 엔진 경계는 `DartLabResearchGraph`다. `runAsk`는 public export로 유지하지 않는다.",
+        "LibreChat은 self-hosted ChatGPT-like 제품 바탕, agents, tools, artifacts 개념을 제공한다.",
+        "AG-UI는 `TEXT_MESSAGE_*`, `TOOL_CALL_*`, `STATE_*`, `ACTIVITY_*`, `RUN_FINISHED`, `RUN_ERROR` 같은 사용자 표면 이벤트를 표준화한다.",
+        "LangGraph는 durable execution, streaming, human-in-the-loop, stateful long-running agent orchestration을 제공한다. DartLab은 LangGraph Platform 종속 없이 OSS graph/checkpoint 사상을 흡수한다.",
+        "Dexter는 금융 research agent의 planning, tool call scratchpad JSONL, self-validation, evaluation loop를 참고한다.",
+        "채팅 본문 허용 표면은 assistant response, concise activity, tool card, source/artifact strip, failure notice다."
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "sourceRef",
+        "executionRef",
+        "verifyRef"
+      ],
+      "expectedOutputs": [
+        "product path contract",
+        "UI replacement boundary",
+        "engine graph contract",
+        "verification gate"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "backup 디렉터리를 만들지 않고 기존 UI/AI 위에 덕지덕지 덧붙임",
+        "internal TraceEvent를 UI에 직접 노출함",
+        "tool 실행 순서와 spinner 상태를 public event에서 재구성하지 못함",
+        "검색만 하고 응답을 성공 처리함",
+        "숫자·날짜·표 claim이 ref 없이 release됨"
+      ],
+      "forbidden": [
+        "`search_reference`, `draft_rejected`, `prose_without_finalize` 같은 내부명을 채팅 본문에 노출하지 않는다.",
+        "`Agent Trace`, raw JSON, provider 내부 오류코드를 채팅 본문 카드로 렌더하지 않는다.",
+        "구 AI 엔진 백업을 새 production path에서 import하지 않는다."
+      ],
+      "examples": [
+        "DartLab web chat을 LibreChat-derived surface로 교체",
+        "`/api/agent/runs`를 AG-UI public event stream으로 검증",
+        "Research Graph가 `route_intent → select_skill → plan_evidence → execute_tool → observe_result → verify_claims → compose_answer → repair_or_fail` 순서로 실행되는지 확인"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "limited"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "notes": [
+            "Product replatform contract is readable in Pyodide; server-side Agent Gateway execution is not available in-browser."
+          ]
+        }
+      }
+    },
+    {
       "id": "operation.apiContract",
       "title": "API Contract — dartlab 호출 규칙 단일 진실의 원천",
       "category": "operation",
@@ -13563,10 +13666,12 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [
-        "start.dartlabSkillOs"
+        "start.dartlabSkillOs",
+        "operation.aiProductReplatform"
       ],
       "sourceRefs": [
-        "dartlab://skills/operation.ui"
+        "dartlab://skills/operation.ui",
+        "dartlab://skills/operation.aiProductReplatform"
       ],
       "procedure": [
         "1. 한눈에 보기 기준을 확인한다.",
@@ -14551,6 +14656,9 @@
       "knowledgeRefs": [],
       "sourceRefs": [],
       "procedure": [
+        "Workbench 공식 순서는 `routeIntent → selectSkill → searchCapability → planEvidence → executeTool → observeResult → verifyClaims → composeAnswer → repairOrFail`이다.",
+        "`routeIntent`는 profile 생성만 담당한다. 실행 계획은 질문 문자열 하드코딩이 아니라 선택된 skill의 `requiredEvidence`/`toolRefs`/`knowledgeRefs`와 엔진 기능 설명/docstring 결과로 만든다.",
+        "root `skills/`가 실행 절차 SSOT이고, `CAPABILITIES`/docstring이 호출 가능 API SSOT다. AI 내부에 별도 skill resolver나 기능 index를 중복 생성하지 않는다.",
         "선택한 skill의 requiredEvidence를 실행 전 체크리스트로 둔다.",
         "dataset이 필요한 질문은 먼저 inspect 단계로 schema, latest, metric 후보를 확인한다.",
         "계산은 실행 결과가 table/value/date ref를 만들 수 있게 수행한다. 표를 만들 때 `metric`은 숫자 컬럼으로 두고, 날짜·라벨·식별자는 `meta`, `asOf`, `period`, `target` 또는 별도 문자열 컬럼으로 둔다.",

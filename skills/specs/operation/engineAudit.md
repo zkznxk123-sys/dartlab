@@ -91,4 +91,7 @@ lastUpdated: '2026-05-03'
 - 주요 종목 (KR + US) 에서 반환값이 기대 형식인지.
 - 새 기능 추가·데이터 갱신·리팩토링 후 회귀 감지.
 - AI audit 전에 선행 점검 (엔진 깨진 채 AI 돌리면 무의미).
+- AI 답변 품질 audit은 자동 점수로 통과 처리하지 않는다. `/api/ask` 서버 경유 원문 답변, refs, events, meta를 저장한 뒤 사람이 직접 읽어 P/F와 root cause를 기록한다.
+- 실패 root cause는 `skillSearch`, `generatedSpecSearch`, `planEvidence`, `engineCall`, `runPython`, `verifyAnswer`, `composeAnswer`, `publicEvent/UI` 중 하나로 귀속한다.
+- 직접 원문 review 전에는 “품질 통과” 또는 “완료”를 주장하지 않는다.
 

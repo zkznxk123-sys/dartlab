@@ -126,6 +126,25 @@ _INTENT_SKILL_BOOSTS: tuple[dict[str, Any], ...] = (
         "boost": 15.0,
     },
     {
+        "skillIds": ("engines.scan", "engines.scan.growth"),
+        "terms": (
+            "찾아",
+            "찾아줘",
+            "후보",
+            "상위",
+            "랭킹",
+            "순위",
+            "스크리닝",
+            "스캔",
+            "screen",
+            "ranking",
+            "candidate",
+            "growth company",
+            "성장하는 회사",
+        ),
+        "boost": 16.0,
+    },
+    {
         "skillIds": ("engines.viz.tableBackedChart",),
         "terms": ("차트", "시각화", "그래프", "랭킹 차트", "비교 차트", "chart", "visual"),
         "boost": 14.0,
@@ -640,15 +659,26 @@ def _score(spec: SkillSpec, terms: list[str], *, query: str = "") -> tuple[float
         "sourceRefs": " ".join(spec.sourceRefs),
         "runtimeCompatibility": json.dumps(spec.runtimeCompatibility, ensure_ascii=False),
         "docs": json.dumps(spec.docs, ensure_ascii=False),
+        "procedure": " ".join(spec.procedure),
+        "requiredEvidence": " ".join(spec.requiredEvidence),
+        "expectedOutputs": " ".join(spec.expectedOutputs),
+        "failureModes": " ".join(spec.failureModes),
+        "forbidden": " ".join(spec.forbidden),
+        "examples": " ".join(spec.examples),
+        "body": str(spec.source.get("body") or ""),
     }
     score = 0.0
     reasons: list[str] = []
+    normalized_query = query.lower()
     for term in terms:
         for name, hay in haystacks.items():
-            if term in hay.lower():
-                weight = 2.0 if name in {"id", "title", "whenToUse"} else 1.0
+            field = hay.lower()
+            if term in field:
+                weight = _field_weight(name)
                 if spec.category in {"engines", "runtime", "operation", "start"}:
                     weight += 0.75
+                if normalized_query and normalized_query in field:
+                    weight += 3.0
                 score += weight
                 reasons.append(f"{name}:{term}")
     boost, boost_reasons = _intent_boost(spec, query)
@@ -658,6 +688,20 @@ def _score(spec: SkillSpec, terms: list[str], *, query: str = "") -> tuple[float
     if spec.status in {"auditP", "official"}:
         score += 0.5
     return score, reasons
+
+
+def _field_weight(name: str) -> float:
+    if name == "id":
+        return 4.0
+    if name == "title":
+        return 3.5
+    if name in {"whenToUse", "purpose"}:
+        return 2.75
+    if name in {"capabilityRefs", "toolRefs", "requiredEvidence", "expectedOutputs"}:
+        return 2.0
+    if name in {"procedure", "examples", "body"}:
+        return 1.25
+    return 1.0
 
 
 def _intent_boost(spec: SkillSpec, query: str) -> tuple[float, list[str]]:

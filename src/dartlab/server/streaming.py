@@ -2,14 +2,12 @@
 
 [최우선 UX 원칙] 사용자용 진행 요약과 raw evidence 분리
 
-모든 분석 로직은 dartlab.ai.kernel 이 처리.
+모든 분석 로직은 dartlab.ai.kernel.ask 가 처리.
 이 모듈은 이벤트를 SSE dict로 변환하는 thin adapter.
 
 이벤트 흐름:
-  task → plan → tool_start → tool_progress → tool_result → observation → decision
-  draft → verify → answer|unable → chunk → done
-  reference/inspect/execute/visual 은 하위호환 trace 로 함께 전달된다.
-  done.responseMeta.journal 은 질의별 JSONL workbench journal artifact 를 가리킨다.
+  understand_intent → skill_search → generated_spec_search → plan_tool_use
+  → execute_step → observe_result → verify → compose_answer|repair_or_fail
 """
 
 from __future__ import annotations
@@ -58,7 +56,7 @@ _SPINNER_ACTIVITY_TOOLS = {"run_python", "compile_visual"}
 
 @dataclass
 class AnalysisStreamError(RuntimeError):
-    """core.runAsk() error event surfaced to server adapters."""
+    """ask event error surfaced to server adapters."""
 
     message: str
     action: str = ""
@@ -66,16 +64,16 @@ class AnalysisStreamError(RuntimeError):
 
 
 async def stream_ask(req: AskRequest):
-    """core.runAsk() 이벤트 → SSE 변환.
+    """ask 이벤트 → SSE 변환.
 
-    모든 분석 로직은 core.runAsk() 에 위임. 종목 resolve 는 AI 가 자율 판단.
+    모든 분석 로직은 ask workbench 에 위임. 종목 resolve 는 AI 가 자율 판단.
     """
     kwargs = _build_kwargs(req)
     auditor = AuditCollector(
         question=req.question,
         stockCode_hint=kwargs.get("stockCode"),
-        provider=kwargs.get("provider"),
-        model=kwargs.get("model"),
+        provider=None,
+        model=None,
     )
     try:
         async for item in stream_analysis(req.question, _audit=auditor, **kwargs):
@@ -85,11 +83,11 @@ async def stream_ask(req: AskRequest):
 
 
 async def stream_analysis(question: str = "", *, _audit: AuditCollector | None = None, **kwargs):
-    """core.runAsk() → SSE adapter."""
-    from dartlab.ai.kernel import runAsk
+    """ask internal events → SSE adapter."""
+    from dartlab.ai.kernel import _ask_events
 
     activity_count = 0
-    async for event in _sync_gen_to_async(runAsk, question, **kwargs):
+    async for event in _sync_gen_to_async(_ask_events, question, **kwargs):
         if _audit is not None:
             _audit.observe(event.kind, event.data)
         activity = _activity_from_event(event.kind, event.data)
@@ -107,20 +105,20 @@ async def stream_analysis(question: str = "", *, _audit: AuditCollector | None =
 
 
 async def collect_analysis_text(question: str = "", **kwargs) -> str:
-    """core.runAsk() 실행 후 chunk 텍스트 수집 (non-stream HTTP endpoint 용)."""
+    """ask 실행 후 chunk 텍스트 수집 (non-stream HTTP endpoint 용)."""
     result = await collect_analysis_result(question, **kwargs)
     return result["answer"]
 
 
 async def collect_analysis_result(question: str = "", **kwargs) -> dict:
-    """core.runAsk() 실행 후 답변과 tool CSV 아티팩트를 함께 수집한다."""
-    from dartlab.ai.kernel import runAsk
+    """ask 실행 후 답변과 tool CSV 아티팩트를 함께 수집한다."""
+    from dartlab.ai.kernel import _ask_events
 
     auditor = AuditCollector(
         question=question,
         stockCode_hint=kwargs.get("stockCode"),
-        provider=kwargs.get("provider"),
-        model=kwargs.get("model"),
+        provider=None,
+        model=None,
     )
     chunks: list[str] = []
     artifacts: list[dict] = []
@@ -134,7 +132,7 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
     responseMeta: dict = {}
     activity_count = 0
     try:
-        async for event in _sync_gen_to_async(runAsk, question, **kwargs):
+        async for event in _sync_gen_to_async(_ask_events, question, **kwargs):
             auditor.observe(event.kind, event.data)
             if _activity_from_event(event.kind, event.data) is not None:
                 activity_count += 1
@@ -190,13 +188,8 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
 
 
 def _build_kwargs(req: AskRequest) -> dict:
-    """AskRequest → core.runAsk() kwargs 변환."""
+    """AskRequest → ask workbench kwargs 변환."""
     kwargs: dict = {
-        "provider": req.provider,
-        "role": req.role,
-        "model": req.model,
-        "api_key": req.api_key,
-        "base_url": req.base_url,
         "include": req.include,
         "exclude": req.exclude,
         "history": [h.model_dump() for h in req.history] if req.history else None,
@@ -288,7 +281,24 @@ def _dedupeStrings(items: list[str]) -> list[str]:
 
 def _sse(event: str, data: dict) -> dict:
     """이벤트 → SSE dict 변환."""
-    return {"event": event, "data": json.dumps(data, ensure_ascii=False)}
+    return {"event": event, "data": json.dumps(_publicSseData(data), ensure_ascii=False)}
+
+
+def _publicSseData(value):
+    if isinstance(value, dict):
+        return {key: _publicSseData(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_publicSseData(item) for item in value]
+    if isinstance(value, str):
+        return (
+            value.replace("search_reference", "search reference")
+            .replace("read_context", "read context")
+            .replace("generated_spec_search", "generated spec search")
+            .replace("engine_call", "engine call")
+            .replace("run_python", "run python")
+            .replace("verify_answer", "verify answer")
+        )
+    return value
 
 
 def _activity_from_event(kind: str, data: dict) -> dict | None:
@@ -305,11 +315,11 @@ def _activity_from_event(kind: str, data: dict) -> dict | None:
     if kind == "reference":
         if data.get("action"):
             return None
-        action = str(data.get("action") or "search_reference")
+        action = str(data.get("action") or "search reference").replace("_", " ")
         refs = data.get("refs") if isinstance(data.get("refs"), list) else []
         ref = data.get("ref") if isinstance(data.get("ref"), dict) else None
         target = _targetFromReference(data, ref)
-        if action == "read_context":
+        if action == "read context":
             summary = f"read context 실행함{': ' + target if target else ''}"
         else:
             summary = f"search reference 실행함{': ' + target if target else ''} · refs {len(refs)}개"

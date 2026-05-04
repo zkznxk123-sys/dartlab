@@ -75,6 +75,9 @@ lastUpdated: "2026-05-02"
 
 ## 절차
 
+- Workbench 공식 순서는 `routeIntent → selectSkill → searchCapability → planEvidence → executeTool → observeResult → verifyClaims → composeAnswer → repairOrFail`이다.
+- `routeIntent`는 profile 생성만 담당한다. 실행 계획은 질문 문자열 하드코딩이 아니라 선택된 skill의 `requiredEvidence`/`toolRefs`/`knowledgeRefs`와 generated capability/docstring 결과로 만든다.
+- root `skills/`가 실행 절차 SSOT이고, `CAPABILITIES`/docstring이 호출 가능 API SSOT다. AI 내부에 별도 skill resolver나 capability index를 중복 생성하지 않는다.
 - 선택한 skill의 requiredEvidence를 실행 전 체크리스트로 둔다.
 - dataset이 필요한 질문은 먼저 inspect 단계로 schema, latest, metric 후보를 확인한다.
 - 계산은 실행 결과가 table/value/date ref를 만들 수 있게 수행한다. 표를 만들 때 `metric`은 숫자 컬럼으로 두고, 날짜·라벨·식별자는 `meta`, `asOf`, `period`, `target` 또는 별도 문자열 컬럼으로 둔다.
@@ -84,4 +87,5 @@ lastUpdated: "2026-05-02"
 - 최종 답변은 evidence refs와 limits만 제출해서 끝내지 않는다. 숫자·날짜·ranking 같은 material claim은 각 claim 안에서 supporting table/value/date ref를 직접 가리켜야 한다.
 - 후보·상위·랭킹 최종 답변은 `입력/유니버스`, `필터`, `계산식/지표`, `결과`를 포함하고, 회사/식별자, 기준 기간, 원값, metric, rank가 들어간 markdown evidence table을 본문에 렌더링한다.
 - 검산 실패 후 재시도할 때는 실패한 초안의 숫자 문장을 그대로 유지하지 말고, ref로 뒷받침되는 claim만 남긴다.
+- 서버 audit runner는 원문 답변과 refs/events/meta를 캡처만 한다. 품질 pass/fail은 저장된 답변 원문을 사람이 직접 읽고 별도 review 기록으로 판정한다.
 

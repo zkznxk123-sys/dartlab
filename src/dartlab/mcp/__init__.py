@@ -63,11 +63,95 @@ def _getCompany(stockCode: str) -> Any:
 
 
 _MCP_MAX_RESULT_CHARS = 12000  # MCP 도구 결과 상한 (외부 AI 컨텍스트 절약)
-from dartlab.ai.mcp import CANONICAL_TOOL_NAMES as _MCP_WORKSPACE_AGENT_TOOL_NAMES  # noqa: E402
-from dartlab.ai.mcp import execute_tool as _executeAskWorkbenchTool  # noqa: E402
-from dartlab.ai.mcp import tool_specs as _askWorkbenchToolSpecs  # noqa: E402
+from dartlab.ai.kernel import ask as _ask  # noqa: E402
+from dartlab.ai.tools.registry import CANONICAL_TOOL_NAMES as _AI_TOOL_NAMES  # noqa: E402
+from dartlab.ai.tools.registry import executeTool as _executeAiTool  # noqa: E402
+from dartlab.ai.tools.registry import toolSpecs as _aiToolSpecs  # noqa: E402
+
+_MCP_WORKSPACE_AGENT_TOOL_NAMES = (
+    "ask",
+    "skill_search",
+    "generated_spec_search",
+    "engine_call",
+    "run_python",
+    "read",
+)
 
 _mcp_workspace_session: Any | None = None
+
+
+def _askWorkbenchToolSpecs() -> list[dict[str, Any]]:
+    specs = {spec["name"]: spec for spec in _aiToolSpecs()}
+    specs["ask"] = {
+        "name": "ask",
+        "description": "DartLab 공식 AI 답변 진입점. Skill OS, generated spec, tools, ref 검증 루프를 통해 답변한다.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"question": {"type": "string"}, "stockCode": {"type": "string"}},
+            "required": ["question"],
+        },
+    }
+    return [specs[name] for name in _MCP_WORKSPACE_AGENT_TOOL_NAMES]
+
+
+def _executeAskWorkbenchTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+    if name == "ask":
+        question = str(args.get("question") or "")
+        kwargs = {key: value for key, value in args.items() if key != "question"}
+        return {"ok": True, "answer": _ask(question, stream=False, **kwargs)}
+    if name in _AI_TOOL_NAMES:
+        return _executeAiTool(name, args)
+    return _executeCompatAskTool(name, args)
+
+
+def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+    if name == "ask_kernel_status":
+        return {
+            "name": "Ask Workbench",
+            "entry": "ask",
+            "tools": list(_MCP_WORKSPACE_AGENT_TOOL_NAMES),
+            "loop": [
+                "understand_intent",
+                "skill_search",
+                "generated_spec_search",
+                "plan_tool_use",
+                "execute_step",
+                "observe_result",
+                "verify",
+                "compose_answer",
+                "repair_or_fail",
+            ],
+        }
+    if name == "search_reference":
+        query = str(args.get("query") or "")
+        skills = _executeAiTool("skill_search", {"query": query, "limit": args.get("limit") or 5})
+        specs = _executeAiTool("generated_spec_search", {"query": query, "limit": args.get("limit") or 5})
+        return {
+            "ok": bool(skills.get("ok") or specs.get("ok")),
+            "refs": [*(skills.get("refs") or []), *(specs.get("refs") or [])],
+        }
+    if name == "listDartlabSkills":
+        from dartlab.skill_os.registry import listSkills
+
+        return {"skills": [skill.to_dict() for skill in listSkills(includeUser=bool(args.get("includeUser", True)))]}
+    if name in {"searchDartlabSkills", "skill_search"}:
+        return _executeAiTool(
+            "skill_search",
+            {
+                "query": args.get("query", ""),
+                "limit": args.get("limit") or 8,
+                "includeUser": args.get("includeUser", True),
+            },
+        )
+    if name == "explainDartlabSkill":
+        return _executeAiTool("read", {"target": f"dartlab://skills/{args.get('skillId')}"})
+    if name == "checkDartlabSkillEvidence":
+        from dartlab.skill_os.registry import checkEvidence
+
+        return checkEvidence(
+            str(args.get("skillId") or ""), args.get("refs") or [], includeUser=bool(args.get("includeUser", True))
+        ).to_dict()
+    return {"ok": False, "error": f"Unknown tool: {name}"}
 
 
 def _fmt(obj) -> str:
@@ -116,7 +200,7 @@ def _resourcePayload(uri_str: str) -> tuple[str, str]:
     if uri_str == "dartlab://datasets":
         return (
             json.dumps(
-                _executeAskWorkbenchTool("ask_kernel_status", {}).get("datasets", []),
+                {"datasets": [], "note": "dataset refs are produced by engine_call/run_python"},
                 ensure_ascii=False,
                 indent=2,
             ),
@@ -142,17 +226,20 @@ def _resourcePayload(uri_str: str) -> tuple[str, str]:
         )
     if uri_str.startswith("dartlab://skills/"):
         skill_id = uri_str.replace("dartlab://skills/", "", 1)
+        from dartlab.skill_os.registry import describeSkill
+
         return (
-            json.dumps(
-                _executeAskWorkbenchTool(
-                    "explainDartlabSkill",
-                    {"skillId": skill_id, "includeUser": False},
-                ),
-                ensure_ascii=False,
-                indent=2,
-            ),
+            json.dumps(describeSkill(skill_id, includeUser=False), ensure_ascii=False, indent=2),
             "application/json",
         )
+    if uri_str.startswith("dartlab://runs/") and uri_str.endswith("/scratchpad"):
+        from pathlib import Path
+
+        run_id = uri_str.removeprefix("dartlab://runs/").removesuffix("/scratchpad")
+        path = Path.home() / ".dartlab" / "ask_runs" / f"{run_id}.jsonl"
+        if not path.exists():
+            return ("", "application/jsonl")
+        return (path.read_text(encoding="utf-8"), "application/jsonl")
     if os.environ.get("DARTLAB_MCP_COMPAT") != "1":
         return ("Unknown resource", "text/plain")
     if uri_str == "dartlab://graph":
@@ -227,28 +314,25 @@ def _fmtDict(d: dict, depth: int = 0) -> str:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _MCP_INSTRUCTIONS = """\
-DartLab MCP의 기본 표면은 Ask Workbench와 DartLab Skill OS다. 목적은 LLM이
-DartLab을 프롬프트 지식으로 외우게 하는 것이 아니라, 질문마다 먼저 skill을
-고르고, 필요한 capability와 런타임 데이터셋을 검사하고, Python으로 계산하고,
-검산한 뒤 답하게 하는 것이다.
+DartLab MCP의 기본 표면은 ask와 canonical AI tools다. 목적은 LLM이 DartLab을
+프롬프트 지식으로 외우게 하는 것이 아니라, 질문마다 먼저 skill을 고르고,
+generated spec/docstring에서 호출 가능한 API를 확인한 뒤 engine_call 또는
+run_python으로 실행하고 ref 검증 후 답하게 하는 것이다.
 
 ## 기본 흐름
-1. start_ask_session으로 Ask Workbench task를 만든다.
-2. search_reference 또는 searchDartlabSkills로 목적 skill을 먼저 선택한다.
-3. explainDartlabSkill 또는 dartlab://skills/{skillId}로 절차, 근거, 실행 환경을 확인한다.
-4. 필요한 API 세부는 skill의 capabilityRefs/docstring으로 확인한다.
-5. inspect_dataset으로 데이터셋의 schema/latest/entity/metric을 확인한다.
-6. run_python으로 DartLab 라이브러리와 Polars를 사용해 계산한다.
-7. compile_visual은 계산표가 있을 때만 사용한다.
-8. finalize_answer는 skill ref와 검산 ref를 거친 최종 답변 표면이다.
-9. 후보·상위·랭킹 답변은 bullet 나열로 끝내지 않고 입력/유니버스, 필터, 계산식/지표, 결과와 evidence table을 함께 낸다.
+1. ask로 전체 답변 루프를 실행한다.
+2. 별도 작업대가 필요하면 skill_search로 목적 skill을 먼저 선택한다.
+3. read 또는 dartlab://skills/{skillId}로 절차, 근거, 실행 환경을 확인한다.
+4. generated_spec_search로 호출 가능한 공개 API와 docstring 정보를 찾는다.
+5. engine_call로 generated spec 기반 call plan을 검증·실행한다.
+6. 계산/랭킹/표 생성은 run_python으로 DartLab 라이브러리와 Polars를 사용한다.
+7. 후보·상위·랭킹 답변은 bullet 나열로 끝내지 않고 입력/유니버스, 필터, 계산식/지표, 결과와 evidence table을 함께 낸다.
 
 ## 경계
-- Company, gather, scan, macro, analysis, quant, viz는 MCP 직접 도구가 아니라
-  run_python 안에서 사용하는 DartLab 라이브러리다.
+- Company, gather, scan, macro, analysis, quant, viz는 generated MCP tool로 직접 우회하지 않는다.
+  engine_call 또는 run_python 안에서 사용하는 DartLab 라이브러리다.
 - Skills는 MCP 전용 규칙이 아니라 dartlab.skill_os 공용 resolver를 그대로 노출한다.
 - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다. 모든 절차는 Skill OS에서 찾는다.
-- inspect_data는 외부 호환 alias일 뿐 기본 도구 목록에 노출하지 않는다.
 - companySections 같은 전체 sections 지도는 메모리 부담이 커서 기본 경로에서 쓰지 않는다.
 - 도구로 확인되지 않은 수치, 날짜, 실행 성공 여부를 단정하지 않는다.
 - 후보·상위·랭킹 결과를 표 없이 종목명과 퍼센트만 나열하지 않는다.

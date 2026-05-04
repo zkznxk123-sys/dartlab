@@ -6,9 +6,7 @@ import time
 
 from dartlab.cli.brand import CLR, CLR_MUTED
 from dartlab.cli.constants import toolLabel, toolResultPreview
-from dartlab.cli.context import PROVIDERS
 from dartlab.cli.services.errors import CLIError
-from dartlab.cli.services.providers import detect_provider
 from dartlab.cli.services.runtime import configure_dartlab
 
 
@@ -24,10 +22,10 @@ def configure_parser(subparsers) -> None:
         help="질문 (종목명 포함). 예: 삼성전자 재무건전성 분석해줘",
     )
     parser.add_argument("--company", "-c", default=None, help="종목 명시 (종목코드 또는 회사명)")
-    parser.add_argument("--provider", "-p", default=None, choices=PROVIDERS, help="LLM provider")
-    parser.add_argument("--model", "-m", default=None, help="모델명")
-    parser.add_argument("--base-url", default=None, help="커스텀 API URL")
-    parser.add_argument("--api-key", default=None, help="API 키")
+    parser.add_argument("--provider", "-p", default=None, help="호환 옵션: provider 선택은 제품 설정에서 관리")
+    parser.add_argument("--model", "-m", default=None, help="호환 옵션: 모델 선택은 제품 설정에서 관리")
+    parser.add_argument("--base-url", default=None, help="호환 옵션")
+    parser.add_argument("--api-key", default=None, help="호환 옵션")
     parser.add_argument("--include", "-i", nargs="+", default=None, help="포함할 topic (BS IS CF dividend ...)")
     parser.add_argument("--exclude", "-e", nargs="+", default=None, help="제외할 topic")
     parser.add_argument("--stream", "-s", action="store_true", default=True, help="스트리밍 출력 (기본값)")
@@ -47,7 +45,6 @@ def run(args) -> int:
     from rich.text import Text
 
     dartlab = configure_dartlab()
-    provider = args.provider or detect_provider()
     console = Console()
 
     # ── 종목 추출 ──
@@ -59,11 +56,7 @@ def run(args) -> int:
         console.print(f"\n  [bold {CLR}]{company.corpName}[/] ({company.stockCode})")
     else:
         console.print(f"\n  [bold {CLR}]Free analysis[/] [dim](LLM will search for companies)[/]")
-    providerLine = f"  [{CLR_MUTED}]provider: {provider}"
-    if args.model:
-        providerLine += f" / {args.model}"
-    providerLine += "[/]"
-    console.print(providerLine)
+    console.print(f"  [{CLR_MUTED}]entry: dartlab.ask[/]")
     console.print()
 
     # ── 히스토리 연속 ──
@@ -72,22 +65,16 @@ def run(args) -> int:
     if args.cont and company is not None:
         session_id, history = _loadHistory(company.stockCode, console)
 
-    # ── runAsk() 직접 호출 (이벤트 스트림) ──
-    from dartlab.ai.kernel import runAsk
+    # ── ask 내부 이벤트 스트림 ──
+    from dartlab.ai.kernel import _ask_events
 
-    events = runAsk(
-        company,
+    events = _ask_events(
         question,
         include=args.include,
         exclude=args.exclude,
-        provider=provider,
-        model=args.model,
-        base_url=args.base_url,
-        api_key=args.api_key,
         history=history,
         report_mode=args.report,
-        use_tools=True,
-        max_turns=10 if args.report else 5,
+        stockCode=getattr(company, "stockCode", None) if company is not None else None,
     )
 
     buffer = ""
