@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: unverified
 category: start
-purpose: DartLab 코드 전체를 읽기 전에 skills catalog만 보고 목적 skill, capability, 근거 요구사항을 찾는 시작 절차다.
+purpose: DartLab 코드 전체를 읽기 전에 skills catalog만 보고 목적 skill, 공개 호출 방식, 대표 반환 형태, 근거 요구사항을 찾는 시작 절차다.
 whenToUse:
   - dartlab skills 어떻게 써
   - dartlab 뭐 할 수 있어
@@ -55,12 +55,12 @@ runtimeCompatibility:
     limitations:
       - 실제 분석 실행 가능 여부는 선택한 skill의 runtimeCompatibility를 따른다.
 failureModes:
-  - generic basic skill만 보고 분석 시작
+  - 엔진 기본 skill을 보지 않고 capability 이름만 보고 분석 시작
   - DartLab 기능 설명 질문을 RuntimeDatasetCatalog만으로 답함
-  - capability schema를 SkillSpec 안에서 찾으려 함
+  - skill에 있는 공개 호출 방식과 대표 반환 형태를 확인하지 않음
   - requiredEvidence 확인 없이 답변 작성
 forbidden:
-  - SkillSpec에 없는 API schema를 추측
+  - skill과 실제 공개 API의 불일치를 방치
   - capabilityRefs 확인 없이 실행 코드 작성
 examples:
   - dartlab skills 어떻게 써?
@@ -74,9 +74,10 @@ lastUpdated: "2026-05-02"
 ## 절차
 
 - 사용자 질문을 그대로 skill 검색어로 사용해 curated skill을 먼저 찾는다.
-- "뭐 할 수 있어", "기능", "사용법", "함수" 질문은 데이터셋보다 skill/capability ref를 먼저 근거로 삼는다.
+- "뭐 할 수 있어", "기능", "사용법", "함수" 질문은 데이터셋보다 엔진 skill과 capability ref를 먼저 근거로 삼는다.
 - 사용법 답변은 코드 예시를 최소화하고, 숫자·날짜가 필요한 실행 claim처럼 보이지 않게 capability ref를 근거로 설명한다.
-- 검색 결과가 generic `basic.*`뿐이면 질문의 목적어를 더 좁혀 다시 검색한다.
-- 선택한 skill의 `capabilityRefs`, `requiredEvidence`, `runtimeCompatibility`를 읽는다.
-- API 인자와 반환 구조는 capability view 또는 docstring에서 확인한다.
+- 검색 결과가 엔진 기본 skill뿐이면 질문의 목적어를 더 좁혀 응용 skill을 다시 검색한다.
+- 선택한 skill의 공개 호출 방식, 호출 동작, 대표 반환 형태, `capabilityRefs`, `requiredEvidence`, `runtimeCompatibility`를 읽는다.
+- 세부 API 인자와 전체 반환 필드는 capability/docstring으로 검산한다.
 - 실행 전에는 어떤 ref를 만들어야 하는지 목록으로 고정한다.
+

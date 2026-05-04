@@ -23,27 +23,7 @@ _CATEGORY_META: dict[str, dict[str, str]] = {
     },
     "engines": {
         "title": "Engines",
-        "description": "DartLab 엔진을 어떤 목적에 연결할지 알려주는 조합 원칙.",
-    },
-    "screens": {
-        "title": "Screens",
-        "description": "scan/gather 기반 후보 발굴, 횡단 비교, 시장 필터링 절차.",
-    },
-    "finance": {
-        "title": "Finance",
-        "description": "기업 분석, 공시 이벤트, 신용, 밸류에이션, 현금흐름 등 금융 리서치 절차.",
-    },
-    "visuals": {
-        "title": "Visuals",
-        "description": "표 근거가 있는 차트와 시각 산출물을 만들고 검증하는 절차.",
-    },
-    "basic": {
-        "title": "Basic Engine Maps",
-        "description": "공개 docstring/capability에서 자동 생성한 엔진별 능력 지도.",
-    },
-    "capability": {
-        "title": "Capability Reference",
-        "description": "공개 API docstring에서 자동 생성한 capability 검색 진입점.",
+        "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
     },
     "user": {
         "title": "User Skills",
@@ -55,11 +35,6 @@ _CATEGORY_ORDER = (
     "runtime",
     "operation",
     "engines",
-    "screens",
-    "finance",
-    "visuals",
-    "basic",
-    "capability",
     "user",
 )
 
@@ -124,25 +99,23 @@ def buildSkillArtifacts(
     _prepare_generated_dir(web_path)
 
     categories = _ordered_categories({skill.category for skill in skills})
-    public_skills = [skill for skill in skills if skill.category != "capability"]
-    search_index = [_search_doc(skill) for skill in public_skills]
+    search_index = [_search_doc(skill) for skill in skills]
     meta = {
         "entrySkillId": "start.dartlabSkillOs",
         "canonicalSurface": "DartLab Skill OS",
-        "skillCount": len(public_skills),
+        "skillCount": len(skills),
         "categories": [
             {
                 "id": category,
                 **_category_meta(category),
-                "count": sum(1 for skill in public_skills if skill.category == category),
+                "count": sum(1 for skill in skills if skill.category == category),
             }
             for category in categories
-            if category != "capability"
         ],
-        "sourcePolicy": "Deleted operation docs are absorbed into engine, runtime, and operation skills.",
+        "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills.",
     }
     pyodide_manifest = [
-        _pyodide_doc(skill) for skill in public_skills if _runtime_status(skill, "pyodide") in {"supported", "limited"}
+        _pyodide_doc(skill) for skill in skills if _runtime_status(skill, "pyodide") in {"supported", "limited"}
     ]
     _write_json(web_path / "index.json", {"meta": meta, "skills": search_index})
     _write_json(web_path / "pyodide.json", {"skills": pyodide_manifest})

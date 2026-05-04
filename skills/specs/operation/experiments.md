@@ -63,7 +63,7 @@ failureModes:
   - 검증 게이트 없이 변경 또는 답변을 완료 처리함
 forbidden:
   - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.
-  - API parameters/returns를 SkillSpec에 복사하지 않는다.
+  - 공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다.
 examples:
   - Experiments 규칙 확인
   - experiments 작업을 Skill OS에서 시작
@@ -77,7 +77,7 @@ lastUpdated: '2026-05-03'
 ## Skill OS 흡수 규칙
 
 - 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.
-- API 세부 인자와 반환 구조는 capability/docstring을 확인한다.
+- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.
 - 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.
 
 ## 실행 순서
@@ -91,3 +91,4 @@ lastUpdated: '2026-05-03'
 - 각 폴더에 `STATUS.md` 로 현황 기록.
 - 실험 코드는 실험 폴더 안에서 관리한다.
 - 네이밍 — `XXX_camelCaseFeature.py` (001 부터).
+

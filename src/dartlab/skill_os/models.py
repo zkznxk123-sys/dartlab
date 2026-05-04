@@ -1,8 +1,9 @@
-"""SkillSpec models for DartLab analysis procedures.
+"""SkillSpec models for DartLab execution skills.
 
-SkillSpec is a shared procedure description, not an execution runner.  API
-parameters and return schemas stay in public docstrings and generated
-capabilities; skills only reference those capabilities.
+SkillSpec is a public execution document for people and AI.  Public call
+patterns, behavior, and representative return contracts belong in skills so a
+reader can run the skill directly.  Generated capabilities remain the API
+source used to validate capabilityRefs and keep skills synchronized with code.
 """
 
 from __future__ import annotations
@@ -29,12 +30,12 @@ SkillCategory = Literal[
 
 @dataclass(frozen=True)
 class SkillSpec:
-    """분석 절차 명세 — capability 를 조합하는 공유 skill 단위.
+    """실행 스킬 명세 — 사람과 AI가 함께 쓰는 공개 skill 단위.
 
     Description
     -----------
-    DartLab AI, MCP, story, UI, audit, GitHub Pages 가 함께 읽는 분석 절차
-    명세다. 이 객체는 실행 코드를 포함하지 않고, 필요한
+    DartLab AI, MCP, story, UI, audit, GitHub Pages 가 함께 읽는 공개 실행
+    문서다. 공개 호출 방식, 호출 동작, 대표 반환 형태, 필요한
     capability/tool/knowledge 와 evidence 계약을 설명한다.
 
     Parameters
@@ -73,7 +74,8 @@ class SkillSpec:
 
     Notes
     -----
-    API signature/returns 중복은 금지한다. capabilityRefs 로 연결한다.
+    기능 개선, API 변경, 반환 형태 변경, 운영 방식 변경이 있으면 관련
+    SkillSpec 을 함께 갱신한다. 스킬과 공개 API가 충돌하면 스킬 갱신 누락이다.
 
     Guide
     -----

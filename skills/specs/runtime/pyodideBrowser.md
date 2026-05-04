@@ -60,3 +60,4 @@ lastUpdated: "2026-05-02"
 - `limited`는 HF snapshot, 업로드 파일, prebuilt parquet 같은 제한 조건을 함께 표시한다.
 - `unsupported`는 로컬 Python 또는 서버 ask 경로를 안내한다.
 - 브라우저에서 말하는 최신성은 live API가 아니라 사용한 snapshot의 asOf 기준으로만 표현한다.
+

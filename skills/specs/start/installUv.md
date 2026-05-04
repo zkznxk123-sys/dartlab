@@ -58,3 +58,4 @@ lastUpdated: "2026-05-02"
 - `uv run python -X utf8 -c "import dartlab; print(dartlab.__version__)"`로 import를 확인한다.
 - 데이터가 필요한 skill은 설치와 별개로 RuntimeDatasetCatalog 또는 prefetch 절차를 확인한다.
 - 첫 분석은 `search_reference`로 목적 skill을 찾은 뒤 capability와 runtime 제한을 함께 확인한다.
+

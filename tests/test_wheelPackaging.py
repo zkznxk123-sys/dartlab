@@ -161,6 +161,9 @@ def test_skillSpecs_inWheel(builtWheel: Path):
 
     required = [
         "dartlab/skill_os/specs/start/dartlabSkillOs.md",
+        "dartlab/skill_os/specs/engines/analysis/SKILL.md",
+        "dartlab/skill_os/specs/engines/analysis/profitability.md",
+        "dartlab/skill_os/specs/engines/scan/undervaluedQuality.md",
         "dartlab/skill_os/specs/operation/apiContract.md",
         "dartlab/skill_os/specs/runtime/mcp.md",
         "dartlab/skill_os/index.json",

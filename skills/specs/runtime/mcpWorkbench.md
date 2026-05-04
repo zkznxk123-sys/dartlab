@@ -56,3 +56,4 @@ lastUpdated: "2026-05-02"
 - API 상세가 필요하면 capability ref를 확인한다.
 - 계산은 `run_python`으로 실행하고 `finalize_answer`에서 ref 검산을 통과한다.
 - legacy engine tool은 compatibility 옵션이 켜진 경우에만 사용한다.
+

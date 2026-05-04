@@ -1,9 +1,36 @@
 {
   "skills": [
     {
-      "id": "cashflowReview",
+      "id": "engines.analysis",
+      "title": "Analysis",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.assetStructure",
+      "title": "Analysis - 자산구조",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.capitalAllocation",
+      "title": "Analysis - 자본배분",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.cashflow",
       "title": "현금흐름 분석",
-      "category": "finance",
+      "category": "engines",
       "status": "limited",
       "dataSources": [
         "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
@@ -18,124 +45,27 @@
       ]
     },
     {
-      "id": "companyCausalReview",
-      "title": "기업 6막 인과 분석",
-      "category": "finance",
+      "id": "engines.analysis.costStructure",
+      "title": "Analysis - 비용구조",
+      "category": "engines",
       "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
-      ],
-      "requiredSetup": [
-        "await dartlab.prefetch(stockCode) 후 Company(stockCode)를 생성한다."
-      ],
-      "limitations": [
-        "live gather, 외부 macro API, OAuth ask는 브라우저 CORS/인증 제약으로 제외한다."
-      ]
-    },
-    {
-      "id": "companyResearchStarter",
-      "title": "기업 분석 시작 라우터",
-      "category": "finance",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet"
-      ],
+      "dataSources": [],
       "requiredSetup": [],
-      "limitations": [
-        "live filings, macro 보강, 신규 수집은 서버 또는 로컬 Python 경로에서 수행한다."
-      ]
+      "limitations": []
     },
     {
-      "id": "creditRiskReview",
-      "title": "신용 위험 분석",
-      "category": "finance",
+      "id": "engines.analysis.disclosureChange",
+      "title": "Analysis - 공시변화",
+      "category": "engines",
       "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet"
-      ],
-      "requiredSetup": [
-        "Company 재무 snapshot을 먼저 prefetch한다."
-      ],
-      "limitations": [
-        "신용등급 외부 실시간 조회는 서버 또는 로컬 Python 환경에서만 가능하다."
-      ]
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
-      "id": "crossSectionStockScreen",
-      "title": "전종목 횡단면 주가 스크리닝",
-      "category": "screens",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data krx/prices parquet",
-        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
-      ],
-      "requiredSetup": [
-        "가격 랭킹은 HF KRX 가격 parquet를 /data/krx/prices에 내려받아 계산한다.",
-        "재무 조건형 스크리닝은 finance-lite prebuild로 제한한다."
-      ],
-      "limitations": [
-        "KRX API 실시간 호출은 CORS 때문에 사용하지 않는다.",
-        "finance-lite에는 주요 계정만 있어 전체 scan과 동일하지 않다."
-      ]
-    },
-    {
-      "id": "damodaranValuationReview",
-      "title": "가치평가 가정 분해 검토",
-      "category": "finance",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
-      ],
-      "requiredSetup": [
-        "await dartlab.prefetch(stockCode) 후 재무/보고서 근거로 가정을 만든다."
-      ],
-      "limitations": [
-        "할인율, 금리, 시장가격 등 live macro/price 보강은 서버 환경에서 수행한다."
-      ]
-    },
-    {
-      "id": "dartlabStoryReview",
-      "title": "DartLab 스토리형 분석",
-      "category": "finance",
-      "status": "supported",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
-      ],
-      "requiredSetup": [
-        "await dartlab.prefetch(stockCode) 후 Company(stockCode)를 생성한다."
-      ],
-      "limitations": [
-        "브라우저에서는 외부 API를 추가 호출하지 않고 prefetched parquet 기준으로만 작성한다."
-      ]
-    },
-    {
-      "id": "disclosureEventReview",
-      "title": "공시 이벤트 중요도 검토",
-      "category": "finance",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
-      ],
-      "requiredSetup": [
-        "await dartlab.prefetch(stockCode) 후 prefetched 공시/보고서 데이터만 사용한다."
-      ],
-      "limitations": [
-        "liveFilings와 DART OpenAPI 직접 호출은 CORS 때문에 사용하지 않는다.",
-        "본문 미조회 상태에서는 제목/프리빌드 기준 한계로 표시한다."
-      ]
-    },
-    {
-      "id": "dividendCapitalReturnReview",
+      "id": "engines.analysis.dividendCapitalReturn",
       "title": "배당과 주주환원 분석",
-      "category": "finance",
+      "category": "engines",
       "status": "limited",
       "dataSources": [
         "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
@@ -150,8 +80,186 @@
       ]
     },
     {
-      "id": "engines.analysis",
-      "title": "Analysis",
+      "id": "engines.analysis.earningsQuality",
+      "title": "Analysis - 이익품질",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.efficiency",
+      "title": "Analysis - 효율성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.financialConsistency",
+      "title": "Analysis - 재무정합성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.financing",
+      "title": "Analysis - 자금조달",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.governance",
+      "title": "Analysis - 지배구조",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.governanceAudit",
+      "title": "지배구조와 감사 리스크 점검",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "감사/공시 snapshot 또는 scan prebuild를 먼저 확인한다."
+      ],
+      "limitations": [
+        "본문 미조회 상태에서는 제목/프리빌드 기준 위험 신호로만 제한한다."
+      ]
+    },
+    {
+      "id": "engines.analysis.growth",
+      "title": "Analysis - 성장성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.investmentEfficiency",
+      "title": "Analysis - 투자효율",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.macroSensitivity",
+      "title": "Analysis - 매크로민감도",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.peerComparison",
+      "title": "동종 기업 비교 분석",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
+      ],
+      "requiredSetup": [
+        "비교 대상별로 await dartlab.prefetch(stockCode)를 먼저 수행한다."
+      ],
+      "limitations": [
+        "여러 종목 parquet를 브라우저 메모리에 올리므로 대상 수를 작게 유지한다.",
+        "live market/macro 보강은 서버 환경에서만 한다."
+      ]
+    },
+    {
+      "id": "engines.analysis.predictionSignal",
+      "title": "Analysis - 예측신호",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.profitability",
+      "title": "수익성 분석",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet",
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "Company 재무 snapshot 또는 finance-lite prebuild를 먼저 확인한다."
+      ],
+      "limitations": [
+        "live macro 보강은 서버 환경에서 수행한다."
+      ]
+    },
+    {
+      "id": "engines.analysis.revenueForecast",
+      "title": "Analysis - 매출전망",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.revenueStructure",
+      "title": "Analysis - 수익구조",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.scorecard",
+      "title": "Analysis - 종합평가",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.stability",
+      "title": "Analysis - 안정성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.valuation",
+      "title": "Analysis - 가치평가",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.analysis.valuationBand",
+      "title": "Analysis - 밸류에이션밴드",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -168,6 +276,53 @@
       "limitations": []
     },
     {
+      "id": "engines.company.disclosureEvent",
+      "title": "공시 이벤트 중요도 검토",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
+      ],
+      "requiredSetup": [
+        "await dartlab.prefetch(stockCode) 후 prefetched 공시/보고서 데이터만 사용한다."
+      ],
+      "limitations": [
+        "liveFilings와 DART OpenAPI 직접 호출은 CORS 때문에 사용하지 않는다.",
+        "본문 미조회 상태에서는 제목/프리빌드 기준 한계로 표시한다."
+      ]
+    },
+    {
+      "id": "engines.company.researchStarter",
+      "title": "기업 분석 시작 라우터",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet"
+      ],
+      "requiredSetup": [],
+      "limitations": [
+        "live filings, macro 보강, 신규 수집은 서버 또는 로컬 Python 경로에서 수행한다."
+      ]
+    },
+    {
+      "id": "engines.company.usEdgarReview",
+      "title": "미국 기업 EDGAR 분석",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet",
+        "HuggingFace dartlab-data edgar/docs/{ticker}.parquet"
+      ],
+      "requiredSetup": [
+        "ticker별 prefetched EDGAR snapshot이 있는지 먼저 확인한다."
+      ],
+      "limitations": [
+        "SEC live API와 신규 filings 조회는 서버 또는 로컬 Python 경로에서 수행한다."
+      ]
+    },
+    {
       "id": "engines.credit",
       "title": "Credit (dCR)",
       "category": "engines",
@@ -175,6 +330,22 @@
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
+    },
+    {
+      "id": "engines.credit.creditRisk",
+      "title": "신용 위험 분석",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet"
+      ],
+      "requiredSetup": [
+        "Company 재무 snapshot을 먼저 prefetch한다."
+      ],
+      "limitations": [
+        "신용등급 외부 실시간 조회는 서버 또는 로컬 Python 환경에서만 가능하다."
+      ]
     },
     {
       "id": "engines.dashboard",
@@ -195,7 +366,7 @@
       "limitations": []
     },
     {
-      "id": "engines.dataEngineFoundation",
+      "id": "engines.data.foundation",
       "title": "데이터 엔진 기본기",
       "category": "engines",
       "status": "limited",
@@ -227,6 +398,141 @@
       "limitations": []
     },
     {
+      "id": "engines.gather.collect",
+      "title": "Gather - Gather snapshot",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.consensus",
+      "title": "Gather - Consensus data",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.dividends",
+      "title": "Gather - Dividend history",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.flow",
+      "title": "Gather - Investor flow",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.history",
+      "title": "Gather - Price and volume history",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.industryPeers",
+      "title": "Gather - Industry peers",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.insiderTrading",
+      "title": "Gather - Insider trading",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.macro",
+      "title": "Gather - Macro raw data",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.majorShareholders",
+      "title": "Gather - Major shareholders",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.news",
+      "title": "Gather - News collection",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.ownership",
+      "title": "Gather - Institutional ownership",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.price",
+      "title": "Gather - Current price snapshot",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.revenueConsensus",
+      "title": "Gather - Revenue consensus",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.sector",
+      "title": "Gather - Sector information",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.splits",
+      "title": "Gather - Split history",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.industry",
       "title": "Industry",
       "category": "engines",
@@ -238,6 +544,130 @@
     {
       "id": "engines.macro",
       "title": "Macro",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.assets",
+      "title": "Macro - 자산",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.corporate",
+      "title": "Macro - 기업집계",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.crisis",
+      "title": "Macro - 위기",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.cycle",
+      "title": "Macro - 사이클",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.forecast",
+      "title": "Macro - 예측",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.inventory",
+      "title": "Macro - 재고",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.liquidity",
+      "title": "Macro - 유동성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.marketReview",
+      "title": "거시 시장 환경 점검",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data macro snapshot",
+        "HuggingFace dartlab-data krx/indices parquet"
+      ],
+      "requiredSetup": [
+        "사용 가능한 macro 또는 index snapshot을 RuntimeDatasetCatalog에서 먼저 확인한다."
+      ],
+      "limitations": [
+        "live FRED, 환율, 금리 API 호출은 브라우저 CORS/인증 제약으로 제외한다."
+      ]
+    },
+    {
+      "id": "engines.macro.rates",
+      "title": "Macro - 금리",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.scenario",
+      "title": "Macro - 시나리오",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.sentiment",
+      "title": "Macro - 심리",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.summary",
+      "title": "Macro - 종합",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.macro.trade",
+      "title": "Macro - 교역",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -263,7 +693,454 @@
       "limitations": []
     },
     {
-      "id": "engines.quantWorldClass",
+      "id": "engines.quant.accruals",
+      "title": "Quant - Sloan Accrual",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.allocation",
+      "title": "Quant - 자산배분",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.altman",
+      "title": "Quant - Altman Z",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.bab",
+      "title": "Quant - BAB 저베타",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.backtest",
+      "title": "Quant - 백테스트",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.benchmark",
+      "title": "Quant - 벤치마크",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.beneish",
+      "title": "Quant - Beneish M",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.beta",
+      "title": "Quant - 베타",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.chartPatterns",
+      "title": "Quant - 차트패턴",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.damodaranValuation",
+      "title": "가치평가 가정 분해 검토",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
+      ],
+      "requiredSetup": [
+        "await dartlab.prefetch(stockCode) 후 재무/보고서 근거로 가정을 만든다."
+      ],
+      "limitations": [
+        "할인율, 금리, 시장가격 등 live macro/price 보강은 서버 환경에서 수행한다."
+      ]
+    },
+    {
+      "id": "engines.quant.divergence",
+      "title": "Quant - 괴리",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.earnings",
+      "title": "Quant - 이익모멘텀",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.entry",
+      "title": "Quant - 진입진단",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.eventSignal",
+      "title": "Quant - 이벤트신호",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.factor",
+      "title": "Quant - 팩터",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.flow",
+      "title": "Quant - 수급",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.fundmom",
+      "title": "Quant - 펀더-가격 모멘텀",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.governanceQuant",
+      "title": "Quant - 거버넌스퀀트",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.indicators",
+      "title": "Quant - 지표",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.liquidity",
+      "title": "Quant - 유동성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.meanvar",
+      "title": "Quant - 평균분산",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.momentum",
+      "title": "Quant - 모멘텀",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.multi",
+      "title": "Quant - 멀티자산",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.pairs",
+      "title": "Quant - 페어",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.pattern",
+      "title": "Quant - 패턴",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.piotroski",
+      "title": "Quant - Piotroski F",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.qfactor",
+      "title": "Quant - q-factor",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.qmj",
+      "title": "Quant - QMJ",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.quality",
+      "title": "Quant - 퀄리티",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.ranking",
+      "title": "Quant - 순위",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.regime",
+      "title": "Quant - 레짐",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.residual",
+      "title": "Quant - 잔여수익",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.riskText",
+      "title": "Quant - 리스크텍스트",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.riskparity",
+      "title": "Quant - 리스크패리티",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.screen",
+      "title": "Quant - 스크린",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.sentiment",
+      "title": "Quant - 공시심리",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.signalReview",
+      "title": "퀀트 신호 교차검토",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data krx/prices parquet",
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "가격 신호는 HF 가격 parquet 또는 이미 prefetched 데이터가 있을 때만 계산한다."
+      ],
+      "limitations": [
+        "gather(\"price\") 같은 외부 가격 API 호출은 브라우저 CORS 때문에 사용하지 않는다.",
+        "가격 데이터가 없으면 재무/valuation-lite 기반 보조 신호로 제한한다."
+      ]
+    },
+    {
+      "id": "engines.quant.signals",
+      "title": "Quant - 신호",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.strategy",
+      "title": "Quant - 전략",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.style",
+      "title": "Quant - 스타일",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.surprise",
+      "title": "Quant - 이익서프라이즈",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.tailrisk",
+      "title": "Quant - 꼬리위험",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.toneChange",
+      "title": "Quant - 톤변화",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.value",
+      "title": "Quant - 가치",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.verdict",
+      "title": "Quant - 판단",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.volatility",
+      "title": "Quant - 변동성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.volume",
+      "title": "Quant - 거래량",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.walkforward",
+      "title": "Quant - 워크포워드",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.quant.worldClass",
       "title": "dartlab quant 세계 최강 — 사상 정합 + 성능 fix 플랜 (2026-04-25 v3)",
       "category": "engines",
       "status": "limited",
@@ -274,6 +1151,244 @@
     {
       "id": "engines.scan",
       "title": "Scan",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.account",
+      "title": "Scan - 계정",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.audit",
+      "title": "Scan - 감사리스크",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.capital",
+      "title": "Scan - 주주환원",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.cashflow",
+      "title": "Scan - 현금흐름",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.crossSectionStockScreen",
+      "title": "전종목 횡단면 주가 스크리닝",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data krx/prices parquet",
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "가격 랭킹은 HF KRX 가격 parquet를 /data/krx/prices에 내려받아 계산한다.",
+        "재무 조건형 스크리닝은 finance-lite prebuild로 제한한다."
+      ],
+      "limitations": [
+        "KRX API 실시간 호출은 CORS 때문에 사용하지 않는다.",
+        "finance-lite에는 주요 계정만 있어 전체 scan과 동일하지 않다."
+      ]
+    },
+    {
+      "id": "engines.scan.debt",
+      "title": "Scan - 부채구조",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.disclosureRisk",
+      "title": "Scan - 공시리스크",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.dividendTrend",
+      "title": "Scan - 배당추이",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.efficiency",
+      "title": "Scan - 효율성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.fields",
+      "title": "Scan - 필드카탈로그",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.governance",
+      "title": "Scan - 거버넌스",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.growth",
+      "title": "Scan - 성장성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.insider",
+      "title": "Scan - 내부자지분",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.krxIndexStrength",
+      "title": "KRX 지수 강세 분석",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data krx/indices parquet"
+      ],
+      "requiredSetup": [
+        "HF parquet를 Pyodide FS의 /data/krx/indices에 내려받은 뒤 inspect_dataset과 run_python으로 계산한다."
+      ],
+      "limitations": [
+        "KRX API 실시간 호출은 CORS 때문에 사용하지 않는다.",
+        "최신성은 HF에 업로드된 parquet의 BAS_DD 기준으로만 말한다."
+      ]
+    },
+    {
+      "id": "engines.scan.liquidity",
+      "title": "Scan - 유동성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.macroBeta",
+      "title": "Scan - 거시베타",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.network",
+      "title": "Scan - 네트워크",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.profitability",
+      "title": "Scan - 수익성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.quality",
+      "title": "Scan - 이익의 질",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.ratio",
+      "title": "Scan - 비율",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.screen",
+      "title": "Scan - 스크리닝",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.undervaluedQuality",
+      "title": "저평가·수익성 종목 후보 찾기",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
+      ],
+      "requiredSetup": [
+        "finance-lite prebuild를 브라우저 런타임에 로드한다."
+      ],
+      "limitations": [
+        "full scan 축 전체가 아니라 prebuild에 포함된 지표 기준 후보만 만든다."
+      ]
+    },
+    {
+      "id": "engines.scan.valuation",
+      "title": "Scan - 밸류에이션",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.scan.workforce",
+      "title": "Scan - 인력/급여",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -299,6 +1414,40 @@
       "limitations": []
     },
     {
+      "id": "engines.story.companyCausal",
+      "title": "기업 6막 인과 분석",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
+      ],
+      "requiredSetup": [
+        "await dartlab.prefetch(stockCode) 후 Company(stockCode)를 생성한다."
+      ],
+      "limitations": [
+        "live gather, 외부 macro API, OAuth ask는 브라우저 CORS/인증 제약으로 제외한다."
+      ]
+    },
+    {
+      "id": "engines.story.dartlabStory",
+      "title": "DartLab 스토리형 분석",
+      "category": "engines",
+      "status": "supported",
+      "dataSources": [
+        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
+        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
+      ],
+      "requiredSetup": [
+        "await dartlab.prefetch(stockCode) 후 Company(stockCode)를 생성한다."
+      ],
+      "limitations": [
+        "브라우저에서는 외부 API를 추가 호출하지 않고 prefetched parquet 기준으로만 작성한다."
+      ]
+    },
+    {
       "id": "engines.viz",
       "title": "Viz",
       "category": "engines",
@@ -308,52 +1457,14 @@
       "limitations": []
     },
     {
-      "id": "governanceAuditReview",
-      "title": "지배구조와 감사 리스크 점검",
-      "category": "finance",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/report/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
-      ],
-      "requiredSetup": [
-        "감사/공시 snapshot 또는 scan prebuild를 먼저 확인한다."
-      ],
+      "id": "engines.viz.tableBackedChart",
+      "title": "표 기반 시각 설명",
+      "category": "engines",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
       "limitations": [
-        "본문 미조회 상태에서는 제목/프리빌드 기준 위험 신호로만 제한한다."
-      ]
-    },
-    {
-      "id": "krxIndexStrengthReview",
-      "title": "KRX 지수 강세 분석",
-      "category": "screens",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data krx/indices parquet"
-      ],
-      "requiredSetup": [
-        "HF parquet를 Pyodide FS의 /data/krx/indices에 내려받은 뒤 inspect_dataset과 run_python으로 계산한다."
-      ],
-      "limitations": [
-        "KRX API 실시간 호출은 CORS 때문에 사용하지 않는다.",
-        "최신성은 HF에 업로드된 parquet의 BAS_DD 기준으로만 말한다."
-      ]
-    },
-    {
-      "id": "macroMarketReview",
-      "title": "거시 시장 환경 점검",
-      "category": "finance",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data macro snapshot",
-        "HuggingFace dartlab-data krx/indices parquet"
-      ],
-      "requiredSetup": [
-        "사용 가능한 macro 또는 index snapshot을 RuntimeDatasetCatalog에서 먼저 확인한다."
-      ],
-      "limitations": [
-        "live FRED, 환율, 금리 API 호출은 브라우저 CORS/인증 제약으로 제외한다."
+        "시각화는 브라우저 renderer가 지원하는 chart spec 범위로 제한한다."
       ]
     },
     {
@@ -474,58 +1585,6 @@
       "limitations": []
     },
     {
-      "id": "peerComparisonReview",
-      "title": "동종 기업 비교 분석",
-      "category": "finance",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/docs/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data dart/report/{stockCode}.parquet"
-      ],
-      "requiredSetup": [
-        "비교 대상별로 await dartlab.prefetch(stockCode)를 먼저 수행한다."
-      ],
-      "limitations": [
-        "여러 종목 parquet를 브라우저 메모리에 올리므로 대상 수를 작게 유지한다.",
-        "live market/macro 보강은 서버 환경에서만 한다."
-      ]
-    },
-    {
-      "id": "profitabilityReview",
-      "title": "수익성 분석",
-      "category": "finance",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/finance/{stockCode}.parquet",
-        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet",
-        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
-      ],
-      "requiredSetup": [
-        "Company 재무 snapshot 또는 finance-lite prebuild를 먼저 확인한다."
-      ],
-      "limitations": [
-        "live macro 보강은 서버 환경에서 수행한다."
-      ]
-    },
-    {
-      "id": "quantSignalReview",
-      "title": "퀀트 신호 교차검토",
-      "category": "finance",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data krx/prices parquet",
-        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
-      ],
-      "requiredSetup": [
-        "가격 신호는 HF 가격 parquet 또는 이미 prefetched 데이터가 있을 때만 계산한다."
-      ],
-      "limitations": [
-        "gather(\"price\") 같은 외부 가격 API 호출은 브라우저 CORS 때문에 사용하지 않는다.",
-        "가격 데이터가 없으면 재무/valuation-lite 기반 보조 신호로 제한한다."
-      ]
-    },
-    {
       "id": "runtime.channel",
       "title": "Channel",
       "category": "runtime",
@@ -630,21 +1689,6 @@
       ]
     },
     {
-      "id": "screens.findUndervaluedQualityStocks",
-      "title": "저평가·수익성 종목 후보 찾기",
-      "category": "screens",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data dart/scan/finance-lite.parquet"
-      ],
-      "requiredSetup": [
-        "finance-lite prebuild를 브라우저 런타임에 로드한다."
-      ],
-      "limitations": [
-        "full scan 축 전체가 아니라 prebuild에 포함된 지표 기준 후보만 만든다."
-      ]
-    },
-    {
       "id": "start.dartlabSkillOs",
       "title": "DartLab Skill OS 최초 진입",
       "category": "start",
@@ -662,33 +1706,6 @@
       "requiredSetup": [],
       "limitations": [
         "실제 분석 실행 가능 여부는 선택한 skill의 runtimeCompatibility를 따른다."
-      ]
-    },
-    {
-      "id": "usEdgarCompanyReview",
-      "title": "미국 기업 EDGAR 분석",
-      "category": "finance",
-      "status": "limited",
-      "dataSources": [
-        "HuggingFace dartlab-data edgar/finance/{ticker}.parquet",
-        "HuggingFace dartlab-data edgar/docs/{ticker}.parquet"
-      ],
-      "requiredSetup": [
-        "ticker별 prefetched EDGAR snapshot이 있는지 먼저 확인한다."
-      ],
-      "limitations": [
-        "SEC live API와 신규 filings 조회는 서버 또는 로컬 Python 경로에서 수행한다."
-      ]
-    },
-    {
-      "id": "visuals.tableBackedChart",
-      "title": "표 기반 시각 설명",
-      "category": "visuals",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "시각화는 브라우저 renderer가 지원하는 chart spec 범위로 제한한다."
       ]
     }
   ]

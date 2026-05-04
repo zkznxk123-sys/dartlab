@@ -84,3 +84,4 @@ lastUpdated: "2026-05-02"
 - 최종 답변은 evidence refs와 limits만 제출해서 끝내지 않는다. 숫자·날짜·ranking 같은 material claim은 각 claim 안에서 supporting table/value/date ref를 직접 가리켜야 한다.
 - 후보·상위·랭킹 최종 답변은 `입력/유니버스`, `필터`, `계산식/지표`, `결과`를 포함하고, 회사/식별자, 기준 기간, 원값, metric, rank가 들어간 markdown evidence table을 본문에 렌더링한다.
 - 검산 실패 후 재시도할 때는 실패한 초안의 숫자 문장을 그대로 유지하지 말고, ref로 뒷받침되는 claim만 남긴다.
+

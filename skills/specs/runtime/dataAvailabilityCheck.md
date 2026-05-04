@@ -76,3 +76,4 @@ lastUpdated: "2026-05-02"
 - date column, latestAsOf, entity column, metric 후보를 기록한다.
 - 데이터가 없으면 필요한 수집 또는 prefetch 경로를 한계로 남긴다.
 - 최신성 claim은 snapshot 기준일 또는 live 조회 기준일이 있을 때만 작성한다.
+

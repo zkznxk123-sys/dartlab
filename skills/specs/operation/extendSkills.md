@@ -70,3 +70,4 @@ lastUpdated: "2026-05-03"
 - 프로젝트별 실험은 `.dartlab/skills/**/*.md` user skill로 시작한다.
 - official 승격은 구조 lint, 서버 audit P, 사용자 확인이 모두 있을 때만 허용한다.
 - 승격 후에도 SkillSpec은 schema를 복사하지 않고 capabilityRefs와 sourceRefs로 원천을 연결한다.
+
