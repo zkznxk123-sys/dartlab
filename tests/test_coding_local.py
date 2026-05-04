@@ -1,99 +1,36 @@
-"""LocalPythonBackend 기능 테스트."""
+"""run_python canonical tool 테스트."""
+
+from __future__ import annotations
 
 import pytest
 
 pytestmark = pytest.mark.unit
 
-from dartlab.ai.tools.coding import LocalPythonBackend, _validateCode
 
-# ══════════════════════════════════════
-# 구문 검증 (보안 제한 없음 — 구문만 확인)
-# ══════════════════════════════════════
+def test_run_python_simple_output():
+    from dartlab.ai.tools.runPython import runPython
 
+    result = runPython("print(2 + 3)", runId="unit")
 
-def test_validateCode_safe():
-    code = "import math\nprint(math.sqrt(16))"
-    _validateCode(code)  # should not raise
-
-
-def test_validateCode_any_module_allowed():
-    """제한 없음 — 어떤 모듈이든 import 가능."""
-    code = "import os\nimport requests\nimport subprocess"
-    _validateCode(code)  # should not raise
+    assert result.ok is True
+    assert "5" in result.data["stdout"]
+    assert result.refs[0].kind == "executionRef"
 
 
-def test_validateCode_syntax_error():
-    code = "def foo(\n"
-    with pytest.raises(SyntaxError):
-        _validateCode(code)
+def test_run_python_runtime_error_returns_failed_result():
+    from dartlab.ai.tools.runPython import runPython
+
+    result = runPython("1/0", runId="unit")
+
+    assert result.ok is False
+    assert result.error == "python_execution_failed"
+    assert result.refs[0].kind == "executionRef"
 
 
-# ══════════════════════════════════════
-# LocalPythonBackend 실행
-# ══════════════════════════════════════
+def test_run_python_emit_result_creates_value_ref():
+    from dartlab.ai.tools.runPython import runPython
 
+    result = runPython("emit_result(values={'answer': 42}, units={'answer': 'x'})", runId="unit")
 
-def test_backend_inspect():
-    backend = LocalPythonBackend()
-    info = backend.inspect()
-    assert info["available"] is True
-    assert info["name"] == "local_python"
-    assert info["restrictions"] == "none (unrestricted local execution)"
-
-
-def test_backend_no_code():
-    backend = LocalPythonBackend()
-    result = backend.run_task("test prompt")
-    assert "[오류]" in result.answer
-
-
-def test_backend_simple_code():
-    backend = LocalPythonBackend()
-    result = backend.run_task("", code="print(2 + 3)")
-    assert result.backend == "local_python"
-    assert "5" in result.answer
-    assert result.metadata["returncode"] == 0
-
-
-def test_backend_math_code():
-    backend = LocalPythonBackend()
-    result = backend.run_task("", code="import math\nprint(math.pi)")
-    assert "3.14" in result.answer
-
-
-def test_backend_unrestricted_execution():
-    """제한 없음 — os, open 등 자유 실행."""
-    backend = LocalPythonBackend()
-    result = backend.run_task("", code="import os\nprint(os.getcwd())")
-    assert result.metadata["returncode"] == 0
-
-
-def test_backend_timeout():
-    backend = LocalPythonBackend(maxTimeout=10)
-    result = backend.run_task("", code="import time\ntime.sleep(30)", timeout_seconds=2)
-    assert "[시간 초과]" in result.answer
-
-
-def test_backend_runtime_error():
-    backend = LocalPythonBackend()
-    result = backend.run_task("", code="1/0")
-    assert "[실행 오류]" in result.answer
-    assert "ZeroDivision" in result.answer
-
-
-def test_backend_data_injection():
-    backend = LocalPythonBackend()
-    result = backend.run_task(
-        "",
-        code="print(data['name'])",
-        dataJson='{"name": "Samsung"}',
-    )
-    assert "Samsung" in result.answer
-
-
-def test_backend_multiline_output():
-    backend = LocalPythonBackend()
-    code = "for i in range(5):\n    print(f'line {i}')"
-    result = backend.run_task("", code=code)
-    assert "line 0" in result.answer
-    assert "line 4" in result.answer
+    assert result.ok is True
+    assert any(ref.kind == "valueRef" and ref.payload["value"] == 42 for ref in result.refs)
