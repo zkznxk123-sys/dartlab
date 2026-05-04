@@ -73,14 +73,13 @@ def ask(
 
             _templateText = get_template(tmpl_name)
 
-    from dartlab.ai.runtime.core import runAsk
+    from dartlab.ai.kernel import runAsk
 
     events = runAsk(
         question,
         stockCode=stockCode,
         provider=provider,
         model=model,
-        reflect=reflect,
         history=history,
         _templateText=_templateText,
         **kwargs,

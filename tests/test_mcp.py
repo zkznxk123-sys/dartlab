@@ -57,7 +57,7 @@ def test_mcp_workbench_tools_execute():
     assert "DARTLAB_RESULT_JSON" in executed
 
     skills = _executeTool("searchDartlabSkills", {"query": "주가지수 강세"})
-    assert "krxIndexStrengthReview" in skills
+    assert "engines.scan.krxIndexStrength" in skills
 
     operation = _executeTool("searchDartlabSkills", {"query": "테스트 규칙"})
     assert "operation.testing" in operation

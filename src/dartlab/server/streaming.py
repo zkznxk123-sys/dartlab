@@ -1,25 +1,21 @@
-"""SSE 스트리밍 generator — core.runAsk() 이벤트 → SSE 변환.
+"""SSE 스트리밍 generator — ask 내부 이벤트 → SSE 변환.
 
-[최우선 UX 원칙] 데이터 투명성 — 절대 제거 금지
+[최우선 UX 원칙] 사용자용 진행 요약과 raw evidence 분리
 
 모든 분석 로직은 dartlab.ai.kernel 이 처리.
 이 모듈은 이벤트를 SSE dict로 변환하는 thin adapter.
 
 이벤트 흐름:
-  task      → Ask Workbench 세션과 release policy
-  reference → 문서/docstring/capability snippet
-  inspect   → runtime dataset schema/latest/entity/metric 확인
-  execute   → bounded Python 실행 결과
-  visual    → table-backed visual spec
-  verify    → ref 기반 검산 결과
-  chunk     → 응답 텍스트
-  done      → ResultBundle
-  error     → 실행 오류
+  task → plan → tool_start → tool_progress → tool_result → observation → decision
+  draft → verify → answer|unable → chunk → done
+  reference/inspect/execute/visual 은 하위호환 trace 로 함께 전달된다.
+  done.responseMeta.journal 은 질의별 JSONL workbench journal artifact 를 가리킨다.
 """
 
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import os
@@ -38,6 +34,26 @@ log = logging.getLogger(__name__)
 #   DARTLAB_STREAM_PUT_TIMEOUT — queue.put 타임아웃(초). 느린 소비자·disconnect 감지.
 _DEFAULT_QUEUE_MAX = int(os.environ.get("DARTLAB_STREAM_QUEUE_MAX", "1024"))
 _DEFAULT_PUT_TIMEOUT = float(os.environ.get("DARTLAB_STREAM_PUT_TIMEOUT", "30"))
+
+_FAILURE_LABELS = {
+    "finalize_answer_failed": "최종 답변 생성 실패",
+    "forced_finalize_failed": "최종 답변 생성 실패",
+    "forced_finalize_prose_failed": "최종 답변 생성 실패",
+    "draft_verification_failed": "초안 검증 실패",
+    "prose_without_finalize": "초안 검증 실패",
+    "prose_without_finalize_failed": "최종 답변 생성 실패",
+    "provider_create_failed": "provider 연결 실패",
+    "provider_transport_failed": "provider 연결 실패",
+    "provider_unavailable": "provider 연결 실패",
+    "tool_failed": "도구 실행 실패",
+    "verification_failed": "검산 실패",
+    "missing_skill_ref": "근거 skill 부족",
+    "unsupported_numeric_claim": "숫자 근거 부족",
+    "unsupported_date_claim": "날짜 근거 부족",
+    "failed_execution_hidden": "도구 실패 은폐",
+    "tool_transcript_released": "내부 실행 로그 노출",
+}
+_SPINNER_ACTIVITY_TOOLS = {"run_python", "compile_visual"}
 
 
 @dataclass
@@ -72,9 +88,21 @@ async def stream_analysis(question: str = "", *, _audit: AuditCollector | None =
     """core.runAsk() → SSE adapter."""
     from dartlab.ai.kernel import runAsk
 
+    activity_count = 0
     async for event in _sync_gen_to_async(runAsk, question, **kwargs):
         if _audit is not None:
             _audit.observe(event.kind, event.data)
+        activity = _activity_from_event(event.kind, event.data)
+        if activity is not None:
+            activity_count += 1
+            activity["index"] = activity_count
+            yield _sse("activity", activity)
+        if event.kind == "done":
+            meta = event.data.setdefault("responseMeta", {})
+            meta.setdefault("activityCount", activity_count)
+            meta.setdefault("responseStatus", _responseStatusFromDone(event.data))
+            if meta["responseStatus"] != "ok":
+                meta.setdefault("failureReason", _failureReasonFromDone(event.data))
         yield _sse(event.kind, event.data)
 
 
@@ -104,9 +132,12 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
     trace: list[dict] = []
     verification: dict = {}
     responseMeta: dict = {}
+    activity_count = 0
     try:
         async for event in _sync_gen_to_async(runAsk, question, **kwargs):
             auditor.observe(event.kind, event.data)
+            if _activity_from_event(event.kind, event.data) is not None:
+                activity_count += 1
             if event.kind == "chunk":
                 chunks.append(event.data.get("text", ""))
             elif event.kind == "tool_result":
@@ -128,6 +159,10 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
                 trace = [v for v in event.data.get("trace") or [] if isinstance(v, dict)]
                 verification = event.data.get("verification") or {}
                 responseMeta = event.data.get("responseMeta") or {}
+                responseMeta.setdefault("activityCount", activity_count)
+                responseMeta.setdefault("responseStatus", _responseStatusFromDone(event.data))
+                if responseMeta["responseStatus"] != "ok":
+                    responseMeta.setdefault("failureReason", _failureReasonFromDone(event.data))
             elif event.kind == "error":
                 error_code = event.data.get("error", "analysis error")
                 if error_code in {"provider_create_failed", "provider_transport_failed", "tool_failed"}:
@@ -254,6 +289,275 @@ def _dedupeStrings(items: list[str]) -> list[str]:
 def _sse(event: str, data: dict) -> dict:
     """이벤트 → SSE dict 변환."""
     return {"event": event, "data": json.dumps(data, ensure_ascii=False)}
+
+
+def _activity_from_event(kind: str, data: dict) -> dict | None:
+    """TraceEvent → 사용자용 activity payload.
+
+    채팅 본문은 raw trace를 직접 보지 않고 이 1줄 payload만 렌더한다.
+    """
+    if kind == "plan":
+        skills = data.get("selectedSkillIds") if isinstance(data.get("selectedSkillIds"), list) else []
+        target = ", ".join(str(item) for item in skills[:3])
+        return _activity(
+            "plan", "계획 수립", "done", f"분석 경로를 정했습니다{': ' + target if target else ''}", target
+        )
+    if kind == "reference":
+        if data.get("action"):
+            return None
+        action = str(data.get("action") or "search_reference")
+        refs = data.get("refs") if isinstance(data.get("refs"), list) else []
+        ref = data.get("ref") if isinstance(data.get("ref"), dict) else None
+        target = _targetFromReference(data, ref)
+        if action == "read_context":
+            summary = f"read context 실행함{': ' + target if target else ''}"
+        else:
+            summary = f"search reference 실행함{': ' + target if target else ''} · refs {len(refs)}개"
+        return _activity(action, _displayToolName(action), "done", summary, target, refs=_refIds(refs, ref))
+    if kind in {"inspect", "execute", "visual"}:
+        if data.get("action"):
+            return None
+        action = str(data.get("action") or ("run_python" if kind == "execute" else kind))
+        return _activity(
+            action,
+            _displayToolName(action),
+            "done",
+            _summaryForTrace(kind, data),
+            _targetFromTrace(kind, data),
+            refs=_refsFromTrace(data),
+        )
+    if kind in {"tool_start", "tool_call"}:
+        name = str(data.get("name") or data.get("tool") or "tool")
+        if name not in _SPINNER_ACTIVITY_TOOLS:
+            return None
+        target = _targetFromToolPayload(data)
+        return _activity(
+            name,
+            _displayToolName(name),
+            "running",
+            f"{_displayToolName(name)} 실행함{': ' + target if target else ''}",
+            target,
+            activity_id=_toolActivityId(data, name),
+        )
+    if kind == "tool_result":
+        name = str(data.get("name") or data.get("tool") or "tool")
+        status = "error" if data.get("status") == "error" else "done"
+        summary = str(data.get("outputSummary") or data.get("summary") or "")
+        target = _targetFromToolPayload(data)
+        line = f"{_displayToolName(name)} {'실패' if status == 'error' else '완료'}"
+        if summary:
+            line += f": {summary}"
+        return _activity(
+            name,
+            _displayToolName(name),
+            status,
+            line,
+            target,
+            refs=[str(v) for v in data.get("evidenceRefs") or []],
+            error=_errorFromPayload(data) if status == "error" else None,
+            activity_id=_toolActivityId(data, name),
+        )
+    if kind == "verify":
+        result = data.get("result") if isinstance(data.get("result"), dict) else {}
+        ok = bool(result.get("ok"))
+        issues = result.get("issues") if isinstance(result.get("issues"), list) else []
+        summary = "verify 실행함: 숫자/날짜/근거 검증 통과" if ok else f"verify 실패: {_issueCodes(issues)}"
+        return _activity(
+            "verify",
+            "verify",
+            "done" if ok else "error",
+            summary,
+            str(data.get("refId") or ""),
+            refs=[str(data.get("refId"))] if data.get("refId") else [],
+            error=None if ok else summary,
+        )
+    if kind == "answer":
+        refs = [str(v) for v in data.get("evidenceRefs") or []]
+        return _activity(
+            "answer", "answer", "done", f"answer 실행함: 근거 refs {len(refs)}개로 답변 작성", "", refs=refs
+        )
+    if kind == "unable":
+        reason = _readableFailure(str(data.get("reason") or "finalize_answer_failed"))
+        return _activity("unable", "unable", "error", reason, "", error=reason)
+    if kind == "draft_rejected":
+        return None
+    if kind == "artifact":
+        artifacts = data.get("artifacts") if isinstance(data.get("artifacts"), list) else []
+        return _activity(
+            "artifact",
+            "artifact",
+            "done",
+            f"artifact 생성함: {len(artifacts)}개",
+            "",
+            artifactRefs=[str(a.get("id") or a.get("url")) for a in artifacts if isinstance(a, dict)],
+        )
+    if kind == "error":
+        reason = _readableFailure(str(data.get("error") or data.get("detail") or "실행 오류"))
+        return _activity("error", "error", "error", f"오류 발생: {reason}", str(data.get("action") or ""), error=reason)
+    return None
+
+
+def _activity(
+    kind: str,
+    displayName: str,
+    status: str,
+    summary: str,
+    target: str = "",
+    *,
+    refs: list[str] | None = None,
+    artifactRefs: list[str] | None = None,
+    error: str | None = None,
+    activity_id: str | None = None,
+) -> dict:
+    digest = hashlib.sha1(
+        json.dumps([kind, summary, target, refs or [], artifactRefs or []], ensure_ascii=False, sort_keys=True).encode(
+            "utf-8"
+        )
+    ).hexdigest()[:12]
+    return {
+        "id": activity_id or f"activity:{kind}:{digest}",
+        "kind": kind,
+        "displayName": displayName,
+        "status": status,
+        "summary": summary,
+        "target": target,
+        "refs": refs or [],
+        "artifactRefs": artifactRefs or [],
+        "error": error,
+    }
+
+
+def _displayToolName(name: str) -> str:
+    return str(name or "tool").replace("_", " ")
+
+
+def _toolActivityId(data: dict, name: str) -> str:
+    call_id = str(data.get("id") or data.get("toolCallId") or "")
+    if call_id:
+        return f"activity:tool:{call_id}"
+    return f"activity:{name}:unknown"
+
+
+def _readableFailure(value: str) -> str:
+    text = str(value or "")
+    if not text:
+        return "최종 답변 생성 실패"
+    for code, label in _FAILURE_LABELS.items():
+        text = text.replace(code, label)
+    return text
+
+
+def _targetFromReference(data: dict, ref: dict | None) -> str:
+    if ref:
+        payload = ref.get("payload") if isinstance(ref.get("payload"), dict) else {}
+        return str(payload.get("path") or payload.get("title") or ref.get("id") or "")
+    query = data.get("query")
+    if isinstance(query, str) and query:
+        return f'"{query[:120]}"'
+    refs = data.get("refs") if isinstance(data.get("refs"), list) else []
+    for item in refs:
+        if not isinstance(item, dict):
+            continue
+        payload = item.get("payload") if isinstance(item.get("payload"), dict) else {}
+        title = payload.get("title") or payload.get("skillId") or payload.get("path")
+        if title:
+            return str(title)
+    return ""
+
+
+def _targetFromTrace(kind: str, data: dict) -> str:
+    if kind == "inspect":
+        return str(data.get("target") or data.get("datasetId") or "")
+    if kind == "execute":
+        result = data.get("result") if isinstance(data.get("result"), dict) else {}
+        return str(data.get("refId") or result.get("id") or "")
+    if kind == "visual":
+        return str(data.get("refId") or "")
+    return ""
+
+
+def _summaryForTrace(kind: str, data: dict) -> str:
+    if kind == "inspect":
+        result = data.get("result") if isinstance(data.get("result"), dict) else {}
+        rows = result.get("rows") or result.get("rowCount") or result.get("row_count")
+        latest = result.get("latest") if isinstance(result.get("latest"), dict) else {}
+        parts = [
+            f"rows {rows}" if rows is not None else "",
+            f"latest {latest.get('value')}" if latest.get("value") else "",
+        ]
+        suffix = " · ".join(part for part in parts if part)
+        return f"inspect dataset 실행함{': ' + suffix if suffix else ''}"
+    if kind == "execute":
+        result = data.get("result") if isinstance(data.get("result"), dict) else {}
+        ok = result.get("ok")
+        return f"run python 실행함: ok={ok}"
+    if kind == "visual":
+        return "compile visual 실행함"
+    return f"{kind} 실행함"
+
+
+def _targetFromToolPayload(data: dict) -> str:
+    args = data.get("input") or data.get("arguments")
+    if not isinstance(args, dict):
+        args = {}
+    for key in ("query", "path", "target", "source_ref", "sourceRef"):
+        value = args.get(key) or data.get(key)
+        if value:
+            return str(value)[:160]
+    code = args.get("code") or data.get("codePreview")
+    if isinstance(code, str) and code.strip():
+        return code.strip().splitlines()[0][:160]
+    return ""
+
+
+def _refIds(refs: list, ref: dict | None = None) -> list[str]:
+    out = [str(item.get("id")) for item in refs if isinstance(item, dict) and item.get("id")]
+    if ref and ref.get("id"):
+        out.append(str(ref["id"]))
+    return _dedupeStrings(out)
+
+
+def _refsFromTrace(data: dict) -> list[str]:
+    out: list[str] = []
+    if data.get("refId"):
+        out.append(str(data["refId"]))
+    for key in ("refs", "derivedRefs"):
+        values = data.get(key)
+        if isinstance(values, list):
+            out.extend(str(item.get("id")) for item in values if isinstance(item, dict) and item.get("id"))
+    return _dedupeStrings(out)
+
+
+def _errorFromPayload(data: dict) -> str:
+    if data.get("error"):
+        return str(data["error"])
+    limits = data.get("limits")
+    if isinstance(limits, list) and limits:
+        return str(limits[0])
+    return str(data.get("summary") or "도구 실행 실패")
+
+
+def _issueCodes(issues: list) -> str:
+    codes = [str(item.get("code") or item.get("message")) for item in issues if isinstance(item, dict)]
+    return ", ".join(_readableFailure(code) for code in codes[:4]) if codes else "검산 실패"
+
+
+def _responseStatusFromDone(data: dict) -> str:
+    verification = data.get("verification") if isinstance(data.get("verification"), dict) else {}
+    meta = data.get("responseMeta") if isinstance(data.get("responseMeta"), dict) else {}
+    final_event = meta.get("finalEvent")
+    if verification.get("ok") is True and final_event != "unable":
+        return "ok"
+    return "failed"
+
+
+def _failureReasonFromDone(data: dict) -> str:
+    verification = data.get("verification") if isinstance(data.get("verification"), dict) else {}
+    issues = verification.get("issues") if isinstance(verification.get("issues"), list) else []
+    if issues:
+        return _issueCodes(issues)
+    limits = data.get("limits") if isinstance(data.get("limits"), list) else []
+    return _readableFailure(str(limits[0])) if limits else "최종 답변 생성 실패"
 
 
 async def _sync_gen_to_async(gen_fn, *args, **kwargs):

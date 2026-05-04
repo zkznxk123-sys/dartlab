@@ -190,113 +190,57 @@ def test_workspace_agent_requires_csv_and_visual_for_ranking_questions(tmp_path)
     assert "missing_visual_explanation" in result["issues"]
 
 
-def test_workspace_agent_loop_requires_finalize_before_answer():
+def test_workspace_agent_loop_is_kernel_shim(monkeypatch):
+    from dartlab.ai import kernel
+    from dartlab.ai.contracts import TraceEvent
     from dartlab.ai.runtime.workspace_agent import buildWorkspaceAgentSystemPrompt, runWorkspaceAgent
-    from dartlab.ai.types import ToolCall, ToolResponse
 
-    class Provider:
-        supports_native_tools = True
-        supports_cache_control = False
+    called = {}
 
-        def __init__(self):
-            self.calls = 0
+    def fake_runask(question, **kwargs):
+        called["question"] = question
+        called["kwargs"] = kwargs
+        yield TraceEvent("plan", {"entrySkillId": "start.dartlabSkillOs"})
+        yield TraceEvent("answer", {"answer": "kernel 답변"})
+        yield TraceEvent("chunk", {"text": "kernel 답변"})
+        yield TraceEvent("done", {"responseMeta": {"kernel": "Ask Workbench Kernel"}})
 
-        def stream_with_tools(self, messages, tools, tool_choice=None):
-            self.calls += 1
-            if self.calls == 1:
-                yield ToolResponse(
-                    answer="",
-                    provider="mock",
-                    model="mock",
-                    tool_calls=[ToolCall(id="call_1", name="workspace_status", arguments={})],
-                )
-                return
-            yield ToolResponse(
-                answer="",
-                provider="mock",
-                model="mock",
-                tool_calls=[
-                    ToolCall(
-                        id="call_2",
-                        name="finalize_answer",
-                        arguments={"answer": "DartLab workspace를 확인한 답변입니다.", "limits": []},
-                    )
-                ],
-            )
-
-        def format_assistant_tool_calls(self, answer, tool_calls):
-            return {"role": "assistant", "content": answer, "tool_calls": []}
-
-        def format_tool_result(self, tool_call_id, result):
-            return {"role": "tool", "tool_call_id": tool_call_id, "content": result}
+    monkeypatch.setattr(kernel, "runAsk", fake_runask)
 
     messages = [
         {"role": "system", "content": buildWorkspaceAgentSystemPrompt(question="DartLab 뭐야?")},
         {"role": "user", "content": "질문: DartLab 뭐야?"},
     ]
-    out = list(runWorkspaceAgent(Provider(), messages, question="DartLab 뭐야?"))
+    out = list(runWorkspaceAgent(object(), messages, question="DartLab 뭐야?", stockCode="005930"))
 
-    assert "DartLab workspace를 확인한 답변입니다." in out
-    assert any(getattr(ev, "kind", None) == "verify" and ev.data.get("ok") for ev in out)
+    assert called["question"] == "DartLab 뭐야?"
+    assert called["kwargs"]["stockCode"] == "005930"
+    assert "kernel 답변" in out
+    assert any(getattr(ev, "kind", None) == "plan" for ev in out)
 
 
-def test_runask_uses_workspace_agent_path(monkeypatch):
+def test_runtime_core_runask_uses_kernel_path(monkeypatch):
+    from dartlab.ai import kernel
+    from dartlab.ai.contracts import TraceEvent
     from dartlab.ai.runtime.core import runAsk
-    from dartlab.ai.types import ToolCall, ToolResponse
 
-    class Provider:
-        supports_native_tools = True
-        supports_cache_control = False
+    called = {}
 
-        def __init__(self):
-            self.calls = 0
+    def fake_runask(question, **kwargs):
+        called["question"] = question
+        called["kwargs"] = kwargs
+        yield TraceEvent("plan", {"entrySkillId": "start.dartlabSkillOs"})
+        yield TraceEvent("answer", {"answer": "kernel 답변"})
+        yield TraceEvent("chunk", {"text": "kernel 답변"})
+        yield TraceEvent("done", {"responseMeta": {"kernel": "Ask Workbench Kernel"}})
 
-        def stream_with_tools(self, messages, tools, tool_choice=None):
-            self.calls += 1
-            if self.calls == 1:
-                names = {tool["function"]["name"] for tool in tools}
-                assert names == {
-                    "workspace_status",
-                    "read_text",
-                    "inspect_data",
-                    "run_python",
-                    "search_workspace",
-                    "create_artifact",
-                    "finalize_answer",
-                }
-                yield ToolResponse(
-                    answer="",
-                    provider="mock",
-                    model="mock",
-                    tool_calls=[ToolCall(id="call_1", name="workspace_status", arguments={})],
-                )
-                return
-            yield ToolResponse(
-                answer="",
-                provider="mock",
-                model="mock",
-                tool_calls=[
-                    ToolCall(
-                        id="call_2",
-                        name="finalize_answer",
-                        arguments={"answer": "workspace-native 답변", "limits": []},
-                    )
-                ],
-            )
-
-        def format_assistant_tool_calls(self, answer, tool_calls):
-            return {"role": "assistant", "content": answer, "tool_calls": []}
-
-        def format_tool_result(self, tool_call_id, result):
-            return {"role": "tool", "tool_call_id": tool_call_id, "content": result}
-
-    monkeypatch.setattr("dartlab.ai.providers.create_provider", lambda _config: Provider())
-    monkeypatch.setattr("dartlab.ai.runtime.core.runPostResponse", lambda **_kwargs: None)
+    monkeypatch.setattr(kernel, "runAsk", fake_runask)
 
     events = list(runAsk("DartLab 뭐야?", provider="openai", emit_system_prompt=False))
 
-    assert any(ev.kind == "observe" for ev in events)
-    assert any(ev.kind == "verify" and ev.data.get("ok") for ev in events)
-    assert any(ev.kind == "chunk" and ev.data.get("text") == "workspace-native 답변" for ev in events)
+    assert called["question"] == "DartLab 뭐야?"
+    assert called["kwargs"]["provider"] == "openai"
+    assert any(ev.kind == "plan" for ev in events)
+    assert any(ev.kind == "chunk" and ev.data.get("text") == "kernel 답변" for ev in events)
     done = [ev for ev in events if ev.kind == "done"][-1]
-    assert done.data["responseMeta"]["coverage"]["workspaceAgent"]["verified"] is True
+    assert done.data["responseMeta"]["kernel"] == "Ask Workbench Kernel"

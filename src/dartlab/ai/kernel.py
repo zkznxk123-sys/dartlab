@@ -22,11 +22,15 @@ from .datasets import inspect_dataset, inspection_to_refs
 from .notebook import execution_to_ref, run_python
 from .providers import ToolCall, WorkbenchProvider, create_provider
 from .reference import read_context, search_reference
+from .runtime.artifacts import WorkbenchJournal, csvArtifactsForToolResult, jsonArtifactForPayload
 from .verify import verification_to_ref, verify_answer
 from .visuals import compile_visual, visual_to_ref
 
 _MAX_WORKBENCH_ROUNDS = 12
 _MAX_REPAIR_ROUNDS = 3
+_TOOL_CONTEXT_CAP_CHARS = 24_000
+_TOOL_CONTEXT_PREVIEW_CHARS = 6_000
+_BASIC_SKILL_IDS = {"engines.company", "engines.gather", "engines.scan", "engines.viz"}
 
 
 @dataclass
@@ -38,10 +42,20 @@ class AskSession:
     artifacts: list[dict[str, Any]] = field(default_factory=list)
     visuals: list[dict[str, Any]] = field(default_factory=list)
     limits: list[str] = field(default_factory=list)
+    journal: WorkbenchJournal | None = field(default=None, init=False)
+
+    def __post_init__(self) -> None:
+        try:
+            self.journal = WorkbenchJournal(question=self.question)
+            self.artifacts.append(self.journal.artifact)
+        except Exception as exc:  # noqa: BLE001
+            self.limits.append(f"workbench journal unavailable: {exc}")
 
     def add_event(self, kind: str, data: dict[str, Any]) -> TraceEvent:
         event = TraceEvent(kind=kind, data=data)
         self.trace.append(event)
+        if self.journal is not None:
+            self.journal.append(event)
         return event
 
     def add_ref(self, ref: Ref) -> Ref:
@@ -73,7 +87,8 @@ def runAsk(question: Any, *args: Any, stream: bool = True, **kwargs: Any) -> Ite
     Returns
     -------
     Iterable[TraceEvent]
-        kind : str — task/reference/inspect/execute/visual/verify/chunk/done/error
+        kind : str — task/plan/tool_start/tool_progress/tool_result/observation/decision/
+        draft/verify/answer/unable/done/error
         data : dict — 이벤트별 payload
 
     Raises
@@ -113,6 +128,7 @@ def runAsk(question: Any, *args: Any, stream: bool = True, **kwargs: Any) -> Ite
     refs = search_reference(_reference_query(question_text, kwargs), limit=5)
     for ref in refs:
         session.add_ref(ref)
+    yield session.add_event("plan", _plan_event_payload(session, task, refs))
     yield session.add_event("reference", _reference_event_payload(refs))
 
     try:
@@ -137,7 +153,7 @@ def runAsk(question: Any, *args: Any, stream: bool = True, **kwargs: Any) -> Ite
             yield event
         if completed:
             return
-        session.limits.append("provider workbench ended without finalize_answer")
+        session.limits.append("provider workbench ended without final answer")
     except Exception as exc:
         session.limits.append(f"provider transport failed: {exc}")
         yield session.add_event("error", {"error": "provider_transport_failed", "detail": str(exc)})
@@ -231,42 +247,63 @@ def _run_provider_workbench(
                 draft = AnswerDraft(
                     answer=turn.content.strip(),
                     evidence_refs=[ref.id for ref in session.refs],
-                    limits=session.limits
-                    + ["provider returned prose without finalize_answer; kernel verified it as a draft"],
+                    limits=session.limits + ["provider returned direct answer; kernel verified it as a draft"],
                 )
                 verification = verify_answer(task, session.refs, draft)
                 if not verification.ok and repair_count < _MAX_REPAIR_ROUNDS:
-                    yield _rejected_draft_event(session, draft, verification, reason="prose_without_finalize")
+                    yield _rejected_draft_event(session, draft, verification, reason="draft_verification_failed")
                     repair_count += 1
-                    messages.append(_repair_message(verification, "prose_without_finalize"))
+                    messages.append(_repair_message(verification, "draft_verification_failed"))
                     continue
-                yield from _finalize(session, task, draft)
+                if not verification.ok:
+                    fallback = _ref_only_answer_draft(session)
+                    if fallback is not None:
+                        yield from _release_draft(session, task, fallback, unable_reason="ref_only_answer_failed")
+                        return
+                yield from _release_draft(session, task, draft, unable_reason="direct_answer_failed")
                 return
             continue
-        for call in turn.tool_calls:
-            if call.name == "finalize_answer":
-                draft = _draft_from_tool_args(call.args, session)
-                verification = verify_answer(task, session.refs, draft)
-                if not verification.ok and repair_count < _MAX_REPAIR_ROUNDS:
-                    yield _rejected_draft_event(session, draft, verification, reason="finalize_answer_failed")
-                    repair_count += 1
-                    messages.append(_repair_message(verification, "finalize_answer_failed"))
-                    continue
-                yield from _finalize(session, task, draft)
-                return
-            yield session.add_event("tool_call", _tool_call_event_payload(call, round_index=_round + 1))
-            try:
-                result, events = _execute_workbench_action(session, call.name, call.args)
-            except Exception as exc:
-                result = {"ok": False, "error": str(exc), "action": call.name}
-                session.limits.append(f"tool {call.name} failed: {exc}")
-                events = [session.add_event("error", {"error": "tool_failed", "action": call.name, "detail": str(exc)})]
-            for event in events:
-                yield event
-            tool_content = _tool_result_content(session, result)
-            yield session.add_event("tool_result", _tool_result_event_payload(call, result, tool_content))
-            messages.append({"role": "tool", "tool_call_id": call.id, "content": tool_content})
-    yield from _force_finalize(session, task, provider, messages)
+        call = turn.tool_calls[0]
+        skipped = turn.tool_calls[1:]
+        if call.name == "finalize_answer":
+            draft = _draft_from_tool_args(call.args, session)
+            verification = verify_answer(task, session.refs, draft)
+            if not verification.ok and repair_count < _MAX_REPAIR_ROUNDS:
+                yield _rejected_draft_event(session, draft, verification, reason="finalize_answer_failed")
+                repair_count += 1
+                messages.append(_repair_message(verification, "finalize_answer_failed"))
+                for skipped_call in skipped:
+                    messages.append(_skipped_tool_message(skipped_call))
+                continue
+            yield from _release_draft(session, task, draft, unable_reason="finalize_answer_failed")
+            return
+        yield session.add_event("tool_call", _tool_call_event_payload(call, round_index=_round + 1))
+        yield session.add_event("tool_start", _tool_start_event_payload(call, round_index=_round + 1))
+        for message in _tool_progress_before(call):
+            yield session.add_event("tool_progress", _tool_progress_event_payload(call, message))
+        try:
+            result, events = _execute_workbench_action(session, call.name, call.args)
+        except Exception as exc:
+            result = {"ok": False, "error": str(exc), "action": call.name}
+            session.limits.append(f"tool {call.name} failed: {exc}")
+            events = [session.add_event("error", {"error": "tool_failed", "action": call.name, "detail": str(exc)})]
+        for event in events:
+            yield event
+        for message in _tool_progress_after(call, result):
+            yield session.add_event("tool_progress", _tool_progress_event_payload(call, message))
+        tool_content = _tool_result_content(session, call.name, result)
+        tool_payload = _tool_result_event_payload(call, result, tool_content)
+        yield session.add_event("tool_result", tool_payload)
+        observation = _observation_event_payload(call, tool_payload)
+        yield session.add_event("observation", observation)
+        decision = _decision_event_payload(call, tool_payload, skipped_count=len(skipped))
+        yield session.add_event("decision", decision)
+        messages.append({"role": "tool", "tool_call_id": call.id, "content": tool_content})
+        for skipped_call in skipped:
+            messages.append(_skipped_tool_message(skipped_call))
+        if skipped:
+            messages.append(_one_tool_at_a_time_message(skipped))
+    yield from _release_ref_only_or_unable(session, task, reason="provider did not produce a final answer")
 
 
 def _execute_workbench_action(
@@ -309,11 +346,19 @@ def _execute_workbench_action(
         session.limits.extend(_limits_from_execution(execution))
         for derived_ref in derived_refs:
             session.add_ref(derived_ref)
+        artifacts: list[dict[str, Any]] = []
+        for derived_ref in derived_refs:
+            if derived_ref.kind != "table":
+                continue
+            rows = derived_ref.payload.get("rows")
+            artifacts.extend(csvArtifactsForToolResult(rows, name="run_python", arguments=args))
+        session.artifacts.extend(artifacts)
         events.append(session.add_event("execute", {"action": name, "refId": ref.id, "result": execution.to_dict()}))
         return {
             "execution": execution.to_dict(),
             "ref": ref.to_dict(),
             "derivedRefs": [r.to_dict() for r in derived_refs],
+            "artifacts": artifacts,
         }, events
     if name == "compile_visual":
         source_ref = str(args.get("source_ref") or args.get("sourceRef") or "")
@@ -349,6 +394,8 @@ def _initial_provider_messages(session: AskSession, task: WorkbenchTask) -> list
         "skillOs": _skill_os_capsule(),
         "rules": [
             "Every non-trivial task starts by selecting a DartLab skillRef. Use start.dartlabSkillOs as the entry skill when the route is unclear.",
+            "Follow the workbench state machine: plan, call exactly one tool, wait for observation, decide continue/narrow/answer/fail, then continue.",
+            "Never request multiple tool calls in one assistant turn; extra tool calls are not executed.",
             "search_reference is skill-first: inspect selected skill refs before datasets, capabilities, knowledge, or source snippets.",
             "When no selected skill fits, call search_reference again with the user's purpose and target identifiers before answering.",
             "Use selected skill refs as reusable procedures: collect their requiredEvidence before strong judgment.",
@@ -358,7 +405,7 @@ def _initial_provider_messages(session: AskSession, task: WorkbenchTask) -> list
             "Inside run_python, use Polars (`pl`) for parquet/csv work; `pl` is pre-imported.",
             "When run_python produces answer evidence, call the preloaded emit_result(...); never define or overwrite emit_result.",
             "Use compile_visual only for table-backed visuals.",
-            "Call finalize_answer only after refs support material claims.",
+            "When refs support the answer, stop calling tools and answer in plain text. The kernel verifies the draft before release.",
             "Ranked candidate or screening answers must not be bullet-only. Include input/universe, filters, formula/metric, and a markdown evidence table with entity, basis/period, metric, and output rows.",
             "Never say current date when you mean dataset asOf.",
         ],
@@ -400,7 +447,9 @@ def _basic_skill_capsule() -> list[dict[str, Any]]:
         return []
     out: list[dict[str, Any]] = []
     for spec in listSkills(includeUser=False):
-        if getattr(spec, "category", None) != "basic":
+        category = getattr(spec, "category", None)
+        spec_id = str(getattr(spec, "id", ""))
+        if category != "basic" and spec_id not in _BASIC_SKILL_IDS:
             continue
         out.append(
             {
@@ -423,6 +472,45 @@ def _reference_event_payload(refs: list[Ref]) -> dict[str, Any]:
         "selectedSkillCandidates": _candidate_summary(refs, kind="skill"),
         "selectedCapabilityCandidates": _candidate_summary(refs, kind="capability"),
     }
+
+
+def _plan_event_payload(session: AskSession, task: WorkbenchTask, refs: list[Ref]) -> dict[str, Any]:
+    skills = _candidate_summary(refs, kind="skill")
+    selected_skill_ids = [str(item.get("id")) for item in skills if item.get("id")]
+    if not selected_skill_ids:
+        selected_skill_ids = ["start.dartlabSkillOs"]
+    required_evidence: list[str] = []
+    expected_outputs: list[str] = []
+    procedure: list[str] = []
+    for ref in refs:
+        if ref.kind != "skill":
+            continue
+        payload = ref.payload
+        required_evidence.extend(str(item) for item in payload.get("requiredEvidence", [])[:8])
+        expected_outputs.extend(str(item) for item in payload.get("expectedOutputs", [])[:8])
+        procedure.extend(str(item) for item in payload.get("procedure", [])[:8])
+    return {
+        "goal": session.question,
+        "entrySkillId": "start.dartlabSkillOs",
+        "selectedSkillIds": _dedupe(selected_skill_ids)[:5],
+        "requiredEvidence": _dedupe(required_evidence)[:12],
+        "expectedOutputs": _dedupe(expected_outputs)[:12],
+        "procedure": _dedupe(procedure)[:12],
+        "allowedDecisions": ["continue", "narrow", "answer", "fail"],
+        "toolPolicy": "one_tool_then_observe_then_decide",
+        "task": task.to_dict(),
+    }
+
+
+def _dedupe(items: list[str]) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in items:
+        if not item or item in seen:
+            continue
+        seen.add(item)
+        out.append(item)
+    return out
 
 
 def _candidate_summary(refs: list[Ref], *, kind: str, limit: int = 5) -> list[dict[str, Any]]:
@@ -475,12 +563,80 @@ def _tool_call_event_payload(call: ToolCall, *, round_index: int) -> dict[str, A
     return payload
 
 
+def _tool_start_event_payload(call: ToolCall, *, round_index: int) -> dict[str, Any]:
+    payload = _tool_call_event_payload(call, round_index=round_index)
+    payload["input"] = payload.pop("arguments", {})
+    return payload
+
+
+def _tool_progress_event_payload(call: ToolCall, message: str) -> dict[str, Any]:
+    return {
+        "id": call.id,
+        "name": call.name,
+        "tool": call.name,
+        "line": message,
+        "message": message,
+    }
+
+
+def _tool_progress_before(call: ToolCall) -> list[str]:
+    if call.name == "search_reference":
+        return ["skill/ref 검색 조건을 준비합니다."]
+    if call.name == "read_context":
+        return ["문서 context 입력 범위를 확인합니다."]
+    if call.name == "inspect_dataset":
+        return ["데이터셋 위치, schema, 최신 관측일을 확인합니다."]
+    if call.name == "run_python":
+        return ["Python 실행 환경을 준비하고 코드 입력을 검토합니다."]
+    if call.name == "compile_visual":
+        return ["표 기반 visual 입력을 확인합니다."]
+    return ["tool 입력을 확인합니다."]
+
+
+def _tool_progress_after(call: ToolCall, result: dict[str, Any]) -> list[str]:
+    if result.get("error"):
+        return [f"{call.name} 실패: {result.get('error')}"]
+    if call.name == "search_reference":
+        refs = result.get("refs") if isinstance(result.get("refs"), list) else []
+        return [f"reference {len(refs)}개를 ref ledger에 등록했습니다."]
+    if call.name == "read_context":
+        ref = result.get("ref") if isinstance(result.get("ref"), dict) else {}
+        return [f"context ref를 등록했습니다: {ref.get('id') or 'unknown'}"]
+    if call.name == "inspect_dataset":
+        inspection = result.get("inspection") if isinstance(result.get("inspection"), dict) else {}
+        rows = inspection.get("rows") or inspection.get("rowCount")
+        columns = inspection.get("columns") if isinstance(inspection.get("columns"), list) else []
+        latest = inspection.get("latest") if isinstance(inspection.get("latest"), dict) else {}
+        detail = f"rows={rows}, columns={len(columns)}"
+        if latest.get("value"):
+            detail += f", latest={latest.get('value')}"
+        return [f"데이터셋 확인 완료: {detail}"]
+    if call.name == "run_python":
+        execution = result.get("execution") if isinstance(result.get("execution"), dict) else {}
+        table_count = len(_tool_result_tables(result))
+        artifacts = result.get("artifacts") if isinstance(result.get("artifacts"), list) else []
+        return [
+            f"Python 실행 완료: returncode={execution.get('returncode')}, durationMs={execution.get('duration_ms')}",
+            f"table ref {table_count}개, artifact {len(artifacts)}개를 추출했습니다.",
+        ]
+    if call.name == "compile_visual":
+        ref = result.get("ref") if isinstance(result.get("ref"), dict) else {}
+        return [f"visual ref를 등록했습니다: {ref.get('id') or 'unknown'}"]
+    return ["tool 실행 결과를 수신했습니다."]
+
+
 def _tool_result_event_payload(call: ToolCall, result: dict[str, Any], content: str) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "id": call.id,
         "name": call.name,
         "status": _tool_result_status(result),
+        "input": _compact_tool_args(dict(call.args or {})),
+        "outputSummary": _tool_result_summary(call.name, result),
         "summary": _tool_result_summary(call.name, result),
+        "evidenceRefs": _tool_result_evidence_refs(result),
+        "tables": _tool_result_tables(result),
+        "limits": _tool_result_limits(result),
+        "nextDecision": _tool_next_decision(call.name, result),
         "result": _preview_text(content, limit=8000),
     }
     refs = result.get("refs")
@@ -489,7 +645,96 @@ def _tool_result_event_payload(call: ToolCall, result: dict[str, Any], content: 
     derived = result.get("derivedRefs")
     if isinstance(derived, list):
         payload["derivedRefCount"] = len(derived)
+    if artifacts := result.get("artifacts"):
+        payload["artifacts"] = artifacts
+    artifact = result.get("_fullResultArtifact")
+    if isinstance(artifact, dict):
+        payload["persisted"] = True
+        payload["fullResultRef"] = artifact.get("id")
+        payload["fullResultArtifact"] = artifact
+        payload["sizeBytes"] = result.get("_fullResultSizeBytes")
+        payload.setdefault("artifacts", [])
+        if isinstance(payload["artifacts"], list):
+            payload["artifacts"].append(artifact)
     return payload
+
+
+def _tool_result_evidence_refs(result: dict[str, Any]) -> list[str]:
+    refs: list[str] = []
+    for key in ("ref", "refs", "derivedRefs"):
+        value = result.get(key)
+        if isinstance(value, dict) and value.get("id"):
+            refs.append(str(value["id"]))
+        elif isinstance(value, list):
+            refs.extend(str(item.get("id")) for item in value if isinstance(item, dict) and item.get("id"))
+    execution = result.get("execution")
+    if isinstance(execution, dict) and execution.get("refId"):
+        refs.append(str(execution["refId"]))
+    return _dedupe(refs)
+
+
+def _tool_result_tables(result: dict[str, Any]) -> list[dict[str, Any]]:
+    tables: list[dict[str, Any]] = []
+    for item in result.get("derivedRefs") if isinstance(result.get("derivedRefs"), list) else []:
+        if not isinstance(item, dict) or item.get("kind") != "table":
+            continue
+        payload = item.get("payload") if isinstance(item.get("payload"), dict) else {}
+        rows = payload.get("rows")
+        tables.append(
+            {
+                "refId": item.get("id"),
+                "rows": len(rows) if isinstance(rows, list) else None,
+                "metric": payload.get("metric"),
+                "executionRef": payload.get("executionRef"),
+            }
+        )
+    return tables
+
+
+def _tool_result_limits(result: dict[str, Any]) -> list[str]:
+    limits: list[str] = []
+    execution = result.get("execution")
+    if isinstance(execution, dict) and execution.get("ok") is False:
+        limits.append(str(execution.get("stderr") or execution.get("error") or "execution failed"))
+    inspection = result.get("inspection")
+    if isinstance(inspection, dict) and inspection.get("ok") is False:
+        limits.append(str(inspection.get("error") or "dataset inspection failed"))
+    if result.get("error"):
+        limits.append(str(result["error"]))
+    return limits[:8]
+
+
+def _tool_next_decision(name: str, result: dict[str, Any]) -> str:
+    if _tool_result_status(result) == "error":
+        return "narrow"
+    if name == "run_python" and _tool_result_tables(result):
+        return "answer"
+    if name == "compile_visual":
+        return "answer"
+    return "continue"
+
+
+def _observation_event_payload(call: ToolCall, tool_payload: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "toolCallId": call.id,
+        "tool": call.name,
+        "facts": [tool_payload.get("outputSummary")],
+        "evidenceRefs": tool_payload.get("evidenceRefs", []),
+        "tables": tool_payload.get("tables", []),
+        "limits": tool_payload.get("limits", []),
+    }
+
+
+def _decision_event_payload(call: ToolCall, tool_payload: dict[str, Any], *, skipped_count: int = 0) -> dict[str, Any]:
+    action = str(tool_payload.get("nextDecision") or "continue")
+    if skipped_count:
+        action = "continue"
+    return {
+        "toolCallId": call.id,
+        "action": action if action in {"continue", "narrow", "answer", "fail"} else "continue",
+        "reason": tool_payload.get("outputSummary") or "tool transaction observed",
+        "skippedToolCalls": skipped_count,
+    }
 
 
 def _tool_result_status(result: dict[str, Any]) -> str:
@@ -598,20 +843,8 @@ def _provider_tool_specs(*, finalize_only: bool = False) -> list[dict[str, Any]]
             },
         }
 
-    finalize_tool = tool(
-        "finalize_answer",
-        "Submit the final answer draft for deterministic verification and release. Ranked candidate answers require input/filter/formula/output text plus a markdown evidence table.",
-        {
-            "answer": {"type": "string"},
-            "evidence_refs": {"type": "array", "items": {"type": "string"}},
-            "material_claims": {"type": "array", "items": {"type": "object"}},
-            "visual_refs": {"type": "array", "items": {"type": "string"}},
-            "limits": {"type": "array", "items": {"type": "string"}},
-        },
-        ["answer"],
-    )
     if finalize_only:
-        return [finalize_tool]
+        return []
     return [
         tool(
             "search_reference",
@@ -655,7 +888,6 @@ def _provider_tool_specs(*, finalize_only: bool = False) -> list[dict[str, Any]]
             },
             ["source_ref", "rows", "category", "metric"],
         ),
-        finalize_tool,
     ]
 
 
@@ -673,6 +905,34 @@ def _assistant_message(content: str, tool_calls: list[ToolCall]) -> dict[str, An
     return message
 
 
+def _skipped_tool_message(call: ToolCall) -> dict[str, Any]:
+    content = json.dumps(
+        {
+            "ok": False,
+            "error": "tool_not_run_one_at_a_time",
+            "instruction": "Only one workbench tool may execute per turn. Observe the previous result, then request the next tool.",
+        },
+        ensure_ascii=False,
+    )
+    return {"role": "tool", "tool_call_id": call.id, "content": content}
+
+
+def _one_tool_at_a_time_message(skipped: list[ToolCall]) -> dict[str, Any]:
+    return {
+        "role": "user",
+        "content": json.dumps(
+            {
+                "type": "state_machine_decision",
+                "decision": "continue",
+                "rule": "plan -> one tool -> observe -> decide -> next tool",
+                "skippedToolCalls": [{"id": call.id, "name": call.name} for call in skipped],
+            },
+            ensure_ascii=False,
+            default=str,
+        ),
+    }
+
+
 def _repair_message(verification: VerificationResult, reason: str) -> dict[str, Any]:
     return {
         "role": "user",
@@ -682,10 +942,14 @@ def _repair_message(verification: VerificationResult, reason: str) -> dict[str, 
                 "reason": reason,
                 "issues": verification.issues,
                 "instruction": (
-                    "Do not repeat unsupported prose or tool-call transcripts. Use workbench actions to create refs, "
-                    "call emit_result(...) from run_python when needed, or submit a narrower finalize_answer "
-                    "whose numeric/date/visual claims are supported. If the answer ranks candidates, include "
-                    "input/universe, filters, formula/metric, output, and a markdown evidence table."
+                    "Do not repeat unsupported prose or tool-call transcripts. If existing skill, capability, doc, "
+                    "knowledge, dataset, execution, table, value, date, or visual refs already support a narrower "
+                    "answer, answer in plain text now instead of searching again. Use at most one workbench action "
+                    "only when a required ref is missing. Call emit_result(...) from run_python when needed, or submit "
+                    "a narrower answer whose numeric/date/visual claims are supported. If the answer ranks candidates, include "
+                    "input/universe, filters, formula/metric, output, and a markdown evidence table. Superseded failed "
+                    "tool attempts must stay in evidence/limits and must not be described in the final answer when later "
+                    "successful refs support the answer."
                 ),
             },
             ensure_ascii=False,
@@ -711,77 +975,78 @@ def _rejected_draft_event(
     )
 
 
-def _force_finalize(
-    session: AskSession,
-    task: WorkbenchTask,
-    provider: WorkbenchProvider,
-    messages: list[dict[str, Any]],
-) -> Iterable[TraceEvent]:
-    messages.append(_finalize_request_message(session))
-    tools = _provider_tool_specs(finalize_only=True)
-    for _attempt in range(2):
-        turn = provider.generate(messages, tools)
-        messages.append(_assistant_message(turn.content, turn.tool_calls))
-        for call in turn.tool_calls:
-            if call.name != "finalize_answer":
-                continue
-            draft = _draft_from_tool_args(call.args, session)
-            verification = verify_answer(task, session.refs, draft)
-            if not verification.ok:
-                yield _rejected_draft_event(session, draft, verification, reason="forced_finalize_failed")
-                messages.append(_repair_message(verification, "forced_finalize_failed"))
-                break
-            yield from _finalize(session, task, draft)
-            return
-        if turn.content.strip():
-            draft = AnswerDraft(
-                answer=turn.content.strip(),
-                evidence_refs=[ref.id for ref in session.refs],
-                visual_refs=[ref.id for ref in session.refs if ref.kind == "visual"],
-                limits=session.limits + ["provider returned prose in forced finalize; kernel verified it as a draft"],
-            )
-            verification = verify_answer(task, session.refs, draft)
-            if verification.ok:
-                yield from _finalize(session, task, draft)
-                return
-            yield _rejected_draft_event(session, draft, verification, reason="forced_finalize_prose_failed")
-            messages.append(_repair_message(verification, "forced_finalize_prose_failed"))
-    yield from _finalize_unable_to_finalize(session, reason="provider could not submit a verified finalize_answer")
+def _release_ref_only_or_unable(session: AskSession, task: WorkbenchTask, *, reason: str) -> Iterable[TraceEvent]:
+    draft = _ref_only_answer_draft(session)
+    if draft is not None:
+        yield from _release_draft(session, task, draft, unable_reason="ref_only_answer_failed")
+        return
+    yield from _finalize_unable_to_finalize(session, reason=reason)
 
 
-def _finalize_request_message(session: AskSession) -> dict[str, Any]:
-    compact_refs = [
-        {"id": ref.id, "kind": ref.kind, "source": ref.source}
-        for ref in session.refs
-        if ref.kind in {"dataset", "date", "execution", "table", "value", "visual"}
-    ][-20:]
-    return {
-        "role": "user",
-        "content": json.dumps(
-            {
-                "type": "finalize_required",
-                "instruction": (
-                    "Stop calling analysis tools. Use finalize_answer now with only claims supported by these refs. "
-                    "Ranked candidate answers must include input/universe, filters, formula/metric, output, and a markdown evidence table."
-                ),
-                "refs": compact_refs,
-                "limits": session.limits,
-            },
-            ensure_ascii=False,
-            default=str,
-        ),
-    }
+def _ref_only_answer_draft(session: AskSession) -> AnswerDraft | None:
+    refs = [ref for ref in session.refs if ref.kind in {"skill", "capability", "doc", "knowledge"}]
+    if not refs:
+        return None
+    skill_refs = [ref for ref in refs if ref.kind == "skill"]
+    source_refs = skill_refs or refs
+    lines = ["확인한 DartLab 기능은 다음과 같습니다.", ""]
+    for ref in source_refs[:6]:
+        payload = ref.payload if isinstance(ref.payload, dict) else {}
+        title = str(payload.get("title") or payload.get("skillId") or payload.get("summary") or ref.id)
+        purpose = str(payload.get("purpose") or payload.get("description") or "").strip()
+        expected = payload.get("expectedOutputs")
+        when = payload.get("whenToUse")
+        detail_parts: list[str] = []
+        if purpose:
+            detail_parts.append(purpose)
+        if isinstance(expected, list) and expected:
+            detail_parts.append("결과: " + ", ".join(str(item) for item in expected[:3]))
+        elif isinstance(when, list) and when:
+            detail_parts.append("사용: " + ", ".join(str(item) for item in when[:3]))
+        detail = " ".join(detail_parts).strip()
+        lines.append(f"- {title}" + (f": {detail}" if detail else ""))
+    lines.extend(
+        [
+            "",
+            "더 구체적인 분석 질문을 주면 필요한 DartLab 엔진과 데이터 근거를 확인한 뒤 답변합니다.",
+        ]
+    )
+    return AnswerDraft(
+        answer="\n".join(lines),
+        evidence_refs=[ref.id for ref in refs],
+        limits=[*session.limits, "provider did not produce direct final text; released ref-only answer"],
+    )
 
 
-def _tool_result_content(session: AskSession, result: dict[str, Any]) -> str:
+def _tool_result_content(session: AskSession, name: str, result: dict[str, Any]) -> str:
     payload = {
         "result": result,
         "refLedger": _compact_ref_ledger(session),
         "limits": session.limits[-10:],
     }
     text = json.dumps(payload, ensure_ascii=False, default=str)
-    if len(text) > 24_000:
-        text = text[:24_000] + "\n...[truncated]"
+    if len(text) > _TOOL_CONTEXT_CAP_CHARS:
+        artifact = jsonArtifactForPayload(
+            payload,
+            name=name,
+            label="full_result",
+            extra={"sizeBytes": len(text.encode("utf-8"))},
+        )
+        session.artifacts.append(artifact)
+        result["_fullResultArtifact"] = artifact
+        result["_fullResultSizeBytes"] = len(text.encode("utf-8"))
+        preview = text[:_TOOL_CONTEXT_PREVIEW_CHARS]
+        text = json.dumps(
+            {
+                "resultPreview": preview,
+                "fullResultArtifact": artifact,
+                "instruction": "Use the referenced artifact only if the preview is insufficient.",
+                "refLedger": _compact_ref_ledger(session),
+                "limits": session.limits[-10:],
+            },
+            ensure_ascii=False,
+            default=str,
+        )
     return text
 
 
@@ -920,7 +1185,8 @@ def _finalize_provider_unavailable(session: AskSession, *, reason: str) -> Itera
     verify_ref = verification_to_ref(result)
     session.add_ref(verify_ref)
     yield session.add_event("verify", {"refId": verify_ref.id, "result": result.to_dict()})
-    answer = "AI provider가 현재 workbench 실행을 완료하지 못했습니다. 답변을 추정하지 않고 중단합니다."
+    answer = _unable_answer(session, reason=reason, issues=result.issues)
+    yield session.add_event("unable", {"answer": answer, "reason": reason, "issues": result.issues})
     for chunk in _stream_chunks(answer):
         yield session.add_event("chunk", {"text": chunk})
     bundle = ResultBundle(
@@ -935,6 +1201,8 @@ def _finalize_provider_unavailable(session: AskSession, *, reason: str) -> Itera
             "kernel": "Ask Workbench Kernel",
             "refCount": len(session.refs),
             "verificationOk": False,
+            "journal": session.journal.artifact if session.journal is not None else None,
+            "artifactCount": len(session.artifacts),
         },
     )
     yield session.add_event("done", bundle.to_dict())
@@ -949,7 +1217,8 @@ def _finalize_unable_to_finalize(session: AskSession, *, reason: str) -> Iterabl
     verify_ref = verification_to_ref(result)
     session.add_ref(verify_ref)
     yield session.add_event("verify", {"refId": verify_ref.id, "result": result.to_dict()})
-    answer = "검증을 통과한 최종 답변을 만들지 못했습니다. 근거 없는 답변을 내보내지 않습니다."
+    answer = _unable_answer(session, reason=reason, issues=result.issues)
+    yield session.add_event("unable", {"answer": answer, "reason": reason, "issues": result.issues})
     for chunk in _stream_chunks(answer):
         yield session.add_event("chunk", {"text": chunk})
     bundle = ResultBundle(
@@ -964,18 +1233,41 @@ def _finalize_unable_to_finalize(session: AskSession, *, reason: str) -> Iterabl
             "kernel": "Ask Workbench Kernel",
             "refCount": len(session.refs),
             "verificationOk": False,
+            "journal": session.journal.artifact if session.journal is not None else None,
+            "artifactCount": len(session.artifacts),
         },
     )
     yield session.add_event("done", bundle.to_dict())
 
 
-def _finalize(session: AskSession, task: WorkbenchTask, draft: AnswerDraft) -> Iterable[TraceEvent]:
+def _release_draft(
+    session: AskSession, task: WorkbenchTask, draft: AnswerDraft, *, unable_reason: str
+) -> Iterable[TraceEvent]:
+    yield session.add_event(
+        "draft",
+        {
+            "answerPreview": draft.answer[:1200],
+            "answerLength": len(draft.answer),
+            "evidenceRefs": draft.evidence_refs[:20],
+            "visualRefs": draft.visual_refs[:20],
+            "limits": draft.limits[-10:],
+        },
+    )
     verification = verify_answer(task, session.refs, draft)
     verify_ref = verification_to_ref(verification)
     session.add_ref(verify_ref)
     yield session.add_event("verify", {"refId": verify_ref.id, "result": verification.to_dict()})
 
-    answer = draft.answer if verification.ok else _verification_failed_answer(verification.issues)
+    if verification.ok:
+        answer = draft.answer
+        yield session.add_event("answer", {"answer": answer, "evidenceRefs": draft.evidence_refs[:40]})
+    else:
+        answer = _unable_answer(session, reason=unable_reason, issues=verification.issues)
+        yield session.add_event(
+            "unable",
+            {"answer": answer, "reason": unable_reason, "issues": verification.to_dict().get("issues", [])},
+        )
+
     for chunk in _stream_chunks(answer):
         yield session.add_event("chunk", {"text": chunk})
 
@@ -991,9 +1283,16 @@ def _finalize(session: AskSession, task: WorkbenchTask, draft: AnswerDraft) -> I
             "kernel": "Ask Workbench Kernel",
             "refCount": len(session.refs),
             "verificationOk": verification.ok,
+            "finalEvent": "answer" if verification.ok else "unable",
+            "journal": session.journal.artifact if session.journal is not None else None,
+            "artifactCount": len(session.artifacts),
         },
     )
     yield session.add_event("done", bundle.to_dict())
+
+
+def _finalize(session: AskSession, task: WorkbenchTask, draft: AnswerDraft) -> Iterable[TraceEvent]:
+    yield from _release_draft(session, task, draft, unable_reason="verification_failed")
 
 
 def _normalize_question(question: Any, args: tuple[Any, ...], kwargs: dict[str, Any]) -> tuple[str, dict[str, Any]]:
@@ -1022,6 +1321,59 @@ def _verification_failed_answer(issues: list[dict[str, Any]]) -> str:
     return "검증을 통과한 답변을 만들지 못했습니다. 근거 없는 최종 답변을 내보내지 않습니다." + (
         f"\n\n검증 실패: {issue_codes}" if issue_codes else ""
     )
+
+
+def _unable_answer(session: AskSession, *, reason: str, issues: list[dict[str, Any]]) -> str:
+    checked = _checked_summary(session)
+    blocked = _blocked_summary(reason, issues)
+    needed = _needed_summary(issues)
+    return "\n".join(
+        [
+            "검증된 최종 답변 대신 확인 가능한 상태를 반환합니다.",
+            "",
+            "확인한 것:",
+            *[f"- {item}" for item in checked],
+            "",
+            "막힌 것:",
+            *[f"- {item}" for item in blocked],
+            "",
+            "필요한 것:",
+            *[f"- {item}" for item in needed],
+        ]
+    )
+
+
+def _checked_summary(session: AskSession) -> list[str]:
+    kinds: dict[str, int] = {}
+    for ref in session.refs:
+        kinds[ref.kind] = kinds.get(ref.kind, 0) + 1
+    if not kinds:
+        return ["아직 검증 가능한 ref를 만들지 못했습니다."]
+    return [f"{kind} ref {count}개" for kind, count in sorted(kinds.items()) if kind != "verify"] or [
+        "검증 ref만 생성됐고 답변 근거 ref는 부족합니다."
+    ]
+
+
+def _blocked_summary(reason: str, issues: list[dict[str, Any]]) -> list[str]:
+    out = [reason]
+    out.extend(str(issue.get("code") or issue.get("message") or "verification_issue") for issue in issues[:5])
+    return _dedupe(out)
+
+
+def _needed_summary(issues: list[dict[str, Any]]) -> list[str]:
+    codes = {str(issue.get("code") or "") for issue in issues}
+    needed: list[str] = []
+    if "missing_skill_ref" in codes:
+        needed.append("목적 skill ref 선택")
+    if any("numeric" in code or "table" in code for code in codes):
+        needed.append("숫자 claim과 직접 매칭되는 table/value ref")
+    if any("date" in code or "basis" in code for code in codes):
+        needed.append("기준일 또는 데이터셋 관측일 ref")
+    if any("screening" in code or "contract" in code for code in codes):
+        needed.append("유니버스, 필터, 계산식, 결과 표를 포함한 screening 답변 계약")
+    if not needed:
+        needed.append("검증 가능한 실행 결과 또는 더 좁은 질문")
+    return needed
 
 
 def _refs_from_execution(execution: Any, execution_ref_id: str) -> list[Ref]:

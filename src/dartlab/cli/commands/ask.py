@@ -110,7 +110,7 @@ def run(args) -> int:
                     buffer += ev.data["text"]
                     live.update(Markdown(buffer))
 
-                elif ev.kind == "tool_call":
+                elif ev.kind == "tool_start":
                     toolCount += 1
                     label = toolLabel(ev.data.get("name", ""))
                     argText = _eventArgsPreview(ev.data)
@@ -134,13 +134,21 @@ def run(args) -> int:
                         elapsed = f" ({dt:.1f}s)"
                         toolStartTime = None
                     resultText = ev.data.get("result", "")
-                    preview = toolResultPreview(resultText)
+                    preview = ev.data.get("outputSummary") or toolResultPreview(resultText)
                     line = f"> {label} done{elapsed}"
+                    if ev.data.get("persisted"):
+                        line += " | full result saved"
                     if preview:
                         line += f" -- {preview}"
                         toolPanels.append(resultText)
                     toolLines.append(line)
                     live.update(Markdown("\n".join(toolLines)))
+
+                elif ev.kind == "tool_progress":
+                    message = ev.data.get("line") or ev.data.get("message")
+                    if message:
+                        toolLines.append(f"> progress: {_shortPreview(str(message), 100)}")
+                        live.update(Markdown("\n".join(toolLines)))
 
                 elif ev.kind == "code_round":
                     r = ev.data.get("round", "?")
@@ -153,7 +161,20 @@ def run(args) -> int:
                         )
                     )
 
-                elif ev.kind in {"task", "reference", "inspect", "execute", "visual", "verify"}:
+                elif ev.kind in {
+                    "task",
+                    "plan",
+                    "reference",
+                    "inspect",
+                    "execute",
+                    "visual",
+                    "observation",
+                    "decision",
+                    "draft",
+                    "verify",
+                    "answer",
+                    "unable",
+                }:
                     line = _kernelEventLine(ev.kind, ev.data)
                     if line:
                         toolLines.append(line)
@@ -223,6 +244,10 @@ def _kernelEventLine(kind: str, data: dict) -> str:
         actions = task.get("actions") if isinstance(task, dict) else None
         suffix = f" ({len(actions)} actions)" if isinstance(actions, list) else ""
         return f"> task: ask workbench{suffix}"
+    if kind == "plan":
+        skills = data.get("selectedSkillIds") or []
+        skill_text = ", ".join(str(item) for item in skills[:3]) if isinstance(skills, list) else ""
+        return f"> plan: {skill_text or data.get('entrySkillId') or 'skill OS'}"
     if kind == "reference":
         refs = data.get("refs") or []
         selected = data.get("selectedSkillCandidates") or []
@@ -244,15 +269,37 @@ def _kernelEventLine(kind: str, data: dict) -> str:
         return f"> execute: {ok} ({result.get('duration_ms') or result.get('durationMs') or '?'}ms){suffix}"
     if kind == "visual":
         return f"> visual: {len(data.get('visuals') or [])} spec"
+    if kind == "observation":
+        facts = data.get("facts") or []
+        refs = data.get("evidenceRefs") or []
+        fact = _shortPreview(facts[0], 90) if facts else ""
+        suffix = f" | refs={len(refs)}" if refs else ""
+        return f"> observation: {fact}{suffix}".rstrip()
+    if kind == "decision":
+        action = data.get("action") or "continue"
+        skipped = data.get("skippedToolCalls") or 0
+        suffix = f" | skipped={skipped}" if skipped else ""
+        return f"> decision: {action}{suffix}"
+    if kind == "draft":
+        refs = data.get("evidenceRefs") or []
+        return f"> draft: {len(refs)} refs"
     if kind == "verify":
         result = data.get("result") or {}
         ok = "ok" if result.get("ok") else "failed"
         issues = result.get("issues") or []
         return f"> verify: {ok}" + (f" ({len(issues)} issues)" if issues else "")
+    if kind == "answer":
+        refs = data.get("evidenceRefs") or []
+        return f"> answer: verified ({len(refs)} refs)"
+    if kind == "unable":
+        issues = data.get("issues") or []
+        return "> unable: transparent failure" + (f" ({len(issues)} issues)" if issues else "")
     return ""
 
 
 def _eventArgsPreview(data: dict) -> str:
+    if isinstance(data.get("input"), dict):
+        data = {**data, **data["input"]}
     if data.get("query"):
         return f": {_shortPreview(data['query'], 72)}"
     if data.get("target"):

@@ -521,6 +521,41 @@ def test_verifier_allows_superseded_failed_execution_when_successful_evidence_ex
     assert result.ok
 
 
+def test_verifier_blocks_superseded_failed_attempt_in_final_answer() -> None:
+    from dartlab.ai.contracts import Ref
+
+    task = WorkbenchTask(id="task:test", question="anything")
+    refs = [
+        Ref(
+            id="execution:failed",
+            kind="execution",
+            source="run_python",
+            payload={"ok": False, "stderr": "missing column", "stdout": "", "returncode": 1},
+        ),
+        Ref(
+            id="execution:ok",
+            kind="execution",
+            source="run_python",
+            payload={"ok": True, "stderr": "", "stdout": "", "returncode": 0},
+        ),
+        Ref(
+            id="table:ok",
+            kind="table",
+            source="run_python",
+            payload={"executionRef": "execution:ok", "rows": [{"name": "A", "value": 2}], "metric": "value"},
+        ),
+    ]
+    draft = AnswerDraft(
+        answer="c.show('BS') 호출은 실패했지만, 이후 성공한 실행으로 A는 2입니다.",
+        evidence_refs=["table:ok", "execution:ok"],
+    )
+
+    result = verify_answer(task, refs, draft)
+
+    assert not result.ok
+    assert "superseded_failed_attempt_released" in {issue["code"] for issue in result.issues}
+
+
 def test_verifier_allows_visual_limitation_without_visual_claim() -> None:
     task = WorkbenchTask(id="task:test", question="anything")
     draft = AnswerDraft(answer="차트는 아직 생성하지 않았습니다. 표 기반 근거가 생기면 만들 수 있습니다.")
@@ -660,10 +695,10 @@ def test_search_reference_returns_skill_capability_and_knowledge_refs() -> None:
     assert "skill" in kinds
     assert "capability" in kinds
     assert "knowledge" in kinds
-    assert "krxIndexStrengthReview" in skill_ids
-    skill_ref = next(ref for ref in refs if ref.payload.get("skillId") == "krxIndexStrengthReview")
+    assert "engines.scan.krxIndexStrength" in skill_ids
+    skill_ref = next(ref for ref in refs if ref.payload.get("skillId") == "engines.scan.krxIndexStrength")
     assert skill_ref.payload["runtimeCompatibility"]["pyodide"]["status"] == "limited"
-    assert skill_ref.payload["category"] == "screens"
+    assert skill_ref.payload["category"] == "engines"
     assert skill_ref.payload["procedure"]
     assert "datasetRefs" in skill_ref.payload
 
@@ -675,7 +710,7 @@ def test_search_reference_can_return_generated_basic_engine_skills() -> None:
     skill_ids = {ref.payload.get("skillId") for ref in refs if ref.kind == "skill"}
     knowledge_refs = {item for ref in refs if ref.kind == "skill" for item in ref.payload.get("knowledgeRefs", [])}
 
-    assert {"basic.gather", "basic.scan"} & (skill_ids | knowledge_refs)
+    assert {"engines.gather", "engines.scan"} & (skill_ids | knowledge_refs)
 
 
 def test_generated_capability_return_schema_preserves_units() -> None:
@@ -734,10 +769,10 @@ def test_kernel_task_capsule_includes_basic_skill_floor() -> None:
     assert capsule["skillOs"]["requiredRefKind"] == "skill"
     basic_ids = {item["id"] for item in capsule["skillOs"]["basicSkills"]}
 
-    assert "basic.company" in basic_ids
-    assert "basic.gather" in basic_ids
-    assert "basic.scan" in basic_ids
-    assert "basic.viz" in basic_ids
+    assert "engines.company" in basic_ids
+    assert "engines.gather" in basic_ids
+    assert "engines.scan" in basic_ids
+    assert "engines.viz" in basic_ids
     assert "basicPythonExecution" not in basic_ids
     assert all("toolRefs" not in item for item in capsule["skillOs"]["basicSkills"])
 
@@ -812,6 +847,208 @@ def test_provider_workbench_loop_executes_actions_and_verifies(monkeypatch) -> N
     assert done.data["verification"]["ok"] is True
 
 
+def test_kernel_public_contract_plan_tool_observe_decide_answer(monkeypatch) -> None:
+    from dartlab.ai import kernel
+    from dartlab.ai.providers import ProviderTurn, ToolCall
+
+    class FakeProvider:
+        def __init__(self) -> None:
+            self.round = 0
+
+        def generate(self, _messages, _tools):
+            self.round += 1
+            if self.round == 1:
+                return ProviderTurn(
+                    content="",
+                    tool_calls=[
+                        ToolCall(
+                            id="call-run",
+                            name="run_python",
+                            args={
+                                "code": "emit_result(rows=[{'name':'A','value':2.0},{'name':'B','value':1.0}], meta={'asOf':'20260102','metric':'value'})"
+                            },
+                        )
+                    ],
+                )
+            return ProviderTurn(
+                content="",
+                tool_calls=[
+                    ToolCall(
+                        id="call-final",
+                        name="finalize_answer",
+                        args={
+                            "answer": "A는 2.0이고 B는 1.0입니다.",
+                            "evidence_refs": [],
+                        },
+                    )
+                ],
+            )
+
+    monkeypatch.setattr(kernel, "create_provider", lambda **_kwargs: FakeProvider())
+
+    events = list(kernel.runAsk("A와 B 비교", provider="openai"))
+    kinds = [event.kind for event in events]
+
+    assert kinds.index("plan") < kinds.index("tool_start") < kinds.index("tool_result")
+    assert kinds.index("tool_result") < kinds.index("observation") < kinds.index("decision")
+    assert kinds.index("draft") < kinds.index("verify") < kinds.index("answer") < kinds.index("done")
+    tool_result = next(event for event in events if event.kind == "tool_result")
+    assert {"input", "outputSummary", "evidenceRefs", "tables", "limits", "nextDecision"} <= set(tool_result.data)
+    assert any(event.kind == "tool_progress" and event.data.get("id") == tool_result.data["id"] for event in events)
+    done = [event for event in events if event.kind == "done"][-1]
+    assert done.data["responseMeta"]["journal"]["format"] == "jsonl"
+
+
+def test_kernel_persists_large_tool_result_with_preview(monkeypatch, tmp_path: Path) -> None:
+    from dartlab import config
+    from dartlab.ai import kernel
+    from dartlab.ai.providers import ProviderTurn, ToolCall
+
+    monkeypatch.setattr(config, "dataDir", str(tmp_path))
+
+    class FakeProvider:
+        def __init__(self) -> None:
+            self.round = 0
+
+        def generate(self, _messages, _tools):
+            self.round += 1
+            if self.round == 1:
+                return ProviderTurn(
+                    content="",
+                    tool_calls=[ToolCall(id="call-large", name="run_python", args={"code": "print('x' * 30000)"})],
+                )
+            return ProviderTurn(
+                content="",
+                tool_calls=[
+                    ToolCall(
+                        id="call-final",
+                        name="finalize_answer",
+                        args={"answer": "Python 실행 결과를 확인했습니다.", "evidence_refs": []},
+                    )
+                ],
+            )
+
+    monkeypatch.setattr(kernel, "create_provider", lambda **_kwargs: FakeProvider())
+
+    events = list(kernel.runAsk("큰 실행 결과 테스트", provider="openai"))
+
+    tool_result = next(event for event in events if event.kind == "tool_result")
+    assert tool_result.data["persisted"] is True
+    artifact = tool_result.data["fullResultArtifact"]
+    assert artifact["format"] == "json"
+    path = tmp_path / "ai-artifacts" / artifact["day"] / artifact["fileName"]
+    assert path.is_file()
+    assert len(tool_result.data["result"]) < 9000
+
+
+def test_kernel_executes_only_one_tool_from_provider_turn(monkeypatch) -> None:
+    from dartlab.ai import kernel
+    from dartlab.ai.providers import ProviderTurn, ToolCall
+
+    class FakeProvider:
+        def __init__(self) -> None:
+            self.round = 0
+            self.messages = []
+
+        def generate(self, messages, _tools):
+            self.messages = messages
+            self.round += 1
+            if self.round == 1:
+                return ProviderTurn(
+                    content="",
+                    tool_calls=[
+                        ToolCall(
+                            id="call-1",
+                            name="run_python",
+                            args={
+                                "code": "emit_result(rows=[{'name':'A','value':2.0},{'name':'B','value':1.0}], meta={'asOf':'20260102','metric':'value'})"
+                            },
+                        ),
+                        ToolCall(
+                            id="call-2",
+                            name="inspect_dataset",
+                            args={"target": "unused"},
+                        ),
+                    ],
+                )
+            return ProviderTurn(
+                content="",
+                tool_calls=[
+                    ToolCall(
+                        id="call-final",
+                        name="finalize_answer",
+                        args={"answer": "A는 2.0이고 B는 1.0입니다.", "evidence_refs": []},
+                    )
+                ],
+            )
+
+    provider = FakeProvider()
+    monkeypatch.setattr(kernel, "create_provider", lambda **_kwargs: provider)
+
+    events = list(kernel.runAsk("A와 B 비교", provider="openai"))
+
+    assert [event.data["name"] for event in events if event.kind == "tool_start"] == ["run_python"]
+    assert not any(event.kind == "inspect" and event.data.get("target") == "unused" for event in events)
+    decision = next(event for event in events if event.kind == "decision")
+    assert decision.data["skippedToolCalls"] == 1
+    assert any("tool_not_run_one_at_a_time" in str(message) for message in provider.messages)
+
+
+def test_finalize_failure_returns_unable_payload_not_empty_failure(monkeypatch) -> None:
+    from dartlab.ai import kernel
+    from dartlab.ai.providers import ProviderTurn, ToolCall
+
+    class FakeProvider:
+        def __init__(self) -> None:
+            self.round = 0
+
+        def generate(self, _messages, _tools):
+            self.round += 1
+            return ProviderTurn(
+                content="",
+                tool_calls=[
+                    ToolCall(
+                        id=f"call-final-{self.round}",
+                        name="finalize_answer",
+                        args={"answer": "근거 없는 숫자 12345"},
+                    )
+                ],
+            )
+
+    monkeypatch.setattr(kernel, "create_provider", lambda **_kwargs: FakeProvider())
+
+    events = list(kernel.runAsk("기능 설명", provider="openai"))
+
+    assert any(event.kind == "unable" for event in events)
+    done = [event for event in events if event.kind == "done"][-1]
+    assert done.data["responseMeta"]["finalEvent"] == "unable"
+    assert "확인한 것:" in done.data["answer"]
+    assert "검증을 통과한 최종 답변을 만들지 못했습니다" not in done.data["answer"]
+
+
+def test_runtime_core_runask_is_kernel_shim(monkeypatch) -> None:
+    from dartlab.ai import kernel
+    from dartlab.ai.contracts import TraceEvent
+    from dartlab.ai.runtime.core import runAsk
+
+    called = {}
+
+    def fake_kernel_runask(question, **kwargs):
+        called["question"] = question
+        called["kwargs"] = kwargs
+        yield TraceEvent("plan", {"entrySkillId": "start.dartlabSkillOs"})
+        yield TraceEvent("done", {"responseMeta": {"kernel": "Ask Workbench Kernel"}})
+
+    monkeypatch.setattr(kernel, "runAsk", fake_kernel_runask)
+
+    events = list(runAsk("질문", provider="openai", stockCode="123456", emit_system_prompt=False))
+
+    assert called["question"] == "질문"
+    assert called["kwargs"]["provider"] == "openai"
+    assert called["kwargs"]["stockCode"] == "123456"
+    assert [event.kind for event in events] == ["plan", "done"]
+
+
 def test_kernel_traces_rejected_draft_for_audit(monkeypatch) -> None:
     from dartlab.ai import kernel
     from dartlab.ai.providers import ProviderTurn
@@ -833,9 +1070,28 @@ def test_kernel_traces_rejected_draft_for_audit(monkeypatch) -> None:
     rejected = [event for event in events if event.kind == "draft_rejected"]
 
     assert rejected
-    assert rejected[0].data["reason"] == "prose_without_finalize"
+    assert rejected[0].data["reason"] == "draft_verification_failed"
     assert "근거 없는 숫자" in rejected[0].data["answerPreview"]
     assert rejected[0].data["verification"]["issues"]
+
+
+def test_kernel_falls_back_to_ref_only_answer_after_direct_draft_failures(monkeypatch) -> None:
+    from dartlab.ai import kernel
+    from dartlab.ai.providers import ProviderTurn
+
+    class FakeProvider:
+        config = None
+
+        def generate(self, messages, tools):
+            return ProviderTurn(content="DartLab은 근거 없는 숫자 12345개 기능을 지원합니다.", tool_calls=[])
+
+    monkeypatch.setattr(kernel, "create_provider", lambda **_kwargs: FakeProvider())
+    events = list(kernel.runAsk("너 뭐 할 수 있니", provider="openai"))
+    done = events[-1].data
+
+    assert done["responseMeta"]["finalEvent"] == "answer"
+    assert done["verification"]["ok"] is True
+    assert "확인한 DartLab 기능" in done["answer"]
 
 
 def test_cli_kernel_event_lines_show_refs_and_execution_preview() -> None:
@@ -931,7 +1187,7 @@ def test_search_reference_returns_short_dataset_resource_first() -> None:
 
     assert refs
     assert refs[0].kind == "skill"
-    assert refs[0].payload.get("skillId") == "krxIndexStrengthReview"
+    assert refs[0].payload.get("skillId") == "engines.scan.krxIndexStrength"
     assert all("src/dartlab/ai/kernel.py" not in str(ref.payload.get("path") or "") for ref in refs)
     assert all(len(str(ref.payload.get("snippet") or "")) <= 2200 for ref in refs)
 
@@ -1043,7 +1299,7 @@ def test_kernel_does_not_release_calculation_answer_without_provider() -> None:
     assert done.data["verification"]["issues"][0]["code"] == "provider_unavailable"
 
 
-def test_kernel_reports_unable_to_finalize_when_provider_cannot_finalize(monkeypatch) -> None:
+def test_kernel_releases_ref_only_answer_when_provider_returns_empty(monkeypatch) -> None:
     from dartlab.ai import kernel
     from dartlab.ai.providers import ProviderTurn
 
@@ -1059,8 +1315,43 @@ def test_kernel_reports_unable_to_finalize_when_provider_cannot_finalize(monkeyp
     events = list(kernel.runAsk("너 뭐 분석할수있나"))
 
     done = [event for event in events if event.kind == "done"][-1]
-    assert done.data["verification"]["issues"][0]["code"] == "unable_to_finalize"
+    assert done.data["verification"]["ok"] is True
+    assert "확인한 DartLab 기능" in done.data["answer"]
+    assert done.data["responseMeta"]["finalEvent"] == "answer"
     assert "provider_unavailable" not in done.data["limits"]
+
+
+def test_provider_tool_specs_do_not_advertise_finalize_answer() -> None:
+    from dartlab.ai.kernel import _provider_tool_specs
+
+    names = [spec["function"]["name"] for spec in _provider_tool_specs()]
+
+    assert "finalize_answer" not in names
+
+
+def test_direct_provider_answer_releases_without_finalize_tool(monkeypatch) -> None:
+    from dartlab.ai import kernel
+    from dartlab.ai.providers import ProviderTurn
+
+    class FakeProvider:
+        def check_available(self):
+            return True
+
+        def generate(self, _messages, tools):
+            assert all(tool["function"]["name"] != "finalize_answer" for tool in tools)
+            return ProviderTurn(
+                content="DartLab은 Skill OS 근거로 분석 사용법과 엔진 능력을 안내합니다.",
+                tool_calls=[],
+            )
+
+    monkeypatch.setattr(kernel, "create_provider", lambda **_kwargs: FakeProvider())
+
+    events = list(kernel.runAsk("너 뭐 분석할수있나"))
+
+    done = [event for event in events if event.kind == "done"][-1]
+    assert done.data["verification"]["ok"] is True
+    assert done.data["responseMeta"]["finalEvent"] == "answer"
+    assert "DartLab은 Skill OS 근거" in done.data["answer"]
 
 
 def test_kernel_uses_provider_loop_without_explicit_provider(monkeypatch) -> None:
@@ -1127,9 +1418,9 @@ def test_kernel_and_verifier_have_no_domain_specific_hardcoding() -> None:
         "AAPL",
         "edgar.finance",
         "finance-lite",
-        "profitabilityReview",
-        "macroMarketReview",
-        "usEdgarCompanyReview",
+        "engines.analysis.profitability",
+        "engines.macro.marketReview",
+        "engines.company.usEdgarReview",
     ]
 
     assert not any(token in source for token in forbidden)

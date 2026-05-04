@@ -1,7 +1,10 @@
-"""서버 경유 /api/ask AI audit runner.
+"""서버 경유 /api/ask AI 원문 캡처 runner.
 
 PowerShell here-string 인코딩에 기대지 않도록 질문 세트와 HTTP 호출을 UTF-8
 Python 파일에 고정한다. 결과는 data/audit/ai/YYYY-MM-DD/{run-id}/ 에 저장한다.
+
+이 스크립트는 품질 pass/fail 을 선언하지 않는다. HTTP 응답, trace, artifact,
+계약 진단을 저장하고, 최종 품질은 저장된 원문 답변을 사람이 직접 읽어 판정한다.
 
 사용법:
     uv run python -X utf8 scripts/audit/serverAskAudit.py --run oauth-contract-rerun1
@@ -19,18 +22,16 @@ from typing import Any
 import httpx
 
 QUESTIONS: list[tuple[str, str | None, str, bool]] = [
-    ("q01_samsung_profit", "005930", "삼성전자 수익성 분석해줘", False),
-    ("q02_daewoo_stability", "047040", "대우건설 안정성 분석해줘", False),
-    ("q03_samyang_cashflow", "003230", "삼양식품 현금흐름 분석해줘", False),
-    ("q04_intel", "INTC", "인텔 분석해줘", False),
-    ("q05_macro", None, "최근 한국 금리와 환율 상황 어때?", False),
-    ("q06_semiconductor_compare", None, "삼성전자와 SK하이닉스 반도체 업종 경쟁력을 비교해줘", False),
-    ("q07_samsung_filings", "005930", "삼성전자 최근 공시에서 중요한 내용 찾아줘", False),
-    ("q08_hynix_story", "000660", "SK하이닉스 기업이야기 만들어줘", False),
-    ("q09_meta", None, "dartlab 뭐 할 수 있어?", False),
-    ("q10_help", None, "show 함수 어떻게 써?", False),
-    ("q11_krx_movers", None, "최근 주가가 많이 오른 종목을 찾아줘", False),
-    ("q12_krx_movers_stream", None, "최근 주가가 많이 오른 종목을 찾아줘", True),
+    ("q01_recent_growth_company", None, "최근 성장하는 회사는?", False),
+    ("q02_undervalued_candidates", None, "저평가 후보를 찾아줘", False),
+    ("q03_recent_price_movers", None, "최근 오른 종목을 찾아줘", False),
+    ("q04_company_profitability", "005930", "삼성전자 수익성 분석해줘", False),
+    ("q05_credit_risk", "047040", "대우건설 신용 위험을 봐줘", False),
+    ("q06_dividend", "055550", "신한지주 배당과 주주환원 봐줘", False),
+    ("q07_us_company", "AAPL", "Apple 최근 실적과 수익성 분석해줘", False),
+    ("q08_macro", None, "최근 한국 금리와 환율 상황 어때?", False),
+    ("q09_no_data", None, "데이터가 없는 가상의 회사 ABCXYZ 수익성을 계산해줘", False),
+    ("q10_provider_tool_failure", None, "존재하지 않는 데이터셋으로 최근 성장 회사 순위를 만들어줘", True),
 ]
 
 
@@ -76,7 +77,7 @@ def _artifactsFromEvents(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def _countEvents(events: list[dict[str, Any]], event_name: str) -> int:
     count = 0
     for event in events:
-        if event.get("event") != event_name:
+        if _eventName(event) != event_name:
             continue
         data = event.get("data")
         if event_name == "chart" and isinstance(data, dict):
@@ -88,7 +89,7 @@ def _countEvents(events: list[dict[str, Any]], event_name: str) -> int:
 
 def _doneMeta(events: list[dict[str, Any]]) -> dict[str, Any]:
     for event in reversed(events):
-        if event.get("event") != "done":
+        if _eventName(event) != "done":
             continue
         data = event.get("data")
         if isinstance(data, dict) and isinstance(data.get("responseMeta"), dict):
@@ -98,7 +99,7 @@ def _doneMeta(events: list[dict[str, Any]]) -> dict[str, Any]:
 
 def _donePayload(events: list[dict[str, Any]]) -> dict[str, Any]:
     for event in reversed(events):
-        if event.get("event") != "done":
+        if _eventName(event) != "done":
             continue
         data = event.get("data")
         if isinstance(data, dict):
@@ -144,7 +145,7 @@ def _latestAuditEntry(day: str, question: str) -> dict[str, Any] | None:
 
 def _requiresCsvArtifact(qid: str, question: str) -> bool:
     q = question.lower()
-    if qid in {"q11_krx_movers", "q12_krx_movers_stream"}:
+    if qid in {"q01_recent_growth_company", "q02_undervalued_candidates", "q03_recent_price_movers"}:
         return True
     return any(word in q for word in ("랭킹", "순위", "많이 오른", "top", "rank", "ranking"))
 
@@ -152,7 +153,7 @@ def _requiresCsvArtifact(qid: str, question: str) -> bool:
 def _compactEvents(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
     compact: list[dict[str, Any]] = []
     for event in events:
-        name = str(event.get("event") or "")
+        name = _eventName(event)
         data = event.get("data")
         if name == "system_prompt":
             continue
@@ -169,10 +170,16 @@ def _compactEvents(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
                         "name": data.get("name"),
                         "label": data.get("label"),
                         "summary": data.get("summary"),
+                        "outputSummary": data.get("outputSummary"),
                         "status": data.get("status"),
-                        "round": data.get("round"),
-                        "durationMs": data.get("durationMs"),
+                        "evidenceRefs": data.get("evidenceRefs") or [],
+                        "tables": data.get("tables") or [],
+                        "limits": data.get("limits") or [],
+                        "nextDecision": data.get("nextDecision"),
                         "resultSizeBytes": data.get("resultSizeBytes"),
+                        "persisted": bool(data.get("persisted")),
+                        "fullResultRef": data.get("fullResultRef"),
+                        "sizeBytes": data.get("sizeBytes"),
                         "resultChars": len(str(data.get("result") or "")),
                         "artifacts": artifacts,
                     },
@@ -181,6 +188,51 @@ def _compactEvents(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
             continue
         compact.append({"event": name, "data": data})
     return compact
+
+
+def _eventName(event: dict[str, Any]) -> str:
+    return str(event.get("event") or event.get("kind") or "")
+
+
+def _stateContract(events: list[dict[str, Any]]) -> dict[str, Any]:
+    names = [_eventName(event) for event in events]
+    first_plan = names.index("plan") if "plan" in names else -1
+    first_tool = names.index("tool_start") if "tool_start" in names else -1
+    final_events = [name for name in names if name in {"answer", "unable"}]
+    tool_transactions_closed = True
+    tool_progress_visible = True
+    for idx, event in enumerate(events):
+        if _eventName(event) != "tool_start":
+            continue
+        data = event.get("data") if isinstance(event.get("data"), dict) else {}
+        tool_id = data.get("id")
+        progressed = any(
+            _eventName(candidate) == "tool_progress"
+            and isinstance(candidate.get("data"), dict)
+            and candidate["data"].get("id") == tool_id
+            for candidate in events[idx + 1 :]
+        )
+        closed = any(
+            _eventName(candidate) == "tool_result"
+            and isinstance(candidate.get("data"), dict)
+            and candidate["data"].get("id") == tool_id
+            for candidate in events[idx + 1 :]
+        )
+        tool_transactions_closed = tool_transactions_closed and closed
+        tool_progress_visible = tool_progress_visible and progressed
+    return {
+        "planFirst": first_plan >= 0 and (first_tool < 0 or first_plan < first_tool),
+        "toolTransactionsClosed": tool_transactions_closed,
+        "toolProgressVisible": tool_progress_visible,
+        "finalEvent": final_events[-1] if final_events else "",
+        "hasAnswerOrUnable": bool(final_events),
+        "noEmptyVerifierFailure": not any(
+            name == "done"
+            and isinstance(event.get("data"), dict)
+            and "검증을 통과한 최종 답변을 만들지 못했습니다" in str(event["data"].get("answer") or "")
+            for name, event in zip(names, events, strict=False)
+        ),
+    }
 
 
 def _compactRefs(refs: list[dict[str, Any]], *, limit: int = 20) -> list[dict[str, Any]]:
@@ -283,6 +335,16 @@ def main() -> int:
             )
             if not isinstance(response_verification, dict):
                 response_verification = {}
+            contract_events = events if stream else response_trace
+            state_contract = _stateContract(contract_events if isinstance(contract_events, list) else [])
+            state_contract_ok = bool(
+                state_contract["planFirst"]
+                and state_contract["toolTransactionsClosed"]
+                and state_contract["toolProgressVisible"]
+                and state_contract["hasAnswerOrUnable"]
+                and state_contract["noEmptyVerifierFailure"]
+            )
+            final_event = str(state_contract.get("finalEvent") or response_meta.get("finalEvent") or "")
             verification_ok = response_verification.get("ok")
             if verification_ok is None:
                 verification_ok = "검증 실패:" not in answer and "검증을 통과한 답변을 만들지 못했습니다" not in answer
@@ -304,7 +366,8 @@ def main() -> int:
                 "company": company,
                 "stream": stream,
                 "status": status,
-                "ok": status == 200 and error is None and bool(verification_ok),
+                "transportOk": status == 200 and error is None,
+                "manualReviewRequired": True,
                 "elapsedSec": elapsed,
                 "answerLen": len(answer),
                 "error": error,
@@ -340,6 +403,14 @@ def main() -> int:
                     float(audit.get("tool_arg_valid_rate") or 0),
                     float(response_meta.get("toolArgValidRate") or 0),
                 ),
+                "stateContractOk": state_contract_ok,
+                "stateContract": state_contract,
+                "finalEvent": final_event,
+                "planFirst": bool(state_contract["planFirst"]),
+                "toolTransactionsClosed": bool(state_contract["toolTransactionsClosed"]),
+                "toolProgressVisible": bool(state_contract["toolProgressVisible"]),
+                "hasAnswerOrUnable": bool(state_contract["hasAnswerOrUnable"]),
+                "noEmptyVerifierFailure": bool(state_contract["noEmptyVerifierFailure"]),
                 "freshnessSatisfied": bool(
                     audit.get("freshness_satisfied", True) and response_meta.get("freshnessSatisfied", True)
                 ),
@@ -364,7 +435,8 @@ def main() -> int:
                 k: meta[k]
                 for k in (
                     "id",
-                    "ok",
+                    "transportOk",
+                    "manualReviewRequired",
                     "status",
                     "elapsedSec",
                     "answerLen",
@@ -389,6 +461,13 @@ def main() -> int:
                     "processMapSatisfied",
                     "claimSupportRate",
                     "toolArgValidRate",
+                    "stateContractOk",
+                    "finalEvent",
+                    "planFirst",
+                    "toolTransactionsClosed",
+                    "toolProgressVisible",
+                    "hasAnswerOrUnable",
+                    "noEmptyVerifierFailure",
                     "freshnessSatisfied",
                     "requiredEvidenceSatisfied",
                     "artifactSatisfied",
@@ -406,7 +485,7 @@ def main() -> int:
         encoding="utf-8",
     )
     print(f"OUT {out}")
-    return 0 if all(row["ok"] and not row["artifactViolation"] for row in summary) else 1
+    return 0 if all(row["transportOk"] for row in summary) else 1
 
 
 if __name__ == "__main__":

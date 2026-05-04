@@ -34,11 +34,16 @@ async def api_ask(req: AskRequest):
 
 @router.get("/api/ask/artifacts/{day}/{filename}")
 async def download_ask_artifact(day: str, filename: str):
-    """AI tool_result 에서 생성된 CSV/JSON 아티팩트를 내려준다."""
+    """AI tool_result 에서 생성된 CSV/JSON/JSONL 아티팩트를 내려준다."""
     path = _artifactPath(day, filename)
     if path is None or not path.is_file():
         raise HTTPException(status_code=404, detail="artifact not found")
-    media_type = "application/json; charset=utf-8" if filename.endswith(".json") else "text/csv; charset=utf-8"
+    if filename.endswith(".jsonl"):
+        media_type = "application/x-ndjson; charset=utf-8"
+    elif filename.endswith(".json"):
+        media_type = "application/json; charset=utf-8"
+    else:
+        media_type = "text/csv; charset=utf-8"
     return FileResponse(path, media_type=media_type, filename=filename)
 
 

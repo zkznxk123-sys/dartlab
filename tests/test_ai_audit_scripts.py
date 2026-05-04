@@ -93,7 +93,7 @@ def test_server_ask_audit_compacts_refs_and_selected_skills():
             "id": "skill:1",
             "kind": "skill",
             "source": "DartLabSkills",
-            "payload": {"skillId": "profitabilityReview", "score": 42.0},
+            "payload": {"skillId": "engines.analysis.profitability", "score": 42.0},
         },
         {
             "id": "table:1",
@@ -103,7 +103,7 @@ def test_server_ask_audit_compacts_refs_and_selected_skills():
         },
     ]
 
-    assert mod._selectedSkillIds(refs) == ["profitabilityReview"]
+    assert mod._selectedSkillIds(refs) == ["engines.analysis.profitability"]
     compact = mod._compactRefs(refs)
     assert compact[1]["metric"] == "op_margin"
     assert compact[1]["rows"] == 1

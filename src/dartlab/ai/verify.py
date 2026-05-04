@@ -150,6 +150,13 @@ def verify_answer(task: WorkbenchTask, refs: list[Ref], draft: AnswerDraft) -> V
                 "message": "failed execution exists but answer does not disclose the limitation",
             }
         )
+    elif failed_executions and successful_executions and _releases_superseded_failed_attempt(draft.answer):
+        issues.append(
+            {
+                "code": "superseded_failed_attempt_released",
+                "message": "superseded failed tool attempts belong in evidence, not the final answer",
+            }
+        )
     else:
         passed.append("failed_execution_not_hidden")
 
@@ -377,6 +384,13 @@ def _looks_like_tool_transcript(answer: str) -> bool:
     return any(marker in text for marker in markers)
 
 
+def _releases_superseded_failed_attempt(answer: str) -> bool:
+    text = answer.lower()
+    failure_markers = ("실패", "오류", "에러", "failed", "error")
+    tool_markers = ("c.show(", "run_python", "traceback", "exception", "도구", "tool")
+    return any(marker in text for marker in failure_markers) and any(marker in text for marker in tool_markers)
+
+
 def _numeric_claims_supported(refs: list[Ref], draft: AnswerDraft) -> bool:
     return not _unsupported_numeric_claims(refs, draft)
 
@@ -445,16 +459,18 @@ def _numbers_from_answer(answer: str) -> list[float]:
 def _strip_non_claim_numbers(answer: str) -> str:
     text = re.sub(r"```.*?```", " codeblock ", answer, flags=re.DOTALL)
     text = re.sub(r"`[^`\n]+`", " inlinecode ", text)
+    text = _DATE_LIKE.sub(" date ", text)
     text = re.sub(r"(?m)^\s*\d+[\.)]\s+", " item ", text)
     text = re.sub(r"(?im)^(\|\s*)\d+(\s*\|)", r"\1rank\2", text)
     text = re.sub(r"(?m)(\|\s*)\d{5,6}(\s*\|)", r"\1identifier\2", text)
     text = re.sub(r"(?i)\btop\s*\d+\b", "top count", text)
+    text = re.sub(r"(상위|하위).{0,8}?\d+\s*(?:개|곳|종목|회사|기업|위)?", r"\1 count", text)
     text = re.sub(r"(상위|하위)\s*\d+\s*(?:개|곳|종목|회사|위)?", r"\1 count", text)
     text = re.sub(r"\d+\s*(?:개|곳)\s*(?:후보|종목|회사)", "count candidate", text)
     text = re.sub(r"\b20\d{2}\s*(?:년|연도|fy)?\s*(?:[→~\-/]\s*20\d{2}\s*(?:년|연도|fy)?)?", "period", text)
     text = re.sub(r"\d+\s*(?:분기|개월|월|일|년|개년)", "period", text)
     text = re.sub(r"(?i)\b(?:q[1-4]|[1-4]q)\b", "period", text)
-    text = re.sub(r"\d+(?:,\d{3})*(?:\.\d+)?\s*(?:조원|억원|만원|원)\s*(?:이상|초과|미만|이하)", "filter", text)
+    text = re.sub(r"\d+(?:,\d{3})*(?:\.\d+)?\s*(?:조원|억원|만원|원)\s*(?:이상|초과|미만|이하)\w*", "filter", text)
     text = re.sub(r"(?i)([×x*]\s*)100\b", r"\1formula", text)
     text = re.sub(r"(?i)\b[a-z_][a-z0-9_]*[a-z_][a-z0-9_]*\b", "identifier", text)
     return text

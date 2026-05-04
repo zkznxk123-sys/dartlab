@@ -1,8 +1,8 @@
 """Compatibility shim for the removed legacy tool-calling loop.
 
-The official ask path is now the DartLab Financial Workspace Agent implemented
-in ``runtime.workspace_agent``.  This module is intentionally small so old
-imports fail loudly instead of silently reintroducing the retired architecture.
+The official ask path is ``dartlab.ai.kernel.runAsk``.  This module is
+intentionally small so old imports fail loudly instead of silently
+reintroducing the retired architecture.
 """
 
 from __future__ import annotations
@@ -11,9 +11,7 @@ from typing import Any
 
 from dartlab.ai.runtime.workspace_visual import isMeaningfulVisualSpec
 
-_LEGACY_MESSAGE = (
-    "runtime.toolLoop is retired. Use dartlab.ask() or dartlab.ai.runtime.workspace_agent.runWorkspaceAgent()."
-)
+_LEGACY_MESSAGE = "runtime.toolLoop is retired. Use dartlab.ask() or dartlab.ai.kernel.runAsk()."
 
 
 def streamWithTools(*_args: Any, **_kwargs: Any) -> Any:

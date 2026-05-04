@@ -1,6 +1,7 @@
-"""AI tool 결과 아티팩트 저장.
+"""AI workbench 아티팩트 저장.
 
-LLM 에 넣는 요약 문자열과 별도로, 웹/CLI 가 내려받을 수 있는 표 원본을 CSV 로 남긴다.
+LLM 에 넣는 요약 문자열과 별도로, 웹/CLI 가 내려받을 수 있는 표 원본과
+질의별 journal/result 원본을 dataDir 내부에 남긴다.
 """
 
 from __future__ import annotations
@@ -51,8 +52,70 @@ def csvArtifactsForToolResult(result: Any, *, name: str, arguments: dict[str, An
     return out
 
 
+class WorkbenchJournal:
+    """Append-only JSONL journal for one Ask Workbench request."""
+
+    def __init__(self, *, question: str) -> None:
+        day = datetime.now().strftime("%Y-%m-%d")
+        filename = _filename("journal", "events").replace(".csv", ".jsonl")
+        self.day = day
+        self.path = _artifactRoot() / day / filename
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.artifact = _artifactMeta(
+            path=self.path,
+            day=day,
+            filename=filename,
+            kind="journal",
+            format="jsonl",
+            name="workbench_journal",
+            label="events",
+            primary=False,
+            mime_type="application/x-ndjson; charset=utf-8",
+            extra={"questionHash": uuid.uuid5(uuid.NAMESPACE_URL, question).hex[:12]},
+        )
+
+    def append(self, event: Any) -> None:
+        """Append one event; journal failures must never break analysis."""
+        try:
+            payload = event.to_dict() if hasattr(event, "to_dict") else event
+            with self.path.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(payload, ensure_ascii=False, default=str))
+                handle.write("\n")
+        except OSError:
+            return
+
+
+def jsonArtifactForPayload(
+    payload: Any,
+    *,
+    name: str,
+    label: str,
+    primary: bool = False,
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Store arbitrary JSON payload and return artifact metadata."""
+    day = datetime.now().strftime("%Y-%m-%d")
+    outDir = _artifactRoot() / day
+    outDir.mkdir(parents=True, exist_ok=True)
+    filename = _filename(name, label).replace(".csv", ".json")
+    path = outDir / filename
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    return _artifactMeta(
+        path=path,
+        day=day,
+        filename=filename,
+        kind="result",
+        format="json",
+        name=name,
+        label=label,
+        primary=primary,
+        mime_type="application/json; charset=utf-8",
+        extra=extra or {},
+    )
+
+
 def _isPrimaryArtifact(*, name: str, label: str, rows: int, columns: int) -> bool:
-    if name == "pythonExec" and label == "stdout":
+    if name in {"pythonExec", "run_python"} and label in {"stdout", "result"}:
         return True
     return 0 < rows <= 100 and columns >= 2
 
@@ -61,9 +124,9 @@ def artifactPath(day: str, filename: str) -> Path | None:
     """다운로드 요청의 day/filename 을 dataDir 내부 artifact 경로로 해석한다."""
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
         return None
-    if "/" in filename or "\\" in filename or not filename.endswith((".csv", ".json")):
+    if "/" in filename or "\\" in filename or not filename.endswith((".csv", ".json", ".jsonl")):
         return None
-    if not re.fullmatch(r"[A-Za-z0-9_.-]+\.(csv|json)", filename):
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+\.(csv|json|jsonl)", filename):
         return None
     path = (_artifactRoot() / day / filename).resolve()
     root = _artifactRoot().resolve()
@@ -72,6 +135,36 @@ def artifactPath(day: str, filename: str) -> Path | None:
     except ValueError:
         return None
     return path
+
+
+def _artifactMeta(
+    *,
+    path: Path,
+    day: str,
+    filename: str,
+    kind: str,
+    format: str,
+    name: str,
+    label: str,
+    primary: bool,
+    mime_type: str,
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    meta = {
+        "id": path.stem,
+        "kind": kind,
+        "format": format,
+        "primary": primary,
+        "mimeType": mime_type,
+        "name": name,
+        "label": label,
+        "fileName": filename,
+        "day": day,
+        "url": f"/api/ask/artifacts/{day}/{filename}",
+    }
+    if extra:
+        meta.update(extra)
+    return meta
 
 
 def _artifactRoot() -> Path:

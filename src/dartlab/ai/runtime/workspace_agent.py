@@ -1,9 +1,9 @@
-"""Workspace-native financial agent runtime.
+"""Retired workspace-agent helpers and compatibility shim.
 
-This module is the LLM-facing analysis workspace for ``dartlab.ask``.  It does
-not expose every DartLab engine function as a tool.  The model gets a small
-set of workspace tools, then reads, inspects, computes, verifies, and finalizes
-inside one request-scoped session.
+Production Ask execution is owned by ``dartlab.ai.kernel.runAsk``.  The old
+``runWorkspaceAgent`` entry point now delegates to the kernel so this module
+cannot run a second LLM loop.  Helper functions remain for legacy tests and
+runtime utilities that still inspect workspace artifacts.
 """
 
 from __future__ import annotations
@@ -44,10 +44,8 @@ from dartlab.ai.runtime.workspace_visual import (
     requiresCsvArtifact,
     requiresVisualExplanation,
 )
-from dartlab.ai.tools import AITool, toolsToOpenAiSchemas
+from dartlab.ai.tools import AITool
 
-_MAX_ROUNDS = 14
-_MAX_TEXT_CHARS = 60_000
 _MAX_TOOL_RESULT_CHARS = 24_000
 _DATE_COL_HINTS = {
     "date",
@@ -92,180 +90,14 @@ def runWorkspaceAgent(
     stockCode: str | None = None,
     workspace: Any | None = None,
 ) -> Generator[str | AnalysisEvent, None, None]:
-    """Run the workspace-native agent loop."""
-    if not getattr(llm, "supports_native_tools", False):
-        raise RuntimeError("현재 provider는 workspace agent tool calling을 지원하지 않습니다.")
+    """Compatibility shim — delegate old workspace-agent calls to kernel.runAsk."""
+    del llm, messages, workspace
+    from dartlab.ai.kernel import runAsk as kernel_runAsk
 
-    session = AgentSession(question=question, workspaceRoot=_repo_root(), dataRoot=_data_root())
-    tools = _workspace_tools(session)
-    schemas = toolsToOpenAiSchemas(tools)
-    by_name = {tool.name: tool for tool in tools}
-    finalize_tool = [tool for tool in tools if tool.name == "finalize_answer"]
-    finalize_schemas = toolsToOpenAiSchemas(finalize_tool)
-    finalize_by_name = {tool.name: tool for tool in finalize_tool}
-    finalized = False
-
-    yield AnalysisEvent("observe", {"currentDate": session.currentDate, "workspaceRoot": str(session.workspaceRoot)})
-
-    for round_idx in range(_MAX_ROUNDS):
-        finalize_only = _ready_to_finalize(session)
-        active_schemas = finalize_schemas if finalize_only else schemas
-        active_by_name = finalize_by_name if finalize_only else by_name
-        tool_choice = "any" if not finalized else "none"
-        llm_start = time.perf_counter()
-        response_iter = llm.stream_with_tools(messages, active_schemas, tool_choice=tool_choice)
-        resp = None
-        streamed_answer: list[str] = []
-        for part in response_iter:
-            if isinstance(part, str):
-                streamed_answer.append(part)
-                continue
-            resp = part
-        if workspace is not None:
-            try:
-                workspace.recordLlmRound(int((time.perf_counter() - llm_start) * 1000))
-            except Exception:  # noqa: BLE001
-                pass
-        if resp is None:
-            if streamed_answer:
-                messages.append(
-                    {
-                        "role": "user",
-                        "content": (
-                            "최종 텍스트를 직접 스트리밍하지 말고 workspace 도구로 관찰/계산/검산한 뒤 "
-                            "finalize_answer를 호출하세요."
-                        ),
-                    }
-                )
-                continue
-            raise RuntimeError("LLM provider returned no response")
-
-        if getattr(resp, "tool_calls", None):
-            messages.append(llm.format_assistant_tool_calls(resp.answer, resp.tool_calls))
-            for call in resp.tool_calls:
-                name = call.name
-                args = dict(call.arguments or {})
-                yield AnalysisEvent(
-                    "tool_call",
-                    {
-                        "id": call.id,
-                        "name": name,
-                        "arguments": _compact_args(args),
-                        "round": round_idx + 1,
-                    },
-                )
-                start = time.perf_counter()
-                try:
-                    if name not in active_by_name:
-                        raise ValueError(f"unknown workspace tool: {name}")
-                    if workspace is not None:
-                        try:
-                            workspace.recordToolCall(name=name, arguments=args, round=round_idx + 1)
-                        except Exception:  # noqa: BLE001
-                            pass
-                    result = active_by_name[name].handler(**args)
-                    status = "ok"
-                except Exception as exc:  # noqa: BLE001
-                    result = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
-                    status = "error"
-                duration_ms = int((time.perf_counter() - start) * 1000)
-                result_text = _tool_result_text(result)
-                artifacts = _artifacts_from_tool_result(result)
-                if workspace is not None:
-                    try:
-                        workspace.recordToolLatency(
-                            name=name,
-                            durationMs=duration_ms,
-                            resultSizeBytes=len(result_text.encode("utf-8")),
-                            round=round_idx + 1,
-                        )
-                        if name != "finalize_answer":
-                            workspace.recordToolResult(
-                                sourceTool=name,
-                                arguments=args,
-                                result=result,
-                                artifacts=artifacts,
-                            )
-                    except Exception:  # noqa: BLE001
-                        pass
-                phase = _phase_for_tool(name)
-                event_payload = {
-                    "id": call.id,
-                    "name": name,
-                    "status": status,
-                    "result": result_text,
-                    "round": round_idx + 1,
-                    "durationMs": duration_ms,
-                    "artifacts": artifacts,
-                }
-                yield AnalysisEvent("tool_result", event_payload)
-                yield AnalysisEvent(phase, {"tool": name, "status": status, "summary": _summary(result)})
-
-                if name == "create_artifact" and isinstance(result, dict) and result.get("kind") == "visual":
-                    spec = result.get("spec")
-                    if isinstance(spec, dict):
-                        yield AnalysisEvent(
-                            "chart", {"charts": [spec], "visuals": [{"id": result.get("id"), "spec": spec}]}
-                        )
-                elif name == "create_artifact" and isinstance(result, dict) and isinstance(result.get("visual"), dict):
-                    visual = result["visual"]
-                    spec = visual.get("spec")
-                    if isinstance(spec, dict):
-                        yield AnalysisEvent("chart", {"charts": [spec], "visuals": [visual]})
-                elif name == "create_artifact" and artifacts:
-                    yield AnalysisEvent("artifact", {"artifacts": artifacts})
-
-                if name == "finalize_answer":
-                    verification = result if isinstance(result, dict) else {"ok": False, "issues": ["invalid_finalize"]}
-                    yield AnalysisEvent("verify", verification)
-                    if verification.get("ok"):
-                        finalized = True
-                        answer = str(verification.get("answer") or "")
-                        session.finalAnswer = answer
-                        if workspace is not None:
-                            try:
-                                _attach_session_to_workspace(workspace, session)
-                                workspace.recordFinalAnswer(answer)
-                                generated_visuals = workspace.ensureRequiredVisuals(answer=answer)
-                                if generated_visuals:
-                                    yield AnalysisEvent(
-                                        "chart",
-                                        {
-                                            "charts": [item.spec for item in generated_visuals],
-                                            "visuals": [item.toDict() for item in generated_visuals],
-                                        },
-                                    )
-                            except Exception:  # noqa: BLE001
-                                pass
-                        yield answer
-                        return
-
-                messages.append(llm.format_tool_result(call.id, result_text))
-            continue
-
-        answer = str(getattr(resp, "answer", "") or "").strip()
-        if answer and not finalized:
-            messages.append(
-                {
-                    "role": "user",
-                    "content": (
-                        "최종 답변을 바로 쓰지 말고 workspace 도구로 관찰/계산/검산한 뒤 finalize_answer를 호출하세요."
-                    ),
-                }
-            )
-            continue
-
-    session.verificationIssues.append("max_rounds_reached")
-    session.add_limit("agent: max rounds reached before verified finalize")
-    if workspace is not None:
-        try:
-            workspace.markMaxRoundsReached()
-        except Exception:  # noqa: BLE001
-            pass
-    if workspace is not None:
-        _attach_session_to_workspace(workspace, session)
-    fallback = _fallback_answer(session)
-    yield fallback
+    for event in kernel_runAsk(question, stockCode=stockCode):
+        yield AnalysisEvent(event.kind, event.data)
+        if event.kind == "chunk":
+            yield str(event.data.get("text") or "")
 
 
 def _workspace_tools(session: AgentSession) -> list[AITool]:

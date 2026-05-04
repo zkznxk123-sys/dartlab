@@ -32,7 +32,6 @@ ActionName = Literal[
     "inspect_dataset",
     "run_python",
     "compile_visual",
-    "finalize_answer",
 ]
 
 
@@ -56,7 +55,6 @@ class WorkbenchTask:
             "inspect_dataset",
             "run_python",
             "compile_visual",
-            "finalize_answer",
         ]
     )
     release_policy: dict[str, Any] = field(
