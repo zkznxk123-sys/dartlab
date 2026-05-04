@@ -1,17 +1,18 @@
 <!--
-	[최우선 UX 원칙] 실행 투명성 — 절대 제거 금지
+	[최우선 UX 원칙] 실행 가시성 — 채팅 본문은 사용자용 요약만 표시
 
-	사용자가 확인해야 하는 것은 원시 프롬프트가 아니라 실제 참조·데이터 확인·실행·검산이다.
-	Ask Workbench 이벤트는 Agent Trace와 Ref 기반 산출물로 표시한다.
+	사용자가 확인해야 하는 것은 내부 JSON이 아니라 무엇을 찾고, 읽고, 실행하고, 검산했는지다.
+	raw trace와 tool payload는 Evidence 패널로 보내고 채팅 본문은 message.parts를 렌더한다.
 
 	SSE 이벤트 흐름과 UI 표시:
 	  meta          → 회사 뱃지, 연도 범위 뱃지, includedModules
 	  snapshot      → 핵심 수치 카드 (클릭 시 원본 JSON)
 	  context       → 모듈별 데이터 뱃지 (클릭 시 원문/렌더링 모달)
-	  reference     → 참조 검색 trace
-	  inspect       → 데이터셋 확인 trace
-	  execute       → 실행 trace
-	  verify        → 검산 trace
+	  activity      → 검색/읽기/실행/검산 1줄 로그
+	  reference     → 하위호환 trace, activity로 변환
+	  inspect       → 하위호환 trace, activity로 변환
+	  execute       → 하위호환 trace, activity/tool part로 변환
+	  verify        → 하위호환 trace, activity/failure part로 변환
 	  tool_call     → legacy 호환 이벤트
 	  tool_result   → legacy 호환 이벤트
 	  chunk         → 응답 텍스트 스트리밍
@@ -21,18 +22,17 @@
 	import { cn } from "$lib/utils.js";
 	import { summarizeDataReady } from "$lib/ai/dataReady.js";
 	import {
-		Database, Eye, Wrench, Loader2,
-		RefreshCw, XCircle,
+		Loader2, RefreshCw, XCircle,
 	} from "lucide-svelte";
 	import { renderMarkdown } from "$lib/markdown.js";
 	import { estimateTokens, formatTokens } from "$lib/chat/tokenEstimator.js";
 	import { createStreamSplitter } from "$lib/chat/contentSplitter.js";
 	import { createIncrementalRenderer } from "$lib/markdown.js";
 	import ViewSpecRenderer from "$lib/ai/ViewSpecRenderer.svelte";
-	import TransparencyBadges from "./TransparencyBadges.svelte";
 	import EvidenceModal from "./EvidenceModal.svelte";
 	import CitationPopover from "./CitationPopover.svelte";
 	import ToolBlock from "./ToolBlock.svelte";
+	import AssistantMessageSurface from "./AssistantMessageSurface.svelte";
 	import { summarizeResult, isToolError, describeCallArgs, cleanErrorMessage } from "$lib/ai/toolSummary.js";
 
 	import { Pencil, Send, Star } from "lucide-svelte";
@@ -50,14 +50,6 @@
 		show_topic: "공시 topic 확인 중",
 		get_data: "재무 데이터 조회 중",
 	};
-	const AGENT_TRACE_LABELS = {
-		observe: "관찰",
-		inspect: "데이터 확인",
-		compute: "계산",
-		verify: "검산",
-		artifact: "산출물",
-	};
-
 	function getToolStringArg(call, key) {
 		const value = call?.arguments?.[key];
 		return typeof value === "string" ? value.trim() : "";
@@ -219,7 +211,15 @@
 		searchCompany: "종목 검색", list_live_filings: "실시간 공시", read_filing: "공시 원문",
 		list_filings: "공시 목록", show_topic: "토픽 조회", get_data: "데이터 조회",
 	};
-	function toolLabel(name) { return TOOL_LABELS[name] || name; }
+	const INTERNAL_TOOL_NAMES = new Set(["search_reference", "read_context", "inspect_dataset", "run_python", "compile_visual"]);
+	const CHAT_TOOL_NAMES = new Set(["run_python", "compile_visual", "pythonExec"]);
+	function displayToolName(name) { return String(name || "tool").replaceAll("_", " "); }
+	function toolLabel(name) { return INTERNAL_TOOL_NAMES.has(name) ? displayToolName(name) : (TOOL_LABELS[name] || displayToolName(name)); }
+	function toolDisplayLabel(label, name) {
+		if (!label) return toolLabel(name);
+		return String(label).includes("_") ? displayToolName(label) : label;
+	}
+	function isChatToolName(name) { return CHAT_TOOL_NAMES.has(name); }
 	function truncateStr(s, max) { return s.length > max ? s.slice(0, max) + "..." : s; }
 
 	let toolPairs = $derived.by(() => {
@@ -232,7 +232,7 @@
 				if (!last.result) last.result = ev;
 			}
 		}
-		return pairs;
+		return pairs.filter(pair => isChatToolName(pair.call?.name));
 	});
 
 	let collapsedTools = $state({});
@@ -242,13 +242,7 @@
 	const splitter = createStreamSplitter();
 	const incRenderer = createIncrementalRenderer();
 	let streamingContent = $derived.by(() => splitter.split(message.text || "", message.loading));
-	let activityBadges = $derived.by(() => {
-		const badges = [];
-		if (message.meta?.includedModules?.length > 0) badges.push({ label: `모듈 ${message.meta.includedModules.length}개`, icon: Database });
-		if (message.contexts?.length > 0) badges.push({ label: `컨텍스트 ${message.contexts.length}건`, icon: Eye });
-		if (toolCallEvents.length > 0) badges.push({ label: `툴 ${toolCallEvents.length}건`, icon: Wrench });
-		return badges;
-	});
+	let messageParts = $derived(message.parts || []);
 
 	// elapsed time for loading state
 	let elapsed = $state(0);
@@ -355,21 +349,8 @@
 		</div>
 	</div>
 {:else}
-	<div class="msg-timeline {tlStatus} animate-message-enter {staggerIndex > 0 ? 'animate-stagger-in' : ''}" style={staggerIndex > 0 ? `--stagger-index: ${staggerIndex}` : ''}>
+		<div class="msg-timeline {tlStatus} animate-message-enter {staggerIndex > 0 ? 'animate-stagger-in' : ''}" style={staggerIndex > 0 ? `--stagger-index: ${staggerIndex}` : ''}>
 		<div class="message-shell flex-1 min-w-0 relative">
-
-			<TransparencyBadges
-				{message}
-				{companyName}
-				{dataYearRange}
-				{dialogueModeLabel}
-				dataReadyInfo={dataReadyInfo}
-				{activityBadges}
-				onOpenContextModal={openContextModal}
-				onOpenSnapshotModal={openSnapshotModal}
-				onOpenToolEventModal={openToolEventModal}
-				{onOpenEvidence}
-			/>
 
 			<!-- ── 워치리스트 별표 ── -->
 			{#if message.meta?.stockCode && (onAddWatch || onRemoveWatch)}
@@ -431,8 +412,8 @@
 				</div>
 			{/if}
 
-			<!-- ── 로딩: 진행 단계 표시 ── (segments 가 있으면 skip — 시간축 렌더가 본 경로) -->
-			{#if message.loading && !message.text && !(message.segments && message.segments.length > 0)}
+			<!-- ── 로딩: 진행 단계 표시 ── (parts/segments 가 있으면 새 activity 렌더가 본 경로) -->
+			{#if message.loading && !message.text && messageParts.length === 0 && !(message.segments && message.segments.length > 0)}
 			<div class="animate-fadeIn">
 					<div class="space-y-1 mb-3">
 						{#each loadingSteps as step}
@@ -488,8 +469,19 @@
 						</div>
 					{/if}
 				{/if}
-				{#if message.segments && message.segments.length > 0}
-					<!-- ── 새 경로: segments 시간축 인터리빙 (tool + text 혼재) ── -->
+				{#if messageParts.length > 0}
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<AssistantMessageSurface
+						{message}
+						{onOpenEvidence}
+						{onOpenArtifact}
+						{onRegenerate}
+						bind:contentEl
+						onContentClick={handleContentClick}
+					/>
+				{:else if message.segments && message.segments.length > 0}
+					<!-- ── legacy 경로: segments 시간축 인터리빙 ── -->
 					<!-- svelte-ignore a11y_click_events_have_key_events -->
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<div
@@ -497,8 +489,8 @@
 						bind:this={contentEl}
 						onclick={handleContentClick}
 					>
-						{#each message.segments as seg (seg.id)}
-							{#if seg.kind === "tool"}
+						{#each message.segments as seg, segIdx (`${seg.id || seg.kind}-${segIdx}`)}
+							{#if seg.kind === "tool" && isChatToolName(seg.name)}
 								<div class="my-1.5">
 									<ToolBlock {seg} />
 								</div>
@@ -545,7 +537,7 @@
 				{/if}
 
 				<!-- ── 코드 실행 (Ask Workbench 실행 Ref) ── -->
-				{#if message.codeRounds?.length}
+				{#if messageParts.length === 0 && message.codeRounds?.length}
 					<div class="flex flex-col gap-1 mt-2 mb-1">
 						{#each message.codeRounds as cr, crIdx}
 							{@const isExpanded = collapsedCodeRounds[crIdx] === true}
@@ -602,7 +594,7 @@
 									{:else}
 										<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" class="tool-ok"><path d="M6.5 12L2 7.5l1.4-1.4L6.5 9.2l6.1-6.1L14 4.5z"/></svg>
 									{/if}
-									<span class="tool-name">{pair.call.label || toolLabel(pair.call.name)}</span>
+									<span class="tool-name">{toolDisplayLabel(pair.call.label, pair.call.name)}</span>
 									{#if resultSummary}
 										<span class="tool-summary" class:tool-summary-error={hasError}>{truncateStr(resultSummary, 80)}</span>
 									{/if}
@@ -666,22 +658,6 @@
 							<ViewSpecRenderer {view} {onOpenArtifact} />
 						{/each}
 					</div>
-				{/if}
-
-				{#if message.agentTrace?.length}
-					<details class="mt-3 rounded-lg border border-dl-border/30 bg-dl-bg-card/35 px-3 py-2 text-[11px] text-dl-text-dim">
-						<summary class="cursor-pointer select-none font-medium text-dl-text-muted">Agent Trace</summary>
-						<div class="mt-2 space-y-1.5">
-							{#each message.agentTrace.slice(-12) as item}
-								<div class="flex items-start gap-2 rounded bg-dl-bg-darker/45 px-2 py-1.5">
-									<span class="w-16 shrink-0 text-dl-accent-light">{AGENT_TRACE_LABELS[item.phase] || item.phase}</span>
-									<code class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[10px] text-dl-text-dim">
-										{JSON.stringify(item.data)}
-									</code>
-								</div>
-							{/each}
-						</div>
-					</details>
 				{/if}
 
 				<!-- ── 하단 메타 (왼쪽 메타 · 오른쪽 액션) ── -->

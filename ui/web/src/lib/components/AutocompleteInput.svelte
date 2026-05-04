@@ -40,22 +40,6 @@
 		return q ? SLASH_CMDS.filter(c => c.name.startsWith(q)) : SLASH_CMDS;
 	});
 
-	// ── 모듈 토글 ──
-	const MODULE_OPTIONS = [
-		{ id: "수익성", label: "수익성" },
-		{ id: "밸류에이션", label: "밸류에이션" },
-		{ id: "전망", label: "전망" },
-		{ id: "비교", label: "비교" },
-	];
-	function toggleModule(id) {
-		if (selectedModules.includes(id)) {
-			selectedModules = selectedModules.filter(m => m !== id);
-		} else if (selectedModules.length < 3) {
-			selectedModules = [...selectedModules, id];
-		}
-		try { localStorage.setItem("dartlab-modules", JSON.stringify(selectedModules)); } catch {}
-	}
-
 	function shouldAutocompleteCompany(value) {
 		if (!enableCompanyAutocomplete) return false;
 		const trimmed = value.trim();
@@ -212,28 +196,6 @@
 			{/if}
 		</div>
 	</div>
-
-	<!-- ── 모듈 토글 footer ── -->
-	{#if !isLoading && !large}
-		<div class="flex items-center gap-1.5 mt-1.5 px-1">
-			{#each MODULE_OPTIONS as mod}
-				<button
-					class={cn(
-						"px-2.5 py-1 rounded-full text-[10px] font-medium border transition-colors",
-						selectedModules.includes(mod.id)
-							? "border-dl-accent/40 bg-dl-accent/10 text-dl-accent-light"
-							: "border-dl-border/30 text-dl-text-dim hover:border-dl-border/60 hover:text-dl-text-muted"
-					)}
-					onclick={() => toggleModule(mod.id)}
-				>
-					{mod.label}
-				</button>
-			{/each}
-			{#if selectedModules.length > 0}
-				<span class="text-[9px] text-dl-text-dim/50 ml-1">{selectedModules.length}/3</span>
-			{/if}
-		</div>
-	{/if}
 
 	<!-- ── 슬래시 명령어 메뉴 ── -->
 	{#if showSlash && filteredCmds.length > 0}

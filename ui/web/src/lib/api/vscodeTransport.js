@@ -42,6 +42,8 @@ export function askStreamVSCode(company, question, options = {}, callbacks, hist
 				case "snapshot": callbacks.onSnapshot?.(data); break;
 				case "context": callbacks.onContext?.(data); break;
 				case "system_prompt": break;
+				case "activity": callbacks.onActivity?.(data); break;
+				case "tool_start":
 				case "tool_call": callbacks.onToolCall?.(data); break;
 				case "tool_result": callbacks.onToolResult?.(data); break;
 				case "chunk": callbacks.onChunk?.(data?.text); break;
@@ -51,12 +53,18 @@ export function askStreamVSCode(company, question, options = {}, callbacks, hist
 					callbacks.onChart?.(data);
 					break;
 				case "task":
+				case "plan":
 				case "reference":
 				case "observe":
+				case "observation":
+				case "decision":
 				case "inspect":
 				case "execute":
 				case "compute":
+				case "draft":
 				case "verify":
+				case "answer":
+				case "unable":
 				case "artifact":
 					callbacks.onAgentTrace?.(event, data);
 					break;

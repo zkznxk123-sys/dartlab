@@ -6,6 +6,8 @@ if (window.__vscode || typeof window.acquireVsCodeApi === "function") {
 	document.body.setAttribute("data-vscode", "");
 }
 
-const app = mount(App, { target: document.getElementById("app") });
+const target = document.getElementById("app");
+target?.querySelector("#boot-fallback")?.remove();
+const app = mount(App, { target });
 
 export default app;

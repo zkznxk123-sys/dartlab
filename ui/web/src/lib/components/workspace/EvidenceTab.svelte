@@ -180,7 +180,7 @@
 			<div class="rounded-2xl border border-dl-border/50 bg-dl-bg-darker/70 p-4">
 				<div class="mb-2 flex items-center gap-2 text-[12px] font-medium text-dl-text">
 					<Brain size={13} class="text-dl-accent-light" />
-					프롬프트 투명성
+					입력 원문
 				</div>
 				{#if evidenceMessage.systemPrompt}
 					<button

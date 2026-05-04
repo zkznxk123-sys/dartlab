@@ -32,6 +32,11 @@ const TOOL_TITLES = {
 	codeName:      { in: "종목코드",     out: "종목명" },
 	causalWeights: { in: "조회 조건",    out: "인과 가중치" },
 	keywordTrend:  { in: "키워드",       out: "추이" },
+	search_reference: { in: "검색 조건", out: "스킬/참조" },
+	read_context: { in: "읽기 조건", out: "문맥" },
+	inspect_dataset: { in: "데이터셋", out: "스키마/기준일" },
+	run_python: { in: "코드", out: "실행 근거" },
+	compile_visual: { in: "표 근거", out: "시각화" },
 };
 
 /**
@@ -48,7 +53,7 @@ export function getToolTitles(name) {
 /**
  * Tool call/result human-readable summaries — SSOT.
  *
- * MessageBubble · TransparencyBadges · EvidenceModal 셋이 이 한 곳만 참조.
+ * MessageBubble · EvidenceModal 등이 이 한 곳만 참조.
  * 백엔드가 이미 사람친화 label ("재무분석 — 종합평가 — 241560") 과
  * summary ("F-Score 7/9, 안정성 B" 같은 1줄) 을 내려주므로,
  * 프론트는 그것을 골라 쓰고 args raw dump 는 노출하지 않는다.
@@ -134,6 +139,9 @@ export function describeCallArgs(call) {
 	if (args.module) parts.push(`모듈: ${args.module}`);
 	if (args.keyword) parts.push(`키워드: "${args.keyword}"`);
 	if (args.query) parts.push(`질의: "${args.query}"`);
+	if (args.target) parts.push(`대상: ${args.target}`);
+	if (args.path) parts.push(`경로: ${args.path}`);
+	if (args.code) parts.push(`코드: ${String(args.code).split("\n").find(line => line.trim()) || ""}`);
 	if (args.stockCode) parts.push(`종목: ${args.stockCode}`);
 	if (args.market) parts.push(`시장: ${String(args.market).toUpperCase()}`);
 	if (args.period) parts.push(`기간: ${args.period}`);

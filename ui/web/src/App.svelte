@@ -443,6 +443,7 @@
 						onSend={sendMessage}
 						onCompanySelect={handleCompanySelectForChat}
 						onCommand={handleSlashCommand}
+						dataReady={onboardingDataReady}
 					/>
 				{/if}
 			</div>

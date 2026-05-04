@@ -61,15 +61,22 @@ export function createIncrementalRenderer() {
 
 function isNumericCell(text) {
 	const s = text.replace(/<\/?strong>/g, '').replace(/\*\*/g, '').trim();
-	return /^[−\-+]?[\d,]+\.?\d*[%조억만원배x배]*$/.test(s) || s === '-' || s === '0' || s === 'N/A';
+	return /^[−\-+]?[\d,]+\.?\d*(?:e[+\-]?\d+)?[%조억만원배x배]*$/i.test(s) || s === '-' || s === '0' || s === 'N/A';
 }
 
 /** 5자리 이상 정수에 콤마 추가: 12345 → 12,345 */
 function formatLargeNumbers(s) {
+	const compact = s.replace(/<\/?strong>/g, '').replace(/\*\*/g, '').trim();
+	if (/^[−\-+]?\d+(?:\.\d+)?e[+\-]?\d+$/i.test(compact)) {
+		const n = Number(compact.replace("−", "-"));
+		if (Number.isFinite(n)) {
+			return Math.abs(n) >= 1 ? n.toLocaleString("ko-KR", { maximumFractionDigits: 0 }) : n.toLocaleString("ko-KR");
+		}
+	}
 	return s.replace(/(?<![.\d])(-?\d{5,})(?!\.\d)/g, (m) => {
 		const n = parseInt(m, 10);
 		if (isNaN(n)) return m;
-		return n.toLocaleString();
+		return n.toLocaleString("ko-KR");
 	});
 }
 

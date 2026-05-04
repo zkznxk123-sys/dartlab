@@ -344,7 +344,8 @@ export async function ask(company, question, options = {}) {
  * @param {function} onMeta - meta 이벤트 콜백
  * @param {function} onSnapshot - snapshot 이벤트 콜백 (핵심 수치 즉시 표시)
  * @param {function} onContext - context 이벤트 콜백 (모듈별, 여러 번 호출됨)
- * @param {function} onToolCall - legacy tool_call 이벤트 콜백
+ * @param {function} onActivity - 사용자용 activity 이벤트 콜백
+ * @param {function} onToolCall - tool_start/legacy tool_call 이벤트 콜백
  * @param {function} onToolProgress - legacy tool_progress 이벤트 콜백
  * @param {function} onToolResult - legacy tool_result 이벤트 콜백
  * @param {function} onChart - chart 이벤트 콜백 (ChartSpec 배열)
@@ -354,11 +355,11 @@ export async function ask(company, question, options = {}) {
  * @param {function} onError - error 이벤트 콜백
  * @param {function} onUiAction - ui_action 이벤트 콜백 (canonical action)
  */
-export function askStream(company, question, options = {}, { onMeta, onSnapshot, onContext, onSystemPrompt, onToolCall, onToolProgress, onToolResult, onCodeRound, onChart, onAgentTrace, onChunk, onDone, onError, onUiAction }, history = null) {
+export function askStream(company, question, options = {}, { onMeta, onSnapshot, onContext, onSystemPrompt, onActivity, onToolCall, onToolProgress, onToolResult, onCodeRound, onChart, onAgentTrace, onChunk, onDone, onError, onUiAction }, history = null) {
 	// VSCode 환경: postMessage 브릿지 사용
 	if (isVSCode) {
 		return askStreamVSCode(company, question, options,
-			{ onMeta, onSnapshot, onContext, onSystemPrompt, onToolCall, onToolProgress, onToolResult, onCodeRound, onChart, onAgentTrace, onChunk, onDone, onError, onUiAction },
+			{ onMeta, onSnapshot, onContext, onSystemPrompt, onActivity, onToolCall, onToolProgress, onToolResult, onCodeRound, onChart, onAgentTrace, onChunk, onDone, onError, onUiAction },
 			history);
 	}
 
@@ -408,13 +409,14 @@ export function askStream(company, question, options = {}, { onMeta, onSnapshot,
 							else if (currentEvent === "system_prompt") {
 								// Legacy event: ignored by the workbench UI.
 							}
-							else if (currentEvent === "tool_call") onToolCall?.(parsed);
+							else if (currentEvent === "activity") onActivity?.(parsed);
+							else if (currentEvent === "tool_start" || currentEvent === "tool_call") onToolCall?.(parsed);
 							else if (currentEvent === "tool_progress") onToolProgress?.(parsed);
 							else if (currentEvent === "tool_result") onToolResult?.(parsed);
 							else if (currentEvent === "chunk") onChunk?.(parsed.text);
 							else if (currentEvent === "code_round") onCodeRound?.(parsed);
 							else if (currentEvent === "chart" || currentEvent === "visual") onChart?.(parsed);
-							else if (["task", "reference", "observe", "inspect", "execute", "compute", "verify", "artifact"].includes(currentEvent)) onAgentTrace?.(currentEvent, parsed);
+							else if (["task", "plan", "reference", "observe", "observation", "decision", "inspect", "execute", "compute", "draft", "verify", "answer", "unable", "artifact"].includes(currentEvent)) onAgentTrace?.(currentEvent, parsed);
 							else if (currentEvent === "ui_action") onUiAction?.(parsed);
 							else if (currentEvent === "error") onError?.(parsed.error, parsed.action, parsed.detail);
 							else if (currentEvent === "done") { if (!doneFired) { doneFired = true; onDone?.(parsed); } }

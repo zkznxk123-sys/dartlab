@@ -41,9 +41,15 @@
 	});
 	// OUT 크기 요약
 	let outLineCount = $derived(outText ? outText.split("\n").length : 0);
+	let fullResultUrl = $derived(seg.fullResultArtifact?.url || "");
+	let fullResultSize = $derived(seg.sizeBytes ? `${Math.round(seg.sizeBytes / 1024)} KB` : "");
 
 	function toggleFull() { fullExpanded = !fullExpanded; }
 	function truncate(s, max) { return s && s.length > max ? s.slice(0, max) + "..." : (s || ""); }
+	function displayToolName(label, name) {
+		const raw = label || name || "tool";
+		return String(raw).includes("_") ? String(raw).replaceAll("_", " ") : String(raw);
+	}
 </script>
 
 <div class="tool-block" class:tool-block-error={isError} class:tool-block-full={fullExpanded}>
@@ -58,7 +64,7 @@
 				<path d="M6.5 12L2 7.5l1.4-1.4L6.5 9.2l6.1-6.1L14 4.5z"/>
 			</svg>
 		{/if}
-		<span class="tool-name">{seg.label || seg.name}</span>
+		<span class="tool-name">{displayToolName(seg.label, seg.name)}</span>
 		{#if headerSummary}
 			<span class="tool-summary" class:tool-summary-error={isError}>{truncate(headerSummary, 80)}</span>
 		{:else if isDone && outLineCount > 0}
@@ -96,6 +102,11 @@
 		{:else if isDone && outText}
 			<section class="tool-section">
 				<h4 class="tool-section-title">{titles.out}</h4>
+				{#if seg.persisted && fullResultUrl}
+					<div class="tool-section-body tool-in mb-2">
+						전체 결과는 artifact로 저장됨{fullResultSize ? ` (${fullResultSize})` : ""}: {fullResultUrl}
+					</div>
+				{/if}
 				<div class="tool-section-body tool-out prose-dartlab">
 					{@html renderMarkdown(outText)}
 				</div>
