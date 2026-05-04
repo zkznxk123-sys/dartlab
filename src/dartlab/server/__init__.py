@@ -22,6 +22,7 @@ from dartlab.ai.trace import installProgressCapture
 from dartlab.core.logger import getLogger as _bootstrapLogger
 
 from .api import (
+    agent_router,
     ai_router,
     analysis_router,
     ask_router,
@@ -146,6 +147,7 @@ app.add_middleware(
 )
 
 app.include_router(ai_router)
+app.include_router(agent_router)
 app.include_router(analysis_router)
 app.include_router(ask_router)
 app.include_router(company_router)

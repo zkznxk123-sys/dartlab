@@ -404,7 +404,7 @@ async def api_ai_profile_events(request: Request):
 def api_models(provider: str):
     """Provider별 사용 가능한 모델 목록 — SDK/API 자동 조회, 실패시 fallback."""
     from dartlab.ai.providers import create_provider
-    from dartlab.ai.types import LLMConfig
+    from dartlab.core.ai.types import LLMConfig
 
     provider = _normalize_provider_name(provider) or provider
 

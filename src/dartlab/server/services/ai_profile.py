@@ -135,7 +135,7 @@ def validate_provider_connection(req: ConfigureRequest) -> dict[str, Any]:
     """LLM provider 연결 가능 여부만 검증한다."""
     from dartlab.ai import get_config
     from dartlab.ai.providers import create_provider
-    from dartlab.ai.types import LLMConfig
+    from dartlab.core.ai.types import LLMConfig
 
     effective_provider = normalize_provider(req.provider) or req.provider
     current = get_config(effective_provider, role=normalize_role(req.role) or DEFAULT_ROLE)

@@ -3,7 +3,8 @@
 우선순위:
 1. DARTLAB_UI_DIR 환경변수 (dartlab-desktop이 설정)
 2. 패키지 내부: site-packages/dartlab/ui/build/ (pip install)
-3. 개발 환경: project_root/ui/web/build/ (editable install)
+3. 개발 환경: project_root/ui/web/client/dist/ (LibreChat-derived web)
+4. 과거 개발 환경: project_root/ui/web/build/
 """
 
 from __future__ import annotations
@@ -28,9 +29,15 @@ def resolve_ui_build_dir() -> Path:
         return pip_build
 
     # 3. 개발 환경 (editable install)
+    #    project_root/ui/web/client/dist/ (LibreChat-derived React app)
+    repo_root = _PKG_ROOT.parent.parent
+    librechat_build = repo_root / "ui" / "web" / "client" / "dist"
+    if librechat_build.is_dir():
+        return librechat_build
+
+    # 4. 과거 개발 환경
     #    project_root/ui/web/build/
-    dev_build = _PKG_ROOT.parent.parent / "ui" / "web" / "build"
-    return dev_build
+    return repo_root / "ui" / "web" / "build"
 
 
 def resolve_ui_source_dir() -> Path:
