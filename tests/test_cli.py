@@ -62,17 +62,16 @@ def test_main_invalid_command_returns_usage_code(capsys):
 
 def test_ask_proceeds_without_company(capsys):
     # resolve_from_text가 종목을 못 찾아도 company=None으로 진행
-    from dartlab.ai.runtime.events import AnalysisEvent
+    from dartlab.ai.contracts import TraceEvent
 
     def _fake_analyze(*a, **kw):
-        yield AnalysisEvent("chunk", {"text": "test answer"})
-        yield AnalysisEvent("done", {})
+        yield TraceEvent("chunk", {"text": "test answer"})
+        yield TraceEvent("done", {})
 
     with (
         patch("dartlab.core.resolve.resolve_from_text", return_value=(None, "bad question")),
         patch("dartlab.cli.commands.ask.configure_dartlab", return_value=MagicMock()),
-        patch("dartlab.cli.commands.ask.detect_provider", return_value="openai"),
-        patch("dartlab.ai.runtime.core.runAsk", side_effect=_fake_analyze),
+        patch("dartlab.ai.kernel._ask_events", side_effect=_fake_analyze),
     ):
         result = main(["ask", "bad", "question"])
 

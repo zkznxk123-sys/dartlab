@@ -68,9 +68,8 @@ def test_promptAndSave_returns_existing_env_value(monkeypatch):
     assert result == "already-set-value"
 
 
-def test_retired_toolLoop_does_not_swallow_auth_guidance():
-    """퇴역한 toolLoop 경로가 AuthKeyMissing 안내를 우회하지 않도록 크게 실패한다."""
-    from dartlab.ai.runtime.toolLoop import streamWithTools
+def test_auth_guidance_no_longer_depends_on_ai_runtime_tool_loop():
+    """API 키 안내는 core.env에서 직접 보장하고 레거시 AI runtime에 의존하지 않는다."""
+    import importlib.util
 
-    with pytest.raises(RuntimeError, match="retired"):
-        streamWithTools()
+    assert importlib.util.find_spec("dartlab.ai.runtime") is None

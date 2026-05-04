@@ -1,67 +1,25 @@
-from __future__ import annotations
+"""인텔리전스 팩은 레거시 runtime 대신 Skill/capability 검색으로 흡수된다."""
 
-import json
+from __future__ import annotations
 
 import pytest
 
 pytestmark = pytest.mark.unit
 
 
-def test_generate_intelligence_pack_has_required_sections():
-    from scripts.build.generateSpec import generateIntelligencePack
+def test_generated_spec_search_replaces_runtime_intelligence_pack():
+    from dartlab.ai.tools.generatedSpecSearch import generatedSpecSearch
 
-    pack = json.loads(generateIntelligencePack())
+    result = generatedSpecSearch("재무상태표 Company show")
 
-    assert pack["schemaVersion"] == 1
-    assert pack["sourceHash"]
-    assert pack["generatedAt"]
-    for key in (
-        "apiMap",
-        "capabilitySkillMap",
-        "analysisGraph",
-        "processMap",
-        "dataCatalog",
-        "recipeMap",
-        "visualContract",
-        "safetyPolicy",
-    ):
-        assert key in pack
-    sample = pack["capabilitySkillMap"][0]
-    for key in (
-        "whenToUse",
-        "questionTypes",
-        "requiredInputs",
-        "outputShape",
-        "dataColumns",
-        "freshness",
-        "commonCalculations",
-        "verification",
-        "visualPolicy",
-        "failureModes",
-        "badUses",
-    ):
-        assert key in sample or any(key in row for row in pack["capabilitySkillMap"])
+    assert result.ok is True
+    assert any(ref.payload.get("apiRef") == "Company.show" for ref in result.refs)
 
 
-def test_intelligence_pack_loader_validates_bundled_pack():
-    from dartlab.ai.runtime.intelligence_pack import loadIntelligencePack, packSummary
+def test_skill_search_replaces_runtime_pack_summary():
+    from dartlab.ai.tools.skillSearch import skillSearch
 
-    pack = loadIntelligencePack()
-    summary = packSummary(pack)
+    result = skillSearch("처음 온 외부 AI 시작점")
 
-    assert pack["available"] is True
-    assert summary["schemaVersion"] == 1
-    assert summary["sourceHash"]
-    assert summary["capabilityCount"] > 0
-
-
-def test_intelligence_pack_search_prefers_krx_indices_for_index_strength():
-    from dartlab.ai.runtime.intelligence_pack import searchIntelligencePack
-
-    rows = searchIntelligencePack("최근 주가지수 강세", kind="data", limit=3)
-
-    assert rows
-    assert rows[0]["summary"] == "krx.indices"
-    assert "BAS_DD" in rows[0]["detail"]
-    assert "IDX_NM" in rows[0]["detail"]
-    assert "FLUC_RT" in rows[0]["detail"]
+    assert result.ok is True
+    assert any(ref.id == "skill:start.dartlabSkillOs" for ref in result.refs)

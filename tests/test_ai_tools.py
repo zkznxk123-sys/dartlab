@@ -5,39 +5,35 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def test_ai_tool_schema_still_supports_workspace_tools():
-    from dartlab.ai.tools import AITool, toolsToOpenAiSchemas
+def test_canonical_tool_registry_exposes_expected_tools():
+    from dartlab.ai.tools import CANONICAL_TOOL_NAMES, toolSpecs
 
-    tool = AITool(
-        name="workspace_status",
-        description="Return workspace status.",
-        parameters={"type": "object", "properties": {}, "required": []},
-        handler=lambda: {"ok": True},
-    )
+    names = set(CANONICAL_TOOL_NAMES)
+    specs = {spec["name"] for spec in toolSpecs()}
 
-    schemas = toolsToOpenAiSchemas([tool])
-
-    assert schemas[0]["function"]["name"] == "workspace_status"
-    assert schemas[0]["function"]["parameters"]["type"] == "object"
+    assert {"skill_search", "generated_spec_search", "engine_call", "run_python", "verify_answer"}.issubset(names)
+    assert names == specs
 
 
-def test_contracts_keep_capabilities_arg_sanitizer():
-    from dartlab.ai.runtime.contracts import sanitizeCapabilitiesArgs
+def test_generated_spec_search_uses_capability_ssot():
+    from dartlab.ai.tools.generatedSpecSearch import generatedSpecSearch
 
-    assert sanitizeCapabilitiesArgs({"key": "functions.capabilities(arguments={scan})"})["key"] == "scan"
+    result = generatedSpecSearch("scan growth")
 
-
-def test_plugin_hints_do_not_recommend_unverified_packages():
-    from dartlab.ai.runtime.plugin_hints import detect_plugin_hints, format_plugin_hints
-
-    hints = detect_plugin_hints("최근 주가 분석해줘")
-
-    assert hints == []
-    assert format_plugin_hints(hints) is None
+    assert result.ok is True
+    assert any(ref.payload.get("apiRef") in {"dartlab.scan", "scan"} for ref in result.refs)
 
 
-def test_legacy_tool_loop_fails_loudly():
-    from dartlab.ai.runtime.toolLoop import streamWithTools
+def test_engine_call_blocks_unknown_api():
+    from dartlab.ai.tools.engineCall import engineCall
 
-    with pytest.raises(RuntimeError, match="retired"):
-        streamWithTools()
+    result = engineCall({"apiRef": "Nope.missing"})
+
+    assert result.ok is False
+    assert result.error == "unknown_api_ref"
+
+
+def test_legacy_runtime_tool_loop_is_not_importable():
+    import importlib.util
+
+    assert importlib.util.find_spec("dartlab.ai.runtime") is None
