@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 
 from dartlab.cli.context import CLI_PROVIDERS
-from dartlab.cli.services.errors import CLIError
 
 log = logging.getLogger(__name__)
 
@@ -24,25 +23,12 @@ def configure_parser(subparsers) -> None:
 
 def run(args) -> int:
     """provider별 설정 안내를 출력하고 인터랙티브 설정을 진행한다."""
-    try:
-        from dartlab.ai.providers.support.cli_setup import detect_codex
-    except (ImportError, ModuleNotFoundError) as exc:
-        raise CLIError(f"setup 정보를 불러오지 못했습니다: {exc}") from exc
-
     if args.provider is None:
         print("\n[ 데이터 수집 ]\n")
         print("  dartlab setup dart-key     DART OpenAPI 키 설정 (공시 데이터 직접 수집)\n")
-        print("[ AI 분석 — API 키 ]\n")
-        print("  dartlab setup gemini       Google Gemini — Gemini 2.5 Pro/Flash")
-        print("  dartlab setup groq         Groq — 초고속 LLaMA 3.3 70B")
-        print("  dartlab setup cerebras     Cerebras — LLaMA 3.3 70B")
-        print("  dartlab setup mistral      Mistral AI — 다양한 모델\n")
-        print("[ AI 분석 — 기타 ]\n")
-        print("  dartlab setup oauth-codex  ChatGPT 구독 계정 — 브라우저 OAuth")
-        print("  dartlab setup openai       OpenAI API — 최신 GPT 모델 (API 키 필요)")
-        print("  dartlab setup ollama       로컬 LLM (오프라인)")
-        print("  dartlab setup codex        Codex CLI — 코딩 에이전트용")
-        print("  dartlab setup custom       OpenAI 호환 API — vLLM, Together 등\n")
+        print("[ 분석 엔진 ]\n")
+        print('  dartlab ask "질문"        Skill/Capability 기반 Workbench 실행')
+        print("  provider/model 설정은 제품 설정 영역에서 관리됩니다.\n")
         return 0
 
     if args.provider == "dart-key":
@@ -53,7 +39,7 @@ def run(args) -> int:
     else:
         handler = {
             "oauth-codex": _setup_oauth_codex,
-            "codex": lambda: _setup_codex(detect_codex()),
+            "codex": _setup_codex,
             "ollama": _setup_ollama,
             "openai": _setup_openai,
             "custom": _setup_custom,
@@ -108,22 +94,9 @@ def _setupApiKeyProvider(providerId: str) -> None:
 
 
 def _setup_oauth_codex() -> None:
-    print("\n[ ChatGPT OAuth 설정 — 브라우저 로그인 (권장) ]\n")
-    print("  ChatGPT Plus/Pro 구독자는 API 키 없이 사용할 수 있습니다.\n")
-
-    # 이미 인증됐는지 확인
-    try:
-        from dartlab.ai.providers.support.oauth_token import is_authenticated
-
-        if is_authenticated():
-            print("  ✓ 이미 인증되어 있습니다.\n")
-            print("  재인증하려면 아래를 입력하세요:")
-            print("     dartlab setup oauth-codex --login\n")
-            return
-    except ImportError:
-        pass
-
-    _do_oauth_login()
+    print("\n[ provider 설정 ]\n")
+    print("  provider 연결은 현재 Workbench 외부 제품 설정 영역에서 관리됩니다.")
+    print("  공식 답변 진입점은 dartlab.ask(...) 와 /api/ask 입니다.\n")
 
 
 def _do_oauth_login() -> None:
@@ -249,7 +222,8 @@ def _do_oauth_login() -> None:
         print("  또는 다시 시도: dartlab.setup('chatgpt')\n")
 
 
-def _setup_codex(info: dict) -> None:
+def _setup_codex(info: dict | None = None) -> None:
+    info = info or {"installed": False}
     print("\n[ Codex CLI 설정 — ChatGPT Plus/Pro 구독 ]\n")
 
     if info["installed"]:
