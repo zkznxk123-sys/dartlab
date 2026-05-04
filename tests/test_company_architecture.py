@@ -111,8 +111,8 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
     expected = [
         "src/dartlab/skill_os",
         "src/dartlab/ai/tools",
-        "src/dartlab/ai/knowledge",
-        "src/dartlab/ai/audit",
+        "src/dartlab/ai/workbench",
+        "src/dartlab/core/search_capabilities.py",
         "src/dartlab/viz/display",
         "src/dartlab/viz/export",
     ]
