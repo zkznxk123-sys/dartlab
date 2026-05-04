@@ -374,7 +374,7 @@ class Company:
         self._financeChecked = False
 
         if not self._hasDocs and not self._hasFinanceParquet and not self._hasReport:
-            from dartlab.core.guidance import emit
+            from dartlab.core.messaging import emit
 
             emit("error:no_data", stockCode=self.stockCode, raise_as=ValueError)
 
@@ -407,7 +407,7 @@ class Company:
         if key in self._hintedKeys:
             return
         self._hintedKeys.add(key)
-        from dartlab.core.guidance import emit
+        from dartlab.core.messaging import emit
 
         emit(f"hint:no_{category}", stockCode=self.stockCode, prop=prop)
 

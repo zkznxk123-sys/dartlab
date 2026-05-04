@@ -29,7 +29,7 @@ class NarrativeThread:
 
 
 def _toDict(selectResult) -> tuple[dict[str, dict], list[str]] | None:
-    from dartlab.analysis.financial._helpers import toDictBySnakeId
+    from dartlab.core.utils.helpers import toDictBySnakeId
 
     return toDictBySnakeId(selectResult)
 

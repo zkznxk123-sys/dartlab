@@ -207,7 +207,7 @@ def calcSynergyValue(
 def _estimateBaseFcf(company: Any) -> float | None:
     """최근 양수 FCF 중앙값."""
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
+        from dartlab.core.utils.helpers import toDictBySnakeId
 
         cf = company.select("CF", ["영업활동현금흐름", "유형자산의취득"])
         parsed = toDictBySnakeId(cf)
@@ -239,7 +239,7 @@ def _estimateNetDebt(company: Any) -> float | None:
         순차입금 (원). 추출 실패 시 None.
     """
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
+        from dartlab.core.utils.helpers import toDictBySnakeId
 
         bs = company.select("BS", ["단기차입금", "장기차입금", "사채", "현금및현금성자산"])
         parsed = toDictBySnakeId(bs)

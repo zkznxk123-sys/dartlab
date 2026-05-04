@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
 from dartlab.core.polarsUtil import isEmptyDf
 
 # 비교할 핵심 비율 목록 (scanRatio name → 표시 label)
@@ -291,7 +291,7 @@ def _loadScanRatio(ratioName: str) -> pl.DataFrame:
 
 def _latestPeriodCol(df: pl.DataFrame) -> str | None:
     """DataFrame에서 최신 기간 컬럼을 찾는다."""
-    from dartlab.analysis.financial._helpers import periodCols
+    from dartlab.core.utils.helpers import periodCols
 
     cols = periodCols(df)
     if not cols:

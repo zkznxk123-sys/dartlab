@@ -154,7 +154,7 @@ def checkFreshness(
     includeFinanceReport: bool = True,
 ) -> FreshnessResult:
     """종목의 로컬 데이터가 최신인지 DART API로 확인."""
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
     from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
 
     # TTL 게이트
@@ -255,7 +255,7 @@ def scanMarketFreshness(
 ) -> pl.DataFrame:
     """시장 전체 freshness 스캔. 로컬 데이터가 있는 종목 중 새 공시가 있는 것."""
     from dartlab.core.dataLoader import _dataDir
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
     from dartlab.providers.dart.openapi.client import DartClient
     from dartlab.providers.dart.openapi.dartKey import hasDartApiKey, resolveDartKeys
     from dartlab.providers.dart.openapi.disclosure import listFilings
@@ -353,7 +353,7 @@ def collectMissing(
     from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
 
     if not hasDartApiKey():
-        from dartlab.core.guidance import emit
+        from dartlab.core.messaging import emit
 
         emit("collect:no_key")
         return {}

@@ -5,7 +5,7 @@ DART sections(productService/생산실적) + IS(매출/CAPEX) 활용.
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
 
 
 @memoized_calc
@@ -19,8 +19,7 @@ def calcSemiconductorKpis(company, *, basePeriod: str | None = None) -> dict | N
         aspProxy : dict | None — 매출/생산량 → ASP 추정
         utilizationProxy : dict | None — 가동률 추정
     """
-    from dartlab.analysis.financial._helpers import toDictBySnakeId
-    from dartlab.core.utils.helpers import annualColsFromPeriods
+    from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
     result: dict = {}
 

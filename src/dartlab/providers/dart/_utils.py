@@ -39,7 +39,7 @@ def _ensureData(stockCode: str, category: str) -> bool:
     """3단계 폴백: 로컬 → HuggingFace 다운로드 → DART API 자동 수집."""
     from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.core.dataLoader import _dataDir, _download
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
 
     dest = _dataDir(category) / f"{stockCode}.parquet"
 
@@ -151,7 +151,7 @@ def _checkDartDocsFreshness(stockCode: str, category: str = "docs"):
     Returns: FreshnessResult | None (L3 체크 결과, API 키 없으면 None).
     """
     from dartlab.core.dataLoader import _checkRemoteFreshness, _dataDir, _download
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
 
     path = _dataDir(category) / f"{stockCode}.parquet"
     if not path.exists():

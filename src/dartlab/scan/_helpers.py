@@ -223,7 +223,7 @@ def scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
     parquet_files = sorted(report_dir.glob("*.parquet"))
 
     if not parquet_files:
-        from dartlab.core.guidance import emit
+        from dartlab.core.messaging import emit
 
         emit("hint:market_data_needed", category="report", fn=api_type)
         return pl.DataFrame()

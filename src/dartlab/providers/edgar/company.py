@@ -1292,7 +1292,7 @@ class Company:
         if cacheKey in self._cache:
             return self._cache[cacheKey]
 
-        from dartlab.core.guidance import progress
+        from dartlab.core.messaging import progress
         from dartlab.providers.edgar.openapi.edgar import OpenEdgar
 
         progress(
@@ -1443,7 +1443,7 @@ class Company:
         if not docUrl:
             raise ValueError("EDGAR filing 읽기에는 filing URL 또는 accessionNo가 필요합니다.")
 
-        from dartlab.core.guidance import progress
+        from dartlab.core.messaging import progress
         from dartlab.providers.edgar.docs.fetch import _downloadFilingSource, _htmlToText
 
         progress(f"{self.corpName} 공시 원문 다운로드 중... ({accessionNo or Path(docUrl).name})")

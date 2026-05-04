@@ -9,8 +9,8 @@ from dartlab.core.utils.safe import get as _get
 
 _getF = _getF2 = _getF3 = _getF4 = _get
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
+from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 _MAX_YEARS = 8
 

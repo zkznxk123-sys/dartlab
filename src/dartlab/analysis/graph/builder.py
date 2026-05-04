@@ -358,7 +358,7 @@ def buildGraph(company: Any, *, basePeriod: str | None = None) -> CompanyGraph:
     bp = basePeriod
     if bp is None:
         try:
-            from dartlab.analysis.financial._helpers import resolveBasePeriod
+            from dartlab.analysis.financial.companyContext import resolveBasePeriod
 
             pr = resolveBasePeriod(company, None, maxYears=5, maxQuarters=8)
             bp = pr.basePeriod if pr else None

@@ -207,7 +207,7 @@ def fetchEdgarDocs(
     if not filings:
         raise ValueError(f"{ticker} EDGAR docs filing 없음 (since {sinceYear})")
 
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
 
     if maxFilings is not None and len(filings) > maxFilings:
         filings = filings[-maxFilings:]
@@ -443,7 +443,7 @@ def downloadListedEdgarDocs(
 
     tickers = universe["ticker"].to_list()
     total = len(tickers)
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
 
     emit("edgar:batch_start", total=total, sinceYear=sinceYear)
 

@@ -24,7 +24,7 @@ def extractChsFeatures(company: Any) -> dict | None:
         입력 부족 시 None.
     """
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
+        from dartlab.core.utils.helpers import toDictBySnakeId
     except ImportError:
         return None
 

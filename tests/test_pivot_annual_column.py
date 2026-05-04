@@ -40,7 +40,7 @@ def test_dart_bs_no_annual_column_default():
 def test_toDictBySnakeId_synthesizes_annual_for_flow():
     """toDictBySnakeId 가 IS 분기에서 연간 합성 (4분기 합)."""
     import dartlab
-    from dartlab.analysis.financial._helpers import toDictBySnakeId
+    from dartlab.core.utils.helpers import toDictBySnakeId
 
     c = dartlab.Company("000660")
     parsed = toDictBySnakeId(c.select("IS", ["매출액"]))
@@ -60,7 +60,7 @@ def test_toDictBySnakeId_synthesizes_annual_for_flow():
 def test_toDictBySnakeId_synthesizes_annual_for_stock():
     """toDictBySnakeId 가 BS 분기에서 Q4 = 연말잔액 alias."""
     import dartlab
-    from dartlab.analysis.financial._helpers import toDictBySnakeId
+    from dartlab.core.utils.helpers import toDictBySnakeId
 
     c = dartlab.Company("000660")
     parsed = toDictBySnakeId(c.select("BS", ["자산총계"]))
@@ -78,7 +78,7 @@ def test_toDictBySnakeId_synthesizes_annual_for_stock():
 def test_annualColsFromPeriods_picks_synthesized():
     """annualColsFromPeriods 가 toDict 가 합성한 연간 라벨을 우선."""
     import dartlab
-    from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
+    from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
     c = dartlab.Company("000660")
     parsed = toDictBySnakeId(c.select("IS", ["매출액"]))

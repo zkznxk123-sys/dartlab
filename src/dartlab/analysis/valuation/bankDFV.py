@@ -64,9 +64,9 @@ def calcBankDFV(company: Any, *, basePeriod: str | None = None, overrides: dict 
         bankModel : detail dict (impliedPBR, excessReturn, ...)
     """
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
         from dartlab.analysis.valuation.bankValuation import calcBankExcessReturn
         from dartlab.core.overrides import applyOverride
+        from dartlab.core.utils.helpers import toDictBySnakeId
         from dartlab.macro.riskPremiums import loadDamodaranERP
     except ImportError:
         return None

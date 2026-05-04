@@ -15,6 +15,6 @@
 {"event":"chunk","data":{"text":"| 3-2 | 비용구조 | 5 | 비용이 어떻게 움직이는지 보는 마진 원인 분석 |\n"},"delay":40}
 {"event":"chunk","data":{"text":"| 3-3 | 자본배분 | 7 | 번 돈을 투자·배당·상환에 어떻게 쓰는지 점검 |\n"},"delay":40}
 {"event":"chunk","data":{"text":"| 3-4 | 투자효율 | 5 | 투자가 실제 가치 창출로 이어지는지 확인 |\n"},"delay":40}
-{"event":"chunk","data":{"text":"| 3-5 | 재무정합성 | 6 | 손익계산서·현금흐름표·대차대조표 일치 여부 확인 |\n"},"delay":40}
+{"event":"chunk","data":{"text":"| 3-5 | 재무정합성 | 6 | 손익계산서·현금흐름표·재무상태표 일치 여부 확인 |\n"},"delay":40}
 {"event":"chunk","data":{"text":"| 4-1 | 가치평가 | 9 | 적정 가치와 현재 가격 수준 판단 |\n"},"delay":40}
 {"event":"chunk","data":{"text":"\n총 22축 중 financial 14축이 핵심이다."},"delay":50}

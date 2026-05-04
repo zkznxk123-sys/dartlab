@@ -584,7 +584,7 @@ def scanAccount(
         parquetFiles = sorted(financeDir.glob("*.parquet"))
 
         if not parquetFiles:
-            from dartlab.core.guidance import emit
+            from dartlab.core.messaging import emit
 
             emit("hint:market_data_needed", category="finance", fn="scanAccount")
             return pl.DataFrame({"stockCode": []})

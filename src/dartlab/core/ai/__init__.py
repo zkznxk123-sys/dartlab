@@ -11,6 +11,7 @@ from dartlab.core.ai.providers import (
 )
 from dartlab.core.ai.routing import AI_ROLES, DEFAULT_ROLE, normalize_role
 from dartlab.core.ai.secrets import SecretStore, get_secret_store
+from dartlab.core.ai.types import LLMConfig
 
 __all__ = [
     "AI_ROLES",
@@ -22,6 +23,7 @@ __all__ = [
     "get_profile_manager",
     "get_provider_spec",
     "get_secret_store",
+    "LLMConfig",
     "normalize_provider",
     "normalize_role",
     "provider_choices",

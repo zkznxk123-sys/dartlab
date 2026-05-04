@@ -524,7 +524,7 @@ def _calcLiquidationValue(company: Any, overrides: dict) -> float | None:
 
     try:
         bs = company.select("BS", ["자본총계", "총발행주식수"])
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
+        from dartlab.core.utils.helpers import toDictBySnakeId
 
         parsed = toDictBySnakeId(bs)
         if not parsed:
@@ -566,8 +566,8 @@ def _inferShares(company: Any) -> int | None:
 def _calcLiquidationDetail(company: Any, overrides: dict) -> dict | None:
     """Damodaran 자산별 회수율 청산가치 (Dark Side Ch.9)."""
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
         from dartlab.analysis.valuation.dcf import liquidationValuation
+        from dartlab.core.utils.helpers import toDictBySnakeId
     except ImportError:
         return None
 
@@ -780,7 +780,7 @@ def _tsdExtractBaseFcf(company: Any) -> float | None:
         positives 리스트 의 median. 양수 FCF 하나도 없으면 None.
     """
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
+        from dartlab.core.utils.helpers import toDictBySnakeId
     except ImportError:
         return None
     try:
@@ -815,9 +815,9 @@ def _tsdMaybeNormalizeFcf(base_fcf: float, life_phase: str | None, company: Any)
         needsNormalized False 이면 base_fcf 그대로, True 면 calcNormalizedFcf 결과.
     """
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
         from dartlab.analysis.financial.investmentAnalysis import calcRoicTimeline
         from dartlab.analysis.financial.normalized import calcNormalizedFcf, needsNormalized
+        from dartlab.core.utils.helpers import toDictBySnakeId
     except ImportError:
         return base_fcf
 
@@ -869,7 +869,7 @@ def _tsdExtractNetDebtShares(company: Any) -> tuple[float, float] | None:
         BS periods 없거나 예외 시 None.
     """
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
+        from dartlab.core.utils.helpers import toDictBySnakeId
     except ImportError:
         return None
     try:

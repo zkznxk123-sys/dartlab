@@ -59,8 +59,8 @@ def test_no_legacy_helper_imports():
     - ttmSum/getFlowValue/isQuarterlyFallback (Plan v4 P3 후속)
     - annualizeFlowRows (Plan v5 F)
     """
-    import dartlab.analysis.financial._helpers as h
     import dartlab.core.utils.flow as f
+    import dartlab.core.utils.helpers as h
 
     assert not hasattr(h, "ttmSum"), "ttmSum 은 Plan v4 에서 제거됨"
     assert not hasattr(h, "getFlowValue"), "getFlowValue 는 Plan v4 에서 제거됨"

@@ -224,7 +224,7 @@ def _maybeWarnStale(path: Path) -> None:
     if ageDays >= _STALE_WARN_DAYS:
         _staleWarnedPaths.add(key)
         try:
-            from dartlab.core.guidance import emit
+            from dartlab.core.messaging import emit
 
             emit("data:stale_warning", ageDays=ageDays)
         except ImportError:
@@ -291,7 +291,7 @@ def _refreshFromHf(stockCode: str, path: Path, category: str) -> None:
         if etagPath.exists():
             etagPath.touch()
         return
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
 
     label = DATA_RELEASES[category]["label"]
     tmpPath = path.with_suffix(".tmp")
@@ -468,8 +468,8 @@ def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefr
 
 def _downloadFromHf(stockCode: str, path: Path, category: str) -> None:
     """HF 최초 다운로드 + 안내 + 예외 처리 단일 블록."""
-    from dartlab.core.guidance import emit
-    from dartlab.core.guidance import format as gfmt
+    from dartlab.core.messaging import emit
+    from dartlab.core.messaging import format as gfmt
 
     label = DATA_RELEASES[category]["label"]
     emit("download:start", stockCode=stockCode, label=label)
@@ -540,7 +540,7 @@ def _ensureEdgarDocs(
         return
 
     if not path.exists():
-        from dartlab.core.guidance import emit
+        from dartlab.core.messaging import emit
 
         label = DATA_RELEASES["edgarDocs"]["label"]
         emit("download:start", stockCode=stockCode, label=label)
@@ -619,7 +619,7 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
     label = DATA_RELEASES[category]["label"]
     hfDir = DATA_RELEASES[category]["dir"]
 
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
 
     emit("download_all:hf_start", label=label, repo=HF_REPO, dir=hfDir)
 
@@ -678,7 +678,7 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
 
 def download(stockCode: str) -> None:
     """특정 종목의 docs + finance + report 데이터를 모두 다운로드."""
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
 
     for category in DATA_RELEASES:
         if category in _EXPLICIT_DOWNLOAD_ONLY_CATEGORIES:
@@ -761,7 +761,7 @@ def updateEdgarListedUniverse(*, force: bool = False) -> Path:
     if not force and path.exists() and not _isLocalCacheExpired(path, _EDGAR_UNIVERSE_TTL_HOURS):
         return path
 
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
 
     emit("edgar:universe_update")
     data = _fetchJson(EDGAR_LISTED_UNIVERSE_URL)
@@ -980,7 +980,7 @@ def _incrementalUpdateEdgarDocs(
     sinceYear: int,
     latestRemote: dict[str, str],
 ) -> None:
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
     from dartlab.providers.edgar.docs.fetch import (
         FILING_TIMEOUT_SECONDS,
         _collectFilingRows,
@@ -1297,7 +1297,7 @@ def _pyodideFetchScanLite() -> None:
     경량본 1 파일만 선별 수신한다. 실패 시 명시적 에러를 emit 하여 fallback 이 조용히
     부분 결과를 돌려주는 상황을 차단한다.
     """
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
 
     scanDir = _dataDir("scan")
     scanDir.mkdir(parents=True, exist_ok=True)

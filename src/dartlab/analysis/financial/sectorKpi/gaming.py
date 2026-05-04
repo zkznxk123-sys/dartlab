@@ -5,7 +5,7 @@ DART sections(productService) + IS 활용.
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
 
 
 @memoized_calc

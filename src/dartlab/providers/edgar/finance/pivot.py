@@ -376,7 +376,7 @@ def _autoDownloadEdgarFinance(cik: str, dest: Path) -> Optional[Path]:
     """SEC EDGAR companyfacts API에서 재무 데이터를 자동 다운로드."""
     from urllib.error import URLError
 
-    from dartlab.core.guidance import emit
+    from dartlab.core.messaging import emit
 
     emit("edgar:sec_download", cik=cik)
     try:

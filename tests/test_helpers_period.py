@@ -2,7 +2,7 @@
 
 import pytest
 
-from dartlab.analysis.financial._helpers import (
+from dartlab.core.utils.helpers import (
     PeriodRange,
     annualColsFromPeriods,
     quarterlyColsFromPeriods,

@@ -19,8 +19,8 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 import logging
 import math
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
+from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 log = logging.getLogger(__name__)
 
@@ -495,7 +495,7 @@ def calcStructuralBreak(company, *, basePeriod: str | None = None) -> dict | Non
 def _getRatioValues(company, ratioName: str, maxYears: int) -> list[float | None]:
     """ratioSeries에서 특정 비율의 시계열을 추출."""
     try:
-        from dartlab.analysis.financial._helpers import getRatioSeries
+        from dartlab.analysis.financial.companyContext import getRatioSeries
 
         result = getRatioSeries(company)
         if result is None:

@@ -25,7 +25,7 @@ def test_sk_hynix_revenue_2025_annual():
     annualColsFromPeriods 가 annual 컬럼 우선 잡음 → calc 가 row['2025'] 직접 read.
     """
     import dartlab
-    from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
+    from dartlab.core.utils.helpers import annualColsFromPeriods, toDict
 
     c = dartlab.Company("000660")
     parsed = toDict(c.select("IS", ["매출액"]))

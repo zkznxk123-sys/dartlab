@@ -11,8 +11,8 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 
 from typing import Any
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, sumCostOfSales, sumSGA, toDictBySnakeId
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
+from dartlab.core.utils.helpers import annualColsFromPeriods, sumCostOfSales, sumSGA, toDictBySnakeId
 
 _MAX_YEARS = 8
 
@@ -82,7 +82,7 @@ def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
         return None
 
     # notes enrichment — 비용의 성격별 분류 (있으면)
-    from dartlab.analysis.financial._helpers import fetchNotesDetail
+    from dartlab.analysis.financial.companyContext import fetchNotesDetail
 
     result: dict[str, Any] = {"history": history}
     notesDetail = fetchNotesDetail(company, ["costByNature"])
@@ -256,7 +256,8 @@ def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict 
         periods : list[str] — 대상 회계연도 목록
         insight : str | None — 주요 변화 요약 문장
     """
-    from dartlab.analysis.financial._helpers import fetchNotesDetail, parseNumStr
+    from dartlab.analysis.financial.companyContext import fetchNotesDetail
+    from dartlab.core.utils.helpers import parseNumStr
 
     notesData = fetchNotesDetail(company, ["costByNature"])
     rawRows = notesData.get("costByNature")
@@ -406,7 +407,7 @@ def calcRawMaterialBreakdown(company, *, basePeriod: str | None = None) -> dict 
         totalAmount : float — 총매입액 (원)
         period : str — 기준 회계연도
     """
-    from dartlab.analysis.financial._helpers import parseNumStr
+    from dartlab.core.utils.helpers import parseNumStr
 
     result = company.select("rawMaterial", ["매입액"])
     if result is None:
@@ -418,7 +419,7 @@ def calcRawMaterialBreakdown(company, *, basePeriod: str | None = None) -> dict 
     if df is None or "항목" not in df.columns:
         return None
 
-    from dartlab.analysis.financial._helpers import periodCols
+    from dartlab.core.utils.helpers import periodCols
 
     pCols = periodCols(df)
     if not pCols:

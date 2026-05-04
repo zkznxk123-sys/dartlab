@@ -243,7 +243,7 @@ def getKindList(*, forceRefresh: bool = False) -> pl.DataFrame:
                 _searchCache = None  # 데이터 변경 시 검색 캐시 무효화
                 return cached
 
-        from dartlab.core.guidance import emit
+        from dartlab.core.messaging import emit
 
         emit("listing:download")
         df = _fetchKind()
@@ -594,7 +594,7 @@ def getDartList(*, forceRefresh: bool = False) -> pl.DataFrame:
                 _dartMemoryTs = time.time()
                 return _dartMemory
 
-        from dartlab.core.guidance import emit
+        from dartlab.core.messaging import emit
 
         emit("listing:dartlist:download")
         df = _loadDartListFromHf()
@@ -753,7 +753,7 @@ def getKrxList(*, forceRefresh: bool = False) -> pl.DataFrame:
                 _krxMemoryTs = time.time()
                 return cached
 
-        from dartlab.core.guidance import emit
+        from dartlab.core.messaging import emit
 
         emit("listing:krx:download")
         df = _fetchKrx()

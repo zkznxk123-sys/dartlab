@@ -556,7 +556,7 @@ class TestCalcSustainableGrowthRate:
 
 class TestHelpers:
     def test_parseNumStr_basic(self):
-        from dartlab.analysis.financial._helpers import parseNumStr
+        from dartlab.core.utils.helpers import parseNumStr
 
         assert parseNumStr("1,234") == 1234.0
         assert parseNumStr("△500") == -500.0
@@ -566,14 +566,14 @@ class TestHelpers:
         assert parseNumStr("12.5%") == 12.5
 
     def test_annualColsFromPeriods(self):
-        from dartlab.analysis.financial._helpers import annualColsFromPeriods
+        from dartlab.core.utils.helpers import annualColsFromPeriods
 
         periods = ["2024", "2023", "2022", "2021", "2024Q4", "2024Q3"]
         result = annualColsFromPeriods(periods, None, 3)
         assert result == ["2024", "2023", "2022"]
 
     def test_annualColsFromPeriods_with_basePeriod(self):
-        from dartlab.analysis.financial._helpers import annualColsFromPeriods
+        from dartlab.core.utils.helpers import annualColsFromPeriods
 
         periods = ["2024", "2023", "2022", "2021"]
         result = annualColsFromPeriods(periods, "2022", 5)
@@ -582,7 +582,7 @@ class TestHelpers:
         assert "2022" in result
 
     def test_annualColsFromPeriods_q4_fallback(self):
-        from dartlab.analysis.financial._helpers import annualColsFromPeriods
+        from dartlab.core.utils.helpers import annualColsFromPeriods
 
         periods = ["2024Q4", "2024Q3", "2023Q4", "2023Q3"]
         result = annualColsFromPeriods(periods, None, 3)
@@ -590,7 +590,7 @@ class TestHelpers:
         assert "2023Q4" in result
 
     def test_mergeRows(self):
-        from dartlab.analysis.financial._helpers import mergeRows
+        from dartlab.core.utils.helpers import mergeRows
 
         a = {"x": 1, "y": None}
         b = {"x": 2, "y": 3, "z": 4}
@@ -600,19 +600,19 @@ class TestHelpers:
         assert merged["z"] == 4  # fallback adds missing
 
     def test_mergeRows_none(self):
-        from dartlab.analysis.financial._helpers import mergeRows
+        from dartlab.core.utils.helpers import mergeRows
 
         assert mergeRows(None, None) == {}
         assert mergeRows(None, {"a": 1}) == {"a": 1}
         assert mergeRows({"a": 1}, None) == {"a": 1}
 
     def test_toDict_none(self):
-        from dartlab.analysis.financial._helpers import toDict
+        from dartlab.core.utils.helpers import toDict
 
         assert toDict(None) is None
 
     def test_toDict_valid(self):
-        from dartlab.analysis.financial._helpers import toDict
+        from dartlab.core.utils.helpers import toDict
 
         df = pl.DataFrame({"항목": ["매출액", "영업이익"], "2024": [100, 50], "2023": [90, 45]})
         result = toDict(_SelectResult(df))
@@ -623,7 +623,7 @@ class TestHelpers:
         assert "2024" in periods
 
     def test_periodCols(self):
-        from dartlab.analysis.financial._helpers import periodCols
+        from dartlab.core.utils.helpers import periodCols
 
         df = pl.DataFrame({"항목": ["x"], "2024": [1], "2023": [2], "foo": [3]})
         cols = periodCols(df)
@@ -632,7 +632,7 @@ class TestHelpers:
         assert "foo" not in cols
 
     def test_annualLabel(self):
-        from dartlab.analysis.financial._helpers import annualLabel
+        from dartlab.core.utils.helpers import annualLabel
 
         assert annualLabel("2025Q4") == "2025"
         assert annualLabel("2025") == "2025"

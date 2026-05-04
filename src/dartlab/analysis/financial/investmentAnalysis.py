@@ -10,12 +10,12 @@ from dartlab.core.utils.safe import get as _get
 
 _getF = _getF2 = _getF3 = _getF4 = _get
 
-from dartlab.analysis.financial._helpers import (
+from dartlab.core.memory import memoized_calc
+from dartlab.core.utils.helpers import (
     annualColsFromPeriods,
     sumBorrowings,
     toDictBySnakeId,
 )
-from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
 
@@ -495,7 +495,7 @@ def calcInvestmentInOther(company, *, basePeriod: str | None = None) -> dict | N
     """
     import re
 
-    from dartlab.analysis.financial._helpers import parseNumStr
+    from dartlab.core.utils.helpers import parseNumStr
 
     result = company.show("investmentInOtherDetail")
     if result is None:

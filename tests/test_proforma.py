@@ -298,7 +298,7 @@ class TestBuildProforma:
         text = repr(result)
         assert "Pro-Forma" in text
         assert "손익계산서" in text
-        assert "대차대조표" in text
+        assert "재무상태표" in text
         assert "현금흐름표" in text
 
     @pytest.mark.unit

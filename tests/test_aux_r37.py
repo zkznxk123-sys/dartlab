@@ -27,9 +27,8 @@ def test_display_module_loads():
     assert hasattr(display, "renderFinance")
 
 
-def test_audit_module_loads():
-    """dartlab.ai.audit import + 핵심 함수."""
-    from dartlab.ai import audit
+def test_ai_audit_legacy_surface_removed():
+    """AI audit compatibility stubs are not part of the production surface."""
 
-    assert hasattr(audit, "runAudit")
-    assert hasattr(audit, "queryAudit")
+    with pytest.raises(ModuleNotFoundError):
+        import dartlab.ai.audit  # noqa: F401

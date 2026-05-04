@@ -83,7 +83,7 @@ def calcSotpNav(
     # 모회사 별도 자산 - 부채 (단순 추정: 자본총계 × 30% 잉여현금/투자부동산 비중)
     parent_net = 0.0
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
+        from dartlab.core.utils.helpers import toDictBySnakeId
 
         bs = company.select("BS", ["자본총계"])
         parsed = toDictBySnakeId(bs)
@@ -108,7 +108,7 @@ def calcSotpNav(
     cur_price = _getCurrentPriceLight(company)
     if cur_price and cur_price > 0:
         try:
-            from dartlab.analysis.financial._helpers import toDictBySnakeId
+            from dartlab.core.utils.helpers import toDictBySnakeId
 
             bs_check = company.select("BS", ["자본총계"])
             parsed_check = toDictBySnakeId(bs_check)
@@ -148,7 +148,7 @@ def calcSotpNav(
         cur_p = _getCurrentPriceLight(company)
         if cur_p and cur_p > 0:
             try:
-                from dartlab.analysis.financial._helpers import toDictBySnakeId
+                from dartlab.core.utils.helpers import toDictBySnakeId
 
                 bs = company.select("BS", ["자본총계"])
                 parsed = toDictBySnakeId(bs)

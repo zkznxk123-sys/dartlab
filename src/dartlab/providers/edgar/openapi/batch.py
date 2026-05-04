@@ -346,7 +346,7 @@ def batchCollectEdgar(
 
         remaining = queue.qsize()
         if remaining > 0:
-            from dartlab.core.guidance import emit
+            from dartlab.core.messaging import emit
 
             emit("edgar:collect_exhausted")
 

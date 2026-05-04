@@ -284,7 +284,7 @@ class ZipDocsCollector:
         onProgress=None,
     ) -> int:
         """2016Q1부터 전체 정기보고서 수집 → parquet 저장. 반환: 저장된 섹션 수."""
-        from dartlab.core.guidance import emit
+        from dartlab.core.messaging import emit
 
         # 공시 목록 조회 (K-IFRS 전면 도입 이후)
         filings = listFilings(

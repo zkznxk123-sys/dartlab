@@ -854,7 +854,7 @@ def batchCollect(
         # 1) 큐에 남은 종목 = exhausted로 잘린 종목 → pending 파일 저장
         # 2) 실패한 종목 = 에러 발생 종목 → failures 파일 저장
         # 다음 실행에서 이 두 파일을 읽고 우선 재시도해야 누락 회복 가능.
-        from dartlab.core.guidance import emit
+        from dartlab.core.messaging import emit
 
         pending: list[str] = []
         while not queue.empty():

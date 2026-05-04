@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
 
 _GRADE_MAP = {
     "performance": "성장성",

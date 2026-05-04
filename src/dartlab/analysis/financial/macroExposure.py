@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
 
 log = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
         return None
 
     # 매출 성장률 시계열 — flow 헬퍼 경유 (Q4 분기 단독값 함정 차단)
-    from dartlab.analysis.financial._helpers import (
+    from dartlab.core.utils.helpers import (
         annualColsFromPeriods,
         toDictBySnakeId,
     )

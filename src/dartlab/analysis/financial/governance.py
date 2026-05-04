@@ -10,10 +10,9 @@ DART 전용 섹션 기반 calc는 EDGAR Company에서 None을 반환한다 (SEC 
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import MAX_RATIO_YEARS
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
+from dartlab.core.utils.helpers import MAX_RATIO_YEARS, annualColsFromPeriods, toDictBySnakeId
 
 # ── 최대주주 지분 시계열 ──
 
@@ -336,8 +335,7 @@ def calcExecutivePayDivergence(company, *, basePeriod: str | None = None) -> dic
         return None
 
     # 매출/순이익 매핑
-    from dartlab.analysis.financial._helpers import toDictBySnakeId
-    from dartlab.core.utils.helpers import annualColsFromPeriods
+    from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
     parsed = toDictBySnakeId(company.select("IS", ["sales", "net_profit"]))
     if parsed is None:

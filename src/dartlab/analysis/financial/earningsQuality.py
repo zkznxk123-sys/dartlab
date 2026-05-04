@@ -11,8 +11,8 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 
 import math
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
+from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 _MAX_YEARS = 8
 
@@ -413,7 +413,7 @@ def calcAccrualAnalysis(company, *, basePeriod: str | None = None) -> dict | Non
     result: dict = {"history": history}
 
     # notes enrichment — 매출채권 대손충당금 상세
-    from dartlab.analysis.financial._helpers import fetchNotesDetail
+    from dartlab.analysis.financial.companyContext import fetchNotesDetail
 
     notesDetail = fetchNotesDetail(company, ["receivables"])
     if notesDetail:
@@ -925,7 +925,7 @@ def calcNonOperatingBreakdown(company, *, basePeriod: str | None = None) -> dict
     result: dict = {"history": history}
 
     # notes enrichment — 관계기업 투자 상세
-    from dartlab.analysis.financial._helpers import fetchNotesDetail
+    from dartlab.analysis.financial.companyContext import fetchNotesDetail
 
     notesDetail = fetchNotesDetail(company, ["affiliates"])
     if notesDetail:
@@ -956,7 +956,7 @@ def calcDilutionTrend(company, *, basePeriod: str | None = None) -> dict | None:
         latestDilution : float | None — 최신 기간 희석 괴리율 (%)
         trend : str | None — 희석 추세 (희석 증가/희석 감소/안정)
     """
-    from dartlab.analysis.financial._helpers import fetchNotesDetail
+    from dartlab.analysis.financial.companyContext import fetchNotesDetail
 
     notesData = fetchNotesDetail(company, ["eps"])
     epsDf = notesData.get("eps")
@@ -983,7 +983,7 @@ def calcDilutionTrend(company, *, basePeriod: str | None = None) -> dict | None:
     if not periodCols:
         return None
 
-    from dartlab.analysis.financial._helpers import parseNumStr
+    from dartlab.core.utils.helpers import parseNumStr
 
     history = []
     for col in periodCols[:_MAX_YEARS]:

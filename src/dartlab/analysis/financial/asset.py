@@ -12,8 +12,8 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 
 from typing import Any
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
+from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 _MAX_YEARS = 8
 _MAX_QUARTERS = 5
@@ -268,7 +268,7 @@ def calcAssetStructure(company, *, basePeriod: str | None = None) -> dict | None
         diagnosis = "비영업 우위 — 영업 자산보다 비영업 자산이 많음"
 
     # notes enrichment — 주석에서 상세 분해 데이터 추가 (있으면)
-    from dartlab.analysis.financial._helpers import fetchNotesDetail
+    from dartlab.analysis.financial.companyContext import fetchNotesDetail
 
     notesDetail = fetchNotesDetail(company, ["inventory", "tangibleAsset", "intangibleAsset", "investmentProperty"])
 
@@ -590,7 +590,7 @@ def calcInvestmentPropertyTrend(company, *, basePeriod: str | None = None) -> di
     result_dict: dict[str, Any] = {"history": history, "trend": trend}
 
     # notes enrichment — 투자부동산 세부 항목 (공정가치, 취득/처분 등)
-    from dartlab.analysis.financial._helpers import fetchNotesDetail
+    from dartlab.analysis.financial.companyContext import fetchNotesDetail
 
     notesData = fetchNotesDetail(company, ["investmentProperty"])
     if notesData.get("investmentProperty"):
@@ -631,7 +631,8 @@ def calcIntangibleAssetDetail(company, *, basePeriod: str | None = None) -> dict
         trend : str | None — 비중 추세 ("비중 증가"|"비중 감소"|"안정")
         notesDetail : list[dict] | None — 주석 원본
     """
-    from dartlab.analysis.financial._helpers import fetchNotesDetail, parseNumStr
+    from dartlab.analysis.financial.companyContext import fetchNotesDetail
+    from dartlab.core.utils.helpers import parseNumStr
 
     notesData = fetchNotesDetail(company, ["intangibleAsset"])
     rawRows = notesData.get("intangibleAsset")

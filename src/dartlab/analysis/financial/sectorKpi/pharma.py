@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
 
 _PHASE_PATTERNS = [
     (re.compile(r"(phase\s*3|임상\s*3상|3상)", re.IGNORECASE), "Phase III"),
@@ -76,8 +76,7 @@ def calcPharmaKpis(company, *, basePeriod: str | None = None) -> dict | None:
 
     # ── R&D/매출 비율 ──
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
-        from dartlab.core.utils.helpers import annualColsFromPeriods
+        from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
         parsed = toDictBySnakeId(company.select("IS", ["sales", "research_and_development"]))
         if parsed:

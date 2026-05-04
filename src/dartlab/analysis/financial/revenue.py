@@ -11,13 +11,13 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import (
+from dartlab.core.memory import memoized_calc
+from dartlab.core.utils.helpers import (
     annualColsFromPeriods as _annualColsFromPeriods,
 )
-from dartlab.analysis.financial._helpers import (
+from dartlab.core.utils.helpers import (
     parseNumStr as _parseNumStr,
 )
-from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_SEGMENTS = 8
 _MAX_YEARS = 8

@@ -9,11 +9,11 @@ from dartlab.core.utils.safe import get as _get
 
 _getF = _getF2 = _getF3 = _getF4 = _get
 
-from dartlab.analysis.financial._helpers import (
+from dartlab.core.memory import memoized_calc
+from dartlab.core.utils.helpers import (
     annualColsFromPeriods,
     toDictBySnakeId,
 )
-from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
 
@@ -365,7 +365,7 @@ def calcDividendDocs(company, *, basePeriod: str | None = None) -> dict | None:
         dividendYield : float | None — 배당수익률 (%)
         period : str — 기준 기간
     """
-    from dartlab.analysis.financial._helpers import parseNumStr
+    from dartlab.core.utils.helpers import parseNumStr
 
     result = company.select("dividend", ["주당현금배당금", "현금배당성향", "현금배당수익률"])
     if result is None:
@@ -377,7 +377,7 @@ def calcDividendDocs(company, *, basePeriod: str | None = None) -> dict | None:
     if df is None or "항목" not in df.columns:
         return None
 
-    from dartlab.analysis.financial._helpers import periodCols
+    from dartlab.core.utils.helpers import periodCols
 
     pCols = periodCols(df)
     if not pCols:
@@ -496,8 +496,7 @@ def _edgarTreasuryStockFallback(company) -> dict | None:
         데이터 없으면 None.
     """
     try:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
-        from dartlab.core.utils.helpers import annualColsFromPeriods
+        from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
         # CF에서 자사주 매입 금액 추출
         parsed = toDictBySnakeId(company.select("CF", ["purchase_of_treasury_stock", "share_repurchase"]))

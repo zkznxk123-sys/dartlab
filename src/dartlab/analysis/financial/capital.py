@@ -6,8 +6,8 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, sumBorrowings, toDictBySnakeId
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
+from dartlab.core.utils.helpers import annualColsFromPeriods, sumBorrowings, toDictBySnakeId
 
 _MAX_QUARTERS = 5
 _MAX_YEARS = 8
@@ -157,7 +157,7 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
     if taRow is None:
         return None
 
-    from dartlab.analysis.financial._helpers import mergeRows
+    from dartlab.core.utils.helpers import mergeRows
 
     reRow = mergeRows(data.get("retained_earnings"), data.get("unappropriated_retained_earnings_deficit"))
     pcRow = data.get("paidin_capital", {})
@@ -270,7 +270,7 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
             )
 
     # notes enrichment — 차입금 주석 (이자율, 만기, 담보 등)
-    from dartlab.analysis.financial._helpers import fetchNotesDetail
+    from dartlab.analysis.financial.companyContext import fetchNotesDetail
 
     notesDetail = fetchNotesDetail(company, ["borrowings"])
     if notesDetail:
@@ -447,7 +447,7 @@ def calcCapitalTimeline(company, *, basePeriod: str | None = None) -> dict | Non
         return None
 
     data, allPeriods = parsed
-    from dartlab.analysis.financial._helpers import mergeRows
+    from dartlab.core.utils.helpers import mergeRows
 
     equityRow = data["total_stockholders_equity"]
     retainedRow = mergeRows(data.get("retained_earnings"), data.get("unappropriated_retained_earnings_deficit"))
@@ -1040,7 +1040,7 @@ def calcCapitalFlags(company, *, basePeriod: str | None = None) -> list[tuple[st
             flags.append((f"금융부채 비중 {finDebtPct:.0f}% — 이자 부담 부채 높음", "warning"))
 
         equityRow = data.get("total_stockholders_equity")
-        from dartlab.analysis.financial._helpers import mergeRows
+        from dartlab.core.utils.helpers import mergeRows
 
         retainedRow = mergeRows(data.get("retained_earnings"), data.get("unappropriated_retained_earnings_deficit"))
         retainedPct = _calcRetainedPct(equityRow, retainedRow)

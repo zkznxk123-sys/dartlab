@@ -5,7 +5,7 @@ DART report(constructionOrders) + sections(productService) + notes(provisions/bo
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
 
 
 @memoized_calc
@@ -19,8 +19,7 @@ def calcConstructionKpis(company, *, basePeriod: str | None = None) -> dict | No
         contractMix : dict | None — 도급 vs 자체개발 비중 + 마진 갭
         pfExposure : dict | None — PF 보증·채무 노출
     """
-    from dartlab.analysis.financial._helpers import toDictBySnakeId
-    from dartlab.core.utils.helpers import annualColsFromPeriods
+    from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
     result: dict = {}
 

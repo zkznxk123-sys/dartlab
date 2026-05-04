@@ -15,7 +15,7 @@ dict
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._memoize import memoized_calc
+from dartlab.core.memory import memoized_calc
 
 
 @memoized_calc
@@ -38,8 +38,7 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
         criticalAssumptions : list[str]
         breakdownPoint : dict | None
     """
-    from dartlab.analysis.financial._helpers import toDictBySnakeId
-    from dartlab.core.utils.helpers import annualColsFromPeriods
+    from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
     parsed = toDictBySnakeId(
         company.select(
@@ -408,8 +407,7 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
         cash = base.get("_cash")
         if cash is None:
             try:
-                from dartlab.analysis.financial._helpers import toDictBySnakeId
-                from dartlab.core.utils.helpers import annualColsFromPeriods
+                from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
                 bs_p = toDictBySnakeId(company.select("BS", ["cash_and_cash_equivalents"]))
                 if bs_p:
@@ -452,8 +450,7 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
     # ── 고성장 기업: 재투자 ROI ──
     if opm is not None and opm > 15 and revenue:
         try:
-            from dartlab.analysis.financial._helpers import toDictBySnakeId
-            from dartlab.core.utils.helpers import annualColsFromPeriods
+            from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
             cf_p = toDictBySnakeId(company.select("CF", ["purchase_of_property_plant_and_equipment"]))
             if cf_p:

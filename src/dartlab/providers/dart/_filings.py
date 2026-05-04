@@ -126,7 +126,7 @@ def buildLiveFilings(
     if cacheKey in company._cache:
         return company._cache[cacheKey]
 
-    from dartlab.core.guidance import progress
+    from dartlab.core.messaging import progress
     from dartlab.providers.dart.openapi.dart import OpenDart
 
     progress(f"{company.corpName} 최신 공시 목록 조회 중... (OpenDART, {startDate}~{endDate})")
@@ -232,7 +232,7 @@ def buildReadFiling(
     if not rceptNo:
         raise ValueError("DART filing 읽기에는 rceptNo 또는 rcpNo가 포함된 viewer URL이 필요합니다.")
 
-    from dartlab.core.guidance import progress
+    from dartlab.core.messaging import progress
 
     if sections:
         from dartlab.providers.dart.openapi.client import DartClient

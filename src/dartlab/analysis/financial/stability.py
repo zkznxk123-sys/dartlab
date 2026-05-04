@@ -7,14 +7,14 @@ select()로 BS/IS/CF 원본 계정을 가져와서
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import (
+from dartlab.analysis.financial.companyContext import getRatios
+from dartlab.core.memory import memoized_calc
+from dartlab.core.utils.helpers import (
     MAX_RATIO_YEARS,
     annualColsFromPeriods,
-    getRatios,
     sumBorrowings,
     toDictBySnakeId,
 )
-from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = MAX_RATIO_YEARS
 
@@ -155,7 +155,7 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
     result["turningPoints"] = injectTurningPoints(history, seriesKey="debtRatio", minDeltaPct=25.0)
 
     # notes enrichment — 차입금 구성 + 리스부채
-    from dartlab.analysis.financial._helpers import fetchNotesDetail
+    from dartlab.analysis.financial.companyContext import fetchNotesDetail
 
     notesDetail = fetchNotesDetail(company, ["borrowings", "lease"])
     if notesDetail:
@@ -309,7 +309,7 @@ def calcDistressScore(company, *, basePeriod: str | None = None) -> dict | None:
     caRow = bsData.get("current_assets", {})
     clRow = bsData.get("current_liabilities", {})
     tlRow = bsData.get("total_liabilities", {})
-    from dartlab.analysis.financial._helpers import mergeRows
+    from dartlab.core.utils.helpers import mergeRows
 
     reRow = mergeRows(bsData.get("retained_earnings"), bsData.get("unappropriated_retained_earnings_deficit"))
     opRow = isData.get("operating_profit", {})
@@ -404,7 +404,7 @@ def calcDistressScore(company, *, basePeriod: str | None = None) -> dict | None:
     }
 
     # notes enrichment — 충당부채 (위험/회색 구간일 때 의미)
-    from dartlab.analysis.financial._helpers import fetchNotesDetail
+    from dartlab.analysis.financial.companyContext import fetchNotesDetail
 
     notesDetail = fetchNotesDetail(company, ["provisions"])
     if notesDetail:
