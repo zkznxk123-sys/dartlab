@@ -314,7 +314,7 @@ def _fmtDict(d: dict, depth: int = 0) -> str:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _MCP_INSTRUCTIONS = """\
-DartLab MCP의 기본 표면은 ask와 canonical AI tools다. 목적은 LLM이 DartLab을
+DartLab MCP의 기본 표면은 ask가 실행하는 Ask Workbench와 canonical AI tools다. 목적은 LLM이 DartLab을
 프롬프트 지식으로 외우게 하는 것이 아니라, 질문마다 먼저 skill을 고르고,
 generated spec/docstring에서 호출 가능한 API를 확인한 뒤 engine_call 또는
 run_python으로 실행하고 ref 검증 후 답하게 하는 것이다.
@@ -324,9 +324,10 @@ run_python으로 실행하고 ref 검증 후 답하게 하는 것이다.
 2. 별도 작업대가 필요하면 skill_search로 목적 skill을 먼저 선택한다.
 3. read 또는 dartlab://skills/{skillId}로 절차, 근거, 실행 환경을 확인한다.
 4. generated_spec_search로 호출 가능한 공개 API와 docstring 정보를 찾는다.
-5. engine_call로 generated spec 기반 call plan을 검증·실행한다.
-6. 계산/랭킹/표 생성은 run_python으로 DartLab 라이브러리와 Polars를 사용한다.
-7. 후보·상위·랭킹 답변은 bullet 나열로 끝내지 않고 입력/유니버스, 필터, 계산식/지표, 결과와 evidence table을 함께 낸다.
+5. inspect_dataset으로 데이터셋 스키마, 기간, 행 수, 최신 기준시점을 확인한다.
+6. engine_call로 generated spec 기반 call plan을 검증·실행한다.
+7. 계산/랭킹/표 생성은 run_python으로 DartLab 라이브러리와 Polars를 사용한다.
+8. 후보·상위·랭킹 답변은 bullet 나열로 끝내지 않고 입력/유니버스, 필터, 계산식/지표, 결과와 evidence table을 함께 낸다.
 
 ## 경계
 - Company, gather, scan, macro, analysis, quant, viz는 generated MCP tool로 직접 우회하지 않는다.
