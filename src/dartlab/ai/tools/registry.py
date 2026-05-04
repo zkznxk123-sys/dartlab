@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 from typing import Any, Callable
 
 from .engineCall import engineCall
@@ -110,7 +111,45 @@ CANONICAL_TOOL_NAMES = tuple(_SPECS.keys())
 
 
 def toolSpecs() -> list[dict[str, Any]]:
-    return [_SPECS[name].to_dict() for name in CANONICAL_TOOL_NAMES]
+    return [spec.to_dict() for spec in _SPECS.values()]
+
+
+def listToolNames() -> tuple[str, ...]:
+    return tuple(_SPECS.keys())
+
+
+def registerTool(
+    name: str,
+    func: Callable[..., Any],
+    *,
+    description: str | None = None,
+    inputSchema: dict[str, Any] | None = None,
+) -> None:
+    if name in CANONICAL_TOOL_NAMES:
+        raise ValueError(f"canonical tool은 plugin으로 덮어쓸 수 없습니다: {name}")
+    _SPECS[name] = ToolSpec(
+        name,
+        description or inspect.getdoc(func) or f"{name} plugin tool",
+        inputSchema or _schemaFromSignature(func),
+    )
+
+    def _wrapped(**kwargs: Any) -> ToolResult:
+        try:
+            result = func(**kwargs)
+        except Exception as exc:  # pragma: no cover - defensive plugin boundary
+            return ToolResult(False, f"{name} plugin tool 실패: {exc}", error=type(exc).__name__)
+        if isinstance(result, ToolResult):
+            return result
+        return ToolResult(True, f"{name} plugin tool 실행 완료", data={"result": result})
+
+    _TOOLS[name] = _wrapped
+
+
+def unregisterTool(name: str) -> None:
+    if name in CANONICAL_TOOL_NAMES:
+        raise ValueError(f"canonical tool은 해제할 수 없습니다: {name}")
+    _SPECS.pop(name, None)
+    _TOOLS.pop(name, None)
 
 
 def executeTool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -124,3 +163,32 @@ def executeTool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any]
     else:
         result = _TOOLS[name](**payload)
     return result.to_dict()
+
+
+def _schemaFromSignature(func: Callable[..., Any]) -> dict[str, Any]:
+    properties: dict[str, dict[str, Any]] = {}
+    required: list[str] = []
+    for param in inspect.signature(func).parameters.values():
+        if param.kind in (param.VAR_POSITIONAL, param.VAR_KEYWORD):
+            continue
+        properties[param.name] = {"type": _jsonType(param.annotation)}
+        if param.default is inspect.Parameter.empty:
+            required.append(param.name)
+    schema: dict[str, Any] = {"type": "object", "properties": properties}
+    if required:
+        schema["required"] = required
+    return schema
+
+
+def _jsonType(annotation: Any) -> str:
+    if annotation in (int, "int"):
+        return "integer"
+    if annotation in (float, "float"):
+        return "number"
+    if annotation in (bool, "bool"):
+        return "boolean"
+    if annotation in (list, "list"):
+        return "array"
+    if annotation in (dict, "dict"):
+        return "object"
+    return "string"

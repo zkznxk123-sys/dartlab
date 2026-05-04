@@ -78,19 +78,20 @@ class PluginContext:
         requires_company: bool = False,
         tags: list[str] | None = None,
     ) -> None:
-        """AI 도구를 ToolPluginRegistry에 등록.
+        """AI 도구를 canonical tool registry에 등록.
 
-        기존 @tool 데코레이터와 동일한 효과.
+        Plugin tool도 Workbench/MCP가 보는 단일 도구 레지스트리에 붙는다.
         """
-        from dartlab.ai.tools.plugin import tool as tool_decorator
+        from dartlab.ai.tools import registerTool
 
-        decorator = tool_decorator(
+        tagsText = f" tags={','.join(tags)}" if tags else ""
+        description = (func.__doc__ or "").strip() or f"{meta.name} plugin tool"
+        description = f"{description} category={category} requires_company={requires_company}{tagsText}"
+        registerTool(
             name=name or func.__name__,
-            category=category,
-            requires_company=requires_company,
-            tags=tags,
+            func=func,
+            description=description,
         )
-        decorator(func)
         _track_plugin(meta)
 
     def add_engine(

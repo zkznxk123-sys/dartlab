@@ -194,7 +194,7 @@ class TestPluginContext:
             reset_for_testing()
 
     def test_add_tool(self):
-        from dartlab.ai.tools.plugin import get_plugin_registry
+        from dartlab.ai.tools import listToolNames, unregisterTool
         from dartlab.core.plugins import PluginContext, PluginMeta, reset_for_testing
 
         meta = PluginMeta(
@@ -209,13 +209,12 @@ class TestPluginContext:
             """테스트 도구."""
             return f"result: {query}"
 
-        registry = get_plugin_registry()
         ctx = PluginContext()
         try:
             ctx.add_tool(my_test_tool, meta=meta, name="__test_ctx_tool")
-            assert "__test_ctx_tool" in registry.list_names()
+            assert "__test_ctx_tool" in listToolNames()
         finally:
-            registry.unregister("__test_ctx_tool")
+            unregisterTool("__test_ctx_tool")
             reset_for_testing()
 
     def test_add_engine(self):
