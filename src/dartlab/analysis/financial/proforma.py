@@ -149,7 +149,7 @@ class ProFormaResult:
 
         # BS 요약
         lines.append("")
-        lines.append("  === 대차대조표 (BS) ===")
+        lines.append("  === 재무상태표 (BS) ===")
         lines.append("  연도   |   총자산   |  총부채   |  총자본   |  현금")
         lines.append("  -------|-----------|----------|----------|----------")
         for p in self.projections:

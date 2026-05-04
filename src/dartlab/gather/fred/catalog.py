@@ -200,7 +200,7 @@ CATALOG: dict[str, list[CatalogEntry]] = {
     "money": [
         CatalogEntry("M2SL", "M2 통화량", "money", "Monthly", "Billions of Dollars", "M2 통화공급"),
         CatalogEntry("BOGMBASE", "본원통화", "money", "Biweekly", "Billions of Dollars", "본원통화 (Monetary Base)"),
-        CatalogEntry("WALCL", "연준 총자산", "money", "Weekly", "Millions of Dollars", "연준 대차대조표 총자산"),
+        CatalogEntry("WALCL", "연준 총자산", "money", "Weekly", "Millions of Dollars", "연준 재무상태표 총자산"),
         CatalogEntry("RRPONTSYD", "역레포", "money", "Daily", "Billions of Dollars", "오버나이트 역레포 잔액"),
         CatalogEntry(
             "TOTRESNS", "은행 지급준비금", "money", "Monthly", "Billions of Dollars", "예금기관 총 지급준비금"

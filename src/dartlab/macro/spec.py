@@ -90,7 +90,7 @@ SPEC = {
         "BIS Credit Gap": "Borio-Drehmann(2014) — 단측 HP λ=400k. Basel III CCyB",
         "GHS Crisis": "Greenwood-Hanson-Shleifer(2022 JoF) — 3Y 신용+자산 → 위기확률",
         "Minsky": "Kindleberger-Minsky — 5단계 금융불안정 (displacement→revulsion)",
-        "Koo BSR": "Koo(2009) — 민간 금융잉여 + 저금리 = 대차대조표 침체",
+        "Koo BSR": "Koo(2009) — 민간 금융잉여 + 저금리 = 재무상태표 침체",
         "Fisher": "Fisher(1933) — DSR+CPI+NPL 부채디플레이션 악순환",
         "Cu/Au Ratio": "실증 — 구리(산업)/금(안전자산) 비율. 10Y 수익률 선행",
         "FCI": "Hatzius(2010) — 5변수 z-score 금융환경지수 (US+KR)",

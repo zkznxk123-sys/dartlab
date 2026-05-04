@@ -185,7 +185,7 @@ def _fetch_liquidity_data(market: str, as_of: str | None = None) -> dict[str, fl
         None 값은 제거된 채 반환. 가능한 키:
 
         - m2_yoy : float — M2 통화량 전년비 증가율 (%)
-        - fed_bs_change_pct : float — 연준 대차대조표 13주 변화율 (%)
+        - fed_bs_change_pct : float — 연준 재무상태표 13주 변화율 (%)
         - hy_spread : float — HY 스프레드 (bp)
         - ig_spread : float — IG 스프레드 (bp)
         - rrp_change_pct : float — 역레포 잔액 3개월 변화율 (%)

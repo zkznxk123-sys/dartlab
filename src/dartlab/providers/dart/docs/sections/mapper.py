@@ -104,7 +104,7 @@ _PATTERN_MAPPINGS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"^내부(?:감시장치|회계관리제도).+$"), "internalControl"),
     (re.compile(r"^(?:반기|분기)(?:연결)?재무제표에대한주석$"), "financialNotes"),
     (re.compile(r"^\(첨부\).+재무제표$"), "financialStatements"),
-    (re.compile(r"^(?:반기|분기)(?:대차대조표|손익계산서|현금흐름표)$"), "financialStatements"),
+    (re.compile(r"^(?:반기|분기)(?:재무상태표|손익계산서|현금흐름표)$"), "financialStatements"),
     (re.compile(r"^국내(?:,|및)해외계열회사현황\(상세\)$"), "affiliateGroupDetail"),
     (re.compile(r"^.+보고서제출기한연장신고(?:서)?$"), "reportCover"),
     # --- 055 추가: 전체 시장 (2,547종목) 스캔에서 발견된 패턴 ---

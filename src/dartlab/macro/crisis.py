@@ -617,7 +617,7 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
         dalio48Match : list[dict] | None — Dalio Part 3 48 사례 매칭
         crisisType : dict | None — R&R 위기 유형 분류
         rrMatch : list[dict] | None — R&R 역사적 매칭
-        kooRecession : dict | None — Koo 대차대조표 불황 (US 전용)
+        kooRecession : dict | None — Koo 재무상태표 불황 (US 전용)
         fisherDeflation : dict | None — Fisher 부채디플레이션 (US 전용)
         krHousingStress : dict | None — 한국 부동산-금융 스트레스 (KR 전용)
         krCreditRisk : dict | None — 한국 신용위험 ↔ CPI (KR 전용)

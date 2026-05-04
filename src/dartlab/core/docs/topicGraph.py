@@ -46,7 +46,7 @@ TOPIC_KEYWORDS: dict[str, list[str]] = {
     "relatedPartyTx": ["특수관계자", "특수관계자 거래", "관계자 거래"],
     "investorProtection": ["투자자 보호", "집단소송", "주주 권리"],
     "segments": ["부문", "영업부문", "사업부문", "부문별"],
-    "financialStatements": ["재무제표", "대차대조표", "손익계산서"],
+    "financialStatements": ["재무제표", "재무상태표", "손익계산서"],
     "consolidatedStatements": ["연결재무제표", "연결", "연결대상"],
     "fundraising": ["자금조달", "차입금", "사채", "회사채"],
     "contingentLiability": ["우발채무", "소송", "채무보증"],

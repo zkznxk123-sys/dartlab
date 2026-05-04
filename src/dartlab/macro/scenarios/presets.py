@@ -264,7 +264,7 @@ MODERN_RISK_SCENARIOS: dict[str, dict] = {
         "extreme": {"indpro_yoy": -15.0, "cpi_yoy": -2.0, "hy_spread": 1000, "vix": 55, "unrate": 8.0, "fedfunds": 0.5},
     },
     "일본식 장기침체": {
-        "description": "대차대조표 침체 — 장기 저성장 + 제로금리 함정",
+        "description": "재무상태표 침체 — 장기 저성장 + 제로금리 함정",
         "type": "디플레이션",
         "transmission": "자산 버블 붕괴 → 민간 디레버리징 → 소비/투자 장기 위축 → 제로금리에도 회복 안 됨",
         "reference": "Koo (2009) Balance Sheet Recession, 일본 1990~2010",

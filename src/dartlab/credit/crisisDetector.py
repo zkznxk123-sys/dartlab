@@ -499,7 +499,7 @@ def kooBalanceSheetRecession(
     gdp: float,
     policyRate: float,
 ) -> KooRecessionResult:
-    """Koo BSR: 민간 금융 잉여 + 저금리 = 대차대조표 침체.
+    """Koo BSR: 민간 금융 잉여 + 저금리 = 재무상태표 침체.
 
     Args:
         privateSaving: 민간 부문 총저축
@@ -517,7 +517,7 @@ def kooBalanceSheetRecession(
     if is_bsr:
         desc = (
             f"민간 금융 잉여 GDP의 {surplus:.1f}% + 정책금리 {policyRate:.2f}% "
-            f"— 대차대조표 침체: 민간이 차입 대신 부채 상환 중. 재정 확대 필수"
+            f"— 재무상태표 침체: 민간이 차입 대신 부채 상환 중. 재정 확대 필수"
         )
     elif surplus > 3.0:
         desc = f"민간 잉여 {surplus:.1f}% 높으나 금리 {policyRate:.2f}% — 부분적 BSR 징후"

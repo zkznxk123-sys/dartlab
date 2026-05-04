@@ -163,7 +163,7 @@ def _narrate_crisis(crisis: dict) -> str:
     if koo.get("isBSR"):
         parts.append(
             f"민간 금융잉여가 GDP의 {koo.get('privateSurplus', 0):.1f}%에 달하고 금리가 낮다 — "
-            "대차대조표 침체 징후다. 금리 인하만으로는 부족하고 재정 확대가 필수적이다."
+            "재무상태표 침체 징후다. 금리 인하만으로는 부족하고 재정 확대가 필수적이다."
         )
 
     fisher = crisis.get("fisherDeflation") or {}
