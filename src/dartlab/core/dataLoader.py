@@ -1,6 +1,5 @@
 """데이터 로딩 및 공통 유틸."""
 
-import inspect
 import json
 import re
 import sys
@@ -73,7 +72,6 @@ def _getDataRoot() -> Path:
 _DOWNLOAD_TIMEOUT = 30
 _MAX_RETRIES = 3
 _EDGAR_UNIVERSE_TTL_HOURS = 24
-_EDGAR_DOCS_FRESHNESS_TTL_HOURS = 24
 _DART_FRESHNESS_TTL_HOURS = 12  # 일일 HF 수집 주기(03:00 KST)에 맞춰 12h — 최대 stale 윈도우 반감
 _KRX_FRESHNESS_TTL_HOURS = 1  # 장마감 후 일별 갱신 데이터라 stale 허용폭을 짧게 둔다
 _SEC_HEADERS = {"User-Agent": "DartLab eddmpython@gmail.com"}
@@ -404,7 +402,9 @@ def loadData(
     if category == "edgarDocs" and effectiveSinceYear is None:
         effectiveSinceYear = 2009
     if category == "edgarDocs":
-        _ensureEdgarDocs(
+        from dartlab.providers.edgar.docs.loader import ensureEdgarDocs
+
+        ensureEdgarDocs(
             stockCode,
             path,
             sinceYear=effectiveSinceYear or 2009,
@@ -489,55 +489,6 @@ def _downloadFromHf(stockCode: str, path: Path, category: str) -> None:
     size = path.stat().st_size
     sizeStr = f"{size / 1024:.0f}KB" if size < 1024 * 1024 else f"{size / 1024 / 1024:.1f}MB"
     emit("download:done_short", sizeStr=sizeStr)
-
-
-def _ensureEdgarDocs(
-    stockCode: str,
-    path: Path,
-    *,
-    sinceYear: int,
-    asOf: str | None,
-    refresh: str,
-) -> None:
-    if refresh not in {"auto", "force_check", "force_rebuild", "local_only"}:
-        raise ValueError(f"지원하지 않는 refresh 정책: {refresh}")
-
-    if refresh == "local_only":
-        if not path.exists():
-            raise FileNotFoundError(f"로컬 EDGAR docs 없음: {path}")
-        return
-
-    if refresh == "force_rebuild":
-        _rebuildEdgarDocs(stockCode, path, sinceYear=sinceYear, sourceMode="sec_api_rebuild")
-        return
-
-    if not path.exists():
-        from dartlab.core.messaging import emit
-
-        label = DATA_RELEASES["edgarDocs"]["label"]
-        emit("download:start", stockCode=stockCode, label=label)
-        try:
-            _download(stockCode, path, "edgarDocs")
-            size = path.stat().st_size
-            sizeStr = f"{size / 1024:.0f}KB" if size < 1024 * 1024 else f"{size / 1024 / 1024:.1f}MB"
-            emit("download:done_short", sizeStr=sizeStr)
-        except (URLError, socket.timeout, OSError):
-            if path.exists():
-                path.unlink()
-            emit("edgar:fallback")
-            _rebuildEdgarDocs(stockCode, path, sinceYear=sinceYear, sourceMode="sec_api")
-        return
-
-    if refresh == "auto" and not _isEdgarDocsCheckExpired(path):
-        return
-
-    latestRemote = _getLatestRegularEdgarFiling(stockCode, sinceYear=sinceYear)
-    if latestRemote is None:
-        return
-    localState = _getLocalEdgarDocsState(path)
-    if localState is not None and _isEdgarDocsFresh(localState, latestRemote, asOf=asOf):
-        return
-    _incrementalUpdateEdgarDocs(stockCode, path, sinceYear=sinceYear, latestRemote=latestRemote)
 
 
 _HF_MAX_RETRIES = 3
@@ -847,165 +798,6 @@ def _fetchJson(url: str) -> dict:
         request = Request(url, headers=_SEC_HEADERS)
         with urlopen(request) as resp:
             return json.loads(resp.read())
-
-
-def _isEdgarDocsCheckExpired(path: Path) -> bool:
-    if not path.exists():
-        return True
-    ageSeconds = time.time() - path.stat().st_mtime
-    return ageSeconds > _EDGAR_DOCS_FRESHNESS_TTL_HOURS * 3600
-
-
-def _getLatestRegularEdgarFiling(stockCode: str, *, sinceYear: int) -> dict[str, str] | None:
-    from dartlab.providers.edgar.docs.fetch import _findFilings, _getSubmissions, _resolveTickerMeta
-
-    meta = _resolveTickerMeta(stockCode.upper())
-    submissions = _getSubmissions(meta["cik"])
-    filings = _findFilings(submissions, sinceYear)
-    if not filings:
-        return None
-    latest = filings[-1]
-    return {
-        "ticker": stockCode.upper(),
-        "cik": meta["cik"],
-        "filing_date": latest["filingDate"],
-        "accession_no": latest["accessionNumber"],
-        "form_type": latest["formType"],
-    }
-
-
-def _getLocalEdgarDocsState(path: Path) -> dict[str, str] | None:
-    if not path.exists():
-        return None
-    df = pl.read_parquet(path, columns=["filing_date", "accession_no"])
-    if df.is_empty():
-        return None
-    latestDate = df["filing_date"].drop_nulls().max()
-    latestAccession = ""
-    if latestDate is not None:
-        latestRows = df.filter(pl.col("filing_date") == latestDate)
-        if latestRows.height and "accession_no" in latestRows.columns:
-            latestAccession = str(latestRows["accession_no"][0] or "")
-    return {
-        "latest_filing_date": str(latestDate or ""),
-        "latest_accession_no": latestAccession,
-    }
-
-
-def _isEdgarDocsFresh(localState: dict[str, str], latestRemote: dict[str, str], *, asOf: str | None) -> bool:
-    latestAccession = str(localState.get("latest_accession_no") or "")
-    latestDate = str(localState.get("latest_filing_date") or "")
-    if asOf is not None and latestDate:
-        return latestDate >= asOf
-    if latestDate and latestDate > latestRemote["filing_date"]:
-        return True
-    if latestDate and latestDate == latestRemote["filing_date"]:
-        return latestAccession == latestRemote["accession_no"] or bool(latestAccession)
-    if latestAccession:
-        return latestAccession == latestRemote["accession_no"]
-    return latestDate == latestRemote["filing_date"]
-
-
-def _callFetchEdgarDocs(
-    fetchFn,
-    stockCode: str,
-    path: Path,
-    *,
-    sinceYear: int,
-    sourceMode: str,
-) -> None:
-    kwargs = {"sinceYear": sinceYear}
-    try:
-        signature = inspect.signature(fetchFn)
-    except (TypeError, ValueError):
-        signature = None
-
-    if signature is None or "sourceMode" in signature.parameters:
-        kwargs["sourceMode"] = sourceMode
-    if signature is None or "strictQuality" in signature.parameters:
-        kwargs["strictQuality"] = False
-
-    fetchFn(stockCode, path, **kwargs)
-
-
-def _rebuildEdgarDocs(stockCode: str, path: Path, *, sinceYear: int, sourceMode: str) -> None:
-    from dartlab.providers.edgar.docs.fetch import fetchEdgarDocs
-
-    try:
-        _callFetchEdgarDocs(
-            fetchEdgarDocs,
-            stockCode,
-            path,
-            sinceYear=sinceYear,
-            sourceMode=sourceMode,
-        )
-    except (URLError, OSError, ValueError):
-        if path.exists():
-            path.unlink()
-        raise
-
-
-def _incrementalUpdateEdgarDocs(
-    stockCode: str,
-    path: Path,
-    *,
-    sinceYear: int,
-    latestRemote: dict[str, str],
-) -> None:
-    from dartlab.core.messaging import emit
-    from dartlab.providers.edgar.docs.fetch import (
-        FILING_TIMEOUT_SECONDS,
-        _collectFilingRows,
-        _findFilings,
-        _getSubmissions,
-        _resolveTickerMeta,
-    )
-
-    currentDf = pl.read_parquet(path)
-    existingAccessions = (
-        set(currentDf["accession_no"].drop_nulls().to_list()) if "accession_no" in currentDf.columns else set()
-    )
-    meta = _resolveTickerMeta(stockCode.upper())
-    filings = _findFilings(_getSubmissions(meta["cik"]), sinceYear)
-    newFilings = [filing for filing in filings if filing["accessionNumber"] not in existingAccessions]
-    if not newFilings:
-        emit("edgar:no_new", ticker=stockCode.upper())
-        return
-
-    emit("edgar:incremental_start", ticker=stockCode.upper(), newCount=len(newFilings))
-
-    from dartlab.providers.edgar.docs.fetch import _make_progress
-
-    rows: list[dict] = []
-    skipped: list[str] = []
-    _prog, _bar = _make_progress(len(newFilings), f"EDGAR 증분 | {stockCode.upper()}")
-    with _prog:
-        _collectFilingRows(rows, newFilings, meta, stockCode.upper(), _bar, FILING_TIMEOUT_SECONDS, skipped)
-
-    if not rows:
-        return
-    newDf = pl.DataFrame(rows)
-
-    # 스키마 정합: currentDf 컬럼 기준으로 newDf 정렬 + 누락 컬럼 NULL 추가
-    for col in currentDf.columns:
-        if col not in newDf.columns:
-            newDf = newDf.with_columns(pl.lit(None).cast(currentDf.schema[col]).alias(col))
-    for col in newDf.columns:
-        if col not in currentDf.columns:
-            currentDf = currentDf.with_columns(pl.lit(None).cast(newDf.schema[col]).alias(col))
-    # 타입 통일
-    for col in currentDf.columns:
-        if col in newDf.columns and currentDf.schema[col] != newDf.schema[col]:
-            try:
-                newDf = newDf.with_columns(pl.col(col).cast(currentDf.schema[col]))
-            except pl.exceptions.ComputeError:
-                newDf = newDf.with_columns(pl.col(col).cast(pl.Utf8))
-                currentDf = currentDf.with_columns(pl.col(col).cast(pl.Utf8))
-    # 컬럼 순서 맞추기
-    newDf = newDf.select(currentDf.columns)
-    merged = pl.concat([currentDf, newDf], how="vertical")
-    merged.write_parquet(path)
-    emit("edgar:incremental_done", ticker=stockCode.upper(), newRows=len(rows))
 
 
 # ── 메모리 최적화: Categorical + 다운캐스트 ──────────────
