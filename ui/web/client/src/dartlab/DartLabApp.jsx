@@ -56,12 +56,9 @@ export default function DartLabApp() {
       activeRunRef.current = controller;
 
       try {
-        await streamAgentRun({
+        await streamAsk({
           body: {
-            threadId: 'dartlab-local-thread',
-            agentId: 'dartlab-research',
-            model: 'dartlab-research-graph',
-            messages: [{ role: 'user', content: text }],
+            question: text,
             stream: true,
           },
           signal: controller.signal,
@@ -79,7 +76,7 @@ export default function DartLabApp() {
           setMessages((current) =>
             current.map((message) =>
               message.id === assistantMessage.id
-                ? { ...message, status: 'failed', failure: 'agent gateway 연결 실패' }
+                ? { ...message, status: 'failed', failure: 'ask stream 연결 실패' }
                 : message,
             ),
           );
@@ -377,15 +374,15 @@ function upsertTool(tools, nextTool) {
   return tools.map((tool) => (tool.id === nextTool.id ? { ...tool, ...nextTool } : tool));
 }
 
-async function streamAgentRun({ body, signal, onEvent }) {
-  const response = await fetch('/api/agent/runs', {
+async function streamAsk({ body, signal, onEvent }) {
+  const response = await fetch('/api/ask', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
     signal,
   });
   if (!response.ok || !response.body) {
-    throw new Error(`agent run failed: ${response.status}`);
+    throw new Error(`ask stream failed: ${response.status}`);
   }
 
   const reader = response.body.getReader();

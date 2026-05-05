@@ -77,6 +77,57 @@ def _auto_numeric_cols(df: pl.DataFrame, exclude: list[str] | None = None) -> li
     ]
 
 
+def _find_row_value(df: pl.DataFrame, keyword: str, year_col: str) -> float | None:
+    label_col = "항목" if "항목" in df.columns else None
+    if label_col is None:
+        return None
+    matched = df.filter(pl.col(label_col).str.contains(keyword))
+    if matched.height == 0:
+        return None
+    val = matched.row(0, named=True).get(year_col)
+    return float(val) if isinstance(val, (int, float)) and val is not None else None
+
+
+def _ratio_table(bs: pl.DataFrame, is_: pl.DataFrame) -> pl.DataFrame:
+    year_cols = sorted([c for c in bs.columns if _PERIOD_COL_RE.match(c)], reverse=True)
+    if not year_cols:
+        return pl.DataFrame()
+
+    rows = []
+    for year in year_cols:
+        equity = _find_row_value(bs, "자본총계", year)
+        total_asset = _find_row_value(bs, "자산총계", year)
+        revenue = _find_row_value(is_, "매출액", year)
+        operating_income = _find_row_value(is_, "영업이익", year)
+        net_income = _find_row_value(is_, "당기순이익", year)
+
+        rows.append(
+            {
+                "year": year,
+                "영업이익률": (
+                    round(operating_income / revenue * 100, 1)
+                    if operating_income is not None and revenue and revenue != 0
+                    else None
+                ),
+                "순이익률": (
+                    round(net_income / revenue * 100, 1)
+                    if net_income is not None and revenue and revenue != 0
+                    else None
+                ),
+                "ROE": (
+                    round(net_income / equity * 100, 1) if net_income is not None and equity and equity != 0 else None
+                ),
+                "ROA": (
+                    round(net_income / total_asset * 100, 1)
+                    if net_income is not None and total_asset and total_asset != 0
+                    else None
+                ),
+            }
+        )
+
+    return pl.DataFrame(rows)
+
+
 # ── 범용 차트 ──
 
 
@@ -436,8 +487,6 @@ def balance_sheet(company: Any, *, n_years: int = 5) -> Any:
 def profitability(company: Any, *, n_years: int = 5) -> Any:
     """영업이익률·순이익률·ROE 추세 라인 차트."""
     go = _ensure_plotly()
-
-    from dartlab.ai.tools.table import ratio_table as _ratio_table
 
     bs_df = getattr(company, "BS", None)
     is_df = getattr(company, "IS", None)

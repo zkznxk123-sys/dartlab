@@ -133,14 +133,13 @@ def test_agent_runs_endpoint_streams_only_public_events(monkeypatch) -> None:
         yield {"event": "RUN_FINISHED", "data": json.dumps({"status": "ok", "refs": ["skill:start"]})}
 
     monkeypatch.setattr(agent_api, "stream_agent_run", fake_stream)
-    client = TestClient(app, raise_server_exceptions=False)
-
-    with client.stream(
-        "POST",
-        "/api/agent/runs",
-        json={"messages": [{"role": "user", "content": "너 뭐 할 수 있니"}], "stream": True},
-    ) as response:
-        body = response.read().decode("utf-8")
+    with TestClient(app, raise_server_exceptions=False) as client:
+        with client.stream(
+            "POST",
+            "/api/agent/runs",
+            json={"messages": [{"role": "user", "content": "너 뭐 할 수 있니"}], "stream": True},
+        ) as response:
+            body = response.read().decode("utf-8")
 
     assert response.status_code == 200
     assert "event: ACTIVITY_DELTA" in body

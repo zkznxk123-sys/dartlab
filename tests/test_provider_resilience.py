@@ -1,31 +1,31 @@
 """public provider 예외 경계 테스트."""
 
+import importlib.util
+
 import pytest
 
 pytestmark = pytest.mark.unit
 
-from unittest.mock import MagicMock, patch
-
-from dartlab.ai.providers.ollama import OllamaProvider
-from dartlab.ai.providers.openai_compat import OpenAICompatProvider
-from dartlab.ai.types import LLMConfig
+from dartlab.core.ai.types import LLMConfig
 
 
-class TestOpenAICompatProvider:
-    def test_check_available_returns_false_on_runtime_error(self, monkeypatch):
-        provider = OpenAICompatProvider(LLMConfig(provider="openai"))
+class TestProviderAdapterBoundary:
+    def test_legacy_provider_modules_are_removed(self):
+        assert importlib.util.find_spec("dartlab.ai.providers.openai_compat") is None
+        assert importlib.util.find_spec("dartlab.ai.providers.ollama") is None
 
-        def raise_runtime_error():
-            raise RuntimeError("client init failed")
+    def test_research_graph_adapter_is_available(self):
+        from dartlab.ai.providers import create_provider
 
-        monkeypatch.setattr(provider, "_get_client", raise_runtime_error)
+        provider = create_provider(LLMConfig(provider="dartlab", model="research"))
 
-        assert provider.check_available() is False
+        assert provider.check_available() is True
+        assert provider.resolved_model == "research"
 
+    def test_create_provider_ignores_unknown_dict_keys(self):
+        from dartlab.ai.providers import create_provider
 
-class TestOllamaProvider:
-    def test_get_installed_models_returns_empty_on_bad_json(self):
-        provider = OllamaProvider(LLMConfig(provider="ollama"))
+        provider = create_provider({"provider": "dartlab", "model": "dict-model", "unknown": "x"})
 
-        with patch("httpx.get", return_value=MagicMock(json=MagicMock(side_effect=ValueError("bad json")))):
-            assert provider.get_installed_models() == []
+        assert provider.check_available() is True
+        assert provider.resolved_model == "dict-model"

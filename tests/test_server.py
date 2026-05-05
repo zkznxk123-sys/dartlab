@@ -4,6 +4,7 @@
 데이터 의존 테스트 (company, modules, preview, export)를 분리한다.
 """
 
+import asyncio
 from unittest.mock import MagicMock
 
 import polars as pl
@@ -721,8 +722,8 @@ class TestAsk:
         assert resp.json()["answer"] == "core-answer"
         assert resp.json()["artifacts"][0]["format"] == "csv"
         assert captured["question"] == "안녕하세요"
-        assert captured["kwargs"]["provider"] == "openai"
-        assert captured["kwargs"]["model"] == "gpt-5.4"
+        assert "provider" not in captured["kwargs"]
+        assert "model" not in captured["kwargs"]
         assert captured["kwargs"]["use_tools"] is True
 
     def test_plain_chat_passes_company_as_stock_code_hint(self, client, monkeypatch):
@@ -763,7 +764,7 @@ class TestAsk:
 
         assert resp.status_code == 404
 
-    def test_topic_summary_uses_core_stream_path(self, client, monkeypatch):
+    def test_topic_summary_uses_core_stream_path(self, monkeypatch):
         class DummyCompany:
             corpName = "테스트기업"
             stockCode = "000000"
@@ -773,22 +774,28 @@ class TestAsk:
                     return pl.DataFrame({"topic": ["businessOverview"]})
                 return None
 
-        async def _fake_stream(question, **kwargs):
-            assert "businessOverview" in question
-            assert kwargs["view_context"]["topic"] == "businessOverview"
-            assert kwargs["view_context"]["company"]["stockCode"] == "000000"
+        async def _fake_topic_summary(company, topic, **kwargs):
+            assert company.stockCode == "000000"
+            assert topic == "businessOverview"
             yield {"event": "context", "data": '{"module":"_focus","text":"ctx"}'}
             yield {"event": "chunk", "data": '{"text":"summary"}'}
 
         monkeypatch.setattr("dartlab.server.api.company.get_company", lambda code: DummyCompany())
-        monkeypatch.setattr("dartlab.server.services.ai_analysis.stream_analysis", _fake_stream)
+        monkeypatch.setattr("dartlab.server.api.company.stream_topic_summary", _fake_topic_summary)
 
-        with client.stream("GET", "/api/company/000000/summary/businessOverview") as resp:
-            body = b"".join(resp.iter_bytes()).decode()
+        from dartlab.server.api.company import api_company_topic_summary
 
-        assert "event: context" in body
-        assert "event: chunk" in body
-        assert "summary" in body
+        async def collect_events() -> list:
+            response = await api_company_topic_summary("000000", "businessOverview")
+            events = []
+            async for chunk in response.body_iterator:
+                events.append(chunk)
+            return events
+
+        events = asyncio.run(collect_events())
+        assert any(event.get("event") == "context" for event in events)
+        assert any(event.get("event") == "chunk" for event in events)
+        assert any("summary" in event.get("data", "") for event in events)
 
 
 # ── 유틸리티/로직 단위 테스트 ──
