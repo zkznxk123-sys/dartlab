@@ -1042,12 +1042,12 @@ def capabilities(key: str | None = None, *, search: str | None = None) -> dict |
         dartlab.capabilities(search="재무건전성")     # 질문 기반 검색 → 상위 10개
     """
     if search is not None:
-        from dartlab.core.search_capabilities import searchCapabilities
+        from dartlab.core.capability.search import searchCapabilities
 
         results = searchCapabilities(search)
         return {key: entry for key, entry, _score in results}
 
-    from dartlab.core._generated import CAPABILITIES
+    from dartlab.core.capability._generated import CAPABILITIES
 
     if key is None:
         return {k: v.get("summary", "") for k, v in CAPABILITIES.items()}

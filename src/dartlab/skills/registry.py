@@ -496,7 +496,7 @@ def _short_text(text: str, *, limit: int = 500) -> str:
 
 def _known_capabilities() -> set[str]:
     try:
-        from dartlab.core._generated import CAPABILITIES
+        from dartlab.core.capability._generated import CAPABILITIES
     except Exception:
         return set()
     return {str(key) for key in CAPABILITIES}

@@ -99,7 +99,7 @@ _KNOWN_VIOLATIONS = {
     # analysis → ai (L2→L3) — lazy import (storyValidation → KnowledgeDB 조회)
     ("dartlab.analysis.financial.storyValidation", "dartlab.ai"),
     # core/_generated → analysis (L0→L2) — generateSpec 자동 생성 (CAPABILITIES JSON 안 example 문자열 매칭)
-    ("dartlab.core._generated", "dartlab.analysis"),
+    ("dartlab.core.capability._generated", "dartlab.analysis"),
     # core/credentials → providers — DART API 키 관리 lazy import
     ("dartlab.core.credentials", "dartlab.providers"),
     # core/credentials → ai.settings — provider 카탈로그/secret store/profile 조회 lazy import

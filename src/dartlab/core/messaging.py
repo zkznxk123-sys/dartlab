@@ -357,7 +357,7 @@ def suggest(funcName: str) -> str | None:
         안내 문자열 또는 매칭 없으면 None.
     """
     try:
-        from dartlab.core._generated import CAPABILITIES
+        from dartlab.core.capability._generated import CAPABILITIES
     except ImportError:
         return None
 

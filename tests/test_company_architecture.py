@@ -115,11 +115,11 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
         "src/dartlab/skills",
         "src/dartlab/ai/tools",
         "src/dartlab/ai/workbench",
-        "src/dartlab/core/capabilities.py",
-        "src/dartlab/core/search_capabilities.py",
-        "src/dartlab/core/analysisGraph.py",
-        "src/dartlab/core/_generated.py",
-        "src/dartlab/core/_generated_analysis_graph.py",
+        "src/dartlab/core/capability/registry.py",
+        "src/dartlab/core/capability/search.py",
+        "src/dartlab/core/capability/analysisGraph.py",
+        "src/dartlab/core/capability/_generated.py",
+        "src/dartlab/core/capability/_generated_analysis_graph.py",
         "src/dartlab/core/credentials.py",
         "src/dartlab/core/axisGuide.py",
         "src/dartlab/viz/display",
@@ -153,6 +153,11 @@ def test_core_does_not_own_retired_subpackages():
         "dartlab.guide",
         # plugins 는 plugin 개발자 entry-point — top-level dartlab.plugins 가 SSOT (Cut 4)
         "dartlab.core.plugins",
+        # capability 5 파일은 core/capability/ 서브디렉토리로 묶임 — flat 재출현 차단
+        "dartlab.core.capabilities",
+        "dartlab.core.search_capabilities",
+        "dartlab.core.analysisGraph",
+        "dartlab.core._generated",
     ]
     for py_file in (repo_root / "src").rglob("*.py"):
         if "__pycache__" in py_file.parts:

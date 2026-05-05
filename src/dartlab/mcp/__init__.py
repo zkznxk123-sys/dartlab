@@ -243,15 +243,15 @@ def _resourcePayload(uri_str: str) -> tuple[str, str]:
     if os.environ.get("DARTLAB_MCP_COMPAT") != "1":
         return ("Unknown resource", "text/plain")
     if uri_str == "dartlab://graph":
-        from dartlab.core.analysisGraph import loadAnalysisGraph
+        from dartlab.core.capability.analysisGraph import loadAnalysisGraph
 
         return (json.dumps(loadAnalysisGraph(), ensure_ascii=False, indent=2), "application/json")
     if uri_str == "dartlab://graph/status":
-        from dartlab.core.analysisGraph import graphStatus
+        from dartlab.core.capability.analysisGraph import graphStatus
 
         return (json.dumps(graphStatus(), ensure_ascii=False, indent=2), "application/json")
     if uri_str.startswith("dartlab://graph/"):
-        from dartlab.core.analysisGraph import impactForGraphNode, loadAnalysisGraph
+        from dartlab.core.capability.analysisGraph import impactForGraphNode, loadAnalysisGraph
 
         tail = uri_str.replace("dartlab://graph/", "", 1)
         if "/" in tail:
@@ -530,7 +530,7 @@ def _executeTool(name: str, args: dict) -> str:
 
         # ── Analysis Graph tools ──
         if name == "contextForQuestion":
-            from dartlab.core.analysisGraph import contextForQuestion
+            from dartlab.core.capability.analysisGraph import contextForQuestion
 
             return json.dumps(
                 contextForQuestion(str(args.get("question") or ""), stockCode=args.get("stockCode")),
@@ -538,7 +538,7 @@ def _executeTool(name: str, args: dict) -> str:
                 indent=2,
             )
         if name == "queryAnalysisGraph":
-            from dartlab.core.analysisGraph import queryAnalysisGraph
+            from dartlab.core.capability.analysisGraph import queryAnalysisGraph
 
             return json.dumps(
                 queryAnalysisGraph(
@@ -550,15 +550,15 @@ def _executeTool(name: str, args: dict) -> str:
                 indent=2,
             )
         if name == "impactForGraphNode":
-            from dartlab.core.analysisGraph import impactForGraphNode
+            from dartlab.core.capability.analysisGraph import impactForGraphNode
 
             return json.dumps(impactForGraphNode(str(args.get("nodeId") or "")), ensure_ascii=False, indent=2)
         if name == "explainDartlabTool":
-            from dartlab.core.analysisGraph import explainDartlabTool
+            from dartlab.core.capability.analysisGraph import explainDartlabTool
 
             return json.dumps(explainDartlabTool(str(args.get("toolName") or "")), ensure_ascii=False, indent=2)
         if name == "planDartlabQuestion":
-            from dartlab.core.analysisGraph import planDartlabQuestion
+            from dartlab.core.capability.analysisGraph import planDartlabQuestion
 
             return json.dumps(
                 planDartlabQuestion(str(args.get("question") or ""), stockCode=args.get("stockCode")),
@@ -566,7 +566,7 @@ def _executeTool(name: str, args: dict) -> str:
                 indent=2,
             )
         if name == "validateDartlabPlan":
-            from dartlab.core.analysisGraph import validateDartlabPlan
+            from dartlab.core.capability.analysisGraph import validateDartlabPlan
 
             return json.dumps(
                 validateDartlabPlan(str(args.get("question") or ""), args.get("proposedTools") or []),
@@ -574,7 +574,7 @@ def _executeTool(name: str, args: dict) -> str:
                 indent=2,
             )
         if name == "listDartlabProcesses":
-            from dartlab.core.analysisGraph import listDartlabProcesses
+            from dartlab.core.capability.analysisGraph import listDartlabProcesses
 
             return json.dumps(listDartlabProcesses(), ensure_ascii=False, indent=2)
         return f"Unknown tool: {name}"

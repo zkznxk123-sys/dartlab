@@ -96,7 +96,7 @@ def graphStatus() -> dict[str, Any]:
 def loadAnalysisGraph() -> dict[str, Any]:
     """Return generated Analysis Graph payload."""
     try:
-        from dartlab.core._generated_analysis_graph import ANALYSIS_GRAPH
+        from dartlab.core.capability._generated_analysis_graph import ANALYSIS_GRAPH
 
         return ANALYSIS_GRAPH
     except Exception:
