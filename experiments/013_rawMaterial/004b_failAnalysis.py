@@ -91,7 +91,7 @@ for f in files:
             eqFails.append((code, title, "유형자산 테이블 헤더 없음", lines[:10]))
 
 
-print(f"=== 원재료 파싱 실패 분석 ===")
+print("=== 원재료 파싱 실패 분석 ===")
 print(f"테이블 헤더 못 찾은 종목: {len(rawFails)}건")
 print()
 
@@ -107,13 +107,13 @@ for code, title, reason, firstLines in rawFails[:50]:
         patterns[pattern] = []
     patterns[pattern].append(code)
 
-print(f"섹션 시작 패턴:")
+print("섹션 시작 패턴:")
 for pat, codes in sorted(patterns.items(), key=lambda x: -len(x[1]))[:15]:
     print(f"  ({len(codes):3d}건) {pat}")
     for c in codes[:3]:
         print(f"         {c}")
 
-print(f"\n=== 상세 샘플 (실패 종목 처음 5건) ===")
+print("\n=== 상세 샘플 (실패 종목 처음 5건) ===")
 for code, title, reason, firstLines in rawFails[:5]:
     print(f"\n  {code} [{title}] — {reason}")
     for l in firstLines:

@@ -152,7 +152,7 @@ if __name__ == "__main__":
             errors.append((code, str(e)))
 
     total = len(files)
-    print(f"\n=== 039 타법인출자 현황 배치 결과 ===")
+    print("\n=== 039 타법인출자 현황 배치 결과 ===")
     print(f"성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}/{total}")
     print(f"투자법인: {totalInvestments}건")

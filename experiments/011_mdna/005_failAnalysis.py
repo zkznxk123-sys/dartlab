@@ -21,7 +21,6 @@
 실험일: 2026-03-07
 """
 import io
-import re
 import sys
 from pathlib import Path
 

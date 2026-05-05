@@ -25,7 +25,6 @@ import re
 import sys
 import time
 from collections import Counter, defaultdict
-from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
@@ -37,7 +36,6 @@ from dartlab.providers.dart.docs.sections.pipeline import sections
 from dartlab.providers.dart.docs.sections.tableParser import (
     _classifyStructure,
     _dataRows,
-    _extractUnit,
     _headerCells,
     _isJunk,
     _normalizeHeader,
@@ -337,7 +335,7 @@ if __name__ == "__main__":
     print(f"기존만:      {baselineOnly}")
     print(f"둘 다 실패:  {bothFail}")
 
-    print(f"\n=== 스키마만 성공한 사례 (실제 데이터) ===")
+    print("\n=== 스키마만 성공한 사례 (실제 데이터) ===")
     for code, topic, bo, result in schemaOnlySamples[:10]:
         pCols = [c for c in result.columns if c != "항목"]
         print(f"\n[{code}] {topic} bo={bo}: {result.shape}")

@@ -7,7 +7,6 @@
 4. 데이터(report) 자체가 없음
 """
 
-import os
 import sys
 
 sys.path.insert(0, "src")
@@ -16,7 +15,7 @@ import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.core.reportSelector import selectReport
-from dartlab.core.tableParser import extractAccounts, extractTables
+from dartlab.core.tableParser import extractAccounts
 from dartlab.finance.statements.extractor import splitStatements
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"

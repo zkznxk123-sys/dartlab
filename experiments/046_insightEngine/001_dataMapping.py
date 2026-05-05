@@ -41,7 +41,7 @@ import dartlab
 
 dartlab.verbose = False
 
-from dartlab.engines.financeEngine.extract import getAnnualValues, getLatest, getTTM
+from dartlab.engines.financeEngine.extract import getAnnualValues, getLatest
 from dartlab.engines.financeEngine.pivot import buildAnnual, buildTimeseries
 from dartlab.engines.financeEngine.ratios import calcRatios
 

@@ -46,7 +46,7 @@ if __name__ == "__main__":
     files = sorted(dataDir.glob("*.parquet"))
     codes = [f.stem for f in files]
 
-    print(f"실제 _horizontalizeTableBlock 경로 None 비율 측정")
+    print("실제 _horizontalizeTableBlock 경로 None 비율 측정")
     print(f"종목 수: {len(codes)}")
     print("=" * 70)
 

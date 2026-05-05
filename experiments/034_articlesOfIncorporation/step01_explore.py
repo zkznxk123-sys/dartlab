@@ -10,10 +10,7 @@
 """
 
 import os
-import re
 import sys
-
-import polars as pl
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
 sys.path.insert(0, r"C:\Users\MSI\OneDrive\Desktop\sideProject\dartlab\src")
@@ -65,7 +62,7 @@ if __name__ == "__main__":
             if len(samples) < 5:
                 samples.append(result)
 
-    print(f"\n=== 정관에 관한 사항 ===")
+    print("\n=== 정관에 관한 사항 ===")
     print(f"출현율: {found}/{total} ({found/total*100:.1f}%)")
     print()
 

@@ -286,11 +286,11 @@ def testSingle(stockCode: str):
     print(f"  단위: {result['unit']}")
 
     if result["noData"]:
-        print(f"  → 해당사항 없음")
+        print("  → 해당사항 없음")
         return
 
     if result.get("textOnly"):
-        print(f"  → 서술형만 (테이블 없음)")
+        print("  → 서술형만 (테이블 없음)")
         return
 
     print(f"  환율 민감도: {len(result['fxSensitivity'])}개 통화")

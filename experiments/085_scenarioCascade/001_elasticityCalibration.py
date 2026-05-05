@@ -239,7 +239,7 @@ def runElasticityCalibration(*, verbose: bool = True) -> pl.DataFrame:
     # 2단계: 섹터별 연평균 매출성장률 vs GDP 성장률 회귀
     results = []
     if verbose:
-        print(f"\n[섹터별 GDP 감응도 (β) 교정]")
+        print("\n[섹터별 GDP 감응도 (β) 교정]")
         print(f"{'섹터':12s} | {'실증β':>6s} | {'R²':>6s} | {'현행β':>6s} | {'차이':>6s} | {'N':>3s} | {'판정'}")
         print("-" * 70)
 
@@ -284,7 +284,7 @@ def runElasticityCalibration(*, verbose: bool = True) -> pl.DataFrame:
 
     # 3단계: market_ratios 교차 검증 (revenueGrowth3Y)
     if verbose:
-        print(f"\n[교차 검증: market_ratios revenueGrowth3Y]")
+        print("\n[교차 검증: market_ratios revenueGrowth3Y]")
         try:
             mrDf = pl.read_parquet(
                 Path(__file__).resolve().parents[1] / "076_marketLab" / "data" / "market_ratios.parquet"

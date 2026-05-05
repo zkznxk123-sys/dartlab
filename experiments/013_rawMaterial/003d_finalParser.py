@@ -339,7 +339,7 @@ for code, name in STOCKS:
         if capResult is None:
             capResult = parseCapex(c)
 
-    print(f"\n  [원재료]")
+    print("\n  [원재료]")
     if rawResult:
         rawOk += 1
         for r in rawResult[:6]:
@@ -348,28 +348,28 @@ for code, name in STOCKS:
             print(f"    ... +{len(rawResult)-6} more")
     else:
         rawFail += 1
-        print(f"    없음")
+        print("    없음")
 
-    print(f"\n  [생산설비]")
+    print("\n  [생산설비]")
     if eqResult:
         eqOk += 1
         for k, v in eqResult.items():
             print(f"    {k:<15}: {v:>20,.0f}")
     else:
         eqFail += 1
-        print(f"    없음")
+        print("    없음")
 
-    print(f"\n  [시설투자]")
+    print("\n  [시설투자]")
     if capResult:
         capOk += 1
         for r in capResult:
             print(f"    {r['segment']:<15}: {r['amount']:>15,.0f}")
     else:
         capFail += 1
-        print(f"    없음")
+        print("    없음")
 
 print(f"\n{'='*60}")
-print(f"  결과 요약 (10종목)")
+print("  결과 요약 (10종목)")
 print(f"{'='*60}")
 print(f"  원재료:   {rawOk} 성공 / {rawFail} 없음 / {rawNa} 미해당")
 print(f"  생산설비: {eqOk} 성공 / {eqFail} 없음 / {eqNa} 미해당")

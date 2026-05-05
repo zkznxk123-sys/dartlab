@@ -175,18 +175,18 @@ def run_embedding_experiment():
     pos_min = min(pos_scores)
     neg_max = max(neg_scores)
     gap = pos_min - neg_max
-    print(f"\n── 분리도 분석 ──")
+    print("\n── 분리도 분석 ──")
     print(f"  Positive min: {pos_min:.4f}")
     print(f"  Negative max: {neg_max:.4f}")
     print(f"  Gap (pos_min - neg_max): {gap:.4f}")
     if gap > 0:
         print(f"  → 분리 가능! threshold ∈ ({neg_max:.4f}, {pos_min:.4f})")
     else:
-        print(f"  → 분리 불가능. 겹침 구간 존재")
+        print("  → 분리 불가능. 겹침 구간 존재")
 
     # ── 추가 엣지케이스 ──
     print(f"\n{'='*80}")
-    print(f"  추가 엣지케이스 (extra_items)")
+    print("  추가 엣지케이스 (extra_items)")
     print(f"{'='*80}")
 
     extra_emb = model.encode(extra_items)
@@ -197,7 +197,7 @@ def run_embedding_experiment():
     evaluate_pairs(extra_negative, extra_sim, extra_items, "Negative (매칭하면 안 됨)")
 
     # ── 속도 벤치마크 ──
-    print(f"\n── 속도 벤치마크 ──")
+    print("\n── 속도 벤치마크 ──")
     batch_sizes = [100, 500, 1000]
     for n in batch_sizes:
         fake_items = [f"테스트항목{i}" for i in range(n)]
@@ -217,7 +217,7 @@ def run_embedding_experiment():
 def run_fuzzy_experiment():
     """Fuzzy matching 비교 실험"""
     print(f"\n{'='*80}")
-    print(f"  Fuzzy Matching (SequenceMatcher) 비교")
+    print("  Fuzzy Matching (SequenceMatcher) 비교")
     print(f"{'='*80}")
 
     # fuzzy sim matrix
@@ -235,14 +235,14 @@ def run_fuzzy_experiment():
     pos_min = min(pos_scores)
     neg_max = max(neg_scores)
     gap = pos_min - neg_max
-    print(f"\n── Fuzzy 분리도 분석 ──")
+    print("\n── Fuzzy 분리도 분석 ──")
     print(f"  Positive min: {pos_min:.4f}")
     print(f"  Negative max: {neg_max:.4f}")
     print(f"  Gap: {gap:.4f}")
     if gap > 0:
         print(f"  → 분리 가능! threshold ∈ ({neg_max:.4f}, {pos_min:.4f})")
     else:
-        print(f"  → 분리 불가능. 겹침 구간 존재")
+        print("  → 분리 불가능. 겹침 구간 존재")
 
     return fuzzy_sim
 

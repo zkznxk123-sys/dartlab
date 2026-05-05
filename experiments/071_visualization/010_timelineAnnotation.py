@@ -158,7 +158,7 @@ def test():
             print(f"  부족(<30%): {sparse}개 기간")
 
             # 최근 5개 기간 상세
-            print(f"\n  최근 5개 기간:")
+            print("\n  최근 5개 기간:")
             for a in annotations[:5]:
                 bar = "█" * int(a["fillRate"] * 20) + "░" * (20 - int(a["fillRate"] * 20))
                 markers = ", ".join(m["type"] for m in a["markers"])
@@ -167,7 +167,7 @@ def test():
 
             # 핫스팟
             if result["hotspots"]:
-                print(f"\n  변화 핫스팟 (상위 5):")
+                print("\n  변화 핫스팟 (상위 5):")
                 for h in result["hotspots"]:
                     print(f"    {h['topic']:<30} changeRate={h['changeRate']:.4f}")
 

@@ -41,7 +41,6 @@
 
 from __future__ import annotations
 
-import re
 import time
 
 import numpy as np

@@ -237,7 +237,7 @@ def main():
         print(f"  {sid:<40} {s['total']:>6} {s['match']:>6} {rate:>7.1f}%")
 
     if diffExamples:
-        print(f"\n[ 큰 불일치 예시 (처음 15개) ]")
+        print("\n[ 큰 불일치 예시 (처음 15개) ]")
         print(f"{'종목':>8} {'연도':>6} {'계정':>30} {'docs(보정)':>18} {'finance':>18} {'차이%':>8}")
         print("-" * 92)
         for code, yr, sid, dv, fv, pct in diffExamples[:15]:

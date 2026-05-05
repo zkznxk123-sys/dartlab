@@ -707,7 +707,7 @@ def _compare10Stocks():
     print(f"둘 다 실패: {df.filter(~pl.col('existing') & ~pl.col('normal_form')).height}")
 
     # topic별 상세
-    print(f"\ntopic별 성공률:")
+    print("\ntopic별 성공률:")
     for topic in test_topics:
         tf = df.filter(pl.col("topic") == topic)
         e = tf.filter(pl.col("existing")).height
@@ -805,7 +805,7 @@ def _compare283Stocks():
                 both_fail += 1
 
     print(f"\n{'='*60}")
-    print(f"전수 비교 결과")
+    print("전수 비교 결과")
     print(f"{'='*60}")
     print(f"총 블록: {total_blocks}, 에러 종목: {errors}")
     print(f"기존 성공: {existing_success} ({100*existing_success/total_blocks:.1f}%)")

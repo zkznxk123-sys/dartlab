@@ -26,7 +26,6 @@
 
 실험일: 2026-03-08
 """
-import collections
 import os
 import re
 import sys
@@ -560,11 +559,11 @@ if __name__ == "__main__":
         print(f"  {result['corpName']} — {result['nYears']}년")
 
         if result["boardDf"] is not None:
-            print(f"\n  [이사회 시계열]")
+            print("\n  [이사회 시계열]")
             print(result["boardDf"])
 
         if result["committeeDf"] is not None:
-            print(f"\n  [위원회 구성] (최근)")
+            print("\n  [위원회 구성] (최근)")
             print(result["committeeDf"].head(10))
 
     # 대량 테스트

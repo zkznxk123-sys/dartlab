@@ -38,13 +38,13 @@
 실험일: 2026-03-27
 """
 
-import httpx
-import time
+import asyncio
 import math
 import re
-import asyncio
-import polars as pl
+import time
 
+import httpx
+import polars as pl
 
 BASE_URL = "https://m.stock.naver.com/api/stocks/marketValue"
 HEADERS = {"User-Agent": "Mozilla/5.0"}
@@ -147,7 +147,7 @@ async def main():
     # 등락률 통계
     pctCol = df.filter(pl.col("changePct").is_not_null())["changePct"]
     if pctCol.len() > 0:
-        print(f"\n[등락률 통계]")
+        print("\n[등락률 통계]")
         print(f"  평균: {pctCol.mean():.2f}%")
         print(f"  중앙값: {pctCol.median():.2f}%")
         print(f"  상승: {(pctCol > 0).sum()}, 하락: {(pctCol < 0).sum()}, 보합: {(pctCol == 0).sum()}")
@@ -155,7 +155,7 @@ async def main():
     # 삼성전자
     samsung = df.filter(pl.col("ticker") == "005930")
     if samsung.height > 0:
-        print(f"\n[삼성전자]")
+        print("\n[삼성전자]")
         print(samsung)
 
 

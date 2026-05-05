@@ -108,7 +108,7 @@ def main():
         return
     os.environ.setdefault("GEMINI_API_KEY", apiKey)
 
-    print(f"\n[1] Company 생성: 삼성전자")
+    print("\n[1] Company 생성: 삼성전자")
     c = dartlab.Company("005930")
     print(f"  corpName: {c.corpName}")
 

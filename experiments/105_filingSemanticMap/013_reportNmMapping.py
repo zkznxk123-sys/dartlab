@@ -40,7 +40,7 @@ from __future__ import annotations
 import json
 import re
 import time
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 
 import numpy as np

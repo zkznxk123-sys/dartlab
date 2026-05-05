@@ -56,11 +56,9 @@
 
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
 
 import polars as pl
-
 
 TEMP_DIR = Path(__file__).parent / "temp"
 
@@ -68,7 +66,7 @@ TEMP_DIR = Path(__file__).parent / "temp"
 def main():
     TEMP_DIR.mkdir(exist_ok=True)
 
-    from dartlab.core.dataLoader import _dataDir, loadData
+    from dartlab.core.dataLoader import _dataDir
 
     # ── 1. 릴리즈 finance parquet 스키마 ──
     releasePath = _dataDir("finance") / "005930.parquet"
@@ -105,7 +103,7 @@ def main():
 
     enriched = enrichFinance(apiDf, "005930", "삼성전자")
     print(f"\n  enriched: {enriched.shape}")
-    print(f"  enriched 컬럼:")
+    print("  enriched 컬럼:")
     for col, dtype in enriched.schema.items():
         print(f"    {col}: {dtype}")
 
@@ -227,7 +225,7 @@ def main():
     print(f"  저장 후 컬럼: {saved.columns}")
 
     savedCols = set(saved.columns)
-    print(f"\n  릴리즈와 비교:")
+    print("\n  릴리즈와 비교:")
     print(f"    릴리즈에만: {sorted(releaseCols - savedCols)}")
     print(f"    저장에만: {sorted(savedCols - releaseCols)}")
 

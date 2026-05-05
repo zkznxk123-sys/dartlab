@@ -35,7 +35,7 @@ def main() -> None:
     files = sorted(docsDir.glob("*.parquet"))
     tickers = [f.stem for f in files]
 
-    print(f"=== 058-006 EDGAR Company 전종목 검증 ===")
+    print("=== 058-006 EDGAR Company 전종목 검증 ===")
     print(f"tickers with docs: {len(tickers)}\n")
 
     from dartlab.providers.edgar.company import Company
@@ -71,13 +71,13 @@ def main() -> None:
             errors.append((ticker, traceback.format_exc()))
             print(f"  [{i+1}/{len(tickers)}] {ticker} → ERROR: {e}")
 
-    print(f"\n=== RESULT ===")
+    print("\n=== RESULT ===")
     print(f"success: {success}")
     print(f"no finance/CIK: {noFinance}")
     print(f"errors: {len(errors)}")
 
     if errors:
-        print(f"\n--- ERRORS (first 5) ---")
+        print("\n--- ERRORS (first 5) ---")
         for ticker, tb in errors[:5]:
             print(f"\n{ticker}: {tb[-300:]}")
 

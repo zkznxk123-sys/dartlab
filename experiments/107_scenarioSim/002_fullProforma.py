@@ -17,7 +17,7 @@ from __future__ import annotations
 import gc
 import json
 import sys
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
@@ -136,7 +136,6 @@ def main():
 
     from dartlab import Company
     from dartlab.analysis.financial.proforma import build_proforma
-    from dartlab.analysis.valuation.dcf import dcfValuation
 
     print("\n[1/5] 삼성전자 로드...")
     c = Company("005930")
@@ -178,14 +177,14 @@ def main():
     # 과거 비율 확인
     from dartlab.analysis.financial.proforma import extract_historical_ratios
     ratios = extract_historical_ratios(series)
-    print(f"\n  과거 비율:")
+    print("\n  과거 비율:")
     print(f"    매출총이익률: {ratios.gross_margin:.1f}%")
     print(f"    판관비율: {ratios.sga_ratio:.1f}%")
     print(f"    CAPEX/매출: {ratios.capex_to_revenue:.1f}%")
     print(f"    유효세율: {ratios.effective_tax_rate:.1f}%")
 
     # [2] 3개 시나리오
-    print(f"\n[2/5] 3개 시나리오 ProForma 생성...")
+    print("\n[2/5] 3개 시나리오 ProForma 생성...")
 
     scenarios = [
         ScenarioDef("bull", "반도체 초회복", 22.0, {
@@ -220,7 +219,7 @@ def main():
             print(f"  [{sc.label}] ProForma 실패: {e}")
 
     # [3] 시나리오별 간이 DCF (ProForma FCF 직접 사용)
-    print(f"\n[3/5] 시나리오별 적정가치 (ProForma FCF 기반)...")
+    print("\n[3/5] 시나리오별 적정가치 (ProForma FCF 기반)...")
     dcfValues = {}
     for sc in scenarios:
         pf = pfResults.get(sc.name)
@@ -246,7 +245,7 @@ def main():
         print(f"  {sc.label}: {perShare:,}원 (FCF {fcf1/1e12:.1f}조, WACC {pf.wacc:.1f}%, EV {ev/1e12:.0f}조)")
 
     # [4] 분기 분해 + 판정
-    print(f"\n[4/5] 분기 분해 + 판정")
+    print("\n[4/5] 분기 분해 + 판정")
 
     seasonYears = ["2021", "2022", "2023"]
     revWeights = _seasonality(is_df, "sales", seasonYears)
@@ -266,7 +265,7 @@ def main():
 
     # 판정
     print(f"\n{'='*70}")
-    print(f"  분기별 판정 (2024 Q1~Q4)")
+    print("  분기별 판정 (2024 Q1~Q4)")
     print(f"{'='*70}")
 
     history = []
@@ -306,7 +305,7 @@ def main():
 
     # [5] 최종 요약
     print(f"\n{'='*70}")
-    print(f"[5/5] 최종 요약")
+    print("[5/5] 최종 요약")
     print(f"{'='*70}")
 
     actualAnnualRev = sum(rev2024)
@@ -319,12 +318,12 @@ def main():
     print(f"  편차: 매출 {(actualAnnualRev-baseAnnualRev)/baseAnnualRev*100:+.1f}%, 영업이익 {(actualAnnualOI-baseAnnualOI)/baseAnnualOI*100:+.1f}%")
 
     if dcfValues:
-        print(f"\n  DCF 적정가치:")
+        print("\n  DCF 적정가치:")
         for sc in scenarios:
             v = dcfValues.get(sc.name, 0)
             print(f"    {sc.label}: {v:,}원")
 
-    print(f"\n  분기별 행동 흐름:")
+    print("\n  분기별 행동 흐름:")
     for q, h in enumerate(history):
         aLabel = f"Q{q+1}"
         print(f"    {aLabel}: 매출={h['revPath']:20s} 이익={h['oiPath']:20s}")

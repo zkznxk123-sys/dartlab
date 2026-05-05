@@ -52,7 +52,6 @@
 
 import json
 import time
-from collections import defaultdict
 from pathlib import Path
 
 _parent = Path(__file__).resolve().parent
@@ -90,7 +89,7 @@ def scenario_1_overview():
             print(f"  {target}: NOT FOUND")
 
     # 그룹간 주요 연결
-    print(f"\n  그룹간 엣지 예시 (top 10 by weight):")
+    print("\n  그룹간 엣지 예시 (top 10 by weight):")
     edges = sorted(overview["edges"], key=lambda e: -e["weight"])[:10]
     for e in edges:
         print(f"    {e['source']} ↔ {e['target']}: {e['weight']}건 ({', '.join(e['types'])})")
@@ -143,7 +142,7 @@ def scenario_2_ego():
         "삼성전기 출자": "삼성전기" in out_names,
         "삼성생명 주주": "삼성생명" in in_names,
     }
-    print(f"\n  핵심 관계 체크:")
+    print("\n  핵심 관계 체크:")
     for desc, ok in checks.items():
         print(f"    {desc}: {'OK' if ok else 'MISSING'}")
 
@@ -224,7 +223,7 @@ def scenario_4_compare():
         print(f"    내부 엣지: {len(internal_edges)}")
         print(f"    외부 엣지: {len(external_edges)}")
         print(f"    평균 degree: {avg_degree:.1f}")
-        print(f"    TOP 5 (degree):")
+        print("    TOP 5 (degree):")
         for n in sorted(members, key=lambda x: -x["degree"])[:5]:
             print(f"      {n['label']} (degree={n['degree']})")
 
@@ -238,7 +237,7 @@ def scenario_4_compare():
             print(f"    {' → '.join(c['path'])}")
 
     result = True
-    print(f"\n  판정: PASS")
+    print("\n  판정: PASS")
     return result
 
 

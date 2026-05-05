@@ -151,7 +151,7 @@ def main():
     estimated_edgar_tokens = int(edgar_tokens * edgar_scale)
     estimated_total = estimated_dart_tokens + estimated_edgar_tokens
 
-    print(f"\n--- 전체 추정 ---")
+    print("\n--- 전체 추정 ---")
     print(f"DART ({319}개사): ~{estimated_dart_tokens:,} tokens")
     print(f"EDGAR ({974}개사): ~{estimated_edgar_tokens:,} tokens")
     print(f"합계: ~{estimated_total:,} tokens ({estimated_total/1_000_000:.1f}M)")

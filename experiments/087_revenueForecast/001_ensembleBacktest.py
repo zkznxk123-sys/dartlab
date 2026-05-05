@@ -37,7 +37,6 @@
 from __future__ import annotations
 
 import logging
-import sys
 import time
 
 logging.basicConfig(level=logging.WARNING)
@@ -84,9 +83,8 @@ BACKTEST_STOCKS: list[tuple[str, str, str]] = [
 
 def run_backtest():
     """메인 백테스트 실행."""
-    from dartlab.providers.dart.finance.pivot import buildTimeseries
-    from dartlab.core.finance.forecast import forecast_metric
     from dartlab.core.finance.revenue_forecast import forecast_revenue
+    from dartlab.providers.dart.finance.pivot import buildTimeseries
 
     results = []
     skipped = []

@@ -118,7 +118,7 @@ if __name__ == "__main__":
             errors.append((code, str(e)))
 
     total = len(files)
-    print(f"\n=== 036 회사의 연혁 배치 결과 ===")
+    print("\n=== 036 회사의 연혁 배치 결과 ===")
     print(f"성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}/{total}")
     print(f"연혁 이벤트: {totalEvents}건")

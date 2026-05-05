@@ -35,9 +35,8 @@
 실험일: 2026-03-20
 """
 
-import json
 import sys
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
@@ -202,7 +201,7 @@ if __name__ == "__main__":
     # 5. 서버 스켈레톤
     skeleton = generate_mcp_server_skeleton()
     skeleton_lines = len(skeleton.strip().split("\n"))
-    print(f"\n=== MCP 서버 스켈레톤 ===")
+    print("\n=== MCP 서버 스켈레톤 ===")
     print(f"  예상 줄 수: {skeleton_lines}줄")
 
     # 6. MCP SDK 설치 필요성
@@ -213,8 +212,8 @@ if __name__ == "__main__":
         print("  MCP SDK: 미설치 — `uv add mcp[cli]` 필요")
 
     # 결론
-    print(f"\n=== 결론 ===")
+    print("\n=== 결론 ===")
     print(f"  1. OpenAI → MCP 변환: {valid}/{len(mcp_tools)} 성공 (1:1 매핑)")
-    print(f"  2. Company 세션: MCP resource URI + 메모리 캐시로 관리")
+    print("  2. Company 세션: MCP resource URI + 메모리 캐시로 관리")
     print(f"  3. 서버 구현 예상: ~{skeleton_lines}줄 (ToolRuntime 재사용)")
-    print(f"  4. 다음 단계: MCP SDK 설치 → 실제 Claude Desktop 연동 테스트")
+    print("  4. 다음 단계: MCP SDK 설치 → 실제 Claude Desktop 연동 테스트")

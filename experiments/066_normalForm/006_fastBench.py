@@ -16,7 +16,6 @@ import sys
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from pathlib import Path
 
 import polars as pl
 
@@ -323,7 +322,7 @@ def main():
     # 이 실험은 topic 단위 (1 topic에 table block이 여러 개 → 하나라도 성공이면 ok)
     # 따라서 직접 비교 불가, but 방향성 확인 가능
 
-    print(f"\n주요 topic별:")
+    print("\n주요 topic별:")
     key = ["dividend","audit","salesOrder","employee","companyOverview",
            "majorHolder","rawMaterial","riskDerivative","shareCapital",
            "executivePay","boardOfDirectors","internalControl",

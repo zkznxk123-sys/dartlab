@@ -10,9 +10,8 @@ import sys
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-import polars as pl
 
-from dartlab.core import buildIndex, loadData
+from dartlab.core import buildIndex
 
 sys.path.insert(0, "experiments/014_business")
 import importlib
@@ -50,30 +49,30 @@ for code in codes:
 
 
 print("=" * 60)
-print(f"전 종목 사업의 내용 추출 결과")
+print("전 종목 사업의 내용 추출 결과")
 print("=" * 60)
 print(f"총 종목: {len(codes)}")
 print(f"성공: {len(results)}")
 print(f"실패: {len(errors)}")
 
-print(f"\n섹션별 추출 성공 수:")
+print("\n섹션별 추출 성공 수:")
 for key, count in sorted(sectionCounts.items(), key=lambda x: -x[1]):
     pct = round(count / len(results) * 100, 1) if results else 0
     print(f"  {key}: {count}종목 ({pct}%)")
 
 if errors:
-    print(f"\n실패 종목:")
+    print("\n실패 종목:")
     for code, msg in errors:
         print(f"  {code}: {msg}")
 
 noBiz = [r for r in results if r["nSections"] == 0]
 if noBiz:
-    print(f"\n섹션 0개 종목:")
+    print("\n섹션 0개 종목:")
     for r in noBiz:
         print(f"  {r['code']} ({r['year']})")
 
 fewSections = [r for r in results if 0 < r["nSections"] <= 2]
 if fewSections:
-    print(f"\n섹션 1~2개 종목 (부분 추출):")
+    print("\n섹션 1~2개 종목 (부분 추출):")
     for r in fewSections:
         print(f"  {r['code']} ({r['year']}): {r['keys']}")

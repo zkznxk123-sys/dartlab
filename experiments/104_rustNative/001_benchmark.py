@@ -211,8 +211,8 @@ def benchmarkRustColumnarCold(
     sectionMappings: dict[str, str] | None,
 ) -> float:
     """Rust columnar 1회 실행 -- dict of lists 반환, DataFrame 직접 구성."""
-    from dartlab_native_poc import parse_text_structure_columnar
     import polars as pl
+    from dartlab_native_poc import parse_text_structure_columnar
 
     batchInput = [(text, topic, i) for i, (text, topic) in enumerate(blocks)]
 
@@ -229,10 +229,11 @@ def checkCorrectness(
     sectionMappings: dict[str, str] | None,
 ) -> None:
     """Python과 Rust 결과의 정합성을 확인한다."""
+    from dartlab_native_poc import parse_text_structure
+
     from dartlab.providers.dart.docs.sections.textStructure import (
         parseTextStructureWithState,
     )
-    from dartlab_native_poc import parse_text_structure
 
     mismatchCount = 0
     totalBlocks = 0

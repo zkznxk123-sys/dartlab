@@ -352,7 +352,7 @@ def _testWithSample():
         {"2024": nf_2024, "2023": nf_2023},
         ["2023", "2024"],
     )
-    print(f"\n수평화 결과:")
+    print("\n수평화 결과:")
     if result is not None:
         print(result)
     else:
@@ -382,7 +382,7 @@ def _testWithSample():
         {"2024": nf2_2024, "2023": nf2_2023},
         ["2023", "2024"],
     )
-    print(f"\n수평화 결과:")
+    print("\n수평화 결과:")
     if result2 is not None:
         print(result2)
     else:
@@ -409,7 +409,7 @@ def _testWithSample():
     nf3_2024 = [toNormalForm(sub) for sub in _splitSubtables(md3_2024)]
     nf3_2023 = [toNormalForm(sub) for sub in _splitSubtables(md3_2023)]
 
-    print(f"\n2024 정규형:")
+    print("\n2024 정규형:")
     for t in nf3_2024[0].triples:
         print(f"  ({t.row_key}, {t.col_key}, {t.value})")
 
@@ -417,7 +417,7 @@ def _testWithSample():
         {"2024": nf3_2024, "2023": nf3_2023},
         ["2023", "2024"],
     )
-    print(f"\n수평화 결과:")
+    print("\n수평화 결과:")
     if result3 is not None:
         print(result3)
     else:
@@ -486,7 +486,7 @@ def _testWithRealData():
         print("  수평화 실패: None")
 
     # 기존 show()와 비교
-    print(f"\n기존 show() 결과:")
+    print("\n기존 show() 결과:")
     existing = c.show(topic)
     if existing is not None:
         if isinstance(existing, list):

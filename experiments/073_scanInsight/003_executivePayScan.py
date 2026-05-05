@@ -192,7 +192,7 @@ def scan_executive_pay() -> pl.DataFrame:
     print(f"임원보수 집계: {df.shape[0]}종목 (유효: {valid.shape[0]})")
 
     pays = valid["임원1인보수_만원"].drop_nulls()
-    print(f"\n=== 임원 1인평균보수 분포 (만원/연) ===")
+    print("\n=== 임원 1인평균보수 분포 (만원/연) ===")
     print(f"평균: {pays.mean():,.0f}")
     print(f"중앙값: {pays.median():,.0f}")
     print(f"최소: {pays.min():,.0f}")
@@ -262,7 +262,7 @@ def scan_employee() -> pl.DataFrame:
     print(f"직원급여 집계: {df.shape[0]}종목 (유효: {valid.shape[0]})")
 
     sals = valid["직원1인급여_만원"].drop_nulls()
-    print(f"\n=== 직원 1인평균급여 분포 (만원/연) ===")
+    print("\n=== 직원 1인평균급여 분포 (만원/연) ===")
     print(f"평균: {sals.mean():,.0f}")
     print(f"중앙값: {sals.median():,.0f}")
     print(f"최소: {sals.min():,.0f}")
@@ -289,7 +289,7 @@ def compute_pay_ratio(exec_df: pl.DataFrame, emp_df: pl.DataFrame) -> pl.DataFra
         (pl.col("임원1인보수_만원") / pl.col("직원1인급여_만원")).round(1).alias("배율")
     )
 
-    print(f"\n=== pay ratio (임원/직원 연봉 배율) ===")
+    print("\n=== pay ratio (임원/직원 연봉 배율) ===")
     print(f"매칭 종목: {merged.shape[0]}")
 
     ratios = merged["배율"].drop_nulls()
@@ -306,7 +306,7 @@ def compute_pay_ratio(exec_df: pl.DataFrame, emp_df: pl.DataFrame) -> pl.DataFra
     # 구간 분포
     bins = [0, 1, 2, 3, 5, 10, 20, 50, 100, 200]
     total = ratios.len()
-    print(f"\n=== 배율 구간별 분포 ===")
+    print("\n=== 배율 구간별 분포 ===")
     for i in range(len(bins) - 1):
         lo, hi = bins[i], bins[i + 1]
         cnt = ratios.filter((ratios >= lo) & (ratios < hi)).len()
@@ -353,7 +353,7 @@ def analyze_by_market(merged: pl.DataFrame) -> None:
         ])
         .sort("평균배율", descending=True)
     )
-    print(f"\n=== 시장별 pay ratio ===")
+    print("\n=== 시장별 pay ratio ===")
     print(market_stats)
 
     # 업종별 (5개 이상)
@@ -367,9 +367,9 @@ def analyze_by_market(merged: pl.DataFrame) -> None:
         .filter(pl.col("종목수") >= 5)
         .sort("평균배율", descending=True)
     )
-    print(f"\n=== pay ratio 높은 업종 ===")
+    print("\n=== pay ratio 높은 업종 ===")
     print(industry_stats.head(10))
-    print(f"\n=== pay ratio 낮은 업종 ===")
+    print("\n=== pay ratio 낮은 업종 ===")
     print(industry_stats.tail(10))
 
     # 극단값: 10배 이상

@@ -52,9 +52,8 @@ import dartlab
 
 dartlab.verbose = False
 
-from dartlab.engines.financeEngine.extract import getAnnualValues, getLatest
-from dartlab.engines.financeEngine.pivot import buildAnnual, buildTimeseries
-from dartlab.engines.financeEngine.ratios import calcRatios
+from dartlab.engines.financeEngine.extract import getAnnualValues
+from dartlab.engines.financeEngine.pivot import buildAnnual
 
 
 @dataclass
@@ -407,12 +406,12 @@ if __name__ == "__main__":
     stocksWithAnomalies = sum(1 for a in allAnomalies.values() if a)
     print(f"\n  총 탐지: {totalAnomalies}건 ({stocksWithAnomalies}/20종목)")
 
-    print(f"\n  심각도별 분포")
+    print("\n  심각도별 분포")
     for sev in ["danger", "warning", "info"]:
         c = severityCounts.get(sev, 0)
         print(f"    {sev:10s}: {c}건")
 
-    print(f"\n  카테고리별 분포")
+    print("\n  카테고리별 분포")
     for cat, cnt in sorted(categoryCounts.items(), key=lambda x: -x[1]):
         print(f"    {cat:25s}: {cnt}건")
 

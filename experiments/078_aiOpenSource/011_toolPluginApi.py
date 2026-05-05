@@ -341,7 +341,7 @@ if __name__ == "__main__":
     # 결론
     print("\n=== 결론 ===")
     print(f"  1. @tool 데코레이터 → schema 자동 생성: 성공 ({len(schemas)}개)")
-    print(f"  2. 전역 도구 실행: 성공")
-    print(f"  3. Company 바인딩 도구 실행: 성공")
-    print(f"  4. ToolRuntime 호환: 성공 (전역 도구 주입)")
+    print("  2. 전역 도구 실행: 성공")
+    print("  3. Company 바인딩 도구 실행: 성공")
+    print("  4. ToolRuntime 호환: 성공 (전역 도구 주입)")
     print(f"  5. 스키마 형식 호환: {'성공' if existing_schemas and same_structure else '확인 필요'}")

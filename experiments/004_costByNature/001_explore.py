@@ -66,6 +66,6 @@ if costRows.height > 0:
         idx = content.find("비용의 성격")
         if idx >= 0:
             snippet = content[max(0, idx - 100):idx + 2000]
-            print(f"    내용 (발견 위치 주변 2000자):")
+            print("    내용 (발견 위치 주변 2000자):")
             print(snippet[:2000])
             print("    ...")

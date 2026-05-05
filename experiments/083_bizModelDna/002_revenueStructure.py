@@ -296,7 +296,7 @@ if __name__ == "__main__":
     segResults = checkSegmentsAvailability()
     elapsed2 = time.time() - start
 
-    print(f"\n[세그먼트 가용성 요약]")
+    print("\n[세그먼트 가용성 요약]")
     hasCount = sum(1 for v in segResults.values() if v.get("hasSegments"))
     print(f"  가용: {hasCount}/{len(segResults)}사")
     print(f"  소요: {elapsed2:.1f}s")

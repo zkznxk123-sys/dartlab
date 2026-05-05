@@ -2,7 +2,6 @@
 import re
 import sys
 from collections import defaultdict
-from dataclasses import dataclass, field
 
 import polars as pl
 

@@ -299,25 +299,25 @@ def collect(cik: str, ticker: str, companyName: str, sinceYear: int = 2015):
         print("수집된 데이터 없음")
         return
 
-    print(f"[4/4] Parquet 저장...")
+    print("[4/4] Parquet 저장...")
     df = pl.DataFrame(allSections)
     outPath = OUTPUT_DIR / f"{ticker}.parquet"
     df.write_parquet(outPath)
 
     fileSizeMb = outPath.stat().st_size / (1024 * 1024)
-    print(f"\n=== 결과 ===")
+    print("\n=== 결과 ===")
     print(f"  파일: {outPath}")
     print(f"  크기: {fileSizeMb:.2f} MB")
     print(f"  행 수: {df.height}")
     print(f"  연도: {df['year'].unique().sort().to_list()}")
     print(f"  섹션 수/연도: {df.height / len(filings):.1f}")
-    print(f"\n  스키마:")
+    print("\n  스키마:")
     print(f"  {df.schema}")
-    print(f"\n  섹션 제목 샘플:")
+    print("\n  섹션 제목 샘플:")
     for title in df["section_title"].unique().sort().to_list()[:20]:
         print(f"    - {title}")
 
-    print(f"\n  섹션별 평균 크기:")
+    print("\n  섹션별 평균 크기:")
     stats = (
         df.group_by("section_title")
         .agg(

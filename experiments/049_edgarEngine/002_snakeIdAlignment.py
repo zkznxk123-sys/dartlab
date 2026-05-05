@@ -172,7 +172,7 @@ def analyze():
     for stmt, ids in EDGAR_SNAKE_IDS.items():
         edgarAll.update(ids)
 
-    print(f"=== snakeId 체계 비교 ===")
+    print("=== snakeId 체계 비교 ===")
     print(f"  EDGAR 전체: {len(edgarAll)}")
     print(f"  DART canonical: {len(DART_ALL_CANONICAL)}")
     print(f"  L2 insight 사용: {len(L2_INSIGHT_USED)}")
@@ -194,17 +194,17 @@ def analyze():
     for sid in sorted(dartOnly):
         print(f"  {sid}")
 
-    print(f"\n=== L2 호환성 분석 ===")
+    print("\n=== L2 호환성 분석 ===")
     l2InEdgar = L2_INSIGHT_USED & edgarAll
     l2NotInEdgar = L2_INSIGHT_USED - edgarAll
     print(f"  L2가 사용하는 snakeId 중 EDGAR에 있는 것: {len(l2InEdgar)}/{len(L2_INSIGHT_USED)}")
 
     if l2NotInEdgar:
-        print(f"\n  L2에서 쓰지만 EDGAR에 없는 snakeId:")
+        print("\n  L2에서 쓰지만 EDGAR에 없는 snakeId:")
         for sid in sorted(l2NotInEdgar):
             print(f"    {sid}")
 
-    print(f"\n=== 네이밍 차이 후보 (동일 개념, 다른 이름) ===")
+    print("\n=== 네이밍 차이 후보 (동일 개념, 다른 이름) ===")
     namingDiffs = [
         ("DART: operating_cashflow", "EDGAR: operating_cash_flow", "CF 소계"),
         ("DART: investing_cashflow", "EDGAR: investing_cash_flow", "CF 소계"),
@@ -228,7 +228,7 @@ def analyze():
         print(f"    {edgar}")
         print()
 
-    print(f"=== 정렬 전략 제안 ===")
+    print("=== 정렬 전략 제안 ===")
     print("""
   1. EDGAR→DART alias 테이블 구축
      - operating_cash_flow → operating_cashflow

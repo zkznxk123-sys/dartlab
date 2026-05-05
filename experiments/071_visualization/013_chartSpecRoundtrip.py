@@ -116,7 +116,7 @@ def test():
             print(f"\n  {name} ({code}): 에러 — {e}")
 
     # 2. chart_from_spec() 왕복 검증
-    print(f"\n\n[2] chart_from_spec() 왕복 검증")
+    print("\n\n[2] chart_from_spec() 왕복 검증")
     print("-" * 60)
 
     roundtrip_success = 0
@@ -145,7 +145,7 @@ def test():
             print(f"\n  {name}: 에러 — {e}")
 
     # 3. spec_xxx() 개별 함수 검증
-    print(f"\n\n[3] spec_xxx() 개별 함수 전종목 검증")
+    print("\n\n[3] spec_xxx() 개별 함수 전종목 검증")
     print("-" * 60)
 
     gen_results = {name: {"success": 0, "fail": 0, "none": 0} for name in _SPEC_GENERATORS}
@@ -174,7 +174,7 @@ def test():
         print(f"  {gen_name:<20} {counts['success']:>6} {counts['none']:>6} {counts['fail']:>6} {rate:>7.0f}%")
 
     # 4. JSON 직렬화 크기
-    print(f"\n\n[4] ChartSpec JSON 크기")
+    print("\n\n[4] ChartSpec JSON 크기")
     print("-" * 60)
 
     c = Company("005930")

@@ -180,7 +180,7 @@ def deepDiveTopics():
         # 인접 기간 유사도
         periods = list(fpByPeriod.keys())
         if len(periods) >= 2:
-            print(f"\n    인접 기간 유사도:")
+            print("\n    인접 기간 유사도:")
             for i in range(len(periods) - 1):
                 sim = fingerprintSimilarity(fpByPeriod[periods[i]], fpByPeriod[periods[i + 1]])
                 s1, s2 = fpByPeriod[periods[i]].signature, fpByPeriod[periods[i + 1]].signature

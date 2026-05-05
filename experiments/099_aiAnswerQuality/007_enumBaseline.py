@@ -74,7 +74,7 @@ def main():
     print(f"  도구 수: {len(schemas2)}")
 
     # 3. topicLabels 검증
-    print(f"\n=== topicLabels ===")
+    print("\n=== topicLabels ===")
     print(f"  총 {len(TOPIC_LABELS)}개 topic")
 
     sample = ["fsSummary", "consolidatedNotes", "BS"]
@@ -83,7 +83,7 @@ def main():
     print(f"  {desc}")
 
     # 4. alias 검증 — "비용의 성격별분류" 관련
-    print(f"\n=== '비용' 관련 topic 검색 ===")
+    print("\n=== '비용' 관련 topic 검색 ===")
     for topic, info in TOPIC_LABELS.items():
         aliases = info.get("aliases", [])
         if "비용" in str(aliases) or "비용" in info["label"]:

@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab import config
 from dartlab.core.dataLoader import loadData
 from dartlab.providers.edgar.docs.sections.pipeline import sections
 

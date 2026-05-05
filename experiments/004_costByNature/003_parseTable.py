@@ -34,7 +34,7 @@ import polars as pl
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from dartlab.core.reportSelector import selectReport
-from dartlab.core.tableParser import extractAccounts, parseAmount
+from dartlab.core.tableParser import extractAccounts
 
 DATA_DIR = Path("data/docsData")
 
@@ -154,7 +154,7 @@ if __name__ == "__main__":
             fail += 1
             print(f"\n{corpName} ({f.stem}) — 파싱 실패")
             print(f"  섹션 길이: {len(section)}자")
-            print(f"  첫 500자:")
+            print("  첫 500자:")
             print(section[:500])
 
     print()

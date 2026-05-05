@@ -160,7 +160,7 @@ def main():
     assert result_before.totalChanges == result_after.totalChanges, \
         f"entries 수 불일치: {result_before.totalChanges} vs {result_after.totalChanges}"
     assert len(result_before.summaries) == len(result_after.summaries), \
-        f"summaries 수 불일치"
+        "summaries 수 불일치"
 
     for b, a in zip(result_before.summaries, result_after.summaries):
         assert b.topic == a.topic, f"topic 불일치: {b.topic} vs {a.topic}"

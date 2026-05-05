@@ -154,7 +154,7 @@ def scan_capital_change() -> pl.DataFrame:
     print(f"유효 데이터: {valid.shape[0]}행, {valid['stockCode'].n_unique()}종목")
 
     # 유형 분포
-    print(f"\n=== 증감자 유형 분포 ===")
+    print("\n=== 증감자 유형 분포 ===")
     type_dist = valid["isu_dcrs_stle"].value_counts().sort("count", descending=True)
     print(type_dist)
 
@@ -177,7 +177,7 @@ def scan_capital_change() -> pl.DataFrame:
     print(f"\n최근 3년(2023~) 이벤트: {recent.shape[0]}행, {recent['stockCode'].n_unique()}종목")
 
     if not recent.is_empty():
-        print(f"\n최근 3년 유형 분포:")
+        print("\n최근 3년 유형 분포:")
         print(recent["isu_dcrs_stle"].value_counts().sort("count", descending=True))
 
     # 종목별 집계

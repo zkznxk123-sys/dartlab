@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import sys
+
 sys.path.insert(0, "src")
 
 
@@ -211,7 +212,7 @@ def ab_test():
     raw_toon = encodeAuto(r["marginTrend"]["history"][:5])
     enriched_toon = encodeAuto(enriched)
 
-    print(f"\n=== 토큰 비교 ===")
+    print("\n=== 토큰 비교 ===")
     print(f"Raw TOON:      {len(raw_toon):>6}자 (~{len(raw_toon)//3}토큰)")
     print(f"Enriched TOON: {len(enriched_toon):>6}자 (~{len(enriched_toon)//3}토큰)")
     print(f"추가 비용:     +{len(enriched_toon) - len(raw_toon)}자")
@@ -229,8 +230,8 @@ def ab_test():
 
 def ai_ab_test():
     """실제 AI에게 두 버전을 주고 해석 품질 비교."""
-    from dartlab.ai.runtime.core import analyze
     from dartlab.ai.context.encoder import encodeAuto
+    from dartlab.ai.runtime.core import analyze
 
     c, r = get_raw_data("005930")
     enriched = enrich_for_ai(c, r)

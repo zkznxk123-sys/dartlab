@@ -43,7 +43,7 @@ from __future__ import annotations
 import importlib.util
 import re
 import sys
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 from time import perf_counter
 
@@ -247,7 +247,7 @@ def mine_disagreements() -> dict[str, object]:
 
 def main() -> None:
     result = mine_disagreements()
-    print(f"\n=== 074-013 disagreement mining ===")
+    print("\n=== 074-013 disagreement mining ===")
     print(f"stocks: {result['totalStocks']}, blocks: {result['totalBlocks']}, "
           f"disagree: {result['disagreements']} ({result['disagreeRate']:.1%}), "
           f"errors: {result['errors']}, elapsed: {result['elapsed']}s")
@@ -257,7 +257,7 @@ def main() -> None:
     print(f"struct disagree: {result['structDisagree']}")
     print(f"pair disagree (scorer, baseline): {result['pairDisagree']}")
     print(f"low-conf disagree (<0.1): {result['lowConfDisagreeCount']}")
-    print(f"\nsample disagreements (first 10):")
+    print("\nsample disagreements (first 10):")
     for d in result["sampleDisagreements"][:10]:
         print(f"  {d['stockCode']}:{d['topic']}:bo{d['blockOrder']} "
               f"struct={d['dominantStruct']} rows={d['approxRowCount']} "

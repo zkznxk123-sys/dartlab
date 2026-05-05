@@ -257,9 +257,9 @@ def analyze_by_market(df: pl.DataFrame) -> None:
         .with_columns((pl.col("배당기업수") / pl.col("종목수") * 100).round(1).alias("배당비율"))
         .sort("배당비율", descending=True)
     )
-    print(f"\n=== 배당 비율 높은 업종 ===")
+    print("\n=== 배당 비율 높은 업종 ===")
     print(industry_stats.head(10))
-    print(f"\n=== 배당 비율 낮은 업종 ===")
+    print("\n=== 배당 비율 낮은 업종 ===")
     print(industry_stats.tail(10))
 
 

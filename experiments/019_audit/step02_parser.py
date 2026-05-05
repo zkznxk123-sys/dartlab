@@ -389,7 +389,7 @@ if __name__ == "__main__":
                 for fee in result["fees"]:
                     print(f"    {fee['fiscalPeriod']} → {fee['year']} | {fee['auditor']} | 계약보수={fee['contractFee']} 실제보수={fee['actualFee']} 시간={fee['actualHours']}")
             else:
-                print(f"  감사보수: 없음")
+                print("  감사보수: 없음")
 
     print(f"\n\n{'='*60}")
     print("267개 대량 테스트")

@@ -89,7 +89,7 @@ def main():
 
             print(f"\n[{code}] {corpName} ({year})")
             print(f"  길이: {len(content):,}자 / 텍스트 {len(textLines)}줄 / 테이블 {len(tableLines)}줄")
-            print(f"  서브섹션:")
+            print("  서브섹션:")
             for title, _ in topSections[:10]:
                 print(f"    {title[:80]}")
 

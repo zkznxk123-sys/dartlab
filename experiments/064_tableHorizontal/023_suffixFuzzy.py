@@ -25,7 +25,6 @@
 실험일: 2026-03-17
 """
 
-import re
 import sys
 from collections import defaultdict
 
@@ -146,12 +145,12 @@ if __name__ == "__main__":
                                     break
                         samples.append((code, topic, bo, merged, mergeMap))
 
-    print(f"=== suffix 분리 fuzzy matching 결과 ===")
+    print("=== suffix 분리 fuzzy matching 결과 ===")
     print(f"30종목, {totalBlocks} blocks 스캔")
     print(f"통합된 항목: {totalMerged}건")
 
     # 오탐 검사: 통합된 항목 중 실제로 다른 의미인 것
-    print(f"\n=== 통합 샘플 ===")
+    print("\n=== 통합 샘플 ===")
     for code, topic, bo, merged, mergeMap in samples:
         print(f"\n[{code}] {topic} bo={bo}: {merged}개 통합")
         for orig, rep in list(mergeMap.items())[:3]:

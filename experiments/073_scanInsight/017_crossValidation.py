@@ -167,7 +167,7 @@ def cross_validate():
         if count >= 3:
             three_plus.add(code)
 
-    print(f"\n=== 교차 커버리지 ===")
+    print("\n=== 교차 커버리지 ===")
     print(f"governance ∩ workforce: {len(gov_work)} ({len(gov_work)/len(all_codes)*100:.1f}%)")
     print(f"governance ∩ capital: {len(gov_cap)} ({len(gov_cap)/len(all_codes)*100:.1f}%)")
     print(f"governance ∩ debt: {len(gov_debt)} ({len(gov_debt)/len(all_codes)*100:.1f}%)")
@@ -175,7 +175,7 @@ def cross_validate():
     print(f"4축 모두: {len(all_four)} ({len(all_four)/len(all_codes)*100:.1f}%)")
 
     # 축별 분포
-    print(f"\n=== 축 수 분포 ===")
+    print("\n=== 축 수 분포 ===")
     for n in [4, 3, 2, 1]:
         cnt = sum(1 for code in all_codes if sum(1 for s in [gov, work, cap, debt] if code in s) == n)
         print(f"  {n}축: {cnt}개 ({cnt/len(all_codes)*100:.1f}%)")

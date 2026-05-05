@@ -25,8 +25,6 @@
 
 from __future__ import annotations
 
-import polars as pl
-
 from dartlab.providers.edgar.docs.sections.pipeline import sections
 
 SEMANTIC_PAIRS = {

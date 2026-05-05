@@ -19,7 +19,6 @@
 from __future__ import annotations
 
 import gc
-import json
 import math
 import re
 import time

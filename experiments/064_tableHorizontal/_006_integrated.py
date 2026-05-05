@@ -37,7 +37,6 @@ from collections import defaultdict
 import polars as pl
 
 from dartlab.providers.dart.docs.sections.pipeline import sections
-from dartlab.providers.dart.docs.sections.tableParser import splitSubtables
 
 # 005에서 만든 개선 파서
 sys.path.insert(0, str(Path(__file__).parent))

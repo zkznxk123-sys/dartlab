@@ -126,7 +126,7 @@ def scan_audit_opinion() -> pl.DataFrame:
     print(f"기준 연도({latest_year}): {latest.shape[0]}행, {latest['stockCode'].n_unique()}종목")
 
     # 감사의견 분포
-    print(f"\n=== 감사의견 전체 분포 ===")
+    print("\n=== 감사의견 전체 분포 ===")
     print(latest["adt_opinion"].value_counts().sort("count", descending=True))
 
     # 종목별 대표 감사의견 (Q4 선호, 최악 의견 채택)
@@ -169,7 +169,7 @@ def scan_audit_opinion() -> pl.DataFrame:
 
     # 의견 분포
     opinion_dist = valid["감사의견"].value_counts().sort("count", descending=True)
-    print(f"\n=== 종목별 감사의견 분포 ===")
+    print("\n=== 종목별 감사의견 분포 ===")
     print(opinion_dist)
 
     total = valid.shape[0]
@@ -182,7 +182,7 @@ def scan_audit_opinion() -> pl.DataFrame:
         ["감사법인"].value_counts()
         .sort("count", descending=True)
     )
-    print(f"\n=== 감사법인 분포 (상위 15) ===")
+    print("\n=== 감사법인 분포 (상위 15) ===")
     print(auditor_dist.head(15))
 
     # Big4 비율

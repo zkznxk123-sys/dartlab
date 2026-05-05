@@ -253,12 +253,12 @@ def runTopicPredictivePower(*, verbose: bool = True) -> pl.DataFrame:
 
 def _printResults(df: pl.DataFrame, allTopicData: dict) -> None:
     """결과 출력."""
-    print(f"\n[토픽별 예측력 분석]")
+    print("\n[토픽별 예측력 분석]")
     print(f"  분석 대상 토픽: {len(df)}개 (N≥10)")
     print(f"  전체 토픽 수: {len(allTopicData)}개")
 
     # 상위 20개 토픽
-    print(f"\n[예측력 상위 20 토픽 (|ρ| 기준)]")
+    print("\n[예측력 상위 20 토픽 (|ρ| 기준)]")
     print(f"{'순위':>4s} {'토픽':40s} {'N':>5s} {'ρ':>8s} {'|ρ|':>8s} {'평균변화율':>10s}")
     print("-" * 80)
 
@@ -283,12 +283,12 @@ def _printResults(df: pl.DataFrame, allTopicData: dict) -> None:
         pl.any_horizontal([pl.col("topic").str.contains(kw) for kw in bizKeywords])
     )
 
-    print(f"\n[위험 관련 토픽]")
+    print("\n[위험 관련 토픽]")
     for i in range(min(5, len(riskTopics))):
         row = riskTopics.row(i, named=True)
         print(f"  {row['topic']:40s} N={row['N']:3d} ρ={row['spearmanRho']:+.3f}")
 
-    print(f"\n[사업 관련 토픽]")
+    print("\n[사업 관련 토픽]")
     for i in range(min(5, len(bizTopics))):
         row = bizTopics.row(i, named=True)
         print(f"  {row['topic']:40s} N={row['N']:3d} ρ={row['spearmanRho']:+.3f}")

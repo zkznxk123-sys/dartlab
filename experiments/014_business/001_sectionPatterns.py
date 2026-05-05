@@ -10,7 +10,6 @@ import sys
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-import polars as pl
 
 from dartlab.core import buildIndex, loadData
 
@@ -101,12 +100,12 @@ print(f"  하위섹션만 (II. 없음): {len(subOnly)}종목")
 print(f"  둘 다 없음: {len(neither)}종목")
 
 if mainOnly:
-    print(f"\n--- II.사업의내용만 (하위 없음) ---")
+    print("\n--- II.사업의내용만 (하위 없음) ---")
     for s in mainOnly:
         print(f"  {s['code']} {s['name']} ({s['year']}): {s['titles']}")
 
 if neither:
-    print(f"\n--- 둘 다 없음 ---")
+    print("\n--- 둘 다 없음 ---")
     for s in neither:
         print(f"  {s['code']} {s['name']} ({s['year']}): {s['titles']}")
 

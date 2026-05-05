@@ -167,7 +167,7 @@ def textCompare():
                 print(f"  → 공통 키워드 TOP15: {', '.join(ranked)}")
 
         # 상세 분석: businessOverview
-        print(f"\n--- businessOverview 상세 ---")
+        print("\n--- businessOverview 상세 ---")
         for who, comp in [(nameA, cA), (nameB, cB)]:
             text = extractText(comp, "businessOverview")
             kw = topKeywords(text)

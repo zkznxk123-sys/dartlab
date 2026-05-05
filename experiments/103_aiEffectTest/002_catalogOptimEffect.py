@@ -65,7 +65,6 @@
 from __future__ import annotations
 
 import gc
-import json
 import sys
 import time
 
@@ -73,7 +72,7 @@ import time
 def _measurePromptSize() -> dict:
     """시나리오 5: 시스템 프롬프트 토큰 효율 측정."""
     print(f"\n{'='*60}")
-    print(f"  시나리오 5: 시스템 프롬프트 크기 측정")
+    print("  시나리오 5: 시스템 프롬프트 크기 측정")
     print(f"{'='*60}")
 
     # _generatedCatalog.py 크기
@@ -101,7 +100,7 @@ def _measurePromptSize() -> dict:
     print(f"  카탈로그 크기: {catalogChars:,}자 (~{catalogTokensEst:,} 토큰)")
     print(f"  전체 프롬프트: {fullChars:,}자 (~{fullTokensEst:,} 토큰)")
     print(f"  카탈로그 비율: {catalogRatio:.1f}%")
-    print(f"  개선 전: 20,872자 (~5,218 토큰)")
+    print("  개선 전: 20,872자 (~5,218 토큰)")
     print(f"  개선 후: {catalogChars:,}자 (~{catalogTokensEst:,} 토큰)")
     print(f"  절감: {20872 - catalogChars:,}자 ({(20872 - catalogChars) / 20872 * 100:.0f}%)")
 
@@ -123,7 +122,7 @@ def _measurePromptSize() -> dict:
 def _checkToolAccuracy(scenarioResults: list[dict]) -> dict:
     """시나리오 6: 도구 호출 파라미터 정확도 검증."""
     print(f"\n{'='*60}")
-    print(f"  시나리오 6: 도구 호출 파라미터 정확도")
+    print("  시나리오 6: 도구 호출 파라미터 정확도")
     print(f"{'='*60}")
 
     # Super Tool 8개의 필수 파라미터 정의
@@ -281,7 +280,7 @@ def _runScenario(
     elapsed = time.monotonic() - t0
     answer = "".join(chunks)
 
-    print(f"\n  --- 결과 ---")
+    print("\n  --- 결과 ---")
     print(f"  시간: {elapsed:.1f}s")
     print(f"  컨텍스트: {contextModules}")
     print(f"  도구 호출: {len(toolCalls)}건 -- {[t['name'] for t in toolCalls]}")

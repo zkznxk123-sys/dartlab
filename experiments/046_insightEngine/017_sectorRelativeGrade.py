@@ -49,8 +49,8 @@ from pathlib import Path
 from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.engines.financeEngine.pivot import buildAnnual
 from dartlab.engines.financeEngine.ratios import calcRatios
-from dartlab.gather.listing import getKindList
 from dartlab.engines.sectorEngine import classify
+from dartlab.gather.listing import getKindList
 
 TEST_STOCKS = [
     ("005930", "삼성전자"), ("000660", "SK하이닉스"), ("005380", "현대자동차"),

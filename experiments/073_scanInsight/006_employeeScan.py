@@ -218,7 +218,7 @@ def scan_employee() -> pl.DataFrame:
 
     # 전체 분포
     sals = valid["평균급여_만원"].drop_nulls()
-    print(f"\n=== 평균급여 분포 (만원/연) ===")
+    print("\n=== 평균급여 분포 (만원/연) ===")
     print(f"평균: {sals.mean():,.0f}")
     print(f"중앙값: {sals.median():,.0f}")
     print(f"최소: {sals.min():,.0f}")
@@ -240,7 +240,7 @@ def scan_employee() -> pl.DataFrame:
     # 근속연수
     tenures = valid.filter(pl.col("평균근속_년").is_not_null())["평균근속_년"].drop_nulls()
     if tenures.len() > 0:
-        print(f"\n=== 평균근속연수 분포 (년) ===")
+        print("\n=== 평균근속연수 분포 (년) ===")
         print(f"평균: {tenures.mean():.1f}")
         print(f"중앙값: {tenures.median():.1f}")
         print(f"10년 이상: {tenures.filter(tenures >= 10).len()}종목")
@@ -280,14 +280,14 @@ def analyze_by_industry(df: pl.DataFrame) -> None:
         .filter(pl.col("종목수") >= 5)
         .sort("평균급여", descending=True)
     )
-    print(f"\n=== 급여 높은 업종 ===")
+    print("\n=== 급여 높은 업종 ===")
     print(industry_stats.head(10))
-    print(f"\n=== 급여 낮은 업종 ===")
+    print("\n=== 급여 낮은 업종 ===")
     print(industry_stats.tail(10))
 
     # 근속 높은 업종
     tenure_stats = industry_stats.filter(pl.col("평균근속").is_not_null()).sort("평균근속", descending=True)
-    print(f"\n=== 근속연수 높은 업종 ===")
+    print("\n=== 근속연수 높은 업종 ===")
     print(tenure_stats.head(10))
 
     # 시장별
@@ -301,7 +301,7 @@ def analyze_by_industry(df: pl.DataFrame) -> None:
         ])
         .sort("평균급여", descending=True)
     )
-    print(f"\n=== 시장별 급여 ===")
+    print("\n=== 시장별 급여 ===")
     print(market_stats)
 
 

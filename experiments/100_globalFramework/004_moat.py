@@ -45,14 +45,14 @@
 실험일: 2026-03-25
 """
 
-import sys
 import os
 import statistics
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 sys.path.insert(0, os.path.dirname(__file__))
 
-from _helpers import annualValues, annualDict, loadCompany
+from _helpers import annualDict, loadCompany
 
 TARGETS = [
     ("005930", "삼성전자"),
@@ -230,7 +230,7 @@ def main():
         )
     print("-" * 62)
 
-    print(f"\n[보조 지표]")
+    print("\n[보조 지표]")
     print(f"{'종목':<12} {'avgROIC':>8} {'무형자산%':>8}")
     print("-" * 30)
     for r in results:
@@ -238,7 +238,7 @@ def main():
         intStr = f"{r['intangibleRatio']:.1f}%" if r["intangibleRatio"] else "N/A"
         print(f"{r['name']:<12} {roicStr:>8} {intStr:>8}")
 
-    print(f"\n[Moat 분포]")
+    print("\n[Moat 분포]")
     for rating in ["Wide", "Narrow", "None"]:
         names = [r["name"] for r in results if r["moatRating"] == rating]
         print(f"  {rating:6}: {', '.join(names) if names else '(없음)'}")

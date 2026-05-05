@@ -51,7 +51,6 @@
 실험일: 2026-03-06
 """
 
-import os
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -762,7 +761,7 @@ def main():
         print(f"  {label}: {count}개 ({pct:.1f}%)")
 
     # 3. 하위 20개 기업 (연속 연도 매칭률 낮은 순)
-    print(f"\n=== 연속 연도 매칭률 하위 20개 ===")
+    print("\n=== 연속 연도 매칭률 하위 20개 ===")
     print(f"{'종목코드':>8} | {'연도':>4} | {'매칭률':>7} | {'매칭':>5}/{'':<5}")
     print("-" * 45)
     for code, rate, matched, total, nYears in contRates[:20]:
@@ -772,7 +771,7 @@ def main():
     bpCounts = [r["nBreakpoints"] for r in results.values()]
     noBp = sum(1 for b in bpCounts if b == 0)
     hasBp = sum(1 for b in bpCounts if b > 0)
-    print(f"\n=== 전환점 통계 ===")
+    print("\n=== 전환점 통계 ===")
     print(f"전환점 없음: {noBp}개 ({noBp/len(results)*100:.1f}%)")
     print(f"전환점 있음: {hasBp}개 ({hasBp/len(results)*100:.1f}%)")
 
@@ -784,7 +783,7 @@ def main():
 
     # 5. 연도 커버리지
     yearCounts = [r["nYears"] for r in results.values()]
-    print(f"\n=== 연도 커버리지 ===")
+    print("\n=== 연도 커버리지 ===")
     print(f"평균 연도 수: {sum(yearCounts)/len(yearCounts):.1f}")
     print(f"최소: {min(yearCounts)}, 최대: {max(yearCounts)}")
     yearBrackets = [(1, 5), (6, 10), (11, 15), (16, 20), (21, 30)]
@@ -804,7 +803,7 @@ def main():
 
     if segRates:
         avgSegRate = sum(segRates) / len(segRates)
-        print(f"\n=== 구간 내 매칭률 (전환점 분리 후) ===")
+        print("\n=== 구간 내 매칭률 (전환점 분리 후) ===")
         print(f"구간 수: {len(segRates)}")
         print(f"평균: {avgSegRate:.1%}")
         print(f"99%+: {sum(1 for r in segRates if r >= 0.99)}/{len(segRates)}")

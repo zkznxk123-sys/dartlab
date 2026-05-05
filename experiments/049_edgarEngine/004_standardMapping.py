@@ -164,7 +164,7 @@ def toDartCanonical(edgarSnakeId: str) -> str:
 
 def measureMappingRate(edgarDir: Path, fullMap: dict[str, str]):
     print(f"\n{'='*70}")
-    print(f"  매핑 데이터 규모")
+    print("  매핑 데이터 규모")
     print(f"{'='*70}")
 
     commonMap = buildCommonTagsMap()
@@ -210,7 +210,7 @@ def measureMappingRate(edgarDir: Path, fullMap: dict[str, str]):
         print(f"\n  L2 snakeId 커버: {len(l2Covered)}/{len(L2_INSIGHT_USED)} ({len(l2Covered)/len(L2_INSIGHT_USED)*100:.0f}%)")
 
         if l2Missing:
-            print(f"  L2 미커버:")
+            print("  L2 미커버:")
             for sid in sorted(l2Missing):
                 print(f"    {sid}")
 
@@ -223,7 +223,7 @@ def measureMappingRate(edgarDir: Path, fullMap: dict[str, str]):
                 cnt = usGaap.filter(pl.col("tag") == tag).height
                 unmappedCounts[tag] = cnt
             topUnmapped = sorted(unmappedCounts.items(), key=lambda x: -x[1])[:15]
-            print(f"\n  미매핑 상위 15 (행 수 기준):")
+            print("\n  미매핑 상위 15 (행 수 기준):")
             for tag, cnt in topUnmapped:
                 print(f"    {tag:60} {cnt:>5} rows")
 
@@ -246,7 +246,7 @@ def _measureRowWeighted(usGaap: pl.DataFrame, fullMap: dict[str, str]) -> float:
 
 def analyzeEquityMapping(edgarDir: Path, fullMap: dict[str, str]):
     print(f"\n{'='*70}")
-    print(f"  자본 구조 매핑 분석 (IFRS vs US-GAAP)")
+    print("  자본 구조 매핑 분석 (IFRS vs US-GAAP)")
     print(f"{'='*70}")
 
     equityTags = [
@@ -267,7 +267,7 @@ def analyzeEquityMapping(edgarDir: Path, fullMap: dict[str, str]):
         dartSid = toDartCanonical(edgarSid) if edgarSid != "(unmapped)" else "(unmapped)"
         print(f"  {tag:65} → {edgarSid:40} → {dartSid}")
 
-    print(f"""
+    print("""
   [자본 구조 핵심 차이]
   - EDGAR total_equity = StockholdersEquity (NCI 포함 가능)
     → DART에서는 이것이 equity_including_nci에 해당
@@ -283,7 +283,7 @@ def analyzeEquityMapping(edgarDir: Path, fullMap: dict[str, str]):
 
 def verifyWithPivot(edgarDir: Path, fullMap: dict[str, str]):
     print(f"\n{'='*70}")
-    print(f"  003 피벗 결과 + 매핑 통합 검증 (AAPL)")
+    print("  003 피벗 결과 + 매핑 통합 검증 (AAPL)")
     print(f"{'='*70}")
 
     from importlib.util import module_from_spec, spec_from_file_location

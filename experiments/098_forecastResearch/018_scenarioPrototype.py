@@ -163,8 +163,8 @@ def main():
         print(f"  방향 정확: {dirAcc:.0f}% ({int(dirAcc * 8 / 100)}/8) | MAE: {mae:.1f}%p")
 
     # 2. 연도별 요약
-    print(f"\n" + "=" * 70)
-    print(f"  연도별 시나리오 성능 요약")
+    print("\n" + "=" * 70)
+    print("  연도별 시나리오 성능 요약")
     print("=" * 70)
     print(f"\n  {'연도':<6} {'상황':<18} {'방향 정확':>10} {'MAE':>8}")
     print(f"  {'─' * 44}")
@@ -180,8 +180,8 @@ def main():
     print(f"  {'평균':<6} {'':18} {avgDir:>9.0f}% {avgMae:>7.1f}%p")
 
     # 3. 프리셋 시나리오 → 예측 결과 미리보기
-    print(f"\n" + "=" * 70)
-    print(f"  프리셋 시나리오별 예측 매출 변동 (% 포인트)")
+    print("\n" + "=" * 70)
+    print("  프리셋 시나리오별 예측 매출 변동 (% 포인트)")
     print("=" * 70)
 
     sectors = list(SECTOR_ELASTICITY.keys())
@@ -197,8 +197,8 @@ def main():
         print(row)
 
     # 4. 가장 잘 맞는 시나리오 프리셋 찾기
-    print(f"\n" + "=" * 70)
-    print(f"  각 연도에 가장 잘 맞는 프리셋 시나리오")
+    print("\n" + "=" * 70)
+    print("  각 연도에 가장 잘 맞는 프리셋 시나리오")
     print("=" * 70)
 
     for year, actual in ACTUAL_REVENUE.items():
@@ -222,8 +222,8 @@ def main():
         print(f"    실제:   GDP={macro['gdp']:+.1f}%, FX={macro['fx']:+.1f}%")
 
     # 5. 시나리오 도구의 한계와 가치 평가
-    print(f"\n" + "=" * 70)
-    print(f"  시나리오 도구 평가")
+    print("\n" + "=" * 70)
+    print("  시나리오 도구 평가")
     print("=" * 70)
 
     print(f"""

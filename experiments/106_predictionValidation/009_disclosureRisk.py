@@ -248,7 +248,7 @@ def main():
             "investChangeCount": "설비/투자변화",
         }
 
-        print(f"\n  --- 개별 시그널 활성 vs 비활성 ---")
+        print("\n  --- 개별 시그널 활성 vs 비활성 ---")
         print(f"  {'시그널':<16s} {'활성n':>6s} {'up%':>6s} {'down%':>6s} {'평균':>8s} | {'비활성n':>6s} {'up%':>6s} {'down%':>6s} {'평균':>8s} | {'p값':>7s}")
 
         for col in signalCols:
@@ -275,7 +275,7 @@ def main():
             print(f"  {signalNames[col]:<14s} {an:>6d} {aUp:>5.0%} {aDown:>5.0%} {aAvg:>+7.1f}% | {inn:>6d} {iUp:>5.0%} {iDown:>5.0%} {iAvg:>+7.1f}% | {p:>6.3f} {sig}")
 
         # --- activeSignals 등급별 ---
-        print(f"\n  --- 종합 등급별 (activeSignals) ---")
+        print("\n  --- 종합 등급별 (activeSignals) ---")
         for grade, lo, hi in [("안정(0)", 0, 0), ("주의(1-2)", 1, 2), ("고위험(3+)", 3, 4)]:
             subset = [r for r in records if lo <= r["activeSignals"] <= hi]
             if not subset:
@@ -287,7 +287,7 @@ def main():
             print(f"  {grade:12s}: n={sn:5d}  up={upRate:5.1%}  down={downRate:5.1%}  평균={avgGrowth:+.1f}%")
 
         # --- 방향 전환 감지력 ---
-        print(f"\n  --- 시그널 활성 + 이전 상승 → 하락 전환? ---")
+        print("\n  --- 시그널 활성 + 이전 상승 → 하락 전환? ---")
         prevUp = [r for r in records if r["prevDir"] == "up"]
         if prevUp:
             for col in signalCols:

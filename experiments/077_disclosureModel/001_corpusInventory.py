@@ -148,7 +148,7 @@ def main():
         print(f"  topic 중앙값: {sub['topic_count'].median():.0f}")
 
     # 분포
-    print(f"\n--- 행 수 분포 (전체) ---")
+    print("\n--- 행 수 분포 (전체) ---")
     for pct in [10, 25, 50, 75, 90]:
         val = df["rows"].quantile(pct / 100)
         print(f"  p{pct}: {val:.0f}")

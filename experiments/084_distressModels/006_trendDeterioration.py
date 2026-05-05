@@ -52,7 +52,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from dartlab import Company
-from dartlab.analysis.financial.ratios import calcRatios, calcRatioSeries
 
 
 def detect_consecutive_negative(values: list, label: str) -> list[dict]:

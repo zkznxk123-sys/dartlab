@@ -6,7 +6,6 @@
 """
 
 import os
-import re
 import sys
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
@@ -69,7 +68,7 @@ if __name__ == "__main__":
             fail += 1
 
     total = len(files)
-    print(f"\n=== 040 작성기준일 이후 주요사항 배치 결과 ===")
+    print("\n=== 040 작성기준일 이후 주요사항 배치 결과 ===")
     print(f"성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}/{total}")
     print(f"해당없음: {noData}건")

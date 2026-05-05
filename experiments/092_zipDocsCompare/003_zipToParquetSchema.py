@@ -224,7 +224,7 @@ def main():
 
     print(f"매칭: {matched}/{len(zipTitles)}")
     if unmatched:
-        print(f"미매칭 ZIP 섹션:")
+        print("미매칭 ZIP 섹션:")
         for u in unmatched:
             print(f"  - {u}")
 

@@ -238,7 +238,7 @@ def main():
     # 3. 강한 선행 상관 조합
     strong, improved = analyzeLeadingPower(df)
 
-    print(f"\n" + "=" * 70)
+    print("\n" + "=" * 70)
     print(f"  선행 상관 |r| > 0.3인 조합 ({len(strong)}개)")
     print("=" * 70)
     if len(strong) > 0:
@@ -248,7 +248,7 @@ def main():
             print(f"  {row['macro']:<8} {row['sector']:<12} {row['concurrent']:>+6.3f} {row['lag1yr']:>+6.3f} {row['lagImprovement']:>+6.3f}")
 
     # 4. 선행이 동시보다 +0.1 이상 개선된 조합
-    print(f"\n" + "=" * 70)
+    print("\n" + "=" * 70)
     print(f"  선행이 동시보다 +0.1 이상 개선 ({len(improved)}개)")
     print("=" * 70)
     if len(improved) > 0:
@@ -256,8 +256,8 @@ def main():
             print(f"  {row['macro']:<8} {row['sector']:<12} 동시={row['concurrent']:>+.3f} → 선행={row['lag1yr']:>+.3f} ({row['lagImprovement']:>+.3f})")
 
     # 5. 방향 예측 정확도
-    print(f"\n" + "=" * 70)
-    print(f"  선행지표 기반 방향 예측 정확도")
+    print("\n" + "=" * 70)
+    print("  선행지표 기반 방향 예측 정확도")
     print("=" * 70)
 
     sectorResults, overallAccuracy = simpleForecastRule(df)
@@ -267,11 +267,11 @@ def main():
         print(f"  {sector:<12} {info['bestMacro']:<10} {info['lagCorr']:>+8.3f} {info['directionAccuracy']:>9.1f}%")
 
     print(f"\n  전체 평균 방향 정확도: {overallAccuracy}%")
-    print(f"  (참고: 랜덤 50%, 동시 GDP 방향 정확도 ~60%)")
+    print("  (참고: 랜덤 50%, 동시 GDP 방향 정확도 ~60%)")
 
     # 6. 섹터-지표 히트맵 (선행 상관)
-    print(f"\n" + "=" * 70)
-    print(f"  선행 상관 히트맵 (1년 lag)")
+    print("\n" + "=" * 70)
+    print("  선행 상관 히트맵 (1년 lag)")
     print("=" * 70)
 
     sectors = list(SECTOR_REVENUE_GROWTH.keys())
@@ -294,7 +294,7 @@ def main():
                 vals.append(f"{'—':>8}")
         print(f"  {sector:>12}" + "".join(vals))
 
-    print(f"\n  (* = |r| > 0.3)")
+    print("\n  (* = |r| > 0.3)")
 
     elapsed = time.time() - startTime
     print(f"\n  소요시간: {elapsed:.1f}s")

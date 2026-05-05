@@ -332,14 +332,14 @@ def run():
     naiveArr = np.array(naiveErrors)
     r2Arr = np.array(r2Values)
 
-    print(f"\n  R² 분포:")
+    print("\n  R² 분포:")
     print(f"    평균: {r2Arr.mean():.3f}")
     print(f"    중앙값: {np.median(r2Arr):.3f}")
     print(f"    >0 비율: {(r2Arr > 0).mean():.1%}")
     print(f"    >0.15 비율: {(r2Arr > 0.15).mean():.1%}")
     print(f"    >0.30 비율: {(r2Arr > 0.30).mean():.1%}")
 
-    print(f"\n  예측 성능 비교:")
+    print("\n  예측 성능 비교:")
     print(f"  {'방법':20s} {'MAE':>8s} {'MdAE':>8s} {'<10%':>8s} {'<20%':>8s}")
     print(f"  {'─' * 52}")
     for label, arr in [("regression", regArr), ("consensus", consArr), ("naive", naiveArr)]:
@@ -348,7 +348,7 @@ def run():
 
     # 대표 종목
     print(f"\n{'─' * 70}")
-    print(f"  대표 종목 상세")
+    print("  대표 종목 상세")
     print(f"{'─' * 70}")
     spotlightCodes = {"005930", "000660", "005380", "035420", "051910", "000270", "097950", "030200"}
     print(f"  {'종목':12s} {'실제':>8s} {'회귀':>8s} {'consensus':>10s} {'naive':>8s} {'R²':>6s}")

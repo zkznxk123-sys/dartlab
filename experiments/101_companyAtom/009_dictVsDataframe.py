@@ -36,10 +36,10 @@
 실험일: 2026-03-27
 """
 
-import sys
-import time
 import hashlib
 import re
+import sys
+import time
 
 sys.path.insert(0, "c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src")
 
@@ -64,6 +64,7 @@ def classifyChange(textA, textB):
 
 def run():
     import polars as pl
+
     import dartlab
 
     c = dartlab.Company("005930")

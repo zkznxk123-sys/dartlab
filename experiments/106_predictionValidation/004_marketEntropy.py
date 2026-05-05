@@ -21,7 +21,6 @@ import gc
 import json
 import math
 import sys
-from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
@@ -309,7 +308,7 @@ def main():
         print(f"  {name:<14s} {acc:>7.1f}%  ({correct}/{n})")
 
     # 실제 방향별
-    print(f"\n--- 실제 방향별 ---")
+    print("\n--- 실제 방향별 ---")
     for d in ["up", "down", "flat"]:
         subset = [r for r in results if r["actualDir"] == d]
         if not subset:

@@ -213,7 +213,7 @@ def main():
             b = df_before.get_column(col).to_list()[:10]
             a = df_after.get_column(col).to_list()[:10]
             assert b == a, f"{col} 불일치 (첫 10행): {b} vs {a}"
-        print(f"\n  docs 동일성 검증 OK")
+        print("\n  docs 동일성 검증 OK")
 
     speedup = docs_before_time / docs_after_time if docs_after_time > 0 else float("inf")
     print(f"\n  docs: {docs_before_time:.4f}s → {docs_after_time:.4f}s ({speedup:.1f}x)")

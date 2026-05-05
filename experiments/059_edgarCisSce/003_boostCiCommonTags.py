@@ -231,7 +231,7 @@ def measureCoverage():
 
     print(f"\n=== CI 커버리지 (보강 후, {sample}개 샘플) ===")
     print(f"CI commonTags 보유 기업: {ciHit}/{sample} ({ciHit / sample * 100:.1f}%)")
-    print(f"\n--- CI 태그 빈도 Top 15 ---")
+    print("\n--- CI 태그 빈도 Top 15 ---")
     for tag, cnt in sorted(ciTagFreq.items(), key=lambda x: -x[1])[:15]:
         print(f"  {tag}: {cnt}/{sample} ({cnt / sample * 100:.1f}%)")
 
@@ -247,8 +247,8 @@ def main():
     print("\n=== 2단계: CI 커버리지 측정 ===")
     ciHit, sample = measureCoverage()
 
-    print(f"\n=== 최종 비교 ===")
-    print(f"  보강 전: 70/500 (14.0%)")
+    print("\n=== 최종 비교 ===")
+    print("  보강 전: 70/500 (14.0%)")
     print(f"  보강 후: {ciHit}/{sample} ({ciHit / sample * 100:.1f}%)")
 
 

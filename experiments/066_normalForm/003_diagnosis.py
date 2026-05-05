@@ -208,7 +208,7 @@ def diagnose():
 
         # 최근 5기간 항목 수
         recent5 = period_cols[-5:]
-        print(f"\n  최근 5기간:")
+        print("\n  최근 5기간:")
         for p in recent5:
             print(f"    {p}: 항목 {len(period_items[p])}, triples {period_triple_count.get(p,0)}, subs {sub_count_per_period.get(p,0)}")
 
@@ -225,14 +225,14 @@ def diagnose():
             avg = sum(overlaps)/len(overlaps) if overlaps else 0
             print(f"\n  평균 Jaccard: {avg:.3f}")
             if avg < 0.3 and len(total_unique_items) > 5:
-                print(f"  → 이력형 감지됨 (< 0.3, 항목 > 5)")
+                print("  → 이력형 감지됨 (< 0.3, 항목 > 5)")
             elif len(total_unique_items) > 50:
-                print(f"  → 목록형 감지됨 (> 50)")
+                print("  → 목록형 감지됨 (> 50)")
             else:
-                print(f"  → 수평화 가능")
+                print("  → 수평화 가능")
 
         # 핵심: 왜 기존은 성공하는가?
-        print(f"\n  기존 show() 결과:")
+        print("\n  기존 show() 결과:")
         try:
             show_r = c.show(topic)
             if isinstance(show_r, pl.DataFrame) and "block" in show_r.columns:

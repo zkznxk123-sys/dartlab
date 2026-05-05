@@ -117,7 +117,7 @@ def analyzeStock(stockCode: str, stockName: str):
     for s in signals:
         print(f"    → {s}")
 
-    print(f"\n  주요 지표:")
+    print("\n  주요 지표:")
     print(f"    revenue TTM:         {_fmt(ratios.revenueTTM)}")
     print(f"    operating_income TTM: {_fmt(ratios.operatingIncomeTTM)}")
     print(f"    net_income TTM:      {_fmt(ratios.netIncomeTTM)}")
@@ -127,7 +127,7 @@ def analyzeStock(stockCode: str, stockName: str):
     print(f"    영업이익률:           {_fmtPct(ratios.operatingMargin)}")
 
     if isFinancial:
-        print(f"\n  [금융업 전용 Health 평가]")
+        print("\n  [금융업 전용 Health 평가]")
         if ratios.debtRatio is not None:
             if ratios.debtRatio < 1000:
                 print(f"    부채비율 {ratios.debtRatio:.0f}% — 금융업 기준 양호 (은행 평균 ~1500%)")

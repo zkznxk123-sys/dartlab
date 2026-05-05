@@ -9,7 +9,6 @@ import re
 import polars as pl
 
 from dartlab.providers.dart.company import Company
-from dartlab.providers.dart.docs.sections.pipeline import sections
 
 
 def _isPeriodCol(c):

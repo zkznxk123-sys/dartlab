@@ -265,7 +265,7 @@ def _printResults(df: pl.DataFrame) -> None:
     if len(validDf) > 0:
         sorted_df = validDf.sort("moatTotal", descending=True)
 
-        print(f"\n[해자 점수 TOP 10]")
+        print("\n[해자 점수 TOP 10]")
         for row_data in sorted_df.head(10).iter_rows(named=True):
             name = row_data["corpName"]
             sector = row_data["sector"]
@@ -276,7 +276,7 @@ def _printResults(df: pl.DataFrame) -> None:
             print(f"  {name:12s} ({sector:8s}) | 해자={total:5.1f} | "
                   f"주도={dominant:6s} | 영업이익률={omS}")
 
-        print(f"\n[해자 점수 BOTTOM 5]")
+        print("\n[해자 점수 BOTTOM 5]")
         for row_data in sorted_df.tail(5).iter_rows(named=True):
             name = row_data["corpName"]
             sector = row_data["sector"]
@@ -298,12 +298,12 @@ def _printResults(df: pl.DataFrame) -> None:
         moatVals = corr_df["moatTotal"].to_list()
         omVals = corr_df["operatingMargin"].to_list()
         rho = _spearmanCorr(moatVals, omVals)
-        print(f"\n[해자 점수 vs 영업이익률 Spearman 상관]")
+        print("\n[해자 점수 vs 영업이익률 Spearman 상관]")
         print(f"  N={len(corr_df)}, ρ={rho:.3f}")
         print(f"  해석: {'유의미 (>0.3)' if abs(rho) > 0.3 else '약한 상관 또는 무상관'}")
 
     # 주도적 해자 유형 분포
-    print(f"\n[주도적 해자 유형 분포]")
+    print("\n[주도적 해자 유형 분포]")
     for moatType in MOAT_KEYWORDS:
         count = len(df.filter(pl.col("dominantMoat") == moatType))
         name = shortNames[moatType]
@@ -312,7 +312,7 @@ def _printResults(df: pl.DataFrame) -> None:
     print(f"  {'없음':8s}: {noMoat}사")
 
     # 유효 데이터
-    print(f"\n[유효 데이터]")
+    print("\n[유효 데이터]")
     print(f"  텍스트 보유: {df['hasDocsText'].sum()}/{len(df)}")
     print(f"  영업이익률:  {df['operatingMargin'].drop_nulls().len()}/{len(df)}")
 

@@ -378,7 +378,7 @@ if __name__ == "__main__":
         if code in listing_codes:
             group_listed[group].append(code)
 
-    print(f"\n   그룹별 상장사 (TOP 20):")
+    print("\n   그룹별 상장사 (TOP 20):")
     for g, members in sorted(group_listed.items(), key=lambda x: -len(x[1]))[:20]:
         names = [code_to_name.get(c, c) for c in sorted(members)]
         print(f"     {g} ({len(members)}): {', '.join(names[:5])}{'...' if len(names) > 5 else ''}")

@@ -219,8 +219,8 @@ def main():
     print(f"\n{'=' * 60}")
     print("결과 비교")
     print(f"{'=' * 60}")
-    print(f"\n| topic | Baseline tools | Hint tools | B답변 | H답변 |")
-    print(f"|-------|---------------|------------|------|------|")
+    print("\n| topic | Baseline tools | Hint tools | B답변 | H답변 |")
+    print("|-------|---------------|------------|------|------|")
     for br, hr in zip(baselineResults, hintResults):
         bTools = [tc.get("name", "?") for tc in br.get("toolCalls", [])]
         hTools = [tc.get("name", "?") for tc in hr.get("toolCalls", [])]

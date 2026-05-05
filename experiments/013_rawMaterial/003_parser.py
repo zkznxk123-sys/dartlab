@@ -305,7 +305,7 @@ for code, name in STOCKS:
         if eqResult is None:
             eqResult = parseEquipment(content)
 
-    print(f"\n  [원재료]")
+    print("\n  [원재료]")
     if rawResult:
         rawOk += 1
         for r in rawResult[:8]:
@@ -314,19 +314,19 @@ for code, name in STOCKS:
             print(f"    ... +{len(rawResult)-8} more")
     else:
         rawFail += 1
-        print(f"    파싱 실패")
+        print("    파싱 실패")
 
-    print(f"\n  [생산설비]")
+    print("\n  [생산설비]")
     if eqResult:
         eqOk += 1
         for k, v in eqResult.items():
             print(f"    {k}: {v:,.0f}")
     else:
         eqFail += 1
-        print(f"    파싱 실패")
+        print("    파싱 실패")
 
 print(f"\n{'='*60}")
-print(f"  결과 요약")
+print("  결과 요약")
 print(f"{'='*60}")
 print(f"  원재료: {rawOk} 성공 / {rawFail} 실패 / {rawNa} 미해당")
 print(f"  생산설비: {eqOk} 성공 / {eqFail} 실패 / {eqNa} 미해당")

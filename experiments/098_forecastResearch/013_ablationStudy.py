@@ -286,7 +286,7 @@ def run():
 
     # 누적 앙상블
     print(f"\n{'─' * 70}")
-    print(f"  누적 앙상블 (단순 평균)")
+    print("  누적 앙상블 (단순 평균)")
     print(f"{'─' * 70}")
 
     sourceOrder = ["naive", "avg3y", "peer", "sector", "macro"]
@@ -308,7 +308,7 @@ def run():
 
     # Leave-one-out
     print(f"\n{'─' * 70}")
-    print(f"  Leave-one-out (하나 제거 시 성능)")
+    print("  Leave-one-out (하나 제거 시 성능)")
     print(f"{'─' * 70}")
 
     allSources = set(sourceOrder)
@@ -340,7 +340,7 @@ def run():
 
     # 최적 조합 탐색 (2~3개)
     print(f"\n{'─' * 70}")
-    print(f"  최적 2~3개 소스 조합")
+    print("  최적 2~3개 소스 조합")
     print(f"{'─' * 70}")
 
     from itertools import combinations

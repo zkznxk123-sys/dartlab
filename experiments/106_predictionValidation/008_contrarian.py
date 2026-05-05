@@ -208,14 +208,14 @@ def _analyzeOnePeriod(
         "baseUpRate": round(baseUpRate * 100, 1),
         "baseDownRate": round(baseDownRate * 100, 1),
         "H1": {
-            "description": f"이전하락+축소우세 → 반등",
+            "description": "이전하락+축소우세 → 반등",
             "n": len(h1),
             "upRate": round(h1_rate * 100, 1),
             "pValue": round(h1_p, 4),
             "significant": h1_p < 0.05,
         },
         "H2": {
-            "description": f"이전상승+확장우세 → 하락",
+            "description": "이전상승+확장우세 → 하락",
             "n": len(h2),
             "downRate": round(h2_rate * 100, 1),
             "pValue": round(h2_p, 4),
@@ -254,14 +254,14 @@ def main():
         print(f"\n  H1 (이전하락+축소 → 반등): n={r['H1']['n']}, up={r['H1']['upRate']}%, p={r['H1']['pValue']:.4f} {'✅' if r['H1']['significant'] else '❌'}")
         print(f"  H2 (이전상승+확장 → 하락): n={r['H2']['n']}, down={r['H2']['downRate']}%, p={r['H2']['pValue']:.4f} {'✅' if r['H2']['significant'] else '❌'}")
 
-        print(f"\n  --- 모든 조합 ---")
+        print("\n  --- 모든 조합 ---")
         print(f"  {'조합':<20s} {'n':>5s} {'up%':>6s} {'down%':>6s} {'평균':>8s}")
         for combo, info in sorted(r["combos"].items()):
             print(f"  {combo:<20s} {info['n']:>5d} {info['upRate']:>5.1f}% {info['downRate']:>5.1f}% {info['avgGrowth']:>+7.1f}%")
 
     # H3: 일관성 검증
     print(f"\n{'='*60}")
-    print(f"[3/3] H3: 2개 연도 일관성 검증")
+    print("[3/3] H3: 2개 연도 일관성 검증")
     print(f"{'='*60}")
 
     for h in ["H1", "H2"]:

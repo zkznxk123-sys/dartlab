@@ -78,13 +78,13 @@ def main():
             print(f"\n  {year}: 총 {len(lines)}줄 (텍스트 {len(textLines)}줄, 테이블 {len(tableLines)}줄)")
             print(f"  콘텐츠 길이: {len(content):,}자")
 
-            print(f"\n  === 첫 30줄 ===")
+            print("\n  === 첫 30줄 ===")
             for line in lines[:30]:
                 print(f"  {line[:120]}")
 
             headers = [l for l in lines if l.strip().startswith("#")]
             if headers:
-                print(f"\n  === 헤더 목록 ===")
+                print("\n  === 헤더 목록 ===")
                 for h in headers[:20]:
                     print(f"  {h.strip()}")
 
@@ -98,7 +98,7 @@ def main():
                 for ss in subSections:
                     print(f"  {ss}")
 
-            print(f"\n  === 마지막 10줄 ===")
+            print("\n  === 마지막 10줄 ===")
             for line in lines[-10:]:
                 print(f"  {line[:120]}")
 

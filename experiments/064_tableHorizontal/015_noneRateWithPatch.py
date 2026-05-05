@@ -245,7 +245,7 @@ if __name__ == "__main__":
     files = sorted(dataDir.glob("*.parquet"))
     codes = [f.stem for f in files]
 
-    print(f"_stripUnitHeader 패치 반영 후 None 비율")
+    print("_stripUnitHeader 패치 반영 후 None 비율")
     print(f"종목 수: {len(codes)}")
     print("=" * 70)
 

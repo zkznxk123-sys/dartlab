@@ -53,7 +53,6 @@
 
 import importlib.util
 import json
-import re
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -414,7 +413,7 @@ if __name__ == "__main__":
     total = len(graph["nodes"])
     print(f"   그룹 분류: {classified}/{total} ({classified/total:.0%})")
     print(f"   그룹 수: {len([g for g in graph['groups'] if g != '(미분류)'])}")
-    print(f"   그룹 분포:")
+    print("   그룹 분포:")
     for g, cnt in sorted(graph["groups"].items(), key=lambda x: -x[1])[:20]:
         print(f"     {g:15s}: {cnt}")
 
@@ -441,7 +440,7 @@ if __name__ == "__main__":
     text = json.dumps(overview, ensure_ascii=False, indent=2)
     path.write_text(text, encoding="utf-8")
     print(f"   {overview['meta']['groupCount']} groups, {overview['meta']['interGroupEdges']} inter-group edges")
-    print(f"   그룹간 엣지 TOP 10:")
+    print("   그룹간 엣지 TOP 10:")
     for e in overview["edges"][:10]:
         avg = f" (avg {e['avgOwnershipPct']}%)" if "avgOwnershipPct" in e else ""
         print(f"     {e['source']} → {e['target']}: {e['edgeCount']}건{avg}")

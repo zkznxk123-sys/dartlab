@@ -11,7 +11,6 @@ import sys
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-import polars as pl
 
 from dartlab.core import loadData
 

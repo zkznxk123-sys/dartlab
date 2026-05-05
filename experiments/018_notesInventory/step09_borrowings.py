@@ -3,7 +3,6 @@
 차입금 섹션의 일반적인 구조를 파악하여 파서 설계에 활용.
 """
 
-import os
 import sys
 
 sys.path.insert(0, "src")
@@ -11,7 +10,6 @@ sys.path.insert(0, "src")
 from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection
 from dartlab.core.reportSelector import selectReport
-from dartlab.core.tableParser import detectUnit, extractTables
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
 

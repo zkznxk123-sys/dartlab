@@ -188,7 +188,7 @@ def main():
 
         try:
             answer = runQuestion(q["question"])
-            print(f"\n--- 답변 ---")
+            print("\n--- 답변 ---")
             print(answer[:500] if answer else "(빈 답변)")
             if answer and len(answer) > 500:
                 print(f"... (총 {len(answer)}자)")

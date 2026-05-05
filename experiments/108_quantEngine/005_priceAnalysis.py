@@ -58,7 +58,9 @@ def _fetchStockPrice(code: str) -> pl.DataFrame | None:
 
 
 def _fetchKospi() -> pl.DataFrame:
-    import httpx, re
+    import re
+
+    import httpx
     url = "https://fchart.stock.naver.com/sise.nhn?symbol=KOSPI&timeframe=day&count=300&requestType=0"
     r = httpx.get(url, timeout=15)
     items = re.findall(r'data="([^"]+)"', r.text)

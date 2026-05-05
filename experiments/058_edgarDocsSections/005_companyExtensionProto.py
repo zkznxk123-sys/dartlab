@@ -249,7 +249,7 @@ def main() -> None:
         if bs is not None:
             print(f"  BS: {bs.height} accounts × {len(bs.columns) - 1} years")
         else:
-            print(f"  BS: None")
+            print("  BS: None")
 
         isdf = c.IS
         if isdf is not None:

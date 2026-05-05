@@ -434,11 +434,11 @@ if __name__ == "__main__":
         group_counts[code_to_group.get(code, "?")] += 1
 
     multi_member_groups = {g: c for g, c in group_counts.items() if c >= 2}
-    print(f"\n  그룹 통계:")
+    print("\n  그룹 통계:")
     print(f"    총 그룹: {len(group_counts)}")
     print(f"    2명+ 그룹: {len(multi_member_groups)}")
     print(f"    독립 (1명): {sum(1 for c in group_counts.values() if c == 1)}")
-    print(f"\n  TOP 20 그룹:")
+    print("\n  TOP 20 그룹:")
     for g, c in sorted(group_counts.items(), key=lambda x: -x[1])[:20]:
         print(f"    {g:15s}: {c}")
 

@@ -179,11 +179,11 @@ def analyzeFailures(maxCompanies: int = 0):
     print(f"\n=== 결과 ({len(codes)}종목) ===")
     print(f"전체 서브테이블: {totalBlocks}")
     print(f"성공(데이터 있음): {successBlocks} ({successBlocks/totalBlocks*100:.1f}%)")
-    print(f"\n실패 원인:")
+    print("\n실패 원인:")
     for reason, cnt in failureReasons.most_common():
         print(f"  {reason}: {cnt} ({cnt/totalBlocks*100:.1f}%)")
 
-    print(f"\nno_data_rows 헤더 패턴:")
+    print("\nno_data_rows 헤더 패턴:")
     for pat, cnt in headerPatterns.most_common():
         print(f"  {pat}: {cnt}")
 
@@ -194,7 +194,7 @@ def analyzeFailures(maxCompanies: int = 0):
             print(f"    {line.strip()}")
         print()
 
-    print(f"\n단위/기준일 아닌 no_data_rows 샘플:")
+    print("\n단위/기준일 아닌 no_data_rows 샘플:")
     for key, samples in noDataSamples.items():
         print(f"\n  === {key} ===")
         for s in samples[:5]:

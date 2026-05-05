@@ -794,7 +794,7 @@ def _loadAdaptive(
 
     # 매핑 후보
     try:
-        from dartlab.core.cross.exogenousAxes import getExogenousSeriesIds
+        from dartlab.gather.exogenousAxes import getExogenousSeriesIds
 
         mapped = getExogenousSeriesIds(stockCode=stockCode)
     except (ImportError, KeyError):
@@ -893,7 +893,7 @@ def _loadMacroAligned(periodCols: list[str], stockCode: str | None = None) -> di
     from dartlab.gather.macro import alignToFinancialPeriods, loadMacroParquet
 
     try:
-        from dartlab.core.cross.exogenousAxes import getExogenousSeriesIds
+        from dartlab.gather.exogenousAxes import getExogenousSeriesIds
 
         seriesPairs = getExogenousSeriesIds(stockCode=stockCode)
     except (ImportError, KeyError):
@@ -2156,7 +2156,7 @@ def calcRevenueDirection(company, *, basePeriod: str | None = None) -> dict | No
     _getSectorKey(company)
     industry = None
     try:
-        from dartlab.core.cross.exogenousAxes import _lookupFromKindList
+        from dartlab.gather.exogenousAxes import _lookupFromKindList
 
         industry, _ = _lookupFromKindList(_getStockCode(company) or "")
     except (ImportError, TypeError):

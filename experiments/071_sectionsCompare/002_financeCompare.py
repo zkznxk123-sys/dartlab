@@ -82,7 +82,7 @@ def financeCompare():
             if not latestAnnual:
                 latestAnnual = commonPeriods[:3]
 
-            print(f"\n--- ratio 기간 커버리지 ---")
+            print("\n--- ratio 기간 커버리지 ---")
             print(f"  {nameA} 기간: {len(periodsA)}")
             print(f"  {nameB} 기간: {len(periodsB)}")
             print(f"  공통 기간: {len(commonPeriods)}")
@@ -93,7 +93,7 @@ def financeCompare():
             itemsB = set(rB["항목"].to_list())
             commonItems = sorted(itemsA & itemsB)
 
-            print(f"\n--- ratio 항목 비교 ---")
+            print("\n--- ratio 항목 비교 ---")
             print(f"  {nameA} 항목: {len(itemsA)}")
             print(f"  {nameB} 항목: {len(itemsB)}")
             print(f"  공통 항목: {len(commonItems)}")
@@ -139,7 +139,7 @@ def financeCompare():
                     print(f"{catA:<10} {item:<20} {aStr:>14} {bStr:>14} {dStr:>12}")
 
         # ── 2. BS/IS/CF 계정 교집합 ──
-        print(f"\n--- BS/IS/CF 계정 교집합 ---")
+        print("\n--- BS/IS/CF 계정 교집합 ---")
         for sheet in ["BS", "IS", "CF"]:
             dfA = getattr(cA.finance, sheet, None)
             dfB = getattr(cB.finance, sheet, None)

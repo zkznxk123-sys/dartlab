@@ -336,7 +336,7 @@ def compute_net_return() -> pl.DataFrame:
     print(f"\n모순형 (배당+최근증자): {contra}개 ({contra/total*100:.1f}%)")
 
     # 조합 패턴
-    print(f"\n=== 상세 패턴 ===")
+    print("\n=== 상세 패턴 ===")
     patterns = {
         "배당O + 자사주O + 증자X": (True, True, False),
         "배당O + 자사주X + 증자X": (True, False, False),

@@ -38,9 +38,7 @@
 
 from __future__ import annotations
 
-import re
 import time
-from collections import defaultdict
 
 import polars as pl
 
@@ -282,7 +280,7 @@ if __name__ == "__main__":
             latencies.append(time.time() - t0)
 
     latencies.sort()
-    print(f"\n=== 속도 (100회) ===")
+    print("\n=== 속도 (100회) ===")
     print(f"평균: {np.mean(latencies)*1000:.0f}ms")
     print(f"p50:  {latencies[len(latencies)//2]*1000:.0f}ms")
     print(f"p95:  {latencies[int(len(latencies)*0.95)]*1000:.0f}ms")

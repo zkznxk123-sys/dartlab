@@ -158,7 +158,7 @@ def main():
             "auditSafePct": round(safe / len(severe_new) * 100, 1),
             "verdict": "유효" if safe >= 10 else "미달",
         }
-        print(f"--- 횡령+배임+과징금 합산 ---")
+        print("--- 횡령+배임+과징금 합산 ---")
         print(f"  신규: {len(severe_new)}, audit 안전: {safe} ({results['횡령+배임+과징금_합산']['auditSafePct']}%)")
         print(f"  판정: {results['횡령+배임+과징금_합산']['verdict']}")
 

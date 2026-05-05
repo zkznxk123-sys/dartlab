@@ -155,7 +155,7 @@ def main():
     print(f"파싱 실패: {failCount}/{total}")
 
     if failList:
-        print(f"\n실패 목록:")
+        print("\n실패 목록:")
         for code, name, reason in failList:
             print(f"  [{code}] {name}: {reason}")
 

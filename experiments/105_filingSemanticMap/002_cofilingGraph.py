@@ -42,14 +42,13 @@
 from __future__ import annotations
 
 import math
-from collections import Counter, defaultdict
-from itertools import combinations
-
-import polars as pl
-
 import re
 import sys
+from collections import Counter, defaultdict
+from itertools import combinations
 from pathlib import Path
+
+import polars as pl
 
 # 프로젝트 루트 추가
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -174,7 +173,7 @@ if __name__ == "__main__":
 
     # 3. 그래프 구축
     graph = buildGraph(pmiResults, threshold=2.0)
-    print(f"\n=== 그래프 (PMI >= 2.0) ===")
+    print("\n=== 그래프 (PMI >= 2.0) ===")
     print(f"노드: {len(graph)}")
     totalEdges = sum(len(edges) for edges in graph.values()) // 2
     print(f"엣지: {totalEdges}")

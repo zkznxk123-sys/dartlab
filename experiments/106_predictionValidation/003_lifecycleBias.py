@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import gc
 import json
-import math
 import sys
 from collections import defaultdict
 from datetime import datetime
@@ -359,7 +358,7 @@ def main():
         print(f"  {stratNames[s]:<10s} {acc:>7.1f}% {correct:>5d}/{n}")
 
     # 방향별 breakdown
-    print(f"\n--- 실제 방향별 정확도 ---")
+    print("\n--- 실제 방향별 정확도 ---")
     for d in ["up", "down", "flat"]:
         subset = [r for r in results if r["actualDir"] == d]
         if not subset:
@@ -371,7 +370,7 @@ def main():
             print(f"    {stratNames[s]:<10s} {acc:>7.1f}%")
 
     # 메트릭별
-    print(f"\n--- 메트릭별 정확도 ---")
+    print("\n--- 메트릭별 정확도 ---")
     for m in ["revenue", "operatingIncome"]:
         subset = [r for r in results if r["metric"] == m]
         if not subset:
@@ -383,7 +382,7 @@ def main():
             print(f"    {stratNames[s]:<10s} {acc:>7.1f}%")
 
     # 현재 방향별 (어떤 상태에서 출발했는가)
-    print(f"\n--- 출발 방향별 정확도 ---")
+    print("\n--- 출발 방향별 정확도 ---")
     for d in ["up", "down", "flat"]:
         subset = [r for r in results if r["dirCurrent"] == d]
         if not subset:

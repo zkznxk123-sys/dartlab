@@ -4,7 +4,6 @@
 테이블 형태인지, 변동표인지, 단순 목록인지 분류.
 """
 
-import os
 import sys
 
 sys.path.insert(0, "src")
@@ -55,6 +54,6 @@ if __name__ == "__main__":
 
             print(f"\n  [{code}] {corpName}")
             print(f"    총 {len(lines)}줄, 테이블 {len(tableLines)}줄, 텍스트 {len(textLines)}줄")
-            print(f"    미리보기 (첫 300자):")
+            print("    미리보기 (첫 300자):")
             preview = section[:300].replace("\n", "\n    ")
             print(f"    {preview}")

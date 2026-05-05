@@ -280,6 +280,6 @@ if __name__ == "__main__":
     for st, count in allStructCounts.most_common():
         print(f"  {st:15s}: {count:5d} ({count/total*100:5.1f}%)")
 
-    print(f"\n단위 분포 (상위 15):")
+    print("\n단위 분포 (상위 15):")
     for unit, count in allUnitCounts.most_common(15):
         print(f"  [{count:4d}] {unit}")

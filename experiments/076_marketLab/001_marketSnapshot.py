@@ -81,8 +81,8 @@ def collectMarketSnapshot(*, maxCompanies: int | None = None, verbose: bool = Tr
     finance parquet를 직접 로드하여 Company 생성 오버헤드(docs 다운로드)를 회피.
     """
     import dartlab
-    from dartlab.core.sector.classifier import classify
     from dartlab.analysis.financial.ratios import calcRatios
+    from dartlab.core.sector.classifier import classify
     from dartlab.providers.dart.finance.pivot import buildTimeseries
 
     kindDf = dartlab.listing()
@@ -167,7 +167,7 @@ def collectMarketSnapshot(*, maxCompanies: int | None = None, verbose: bool = Tr
         print(f"finance 없음: {len(noFinance)} ({len(noFinance)/len(codes)*100:.1f}%)")
 
         # 비율별 커버리지
-        print(f"\n비율별 커버리지 (non-null %):")
+        print("\n비율별 커버리지 (non-null %):")
         for f in ["roe", "debtRatio", "operatingMargin", "revenueGrowth", "currentRatio",
                    "fcf", "totalAssetTurnover", "per", "grossMargin", "netMargin",
                    "revenueTTM", "totalAssets"]:
@@ -210,18 +210,18 @@ if __name__ == "__main__":
     path = saveSnapshot(df)
 
     # 요약 통계
-    print(f"\n=== 요약 통계 ===")
+    print("\n=== 요약 통계 ===")
     print(f"총 종목: {df.shape[0]}")
     print(f"총 컬럼: {df.shape[1]}")
 
     # 섹터별 종목 수
     if "sector" in df.columns:
         sectorCounts = df.group_by("sector").len().sort("len", descending=True)
-        print(f"\n섹터별 종목 수:")
+        print("\n섹터별 종목 수:")
         print(sectorCounts)
 
     # 핵심 비율 기초통계
-    print(f"\n핵심 비율 기초통계:")
+    print("\n핵심 비율 기초통계:")
     for f in ["roe", "debtRatio", "operatingMargin", "revenueGrowth", "currentRatio"]:
         if f in df.columns:
             col = df[f].drop_nulls()

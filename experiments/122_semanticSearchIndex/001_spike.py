@@ -144,8 +144,8 @@ def _load_model():
 
 def _bm25_search(docs: list[str], query: str, top_k: int = 5) -> list[int]:
     """간단 BM25 단순 파이썬. 속도보다 비교 baseline 목적."""
-    from collections import Counter
     import math
+    from collections import Counter
 
     tokenized = [d.split() for d in docs]
     n = len(tokenized)

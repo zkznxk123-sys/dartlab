@@ -278,7 +278,7 @@ def _printResults(df: pl.DataFrame) -> None:
                       (f" 외 {len(members)-5}사" if len(members) > 5 else ""))
 
     # 유효 데이터 비율
-    print(f"\n[유효 데이터]")
+    print("\n[유효 데이터]")
     for col in ["dso", "dio", "dpo", "ccc", "opcfMargin"]:
         n = df[col].drop_nulls().len()
         print(f"  {col:15s}: {n}/{len(df)}")

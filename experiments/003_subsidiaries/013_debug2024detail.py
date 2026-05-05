@@ -4,7 +4,6 @@
 - 횡전개(기업명=열): 네이버, POSCO일부, SK하이닉스일부
 - 일반 테이블: 삼성전자, 현대차, LG전자, 카카오, 삼성SDI, LG에너지
 """
-import re
 from pathlib import Path
 
 import polars as pl
@@ -126,7 +125,7 @@ if section:
         p(f"    {sm['항목']}: 당기={sm['당기']} 전기={sm['전기']}")
 
     # 투자현황 테이블 구간 - 전기/당기 별로 별도 테이블
-    p(f"\n  투자현황 가능 구간:")
+    p("\n  투자현황 가능 구간:")
     for i, cells in enumerate(rows):
         if len(cells) >= 4:
             cellStr = " ".join(cells)

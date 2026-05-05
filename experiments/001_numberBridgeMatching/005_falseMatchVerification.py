@@ -53,12 +53,9 @@
 """
 
 import io
-import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-
-import polars as pl
 
 # Windows 콘솔 UTF-8
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -348,7 +345,7 @@ def main():
 
         # ─── 검증 A: 이름 일치율 ───
         nameStats = verifyNameConsistency(companyPairs)
-        print(f"\n  [검증 A] 이름 일치율:")
+        print("\n  [검증 A] 이름 일치율:")
         print(f"    이름 완전 일치 (1.0): {nameStats['exact_name']}개 ({nameStats['exact_name']/nameStats['total']*100:.1f}%)")
         print(f"    높은 유사도 (0.8~1.0): {nameStats['high_sim']}개 ({nameStats['high_sim']/nameStats['total']*100:.1f}%)")
         print(f"    중간 유사도 (0.6~0.8): {nameStats['medium_sim']}개 ({nameStats['medium_sim']/nameStats['total']*100:.1f}%)")
@@ -366,7 +363,7 @@ def main():
             if len(suspicious) > 10:
                 print(f"    ... 외 {len(suspicious)-10}건")
 
-            print(f"\n    유형 분류:")
+            print("\n    유형 분류:")
             for cat, items in categories.items():
                 catLabels = {
                     "zero_amount": "제로/소액",
@@ -388,7 +385,7 @@ def main():
             totalNotVerifiable = sum(r["notVerifiable"] for r in crossResults)
             totalCheck = totalVerified + totalConsistent + totalContradicted
 
-            print(f"\n  [검증 B] 전전기 교차 검증:")
+            print("\n  [검증 B] 전전기 교차 검증:")
             print(f"    검증됨 (두 경로 일치): {totalVerified}건")
             print(f"    일관됨 (유사 계정): {totalConsistent}건")
             print(f"    모순됨 (다른 계정): {totalContradicted}건")
@@ -409,7 +406,7 @@ def main():
 
     # 이름 일치율 종합
     globalNameStats = verifyNameConsistency(globalPairs)
-    print(f"\n[종합 A] 이름 일치율 분포:")
+    print("\n[종합 A] 이름 일치율 분포:")
     print(f"  이름 완전 일치 (1.0): {globalNameStats['exact_name']}개 ({globalNameStats['exact_name']/totalPairs*100:.1f}%)")
     print(f"  높은 유사도 (0.8+): {globalNameStats['exact_name'] + globalNameStats['high_sim']}개 ({(globalNameStats['exact_name']+globalNameStats['high_sim'])/totalPairs*100:.1f}%)")
     print(f"  중간 유사도 (0.6~0.8): {globalNameStats['medium_sim']}개 ({globalNameStats['medium_sim']/totalPairs*100:.1f}%)")
@@ -426,7 +423,7 @@ def main():
         totalNV = sum(r["notVerifiable"] for r in globalCrossResults)
         totalCheck = totalV + totalC + totalX
 
-        print(f"\n[종합 B] 전전기 교차 검증:")
+        print("\n[종합 B] 전전기 교차 검증:")
         print(f"  검증됨: {totalV}건, 일관됨: {totalC}건, 모순됨: {totalX}건, 불가: {totalNV}건")
         if totalCheck > 0:
             print(f"  → 교차 검증 통과율: {(totalV+totalC)/totalCheck:.1%} ({totalV+totalC}/{totalCheck})")
@@ -434,7 +431,7 @@ def main():
 
     # 오매칭 유형 종합
     allSuspicious, allCategories = classifyFalseMatches(globalPairs)
-    print(f"\n[종합 C] 의심 오매칭 유형 분류 (이름 유사도 < 0.3):")
+    print("\n[종합 C] 의심 오매칭 유형 분류 (이름 유사도 < 0.3):")
     print(f"  총 {len(allSuspicious)}건 / {totalPairs}건 = {len(allSuspicious)/totalPairs*100:.2f}%")
     catLabels = {
         "zero_amount": "제로/소액",
@@ -449,7 +446,7 @@ def main():
 
     # 금액 범위별 오매칭률
     amountResults = analyzeByAmountRange(globalPairs)
-    print(f"\n[종합 D] 금액 범위별 분석:")
+    print("\n[종합 D] 금액 범위별 분석:")
     print(f"  {'범위':<15} {'총 쌍':>6} {'이름일치':>8} {'의심':>6} {'오매칭률':>8}")
     print(f"  {'-'*45}")
     for label, total, nameMatch, sus, rate in amountResults:

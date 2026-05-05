@@ -84,7 +84,7 @@ def main():
     print(f"  처리 시간: {elapsed*1000:.1f}ms")
 
     # 4. 결과 구조 확인
-    print(f"\n--- 결과 요약 ---")
+    print("\n--- 결과 요약 ---")
     print(f"  topic: {doc['topic']}")
     print(f"  basePeriod: {doc['basePeriod']}")
     print(f"  comparePeriod: {doc['comparePeriod']}")
@@ -132,19 +132,19 @@ def main():
     # 7. JSON 직렬화 확인
     try:
         jsonStr = json.dumps(doc, ensure_ascii=False)
-        print(f"\n--- JSON 직렬화 ---")
+        print("\n--- JSON 직렬화 ---")
         print(f"  성공: {len(jsonStr):,}bytes")
     except (TypeError, ValueError) as e:
-        print(f"\n--- JSON 직렬화 실패 ---")
+        print("\n--- JSON 직렬화 실패 ---")
         print(f"  {e}")
 
     # 8. 단독 뷰 (compare 없음)
-    print(f"\n--- 단독 뷰 (compare 없음) ---")
+    print("\n--- 단독 뷰 (compare 없음) ---")
     docSingle = viewer(sec, testTopic, basePeriod, None)
     print(f"  blocks: {len(docSingle['blocks'])}, summary: {docSingle['summary']}")
 
     # 9. 성능 요약
-    print(f"\n=== 성능 요약 ===")
+    print("\n=== 성능 요약 ===")
     print(f"  Company 생성: {time.perf_counter() - t0:.2f}s")
     print(f"  viewerDocument: {elapsed*1000:.1f}ms (목표: <500ms)")
     print(f"  {'PASS' if elapsed < 0.5 else 'FAIL'}: 성능 기준")

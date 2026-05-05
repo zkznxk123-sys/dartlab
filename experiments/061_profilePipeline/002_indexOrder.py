@@ -43,8 +43,6 @@ import polars as pl
 
 def buildOrderedIndex(c):
     """문서 순서를 보존하는 index 구성."""
-    from dartlab.providers.dart.docs.sections.chunker import parseMajorNum
-    from dartlab.providers.dart.docs.sections.runtime import chapterFromMajorNum
 
     rows = []
     _CHAPTER_ORDER = {

@@ -140,11 +140,11 @@ if __name__ == "__main__":
 
         print(f"  shape: {df.shape}")
         print(f"  columns: {df.columns}")
-        print(f"  dtypes:")
+        print("  dtypes:")
         for c in df.columns:
             print(f"    {c}: {df[c].dtype}")
 
-        print(f"\n  sample (latest 3 rows):")
+        print("\n  sample (latest 3 rows):")
         latest = df.tail(3)
         for row in latest.iter_rows(named=True):
             print(f"    {row}")

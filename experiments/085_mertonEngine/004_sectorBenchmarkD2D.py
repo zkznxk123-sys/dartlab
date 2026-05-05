@@ -44,6 +44,7 @@
 """
 
 import sys
+
 sys.path.insert(0, "src")
 
 from dartlab.credit.merton import solveMerton

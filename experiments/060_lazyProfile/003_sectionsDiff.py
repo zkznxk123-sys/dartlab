@@ -81,7 +81,6 @@ def computeDiff(sections):
 
 
 def main():
-    import polars as pl
 
     from dartlab.providers.dart.company import Company
 
@@ -113,7 +112,7 @@ def main():
 
     print(f"\n... (총 {len(summaries)}개 topic)")
 
-    print(f"\n가장 자주 변하는 topic Top 10:")
+    print("\n가장 자주 변하는 topic Top 10:")
     print("-" * 70)
     for s in summaries[:10]:
         topic = s["topic"]
@@ -124,7 +123,7 @@ def main():
             sign = "+" if lenDiff > 0 else ""
             print(f"    {d['from']} → {d['to']}: {d['prevLen']:,}자 → {d['curLen']:,}자 ({sign}{lenDiff:,})")
 
-    print(f"\n\n안정적인 topic (변화 없음):")
+    print("\n\n안정적인 topic (변화 없음):")
     stable = [s for s in summaries if s["prevLen"] == 0]
     print(f"  {len(stable)}개: {[s['topic'] for s in stable[:10]]}")
 

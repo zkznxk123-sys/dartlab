@@ -525,7 +525,7 @@ def main():
             print(f"  매칭 가능 행: {both.height}개, 유사도 평균: {sum(allSims)/len(allSims):.1%}")
 
     # 총 텍스트 볼륨
-    print(f"\n총 텍스트 볼륨:")
+    print("\n총 텍스트 볼륨:")
     for label, df, pcols in [
         ("collector", collSections, periodCols),
         ("ZIP_v2", zipV2Sections, v2PeriodCols),

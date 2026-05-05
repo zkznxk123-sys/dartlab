@@ -275,7 +275,7 @@ def evaluate():
     print("=" * 80)
     print(f"\n  1순위: {ranked[0][0]} (가중합계 {ranked[0][1]})")
     print(f"  차선:  {ranked[1][0]} (가중합계 {ranked[1][1]})")
-    print(f"\n  기각:")
+    print("\n  기각:")
     for lib, score in ranked[2:]:
         print(f"    - {lib} ({score})")
 

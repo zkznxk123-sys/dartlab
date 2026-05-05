@@ -66,11 +66,8 @@ from dartlab.providers.dart.docs.sections._common import (
     detectContentCol,
     sortPeriods,
 )
-from dartlab.providers.dart.docs.sections.chunker import parseMajorNum
-from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSectionPrefix
 from dartlab.providers.dart.docs.sections.pipeline import (
     _expandStructuredRows,
-    _periodCadence,
     _reportRowsToTopicRows,
     _rowCadenceMeta,
     _splitContentBlocks,
@@ -79,7 +76,6 @@ from dartlab.providers.dart.docs.sections.pipeline import (
 from dartlab.providers.dart.docs.sections.runtime import (
     applyProjections,
     chapterTeacherTopics,
-    projectionSuppressedTopics,
 )
 from dartlab.providers.dart.docs.sections.textStructure import parseTextStructureWithState
 

@@ -187,7 +187,7 @@ def run():
     # 요약
     total = len([c for c, _ in TARGET_CODES if (DATA_DIR / f"{c}.parquet").exists()])
     print(f"\n{'=' * 70}")
-    print(f"  요약")
+    print("  요약")
     print(f"{'=' * 70}")
     print(f"  대상 종목: {total}개")
     print(f"  수출/해외 비중 추출: {exportFound}/{total} ({exportFound/total:.0%})")

@@ -237,6 +237,6 @@ if __name__ == "__main__":
     if mh:
         print(f"  years: {mh['years']}")
         print(f"  totalShareRatio: {mh['totalShareRatio']}")
-        print(f"  latestTopHolders:")
+        print("  latestTopHolders:")
         for h in mh["latestTopHolders"]:
             print(f"    {h['name']} ({h['relate']}): {h['ratio']}%")

@@ -268,7 +268,7 @@ def run():
 
     # 종합
     print(f"\n{'=' * 70}")
-    print(f"  종합 비교")
+    print("  종합 비교")
     print(f"{'=' * 70}")
     if allHardErrors:
         totalHardMAE = np.mean(allHardErrors)
@@ -278,10 +278,10 @@ def run():
               f"{abs(totalEmpMAE - totalHardMAE):.1f}%p")
 
         # 가설 검증
-        print(f"\n  가설 검증:")
+        print("\n  가설 검증:")
 
         # 가설1: 2020 경기민감 > 방어적 하락
-        print(f"\n  가설1 (2020 코로나: 경기민감 > 방어적 하락):")
+        print("\n  가설1 (2020 코로나: 경기민감 > 방어적 하락):")
         for sector in ["반도체", "자동차", "유통", "식품", "통신"]:
             revs = sectorRevenues.get(sector, {})
             prev = revs.get("2019")
@@ -292,7 +292,7 @@ def run():
                 print(f"    {sector:12s} ({tag}): {g:+.1f}%")
 
         # 가설2: 2022 내수 > 수출 타격
-        print(f"\n  가설2 (2022 금리인상: 내수 > 수출 타격):")
+        print("\n  가설2 (2022 금리인상: 내수 > 수출 타격):")
         for sector in ["유통", "식품", "반도체", "자동차"]:
             revs = sectorRevenues.get(sector, {})
             prev = revs.get("2021")

@@ -218,7 +218,7 @@ def run():
     tTotal = time.time() - t0
     allJaccards = np.concatenate(list(pairJaccards.values()))
     print(f"\n{'=' * 70}")
-    print(f"  요약")
+    print("  요약")
     print(f"{'=' * 70}")
     print(f"  공통 종목: {len(commonCodes)}개")
     print(f"  전체 Jaccard 평균: {allJaccards.mean():.3f}")

@@ -73,7 +73,7 @@ def selectModels(company: Any, *, lifeCyclePhase: str | None = None) -> dict:
     """
     template = None
     try:
-        from dartlab.core.cross.companyType import detectTemplate
+        from dartlab.analysis.financial.companyType import detectTemplate
 
         template = detectTemplate(company)
     except (ImportError, AttributeError):

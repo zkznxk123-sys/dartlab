@@ -201,7 +201,7 @@ def test_001_failures():
     fp1 = TableFingerprint(t2024)
     fp2 = TableFingerprint(t2025)
     sim = fingerprintSimilarity(fp1, fp2)
-    print(f"\n  [테스트 1: 컬럼 추가 (3→4열)]")
+    print("\n  [테스트 1: 컬럼 추가 (3→4열)]")
     print(f"    2024: {fp1}  프로필={fp1.profile}")
     print(f"    2025: {fp2}  프로필={fp2.profile}")
     print(f"    유사도: {sim:.4f}  (001: 0.6768)")
@@ -222,7 +222,7 @@ def test_001_failures():
     fp_dense = TableFingerprint(t_dense)
     fp_sparse = TableFingerprint(t_sparse)
     sim8 = fingerprintSimilarity(fp_dense, fp_sparse)
-    print(f"\n  [테스트 8: sparse vs dense]")
+    print("\n  [테스트 8: sparse vs dense]")
     print(f"    Dense: {fp_dense}  sig={fp_dense.signature}")
     print(f"    Sparse: {fp_sparse}  sig={fp_sparse.signature}")
     print(f"    유사도: {sim8:.4f}  (001: 0.4736)")
@@ -242,7 +242,7 @@ def test_001_failures():
     fp_comp = TableFingerprint(t_comp)
     fp_chg = TableFingerprint(t_chg)
     sim_diff = fingerprintSimilarity(fp_comp, fp_chg)
-    print(f"\n  [보수 vs 변동 (다른 구조)]")
+    print("\n  [보수 vs 변동 (다른 구조)]")
     print(f"    보수: {fp_comp}  sig={fp_comp.signature}")
     print(f"    변동: {fp_chg}  sig={fp_chg.signature}")
     print(f"    유사도: {sim_diff:.4f}  (001: 0.0000)")
@@ -311,7 +311,7 @@ def test_real_data():
 
             results.append((topic, avgSim, isSame, len(fingerprints)))
 
-        print(f"\n  핑거프린트 결과 (상위 80 topics):")
+        print("\n  핑거프린트 결과 (상위 80 topics):")
         print(f"    같은 구조 판정: {sameCount}")
         print(f"    다른 구조 판정: {diffCount}")
 
@@ -323,13 +323,13 @@ def test_real_data():
                 print(f"    - {topic}: sim={sim:.3f}  ({nPeriods} periods)")
 
         # 001 대비 개선 확인
-        print(f"\n  001 결과: 같은 31, 다른 6 (50 topics)")
+        print("\n  001 결과: 같은 31, 다른 6 (50 topics)")
         print(f"  002 결과: 같은 {sameCount}, 다른 {diffCount} (80 topics)")
 
         # 경계선 케이스 (0.6~0.8)
         borderline = [r for r in results if 0.6 <= r[1] < 0.8]
         if borderline:
-            print(f"\n  경계선 케이스 (0.6~0.8):")
+            print("\n  경계선 케이스 (0.6~0.8):")
             for topic, sim, isSame, nPeriods in borderline:
                 print(f"    - {topic}: sim={sim:.3f}  판정={'같음' if isSame else '다름'}  ({nPeriods} periods)")
 

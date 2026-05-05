@@ -328,7 +328,7 @@ def run():
     # 7. 요약
     tTotal = time.time() - t0
     print(f"\n{'=' * 70}")
-    print(f"  요약")
+    print("  요약")
     print(f"{'=' * 70}")
     print(f"  매출 데이터 보유 종목: {len(growthMap)}개")
     pArr = np.array(peerCorrs)

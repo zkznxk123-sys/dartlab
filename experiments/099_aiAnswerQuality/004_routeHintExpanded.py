@@ -315,17 +315,17 @@ def main():
     print(f"\n{'=' * 60}")
     print("결과 비교")
     print(f"{'=' * 60}")
-    print(f"\n| 지표 | Baseline | Hint | 변화 |")
-    print(f"|------|---------|------|------|")
+    print("\n| 지표 | Baseline | Hint | 변화 |")
+    print("|------|---------|------|------|")
     for key in ["nameAccuracy", "paramAccuracy"]:
         b = baselineScore[key]
         h = hintScore[key]
         delta = h - b
         print(f"| {key} | {b:.1%} | {h:.1%} | {delta:+.1%} |")
 
-    print(f"\n### 상세 tool 호출 비교")
-    print(f"| topic | expected | baseline tools | hint tools | B답변 | H답변 |")
-    print(f"|-------|----------|---------------|------------|------|------|")
+    print("\n### 상세 tool 호출 비교")
+    print("| topic | expected | baseline tools | hint tools | B답변 | H답변 |")
+    print("|-------|----------|---------------|------------|------|------|")
     for br, hr in zip(baselineResults, hintResults):
         topic = br["topic"]
         exp = [f"{n}({a})" for n, a in EXPECTED_TOOLS.get(topic, [])]

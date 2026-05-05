@@ -142,7 +142,7 @@ def main():
         print(f"{name:<35} {cnt:>8} {pct:>7.1f}%")
 
     if errors:
-        print(f"\n[ 에러 종목 (처음 20개) ]")
+        print("\n[ 에러 종목 (처음 20개) ]")
         for cik, msg in errors[:20]:
             print(f"  {cik}: {msg}")
         if len(errors) > 20:

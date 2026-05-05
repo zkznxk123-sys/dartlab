@@ -131,7 +131,7 @@ def main():
             p(f"\n  {year}: 테이블행 {len(rows)}개")
 
             # 첫 20행의 셀 수와 내용 출력
-            p(f"  --- 처음 20행 ---")
+            p("  --- 처음 20행 ---")
             for i, row in enumerate(rows[:20]):
                 cellPreview = " | ".join(row[:8])
                 if len(row) > 8:
@@ -139,7 +139,7 @@ def main():
                 p(f"    [{i:>3}] ({len(row)}셀) {cellPreview}")
 
             # 헤더 패턴 찾기: "기업명" or "기 업 명" 포함 행
-            p(f"  --- 헤더 후보 (기업명/지분율/당기/기초 키워드) ---")
+            p("  --- 헤더 후보 (기업명/지분율/당기/기초 키워드) ---")
             for i, row in enumerate(rows):
                 cellStr = " ".join(row)
                 if any(kw in cellStr for kw in ["기업명", "기 업 명", "지분율", "당기말", "당분기말", "기초"]):

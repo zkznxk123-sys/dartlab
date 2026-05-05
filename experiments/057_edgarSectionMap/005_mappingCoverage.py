@@ -58,7 +58,7 @@ def main() -> None:
     )
 
     print("=" * 72)
-    print(f"057-005 sectionMappings 커버리지 검증")
+    print("057-005 sectionMappings 커버리지 검증")
     print(f"docs files: {len(files)}")
     print(f"total rows: {allDf.height:,}")
     print(f"mappings in json: {len(mappings)}")

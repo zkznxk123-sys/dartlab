@@ -12,7 +12,7 @@ sys.path.insert(0, "src")
 from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection
 from dartlab.core.reportSelector import selectReport
-from dartlab.core.tableParser import detectUnit, extractAccounts, extractTables
+from dartlab.core.tableParser import detectUnit, extractTables
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
 
@@ -112,7 +112,7 @@ if __name__ == "__main__":
                 print(f"  미리보기: {section[:200]}")
 
     total = hasSection
-    print(f"\n=== 재고자산 파싱 결과 ===")
+    print("\n=== 재고자산 파싱 결과 ===")
     print(f"섹션 있음: {hasSection}, 없음: {noSection}")
     print(f"파싱 성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}")

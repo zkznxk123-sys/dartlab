@@ -111,7 +111,7 @@ def auditDebt() -> dict:
     # 위험등급 분포
     if "위험등급" in cols:
         grades = df.filter(pl.col("위험등급").is_not_null()).group_by("위험등급").agg(pl.len().alias("n")).sort("n", descending=True)
-        print(f"\n  위험등급 분포:")
+        print("\n  위험등급 분포:")
         for row in grades.iter_rows(named=True):
             print(f"    {row['위험등급']}: {row['n']}사")
 
@@ -138,7 +138,7 @@ def auditDebt() -> dict:
 
 def auditSignal() -> dict:
     """signal 축 전수조사."""
-    from dartlab.scan.signal import scan_signal, KEYWORDS
+    from dartlab.scan.signal import KEYWORDS, scan_signal
 
     print("\n=== [P0] signal 축 품질 조사 ===")
 
@@ -169,14 +169,14 @@ def auditSignal() -> dict:
         # 연도별 커버리지
         if "year" in df.columns and "companies" in df.columns:
             yearly = df.group_by("year").agg(pl.col("companies").sum()).sort("year")
-            print(f"\n  연도별 기업수 합:")
+            print("\n  연도별 기업수 합:")
             for row in yearly.iter_rows(named=True):
                 print(f"    {row['year']}: {row['companies']}사")
 
         # 키워드별 총 언급수
         if "keyword" in df.columns and "totalMentions" in df.columns:
             topKw = df.group_by("keyword").agg(pl.col("totalMentions").sum().alias("mentions")).sort("mentions", descending=True).head(10)
-            print(f"\n  키워드 TOP 10:")
+            print("\n  키워드 TOP 10:")
             for row in topKw.iter_rows(named=True):
                 print(f"    {row['keyword']}: {row['mentions']}건")
     else:
@@ -268,7 +268,7 @@ def auditPeers() -> dict:
             except (ValueError, KeyError, ImportError):
                 failed += 1
 
-        print(f"\n  표본 50사 결과:")
+        print("\n  표본 50사 결과:")
         print(f"    분류 성공: {classified}사")
         print(f"    IT fallback 의심: {itFallback}사 ({itFallback/max(classified,1)*100:.1f}%)")
         print(f"    실패: {failed}사")
@@ -374,7 +374,7 @@ def auditRatio() -> dict:
 
 def auditScreen() -> dict:
     """screen 축 품질 조사 (빌드 성능 + 비율 null률 + preset 건수)."""
-    from dartlab.scan.screen.screen import screen, presets, benchmark, _buildMarketRatios, _RATIO_FIELDS
+    from dartlab.scan.screen.screen import _RATIO_FIELDS, _buildMarketRatios, benchmark, presets, screen
 
     print("\n=== [P1] screen 축 품질 조사 ===")
 
@@ -385,7 +385,7 @@ def auditScreen() -> dict:
     print(f"  빌드: {buildTime:.1f}s, {marketDf.height}종목")
 
     # 29개 비율 null률
-    print(f"\n  비율 null률 (상위 10):")
+    print("\n  비율 null률 (상위 10):")
     nullRates = {}
     for field in _RATIO_FIELDS:
         if field in marketDf.columns:
@@ -397,7 +397,7 @@ def auditScreen() -> dict:
         print(f"    {field}: {rate}%")
 
     # preset별 건수
-    print(f"\n  preset별 결과:")
+    print("\n  preset별 결과:")
     presetNames = presets()
     presetCounts = {}
     for name in presetNames:

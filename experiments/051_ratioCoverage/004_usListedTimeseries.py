@@ -161,12 +161,12 @@ def main():
         print(f"{name:<40} {cnt:>8} {pct:>7.1f}%{mark}")
 
     if warningCount:
-        print(f"\n[ 경고 분포 (상위 10개) ]")
+        print("\n[ 경고 분포 (상위 10개) ]")
         for w, cnt in sorted(warningCount.items(), key=lambda x: -x[1])[:10]:
             print(f"  {cnt:>5}건: {w}")
 
     if errors:
-        print(f"\n[ 에러 종목 (처음 20개) ]")
+        print("\n[ 에러 종목 (처음 20개) ]")
         for cik, msg in errors[:20]:
             print(f"  {cik}: {msg}")
         if len(errors) > 20:

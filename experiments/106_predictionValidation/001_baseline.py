@@ -24,7 +24,6 @@ from __future__ import annotations
 import argparse
 import gc
 import json
-import math
 import sys
 from collections import defaultdict
 from datetime import datetime
@@ -438,19 +437,19 @@ def main():
     print(f"OLS     방향 정확도: {summary['ols']['accuracy']}%")
     print(f"OLS     MAE 평균:    {summary['ols']['maeAvg']}%p")
 
-    print(f"\n--- 실제 방향별 ---")
+    print("\n--- 실제 방향별 ---")
     for d, info in dirBreakdown.items():
         print(f"  {d:6s}: n={info['count']:5d}  mom={info['momAcc']:5.1f}%  ols={info['olsAcc']:5.1f}%  mae={info['olsMae']:.1f}%p")
 
-    print(f"\n--- 메트릭별 ---")
+    print("\n--- 메트릭별 ---")
     for m, info in metricBreakdown.items():
         print(f"  {m:20s}: n={info['count']:5d}  mom={info['momAcc']:5.1f}%  ols={info['olsAcc']:5.1f}%  mae={info['olsMae']:.1f}%p")
 
-    print(f"\n--- 생애주기별 ---")
+    print("\n--- 생애주기별 ---")
     for lc, info in lifecycleBreakdown.items():
         print(f"  {lc:15s}: n={info['count']:5d}  mom={info['momAcc']:5.1f}%  ols={info['olsAcc']:5.1f}%  mae={info['olsMae']:.1f}%p")
 
-    print(f"\n--- 테스트 연도별 ---")
+    print("\n--- 테스트 연도별 ---")
     for y, info in yearBreakdown.items():
         print(f"  {y}: n={info['count']:5d}  mom={info['momAcc']:5.1f}%  ols={info['olsAcc']:5.1f}%  mae={info['olsMae']:.1f}%p")
 

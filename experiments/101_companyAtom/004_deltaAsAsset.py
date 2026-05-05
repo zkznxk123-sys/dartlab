@@ -36,9 +36,9 @@
 실험일: 2026-03-27
 """
 
-import sys
 import hashlib
 import re
+import sys
 from collections import defaultdict
 
 sys.path.insert(0, "c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src")
@@ -205,7 +205,7 @@ def run():
     print("=" * 70)
     totalDeltaBytes = sum(d["sizeB"] for d in allDeltas)
     originalBytes = 97.32 * 1024 * 1024  # 001에서 측정
-    print(f"  원본 텍스트: 97.32 MB")
+    print("  원본 텍스트: 97.32 MB")
     print(f"  변화 블록 텍스트만: {totalDeltaBytes / 1024 / 1024:.2f} MB")
     print(f"  비율: {totalDeltaBytes / originalBytes * 100:.1f}%")
     print(f"  → 전체의 {totalDeltaBytes / originalBytes * 100:.1f}%에 기업 변화의 100%가 담겨있다")

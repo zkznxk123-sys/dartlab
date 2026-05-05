@@ -246,7 +246,7 @@ def main():
             print(f"  매출: {r['baseRev_조']}조 vs {r['actualRev_조']}조 ({r['revDev']:+.1f}%)")
             print(f"  이익: {r['baseOI_조']}조 vs {r['actualOI_조']}조 ({r['oiDev']:+.1f}%)")
         else:
-            print(f"  분석 실패")
+            print("  분석 실패")
 
     # ── 요약 ──
     n = len(results)
@@ -288,7 +288,7 @@ def main():
     print(f"  이익 개선: {totalOiImproved}/{n}")
 
     # P2: 재예측 정확도
-    print(f"\n  --- 분기 재예측 정확도 (매출, Q3 시점) ---")
+    print("\n  --- 분기 재예측 정확도 (매출, Q3 시점) ---")
     for r in results:
         rf = [x for x in r.get("reforecasts", []) if x["atQ"] == 3]
         if rf:

@@ -62,7 +62,7 @@ def diagnose(html: str, year: int):
 
     print(f"\n[HTML 크기] {len(html):,} bytes")
 
-    print(f"\n[1] HTML 원문에서 'Item' 검색 (대소문자 무시, 처음 30개):")
+    print("\n[1] HTML 원문에서 'Item' 검색 (대소문자 무시, 처음 30개):")
     itemRe = re.compile(r".{0,50}(?:Item|ITEM)\s+\d+[A-C]?.{0,50}", re.IGNORECASE)
     htmlMatches = itemRe.findall(html)
     for i, m in enumerate(htmlMatches[:30]):
@@ -81,7 +81,7 @@ def diagnose(html: str, year: int):
     lines = [line.strip() for line in text.splitlines()]
     text = "\n".join(line for line in lines if line)
 
-    print(f"\n[2] 텍스트 변환 후 'Item' 검색:")
+    print("\n[2] 텍스트 변환 후 'Item' 검색:")
     textItemRe = re.compile(
         r"^(.{0,10}(?:Item|ITEM)\s+\d+[A-C]?.{0,80})",
         re.MULTILINE | re.IGNORECASE,
@@ -93,7 +93,7 @@ def diagnose(html: str, year: int):
 
     print(f"\n  총 {len(textMatches)}개 매치")
 
-    print(f"\n[3] 정확한 Item 헤더 패턴 (줄 시작):")
+    print("\n[3] 정확한 Item 헤더 패턴 (줄 시작):")
     headerRe = re.compile(
         r"^((?:Item|ITEM)\s+\d+[A-C]?[\.\:\s\—\-]+[^\n]{3,80})",
         re.MULTILINE,
@@ -103,7 +103,7 @@ def diagnose(html: str, year: int):
         print(f"  [{i:2d}] {m.strip()[:120]}")
     print(f"\n  총 {len(headerMatches)}개 매치")
 
-    print(f"\n[4] 'PART' 패턴:")
+    print("\n[4] 'PART' 패턴:")
     partRe = re.compile(r"^(.{0,5}(?:PART|Part)\s+[IViv]+.{0,50})", re.MULTILINE)
     partMatches = partRe.findall(text)
     for m in partMatches[:10]:

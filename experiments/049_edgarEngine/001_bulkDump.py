@@ -244,7 +244,7 @@ def downloadBulk(edgarDir: Path, force: bool = False) -> Path:
     errors = [r for r in results if r.startswith("error")]
     noData = [r for r in results if r.startswith("no")]
 
-    print(f"\n변환 완료!")
+    print("\n변환 완료!")
     print(f"  성공: {len(completed)}")
     print(f"  데이터 없음: {len(noData)}")
     print(f"  에러: {len(errors)}")
@@ -307,7 +307,7 @@ def analyzeSample(financeDir: Path, tickerToCik: dict[str, str]):
             print(f"  fy 범위: {fyRange['fy'].min()} ~ {fyRange['fy'].max()}")
 
         fpCounts = df.group_by("fp").len().sort("len", descending=True)
-        print(f"  fp 분포:")
+        print("  fp 분포:")
         for row in fpCounts.head(8).iter_rows(named=True):
             print(f"    {row['fp']}: {row['len']}")
 
@@ -317,7 +317,7 @@ def analyzeSample(financeDir: Path, tickerToCik: dict[str, str]):
             "OperatingIncomeLoss", "CashAndCashEquivalentsAtCarryingValue",
         ]
         existingTags = usGaap.select("tag").unique().to_series().to_list()
-        print(f"  핵심 태그:")
+        print("  핵심 태그:")
         for tag in keyTags:
             mark = "O" if tag in existingTags else "X"
             count = usGaap.filter(pl.col("tag") == tag).height
@@ -338,7 +338,7 @@ def main():
 
     totalParquets = len(list(financeDir.glob("*.parquet")))
     totalSizeMb = sum(f.stat().st_size for f in financeDir.glob("*.parquet")) / 1024 / 1024
-    print(f"\n=== 전체 요약 ===")
+    print("\n=== 전체 요약 ===")
     print(f"  parquet 파일: {totalParquets}개")
     print(f"  전체 크기: {totalSizeMb:.0f} MB ({totalSizeMb/1024:.1f} GB)")
 

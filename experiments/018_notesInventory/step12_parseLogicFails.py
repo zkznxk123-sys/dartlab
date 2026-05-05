@@ -92,6 +92,6 @@ if __name__ == "__main__":
             allText = " ".join(str(c) for tbl in rawTables for c in tbl["headers"])
             allText += " " + " ".join(str(c) for tbl in rawTables for row in tbl["rows"] for c in row)
             if not hasPeriodText(allText):
-                print(f"    >>> 테이블 전체에 기간 키워드 없음 — 단일 시점 테이블")
+                print("    >>> 테이블 전체에 기간 키워드 없음 — 단일 시점 테이블")
             else:
-                print(f"    >>> 기간 키워드는 있으나 패턴 감지 실패")
+                print("    >>> 기간 키워드는 있으나 패턴 감지 실패")

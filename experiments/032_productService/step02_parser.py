@@ -287,7 +287,7 @@ def testSingle(stockCode: str):
     print(f"  단위: {result['unit']}, 제품수: {len(result['products'])}")
 
     if result["noData"]:
-        print(f"  → 해당사항 없음")
+        print("  → 해당사항 없음")
         return
 
     for p in result["products"][:8]:

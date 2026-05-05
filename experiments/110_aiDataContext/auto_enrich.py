@@ -11,7 +11,9 @@
 """
 
 from __future__ import annotations
+
 import sys
+
 sys.path.insert(0, "src")
 
 
@@ -279,8 +281,9 @@ def _format_number(value, field: str = "") -> str:
 def _get_peer_position(company) -> dict | None:
     """scan에서 업종 백분위 조회."""
     try:
-        import dartlab
         import polars as pl
+
+        import dartlab
         scan_df = dartlab.scan("profitability")
         stock_code = getattr(company, "stockCode", None)
         if scan_df is None or not stock_code:
@@ -324,32 +327,32 @@ def test_all_engines():
     # credit
     cr = c.credit("등급")
     enriched = auto_enrich(cr, label="credit/등급")
-    print(f"\n[credit/등급]")
+    print("\n[credit/등급]")
     print(f"  {enriched.get('oneLiner', '-')}")
 
     # quant
     qt = c.quant("종합")
     enriched = auto_enrich(qt, label="quant/종합")
-    print(f"\n[quant/종합]")
+    print("\n[quant/종합]")
     print(f"  {enriched.get('oneLiner', '-')}")
 
     # scan
     df = dartlab.scan("profitability")
     enriched = auto_enrich(df, label="scan/profitability")
-    print(f"\n[scan/profitability]")
+    print("\n[scan/profitability]")
     print(f"  {enriched.get('oneLiner', '-')}")
 
     # show
     df2 = c.show("IS")
     enriched = auto_enrich(df2, label="show/IS")
-    print(f"\n[show/IS]")
+    print("\n[show/IS]")
     print(f"  {enriched.get('oneLiner', '-')}")
 
     # macro
     try:
         m = dartlab.macro("사이클")
         enriched = auto_enrich(m, label="macro/사이클")
-        print(f"\n[macro/사이클]")
+        print("\n[macro/사이클]")
         print(f"  {enriched.get('oneLiner', '-')}")
     except Exception as e:
         print(f"\n[macro/사이클] SKIP: {e}")

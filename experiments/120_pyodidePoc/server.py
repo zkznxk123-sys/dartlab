@@ -1,6 +1,7 @@
 """POC 서버 — OAuth 콜백을 index.html로 리다이렉트."""
 import http.server
 
+
 class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         # /auth/callback?code=xxx → /?code=xxx 로 리다이렉트

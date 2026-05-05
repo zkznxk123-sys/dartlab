@@ -24,6 +24,7 @@ from __future__ import annotations
 import sys
 import traceback
 
+
 def runKr() -> dict:
     """KR 시총 sanity."""
     from dartlab.gather.marketCap import marketCap, marketCapSnapshot

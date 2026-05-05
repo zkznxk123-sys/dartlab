@@ -278,7 +278,7 @@ def analyze_edges(edges: pl.DataFrame) -> None:
     total_unique_targets = edges["to_name_norm"].n_unique()
     listed_unique_targets = listed["to_name_norm"].n_unique()
 
-    print(f"\n  피출자 상장사 매칭:")
+    print("\n  피출자 상장사 매칭:")
     print(f"    매칭된 법인명: {listed_unique_targets:,} / {total_unique_targets:,} ({listed_unique_targets/total_unique_targets:.1%})")
     print(f"    매칭된 엣지: {len(listed):,} / {len(edges):,} ({len(listed)/len(edges):.1%})")
 
@@ -303,7 +303,7 @@ def analyze_edges(edges: pl.DataFrame) -> None:
     mgmt = latest_listed.filter(pl.col("purpose") == "경영참여")
     print(f"\n  [{latest_year}년] 경영참여 + 상장사간: {len(mgmt):,}")
     if len(mgmt) > 0:
-        print(f"  상위 20개 엣지 (경영참여, 상장사간):")
+        print("  상위 20개 엣지 (경영참여, 상장사간):")
         top = mgmt.sort("ownership_pct", descending=True, nulls_last=True).head(20)
         for row in top.iter_rows(named=True):
             pct = f"{row['ownership_pct']:.1f}%" if row["ownership_pct"] is not None else "N/A"

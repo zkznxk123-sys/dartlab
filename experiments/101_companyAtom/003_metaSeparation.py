@@ -32,16 +32,15 @@
 실험일: 2026-03-27
 """
 
-import sys
 import hashlib
-import re
 import json
+import re
+import sys
 
 sys.path.insert(0, "c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src")
 
 
 def run():
-    import polars as pl
     import dartlab
 
     c = dartlab.Company("005930")
@@ -150,16 +149,16 @@ def run():
 
     totalAtomBytes = contentStoreBytes + indexBytes
 
-    print(f"  Content Store:")
+    print("  Content Store:")
     print(f"    고유 텍스트 블록: {len(contentStore)}개")
     print(f"    텍스트 용량: {contentStoreBytes / 1024 / 1024:.2f} MB")
     print()
-    print(f"  Atom Index:")
+    print("  Atom Index:")
     print(f"    행 수: {len(atomIndex)}")
     print(f"    인덱스 용량: {indexBytes / 1024 / 1024:.2f} MB")
     print()
     print(f"  Atom 총 용량: {totalAtomBytes / 1024 / 1024:.2f} MB")
-    print(f"  원본 텍스트: 97.32 MB")
+    print("  원본 텍스트: 97.32 MB")
     print(f"  원본 DataFrame: {fullMb:.2f} MB (Polars 내부 압축 포함)")
     print(f"  Atom vs 원본텍스트: {(1 - totalAtomBytes / (97.32 * 1024 * 1024)) * 100:.1f}% 절감")
     print()
@@ -174,7 +173,7 @@ def run():
         entry for entry in atomIndex
         if entry["topic"] == "businessOverview" and "2024" in entry["periods"]
     ]
-    print(f"  query: topic=businessOverview, period=2024")
+    print("  query: topic=businessOverview, period=2024")
     print(f"  매칭 블록: {len(results)}개")
     if results:
         firstHash = results[0]["periods"]["2024"]
@@ -193,7 +192,7 @@ def run():
             else:
                 changedBlocks += 1
 
-    print(f"  query: 2023→2024 변경 감지")
+    print("  query: 2023→2024 변경 감지")
     print(f"  변경됨: {changedBlocks} 블록")
     print(f"  동일: {unchangedBlocks} 블록")
     print(f"  변경률: {changedBlocks / max(changedBlocks + unchangedBlocks, 1) * 100:.1f}%")
@@ -205,8 +204,8 @@ def run():
     print("=" * 70)
     print(f"  Git의 .git/objects = Content Store ({len(contentStore)} objects)")
     print(f"  Git의 tree/commit = Atom Index ({len(atomIndex)} entries)")
-    print(f"  snapshot(period) = git checkout <commit>")
-    print(f"  diff(p1, p2) = git diff <c1> <c2>  — hash 비교만으로 즉시 감지")
+    print("  snapshot(period) = git checkout <commit>")
+    print("  diff(p1, p2) = git diff <c1> <c2>  — hash 비교만으로 즉시 감지")
 
 
 if __name__ == "__main__":

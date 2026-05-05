@@ -81,7 +81,7 @@ if __name__ == "__main__":
         for lineNum, content in itemLines[:40]:
             print(f"  L{lineNum:5d}: {content}")
 
-        print(f"\n처음 200줄:")
+        print("\n처음 200줄:")
         for i, line in enumerate(text.split("\n")[:200]):
             if line.strip():
                 print(f"  L{i:5d}: {line[:120]}")

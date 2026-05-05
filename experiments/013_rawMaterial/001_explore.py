@@ -38,7 +38,7 @@ for code, name in STOCKS:
 
     if sections.height == 0:
         allSections = report["section_title"].unique().sort().to_list()
-        print(f"  원재료/생산설비 섹션 없음")
+        print("  원재료/생산설비 섹션 없음")
         print(f"  전체 섹션: {allSections[:20]}")
         continue
 

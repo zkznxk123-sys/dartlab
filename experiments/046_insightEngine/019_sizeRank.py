@@ -51,8 +51,8 @@ from pathlib import Path
 from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.engines.financeEngine.pivot import buildAnnual
 from dartlab.engines.financeEngine.ratios import calcRatios
-from dartlab.gather.listing import getKindList
 from dartlab.engines.sectorEngine import classify
+from dartlab.gather.listing import getKindList
 
 
 def _financeExists(stockCode: str) -> bool:
@@ -227,16 +227,16 @@ def run():
     for sc, cnt in sizeCount.items():
         print(f"  {sc}: {cnt}종목 ({cnt/nRev*100:.1f}%)")
 
-    print(f"\n[섹터별 종목 수 (매출 기준)]")
+    print("\n[섹터별 종목 수 (매출 기준)]")
     for sector in sorted(sectorRevLists.keys()):
         n = len(sectorRevLists[sector])
         print(f"  {sector:<15} {n:>4}종목")
 
-    print(f"\n[매출 상위 20]")
+    print("\n[매출 상위 20]")
     for i, r in enumerate(revSorted[:20]):
         print(f"  {i+1:>3}. {r['name']:<15} {r['sector']:<10} {r['revenue']/1e8:>12,.0f}억")
 
-    print(f"\n[매출 성장률 상위 20 (3Y CAGR)]")
+    print("\n[매출 성장률 상위 20 (3Y CAGR)]")
     for i, r in enumerate(growthSorted[:20]):
         print(f"  {i+1:>3}. {r['name']:<15} {r['sector']:<10} {r['revenueGrowth3Y']:>7.1f}%")
 

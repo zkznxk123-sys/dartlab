@@ -274,7 +274,7 @@ if __name__ == "__main__":
             topicCounts[b["topic"]] += 1
 
     print(f"\n\n전체 sparse 블록: {len(allSparse)}")
-    print(f"\ntopic별:")
+    print("\ntopic별:")
     for topic, cnt in topicCounts.most_common(15):
         avgItems = sum(b["items"] for b in allSparse if b["topic"] == topic) / cnt
         avgFill = sum(b["fillRate"] for b in allSparse if b["topic"] == topic) / cnt
@@ -301,7 +301,7 @@ if __name__ == "__main__":
     print(f"\n\n전체 값 매칭 후보: {totalMerges}건")
 
     if mergeExamples:
-        print(f"\n항목명 불일치 유형 분석:")
+        print("\n항목명 불일치 유형 분석:")
         # 불일치 패턴 분류
         categories = Counter()
         for ex in mergeExamples:
@@ -318,8 +318,8 @@ if __name__ == "__main__":
         for cat, cnt in categories.most_common():
             print(f"  {cat}: {cnt}건")
 
-    print(f"\n\n=== 결론 ===")
+    print("\n\n=== 결론 ===")
     print(f"sparse 블록 {len(allSparse)}건 중 값 매칭 가능: {totalMerges}건")
     if len(allSparse) > 0:
         print(f"개선 잠재력: {totalMerges / len(allSparse) * 100:.1f}% (sparse 블록 대비)")
-        print(f"전체 수평화 대비: 미미 (sparse는 전체의 10.9%)")
+        print("전체 수평화 대비: 미미 (sparse는 전체의 10.9%)")

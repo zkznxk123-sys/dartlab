@@ -318,7 +318,7 @@ def run_experiment():
     print(f"  errors: {len(errors)}")
 
     if errors:
-        print(f"\n에러 목록:")
+        print("\n에러 목록:")
         for code, msg in errors[:20]:
             print(f"  {code}: {msg}")
 

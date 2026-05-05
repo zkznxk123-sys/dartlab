@@ -24,7 +24,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from dartlab.gather import getDefaultGather  # noqa: E402
 
-
 # ── NBER 기준일 (미국) ──
 # https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions
 # Peak = 확장 끝 → 침체 시작, Trough = 침체 끝 → 회복 시작

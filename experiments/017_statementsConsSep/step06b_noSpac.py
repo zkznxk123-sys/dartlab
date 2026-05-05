@@ -9,7 +9,7 @@ sys.path.insert(0, "src")
 import polars as pl
 
 from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
-from dartlab.core.reportSelector import parsePeriodKey, selectReport
+from dartlab.core.reportSelector import selectReport
 from dartlab.core.tableParser import extractAccounts
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
@@ -147,7 +147,7 @@ if __name__ == "__main__":
             ok += 1
 
     total = len(codes) - spacCount
-    print(f"=== SPAC 제외 커버리지 ===")
+    print("=== SPAC 제외 커버리지 ===")
     print(f"전체: {len(codes)}, SPAC: {spacCount}, 대상: {total}")
     print(f"성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}")
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     print(f"\n실질 커버리지 (보고서있는 기업): {ok}/{total - noReport} ({ok/(total-noReport)*100:.1f}%)")
 
     if failCodes:
-        print(f"\n실패 기업:")
+        print("\n실패 기업:")
         for code, name, noRep in failCodes:
             tag = "보고서없음" if noRep else "파싱실패"
             print(f"  [{code}] {name} ({tag})")

@@ -49,11 +49,11 @@
 import time
 from pathlib import Path
 
+import numpy as np
 import polars as pl
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import adjusted_rand_score
-import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 # ── 설정 ──
 DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "dart" / "docs"
@@ -253,7 +253,7 @@ def run():
     # 10. 요약
     tTotal = time.time() - t0
     print(f"\n{'=' * 70}")
-    print(f"  요약")
+    print("  요약")
     print(f"{'=' * 70}")
     print(f"  유효 종목: {len(corpus)}개")
     print(f"  TF-IDF features: {tfidfMatrix.shape[1]}개")

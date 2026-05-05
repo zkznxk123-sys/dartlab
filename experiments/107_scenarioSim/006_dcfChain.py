@@ -154,7 +154,7 @@ def main():
         print(f"  {label:16s} | {perShare1:>10,}원 | {dcf3['perShare']:>10,}원 | {diff:>+7,}원")
 
     # 역전 확인
-    print(f"\n  --- 역전 여부 확인 ---")
+    print("\n  --- 역전 여부 확인 ---")
     dcfResults = {}
     for label, growthPath, histWeight in scenarios:
         blendedGM = baseGM * (1 - histWeight) + ratios.gross_margin * histWeight

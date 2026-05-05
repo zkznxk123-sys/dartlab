@@ -1051,16 +1051,16 @@ def scanMultipleCompanies():
     print(f"매핑됨: {mapped:,} ({mapped/totalRows*100:.1f}%)")
     print(f"미매핑: {unmapped:,} ({unmapped/totalRows*100:.1f}%)")
 
-    print(f"\n--- 매핑된 변동사유 TOP 20 ---")
+    print("\n--- 매핑된 변동사유 TOP 20 ---")
     for cause, cnt in allCauses.most_common(20):
         if not cause.startswith("unmapped:"):
             print(f"  {cause:30s}: {cnt:>8,}행")
 
-    print(f"\n--- 미매핑 변동사유 TOP 30 ---")
+    print("\n--- 미매핑 변동사유 TOP 30 ---")
     for nm, cnt in unmappedCauses.most_common(30):
         print(f"  {nm}: {cnt:,}행")
 
-    print(f"\n--- 미매핑 자본항목 TOP 20 ---")
+    print("\n--- 미매핑 자본항목 TOP 20 ---")
     for d, cnt in unmappedDetails.most_common(20):
         print(f"  {d}: {cnt:,}행")
 

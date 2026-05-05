@@ -68,9 +68,9 @@ for code, name in STOCKS:
                         subSections.append(s[:60])
 
         print(f"\n  [{title}] — {len(lines)} lines, {tableCount} tables")
-        print(f"  서브섹션:")
+        print("  서브섹션:")
         for ss in subSections[:10]:
             print(f"    {ss}")
-        print(f"  테이블 헤더:")
+        print("  테이블 헤더:")
         for h in headers[:10]:
             print(f"    {h}")

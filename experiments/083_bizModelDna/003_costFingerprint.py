@@ -275,7 +275,7 @@ def runCostFingerprint(*, verbose: bool = True) -> pl.DataFrame:
                       f"자산={ai_val:5.1f}% 노동={li_val:5.1f}% → {quad}")
 
         # 유효 데이터 비율
-        print(f"\n[유효 데이터]")
+        print("\n[유효 데이터]")
         print(f"  assetIntensity:  {df['assetIntensity'].drop_nulls().len()}/{len(df)}")
         print(f"  laborIntensity:  {df['laborIntensity'].drop_nulls().len()}/{len(df)}")
         print(f"  headcount:       {df['headcount'].drop_nulls().len()}/{len(df)}")

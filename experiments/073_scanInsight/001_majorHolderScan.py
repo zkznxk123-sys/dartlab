@@ -165,7 +165,7 @@ def scan_major_holder() -> pl.DataFrame:
     # 지분율 분포 통계
     ratios = holder_top["지분율"].drop_nulls()
     if ratios.len() > 0:
-        print(f"\n=== 최대주주 지분율 분포 ===")
+        print("\n=== 최대주주 지분율 분포 ===")
         print(f"평균: {ratios.mean():.1f}%")
         print(f"중앙값: {ratios.median():.1f}%")
         print(f"최소: {ratios.min():.1f}%")
@@ -175,7 +175,7 @@ def scan_major_holder() -> pl.DataFrame:
 
         # 구간 분포
         bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-        print(f"\n=== 구간별 분포 ===")
+        print("\n=== 구간별 분포 ===")
         total = ratios.len()
         for i in range(len(bins) - 1):
             lo, hi = bins[i], bins[i + 1]
@@ -187,7 +187,7 @@ def scan_major_holder() -> pl.DataFrame:
         # 경영권 분류
         under20 = ratios.filter(ratios < 20).len()
         over50 = ratios.filter(ratios >= 50).len()
-        print(f"\n=== 경영권 분류 ===")
+        print("\n=== 경영권 분류 ===")
         print(f"20% 미만 (경영권 불안): {under20}개 ({under20/total*100:.1f}%)")
         print(f"20~50% (적정): {total - under20 - over50}개 ({(total-under20-over50)/total*100:.1f}%)")
         print(f"50% 이상 (과점): {over50}개 ({over50/total*100:.1f}%)")
@@ -234,20 +234,20 @@ def analyze_by_industry(holder_top: pl.DataFrame) -> None:
         .sort("평균지분율", descending=True)
     )
 
-    print(f"\n=== 업종별 최대주주 지분율 (5개 이상 업종) ===")
+    print("\n=== 업종별 최대주주 지분율 (5개 이상 업종) ===")
     print(industry_stats.head(15))
 
-    print(f"\n=== 지분율 낮은 업종 (경영권 분산) ===")
+    print("\n=== 지분율 낮은 업종 (경영권 분산) ===")
     print(industry_stats.tail(10))
 
     # 극단값: 지분율 90% 이상
     extreme_high = df.filter(pl.col("지분율") >= 90).sort("지분율", descending=True)
-    print(f"\n=== 지분율 90% 이상 (극단 과점) ===")
+    print("\n=== 지분율 90% 이상 (극단 과점) ===")
     print(extreme_high.head(10))
 
     # 극단값: 지분율 5% 미만
     extreme_low = df.filter(pl.col("지분율") < 5).sort("지분율")
-    print(f"\n=== 지분율 5% 미만 (극단 분산) ===")
+    print("\n=== 지분율 5% 미만 (극단 분산) ===")
     print(extreme_low.head(10))
 
 

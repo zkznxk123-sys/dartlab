@@ -103,7 +103,7 @@ def audit() -> None:
     total = full.shape[0]
     mappedCount = full.filter(pl.col("isMapped")).shape[0]
     rate = mappedCount / total * 100 if total else 0
-    print(f"== 전체 매핑률 ==")
+    print("== 전체 매핑률 ==")
     print(f"  total: {total:,}, mapped: {mappedCount:,}, rate: {rate:.3f}%\n")
 
     # annual / quarterly
@@ -131,7 +131,7 @@ def audit() -> None:
     )
 
     print(f"\n== 미매핑: {unmapped.shape[0]:,} rows, {freq.shape[0]} 고유 title ==")
-    print(f"\n상위 50:")
+    print("\n상위 50:")
     top50 = freq.head(50)
     for row in top50.iter_rows(named=True):
         print(
@@ -140,7 +140,7 @@ def audit() -> None:
         )
 
     # 빈도 구간별 분포
-    print(f"\n== 빈도 구간 ==")
+    print("\n== 빈도 구간 ==")
     for lo, hi, label in [(100, 999999, "100+"), (10, 99, "10~99"), (3, 9, "3~9"), (1, 2, "1~2")]:
         band = freq.filter((pl.col("count") >= lo) & (pl.col("count") <= hi))
         print(f"  {label}: {band.shape[0]}개 title, {band['count'].sum()} rows")

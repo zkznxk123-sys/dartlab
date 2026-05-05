@@ -278,7 +278,7 @@ def compute_revenue_per_employee(
     bins_eok = [0, 1, 2, 3, 5, 10, 20, 50, 100]  # 억원
     bins = [b * 10000 for b in bins_eok]  # 만원 변환
     total = rpe.len()
-    print(f"\n=== 직원당 매출 구간별 분포 (억원) ===")
+    print("\n=== 직원당 매출 구간별 분포 (억원) ===")
     for i in range(len(bins) - 1):
         lo, hi = bins[i], bins[i + 1]
         cnt = rpe.filter((rpe >= lo) & (rpe < hi)).len()
@@ -319,7 +319,7 @@ def analyze_by_market(df: pl.DataFrame) -> None:
         ])
         .sort("평균", descending=True)
     )
-    print(f"\n=== 시장별 직원당 매출 ===")
+    print("\n=== 시장별 직원당 매출 ===")
     print(market_stats)
 
     # 업종별 (5개 이상)
@@ -333,9 +333,9 @@ def analyze_by_market(df: pl.DataFrame) -> None:
         .filter(pl.col("종목수") >= 5)
         .sort("중앙값", descending=True)
     )
-    print(f"\n=== 직원당 매출 높은 업종 (중앙값) ===")
+    print("\n=== 직원당 매출 높은 업종 (중앙값) ===")
     print(industry_stats.head(10))
-    print(f"\n=== 직원당 매출 낮은 업종 (중앙값) ===")
+    print("\n=== 직원당 매출 낮은 업종 (중앙값) ===")
     print(industry_stats.tail(10))
 
 

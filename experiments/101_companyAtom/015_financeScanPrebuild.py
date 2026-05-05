@@ -46,9 +46,9 @@
 실험일: 2026-03-27
 """
 
+import gc
 import sys
 import time
-import gc
 from pathlib import Path
 
 sys.path.insert(0, "c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src")

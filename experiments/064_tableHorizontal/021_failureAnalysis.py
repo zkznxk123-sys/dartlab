@@ -39,7 +39,6 @@ from dartlab.providers.dart.docs.sections.tableParser import (
     _dataRows,
     _headerCells,
     _isJunk,
-    _normalizeItemName,
     _parseKeyValueOrMatrix,
     _parseMultiYear,
     splitSubtables,
@@ -333,17 +332,17 @@ if __name__ == "__main__":
         if (i + 1) % 50 == 0:
             print(f"  [{i+1}/{len(codes)}]...")
 
-    print(f"\n=== 전체 결과 ===")
+    print("\n=== 전체 결과 ===")
     print(f"총 블록: {totalBlocks}")
     print(f"성공: {successBlocks} ({successBlocks*100/totalBlocks:.1f}%)")
     print(f"실패: {totalBlocks - successBlocks} ({(totalBlocks-successBlocks)*100/totalBlocks:.1f}%)")
 
-    print(f"\n=== 실패 원인 분류 ===")
+    print("\n=== 실패 원인 분류 ===")
     for reason, count in failReasons.most_common():
         pct = count * 100 / totalBlocks
         print(f"  {reason:30s} {count:6d} ({pct:.1f}%)")
 
-    print(f"\n=== 실패 샘플 ===")
+    print("\n=== 실패 샘플 ===")
     for reason in ["skip_no_unit_match", "no_data_rows", "multi_year_parse_fail", "all_junk_items", "all_periods_null"]:
         samples = failSamples.get(reason, [])
         if samples:
@@ -353,7 +352,7 @@ if __name__ == "__main__":
                 if sample:
                     print(f"    {sample[:200]}")
 
-    print(f"\n=== 괄호 차이 분석 ===")
+    print("\n=== 괄호 차이 분석 ===")
     print(f"괄호 변형 발견: {len(bracketDiffs)}건")
     for code, topic, bi, variants in bracketDiffs[:10]:
         print(f"  [{code}] {topic}: '{bi}' vs {variants}")

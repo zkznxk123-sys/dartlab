@@ -264,12 +264,12 @@ def _printResults(df: pl.DataFrame) -> None:
         rev = validDf["nextYrRevGrowth"].to_list()
         rho = _spearmanCorr(biz, rev)
 
-        print(f"\n[핵심 결과: 사업의내용 변화율 vs T+1 매출성장률]")
+        print("\n[핵심 결과: 사업의내용 변화율 vs T+1 매출성장률]")
         print(f"  N={len(validDf)}, Spearman ρ={rho:.3f}")
         print(f"  판정: {'✓ PASS (>0.15)' if abs(rho) > 0.15 else '✗ FAIL (|ρ| ≤ 0.15)'}")
 
         # 변화율 크기별 그룹 분석
-        print(f"\n[변화율 크기별 T+1 매출성장률]")
+        print("\n[변화율 크기별 T+1 매출성장률]")
         for label, lo, hi in [("소(~10%)", 0, 10), ("중(10~50%)", 10, 50), ("대(50%+)", 50, 10000)]:
             grp = validDf.filter(
                 (pl.col("bizChangeRate") >= lo) & (pl.col("bizChangeRate") < hi)
@@ -287,11 +287,11 @@ def _printResults(df: pl.DataFrame) -> None:
         risk = riskDf["riskChangeRate"].to_list()
         rev2 = riskDf["nextYrRevGrowth"].to_list()
         rho2 = _spearmanCorr(risk, rev2)
-        print(f"\n[리스크 섹션 변화율 vs T+1 매출성장률]")
+        print("\n[리스크 섹션 변화율 vs T+1 매출성장률]")
         print(f"  N={len(riskDf)}, Spearman ρ={rho2:.3f}")
 
     # 섹터별
-    print(f"\n[섹터별 상관]")
+    print("\n[섹터별 상관]")
     for sector in ["IT/반도체", "산업재", "건강관리", "금융", "필수소비재"]:
         sdf = validDf.filter(pl.col("sector") == sector) if len(validDf) > 0 else pl.DataFrame()
         if len(sdf) >= 5:
@@ -312,7 +312,7 @@ def _printResults(df: pl.DataFrame) -> None:
         print(f"Phase 3 GATE 판정: {'✓ PASS' if gatePass else '✗ FAIL'}")
         print(f"  |ρ|={abs(rho):.3f} {'>' if gatePass else '<='} 0.15")
         if abs(rho) < 0.10:
-            print(f"  → 공시 텍스트 선행 신호 가설 기각")
+            print("  → 공시 텍스트 선행 신호 가설 기각")
         print(f"{'='*50}")
 
 

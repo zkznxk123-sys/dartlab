@@ -334,7 +334,7 @@ def main():
     else:
         print(f"\n  차이 있는 건: {diffCount}/{merged.height}")
 
-    print(f"\n저장 완료. sections 비교는 별도 실험(010)에서 진행")
+    print("\n저장 완료. sections 비교는 별도 실험(010)에서 진행")
     print(f"  {TEMP_DIR / 'collector_full.parquet'}")
     print(f"  {TEMP_DIR / 'zip_full.parquet'}")
 

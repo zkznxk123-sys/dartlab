@@ -244,7 +244,7 @@ def main():
             )
 
         # 이상치 검출: 전년대비 ±30% 이상 변동
-        print(f"\n  --- 변동 분석 ---")
+        print("\n  --- 변동 분석 ---")
         anomalies = 0
         for i in range(1, len(ts)):
             prev = ts[i - 1]["totalEmployees"]
@@ -258,7 +258,7 @@ def main():
                     )
                     anomalies += 1
         if anomalies == 0:
-            print(f"  변동 ±30% 이상: 없음 (안정적)")
+            print("  변동 ±30% 이상: 없음 (안정적)")
         else:
             print(f"  변동 ±30% 이상: {anomalies}건")
 

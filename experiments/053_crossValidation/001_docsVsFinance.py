@@ -40,7 +40,7 @@ def main():
     from dartlab import config
     from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.providers.dart.docs.finance.summary.pipeline import fsSummary
-    from dartlab.providers.dart.finance.mapper import ACCOUNT_NAME_SYNONYMS, AccountMapper
+    from dartlab.providers.dart.finance.mapper import AccountMapper
     from dartlab.providers.dart.finance.pivot import buildAnnual
 
     dataDir = Path(config.dataDir)
@@ -230,13 +230,13 @@ def main():
         print()
 
     if unmappedNames:
-        print(f"[ 미매핑 한글계정명 (상위 30개) ]")
+        print("[ 미매핑 한글계정명 (상위 30개) ]")
         for name, cnt in sorted(unmappedNames.items(), key=lambda x: -x[1])[:30]:
             print(f"  {cnt:>4}건: {name}")
         print()
 
     if diffExamples:
-        print(f"[ 큰 불일치 예시 (처음 20개) ]")
+        print("[ 큰 불일치 예시 (처음 20개) ]")
         print(f"{'종목':>8} {'연도':>6} {'계정명':<30} {'docs':>18} {'finance':>18} {'차이%':>8}")
         print("-" * 92)
         for code, year, nm, dv, fv, pct in diffExamples[:20]:

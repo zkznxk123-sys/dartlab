@@ -38,9 +38,8 @@
 실험일: 2026-03-25
 """
 
-import sys
 import os
-import statistics
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -235,7 +234,7 @@ def main():
         )
     print("-" * 48)
 
-    print(f"\n[Past 상세]")
+    print("\n[Past 상세]")
     print(f"{'종목':<12} {'매출5Y':>5} {'영업5Y':>5} {'ROE>15':>6} {'NI증가':>5} {'OM>10':>5} {'3Y흑자':>5}")
     print("-" * 48)
     for r in results:
@@ -243,7 +242,7 @@ def main():
         row = " ".join(f"{'O' if v else 'X':>5}" for v in d)
         print(f"{r['name']:<12} {row}")
 
-    print(f"\n[Health 상세]")
+    print("\n[Health 상세]")
     print(f"{'종목':<12} {'D/E<1':>5} {'CR>1.5':>6} {'ICR>3':>5} {'OCF>0':>5} {'FCF>0':>5} {'ND<50':>5}")
     print("-" * 48)
     for r in results:

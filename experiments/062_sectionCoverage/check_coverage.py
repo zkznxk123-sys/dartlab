@@ -113,14 +113,14 @@ unmapped_count = len(unmapped)
 rate = mapped_count / total_unique * 100 if total_unique > 0 else 0
 
 print(f"\n{'='*60}")
-print(f"=== 매핑률 (고유 정규화 타이틀 기준) ===")
+print("=== 매핑률 (고유 정규화 타이틀 기준) ===")
 print(f"{'='*60}")
 print(f"전체 고유 타이틀: {total_unique}")
 print(f"매핑됨:          {mapped_count} ({rate:.1f}%)")
 print(f"미매핑:          {unmapped_count} ({100-rate:.1f}%)")
 
 row_rate = mapped_rows / total_rows * 100 if total_rows > 0 else 0
-print(f"\n=== 매핑률 (행 수 기준) ===")
+print("\n=== 매핑률 (행 수 기준) ===")
 print(f"전체 행:    {total_rows:,}")
 print(f"매핑됨:     {mapped_rows:,} ({row_rate:.1f}%)")
 print(f"미매핑:     {unmapped_rows:,} ({100-row_rate:.1f}%)")
@@ -144,7 +144,7 @@ if unmapped:
 # 매핑된 topic별 통계
 if mapped:
     print(f"\n{'='*60}")
-    print(f"=== 매핑된 topic 분포 (상위 30) ===")
+    print("=== 매핑된 topic 분포 (상위 30) ===")
     print(f"{'='*60}")
 
     topic_stats = Counter()

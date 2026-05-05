@@ -87,7 +87,7 @@ def main():
                 print(f"\n  [{title}] ({len(content)}자)")
 
                 if "최대주주" not in content and "주주명" not in content:
-                    print(f"    (최대주주 관련 테이블 없음)")
+                    print("    (최대주주 관련 테이블 없음)")
                     continue
 
                 lines = content.split("\n")

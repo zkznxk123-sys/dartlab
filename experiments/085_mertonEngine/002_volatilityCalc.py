@@ -44,6 +44,7 @@
 """
 
 import sys
+
 sys.path.insert(0, "src")
 
 
@@ -101,8 +102,8 @@ def run():
         print("\n3. DART ratios 수집")
         print("-" * 70)
         try:
-            from dartlab.providers.dart.finance.pivot import buildAnnual
             from dartlab.analysis.financial.ratios import calcRatios
+            from dartlab.providers.dart.finance.pivot import buildAnnual
 
             aResult = buildAnnual("005930")
             if aResult:

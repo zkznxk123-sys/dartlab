@@ -68,18 +68,18 @@ def test():
             break
 
     if chart_schema:
-        print(f"  ✓ create_chart 도구 등록 확인")
+        print("  ✓ create_chart 도구 등록 확인")
         print(f"    설명: {chart_schema.get('description', '')[:60]}...")
         params = chart_schema.get("parameters", {}).get("properties", {})
         chart_type_enum = params.get("chart_type", {}).get("enum", [])
         print(f"    chart_type enum: {chart_type_enum}")
         print(f"    전체 도구 수: {len(schemas)}개")
     else:
-        print(f"  ✗ create_chart 도구 미등록!")
+        print("  ✗ create_chart 도구 미등록!")
         return
 
     # 2. auto 호출
-    print(f"\n\n[2] create_chart(auto) 호출")
+    print("\n\n[2] create_chart(auto) 호출")
     print("-" * 60)
 
     t0 = time.perf_counter()
@@ -98,7 +98,7 @@ def test():
         print(f"    {ct:<12} {title:<32} source={meta.get('source','?')}")
 
     # 3. 개별 chart_type 호출
-    print(f"\n\n[3] 개별 chart_type 호출")
+    print("\n\n[3] 개별 chart_type 호출")
     print("-" * 60)
 
     test_types = ["revenue_trend", "cashflow", "insight_radar", "profitability", "diff_heatmap"]
@@ -116,18 +116,18 @@ def test():
             print(f"  {ct:<20} → {len(charts)}개 차트, {size} bytes, {elapsed*1000:.0f}ms")
 
     # 4. 잘못된 chart_type
-    print(f"\n\n[4] 잘못된 chart_type 에러 처리")
+    print("\n\n[4] 잘못된 chart_type 에러 처리")
     print("-" * 60)
 
     result = runtime.execute_tool("create_chart", {"chart_type": "invalid_type"})
     parsed = json.loads(result)
-    print(f"  입력: 'invalid_type'")
+    print("  입력: 'invalid_type'")
     print(f"  결과: {parsed}")
     has_error = "error" in parsed
     print(f"  에러 감지: {'✓' if has_error else '✗'}")
 
     # 5. Company 없을 때
-    print(f"\n\n[5] Company 없을 때")
+    print("\n\n[5] Company 없을 때")
     print("-" * 60)
 
     runtime_no_company = build_tool_runtime(None, name="test-no-company")
@@ -140,10 +140,10 @@ def test():
     except Exception as e:
         # Company=None이면 create_chart 도구가 등록되지 않을 수 있음
         print(f"  예외: {e}")
-        print(f"  ✓ Company 없으면 도구 호출 불가 (정상 동작)")
+        print("  ✓ Company 없으면 도구 호출 불가 (정상 동작)")
 
     # 6. SSE 이벤트 구조 시뮬레이션
-    print(f"\n\n[6] SSE chart 이벤트 구조 시뮬레이션")
+    print("\n\n[6] SSE chart 이벤트 구조 시뮬레이션")
     print("-" * 60)
 
     result = runtime.execute_tool("create_chart", {"chart_type": "auto"})
@@ -157,7 +157,7 @@ def test():
     print(f"  차트 수: {len(charts)}개")
 
     # 다종목 테스트
-    print(f"\n\n[7] 다종목 create_chart(auto) 검증")
+    print("\n\n[7] 다종목 create_chart(auto) 검증")
     print("-" * 60)
 
     test_codes = [
@@ -179,9 +179,9 @@ def test():
     print("결과 요약")
     print(f"{'='*90}")
     print(f"  가설1: auto → {len(json.loads(runtime.execute_tool('create_chart', {'chart_type': 'auto'})).get('charts', []))}개 ChartSpec 생성 — 채택")
-    print(f"  가설2: 개별 chart_type 동작 확인 — 채택")
+    print("  가설2: 개별 chart_type 동작 확인 — 채택")
     print(f"  가설3: JSON 크기 {len(sse_json)/1024:.1f}KB < 50KB — 채택")
-    print(f"  가설4: 잘못된 chart_type 에러 반환 — 채택")
+    print("  가설4: 잘못된 chart_type 에러 반환 — 채택")
 
 
 if __name__ == "__main__":

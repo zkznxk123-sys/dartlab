@@ -243,6 +243,6 @@ if __name__ == "__main__":
         marker = " *" if r.get("incomplete") else ""
         print(f"  {name:<15} {orig:>10} {a:>12} {b:>12} {c:>10}{marker}")
 
-    print(f"\n  * = 불완전 연도 감지됨")
-    print(f"\n  권장: 전략 A (불완전 연도 제외) — 단순하고 안정적")
-    print(f"        전략 C (TTM) — 분기 데이터 활용, 계절성 보정")
+    print("\n  * = 불완전 연도 감지됨")
+    print("\n  권장: 전략 A (불완전 연도 제외) — 단순하고 안정적")
+    print("        전략 C (TTM) — 분기 데이터 활용, 계절성 보정")

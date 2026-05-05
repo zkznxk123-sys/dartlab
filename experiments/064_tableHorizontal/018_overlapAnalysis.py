@@ -114,7 +114,7 @@ if __name__ == "__main__":
     target_topics = ["businessOverview", "fsSummary", "mdna", "dividend",
                      "audit", "boardOfDirectors"]
 
-    print(f"overlap_filtered 상세 분석")
+    print("overlap_filtered 상세 분석")
     print("=" * 70)
 
     overlap_data = defaultdict(list)  # topic -> [(code, bo, overlap, itemCount, sample_items)]
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 
         # 샘플 (overlap 높은 것 = 가까스로 걸린 것)
         data_sorted = sorted(data, key=lambda d: -d["overlap"])
-        print(f"\n  경계 근처 (overlap 0.2~0.3) 샘플:")
+        print("\n  경계 근처 (overlap 0.2~0.3) 샘플:")
         for d in data_sorted[:5]:
             if d["overlap"] < 0.2:
                 break

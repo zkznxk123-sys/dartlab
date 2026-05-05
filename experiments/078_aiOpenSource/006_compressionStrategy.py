@@ -119,8 +119,8 @@ if __name__ == "__main__":
     # 전략 1: topics 요약
     topics_summary = strategy_topics_summary(c)
     topics_tok = _estimate_tokens(topics_summary)
-    print(f"\n전략 1 — Topics 요약:")
-    print(f"  원본 _topics: ~690 tok (005 기준)")
+    print("\n전략 1 — Topics 요약:")
+    print("  원본 _topics: ~690 tok (005 기준)")
     print(f"  요약: {topics_tok} tok")
     print(f"  절감: ~{690 - topics_tok} tok ({round((690-topics_tok)/690*100)}%)")
     print(f"  내용: {topics_summary[:80]}...")
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     report_tok = _estimate_tokens(report_oneliner)
     # 원본 report 합계 (005 기준)
     original_report_tok = 437  # report_dividend+employee+majorHolder+audit+executive
-    print(f"\n전략 2 — Report 1줄 요약:")
+    print("\n전략 2 — Report 1줄 요약:")
     print(f"  원본 report 합계: ~{original_report_tok} tok")
     print(f"  1줄 요약: {report_tok} tok")
     print(f"  절감: ~{original_report_tok - report_tok} tok ({round((original_report_tok-report_tok)/original_report_tok*100)}%)")
@@ -142,7 +142,7 @@ if __name__ == "__main__":
         ("수익성", "삼성전자의 수익성을 분석해주세요."),
         ("배당", "삼성전자의 배당 정책을 분석해주세요."),
     ]
-    print(f"\n전략 3 — 동적 필터:")
+    print("\n전략 3 — 동적 필터:")
     for label, q in questions:
         dyn_mods, dyn_inc, dyn_hdr = strategy_dynamic_filter(c, q)
         dyn_text = dyn_hdr + "\n\n" + "\n\n".join(dyn_mods.values())
@@ -161,4 +161,4 @@ if __name__ == "__main__":
     print(f"\n  full 원본: {full_tok} tok")
     print(f"  전략 1+2 적용 (topics 요약 + report 1줄): ~{estimated_optimized} tok")
     print(f"  절감: ~{full_tok - estimated_optimized} tok ({round((full_tok-estimated_optimized)/full_tok*100)}%)")
-    print(f"  전략 3 (동적 필터): 질문별 20-50% 추가 절감")
+    print("  전략 3 (동적 필터): 질문별 20-50% 추가 절감")

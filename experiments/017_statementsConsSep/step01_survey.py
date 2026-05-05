@@ -11,7 +11,6 @@ import sys
 
 sys.path.insert(0, "src")
 
-import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.core.reportSelector import selectReport
@@ -107,6 +106,6 @@ if __name__ == "__main__":
     print(f"  둘 다: {both}")
     print(f"  둘 다 없음: {neither}")
 
-    print(f"\n재무 관련 section_title 패턴 (상위 30):")
+    print("\n재무 관련 section_title 패턴 (상위 30):")
     for title, count in sorted(titlePatterns.items(), key=lambda x: -x[1])[:30]:
         print(f"  {count:4d}개  {title}")

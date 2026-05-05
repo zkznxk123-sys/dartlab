@@ -149,7 +149,7 @@ def analyzeRawDuplicates(df: pl.DataFrame, tag: str):
             ])
             .sort(["fy", "fp"])
         )
-        print(f"  frame=null (fy, fp)별 값 개수:")
+        print("  frame=null (fy, fp)별 값 개수:")
         for row in grouped.tail(12).iter_rows(named=True):
             fy, fp = row["fy"], row["fp"]
             cnt, minV, maxV = row["count"], row["min_val"], row["max_val"]
@@ -596,7 +596,7 @@ def verifyAll(edgarDir: Path):
             print(f"  {'-'*10}-+-{'-'*14}-+-{'-'*14}-+-{'-'*8}")
 
             if pivoted.height == 0:
-                print(f"  (데이터 없음)")
+                print("  (데이터 없음)")
                 continue
 
             row = pivoted.row(0, named=True)

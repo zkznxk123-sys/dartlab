@@ -309,7 +309,7 @@ def _printResults(df: pl.DataFrame, companyData: list[dict]) -> None:
         print(f"{row['keyword']:16s} | {row['mentionRate']:5.0f}% | {row['earlyN']:5d} | {row['lateN']:5d} | {earlyStr:>8s} | {lateStr:>8s} | {gapStr:>8s}{marker}")
 
     # 키워드 밀도 상위 기업
-    print(f"\n[키워드별 가장 많이 언급한 기업 (상위 3)]")
+    print("\n[키워드별 가장 많이 언급한 기업 (상위 3)]")
     for category in TREND_KEYWORDS:
         top3 = sorted(
             [(d["corpName"], d[f"{category}_totalCount"]) for d in companyData if d[f"{category}_totalCount"] > 0],

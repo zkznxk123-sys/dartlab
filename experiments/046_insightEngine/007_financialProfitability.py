@@ -55,7 +55,6 @@ import dartlab
 
 dartlab.verbose = False
 
-from dartlab.engines.financeEngine.extract import getAnnualValues, getLatest
 from dartlab.engines.financeEngine.pivot import buildAnnual
 from dartlab.engines.financeEngine.ratios import calcRatios
 
@@ -97,7 +96,7 @@ def dumpAccounts(stockCode: str, stockName: str):
                 print(f"    {key:40s} {latest/1e8:>15,.0f}억")
                 accountMap.setdefault(sjDiv, {})[key] = latest
 
-    print(f"\n  [RATIOS]")
+    print("\n  [RATIOS]")
     print(f"    operatingMargin:  {ratios.operatingMargin}")
     print(f"    netMargin:        {ratios.netMargin}")
     print(f"    ROE:              {ratios.roe}")
@@ -132,7 +131,7 @@ def findCommonAccounts(allMaps: dict):
 
         print(f"\n  [{sjDiv}] 전체 {len(allKeys)}개, 공통 {len(common)}개")
         if common:
-            print(f"    공통 계정:")
+            print("    공통 계정:")
             for k in sorted(common):
                 print(f"      {k}")
 

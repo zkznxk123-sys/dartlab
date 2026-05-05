@@ -37,7 +37,6 @@ from dartlab.providers.dart.docs.sections.tableParser import (
     _dataRows,
     _headerCells,
     _isJunk,
-    _normalizeHeader,
     _normalizeItemName,
     _parseKeyValueOrMatrix,
     _parseMultiYear,
@@ -252,7 +251,7 @@ if __name__ == "__main__":
 
     # overlap_low 세부 분석
     if allOverlapDetails:
-        print(f"\n\noverlap_low 분포:")
+        print("\n\noverlap_low 분포:")
 
         # overlap 구간별
         buckets = {"0.0-0.1": 0, "0.1-0.2": 0, "0.2-0.3": 0}
@@ -270,7 +269,7 @@ if __name__ == "__main__":
 
         # topic별
         topicCounts = Counter(d["topic"] for d in allOverlapDetails)
-        print(f"\n  topic별:")
+        print("\n  topic별:")
         for topic, cnt in topicCounts.most_common(15):
             items_avg = sum(d["items"] for d in allOverlapDetails if d["topic"] == topic) / cnt
             print(f"    {topic}: {cnt}건, 평균 항목 {items_avg:.0f}개")

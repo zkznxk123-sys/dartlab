@@ -99,7 +99,7 @@ def measure(stockCode: str) -> None:
                 utf8Size += colSize
             else:
                 otherSize += colSize
-        print(f"\n컬럼 타입별 메모리:")
+        print("\n컬럼 타입별 메모리:")
         print(f"  Categorical: {catSize / 1024 / 1024:.2f}MB")
         print(f"  String/Utf8: {utf8Size / 1024 / 1024:.2f}MB")
         print(f"  기타 (Int64, Boolean, List): {otherSize / 1024 / 1024:.2f}MB")

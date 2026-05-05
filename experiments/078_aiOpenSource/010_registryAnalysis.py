@@ -39,7 +39,6 @@
 실험일: 2026-03-20
 """
 
-import json
 import sys
 from pathlib import Path
 
@@ -241,7 +240,7 @@ if __name__ == "__main__":
     # company 필요/불필요 비율
     total = patterns["total_tools"]
     need_company = len(patterns["requires_company"])
-    print(f"\n결론:")
+    print("\n결론:")
     print(f"  - {len(patterns['categories'])}개 카테고리로 분류 (가설: 5~6개)")
     print(f"  - Company 필요 비율: {need_company}/{total} = {round(need_company/max(total,1)*100)}% (가설: 80%+)")
-    print(f"  - 모든 도구 시그니처: dict → str (markdown) — 공통 패턴 확인")
+    print("  - 모든 도구 시그니처: dict → str (markdown) — 공통 패턴 확인")

@@ -405,19 +405,19 @@ def build_governance_score() -> pl.DataFrame:
     print(f"\n거버넌스 스코어: {df.shape[0]}종목")
 
     # 유효축 분포
-    print(f"\n=== 유효축수 분포 ===")
+    print("\n=== 유효축수 분포 ===")
     print(df["유효축수"].value_counts().sort("유효축수", descending=True))
 
     four_valid = df.filter(pl.col("유효축수") == 4)
     print(f"\n4축 모두 유효: {four_valid.shape[0]}개 ({four_valid.shape[0]/df.shape[0]*100:.1f}%)")
 
     # 등급 분포
-    print(f"\n=== 등급 분포 ===")
+    print("\n=== 등급 분포 ===")
     print(df["등급"].value_counts().sort("등급"))
 
     # 총점 통계
     scores = df["총점"]
-    print(f"\n=== 총점 분포 ===")
+    print("\n=== 총점 분포 ===")
     print(f"평균: {scores.mean():.1f}")
     print(f"중앙값: {scores.median():.1f}")
     print(f"최소: {scores.min():.1f}")
@@ -459,7 +459,7 @@ def analyze_by_market(df: pl.DataFrame) -> None:
         ])
         .sort("평균총점", descending=True)
     )
-    print(f"\n=== 시장별 거버넌스 점수 ===")
+    print("\n=== 시장별 거버넌스 점수 ===")
     print(market_stats)
 
     for market in ["유가", "코스닥", "코넥스"]:
@@ -479,14 +479,14 @@ def analyze_by_market(df: pl.DataFrame) -> None:
         .filter(pl.col("종목수") >= 5)
         .sort("평균총점", descending=True)
     )
-    print(f"\n=== 거버넌스 점수 높은 업종 ===")
+    print("\n=== 거버넌스 점수 높은 업종 ===")
     print(industry_stats.head(10))
-    print(f"\n=== 거버넌스 점수 낮은 업종 ===")
+    print("\n=== 거버넌스 점수 낮은 업종 ===")
     print(industry_stats.tail(10))
 
     # A등급 기업 상위
     a_grade = merged.filter(pl.col("등급") == "A").sort("총점", descending=True)
-    print(f"\n=== A등급 기업 (상위 15) ===")
+    print("\n=== A등급 기업 (상위 15) ===")
     print(a_grade.select(["종목코드", "지분율", "사외이사비율", "pay_ratio", "감사의견", "총점", "업종"]).head(15))
 
     # E등급 기업

@@ -317,7 +317,7 @@ def analyzeProfitability(
             details.append(f"높은 레버리지로 ROE 달성 (ROE/ROA={leverage:.1f}x)")
             risks.append(Flag("warning", "finance", f"ROE/ROA {leverage:.1f}x — 부채 활용 높음"))
         elif leverage < 1.5 and roe > 15:
-            details.append(f"낮은 레버리지로 고ROE — 진성 수익성")
+            details.append("낮은 레버리지로 고ROE — 진성 수익성")
             opps.append(Flag("strong", "finance", f"레버리지 {leverage:.1f}x로 ROE {roe:.1f}%"))
 
     grade = _scoreToGrade(score, 5)

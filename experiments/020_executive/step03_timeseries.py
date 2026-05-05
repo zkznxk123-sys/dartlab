@@ -32,14 +32,12 @@ import polars as pl
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 from dartlab.core.dataLoader import extractCorpName, loadData
-from dartlab.core.reportSelector import selectReport
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
 
 sys.path.insert(0, os.path.dirname(__file__))
 from step02_parser import (
     _cellsFromLine,
-    _flatText,
     _isSeparator,
     _parseFloat,
     aggregateExecutives,
@@ -366,15 +364,15 @@ if __name__ == "__main__":
         print(f"  {result['corpName']} — {result['nYears']}년")
 
         if result["executiveDf"] is not None:
-            print(f"\n  [등기임원 시계열]")
+            print("\n  [등기임원 시계열]")
             print(result["executiveDf"])
 
         if result["employeeDf"] is not None:
-            print(f"\n  [직원현황 시계열]")
+            print("\n  [직원현황 시계열]")
             print(result["employeeDf"])
 
         if result["unregPayDf"] is not None:
-            print(f"\n  [미등기임원 보수 시계열]")
+            print("\n  [미등기임원 보수 시계열]")
             print(result["unregPayDf"])
 
     # 대량 테스트

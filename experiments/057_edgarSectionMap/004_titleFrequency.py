@@ -46,7 +46,7 @@ def main() -> None:
     allDf = pl.concat(frames, how="vertical_relaxed")
 
     print("=" * 72)
-    print(f"057-004 EDGAR section_title 빈도 분석")
+    print("057-004 EDGAR section_title 빈도 분석")
     print(f"docs files: {len(files)}")
     print(f"total rows: {allDf.height:,}")
     print(f"tickers: {allDf['ticker'].n_unique()}")

@@ -40,7 +40,6 @@
 from __future__ import annotations
 
 import importlib.util
-import time
 from pathlib import Path
 
 import numpy as np
@@ -59,11 +58,13 @@ _ind = _load_mod("indicators", _TRADIX / "indicators.py")
 
 # signals.py는 tradix.vectorized.indicators를 import하므로 직접 패치
 import types
+
 _fake_tradix = types.ModuleType("tradix")
 _fake_vec = types.ModuleType("tradix.vectorized")
 _fake_vec.indicators = _ind
 _fake_tradix.vectorized = _fake_vec
 import sys
+
 sys.modules["tradix"] = _fake_tradix
 sys.modules["tradix.vectorized"] = _fake_vec
 sys.modules["tradix.vectorized.indicators"] = _ind

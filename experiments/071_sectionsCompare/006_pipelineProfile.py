@@ -64,14 +64,11 @@ from dartlab.providers.dart.docs.sections._common import (
 from dartlab.providers.dart.docs.sections.pipeline import (
     _expandStructuredRows,
     _reportRowsToTopicRows,
-    _rowCadenceMeta,
     sections,
 )
 from dartlab.providers.dart.docs.sections.runtime import (
     applyProjections,
     chapterTeacherTopics,
-    detailTopicForTopic,
-    projectionSuppressedTopics,
 )
 
 
@@ -182,7 +179,7 @@ def profilePipeline(stockCode: str = "005930"):
         print("  (None)")
 
     # ── 기간별 상세 ──
-    print(f"\n--- 기간별 _reportRowsToTopicRows 시간 ---")
+    print("\n--- 기간별 _reportRowsToTopicRows 시간 ---")
     for year in sorted(df["year"].unique().to_list(), reverse=True)[:3]:
         for reportKind, suffix in REPORT_KINDS:
             periodKey = f"{year}{suffix}"
@@ -202,7 +199,7 @@ def profilePipeline(stockCode: str = "005930"):
             print(f"  {periodKey}: {dt:.3f}s  ({len(rows)} rows, subset={subset.height})")
 
     # ── _expandStructuredRows 기간별 상세 ──
-    print(f"\n--- 기간별 _expandStructuredRows 시간 ---")
+    print("\n--- 기간별 _expandStructuredRows 시간 ---")
     for periodKey in validPeriods[-6:]:
         projected = applyProjections(periodRows.get(periodKey, []), teacherTopics)
         ts = time.perf_counter()
@@ -222,7 +219,7 @@ def profilePipeline(stockCode: str = "005930"):
     print(f"  applyProjections:      {t_projection_total:.3f}s  ({t_projection_total/t_full*100:.1f}%)")
     print(f"  _expandStructuredRows: {t_expand_total:.3f}s  ({t_expand_total/t_full*100:.1f}%)")
     print(f"  dict+DataFrame 조립:   {overhead:.3f}s  ({overhead/t_full*100:.1f}%)")
-    print(f"  ──────────────────")
+    print("  ──────────────────")
     print(f"  sections() 전체:       {t_full:.3f}s  (100%)")
 
 

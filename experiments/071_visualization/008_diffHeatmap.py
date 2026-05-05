@@ -137,7 +137,7 @@ def test():
             print(f"  최대 changeRate: {stats['maxChangeRate']:.4f}")
 
             # 상위 10 핫스팟
-            print(f"\n  상위 10 변화 topic:")
+            print("\n  상위 10 변화 topic:")
             for item in spec["data"][:10]:
                 bar = "█" * int(item["changeRate"] * 20)
                 print(f"    {item['topic']:<30} {item['changeRate']:.4f} {bar} [{item['intensity']}]")

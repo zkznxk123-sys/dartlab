@@ -366,7 +366,7 @@ def run_experiment():
         print(f"  {code}: multi_year {code_baseline_t}→{code_patched_t} (+{recovered_t}), "
               f"kv/matrix {code_baseline_kv}→{code_patched_kv} (+{recovered_kv})")
 
-    print(f"\n총합:")
+    print("\n총합:")
     print(f"  multi_year: {total_baseline_triples}→{total_patched_triples} (+{total_recovered_triples})")
     print(f"  kv/matrix:  {total_baseline_kv_items}→{total_patched_kv_items} (+{total_recovered_kv_items})")
     print(f"  regression: {len(regression_cases)}건")

@@ -32,11 +32,11 @@
 실험일: 2026-03-27
 """
 
-import httpx
-import time
-import polars as pl
 import re
+import time
 
+import httpx
+import polars as pl
 
 KRX_URL = "https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd"
 HEADERS = {

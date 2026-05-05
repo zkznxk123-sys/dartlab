@@ -418,5 +418,5 @@ combo_test(
 )
 
 print()
-print(f"** = baseline+2%p 초과, * = baseline 초과")
+print("** = baseline+2%p 초과, * = baseline 초과")
 print(f"Baseline: {baseline_acc:.1f}%")

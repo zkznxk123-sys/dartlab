@@ -15,7 +15,6 @@ import polars as pl
 from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.core.reportSelector import selectReport
 from dartlab.finance.statements import statements
-from dartlab.finance.statements.extractor import extractConsolidatedContent
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
 
@@ -71,7 +70,7 @@ if __name__ == "__main__":
     print(f"statements() 결과 없음: {noResult}")
 
     if noResultCodes:
-        print(f"\nstatements() 없는 기업 (처음 20개):")
+        print("\nstatements() 없는 기업 (처음 20개):")
         for code, name, hasCons in noResultCodes[:20]:
             tag = "연결O" if hasCons else "연결X"
             print(f"  [{code}] {name} ({tag})")

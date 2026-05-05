@@ -49,10 +49,10 @@
 실험일: 2026-03-27
 """
 
+import gc
+import re
 import sys
 import time
-import re
-import gc
 from pathlib import Path
 
 sys.path.insert(0, "c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src")
@@ -384,9 +384,9 @@ def run():
             break
 
     tokens = int(sum(1.5 if '\uac00' <= ch <= '\ud7a3' else 0.25 for ch in context))
-    print(f"  시나리오: '2024→2025 structural 변화 급증 기업 분석'")
+    print("  시나리오: '2024→2025 structural 변화 급증 기업 분석'")
     print(f"  컨텍스트 크기: {len(context)}자, ~{tokens} 토큰")
-    print(f"  포함 내용: 상위 10개 순위표 + 상위 3개 기업 상세 (각 5건)")
+    print("  포함 내용: 상위 10개 순위표 + 상위 3개 기업 상세 (각 5건)")
     print()
     print("  [컨텍스트 미리보기 — 처음 800자]")
     print(context[:800])

@@ -42,7 +42,6 @@
 실험일: 2026-03-20
 """
 
-import math
 import time
 
 import polars as pl

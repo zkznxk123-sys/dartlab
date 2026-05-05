@@ -43,7 +43,6 @@
 import importlib.util
 import json
 import time
-from collections import defaultdict
 from pathlib import Path
 
 import polars as pl

@@ -4,7 +4,6 @@
 2. 별도 추출됐지만 파싱 실패한 13개: splitStatements 결과 확인
 """
 
-import os
 import sys
 
 sys.path.insert(0, "src")
@@ -13,7 +12,6 @@ import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.core.reportSelector import selectReport
-from dartlab.core.tableParser import extractAccounts
 from dartlab.finance.statements.extractor import splitStatements
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
@@ -76,6 +74,6 @@ if __name__ == "__main__":
         print(f"\n[{code}] {corpName}")
         print(f"  splitStatements keys: {list(parts.keys())}")
         print(f"  content length: {len(sep)} chars")
-        print(f"  content preview (first 500 chars):")
+        print("  content preview (first 500 chars):")
         print(f"  {sep[:500]}")
-        print(f"  ---")
+        print("  ---")

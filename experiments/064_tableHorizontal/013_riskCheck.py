@@ -14,7 +14,6 @@ from dartlab.providers.dart.docs.sections.tableParser import (
     _classifyStructure,
     _dataRows,
     _headerCells,
-    _isJunk,
     _parseKeyValueOrMatrix,
     _parseMultiYear,
     splitSubtables,

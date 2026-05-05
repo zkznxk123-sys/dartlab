@@ -64,8 +64,8 @@ def analyzeFormat():
     if dartResult:
         _, dartPeriods = dartResult
         print(f"  periods ({len(dartPeriods)}개): {dartPeriods[:8]}...")
-        print(f"  포맷: YYYY_QN (underscore)")
-        print(f"  연도 추출: split('_')[0]")
+        print("  포맷: YYYY_QN (underscore)")
+        print("  연도 추출: split('_')[0]")
     else:
         print("  DART 데이터 없음")
 
@@ -86,8 +86,8 @@ def analyzeFormat():
                 _, edgarPeriods = edgarResult
                 print(f"  CIK: {cik}")
                 print(f"  periods ({len(edgarPeriods)}개): {edgarPeriods[:8]}...")
-                print(f"  포맷: YYYY-QN (hyphen)")
-                print(f"  연도 추출: split('-')[0]")
+                print("  포맷: YYYY-QN (hyphen)")
+                print("  연도 추출: split('-')[0]")
             else:
                 print(f"  EDGAR 데이터 없음 (CIK: {cik})")
         else:
@@ -149,8 +149,8 @@ def analyzeFormat():
         if dartAnnual:
             _, dartYears = dartAnnual
             print(f"  DART annual years: {dartYears}")
-            print(f"  EDGAR annual years: ['2020', '2021', ...] (코드 기준)")
-            print(f"  → 연도 문자열은 양쪽 동일 (포맷 무관)")
+            print("  EDGAR annual years: ['2020', '2021', ...] (코드 기준)")
+            print("  → 연도 문자열은 양쪽 동일 (포맷 무관)")
 
     print()
     print("=" * 60)
@@ -197,7 +197,7 @@ def _findFormatDependentLines(
                 continue
             if f'split("{separator}")' in line:
                 results.append((i, line))
-            elif f'f"{{' in line and f"{separator}Q" in line:
+            elif 'f"{' in line and f"{separator}Q" in line:
                 results.append((i, line))
             elif f'"{separator}Q' in line and "endswith" in line:
                 results.append((i, line))

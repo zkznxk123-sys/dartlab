@@ -50,7 +50,7 @@ import json
 import re
 import sys
 from collections import Counter, defaultdict
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
@@ -741,7 +741,7 @@ if __name__ == "__main__":
                     schema.itemFrequency.items(),
                     key=lambda x: (-x[1], x[0])
                 )
-                print(f"    항목 빈도 (상위 10):")
+                print("    항목 빈도 (상위 10):")
                 for item, freq in sortedItems[:10]:
                     pct = freq / schema.periodCount * 100
                     print(f"      {item}: {freq}/{schema.periodCount} ({pct:.0f}%)")
@@ -760,7 +760,7 @@ if __name__ == "__main__":
                 print(f"\n  기존 방식 수평화: {baseline.shape}")
                 print(baseline.head(15))
             else:
-                print(f"\n  기존 방식 수평화: None")
+                print("\n  기존 방식 수평화: None")
 
     # ── Part B: 다양한 topic에서 정량 비교 ──
     print("\n" + "=" * 70)
@@ -865,19 +865,19 @@ if __name__ == "__main__":
     print(f"기존만 성공:   {sum(1 for c in comparison if c['winner'] == 'baseline')}")
 
     # 차이가 나는 사례 출력
-    print(f"\n--- 스키마만 성공한 사례 (최대 10개) ---")
+    print("\n--- 스키마만 성공한 사례 (최대 10개) ---")
     schemaOnly = [c for c in comparison if c["winner"] == "schema"]
     for c in schemaOnly[:10]:
         print(f"  {c['topic']} bo={c['bo']}: schema={c['schema']}, baseline={c['baseline']}")
 
-    print(f"\n--- 기존만 성공한 사례 (최대 10개) ---")
+    print("\n--- 기존만 성공한 사례 (최대 10개) ---")
     baselineOnly = [c for c in comparison if c["winner"] == "baseline"]
     for c in baselineOnly[:10]:
         print(f"  {c['topic']} bo={c['bo']}: schema={c['schema']}, baseline={c['baseline']}")
 
     # 스키마 JSON 예시 출력
     if schemas:
-        print(f"\n--- 캐노니컬 스키마 JSON 예시 (executivePay 마지막) ---")
+        print("\n--- 캐노니컬 스키마 JSON 예시 (executivePay 마지막) ---")
         example = schemas[-1] if schemas else schemas[0]
         schemaDict = {
             "canonicalHeader": example.canonicalHeader,

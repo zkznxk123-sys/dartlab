@@ -237,7 +237,7 @@ def run():
 
     # 1. 단변량 (GDP only) vs 다변량
     print(f"\n{'─' * 70}")
-    print(f"  단변량(GDP) vs 다변량 R² 비교")
+    print("  단변량(GDP) vs 다변량 R² 비교")
     print(f"{'─' * 70}")
 
     print(f"\n  {'섹터':15s} {'GDP R²':>8s} {'다변량R²':>8s} {'adj-R²':>8s} {'개선':>8s}")
@@ -278,7 +278,7 @@ def run():
 
     # 2. 변수별 stepwise 기여
     print(f"\n{'─' * 70}")
-    print(f"  변수 Stepwise 추가 (전 섹터 평균 R²)")
+    print("  변수 Stepwise 추가 (전 섹터 평균 R²)")
     print(f"{'─' * 70}")
 
     stepOrder = ["gdp", "fx", "rate", "ipi", "oil"]
@@ -309,7 +309,7 @@ def run():
 
     # 3. 섹터별 변수 중요도 (계수 크기)
     print(f"\n{'─' * 70}")
-    print(f"  섹터별 변수 계수 (정규화)")
+    print("  섹터별 변수 계수 (정규화)")
     print(f"{'─' * 70}")
 
     print(f"\n  {'섹터':15s}", end="")
@@ -340,7 +340,7 @@ def run():
 
     # 4. 2024 예측 (다변량 beta, 학습: 2017~2023, 예측: 2024)
     print(f"\n{'─' * 70}")
-    print(f"  2024 예측: 다변량 beta (학습 2017~2023)")
+    print("  2024 예측: 다변량 beta (학습 2017~2023)")
     print(f"{'─' * 70}")
 
     trainYears = [y for y in commonYears if y != "2024"]

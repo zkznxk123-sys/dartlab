@@ -98,7 +98,7 @@ total = len(files)
 hasSection = total - rawNa
 
 print(f"{'='*60}")
-print(f"  원재료/생산설비 전체 종목 테스트 결과")
+print("  원재료/생산설비 전체 종목 테스트 결과")
 print(f"{'='*60}")
 print(f"  전체 종목:     {total}")
 print(f"  섹션 있음:     {hasSection}")
@@ -117,7 +117,7 @@ if errors:
 
 if rawDetails:
     rawDetails.sort(key=lambda x: x[1], reverse=True)
-    print(f"  원재료 항목수 상위:")
+    print("  원재료 항목수 상위:")
     for code, n in rawDetails[:5]:
         print(f"    {code}: {n}건")
     print()

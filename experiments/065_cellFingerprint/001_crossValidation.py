@@ -39,7 +39,6 @@ from dartlab.providers.dart.docs.sections.tableParser import (
     _headerCells,
     _isJunk,
     _normalizeItemName,
-    _parseMultiYear,
     splitSubtables,
 )
 
@@ -449,7 +448,7 @@ if __name__ == "__main__":
                   f"{grandTotal['name_mismatched'] / grandTotal['cross_matched'] * 100:.1f}%")
 
     # 핵심 수치: 교차값이 "새로 매칭"할 수 있는 비율 vs 전체 개선 잠재력
-    print(f"\n\n  === 결론 ===")
-    print(f"  교차값 매칭이 해결할 수 있는 문제:")
+    print("\n\n  === 결론 ===")
+    print("  교차값 매칭이 해결할 수 있는 문제:")
     print(f"  - multi_year에서 항목명 불일치: {grandTotal['name_mismatched']}건")
-    print(f"  - 이것은 전체 37% fallback 중 얼마인가? → Part 5에서 계산")
+    print("  - 이것은 전체 37% fallback 중 얼마인가? → Part 5에서 계산")

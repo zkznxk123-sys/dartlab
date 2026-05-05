@@ -306,7 +306,7 @@ def testSingle(stockCode: str):
     print(f"  매출 행수: {len(result['sales'])}, 수주 행수: {len(result['orders'])}")
 
     if result["noData"]:
-        print(f"  → 해당사항 없음")
+        print("  → 해당사항 없음")
         return
 
     for s in result["sales"][:5]:

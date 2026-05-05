@@ -86,7 +86,7 @@ print(f"사업보고서 보유: {annualCount}")
 print(f"I.회사의 개요 존재: {mainCount}")
 print(f"1.회사의 개요 하위섹션: {subCount}")
 
-print(f"\n하위 섹션 타이틀별 종목 수:")
+print("\n하위 섹션 타이틀별 종목 수:")
 for title, count in sorted(subTitleCounts.items(), key=lambda x: -x[1]):
     print(f"  {title}: {count}")
 

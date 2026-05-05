@@ -47,11 +47,10 @@
 실험일: 2026-03-27
 """
 
+import gc
+import re
 import sys
 import time
-import re
-import gc
-from pathlib import Path
 
 sys.path.insert(0, "c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src")
 
@@ -319,7 +318,7 @@ def run():
     saving = (1 - cacheTotal / noCacheTotal) * 100
 
     print(f"\n  changes 컨텍스트: ~{changesTokens:,} 토큰")
-    print(f"  시나리오: 1기업 × 5회 질문 × 평균 2K 출력 토큰")
+    print("  시나리오: 1기업 × 5회 질문 × 평균 2K 출력 토큰")
     print()
     print(f"  [캐시 없음] 매 질문 ${noCachePerQ:.4f} × 5회 = ${noCacheTotal:.4f}")
     print(f"  [캐시 사용] 첫 질문 ${cacheFirstQ:.4f} + 나머지 ${cacheNextQ:.4f}×4 = ${cacheTotal:.4f}")
@@ -327,7 +326,7 @@ def run():
     print()
 
     # 전 종목 시나리오
-    print(f"  전 종목 시나리오 (2,548종목 × 1회 분석):")
+    print("  전 종목 시나리오 (2,548종목 × 1회 분석):")
     allNoCost = noCachePerQ * 2548
     # 전 종목은 시스템 프롬프트만 캐시 (changes는 종목별로 다름)
     # 그러나 시스템 프롬프트 + 분석 지시를 캐시하면 절감 가능

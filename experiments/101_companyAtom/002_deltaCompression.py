@@ -33,10 +33,10 @@
 실험일: 2026-03-27
 """
 
-import sys
-import hashlib
 import difflib
+import hashlib
 import re
+import sys
 
 sys.path.insert(0, "c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src")
 
@@ -200,7 +200,7 @@ def run():
     print(f"  원본: {originalTotal:.2f} MB")
     print(f"  Layer 1 (CAS dedup): {afterCas:.2f} MB (-{casReduction:.2f} MB)")
     print(f"  Layer 2 (Delta): ~{afterDelta:.2f} MB (-{deltaReduction:.2f} MB)")
-    print(f"  Layer 3 (Semantic Index): 측정 필요")
+    print("  Layer 3 (Semantic Index): 측정 필요")
     print(f"  총 압축률: ~{(1 - afterDelta / originalTotal) * 100:.1f}%")
 
 

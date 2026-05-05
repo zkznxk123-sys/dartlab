@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
     total = len(codes)
     ok = consOk + sepOk + bothOk
-    print(f"\n=== 통합 추출 결과 ===")
+    print("\n=== 통합 추출 결과 ===")
     print(f"총: {total}")
     print(f"성공: {ok} ({ok/total*100:.1f}%)")
     print(f"  연결만: {consOk}")

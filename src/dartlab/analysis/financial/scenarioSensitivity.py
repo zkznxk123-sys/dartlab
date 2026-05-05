@@ -342,7 +342,7 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
     # 기업유형 라벨
     template_name = None
     try:
-        from dartlab.core.cross.companyType import detectTemplate
+        from dartlab.analysis.financial.companyType import detectTemplate
 
         template_name = detectTemplate(company)
     except (ImportError, AttributeError):

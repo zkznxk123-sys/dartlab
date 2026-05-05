@@ -55,7 +55,6 @@
 
 from __future__ import annotations
 
-import math
 import sys
 import time
 from pathlib import Path
@@ -243,14 +242,14 @@ def _printResults(df: pl.DataFrame) -> None:
     marginDir = marginDf["marginDirCorrect"].sum() / len(marginDf) * 100 if len(marginDf) > 0 else 0
     avgMAPE = df["revMAPE"].mean()
 
-    print(f"\n[백테스트 결과 요약]")
+    print("\n[백테스트 결과 요약]")
     print(f"  대상: {len(df)}건 (27사 × 2023-2024)")
     print(f"  매출 방향성 정확도: {revDir:.1f}% {'✓ PASS' if revDir > 55 else '✗ FAIL'} (기준: >55%)")
     print(f"  마진 방향성 정확도: {marginDir:.1f}% {'✓ PASS' if marginDir > 55 else '✗ FAIL'} (기준: >55%)")
     print(f"  매출 MAPE 평균: {avgMAPE:.1f}%")
 
     # 섹터별
-    print(f"\n[섹터별 상세]")
+    print("\n[섹터별 상세]")
     print(f"{'섹터':12s} | {'매출방향':>8s} | {'마진방향':>8s} | {'MAPE':>8s} | {'N':>3s}")
     print("-" * 50)
 
@@ -272,7 +271,7 @@ def _printResults(df: pl.DataFrame) -> None:
         actual = rankDf["actualRevGrowth"].to_list()
         pred = rankDf["predRevGrowth"].to_list()
         rho = _spearmanCorr(actual, pred)
-        print(f"\n[순위 상관 (Spearman)]")
+        print("\n[순위 상관 (Spearman)]")
         print(f"  전체: ρ={rho:.3f} {'✓ PASS' if rho > 0.2 else '✗ FAIL'} (기준: >0.2)")
 
         # 섹터별
@@ -290,7 +289,7 @@ def _printResults(df: pl.DataFrame) -> None:
     print(f"Phase 2 GATE 판정: {'✓ PASS' if gatePass else '✗ FAIL'}")
     print(f"  매출 방향성 {revDir:.1f}% {'>' if gatePass else '<='} 55%")
     if not gatePass:
-        print(f"  → simulation.py 재설계 필요")
+        print("  → simulation.py 재설계 필요")
     print(f"{'='*50}")
 
 

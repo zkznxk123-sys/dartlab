@@ -97,7 +97,7 @@ def test_mock_financial_data():
                         digits.append(d)
 
     print(f"Mock 데이터 수치 수: {len(digits)}")
-    print(f"  → 숫자 50개 미만: 탐지기 스킵 (설계 의도)")
+    print("  → 숫자 50개 미만: 탐지기 스킵 (설계 의도)")
 
     return len(digits)
 
@@ -171,13 +171,13 @@ def test_detector_integration():
     }
 
     anomalies = detectBenfordAnomaly(large_series)
-    print(f"\n탐지기 통합 테스트 (대수정규 90개 값)")
+    print("\n탐지기 통합 테스트 (대수정규 90개 값)")
     print(f"  anomaly 수: {len(anomalies)}")
     if anomalies:
         for a in anomalies:
             print(f"  [{a.severity}] {a.text}")
     else:
-        print(f"  → 정상: anomaly 없음 (Benford 준수)")
+        print("  → 정상: anomaly 없음 (Benford 준수)")
 
     # 균등분포 → 위반 기대
     uniform_series = {
@@ -187,14 +187,14 @@ def test_detector_integration():
     }
 
     anomalies2 = detectBenfordAnomaly(uniform_series)
-    print(f"\n탐지기 통합 테스트 (균등분포 90개 값)")
+    print("\n탐지기 통합 테스트 (균등분포 90개 값)")
     print(f"  anomaly 수: {len(anomalies2)}")
     if anomalies2:
         for a in anomalies2:
             print(f"  [{a.severity}] {a.text}")
-        print(f"  → 정상: Benford 위반 탐지")
+        print("  → 정상: Benford 위반 탐지")
     else:
-        print(f"  → 주의: 균등분포인데 탐지 안 됨 (n 부족 가능)")
+        print("  → 주의: 균등분포인데 탐지 안 됨 (n 부족 가능)")
 
     return len(anomalies) == 0, len(anomalies2) > 0
 

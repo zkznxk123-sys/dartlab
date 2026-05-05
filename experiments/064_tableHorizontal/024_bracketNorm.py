@@ -199,7 +199,7 @@ if __name__ == "__main__":
                         samples.append((code, topic, bo, merged, mergeMap))
 
     print(f"{totalBlocks} blocks 스캔, {totalMerged}건 통합")
-    print(f"\n=== 통합 샘플 ===")
+    print("\n=== 통합 샘플 ===")
     for code, topic, bo, merged, mergeMap in samples:
         print(f"\n[{code}] {topic} bo={bo}: {merged}개 통합")
         for orig, rep in list(mergeMap.items())[:3]:

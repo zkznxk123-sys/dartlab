@@ -71,9 +71,9 @@ def exploreSectionTitles():
         if found:
             hasSection += 1
 
-    print(f"\n=== 우발부채 관련 섹션 커버리지 ===")
+    print("\n=== 우발부채 관련 섹션 커버리지 ===")
     print(f"total: {total}, hasSection: {hasSection} ({hasSection/total*100:.1f}%)")
-    print(f"\n--- 섹션 타이틀 빈도 ---")
+    print("\n--- 섹션 타이틀 빈도 ---")
     for title, count in titleCounter.most_common(20):
         print(f"  [{count:3d}] {title}")
 

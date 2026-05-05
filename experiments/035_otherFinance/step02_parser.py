@@ -256,7 +256,7 @@ if __name__ == "__main__":
             errors.append((code, str(e)))
 
     total = len(files)
-    print(f"\n=== 035 기타 재무에 관한 사항 배치 결과 ===")
+    print("\n=== 035 기타 재무에 관한 사항 배치 결과 ===")
     print(f"성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}/{total}")
     print(f"대손충당금: {totalBadDebt}건")

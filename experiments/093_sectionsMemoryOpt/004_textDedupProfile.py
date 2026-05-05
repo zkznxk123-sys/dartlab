@@ -96,7 +96,7 @@ def main(stockCode: str = "005930") -> None:
     if dupTexts:
         # 바이트 낭비 기준 상위 10
         byWaste = sorted(dupTexts.items(), key=lambda x: len(x[0].encode("utf-8")) * (x[1] - 1), reverse=True)
-        print(f"\n--- 중복 바이트 낭비 상위 10 ---")
+        print("\n--- 중복 바이트 낭비 상위 10 ---")
         for text, count in byWaste[:10]:
             textBytes = len(text.encode("utf-8"))
             waste = textBytes * (count - 1)
@@ -141,7 +141,7 @@ def main(stockCode: str = "005930") -> None:
             catSize += catSeries.estimated_size()
         except Exception:
             catSize += df[col].estimated_size()
-    print(f"\n--- Categorical 인코딩 시뮬레이션 ---")
+    print("\n--- Categorical 인코딩 시뮬레이션 ---")
     origSize = sum(df[col].estimated_size() for col in periodCols)
     print(f"원본 period 컬럼 크기: {origSize / 1024 / 1024:.2f}MB")
     print(f"Categorical 시 크기: {catSize / 1024 / 1024:.2f}MB")

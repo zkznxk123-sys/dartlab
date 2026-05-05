@@ -37,9 +37,9 @@
 실험일: 2026-03-25
 """
 
-import sys
 import os
 import statistics
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -148,7 +148,7 @@ def main():
         )
     print("-" * 62)
 
-    print(f"\n[등급별 분포]")
+    print("\n[등급별 분포]")
     for rating in ["Low", "Medium", "High", "Very High", "Extreme"]:
         names = [r["name"] for r in results if r["rating"] == rating]
         if names:

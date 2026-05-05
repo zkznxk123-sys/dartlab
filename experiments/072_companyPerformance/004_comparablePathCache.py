@@ -83,7 +83,7 @@ def main():
 
     # 동일성 검증
     assert sec1.shape == sec2.shape, f"shape 불일치: {sec1.shape} vs {sec2.shape}"
-    assert sec1.columns == sec2.columns, f"columns 불일치"
+    assert sec1.columns == sec2.columns, "columns 불일치"
     print(f"\n  동일성 검증 OK (shape={sec1.shape})")
 
     speedup = time_before / time_after if time_after > 0 else float("inf")

@@ -167,20 +167,20 @@ if __name__ == "__main__":
         if (i + 1) % 50 == 0:
             print(f"  [{i+1}/{len(codes)}]...")
 
-    print(f"\n=== 전수 검증 결과 ===")
+    print("\n=== 전수 검증 결과 ===")
     print(f"종목: {len(codes)}, blocks: {totalBlocks}")
     print(f"통합된 항목: {totalMerged}건")
 
-    print(f"\n=== 통합 유형 분류 ===")
+    print("\n=== 통합 유형 분류 ===")
     for cat, count in mergeCategories.most_common():
         print(f"  {cat}: {count}건")
 
-    print(f"\n=== 통합 샘플 (전수) ===")
+    print("\n=== 통합 샘플 (전수) ===")
     for code, topic, bo, orig, rep in allMergeSamples[:30]:
         print(f"  [{code}] {topic} bo={bo}: {orig}  →  {rep}")
 
     # 오탐 의심 (skeleton이 같은데 괄호가 완전히 다른 경우)
-    print(f"\n=== 오탐 의심 ===")
+    print("\n=== 오탐 의심 ===")
     suspicious = 0
     for code, topic, bo, orig, rep in allMergeSamples:
         _, brO = _extractBrackets(orig)

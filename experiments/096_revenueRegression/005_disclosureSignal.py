@@ -71,7 +71,7 @@ def run():
 
         sections = c.sections
         if sections is None:
-            print(f"  ❌ sections 없음")
+            print("  ❌ sections 없음")
             continue
 
         print(f"  sections: {sections.height}행 × {sections.width}열, 로드 {tLoad:.1f}s")
@@ -88,7 +88,7 @@ def run():
         tSignal = time.time() - t1
 
         if signal is None:
-            print(f"  ❌ 신호 추출 실패")
+            print("  ❌ 신호 추출 실패")
             continue
 
         print(f"  toneScore: {signal.toneScore:+.3f}")
@@ -97,12 +97,12 @@ def run():
         print(f"  confidence: {signal.confidence}")
 
         if signal.topicSignals:
-            print(f"  topic별 신호:")
+            print("  topic별 신호:")
             for topic, score in signal.topicSignals.items():
                 print(f"    {topic:30s}: {score:+.2f}")
 
         if signal.keyPhrases:
-            print(f"  핵심 구절:")
+            print("  핵심 구절:")
             for phrase in signal.keyPhrases[:3]:
                 print(f"    \"{phrase}\"")
 
@@ -116,7 +116,7 @@ def run():
 
     # 요약
     print(f"\n{'='*60}")
-    print(f"  요약")
+    print("  요약")
     print(f"{'='*60}")
     print(f"  비영 신호: {nonZeroCount}/{len(STOCKS)} ({nonZeroCount/len(STOCKS)*100:.0f}%)")
 

@@ -1,6 +1,5 @@
 """남은 5개 실패 케이스 상세 분석."""
 
-import os
 import sys
 
 sys.path.insert(0, "src")

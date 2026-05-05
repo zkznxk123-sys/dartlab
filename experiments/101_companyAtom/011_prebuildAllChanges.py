@@ -46,11 +46,10 @@
 실험일: 2026-03-27
 """
 
+import gc
+import re
 import sys
 import time
-import re
-import gc
-import os
 from pathlib import Path
 
 sys.path.insert(0, "c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src")
@@ -396,20 +395,20 @@ def run():
 
     print(f"  예산: {BUDGET}자")
     print()
-    print(f"  [현재 방식] sections 최신기간 텍스트:")
+    print("  [현재 방식] sections 최신기간 텍스트:")
     print(f"    커버 topic 수: {topicsCovered}")
     print(f"    사용 문자: {currentChars}자")
-    print(f"    정보 유형: 최신 기간 원문 스냅샷 (변화 여부 불명)")
+    print("    정보 유형: 최신 기간 원문 스냅샷 (변화 여부 불명)")
     print()
-    print(f"  [changes 방식] 변화 블록 + 유형 태그:")
+    print("  [changes 방식] 변화 블록 + 유형 태그:")
     print(f"    커버 transition 수: {min(len(transitions), sum(1 for c in changesContext if c.startswith('##')))}기간")
     print(f"    포함 변화 블록: {changesBlocks}개")
     print(f"    사용 문자: {changesChars}자")
-    print(f"    정보 유형: 변화 유형(appeared/structural/...) + topic + preview")
+    print("    정보 유형: 변화 유형(appeared/structural/...) + topic + preview")
     print()
 
     # 밀도 비교
-    print(f"  정보 밀도 비교:")
+    print("  정보 밀도 비교:")
     print(f"    현재: {topicsCovered} topics의 정적 텍스트 → AI는 '뭐가 바뀌었는지' 모름")
     print(f"    changes: {changesBlocks}개 변화 블록, 유형 태그 포함 → AI는 변화의 종류와 크기를 즉시 파악")
 

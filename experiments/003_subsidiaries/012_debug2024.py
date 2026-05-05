@@ -3,7 +3,6 @@
 2024년 데이터는 기업명이 열 헤더로 들어가는 전치(transpose) 형태.
 각 기업의 실제 구조를 확인한다.
 """
-import re
 from pathlib import Path
 
 import polars as pl
@@ -76,10 +75,10 @@ for code, name in COMPANIES:
             numCount = sum(1 for c in rows[idx] if parseAmount(c) is not None)
             p(f"      기업명셀={alphaCount}, 숫자셀={numCount}")
     else:
-        p(f"  거대행 없음 → 일반 테이블")
+        p("  거대행 없음 → 일반 테이블")
 
     # 처음 20행 출력
-    p(f"\n  처음 20행:")
+    p("\n  처음 20행:")
     for i in range(min(len(rows), 20)):
         cells = rows[i]
         preview = ' | '.join(cells[:10])

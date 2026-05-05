@@ -135,7 +135,7 @@ def _runScenario(
     elapsed = time.monotonic() - t0
     answer = "".join(chunks)
 
-    print(f"\n  --- 결과 ---")
+    print("\n  --- 결과 ---")
     print(f"  시간: {elapsed:.1f}s")
     print(f"  컨텍스트: {contextModules}")
     print(f"  도구 호출: {len(toolCalls)}건 -- {[t['name'] for t in toolCalls]}")

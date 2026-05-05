@@ -10,8 +10,6 @@
 빈 셀을 유지해야 올바르게 파싱 가능.
 """
 
-import os
-import re
 import sys
 
 sys.path.insert(0, "src")
@@ -19,7 +17,6 @@ sys.path.insert(0, "src")
 from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection
 from dartlab.core.reportSelector import selectReport
-from dartlab.core.tableParser import detectUnit
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
 

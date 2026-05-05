@@ -206,14 +206,14 @@ def viewerDesign():
     jsonStr = json.dumps(payload, ensure_ascii=False)
     sizeKB = len(jsonStr.encode("utf-8")) / 1024
 
-    print(f"\n--- payload 크기 ---")
+    print("\n--- payload 크기 ---")
     print(f"  JSON: {sizeKB:.1f} KB")
     print(f"  ratioSummary rows: {len(payload['ratioSummary']['rows'])}")
     print(f"  topicDetails: {len(payload['topicDetails'])} topics")
     print(f"  topicCoverage: common={len(payload['topicCoverage']['common'])}")
 
     # payload 구조 요약
-    print(f"\n--- payload 구조 ---")
+    print("\n--- payload 구조 ---")
     for key, val in payload.items():
         if isinstance(val, dict):
             subkeys = list(val.keys())
@@ -228,7 +228,7 @@ def viewerDesign():
         print(f"  {row['category']:<8} {row['item']:<20} A={row['valA']:>12} B={row['valB']:>12} diff={sign}{row['diff']}")
 
     # topicDetails 샘플
-    print(f"\n--- topicDetails 샘플 ---")
+    print("\n--- topicDetails 샘플 ---")
     for td in payload["topicDetails"]:
         print(f"  {td['topic']}: textLen A={td['textLenA']:,} B={td['textLenB']:,}, 공통KW={td['commonKeywords'][:5]}")
 

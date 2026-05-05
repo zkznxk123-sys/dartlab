@@ -32,14 +32,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 import re
-from collections import defaultdict
 
 import polars as pl
 
 from dartlab.providers.dart.docs.sections.pipeline import sections
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _002_cellParser import ParsedSubtable, parseCellSubtables
+from _002_cellParser import parseCellSubtables
 
 
 def horizontalizeKvMatrix(

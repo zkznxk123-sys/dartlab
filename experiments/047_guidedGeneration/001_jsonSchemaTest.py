@@ -125,7 +125,7 @@ def test_json_schema():
 		print(raw[:2000])
 
 		parsed = AnalysisResponse.model_validate_json(raw)
-		print(f"\n=== 파싱 성공 ===")
+		print("\n=== 파싱 성공 ===")
 		print(f"요약: {parsed.summary}")
 		print(f"지표 수: {len(parsed.metrics)}")
 		for m in parsed.metrics:

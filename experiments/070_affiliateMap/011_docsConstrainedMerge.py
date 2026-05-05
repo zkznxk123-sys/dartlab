@@ -345,7 +345,7 @@ if __name__ == "__main__":
         print(f"  {g:10s} {c007:5d} {c_new:7d} {c_docs:7d}{marker}")
 
     # 삼성 상세 비교
-    print(f"\n  삼성 상세:")
+    print("\n  삼성 상세:")
     samsung_007 = sorted(n for n in all_node_ids if code_to_group_007.get(n) == "삼성")
     samsung_new = sorted(n for n in all_node_ids if code_to_group.get(n) == "삼성")
     samsung_docs = sorted(c for c, g in docs_ground_truth.items() if g == "삼성" and c in all_node_ids)
@@ -383,7 +383,7 @@ if __name__ == "__main__":
     multi_007 = {g: c for g, c in group_counts_007.items() if c >= 2}
     indep_007 = sum(1 for c in group_counts_007.values() if c == 1)
 
-    print(f"\n  전체 통계:")
+    print("\n  전체 통계:")
     print(f"    {'':20s} {'007':>6s} {'docs제약':>8s}")
     print(f"    {'2명+ 그룹':20s} {len(multi_007):6d} {len(multi_new):8d}")
     print(f"    {'독립':20s} {indep_007:6d} {indep_new:8d}")

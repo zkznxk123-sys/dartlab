@@ -203,18 +203,18 @@ if __name__ == "__main__":
 
         # 분석 (임계값 3)
         analysis = analyze_graph(matrix["adjacency"], threshold=3)
-        print(f"\n  [그래프 분석 (임계값 ≥ 3)]")
+        print("\n  [그래프 분석 (임계값 ≥ 3)]")
         print(f"  엣지: {analysis['edges']}개")
         print(f"  노드: {analysis['nodes']}개")
         print(f"  평균 degree: {analysis['avg_degree']}")
 
         if analysis["hubs"]:
-            print(f"\n  [허브 topic (degree 상위)]")
+            print("\n  [허브 topic (degree 상위)]")
             for topic, deg in analysis["hubs"]:
                 print(f"    · {topic}: degree {deg}")
 
         if analysis["top_edges"]:
-            print(f"\n  [강한 연결 (mention 상위)]")
+            print("\n  [강한 연결 (mention 상위)]")
             for (src, tgt), count in analysis["top_edges"][:7]:
                 print(f"    · {src} → {tgt}: {count}회")
 
@@ -244,6 +244,6 @@ if __name__ == "__main__":
         for topic, deg in r["hubs"]:
             hub_counts[topic] = hub_counts.get(topic, 0) + 1
 
-    print(f"\n  [허브 일관성] (5사 중 허브 등장 횟수)")
+    print("\n  [허브 일관성] (5사 중 허브 등장 횟수)")
     for topic, count in sorted(hub_counts.items(), key=lambda x: -x[1]):
         print(f"    · {topic}: {count}/5사")

@@ -37,7 +37,6 @@
 실험일: 2026-03-09
 """
 
-import json
 import time
 
 COMPRESS_PROMPT = """아래 분석 초안을 개선하세요.

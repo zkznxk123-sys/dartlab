@@ -201,7 +201,7 @@ if __name__ == "__main__":
         print(f"  총 slot(행) 수: {result['slot_count']}")
 
         # 매칭 통계
-        print(f"\n  [기간별 매칭률]")
+        print("\n  [기간별 매칭률]")
         avg_ratio = 0
         for ms in result["match_stats"]:
             print(f"    {ms['from']} → {ms['to']}: "
@@ -216,7 +216,7 @@ if __name__ == "__main__":
             n_periods = len(slot)
             coverage[n_periods] = coverage.get(n_periods, 0) + 1
 
-        print(f"\n  [slot 기간 분포]")
+        print("\n  [slot 기간 분포]")
         for n, cnt in sorted(coverage.items(), reverse=True):
             print(f"    {n}기간 출현: {cnt}개 slot")
 

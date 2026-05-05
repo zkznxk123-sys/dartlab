@@ -178,7 +178,7 @@ def main():
         print(f"{name:<40} {cnt:>8} {pct:>7.1f}%  {sign}{diff:>6.1f}p")
 
     if errors:
-        print(f"\n[ 에러 종목 (처음 10개) ]")
+        print("\n[ 에러 종목 (처음 10개) ]")
         for cik, msg in errors[:10]:
             print(f"  {cik}: {msg}")
 

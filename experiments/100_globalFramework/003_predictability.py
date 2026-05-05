@@ -41,9 +41,9 @@
 실험일: 2026-03-25
 """
 
-import sys
 import os
 import statistics
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -156,7 +156,7 @@ def main():
         print(f"점수 범위: {min(scores):.1f} ~ {max(scores):.1f}")
         print(f"점수 평균: {statistics.mean(scores):.1f}")
 
-    print(f"\n[점수 분해 (각 최대 2.5점)]")
+    print("\n[점수 분해 (각 최대 2.5점)]")
     print(f"{'종목':<12} {'매출안정':>7} {'영업안정':>7} {'연속성장':>7} {'무적자':>7} {'합계':>6}")
     print("-" * 50)
     for r in results:

@@ -71,7 +71,7 @@ if __name__ == "__main__":
             failTypes["no_blocks"] += 1
 
     total = hasSection
-    print(f"=== 무형자산 — 유형자산 파서 적용 결과 ===")
+    print("=== 무형자산 — 유형자산 파서 적용 결과 ===")
     print(f"무형자산 섹션 있음: {hasSection}")
     print(f"섹션 없음: {noSection}")
     print(f"파싱 성공: {ok}/{total} ({ok/total*100:.1f}%)")

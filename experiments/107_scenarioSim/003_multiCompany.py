@@ -20,7 +20,6 @@ from __future__ import annotations
 import gc
 import json
 import sys
-from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
@@ -271,7 +270,7 @@ def main():
             qSummary = " → ".join(f"{j['q']}:{j['revPath'][:3]}/{j['oiPath'][:3]}" for j in r["judgments"])
             print(f"  분기: {qSummary}")
         else:
-            print(f"  분석 실패")
+            print("  분석 실패")
 
     # 요약 테이블
     print(f"\n{'='*70}")
@@ -284,7 +283,7 @@ def main():
         print(f"{r['name']:10s} {r['scenario']:16s} {r['revDeviation']:>+7.1f}% {r['oiDeviation']:>+7.1f}% {r['finalRevPath']:>12s} {r['finalOiPath']:>12s}")
 
     # 시나리오 정확도
-    print(f"\n--- 시나리오 정확도 ---")
+    print("\n--- 시나리오 정확도 ---")
     revOnTrack = sum(1 for r in results if abs(r["revDeviation"]) <= 10)
     oiOnTrack = sum(1 for r in results if abs(r["oiDeviation"]) <= 30)
     n = len(results)
@@ -292,7 +291,7 @@ def main():
     print(f"  이익 ±30% 이내: {oiOnTrack}/{n} ({oiOnTrack/n*100:.0f}%)")
 
     # 이중 판정의 가치
-    print(f"\n--- 이중 판정 차이 (매출 vs 이익이 다른 판정) ---")
+    print("\n--- 이중 판정 차이 (매출 vs 이익이 다른 판정) ---")
     for r in results:
         for j in r["judgments"]:
             if j["revPath"] != j["oiPath"]:

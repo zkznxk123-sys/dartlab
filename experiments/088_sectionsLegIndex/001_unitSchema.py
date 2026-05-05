@@ -62,13 +62,13 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from dartlab.core.memory import check_memory_and_gc, get_memory_mb  # noqa: E402
 from dartlab.providers.dart.docs.sections.pipeline import sections as buildSections  # noqa: E402
 from dartlab.providers.dart.docs.sections.views import (  # noqa: E402
     retrievalBlocks,
     splitContextText,
     splitMarkdownTable,
 )
-from dartlab.core.memory import check_memory_and_gc, get_memory_mb  # noqa: E402
 
 EXPERIMENT_DATE = "2026-03-23"
 EXPERIMENT_DIR = Path(__file__).resolve().parent

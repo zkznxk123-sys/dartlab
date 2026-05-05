@@ -41,7 +41,6 @@
 """
 
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -104,7 +103,7 @@ def _build_test_responses(golden: list[dict]) -> list[dict]:
 
 def validate_regex(answer_text: str, expected_facts: list[dict]) -> dict:
     """현재 validation.py 방식: regex 기반 수치 추출."""
-    from dartlab.ai.validation import extract_numbers, validate_claims
+    from dartlab.ai.validation import extract_numbers
 
     claims = extract_numbers(answer_text)
     # expected_facts에서 검증 가능한 것만 카운트

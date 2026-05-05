@@ -391,7 +391,7 @@ def _printResults(df: pl.DataFrame) -> None:
             print(f"    → {', '.join(members[:6])}" + (f" 외 {len(members)-6}사" if len(members) > 6 else ""))
 
     # 유효 데이터 비율
-    print(f"\n[유효 데이터]")
+    print("\n[유효 데이터]")
     for col in ["rndRatio", "capexRatio", "dividendPayoutRatio", "investedCompanyCount", "roic"]:
         n = df[col].drop_nulls().len()
         print(f"  {col:25s}: {n}/{len(df)}")

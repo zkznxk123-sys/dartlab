@@ -237,7 +237,7 @@ def test():
             for chart_name in charts:
                 print(f"    ✓ {chart_name}")
 
-            print(f"\n  생성 시간:")
+            print("\n  생성 시간:")
             for step, t in dashboard["timing"].items():
                 print(f"    {step:<12}: {t*1000:.0f}ms")
             print(f"    {'전체':<12}: {t_total*1000:.0f}ms")

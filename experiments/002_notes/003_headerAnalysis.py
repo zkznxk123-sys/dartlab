@@ -277,7 +277,7 @@ def main():
                     name, cells = block["dataRows"][0]
                     p(f"    DATA:   {cells}")
                     # 매핑
-                    p(f"    매핑:")
+                    p("    매핑:")
                     for i in range(min(len(merged), len(cells))):
                         label = merged[i] or "(empty)"
                         val = cells[i]

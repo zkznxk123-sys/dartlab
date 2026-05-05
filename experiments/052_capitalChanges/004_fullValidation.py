@@ -58,7 +58,6 @@ from __future__ import annotations
 import importlib.util
 import pathlib
 from collections import Counter
-from typing import Optional
 
 import polars as pl
 
@@ -229,7 +228,7 @@ def scanAll():
             gapPct = abs(gap / endTotal * 100)
             gapPcts.append(gapPct)
 
-    print(f"\n=== 전종목 SCE 피벗 검증 ===")
+    print("\n=== 전종목 SCE 피벗 검증 ===")
     print(f"전체: {total}종목")
     print(f"피벗 성공: {success} ({success/total*100:.1f}%)")
     print(f"SCE 없음: {noSce}")

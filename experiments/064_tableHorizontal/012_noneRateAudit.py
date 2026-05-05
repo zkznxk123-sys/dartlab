@@ -159,7 +159,7 @@ if __name__ == "__main__":
     files = sorted(dataDir.glob("*.parquet"))
     codes = [f.stem for f in files]
 
-    print(f"283종목 topic별 수평화 None 비율 측정")
+    print("283종목 topic별 수평화 None 비율 측정")
     print(f"종목 수: {len(codes)}")
     print("=" * 70)
 

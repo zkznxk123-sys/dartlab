@@ -289,7 +289,7 @@ if __name__ == "__main__":
         )
         spearman = 1 - (6 * d_sq_sum) / (n * (n**2 - 1)) if n > 1 else 0
         print(f"\n  스피어만 순위 상관계수: {spearman:.4f}")
-        print(f"  (1에 가까울수록 O-Score↑ = Z-Score↓ 일관성)")
+        print("  (1에 가까울수록 O-Score↑ = Z-Score↓ 일관성)")
 
     # ── 변수별 분포 ──
     print("\n" + "=" * 90)

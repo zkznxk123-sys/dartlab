@@ -38,7 +38,6 @@ from __future__ import annotations
 
 import json
 import time
-from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
@@ -219,7 +218,7 @@ if __name__ == "__main__":
     print(f"최대: {max(latencies):.0f}ms")
 
     # 010 대비 비교
-    print(f"\n=== 010(파이썬 루프) vs 011(numpy bincount) ===")
-    print(f"010: 3,500~5,500ms")
+    print("\n=== 010(파이썬 루프) vs 011(numpy bincount) ===")
+    print("010: 3,500~5,500ms")
     print(f"011: {np.mean(latencies):.0f}ms")
     print(f"가속: {4500 / np.mean(latencies):.0f}x")

@@ -74,9 +74,9 @@ def exploreSectionTitles():
         if found:
             hasCapital += 1
 
-    print(f"\n=== 자본금 관련 섹션 커버리지 ===")
+    print("\n=== 자본금 관련 섹션 커버리지 ===")
     print(f"total: {total}, hasCapital: {hasCapital} ({hasCapital/total*100:.1f}%)")
-    print(f"\n--- 섹션 타이틀 빈도 ---")
+    print("\n--- 섹션 타이틀 빈도 ---")
     for title, count in titleCounter.most_common(20):
         print(f"  [{count:3d}] {title}")
 

@@ -428,29 +428,29 @@ if __name__ == "__main__":
         if f.stem in sampleCodes:
             sampleResults[f.stem] = (result, meta)
 
-    print(f"\n결과 요약")
+    print("\n결과 요약")
     print(f"  성공: {totalSuccess}개")
     print(f"  스킵 (데이터 없음): {totalSkip}개")
     print(f"  실패: {totalFail}개")
 
     crossTotal = allCrossMatches + allCrossMismatches
     if crossTotal > 0:
-        print(f"\n교차검증 (당기 vs 전기)")
+        print("\n교차검증 (당기 vs 전기)")
         print(f"  일치: {allCrossMatches}/{crossTotal} ({allCrossMatches/crossTotal*100:.1f}%)")
         print(f"  불일치: {allCrossMismatches}/{crossTotal}")
 
     if allCells > 0:
-        print(f"\nnull 비율")
+        print("\nnull 비율")
         print(f"  전체 셀: {allCells:,}")
         print(f"  null 셀: {allNulls:,} ({allNulls/allCells*100:.1f}%)")
         print(f"  유효 셀: {allCells - allNulls:,} ({(allCells-allNulls)/allCells*100:.1f}%)")
 
     if accountCounts:
-        print(f"\n계정 수 통계 (정규화 후)")
+        print("\n계정 수 통계 (정규화 후)")
         print(f"  평균: {sum(accountCounts)/len(accountCounts):.1f}개")
         print(f"  최소: {min(accountCounts)}개, 최대: {max(accountCounts)}개")
 
-    print(f"\n시계열 기간 분포")
+    print("\n시계열 기간 분포")
     for nYears in sorted(yearCounts.keys(), reverse=True):
         cnt = yearCounts[nYears]
         print(f"  {nYears}년: {cnt}개 종목")

@@ -20,7 +20,6 @@
 실험일: 2026-03-07
 """
 import io
-import re
 import sys
 from pathlib import Path
 
@@ -86,7 +85,7 @@ def main():
                         print(f"    [{len(cells)}셀] {s[:200]}")
 
                 if tableLines == 0:
-                    print(f"    (테이블 없음)")
+                    print("    (테이블 없음)")
                 else:
                     print(f"    총 테이블 행: {tableLines}")
 

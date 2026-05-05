@@ -225,7 +225,7 @@ def main():
         general = findSection(contents, "일반적 사항")
         if general:
             fmt = analyzeTableFormat(general)
-            p(f"\n  [일반적 사항]")
+            p("\n  [일반적 사항]")
             p(f"    포맷: {fmt}")
 
             subs = extractSubsidiaryList(general)
@@ -236,7 +236,7 @@ def main():
                 if len(subs) > 5:
                     p(f"      ... ({len(subs) - 5}개 더)")
             else:
-                p(f"    종속기업 추출 실패 (포맷 확인 필요)")
+                p("    종속기업 추출 실패 (포맷 확인 필요)")
                 # 첫 500자 프리뷰
                 preview = general[:500]
                 for line in preview.split("\n")[:15]:
@@ -246,7 +246,7 @@ def main():
         affiliate = findSection(contents, "관계기업")
         if affiliate:
             fmt = analyzeTableFormat(affiliate)
-            p(f"\n  [관계기업 및 공동기업 투자]")
+            p("\n  [관계기업 및 공동기업 투자]")
             p(f"    포맷: {fmt}")
 
             affiliates = extractAffiliateSummary(affiliate)
@@ -255,7 +255,7 @@ def main():
                 for a in affiliates:
                     p(f"      {a}")
             else:
-                p(f"    관계기업 추출 실패 (포맷 확인 필요)")
+                p("    관계기업 추출 실패 (포맷 확인 필요)")
                 # 첫 500자
                 preview = affiliate[:500]
                 for line in preview.split("\n")[:15]:

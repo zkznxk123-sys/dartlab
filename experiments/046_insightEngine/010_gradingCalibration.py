@@ -294,7 +294,7 @@ def analyzeProfitability(ratios, series, isFinancial=False):
             details.append(f"높은 레버리지로 ROE 달성 (ROE/ROA={leverage:.1f}x)")
             risks.append(Flag("warning", "finance", f"ROE/ROA {leverage:.1f}x — 부채 활용 높음"))
         elif leverage < 1.5 and roe > 15:
-            details.append(f"낮은 레버리지로 고ROE — 진성 수익성")
+            details.append("낮은 레버리지로 고ROE — 진성 수익성")
             opps.append(Flag("strong", "finance", f"레버리지 {leverage:.1f}x로 ROE {roe:.1f}%"))
 
     grade = _scoreToGrade(score, 5)
@@ -761,7 +761,7 @@ if __name__ == "__main__":
     print(f"  009: {dict(sorted(cfCounter009.items()))}")
     print(f"  010: {dict(sorted(cfCounter010.items()))}")
 
-    print(f"\n  009 vs 010 Opportunity 비교")
+    print("\n  009 vs 010 Opportunity 비교")
     opCounter009 = Counter({"A": 5, "B": 15})
     opCounter010 = Counter()
     for grades in results.values():
@@ -769,7 +769,7 @@ if __name__ == "__main__":
     print(f"  009: {dict(sorted(opCounter009.items()))}")
     print(f"  010: {dict(sorted(opCounter010.items()))}")
 
-    print(f"\n  009 vs 010 Governance 비교")
+    print("\n  009 vs 010 Governance 비교")
     govCounter009 = Counter({"B": 13, "D": 3, "N": 4})
     govCounter010 = Counter()
     for grades in results.values():

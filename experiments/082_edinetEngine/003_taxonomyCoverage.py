@@ -49,7 +49,6 @@
 
 import json
 import sys
-from collections import Counter
 from pathlib import Path
 
 # dartlab import
@@ -72,7 +71,7 @@ def main():
 
     field_map = data.get("field_map", {})
     meta = data.get("_meta", {})
-    print(f"=== edinet-xbrl taxonomy ===")
+    print("=== edinet-xbrl taxonomy ===")
     print(f"출처: FSA EDINET Taxonomy {meta.get('taxonomy_year', '?')}")
     print(f"총 element: {len(field_map)}개")
     print(f"정의 field: {meta.get('fields_defined', '?')}개")
@@ -100,7 +99,7 @@ def main():
     # ── 전체 집계 ──
     total = len(results)
     mapped = sum(1 for r in results if r["is_mapped"])
-    print(f"=== 전체 매핑률 ===")
+    print("=== 전체 매핑률 ===")
     print(f"총: {total}개, 매핑: {mapped}개, 미매핑: {total - mapped}개")
     print(f"매핑률: {mapped / total * 100:.1f}%")
     print()
@@ -114,7 +113,7 @@ def main():
 
     # ── 카테고리별 집계 ──
     categories = sorted(set(r["category"] for r in results))
-    print(f"=== 카테고리별 매핑률 ===")
+    print("=== 카테고리별 매핑률 ===")
     for cat in categories:
         cat_results = [r for r in results if r["category"] == cat]
         cat_mapped = sum(1 for r in cat_results if r["is_mapped"])

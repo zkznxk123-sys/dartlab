@@ -150,7 +150,7 @@ def analyze_quality(df: pl.DataFrame) -> None:
             & (inv != "")
         )
         print(f"\n  유효 법인명 수: {valid.n_unique():,} (총 {valid.len():,}행)")
-        print(f"  상위 20개 법인명:")
+        print("  상위 20개 법인명:")
         top = valid.value_counts().sort("count", descending=True).head(20)
         print(top)
 

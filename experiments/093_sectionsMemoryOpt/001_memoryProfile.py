@@ -66,7 +66,7 @@ def measureSections(stockCode: str) -> None:
         print(f"\nDataFrame shape: {df.shape}")
         estSize = df.estimated_size()
         print(f"DataFrame estimated_size: {estSize / 1024 / 1024:.2f}MB")
-        print(f"DataFrame dtypes (처음 10개):")
+        print("DataFrame dtypes (처음 10개):")
         for col in df.columns[:10]:
             print(f"  {col}: {df[col].dtype}")
 

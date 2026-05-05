@@ -31,9 +31,9 @@
 실험일: 2026-03-27
 """
 
+import re
 import sys
 import time
-import re
 
 sys.path.insert(0, "c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src")
 

@@ -6,7 +6,6 @@
 """
 
 import os
-import re
 import sys
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
@@ -67,7 +66,7 @@ if __name__ == "__main__":
             fail += 1
 
     total = len(files)
-    print(f"\n=== 043 사업의 개요 배치 결과 ===")
+    print("\n=== 043 사업의 개요 배치 결과 ===")
     print(f"성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}/{total}")
     print(f"평균 길이: {totalLen//max(ok,1)}자")

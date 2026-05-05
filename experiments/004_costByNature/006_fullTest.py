@@ -421,7 +421,7 @@ if __name__ == "__main__":
     total = len(files)
     withData = total - len(noReportList)
 
-    print(f"\n결과 요약")
+    print("\n결과 요약")
     print(f"  전체: {total}개")
     print(f"  보고서 없음: {len(noReportList)}개")
     print(f"  주석/키워드 없음: {len(noSectionList)}개")
@@ -434,13 +434,13 @@ if __name__ == "__main__":
     if targetBase > 0:
         print(f"  성공률 (비용의 성격 존재하는 종목 기준): {len(successList)}/{targetBase} = {len(successList)/targetBase*100:.1f}%")
 
-    print(f"\n테이블 유형 분포:")
+    print("\n테이블 유형 분포:")
     for t, cnt in typeCount.items():
         print(f"  {t}: {cnt}개")
 
     accountCounts = [r[3] for r in successList]
     if accountCounts:
-        print(f"\n계정 항목 수 통계:")
+        print("\n계정 항목 수 통계:")
         print(f"  평균: {sum(accountCounts)/len(accountCounts):.1f}개")
         print(f"  최소: {min(accountCounts)}개, 최대: {max(accountCounts)}개")
 

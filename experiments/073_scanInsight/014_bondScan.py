@@ -254,7 +254,7 @@ def scan_bonds() -> pl.DataFrame:
 
         short_ratio = cb_result["단기비중"].drop_nulls()
         if short_ratio.len() > 0:
-            print(f"\n=== 단기(1년이내) 비중 분포 ===")
+            print("\n=== 단기(1년이내) 비중 분포 ===")
             print(f"평균: {short_ratio.mean():.1f}%")
             print(f"중앙값: {short_ratio.median():.1f}%")
         return cb_result

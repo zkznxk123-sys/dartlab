@@ -264,7 +264,7 @@ def runArchetypeClassify(*, verbose: bool = True) -> pl.DataFrame:
     # k=3~8 시도, 최적 silhouette
     bestK, bestSil, bestLabels = 4, -1.0, []
     if verbose:
-        print(f"\n[k별 silhouette 점수]")
+        print("\n[k별 silhouette 점수]")
 
     for k in range(3, 9):
         labels, centroids = _kmeans(data, k)
@@ -284,7 +284,7 @@ def runArchetypeClassify(*, verbose: bool = True) -> pl.DataFrame:
 
     # 클러스터별 프로파일
     if verbose:
-        print(f"\n[클러스터별 특성 프로파일 (원본 스케일)]")
+        print("\n[클러스터별 특성 프로파일 (원본 스케일)]")
         for c in range(bestK):
             cdf = nonFinDf.filter(pl.col("cluster") == c)
             n = len(cdf)
@@ -320,7 +320,7 @@ def runArchetypeClassify(*, verbose: bool = True) -> pl.DataFrame:
             print(f"    → 추정 아키타입: {archetype}")
 
         # 섹터-클러스터 교차표
-        print(f"\n[섹터-클러스터 매칭]")
+        print("\n[섹터-클러스터 매칭]")
         for sector in ["IT/반도체", "산업재", "건강관리", "필수소비재"]:
             sdf = nonFinDf.filter(pl.col("sector") == sector)
             if sdf.is_empty():
@@ -333,7 +333,7 @@ def runArchetypeClassify(*, verbose: bool = True) -> pl.DataFrame:
             print(f"  {sector:12s}: 주 클러스터 {dominant[0]} ({purity:.0f}%) | 분포: {dict(dist)}")
 
         # 기업별 클러스터 할당
-        print(f"\n[기업별 클러스터]")
+        print("\n[기업별 클러스터]")
         for row_data in nonFinDf.sort("cluster").iter_rows(named=True):
             print(f"  C{row_data['cluster']}: {row_data['corpName']:12s} ({row_data['sector']})")
 

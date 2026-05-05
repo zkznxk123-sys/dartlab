@@ -146,7 +146,7 @@ if __name__ == "__main__":
         print(f"  기간 목록: {matrix_data['periods'][:10]}...")
 
         # 핫 토픽 상위 10
-        print(f"\n  [핫 토픽 상위 10]")
+        print("\n  [핫 토픽 상위 10]")
         hot_topics = matrix_data["matrix"][:10]
         for i, row in enumerate(hot_topics, 1):
             rate = row["changeRate"]
@@ -160,7 +160,7 @@ if __name__ == "__main__":
             print(f"    · {r['topic']}")
 
         # text-only 핫 토픽
-        print(f"\n  [text-only 핫 토픽 상위 10]")
+        print("\n  [text-only 핫 토픽 상위 10]")
         text_hot = text_matrix["matrix"][:10]
         for i, row in enumerate(text_hot, 1):
             rate = row["changeRate"]
@@ -169,7 +169,7 @@ if __name__ == "__main__":
 
         # HeatmapChart ChartSpec (text-only)
         spec = build_heatmap_spec(text_matrix, name, top_n=15)
-        print(f"\n  [HeatmapChart ChartSpec (text-only)]")
+        print("\n  [HeatmapChart ChartSpec (text-only)]")
         print(f"    x축(기간): {len(spec['xLabels'])}개")
         print(f"    y축(topic): {len(spec['yLabels'])}개")
         print(f"    data shape: {len(spec['data'])}×{len(spec['data'][0]) if spec['data'] else 0}")

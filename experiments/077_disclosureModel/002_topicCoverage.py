@@ -147,7 +147,7 @@ def main():
     dart_topics = {t for t, s in topic_stats.items() if s["DART"]["companies"]}
     edgar_topics = {t for t, s in topic_stats.items() if s["EDGAR"]["companies"]}
     common = dart_topics & edgar_topics
-    print(f"\n--- 공통 topic ---")
+    print("\n--- 공통 topic ---")
     print(f"DART only: {len(dart_topics - edgar_topics)}")
     print(f"EDGAR only: {len(edgar_topics - dart_topics)}")
     print(f"공통: {len(common)}")

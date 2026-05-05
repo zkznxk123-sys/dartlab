@@ -91,7 +91,7 @@ def sampleContent(stockCode: str, year: str = None):
 def compareMajorSections(codes: list):
     """다종목 대분류 구조 비교."""
     print(f"\n{'='*80}")
-    print(f" 다종목 대분류 비교")
+    print(" 다종목 대분류 비교")
     print(f"{'='*80}")
 
     results = {}

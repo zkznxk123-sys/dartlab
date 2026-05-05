@@ -111,7 +111,7 @@ if __name__ == "__main__":
             fail += 1
 
     total = len(files)
-    print(f"\n=== 044 회사의 개요 배치 결과 ===")
+    print("\n=== 044 회사의 개요 배치 결과 ===")
     print(f"성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}/{total}")
     print(f"기본정보 파싱: {withInfo}건")

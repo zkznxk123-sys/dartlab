@@ -163,7 +163,7 @@ def run_experiment():
         print(f"  {code}: noise_new={code_noise}, temporal_new={code_temporal}")
 
     # 결과 출력
-    print(f"\n총합:")
+    print("\n총합:")
     print(f"  short_paren headings 전수: {total_short_paren_headings}")
     print(f"  bracket headings 전수: {total_bracket_headings}")
     print(f"  새 noise 필터 차단: {len(noise_newly_filtered)}건")
@@ -171,7 +171,7 @@ def run_experiment():
 
     # 새 noise 필터에 잡힌 것들 출력
     if noise_newly_filtered:
-        print(f"\n  [noise 새 차단 목록] (최대 30개):")
+        print("\n  [noise 새 차단 목록] (최대 30개):")
         # 빈도 집계
         from collections import Counter
         noise_counter = Counter(text for _, text in noise_newly_filtered)
@@ -179,7 +179,7 @@ def run_experiment():
             print(f"    '{text}' x{count}")
 
     if temporal_newly_filtered:
-        print(f"\n  [temporal 새 차단 목록] (최대 30개):")
+        print("\n  [temporal 새 차단 목록] (최대 30개):")
         from collections import Counter
         temporal_counter = Counter(text for _, text in temporal_newly_filtered)
         for text, count in temporal_counter.most_common(30):

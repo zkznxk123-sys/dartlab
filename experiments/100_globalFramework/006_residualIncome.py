@@ -38,9 +38,9 @@
 실험일: 2026-03-25
 """
 
-import sys
 import os
 import statistics
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -145,7 +145,7 @@ def main():
     print(f"\n가치 창출 (RI>0): {', '.join(r['name'] for r in creating) or '(없음)'}")
     print(f"가치 파괴 (RI<0): {', '.join(r['name'] for r in destroying) or '(없음)'}")
 
-    print(f"\n[ROE - Ke 스프레드]")
+    print("\n[ROE - Ke 스프레드]")
     for r in results:
         if r["avgRoe"]:
             spread = r["avgRoe"] - r["ke"] * 100

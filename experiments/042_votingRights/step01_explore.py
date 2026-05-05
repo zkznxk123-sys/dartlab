@@ -143,7 +143,7 @@ if __name__ == "__main__":
             fail += 1
 
     total = len(files)
-    print(f"\n=== 042 의결권 현황 배치 결과 ===")
+    print("\n=== 042 의결권 현황 배치 결과 ===")
     print(f"성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}/{total}")
     print(f"의결권 항목: {totalRights}건")

@@ -297,10 +297,10 @@ def run():
 
     # 종합
     print(f"\n{'=' * 70}")
-    print(f"  종합 비교 (3개년 평균)")
+    print("  종합 비교 (3개년 평균)")
     print(f"{'=' * 70}")
 
-    print(f"\n  MdAE 연도별 추이:")
+    print("\n  MdAE 연도별 추이:")
     print(f"  {'방법':20s}", end="")
     for y in TARGET_YEARS:
         print(f" {y:>8s}", end="")
@@ -316,7 +316,7 @@ def run():
             print(f" {md:8.1f}%", end="")
         print(f" {avg:8.1f}% {cv:6.2f}")
 
-    print(f"\n  20% 이내 적중률 연도별 추이:")
+    print("\n  20% 이내 적중률 연도별 추이:")
     print(f"  {'방법':20s}", end="")
     for y in TARGET_YEARS:
         print(f" {y:>8s}", end="")

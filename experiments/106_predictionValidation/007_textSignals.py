@@ -207,10 +207,10 @@ def main():
     print(f"\n[4/4] 분석 ({n} 종목)")
 
     # --- A. 키워드 방향 예측 정확도 ---
-    print(f"\n=== A. 키워드 방향 예측 정확도 ===")
+    print("\n=== A. 키워드 방향 예측 정확도 ===")
     kwCorrect = sum(1 for r in records if r["kwDir"] == r["actualDir"])
     print(f"  정확도: {kwCorrect/n*100:.1f}% ({kwCorrect}/{n})")
-    print(f"  (비교: 001 OLS=47%, 모멘텀=13%, 항상up=53%)")
+    print("  (비교: 001 OLS=47%, 모멘텀=13%, 항상up=53%)")
 
     for d in ["up", "down", "flat"]:
         predicted = [r for r in records if r["kwDir"] == d]
@@ -219,7 +219,7 @@ def main():
             print(f"  {d} 예측: {correct/len(predicted)*100:.1f}% 정확 (n={len(predicted)})")
 
     # --- B. expandRatio 구간별 ---
-    print(f"\n=== B. 확장키워드 비율 구간별 매출 ===")
+    print("\n=== B. 확장키워드 비율 구간별 매출 ===")
     rBins = [(0, 0.4, "축소우세(<40%)"), (0.4, 0.5, "균형(40-50%)"),
              (0.5, 0.6, "확장소폭(50-60%)"), (0.6, 1.01, "확장우세(60%+)")]
     for lo, hi, label in rBins:
@@ -233,7 +233,7 @@ def main():
         print(f"  {label:18s}: n={sn:4d}  up={upRate:4.0f}%  down={downRate:4.0f}%  평균={avgGrowth:+.1f}%")
 
     # --- C. 사업섹션 확장비율 vs 매출 ---
-    print(f"\n=== C. 사업섹션 확장키워드 비율 vs 매출 ===")
+    print("\n=== C. 사업섹션 확장키워드 비율 vs 매출 ===")
     for lo, hi, label in rBins:
         subset = [r for r in records if lo <= r["bizExpandRatio"] < hi]
         if not subset:
@@ -245,7 +245,7 @@ def main():
         print(f"  {label:18s}: n={sn:4d}  up={upRate:4.0f}%  down={downRate:4.0f}%  평균={avgGrowth:+.1f}%")
 
     # --- D. 리스크 축소키워드 비율 vs 매출 ---
-    print(f"\n=== D. 리스크섹션 축소키워드 비율 vs 매출 ===")
+    print("\n=== D. 리스크섹션 축소키워드 비율 vs 매출 ===")
     for lo, hi, label in [(0, 0.3, "축소적음(<30%)"), (0.3, 0.5, "중간(30-50%)"),
                           (0.5, 0.7, "많음(50-70%)"), (0.7, 1.01, "매우많음(70%+)")]:
         subset = [r for r in records if lo <= r["riskShrinkRatio"] < hi]
@@ -258,7 +258,7 @@ def main():
         print(f"  {label:18s}: n={sn:4d}  up={upRate:4.0f}%  down={downRate:4.0f}%  평균={avgGrowth:+.1f}%")
 
     # --- E. 방향 전환 감지 ---
-    print(f"\n=== E. 키워드 신호 vs 방향 전환 ===")
+    print("\n=== E. 키워드 신호 vs 방향 전환 ===")
     turnRecords = [r for r in records if r["prevDir"] is not None]
     if turnRecords:
         tn = len(turnRecords)
@@ -276,7 +276,7 @@ def main():
             print(f"  키워드가 같은 방향 지시: n={pn}, 실제 유지율={actuallyKept/pn*100:.1f}%")
 
     # --- F. 상위/하위 비교 ---
-    print(f"\n=== F. 확장비율 상위25% vs 하위25% ===")
+    print("\n=== F. 확장비율 상위25% vs 하위25% ===")
     sortedByExpand = sorted(records, key=lambda r: r["expandRatio"], reverse=True)
     q = max(1, n // 4)
     top25 = sortedByExpand[:q]

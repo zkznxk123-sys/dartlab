@@ -65,7 +65,6 @@ from __future__ import annotations
 
 import importlib.util
 import pathlib
-from collections import Counter
 from typing import Optional
 
 import polars as pl
@@ -239,7 +238,7 @@ def exploreSamsung():
         return
 
     matrix, years = result
-    print(f"=== 삼성전자 SCE 피벗 ===")
+    print("=== 삼성전자 SCE 피벗 ===")
     print(f"연도: {years}")
     print()
 
@@ -297,7 +296,6 @@ def exploreSamsung():
 
 
 def exploreMultiple():
-    from dartlab import config
 
     codes = [
         ("005930", "삼성전자"),
@@ -353,7 +351,7 @@ def testAnnualSeries():
 
     series, years = result
     sceData = series["SCE"]
-    print(f"\n=== 삼성전자 SCE 연도별 시계열 ===")
+    print("\n=== 삼성전자 SCE 연도별 시계열 ===")
     print(f"연도: {years}")
     print(f"키 수: {len(sceData)}")
 

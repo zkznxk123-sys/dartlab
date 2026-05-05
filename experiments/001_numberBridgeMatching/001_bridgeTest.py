@@ -203,7 +203,7 @@ def main():
                 vstr = [f"{v:,.0f}" if v is not None else "N/A" for v in vals]
                 print(f"    {name}: {vstr}")
 
-    print(f"\n=== 브릿지 매칭 테스트 ===")
+    print("\n=== 브릿지 매칭 테스트 ===")
     sortedYears = sorted(yearAccounts.keys(), reverse=True)
 
     totalMatch = 0
@@ -240,7 +240,7 @@ def main():
         totalNoMatch += nm
 
     print(f"\n{'='*60}")
-    print(f"=== 종합 결과 ===")
+    print("=== 종합 결과 ===")
     grandTotal = totalMatch + totalNameChange + totalNoMatch
     print(f"전체: 동일계정={totalMatch}, 이름변경={totalNameChange}, 미매칭={totalNoMatch}")
     if grandTotal > 0:
@@ -248,7 +248,7 @@ def main():
         print(f"이름변경률: {totalNameChange / grandTotal * 100:.1f}%")
 
     if allNameChanges:
-        print(f"\n=== 발견된 계정명 변형 패턴 ===")
+        print("\n=== 발견된 계정명 변형 패턴 ===")
         for c in allNameChanges:
             print(f"  '{c[0]}' → '{c[1]}'")
 

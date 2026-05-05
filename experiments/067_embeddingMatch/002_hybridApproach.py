@@ -331,7 +331,7 @@ def test_normalized_embedding():
     if gap > 0:
         print(f"  → 분리 가능! threshold ∈ ({neg_max:.4f}, {pos_min:.4f})")
     else:
-        print(f"  → 분리 불가능")
+        print("  → 분리 불가능")
 
 
 def test_final_strategy():

@@ -6,7 +6,6 @@
 - 유형자산과의 차이점
 """
 
-import os
 import sys
 
 sys.path.insert(0, "src")
@@ -61,9 +60,9 @@ if __name__ == "__main__":
         print(f"\n{'='*60}")
         print(f"[{code}] {corpName}")
         print(f"무형자산 섹션 길이: {len(section)} chars")
-        print(f"첫 500자:")
+        print("첫 500자:")
         print(section[:500])
-        print(f"...")
+        print("...")
 
         results, warnings = findMovementTables(section)
         if results:
@@ -82,9 +81,9 @@ if __name__ == "__main__":
                     print(f"    기말 합계: {total:,.0f}")
         else:
             fail += 1
-            print(f"\n파싱 실패")
+            print("\n파싱 실패")
             if warnings:
                 print(f"  경고: {warnings}")
 
-    print(f"\n=== 요약 ===")
+    print("\n=== 요약 ===")
     print(f"성공: {ok}, 실패: {fail}, 섹션없음: {noSection}")

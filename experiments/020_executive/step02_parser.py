@@ -28,13 +28,12 @@
 import os
 import re
 import sys
-from collections import Counter
 
 import polars as pl
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import loadData
 from dartlab.core.reportSelector import selectReport
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
@@ -486,7 +485,7 @@ if __name__ == "__main__":
             print(f"    상근: {s['fullTimeCount']}, 비상근: {s['partTimeCount']}")
             print(f"    남: {s['maleCount']}, 여: {s['femaleCount']}")
 
-            print(f"\n  [등기임원 리스트]")
+            print("\n  [등기임원 리스트]")
             for e in result["executives"][:5]:
                 print(f"    {e['name']:8s} | {e['gender']} | {e['position']:10s} | {e['registrationType']:10s} | {e['fullTime']}")
             if len(result["executives"]) > 5:

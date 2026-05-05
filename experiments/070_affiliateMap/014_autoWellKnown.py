@@ -56,7 +56,7 @@
 # 013 통합 파이프라인에서 필요한 함수 import
 import importlib.util
 import time
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 
 import polars as pl

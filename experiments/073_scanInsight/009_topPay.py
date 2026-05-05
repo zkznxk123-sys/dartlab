@@ -179,7 +179,7 @@ def scan_top_pay() -> pl.DataFrame:
     print(f"고액 보수 기업 비율: {high_stocks}/{total_stocks} ({high_stocks/total_stocks*100:.1f}%)")
 
     # top 20
-    print(f"\n=== 보수 상위 20명 ===")
+    print("\n=== 보수 상위 20명 ===")
     top20 = person_df.sort("보수_억", descending=True).head(20)
     print(top20.select(["종목코드", "이름", "직위", "보수_억"]))
 

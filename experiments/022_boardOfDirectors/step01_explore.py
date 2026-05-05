@@ -32,7 +32,7 @@ import polars as pl
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import loadData
 from dartlab.core.reportSelector import selectReport
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"

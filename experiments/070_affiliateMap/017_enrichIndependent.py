@@ -110,7 +110,7 @@ def strategy_a_all_investments(
     # 목적별 분류
     purpose_counts = Counter(e["purpose"] for e in edges_for_indep)
 
-    print(f"\n전략 A: 단순투자 포함 전체 출자 엣지")
+    print("\n전략 A: 단순투자 포함 전체 출자 엣지")
     print(f"  전체 상장사간 엣지: {all_listed.height:,}")
     print(f"  독립 회사 관련 엣지: {len(edges_for_indep):,}")
     print(f"  독립 회사 연결: {len(indep_connected)} / {len(indep_codes)} ({len(indep_connected)/max(len(indep_codes),1):.0%})")
@@ -118,7 +118,7 @@ def strategy_a_all_investments(
 
     # 연결된 독립 회사 샘플
     if indep_connected:
-        print(f"\n  연결된 독립 회사 샘플 (상위 10):")
+        print("\n  연결된 독립 회사 샘플 (상위 10):")
         conn_edges_count = Counter()
         for e in edges_for_indep:
             if e["from"] in indep_codes:
@@ -210,11 +210,11 @@ def strategy_b_shared_holders(
     for e in shared_edges:
         top_holders[e["holder"]] += 1
 
-    print(f"\n전략 B: 공유 주주 네트워크")
+    print("\n전략 B: 공유 주주 네트워크")
     print(f"  공유 주주 엣지: {len(shared_edges):,}")
     print(f"  독립 회사 연결: {len(indep_connected)} / {len(indep_codes)} ({len(indep_connected)/max(len(indep_codes),1):.0%})")
 
-    print(f"\n  주요 공유 주주 TOP 15:")
+    print("\n  주요 공유 주주 TOP 15:")
     for holder, cnt in top_holders.most_common(15):
         if holder.startswith("person_"):
             label = holder.replace("person_", "") + " (개인)"
@@ -265,7 +265,7 @@ def strategy_c_industry_cluster(
             indep_with_industry += 1
             indep_industry_sizes.append(len(industry_groups[industry]))
 
-    print(f"\n전략 C: 업종 클러스터")
+    print("\n전략 C: 업종 클러스터")
     print(f"  업종 수: {len(industry_groups)}")
     print(f"  업종 있는 회사: {sum(len(v) for v in industry_groups.values())} / {len(all_node_ids)}")
     print(f"  업종 없는 회사: {len(no_industry)}")
@@ -283,7 +283,7 @@ def strategy_c_industry_cluster(
         if industry:
             indep_per_industry[industry] += 1
 
-    print(f"\n  독립 회사 많은 업종 TOP 15:")
+    print("\n  독립 회사 많은 업종 TOP 15:")
     for ind, cnt in sorted(indep_per_industry.items(), key=lambda x: -x[1])[:15]:
         total = len(industry_groups[ind])
         print(f"    {ind}: 독립 {cnt} / 전체 {total}")
@@ -335,7 +335,7 @@ def combined_analysis(
             print(f"    {code} {code_to_name.get(code, '?')}")
 
     # ego 뷰 예시 — 독립 회사
-    print(f"\n  독립 회사 ego 풍부도 예시:")
+    print("\n  독립 회사 ego 풍부도 예시:")
     for code in sorted(a_conn)[:5]:
         name = code_to_name.get(code, code)
         a_edges = sum(1 for e in result_a["edges"] if e["from"] == code or e["to"] == code)

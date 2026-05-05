@@ -57,7 +57,6 @@
 """
 
 import importlib.util
-import sys
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -137,7 +136,7 @@ def build_graph_stats(edges: pl.DataFrame, code_to_name: dict[str, str]) -> None
     out_deg = edges.group_by("from_code").agg(
         pl.col("to_name_norm").count().alias("out_degree")
     ).sort("out_degree", descending=True)
-    print(f"\n  Out-degree (출자 수) TOP 15:")
+    print("\n  Out-degree (출자 수) TOP 15:")
     for row in out_deg.head(15).iter_rows(named=True):
         name = code_to_name.get(row["from_code"], row["from_code"])
         print(f"    {name}: {row['out_degree']}")
@@ -147,7 +146,7 @@ def build_graph_stats(edges: pl.DataFrame, code_to_name: dict[str, str]) -> None
     in_deg = listed_edges.group_by("to_name_norm").agg(
         pl.col("from_code").n_unique().alias("in_degree")
     ).sort("in_degree", descending=True)
-    print(f"\n  In-degree (출자 받는 횟수, 상장사만) TOP 15:")
+    print("\n  In-degree (출자 받는 횟수, 상장사만) TOP 15:")
     for row in in_deg.head(15).iter_rows(named=True):
         print(f"    {row['to_name_norm']}: {row['in_degree']}개사")
 
@@ -283,7 +282,7 @@ def analyze_chaebol_clusters(
             .head(5)
         )
         if len(top_stakes) > 0:
-            print(f"    → 최대 지분:")
+            print("    → 최대 지분:")
             for row in top_stakes.iter_rows(named=True):
                 pct = f"{row['ownership_pct']:.1f}%"
                 bv = f"{row['book_value']/1e8:.0f}억" if row["book_value"] else "N/A"

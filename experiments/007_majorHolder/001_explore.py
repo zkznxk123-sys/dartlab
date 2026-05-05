@@ -53,12 +53,12 @@ def main():
         print(f"\n--- {year} (사업보고서 전체 섹션 {len(titles)}개) ---")
 
         holderTitles = [t for t in titles if "주주" in t or "지분" in t or "소유" in t or "대주주" in t]
-        print(f"\n  최대주주 관련 섹션:")
+        print("\n  최대주주 관련 섹션:")
         for t in sorted(holderTitles):
             print(f"    {t}")
 
         empTitles = [t for t in titles if "임원" in t]
-        print(f"\n  임원 관련 섹션:")
+        print("\n  임원 관련 섹션:")
         for t in sorted(empTitles):
             print(f"    {t}")
 

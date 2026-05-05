@@ -50,8 +50,8 @@
 
 import importlib
 import inspect
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
@@ -96,9 +96,9 @@ def test1_system_prompts():
     print("=" * 60)
 
     from dartlab.ai.conversation.templates.system_base import (
-        SYSTEM_PROMPT_KR,
-        SYSTEM_PROMPT_EN,
         SYSTEM_PROMPT_COMPACT,
+        SYSTEM_PROMPT_EN,
+        SYSTEM_PROMPT_KR,
     )
 
     issues = []

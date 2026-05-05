@@ -95,14 +95,14 @@ def analyze():
         for tag in a.get("commonTags", []):
             edgar_tags.add(tag)
 
-    print(f"\n2. EDGAR standardAccounts.json 분석")
+    print("\n2. EDGAR standardAccounts.json 분석")
     print(f"   계정 수: {len(edgar_accounts)}개")
     print(f"   고유 snakeId: {len(edgar_snakeIds)}개")
     print(f"   공통 태그: {len(edgar_tags)}개")
 
     # ── 3. DART ↔ EDGAR snakeId 교집합 ──
     shared_snakeIds = dart_snakeIds & edgar_snakeIds
-    print(f"\n3. DART ↔ EDGAR snakeId 교집합")
+    print("\n3. DART ↔ EDGAR snakeId 교집합")
     print(f"   공유 snakeId: {len(shared_snakeIds)}개")
     print(f"   DART 전용: {len(dart_snakeIds - edgar_snakeIds)}개")
     print(f"   EDGAR 전용: {len(edgar_snakeIds - dart_snakeIds)}개")
@@ -114,7 +114,7 @@ def analyze():
     covered_by_dart = edinet_snakeIds & dart_snakeIds
     covered_by_edgar = edinet_snakeIds & edgar_snakeIds
 
-    print(f"\n4. EDINET CORE_MAP 분석")
+    print("\n4. EDINET CORE_MAP 분석")
     print(f"   CORE_MAP 항목: {len(CORE_MAP)}개")
     print(f"   고유 snakeId: {len(edinet_snakeIds)}개")
     print(f"   DART에도 존재하는 snakeId: {len(covered_by_dart)}개")
@@ -139,7 +139,7 @@ def analyze():
         "owners_of_parent_equity", "basic_earnings_per_share",
     ]
 
-    print(f"\n5. 핵심 재무 snakeId — DART 한글명 → EDINET 일본어명 대응")
+    print("\n5. 핵심 재무 snakeId — DART 한글명 → EDINET 일본어명 대응")
     for sid in core_financial_snakeIds:
         dart_names = [k for k, v in dart_map.items() if v == sid and any(ord(c) > 0x1100 for c in k)]
         dart_names_short = dart_names[:3]
@@ -152,7 +152,7 @@ def analyze():
     top30 = [sid for sid, _ in dart_freq.most_common(30)]
 
     missing = [sid for sid in top30 if sid not in edinet_snakeIds]
-    print(f"\n6. DART 상위 30 snakeId 중 EDINET CORE_MAP 누락")
+    print("\n6. DART 상위 30 snakeId 중 EDINET CORE_MAP 누락")
     print(f"   누락 {len(missing)}개:")
     for sid in missing:
         print(f"     - {sid} (DART {dart_freq[sid]}건)")

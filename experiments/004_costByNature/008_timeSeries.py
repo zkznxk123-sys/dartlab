@@ -474,12 +474,12 @@ if __name__ == "__main__":
         print(f"  기간: {len(meta['years'])}년")
 
         if meta["crossCheck"]:
-            print(f"\n  교차검증 (당기 vs 전기):")
+            print("\n  교차검증 (당기 vs 전기):")
             for year, cc in sorted(meta["crossCheck"].items()):
                 total = cc["matches"] + cc["mismatches"]
                 rate = cc["matches"] / total * 100 if total > 0 else 0
                 print(f"    {year}: {cc['matches']}/{total} 일치 ({rate:.0f}%)")
 
-        print(f"\n  DataFrame:")
+        print("\n  DataFrame:")
         with pl.Config(tbl_cols=min(len(meta["years"]) + 1, 12), tbl_width_chars=120):
             print(result)

@@ -342,7 +342,7 @@ def run():
 
     # 결과
     print(f"\n{'=' * 70}")
-    print(f"  3개년 MdAE 비교")
+    print("  3개년 MdAE 비교")
     print(f"{'=' * 70}")
 
     print(f"\n  {'방법':25s}", end="")
@@ -358,7 +358,7 @@ def run():
             print(f" {md:8.1f}%", end="")
         print(f" {np.mean(mdaes):8.1f}%")
 
-    print(f"\n  3개년 20%이내 비교:")
+    print("\n  3개년 20%이내 비교:")
     print(f"  {'방법':25s}", end="")
     for y in TARGET_YEARS:
         print(f" {y:>8s}", end="")

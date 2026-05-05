@@ -180,7 +180,7 @@ def items_match(a: str, b: str) -> tuple[bool, str]:
         return normalize_core(''.join(parts))
 
     if full_form(pa) == full_form(pb):
-        return True, f"full form match"
+        return True, "full form match"
 
     # Rule 5: core의 fuzzy 유사도 (높은 threshold)
     from difflib import SequenceMatcher
@@ -273,7 +273,7 @@ def run_test():
     tp, fp, fn, tn = 0, 0, 0, 0
     errors = []
 
-    print(f"\n── Positive 쌍 (매칭해야 함) ──")
+    print("\n── Positive 쌍 (매칭해야 함) ──")
     for i, j, desc in positive_pairs:
         matched, reason = items_match(items[i], items[j])
         if matched:
@@ -285,7 +285,7 @@ def run_test():
             print(f"  ✗ FN  [{i:2d}]×[{j:2d}]  {desc}")
         print(f"         reason: {reason}")
 
-    print(f"\n── Negative 쌍 (매칭하면 안 됨) ──")
+    print("\n── Negative 쌍 (매칭하면 안 됨) ──")
     for i, j, desc in negative_pairs:
         matched, reason = items_match(items[i], items[j])
         if not matched:
@@ -304,7 +304,7 @@ def run_test():
     accuracy = (tp + tn) / (tp + fp + fn + tn)
 
     print(f"\n{'='*90}")
-    print(f"  결과 요약")
+    print("  결과 요약")
     print(f"{'='*90}")
     print(f"  TP={tp}  FP={fp}  FN={fn}  TN={tn}")
     print(f"  Precision: {precision:.2%}")
@@ -313,7 +313,7 @@ def run_test():
     print(f"  Accuracy:  {accuracy:.2%}")
 
     if errors:
-        print(f"\n── 오류 케이스 ──")
+        print("\n── 오류 케이스 ──")
         for typ, i, j, desc, reason in errors:
             print(f"  {typ}: [{i}]×[{j}] {desc}")
             print(f"    → {reason}")
@@ -328,14 +328,14 @@ def run_test():
             items_match(a, b)
             count += 1
     elapsed = time.time() - t0
-    print(f"\n── 속도 벤치마크 ──")
+    print("\n── 속도 벤치마크 ──")
     print(f"  200×200 = {count} 쌍: {elapsed:.3f}초 ({elapsed/count*1e6:.1f}μs/쌍)")
     print(f"  283종목 × 200항목 추정: {283 * elapsed:.1f}초 ({283 * elapsed / 60:.1f}분)")
-    print(f"  (cf. 임베딩: 38분)")
+    print("  (cf. 임베딩: 38분)")
 
     # 비교 요약
     print(f"\n{'='*90}")
-    print(f"  방법별 비교 요약")
+    print("  방법별 비교 요약")
     print(f"{'='*90}")
     print(f"  {'방법':30s} {'Precision':>10s} {'Recall':>10s} {'F1':>10s} {'속도':>15s}")
     print(f"  {'-'*75}")

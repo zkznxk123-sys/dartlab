@@ -80,7 +80,7 @@ for code, name in FAIL_CODES.items():
 
     if not allContents:
         allContents = report["section_content"].to_list()
-        print(f"  (주석 없음, 전체 섹션에서 검색)")
+        print("  (주석 없음, 전체 섹션에서 검색)")
 
     found = False
     for content in allContents:
@@ -99,11 +99,11 @@ for code, name in FAIL_CODES.items():
         costRows = df.filter(pl.col("section_content").str.contains("비용의 성격"))
         if costRows.height > 0:
             sample = costRows.head(1)
-            print(f"  최신 보고서에는 없지만 다른 데이터에서 발견됨")
+            print("  최신 보고서에는 없지만 다른 데이터에서 발견됨")
             print(f"    year={sample['year'][0]}, report_type={sample['report_type'][0]}")
             print(f"    section_title={sample['section_title'][0]}")
         else:
-            print(f"  전체 데이터에도 '비용의 성격' 없음")
+            print("  전체 데이터에도 '비용의 성격' 없음")
 
 
 print()
@@ -181,7 +181,7 @@ for code, name in TABLE_FAIL_CODES.items():
         print(f"  당기/전기 별도 블록: {'Y' if hasDanggi or hasJeongi else 'N'}")
         print(f"  단일 컬럼(공시금액): {'Y' if not hasMultiCol else 'N'}")
         print(f"  멀티 컬럼(판관비/원가/합계): {'Y' if hasMultiCol else 'N'}")
-        print(f"  --- 첫 30행 ---")
+        print("  --- 첫 30행 ---")
         for l in sectionLines[:30]:
             print(f"    {l[:120]}")
         break

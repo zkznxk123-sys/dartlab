@@ -55,7 +55,6 @@ def collectRatioTimeSeries(*, maxCompanies: int | None = None, verbose: bool = T
     """전체 종목의 연도별 핵심 비율 시계열 수집."""
     import dartlab
     from dartlab.core.sector.classifier import classify
-    from dartlab.analysis.financial.ratios import calcRatios
     from dartlab.providers.dart.finance.pivot import buildTimeseries
 
     kindDf = dartlab.listing()
@@ -239,7 +238,7 @@ if __name__ == "__main__":
     print(f"종목: {tsDf['stockCode'].n_unique()}, 연도 범위: {tsDf['year'].min()} ~ {tsDf['year'].max()}")
 
     # YoY 변화율
-    print(f"\n=== YoY 변화율 계산 ===")
+    print("\n=== YoY 변화율 계산 ===")
     yoyDf = computeYoYChanges(tsDf)
 
     # 이상치 탐지
@@ -254,21 +253,21 @@ if __name__ == "__main__":
         print(f"종목: {anomalies['stockCode'].n_unique()}개")
 
         # 메트릭별 이벤트 수
-        print(f"\n메트릭별 이벤트 수:")
+        print("\n메트릭별 이벤트 수:")
         metricCounts = anomalies.group_by("metric").len().sort("len", descending=True)
         print(metricCounts)
 
         # 연도별 이벤트 수
-        print(f"\n연도별 이벤트 수:")
+        print("\n연도별 이벤트 수:")
         yearCounts = anomalies.group_by("year").len().sort("year")
         print(yearCounts)
 
         # 섹터별 이벤트 수
-        print(f"\n섹터별 이벤트 수:")
+        print("\n섹터별 이벤트 수:")
         sectorCounts = anomalies.group_by("sector").len().sort("len", descending=True)
         print(sectorCounts)
 
         # Top 20 급변 이벤트
-        print(f"\n급변 이벤트 Top 20 (|Z| 최대):")
+        print("\n급변 이벤트 Top 20 (|Z| 최대):")
         top = anomalies.sort(pl.col("zScore").abs(), descending=True).head(20)
         print(top.select(["corpName", "year", "metric", "yoyChange", "zScore", "direction"]))

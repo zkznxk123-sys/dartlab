@@ -1,8 +1,6 @@
 """006의 hzTopic를 삼성전자 dividend에 직접 호출하여 0% 원인 확인."""
 import re
 import sys
-from collections import defaultdict
-from dataclasses import dataclass, field
 
 import polars as pl
 
@@ -37,7 +35,7 @@ period_cols = sorted([
 topic = "dividend"
 tt = table_rows.filter(pl.col("topic") == topic)
 
-print(f"Testing 006's hzTopic on dividend...")
+print("Testing 006's hzTopic on dividend...")
 try:
     results = mod.hzTopic(tt, period_cols)
     print(f"  결과: {len(results)} DataFrames")

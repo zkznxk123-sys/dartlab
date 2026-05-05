@@ -75,7 +75,7 @@ if __name__ == "__main__":
                 numToTitles[num][title] += 1
 
     print(f"주석 있음: {hasNotes}, 없음: {noNotes}")
-    print(f"\n=== 주석 번호별 출현 빈도 (상위) ===")
+    print("\n=== 주석 번호별 출현 빈도 (상위) ===")
 
     for num in sorted(numToTitles.keys()):
         titles = numToTitles[num]
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         variants = len(titles)
         print(f"  {num:2d}. {topTitle:<30s}  ({total}개 기업, {variants}개 변형)")
 
-    print(f"\n=== 주석 제목 변형 상세 (3개 이상 변형) ===")
+    print("\n=== 주석 제목 변형 상세 (3개 이상 변형) ===")
     for num in sorted(numToTitles.keys()):
         titles = numToTitles[num]
         if len(titles) >= 3:

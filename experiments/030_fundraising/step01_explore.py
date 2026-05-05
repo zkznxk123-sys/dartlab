@@ -27,7 +27,6 @@
 """
 
 import os
-import re
 import sys
 from collections import Counter
 
@@ -119,7 +118,7 @@ def batchExplore():
     if lengths:
         print(f"평균 길이: {sum(lengths)/len(lengths):.0f}, 최대: {max(lengths)}")
 
-    print(f"\n섹션 제목:")
+    print("\n섹션 제목:")
     for title, count in titleCounter.most_common(10):
         print(f"  {count:3d} | {title}")
 

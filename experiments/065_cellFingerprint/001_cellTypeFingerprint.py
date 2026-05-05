@@ -318,7 +318,7 @@ def test_real_world_edge_cases():
     print(f"  2024: {fp2}  sig={fp2.signature}")
     print(f"  유사도: {sim:.4f}")
     print(f"  판정: {'같은 구조' if sim >= 0.7 else '다른 구조'}")
-    print(f"  → 항목명이 다르지만 셀 타입이 동일 → 핑거프린트가 같음")
+    print("  → 항목명이 다르지만 셀 타입이 동일 → 핑거프린트가 같음")
 
     print()
     print("=" * 70)
@@ -346,7 +346,7 @@ def test_real_world_edge_cases():
     print(f"  5명: {fp_more}  sig={fp_more.signature}")
     print(f"  유사도: {sim6:.4f}")
     print(f"  판정: {'같은 구조' if sim6 >= 0.7 else '다른 구조'}")
-    print(f"  → 행 수 달라도 열 패턴이 TTT로 동일 → 같은 구조 정확 판별")
+    print("  → 행 수 달라도 열 패턴이 TTT로 동일 → 같은 구조 정확 판별")
 
     print()
     print("=" * 70)
@@ -364,7 +364,7 @@ def test_real_world_edge_cases():
     print(f"  혼합: {fp_mix}")
     print(f"    시그니처: {fp_mix.signature}")
     print(f"    열별 분포: {[dict(d) for d in fp_mix.colDistributions]}")
-    print(f"  → 2열 내용이 D/T/T/N 혼합 → 주요 타입이 T (다양한 값)")
+    print("  → 2열 내용이 D/T/T/N 혼합 → 주요 타입이 T (다양한 값)")
 
     print()
     print("=" * 70)
@@ -520,13 +520,13 @@ def test_with_real_data():
                                      fingerprints[periods[0]].signature,
                                      fingerprints[periods[1]].signature if len(periods) > 1 else "N/A"))
 
-        print(f"\n  핑거프린트 결과 (상위 50 topics):")
+        print("\n  핑거프린트 결과 (상위 50 topics):")
         print(f"    같은 구조 판정: {sameCount}")
         print(f"    다른 구조 판정: {diffCount}")
         print(f"    파싱 실패: {failCount}")
 
         if examples:
-            print(f"\n  다른 구조로 판정된 예시:")
+            print("\n  다른 구조로 판정된 예시:")
             for topic, sim, periods, sig1, sig2 in examples:
                 print(f"    - {topic}: sim={sim:.3f}")
                 print(f"      {periods[0]}: {sig1}")

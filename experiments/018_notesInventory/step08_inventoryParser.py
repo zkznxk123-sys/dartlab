@@ -24,7 +24,6 @@ sys.path.insert(0, "src")
 from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection
 from dartlab.core.reportSelector import selectReport
-from dartlab.core.tableParser import detectUnit, parseAmount
 
 DATA_DIR = r"C:\Users\MSI\OneDrive\Desktop\sideProject\nicegui\eddmpython\data\dartData\docsData"
 
@@ -303,12 +302,12 @@ if __name__ == "__main__":
             failCodes.append((code, corpName))
 
     total = ok + fail
-    print(f"=== 재고자산 통합 파서 결과 ===")
+    print("=== 재고자산 통합 파서 결과 ===")
     print(f"섹션 있음: {total}, 없음: {noSection}")
     print(f"파싱 성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}")
 
     if failCodes:
-        print(f"\n실패 목록:")
+        print("\n실패 목록:")
         for code, name in failCodes:
             print(f"  [{code}] {name}")

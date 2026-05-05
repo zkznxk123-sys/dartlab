@@ -48,7 +48,6 @@
 import re
 import sys
 import time
-from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -57,13 +56,11 @@ sys.path.insert(0, str(ROOT / "src"))
 import polars as pl
 
 from dartlab.core.dataLoader import _dataDir
-from dartlab.providers.dart.docs.sections.pipeline import sections
 from dartlab.providers.dart.docs.sections.tableParser import (
     _classifyStructure,
     _dataRows,
     _headerCells,
     _isJunk,
-    _normalizeHeader,
     splitSubtables,
 )
 
@@ -457,7 +454,7 @@ if __name__ == "__main__":
     ruleTestPred = np.array([_ruleBasedPredict(features[i]) for i in testIdx])
 
     print("\n[테스트셋]")
-    print(f"  규칙 기반:")
+    print("  규칙 기반:")
     print(
         classification_report(
             y_test, ruleTestPred, target_names=["실패", "성공"], zero_division=0

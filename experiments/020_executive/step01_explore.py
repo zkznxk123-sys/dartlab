@@ -131,7 +131,7 @@ if __name__ == "__main__":
             print(f"  ERROR {code}: {e}")
 
     print(f"\n섹션 있음: {hasSection}, 없음: {noSection}")
-    print(f"\n=== 섹션 제목 분포 (top 30) ===")
+    print("\n=== 섹션 제목 분포 (top 30) ===")
     for title, count in titleCounter.most_common(30):
         print(f"  {count:4d} | {title}")
 
@@ -162,6 +162,6 @@ if __name__ == "__main__":
 
             # 첫 1000자 미리보기
             preview = s["content"][:1000]
-            print(f"\n  --- 미리보기 ---")
+            print("\n  --- 미리보기 ---")
             for line in preview.split("\n")[:30]:
                 print(f"  {line}")

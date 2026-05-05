@@ -40,7 +40,7 @@ def main() -> None:
         return
 
     tickers = [f.stem for f in files]
-    print(f"=== 057-007 sections pipeline validation ===")
+    print("=== 057-007 sections pipeline validation ===")
     print(f"tickers: {len(tickers)}")
     print()
 
@@ -71,7 +71,7 @@ def main() -> None:
             print(f"  [{i+1}/{len(tickers)}] {ticker} → ERROR: {e}")
 
     print()
-    print(f"=== RESULT ===")
+    print("=== RESULT ===")
     print(f"success: {success}")
     print(f"none:    {noneCount}")
     print(f"errors:  {len(errors)}")
@@ -83,7 +83,7 @@ def main() -> None:
         print(f"periods min={min(periods)} max={max(periods)} avg={sum(periods)/len(periods):.1f}")
 
     if errors:
-        print(f"\n--- ERRORS ---")
+        print("\n--- ERRORS ---")
         for ticker, tb in errors[:5]:
             print(f"\n{ticker}:")
             print(tb[-500:])

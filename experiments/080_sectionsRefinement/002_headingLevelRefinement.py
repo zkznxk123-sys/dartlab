@@ -43,7 +43,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSectionPrefix
+from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
 from dartlab.providers.dart.docs.sections.pipeline import iterPeriodSubsets
 from dartlab.providers.dart.docs.sections.textStructure import (
     _RE_BRACKET,
@@ -334,7 +334,6 @@ def run_experiment():
     print("\n@topic: 감지 테스트:")
     topic_pass = True
     for text, topic, desc in topic_tests:
-        from dartlab.providers.dart.docs.sections.textStructure import mapSectionTitle
         # monkeypatch 대신 직접 테스트 — mapSectionTitle이 topic으로 매핑하는지 확인
         nodes = parse_6level(text, topic=topic)
         first_heading = nodes[0] if nodes else {}
@@ -372,7 +371,7 @@ def run_experiment():
     else:
         is_nested = False
 
-    print(f"\n총합:")
+    print("\n총합:")
     print(f"  headings: {total_orig_headings}")
     print(f"  level 변경: {total_level_changes}")
     print(f"  path 변경: {total_path_changes}")
@@ -380,7 +379,7 @@ def run_experiment():
     print(f"  parent-child (I > 1): {'PASS' if is_nested else 'FAIL'}")
 
     if parent_child_examples:
-        print(f"\n  path 변경 예시 (최대 5개):")
+        print("\n  path 변경 예시 (최대 5개):")
         for ex in parent_child_examples:
             print(f"    {ex['code']}: lv {ex['orig_level']}→{ex['patched_level']} | "
                   f"'{ex['orig_path']}' → '{ex['patched_path']}'")

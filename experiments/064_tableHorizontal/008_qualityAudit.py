@@ -23,7 +23,6 @@
 
 import re
 import sys
-import traceback
 from collections import defaultdict
 from pathlib import Path
 
@@ -37,7 +36,6 @@ from dartlab.providers.dart.docs.sections.tableParser import (
     _dataRows,
     _headerCells,
     _isJunk,
-    _normalizeItemName,
     _parseKeyValueOrMatrix,
     _parseMultiYear,
     splitSubtables,
@@ -187,9 +185,6 @@ def auditStock(code: str) -> list[dict]:
     topics = sec["topic"].unique().to_list()
 
     # _horizontalizeTableBlock와 동일한 로직으로 수평화 시도
-    from dartlab.providers.dart.docs.sections.tableParser import (
-        _normalizeItemName as _ni,
-    )
     _SUFFIX_RE = re.compile(r"(사업)?부문$")
     _KISU_RE = re.compile(r"제\d+기\s*(?:\d*분기)?\s*\(?(당기|전기|전전기|당반기|전반기)\)?")
 
@@ -369,7 +364,7 @@ if __name__ == "__main__":
         if not r["success"]:
             reasons[r["reason"]].append(r)
 
-    print(f"\nNone 원인 분류:")
+    print("\nNone 원인 분류:")
     for reason, cases in sorted(reasons.items(), key=lambda x: -len(x[1])):
         print(f"  {reason}: {len(cases)}건")
         # topic별 분포

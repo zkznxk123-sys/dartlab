@@ -36,7 +36,7 @@ if __name__ == "__main__":
         for row in df.select("year", "section_title", pl.col("section_content").str.len_chars().alias("chars")).iter_rows(named=True):
             if row["chars"] < 100:
                 print(f"  {row['year']} {row['section_title']}: {row['chars']} chars <<<< EMPTY")
-        print(f"\n  연도별 합계 chars:")
+        print("\n  연도별 합계 chars:")
         stats = df.group_by("year").agg(
             pl.col("section_content").str.len_chars().sum().alias("total_chars"),
             pl.len().alias("sections"),

@@ -33,7 +33,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill, numbers
+from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 from dartlab.providers.dart.finance.pivot import buildAnnual

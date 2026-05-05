@@ -5,7 +5,7 @@ import sys
 
 sys.path.insert(0, "src")
 
-from step03_parser import findMovementTables, getTotalValue
+from step03_parser import findMovementTables
 
 from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection
@@ -110,7 +110,7 @@ if __name__ == "__main__":
             print(f"  ... {i + 1}/{len(codes)} 완료 (OK: {len(okList)})")
 
     print(f"\n{'=' * 80}")
-    print(f"결과 요약")
+    print("결과 요약")
     print(f"{'=' * 80}")
     print(f"  전체: {len(codes)}개")
     print(f"  성공 (변동표 추출): {len(okList)}개 ({len(okList)/len(codes)*100:.1f}%)")
@@ -119,25 +119,25 @@ if __name__ == "__main__":
     print(f"  에러: {len(errorList)}개")
 
     if noMovList:
-        print(f"\n변동표 실패 목록:")
+        print("\n변동표 실패 목록:")
         for r in noMovList:
             print(f"  {r['code']} {r.get('name', '')} (섹션 {r.get('section_length', 0):,}자)")
 
     if noSecList:
-        print(f"\n주석 없음 목록:")
+        print("\n주석 없음 목록:")
         for r in noSecList[:20]:
             print(f"  {r['code']} {r.get('name', '')}")
         if len(noSecList) > 20:
             print(f"  ... 외 {len(noSecList) - 20}개")
 
     if errorList:
-        print(f"\n에러 목록:")
+        print("\n에러 목록:")
         for r in errorList:
             print(f"  {r['code']}: {r.get('error', '')[:80]}")
 
     if okList:
         print(f"\n{'─' * 60}")
-        print(f"성공 기업 카테고리 수 분포:")
+        print("성공 기업 카테고리 수 분포:")
         catCounts = {}
         for r in okList:
             n = len(r["categories"])
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         for n in sorted(catCounts.keys()):
             print(f"  {n}개 카테고리: {catCounts[n]}개 기업")
 
-        print(f"\n변동행 수 분포:")
+        print("\n변동행 수 분포:")
         rowCounts = {}
         for r in okList:
             n = r["rowCount"]
@@ -153,7 +153,7 @@ if __name__ == "__main__":
         for n in sorted(rowCounts.keys()):
             print(f"  {n}행: {rowCounts[n]}개 기업")
 
-        print(f"\n단위 분포:")
+        print("\n단위 분포:")
         unitCounts = {}
         for r in okList:
             u = r["unit"]

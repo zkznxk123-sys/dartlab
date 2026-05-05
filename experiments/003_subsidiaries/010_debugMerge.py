@@ -1,6 +1,4 @@
 """서브헤더 병합 디버깅."""
-import re
-from pathlib import Path
 
 import polars as pl
 

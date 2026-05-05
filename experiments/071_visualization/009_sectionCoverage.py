@@ -124,7 +124,7 @@ def test():
                 else:
                     sparse.append(topic)
 
-            print(f"\n  커버리지 분포:")
+            print("\n  커버리지 분포:")
             print(f"    100%: {len(full)}개 topic")
             print(f"    80%+: {len(high)}개 topic")
             print(f"    50-80%: {len(medium)}개 topic")
@@ -132,7 +132,7 @@ def test():
 
             # sparse topic 상세
             if sparse:
-                print(f"\n  sparse topic (<50% 커버리지):")
+                print("\n  sparse topic (<50% 커버리지):")
                 for topic in sparse[:15]:
                     info = coverage[topic]
                     bar = "█" * int(info["rate"] * 20) + "░" * (20 - int(info["rate"] * 20))

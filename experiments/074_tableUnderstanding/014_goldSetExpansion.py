@@ -35,9 +35,7 @@
 
 from __future__ import annotations
 
-import importlib.util
 import re
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from time import perf_counter
@@ -249,7 +247,7 @@ def judge_gold_action(
     if arc <= 3 and nr < 0.2:
         return "raw_fallback", f"small_non_numeric rows={arc} nr={nr}", 0.65
 
-    return "raw_fallback", f"default_fallback", 0.40
+    return "raw_fallback", "default_fallback", 0.40
 
 
 def build_gold_set() -> dict[str, object]:
@@ -396,7 +394,7 @@ def build_gold_set() -> dict[str, object]:
 
 def main() -> None:
     result = build_gold_set()
-    print(f"\n=== 074-014 gold set expansion ===")
+    print("\n=== 074-014 gold set expansion ===")
     print(f"total gold: {result['totalGold']}, elapsed: {result['elapsed']}s, errors: {result['errors']}")
     print(f"\npair counts: {result['pairCounts']}")
     print(f"gold action dist: {result['goldActionDist']}")
@@ -405,7 +403,7 @@ def main() -> None:
     print(f"needs review: {result['needsReview']}")
     print(f"\nscorer accuracy on gold: {result['scorerAccuracy']}")
     print(f"baseline accuracy on gold: {result['baselineAccuracy']}")
-    print(f"\nsample gold entries:")
+    print("\nsample gold entries:")
     for g in result["goldSet"][:15]:
         review = " [REVIEW]" if g["needsReview"] else ""
         print(f"  {g['stockCode']}:{g['topic']}:bo{g['blockOrder']} "

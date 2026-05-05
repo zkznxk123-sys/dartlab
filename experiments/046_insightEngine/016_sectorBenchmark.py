@@ -48,8 +48,8 @@ from pathlib import Path
 from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.engines.financeEngine.pivot import buildAnnual
 from dartlab.engines.financeEngine.ratios import calcRatios
-from dartlab.gather.listing import getKindList
 from dartlab.engines.sectorEngine import classify
+from dartlab.gather.listing import getKindList
 
 
 def _financeExists(stockCode: str) -> bool:
@@ -181,7 +181,7 @@ def run():
         drBelowB = sum(1 for v in drVals if v < 100) / len(drVals) * 100
         print(f"{sector:<15} {omMed:>8.1f} {omAboveA:>7.1f}% {omAboveB:>7.1f}% | {drMed:>8.1f} {drBelowA:>7.1f}% {drBelowB:>7.1f}%")
 
-    print(f"\n\n[섹터별 종목 수]")
+    print("\n\n[섹터별 종목 수]")
     for sector in sorted(sectorData.keys()):
         d = sectorData[sector]
         print(f"  {sector:<15} 전체 {d['count']:>4} / finance {d['hasFinance']:>4} ({d['hasFinance']/d['count']*100:.0f}%)")

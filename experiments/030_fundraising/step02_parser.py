@@ -220,7 +220,7 @@ def testSingle(stockCode: str):
     print(f"  발행 건수: {len(result['issuances'])}")
 
     if result["noData"]:
-        print(f"  → 발행 실적 없음")
+        print("  → 발행 실적 없음")
         return
 
     # 형태별 집계

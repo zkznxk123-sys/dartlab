@@ -4,7 +4,7 @@ import sys
 
 sys.path.insert(0, "src")
 
-from step03_parser import isAssetCategory, isMovementRow, normalizeLabel, splitCells, splitPeriodBlocks
+from step03_parser import isAssetCategory, isMovementRow, splitCells, splitPeriodBlocks
 
 from dartlab.core.dataLoader import loadData
 from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection

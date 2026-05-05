@@ -27,7 +27,6 @@
 
 import re
 import sys
-from collections import Counter, defaultdict
 
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "src"))
 import polars as pl
@@ -38,7 +37,6 @@ from dartlab.providers.dart.docs.sections.tableParser import (
     _dataRows,
     _headerCells,
     _isJunk,
-    _normalizeItemName,
     _parseKeyValueOrMatrix,
     _parseMultiYear,
     splitSubtables,

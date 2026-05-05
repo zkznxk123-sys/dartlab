@@ -110,7 +110,7 @@ def main():
         aResult = buildAnnual(code)
         if aResult is None:
             errors[code] = "데이터 없음"
-            print(f"    → 데이터 없음")
+            print("    → 데이터 없음")
             continue
 
         aSeries, _ = aResult
@@ -121,7 +121,7 @@ def main():
         insights = proto.runFullAnalysis(code)
         if insights is None:
             errors[code] = "분석 실패"
-            print(f"    → 분석 실패")
+            print("    → 분석 실패")
             continue
 
         grades = {}
@@ -156,7 +156,7 @@ def main():
             row += f" {g:^7}"
         print(row)
 
-    print(f"\n  * = 금융업 감지")
+    print("\n  * = 금융업 감지")
 
     print(f"\n\n{'=' * 80}")
     print("  등급 분포")

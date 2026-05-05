@@ -344,7 +344,7 @@ def run():
 
     # 대표 종목 상세
     print(f"\n{'─' * 70}")
-    print(f"  대표 종목 상세 (상위 10)")
+    print("  대표 종목 상세 (상위 10)")
     print(f"{'─' * 70}")
     spotlightCodes = ["005930", "000660", "005380", "035420", "051910",
                       "000270", "097950", "004170", "030200", "035720"]
@@ -359,7 +359,7 @@ def run():
 
     # 가설3: 상관이 높은 peer의 consensus 성능
     print(f"\n{'─' * 70}")
-    print(f"  peer 유사도 구간별 consensus 성능")
+    print("  peer 유사도 구간별 consensus 성능")
     print(f"{'─' * 70}")
     highSimErrors = []
     lowSimErrors = []

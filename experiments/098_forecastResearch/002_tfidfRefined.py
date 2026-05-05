@@ -345,7 +345,7 @@ def run():
     # 요약
     tTotal = time.time() - t0
     print(f"\n{'=' * 70}")
-    print(f"  요약")
+    print("  요약")
     print(f"{'=' * 70}")
     print(f"  유효 종목: {len(corpus)}개 (지주/투자 {excludedCount}개 제외)")
     print(f"  대분류 내/외 비율: {ratio:.2f}x")

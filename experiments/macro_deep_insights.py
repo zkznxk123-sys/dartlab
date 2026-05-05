@@ -367,7 +367,7 @@ if current_flags:
             similar_periods.append((m, flags, mtr, in_rec, overlap))
 
     if similar_periods:
-        print(f"\n과거 유사 시기 (경고등 2개+ 일치):")
+        print("\n과거 유사 시기 (경고등 2개+ 일치):")
         for m, flags, mtr, in_rec, overlap in similar_periods[:5]:
             rec_str = "침체중" if in_rec else (f"{mtr}m후 침체" if mtr < 24 else "침체 없음")
             print(f"  {m}: {', '.join(flags)} → {rec_str}")

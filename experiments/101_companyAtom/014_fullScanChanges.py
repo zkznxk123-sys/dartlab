@@ -51,7 +51,6 @@
 
 import sys
 import time
-import re
 from pathlib import Path
 
 sys.path.insert(0, "c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src")

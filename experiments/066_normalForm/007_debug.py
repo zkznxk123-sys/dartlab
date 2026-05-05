@@ -1,8 +1,6 @@
 """빠른 디버그: 왜 0% 인지."""
 import re
 import sys
-from collections import defaultdict
-from dataclasses import dataclass, field
 
 import polars as pl
 
@@ -13,7 +11,6 @@ from dartlab.providers.dart.docs.sections.tableParser import (
     _dataRows,
     _headerCells,
     _isJunk,
-    _normalizeHeader,
     splitSubtables,
 )
 

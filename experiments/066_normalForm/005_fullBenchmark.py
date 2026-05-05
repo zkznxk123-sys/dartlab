@@ -382,7 +382,7 @@ def main():
     print(f"둘 다 실패: {fail}")
 
     # 주요 topic별
-    print(f"\n주요 topic별:")
+    print("\n주요 topic별:")
     key_topics = ["dividend", "audit", "salesOrder", "employee", "companyOverview",
                   "majorHolder", "rawMaterial", "riskDerivative", "shareCapital",
                   "executivePay", "boardOfDirectors", "internalControl"]

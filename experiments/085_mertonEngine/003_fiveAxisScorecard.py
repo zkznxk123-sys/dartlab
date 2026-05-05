@@ -50,11 +50,12 @@
 """
 
 import sys
+
 sys.path.insert(0, "src")
 
 from dartlab.analysis.financial.insight.distress import calcDistress
-from dartlab.credit.merton import MertonResult
 from dartlab.analysis.financial.ratios import RatioResult
+from dartlab.credit.merton import MertonResult
 
 
 def make_merton(d2d: float, pd: float) -> MertonResult:

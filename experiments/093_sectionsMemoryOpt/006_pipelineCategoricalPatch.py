@@ -83,7 +83,7 @@ def main(stockCode: str = "005930") -> None:
     gc.collect()
     origRss = mb()
     origSize = dfOrig.estimated_size() / 1024 / 1024
-    print(f"[Baseline]")
+    print("[Baseline]")
     print(f"  shape: {dfOrig.shape}")
     print(f"  RSS: {origRss:.0f}MB (+{origRss - baseRss:.0f}MB)")
     print(f"  estimated_size: {origSize:.1f}MB")
@@ -100,7 +100,6 @@ def main(stockCode: str = "005930") -> None:
 
     def patchedSections(code: str) -> pl.DataFrame | None:
         # 원본 호출하되, schema를 패치
-        import re
 
         # 원본 sections 코드를 그대로 실행하지 않고,
         # sections() 결과의 period + meta 컬럼을 Categorical로 cast
@@ -151,7 +150,7 @@ def main(stockCode: str = "005930") -> None:
     periodCols = [c for c in dfPatched.columns if re.fullmatch(r"\d{4}(Q[1-4])?", c)]
     periodSize = sum(dfPatched[c].estimated_size() for c in periodCols) / 1024 / 1024
 
-    print(f"[Patched — Categorical 스키마]")
+    print("[Patched — Categorical 스키마]")
     print(f"  shape: {dfPatched.shape}")
     print(f"  RSS: {patchedRss:.0f}MB (+{patchedRss - prePatchRss:.0f}MB)")
     print(f"  estimated_size: {patchedSize:.1f}MB")
@@ -160,12 +159,12 @@ def main(stockCode: str = "005930") -> None:
     # 절감 요약
     rssSaved = (origRss - baseRss) - (patchedRss - prePatchRss)
     sizeSaved = origSize - patchedSize
-    print(f"\n[절감 요약]")
+    print("\n[절감 요약]")
     print(f"  RSS 절감: {rssSaved:.0f}MB")
     print(f"  estimated_size 절감: {sizeSaved:.1f}MB ({sizeSaved/origSize*100:.1f}%)")
 
     # 소비자 호환성
-    print(f"\n[소비자 호환성]")
+    print("\n[소비자 호환성]")
     latestPeriod = periodCols[-1]
     try:
         nonNull = dfPatched.filter(pl.col(latestPeriod).is_not_null())
@@ -175,7 +174,7 @@ def main(stockCode: str = "005930") -> None:
 
     try:
         restored = dfPatched[latestPeriod].cast(pl.Utf8)
-        print(f"  cast(Utf8) 복원: OK")
+        print("  cast(Utf8) 복원: OK")
     except Exception as e:
         print(f"  cast(Utf8) 실패: {e}")
 

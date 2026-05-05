@@ -116,7 +116,7 @@ def main():
     # 환경변수에도 설정 (provider가 읽을 수 있게)
     os.environ.setdefault("GEMINI_API_KEY", apiKey)
 
-    print(f"\n[1] Company 생성: 삼성전자 (005930)")
+    print("\n[1] Company 생성: 삼성전자 (005930)")
     c = dartlab.Company("005930")
     print(f"  corpName: {c.corpName}")
     print(f"  topics count: {len(c.topics) if hasattr(c, 'topics') and c.topics is not None else 'N/A'}")

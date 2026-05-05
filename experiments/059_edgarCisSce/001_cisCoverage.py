@@ -188,11 +188,11 @@ def main():
     print(f"CI known commonTags 보유: {ciKnownHit}/{sample} ({ciKnownHit/sample*100:.1f}%)")
     print(f"EQ known commonTags 보유: {eqKnownHit}/{sample} ({eqKnownHit/sample*100:.1f}%)")
 
-    print(f"\n--- CI 태그 빈도 Top 20 ---")
+    print("\n--- CI 태그 빈도 Top 20 ---")
     for tag, cnt in sorted(ciTagFreq.items(), key=lambda x: -x[1])[:20]:
         print(f"  {tag}: {cnt}/{sample} ({cnt/sample*100:.1f}%)")
 
-    print(f"\n--- EQ 태그 빈도 Top 20 ---")
+    print("\n--- EQ 태그 빈도 Top 20 ---")
     for tag, cnt in sorted(eqTagFreq.items(), key=lambda x: -x[1])[:20]:
         print(f"  {tag}: {cnt}/{sample} ({cnt/sample*100:.1f}%)")
 

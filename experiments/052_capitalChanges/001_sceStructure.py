@@ -87,7 +87,7 @@ def exploreSamsung():
         return
 
     sce = df.filter(pl.col("sj_div") == "SCE")
-    print(f"=== 삼성전자 SCE ===")
+    print("=== 삼성전자 SCE ===")
     print(f"총 행 수: {sce.height}")
     print(f"컬럼: {sce.columns}")
     print()
@@ -185,7 +185,7 @@ def scanAllStocks():
             hasSce += 1
             sceRows.append(sce.height)
 
-    print(f"\n=== 전종목 SCE 스캔 ===")
+    print("\n=== 전종목 SCE 스캔 ===")
     print(f"총 종목: {total}")
     print(f"SCE 보유: {hasSce} ({hasSce/total*100:.1f}%)")
     if sceRows:

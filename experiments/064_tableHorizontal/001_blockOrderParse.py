@@ -43,7 +43,6 @@ from dartlab.providers.dart.docs.sections.tableParser import (
     _extractUnit,
     _headerCells,
     _isJunk,
-    _normalizeItemName,
     _parseKeyValueOrMatrix,
     _parseMultiYear,
     splitSubtables,

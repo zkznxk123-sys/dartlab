@@ -41,15 +41,13 @@ NaN 비율: RSI 5.7%, MACD 10.2%, BB 7.8% (초기 워밍업 기간)
 """
 from __future__ import annotations
 
-import sys
+# tradix vectorized indicators 직접 로드 (import 충돌 우회)
+import importlib.util
 import time
 from pathlib import Path
 
 import numpy as np
 import polars as pl
-
-# tradix vectorized indicators 직접 로드 (import 충돌 우회)
-import importlib.util
 
 TRADIX_INDICATORS = Path("c:/Users/MSI/OneDrive/Desktop/sideProject/tradix/vectorized/indicators.py")
 spec = importlib.util.spec_from_file_location("tradix_indicators", TRADIX_INDICATORS)
@@ -130,7 +128,7 @@ def main():
         # 1. 주가 수집
         df = _gatherPrice(code)
         if df is None or df.is_empty():
-            print(f"  데이터 없음")
+            print("  데이터 없음")
             results[code] = {"status": "NO_DATA"}
             continue
         t_gather = time.time() - t0

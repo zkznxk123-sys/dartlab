@@ -302,7 +302,7 @@ if __name__ == "__main__":
     nw_matched_total = df["nw_matched"].sum()
     dl_matched_total = df["dl_matched"].sum()
 
-    print(f"\n=== 전체 통계 ===")
+    print("\n=== 전체 통계 ===")
     print(f"  NW 평균 유사도: {nw_avg:.1f}  |  difflib 평균 유사도: {dl_avg:.1f}  |  차이: {nw_avg - dl_avg:+.1f}")
     print(f"  NW 고품질(≥70) 매칭: {nw_hq}  |  difflib 고품질: {dl_hq}  |  차이: {nw_hq - dl_hq:+d}")
     print(f"  NW 총 매칭: {nw_matched_total}  |  difflib 총 매칭: {dl_matched_total}")
@@ -314,7 +314,7 @@ if __name__ == "__main__":
     print(f"\n  NW 승: {nw_better.height}건  |  difflib 승: {dl_better.height}건  |  동률: {tied.height}건")
 
     # 단락 수 구간별 분석
-    print(f"\n=== 단락 수 구간별 ===")
+    print("\n=== 단락 수 구간별 ===")
     for lo, hi, label in [(3, 5, "3-5"), (5, 10, "5-10"), (10, 50, "10-50"), (50, 999, "50+")]:
         subset = df.filter((pl.col("paras_a") >= lo) & (pl.col("paras_a") < hi))
         if subset.height == 0:
@@ -325,11 +325,11 @@ if __name__ == "__main__":
 
     # NW가 크게 나은 사례 Top-5
     if nw_better.height > 0:
-        print(f"\n=== NW가 크게 나은 사례 (Top-5) ===")
+        print("\n=== NW가 크게 나은 사례 (Top-5) ===")
         top5 = nw_better.sort("sim_diff", descending=True).head(5)
         for row in top5.iter_rows(named=True):
             print(f"  {row['code']} {row['topic']} {row['periods']}: "
                   f"NW {row['nw_avg_sim']} vs DL {row['dl_avg_sim']} (+{row['sim_diff']})")
 
-    print(f"\n상세:")
+    print("\n상세:")
     print(df.sort("sim_diff", descending=True))

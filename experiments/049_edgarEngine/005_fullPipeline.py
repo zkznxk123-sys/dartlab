@@ -684,7 +684,7 @@ def buildAnnual(
 
 def _verifyTimeseries(edgarDir: Path):
     print(f"\n{'='*70}")
-    print(f"  Part 1: buildTimeseries 검증")
+    print("  Part 1: buildTimeseries 검증")
     print(f"{'='*70}")
 
     VERIFY = {
@@ -739,7 +739,7 @@ def _verifyTimeseries(edgarDir: Path):
         print(f"\n  --- {ticker} ---")
         result = buildTimeseries(edgarDir, data["cik"])
         if result is None:
-            print(f"  ERROR: buildTimeseries returned None")
+            print("  ERROR: buildTimeseries returned None")
             continue
 
         series, periods = result
@@ -766,7 +766,7 @@ def _verifyTimeseries(edgarDir: Path):
 
 def _verifyL2Coverage(edgarDir: Path):
     print(f"\n{'='*70}")
-    print(f"  Part 2: L2 snakeId 커버리지 (3사)")
+    print("  Part 2: L2 snakeId 커버리지 (3사)")
     print(f"{'='*70}")
 
     for ticker, cik in TICKER_CIK.items():
@@ -791,7 +791,7 @@ def _verifyL2Coverage(edgarDir: Path):
 
 def _verifyAnnual(edgarDir: Path):
     print(f"\n{'='*70}")
-    print(f"  Part 3: buildAnnual 검증")
+    print("  Part 3: buildAnnual 검증")
     print(f"{'='*70}")
 
     VERIFY_ANNUAL = {
@@ -835,7 +835,7 @@ def _verifyAnnual(edgarDir: Path):
 
 def _verifyRatios(edgarDir: Path):
     print(f"\n{'='*70}")
-    print(f"  Part 4: calcRatios 검증 (연간 데이터 + DART 인터페이스 호환)")
+    print("  Part 4: calcRatios 검증 (연간 데이터 + DART 인터페이스 호환)")
     print(f"{'='*70}")
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
@@ -870,7 +870,7 @@ def _verifyRatios(edgarDir: Path):
 
 def _verifySeries(edgarDir: Path):
     print(f"\n{'='*70}")
-    print(f"  Part 5: IS/CF net_income 분리 검증")
+    print("  Part 5: IS/CF net_income 분리 검증")
     print(f"{'='*70}")
 
     for ticker, cik in TICKER_CIK.items():

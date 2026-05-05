@@ -170,7 +170,7 @@ def runIndustryScenario(*, verbose: bool = True) -> pl.DataFrame:
         sectorAvgGrowth[sector] = sum(allGrowths) / len(allGrowths) if allGrowths else 0
 
     if verbose:
-        print(f"\n[섹터별 평균 매출성장률 2019-2022 (학습 기간)]")
+        print("\n[섹터별 평균 매출성장률 2019-2022 (학습 기간)]")
         for sector, avg in sectorAvgGrowth.items():
             print(f"  {sector:12s}: {avg:+.1f}%")
 
@@ -230,7 +230,7 @@ def runIndustryScenario(*, verbose: bool = True) -> pl.DataFrame:
 
 def _printResults(df: pl.DataFrame) -> None:
     """결과 출력."""
-    print(f"\n[예측 비교: GDP β모델 vs 평균회귀 모델]")
+    print("\n[예측 비교: GDP β모델 vs 평균회귀 모델]")
     print(f"{'섹터':12s} | {'GDP MAPE':>10s} | {'MR MAPE':>10s} | "
           f"{'GDP방향':>8s} | {'MR방향':>8s} | {'N':>3s} | {'우위'}")
     print("-" * 75)
@@ -276,7 +276,7 @@ def _printResults(df: pl.DataFrame) -> None:
               f"{dirGDP:7.0f}% | {dirMR:7.0f}% | {len(overall_gdp_mape):3d} | {winner} ({improvement:+.0f}%)")
 
     # 기업별 상세 (이상값 확인)
-    print(f"\n[기업별 MAPE 상세 — 이상값 TOP 5]")
+    print("\n[기업별 MAPE 상세 — 이상값 TOP 5]")
     sorted_df = df.filter(pl.col("mapeGDP").is_not_null()).sort("mapeGDP", descending=True)
     for row in sorted_df.head(5).iter_rows(named=True):
         print(f"  {row['corpName']:12s} {row['year']} | "

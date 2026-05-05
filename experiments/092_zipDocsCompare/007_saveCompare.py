@@ -38,7 +38,6 @@ from lxml import etree
 
 from dartlab.providers.dart.openapi.client import DartClient
 
-
 TEMP_DIR = Path(__file__).parent / "temp"
 
 
@@ -294,7 +293,7 @@ def main():
     print("=" * 70)
     if collRows:
         print(f"  collector 예시: {collRows[0].get('section_url', '')[:80]}")
-    print(f"  zip: (빈 문자열)")
+    print("  zip: (빈 문자열)")
     print("  → ZIP에는 DART viewer URL이 없으므로 빈 문자열 또는 rcept_no 기반 URL 생성 가능")
 
     print(f"\n저장 위치: {TEMP_DIR.resolve()}")

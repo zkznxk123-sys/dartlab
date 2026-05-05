@@ -20,12 +20,11 @@ import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from dartlab.core.cross.exogenousAxes import (  # noqa: E402
+from dartlab.gather import getDefaultGather  # noqa: E402
+from dartlab.gather.exogenousAxes import (  # noqa: E402
     ExogenousIndicator,
     getExogenousIndicators,
 )
-from dartlab.gather import getDefaultGather  # noqa: E402
-
 
 # 테스트 대상 기업
 TARGETS = [

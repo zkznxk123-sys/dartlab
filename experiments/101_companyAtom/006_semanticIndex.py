@@ -44,11 +44,11 @@
 실험일: 2026-03-27
 """
 
-import sys
 import hashlib
 import re
+import sys
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 sys.path.insert(0, "c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/src")
 
@@ -252,7 +252,7 @@ def run():
         topicCounts[coord.topic] += 1
     topTopics = sorted(topicCounts.items(), key=lambda x: x[1], reverse=True)[:10]
 
-    print(f"\n  상위 10 topic × changeType:")
+    print("\n  상위 10 topic × changeType:")
     print(f"  {'topic':25s} {'appeared':>9s} {'disapp.':>9s} {'wording':>9s} {'struct.':>9s} {'numeric':>9s}")
     print("  " + "─" * 72)
 
@@ -288,7 +288,7 @@ def run():
     for coord in index:
         for kw in coord.keywords:
             kwFreq[kw] += 1
-    print(f"\n  키워드 빈도 TOP 10:")
+    print("\n  키워드 빈도 TOP 10:")
     for kw, cnt in sorted(kwFreq.items(), key=lambda x: x[1], reverse=True)[:10]:
         cat = ALL_KEYWORDS[kw]
         bar = "█" * (cnt // 50)

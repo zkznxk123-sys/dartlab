@@ -29,8 +29,6 @@ import argparse
 import gc
 import json
 import sys
-import traceback
-from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
@@ -221,7 +219,7 @@ def main():
     print(f"  후보 {len(candidates)}개 중 {len(selected)}개 선택")
 
     # 2. 순차 신호 추출
-    print(f"\n[2/4] 문서 신호 추출 (Company 순차 로드)...")
+    print("\n[2/4] 문서 신호 추출 (Company 순차 로드)...")
     records = []
     for i, code in enumerate(selected):
         if (i + 1) % 10 == 0 or i == 0:
@@ -263,11 +261,11 @@ def main():
         sys.exit(1)
 
     # 3. 분석
-    print(f"\n[3/4] 분석...")
+    print("\n[3/4] 분석...")
     n = len(records)
 
     # --- A. signalDirection vs actualDir ---
-    print(f"\n=== A. 신호 방향 vs 실제 매출 방향 ===")
+    print("\n=== A. 신호 방향 vs 실제 매출 방향 ===")
     for sigDir in ["positive", "negative", "neutral"]:
         subset = [r for r in records if r["signalDirection"] == sigDir]
         if not subset:
@@ -279,7 +277,7 @@ def main():
         print(f"  신호={sigDir:8s}: n={sn:3d}  실제 up={upCount/sn*100:.0f}%  down={downCount/sn*100:.0f}%  flat={flatCount/sn*100:.0f}%")
 
     # --- B. 변화율 구간별 매출 방향 ---
-    print(f"\n=== B. 전체 변화율 구간별 매출 방향 ===")
+    print("\n=== B. 전체 변화율 구간별 매출 방향 ===")
     bins = [(0, 10, "낮음(0-10%)"), (10, 30, "중간(10-30%)"), (30, 60, "높음(30-60%)"), (60, 999, "매우높음(60%+)")]
     for lo, hi, label in bins:
         subset = [r for r in records if lo <= r["overallChangeRate"] < hi]
@@ -292,7 +290,7 @@ def main():
         print(f"  {label:16s}: n={sn:3d}  up={upCount/sn*100:.0f}%  down={downCount/sn*100:.0f}%  평균성장={avgGrowth:+.1f}%")
 
     # --- C. 리스크 변화율 vs 매출 ---
-    print(f"\n=== C. 리스크 변화율 구간별 매출 방향 ===")
+    print("\n=== C. 리스크 변화율 구간별 매출 방향 ===")
     for lo, hi, label in bins:
         subset = [r for r in records if lo <= r["riskChangeRate"] < hi]
         if not subset:
@@ -304,7 +302,7 @@ def main():
         print(f"  {label:16s}: n={sn:3d}  up={upCount/sn*100:.0f}%  down={downCount/sn*100:.0f}%  평균성장={avgGrowth:+.1f}%")
 
     # --- D. 사업 변화율 vs 매출 ---
-    print(f"\n=== D. 사업내용 변화율 구간별 매출 방향 ===")
+    print("\n=== D. 사업내용 변화율 구간별 매출 방향 ===")
     for lo, hi, label in bins:
         subset = [r for r in records if lo <= r["businessChangeRate"] < hi]
         if not subset:
@@ -316,7 +314,7 @@ def main():
         print(f"  {label:16s}: n={sn:3d}  up={upCount/sn*100:.0f}%  down={downCount/sn*100:.0f}%  평균성장={avgGrowth:+.1f}%")
 
     # --- E. 매출관련 섹션 변화 vs 매출 ---
-    print(f"\n=== F. 매출관련 섹션 변화율 구간별 ===")
+    print("\n=== F. 매출관련 섹션 변화율 구간별 ===")
     for lo, hi, label in bins:
         subset = [r for r in records if lo <= r["revenueRelatedChange"] < hi]
         if not subset:
@@ -329,7 +327,7 @@ def main():
 
     # --- G. 방향 전환 감지력 ---
     # 핵심: "문서가 많이 바뀐 기업"이 실제로 "매출 방향이 전환"된 비율
-    print(f"\n=== G. 핵심 질문: 문서 변화 = 매출 방향 전환? ===")
+    print("\n=== G. 핵심 질문: 문서 변화 = 매출 방향 전환? ===")
     # 2022→2023 매출 방향과 2023→2024 매출 방향이 다른 기업 = "전환"
     turnRecords = []
     for r in records:

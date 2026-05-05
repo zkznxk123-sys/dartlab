@@ -195,8 +195,8 @@ def main():
     print("=" * 60)
     print("Phase 0: 질문 복잡도 스코어링")
     print("=" * 60)
-    print(f"\n| topic | complexity | tier | qTypes | moduleMatches |")
-    print(f"|-------|-----------|------|--------|---------------|")
+    print("\n| topic | complexity | tier | qTypes | moduleMatches |")
+    print("|-------|-----------|------|--------|---------------|")
     for q in QUESTIONS:
         comp = scoreComplexity(q["question"])
         print(f"| {q['topic']} | {comp['complexity']} | {comp['tier']} | {comp['qTypes']} | {comp['moduleMatches']} |")
@@ -224,8 +224,8 @@ def main():
     print(f"\n{'=' * 60}")
     print("결과 비교")
     print(f"{'=' * 60}")
-    print(f"\n| topic | B-tier | A-tier | B-tools | A-tools | B답변 | A답변 |")
-    print(f"|-------|--------|--------|---------|---------|------|------|")
+    print("\n| topic | B-tier | A-tier | B-tools | A-tools | B답변 | A답변 |")
+    print("|-------|--------|--------|---------|---------|------|------|")
     for br, ar in zip(baselineResults, adaptiveResults):
         bTools = [tc.get("name", "?") for tc in br.get("toolCalls", [])]
         aTools = [tc.get("name", "?") for tc in ar.get("toolCalls", [])]

@@ -46,7 +46,6 @@
 
 import re
 import time
-from collections import defaultdict
 from pathlib import Path
 
 import polars as pl
@@ -220,7 +219,7 @@ def analyze_holder_data(
     print(f"  종목 수: {latest['stockCode'].n_unique()}")
 
     # 주주 유형별
-    print(f"\n  주주 유형:")
+    print("\n  주주 유형:")
     if "holder_type" not in latest.columns:
         # classify
         types = [classify_holder(nm) for nm in latest["nm"].to_list()]
@@ -237,7 +236,7 @@ def analyze_holder_data(
 
     # 매칭된 법인 주주 TOP
     if len(matched) > 0:
-        print(f"\n  매칭된 법인 주주 TOP 10:")
+        print("\n  매칭된 법인 주주 TOP 10:")
         top = matched.group_by("from_name").agg(
             pl.col("to_code").n_unique().alias("companies"),
             pl.col("ownership_pct").mean().alias("avg_pct"),
@@ -254,7 +253,7 @@ def analyze_holder_data(
     print(f"    2개사+ 주주인 사람: {len(multi_company):,}")
 
     if len(multi_company) > 0:
-        print(f"\n  여러 회사 주주인 개인 TOP 20:")
+        print("\n  여러 회사 주주인 개인 TOP 20:")
         for row in multi_company.head(20).iter_rows(named=True):
             # 이 사람이 주주인 회사들
             companies = person_edges.filter(
@@ -264,7 +263,7 @@ def analyze_holder_data(
             print(f"      {row['person_name']}: {', '.join(comp_names[:6])}")
 
     # relate 분포
-    print(f"\n  관계(relate) 분포:")
+    print("\n  관계(relate) 분포:")
     if "relate" in latest.columns:
         for row in latest["relate"].value_counts().sort("count", descending=True).head(10).iter_rows(named=True):
             print(f"    {row['relate']}: {row['count']:,}")

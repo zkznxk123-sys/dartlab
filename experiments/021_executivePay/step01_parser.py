@@ -456,11 +456,11 @@ if __name__ == "__main__":
         print(f"  {result['corpName']} — {result['nYears']}년")
 
         if result["payByTypeDf"] is not None:
-            print(f"\n  [유형별 보수 시계열]")
+            print("\n  [유형별 보수 시계열]")
             print(result["payByTypeDf"])
 
         if result["topPayDf"] is not None:
-            print(f"\n  [5억 초과 개인별 보수] (최근 3명만)")
+            print("\n  [5억 초과 개인별 보수] (최근 3명만)")
             print(result["topPayDf"].head(6))
 
     # 대량 테스트

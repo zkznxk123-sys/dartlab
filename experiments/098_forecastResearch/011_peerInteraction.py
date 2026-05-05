@@ -234,7 +234,7 @@ def run():
 
     # Peer 쌍 상관 분석
     print(f"\n{'─' * 70}")
-    print(f"  Peer 쌍 매출 상관 분석")
+    print("  Peer 쌍 매출 상관 분석")
     print(f"{'─' * 70}")
 
     pairCorrs = []
@@ -258,11 +258,11 @@ def run():
 
     corrArr = np.array(pairCorrs)
     print(f"\n  유효 peer 쌍: {len(pairCorrs)}개")
-    print(f"\n  상관 분포:")
+    print("\n  상관 분포:")
     print(f"    평균: {corrArr.mean():.3f}")
     print(f"    중앙값: {np.median(corrArr):.3f}")
     print(f"    표준편차: {corrArr.std():.3f}")
-    print(f"\n  구간별 비율:")
+    print("\n  구간별 비율:")
     print(f"    강한 양(r>0.5):  {(corrArr > 0.5).mean():.1%}")
     print(f"    양(0.2<r≤0.5):  {((corrArr > 0.2) & (corrArr <= 0.5)).mean():.1%}")
     print(f"    중립(-0.2~0.2): {((corrArr >= -0.2) & (corrArr <= 0.2)).mean():.1%}")
@@ -273,7 +273,7 @@ def run():
 
     # 가장 강한 음의 상관 쌍
     print(f"\n{'─' * 70}")
-    print(f"  가장 강한 음의 상관 peer 쌍 (Top 10)")
+    print("  가장 강한 음의 상관 peer 쌍 (Top 10)")
     print(f"{'─' * 70}")
     pairDetails.sort(key=lambda x: x[2])
     print(f"  {'종목A':12s} {'종목B':12s} {'매출상관':>8s} {'텍스트sim':>10s}")
@@ -285,7 +285,7 @@ def run():
 
     # 가장 강한 양의 상관 쌍
     print(f"\n{'─' * 70}")
-    print(f"  가장 강한 양의 상관 peer 쌍 (Top 10)")
+    print("  가장 강한 양의 상관 peer 쌍 (Top 10)")
     print(f"{'─' * 70}")
     print(f"  {'종목A':12s} {'종목B':12s} {'매출상관':>8s} {'텍스트sim':>10s}")
     print(f"  {'─' * 46}")
@@ -296,7 +296,7 @@ def run():
 
     # 대표 경쟁 쌍
     print(f"\n{'─' * 70}")
-    print(f"  대표 경쟁 쌍 분석")
+    print("  대표 경쟁 쌍 분석")
     print(f"{'─' * 70}")
     targetPairs = [
         ("005930", "000660", "삼성전자-SK하이닉스"),

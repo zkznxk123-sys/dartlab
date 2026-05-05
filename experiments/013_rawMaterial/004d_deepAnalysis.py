@@ -96,17 +96,17 @@ for f in files:
         else:
             noPurchaseTable += 1
 
-print(f"=== 원재료 파싱 실패 종목 분석 ===")
+print("=== 원재료 파싱 실패 종목 분석 ===")
 print(f"  매입 테이블 있는데 실패: {hasPurchaseTable}건")
 print(f"  매입 테이블 자체 없음:   {noPurchaseTable}건")
 print()
-print(f"  실패 유형:")
+print("  실패 유형:")
 for t, cnt in sorted(failedTypes.items(), key=lambda x: -x[1]):
     print(f"    {t}: {cnt}건")
 print()
 
 # 매입액헤더 있는 실패 종목 샘플
-print(f"=== 매입액 헤더 있는 실패 종목 샘플 ===")
+print("=== 매입액 헤더 있는 실패 종목 샘플 ===")
 for code, ttype in failedWithTable[:10]:
     df = loadData(code)
     years = sorted(df["year"].unique().to_list(), reverse=True)

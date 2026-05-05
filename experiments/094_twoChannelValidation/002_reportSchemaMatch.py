@@ -94,7 +94,7 @@ def main():
     print("2. API 직접 수집 (saveReport)")
     print("=" * 80)
 
-    from dartlab.providers.dart.openapi.dart import Dart, _PERIODIC_REPORT_CATEGORIES
+    from dartlab.providers.dart.openapi.dart import _PERIODIC_REPORT_CATEGORIES, Dart
     from dartlab.providers.dart.openapi.disclosure import _resolveCorpCode
     from dartlab.providers.dart.openapi.saver import enrichReport
 
@@ -149,7 +149,7 @@ def main():
         if rType != aType:
             dtypeMis.append((col, rType, aType))
     if dtypeMis:
-        print(f"\n  dtype 불일치:")
+        print("\n  dtype 불일치:")
         for col, rt, at in dtypeMis:
             print(f"    {col}: 릴리즈={rt}, API={at}")
     else:
@@ -226,7 +226,7 @@ def main():
     print("\n" + "=" * 80)
     print("6. collectStatus 비교")
     print("=" * 80)
-    print(f"  릴리즈 collectStatus 분포:")
+    print("  릴리즈 collectStatus 분포:")
     for row in releaseDf.group_by("collectStatus").len().sort("collectStatus").iter_rows(named=True):
         print(f"    {row['collectStatus']}: {row['len']}행")
     print(f"  API collectStatus: {apiDf['collectStatus'].unique().to_list()}")

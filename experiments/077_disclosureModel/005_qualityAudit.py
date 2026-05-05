@@ -175,7 +175,7 @@ def main():
             print(f"  {col}: median={med:.3f} mean={avg:.3f} min={mn:.3f}")
 
     all_scores = df["quality_score"]
-    print(f"\n전체 품질 스코어:")
+    print("\n전체 품질 스코어:")
     print(f"  median: {all_scores.median():.3f}")
     print(f"  mean: {all_scores.mean():.3f}")
     print(f"  min: {all_scores.min():.3f}")

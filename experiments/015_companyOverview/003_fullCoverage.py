@@ -73,7 +73,7 @@ print(f"총 종목: {len(codes)}")
 print(f"파싱 성공: {len(results)}")
 print(f"실패/없음: {len(errors)}")
 
-print(f"\n필드별 추출 성공 수:")
+print("\n필드별 추출 성공 수:")
 for key, count in sorted(fieldCounts.items(), key=lambda x: -x[1]):
     pct = round(count / len(results) * 100, 1) if results else 0
     print(f"  {key}: {count}종목 ({pct}%)")
@@ -91,6 +91,6 @@ if noAddress:
         print(f"  {r['code']}")
 
 if errors:
-    print(f"\n실패 종목:")
+    print("\n실패 종목:")
     for code, msg in errors[:20]:
         print(f"  {code}: {msg}")

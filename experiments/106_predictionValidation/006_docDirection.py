@@ -21,9 +21,7 @@ from __future__ import annotations
 
 import gc
 import json
-import math
 import sys
-from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
@@ -206,8 +204,8 @@ def main():
     print(f"\n[4/4] 분석 ({n} 종목)")
 
     # --- A. 리스크 섹션 sizeDelta vs 매출 ---
-    print(f"\n=== A. 리스크 섹션 크기 변화 vs 다음 해 매출 ===")
-    print(f"  (riskDelta > 0 = 위험 내용 추가, < 0 = 삭제)")
+    print("\n=== A. 리스크 섹션 크기 변화 vs 다음 해 매출 ===")
+    print("  (riskDelta > 0 = 위험 내용 추가, < 0 = 삭제)")
     rBins = [(-9999999, -100, "대폭축소(<-100)"), (-100, 0, "소폭축소(-100~0)"),
              (0, 100, "소폭증가(0~100)"), (100, 1000, "증가(100~1K)"), (1000, 9999999, "대폭증가(1K+)")]
     for lo, hi, label in rBins:
@@ -221,7 +219,7 @@ def main():
         print(f"  {label:18s}: n={sn:4d}  up={upRate:4.0f}%  down={downRate:4.0f}%  평균={avgGrowth:+.1f}%")
 
     # --- B. 사업 섹션 sizeDelta vs 매출 ---
-    print(f"\n=== B. 사업/매출 섹션 크기 변화 vs 다음 해 매출 ===")
+    print("\n=== B. 사업/매출 섹션 크기 변화 vs 다음 해 매출 ===")
     for lo, hi, label in rBins:
         subset = [r for r in records if lo <= r["bizDelta"] < hi]
         if not subset:
@@ -233,7 +231,7 @@ def main():
         print(f"  {label:18s}: n={sn:4d}  up={upRate:4.0f}%  down={downRate:4.0f}%  평균={avgGrowth:+.1f}%")
 
     # --- C. 확장 섹션 (설비/R&D/특허) ---
-    print(f"\n=== C. 확장 섹션(설비/R&D/특허) 변화 vs 다음 해 매출 ===")
+    print("\n=== C. 확장 섹션(설비/R&D/특허) 변화 vs 다음 해 매출 ===")
     for lo, hi, label in rBins:
         subset = [r for r in records if lo <= r["expDelta"] < hi]
         if not subset:
@@ -245,7 +243,7 @@ def main():
         print(f"  {label:18s}: n={sn:4d}  up={upRate:4.0f}%  down={downRate:4.0f}%  평균={avgGrowth:+.1f}%")
 
     # --- D. structural 변화 건수 vs 매출 ---
-    print(f"\n=== D. 구조적 변화 건수 vs 다음 해 매출 ===")
+    print("\n=== D. 구조적 변화 건수 vs 다음 해 매출 ===")
     sBins = [(0, 1, "없음(0)"), (1, 5, "소수(1-4)"), (5, 20, "중간(5-19)"), (20, 9999, "많음(20+)")]
     for lo, hi, label in sBins:
         subset = [r for r in records if lo <= r["structuralCount"] < hi]
@@ -262,7 +260,7 @@ def main():
         print(f"  {label:12s}: n={sn:4d}  up={upRate:4.0f}%  down={downRate:4.0f}%  평균={avgGrowth:+.1f}%  전환={turnRate:.0f}%")
 
     # --- E. 핵심: 리스크 대폭 증가 + 사업 축소 = 하락 신호? ---
-    print(f"\n=== E. 복합 신호: 리스크↑ + 사업↓ = 하락? ===")
+    print("\n=== E. 복합 신호: 리스크↑ + 사업↓ = 하락? ===")
     bearSignal = [r for r in records if r["riskDelta"] > 500 and r["bizDelta"] < -100]
     bullSignal = [r for r in records if r["riskDelta"] < -100 and r["bizDelta"] > 500]
     neutral = [r for r in records if r not in bearSignal and r not in bullSignal]
@@ -280,7 +278,7 @@ def main():
         print(f"  {label:22s}: n={sn:4d}  up={upRate:4.0f}%  down={downRate:4.0f}%  평균={avgGrowth:+.1f}%")
 
     # --- F. 상위/하위 비교 ---
-    print(f"\n=== F. 리스크 변화 상위25% vs 하위25% ===")
+    print("\n=== F. 리스크 변화 상위25% vs 하위25% ===")
     sortedByRisk = sorted(records, key=lambda r: r["riskDelta"], reverse=True)
     q = max(1, n // 4)
     top25 = sortedByRisk[:q]

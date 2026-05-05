@@ -44,8 +44,8 @@ def _isPeriodColumn(c: str) -> bool:
 
 
 def measureRate(maxCompanies: int = 0):
-    from dartlab.providers.dart.company import Company
     from dartlab.gather.listing import getKindList
+    from dartlab.providers.dart.company import Company
 
     kindList = getKindList()
     codes = kindList["종목코드"].to_list()
@@ -110,7 +110,7 @@ def measureRate(maxCompanies: int = 0):
         "auditSystem", "relatedPartyTx", "shareholderMeeting",
         "majorContractsAndRnd", "businessOverview",
     ]
-    print(f"\n핵심 topic 성공률:")
+    print("\n핵심 topic 성공률:")
     print(f"{'topic':<30} {'success':>8} {'total':>8} {'rate':>8}")
     for t in keyTopics:
         total = topicStats.get(t, 0)
@@ -120,7 +120,7 @@ def measureRate(maxCompanies: int = 0):
             print(f"{t:<30} {success:>8} {total:>8} {r:>7.1f}%")
 
     if errorCodes:
-        print(f"\n에러 샘플:")
+        print("\n에러 샘플:")
         for code, topic, bo, err in errorCodes[:10]:
             print(f"  [{code}] {topic} bo={bo}: {err}")
 

@@ -99,7 +99,7 @@ def main():
     }
 
     print(f"\n{'='*70}")
-    print(f"  시나리오별 마진 블렌딩 → ProForma → 이익 비교")
+    print("  시나리오별 마진 블렌딩 → ProForma → 이익 비교")
     print(f"{'='*70}")
 
     # 계절성
@@ -147,7 +147,7 @@ def main():
 
         # 분기별 판정 비교 (base 시나리오만)
         if scName == "base":
-            print(f"\n    --- Base 분기별 이익 판정 비교 ---")
+            print("\n    --- Base 분기별 이익 판정 비교 ---")
             for q in range(4):
                 actual = oi24Q[q] if q < len(oi24Q) else 0
                 target_fix = qOiTargets[q]

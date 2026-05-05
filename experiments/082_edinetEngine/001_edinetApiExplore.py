@@ -29,7 +29,6 @@
 
 from __future__ import annotations
 
-import json
 import os
 import sys
 import zipfile
@@ -71,12 +70,12 @@ def explore():
     if yuho:
         # 첫 번째 서류 구조 출력
         first = yuho[0]
-        print(f"\n   첫 번째 서류 키:")
+        print("\n   첫 번째 서류 키:")
         for k, v in first.items():
             print(f"     {k}: {v!r}")
 
     # ── 2. 여러 날짜 샘플 ──
-    print(f"\n2. 날짜별 유가증권보고서 건수")
+    print("\n2. 날짜별 유가증권보고서 건수")
     for date in ["2024-06-20", "2024-06-25", "2024-06-28", "2024-06-30"]:
         try:
             d = client.listDocuments(date, docType="120")
@@ -122,12 +121,12 @@ def explore():
             print(f"   다운로드 실패: {e}")
 
     # ── 4. EDINET 코드 목록 ──
-    print(f"\n4. EDINET 코드 목록 (기업 마스터)")
+    print("\n4. EDINET 코드 목록 (기업 마스터)")
     try:
         codes = client.listEdinetCodes()
         print(f"   총 기업: {len(codes)}개")
         if codes:
-            print(f"   첫 번째 기업 키:")
+            print("   첫 번째 기업 키:")
             for k, v in codes[0].items():
                 print(f"     {k}: {v!r}")
 

@@ -1,6 +1,4 @@
 """LG에너지솔루션 2025 변동내역 디버깅."""
-import re
-from pathlib import Path
 
 import polars as pl
 

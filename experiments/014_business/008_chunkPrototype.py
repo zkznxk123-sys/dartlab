@@ -31,7 +31,7 @@ import sys
 sys.stdout.reconfigure(encoding="utf-8")
 sys.path.insert(0, r"C:\Users\MSI\OneDrive\Desktop\sideProject\dartlab\src")
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import polars as pl
 
@@ -285,7 +285,7 @@ def chunkReport(stockCode: str, year: str = None) -> list[Chunk]:
                     allChunks.append(Chunk(
                         majorNum=mNum, majorTitle=majorTitle, subTitle=subTitle,
                         path=f"{majorTitle} > {subTitle}",
-                        textContent=f"(finance/report 엔진이 정량 처리 — 스킵)",
+                        textContent="(finance/report 엔진이 정량 처리 — 스킵)",
                         tableCount=0, tableRowCount=0, tableSummary="",
                         totalChars=len(subContent),
                         textChars=0, kind="skipped",
@@ -337,7 +337,7 @@ def printChunkReport(chunks: list[Chunk], corpName: str, stockCode: str):
 
         print(f" {i:3d} | {kindLabel:>12} | {c.textChars:>7,} | {c.totalChars:>7,} | {c.path[:55]}")
 
-    print(f"\n\n--- LLM에 제공할 텍스트 청크 (상위 10개) ---\n")
+    print("\n\n--- LLM에 제공할 텍스트 청크 (상위 10개) ---\n")
 
     textChunks = [c for c in chunks if c.kind not in ("skipped", "table_only")]
     textChunks.sort(key=lambda c: c.textChars, reverse=True)

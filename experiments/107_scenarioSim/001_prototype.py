@@ -17,7 +17,7 @@ from __future__ import annotations
 import gc
 import json
 import sys
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
@@ -327,8 +327,8 @@ def main():
     print(f"  실제 YoY: {actualYoY:+.1f}%")
 
     # [2] 시나리오 설정: "2024 반도체 회복"
-    print(f"\n[2/4] 시나리오 설정: '반도체 회복'")
-    print(f"  가정: 매출 +15%, 마진 개선")
+    print("\n[2/4] 시나리오 설정: '반도체 회복'")
+    print("  가정: 매출 +15%, 마진 개선")
 
     sim = createSimulation(
         company=c,
@@ -341,17 +341,17 @@ def main():
         bearSpread=0.3,         # bear: +4.5%
     )
 
-    print(f"\n  연간 목표:")
+    print("\n  연간 목표:")
     for sc in ["bull", "base", "bear"]:
         rev = sim.annualRevenue[sc]
         print(f"    {sc:5s}: 매출 {rev/1e12:.1f}조")
 
-    print(f"\n  분기 목표 (base):")
+    print("\n  분기 목표 (base):")
     for qt in sim.quarterlyTargets:
         print(f"    {qt.quarter}: bull={qt.bull/1e12:.1f}조 base={qt.base/1e12:.1f}조 bear={qt.bear/1e12:.1f}조")
 
     # [3] 분기별 판정
-    print(f"\n[3/4] 분기별 판정 (실제 실적 vs 시나리오)")
+    print("\n[3/4] 분기별 판정 (실제 실적 vs 시나리오)")
     print(f"{'='*70}")
 
     for q in range(4):
@@ -368,7 +368,7 @@ def main():
 
     # [4] 최종 요약
     print(f"\n{'='*70}")
-    print(f"[4/4] 최종 요약")
+    print("[4/4] 최종 요약")
     print(f"{'='*70}")
     print(f"  시나리오: {sim.scenarioName} (매출 +{sim.revenueGrowth}%)")
     print(f"  실제 YoY: {actualYoY:+.1f}%")
@@ -376,7 +376,7 @@ def main():
     print(f"  최종 행동: {sim.finalAction}")
 
     # 분기별 판정 요약
-    print(f"\n  분기별 경로:")
+    print("\n  분기별 경로:")
     for j in sim.judgments:
         print(f"    {j.quarter}: {j.path:20s} → {j.action}")
 

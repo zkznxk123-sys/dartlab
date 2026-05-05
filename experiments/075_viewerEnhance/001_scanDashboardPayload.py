@@ -44,9 +44,6 @@
 """
 
 import json
-import sys
-
-import polars as pl
 
 import dartlab
 
@@ -361,7 +358,7 @@ if __name__ == "__main__":
         json_str = json.dumps(unified, ensure_ascii=False, default=str)
         json_kb = len(json_str.encode("utf-8")) / 1024
 
-        print(f"\n[통계]")
+        print("\n[통계]")
         print(f"  총 영역: {total_areas}")
         print(f"  유효 영역: {valid_areas}")
         print(f"  null 영역: {null_count}")

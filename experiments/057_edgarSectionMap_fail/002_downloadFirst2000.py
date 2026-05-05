@@ -457,7 +457,6 @@ def main() -> None:
     docsDir.mkdir(parents=True, exist_ok=True)
 
     progressPath = Path(__file__).parent / "output" / "downloadFirst2000.progress.jsonl"
-    import polars as pl
     import requests
     outputDir = Path(__file__).parent / "output"
     candidatePath = dataRoot / "edgar" / "docsCandidates2000.parquet"

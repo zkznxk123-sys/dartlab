@@ -163,7 +163,7 @@ def main():
     from difflib import SequenceMatcher
 
     # 최근 연간 기간
-    latestAnnual = [p for p in commonPeriods if not "Q" in p]
+    latestAnnual = [p for p in commonPeriods if "Q" not in p]
     if latestAnnual:
         targetPeriod = latestAnnual[-1]
     else:

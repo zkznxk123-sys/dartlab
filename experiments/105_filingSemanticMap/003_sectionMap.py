@@ -36,8 +36,7 @@
 
 from __future__ import annotations
 
-import re
-from collections import Counter, defaultdict
+from collections import Counter
 
 import polars as pl
 
@@ -134,7 +133,7 @@ if __name__ == "__main__":
             classifiedCount += 1
 
     totalUnique = sections["section_title"].n_unique()
-    print(f"\n=== 섹션 클러스터 분포 ===")
+    print("\n=== 섹션 클러스터 분포 ===")
     for cluster, count in clusterCounts.most_common():
         print(f"  {cluster:12s}: {count}개")
     print(f"\n분류 완료: {classifiedCount}/{totalUnique} ({classifiedCount/totalUnique*100:.0f}%)")

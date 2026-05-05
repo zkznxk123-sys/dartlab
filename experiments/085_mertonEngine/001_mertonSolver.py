@@ -41,10 +41,10 @@
 """
 
 import sys
+
 sys.path.insert(0, "src")
 
 from dartlab.credit.merton import (
-    MertonResult,
     calcEquityVolatility,
     solveMerton,
 )
@@ -107,7 +107,7 @@ def run_volatility_test():
     vol = calcEquityVolatility(returns)
     expected = daily_sigma * math.sqrt(252)
 
-    print(f"\n변동성 검증:")
+    print("\n변동성 검증:")
     print(f"  합성 daily σ = {daily_sigma:.4f}")
     print(f"  기대 annual σ ≈ {expected:.4f}")
     print(f"  계산 annual σ = {vol:.4f}")

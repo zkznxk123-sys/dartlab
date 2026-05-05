@@ -266,7 +266,7 @@ def processCompany(code, name):
                     sameCore = "O" if cm["core"] == cm["prevCore"] else "X"
                     print(f"      [{cm['core']}] '{cm['curName']}' → '{cm['prevName']}' ({cm['amount']:,.0f}) 핵심일치={sameCore}")
             else:
-                print(f"    핵심 계정 브릿지: 없음")
+                print("    핵심 계정 브릿지: 없음")
         else:
             currentSegment.append(prevYear)
 

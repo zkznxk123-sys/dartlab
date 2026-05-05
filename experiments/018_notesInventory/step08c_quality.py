@@ -3,7 +3,6 @@
 다양한 패턴의 기업에서 파싱 결과가 정확한지 확인.
 """
 
-import os
 import sys
 
 sys.path.insert(0, "src")

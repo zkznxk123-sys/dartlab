@@ -151,7 +151,7 @@ if __name__ == "__main__":
             errors.append((code, str(e)))
 
     total = len(files)
-    print(f"\n=== 037 주주총회 배치 결과 ===")
+    print("\n=== 037 주주총회 배치 결과 ===")
     print(f"성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}/{total}")
     print(f"안건: {totalAgendas}건")

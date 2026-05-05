@@ -136,6 +136,6 @@ if __name__ == "__main__":
                 for name in order[:3]:
                     print(f"    {name}: {accounts[name]}")
         else:
-            print(f"  BS: None")
+            print("  BS: None")
 
         print()

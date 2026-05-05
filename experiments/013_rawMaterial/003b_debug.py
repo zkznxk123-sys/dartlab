@@ -1,7 +1,6 @@
 """삼성전자 원재료 + 생산설비 테이블 상세 디버깅."""
 
 import io
-import re
 import sys
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")

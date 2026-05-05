@@ -135,7 +135,7 @@ def batchExplore():
     print(f"섹션 없음: {notFound}")
     print(f"테이블 있음: {hasTable}")
 
-    print(f"\n섹션 제목 분포:")
+    print("\n섹션 제목 분포:")
     for title, count in titleCounter.most_common(10):
         print(f"  {count:3d} | {title}")
 

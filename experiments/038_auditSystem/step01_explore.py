@@ -179,7 +179,7 @@ if __name__ == "__main__":
             errors.append((code, str(e)))
 
     total = len(files)
-    print(f"\n=== 038 감사제도 배치 결과 ===")
+    print("\n=== 038 감사제도 배치 결과 ===")
     print(f"성공: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"실패: {fail}/{total}")
     print(f"감사위원: {totalCommittee}건")

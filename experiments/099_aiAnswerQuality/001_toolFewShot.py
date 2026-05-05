@@ -229,8 +229,8 @@ def main():
     print(f"\n{'=' * 60}")
     print("결과 비교")
     print(f"{'=' * 60}")
-    print(f"\n| 지표 | Baseline | Few-Shot | 변화 |")
-    print(f"|------|---------|---------|------|")
+    print("\n| 지표 | Baseline | Few-Shot | 변화 |")
+    print("|------|---------|---------|------|")
     for key in ["nameAccuracy", "paramAccuracy"]:
         b = baselineScore[key]
         f = fewShotScore[key]
@@ -238,9 +238,9 @@ def main():
         print(f"| {key} | {b:.1%} | {f:.1%} | {delta:+.1%} |")
 
     # 상세 비교
-    print(f"\n### 상세 tool 호출 비교")
-    print(f"| topic | baseline tools | fewShot tools | baseline답변 | fewShot답변 |")
-    print(f"|-------|---------------|---------------|------------|-----------|")
+    print("\n### 상세 tool 호출 비교")
+    print("| topic | baseline tools | fewShot tools | baseline답변 | fewShot답변 |")
+    print("|-------|---------------|---------------|------------|-----------|")
     for br, fr in zip(baselineResults, fewShotResults):
         bTools = [tc.get("name", "?") for tc in br.get("toolCalls", [])]
         fTools = [tc.get("name", "?") for tc in fr.get("toolCalls", [])]

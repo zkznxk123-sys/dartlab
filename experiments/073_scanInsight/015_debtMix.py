@@ -268,7 +268,7 @@ def compute_debt_mix() -> pl.DataFrame:
     nobond_dr = valid_dr.filter(pl.col("사채발행") == False)["부채비율"]
 
     if bond_dr.len() > 0 and nobond_dr.len() > 0:
-        print(f"\n=== 부채비율 비교 ===")
+        print("\n=== 부채비율 비교 ===")
         print(f"사채 발행 기업: 중앙값 {bond_dr.median():.1f}%, 평균 {bond_dr.mean():.1f}%")
         print(f"사채 미발행 기업: 중앙값 {nobond_dr.median():.1f}%, 평균 {nobond_dr.mean():.1f}%")
 
@@ -328,9 +328,9 @@ def analyze_by_market(df: pl.DataFrame) -> None:
         .sort("중앙값의존도", descending=True)
     )
     if not industry_stats.is_empty():
-        print(f"\n=== 사채의존도 높은 업종 ===")
+        print("\n=== 사채의존도 높은 업종 ===")
         print(industry_stats.head(10))
-        print(f"\n=== 사채의존도 낮은 업종 ===")
+        print("\n=== 사채의존도 낮은 업종 ===")
         print(industry_stats.tail(10))
 
 

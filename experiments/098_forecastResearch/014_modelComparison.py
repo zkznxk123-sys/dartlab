@@ -279,7 +279,7 @@ def run():
 
     # 결과 테이블
     print(f"\n{'=' * 70}")
-    print(f"  3개년 평균 성능 비교 (2022/2023/2024)")
+    print("  3개년 평균 성능 비교 (2022/2023/2024)")
     print(f"{'=' * 70}")
 
     print(f"\n  {'모델':20s} {'MdAE':>8s} {'<20%':>8s} {'방향':>8s}")
@@ -305,7 +305,7 @@ def run():
 
     # 외부 벤치마크 대비
     print(f"\n{'=' * 70}")
-    print(f"  외부 벤치마크 대비 위치")
+    print("  외부 벤치마크 대비 위치")
     print(f"{'=' * 70}")
     bestMdAE = np.mean(yearMetrics["ensemble3"]["mdae"])
     bestW20 = np.mean(yearMetrics["ensemble3"]["w20"])

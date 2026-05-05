@@ -71,7 +71,7 @@ def main(stockCode: str = "005930") -> None:
     gc.collect()
     origRss = mb()
     origSize = df.estimated_size() / 1024 / 1024
-    print(f"\n[원본 sections]")
+    print("\n[원본 sections]")
     print(f"  shape: {df.shape}")
     print(f"  RSS: {origRss:.0f}MB (+{origRss - baseRss:.0f}MB)")
     print(f"  estimated_size: {origSize:.1f}MB")
@@ -94,7 +94,7 @@ def main(stockCode: str = "005930") -> None:
     catRss = mb()
     catSize = dfCat.estimated_size() / 1024 / 1024
     catPeriodSize = sum(dfCat[c].estimated_size() for c in periodCols) / 1024 / 1024
-    print(f"\n[Categorical 변환 후]")
+    print("\n[Categorical 변환 후]")
     print(f"  RSS: {catRss:.0f}MB (+{catRss - baseRss:.0f}MB)")
     print(f"  estimated_size: {catSize:.1f}MB")
     print(f"  period 컬럼 estimated_size: {catPeriodSize:.1f}MB")
@@ -103,7 +103,7 @@ def main(stockCode: str = "005930") -> None:
     print(f"  period 절감: {origPeriodSize - catPeriodSize:.1f}MB ({(1 - catPeriodSize/origPeriodSize)*100:.1f}%)")
 
     # 3. 소비자 호환성 테스트
-    print(f"\n[소비자 호환성]")
+    print("\n[소비자 호환성]")
 
     # 3a. 문자열 비교 가능?
     sampleCol = periodCols[-1]  # 최신 period
@@ -129,7 +129,7 @@ def main(stockCode: str = "005930") -> None:
     print(f"  null 보존: {nullCount}개 (원본과 동일해야 함)")
 
     # 4. 메타 컬럼도 Categorical 가능한지 탐색
-    print(f"\n[메타 컬럼 Categorical 탐색]")
+    print("\n[메타 컬럼 Categorical 탐색]")
     nonPeriodStr = [
         c for c in dfCat.columns
         if c not in periodCols

@@ -35,10 +35,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 
 def main():
-    from dartlab.company import _ensureData
     from dartlab.analysis.financial.ratios import RatioResult, calcRatios
-    from dartlab.providers.dart.finance.pivot import buildAnnual
+    from dartlab.company import _ensureData
     from dartlab.gather.listing import getKindList
+    from dartlab.providers.dart.finance.pivot import buildAnnual
 
     kindList = getKindList()
     if kindList is None or kindList.is_empty():
@@ -134,7 +134,7 @@ def main():
         print(f"{name:<35} {cnt:>8} {pct:>7.1f}%")
 
     if errors:
-        print(f"\n[ 에러 종목 (처음 20개) ]")
+        print("\n[ 에러 종목 (처음 20개) ]")
         for code, msg in errors[:20]:
             print(f"  {code}: {msg}")
         if len(errors) > 20:

@@ -74,7 +74,7 @@ def main():
     from dartlab.core.docs.viewer import _charDiffOps
     modBlocks = [b for b in docAuto["blocks"] if b.get("status") == "modified" and b["kind"] != "table"]
     tblModBlocks = [b for b in docAuto["blocks"] if b.get("status") == "modified" and b["kind"] == "table"]
-    print(f"\n--- 성능 프로파일 ---")
+    print("\n--- 성능 프로파일 ---")
     print(f"  modified 텍스트 블록: {len(modBlocks)}, modified 테이블: {len(tblModBlocks)}")
     # diff 시간만 측정
     tDiff = time.perf_counter()
@@ -84,7 +84,7 @@ def main():
     tDiffEnd = time.perf_counter()
     print(f"  텍스트 diff 총 시간: {(tDiffEnd - tDiff)*1000:.1f}ms")
     # 테이블 파싱/비교 시간
-    from dartlab.core.docs.viewer import _parseTable, _tableCellDiffs
+    from dartlab.core.docs.viewer import _tableCellDiffs
     tTbl = time.perf_counter()
     for b in tblModBlocks:
         base = b.get("base")
@@ -95,7 +95,7 @@ def main():
     print(f"  테이블 비교 시간: {(tTblEnd - tTbl)*1000:.1f}ms")
 
     # 4. 테스트 B: 단독 뷰 (comparePeriod="")
-    print(f"\n--- 테스트 B: 단독 뷰 (comparePeriod='') ---")
+    print("\n--- 테스트 B: 단독 뷰 (comparePeriod='') ---")
     docSingle = viewer(sec, "businessOverview", basePeriod, "")
     print(f"  comparePeriod: {docSingle['comparePeriod']}")
     print(f"  blocks: {len(docSingle['blocks'])}")
@@ -106,7 +106,7 @@ def main():
     blocks = docAuto["blocks"]
     tableBlocks = [b for b in blocks if b["kind"] == "table"]
     tableNullPaths = [b for b in tableBlocks if b.get("path") is None]
-    print(f"\n--- 개선 1: 테이블 path 상속 ---")
+    print("\n--- 개선 1: 테이블 path 상속 ---")
     print(f"  테이블 블록 수: {len(tableBlocks)}")
     print(f"  path=None 수: {len(tableNullPaths)}")
     if tableBlocks:
@@ -115,7 +115,7 @@ def main():
     print(f"  {'PASS' if len(tableNullPaths) == 0 else 'FAIL'}: 테이블 path 상속")
 
     # 6. 개선 4 검증: foldable 그룹
-    print(f"\n--- 개선 4: foldable 그룹 ---")
+    print("\n--- 개선 4: foldable 그룹 ---")
     print(f"  foldableGroups: {docAuto['summary'].get('foldableGroups', 0)}")
     foldableBlocks = [b for b in blocks if b.get("foldable")]
     print(f"  foldable 블록 수: {len(foldableBlocks)}")
@@ -128,7 +128,7 @@ def main():
             print(f"    그룹 {gid}: {len(ids)}개 블록 ({ids[0]}~{ids[-1]})")
 
     # 7. 개선 5 검증: depth/parentId
-    print(f"\n--- 개선 5: 트리 구조 ---")
+    print("\n--- 개선 5: 트리 구조 ---")
     hasDepth = all("depth" in b for b in blocks)
     hasParent = all("parentId" in b for b in blocks)
     print(f"  depth 할당: {hasDepth}")
@@ -148,13 +148,13 @@ def main():
     # 8. JSON 직렬화
     try:
         jsonStr = json.dumps(docAuto, ensure_ascii=False)
-        print(f"\n--- JSON 직렬화 ---")
+        print("\n--- JSON 직렬화 ---")
         print(f"  성공: {len(jsonStr):,}bytes")
     except (TypeError, ValueError) as e:
         print(f"\n--- JSON 직렬화 실패: {e} ---")
 
     # 9. 성능 요약
-    print(f"\n=== 성능 요약 ===")
+    print("\n=== 성능 요약 ===")
     print(f"  viewer (자동선택): {elapsedAuto*1000:.1f}ms")
     print(f"  {'PASS' if elapsedAuto < 0.5 else 'FAIL'}: 성능 기준 (< 500ms)")
     print(f"  summary: {docAuto['summary']}")

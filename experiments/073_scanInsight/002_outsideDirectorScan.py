@@ -173,7 +173,7 @@ def scan_executive() -> pl.DataFrame:
 
     # 분포 통계
     ratios = df["사외이사비율"]
-    print(f"\n=== 사외이사 비율 분포 ===")
+    print("\n=== 사외이사 비율 분포 ===")
     print(f"평균: {ratios.mean():.1f}%")
     print(f"중앙값: {ratios.median():.1f}%")
     print(f"최소: {ratios.min():.1f}%")
@@ -186,7 +186,7 @@ def scan_executive() -> pl.DataFrame:
     # 구간 분포
     bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     total_cnt = ratios.len()
-    print(f"\n=== 구간별 분포 ===")
+    print("\n=== 구간별 분포 ===")
     for i in range(len(bins) - 1):
         lo, hi = bins[i], bins[i + 1]
         cnt = ratios.filter((ratios >= lo) & (ratios < hi)).len()
@@ -225,7 +225,7 @@ def analyze_by_market(df: pl.DataFrame) -> None:
         ])
         .sort("평균비율", descending=True)
     )
-    print(f"\n=== 시장별 사외이사 비율 ===")
+    print("\n=== 시장별 사외이사 비율 ===")
     print(market_stats)
 
     # 업종별 (5개 이상)
@@ -238,9 +238,9 @@ def analyze_by_market(df: pl.DataFrame) -> None:
         .filter(pl.col("종목수") >= 5)
         .sort("평균비율", descending=True)
     )
-    print(f"\n=== 사외이사 비율 높은 업종 ===")
+    print("\n=== 사외이사 비율 높은 업종 ===")
     print(industry_stats.head(10))
-    print(f"\n=== 사외이사 비율 낮은 업종 ===")
+    print("\n=== 사외이사 비율 낮은 업종 ===")
     print(industry_stats.tail(10))
 
 

@@ -95,7 +95,7 @@ def strategy_a_more_keywords(
 
     # 상위 후보 출력 + 적용
     print(f"\n  전략 A: 독립 {len(indep_names)}개에서 접두사 분석")
-    print(f"  3개+ 공유 접두사 후보 (상위 20):")
+    print("  3개+ 공유 접두사 후보 (상위 20):")
     applied = 0
     for prefix, names in list(auto_groups.items())[:20]:
         print(f"    '{prefix}' ({len(names)}개): {', '.join(names[:5])}")
@@ -240,7 +240,7 @@ def strategy_b_lower_threshold(
     for node in all_node_ids - set(code_to_group.keys()):
         code_to_group[node] = code_to_name.get(node, node)
 
-    print(f"\n  전략 B: Phase 3 임계값 10%")
+    print("\n  전략 B: Phase 3 임계값 10%")
     print(f"    Phase 3 추가: +{phase3}")
     return code_to_group
 

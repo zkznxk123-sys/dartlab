@@ -47,7 +47,6 @@
 from __future__ import annotations
 
 import polars as pl
-from _common import ratioSurfaceFrame
 
 SAMPLES: list[tuple[str, str]] = [
     ("005930", "제조"),

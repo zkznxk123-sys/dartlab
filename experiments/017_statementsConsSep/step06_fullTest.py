@@ -200,7 +200,7 @@ if __name__ == "__main__":
 
     total = len(codes)
     ok = consOk + sepOk + bothOk
-    print(f"\n=== 최종 커버리지 (개선 후) ===")
+    print("\n=== 최종 커버리지 (개선 후) ===")
     print(f"총: {total}")
     print(f"성공: {ok} ({ok/total*100:.1f}%)")
     print(f"  연결만: {consOk}")
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     # 연도 수 분포
     if results:
         nYears = [r["nYears"] for r in results]
-        print(f"\n연도 수 분포:")
+        print("\n연도 수 분포:")
         print(f"  평균: {sum(nYears)/len(nYears):.1f}")
         print(f"  최소: {min(nYears)}, 최대: {max(nYears)}")
 
@@ -222,7 +222,7 @@ if __name__ == "__main__":
             print(f"  [{code}] {name}")
 
     # 기존 대비 개선
-    print(f"\n=== 기존 대비 개선 ===")
-    print(f"기존 statements(): 161/267 (60.3%)")
+    print("\n=== 기존 대비 개선 ===")
+    print("기존 statements(): 161/267 (60.3%)")
     print(f"개선 후: {ok}/{total} ({ok/total*100:.1f}%)")
     print(f"순증: +{ok - 161}개")
