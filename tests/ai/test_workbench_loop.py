@@ -1,0 +1,76 @@
+"""5 패스 작업대 e2e — mock WorkbenchProvider 로 단순 시나리오."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any
+
+import pytest
+
+from dartlab.ai.providers import ProviderConfig, ProviderTurn
+from dartlab.ai.workbench.loop import WorkbenchLoop
+
+
+@dataclass
+class _MockProvider:
+    """지정한 ProviderTurn 시퀀스를 round-robin 으로 반환."""
+
+    config: ProviderConfig = field(default_factory=lambda: ProviderConfig(provider="openai", api_key="sk-test"))
+    script: list[ProviderTurn] = field(default_factory=list)
+    _idx: int = 0
+
+    def check_available(self) -> bool:
+        return True
+
+    def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn:
+        if self._idx < len(self.script):
+            turn = self.script[self._idx]
+            self._idx += 1
+            return turn
+        return ProviderTurn(content="(no more script)", tool_calls=[])
+
+
+def _text(content: str) -> ProviderTurn:
+    return ProviderTurn(content=content, tool_calls=[])
+
+
+@pytest.mark.unit
+def test_workbench_dispatches_to_llm_path_when_provider_real() -> None:
+    provider = _MockProvider(
+        script=[
+            _text("BRIEF 결과"),
+            _text("WORK 결과"),
+            _text("CRITIQUE 결과"),
+            _text("COMPOSE 답안"),
+            _text("HARVEST 결과"),
+        ]
+    )
+    loop = WorkbenchLoop()
+    events = list(loop.stream("hi", provider=provider))
+    kinds = {e.kind for e in events}
+    assert "pass_enter" in kinds
+    assert "pass_exit" in kinds
+    assert "answer" in kinds
+    assert "done" in kinds
+
+
+@pytest.mark.unit
+def test_workbench_5_passes_invoked_in_order() -> None:
+    provider = _MockProvider(script=[_text("ok")] * 6)
+    loop = WorkbenchLoop()
+    pass_order: list[str] = []
+    for ev in loop.stream("test", provider=provider):
+        if ev.kind == "pass_enter":
+            pass_order.append(ev.data.get("pass", ""))
+    assert pass_order[:5] == ["brief", "work", "critique", "compose", "gate"]
+    assert "harvest" in pass_order
+
+
+@pytest.mark.unit
+def test_workbench_legacy_path_when_provider_dartlab() -> None:
+    """provider 미지정 시 기존 휴리스틱 path."""
+    loop = WorkbenchLoop()
+    events = list(loop.stream("삼성전자 005930"))
+    kinds = [e.kind for e in events]
+    assert any(k == "graph_node" for k in kinds)
+    assert any(k in {"answer", "chunk", "unable"} for k in kinds)

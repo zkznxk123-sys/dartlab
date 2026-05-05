@@ -1,0 +1,137 @@
+{
+  "_comment": "휴리스틱 ask() 캡처. P1 LLM 5 패스 회귀 비교용. 안전 question 셋만 — dartlab 데이터 로드 안 함.",
+  "_capturedAt": "2026-05-05T14:01:23.316090+00:00",
+  "_dartlabVersion": "0.9.27",
+  "scenarios": [
+    {
+      "question": "hi",
+      "expected": {
+        "textPreview": "종목을 먼저 특정해야 분석할 수 있습니다. 예: `삼성전자 재무상태표 확인`",
+        "textLength": 42,
+        "refs": [
+          "skill:operation.philosophy",
+          "skill:engines.gather.ownership",
+          "skill:engines.gather.history",
+          "skill:engines.gather.splits",
+          "skill:engines.gather.dividends",
+          "skill:operation.architecture",
+          "skill:engines.quant.fundmom",
+          "skill:engines.quant.accruals"
+        ],
+        "refCount": 8
+      }
+    },
+    {
+      "question": "DartLab 의 분석 범위는?",
+      "expected": {
+        "textPreview": "종목을 먼저 특정해야 분석할 수 있습니다. 예: `삼성전자 재무상태표 확인`",
+        "textLength": 42,
+        "refs": [
+          "skill:start.dartlabSkillOs",
+          "skill:engines.company.researchStarter",
+          "skill:engines.analysis",
+          "skill:engines.analysis.profitability",
+          "skill:operation.architecture",
+          "skill:operation.testing",
+          "skill:operation.apiContract",
+          "skill:engines.story.dartlabStory",
+          "api:capabilities",
+          "api:scan",
+          "api:ask",
+          "api:Company.show",
+          "api:Company",
+          "api:listing",
+          "api:downloadAll",
+          "api:gather",
+          "api:macro",
+          "api:search"
+        ],
+        "refCount": 18
+      }
+    },
+    {
+      "question": "재무제표 분석 절차 알려줘",
+      "expected": {
+        "textPreview": "종목을 먼저 특정해야 분석할 수 있습니다. 예: `삼성전자 재무상태표 확인`",
+        "textLength": 42,
+        "refs": [
+          "skill:engines.analysis",
+          "skill:engines.analysis.financialConsistency",
+          "skill:engines.company.researchStarter",
+          "skill:engines.company.usEdgarReview",
+          "skill:start.dartlabSkillOs",
+          "skill:engines.credit.creditRisk",
+          "skill:engines.company",
+          "skill:engines.data.foundation",
+          "api:Company.analysis",
+          "api:Company.rawFinance",
+          "api:Company.show",
+          "api:Company.story",
+          "api:ask",
+          "api:Company.select",
+          "api:Company",
+          "api:scan",
+          "api:credit",
+          "api:quant"
+        ],
+        "refCount": 18
+      }
+    },
+    {
+      "question": "회사 비교는 어떻게 하나",
+      "expected": {
+        "textPreview": "종목을 먼저 특정해야 분석할 수 있습니다. 예: `삼성전자 재무상태표 확인`",
+        "textLength": 42,
+        "refs": [
+          "skill:engines.analysis.revenueForecast",
+          "skill:operation.philosophy",
+          "skill:engines.analysis.costStructure",
+          "skill:engines.analysis.peerComparison",
+          "skill:engines.company.researchStarter",
+          "skill:engines.analysis",
+          "skill:start.useSkillsCatalog",
+          "skill:engines.macro",
+          "api:scan",
+          "api:Company",
+          "api:Company.capital",
+          "api:Company.debt",
+          "api:Company.governance",
+          "api:Company.workforce",
+          "api:search",
+          "api:Company.diff",
+          "api:aiContract.comparison.same_axis",
+          "api:ask"
+        ],
+        "refCount": 18
+      }
+    },
+    {
+      "question": "거시 경제 지표는 무엇이 있나",
+      "expected": {
+        "textPreview": "스캔 결과가 비어 있어 후보를 만들 수 없습니다. scan 데이터 수집 상태를 먼저 확인해야 합니다.",
+        "textLength": 56,
+        "refs": [
+          "skill:engines.macro.marketReview",
+          "skill:engines.scan.macroBeta",
+          "skill:engines.quant.indicators",
+          "skill:engines.company.researchStarter",
+          "skill:engines.macro.cycle",
+          "skill:start.dartlabSkillOs",
+          "skill:engines.quant.chartPatterns",
+          "skill:engines.analysis.revenueStructure",
+          "api:Company.gather",
+          "api:gather",
+          "api:macro",
+          "api:gather.macro",
+          "api:Company.macro",
+          "api:Company",
+          "api:Company.analysis",
+          "api:scan",
+          "api:Fred",
+          "api:macro.cycle"
+        ],
+        "refCount": 18
+      }
+    }
+  ]
+}
