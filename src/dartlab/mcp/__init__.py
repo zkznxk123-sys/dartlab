@@ -70,10 +70,17 @@ from dartlab.ai.tools.registry import toolSpecs as _aiToolSpecs  # noqa: E402
 
 _MCP_WORKSPACE_AGENT_TOOL_NAMES = (
     "ask",
+    # SSOT v2 — 6 종 신규 (권장)
+    "read_skill",
+    "read_capability",
+    "run_python",
+    "web_search",
+    "save_artifact",
+    "propose_skill",
+    # 호환 (P1 deprecate)
     "skill_search",
     "generated_spec_search",
     "engine_call",
-    "run_python",
     "read",
 )
 
@@ -314,24 +321,33 @@ def _fmtDict(d: dict, depth: int = 0) -> str:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _MCP_INSTRUCTIONS = """\
-DartLab MCP의 기본 표면은 ask가 실행하는 Ask Workbench와 canonical AI tools다. 목적은 LLM이 DartLab을
-프롬프트 지식으로 외우게 하는 것이 아니라, 질문마다 먼저 skill을 고르고,
-generated spec/docstring에서 호출 가능한 API를 확인한 뒤 engine_call 또는
-run_python으로 실행하고 ref 검증 후 답하게 하는 것이다.
+DartLab MCP의 기본 표면은 ask가 실행하는 Ask Workbench와 SSOT v2 6 종 도구다. 목적은 LLM이 DartLab을
+프롬프트 지식으로 외우게 하는 것이 아니라, 질문마다 먼저 skill을 고르고, capability docstring에서 호출 가능한 API를
+확인한 뒤 run_python으로 실행하고 ref 검증 후 답하게 하는 것이다.
+
+## SSOT v2 — 권장 6 종
+- ask: Workbench 5 패스 (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) 일괄 실행.
+- read_skill: Skill OS 검색 + frontmatter (whenToUse, capabilityRefs, requiredEvidence) + 본문.
+- read_capability: dartlab 공개 API/docstring 검색.
+- run_python: dartlab + Polars 코드 실행, ref 발급 (executionRef/valueRef/tableRef/dateRef).
+- web_search: 외부 최신 정보 → webRef.
+- save_artifact: 큰 표·차트 별도 파일 저장 → artifactRef.
+- propose_skill: HARVEST 가 발견한 새 절차를 skill spec(kind: generated, status: unverified)으로 작성.
 
 ## 기본 흐름
-1. ask로 전체 답변 루프를 실행한다.
-2. 별도 작업대가 필요하면 skill_search로 목적 skill을 먼저 선택한다.
-3. read 또는 dartlab://skills/{skillId}로 절차, 근거, 실행 환경을 확인한다.
-4. generated_spec_search로 호출 가능한 공개 API와 docstring 정보를 찾는다.
-5. inspect_dataset으로 데이터셋 스키마, 기간, 행 수, 최신 기준시점을 확인한다.
-6. engine_call로 generated spec 기반 call plan을 검증·실행한다.
-7. 계산/랭킹/표 생성은 run_python으로 DartLab 라이브러리와 Polars를 사용한다.
-8. 후보·상위·랭킹 답변은 bullet 나열로 끝내지 않고 입력/유니버스, 필터, 계산식/지표, 결과와 evidence table을 함께 낸다.
+1. ask로 전체 답변 루프 실행 (단순 질문은 이걸로 끝).
+2. 작업대 직접 사용 시: read_skill 로 절차 → read_capability 로 API → run_python 으로 실행 → 답변 + ref.
+3. 후보·상위·랭킹 답변은 bullet 나열로 끝내지 않고 입력/유니버스, 필터, 계산식/지표, 결과와 evidence table을 함께 낸다.
+
+## 호환 (deprecated, 점진 폐기)
+- skill_search → read_skill 권장.
+- generated_spec_search → read_capability 권장.
+- engine_call → run_python 권장 (run_python 안에서 dartlab 라이브러리 직접 호출).
+- read → read_skill 으로 통합.
 
 ## 경계
 - Company, gather, scan, macro, analysis, quant, viz는 generated MCP tool로 직접 우회하지 않는다.
-  engine_call 또는 run_python 안에서 사용하는 DartLab 라이브러리다.
+  run_python 안에서 사용하는 DartLab 라이브러리다.
 - Skills는 MCP 전용 규칙이 아니라 dartlab.skills 공용 runtime을 그대로 노출한다.
 - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다. 모든 절차는 Skill OS에서 찾는다.
 - companySections 같은 전체 sections 지도는 메모리 부담이 커서 기본 경로에서 쓰지 않는다.

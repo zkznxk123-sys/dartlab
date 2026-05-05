@@ -1,4 +1,8 @@
-"""Ask Workbench loop backed by Skill OS and generated capabilities."""
+"""Ask Workbench loop.
+
+P1+: LLM provider 가 실제 anthropic/openai 등이면 5 패스 작업대 (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST).
+provider="dartlab" (stub) 이면 기존 휴리스틱 path 유지 — 외부 callers (CLI/server/tests) 호환.
+"""
 
 from __future__ import annotations
 
@@ -13,8 +17,15 @@ from dartlab.ai.tools.skillSearch import skillSearch
 from dartlab.ai.tools.types import ToolResult
 from dartlab.ai.tools.verifyAnswer import verifyAnswer
 
+# P1: 5 패스 모듈
+from .brief import runBrief
+from .compose import runCompose
+from .critique import runCritique
+from .gate import runGate
+from .harvest import runHarvest
 from .scratchpad import Scratchpad
 from .state import WorkbenchState
+from .work import runWork
 
 GRAPH_NODES: tuple[str, ...] = (
     "routeIntent",
@@ -84,6 +95,83 @@ class WorkbenchLoop:
     nodes = GRAPH_NODES
 
     def stream(self, question: str, **kwargs: Any) -> Iterator[TraceEvent]:
+        # P1 dispatch: LLM provider 가 anthropic/openai/google/xai/ollama 면 5 패스
+        provider_obj = kwargs.pop("provider", None)
+        if provider_obj is None:
+            provider_obj = _resolveProvider(kwargs.get("config"))
+        if _isLLMProvider(provider_obj):
+            yield from self._streamLLMPasses(question, provider_obj, **kwargs)
+            return
+
+        # provider="dartlab" 또는 미해결 → 기존 휴리스틱 path (호환)
+        yield from self._streamHeuristic(question, **kwargs)
+
+    def _streamLLMPasses(self, question: str, provider: Any, **kwargs: Any) -> Iterator[TraceEvent]:
+        """5 패스 LLM-driven 작업대."""
+        state = WorkbenchState(
+            question=str(question or "").strip(),
+            threadId=str(kwargs.get("threadId") or ""),
+            messages=list(kwargs.get("history") or kwargs.get("messages") or []),
+        )
+        scratchpad = Scratchpad(state.runId)
+        scratchpad.append("start", {"question": state.question, "provider": getattr(provider, "name", "?")})
+
+        yield TraceEvent("graph_node", {"node": "brief", "status": "running"})
+        yield from runBrief(state, provider)
+
+        yield TraceEvent("graph_node", {"node": "work", "status": "running"})
+        yield from runWork(state, provider)
+
+        yield TraceEvent("graph_node", {"node": "critique", "status": "running"})
+        yield from runCritique(state, provider)
+
+        yield TraceEvent("graph_node", {"node": "compose", "status": "running"})
+        yield from runCompose(state, provider)
+
+        yield TraceEvent("graph_node", {"node": "gate", "status": "running"})
+        yield from runGate(state)
+
+        # GATE blocked 면 WORK 1 회 회귀 — 이후 다시 COMPOSE/GATE
+        if state.gateBlocked and state.iteration < 1:
+            state.iteration += 1
+            yield TraceEvent("graph_node", {"node": "work_repeat", "status": "running"})
+            yield from runWork(state, provider)
+            yield from runCompose(state, provider)
+            yield from runGate(state)
+
+        yield TraceEvent("graph_node", {"node": "harvest", "status": "running"})
+        yield from runHarvest(state, provider)
+
+        # 답변 emit
+        answer = state.answerText or "응답 생성 실패"
+        if state.gateBlocked:
+            issues = "; ".join(state.gateIssues)
+            answer = f"{answer}\n\n[GATE 미통과 — 추가 검증 필요: {issues}]"
+            state.status = "gate_blocked"
+        else:
+            state.status = "done"
+
+        yield TraceEvent("answer", {"text": answer, "evidenceRefs": [r.id for r in state.refs]})
+        for chunk in _chunks(answer):
+            yield TraceEvent("chunk", {"text": chunk})
+        yield TraceEvent(
+            "done",
+            {
+                "refs": [r.to_dict() for r in state.refs],
+                "artifacts": [],
+                "verification": state.verification,
+                "responseMeta": {
+                    "finalEvent": "answer",
+                    "responseStatus": state.status,
+                    "refCount": len(state.refs),
+                    "scratchpad": scratchpad.ref(),
+                    "passes": ["brief", "work", "critique", "compose", "gate", "harvest"],
+                },
+            },
+        )
+
+    def _streamHeuristic(self, question: str, **kwargs: Any) -> Iterator[TraceEvent]:
+        """기존 휴리스틱 path. CLI/server/test_ai_research_graph 호환."""
         state = WorkbenchState(
             question=str(question or "").strip(),
             threadId=str(kwargs.get("threadId") or ""),
@@ -623,3 +711,43 @@ def _skillId(ref: Ref) -> str:
 def _chunks(text: str, *, size: int = 240) -> Iterator[str]:
     for index in range(0, len(text), size):
         yield text[index : index + size]
+
+
+def _resolveProvider(config: Any = None) -> Any:
+    """config 으로부터 provider 객체 시도. 실패 시 None."""
+    try:
+        from dartlab.ai.providers import create_provider
+
+        return create_provider(config)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _isLLMProvider(obj: Any) -> bool:
+    """5 패스 작업대 path 사용 여부 — WorkbenchProvider Protocol (generate) 만족 + check_available True 면 True.
+
+    config.provider 가 oauth-codex / openai / gemini / codex / ollama / custom / groq / cerebras / mistral
+    중 하나일 때 적용. 미해결 / dartlab stub 등은 휴리스틱 path.
+    """
+    if obj is None:
+        return False
+    if not callable(getattr(obj, "generate", None)):
+        return False
+    config = getattr(obj, "config", None)
+    provider_id = (getattr(config, "provider", None) or "").lower()
+    if provider_id not in {
+        "oauth-codex",
+        "openai",
+        "gemini",
+        "codex",
+        "ollama",
+        "custom",
+        "groq",
+        "cerebras",
+        "mistral",
+    }:
+        return False
+    try:
+        return bool(obj.check_available())
+    except Exception:  # noqa: BLE001
+        return False

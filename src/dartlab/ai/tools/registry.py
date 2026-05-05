@@ -7,8 +7,12 @@ from typing import Any, Callable
 
 from .engineCall import engineCall
 from .generatedSpecSearch import generatedSpecSearch
+from .proposeSkill import proposeSkill
 from .read import read
+from .readCapability import readCapability
+from .readSkill import readSkill
 from .runPython import runPython
+from .saveArtifact import saveArtifact
 from .skillSearch import skillSearch
 from .types import ToolResult, ToolSpec
 from .verifyAnswer import verifyAnswer
@@ -51,7 +55,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "skill_search": ToolSpec(
         "skill_search",
-        "Skill OS에서 질문 목적에 맞는 실행 skill을 찾는다.",
+        "DEPRECATED — read_skill 사용 권장. Skill OS에서 실행 skill을 찾는다.",
         {
             "type": "object",
             "properties": {
@@ -64,7 +68,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "generated_spec_search": ToolSpec(
         "generated_spec_search",
-        "CAPABILITIES/docstring generated spec에서 호출 가능한 공개 API를 찾는다.",
+        "DEPRECATED — read_capability 사용 권장. CAPABILITIES/docstring에서 공개 API를 찾는다.",
         {
             "type": "object",
             "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}},
@@ -94,6 +98,64 @@ _SPECS: dict[str, ToolSpec] = {
             "required": ["answer", "refs"],
         },
     ),
+    # P1: SSOT v2 — 6 종 화이트리스트
+    "read_skill": ToolSpec(
+        "read_skill",
+        "Skill OS에서 분석 절차 spec(frontmatter+본문)을 검색해 반환한다.",
+        {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "limit": {"type": "integer"},
+                "includeUser": {"type": "boolean"},
+            },
+            "required": ["query"],
+        },
+    ),
+    "read_capability": ToolSpec(
+        "read_capability",
+        "DartLab 공개 API/docstring catalog에서 호출 가능한 capability를 검색한다.",
+        {
+            "type": "object",
+            "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}},
+            "required": ["query"],
+        },
+    ),
+    "save_artifact": ToolSpec(
+        "save_artifact",
+        "산출물(표/차트/긴 텍스트)을 사용자 홈 안전 경로에 저장하고 artifactRef를 만든다.",
+        {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "content": {"type": "string"},
+                "kind": {"type": "string"},
+            },
+            "required": ["name", "content"],
+        },
+    ),
+    "propose_skill": ToolSpec(
+        "propose_skill",
+        "HARVEST가 발견한 새 분석 절차를 skill spec(kind: generated, status: unverified)으로 작성한다.",
+        {
+            "type": "object",
+            "properties": {
+                "skillId": {"type": "string"},
+                "title": {"type": "string"},
+                "purpose": {"type": "string"},
+                "category": {"type": "string"},
+                "engine": {"type": "string"},
+                "whenToUse": {"type": "array"},
+                "capabilityRefs": {"type": "array"},
+                "datasetRefs": {"type": "array"},
+                "toolRefs": {"type": "array"},
+                "knowledgeRefs": {"type": "array"},
+                "requiredEvidence": {"type": "array"},
+                "body": {"type": "string"},
+            },
+            "required": ["skillId", "title", "purpose"],
+        },
+    ),
 }
 
 _TOOLS: dict[str, ToolFn] = {
@@ -105,13 +167,49 @@ _TOOLS: dict[str, ToolFn] = {
     "engine_call": engineCall,
     "run_python": runPython,
     "verify_answer": verifyAnswer,
+    # SSOT v2 6 종
+    "read_skill": readSkill,
+    "read_capability": readCapability,
+    "save_artifact": saveArtifact,
+    "propose_skill": proposeSkill,
 }
 
 CANONICAL_TOOL_NAMES = tuple(_SPECS.keys())
 
+# SSOT 6 종 (P1 에서 canonical 로 승격). P0 에서는 list 만 보유.
+CANONICAL_V2: tuple[str, ...] = (
+    "run_python",
+    "read_skill",
+    "read_capability",
+    "web_search",
+    "save_artifact",
+    "propose_skill",
+)
 
-def toolSpecs() -> list[dict[str, Any]]:
-    return [spec.to_dict() for spec in _SPECS.values()]
+
+def toolSpecs(provider: Any = None) -> list[dict[str, Any]]:
+    """Tool 명세 목록.
+
+    provider=None: 기존 generic dict (호환).
+    provider=LLMProvider 인스턴스 또는 provider id 문자열: 해당 provider 의 schema 형식.
+    """
+    if provider is None:
+        return [spec.to_dict() for spec in _SPECS.values()]
+
+    if isinstance(provider, str):
+        from dartlab.ai.providers.catalog import PROVIDER_CLASSES
+
+        cls = PROVIDER_CLASSES.get(provider)
+        if cls is None:
+            raise ValueError(f"Unknown provider: {provider!r}")
+        # 빈 config 로 instantiate — toolSchema 만 사용하므로 API 키 불필요
+        from dartlab.ai.providers.base import ProviderConfig
+
+        provider_inst = cls(config=ProviderConfig(provider=provider))
+    else:
+        provider_inst = provider
+
+    return [provider_inst.toolSchema(spec) for spec in _SPECS.values()]
 
 
 def listToolNames() -> tuple[str, ...]:

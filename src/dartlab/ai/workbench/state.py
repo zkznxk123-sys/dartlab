@@ -1,4 +1,4 @@
-"""Workbench state for ask runs."""
+"""Workbench state for ask runs (5 패스 작업대)."""
 
 from __future__ import annotations
 
@@ -15,24 +15,47 @@ class WorkbenchState:
     threadId: str = ""
     runId: str = field(default_factory=lambda: uuid4().hex[:12])
     messages: list[dict[str, Any]] = field(default_factory=list)
+
+    # BRIEF
     intent: str = "research"
     profile: dict[str, Any] = field(default_factory=dict)
-    plan: list[dict[str, Any]] = field(default_factory=list)
     selectedSkillRefs: list[Ref] = field(default_factory=list)
     apiRefs: list[Ref] = field(default_factory=list)
+    requiredEvidence: list[str] = field(default_factory=list)
+    plan: list[dict[str, Any]] = field(default_factory=list)
+    recall: list[dict[str, Any]] = field(default_factory=list)
+
+    # WORK
     toolCalls: list[dict[str, Any]] = field(default_factory=list)
     refs: list[Ref] = field(default_factory=list)
+
+    # CRITIQUE
+    critiques: list[dict[str, Any]] = field(default_factory=list)
+
+    # COMPOSE
+    answerText: str = ""
     claims: list[dict[str, Any]] = field(default_factory=list)
+
+    # GATE
     verification: dict[str, Any] = field(default_factory=dict)
+    gateBlocked: bool = False
+    gateIssues: list[str] = field(default_factory=list)
+
+    # HARVEST
+    harvestProposals: list[dict[str, Any]] = field(default_factory=list)
+
+    # control
     iteration: int = 0
     status: str = "running"
     failure: str | None = None
+    currentPass: str = "init"
 
     def public(self, *, currentNode: str) -> dict[str, Any]:
         return {
             "threadId": self.threadId,
             "runId": self.runId,
             "currentNode": currentNode,
+            "currentPass": self.currentPass,
             "intent": self.intent,
             "profile": self.profile,
             "selectedSkillRefs": [ref.id for ref in self.selectedSkillRefs],
@@ -42,4 +65,5 @@ class WorkbenchState:
             "iteration": self.iteration,
             "status": self.status,
             "failure": self.failure,
+            "gateBlocked": self.gateBlocked,
         }

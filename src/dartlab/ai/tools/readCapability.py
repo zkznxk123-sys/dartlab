@@ -1,6 +1,6 @@
-"""Generated capability/docstring search tool — DEPRECATED.
+"""read_capability — generated capability/docstring 검색.
 
-새 코드는 readCapability (read_capability) 를 사용하세요. 본 모듈은 휴리스틱 loop path 호환용.
+generatedSpecSearch.py 의 후속. dartlab.core.capability.search 래퍼.
 """
 
 from __future__ import annotations
@@ -10,8 +10,7 @@ from dartlab.ai.contracts import Ref
 from .types import ToolResult
 
 
-def generatedSpecSearch(query: str, *, limit: int = 8) -> ToolResult:
-    """DEPRECATED: read_capability (readCapability) 사용 권장."""
+def readCapability(query: str, *, limit: int = 8) -> ToolResult:
     from dartlab.core.capability.search import searchCapabilities
 
     results = searchCapabilities(query or "", topK=max(1, int(limit or 8)), minScore=0.0)
@@ -39,5 +38,8 @@ def generatedSpecSearch(query: str, *, limit: int = 8) -> ToolResult:
             }
         )
     return ToolResult(
-        ok=bool(refs), summary=f"generated spec 후보 {len(refs)}개", refs=refs, data={"capabilities": rows}
+        ok=bool(refs),
+        summary=f"capability 후보 {len(refs)}개",
+        refs=refs,
+        data={"capabilities": rows},
     )
