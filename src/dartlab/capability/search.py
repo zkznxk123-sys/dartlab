@@ -94,7 +94,7 @@ def _buildIndex() -> None:
     """CAPABILITIES를 토큰화하여 역인덱스 + IDF 구축."""
     global _index, _idf, _keys
 
-    from dartlab.core._generated import CAPABILITIES
+    from dartlab.capability._generated import CAPABILITIES
 
     _keys = list(CAPABILITIES.keys())
     n = len(_keys)
@@ -181,7 +181,7 @@ def searchCapabilities(
     _ensureIndex()
     assert _index is not None
 
-    from dartlab.core._generated import CAPABILITIES
+    from dartlab.capability._generated import CAPABILITIES
 
     queryTokens = _tokenize(query)
     if not queryTokens:

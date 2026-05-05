@@ -111,7 +111,11 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
         "src/dartlab/skills",
         "src/dartlab/ai/tools",
         "src/dartlab/ai/workbench",
-        "src/dartlab/core/search_capabilities.py",
+        "src/dartlab/capability/search.py",
+        "src/dartlab/capability/registry.py",
+        "src/dartlab/capability/analysisGraph.py",
+        "src/dartlab/capability/_generated.py",
+        "src/dartlab/capability/_generated_analysis_graph.py",
         "src/dartlab/viz/display",
         "src/dartlab/viz/export",
     ]
@@ -129,6 +133,16 @@ def test_core_does_not_own_product_settings_or_guide_layers():
     for rel in forbidden_dirs:
         assert not (repo_root / rel).exists(), f"core must not own product layer: {rel}"
 
+    forbidden_files = [
+        "src/dartlab/core/capabilities.py",
+        "src/dartlab/core/search_capabilities.py",
+        "src/dartlab/core/analysisGraph.py",
+        "src/dartlab/core/_generated.py",
+        "src/dartlab/core/_generated_analysis_graph.py",
+    ]
+    for rel in forbidden_files:
+        assert not (repo_root / rel).exists(), f"core must not own capability artifact: {rel}"
+
     forbidden_imports = [
         "dartlab.core.ai",
         "dartlab.core.finance",
@@ -137,6 +151,10 @@ def test_core_does_not_own_product_settings_or_guide_layers():
         "dartlab.core.desk",
         "dartlab.core.guide",
         "dartlab.core.integration",
+        "dartlab.core.capabilities",
+        "dartlab.core.search_capabilities",
+        "dartlab.core.analysisGraph",
+        "dartlab.core._generated",
     ]
     for py_file in (repo_root / "src").rglob("*.py"):
         if "__pycache__" in py_file.parts:

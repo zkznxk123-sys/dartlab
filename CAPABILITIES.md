@@ -37,8 +37,8 @@
 | `codeToName` | function | 종목코드 → 회사명. |
 | `nameToCode` | function | 회사명 → 종목코드. 정확히 일치하는 첫 번째 결과. |
 | `searchName` | function | 종목명/코드로 종목 찾기 (KR + US). |
-| `pastInsight` | function | - |
-| `sectorInsights` | function | - |
+| `pastInsight` | function | 종목별 과거 분석 인사이트 조회. |
+| `sectorInsights` | function | 섹터별 과거 분석 인사이트 조회. |
 | `Story` | class | 보고서 조합기 — 6 엔진 블록을 조합하여 6막 구조화 보고서 생성. |
 | `SelectResult` | class | select() 반환 객체 — DataFrame 위임 + 체이닝. |
 | `ChartResult` | class | chart() 반환 객체 — 시각화 + 렌더링. |
@@ -209,6 +209,18 @@ See Also
 analysis : 재무 심층 분석 — 안정성·현금흐름 축이 credit 과 상호 보완.
 scan : 전종목 재무건전성 비교.
 
+#### pastInsight
+**Guide:** AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.
+
+See Also:
+sectorInsights
+
+#### sectorInsights
+**Guide:** AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.
+
+See Also:
+pastInsight
+
 #### Story
 **Guide:** AI 역할: AI는 story를 검증된 engine output을 보고서 섹션으로 조립하는 엔진으로 보고 원자료 없이 새 claim을 만들지 않는다.
 When: 종목의 종합 분석 보고서가 필요할 때.
@@ -280,12 +292,13 @@ setup: AI provider 설정 (capabilities 확인 후 설정)
 
 ---
 
-## Server API (85개 엔드포인트)
+## Server API (86개 엔드포인트)
 
 FastAPI `/api/*` 엔드포인트. 모든 클라이언트의 단일 소비 경로.
 
 | Method | Path | 설명 |
 |--------|------|------|
+| POST | `/runs` | Run the DartLab research agent through the public AG-UI event stream. |
 | GET | `/api/status` | LLM provider 상태 확인 (설치/인증/모델 포함). |
 | GET | `/api/suggest` | 회사 데이터 상태에 맞는 추천 질문 목록을 반환한다. |
 | POST | `/api/provider/validate` | LLM provider 검증. 전역 상태는 변경하지 않는다. |
@@ -318,7 +331,7 @@ FastAPI `/api/*` 엔드포인트. 모든 클라이언트의 단일 소비 경로
 | GET | `/api/company/{code}/searchIndex` | MiniSearch 인덱스용 flat document list. |
 | GET | `/api/company/{code}/modules` | 기업의 사용 가능한 데이터 모듈 목록. |
 | POST | `/api/ask` | LLM 질문 — AI가 질문 의도를 자율 판단하고 종목/매크로/비교를 결정한다. |
-| GET | `/api/ask/artifacts/{day}/{filename}` | AI tool_result 에서 생성된 CSV/JSON 아티팩트를 내려준다. |
+| GET | `/api/ask/artifacts/{day}/{filename}` | AI tool_result 에서 생성된 CSV/JSON/JSONL 아티팩트를 내려준다. |
 | GET | `/api/search` | 종목 검색 — substring 우선, 결과 없으면 fuzzy(초성/Levenshtein) fallback. |
 | GET | `/api/company/{code}` | 종목 기본 정보 + 사용 가능 API surface 목록. |
 | GET | `/api/company/{code}/index` | 회사 데이터 구조 인덱스 DataFrame. |

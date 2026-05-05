@@ -5,7 +5,7 @@
 - landing/static/llms.txt   — AI 크롤러용 구조화 문서
 - .claude/skills/dartlab/reference.md — Claude Code 스킬 레퍼런스
 - src/dartlab/ai/conversation/_generated_catalog.py — AI 시스템 프롬프트용 도구 카탈로그
-- src/dartlab/core/_generated.py — 런타임 capabilities 카탈로그
+- src/dartlab/capability/_generated.py — 런타임 capabilities 카탈로그
 
 실행:
     uv run python scripts/build/generateSpec.py
@@ -168,7 +168,9 @@ def _parseAiContract(value: str | None) -> dict[str, Any]:
     return out
 
 
-_RETURN_FIELD_RE = re.compile(r"^(?P<indent>\s*)(?P<name>[^:\n]{1,120})\s*:\s*(?P<type>[^—\-\n]+)(?:[—-]\s*(?P<desc>.*))?$")
+_RETURN_FIELD_RE = re.compile(
+    r"^(?P<indent>\s*)(?P<name>[^:\n]{1,120})\s*:\s*(?P<type>[^—\-\n]+)(?:[—-]\s*(?P<desc>.*))?$"
+)
 _RETURN_UNIT_RE = re.compile(r"\((?P<unit>%|원|백만원|천원|달러|USD|KRW|일|배|점|건|주|명|개|회|년|월|분기|bps|pp)\)")
 
 
@@ -1459,8 +1461,8 @@ def _parseAxisRegistry(entries: dict[str, dict[str, str]], path: Path, *, prefix
 
 
 def _applyAiContractMetadata(entries: dict[str, dict[str, Any]]) -> None:
-    """Attach generated AI contract metadata from core Capability SSOT."""
-    from dartlab.core.capabilities import get_analysis_contract_specs
+    """Attach generated AI contract metadata from capability registry SSOT."""
+    from dartlab.capability.registry import get_analysis_contract_specs
 
     for key, contract in get_analysis_contract_specs().items():
         entries.setdefault(key, {})
@@ -2843,8 +2845,8 @@ def main():
     capabilitiesPath = ROOT / "CAPABILITIES.md"
     llmsTxtPath = ROOT / "landing" / "static" / "llms.txt"
     skillRefPath = ROOT / ".claude" / "skills" / "dartlab" / "reference.md"
-    capabilitiesPyPath = SRC / "dartlab" / "core" / "_generated.py"
-    analysisGraphPyPath = SRC / "dartlab" / "core" / "_generated_analysis_graph.py"
+    capabilitiesPyPath = SRC / "dartlab" / "capability" / "_generated.py"
+    analysisGraphPyPath = SRC / "dartlab" / "capability" / "_generated_analysis_graph.py"
     intelligencePackPath = SRC / "dartlab" / "ai" / "intelligence" / "pack.json"
 
     skillRefPath.parent.mkdir(parents=True, exist_ok=True)

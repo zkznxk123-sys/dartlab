@@ -2507,8 +2507,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "회사명 → 종목코드. 정확히 일치하는 첫 번째 결과."
     },
     "pastInsight": {
+        "guide": "AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.\n\nSee Also:\nsectorInsights",
         "kind": "function",
-        "summary": ""
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "list[dict[str, Any]]",
+                "type": "저장된 인사이트가 없으면 빈 목록.",
+                "unit": null
+            }
+        ],
+        "returns": "list[dict[str, Any]]: 저장된 인사이트가 없으면 빈 목록.\n\nRaises:\n없음.\n\nExamples:\n>>> import dartlab\n>>> dartlab.pastInsight(stockCode=\"005930\")\n[]\n\nNotes:\n새 저장소가 붙으면 이 함수가 공개 조회 계약의 단일 진입점이다.",
+        "summary": "종목별 과거 분석 인사이트 조회."
     },
     "quant": {
         "guide": "AI 역할: AI는 quant를 가격·팩터·시계열 신호 엔진으로 보고 기간, benchmark, 수익률/변동성 근거를 분리한다.\nWhen: 주가 기반 기술적 신호·팩터·리스크를 정량 분석할 때.\nHow: quant(\"판단\") 으로 종합 신호 확인 → 세부 축으로 근거 파악.\nquant(\"벤치마크\") 로 시장·섹터·스타일 benchmarkStack 을 확인한다.\nbeta/residual/factor/BAB 는 기본 market mode를 유지하고,\nbenchmarkMode=\"sector\" 또는 \"style\" 로 상대 기준을 명시 전환한다.\nanalysis(재무) + quant(기술) 조합이 story full/valuation 타입의 핵심.\ncredit 과 함께 사용 시 altman/piotroski 로 부도 위험 교차 검증.\nVerified:\nquant(\"판단\") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nquant(\"베타\", benchmarkMode=\"sector\") → KRX 섹터 지수 대비 beta.\n\nSee Also\nanalysis : 재무 인과 분석 — quant 기술 + analysis 재무 조합.\ngather : 주가·수급 데이터 수집 — quant 의 데이터 원천.\nscan : 전종목 횡단 비교.",
@@ -3179,8 +3190,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "종목명/코드로 종목 찾기 (KR + US)."
     },
     "sectorInsights": {
+        "guide": "AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.\n\nSee Also:\npastInsight",
         "kind": "function",
-        "summary": ""
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "list[dict[str, Any]]",
+                "type": "저장된 인사이트가 없으면 빈 목록.",
+                "unit": null
+            }
+        ],
+        "returns": "list[dict[str, Any]]: 저장된 인사이트가 없으면 빈 목록.\n\nRaises:\n없음.\n\nExamples:\n>>> import dartlab\n>>> dartlab.sectorInsights(sector=\"반도체\")\n[]\n\nNotes:\n새 저장소가 붙으면 이 함수가 공개 조회 계약의 단일 진입점이다.",
+        "summary": "섹터별 과거 분석 인사이트 조회."
     },
     "setup": {
         "aicontext": "AI 분석 기능 사용 전 provider 설정 상태 확인\n미설정 provider 감지 시 setup() 안내로 연결\n설정 완료 여부를 프로그래밍 방식으로 체크 가능",

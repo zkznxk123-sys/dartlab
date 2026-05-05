@@ -13,6 +13,7 @@ SRC = Path(__file__).resolve().parent.parent / "src" / "dartlab"
 # 레이어 정의: 숫자가 낮을수록 하위 (의존 대상)
 LAYERS = {
     "dartlab.core": 0,
+    "dartlab.capability": 1,
     "dartlab.providers": 1,
     "dartlab.gather": 1,
     "dartlab.scan": 1,
@@ -101,8 +102,10 @@ _KNOWN_VIOLATIONS = {
     ("dartlab.core.cross.companyType", "dartlab.analysis"),
     # analysis → ai (L2→L3) — lazy import (storyValidation → KnowledgeDB 조회)
     ("dartlab.analysis.financial.storyValidation", "dartlab.ai"),
-    # core/_generated → analysis (L0→L2) — generateSpec 자동 생성 참조
-    ("dartlab.core._generated", "dartlab.analysis"),
+    # capability/_generated → analysis (L1→L2) — generateSpec 자동 생성 (CAPABILITIES JSON 안 example 문자열 매칭)
+    ("dartlab.capability._generated", "dartlab.analysis"),
+    # core/messaging.suggest() → capability/_generated (L0→L1) — lazy import (try/except, capability 부재 시 None)
+    ("dartlab.core.messaging", "dartlab.capability"),
     # settings/credentials → providers — DART API 키 관리 lazy import
     ("dartlab.settings.credentials", "dartlab.providers"),
     # core/messaging → providers (L0→L1) — hasDartApiKey 확인 lazy import
