@@ -93,13 +93,13 @@ def search(
 
 
 def _searchTitle(query, *, corpCode, stockCode, topK):
-    from dartlab.core.search.ngramIndex import searchNgram
+    from dartlab.providers.dart.search.ngramIndex import searchNgram
 
     return searchNgram(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
 
 
 def _searchContent(query, *, corpCode, stockCode, topK):
-    from dartlab.core.search.fieldIndex import searchContent
+    from dartlab.providers.dart.search.fieldIndex import searchContent
 
     return searchContent(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
 
@@ -170,7 +170,7 @@ def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:
 
 def buildIndex(parquetPaths: list[str] | None = None, *, includeDocs: bool = False, **kwargs) -> int:
     """Ngram 인덱스 빌드. allFilings + (선택) docs 통합."""
-    from dartlab.core.search.ngramIndex import buildNgramIndex
+    from dartlab.providers.dart.search.ngramIndex import buildNgramIndex
 
     return buildNgramIndex(parquetPaths, includeDocs=includeDocs, **kwargs)
 
@@ -189,7 +189,7 @@ def rebuildContent(**kwargs) -> int:
     실험 116 검증: docs + allFilings 전체로 BM25 인덱스 구축.
     4M 문서 기준 약 18분 소요.
     """
-    from dartlab.core.search.fieldIndex import rebuildMain
+    from dartlab.providers.dart.search.fieldIndex import rebuildMain
 
     return rebuildMain(**kwargs)
 
@@ -199,7 +199,7 @@ def rebuildContentDelta(**kwargs) -> int:
 
     최근 N일 allFilings만 인덱싱. main 이후 추가분 병합 검색용.
     """
-    from dartlab.core.search.fieldIndex import rebuildDelta
+    from dartlab.providers.dart.search.fieldIndex import rebuildDelta
 
     return rebuildDelta(**kwargs)
 
@@ -230,7 +230,7 @@ def fillContent(date: str | None = None, **kwargs):
 
 def stats() -> dict:
     """수집 + 인덱스 통합 통계."""
-    from dartlab.core.search.ngramIndex import ngramStats
+    from dartlab.providers.dart.search.ngramIndex import ngramStats
     from dartlab.providers.dart.openapi.allFilingsCollector import stats as collectorStats
 
     result = collectorStats()
@@ -241,15 +241,15 @@ def stats() -> dict:
 
 def pushIndex(**kwargs) -> str:
     """stemIndex를 HuggingFace에 업로드."""
-    from dartlab.core.search.ngramIndex import pushStemIndex
+    from dartlab.providers.dart.search.ngramIndex import pushStemIndex
 
     return pushStemIndex(**kwargs)
 
 
 def pullIndex(**kwargs):
     """HuggingFace에서 검색 인덱스 다운로드 (stemIndex + contentIndex)."""
-    from dartlab.core.search.fieldIndex import pullContentIndex
-    from dartlab.core.search.ngramIndex import pullStemIndex
+    from dartlab.providers.dart.search.fieldIndex import pullContentIndex
+    from dartlab.providers.dart.search.ngramIndex import pullStemIndex
 
     ngramResult = pullStemIndex(**kwargs)
     try:
@@ -270,34 +270,34 @@ def profile(stockCode: str | None = None):
     stockCode 지정 시 해당 기업의 공시 요약 dict 반환.
     미지정 시 전체 DataFrame 반환.
     """
-    from dartlab.core.search.derived import loadProfile
+    from dartlab.providers.dart.search.derived import loadProfile
 
     return loadProfile(stockCode)
 
 
 def pulse(topK: int = 10) -> pl.DataFrame:
     """최근 월의 공시 유형별 건수 + 전월 대비 변화."""
-    from dartlab.core.search.derived import pulse as _pulse
+    from dartlab.providers.dart.search.derived import pulse as _pulse
 
     return _pulse(topK=topK)
 
 
 def timeline(typeFilter: str | None = None, periodFilter: str | None = None) -> pl.DataFrame:
     """유형×월 빈도 시계열 조회."""
-    from dartlab.core.search.derived import loadTimeline
+    from dartlab.providers.dart.search.derived import loadTimeline
 
     return loadTimeline(typeFilter=typeFilter, periodFilter=periodFilter)
 
 
 def dna(stockCode: str) -> dict:
     """기업의 Disclosure DNA (114차원 유형 빈도 벡터)."""
-    from dartlab.core.search.derived import dna as _dna
+    from dartlab.providers.dart.search.derived import dna as _dna
 
     return _dna(stockCode)
 
 
 def similarCompanies(stockCode: str, topK: int = 5) -> pl.DataFrame:
     """공시 패턴이 유사한 기업 탐색 (코사인 유사도)."""
-    from dartlab.core.search.derived import similarCompanies as _similar
+    from dartlab.providers.dart.search.derived import similarCompanies as _similar
 
     return _similar(stockCode, topK=topK)

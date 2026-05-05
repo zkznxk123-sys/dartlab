@@ -15,7 +15,7 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 
-from dartlab.core.search.ngramIndex import _stemIndexDir
+from dartlab.providers.dart.search.ngramIndex import _stemIndexDir
 
 # ── 캐시 ──
 

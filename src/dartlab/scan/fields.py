@@ -687,7 +687,7 @@ def _docs_condition_values(cond: dict[str, Any], spec: dict[str, Any]) -> pl.Dat
     scope = "content" if field == "docs.content" else "title"
     top_k = int(cond.get("topK", spec.get("docsTopK", 500)))
 
-    from dartlab.core.search import search
+    from dartlab.providers.dart.search import search
 
     hits = search(query, topK=top_k, scope=scope)
     if hits is None or hits.is_empty() or "info" in hits.columns:

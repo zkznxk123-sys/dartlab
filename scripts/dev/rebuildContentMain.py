@@ -15,8 +15,8 @@ import time
 
 def main() -> int:
     print(f"[start] {time.strftime('%H:%M:%S')}")
-    from dartlab.core.search import rebuildContent
-    from dartlab.core.search.fieldIndex import pushContentIndex
+    from dartlab.providers.dart.search import rebuildContent
+    from dartlab.providers.dart.search.fieldIndex import pushContentIndex
 
     t0 = time.perf_counter()
     nDocs = rebuildContent(showProgress=True)

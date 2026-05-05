@@ -305,7 +305,7 @@ def searchContent(
     segments = _getSegments()
     if not segments:
         return pl.DataFrame(
-            {"info": ["content 인덱스가 없습니다. dartlab.core.search.fieldIndex.rebuildContent() 실행 필요."]}
+            {"info": ["content 인덱스가 없습니다. dartlab.providers.dart.search.fieldIndex.rebuildContent() 실행 필요."]}
         )
 
     allHits: list[dict] = []

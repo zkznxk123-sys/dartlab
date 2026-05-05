@@ -337,7 +337,7 @@ def buildNgramIndex(
     _buildAndSaveTypeIndex(metaDf, outDir)
 
     # 파생 지식 레이어 빌드 (companyProfile, eventTimeline, DNA)
-    from dartlab.core.search.derived import buildCompanyProfile, buildDna, buildEventTimeline
+    from dartlab.providers.dart.search.derived import buildCompanyProfile, buildDna, buildEventTimeline
 
     buildCompanyProfile(metaDf, outDir)
     buildEventTimeline(metaDf, outDir)

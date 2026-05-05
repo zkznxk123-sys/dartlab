@@ -89,7 +89,7 @@ _KNOWN_VIOLATIONS = {
     ("dartlab.core.docs.diff", "dartlab.providers"),
     ("dartlab.core.docs.diff", "dartlab.scan"),
     # core/search → providers (L0→L1) — 수집 디렉토리/파일 참조
-    ("dartlab.core.search", "dartlab.providers"),
+    ("dartlab.providers.dart.search", "dartlab.providers"),
     # core/finance → scan (L0→L1) — lazy import (함수 내부)
     ("dartlab.quant.bottomUpBeta", "dartlab.scan"),
     ("dartlab.macro.impliedERP", "dartlab.scan"),

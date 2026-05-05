@@ -105,7 +105,7 @@ def test_docs_condition_uses_search_hits(monkeypatch):
     """docs conditions summarize search index hits by stockCode."""
     import importlib
 
-    search_mod = importlib.import_module("dartlab.core.search")
+    search_mod = importlib.import_module("dartlab.providers.dart.search")
     from dartlab.scan.screen import scanScreen
 
     def fake_search(query, *, topK=10, scope="auto", **kwargs):

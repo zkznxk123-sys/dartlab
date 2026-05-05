@@ -238,7 +238,7 @@ def search(
         raise ValueError(
             "search 의 query 가 비어 있습니다. 검색어를 1자 이상 전달하세요. 예: dartlab.search('유상증자')"
         )
-    from dartlab.core.search import search as _search
+    from dartlab.providers.dart.search import search as _search
 
     return _search(query, corp=corp, start=start, end=end, topK=topK, scope=scope)
 

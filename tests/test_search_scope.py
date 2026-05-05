@@ -17,7 +17,7 @@ def test_scope_validation():
 
 def test_tokenize_word():
     """word 토크나이저 동작."""
-    from dartlab.core.search.fieldIndex import tokenizeWord
+    from dartlab.providers.dart.search.fieldIndex import tokenizeWord
 
     # 공백/구두점 분리
     assert tokenizeWord("원재료 가격 급등") == ["원재료", "가격", "급등"]
@@ -30,7 +30,7 @@ def test_tokenize_word():
 
 def test_build_content_segment_smoke():
     """소규모 문서로 세그먼트 빌드 + 구조 검증."""
-    from dartlab.core.search.fieldIndex import buildContentSegment
+    from dartlab.providers.dart.search.fieldIndex import buildContentSegment
 
     rows = [
         {
@@ -70,7 +70,7 @@ def test_build_content_segment_smoke():
 def test_bm25_ranks_relevant_doc():
     """BM25 스코어링이 관련 문서를 상위로 올리는지."""
 
-    from dartlab.core.search.fieldIndex import _scoreBM25, buildContentSegment
+    from dartlab.providers.dart.search.fieldIndex import _scoreBM25, buildContentSegment
 
     rows = [
         {
@@ -106,7 +106,7 @@ def test_bm25_ranks_relevant_doc():
 
 def test_segment_save_load_roundtrip(tmp_path):
     """saveSegment + loadSegment 왕복."""
-    from dartlab.core.search.fieldIndex import (
+    from dartlab.providers.dart.search.fieldIndex import (
         buildContentSegment,
         loadSegment,
         saveSegment,
@@ -139,7 +139,7 @@ def test_segment_save_load_roundtrip(tmp_path):
 
 def test_load_segment_missing_returns_none(tmp_path):
     """없는 세그먼트 로드 시 None."""
-    from dartlab.core.search.fieldIndex import loadSegment
+    from dartlab.providers.dart.search.fieldIndex import loadSegment
 
     assert loadSegment("nonexistent", inDir=tmp_path) is None
 
