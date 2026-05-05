@@ -11,8 +11,9 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 
 from typing import Any
 
+from dartlab.analysis.financial.accountSums import sumCostOfSales, sumSGA
 from dartlab.core.memory import memoized_calc
-from dartlab.core.utils.helpers import annualColsFromPeriods, sumCostOfSales, sumSGA, toDictBySnakeId
+from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 _MAX_YEARS = 8
 

@@ -6,8 +6,9 @@
 
 from __future__ import annotations
 
+from dartlab.analysis.financial.accountSums import sumBorrowings
 from dartlab.core.memory import memoized_calc
-from dartlab.core.utils.helpers import annualColsFromPeriods, sumBorrowings, toDictBySnakeId
+from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 _MAX_QUARTERS = 5
 _MAX_YEARS = 8

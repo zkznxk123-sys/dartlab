@@ -7,12 +7,12 @@ select()로 BS/IS/CF 원본 계정을 가져와서
 
 from __future__ import annotations
 
+from dartlab.analysis.financial.accountSums import sumBorrowings
 from dartlab.analysis.financial.companyContext import getRatios
 from dartlab.core.memory import memoized_calc
 from dartlab.core.utils.helpers import (
     MAX_RATIO_YEARS,
     annualColsFromPeriods,
-    sumBorrowings,
     toDictBySnakeId,
 )
 

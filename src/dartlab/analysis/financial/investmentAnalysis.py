@@ -10,10 +10,10 @@ from dartlab.core.utils.safe import get as _get
 
 _getF = _getF2 = _getF3 = _getF4 = _get
 
+from dartlab.analysis.financial.accountSums import sumBorrowings
 from dartlab.core.memory import memoized_calc
 from dartlab.core.utils.helpers import (
     annualColsFromPeriods,
-    sumBorrowings,
     toDictBySnakeId,
 )
 
