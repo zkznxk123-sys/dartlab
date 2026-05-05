@@ -324,7 +324,6 @@ uv run python main.py
 
 컴퓨터에 아무것도 설치하지 않고 dartlab을 체험할 수도 있다.
 
-- [HF Spaces 데모](https://huggingface.co/spaces/eddmpython/dartlab) — 종목코드 입력하면 바로 결과
 - [Colab 노트북](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/showcase/01_quickstart.ipynb) — Google 계정만 있으면 실행
 
 ---

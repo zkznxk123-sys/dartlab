@@ -5,7 +5,7 @@
 
 import marimo
 
-__generated_with = "0.22.0"
+__generated_with = "0.23.4"
 app = marimo.App(width="medium")
 
 
@@ -15,7 +15,7 @@ def _():
     import dartlab
     c = dartlab.Company("005930")
     c.corpName
-    return (dartlab, c)
+    return (c,)
 
 
 @app.cell

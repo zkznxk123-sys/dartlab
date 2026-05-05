@@ -70,10 +70,7 @@ dependencies = [
     "rich; sys_platform == 'emscripten'",
     # ai providers (pyodide 불필요)
     "openai>=1.0.0,<3; sys_platform != 'emscripten'",
-    "google-genai>=1.0.0,<2; sys_platform != 'emscripten'",
-    "anthropic>=0.30.0,<2; sys_platform != 'emscripten'",
     # server (pyodide 불필요)
-    "marimo>=0.23.1; sys_platform != 'emscripten'",
     "fastapi>=0.135.1,<1; sys_platform != 'emscripten'",
     "uvicorn[standard]>=0.30.0,<1; sys_platform != 'emscripten'",
     "sse-starlette>=2.0.0,<3; sys_platform != 'emscripten'",
@@ -83,7 +80,7 @@ dependencies = [
     # viz
     "plotly>=5.0.0,<6; sys_platform != 'emscripten'",
     "plotext>=5.2.8,<6; sys_platform != 'emscripten'",  # 터미널 ASCII 차트 (toAscii)
-    "marimo>=0.23.4",
+    "marimo>=0.23.5",
 ]
 
 [project.scripts]
@@ -299,8 +296,6 @@ DEP001 = [
 ]
 DEP002 = [
     "beautifulsoup4",  # bs4 직접 import
-    "google-genai",    # google.genai 사용 (gemini provider)
-    "marimo",          # 노트북 컴파일/배포 도구
 ]
 
 [dependency-groups]

@@ -95,6 +95,3 @@ overview = holderOverview("005930")    # -> HolderOverview | None
 - "의결권있는 주식" (띄어쓰기 없음) 포맷도 처리
 - 스팩/비상장사는 5% 이상 주주/소액주주가 없을 수 있음
 
-## 실험
-- experiments/007_majorHolder/ (001~004) — 최대주주 파서 개발
-- experiments/012_majorHolderDeep/ (001~005) — 5%주주/소액주주/의결권 추가

@@ -1522,15 +1522,6 @@
       "limitations": []
     },
     {
-      "id": "operation.experiments",
-      "title": "Experiments",
-      "category": "operation",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "operation.extendSkills",
       "title": "Skill 확장과 공식 승격 규칙",
       "category": "operation",
@@ -1667,15 +1658,6 @@
       "limitations": [
         "Pyodide에서는 live API가 필요한 조합을 서버 audit 없이 official로 승격하지 않는다."
       ]
-    },
-    {
-      "id": "runtime.spaces",
-      "title": "HuggingFace Spaces — API + MCP 서버",
-      "category": "runtime",
-      "status": "supported",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
     },
     {
       "id": "runtime.vscode",

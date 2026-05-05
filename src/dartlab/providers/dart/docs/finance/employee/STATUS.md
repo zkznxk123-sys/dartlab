@@ -41,5 +41,3 @@ result = employee("005930")  # -> EmployeeResult | None
 - 2015년 이전 보고서는 테이블 구조 차이로 파싱 불가능한 경우 있음
 - 리츠, 스팩 등 직원 없는 기업은 None 반환
 
-## 실험
-- experiments/006_employee/ (001~005)

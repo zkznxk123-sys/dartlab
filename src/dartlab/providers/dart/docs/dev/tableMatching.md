@@ -59,8 +59,8 @@ show() 호출:
 
 ### 실험 결과
 
-- `experiments/066_universalNorm/002_canonicalSchema.py` — 삼성전자 1종목 PoC (+21.3%p)
-- `experiments/066_universalNorm/004_fullVerify.py` — **283종목 전수 검증: 34.1% (기존 58.4%보다 못함)**
+- 삼성전자 1종목 PoC: +21.3%p
+- 283 종목 전수 검증: **34.1% (기존 58.4% 보다 못함)**
 
 ### 전수 검증 결과 — 흡수 불가
 
@@ -87,10 +87,3 @@ show() 호출:
 - **STARMIE/Watchog 컬럼 임베딩** — 테이블 간 unionable 컬럼 자동 탐색
 - **DART 테이블 수평화 연구는 세계적으로 없음** — dartlab이 최초
 
-## 실험 폴더
-
-- `experiments/064_tableHorizontal/` — 기본 수평화 개선 (020~026)
-- `experiments/065_cellFingerprint/` — 셀 타입 핑거프린트
-- `experiments/066_universalNorm/` — 정규형, 캐노니컬 스키마, ML 분류기
-- `experiments/066_normalForm/` — 정규형 심화 실험 (001~010)
-- `experiments/067_embeddingMatch/` — 임베딩 기반 매칭

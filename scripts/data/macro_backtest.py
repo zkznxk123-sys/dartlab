@@ -1,7 +1,6 @@
 """dartlab macro 엔진 종합 벤치마크.
 
 실행: uv run python -X utf8 scripts/macro_backtest.py
-출력: experiments/macro_benchmark.md
 """
 
 import os

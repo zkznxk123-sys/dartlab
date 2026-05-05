@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 176,
+    "skillCount": 174,
     "categories": [
       {
         "id": "start",
@@ -14,13 +14,13 @@
         "id": "runtime",
         "title": "Runtime",
         "description": "Local Python, Pyodide, Web AI, MCP, VSCode 같은 실행 환경별 제약과 근거 흐름.",
-        "count": 11
+        "count": 10
       },
       {
         "id": "operation",
         "title": "Operation",
         "description": "ops 원문을 skill 절차로 묶어 테스트, 문서, 릴리즈, 확장 규칙을 찾는 운영 지도.",
-        "count": 14
+        "count": 13
       },
       {
         "id": "engines",
@@ -13013,96 +13013,6 @@
       }
     },
     {
-      "id": "operation.experiments",
-      "title": "Experiments",
-      "category": "operation",
-      "categoryTitle": "Operation",
-      "status": "observed",
-      "purpose": "Experiments 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
-      "whenToUse": [
-        "Experiments",
-        "experiments",
-        "1. 폴더 — `experiments/XXX_camelCaseName/` + `STATUS.md` 로 정리한다",
-        "2. 파일 — `XXX_camelCaseFeature.py` 로 독립 실행 가능하게 쓴다",
-        "3. 파일 생성 — 만들었으면 같은 턴에 실행하고 결과를 채운다",
-        "4. Docstring — 이 구조로 채운다",
-        "5. 흡수 — 사용자 승인 후에만 본체에 반영한다"
-      ],
-      "inputs": [
-        "작업 목적",
-        "대상 엔진 또는 실행 환경",
-        "검증 범위"
-      ],
-      "requiredInputs": [],
-      "outputs": [
-        "selected skill",
-        "기능/docstring handoff",
-        "verification gate"
-      ],
-      "apiRefs": [],
-      "toolRefs": [
-        "search_reference"
-      ],
-      "datasetRefs": [],
-      "knowledgeRefs": [
-        "start.dartlabSkillOs"
-      ],
-      "sourceRefs": [
-        "dartlab://skills/operation.experiments"
-      ],
-      "procedure": [
-        "1. 폴더 — `experiments/XXX_camelCaseName/` + `STATUS.md` 로 정리한다 기준을 확인한다.",
-        "2. 파일 — `XXX_camelCaseFeature.py` 로 독립 실행 가능하게 쓴다 기준을 확인한다.",
-        "3. 파일 생성 — 만들었으면 같은 턴에 실행하고 결과를 채운다 기준을 확인한다.",
-        "4. Docstring — 이 구조로 채운다 기준을 확인한다.",
-        "5. 흡수 — 사용자 승인 후에만 본체에 반영한다 기준을 확인한다.",
-        "`experiments/XXX_camelCaseName/` — 실험별 하위 폴더 분리.",
-        "각 폴더에 `STATUS.md` 로 현황 기록.",
-        "실험 코드는 실험 폴더 안에서 관리한다.",
-        "네이밍 — `XXX_camelCaseFeature.py` (001 부터)."
-      ],
-      "requiredEvidence": [
-        "skillRef"
-      ],
-      "expectedOutputs": [
-        "작업 경로",
-        "확인한 근거",
-        "검증 결과"
-      ],
-      "visualGuidance": [],
-      "failureModes": [
-        "Skill OS 검색 없이 과거 문서 경로를 직접 찾음",
-        "API schema를 skill 본문에 중복해 docstring/기능와 어긋남",
-        "검증 게이트 없이 변경 또는 답변을 완료 처리함"
-      ],
-      "forbidden": [
-        "삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.",
-        "공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다."
-      ],
-      "examples": [
-        "Experiments 규칙 확인",
-        "experiments 작업을 Skill OS에서 시작"
-      ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "supported"
-        },
-        "pyodide": {
-          "status": "supported",
-          "notes": []
-        }
-      }
-    },
-    {
       "id": "operation.extendSkills",
       "title": "Skill 확장과 공식 승격 규칙",
       "category": "operation",
@@ -14436,96 +14346,6 @@
           "limitations": [
             "Pyodide에서는 live API가 필요한 조합을 서버 audit 없이 official로 승격하지 않는다."
           ]
-        }
-      }
-    },
-    {
-      "id": "runtime.spaces",
-      "title": "HuggingFace Spaces — API + MCP 서버",
-      "category": "runtime",
-      "categoryTitle": "Runtime",
-      "status": "observed",
-      "purpose": "HuggingFace Spaces — API + MCP 서버 실행 환경의 제약, 시작 절차, 검증 기준을 Skill OS에서 확인한다.",
-      "whenToUse": [
-        "HuggingFace Spaces — API + MCP 서버",
-        "spaces",
-        "1. 한눈에 보기",
-        "2. 접근 방법 — 3 경로로 쓴다",
-        "1) MCP (설치 없이 AI 에서 직접)",
-        "2) REST API (curl · 브라우저)",
-        "3) dartlab 설치 + 키 없음 (자동 fallback)"
-      ],
-      "inputs": [
-        "작업 목적",
-        "대상 엔진 또는 실행 환경",
-        "검증 범위"
-      ],
-      "requiredInputs": [],
-      "outputs": [
-        "selected skill",
-        "기능/docstring handoff",
-        "verification gate"
-      ],
-      "apiRefs": [],
-      "toolRefs": [
-        "search_reference"
-      ],
-      "datasetRefs": [],
-      "knowledgeRefs": [
-        "start.dartlabSkillOs"
-      ],
-      "sourceRefs": [
-        "dartlab://skills/runtime.spaces"
-      ],
-      "procedure": [
-        "1. 한눈에 보기 기준을 확인한다.",
-        "2. 접근 방법 — 3 경로로 쓴다 기준을 확인한다.",
-        "1) MCP (설치 없이 AI 에서 직접) 기준을 확인한다.",
-        "2) REST API (curl · 브라우저) 기준을 확인한다.",
-        "3) dartlab 설치 + 키 없음 (자동 fallback) 기준을 확인한다.",
-        "개별 종목 — `companyInsights` · `companyAnalysis` · `companyStory` · `companyValuation` · `companyCredit` · `companyGather` · `companyQuant` …",
-        "시장·거시 — `macroAnalysis` · `marketScan` · `gatherData` · `quantAnalysis` · `topdownScreen`.",
-        "검색·목록 — `searchCompany` · `dartlabSearch` · `dartlabListing`.",
-        "`crtfc_key` 필드 자동 제거 (키 노출 방지)."
-      ],
-      "requiredEvidence": [
-        "skillRef"
-      ],
-      "expectedOutputs": [
-        "작업 경로",
-        "확인한 근거",
-        "검증 결과"
-      ],
-      "visualGuidance": [],
-      "failureModes": [
-        "Skill OS 검색 없이 과거 문서 경로를 직접 찾음",
-        "API schema를 skill 본문에 중복해 docstring/기능와 어긋남",
-        "검증 게이트 없이 변경 또는 답변을 완료 처리함"
-      ],
-      "forbidden": [
-        "삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.",
-        "공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다."
-      ],
-      "examples": [
-        "HuggingFace Spaces — API + MCP 서버 규칙 확인",
-        "spaces 작업을 Skill OS에서 시작"
-      ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "supported"
-        },
-        "pyodide": {
-          "status": "supported",
-          "notes": []
         }
       }
     },

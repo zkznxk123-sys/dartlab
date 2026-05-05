@@ -942,7 +942,6 @@ https://eddmpython.github.io/dartlab/
 | 시리즈 | `https://eddmpython.github.io/dartlab/blog/series/{series}` |
 | GitHub | `https://github.com/eddmpython/dartlab` |
 | PyPI | `https://pypi.org/project/dartlab/` |
-| HF Spaces | `https://huggingface.co/spaces/eddmpython/dartlab` |
 
 **slug 는 폴더명과 다름**:
 

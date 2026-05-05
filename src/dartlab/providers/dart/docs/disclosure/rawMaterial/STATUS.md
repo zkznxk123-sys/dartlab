@@ -121,5 +121,3 @@ result = rawMaterial("005930")  # -> RawMaterialResult | None
 2. "구분" + "투자" 헤더 탐지
 3. 각 행의 마지막 숫자를 투자금액으로 추출
 
-## 실험
-- experiments/013_rawMaterial/ (001~004) — 탐색, 비교, 파서 개발, 전체 테스트

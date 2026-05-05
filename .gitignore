@@ -76,6 +76,12 @@ site/
 # Hypothesis test artifacts
 .hypothesis/
 
+# Pytest / benchmark / cache artifacts
+.pytest_cache/
+.benchmarks/
+.ruff_cache/
+.mypy_cache/
+
 # Coverage artifacts (local runtime)
 .coverage
 htmlcov/
@@ -83,18 +89,18 @@ htmlcov/
 # Log files (any directory)
 *.log
 
-# Backup directories (landing·experiments 로컬 작업 백업)
-landing/_backup/
-experiments/**/_backup/
+# Removed sandbox dirs — never track again
+/experiments/
+/examples/
+/spaces/
 
-# Local experiment artifacts
-experiments/**/output/
-experiments/**/*.parquet
-experiments/055_edgarDocs/*.parquet
-experiments/055_edgarDocs/batch/
+# Local git hooks (제공자별 셋업 — 추적 안 함)
+/.githooks/
+
+# Backup directories (landing 로컬 작업 백업)
+landing/_backup/
+
 crates/
-experiments/105_filingSemanticMap/docsStore/stemIndex.npz
-experiments/**/target/
 .vscode/
 
 # Temp / debug scripts (root)

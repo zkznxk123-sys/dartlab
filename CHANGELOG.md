@@ -1526,7 +1526,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 ### Fixed
 
 **EDGAR docs foundation release test 정합성 복구**
-- `tests/test_edgarDocs_foundation.py` 가 기대하는 EDGAR 배치 다운로드 helper를 `experiments/057_edgarSectionMap/002_downloadFirst2000.py` 에 다시 반영
+- `tests/test_edgarDocs_foundation.py` 가 기대하는 EDGAR 배치 다운로드 helper 를 다시 반영
 - `v0.4.5` publish workflow 를 막던 release test mismatch를 해소
 
 ## [0.4.5] - 2026-03-13

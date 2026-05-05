@@ -1258,7 +1258,6 @@ def generateLlmsTxt() -> str:
             "- Documentation: https://eddmpython.github.io/dartlab/docs/",
             "- GitHub: https://github.com/eddmpython/dartlab",
             "- PyPI: https://pypi.org/project/dartlab/",
-            "- Demo: https://huggingface.co/spaces/eddmpython/dartlab",
             "",
         ]
     )

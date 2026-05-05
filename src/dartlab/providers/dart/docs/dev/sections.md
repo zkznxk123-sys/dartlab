@@ -227,10 +227,6 @@
 
 ## coverage 검증
 
-검증 스크립트:
-- `experiments/056_sectionMap/051_validateCompanyShowCoverage.py`
-- `experiments/056_sectionMap/052_validateAdditionalShowCoverage.py`
-
 현재 전회사(`283`) 기준 failure `0`:
 - `salesOrder`
 - `riskDerivative`
