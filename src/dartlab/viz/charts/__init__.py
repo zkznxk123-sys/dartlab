@@ -20,7 +20,7 @@ from typing import Any
 
 import polars as pl
 
-from dartlab.viz.palette import COLORS
+from dartlab.core.palette import COLORS
 
 _PERIOD_COL_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 

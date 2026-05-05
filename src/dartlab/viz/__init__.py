@@ -34,6 +34,8 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 
+# ── 팔레트 ──
+from dartlab.core.palette import COLORS  # noqa: F401
 from dartlab.viz.charts import (
     balance_sheet as balance_sheet_chart,
 )
@@ -79,9 +81,6 @@ from dartlab.viz.generators import (  # noqa: F401
 
 # ── Dashboard visual intent catalog ──
 from dartlab.viz.intents import VIZ_INTENTS, VizIntent, listVizIntents  # noqa: F401
-
-# ── 팔레트 ──
-from dartlab.viz.palette import COLORS  # noqa: F401
 
 # ── ChartSpec → Plotly Figure 변환 ──
 from dartlab.viz.plotly import from_spec as chart_from_spec  # noqa: F401

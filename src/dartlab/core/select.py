@@ -19,7 +19,7 @@ from typing import Any
 import polars as pl
 
 from dartlab.core.formatting import formatComma, formatDecimal
-from dartlab.viz.palette import COLORS as _COLORS
+from dartlab.core.palette import COLORS as _COLORS
 
 _PERIOD_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 

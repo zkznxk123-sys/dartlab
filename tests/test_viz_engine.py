@@ -17,19 +17,19 @@ pytestmark = pytest.mark.unit
 
 
 def test_colors_is_list():
-    from dartlab.viz.palette import COLORS
+    from dartlab.core.palette import COLORS
 
     assert isinstance(COLORS, list)
 
 
 def test_colors_has_at_least_5():
-    from dartlab.viz.palette import COLORS
+    from dartlab.core.palette import COLORS
 
     assert len(COLORS) >= 5
 
 
 def test_colors_are_hex_strings():
-    from dartlab.viz.palette import COLORS
+    from dartlab.core.palette import COLORS
 
     for color in COLORS:
         assert isinstance(color, str)

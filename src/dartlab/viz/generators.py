@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.viz.palette import COLORS
+from dartlab.core.palette import COLORS
 
 # ── 7영역 인사이트 상수 ──
 
