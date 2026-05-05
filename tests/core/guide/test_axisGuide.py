@@ -1,4 +1,4 @@
-"""guide/axisGuide SSOT 빌더 단위 테스트."""
+"""core/axisGuide SSOT 빌더 단위 테스트."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import polars as pl
 import pytest
 
-from dartlab.guide import buildAxisGuideDataFrame
+from dartlab.core.axisGuide import buildAxisGuideDataFrame
 
 pytestmark = pytest.mark.unit
 

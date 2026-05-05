@@ -107,6 +107,8 @@ _KNOWN_VIOLATIONS = {
     ("dartlab.core.credentials", "dartlab.providers"),
     # core/credentials → ai.settings — provider 카탈로그/secret store/profile 조회 lazy import
     ("dartlab.core.credentials", "dartlab.ai"),
+    # core/messaging → ai.settings — apiKeyMissingHint·onKeyRequired·promptKeyIfMissing lazy import
+    ("dartlab.core.messaging", "dartlab.ai"),
     # core/messaging → providers (L0→L1) — hasDartApiKey 확인 lazy import
     ("dartlab.core.messaging", "dartlab.providers"),
     # providers/dart/finance/spec → analysis/financial/ratios (L1→L2)

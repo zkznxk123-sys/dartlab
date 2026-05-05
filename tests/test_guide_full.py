@@ -89,7 +89,7 @@ class TestMessaging:
 
 class TestHints:
     def test_on_company_created_no_hints(self):
-        from dartlab.guide.hints import onCompanyCreated
+        from dartlab.core.messaging import onCompanyCreated
 
         company = MagicMock()
         company._hasDocs = True
@@ -102,7 +102,7 @@ class TestHints:
         assert hints == []
 
     def test_on_company_created_missing_finance(self):
-        from dartlab.guide.hints import onCompanyCreated
+        from dartlab.core.messaging import onCompanyCreated
 
         company = MagicMock()
         company._hasDocs = True
@@ -115,7 +115,7 @@ class TestHints:
         assert any("finance" in h for h in hints)
 
     def test_on_company_created_stale_data(self):
-        from dartlab.guide.hints import onCompanyCreated
+        from dartlab.core.messaging import onCompanyCreated
 
         company = MagicMock()
         company._hasDocs = True
@@ -131,7 +131,7 @@ class TestHints:
         assert any("120일" in h for h in hints)
 
     def test_next_steps_with_finance(self):
-        from dartlab.guide.hints import nextSteps
+        from dartlab.core.messaging import nextSteps
 
         company = MagicMock()
         company._hasFinanceParquet = True
@@ -142,7 +142,7 @@ class TestHints:
         assert any("show" in s for s in steps)
 
     def test_next_steps_without_finance(self):
-        from dartlab.guide.hints import nextSteps
+        from dartlab.core.messaging import nextSteps
 
         company = MagicMock()
         company._hasFinanceParquet = False
@@ -154,13 +154,13 @@ class TestHints:
         assert any("show" in s for s in steps)
 
     def test_on_analysis_requested_with_axis(self):
-        from dartlab.guide.hints import onAnalysisRequested
+        from dartlab.core.messaging import onAnalysisRequested
 
         result = onAnalysisRequested("수익성")
         assert result is None
 
     def test_on_analysis_requested_without_axis(self):
-        from dartlab.guide.hints import onAnalysisRequested
+        from dartlab.core.messaging import onAnalysisRequested
 
         result = onAnalysisRequested(None)
         assert result is not None
@@ -279,15 +279,14 @@ class TestCapabilities:
         assert summary["byKind"]["analysis"] == 1
 
 
-# ── 5. desk (GuideDesk) ──
+# ── 5. capability search (capabilities() 의 search 모드) ──
+#
+# 옛 GuideDesk.whatCanIDo 는 dartlab.capabilities(search=...) 으로 흡수됨.
 
 
-class TestGuideDesk:
-    # checkReady/checkReadyAll/require — readiness.py 삭제로 테스트 제거 (Phase 20)
+class TestCapabilitySearch:
+    def test_search_returns_dict(self):
+        import dartlab
 
-    def test_what_can_i_do_with_question(self):
-        from dartlab.guide.desk import GuideDesk
-
-        desk = GuideDesk()
-        result = desk.whatCanIDo("재무 분석")
-        assert isinstance(result, str)
+        result = dartlab.capabilities(search="재무 분석")
+        assert isinstance(result, dict)

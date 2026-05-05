@@ -387,3 +387,409 @@ def suggest(funcName: str) -> str | None:
         lines.append(f"\n  필요: {reqText}")
 
     return "\n".join(lines)
+
+
+# ── 에러 복구 안내 템플릿 ───────────────────────────────────────────
+#
+# "데이터 없음" 계열 에러 메시지는 해결책 (gather 명령·show 경로·수집 절차)
+# 을 포함해야 한다. 편의성 원칙(사용자 배려 최우선) 의 SSOT.
+
+
+def missingDataHint(
+    resource: str,
+    *,
+    recoverCmd: str | None = None,
+    detail: str | None = None,
+) -> str:
+    """\"데이터 없음\" 에러에 복구 명령을 포함한 친절한 안내 문자열 생성.
+
+    Parameters
+    ----------
+    resource : str
+        데이터 리소스 이름 (예: "재고자산", "컨센서스").
+    recoverCmd : str, optional
+        사용자가 실행할 복구 명령 문자열.
+    detail : str, optional
+        부가 설명 (예: "최소 2기 필요").
+
+    Returns
+    -------
+    str — 한국어 안내 문자열.
+    """
+    base = f"{resource} 데이터 없음"
+    if recoverCmd:
+        base += f" → {recoverCmd}으로 먼저 수집하세요"
+    if detail:
+        base += f" ({detail})"
+    return base
+
+
+def apiKeyMissingHint(provider: str) -> str:
+    """provider 별 API 키 발급·설정 안내. ``ai/settings/aiSetup.provider_guide`` 위임."""
+    from dartlab.ai.settings.aiSetup import provider_guide
+
+    return provider_guide(provider)
+
+
+# ── 맥락 인식 힌트 ──────────────────────────────────────────────────
+#
+# 상황별 (Company 생성, 분석/스캔 요청, 키 누락, 외부 공유 등) 사용자 안내.
+
+
+def onCompanyCreated(company: Any) -> list[str]:
+    """Company 생성 후 표시할 힌트 목록."""
+    hints: list[str] = []
+
+    hasDocs = getattr(company, "_hasDocs", False)
+    hasFinance = getattr(company, "_hasFinanceParquet", False)
+    hasReport = getattr(company, "_hasReport", False)
+    stockCode = getattr(company, "stockCode", "")
+
+    if hasDocs and not hasFinance:
+        hints.append(f"finance 데이터를 추가하면 재무비율/분석을 사용할 수 있습니다: dartlab.collect('{stockCode}')")
+    if hasDocs and not hasReport:
+        hints.append("report 데이터를 추가하면 배당/임원/지배구조 상세를 볼 수 있습니다")
+
+    freshnessResult = getattr(company, "_freshnessResult", None)
+    if freshnessResult and hasattr(freshnessResult, "ageInDays"):
+        age = freshnessResult.ageInDays
+        if age is not None and age > 90:
+            hints.append(f"데이터가 {age}일 전 기준입니다. 갱신: c.update() 또는 dartlab collect {stockCode}")
+
+    return hints
+
+
+def nextSteps(company: Any) -> list[str]:
+    """Company 생성 후 '다음에 뭘 할 수 있는지' 안내."""
+    hasFinance = getattr(company, "_hasFinanceParquet", False)
+    hasDocs = getattr(company, "_hasDocs", False)
+    steps: list[str] = []
+
+    if hasFinance:
+        steps.append("c.show('IS' / 'BS' / 'CF')   재무제표")
+        steps.append("c.show('ratios')             재무비율")
+    if hasDocs:
+        steps.append("c.show(topic)                공시 원문 조회")
+        steps.append("c.sections                   전체 topic × period 지도")
+    steps.append("c.analysis('수익성')             14축 분석")
+    steps.append("c.story('수익성')               6막 보고서")
+
+    return steps
+
+
+def onScanRequested(axis: str) -> str | None:
+    """스캔 호출 시 안내. (현재는 데이터 준비 상태 점검 미구현 — None.)"""
+    return None
+
+
+def onAnalysisRequested(axis: str | None = None) -> str | None:
+    """분석 축 선택 시 안내. axis=None이면 축 선택 가이드."""
+    if axis is not None:
+        return None
+
+    return (
+        "분석 축을 선택하세요:\n"
+        "  구조: 수익구조, 자금조달, 자산구조, 현금흐름\n"
+        "  성과: 수익성, 성장성, 안정성, 효율성\n"
+        "  종합: 종합평가, 이익품질, 비용구조\n"
+        "  투자: 자본배분, 투자효율\n"
+        "  외부: 지배구조, 공시변화, 비교분석\n"
+        "  전망: 매출전망, 예측신호\n"
+        '  예시: c.analysis("financial", "수익구조")'
+    )
+
+
+# ── 키 관리 통합 안내 ──────────────────────────────────────────────
+
+# 키가 필요한 기능 → (환경변수, 서비스명, 발급URL, 안내) 매핑
+_KEY_REQUIREMENTS: dict[str, dict[str, str]] = {
+    "dart": {
+        "envKey": "DART_API_KEY",
+        "label": "DART OpenAPI",
+        "signupUrl": "https://opendart.fss.or.kr",
+        "guide": "전자공시 API 키 — 한국 상장기업 공시 직접 수집에 필요",
+        "setupCmd": 'dartlab.setup("dart-key")',
+    },
+    "fred": {
+        "envKey": "FRED_API_KEY",
+        "label": "FRED (미국 연방준비제도)",
+        "signupUrl": "https://fred.stlouisfed.org/docs/api/api_key.html",
+        "guide": "미국 거시경제 데이터 (금리, 실업률, GDP 등) 수집에 필요",
+        "setupCmd": "FRED_API_KEY=... (.env에 직접 입력)",
+    },
+    "ecos": {
+        "envKey": "ECOS_API_KEY",
+        "label": "ECOS (한국은행 경제통계)",
+        "signupUrl": "https://ecos.bok.or.kr/api/",
+        "guide": "한국 거시경제 데이터 (기준금리, 환율, 물가 등) 수집에 필요",
+        "setupCmd": "ECOS_API_KEY=... (.env에 직접 입력)",
+    },
+}
+
+
+def onKeyRequired(service: str) -> str:
+    """키가 필요한 기능 호출 시 안내 메시지 생성.
+
+    Parameters
+    ----------
+    service : str
+        "dart", "fred", "ecos", 또는 provider id ("gemini", "groq" 등).
+    """
+    req = _KEY_REQUIREMENTS.get(service)
+    if req:
+        return (
+            f"\n  {req['label']} API 키가 필요합니다.\n"
+            f"  {req['guide']}\n\n"
+            f"  1. 키 발급: {req['signupUrl']}\n"
+            f"  2. 설정 방법 (택1):\n"
+            f"     a) dartlab.setup() → {req['setupCmd']}\n"
+            f"     b) .env 파일에 직접 입력: {req['envKey']}=발급받은키\n"
+            f"     c) 환경변수 설정: export {req['envKey']}=발급받은키\n"
+        )
+
+    try:
+        from dartlab.ai.settings.provider_catalog import _PROVIDERS
+
+        spec = _PROVIDERS.get(service)
+        if spec and spec.auth_kind == "api_key" and spec.env_key:
+            lines = [
+                f"\n  {spec.label} API 키가 필요합니다.",
+                f"  {spec.description}",
+            ]
+            if spec.freeTierHint:
+                lines.append(f"  ({spec.freeTierHint})")
+            lines.append("")
+            if spec.signupUrl:
+                lines.append(f"  1. 키 발급: {spec.signupUrl}")
+            lines.append("  2. 설정 방법 (택1):")
+            lines.append(f'     a) dartlab.setup("{service}") → 대화형 입력')
+            lines.append(f"     b) .env 파일에 직접 입력: {spec.env_key}=발급받은키")
+            lines.append(f"     c) 환경변수 설정: export {spec.env_key}=발급받은키")
+            lines.append("")
+            return "\n".join(lines)
+    except ImportError:
+        pass
+
+    return f"\n  '{service}' 서비스의 API 키가 필요합니다.\n  dartlab.setup()으로 설정하세요.\n"
+
+
+# ── 외부 공유(channel) 안내 ─────────────────────────────────────────
+
+
+def onCloudflaredMissing(os_name: str = "") -> str:
+    """cloudflared 자동 설치 실패 시 수동 설치 안내."""
+    lines = ["\n  cloudflared 바이너리를 찾을 수 없습니다."]
+    if os_name == "Windows":
+        lines.append("  설치(택1):")
+        lines.append("    a) winget install --id Cloudflare.cloudflared -e")
+        lines.append(
+            "    b) https://github.com/cloudflare/cloudflared/releases 에서 cloudflared-windows-amd64.exe 다운로드"
+        )
+        lines.append("       → ~/.dartlab/bin/cloudflared.exe 로 저장")
+    elif os_name == "Darwin":
+        lines.append("  설치(택1):")
+        lines.append("    a) brew install cloudflared")
+        lines.append("    b) https://github.com/cloudflare/cloudflared/releases 에서 darwin 빌드 다운로드")
+    elif os_name == "Linux":
+        lines.append("  설치(택1):")
+        lines.append("    a) https://pkg.cloudflare.com 의 apt/yum 저장소 등록")
+        lines.append("    b) https://github.com/cloudflare/cloudflared/releases 에서 linux 빌드 다운로드")
+    else:
+        lines.append("  https://github.com/cloudflare/cloudflared/releases 에서 OS에 맞는 빌드를 받으세요")
+    lines.append("\n  설치 후 다시 실행: dartlab channel --persistent")
+    return "\n".join(lines)
+
+
+def onCloudflareLoginRequired() -> str:
+    """최초 1회 Cloudflare 인증 안내."""
+    return (
+        "\n  영구 URL 모드는 Cloudflare 계정 인증이 1회 필요합니다.\n"
+        "  잠시 후 브라우저가 자동으로 열립니다.\n"
+        "  → Cloudflare 로그인 → 사용할 도메인(zone) 선택 → Authorize 클릭\n"
+        "  (도메인이 없다면 https://dash.cloudflare.com 에서 무료로 도메인 1개를 추가하세요)\n"
+        "  인증 후에는 다시 묻지 않습니다."
+    )
+
+
+# cloudflared 흔한 에러 매핑
+_CLOUDFLARED_ERROR_HINTS: list[tuple[str, str]] = [
+    ("1033", "DNS 전파 대기 중. 1~2분 후 다시 시도하세요."),
+    ("1034", "Argo 터널이 활성화되지 않았습니다. cloudflared service start 또는 다시 실행해보세요."),
+    (
+        "530",
+        "DNS route가 이 tunnel을 가리키지 않습니다. cloudflared tunnel route dns <id> <hostname>를 다시 실행하세요.",
+    ),
+    ("502", "로컬 서버가 응답하지 않습니다. dartlab 서버가 켜져 있는지 확인하세요."),
+    ("certificate", "cert.pem이 없거나 만료되었습니다. cloudflared tunnel login으로 재인증하세요."),
+    ("permission", "credentials 파일 권한 문제. ~/.cloudflared/*.json 의 권한을 확인하세요."),
+]
+
+
+def onTunnelStartFailed(stderr_excerpt: str) -> str:
+    """cloudflared 시작 실패 시 stderr를 분석해 안내."""
+    lines = ["\n  cloudflared 터널 시작에 실패했습니다."]
+    matched = []
+    for needle, hint in _CLOUDFLARED_ERROR_HINTS:
+        if needle.lower() in stderr_excerpt.lower():
+            matched.append(f"    • {hint}")
+    if matched:
+        lines.append("  추정 원인:")
+        lines.extend(matched)
+    else:
+        lines.append("  원본 에러:")
+        for line in stderr_excerpt.strip().splitlines()[-5:]:
+            lines.append(f"    {line}")
+    lines.append("\n  추가 점검:")
+    lines.append("    • dartlab channel --persistent --dry-run 으로 단계 확인")
+    lines.append("    • ~/.cloudflared/cert.pem 존재 확인")
+    lines.append("    • cloudflared tunnel list 로 tunnel 상태 확인")
+    return "\n".join(lines)
+
+
+def onShareSecurityWarning(*, mode: str, hostname: str, readonly: bool) -> str:
+    """share 첫 실행 시 보안 요약 패널."""
+    mode_labels = {
+        "cloudflare": "Quick Tunnel (임시 URL, 데모용)",
+        "cloudflare-named": "Named Tunnel (영구 URL, 1인 SaaS 표준)",
+        "tailscale": "Tailscale Funnel (본인/지인용 ts.net)",
+        "ngrok": "ngrok",
+        "ssh": "SSH (localhost.run)",
+    }
+    label = mode_labels.get(mode, mode)
+    rw = "읽기 전용 (POST 차단)" if readonly else "읽기/쓰기 (POST /api/ask 허용)"
+    return (
+        f"\n  ── 외부 공유 보안 요약 ──\n"
+        f"  모드        : {label}\n"
+        f"  호스트      : {hostname}\n"
+        f"  권한        : {rw}\n"
+        f"  방어 계층   : 토큰 + 화이트리스트 + Rate Limit + 감사 로그 + Kill Switch\n"
+        f"  감사 로그   : ~/.dartlab/audit.jsonl\n"
+        f"  종료        : Ctrl+C (포그라운드) / cloudflared service uninstall (서비스 모드)\n"
+        f"  주의        : 토큰이 들어간 URL은 노출 = 접근 허용. 토큰 회수는 서버 재시작.\n"
+    )
+
+
+def promptKeyIfMissing(service: str) -> str | None:
+    """키가 없으면 안내 출력 + 대화형 입력 시도. 반환: 키 또는 None.
+
+    노트북/REPL 환경에서 키 입력까지 한 흐름으로 처리한다.
+    비대화형 환경(서버, CI)에서는 안내만 출력하고 None 반환.
+    """
+    import os
+
+    req = _KEY_REQUIREMENTS.get(service)
+    if req:
+        envKey = req["envKey"]
+        existing = os.environ.get(envKey)
+        if existing:
+            return existing
+        _log.info(onKeyRequired(service))
+        try:
+            from dartlab.core.env import promptAndSave
+
+            return promptAndSave(envKey, label=req["label"], guide=req["signupUrl"])
+        except (EOFError, KeyboardInterrupt):
+            return None
+
+    try:
+        from dartlab.ai.settings.provider_catalog import _PROVIDERS
+
+        spec = _PROVIDERS.get(service)
+        if spec and spec.auth_kind == "api_key" and spec.env_key:
+            existing = os.environ.get(spec.env_key)
+            if existing:
+                return existing
+            _log.info(onKeyRequired(service))
+            try:
+                from dartlab.core.env import promptAndSave
+
+                return promptAndSave(spec.env_key, label=spec.label, guide=spec.signupUrl or "")
+            except (EOFError, KeyboardInterrupt):
+                return None
+    except ImportError:
+        pass
+
+    return None
+
+
+# ── 에러 → 사용자 친화 메시지 변환 ──────────────────────────────────
+
+
+def handleError(error: Exception, *, feature: str | None = None) -> str:
+    """에러를 사용자 친화적 안내 메시지로 변환.
+
+    에러 타입별 구체적 분류 → 일반 폴백 순으로 처리. CLI/server 의 에러
+    응답 표준 변환기. 직접 호출하지 말고 ``cli.services.errors.wrapError``
+    또는 server 의 ``guideDetail`` 을 거쳐 사용한다.
+    """
+    errType = type(error).__name__
+    errStr = str(error)
+    errLow = errStr.lower()
+
+    # share/channel 에러 (cloudflared, tunnel)
+    if feature == "share" or "cloudflared" in errLow or "tunnel" in errLow:
+        if "cloudflared" in errLow and ("not found" in errLow or "missing" in errLow or "찾을" in errStr):
+            import platform
+
+            return onCloudflaredMissing(platform.system())
+        if "cert" in errLow or "login" in errLow or "unauthenticated" in errLow:
+            return onCloudflareLoginRequired()
+        return onTunnelStartFailed(errStr[-500:])
+
+    if isinstance(error, FileNotFoundError):
+        return (
+            f"파일을 찾을 수 없습니다: {errStr}\n  dartlab.downloadAll() 또는 dartlab.collect()로 데이터를 준비하세요."
+        )
+
+    if isinstance(error, PermissionError):
+        return f"권한 오류: {errStr}\n  dartlab.setup()으로 인증을 확인하세요."
+
+    if errType == "ChatGPTOAuthError":
+        if any(kw in errLow for kw in ("token", "expire", "login")):
+            return 'ChatGPT 인증이 만료되었습니다.\n  dartlab.setup("chatgpt")으로 다시 로그인하세요.'
+        if any(kw in errLow for kw in ("rate", "limit")):
+            return "ChatGPT 요청 한도에 도달했습니다. 잠시 후 다시 시도해주세요."
+        return f'ChatGPT 연결 오류: {errStr}\n  dartlab.setup("chatgpt")으로 재인증하세요.'
+
+    if errType == "OpenAIError" or "api_key" in errLow or "apikey" in errLow:
+        return "AI 설정이 필요합니다.\n  dartlab.setup()으로 API 키를 확인하거나 다른 provider를 선택하세요."
+
+    if (
+        errType in ("ServerError", "ClientError", "APIError")
+        or "google" in errType.lower()
+        or "genai" in errType.lower()
+    ):
+        if "503" in errStr or "unavailable" in errLow or "high demand" in errLow:
+            return "Gemini 서버가 일시적으로 혼잡합니다. 잠시 후 다시 시도해주세요."
+        if "429" in errStr or "rate" in errLow or "quota" in errLow or "resource_exhausted" in errLow:
+            return "Gemini 요청 한도에 도달했습니다. 잠시 후 다시 시도해주세요."
+        if "401" in errStr or "403" in errStr or "unauthenticated" in errLow or "permission" in errLow:
+            return 'Gemini API 키가 유효하지 않습니다.\n  dartlab.setup("gemini")으로 키를 확인하세요.'
+        if "400" in errStr or "invalid" in errLow:
+            return f"Gemini 요청 오류: {errStr}"
+        return f"Gemini 연결 오류: {errStr}\n  잠시 후 다시 시도해주세요."
+
+    if "connection" in errLow and ("refused" in errLow or "11434" in errLow):
+        return (
+            "Ollama가 실행 중이지 않습니다.\n"
+            "  ollama serve로 시작한 뒤 다시 시도하세요.\n"
+            '  미설치: dartlab.setup("ollama")'
+        )
+
+    if isinstance(error, (ConnectionError, TimeoutError)):
+        return (
+            "AI 서버에 연결할 수 없습니다.\n"
+            "  네트워크를 확인하거나 잠시 후 다시 시도해주세요.\n"
+            "  다른 provider 시도: dartlab.setup()"
+        )
+
+    if any(kw in errLow for kw in ("context", "token limit", "too long", "max_tokens")):
+        return f"입력이 너무 깁니다: {errStr}\n  --exclude 옵션으로 컨텍스트를 줄여보세요."
+
+    # 일반 폴백 — feature 정보가 있으면 prefix 추가
+    if feature:
+        return (
+            f"[{feature}] {errType}: {errStr}\n"
+            f"  dartlab.capabilities(search='{feature}') 로 사용 가능한 기능을 확인하세요."
+        )
+    return f"{errType}: {errStr}"

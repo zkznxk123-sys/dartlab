@@ -64,7 +64,7 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_OK
     except Exception as exc:  # noqa: BLE001 — CLI 진입점 최종 catch-all
         try:
-            from dartlab.guide.integration import wrapError
+            from dartlab.cli.services.errors import wrapError
 
             print_error(wrapError(exc))
         except ImportError:

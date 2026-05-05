@@ -164,7 +164,7 @@ def guide():
     >>> c.credit("등급")                        # 종합 등급
     >>> c.credit("채무상환", detail=True)        # 채무상환 축 상세
     """
-    from dartlab.guide import buildAxisGuideDataFrame
+    from dartlab.core.axisGuide import buildAxisGuideDataFrame
 
     df = buildAxisGuideDataFrame(
         _AXIS_REGISTRY,

@@ -70,7 +70,7 @@ def buildAxisGuideDataFrame(
 
     Examples
     --------
-    >>> from dartlab.guide import buildAxisGuideDataFrame
+    >>> from dartlab.core.axisGuide import buildAxisGuideDataFrame
     >>> df = buildAxisGuideDataFrame(
     ...     _AXIS_REGISTRY,
     ...     groupExtractor=lambda k, e: e.section,

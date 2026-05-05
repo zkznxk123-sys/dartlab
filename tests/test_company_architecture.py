@@ -103,9 +103,10 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
         "src/dartlab/audit",
         "src/dartlab/display",
         "src/dartlab/export",
-        # Cut 2.5a 환원 — capability/settings 는 core 로 흡수됐으므로 top-level 재출현 금지
+        # Cut 2.5 환원 — capability/settings/guide 는 core 또는 사용처로 흡수됐으므로 top-level 재출현 금지
         "src/dartlab/capability",
         "src/dartlab/settings",
+        "src/dartlab/guide",
     ]
     for rel in forbidden:
         assert not (repo_root / rel).exists(), f"retired root package still exists: {rel}"
@@ -120,6 +121,7 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
         "src/dartlab/core/_generated.py",
         "src/dartlab/core/_generated_analysis_graph.py",
         "src/dartlab/core/credentials.py",
+        "src/dartlab/core/axisGuide.py",
         "src/dartlab/viz/display",
         "src/dartlab/viz/export",
     ]
@@ -147,6 +149,8 @@ def test_core_does_not_own_retired_subpackages():
         "dartlab.core.finance",
         # CLI 통합 wrapper 는 cli/services/errors 로 이관됨 (Cut 2.5b 후)
         "dartlab.core.integration",
+        # guide 패키지 자체가 폐기됨 (Cut 2.5b)
+        "dartlab.guide",
     ]
     for py_file in (repo_root / "src").rglob("*.py"):
         if "__pycache__" in py_file.parts:
