@@ -117,3 +117,30 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
     ]
     for rel in expected:
         assert (repo_root / rel).exists(), f"canonical package missing: {rel}"
+
+
+def test_core_does_not_own_product_settings_or_guide_layers():
+    repo_root = Path(__file__).resolve().parents[1]
+    forbidden_dirs = [
+        "src/dartlab/core/ai",
+        "src/dartlab/core/finance",
+        "src/dartlab/core/guide",
+    ]
+    for rel in forbidden_dirs:
+        assert not (repo_root / rel).exists(), f"core must not own product layer: {rel}"
+
+    forbidden_imports = [
+        "dartlab.core.ai",
+        "dartlab.core.finance",
+        "dartlab.core.credentials",
+        "dartlab.core.hints",
+        "dartlab.core.desk",
+        "dartlab.core.guide",
+        "dartlab.core.integration",
+    ]
+    for py_file in (repo_root / "src").rglob("*.py"):
+        if "__pycache__" in py_file.parts:
+            continue
+        text = py_file.read_text(encoding="utf-8")
+        for pattern in forbidden_imports:
+            assert pattern not in text, f"{py_file} contains retired core import: {pattern}"

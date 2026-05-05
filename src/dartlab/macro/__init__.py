@@ -407,7 +407,7 @@ class Macro:
             - group : str — 6막 내 위치 (예: ``"제1막: 경제는 어디에 있나"``).
             - apiKey : str — 필요한 API 키 안내.
         """
-        from dartlab.core.guide import buildAxisGuideDataFrame
+        from dartlab.guide import buildAxisGuideDataFrame
 
         def _group(_key: str, entry) -> str:
             act_label = _ACT_LABELS.get(entry.act, "")

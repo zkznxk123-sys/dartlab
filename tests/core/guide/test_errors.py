@@ -1,10 +1,10 @@
-"""core/guide/errors 템플릿 단위 테스트."""
+"""guide/errors 템플릿 단위 테스트."""
 
 from __future__ import annotations
 
 import pytest
 
-from dartlab.core.guide import apiKeyMissingHint, missingDataHint
+from dartlab.guide import apiKeyMissingHint, missingDataHint
 
 pytestmark = pytest.mark.unit
 

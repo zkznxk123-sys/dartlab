@@ -11,7 +11,7 @@
 
 허용 (화이트리스트):
     - 사용자 입력 파싱 (tests, scripts/dev)
-    - core/ai/secrets.py 같은 옵셔널 설정 로더
+    - ai/settings/secrets.py 같은 옵셔널 설정 로더
     - 이미 명시적으로 허용된 경로
 
 사용법::
@@ -34,8 +34,8 @@ _SRC_ROOT = Path(__file__).resolve().parents[2] / "src" / "dartlab"
 _ALLOWLIST_FILES: frozenset[str] = frozenset(
     {
         # 사용자 설정/인증 파일 (옵셔널)
-        "core/ai/secrets.py",
-        "core/ai/profile.py",
+        "ai/settings/secrets.py",
+        "ai/settings/profile.py",
         "ai/persistence/knowledge_db.py",
         "ai/providers/support/codex_cli.py",
         "ai/tools/__init__.py",

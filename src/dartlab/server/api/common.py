@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import Request, Response
 
-from dartlab.core.ai import normalize_provider
+from dartlab.ai.settings import normalize_provider
 
 HANDLED_API_ERRORS = (
     AttributeError,
@@ -42,10 +42,10 @@ def guideDetail(exc: BaseException, *, feature: str | None = None) -> str:
     """sanitize_error + guide 안내 포함. Server API 에러 응답 표준."""
     detail = sanitize_error(exc)
     try:
-        from dartlab.core.integration import inferFeature
+        from dartlab.guide.integration import inferFeature
 
         resolvedFeature = feature or inferFeature(exc)  # type: ignore[arg-type]
-        from dartlab.core.desk import guide
+        from dartlab.guide.desk import guide
 
         guideMsg = guide.handleError(exc, feature=resolvedFeature)  # type: ignore[arg-type]
         if guideMsg and guideMsg != f"오류: {exc}":

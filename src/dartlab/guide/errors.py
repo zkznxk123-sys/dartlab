@@ -83,7 +83,7 @@ def missingDataHint(
 def apiKeyMissingHint(provider: str) -> str:
     """provider 별 API 키 발급·설정 안내 문자열.
 
-    core/ai/aiSetup.py 의 `provider_guide` 에 delegate (중복 구현 방지).
+    dartlab.ai.settings.aiSetup 의 `provider_guide` 에 delegate (중복 구현 방지).
     8개 provider (Gemini/Groq/Cerebras/Mistral/ChatGPT/OpenAI/Ollama/Codex)
     의 발급 URL + `.env` 설정법 SSOT 가 거기 있다.
 
@@ -110,7 +110,7 @@ def apiKeyMissingHint(provider: str) -> str:
     Notes
     -----
     이 함수는 단순 delegate 이다. provider 별 안내 원문을 고치려면
-    `core/ai/aiSetup.py::provider_guide` 를 수정한다 — SSOT 위치.
+    `dartlab.ai.settings.aiSetup::provider_guide` 를 수정한다 — SSOT 위치.
 
     Guide
     -----
@@ -121,6 +121,6 @@ def apiKeyMissingHint(provider: str) -> str:
     --------
     missingDataHint : 데이터 누락 시 복구 안내.
     """
-    from dartlab.core.ai.aiSetup import provider_guide
+    from dartlab.ai.settings.aiSetup import provider_guide
 
     return provider_guide(provider)

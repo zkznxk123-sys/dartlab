@@ -255,7 +255,7 @@ class TestAiProfile:
 
     def test_put_ai_profile_updates_shared_config(self, client):
         from dartlab.ai import get_config
-        from dartlab.core.ai.model_resolver import latest_openai_model
+        from dartlab.ai.settings.model_resolver import latest_openai_model
 
         resp = client.put(
             "/api/ai/profile",
@@ -515,9 +515,8 @@ class TestOAuth:
 
 
 class TestCodexAuth:
-    def test_codex_logout(self, client, monkeypatch):
+    def test_codex_logout(self, client):
         """POST /api/codex/logout — Codex CLI 인증 제거."""
-        monkeypatch.setattr("dartlab.ai.providers.support.codex_cli.logout_codex_cli", lambda: None)
         resp = client.post("/api/codex/logout")
         assert resp.status_code == 200
         assert resp.json()["ok"] is True

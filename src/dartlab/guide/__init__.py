@@ -8,7 +8,7 @@
 extra 컬럼)를 콜러블 주입으로 흡수해 한 블록으로 축소된다.
 """
 
-from dartlab.core.guide.axisGuide import buildAxisGuideDataFrame
-from dartlab.core.guide.errors import apiKeyMissingHint, missingDataHint
+from dartlab.guide.axisGuide import buildAxisGuideDataFrame
+from dartlab.guide.errors import apiKeyMissingHint, missingDataHint
 
 __all__ = ["buildAxisGuideDataFrame", "missingDataHint", "apiKeyMissingHint"]

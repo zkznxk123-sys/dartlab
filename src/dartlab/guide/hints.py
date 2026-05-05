@@ -73,7 +73,7 @@ def nextSteps(company: Any) -> list[str]:
 def onScanRequested(axis: str) -> str | None:
     """스캔 호출 시 안내. 데이터 부족하면 안내 반환."""
     try:
-        from dartlab.core.desk import guide
+        from dartlab.guide.desk import guide
 
         result = guide.checkReady("scan")
         if not result.ok:
@@ -152,7 +152,7 @@ def onKeyRequired(service: str) -> str:
 
     # 2) AI provider (gemini, groq, cerebras 등)
     try:
-        from dartlab.core.ai.providers import _PROVIDERS
+        from dartlab.ai.settings.provider_catalog import _PROVIDERS
 
         spec = _PROVIDERS.get(service)
         if spec and spec.auth_kind == "api_key" and spec.env_key:
@@ -305,7 +305,7 @@ def promptKeyIfMissing(service: str) -> str | None:
 
     # AI provider
     try:
-        from dartlab.core.ai.providers import _PROVIDERS
+        from dartlab.ai.settings.provider_catalog import _PROVIDERS
 
         spec = _PROVIDERS.get(service)
         if spec and spec.auth_kind == "api_key" and spec.env_key:

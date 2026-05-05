@@ -87,8 +87,6 @@ _KNOWN_VIOLATIONS = {
     ("dartlab.core.dataLoader", "dartlab.providers"),
     ("dartlab.core.resolve", "dartlab.gather"),
     ("dartlab.core", "dartlab.gather"),  # core/__init__ → listing
-    # core/ → ai (L0→L3)
-    ("dartlab.core.ai", "dartlab.ai"),
     # core/ → providers (L0→L1)
     ("dartlab.core.docs.diff", "dartlab.providers"),
     ("dartlab.core.docs.diff", "dartlab.scan"),
@@ -105,16 +103,13 @@ _KNOWN_VIOLATIONS = {
     ("dartlab.analysis.financial.storyValidation", "dartlab.ai"),
     # core/_generated → analysis (L0→L2) — generateSpec 자동 생성 참조
     ("dartlab.core._generated", "dartlab.analysis"),
-    # core/credentials → providers (L0→L1) — DART API 키 관리 lazy import
-    ("dartlab.core.credentials", "dartlab.providers"),
+    # settings/credentials → providers — DART API 키 관리 lazy import
+    ("dartlab.settings.credentials", "dartlab.providers"),
     # core/messaging → providers (L0→L1) — hasDartApiKey 확인 lazy import
     ("dartlab.core.messaging", "dartlab.providers"),
     # providers/dart/finance/spec → analysis/financial/ratios (L1→L2)
     # — finance.ratios re-export wrapper는 제거했고 spec의 분석 타입 참조만 남았다.
     ("dartlab.providers.dart.finance.spec", "dartlab.analysis"),
-    # core/finance package 공개 묶음 → analysis/financial
-    # 개별 core.finance.* shim은 제거했고 package-level compatibility surface만 남았다.
-    ("dartlab.core.finance", "dartlab.analysis"),
     # providers/dart/{_docsIndex,_financeBuilders} + providers/edgar/_finance_accessor →
     # analysis/financial/ratios (L1→L2). ratios 가 L2 로 이주됐는데 L1 facade backend
     # 가 그 결과 타입 (RatioResult dataclass) 을 import — 큰 레포 표준상 결과 dataclass

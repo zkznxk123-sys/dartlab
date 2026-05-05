@@ -1168,7 +1168,7 @@ class Analysis:
             items : int — calc 함수 개수
             apiKey : str — 필요한 API 키 ("불필요" — 모든 축이 DART 공시 기반)
         """
-        from dartlab.core.guide import buildAxisGuideDataFrame
+        from dartlab.guide import buildAxisGuideDataFrame
 
         return buildAxisGuideDataFrame(
             _AXIS_REGISTRY,

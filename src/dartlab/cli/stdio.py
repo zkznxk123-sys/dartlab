@@ -124,8 +124,8 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
 def _handleStatus(_msg: dict[str, Any]) -> None:
     """Return provider status with available providers list."""
     try:
-        from dartlab.core.ai.profile import get_profile_manager
-        from dartlab.core.ai.providers import _PROVIDERS
+        from dartlab.ai.settings.profile import get_profile_manager
+        from dartlab.ai.settings.provider_catalog import _PROVIDERS
 
         profile = get_profile_manager().load()
         provider = _sessionProvider or profile.default_provider or "none"
@@ -180,7 +180,7 @@ def _handleSetProvider(msg: dict[str, Any]) -> None:
     # API 키가 왔으면 저장
     if provider and apiKey:
         try:
-            from dartlab.core.credentials import CredentialManager
+            from dartlab.settings.credentials import CredentialManager
 
             CredentialManager().saveKey(f"{provider}_api_key", apiKey)
         except Exception as exc:  # noqa: BLE001
@@ -190,7 +190,7 @@ def _handleSetProvider(msg: dict[str, Any]) -> None:
     # provider 인증 확인
     if provider and not apiKey:
         try:
-            from dartlab.core.ai.providers import get_provider_spec
+            from dartlab.ai.settings.provider_catalog import get_provider_spec
 
             spec = get_provider_spec(provider)
             if spec:
@@ -200,7 +200,7 @@ def _handleSetProvider(msg: dict[str, Any]) -> None:
                     return
                 # API 키 provider → 키 없으면 needCredential
                 if spec.auth_kind == "api_key":
-                    from dartlab.core.credentials import CredentialManager
+                    from dartlab.settings.credentials import CredentialManager
 
                     cred = CredentialManager().getCredential(f"{provider}_api_key")
                     if not cred.configured:
@@ -475,7 +475,7 @@ def _buildReadyDiag() -> dict[str, Any]:
     diag: dict[str, Any] = {"version": _getVersion()}
     diag["python"] = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
     try:
-        from dartlab.core.ai.profile import get_profile_manager
+        from dartlab.ai.settings.profile import get_profile_manager
 
         profile = get_profile_manager().load()
         diag["aiProvider"] = profile.default_provider or "none"

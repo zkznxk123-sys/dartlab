@@ -70,7 +70,7 @@ class CredentialManager:
 
             saveDartKeyToDotenv(value)
             return
-        from dartlab.core.ai.profile import get_profile_manager
+        from dartlab.ai.settings.profile import get_profile_manager
 
         mgr = get_profile_manager()
         provider = name.replace("_api_key", "")
@@ -106,8 +106,8 @@ class CredentialManager:
         try:
             import os
 
-            from dartlab.core.ai.providers import _PROVIDERS, api_key_secret_name
-            from dartlab.core.ai.secrets import get_secret_store
+            from dartlab.ai.settings.provider_catalog import _PROVIDERS, api_key_secret_name
+            from dartlab.ai.settings.secrets import get_secret_store
 
             store = get_secret_store()
             for pid, spec in _PROVIDERS.items():
@@ -125,7 +125,7 @@ class CredentialManager:
                         maskedValue=masked if configured else None,
                     )
                 elif spec.auth_kind == "oauth":
-                    from dartlab.core.ai.providers import oauth_secret_name
+                    from dartlab.ai.settings.provider_catalog import oauth_secret_name
 
                     configured = store.has(oauth_secret_name(pid))
                     results[pid] = CredentialStatus(
@@ -139,7 +139,7 @@ class CredentialManager:
 
     def _getDefaultProvider(self) -> str | None:
         try:
-            from dartlab.core.ai.profile import get_profile_manager
+            from dartlab.ai.settings.profile import get_profile_manager
 
             mgr = get_profile_manager()
             profile = mgr.load()

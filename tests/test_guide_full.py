@@ -89,7 +89,7 @@ class TestMessaging:
 
 class TestHints:
     def test_on_company_created_no_hints(self):
-        from dartlab.core.hints import onCompanyCreated
+        from dartlab.guide.hints import onCompanyCreated
 
         company = MagicMock()
         company._hasDocs = True
@@ -102,7 +102,7 @@ class TestHints:
         assert hints == []
 
     def test_on_company_created_missing_finance(self):
-        from dartlab.core.hints import onCompanyCreated
+        from dartlab.guide.hints import onCompanyCreated
 
         company = MagicMock()
         company._hasDocs = True
@@ -115,7 +115,7 @@ class TestHints:
         assert any("finance" in h for h in hints)
 
     def test_on_company_created_stale_data(self):
-        from dartlab.core.hints import onCompanyCreated
+        from dartlab.guide.hints import onCompanyCreated
 
         company = MagicMock()
         company._hasDocs = True
@@ -131,7 +131,7 @@ class TestHints:
         assert any("120일" in h for h in hints)
 
     def test_next_steps_with_finance(self):
-        from dartlab.core.hints import nextSteps
+        from dartlab.guide.hints import nextSteps
 
         company = MagicMock()
         company._hasFinanceParquet = True
@@ -142,7 +142,7 @@ class TestHints:
         assert any("show" in s for s in steps)
 
     def test_next_steps_without_finance(self):
-        from dartlab.core.hints import nextSteps
+        from dartlab.guide.hints import nextSteps
 
         company = MagicMock()
         company._hasFinanceParquet = False
@@ -154,13 +154,13 @@ class TestHints:
         assert any("show" in s for s in steps)
 
     def test_on_analysis_requested_with_axis(self):
-        from dartlab.core.hints import onAnalysisRequested
+        from dartlab.guide.hints import onAnalysisRequested
 
         result = onAnalysisRequested("수익성")
         assert result is None
 
     def test_on_analysis_requested_without_axis(self):
-        from dartlab.core.hints import onAnalysisRequested
+        from dartlab.guide.hints import onAnalysisRequested
 
         result = onAnalysisRequested(None)
         assert result is not None
@@ -286,7 +286,7 @@ class TestGuideDesk:
     # checkReady/checkReadyAll/require — readiness.py 삭제로 테스트 제거 (Phase 20)
 
     def test_what_can_i_do_with_question(self):
-        from dartlab.core.desk import GuideDesk
+        from dartlab.guide.desk import GuideDesk
 
         desk = GuideDesk()
         result = desk.whatCanIDo("재무 분석")

@@ -15,7 +15,7 @@ def test_available_provider_is_dartlab_adapter_only():
 
 def test_create_provider_returns_research_graph_adapter():
     from dartlab.ai.providers import create_provider
-    from dartlab.core.ai.types import LLMConfig
+    from dartlab.ai.settings.types import LLMConfig
 
     provider = create_provider(LLMConfig(provider="dartlab", model="research"))
 

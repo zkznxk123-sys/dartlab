@@ -526,7 +526,7 @@ def setup(provider: str | None = None):
         dartlab.setup("openai")      # OpenAI API 키 설정
         dartlab.setup("ollama")      # Ollama 설치 안내
     """
-    from dartlab.core.ai.aiSetup import (
+    from dartlab.ai.settings.aiSetup import (
         providers_status,
         resolve_alias,
     )
@@ -566,11 +566,11 @@ def _setup_oauth_interactive():
 
 def _setup_apikey_interactive(provider: str):
     """API 키 기반 provider 인터랙티브 설정."""
-    from dartlab.core.ai.providers import _PROVIDERS
+    from dartlab.ai.settings.provider_catalog import _PROVIDERS
 
     spec = _PROVIDERS.get(provider)
     if spec is None or not spec.env_key:
-        from dartlab.core.ai.aiSetup import provider_guide
+        from dartlab.ai.settings.aiSetup import provider_guide
 
         print(provider_guide(provider))
         return

@@ -6,7 +6,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-from dartlab.core.ai.types import LLMConfig
+from dartlab.ai.settings.types import LLMConfig
 
 
 class TestProviderAdapterBoundary:

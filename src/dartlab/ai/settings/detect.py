@@ -26,7 +26,7 @@ def _quick_check(provider_id: str) -> bool:
     """provider 사용 가능 여부를 빠르게 체크."""
     try:
         from dartlab.ai.providers import create_provider
-        from dartlab.core.ai.types import LLMConfig
+        from dartlab.ai.settings.types import LLMConfig
 
         config = LLMConfig(provider=provider_id)
         prov = create_provider(config)
@@ -49,7 +49,7 @@ def auto_detect_provider(*, verbose: bool = False) -> str | None:
             return provider_id
 
     if verbose:
-        from dartlab.core.ai.aiSetup import no_provider_message
+        from dartlab.ai.settings.aiSetup import no_provider_message
 
         _log.info(no_provider_message())
 

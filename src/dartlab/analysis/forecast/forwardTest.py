@@ -130,7 +130,7 @@ def evaluate(
         nCompared : int — 비교 기간 수
         evaluatedAt : str — 평가 시각 (ISO 8601)
     """
-    from dartlab.core.guide import missingDataHint
+    from dartlab.guide import missingDataHint
 
     projected = record.projected
     n = min(len(projected), len(actualRevenue))

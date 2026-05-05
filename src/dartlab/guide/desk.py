@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Any
 
 from dartlab.core.capabilities import build_capability_summary
-from dartlab.core.credentials import CredentialManager, EnvironmentSnapshot
+from dartlab.settings.credentials import CredentialManager, EnvironmentSnapshot
 from dartlab.core.messaging import suggest
 from dartlab.core.search_capabilities import formatSearchResults, searchCapabilities
 
@@ -18,7 +18,7 @@ class GuideDesk:
 
     사용법::
 
-        from dartlab.core.desk import guide
+        from dartlab.guide.desk import guide
 
         guide.checkReady("finance", stockCode="005930")
         guide.whatCanIDo("재무 분석")
@@ -115,7 +115,7 @@ class GuideDesk:
 
         # share/channel 에러 (cloudflared, tunnel)
         if feature == "share" or "cloudflared" in errLow or "tunnel" in errLow:
-            from dartlab.core.hints import (
+            from dartlab.guide.hints import (
                 onCloudflaredMissing,
                 onCloudflareLoginRequired,
                 onTunnelStartFailed,
@@ -195,7 +195,7 @@ class GuideDesk:
         if feature:
             return (
                 f"[{feature}] {errType}: {errStr}\n"
-                f"  dartlab.core.desk.whatCanIDo('{feature}') 로 사용 가능한 기능을 확인하세요."
+                f"  dartlab.guide.desk.whatCanIDo('{feature}') 로 사용 가능한 기능을 확인하세요."
             )
         return f"{errType}: {errStr}"
 

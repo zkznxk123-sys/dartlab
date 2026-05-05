@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.core.ai.types import LLMConfig
+from dartlab.ai.settings.types import LLMConfig
 
 ProviderConfig = LLMConfig
 

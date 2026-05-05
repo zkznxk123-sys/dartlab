@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from dartlab.core.ai.routing import AI_ROLES
+from dartlab.ai.settings.routing import AI_ROLES
 
 
 @dataclass(frozen=True)

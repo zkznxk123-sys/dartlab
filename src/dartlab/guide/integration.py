@@ -20,7 +20,7 @@ def wrapError(error: Exception, *, feature: str | None = None, stockCode: str | 
         원본 에러 메시지 + guide 안내가 합쳐진 문자열.
     """
     try:
-        from dartlab.core.desk import guide
+        from dartlab.guide.desk import guide
 
         resolvedFeature = feature or inferFeature(error)
         guideMsg = guide.handleError(error, feature=resolvedFeature)

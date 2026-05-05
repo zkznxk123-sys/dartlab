@@ -10,13 +10,13 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from sse_starlette.sse import EventSourceResponse
 
 import dartlab
-from dartlab.core.ai import (
+from dartlab.ai.settings import (
     build_provider_catalog,
     get_profile_manager,
     get_provider_spec,
     public_provider_ids,
 )
-from dartlab.core.ai.model_resolver import fallback_models, is_openai_chat_model, sort_openai_models
+from dartlab.ai.settings.model_resolver import fallback_models, is_openai_chat_model, sort_openai_models
 
 from ..chat import OLLAMA_MODEL_GUIDE
 from ..models import (
@@ -232,6 +232,8 @@ def api_ai_profile():
 @router.put("/api/ai/profile")
 def api_ai_profile_update(req: AiProfileUpdateRequest):
     """공통 AI profile 갱신."""
+    from dartlab.ai import configure as configure_ai
+
     manager = get_profile_manager()
     provider = _normalize_provider_name(req.provider) or req.provider
     if provider and get_provider_spec(provider) is None:
@@ -246,6 +248,16 @@ def api_ai_profile_update(req: AiProfileUpdateRequest):
         system_prompt=req.system_prompt,
         updated_by="ui",
     )
+    if provider:
+        configure_ai(
+            provider=provider,
+            role=req.role,
+            model=req.model,
+            base_url=req.base_url,
+            temperature=req.temperature,
+            max_tokens=req.max_tokens,
+            system_prompt=req.system_prompt,
+        )
     return manager.serialize() | {"revision": profile.revision}
 
 
@@ -404,19 +416,25 @@ async def api_ai_profile_events(request: Request):
 def api_models(provider: str):
     """Provider별 사용 가능한 모델 목록 — SDK/API 자동 조회, 실패시 fallback."""
     from dartlab.ai.providers import create_provider
-    from dartlab.core.ai.types import LLMConfig
+    from dartlab.ai.settings.types import LLMConfig
 
     provider = _normalize_provider_name(provider) or provider
 
     if provider == "codex":
-        from dartlab.ai.providers.support.codex_cli import get_codex_model_catalog
+        try:
+            from dartlab.ai.providers.support.codex_cli import get_codex_model_catalog
 
-        return {"models": get_codex_model_catalog()}
+            return {"models": get_codex_model_catalog()}
+        except (ImportError, OSError, RuntimeError, ValueError):
+            return {"models": fallback_models("codex")}
 
     if provider == "oauth-codex":
-        from dartlab.ai.providers.oauth_codex import availableModels
+        try:
+            from dartlab.ai.providers.oauth_codex import availableModels
 
-        return {"models": availableModels()}
+            return {"models": availableModels()}
+        except (ImportError, OSError, RuntimeError, ValueError):
+            return {"models": fallback_models("oauth-codex")}
 
     if provider in STATIC_MODELS:
         return {"models": STATIC_MODELS[provider]}
@@ -473,10 +491,12 @@ def _fetch_openai_models() -> list[str]:
 @router.post("/api/codex/logout")
 def api_codex_logout():
     """Codex CLI에 저장된 계정 인증을 제거한다."""
-    from dartlab.ai.providers.support.codex_cli import logout_codex_cli
-
     try:
+        from dartlab.ai.providers.support.codex_cli import logout_codex_cli
+
         logout_codex_cli()
+    except ImportError:
+        return {"ok": True}
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=_guideDetail(exc)) from exc
     except RuntimeError as exc:
@@ -514,9 +534,12 @@ def api_oauth_status():
 @router.post("/api/oauth/logout")
 def api_oauth_logout():
     """OAuth 토큰 제거."""
-    from dartlab.ai.providers.support.oauth_token import revoke_token
+    try:
+        from dartlab.ai.providers.support.oauth_token import revoke_token
 
-    revoke_token()
+        revoke_token()
+    except (ImportError, OSError, RuntimeError, ValueError):
+        pass
     get_profile_manager().update(provider="oauth-codex", updated_by="ui")
     return {"ok": True}
 

@@ -582,7 +582,7 @@ def _executeTool(name: str, args: dict) -> str:
     except Exception as e:  # noqa: BLE001
         _log.error("Tool %s error: %s\n%s", name, e, traceback.format_exc())
         try:
-            from dartlab.core.desk import guide
+            from dartlab.guide.desk import guide
 
             feature = _TOOL_FEATURE_MAP.get(name, "data")
             guideMsg = guide.handleError(e, feature=feature)
