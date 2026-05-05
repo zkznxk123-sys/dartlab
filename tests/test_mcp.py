@@ -13,7 +13,12 @@ def test_mcp_tools_defined():
     from dartlab.mcp import _advertisedTools
 
     names = {tool["name"] for tool in _advertisedTools()}
-    assert names == {"ask", "skill_search", "generated_spec_search", "engine_call", "run_python", "read"}
+    # SSOT v2 6 종 (권장)
+    v2 = {"ask", "read_skill", "read_capability", "run_python", "web_search", "save_artifact", "propose_skill"}
+    assert v2.issubset(names)
+    # 호환 4 종 (deprecated)
+    compat = {"skill_search", "generated_spec_search", "engine_call", "read"}
+    assert compat.issubset(names)
     assert "companyInsights" not in names
     assert "search_reference" not in names
     assert "finalize_answer" not in names
