@@ -160,14 +160,14 @@ def test_skillSpecs_inWheel(builtWheel: Path):
         names = set(zf.namelist())
 
     required = [
-        "dartlab/skill_os/specs/start/dartlabSkillOs.md",
-        "dartlab/skill_os/specs/engines/analysis/SKILL.md",
-        "dartlab/skill_os/specs/engines/analysis/profitability.md",
-        "dartlab/skill_os/specs/engines/scan/undervaluedQuality.md",
-        "dartlab/skill_os/specs/operation/apiContract.md",
-        "dartlab/skill_os/specs/runtime/mcp.md",
-        "dartlab/skill_os/index.json",
-        "dartlab/skill_os/pyodide.json",
+        "dartlab/skills/specs/start/dartlabSkillOs.md",
+        "dartlab/skills/specs/engines/analysis/SKILL.md",
+        "dartlab/skills/specs/engines/analysis/profitability.md",
+        "dartlab/skills/specs/engines/scan/undervaluedQuality.md",
+        "dartlab/skills/specs/operation/apiContract.md",
+        "dartlab/skills/specs/runtime/mcp.md",
+        "dartlab/skills/index.json",
+        "dartlab/skills/pyodide.json",
     ]
     for req in required:
         assert req in names, f"wheel 에 Skill OS 리소스 누락: {req}"

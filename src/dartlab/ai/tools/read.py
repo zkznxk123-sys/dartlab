@@ -24,7 +24,7 @@ def read(target: str, *, startLine: int | None = None, endLine: int | None = Non
 
 
 def _read_skill(skill_id: str) -> ToolResult:
-    from dartlab.skill_os.registry import describeSkill
+    from dartlab.skills import describeSkill
 
     try:
         payload = describeSkill(skill_id)

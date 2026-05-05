@@ -8,7 +8,7 @@ from .types import ToolResult
 
 
 def skillSearch(query: str, *, limit: int = 8, includeUser: bool = True) -> ToolResult:
-    from dartlab.skill_os.registry import searchSkills
+    from dartlab.skills import searchSkills
 
     matches = searchSkills(query or "", limit=max(1, int(limit or 8)), includeUser=includeUser)
     refs: list[Ref] = []

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from dartlab.skill_os.compiler import buildSkillArtifacts
+from dartlab.skills import buildSkillArtifacts
 
 
 def main() -> None:

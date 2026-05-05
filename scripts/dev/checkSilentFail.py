@@ -68,7 +68,7 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "ai/persistence/store.py",
         "ai/reference.py",
         "ai/__init__.py",
-        "skill_os/registry.py",
+        "skills/registry.py",
         # analysis/forecast/core 런타임 캐시 (HF seed/backtest output)
         "analysis/forecast/forwardTest.py",
         "core/finance/bottomUpBeta.py",

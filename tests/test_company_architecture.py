@@ -76,8 +76,8 @@ def test_public_docs_do_not_reference_legacy_company_names():
         "docs/index.md",
         "docs/getting-started/quickstart.md",
         "docs/stability.md",
-        "skills/specs/start/dartlabSkillOs.md",
-        "skills/specs/operation/apiContract.md",
+        "src/dartlab/skills/specs/start/dartlabSkillOs.md",
+        "src/dartlab/skills/specs/operation/apiContract.md",
     ]
     banned = ["USCompany", "KRCompany", "DartCompany", "EdgarCompany", "c.docs()"]
 
@@ -97,7 +97,6 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
     repo_root = Path(__file__).resolve().parents[1]
     forbidden = [
         "src/dartlab/" + "ai_" + "backup",
-        "src/dartlab/skills",
         "src/dartlab/tools",
         "src/dartlab/table",
         "src/dartlab/knowledge",
@@ -109,7 +108,7 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
         assert not (repo_root / rel).exists(), f"retired root package still exists: {rel}"
 
     expected = [
-        "src/dartlab/skill_os",
+        "src/dartlab/skills",
         "src/dartlab/ai/tools",
         "src/dartlab/ai/workbench",
         "src/dartlab/core/search_capabilities.py",

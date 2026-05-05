@@ -131,7 +131,7 @@ def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
             "refs": [*(skills.get("refs") or []), *(specs.get("refs") or [])],
         }
     if name == "listDartlabSkills":
-        from dartlab.skill_os.registry import listSkills
+        from dartlab.skills import listSkills
 
         return {"skills": [skill.to_dict() for skill in listSkills(includeUser=bool(args.get("includeUser", True)))]}
     if name in {"searchDartlabSkills", "skill_search"}:
@@ -146,7 +146,7 @@ def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     if name == "explainDartlabSkill":
         return _executeAiTool("read", {"target": f"dartlab://skills/{args.get('skillId')}"})
     if name == "checkDartlabSkillEvidence":
-        from dartlab.skill_os.registry import checkEvidence
+        from dartlab.skills import checkEvidence
 
         return checkEvidence(
             str(args.get("skillId") or ""), args.get("refs") or [], includeUser=bool(args.get("includeUser", True))
@@ -226,7 +226,7 @@ def _resourcePayload(uri_str: str) -> tuple[str, str]:
         )
     if uri_str.startswith("dartlab://skills/"):
         skill_id = uri_str.replace("dartlab://skills/", "", 1)
-        from dartlab.skill_os.registry import describeSkill
+        from dartlab.skills import describeSkill
 
         return (
             json.dumps(describeSkill(skill_id, includeUser=False), ensure_ascii=False, indent=2),
@@ -332,7 +332,7 @@ run_python으로 실행하고 ref 검증 후 답하게 하는 것이다.
 ## 경계
 - Company, gather, scan, macro, analysis, quant, viz는 generated MCP tool로 직접 우회하지 않는다.
   engine_call 또는 run_python 안에서 사용하는 DartLab 라이브러리다.
-- Skills는 MCP 전용 규칙이 아니라 dartlab.skill_os 공용 resolver를 그대로 노출한다.
+- Skills는 MCP 전용 규칙이 아니라 dartlab.skills 공용 runtime을 그대로 노출한다.
 - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다. 모든 절차는 Skill OS에서 찾는다.
 - companySections 같은 전체 sections 지도는 메모리 부담이 커서 기본 경로에서 쓰지 않는다.
 - 도구로 확인되지 않은 수치, 날짜, 실행 성공 여부를 단정하지 않는다.

@@ -7,7 +7,7 @@ from typing import Any
 
 _IS_PYODIDE = sys.platform == "emscripten"
 
-from dartlab import config, core, skill_os  # noqa: F401 — 공용 분석 절차 런타임
+from dartlab import config, core, skills  # noqa: F401 — 공용 분석 절차 런타임
 from dartlab.company import Company
 from dartlab.core.select import ChartResult, SelectResult
 
