@@ -455,7 +455,9 @@ def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefr
     - 그 외 → HF 다운로드 + ETag 기반 증분 갱신
     """
     if category == "edgar":
-        _ensureEdgarFinanceFromBulk(stockCode, path, refresh=shouldRefresh)
+        from dartlab.providers.edgar.bulk import ensureFinanceParquet
+
+        ensureFinanceParquet(stockCode, path, refresh=shouldRefresh)
         return
 
     if not path.exists():
@@ -487,36 +489,6 @@ def _downloadFromHf(stockCode: str, path: Path, category: str) -> None:
     size = path.stat().st_size
     sizeStr = f"{size / 1024:.0f}KB" if size < 1024 * 1024 else f"{size / 1024 / 1024:.1f}MB"
     emit("download:done_short", sizeStr=sizeStr)
-
-
-def _ensureEdgarFinanceFromBulk(stockCode: str, path: Path, *, refresh: bool = False) -> None:
-    """EDGAR finance {cik}.parquet 을 SEC 벌크에서 보장.
-
-    dartlab 은 ``companyfacts.zip`` (SEC daily, ~1.37GB) 을 사용자 PC 에 받아서
-    16,600+ CIK parquet 으로 일괄 변환한다. HF 미러링 없음 — SEC 가 원본.
-
-    정책:
-    - path 없으면: 벌크 다운로드 + 전체 변환 (최초 1회 5~15분)
-    - refresh=True + zip 갱신: 전체 재변환 (daily 갱신 반영)
-    - refresh=True + zip 미갱신: 아무것도 안 함 (낭비 방지)
-    """
-    from dartlab.providers.edgar.bulk import (
-        convertBulkToParquets,
-        downloadCompanyfactsBulk,
-    )
-
-    zipPath = downloadCompanyfactsBulk(force=False)  # ETag + TTL 기반 재사용
-    # convertBulkToParquets 자체가 zip mtime vs stamp 비교로 skip 가드.
-    # 최초 로드 (path 없음) 는 stamp 가드 우회하기 위해 force=True.
-    if not path.exists():
-        convertBulkToParquets(zipPath=zipPath, force=True)
-    elif refresh:
-        convertBulkToParquets(zipPath=zipPath)  # stamp 비교 → 필요시만 재변환
-    if not path.exists():
-        raise FileNotFoundError(
-            f"{stockCode} (CIK={path.stem}) EDGAR finance parquet 생성 실패 — "
-            f"companyfacts.zip 에 해당 CIK 없음 (상장 폐지/비공시 기업 가능성)."
-        )
 
 
 def _ensureEdgarDocs(

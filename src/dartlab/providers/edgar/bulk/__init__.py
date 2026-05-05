@@ -15,6 +15,7 @@ num.tsv는 받지 않는다 — companyfacts.zip이 같은 값의 더 신선한 
 from dartlab.providers.edgar.bulk.companyfactsBulk import (
     convertBulkToParquets,
     downloadCompanyfactsBulk,
+    ensureFinanceParquet,
     extractCompanyfactsZip,
 )
 from dartlab.providers.edgar.bulk.datasetBulk import (
@@ -41,6 +42,7 @@ __all__ = [
     "discoverLatestQuarter",
     "downloadCompanyfactsBulk",
     "downloadQuarterlyDataset",
+    "ensureFinanceParquet",
     "extractCompanyfactsZip",
     "inspectBulkFreshness",
     "invalidateBulkFreshness",
