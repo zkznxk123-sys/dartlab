@@ -18,7 +18,7 @@ class TestPluginMeta:
     """PluginMeta 유효성 검증."""
 
     def test_valid_meta(self):
-        from dartlab.core.plugins import PluginMeta
+        from dartlab.plugins import PluginMeta
 
         meta = PluginMeta(
             name="my-plugin",
@@ -31,7 +31,7 @@ class TestPluginMeta:
         assert meta.stability == "experimental"
 
     def test_invalid_name_uppercase(self):
-        from dartlab.core.plugins import PluginMeta
+        from dartlab.plugins import PluginMeta
 
         with pytest.raises(ValueError, match="규칙에 맞지 않습니다"):
             PluginMeta(
@@ -43,7 +43,7 @@ class TestPluginMeta:
             )
 
     def test_invalid_name_too_short(self):
-        from dartlab.core.plugins import PluginMeta
+        from dartlab.plugins import PluginMeta
 
         with pytest.raises(ValueError, match="규칙에 맞지 않습니다"):
             PluginMeta(
@@ -55,7 +55,7 @@ class TestPluginMeta:
             )
 
     def test_invalid_plugin_type(self):
-        from dartlab.core.plugins import PluginMeta
+        from dartlab.plugins import PluginMeta
 
         with pytest.raises(ValueError, match="plugin_type"):
             PluginMeta(
@@ -67,7 +67,7 @@ class TestPluginMeta:
             )
 
     def test_invalid_stability(self):
-        from dartlab.core.plugins import PluginMeta
+        from dartlab.plugins import PluginMeta
 
         with pytest.raises(ValueError, match="stability"):
             PluginMeta(
@@ -167,8 +167,8 @@ class TestPluginContext:
     """PluginContext를 통한 등록 검증."""
 
     def test_add_data_entry(self):
-        from dartlab.core.plugins import PluginContext, PluginMeta, reset_for_testing
         from dartlab.core.registry import DataEntry, getEntry, unregisterEntry
+        from dartlab.plugins import PluginContext, PluginMeta, reset_for_testing
 
         meta = PluginMeta(
             name="test-data-plugin",
@@ -195,7 +195,7 @@ class TestPluginContext:
 
     def test_add_tool(self):
         from dartlab.ai.tools import listToolNames, unregisterTool
-        from dartlab.core.plugins import PluginContext, PluginMeta, reset_for_testing
+        from dartlab.plugins import PluginContext, PluginMeta, reset_for_testing
 
         meta = PluginMeta(
             name="test-tool-plugin",
@@ -218,8 +218,8 @@ class TestPluginContext:
             reset_for_testing()
 
     def test_add_engine(self):
-        from dartlab.core.plugins import PluginContext, PluginMeta, reset_for_testing
         from dartlab.core.registry import getEntry, unregisterEntry
+        from dartlab.plugins import PluginContext, PluginMeta, reset_for_testing
 
         meta = PluginMeta(
             name="test-engine-plugin",
@@ -258,7 +258,7 @@ class TestDiscovery:
     """discover() 함수 동작 검증."""
 
     def test_discover_returns_list(self):
-        from dartlab.core.plugins import discover, reset_for_testing
+        from dartlab.plugins import discover, reset_for_testing
 
         reset_for_testing()
         result = discover()
@@ -267,7 +267,7 @@ class TestDiscovery:
         reset_for_testing()
 
     def test_discover_idempotent(self):
-        from dartlab.core.plugins import discover, reset_for_testing
+        from dartlab.plugins import discover, reset_for_testing
 
         reset_for_testing()
         r1 = discover()
@@ -276,7 +276,7 @@ class TestDiscovery:
         reset_for_testing()
 
     def test_plugin_tracking_no_duplicates(self):
-        from dartlab.core.plugins import PluginMeta, _track_plugin, get_loaded_plugins, reset_for_testing
+        from dartlab.plugins import PluginMeta, _track_plugin, get_loaded_plugins, reset_for_testing
 
         reset_for_testing()
         meta = PluginMeta(

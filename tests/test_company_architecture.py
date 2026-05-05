@@ -151,6 +151,8 @@ def test_core_does_not_own_retired_subpackages():
         "dartlab.core.integration",
         # guide 패키지 자체가 폐기됨 (Cut 2.5b)
         "dartlab.guide",
+        # plugins 는 plugin 개발자 entry-point — top-level dartlab.plugins 가 SSOT (Cut 4)
+        "dartlab.core.plugins",
     ]
     for py_file in (repo_root / "src").rglob("*.py"):
         if "__pycache__" in py_file.parts:

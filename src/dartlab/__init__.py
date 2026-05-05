@@ -736,7 +736,7 @@ def plugins():
         import dartlab
         dartlab.plugins()  # [PluginMeta(name="esg-scores", ...)]
     """
-    from dartlab.core.plugins import discover, get_loaded_plugins
+    from dartlab.plugins import discover, get_loaded_plugins
 
     discover()
     return get_loaded_plugins()
@@ -781,7 +781,7 @@ def reload_plugins():
         # 3. 즉시 사용
         dartlab.Company("005930").show("esgScore")
     """
-    from dartlab.core.plugins import rediscover
+    from dartlab.plugins import rediscover
 
     return rediscover()
 

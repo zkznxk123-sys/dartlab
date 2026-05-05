@@ -13,8 +13,8 @@
     dartlab.plugins()            # [PluginMeta(name="example-score", ...)]
 """
 
-from dartlab.core.plugins import PluginContext, PluginMeta
 from dartlab.core.registry import DataEntry
+from dartlab.plugins import PluginContext, PluginMeta
 
 _META = PluginMeta(
     name="example-score",

@@ -82,8 +82,6 @@ _FACADE_PATTERNS = {
 # ── 알려진 인프라 역방향 의존 (리팩토링에서 순차 해소) ──
 _KNOWN_VIOLATIONS = {
     # core/ → providers (L0→L1)
-    ("dartlab.core.plugins", "dartlab.providers"),
-    ("dartlab.core.plugins", "dartlab.ai"),
     ("dartlab.core.dataLoader", "dartlab.providers"),
     ("dartlab.core.resolve", "dartlab.gather"),
     ("dartlab.core", "dartlab.gather"),  # core/__init__ → listing

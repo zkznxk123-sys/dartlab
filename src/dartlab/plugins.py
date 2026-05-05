@@ -10,7 +10,7 @@ dartlab 시작 시 자동 발견되어 Company.show(), AI tool, Server API에서
     my_plugin = "dartlab_plugin_mine:register"
 
     # dartlab_plugin_mine/__init__.py
-    from dartlab.core.plugins import PluginContext, PluginMeta
+    from dartlab.plugins import PluginContext, PluginMeta
 
     def register(ctx: PluginContext) -> None:
         ctx.add_data_entry(DataEntry(...), meta=PluginMeta(...))

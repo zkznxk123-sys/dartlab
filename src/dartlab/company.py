@@ -24,7 +24,7 @@ def _discover() -> None:
     _PROVIDERS.extend([DartCompany, EdgarCompany])
 
     # entry_points 기반 외부 플러그인 (향후)
-    from dartlab.core.plugins import discover as _pluginDiscover
+    from dartlab.plugins import discover as _pluginDiscover
 
     _pluginDiscover()
 

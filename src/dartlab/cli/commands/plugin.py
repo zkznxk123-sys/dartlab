@@ -33,7 +33,7 @@ def run(args) -> int:
 
 
 def _list_plugins() -> int:
-    from dartlab.core.plugins import discover, get_loaded_plugins
+    from dartlab.plugins import discover, get_loaded_plugins
 
     discover()
     plugins = get_loaded_plugins()
