@@ -125,18 +125,6 @@ def quarterlyColsFromPeriods(
     return qs[:maxQuarters]
 
 
-def annualLabel(period: str) -> str:
-    """연간 기간 표시용 라벨. "2025Q4" -> "2025"."""
-    if period.endswith("Q4"):
-        return period[:-2]
-    return period
-
-
-def annualLabels(periods: list[str]) -> dict[str, str]:
-    """연간 기간 컬럼 → 표시 라벨 매핑."""
-    return {p: annualLabel(p) for p in periods}
-
-
 # ══════════════════════════════════════
 # SelectResult → dict 변환
 # ══════════════════════════════════════

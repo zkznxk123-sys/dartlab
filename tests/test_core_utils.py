@@ -9,8 +9,6 @@ import polars as pl
 from dartlab.core.select import SelectResult
 from dartlab.core.utils.helpers import (
     annualColsFromPeriods,
-    annualLabel,
-    annualLabels,
     mergeRows,
     parseNumStr,
     quarterlyColsFromPeriods,
@@ -131,26 +129,6 @@ class TestQuarterlyColsFromPeriods:
         periods = [f"2023Q{i}" for i in range(1, 5)] + [f"2024Q{i}" for i in range(1, 5)]
         result = quarterlyColsFromPeriods(periods, maxQuarters=3)
         assert len(result) == 3
-
-
-# ══════════════════════════════════════
-# annualLabel / annualLabels
-# ══════════════════════════════════════
-
-
-class TestAnnualLabel:
-    def test_q4_strip(self):
-        assert annualLabel("2025Q4") == "2025"
-
-    def test_year_passthrough(self):
-        assert annualLabel("2025") == "2025"
-
-    def test_non_q4_kept(self):
-        assert annualLabel("2025Q3") == "2025Q3"
-
-    def test_labels_dict(self):
-        result = annualLabels(["2023", "2024Q4"])
-        assert result == {"2023": "2023", "2024Q4": "2024"}
 
 
 # ══════════════════════════════════════

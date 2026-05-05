@@ -630,10 +630,3 @@ class TestHelpers:
         assert "2024" in cols
         assert "2023" in cols
         assert "foo" not in cols
-
-    def test_annualLabel(self):
-        from dartlab.core.utils.helpers import annualLabel
-
-        assert annualLabel("2025Q4") == "2025"
-        assert annualLabel("2025") == "2025"
-        assert annualLabel("2025Q3") == "2025Q3"
