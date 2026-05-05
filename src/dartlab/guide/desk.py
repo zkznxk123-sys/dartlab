@@ -7,10 +7,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.capability.registry import build_capability_summary
-from dartlab.capability.search import formatSearchResults, searchCapabilities
+from dartlab.core.capabilities import build_capability_summary
+from dartlab.core.credentials import CredentialManager, EnvironmentSnapshot
 from dartlab.core.messaging import suggest
-from dartlab.settings.credentials import CredentialManager, EnvironmentSnapshot
+from dartlab.core.search_capabilities import formatSearchResults, searchCapabilities
 
 
 class GuideDesk:

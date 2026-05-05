@@ -8,7 +8,7 @@ from .types import ToolResult
 
 
 def generatedSpecSearch(query: str, *, limit: int = 8) -> ToolResult:
-    from dartlab.capability.search import searchCapabilities
+    from dartlab.core.search_capabilities import searchCapabilities
 
     results = searchCapabilities(query or "", topK=max(1, int(limit or 8)), minScore=0.0)
     refs: list[Ref] = []
@@ -22,7 +22,7 @@ def generatedSpecSearch(query: str, *, limit: int = 8) -> ToolResult:
                 id=f"api:{api_ref}",
                 kind="apiRef",
                 title=api_ref,
-                source="dartlab.capability._generated.CAPABILITIES",
+                source="dartlab.core._generated.CAPABILITIES",
                 payload=payload,
             )
         )

@@ -103,6 +103,9 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
         "src/dartlab/audit",
         "src/dartlab/display",
         "src/dartlab/export",
+        # Cut 2.5a 환원 — capability/settings 는 core 로 흡수됐으므로 top-level 재출현 금지
+        "src/dartlab/capability",
+        "src/dartlab/settings",
     ]
     for rel in forbidden:
         assert not (repo_root / rel).exists(), f"retired root package still exists: {rel}"
@@ -111,11 +114,12 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
         "src/dartlab/skills",
         "src/dartlab/ai/tools",
         "src/dartlab/ai/workbench",
-        "src/dartlab/capability/search.py",
-        "src/dartlab/capability/registry.py",
-        "src/dartlab/capability/analysisGraph.py",
-        "src/dartlab/capability/_generated.py",
-        "src/dartlab/capability/_generated_analysis_graph.py",
+        "src/dartlab/core/capabilities.py",
+        "src/dartlab/core/search_capabilities.py",
+        "src/dartlab/core/analysisGraph.py",
+        "src/dartlab/core/_generated.py",
+        "src/dartlab/core/_generated_analysis_graph.py",
+        "src/dartlab/core/credentials.py",
         "src/dartlab/viz/display",
         "src/dartlab/viz/export",
     ]
@@ -123,38 +127,26 @@ def test_ai_owned_helpers_do_not_live_in_src_root():
         assert (repo_root / rel).exists(), f"canonical package missing: {rel}"
 
 
-def test_core_does_not_own_product_settings_or_guide_layers():
+def test_core_does_not_own_retired_subpackages():
+    """Core 정리 작업으로 폐기된 하위 디렉토리/모듈이 다시 생기지 않도록 차단.
+
+    architecture.md 의 L0 정의: 환경/자격증명·데이터 로더·교차 도메인 헬퍼·
+    가이드 안내·유틸·프로토콜은 OK. AI provider config (ai/settings),
+    도메인 분석 (finance), CLI 통합 wrapper 는 core 가 아니다.
+    """
     repo_root = Path(__file__).resolve().parents[1]
     forbidden_dirs = [
         "src/dartlab/core/ai",
         "src/dartlab/core/finance",
-        "src/dartlab/core/guide",
     ]
     for rel in forbidden_dirs:
         assert not (repo_root / rel).exists(), f"core must not own product layer: {rel}"
 
-    forbidden_files = [
-        "src/dartlab/core/capabilities.py",
-        "src/dartlab/core/search_capabilities.py",
-        "src/dartlab/core/analysisGraph.py",
-        "src/dartlab/core/_generated.py",
-        "src/dartlab/core/_generated_analysis_graph.py",
-    ]
-    for rel in forbidden_files:
-        assert not (repo_root / rel).exists(), f"core must not own capability artifact: {rel}"
-
     forbidden_imports = [
         "dartlab.core.ai",
         "dartlab.core.finance",
-        "dartlab.core.credentials",
-        "dartlab.core.hints",
-        "dartlab.core.desk",
-        "dartlab.core.guide",
+        # CLI 통합 wrapper 는 cli/services/errors 로 이관됨 (Cut 2.5b 후)
         "dartlab.core.integration",
-        "dartlab.core.capabilities",
-        "dartlab.core.search_capabilities",
-        "dartlab.core.analysisGraph",
-        "dartlab.core._generated",
     ]
     for py_file in (repo_root / "src").rglob("*.py"):
         if "__pycache__" in py_file.parts:

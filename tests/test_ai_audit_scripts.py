@@ -142,7 +142,7 @@ def test_generate_spec_parses_ai_contract_block():
 
 
 def test_analysis_graph_does_not_fallback_specific_gather_contract_to_any_gather():
-    from dartlab.capability.analysisGraph import contractForTool
+    from dartlab.core.analysisGraph import contractForTool
 
     contract = contractForTool(
         "gather",

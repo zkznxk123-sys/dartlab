@@ -91,7 +91,7 @@ def _api_ref(plan: dict[str, Any]) -> str:
 
 
 def _capability_exists(api_ref: str) -> bool:
-    from dartlab.capability._generated import CAPABILITIES
+    from dartlab.core._generated import CAPABILITIES
 
     return api_ref in CAPABILITIES
 
