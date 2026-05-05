@@ -33,9 +33,7 @@ MAPPINGS: list[tuple[str, str]] = [
 ]
 MAPPINGS.sort(key=lambda x: -len(x[0]))  # 긴 패턴 먼저
 
-ABBR_PATTERN = re.compile(
-    r"(?<![A-Za-z0-9])(" + "|".join(re.escape(a) for a, _ in MAPPINGS) + r")(?![A-Za-z0-9])"
-)
+ABBR_PATTERN = re.compile(r"(?<![A-Za-z0-9])(" + "|".join(re.escape(a) for a, _ in MAPPINGS) + r")(?![A-Za-z0-9])")
 ABBR_MAP = dict(MAPPINGS)
 
 
@@ -77,7 +75,9 @@ def processFile(path: Path) -> tuple[bool, dict[str, int]]:
     changed = result != text
     if changed:
         path.write_text(result, encoding="utf-8")
-    after = {abbr: len(re.findall(rf"(?<![A-Za-z0-9]){re.escape(abbr)}(?![A-Za-z0-9])", newBody)) for abbr, _ in MAPPINGS}
+    after = {
+        abbr: len(re.findall(rf"(?<![A-Za-z0-9]){re.escape(abbr)}(?![A-Za-z0-9])", newBody)) for abbr, _ in MAPPINGS
+    }
     diff = {a: before[a] - after[a] for a in before if before[a] != after[a]}
     return changed, diff
 

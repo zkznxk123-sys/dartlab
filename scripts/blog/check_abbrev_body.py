@@ -6,9 +6,7 @@ import re
 from pathlib import Path
 
 ABBR = ["OPM", "CAPEX", "OCF", "FCF", "ICR", "DOL", "ROIC", "ROE", "GPM", "CCC", "CAGR", "DSO", "DPS", "ROA", "LCOE"]
-PATTERN = re.compile(
-    r"(?<![A-Za-z0-9])(" + "|".join(re.escape(a) for a in ABBR) + r")(?![A-Za-z0-9])"
-)
+PATTERN = re.compile(r"(?<![A-Za-z0-9])(" + "|".join(re.escape(a) for a in ABBR) + r")(?![A-Za-z0-9])")
 
 
 def splitFrontmatter(text: str) -> tuple[str, str]:

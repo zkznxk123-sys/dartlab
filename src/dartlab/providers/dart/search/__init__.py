@@ -230,8 +230,8 @@ def fillContent(date: str | None = None, **kwargs):
 
 def stats() -> dict:
     """수집 + 인덱스 통합 통계."""
-    from dartlab.providers.dart.search.ngramIndex import ngramStats
     from dartlab.providers.dart.openapi.allFilingsCollector import stats as collectorStats
+    from dartlab.providers.dart.search.ngramIndex import ngramStats
 
     result = collectorStats()
     result["stemIndex"] = ngramStats()

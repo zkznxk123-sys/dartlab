@@ -41,8 +41,7 @@ POSTS: list[tuple[str, str, str]] = [
         "dartlab-easy-start",
         "A clean minimalist desk with a dark laptop screen showing a terminal window running Python commands, "
         "uv package manager installing a library with colorful progress bars, cozy home office, "
-        "warm ambient lamp light, cinematic shallow depth of field, photorealistic, "
-        + NO_TEXT,
+        "warm ambient lamp light, cinematic shallow depth of field, photorealistic, " + NO_TEXT,
     ),
     (
         "02",
@@ -50,56 +49,49 @@ POSTS: list[tuple[str, str, str]] = [
         "A wide shot of a modern editor window with VS Code style interface, sidebar panel open "
         "showing an extension, Korean financial data dashboard visible on the right half, "
         "dark IDE theme, syntax highlighted code lines, soft studio lighting, "
-        "photorealistic, cinematic, "
-        + NO_TEXT,
+        "photorealistic, cinematic, " + NO_TEXT,
     ),
     (
         "03",
         "scan-market-finance",
         "A wall of glowing screens showing dozens of financial market tickers and candlestick charts in a "
         "dark analytics room, Korean stock market style, blue and green numbers blinking, wide cinematic shot, "
-        "data wall aesthetic, photorealistic, "
-        + NO_TEXT,
+        "data wall aesthetic, photorealistic, " + NO_TEXT,
     ),
     (
         "04",
         "company-one-stock-code",
         "A single dark screen displaying one large 6-digit stock code in bold, surrounded by soft-focus company "
         "financial charts and data cards, spotlight on the code, moody blue tones, cinematic close-up, "
-        "photorealistic product shot, "
-        + NO_TEXT,
+        "photorealistic product shot, " + NO_TEXT,
     ),
     (
         "05",
         "search-without-embeddings",
         "A dark minimalist search bar floating over a cascading waterfall of Korean financial documents and "
         "filings pages, search results materializing instantly as tiny paper fragments, cyan accent glow, "
-        "cinematic wide shot, photorealistic, "
-        + NO_TEXT,
+        "cinematic wide shot, photorealistic, " + NO_TEXT,
     ),
     (
         "06",
         "magic-formula-korea",
         "A dark trading desk with a stack of ranked Korean stock cards glowing, a magnifying glass hovering "
         "over the top card, formulaic ranking visualization, gold and amber rim light, cinematic still life, "
-        "photorealistic, "
-        + NO_TEXT,
+        "photorealistic, " + NO_TEXT,
     ),
     (
         "07",
         "dataset-auto-sync",
         "A sleek laptop on a dark desk receiving streams of data packets from a cloud, cinematic data pipeline "
         "visualization, glowing network lines flowing into the screen, late-night developer workspace, "
-        "photorealistic, "
-        + NO_TEXT,
+        "photorealistic, " + NO_TEXT,
     ),
     (
         "08",
         "pyodide-dartlab-lite",
         "A Microsoft Excel web interface on a laptop screen with a Python sidebar panel open on the right, "
         "spreadsheet cells filled with glowing financial numbers, modern clean office desk, "
-        "Korean corporate context, cinematic wide product shot, photorealistic, "
-        + NO_TEXT,
+        "Korean corporate context, cinematic wide product shot, photorealistic, " + NO_TEXT,
     ),
 ]
 
