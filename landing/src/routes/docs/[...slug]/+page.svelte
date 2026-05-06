@@ -5,20 +5,6 @@
 
 	let { data } = $props();
 
-	const sampleCodes = [
-		'000270',
-		'000660',
-		'004020',
-		'005930',
-		'017670',
-		'034730',
-		'036570',
-		'042660',
-		'051910',
-		'055550',
-		'090430'
-	];
-
 	const redirectMap: Record<string, string> = {
 		'getting-started/installation': '/skills/start.installUv',
 		'getting-started/quickstart': '/skills/start.quickStart',
@@ -27,8 +13,7 @@
 		tutorials: '/skills/runtime.notebooks',
 		about: '/about',
 		stability: '/skills/operation.stability',
-		methodology: '/skills/operation.methodology',
-		...Object.fromEntries(sampleCodes.map((code) => [`samples/${code}`, `/samples/${code}`]))
+		methodology: '/skills/operation.methodology'
 	};
 
 	const target = $derived(redirectMap[data.slug] ?? '/skills');

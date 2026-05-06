@@ -6,7 +6,6 @@
 		'제품': [
 			{ label: '시작하기', href: `${base}/skills/start.installUv` },
 			{ label: 'Skills', href: `${base}/skills` },
-			{ label: 'Samples', href: `${base}/samples` },
 			{ label: '릴리즈', href: `${brand.repo}/releases` },
 			{ label: 'PyPI', href: brand.pypi }
 		],

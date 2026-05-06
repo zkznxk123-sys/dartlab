@@ -178,7 +178,7 @@ const fullContent = fullParts.join('\n\n---\n\n') + '\n';
 writeFileSync(resolve(buildDir, 'llms-full.txt'), fullContent, 'utf-8');
 console.log(`  -> llms-full.txt generated (${Math.round(fullParts.join('').length / 1024)}KB)`);
 
-// sitemap.xml — auto-generate with blog + skills + samples
+// sitemap.xml — auto-generate with blog + skills
 function extractFrontmatter(content) {
 	const fm = content.match(/^---\s*\n([\s\S]*?)\n---/);
 	if (!fm) return {};
@@ -226,7 +226,6 @@ let sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www
 sitemap += `  <url>\n    <loc>${siteUrl}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
 sitemap += `  <url>\n    <loc>${siteUrl}/blog/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
 sitemap += `  <url>\n    <loc>${siteUrl}/skills</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.85</priority>\n  </url>\n`;
-sitemap += `  <url>\n    <loc>${siteUrl}/samples</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.75</priority>\n  </url>\n`;
 for (const skill of skillEntries) {
 	sitemap += `  <url>\n    <loc>${siteUrl}/skills/${skill.id}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
 }
@@ -245,22 +244,11 @@ for (const p of blogPosts) {
 	sitemap += `  </url>\n`;
 }
 
-// Samples — 정식 라우트 승격 후 sitemap 항목.
-const samplesRoot = resolve(projectRoot, 'samples');
-const sampleCodes = existsSync(samplesRoot)
-	? readdirSync(samplesRoot)
-			.filter((name) => /^\d{6}\.md$/.test(name))
-			.map((name) => name.replace(/\.md$/, ''))
-			.sort()
-	: [];
-for (const code of sampleCodes) {
-	sitemap += `  <url>\n    <loc>${siteUrl}/samples/${code}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.65</priority>\n  </url>\n`;
-}
 sitemap += `</urlset>\n`;
 
 writeFileSync(resolve(buildDir, 'sitemap.xml'), sitemap, 'utf-8');
 writeFileSync(resolve(__dirname, '..', 'static', 'sitemap.xml'), sitemap, 'utf-8');
-console.log(`  -> sitemap.xml generated (${blogPosts.length} blog posts + ${skillEntries.length} skills + ${sampleCodes.length} samples)`);
+console.log(`  -> sitemap.xml generated (${blogPosts.length} blog posts + ${skillEntries.length} skills)`);
 
 // RSS feed (Atom)
 const feedUpdated = blogPosts.length > 0 ? blogPosts[0].date || new Date().toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);

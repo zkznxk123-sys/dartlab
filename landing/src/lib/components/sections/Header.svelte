@@ -23,7 +23,6 @@
 	const navLinks = [
 		{ label: 'Skills', href: `${base}/skills` },
 		{ label: 'Blog', href: `${base}/blog/` },
-		{ label: 'Samples', href: `${base}/samples` },
 		{ label: 'Scan', href: `${base}/scan` },
 		{ label: 'Map', href: `${base}/map` }
 	];

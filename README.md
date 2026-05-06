@@ -293,8 +293,6 @@ dartlab.ask()            # 보고서 + AI 종합의견
 
 > 삼성전자 보고서 미리보기: *"매출 +23.8% 성장, 영업이익률 8.6%→21.4% 반등. FCF 양수 전환, ROIC > WACC — 재투자가 가치를 창출하는 구간."*
 
-**샘플 보고서:** [삼성전자](https://eddmpython.github.io/dartlab/samples/005930) · [SK하이닉스](https://eddmpython.github.io/dartlab/samples/000660) · [기아](https://eddmpython.github.io/dartlab/samples/000270) · [한화오션](https://eddmpython.github.io/dartlab/samples/042660) · [SK텔레콤](https://eddmpython.github.io/dartlab/samples/017670) · [LG화학](https://eddmpython.github.io/dartlab/samples/051910) · [엔씨소프트](https://eddmpython.github.io/dartlab/samples/036570) · [아모레퍼시픽](https://eddmpython.github.io/dartlab/samples/090430)
-
 ### 이야기꾼 — 숫자가 아니라 이야기다
 
 > 설계: [engines.story](/skills) · 시리즈: [기업이야기](https://eddmpython.github.io/dartlab/blog/series/company-reports)
@@ -678,7 +676,7 @@ e.filings("AAPL", forms=["10-K", "10-Q"])
 
 ## 문서
 
-[문서](https://eddmpython.github.io/dartlab/) · [빠른 시작](https://eddmpython.github.io/dartlab/skills/start.quickStart) · [Skills](https://eddmpython.github.io/dartlab/skills) · [Samples](https://eddmpython.github.io/dartlab/samples)
+[문서](https://eddmpython.github.io/dartlab/) · [빠른 시작](https://eddmpython.github.io/dartlab/skills/start.quickStart) · [Skills](https://eddmpython.github.io/dartlab/skills)
 
 **블로그 (120+ 글):** [전체](https://eddmpython.github.io/dartlab/blog/) · [기업이야기](https://eddmpython.github.io/dartlab/blog/series/company-reports) · [신용평가 보고서](https://eddmpython.github.io/dartlab/blog/credit-reports) · [매크로 보고서](https://eddmpython.github.io/dartlab/blog/macro-reports)
 
