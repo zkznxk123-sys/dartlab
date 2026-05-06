@@ -109,7 +109,8 @@ const config = {
 		},
 		alias: {
 			$pyodide: '../pyodide',
-			$chart: '../ui/shared/chart'
+			$chart: '../ui/shared/chart',
+			$skills: '../src/dartlab/skills'
 		}
 	}
 };

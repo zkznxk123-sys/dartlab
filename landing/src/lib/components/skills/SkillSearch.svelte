@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { dev } from '$app/environment';
+	import { base } from '$app/paths';
 	import { BookOpen, CheckCircle2, Search, SlidersHorizontal } from 'lucide-svelte';
-	import { onMount } from 'svelte';
+	import skillIndex from '$skills/index.json';
 
 	interface RuntimeEntry {
 		status?: string;
@@ -42,18 +42,17 @@
 		skillCount?: number;
 	}
 
-	let skills = $state<SkillDoc[]>([]);
-	let meta = $state<SkillIndexMeta>({});
+	const initialSkills = (skillIndex as { skills?: SkillDoc[] }).skills ?? [];
+	const initialMeta = (skillIndex as { meta?: SkillIndexMeta }).meta ?? {};
+
+	let skills = $state<SkillDoc[]>(initialSkills);
+	let meta = $state<SkillIndexMeta>(initialMeta);
 	let query = $state('');
 	let activeCategory = $state('all');
 	let activeRuntime = $state('all');
 	let selectedSkill = $state<SkillDoc | null>(null);
-	let loadError = $state('');
 
 	const categoryOrder = ['start', 'runtime', 'operation', 'engines', 'screens', 'finance', 'visuals', 'basic'];
-	const skillIndexUrl = dev
-		? '/__dartlab_skills/index.json'
-		: 'https://raw.githubusercontent.com/eddmpython/dartlab/master/skills/index.json';
 	const runtimeOptions = [
 		{ id: 'all', label: 'All runtimes' },
 		{ id: 'pyodide', label: 'Pyodide' },
@@ -117,17 +116,9 @@
 		}
 	});
 
-	onMount(async () => {
-		try {
-			const response = await fetch(skillIndexUrl);
-			if (!response.ok) throw new Error(`HTTP ${response.status}`);
-			const payload = await response.json();
-			meta = payload.meta ?? {};
-			skills = Array.isArray(payload.skills) ? payload.skills : [];
-		} catch (error) {
-			loadError = error instanceof Error ? error.message : 'unknown error';
-		}
-	});
+	function skillUrl(id: string) {
+		return `${base}/skills/${id}`;
+	}
 
 	function scoreSkill(skill: SkillDoc, tokens: string[]) {
 		if (tokens.length === 0) return categoryOrder.length - Math.max(categoryOrder.indexOf(skill.category), 0);
@@ -235,9 +226,7 @@
 		{/each}
 	</div>
 
-	{#if loadError}
-		<p class="empty">Skill index를 불러오지 못했다: {loadError}</p>
-	{:else if filtered.length === 0}
+	{#if filtered.length === 0}
 		<p class="empty">검색 결과가 없다. 더 넓은 목적어나 분석 주제로 다시 검색한다.</p>
 	{:else}
 		<div class="skill-reader">
@@ -270,6 +259,7 @@
 						<div>
 							<span class="detail-kicker">{selectedSkill.categoryTitle ?? selectedSkill.category}</span>
 							<h3>{selectedSkill.title}</h3>
+							<a class="detail-link" href={skillUrl(selectedSkill.id)}>전용 페이지 →</a>
 						</div>
 						<span class="detail-status">{selectedSkill.status}</span>
 					</div>
@@ -643,6 +633,19 @@
 
 	.detail-head > div {
 		min-width: 0;
+	}
+
+	.detail-link {
+		display: inline-block;
+		margin-top: 0.35rem;
+		color: #fb923c;
+		font-size: 0.78rem;
+		text-decoration: none;
+		font-family: 'JetBrains Mono', monospace;
+	}
+
+	.detail-link:hover {
+		text-decoration: underline;
 	}
 
 	.detail-kicker,
