@@ -25,7 +25,7 @@ ToolFn = Callable[..., ToolResult]
 _SPECS: dict[str, ToolSpec] = {
     "read": ToolSpec(
         "read",
-        "repo, Skill OS resource, allowed local text file을 읽고 docRef를 만든다.",
+        "repo, Skill OS resource, allowed local text file을 읽고 docRef를 만든다. 쓸 때: 특정 file/skill 본문 정확히 읽기. 안 쓸 때: 검색은 read_skill/read_capability.",
         {
             "type": "object",
             "properties": {
@@ -38,7 +38,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "write": ToolSpec(
         "write",
-        "artifact/scratchpad-adjacent output을 안전한 사용자 홈 경로에 저장하고 artifactRef를 만든다.",
+        "artifact/scratchpad-adjacent output을 안전한 사용자 홈 경로에 저장하고 artifactRef를 만든다. 쓸 때: 큰 결과를 파일로 보존. 안 쓸 때: 답변 본문 (chunk 로 자동 발행).",
         {
             "type": "object",
             "properties": {"name": {"type": "string"}, "content": {"type": "string"}, "kind": {"type": "string"}},
@@ -47,7 +47,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "web_search": ToolSpec(
         "web_search",
-        "외부 최신 정보가 필요할 때 웹 검색을 실행하고 webRef를 만든다.",
+        "외부 최신 정보가 필요할 때 웹 검색을 실행하고 webRef를 만든다. 쓸 때: 외부 최신 (오늘 종가, 신규 공시, 컨센서스). 안 쓸 때: dartlab 내부 데이터 (engine_call/run_python).",
         {
             "type": "object",
             "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}},
@@ -78,12 +78,12 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "engine_call": ToolSpec(
         "engine_call",
-        "generated spec 기반 call plan을 검증한 뒤 DartLab 공개 API를 호출하고 refs를 만든다.",
+        "generated spec 기반 call plan을 검증한 뒤 DartLab 공개 API를 호출하고 refs를 만든다. 쓸 때: 단일 capability 1 회 호출 (Company.show, dartlab.scan). 안 쓸 때: 다단 계산·랭킹·dataframe 가공 (run_python).",
         {"type": "object", "properties": {"plan": {"type": "object"}}, "required": ["plan"]},
     ),
     "run_python": ToolSpec(
         "run_python",
-        "DartLab library와 Polars를 조합해 계산/랭킹/표 생성 코드를 실행한다.",
+        "DartLab library와 Polars를 조합해 계산/랭킹/표 생성 코드를 실행한다. 쓸 때: 다단 계산, 비교, 랭킹, dataframe 가공. 안 쓸 때: 단일 API 1 회 (engine_call). emit_result() 필수 — print 만 하면 GATE 차단.",
         {
             "type": "object",
             "properties": {"code": {"type": "string"}, "runId": {"type": "string"}},
@@ -92,7 +92,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "verify_answer": ToolSpec(
         "verify_answer",
-        "최종 답변의 숫자/날짜/랭킹 claim이 refs로 뒷받침되는지 검증한다.",
+        "최종 답변의 숫자/날짜/랭킹 claim이 refs로 뒷받침되는지 검증한다. 쓸 때: GATE 통합 호환 wrapper (자동 호출). 안 쓸 때: LLM 직접 호출 (GATE 가 자동).",
         {
             "type": "object",
             "properties": {"answer": {"type": "string"}, "refs": {"type": "array"}},
@@ -102,7 +102,7 @@ _SPECS: dict[str, ToolSpec] = {
     # P1: SSOT v2 — 6 종 화이트리스트
     "read_skill": ToolSpec(
         "read_skill",
-        "Skill OS에서 분석 절차 spec(frontmatter+본문)을 검색해 반환한다.",
+        "Skill OS에서 분석 절차 spec(frontmatter+본문)을 검색해 반환한다. 쓸 때: skill 검색·본문 읽기. recipe 발동 후 그 절차 단계 따르기. 안 쓸 때: capability docstring 검색 (read_capability).",
         {
             "type": "object",
             "properties": {
@@ -115,7 +115,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "read_capability": ToolSpec(
         "read_capability",
-        "DartLab 공개 API/docstring catalog에서 호출 가능한 capability를 검색한다.",
+        "DartLab 공개 API/docstring catalog에서 호출 가능한 capability를 검색한다. 쓸 때: capability 검색·docstring·OutputSchema·AntiPatterns 확인. 안 쓸 때: skill 절차 (read_skill).",
         {
             "type": "object",
             "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}},
@@ -124,7 +124,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "save_artifact": ToolSpec(
         "save_artifact",
-        "산출물(표/차트/긴 텍스트)을 사용자 홈 안전 경로에 저장하고 artifactRef를 만든다.",
+        "산출물(표/차트/긴 텍스트)을 사용자 홈 안전 경로에 저장하고 artifactRef를 만든다. 쓸 때: 큰 표 (>50 rows), 차트, 긴 텍스트. 안 쓸 때: 짧은 답변 본문.",
         {
             "type": "object",
             "properties": {
@@ -137,7 +137,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "propose_skill": ToolSpec(
         "propose_skill",
-        "HARVEST가 발견한 새 분석 절차를 skill spec(kind: generated, status: unverified)으로 작성한다.",
+        "HARVEST가 발견한 새 분석 절차를 skill spec(kind: generated, status: unverified)으로 작성한다. 쓸 때: HARVEST 단계 trace 기반 신규 후보. 안 쓸 때: WORK·COMPOSE 도중 (운영자 수동 작성 영역).",
         {
             "type": "object",
             "properties": {
@@ -159,7 +159,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "inspect_dataset": ToolSpec(
         "inspect_dataset",
-        "dataset 의 schema, 행 수, 최신 관측, 샘플을 빠르게 확인해 datasetRef 를 만든다. WORK 에서 run_python 코드를 짜기 전 schema 확인용.",
+        "dataset 의 schema, 행 수, 최신 관측, 샘플을 빠르게 확인해 datasetRef 를 만든다. WORK 에서 run_python 코드를 짜기 전 schema 확인용. 쓸 때: 처음 보는 dataset 의 컬럼·dtype·최신 시점 확인. 안 쓸 때: 한 번 본 dataset 의 다른 슬라이스 (run_python 안에서 직접).",
         {
             "type": "object",
             "properties": {

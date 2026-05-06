@@ -210,6 +210,9 @@ def buildContextSummary(state: WorkbenchState) -> str:
         parts.append("후보 API: " + ", ".join(r.id for r in state.apiRefs[:8]))
     if state.requiredEvidence:
         parts.append("requiredEvidence: " + ", ".join(state.requiredEvidence))
+    recipe_lines = _formatRecipeSteps(state.selectedSkillRefs)
+    if recipe_lines:
+        parts.append("선택 recipe 의 단계 (순차 실행):\n" + recipe_lines)
     if state.refs:
         parts.append(f"누적 ref: {len(state.refs)}개")
         sample = [f"{r.kind}:{r.id}" for r in state.refs[-10:]]
@@ -217,3 +220,33 @@ def buildContextSummary(state: WorkbenchState) -> str:
     if state.critiques:
         parts.append("CRITIQUE 이슈: " + "; ".join(c.get("text", "") for c in state.critiques[:5]))
     return "\n".join(parts)
+
+
+def _formatRecipeSteps(refs: list[Ref]) -> str:
+    """selectedSkillRefs 중 recipe ref 의 step list 직렬화.
+
+    형식: "1. {skillId} — {note}\\n2. ...". step 당 60 char truncate, max 8 step.
+    """
+    for ref in refs:
+        payload = ref.payload if isinstance(ref.payload, dict) else {}
+        if payload.get("kind") != "recipe" and not payload.get("recipeSteps"):
+            continue
+        steps = payload.get("recipeSteps") or []
+        if not steps:
+            from dartlab.skills.registry import _steps_from_recipe_body
+
+            steps = _steps_from_recipe_body(str(payload.get("body") or ""))
+        if not steps:
+            steps = [{"skillId": sid, "note": ""} for sid in payload.get("linkedSkills") or []]
+        if not steps:
+            continue
+        lines: list[str] = []
+        for index, step in enumerate(steps[:8], start=1):
+            skill_id = str(step.get("skillId") or "")
+            note = str(step.get("note") or "")
+            entry = f"{index}. {skill_id}"
+            if note:
+                entry += f" — {note[:60]}"
+            lines.append(entry)
+        return "\n".join(lines)
+    return ""

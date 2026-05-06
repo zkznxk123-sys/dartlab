@@ -127,8 +127,9 @@ class WorkbenchLoop:
         yield TraceEvent("graph_node", {"node": "gate", "status": "running"})
         yield from runGate(state)
 
-        # GATE 차단 시 WORK 1 회 회귀 — 이후 다시 COMPOSE/GATE.
-        if state.gateBlocked and state.iteration < 1:
+        # GATE 차단 시 WORK 회귀. recipe 활성이면 최대 3 회, 아니면 1 회.
+        max_iter = 3 if _hasRecipe(state) else 1
+        while state.gateBlocked and state.iteration < max_iter:
             state.iteration += 1
             yield TraceEvent("graph_node", {"node": "work", "status": "running", "round": state.iteration})
             yield from runWork(state, provider)
@@ -415,6 +416,10 @@ def _inferShowTopic(question: str) -> str:
 
 
 def _planEvidence(state: WorkbenchState) -> list[dict[str, Any]]:
+    recipe_plans = _expandRecipe(state)
+    if recipe_plans:
+        return recipe_plans
+
     candidates = _candidateApiRefs(state)
     targets = list(state.profile.get("targets") or [])
     plans: list[dict[str, Any]] = []
@@ -737,6 +742,89 @@ def _resolveProvider(config: Any = None) -> Any:
         return create_provider(config)
     except Exception:  # noqa: BLE001
         return None
+
+
+def _hasRecipe(state: WorkbenchState) -> bool:
+    """state.selectedSkillRefs 안에 kind=='recipe' 또는 recipeSteps 가 있는지."""
+    for ref in state.selectedSkillRefs:
+        payload = ref.payload if isinstance(ref.payload, dict) else {}
+        if payload.get("kind") == "recipe":
+            return True
+        if payload.get("recipeSteps"):
+            return True
+    return False
+
+
+def _recipeRefForState(state: WorkbenchState) -> Ref | None:
+    """state.selectedSkillRefs 중 첫 recipe ref 반환."""
+    for ref in state.selectedSkillRefs:
+        payload = ref.payload if isinstance(ref.payload, dict) else {}
+        if payload.get("kind") == "recipe" or payload.get("recipeSteps"):
+            return ref
+    return None
+
+
+def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
+    """recipe ref 의 step list 를 plan list 로 전개.
+
+    각 step 의 skillId 에 대해 Skill OS 에서 spec 을 찾고, 그 capabilityRefs 로
+    engine_call plan 을 생성한다. 무한재귀 방지: state.profile 에 expandedOnce flag.
+    """
+    if state.profile.get("_recipeExpanded"):
+        return []
+    recipe_ref = _recipeRefForState(state)
+    if recipe_ref is None:
+        return []
+    state.profile["_recipeExpanded"] = True
+
+    payload = recipe_ref.payload if isinstance(recipe_ref.payload, dict) else {}
+    steps = payload.get("recipeSteps") or []
+    if not steps:
+        # body 에서 직접 추출 fallback
+        from dartlab.skills.registry import _steps_from_recipe_body
+
+        steps = _steps_from_recipe_body(str(payload.get("body") or ""))
+    if not steps:
+        # linkedSkills 만 있고 body step 없으면 단순 전개
+        steps = [{"skillId": sid, "note": ""} for sid in payload.get("linkedSkills") or []]
+    if not steps:
+        return []
+
+    targets = list(state.profile.get("targets") or [])
+    plans: list[dict[str, Any]] = []
+    try:
+        from dartlab.skills.registry import getSkill
+    except Exception:  # noqa: BLE001
+        return []
+
+    for step in steps[:8]:  # max 8 step (token cost guard)
+        skill_id = str(step.get("skillId") or "")
+        if not skill_id:
+            continue
+        try:
+            spec = getSkill(skill_id, includeUser=False)
+        except Exception:  # noqa: BLE001
+            continue
+        capability_refs = [ref for ref in (spec.capabilityRefs or []) if _isExecutableApiRef(str(ref))]
+        if not capability_refs:
+            continue
+        api_ref = capability_refs[0]
+        for target in targets[:2] if targets else [None]:
+            plan = {
+                "tool": "engine_call",
+                "args": {
+                    "plan": {
+                        "apiRef": api_ref,
+                        "target": target,
+                        "question": state.question,
+                        "_recipeStep": skill_id,
+                    }
+                },
+            }
+            if not target:
+                plan["args"]["plan"].pop("target", None)
+            plans.append(plan)
+    return plans
 
 
 def _isLLMProvider(obj: Any) -> bool:
