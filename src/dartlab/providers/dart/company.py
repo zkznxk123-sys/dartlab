@@ -659,6 +659,18 @@ class Company:
 
         Requires:
             데이터: docs (자동 다운로드)
+
+        LLM Specifications:
+            AntiPatterns:
+                - 실시간 공시 확인용으로 사용 (filings 는 local cache — 실시간은 disclosure/liveFilings)
+                - readFiling 호출 전 filings 결과의 컬럼명 추측 (rceptNo 사용)
+            OutputSchema:
+                - rceptNo : str — 공시 접수번호 (readFiling 입력용)
+                - filedAt : str — 공시 일자
+                - title : str — 공시 제목
+                - viewerUrl : str — DART 뷰어 링크
+            Freshness:
+                local cache 기반. c.update() 호출 시점이 기준.
         """
         from dartlab.providers.dart._filings import buildFilings
 
@@ -690,6 +702,17 @@ class Company:
 
         Requires:
             API 키: DART_API_KEY
+
+        LLM Specifications:
+            AntiPatterns:
+                - 분석 전 무조건 update() 호출 (이미 최신이면 불필요한 비용)
+                - categories 에 "all" 같은 값 (None 또는 list[str] 만)
+            OutputSchema:
+                - finance : int — 추가 수집된 finance 건수
+                - docs : int — 추가 수집된 docs 건수
+                - report : int — 추가 수집된 report 건수
+            Freshness:
+                호출 시점에 DART API 와 비교해 누락만 수집. 매 호출 시점 = 최신 기준.
         """
         from dartlab.providers.dart._filings import buildUpdate
 
@@ -765,6 +788,18 @@ class Company:
             - liveFilings: 실시간 최신 공시 (정규화된 포맷, 단일 종목)
             - readFiling: 공시 원문 텍스트 읽기
             - filings: 로컬 보유 공시 목록 (단일 종목)
+
+        LLM Specifications:
+            AntiPatterns:
+                - 전종목 disclosure() (단일 종목 전용 — 전종목은 dartlab.search())
+                - days 와 start/end 동시 (start/end 우선)
+            OutputSchema:
+                - rceptNo : str — 공시 접수번호 (readFiling 입력용)
+                - filedAt : str — 공시 일자 (YYYY-MM-DD)
+                - title : str — 공시 제목
+                - formType : str — 공시 유형 (정기/주요사항/지분 등)
+            Freshness:
+                DART API 실시간 (분 단위). filings() 와 다름 (filings 는 local cache).
         """
         from dartlab.providers.dart._filings import buildDisclosure
 
@@ -879,6 +914,18 @@ class Company:
         SeeAlso:
             - liveFilings: 최신 공시 목록에서 접수번호 확인
             - disclosure: 과거 공시 목록에서 접수번호 확인
+
+        LLM Specifications:
+            AntiPatterns:
+                - 종목 이름 (str) 을 filing 인자로 전달 (rceptNo 또는 row 만)
+                - sections=True + maxChars 동시 (sections 일 때 maxChars 무시)
+            OutputSchema:
+                - rceptNo : str — 공시 접수번호
+                - viewerUrl : str — DART 뷰어 링크
+                - text : str — 공시 본문 (sections=False)
+                - sections : list[dict] — 섹션 목록 (sections=True)
+            Freshness:
+                DART API 실시간. 단 본문 캐시 없음 — 매 호출 = 새 download.
         """
         from dartlab.providers.dart._filings import buildReadFiling
 
@@ -1250,6 +1297,18 @@ class Company:
 
             c = Company("005930")
             c.sections  # 전체 sections 지도
+
+        LLM Specifications:
+            AntiPatterns:
+                - 단일 topic 만 필요한데 sections 호출 (메모리 폭주 — show(topic) 사용)
+                - sections 결과를 캐시 안 하고 반복 호출 (re-build 비용 큼)
+            OutputSchema:
+                - chapter : str — 장 이름
+                - topic : str — topic 식별자
+                - period : str — 기간
+                - source : str — docs / finance / report
+            Freshness:
+                docs/finance/report 3 source 각각의 최신 시점. c.update() 시점.
         """
         from dartlab.providers.dart._sectionsBuilder import buildSections
 
@@ -1461,6 +1520,19 @@ class Company:
             c.show("IS", period="2023")               # 2023년 필터
             c.show("dividend")                        # 배당
             c.show("majorHolder")                     # 주요주주/최대주주
+
+        LLM Specifications:
+            AntiPatterns:
+                - 분기 컬럼명을 "Q4_2025" 로 추측 (실제는 "2025Q4")
+                - freq="M" 같은 미지원 값 (Q/Y/YTD 만)
+                - finance topic 에 raw=True 후 비율 계산 (정제 단계 누락)
+            OutputSchema:
+                - snakeId : str — 영문 snake_case 계정 식별자 (finance 한정)
+                - 항목 : str — 한글 계정명
+                - 2025Q4, 2025Q3, ... : float — 분기 값 (원 단위, freq="Q" 기본)
+                - 2025, 2024, ... : float — 연간 합산 (원 단위, freq="Y")
+            Freshness:
+                분기 마감 후 45일 (DART 공시 마감일). c.update() 로 증분 갱신.
         """
         from dartlab.providers.dart._showDispatch import showImpl
 
@@ -2168,6 +2240,20 @@ class Company:
             - story: 14축 분석을 14개 섹션 보고서로 조합
             - insights: 7영역 등급 요약 (analysis보다 요약적)
             - ratios: 재무비율 시계열 (analysis의 입력 데이터)
+
+        LLM Specifications:
+            AntiPatterns:
+                - axis 만 주고 sub 없이 호출 (그룹 가이드만 반환, 실제 분석 X)
+                - 그룹명 ("financial") 을 axis 로, 축명 ("수익성") 을 sub 로 — 순서 헷갈림
+                - sub 에 영문 ("profitability") 사용 (실제는 한글)
+            OutputSchema:
+                - history : list[dict] — 시계열 (period + 지표들)
+                - displayHints : dict — core 컬럼 목록
+                - turningPoints : list — 전환점
+                - dataAsOf : dict — latestPeriod, retrievedAt
+                - assumptions : dict — 엔진 가정 (overrides 재호출용)
+            Freshness:
+                finance 데이터 기준 — 분기 마감 후 45일.
         """
         from dartlab.analysis.financial import Analysis
 
@@ -2296,6 +2382,19 @@ class Company:
         SeeAlso:
             - story("신용평가"): 보고서 형식으로 렌더링
             - analysis("financial", "신용평가"): analysis 축으로 접근
+
+        LLM Specifications:
+            AntiPatterns:
+                - axis 와 detail=True 동시 (개별 축에 detail 효과 없음)
+                - overrides 키 추측 (validateOverrides 가 검증, 미지원 키는 차단)
+            OutputSchema:
+                - grade : str — dCR 등급 (예: dCR-AA, dCR-BBB)
+                - score : float — 종합 점수 (0~10)
+                - healthScore : float — 재무 건전성 점수
+                - axes : dict — 7축 위험 점수 (axis 미지정 시)
+                - outlook : str — 등급 전망
+            Freshness:
+                finance 데이터 기준 — 분기 마감 후 45일.
         """
         from dartlab.core.overrides import validateOverrides
         from dartlab.credit import creditCompany
@@ -2386,6 +2485,19 @@ class Company:
         SeeAlso:
             - news: 뉴스 전용 단축 메서드
             - ask: gather 데이터를 컨텍스트로 활용한 AI 분석
+
+        LLM Specifications:
+            AntiPatterns:
+                - axis="all" 같은 미지원 값 (price/flow/macro/news/sector/insider/peers/ownership 만)
+                - flow 를 EDGAR ticker (US) 에 호출 (KR 전용)
+                - news 의 target 비워두고 종목 무관 결과 기대 (종목 fallback 발생)
+            OutputSchema:
+                - price: date / open / high / low / close / volume (원, 정수)
+                - flow: date / 외국인순매수 / 기관순매수 (KR 전용, 정수)
+                - macro: date / 지표별 컬럼 (float)
+                - news: title / link / pubDate (string)
+            Freshness:
+                price/flow: T+1 (전일 종가). macro: ECOS/FRED 갱신 주기. news: 실시간 RSS.
         """
         from dartlab.gather.entry import GatherEntry
 
@@ -3425,6 +3537,18 @@ class Company:
             How: axis 로 분석 영역 지정. 무인자 = 가이드.
             Verified:
                 - quant("판단") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+
+        LLM Specifications:
+            AntiPatterns:
+                - 영문 axis ("momentum") 사용 (실제는 한글 "모멘텀")
+                - metric= 인자 사용 (Phase 8 deprecated alias — axis= 사용)
+                - overrides 키 추측 (window/threshold/period/benchmark 만)
+            OutputSchema:
+                - axis="판단": dict — verdict (str) + RSI/ADX/SMA/MACD 등 핵심 지표
+                - axis="지표": DataFrame — 45 개 기술 지표 컬럼
+                - axis="베타": dict — beta 값 + benchmark + window
+            Freshness:
+                price 데이터 기준 — T+1 (전일 종가).
         """
         from dartlab.core.overrides import validateOverrides
         from dartlab.quant import Quant

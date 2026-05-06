@@ -153,6 +153,21 @@ ANALYSIS_GRAPH: dict = json.loads(
                 ]
             },
             "kind": "property",
+            "llmSpecs": {
+                "antiPatterns": [
+                    "axis 만 주고 sub 없이 호출 (그룹 가이드만 반환, 실제 분석 X)",
+                    "그룹명 (\"financial\") 을 axis 로, 축명 (\"수익성\") 을 sub 로 — 순서 헷갈림",
+                    "sub 에 영문 (\"profitability\") 사용 (실제는 한글)"
+                ],
+                "freshness": "finance 데이터 기준 — 분기 마감 후 45일.",
+                "outputSchema": [
+                    "history : list[dict] — 시계열 (period + 지표들)",
+                    "displayHints : dict — core 컬럼 목록",
+                    "turningPoints : list — 전환점",
+                    "dataAsOf : dict — latestPeriod, retrievedAt",
+                    "assumptions : dict — 엔진 가정 (overrides 재호출용)"
+                ]
+            },
             "priority": 90,
             "questionTypes": [
                 "company_compare",
@@ -2822,7 +2837,7 @@ ANALYSIS_GRAPH: dict = json.loads(
             }
         }
     ],
-    "sourceHash": "fefb8d52339c8141"
+    "sourceHash": "950469bb7263c0dc"
 }
 """
 )

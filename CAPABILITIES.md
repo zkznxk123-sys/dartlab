@@ -204,22 +204,16 @@ story credit 타입이 credit + analysis(안정성) + analysis(현금흐름) + a
 Verified:
 credit 단독 → dCR 등급 + 7축 위험점수 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
 credit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
-
-See Also
-analysis : 재무 심층 분석 — 안정성·현금흐름 축이 credit 과 상호 보완.
+**SeeAlso:** analysis : 재무 심층 분석 — 안정성·현금흐름 축이 credit 과 상호 보완.
 scan : 전종목 재무건전성 비교.
 
 #### pastInsight
 **Guide:** AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.
-
-See Also:
-sectorInsights
+**SeeAlso:** sectorInsights
 
 #### sectorInsights
 **Guide:** AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.
-
-See Also:
-pastInsight
+**SeeAlso:** pastInsight
 
 #### Story
 **Guide:** AI 역할: AI는 story를 검증된 engine output을 보고서 섹션으로 조립하는 엔진으로 보고 원자료 없이 새 claim을 만들지 않는다.
@@ -234,9 +228,7 @@ governance 타입 → analysis(지배구조,공시변화) (observed via ai-ask, 
 dividend 타입 → analysis(수익구조,현금흐름,자본배분) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
 valuation 타입 → analysis(가치평가) + quant (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
 thesis 타입 → macro + analysis 복합 근거 수집 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
-
-See Also
-analysis : 재무 심층 분석 — story 의 주요 데이터 공급원.
+**SeeAlso:** analysis : 재무 심층 분석 — story 의 주요 데이터 공급원.
 credit : 신용 분석 — story credit 타입의 핵심 엔진.
 scan : 전종목 비교 — 동종업계 비교 블록 제공.
 quant : 기술적 분석 — 가격 기반 신호 블록 제공.

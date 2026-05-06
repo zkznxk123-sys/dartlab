@@ -58,6 +58,21 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.analysis()                            # 전체 가이드\nc.analysis(\"financial\", \"수익구조\")       # 수익구조 분석\nc.analysis(\"valuation\", \"가치평가\")       # 가치평가\nc.analysis(\"forecast\", \"매출전망\")        # 매출전망",
         "guide": "AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.\nWhen: 특정 종목의 재무 심층 분석이 필요할 때.\nHow: axis 로 분석 영역, sub 로 세부 축 지정.\n\"14축 분석 뭐가 있어?\" → c.analysis() (가이드 반환)\n\"수익구조 분석해줘\" → c.analysis(\"financial\", \"수익구조\")\n\"안정성 분석\" → c.analysis(\"financial\", \"안정성\")\n\"가치평가 해줘\" → c.analysis(\"valuation\", \"가치평가\")\n\"매출전망\" → c.analysis(\"forecast\", \"매출전망\")\nVerified:\n수익성 단독 → 마진 시계열 + 전환점 + 반도체 사이클 인과 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n이익품질 + 재무정합성 → 분식회계 가능성 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n가치평가 → 적정주가 범위 + 현재가 대비 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n자본배분 + 현금흐름 → 배당 매력 종합 판단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n지배구조 → 이사회 독립성 + 지배력 집중 점검 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": [
+                "axis 만 주고 sub 없이 호출 (그룹 가이드만 반환, 실제 분석 X)",
+                "그룹명 (\"financial\") 을 axis 로, 축명 (\"수익성\") 을 sub 로 — 순서 헷갈림",
+                "sub 에 영문 (\"profitability\") 사용 (실제는 한글)"
+            ],
+            "freshness": "finance 데이터 기준 — 분기 마감 후 45일.",
+            "outputSchema": [
+                "history : list[dict] — 시계열 (period + 지표들)",
+                "displayHints : dict — core 컬럼 목록",
+                "turningPoints : list — 전환점",
+                "dataAsOf : dict — latestPeriod, retrievedAt",
+                "assumptions : dict — 엔진 가정 (overrides 재호출용)"
+            ]
+        },
         "priority": 90,
         "questionTypes": [
             "company_compare",
@@ -288,6 +303,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c.credit()              # → {\"grade\": \"dCR-AA\", \"score\": 6.6, ...}\nc.credit(\"채무상환\")     # → {\"axis\": \"채무상환능력\", \"score\": 2.7, ...}\nc.credit(detail=True)   # → 7축 상세 + metricsHistory\nc.credit(overrides={\"debtRatio\": 150, \"interestCoverage\": 2.5})  # 스트레스 시나리오",
         "guide": "When: 부도 위험·신용등급·채무상환능력 판단이 필요할 때.\nHow: 무인자 호출로 종합 등급, axis 로 개별 축, detail=True 로 시계열.\nVerified:\ncredit 단독 → dCR 등급 + 7축 위험점수 분해 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ncredit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": [
+                "axis 와 detail=True 동시 (개별 축에 detail 효과 없음)",
+                "overrides 키 추측 (validateOverrides 가 검증, 미지원 키는 차단)"
+            ],
+            "freshness": "finance 데이터 기준 — 분기 마감 후 45일.",
+            "outputSchema": [
+                "grade : str — dCR 등급 (예: dCR-AA, dCR-BBB)",
+                "score : float — 종합 점수 (0~10)",
+                "healthScore : float — 재무 건전성 점수",
+                "axes : dict — 7축 위험 점수 (axis 미지정 시)",
+                "outlook : str — 등급 전망"
+            ]
+        },
         "returnSchema": [
             {
                 "depth": 0,
@@ -383,6 +412,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.disclosure()                  # 최근 1년 전체 공시\nc.disclosure(days=30)           # 최근 30일\nc.disclosure(type=\"A\")          # 정기공시만\nc.disclosure(keyword=\"사업보고서\")",
         "guide": "단일 종목: \"삼성전자 최근 공시 뭐 나왔어?\" → c.disclosure(days=30)\n전종목: \"최근 어떤 회사들이 자사주 매입했어?\" → dartlab.search(\"자기주식 취득\")",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "전종목 disclosure() (단일 종목 전용 — 전종목은 dartlab.search())",
+                "days 와 start/end 동시 (start/end 우선)"
+            ],
+            "freshness": "DART API 실시간 (분 단위). filings() 와 다름 (filings 는 local cache).",
+            "outputSchema": [
+                "rceptNo : str — 공시 접수번호 (readFiling 입력용)",
+                "filedAt : str — 공시 일자 (YYYY-MM-DD)",
+                "title : str — 공시 제목",
+                "formType : str — 공시 유형 (정기/주요사항/지분 등)"
+            ]
+        },
         "requires": "API 키: DART_API_KEY",
         "returns": "pl.DataFrame -- docId, filedAt, title, formType 등 공시 목록 (이 종목 한정).",
         "seeAlso": "dartlab.search: **전종목 공시 검색 — 키워드 기반 (이 함수 대안)**\nliveFilings: 실시간 최신 공시 (정규화된 포맷, 단일 종목)\nreadFiling: 공시 원문 텍스트 읽기\nfilings: 로컬 보유 공시 목록 (단일 종목)",
@@ -421,6 +463,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "capabilities": "로컬에 보유한 공시 문서 목록\n기간별, 문서유형별 정리\nDART 뷰어 링크 포함",
         "guide": "\"이 회사 공시 목록 보여줘\" → c.filings()\n\"어떤 보고서가 있어?\" → c.filings()로 보유 문서 확인",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "실시간 공시 확인용으로 사용 (filings 는 local cache — 실시간은 disclosure/liveFilings)",
+                "readFiling 호출 전 filings 결과의 컬럼명 추측 (rceptNo 사용)"
+            ],
+            "freshness": "local cache 기반. c.update() 호출 시점이 기준.",
+            "outputSchema": [
+                "rceptNo : str — 공시 접수번호 (readFiling 입력용)",
+                "filedAt : str — 공시 일자",
+                "title : str — 공시 제목",
+                "viewerUrl : str — DART 뷰어 링크"
+            ]
+        },
         "requires": "데이터: docs (자동 다운로드)",
         "returns": "pl.DataFrame | None — year, rceptDate, rceptNo, reportNm, viewerUrl 등.",
         "seeAlso": "disclosure: OpenDART API 기반 실시간 공시 목록 (로컬 보유가 아닌 전체)\nliveFilings: 최신 공시 실시간 조회\nupdate: 누락 공시 증분 수집",
@@ -438,6 +493,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.gather()                 # 4축 가이드\nc.gather(\"price\")          # 주가 시계열\nc.gather(\"news\")           # 뉴스",
         "guide": "When: 주가·수급·거시지표·뉴스 원본 데이터가 필요할 때.\nHow: axis 로 데이터 종류 지정. 무인자 = 가이드.\n\"주가 데이터\" → c.gather(\"price\")\n\"외국인/기관 수급\" → c.gather(\"flow\")\n\"거시경제 지표\" → c.gather(\"macro\")\n\"뉴스 수집\" → c.gather(\"news\") 또는 c.news()\nVerified:\ngather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "axis=\"all\" 같은 미지원 값 (price/flow/macro/news/sector/insider/peers/ownership 만)",
+                "flow 를 EDGAR ticker (US) 에 호출 (KR 전용)",
+                "news 의 target 비워두고 종목 무관 결과 기대 (종목 fallback 발생)"
+            ],
+            "freshness": "price/flow: T+1 (전일 종가). macro: ECOS/FRED 갱신 주기. news: 실시간 RSS.",
+            "outputSchema": [
+                "price: date / open / high / low / close / volume (원, 정수)",
+                "flow: date / 외국인순매수 / 기관순매수 (KR 전용, 정수)",
+                "macro: date / 지표별 컬럼 (float)",
+                "news: title / link / pubDate (string)"
+            ]
+        },
         "requires": "price/flow/news: 없음 (공개 API)\nmacro: 불필요 -- apiKey 명시 시 ECOS/FRED 직접 API 호출",
         "returnSchema": [
             {
@@ -769,6 +838,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "args": "axis: 축 이름. None이면 30축 가이드 DataFrame.\n(Phase 8 A1: 기존 `metric=` 은 호환 alias)\noverrides: 기술 분석 파라미터 교체. 키: window/threshold/period/benchmark.\n**kwargs: 축별 추가 파라미터.",
         "guide": "When: 주가 기반 기술적 판단이 필요할 때.\nHow: axis 로 분석 영역 지정. 무인자 = 가이드.\nVerified:\nquant(\"판단\") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": [
+                "영문 axis (\"momentum\") 사용 (실제는 한글 \"모멘텀\")",
+                "metric= 인자 사용 (Phase 8 deprecated alias — axis= 사용)",
+                "overrides 키 추측 (window/threshold/period/benchmark 만)"
+            ],
+            "freshness": "price 데이터 기준 — T+1 (전일 종가).",
+            "outputSchema": [
+                "axis=\"판단\": dict — verdict (str) + RSI/ADX/SMA/MACD 등 핵심 지표",
+                "axis=\"지표\": DataFrame — 45 개 기술 지표 컬럼",
+                "axis=\"베타\": dict — beta 값 + benchmark + window"
+            ]
+        },
         "returns": "axis=None → DataFrame (30축 가이드)\naxis=\"종합\" → dict (verdict, RSI, ADX, SMA 등)\naxis=\"지표\" → DataFrame (45개 지표)",
         "summary": "주가 기술적 분석 — 30축 (내부 구현)."
     },
@@ -823,6 +905,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nresult = c.readFiling(\"20240315000123\")\nresult = c.readFiling(\"20240315000123\", sections=True)",
         "guide": "\"이 공시 내용 보여줘\" → c.readFiling(접수번호)\n\"공시 원문 분석해줘\" → c.readFiling()으로 원문 확보 후 ask()로 분석",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "종목 이름 (str) 을 filing 인자로 전달 (rceptNo 또는 row 만)",
+                "sections=True + maxChars 동시 (sections 일 때 maxChars 무시)"
+            ],
+            "freshness": "DART API 실시간. 단 본문 캐시 없음 — 매 호출 = 새 download.",
+            "outputSchema": [
+                "rceptNo : str — 공시 접수번호",
+                "viewerUrl : str — DART 뷰어 링크",
+                "text : str — 공시 본문 (sections=False)",
+                "sections : list[dict] — 섹션 목록 (sections=True)"
+            ]
+        },
         "requires": "API 키: DART_API_KEY",
         "returns": "dict -- rceptNo, viewerUrl, text/sections 등 원문 정보.",
         "seeAlso": "liveFilings: 최신 공시 목록에서 접수번호 확인\ndisclosure: 과거 공시 목록에서 접수번호 확인",
@@ -866,6 +961,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.sections  # 전체 sections 지도",
         "guide": "\"이 회사 전체 데이터 지도\" → c.sections\n\"어떤 topic이 있어?\" → c.topics (경량)",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": [
+                "단일 topic 만 필요한데 sections 호출 (메모리 폭주 — show(topic) 사용)",
+                "sections 결과를 캐시 안 하고 반복 호출 (re-build 비용 큼)"
+            ],
+            "freshness": "docs/finance/report 3 source 각각의 최신 시점. c.update() 시점.",
+            "outputSchema": [
+                "chapter : str — 장 이름",
+                "topic : str — topic 식별자",
+                "period : str — 기간",
+                "source : str — docs / finance / report"
+            ]
+        },
         "requires": "데이터: docs (필수), finance/report (선택, 자동 다운로드)",
         "returns": "pl.DataFrame — chapter | topic | period | source | ... 또는 None.",
         "seeAlso": "topics: sections 기반 topic 요약 (더 간결)\nshow: 특정 topic 데이터 조회\nindex: 전체 구조 메타데이터 목차",
@@ -937,6 +1045,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = dartlab.Company(\"005930\")\nc.show(\"IS\")                              # 분기 연결 (기본)\nc.show(\"IS\", freq=\"Y\")                    # 연간 연결\nc.show(\"IS\", scope=\"separate\")            # 분기 별도\nc.show(\"IS\", freq=\"Y\", scope=\"separate\")  # 연간 별도\nc.show(\"IS\", period=\"2023\")               # 2023년 필터\nc.show(\"dividend\")                        # 배당\nc.show(\"majorHolder\")                     # 주요주주/최대주주",
         "guide": "\"분기 손익\" → ``c.show(\"IS\")``\n\"연간 손익\" → ``c.show(\"IS\", freq=\"Y\")``\n\"별도 재무상태표\" → ``c.show(\"BS\", scope=\"separate\")``\n\"2023년 손익\" → ``c.show(\"IS\", period=\"2023\")``\n\"배당 정보\" → ``c.show(\"dividend\")``\n\"주요주주/최대주주\" → ``c.show(\"majorHolder\")``",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": [
+                "분기 컬럼명을 \"Q4_2025\" 로 추측 (실제는 \"2025Q4\")",
+                "freq=\"M\" 같은 미지원 값 (Q/Y/YTD 만)",
+                "finance topic 에 raw=True 후 비율 계산 (정제 단계 누락)"
+            ],
+            "freshness": "분기 마감 후 45일 (DART 공시 마감일). c.update() 로 증분 갱신.",
+            "outputSchema": [
+                "snakeId : str — 영문 snake_case 계정 식별자 (finance 한정)",
+                "항목 : str — 한글 계정명",
+                "2025Q4, 2025Q3, ... : float — 분기 값 (원 단위, freq=\"Q\" 기본)",
+                "2025, 2024, ... : float — 연간 합산 (원 단위, freq=\"Y\")"
+            ]
+        },
         "requires": "데이터: docs (자동 다운로드). finance topic 은 finance parquet 도 필요.",
         "returnSchema": [
             {
@@ -1122,6 +1244,18 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "capabilities": "DART API로 최신 공시 확인 후 누락분만 수집\n카테고리별 선택 수집",
         "guide": "\"최신 공시 반영해줘\" → c.update()\n\"데이터 업데이트\" → c.update()로 증분 수집",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "분석 전 무조건 update() 호출 (이미 최신이면 불필요한 비용)",
+                "categories 에 \"all\" 같은 값 (None 또는 list[str] 만)"
+            ],
+            "freshness": "호출 시점에 DART API 와 비교해 누락만 수집. 매 호출 시점 = 최신 기준.",
+            "outputSchema": [
+                "finance : int — 추가 수집된 finance 건수",
+                "docs : int — 추가 수집된 docs 건수",
+                "report : int — 추가 수집된 report 건수"
+            ]
+        },
         "requires": "API 키: DART_API_KEY",
         "returnSchema": [
             {
@@ -1235,7 +1369,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "select() 반환 객체 — DataFrame 위임 + 체이닝."
     },
     "Story": {
-        "guide": "AI 역할: AI는 story를 검증된 engine output을 보고서 섹션으로 조립하는 엔진으로 보고 원자료 없이 새 claim을 만들지 않는다.\nWhen: 종목의 종합 분석 보고서가 필요할 때.\nHow: 11 타입 중 선택 — full(전체), executive(경영진 요약), credit(신용),\nvaluation(가치평가), growth(성장), crisis(위기), audit(감사),\ndividend(배당), governance(지배구조), macro(매크로), thesis(투자논제).\nVerified:\ncredit 타입 → credit + analysis(안정성,현금흐름,자금조달) 조합 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\naudit 타입 → analysis(이익품질,재무정합성) + 감사의견 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ngovernance 타입 → analysis(지배구조,공시변화) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ndividend 타입 → analysis(수익구조,현금흐름,자본배분) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nvaluation 타입 → analysis(가치평가) + quant (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nthesis 타입 → macro + analysis 복합 근거 수집 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nanalysis : 재무 심층 분석 — story 의 주요 데이터 공급원.\ncredit : 신용 분석 — story credit 타입의 핵심 엔진.\nscan : 전종목 비교 — 동종업계 비교 블록 제공.\nquant : 기술적 분석 — 가격 기반 신호 블록 제공.\nmacro : 거시 분석 — 매크로 환경 블록 제공.",
+        "guide": "AI 역할: AI는 story를 검증된 engine output을 보고서 섹션으로 조립하는 엔진으로 보고 원자료 없이 새 claim을 만들지 않는다.\nWhen: 종목의 종합 분석 보고서가 필요할 때.\nHow: 11 타입 중 선택 — full(전체), executive(경영진 요약), credit(신용),\nvaluation(가치평가), growth(성장), crisis(위기), audit(감사),\ndividend(배당), governance(지배구조), macro(매크로), thesis(투자논제).\nVerified:\ncredit 타입 → credit + analysis(안정성,현금흐름,자금조달) 조합 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\naudit 타입 → analysis(이익품질,재무정합성) + 감사의견 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ngovernance 타입 → analysis(지배구조,공시변화) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ndividend 타입 → analysis(수익구조,현금흐름,자본배분) (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nvaluation 타입 → analysis(가치평가) + quant (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nthesis 타입 → macro + analysis 복합 근거 수집 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "class",
         "returnSchema": [
             {
@@ -1282,6 +1416,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "Story\n보고서 인스턴스. 주요 속성/메서드:\nsections : list[Section] — 6막별 섹션 목록\nrender(fmt) : str — 렌더링 (\"rich\"/\"html\"/\"markdown\"/\"json\")\ntoHtml() : str — HTML 출력\ntoMarkdown() : str — Markdown 출력\nsummaryCard : SummaryCard — 최상단 요약 카드\n\nRaises\nValueError\n보고서 타입이 등록되지 않은 경우.\nRuntimeError\nCompany 데이터 로드 실패 시.\n\nExamples\n>>> c.story()                              # 전체 보고서\n>>> c.story(\"수익구조\")                     # 수익구조 섹션만\n>>> c.story(reportType=\"credit\")           # 신용분석 보고서\n>>> from dartlab.story import blocks, Story\n>>> b = blocks(c)\n>>> Story([b[\"growth\"], b[\"margin\"]])       # 자유 조립\n\nNotes\n사람의 진입점은 c.story() (Company 메서드). AI 는 dartlab.ask() 경유.\n4 출력 형식: rich(터미널), html, markdown, json.\nJupyter/Colab/Marimo 에서 _repr_html_ 자동 렌더링.",
+        "seeAlso": "analysis : 재무 심층 분석 — story 의 주요 데이터 공급원.\ncredit : 신용 분석 — story credit 타입의 핵심 엔진.\nscan : 전종목 비교 — 동종업계 비교 블록 제공.\nquant : 기술적 분석 — 가격 기반 신호 블록 제공.\nmacro : 거시 분석 — 매크로 환경 블록 제공.",
         "summary": "보고서 조합기 — 6 엔진 블록을 조합하여 6막 구조화 보고서 생성."
     },
     "aiContract.capabilities.valid_key": {
@@ -1663,7 +1798,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "dartlab 전역 설정."
     },
     "credit": {
-        "guide": "AI 역할: AI는 credit을 상환능력·재무건전성 판단 엔진으로 보고 부채, 현금흐름, 이자보상, 만기 근거를 요구한다.\nWhen: 종목의 부도 위험·재무 건전성을 독립 평가할 때.\nHow: credit 단독으로 종합 등급 확인 → analysis(안정성, 현금흐름) 와 함께 심층 진단.\nstory credit 타입이 credit + analysis(안정성) + analysis(현금흐름) + analysis(자금조달) 순서로 조합.\nVerified:\ncredit 단독 → dCR 등급 + 7축 위험점수 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ncredit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nanalysis : 재무 심층 분석 — 안정성·현금흐름 축이 credit 과 상호 보완.\nscan : 전종목 재무건전성 비교.",
+        "guide": "AI 역할: AI는 credit을 상환능력·재무건전성 판단 엔진으로 보고 부채, 현금흐름, 이자보상, 만기 근거를 요구한다.\nWhen: 종목의 부도 위험·재무 건전성을 독립 평가할 때.\nHow: credit 단독으로 종합 등급 확인 → analysis(안정성, 현금흐름) 와 함께 심층 진단.\nstory credit 타입이 credit + analysis(안정성) + analysis(현금흐름) + analysis(자금조달) 순서로 조합.\nVerified:\ncredit 단독 → dCR 등급 + 7축 위험점수 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ncredit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "function",
         "returnSchema": [
             {
@@ -1745,6 +1880,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "DataFrame | dict | None\nstockCode=None → 가이드 DataFrame (axis, label, description, example, group)\naxis=\"등급\" 또는 None+stockCode → 종합 등급 dict\n\ngrade : str — dCR 등급 (예: \"dCR-AA+\")\nscore : float — 위험 점수 (0=최우량, 100=최위험) (점)\nhealthScore : float — 건전성 점수 (100-score) (점)\naxes : list[dict] — 7축 상세 (name, score, weight, metrics)\neCR : str | None — 현금흐름등급\noutlook : str — 전망 (\"안정적\"/\"긍정적\"/\"부정적\")\n\naxis=축이름 → 해당 축 dict\n\naxis : str — 축 풀네임\nscore : float — 해당 축 위험 점수 (점)\nweight : int — 가중치 (%)\nmetrics : list[dict] — 개별 지표 (name, value, score)\n\nExamples\n>>> import dartlab\n>>> dartlab.credit(\"005930\")                # 삼성전자 종합\n>>> dartlab.credit(\"005930\", \"채무상환\")     # 채무상환 축만\n>>> dartlab.credit()                        # 가이드 DataFrame\n\nRaises\nValueError\n축 이름이 등록되지 않은 경우.\n\nNotes\n3-Track 모델(일반/금융/지주) + Notch Adjustment + CHS 시장 보정.\n79개사 검증: 대기업 87%, 중대형 82%. DART 공시 기반, API 키 불필요.",
+        "seeAlso": "analysis : 재무 심층 분석 — 안정성·현금흐름 축이 credit 과 상호 보완.\nscan : 전종목 재무건전성 비교.",
         "summary": "신용등급 산출 단일 진입점."
     },
     "dataDir": {
@@ -1763,7 +1899,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "HuggingFace에서 전체 시장 데이터 다운로드."
     },
     "gather": {
-        "guide": "AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다.\n데이터 기본기: gather 경로는 provider, latestAsOf, metric, period,\nraw table 을 먼저 evidence 로 남긴다. 수집 실패나 빈 결과는\nunavailable 로 공개하고 추정값으로 채우지 않는다.\nWhen: 분석 엔진에 필요한 외부 데이터를 수집할 때.\nHow: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천.\ngather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과).\n단일 종목 맥락은 Company 로 target/topic/source 를 고정한 뒤 gather 로 보강하고,\n횡단 비교는 scan 결과와 분리해서 연결한다.\nVerified:\ngather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nquant : 주가 기반 정량 분석 — gather(\"price\") 데이터 소비.\nmacro : 거시 분석 — gather(\"macro\") raw 데이터의 분석 결과.\nscan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완.",
+        "guide": "AI 역할: AI는 gather를 외부 데이터 수집 진입점으로 보고 데이터 신선도, 시장, 수집 가능 범위를 먼저 확인한다.\n데이터 기본기: gather 경로는 provider, latestAsOf, metric, period,\nraw table 을 먼저 evidence 로 남긴다. 수집 실패나 빈 결과는\nunavailable 로 공개하고 추정값으로 채우지 않는다.\nWhen: 분석 엔진에 필요한 외부 데이터를 수집할 때.\nHow: gather → analysis/quant 파이프라인. gather(\"price\") 는 quant 의 데이터 원천.\ngather(\"macro\") 는 macro 엔진과 상호 보완 (raw 데이터 vs 분석 결과).\n단일 종목 맥락은 Company 로 target/topic/source 를 고정한 뒤 gather 로 보강하고,\n횡단 비교는 scan 결과와 분리해서 연결한다.\nVerified:\ngather(\"news\") → 뉴스 목록 + 헤드라인 해석 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "function",
         "returnSchema": [
             {
@@ -1964,6 +2100,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "pl.DataFrame\naxis=None (가이드):\naxis : str — 축 이름\nlabel : str — 한글 레이블\ndescription : str — 설명\nexample : str — 사용 예시\naxis=\"price\":\ndate : date — 날짜\nopen : float — 시가\nhigh : float — 고가\nlow : float — 저가\nclose : float — 종가\nvolume : int — 거래량\naxis=\"flow\":\ndate : date — 날짜\n외국인순매수 : int — 외국인 순매수량\n기관순매수 : int — 기관 순매수량\naxis=\"macro\":\ndate : date — 날짜\n지표별 컬럼 : float — ECOS/FRED 거시지표 값\naxis=\"news\":\ntitle : str — 뉴스 제목\nlink : str — 기사 URL\npubDate : str — 발행일\naxis=\"sector\":\nsectorCode : str — 업종코드\nsectorName : str — 업종명\nindustryCode : str — 산업코드\nindustryName : str — 산업명\nmarket : str — 시장 (KR/US)\naxis=\"insider\":\ndate : str — 거래일\nname : str — 거래자명\nposition : str — 직위\ntradeType : str — 거래유형\nchangeShares : int — 변동 주수\n\nRaises\nValueError\n축 이름이 등록되지 않은 경우.\ntarget 필수 축에서 target 누락 시.\n\nExamples\n>>> dartlab.gather()                              # 가이드\n>>> dartlab.gather(\"price\", \"005930\")              # KR OHLCV\n>>> dartlab.gather(\"price\", \"AAPL\", market=\"US\")   # US 주가\n>>> dartlab.gather(\"macro\", \"FEDFUNDS\")            # 미국 기준금리\n>>> dartlab.gather(\"news\", \"삼성전자\")              # Google News\n\nNotes\nNaver(KR)/Yahoo(US)/FRED/ECOS/Google News 경유. API 키 불필요.\n결과는 Polars DataFrame — 분석 엔진 입력으로 바로 사용 가능.",
+        "seeAlso": "quant : 주가 기반 정량 분석 — gather(\"price\") 데이터 소비.\nmacro : 거시 분석 — gather(\"macro\") raw 데이터의 분석 결과.\nscan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완.",
         "summary": "외부 시장 데이터 수집 — 주가·수급·거시지표·뉴스 4 축."
     },
     "gather.flow": {
@@ -2399,7 +2536,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "목록 조회 단일 진입점."
     },
     "macro": {
-        "guide": "AI 역할: AI는 macro를 시장 환경과 기업/섹터 해석을 연결하는 엔진으로 보고 asOf, 지표, 방향성 근거를 고정한다.\nWhen: 종목 분석 전 경제 환경을 먼저 파악할 때. Company 없이 사용 가능.\nHow: 6막 인과의 최상위 — macro(사이클) → scan(업종) → analysis(기업) 순서.\nstory macro/crisis 타입이 macro 종합 → analysis(안정성, 현금흐름) 순서로 조합.\nVerified:\nmacro(\"사이클\") → CLI + 사분면 + 금리 + 유동성 + 심리 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nmacro + analysis 조합 → 경제 고려한 논제 검증 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n\nSee Also\nscan : 전종목 횡단 — macro 사이클에 따른 업종별 영향 비교.\nquant : 시장 심리·변동성 — macro 사이클과 교차 분석.\nanalysis : 개별 기업 재무 — macro 환경 하에서 기업 건전성 판단.",
+        "guide": "AI 역할: AI는 macro를 시장 환경과 기업/섹터 해석을 연결하는 엔진으로 보고 asOf, 지표, 방향성 근거를 고정한다.\nWhen: 종목 분석 전 경제 환경을 먼저 파악할 때. Company 없이 사용 가능.\nHow: 6막 인과의 최상위 — macro(사이클) → scan(업종) → analysis(기업) 순서.\nstory macro/crisis 타입이 macro 종합 → analysis(안정성, 현금흐름) 순서로 조합.\nVerified:\nmacro(\"사이클\") → CLI + 사분면 + 금리 + 유동성 + 심리 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nmacro + analysis 조합 → 경제 고려한 논제 검증 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "function",
         "returnSchema": [
             {
@@ -2439,6 +2576,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "pl.DataFrame | dict\naxis=None (가이드): DataFrame (axis/label/description/example/group 컬럼)\naxis 지정: dict — 축별 분석 결과.\ncycle: {phase, label, confidence, indicators[{name, value, signal}]}\nsummary: {indicators[], narrative}\nrates/liquidity/trade/...: {지표별 dict, narrative}\n_summary (autoEnrich 자동) — 핵심 요약 + [엔진가정].\n\nRaises\nValueError\nmarket 이 \"US\"/\"KR\" 이 아닌 경우.\n축 이름이 등록되지 않은 경우.\n\nExamples\n>>> dartlab.macro()                          # 가이드\n>>> dartlab.macro(\"사이클\")                   # 경기 4국면 판별\n>>> dartlab.macro(\"금리\")                     # 금리 + 수익률곡선\n>>> dartlab.macro(\"예측\")                     # 침체확률 + GDP Nowcast\n>>> dartlab.macro(\"종합\")                     # 매크로 종합 + 투자전략\n>>> dartlab.macro(\"시나리오\", \"2008 금융위기\")  # 역사적 시나리오\n\nNotes\nFRED 데이터 기반. API 키 불필요 (공개 API).\nHamilton EM, Kalman DFM, Nelson-Siegel, Cleveland Fed 프로빗 등 numpy 직접 구현.",
+        "seeAlso": "scan : 전종목 횡단 — macro 사이클에 따른 업종별 영향 비교.\nquant : 시장 심리·변동성 — macro 사이클과 교차 분석.\nanalysis : 개별 기업 재무 — macro 환경 하에서 기업 건전성 판단.",
         "summary": "매크로 분석 실행."
     },
     "macro.assets": {
@@ -2507,7 +2645,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "회사명 → 종목코드. 정확히 일치하는 첫 번째 결과."
     },
     "pastInsight": {
-        "guide": "AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.\n\nSee Also:\nsectorInsights",
+        "guide": "AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.",
         "kind": "function",
         "returnSchema": [
             {
@@ -2519,10 +2657,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "list[dict[str, Any]]: 저장된 인사이트가 없으면 빈 목록.\n\nRaises:\n없음.\n\nExamples:\n>>> import dartlab\n>>> dartlab.pastInsight(stockCode=\"005930\")\n[]\n\nNotes:\n새 저장소가 붙으면 이 함수가 공개 조회 계약의 단일 진입점이다.",
+        "seeAlso": "sectorInsights",
         "summary": "종목별 과거 분석 인사이트 조회."
     },
     "quant": {
-        "guide": "AI 역할: AI는 quant를 가격·팩터·시계열 신호 엔진으로 보고 기간, benchmark, 수익률/변동성 근거를 분리한다.\nWhen: 주가 기반 기술적 신호·팩터·리스크를 정량 분석할 때.\nHow: quant(\"판단\") 으로 종합 신호 확인 → 세부 축으로 근거 파악.\nquant(\"벤치마크\") 로 시장·섹터·스타일 benchmarkStack 을 확인한다.\nbeta/residual/factor/BAB 는 기본 market mode를 유지하고,\nbenchmarkMode=\"sector\" 또는 \"style\" 로 상대 기준을 명시 전환한다.\nanalysis(재무) + quant(기술) 조합이 story full/valuation 타입의 핵심.\ncredit 과 함께 사용 시 altman/piotroski 로 부도 위험 교차 검증.\nVerified:\nquant(\"판단\") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nquant(\"베타\", benchmarkMode=\"sector\") → KRX 섹터 지수 대비 beta.\n\nSee Also\nanalysis : 재무 인과 분석 — quant 기술 + analysis 재무 조합.\ngather : 주가·수급 데이터 수집 — quant 의 데이터 원천.\nscan : 전종목 횡단 비교.",
+        "guide": "AI 역할: AI는 quant를 가격·팩터·시계열 신호 엔진으로 보고 기간, benchmark, 수익률/변동성 근거를 분리한다.\nWhen: 주가 기반 기술적 신호·팩터·리스크를 정량 분석할 때.\nHow: quant(\"판단\") 으로 종합 신호 확인 → 세부 축으로 근거 파악.\nquant(\"벤치마크\") 로 시장·섹터·스타일 benchmarkStack 을 확인한다.\nbeta/residual/factor/BAB 는 기본 market mode를 유지하고,\nbenchmarkMode=\"sector\" 또는 \"style\" 로 상대 기준을 명시 전환한다.\nanalysis(재무) + quant(기술) 조합이 story full/valuation 타입의 핵심.\ncredit 과 함께 사용 시 altman/piotroski 로 부도 위험 교차 검증.\nVerified:\nquant(\"판단\") → RSI/ADX/MACD/볼린저/상대강도 + 종합 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nquant(\"베타\", benchmarkMode=\"sector\") → KRX 섹터 지수 대비 beta.",
         "kind": "function",
         "returnSchema": [
             {
@@ -2590,10 +2729,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "dict\n종목 지정 시 축별 분석 결과:\nverdict(판단): signal, confidence, indicators (매수/매도/중립)\nmomentum(모멘텀): returns, rsi, macd, moving_averages\nvolatility(변동성): realized, garch, regime\nbenchmark(벤치마크): benchmarkUsed, benchmarkStack, 기간 수익률 (%)\nsimulation(시뮬레이션): paths, expectedReturn, var (%)\naltman: zScore, zone (safe/grey/distress)\npiotroski: fScore (0~9점)\npl.DataFrame\naxis=None: 가이드 — 축 목록 + 설명 + 예시.\n횡단면 축 (market=\"KR\"): 전종목 DataFrame.\n\nRaises\nValueError\n축 이름이 등록되지 않은 경우.\n종목 필수 축에서 stockCode 누락 시.\nTypeError\naxis 에 list 전달 시.\n\nExamples\n>>> c.quant()                          # 가이드\n>>> c.quant(\"판단\")                     # 종합 매수/매도 판단\n>>> c.quant(\"모멘텀\")                   # 모멘텀 지표\n>>> dartlab.quant(\"altman\", \"005930\")   # Altman Z-Score\n>>> dartlab.quant(\"piotroski\", \"005930\")  # Piotroski F-Score\n\nNotes\n주가 데이터는 gather(\"price\") 경유 자동 수집. API 키 불필요 (Naver/Yahoo).",
+        "seeAlso": "analysis : 재무 인과 분석 — quant 기술 + analysis 재무 조합.\ngather : 주가·수급 데이터 수집 — quant 의 데이터 원천.\nscan : 전종목 횡단 비교.",
         "summary": "가격 기반 정량 분석 — 8 그룹 30+ 축 (기술·리스크·팩터·백테스트·알파)."
     },
     "scan": {
-        "guide": "AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다.\n데이터 기본기: scan 경로는 universe, metric, period, rank, table 을 먼저\nevidence 로 남긴다. 조건 검색은 scan(\"fields\") 로 가능한 field 를\n확인한 뒤 scan(\"screen\") 으로 구성한다.\nWhen: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.\nHow: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.\nstory credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.\n조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서.\n단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.\n단일 종목 결론은 scan 후보/rank 에서 끝내지 말고 Company 원자료와\nanalysis/credit 로 후속 검증한다.\nVerified:\nscan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)\n\nSee Also\nanalysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석.",
+        "guide": "AI 역할: AI는 scan을 전종목 횡단 비교와 스크리닝 엔진으로 보고 universe, metric, 기간, rank 근거를 만든다.\n데이터 기본기: scan 경로는 universe, metric, period, rank, table 을 먼저\nevidence 로 남긴다. 조건 검색은 scan(\"fields\") 로 가능한 field 를\n확인한 뒤 scan(\"screen\") 으로 구성한다.\nWhen: 특정 종목 심층 분석 전, 업종·시장 내 상대 위치를 파악할 때.\nHow: scan 으로 전체 분포를 보고 → analysis 로 개별 종목 심층 분석.\nstory credit/governance/audit 타입에서 scan 데이터를 동종업계 비교로 활용.\n조건형 종목 발굴은 scan(\"fields\") → scan(\"screen\", spec=...) → Company/analysis 순서.\n단일 지표 하나만으로 후보 추천을 끝내지 말고 finance/report/docs/krx 중 최소 3관점 교차 검증.\n단일 종목 결론은 scan 후보/rank 에서 끝내지 말고 Company 원자료와\nanalysis/credit 로 후속 검증한다.\nVerified:\nscan(\"재무건전성\") → 업종 비교 테이블, 해석 약간 부족 (observed weak via ai-ask, 2026-04-25 — 정식 Phase 판정 아님)",
         "kind": "function",
         "returnSchema": [
             {
@@ -2780,6 +2920,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "pl.DataFrame\naxis=None (가이드):\naxis : str — 축 이름\nlabel : str — 한글 레이블\ndescription : str — 설명\nexample : str — 사용 예시\naxis=\"profitability\":\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n영업이익률 : float — 영업이익률 (%)\n순이익률 : float — 순이익률 (%)\nROE : float — 자기자본이익률 (%)\nROA : float — 총자산이익률 (%)\n등급 : str — 수익성 등급\naxis=\"account\" (target=\"매출액\"):\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n2024, 2023, ... : float — 연도별 값 (원 단위)\naxis=\"ratio\" (target=\"roe\"):\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n2024, 2023, ... : float — 연도별 비율값 (%, 배)\naxis=\"fields\":\nfield : str — screen spec 에 넣는 정규 필드 키\nlabel : str — 표시명\nsource : str — finance/report/docs/krx/krxIndex 등 원천\nkind : str — number/text/boolean/context\nunit : str — 원/%/배/건/일/점/주/텍스트/없음\noperatorSet : str — 허용 연산자 목록\ncoverage : str — 로컬 prebuild 기준 커버리지\n기타 축: 종목코드 + 종목명 + 축별 지표 컬럼\n\nRaises\nValueError\naxis 또는 target 이 등록되지 않은 경우.\n그룹 호출 시 target 이 해당 그룹에 속하지 않는 경우.\n\nExamples\n>>> dartlab.scan()                              # 전체 축 가이드\n>>> dartlab.scan(\"profitability\")               # 전종목 수익성\n>>> dartlab.scan(\"account\", \"매출액\")            # 전종목 매출액 시계열\n>>> dartlab.scan(\"ratio\", \"roe\")                # 전종목 ROE 시계열\n>>> dartlab.scan(\"fields\", \"매출\")               # 스크리닝 필드 검색\n>>> dartlab.scan(\"screen\", spec={\"where\": [{\"field\": \"finance.ratio.roe\", \"op\": \">\", \"value\": 10}]})\n>>> dartlab.scan(\"financial\")                   # 재무 8축 가이드\n>>> dartlab.scan(\"financial\", \"수익성\")          # 재무 그룹 내 수익성\n\nNotes\n사전 빌드 parquet 기반. 첫 호출 시 HuggingFace 에서 자동 다운로드.\n전종목 데이터를 한 번에 로드하므로 메모리 ~200MB 소비.",
+        "seeAlso": "analysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석.",
         "summary": "축(axis)별 전종목 횡단분석."
     },
     "scan.account": {
@@ -3190,7 +3331,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "종목명/코드로 종목 찾기 (KR + US)."
     },
     "sectorInsights": {
-        "guide": "AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.\n\nSee Also:\npastInsight",
+        "guide": "AI 답변 루프는 generated spec 검색 후 engine_call을 통해 호출한다.",
         "kind": "function",
         "returnSchema": [
             {
@@ -3202,6 +3343,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "list[dict[str, Any]]: 저장된 인사이트가 없으면 빈 목록.\n\nRaises:\n없음.\n\nExamples:\n>>> import dartlab\n>>> dartlab.sectorInsights(sector=\"반도체\")\n[]\n\nNotes:\n새 저장소가 붙으면 이 함수가 공개 조회 계약의 단일 진입점이다.",
+        "seeAlso": "pastInsight",
         "summary": "섹터별 과거 분석 인사이트 조회."
     },
     "setup": {
