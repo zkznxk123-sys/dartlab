@@ -23,6 +23,7 @@ from .state import WorkbenchState
 _CODE_SPAN_RE = re.compile(r"`[^`]*`")
 _CODE_BLOCK_RE = re.compile(r"```.*?```", re.DOTALL)
 _REF_TOKEN_RE = re.compile(r"\[(value|table|execution|date|web|artifact|api|skill|verify|dataset):[\w./\-:가-힣]+\]")
+_BROAD_REF_TOKEN_RE = re.compile(r"\[(value|table|execution|date|web|artifact|api|skill|verify|dataset)Ref?:([^\]]+)\]")
 _MATERIAL_NUMBER_RE = re.compile(r"\d[\d,.]*\s?(?:조원|억원|원|%|배|건|개|위|Q[1-4])")
 _DATE_RE = re.compile(r"(?:20\d{2}|19\d{2})(?:[-./]\d{1,2})?(?:[-./]\d{1,2})?(?:Q[1-4])?|\d{1,2}분기")
 _MATERIAL_DATE_TERMS = ("기준", "최신", "기간", "시점", "as of", "asof", "latest")
@@ -67,6 +68,11 @@ def runGate(state: WorkbenchState) -> Iterator[TraceEvent]:
     missing = normalized_required - ref_kinds
     if missing:
         issues.append(f"missing_required_evidence:{sorted(missing)}")
+
+    # 6) fake/truncated ref token 검증 — 답안의 ref token id 가 state.refs id 와 매칭 안 되면 fake
+    fake_tokens = _findFakeRefTokens(state.answerText or "", state.refs)
+    if fake_tokens:
+        issues.append(f"fake_ref_token:{fake_tokens[:3]}")
 
     # numbers/dates 는 사용자 trace 에 노출용 통계
     numbers = _MATERIAL_NUMBER_RE.findall(text)
@@ -161,3 +167,40 @@ def _refTokenKinds(text: str) -> set[str]:
         kind_short = match.group(1)
         kinds.add(f"{kind_short}Ref")
     return kinds
+
+
+def _findFakeRefTokens(text: str, refs: list[Ref]) -> list[str]:
+    """답안에 박힌 ref token 중 state.refs id 와 매칭 안 되는 fake/truncated token 목록.
+
+    감지 대상:
+    - LLM 자작 fake (예: `[valueRef:value:samsung_latest_bs_total_assets:343]`)
+    - LLM 이 잘라 박은 truncated (예: `[valueRef:value:samsung_bs_…]` 또는 `[valueRef:value:samsung…]`)
+    - kind 가 `valueRef:` 형태로 박혔지만 `value:` prefix 가 빠진 경우
+    """
+    state_ids = {ref.id for ref in refs}
+    fake: list[str] = []
+    seen: set[str] = set()
+    for match in _BROAD_REF_TOKEN_RE.finditer(str(text or "")):
+        kind_short = match.group(1)
+        id_part = match.group(2).strip()
+        # token 안에 truncate 표시 (`…` U+2026 또는 `...`) 가 있으면 무조건 fake
+        if "…" in id_part or "..." in id_part:
+            full = f"{kind_short}:{id_part}"
+            if full not in seen:
+                seen.add(full)
+                fake.append(full)
+            continue
+        # state.refs id 형태는 `value:005930:BS:...` 즉 kind_short prefix 포함
+        candidate_with_prefix = f"{kind_short}:{id_part}" if not id_part.startswith(f"{kind_short}:") else id_part
+        # token 의 id_part 가 state.refs id 와 정확히 또는 prefix 매칭되는지
+        if candidate_with_prefix in state_ids:
+            continue
+        if id_part in state_ids:
+            continue
+        if any(rid.startswith(candidate_with_prefix) or rid.startswith(id_part) for rid in state_ids):
+            continue
+        full = f"{kind_short}:{id_part}"
+        if full not in seen:
+            seen.add(full)
+            fake.append(full)
+    return fake

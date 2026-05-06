@@ -74,3 +74,25 @@ def test_workbench_legacy_path_when_provider_dartlab() -> None:
     kinds = [e.kind for e in events]
     assert any(k == "graph_node" for k in kinds)
     assert any(k in {"answer", "chunk", "unable"} for k in kinds)
+
+
+@pytest.mark.unit
+def test_done_event_carries_evidence_and_normalized_status() -> None:
+    """done event 가 evidence/claims/artifacts 를 실어 보내고, responseStatus 가 정규화 ('done' → 'ok')."""
+    provider = _MockProvider(
+        script=[_text("brief"), _text("work"), _text("critique"), _text("answer text"), _text("harvest")]
+    )
+    loop = WorkbenchLoop()
+    events = list(loop.stream("hi", provider=provider))
+    done = next((e for e in events if e.kind == "done"), None)
+    assert done is not None
+    # evidence/claims/artifacts 키가 존재하고 list 형
+    assert isinstance(done.data.get("evidence"), list)
+    assert isinstance(done.data.get("claims"), list)
+    assert isinstance(done.data.get("artifacts"), list)
+    # responseStatus 정규화
+    meta = done.data.get("responseMeta") or {}
+    assert meta.get("responseStatus") in {"ok", "failed"}
+    # 정상 시 failureReason 없음
+    if meta.get("responseStatus") == "ok":
+        assert "failureReason" not in meta

@@ -47,3 +47,49 @@ def test_gate_emits_gate_result_event() -> None:
     assert "pass_enter" in kinds
     assert "gate_result" in kinds
     assert "pass_exit" in kinds
+
+
+@pytest.mark.unit
+def test_gate_blocks_truncated_ref_token() -> None:
+    """LLM 이 ref id 를 잘라 박은 토큰 (`samsung_bs_…`) 은 fake 로 차단."""
+    from dartlab.ai.contracts import Ref
+
+    state = WorkbenchState(question="test")
+    state.answerText = "자산총계 566조원 [valueRef:value:samsung_bs_…]"
+    state.refs = [
+        Ref(id="value:005930:BS:2025Q4:total_assets", kind="valueRef", title="자산총계", source="t1", payload={})
+    ]
+    list(runGate(state))
+    assert state.gateBlocked is True
+    assert any("fake_ref_token" in issue for issue in state.gateIssues)
+
+
+@pytest.mark.unit
+def test_gate_blocks_self_invented_ref_token() -> None:
+    """LLM 이 자작한 fake ref id (state.refs 에 없음) 차단."""
+    from dartlab.ai.contracts import Ref
+
+    state = WorkbenchState(question="test")
+    state.answerText = "삼성전자 자산총계 566조원 [executionRef:execution:samsung_latest_bs_total_assets:343]"
+    state.refs = [
+        Ref(id="value:005930:BS:2025Q4:total_assets", kind="valueRef", title="자산총계", source="t1", payload={}),
+        Ref(id="execution:run:abc:1", kind="executionRef", title="run", source="run_python", payload={}),
+    ]
+    list(runGate(state))
+    assert state.gateBlocked is True
+    assert any("fake_ref_token" in issue for issue in state.gateIssues)
+
+
+@pytest.mark.unit
+def test_gate_passes_when_ref_token_matches_state_refs() -> None:
+    """답안의 ref token id 가 state.refs id 와 정확히 일치하면 fake 아님."""
+    from dartlab.ai.contracts import Ref
+
+    state = WorkbenchState(question="test")
+    state.answerText = "자산총계 566조원 [value:005930:BS:2025Q4:total_assets]"
+    state.refs = [
+        Ref(id="value:005930:BS:2025Q4:total_assets", kind="valueRef", title="자산총계", source="t1", payload={})
+    ]
+    list(runGate(state))
+    assert state.gateBlocked is False
+    assert not any("fake_ref_token" in issue for issue in state.gateIssues)

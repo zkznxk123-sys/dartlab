@@ -156,11 +156,13 @@ class WorkbenchLoop:
             "done",
             {
                 "refs": [r.to_dict() for r in state.refs],
-                "artifacts": [],
+                "evidence": [r.to_dict() for r in state.refs if r.kind != "verifyRef"],
+                "claims": list(state.claims),
+                "artifacts": _harvestArtifacts(state),
                 "verification": state.verification,
                 "responseMeta": {
                     "finalEvent": "answer",
-                    "responseStatus": state.status,
+                    "responseStatus": "ok" if state.status == "done" else "failed",
                     "refCount": len(state.refs),
                     "scratchpad": scratchpad.ref(),
                     "passes": list(GRAPH_NODES),
@@ -312,7 +314,9 @@ class WorkbenchLoop:
             "done",
             {
                 "refs": [ref.to_dict() for ref in state.refs],
-                "artifacts": [],
+                "evidence": [ref.to_dict() for ref in state.refs if ref.kind != "verifyRef"],
+                "claims": list(state.claims),
+                "artifacts": _harvestArtifacts(state),
                 "verification": {"ok": True, "refId": "verify:answer"},
                 "responseMeta": {
                     "finalEvent": "answer",
@@ -354,6 +358,10 @@ class WorkbenchLoop:
                 "error": result.error,
             },
         )
+
+
+def _harvestArtifacts(state: WorkbenchState) -> list[dict[str, Any]]:
+    return [ref.to_dict() for ref in state.refs if ref.kind == "artifactRef"]
 
 
 def _buildQuestionProfile(question: str, *, stockCode: Any = None) -> dict[str, Any]:
