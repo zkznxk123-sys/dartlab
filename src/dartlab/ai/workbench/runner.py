@@ -284,14 +284,41 @@ def _summarizeTableRef(ref: Ref) -> str:
     period = payload.get("latestPeriod") or payload.get("period")
     if period:
         parts.append(f"@{period}")
+    rows = payload.get("rows")
     row_count = payload.get("rowCount")
+    if row_count is None and isinstance(rows, list):
+        row_count = len(rows)
     if row_count is not None:
         parts.append(f"rows={row_count}")
     columns = payload.get("columns")
     if isinstance(columns, list) and columns:
         sample_cols = ", ".join(str(c) for c in columns[:3])
         parts.append(f"cols=[{sample_cols}]")
-    return _withRefSuffix(" ".join(parts), ref, 120)
+    base = _withRefSuffix(" ".join(parts), ref, 120)
+    # COMPOSE 단계 등에서 LLM 이 행 데이터 인용 가능하도록 처음 N 행 짧게 노출.
+    # 보수적: 처음 5 행, 각 행 160 chars cap, 총 1.5KB 이하.
+    if isinstance(rows, list) and rows:
+        try:
+            import json as _json
+
+            sample_rows = rows[:5]
+            row_lines = []
+            total = 0
+            for row in sample_rows:
+                if isinstance(row, dict):
+                    line = _truncate(_json.dumps(row, ensure_ascii=False, default=str), 160)
+                else:
+                    line = _truncate(str(row), 160)
+                if total + len(line) > 1500:
+                    break
+                row_lines.append(line)
+                total += len(line)
+            if row_lines:
+                more = f" (+{len(rows) - len(row_lines)} more)" if len(rows) > len(row_lines) else ""
+                base += " | rows: " + " ; ".join(row_lines) + more
+        except Exception:  # noqa: BLE001 - context 직렬화 실패는 무시
+            pass
+    return base
 
 
 def _summarizeDateRef(ref: Ref) -> str:
