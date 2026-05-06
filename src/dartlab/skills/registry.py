@@ -477,6 +477,10 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
         "sourceRefs",
         "visualRefs",
         "linkedSkills",
+        "requires",
+        "alternatives",
+        "succeededBy",
+        "deprecatedBy",
         "procedure",
         "requiredEvidence",
         "expectedOutputs",
@@ -707,6 +711,10 @@ def _score(spec: SkillSpec, terms: list[str], *, query: str = "") -> tuple[float
         "visualRefs": " ".join(spec.visualRefs),
         "knowledgeRefs": " ".join(spec.knowledgeRefs),
         "linkedSkills": " ".join(spec.linkedSkills),
+        "requires": " ".join(spec.requires),
+        "alternatives": " ".join(spec.alternatives),
+        "succeededBy": " ".join(spec.succeededBy),
+        "deprecatedBy": " ".join(spec.deprecatedBy),
         "sourceRefs": " ".join(spec.sourceRefs),
         "runtimeCompatibility": json.dumps(spec.runtimeCompatibility, ensure_ascii=False),
         "docs": json.dumps(spec.docs, ensure_ascii=False),
@@ -750,7 +758,16 @@ def _field_weight(name: str) -> float:
         return 2.75
     if name in {"capabilityRefs", "toolRefs", "requiredEvidence", "expectedOutputs"}:
         return 2.0
-    if name in {"procedure", "examples", "body", "linkedSkills"}:
+    if name in {
+        "procedure",
+        "examples",
+        "body",
+        "linkedSkills",
+        "requires",
+        "alternatives",
+        "succeededBy",
+        "deprecatedBy",
+    }:
         return 1.25
     return 1.0
 
