@@ -236,6 +236,7 @@ class WorkbenchLoop:
         activity_count += 1
         results: list[dict[str, Any]] = []
         for index, plan in enumerate(state.plan, start=1):
+            plan = _injectStepDependency(plan, results)
             yield self._tool_start(state, plan["tool"], plan["args"])
             result = _executePlan(plan)
             state.toolCalls.append({"pass": "work", "tool": plan["tool"], "ok": result.ok, "summary": result.summary})
@@ -812,6 +813,7 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
     except Exception:  # noqa: BLE001
         return []
 
+    last_scan_index: int | None = None
     for step in steps[:8]:  # max 8 step (token cost guard)
         skill_id = str(step.get("skillId") or "")
         if not skill_id:
@@ -827,6 +829,9 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
         if not capability_refs:
             continue
         api_ref = capability_refs[0]
+        is_scan_step = api_ref.startswith("scan.") or api_ref in {"scan", "dartlab.scan"}
+        is_company_step = api_ref.startswith("Company.")
+
         for target in targets[:2] if targets else [None]:
             plan = {
                 "tool": "engine_call",
@@ -839,10 +844,53 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
                     }
                 },
             }
+            # scan→company step dependency: 다음 Company step 이 prev scan 결과
+            # stockCodes 를 target 으로 받게 메타 추가 (실제 inject 는 _injectStepDependency).
+            if is_company_step and last_scan_index is not None and not target:
+                plan["args"]["plan"]["_inheritTargetsFrom"] = last_scan_index
             if not target:
                 plan["args"]["plan"].pop("target", None)
             plans.append(plan)
+        if is_scan_step:
+            last_scan_index = len(plans) - 1
     return plans
+
+
+def _injectStepDependency(plan: dict[str, Any], prev_results: list[dict[str, Any]]) -> dict[str, Any]:
+    """plan 의 _inheritTargetsFrom 메타가 가리키는 prev step 결과 ref 에서 stockCode 추출 후 target 으로 inject.
+
+    매칭 안 되면 원본 그대로 반환 (회귀 보호).
+    """
+    args = plan.get("args") or {}
+    inner = args.get("plan") or {}
+    src_idx = inner.get("_inheritTargetsFrom")
+    if src_idx is None or not isinstance(src_idx, int):
+        return plan
+    if src_idx < 0 or src_idx >= len(prev_results):
+        return plan
+    prev = prev_results[src_idx]
+    prev_refs = (prev.get("result") or {}).refs if hasattr(prev.get("result") or {}, "refs") else []
+    # ref payload 안 stockCode 후보 추출
+    candidates: list[str] = []
+    for ref in prev_refs or []:
+        payload = getattr(ref, "payload", None) or {}
+        if not isinstance(payload, dict):
+            continue
+        # scan rows 형태 — payload.rows[*].stockCode 또는 payload.stockCode
+        rows = payload.get("rows")
+        if isinstance(rows, list):
+            for row in rows[:5]:
+                if isinstance(row, dict):
+                    code = str(row.get("stockCode") or row.get("종목코드") or "").strip()
+                    if code and code not in candidates:
+                        candidates.append(code)
+        code = str(payload.get("stockCode") or "").strip()
+        if code and code not in candidates:
+            candidates.append(code)
+    if not candidates:
+        return plan
+    inner["target"] = candidates[0]  # 첫 후보만 — peer 일괄은 별도 향후 확장
+    return plan
 
 
 def _isLLMProvider(obj: Any) -> bool:

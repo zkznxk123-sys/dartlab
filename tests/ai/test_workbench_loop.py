@@ -96,3 +96,52 @@ def test_done_event_carries_evidence_and_normalized_status() -> None:
     # 정상 시 failureReason 없음
     if meta.get("responseStatus") == "ok":
         assert "failureReason" not in meta
+
+
+@pytest.mark.unit
+def test_inject_step_dependency_inherits_target_from_scan() -> None:
+    """scan step 결과 ref 의 stockCode 를 다음 Company step 의 target 으로 inject."""
+    from dataclasses import dataclass
+    from dataclasses import field as _field
+
+    from dartlab.ai.contracts import Ref
+    from dartlab.ai.workbench.loop import _injectStepDependency
+
+    @dataclass
+    class _MockResult:
+        refs: list[Ref] = _field(default_factory=list)
+
+    scan_result = _MockResult(
+        refs=[
+            Ref(
+                id="table:scan:growth",
+                kind="tableRef",
+                title="growth scan",
+                source="scan",
+                payload={
+                    "axis": "growth",
+                    "rows": [
+                        {"stockCode": "005930", "name": "삼성전자"},
+                        {"stockCode": "005380", "name": "현대차"},
+                    ],
+                },
+            )
+        ]
+    )
+    prev_results = [{"plan": {"args": {"plan": {"apiRef": "scan.growth"}}}, "result": scan_result}]
+    plan = {
+        "tool": "engine_call",
+        "args": {"plan": {"apiRef": "Company.show", "_inheritTargetsFrom": 0}},
+    }
+    injected = _injectStepDependency(plan, prev_results)
+    assert injected["args"]["plan"].get("target") == "005930"
+
+
+@pytest.mark.unit
+def test_inject_step_dependency_passthrough_when_no_meta() -> None:
+    """_inheritTargetsFrom 메타가 없으면 plan 그대로 반환 (회귀 보호)."""
+    from dartlab.ai.workbench.loop import _injectStepDependency
+
+    plan = {"tool": "engine_call", "args": {"plan": {"apiRef": "Company.show", "target": "005930"}}}
+    injected = _injectStepDependency(plan, [])
+    assert injected == plan
