@@ -1,3 +1,7 @@
+// docs 라우트는 /skills 로 흡수됐다. 본 navigation 배열은 빈 배열로 유지하고,
+// 호출처 (CommandPalette, search 페이지) 가 자동으로 빈 결과를 반환하게 한다.
+// flattenNav 와 findPrevNext 는 호출 시그니처 호환성 위해 보존.
+
 export interface NavItem {
 	title: string;
 	href: string;
@@ -5,24 +9,7 @@ export interface NavItem {
 	items?: NavItem[];
 }
 
-export const navigation: NavItem[] = [
-	{
-		title: 'Getting Started',
-		href: '/docs/getting-started',
-		items: [
-			{ title: 'Installation', href: '/docs/getting-started/installation' },
-			{ title: 'Quick Start', href: '/docs/getting-started/quickstart' }
-		]
-	},
-	{
-		title: 'Notebooks',
-		href: '/docs/tutorials'
-	},
-	{
-		title: 'About',
-		href: '/docs/about'
-	}
-];
+export const navigation: NavItem[] = [];
 
 export function flattenNav(items: NavItem[]): NavItem[] {
 	const result: NavItem[] = [];

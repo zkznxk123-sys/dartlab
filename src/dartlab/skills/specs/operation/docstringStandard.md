@@ -110,7 +110,7 @@ TargetMarkets:
 
 ## 작성 예시
 
-[src/dartlab/providers/dart/company.py](src/dartlab/providers/dart/company.py) 의 `_showImpl` docstring 끝부분:
+`src/dartlab/providers/dart/company.py` ([GitHub](https://github.com/eddmpython/dartlab/blob/master/src/dartlab/providers/dart/company.py)) 의 `_showImpl` docstring 끝부분:
 
 ```
 LLM Specifications:
@@ -129,7 +129,7 @@ LLM Specifications:
 
 ## 검증
 
-[scripts/build/generateSpec.py](scripts/build/generateSpec.py) `_parseDocstringSections` 가 `## LLM Specifications` 또는 `LLM Specifications:` 헤더를 인식해 `_parseLLMSpecs(value)` 로 sub-key 6 종 (AntiPatterns / OutputSchema / Prerequisites / Freshness / Dataflow / TargetMarkets) 추출 → `entry["llmSpecs"]` 에 박힌다. 이 `llmSpecs` 는:
+`scripts/build/generateSpec.py` ([GitHub](https://github.com/eddmpython/dartlab/blob/master/scripts/build/generateSpec.py)) 의 `_parseDocstringSections` 가 `## LLM Specifications` 또는 `LLM Specifications:` 헤더를 인식해 `_parseLLMSpecs(value)` 로 sub-key 6 종 (AntiPatterns / OutputSchema / Prerequisites / Freshness / Dataflow / TargetMarkets) 추출 → `entry["llmSpecs"]` 에 박힌다. 이 `llmSpecs` 는:
 
 - `dartlab/core/capability/_generated.py` 의 capability catalog
 - `dartlab.ai.tools.readCapability.readCapability(...)` 의 payload
