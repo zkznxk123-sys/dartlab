@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { Search, FileText, BookOpen, ArrowRight } from 'lucide-svelte';
+	import { Search, FileText, BookOpen, ArrowRight, Wrench } from 'lucide-svelte';
 	import { navigation, flattenNav } from '$lib/docs/navigation';
 	import { posts } from '$lib/blog/posts';
+	import skillIndex from '$skills/index.json';
 
 	let open = $state(false);
 	let query = $state('');
@@ -13,7 +14,8 @@
 	interface SearchItem {
 		title: string;
 		href: string;
-		category: 'Docs' | 'Blog' | 'Quick Links';
+		category: 'Docs' | 'Blog' | 'Quick Links' | 'Skills';
+		subtitle?: string;
 	}
 
 	const docsItems: SearchItem[] = flattenNav(navigation).map((item) => ({
@@ -28,19 +30,43 @@
 		category: 'Blog'
 	}));
 
+	interface SkillIndexEntry {
+		id: string;
+		title: string;
+		category?: string;
+		categoryTitle?: string;
+		purpose?: string;
+	}
+
+	const skillItems: SearchItem[] = (
+		(skillIndex as { skills?: SkillIndexEntry[] }).skills ?? []
+	)
+		.filter((skill) => skill.category !== 'capability')
+		.map((skill) => ({
+			title: skill.title,
+			href: `${base}/skills/${skill.id}`,
+			category: 'Skills' as const,
+			subtitle: skill.id
+		}));
+
 	const quickLinks: SearchItem[] = [
-		{ title: 'Installation', href: `${base}/docs/getting-started/installation`, category: 'Quick Links' },
-		{ title: 'Quickstart', href: `${base}/docs/getting-started/quickstart`, category: 'Quick Links' },
-		{ title: 'Skills', href: `${base}/skills`, category: 'Quick Links' }
+		{ title: 'Installation', href: `${base}/skills/start.installUv`, category: 'Quick Links' },
+		{ title: 'Quick Start', href: `${base}/skills/start.quickStart`, category: 'Quick Links' },
+		{ title: 'Skills Catalog', href: `${base}/skills`, category: 'Quick Links' },
+		{ title: 'About', href: `${base}/about`, category: 'Quick Links' }
 	];
 
-	const allItems = [...quickLinks, ...docsItems, ...blogItems];
+	const allItems = [...quickLinks, ...skillItems, ...docsItems, ...blogItems];
 
 	let filtered = $derived.by(() => {
 		if (!query.trim()) return allItems.slice(0, 8);
 		const q = query.toLowerCase();
 		return allItems
-			.filter((item) => item.title.toLowerCase().includes(q))
+			.filter(
+				(item) =>
+					item.title.toLowerCase().includes(q) ||
+					(item.subtitle?.toLowerCase().includes(q) ?? false)
+			)
 			.slice(0, 12);
 	});
 
@@ -101,6 +127,7 @@
 	function getCategoryIcon(category: string) {
 		if (category === 'Docs') return BookOpen;
 		if (category === 'Blog') return FileText;
+		if (category === 'Skills') return Wrench;
 		return ArrowRight;
 	}
 </script>
@@ -123,7 +150,7 @@
 					bind:this={inputEl}
 					bind:value={query}
 					type="text"
-					placeholder="Search docs, blog..."
+					placeholder="Search skills, docs, blog..."
 					class="flex-1 bg-transparent text-sm text-dl-text placeholder:text-dl-text-dim outline-none"
 				/>
 				<kbd class="px-1.5 py-0.5 rounded bg-dl-bg-card border border-dl-border text-[10px] font-mono text-dl-text-dim leading-none">ESC</kbd>

@@ -23,16 +23,22 @@ const industryEntries = existsSync(mapIndustriesDir)
 	: [];
 
 function rehypeBaseUrl() {
-	return (tree) => {
+	return (tree, file) => {
+		// 호출 컨텍스트 식별: skill 본문이면 ./assets/foo → /skills/assets/foo,
+		// 블로그(또는 그 외) 이면 /blog/assets/foo (기존 동작).
+		const filePath = file?.path ?? file?.history?.[0] ?? '';
+		const isSkillFile =
+			filePath.includes('/skills/specs/') || filePath.includes('\\skills\\specs\\');
+		const assetsBase = isSkillFile ? '/skills/assets/' : '/blog/assets/';
+
 		visit(tree, 'element', (node) => {
 			if (node.tagName === 'img' && node.properties?.src) {
 				const src = node.properties.src;
-				// 1) 블로그 본문의 ./assets/foo.svg|webp|png 상대경로 →
-				//    평면 구조(/blog/assets/{filename})로 변환.
-				//    syncBlogAssets.js가 모든 블로그 자산을 단일 폴더로 복사함.
+				// 1) 본문의 ./assets/foo.svg|webp|png 상대경로 →
+				//    평면 구조 (skills 본문은 /skills/assets/, 그 외는 /blog/assets/) 로 변환.
 				if (src.startsWith('./assets/')) {
 					const fileName = src.slice('./assets/'.length);
-					node.properties.src = `${basePath}/blog/assets/${fileName}`;
+					node.properties.src = `${basePath}${assetsBase}${fileName}`;
 					return;
 				}
 				// 2) 절대경로 (/avatar.png 등) → basePath 접두

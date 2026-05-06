@@ -1,0 +1,353 @@
+<script lang="ts">
+	import skillIndex from '$skills/index.json';
+	import { ChevronDown, ChevronRight, Layers } from 'lucide-svelte';
+
+	interface SkillDoc {
+		id: string;
+		title: string;
+		category: string;
+		categoryTitle?: string;
+	}
+
+	interface CategoryMeta {
+		id: string;
+		title: string;
+		description?: string;
+		count: number;
+	}
+
+	let {
+		selectedCategory = $bindable('all'),
+		selectedSubGroup = $bindable<string | null>(null)
+	}: {
+		selectedCategory?: string;
+		selectedSubGroup?: string | null;
+	} = $props();
+
+	const skills = ((skillIndex as { skills?: SkillDoc[] }).skills ?? []).filter(
+		(s) => s.category !== 'capability'
+	);
+
+	const indexMeta =
+		(skillIndex as { meta?: { categories?: CategoryMeta[] } }).meta ?? {};
+
+	const categoryOrder = ['start', 'runtime', 'operation', 'engines'];
+
+	const categories = $derived.by(() => {
+		return categoryOrder.map((id) => {
+			const items = skills.filter((s) => s.category === id);
+			const metaEntry = indexMeta.categories?.find((c) => c.id === id);
+			return {
+				id,
+				title: metaEntry?.title ?? id,
+				description: metaEntry?.description,
+				count: items.length
+			};
+		});
+	});
+
+	function getSubGroup(skill: SkillDoc): string | null {
+		if (skill.category !== 'engines') return null;
+		const parts = skill.id.split('.');
+		return parts.length >= 2 ? parts[1] : null;
+	}
+
+	const engineSubGroups = $derived.by(() => {
+		const grouped = new Map<string, number>();
+		for (const s of skills) {
+			const sg = getSubGroup(s);
+			if (sg) grouped.set(sg, (grouped.get(sg) ?? 0) + 1);
+		}
+		return [...grouped.entries()]
+			.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+			.map(([id, count]) => ({ id, count }));
+	});
+
+	let enginesExpanded = $state(true);
+
+	function selectCategory(id: string) {
+		selectedCategory = id;
+		selectedSubGroup = null;
+		if (id === 'engines') enginesExpanded = true;
+	}
+
+	function toggleEngines(e: MouseEvent) {
+		e.stopPropagation();
+		enginesExpanded = !enginesExpanded;
+	}
+
+	function selectSubGroup(sg: string) {
+		selectedCategory = 'engines';
+		selectedSubGroup = sg;
+		enginesExpanded = true;
+	}
+
+	function selectAll() {
+		selectedCategory = 'all';
+		selectedSubGroup = null;
+	}
+
+	const totalCount = $derived(skills.length);
+</script>
+
+<aside class="sidebar" aria-label="Skill categories">
+	<div class="head">
+		<p class="head-kicker">Catalog</p>
+		<p class="head-title">{totalCount} skills · 4 카테고리</p>
+	</div>
+
+	<div class="cat-row all-row" class:active={selectedCategory === 'all'}>
+		<button class="cat-main" onclick={selectAll}>
+			<Layers size={14} class="row-icon" />
+			<span class="cat-name">All</span>
+			<span class="cat-count">{totalCount}</span>
+		</button>
+	</div>
+
+	{#each categories as cat}
+		<div class="cat-block">
+			<div
+				class="cat-row cat-{cat.id}"
+				class:active={selectedCategory === cat.id && !selectedSubGroup}
+			>
+				<button
+					class="cat-main"
+					onclick={() => selectCategory(cat.id)}
+					title={cat.description ?? ''}
+				>
+					{#if cat.id === 'engines'}
+						<span class="cat-chevron-spacer"></span>
+					{:else}
+						<span class="cat-dot"></span>
+					{/if}
+					<span class="cat-name">{cat.title}</span>
+					<span class="cat-count">{cat.count}</span>
+				</button>
+				{#if cat.id === 'engines'}
+					<button
+						class="expand-btn"
+						onclick={toggleEngines}
+						aria-label={enginesExpanded ? 'Collapse engines' : 'Expand engines'}
+					>
+						{#if enginesExpanded}
+							<ChevronDown size={14} />
+						{:else}
+							<ChevronRight size={14} />
+						{/if}
+					</button>
+				{/if}
+			</div>
+
+			{#if cat.id === 'engines' && enginesExpanded}
+				<ul class="sub-list">
+					{#each engineSubGroups as sg}
+						<li>
+							<button
+								class="sub-row"
+								class:active={selectedSubGroup === sg.id}
+								onclick={() => selectSubGroup(sg.id)}
+							>
+								<span class="sub-name">{sg.id}</span>
+								<span class="sub-count">{sg.count}</span>
+							</button>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</div>
+	{/each}
+</aside>
+
+<style>
+	.sidebar {
+		position: sticky;
+		top: 5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 1rem 0.85rem;
+		border: 1px solid var(--dl-line);
+		border-radius: var(--dl-r-md);
+		background: var(--dl-bg-raised);
+		max-height: calc(100vh - 6rem);
+		overflow-y: auto;
+	}
+
+	.head {
+		padding: 0 0.4rem 0.85rem;
+		border-bottom: 1px solid var(--dl-line);
+		margin-bottom: 0.6rem;
+	}
+
+	.head-kicker {
+		margin: 0;
+		font-size: 0.65rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		font-weight: 700;
+		color: var(--dl-orange);
+	}
+
+	.head-title {
+		margin: 0.2rem 0 0;
+		font-size: 0.78rem;
+		color: var(--dl-ink-mute);
+		font-family: var(--dl-font-mono);
+	}
+
+	.cat-row {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		border-radius: var(--dl-r-sm);
+		transition: background var(--dl-dur-hover) var(--dl-ease-soft);
+	}
+
+	.cat-row:hover {
+		background: var(--dl-bg-overlay);
+	}
+
+	.cat-row.active {
+		background: var(--dl-bg-overlay);
+	}
+
+	.cat-main {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		gap: 0.55rem;
+		min-width: 0;
+		padding: 0.5rem 0.55rem;
+		border: none;
+		background: transparent;
+		color: var(--dl-ink-mute);
+		font-size: 0.85rem;
+		text-align: left;
+		cursor: pointer;
+		border-radius: var(--dl-r-sm);
+		transition: color var(--dl-dur-hover) var(--dl-ease-soft);
+	}
+
+	.cat-row:hover .cat-main {
+		color: var(--dl-ink);
+	}
+
+	.cat-row.active .cat-main {
+		color: var(--dl-ink-print);
+		font-weight: 600;
+	}
+
+	.all-row .cat-main {
+		flex: 1;
+	}
+
+	.cat-name {
+		flex: 1;
+	}
+
+	.cat-count {
+		padding: 0.05rem 0.4rem;
+		border-radius: var(--dl-r-pill);
+		background: var(--dl-bg-modal);
+		color: var(--dl-ink-dim);
+		font-size: 0.7rem;
+		font-family: var(--dl-font-mono);
+	}
+
+	.cat-row.active .cat-count {
+		color: var(--dl-ink);
+	}
+
+	.cat-dot {
+		display: inline-block;
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--dl-ink-dim);
+		flex-shrink: 0;
+	}
+
+	.cat-chevron-spacer {
+		display: inline-block;
+		width: 8px;
+		flex-shrink: 0;
+	}
+
+	.cat-start .cat-dot { background: var(--dl-cat-start); }
+	.cat-runtime .cat-dot { background: var(--dl-cat-runtime); }
+	.cat-operation .cat-dot { background: var(--dl-cat-operation); }
+
+	.expand-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		margin-right: 0.25rem;
+		padding: 0;
+		border: none;
+		border-radius: 3px;
+		background: transparent;
+		color: var(--dl-cat-engines);
+		cursor: pointer;
+		transition: background var(--dl-dur-hover);
+	}
+
+	.expand-btn:hover {
+		background: var(--dl-cat-engines-soft);
+	}
+
+	.sub-list {
+		list-style: none;
+		margin: 0.3rem 0 0.3rem 1.4rem;
+		padding: 0 0 0 0.35rem;
+		border-left: 1px solid var(--dl-line);
+		max-height: 18rem;
+		overflow-y: auto;
+	}
+
+	.sub-list li + li {
+		margin-top: 0.1rem;
+	}
+
+	.sub-row {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		width: 100%;
+		padding: 0.32rem 0.45rem;
+		border: none;
+		border-radius: var(--dl-r-sm);
+		background: transparent;
+		color: var(--dl-ink-dim);
+		font-size: 0.78rem;
+		font-family: var(--dl-font-mono);
+		text-align: left;
+		cursor: pointer;
+		transition: background var(--dl-dur-hover);
+	}
+
+	.sub-row:hover {
+		background: var(--dl-cat-engines-soft);
+		color: var(--dl-cat-engines);
+	}
+
+	.sub-row.active {
+		background: var(--dl-cat-engines-soft);
+		color: var(--dl-cat-engines);
+		font-weight: 600;
+	}
+
+	.sub-name { flex: 1; }
+	.sub-count {
+		font-size: 0.68rem;
+		color: var(--dl-ink-faint);
+	}
+
+	@media (max-width: 920px) {
+		.sidebar {
+			position: static;
+			max-height: none;
+		}
+	}
+</style>

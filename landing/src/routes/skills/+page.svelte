@@ -1,13 +1,46 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import Header from '$lib/components/sections/Header.svelte';
 	import Footer from '$lib/components/sections/Footer.svelte';
-	import SkillSearch from '$lib/components/skills/SkillSearch.svelte';
+	import CategorySidebar from '$lib/components/skills/CategorySidebar.svelte';
+	import SkillCardGrid from '$lib/components/skills/SkillCardGrid.svelte';
+	import skillIndex from '$skills/index.json';
 	import { buildAbsoluteUrl, buildBreadcrumbJsonLd, buildWebsiteJsonLd } from '$lib/seo';
 	import { brand } from '$lib/brand';
+	import { Search, Sparkles, ArrowRight } from 'lucide-svelte';
 
-	const pageTitle = 'DartLab Skills — 작업 체계 문서';
+	interface RuntimeEntry { status?: string; }
+	interface SkillDoc {
+		id: string;
+		title: string;
+		category: string;
+		categoryTitle?: string;
+		status: string;
+		purpose: string;
+		runtimeCompatibility?: Record<string, RuntimeEntry>;
+	}
+
+	const skills = ((skillIndex as { skills?: SkillDoc[] }).skills ?? []).filter(
+		(s) => s.category !== 'capability'
+	);
+
+	// 진입 skill — 처음 방문자가 어디부터 봐야 하는지 명시.
+	const entryIds = ['start.dartlabSkillOs', 'start.installUv', 'start.quickStart'];
+	const entrySkills = entryIds
+		.map((id) => skills.find((s) => s.id === id))
+		.filter((s): s is SkillDoc => s !== undefined);
+
+	let selectedCategory = $state('all');
+	let selectedSubGroup = $state<string | null>(null);
+	let query = $state('');
+
+	function openGlobalSearch() {
+		window.dispatchEvent(new Event('open-command-palette'));
+	}
+
+	const pageTitle = 'DartLab Skills — 작업 체계 카탈로그';
 	const pageDesc =
-		'DartLab 분석 절차, 엔진 능력, 운영 규칙, 확장 절차를 목적별로 검색하고 바로 실행 순서로 읽는 문서형 skill catalog.';
+		'DartLab 분석 절차 · 엔진 능력 · 운영 규칙 · 확장 절차를 카테고리로 골라 입력 · 출력 · 검증 · 실행 순서를 한 화면에서 읽는 skill catalog. 사람과 LLM 이 같은 표면을 본다.';
 	const pageUrl = buildAbsoluteUrl('skills');
 	const jsonLd = JSON.stringify([
 		buildWebsiteJsonLd(),
@@ -30,59 +63,328 @@
 </svelte:head>
 
 <Header context="skills" />
+
 <main class="skill-page">
-	<section class="skill-hero">
+	<section class="hero">
 		<p class="kicker">Skills</p>
 		<h1>DartLab Skills 작업 체계</h1>
-		<p>
-			무엇을 분석하거나 운영하려는지 먼저 고르고, 필요한 데이터·실행 순서·검산 기준·원문 위치를 한 화면에서 읽는다.
-			개별 API 문서와 흩어진 운영 문서를 직접 뒤지는 대신 사람과 LLM이 같은 skill을 기준으로 작업한다.
-			각 skill 은 <code>/skills/&lt;id&gt;</code> 전용 페이지가 있어 직접 링크·인용·LLM 인덱싱이 가능하다.
+		<p class="lead">
+			무엇을 분석하거나 운영하려는지 먼저 고른다. 각 skill 은 입력 · 출력 · 검증 기준 · 실행 순서를
+			한 화면에 묶는다. 사람과 LLM 이 같은 표면을 본다 — 외부 API 문서를 직접 뒤지지 않는다.
 		</p>
+
+		<div class="search-row">
+			<button class="cmdk-btn" onclick={openGlobalSearch} type="button">
+				<Search size={14} />
+				<span>전역 검색</span>
+				<kbd>⌘K</kbd>
+			</button>
+			<input
+				type="text"
+				bind:value={query}
+				placeholder="현재 카테고리 안에서 검색..."
+				class="local-search"
+			/>
+		</div>
 	</section>
-	<SkillSearch />
+
+	{#if entrySkills.length > 0}
+		<section class="entry-block" aria-label="첫 진입">
+			<header class="entry-head">
+				<Sparkles size={14} class="entry-icon" />
+				<h2>처음 왔다면 — 진입 순서</h2>
+			</header>
+			<ol class="entry-grid">
+				{#each entrySkills as skill, i}
+					<li>
+						<a href="{base}/skills/{skill.id}" class="entry-card">
+							<span class="step">{i + 1}</span>
+							<div class="entry-body">
+								<h3>{skill.title}</h3>
+								<p>{skill.purpose}</p>
+								<div class="entry-foot">
+									<code>{skill.id}</code>
+									<ArrowRight size={12} class="arrow" />
+								</div>
+							</div>
+						</a>
+					</li>
+				{/each}
+			</ol>
+		</section>
+	{/if}
+
+	<section class="catalog" aria-label="전체 카탈로그">
+		<header class="catalog-head">
+			<h2>전체 카탈로그</h2>
+			<p class="catalog-sub">
+				4 카테고리 · 시작 (Start) · 실행 환경 (Runtime) · 운영 규칙 (Operation) · 엔진 (Engines)
+			</p>
+		</header>
+
+		<div class="layout">
+			<CategorySidebar bind:selectedCategory bind:selectedSubGroup />
+			<SkillCardGrid {skills} {selectedCategory} {selectedSubGroup} {query} />
+		</div>
+	</section>
 </main>
+
 <Footer />
 
 <style>
 	.skill-page {
 		min-height: 100vh;
-		padding: 6.5rem 1.25rem 4rem;
-		background: #050811;
-		color: #f1f5f9;
-	}
-
-	.skill-page :global(.skill-search) {
-		max-width: 1120px;
+		max-width: var(--dl-w-max);
 		margin: 0 auto;
+		padding: 6.5rem 1.25rem 4rem;
+		background: var(--dl-bg-base);
+		color: var(--dl-ink);
 	}
 
-	.skill-hero {
-		max-width: 1120px;
-		margin: 0 auto 1.5rem;
+	.hero {
+		max-width: var(--dl-w-wide);
+		margin: 0 auto 2.5rem;
 	}
 
 	.kicker {
 		margin: 0 0 0.5rem;
-		color: #fb923c;
-		font-size: 0.75rem;
+		color: var(--dl-orange);
+		font-size: 0.72rem;
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.1em;
 	}
 
 	h1 {
-		margin: 0 0 0.75rem;
-		font-size: clamp(2rem, 4vw, 3.5rem);
-		line-height: 1.05;
-		letter-spacing: 0;
+		margin: 0 0 0.85rem;
+		font-family: var(--dl-font-head);
+		font-size: clamp(2rem, 4vw, 3.2rem);
+		line-height: 1.1;
+		color: var(--dl-ink-print);
+		letter-spacing: -0.01em;
 	}
 
-	.skill-hero p {
-		max-width: 760px;
+	.lead {
+		max-width: 60rem;
+		margin: 0 0 1.5rem;
+		color: var(--dl-ink-mute);
+		font-size: 1rem;
+		line-height: 1.7;
+	}
+
+	.search-row {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		flex-wrap: wrap;
+	}
+
+	.cmdk-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--dl-line-strong);
+		border-radius: var(--dl-r-md);
+		background: var(--dl-bg-overlay);
+		color: var(--dl-ink-mute);
+		font-size: 0.85rem;
+		cursor: pointer;
+		transition: border-color var(--dl-dur-hover), color var(--dl-dur-hover);
+	}
+
+	.cmdk-btn:hover {
+		border-color: var(--dl-orange);
+		color: var(--dl-ink);
+	}
+
+	.cmdk-btn kbd {
+		padding: 0.05rem 0.35rem;
+		border: 1px solid var(--dl-line-strong);
+		border-radius: 3px;
+		background: var(--dl-bg-modal);
+		color: var(--dl-ink-dim);
+		font-family: var(--dl-font-mono);
+		font-size: 0.7rem;
+	}
+
+	.local-search {
+		flex: 1;
+		min-width: 220px;
+		padding: 0.55rem 0.85rem;
+		border: 1px solid var(--dl-line);
+		border-radius: var(--dl-r-md);
+		background: var(--dl-bg-raised);
+		color: var(--dl-ink);
+		font-size: 0.88rem;
+		font-family: var(--dl-font-ui);
+	}
+
+	.local-search:focus {
+		outline: none;
+		border-color: var(--dl-orange);
+	}
+
+	.local-search::placeholder {
+		color: var(--dl-ink-dim);
+	}
+
+	.entry-block {
+		max-width: var(--dl-w-wide);
+		margin: 0 auto 2.5rem;
+		padding: 1.4rem 1.5rem;
+		border: 1px solid var(--dl-line);
+		border-radius: var(--dl-r-lg);
+		background: linear-gradient(
+			135deg,
+			rgba(251, 146, 60, 0.06),
+			rgba(15, 18, 25, 0.6)
+		);
+	}
+
+	.entry-head {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.entry-head h2 {
 		margin: 0;
-		color: #94a3b8;
-		line-height: 1.75;
+		font-size: 1rem;
+		color: var(--dl-ink-print);
+		font-weight: 600;
 	}
 
+	.entry-block :global(.entry-icon) {
+		color: var(--dl-orange);
+	}
+
+	.entry-grid {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: 0.75rem;
+	}
+
+	.entry-card {
+		display: flex;
+		gap: 0.75rem;
+		align-items: flex-start;
+		padding: 0.95rem 1rem;
+		border: 1px solid var(--dl-line);
+		border-radius: var(--dl-r-md);
+		background: var(--dl-bg-raised);
+		text-decoration: none;
+		color: inherit;
+		transition: border-color var(--dl-dur-hover), background var(--dl-dur-hover),
+			transform var(--dl-dur-hover);
+	}
+
+	.entry-card:hover {
+		border-color: var(--dl-orange);
+		background: var(--dl-bg-overlay);
+		transform: translateY(-1px);
+	}
+
+	.step {
+		flex-shrink: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: var(--dl-orange-soft);
+		color: var(--dl-orange);
+		font-family: var(--dl-font-mono);
+		font-size: 0.75rem;
+		font-weight: 700;
+	}
+
+	.entry-body {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.entry-body h3 {
+		margin: 0 0 0.3rem;
+		font-size: 0.9rem;
+		color: var(--dl-ink-print);
+		font-weight: 600;
+	}
+
+	.entry-body p {
+		margin: 0 0 0.5rem;
+		font-size: 0.78rem;
+		line-height: 1.5;
+		color: var(--dl-ink-mute);
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.entry-foot {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.4rem;
+	}
+
+	.entry-foot code {
+		font-family: var(--dl-font-mono);
+		font-size: 0.66rem;
+		color: var(--dl-ink-dim);
+	}
+
+	.entry-card :global(.arrow) {
+		color: var(--dl-ink-faint);
+		transition: color var(--dl-dur-hover), transform var(--dl-dur-hover);
+	}
+
+	.entry-card:hover :global(.arrow) {
+		color: var(--dl-orange);
+		transform: translateX(2px);
+	}
+
+	.catalog {
+		max-width: var(--dl-w-wide);
+		margin: 0 auto;
+	}
+
+	.catalog-head {
+		margin-bottom: 1.25rem;
+		padding-bottom: 0.85rem;
+		border-bottom: 1px solid var(--dl-line);
+	}
+
+	.catalog-head h2 {
+		margin: 0 0 0.3rem;
+		font-size: 1.15rem;
+		color: var(--dl-ink-print);
+		font-weight: 600;
+	}
+
+	.catalog-sub {
+		margin: 0;
+		font-size: 0.82rem;
+		color: var(--dl-ink-dim);
+		font-family: var(--dl-font-mono);
+	}
+
+	.layout {
+		display: grid;
+		grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+		gap: 1.5rem;
+		align-items: start;
+	}
+
+	@media (max-width: 920px) {
+		.layout {
+			grid-template-columns: 1fr;
+		}
+	}
 </style>

@@ -61,6 +61,19 @@
 	--dl-bad: #ef4444;
 	--dl-info: #60a5fa;
 
+	/* ── Skills 카테고리 색상 ──
+	 * 4 카테고리 (start · runtime · operation · engines) 시각 구분.
+	 * 카드 borderLeft, 사이드바 chip, 검색 결과 badge 에 일관 적용.
+	 */
+	--dl-cat-start: #60a5fa;
+	--dl-cat-start-soft: rgba(96, 165, 250, 0.1);
+	--dl-cat-runtime: #a78bfa;
+	--dl-cat-runtime-soft: rgba(167, 139, 250, 0.1);
+	--dl-cat-operation: #34d399;
+	--dl-cat-operation-soft: rgba(52, 211, 153, 0.1);
+	--dl-cat-engines: #fb923c;
+	--dl-cat-engines-soft: rgba(251, 146, 60, 0.1);
+
 	/* ── Radius · 4/8/12, 16+ 금지 (신뢰감) ── */
 	--dl-r-sm: 4px;
 	--dl-r-md: 8px;
