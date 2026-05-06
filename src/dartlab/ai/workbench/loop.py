@@ -1,7 +1,8 @@
-"""Ask Workbench loop.
+"""Ask Workbench loop — 5 패스 단일 SSOT.
 
-P1+: LLM provider 가 실제 anthropic/openai 등이면 5 패스 작업대 (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST).
-provider="dartlab" (stub) 이면 기존 휴리스틱 path 유지 — 외부 callers (CLI/server/tests) 호환.
+`runtime.workbenchEvidenceFlow` 명세에 따라 BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST
+순서로 진행한다. provider 가 실제 LLM (anthropic/openai/etc) 이면 LLM-driven 5 패스,
+provider="dartlab" / 미해결이면 휴리스틱 path — 둘 다 같은 5 패스 노드명을 사용한다.
 """
 
 from __future__ import annotations
@@ -17,26 +18,23 @@ from dartlab.ai.tools.skillSearch import skillSearch
 from dartlab.ai.tools.types import ToolResult
 from dartlab.ai.tools.verifyAnswer import verifyAnswer
 
-# P1: 5 패스 모듈
 from .brief import runBrief
 from .compose import runCompose
 from .critique import runCritique
 from .gate import runGate
-from .harvest import runHarvest
+from .harvest import _wireMemory, runHarvest
 from .scratchpad import Scratchpad
 from .state import WorkbenchState
 from .work import runWork
 
+# 5 패스 단일 SSOT — runtime.workbenchEvidenceFlow 와 일치.
 GRAPH_NODES: tuple[str, ...] = (
-    "routeIntent",
-    "selectSkill",
-    "searchCapability",
-    "planEvidence",
-    "executeTool",
-    "observeResult",
-    "verifyClaims",
-    "composeAnswer",
-    "repairOrFail",
+    "brief",
+    "work",
+    "critique",
+    "compose",
+    "gate",
+    "harvest",
 )
 
 _COMPANY_SPLIT_RE = re.compile(r"\s*(?:,|/|vs\.?|VS\.?|랑|하고|와|과)\s*")
@@ -85,25 +83,23 @@ _NON_EXECUTABLE_API_REFS = {"ask", "Company.ask", "ChartResult"}
 
 
 class WorkbenchLoop:
-    """Production ask loop.
+    """Production ask loop — 5 패스 단일 SSOT.
 
-    The loop does not route by question-specific answer templates.  It first
-    searches root Skill OS, then generated capabilities/docstrings, then builds
-    executable tool plans from those refs.
+    routeIntent / selectSkill / searchCapability / planEvidence 는 BRIEF 안에 흡수,
+    executeTool / observeResult 는 WORK 안의 도구 루프, verifyClaims 는 GATE 의
+    programmatic 검증, composeAnswer 는 COMPOSE, repairOrFail 은 GATE 회귀 + 종료
+    분기로 통합되었다.
     """
 
     nodes = GRAPH_NODES
 
     def stream(self, question: str, **kwargs: Any) -> Iterator[TraceEvent]:
-        # P1 dispatch: LLM provider 가 anthropic/openai/google/xai/ollama 면 5 패스
         provider_obj = kwargs.pop("provider", None)
         if provider_obj is None:
             provider_obj = _resolveProvider(kwargs.get("config"))
         if _isLLMProvider(provider_obj):
             yield from self._streamLLMPasses(question, provider_obj, **kwargs)
             return
-
-        # provider="dartlab" 또는 미해결 → 기존 휴리스틱 path (호환)
         yield from self._streamHeuristic(question, **kwargs)
 
     def _streamLLMPasses(self, question: str, provider: Any, **kwargs: Any) -> Iterator[TraceEvent]:
@@ -131,18 +127,19 @@ class WorkbenchLoop:
         yield TraceEvent("graph_node", {"node": "gate", "status": "running"})
         yield from runGate(state)
 
-        # GATE blocked 면 WORK 1 회 회귀 — 이후 다시 COMPOSE/GATE
+        # GATE 차단 시 WORK 1 회 회귀 — 이후 다시 COMPOSE/GATE.
         if state.gateBlocked and state.iteration < 1:
             state.iteration += 1
-            yield TraceEvent("graph_node", {"node": "work_repeat", "status": "running"})
+            yield TraceEvent("graph_node", {"node": "work", "status": "running", "round": state.iteration})
             yield from runWork(state, provider)
+            yield TraceEvent("graph_node", {"node": "compose", "status": "running", "round": state.iteration})
             yield from runCompose(state, provider)
+            yield TraceEvent("graph_node", {"node": "gate", "status": "running", "round": state.iteration})
             yield from runGate(state)
 
         yield TraceEvent("graph_node", {"node": "harvest", "status": "running"})
         yield from runHarvest(state, provider)
 
-        # 답변 emit
         answer = state.answerText or "응답 생성 실패"
         if state.gateBlocked:
             issues = "; ".join(state.gateIssues)
@@ -165,13 +162,20 @@ class WorkbenchLoop:
                     "responseStatus": state.status,
                     "refCount": len(state.refs),
                     "scratchpad": scratchpad.ref(),
-                    "passes": ["brief", "work", "critique", "compose", "gate", "harvest"],
+                    "passes": list(GRAPH_NODES),
                 },
             },
         )
 
     def _streamHeuristic(self, question: str, **kwargs: Any) -> Iterator[TraceEvent]:
-        """기존 휴리스틱 path. CLI/server/test_ai_research_graph 호환."""
+        """휴리스틱 path — provider 가 LLM 이 아닐 때. 같은 5 패스 노드명을 발행한다.
+
+        - BRIEF: profile + skill_search + generated_spec_search + planEvidence 를 묶음
+        - WORK: engine_call 실행 루프
+        - GATE: verifyAnswer (programmatic)
+        - COMPOSE: 답안 합성
+        - HARVEST: 휴리스틱 path 에서는 LLM 이 없어 no-op
+        """
         state = WorkbenchState(
             question=str(question or "").strip(),
             threadId=str(kwargs.get("threadId") or ""),
@@ -180,37 +184,39 @@ class WorkbenchLoop:
         scratchpad = Scratchpad(state.runId)
         activity_count = 0
 
+        # ── BRIEF ──
+        yield self._node("brief", "질문 profile + skill/capability 후보를 만듭니다.", state)
+        activity_count += 1
         state.profile = _buildQuestionProfile(state.question, stockCode=kwargs.get("stockCode"))
         state.intent = str(state.profile.get("taskType") or "research")
-        yield self._node("routeIntent", "질문 profile을 만들었습니다.", state)
-        activity_count += 1
-        scratchpad.append("routeIntent", {"profile": state.profile})
+        scratchpad.append("brief.profile", {"profile": state.profile})
 
-        yield self._node("selectSkill", "Skill OS에서 실행 절차를 찾습니다.", state)
-        activity_count += 1
         yield self._tool_start(state, "skill_search", {"query": state.question, "limit": 8})
         skill_result = skillSearch(state.question, limit=8)
         state.selectedSkillRefs = skill_result.refs
         state.refs.extend(skill_result.refs)
-        state.toolCalls.append({"tool": "skill_search", "ok": skill_result.ok})
-        scratchpad.append("toolResult", {"tool": "skill_search", "result": skill_result.to_dict()})
+        state.toolCalls.append({"pass": "brief", "tool": "skill_search", "ok": skill_result.ok})
+        scratchpad.append("brief.skill_search", {"result": skill_result.to_dict()})
         yield self._tool_result(state, "skill_search", skill_result)
         yield TraceEvent("reference", {"refs": [ref.to_dict() for ref in skill_result.refs], "query": state.question})
 
-        yield self._node("searchCapability", "generated spec/docstring에서 호출 가능한 API를 찾습니다.", state)
-        activity_count += 1
         yield self._tool_start(state, "generated_spec_search", {"query": state.question, "limit": 10})
         spec_result = generatedSpecSearch(state.question, limit=10)
         state.apiRefs = spec_result.refs
         state.refs.extend(spec_result.refs)
-        state.toolCalls.append({"tool": "generated_spec_search", "ok": spec_result.ok})
-        scratchpad.append("toolResult", {"tool": "generated_spec_search", "result": spec_result.to_dict()})
+        state.toolCalls.append({"pass": "brief", "tool": "generated_spec_search", "ok": spec_result.ok})
+        scratchpad.append("brief.spec_search", {"result": spec_result.to_dict()})
         yield self._tool_result(state, "generated_spec_search", spec_result)
 
-        yield self._node("planEvidence", "skill/capability refs로 실행 계획을 만듭니다.", state)
-        activity_count += 1
+        # selectedSkillRefs 의 requiredEvidence 통합 → state.requiredEvidence
+        for ref in state.selectedSkillRefs:
+            payload = ref.payload if isinstance(ref.payload, dict) else {}
+            for ev in payload.get("requiredEvidence") or []:
+                if ev not in state.requiredEvidence:
+                    state.requiredEvidence.append(str(ev))
+
         state.plan = _planEvidence(state)
-        scratchpad.append("planEvidence", {"plan": state.plan})
+        scratchpad.append("brief.plan", {"plan": state.plan})
         yield TraceEvent(
             "plan",
             {
@@ -218,23 +224,24 @@ class WorkbenchLoop:
                 "nodes": list(self.nodes),
                 "selectedSkillIds": [_skillId(ref) for ref in state.selectedSkillRefs],
                 "candidateApiRefs": _candidateApiRefs(state),
-                "requiredEvidence": _requiredEvidence(state),
+                "requiredEvidence": state.requiredEvidence or _requiredEvidence(state),
             },
         )
 
+        # ── WORK ──
+        yield self._node("work", "engine_call 실행 루프.", state)
+        activity_count += 1
         results: list[dict[str, Any]] = []
         for index, plan in enumerate(state.plan, start=1):
-            yield self._node("executeTool", f"{plan['tool']} 실행 {index}/{len(state.plan)}", state)
-            activity_count += 1
             yield self._tool_start(state, plan["tool"], plan["args"])
             result = _executePlan(plan)
-            state.toolCalls.append({"tool": plan["tool"], "ok": result.ok, "summary": result.summary})
+            state.toolCalls.append({"pass": "work", "tool": plan["tool"], "ok": result.ok, "summary": result.summary})
             state.refs.extend(result.refs)
             results.append({"plan": plan, "result": result})
-            scratchpad.append("toolResult", {"tool": plan["tool"], "args": plan["args"], "result": result.to_dict()})
+            scratchpad.append(
+                "work.toolResult", {"tool": plan["tool"], "args": plan["args"], "result": result.to_dict()}
+            )
             yield self._tool_result(state, plan["tool"], result)
-            yield self._node("observeResult", result.summary, state, status="done" if result.ok else "failed")
-            activity_count += 1
             if not result.ok:
                 state.failure = result.error or "tool_failed"
                 break
@@ -244,27 +251,33 @@ class WorkbenchLoop:
         elif not state.plan and _requiresExecution(state):
             state.failure = "missing_tool_plan"
 
+        # ── COMPOSE + GATE ──
         if state.failure is None:
+            yield self._node("compose", "검증된 근거로 답변을 작성합니다.", state)
+            activity_count += 1
             answer = _composeAnswer(state, results)
+            state.answerText = answer
+
+            yield self._node("gate", "claim ↔ ref 검증.", state)
+            activity_count += 1
             verify_result = verifyAnswer(answer, state.refs)
             state.verification = verify_result.data
             state.refs.extend(verify_result.refs)
-            scratchpad.append("verifyClaims", verify_result.to_dict())
-            yield self._node("verifyClaims", "숫자/날짜/근거를 검증합니다.", state)
-            activity_count += 1
+            scratchpad.append("gate.verify", verify_result.to_dict())
             yield TraceEvent("verify", {"refId": "verify:answer", "result": verify_result.data})
             if not verify_result.ok:
                 state.failure = ",".join(verify_result.data.get("issues") or ["verification_failed"])
         else:
             answer = _failureMessage(state.failure)
-            yield self._node("verifyClaims", "도구 실패로 검증을 중단합니다.", state, status="failed")
+            yield self._node("gate", "도구 실패로 검증을 중단합니다.", state, status="failed")
             activity_count += 1
             yield TraceEvent("verify", {"refId": "verify:answer", "result": {"ok": False, "issues": [state.failure]}})
 
+        # ── 실패 분기 ──
         if state.failure:
             state.status = "failed"
             failure_text = _failureMessage(state.failure)
-            yield self._node("repairOrFail", failure_text, state, status="failed")
+            yield self._node("gate", failure_text, state, status="failed")
             yield TraceEvent(
                 "unable", {"reason": state.failure, "message": failure_text, "refs": [ref.id for ref in state.refs]}
             )
@@ -281,14 +294,16 @@ class WorkbenchLoop:
                         "failureReason": state.failure,
                         "activityCount": activity_count,
                         "scratchpad": scratchpad.ref(),
+                        "passes": list(GRAPH_NODES),
                     },
                 },
             )
             return
 
+        # ── HARVEST (휴리스틱: LLM 발굴은 no-op, 메모리 wiring 은 실행) ──
         state.status = "done"
-        yield self._node("composeAnswer", "검증된 근거로 답변을 작성합니다.", state, status="done")
-        activity_count += 1
+        state.answerText = answer
+        _wireMemory(state)
         yield TraceEvent("answer", {"text": answer, "evidenceRefs": [ref.id for ref in state.refs]})
         for chunk in _chunks(answer):
             yield TraceEvent("chunk", {"text": chunk})
@@ -304,6 +319,7 @@ class WorkbenchLoop:
                     "refCount": len(state.refs),
                     "activityCount": activity_count,
                     "scratchpad": scratchpad.ref(),
+                    "passes": list(GRAPH_NODES),
                 },
             },
         )
@@ -724,10 +740,10 @@ def _resolveProvider(config: Any = None) -> Any:
 
 
 def _isLLMProvider(obj: Any) -> bool:
-    """5 패스 작업대 path 사용 여부 — WorkbenchProvider Protocol (generate) 만족 + check_available True 면 True.
+    """5 패스 LLM-driven path 사용 여부.
 
-    config.provider 가 oauth-codex / openai / gemini / codex / ollama / custom / groq / cerebras / mistral
-    중 하나일 때 적용. 미해결 / dartlab stub 등은 휴리스틱 path.
+    WorkbenchProvider Protocol (generate) 만족 + check_available True + provider id 가
+    실제 LLM 어댑터일 때 True. 미해결 / dartlab stub 등은 휴리스틱 path.
     """
     if obj is None:
         return False

@@ -57,9 +57,28 @@ def get_config(provider: str | None = None, role: str | None = None, **kwargs: A
             resolved = get_profile_manager().resolve(provider, role=role)
         except (OSError, RuntimeError, ValueError):
             resolved = {}
+    resolved_provider = provider or resolved.get("provider") or base.provider
+    # 모델 우선순위:
+    #   1. 호출자 explicit kwarg (아래 for-loop 에서 마지막 덮어씀)
+    #   2. configure() 로 저장한 base.model — 사용자 명시 선택, 보존
+    #   3. OpenAI family + base.model 미설정 → latest_openai_model()
+    #   4. profile_manager 저장 model (server 자동 저장)
+    profile_model = resolved.get("model")
+    if base.model:
+        resolved_model = base.model
+    else:
+        try:
+            from dartlab.ai.settings.model_resolver import is_openai_family_provider, latest_openai_model
+
+            if is_openai_family_provider(resolved_provider):
+                resolved_model = latest_openai_model()
+            else:
+                resolved_model = profile_model
+        except (ImportError, OSError, RuntimeError, ValueError):
+            resolved_model = profile_model
     values = {
-        "provider": provider or resolved.get("provider") or base.provider,
-        "model": resolved.get("model") or base.model,
+        "provider": resolved_provider,
+        "model": resolved_model,
         "api_key": resolved.get("api_key") or base.api_key,
         "base_url": resolved.get("base_url") or base.base_url,
         "temperature": resolved.get("temperature") if resolved.get("temperature") is not None else base.temperature,

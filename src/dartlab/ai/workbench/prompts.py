@@ -28,13 +28,36 @@ WORK_PROMPT = f"""{ANALYST_IDENTITY}
 지금은 WORK 단계입니다. BRIEF 에서 세운 계획을 실행해 데이터·계산 결과를 모읍니다.
 
 핵심 도구:
-- run_python: dartlab + Polars 코드 실행. 재무제표·가격·스캔·랭킹 모두 이 도구 안에서. \
-emit_result(...) 로 결과를 묶으면 자동으로 valueRef·tableRef 가 발급됩니다.
+- inspect_dataset: dataset schema/최신/샘플을 먼저 확인. run_python 코드 짜기 전에 컬럼 추측 실패 방지.
+- run_python: dartlab + Polars 코드 실행. 재무제표·가격·스캔·랭킹 모두 이 도구 안에서.
+- engine_call: 단순 dartlab API 호출 (Company.show / scan / macro 등) 만 필요하면 run_python 대신 사용.
 - web_search: 외부 최신 정보가 필요할 때만.
 - save_artifact: 큰 표·차트를 별도 파일로 남길 때.
 
+**emit_result() 필수 사용**:
+run_python 안에서 결과를 그냥 print 만 하면 GATE 가 차단합니다. 반드시 emit_result() 로 묶어야 valueRef / tableRef / dateRef 가 자동 발급됩니다.
+
+```python
+import dartlab
+c = dartlab.Company('005930')
+bs = c.show('BS', freq='Q')  # Polars DataFrame
+# 핵심 숫자
+emit_result(
+    values={{"asset": float(bs[0, '자산총계']), "equity": float(bs[0, '자본총계'])}},
+    units={{"asset": "원", "equity": "원"}},
+    table=bs.to_dicts(),  # 표 형태 결과
+    date="2025-Q3",  # 데이터 기준일
+)
+```
+
+규약:
+- 숫자 답: `values={{...}}` (dict[str, number]) → 각 키마다 valueRef 발급
+- 표 답: `table=[...]` (list[dict]) → tableRef 발급
+- 기간 답: `date="..."` 또는 `dateRef="..."` → dateRef 발급
+- 단위 명시: `units={{"key": "원/억/%"}}`
+
 원칙:
-- 질문의 모든 숫자·날짜·랭킹 주장은 run_python 결과 ref 로 뒷받침되어야 합니다.
+- 질문의 모든 숫자·날짜·랭킹 주장은 emit_result() 로 묶인 ref 로 뒷받침되어야 합니다.
 - 코드 실행 실패 시 즉시 다른 접근을 시도. 같은 오류로 반복하지 않습니다.
 - 충분한 ref 가 모이면 작업을 종료합니다.
 """
@@ -43,11 +66,12 @@ CRITIQUE_PROMPT = f"""{ANALYST_IDENTITY}
 
 지금은 CRITIQUE 단계입니다. WORK 에서 모은 결과를 비판적으로 점검합니다.
 
-점검 항목:
-1. 반대가설: 답이 맞다면 어떤 증거가 더 필요한가? 누락된 lens (펀더멘털 / 거시 / 기술 / 심리) 가 있는가?
+기본 점검 항목:
+1. 반대가설: 답이 맞다면 어떤 증거가 더 필요한가? 본 질문이 실제로 요구하는 lens 가 빠지지 않았는가?
 2. 데이터 신선도: ref 의 dateRef 가 최신인가? 휴장·미공시·아직 미반영 분기는 없는가?
 3. 비교 단위: 회사간·기간간·시장간·엔진간 비교의 단위 (통화·기간·연결/별도) 가 일치하는가?
-4. 인과 6 막: 경제 → 섹터 → 기업 → 재무 → 가치 흐름이 끊기지 않았는가?
+
+추가 점검 항목은 BRIEF 에서 선택한 skill 의 requiredEvidence 가 결정합니다 — 사용자 컨텍스트의 "선택 skill 의 requiredEvidence" 목록을 그대로 체크리스트로 사용하세요. 모든 질문에 동일한 분석 단계 (6 막 인과 같은) 를 강제하지 않습니다 — 절차는 skill 이 정합니다.
 
 출력: 발견한 이슈를 1~5 개 bullet 로. 추가 데이터가 필요하면 명시. 충분하면 "추가 작업 불필요".
 """

@@ -13,7 +13,10 @@ from typing import Any
 
 _CODEX_CONFIG_PATH = Path.home() / ".codex" / "config.toml"
 _DEFAULT_CODEX_MODELS = [
+    "gpt-5.5",
+    "gpt-5.5-codex",
     "gpt-5.4",
+    "gpt-5.4-codex",
     "gpt-5.3",
     "gpt-5.3-codex",
     "gpt-5.2",

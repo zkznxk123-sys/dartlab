@@ -32,6 +32,7 @@ def proposeSkill(
     knowledgeRefs: list[str] | None = None,
     requiredEvidence: list[str] | None = None,
     body: str = "",
+    **_extra: Any,  # LLM 이 schema 외 인자 (kind/scope/status 등) 넘겨도 무시
 ) -> ToolResult:
     sid = (skillId or "").strip()
     if not sid or not _ID_RE.match(sid.replace(".", "")):

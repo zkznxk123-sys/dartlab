@@ -19,6 +19,12 @@ def runWork(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[Trac
         passName="work",
         systemPrompt=WORK_PROMPT,
         userContext=buildContextSummary(state),
-        allowedTools=["run_python", "web_search", "save_artifact"],
+        allowedTools=[
+            "run_python",
+            "inspect_dataset",
+            "engine_call",
+            "web_search",
+            "save_artifact",
+        ],
         maxRounds=8,
     )

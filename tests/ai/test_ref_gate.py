@@ -15,7 +15,7 @@ def test_gate_blocks_numbers_without_value_refs() -> None:
     state.refs = []  # ref 0
     list(runGate(state))
     assert state.gateBlocked is True
-    assert any("valueRef" in i or "tableRef" in i or "executionRef" in i for i in state.gateIssues)
+    assert "unsupported_numeric_claim" in state.gateIssues
 
 
 @pytest.mark.unit

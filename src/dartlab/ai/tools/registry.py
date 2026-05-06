@@ -7,6 +7,7 @@ from typing import Any, Callable
 
 from .engineCall import engineCall
 from .generatedSpecSearch import generatedSpecSearch
+from .inspectDataset import inspectDataset
 from .proposeSkill import proposeSkill
 from .read import read
 from .readCapability import readCapability
@@ -156,6 +157,21 @@ _SPECS: dict[str, ToolSpec] = {
             "required": ["skillId", "title", "purpose"],
         },
     ),
+    "inspect_dataset": ToolSpec(
+        "inspect_dataset",
+        "dataset 의 schema, 행 수, 최신 관측, 샘플을 빠르게 확인해 datasetRef 를 만든다. WORK 에서 run_python 코드를 짜기 전 schema 확인용.",
+        {
+            "type": "object",
+            "properties": {
+                "target": {
+                    "type": "string",
+                    "description": "예: 'Company.show:005930:BS', 'scan:profitability', 'macro', 'gather:price:005930'",
+                },
+                "sampleRows": {"type": "integer"},
+            },
+            "required": ["target"],
+        },
+    ),
 }
 
 _TOOLS: dict[str, ToolFn] = {
@@ -172,6 +188,7 @@ _TOOLS: dict[str, ToolFn] = {
     "read_capability": readCapability,
     "save_artifact": saveArtifact,
     "propose_skill": proposeSkill,
+    "inspect_dataset": inspectDataset,
 }
 
 CANONICAL_TOOL_NAMES = tuple(_SPECS.keys())
@@ -259,8 +276,23 @@ def executeTool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any]
     elif name == "verify_answer":
         result = _TOOLS[name](payload.get("answer", ""), payload.get("refs") or [])
     else:
-        result = _TOOLS[name](**payload)
+        # 약한 모델이 schema 외 인자를 줄 수 있어 알려진 파라미터만 필터.
+        # 함수가 **kwargs 를 받으면 그대로 통과.
+        filtered = _filterKwargs(_TOOLS[name], payload)
+        result = _TOOLS[name](**filtered)
     return result.to_dict()
+
+
+def _filterKwargs(func: Callable[..., Any], payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        sig = inspect.signature(func)
+    except (TypeError, ValueError):
+        return payload
+    accepts_var_kw = any(p.kind is inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values())
+    if accepts_var_kw:
+        return payload
+    known = {p.name for p in sig.parameters.values() if p.kind is not inspect.Parameter.VAR_POSITIONAL}
+    return {k: v for k, v in payload.items() if k in known}
 
 
 def _schemaFromSignature(func: Callable[..., Any]) -> dict[str, Any]:

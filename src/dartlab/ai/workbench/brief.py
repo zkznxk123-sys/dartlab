@@ -30,7 +30,7 @@ def runBrief(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[Tra
         passName="brief",
         systemPrompt=BRIEF_PROMPT,
         userContext=user_ctx,
-        allowedTools=["read_skill", "read_capability"],
+        allowedTools=["read_skill", "read_capability", "read"],
         maxRounds=4,
     )
 

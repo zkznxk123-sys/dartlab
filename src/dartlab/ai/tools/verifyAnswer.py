@@ -1,30 +1,43 @@
-"""Ref-based final answer verifier."""
+"""verify_answer — GATE 검증 로직의 호환 wrapper.
+
+검증 SSOT 는 `dartlab.ai.workbench.gate`. 본 도구는 외부 호출자 (휴리스틱 path,
+독립 호출자) 가 동일 검증을 직접 트리거할 때 사용한다. 새 production 경로의
+LLM-driven 패스에서는 GATE 가 직접 실행하므로 이 도구를 호출할 필요 없다.
+"""
 
 from __future__ import annotations
-
-import re
 
 from dartlab.ai.contracts import Ref
 
 from .types import ToolResult
 
-_DATE_RE = re.compile(r"\b(?:20\d{2}|19\d{2})(?:[-.]?\d{1,2})?(?:[-.]?\d{1,2})?\b")
-_CODE_SPAN_RE = re.compile(r"`[^`]*`")
-_CODE_BLOCK_RE = re.compile(r"```.*?```", re.DOTALL)
-_MATERIAL_NUMBER_RE = re.compile(r"\d[\d,.]*(?:\s?(?:조원|억원|원|%|배|건|개|위|Q[1-4]))")
-_MATERIAL_DATE_TERMS = ("기준", "최신", "기간", "시점", "as of", "asof", "latest")
-
 
 def verifyAnswer(answer: str, refs: list[Ref] | list[dict]) -> ToolResult:
-    ref_kinds = {_ref_kind(ref) for ref in refs}
+    """답안 ↔ refs 검증 — gate.runGate 와 같은 규칙."""
+    from dartlab.ai.workbench.gate import (
+        _hasMaterialDate,
+        _hasMaterialNumber,
+        _hasRankingClaim,
+        _refTokenKinds,
+        _stripCode,
+    )
+
+    ref_kinds = {_refKind(ref) for ref in refs}
+    text = _stripCode(str(answer or ""))
+    token_kinds = _refTokenKinds(answer or "")
     issues: list[str] = []
-    text = _strip_code(str(answer or ""))
-    if _has_material_number(text) and not ({"valueRef", "tableRef"} & ref_kinds):
+
+    if (
+        _hasMaterialNumber(text)
+        and not (ref_kinds & {"valueRef", "tableRef", "executionRef"})
+        and not (token_kinds & {"valueRef", "tableRef", "executionRef"})
+    ):
         issues.append("unsupported_numeric_claim")
-    if _has_material_date(text) and "dateRef" not in ref_kinds:
+    if _hasMaterialDate(text) and "dateRef" not in ref_kinds and "dateRef" not in token_kinds:
         issues.append("unsupported_date_claim")
-    if _has_material_ranking(text) and "tableRef" not in ref_kinds:
+    if _hasRankingClaim(text) and "tableRef" not in ref_kinds and "tableRef" not in token_kinds:
         issues.append("missing_ranking_table_ref")
+
     ok = not issues
     verify_ref = Ref(
         id="verify:answer",
@@ -36,28 +49,7 @@ def verifyAnswer(answer: str, refs: list[Ref] | list[dict]) -> ToolResult:
     return ToolResult(ok, "검증 통과" if ok else "검증 실패", refs=[verify_ref], data={"ok": ok, "issues": issues})
 
 
-def _strip_code(text: str) -> str:
-    return _CODE_SPAN_RE.sub("", _CODE_BLOCK_RE.sub("", text))
-
-
-def _has_material_number(text: str) -> bool:
-    return bool(_MATERIAL_NUMBER_RE.search(text))
-
-
-def _has_material_date(text: str) -> bool:
-    if not _DATE_RE.search(text):
-        return False
-    lowered = text.lower()
-    return any(term in lowered for term in _MATERIAL_DATE_TERMS)
-
-
-def _has_material_ranking(text: str) -> bool:
-    if not any(term in text for term in ("순위", "상위", "후보", "랭킹")):
-        return False
-    return "|" in text or bool(_MATERIAL_NUMBER_RE.search(text))
-
-
-def _ref_kind(ref: Ref | dict) -> str:
+def _refKind(ref: Ref | dict) -> str:
     if isinstance(ref, Ref):
         return ref.kind
     return str(ref.get("kind") or "")
