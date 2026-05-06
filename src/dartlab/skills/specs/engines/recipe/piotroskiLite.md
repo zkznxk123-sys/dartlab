@@ -55,13 +55,13 @@ Joseph Piotroski, *"Value Investing: The Use of Historical Financial Statement I
 
 | 번호 | 항목 | dartlab 계산 |
 |---|---|---|
-| 1 | ROA > 0 | `roa > 0` |
-| 2 | CFO > 0 | `operatingCfMargin > 0` |
-| 3 | ΔROA > 0 | 당년 `roa` − 전년 `roa` > 0 |
-| 4 | CFO > NI | `operatingCfMargin > netMargin` (accrual quality) |
-| 5 | ΔdebtRatio < 0 | 당년 `debtRatio` − 전년 `debtRatio` < 0 |
-| 6 | ΔcurrentRatio > 0 | 당년 `currentRatio` − 전년 `currentRatio` > 0 |
-| 7 | ΔgrossMargin > 0 | 당년 `grossMargin` − 전년 `grossMargin` > 0 |
+| 1 | ROA &gt; 0 | `roa > 0` |
+| 2 | CFO &gt; 0 | `operatingCfMargin > 0` |
+| 3 | ΔROA &gt; 0 | 당년 `roa` − 전년 `roa` &gt; 0 |
+| 4 | CFO &gt; NI | `operatingCfMargin > netMargin` (accrual quality) |
+| 5 | ΔdebtRatio &lt; 0 | 당년 `debtRatio` − 전년 `debtRatio` &lt; 0 |
+| 6 | ΔcurrentRatio &gt; 0 | 당년 `currentRatio` − 전년 `currentRatio` &gt; 0 |
+| 7 | ΔgrossMargin &gt; 0 | 당년 `grossMargin` − 전년 `grossMargin` &gt; 0 |
 
 원전 9 점 → 7 점 변환 시 임계는 5 점 이상 (≈ 원전 7 점) 을 권장.
 

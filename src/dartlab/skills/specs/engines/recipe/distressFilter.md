@@ -59,9 +59,9 @@ Z = 1.2·X₁ + 1.4·X₂ + 3.3·X₃ + 0.6·X₄ + 1.0·X₅
 본 recipe 는 X₄ 제외 + 음수 영업CF 게이트 추가. 정확한 Z-Score 계산 대신 **회피용 블랙리스트** (역방향 스크리너) 로 사용.
 
 해석:
-- Z > 2.99 = 안전 (Safe Zone)
+- Z &gt; 2.99 = 안전 (Safe Zone)
 - 1.81 ≤ Z ≤ 2.99 = 회색 (Grey Zone)
-- Z < 1.81 = 위험 (Distress Zone)
+- Z &lt; 1.81 = 위험 (Distress Zone)
 
 본 recipe 는 다른 스크리너 (qualityValue, garp, graham) 결과에서 distress 종목을 빼는 데 우선. 단독 사용 시 부도 위험 종목 식별 가능.
 

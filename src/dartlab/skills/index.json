@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 211,
+    "skillCount": 217,
     "categories": [
       {
         "id": "start",
@@ -26,7 +26,7 @@
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 179
+        "count": 185
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -10931,6 +10931,88 @@
       }
     },
     {
+      "id": "engines.recipe.compounderCandidates",
+      "title": "Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "Buffett-style quality compounder 발굴 — ROE / revenueGrowth / grossMargin 의 5 년 평균과 표준편차로 사이클 무관 일관 quality 종목을 횡단으로 식별하는 절차.",
+      "whenToUse": [
+        "장기 복리 종목 발굴",
+        "Buffett style quality",
+        "5 년 ROE 일관성",
+        "사이클 무관 quality",
+        "compounder 후보",
+        "우량주 횡단 비교"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan",
+        "engines.scan.ratio",
+        "engines.scan.valuation",
+        "engines.recipe.qualityValueScreen",
+        "engines.recipe.garpScreen",
+        "engines.recipe.distressFilter",
+        "engines.analysis.profitability",
+        "engines.analysis.efficiency"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "ROE ≥ 15% 일관 5 년 + 표준편차 작음 (사이클 무관).",
+        "매출 안정 성장 (역성장 없음).",
+        "grossMargin 안정 — moat (가격결정력) 의 정량 신호.",
+        "Asness-Frazzini-Pedersen, *\"Quality Minus Junk\"* (2019): profitability + safety + payout 결합 quality factor. 1956-2016 미국 연 5%p 초과수익. 핵심 — 단년도가 아닌 5 년 평균 + 일관성 (표준편차 역수).",
+        "Novy-Marx (2014): ROE 일관성 (low volatility) 가 high mean ROE 보다 미래 수익률과 강한 상관.",
+        "Sloan (1996): 일관 고-ROE 회사가 mean reversion 회피하는 비율 30% (전체 평균 5%) — 진짜 moat 신호.",
+        "`stockCode`, `corpName`",
+        "`roe5yMean : float` — 5 년 ROE 평균 (≥ 15%)",
+        "`roe5yStd : float` — 5 년 ROE 표준편차 (≤ 5%p)",
+        "`roe5yMin : float` — 5 년 ROE 최소값 (≥ 10%)",
+        "`gm5yMean : float` — 5 년 grossMargin 평균",
+        "`gm5yStd : float` — 5 년 grossMargin 표준편차"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 freq=\"Y\" 5 기간 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
       "id": "engines.recipe.creditDeepDive",
       "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)",
       "category": "engines",
@@ -11366,6 +11448,88 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 전종목 스캔 메모리 부담"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.distressFilter",
+      "title": "Altman-lite 부도 위험 회피 필터 (역방향 블랙리스트)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "Altman Z-Score (1968) 5 변수 중 dartlab 으로 가능한 4 변수 + 음수 영업CF 게이트 를 결합해 부도 위험 종목을 횡단으로 식별하고 다른 스크리너 결과의 블랙리스트로 사용하는 회피 절차.",
+      "whenToUse": [
+        "부도 위험 회피",
+        "Altman Z-Score 근사",
+        "재무 부실 종목 거름",
+        "가치 함정 안전 가드",
+        "블랙리스트 필터",
+        "distress signal"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan",
+        "engines.scan.screen",
+        "engines.scan.account",
+        "engines.recipe.qualityValueScreen",
+        "engines.recipe.garpScreen",
+        "engines.recipe.grahamDeepValue",
+        "engines.credit",
+        "engines.analysis.cashflow"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "Z > 2.99 = 안전 (Safe Zone)",
+        "1.81 ≤ Z ≤ 2.99 = 회색 (Grey Zone)",
+        "Z < 1.81 = 위험 (Distress Zone)",
+        "`stockCode`, `corpName`",
+        "`finance.ratio.debtRatio : float` (≥ 200%)",
+        "`finance.ratio.currentRatio : float` (≤ 1.0)",
+        "`finance.ratio.operatingCfMargin : float` (음수)",
+        "`stockCode`, 3 기간 net_income (모두 음수)",
+        "**X₄ 부재 (시총/총부채)** — 정확한 Z-Score 직접 X. 본 recipe 는 4/5 변수 근사 + CFO 추가.",
+        "**금융업 부적합** — 은행·보험 부채비율 자연히 높음 (수신·보험금). 본 recipe 결과에서 금융업 별도 제외 필요 (`scan(\"fields\")` 의 industry 필터 활용).",
+        "**사이클 산업 일시 적자** — 조선·반도체 다운사이클 1-2 년 적자 정상. 3 년 연속 적자만 가져와서 일시 적자 회피.",
+        "**임계값 (200% / 1.0 / 음수) 은 보수적 절대치** — 산업별 분포 차이 큼. 산업 percentile 기반 게이트 확장 가능."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
       }
@@ -11830,6 +11994,88 @@
       }
     },
     {
+      "id": "engines.recipe.garpScreen",
+      "title": "GARP 스크리닝 (Lynch PEG 근사 + 부채 게이트)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "Lynch GARP (Growth at Reasonable Price) — PEG = PER / 이익성장률 ≤ 1 을 dartlab 의 netProfitGrowth 로 근사하고 부채·매출성장 게이트 를 더해 성장+가치 결합 후보를 횡단으로 발굴하는 절차.",
+      "whenToUse": [
+        "GARP 성장+가치 결합",
+        "Lynch PEG 스크리닝",
+        "성장 대비 저평가",
+        "PER < 성장률",
+        "부채 안정 성장주",
+        "시장 미반영 성장"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan",
+        "engines.scan.screen",
+        "engines.scan.valuation",
+        "engines.scan.ratio",
+        "engines.recipe.qualityValueScreen",
+        "engines.recipe.distressFilter",
+        "engines.recipe.compounderCandidates",
+        "engines.analysis.valuation"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "**PEG ratio** = PER / 이익성장률 (%). PEG ≤ 1 = 시장이 성장률을 미반영.",
+        "핵심 발견: PER 단독 또는 성장률 단독 보다 두 결합이 sharpe ratio 우월.",
+        "Lynch Magellan Fund (1977-1990): 연 29% 수익률 — 본 framework 의 실증.",
+        "`stockCode`, `corpName`",
+        "`finance.ratio.netProfitGrowth : float` — 순이익 YoY (%)",
+        "`finance.ratio.revenueGrowth : float` — 매출 YoY (%)",
+        "`finance.ratio.debtRatio : float` — 부채비율 (%)",
+        "`per`, `pbr : float`",
+        "`grade : str` — valuation grade",
+        "`pegApprox : float` — PEG 근사 (낮을수록 저평가)",
+        "**EPS 성장률 → netProfitGrowth 근사** — 자사주 매입 비중 큰 미국 기업에서 EPS 성장률 > netProfitGrowth (주식수 감소). 한국에서는 자사주 소각 부재로 두 값 거의 동일.",
+        "**단일 연도 성장률 의존** — Lynch 원전은 5 년 평균 EPS 성장률 사용. 본 recipe 는 YoY 1 년 (분기/연간) 만. 5 년 일관성은 `engines.recipe.compounderCandidates` 로 보완."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 valuation snapshot prebuild 의존"
+          ]
+        }
+      }
+    },
+    {
       "id": "engines.recipe.governanceAudit",
       "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)",
       "category": "engines",
@@ -11920,6 +12166,88 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 governance topic 단일 호출 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.grahamDeepValue",
+      "title": "Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "Benjamin Graham (1949) 안전마진 framework 을 ratio 4 게이트 + 5 년 흑자 후처리로 근사해 한국 chaebol discount 트랩을 회피한 deep value 후보를 횡단으로 발굴하는 절차.",
+      "whenToUse": [
+        "Graham deep value",
+        "안전마진 스크리닝",
+        "PBR 1 이하 안전 종목",
+        "저레버리지 가치주",
+        "5 년 흑자 자산주",
+        "가치 함정 회피"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan",
+        "engines.scan.screen",
+        "engines.scan.valuation",
+        "engines.scan.account",
+        "engines.recipe.qualityValueScreen",
+        "engines.recipe.distressFilter",
+        "engines.recipe.piotroskiLite",
+        "engines.analysis.valuation"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "Lakonishok-Shleifer-Vishny (1994): 저-PBR 가치주 1968-90 미국 연 17.3% vs 성장주 9.3%.",
+        "Chan-Hamao-Lakonishok (1991): 일본 시장 동일 효과 — 저-PBR + 높은 매출/주가 결합 우월.",
+        "한국: 단순 저-PBR 은 chaebol discount 함정 → Graham 의 4 게이트 결합으로 함정 회피.",
+        "`stockCode`, `corpName`",
+        "`valuation.pbr : float` — PBR (≤ 1.0)",
+        "`valuation.per : float`",
+        "`finance.ratio.currentRatio : float` — 유동비율",
+        "`finance.ratio.debtRatio : float` — 부채비율",
+        "`finance.ratio.netMargin : float` — 순이익률",
+        "별도 5 년 net_income 컬럼은 후처리 join 시 보존 가능",
+        "**NCAV 직접 계산 X** — Graham 원전 net-net 은 `(cash + 0.75·AR + 0.5·Inv − totalLiab) × 2/3 > marketCap`. 본 recipe 는 PBR 게이트로 근사. 정확한 NCAV 는 `scanAccount` 4 항목 (현금·매출채권·재고·총부채) 결합 + 시가총액 join 별 단계.",
+        "**PBR 1.0 임계는 한국 시장 평균 부근** — 너무 느슨. 진정 deep value 는 PBR 0.7 이하 가능. 단계적 임계 (PBR 0.7 / 0.8 / 1.0) 권장."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 scanAccount 5 기간 시계열 일부 한정"
           ]
         }
       }
@@ -12559,6 +12887,169 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 multi-company 동시 로드 메모리 부담"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.piotroskiLite",
+      "title": "Piotroski F-Score 7 항목 횡단 점수카드",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "Piotroski (2000) F-Score 의 9 항목 중 dartlab ratio 로 가능한 7 항목을 횡단 계산해 저평가 종목군에서 우량 회사를 골라내는 점수카드 절차.",
+      "whenToUse": [
+        "Piotroski F-Score",
+        "가치주 함정 회피",
+        "저PBR 우량 회사 선별",
+        "수익성 + 재무건전성 + 효율성 점수",
+        "F-Score 5 점 이상",
+        "가치주 quality 점수카드"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan",
+        "engines.scan.screen",
+        "engines.scan.ratio",
+        "engines.scan.valuation",
+        "engines.recipe.qualityValueScreen",
+        "engines.recipe.grahamDeepValue",
+        "engines.analysis.earningsQuality"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "고-점수 (8-9 점) 가치주 연 13.4% vs 저-점수 (0-1 점) 5.9%.",
+        "점수 0 → 1 단위 상승 시 평균 +1.5%p 초과수익.",
+        "가치주 (BM 상위 quintile) 안에서 작동, 성장주에서는 약함.",
+        "`stockCode`, `corpName`",
+        "`p1_roa` ~ `p7_dGm : int8` — 7 항목 통과 여부 (0 또는 1)",
+        "`fScore : int` — 0~7 합계",
+        "`pbr`, `per : float` — 시장 multiple",
+        "`grade : str` — valuation grade",
+        "**원전 9 → 7 변환** — 신주발행 항목과 ΔassetTurnover 제외. 한국 자본금 변동은 무상증자·주식배당 등 노이즈로 학술 신호 약함.",
+        "**freq=\"Y\" 만 의존** — 분기 데이터로 ΔROA 등 더 민감한 신호도 가능하나 본 recipe 는 연간 표준.",
+        "**5 기간 일관성 미점검** — 단일 연도 변화만 봄. 5 년 일관성 (compounderCandidates) 또는 학술적 ΔROA 5 년 평균은 별도 확장.",
+        "**PBR 1.5 임계는 조정 가능** — 한국 chaebol discount 시장에서는 1.0 이하로 더 빡빡하게 가능."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 freq=\"Y\" 5 기간 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.qualityValueScreen",
+      "title": "Quality + Value 횡단 스크리닝 (Novy-Marx GP/A 기반)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "Novy-Marx (2013) gross profitability factor (Gross Profit / Total Assets) 와 단순 가치 (PER/PBR) 를 결합해 한국 chaebol discount 트랩을 회피한 quality value 후보를 횡단으로 발굴하는 절차.",
+      "whenToUse": [
+        "저평가 종목 함정 회피",
+        "quality value 결합 스크리닝",
+        "Novy-Marx gross profitability",
+        "한국 PBR 1 이하 함정 거름",
+        "chaebol discount 회피",
+        "횡단 quality + value 후보 발굴"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan",
+        "engines.scan.screen",
+        "engines.scan.valuation",
+        "engines.scan.ratio",
+        "engines.scan.undervaluedQuality",
+        "engines.recipe.distressFilter",
+        "engines.recipe.valuationCheck",
+        "engines.analysis.valuation"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "GP/A 는 가치 (B/M) 와 음(−) 상관 → 둘을 결합하면 hedge 효과로 위험 추가 없이 초과수익.",
+        "1963-2010 미국에서 GP/A 상위 quintile 이 하위 quintile 대비 연 4-5%p 초과수익 (Fama-French 3-factor 보정 후).",
+        "다른 quality 지표 (ROE·earnings growth) 가 가치 (low P/E·P/B) 와 양 상관 → 결합 시 quality 와 value 가 같은 방향, 분산 효과 약함.",
+        "`stockCode : str` — 6 자리 종목 코드 (KR)",
+        "`corpName : str` — 회사명",
+        "`finance.ratio.grossMargin : float` — 매출총이익률 (%)",
+        "`finance.ratio.totalAssetTurnover : float` — 총자산회전율",
+        "`finance.ratio.roe : float` — ROE (%)",
+        "`per`, `pbr`, `psr : float` — 시장 multiple",
+        "`grade : str` — 저평가/적정/고평가/과열",
+        "`gpaApprox : float` — GP/A 근사 (높을수록 강한 quality)",
+        "**GP/A 직접 컬럼 부재** — `grossMargin × totalAssetTurnover` 근사. 정확한 GP/A 는 `gross_profit / total_assets` (account 직접) 으로 확장 가능하나 본 recipe 는 ratio 만 사용."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 valuation snapshot prebuild 의존, refresh=True 호출 불가"
           ]
         }
       }

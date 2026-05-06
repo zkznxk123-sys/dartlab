@@ -122,7 +122,7 @@ candidates = (
 
 ## 기본 검증
 
-- 후보 수 < 30 → 게이트 너무 빡빡 (임계값 완화).
-- 후보 수 > 200 → 게이트 너무 느슨 (totalAssetTurnover 0.7, grossMargin 35% 등 조정).
+- 후보 수 &lt; 30 → 게이트 너무 빡빡 (임계값 완화).
+- 후보 수 &gt; 200 → 게이트 너무 느슨 (totalAssetTurnover 0.7, grossMargin 35% 등 조정).
 - `gpaApprox` 분포 확인 — 상위 10% 와 평균 격차 2 배 이상이어야 quality factor 작동.
 - 단일 종목 결론 X — 본 recipe 는 후보 발굴 단계. 투자 결정은 단일 회사 심층 + valuation band + governance 점검 후.

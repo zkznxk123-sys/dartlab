@@ -1169,6 +1169,17 @@
       ]
     },
     {
+      "id": "engines.recipe.compounderCandidates",
+      "title": "Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 freq=\"Y\" 5 기간 시계열 일부 한정"
+      ]
+    },
+    {
       "id": "engines.recipe.creditDeepDive",
       "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)",
       "category": "engines",
@@ -1221,6 +1232,17 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 전종목 스캔 메모리 부담"
+      ]
+    },
+    {
+      "id": "engines.recipe.distressFilter",
+      "title": "Altman-lite 부도 위험 회피 필터 (역방향 블랙리스트)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 다년 시계열 일부 한정"
       ]
     },
     {
@@ -1279,6 +1301,17 @@
       ]
     },
     {
+      "id": "engines.recipe.garpScreen",
+      "title": "GARP 스크리닝 (Lynch PEG 근사 + 부채 게이트)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 valuation snapshot prebuild 의존"
+      ]
+    },
+    {
       "id": "engines.recipe.governanceAudit",
       "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)",
       "category": "engines",
@@ -1287,6 +1320,17 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 governance topic 단일 호출 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.grahamDeepValue",
+      "title": "Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 scanAccount 5 기간 시계열 일부 한정"
       ]
     },
     {
@@ -1364,6 +1408,28 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 multi-company 동시 로드 메모리 부담"
+      ]
+    },
+    {
+      "id": "engines.recipe.piotroskiLite",
+      "title": "Piotroski F-Score 7 항목 횡단 점수카드",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 freq=\"Y\" 5 기간 시계열 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.qualityValueScreen",
+      "title": "Quality + Value 횡단 스크리닝 (Novy-Marx GP/A 기반)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 valuation snapshot prebuild 의존, refresh=True 호출 불가"
       ]
     },
     {

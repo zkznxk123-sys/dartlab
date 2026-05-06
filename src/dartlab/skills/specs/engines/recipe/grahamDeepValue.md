@@ -44,7 +44,7 @@ lastUpdated: '2026-05-06'
 
 ## 학술 근거
 
-Benjamin Graham, *The Intelligent Investor* (1949) + *Security Analysis* (1934, with Dodd): **Margin of Safety** — 시장가 < 본질가치 와 자본구조 안전성 동시 요구. 핵심 게이트:
+Benjamin Graham, *The Intelligent Investor* (1949) + *Security Analysis* (1934, with Dodd): **Margin of Safety** — 시장가 &lt; 본질가치 와 자본구조 안전성 동시 요구. 핵심 게이트:
 
 1. **PBR ≤ 1.0** — 시장가 ≤ 장부가 (회계상 청산가치 안전마진).
 2. **Current Ratio ≥ 2.0** — 단기 부채 대비 유동자산 2 배 이상 (유동성 안전).
@@ -56,7 +56,7 @@ Benjamin Graham, *The Intelligent Investor* (1949) + *Security Analysis* (1934, 
 - Chan-Hamao-Lakonishok (1991): 일본 시장 동일 효과 — 저-PBR + 높은 매출/주가 결합 우월.
 - 한국: 단순 저-PBR 은 chaebol discount 함정 → Graham 의 4 게이트 결합으로 함정 회피.
 
-dartlab 한계: 진정한 NCAV (Net Current Asset Value) 계산은 `(currentAssets - totalLiabilities) × 2/3 > marketCap` 인데 시가총액 시계열 직접 결합 어려움 → 본 recipe 는 PBR 게이트로 근사. NCAV 계산은 `engines.scan.account` 로 별도 후속 단계.
+dartlab 한계: 진정한 NCAV (Net Current Asset Value) 계산은 `(currentAssets - totalLiabilities) × 2/3` 가 marketCap 보다 커야 하는데 시가총액 시계열 직접 결합 어려움 → 본 recipe 는 PBR 게이트로 근사. NCAV 계산은 `engines.scan.account` 로 별도 후속 단계.
 
 ## 공개 호출 방식
 
@@ -108,7 +108,7 @@ candidates = (
 
 ## 한계
 
-- **NCAV 직접 계산 X** — Graham 원전 net-net 은 `(cash + 0.75·AR + 0.5·Inv − totalLiab) × 2/3 > marketCap`. 본 recipe 는 PBR 게이트로 근사. 정확한 NCAV 는 `scanAccount` 4 항목 (현금·매출채권·재고·총부채) 결합 + 시가총액 join 별 단계.
+- **NCAV 직접 계산 X** — Graham 원전 net-net 공식은 `(cash + 0.75·AR + 0.5·Inv − totalLiab) × 2/3` 가 marketCap 보다 커야 한다. 본 recipe 는 PBR 게이트로 근사. 정확한 NCAV 는 `scanAccount` 4 항목 (현금·매출채권·재고·총부채) 결합 + 시가총액 join 별 단계.
 - **PBR 1.0 임계는 한국 시장 평균 부근** — 너무 느슨. 진정 deep value 는 PBR 0.7 이하 가능. 단계적 임계 (PBR 0.7 / 0.8 / 1.0) 권장.
 - **5 년 흑자만 봄** — 사이클 회사 (조선·반도체) 부분 적자도 정상 가능. 산업별 적용 한계 명시.
 - **금융업 부채비율 게이트 부적합** — 은행·보험·증권은 부채비율 1000% 일상. 본 recipe 결과에서 금융업 별도 분리 권장.

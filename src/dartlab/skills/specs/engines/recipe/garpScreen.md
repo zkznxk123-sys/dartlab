@@ -10,7 +10,7 @@ whenToUse:
   - GARP 성장+가치 결합
   - Lynch PEG 스크리닝
   - 성장 대비 저평가
-  - PER < 성장률
+  - PER 대비 저평가
   - 부채 안정 성장주
   - 시장 미반영 성장
 linkedSkills:
@@ -104,7 +104,7 @@ candidates = (
 
 ## 한계
 
-- **EPS 성장률 → netProfitGrowth 근사** — 자사주 매입 비중 큰 미국 기업에서 EPS 성장률 > netProfitGrowth (주식수 감소). 한국에서는 자사주 소각 부재로 두 값 거의 동일.
+- **EPS 성장률 → netProfitGrowth 근사** — 자사주 매입 비중 큰 미국 기업에서 EPS 성장률 &gt; netProfitGrowth (주식수 감소). 한국에서는 자사주 소각 부재로 두 값 거의 동일.
 - **단일 연도 성장률 의존** — Lynch 원전은 5 년 평균 EPS 성장률 사용. 본 recipe 는 YoY 1 년 (분기/연간) 만. 5 년 일관성은 `engines.recipe.compounderCandidates` 로 보완.
 - **PEG 1.5 임계는 한국 KOSPI 분포 기반** — 미국은 1.0 표준. 시장별 조정 필요.
 - **성장률 음수 종목 자동 제외** — netProfitGrowth ≤ 0 이면 PEG 음수 → 무의미. 흑자 게이트 (`netMargin > 0`) 필수.
@@ -113,7 +113,7 @@ candidates = (
 ## 한국 / 미국 시장 차이
 
 - **한국**: 자사주 매입·소각 미발달로 EPS 성장률 ≈ netProfitGrowth. 단 한국 IPO·주식분할 빈도 낮아 분모 안정. KOSPI 성장주 풀 작아 임계 (15%/10%) 달성 종목 수 100~200 개.
-- **미국**: 자사주 매입 비중 커 EPS > 순이익 성장률 (1-3%p). 본 recipe 보수적 근사. S&P 500 성장 임계 보통 10%/5% 정도로 완화.
+- **미국**: 자사주 매입 비중 커 EPS &gt; 순이익 성장률 (1-3%p). 본 recipe 보수적 근사. S&amp;P 500 성장 임계 보통 10%/5% 정도로 완화.
 
 ## 연계 절차
 

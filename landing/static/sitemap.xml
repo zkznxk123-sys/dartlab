@@ -616,6 +616,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.compounderCandidates</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.creditDeepDive</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -637,6 +642,11 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.disclosureRiskScreen</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.distressFilter</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -666,7 +676,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.garpScreen</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.governanceAudit</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.grahamDeepValue</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -702,6 +722,16 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.peerBenchmark</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.piotroskiLite</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.qualityValueScreen</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
