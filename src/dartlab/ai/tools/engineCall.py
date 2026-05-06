@@ -17,41 +17,14 @@ from .types import ToolResult
 
 _PERIOD_RE = re.compile(r"^\d{4}(?:Q[1-4])?$")
 _STMT_LABELS = {"BS": "재무상태표", "IS": "손익계산서", "CF": "현금흐름표"}
+# 컬럼 alias SSOT 는 dartlab.ai.tools.columnAlias 에 있다. 여기서는 priority list 만
+# 호환 dict 로 변환해 사용 — IS/CF/BS 5+ 표준 컬럼 + 한국어 label.
+from .columnAlias import topicAccountPriority as _topicAccountPriority
+
 _ACCOUNT_PRIORITY = {
-    "BS": (
-        ("cash_and_cash_equivalents", "현금및현금성자산"),
-        ("shortterm_financial_instruments", "단기금융상품"),
-        ("accounts_receivable", "매출채권"),
-        ("inventories", "재고자산"),
-        ("current_assets", "유동자산"),
-        ("total_assets", "자산총계"),
-        ("current_liabilities", "유동부채"),
-        ("total_liabilities", "부채총계"),
-        ("owners_of_parent_equity", "지배주주지분"),
-        ("total_stockholders_equity", "자본총계"),
-        ("total_equity", "자본총계"),
-    ),
-    "IS": (
-        ("sales", "매출액"),
-        ("revenue", "매출액"),
-        ("gross_profit", "매출총이익"),
-        ("operating_profit", "영업이익"),
-        ("operating_income", "영업이익"),
-        ("profit_before_tax", "법인세차감전순이익"),
-        ("net_profit", "당기순이익"),
-        ("net_income", "당기순이익"),
-    ),
-    "CF": (
-        ("operating_cashflow", "영업활동현금흐름"),
-        ("cash_flows_from_operating_activities", "영업활동현금흐름"),
-        ("investing_cashflow", "투자활동현금흐름"),
-        ("cash_flows_from_investing_activities", "투자활동현금흐름"),
-        ("financing_cashflow", "재무활동현금흐름"),
-        ("cash_flows_from_financing_activities", "재무활동현금흐름"),
-        ("purchase_of_property_plant_and_equipment", "유형자산의취득"),
-        ("capital_expenditures", "유형자산의취득"),
-        ("dividends_paid", "배당금지급"),
-    ),
+    "BS": _topicAccountPriority("BS"),
+    "IS": _topicAccountPriority("IS"),
+    "CF": _topicAccountPriority("CF"),
 }
 
 

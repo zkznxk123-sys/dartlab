@@ -34,6 +34,13 @@ WORK_PROMPT = f"""{ANALYST_IDENTITY}
 - web_search: 외부 최신 정보가 필요할 때만.
 - save_artifact: 큰 표·차트를 별도 파일로 남길 때.
 
+**컬럼 정규화 헬퍼** (run_python prelude 자동 노출):
+- `normalizeColumn(topic, hint)` — 한국어 / snake / alias 입력 → 표준 snake_id 반환. 추측 실패 0.
+  - 예: `normalizeColumn("BS", "총자산")` → `"total_assets"`
+  - 예: `normalizeColumn("IS", "영업")` → `"operating_profit"`
+- `columnsFor(topic)` — 표준 컬럼 목록 (snake_id, label, aliases)
+- `availableTopics()` — BS/IS/CF/CIS/SCE
+
 **emit_result() 필수 사용**:
 run_python 안에서 결과를 그냥 print 만 하면 GATE 가 차단합니다. 반드시 emit_result() 로 묶어야 valueRef / tableRef / dateRef 가 자동 발급됩니다.
 

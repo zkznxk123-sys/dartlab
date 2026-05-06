@@ -42,8 +42,22 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
             import polars as pl
 
             import dartlab
+            from dartlab.ai.tools.columnAlias import (
+                availableTopics,
+                columnsFor,
+                normalizeColumn,
+            )
 
-            globals_dict.update({"dartlab": dartlab, "pl": pl})
+            globals_dict.update(
+                {
+                    "dartlab": dartlab,
+                    "pl": pl,
+                    # 컬럼 정규화 헬퍼 — 한국어 / snake / alias → 표준 snake_id.
+                    "normalizeColumn": normalizeColumn,
+                    "columnsFor": columnsFor,
+                    "availableTopics": availableTopics,
+                }
+            )
             with redirect_stdout(stdout), redirect_stderr(stderr):
                 exec(str(code or ""), globals_dict, globals_dict)  # noqa: S102
         except Exception:  # noqa: BLE001
