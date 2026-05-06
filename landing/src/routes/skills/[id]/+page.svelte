@@ -1,11 +1,18 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { onMount, tick } from 'svelte';
 	import Header from '$lib/components/sections/Header.svelte';
 	import Footer from '$lib/components/sections/Footer.svelte';
 	import { brand } from '$lib/brand';
 	import { buildAbsoluteUrl, buildBreadcrumbJsonLd, buildWebsiteJsonLd } from '$lib/seo';
 	import { findRelatedSkills, isCatalogSkillId } from '$lib/skills/catalog';
 	import { ArrowLeft, ExternalLink } from 'lucide-svelte';
+	import ProcedureStepper from '$lib/components/skills/sections/ProcedureStepper.svelte';
+	import EvidenceChecklist from '$lib/components/skills/sections/EvidenceChecklist.svelte';
+	import DoNotDo from '$lib/components/skills/sections/DoNotDo.svelte';
+	import UsageExamples from '$lib/components/skills/sections/UsageExamples.svelte';
+	import RuntimeMatrix from '$lib/components/skills/sections/RuntimeMatrix.svelte';
+	import RecipeSteps from '$lib/components/skills/sections/RecipeSteps.svelte';
 
 	let { data } = $props();
 
@@ -15,6 +22,58 @@
 	const sourcePath = $derived(data.sourcePath);
 
 	const related = $derived(findRelatedSkills(id, 6));
+
+	interface TocItem { id: string; text: string; level: number; }
+	let tocItems: TocItem[] = $state([]);
+	let activeId = $state('');
+	let articleEl: HTMLElement | undefined = $state();
+
+	function extractToc() {
+		if (!articleEl) return;
+		const headings = articleEl.querySelectorAll('h1, h2, h3');
+		const items: TocItem[] = [];
+		headings.forEach((h) => {
+			if (!h.id) {
+				h.id = (h.textContent ?? '')
+					.trim()
+					.toLowerCase()
+					.replace(/[^a-z0-9가-힣]+/g, '-')
+					.replace(/(^-|-$)/g, '');
+			}
+			items.push({
+				id: h.id,
+				text: (h.textContent ?? '').trim(),
+				level: h.tagName === 'H1' ? 1 : h.tagName === 'H2' ? 2 : 3
+			});
+		});
+		tocItems = items;
+	}
+
+	function observeHeadings() {
+		if (!articleEl) return;
+		const headings = articleEl.querySelectorAll('h1, h2, h3');
+		if (headings.length === 0) return;
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						activeId = entry.target.id;
+						break;
+					}
+				}
+			},
+			{ rootMargin: '-80px 0px -70% 0px', threshold: 0 }
+		);
+		headings.forEach((h) => observer.observe(h));
+		return () => observer.disconnect();
+	}
+
+	onMount(async () => {
+		await tick();
+		extractToc();
+		const cleanup = observeHeadings();
+		return cleanup;
+	});
 
 	const pageTitle = $derived(`${meta.title} — DartLab Skills`);
 	const pageDesc = $derived(meta.purpose);
@@ -69,6 +128,9 @@
 	<header class="skill-head">
 		<div class="kicker-row">
 			<span class="kicker">{meta.categoryTitle ?? meta.category}</span>
+			{#if meta.kind === 'recipe'}
+				<span class="recipe-badge">Recipe</span>
+			{/if}
 			<span class="status">{meta.status}</span>
 		</div>
 		<h1>{meta.title}</h1>
@@ -85,6 +147,19 @@
 
 	<div class="layout">
 		<aside class="meta-card" aria-label="Skill metadata">
+			{#if tocItems.length > 0}
+				<section class="toc-section">
+					<h3>이 페이지</h3>
+					<ul class="toc">
+						{#each tocItems as item}
+							<li class="toc-l{item.level}">
+								<a href="#{item.id}" class:active={activeId === item.id}>{item.text}</a>
+							</li>
+						{/each}
+					</ul>
+				</section>
+			{/if}
+
 			{#if meta.whenToUse?.length}
 				<section>
 					<h3>언제 쓰나</h3>
@@ -156,10 +231,27 @@
 			{/if}
 		</aside>
 
-		<article class="body" aria-label="Skill body">
-			{#if Component}
-				<Component />
-			{/if}
+		<article class="body" aria-label="Skill body" bind:this={articleEl}>
+			<RecipeSteps
+				recipeSteps={meta.recipeSteps ?? []}
+				linkedSkills={meta.linkedSkills ?? []}
+			/>
+			<ProcedureStepper steps={meta.procedure ?? []} />
+			<UsageExamples examples={meta.examples ?? []} />
+			<EvidenceChecklist
+				items={meta.expectedOutputs ?? []}
+				title="기대 결과"
+				kicker="출력"
+			/>
+
+			<div class="prose">
+				{#if Component}
+					<Component />
+				{/if}
+			</div>
+
+			<RuntimeMatrix runtimeCompatibility={meta.runtimeCompatibility ?? {}} />
+			<DoNotDo failureModes={meta.failureModes ?? []} forbidden={meta.forbidden ?? []} />
 		</article>
 	</div>
 </main>
@@ -226,6 +318,17 @@
 		color: #fb923c;
 		font-size: 0.68rem;
 		font-family: 'JetBrains Mono', monospace;
+	}
+
+	.recipe-badge {
+		padding: 0.1rem 0.5rem;
+		border-radius: 999px;
+		background: linear-gradient(135deg, #ea4647, #fb923c);
+		color: #f8fafc;
+		font-size: 0.66rem;
+		font-weight: 700;
+		font-family: 'JetBrains Mono', monospace;
+		letter-spacing: 0.04em;
 	}
 
 	.skill-head h1 {
@@ -424,6 +527,53 @@
 		text-decoration: underline;
 		text-decoration-thickness: 1px;
 		text-underline-offset: 3px;
+	}
+
+	.toc-section h3 {
+		margin: 0 0 0.55rem;
+		color: #f1f5f9;
+		font-size: 0.85rem;
+	}
+
+	.toc {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		max-height: 18rem;
+		overflow-y: auto;
+		padding-right: 0.4rem;
+	}
+
+	.toc li {
+		margin: 0.18rem 0;
+	}
+
+	.toc a {
+		display: block;
+		padding: 0.18rem 0.4rem;
+		border-left: 2px solid transparent;
+		color: #94a3b8;
+		font-size: 0.8rem;
+		line-height: 1.45;
+		text-decoration: none;
+		transition: color 180ms ease, border-color 180ms ease;
+	}
+
+	.toc a:hover {
+		color: #fb923c;
+	}
+
+	.toc a.active {
+		color: #fb923c;
+		border-left-color: #fb923c;
+		background: rgba(251, 146, 60, 0.06);
+	}
+
+	.toc .toc-l2 a { padding-left: 0.85rem; }
+	.toc .toc-l3 a { padding-left: 1.4rem; font-size: 0.74rem; }
+
+	.prose {
+		margin: 0.5rem 0;
 	}
 
 	@media (max-width: 920px) {
