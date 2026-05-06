@@ -127,11 +127,14 @@ def buildSkillArtifacts(
 
 
 def _search_doc(skill: Any) -> dict[str, Any]:
+    from dartlab.skills.registry import _steps_from_recipe_body
+
     return {
         "id": skill.id,
         "title": _public_text(skill.title),
         "category": skill.category,
         "categoryTitle": _category_meta(skill.category)["title"],
+        "kind": skill.kind,
         "status": skill.status,
         "purpose": _public_text(skill.purpose),
         "whenToUse": _public_list(skill.whenToUse),
@@ -142,8 +145,10 @@ def _search_doc(skill: Any) -> dict[str, Any]:
         "toolRefs": _public_list(skill.toolRefs),
         "datasetRefs": _public_list(skill.datasetRefs),
         "knowledgeRefs": _public_list(skill.knowledgeRefs),
+        "linkedSkills": _public_list(skill.linkedSkills),
         "sourceRefs": _public_list(skill.sourceRefs),
         "procedure": _public_list(skill.procedure),
+        "recipeSteps": _steps_from_recipe_body(str(skill.source.get("body") or "")),
         "requiredEvidence": _public_list(skill.requiredEvidence),
         "expectedOutputs": _public_list(skill.expectedOutputs),
         "visualGuidance": _public_list(skill.visualGuidance),

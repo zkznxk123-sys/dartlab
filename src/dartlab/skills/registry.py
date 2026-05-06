@@ -308,8 +308,61 @@ def lintSkill(spec: SkillSpec) -> None:
     _validate_status_evidence(spec)
     if spec.kind == "curated" and "pyodide" not in spec.runtimeCompatibility:
         raise ValueError(f"curated skill {spec.id} must declare runtimeCompatibility.pyodide")
-    _validate_execution_skill_contract(spec)
+    if spec.kind == "recipe":
+        _validate_recipe_skill(spec)
+    else:
+        _validate_execution_skill_contract(spec)
     _validate_capability_refs(spec)
+
+
+def _validate_recipe_skill(spec: SkillSpec) -> None:
+    """recipe kind 검증 — 본문 ## 연계 절차 + linkedSkills 또는 step list 비어있지 않음.
+
+    순환 의존 검사는 listSkills() 재귀 위험으로 본 단계에서 수행하지 않는다 — 별도
+    validateRecipes() 후속 작업으로 분리. 여기서는 구조 검증만.
+    """
+    body = str(spec.source.get("body") or "")
+    if "## 연계 절차" not in body:
+        raise ValueError(f"recipe skill {spec.id} missing '## 연계 절차' section")
+    has_linked = bool(spec.linkedSkills)
+    has_body_steps = bool(_steps_from_recipe_body(body))
+    if not (has_linked or has_body_steps):
+        raise ValueError(f"recipe skill {spec.id} must declare linkedSkills frontmatter or '## 연계 절차' step list")
+
+
+_RECIPE_STEP_RE = re.compile(r"^\s*(?:\d+\.|-)\s*([\w.]+)(?:\s*[—\-:]\s*(.*))?$")
+
+
+def _steps_from_recipe_body(body: str) -> list[dict[str, str]]:
+    """recipe 본문의 '## 연계 절차' 섹션에서 step list 파싱.
+
+    인식 형식:
+        1. engines.macro — 매크로 환경
+        - engines.scan — peer 5 종
+
+    반환: [{"skillId": "engines.macro", "note": "매크로 환경"}, ...]
+    """
+    if not body:
+        return []
+    text = str(body)
+    marker = "## 연계 절차"
+    idx = text.find(marker)
+    if idx < 0:
+        return []
+    section = text[idx + len(marker) :]
+    next_heading = section.find("\n## ")
+    if next_heading >= 0:
+        section = section[:next_heading]
+    steps: list[dict[str, str]] = []
+    for line in section.splitlines():
+        match = _RECIPE_STEP_RE.match(line)
+        if not match:
+            continue
+        skill_id = match.group(1).strip()
+        note = (match.group(2) or "").strip()
+        if "." in skill_id:
+            steps.append({"skillId": skill_id, "note": note})
+    return steps
 
 
 def _validate_execution_skill_contract(spec: SkillSpec) -> None:
@@ -423,6 +476,7 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
         "knowledgeRefs",
         "sourceRefs",
         "visualRefs",
+        "linkedSkills",
         "procedure",
         "requiredEvidence",
         "expectedOutputs",
@@ -652,6 +706,7 @@ def _score(spec: SkillSpec, terms: list[str], *, query: str = "") -> tuple[float
         "datasetRefs": " ".join(spec.datasetRefs),
         "visualRefs": " ".join(spec.visualRefs),
         "knowledgeRefs": " ".join(spec.knowledgeRefs),
+        "linkedSkills": " ".join(spec.linkedSkills),
         "sourceRefs": " ".join(spec.sourceRefs),
         "runtimeCompatibility": json.dumps(spec.runtimeCompatibility, ensure_ascii=False),
         "docs": json.dumps(spec.docs, ensure_ascii=False),
@@ -695,7 +750,7 @@ def _field_weight(name: str) -> float:
         return 2.75
     if name in {"capabilityRefs", "toolRefs", "requiredEvidence", "expectedOutputs"}:
         return 2.0
-    if name in {"procedure", "examples", "body"}:
+    if name in {"procedure", "examples", "body", "linkedSkills"}:
         return 1.25
     return 1.0
 

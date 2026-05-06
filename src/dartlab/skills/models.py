@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any, Literal
 
-SkillKind = Literal["generated", "curated", "user"]
+SkillKind = Literal["generated", "curated", "user", "recipe"]
 SkillScope = Literal["builtin", "project", "user"]
 SkillStatus = Literal["unverified", "observed", "auditP", "official", "deprecated"]
 SkillCategory = Literal[
@@ -104,6 +104,7 @@ class SkillSpec:
     knowledgeRefs: list[str] = field(default_factory=list)
     sourceRefs: list[str] = field(default_factory=list)
     visualRefs: list[str] = field(default_factory=list)
+    linkedSkills: list[str] = field(default_factory=list)
     procedure: list[str] = field(default_factory=list)
     requiredEvidence: list[str] = field(default_factory=list)
     expectedOutputs: list[str] = field(default_factory=list)
