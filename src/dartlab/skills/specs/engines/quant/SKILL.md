@@ -71,12 +71,28 @@ forbidden:
   - 공개 API 호출법, guide 축, 반환 형태가 바뀌었는데 이 skill을 갱신하지 않은 상태로 완료 처리하지 않는다.
 examples:
   - 삼성전자 기술적 판단
-  - 모멘텀/가치/퀄리티 멀티팩터 점검
+  - 모멘텀 가치 퀄리티 멀티팩터 점검
   - 종목 리스트 리스크패리티 포트폴리오
+  - dartlab.quant 46 축 가이드
+  - DCF 가치평가 (Damodaran)
+  - 베타와 시장 민감도 측정
+  - 백테스트 trendFollow 전략
+procedure:
+  - dartlab.quant() 로 46 축 가이드 DataFrame 확인.
+  - axis 선택 (지표 · 판단 · 베타 · 순위 · 리스크패리티 · backtest 등).
+  - 단일 종목은 dartlab.quant(axis, code), 종목 리스트는 dartlab.quant(axis, [code1, code2]).
+  - 결과의 period · benchmark · valueRef · dateRef · executionRef 묶음.
+  - 백테스트 결론은 미래 성과 보장 아님 — 가정 (수수료 · 슬리피지 · 벤치마크) 명시.
+linkedSkills:
+  - engines.quant.damodaranValuation
+  - engines.quant.indicators
+  - engines.quant.factor
+  - engines.gather
+  - engines.analysis
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-04'
+lastUpdated: '2026-05-06'
 ---
 
 ## 엔진 역할

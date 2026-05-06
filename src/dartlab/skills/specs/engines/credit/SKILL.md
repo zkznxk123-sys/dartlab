@@ -33,15 +33,11 @@ knowledgeRefs:
 sourceRefs:
   - dartlab://skills/engines.credit
 procedure:
-  - 1. 호출 — `dartlab.credit` · `c.credit` 두 진입점으로 쓴다 기준을 확인한다.
-  - 2. 7 축 — 이 구조로 평가한다 기준을 확인한다.
-  - 3. 결과 구조 — 종합·축별·detail 3 형태로 반환한다 기준을 확인한다.
-  - 종합 등급 (axis 미지정) 기준을 확인한다.
-  - 축 단일 (axis 지정) 기준을 확인한다.
-  - 7 축 `metrics` 에 시계열 (YoY · 5 년 평균) 부착.
-  - '`narrative` 키 추가 — 한국어 인과 문장 (story 블록 재료).'
-  - '`debtRatio` — 부채비율 (%)'
-  - '`interestCoverage` — 이자보상배율 (배)'
+  - dartlab.Company(code) 또는 dartlab.credit() 로 진입.
+  - 종합 등급 (axis 미지정) 또는 축 단일 (axis 지정) 호출 형태 결정.
+  - c.credit() 또는 dartlab.credit(c, axis?) 실행.
+  - 결과의 종합 등급 · 축별 metrics (시계열 YoY · 5 년 평균) · narrative · detail 검증.
+  - 외부 신용평가와 비교 시 표본 한계와 정성 요소 (시스템적 중요성) 차이를 함께 설명.
 requiredEvidence:
   - skillRef
 expectedOutputs:
@@ -69,13 +65,22 @@ forbidden:
   - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.
   - 공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다.
 examples:
-  - Credit (dCR) 규칙 확인
-  - credit 작업을 Skill OS에서 시작
+  - 삼성전자 신용 등급 산출
+  - 종합 등급과 7 축 분석
+  - 외부 신평과 비교 (표본 79 개사)
+  - 부실 위험 스코어카드
+  - 부채비율과 이자보상배율 계산
+linkedSkills:
+  - engines.credit.creditRisk
+  - engines.company
+  - engines.analysis
+  - engines.story
+  - operation.methodology
 source:
   type: absorbed_skills
   absorbedKey: credit
   format: markdown
-lastUpdated: '2026-05-03'
+lastUpdated: '2026-05-06'
 ---
 
 ## Skill OS 흡수 규칙

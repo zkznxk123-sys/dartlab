@@ -71,10 +71,24 @@ examples:
   - 현재 가격 snapshot 수집
   - 컨센서스와 뉴스 확인
   - 주요주주와 기관 보유 확인
+  - 배당 분할 이력
+  - peer 그룹 자동 추출
+  - 매크로 원자료 (FRED · ECOS) 가져오기
+procedure:
+  - dartlab.gather() 또는 c.gather() 로 사용 가능한 method 가이드 확인.
+  - method 선택 (price · consensus · news · supplyDemand · dividend · ownership · sector · insider · macro).
+  - dartlab.gather(method, stockCode, period?, market?) 호출.
+  - 결과의 provider · source · latestAsOf · executionRef 검증.
+  - 분석 결합은 engines.analysis · engines.macro 가 담당. gather 결과를 결론으로 직접 포장 금지.
+linkedSkills:
+  - engines.company
+  - engines.macro
+  - engines.analysis
+  - engines.scan
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-04'
+lastUpdated: '2026-05-06'
 ---
 
 ## 엔진 역할

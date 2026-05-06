@@ -68,10 +68,26 @@ examples:
   - 한국 금리 환경 점검
   - 경기 사이클과 자산배분 확인
   - 2008 금융위기 시나리오 비교
+  - 미국 유동성 측정
+  - dartlab.macro 12 축 가이드
+  - 매크로 종합 (한국 / 미국)
+  - 기업 매크로 민감도 (c.macro)
+procedure:
+  - dartlab.macro() 로 12 축 가이드 DataFrame 확인.
+  - axis 선택 (cycle · inventory · corporate · trade · rates · liquidity · crisis · assets · sentiment · forecast · scenario · summary).
+  - dartlab.macro(axis, market="KR" 또는 "US") 호출.
+  - 결과의 indicator · dateRef · valueRef · executionRef 묶음.
+  - 시장 레벨 macro 와 기업 내부 재무 해석은 분리 — 회사 단위는 c.macro 또는 engines.analysis.
+linkedSkills:
+  - engines.macro.cycle
+  - engines.macro.summary
+  - engines.story
+  - engines.gather
+  - engines.analysis.macroSensitivity
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-04'
+lastUpdated: '2026-05-06'
 ---
 
 ## 엔진 역할

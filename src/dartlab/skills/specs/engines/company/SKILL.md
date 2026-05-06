@@ -86,10 +86,27 @@ examples:
   - 삼성전자 재무제표 조회
   - 미국 기업 공시와 분석 연결
   - 단일 기업 story 생성
+  - dartlab.Company 사용법
+  - 005930 분석 시작
+  - AAPL EDGAR 재무 분석
+  - 단일 기업 sections 가로화
+  - 기간 간 텍스트 변화 (diff) 추적
+procedure:
+  - dartlab.Company(code) 로 종목코드 또는 ticker 로 facade 생성.
+  - c.sections 또는 c.topics 로 사용 가능한 topic 확인.
+  - c.show(topic) 으로 단일 topic 본문 (source priority — finance > report > docs).
+  - 깊이 분석은 c.analysis · c.credit · c.quant · c.macro · c.story 같은 하위 엔진.
+  - 답변에 target · period · topic · tableRef · valueRef · dateRef · executionRef 묶음.
+linkedSkills:
+  - engines.company.sections
+  - engines.analysis
+  - engines.scan
+  - engines.story
+  - engines.credit
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-04'
+lastUpdated: '2026-05-06'
 ---
 
 ## 엔진 역할

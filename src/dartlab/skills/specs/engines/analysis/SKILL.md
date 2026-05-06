@@ -97,10 +97,25 @@ examples:
   - 기업 현금흐름과 이익품질 점검
   - 가치평가 축으로 적정가 범위 확인
   - 매출전망과 예측신호 확인
+  - Company.analysis 호출법
+  - 22 분석 축 가이드 확인
+  - 기업 매크로 민감도 측정
+procedure:
+  - dartlab.Company(code) 또는 c.analysis() 로 22 축 가이드 DataFrame 확인.
+  - group (financial · valuation · forecast · governance) 과 axis 선택.
+  - c.analysis(group, axis) 또는 dartlab.analysis(...) 호출.
+  - 결과의 tableRef · valueRef · dateRef · executionRef 검증 후 답변에 묶음.
+  - L2 엔진 (credit · macro · scan · story) 와 직접 결합하지 않는다 — 결합은 story 가 담당.
+linkedSkills:
+  - engines.company
+  - engines.analysis.cashflow
+  - engines.analysis.valuation
+  - engines.story
+  - engines.credit
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-04'
+lastUpdated: '2026-05-06'
 ---
 
 ## 엔진 역할

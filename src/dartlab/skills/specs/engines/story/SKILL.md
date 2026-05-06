@@ -33,15 +33,11 @@ knowledgeRefs:
 sourceRefs:
   - dartlab://skills/engines.story
 procedure:
-  - 1. 사상 — 보고서 빌더로 간다 기준을 확인한다.
-  - 방향성 메모 — docstring SSOT 와의 교류 (2026-04-24) 기준을 확인한다.
-  - 2. 2 축 체계 — reportType × template 로 간다 기준을 확인한다.
-  - 1 축 — reportType (무엇을 집중적으로 볼 것인가) 기준을 확인한다.
-  - 2 축 — template (이 기업은 어떤 유형인가, 자동 감지) 기준을 확인한다.
-  - '**docstring → story**: 엔진 docstring Guide 섹션이 audit 로 충분히 검증되면 story 블록 템플릿에 반영 (같은 해석 규칙 · 같은 임계값).'
-  - '**story → docstring**: 기존 story 블록 중 재현 가능 · 해석 규칙 명확한 것은 공개 함수로 추출해 엔진 docstring 에 Guide 로 명시. AI · story 공용 호출.'
-  - '`scorecard` — 5 영역 A~F 종합평가.'
-  - '`creditScore` — 20 등급 신용평가.'
+  - dartlab.Company(code) 또는 dartlab.story() 로 보고서 빌더 진입.
+  - reportType (집중 시점) × template (기업 유형 자동 감지) 2 축 결정.
+  - c.story() 또는 dartlab.story(reportType, ...) 호출.
+  - 블록별 출력 (scorecard · creditScore · narrative · valuationBand) 검증.
+  - capability docstring 의 Guide 섹션과 정합성 확인 후 답변에 묶음.
 requiredEvidence:
   - skillRef
 expectedOutputs:
@@ -69,13 +65,21 @@ forbidden:
   - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.
   - 공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다.
 examples:
-  - Story 규칙 확인
-  - story 작업을 Skill OS에서 시작
+  - 삼성전자 종합 보고서 생성
+  - 5 영역 scorecard A~F 평가
+  - 20 등급 신용평가 함께 보기
+  - reportType 자동 선택
+  - 보고서 블록 템플릿 사용법
+linkedSkills:
+  - engines.company
+  - engines.analysis
+  - engines.credit
+  - engines.macro
 source:
   type: absorbed_skills
   absorbedKey: story
   format: markdown
-lastUpdated: '2026-05-03'
+lastUpdated: '2026-05-06'
 ---
 
 ## Skill OS 흡수 규칙

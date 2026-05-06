@@ -74,10 +74,25 @@ examples:
   - 저평가 퀄리티 종목 찾기
   - 배당 증가 종목 스크리닝
   - 공시리스크 상위 종목 확인
+  - ROE 전 종목 횡단 비교
+  - 매출 상위 100 개 회사 발굴
+  - 신용 위험 상위 100 개 스크리닝
+procedure:
+  - dartlab.scan() 으로 19 축 가이드 DataFrame 확인.
+  - axis 선택 (account · ratio · screen · valuation · quality · governance 등).
+  - dartlab.scan(axis, target?, universe=..., spec=...) 호출.
+  - 결과의 ranking · universe · datasetAsOf · filter · formula · executionRef 묶음.
+  - 후보 발굴 후 단일 종목 심층 검증은 engines.analysis · engines.credit · engines.quant.
+linkedSkills:
+  - engines.scan.ratio
+  - engines.scan.screen
+  - engines.analysis
+  - engines.credit
+  - engines.quant
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-04'
+lastUpdated: '2026-05-06'
 ---
 
 ## 엔진 역할
