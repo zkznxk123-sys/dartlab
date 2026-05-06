@@ -769,11 +769,18 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
 
     각 step 의 skillId 에 대해 Skill OS 에서 spec 을 찾고, 그 capabilityRefs 로
     engine_call plan 을 생성한다. 무한재귀 방지: state.profile 에 expandedOnce flag.
+
+    회귀 보호: targets >= 2 인 두 회사 비교는 휴리스틱의 _composeStatementComparison
+    분기가 더 정확한 답을 만들므로 recipe 발동을 양보 (빈 list 반환).
     """
     if state.profile.get("_recipeExpanded"):
         return []
     recipe_ref = _recipeRefForState(state)
     if recipe_ref is None:
+        return []
+    targets = list(state.profile.get("targets") or [])
+    if len(targets) >= 2:
+        # 두 회사 비교는 휴리스틱 분기 우선 — recipe 양보.
         return []
     state.profile["_recipeExpanded"] = True
 
