@@ -129,6 +129,11 @@ def buildSkillArtifacts(
 def _search_doc(skill: Any) -> dict[str, Any]:
     from dartlab.skills.registry import _steps_from_recipe_body
 
+    # frontmatter recipeSteps 가 있으면 우선, 없으면 본문 ## 연계 절차 파싱 fallback.
+    recipe_steps = (
+        list(skill.recipeSteps) if skill.recipeSteps else _steps_from_recipe_body(str(skill.source.get("body") or ""))
+    )
+
     return {
         "id": skill.id,
         "title": _public_text(skill.title),
@@ -152,7 +157,7 @@ def _search_doc(skill: Any) -> dict[str, Any]:
         "deprecatedBy": _public_list(skill.deprecatedBy),
         "sourceRefs": _public_list(skill.sourceRefs),
         "procedure": _public_list(skill.procedure),
-        "recipeSteps": _steps_from_recipe_body(str(skill.source.get("body") or "")),
+        "recipeSteps": recipe_steps,
         "requiredEvidence": _public_list(skill.requiredEvidence),
         "expectedOutputs": _public_list(skill.expectedOutputs),
         "visualGuidance": _public_list(skill.visualGuidance),

@@ -79,7 +79,7 @@ _EVIDENCE_EXECUTION_NAMES = {
     "filter",
     "formula",
 }
-_NON_EXECUTABLE_API_REFS = {"ask", "Company.ask", "ChartResult"}
+_NON_EXECUTABLE_API_REFS = {"ask", "Company", "Company.ask", "ChartResult", "SelectResult"}
 
 
 class WorkbenchLoop:
@@ -812,7 +812,10 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
             spec = getSkill(skill_id, includeUser=False)
         except Exception:  # noqa: BLE001
             continue
-        capability_refs = [ref for ref in (spec.capabilityRefs or []) if _isExecutableApiRef(str(ref))]
+        executable_refs = [ref for ref in (spec.capabilityRefs or []) if _isExecutableApiRef(str(ref))]
+        # Company.show / Company.analysis 같은 method-form 우선, 단순 'Company' 클래스명 후순위.
+        method_refs = [ref for ref in executable_refs if "." in str(ref)]
+        capability_refs = method_refs or executable_refs
         if not capability_refs:
             continue
         api_ref = capability_refs[0]

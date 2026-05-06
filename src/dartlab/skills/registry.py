@@ -498,6 +498,14 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
             data[field] = [value]
         else:
             data[field] = builtins.list(value)
+    # recipeSteps 는 list[dict] — frontmatter 에 박혀 있을 수 있다 (운영자 명시).
+    rs = data.get("recipeSteps")
+    if rs is None:
+        data["recipeSteps"] = []
+    elif isinstance(rs, list):
+        data["recipeSteps"] = [item if isinstance(item, dict) else {"skillId": str(item)} for item in rs]
+    else:
+        data["recipeSteps"] = []
     for field in ("runtimeCompatibility", "pyodide", "docs", "quality", "source"):
         value = data.get(field)
         if value is None:
@@ -632,6 +640,9 @@ def _parse_yaml_mapping(lines: list[str], start: int, indent: int) -> tuple[dict
     return out, index
 
 
+_DICT_LIST_KEY_RE = re.compile(r"^[A-Za-z_][\w]*\s*:")
+
+
 def _parse_yaml_list(lines: list[str], start: int, indent: int) -> tuple[list[Any], int]:
     out: list[Any] = []
     index = start
@@ -645,6 +656,37 @@ def _parse_yaml_list(lines: list[str], start: int, indent: int) -> tuple[list[An
         if current_indent != indent or not stripped.startswith("- "):
             break
         item = stripped[2:].strip()
+        # dict-list 처리: "- key: value" 형식 + 다음 줄도 같은 들여쓰기 dict key 면 dict.
+        # 단순 문장 안 콜론 (예: "When: 분석") 은 string 으로 보존 — 정규식으로 첫 단어가 식별자 + 콜론인지 검사.
+        is_dict_form = _DICT_LIST_KEY_RE.match(item) is not None and not item.startswith("[") and not item.endswith(":")
+        next_indent_is_dict = False
+        if is_dict_form and index + 1 < len(lines):
+            nxt = lines[index + 1]
+            nxt_strip = nxt.strip()
+            nxt_indent = len(nxt) - len(nxt.lstrip(" "))
+            if nxt_strip and nxt_indent == current_indent + 2 and _DICT_LIST_KEY_RE.match(nxt_strip):
+                next_indent_is_dict = True
+        if is_dict_form and next_indent_is_dict:
+            key, raw = item.split(":", 1)
+            entry: dict[str, Any] = {key.strip(): _parse_yaml_scalar(raw.strip()) if raw.strip() else None}
+            index += 1
+            inner_indent = current_indent + 2
+            while index < len(lines):
+                next_line = lines[index]
+                next_indent = len(next_line) - len(next_line.lstrip(" "))
+                next_stripped = next_line.strip()
+                if not next_stripped:
+                    index += 1
+                    continue
+                if next_indent < inner_indent or next_stripped.startswith("- "):
+                    break
+                if not _DICT_LIST_KEY_RE.match(next_stripped):
+                    break
+                k2, r2 = next_stripped.split(":", 1)
+                entry[k2.strip()] = _parse_yaml_scalar(r2.strip()) if r2.strip() else None
+                index += 1
+            out.append(entry)
+            continue
         out.append(_parse_yaml_scalar(item))
         index += 1
     return out, index

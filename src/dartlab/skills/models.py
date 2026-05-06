@@ -109,6 +109,7 @@ class SkillSpec:
     alternatives: list[str] = field(default_factory=list)
     succeededBy: list[str] = field(default_factory=list)
     deprecatedBy: list[str] = field(default_factory=list)
+    recipeSteps: list[dict[str, Any]] = field(default_factory=list)
     procedure: list[str] = field(default_factory=list)
     requiredEvidence: list[str] = field(default_factory=list)
     expectedOutputs: list[str] = field(default_factory=list)
