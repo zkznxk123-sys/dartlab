@@ -97,6 +97,7 @@ def _parseDocstringSections(doc: str | None) -> dict[str, str]:
         "args",
         "returns",
         "example",
+        "llmspecifications",
     }
     currentKey: str | None = None
     currentLines: list[str] = []
@@ -107,8 +108,10 @@ def _parseDocstringSections(doc: str | None) -> dict[str, str]:
         if stripped and all(c == "-" for c in stripped):
             continue
         # "SectionName:" (Google) 또는 "SectionName" 단독 줄 (NumPy) 매칭
-        candidate = stripped.rstrip(":").lower()
-        if candidate in knownSections and (stripped.endswith(":") or candidate == stripped.lower()):
+        # 공백 포함 헤더 ("LLM Specifications:") 도 인식하기 위해 공백 제거 변형도 비교
+        candidate_raw = stripped.rstrip(":").lower()
+        candidate = candidate_raw.replace(" ", "")
+        if candidate in knownSections and (stripped.endswith(":") or candidate_raw == stripped.lower()):
             # 이전 섹션 저장
             if currentKey is not None:
                 result[currentKey] = "\n".join(currentLines).strip()
@@ -131,6 +134,76 @@ def _parseDocstringSections(doc: str | None) -> dict[str, str]:
         result[currentKey] = "\n".join(currentLines).strip()
 
     return result
+
+
+_LLM_SPEC_SUBKEYS = {
+    "antipatterns": "antiPatterns",
+    "outputschema": "outputSchema",
+    "prerequisites": "prerequisites",
+    "freshness": "freshness",
+    "dataflow": "dataflow",
+    "targetmarkets": "targetMarkets",
+}
+
+
+def _parseLLMSpecs(value: str | None) -> dict[str, Any]:
+    """LLM Specifications 섹션 본문에서 6 sub-key (AntiPatterns/OutputSchema/Prerequisites/Freshness/Dataflow/TargetMarkets) 추출.
+
+    형식 (들여쓰기 기반):
+        AntiPatterns:
+            - 분기 데이터인데 monthly average 비교
+            - 한국 회사에 미국 GAAP 가정
+        OutputSchema:
+            - 자산총계 : float — BS 자산 총계 (원)
+            - 자본총계 : float — BS 자본 총계 (원)
+        Freshness:
+            분기마감 후 45일 (DART 공시 마감)
+        ...
+
+    각 sub-key 는 list (bullet 일 때) 또는 string (free text 일 때).
+    파싱 실패 시 raw text 보존 (key='_raw').
+    """
+    if not value or not value.strip():
+        return {}
+    out: dict[str, Any] = {}
+    current_key: str | None = None
+    current_lines: list[str] = []
+
+    # freshness 만 string. 나머지 5 sub-key 는 항상 list (multi-line 자동 인식).
+    string_keys = {"freshness"}
+
+    def _flush() -> None:
+        if current_key is None:
+            return
+        camel = _LLM_SPEC_SUBKEYS.get(current_key, current_key)
+        non_empty = [line for line in current_lines if line.strip()]
+        if not non_empty:
+            return
+        if current_key in string_keys:
+            out[camel] = " ".join(non_empty).strip()
+            return
+        # bullet 마커가 있으면 제거. _parseDocstringSections 가 이미 "- " 를 제거했을 수도.
+        items = [line.strip().lstrip("-").lstrip("*").strip() for line in non_empty]
+        items = [item for item in items if item]
+        if items:
+            out[camel] = items if len(items) > 1 else items[0]
+
+    for line in value.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            current_lines.append("")
+            continue
+        candidate = stripped.rstrip(":").lower().replace(" ", "")
+        if stripped.endswith(":") and candidate in _LLM_SPEC_SUBKEYS:
+            _flush()
+            current_key = candidate
+            current_lines = []
+            continue
+        if current_key is not None:
+            current_lines.append(stripped)
+    _flush()
+
+    return out or {"_raw": value.strip()}
 
 
 def _parseAiContract(value: str | None) -> dict[str, Any]:
@@ -1837,6 +1910,8 @@ def _generateCapabilitiesPy() -> str:
                 entry[key if key != "seealso" else "seeAlso"] = val
         if return_schema := _parseReturnsSchema(sections.get("returns")):
             entry["returnSchema"] = return_schema
+        if llm_specs := _parseLLMSpecs(sections.get("llmspecifications")):
+            entry["llmSpecs"] = llm_specs
         _applyAiContract(entry, sections)
         entries[name] = entry
 
@@ -1873,6 +1948,8 @@ def _generateCapabilitiesPy() -> str:
                 entry[key if key != "seealso" else "seeAlso"] = val
         if return_schema := _parseReturnsSchema(sections.get("returns")):
             entry["returnSchema"] = return_schema
+        if llm_specs := _parseLLMSpecs(sections.get("llmspecifications")):
+            entry["llmSpecs"] = llm_specs
         _applyAiContract(entry, sections)
         entries[f"Company.{memberName}"] = entry
 
@@ -1964,6 +2041,8 @@ def _collectApiReference() -> list[dict[str, Any]]:
         for key in ("args", "returns", "example", "capabilities", "requires", "guide", "seealso"):
             if val := sections.get(key):
                 entry[key] = val
+        if llm_specs := _parseLLMSpecs(sections.get("llmspecifications")):
+            entry["llmSpecs"] = llm_specs
         entries.append(entry)
 
     # 2) Company 공개 메서드/프로퍼티
@@ -1993,6 +2072,8 @@ def _collectApiReference() -> list[dict[str, Any]]:
         for key in ("args", "returns", "example", "capabilities", "requires", "guide", "seealso"):
             if val := sections.get(key):
                 entry[key] = val
+        if llm_specs := _parseLLMSpecs(sections.get("llmspecifications")):
+            entry["llmSpecs"] = llm_specs
         entries.append(entry)
 
     return entries

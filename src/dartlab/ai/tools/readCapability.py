@@ -34,6 +34,7 @@ def readCapability(query: str, *, limit: int = 8) -> ToolResult:
                 "apiRef": api_ref,
                 "summary": entry.get("summary") or "",
                 "guide": entry.get("guide") or "",
+                "llmSpecs": entry.get("llmSpecs") or {},
                 "score": score,
             }
         )
