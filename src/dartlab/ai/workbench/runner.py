@@ -215,11 +215,109 @@ def buildContextSummary(state: WorkbenchState) -> str:
         parts.append("선택 recipe 의 단계 (순차 실행):\n" + recipe_lines)
     if state.refs:
         parts.append(f"누적 ref: {len(state.refs)}개")
-        sample = [f"{r.kind}:{r.id}" for r in state.refs[-10:]]
-        parts.append("최근 ref 샘플: " + ", ".join(sample))
+        by_kind: dict[str, list[Ref]] = {}
+        for ref in state.refs:
+            by_kind.setdefault(ref.kind, []).append(ref)
+
+        for kind, summarizer, max_count in (
+            ("valueRef", _summarizeValueRef, 20),
+            ("tableRef", _summarizeTableRef, 5),
+            ("dateRef", _summarizeDateRef, 5),
+            ("executionRef", _summarizeExecutionRef, 3),
+            ("datasetRef", _summarizeDatasetRef, 5),
+        ):
+            refs_of_kind = by_kind.get(kind)
+            if not refs_of_kind:
+                continue
+            recent = refs_of_kind[-max_count:]
+            parts.append(f"## {kind} ({len(refs_of_kind)}개, 최근 {len(recent)}개 노출)")
+            parts.extend(f"- {summarizer(r)}" for r in recent)
+
+        handled = {"valueRef", "tableRef", "dateRef", "executionRef", "datasetRef"}
+        other_kinds = sorted(set(by_kind) - handled)
+        for kind in other_kinds:
+            refs_of_kind = by_kind[kind]
+            sample = [f"{kind}:{r.id}"[:60] for r in refs_of_kind[-10:]]
+            parts.append(f"기타 {kind} ({len(refs_of_kind)}개): " + ", ".join(sample))
     if state.critiques:
         parts.append("CRITIQUE 이슈: " + "; ".join(c.get("text", "") for c in state.critiques[:5]))
     return "\n".join(parts)
+
+
+def _truncate(text: str, limit: int) -> str:
+    text = str(text)
+    if len(text) <= limit:
+        return text
+    return text[: max(0, limit - 1)] + "…"
+
+
+def _summarizeValueRef(ref: Ref) -> str:
+    payload = ref.payload if isinstance(ref.payload, dict) else {}
+    item = payload.get("item") or payload.get("key") or ""
+    formatted = payload.get("formatted")
+    value = payload.get("value")
+    period = payload.get("period") or ""
+    unit = payload.get("unit") or ""
+    value_str = str(formatted) if formatted else (str(value) if value is not None else "?")
+    pieces = [str(item) or ref.id, "=", value_str]
+    if unit:
+        pieces.append(f"({unit})")
+    if period:
+        pieces.append(f"@{period}")
+    pieces.append(f"<{ref.kind}:{ref.id}>")
+    return _truncate(" ".join(p for p in pieces if p), 100)
+
+
+def _summarizeTableRef(ref: Ref) -> str:
+    payload = ref.payload if isinstance(ref.payload, dict) else {}
+    parts: list[str] = []
+    label = payload.get("label") or payload.get("statement") or payload.get("axis") or ""
+    if label:
+        parts.append(str(label))
+    period = payload.get("latestPeriod") or payload.get("period")
+    if period:
+        parts.append(f"@{period}")
+    row_count = payload.get("rowCount")
+    if row_count is not None:
+        parts.append(f"rows={row_count}")
+    columns = payload.get("columns")
+    if isinstance(columns, list) and columns:
+        sample_cols = ", ".join(str(c) for c in columns[:3])
+        parts.append(f"cols=[{sample_cols}]")
+    parts.append(f"<{ref.kind}:{ref.id}>")
+    return _truncate(" ".join(parts), 120)
+
+
+def _summarizeDateRef(ref: Ref) -> str:
+    payload = ref.payload if isinstance(ref.payload, dict) else {}
+    period = payload.get("period") or payload.get("value") or ""
+    return _truncate(f"{period} <{ref.kind}:{ref.id}>".strip(), 60)
+
+
+def _summarizeExecutionRef(ref: Ref) -> str:
+    payload = ref.payload if isinstance(ref.payload, dict) else {}
+    duration_ms = payload.get("durationMs")
+    preview = payload.get("preview") or payload.get("stdout") or payload.get("result") or ""
+    snippet = _truncate(str(preview).replace("\n", " "), 200)
+    head = f"[{duration_ms}ms]" if duration_ms is not None else ""
+    return _truncate(f"{head} {snippet} <{ref.kind}:{ref.id}>".strip(), 250)
+
+
+def _summarizeDatasetRef(ref: Ref) -> str:
+    payload = ref.payload if isinstance(ref.payload, dict) else {}
+    target = payload.get("target") or ref.title or ""
+    source = payload.get("source") or ""
+    row_count = payload.get("rowCount")
+    latest = payload.get("latest")
+    parts = [str(target)]
+    if source:
+        parts.append(f"src={source}")
+    if row_count is not None:
+        parts.append(f"rows={row_count}")
+    if latest:
+        parts.append(f"latest={latest}")
+    parts.append(f"<{ref.kind}:{ref.id}>")
+    return _truncate(" ".join(parts), 120)
 
 
 def _formatRecipeSteps(refs: list[Ref]) -> str:
