@@ -163,10 +163,33 @@ for (const section of sections) {
 	llmsTxt += '\n';
 }
 
+// Skills — inject from compiled SSOT index.json (src/dartlab/skills/index.json)
+const skillsIndexPath = resolve(projectRoot, 'src', 'dartlab', 'skills', 'index.json');
+let skillEntries = [];
+if (existsSync(skillsIndexPath)) {
+	try {
+		const skillsRaw = JSON.parse(readFileSync(skillsIndexPath, 'utf-8'));
+		skillEntries = (skillsRaw.skills || []).filter((s) => s.category !== 'capability');
+	} catch (err) {
+		console.warn(`  -> skills index parse failed: ${err.message}`);
+	}
+}
+
+if (skillEntries.length > 0) {
+	llmsTxt += `## Skills\n`;
+	llmsTxt += `사람과 LLM이 같은 절차로 작업하는 실행 문서. 각 skill 은 직접 링크·인용·인덱싱이 가능한 전용 페이지를 가진다.\n\n`;
+	for (const skill of skillEntries) {
+		const url = `${siteUrl}/skills/${skill.id}`;
+		const purpose = (skill.purpose || '').replace(/\s+/g, ' ').trim();
+		llmsTxt += `- [${skill.title}](${url})${purpose ? ` — ${purpose}` : ''}\n`;
+	}
+	llmsTxt += '\n';
+}
+
 const llmsContent = llmsTxt.trim() + '\n';
 writeFileSync(resolve(buildDir, 'llms.txt'), llmsContent, 'utf-8');
 writeFileSync(resolve(__dirname, '..', 'static', 'llms.txt'), llmsContent, 'utf-8');
-console.log(`  -> llms.txt generated (${sections.reduce((n, s) => n + s.files.length, 0)} files)`);
+console.log(`  -> llms.txt generated (${sections.reduce((n, s) => n + s.files.length, 0)} files + ${skillEntries.length} skills)`);
 
 const fullContent = fullParts.join('\n\n---\n\n') + '\n';
 writeFileSync(resolve(buildDir, 'llms-full.txt'), fullContent, 'utf-8');
@@ -225,6 +248,10 @@ let sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www
 sitemap += `  <url>\n    <loc>${siteUrl}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
 sitemap += `  <url>\n    <loc>${siteUrl}/docs/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
 sitemap += `  <url>\n    <loc>${siteUrl}/blog/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+sitemap += `  <url>\n    <loc>${siteUrl}/skills</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.85</priority>\n  </url>\n`;
+for (const skill of skillEntries) {
+	sitemap += `  <url>\n    <loc>${siteUrl}/skills/${skill.id}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+}
 for (const extraPage of extraPages) {
 	sitemap += `  <url>\n    <loc>${extraPage.loc}</loc>\n    <changefreq>${extraPage.changefreq}</changefreq>\n    <priority>${extraPage.priority}</priority>\n  </url>\n`;
 }
@@ -246,7 +273,7 @@ sitemap += `</urlset>\n`;
 
 writeFileSync(resolve(buildDir, 'sitemap.xml'), sitemap, 'utf-8');
 writeFileSync(resolve(__dirname, '..', 'static', 'sitemap.xml'), sitemap, 'utf-8');
-console.log(`  -> sitemap.xml generated (${docUrls.length} docs + ${blogPosts.length} blog posts)`);
+console.log(`  -> sitemap.xml generated (${docUrls.length} docs + ${blogPosts.length} blog posts + ${skillEntries.length} skills)`);
 
 // RSS feed (Atom)
 const feedUpdated = blogPosts.length > 0 ? blogPosts[0].date || new Date().toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
