@@ -235,7 +235,7 @@ c.credit("등급", detail=True)               # grade + narrative + metrics
 
 Independent credit analysis with 3-Track model (general/financial/holding), Notch Adjustment, CHS market correction, and separate financial statement blending.
 
-**79-company validation: large-cap 87% (26/30), mid-cap 82% (41/50), full sample 70% (55/79, re-measurement pending after v5.0 overvaluation fix). Samsung AA+ exact match.** See [methodology](docs/methodology.md) for validation details.
+**79-company validation: large-cap 87% (26/30), mid-cap 82% (41/50), full sample 70% (55/79, re-measurement pending after v5.0 overvaluation fix). Samsung AA+ exact match.** See [methodology](https://eddmpython.github.io/dartlab/skills/operation.methodology) for validation details.
 
 ```python
 print(c.credit())           # self-discovery — available axes + grade
@@ -286,7 +286,7 @@ dartlab.ask()            # report + AI interpretation
 
 > Samsung report preview: *"Revenue +23.8%, operating margin 8.6%→21.4%. FCF turned positive, ROIC > WACC — reinvestment is creating value."*
 
-**Sample reports:** [Samsung Electronics](docs/samples/005930.md) · [SK Hynix](docs/samples/000660.md) · [Kia](docs/samples/000270.md) · [HD Hyundai Heavy Industries](docs/samples/042660.md) · [SK Telecom](docs/samples/017670.md) · [LG Chem](docs/samples/051910.md) · [NCSoft](docs/samples/036570.md) · [Amorepacific](docs/samples/090430.md)
+**Sample reports:** [Samsung Electronics](https://eddmpython.github.io/dartlab/samples/005930) · [SK Hynix](https://eddmpython.github.io/dartlab/samples/000660) · [Kia](https://eddmpython.github.io/dartlab/samples/000270) · [HD Hyundai Heavy Industries](https://eddmpython.github.io/dartlab/samples/042660) · [SK Telecom](https://eddmpython.github.io/dartlab/samples/017670) · [LG Chem](https://eddmpython.github.io/dartlab/samples/051910) · [NCSoft](https://eddmpython.github.io/dartlab/samples/036570) · [Amorepacific](https://eddmpython.github.io/dartlab/samples/090430)
 
 ### Storyteller — Numbers Tell Stories
 
@@ -324,7 +324,7 @@ publishReport("068270")    # Celltrion — auto-publish 6-act company story
 
 > Design: [engines.search](/skills)
 
-No model, no GPU, no cold start. 95% precision on 4M documents — better than neural embeddings at 1/100th the cost. See [methodology](docs/methodology.md) for benchmark details.
+No model, no GPU, no cold start. 95% precision on 4M documents — better than neural embeddings at 1/100th the cost. See [methodology](https://eddmpython.github.io/dartlab/skills/operation.methodology) for benchmark details.
 
 ```python
 dartlab.search("유상증자 결정")                     # find capital raise filings
@@ -650,7 +650,7 @@ Pipeline: local cache (instant) → HuggingFace (auto-download) → DART API (wi
 
 ## Documentation
 
-[Docs](https://eddmpython.github.io/dartlab/) · [Quick Start](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [Skills](https://eddmpython.github.io/dartlab/skills)
+[Docs](https://eddmpython.github.io/dartlab/) · [Quick Start](https://eddmpython.github.io/dartlab/skills/start.quickStart) · [Skills](https://eddmpython.github.io/dartlab/skills) · [Samples](https://eddmpython.github.io/dartlab/samples)
 
 **Blog:** [All](https://eddmpython.github.io/dartlab/blog/) · [Company Stories](https://eddmpython.github.io/dartlab/blog/series/company-reports) · [Credit Reports](https://eddmpython.github.io/dartlab/blog/credit-reports) · [Macro Reports](https://eddmpython.github.io/dartlab/blog/macro-reports)
 
@@ -662,7 +662,7 @@ Pipeline: local cache (instant) → HuggingFace (auto-download) → DART API (wi
 | **Beta** | EDGAR power-user (SCE, notes, freq, coverage), credit, insights, distress, ratios, timeseries, network, governance, workforce, capital, debt, chart/table/text tools, ask/chat, OpenDart, OpenEdgar, Server API, MCP |
 | **Experimental** | AI tool calling, export, viz (charts) |
 
-See [docs/stability.md](docs/stability.md).
+See [operation.stability](https://eddmpython.github.io/dartlab/skills/operation.stability).
 
 ## Contributing
 

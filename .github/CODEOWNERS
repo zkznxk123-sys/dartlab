@@ -18,6 +18,6 @@
 # CI/CD
 /.github/workflows/         @eddmpython
 
-# Landing / Docs
+# Landing
 /landing/                   @eddmpython
-/docs/                      @eddmpython
+/samples/                   @eddmpython

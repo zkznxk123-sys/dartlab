@@ -242,7 +242,7 @@ c.credit("등급", detail=True)                # 등급 + 서사 + 지표 시계
 
 3-Track 모델(일반/금융/지주) + Notch Adjustment + CHS 시장 보정 + 별도재무 블렌딩.
 
-**79개사 검증: 대기업 87% (26/30), 중대형 82% (41/50), 전체 70% (55/79, v5.0 과대평가 수정 후 재측정 예정). 삼성전자 AA+ 정확 일치.** 검증 방법론은 [methodology](docs/methodology.md) 참조.
+**79개사 검증: 대기업 87% (26/30), 중대형 82% (41/50), 전체 70% (55/79, v5.0 과대평가 수정 후 재측정 예정). 삼성전자 AA+ 정확 일치.** 검증 방법론은 [methodology](https://eddmpython.github.io/dartlab/skills/operation.methodology) 참조.
 
 ```python
 print(c.credit())            # self-discovery — 사용 가능한 축 + 종합 등급
@@ -293,7 +293,7 @@ dartlab.ask()            # 보고서 + AI 종합의견
 
 > 삼성전자 보고서 미리보기: *"매출 +23.8% 성장, 영업이익률 8.6%→21.4% 반등. FCF 양수 전환, ROIC > WACC — 재투자가 가치를 창출하는 구간."*
 
-**샘플 보고서:** [삼성전자](docs/samples/005930.md) · [SK하이닉스](docs/samples/000660.md) · [기아](docs/samples/000270.md) · [한화오션](docs/samples/042660.md) · [SK텔레콤](docs/samples/017670.md) · [LG화학](docs/samples/051910.md) · [엔씨소프트](docs/samples/036570.md) · [아모레퍼시픽](docs/samples/090430.md)
+**샘플 보고서:** [삼성전자](https://eddmpython.github.io/dartlab/samples/005930) · [SK하이닉스](https://eddmpython.github.io/dartlab/samples/000660) · [기아](https://eddmpython.github.io/dartlab/samples/000270) · [한화오션](https://eddmpython.github.io/dartlab/samples/042660) · [SK텔레콤](https://eddmpython.github.io/dartlab/samples/017670) · [LG화학](https://eddmpython.github.io/dartlab/samples/051910) · [엔씨소프트](https://eddmpython.github.io/dartlab/samples/036570) · [아모레퍼시픽](https://eddmpython.github.io/dartlab/samples/090430)
 
 ### 이야기꾼 — 숫자가 아니라 이야기다
 
@@ -333,7 +333,7 @@ publishReport("068270")    # 셀트리온 — 6막 기업이야기 자동 발간
 
 > ⚠ 현재 인덱스가 일정 시점까지만 빌드됨 (매일 증분 자동화 미완성). 단일 종목 공시 조회는 `Company.disclosure` / `Company.liveFilings` 권장. 인프라(CI cron + HF push) 구축 후 stable 승격 예정.
 
-모델 없음, GPU 없음, cold start 없음. 400만 문서 95% 정밀도 — 임베딩보다 정확, 1/100 비용. 벤치마크 상세는 [methodology](docs/methodology.md) 참조.
+모델 없음, GPU 없음, cold start 없음. 400만 문서 95% 정밀도 — 임베딩보다 정확, 1/100 비용. 벤치마크 상세는 [methodology](https://eddmpython.github.io/dartlab/skills/operation.methodology) 참조.
 
 ```python
 dartlab.search("유상증자 결정")                     # 유상증자 공시 찾기
@@ -678,7 +678,7 @@ e.filings("AAPL", forms=["10-K", "10-Q"])
 
 ## 문서
 
-[문서](https://eddmpython.github.io/dartlab/) · [빠른 시작](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [Skills](https://eddmpython.github.io/dartlab/skills)
+[문서](https://eddmpython.github.io/dartlab/) · [빠른 시작](https://eddmpython.github.io/dartlab/skills/start.quickStart) · [Skills](https://eddmpython.github.io/dartlab/skills) · [Samples](https://eddmpython.github.io/dartlab/samples)
 
 **블로그 (120+ 글):** [전체](https://eddmpython.github.io/dartlab/blog/) · [기업이야기](https://eddmpython.github.io/dartlab/blog/series/company-reports) · [신용평가 보고서](https://eddmpython.github.io/dartlab/blog/credit-reports) · [매크로 보고서](https://eddmpython.github.io/dartlab/blog/macro-reports)
 
@@ -690,7 +690,7 @@ e.filings("AAPL", forms=["10-K", "10-Q"])
 | **Beta** | EDGAR 파워유저 (SCE, notes, freq, coverage), credit, insights, distress, ratios, timeseries, network, governance, workforce, capital, debt, chart/table/text 도구, ask/chat, OpenDart, OpenEdgar, Server API, MCP |
 | **Experimental** | AI 도구 호출, export, viz (차트) |
 
-자세한 기준은 [docs/stability.md](docs/stability.md)를 본다.
+자세한 기준은 [operation.stability](https://eddmpython.github.io/dartlab/skills/operation.stability) 를 본다.
 
 ## 기여
 

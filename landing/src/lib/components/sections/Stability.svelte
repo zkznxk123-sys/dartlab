@@ -107,7 +107,7 @@
 		</div>
 
 		<div class="mt-6 text-center">
-			<a href="{base}/docs/stability" class="text-xs text-dl-text-dim hover:text-dl-text transition-colors no-underline">
+			<a href="{base}/skills/operation.stability" class="text-xs text-dl-text-dim hover:text-dl-text transition-colors no-underline">
 				안정성 문서 전체 →
 			</a>
 		</div>
