@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 217,
+    "skillCount": 224,
     "categories": [
       {
         "id": "start",
@@ -26,7 +26,7 @@
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 185
+        "count": 192
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -10836,13 +10836,93 @@
       }
     },
     {
-      "id": "engines.recipe.companyDeepAnalysis",
-      "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality)",
+      "id": "engines.recipe.capitalAllocationScorecard",
+      "title": "자본배분 점수카드 (FCF 5 사용처 + ROIIC + SGR — L1 raw)",
       "category": "engines",
       "categoryTitle": "Engines",
       "kind": "recipe",
       "status": "unverified",
-      "purpose": "단일 회사의 깊이 있는 분석을 매크로 환경, 산업 위치, 회사 본질, ROE 분해, 회계 quality 5 단으로 엮는 절차.",
+      "purpose": "Buffett-style 자본배분 평가 — FCF 의 5 사용처 (재투자·배당·자사주·M&A·부채상환) 비중 + 증분자본수익률 (ROIIC) + 지속가능성장률 (SGR) 을 L1 raw 시계열에서 직접 계산해 경영진의 자본배분 효율을 평가하는 절차. analysis axis 미사용.",
+      "whenToUse": [
+        "자본배분 평가",
+        "FCF 사용처 분석",
+        "Buffett 자본배분 점수",
+        "ROIIC 증분자본수익률",
+        "지속가능성장률 SGR",
+        "경영진 효율 평가"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.gather",
+        "engines.recipe.dupontDriver",
+        "engines.recipe.compounderCandidates",
+        "engines.recipe.intrinsicValueBand",
+        "engines.recipe.workingCapitalQuality"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "**5 사용처** — Free Cash Flow 가 어디로 가나: (1) 재투자 (CAPEX·R&D), (2) 배당, (3) 자사주 매입, (4) M&A, (5) 부채 상환.",
+        "**ROIIC** (Return on Incremental Invested Capital) = ΔNOPAT / ΔInvestedCapital. 새로 투입한 자본 1 원이 얻는 수익률. 본질적 capital efficiency.",
+        "**SGR** (Sustainable Growth Rate) = ROE × (1 − payoutRatio). 외부 자본조달 없이 가능한 성장 한계.",
+        "Penman-Reggiani (2018): ROIIC > WACC 인 회사가 미래 abnormal return 강함. 단순 ROE 보다 우월.",
+        "Damodaran (2010): \"Capital Allocation Quality\" — 5 사용처 비중이 회사 가치의 30-50% 설명. M&A 비중 높은 회사 평균 가치 파괴.",
+        "Higgins (1977): SGR 가 actual growth 보다 크게 떨어지면 자본 부족 또는 비효율.",
+        "`year`, `fcf : float`",
+        "`reinvestPct`, `dividendPct`, `buybackPct`, `acquisitionPct`, `debtRepayPct : float` — 합 ≈ 100%",
+        "`payoutRatio : float` — (배당 + 자사주) / NI",
+        "`sgr : float` — 지속가능성장률",
+        "`roiic : float` — 증분 자본 수익률",
+        "**snakeId 가용성** — 한국 일부 회사 CF 항목 분리 안 됨 (특히 M&A 가 investing_cashflow 안에 통합). fallback 으로 항목 누락 시 0 처리."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 다년 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.companyDeepAnalysis",
+      "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "단일 회사의 깊이 있는 분석을 매크로 환경, 산업 위치, 회사 본질, ROE 분해, 회계 quality, 가치평가 6 단으로 엮는 절차. 마지막 valuation 단계 누락 시 종합 분석 미완료.",
       "whenToUse": [
         "회사 종합 분석",
         "깊이 있는 회사 분석",
@@ -10866,7 +10946,9 @@
         "engines.scan.profitability",
         "engines.company.researchStarter",
         "engines.analysis.profitability",
-        "engines.analysis.earningsQuality"
+        "engines.analysis.earningsQuality",
+        "engines.analysis.valuation",
+        "engines.analysis.valuationBand"
       ],
       "requires": [],
       "alternatives": [],
@@ -10874,8 +10956,8 @@
       "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
-        "`tableRef` 4 개 (macro snapshot, peer scan, BS, IS)",
-        "`valueRef` 6+ 개 (ROE, 마진, 회전, 레버리지, 현금흐름 quality, 일회성 비중)",
+        "`tableRef` 5 개 (macro snapshot, peer scan, BS, IS, valuation peer multiple)",
+        "`valueRef` 9+ 개 (ROE, 마진, 회전, 레버리지, 현금흐름 quality, 일회성 비중, PER, PBR, EV/EBITDA)",
         "`dateRef` 1 개 (분기 기준일)",
         "답변에 숫자가 들어가면 valueRef 또는 tableRef 묶음 필수.",
         "분기 기준은 dateRef 명시.",
@@ -10902,6 +10984,10 @@
         {
           "skillId": "engines.analysis.earningsQuality",
           "note": "일회성·발생주의 점검"
+        },
+        {
+          "skillId": "engines.analysis.valuation",
+          "note": "PER/PBR/EV-EBITDA + peer 비교 (가치평가 axis)"
         }
       ],
       "requiredEvidence": [
@@ -11102,6 +11188,86 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 macro 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.creditDistressDual",
+      "title": "부도 위험 2 모델 합의 (Altman Z″ + Ohlson O — L1 raw)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "단일 회사 부도 위험을 Altman Z″-Score (1968 비제조업 변형) + Ohlson O-Score (1980 logit) 2 학술 모델 동시 적용으로 합의 평가. analysis axis 와 credit 엔진 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용.",
+      "whenToUse": [
+        "Altman Z-Score 부도 위험",
+        "Ohlson O-Score 부도 logit",
+        "2 모델 합의 부도 위험",
+        "비제조업 신용 위험",
+        "재무 부실 단일 회사",
+        "신용 위험 학술 검증"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.gather",
+        "engines.recipe.distressFilter",
+        "engines.recipe.earningsQualityTriad",
+        "engines.recipe.leverageSensitivity",
+        "engines.credit"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "Z″ &gt; 2.60 = 안전 (Safe Zone)",
+        "1.10 ≤ Z″ ≤ 2.60 = 회색 (Grey Zone)",
+        "Z″ &lt; 1.10 = 위험 (Distress Zone)",
+        "원전 검증: Altman Z 1 년 전 80-90%, 2 년 전 72%. Ohlson O 96% (1970s).",
+        "Begley-Ming-Watts (1996): 시간 경과로 두 모델 모두 정확도 70-80% 로 하락. *합의* 사용 시 false positive 감소.",
+        "Hillegeist 등 (2004): Z + O + Merton 동시 사용 가장 우월.",
+        "1.72 * oeneg - 2.37 * nita - 1.83 * futl + 0.285 * intwo - 0.521 * chin)",
+        "`year : str`",
+        "`altmanZpp : float` — Z″-Score",
+        "`altmanZone : str` — Safe / Grey / Distress",
+        "`ohlsonO : float` — O-Score",
+        "`ohlsonProb : float` — 부도 확률 0~1"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
       }
@@ -11625,6 +11791,86 @@
       }
     },
     {
+      "id": "engines.recipe.dupontDriver",
+      "title": "DuPont 5-step ROE 동인 분해 (L1 raw 시계열 직접 계산)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "ROE 변동의 진짜 원인을 5 동인 (세부담·이자부담·영업마진·자산회전·재무레버리지) 으로 분리해 단일 회사 5 년 시계열에서 어떤 요소가 ROE 를 끌고 갔는지 정량화하는 절차. L1 raw (`c.show(\"BS\"|\"IS\")`) 만 사용.",
+      "whenToUse": [
+        "DuPont 5-step 분해",
+        "ROE 동인 식별",
+        "ROE 변동 원인 분석",
+        "영업마진 vs 레버리지 효과 분리",
+        "5 년 ROE 추세 해석",
+        "CFA 표준 ROE 분해"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.gather",
+        "engines.scan.ratio",
+        "engines.recipe.qualityValueScreen",
+        "engines.recipe.compounderCandidates",
+        "engines.recipe.capitalAllocationScorecard"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "**TaxBurden** — 세후 / 세전. 1 에 가까울수록 세부담 낮음. 산업·국가·세제 의존.",
+        "**InterestBurden** — 세전 / 영업이익. 1 에 가까울수록 이자비용 낮음. 부채 자본 구조 반영.",
+        "**OperatingMargin** — 영업이익 / 매출. 사업 본업의 수익성.",
+        "**AssetTurnover** — 매출 / 평균자산. 자산 효율 (자본 회전).",
+        "**FinancialLeverage** — 평균자산 / 평균자기자본. 부채를 통한 자본 증폭 — equity multiplier.",
+        "Penman (2013): DuPont 분해가 future earnings 예측에서 단순 ROE 보다 우월. RNOA (Return on Net Operating Assets) 와 결합 시 가장 강한 신호.",
+        "Soliman (2008): 산업 평균 대비 OpMargin·Turnover 분해로 미래 수익률 예측 가능.",
+        "`year : str` — 4 기간 (5 년 시계열에서 평균자산 계산으로 1 기간 손실)",
+        "`taxBurden : float` — NI/EBT",
+        "`interestBurden : float` — EBT/EBIT",
+        "`operatingMargin : float` — EBIT/Sales",
+        "`assetTurnover : float` — Sales/AvgAssets"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 다년 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
       "id": "engines.recipe.earningsQualityCheck",
       "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)",
       "category": "engines",
@@ -11711,6 +11957,86 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 분기별 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.earningsQualityTriad",
+      "title": "이익 quality 3 모델 합의 (Sloan + Beneish + Novy-Marx — L1 raw)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "이익 quality 를 3 학술 모델 (Sloan accruals · Beneish M-Score · Novy-Marx GP/A) 동시 적용으로 합의 점수화. analysis axis 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용.",
+      "whenToUse": [
+        "Sloan accruals 분식 신호",
+        "Beneish M-Score 분식 가능성",
+        "Novy-Marx GP/A quality",
+        "이익 quality 3 모델 합의",
+        "발생주의 vs 현금주의 괴리",
+        "분식 회계 다축 점검"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.gather",
+        "engines.recipe.workingCapitalQuality",
+        "engines.recipe.distressFilter",
+        "engines.recipe.creditDistressDual",
+        "engines.recipe.qualityValueScreen"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "ACC = (NI − CFO) / Average Total Assets",
+        "발생액 (accruals) 이 큰 회사 → 미래 abnormal return 음(−). 1962-1991 백테스트 연 10%p 차이.",
+        "핵심 — 회계상 이익 ≠ 현금 이익. 차이가 클수록 미래 회귀 가능성.",
+        "M = −4.84 + 0.92·DSRI + 0.528·GMI + 0.404·AQI + 0.892·SGI + 0.115·DEPI − 0.172·SGAI − 0.327·LVGI + 4.679·TATA",
+        "8 변수 logit. M &gt; −1.78 = 분식 의심. 검증 76% 적중.",
+        "Enron (1998 M-Score = +5.5) 분식 1 년 전 detection.",
+        "GP/A = (Sales − COGS) / Total Assets",
+        "ROE·ROA 보다 강력 quality factor. 가치 (B/M) 와 음(-) 상관.",
+        "`year : str`",
+        "`sloanAccruals : float` — (NI−CFO)/AvgAssets",
+        "`sloanFlag : bool` — &gt; 0.10 = 분식 의심",
+        "`beneishM : float` — M-Score"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
       }
@@ -12525,6 +12851,87 @@
       }
     },
     {
+      "id": "engines.recipe.intrinsicValueBand",
+      "title": "본질가치 3 anchor (Graham + EVA + CFROI proxy — L1 raw)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "단일 회사 본질가치를 Graham 수정공식 + EVA spread + CFROI proxy 3 anchor 로 동시 추정해 시장가와 비교한 가치 판정 band 를 만드는 절차. analysis valuation axis 미사용, L1 raw (`c.show(\"IS\"|\"BS\"|\"CF\"|\"PRICE\"|\"FQ\")`) 만 사용.",
+      "whenToUse": [
+        "본질가치 3 anchor",
+        "Graham 수정공식",
+        "EVA spread 가치 창출",
+        "CFROI proxy",
+        "단일 회사 가치 band",
+        "시장가 vs 본질가치 비교"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.gather",
+        "engines.scan.valuation",
+        "engines.recipe.dupontDriver",
+        "engines.recipe.capitalAllocationScorecard",
+        "engines.recipe.compounderCandidates",
+        "engines.recipe.qualityValueScreen"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "1962-2000 미국 백테스트 — 본 공식 V × 0.5 < 시장가 = 안전마진. 매수 후 5 년 평균 +6%p 초과수익.",
+        "Stewart (1991): EVA spread 와 stock price correlation 0.50-0.65 (회계 EPS 보다 높음).",
+        "O'Byrne-Young (2000): 5 년 EVA 변화가 5 년 stock return 과 강한 상관.",
+        "HOLT 데이터베이스 (1950-2020): CFROI > WACC 인 회사가 미래 stock return 우월. 회계 ROE 보다 noise 적음.",
+        "`anchor : str` — Graham_V / EVA_spread / CFROI_5y_avg",
+        "`value : float` — 추정값",
+        "`interpretation : str` — 시장가 비교 해석 1 문장",
+        "**Graham AAA yield 가정** — 본 recipe 는 4.5% 고정. 실제는 한국 회사채 AAA 일평 yield 변동. 외부 fetch 필요. 또는 AA- 등급 회사채 yield 사용 권장.",
+        "**EVA WACC proxy 7%** — 산업·국가·회사 별 다름. 정확한 WACC 는 산업 beta + risk-free rate + ERP 결합. 본 recipe 는 단순 가정.",
+        "**CFROI 단순화** — 원전은 인플레이션 조정 IRR over asset life. 본 recipe 는 현금 ROIC 근사. asset vintage 미반영.",
+        "**EPS CAGR 5 년** — 사이클 회사는 5 년 CAGR 가 사이클 시작/끝 노이즈. 더 긴 기간 (10 년) 또는 정상화 EPS 권장.",
+        "**시가총액 시계열 결합 X** — `c.show(\"PRICE\")` 의 마지막 종가만 사용 가능. 추세 비교는 별 처리."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 다년 시계열 + 가격 snapshot 일부 한정"
+          ]
+        }
+      }
+    },
+    {
       "id": "engines.recipe.inventoryAndCycle",
       "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)",
       "category": "engines",
@@ -12609,6 +13016,86 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 macro inventory 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.leverageSensitivity",
+      "title": "영업·재무 레버리지 민감도 (DOL/DFL/DCL — L1 raw)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "매출 변동이 영업이익·순이익에 얼마나 증폭되는지 영업레버리지 (DOL) · 재무레버리지 (DFL) · 결합레버리지 (DCL) 로 정량화하고 매크로 충격 시나리오에서 본 회사가 얼마나 민감한지 평가하는 절차. L1 raw (`c.show(\"IS\")`) 시계열만 사용.",
+      "whenToUse": [
+        "DOL 영업레버리지",
+        "DFL 재무레버리지",
+        "DCL 결합레버리지",
+        "매출 변동 민감도",
+        "사이클 회사 위험",
+        "매크로 충격 시나리오",
+        "고정비 비중"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.gather",
+        "engines.recipe.dupontDriver",
+        "engines.recipe.distressFilter",
+        "engines.recipe.creditDistressDual"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "**DOL** (Degree of Operating Leverage) = % ΔOP / % ΔSales = (Sales − VC) / (Sales − VC − FC). 고정비 비중 클수록 DOL 큼 — 매출 1% 변동 → 영업이익 N% 변동.",
+        "**DFL** (Degree of Financial Leverage) = % ΔNI / % ΔOP = OP / (OP − Interest). 이자비용 비중 클수록 DFL 큼.",
+        "**DCL** (Degree of Combined Leverage) = DOL × DFL = % ΔNI / % ΔSales. 매출 1% 변동 → 순이익 N% 변동.",
+        "Mandelker-Rhee (1984): DOL × DFL 가 stock beta 에 직접 영향. 고-DCL 회사가 system risk 높음.",
+        "Dugan-Shriver (1992): DOL 표준 추정 — 5 년 회귀법 (% ΔOP = α + β × % ΔSales). 본 recipe 의 추정 방법.",
+        "Faff-Brooks (1998): 사이클 회사 (조선·반도체·정유) 의 DCL 평균 3-5, 안정 회사 (통신·소비재) 1-1.5.",
+        "매출 −10% 충격 시 영업이익 = −10% × DOL, 순이익 = −10% × DCL.",
+        "침체 시나리오 (매출 -20%) 에서 ROE 가 어떻게 변할지 직접 추정.",
+        "`metric : str` — 5 metric 이름",
+        "`value : float`",
+        "`salesShockPct : float` — −20% ~ +20%",
+        "`opChangePct`, `niChangePct : float` — DOL/DCL 곱한 추정 변화율"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
       }
@@ -14034,6 +14521,86 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 docs 일부 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.workingCapitalQuality",
+      "title": "운전자본 quality (CCC + 회전율 추세 — L1 raw)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "Cash Conversion Cycle (DSO + DIO − DPO) + 매출채권·재고·매입채무 회전율 5 년 추세를 L1 raw (`c.show(\"BS\"|\"IS\")`) 에서 직접 계산해 매출 신뢰도와 운전자본 효율을 정량화하는 절차. analysis axis 미사용.",
+      "whenToUse": [
+        "운전자본 효율",
+        "Cash Conversion Cycle CCC",
+        "매출채권 회전율",
+        "재고 회전율",
+        "매입채무 회전율",
+        "매출 신뢰도 점검",
+        "운전자본 늘어남 위험"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.gather",
+        "engines.recipe.dupontDriver",
+        "engines.recipe.earningsQualityTriad",
+        "engines.recipe.distressFilter"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "**DSO** (Days Sales Outstanding) = (매출채권 / 매출) × 365",
+        "**DIO** (Days Inventory Outstanding) = (재고 / 매출원가) × 365",
+        "**DPO** (Days Payables Outstanding) = (매입채무 / 매출원가) × 365",
+        "**CCC** (Cash Conversion Cycle) = DSO + DIO − DPO. 현금이 운전자본에 묶여 있는 일수.",
+        "Sloan (1996) 의 accruals anomaly — 매출채권·재고 급증이 미래 abnormal return 음(-) 예측. 본 recipe 의 변동률 분석이 그 신호.",
+        "Dechow-Kothari-Watts (1998): CCC 단축 = 운전자본 효율 + 매출 신뢰도 동시 시그널.",
+        "Damodaran (2007): 매출 성장보다 매출채권 성장 빠른 회사 = \"매출 인식 의심\" — 분식 회계 신호.",
+        "**DSO 급증** + 매출 성장 둔화 = 채권 미회수 누적 → 향후 손상 위험.",
+        "**DIO 급증** + 매출 성장 둔화 = 재고 적체 → 평가손 위험.",
+        "**DPO 급증** = 거래처 신용 활용 (현금 보전) 또는 지급 능력 약화.",
+        "**CCC 음수** = 매입채무로 매출/재고 funding 가능 (Apple 모델, Amazon 모델).",
+        "(ap[i] / cogs[i] * 365 if cogs[i] > 0 else 0)"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
       }

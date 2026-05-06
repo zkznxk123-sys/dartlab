@@ -1,11 +1,11 @@
 ---
 id: engines.recipe.companyDeepAnalysis
-title: 회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality)
+title: 회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)
 category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 단일 회사의 깊이 있는 분석을 매크로 환경, 산업 위치, 회사 본질, ROE 분해, 회계 quality 5 단으로 엮는 절차.
+purpose: 단일 회사의 깊이 있는 분석을 매크로 환경, 산업 위치, 회사 본질, ROE 분해, 회계 quality, 가치평가 6 단으로 엮는 절차. 마지막 valuation 단계 누락 시 종합 분석 미완료.
 whenToUse:
   - 회사 종합 분석
   - 깊이 있는 회사 분석
@@ -19,6 +19,8 @@ linkedSkills:
   - engines.company.researchStarter
   - engines.analysis.profitability
   - engines.analysis.earningsQuality
+  - engines.analysis.valuation
+  - engines.analysis.valuationBand
 toolRefs:
   - engine_call
   - run_python
@@ -47,13 +49,14 @@ import dartlab
 # 회사 진입
 c = dartlab.Company("005930")
 
-# 5 단 절차: 매크로 → peer → 회사 → 분해 → quality
+# 6 단 절차: 매크로 → peer → 회사 → 분해 → quality → valuation
 macro = dartlab.macro()
 peers = dartlab.scan("profitability")
 bs = c.show("BS")
 ratios = c.ratios
 roe_decomp = c.analysis("financial", "수익성")
 quality = c.analysis("financial", "이익품질")
+valuation = c.analysis("가치평가", "가치평가")
 ```
 
 ## 호출 동작
@@ -65,12 +68,13 @@ quality = c.analysis("financial", "이익품질")
 3. `Company(code).show("BS")`/`show("IS")` — 재무제표 시계열 (tableRef + dateRef)
 4. `Company.analysis("financial", "수익성")` — ROE DuPont 분해 (valueRef × N)
 5. `Company.analysis("financial", "이익품질")` — 회계 quality (valueRef × N)
+6. `Company.analysis("가치평가", "가치평가")` — PER·PBR·EV/EBITDA peer 비교 (valueRef × N + tableRef). 종합 분석에서 가치평가 단계 누락 = 미완료. peer 비교 없는 절대값 단독 노출 금지.
 
 ## 대표 반환 형태
 
 총 ref:
-- `tableRef` 4 개 (macro snapshot, peer scan, BS, IS)
-- `valueRef` 6+ 개 (ROE, 마진, 회전, 레버리지, 현금흐름 quality, 일회성 비중)
+- `tableRef` 5 개 (macro snapshot, peer scan, BS, IS, valuation peer multiple)
+- `valueRef` 9+ 개 (ROE, 마진, 회전, 레버리지, 현금흐름 quality, 일회성 비중, PER, PBR, EV/EBITDA)
 - `dateRef` 1 개 (분기 기준일)
 
 ## 연계 절차
@@ -80,6 +84,7 @@ quality = c.analysis("financial", "이익품질")
 3. engines.company.researchStarter — 회사 진입 + show("BS") + show("IS")
 4. engines.analysis.profitability — ROE DuPont 분해 (마진 × 회전 × 레버리지)
 5. engines.analysis.earningsQuality — 일회성·발생주의 점검
+6. engines.analysis.valuation — PER/PBR/EV-EBITDA + peer 비교 (가치평가 axis)
 
 ## 기본 검증
 

@@ -1158,8 +1158,19 @@
       "limitations": []
     },
     {
+      "id": "engines.recipe.capitalAllocationScorecard",
+      "title": "자본배분 점수카드 (FCF 5 사용처 + ROIIC + SGR — L1 raw)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 다년 시계열 일부 한정"
+      ]
+    },
+    {
       "id": "engines.recipe.companyDeepAnalysis",
-      "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality)",
+      "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -1188,6 +1199,17 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 macro 시계열 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.creditDistressDual",
+      "title": "부도 위험 2 모델 합의 (Altman Z″ + Ohlson O — L1 raw)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 다년 시계열 일부 한정"
       ]
     },
     {
@@ -1257,6 +1279,17 @@
       ]
     },
     {
+      "id": "engines.recipe.dupontDriver",
+      "title": "DuPont 5-step ROE 동인 분해 (L1 raw 시계열 직접 계산)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 다년 시계열 일부 한정"
+      ]
+    },
+    {
       "id": "engines.recipe.earningsQualityCheck",
       "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)",
       "category": "engines",
@@ -1265,6 +1298,17 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 분기별 시계열 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.earningsQualityTriad",
+      "title": "이익 quality 3 모델 합의 (Sloan + Beneish + Novy-Marx — L1 raw)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 다년 시계열 일부 한정"
       ]
     },
     {
@@ -1367,6 +1411,17 @@
       ]
     },
     {
+      "id": "engines.recipe.intrinsicValueBand",
+      "title": "본질가치 3 anchor (Graham + EVA + CFROI proxy — L1 raw)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 다년 시계열 + 가격 snapshot 일부 한정"
+      ]
+    },
+    {
       "id": "engines.recipe.inventoryAndCycle",
       "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)",
       "category": "engines",
@@ -1375,6 +1430,17 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 macro inventory 시계열 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.leverageSensitivity",
+      "title": "영업·재무 레버리지 민감도 (DOL/DFL/DCL — L1 raw)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 다년 시계열 일부 한정"
       ]
     },
     {
@@ -1549,6 +1615,17 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 docs 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.workingCapitalQuality",
+      "title": "운전자본 quality (CCC + 회전율 추세 — L1 raw)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 안에서는 다년 시계열 일부 한정"
       ]
     },
     {

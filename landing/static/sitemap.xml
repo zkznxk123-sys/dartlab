@@ -611,6 +611,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.capitalAllocationScorecard</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.companyDeepAnalysis</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -622,6 +627,11 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.creditDeepDive</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.creditDistressDual</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -656,7 +666,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.dupontDriver</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.earningsQualityCheck</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.earningsQualityTriad</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -706,7 +726,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.intrinsicValueBand</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.inventoryAndCycle</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.leverageSensitivity</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -787,6 +817,11 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.workforceAndCapital</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.workingCapitalQuality</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
