@@ -52,6 +52,10 @@ ui/vscode/node_modules/
 ui/vscode/dist/
 ui/vscode/webview/node_modules/
 ui/vscode/*.vsix
+
+# Playwright before/after 검증 산출물 (UI 변경 시각 비교용, 커밋 X)
+ui/screenshots/
+ui/web/screenshots/
 ui/vscode/webview/.vite/
 ui/screenshots/
 ui/vscode/webview/screenshots/
