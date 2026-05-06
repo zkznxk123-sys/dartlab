@@ -233,6 +233,22 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.capital()              # 삼성전자 주주환원\nc.capital(\"all\")         # 전체 상장사",
         "guide": "\"배당 정보\" → c.capital() 또는 c.show(\"dividend\")\n\"주주환원율은?\" → c.capital()\n\"전체 상장사 배당 비교\" → c.capital(\"all\")",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "배당수익률 단독 노출 (배당성향 + 자사주 함께)",
+                "\"환원형\" 단정 X (총환원율 + 분류 + 시계열 함께)"
+            ],
+            "freshness": "정기보고서 마감 후 30~45 일.",
+            "outputSchema": [
+                "종목코드 : str",
+                "배당수익률 : float — %",
+                "배당성향 : float — %",
+                "자사주매입 : int — 주",
+                "총환원율 : float — % ((배당 + 자사주) / 시가총액)",
+                "분류 : str — 환원형 / 중립 / 희석형"
+            ],
+            "targetMarkets": "KR"
+        },
         "requires": "데이터: DART 정기보고서 (자동 수집)",
         "returnSchema": [
             {
@@ -358,6 +374,21 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.debt()                 # 삼성전자 부채 구조\nc.debt(\"all\")            # 전체 상장사",
         "guide": "\"부채 구조 분석\" → c.debt()\n\"부채비율은?\" → c.debt() 또는 c.show(\"ratios\")\n\"전체 상장사 부채 비교\" → c.debt(\"all\")",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "부채비율 단독 노출 (ICR + 의존도 함께)",
+                "\"위험\" 단정 X (위험등급 + 절대값 + peer median 함께)"
+            ],
+            "freshness": "정기보고서 마감 후 30~45 일.",
+            "outputSchema": [
+                "종목코드 : str",
+                "부채비율 : float — %",
+                "차입금의존도 : float — %",
+                "ICR : float — 배 (이자보상배율)",
+                "위험등급 : str — 안전 / 주의 / 경고 / 위험"
+            ],
+            "targetMarkets": "KR"
+        },
         "requires": "데이터: DART 정기보고서 (자동 수집)",
         "returnSchema": [
             {
@@ -843,6 +874,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.network()              # → NetworkView (.show()로 브라우저)\nc.network().show()       # 브라우저 오픈\nc.network(\"members\")     # 같은 그룹 계열사 DataFrame\nc.network(\"edges\")       # 출자/지분 연결 DataFrame\nc.network(\"cycles\")      # 순환출자 경로 DataFrame\nc.network(\"peers\")       # 이 회사 중심 서브그래프 DataFrame",
         "guide": "\"계열사 관계도\" → c.network() 또는 c.network().show()\n\"같은 그룹 계열사\" → c.network(\"members\")\n\"출자/지분 구조\" → c.network(\"edges\")\n\"순환출자 있어?\" → c.network(\"cycles\")",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "view 미지정 시 NetworkView 객체 — 답변 본문에 dump X (.show() 로 별도)",
+                "hops > 2 (네트워크 폭주, 메모리 부담)",
+                "\"순환출자 = 분식\" 단정 X (한국 그룹 일반)"
+            ],
+            "freshness": "대량보유/임원 공시 기준.",
+            "outputSchema": [
+                "view=\"members\": 종목코드 / 종목명 / 그룹 / 지분율",
+                "view=\"edges\": from / to / 지분율 / 출자유형",
+                "view=\"cycles\": cycle 경로 (list[stockCode])",
+                "view=\"peers\": ego 서브그래프 노드"
+            ]
+        },
         "requires": "데이터: DART 대량보유/임원 공시 (자동 수집)",
         "returns": "NetworkView (view=None) 또는 DataFrame (view 지정 시). 데이터 없으면 None.",
         "seeAlso": "governance: 이사회/감사위원/최대주주 분석\ncapital: 주주환원 분석",
@@ -891,6 +936,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "from dartlab.analysis.financial.insight import buildSnapshot\nbuildSnapshot()\n\nc = Company(\"005930\")\nc.rank                    # RankInfo(삼성전자, 매출 2/2192, 섹터 2/467, large)\nc.rank.revenueRank        # 2\nc.rank.revenueRankInSector # 2\nc.rank.sizeClass          # \"large\"",
         "guide": "\"이 회사 순위는?\" → c.rank\n\"시장에서 몇 등이야?\" → c.rank.revenueRank\n\"대형주야?\" → c.rank.sizeClass",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": [
+                "rank 단독 노출 (sizeClass + sector 함께)",
+                "rank 결과를 절대 평가로 인용 (시장 전체 / 섹터 내 모두 표시)"
+            ],
+            "freshness": "scan 데이터 기준 — 분기 마감 후 갱신.",
+            "outputSchema": [
+                "revenueRank : int — 매출 기준 시장 순위",
+                "revenueRankInSector : int — 매출 기준 섹터 순위",
+                "sizeClass : str — large / mid / small",
+                "sectorTotal : int — 섹터 종목 수"
+            ],
+            "targetMarkets": "KR"
+        },
         "requires": "데이터: buildSnapshot() 사전 실행 필요",
         "returns": "RankInfo 또는 스냅샷 미빌드 시 None.",
         "seeAlso": "sector: 섹터 분류 (rank의 기준 그룹)\ninsights: 종합 등급 평가",
@@ -1372,6 +1431,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
     "Company.valuationImpact": {
         "guide": "\"WACC 조정 어떻게\" → c.valuationImpact()['waccAdj']\n\"override 근거\" → c.valuationImpact()['narrative']",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "waccAdj 단독 노출 (narrative 근거 함께)",
+                "DCF 직접 override 적용 X (overrides 는 힌트, 사용자 판단 후 적용)"
+            ],
+            "freshness": "story 인과 체인 기준 — finance 데이터 시점.",
+            "outputSchema": [
+                "terminalGrowthAdj : float — terminal growth 가산 (% 포인트)",
+                "waccAdj : float — WACC 가산 (% 포인트)",
+                "narrative : str — 조정 근거 (인과 체인)",
+                "overrides : dict — analysis(valuation, overrides=...) 호출용"
+            ]
+        },
         "returns": "dict — terminalGrowthAdj/waccAdj/narrative/overrides",
         "summary": "인과 체인에서 DCF override 힌트 — narrative → 숫자 피드백."
     },
@@ -1406,6 +1478,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.workforce()            # 삼성전자 인력 현황\nc.workforce(\"all\")       # 전체 상장사",
         "guide": "\"직원 현황\" → c.workforce()\n\"평균 급여는?\" → c.workforce()\n\"전체 상장사 인력 비교\" → c.workforce(\"all\")",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "평균 급여 단독 노출 (1 인당 매출 + 평균 근속 함께)",
+                "\"고임금 = 위험\" 단정 X (생산성 함께)"
+            ],
+            "freshness": "정기보고서 마감 후 30~45 일.",
+            "outputSchema": [
+                "종목코드 : str",
+                "직원수 : int — 정규/비정규 합계",
+                "평균근속 : float — 년",
+                "1인당매출 : float — 억원"
+            ],
+            "targetMarkets": "KR"
+        },
         "requires": "데이터: DART 정기보고서 (자동 수집)",
         "returns": "DataFrame 또는 데이터 없으면 None.",
         "seeAlso": "governance: 이사회/감사위원 구성 (인력의 다른 관점)\nshow: c.show(\"employee\")로 docs 기반 직원 상세",

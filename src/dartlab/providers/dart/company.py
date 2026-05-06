@@ -3170,6 +3170,20 @@ class Company:
         SeeAlso:
             - sector: 섹터 분류 (rank의 기준 그룹)
             - insights: 종합 등급 평가
+
+        LLM Specifications:
+            AntiPatterns:
+                - rank 단독 노출 (sizeClass + sector 함께)
+                - rank 결과를 절대 평가로 인용 (시장 전체 / 섹터 내 모두 표시)
+            OutputSchema:
+                - revenueRank : int — 매출 기준 시장 순위
+                - revenueRankInSector : int — 매출 기준 섹터 순위
+                - sizeClass : str — large / mid / small
+                - sectorTotal : int — 섹터 종목 수
+            Freshness:
+                scan 데이터 기준 — 분기 마감 후 갱신.
+            TargetMarkets:
+                - KR
         """
         cacheKey = "_rank"
         if cacheKey in self._cache:
@@ -3338,6 +3352,19 @@ class Company:
         SeeAlso:
             - governance: 이사회/감사위원/최대주주 분석
             - capital: 주주환원 분석
+
+        LLM Specifications:
+            AntiPatterns:
+                - view 미지정 시 NetworkView 객체 — 답변 본문에 dump X (.show() 로 별도)
+                - hops > 2 (네트워크 폭주, 메모리 부담)
+                - "순환출자 = 분식" 단정 X (한국 그룹 일반)
+            OutputSchema:
+                - view="members": 종목코드 / 종목명 / 그룹 / 지분율
+                - view="edges": from / to / 지분율 / 출자유형
+                - view="cycles": cycle 경로 (list[stockCode])
+                - view="peers": ego 서브그래프 노드
+            Freshness:
+                대량보유/임원 공시 기준.
         """
         from dartlab.providers.dart._scanRelated import buildScanNetwork
 
@@ -3445,6 +3472,20 @@ class Company:
         SeeAlso:
             - governance: 이사회/감사위원 구성 (인력의 다른 관점)
             - show: c.show("employee")로 docs 기반 직원 상세
+
+        LLM Specifications:
+            AntiPatterns:
+                - 평균 급여 단독 노출 (1 인당 매출 + 평균 근속 함께)
+                - "고임금 = 위험" 단정 X (생산성 함께)
+            OutputSchema:
+                - 종목코드 : str
+                - 직원수 : int — 정규/비정규 합계
+                - 평균근속 : float — 년
+                - 1인당매출 : float — 억원
+            Freshness:
+                정기보고서 마감 후 30~45 일.
+            TargetMarkets:
+                - KR
         """
         from dartlab.providers.dart._scanRelated import buildScanWorkforce
 
@@ -3496,6 +3537,22 @@ class Company:
             - show: c.show("dividend")로 docs 기반 배당 상세
             - sceMatrix: 자본변동표 (배당/자사주가 자본에 미치는 영향)
             - debt: 부채 구조 (자본 정책의 다른 면)
+
+        LLM Specifications:
+            AntiPatterns:
+                - 배당수익률 단독 노출 (배당성향 + 자사주 함께)
+                - "환원형" 단정 X (총환원율 + 분류 + 시계열 함께)
+            OutputSchema:
+                - 종목코드 : str
+                - 배당수익률 : float — %
+                - 배당성향 : float — %
+                - 자사주매입 : int — 주
+                - 총환원율 : float — % ((배당 + 자사주) / 시가총액)
+                - 분류 : str — 환원형 / 중립 / 희석형
+            Freshness:
+                정기보고서 마감 후 30~45 일.
+            TargetMarkets:
+                - KR
         """
         from dartlab.providers.dart._scanRelated import buildScanCapital
 
@@ -3546,6 +3603,21 @@ class Company:
             - BS: 재무상태표 (부채 원본 데이터)
             - ratios: 재무비율 (부채비율 포함)
             - capital: 주주환원 (자본 정책의 다른 면)
+
+        LLM Specifications:
+            AntiPatterns:
+                - 부채비율 단독 노출 (ICR + 의존도 함께)
+                - "위험" 단정 X (위험등급 + 절대값 + peer median 함께)
+            OutputSchema:
+                - 종목코드 : str
+                - 부채비율 : float — %
+                - 차입금의존도 : float — %
+                - ICR : float — 배 (이자보상배율)
+                - 위험등급 : str — 안전 / 주의 / 경고 / 위험
+            Freshness:
+                정기보고서 마감 후 30~45 일.
+            TargetMarkets:
+                - KR
         """
         from dartlab.providers.dart._scanRelated import buildScanDebt
 
@@ -3681,6 +3753,18 @@ class Company:
 
         Returns:
             dict — terminalGrowthAdj/waccAdj/narrative/overrides
+
+        LLM Specifications:
+            AntiPatterns:
+                - waccAdj 단독 노출 (narrative 근거 함께)
+                - DCF 직접 override 적용 X (overrides 는 힌트, 사용자 판단 후 적용)
+            OutputSchema:
+                - terminalGrowthAdj : float — terminal growth 가산 (% 포인트)
+                - waccAdj : float — WACC 가산 (% 포인트)
+                - narrative : str — 조정 근거 (인과 체인)
+                - overrides : dict — analysis(valuation, overrides=...) 호출용
+            Freshness:
+                story 인과 체인 기준 — finance 데이터 시점.
         """
         from dartlab.story.narrative import buildCausalWeights, buildValuationImpact
 
