@@ -2269,6 +2269,7 @@ def _collectSpecAxesLabels(specPath: Path) -> dict[str, str]:
 
 
 _MCP_TOOL_TO_CAPABILITY: dict[str, str] = {
+    # Company core
     "companyShow": "Company.show",
     "companyAnalysis": "Company.analysis",
     "companyFilings": "Company.filings",
@@ -2283,10 +2284,23 @@ _MCP_TOOL_TO_CAPABILITY: dict[str, str] = {
     "companyGovernance": "Company.governance",
     "companyProfile": "Company.facts",
     "companySections": "Company.sections",
+    "companyInsights": "Company.analysis",
+    "companyValuation": "Company.analysis",
+    "companyForecast": "Company.analysis",
+    # 모듈 레벨
     "marketScan": "scan",
     "macroAnalysis": "macro",
     "gatherData": "gather",
     "industryMap": "industry",
+    "topdownScreen": "topdown",
+    "dartlabSearch": "search",
+    "dartlabListing": "listing",
+    "pastInsight": "pastInsight",
+    "sectorInsights": "sectorInsights",
+    # Discovery
+    "listDartlabApi": "capabilities",
+    "searchDartlabApi": "capabilities",
+    "verifyDartlabApi": "capabilities",
 }
 
 
