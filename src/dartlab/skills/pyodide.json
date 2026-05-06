@@ -307,6 +307,15 @@
       ]
     },
     {
+      "id": "engines.company.sections",
+      "title": "sections — 회사 전체 지도",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.company.usEdgarReview",
       "title": "미국 기업 EDGAR 분석",
       "category": "engines",
@@ -1149,6 +1158,59 @@
       "limitations": []
     },
     {
+      "id": "engines.recipe.companyDeepAnalysis",
+      "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 macro/scan dataset snapshot 범위 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.financialStatementCompare",
+      "title": "두 회사 재무제표 비교 (peer + show + 분해)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 두 회사 dataset snapshot 동시 로드 부담"
+      ]
+    },
+    {
+      "id": "engines.recipe.growthScreenToDeepDive",
+      "title": "성장 스캔 → 상위 후보 → 각 회사 분석",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 scan dataset snapshot 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.macroToCompany",
+      "title": "매크로 → 섹터 → 회사 영향 (transmission)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 macro snapshot 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.usageAndApi",
+      "title": "dartlab 사용법·API 설명 (run_python 우회)",
+      "category": "engines",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.scan",
       "title": "Scan",
       "category": "engines",
@@ -1513,6 +1575,15 @@
       "limitations": []
     },
     {
+      "id": "operation.docstringStandard",
+      "title": "capability docstring 의 LLM Specifications 섹션 표준",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "operation.engineAudit",
       "title": "Engine Audit — 엔진 기능 점검 규격",
       "category": "operation",
@@ -1540,6 +1611,15 @@
       "limitations": []
     },
     {
+      "id": "operation.methodology",
+      "title": "검증 방법론 (credit · forecast · search · ai)",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "operation.opsAsSkills",
       "title": "운영 문서를 Skills 체계로 흡수",
       "category": "operation",
@@ -1560,6 +1640,15 @@
     {
       "id": "operation.refactorChecklist",
       "title": "Refactor Checklist — 대규모 rename / API 변경 6 단계",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.stability",
+      "title": "API 안정성 정책 (tier · deprecation · semver)",
       "category": "operation",
       "status": "supported",
       "dataSources": [],
@@ -1618,9 +1707,9 @@
     },
     {
       "id": "runtime.notebooks",
-      "title": "notebooks 정책 — Colab vs Marimo",
+      "title": "Colab · Molab · 로컬 marimo 노트북",
       "category": "runtime",
-      "status": "supported",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
@@ -1684,6 +1773,15 @@
       "title": "DartLab Skill OS 최초 진입",
       "category": "start",
       "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "start.quickStart",
+      "title": "DartLab 8 단계 빠른 시작",
+      "category": "start",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []

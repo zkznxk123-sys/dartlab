@@ -2,13 +2,13 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 174,
+    "skillCount": 185,
     "categories": [
       {
         "id": "start",
         "title": "Start",
         "description": "설치, 첫 실행, skill catalog 사용법처럼 처음 진입할 때 필요한 절차.",
-        "count": 3
+        "count": 4
       },
       {
         "id": "runtime",
@@ -20,13 +20,13 @@
         "id": "operation",
         "title": "Operation",
         "description": "ops 원문을 skill 절차로 묶어 테스트, 문서, 릴리즈, 확장 규칙을 찾는 운영 지도.",
-        "count": 13
+        "count": 17
       },
       {
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 148
+        "count": 154
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -37,6 +37,7 @@
       "title": "Analysis",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Analysis 엔진은 단일 기업의 재무제표, 가치평가, 지배구조, 전망, 기업 단위 매크로 민감도를 22개 분석 축으로 읽는 실행 스킬이다.",
       "whenToUse": [
@@ -94,10 +95,12 @@
         "engines.data.foundation",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -159,6 +162,7 @@
       "title": "Analysis - 자산구조",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 자산구조 axis: 조달한 돈으로 뭘 준비했는가.",
       "whenToUse": [
@@ -189,10 +193,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.assetStructure"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -238,6 +244,7 @@
       "title": "Analysis - 자본배분",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 자본배분 axis: 번 돈을 어디에 쓰는가.",
       "whenToUse": [
@@ -268,10 +275,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.capitalAllocation"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -317,6 +326,7 @@
       "title": "현금흐름 분석",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "영업현금흐름, 투자, 재무활동, 이익의 현금 전환을 점검한다.",
       "whenToUse": [
@@ -350,6 +360,7 @@
         "cashflowConcepts",
         "financialStatementConcepts"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "CF, IS, BS 관련 기능를 확인하고 같은 기간 기준으로 묶는다.",
@@ -365,6 +376,7 @@
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
         "주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -427,6 +439,7 @@
       "title": "Analysis - 비용구조",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 비용구조 axis: 비용이 어떻게 움직이는가.",
       "whenToUse": [
@@ -457,10 +470,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.costStructure"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -506,6 +521,7 @@
       "title": "Analysis - 공시변화",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 공시변화 axis: 이 회사의 공시가 뭐가 달라졌는가.",
       "whenToUse": [
@@ -536,10 +552,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.disclosureChange"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -585,6 +603,7 @@
       "title": "배당과 주주환원 분석",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "배당, 자사주, 총환원율을 이익과 현금흐름의 지속 가능성 관점에서 분석한다.",
       "whenToUse": [
@@ -617,6 +636,7 @@
       "knowledgeRefs": [
         "capitalAllocationConcepts"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "Company.capital과 현금흐름 관련 기능를 함께 확인한다.",
@@ -632,6 +652,7 @@
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
         "주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -693,6 +714,7 @@
       "title": "Analysis - 이익품질",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 이익품질 axis: 이익이 진짜인가.",
       "whenToUse": [
@@ -723,10 +745,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.earningsQuality"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -772,6 +796,7 @@
       "title": "Analysis - 효율성",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 효율성 axis: 이 회사는 자산을 잘 굴리는가.",
       "whenToUse": [
@@ -802,10 +827,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.efficiency"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -851,6 +878,7 @@
       "title": "Analysis - 재무정합성",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 재무정합성 axis: 재무제표가 서로 맞는가.",
       "whenToUse": [
@@ -881,10 +909,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.financialConsistency"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -930,6 +960,7 @@
       "title": "Analysis - 자금조달",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 자금조달 axis: 돈을 어디서 조달하는가.",
       "whenToUse": [
@@ -960,10 +991,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.financing"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1009,6 +1042,7 @@
       "title": "Analysis - 지배구조",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 지배구조 axis: 이 회사의 주인은 누구이며 감시는 작동하는가.",
       "whenToUse": [
@@ -1039,10 +1073,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.governance"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1088,6 +1124,7 @@
       "title": "지배구조와 감사 리스크 점검",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "감사의견, 내부통제, 특수관계자, 지배구조 신호를 공시와 scan 근거로 점검한다.",
       "whenToUse": [
@@ -1122,6 +1159,7 @@
         "auditRiskConcepts",
         "governanceConcepts"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "Company.audit, disclosure, scan.audit, scan.governance 기능를 확인한다.",
@@ -1137,6 +1175,7 @@
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
         "주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1199,6 +1238,7 @@
       "title": "Analysis - 성장성",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 성장성 axis: 이 회사는 얼마나 빨리 성장하는가.",
       "whenToUse": [
@@ -1229,10 +1269,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.growth"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1278,6 +1320,7 @@
       "title": "Analysis - 투자효율",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 투자효율 axis: 투자가 가치를 만드는가.",
       "whenToUse": [
@@ -1308,10 +1351,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.investmentEfficiency"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1357,6 +1402,7 @@
       "title": "Analysis - 매크로민감도",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 매크로민감도 axis: 이 회사의 매출은 어떤 매크로 변수에 민감한가.",
       "whenToUse": [
@@ -1387,10 +1433,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.macroSensitivity"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1436,6 +1484,7 @@
       "title": "동종 기업 비교 분석",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "둘 이상의 기업을 같은 metric, 같은 기간, 같은 기준으로 비교해 상대 우위와 한계를 판단한다.",
       "whenToUse": [
@@ -1464,6 +1513,7 @@
       "knowledgeRefs": [
         "financialStatementConcepts"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "각 대상의 식별 결과를 확인한다.",
@@ -1479,6 +1529,7 @@
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
         "주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1538,6 +1589,7 @@
       "title": "Analysis - 예측신호",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 예측신호 axis: 이 회사의 실적은 어디로 향하는가.",
       "whenToUse": [
@@ -1568,10 +1620,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.predictionSignal"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1617,6 +1671,7 @@
       "title": "수익성 분석",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "매출, 마진, 이익의 변화를 기간·섹터 맥락과 함께 분석한다.",
       "whenToUse": [
@@ -1654,6 +1709,7 @@
         "financialStatementConcepts",
         "dartlabCausalSixActs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "단일 기업 수익성 질문은 Company 경로가 기본이다. 먼저 Company.analysis와 Company.show 기능에서 수익성 관련 축과 원자료 topic을 찾는다.",
@@ -1669,6 +1725,7 @@
         "`c.analysis()`",
         "`c.analysis(\"financial\", \"수익성\")`"
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1736,6 +1793,7 @@
       "title": "Analysis - 매출전망",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 매출전망 axis: 이 회사의 매출은 어디로 가며 재무는 어떻게 변하는가.",
       "whenToUse": [
@@ -1766,10 +1824,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.revenueForecast"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1815,6 +1875,7 @@
       "title": "Analysis - 수익구조",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 수익구조 axis: 이 회사는 무엇으로 돈을 버는가.",
       "whenToUse": [
@@ -1845,10 +1906,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.revenueStructure"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1894,6 +1957,7 @@
       "title": "Analysis - 종합평가",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 종합평가 axis: 재무 상태를 한마디로.",
       "whenToUse": [
@@ -1924,10 +1988,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.scorecard"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -1973,6 +2039,7 @@
       "title": "Analysis - 안정성",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 안정성 axis: 이 회사는 망하지 않는가.",
       "whenToUse": [
@@ -2003,10 +2070,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.stability"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -2052,6 +2121,7 @@
       "title": "Analysis - 가치평가",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 가치평가 axis: 이 회사의 적정 가치는 얼마인가.",
       "whenToUse": [
@@ -2082,10 +2152,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.valuation"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -2131,6 +2203,7 @@
       "title": "Analysis - 밸류에이션밴드",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "analysis engine application skill for the 밸류에이션밴드 axis: PER/PBR이 과거 대비 어디에 있는가.",
       "whenToUse": [
@@ -2161,10 +2234,12 @@
         "engines.company",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.valuationBand"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -2210,6 +2285,7 @@
       "title": "Company",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Company 엔진은 종목코드 하나를 target으로 고정하고 재무, 공시, 검색, 분석, 신용, 수집, 퀀트, 매크로, 스토리, 산업 연결을 제공하는 facade 실행 스킬이다.",
       "whenToUse": [
@@ -2262,10 +2338,12 @@
         "engines.macro",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.company"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -2320,6 +2398,7 @@
       "title": "공시 이벤트 중요도 검토",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "기업 공시 목록과 가능한 경량 본문 근거를 확인해 중요한 이벤트 후보와 한계를 구분한다.",
       "whenToUse": [
@@ -2345,6 +2424,7 @@
       "knowledgeRefs": [
         "dartDisclosureStructure"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "공시 목록의 접수일, 제목, 유형을 확인한다.",
@@ -2360,6 +2440,7 @@
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
         "Company 객체 메서드는 topic별 DataFrame, dict, 또는 하위 엔진 결과를 반환한다. 핵심 식별자는 stockCode/ticker, companyName, period, topic, source, value, unit이다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -2418,6 +2499,7 @@
       "title": "기업 분석 시작 라우터",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "종목 또는 기업 질문을 받았을 때 어떤 분석 skill과 기능로 시작할지 결정한다.",
       "whenToUse": [
@@ -2453,6 +2535,7 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "기업명, 종목코드, ticker 중 무엇이 입력됐는지 먼저 식별한다.",
@@ -2468,6 +2551,7 @@
         "`c.trace()`",
         "종목코드 또는 ticker를 target으로 고정하고 재무, 공시, 가격, 하위 엔진 호출의 단일 진입점을 제공한다. 무인자 호출은 사용 가능한 topic/axis 가이드를 반환한다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "skillRef",
@@ -2521,10 +2605,107 @@
       }
     },
     {
+      "id": "engines.company.sections",
+      "title": "sections — 회사 전체 지도",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "sections 는 한 회사의 모든 기간 공시를 topic × period 매트릭스로 가로화한 단일 진입 DataFrame 이다. 개별 보고서를 하나씩 열지 않고 전 기간을 한 화면에서 비교한다.",
+      "whenToUse": [
+        "회사 전체 공시를 한 번에 훑기",
+        "topic × period 매트릭스 직접 다루기",
+        "show / trace 의 원천 자료 이해",
+        "공시 기간 커버리지 확인",
+        "한국 DART 와 미국 EDGAR 같은 구조 이해"
+      ],
+      "inputs": [
+        "종목코드 또는 ticker",
+        "선택적 topic 또는 period 필터"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "topic × period Polars DataFrame",
+        "chapter / blockType / textNodeType / textLevel / textPath 메타",
+        "기간별 원문 payload (text 또는 markdown table)"
+      ],
+      "apiRefs": [
+        "Company.sections",
+        "Company.show",
+        "Company.trace",
+        "Company.select",
+        "Company.diff"
+      ],
+      "toolRefs": [],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.company",
+        "engines.data.foundation",
+        "engines.story"
+      ],
+      "linkedSkills": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.company.sections"
+      ],
+      "procedure": [
+        "dartlab.Company(code) 로 회사를 만든다.",
+        "c.sections 로 전체 매트릭스 DataFrame 을 받는다.",
+        "chapter · topic · blockType 으로 Polars filter 한다.",
+        "c.show(topic) 으로 source priority (finance > report > docs) 적용된 단일 topic 을 본다.",
+        "c.trace(topic) 으로 어떤 source 가 선택됐는지 확인한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "target",
+        "period",
+        "topic",
+        "tableRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "선택한 topic 의 chapter / blockType / textNodeType",
+        "기간별 payload 비교 결과",
+        "source priority 적용 결과 (finance > report > docs)"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "결손값 (null) 을 0 으로 대체해 추세 왜곡",
+        "source priority 무시하고 docs 의 숫자를 finance 결과로 단정",
+        "같은 topic 의 text 와 table 블록을 한 셀로 합쳐 처리"
+      ],
+      "forbidden": [
+        "기간 컬럼의 null 을 0 으로 대체하지 않는다.",
+        "source priority 가 적용되지 않은 raw 값을 분석 결론으로 단정하지 않는다."
+      ],
+      "examples": [
+        "삼성전자 sections 보기",
+        "사업개요 기간별 변화 추적",
+        "DART · EDGAR 같은 구조로 미국 종목 가로화"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      }
+    },
+    {
       "id": "engines.company.usEdgarReview",
       "title": "미국 기업 EDGAR 분석",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "미국 ticker 또는 EDGAR 공시 질문을 Company, EDGAR filings, 재무 근거로 분석한다.",
       "whenToUse": [
@@ -2562,6 +2743,7 @@
         "edgarFilingConcepts",
         "dartlabCausalSixActs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "ticker를 식별하고 EDGAR Company 경로가 가능한지 확인한다.",
@@ -2577,6 +2759,7 @@
         "`c.index()`",
         "`c.trace()`"
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -2642,6 +2825,7 @@
       "title": "Credit (dCR)",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Credit (dCR) 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 기능/docstring으로 내려간다.",
       "whenToUse": [
@@ -2676,6 +2860,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.credit"
       ],
@@ -2690,6 +2875,7 @@
         "`debtRatio` — 부채비율 (%)",
         "`interestCoverage` — 이자보상배율 (배)"
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -2738,6 +2924,7 @@
       "title": "신용 위험 분석",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "기업의 재무 안정성, 차입 부담, 현금흐름 방어력을 신용 관점에서 점검한다.",
       "whenToUse": [
@@ -2771,6 +2958,7 @@
       "knowledgeRefs": [
         "creditRiskConcepts"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "Company.credit와 재무 안정성 관련 기능를 확인한다.",
@@ -2786,6 +2974,7 @@
         "dict 또는 DataFrame 형태의 신용 지표를 반환한다. 핵심 키는 grade/score, leverage, interestCoverage, cashflowBuffer, riskFlags, basis이며 비율은 %, 배수는 배 단위다.",
         "전체 세부 필드는 공개 docstring/기능와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -2847,6 +3036,7 @@
       "title": "대시보드 — 회사 종합 스냅샷 (v19 · 정보 깊이 확장)",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "대시보드 — 회사 종합 스냅샷 (v19 · 정보 깊이 확장) 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 기능/docstring으로 내려간다.",
       "whenToUse": [
@@ -2880,6 +3070,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.dashboard"
       ],
@@ -2894,6 +3085,7 @@
         "Beneish M: 5-var simplified (DSRI · GMI · AQI).",
         "HHI + Top-N suppliers: `ecosystem.links` 필터."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -2942,6 +3134,7 @@
       "title": "Data",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Data 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 기능/docstring으로 내려간다.",
       "whenToUse": [
@@ -2977,6 +3170,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.data"
       ],
@@ -2991,6 +3185,7 @@
         "**workflow_run 체인**: KindList 완료 → 신규 종목 bootstrap, DART 수집 완료 → 자동 프리빌드 트리거 (EDGAR 는 edgarSync 내부 end-to-end).",
         "**backup**: `dataSync.yml workflow_dispatch mode=full` 로 88 분기 차집합 수동 실행."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -3039,6 +3234,7 @@
       "title": "데이터 엔진 기본기",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "응용 분석 skill이 시작 전에 참조할 Company, gather, scan 데이터 엔진의 기본 선택 순서와 evidence 계약을 정의한다.",
       "whenToUse": [
@@ -3073,6 +3269,7 @@
         "engines.gather",
         "engines.scan"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "단일 종목의 재무, 공시, 사업, 하위 엔진 라우팅은 `Company`가 먼저다. scan prebuild는 peer 위치, universe ranking, Company 원자료 부재 시의 보조 경로다.",
@@ -3088,6 +3285,7 @@
         "Company 경로는 target, topic, source, period를 남긴다.",
         "gather 경로는 provider, latestAsOf, metric, table을 남긴다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "universe",
@@ -3158,6 +3356,7 @@
       "title": "EDGAR 동기화 규칙",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "EDGAR 동기화 규칙 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 기능/docstring으로 내려간다.",
       "whenToUse": [
@@ -3192,6 +3391,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.edgar"
       ],
@@ -3206,6 +3406,7 @@
         "scan EDGAR 11 축·프리빌드는 `engines.scan` skill에서 확인한다.",
         "gather market 분기는 `engines.gather` skill에서 확인한다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -3254,6 +3455,7 @@
       "title": "Gather",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Gather 엔진은 가격, 컨센서스, 수급, 뉴스, 배당, 소유구조, 섹터, 매크로 등 외부/보조 데이터를 수집하는 실행 스킬이다.",
       "whenToUse": [
@@ -3293,10 +3495,12 @@
         "engines.data.foundation",
         "engines.macro"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -3349,6 +3553,7 @@
       "title": "Gather - Gather snapshot",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Gather snapshot.",
       "whenToUse": [
@@ -3377,10 +3582,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.collect"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -3424,6 +3631,7 @@
       "title": "Gather - Consensus data",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Consensus data.",
       "whenToUse": [
@@ -3452,10 +3660,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.consensus"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -3499,6 +3709,7 @@
       "title": "Gather - Dividend history",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Dividend history.",
       "whenToUse": [
@@ -3527,10 +3738,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.dividends"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -3574,6 +3787,7 @@
       "title": "Gather - Investor flow",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Investor flow.",
       "whenToUse": [
@@ -3602,10 +3816,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.flow"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -3649,6 +3865,7 @@
       "title": "Gather - Price and volume history",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Price and volume history.",
       "whenToUse": [
@@ -3677,10 +3894,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.history"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -3724,6 +3943,7 @@
       "title": "Gather - Industry peers",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Industry peers.",
       "whenToUse": [
@@ -3752,10 +3972,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.industryPeers"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -3799,6 +4021,7 @@
       "title": "Gather - Insider trading",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Insider trading.",
       "whenToUse": [
@@ -3827,10 +4050,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.insiderTrading"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -3874,6 +4099,7 @@
       "title": "Gather - Macro raw data",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Macro raw data.",
       "whenToUse": [
@@ -3902,10 +4128,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.macro"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -3949,6 +4177,7 @@
       "title": "Gather - Major shareholders",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Major shareholders.",
       "whenToUse": [
@@ -3977,10 +4206,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.majorShareholders"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -4024,6 +4255,7 @@
       "title": "Gather - News collection",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for News collection.",
       "whenToUse": [
@@ -4052,10 +4284,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.news"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -4099,6 +4333,7 @@
       "title": "Gather - Institutional ownership",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Institutional ownership.",
       "whenToUse": [
@@ -4127,10 +4362,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.ownership"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -4174,6 +4411,7 @@
       "title": "Gather - Current price snapshot",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Current price snapshot.",
       "whenToUse": [
@@ -4202,10 +4440,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.price"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -4249,6 +4489,7 @@
       "title": "Gather - Revenue consensus",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Revenue consensus.",
       "whenToUse": [
@@ -4277,10 +4518,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.revenueConsensus"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -4324,6 +4567,7 @@
       "title": "Gather - Sector information",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Sector information.",
       "whenToUse": [
@@ -4352,10 +4596,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.sector"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -4399,6 +4645,7 @@
       "title": "Gather - Split history",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "gather engine application skill for Split history.",
       "whenToUse": [
@@ -4427,10 +4674,12 @@
         "engines.gather",
         "engines.data.foundation"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.splits"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "provider",
@@ -4474,6 +4723,7 @@
       "title": "Industry",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Industry 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 기능/docstring으로 내려간다.",
       "whenToUse": [
@@ -4508,6 +4758,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.industry"
       ],
@@ -4522,6 +4773,7 @@
         "keywords = 빌드 파이프라인이 매칭에 사용.",
         "**AI/사람이 JSON 을 직접 편집하여 산업 추가, 키워드 갱신, 공정 재정의**."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -4570,6 +4822,7 @@
       "title": "Macro",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Macro 엔진은 경기, 정책, 유동성, 위기, 자산, 심리, 예측을 6막 구조로 읽는 시장 레벨 분석 스킬이다.",
       "whenToUse": [
@@ -4606,10 +4859,12 @@
         "engines.story",
         "engines.gather"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -4662,6 +4917,7 @@
       "title": "Macro - 자산",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 자산: 5대 자산 심층 해석 + Cu/Au + BEI 4분면.",
       "whenToUse": [
@@ -4691,10 +4947,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.assets"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -4738,6 +4996,7 @@
       "title": "Macro - 기업집계",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 기업집계: 전종목 이익사이클 + Ponzi비율 + 레버리지.",
       "whenToUse": [
@@ -4767,10 +5026,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.corporate"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -4814,6 +5075,7 @@
       "title": "Macro - 위기",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 위기: Credit-to-GDP gap + GHS + Minsky + 역사적 맥락.",
       "whenToUse": [
@@ -4843,10 +5105,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.crisis"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -4890,6 +5154,7 @@
       "title": "Macro - 사이클",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 사이클: 경제 사이클 4국면 식별 + 전환 시퀀스 감지.",
       "whenToUse": [
@@ -4919,10 +5184,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.cycle"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -4966,6 +5233,7 @@
       "title": "Macro - 예측",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 예측: LEI + Cleveland Fed 침체확률 + Sahm + Hamilton RS + GaR.",
       "whenToUse": [
@@ -4995,10 +5263,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.forecast"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -5042,6 +5312,7 @@
       "title": "Macro - 재고",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 재고: ISM 재고순환 4국면 + 자산배분 바로미터.",
       "whenToUse": [
@@ -5071,10 +5342,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.inventory"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -5118,6 +5391,7 @@
       "title": "Macro - 유동성",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 유동성: M2 + 연준 B/S + NFCI + 자체 FCI.",
       "whenToUse": [
@@ -5147,10 +5421,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.liquidity"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -5194,6 +5470,7 @@
       "title": "거시 시장 환경 점검",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "금리, 환율, 경기, 유동성 질문을 기업 분석의 상위 맥락으로 연결한다.",
       "whenToUse": [
@@ -5228,6 +5505,7 @@
         "dartlabCausalSixActs",
         "macroCycleConcepts"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "macro와 관련 dataset 후보를 찾고 최신 관측일을 확인한다.",
@@ -5243,6 +5521,7 @@
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
         "macro table 또는 dict를 반환한다. 핵심 컬럼/키는 region, date/latestAsOf, indicator, value, unit, signal, basis다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "latestAsOf",
         "metric",
@@ -5304,6 +5583,7 @@
       "title": "Macro - 금리",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 금리: 금리 방향 + 고용/물가 + 수익률곡선 + 기간프리미엄.",
       "whenToUse": [
@@ -5333,10 +5613,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.rates"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -5380,6 +5662,7 @@
       "title": "Macro - 시나리오",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 시나리오: 역사적 충격 재현 + 유형별 스트레스 (~146개 프리셋).",
       "whenToUse": [
@@ -5409,10 +5692,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.scenario"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -5456,6 +5741,7 @@
       "title": "Macro - 심리",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 심리: 공포탐욕 근사 + VIX 구간 + JLN 실물 불확실성.",
       "whenToUse": [
@@ -5485,10 +5771,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.sentiment"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -5532,6 +5820,7 @@
       "title": "Macro - 종합",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 종합: 6막 전체 종합 — 점수 + 자산배분 + 40개 투자전략.",
       "whenToUse": [
@@ -5561,10 +5850,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.summary"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -5608,6 +5899,7 @@
       "title": "Macro - 교역",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "macro engine application skill for 교역: 교역조건 + 수출이익 선행 + 양국 선행지수.",
       "whenToUse": [
@@ -5637,10 +5929,12 @@
         "engines.gather",
         "engines.story"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.trade"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "market",
         "indicator",
@@ -5684,6 +5978,7 @@
       "title": "Mappers",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Mappers 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 기능/docstring으로 내려간다.",
       "whenToUse": [
@@ -5715,6 +6010,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.mappers"
       ],
@@ -5728,6 +6024,7 @@
         "key → value — 한국어 → 영문 canonical (일관된 패턴).",
         "category·type 분류 — AI 가 새 항목을 자동 분류하는 학습 데이터."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -5776,6 +6073,7 @@
       "title": "Quant",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Quant 엔진은 가격, 기술적 신호, 팩터, 리스크, 텍스트/공시, 횡단면 랭킹, 포트폴리오, 백테스트를 46개 축으로 실행하는 정량 분석 스킬이다.",
       "whenToUse": [
@@ -5815,10 +6113,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -5873,6 +6173,7 @@
       "title": "Quant - Sloan Accrual",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for Sloan Accrual: Sloan 1996 — (NI−CFO)/TA, high/neutral/low 3 그룹 분포 (종목 불필요).",
       "whenToUse": [
@@ -5904,10 +6205,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.accruals"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -5953,6 +6256,7 @@
       "title": "Quant - 자산배분",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 자산배분: Equal Risk Contribution (Maillard 2010) — 종목별 위험 기여도 균등 배분 (종목 리스트).",
       "whenToUse": [
@@ -5984,10 +6288,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.allocation"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6033,6 +6339,7 @@
       "title": "Quant - Altman Z",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for Altman Z: Altman 1968/1995 — 전종목 부실확률 (safe/grey/distress 3 zone) + topSafe/topDistress (종목 불필요).",
       "whenToUse": [
@@ -6064,10 +6371,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.altman"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6113,6 +6422,7 @@
       "title": "Quant - BAB 저베타",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for BAB 저베타: Frazzini-Pedersen 2014 — 252일 beta 저베타 랭킹 + 60일 realized vol 보조 (종목 불필요).",
       "whenToUse": [
@@ -6144,10 +6454,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.bab"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6193,6 +6505,7 @@
       "title": "Quant - 백테스트",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 백테스트: 스타일명 또는 Rule 백테스트 (cpcv 옵션).",
       "whenToUse": [
@@ -6224,10 +6537,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.backtest"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6273,6 +6588,7 @@
       "title": "Quant - 벤치마크",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 벤치마크: 종목별 시장·섹터·스타일 KRX 벤치마크 스택과 기간 수익률.",
       "whenToUse": [
@@ -6304,10 +6620,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.benchmark"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6353,6 +6671,7 @@
       "title": "Quant - Beneish M",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for Beneish M: Beneish 1999 — 8변수 이익조작 감지, red flag (M > -1.78) 비율 + topFlag (종목 불필요).",
       "whenToUse": [
@@ -6384,10 +6703,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.beneish"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6433,6 +6754,7 @@
       "title": "Quant - 베타",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 베타: 시장/섹터/스타일 벤치마크 선택형 베타 + CAPM + 알파 + R².",
       "whenToUse": [
@@ -6464,10 +6786,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.beta"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6513,6 +6837,7 @@
       "title": "Quant - 차트패턴",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 차트패턴: 거시 차트 패턴 — W/M/H&S/삼중/원형 (자동 인식 + 목표가).",
       "whenToUse": [
@@ -6544,10 +6869,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.chartPatterns"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6593,6 +6920,7 @@
       "title": "가치평가 가정 분해 검토",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "성장, 마진, 재투자, 할인율, 터미널 가정을 분해해 가치평가 민감도와 한계를 검토한다.",
       "whenToUse": [
@@ -6617,6 +6945,7 @@
       "knowledgeRefs": [
         "valuationPrinciples"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "매출 성장률과 마진 추세를 실제 재무 데이터로 확인한다.",
@@ -6632,6 +6961,7 @@
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
         "dict 또는 DataFrame을 반환한다. 핵심 키는 valuation, momentum, volatility, assumptions, sensitivity, basis이며 가격은 원/달러, 비율은 %/배다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6689,6 +7019,7 @@
       "title": "Quant - 괴리",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 괴리: 재무-기술적 괴리 진단.",
       "whenToUse": [
@@ -6720,10 +7051,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.divergence"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6769,6 +7102,7 @@
       "title": "Quant - 이익모멘텀",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 이익모멘텀: SUE, PEAD, 이익 수정 모멘텀.",
       "whenToUse": [
@@ -6800,10 +7134,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.earnings"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6849,6 +7185,7 @@
       "title": "Quant - 진입진단",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 진입진단: 현재 시점 진입/청산/스톱 진단 (백테스트 안 돌림).",
       "whenToUse": [
@@ -6880,10 +7217,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.entry"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -6929,6 +7268,7 @@
       "title": "Quant - 이벤트신호",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 이벤트신호: allFilings 이벤트 기반 신호 (경영진변경, M&A 등).",
       "whenToUse": [
@@ -6960,10 +7300,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.eventSignal"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7009,6 +7351,7 @@
       "title": "Quant - 팩터",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 팩터: Fama-French 5 + q-factor 분해 (MKT/SMB/HML/RMW/CMA).",
       "whenToUse": [
@@ -7040,10 +7383,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.factor"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7089,6 +7434,7 @@
       "title": "Quant - 수급",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 수급: 기관/외국인 매매 분석 (KR전용).",
       "whenToUse": [
@@ -7120,10 +7466,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.flow"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7169,6 +7517,7 @@
       "title": "Quant - 펀더-가격 모멘텀",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 펀더-가격 모멘텀: Chordia-Shivakumar 2006 — earnings + 12-1 price 모멘텀 합성 랭킹 (종목 불필요).",
       "whenToUse": [
@@ -7200,10 +7549,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.fundmom"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7249,6 +7600,7 @@
       "title": "Quant - 거버넌스퀀트",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 거버넌스퀀트: 지배구조 품질 정량화 (사외이사비율, 감사의견, 보수).",
       "whenToUse": [
@@ -7280,10 +7632,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.governanceQuant"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7329,6 +7683,7 @@
       "title": "Quant - 지표",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 지표: 45개 기술적 지표 DataFrame (SMA, EMA, MACD, RSI, BB 등).",
       "whenToUse": [
@@ -7360,10 +7715,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.indicators"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7409,6 +7766,7 @@
       "title": "Quant - 유동성",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 유동성: Amihud 비유동성, Roll 스프레드, 회전율.",
       "whenToUse": [
@@ -7440,10 +7798,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.liquidity"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7489,6 +7849,7 @@
       "title": "Quant - 평균분산",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 평균분산: Markowitz 평균-분산 최적화 (종목 리스트).",
       "whenToUse": [
@@ -7520,10 +7881,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.meanvar"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7569,6 +7932,7 @@
       "title": "Quant - 모멘텀",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 모멘텀: 12-1개월 횡단면, 시계열 모멘텀, 52주 신고가 비율.",
       "whenToUse": [
@@ -7600,10 +7964,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.momentum"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7649,6 +8015,7 @@
       "title": "Quant - 멀티자산",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 멀티자산: 멀티 종목 포트폴리오 백테스트 (equal/inv_vol/risk_parity 가중) (종목 리스트).",
       "whenToUse": [
@@ -7680,10 +8047,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.multi"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7729,6 +8098,7 @@
       "title": "Quant - 페어",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 페어: 공적분 기반 페어 트레이딩 후보 탐색 (종목 불필요).",
       "whenToUse": [
@@ -7760,10 +8130,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.pairs"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7809,6 +8181,7 @@
       "title": "Quant - 패턴",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 패턴: 캔들스틱 10종 + zigzag 기반 지지/저항.",
       "whenToUse": [
@@ -7840,10 +8213,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.pattern"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7889,6 +8264,7 @@
       "title": "Quant - Piotroski F",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for Piotroski F: Piotroski 2000 — 9 신호 합 (0~9점) 전종목 분포 + 9 신호 시장 통과율 (종목 불필요).",
       "whenToUse": [
@@ -7920,10 +8296,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.piotroski"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -7969,6 +8347,7 @@
       "title": "Quant - q-factor",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for q-factor: Hou-Xue-Zhang 2015 — ROE + (−assetGrowth) composite, 수익성×보수투자 (종목 불필요).",
       "whenToUse": [
@@ -8000,10 +8379,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.qfactor"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -8049,6 +8430,7 @@
       "title": "Quant - QMJ",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for QMJ: Asness-Frazzini-Pedersen 2019 — Profitability + Safety 합성 품질 랭킹 (종목 불필요).",
       "whenToUse": [
@@ -8080,10 +8462,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.qmj"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -8129,6 +8513,7 @@
       "title": "Quant - 퀄리티",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 퀄리티: Asness 퀄리티 팩터: 수익성+안전성+성장성 복합.",
       "whenToUse": [
@@ -8160,10 +8545,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.quality"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -8209,6 +8596,7 @@
       "title": "Quant - 순위",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 순위: 멀티팩터 복합 순위 (모멘텀+가치+퀄리티+리스크) (종목 불필요).",
       "whenToUse": [
@@ -8240,10 +8628,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.ranking"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -8289,6 +8679,7 @@
       "title": "Quant - 레짐",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 레짐: Hamilton 2-state HMM (bull/bear), 추세추종 신호.",
       "whenToUse": [
@@ -8320,10 +8711,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.regime"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -8369,6 +8762,7 @@
       "title": "Quant - 잔여수익",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 잔여수익: 팩터 제거 후 잔여 모멘텀/알파.",
       "whenToUse": [
@@ -8400,10 +8794,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.residual"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -8449,6 +8845,7 @@
       "title": "Quant - 리스크텍스트",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 리스크텍스트: 리스크 팩터 출현/소멸 텍스트 델타.",
       "whenToUse": [
@@ -8480,10 +8877,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.riskText"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -8529,6 +8928,7 @@
       "title": "Quant - 리스크패리티",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 리스크패리티: HRP (Lopez de Prado) 계층적 리스크 패리티 (종목 리스트).",
       "whenToUse": [
@@ -8560,10 +8960,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.riskparity"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -8609,6 +9011,7 @@
       "title": "Quant - 스크린",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 스크린: 팩터 스크리닝 프리셋 (가치/모멘텀/퀄리티/저변동) (종목 불필요).",
       "whenToUse": [
@@ -8640,10 +9043,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.screen"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -8689,6 +9094,7 @@
       "title": "Quant - 공시심리",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 공시심리: Loughran-McDonald 감성 사전 기반 공시 텍스트 스코어링.",
       "whenToUse": [
@@ -8720,10 +9126,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.sentiment"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -8769,6 +9177,7 @@
       "title": "퀀트 신호 교차검토",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "가격, 변동성, 밸류에이션, 모멘텀 신호를 같은 기준일에서 확인해 계량 판단을 보조한다.",
       "whenToUse": [
@@ -8792,6 +9201,7 @@
       "knowledgeRefs": [
         "quantSignalConcepts"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "대상과 가격 데이터 기준일을 확인한다.",
@@ -8807,6 +9217,7 @@
         "dict 또는 DataFrame을 반환한다. 핵심 키는 valuation, momentum, volatility, assumptions, sensitivity, basis이며 가격은 원/달러, 비율은 %/배다.",
         "전체 세부 필드는 공개 docstring/기능와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "metric",
@@ -8863,6 +9274,7 @@
       "title": "Quant - 신호",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 신호: 최근 매매 신호 이벤트 (골든크로스, RSI, MACD, 볼린저).",
       "whenToUse": [
@@ -8894,10 +9306,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.signals"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -8943,6 +9357,7 @@
       "title": "Quant - 전략",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 전략: 사용자 정의 boolean rule 백테스트 (Rule + sizing + stop).",
       "whenToUse": [
@@ -8974,10 +9389,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.strategy"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -9023,6 +9440,7 @@
       "title": "Quant - 스타일",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 스타일: 8 검증된 스타일 프리셋 일괄/단일 백테스트 (시총 의존 0) (종목 불필요).",
       "whenToUse": [
@@ -9054,10 +9472,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.style"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -9103,6 +9523,7 @@
       "title": "Quant - 이익서프라이즈",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 이익서프라이즈: Bernard-Thomas 1989 PEAD — YoY NI growth z-score, positive SUE drift 후보 (종목 불필요).",
       "whenToUse": [
@@ -9134,10 +9555,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.surprise"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -9183,6 +9606,7 @@
       "title": "Quant - 꼬리위험",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 꼬리위험: CVaR, 최대낙폭, Sortino, 하방편차.",
       "whenToUse": [
@@ -9214,10 +9638,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.tailrisk"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -9263,6 +9689,7 @@
       "title": "Quant - 톤변화",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 톤변화: 기간별 공시 톤 변화 감지.",
       "whenToUse": [
@@ -9294,10 +9721,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.toneChange"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -9343,6 +9772,7 @@
       "title": "Quant - 가치",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 가치: 가치 신호: PBR/PER/PSR vs 가격 모멘텀.",
       "whenToUse": [
@@ -9374,10 +9804,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.value"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -9423,6 +9855,7 @@
       "title": "Quant - 판단",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 판단: 종합 기술적 판단 (강세/중립/약세) + RSI/SMA/BB.",
       "whenToUse": [
@@ -9454,10 +9887,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.verdict"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -9503,6 +9938,7 @@
       "title": "Quant - 변동성",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 변동성: GARCH(1,1), HAR-RV 실현변동성, 변동성 기간구조.",
       "whenToUse": [
@@ -9534,10 +9970,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.volatility"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -9583,6 +10021,7 @@
       "title": "Quant - 거래량",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 거래량: OBV 추세, 거래량-가격 괴리, 누적분배.",
       "whenToUse": [
@@ -9614,10 +10053,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.volume"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -9663,6 +10104,7 @@
       "title": "Quant - 워크포워드",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "quant engine application skill for 워크포워드: Lopez de Prado 슬라이딩 OOS Sharpe + DSR + PBO.",
       "whenToUse": [
@@ -9694,10 +10136,12 @@
         "engines.gather",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.walkforward"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -9743,6 +10187,7 @@
       "title": "dartlab quant 세계 최강 — 사상 정합 + 성능 fix 플랜 (2026-04-25 v3)",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "dartlab quant 세계 최강 — 사상 정합 + 성능 fix 플랜 (2026-04-25 v3) 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 기능/docstring으로 내려간다.",
       "whenToUse": [
@@ -9776,6 +10221,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.quantWorldClass"
       ],
@@ -9790,6 +10236,7 @@
         "✅ Phase 2b 11/11 통과 (Step 1)",
         "✅ `c.quant(\"altman\", \"005930\")` 단일 / `c.quant(\"altman\")` 횡단면 / `c.quant.altman(\"005930\")` attr (Step 6/7)"
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -9834,10 +10281,440 @@
       }
     },
     {
+      "id": "engines.recipe.companyDeepAnalysis",
+      "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "단일 회사의 깊이 있는 분석을 매크로 환경, 산업 위치, 회사 본질, ROE 분해, 회계 quality 5 단으로 엮는 절차.",
+      "whenToUse": [
+        "회사 종합 분석",
+        "깊이 있는 회사 분석",
+        "매크로와 회사를 같이 보고 싶을 때",
+        "회사 분석 종합 보고서",
+        "종목 깊이 분석"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.macro.marketReview",
+        "engines.analysis.peerComparison",
+        "engines.scan.profitability",
+        "engines.company.researchStarter",
+        "engines.analysis.profitability",
+        "engines.analysis.earningsQuality"
+      ],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 4 개 (macro snapshot, peer scan, BS, IS)",
+        "`valueRef` 6+ 개 (ROE, 마진, 회전, 레버리지, 현금흐름 quality, 일회성 비중)",
+        "`dateRef` 1 개 (분기 기준일)",
+        "답변에 숫자가 들어가면 valueRef 또는 tableRef 묶음 필수.",
+        "분기 기준은 dateRef 명시.",
+        "peer 비교는 tableRef + 답변 본문에 evidence table 동시 노출.",
+        "\"12 조\" 같은 절대값 단독 노출 금지 — peer median / 5 년 평균과 함께."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.macro.marketReview",
+          "note": "매크로 환경 (금리·환율·경기 사이클)"
+        },
+        {
+          "skillId": "engines.scan.profitability",
+          "note": "peer 후보 5~10 (수익성 축)"
+        },
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입 + show(\"BS\") + show(\"IS\")"
+        },
+        {
+          "skillId": "engines.analysis.profitability",
+          "note": "ROE DuPont 분해 (마진 × 회전 × 레버리지)"
+        },
+        {
+          "skillId": "engines.analysis.earningsQuality",
+          "note": "일회성·발생주의 점검"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 macro/scan dataset snapshot 범위 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.financialStatementCompare",
+      "title": "두 회사 재무제표 비교 (peer + show + 분해)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "두 회사의 재무제표를 같은 기준 기간에서 비교하고 핵심 차이를 분해해 평가하는 절차.",
+      "whenToUse": [
+        "두 회사 재무제표 비교",
+        "A 와 B 비교",
+        "회사 vs 회사",
+        "peer 비교",
+        "동종 비교",
+        "종목 비교"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company.researchStarter",
+        "engines.analysis.peerComparison",
+        "engines.analysis.profitability",
+        "engines.analysis.financing"
+      ],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 4 개 (두 회사 × BS + IS)",
+        "`valueRef` 6+ 개 (양사 ROE 구성 요소)",
+        "`dateRef` 1 개 (양사 공통 분기)",
+        "답변 본문 안 markdown evidence table (양사 핵심 항목 5~10 행)",
+        "양사 비교는 같은 분기·같은 단위 (조원) 기준.",
+        "답변 본문에 markdown evidence table 필수 — bullet 만 X.",
+        "차이 해석 시 절대값과 함께 비율 (배·%pt) 함께.",
+        "연결/별도 구분 명시 (양사 모두 연결 또는 모두 별도)."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "첫 회사 진입 + show(\"BS\") + show(\"IS\")"
+        },
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "둘째 회사 진입 + show(\"BS\") + show(\"IS\")"
+        },
+        {
+          "skillId": "engines.analysis.peerComparison",
+          "note": "양사 같은 기간 정렬 + 핵심 차이"
+        },
+        {
+          "skillId": "engines.analysis.profitability",
+          "note": "양사 ROE DuPont 분해"
+        },
+        {
+          "skillId": "engines.analysis.financing",
+          "note": "양사 자본구조 비교 (선택)"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 두 회사 dataset snapshot 동시 로드 부담"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.growthScreenToDeepDive",
+      "title": "성장 스캔 → 상위 후보 → 각 회사 분석",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "전종목 성장 스캔으로 후보를 추리고 상위 N 종에 대해 회사별 깊이 분석을 진행하는 절차.",
+      "whenToUse": [
+        "성장하는 회사 찾기",
+        "성장주 후보",
+        "growth screen",
+        "후보 분석",
+        "상위 종목 분석",
+        "성장성 스크리닝"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan.growth",
+        "engines.scan.crossSectionStockScreen",
+        "engines.company.researchStarter",
+        "engines.analysis.growth",
+        "engines.analysis.earningsQuality"
+      ],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 1+5 개 (스캔 결과 + 5 회사 IS)",
+        "`valueRef` 회사당 3~5 개 (매출/영업이익/순이익 CAGR + quality)",
+        "`dateRef` 1 개 (스캔 기준 시점)",
+        "답변 본문 안 markdown evidence table — 후보 5 행 (회사 / 매출 CAGR / OP CAGR / NI CAGR / quality)",
+        "후보 답변은 bullet 만 X — `입력 / 유니버스 / 필터 / 계산식 / 결과` 4 단 + evidence table.",
+        "CAGR 기준 기간 명시 (3 년·5 년·10 년).",
+        "매출 규모 하한 (예: 매출 1000 억 이상) 으로 micro-cap 잡음 제거.",
+        "후보 회사별 quality 등급 함께 — 성장 quality 가 매출 채권 급증·일회성에 의존하면 표시."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.scan.growth",
+          "note": "전종목 성장성 스코어 (CAGR 기준)"
+        },
+        {
+          "skillId": "engines.scan.crossSectionStockScreen",
+          "note": "매출 규모·기간 필터로 상위 후보"
+        },
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "각 회사 진입"
+        },
+        {
+          "skillId": "engines.analysis.growth",
+          "note": "회사별 성장 분해 (P×Q × Mix)"
+        },
+        {
+          "skillId": "engines.analysis.earningsQuality",
+          "note": "회사별 이익 quality 점검"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 scan dataset snapshot 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.macroToCompany",
+      "title": "매크로 → 섹터 → 회사 영향 (transmission)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "매크로 환경 변화가 특정 회사의 매출·영업이익·이자비용·환산손익에 어떻게 전이되는지 단계별로 추적하는 절차.",
+      "whenToUse": [
+        "금리가 회사에 미치는 영향",
+        "환율이 회사에 미치는 영향",
+        "매크로 영향",
+        "거시 영향",
+        "macro sensitivity",
+        "금리 인상 영향",
+        "환율 영향"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.macro.marketReview",
+        "engines.macro.rates",
+        "engines.analysis.macroSensitivity",
+        "engines.company.researchStarter",
+        "engines.analysis.financing"
+      ],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 2 개 (macro snapshot, sensitivity 표)",
+        "`valueRef` 4+ 개 (환율 elasticity, 금리 elasticity, 유가 elasticity)",
+        "`dateRef` 1 개 (분석 기준 시점)",
+        "elasticity 는 비율 (%, 배) — 단위 명시.",
+        "시나리오 (base/bull/bear) 가 있으면 가정 명시.",
+        "단발 추측 금지 — historic 추정 데이터로 뒷받침된 elasticity 만."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.macro.marketReview",
+          "note": "현재 매크로 환경 (금리·환율·경기 사이클)"
+        },
+        {
+          "skillId": "engines.macro.rates",
+          "note": "금리 변동 흐름 (필요 시)"
+        },
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입"
+        },
+        {
+          "skillId": "engines.analysis.macroSensitivity",
+          "note": "매크로 변수별 회사 P&L elasticity"
+        },
+        {
+          "skillId": "engines.analysis.financing",
+          "note": "자본구조 (이자부 부채·외화 부채 비중)"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 macro snapshot 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.usageAndApi",
+      "title": "dartlab 사용법·API 설명 (run_python 우회)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "dartlab 의 기능·사용법·API 를 설명하는 질문에서 read_skill + read_기능 만 사용하고 run_python 가짜 evidence 를 만들지 않는 절차.",
+      "whenToUse": [
+        "dartlab 사용법",
+        "어떤 기능이 있나",
+        "너 뭐 할 수 있니",
+        "dartlab 으로 뭐 가능",
+        "어떻게 쓰나",
+        "API 설명",
+        "함수 사용법",
+        "기능 설명"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "read_skill",
+        "read_기능"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "start.dartlabSkillOs"
+      ],
+      "sourceRefs": [],
+      "procedure": [
+        "`skillRef` 3~5 개 (관련 skill 본문)",
+        "`apiRef` 3~5 개 (호출 가능한 기능 docstring)",
+        "답변 본문 안 기능 사용 예시 (파이썬 코드블록)",
+        "사용법 답변에 숫자 (12 조원, 30%) 가 들어가면 GATE 차단 — 실제 데이터가 없는 가짜 숫자다.",
+        "skill ref + apiRef 만 묶고 evidence table 없이 답해도 OK.",
+        "사용자에게 \"이 함수를 직접 호출해 보세요\" 같은 행동 유도는 코드블록으로."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "start.dartlabSkillOs",
+          "note": "첫 진입 skill 확인"
+        }
+      ],
+      "requiredEvidence": [],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      }
+    },
+    {
       "id": "engines.scan",
       "title": "Scan",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Scan 엔진은 시장/유니버스 횡단면에서 후보를 발굴하고 순위를 계산하는 실행 스킬이다.",
       "whenToUse": [
@@ -9875,10 +10752,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -9937,6 +10816,7 @@
       "title": "Scan - 계정",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 계정: 전종목 단일 계정 시계열 (매출액, 영업이익 등).",
       "whenToUse": [
@@ -9966,10 +10846,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.account"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10014,6 +10896,7 @@
       "title": "Scan - 감사리스크",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 감사리스크: 감사의견, 감사인변경, 특기사항, 감사독립성비율.",
       "whenToUse": [
@@ -10043,10 +10926,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.audit"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10091,6 +10976,7 @@
       "title": "Scan - 주주환원",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 주주환원: 배당, 자사주(취득/처분/소각), 증자/감자, 환원 분류.",
       "whenToUse": [
@@ -10120,10 +11006,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.capital"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10168,6 +11056,7 @@
       "title": "Scan - 현금흐름",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 현금흐름: OCF/ICF/FCF + 현금흐름 패턴 분류 (8종).",
       "whenToUse": [
@@ -10197,10 +11086,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.cashflow"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10245,6 +11136,7 @@
       "title": "전종목 횡단면 주가 스크리닝",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "런타임 시장 데이터에서 종목 universe와 최신 관측일을 확인한 뒤 조건에 맞는 종목 후보군을 만든다.",
       "whenToUse": [
@@ -10278,6 +11170,7 @@
       "knowledgeRefs": [
         "krxDatasetStructure"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "RuntimeDatasetCatalog에서 KRX 가격 또는 종목 데이터셋 후보를 찾는다.",
@@ -10293,6 +11186,7 @@
         "`dartlab.scan(\"account\", account=\"revenue\")`",
         "시장/유니버스 횡단면에서 필터, 순위, peer 위치를 계산한다. 단일 종목 원자료 확인은 Company가 우선이다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "latestAsOf",
         "universe",
@@ -10365,6 +11259,7 @@
       "title": "Scan - 부채구조",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 부채구조: 사채만기, 부채비율, ICR, 위험등급.",
       "whenToUse": [
@@ -10394,10 +11289,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.debt"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10442,6 +11339,7 @@
       "title": "Scan - 공시리스크",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 공시리스크: 공시 변화 기반 선행 리스크 (우발부채, 감사변경, 계열변화, 사업전환).",
       "whenToUse": [
@@ -10471,10 +11369,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.disclosureRisk"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10519,6 +11419,7 @@
       "title": "Scan - 배당추이",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 배당추이: DPS 3개년 시계열 + 패턴 분류 (연속증가/안정/감소/시작/중단).",
       "whenToUse": [
@@ -10548,10 +11449,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.dividendTrend"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10596,6 +11499,7 @@
       "title": "Scan - 효율성",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 효율성: 자산/재고/매출채권 회전율 + CCC(현금전환주기) + 등급.",
       "whenToUse": [
@@ -10625,10 +11529,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.efficiency"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10673,6 +11579,7 @@
       "title": "Scan - 필드카탈로그",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 필드카탈로그: 조건형 스크리닝용 필드 검색 (finance/report/docs/krx/krxIndex).",
       "whenToUse": [
@@ -10702,10 +11609,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.fields"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10750,6 +11659,7 @@
       "title": "Scan - 거버넌스",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 거버넌스: 지배구조 (지분율, 사외이사, 보수비율, 감사의견, 소액주주 분산).",
       "whenToUse": [
@@ -10779,10 +11689,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.governance"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10827,6 +11739,7 @@
       "title": "Scan - 성장성",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 성장성: 매출/영업이익/순이익 CAGR + 성장 패턴 분류 (6종).",
       "whenToUse": [
@@ -10856,10 +11769,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.growth"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10904,6 +11819,7 @@
       "title": "Scan - 내부자지분",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 내부자지분: 최대주주 지분변동, 자기주식 현황, 경영권 안정성.",
       "whenToUse": [
@@ -10933,10 +11849,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.insider"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -10981,6 +11899,7 @@
       "title": "KRX 지수 강세 분석",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "런타임 KRX 지수 데이터에서 최신 관측일과 비교 기간을 확인하고 여러 지수의 상대 강세를 검토한다.",
       "whenToUse": [
@@ -11013,6 +11932,7 @@
       "knowledgeRefs": [
         "krxDatasetStructure"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "RuntimeDatasetCatalog에서 KRX 지수 데이터셋 후보를 찾는다.",
@@ -11028,6 +11948,7 @@
         "실행 전에 target, period/date, metric, source 또는 universe를 확인한다.",
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "latestAsOf",
         "universe",
@@ -11087,6 +12008,7 @@
       "title": "Scan - 유동성",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 유동성: 유동비율 + 당좌비율 — 단기 지급능력.",
       "whenToUse": [
@@ -11116,10 +12038,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.liquidity"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -11164,6 +12088,7 @@
       "title": "Scan - 거시베타",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 거시베타: 전종목 GDP/금리/환율 베타 횡단면 (OLS 회귀). 사전 수집: Ecos().series('GDP', enrich=True).",
       "whenToUse": [
@@ -11193,10 +12118,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.macroBeta"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -11241,6 +12168,7 @@
       "title": "Scan - 네트워크",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 네트워크: 상장사 관계 네트워크 (출자/지분/계열).",
       "whenToUse": [
@@ -11270,10 +12198,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.network"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -11318,6 +12248,7 @@
       "title": "Scan - 수익성",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 수익성: 영업이익률/순이익률/ROE/ROA + 등급.",
       "whenToUse": [
@@ -11347,10 +12278,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.profitability"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -11395,6 +12328,7 @@
       "title": "Scan - 이익의 질",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 이익의 질: Accrual Ratio + CF/NI 비율 — 이익이 현금 뒷받침되는지.",
       "whenToUse": [
@@ -11424,10 +12358,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.quality"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -11472,6 +12408,7 @@
       "title": "Scan - 비율",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 비율: 전종목 단일 재무비율 시계열 (ROE, 부채비율 등).",
       "whenToUse": [
@@ -11501,10 +12438,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.ratio"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -11549,6 +12488,7 @@
       "title": "Scan - 스크리닝",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 스크리닝: 멀티팩터 프리셋 + spec 기반 조건형 스크리닝.",
       "whenToUse": [
@@ -11578,10 +12518,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.screen"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -11626,6 +12568,7 @@
       "title": "저평가·수익성 종목 후보 찾기",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "scan과 재무 prebuild를 이용해 밸류에이션이 낮고 수익성 근거가 있는 후보 종목을 횡단면으로 찾는다.",
       "whenToUse": [
@@ -11660,6 +12603,7 @@
         "valuationPrinciples",
         "financialStatementConcepts"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "`engines.scan` 기본 skill로 가능한 횡단면 축을 확인한다.",
@@ -11675,6 +12619,7 @@
         "실행 전에 target, period/date, metric, source 또는 universe를 확인한다.",
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "input",
@@ -11741,6 +12686,7 @@
       "title": "Scan - 밸류에이션",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 밸류에이션: PER/PBR/PSR + 시가총액 + 등급 (네이버 실시간).",
       "whenToUse": [
@@ -11770,10 +12716,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.valuation"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -11818,6 +12766,7 @@
       "title": "Scan - 인력/급여",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "scan engine application skill for 인력/급여: 직원수, 평균급여, 인건비율, 1인당부가가치, 성장률, 고액보수.",
       "whenToUse": [
@@ -11847,10 +12796,12 @@
         "engines.data.foundation",
         "engines.analysis"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.workforce"
       ],
       "procedure": [],
+      "recipeSteps": [],
       "requiredEvidence": [
         "universe",
         "datasetAsOf",
@@ -11895,6 +12846,7 @@
       "title": "Search *(beta — AI 사용 비권장)*",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Search *(beta — AI 사용 비권장)* 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 기능/docstring으로 내려간다.",
       "whenToUse": [
@@ -11929,6 +12881,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.search"
       ],
@@ -11943,6 +12896,7 @@
         "두 엔진은 독립. **가중치 합산은 쓰지 않는다** — 실험 116 에서 합산 방식은 품질 저하 확인됨.",
         "외부 모델/서버 불필요 — 로컬 numpy 역인덱스만으로 동작."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -11991,6 +12945,7 @@
       "title": "Story",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Story 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 기능/docstring으로 내려간다.",
       "whenToUse": [
@@ -12025,6 +12980,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.story"
       ],
@@ -12039,6 +12995,7 @@
         "`scorecard` — 5 영역 A~F 종합평가.",
         "`creditScore` — 20 등급 신용평가."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -12087,6 +13044,7 @@
       "title": "기업 6막 인과 분석",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "한 기업을 경제, 섹터, 기업, 재무, 가치 신호의 연결로 검토한다.",
       "whenToUse": [
@@ -12120,6 +13078,7 @@
         "dartlabCausalSixActs",
         "financialStatementConcepts"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "기업 식별과 사용 가능한 Company topic을 확인한다.",
@@ -12135,6 +13094,7 @@
         "report dict 또는 block list를 반환한다. 핵심 키는 thesis, evidenceBlocks, riskBlocks, limits, sourceRefs다.",
         "전체 세부 필드는 공개 docstring/기능와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -12195,6 +13155,7 @@
       "title": "DartLab 스토리형 분석",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "여러 엔진의 근거를 thesis, evidence, risk, limit 구조로 조립한다.",
       "whenToUse": [
@@ -12219,6 +13180,7 @@
       "knowledgeRefs": [
         "dartlabCausalSixActs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "story 기능가 제공하는 report type과 한계를 확인한다.",
@@ -12234,6 +13196,7 @@
         "전체 세부 필드는 공개 docstring/기능와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.",
         "실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "target",
         "period",
@@ -12289,6 +13252,7 @@
       "title": "Viz",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Viz 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 기능/docstring으로 내려간다.",
       "whenToUse": [
@@ -12322,6 +13286,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/engines.viz"
       ],
@@ -12336,6 +13301,7 @@
         "`extract_viz_specs(stdout)` — 마커 추출 + 텍스트 정제.",
         "`AnalysisEvent(\"chart\", {\"charts\": [spec]})` — SSE 로 전달."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -12384,6 +13350,7 @@
       "title": "표 기반 시각 설명",
       "category": "engines",
       "categoryTitle": "Engines",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "차트나 다이어그램을 장식이 아니라 검산 가능한 표에서 파생되는 설명 산출물로 만든다.",
       "whenToUse": [
@@ -12404,6 +13371,7 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "먼저 실행 결과에서 tableRef가 있는지 확인한다.",
@@ -12419,6 +13387,7 @@
         "전체 세부 필드는 공개 docstring/기능와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.",
         "실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "table",
         "metric"
@@ -12464,6 +13433,7 @@
       "title": "DartLab AI 제품 바탕 교체",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "observed",
       "purpose": "기존 DartLab web chat과 AI 엔진을 백업으로 분리하고, LibreChat UI 바탕과 AG-UI 공개 이벤트, LangGraph/Dexter식 금융 research loop로 제품 경계를 재설계하는 공식 전환 계약이다.",
       "whenToUse": [
@@ -12493,6 +13463,7 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.aiProductReplatform",
         "dartlab://skills/operation.ui"
@@ -12511,6 +13482,7 @@
         "Dexter는 금융 research agent의 planning, tool call scratchpad JSONL, self-validation, evaluation loop를 참고한다.",
         "채팅 본문 허용 표면은 assistant response, concise activity, tool card, source/artifact strip, failure notice다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef",
         "sourceRef",
@@ -12567,6 +13539,7 @@
       "title": "API Contract — dartlab 호출 규칙 단일 진실의 원천",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "observed",
       "purpose": "API Contract — dartlab 호출 규칙 단일 진실의 원천 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
       "whenToUse": [
@@ -12597,6 +13570,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.apiContract"
       ],
@@ -12611,6 +13585,7 @@
         "공개 함수는 종목코드 (str) 또는 Company 만 받는다.",
         "추가 import 금지 — `import dartlab` 하나로 모든 기능 접근."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -12657,6 +13632,7 @@
       "title": "dartlab 아키텍처 — 전체 청사진",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "observed",
       "purpose": "dartlab 아키텍처 — 전체 청사진 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
       "whenToUse": [
@@ -12687,6 +13663,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.architecture"
       ],
@@ -12701,6 +13678,7 @@
         "엔진은 양쪽 모두에게 최고의 재료를 제공한다. 숫자와 근거를 투명하게 반환하여 story 는 배치하고 AI 는 검증할 수 있게.",
         "calc 함수는 **독립 모듈** — 다른 calc 호출 가능하지만 순환 없음."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -12743,10 +13721,107 @@
       }
     },
     {
+      "id": "operation.cliMaintenance",
+      "title": "CLI 유지보수 규칙",
+      "category": "operation",
+      "categoryTitle": "Operation",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "dartlab CLI 의 명령 추가·변경·폐기 절차와 stdout/stderr 분리, exit code 계약, 테스트 게이트를 정의한다. CLI 는 단일 파일이 아니라 src/dartlab/cli/ 패키지로 유지한다.",
+      "whenToUse": [
+        "새 CLI 명령 추가",
+        "기존 명령 옵션 변경",
+        "명령 폐기 또는 별칭 처리",
+        "exit code 또는 출력 형식 변경",
+        "CLI 패키지 구조 점검"
+      ],
+      "inputs": [
+        "변경할 명령 또는 신규 기능",
+        "변경 종류 (추가 · 수정 · 폐기)"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "갱신된 src/dartlab/cli/commands/ 모듈",
+        "갱신된 parser 와 services",
+        "테스트 (parser + execution)",
+        "도움말 출력 일관성"
+      ],
+      "apiRefs": [],
+      "toolRefs": [
+        "argparse",
+        "operation.stability",
+        "operation.testing"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [],
+      "sourceRefs": [
+        "dartlab://skills/operation.cliMaintenance",
+        "https://github.com/eddmpython/dartlab/tree/master/src/dartlab/cli"
+      ],
+      "procedure": [
+        "src/dartlab/cli/commands/{name}.py 에 신규 명령 모듈 추가.",
+        "configure_parser(subparsers) 와 run(args) 분리.",
+        "공유 상수는 src/dartlab/cli/context.py, 출력/환경 로직은 src/dartlab/cli/services/.",
+        "CLIError 로 사용자 에러 발생 (ad-hoc print 금지).",
+        "parser 테스트 1 개 + execution 또는 error-path 테스트 1 개 추가.",
+        "폐기 시 deprecated 별칭은 마이그레이션 메시지 출력 + 테스트 보존.",
+        "operation.stability 의 Tier 정책에 따라 안내."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "변경된 모듈 경로",
+        "테스트 통과 결과",
+        "exit code 일관성 확인"
+      ],
+      "expectedOutputs": [
+        "변경된 명령",
+        "도움말 갱신",
+        "CHANGELOG 항목 (Tier 1 기준)"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "명령에서 직접 print 로 에러 출력 (CLIError 미사용)",
+        "stdout 에 경고/에러 출력 (stderr 가 정답)",
+        "argparse 외 다른 프레임워크 즉흥 도입",
+        "별도 helper 스크립트 신설 (명령 트리 확장이 정답)",
+        "exit code 의미 변경"
+      ],
+      "forbidden": [
+        "exit code 0 / 1 / 2 / 130 의 의미를 변경하지 않는다.",
+        "공개 명령 이름을 마이그레이션 계획 없이 바꾸지 않는다.",
+        "새 명령에 테스트 없이 머지하지 않는다.",
+        "별도 helper 스크립트로 명령 트리 우회하지 않는다."
+      ],
+      "examples": [
+        "새 dartlab subcommand 추가",
+        "기존 명령 옵션 폐기",
+        "CLI 출력 형식 변경"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "limited"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "limited"
+        },
+        "webAi": {
+          "status": "limited"
+        },
+        "pyodide": {
+          "status": "unsupported"
+        }
+      }
+    },
+    {
       "id": "operation.code",
       "title": "코드 규칙",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "observed",
       "purpose": "코드 규칙 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
       "whenToUse": [
@@ -12777,6 +13852,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.code"
       ],
@@ -12791,6 +13867,7 @@
         "**최신 먼저 역순** — 데이터 정렬 기본값.",
         "`AI role:` 또는 `AI 역할:` 로 시작하는 짧은 문장을 둔다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -12837,6 +13914,7 @@
       "title": "Core Loop — 자가개선 루프 운영 SSOT",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Core Loop — 자가개선 루프 운영 SSOT 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
       "whenToUse": [
@@ -12867,6 +13945,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.coreloop"
       ],
@@ -12881,6 +13960,7 @@
         "compatibility 코드가 필요하면 새 `AuditPacket`/`ImprovementCandidate` 스키마로 어댑트한다.",
         "I/O 실패 조용 무시 (응답 경로 보호)."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -12923,10 +14003,76 @@
       }
     },
     {
+      "id": "operation.docstringStandard",
+      "title": "기능 docstring 의 LLM Specifications 섹션 표준",
+      "category": "operation",
+      "categoryTitle": "Operation",
+      "kind": "curated",
+      "status": "unverified",
+      "purpose": "기능 docstring 에 LLM 친화 메타 (AntiPatterns / OutputSchema / Prerequisites / Freshness / Dataflow / TargetMarkets) 6 sub-key 표준 정의. 사람용 (Capabilities / Args / Returns / Example) 과 분리해 LLM 비교 선택 정확도를 높인다.",
+      "whenToUse": [
+        "기능 docstring 작성",
+        "새 함수 추가 후 LLM 메타 보강",
+        "docstring 표준 확인",
+        "사람용/LLM용 분리 설계",
+        "mcp tool description 자동 생성 입력"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "read",
+        "read_기능"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "operation.code",
+        "operation.apiContract"
+      ],
+      "sourceRefs": [],
+      "procedure": [
+        "`Capabilities:` — 무엇을 할 수 있나",
+        "`Args:` — 파라미터 의미",
+        "`Returns:` — 반환 타입과 구조",
+        "`Example::` — 실행 예시",
+        "`Guide:` — 자연어 질문 ↔ 함수 호출 매핑",
+        "`SeeAlso:` — 관련 함수",
+        "`Requires:` — 필요 조건 (API 키, 데이터)",
+        "`AIContext:` — LLM 시나리오 짧은 멘션",
+        "`## LLM Specifications` 섹션 안 6 sub-key",
+        "사람이 읽기 어려운 형식 OK (LLM 비교 선택용 메타)",
+        "`read_기능` payload 와 `mcp` tool description 자동 생성에 직접 사용",
+        "분기 데이터인데 monthly average 비교"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      }
+    },
+    {
       "id": "operation.engineAudit",
       "title": "Engine Audit — 엔진 기능 점검 규격",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Engine Audit — 엔진 기능 점검 규격 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
       "whenToUse": [
@@ -12957,6 +14103,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.engineAudit"
       ],
@@ -12971,6 +14118,7 @@
         "새 기능 추가·데이터 갱신·리팩토링 후 회귀 감지.",
         "AI audit 전에 선행 점검 (엔진 깨진 채 AI 돌리면 무의미)."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -13017,6 +14165,7 @@
       "title": "Skill 확장과 공식 승격 규칙",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "새 분석법, 운영 규칙, 외부 LLM 사용법을 Skills 체계에 추가하고 official 수준으로 승격하는 기준을 정한다.",
       "whenToUse": [
@@ -13042,6 +14191,7 @@
       "toolRefs": [],
       "datasetRefs": [],
       "knowledgeRefs": [],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.opsAsSkills",
         "dartlab://skills/operation.code",
@@ -13055,6 +14205,7 @@
         "official 승격은 구조 lint, 서버 audit P, 사용자 확인이 모두 있을 때만 허용한다.",
         "승격 후에도 SkillSpec은 schema를 복사하지 않고 사용 기능와 sourceRefs로 원천을 연결한다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "sourceRef",
         "auditResult",
@@ -13104,6 +14255,7 @@
       "title": "이슈 관리",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "observed",
       "purpose": "이슈 관리 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
       "whenToUse": [
@@ -13134,6 +14286,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.issues"
       ],
@@ -13148,6 +14301,7 @@
         "수정 후 PASS 확인.",
         "GitHub 이 자동으로 Issue 에 커밋 링크 연결."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -13190,10 +14344,100 @@
       }
     },
     {
+      "id": "operation.methodology",
+      "title": "검증 방법론 (credit · forecast · search · ai)",
+      "category": "operation",
+      "categoryTitle": "Operation",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "dartlab 분석 엔진이 주장하는 수치의 근거와 한계를 공개한다. credit · forecast · search · ai 각 엔진의 검증 방법, 표본 구성, 정확도 정의, 시도했지만 효과 없던 접근까지 투명하게 기록한다.",
+      "whenToUse": [
+        "dartlab 정확도 주장 근거 확인",
+        "credit / forecast / search / ai 검증 표본 확인",
+        "정량 모델의 한계와 비-적중 케이스 분석",
+        "외부 사용자가 신뢰성 평가",
+        "시도했지만 효과 없던 접근 (negative results) 확인"
+      ],
+      "inputs": [
+        "검증할 엔진 (credit · forecast · search · ai)",
+        "표본 정의"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "적중률 / precision / 정확도",
+        "한계 명시",
+        "재현 가능한 코드 경로"
+      ],
+      "apiRefs": [],
+      "toolRefs": [
+        "operation.stability",
+        "operation.testing"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [],
+      "sourceRefs": [
+        "dartlab://skills/operation.methodology",
+        "https://github.com/eddmpython/dartlab"
+      ],
+      "procedure": [
+        "검증할 엔진 결정 (credit · forecast · search · ai).",
+        "해당 엔진의 표본과 적중 정의 확인.",
+        "정확도 / 적중률 수치 인용 시 한계와 함께 명시.",
+        "재현 필요시 코드 경로 (`tests/` 또는 `src/dartlab/{engine}/`) 직접 확인."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "표본 구성",
+        "적중 정의",
+        "한계 명시"
+      ],
+      "expectedOutputs": [
+        "엔진별 검증 결과",
+        "비-적중 원인 분석",
+        "재현 코드 위치"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "적중률만 인용하고 한계 또는 비-적중 원인 누락",
+        "표본 정의 없이 정확도 단정",
+        "정량 모델 한계 영역 (FCF 음수 · 정성 요소) 을 정량으로 답변"
+      ],
+      "forbidden": [
+        "표본 정의 없이 정확도 수치를 단정하지 않는다.",
+        "외부 신용평가의 정성 요소 (시스템적 중요성 등) 를 정량 모델이 100% 일치한다고 주장하지 않는다.",
+        "비-적중 케이스를 숨기지 않는다."
+      ],
+      "examples": [
+        "dartlab 신용 분석 정확도 근거",
+        "매출 예측 정확도 어떻게 측정하나",
+        "공시 검색이 임베딩 없이 왜 95% 인가",
+        "AI 도구 선택 검증 결과"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      }
+    },
+    {
       "id": "operation.opsAsSkills",
       "title": "운영 문서를 Skills 체계로 흡수",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "skills를 공개 문서이자 사람과 AI가 직접 실행하는 skill resolver로 유지하고, 엔진 기능·운영 방식 변경을 관련 skill에 동기화하는 운영 규칙이다.",
       "whenToUse": [
@@ -13217,6 +14461,7 @@
       "toolRefs": [],
       "datasetRefs": [],
       "knowledgeRefs": [],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/start.dartlabSkillOs",
         "dartlab://skills/operation.opsAsSkills"
@@ -13230,6 +14475,7 @@
         "새 운영 규칙은 먼저 operation skill로 검색 가능해야 하며, 원문 위치가 필요하면 sourceRef를 반드시 둔다.",
         "이 전환이 완료되면 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "sourceRef"
       ],
@@ -13278,6 +14524,7 @@
       "title": "Philosophy — dartlab 사상 SSOT",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Philosophy — dartlab 사상 SSOT 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
       "whenToUse": [
@@ -13308,6 +14555,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.philosophy"
       ],
@@ -13322,6 +14570,7 @@
         "AI 가 실행 중 발견한 개선 (반복 패턴·반례·새 조합) 은 엔진 docstring·블로그 frontmatter 로 사람 자산에 환류한다.",
         "**엔진이 다리다.** 한 파일이 사람의 분석엔진이자 AI 의 skill 본문."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -13368,6 +14617,7 @@
       "title": "Refactor Checklist — 대규모 rename / API 변경 6 단계",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Refactor Checklist — 대규모 rename / API 변경 6 단계 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
       "whenToUse": [
@@ -13398,6 +14648,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.refactorChecklist"
       ],
@@ -13412,6 +14663,7 @@
         "폐기 (예: `c.docs.X` namespace → `c.show(topic)` 단일 진입)",
         "registry/dataclass 필드 rename, 변수/contextvar rename"
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -13454,10 +14706,103 @@
       }
     },
     {
+      "id": "operation.stability",
+      "title": "API 안정성 정책 (tier · deprecation · semver)",
+      "category": "operation",
+      "categoryTitle": "Operation",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "dartlab 공개 API 의 stability tier 4 단계 (Stable · Beta · Experimental · Alpha) 와 변경·삭제 정책을 정의한다. DART core 는 stable, EDGAR 와 일부 AI 는 더 빨리 변할 수 있다.",
+      "whenToUse": [
+        "공개 API 변경 또는 삭제 검토",
+        "외부 사용자가 호환성 약속 확인",
+        "새 메서드 추가 시 어느 tier 로 둘지 결정",
+        "deprecation 안내 형식 확인",
+        "CLI / EDGAR / DART 의 안정성 차이 이해"
+      ],
+      "inputs": [
+        "변경하려는 API 식별자",
+        "변경 종류 (추가 · 폐기 · 시그니처 변경)"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "적용할 tier",
+        "deprecation 안내 문구",
+        "CHANGELOG 항목",
+        "관련 skill 갱신 항목"
+      ],
+      "apiRefs": [],
+      "toolRefs": [
+        "CHANGELOG.md",
+        "operation.code",
+        "operation.apiContract"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [],
+      "sourceRefs": [
+        "dartlab://skills/operation.stability",
+        "https://github.com/eddmpython/dartlab/blob/master/CHANGELOG.md"
+      ],
+      "procedure": [
+        "변경하려는 API 가 어느 tier 인지 식별 (Tier 1 ~ 4).",
+        "tier 별 deprecation 정책 적용 (Tier 1 = 2 minor 사전 안내, Tier 2 = 1 minor, Tier 3 = 즉시).",
+        "DeprecationWarning 또는 CHANGELOG 항목으로 외부 사용자에게 알림.",
+        "관련 skill (engines.* 또는 operation.*) 본문 동시 갱신.",
+        "semver 규칙 준수 (major = breaking, minor = feature, patch = bugfix)."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "tier 분류 결정 근거",
+        "영향받는 호출처 목록",
+        "CHANGELOG 항목"
+      ],
+      "expectedOutputs": [
+        "변경 tier 와 적용 정책",
+        "deprecation 메시지 또는 즉시 제거 결정",
+        "skill 동기화 결과"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "tier 분류 없이 API 즉시 삭제",
+        "deprecation 안내 없이 시그니처 변경",
+        "CLI exit code 변경",
+        "관련 skill 갱신 누락"
+      ],
+      "forbidden": [
+        "Tier 1 API 를 deprecation 안내 없이 변경하지 않는다.",
+        "CLI exit code 0/1/2/130 의 의미를 변경하지 않는다.",
+        "skill 갱신 없이 API 변경을 완료 처리하지 않는다."
+      ],
+      "examples": [
+        "새 메서드 어느 tier 에 둘까",
+        "Tier 1 API 폐기 안내",
+        "EDGAR 추가 메서드의 tier 결정"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      }
+    },
+    {
       "id": "operation.testing",
       "title": "dartlab 테스트 · CI 운영 규칙",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "observed",
       "purpose": "dartlab 테스트 · CI 운영 규칙 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
       "whenToUse": [
@@ -13488,6 +14833,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.testing"
       ],
@@ -13502,6 +14848,7 @@
         "**function scope** — 필요하면 사용, `gc.collect()` 권장.",
         "root `dartlab` logger 에 stderr `StreamHandler` 자동 부착 (최초 1 회)."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -13548,6 +14895,7 @@
       "title": "UI 엔진 (L4 표현 계층)",
       "category": "operation",
       "categoryTitle": "Operation",
+      "kind": "curated",
       "status": "observed",
       "purpose": "UI 엔진 (L4 표현 계층) 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
       "whenToUse": [
@@ -13579,6 +14927,7 @@
         "start.dartlabSkillOs",
         "operation.aiProductReplatform"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/operation.ui",
         "dartlab://skills/operation.aiProductReplatform"
@@ -13594,6 +14943,7 @@
         "`ensure_ui_build()` — GitHub ZIP 다운로드 제거. wheel 설치 후 `index.html` 존재만 확인, 없으면 `--force-reinstall`.",
         "`runner.rs` — `DARTLAB_UI_DIR` 환경변수를 서버 프로세스에 주입."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -13640,6 +14990,7 @@
       "title": "Channel",
       "category": "runtime",
       "categoryTitle": "Runtime",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Channel 실행 환경의 제약, 시작 절차, 검증 기준을 Skill OS에서 확인한다.",
       "whenToUse": [
@@ -13670,6 +15021,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/runtime.channel"
       ],
@@ -13684,6 +15036,7 @@
         "같은 폰에서 다른 SPA (예: 정적 블로그) 는 정상 동작.",
         "외부 패키지의 deprecated export 가 번들에 남아 런타임 `ReferenceError` 발생 → 모듈 평가 단계 throw → SPA 전체 hydration 실패."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -13730,6 +15083,7 @@
       "title": "데이터 가용성 확인",
       "category": "runtime",
       "categoryTitle": "Runtime",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "분석 전에 dataset, Company topic, snapshot 최신성, 실행 가능 runtime을 확인한다.",
       "whenToUse": [
@@ -13762,6 +15116,7 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "선택한 skill의 runtimeCompatibility와 datasetRefs를 먼저 확인한다.",
@@ -13770,6 +15125,7 @@
         "데이터가 없으면 필요한 수집 또는 prefetch 경로를 한계로 남긴다.",
         "최신성 claim은 snapshot 기준일 또는 live 조회 기준일이 있을 때만 작성한다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "latestAsOf",
         "dataset",
@@ -13825,6 +15181,7 @@
       "title": "MCP",
       "category": "runtime",
       "categoryTitle": "Runtime",
+      "kind": "curated",
       "status": "observed",
       "purpose": "MCP 실행 환경의 제약, 시작 절차, 검증 기준을 Skill OS에서 확인한다.",
       "whenToUse": [
@@ -13855,6 +15212,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/runtime.mcp"
       ],
@@ -13869,6 +15227,7 @@
         "Company 로딩 자체가 수초 걸리므로 같은 종목 반복 질의에 유효.",
         "`ask` · `Company` · `setup` · `collect` · `config` 등 비분석 API."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -13915,6 +15274,7 @@
       "title": "MCP 외부 AI Workbench 연결",
       "category": "runtime",
       "categoryTitle": "Runtime",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "MCP 클라이언트가 DartLab skill resolver와 workbench action을 같은 방식으로 쓰게 한다.",
       "whenToUse": [
@@ -13938,6 +15298,7 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "MCP 기본 표면은 workbench action과 skill resolver다.",
@@ -13946,6 +15307,7 @@
         "계산은 `run_python`으로 실행하고 `finalize_answer`에서 ref 검산을 통과한다.",
         "legacy engine tool은 compatibility 옵션이 켜진 경우에만 사용한다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef",
         "execution"
@@ -13986,91 +15348,103 @@
     },
     {
       "id": "runtime.notebooks",
-      "title": "notebooks 정책 — Colab vs Marimo",
+      "title": "Colab · Molab · 로컬 marimo 노트북",
       "category": "runtime",
       "categoryTitle": "Runtime",
+      "kind": "curated",
       "status": "observed",
-      "purpose": "notebooks 정책 — Colab vs Marimo 실행 환경의 제약, 시작 절차, 검증 기준을 Skill OS에서 확인한다.",
+      "purpose": "같은 dartlab 코드를 Colab (Google) · Molab (marimo cloud) · 로컬 marimo 세 경로로 실행하는 노트북 카탈로그와 작성·운영 규칙이다.",
       "whenToUse": [
-        "notebooks 정책 — Colab vs Marimo",
-        "notebooks",
-        "1. 설명 전략 — Colab 은 마크다운 허용, Marimo 는 주석으로만",
-        "2. Colab 마크다운 분량 — 3~4 코드 셀마다 1 마크다운으로 간다",
-        "3. Marimo 노트북 — 코드 셀 + 첫 줄 한글 주석으로 간다",
-        "4. 공통 — 같은 코드·같은 순서로 동기화한다",
-        "5. 파일 매핑"
+        "dartlab 을 설치 없이 브라우저에서 시도",
+        "Molab 무료 클라우드에서 실행",
+        "로컬 marimo 로 영구 노트북 작성",
+        "colab/marimo 1:1 대응 코드 위치 찾기",
+        "노트북 새로 만들거나 기존 노트북 수정"
       ],
       "inputs": [
-        "작업 목적",
-        "대상 엔진 또는 실행 환경",
-        "검증 범위"
+        "노트북 환경 선택 (Colab · Molab · 로컬)",
+        "분석 대상 (Company · Scan · Story · Gather · Analysis · Ask)"
       ],
       "requiredInputs": [],
       "outputs": [
-        "selected skill",
-        "기능/docstring handoff",
-        "verification gate"
+        "실행 가능한 노트북 링크",
+        "로컬 실행 명령",
+        "노트북 작성 규칙"
       ],
       "apiRefs": [],
       "toolRefs": [
-        "search_reference"
+        "colab",
+        "marimo"
       ],
       "datasetRefs": [],
       "knowledgeRefs": [
-        "start.dartlabSkillOs"
+        "start.dartlabSkillOs",
+        "start.installUv",
+        "start.quickStart"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
-        "dartlab://skills/runtime.notebooks"
+        "dartlab://skills/runtime.notebooks",
+        "https://github.com/eddmpython/dartlab/tree/master/notebooks"
       ],
       "procedure": [
-        "1. 설명 전략 — Colab 은 마크다운 허용, Marimo 는 주석으로만 기준을 확인한다.",
-        "2. Colab 마크다운 분량 — 3~4 코드 셀마다 1 마크다운으로 간다 기준을 확인한다.",
-        "3. Marimo 노트북 — 코드 셀 + 첫 줄 한글 주석으로 간다 기준을 확인한다.",
-        "4. 공통 — 같은 코드·같은 순서로 동기화한다 기준을 확인한다.",
-        "5. 파일 매핑 기준을 확인한다.",
-        "**Colab 은 마크다운 셀로 섹션 설명** — 학습·공유용 독자가 맥락을 빠르게 잡게.",
-        "**Marimo 는 코드만** — 실습·실행용. 설명은 코드 옆 짧은 주석으로.",
-        "노트북 최상단 1 장: 제목 + 한 줄 요약 + \"이 노트북에서 다루는 것\" 2~3 줄.",
-        "주요 섹션 전환점에만 1 장씩 — **3~4 코드 셀마다 1 마크다운**."
+        "환경을 고른다 (브라우저 즉시 → Colab/Molab, 로컬 영구 → marimo).",
+        "노트북 카탈로그에서 분석 대상에 맞는 항목을 연다.",
+        "첫 셀에서 의존성 추가 (`!pip install dartlab` 또는 `uv add dartlab`).",
+        "코드 실행 — 데이터는 자동 다운로드.",
+        "새 노트북 작성 시 작성 규칙 (Colab 마크다운 / marimo 주석) 을 따른다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
-        "skillRef"
+        "execution"
       ],
       "expectedOutputs": [
-        "작업 경로",
-        "확인한 근거",
-        "검증 결과"
+        "노트북 진입 링크",
+        "실행 환경별 의존성 설치 결과",
+        "작성 규칙 충족 여부"
       ],
       "visualGuidance": [],
       "failureModes": [
-        "Skill OS 검색 없이 과거 문서 경로를 직접 찾음",
-        "API schema를 skill 본문에 중복해 docstring/기능와 어긋남",
-        "검증 게이트 없이 변경 또는 답변을 완료 처리함"
+        "Colab 노트북을 로컬 jupyter 와 혼동",
+        "marimo 의 reactive 모델을 jupyter 의 셀 순서 모델로 오해",
+        "노트북에서 큰 데이터 셋을 메모리 폭주시킴",
+        "셀 순서에 의존하는 비결정 코드 작성 (marimo reactive 모델 위반)",
+        "colab (.ipynb) 과 marimo (.py) 의 1:1 대응을 깨고 한쪽만 갱신"
       ],
       "forbidden": [
-        "삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.",
-        "공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다."
+        "셀 순서에 의존하는 비결정 코드 작성",
+        "colab/marimo 한쪽만 갱신한 채 변경 완료 처리"
       ],
       "examples": [
-        "notebooks 정책 — Colab vs Marimo 규칙 확인",
-        "notebooks 작업을 Skill OS에서 시작"
+        "dartlab Colab 으로 시도",
+        "로컬 marimo 에서 Company 분석",
+        "Molab 으로 무료 실행",
+        "새 노트북 작성 규칙 확인"
       ],
       "runtimeCompatibility": {
         "server": {
-          "status": "supported"
+          "status": "limited"
         },
         "localPython": {
-          "status": "supported"
+          "status": "supported",
+          "notes": [
+            "uv run marimo edit notebooks/marimo/{name}.py 로 실행."
+          ]
         },
         "mcp": {
-          "status": "supported"
+          "status": "limited"
         },
         "webAi": {
-          "status": "supported"
+          "status": "supported",
+          "notes": [
+            "Colab / Molab 둘 다 브라우저에서 즉시."
+          ]
         },
         "pyodide": {
-          "status": "supported",
-          "notes": []
+          "status": "limited",
+          "notes": [
+            "marimo wasm 빌드는 별도 — 본 카탈로그 외 항목."
+          ]
         }
       }
     },
@@ -14079,6 +15453,7 @@
       "title": "Pyodide",
       "category": "runtime",
       "categoryTitle": "Runtime",
+      "kind": "curated",
       "status": "observed",
       "purpose": "Pyodide 실행 환경의 제약, 시작 절차, 검증 기준을 Skill OS에서 확인한다.",
       "whenToUse": [
@@ -14109,6 +15484,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/runtime.pyodide"
       ],
@@ -14123,6 +15499,7 @@
         "내부 구현 — `scanAccount._scanAccountFromMerged` 가 `_IS_PYODIDE` 분기에서 `pyarrow.parquet.read_table` + `pl.from_arrow` 로 전환 (polars `scan_parquet` 미지원 우회).",
         "SSOT 계정 리스트 — `src/dartlab/scan/_helpers.py::LITE_ACCOUNTS`."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -14169,6 +15546,7 @@
       "title": "Pyodide / Web AI 실행 범위",
       "category": "runtime",
       "categoryTitle": "Runtime",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "브라우저에서 가능한 DartLab skill과 제한을 구분한다.",
       "whenToUse": [
@@ -14192,6 +15570,7 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "skill search 결과의 `runtimeCompatibility.pyodide.status`를 먼저 확인한다.",
@@ -14200,6 +15579,7 @@
         "`unsupported`는 로컬 Python 또는 서버 ask 경로를 안내한다.",
         "브라우저에서 말하는 최신성은 live API가 아니라 사용한 snapshot의 asOf 기준으로만 표현한다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "runtimeCompatibility",
         "dataset"
@@ -14248,6 +15628,7 @@
       "title": "Skill 개발과 엔진 조합 루프",
       "category": "runtime",
       "categoryTitle": "Runtime",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "엔진 기본 skill과 기능를 조합해 엔진에 직접 정의되지 않은 분석 절차를 만들고 audit 결과를 엔진 skill 또는 docstring 개선으로 되돌리는 체계다.",
       "whenToUse": [
@@ -14292,6 +15673,7 @@
       "knowledgeRefs": [
         "dartlabCausalSixActs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "실패 또는 신규 질문을 목적어, 대상, 필요한 근거, runtime 제약으로 나눈다.",
@@ -14300,6 +15682,7 @@
         "서버 경유 `/api/ask` audit에서 같은 skill이 반복 P를 받으면 `auditP` 후보가 된다. `official`은 구조 lint, 서버 audit P, 사용자 확인을 모두 만족할 때만 허용한다.",
         "public API 자체가 새 축을 요구할 정도로 반복되면 docstring Guide/AIContract 또는 공식 엔진 axis로 승격하고, 관련 SkillSpec의 공개 호출 방식과 대표 반환 형태를 같은 변경에서 갱신한다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef",
         "사용 기능",
@@ -14354,6 +15737,7 @@
       "title": "VSCode Extension",
       "category": "runtime",
       "categoryTitle": "Runtime",
+      "kind": "curated",
       "status": "observed",
       "purpose": "VSCode Extension 실행 환경의 제약, 시작 절차, 검증 기준을 Skill OS에서 확인한다.",
       "whenToUse": [
@@ -14384,6 +15768,7 @@
       "knowledgeRefs": [
         "start.dartlabSkillOs"
       ],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/runtime.vscode"
       ],
@@ -14398,6 +15783,7 @@
         "태그: `vsce-{버전}` (예: `vsce-0.2.1`).",
         "CHANGELOG: `ui/vscode/CHANGELOG.md`."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
@@ -14444,6 +15830,7 @@
       "title": "Workbench 5 패스 + ref 발급 명세",
       "category": "runtime",
       "categoryTitle": "Runtime",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "ask 작업대의 5 패스 (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) 와 각 패스에서 발급해야 할 ref kind 를 단일 SSOT 로 못박는다.",
       "whenToUse": [
@@ -14479,6 +15866,7 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "5 패스 순서는 `BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST` 로 고정.",
@@ -14494,6 +15882,7 @@
         "후보·상위·랭킹 최종 답변은 `입력/유니버스`, `필터`, `계산식/지표`, `결과` 를 포함하고, 회사/식별자, 기준 기간, 원값, metric, rank 가 들어간 markdown evidence table 을 본문에 렌더링한다.",
         "검산 실패 후 재시도할 때는 실패한 초안의 숫자 문장을 그대로 유지하지 않고, ref 로 뒷받침되는 claim 만 남긴다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef",
         "executionRef",
@@ -14555,6 +15944,7 @@
       "title": "DartLab Skill OS 최초 진입",
       "category": "start",
       "categoryTitle": "Start",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "사람과 LLM이 DartLab을 처음 볼 때 Skills 하나에서 분석, 엔진 능력, 운영 규칙, 확장 절차를 찾는 공식 시작점이다.",
       "whenToUse": [
@@ -14584,6 +15974,7 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [],
+      "linkedSkills": [],
       "sourceRefs": [
         "dartlab://skills/start.dartlabSkillOs",
         "dartlab://skills/operation.opsAsSkills",
@@ -14600,6 +15991,7 @@
         "후보·상위·랭킹 결과는 사람과 LLM이 재검산할 수 있게 입력/유니버스, 필터, 계산식/지표, 결과 evidence table을 함께 낸다.",
         "새 절차가 반복되면 user skill로 시작하고, audit과 사용자 확인을 거쳐 curated 또는 엔진 docstring으로 승격한다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef",
         "sourceRef"
@@ -14649,53 +16041,70 @@
       "title": "uv로 DartLab 설치와 첫 실행",
       "category": "start",
       "categoryTitle": "Start",
-      "status": "unverified",
-      "purpose": "DartLab을 처음 설치하거나 새 환경에서 실행할 때 필요한 최소 절차를 안내한다.",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "DartLab을 처음 설치하거나 새 환경에서 실행할 때 uv로 Python부터 dartlab까지 한 번에 준비하는 최소 절차다.",
       "whenToUse": [
-        "uv로 dartlab 시작하는 법",
-        "새 가상환경에서 DartLab 설치",
-        "첫 실행 전 환경 점검"
+        "DartLab 처음 설치",
+        "uv로 새 가상환경에서 시작",
+        "첫 실행 전 환경 점검",
+        "Python이 깔려있지 않은 상태에서 시작",
+        "dartlab[ai] 같은 옵션 의존성 추가"
       ],
       "inputs": [
-        "Python 3.12 이상"
+        "운영체제 (Windows · macOS · Linux)",
+        "인터넷 연결",
+        "설치 권한 있는 사용자 계정"
       ],
       "requiredInputs": [],
       "outputs": [
-        "설치 명령",
-        "import smoke 절차",
-        "다음에 실행할 분석 skill 후보"
+        "작동하는 가상환경",
+        "import 가능한 dartlab 패키지",
+        "자동 다운로드된 첫 회사 데이터"
       ],
       "apiRefs": [],
       "toolRefs": [
-        "search_reference",
-        "run_python"
+        "uv",
+        "dartlab CLI"
       ],
       "datasetRefs": [],
       "knowledgeRefs": [],
-      "sourceRefs": [],
-      "procedure": [
-        "`uv venv` 또는 기존 프로젝트 가상환경을 준비한다.",
-        "`uv pip install -U dartlab` 또는 repo 개발 환경에서는 `uv sync`를 실행한다.",
-        "`uv run python -X utf8 -c \"import dartlab; print(dartlab.__version__)\"`로 import를 확인한다.",
-        "데이터가 필요한 skill은 설치와 별개로 RuntimeDatasetCatalog 또는 prefetch 절차를 확인한다.",
-        "첫 분석은 `search_reference`로 목적 skill을 찾은 뒤 기능와 runtime 제한을 함께 확인한다."
+      "linkedSkills": [],
+      "sourceRefs": [
+        "dartlab://skills/start.installUv",
+        "https://github.com/eddmpython/dartlab"
       ],
+      "procedure": [
+        "uv를 설치한다 (Windows PowerShell 또는 macOS/Linux 터미널).",
+        "uv init 으로 프로젝트와 가상환경을 만든다.",
+        "uv add dartlab 으로 패키지를 추가한다.",
+        "uv run python 으로 import 와 첫 회사 호출을 검증한다.",
+        "분석 목적이면 다음 skill (start.dartlabSkillOs · start.quickStart) 로 넘어간다."
+      ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "execution"
       ],
       "expectedOutputs": [
-        "install guide",
-        "smoke check"
+        "설치 명령",
+        "smoke check 결과",
+        "다음 분석 skill 후보"
       ],
       "visualGuidance": [],
       "failureModes": [
-        "설치와 런타임 데이터 준비를 혼동"
+        "cmd 에서 PowerShell 전용 명령을 실행",
+        "시스템 Python 으로 dartlab 을 호출 (uv run python 미사용)",
+        "HuggingFace 다운로드 속도 문제를 설치 실패로 오해"
       ],
       "forbidden": [
-        "검증 없이 설치 성공 단정"
+        "검증 없이 설치 성공 단정",
+        "dartlab 패키지를 시스템 Python 에 직접 설치 권장"
       ],
       "examples": [
-        "uv로 dartlab 시작하는 법 알려줘"
+        "DartLab 처음 깔아본다",
+        "Windows 에 dartlab 설치",
+        "Mac 에서 dartlab 시작",
+        "dartlab[ai] 추가"
       ],
       "runtimeCompatibility": {
         "server": {
@@ -14722,10 +16131,104 @@
       }
     },
     {
+      "id": "start.quickStart",
+      "title": "DartLab 8 단계 빠른 시작",
+      "category": "start",
+      "categoryTitle": "Start",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "설치 직후 Company · sections · show · diff · EDGAR · scan · ask 까지 핵심 기능을 한 번에 통과하는 walkthrough 절차다.",
+      "whenToUse": [
+        "DartLab 설치 직후 첫 분석",
+        "핵심 기능 빠르게 훑기",
+        "데모용 코드 흐름이 필요할 때",
+        "Company / Scan / Ask 셋의 관계를 파악할 때"
+      ],
+      "inputs": [
+        "설치된 dartlab 환경",
+        "임의의 한국 종목코드 또는 미국 ticker"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "회사 객체와 topic 별 DataFrame",
+        "시장 횡단 scan 결과",
+        "AI 분석 결과 (옵션)"
+      ],
+      "apiRefs": [],
+      "toolRefs": [
+        "dartlab.Company",
+        "dartlab.scan",
+        "dartlab.ask",
+        "dartlab.search"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [],
+      "sourceRefs": [
+        "dartlab://skills/start.quickStart",
+        "dartlab://skills/engines.company"
+      ],
+      "procedure": [
+        "dartlab.Company(code) 로 회사 객체를 만든다.",
+        "c.sections / c.topics 로 회사 전체 지도를 본다.",
+        "c.show(topic) 으로 개별 topic 본문을 연다 (BS · IS · CF · ratios 등).",
+        "c.diff() 로 기간 간 변화 큰 topic 을 찾는다.",
+        "미국 종목은 같은 API 로 동작한다 (Company(\"AAPL\")).",
+        "dartlab.scan(group, axis) 로 시장 전체 횡단.",
+        "dartlab.search(name) 으로 회사 식별.",
+        "dartlab.ask(question) 으로 자연어 분석 (LLM provider 필요)."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "execution"
+      ],
+      "expectedOutputs": [
+        "회사 단위 결과",
+        "시장 단위 결과",
+        "다음에 깊이 볼 skill 후보"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "종목코드 / ticker 혼동 (한국 6 자리 vs 미국 알파벳)",
+        "show 의 topic 이름 오타 (companyOverview vs company-overview)",
+        "ask 호출 전 dartlab[llm] 미설치"
+      ],
+      "forbidden": [
+        "검증 없이 코드 결과를 결론으로 단정",
+        "sections 에서 누락 (null) 을 0 으로 대체"
+      ],
+      "examples": [
+        "처음 dartlab 깔고 뭘 해봐야 하나",
+        "8 분 안에 회사·시장·AI 까지 한 번 훑기",
+        "미국 종목도 같은 코드로 분석"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "limited"
+        },
+        "pyodide": {
+          "status": "limited",
+          "notes": [
+            "scan 과 ask 는 데이터·모델 의존성에 따라 제한될 수 있다."
+          ]
+        }
+      }
+    },
+    {
       "id": "start.useSkillsCatalog",
       "title": "Skill catalog 기반 작업 시작",
       "category": "start",
       "categoryTitle": "Start",
+      "kind": "curated",
       "status": "unverified",
       "purpose": "DartLab 코드 전체를 읽기 전에 skills catalog만 보고 목적 skill, 공개 호출 방식, 대표 반환 형태, 근거 요구사항을 찾는 시작 절차다.",
       "whenToUse": [
@@ -14765,6 +16268,7 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [],
+      "linkedSkills": [],
       "sourceRefs": [],
       "procedure": [
         "사용자 질문을 그대로 skill 검색어로 사용해 curated skill을 먼저 찾는다.",
@@ -14775,6 +16279,7 @@
         "세부 API 인자와 전체 반환 필드는 기능/docstring으로 검산한다.",
         "실행 전에는 어떤 ref를 만들어야 하는지 목록으로 고정한다."
       ],
+      "recipeSteps": [],
       "requiredEvidence": [
         "skillRef"
       ],
