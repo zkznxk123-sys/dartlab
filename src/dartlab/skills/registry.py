@@ -788,7 +788,46 @@ def _score(spec: SkillSpec, terms: list[str], *, query: str = "") -> tuple[float
         reasons.extend(boost_reasons)
     if spec.status in {"auditP", "official"}:
         score += 0.5
+    domain_bonus, domain_reasons = _domainBonus(spec, normalized_query)
+    if domain_bonus:
+        score += domain_bonus
+        reasons.extend(domain_reasons)
     return score, reasons
+
+
+_COMPOSITE_TERMS: tuple[str, ...] = (
+    "종합",
+    "깊이",
+    "비교",
+    "추세",
+    "사이클",
+    "다단",
+    "deep",
+    "comprehensive",
+    "compare",
+)
+
+
+def _domainBonus(spec: SkillSpec, normalized_query: str) -> tuple[float, list[str]]:
+    """recipe / engines kind 우선 — 종합 키워드 매칭 시 recipe 추가 가중.
+
+    base 가중:
+    - recipe: +1.0 (다단 절차)
+    - 종합 키워드 매칭 시 recipe: +2.5 추가 (회사명 매칭 점수와 경쟁 가능 수준)
+    - engines.* category: +0.3
+    """
+    bonus = 0.0
+    reasons: list[str] = []
+    if spec.kind == "recipe":
+        bonus += 1.0
+        reasons.append("kind:recipe")
+        if normalized_query and any(term in normalized_query for term in _COMPOSITE_TERMS):
+            bonus += 2.5
+            reasons.append("composite_query+recipe")
+    elif spec.category == "engines":
+        bonus += 0.3
+        reasons.append("category:engines")
+    return bonus, reasons
 
 
 def _field_weight(name: str) -> float:
