@@ -1670,7 +1670,7 @@
     },
     {
       "id": "runtime.workbenchEvidenceFlow",
-      "title": "Workbench 근거 생성과 검산 흐름",
+      "title": "Workbench 5 패스 + ref 발급 명세",
       "category": "runtime",
       "status": "limited",
       "dataSources": [],

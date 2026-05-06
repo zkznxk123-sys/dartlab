@@ -169,14 +169,8 @@ def test_research_graph_emits_ordered_node_state(monkeypatch) -> None:
     events = list(DartLabResearchGraph().stream("너 뭐 할 수 있니"))
     nodes = [event.data["node"] for event in events if event.kind == "graph_node"]
 
-    assert nodes == [
-        "routeIntent",
-        "selectSkill",
-        "searchCapability",
-        "planEvidence",
-        "executeTool",
-        "observeResult",
-        "verifyClaims",
-        "composeAnswer",
-    ]
+    # 5 패스 SSOT — workbench loop 의 GRAPH_NODES 와 일치.
+    # 휴리스틱 path 는 brief→work→compose→gate 순으로 발행 (HARVEST 는 LLM 전용 no-op).
+    # GATE 는 결과 + 실패 분기에서 두 번 발행될 수 있다.
+    assert nodes[:4] == ["brief", "work", "compose", "gate"]
     assert events[-1].kind == "done"

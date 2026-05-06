@@ -5,9 +5,8 @@
 모든 분석 로직은 dartlab.ai.kernel.ask 가 처리.
 이 모듈은 이벤트를 SSE dict로 변환하는 thin adapter.
 
-이벤트 흐름:
-  understand_intent → skill_search → generated_spec_search → plan_tool_use
-  → execute_step → observe_result → verify → compose_answer|repair_or_fail
+5 패스 흐름 (workbench loop SSOT):
+  brief → work → critique → compose → gate → harvest
 """
 
 from __future__ import annotations

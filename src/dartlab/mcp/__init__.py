@@ -113,21 +113,13 @@ def _executeAskWorkbenchTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
 
 def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     if name == "ask_kernel_status":
+        from dartlab.ai.workbench.loop import GRAPH_NODES
+
         return {
             "name": "Ask Workbench",
             "entry": "ask",
             "tools": list(_MCP_WORKSPACE_AGENT_TOOL_NAMES),
-            "loop": [
-                "understand_intent",
-                "skill_search",
-                "generated_spec_search",
-                "plan_tool_use",
-                "execute_step",
-                "observe_result",
-                "verify",
-                "compose_answer",
-                "repair_or_fail",
-            ],
+            "passes": list(GRAPH_NODES),
         }
     if name == "search_reference":
         query = str(args.get("query") or "")

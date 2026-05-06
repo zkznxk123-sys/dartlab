@@ -255,7 +255,6 @@ class TestAiProfile:
 
     def test_put_ai_profile_updates_shared_config(self, client):
         from dartlab.ai import get_config
-        from dartlab.ai.settings.model_resolver import latest_openai_model
 
         resp = client.put(
             "/api/ai/profile",
@@ -264,7 +263,8 @@ class TestAiProfile:
         assert resp.status_code == 200
         config = get_config()
         assert config.provider == "openai"
-        assert config.model == latest_openai_model()
+        # 사용자 명시 model 보존 — 최신 자동 강제 X (configure/PUT 으로 선택한 모델은 의도된 선택)
+        assert config.model == "gpt-5.4"
         assert get_config(provider="openai", model="gpt-5.4").model == "gpt-5.4"
 
     def test_post_ai_profile_secret_updates_shared_secret(self, client):
