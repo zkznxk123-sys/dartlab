@@ -11494,9 +11494,9 @@
       "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
-        "Z > 2.99 = 안전 (Safe Zone)",
+        "Z &gt; 2.99 = 안전 (Safe Zone)",
         "1.81 ≤ Z ≤ 2.99 = 회색 (Grey Zone)",
-        "Z < 1.81 = 위험 (Distress Zone)",
+        "Z &lt; 1.81 = 위험 (Distress Zone)",
         "`stockCode`, `corpName`",
         "`finance.ratio.debtRatio : float` (≥ 200%)",
         "`finance.ratio.currentRatio : float` (≤ 1.0)",
@@ -12005,7 +12005,7 @@
         "GARP 성장+가치 결합",
         "Lynch PEG 스크리닝",
         "성장 대비 저평가",
-        "PER < 성장률",
+        "PER 대비 저평가",
         "부채 안정 성장주",
         "시장 미반영 성장"
       ],
@@ -12045,7 +12045,7 @@
         "`per`, `pbr : float`",
         "`grade : str` — valuation grade",
         "`pegApprox : float` — PEG 근사 (낮을수록 저평가)",
-        "**EPS 성장률 → netProfitGrowth 근사** — 자사주 매입 비중 큰 미국 기업에서 EPS 성장률 > netProfitGrowth (주식수 감소). 한국에서는 자사주 소각 부재로 두 값 거의 동일.",
+        "**EPS 성장률 → netProfitGrowth 근사** — 자사주 매입 비중 큰 미국 기업에서 EPS 성장률 &gt; netProfitGrowth (주식수 감소). 한국에서는 자사주 소각 부재로 두 값 거의 동일.",
         "**단일 연도 성장률 의존** — Lynch 원전은 5 년 평균 EPS 성장률 사용. 본 recipe 는 YoY 1 년 (분기/연간) 만. 5 년 일관성은 `engines.recipe.compounderCandidates` 로 보완."
       ],
       "recipeSteps": [],
@@ -12222,7 +12222,7 @@
         "`finance.ratio.debtRatio : float` — 부채비율",
         "`finance.ratio.netMargin : float` — 순이익률",
         "별도 5 년 net_income 컬럼은 후처리 join 시 보존 가능",
-        "**NCAV 직접 계산 X** — Graham 원전 net-net 은 `(cash + 0.75·AR + 0.5·Inv − totalLiab) × 2/3 > marketCap`. 본 recipe 는 PBR 게이트로 근사. 정확한 NCAV 는 `scanAccount` 4 항목 (현금·매출채권·재고·총부채) 결합 + 시가총액 join 별 단계.",
+        "**NCAV 직접 계산 X** — Graham 원전 net-net 공식은 `(cash + 0.75·AR + 0.5·Inv − totalLiab) × 2/3` 가 marketCap 보다 커야 한다. 본 recipe 는 PBR 게이트로 근사. 정확한 NCAV 는 `scanAccount` 4 항목 (현금·매출채권·재고·총부채) 결합 + 시가총액 join 별 단계.",
         "**PBR 1.0 임계는 한국 시장 평균 부근** — 너무 느슨. 진정 deep value 는 PBR 0.7 이하 가능. 단계적 임계 (PBR 0.7 / 0.8 / 1.0) 권장."
       ],
       "recipeSteps": [],
