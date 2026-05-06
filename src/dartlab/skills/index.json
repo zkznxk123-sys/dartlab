@@ -96,6 +96,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis"
       ],
@@ -194,6 +198,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.assetStructure"
       ],
@@ -276,6 +284,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.capitalAllocation"
       ],
@@ -361,6 +373,10 @@
         "financialStatementConcepts"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "CF, IS, BS 관련 기능를 확인하고 같은 기간 기준으로 묶는다.",
@@ -471,6 +487,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.costStructure"
       ],
@@ -553,6 +573,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.disclosureChange"
       ],
@@ -637,6 +661,10 @@
         "capitalAllocationConcepts"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "Company.capital과 현금흐름 관련 기능를 함께 확인한다.",
@@ -746,6 +774,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.earningsQuality"
       ],
@@ -828,6 +860,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.efficiency"
       ],
@@ -910,6 +946,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.financialConsistency"
       ],
@@ -992,6 +1032,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.financing"
       ],
@@ -1074,6 +1118,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.governance"
       ],
@@ -1160,6 +1208,10 @@
         "governanceConcepts"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "Company.audit, disclosure, scan.audit, scan.governance 기능를 확인한다.",
@@ -1270,6 +1322,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.growth"
       ],
@@ -1352,6 +1408,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.investmentEfficiency"
       ],
@@ -1434,6 +1494,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.macroSensitivity"
       ],
@@ -1514,6 +1578,10 @@
         "financialStatementConcepts"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "각 대상의 식별 결과를 확인한다.",
@@ -1621,6 +1689,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.predictionSignal"
       ],
@@ -1710,6 +1782,10 @@
         "dartlabCausalSixActs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "단일 기업 수익성 질문은 Company 경로가 기본이다. 먼저 Company.analysis와 Company.show 기능에서 수익성 관련 축과 원자료 topic을 찾는다.",
@@ -1825,6 +1901,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.revenueForecast"
       ],
@@ -1907,6 +1987,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.revenueStructure"
       ],
@@ -1989,6 +2073,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.scorecard"
       ],
@@ -2071,6 +2159,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.stability"
       ],
@@ -2153,6 +2245,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.valuation"
       ],
@@ -2235,6 +2331,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.analysis.valuationBand"
       ],
@@ -2339,6 +2439,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.company"
       ],
@@ -2425,6 +2529,10 @@
         "dartDisclosureStructure"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "공시 목록의 접수일, 제목, 유형을 확인한다.",
@@ -2536,6 +2644,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "기업명, 종목코드, ticker 중 무엇이 입력됐는지 먼저 식별한다.",
@@ -2644,6 +2756,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.company.sections"
       ],
@@ -2744,6 +2860,10 @@
         "dartlabCausalSixActs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "ticker를 식별하고 EDGAR Company 경로가 가능한지 확인한다.",
@@ -2861,6 +2981,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.credit"
       ],
@@ -2959,6 +3083,10 @@
         "creditRiskConcepts"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "Company.credit와 재무 안정성 관련 기능를 확인한다.",
@@ -3071,6 +3199,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.dashboard"
       ],
@@ -3171,6 +3303,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.data"
       ],
@@ -3270,6 +3406,10 @@
         "engines.scan"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "단일 종목의 재무, 공시, 사업, 하위 엔진 라우팅은 `Company`가 먼저다. scan prebuild는 peer 위치, universe ranking, Company 원자료 부재 시의 보조 경로다.",
@@ -3392,6 +3532,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.edgar"
       ],
@@ -3496,6 +3640,10 @@
         "engines.macro"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather"
       ],
@@ -3583,6 +3731,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.collect"
       ],
@@ -3661,6 +3813,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.consensus"
       ],
@@ -3739,6 +3895,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.dividends"
       ],
@@ -3817,6 +3977,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.flow"
       ],
@@ -3895,6 +4059,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.history"
       ],
@@ -3973,6 +4141,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.industryPeers"
       ],
@@ -4051,6 +4223,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.insiderTrading"
       ],
@@ -4129,6 +4305,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.macro"
       ],
@@ -4207,6 +4387,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.majorShareholders"
       ],
@@ -4285,6 +4469,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.news"
       ],
@@ -4363,6 +4551,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.ownership"
       ],
@@ -4441,6 +4633,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.price"
       ],
@@ -4519,6 +4715,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.revenueConsensus"
       ],
@@ -4597,6 +4797,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.sector"
       ],
@@ -4675,6 +4879,10 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.gather.splits"
       ],
@@ -4759,6 +4967,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.industry"
       ],
@@ -4860,6 +5072,10 @@
         "engines.gather"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro"
       ],
@@ -4948,6 +5164,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.assets"
       ],
@@ -5027,6 +5247,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.corporate"
       ],
@@ -5106,6 +5330,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.crisis"
       ],
@@ -5185,6 +5413,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.cycle"
       ],
@@ -5264,6 +5496,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.forecast"
       ],
@@ -5343,6 +5579,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.inventory"
       ],
@@ -5422,6 +5662,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.liquidity"
       ],
@@ -5506,6 +5750,10 @@
         "macroCycleConcepts"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "macro와 관련 dataset 후보를 찾고 최신 관측일을 확인한다.",
@@ -5614,6 +5862,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.rates"
       ],
@@ -5693,6 +5945,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.scenario"
       ],
@@ -5772,6 +6028,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.sentiment"
       ],
@@ -5851,6 +6111,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.summary"
       ],
@@ -5930,6 +6194,10 @@
         "engines.story"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.macro.trade"
       ],
@@ -6011,6 +6279,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.mappers"
       ],
@@ -6114,6 +6386,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant"
       ],
@@ -6206,6 +6482,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.accruals"
       ],
@@ -6289,6 +6569,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.allocation"
       ],
@@ -6372,6 +6656,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.altman"
       ],
@@ -6455,6 +6743,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.bab"
       ],
@@ -6538,6 +6830,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.backtest"
       ],
@@ -6621,6 +6917,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.benchmark"
       ],
@@ -6704,6 +7004,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.beneish"
       ],
@@ -6787,6 +7091,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.beta"
       ],
@@ -6870,6 +7178,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.chartPatterns"
       ],
@@ -6946,6 +7258,10 @@
         "valuationPrinciples"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "매출 성장률과 마진 추세를 실제 재무 데이터로 확인한다.",
@@ -7052,6 +7368,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.divergence"
       ],
@@ -7135,6 +7455,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.earnings"
       ],
@@ -7218,6 +7542,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.entry"
       ],
@@ -7301,6 +7629,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.eventSignal"
       ],
@@ -7384,6 +7716,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.factor"
       ],
@@ -7467,6 +7803,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.flow"
       ],
@@ -7550,6 +7890,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.fundmom"
       ],
@@ -7633,6 +7977,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.governanceQuant"
       ],
@@ -7716,6 +8064,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.indicators"
       ],
@@ -7799,6 +8151,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.liquidity"
       ],
@@ -7882,6 +8238,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.meanvar"
       ],
@@ -7965,6 +8325,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.momentum"
       ],
@@ -8048,6 +8412,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.multi"
       ],
@@ -8131,6 +8499,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.pairs"
       ],
@@ -8214,6 +8586,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.pattern"
       ],
@@ -8297,6 +8673,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.piotroski"
       ],
@@ -8380,6 +8760,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.qfactor"
       ],
@@ -8463,6 +8847,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.qmj"
       ],
@@ -8546,6 +8934,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.quality"
       ],
@@ -8629,6 +9021,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.ranking"
       ],
@@ -8712,6 +9108,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.regime"
       ],
@@ -8795,6 +9195,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.residual"
       ],
@@ -8878,6 +9282,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.riskText"
       ],
@@ -8961,6 +9369,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.riskparity"
       ],
@@ -9044,6 +9456,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.screen"
       ],
@@ -9127,6 +9543,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.sentiment"
       ],
@@ -9202,6 +9622,10 @@
         "quantSignalConcepts"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "대상과 가격 데이터 기준일을 확인한다.",
@@ -9307,6 +9731,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.signals"
       ],
@@ -9390,6 +9818,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.strategy"
       ],
@@ -9473,6 +9905,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.style"
       ],
@@ -9556,6 +9992,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.surprise"
       ],
@@ -9639,6 +10079,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.tailrisk"
       ],
@@ -9722,6 +10166,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.toneChange"
       ],
@@ -9805,6 +10253,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.value"
       ],
@@ -9888,6 +10340,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.verdict"
       ],
@@ -9971,6 +10427,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.volatility"
       ],
@@ -10054,6 +10514,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.volume"
       ],
@@ -10137,6 +10601,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quant.walkforward"
       ],
@@ -10222,6 +10690,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.quantWorldClass"
       ],
@@ -10313,6 +10785,10 @@
         "engines.analysis.profitability",
         "engines.analysis.earningsQuality"
       ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "`tableRef` 4 개 (macro snapshot, peer scan, BS, IS)",
@@ -10403,6 +10879,10 @@
         "engines.analysis.profitability",
         "engines.analysis.financing"
       ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "`tableRef` 4 개 (두 회사 × BS + IS)",
@@ -10495,6 +10975,10 @@
         "engines.analysis.growth",
         "engines.analysis.earningsQuality"
       ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "`tableRef` 1+5 개 (스캔 결과 + 5 회사 IS)",
@@ -10588,6 +11072,10 @@
         "engines.company.researchStarter",
         "engines.analysis.financing"
       ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "`tableRef` 2 개 (macro snapshot, sensitivity 표)",
@@ -10676,6 +11164,10 @@
       "linkedSkills": [
         "start.dartlabSkillOs"
       ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "`skillRef` 3~5 개 (관련 skill 본문)",
@@ -10753,6 +11245,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan"
       ],
@@ -10847,6 +11343,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.account"
       ],
@@ -10927,6 +11427,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.audit"
       ],
@@ -11007,6 +11511,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.capital"
       ],
@@ -11087,6 +11595,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.cashflow"
       ],
@@ -11171,6 +11683,10 @@
         "krxDatasetStructure"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "RuntimeDatasetCatalog에서 KRX 가격 또는 종목 데이터셋 후보를 찾는다.",
@@ -11290,6 +11806,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.debt"
       ],
@@ -11370,6 +11890,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.disclosureRisk"
       ],
@@ -11450,6 +11974,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.dividendTrend"
       ],
@@ -11530,6 +12058,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.efficiency"
       ],
@@ -11610,6 +12142,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.fields"
       ],
@@ -11690,6 +12226,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.governance"
       ],
@@ -11770,6 +12310,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.growth"
       ],
@@ -11850,6 +12394,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.insider"
       ],
@@ -11933,6 +12481,10 @@
         "krxDatasetStructure"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "RuntimeDatasetCatalog에서 KRX 지수 데이터셋 후보를 찾는다.",
@@ -12039,6 +12591,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.liquidity"
       ],
@@ -12119,6 +12675,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.macroBeta"
       ],
@@ -12199,6 +12759,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.network"
       ],
@@ -12279,6 +12843,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.profitability"
       ],
@@ -12359,6 +12927,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.quality"
       ],
@@ -12439,6 +13011,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.ratio"
       ],
@@ -12519,6 +13095,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.screen"
       ],
@@ -12604,6 +13184,10 @@
         "financialStatementConcepts"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "`engines.scan` 기본 skill로 가능한 횡단면 축을 확인한다.",
@@ -12717,6 +13301,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.valuation"
       ],
@@ -12797,6 +13385,10 @@
         "engines.analysis"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.scan.workforce"
       ],
@@ -12882,6 +13474,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.search"
       ],
@@ -12981,6 +13577,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.story"
       ],
@@ -13079,6 +13679,10 @@
         "financialStatementConcepts"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "기업 식별과 사용 가능한 Company topic을 확인한다.",
@@ -13181,6 +13785,10 @@
         "dartlabCausalSixActs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "story 기능가 제공하는 report type과 한계를 확인한다.",
@@ -13287,6 +13895,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.viz"
       ],
@@ -13372,6 +13984,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "먼저 실행 결과에서 tableRef가 있는지 확인한다.",
@@ -13464,6 +14080,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.aiProductReplatform",
         "dartlab://skills/operation.ui"
@@ -13571,6 +14191,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.apiContract"
       ],
@@ -13664,6 +14288,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.architecture"
       ],
@@ -13755,6 +14383,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.cliMaintenance",
         "https://github.com/eddmpython/dartlab/tree/master/src/dartlab/cli"
@@ -13853,6 +14485,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.code"
       ],
@@ -13946,6 +14582,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.coreloop"
       ],
@@ -14031,6 +14671,10 @@
         "operation.code",
         "operation.apiContract"
       ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "`Capabilities:` — 무엇을 할 수 있나",
@@ -14104,6 +14748,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.engineAudit"
       ],
@@ -14192,6 +14840,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.opsAsSkills",
         "dartlab://skills/operation.code",
@@ -14287,6 +14939,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.issues"
       ],
@@ -14376,6 +15032,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.methodology",
         "https://github.com/eddmpython/dartlab"
@@ -14462,6 +15122,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/start.dartlabSkillOs",
         "dartlab://skills/operation.opsAsSkills"
@@ -14556,6 +15220,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.philosophy"
       ],
@@ -14649,6 +15317,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.refactorChecklist"
       ],
@@ -14740,6 +15412,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.stability",
         "https://github.com/eddmpython/dartlab/blob/master/CHANGELOG.md"
@@ -14834,6 +15510,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.testing"
       ],
@@ -14928,6 +15608,10 @@
         "operation.aiProductReplatform"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/operation.ui",
         "dartlab://skills/operation.aiProductReplatform"
@@ -15022,6 +15706,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/runtime.channel"
       ],
@@ -15117,6 +15805,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "선택한 skill의 runtimeCompatibility와 datasetRefs를 먼저 확인한다.",
@@ -15213,6 +15905,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/runtime.mcp"
       ],
@@ -15299,6 +15995,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "MCP 기본 표면은 workbench action과 skill resolver다.",
@@ -15383,6 +16083,10 @@
         "start.quickStart"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/runtime.notebooks",
         "https://github.com/eddmpython/dartlab/tree/master/notebooks"
@@ -15485,6 +16189,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/runtime.pyodide"
       ],
@@ -15571,6 +16279,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "skill search 결과의 `runtimeCompatibility.pyodide.status`를 먼저 확인한다.",
@@ -15674,6 +16386,10 @@
         "dartlabCausalSixActs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "실패 또는 신규 질문을 목적어, 대상, 필요한 근거, runtime 제약으로 나눈다.",
@@ -15769,6 +16485,10 @@
         "start.dartlabSkillOs"
       ],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/runtime.vscode"
       ],
@@ -15867,6 +16587,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "5 패스 순서는 `BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST` 로 고정.",
@@ -15975,6 +16699,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/start.dartlabSkillOs",
         "dartlab://skills/operation.opsAsSkills",
@@ -16070,6 +16798,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/start.installUv",
         "https://github.com/eddmpython/dartlab"
@@ -16164,6 +16896,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/start.quickStart",
         "dartlab://skills/engines.company"
@@ -16269,6 +17005,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
       "sourceRefs": [],
       "procedure": [
         "사용자 질문을 그대로 skill 검색어로 사용해 curated skill을 먼저 찾는다.",
