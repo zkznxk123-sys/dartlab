@@ -79,6 +79,9 @@ def runGate(state: WorkbenchState) -> Iterator[TraceEvent]:
     dates = _DATE_RE.findall(text)
     ref_tokens = _REF_TOKEN_RE.findall(text)
 
+    # 7) ref token 주변 context 추출 → state.claims 자동 발급
+    state.claims = _extractClaimsFromAnswer(state.answerText or "", state.refs)
+
     state.gateIssues = issues
     state.gateBlocked = bool(issues)
     state.verification = {
@@ -204,3 +207,58 @@ def _findFakeRefTokens(text: str, refs: list[Ref]) -> list[str]:
             seen.add(full)
             fake.append(full)
     return fake
+
+
+def _extractClaimsFromAnswer(text: str, refs: list[Ref]) -> list[dict]:
+    """답안의 [refId] token 주변 context 를 claim dict 으로 직렬화.
+
+    출력 형식: `[{"text": context, "refIds": [...], "kind": "numeric"|"date"|"ranking"|"narrative"}]`.
+    같은 ref 가 여러 번 등장하면 첫 출현만 claim 으로 등록 (중복 제거).
+    GATE 가 이미 검증한 ref kind 정보를 활용해 claim kind 분류.
+    """
+    if not text:
+        return []
+    state_ids = {ref.id for ref in refs}
+    state_kind_by_id = {ref.id: ref.kind for ref in refs}
+    stripped = _stripCode(text)
+    claims: list[dict] = []
+    seen_ref_ids: set[str] = set()
+
+    for match in _BROAD_REF_TOKEN_RE.finditer(stripped):
+        kind_short = match.group(1)
+        id_part = match.group(2).strip()
+        if "…" in id_part or "..." in id_part:
+            continue
+        candidate = f"{kind_short}:{id_part}" if not id_part.startswith(f"{kind_short}:") else id_part
+        ref_id = candidate if candidate in state_ids else (id_part if id_part in state_ids else None)
+        if not ref_id:
+            continue
+        if ref_id in seen_ref_ids:
+            continue
+        seen_ref_ids.add(ref_id)
+
+        # 주변 context 추출 (앞 80 char + 토큰 + 뒤 30 char)
+        start = max(0, match.start() - 80)
+        end = min(len(stripped), match.end() + 30)
+        context = stripped[start:end].replace("\n", " ").strip()
+
+        # claim kind 분류
+        ref_kind = state_kind_by_id.get(ref_id, f"{kind_short}Ref")
+        if ref_kind in {"valueRef", "tableRef", "executionRef"} and _hasMaterialNumber(context):
+            claim_kind = "numeric"
+        elif ref_kind == "dateRef":
+            claim_kind = "date"
+        elif _hasRankingClaim(context):
+            claim_kind = "ranking"
+        else:
+            claim_kind = "narrative"
+
+        claims.append(
+            {
+                "id": f"claim:{len(claims) + 1}",
+                "text": context,
+                "refIds": [ref_id],
+                "kind": claim_kind,
+            }
+        )
+    return claims

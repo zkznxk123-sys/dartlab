@@ -93,3 +93,53 @@ def test_gate_passes_when_ref_token_matches_state_refs() -> None:
     list(runGate(state))
     assert state.gateBlocked is False
     assert not any("fake_ref_token" in issue for issue in state.gateIssues)
+
+
+@pytest.mark.unit
+def test_gate_extracts_numeric_claim_from_answer() -> None:
+    """답안의 valueRef token 주변 context 가 numeric claim 으로 state.claims 에 등록."""
+    from dartlab.ai.contracts import Ref
+
+    state = WorkbenchState(question="test")
+    state.answerText = "삼성전자 자산총계 566.94조원 [valueRef:value:005930:BS:2025Q4:total_assets] 입니다."
+    state.refs = [
+        Ref(id="value:005930:BS:2025Q4:total_assets", kind="valueRef", title="자산총계", source="t1", payload={})
+    ]
+    list(runGate(state))
+    assert len(state.claims) == 1
+    claim = state.claims[0]
+    assert claim["kind"] == "numeric"
+    assert "value:005930:BS:2025Q4:total_assets" in claim["refIds"]
+    assert "566.94조원" in claim["text"]
+
+
+@pytest.mark.unit
+def test_gate_extracts_date_claim_from_answer() -> None:
+    """dateRef token 주변 context 는 date claim 으로 분류."""
+    from dartlab.ai.contracts import Ref
+
+    state = WorkbenchState(question="test")
+    state.answerText = "기준 기간은 2025Q4 [dateRef:date:samsung_bs:2025Q4] 입니다."
+    state.refs = [
+        Ref(id="date:samsung_bs:2025Q4", kind="dateRef", title="기준시점", source="t1", payload={"period": "2025Q4"})
+    ]
+    list(runGate(state))
+    date_claims = [c for c in state.claims if c["kind"] == "date"]
+    assert len(date_claims) == 1
+    assert "date:samsung_bs:2025Q4" in date_claims[0]["refIds"]
+
+
+@pytest.mark.unit
+def test_gate_dedupes_repeated_ref_in_claims() -> None:
+    """같은 ref 가 답안에 여러 번 등장해도 claim 은 1 개만."""
+    from dartlab.ai.contracts import Ref
+
+    state = WorkbenchState(question="test")
+    state.answerText = (
+        "매출액 46.84조원 [valueRef:value:005380:IS:2025Q4:sales] "
+        "(영업이익률 계산용 매출액 [valueRef:value:005380:IS:2025Q4:sales])"
+    )
+    state.refs = [Ref(id="value:005380:IS:2025Q4:sales", kind="valueRef", title="매출액", source="t1", payload={})]
+    list(runGate(state))
+    sales_claims = [c for c in state.claims if "value:005380:IS:2025Q4:sales" in c["refIds"]]
+    assert len(sales_claims) == 1
