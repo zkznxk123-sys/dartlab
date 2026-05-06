@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import Header from '$lib/components/sections/Header.svelte';
 	import Footer from '$lib/components/sections/Footer.svelte';
 	import { brand } from '$lib/brand';
@@ -112,10 +113,10 @@
 			<h2>이 사이트를 어떻게 읽나</h2>
 			<p>처음 방문이라면 다음 순서가 가장 효율적이다.</p>
 			<ol>
-				<li><a href="/skills">Skill Catalog</a> — 절차·엔진 능력·운영 규칙 진입.</li>
-				<li><a href="/skills/start.installUv">Installation</a> — 설치와 첫 실행.</li>
-				<li><a href="/skills/start.quickStart">Quick Start</a> — 8 단계 walkthrough.</li>
-				<li><a href="/blog">Blog</a> — 공시 해석 프레임워크와 사례.</li>
+				<li><a href="{base}/skills">Skill Catalog</a> — 절차·엔진 능력·운영 규칙 진입.</li>
+				<li><a href="{base}/skills/start.installUv">Installation</a> — 설치와 첫 실행.</li>
+				<li><a href="{base}/skills/start.quickStart">Quick Start</a> — 8 단계 walkthrough.</li>
+				<li><a href="{base}/blog">Blog</a> — 공시 해석 프레임워크와 사례.</li>
 			</ol>
 			<p>
 				Skills 가 사용 절차·AI workflow·런타임 제약의 일차 카탈로그. 블로그는 실제 공시를 어떻게
