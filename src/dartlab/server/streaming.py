@@ -172,18 +172,40 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
                 )
     finally:
         auditor.flush()
-    return {
-        "answer": "".join(chunks),
-        "artifacts": _dedupeArtifacts(artifacts),
-        "evidence": _dedupeById(evidence),
-        "claims": _dedupeById(claims),
-        "visuals": _dedupeVisuals(visuals),
-        "limits": _dedupeStrings(limits),
-        "refs": refs,
-        "trace": trace,
-        "verification": verification,
-        "responseMeta": responseMeta,
-    }
+    return _sanitizeNanInf(
+        {
+            "answer": "".join(chunks),
+            "artifacts": _dedupeArtifacts(artifacts),
+            "evidence": _dedupeById(evidence),
+            "claims": _dedupeById(claims),
+            "visuals": _dedupeVisuals(visuals),
+            "limits": _dedupeStrings(limits),
+            "refs": refs,
+            "trace": trace,
+            "verification": verification,
+            "responseMeta": responseMeta,
+        }
+    )
+
+
+def _sanitizeNanInf(obj):
+    """JSON 호환 — NaN / Inf / -Inf float 을 None 으로 재귀 변환.
+
+    polars/pandas 가 missing 을 NaN 으로 표기하는 경우가 있어 ref payload 안에
+    섞여 들어오면 fastapi 의 json.dumps(allow_nan=False) 가 ValueError 발생.
+    """
+    import math
+
+    if isinstance(obj, dict):
+        return {k: _sanitizeNanInf(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitizeNanInf(v) for v in obj]
+    if isinstance(obj, tuple):
+        return tuple(_sanitizeNanInf(v) for v in obj)
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+    return obj
 
 
 def _build_kwargs(req: AskRequest) -> dict:
