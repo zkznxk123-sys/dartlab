@@ -2137,6 +2137,20 @@ class Company:
             - dartlab.ask: AI 자율 분석 (분석 질문은 여기로)
             - analysis: 14축 개별 분석 (story가 내부적으로 소비)
             - insights: 7영역 등급 + 이상치 요약
+
+        LLM Specifications:
+            AntiPatterns:
+                - story() 무인자 호출 후 결과 dict 전체를 답변 본문에 dump (사용자 부담)
+                - section 추측 (정확한 한글 섹션명 — c.topics 또는 가이드 확인 후)
+                - preset / template 잘못 매핑 (executive/audit/credit/growth/valuation 만)
+            OutputSchema:
+                - Story 객체 — 14 섹션 dict + 메타 (basePeriod, prefset, template)
+                - section 지정 시: 단일 섹션 dict
+                - .toMarkdown() 메서드로 markdown 문자열 변환
+            Prerequisites:
+                - finance + report 데이터 (자동 다운로드, 첫 호출 시간 소요)
+            Freshness:
+                finance/report 데이터의 c.update() 시점.
         """
         from dartlab.story.registry import buildStory
 
@@ -2610,6 +2624,21 @@ class Company:
             c = Company("005930")
             c.topics                   # 전체 topic 요약
             c.topics.filter(pl.col("source") == "finance")  # finance만
+
+        LLM Specifications:
+            AntiPatterns:
+                - 매 호출마다 c.topics 재호출 (캐시 — 1 회면 충분)
+                - topics 결과로 추측한 토픽명을 show() 에 잘못 매핑 (정확한 topic 문자열 필요)
+            OutputSchema:
+                - order : int — chapter 순서
+                - chapter : str — 장 이름
+                - topic : str — topic 식별자 (show 호출 키)
+                - source : str — docs / finance / report
+                - blocks : int — 블록 수
+                - periods : int — 기간 수
+                - latestPeriod : str — 최신 기간
+            Freshness:
+                docs/finance/report 각각의 c.update() 시점.
         """
         cacheKey = "_topicsDataFrame"
         if cacheKey in self._cache:
@@ -3196,6 +3225,19 @@ class Company:
             - governance: 지배구조 분석 (감사위원회 구성 포함)
             - insights: 종합 등급 (감사 리스크도 반영)
             - story: 재무정합성 섹션에서 감사 결과 활용
+
+        LLM Specifications:
+            AntiPatterns:
+                - "한정/부적정" 같은 무거운 결과를 답변 본문에 단정 노출 (출처 + 연도 함께)
+                - audit() 결과를 매 분석마다 호출 (캐시 — 1 회면 충분)
+            OutputSchema:
+                - opinion : str — 감사의견 (적정 / 한정 / 부적정 / 의견거절)
+                - auditorChanges : list[dict] — 감사인 변경 이력 (year, from, to, reason)
+                - goingConcern : bool — 계속기업 불확실성 존재 여부
+                - kam : list[str] — 핵심감사사항
+                - internalControl : str — 내부회계관리제도 검토의견
+            Freshness:
+                report 데이터 기준 — 정기보고서 마감 후 30~45 일.
         """
         from dartlab.analysis.financial.insight.pipeline import analyzeAudit
 
@@ -3345,6 +3387,23 @@ class Company:
         SeeAlso:
             - network: 출자/계열사 관계 (거버넌스의 다른 관점)
             - audit: 감사 리스크 (감사위원회와 연관)
+
+        LLM Specifications:
+            AntiPatterns:
+                - view="all" 호출 후 전체 결과를 답변 본문에 dump (수천 행)
+                - 종합점수 단독 노출 (사외이사 비율 + 최대주주 지분율 함께)
+            OutputSchema:
+                - 종목코드 : str — 6 자리
+                - 종목명 : str
+                - 최대주주지분율 : float — % (특수관계인 포함)
+                - 사외이사비율 : float — %
+                - 감사위원회 : str — 설치 여부
+                - 종합점수 : float — 100 점 만점
+                - 등급 : str — A/B/C/D/E
+            Freshness:
+                정기보고서 마감 후 30~45 일.
+            TargetMarkets:
+                - KR (DART)
         """
         from dartlab.providers.dart._scanRelated import buildScanGovernance
 

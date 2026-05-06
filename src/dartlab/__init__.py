@@ -232,6 +232,21 @@ def search(
         dartlab.search("반도체 HBM 투자")                          # 본문 자동 매칭
         dartlab.search("환율 리스크", scope="content")              # 본문 강제
         dartlab.search("대표이사 변경", corp="005930")              # 종목 필터
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 종목 공시 검색에 사용 (Company(code).disclosure() 또는 liveFilings() 우선)
+            - 0 건 반환 시 키워드 변형 round 반복 (즉시 다른 경로 fallback)
+            - 최근 공시 확인 용도 (인덱스 신선도 부족 — DART API 직접 호출이 정확)
+        OutputSchema:
+            - rcept_no : str — 공시 접수번호 (readFiling 입력용)
+            - corp_name : str — 회사명
+            - report_nm : str — 공시 유형명
+            - dartUrl : str — DART 공시 뷰어 URL
+        Freshness:
+            인덱스 빌드 시점 기준. BETA — 매일 자동 증분 미완성. 최근 N 일 누락 가능.
+        TargetMarkets:
+            - KR (DART)
     """
     # R33-1: 빈 query 거부
     if not query or not query.strip():
@@ -1040,6 +1055,19 @@ def capabilities(key: str | None = None, *, search: str | None = None) -> dict |
         dartlab.capabilities("Company.analysis")     # Company.analysis 상세
         dartlab.capabilities("scan")                 # scan 상세
         dartlab.capabilities(search="재무건전성")     # 질문 기반 검색 → 상위 10개
+
+    LLM Specifications:
+        AntiPatterns:
+            - 매 호출마다 capabilities() 호출 (전체 목차 — 큰 dict)
+            - key 와 search 동시 (search 우선이지만 의미 모호)
+            - capability 본문 답변에 그대로 노출 (사용자에게 유용한 형태로 정제 필요)
+        OutputSchema:
+            - key 없을 때: dict[str, str] — apiRef → summary
+            - key 있을 때: dict — summary / capabilities / guide / aicontext / args / returns / example / seeAlso / llmSpecs (있으면)
+        Freshness:
+            generateSpec.py 빌드 시점 — _generated.py 와 동기.
+        Dataflow:
+            capabilities() → 목차 → capabilities("apiRef") → 상세 → run_python 으로 실행
     """
     if search is not None:
         from dartlab.core.capability.search import searchCapabilities

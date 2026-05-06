@@ -165,6 +165,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.audit()",
         "guide": "\"감사의견 확인\" → c.audit()\n\"감사인 바뀌었어?\" → c.audit()[\"auditorChanges\"]\n\"계속기업 의문은?\" → c.audit()[\"goingConcern\"]",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "\"한정/부적정\" 같은 무거운 결과를 답변 본문에 단정 노출 (출처 + 연도 함께)",
+                "audit() 결과를 매 분석마다 호출 (캐시 — 1 회면 충분)"
+            ],
+            "freshness": "report 데이터 기준 — 정기보고서 마감 후 30~45 일.",
+            "outputSchema": [
+                "opinion : str — 감사의견 (적정 / 한정 / 부적정 / 의견거절)",
+                "auditorChanges : list[dict] — 감사인 변경 이력 (year, from, to, reason)",
+                "goingConcern : bool — 계속기업 불확실성 존재 여부",
+                "kam : list[str] — 핵심감사사항",
+                "internalControl : str — 내부회계관리제도 검토의견"
+            ]
+        },
         "requires": "데이터: docs + report (자동 다운로드)",
         "returnSchema": [
             {
@@ -647,6 +661,23 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.governance()           # 삼성전자 거버넌스\nc.governance(\"all\")      # 전체 상장사",
         "guide": "\"지배구조 분석\" → c.governance()\n\"사외이사 비율은?\" → c.governance()\n\"전체 상장사 거버넌스 비교\" → c.governance(\"all\")",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "view=\"all\" 호출 후 전체 결과를 답변 본문에 dump (수천 행)",
+                "종합점수 단독 노출 (사외이사 비율 + 최대주주 지분율 함께)"
+            ],
+            "freshness": "정기보고서 마감 후 30~45 일.",
+            "outputSchema": [
+                "종목코드 : str — 6 자리",
+                "종목명 : str",
+                "최대주주지분율 : float — % (특수관계인 포함)",
+                "사외이사비율 : float — %",
+                "감사위원회 : str — 설치 여부",
+                "종합점수 : float — 100 점 만점",
+                "등급 : str — A/B/C/D/E"
+            ],
+            "targetMarkets": "KR (DART)"
+        },
         "requires": "데이터: DART 정기보고서 (자동 수집)",
         "returnSchema": [
             {
@@ -1169,6 +1200,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c.story()                        # 전체 검토서\nc.story(\"수익구조\")                # 특정 섹션\nc.story(preset=\"audit\")          # 감사/회계 검토용\nc.story(template=\"auto\")         # 스토리 자동 판별\nc.story(template=\"성장\")          # 성장 템플릿 적용\nc.story(detail=False)            # 전 섹션 요약만",
         "guide": "When: 구조화된 보고서가 필요할 때. 사용자가 \"보고서\" 명시 시에만.\nHow: 무인자 = 전체 보고서. section 으로 개별 섹션. type 으로 보고서 타입.\n\"재무 검토서 만들어줘\" -> c.story()\n\"수익구조 분석\" -> c.story(\"수익구조\")\n\"감사용 리뷰\" -> c.story(preset=\"audit\")\n\"이 회사 스토리는?\" -> c.story(template=\"auto\")\n\"요약만 보여줘\" -> c.story(detail=False)\n\"AI 가 해석한 보고서\" -> dartlab.ask(\"005930 보고서 작성해줘\") (AI 가 story tool 호출)\nVerified:\ncredit 타입 → 신용 종합 보고서 (observed via credit ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\naudit 타입 → 분식회계 가능성 판정 보고서 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ngovernance 타입 → 지배구조 점검 보고서 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ndividend 타입 → 배당 매력 종합 보고서 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": [
+                "story() 무인자 호출 후 결과 dict 전체를 답변 본문에 dump (사용자 부담)",
+                "section 추측 (정확한 한글 섹션명 — c.topics 또는 가이드 확인 후)",
+                "preset / template 잘못 매핑 (executive/audit/credit/growth/valuation 만)"
+            ],
+            "freshness": "finance/report 데이터의 c.update() 시점.",
+            "outputSchema": [
+                "Story 객체 — 14 섹션 dict + 메타 (basePeriod, prefset, template)",
+                "section 지정 시: 단일 섹션 dict",
+                ".toMarkdown() 메서드로 markdown 문자열 변환"
+            ],
+            "prerequisites": "finance + report 데이터 (자동 다운로드, 첫 호출 시간 소요)"
+        },
         "requires": "데이터: finance + report (자동 다운로드)",
         "returns": "Story — 구조화 보고서.",
         "seeAlso": "dartlab.ask: AI 자율 분석 (분석 질문은 여기로)\nanalysis: 14축 개별 분석 (story가 내부적으로 소비)\ninsights: 7영역 등급 + 이상치 요약",
@@ -1212,6 +1257,22 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.topics                   # 전체 topic 요약\nc.topics.filter(pl.col(\"source\") == \"finance\")  # finance만",
         "guide": "\"어떤 데이터가 있어?\" → c.topics\n\"topic 목록\" → c.topics",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": [
+                "매 호출마다 c.topics 재호출 (캐시 — 1 회면 충분)",
+                "topics 결과로 추측한 토픽명을 show() 에 잘못 매핑 (정확한 topic 문자열 필요)"
+            ],
+            "freshness": "docs/finance/report 각각의 c.update() 시점.",
+            "outputSchema": [
+                "order : int — chapter 순서",
+                "chapter : str — 장 이름",
+                "topic : str — topic 식별자 (show 호출 키)",
+                "source : str — docs / finance / report",
+                "blocks : int — 블록 수",
+                "periods : int — 기간 수",
+                "latestPeriod : str — 최신 기간"
+            ]
+        },
         "requires": "데이터: docs/finance/report 중 하나 이상 (자동 다운로드)",
         "returnSchema": [
             {
@@ -1760,6 +1821,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "dartlab.capabilities()                       # 전체 목차\ndartlab.capabilities(\"analysis\")             # analysis 상세 (guide, capabilities)\ndartlab.capabilities(\"Company.analysis\")     # Company.analysis 상세\ndartlab.capabilities(\"scan\")                 # scan 상세\ndartlab.capabilities(search=\"재무건전성\")     # 질문 기반 검색 → 상위 10개",
         "guide": "\"dartlab 뭐 할 수 있어?\" -> capabilities()\n\"분석 기능 뭐 있어?\" -> capabilities(\"analysis\")\n\"scan 어떻게 써?\" -> capabilities(\"scan\")\n\"재무건전성 관련 API?\" -> capabilities(search=\"재무건전성\")",
         "kind": "function",
+        "llmSpecs": {
+            "antiPatterns": [
+                "매 호출마다 capabilities() 호출 (전체 목차 — 큰 dict)",
+                "key 와 search 동시 (search 우선이지만 의미 모호)",
+                "capability 본문 답변에 그대로 노출 (사용자에게 유용한 형태로 정제 필요)"
+            ],
+            "dataflow": "capabilities() → 목차 → capabilities(\"apiRef\") → 상세 → run_python 으로 실행",
+            "freshness": "generateSpec.py 빌드 시점 — _generated.py 와 동기.",
+            "outputSchema": [
+                "key 없을 때: dict[str, str] — apiRef → summary",
+                "key 있을 때: dict — summary / capabilities / guide / aicontext / args / returns / example / seeAlso / llmSpecs (있으면)"
+            ]
+        },
         "requires": "없음",
         "returns": "dict | list[str] — key 있으면 해당 항목 dict, 없으면 키+summary 목록.",
         "seeAlso": "ask: AI 질문 (capabilities로 기능 파악 후 ask로 분석)\nsetup: AI provider 설정 (capabilities 확인 후 설정)",
@@ -3274,6 +3348,21 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "import dartlab\ndartlab.search(\"유상증자\")                                # 제목 매칭\ndartlab.search(\"반도체 HBM 투자\")                          # 본문 자동 매칭\ndartlab.search(\"환율 리스크\", scope=\"content\")              # 본문 강제\ndartlab.search(\"대표이사 변경\", corp=\"005930\")              # 종목 필터",
         "guide": "\"유상증자 한 회사?\" -> search(\"유상증자\") [BETA, 0건이면 stop]\n\"반도체 투자 트렌드?\" -> search(\"반도체 HBM 투자\") [BETA, 0건이면 stop]\n\"삼성전자 최근 공시\" -> Company(\"005930\").disclosure() (search 아님)",
         "kind": "function",
+        "llmSpecs": {
+            "antiPatterns": [
+                "단일 종목 공시 검색에 사용 (Company(code).disclosure() 또는 liveFilings() 우선)",
+                "0 건 반환 시 키워드 변형 round 반복 (즉시 다른 경로 fallback)",
+                "최근 공시 확인 용도 (인덱스 신선도 부족 — DART API 직접 호출이 정확)"
+            ],
+            "freshness": "인덱스 빌드 시점 기준. BETA — 매일 자동 증분 미완성. 최근 N 일 누락 가능.",
+            "outputSchema": [
+                "rcept_no : str — 공시 접수번호 (readFiling 입력용)",
+                "corp_name : str — 회사명",
+                "report_nm : str — 공시 유형명",
+                "dartUrl : str — DART 공시 뷰어 URL"
+            ],
+            "targetMarkets": "KR (DART)"
+        },
         "requires": "데이터: stemIndex (scope=title) + contentIndex (scope=content)",
         "returnSchema": [
             {
