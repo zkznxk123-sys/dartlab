@@ -35,6 +35,7 @@ _ALLOWED_EVENTS = {
     "MESSAGES_SNAPSHOT",
     "ACTIVITY_SNAPSHOT",
     "ACTIVITY_DELTA",
+    "VIEW_SPEC",
     "RUN_FINISHED",
     "RUN_ERROR",
 }
@@ -275,6 +276,31 @@ def _activity(summary: str, *, status: str = "done", refs: list[str] | None = No
             "refs": refs or [],
         },
     )
+
+
+def _view_spec(
+    spec: dict[str, Any],
+    *,
+    run_id: str,
+    message_id: str,
+    source: str | None = None,
+    title: str | None = None,
+) -> dict[str, str]:
+    """View-spec part — 차트/표/대시보드 같은 시각 답변을 메시지 흐름에 인라인.
+
+    spec 형식: viewSpec.normalizeViewSpec 가 받는 모양 (widgets[]/charts[]/component).
+    분석 워크벤치 정체성의 주체. tool/activity 보다 시각적 위계가 높다.
+    """
+    payload: dict[str, Any] = {
+        "runId": run_id,
+        "messageId": message_id,
+        "spec": spec,
+    }
+    if source:
+        payload["source"] = source
+    if title:
+        payload["title"] = title
+    return _event("VIEW_SPEC", payload)
 
 
 def _tool_name(data: dict[str, Any]) -> str:

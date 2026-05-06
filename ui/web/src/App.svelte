@@ -7,6 +7,7 @@
 		appendActivityPart,
 		appendFailurePart,
 		appendTextPart,
+		appendViewSpecPart,
 		buildConversationHistory,
 		upsertToolPart,
 	} from "$lib/agent/conversationModel.js";
@@ -288,6 +289,11 @@
 			onToolResult: (payload) => {
 				updateAgentMessage((last) => ({
 					parts: upsertToolPart(last, { ...payload, status: payload?.status || "done" }),
+				}));
+			},
+			onViewSpec: (payload) => {
+				updateAgentMessage((last) => ({
+					parts: appendViewSpecPart(last, payload || {}),
 				}));
 			},
 			onDone: (payload) => {

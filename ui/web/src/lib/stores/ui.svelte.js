@@ -47,7 +47,8 @@ const OLLAMA_MODELS = [
 
 export function createUiStore() {
 	// ── Layout ──
-	let sidebarOpen = $state(false);
+	// 데스크톱은 default 열림 (외부 챗 표면 표준). 모바일은 effect 에서 false 강제.
+	let sidebarOpen = $state(typeof window !== "undefined" && window.innerWidth >= 768);
 	let viewerFullscreen = $state(false);
 	let isMobile = $state(false);
 
@@ -189,6 +190,9 @@ export function createUiStore() {
 		_core.statusLoading = true;
 		// 핵심 원칙: statusLoading은 "프로바이더 목록이 있는가"만 의미한다.
 		// /api/status 응답 오는 순간 풀리고, 나머지(모델 로드/검증/SSE)는 백그라운드.
+		// 첫 호출은 probe=false — 모든 provider 직렬 점검 회피해 화면 로드를 빠르게.
+		// 활성 provider availability 는 아래 백그라운드 validateProvider 가 단독 검증.
+		// 사용자가 설정 패널을 열면 selectProvider/openSettings 경로에서 probe=true 가 동작.
 		let profile = null;
 		try {
 			profile = await fetchAiProfile();
@@ -198,7 +202,7 @@ export function createUiStore() {
 		}
 		const preferredProvider = normalizeProvider(profile?.defaultProvider || "codex");
 		try {
-			await refreshProviderStatus(preferredProvider, true);
+			await refreshProviderStatus(preferredProvider, false);
 		} catch (e) {
 			console.warn("[loadStatus] refreshProviderStatus:", e);
 		}

@@ -10,6 +10,27 @@
 		<link rel="icon" type="image/png" sizes="192x192" href="/avatar.png" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
 		<link rel="apple-touch-icon" href="/avatar.png" />
+		<script>
+			// 옛 Service Worker 잔재 제거. ui/web 은 PWA 의도 없음 — 과거 배포의 SW 가
+			// 브라우저에 캐시되어 `non-precached-url: index.html` 에러를 일으키는 케이스 정리.
+			(function () {
+				if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+				try {
+					if (localStorage.getItem("dl-sw-purged") === "1") return;
+					navigator.serviceWorker.getRegistrations().then(function (regs) {
+						var purged = 0;
+						regs.forEach(function (r) { r.unregister(); purged++; });
+						if (typeof caches !== "undefined") {
+							caches.keys().then(function (keys) {
+								keys.forEach(function (k) { caches.delete(k); });
+							});
+						}
+						localStorage.setItem("dl-sw-purged", "1");
+						if (purged > 0) location.reload();
+					});
+				} catch (e) {}
+			})();
+		</script>
 	</head>
 	<body>
 		<div id="app">

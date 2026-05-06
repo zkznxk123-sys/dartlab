@@ -179,3 +179,22 @@ export function appendFailurePart(message, failure) {
 	});
 	return parts;
 }
+
+/**
+ * View-spec part — 차트·표·대시보드 같은 시각 답변을 메시지 흐름에 인라인.
+ * spec 은 viewSpec.normalizeViewSpec 가 받는 모양 (widgets[]/charts[]/component).
+ * 분석 워크벤치 정체성의 주체 — tool/activity 보다 시각적 위계가 높다.
+ */
+export function appendViewSpecPart(message, payload) {
+	const parts = Array.isArray(message.parts) ? [...message.parts] : [];
+	const spec = payload?.spec || payload?.view || payload;
+	if (!spec) return parts;
+	parts.push({
+		type: "view-spec",
+		id: payload?.id || `view-spec-${Date.now()}-${parts.length}`,
+		spec,
+		source: payload?.source || null,
+		title: payload?.title || null,
+	});
+	return parts;
+}

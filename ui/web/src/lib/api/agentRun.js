@@ -13,6 +13,7 @@ const ALLOWED_EVENTS = new Set([
 	"MESSAGES_SNAPSHOT",
 	"ACTIVITY_SNAPSHOT",
 	"ACTIVITY_DELTA",
+	"VIEW_SPEC",
 	"RUN_FINISHED",
 	"RUN_ERROR",
 ]);
@@ -92,6 +93,7 @@ function dispatch(type, payload, callbacks) {
 	else if (type === "ACTIVITY_DELTA" || type === "ACTIVITY_SNAPSHOT") callbacks.onActivity?.(payload);
 	else if (type === "TOOL_CALL_START") callbacks.onToolStart?.(payload);
 	else if (type === "TOOL_CALL_RESULT") callbacks.onToolResult?.(payload);
+	else if (type === "VIEW_SPEC") callbacks.onViewSpec?.(payload);
 	else if (type === "RUN_FINISHED") callbacks.onDone?.(payload);
 	else if (type === "RUN_ERROR") callbacks.onError?.(payload);
 	else if (type === "STATE_SNAPSHOT" || type === "STATE_DELTA") callbacks.onState?.(payload);

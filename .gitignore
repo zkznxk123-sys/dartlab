@@ -116,6 +116,9 @@ crates/
 
 # SNS + Video pipeline (local-only workspace, assets/docs/video/toolkit 통합)
 /sns/
+
+# 로컬 환경별 ignore (개별 dev 머신용 — repo 공유 안 함)
+.gitignore.local
 tests/fixtures/dart/docs/034730.parquet
 tests/fixtures/dart/docs/055550.parquet
 unsloth_compiled_cache/
