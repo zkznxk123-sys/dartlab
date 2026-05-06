@@ -1180,6 +1180,28 @@
       ]
     },
     {
+      "id": "engines.recipe.dataAvailabilityFirst",
+      "title": "데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 update() 호출 제약"
+      ]
+    },
+    {
+      "id": "engines.recipe.debtStructureAudit",
+      "title": "부채 구조 audit (만기 + 이자보상 + peer 횡단)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 finance 시계열 일부 한정"
+      ]
+    },
+    {
       "id": "engines.recipe.disclosureEvent",
       "title": "공시 이벤트 분석 (목록 + 원문 + 변화 추적)",
       "category": "engines",
@@ -1188,6 +1210,17 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 readFiling 본문 길이 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.disclosureRiskScreen",
+      "title": "공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 전종목 스캔 메모리 부담"
       ]
     },
     {
@@ -1213,6 +1246,17 @@
       ]
     },
     {
+      "id": "engines.recipe.esgGovernanceLight",
+      "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 docs/finance 일부 한정"
+      ]
+    },
+    {
       "id": "engines.recipe.financialStatementCompare",
       "title": "두 회사 재무제표 비교 (peer + show + 분해)",
       "category": "engines",
@@ -1221,6 +1265,17 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 두 회사 dataset snapshot 동시 로드 부담"
+      ]
+    },
+    {
+      "id": "engines.recipe.flowAndPattern",
+      "title": "수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 flow KR 전용"
       ]
     },
     {
@@ -1246,6 +1301,50 @@
       ]
     },
     {
+      "id": "engines.recipe.industryDeepDive",
+      "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 industry stage 단일 호출만"
+      ]
+    },
+    {
+      "id": "engines.recipe.insiderEventCheck",
+      "title": "내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 disclosure 단일 호출만"
+      ]
+    },
+    {
+      "id": "engines.recipe.inventoryAndCycle",
+      "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 macro inventory 시계열 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.macroLiquidityCycle",
+      "title": "매크로 유동성 사이클 (금리 + 환율 + 유동성)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 macro 시계열 일부 한정"
+      ]
+    },
+    {
       "id": "engines.recipe.macroToCompany",
       "title": "매크로 → 섹터 → 회사 영향 (transmission)",
       "category": "engines",
@@ -1254,6 +1353,28 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 macro snapshot 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.peerBenchmark",
+      "title": "peer 벤치마크 (산업 + 횡단 비교 + ratio)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 multi-company 동시 로드 메모리 부담"
+      ]
+    },
+    {
+      "id": "engines.recipe.quantTechnicalReview",
+      "title": "quant 기술적 review (지표 + 모멘텀 + 변동성 + 패턴)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 price 시계열 일부 한정"
       ]
     },
     {
@@ -1268,6 +1389,17 @@
       ]
     },
     {
+      "id": "engines.recipe.screenAndChart",
+      "title": "스캔 + 차트 결합 (scan 결과 → table-backed chart)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 chart artifact 저장 제약"
+      ]
+    },
+    {
       "id": "engines.recipe.sectorRotation",
       "title": "섹터 로테이션 분석 (매크로 + scan + industry)",
       "category": "engines",
@@ -1276,6 +1408,17 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 macro 사이클 시계열 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.smallCapDiscovery",
+      "title": "중소형주 발굴 (성장 + valuation + quality 교집합)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 multi-scan 메모리 부담"
       ]
     },
     {
@@ -1310,6 +1453,17 @@
       "limitations": []
     },
     {
+      "id": "engines.recipe.valuationBandTrack",
+      "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 historic 시계열 일부 한정"
+      ]
+    },
+    {
       "id": "engines.recipe.valuationCheck",
       "title": "가치평가 점검 (DCF + 상대가치 + valuation band)",
       "category": "engines",
@@ -1318,6 +1472,17 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 quant value 시계열 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.workforceAndCapital",
+      "title": "인력·자본 사이클 (workforce + capital + 자본배분)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 docs 일부 한정"
       ]
     },
     {

@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 196,
+    "skillCount": 211,
     "categories": [
       {
         "id": "start",
@@ -26,7 +26,7 @@
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 164
+        "count": 179
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -11025,6 +11025,179 @@
       }
     },
     {
+      "id": "engines.recipe.dataAvailabilityFirst",
+      "title": "데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "분석 시작 전 필요한 데이터 (finance/docs/report/price) 가 local 에 있는지 확인하고 누락 시 수집을 트리거하는 절차. emit_result 실패 사이클 예방.",
+      "whenToUse": [
+        "데이터 가용성",
+        "데이터 있는지",
+        "분석 전 확인",
+        "데이터 수집",
+        "누락 데이터",
+        "inspect dataset",
+        "schema 확인"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "inspect_dataset",
+        "engine_call"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company.researchStarter",
+        "engines.gather",
+        "engines.data.foundation"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`skillRef` 1 (data foundation)",
+        "`datasetRef` 3+ (BS / IS / CF 또는 price / macro)",
+        "답변 본문: 가용 vs 누락 dataset 표",
+        "가용 dataset / 누락 dataset 명시.",
+        "schema (컬럼 + dtype + 최신 시점) 표시.",
+        "update 호출은 비용 (네트워크) — 누락 명확할 때만."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입 + topics 조회"
+        },
+        {
+          "skillId": "engines.data.foundation",
+          "note": "데이터 기본기 확인"
+        },
+        {
+          "skillId": "engines.gather",
+          "note": "누락 데이터 수집"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "datasetRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 update() 호출 제약"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.debtStructureAudit",
+      "title": "부채 구조 audit (만기 + 이자보상 + peer 횡단)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "회사 부채 구조를 만기 분포 + 이자보상배율 + peer 횡단 비교 + 신용 등급 4 축으로 종합 audit 하는 절차.",
+      "whenToUse": [
+        "부채 구조",
+        "만기 구조",
+        "이자보상배율",
+        "부채 audit",
+        "debt structure",
+        "부채 만기",
+        "단기 장기 부채"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company.researchStarter",
+        "engines.scan.debt",
+        "engines.analysis.financing",
+        "engines.credit.creditRisk"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 3 개 (debt + peer + financing)",
+        "`valueRef` 5+ (총차입금 / 차입금의존도 / ICR / dCR 등급 / OCF/부채)",
+        "`dateRef` 1 개",
+        "부채비율 (%) + 차입금의존도 (%) + ICR (배) 명시.",
+        "만기 구조 (단기 / 장기 비율) 명시.",
+        "\"안전\" 단정 X — 위험등급 (안전/주의/경고/위험) 함께."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입"
+        },
+        {
+          "skillId": "engines.scan.debt",
+          "note": "부채 구조 + peer 횡단"
+        },
+        {
+          "skillId": "engines.analysis.financing",
+          "note": "자본조달 종합"
+        },
+        {
+          "skillId": "engines.credit.creditRisk",
+          "note": "dCR 등급"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 finance 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
       "id": "engines.recipe.disclosureEvent",
       "title": "공시 이벤트 분석 (목록 + 원문 + 변화 추적)",
       "category": "engines",
@@ -11110,6 +11283,89 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 readFiling 본문 길이 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.disclosureRiskScreen",
+      "title": "공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "전종목 횡단으로 공시 위험 신호 (정정 빈도, 자기자본 변동, 영업환경 변경 등) 가 높은 종목 후보를 추출하는 절차.",
+      "whenToUse": [
+        "공시 위험",
+        "정정 공시",
+        "disclosure 위험",
+        "공시 위험 스크린",
+        "정정 빈도",
+        "위험 신호 종목"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan.disclosureRisk",
+        "engines.scan.crossSectionStockScreen",
+        "engines.analysis.disclosureChange"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 2 개 (위험 스캔 + 상위 후보)",
+        "`dateRef` 1 개",
+        "답변 본문 markdown table — 위험 후보 10 행 (위험 점수 + 정정 빈도 + 비고)",
+        "위험 점수 + 정정 빈도 + 사유 함께.",
+        "\"분식 가능성\" 단정 X — 위험 신호일 뿐 결과 아님.",
+        "상위 후보의 산업·시가총액 분포 확인."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.scan.disclosureRisk",
+          "note": "전종목 위험 점수"
+        },
+        {
+          "skillId": "engines.scan.crossSectionStockScreen",
+          "note": "필터"
+        },
+        {
+          "skillId": "engines.analysis.disclosureChange",
+          "note": "변화 신호 분석"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 전종목 스캔 메모리 부담"
           ]
         }
       }
@@ -11296,6 +11552,100 @@
       }
     },
     {
+      "id": "engines.recipe.esgGovernanceLight",
+      "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "정식 ESG 데이터 부재 시 dartlab 보유 신호 (지배구조 + 감사 + 종업원 + 자본배분 일관성) 만으로 가벼운 ESG audit 을 만드는 절차.",
+      "whenToUse": [
+        "ESG 분석",
+        "지속가능성",
+        "사회 책임",
+        "light ESG",
+        "ESG 점검",
+        "비재무 audit"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company.researchStarter",
+        "engines.analysis.governance",
+        "engines.analysis.governanceAudit",
+        "engines.scan.workforce",
+        "engines.analysis.financialConsistency"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 3+ 개",
+        "`valueRef` 5+ (지배구조 점수 / 감사 신호 / 인력 변화 / 일관성)",
+        "`dateRef` 1 개",
+        "\"ESG 우수\" 단정 X — light audit 임을 명시.",
+        "환경 (E) 영역은 dartlab 직접 데이터 없음 — 명시.",
+        "G 종합 점수 + 보조 신호 (감사·인력) 함께."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입"
+        },
+        {
+          "skillId": "engines.analysis.governance",
+          "note": "G 종합"
+        },
+        {
+          "skillId": "engines.analysis.governanceAudit",
+          "note": "감사 신호"
+        },
+        {
+          "skillId": "engines.scan.workforce",
+          "note": "S 보조 (인력)"
+        },
+        {
+          "skillId": "engines.analysis.financialConsistency",
+          "note": "일관성"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 docs/finance 일부 한정"
+          ]
+        }
+      }
+    },
+    {
       "id": "engines.recipe.financialStatementCompare",
       "title": "두 회사 재무제표 비교 (peer + show + 분해)",
       "category": "engines",
@@ -11386,6 +11736,95 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 두 회사 dataset snapshot 동시 로드 부담"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.flowAndPattern",
+      "title": "수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "단일 종목의 수급 (외인/기관 매매) + 차트 패턴 + 모멘텀 신호를 결합해 단기 entry/exit 보조 신호를 만드는 절차.",
+      "whenToUse": [
+        "수급 분석",
+        "외인 기관 매매",
+        "flow analysis",
+        "차트 패턴 모멘텀",
+        "단기 매매 신호",
+        "수급 패턴"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company.researchStarter",
+        "engines.quant.chartPatterns",
+        "engines.quant.momentum",
+        "engines.quant.flow"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 3 개 (flow / patterns / momentum)",
+        "`valueRef` 4+ (외인 누적 / 기관 누적 / 패턴 신호 / 모멘텀)",
+        "`dateRef` 1 개",
+        "KR 전용 — US ticker 에는 flow 데이터 없음 명시.",
+        "\"매수 신호\" 단정 X — 신호 + 신뢰 구간 + 상충 신호 함께.",
+        "펀더멘털과 분리 — 단기 보조 신호로만."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입 (KR 만)"
+        },
+        {
+          "skillId": "engines.quant.chartPatterns",
+          "note": "패턴"
+        },
+        {
+          "skillId": "engines.quant.momentum",
+          "note": "모멘텀"
+        },
+        {
+          "skillId": "engines.quant.flow",
+          "note": "가격·거래량 결합"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 flow KR 전용"
           ]
         }
       }
@@ -11582,6 +12021,365 @@
       }
     },
     {
+      "id": "engines.recipe.industryDeepDive",
+      "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "단일 산업의 가치 사슬 + 매크로 영향 + 핵심 종목 3 축으로 산업 자체를 분석하는 절차. 종목 없이도 가능.",
+      "whenToUse": [
+        "산업 분석",
+        "업종 분석",
+        "가치 사슬",
+        "산업 구조",
+        "산업 deep dive",
+        "섹터 분석",
+        "산업 지도"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.industry",
+        "engines.macro.marketReview",
+        "engines.scan.profitability",
+        "engines.analysis.peerComparison"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 4 개 (industry 지도 + stage 종목 + macro + peer scan)",
+        "`dateRef` 1 개",
+        "가치 사슬 (upstream/midstream/downstream) 명시.",
+        "핵심 종목 5~10 (각 stage 별).",
+        "매크로 영향은 산업 elasticity (예: 반도체 → 환율 / 수요 사이클)."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.industry",
+          "note": "산업 가치 사슬 + stage 별 종목"
+        },
+        {
+          "skillId": "engines.macro.marketReview",
+          "note": "매크로 환경"
+        },
+        {
+          "skillId": "engines.scan.profitability",
+          "note": "peer 횡단 수익성"
+        },
+        {
+          "skillId": "engines.analysis.peerComparison",
+          "note": "핵심 종목 비교"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 industry stage 단일 호출만"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.insiderEventCheck",
+      "title": "내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "회사의 내부자 거래·자본변동·임원 변경 같은 이벤트 신호를 시계열로 점검하는 절차. 거버넌스 점검의 보완.",
+      "whenToUse": [
+        "내부자 거래",
+        "임원 매매",
+        "자본 변동",
+        "insider trade",
+        "임원 변경",
+        "자기주식 매입 매도",
+        "이벤트 신호"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company.researchStarter",
+        "engines.scan.insider",
+        "engines.scan.capital",
+        "engines.company.disclosureEvent"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 4 개 (insider scan + capital scan + disclosure + majorHolder)",
+        "`dateRef` 1 개",
+        "내부자 매매 시점 명시 (filedAt) + 거래 종류 (매수/매도).",
+        "자본 변동은 변동 전후 지분율 함께.",
+        "\"내부자 매수 = 호재\" 단정 X — 시점·규모·맥락 함께."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입"
+        },
+        {
+          "skillId": "engines.scan.insider",
+          "note": "내부자 매매 횡단"
+        },
+        {
+          "skillId": "engines.scan.capital",
+          "note": "자본구조 변동"
+        },
+        {
+          "skillId": "engines.company.disclosureEvent",
+          "note": "자본 관련 공시 원문"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 disclosure 단일 호출만"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.inventoryAndCycle",
+      "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "산업 재고 사이클 + 회사 재고 회전 + 매크로 수요 신호 결합으로 사이클 위치를 진단하는 절차. 반도체·석유화학·철강 등에 유용.",
+      "whenToUse": [
+        "재고 사이클",
+        "재고 회전",
+        "inventory cycle",
+        "산업 사이클",
+        "수요 사이클",
+        "재고 분석"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.macro.inventory",
+        "engines.company.researchStarter",
+        "engines.analysis.efficiency",
+        "engines.macro.cycle"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 3 개 (inventory + efficiency + cycle)",
+        "`valueRef` 4+ (재고 지수 / 재고 회전 / 매출채권 회전 / 사이클 위치)",
+        "`dateRef` 1 개",
+        "사이클 위치 (저점/회복/확장/정점/하락) + 근거 지표.",
+        "재고 회전율 단위 (회) + 매출채권 회전율 (일) 명시.",
+        "\"사이클 저점\" 단정 X — 시나리오 + 모니터링 트리거."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.macro.inventory",
+          "note": "산업 재고 지수"
+        },
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입"
+        },
+        {
+          "skillId": "engines.analysis.efficiency",
+          "note": "회사 회전율"
+        },
+        {
+          "skillId": "engines.macro.cycle",
+          "note": "경기 사이클"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 macro inventory 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.macroLiquidityCycle",
+      "title": "매크로 유동성 사이클 (금리 + 환율 + 유동성)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "매크로 유동성 환경을 금리 + 환율 + 유동성 지표 + 위기 신호 4 축으로 종합 판정하는 절차. 종목 없이 매크로 분석 가능.",
+      "whenToUse": [
+        "매크로 유동성",
+        "금리 환경",
+        "환율 환경",
+        "유동성 사이클",
+        "매크로 종합",
+        "위기 신호",
+        "거시 환경"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.macro.marketReview",
+        "engines.macro.rates",
+        "engines.macro.liquidity",
+        "engines.macro.crisis",
+        "engines.macro.summary"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 5 개 (각 axis 별 시계열)",
+        "`dateRef` 1 개 (최신 관측 시점)",
+        "답변 본문: 매크로 단계 (확장/둔화/침체/회복) + 근거 지표",
+        "사이클 위치 (확장/둔화/침체/회복) + 근거 지표 (PMI/금리곡선/VIX).",
+        "금리 곡선 inversion 신호 명시.",
+        "\"유동성 풍부\" 단정 X — M2 증가율 + 신용 스프레드 함께."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.macro.marketReview",
+          "note": "매크로 환경 종합"
+        },
+        {
+          "skillId": "engines.macro.rates",
+          "note": "금리 곡선"
+        },
+        {
+          "skillId": "engines.macro.liquidity",
+          "note": "유동성 지표"
+        },
+        {
+          "skillId": "engines.macro.crisis",
+          "note": "위기 신호"
+        },
+        {
+          "skillId": "engines.macro.summary",
+          "note": "최종 종합"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 macro 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
       "id": "engines.recipe.macroToCompany",
       "title": "매크로 → 섹터 → 회사 영향 (transmission)",
       "category": "engines",
@@ -11672,6 +12470,191 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 macro snapshot 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.peerBenchmark",
+      "title": "peer 벤치마크 (산업 + 횡단 비교 + ratio)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "회사를 같은 산업 peer 5~10 종과 핵심 ratio (수익성/안정성/성장성/valuation) 4 축으로 벤치마크하는 절차.",
+      "whenToUse": [
+        "peer 비교",
+        "동종 비교",
+        "벤치마크",
+        "같은 업종 비교",
+        "peer benchmark",
+        "동일 산업 비교",
+        "peer 5종"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company.researchStarter",
+        "engines.industry",
+        "engines.analysis.peerComparison",
+        "engines.scan.ratio"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 1+5 개 (산업 + 5 peer ratio)",
+        "`dateRef` 1 개",
+        "답변 본문 markdown table — 회사 + 5 peer × 핵심 ratio 5",
+        "peer 5~10 — 너무 적으면 통계 의미 X, 너무 많으면 산업 동질성 X.",
+        "같은 분기 + 같은 회계 기준 비교.",
+        "\"우위\" 단정 X — peer median 대비 ±σ 위치 함께."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입"
+        },
+        {
+          "skillId": "engines.industry",
+          "note": "같은 산업 peer 추출"
+        },
+        {
+          "skillId": "engines.analysis.peerComparison",
+          "note": "횡단 비교"
+        },
+        {
+          "skillId": "engines.scan.ratio",
+          "note": "peer ratio 일괄 (대안 path)"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 multi-company 동시 로드 메모리 부담"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.quantTechnicalReview",
+      "title": "quant 기술적 review (지표 + 모멘텀 + 변동성 + 패턴)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "단일 종목의 기술적 신호를 지표 종합 + 모멘텀 + 변동성 + 차트 패턴 4 축으로 묶어 entry/exit 판단을 보강하는 절차.",
+      "whenToUse": [
+        "기술적 분석",
+        "quant 분석",
+        "차트 신호",
+        "모멘텀 분석",
+        "RSI MACD 볼린저",
+        "변동성 점검",
+        "차트 패턴 인식"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company.researchStarter",
+        "engines.quant.indicators",
+        "engines.quant.momentum",
+        "engines.quant.volatility",
+        "engines.quant.chartPatterns"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 3+ 개 (지표 / 모멘텀 / 변동성)",
+        "`valueRef` 5+ (verdict / RSI / ADX / MACD signal / ATR)",
+        "`dateRef` 1 개",
+        "verdict 단독 노출 X — 핵심 지표 (RSI / ADX / MACD) 함께.",
+        "시간 단위 명시 (일봉 / 주봉 / 월봉).",
+        "\"강한 매수\" 단정 X — 지표 값 + 신뢰 구간 함께.",
+        "펀더멘털 (analysis) 과 함께 보면 더 강한 신호."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입"
+        },
+        {
+          "skillId": "engines.quant.indicators",
+          "note": "45 지표"
+        },
+        {
+          "skillId": "engines.quant.momentum",
+          "note": "모멘텀"
+        },
+        {
+          "skillId": "engines.quant.volatility",
+          "note": "변동성"
+        },
+        {
+          "skillId": "engines.quant.chartPatterns",
+          "note": "차트 패턴"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 price 시계열 일부 한정"
           ]
         }
       }
@@ -11773,6 +12756,89 @@
       }
     },
     {
+      "id": "engines.recipe.screenAndChart",
+      "title": "스캔 + 차트 결합 (scan 결과 → table-backed chart)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "scan 으로 후보를 스크리닝한 뒤 그 결과를 table-backed chart 로 시각화하는 절차. UI / 보고서 출력 직전 단계.",
+      "whenToUse": [
+        "스캔 차트",
+        "후보 시각화",
+        "랭킹 차트",
+        "스크리닝 차트",
+        "scan visualization",
+        "후보 chart"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan",
+        "engines.viz.tableBackedChart",
+        "engines.scan.crossSectionStockScreen"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 1 (scan + 필터 결과)",
+        "`artifactRef` 1 (chart 파일)",
+        "답변 본문: chart 미리보기 + 상위 N 행 markdown table",
+        "chart 는 항상 table 뒷받침 — 단일값 chart X.",
+        "차트 axis label + 단위 명시.",
+        "상위 N 추출 기준 (CAGR / score) 명시."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.scan",
+          "note": "전종목 스코어"
+        },
+        {
+          "skillId": "engines.scan.crossSectionStockScreen",
+          "note": "매출 규모·기간 필터"
+        },
+        {
+          "skillId": "engines.viz.tableBackedChart",
+          "note": "chart 생성"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "artifactRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 chart artifact 저장 제약"
+          ]
+        }
+      }
+    },
+    {
       "id": "engines.recipe.sectorRotation",
       "title": "섹터 로테이션 분석 (매크로 + scan + industry)",
       "category": "engines",
@@ -11857,6 +12923,101 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 macro 사이클 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.smallCapDiscovery",
+      "title": "중소형주 발굴 (성장 + valuation + quality 교집합)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "시가총액 하위 종목 중 성장 + 저평가 + 회계 quality 가 양호한 후보를 발굴하는 절차. small-cap value+growth thesis.",
+      "whenToUse": [
+        "중소형주",
+        "소형주 발굴",
+        "small cap",
+        "저평가 성장",
+        "value growth",
+        "발굴 후보",
+        "시가총액 하위"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan.growth",
+        "engines.scan.valuation",
+        "engines.scan.profitability",
+        "engines.scan.crossSectionStockScreen",
+        "engines.analysis.earningsQuality"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 4+ 개 (3 scan + 교집합)",
+        "`dateRef` 1 개",
+        "답변 본문 markdown table — 후보 5~10 행 (시가총액 / 매출 CAGR / PER / OPM / quality)",
+        "시가총액 하위 + 매출 규모 하한 (예: 매출 1000 억) 으로 micro-cap 잡음 제거.",
+        "3 축 교집합 — AND 조건 명시.",
+        "quality 등급 D/E 후보는 제외 또는 표시.",
+        "\"발굴\" 단정 X — 분석 가설 + 모니터링 트리거 함께."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.scan.growth",
+          "note": "성장"
+        },
+        {
+          "skillId": "engines.scan.valuation",
+          "note": "저평가"
+        },
+        {
+          "skillId": "engines.scan.profitability",
+          "note": "수익성"
+        },
+        {
+          "skillId": "engines.scan.crossSectionStockScreen",
+          "note": "시가총액 + 매출 필터"
+        },
+        {
+          "skillId": "engines.analysis.earningsQuality",
+          "note": "quality 검증"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 multi-scan 메모리 부담"
           ]
         }
       }
@@ -12111,6 +13272,95 @@
       }
     },
     {
+      "id": "engines.recipe.valuationBandTrack",
+      "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "회사 valuation multiple (PER/PBR/EV/EBITDA) 의 역사 평균 ±σ 밴드 안 현재 위치를 추적하는 절차. 단순 스냅샷이 아닌 시계열 추적.",
+      "whenToUse": [
+        "valuation 밴드",
+        "PER 밴드",
+        "PBR 밴드",
+        "역사 평균 비교",
+        "valuation 추적",
+        "현재가 적정 여부"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company.researchStarter",
+        "engines.analysis.valuationBand",
+        "engines.quant.value",
+        "engines.scan.valuation"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 3 개 (band 시계열 + qvalue + peer)",
+        "`valueRef` 4+ (현재 PER / 5 년 평균 / σ 위치 / peer median)",
+        "`dateRef` 1 개",
+        "시계열 N 년 (3/5/10) 명시.",
+        "\"현재 저평가\" 단정 X — σ 위치 + 가정 (역사 평균 = 적정 여부) 함께.",
+        "peer median 과 함께 — 단일 회사 시계열 만으로는 부족."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입"
+        },
+        {
+          "skillId": "engines.analysis.valuationBand",
+          "note": "역사 ±σ 밴드"
+        },
+        {
+          "skillId": "engines.quant.value",
+          "note": "기술적 가치 신호"
+        },
+        {
+          "skillId": "engines.scan.valuation",
+          "note": "peer 횡단"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 historic 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
       "id": "engines.recipe.valuationCheck",
       "title": "가치평가 점검 (DCF + 상대가치 + valuation band)",
       "category": "engines",
@@ -12202,6 +13452,97 @@
           "status": "limited",
           "limitations": [
             "browser 안에서는 quant value 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.workforceAndCapital",
+      "title": "인력·자본 사이클 (workforce + capital + 자본배분)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "unverified",
+      "purpose": "회사의 인력 (직원수·인건비·생산성) 과 자본 (배당·자사주·신주) 사이클을 결합해 자원 배분 전략을 분석하는 절차.",
+      "whenToUse": [
+        "인력 분석",
+        "직원 수",
+        "인건비",
+        "자본 사이클",
+        "자본 배분",
+        "자사주 신주",
+        "workforce",
+        "capital allocation"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "engine_call",
+        "run_python"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company.researchStarter",
+        "engines.scan.workforce",
+        "engines.scan.capital",
+        "engines.analysis.capitalAllocation"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef` 3 개 (workforce + capital + allocation)",
+        "`valueRef` 4+ (직원수 / 매출당 직원 / CAPEX / FCF)",
+        "`dateRef` 1 개",
+        "인력 효율성 = 매출 / 직원수 (시계열).",
+        "자본 사이클 = CAPEX vs FCF 균형.",
+        "\"효율적\" 단정 X — peer 평균 + 산업 표준 함께."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.company.researchStarter",
+          "note": "회사 진입"
+        },
+        {
+          "skillId": "engines.scan.workforce",
+          "note": "인력 횡단"
+        },
+        {
+          "skillId": "engines.scan.capital",
+          "note": "자본 변동 횡단"
+        },
+        {
+          "skillId": "engines.analysis.capitalAllocation",
+          "note": "배분 의지"
+        }
+      ],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "browser 안에서는 docs 일부 한정"
           ]
         }
       }

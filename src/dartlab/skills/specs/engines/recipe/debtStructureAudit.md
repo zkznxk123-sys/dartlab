@@ -1,0 +1,82 @@
+---
+id: engines.recipe.debtStructureAudit
+title: 부채 구조 audit (만기 + 이자보상 + peer 횡단)
+category: engines
+kind: recipe
+scope: builtin
+status: unverified
+purpose: 회사 부채 구조를 만기 분포 + 이자보상배율 + peer 횡단 비교 + 신용 등급 4 축으로 종합 audit 하는 절차.
+whenToUse:
+  - 부채 구조
+  - 만기 구조
+  - 이자보상배율
+  - 부채 audit
+  - debt structure
+  - 부채 만기
+  - 단기 장기 부채
+linkedSkills:
+  - engines.company.researchStarter
+  - engines.scan.debt
+  - engines.analysis.financing
+  - engines.credit.creditRisk
+toolRefs:
+  - engine_call
+  - run_python
+requiredEvidence:
+  - skillRef
+  - tableRef
+  - valueRef
+  - dateRef
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  pyodide:
+    status: limited
+    limitations:
+      - browser 안에서는 finance 시계열 일부 한정
+lastUpdated: '2026-05-06'
+---
+
+## 공개 호출 방식
+
+```python
+import dartlab
+
+c = dartlab.Company("005930")
+
+debt = c.debt()
+debt_peer = c.debt("all")
+financing = c.analysis("financial", "자금조달")
+credit = c.credit()
+```
+
+## 호출 동작
+
+부채 구성 + 만기 구조 + 이자보상배율 → peer 횡단 → 자본조달 종합 → 신용 등급.
+
+1. 회사 진입
+2. debt() — 회사 부채 구조 (총차입금 / 단기 / 장기 / ICR)
+3. debt("all") — peer 횡단 부채 비교
+4. analysis("financial", "자금조달") — 자본조달 의지 + 만기 구조
+5. credit() — dCR 등급
+
+## 대표 반환 형태
+
+- `tableRef` 3 개 (debt + peer + financing)
+- `valueRef` 5+ (총차입금 / 차입금의존도 / ICR / dCR 등급 / OCF/부채)
+- `dateRef` 1 개
+
+## 연계 절차
+
+1. engines.company.researchStarter — 회사 진입
+2. engines.scan.debt — 부채 구조 + peer 횡단
+3. engines.analysis.financing — 자본조달 종합
+4. engines.credit.creditRisk — dCR 등급
+
+## 기본 검증
+
+- 부채비율 (%) + 차입금의존도 (%) + ICR (배) 명시.
+- 만기 구조 (단기 / 장기 비율) 명시.
+- "안전" 단정 X — 위험등급 (안전/주의/경고/위험) 함께.
