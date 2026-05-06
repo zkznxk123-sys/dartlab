@@ -22,8 +22,9 @@ from .state import WorkbenchState
 
 _CODE_SPAN_RE = re.compile(r"`[^`]*`")
 _CODE_BLOCK_RE = re.compile(r"```.*?```", re.DOTALL)
-_REF_TOKEN_RE = re.compile(r"\[(value|table|execution|date|web|artifact|api|skill|verify|dataset):[\w./\-:가-힣]+\]")
-_BROAD_REF_TOKEN_RE = re.compile(r"\[(value|table|execution|date|web|artifact|api|skill|verify|dataset)Ref?:([^\]]+)\]")
+_REF_KIND = r"value|table|execution|date|web|artifact|api|skill|verify|dataset"
+_REF_TOKEN_RE = re.compile(rf"(?:\[({_REF_KIND}):[\w./\-:가-힣]+\])|(?:<({_REF_KIND})Ref?:[^>]+>)")
+_BROAD_REF_TOKEN_RE = re.compile(rf"\[({_REF_KIND})Ref?:([^\]]+)\]|<({_REF_KIND})Ref?:([^>]+)>")
 _MATERIAL_NUMBER_RE = re.compile(r"\d[\d,.]*\s?(?:조원|억원|원|%|배|건|개|위|Q[1-4])")
 _DATE_RE = re.compile(r"(?:20\d{2}|19\d{2})(?:[-./]\d{1,2})?(?:[-./]\d{1,2})?(?:Q[1-4])?|\d{1,2}분기")
 _MATERIAL_DATE_TERMS = ("기준", "최신", "기간", "시점", "as of", "asof", "latest")
@@ -38,11 +39,13 @@ def runGate(state: WorkbenchState) -> Iterator[TraceEvent]:
     state.currentPass = "gate"
     yield TraceEvent(kind="pass_enter", data={"pass": "gate"})
 
-    text = _stripCode(state.answerText or "")
+    raw_text = state.answerText or ""
+    text = _stripCode(raw_text)
     issues: list[str] = []
 
     ref_kinds = {r.kind for r in state.refs}
-    ref_token_kinds = _refTokenKinds(state.answerText or "")
+    # ref token 은 backtick code span 안에 들어가도 인식 — raw text 사용
+    ref_token_kinds = _refTokenKinds(raw_text)
 
     # 1) emit_result 강제 — executionRef 가 있는데 value/table/date 가 0 이면 emit_result 누락
     has_execution = "executionRef" in ref_kinds
@@ -69,18 +72,19 @@ def runGate(state: WorkbenchState) -> Iterator[TraceEvent]:
     if missing:
         issues.append(f"missing_required_evidence:{sorted(missing)}")
 
-    # 6) fake/truncated ref token 검증 — 답안의 ref token id 가 state.refs id 와 매칭 안 되면 fake
-    fake_tokens = _findFakeRefTokens(state.answerText or "", state.refs)
+    # 6) fake/truncated ref token 검증 — raw text 사용 (backtick code span 안에서도 검증)
+    fake_tokens = _findFakeRefTokens(raw_text, state.refs)
     if fake_tokens:
         issues.append(f"fake_ref_token:{fake_tokens[:3]}")
 
-    # numbers/dates 는 사용자 trace 에 노출용 통계
+    # numbers/dates 는 사용자 trace 에 노출용 통계 (material claim — stripped text)
     numbers = _MATERIAL_NUMBER_RE.findall(text)
     dates = _DATE_RE.findall(text)
-    ref_tokens = _REF_TOKEN_RE.findall(text)
+    # ref token 카운트는 raw text 에서 (backtick 안도 포함)
+    ref_tokens = _REF_TOKEN_RE.findall(raw_text)
 
-    # 7) ref token 주변 context 추출 → state.claims 자동 발급
-    state.claims = _extractClaimsFromAnswer(state.answerText or "", state.refs)
+    # 7) ref token 주변 context 추출 → state.claims 자동 발급 (raw text 사용)
+    state.claims = _extractClaimsFromAnswer(raw_text, state.refs)
 
     state.gateIssues = issues
     state.gateBlocked = bool(issues)
@@ -164,11 +168,12 @@ def _hasRankingClaim(text: str) -> bool:
 
 
 def _refTokenKinds(text: str) -> set[str]:
-    """답안 본문의 [kind:id] 토큰에서 ref kind 집합 추출."""
+    """답안 본문의 [kind:id] 또는 <kindRef:id> 토큰에서 ref kind 집합 추출."""
     kinds: set[str] = set()
     for match in _REF_TOKEN_RE.finditer(str(text or "")):
-        kind_short = match.group(1)
-        kinds.add(f"{kind_short}Ref")
+        kind_short = match.group(1) or match.group(2)
+        if kind_short:
+            kinds.add(f"{kind_short}Ref")
     return kinds
 
 
@@ -184,8 +189,11 @@ def _findFakeRefTokens(text: str, refs: list[Ref]) -> list[str]:
     fake: list[str] = []
     seen: set[str] = set()
     for match in _BROAD_REF_TOKEN_RE.finditer(str(text or "")):
-        kind_short = match.group(1)
-        id_part = match.group(2).strip()
+        kind_short = match.group(1) or match.group(3)
+        id_raw = match.group(2) if match.group(1) else match.group(4)
+        if not kind_short or id_raw is None:
+            continue
+        id_part = id_raw.strip()
         # token 안에 truncate 표시 (`…` U+2026 또는 `...`) 가 있으면 무조건 fake
         if "…" in id_part or "..." in id_part:
             full = f"{kind_short}:{id_part}"
@@ -220,13 +228,17 @@ def _extractClaimsFromAnswer(text: str, refs: list[Ref]) -> list[dict]:
         return []
     state_ids = {ref.id for ref in refs}
     state_kind_by_id = {ref.id: ref.kind for ref in refs}
-    stripped = _stripCode(text)
+    # raw text 그대로 — backtick code span 안의 ref token 도 claim 으로 추출
+    stripped = str(text)
     claims: list[dict] = []
     seen_ref_ids: set[str] = set()
 
     for match in _BROAD_REF_TOKEN_RE.finditer(stripped):
-        kind_short = match.group(1)
-        id_part = match.group(2).strip()
+        kind_short = match.group(1) or match.group(3)
+        id_raw = match.group(2) if match.group(1) else match.group(4)
+        if not kind_short or id_raw is None:
+            continue
+        id_part = id_raw.strip()
         if "…" in id_part or "..." in id_part:
             continue
         candidate = f"{kind_short}:{id_part}" if not id_part.startswith(f"{kind_short}:") else id_part

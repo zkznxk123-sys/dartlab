@@ -143,3 +143,55 @@ def test_gate_dedupes_repeated_ref_in_claims() -> None:
     list(runGate(state))
     sales_claims = [c for c in state.claims if "value:005380:IS:2025Q4:sales" in c["refIds"]]
     assert len(sales_claims) == 1
+
+
+@pytest.mark.unit
+def test_gate_extracts_claim_from_angle_bracket_token() -> None:
+    """답안에 <kindRef:id> 형식 ref token 도 claim 추출 + verification 통과."""
+    from dartlab.ai.contracts import Ref
+
+    state = WorkbenchState(question="test")
+    state.answerText = "삼성전자 자산총계 566조원 <valueRef:value:005930:BS:2025Q4:total_assets> 입니다."
+    state.refs = [
+        Ref(id="value:005930:BS:2025Q4:total_assets", kind="valueRef", title="자산총계", source="t1", payload={})
+    ]
+    list(runGate(state))
+    assert state.gateBlocked is False
+    numeric_claims = [c for c in state.claims if c["kind"] == "numeric"]
+    assert len(numeric_claims) == 1
+    assert "value:005930:BS:2025Q4:total_assets" in numeric_claims[0]["refIds"]
+
+
+@pytest.mark.unit
+def test_gate_blocks_fake_angle_bracket_token() -> None:
+    """<kindRef:id> 형식이라도 state.refs 에 없는 id 는 fake 로 차단."""
+    from dartlab.ai.contracts import Ref
+
+    state = WorkbenchState(question="test")
+    state.answerText = "삼성전자 자산총계 566조원 <valueRef:value:samsung_invented_id>"
+    state.refs = [
+        Ref(id="value:005930:BS:2025Q4:total_assets", kind="valueRef", title="자산총계", source="t1", payload={})
+    ]
+    list(runGate(state))
+    assert state.gateBlocked is True
+    assert any("fake_ref_token" in issue for issue in state.gateIssues)
+
+
+@pytest.mark.unit
+def test_gate_mixed_bracket_styles_in_one_answer() -> None:
+    """한 답안에 [...] 와 <...> 가 섞여 있어도 둘 다 추출."""
+    from dartlab.ai.contracts import Ref
+
+    state = WorkbenchState(question="test")
+    state.answerText = (
+        "매출액 46.84조원 [valueRef:value:005380:IS:2025Q4:sales] 기준 기간 2025Q4 <dateRef:date:hyundai:2025Q4>."
+    )
+    state.refs = [
+        Ref(id="value:005380:IS:2025Q4:sales", kind="valueRef", title="매출액", source="t1", payload={}),
+        Ref(id="date:hyundai:2025Q4", kind="dateRef", title="기준시점", source="t1", payload={"period": "2025Q4"}),
+    ]
+    list(runGate(state))
+    assert state.gateBlocked is False
+    kinds = {c["kind"] for c in state.claims}
+    assert "numeric" in kinds
+    assert "date" in kinds
