@@ -2268,8 +2268,64 @@ def _collectSpecAxesLabels(specPath: Path) -> dict[str, str]:
     return result
 
 
-def _generateMcpToolsPy() -> str:
-    """MCP 도구 정의를 자동 생성. 엔진 레지스트리에서 enum을 동적으로 추출."""
+_MCP_TOOL_TO_CAPABILITY: dict[str, str] = {
+    "companyShow": "Company.show",
+    "companyAnalysis": "Company.analysis",
+    "companyFilings": "Company.filings",
+    "companyTopics": "Company.topics",
+    "companyRatios": "Company.ratios",
+    "companyDiff": "Company.diff",
+    "companyStory": "Company.story",
+    "companyAudit": "Company.audit",
+    "companyGather": "Company.gather",
+    "companyCredit": "Company.credit",
+    "companyQuant": "Company.quant",
+    "companyGovernance": "Company.governance",
+    "companyProfile": "Company.facts",
+    "companySections": "Company.sections",
+    "marketScan": "scan",
+    "macroAnalysis": "macro",
+    "gatherData": "gather",
+    "industryMap": "industry",
+}
+
+
+def _augmentDescWithLlmSpecs(
+    fallback: str,
+    *,
+    name: str,
+    entries: dict[str, dict[str, Any]] | None,
+) -> str:
+    """capability docstring summary + antiPatterns[0] 가 있으면 description 에 합성.
+
+    매핑이 없거나 capability 가 비어있으면 fallback 그대로. 외부 mcp 클라이언트
+    캐시 호환 위해 fallback 우선 보존 (capability summary 가 fallback 과 같으면 fallback).
+    """
+    if not entries:
+        return fallback
+    api_ref = _MCP_TOOL_TO_CAPABILITY.get(name)
+    if not api_ref:
+        return fallback
+    entry = entries.get(api_ref) or {}
+    if not entry:
+        return fallback
+    desc = fallback
+    llm_specs = entry.get("llmSpecs") or {}
+    anti = llm_specs.get("antiPatterns")
+    if isinstance(anti, list) and anti:
+        first = str(anti[0])[:90]
+        desc = f"{desc} | 안 쓸 때: {first}"
+    elif isinstance(anti, str) and anti.strip():
+        desc = f"{desc} | 안 쓸 때: {anti.strip()[:90]}"
+    return desc
+
+
+def _generateMcpToolsPy(entries: dict[str, dict[str, Any]] | None = None) -> str:
+    """MCP 도구 정의를 자동 생성. 엔진 레지스트리에서 enum을 동적으로 추출.
+
+    entries 가 주어지면 (capability catalog dict) 매핑된 mcp 도구의 description 에
+    capability llmSpecs.antiPatterns[0] 를 자동 합성한다. 매핑은 _MCP_TOOL_TO_CAPABILITY.
+    """
 
     # ── 동적 enum 수집 ──
     scanAxes = _collectAxisEnum(SRC / "dartlab" / "scan" / "__init__.py")
@@ -2316,10 +2372,13 @@ def _generateMcpToolsPy() -> str:
     toolDefs: list[tuple[str, str]] = []  # (name, feature) — TOOL_FEATURE_MAP 용
 
     def _tool(name, desc, params, required, feature="data"):
-        """도구 하나를 문자열로."""
+        """도구 하나를 문자열로. capability 매핑이 있으면 description 자동 보강."""
         toolDefs.append((name, feature))
         params = _resolveMcpSchemaPlaceholders(params)
-        return f'    {{"name": {name!r}, "description": {desc!r}, "params": {params!r}, "required": {required!r}}},'
+        augmented = _augmentDescWithLlmSpecs(desc, name=name, entries=entries)
+        return (
+            f'    {{"name": {name!r}, "description": {augmented!r}, "params": {params!r}, "required": {required!r}}},'
+        )
 
     # ── 정적 도구 (Company-bound) ──
     tools = []
@@ -2779,7 +2838,7 @@ def main():
     print(f"  _generated_analysis_graph.py ({len(analysisGraphPy):,} chars) -> {analysisGraphPyPath}")
 
     mcpToolsPyPath = SRC / "dartlab" / "mcp" / "_generated_tools.py"
-    mcpToolsPy = _generateMcpToolsPy()
+    mcpToolsPy = _generateMcpToolsPy(entries=capabilityEntries)
     mcpToolsPyPath.write_text(mcpToolsPy, encoding="utf-8")
     print(f"  _generated_tools.py ({len(mcpToolsPy):,} chars) -> {mcpToolsPyPath}")
 
