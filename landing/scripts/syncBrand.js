@@ -49,26 +49,7 @@ ${cssVars}
 }
 `;
 
-const mkdocsCss = `[data-md-color-scheme="slate"] {
-    --md-primary-fg-color: ${colors.primary};
-    --md-primary-bg-color: ${colors.bgDark};
-    --md-accent-fg-color: ${colors.accent};
-    --md-default-bg-color: ${colors.bgDark};
-    --md-code-bg-color: ${colors.bgCard};
-}
-
-[data-md-color-scheme="default"] {
-    --md-primary-fg-color: ${colors.primaryDark};
-    --md-accent-fg-color: ${colors.accent};
-}
-`;
-
 writeFileSync(resolve(__dirname, '..', 'src', 'app.css'), appCss);
-
-const mkdocsDir = resolve(__dirname, '..', '..', 'docs', 'stylesheets');
-mkdirSync(mkdocsDir, { recursive: true });
-writeFileSync(resolve(mkdocsDir, 'theme.css'), mkdocsCss);
 
 console.log('Brand synced:');
 console.log('  -> landing/src/app.css');
-console.log('  -> docs/stylesheets/theme.css');
