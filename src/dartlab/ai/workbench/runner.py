@@ -251,6 +251,13 @@ def _truncate(text: str, limit: int) -> str:
     return text[: max(0, limit - 1)] + "…"
 
 
+def _withRefSuffix(prefix: str, ref: Ref, total_cap: int) -> str:
+    """ref id 는 절대 자르지 않고 prefix 만 cap 안에 맞춘다."""
+    suffix = f" <{ref.kind}:{ref.id}>"
+    max_prefix = max(20, total_cap - len(suffix))
+    return _truncate(prefix, max_prefix) + suffix
+
+
 def _summarizeValueRef(ref: Ref) -> str:
     payload = ref.payload if isinstance(ref.payload, dict) else {}
     item = payload.get("item") or payload.get("key") or ""
@@ -264,8 +271,8 @@ def _summarizeValueRef(ref: Ref) -> str:
         pieces.append(f"({unit})")
     if period:
         pieces.append(f"@{period}")
-    pieces.append(f"<{ref.kind}:{ref.id}>")
-    return _truncate(" ".join(p for p in pieces if p), 100)
+    prefix = " ".join(p for p in pieces if p)
+    return _withRefSuffix(prefix, ref, 100)
 
 
 def _summarizeTableRef(ref: Ref) -> str:
@@ -284,23 +291,23 @@ def _summarizeTableRef(ref: Ref) -> str:
     if isinstance(columns, list) and columns:
         sample_cols = ", ".join(str(c) for c in columns[:3])
         parts.append(f"cols=[{sample_cols}]")
-    parts.append(f"<{ref.kind}:{ref.id}>")
-    return _truncate(" ".join(parts), 120)
+    return _withRefSuffix(" ".join(parts), ref, 120)
 
 
 def _summarizeDateRef(ref: Ref) -> str:
     payload = ref.payload if isinstance(ref.payload, dict) else {}
     period = payload.get("period") or payload.get("value") or ""
-    return _truncate(f"{period} <{ref.kind}:{ref.id}>".strip(), 60)
+    return _withRefSuffix(str(period), ref, 80)
 
 
 def _summarizeExecutionRef(ref: Ref) -> str:
     payload = ref.payload if isinstance(ref.payload, dict) else {}
     duration_ms = payload.get("durationMs")
     preview = payload.get("preview") or payload.get("stdout") or payload.get("result") or ""
-    snippet = _truncate(str(preview).replace("\n", " "), 200)
+    snippet = _truncate(str(preview).replace("\n", " "), 180)
     head = f"[{duration_ms}ms]" if duration_ms is not None else ""
-    return _truncate(f"{head} {snippet} <{ref.kind}:{ref.id}>".strip(), 250)
+    prefix = f"{head} {snippet}".strip()
+    return _withRefSuffix(prefix, ref, 250)
 
 
 def _summarizeDatasetRef(ref: Ref) -> str:
@@ -316,8 +323,7 @@ def _summarizeDatasetRef(ref: Ref) -> str:
         parts.append(f"rows={row_count}")
     if latest:
         parts.append(f"latest={latest}")
-    parts.append(f"<{ref.kind}:{ref.id}>")
-    return _truncate(" ".join(parts), 120)
+    return _withRefSuffix(" ".join(parts), ref, 140)
 
 
 def _formatRecipeSteps(refs: list[Ref]) -> str:
