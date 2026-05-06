@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from io import StringIO
@@ -14,6 +15,8 @@ from dartlab.ai.contracts import Ref
 
 from .formatting import format_money, format_percent
 from .types import ToolResult
+
+_AUTO_GATHER_ENABLED = os.environ.get("DARTLAB_AUTO_GATHER", "1") not in {"0", "false", "False"}
 
 _PERIOD_RE = re.compile(r"^\d{4}(?:Q[1-4])?$")
 _STMT_LABELS = {"BS": "재무상태표", "IS": "손익계산서", "CF": "현금흐름표"}
@@ -88,10 +91,17 @@ def _company_show(plan: dict[str, Any]) -> ToolResult:
     stock_code = str(getattr(company, "stockCode", None) or target or "")
     with _quiet_execution_noise():
         table = company.show(topic)
+    auto_gather_used = False
+    if (not isinstance(table, pl.DataFrame) or table.height == 0) and _AUTO_GATHER_ENABLED:
+        if _try_auto_update(company, "finance"):
+            auto_gather_used = True
+            with _quiet_execution_noise():
+                table = company.show(topic)
     if not isinstance(table, pl.DataFrame) or table.height == 0:
-        return ToolResult(
-            False, f"{company_name or stock_code} {topic} 데이터를 찾지 못했습니다.", error="empty_result"
-        )
+        msg = f"{company_name or stock_code} {topic} 데이터를 찾지 못했습니다."
+        if auto_gather_used:
+            msg += " (자동 update 후에도 빈 결과 — 미공시 분기 또는 폐상장 가능성)."
+        return ToolResult(False, msg, error="empty_result")
     summary = _summarize_statement(topic, table)
     if not summary:
         return ToolResult(
@@ -124,9 +134,12 @@ def _company_show(plan: dict[str, Any]) -> ToolResult:
             payload={"period": summary["latestPeriod"]},
         )
     )
+    summary_msg = f"{company_name or stock_code} {_STMT_LABELS[topic]} {summary['latestPeriod']} 확인"
+    if auto_gather_used:
+        summary_msg += " (자동 update 후 재조회 성공)"
     return ToolResult(
         True,
-        f"{company_name or stock_code} {_STMT_LABELS[topic]} {summary['latestPeriod']} 확인",
+        summary_msg,
         refs=refs,
         data={
             "companyName": company_name,
@@ -135,8 +148,28 @@ def _company_show(plan: dict[str, Any]) -> ToolResult:
             "label": _STMT_LABELS[topic],
             "summary": summary,
             "markdown": _statement_markdown(company_name, stock_code, topic, summary),
+            "autoGatherUsed": auto_gather_used,
         },
     )
+
+
+def _try_auto_update(company: Any, category: str) -> bool:
+    """company.update(categories=[category]) 자동 호출. 예외/지연 발생 시 False.
+
+    실패 정책: 어떤 예외든 잡아서 False 반환 (호출자가 기존 empty_result 처리).
+    DART API 호출이라 5~30s 소요 가능 — 환경에 따라 timeout 보호 필요 시 별도 thread/signal.
+    """
+    if not hasattr(company, "update"):
+        return False
+    try:
+        with _quiet_execution_noise():
+            result = company.update(categories=[category])
+        if isinstance(result, dict):
+            return any(v > 0 for v in result.values() if isinstance(v, int))
+    except Exception as exc:
+        logging.getLogger(__name__).debug("auto_gather update failed: %s", exc)
+        return False
+    return False
 
 
 def _scan(plan: dict[str, Any]) -> ToolResult:
