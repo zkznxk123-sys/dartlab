@@ -343,6 +343,25 @@ class Macro:
         scan : 전종목 횡단 — macro 사이클에 따른 업종별 영향 비교.
         quant : 시장 심리·변동성 — macro 사이클과 교차 분석.
         analysis : 개별 기업 재무 — macro 환경 하에서 기업 건전성 판단.
+
+        LLM Specifications:
+            AntiPatterns:
+                - axis 추측 (한글 — 사이클 / 위기 / 시나리오 / 유동성 / 심리 / 금리 / 종합 등)
+                - market 미지정 시 default "US" — KR 분석 의도면 명시 필수
+                - overrides 키 추측 (cyclePhase / rateScenario / fxScenario / liquidityScenario)
+            OutputSchema:
+                - axis="사이클": dict — phase / label / confidence / indicators
+                - axis="시나리오": dict — historical analogue + projection
+                - axis="종합": dict — indicators[] + narrative + 투자전략
+                - axis 미지정: 가이드 DataFrame (axis/label/description/example/group)
+            Prerequisites:
+                - FRED 데이터 (US) — 공개 API, API 키 불필요
+                - ECOS (KR) — public API
+            Freshness:
+                FRED / ECOS 갱신 주기 (월 / 분기).
+            TargetMarkets:
+                - US (FRED)
+                - KR (ECOS)
         """
         from dartlab.core.overrides import validateOverrides
 

@@ -858,6 +858,20 @@ class Company:
             - disclosure: 과거 전체 공시 이력 조회
             - readFiling: 공시 원문 텍스트 읽기
             - watch: 공시 변화 중요도 스코어링
+
+        LLM Specifications:
+            AntiPatterns:
+                - 종목코드 외 ticker 전달 (KR DART 전용)
+                - keyword 정규식 입력 (단순 substring 만 지원)
+            OutputSchema:
+                - rceptNo : str — 공시 접수번호 (readFiling 입력용)
+                - filedAt : str — 공시 일자
+                - title : str — 공시 제목
+                - importance : float — 중요도 점수
+            Freshness:
+                DART API 실시간 (분 단위).
+            TargetMarkets:
+                - KR
         """
         from dartlab.providers.dart._filings import buildLiveFilings
 
@@ -964,6 +978,15 @@ class Company:
             - sections: docs 가공 후 topic x period 통합 지도
             - rawFinance: 재무제표 원본 데이터
             - rawReport: 정기보고서 원본 데이터
+
+        LLM Specifications:
+            AntiPatterns:
+                - 분석 답변에 raw parquet 직접 인용 (sections / show 가공본 우선)
+                - 메모리 부담 큼 — 매 호출마다 호출 X (캐시)
+            OutputSchema:
+                - HuggingFace docs parquet 원본 — 컬럼 구조는 dataset 별로 다름
+            Freshness:
+                HuggingFace parquet 다운로드 시점.
         """
         if not self._hasDocs:
             self._hintOnce("rawDocs", "rawDocs", "docs")
@@ -1006,6 +1029,15 @@ class Company:
             - BS: 가공된 재무상태표
             - IS: 가공된 손익계산서
             - rawDocs: 공시 문서 원본
+
+        LLM Specifications:
+            AntiPatterns:
+                - 분석 답변에 raw parquet 직접 인용 (show("BS") 등 가공본 우선)
+                - 매 호출 reload (캐시 — 1 회면 충분)
+            OutputSchema:
+                - XBRL 정규화 전 원본 — bsns_year / sj_div / account_id / amount 등
+            Freshness:
+                HuggingFace finance parquet 다운로드 시점.
         """
         if not self._hasFinanceParquet:
             self._hintOnce("rawFinance", "rawFinance", "finance")
@@ -1048,6 +1080,15 @@ class Company:
             - rawDocs: 공시 문서 원본
             - rawFinance: 재무제표 원본
             - show: 가공된 topic 데이터 조회
+
+        LLM Specifications:
+            AntiPatterns:
+                - report 원본을 본문 답변에 직접 인용 (show / story 가공본 우선)
+                - 매 호출 reload (캐시 — 1 회면 충분)
+            OutputSchema:
+                - 정기보고서 API 원본 — 컬럼은 보고서 form 별로 다름
+            Freshness:
+                HuggingFace report parquet 다운로드 시점.
         """
         if not self._hasReport:
             self._hintOnce("rawReport", "rawReport", "report")
@@ -2717,6 +2758,19 @@ class Company:
         SeeAlso:
             - topics: topic 단위 상세 데이터 지도
             - trace: 특정 topic의 출처 추적
+
+        LLM Specifications:
+            AntiPatterns:
+                - 매 분석마다 c.sources 호출 (캐시 — 1 회면 충분)
+                - sources 결과로 분석 결정 (가용성만 확인, 실제 분석은 show)
+            OutputSchema:
+                - source : str — docs / finance / report
+                - available : bool — 데이터 보유 여부
+                - rows : int | None — 행 수
+                - cols : int | None — 컬럼 수
+                - shape : str — "rows × cols" 표기
+            Freshness:
+                rawDocs / rawFinance / rawReport 의 다운로드 시점 기준.
         """
         rows = []
         for source, raw in (
@@ -2769,6 +2823,22 @@ class Company:
             c = Company("005930")
             c.index                    # 전체 구조 목차
             c.index.filter(pl.col("source") == "docs")  # docs 항목만
+
+        LLM Specifications:
+            AntiPatterns:
+                - index 결과 전체를 답변 본문에 dump (50+ 행)
+                - chapter / kind 추측 (docs / finance / report 중 source 컬럼 확인 후)
+            OutputSchema:
+                - chapter : str — I / II / III ... (보고서 장)
+                - topic : str — topic 식별자 (show 호출 키)
+                - label : str — 사람용 라벨
+                - kind : str — table / text / notice
+                - source : str — docs / finance / report
+                - periods : str — 보유 기간 표기
+                - shape : str — "rows × cols"
+                - preview : str — 첫 줄 미리보기
+            Freshness:
+                docs / finance / report 다운로드 시점.
         """
         cacheKey = "_lazyIndex"
         if cacheKey in self._cache:
@@ -2844,6 +2914,17 @@ class Company:
             period : str — 기간 (예: "2025Q4")
             value : str — 해당 topic/period 의 텍스트 또는 숫자 요약
             데이터 없으면 None.
+
+        LLM Specifications:
+            AntiPatterns:
+                - facts 결과를 그대로 답변 본문에 dump (수백 행)
+                - value 가 텍스트일 때 숫자 계산 시도 (numeric 파싱 별도)
+            OutputSchema:
+                - topic : str — topic 식별자
+                - period : str — 기간 (2025Q4 형식)
+                - value : str — 텍스트 또는 숫자 요약
+            Freshness:
+                sections / finance / report 의 c.update() 시점.
         """
         return self._profileAccessor.facts
 
@@ -3073,6 +3154,20 @@ class Company:
             - sectorParams: 섹터별 밸류에이션 파라미터 (할인율, PER 등)
             - rank: 섹터 내 규모 순위
             - insights: 섹터 기준 등급 평가
+
+        LLM Specifications:
+            AntiPatterns:
+                - sector 결과를 sector 컬럼 (str) 만 인용 (industryGroup 도 함께)
+                - confidence 무시하고 단정 (1.0 = override, 0.5~0.9 = 키워드 매칭)
+            OutputSchema:
+                - sector : Sector enum — IT / Materials / Industrials / ...
+                - industryGroup : IndustryGroup enum — SEMICONDUCTOR / AUTOMOBILE / ...
+                - confidence : float — 0.0~1.0 (1.0 = override, 0.5+ = 키워드 매칭)
+                - source : str — override / keyword / industry
+            Freshness:
+                KIND 상장사 목록 시점.
+            TargetMarkets:
+                - KR
         """
         cacheKey = "_sector"
         if cacheKey in self._cache:
@@ -3723,6 +3818,17 @@ class Company:
             Verified:
                 - macro("사이클") → CLI + 사분면 + 금리 + 유동성 + 심리 6축 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
                 - macro + analysis → 경제 고려한 종목 분석 (observed via thesis ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
+
+        LLM Specifications:
+            AntiPatterns:
+                - axis 추측 (한글 — 사이클 / 위기 / 시나리오 / 유동성 / 심리)
+                - 종목 매크로 = 시장 매크로 혼동 (이건 c.macro = 시장 KR 자동)
+            OutputSchema:
+                - axis="사이클": dict — quadrant + indicators + narrative
+                - axis="시나리오": dict — historical analogue + projection
+                - axis 미지정: 가이드 DataFrame
+            Freshness:
+                ECOS / FRED 갱신 주기 (월 / 분기).
         """
         from dartlab.macro import Macro
 
@@ -3739,6 +3845,21 @@ class Company:
 
         Returns:
             list[dict] — from_act/to_act/metric_from/metric_to/delta_from/delta_to/weight/direction
+
+        LLM Specifications:
+            AntiPatterns:
+                - direction 단독 인용 (weight + metric 함께)
+                - 6 막 인과는 종목 분석 한정 — 매크로 / 산업 분석에는 부적합
+            OutputSchema:
+                - from_act : str — 출발 막
+                - to_act : str — 도착 막
+                - metric_from : str — 출발 지표
+                - metric_to : str — 도착 지표
+                - delta_from / delta_to : float — 변화율
+                - weight : float — 영향 강도
+                - direction : str — amplify / dampen / neutral
+            Freshness:
+                finance 시계열 시점.
         """
         from dartlab.story.narrative import buildCausalWeights
 
@@ -3780,6 +3901,18 @@ class Company:
 
         Returns:
             dict — possible/plausible/probable + summary {min/max/spread/spreadPct/mean}
+
+        LLM Specifications:
+            AntiPatterns:
+                - 단일 시나리오 (예: probable) 만 인용 (3 시나리오 + 분포 함께)
+                - spreadPct 가 작으면 "확실" 단정 X (가정 강도와 함께)
+            OutputSchema:
+                - possible : dict — 낙관 시나리오 DCF 결과
+                - plausible : dict — 중도 시나리오
+                - probable : dict — 보수 시나리오
+                - summary : dict — min / max / spread / spreadPct / mean
+            Freshness:
+                finance 시계열 시점.
         """
         from dartlab.story.storyTree import buildStoryTree
 
@@ -3794,6 +3927,19 @@ class Company:
 
         Returns:
             list[dict] — claim/dFV_neutral/delta_abs/delta_pct/contribution
+
+        LLM Specifications:
+            AntiPatterns:
+                - contribution 단독 인용 (delta_abs + delta_pct 함께)
+                - claim 추측 (default 또는 명시 list 만)
+            OutputSchema:
+                - claim : str — narrative claim 식별자
+                - dFV_neutral : float — 중립 시나리오 가치
+                - delta_abs : float — claim 제거 시 절대 변화
+                - delta_pct : float — % 변화
+                - contribution : float — 기여도 (정규화)
+            Freshness:
+                story 인과 체인 시점.
         """
         from dartlab.story.narrativeDiff import computeImpact
 
@@ -3812,6 +3958,21 @@ class Company:
             c = Company("005930")
             pos = c.industry()
             # {'chainId': 'semiconductor', 'stage': 'fab', 'stageLabel': '전공정(FAB)', ...}
+
+        LLM Specifications:
+            AntiPatterns:
+                - sector 와 industry 혼동 (sector = 11 대 분류, industry = 가치 사슬 위치)
+                - peers 추측 (industry().peers 가 실제 매칭된 종목)
+                - confidence 무시하고 단정 (낮으면 매칭 신뢰도 낮음)
+            OutputSchema:
+                - chainId : str — 산업 체인 ID (semiconductor / automobile / ...)
+                - chainName : str — 한글 산업명
+                - stage : str — upstream / midstream / downstream / fab / equipment / ...
+                - stageLabel : str — 한글 단계 레이블
+                - confidence : float — 0.0~1.0 매칭 신뢰도
+                - peers : list[str] — 같은 stage 종목코드
+            Freshness:
+                산업 지도 정의 시점 — 운영자 수동 업데이트.
         """
         from dartlab.industry.calcs import calcChainPosition
 

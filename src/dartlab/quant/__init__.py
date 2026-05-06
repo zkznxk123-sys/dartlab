@@ -717,6 +717,27 @@ class Quant:
         analysis : 재무 인과 분석 — quant 기술 + analysis 재무 조합.
         gather : 주가·수급 데이터 수집 — quant 의 데이터 원천.
         scan : 전종목 횡단 비교.
+
+        LLM Specifications:
+            AntiPatterns:
+                - axis 추측 (한글 — 판단 / 모멘텀 / 변동성 / 가치 / 베타 / altman / piotroski 등)
+                - stockCode 형식 혼동 — KR 6 자리 숫자 / US ticker 알파벳
+                - axis="베타" 호출 시 benchmarkMode 미지정 (default market — 섹터 의도면 명시)
+                - quant("005930", "판단") deprecated 형식 (axis 가 첫 인자)
+            OutputSchema:
+                - axis="판단": dict — signal / confidence / indicators
+                - axis="모멘텀": dict — returns / rsi / macd / moving_averages
+                - axis="베타": dict — beta / benchmarkUsed / benchmarkStack
+                - axis="altman": dict — zScore / zone (safe / grey / distress)
+                - axis="piotroski": dict — fScore (0~9)
+                - axis 미지정: 가이드 DataFrame
+            Prerequisites:
+                - 주가 데이터 (gather("price") 자동 수집) — 첫 호출 시간 소요
+            Freshness:
+                price 데이터 — T+1 (전일 종가).
+            TargetMarkets:
+                - KR (Naver Finance)
+                - US (Yahoo Finance)
         """
         if axis is None and stockCode is None:
             return self._guide()

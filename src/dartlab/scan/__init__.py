@@ -714,6 +714,27 @@ class Scan:
         analysis : 개별 종목 재무 심층 분석.
         quant : 가격 기반 정량 신호.
         credit : 개별 종목 신용 분석.
+
+        LLM Specifications:
+            AntiPatterns:
+                - axis 추측 (가용 axis 는 scan() 무인자 호출 결과 가이드 확인)
+                - account/ratio 호출 시 target 누락 (둘 다 target 필수)
+                - "growth" 결과 상위 그대로 추천 (매출 규모·기간 필터 없으면 micro-cap 잡음)
+            OutputSchema:
+                - 모든 axis 공통: 종목코드 (str) + 종목명 (str) + 축별 컬럼
+                - account: 연도별 컬럼 (원 단위)
+                - ratio: 연도별 컬럼 (% / 배)
+                - growth: 매출 CAGR / 영업이익 CAGR / 순이익 CAGR + 등급
+                - profitability: 영업이익률 / 순이익률 / ROE / ROA + 등급
+                - fields: field / label / source / kind / unit / coverage
+            Prerequisites:
+                - HuggingFace prebuild parquet 자동 다운로드 (첫 호출 시간 + ~200 MB)
+            Freshness:
+                prebuild parquet 빌드 시점. 분기 마감 후 30~45 일.
+            Dataflow:
+                scan(axis) → 후보 → Company(stockCode).analysis(...) 또는 .show(...)
+            TargetMarkets:
+                - KR (DART)
         """
         if axis is None:
             return self._guide()

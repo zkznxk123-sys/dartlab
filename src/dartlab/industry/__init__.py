@@ -117,6 +117,21 @@ class Industry:
         AI 역할: AI는 industry를 섹터/밸류체인 맥락 엔진으로 보고 기업 지표와 산업 driver를 분리해 연결한다.
         When: 개별 기업 지표를 산업 공정, 밸류체인, peer 맥락으로 해석할 때.
         How: industry() 로 산업 목록 확인 → industry(industryId) 로 공정별 기업 위치 확인 → analysis/scan 근거와 연결.
+
+        LLM Specifications:
+            AntiPatterns:
+                - industryId 추측 (industry() 무인자 호출 결과 가이드 확인 후)
+                - stage 추측 (industryId 별로 다름 — industry(industryId) 결과의 공정 컬럼 확인)
+                - summary 와 timeline 동시 (둘 중 하나만)
+            OutputSchema:
+                - industryId 미지정: 산업ID / 산업명 / 공정수
+                - industryId 지정: 공정 / 종목코드 / 종목명
+                - summary=True: 공정 / 매출합계 / 영업이익합계
+                - timeline=True: 연도 / 공정별 매출 컬럼
+            Freshness:
+                taxonomy 정의 시점 — 운영자 수동 업데이트.
+            TargetMarkets:
+                - KR
         """
         if industryId is None:
             return self._guide()
