@@ -1169,6 +1169,50 @@
       ]
     },
     {
+      "id": "engines.recipe.creditDeepDive",
+      "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 macro 시계열 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.disclosureEvent",
+      "title": "공시 이벤트 분석 (목록 + 원문 + 변화 추적)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 readFiling 본문 길이 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.dividendThesis",
+      "title": "배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 dividend topic 단일 호출만"
+      ]
+    },
+    {
+      "id": "engines.recipe.earningsQualityCheck",
+      "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 분기별 시계열 일부 한정"
+      ]
+    },
+    {
       "id": "engines.recipe.financialStatementCompare",
       "title": "두 회사 재무제표 비교 (peer + show + 분해)",
       "category": "engines",
@@ -1177,6 +1221,17 @@
       "requiredSetup": [],
       "limitations": [
         "browser 안에서는 두 회사 dataset snapshot 동시 로드 부담"
+      ]
+    },
+    {
+      "id": "engines.recipe.governanceAudit",
+      "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 governance topic 단일 호출 한정"
       ]
     },
     {
@@ -1202,6 +1257,50 @@
       ]
     },
     {
+      "id": "engines.recipe.scenarioAnalysis",
+      "title": "시나리오 분석 (forecast + macro 시나리오 + quant regime)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 forecast scenario 가정 grid 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.sectorRotation",
+      "title": "섹터 로테이션 분석 (매크로 + scan + industry)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 macro 사이클 시계열 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.storyReportBuild",
+      "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 story 전체 조립 메모리 부담 (개별 섹션만)"
+      ]
+    },
+    {
+      "id": "engines.recipe.usMarketReview",
+      "title": "미국 종목 review (EDGAR + macro + quant)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 EDGAR API 직접 호출 제한"
+      ]
+    },
+    {
       "id": "engines.recipe.usageAndApi",
       "title": "dartlab 사용법·API 설명 (run_python 우회)",
       "category": "engines",
@@ -1209,6 +1308,17 @@
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
+    },
+    {
+      "id": "engines.recipe.valuationCheck",
+      "title": "가치평가 점검 (DCF + 상대가치 + valuation band)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "browser 안에서는 quant value 시계열 일부 한정"
+      ]
     },
     {
       "id": "engines.scan",
@@ -1778,6 +1888,15 @@
       "limitations": []
     },
     {
+      "id": "start.firstAnalysisRecipe",
+      "title": "첫 회사 분석 recipe — install → quickStart → Company → Analysis",
+      "category": "start",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "start.quickStart",
       "title": "DartLab 8 단계 빠른 시작",
       "category": "start",
@@ -1794,7 +1913,7 @@
       "dataSources": [],
       "requiredSetup": [],
       "limitations": [
-        "실제 분석 실행 가능 여부는 선택한 skill의 runtimeCompatibility를 따른다."
+        "실제 분석 실행 가능 여부는 선택한 skill 의 runtimeCompatibility 를 따른다."
       ]
     }
   ]
