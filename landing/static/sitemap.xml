@@ -6,11 +6,6 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://eddmpython.github.io/dartlab/blog/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -19,6 +14,11 @@
     <loc>https://eddmpython.github.io/dartlab/skills</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.analysis</loc>
@@ -621,7 +621,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.dataAvailabilityFirst</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.debtStructureAudit</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.disclosureEvent</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.disclosureRiskScreen</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -636,7 +651,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.esgGovernanceLight</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.financialStatementCompare</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.flowAndPattern</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -651,7 +676,37 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.industryDeepDive</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.insiderEventCheck</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.inventoryAndCycle</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.macroLiquidityCycle</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.macroToCompany</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.peerBenchmark</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.quantTechnicalReview</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -661,7 +716,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.screenAndChart</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.sectorRotation</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.smallCapDiscovery</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -681,7 +746,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.valuationBandTrack</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.valuationCheck</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.workforceAndCapital</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1099,106 +1174,6 @@
     <loc>https://eddmpython.github.io/dartlab/blog/series/interesting-story</loc>
     <changefreq>weekly</changefreq>
     <priority>0.72</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/about</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/getting-started/cli-maintenance</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/getting-started/installation</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/getting-started/quickstart</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/getting-started/sections</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/macro-reports/2026-04-KR</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/macro-reports/2026-04-US</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/methodology</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/samples/000270</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/samples/000660</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/samples/004020</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/samples/005930</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/samples/017670</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/samples/034730</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/samples/036570</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/samples/042660</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/samples/051910</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/samples/055550</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/samples/090430</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/docs/stability</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/everything-about-dart</loc>
@@ -2111,6 +2086,12 @@
     <lastmod>2026-04-29</lastmod>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/161890-kolmar</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-05-06</lastmod>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/blog/04-kr</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -2121,5 +2102,60 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <lastmod>2026-04-05</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples/000270</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples/000660</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples/004020</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples/005930</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples/017670</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples/034730</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples/036570</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples/042660</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples/051910</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples/055550</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/samples/090430</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
   </url>
 </urlset>

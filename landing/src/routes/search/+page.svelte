@@ -1,16 +1,24 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { posts } from '$lib/blog/posts';
-	import { flattenNav, navigation } from '$lib/docs/navigation';
+	import skillIndex from '$skills/index.json';
 	import { buildAbsoluteUrl, buildBreadcrumbJsonLd } from '$lib/seo';
 	import { onMount } from 'svelte';
 
-	const docItems = flattenNav(navigation)
-		.filter((item) => item.href !== '/docs/getting-started')
-		.map((item) => ({
-			title: item.title,
-			href: item.href,
-			kind: 'Docs'
+	interface SkillIndexEntry {
+		id: string;
+		title: string;
+		category?: string;
+		purpose?: string;
+	}
+
+	const skillItems = ((skillIndex as { skills?: SkillIndexEntry[] }).skills ?? [])
+		.filter((skill) => skill.category !== 'capability')
+		.map((skill) => ({
+			title: skill.title,
+			href: `/skills/${skill.id}`,
+			kind: 'Skill',
+			description: skill.purpose ?? ''
 		}));
 
 	const blogItems = posts.map((post) => ({
@@ -27,9 +35,13 @@
 	});
 
 	const query = $derived(queryInput.trim().toLowerCase());
-	const docResults = $derived(
+	const skillResults = $derived(
 		query
-			? docItems.filter((item) => item.title.toLowerCase().includes(query)).slice(0, 12)
+			? skillItems
+					.filter((item) =>
+						`${item.title} ${item.description ?? ''} ${item.href}`.toLowerCase().includes(query)
+					)
+					.slice(0, 12)
 			: []
 	);
 	const blogResults = $derived(
@@ -39,7 +51,7 @@
 					.slice(0, 12)
 			: []
 	);
-	const totalResults = $derived(docResults.length + blogResults.length);
+	const totalResults = $derived(skillResults.length + blogResults.length);
 	const pageUrl = buildAbsoluteUrl('search');
 	const pageTitle = 'DartLab 검색 — 전자공시 문서와 블로그 찾기';
 	const pageDesc = 'DartLab 문서와 블로그에서 전자공시, DART, EDGAR 관련 내용을 검색한다.';
@@ -108,19 +120,22 @@
 		{#if query}
 			<div class="search-grid">
 				<section class="search-section">
-					<h2>Docs</h2>
-					{#if docResults.length > 0}
+					<h2>Skills</h2>
+					{#if skillResults.length > 0}
 						<div class="result-list">
-							{#each docResults as item}
+							{#each skillResults as item}
 								<a href="{base}{item.href}" class="result-card">
 									<span class="result-kind">{item.kind}</span>
 									<strong>{item.title}</strong>
+									{#if item.description}
+										<p>{item.description}</p>
+									{/if}
 									<span class="result-path">{item.href}</span>
 								</a>
 							{/each}
 						</div>
 					{:else}
-						<p class="result-empty">일치하는 문서가 없다.</p>
+						<p class="result-empty">일치하는 skill 이 없다.</p>
 					{/if}
 				</section>
 

@@ -91,27 +91,13 @@ function writeMarkdownMirror(relPath, title, url, description, content) {
 	return `${siteUrl}/markdown/${relPath.replace(/\\/g, '/')}`;
 }
 
-const docsRoot = resolve(projectRoot, 'docs');
 const blogRoot = resolve(projectRoot, 'blog');
 
-const docFiles = collectMdFiles(docsRoot);
 const blogFiles = collectMdFiles(blogRoot, '', { includeIndex: true }).filter((file) =>
 	/^[^/]+\/\d+-[^/]+\/index\.md$/.test(file.rel)
 );
 
 const sections = [
-	{
-		heading: 'Docs',
-		description: '설치, quickstart, 튜토리얼. DartLab을 실제 코드와 데이터 흐름으로 사용하는 문서.',
-		files: docFiles,
-		urlPrefix: `${siteUrl}/docs/`,
-		pathToUrl: (rel) => {
-			return rel
-				.replace(/\.md$/, '')
-				.replace(/^\d+_/, '')
-				.replace(/\/\d+_/g, '/');
-		}
-	},
 	{
 		heading: 'Blog',
 		description: 'DART, EDGAR, 사업보고서 읽기, 재무 해석, 데이터 자동화에 관한 장문 가이드.',
@@ -151,10 +137,7 @@ for (const section of sections) {
 		const title = extractTitle(content) || file.rel;
 		const url = section.urlPrefix + section.pathToUrl(file.rel);
 		const description = fm.description || '';
-		const mirrorRelPath =
-			section.heading === 'Docs'
-				? `docs/${section.pathToUrl(file.rel)}.md`
-				: `blog/${section.pathToUrl(file.rel)}.md`;
+		const mirrorRelPath = `blog/${section.pathToUrl(file.rel)}.md`;
 		const mirrorUrl = writeMarkdownMirror(mirrorRelPath, title, url, description, content);
 		const detail = description ? ` — ${description}` : '';
 		llmsTxt += `- [${title}](${url})${detail} | Markdown: ${mirrorUrl}\n`;
@@ -195,7 +178,7 @@ const fullContent = fullParts.join('\n\n---\n\n') + '\n';
 writeFileSync(resolve(buildDir, 'llms-full.txt'), fullContent, 'utf-8');
 console.log(`  -> llms-full.txt generated (${Math.round(fullParts.join('').length / 1024)}KB)`);
 
-// sitemap.xml — auto-generate with docs + blog
+// sitemap.xml — auto-generate with blog + skills + samples
 function extractFrontmatter(content) {
 	const fm = content.match(/^---\s*\n([\s\S]*?)\n---/);
 	if (!fm) return {};
@@ -206,11 +189,6 @@ function extractFrontmatter(content) {
 	}
 	return result;
 }
-
-const docUrls = docFiles.map(f => {
-	const url = `${siteUrl}/docs/` + f.rel.replace(/\.md$/, '').replace(/^\d+_/, '').replace(/\/\d+_/g, '/');
-	return { loc: url, priority: '0.7', changefreq: 'monthly' };
-});
 
 const blogPosts = blogFiles.map(f => {
 	const content = readFileSync(f.path, 'utf-8');
@@ -246,9 +224,9 @@ const blogSeries = [...new Set(blogFiles
 
 let sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 sitemap += `  <url>\n    <loc>${siteUrl}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
-sitemap += `  <url>\n    <loc>${siteUrl}/docs/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
 sitemap += `  <url>\n    <loc>${siteUrl}/blog/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
 sitemap += `  <url>\n    <loc>${siteUrl}/skills</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.85</priority>\n  </url>\n`;
+sitemap += `  <url>\n    <loc>${siteUrl}/samples</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.75</priority>\n  </url>\n`;
 for (const skill of skillEntries) {
 	sitemap += `  <url>\n    <loc>${siteUrl}/skills/${skill.id}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
 }
@@ -261,19 +239,28 @@ for (const category of blogCategories) {
 for (const series of blogSeries) {
 	sitemap += `  <url>\n    <loc>${siteUrl}/blog/series/${series}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.72</priority>\n  </url>\n`;
 }
-for (const u of docUrls) {
-	sitemap += `  <url>\n    <loc>${u.loc}</loc>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>\n`;
-}
 for (const p of blogPosts) {
 	sitemap += `  <url>\n    <loc>${p.loc}</loc>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n`;
 	if (p.lastmod) sitemap += `    <lastmod>${p.lastmod}</lastmod>\n`;
 	sitemap += `  </url>\n`;
 }
+
+// Samples — 정식 라우트 승격 후 sitemap 항목.
+const samplesRoot = resolve(projectRoot, 'samples');
+const sampleCodes = existsSync(samplesRoot)
+	? readdirSync(samplesRoot)
+			.filter((name) => /^\d{6}\.md$/.test(name))
+			.map((name) => name.replace(/\.md$/, ''))
+			.sort()
+	: [];
+for (const code of sampleCodes) {
+	sitemap += `  <url>\n    <loc>${siteUrl}/samples/${code}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.65</priority>\n  </url>\n`;
+}
 sitemap += `</urlset>\n`;
 
 writeFileSync(resolve(buildDir, 'sitemap.xml'), sitemap, 'utf-8');
 writeFileSync(resolve(__dirname, '..', 'static', 'sitemap.xml'), sitemap, 'utf-8');
-console.log(`  -> sitemap.xml generated (${docUrls.length} docs + ${blogPosts.length} blog posts + ${skillEntries.length} skills)`);
+console.log(`  -> sitemap.xml generated (${blogPosts.length} blog posts + ${skillEntries.length} skills + ${sampleCodes.length} samples)`);
 
 // RSS feed (Atom)
 const feedUpdated = blogPosts.length > 0 ? blogPosts[0].date || new Date().toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { Search, FileText, BookOpen, ArrowRight, Wrench } from 'lucide-svelte';
-	import { navigation, flattenNav } from '$lib/docs/navigation';
+	import { Search, FileText, ArrowRight, Wrench } from 'lucide-svelte';
 	import { posts } from '$lib/blog/posts';
 	import skillIndex from '$skills/index.json';
 
@@ -14,15 +13,9 @@
 	interface SearchItem {
 		title: string;
 		href: string;
-		category: 'Docs' | 'Blog' | 'Quick Links' | 'Skills';
+		category: 'Blog' | 'Quick Links' | 'Skills';
 		subtitle?: string;
 	}
-
-	const docsItems: SearchItem[] = flattenNav(navigation).map((item) => ({
-		title: item.title,
-		href: `${base}${item.href}`,
-		category: 'Docs'
-	}));
 
 	const blogItems: SearchItem[] = posts.map((post) => ({
 		title: post.title,
@@ -56,7 +49,7 @@
 		{ title: 'About', href: `${base}/about`, category: 'Quick Links' }
 	];
 
-	const allItems = [...quickLinks, ...skillItems, ...docsItems, ...blogItems];
+	const allItems = [...quickLinks, ...skillItems, ...blogItems];
 
 	let filtered = $derived.by(() => {
 		if (!query.trim()) return allItems.slice(0, 8);
@@ -125,7 +118,6 @@
 	});
 
 	function getCategoryIcon(category: string) {
-		if (category === 'Docs') return BookOpen;
 		if (category === 'Blog') return FileText;
 		if (category === 'Skills') return Wrench;
 		return ArrowRight;

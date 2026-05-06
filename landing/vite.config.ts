@@ -6,7 +6,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const docsDir = path.resolve(__dirname, '..', 'docs');
 const blogDir = path.resolve(__dirname, '..', 'blog');
 const samplesDir = path.resolve(__dirname, '..', 'samples');
 const skillsDir = path.resolve(__dirname, '..', 'src', 'dartlab', 'skills');
@@ -97,7 +96,6 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
-			'@docs': docsDir,
 			'@blog': blogDir,
 			'@samples': samplesDir,
 			'$chart': sharedChartDir,
@@ -110,7 +108,6 @@ export default defineConfig({
 		strictPort: true,
 		fs: {
 			allow: [
-				docsDir,
 				blogDir,
 				samplesDir,
 				pyodideDir,
