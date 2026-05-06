@@ -97,6 +97,7 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
         tool = _tool_name(data)
         if tool not in {"engine_call", "run_python", "compile_visual"}:
             return []
+        # ToolBlock 카드(TOOL_CALL_START)가 진행 표현 전담. activity 줄 중복 emit 금지.
         return [
             _event(
                 "TOOL_CALL_START",
@@ -108,7 +109,6 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
                     "status": "running",
                 },
             ),
-            _activity(f"{_display_tool(tool)} 실행 중", status="running"),
         ]
     if kind == "tool_result":
         tool = _tool_name(data)
@@ -139,7 +139,6 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
                     "status": status,
                 },
             ),
-            _activity(f"{_display_tool(tool)} 실행함", status=status),
         ]
     if kind == "reference":
         refs = data.get("refs") if isinstance(data.get("refs"), list) else []
@@ -164,6 +163,7 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
         status = "ok" if (data.get("responseMeta") or {}).get("finalEvent") == "answer" else "failed"
         refs = _ref_ids(data.get("refs") if isinstance(data.get("refs"), list) else [])
         artifacts = [a for a in data.get("artifacts") or [] if isinstance(a, dict)]
+        suggested_questions = _suggest_followups(data) if status == "ok" else []
         finished = _event(
             "RUN_FINISHED",
             {
@@ -172,6 +172,7 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
                 "refs": refs,
                 "artifacts": artifacts,
                 "responseMeta": _public_response_meta(data.get("responseMeta") or {}),
+                "suggestedQuestions": suggested_questions,
             },
         )
         if status == "ok":
@@ -235,6 +236,34 @@ def _publicEventData(value):
             .replace("verify_answer", "verify answer")
         )
     return value
+
+
+def _suggest_followups(done_data: dict[str, Any]) -> list[str]:
+    """답변 종료 시점 휴리스틱 follow-up 추천 질문 3 개.
+
+    Perplexity 식 — 사용자가 추가 탐색을 쉽게 할 수 있게. backend 컨텍스트
+    (responseMeta.stockCode, refs, evidenceRefs) 기반. LLM 추가 호출 없이 가벼움.
+    """
+    meta = done_data.get("responseMeta") if isinstance(done_data.get("responseMeta"), dict) else {}
+    stock = meta.get("stockCode") or meta.get("company") or ""
+    if stock:
+        return [
+            f"{stock}의 수익성·안정성·성장성 축으로 비교해줘",
+            f"{stock}의 최근 공시에서 의미 있는 변화는?",
+            "같은 산업의 다른 회사와 비교해줘",
+        ]
+    topic = meta.get("topic") or ""
+    if topic:
+        return [
+            f"{topic} 관련 주요 종목 후보를 추려줘",
+            f"{topic} 의 최근 추세는 어떤가?",
+            f"{topic} 와 가장 연관 있는 매크로 지표는?",
+        ]
+    return [
+        "관련된 매크로 흐름을 보여줘",
+        "비슷한 사례를 더 보여줘",
+        "이 결과를 표·차트로 정리해줘",
+    ]
 
 
 def _activity(summary: str, *, status: str = "done", refs: list[str] | None = None) -> dict[str, str]:
