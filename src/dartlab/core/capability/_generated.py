@@ -2126,6 +2126,24 @@ CAPABILITIES: dict[str, dict] = json.loads(
     "credit": {
         "guide": "AI 역할: AI는 credit을 상환능력·재무건전성 판단 엔진으로 보고 부채, 현금흐름, 이자보상, 만기 근거를 요구한다.\nWhen: 종목의 부도 위험·재무 건전성을 독립 평가할 때.\nHow: credit 단독으로 종합 등급 확인 → analysis(안정성, 현금흐름) 와 함께 심층 진단.\nstory credit 타입이 credit + analysis(안정성) + analysis(현금흐름) + analysis(자금조달) 순서로 조합.\nVerified:\ncredit 단독 → dCR 등급 + 7축 위험점수 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ncredit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "function",
+        "llmSpecs": {
+            "antiPatterns": [
+                "axis 영문 (\"repayment\") 사용 시 한글 alias 함께 — 한글 우선 권장",
+                "종합 score 단독 인용 (grade + 7 축 dict 함께)",
+                "\"부도 위험 높음\" 단정 X (등급 + outlook + 시계열 함께)"
+            ],
+            "freshness": "정기보고서 마감 후 30~45 일.",
+            "outputSchema": [
+                "grade : str — dCR 등급 (dCR-AAA ~ dCR-D)",
+                "score : float — 위험 점수 (0~100, 0 = 최우량)",
+                "healthScore : float — 건전성 점수 (100 - score)",
+                "axes : list[dict] — 7 축 (name / score / weight / metrics)",
+                "eCR : str | None — 현금흐름등급",
+                "outlook : str — 안정적 / 긍정적 / 부정적"
+            ],
+            "prerequisites": "finance + report 데이터 (자동 다운로드)",
+            "targetMarkets": "KR (DART)"
+        },
         "returnSchema": [
             {
                 "depth": 0,

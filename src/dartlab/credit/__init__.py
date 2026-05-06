@@ -304,6 +304,25 @@ def credit(
     --------
     analysis : 재무 심층 분석 — 안정성·현금흐름 축이 credit 과 상호 보완.
     scan : 전종목 재무건전성 비교.
+
+    LLM Specifications:
+        AntiPatterns:
+            - axis 영문 ("repayment") 사용 시 한글 alias 함께 — 한글 우선 권장
+            - 종합 score 단독 인용 (grade + 7 축 dict 함께)
+            - "부도 위험 높음" 단정 X (등급 + outlook + 시계열 함께)
+        OutputSchema:
+            - grade : str — dCR 등급 (dCR-AAA ~ dCR-D)
+            - score : float — 위험 점수 (0~100, 0 = 최우량)
+            - healthScore : float — 건전성 점수 (100 - score)
+            - axes : list[dict] — 7 축 (name / score / weight / metrics)
+            - eCR : str | None — 현금흐름등급
+            - outlook : str — 안정적 / 긍정적 / 부정적
+        Prerequisites:
+            - finance + report 데이터 (자동 다운로드)
+        Freshness:
+            정기보고서 마감 후 30~45 일.
+        TargetMarkets:
+            - KR (DART)
     """
     if stockCode is None:
         return guide()

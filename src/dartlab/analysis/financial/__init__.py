@@ -1092,6 +1092,26 @@ class Analysis:
         scan : 전종목 횡단 비교 — 상대 위치 파악 후 심층 분석.
         quant : 가격 기반 정량 신호 — analysis 재무 + quant 기술 조합.
         macro : 거시 환경 — 기업 분석의 매크로 컨텍스트.
+
+        LLM Specifications:
+            AntiPatterns:
+                - axis 영문 ("profitability") 사용 (실제는 한글 — "수익성")
+                - "valuation" 그룹에 "수익성" 같이 다른 그룹 sub 전달 (그룹별 sub 다름)
+                - overrides 키 추측 (axis 별 다름 — calc 함수 시그니처 확인)
+            OutputSchema:
+                - period : str — 기준 기간
+                - items : list[dict] — 지표 (name / value / unit / trend)
+                - axis 별 추가: marginTrend (수익성), debtMetrics (안정성), fcfHistory
+                  (현금흐름), targetPrice (가치평가), forecastRevenue (매출전망)
+                - dataAsOf : dict — latestPeriod / retrievedAt
+            Prerequisites:
+                - finance 데이터 (자동 다운로드)
+            Freshness:
+                finance 분기 — 마감 후 30~45 일.
+            Dataflow:
+                analysis(axis) → 결과 dict → review/story 가 보고서로 조립
+            TargetMarkets:
+                - KR (DART)
         """
         if axis is None:
             return self._guide()
