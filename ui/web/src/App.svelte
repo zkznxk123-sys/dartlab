@@ -215,6 +215,10 @@
 		const question = (prefilledQuestion ?? inputText).trim();
 		if (!question || isLoading) return;
 
+		if (ui.statusLoading) {
+			ui.showToast("프로바이더 확인 중입니다. 잠시 후 다시 시도해주세요.", "info");
+			return;
+		}
 		if (!ui.activeProvider || !ui.providers[ui.activeProvider]?.available) {
 			ui.showToast("먼저 AI Provider를 설정해주세요. 우상단 설정 버튼을 클릭하세요.");
 			ui.openSettings();
