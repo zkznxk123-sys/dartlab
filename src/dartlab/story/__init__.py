@@ -53,6 +53,7 @@ from dartlab.story.layout import DEFAULT_LAYOUT, StoryLayout
 from dartlab.story.registry import buildBlocks, buildStory
 from dartlab.story.renderer import renderStory
 from dartlab.story.section import Section
+from dartlab.story.sixAct import SixActScore, sixActScore
 from dartlab.story.summary import SummaryCard
 from dartlab.story.utils import fmtAmt, fmtAmtScale, isTerminal, unifyTableScale
 
@@ -481,6 +482,8 @@ __all__ = [
     "buildBlocks",
     "buildStory",
     "renderStory",
+    "SixActScore",
+    "sixActScore",
     "fmtAmt",
     "fmtAmtScale",
     "unifyTableScale",
