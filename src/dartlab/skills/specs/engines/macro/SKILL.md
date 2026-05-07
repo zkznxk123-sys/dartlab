@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Macro 엔진은 경기, 정책, 유동성, 위기, 자산, 심리, 예측을 6막 구조로 읽는 시장 레벨 분석 스킬이다.
+purpose: Macro 엔진은 경기, 정책, 유동성, 위기, 자산, 심리, 예측을 6막 구조로 읽는 시장 레벨 분석 스킬이다. 트리거 — '매크로', '거시', '금리', '환율'.
 whenToUse:
   - Macro
   - macro
@@ -87,7 +87,7 @@ linkedSkills:
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 엔진 역할
