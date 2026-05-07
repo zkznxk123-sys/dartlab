@@ -204,6 +204,15 @@ def runAgent(
         yield TraceEvent("error", {"error": "max_iterations_reached"})
         return
 
+    # chat-native HARVEST bridge — workbench HARVEST 와 동일 helper 로 memory 작성.
+    # SSOT.md Principle 6 정합 (모든 종료 경로 → decisions.jsonl + skill_stats.jsonl).
+    _wireChatNativeMemory(
+        question=user_text,
+        answerText=text_emitted,
+        refs=refs,
+        kwargs=_unused,
+    )
+
     yield TraceEvent(
         "done",
         {
@@ -214,10 +223,48 @@ def runAgent(
                 "finalEvent": "answer",
                 "responseStatus": "ok",
                 "refCount": len(refs),
-                "passes": ["agent"],
+                "passes": ["agent", "memory"],
                 "mode": "agent",
             },
         },
+    )
+
+
+def _wireChatNativeMemory(
+    *, question: str, answerText: str, refs: list[dict[str, Any]], kwargs: dict[str, Any]
+) -> None:
+    """agent.py 종료 시 memory wiring — workbench/harvest.py 와 동일 helper 사용."""
+    from .contracts import Ref
+    from .memory.wiring import inferStockCodeContext, wireSessionMemory
+
+    ref_objects: list[Ref] = []
+    for raw in refs:
+        if not isinstance(raw, dict):
+            continue
+        ref_objects.append(
+            Ref(
+                id=str(raw.get("id") or ""),
+                kind=str(raw.get("kind") or ""),
+                title=str(raw.get("title") or ""),
+                source=str(raw.get("source") or ""),
+                payload=raw.get("payload") if isinstance(raw.get("payload"), dict) else {},
+            )
+        )
+
+    extra_tags: list[str] = []
+    stock_code, market = inferStockCodeContext(ref_objects, kwargs=kwargs)
+    if stock_code:
+        extra_tags.append(f"target:{stock_code}")
+    if market:
+        extra_tags.append(f"market:{market}")
+
+    wireSessionMemory(
+        question=question,
+        answerText=answerText,
+        refs=ref_objects,
+        selectedSkillRefs=(r for r in ref_objects if r.kind == "skillRef"),
+        ok=True,
+        extraTags=extra_tags,
     )
 
 
