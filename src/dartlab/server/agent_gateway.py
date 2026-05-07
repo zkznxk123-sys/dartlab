@@ -497,6 +497,7 @@ _FAILURE_LABELS = {
     "verification": "근거 검증 실패",
     "direct_answer": "최종 답변 생성 실패",
     "ref_only": "근거 기반 답변 생성 실패",
+    "prose_without_finalize": "최종 답변을 생성하지 못했습니다.",
 }
 _FAILURE_MAX = 200
 
