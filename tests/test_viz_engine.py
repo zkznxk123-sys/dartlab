@@ -143,7 +143,7 @@ def test_vizspec_from_dict_diagram():
 def test_emit_chart_marker_format(capsys):
     from dartlab.viz import emit_chart
 
-    spec = {"chartType": "bar", "title": "Test"}
+    spec = {"chartType": "bar", "title": "Test", "evidenceIds": ["test:fixture"]}
     emit_chart(spec)
     captured = capsys.readouterr().out.strip()
 
@@ -160,7 +160,7 @@ def test_emit_chart_marker_format(capsys):
 def test_emit_chart_adds_viztype(capsys):
     from dartlab.viz import emit_chart
 
-    spec = {"chartType": "line", "title": "X"}
+    spec = {"chartType": "line", "title": "X", "evidenceIds": ["test:fixture"]}
     emit_chart(spec)
     captured = capsys.readouterr().out.strip()
     json_str = captured[len("<!--DARTLAB_VIZ:") : -len(":VIZ_END-->")]
@@ -248,6 +248,7 @@ def test_emit_chart_passes_real_data(capsys, caplog):
         "title": "삼성전자 매출 추이",
         "categories": ["2021", "2022", "2023", "2024", "2025"],
         "series": [{"name": "매출", "data": [279.6, 302.2, 258.9, 300.9, 333.6]}],
+        "evidenceIds": ["test:fixture"],
     }
     with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
         emit_chart(spec)
@@ -265,6 +266,7 @@ def test_emit_chart_passes_axis_categories_with_real_values(capsys):
         "title": "축별 점수 비교",
         "categories": ["수익구조", "자금조달", "자산구조", "현금흐름", "수익성"],
         "series": [{"name": "점수", "data": [85.3, 72.1, 91.4, 68.7, 77.9]}],
+        "evidenceIds": ["test:fixture"],
     }
     emit_chart(spec)
     captured = capsys.readouterr().out

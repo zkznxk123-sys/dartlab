@@ -7,12 +7,34 @@ ChartSpec JSON 프로토콜::
 
     {
         "chartType": "combo" | "bar" | "line" | "radar" | "waterfall"
-                     | "heatmap" | "sparkline" | "pie",
+                     | "heatmap" | "sparkline" | "pie"
+                     | "income-trend-matrix" | "cashflow-signed-matrix"
+                     | "balance-structure-trend" | "kpi-ribbon"
+                     | "peer-matrix" | "six-act-radar" | "hover-spark"
+                     | "evidence-coverage",
         "title": str,
-        "series": [{"name": str, "data": [number], "color": str, "type": "bar"|"line"}],
+        "series": [
+            {
+                "name": str,
+                "data": [number],
+                "color": str,
+                "type": "bar"|"line",
+                # datapoint 단위 evidence — series.data[i] 와 1:1 대응
+                "pointRefs": [{"period": str, "valueRef": str, "rcept_no": str?}],
+            }
+        ],
         "categories": [str],
         "options": {"unit": str, "stacked": bool, "maxValue": number, ...},
-        "meta": {"source": str, "stockCode": str, "corpName": str}
+        "meta": {"source": str, "stockCode": str, "corpName": str},
+        # 차트 단위 evidence — drill-back 회로의 진입점
+        "evidenceBinding": {
+            "tableRef": str,        # e.g. "finance:IS:annual"
+            "source": str,          # finance / report / docs / scan / industry
+            "stockCode": str,
+            "topic": str,           # IS / BS / CF / RATIO / PEER / RADAR ...
+            "periodKind": str,      # "Y" / "Q" / "MIXED"
+            "periods": [str],       # 차트에 포함된 모든 period
+        }
     }
 """
 
@@ -46,6 +68,9 @@ class VizSpec:
     meta: dict[str, Any] = field(default_factory=dict)
     purpose: str = ""
     evidenceIds: list[str] = field(default_factory=list)
+    # 차트 단위 evidence binding — drill-back 회로의 진입점.
+    # generator 가 채우면 emit_chart 가드를 통과한다. 비어 있으면 거부.
+    evidenceBinding: dict[str, Any] = field(default_factory=dict)
 
     # ── diagram ──
     diagramType: str = ""
@@ -71,6 +96,8 @@ class VizSpec:
                 out["purpose"] = self.purpose
             if self.evidenceIds:
                 out["evidenceIds"] = self.evidenceIds
+            if self.evidenceBinding:
+                out["evidenceBinding"] = self.evidenceBinding
             return out
         out = {
             "chartType": self.chartType,
@@ -84,6 +111,8 @@ class VizSpec:
             out["purpose"] = self.purpose
         if self.evidenceIds:
             out["evidenceIds"] = self.evidenceIds
+        if self.evidenceBinding:
+            out["evidenceBinding"] = self.evidenceBinding
         return out
 
     def toJson(self) -> str:
@@ -168,6 +197,7 @@ class VizSpec:
                 meta=d.get("meta", {}),
                 purpose=d.get("purpose", ""),
                 evidenceIds=d.get("evidenceIds", []),
+                evidenceBinding=d.get("evidenceBinding", {}),
             )
         return VizSpec(
             vizType="chart",
@@ -179,4 +209,5 @@ class VizSpec:
             meta=d.get("meta", {}),
             purpose=d.get("purpose", ""),
             evidenceIds=d.get("evidenceIds", []),
+            evidenceBinding=d.get("evidenceBinding", {}),
         )

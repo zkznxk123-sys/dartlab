@@ -15,6 +15,7 @@ from __future__ import annotations
 from typing import Any
 
 from dartlab.core.palette import COLORS
+from dartlab.viz.refs import chartEvidenceBinding
 
 # ── 7영역 인사이트 상수 ──
 
@@ -50,11 +51,24 @@ def _meta(company: Any, source: str) -> dict:
     }
 
 
-def _with_visual_context(spec: dict, *, purpose: str, evidenceIds: list[str] | None = None) -> dict:
-    """Add optional visual-policy fields while preserving ChartSpec compatibility."""
+def _with_visual_context(
+    spec: dict,
+    *,
+    purpose: str,
+    evidenceIds: list[str] | None = None,
+    binding: dict[str, Any] | None = None,
+) -> dict:
+    """Add optional visual-policy fields while preserving ChartSpec compatibility.
+
+    binding 은 차트 단위 evidenceBinding dict (refs.chartEvidenceBinding 결과).
+    drill-back 회로의 진입점 — emit_chart 가드를 통과하려면 binding 또는
+    evidenceIds 가 채워져 있어야 한다.
+    """
     spec["purpose"] = purpose
     if evidenceIds:
         spec["evidenceIds"] = evidenceIds
+    if binding:
+        spec["evidenceBinding"] = binding
     return spec
 
 
@@ -98,17 +112,25 @@ def spec_revenue_trend(company: Any, *, n_years: int = 5) -> dict | None:
 
     if not series:
         return None
+    periods = list(ann_years[-n_years:])
     return _with_visual_context(
         {
             "chartType": "combo",
             "title": f"{company.corpName} 손익 추이",
             "series": series,
-            "categories": ann_years[-n_years:],
+            "categories": periods,
             "options": {"unit": "백만원"},
             "meta": _meta(company, "finance"),
         },
         purpose="trend",
         evidenceIds=["finance:IS"],
+        binding=chartEvidenceBinding(
+            stockCode=getattr(company, "stockCode", ""),
+            source="finance",
+            topic="IS",
+            periodKind="Y",
+            periods=periods,
+        ),
     )
 
 
@@ -149,6 +171,13 @@ def spec_cashflow_waterfall(company: Any) -> dict | None:
         },
         purpose="bridge",
         evidenceIds=["finance:CF"],
+        binding=chartEvidenceBinding(
+            stockCode=getattr(company, "stockCode", ""),
+            source="finance",
+            topic="CF",
+            periodKind="Y",
+            periods=[str(ann_years[-1])],
+        ),
     )
 
 
@@ -182,17 +211,25 @@ def spec_balance_sheet(company: Any, *, n_years: int = 5) -> dict | None:
 
     if not series:
         return None
+    periods = list(ann_years[-n_years:])
     return _with_visual_context(
         {
             "chartType": "bar",
             "title": f"{company.corpName} 자산 구성",
             "series": series,
-            "categories": ann_years[-n_years:],
+            "categories": periods,
             "options": {"unit": "백만원", "stacked": True},
             "meta": _meta(company, "finance"),
         },
         purpose="composition",
         evidenceIds=["finance:BS"],
+        binding=chartEvidenceBinding(
+            stockCode=getattr(company, "stockCode", ""),
+            source="finance",
+            topic="BS",
+            periodKind="Y",
+            periods=periods,
+        ),
     )
 
 
@@ -229,17 +266,25 @@ def spec_profitability(company: Any, *, n_years: int = 5) -> dict | None:
 
     if not series:
         return None
+    chart_periods = list(periods[-len(series[0]["data"]) :])
     return _with_visual_context(
         {
             "chartType": "line",
             "title": f"{company.corpName} 수익성 추이",
             "series": series,
-            "categories": periods[-len(series[0]["data"]) :],
+            "categories": chart_periods,
             "options": {"unit": "%"},
             "meta": _meta(company, "finance"),
         },
         purpose="trend",
         evidenceIds=["finance:ratioSeries"],
+        binding=chartEvidenceBinding(
+            stockCode=getattr(company, "stockCode", ""),
+            source="finance",
+            topic="RATIO",
+            periodKind="Q",
+            periods=chart_periods,
+        ),
     )
 
 
@@ -293,6 +338,13 @@ def spec_dividend(company: Any) -> dict | None:
         },
         purpose="trend",
         evidenceIds=["report:dividend"],
+        binding=chartEvidenceBinding(
+            stockCode=getattr(company, "stockCode", ""),
+            source="report",
+            topic="dividend",
+            periodKind="Y",
+            periods=years,
+        ),
     )
 
 
@@ -321,6 +373,12 @@ def spec_insight_radar(company: Any) -> dict | None:
         },
         purpose="comparison",
         evidenceIds=["insight:grades"],
+        binding=chartEvidenceBinding(
+            stockCode=getattr(company, "stockCode", ""),
+            source="analysis",
+            topic="insightGrades",
+            extra={"axes": list(_AREA_NAMES)},
+        ),
     )
 
 
@@ -367,17 +425,25 @@ def spec_ratio_sparklines(company: Any) -> dict | None:
 
     if not sparklines:
         return None
+    chart_periods = list(periods[-20:])
     return _with_visual_context(
         {
             "chartType": "sparkline",
             "title": f"{company.corpName} 비율 스파크라인",
             "series": sparklines,
-            "categories": periods[-20:],
+            "categories": chart_periods,
             "options": {},
             "meta": _meta(company, "finance"),
         },
         purpose="trend",
         evidenceIds=["finance:ratioSeries"],
+        binding=chartEvidenceBinding(
+            stockCode=getattr(company, "stockCode", ""),
+            source="finance",
+            topic="RATIO",
+            periodKind="Q",
+            periods=chart_periods,
+        ),
     )
 
 
@@ -413,6 +479,12 @@ def spec_diff_heatmap(company: Any) -> dict | None:
         },
         purpose="evidence",
         evidenceIds=["docs:diff"],
+        binding=chartEvidenceBinding(
+            stockCode=getattr(company, "stockCode", ""),
+            source="docs",
+            topic="diff",
+            extra={"topicCount": len(heatmap_data)},
+        ),
     )
 
 
@@ -448,6 +520,12 @@ def spec_peer_radar(peer_data: dict) -> dict | None:
             "statement": "PEER",
             "total_stocks": peer_data.get("total_stocks"),
         },
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode=peer_data.get("stockCode", ""),
+            source="scan",
+            topic="peerPosition",
+            extra={"axes": labels, "totalStocks": peer_data.get("total_stocks")},
+        ),
     }
 
 
@@ -477,6 +555,12 @@ def spec_sensitivity_heatmap(grid: list[dict]) -> dict | None:
         "purpose": "valuation",
         "evidenceIds": ["valuation:sensitivity"],
         "meta": {"source": "core/finance/dcf::sensitivityAnalysis", "statement": "PRICE"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode="",
+            source="valuation",
+            topic="sensitivity",
+            extra={"gridSize": len(grid)},
+        ),
     }
 
 
@@ -508,6 +592,14 @@ def spec_margin_trend(history: list[dict]) -> dict | None:
         "purpose": "trend",
         "evidenceIds": ["finance:IS"],
         "meta": {"source": "analysis/financial::calcMarginTrend", "statement": "IS"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode="",
+            source="finance",
+            topic="IS",
+            periodKind="Q",
+            periods=periods,
+            extra={"derivation": "calcMarginTrend"},
+        ),
     }
 
 
@@ -515,17 +607,26 @@ def spec_leverage_trend(history: list[dict]) -> dict | None:
     """부채비율 시계열 line spec."""
     if not history:
         return None
+    periods = [h.get("period", "") for h in history]
     return {
         "chartType": "line",
         "title": "레버리지 추이",
         "series": [
             {"name": "부채비율", "data": [h.get("debtRatio") for h in history], "color": COLORS[3], "type": "line"}
         ],
-        "categories": [h.get("period", "") for h in history],
+        "categories": periods,
         "options": {"unit": "%"},
         "purpose": "risk",
         "evidenceIds": ["finance:BS"],
         "meta": {"source": "analysis/financial::calcLeverage", "statement": "BS"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode="",
+            source="finance",
+            topic="BS",
+            periodKind="Q",
+            periods=periods,
+            extra={"derivation": "calcLeverage"},
+        ),
     }
 
 
@@ -533,6 +634,7 @@ def spec_growth_yoy_bar(history: list[dict]) -> dict | None:
     """매출/영업이익/순이익 YoY bar chart spec."""
     if not history:
         return None
+    periods = [h.get("period", "") for h in history]
     return {
         "chartType": "bar",
         "title": "성장률 YoY",
@@ -540,11 +642,19 @@ def spec_growth_yoy_bar(history: list[dict]) -> dict | None:
             {"name": "매출 YoY", "data": [h.get("revenueYoY") for h in history], "color": COLORS[0], "type": "bar"},
             {"name": "영업이익 YoY", "data": [h.get("opYoY") for h in history], "color": COLORS[1], "type": "bar"},
         ],
-        "categories": [h.get("period", "") for h in history],
+        "categories": periods,
         "options": {"unit": "%"},
         "purpose": "trend",
         "evidenceIds": ["finance:IS"],
         "meta": {"source": "analysis/financial::calcRevenueGrowth", "statement": "IS"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode="",
+            source="finance",
+            topic="IS",
+            periodKind="Q",
+            periods=periods,
+            extra={"derivation": "calcRevenueGrowth"},
+        ),
     }
 
 
@@ -582,6 +692,439 @@ def spec_revenue_scenario_band(history: list[dict], forecasts: dict | None) -> d
         "purpose": "valuation",
         "evidenceIds": ["forecast:revenue"],
         "meta": {"source": "analysis/forecast", "statement": "IS"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode="",
+            source="forecast",
+            topic="revenue",
+            periodKind="MIXED",
+            periods=categories,
+            extra={"forecastKeys": list((forecasts or {}).keys()) if forecasts else []},
+        ),
+    }
+
+
+# ── Phase 1.5 신규 chartType 8 종 ─────────────────────────────────────────
+
+
+def spec_six_act_radar(
+    score: dict[str, float],
+    *,
+    stockCode: str,
+    corpName: str = "",
+    evidence: dict[str, list[str]] | None = None,
+) -> dict | None:
+    """6 막 인과 (macro·sector·firm·financial·value·risk) 종합 점수 레이더.
+
+    score: ``{"macro": 0..100, "sector": ..., "firm": ..., "financial": ...,
+              "value": ..., "risk": ...}``
+    evidence: 축별 evidenceIds (story.sixActScore 결과의 axis evidence).
+    """
+    if not score:
+        return None
+    axes_order = ["macro", "sector", "firm", "financial", "value", "risk"]
+    labels = {
+        "macro": "거시",
+        "sector": "산업",
+        "firm": "기업",
+        "financial": "재무",
+        "value": "가치",
+        "risk": "리스크",
+    }
+    data = [_safe_val(score.get(k)) for k in axes_order]
+    categories = [labels[k] for k in axes_order]
+    evidence_ids = []
+    for k in axes_order:
+        evidence_ids.extend((evidence or {}).get(k, []))
+    return {
+        "chartType": "six-act-radar",
+        "title": f"{corpName or stockCode} 6 막 종합 점수",
+        "series": [{"name": corpName or stockCode, "data": data, "color": COLORS[0]}],
+        "categories": categories,
+        "options": {"unit": "점", "maxValue": 100},
+        "purpose": "comparison",
+        "evidenceIds": evidence_ids or ["story:sixAct"],
+        "meta": {"source": "story/sixAct", "statement": "RADAR"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode=stockCode,
+            source="story",
+            topic="sixAct",
+            extra={"axes": axes_order, "axisLabels": labels},
+        ),
+    }
+
+
+def spec_peer_matrix(
+    rows: list[dict],
+    metrics: list[str],
+    *,
+    stockCode: str,
+    corpName: str = "",
+) -> dict | None:
+    """동종업종 peer × metric 매트릭스.
+
+    rows: ``[{"stockCode": "005930", "corpName": "삼성전자",
+              "values": {"PER": 12.3, "ROE": 18.5, ...}}, ...]``
+    metrics: 컬럼 라벨 리스트. 첫 행은 본 기업 (highlight=True).
+    """
+    if not rows or not metrics:
+        return None
+    series = []
+    for metric in metrics:
+        series.append(
+            {
+                "name": metric,
+                "data": [_safe_val(r.get("values", {}).get(metric)) for r in rows],
+            }
+        )
+    return {
+        "chartType": "peer-matrix",
+        "title": f"{corpName or stockCode} 동종업종 비교",
+        "series": series,
+        "categories": [r.get("corpName") or r.get("stockCode", "") for r in rows],
+        "options": {
+            "metrics": metrics,
+            "highlightStockCode": stockCode,
+            "rowMeta": [{"stockCode": r.get("stockCode"), "corpName": r.get("corpName")} for r in rows],
+        },
+        "purpose": "comparison",
+        "evidenceIds": ["industry:peers"],
+        "meta": {"source": "industry/peers", "statement": "PEER"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode=stockCode,
+            source="industry",
+            topic="peers",
+            extra={"peerCount": len(rows), "metricCount": len(metrics)},
+        ),
+    }
+
+
+def spec_kpi_ribbon(
+    items: list[dict],
+    *,
+    stockCode: str,
+    corpName: str = "",
+) -> dict | None:
+    """Hero KPI 카드 8 개 — landing KpiRibbon 의 ChartSpec 형태.
+
+    items: ``[{"id", "label", "value", "unit", "period",
+               "delta", "deltaTone", "tone", "note", "sparkValues",
+               "valueRef"}, ...]``. 각 item 의 `valueRef` 는 EvidencePanel 진입점.
+    """
+    if not items:
+        return None
+    # KpiRibbon 은 series 가 카드 단위 — series.data 는 spark 막대.
+    series = []
+    for it in items:
+        spark = list(it.get("sparkValues") or [])
+        series.append(
+            {
+                "name": it.get("label", ""),
+                "data": spark,
+                "kpi": {
+                    "id": it.get("id"),
+                    "label": it.get("label"),
+                    "value": it.get("value"),
+                    "unit": it.get("unit"),
+                    "period": it.get("period"),
+                    "delta": it.get("delta"),
+                    "deltaTone": it.get("deltaTone"),
+                    "tone": it.get("tone"),
+                    "note": it.get("note"),
+                    "valueRef": it.get("valueRef"),
+                },
+            }
+        )
+    return {
+        "chartType": "kpi-ribbon",
+        "title": f"{corpName or stockCode} 핵심 지표",
+        "series": series,
+        "categories": [it.get("id", str(i)) for i, it in enumerate(items)],
+        "options": {"cardCount": len(items)},
+        "purpose": "comparison",
+        "evidenceIds": ["finance:kpi"],
+        "meta": {"source": "review/kpi", "statement": "KPI"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode=stockCode,
+            source="review",
+            topic="kpi",
+            extra={"cardCount": len(items)},
+        ),
+    }
+
+
+def spec_hover_spark(
+    *,
+    stockCode: str,
+    source: str,
+    topic: str,
+    account: str,
+    accountLabel: str = "",
+    periods: list[str],
+    values: list[float | None],
+    unit: str = "",
+    rceptMap: dict[str, str] | None = None,
+) -> dict | None:
+    """statement table row hover 용 단일 sparkline.
+
+    statement table 의 한 row 위에 마우스를 올렸을 때 우측 popover 에 표시.
+    rceptMap 으로 datapoint 별 filing deep-link 이 가능하다.
+    """
+    if not periods or not values:
+        return None
+    from dartlab.viz.refs import seriesPointRefs
+
+    return {
+        "chartType": "hover-spark",
+        "title": accountLabel or account,
+        "series": [
+            {
+                "name": accountLabel or account,
+                "data": [_safe_val(v) for v in values],
+                "color": COLORS[0],
+                "type": "line",
+                "pointRefs": seriesPointRefs(
+                    stockCode=stockCode,
+                    source=source,
+                    topic=topic,
+                    account=account,
+                    periods=periods,
+                    rceptMap=rceptMap,
+                ),
+            }
+        ],
+        "categories": list(periods),
+        "options": {"unit": unit},
+        "purpose": "trend",
+        "evidenceIds": [f"{source}:{topic}:{account}"],
+        "meta": {"source": f"{source}/{topic}", "statement": topic},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode=stockCode,
+            source=source,
+            topic=topic,
+            periods=list(periods),
+            extra={"account": account},
+        ),
+    }
+
+
+def spec_income_trend_matrix(
+    view: dict,
+    *,
+    stockCode: str,
+    corpName: str = "",
+) -> dict | None:
+    """IncomeConversionView 흡수 — 매출/영업이익/순이익 + 마진 멀티-시리즈.
+
+    view: ``{"periods", "revenue": ChartPointSeries, "op": ..., "net": ...,
+             "opMargin": ..., "netMargin": ..., "latestPeriod", "sourceMode",
+             "watch", "coverageNotes"}`` (companyDashboardModel.ts 의
+    IncomeConversionView 와 동일 형태).
+    """
+    if not view or not view.get("periods"):
+        return None
+    periods = list(view["periods"])
+    series = []
+    for key, label, color, kind in [
+        ("revenue", "매출액", COLORS[2], "bar"),
+        ("op", "영업이익", COLORS[0], "line"),
+        ("net", "당기순이익", COLORS[3], "line"),
+        ("opMargin", "영업이익률", COLORS[0], "line"),
+        ("netMargin", "순이익률", COLORS[3], "line"),
+    ]:
+        s = view.get(key) or {}
+        vals = list(s.get("values") or [])
+        if not vals:
+            continue
+        series.append(
+            {
+                "name": label,
+                "data": [_safe_val(v) for v in vals],
+                "color": color,
+                "type": kind,
+                "axis": "margin" if key.endswith("Margin") else "amount",
+                "unit": s.get("unit", ""),
+            }
+        )
+    if not series:
+        return None
+    return {
+        "chartType": "income-trend-matrix",
+        "title": view.get("title") or f"{corpName or stockCode} 손익 전환 매트릭스",
+        "series": series,
+        "categories": periods,
+        "options": {
+            "secondaryY": ["영업이익률", "순이익률"],
+            "sourceMode": view.get("sourceMode", ""),
+            "watch": bool(view.get("watch")),
+            "coverageNotes": view.get("coverageNotes", []),
+        },
+        "purpose": "trend",
+        "evidenceIds": ["finance:IS"],
+        "meta": {"source": view.get("sourceLabel", "finance/IS"), "statement": "IS"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode=stockCode,
+            source="finance",
+            topic="IS",
+            periodKind="MIXED",
+            periods=periods,
+            extra={"latestPeriod": view.get("latestPeriod"), "viewId": view.get("id")},
+        ),
+    }
+
+
+def spec_balance_structure_trend(
+    view: dict,
+    *,
+    stockCode: str,
+    corpName: str = "",
+) -> dict | None:
+    """BalanceStructureView 흡수 — 자산/부채/자본 구조 + 추세 + 델타.
+
+    view: companyDashboardModel.ts 의 BalanceStructureView 와 동일 형태.
+    """
+    if not view or not view.get("periods"):
+        return None
+    periods = list(view["periods"])
+    series = []
+    for parts_key, group_label in [
+        ("assetTrendParts", "자산"),
+        ("fundingTrendParts", "조달"),
+        ("equityTrendParts", "자본"),
+    ]:
+        for part in view.get(parts_key) or []:
+            series.append(
+                {
+                    "name": f"{group_label}::{part.get('label', part.get('id', ''))}",
+                    "data": [_safe_val(v) for v in (part.get("values") or [])],
+                    "shares": [_safe_val(v) for v in (part.get("shares") or [])],
+                    "color": part.get("color", COLORS[0]),
+                    "type": "bar",
+                    "stack": parts_key,
+                    "tone": part.get("tone", "neutral"),
+                    "unit": part.get("unit", ""),
+                    "missing": bool(part.get("missing")),
+                }
+            )
+    if not series:
+        return None
+    return {
+        "chartType": "balance-structure-trend",
+        "title": view.get("title") or f"{corpName or stockCode} 자산 구조 추이",
+        "series": series,
+        "categories": periods,
+        "options": {
+            "totalAssetsSeries": [_safe_val(v) for v in view.get("totalAssetsSeries") or []],
+            "totalFundingSeries": [_safe_val(v) for v in view.get("totalFundingSeries") or []],
+            "assetDeltaParts": view.get("assetDeltaParts", []),
+            "debtRatio": view.get("debtRatio"),
+            "sourceMode": view.get("sourceMode", ""),
+            "coverageNotes": view.get("coverageNotes", []),
+        },
+        "purpose": "composition",
+        "evidenceIds": ["finance:BS"],
+        "meta": {"source": view.get("sourceLabel", "finance/BS"), "statement": "BS"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode=stockCode,
+            source="finance",
+            topic="BS",
+            periodKind="MIXED",
+            periods=periods,
+            extra={"latestPeriod": view.get("period"), "viewId": view.get("id")},
+        ),
+    }
+
+
+def spec_cashflow_signed_matrix(
+    view: dict,
+    *,
+    stockCode: str,
+    corpName: str = "",
+) -> dict | None:
+    """CashflowBridgeView 흡수 — 영업/투자/재무 signed bars + 최신 패널.
+
+    view: companyDashboardModel.ts 의 CashflowBridgeView 와 동일 형태.
+    """
+    if not view or not view.get("periods"):
+        return None
+    periods = list(view["periods"])
+    raw_series = view.get("series") or []
+    series = []
+    palette = [COLORS[2], COLORS[3], COLORS[0], COLORS[1], COLORS[4]]
+    for i, s in enumerate(raw_series):
+        vals = list(s.get("values") or [])
+        if not vals:
+            continue
+        series.append(
+            {
+                "name": s.get("label", s.get("id", f"series_{i}")),
+                "data": [_safe_val(v) for v in vals],
+                "color": palette[i % len(palette)],
+                "type": "bar",
+                "signed": True,
+                "tone": s.get("tone", "neutral"),
+                "unit": s.get("unit", ""),
+            }
+        )
+    if not series:
+        return None
+    return {
+        "chartType": "cashflow-signed-matrix",
+        "title": view.get("title") or f"{corpName or stockCode} 현금흐름 signed",
+        "series": series,
+        "categories": periods,
+        "options": {
+            "latest": view.get("latest", []),
+            "sourceMode": view.get("sourceMode", ""),
+            "coverageNotes": view.get("coverageNotes", []),
+        },
+        "purpose": "bridge",
+        "evidenceIds": ["finance:CF"],
+        "meta": {"source": view.get("sourceLabel", "finance/CF"), "statement": "CF"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode=stockCode,
+            source="finance",
+            topic="CF",
+            periodKind="MIXED",
+            periods=periods,
+            extra={"viewId": view.get("id")},
+        ),
+    }
+
+
+def spec_evidence_coverage(
+    items: list[dict],
+    *,
+    stockCode: str,
+    corpName: str = "",
+) -> dict | None:
+    """근거 소스 커버리지 — EvidenceCoverageView 흡수.
+
+    items: ``[{"label", "status": "ready"|"lazy"|"fallback"|"missing",
+               "source", "url"}, ...]``
+    """
+    if not items:
+        return None
+    return {
+        "chartType": "evidence-coverage",
+        "title": f"{corpName or stockCode} 근거 커버리지",
+        "series": [
+            {
+                "name": "coverage",
+                "data": [it.get("status") for it in items],
+                "items": items,
+            }
+        ],
+        "categories": [it.get("label", "") for it in items],
+        "options": {"itemCount": len(items)},
+        "purpose": "evidence",
+        "evidenceIds": ["coverage:status"],
+        "meta": {"source": "review/coverage", "statement": "COVERAGE"},
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode=stockCode,
+            source="review",
+            topic="coverage",
+            extra={"itemCount": len(items)},
+        ),
     }
 
 

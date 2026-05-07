@@ -70,13 +70,27 @@ from dartlab.viz.generators import (  # noqa: F401
     SPEC_GENERATORS,
     auto_chart,
     spec_balance_sheet,
+    spec_balance_structure_trend,
+    spec_cashflow_signed_matrix,
     spec_cashflow_waterfall,
     spec_diff_heatmap,
     spec_dividend,
+    spec_evidence_coverage,
+    spec_growth_yoy_bar,
+    spec_hover_spark,
+    spec_income_trend_matrix,
     spec_insight_radar,
+    spec_kpi_ribbon,
+    spec_leverage_trend,
+    spec_margin_trend,
+    spec_peer_matrix,
+    spec_peer_radar,
     spec_profitability,
     spec_ratio_sparklines,
+    spec_revenue_scenario_band,
     spec_revenue_trend,
+    spec_sensitivity_heatmap,
+    spec_six_act_radar,
 )
 
 # ── Dashboard visual intent catalog ──
@@ -84,6 +98,15 @@ from dartlab.viz.intents import VIZ_INTENTS, VizIntent, listVizIntents  # noqa: 
 
 # ── ChartSpec → Plotly Figure 변환 ──
 from dartlab.viz.plotly import from_spec as chart_from_spec  # noqa: F401
+
+# ── evidence ref 빌더 ──
+from dartlab.viz.refs import (  # noqa: F401
+    chartEvidenceBinding,
+    filingDeepLink,
+    seriesPointRefs,
+    tableRef,
+    valueRef,
+)
 
 # ── VizSpec ──
 from dartlab.viz.spec import VizSpec  # noqa: F401
@@ -151,6 +174,24 @@ def _is_meta_guide_chart(spec: dict) -> bool:
     return False
 
 
+def _has_evidence(spec: dict) -> bool:
+    """evidence 회로 진입점이 있는지 확인.
+
+    1.0.0 정식 계약: evidenceBinding (chart-level structured) 채워져야 한다.
+    transition: 14 종 기존 generator 가 가진 legacy evidenceIds 도 통과시킨다.
+    diagram (vizType=diagram) 은 evidence 의무 없음.
+    """
+    if spec.get("vizType") == "diagram":
+        return True
+    binding = spec.get("evidenceBinding")
+    if isinstance(binding, dict) and binding.get("tableRef"):
+        return True
+    legacy = spec.get("evidenceIds")
+    if isinstance(legacy, list) and legacy:
+        return True
+    return False
+
+
 def emit_chart(spec: dict) -> None:
     """AI 코드에서 차트 출력.
 
@@ -191,6 +232,24 @@ def emit_chart(spec: dict) -> None:
             "                         'data':[h['operatingMargin'] for h in hist]}]})"
         )
         return
+
+    # evidence 회로 진입점 누락 거부 — 모든 차트는 tableRef 까지 drill 가능해야 한다.
+    if not _has_evidence(spec):
+        _log.warning(
+            "[차트 거부] evidenceBinding 또는 evidenceIds 가 비어 있습니다. "
+            "모든 차트는 어떤 표·계정·기간에서 파생되었는지 명시해야 합니다. 예시:\n"
+            "  emit_chart({\n"
+            "      'chartType': 'line', 'title': '...',\n"
+            "      'categories': [...], 'series': [{'name':'...', 'data':[...]}],\n"
+            "      'evidenceBinding': {\n"
+            "          'tableRef': 'finance:IS:annual',\n"
+            "          'source': 'finance', 'stockCode': '005930',\n"
+            "          'topic': 'IS', 'periodKind': 'Y',\n"
+            "          'periods': [...],\n"
+            "      },\n"
+            "  })"
+        )
+        return
     spec.setdefault("vizType", "chart")
     # DARTLAB_VIZ 마커는 **사용자 출력** (webview 가 stdout 을 파싱) — print 유지.
     print(f"{_MARKER_START}{json.dumps(spec, ensure_ascii=False)}{_MARKER_END}")
@@ -226,6 +285,12 @@ __all__ = [
     "VizIntent",
     "VIZ_INTENTS",
     "listVizIntents",
+    # refs
+    "tableRef",
+    "valueRef",
+    "filingDeepLink",
+    "chartEvidenceBinding",
+    "seriesPointRefs",
     # generators
     "auto_chart",
     "spec_revenue_trend",
@@ -236,6 +301,20 @@ __all__ = [
     "spec_insight_radar",
     "spec_ratio_sparklines",
     "spec_diff_heatmap",
+    "spec_peer_radar",
+    "spec_sensitivity_heatmap",
+    "spec_margin_trend",
+    "spec_leverage_trend",
+    "spec_growth_yoy_bar",
+    "spec_revenue_scenario_band",
+    "spec_six_act_radar",
+    "spec_peer_matrix",
+    "spec_kpi_ribbon",
+    "spec_hover_spark",
+    "spec_evidence_coverage",
+    "spec_income_trend_matrix",
+    "spec_balance_structure_trend",
+    "spec_cashflow_signed_matrix",
     "SPEC_GENERATORS",
     # charts (Plotly)
     "line",
