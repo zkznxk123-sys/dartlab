@@ -163,6 +163,15 @@ def _validateApplicationCallExample(path: Path, text: str, block: str) -> list[s
     if sid.startswith("engines.scan.") and sid != "engines.scan":
         if 'dartlab.scan("' not in text and 'scan("' not in text:
             errors.append(f'{path}: engines.scan 응용 skill 은 본문에 dartlab.scan("<axis>") 호출 예시 필요')
+    if sid.startswith("engines.quant.") and sid != "engines.quant":
+        if 'dartlab.quant("' not in text and 'quant("' not in text:
+            errors.append(f'{path}: engines.quant 응용 skill 은 본문에 dartlab.quant("<axis>", ...) 호출 예시 필요')
+    if sid.startswith("engines.macro.") and sid != "engines.macro":
+        if 'dartlab.macro("' not in text and 'macro("' not in text:
+            errors.append(f'{path}: engines.macro 응용 skill 은 본문에 dartlab.macro("<axis>", ...) 호출 예시 필요')
+    if sid.startswith("engines.gather.") and sid != "engines.gather":
+        if 'dartlab.gather("' not in text and 'gather("' not in text:
+            errors.append(f'{path}: engines.gather 응용 skill 은 본문에 dartlab.gather("<axis>", ...) 호출 예시 필요')
     return errors
 
 

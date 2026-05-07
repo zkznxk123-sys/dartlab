@@ -237,6 +237,67 @@ def test_analysis_application_skills_have_correct_call_example() -> None:
         assert expected in body, f"engines.analysis.{slug} body missing expected call example: {expected}"
 
 
+def test_quant_application_skills_have_correct_call_example() -> None:
+    """각 quant 응용 skill 본문에 dartlab.quant("axis", ...) 호출 예시가 있어야 한다.
+
+    SSOT 는 dartlab.quant._AXIS_REGISTRY. multi-stock / cross-section / single-stock
+    모두 prefix dartlab.quant("axis" 로 시작하므로 prefix 매칭으로 검증.
+    """
+    for axis in dartlab.quant().get_column("axis").to_list():
+        skill_id = f"engines.quant.{axis}"
+        ids = {item.id for item in skills.list(includeUser=False)}
+        if skill_id not in ids:
+            continue
+        body = _skill_body(skill_id)
+        prefix = f'dartlab.quant("{axis}"'
+        assert prefix in body, f"{skill_id} body missing expected call example prefix: {prefix}"
+
+
+def test_macro_application_skills_have_correct_call_example() -> None:
+    """각 macro 응용 skill 본문에 dartlab.macro("axis", ...) 호출 예시가 있어야 한다."""
+    for axis in dartlab.macro().get_column("axis").to_list():
+        skill_id = f"engines.macro.{axis}"
+        ids = {item.id for item in skills.list(includeUser=False)}
+        if skill_id not in ids:
+            continue
+        body = _skill_body(skill_id)
+        prefix = f'dartlab.macro("{axis}"'
+        assert prefix in body, f"{skill_id} body missing expected call example prefix: {prefix}"
+
+
+def test_gather_application_skills_have_correct_call_example() -> None:
+    """각 gather 응용 skill 본문에 dartlab.gather("axis", ...) 호출 예시가 있어야 한다.
+
+    revenueConsensus 는 메서드 이름이 revenue_consensus 지만 skill axis slug 는
+    revenueConsensus — base SKILL 의 가이드 표 매핑. axis slug 를 그대로 사용한다.
+    """
+    skill_dir = "src/dartlab/skills/specs/engines/gather"
+    ids = {item.id for item in skills.list(includeUser=False)}
+    for axis in [
+        "collect",
+        "consensus",
+        "dividends",
+        "flow",
+        "history",
+        "industryPeers",
+        "insiderTrading",
+        "macro",
+        "majorShareholders",
+        "news",
+        "ownership",
+        "price",
+        "revenueConsensus",
+        "sector",
+        "splits",
+    ]:
+        skill_id = f"engines.gather.{axis}"
+        if skill_id not in ids:
+            continue
+        body = _skill_body(skill_id)
+        prefix = f'dartlab.gather("{axis}"'
+        assert prefix in body, f"{skill_id} body missing expected call example prefix: {prefix}"
+
+
 def test_scan_application_skills_have_correct_call_example() -> None:
     """각 scan 응용 skill 본문에 dartlab.scan("axis") 호출이 있어야 한다.
 
@@ -249,8 +310,9 @@ def test_scan_application_skills_have_correct_call_example() -> None:
         if skill_id not in ids:
             continue  # axis 응용 skill 미생성 — test_application_skills_cover_engine_guide_axes 가 잡음
         body = _skill_body(skill_id)
-        expected = f'dartlab.scan("{axis}")'
-        assert expected in body, f"{skill_id} body missing expected call example: {expected}"
+        # prefix 매칭 — target 필수 axis (account · ratio) 는 dartlab.scan("axis", "...") 형식 허용.
+        prefix = f'dartlab.scan("{axis}"'
+        assert prefix in body, f"{skill_id} body missing expected call example prefix: {prefix}"
 
 
 def test_gather_application_skills_cover_public_methods() -> None:
