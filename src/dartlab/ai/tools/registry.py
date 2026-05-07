@@ -6,104 +6,37 @@ import inspect
 from typing import Any, Callable
 
 from .compileVisual import compileVisual
-from .engineCall import engineCall
-from .generatedSpecSearch import generatedSpecSearch
 from .inspectDataset import inspectDataset
 from .proposeSkill import proposeSkill
-from .read import read
 from .readCapability import readCapability
 from .readSkill import readSkill
 from .runPython import runPython
 from .saveArtifact import saveArtifact
-from .skillSearch import skillSearch
 from .types import ToolResult, ToolSpec
-from .verifyAnswer import verifyAnswer
 from .webSearch import webSearch
-from .write import write
 
 ToolFn = Callable[..., ToolResult]
 
 _SPECS: dict[str, ToolSpec] = {
-    "read": ToolSpec(
-        "read",
-        "repo, Skill OS resource, allowed local text file을 읽고 docRef를 만든다. 쓸 때: 특정 file/skill 본문 정확히 읽기. 안 쓸 때: 검색은 read_skill/read_capability.",
-        {
-            "type": "object",
-            "properties": {
-                "target": {"type": "string"},
-                "startLine": {"type": "integer"},
-                "endLine": {"type": "integer"},
-            },
-            "required": ["target"],
-        },
-    ),
-    "write": ToolSpec(
-        "write",
-        "artifact/scratchpad-adjacent output을 안전한 사용자 홈 경로에 저장하고 artifactRef를 만든다. 쓸 때: 큰 결과를 파일로 보존. 안 쓸 때: 답변 본문 (chunk 로 자동 발행).",
-        {
-            "type": "object",
-            "properties": {"name": {"type": "string"}, "content": {"type": "string"}, "kind": {"type": "string"}},
-            "required": ["name", "content"],
-        },
-    ),
     "web_search": ToolSpec(
         "web_search",
-        "외부 최신 정보가 필요할 때 웹 검색을 실행하고 webRef를 만든다. 쓸 때: 외부 최신 (오늘 종가, 신규 공시, 컨센서스). 안 쓸 때: dartlab 내부 데이터 (engine_call/run_python).",
+        "외부 최신 정보가 필요할 때 웹 검색을 실행하고 webRef를 만든다. 쓸 때: 외부 최신 (오늘 종가, 신규 공시, 컨센서스). 안 쓸 때: dartlab 내부 데이터 (run_python).",
         {
             "type": "object",
             "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}},
             "required": ["query"],
         },
-    ),
-    "skill_search": ToolSpec(
-        "skill_search",
-        "DEPRECATED — read_skill 사용 권장. Skill OS에서 실행 skill을 찾는다.",
-        {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string"},
-                "limit": {"type": "integer"},
-                "includeUser": {"type": "boolean"},
-            },
-            "required": ["query"],
-        },
-    ),
-    "generated_spec_search": ToolSpec(
-        "generated_spec_search",
-        "DEPRECATED — read_capability 사용 권장. CAPABILITIES/docstring에서 공개 API를 찾는다.",
-        {
-            "type": "object",
-            "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}},
-            "required": ["query"],
-        },
-    ),
-    "engine_call": ToolSpec(
-        "engine_call",
-        "generated spec 기반 call plan을 검증한 뒤 DartLab 공개 API를 호출하고 refs를 만든다. 쓸 때: 단일 capability 1 회 호출 (Company.show, dartlab.scan). 안 쓸 때: 다단 계산·랭킹·dataframe 가공 (run_python).",
-        {"type": "object", "properties": {"plan": {"type": "object"}}, "required": ["plan"]},
     ),
     "run_python": ToolSpec(
         "run_python",
-        "DartLab library와 Polars를 조합해 계산/랭킹/표 생성 코드를 실행한다. 쓸 때: 다단 계산, 비교, 랭킹, dataframe 가공. 안 쓸 때: 단일 API 1 회 (engine_call). emit_result() 필수 — print 만 하면 GATE 차단.",
+        "DartLab library와 Polars를 조합해 계산/랭킹/표 생성 코드를 실행한다. 쓸 때: 다단 계산, 비교, 랭킹, dataframe 가공, 단일 capability 1 회 호출도 가능 (Company.show / dartlab.scan 등). emit_result() 필수 — print 만 하면 GATE 차단.",
         {
             "type": "object",
             "properties": {"code": {"type": "string"}, "runId": {"type": "string"}},
             "required": ["code"],
         },
     ),
-    "verify_answer": ToolSpec(
-        "verify_answer",
-        "최종 답변의 숫자/날짜/랭킹 claim이 refs로 뒷받침되는지 검증한다. 쓸 때: GATE 통합 호환 wrapper (자동 호출). 안 쓸 때: LLM 직접 호출 (GATE 가 자동).",
-        {
-            "type": "object",
-            "properties": {
-                "answer": {"type": "string"},
-                "refs": {"type": "array", "items": {"type": "object", "additionalProperties": True}},
-            },
-            "required": ["answer", "refs"],
-        },
-    ),
-    # P1: SSOT v2 — 6 종 화이트리스트
+    # SSOT P-revised — canonical 6 데이터 도구 + meta
     "read_skill": ToolSpec(
         "read_skill",
         "Skill OS에서 분석 절차 spec(frontmatter+본문)을 검색해 반환한다. 쓸 때: skill 검색·본문 읽기. recipe 발동 후 그 절차 단계 따르기. 안 쓸 때: capability docstring 검색 (read_capability).",
@@ -204,15 +137,8 @@ _SPECS: dict[str, ToolSpec] = {
 }
 
 _TOOLS: dict[str, ToolFn] = {
-    "read": read,
-    "write": write,
     "web_search": webSearch,
-    "skill_search": skillSearch,
-    "generated_spec_search": generatedSpecSearch,
-    "engine_call": engineCall,
     "run_python": runPython,
-    "verify_answer": verifyAnswer,
-    # SSOT v2 6 종
     "read_skill": readSkill,
     "read_capability": readCapability,
     "save_artifact": saveArtifact,
@@ -223,14 +149,15 @@ _TOOLS: dict[str, ToolFn] = {
 
 CANONICAL_TOOL_NAMES = tuple(_SPECS.keys())
 
-# SSOT 6 종 (P1 에서 canonical 로 승격). P0 에서는 list 만 보유.
+# SSOT P-revised — canonical 6 데이터 도구 (chat-native LLM 노출 default).
+# inspect_dataset 은 workbench WORK 패스 한정 helper, propose_skill 은 다음 commit 에서 삭제.
 CANONICAL_V2: tuple[str, ...] = (
     "run_python",
     "read_skill",
     "read_capability",
     "web_search",
     "save_artifact",
-    "propose_skill",
+    "compile_visual",
 )
 
 
@@ -301,15 +228,10 @@ def executeTool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any]
     if name not in _TOOLS:
         return ToolResult(False, f"Unknown tool: {name}", error="unknown_tool").to_dict()
     payload = dict(args or {})
-    if name == "engine_call":
-        result = _TOOLS[name](payload.get("plan") or payload)
-    elif name == "verify_answer":
-        result = _TOOLS[name](payload.get("answer", ""), payload.get("refs") or [])
-    else:
-        # 약한 모델이 schema 외 인자를 줄 수 있어 알려진 파라미터만 필터.
-        # 함수가 **kwargs 를 받으면 그대로 통과.
-        filtered = _filterKwargs(_TOOLS[name], payload)
-        result = _TOOLS[name](**filtered)
+    # 약한 모델이 schema 외 인자를 줄 수 있어 알려진 파라미터만 필터.
+    # 함수가 **kwargs 를 받으면 그대로 통과.
+    filtered = _filterKwargs(_TOOLS[name], payload)
+    result = _TOOLS[name](**filtered)
     return result.to_dict()
 
 

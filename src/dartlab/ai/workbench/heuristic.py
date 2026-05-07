@@ -1,9 +1,11 @@
 """휴리스틱 흐름 — provider 가 LLM 이 아닐 때 5 패스 노드명을 발행하며 답을 합성.
 
-BRIEF (profile + skill_search + spec_search + planEvidence) → WORK (engine_call 루프)
+BRIEF (profile + read_skill + read_capability + planEvidence) → WORK (engine_call 루프)
 → COMPOSE (휴리스틱 답안) → GATE (verifyAnswer programmatic) → HARVEST (no-op).
 
 본 모듈은 외부 LLM 의존 없음. targets / intent 의 정적 함수 + workbench tools 만 사용.
+engineCall / verifyAnswer 는 registry 등록되어 있지 않고 직접 import — 휴리스틱 path 의
+plan 실행 + GATE 검증은 LLM 도구 노출과 무관한 내부 helper 다.
 """
 
 from __future__ import annotations
@@ -13,8 +15,8 @@ from typing import Any
 
 from dartlab.ai.contracts import TraceEvent
 from dartlab.ai.tools.engineCall import engineCall
-from dartlab.ai.tools.generatedSpecSearch import generatedSpecSearch
-from dartlab.ai.tools.skillSearch import skillSearch
+from dartlab.ai.tools.readCapability import readCapability
+from dartlab.ai.tools.readSkill import readSkill
 from dartlab.ai.tools.types import ToolResult
 from dartlab.ai.tools.verifyAnswer import verifyAnswer
 
@@ -52,22 +54,22 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
     state.intent = str(state.profile.get("taskType") or "research")
     scratchpad.append("brief.profile", {"profile": state.profile})
 
-    yield _toolStart(state, "skill_search", {"query": state.question, "limit": 8})
-    skill_result = skillSearch(state.question, limit=8)
+    yield _toolStart(state, "read_skill", {"query": state.question, "limit": 8})
+    skill_result = readSkill(state.question, limit=8)
     state.selectedSkillRefs = skill_result.refs
     state.refs.extend(skill_result.refs)
-    state.toolCalls.append({"pass": "brief", "tool": "skill_search", "ok": skill_result.ok})
-    scratchpad.append("brief.skill_search", {"result": skill_result.to_dict()})
-    yield _toolResult(state, "skill_search", skill_result)
+    state.toolCalls.append({"pass": "brief", "tool": "read_skill", "ok": skill_result.ok})
+    scratchpad.append("brief.read_skill", {"result": skill_result.to_dict()})
+    yield _toolResult(state, "read_skill", skill_result)
     yield TraceEvent("reference", {"refs": [ref.to_dict() for ref in skill_result.refs], "query": state.question})
 
-    yield _toolStart(state, "generated_spec_search", {"query": state.question, "limit": 10})
-    spec_result = generatedSpecSearch(state.question, limit=10)
+    yield _toolStart(state, "read_capability", {"query": state.question, "limit": 10})
+    spec_result = readCapability(state.question, limit=10)
     state.apiRefs = spec_result.refs
     state.refs.extend(spec_result.refs)
-    state.toolCalls.append({"pass": "brief", "tool": "generated_spec_search", "ok": spec_result.ok})
-    scratchpad.append("brief.spec_search", {"result": spec_result.to_dict()})
-    yield _toolResult(state, "generated_spec_search", spec_result)
+    state.toolCalls.append({"pass": "brief", "tool": "read_capability", "ok": spec_result.ok})
+    scratchpad.append("brief.read_capability", {"result": spec_result.to_dict()})
+    yield _toolResult(state, "read_capability", spec_result)
 
     # selectedSkillRefs 의 requiredEvidence 통합 → state.requiredEvidence
     for ref in state.selectedSkillRefs:

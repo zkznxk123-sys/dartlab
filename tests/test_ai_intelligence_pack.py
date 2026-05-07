@@ -7,19 +7,19 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def test_generated_spec_search_replaces_runtime_intelligence_pack():
-    from dartlab.ai.tools.generatedSpecSearch import generatedSpecSearch
+def test_read_capability_replaces_runtime_intelligence_pack():
+    from dartlab.ai.tools.readCapability import readCapability
 
-    result = generatedSpecSearch("재무상태표 Company show")
+    result = readCapability("재무상태표 Company show")
 
     assert result.ok is True
     assert any(ref.payload.get("apiRef") == "Company.show" for ref in result.refs)
 
 
-def test_skill_search_replaces_runtime_pack_summary():
-    from dartlab.ai.tools.skillSearch import skillSearch
+def test_read_skill_replaces_runtime_pack_summary():
+    from dartlab.ai.tools.readSkill import readSkill
 
-    result = skillSearch("처음 온 외부 AI 시작점")
+    result = readSkill("처음 온 외부 시작점")
 
     assert result.ok is True
     assert any(ref.id == "skill:start.dartlabSkillOs" for ref in result.refs)

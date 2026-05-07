@@ -29,7 +29,6 @@ def runWork(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[Trac
         allowedTools=[
             "run_python",
             "inspect_dataset",
-            "engine_call",
             "web_search",
             "save_artifact",
         ],

@@ -122,11 +122,12 @@ def test_frontmatter_rejects_invalid_status(tmp_path) -> None:
 
 
 @pytest.mark.unit
-def test_skillsearch_and_generatedspec_marked_deprecated() -> None:
+def test_deprecated_tools_removed_from_registry() -> None:
+    """P-revised: skill_search / generated_spec_search / engine_call / verify_answer / read / write 가 registry 에서 제거됨."""
     from dartlab.ai.tools.registry import _SPECS
 
-    assert "DEPRECATED" in _SPECS["skill_search"].description
-    assert "DEPRECATED" in _SPECS["generated_spec_search"].description
+    deprecated = {"skill_search", "generated_spec_search", "engine_call", "verify_answer", "read", "write"}
+    assert deprecated.isdisjoint(set(_SPECS.keys()))
 
 
 @dataclass

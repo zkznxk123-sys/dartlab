@@ -34,14 +34,14 @@ from .workbench.prompts import DARTLAB_CHAT_SYSTEM
 
 logger = logging.getLogger(__name__)
 
-# LLM 노출 도구 set — 결정 마비 막기 위해 5 개 핵심.
-# 추후 확장 신중히. read 등 보조 도구는 LLM 이 read_skill/read_capability 통해 우회 가능.
+# LLM 노출 도구 set — SSOT P-revised canonical 6 데이터 도구.
+# `engine_call` 은 `run_python` 안에서 임의 dartlab 호출로 통합되어 폐기됨.
 _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     "run_python",
-    "engine_call",
     "read_skill",
     "read_capability",
     "web_search",
+    "save_artifact",
     "compile_visual",
 )
 

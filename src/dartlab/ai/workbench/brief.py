@@ -30,7 +30,7 @@ def runBrief(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[Tra
         passName="brief",
         systemPrompt=BRIEF_PROMPT,
         userContext=user_ctx,
-        allowedTools=["read_skill", "read_capability", "read"],
+        allowedTools=["read_skill", "read_capability"],
         maxRounds=4,
     )
 
@@ -45,13 +45,13 @@ def runBrief(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[Tra
             state.apiRefs.append(ref)
 
     # BRIEF fallback — LLM 이 도구 호출 없이 종료해 ref 가 비어 있으면
-    # 휴리스틱으로 skill_search + generated_spec_search 강제 실행.
+    # 휴리스틱으로 read_skill + read_capability 강제 실행.
     # ask_workbench.md "FINANCE 는 tool 1 회 이상 필수" 룰 강제.
     if not state.selectedSkillRefs and not state.apiRefs and state.failure != "rate_limit":
-        from dartlab.ai.tools.generatedSpecSearch import generatedSpecSearch
-        from dartlab.ai.tools.skillSearch import skillSearch
+        from dartlab.ai.tools.readCapability import readCapability
+        from dartlab.ai.tools.readSkill import readSkill
 
-        skill_result = skillSearch(state.question, limit=5)
+        skill_result = readSkill(state.question, limit=5)
         for ref in skill_result.refs:
             state.refs.append(ref)
             if ref not in state.selectedSkillRefs:
@@ -60,15 +60,13 @@ def runBrief(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[Tra
                 for ev in payload.get("requiredEvidence") or []:
                     if ev not in state.requiredEvidence:
                         state.requiredEvidence.append(str(ev))
-        spec_result = generatedSpecSearch(state.question, limit=5)
+        spec_result = readCapability(state.question, limit=5)
         for ref in spec_result.refs:
             state.refs.append(ref)
             if ref not in state.apiRefs:
                 state.apiRefs.append(ref)
-        state.toolCalls.append({"pass": "brief", "tool": "skill_search", "ok": skill_result.ok, "fallback": True})
-        state.toolCalls.append(
-            {"pass": "brief", "tool": "generated_spec_search", "ok": spec_result.ok, "fallback": True}
-        )
+        state.toolCalls.append({"pass": "brief", "tool": "read_skill", "ok": skill_result.ok, "fallback": True})
+        state.toolCalls.append({"pass": "brief", "tool": "read_capability", "ok": spec_result.ok, "fallback": True})
         yield TraceEvent(
             kind="brief_fallback",
             data={
