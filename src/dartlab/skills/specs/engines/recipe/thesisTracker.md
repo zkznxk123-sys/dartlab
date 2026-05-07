@@ -17,7 +17,7 @@ inputs:
   - ticker
   - thesis 본문 (신규) 또는 새 데이터 포인트 (갱신)
 outputs:
-  - artifactRef (thesis 파일 ~/.dartlab/thesis/{ticker}.md)
+  - artifactRef (thesis 파일 ~/.dartlab/thesis/`{ticker}.md`)
   - tableRef (pillar status scorecard)
   - 한국어 thesis 점검 결과
 linkedSkills:
@@ -68,9 +68,9 @@ procedure:
   - ticker 확정 + 신규/갱신 분기.
   - 신규 thesis — 본문 + pillar 3~5 + risk 3~5 + catalyst N 입력 받음.
   - falsifiable 게이트 — 각 pillar 에 "어떤 관측이면 반증되는가" 명시 의무. vague claim 거부 + 사용자에 반증 조건 예시 안내.
-  - 갱신 — 기존 ~/.dartlab/thesis/{ticker}.md 로드 → 새 데이터 포인트가 어떤 pillar status 를 어떻게 바꾸는지 표시 (strengthen / weaken / neutral) + scorecard 갱신.
+  - 갱신 — 기존 ~/.dartlab/thesis/`{ticker}.md` 로드 → 새 데이터 포인트가 어떤 pillar status 를 어떻게 바꾸는지 표시 (strengthen / weaken / neutral) + scorecard 갱신.
   - dartlab capability 호출 — 재무 pillar 는 c.show 또는 c.analysis, 시장 pillar 는 gather 또는 quant, 산업 pillar 는 industry 엔진.
-  - 파일 저장 — save_artifact tool 또는 run_python 안에서 ~/.dartlab/thesis/{ticker}.md 작성.
+  - 파일 저장 — save_artifact tool 또는 run_python 안에서 ~/.dartlab/thesis/`{ticker}.md` 작성.
   - 본문 — 한국어 점검 결과 + scorecard 표 + 다음 cycle 갱신 시기 (보통 분기 단위).
 sourceRefs:
   - dartlab://skills/engines.company
@@ -78,7 +78,7 @@ sourceRefs:
 lastUpdated: '2026-05-07'
 ---
 
-## thesis 파일 schema (~/.dartlab/thesis/{ticker}.md)
+## thesis 파일 schema (~/.dartlab/thesis/`{ticker}.md`)
 
 ```markdown
 ---
@@ -127,7 +127,7 @@ THESIS_DIR = Path.home() / ".dartlab" / "thesis"
 THESIS_DIR.mkdir(parents=True, exist_ok=True)
 
 ticker = "005930"
-thesis_path = THESIS_DIR / f"{ticker}.md"
+thesis_path = THESIS_DIR / (ticker + ".md")
 
 # 신규 — falsifiable 게이트 통과한 pillar 만 수용
 pillars = [
@@ -169,12 +169,12 @@ emit_result(
 2. 신규: pillar 3~5 + risk 3~5 + catalyst N 수집 + **falsifiable 게이트** (각 pillar 에 반증 조건 명시 의무).
 3. 갱신: 기존 파일 로드 + 새 데이터 포인트 → pillar status 변경 매핑.
 4. dartlab capability 로 pillar 정량 검증.
-5. ~/.dartlab/thesis/{ticker}.md 저장 + scorecard 표.
+5. ~/.dartlab/thesis/`{ticker}.md` 저장 + scorecard 표.
 6. 한국어 본문 — 갱신 요약 + scorecard + 다음 cycle 시기.
 
 ## 대표 반환 형태
 
-- `artifactRef` 1 개 — ~/.dartlab/thesis/{ticker}.md (gitignore — 사용자 로컬 전용)
+- `artifactRef` 1 개 — ~/.dartlab/thesis/`{ticker}.md` (gitignore — 사용자 로컬 전용)
 - `tableRef` 1 개 — pillar scorecard (pillar · expectation · current · trend · reproof_condition)
 - 답변 본문 — 한국어 thesis 점검 결과 + 다음 cycle 시기
 
@@ -191,7 +191,7 @@ emit_result(
 각 pillar 는 *반증 가능* 해야 한다. *반증 불가능* 한 thesis 는 거부.
 
 - ❌ "회사가 좋아진다" — 어떤 관측이면 반증?
-- ✅ "2026 년 HBM 매출 비중 ≥ 35%. 반증: 2026 H1 HBM 매출 비중 < 30% 이면 thesis 무효."
+- ✅ "2026 년 HBM 매출 비중 ≥ 35%. 반증: 2026 H1 HBM 매출 비중 &lt; 30% 이면 thesis 무효."
 
 거부 시 사용자에 반증 조건 예시 (정량 / 기한 / 구체) 1~2 가지 안내. 한 번도 통과 못하면 본문 작성하지 않는다.
 

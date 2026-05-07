@@ -100,6 +100,14 @@ export default defineConfig({
 			'$skills': skillsDir
 		}
 	},
+	// ui/shared/chart 의 svelte 컴포넌트가 d3-scale 등을 import. ui/ 트리에 node_modules 가
+	// 없어 SSR resolution 이 landing/node_modules 까지 못 가는 경우가 있음 → 강제 inline.
+	ssr: {
+		noExternal: [/^d3-/]
+	},
+	optimizeDeps: {
+		include: ['d3-scale', 'd3-selection', 'd3-shape', 'd3-array']
+	},
 	server: {
 		host: '127.0.0.1',
 		port: 5173,
