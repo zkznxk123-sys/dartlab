@@ -13,6 +13,7 @@ from typing import Any
 
 from .agent import runAgent
 from .contracts import TraceEvent, WorkbenchTask
+from .settings.provider_catalog import wired_provider_ids
 from .workbench import WorkbenchLoop
 from .workbench.intent import isAnalysisIntent
 
@@ -65,17 +66,7 @@ def _isLLMProvider(obj: Any) -> bool:
         return False
     config = getattr(obj, "config", None)
     provider_id = (getattr(config, "provider", None) or "").lower()
-    if provider_id not in {
-        "oauth-codex",
-        "openai",
-        "gemini",
-        "codex",
-        "ollama",
-        "custom",
-        "groq",
-        "cerebras",
-        "mistral",
-    }:
+    if provider_id not in wired_provider_ids():
         return False
     try:
         return bool(obj.check_available())

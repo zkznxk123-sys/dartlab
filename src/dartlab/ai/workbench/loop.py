@@ -17,6 +17,7 @@ from collections.abc import Iterator
 from typing import Any
 
 from dartlab.ai.contracts import TraceEvent
+from dartlab.ai.settings.provider_catalog import wired_provider_ids
 
 from .heuristic import streamHeuristic
 from .passes import streamLLMPasses
@@ -73,10 +74,11 @@ def _resolveProvider(config: Any = None) -> Any:
 
 
 def _isLLMProvider(obj: Any) -> bool:
-    """5 패스 / chat-native LLM-driven path 사용 여부.
+    """5 패스 LLM-driven path 사용 여부.
 
     WorkbenchProvider Protocol (generate) 만족 + check_available True + provider id 가
-    실제 LLM 어댑터일 때 True. 미해결 / dartlab stub 등은 휴리스틱 path.
+    `provider_catalog.wired_provider_ids()` 에 등록된 어댑터일 때 True. 미해결 /
+    dartlab stub 등은 휴리스틱 path.
     """
     if obj is None:
         return False
@@ -84,17 +86,7 @@ def _isLLMProvider(obj: Any) -> bool:
         return False
     config = getattr(obj, "config", None)
     provider_id = (getattr(config, "provider", None) or "").lower()
-    if provider_id not in {
-        "oauth-codex",
-        "openai",
-        "gemini",
-        "codex",
-        "ollama",
-        "custom",
-        "groq",
-        "cerebras",
-        "mistral",
-    }:
+    if provider_id not in wired_provider_ids():
         return False
     try:
         return bool(obj.check_available())

@@ -463,31 +463,57 @@ def create_provider(*args: Any, **kwargs: Any) -> WorkbenchProvider:
     else:
         config = get_config(**kwargs)
     provider = (config.provider or "").lower()
-    if provider == "oauth-codex":
-        from .oauth_codex import OAuthCodexProvider
+    factory = _PROVIDER_FACTORIES.get(provider)
+    if factory is None:
+        return UnavailableProvider(config)
+    return factory(config)
 
-        return OAuthCodexProvider(config)
-    if provider == "codex":
-        from .codex import CodexProvider
 
-        return CodexProvider(config)
-    if provider in {"openai", "custom", "openai-compatible", "openai_compat", "groq", "cerebras", "mistral", "ollama"}:
-        return OpenAICompatibleProvider(config)
-    return UnavailableProvider(config)
+def _make_oauth_codex(config: ProviderConfig) -> WorkbenchProvider:
+    from .oauth_codex import OAuthCodexProvider
+
+    return OAuthCodexProvider(config)
+
+
+def _make_codex(config: ProviderConfig) -> WorkbenchProvider:
+    from .codex import CodexProvider
+
+    return CodexProvider(config)
+
+
+def _make_gemini(config: ProviderConfig) -> WorkbenchProvider:
+    from .gemini import GeminiProvider
+
+    return GeminiProvider(config)
+
+
+def _make_openai_compat(config: ProviderConfig) -> WorkbenchProvider:
+    return OpenAICompatibleProvider(config)
+
+
+# Provider id → factory. provider_catalog._PROVIDERS 와 1:1 일치해야 한다.
+# wired_provider_ids() 가 본 dict 의 keys 와 catalog keys 의 정합을 보장.
+_PROVIDER_FACTORIES: dict[str, Any] = {
+    "oauth-codex": _make_oauth_codex,
+    "codex": _make_codex,
+    "gemini": _make_gemini,
+    "openai": _make_openai_compat,
+    "custom": _make_openai_compat,
+    "groq": _make_openai_compat,
+    "cerebras": _make_openai_compat,
+    "mistral": _make_openai_compat,
+    "ollama": _make_openai_compat,
+    # legacy aliases — get_config normalizes but kept for safety.
+    "openai-compatible": _make_openai_compat,
+    "openai_compat": _make_openai_compat,
+}
 
 
 def available_providers() -> list[str]:
-    return [
-        "openai",
-        "ollama",
-        "custom",
-        "codex",
-        "oauth-codex",
-        "gemini",
-        "groq",
-        "cerebras",
-        "mistral",
-    ]
+    """카탈로그 등록 provider id 목록. legacy alias 제외."""
+    from ..settings.provider_catalog import wired_provider_ids
+
+    return sorted(wired_provider_ids())
 
 
 __all__ = [

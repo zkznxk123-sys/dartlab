@@ -132,6 +132,15 @@ def public_provider_ids() -> tuple[str, ...]:
     return tuple(spec.id for spec in _PROVIDERS.values() if spec.public)
 
 
+def wired_provider_ids() -> frozenset[str]:
+    """카탈로그 등록 provider id 전체 (public + hidden). LLM 판정 단일 출처.
+
+    `kernel._isLLMProvider`, `workbench.loop._isLLMProvider`, 그 외 provider
+    검증 코드는 본 함수만 사용. hardcoded set 중복 금지.
+    """
+    return frozenset(_PROVIDERS.keys())
+
+
 def provider_choices(*, include_hidden: bool = False) -> list[str]:
     """선택 가능한 provider id 목록."""
     return [spec.id for spec in _PROVIDERS.values() if include_hidden or spec.public]
