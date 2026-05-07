@@ -1,7 +1,7 @@
 """GATE — claim ↔ ref 매칭 검증 (programmatic, LLM 없음).
 
 verify_answer 도구의 검증 로직과 통합 SSOT. 답안 본문의 material claim 을 추출하고
-[refId] 토큰 또는 같은 줄 인접한 ref 종류를 매칭해 검증한다.
+`<kindRef:id>` 토큰 또는 같은 줄 인접한 ref 종류를 매칭해 검증한다 (P-revised: 단일 형식).
 
 차단 사유:
 - emit_result_missing: WORK 가 executionRef 만 만들고 emit_result 로 valueRef/tableRef/dateRef 를 안 발급
@@ -23,8 +23,10 @@ from .state import WorkbenchState
 _CODE_SPAN_RE = re.compile(r"`[^`]*`")
 _CODE_BLOCK_RE = re.compile(r"```.*?```", re.DOTALL)
 _REF_KIND = r"value|table|execution|date|web|artifact|api|skill|verify|dataset"
-_REF_TOKEN_RE = re.compile(rf"(?:\[({_REF_KIND}):[\w./\-:가-힣]+\])|(?:<({_REF_KIND})Ref?:[^>]+>)")
-_BROAD_REF_TOKEN_RE = re.compile(rf"\[({_REF_KIND})Ref?:([^\]]+)\]|<({_REF_KIND})Ref?:([^>]+)>")
+# 단일 형식 — `<kindRef:id>` (angle bracket + Ref 접미사). markdown link 문법 충돌 회피
+# + LLM 자작 fake token 차단. 이전 `[kind:id]` 사각괄호 형식 폐기 (P-revised).
+_REF_TOKEN_RE = re.compile(rf"<({_REF_KIND})Ref:[^>]+>")
+_BROAD_REF_TOKEN_RE = re.compile(rf"<({_REF_KIND})Ref:([^>]+)>")
 _MATERIAL_NUMBER_RE = re.compile(r"\d[\d,.]*\s?(?:조원|억원|원|%|배|건|개|위|Q[1-4])")
 _DATE_RE = re.compile(r"(?:20\d{2}|19\d{2})(?:[-./]\d{1,2})?(?:[-./]\d{1,2})?(?:Q[1-4])?|\d{1,2}분기")
 _MATERIAL_DATE_TERMS = ("기준", "최신", "기간", "시점", "as of", "asof", "latest")
@@ -168,10 +170,10 @@ def _hasRankingClaim(text: str) -> bool:
 
 
 def _refTokenKinds(text: str) -> set[str]:
-    """답안 본문의 [kind:id] 또는 <kindRef:id> 토큰에서 ref kind 집합 추출."""
+    """답안 본문의 `<kindRef:id>` 토큰에서 ref kind 집합 추출."""
     kinds: set[str] = set()
     for match in _REF_TOKEN_RE.finditer(str(text or "")):
-        kind_short = match.group(1) or match.group(2)
+        kind_short = match.group(1)
         if kind_short:
             kinds.add(f"{kind_short}Ref")
     return kinds
@@ -180,17 +182,17 @@ def _refTokenKinds(text: str) -> set[str]:
 def _findFakeRefTokens(text: str, refs: list[Ref]) -> list[str]:
     """답안에 박힌 ref token 중 state.refs id 와 매칭 안 되는 fake/truncated token 목록.
 
-    감지 대상:
-    - LLM 자작 fake (예: `[valueRef:value:samsung_latest_bs_total_assets:343]`)
-    - LLM 이 잘라 박은 truncated (예: `[valueRef:value:samsung_bs_…]` 또는 `[valueRef:value:samsung…]`)
+    감지 대상 (단일 `<kindRef:id>` 형식):
+    - LLM 자작 fake (예: `<valueRef:value:samsung_latest_bs_total_assets:343>`)
+    - LLM 이 잘라 박은 truncated (예: `<valueRef:value:samsung_bs_…>`)
     - kind 가 `valueRef:` 형태로 박혔지만 `value:` prefix 가 빠진 경우
     """
     state_ids = {ref.id for ref in refs}
     fake: list[str] = []
     seen: set[str] = set()
     for match in _BROAD_REF_TOKEN_RE.finditer(str(text or "")):
-        kind_short = match.group(1) or match.group(3)
-        id_raw = match.group(2) if match.group(1) else match.group(4)
+        kind_short = match.group(1)
+        id_raw = match.group(2)
         if not kind_short or id_raw is None:
             continue
         id_part = id_raw.strip()
@@ -218,7 +220,7 @@ def _findFakeRefTokens(text: str, refs: list[Ref]) -> list[str]:
 
 
 def _extractClaimsFromAnswer(text: str, refs: list[Ref]) -> list[dict]:
-    """답안의 [refId] token 주변 context 를 claim dict 으로 직렬화.
+    """답안의 `<kindRef:id>` token 주변 context 를 claim dict 으로 직렬화.
 
     출력 형식: `[{"text": context, "refIds": [...], "kind": "numeric"|"date"|"ranking"|"narrative"}]`.
     같은 ref 가 여러 번 등장하면 첫 출현만 claim 으로 등록 (중복 제거).
@@ -234,8 +236,8 @@ def _extractClaimsFromAnswer(text: str, refs: list[Ref]) -> list[dict]:
     seen_ref_ids: set[str] = set()
 
     for match in _BROAD_REF_TOKEN_RE.finditer(stripped):
-        kind_short = match.group(1) or match.group(3)
-        id_raw = match.group(2) if match.group(1) else match.group(4)
+        kind_short = match.group(1)
+        id_raw = match.group(2)
         if not kind_short or id_raw is None:
             continue
         id_part = id_raw.strip()

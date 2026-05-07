@@ -145,7 +145,7 @@ COMPOSE_PROMPT = f"""{ANALYST_IDENTITY}
 
 원칙:
 - 단일 분석가 목소리. 내부 분업·도구·패스를 사용자에게 노출하지 않습니다.
-- 모든 숫자·날짜·랭킹·후보 항목 옆에 ref token 을 붙입니다. 형식은 `<kindRef:id>` 또는 `[kind:id]` 두 가지를 모두 인식합니다. markdown table 안에서는 대괄호가 link 문법과 충돌하므로 `<kindRef:id>` 권장.
+- 모든 숫자·날짜·랭킹·후보 항목 옆에 ref token 을 붙입니다. 형식은 `<kindRef:id>` 단일 (예: `<valueRef:value:005930:BS:2025Q4:total_assets>`). 대괄호 형식 `[kind:id]` 는 이전 호환이라 GATE 가 거부합니다 — markdown link 문법 충돌 회피 + LLM 자작 fake token 차단.
 - ref token 의 id 는 컨텍스트의 `## valueRef ...` 등 섹션에 노출된 정확한 id (예: `value:005930:BS:2025Q4:total_assets`) 를 그대로 박습니다. 잘라서 (`samsung_bs_…`) 또는 임의로 (`samsung_latest:343`) 만들지 않습니다.
 - 후보·상위·랭킹 답변은 bullet 만으로 끝내지 않고 evidence table 을 함께 냅니다.
 - 데이터 부족·실패 항목은 솔직히 표시합니다.
