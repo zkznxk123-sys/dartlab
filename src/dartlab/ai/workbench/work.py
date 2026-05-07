@@ -16,6 +16,7 @@ from dartlab.ai.providers import WorkbenchProvider
 from .prompts import WORK_PROMPT
 from .runner import buildContextSummary, runLLMPass
 from .state import WorkbenchState
+from .targets import _hasRecipe
 
 
 def runWork(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[TraceEvent]:
@@ -50,11 +51,3 @@ def _inferWorkRounds(state: WorkbenchState) -> int:
     if len(state.selectedSkillRefs) <= 1 and len(targets) <= 1 and not active_lenses:
         return 4
     return 8
-
-
-def _hasRecipe(state: WorkbenchState) -> bool:
-    for ref in state.selectedSkillRefs:
-        payload = ref.payload if isinstance(ref.payload, dict) else {}
-        if payload.get("kind") == "recipe" or payload.get("recipeSteps"):
-            return True
-    return False

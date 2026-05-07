@@ -308,12 +308,13 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
     """recipe ref 의 step list 를 plan list 로 전개.
 
     각 step 의 skillId 에 대해 Skill OS 에서 spec 을 찾고, 그 capabilityRefs 로
-    engine_call plan 을 생성한다. 무한재귀 방지: state.profile 에 expandedOnce flag.
+    engine_call plan 을 생성한다. 한 번만 전개 (BRIEF retry 시 재전개 방지) —
+    명시적 `state.recipeExpanded` boolean.
 
     회귀 보호: targets >= 2 인 두 회사 비교는 휴리스틱의 _composeStatementComparison
     분기가 더 정확한 답을 만들므로 recipe 발동을 양보 (빈 list 반환).
     """
-    if state.profile.get("_recipeExpanded"):
+    if state.recipeExpanded:
         return []
     recipe_ref = _recipeRefForState(state)
     if recipe_ref is None:
@@ -322,7 +323,7 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
     if len(targets) >= 2:
         # 두 회사 비교는 휴리스틱 분기 우선 — recipe 양보.
         return []
-    state.profile["_recipeExpanded"] = True
+    state.recipeExpanded = True
 
     payload = recipe_ref.payload if isinstance(recipe_ref.payload, dict) else {}
     steps = payload.get("recipeSteps") or []

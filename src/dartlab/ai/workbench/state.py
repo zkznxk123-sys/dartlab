@@ -50,6 +50,9 @@ class WorkbenchState:
     failure: str | None = None
     currentPass: str = "init"
 
+    # internal — recipe 한 번만 전개 (BRIEF retry 시 재전개 방지). 명시적 boolean.
+    recipeExpanded: bool = False
+
     def public(self, *, currentNode: str) -> dict[str, Any]:
         return {
             "threadId": self.threadId,
