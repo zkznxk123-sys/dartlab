@@ -1,0 +1,97 @@
+{
+  "chartType": "peer-matrix",
+  "title": "삼성전자 동종업종 비교",
+  "series": [
+    {
+      "name": "매출(억)",
+      "data": [
+        3336059.0,
+        971467.0,
+        29419.0,
+        16391.0,
+        15344.0,
+        13972.0,
+        10135.0,
+        9098.0,
+        7434.0,
+        6534.0
+      ]
+    }
+  ],
+  "categories": [
+    "삼성전자",
+    "SK하이닉스",
+    "서진오토모티브",
+    "LX세미콘",
+    "하나마이크론",
+    "DB하이텍",
+    "서울반도체",
+    "원익IPS",
+    "성도이엔지",
+    "해성디에스"
+  ],
+  "options": {
+    "metrics": [
+      "매출(억)"
+    ],
+    "highlightStockCode": "005930",
+    "rowMeta": [
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자"
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스"
+      },
+      {
+        "stockCode": "122690",
+        "corpName": "서진오토모티브"
+      },
+      {
+        "stockCode": "108320",
+        "corpName": "LX세미콘"
+      },
+      {
+        "stockCode": "067310",
+        "corpName": "하나마이크론"
+      },
+      {
+        "stockCode": "000990",
+        "corpName": "DB하이텍"
+      },
+      {
+        "stockCode": "046890",
+        "corpName": "서울반도체"
+      },
+      {
+        "stockCode": "240810",
+        "corpName": "원익IPS"
+      },
+      {
+        "stockCode": "037350",
+        "corpName": "성도이엔지"
+      },
+      {
+        "stockCode": "195870",
+        "corpName": "해성디에스"
+      }
+    ]
+  },
+  "purpose": "comparison",
+  "evidenceIds": [
+    "industry:peers"
+  ],
+  "meta": {
+    "source": "industry/peers",
+    "statement": "PEER"
+  },
+  "evidenceBinding": {
+    "tableRef": "industry:peers",
+    "source": "industry",
+    "stockCode": "005930",
+    "topic": "peers",
+    "peerCount": 10,
+    "metricCount": 1
+  }
+}

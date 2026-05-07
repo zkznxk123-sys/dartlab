@@ -1,7 +1,14 @@
 <script lang="ts">
 	import type { DashboardMetric } from '$lib/browser/companyDashboardModel';
 
-	let { metrics = [] }: { metrics?: DashboardMetric[] } = $props();
+	let {
+		metrics = [],
+		onSelect
+	}: { metrics?: DashboardMetric[]; onSelect?: (metric: DashboardMetric) => void } = $props();
+
+	function handleClick(metric: DashboardMetric) {
+		if (typeof onSelect === 'function') onSelect(metric);
+	}
 
 	function values(metric: DashboardMetric): Array<number | null> {
 		return metric.series.slice(-8);
@@ -29,7 +36,14 @@
 
 <section class="kpi-ribbon" aria-label="핵심 지표">
 	{#each metrics as metric}
-		<article class="kpi {metric.tone}">
+		<article
+			class="kpi {metric.tone}"
+			class:clickable={typeof onSelect === 'function'}
+			role={typeof onSelect === 'function' ? 'button' : undefined}
+			tabindex={typeof onSelect === 'function' ? 0 : undefined}
+			onclick={() => handleClick(metric)}
+			onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleClick(metric)}
+		>
 			<div class="top">
 				<span>{metric.label}</span>
 				{#if metric.note}<em>{metric.note}</em>{/if}
@@ -65,6 +79,15 @@
 		border-radius: 7px;
 		background: linear-gradient(180deg, #08101c 0%, #060b13 100%);
 		padding: 11px;
+		text-align: left;
+	}
+	.kpi.clickable {
+		cursor: pointer;
+		transition: border-color 0.15s ease, transform 0.15s ease;
+	}
+	.kpi.clickable:hover {
+		border-color: #fb923c;
+		transform: translateY(-1px);
 	}
 	.top,
 	.bottom {

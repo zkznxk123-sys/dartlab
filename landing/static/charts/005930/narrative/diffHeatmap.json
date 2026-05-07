@@ -1,0 +1,216 @@
+{
+  "chartType": "heatmap",
+  "title": "삼성전자 공시 변화 밀도",
+  "series": [
+    {
+      "name": "변화율",
+      "data": [
+        {
+          "topic": "shareCapital",
+          "changeRate": 1.0,
+          "intensity": "high"
+        },
+        {
+          "topic": "businessOverview",
+          "changeRate": 1.0,
+          "intensity": "high"
+        },
+        {
+          "topic": "rawMaterial",
+          "changeRate": 1.0,
+          "intensity": "high"
+        },
+        {
+          "topic": "otherReferences",
+          "changeRate": 1.0,
+          "intensity": "high"
+        },
+        {
+          "topic": "companyOverview",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "companyHistory",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "capitalChange",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "articlesOfIncorporation",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "dividend",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "productService",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "salesOrder",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "riskDerivative",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "majorContractsAndRnd",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "fsSummary",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "consolidatedStatements",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "consolidatedNotes",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "financialStatements",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "financialNotes",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "mdna",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "cautionaryStatement",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "mdnaOverview",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "financialConditionAndResults",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "liquidityAndCapitalResources",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "otherFinance",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "investorProtection",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "audit",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "internalControl",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "boardOfDirectors",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "auditSystem",
+          "changeRate": 0.0,
+          "intensity": "low"
+        },
+        {
+          "topic": "shareholderMeeting",
+          "changeRate": 0.0,
+          "intensity": "low"
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "shareCapital",
+    "businessOverview",
+    "rawMaterial",
+    "otherReferences",
+    "companyOverview",
+    "companyHistory",
+    "capitalChange",
+    "articlesOfIncorporation",
+    "dividend",
+    "productService",
+    "salesOrder",
+    "riskDerivative",
+    "majorContractsAndRnd",
+    "fsSummary",
+    "consolidatedStatements",
+    "consolidatedNotes",
+    "financialStatements",
+    "financialNotes",
+    "mdna",
+    "cautionaryStatement",
+    "mdnaOverview",
+    "financialConditionAndResults",
+    "liquidityAndCapitalResources",
+    "otherFinance",
+    "investorProtection",
+    "audit",
+    "internalControl",
+    "boardOfDirectors",
+    "auditSystem",
+    "shareholderMeeting"
+  ],
+  "options": {
+    "colorScale": {
+      "low": "#22c55e",
+      "medium": "#f59e0b",
+      "high": "#ea4647"
+    }
+  },
+  "meta": {
+    "source": "docs",
+    "stockCode": "005930",
+    "corpName": "삼성전자"
+  },
+  "purpose": "evidence",
+  "evidenceIds": [
+    "docs:diff"
+  ],
+  "evidenceBinding": {
+    "tableRef": "docs:diff",
+    "source": "docs",
+    "stockCode": "005930",
+    "topic": "diff",
+    "topicCount": 30
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "version": "v1",
+  "generatedAt": "2026-05-07T01:22:17+00:00",
+  "companies": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "chartCount": 3
+    }
+  ]
+}

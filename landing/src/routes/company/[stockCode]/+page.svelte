@@ -33,6 +33,16 @@
 	import { loadStoryManifest, type StoryManifest } from '$lib/browser/storyDashboard';
 	import type { BrowserTable } from '$lib/browser/types';
 	import type { PageData } from './$types';
+	import {
+		loadAllChartSpecs,
+		loadChartManifest,
+		groupBySection,
+		type ChartManifest,
+		type ChartSpec,
+		type ChartPointRef
+	} from '$lib/browser/charts';
+	import ChartRenderer from '$chart/ChartRenderer.svelte';
+	import CopilotDock from '$lib/components/company/CopilotDock.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -55,6 +65,11 @@
 	let activeSection = $state('summary');
 	let observer: IntersectionObserver | null = null;
 
+	// viz SSOT — Python dartlab.viz 가 빌드한 ChartSpec dump.
+	// 매니페스트 + section 별 ChartSpec dict. 없으면 기존 view-based 회로 fallback.
+	let chartManifest = $state<ChartManifest | null>(null);
+	let chartSpecs = $state<Map<string, ChartSpec>>(new Map());
+
 	onMount(() => {
 		void boot();
 		return () => observer?.disconnect();
@@ -68,16 +83,21 @@
 		evidenceOpen = false;
 
 		try {
-			const [nextManifest, bundle, isQ, bsQ, cfQ] = await Promise.all([
+			const [nextManifest, bundle, isQ, bsQ, cfQ, nextChartManifest] = await Promise.all([
 				loadStoryManifest(fetch),
 				loadLiveCompany(data.stockCode),
 				loadLiveCompanyStatement(data.stockCode, 'IS', 'Q'),
 				loadLiveCompanyStatement(data.stockCode, 'BS', 'Q'),
-				loadLiveCompanyStatement(data.stockCode, 'CF', 'Q')
+				loadLiveCompanyStatement(data.stockCode, 'CF', 'Q'),
+				loadChartManifest(data.stockCode, fetch)
 			]);
 			manifest = nextManifest;
 			company = bundle;
 			statements = mergeQuarterly(bundle.statements, { IS: isQ, BS: bsQ, CF: cfQ });
+			chartManifest = nextChartManifest;
+			if (nextChartManifest) {
+				chartSpecs = await loadAllChartSpecs(data.stockCode, nextChartManifest, fetch);
+			}
 			loading = false;
 			await tick();
 			observeSections();
@@ -231,6 +251,28 @@
 		{ id: 'cf', label: 'CF' }
 	]);
 	let busyStatements = $derived(Object.values(statementLoading).some(Boolean));
+
+	// ChartSpec 매니페스트의 section 별 grouping
+	let chartSections = $derived(chartManifest ? groupBySection(chartManifest) : {});
+	let heroCharts = $derived((chartSections.hero ?? []).map((e) => chartSpecs.get(e.key)).filter((s): s is ChartSpec => Boolean(s)));
+	let narrativeCharts = $derived((chartSections.narrative ?? []).map((e) => ({ entry: e, spec: chartSpecs.get(e.key) })).filter((p): p is { entry: typeof p.entry; spec: ChartSpec } => Boolean(p.spec)));
+
+	let copilotDock = $state<{ setContext: (ctx: Record<string, unknown>) => void } | null>(null);
+
+	function onChartPoint(ref: object) {
+		// drill-back 회로의 진입점.
+		// 1. EvidencePanel 열기 (Phase 2 deep-link).
+		// 2. CopilotDock 에 selection context 주입 (다음 질문이 그 selection 컨텍스트로).
+		evidenceOpen = true;
+		const point = ref as ChartPointRef;
+		copilotDock?.setContext({
+			chartId: point.name,
+			accountKey: point.name,
+			valueRef: point.valueRef,
+			period: point.period,
+			rcept_no: point.rcept_no
+		});
+	}
 </script>
 
 <svelte:head>
@@ -266,7 +308,15 @@
 
 		<TocRail activeSection={activeSection} items={tocItems} />
 
-		<KpiRibbon metrics={view.kpis} />
+		{#if heroCharts.length}
+			<section class="hero-charts" data-section id="hero">
+				{#each heroCharts as spec}
+					<ChartRenderer {spec} onPointClick={onChartPoint} />
+				{/each}
+			</section>
+		{/if}
+
+		<KpiRibbon metrics={view.kpis} onSelect={() => (evidenceOpen = true)} />
 
 		{#if busyStatements || secondaryLoading}
 			<div class="load-note">
@@ -278,6 +328,27 @@
 			{#each view.questions as section}
 				<StoryReportSection {section} onOpenEvidence={openEvidence} onSelectRow={selectTableRow} />
 			{/each}
+
+			{#if narrativeCharts.length}
+				<section class="viz-narrative-band" data-section id="viz-narrative">
+					<div class="band-head">
+						<div class="eyebrow">viz 엔진 산출</div>
+						<h2>차트 SSOT</h2>
+						<p>Python <code>dartlab.viz</code> 가 빌드한 ChartSpec — 모든 datapoint 가 tableRef 까지 drill 된다.</p>
+					</div>
+					<div class="viz-narrative-grid">
+						{#each narrativeCharts as { entry, spec }}
+							<article>
+								<header>
+									<small>{entry.purpose ?? entry.chartType}</small>
+									<h3>{entry.title}</h3>
+								</header>
+								<ChartRenderer {spec} onPointClick={onChartPoint} />
+							</article>
+						{/each}
+					</div>
+				</section>
+			{/if}
 
 			<section class="statement-band">
 				<div>
@@ -300,6 +371,14 @@
 			{changes}
 			sourceStatus={company.sourceStatus}
 		/>
+
+		<div class="copilot-anchor">
+			<CopilotDock
+				bind:this={copilotDock}
+				stockCode={data.stockCode}
+				onOpenEvidence={() => (evidenceOpen = true)}
+			/>
+		</div>
 	{/if}
 </main>
 
@@ -326,11 +405,68 @@
 	.statement-band {
 		grid-column: 1 / -1;
 	}
-	.statement-band {
+	.statement-band,
+	.viz-narrative-band {
 		border: 1px solid #1e2433;
 		border-radius: 8px;
 		background: rgba(8, 13, 23, 0.96);
 		padding: 16px;
+	}
+	.hero-charts {
+		max-width: var(--company-shell-width);
+		margin: 12px auto 0;
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+	.viz-narrative-band {
+		display: grid;
+		gap: 14px;
+	}
+	.viz-narrative-band .band-head {
+		display: grid;
+		gap: 4px;
+	}
+	.viz-narrative-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+		gap: 12px;
+	}
+	.viz-narrative-grid article {
+		border: 1px solid #263145;
+		border-radius: 7px;
+		background: #060b13;
+		padding: 11px 13px;
+	}
+	.viz-narrative-grid header small {
+		display: block;
+		font-size: 10px;
+		color: #fb923c;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+	.viz-narrative-grid header h3 {
+		margin: 4px 0 8px;
+		font-size: 14px;
+		font-weight: 700;
+		color: #f8fafc;
+	}
+	.copilot-anchor {
+		position: fixed;
+		right: 16px;
+		bottom: 16px;
+		width: min(360px, calc(100vw - 32px));
+		max-height: calc(100vh - 32px);
+		z-index: 60;
+		pointer-events: auto;
+	}
+	@media (max-width: 880px) {
+		.copilot-anchor {
+			right: 8px;
+			bottom: 8px;
+			width: calc(100vw - 16px);
+		}
 	}
 	.eyebrow {
 		color: #fb923c;

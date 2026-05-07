@@ -42,6 +42,13 @@
 		if (source.includes('price')) return '시장가격';
 		return '원본 데이터';
 	}
+
+	const DART_BASE = 'https://dart.fss.or.kr/dsaf001/main.do';
+
+	function dartLink(rceptNo: string | null | undefined): string | null {
+		if (!rceptNo) return null;
+		return `${DART_BASE}?rcpNo=${rceptNo}`;
+	}
 </script>
 
 <Dialog.Root bind:open>
@@ -111,6 +118,11 @@
 							<strong>{doc.title}</strong>
 							<span>{doc.year ?? '연도 없음'} · {doc.reportType ?? '보고서'}</span>
 							<p>{doc.excerpt}</p>
+							{#if dartLink(doc.rceptNo)}
+								<a class="deep-link" href={dartLink(doc.rceptNo)} target="_blank" rel="noopener noreferrer">
+									DART 원문 →
+								</a>
+							{/if}
 						</article>
 					{:else}
 						<p>연결된 원문 발췌가 없습니다.</p>
@@ -258,5 +270,20 @@
 	}
 	article p {
 		margin-top: 6px;
+	}
+	.deep-link {
+		display: inline-block;
+		margin-top: 8px;
+		padding: 4px 8px;
+		border: 1px solid #fb923c;
+		border-radius: 5px;
+		color: #fb923c;
+		font-size: 11px;
+		font-weight: 600;
+		text-decoration: none;
+		transition: background 0.15s ease;
+	}
+	.deep-link:hover {
+		background: rgba(251, 146, 60, 0.12);
 	}
 </style>

@@ -1,0 +1,88 @@
+{
+  "version": "v1",
+  "stockCode": "005930",
+  "corpName": "삼성전자",
+  "generatedAt": "2026-05-07T01:22:17+00:00",
+  "charts": [
+    {
+      "section": "narrative",
+      "key": "diffHeatmap",
+      "path": "narrative/diffHeatmap.json",
+      "chartType": "heatmap",
+      "title": "삼성전자 공시 변화 밀도",
+      "purpose": "evidence",
+      "evidenceBinding": {
+        "tableRef": "docs:diff",
+        "source": "docs",
+        "stockCode": "005930",
+        "topic": "diff",
+        "topicCount": 30
+      },
+      "evidenceIds": [
+        "docs:diff"
+      ]
+    },
+    {
+      "section": "hero",
+      "key": "sixActRadar",
+      "path": "hero/sixActRadar.json",
+      "chartType": "six-act-radar",
+      "title": "삼성전자 6 막 종합 점수",
+      "purpose": "comparison",
+      "evidenceBinding": {
+        "tableRef": "story:sixAct",
+        "source": "story",
+        "stockCode": "005930",
+        "topic": "sixAct",
+        "axes": [
+          "macro",
+          "sector",
+          "firm",
+          "financial",
+          "value",
+          "risk"
+        ],
+        "axisLabels": {
+          "macro": "거시",
+          "sector": "산업",
+          "firm": "기업",
+          "financial": "재무",
+          "value": "가치",
+          "risk": "리스크"
+        }
+      },
+      "evidenceIds": [
+        "story:sixAct"
+      ]
+    },
+    {
+      "section": "peer",
+      "key": "peerMatrix",
+      "path": "peer/peerMatrix.json",
+      "chartType": "peer-matrix",
+      "title": "삼성전자 동종업종 비교",
+      "purpose": "comparison",
+      "evidenceBinding": {
+        "tableRef": "industry:peers",
+        "source": "industry",
+        "stockCode": "005930",
+        "topic": "peers",
+        "peerCount": 10,
+        "metricCount": 1
+      },
+      "evidenceIds": [
+        "industry:peers"
+      ]
+    }
+  ],
+  "skipped": [
+    "revenueTrend:no_data",
+    "balanceSheet:no_data",
+    "profitability:no_data",
+    "cashflowWaterfall:no_data",
+    "dividend:no_data",
+    "insightRadar:no_data",
+    "ratioSparklines:no_data"
+  ],
+  "elapsedSec": 3.71
+}
