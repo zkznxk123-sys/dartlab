@@ -41,7 +41,6 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
     state = WorkbenchState(
         question=str(question or "").strip(),
         threadId=str(kwargs.get("threadId") or ""),
-        messages=list(kwargs.get("history") or kwargs.get("messages") or []),
     )
     scratchpad = Scratchpad(state.runId)
     activity_count = 0

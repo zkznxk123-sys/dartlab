@@ -28,7 +28,6 @@ def streamLLMPasses(
     state = WorkbenchState(
         question=str(question or "").strip(),
         threadId=str(kwargs.get("threadId") or ""),
-        messages=list(kwargs.get("history") or kwargs.get("messages") or []),
     )
     scratchpad = Scratchpad(state.runId)
     scratchpad.append("start", {"question": state.question, "provider": getattr(provider, "name", "?")})

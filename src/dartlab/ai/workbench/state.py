@@ -14,7 +14,6 @@ class WorkbenchState:
     question: str
     threadId: str = ""
     runId: str = field(default_factory=lambda: uuid4().hex[:12])
-    messages: list[dict[str, Any]] = field(default_factory=list)
 
     # BRIEF
     intent: str = "research"
