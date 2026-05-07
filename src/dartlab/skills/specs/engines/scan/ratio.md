@@ -5,20 +5,19 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: "scan engine application skill for 비율: 전종목 단일 재무비율 시계열 (ROE, 부채비율 등)."
+purpose: "scan 엔진의 ratio 축 응용 — 전종목 단일 재무비율 시계열 (ROE, 부채비율 등)."
 whenToUse:
   - "scan"
   - "ratio"
   - "비율"
   - "전종목 단일 재무비율 시계열 (ROE, 부채비율 등)"
 inputs:
-  - "target"
-  - "period"
-  - "axis or method"
+  - "축 이름 (axis)"
+  - "필요 시 axis-specific target"
 outputs:
-  - "result"
+  - "DataFrame (전종목 횡단)"
   - "evidence refs"
-  - "limits and assumptions"
+  - "한계와 가정"
 capabilityRefs:
   - "scan"
 knowledgeRefs:
@@ -35,9 +34,9 @@ requiredEvidence:
   - "table"
   - "executionRef"
 expectedOutputs:
-  - "public call"
-  - "representative return shape"
-  - "verification result"
+  - "공개 호출"
+  - "대표 반환 형태"
+  - "검증 결과"
 runtimeCompatibility:
   server:
     status: supported
@@ -50,42 +49,55 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "Do not list candidates without universe and datasetAsOf."
-  - "Do not answer with company names only; include a ranking/evidence table."
-  - "Do not present screening output as deep analysis."
+  - "universe / datasetAsOf 없이 후보 나열 금지."
+  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
+  - "screening 결과를 심층 분석으로 제시 금지."
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-04'
+lastUpdated: '2026-05-07'
 ---
 
 ## 엔진 역할
 
-scan engine application skill for 비율: 전종목 단일 재무비율 시계열 (ROE, 부채비율 등).
+scan 엔진의 비율 축 응용 skill — 전종목 단일 재무비율 시계열 (ROE, 부채비율 등). SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/scan/__init__.py`) + `scanRatio()` 함수 docstring.
 
 ## 공개 호출 방식
 
 ```python
 import dartlab
-result = dartlab.scan("ratio")
+
+# ratioName 필수
+df = dartlab.scan("ratio", "roe")
+
+# accessor (동등)
+df = dartlab.scan.ratio("roe")
 ```
 
 ## 호출 동작
 
-Reads DART+EDGAR universe prebuilt/provider data and computes candidates or rankings. Primitive axes may require a target argument, so check the guide example first.
+전종목 finance / disclosure / market universe 를 읽어 비율 축 지표를 산출한다. 전종목 단일 재무비율 시계열 (ROE, 부채비율 등). 결손 종목은 결과 DataFrame 의 null 또는 별도 flag 로 표현하며 0 으로 채우지 않는다. 자세한 동작은 base SKILL `engines.scan` + `scanRatio()` docstring 참조.
 
 ## 대표 반환 형태
 
-Returns a DataFrame. Core fields are stockCode/ticker, corpName/name, market/universe, latestAsOf/asOf, metric/value/score, rank, source/basis, and flags.
+DataFrame 반환. 공통 column:
+
+- `stockCode` / `corpName`: 종목 식별자
+- `market`: KOSPI / KOSDAQ / KONEX
+- `latestAsOf` / `asOf`: 데이터 기준일
+- 축 고유 metric / score / rank / grade column (정확한 spec 은 `scanRatio()` docstring 검산)
+- `flags`: 결손 / 이상 / 비교 불가 신호
+
+전체 column 은 `scanRatio()` docstring 으로 검산. 코드 변경 시 본 skill 도 같이 갱신.
 
 ## 기본 실행 순서
 
-1. target, period, and source data are fixed first.
-2. Run the public call exactly as documented.
-3. Check latestAsOf/date, missing values, flags, and assumptions.
-4. Bind numeric claims to tableRef/valueRef/dateRef/executionRef.
-5. Hand off multi-axis narrative composition to story or the parent report skill.
+1. universe 와 datasetAsOf 확정.
+2. 위 공개 호출 그대로 실행.
+3. 결손 종목 / `flags` / 이상치 점검.
+4. 랭킹 / 후보 답변은 universe + datasetAsOf + 핵심 column 표를 evidence 로 묶음.
+5. 심층 해석은 `engines.analysis` 또는 `engines.story` 가 담당.
 
 ## 기본 검증
 
-This skill is a public execution document. If this axis call, representative return keys, error behavior, or runtime limits change, update this file in the same change.
+이 skill 은 공개 실행 문서다. 본 axis 호출 방식, 반환 column, 오류 / 제한 동작이 변경되면 같은 변경에서 본 파일을 갱신한다. SSOT 는 `_AXIS_REGISTRY` + `scanRatio()` docstring.

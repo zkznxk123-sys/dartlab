@@ -5,20 +5,19 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: "scan engine application skill for 네트워크: 상장사 관계 네트워크 (출자/지분/계열)."
+purpose: "scan 엔진의 network 축 응용 — 상장사 관계 네트워크 (출자 / 지분 / 계열)."
 whenToUse:
   - "scan"
   - "network"
   - "네트워크"
-  - "상장사 관계 네트워크 (출자/지분/계열)"
+  - "상장사 관계 네트워크 (출자 / 지분 / 계열)"
 inputs:
-  - "target"
-  - "period"
-  - "axis or method"
+  - "축 이름 (axis)"
+  - "필요 시 axis-specific target"
 outputs:
-  - "result"
+  - "DataFrame (전종목 횡단)"
   - "evidence refs"
-  - "limits and assumptions"
+  - "한계와 가정"
 capabilityRefs:
   - "scan"
 knowledgeRefs:
@@ -35,9 +34,9 @@ requiredEvidence:
   - "table"
   - "executionRef"
 expectedOutputs:
-  - "public call"
-  - "representative return shape"
-  - "verification result"
+  - "공개 호출"
+  - "대표 반환 형태"
+  - "검증 결과"
 runtimeCompatibility:
   server:
     status: supported
@@ -50,42 +49,55 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "Do not list candidates without universe and datasetAsOf."
-  - "Do not answer with company names only; include a ranking/evidence table."
-  - "Do not present screening output as deep analysis."
+  - "universe / datasetAsOf 없이 후보 나열 금지."
+  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
+  - "screening 결과를 심층 분석으로 제시 금지."
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-04'
+lastUpdated: '2026-05-07'
 ---
 
 ## 엔진 역할
 
-scan engine application skill for 네트워크: 상장사 관계 네트워크 (출자/지분/계열).
+scan 엔진의 네트워크 축 응용 skill — 상장사 관계 네트워크 (출자 / 지분 / 계열). SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/scan/__init__.py`) + `build_graph()` 함수 docstring.
 
 ## 공개 호출 방식
 
 ```python
 import dartlab
-result = dartlab.scan("network")
+
+# 1. 문자열 호출
+df = dartlab.scan("network")
+
+# 2. accessor (동등)
+df = dartlab.scan.network()
 ```
 
 ## 호출 동작
 
-Reads DART universe prebuilt/provider data and computes candidates or rankings. Primitive axes may require a target argument, so check the guide example first.
+전종목 finance / disclosure / market universe 를 읽어 네트워크 축 지표를 산출한다. 상장사 관계 네트워크 (출자 / 지분 / 계열). 결손 종목은 결과 DataFrame 의 null 또는 별도 flag 로 표현하며 0 으로 채우지 않는다. 자세한 동작은 base SKILL `engines.scan` + `build_graph()` docstring 참조.
 
 ## 대표 반환 형태
 
-Returns a DataFrame. Core fields are stockCode/ticker, corpName/name, market/universe, latestAsOf/asOf, metric/value/score, rank, source/basis, and flags.
+DataFrame 반환. 공통 column:
+
+- `stockCode` / `corpName`: 종목 식별자
+- `market`: KOSPI / KOSDAQ / KONEX
+- `latestAsOf` / `asOf`: 데이터 기준일
+- 축 고유 metric / score / rank / grade column (정확한 spec 은 `build_graph()` docstring 검산)
+- `flags`: 결손 / 이상 / 비교 불가 신호
+
+전체 column 은 `build_graph()` docstring 으로 검산. 코드 변경 시 본 skill 도 같이 갱신.
 
 ## 기본 실행 순서
 
-1. target, period, and source data are fixed first.
-2. Run the public call exactly as documented.
-3. Check latestAsOf/date, missing values, flags, and assumptions.
-4. Bind numeric claims to tableRef/valueRef/dateRef/executionRef.
-5. Hand off multi-axis narrative composition to story or the parent report skill.
+1. universe 와 datasetAsOf 확정.
+2. 위 공개 호출 그대로 실행.
+3. 결손 종목 / `flags` / 이상치 점검.
+4. 랭킹 / 후보 답변은 universe + datasetAsOf + 핵심 column 표를 evidence 로 묶음.
+5. 심층 해석은 `engines.analysis` 또는 `engines.story` 가 담당.
 
 ## 기본 검증
 
-This skill is a public execution document. If this axis call, representative return keys, error behavior, or runtime limits change, update this file in the same change.
+이 skill 은 공개 실행 문서다. 본 axis 호출 방식, 반환 column, 오류 / 제한 동작이 변경되면 같은 변경에서 본 파일을 갱신한다. SSOT 는 `_AXIS_REGISTRY` + `build_graph()` docstring.
