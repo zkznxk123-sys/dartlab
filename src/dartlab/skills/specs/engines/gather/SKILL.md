@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Gather 엔진은 가격, 컨센서스, 수급, 뉴스, 배당, 소유구조, 섹터, 매크로 등 외부/보조 데이터를 수집하는 실행 스킬이다.
+purpose: Gather 엔진은 가격, 컨센서스, 수급, 뉴스, 배당, 소유구조, 섹터, 매크로, catalyst 일정 등 외부/보조 데이터를 수집하는 실행 스킬이다. 트리거 — '가격', '뉴스', '소유구조', '컨센서스', '외부 데이터 수집', '다가오는 일정'.
 whenToUse:
   - Gather
   - gather
@@ -17,6 +17,9 @@ whenToUse:
   - 소유구조
   - 섹터
   - 매크로 원자료
+  - 다가오는 일정
+  - catalyst calendar
+  - 정기공시 due
 inputs:
   - axis 또는 method
   - stockCode/ticker
@@ -88,7 +91,7 @@ linkedSkills:
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 엔진 역할
