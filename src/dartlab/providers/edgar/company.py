@@ -371,6 +371,46 @@ def _isPeriodColumn(col: str) -> bool:
     return bool(_PERIOD_COLUMN_RE.fullmatch(col))
 
 
+def _filterPeriodColumnsByAsOf(df: "pl.DataFrame", asOf: str) -> "pl.DataFrame":
+    """asOf 이후 fiscal period 컬럼 drop — look-ahead bias 방지 (DART 와 동일 패턴).
+
+    EDGAR finance topic 의 horizontal view 는 컬럼명이 fiscal period
+    (예: "2024", "2024Q3"). asOf 이후 컬럼 drop 으로 미래 정보 누설 차단.
+    """
+    asof_year, asof_quarter = _parse_asof(asOf)
+    if asof_year is None:
+        return df
+    keep_cols: list[str] = []
+    for col in df.columns:
+        col_year, col_quarter = _parse_asof(col)
+        if col_year is None:
+            keep_cols.append(col)
+            continue
+        if col_year < asof_year:
+            keep_cols.append(col)
+        elif col_year == asof_year and (col_quarter is None or asof_quarter is None or col_quarter <= asof_quarter):
+            keep_cols.append(col)
+    return df.select(keep_cols) if len(keep_cols) < len(df.columns) else df
+
+
+def _parse_asof(value: str) -> tuple[int | None, int | None]:
+    """fiscal period or ISO date → (year, quarter or None). 미인식 → (None, None)."""
+    raw = str(value or "").strip()
+    if not raw:
+        return None, None
+    m = re.match(r"^(\d{4})[Qq]([1-4])$", raw)
+    if m:
+        return int(m.group(1)), int(m.group(2))
+    m = re.match(r"^(\d{4})-(\d{1,2})-\d{1,2}$", raw)
+    if m:
+        month = int(m.group(2))
+        return int(m.group(1)), (month - 1) // 3 + 1
+    m = re.match(r"^(\d{4})$", raw)
+    if m:
+        return int(m.group(1)), None
+    return None, None
+
+
 class Company:
     """SEC EDGAR 기반 미국 기업 진입점.
 
@@ -1581,6 +1621,7 @@ class Company:
         *,
         period: str | list[str] | None = None,
         raw: bool = False,
+        asOf: str | None = None,
         **_kw: Any,
     ) -> pl.DataFrame | None:
         """topic 데이터 조회 — sections 사상의 핵심 소비 경로 (내부 구현).
@@ -1640,7 +1681,10 @@ class Company:
         """
         from dartlab.providers.edgar._showDispatch import showImpl
 
-        return showImpl(self, topic, block, period=period, raw=raw, **_kw)
+        result = showImpl(self, topic, block, period=period, raw=raw, **_kw)
+        if asOf is None or result is None:
+            return result
+        return _filterPeriodColumnsByAsOf(result, asOf)
 
     @staticmethod
     def _transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame | None:

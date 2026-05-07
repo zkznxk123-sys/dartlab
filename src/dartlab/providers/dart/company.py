@@ -239,6 +239,52 @@ _TOPIC_LABELS: dict[str, str] = {
 }
 
 
+def _filterPeriodColumnsByAsOf(df: "pl.DataFrame", asOf: str) -> "pl.DataFrame":
+    """asOf 이후 fiscal period 컬럼/행 drop — look-ahead bias 방지.
+
+    DART 재무제표 finance topic 의 horizontal view 는 컬럼명이 fiscal period
+    (예: "2025Q4", "2024", "2023Q3"). 사용자가 시점 X 분석 재현 시 X 이후
+    컬럼은 미래 정보 누설.
+
+    asOf 형식: "YYYY-MM-DD" / "YYYYQn" / "YYYY". 컬럼 헤더가 fiscal period
+    pattern 이면 비교, 아니면 그대로 유지 (snakeId / 항목 같은 metadata 컬럼).
+    """
+    asof_year, asof_quarter = _parse_asof(asOf)
+    if asof_year is None:
+        return df
+    keep_cols: list[str] = []
+    for col in df.columns:
+        col_year, col_quarter = _parse_asof(col)
+        if col_year is None:
+            keep_cols.append(col)
+            continue
+        if col_year < asof_year:
+            keep_cols.append(col)
+        elif col_year == asof_year and (col_quarter is None or asof_quarter is None or col_quarter <= asof_quarter):
+            keep_cols.append(col)
+    return df.select(keep_cols) if len(keep_cols) < len(df.columns) else df
+
+
+def _parse_asof(value: str) -> tuple[int | None, int | None]:
+    """fiscal period or ISO date → (year, quarter or None). 미인식 → (None, None)."""
+    import re as _re
+
+    raw = str(value or "").strip()
+    if not raw:
+        return None, None
+    m = _re.match(r"^(\d{4})[Qq]([1-4])$", raw)
+    if m:
+        return int(m.group(1)), int(m.group(2))
+    m = _re.match(r"^(\d{4})-(\d{1,2})-\d{1,2}$", raw)
+    if m:
+        month = int(m.group(2))
+        return int(m.group(1)), (month - 1) // 3 + 1
+    m = _re.match(r"^(\d{4})$", raw)
+    if m:
+        return int(m.group(1)), None
+    return None, None
+
+
 def listExportModules() -> list[tuple[str, str]]:
     """Excel/export용 DART 공개 모듈 목록.
 
@@ -1485,6 +1531,7 @@ class Company:
         freq: str = "Q",
         scope: str = "consolidated",
         raw: bool = False,
+        asOf: str | None = None,
     ) -> pl.DataFrame | None:
         """topic 의 데이터를 반환 — 내부 구현 (사용자는 ``c.show`` 호출).
 
@@ -1577,7 +1624,10 @@ class Company:
         """
         from dartlab.providers.dart._showDispatch import showImpl
 
-        return showImpl(self, topic, block, period=period, freq=freq, scope=scope, raw=raw)
+        result = showImpl(self, topic, block, period=period, freq=freq, scope=scope, raw=raw)
+        if asOf is None or result is None:
+            return result
+        return _filterPeriodColumnsByAsOf(result, asOf)
 
     def _showFinanceStatement(
         self,
