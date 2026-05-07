@@ -1,8 +1,12 @@
-"""HARVEST — trace 보고 propose_skill 후보 결정 + 메모리 자동 wiring.
+"""HARVEST — 세션 종료 시 메모리 자동 wiring (P-revised: propose_skill 폐기).
 
 세션 종료 시:
-- 선택된 skill 별로 recordSkillUsage() — promotion 통계 누적
+- 선택된 skill 별로 recordSkillUsage() — usage 통계 누적
 - 답변 요약을 remember() 로 decisions.jsonl 에 저장 — 다음 세션 recall
+
+P-revised 이전: LLM 이 propose_skill tool 로 신규 skill 후보 spec 작성 → kind=generated
+status=unverified 사다리. 0 promoted skill 로 dormant 상태였고 outcome ground truth loop 가
+실용적 학습 신호로 대체.
 """
 
 from __future__ import annotations
@@ -13,27 +17,17 @@ from dartlab.ai.contracts import TraceEvent
 from dartlab.ai.memory import recordSkillUsage, remember
 from dartlab.ai.providers import WorkbenchProvider
 
-from .prompts import HARVEST_PROMPT
-from .runner import buildContextSummary, runLLMPass
 from .state import WorkbenchState
 
 
 def runHarvest(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[TraceEvent]:
-    yield from runLLMPass(
-        state,
-        provider,
-        passName="harvest",
-        systemPrompt=HARVEST_PROMPT,
-        userContext=buildContextSummary(state),
-        allowedTools=["propose_skill"],
-        maxRounds=2,
-    )
+    """P-revised: LLM 패스 호출 없이 memory wiring 만 실행.
 
-    for call in state.toolCalls:
-        if call.get("pass") == "harvest" and call.get("tool") == "propose_skill" and call.get("ok"):
-            state.harvestProposals.append({"args": call.get("args")})
-
+    provider 인자는 시그니처 호환을 위해 유지. 향후 outcome_log resolve hook 도입 시 사용.
+    """
+    yield TraceEvent(kind="pass_enter", data={"pass": "harvest"})
     _wireMemory(state)
+    yield TraceEvent(kind="pass_exit", data={"pass": "harvest"})
 
 
 def _wireMemory(state: WorkbenchState) -> None:

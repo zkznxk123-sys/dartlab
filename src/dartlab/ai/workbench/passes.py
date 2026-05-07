@@ -16,7 +16,6 @@ from .compose import runCompose
 from .critique import runCritique
 from .gate import runGate
 from .harvest import runHarvest
-from .scratchpad import Scratchpad
 from .state import WorkbenchState
 from .targets import _hasRecipe
 from .work import runWork
@@ -29,8 +28,6 @@ def streamLLMPasses(
         question=str(question or "").strip(),
         threadId=str(kwargs.get("threadId") or ""),
     )
-    scratchpad = Scratchpad(state.runId)
-    scratchpad.append("start", {"question": state.question, "provider": getattr(provider, "name", "?")})
 
     yield TraceEvent("graph_node", {"node": "brief", "status": "running"})
     yield from runBrief(state, provider)
@@ -92,7 +89,6 @@ def streamLLMPasses(
                 "finalEvent": "answer",
                 "responseStatus": "ok" if state.status == "done" else "failed",
                 "refCount": len(state.refs),
-                "scratchpad": scratchpad.ref(),
                 "passes": list(graphNodes),
             },
         },

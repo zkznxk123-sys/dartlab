@@ -21,7 +21,6 @@ from dartlab.ai.tools.types import ToolResult
 from dartlab.ai.tools.verifyAnswer import verifyAnswer
 
 from .harvest import _wireMemory
-from .scratchpad import Scratchpad
 from .state import WorkbenchState
 from .targets import (
     _buildQuestionProfile,
@@ -44,7 +43,6 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
         question=str(question or "").strip(),
         threadId=str(kwargs.get("threadId") or ""),
     )
-    scratchpad = Scratchpad(state.runId)
     activity_count = 0
 
     # ── BRIEF ──
@@ -52,14 +50,12 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
     activity_count += 1
     state.profile = _buildQuestionProfile(state.question, stockCode=kwargs.get("stockCode"))
     state.intent = str(state.profile.get("taskType") or "research")
-    scratchpad.append("brief.profile", {"profile": state.profile})
 
     yield _toolStart(state, "read_skill", {"query": state.question, "limit": 8})
     skill_result = readSkill(state.question, limit=8)
     state.selectedSkillRefs = skill_result.refs
     state.refs.extend(skill_result.refs)
     state.toolCalls.append({"pass": "brief", "tool": "read_skill", "ok": skill_result.ok})
-    scratchpad.append("brief.read_skill", {"result": skill_result.to_dict()})
     yield _toolResult(state, "read_skill", skill_result)
     yield TraceEvent("reference", {"refs": [ref.to_dict() for ref in skill_result.refs], "query": state.question})
 
@@ -68,7 +64,6 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
     state.apiRefs = spec_result.refs
     state.refs.extend(spec_result.refs)
     state.toolCalls.append({"pass": "brief", "tool": "read_capability", "ok": spec_result.ok})
-    scratchpad.append("brief.read_capability", {"result": spec_result.to_dict()})
     yield _toolResult(state, "read_capability", spec_result)
 
     # selectedSkillRefs 의 requiredEvidence 통합 → state.requiredEvidence
@@ -79,7 +74,6 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
                 state.requiredEvidence.append(str(ev))
 
     state.plan = _planEvidence(state)
-    scratchpad.append("brief.plan", {"plan": state.plan})
     yield TraceEvent(
         "plan",
         {
@@ -102,7 +96,6 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
         state.toolCalls.append({"pass": "work", "tool": plan["tool"], "ok": result.ok, "summary": result.summary})
         state.refs.extend(result.refs)
         results.append({"plan": plan, "result": result})
-        scratchpad.append("work.toolResult", {"tool": plan["tool"], "args": plan["args"], "result": result.to_dict()})
         yield _toolResult(state, plan["tool"], result)
         if not result.ok:
             state.failure = result.error or "tool_failed"
@@ -125,7 +118,6 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
         verify_result = verifyAnswer(answer, state.refs)
         state.verification = verify_result.data
         state.refs.extend(verify_result.refs)
-        scratchpad.append("gate.verify", verify_result.to_dict())
         yield TraceEvent("verify", {"refId": "verify:answer", "result": verify_result.data})
         if not verify_result.ok:
             state.failure = ",".join(verify_result.data.get("issues") or ["verification_failed"])
@@ -155,7 +147,6 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
                     "responseStatus": "failed",
                     "failureReason": state.failure,
                     "activityCount": activity_count,
-                    "scratchpad": scratchpad.ref(),
                     "passes": list(graphNodes),
                 },
             },
@@ -182,7 +173,6 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
                 "responseStatus": "ok",
                 "refCount": len(state.refs),
                 "activityCount": activity_count,
-                "scratchpad": scratchpad.ref(),
                 "passes": list(graphNodes),
             },
         },

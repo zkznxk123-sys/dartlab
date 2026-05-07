@@ -7,7 +7,6 @@ from typing import Any, Callable
 
 from .compileVisual import compileVisual
 from .inspectDataset import inspectDataset
-from .proposeSkill import proposeSkill
 from .readCapability import readCapability
 from .readSkill import readSkill
 from .runPython import runPython
@@ -72,28 +71,6 @@ _SPECS: dict[str, ToolSpec] = {
             "required": ["name", "content"],
         },
     ),
-    "propose_skill": ToolSpec(
-        "propose_skill",
-        "HARVEST가 발견한 새 분석 절차를 skill spec(kind: generated, status: unverified)으로 작성한다. 쓸 때: HARVEST 단계 trace 기반 신규 후보. 안 쓸 때: WORK·COMPOSE 도중 (운영자 수동 작성 영역).",
-        {
-            "type": "object",
-            "properties": {
-                "skillId": {"type": "string"},
-                "title": {"type": "string"},
-                "purpose": {"type": "string"},
-                "category": {"type": "string"},
-                "engine": {"type": "string"},
-                "whenToUse": {"type": "array", "items": {"type": "string"}},
-                "capabilityRefs": {"type": "array", "items": {"type": "string"}},
-                "datasetRefs": {"type": "array", "items": {"type": "string"}},
-                "toolRefs": {"type": "array", "items": {"type": "string"}},
-                "knowledgeRefs": {"type": "array", "items": {"type": "string"}},
-                "requiredEvidence": {"type": "array", "items": {"type": "string"}},
-                "body": {"type": "string"},
-            },
-            "required": ["skillId", "title", "purpose"],
-        },
-    ),
     "compile_visual": ToolSpec(
         "compile_visual",
         "분석 결과를 차트/표 spec 으로 변환해 visualRef 를 발급한다. agent.py 가 visualRef 감지 시 VIEW_SPEC event 발행 → ChartRenderer 인라인. 쓸 때: 시계열·비교·분포 시각화. 안 쓸 때: 단순 텍스트 답변 (chartType 모를 때).",
@@ -142,7 +119,6 @@ _TOOLS: dict[str, ToolFn] = {
     "read_skill": readSkill,
     "read_capability": readCapability,
     "save_artifact": saveArtifact,
-    "propose_skill": proposeSkill,
     "inspect_dataset": inspectDataset,
     "compile_visual": compileVisual,
 }
@@ -150,7 +126,7 @@ _TOOLS: dict[str, ToolFn] = {
 CANONICAL_TOOL_NAMES = tuple(_SPECS.keys())
 
 # SSOT P-revised — canonical 6 데이터 도구 (chat-native LLM 노출 default).
-# inspect_dataset 은 workbench WORK 패스 한정 helper, propose_skill 은 다음 commit 에서 삭제.
+# inspect_dataset 은 workbench WORK 패스 한정 helper.
 CANONICAL_V2: tuple[str, ...] = (
     "run_python",
     "read_skill",

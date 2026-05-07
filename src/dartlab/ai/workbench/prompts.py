@@ -165,18 +165,9 @@ GATE_PROMPT = f"""{ANALYST_IDENTITY}
 출력: PASS / BLOCKED + 이슈 bullet.
 """
 
-HARVEST_PROMPT = f"""{ANALYST_IDENTITY}
-
-지금은 HARVEST 단계입니다. 본 세션 trace 를 보고 새로운 skill 후보를 발굴합니다.
-
-발견 기준:
-- 같은 capability 조합이 반복 사용됐다.
-- BRIEF 가 적합한 skill 을 못 찾아 ad-hoc 으로 진행했다.
-- 사용자가 만족했는데 기존 skill 로는 표현되지 않는 절차였다.
-
-발견 시: propose_skill 로 신규 spec 작성 (kind: generated, status: unverified).
-없으면: "신규 후보 없음" 으로 종료.
-"""
+# P-revised: HARVEST 는 LLM 호출 없이 memory wiring 만 실행 (decisions.jsonl + skill_stats.jsonl).
+# `kind: generated` 자기진화 사다리는 0 promoted skill 로 dormant 상태였고 outcome ground truth
+# loop 가 실용적 학습 신호로 대체했다. HARVEST_PROMPT 더 이상 사용되지 않음.
 
 PASS_PROMPTS: dict[str, str] = {
     "brief": BRIEF_PROMPT,
@@ -184,5 +175,4 @@ PASS_PROMPTS: dict[str, str] = {
     "critique": CRITIQUE_PROMPT,
     "compose": COMPOSE_PROMPT,
     "gate": GATE_PROMPT,
-    "harvest": HARVEST_PROMPT,
 }

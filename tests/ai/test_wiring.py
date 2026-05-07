@@ -46,55 +46,6 @@ def test_brief_context_builder_includes_recall_and_lens(monkeypatch, tmp_path) -
 
 
 @pytest.mark.unit
-def test_propose_skill_calls_compiler_rebuild(monkeypatch, tmp_path) -> None:
-    from dartlab.ai.tools import proposeSkill as module
-    from dartlab.ai.tools.proposeSkill import proposeSkill
-
-    monkeypatch.setattr(module, "_SPEC_ROOT", tmp_path / "specs")
-
-    called = {"count": 0}
-
-    def fake_build():
-        called["count"] += 1
-
-    import dartlab.skills.compiler as compiler_module
-
-    monkeypatch.setattr(compiler_module, "buildSkillArtifacts", fake_build)
-
-    result = proposeSkill(
-        skillId="engines.scan.wiringTest",
-        title="wiring test",
-        purpose="compiler 트리거 검증",
-    )
-    assert result.ok is True
-    assert called["count"] == 1
-    assert result.data.get("rebuild") == "ok"
-
-
-@pytest.mark.unit
-def test_propose_skill_handles_compiler_failure_gracefully(monkeypatch, tmp_path) -> None:
-    from dartlab.ai.tools import proposeSkill as module
-    from dartlab.ai.tools.proposeSkill import proposeSkill
-
-    monkeypatch.setattr(module, "_SPEC_ROOT", tmp_path / "specs")
-
-    def fail_build():
-        raise RuntimeError("compiler down")
-
-    import dartlab.skills.compiler as compiler_module
-
-    monkeypatch.setattr(compiler_module, "buildSkillArtifacts", fail_build)
-
-    result = proposeSkill(
-        skillId="engines.scan.wiringFail",
-        title="x",
-        purpose="y",
-    )
-    assert result.ok is True
-    assert "failed:RuntimeError" in result.data.get("rebuild", "")
-
-
-@pytest.mark.unit
 def test_frontmatter_update_status_round_trip(tmp_path) -> None:
     from dartlab.ai.memory.frontmatter import readStatus, updateStatus
 

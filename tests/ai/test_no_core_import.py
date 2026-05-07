@@ -1,6 +1,7 @@
 """회귀 가드 — ai/ 가 dartlab core engine 을 정적 import 하지 않는다.
 
-ai/tools/{readSkill,readCapability,proposeSkill}.py 만 dartlab.skills.* 와 dartlab.core.capability.* 메타 read-only 허용.
+ai/tools/{readSkill,readCapability}.py 만 dartlab.skills.* 와 dartlab.core.capability.* 메타 read-only 허용.
+P-revised: proposeSkill / kind=generated 사다리 폐기로 spec 작성 도구 없음.
 """
 
 from __future__ import annotations
@@ -30,16 +31,15 @@ _FORBIDDEN_PREFIXES = (
     "dartlab.search",
 )
 
-# 메타 접근만 허용되는 파일 화이트리스트 (skills 메타, capability docstring)
+# 메타 접근만 허용되는 파일 화이트리스트 (skills 메타, capability docstring).
+# P-revised 후 deprecated 도구 (skillSearch / generatedSpecSearch / proposeSkill / read / write)
+# 파일은 모두 삭제됨. engineCall / verifyAnswer 는 휴리스틱 helper 로 유지 (registry 미노출).
 _META_ALLOWED_FILES = {
-    "ai/tools/skillSearch.py",
     "ai/tools/readSkill.py",
-    "ai/tools/generatedSpecSearch.py",
     "ai/tools/readCapability.py",
-    "ai/tools/proposeSkill.py",
-    "ai/tools/read.py",
     "ai/tools/runPython.py",  # runPython 안에서 동적 import 만, 정적 import 는 polars/dartlab 루트만
-    "ai/tools/engineCall.py",  # legacy heuristic — dynamic import only
+    "ai/tools/engineCall.py",  # legacy heuristic helper — dynamic import only
+    "ai/tools/verifyAnswer.py",  # legacy heuristic GATE — internal helper
 }
 
 

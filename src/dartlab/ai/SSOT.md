@@ -32,7 +32,7 @@ BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST
 - **CRITIQUE**: 반대가설 강제, 누락 lens 점검 → 필요 시 WORK 회귀
 - **COMPOSE**: 답안 + ref 묶음
 - **GATE**: ref 검증 — 미달 시 차단/회귀
-- **HARVEST**: trace 보고 `propose_skill` 후보 결정
+- **HARVEST**: 세션 종료 시 memory wiring (recordSkillUsage + remember + outcome_log.store_decision)
 
 ### 3. 도구 6 + 1 고정 (canonical 6 데이터 도구 + 1 meta-tool)
 
