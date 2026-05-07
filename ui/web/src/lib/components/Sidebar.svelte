@@ -30,6 +30,36 @@
 	}
 	function closeMenu() { openMenuId = null; }
 
+	// 키보드 단축키 — 활성 대화 (activeId) 에 적용. 입력·편집 중엔 무시.
+	// E: 이름 변경 / P: 핀 토글 / D: 삭제
+	function handleKeydown(e) {
+		if (editingId) return;
+		const target = e.target;
+		if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+		if (e.metaKey || e.ctrlKey || e.altKey) return;
+		if (!activeId) return;
+		const conv = conversations.find((c) => c.id === activeId);
+		if (!conv) return;
+		const key = e.key.toLowerCase();
+		if (key === "e") {
+			e.preventDefault();
+			editingId = activeId;
+			editTitle = conv.title;
+		} else if (key === "p" && onTogglePin) {
+			e.preventDefault();
+			onTogglePin(activeId);
+		} else if (key === "d" && onDelete) {
+			e.preventDefault();
+			onDelete(activeId);
+		}
+	}
+
+	$effect(() => {
+		if (typeof window === "undefined") return;
+		window.addEventListener("keydown", handleKeydown);
+		return () => window.removeEventListener("keydown", handleKeydown);
+	});
+
 	let filteredConversations = $derived(
 		searchQuery.trim()
 			? conversations.filter((c) => c.title.toLowerCase().includes(searchQuery.toLowerCase()))

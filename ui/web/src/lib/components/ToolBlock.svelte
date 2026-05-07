@@ -7,18 +7,12 @@
 	- running 상태는 진행 로그 실시간 표시
 -->
 <script>
-	import {
-		BarChart3, BookOpen, CheckCheck, Code2, Cpu, Database,
-		Globe, Loader2, MessageSquare, Save, Search, Sparkles,
-		Terminal, Wrench, XCircle,
-	} from "lucide-svelte";
+	import { Loader2, XCircle } from "lucide-svelte";
 	import { renderMarkdown } from "$lib/markdown.js";
 	import { cleanErrorMessage, describeCallArgs, getToolTitles, TOOL_ICONS } from "$lib/ai/toolSummary.js";
+	import { DEFAULT_TOOL_ICON, TOOL_ICON_MAP } from "$lib/ai/toolIcons.js";
 
-	const ICON_MAP = {
-		Terminal, Code2, Database, Search, BarChart3, BookOpen,
-		CheckCheck, Cpu, Globe, Sparkles, MessageSquare, Wrench, Save,
-	};
+	const ICON_MAP = TOOL_ICON_MAP;
 
 	let { seg } = $props();
 
@@ -60,7 +54,7 @@
 		return String(raw).includes("_") ? String(raw).replaceAll("_", " ") : String(raw);
 	}
 
-	let toolIcon = $derived(ICON_MAP[TOOL_ICONS[seg.name]] || Terminal);
+	let toolIcon = $derived(ICON_MAP[TOOL_ICONS[seg.name]] || DEFAULT_TOOL_ICON);
 </script>
 
 <div class="tool-block" class:tool-block-error={isError} class:tool-block-full={fullExpanded}>
