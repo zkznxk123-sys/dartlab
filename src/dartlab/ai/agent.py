@@ -22,13 +22,17 @@ loop (max 8 iter):
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import Iterator
 from typing import Any
 
 from .contracts import TraceEvent
 from .providers import stream_provider
+from .tools.formatting import wrap_external_in_result
 from .tools.registry import executeTool, toolSpecs
 from .workbench.prompts import DARTLAB_CHAT_SYSTEM
+
+logger = logging.getLogger(__name__)
 
 # LLM 노출 도구 set — 결정 마비 막기 위해 5 개 핵심.
 # 추후 확장 신중히. read 등 보조 도구는 LLM 이 read_skill/read_capability 통해 우회 가능.
@@ -77,7 +81,12 @@ def runAgent(
         try:
             chunks = list(stream_provider(provider, messages, tools))
         except Exception as exc:  # noqa: BLE001
-            yield TraceEvent("error", {"error": str(exc)})
+            logger.exception(
+                "stream_provider failed (provider=%s, iter=%d)",
+                getattr(getattr(provider, "config", None), "provider", "?"),
+                iteration,
+            )
+            yield TraceEvent("error", {"error": f"{type(exc).__name__}: {exc}"})
             return
 
         # 텍스트 델타 emit (final 아닌 chunks)
@@ -161,16 +170,20 @@ def runAgent(
                             "source": ref.get("source"),
                         },
                     )
+                # 외부 본문 (sourceType=external) 인 ref 가 있으면 data 텍스트 필드를 [EXTERNAL CONTENT START/END]
+                # 마커로 감싼다 — LLM 이 마커 안의 지시를 *데이터* 로만 다루게 한다.
+                # 상세: runtime.workbenchEvidenceFlow "외부 본문 처리".
+                wrapped = wrap_external_in_result(result_dict)
                 messages.append(
                     {
                         "role": "tool",
                         "tool_call_id": tc.id,
                         "content": json.dumps(
                             {
-                                "ok": result_dict.get("ok"),
-                                "summary": result_dict.get("summary", ""),
-                                "data": result_dict.get("data"),
-                                "error": result_dict.get("error"),
+                                "ok": wrapped.get("ok"),
+                                "summary": wrapped.get("summary", ""),
+                                "data": wrapped.get("data"),
+                                "error": wrapped.get("error"),
                             },
                             ensure_ascii=False,
                         ),

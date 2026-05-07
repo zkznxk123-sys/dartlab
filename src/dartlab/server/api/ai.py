@@ -27,6 +27,7 @@ from ..models import (
     DartKeyUpdateRequest,
 )
 from ..services.ai_profile import (
+    build_codex_detail,
     build_oauth_codex_detail,
     build_ollama_detail,
     probe_provider_availability,
@@ -127,28 +128,7 @@ def api_status(
     oauth_codex_detail = build_oauth_codex_detail(
         probe=probe and (target_provider is None or target_provider == "oauth-codex")
     )
-    codex_detail = {"installed": False, "authenticated": False, "authMode": None, "loginStatus": None, "version": None}
-    try:
-        from dartlab.ai.providers.support.cli_setup import detect_codex
-
-        codex_detail = detect_codex()
-    except (
-        AttributeError,
-        FileNotFoundError,
-        ImportError,
-        OSError,
-        PermissionError,
-        RuntimeError,
-        TypeError,
-        ValueError,
-    ):
-        codex_detail = {
-            "installed": False,
-            "authenticated": False,
-            "authMode": None,
-            "loginStatus": None,
-            "version": None,
-        }
+    codex_detail = build_codex_detail(probe=probe and (target_provider is None or target_provider == "codex"))
 
     version = dartlab.__version__ if hasattr(dartlab, "__version__") else "unknown"
 

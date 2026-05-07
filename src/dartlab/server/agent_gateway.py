@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import AsyncIterator
 from typing import Any
 
@@ -14,6 +15,8 @@ from dartlab.ai.workbench.intent import isAnalysisIntent
 from . import agent_metrics
 from .models import AgentRunRequest
 from .streaming import _sync_gen_to_async
+
+logger = logging.getLogger(__name__)
 
 _TOOL_DISPLAY = {
     "search_reference": "search reference",
@@ -136,7 +139,11 @@ async def stream_agent_run(req: AgentRunRequest) -> AsyncIterator[dict[str, str]
         if text_started:
             yield _event("TEXT_MESSAGE_END", {"messageId": message_id})
     except Exception as exc:  # noqa: BLE001
-        yield _event("RUN_ERROR", {"runId": run_id, "message": _public_failure(str(exc)), "code": "agent_run_failed"})
+        logger.exception("agent run failed (runId=%s)", run_id)
+        yield _event(
+            "RUN_ERROR",
+            {"runId": run_id, "message": _public_failure(str(exc)), "code": "agent_run_failed"},
+        )
 
 
 def _shouldUseWorkbench(req: AgentRunRequest, question: str, kernel_kwargs: dict[str, Any]) -> bool:
@@ -161,6 +168,7 @@ def _resolveProvider(kernel_kwargs: dict[str, Any]) -> Any:
             model=kernel_kwargs.get("model"),
         )
     except Exception:  # noqa: BLE001
+        logger.exception("provider resolve failed (provider=%s)", kernel_kwargs.get("provider"))
         return None
 
 
@@ -185,6 +193,7 @@ def _isLLMProvider(obj: Any) -> bool:
     try:
         return bool(obj.check_available())
     except Exception:  # noqa: BLE001
+        logger.exception("provider check_available failed (provider=%s)", provider_id)
         return False
 
 
@@ -484,18 +493,20 @@ def _public_graph_state(state: dict[str, Any]) -> dict[str, Any]:
     return {key: state.get(key) for key in allowed if key in state}
 
 
+_FAILURE_LABELS = {
+    "verification": "근거 검증 실패",
+    "direct_answer": "최종 답변 생성 실패",
+    "ref_only": "근거 기반 답변 생성 실패",
+}
+_FAILURE_MAX = 200
+
+
 def _public_failure(reason: str) -> str:
+    """workbench 내부 reason 코드는 라벨링, 그 외 (provider/스택 메시지) 는 원문 보존."""
     text = reason.strip()
     if not text:
         return "최종 답변을 생성하지 못했습니다."
-    labels = {
-        "provider": "provider 연결 실패",
-        "tool": "도구 실행 실패",
-        "verification": "근거 검증 실패",
-        "direct_answer": "최종 답변 생성 실패",
-        "ref_only": "근거 기반 답변 생성 실패",
-    }
-    for needle, label in labels.items():
+    for needle, label in _FAILURE_LABELS.items():
         if needle in text:
             return label
-    return "최종 답변을 생성하지 못했습니다."
+    return text[:_FAILURE_MAX]

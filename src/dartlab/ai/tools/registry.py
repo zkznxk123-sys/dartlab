@@ -172,6 +172,7 @@ _SPECS: dict[str, ToolSpec] = {
                 "data": {
                     "type": "array",
                     "description": "행 list (예: [{date:'2024-Q1', value:100}, ...])",
+                    "items": {"type": "object", "additionalProperties": True},
                 },
                 "title": {"type": "string"},
                 "xAxis": {"type": "string"},

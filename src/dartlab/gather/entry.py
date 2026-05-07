@@ -130,6 +130,17 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         targetRequired=False,
         targetType="columnName",
     ),
+    "calendar": _GatherAxisEntry(
+        label="catalyst 일정",
+        description=(
+            "다가오는 정기공시 (사업/반기/분기보고서) due date 추론. "
+            "한국 fiscal cycle (FY=calendar year) 가정 + DART disclosure 시계열에서 last 보고서 → next due. "
+            "P0: KR 정기공시만. AGM·만기·컨센서스·EDGAR 8-K 미포함 (P1+). "
+            "API 키: DART_API_KEY (Company.disclosure 사용)."
+        ),
+        example='gather("calendar", "005930", horizon_days=30) / gather("calendar", ["005930", "000660"])',
+        targetType="stockCode",
+    ),
 }
 
 
@@ -146,6 +157,7 @@ _API_KEY_INFO: dict[str, str] = {
     "peers": "불필요",
     "krx": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX OpenAPI 직접 호출)",
     "krxIndex": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX idx OpenAPI 직접 호출)",
+    "calendar": "DART_API_KEY (Company.disclosure 사용)",
 }
 
 _ALIASES: dict[str, str] = {
@@ -159,6 +171,8 @@ _ALIASES: dict[str, str] = {
     "지분": "ownership",
     "피어": "peers",
     "동종업종": "peers",
+    "일정": "calendar",
+    "캘린더": "calendar",
 }
 
 
@@ -597,6 +611,17 @@ class GatherEntry:
                 indexFilter=indexFilter,
                 indicators=indicators,
             )
+        if axis == "calendar":
+            from dartlab.gather.calendar import gatherCalendar
+
+            horizon_days = kwargs.pop("horizon_days", 30)
+            codes = kwargs.pop("codes", None) or target
+            if codes is None:
+                raise ValueError(
+                    "gather('calendar') 에는 종목코드가 필요합니다. "
+                    "예: gather('calendar', '005930') 또는 gather('calendar', codes=['005930', '000660'])."
+                )
+            return gatherCalendar(codes, horizon_days=horizon_days, market=market)
 
         raise ValueError(f"미지원 gather 축: {axis}")
 

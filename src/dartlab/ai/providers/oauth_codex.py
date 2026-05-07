@@ -212,6 +212,8 @@ def _headers(token: str, *, accept_json: bool = False) -> dict[str, str]:
 
 def _raise_http_error(status: int, body: str) -> None:
     detail = body[:500]
+    snippet = _extract_error_snippet(body)
+    suffix = f" — {snippet}" if snippet else ""
     if status == 401:
         raise OAuthCodexError("relogin", "ChatGPT OAuth 인증이 만료되었습니다.", detail=detail)
     if status == 403:
@@ -222,7 +224,29 @@ def _raise_http_error(status: int, body: str) -> None:
         from .base import RateLimitError
 
         raise RateLimitError("oauth-codex", "ChatGPT OAuth backend 요청 한도를 초과했습니다.")
-    raise OAuthCodexError("http_error", f"ChatGPT OAuth backend 오류입니다. HTTP {status}", detail=detail)
+    raise OAuthCodexError("http_error", f"ChatGPT OAuth backend HTTP {status}{suffix}", detail=detail)
+
+
+_SNIPPET_MAX = 160
+
+
+def _extract_error_snippet(body: str) -> str:
+    """응답 본문에서 사용자에게 보여줄 짧은 사유 추출. 보통 OpenAI 식 {error:{message:...}}."""
+    if not body:
+        return ""
+    try:
+        data = json.loads(body)
+    except (json.JSONDecodeError, ValueError):
+        return body.strip()[:_SNIPPET_MAX]
+    if isinstance(data, dict):
+        err = data.get("error")
+        if isinstance(err, dict):
+            msg = err.get("message") or err.get("code") or err.get("type")
+            if msg:
+                return str(msg)[:_SNIPPET_MAX]
+        if data.get("message"):
+            return str(data["message"])[:_SNIPPET_MAX]
+    return body.strip()[:_SNIPPET_MAX]
 
 
 def _build_body(messages: list[dict[str, Any]], tools: list[dict[str, Any]], *, model: str) -> dict[str, Any]:

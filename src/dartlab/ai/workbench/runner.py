@@ -19,6 +19,7 @@ from typing import Any
 from dartlab.ai.contracts import Ref, TraceEvent
 from dartlab.ai.providers import ProviderTurn, WorkbenchProvider
 from dartlab.ai.providers.base import RateLimitError
+from dartlab.ai.tools.formatting import wrap_external_in_result
 from dartlab.ai.tools.registry import _SPECS as TOOL_SPECS
 from dartlab.ai.tools.registry import executeTool
 
@@ -133,7 +134,11 @@ def runLLMPass(
                     "error": result.get("error"),
                 },
             )
-            content = json.dumps(result, ensure_ascii=False, default=str)
+            # 외부 본문 (sourceType=external) 인 ref 의 payload·data 텍스트 필드를
+            # [EXTERNAL CONTENT START/END] 마커로 감싼다.
+            # 상세: runtime.workbenchEvidenceFlow "외부 본문 처리".
+            wrapped = wrap_external_in_result(result)
+            content = json.dumps(wrapped, ensure_ascii=False, default=str)
             if len(content) > _MAX_TOOL_RESULT_CHARS:
                 content = content[:_MAX_TOOL_RESULT_CHARS] + f"\n...(truncated, full {len(content)} chars)"
             messages.append(

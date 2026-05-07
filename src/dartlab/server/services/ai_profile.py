@@ -86,6 +86,45 @@ def build_ollama_detail(*, probe: bool) -> dict[str, Any]:
     }
 
 
+def build_codex_detail(*, probe: bool) -> dict[str, Any]:
+    """Codex CLI 상태. probe=False 면 subprocess 없이 PATH 존재만 확인.
+
+    detect_codex() 는 codex CLI 5 회 직렬 호출 (Windows Node 콜드 스타트 회당 0.3~0.7s)
+    + OAuth 토큰 만료 시 refresh 네트워크 호출. 화면 첫 로드 (probe=0) 에서는 회피.
+    """
+    if not probe:
+        return {
+            "installed": bool(shutil.which("codex")),
+            "authenticated": False,
+            "authMode": None,
+            "loginStatus": None,
+            "version": None,
+            "checked": False,
+        }
+    try:
+        from dartlab.ai.providers.support.cli_setup import detect_codex
+
+        return detect_codex()
+    except (
+        AttributeError,
+        FileNotFoundError,
+        ImportError,
+        OSError,
+        PermissionError,
+        RuntimeError,
+        TypeError,
+        ValueError,
+    ):
+        return {
+            "installed": False,
+            "authenticated": False,
+            "authMode": None,
+            "loginStatus": None,
+            "version": None,
+            "checked": True,
+        }
+
+
 def build_oauth_codex_detail(*, probe: bool) -> dict[str, Any]:
     """OAuth Codex 인증/토큰 상태를 조회한다."""
     try:
