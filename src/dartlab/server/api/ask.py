@@ -1,11 +1,13 @@
-"""LLM 질문 엔드포인트 — api_ask, plain_chat."""
+"""LLM 질문 엔드포인트 — api_ask, plain_chat, company copilot."""
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 import dartlab
@@ -16,6 +18,26 @@ from ..models import AgentRunMessage, AgentRunRequest, AskRequest
 from ..services.ai_analysis import run_plain_chat
 
 router = APIRouter()
+
+
+class CopilotRequest(BaseModel):
+    """/api/company/{code}/copilot — landing inline copilot dock 요청.
+
+    context 는 사용자가 클릭한 차트/표 정보를 담아 시스템 프롬프트로 주입한다.
+    """
+
+    question: str
+    sectionId: str | None = None
+    chartId: str | None = None
+    accountKey: str | None = None
+    valueRef: str | None = None
+    period: str | None = None
+    rcept_no: str | None = None
+    extra: dict[str, Any] = Field(default_factory=dict)
+    stream: bool = True
+    provider: str | None = None
+    role: str | None = None
+    model: str | None = None
 
 
 @router.post("/api/ask")
@@ -45,6 +67,76 @@ async def _streamPublicAsk(req: AskRequest):
         }
     agent_req = AgentRunRequest(
         messages=[AgentRunMessage(role="user", content=req.question)],
+        provider=req.provider,
+        role=req.role,
+        model=req.model,
+        workspaceContext=context,
+        stream=True,
+    )
+    async for event in stream_agent_run(agent_req):
+        yield event
+
+
+@router.post("/api/company/{stockCode}/copilot")
+async def api_company_copilot(stockCode: str, req: CopilotRequest):
+    """landing/company 인라인 Copilot dock — citation-first 답변.
+
+    사용자가 차트/표 selection 을 했으면 chartId/accountKey/valueRef/period 를
+    함께 받아 시스템 프롬프트의 evidence 진입점으로 주입한다. 응답은 SSE
+    (stream=True) 또는 단일 plain_chat (stream=False).
+    """
+    dartlab.verbose = False
+
+    if req.stream:
+        return EventSourceResponse(
+            _streamCompanyCopilot(stockCode, req),
+            media_type="text/event-stream",
+        )
+
+    # non-stream fallback — 컨텍스트 주입 후 plain_chat
+    augmented_q = _augmentCopilotQuestion(stockCode, req)
+    plain_req = AskRequest(question=augmented_q, company=stockCode, stream=False)
+    return await run_plain_chat(plain_req)
+
+
+def _augmentCopilotQuestion(stockCode: str, req: CopilotRequest) -> str:
+    """사용자 질문에 chart/table selection context 를 부가."""
+    parts = [req.question.strip()]
+    ctx_lines: list[str] = []
+    if req.sectionId:
+        ctx_lines.append(f"섹션: {req.sectionId}")
+    if req.chartId:
+        ctx_lines.append(f"차트: {req.chartId}")
+    if req.accountKey:
+        ctx_lines.append(f"계정: {req.accountKey}")
+    if req.period:
+        ctx_lines.append(f"기간: {req.period}")
+    if req.valueRef:
+        ctx_lines.append(f"valueRef: {req.valueRef}")
+    if req.rcept_no:
+        ctx_lines.append(f"rcept_no: {req.rcept_no}")
+    if ctx_lines:
+        parts.append("\n[selection 컨텍스트]\n" + "\n".join(ctx_lines))
+    return "\n".join(parts)
+
+
+async def _streamCompanyCopilot(stockCode: str, req: CopilotRequest):
+    """copilot SSE — agent gateway 위에 stockCode + selection context 주입."""
+    augmented_q = _augmentCopilotQuestion(stockCode, req)
+    context: dict[str, Any] = {
+        "company": {"stockCode": stockCode, "company": stockCode},
+        "copilot": {
+            "sectionId": req.sectionId,
+            "chartId": req.chartId,
+            "accountKey": req.accountKey,
+            "valueRef": req.valueRef,
+            "period": req.period,
+            "rcept_no": req.rcept_no,
+            **req.extra,
+        },
+    }
+    agent_req = AgentRunRequest(
+        messages=[AgentRunMessage(role="user", content=augmented_q)],
         provider=req.provider,
         role=req.role,
         model=req.model,

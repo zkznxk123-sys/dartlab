@@ -47,8 +47,12 @@ def test_agent_gateway_public_events_hide_internal_kernel_names(monkeypatch) -> 
                 },
             )
 
-    monkeypatch.setattr(agent_gateway, "DartLabResearchGraph", FakeGraph)
-    req = AgentRunRequest(messages=[AgentRunMessage(role="user", content="너 뭐 할 수 있니")])
+    monkeypatch.setattr(agent_gateway, "WorkbenchLoop", FakeGraph)
+    # workspaceContext.mode="analyze" → workbench 분기 (FakeGraph) 강제. chat 분기 (runAgent) 우회.
+    req = AgentRunRequest(
+        messages=[AgentRunMessage(role="user", content="너 뭐 할 수 있니")],
+        workspaceContext={"mode": "analyze"},
+    )
 
     async def collect():
         return [event async for event in agent_gateway.stream_agent_run(req)]
@@ -75,8 +79,11 @@ def test_agent_gateway_failure_reason_is_public(monkeypatch) -> None:
         def stream(self, question: str, **kwargs):
             yield TraceEvent("unable", {"reason": "prose_without_finalize"})
 
-    monkeypatch.setattr(agent_gateway, "DartLabResearchGraph", FakeGraph)
-    req = AgentRunRequest(messages=[AgentRunMessage(role="user", content="질문")])
+    monkeypatch.setattr(agent_gateway, "WorkbenchLoop", FakeGraph)
+    req = AgentRunRequest(
+        messages=[AgentRunMessage(role="user", content="질문")],
+        workspaceContext={"mode": "analyze"},
+    )
 
     async def collect():
         return [event async for event in agent_gateway.stream_agent_run(req)]
@@ -108,8 +115,11 @@ def test_agent_gateway_failed_done_emits_public_error_without_internal_meta(monk
                 },
             )
 
-    monkeypatch.setattr(agent_gateway, "DartLabResearchGraph", FakeGraph)
-    req = AgentRunRequest(messages=[AgentRunMessage(role="user", content="질문")])
+    monkeypatch.setattr(agent_gateway, "WorkbenchLoop", FakeGraph)
+    req = AgentRunRequest(
+        messages=[AgentRunMessage(role="user", content="질문")],
+        workspaceContext={"mode": "analyze"},
+    )
 
     async def collect():
         return [event async for event in agent_gateway.stream_agent_run(req)]
@@ -164,9 +174,9 @@ def test_api_ask_stream_uses_public_agent_events() -> None:
 
 
 def test_research_graph_emits_ordered_node_state(monkeypatch) -> None:
-    from dartlab.ai.research_graph import DartLabResearchGraph
+    from dartlab.ai.workbench import WorkbenchLoop
 
-    events = list(DartLabResearchGraph().stream("너 뭐 할 수 있니"))
+    events = list(WorkbenchLoop().stream("너 뭐 할 수 있니"))
     nodes = [event.data["node"] for event in events if event.kind == "graph_node"]
 
     # 5 패스 SSOT — workbench loop 의 GRAPH_NODES 와 일치.

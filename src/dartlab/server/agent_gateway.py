@@ -6,9 +6,12 @@ import json
 from collections.abc import AsyncIterator
 from typing import Any
 
+from dartlab.ai.agent import runAgent
 from dartlab.ai.contracts import TraceEvent
-from dartlab.ai.research_graph import DartLabResearchGraph
+from dartlab.ai.workbench import WorkbenchLoop
+from dartlab.ai.workbench.intent import isAnalysisIntent
 
+from . import agent_metrics
 from .models import AgentRunRequest
 from .streaming import _sync_gen_to_async
 
@@ -20,6 +23,24 @@ _TOOL_DISPLAY = {
     "engine_call": "engine call",
     "compile_visual": "compile visual",
     "verify": "verify",
+    "read_skill": "read skill",
+    "read_capability": "read capability",
+    "web_search": "web search",
+    "save_artifact": "save artifact",
+}
+
+# UI 가 ToolBlock 카드로 표현할 도구 화이트리스트.
+# agent.py 가 자율 호출하는 6 개 + workbench 5 패스의 3 개.
+_PUBLIC_TOOL_NAMES = {
+    "run_python",
+    "engine_call",
+    "compile_visual",
+    "read_skill",
+    "read_capability",
+    "web_search",
+    "save_artifact",
+    "inspect_dataset",
+    "verify",
 }
 
 _ALLOWED_EVENTS = {
@@ -42,26 +63,71 @@ _ALLOWED_EVENTS = {
 
 
 async def stream_agent_run(req: AgentRunRequest) -> AsyncIterator[dict[str, str]]:
-    """Stream one DartLab research run using the public AG-UI event contract."""
+    """Stream one DartLab run using the public AG-UI event contract.
+
+    분기:
+    - 명시적 mode="analyze" / "research" / 종목 컨텍스트 / 분석 키워드 → WorkbenchLoop (5 패스)
+    - 그 외 (메타 / chitchat / 일반 대화) → runAgent (LLM 자율 + tool calling)
+
+    회귀 방지: memory/feedback_no_graph_regression.md — runAgent 가 본체. WorkbenchLoop 는 옵션.
+    """
     question = _last_user_message(req)
     run_id = req.threadId or "dartlab-thread"
     message_id = f"msg-{run_id}"
-    graph = DartLabResearchGraph()
     text_started = False
 
-    yield _event(
-        "STATE_SNAPSHOT",
-        {
-            "runId": run_id,
-            "agentId": req.agentId or "dartlab-research",
-            "status": "running",
-            "graph": {"name": "DartLabResearchGraph", "nodes": list(graph.nodes)},
-        },
-    )
-    yield _activity("계획을 세우고 필요한 근거를 확인합니다.", status="done")
+    kernel_kwargs = _kernel_kwargs(req)
+    use_workbench = _shouldUseWorkbench(req, question, kernel_kwargs)
+
+    if use_workbench:
+        graph = WorkbenchLoop()
+        agent_metrics.record("workbench")
+        yield _event(
+            "STATE_SNAPSHOT",
+            {
+                "runId": run_id,
+                "agentId": req.agentId or "dartlab-research",
+                "status": "running",
+                "graph": {"name": "DartLabWorkbench", "nodes": list(graph.nodes)},
+                "mode": "workbench",
+            },
+        )
+        yield _activity("계획을 세우고 필요한 근거를 확인합니다.", status="done")
+        producer = lambda: graph.stream(question, **kernel_kwargs)  # noqa: E731
+    else:
+        provider_obj = _resolveProvider(kernel_kwargs)
+        if provider_obj is None or not _isLLMProvider(provider_obj):
+            # provider 미해결 — workbench 휴리스틱 fallback
+            graph = WorkbenchLoop()
+            agent_metrics.record("workbench-heuristic")
+            yield _event(
+                "STATE_SNAPSHOT",
+                {
+                    "runId": run_id,
+                    "agentId": req.agentId or "dartlab-research",
+                    "status": "running",
+                    "graph": {"name": "DartLabWorkbench", "nodes": list(graph.nodes)},
+                    "mode": "workbench-heuristic",
+                },
+            )
+            producer = lambda: graph.stream(question, **kernel_kwargs)  # noqa: E731
+        else:
+            agent_metrics.record("agent")
+            yield _event(
+                "STATE_SNAPSHOT",
+                {
+                    "runId": run_id,
+                    "agentId": req.agentId or "dartlab-agent",
+                    "status": "running",
+                    "graph": {"name": "DartLabAgent", "nodes": ["agent"]},
+                    "mode": "agent",
+                },
+            )
+            agent_kwargs = {**kernel_kwargs, "provider": provider_obj}
+            producer = lambda: runAgent(question, **agent_kwargs)  # noqa: E731
 
     try:
-        async for internal in _sync_gen_to_async(graph.stream, question, **_kernel_kwargs(req)):
+        async for internal in _sync_gen_to_async(producer):
             for public in _public_events(internal, run_id=run_id, message_id=message_id):
                 if public["event"] == "TEXT_MESSAGE_CONTENT" and not text_started:
                     text_started = True
@@ -71,6 +137,55 @@ async def stream_agent_run(req: AgentRunRequest) -> AsyncIterator[dict[str, str]
             yield _event("TEXT_MESSAGE_END", {"messageId": message_id})
     except Exception as exc:  # noqa: BLE001
         yield _event("RUN_ERROR", {"runId": run_id, "message": _public_failure(str(exc)), "code": "agent_run_failed"})
+
+
+def _shouldUseWorkbench(req: AgentRunRequest, question: str, kernel_kwargs: dict[str, Any]) -> bool:
+    """명시적 분석 모드 / 종목 컨텍스트 / 분석 키워드 → workbench. 그 외 → agent."""
+    mode = ""
+    context = req.workspaceContext if isinstance(req.workspaceContext, dict) else {}
+    if isinstance(context, dict):
+        mode = str(context.get("mode") or context.get("dialogueMode") or "").lower()
+    if mode in {"analyze", "analysis", "research", "workbench"}:
+        return True
+    if isAnalysisIntent(question, kernel_kwargs):
+        return True
+    return False
+
+
+def _resolveProvider(kernel_kwargs: dict[str, Any]) -> Any:
+    try:
+        from dartlab.ai.providers import create_provider
+
+        return create_provider(
+            provider=kernel_kwargs.get("provider"),
+            model=kernel_kwargs.get("model"),
+        )
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _isLLMProvider(obj: Any) -> bool:
+    """provider 가 LLM 어댑터인지 — workbench/loop 의 _isLLMProvider 와 동일 룰."""
+    if obj is None or not callable(getattr(obj, "generate", None)):
+        return False
+    config = getattr(obj, "config", None)
+    provider_id = (getattr(config, "provider", None) or "").lower()
+    if provider_id not in {
+        "oauth-codex",
+        "openai",
+        "gemini",
+        "codex",
+        "ollama",
+        "custom",
+        "groq",
+        "cerebras",
+        "mistral",
+    }:
+        return False
+    try:
+        return bool(obj.check_available())
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[dict[str, str]]:
@@ -96,7 +211,7 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
         return [_activity(f"분석 경로를 정했습니다{': ' + target if target else ''}", refs=[])]
     if kind in {"tool_start", "tool_call"}:
         tool = _tool_name(data)
-        if tool not in {"engine_call", "run_python", "compile_visual"}:
+        if tool not in _PUBLIC_TOOL_NAMES:
             return []
         # ToolBlock 카드(TOOL_CALL_START)가 진행 표현 전담. activity 줄 중복 emit 금지.
         return [
@@ -111,9 +226,26 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
                 },
             ),
         ]
+    if kind == "view_spec":
+        spec = data.get("spec")
+        if not spec:
+            return []
+        return [
+            _event(
+                "VIEW_SPEC",
+                {
+                    "runId": run_id,
+                    "messageId": message_id,
+                    "id": data.get("id"),
+                    "spec": spec,
+                    "title": data.get("title"),
+                    "source": data.get("source"),
+                },
+            )
+        ]
     if kind == "tool_result":
         tool = _tool_name(data)
-        if tool not in {"engine_call", "run_python", "compile_visual"}:
+        if tool not in _PUBLIC_TOOL_NAMES:
             return []
         status = "error" if data.get("status") == "error" else "done"
         return [
@@ -200,6 +332,20 @@ def _kernel_kwargs(req: AgentRunRequest) -> dict[str, Any]:
         "role": req.role,
         "model": req.model,
     }
+    # history: 마지막 user message (= 현재 question) 제외, 이전 대화만.
+    messages = list(req.messages or [])
+    history: list[dict[str, Any]] = []
+    last_user_index = -1
+    for idx, msg in enumerate(messages):
+        if msg.role == "user" and msg.content.strip():
+            last_user_index = idx
+    for idx, msg in enumerate(messages):
+        if idx == last_user_index:
+            continue
+        if msg.role in {"user", "assistant"} and msg.content:
+            history.append({"role": msg.role, "content": msg.content})
+    if history:
+        kwargs["history"] = history
     company = context.get("company") if isinstance(context, dict) else None
     if isinstance(company, dict):
         hint = company.get("stockCode") or company.get("corpName") or company.get("company")
