@@ -286,8 +286,6 @@ dartlab.ask()            # report + AI interpretation
 
 > Samsung report preview: *"Revenue +23.8%, operating margin 8.6%→21.4%. FCF turned positive, ROIC > WACC — reinvestment is creating value."*
 
-**Sample reports:** [Samsung Electronics](https://eddmpython.github.io/dartlab/samples/005930) · [SK Hynix](https://eddmpython.github.io/dartlab/samples/000660) · [Kia](https://eddmpython.github.io/dartlab/samples/000270) · [HD Hyundai Heavy Industries](https://eddmpython.github.io/dartlab/samples/042660) · [SK Telecom](https://eddmpython.github.io/dartlab/samples/017670) · [LG Chem](https://eddmpython.github.io/dartlab/samples/051910) · [NCSoft](https://eddmpython.github.io/dartlab/samples/036570) · [Amorepacific](https://eddmpython.github.io/dartlab/samples/090430)
-
 ### Storyteller — Numbers Tell Stories
 
 > Design: [engines.story](/skills) · Series: [Company Stories](https://eddmpython.github.io/dartlab/blog/series/company-reports)
@@ -650,7 +648,7 @@ Pipeline: local cache (instant) → HuggingFace (auto-download) → DART API (wi
 
 ## Documentation
 
-[Docs](https://eddmpython.github.io/dartlab/) · [Quick Start](https://eddmpython.github.io/dartlab/skills/start.quickStart) · [Skills](https://eddmpython.github.io/dartlab/skills) · [Samples](https://eddmpython.github.io/dartlab/samples)
+[Docs](https://eddmpython.github.io/dartlab/) · [Quick Start](https://eddmpython.github.io/dartlab/skills/start.quickStart) · [Skills](https://eddmpython.github.io/dartlab/skills)
 
 **Blog:** [All](https://eddmpython.github.io/dartlab/blog/) · [Company Stories](https://eddmpython.github.io/dartlab/blog/series/company-reports) · [Credit Reports](https://eddmpython.github.io/dartlab/blog/credit-reports) · [Macro Reports](https://eddmpython.github.io/dartlab/blog/macro-reports)
 

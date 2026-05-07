@@ -8,7 +8,6 @@ on:
       - 'src/dartlab/skills/**'
       - 'scripts/build/generateSkills.py'
       - 'blog/**'
-      - 'samples/**'
       - '.github/workflows/docs.yml'
   workflow_run:
     workflows: ["Industry Map Build"]
