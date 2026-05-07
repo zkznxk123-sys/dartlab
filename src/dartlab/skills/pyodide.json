@@ -2020,6 +2020,15 @@
       "limitations": []
     },
     {
+      "id": "operation.intentBoosts",
+      "title": "Skill 검색 의도 가중치 SSOT",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "operation.issues",
       "title": "이슈 관리",
       "category": "operation",

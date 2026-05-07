@@ -940,7 +940,12 @@ class Company:
         """분석 엔진 실행 — analysis()에 self를 바인딩 (내부 구현).
 
         Capabilities:
-            - 14축 재무분석 + forecast + valuation
+            - 22축 분석 (5 group)
+              - financial (14): 수익구조, 자금조달, 자산구조, 현금흐름, 수익성, 성장성, 안정성, 효율성, 종합평가, 이익품질, 비용구조, 자본배분, 투자효율, 재무정합성
+              - valuation (1): 가치평가
+              - governance (3): 지배구조, 공시변화, 비교분석
+              - forecast (2): 매출전망, 예측신호
+              - macro (2): 매크로민감도, 밸류에이션밴드
             - 2-level 호출: c.analysis("financial", "수익성"), c.analysis("valuation", "가치평가")
             - axis 없이 호출하면 사용 가능한 축 목록 반환
 
@@ -955,6 +960,7 @@ class Company:
             - "어떤 분석이 가능해?" → c.analysis()로 축 목록 확인
             - "가치평가 해줘" → c.analysis("valuation", "가치평가")
             - "매출전망" → c.analysis("forecast", "매출전망")
+            - "지배구조" → c.analysis("governance", "지배구조")
 
         SeeAlso:
             - story: 분석 결과를 보고서로 조합
@@ -962,8 +968,8 @@ class Company:
             - ask: AI 기반 해석
 
         Args:
-            axis: 그룹 이름 ("financial", "valuation", "forecast") 또는 축 이름. None이면 가이드.
-            sub: 그룹 내 하위 축 이름 ("수익성", "가치평가", "매출전망" 등).
+            axis: 그룹 이름 ("financial", "valuation", "governance", "forecast", "macro") 또는 축 이름. None이면 가이드.
+            sub: 그룹 내 하위 축 이름 ("수익성", "가치평가", "매출전망", "지배구조" 등).
             **kwargs: 축별 추가 파라미터.
 
         Returns:
@@ -972,9 +978,10 @@ class Company:
         Example::
 
             c = Company("AAPL")
-            c.analysis()                            # 사용 가능한 축 목록
-            c.analysis("financial", "profitability") # 수익성 분석
+            c.analysis()                            # 사용 가능한 축 목록 (22축)
+            c.analysis("financial", "수익성")        # 수익성 분석
             c.analysis("valuation", "가치평가")       # 가치평가
+            c.analysis("governance", "지배구조")      # 지배구조
             c.analysis("forecast", "매출전망")        # 매출전망
         """
         from dartlab.analysis.financial import Analysis

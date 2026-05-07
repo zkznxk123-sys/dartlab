@@ -2211,7 +2211,7 @@ class Company:
 
     @property
     def analysis(self):
-        """재무제표 완전 분석 — 14축, 6막 인과 구조. dual access (api-contract).
+        """재무제표 완전 분석 — 22축 (5 group), 6막 인과 구조. dual access (api-contract).
 
         Guide:
             - "분석해줘" → c.analysis() (가이드 반환)
@@ -2235,11 +2235,16 @@ class Company:
         return self._cache["_analysisAccessor"]
 
     def _analysisImpl(self, axis: str | None = None, sub: str | None = None, **kwargs):
-        """재무제표 완전 분석 — 14축, 단일 종목 심층 (내부 구현).
+        """재무제표 완전 분석 — 22축, 단일 종목 심층 (내부 구현).
 
         Capabilities:
-            - 14축 분석: 수익구조, 자금조달, 자산구조, 현금흐름, 수익성, 성장성, 안정성, 효율성, 종합평가, 이익품질, 비용구조, 자본배분, 투자효율, 재무정합성
-            - 축 없이 호출 시 14축 가이드 반환
+            - 22축 분석 (5 group)
+              - financial (14): 수익구조, 자금조달, 자산구조, 현금흐름, 수익성, 성장성, 안정성, 효율성, 종합평가, 이익품질, 비용구조, 자본배분, 투자효율, 재무정합성
+              - valuation (1): 가치평가
+              - governance (3): 지배구조, 공시변화, 비교분석
+              - forecast (2): 매출전망, 예측신호
+              - macro (2): 매크로민감도, 밸류에이션밴드
+            - 축 없이 호출 시 22축 가이드 반환
             - 개별 축 분석 시 Company 바인딩 (self 자동 전달)
             - 2-level 호출: c.analysis("financial", "수익성"), c.analysis("valuation", "가치평가")
 
@@ -2248,8 +2253,8 @@ class Company:
             - story가 내부적으로 analysis 결과를 소비
 
         Args:
-            axis: 그룹 이름 ("financial", "valuation", "forecast") 또는 축 이름. None이면 가이드 반환.
-            sub: 그룹 내 하위 축 이름 ("수익성", "가치평가", "매출전망" 등).
+            axis: 그룹 이름 ("financial", "valuation", "governance", "forecast", "macro") 또는 축 이름. None이면 가이드 반환.
+            sub: 그룹 내 하위 축 이름 ("수익성", "가치평가", "매출전망", "지배구조", "매크로민감도" 등).
             **kwargs: 축별 추가 옵션.
 
         Returns:
@@ -2270,16 +2275,18 @@ class Company:
         Example::
 
             c = Company("005930")
-            c.analysis()                            # 전체 가이드
+            c.analysis()                            # 전체 가이드 (22축)
             c.analysis("financial", "수익구조")       # 수익구조 분석
             c.analysis("valuation", "가치평가")       # 가치평가
+            c.analysis("governance", "지배구조")      # 지배구조
             c.analysis("forecast", "매출전망")        # 매출전망
+            c.analysis("macro", "매크로민감도")        # 매크로 민감도
 
         Guide:
             AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.
             When: 특정 종목의 재무 심층 분석이 필요할 때.
             How: axis 로 분석 영역, sub 로 세부 축 지정.
-            - "14축 분석 뭐가 있어?" → c.analysis() (가이드 반환)
+            - "22축 분석 뭐가 있어?" → c.analysis() (가이드 반환)
             - "수익구조 분석해줘" → c.analysis("financial", "수익구조")
             - "안정성 분석" → c.analysis("financial", "안정성")
             - "가치평가 해줘" → c.analysis("valuation", "가치평가")
@@ -2292,7 +2299,7 @@ class Company:
                 - 지배구조 → 이사회 독립성 + 지배력 집중 점검 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)
 
         SeeAlso:
-            - story: 14축 분석을 14개 섹션 보고서로 조합
+            - story: 22축 분석을 섹션별 보고서로 조합
             - insights: 7영역 등급 요약 (analysis보다 요약적)
             - ratios: 재무비율 시계열 (analysis의 입력 데이터)
 

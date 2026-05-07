@@ -1,11 +1,11 @@
 ---
 id: engines.analysis.governanceAudit
 title: 지배구조와 감사 리스크 점검
-kind: curated
+kind: recipe
 scope: builtin
 status: unverified
 category: engines
-purpose: 감사의견, 내부통제, 특수관계자, 지배구조 신호를 공시와 scan 근거로 점검한다.
+purpose: 감사의견, 내부통제, 특수관계자, 지배구조 신호를 지배구조 + 이익품질 + 재무정합성 + 공시변화 4 축의 결합으로 점검하는 다단 응용.
 whenToUse:
   - 지배구조 리스크
   - 감사 리스크
@@ -18,18 +18,35 @@ outputs:
   - 감사/공시 근거
   - 한계
 capabilityRefs:
-  - Company.audit
+  - Company.analysis
   - Company.disclosure
   - Company.readFiling
-  - scan.audit
-  - scan.governance
 toolRefs:
   - search_reference
   - run_python
   - finalize_answer
 knowledgeRefs:
-  - auditRiskConcepts
-  - governanceConcepts
+  - engines.analysis
+  - engines.analysis.governance
+  - engines.analysis.earningsQuality
+  - engines.analysis.financialConsistency
+  - engines.analysis.disclosureChange
+linkedSkills:
+  - engines.analysis.governance
+  - engines.analysis.earningsQuality
+  - engines.analysis.financialConsistency
+  - engines.analysis.disclosureChange
+recipeSteps:
+  - skillId: engines.analysis.governance
+    note: 이사회 독립성, 지배력 집중, 특수관계자 지표.
+  - skillId: engines.analysis.earningsQuality
+    note: 이익이 진짜인지 (accruals, OCF/순이익 비교).
+  - skillId: engines.analysis.financialConsistency
+    note: 재무제표 간 정합성 (BS-PL-CF 합치).
+  - skillId: engines.analysis.disclosureChange
+    note: 공시 변경 추적 — 회계 기준 / 정책 변경 신호.
+sourceRefs:
+  - dartlab://skills/engines.analysis.governanceAudit
 requiredEvidence:
   - target
   - period
@@ -72,40 +89,28 @@ examples:
   - 지배구조 리스크 점검해줘
   - 감사 리스크와 내부통제 이슈 봐줘
 source:
-  type: curated_markdown
-  owner: dartlab
-lastUpdated: "2026-05-02"
+  type: manual_skill
+  format: markdown
+lastUpdated: '2026-05-07'
 ---
 
-## 절차
+## 엔진 역할
 
-- Company.audit, disclosure, scan.audit, scan.governance capability를 확인한다.
-- 감사의견, 내부통제, 특수관계자, 지배구조 신호를 기간별 근거로 분리한다.
-- 위험 신호와 확정 사실을 구분하고 반대 근거가 있으면 함께 남긴다.
-- 본문 조회가 없으면 제목/프리빌드 기준 한계를 명시한다.
+본 skill 은 단일 axis 응용이 아니라 지배구조 + 이익품질 + 재무정합성 + 공시변화 4 축을 묶는 **recipe** 다. 각 axis 호출은 base SKILL `engines.analysis` 와 자식 응용 skill 에서 한다. 본 skill 은 묶음 절차와 판정 게이트만 제공한다.
 
-## 공개 호출 방식
+## 연계 절차
 
-- `c = dartlab.Company("005930")`
-- `c.analysis()`
-- `c.analysis("financial", "수익성")`
-- `dartlab.analysis(c, axis="financial", sub="수익성")`
+1. engines.analysis.governance — 이사회 독립성, 지배력 집중, 특수관계자 지표 확인.
+2. engines.analysis.earningsQuality — accruals, OCF/순이익 비교로 이익의 진위 점검.
+3. engines.analysis.financialConsistency — BS-PL-CF 정합성 검산.
+4. engines.analysis.disclosureChange — 공시 변경 추적 (회계 기준·정책 변경 신호).
 
-## 호출 동작
+## 판정 게이트
 
-- Company 재무 snapshot과 표준 계정 매핑을 읽어 단일 기업의 재무 축을 계산한다. 인자 없이 호출하면 사용 가능한 axis/subaxis 가이드 DataFrame을 반환한다. 데이터가 없으면 값을 만들지 않고 None 또는 데이터 부재 메시지로 제한한다.
-- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
-- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
-
-## 대표 반환 형태
-
-- 주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다.
-- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+- 단일 신호 (감사의견 한 줄 / 일회성 정정공시) 로 분식 단정 금지. 4 축 신호가 일관될 때만 risk claim.
+- 본문 미조회 상태에서는 제목·프리빌드 기준 위험 신호로 제한 — 그 한계를 답변에 명시.
+- 위험 신호 ↔ 확정 사실 구분 — 리스크 thesis 에는 반대 근거도 같이 남긴다.
 
 ## 기본 검증
 
-- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
-- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
-- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
-
-
+claim 은 기간·metric·값·source 를 포함하며 각 claim 은 해당 axis 결과의 `tableRef` / `valueRef` / `dateRef` 에 직접 묶는다. 본 recipe 는 자식 axis skill 의 호출 방식·반환 키가 변경되면 같은 변경에서 갱신한다.

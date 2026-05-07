@@ -99,10 +99,20 @@ lastUpdated: "2026-05-02"
 
 ## 공개 호출 방식
 
-- `c = dartlab.Company("005930")`
-- `c.analysis()`
-- `c.analysis("financial", "수익성")`
-- `dartlab.analysis(c, axis="financial", sub="수익성")`
+```python
+import dartlab
+
+c = dartlab.Company("005930")
+
+# 1. 가이드 확인 (선택)
+c.analysis()
+
+# 2. 실제 axis 실행
+result = c.analysis("financial", "수익성")
+
+# 3. 모듈 함수형 (대안)
+result = dartlab.analysis("financial", "수익성", company=c)
+```
 
 ## 호출 동작
 

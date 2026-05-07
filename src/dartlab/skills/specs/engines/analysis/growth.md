@@ -5,20 +5,18 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: "analysis engine application skill for the 성장성 axis: 이 회사는 얼마나 빨리 성장하는가."
+purpose: "analysis 엔진의 성장성 축 응용 — 이 회사는 얼마나 빨리 성장하는가."
 whenToUse:
   - "analysis"
   - "성장성"
   - "이 회사는 얼마나 빨리 성장하는가"
-  - "성장성"
 inputs:
-  - "target"
-  - "period"
-  - "axis or method"
+  - "Company 또는 종목코드"
+  - "기준 기간"
 outputs:
-  - "result"
+  - "축별 dict"
   - "evidence refs"
-  - "limits and assumptions"
+  - "한계와 가정"
 capabilityRefs:
   - "analysis"
   - "Company.analysis"
@@ -37,9 +35,9 @@ requiredEvidence:
   - "dateRef"
   - "executionRef"
 expectedOutputs:
-  - "public call"
-  - "representative return shape"
-  - "verification result"
+  - "공개 호출"
+  - "대표 반환 형태"
+  - "검증 결과"
 runtimeCompatibility:
   server:
     status: supported
@@ -52,43 +50,62 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "Do not fabricate numbers."
-  - "Do not zero-fill missing values."
-  - "Do not treat one axis result as a final investment conclusion."
+  - "근거 없는 숫자를 만들지 않는다."
+  - "결손값을 0 으로 채우지 않는다."
+  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-04'
+lastUpdated: '2026-05-07'
 ---
 
 ## 엔진 역할
 
-analysis engine application skill for the 성장성 axis: 이 회사는 얼마나 빨리 성장하는가.
+analysis 엔진의 성장성 축 응용 skill — 이 회사는 얼마나 빨리 성장하는가. SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/analysis/financial/__init__.py`).
 
 ## 공개 호출 방식
 
 ```python
 import dartlab
+
 c = dartlab.Company("005930")
-result = c.analysis("성장성", "성장성")
+
+# 1. 가이드 확인 (선택)
+c.analysis()
+
+# 2. 실제 axis 실행
+result = c.analysis("financial", "성장성")
+
+# 3. 모듈 함수형 (대안)
+result = dartlab.analysis("financial", "성장성", company=c)
 ```
 
 ## 호출 동작
 
-Reads the Company financial/disclosure/market snapshot required for the 성장성 axis. The guide reports 5 calculation items. Missing values are represented through flags, assumptions, dataAsOf, nulls, or empty history; they are not zero-filled.
+Company 의 finance/disclosure/market snapshot 을 읽어 성장성 축 계산 항목을 산출한다. 결손 값은 0 으로 채우지 않고 `flags`, `assumptions`, `dataAsOf`, 빈 history, null 로 표현한다. 자세한 동작은 base SKILL `engines.analysis` 의 `## 호출 동작` 참조.
 
 ## 대표 반환 형태
 
-Returns a dict. Check items, history, displayHints, turningPoints, dataAsOf, assumptions, flags, _summary, tableRef, valueRef, dateRef, and executionRef-style evidence fields.
+dict 반환. 공통 키:
+
+- `items`: 축별 계산 항목과 결과
+- `history`: 기간별 시계열
+- `displayHints`: 표/차트 표시 힌트
+- `turningPoints`: 전환점 (해당 시)
+- `dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호
+- `_summary`: 사람이 읽을 요약
+- `tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조
+
+전체 반환 키는 base SKILL `engines.analysis` 표 + `_analysisImpl` docstring 으로 검산.
 
 ## 기본 실행 순서
 
-1. target, period, and source data are fixed first.
-2. Run the public call exactly as documented.
-3. Check latestAsOf/date, missing values, flags, and assumptions.
-4. Bind numeric claims to tableRef/valueRef/dateRef/executionRef.
-5. Hand off multi-axis narrative composition to story or the parent report skill.
+1. 대상, 기간, 원천 데이터 확정.
+2. 위 공개 호출을 그대로 실행.
+3. `dataAsOf`, 결손 값, `flags`, `assumptions` 점검.
+4. 숫자 claim 은 `tableRef` / `valueRef` / `dateRef` / `executionRef` 에 묶음.
+5. 다축 보고서 조립은 `engines.story` 또는 상위 recipe 가 담당.
 
 ## 기본 검증
 
-This skill is a public execution document. If this axis call, representative return keys, error behavior, or runtime limits change, update this file in the same change.
+이 skill 은 공개 실행 문서다. 본 axis 호출 방식, 대표 반환 키, 오류/제한 동작이 변경되면 같은 변경에서 본 파일을 갱신한다. SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/analysis/financial/__init__.py`).

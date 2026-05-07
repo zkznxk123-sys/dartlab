@@ -141,7 +141,28 @@ def validateOne(path: Path, *, knownSkillIds: set[str] | None = None) -> list[st
 
     if kind == "recipe":
         errors.extend(_validateRecipe(path, text, block, knownSkillIds=knownSkillIds))
+    else:
+        errors.extend(_validateApplicationCallExample(path, text, block))
 
+    return errors
+
+
+def _validateApplicationCallExample(path: Path, text: str, block: str) -> list[str]:
+    """engines.analysis.* / engines.scan.* 응용 skill 본문에 호출 예시가 있는지.
+
+    빈 boilerplate 또는 잘못된 호출 예시 회귀 차단용 약한 lint. 정확한 (group, axis)
+    매칭은 ``tests/test_skills.py`` 의 정합성 테스트가 담당.
+    """
+    sid = hasScalar(block, "id") or ""
+    errors: list[str] = []
+    if sid.startswith("engines.analysis.") and sid != "engines.analysis":
+        if 'c.analysis("' not in text and 'dartlab.analysis("' not in text:
+            errors.append(
+                f'{path}: engines.analysis 응용 skill 은 본문에 c.analysis("<group>", "<axis>") 호출 예시 필요'
+            )
+    if sid.startswith("engines.scan.") and sid != "engines.scan":
+        if 'dartlab.scan("' not in text and 'scan("' not in text:
+            errors.append(f'{path}: engines.scan 응용 skill 은 본문에 dartlab.scan("<axis>") 호출 예시 필요')
     return errors
 
 

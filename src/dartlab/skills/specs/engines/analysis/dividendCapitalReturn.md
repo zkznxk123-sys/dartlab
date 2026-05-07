@@ -1,11 +1,11 @@
 ---
 id: engines.analysis.dividendCapitalReturn
 title: 배당과 주주환원 분석
-kind: curated
+kind: recipe
 scope: builtin
 status: unverified
 category: engines
-purpose: 배당, 자사주, 총환원율을 이익과 현금흐름의 지속 가능성 관점에서 분석한다.
+purpose: 배당, 자사주, 총환원율을 자본배분 + 현금흐름 + 수익성 축의 결합으로 점검하는 다단 응용.
 whenToUse:
   - 배당 매력 분석
   - 주주환원 정책 점검
@@ -17,17 +17,30 @@ outputs:
   - 배당/환원 표
   - 지속 가능성
 capabilityRefs:
-  - Company.capital
   - Company.analysis
   - Company.show
-  - scan.dividendTrend
-  - scan.cashflow
 toolRefs:
   - search_reference
   - run_python
   - finalize_answer
 knowledgeRefs:
-  - capitalAllocationConcepts
+  - engines.analysis
+  - engines.analysis.capitalAllocation
+  - engines.analysis.cashflow
+  - engines.analysis.profitability
+linkedSkills:
+  - engines.analysis.capitalAllocation
+  - engines.analysis.cashflow
+  - engines.analysis.profitability
+recipeSteps:
+  - skillId: engines.analysis.capitalAllocation
+    note: 번 돈을 어디에 쓰는가 — 배당 / 자사주 / 재투자 비중 확인.
+  - skillId: engines.analysis.cashflow
+    note: OCF / FCF 가 환원 정책을 지속 가능하게 받쳐주는지.
+  - skillId: engines.analysis.profitability
+    note: 이익률과 ROE 가 환원 여력을 만들어내는지.
+sourceRefs:
+  - dartlab://skills/engines.analysis.dividendCapitalReturn
 requiredEvidence:
   - target
   - period
@@ -69,40 +82,27 @@ examples:
   - 배당 매력 분석해줘
   - 주주환원 정책 지속 가능한지 봐줘
 source:
-  type: curated_markdown
-  owner: dartlab
-lastUpdated: "2026-05-02"
+  type: manual_skill
+  format: markdown
+lastUpdated: '2026-05-07'
 ---
 
-## 절차
+## 엔진 역할
 
-- Company.capital과 현금흐름 관련 capability를 함께 확인한다.
-- 배당성향, 배당수익률, 자사주, 총환원율을 기간별 표로 만든다.
-- 지속 가능성은 이익과 OCF/FCF 근거가 있을 때만 판단한다.
-- 주가 또는 배당 기준일 한계를 답변에 남긴다.
+본 skill 은 단일 axis 응용이 아니라 자본배분 + 현금흐름 + 수익성 세 축을 묶는 **recipe** 다. 각 axis 호출은 base SKILL `engines.analysis` 와 자식 응용 skill 에서 한다. 본 skill 은 묶음 절차와 판정 게이트만 제공한다.
 
-## 공개 호출 방식
+## 연계 절차
 
-- `c = dartlab.Company("005930")`
-- `c.analysis()`
-- `c.analysis("financial", "수익성")`
-- `dartlab.analysis(c, axis="financial", sub="수익성")`
+1. engines.analysis.capitalAllocation — 자본배분 (배당 / 자사주 / 재투자 비중) 시계열 확인.
+2. engines.analysis.cashflow — OCF / FCF 시계열로 환원 재원의 지속 가능성 검산.
+3. engines.analysis.profitability — ROE / 이익률 시계열로 환원 여력의 원천 확인.
 
-## 호출 동작
+## 판정 게이트
 
-- Company 재무 snapshot과 표준 계정 매핑을 읽어 단일 기업의 재무 축을 계산한다. 인자 없이 호출하면 사용 가능한 axis/subaxis 가이드 DataFrame을 반환한다. 데이터가 없으면 값을 만들지 않고 None 또는 데이터 부재 메시지로 제한한다.
-- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
-- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
-
-## 대표 반환 형태
-
-- 주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다.
-- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+- 배당성향 / 총환원율 만으로 결론 짓지 않는다. 위 3 축 결과가 모두 일관되어야 "지속 가능" claim 을 허용.
+- OCF < 배당총액인 기간이 있으면 그 자체를 evidence 로 남기고 "차입 의존" flag.
+- 자사주 매입은 일회성 / 반복 정책 구분 — 최근 3~5 기간의 빈도 + 평균 규모를 함께 본다.
 
 ## 기본 검증
 
-- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
-- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
-- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
-
-
+claim 은 기간·metric·값을 포함하며 각 claim 은 해당 axis 결과의 `tableRef` / `valueRef` / `dateRef` 에 직접 묶는다. 본 recipe 는 base SKILL 또는 자식 axis skill 의 호출 방식·반환 키가 변경되면 같은 변경에서 갱신한다.

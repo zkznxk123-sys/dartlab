@@ -64,10 +64,15 @@ def test_engine_skills_include_public_execution_contract() -> None:
     assert engine_specs
     for spec in engine_specs:
         body = spec.source.get("body", "")
-        assert "## 공개 호출 방식" in body
-        assert "## 호출 동작" in body
-        assert "## 대표 반환 형태" in body
-        assert spec.capabilityRefs or spec.toolRefs
+        if spec.kind == "recipe":
+            # recipe 는 다축 묶음 절차 — execution 3 섹션 대신 ## 연계 절차 + linkedSkills 를 본다.
+            assert "## 연계 절차" in body, f"recipe skill {spec.id} missing '## 연계 절차'"
+            assert spec.linkedSkills or spec.recipeSteps, f"recipe skill {spec.id} missing linkedSkills/recipeSteps"
+        else:
+            assert "## 공개 호출 방식" in body
+            assert "## 호출 동작" in body
+            assert "## 대표 반환 형태" in body
+            assert spec.capabilityRefs or spec.toolRefs
 
 
 def _skill_body(skill_id: str) -> str:
@@ -190,6 +195,62 @@ def test_application_skills_cover_engine_guide_axes() -> None:
 
     for axis in dartlab.macro().get_column("axis").to_list():
         assert f"engines.macro.{axis}" in ids
+
+
+def test_analysis_application_skills_have_correct_call_example() -> None:
+    """각 analysis 응용 skill 본문에 자기 axis 의 정확한 c.analysis("group", "axis") 호출이 있어야 한다.
+
+    SSOT 는 dartlab.analysis.financial._GROUPS / _AXIS_TO_GROUP. 응용 skill 본문이 자기
+    axis 가 아닌 다른 axis 호출을 박아두면 사용자가 그대로 복사 실행 시 다른 분석이 나온다.
+    """
+    from dartlab.analysis.financial import _AXIS_TO_GROUP
+
+    analysis_slugs = {
+        "수익구조": "revenueStructure",
+        "자금조달": "financing",
+        "자산구조": "assetStructure",
+        "현금흐름": "cashflow",
+        "수익성": "profitability",
+        "성장성": "growth",
+        "안정성": "stability",
+        "효율성": "efficiency",
+        "종합평가": "scorecard",
+        "이익품질": "earningsQuality",
+        "비용구조": "costStructure",
+        "자본배분": "capitalAllocation",
+        "투자효율": "investmentEfficiency",
+        "재무정합성": "financialConsistency",
+        "가치평가": "valuation",
+        "지배구조": "governance",
+        "공시변화": "disclosureChange",
+        "비교분석": "peerComparison",
+        "매출전망": "revenueForecast",
+        "예측신호": "predictionSignal",
+        "매크로민감도": "macroSensitivity",
+        "밸류에이션밴드": "valuationBand",
+    }
+
+    for axis_kr, slug in analysis_slugs.items():
+        body = _skill_body(f"engines.analysis.{slug}")
+        group = _AXIS_TO_GROUP[axis_kr]
+        expected = f'c.analysis("{group}", "{axis_kr}")'
+        assert expected in body, f"engines.analysis.{slug} body missing expected call example: {expected}"
+
+
+def test_scan_application_skills_have_correct_call_example() -> None:
+    """각 scan 응용 skill 본문에 dartlab.scan("axis") 호출이 있어야 한다.
+
+    응용 skill 본문이 generic boilerplate 이거나 자기 axis 가 아닌 호출을 박아두면
+    사용자가 그대로 복사 실행 시 잘못된 결과가 나온다.
+    """
+    for axis in dartlab.scan().get_column("axis").to_list():
+        skill_id = f"engines.scan.{axis}"
+        ids = {item.id for item in skills.list(includeUser=False)}
+        if skill_id not in ids:
+            continue  # axis 응용 skill 미생성 — test_application_skills_cover_engine_guide_axes 가 잡음
+        body = _skill_body(skill_id)
+        expected = f'dartlab.scan("{axis}")'
+        assert expected in body, f"{skill_id} body missing expected call example: {expected}"
 
 
 def test_gather_application_skills_cover_public_methods() -> None:

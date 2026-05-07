@@ -12,180 +12,44 @@ from .models import EvidenceCheckResult, SkillMatch, SkillSpec
 
 _FORBIDDEN_TEMPLATE_MARKERS = ("final answer", "최종 답변:", "답변 템플릿", "{{answer", "{answer}")
 _MAX_PROCEDURE_ITEM_CHARS = 1200
-_INTENT_SKILL_BOOSTS: tuple[dict[str, Any], ...] = (
-    {
-        "skillIds": ("start.useSkillsCatalog",),
-        "terms": (
-            "skills",
-            "skill",
-            "스킬",
-            "스킬스",
-            "catalog",
-            "카탈로그",
-            "어떻게 써",
-            "사용법",
-            "뭐 할 수",
-            "할 수 있어",
-            "할수",
-            "기능",
-            "뭘 분석",
-        ),
-        "boost": 16.0,
-    },
-    {
-        "skillIds": ("start.dartlabSkillOs",),
-        "terms": (
-            "처음",
-            "최초",
-            "진입점",
-            "입문",
-            "전체 체계",
-            "문서 체계",
-            "skill os",
-            "스킬 os",
-            "어디서 시작",
-            "llm이 와도",
-            "외부 ai",
-            "운영 문서",
-            "ops",
-        ),
-        "boost": 18.0,
-    },
-    {
-        "skillIds": ("operation.opsAsSkills",),
-        "terms": (
-            "ops를 스킬",
-            "ops 문서",
-            "운영 규칙",
-            "규칙 통합",
-            "문서 중복",
-            "ssot",
-            "sourceRefs",
-            "문서 정리",
-            "체계 단순화",
-        ),
-        "boost": 17.0,
-    },
-    {
-        "skillIds": ("operation.extendSkills",),
-        "terms": (
-            "스킬 추가",
-            "스킬 확장",
-            "확장 규칙",
-            "새 skill",
-            "user skill",
-            "curated skill",
-            "공식 승격",
-            "독스트링 승격",
-        ),
-        "boost": 16.0,
-    },
-    {
-        "skillIds": ("runtime.skillDevelopmentLoop",),
-        "terms": (
-            "스킬 개발",
-            "skill 개발",
-            "엔진 조합",
-            "엔진에 없는",
-            "정의되지 않은",
-            "응용",
-            "조합",
-            "새 분석",
-            "audit 반영",
-            "독스트링 보강",
-        ),
-        "boost": 15.0,
-    },
-    {
-        "skillIds": ("runtime.workbenchEvidenceFlow",),
-        "terms": ("근거", "검산", "마무리", "evidence", "ref", "refs", "finalize", "실행하고", "답변"),
-        "boost": 15.0,
-    },
-    {
-        "skillIds": ("runtime.dataAvailabilityCheck",),
-        "terms": ("데이터가", "데이터", "dataset", "있는지", "가용", "최신", "기준일", "확인"),
-        "boost": 14.0,
-    },
-    {
-        "skillIds": ("engines.company.researchStarter",),
-        "terms": ("종목 분석", "기업 분석", "분석 시작", "첫 단계", "시작", "company research"),
-        "boost": 13.0,
-    },
-    {
-        "skillIds": ("engines.data.foundation",),
-        "terms": (
-            "데이터 엔진",
-            "데이터 기본기",
-            "기본 데이터",
-            "company gather scan",
-            "company/gather/scan",
-            "원자료 횡단",
-            "데이터 확보 순서",
-            "응용 분석 시작",
-        ),
-        "boost": 15.0,
-    },
-    {
-        "skillIds": ("engines.scan", "engines.scan.growth"),
-        "terms": (
-            "찾아",
-            "찾아줘",
-            "후보",
-            "상위",
-            "랭킹",
-            "순위",
-            "스크리닝",
-            "스캔",
-            "screen",
-            "ranking",
-            "candidate",
-            "growth company",
-            "성장하는 회사",
-        ),
-        "boost": 16.0,
-    },
-    {
-        "skillIds": ("engines.viz.tableBackedChart",),
-        "terms": ("차트", "시각화", "그래프", "랭킹 차트", "비교 차트", "chart", "visual"),
-        "boost": 14.0,
-    },
-    {
-        "skillIds": ("engines.company.usEdgarReview",),
-        "terms": ("미국", "미장", "edgar", "filings", "filing", "10-k", "10-q", "ticker", "티커"),
-        "boost": 13.0,
-    },
-    {
-        "skillIds": ("engines.macro.marketReview",),
-        "terms": ("금리", "환율", "매크로", "거시", "경기", "유동성", "macro", "rates", "fx"),
-        "boost": 12.0,
-    },
-    {
-        "skillIds": ("engines.credit.creditRisk",),
-        "terms": ("신용", "위험", "안정성", "부채", "이자보상", "credit", "risk"),
-        "boost": 11.0,
-    },
-    {
-        "skillIds": ("engines.analysis.profitability",),
-        "terms": ("수익성", "이익률", "마진", "영업이익", "profitability", "margin"),
-        "boost": 10.0,
-    },
-    {
-        "skillIds": ("engines.analysis.cashflow",),
-        "terms": ("현금흐름", "영업현금", "fcf", "cashflow", "cash flow"),
-        "boost": 10.0,
-    },
-    {
-        "skillIds": ("engines.analysis.dividendCapitalReturn",),
-        "terms": ("배당", "주주환원", "자사주", "dividend", "buyback"),
-        "boost": 10.0,
-    },
-    {
-        "skillIds": ("engines.analysis.governanceAudit",),
-        "terms": ("지배구조", "감사", "내부통제", "분식", "governance", "audit"),
-        "boost": 10.0,
-    },
-)
 _TICKER_QUERY_RE = re.compile(r"\b[A-Z]{1,5}\b")
+_INTENT_BOOSTS_CACHE: tuple[dict[str, Any], ...] | None = None
+_INTENT_BOOSTS_SOURCE = "specs/operation/intentBoosts.md"
+
+
+def _load_intent_boosts() -> tuple[dict[str, Any], ...]:
+    """``operation.intentBoosts`` skill frontmatter 에서 의도 boost 규칙을 로드.
+
+    SSOT 는 ``src/dartlab/skills/specs/operation/intentBoosts.md`` 의 frontmatter
+    ``intentBoosts[]``. 코드 하드코딩 금지 — 새 규칙은 markdown 에만 추가한다.
+    Lazy 캐시 — 첫 호출 시 로드, 이후 동일 tuple 재사용.
+    """
+    global _INTENT_BOOSTS_CACHE
+    if _INTENT_BOOSTS_CACHE is not None:
+        return _INTENT_BOOSTS_CACHE
+    path = _builtin_specs_root() / "operation" / "intentBoosts.md"
+    if not path.exists():
+        _INTENT_BOOSTS_CACHE = ()
+        return _INTENT_BOOSTS_CACHE
+    data = _read_mapping(path)
+    raw = data.get("intentBoosts") or []
+    out: list[dict[str, Any]] = []
+    for entry in raw:
+        if not isinstance(entry, dict):
+            continue
+        skill_ids = tuple(entry.get("skillIds") or ())
+        terms = tuple(entry.get("terms") or ())
+        boost = entry.get("boost")
+        if not skill_ids or not terms or boost is None:
+            continue
+        try:
+            boost_val = float(boost)
+        except (TypeError, ValueError):
+            continue
+        out.append({"skillIds": skill_ids, "terms": terms, "boost": boost_val})
+    _INTENT_BOOSTS_CACHE = tuple(out)
+    return _INTENT_BOOSTS_CACHE
+
 
 _MANUAL_SKILL_CATEGORIES = {"start", "runtime", "operation", "engines", "user"}
 
@@ -514,6 +378,13 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"skill field must be a mapping: {field}")
     if data.get("pyodide") and not data["runtimeCompatibility"].get("pyodide"):
         data["runtimeCompatibility"]["pyodide"] = data["pyodide"]
+    # SkillSpec field 가 아닌 frontmatter 키는 drop — markdown 에 자유 메타 (intentBoosts 등) 허용.
+    import dataclasses as _dc
+
+    spec_fields = {f.name for f in _dc.fields(SkillSpec)}
+    for key in list(data.keys()):
+        if key not in spec_fields:
+            data.pop(key)
     return data
 
 
@@ -857,7 +728,7 @@ def _intent_boost(spec: SkillSpec, query: str) -> tuple[float, list[str]]:
     query_text = query.lower()
     score = 0.0
     reasons: list[str] = []
-    for entry in _INTENT_SKILL_BOOSTS:
+    for entry in _load_intent_boosts():
         if spec.id not in entry["skillIds"]:
             continue
         matched = [term for term in entry["terms"] if term.lower() in query_text]

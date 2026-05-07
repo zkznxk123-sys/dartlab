@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 224,
+    "skillCount": 225,
     "categories": [
       {
         "id": "start",
@@ -20,7 +20,7 @@
         "id": "operation",
         "title": "Operation",
         "description": "ops 원문을 skill 절차로 묶어 테스트, 문서, 릴리즈, 확장 규칙을 찾는 운영 지도.",
-        "count": 17
+        "count": 18
       },
       {
         "id": "engines",
@@ -183,23 +183,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 자산구조 axis: 조달한 돈으로 뭘 준비했는가.",
+      "purpose": "analysis 엔진의 자산구조 축 응용 — 조달한 돈으로 뭘 준비했는가.",
       "whenToUse": [
         "analysis",
         "자산구조",
-        "조달한 돈으로 뭘 준비했는가",
-        "자산구조"
+        "조달한 돈으로 뭘 준비했는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -220,7 +218,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.assetStructure"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -232,16 +238,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -269,23 +275,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 자본배분 axis: 번 돈을 어디에 쓰는가.",
+      "purpose": "analysis 엔진의 자본배분 축 응용 — 번 돈을 어디에 쓰는가.",
       "whenToUse": [
         "analysis",
         "자본배분",
-        "번 돈을 어디에 쓰는가",
-        "자본배분"
+        "번 돈을 어디에 쓰는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -306,7 +310,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.capitalAllocation"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -318,16 +330,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -398,14 +410,14 @@
         "OCF, capex, FCF, 순이익 또는 운전자본 변동을 표로 만든다.",
         "현금흐름 품질 claim은 이익과 현금의 차이를 보여주는 ref에 묶는다.",
         "세부 주석이 없으면 원인 판단을 제한한다.",
-        "`c = dartlab.Company(\"005930\")`",
-        "`c.analysis()`",
-        "`c.analysis(\"financial\", \"수익성\")`",
-        "`dartlab.analysis(c, axis=\"financial\", sub=\"수익성\")`",
         "Company 재무 snapshot과 표준 계정 매핑을 읽어 단일 기업의 재무 축을 계산한다. 인자 없이 호출하면 사용 가능한 axis/subaxis 가이드 DataFrame을 반환한다. 데이터가 없으면 값을 만들지 않고 None 또는 데이터 부재 메시지로 제한한다.",
         "실행 전에 target, period/date, metric, source 또는 universe를 확인한다.",
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
-        "주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다."
+        "주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다.",
+        "전체 세부 필드는 공개 docstring/기능와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.",
+        "실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.",
+        "최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.",
+        "스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다."
       ],
       "recipeSteps": [],
       "requiredEvidence": [
@@ -472,23 +484,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 비용구조 axis: 비용이 어떻게 움직이는가.",
+      "purpose": "analysis 엔진의 비용구조 축 응용 — 비용이 어떻게 움직이는가.",
       "whenToUse": [
         "analysis",
         "비용구조",
-        "비용이 어떻게 움직이는가",
-        "비용구조"
+        "비용이 어떻게 움직이는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -509,7 +519,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.costStructure"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -521,16 +539,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -558,23 +576,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 공시변화 axis: 이 회사의 공시가 뭐가 달라졌는가.",
+      "purpose": "analysis 엔진의 공시변화 축 응용 — 이 회사의 공시가 뭐가 달라졌는가.",
       "whenToUse": [
         "analysis",
         "공시변화",
-        "이 회사의 공시가 뭐가 달라졌는가",
-        "공시변화"
+        "이 회사의 공시가 뭐가 달라졌는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -595,7 +611,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.disclosureChange"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -607,16 +631,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -642,9 +666,9 @@
       "title": "배당과 주주환원 분석",
       "category": "engines",
       "categoryTitle": "Engines",
-      "kind": "curated",
+      "kind": "recipe",
       "status": "unverified",
-      "purpose": "배당, 자사주, 총환원율을 이익과 현금흐름의 지속 가능성 관점에서 분석한다.",
+      "purpose": "배당, 자사주, 총환원율을 자본배분 + 현금흐름 + 수익성 축의 결합으로 점검하는 다단 응용.",
       "whenToUse": [
         "배당 매력 분석",
         "주주환원 정책 점검",
@@ -660,11 +684,8 @@
         "지속 가능성"
       ],
       "apiRefs": [
-        "Company.capital",
         "Company.analysis",
-        "Company.show",
-        "scan.dividendTrend",
-        "scan.cashflow"
+        "Company.show"
       ],
       "toolRefs": [
         "search_reference",
@@ -673,29 +694,42 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [
-        "capitalAllocationConcepts"
+        "engines.analysis",
+        "engines.analysis.capitalAllocation",
+        "engines.analysis.cashflow",
+        "engines.analysis.profitability"
       ],
-      "linkedSkills": [],
+      "linkedSkills": [
+        "engines.analysis.capitalAllocation",
+        "engines.analysis.cashflow",
+        "engines.analysis.profitability"
+      ],
       "requires": [],
       "alternatives": [],
       "succeededBy": [],
       "deprecatedBy": [],
-      "sourceRefs": [],
-      "procedure": [
-        "Company.capital과 현금흐름 관련 기능를 함께 확인한다.",
-        "배당성향, 배당수익률, 자사주, 총환원율을 기간별 표로 만든다.",
-        "지속 가능성은 이익과 OCF/FCF 근거가 있을 때만 판단한다.",
-        "주가 또는 배당 기준일 한계를 답변에 남긴다.",
-        "`c = dartlab.Company(\"005930\")`",
-        "`c.analysis()`",
-        "`c.analysis(\"financial\", \"수익성\")`",
-        "`dartlab.analysis(c, axis=\"financial\", sub=\"수익성\")`",
-        "Company 재무 snapshot과 표준 계정 매핑을 읽어 단일 기업의 재무 축을 계산한다. 인자 없이 호출하면 사용 가능한 axis/subaxis 가이드 DataFrame을 반환한다. 데이터가 없으면 값을 만들지 않고 None 또는 데이터 부재 메시지로 제한한다.",
-        "실행 전에 target, period/date, metric, source 또는 universe를 확인한다.",
-        "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
-        "주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다."
+      "sourceRefs": [
+        "dartlab://skills/engines.analysis.dividendCapitalReturn"
       ],
-      "recipeSteps": [],
+      "procedure": [
+        "배당성향 / 총환원율 만으로 결론 짓지 않는다. 위 3 축 결과가 모두 일관되어야 \"지속 가능\" claim 을 허용.",
+        "OCF < 배당총액인 기간이 있으면 그 자체를 evidence 로 남기고 \"차입 의존\" flag.",
+        "자사주 매입은 일회성 / 반복 정책 구분 — 최근 3~5 기간의 빈도 + 평균 규모를 함께 본다."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.analysis.capitalAllocation",
+          "note": "번 돈을 어디에 쓰는가 — 배당 / 자사주 / 재투자 비중 확인."
+        },
+        {
+          "skillId": "engines.analysis.cashflow",
+          "note": "OCF / FCF 가 환원 정책을 지속 가능하게 받쳐주는지."
+        },
+        {
+          "skillId": "engines.analysis.profitability",
+          "note": "이익률과 ROE 가 환원 여력을 만들어내는지."
+        }
+      ],
       "requiredEvidence": [
         "target",
         "period",
@@ -759,23 +793,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 이익품질 axis: 이익이 진짜인가.",
+      "purpose": "analysis 엔진의 이익품질 축 응용 — 이익이 진짜인가.",
       "whenToUse": [
         "analysis",
         "이익품질",
-        "이익이 진짜인가",
-        "이익품질"
+        "이익이 진짜인가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -796,7 +828,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.earningsQuality"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -808,16 +848,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -845,23 +885,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 효율성 axis: 이 회사는 자산을 잘 굴리는가.",
+      "purpose": "analysis 엔진의 효율성 축 응용 — 이 회사는 자산을 잘 굴리는가.",
       "whenToUse": [
         "analysis",
         "효율성",
-        "이 회사는 자산을 잘 굴리는가",
-        "효율성"
+        "이 회사는 자산을 잘 굴리는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -882,7 +920,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.efficiency"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -894,16 +940,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -931,23 +977,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 재무정합성 axis: 재무제표가 서로 맞는가.",
+      "purpose": "analysis 엔진의 재무정합성 축 응용 — 재무제표가 서로 맞는가.",
       "whenToUse": [
         "analysis",
         "재무정합성",
-        "재무제표가 서로 맞는가",
-        "재무정합성"
+        "재무제표가 서로 맞는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -968,7 +1012,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.financialConsistency"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -980,16 +1032,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -1017,23 +1069,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 자금조달 axis: 돈을 어디서 조달하는가.",
+      "purpose": "analysis 엔진의 자금조달 축 응용 — 돈을 어디서 조달하는가.",
       "whenToUse": [
         "analysis",
         "자금조달",
-        "돈을 어디서 조달하는가",
-        "자금조달"
+        "돈을 어디서 조달하는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -1054,7 +1104,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.financing"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -1066,16 +1124,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -1103,23 +1161,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 지배구조 axis: 이 회사의 주인은 누구이며 감시는 작동하는가.",
+      "purpose": "analysis 엔진의 지배구조 축 응용 — 이 회사의 주인은 누구이며 감시는 작동하는가.",
       "whenToUse": [
         "analysis",
         "지배구조",
-        "이 회사의 주인은 누구이며 감시는 작동하는가",
-        "지배구조"
+        "이 회사의 주인은 누구이며 감시는 작동하는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -1140,7 +1196,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.governance"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -1152,16 +1216,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -1187,9 +1251,9 @@
       "title": "지배구조와 감사 리스크 점검",
       "category": "engines",
       "categoryTitle": "Engines",
-      "kind": "curated",
+      "kind": "recipe",
       "status": "unverified",
-      "purpose": "감사의견, 내부통제, 특수관계자, 지배구조 신호를 공시와 scan 근거로 점검한다.",
+      "purpose": "감사의견, 내부통제, 특수관계자, 지배구조 신호를 지배구조 + 이익품질 + 재무정합성 + 공시변화 4 축의 결합으로 점검하는 다단 응용.",
       "whenToUse": [
         "지배구조 리스크",
         "감사 리스크",
@@ -1206,11 +1270,9 @@
         "한계"
       ],
       "apiRefs": [
-        "Company.audit",
+        "Company.analysis",
         "Company.disclosure",
-        "Company.readFiling",
-        "scan.audit",
-        "scan.governance"
+        "Company.readFiling"
       ],
       "toolRefs": [
         "search_reference",
@@ -1219,30 +1281,48 @@
       ],
       "datasetRefs": [],
       "knowledgeRefs": [
-        "auditRiskConcepts",
-        "governanceConcepts"
+        "engines.analysis",
+        "engines.analysis.governance",
+        "engines.analysis.earningsQuality",
+        "engines.analysis.financialConsistency",
+        "engines.analysis.disclosureChange"
       ],
-      "linkedSkills": [],
+      "linkedSkills": [
+        "engines.analysis.governance",
+        "engines.analysis.earningsQuality",
+        "engines.analysis.financialConsistency",
+        "engines.analysis.disclosureChange"
+      ],
       "requires": [],
       "alternatives": [],
       "succeededBy": [],
       "deprecatedBy": [],
-      "sourceRefs": [],
-      "procedure": [
-        "Company.audit, disclosure, scan.audit, scan.governance 기능를 확인한다.",
-        "감사의견, 내부통제, 특수관계자, 지배구조 신호를 기간별 근거로 분리한다.",
-        "위험 신호와 확정 사실을 구분하고 반대 근거가 있으면 함께 남긴다.",
-        "본문 조회가 없으면 제목/프리빌드 기준 한계를 명시한다.",
-        "`c = dartlab.Company(\"005930\")`",
-        "`c.analysis()`",
-        "`c.analysis(\"financial\", \"수익성\")`",
-        "`dartlab.analysis(c, axis=\"financial\", sub=\"수익성\")`",
-        "Company 재무 snapshot과 표준 계정 매핑을 읽어 단일 기업의 재무 축을 계산한다. 인자 없이 호출하면 사용 가능한 axis/subaxis 가이드 DataFrame을 반환한다. 데이터가 없으면 값을 만들지 않고 None 또는 데이터 부재 메시지로 제한한다.",
-        "실행 전에 target, period/date, metric, source 또는 universe를 확인한다.",
-        "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
-        "주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다."
+      "sourceRefs": [
+        "dartlab://skills/engines.analysis.governanceAudit"
       ],
-      "recipeSteps": [],
+      "procedure": [
+        "단일 신호 (감사의견 한 줄 / 일회성 정정공시) 로 분식 단정 금지. 4 축 신호가 일관될 때만 risk claim.",
+        "본문 미조회 상태에서는 제목·프리빌드 기준 위험 신호로 제한 — 그 한계를 답변에 명시.",
+        "위험 신호 ↔ 확정 사실 구분 — 리스크 thesis 에는 반대 근거도 같이 남긴다."
+      ],
+      "recipeSteps": [
+        {
+          "skillId": "engines.analysis.governance",
+          "note": "이사회 독립성, 지배력 집중, 특수관계자 지표."
+        },
+        {
+          "skillId": "engines.analysis.earningsQuality",
+          "note": "이익이 진짜인지 (accruals, OCF/순이익 비교)."
+        },
+        {
+          "skillId": "engines.analysis.financialConsistency",
+          "note": "재무제표 간 정합성 (BS-PL-CF 합치)."
+        },
+        {
+          "skillId": "engines.analysis.disclosureChange",
+          "note": "공시 변경 추적 — 회계 기준 / 정책 변경 신호."
+        }
+      ],
       "requiredEvidence": [
         "target",
         "period",
@@ -1307,23 +1387,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 성장성 axis: 이 회사는 얼마나 빨리 성장하는가.",
+      "purpose": "analysis 엔진의 성장성 축 응용 — 이 회사는 얼마나 빨리 성장하는가.",
       "whenToUse": [
         "analysis",
         "성장성",
-        "이 회사는 얼마나 빨리 성장하는가",
-        "성장성"
+        "이 회사는 얼마나 빨리 성장하는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -1344,7 +1422,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.growth"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -1356,16 +1442,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -1393,23 +1479,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 투자효율 axis: 투자가 가치를 만드는가.",
+      "purpose": "analysis 엔진의 투자효율 축 응용 — 투자가 가치를 만드는가.",
       "whenToUse": [
         "analysis",
         "투자효율",
-        "투자가 가치를 만드는가",
-        "투자효율"
+        "투자가 가치를 만드는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -1430,7 +1514,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.investmentEfficiency"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -1442,16 +1534,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -1479,23 +1571,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 매크로민감도 axis: 이 회사의 매출은 어떤 매크로 변수에 민감한가.",
+      "purpose": "analysis 엔진의 매크로민감도 축 응용 — 이 회사의 매출은 어떤 매크로 변수에 민감한가.",
       "whenToUse": [
         "analysis",
         "매크로민감도",
-        "이 회사의 매출은 어떤 매크로 변수에 민감한가",
-        "매크로민감도"
+        "이 회사의 매출은 어떤 매크로 변수에 민감한가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -1516,7 +1606,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.macroSensitivity"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -1528,16 +1626,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -1603,14 +1701,14 @@
         "같은 metric과 기간을 가진 evidence를 대상별로 만든다.",
         "한쪽만 있는 수치로 강한 비교 결론을 내지 않는다.",
         "비교 표가 있으면 visual을 만든다.",
-        "`c = dartlab.Company(\"005930\")`",
-        "`c.analysis()`",
-        "`c.analysis(\"financial\", \"수익성\")`",
-        "`dartlab.analysis(c, axis=\"financial\", sub=\"수익성\")`",
         "Company 재무 snapshot과 표준 계정 매핑을 읽어 단일 기업의 재무 축을 계산한다. 인자 없이 호출하면 사용 가능한 axis/subaxis 가이드 DataFrame을 반환한다. 데이터가 없으면 값을 만들지 않고 None 또는 데이터 부재 메시지로 제한한다.",
         "실행 전에 target, period/date, metric, source 또는 universe를 확인한다.",
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
-        "주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다."
+        "주로 DataFrame 또는 dict-like 결과를 반환한다. 핵심 컬럼/키는 period, metric/account, value, unit, basis, comment이며 금액 단위는 원/백만원, 비율은 % 또는 배수다.",
+        "전체 세부 필드는 공개 docstring/기능와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.",
+        "실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.",
+        "최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.",
+        "스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다."
       ],
       "recipeSteps": [],
       "requiredEvidence": [
@@ -1674,23 +1772,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 예측신호 axis: 이 회사의 실적은 어디로 향하는가.",
+      "purpose": "analysis 엔진의 예측신호 축 응용 — 이 회사의 실적은 어디로 향하는가.",
       "whenToUse": [
         "analysis",
         "예측신호",
-        "이 회사의 실적은 어디로 향하는가",
-        "예측신호"
+        "이 회사의 실적은 어디로 향하는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -1711,7 +1807,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.predictionSignal"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -1723,16 +1827,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -1812,9 +1916,9 @@
         "최종 material claim은 기간·metric·값을 포함하되, 각 claim이 해당 table/value ref를 직접 참조하게 한다. evidence refs만 나열하고 claim refs를 비워 두면 숫자 검산을 통과하지 못한다.",
         "scan 또는 macro 맥락이 있으면 업황과 기업 수익성 변화를 연결한다.",
         "claim은 기간, metric, table 또는 value ref에 묶는다.",
-        "`c = dartlab.Company(\"005930\")`",
-        "`c.analysis()`",
-        "`c.analysis(\"financial\", \"수익성\")`"
+        "Company 재무 snapshot과 표준 계정 매핑을 읽어 단일 기업의 재무 축을 계산한다. 인자 없이 호출하면 사용 가능한 axis/subaxis 가이드 DataFrame을 반환한다. 데이터가 없으면 값을 만들지 않고 None 또는 데이터 부재 메시지로 제한한다.",
+        "실행 전에 target, period/date, metric, source 또는 universe를 확인한다.",
+        "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다."
       ],
       "recipeSteps": [],
       "requiredEvidence": [
@@ -1886,23 +1990,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 매출전망 axis: 이 회사의 매출은 어디로 가며 재무는 어떻게 변하는가.",
+      "purpose": "analysis 엔진의 매출전망 축 응용 — 이 회사의 매출은 어디로 가며 재무는 어떻게 변하는가.",
       "whenToUse": [
         "analysis",
         "매출전망",
-        "이 회사의 매출은 어디로 가며 재무는 어떻게 변하는가",
-        "매출전망"
+        "이 회사의 매출은 어디로 가며 재무는 어떻게 변하는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -1923,7 +2025,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.revenueForecast"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -1935,16 +2045,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -1972,23 +2082,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 수익구조 axis: 이 회사는 무엇으로 돈을 버는가.",
+      "purpose": "analysis 엔진의 수익구조 축 응용 — 이 회사는 무엇으로 돈을 버는가.",
       "whenToUse": [
         "analysis",
         "수익구조",
-        "이 회사는 무엇으로 돈을 버는가",
-        "수익구조"
+        "이 회사는 무엇으로 돈을 버는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -2009,7 +2117,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.revenueStructure"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -2021,16 +2137,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -2058,23 +2174,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 종합평가 axis: 재무 상태를 한마디로.",
+      "purpose": "analysis 엔진의 종합평가 축 응용 — 재무 상태를 한마디로.",
       "whenToUse": [
         "analysis",
         "종합평가",
-        "재무 상태를 한마디로",
-        "종합평가"
+        "재무 상태를 한마디로"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -2095,7 +2209,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.scorecard"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -2107,16 +2229,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -2144,23 +2266,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 안정성 axis: 이 회사는 망하지 않는가.",
+      "purpose": "analysis 엔진의 안정성 축 응용 — 이 회사는 망하지 않는가.",
       "whenToUse": [
         "analysis",
         "안정성",
-        "이 회사는 망하지 않는가",
-        "안정성"
+        "이 회사는 망하지 않는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -2181,7 +2301,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.stability"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -2193,16 +2321,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -2230,23 +2358,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 가치평가 axis: 이 회사의 적정 가치는 얼마인가.",
+      "purpose": "analysis 엔진의 가치평가 축 응용 — 이 회사의 적정 가치는 얼마인가.",
       "whenToUse": [
         "analysis",
         "가치평가",
-        "이 회사의 적정 가치는 얼마인가",
-        "가치평가"
+        "이 회사의 적정 가치는 얼마인가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -2267,7 +2393,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.valuation"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -2279,16 +2413,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -2316,23 +2450,21 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "analysis engine application skill for the 밸류에이션밴드 axis: PER/PBR이 과거 대비 어디에 있는가.",
+      "purpose": "analysis 엔진의 밸류에이션밴드 축 응용 — PER/PBR이 과거 대비 어디에 있는가.",
       "whenToUse": [
         "analysis",
         "밸류에이션밴드",
-        "PER/PBR이 과거 대비 어디에 있는가",
-        "밸류에이션밴드"
+        "PER/PBR이 과거 대비 어디에 있는가"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "Company 또는 종목코드",
+        "기준 기간"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "축별 dict",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "analysis",
@@ -2353,7 +2485,15 @@
       "sourceRefs": [
         "dartlab://skills/engines.analysis.valuationBand"
       ],
-      "procedure": [],
+      "procedure": [
+        "`items`: 축별 계산 항목과 결과",
+        "`history`: 기간별 시계열",
+        "`displayHints`: 표/차트 표시 힌트",
+        "`turningPoints`: 전환점 (해당 시)",
+        "`dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호",
+        "`_summary`: 사람이 읽을 요약",
+        "`tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "target",
@@ -2365,16 +2505,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not fabricate numbers.",
-        "Do not zero-fill missing values.",
-        "Do not treat one axis result as a final investment conclusion."
+        "근거 없는 숫자를 만들지 않는다.",
+        "결손값을 0 으로 채우지 않는다.",
+        "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -14985,7 +15125,7 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "scan engine application skill for 현금흐름: OCF/ICF/FCF + 현금흐름 패턴 분류 (8종).",
+      "purpose": "scan 엔진의 cashflow 축 응용 — OCF/ICF/FCF + 현금흐름 패턴 분류 (8종).",
       "whenToUse": [
         "scan",
         "cashflow",
@@ -14993,15 +15133,13 @@
         "OCF/ICF/FCF + 현금흐름 패턴 분류 (8종)"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "축 이름 (axis)"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "DataFrame (전종목 횡단)",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "scan"
@@ -15021,7 +15159,13 @@
       "sourceRefs": [
         "dartlab://skills/engines.scan.cashflow"
       ],
-      "procedure": [],
+      "procedure": [
+        "`stockCode` / `corpName`: 종목 식별자",
+        "`market`: KOSPI / KOSDAQ / KONEX",
+        "`latestAsOf` / `asOf`: 데이터 기준일",
+        "축 고유 metric / score / rank / grade column (정확한 spec 은 `scanCashflow()` docstring 검산)",
+        "`flags`: 결손 / 이상 / 비교 불가 신호"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "universe",
@@ -15032,16 +15176,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not list candidates without universe and datasetAsOf.",
-        "Do not answer with company names only; include a ranking/evidence table.",
-        "Do not present screening output as deep analysis."
+        "universe / datasetAsOf 없이 후보 나열 금지.",
+        "기업명만 나열 금지 — 랭킹 / evidence 표 동반.",
+        "screening 결과를 심층 분석으로 제시 금지."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -15364,7 +15508,7 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "scan engine application skill for 배당추이: DPS 3개년 시계열 + 패턴 분류 (연속증가/안정/감소/시작/중단).",
+      "purpose": "scan 엔진의 dividendTrend 축 응용 — DPS 3개년 시계열 + 패턴 분류 (연속증가/안정/감소/시작/중단).",
       "whenToUse": [
         "scan",
         "dividendTrend",
@@ -15372,15 +15516,13 @@
         "DPS 3개년 시계열 + 패턴 분류 (연속증가/안정/감소/시작/중단)"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "축 이름 (axis)"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "DataFrame (전종목 횡단)",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "scan"
@@ -15400,7 +15542,13 @@
       "sourceRefs": [
         "dartlab://skills/engines.scan.dividendTrend"
       ],
-      "procedure": [],
+      "procedure": [
+        "`stockCode` / `corpName`: 종목 식별자",
+        "`market`: KOSPI / KOSDAQ / KONEX",
+        "`latestAsOf` / `asOf`: 데이터 기준일",
+        "축 고유 metric / score / rank / grade column (정확한 spec 은 `scanDividendTrend()` docstring 검산)",
+        "`flags`: 결손 / 이상 / 비교 불가 신호"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "universe",
@@ -15411,16 +15559,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not list candidates without universe and datasetAsOf.",
-        "Do not answer with company names only; include a ranking/evidence table.",
-        "Do not present screening output as deep analysis."
+        "universe / datasetAsOf 없이 후보 나열 금지.",
+        "기업명만 나열 금지 — 랭킹 / evidence 표 동반.",
+        "screening 결과를 심층 분석으로 제시 금지."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -15448,7 +15596,7 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "scan engine application skill for 효율성: 자산/재고/매출채권 회전율 + CCC(현금전환주기) + 등급.",
+      "purpose": "scan 엔진의 efficiency 축 응용 — 자산/재고/매출채권 회전율 + CCC(현금전환주기) + 등급.",
       "whenToUse": [
         "scan",
         "efficiency",
@@ -15456,15 +15604,13 @@
         "자산/재고/매출채권 회전율 + CCC(현금전환주기) + 등급"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "축 이름 (axis)"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "DataFrame (전종목 횡단)",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "scan"
@@ -15484,7 +15630,13 @@
       "sourceRefs": [
         "dartlab://skills/engines.scan.efficiency"
       ],
-      "procedure": [],
+      "procedure": [
+        "`stockCode` / `corpName`: 종목 식별자",
+        "`market`: KOSPI / KOSDAQ / KONEX",
+        "`latestAsOf` / `asOf`: 데이터 기준일",
+        "축 고유 metric / score / rank / grade column (정확한 spec 은 `scanEfficiency()` docstring 검산)",
+        "`flags`: 결손 / 이상 / 비교 불가 신호"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "universe",
@@ -15495,16 +15647,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not list candidates without universe and datasetAsOf.",
-        "Do not answer with company names only; include a ranking/evidence table.",
-        "Do not present screening output as deep analysis."
+        "universe / datasetAsOf 없이 후보 나열 금지.",
+        "기업명만 나열 금지 — 랭킹 / evidence 표 동반.",
+        "screening 결과를 심층 분석으로 제시 금지."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -15700,7 +15852,7 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "scan engine application skill for 성장성: 매출/영업이익/순이익 CAGR + 성장 패턴 분류 (6종).",
+      "purpose": "scan 엔진의 growth 축 응용 — 매출/영업이익/순이익 CAGR + 성장 패턴 분류 (6종).",
       "whenToUse": [
         "scan",
         "growth",
@@ -15708,15 +15860,13 @@
         "매출/영업이익/순이익 CAGR + 성장 패턴 분류 (6종)"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "축 이름 (axis)"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "DataFrame (전종목 횡단)",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "scan"
@@ -15736,7 +15886,13 @@
       "sourceRefs": [
         "dartlab://skills/engines.scan.growth"
       ],
-      "procedure": [],
+      "procedure": [
+        "`stockCode` / `corpName`: 종목 식별자",
+        "`market`: KOSPI / KOSDAQ / KONEX",
+        "`latestAsOf` / `asOf`: 데이터 기준일",
+        "축 고유 metric / score / rank / grade column (정확한 spec 은 `scanGrowth()` docstring 검산)",
+        "`flags`: 결손 / 이상 / 비교 불가 신호"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "universe",
@@ -15747,16 +15903,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not list candidates without universe and datasetAsOf.",
-        "Do not answer with company names only; include a ranking/evidence table.",
-        "Do not present screening output as deep analysis."
+        "universe / datasetAsOf 없이 후보 나열 금지.",
+        "기업명만 나열 금지 — 랭킹 / evidence 표 동반.",
+        "screening 결과를 심층 분석으로 제시 금지."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -15981,7 +16137,7 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "scan engine application skill for 유동성: 유동비율 + 당좌비율 — 단기 지급능력.",
+      "purpose": "scan 엔진의 liquidity 축 응용 — 유동비율 + 당좌비율 — 단기 지급능력.",
       "whenToUse": [
         "scan",
         "liquidity",
@@ -15989,15 +16145,13 @@
         "유동비율 + 당좌비율 — 단기 지급능력"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "축 이름 (axis)"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "DataFrame (전종목 횡단)",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "scan"
@@ -16017,7 +16171,13 @@
       "sourceRefs": [
         "dartlab://skills/engines.scan.liquidity"
       ],
-      "procedure": [],
+      "procedure": [
+        "`stockCode` / `corpName`: 종목 식별자",
+        "`market`: KOSPI / KOSDAQ / KONEX",
+        "`latestAsOf` / `asOf`: 데이터 기준일",
+        "축 고유 metric / score / rank / grade column (정확한 spec 은 `scanLiquidity()` docstring 검산)",
+        "`flags`: 결손 / 이상 / 비교 불가 신호"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "universe",
@@ -16028,16 +16188,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not list candidates without universe and datasetAsOf.",
-        "Do not answer with company names only; include a ranking/evidence table.",
-        "Do not present screening output as deep analysis."
+        "universe / datasetAsOf 없이 후보 나열 금지.",
+        "기업명만 나열 금지 — 랭킹 / evidence 표 동반.",
+        "screening 결과를 심층 분석으로 제시 금지."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -16233,7 +16393,7 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "scan engine application skill for 수익성: 영업이익률/순이익률/ROE/ROA + 등급.",
+      "purpose": "scan 엔진의 profitability 축 응용 — 영업이익률/순이익률/ROE/ROA + 등급.",
       "whenToUse": [
         "scan",
         "profitability",
@@ -16241,15 +16401,13 @@
         "영업이익률/순이익률/ROE/ROA + 등급"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "축 이름 (axis)"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "DataFrame (전종목 횡단)",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "scan"
@@ -16269,7 +16427,13 @@
       "sourceRefs": [
         "dartlab://skills/engines.scan.profitability"
       ],
-      "procedure": [],
+      "procedure": [
+        "`stockCode` / `corpName`: 종목 식별자",
+        "`market`: KOSPI / KOSDAQ / KONEX",
+        "`latestAsOf` / `asOf`: 데이터 기준일",
+        "축 고유 metric / score / rank / grade column (정확한 spec 은 `scanProfitability()` docstring 검산)",
+        "`flags`: 결손 / 이상 / 비교 불가 신호"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "universe",
@@ -16280,16 +16444,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not list candidates without universe and datasetAsOf.",
-        "Do not answer with company names only; include a ranking/evidence table.",
-        "Do not present screening output as deep analysis."
+        "universe / datasetAsOf 없이 후보 나열 금지.",
+        "기업명만 나열 금지 — 랭킹 / evidence 표 동반.",
+        "screening 결과를 심층 분석으로 제시 금지."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -16317,7 +16481,7 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "scan engine application skill for 이익의 질: Accrual Ratio + CF/NI 비율 — 이익이 현금 뒷받침되는지.",
+      "purpose": "scan 엔진의 quality 축 응용 — Accrual Ratio + CF/NI 비율 — 이익이 현금 뒷받침되는지.",
       "whenToUse": [
         "scan",
         "quality",
@@ -16325,15 +16489,13 @@
         "Accrual Ratio + CF/NI 비율 — 이익이 현금 뒷받침되는지"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "축 이름 (axis)"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "DataFrame (전종목 횡단)",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "scan"
@@ -16353,7 +16515,13 @@
       "sourceRefs": [
         "dartlab://skills/engines.scan.quality"
       ],
-      "procedure": [],
+      "procedure": [
+        "`stockCode` / `corpName`: 종목 식별자",
+        "`market`: KOSPI / KOSDAQ / KONEX",
+        "`latestAsOf` / `asOf`: 데이터 기준일",
+        "축 고유 metric / score / rank / grade column (정확한 spec 은 `scanQuality()` docstring 검산)",
+        "`flags`: 결손 / 이상 / 비교 불가 신호"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "universe",
@@ -16364,16 +16532,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not list candidates without universe and datasetAsOf.",
-        "Do not answer with company names only; include a ranking/evidence table.",
-        "Do not present screening output as deep analysis."
+        "universe / datasetAsOf 없이 후보 나열 금지.",
+        "기업명만 나열 금지 — 랭킹 / evidence 표 동반.",
+        "screening 결과를 심층 분석으로 제시 금지."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -16691,7 +16859,7 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "scan engine application skill for 밸류에이션: PER/PBR/PSR + 시가총액 + 등급 (네이버 실시간).",
+      "purpose": "scan 엔진의 valuation 축 응용 — PER/PBR/PSR + 시가총액 + 등급 (네이버 실시간).",
       "whenToUse": [
         "scan",
         "valuation",
@@ -16699,15 +16867,13 @@
         "PER/PBR/PSR + 시가총액 + 등급 (네이버 실시간)"
       ],
       "inputs": [
-        "target",
-        "period",
-        "axis or method"
+        "축 이름 (axis)"
       ],
       "requiredInputs": [],
       "outputs": [
-        "result",
+        "DataFrame (전종목 횡단)",
         "evidence refs",
-        "limits and assumptions"
+        "한계와 가정"
       ],
       "apiRefs": [
         "scan"
@@ -16727,7 +16893,13 @@
       "sourceRefs": [
         "dartlab://skills/engines.scan.valuation"
       ],
-      "procedure": [],
+      "procedure": [
+        "`stockCode` / `corpName`: 종목 식별자",
+        "`market`: KOSPI / KOSDAQ / KONEX",
+        "`latestAsOf` / `asOf`: 데이터 기준일",
+        "축 고유 metric / score / rank / grade column (정확한 spec 은 `scanValuation()` docstring 검산)",
+        "`flags`: 결손 / 이상 / 비교 불가 신호"
+      ],
       "recipeSteps": [],
       "requiredEvidence": [
         "universe",
@@ -16738,16 +16910,16 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "public call",
-        "representative return shape",
-        "verification result"
+        "공개 호출",
+        "대표 반환 형태",
+        "검증 결과"
       ],
       "visualGuidance": [],
       "failureModes": [],
       "forbidden": [
-        "Do not list candidates without universe and datasetAsOf.",
-        "Do not answer with company names only; include a ranking/evidence table.",
-        "Do not present screening output as deep analysis."
+        "universe / datasetAsOf 없이 후보 나열 금지.",
+        "기업명만 나열 금지 — 랭킹 / evidence 표 동반.",
+        "screening 결과를 심층 분석으로 제시 금지."
       ],
       "examples": [],
       "runtimeCompatibility": {
@@ -17293,7 +17465,8 @@
         "1. 호출 — `emit_chart` · `emit_diagram` 하나로 시작한다",
         "2. VizSpec 프로토콜 — 이 구조로 넘긴다",
         "3. AI → 차트 파이프라인 — stdout 마커로 전달한다",
-        "4. Company → ChartSpec 자동 생성기 8 종"
+        "4. Company → ChartSpec 자동 생성기 22 종 (8 + 6 + 8)",
+        "5. landing/company SSOT — 정적 ChartSpec JSON dump → ChartRenderer 단일 렌더"
       ],
       "inputs": [
         "작업 목적",
@@ -17330,11 +17503,14 @@
         "1. 호출 — `emit_chart` · `emit_diagram` 하나로 시작한다 기준을 확인한다.",
         "2. VizSpec 프로토콜 — 이 구조로 넘긴다 기준을 확인한다.",
         "3. AI → 차트 파이프라인 — stdout 마커로 전달한다 기준을 확인한다.",
-        "4. Company → ChartSpec 자동 생성기 8 종 기준을 확인한다.",
-        "`emit_chart(spec)` — ChartSpec dict 를 stdout 마커로 출력.",
+        "4. Company → ChartSpec 자동 생성기 22 종 (8 핵심 + 6 추가 + 8 신규).",
+        "5. landing/company 정적 빌드 — `scripts/build/buildCompanyCharts.py --code <stockCode>` → `landing/static/charts/{code}/manifest.json` + section JSON.",
+        "`emit_chart(spec)` — ChartSpec dict 를 stdout 마커로 출력. evidenceBinding 또는 evidenceIds 필수.",
         "`emit_diagram(type, source)` — 다이어그램 소스를 stdout 마커로 출력.",
         "`extract_viz_specs(stdout)` — 마커 추출 + 텍스트 정제.",
-        "`AnalysisEvent(\"chart\", {\"charts\": [spec]})` — SSE 로 전달."
+        "`AnalysisEvent(\"chart\", {\"charts\": [spec]})` — SSE 로 전달.",
+        "`tableRef(source, topic, periodKind)` / `valueRef(...)` / `chartEvidenceBinding(...)` / `seriesPointRefs(...)` — refs.py 의 evidence helper.",
+        "`filingDeepLink(rcept_no, page=None)` — DART 정기보고서 원문 URL."
       ],
       "recipeSteps": [],
       "requiredEvidence": [
@@ -17417,14 +17593,14 @@
         "category와 metric이 각각 2개 이상 비교 가능한지 확인한다.",
         "`compile_visual`은 tableRef 기반으로만 호출한다.",
         "visual이 실패하면 답변에 차트를 주장하지 않는다.",
+        "ChartSpec 직접 만들 때는 `dartlab.viz.refs.chartEvidenceBinding(...)` 으로 `evidenceBinding` 을 채운다 — `emit_chart` 는 evidence 회로 진입점이 없는 spec 을 거부한다.",
+        "datapoint 단위 drill-back 이 필요한 series 는 `seriesPointRefs(...)` 로 `series[i].pointRefs` 를 채운다.",
         "`result = c.analysis(\"financial\", \"수익성\")`",
         "`chart = result.chart() 또는 dartlab.viz.tableBackedChart(table)`",
         "표에서 파생 가능한 차트만 만든다. 단일값/근거 없는 장식 시각화는 만들지 않는다.",
         "실행 전에 target, period/date, metric, source 또는 universe를 확인한다.",
         "데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.",
-        "ChartResult 또는 visual spec dict를 반환한다. 핵심 키는 data/tableRef, marks, x, y, unit, title, warnings다.",
-        "전체 세부 필드는 공개 docstring/기능와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.",
-        "실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다."
+        "ChartResult 또는 visual spec dict를 반환한다. 핵심 키는 data/tableRef, marks, x, y, unit, title, warnings다."
       ],
       "recipeSteps": [],
       "requiredEvidence": [
@@ -17441,7 +17617,9 @@
       ],
       "forbidden": [
         "tableRef 없는 차트",
-        "단일 막대 차트"
+        "단일 막대 차트",
+        "evidenceBinding (chart 단위) 또는 evidenceIds (legacy) 가 비어 있는 차트",
+        "pointRefs 없이 datapoint drill-back 이 필요한 차트"
       ],
       "examples": [
         "최근 상승률 순위표를 차트로 보여줘"
@@ -18307,6 +18485,75 @@
         "새 운영 규칙을 operation skill로 추가하기",
         "반복 분석 절차를 curated skill로 승격하기"
       ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "id": "operation.intentBoosts",
+      "title": "Skill 검색 의도 가중치 SSOT",
+      "category": "operation",
+      "categoryTitle": "Operation",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "skills.search() 가 사용자 query 를 특정 skill 로 라우팅하기 위해 적용하는 의도 매칭 가중치 규칙의 단일 정본. 코드에서 하드코딩된 값을 제거해 markdown SSOT 로 통합.",
+      "whenToUse": [
+        "검색 가중치",
+        "intent boost",
+        "search ranking",
+        "query 라우팅",
+        "skill 검색이 의도와 어긋나"
+      ],
+      "inputs": [
+        "사용자 query (자연어)"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "추천 skill id 와 추가 score"
+      ],
+      "apiRefs": [],
+      "toolRefs": [],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "start.useSkillsCatalog",
+        "start.dartlabSkillOs"
+      ],
+      "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/operation.intentBoosts"
+      ],
+      "procedure": [
+        "`skillIds[]`: 가중치를 받을 대상 skill id 목록.",
+        "`terms[]`: query 에 (case-insensitive substring) 등장하면 매칭으로 간주할 키워드 목록.",
+        "`boost`: 매칭 시 점수에 더할 값.",
+        "[start.useSkillsCatalog](/skills/start.useSkillsCatalog) — query → skill 검색 절차.",
+        "[operation.opsAsSkills](/skills/operation.opsAsSkills) — 운영 문서가 어떻게 skills 로 흡수됐는지."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [],
+      "forbidden": [],
+      "examples": [],
       "runtimeCompatibility": {
         "server": {
           "status": "supported"
