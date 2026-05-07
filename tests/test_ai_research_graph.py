@@ -108,13 +108,13 @@ def test_ask_public_entry_compares_two_financial_statements(monkeypatch) -> None
 
 
 def test_ask_growth_scan_returns_candidate_table(monkeypatch) -> None:
-    import dartlab.ai.workbench.loop as loop_mod
+    import dartlab.ai.workbench.heuristic as heuristic_mod
     from dartlab.ai.contracts import Ref
     from dartlab.ai.kernel import ask
     from dartlab.ai.tools.types import ToolResult
 
     monkeypatch.setattr(
-        loop_mod,
+        heuristic_mod,
         "engineCall",
         lambda plan: ToolResult(
             True,
