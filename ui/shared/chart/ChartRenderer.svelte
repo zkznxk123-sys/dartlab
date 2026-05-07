@@ -2,10 +2,15 @@
   // @ts-nocheck
   /**
    * ChartSpec JSON → 적절한 차트 컴포넌트로 dispatch.
-   * VSCode webview 전용 — ErrorBoundary 없이 try-catch fallback.
-   * @type {{ spec: object, class?: string }}
+   * dartlab.viz 의 단일 시각화 SSOT 진입점 — VSCode webview · landing · notebook
+   * 모두 같은 컴포넌트로 렌더한다.
+   *
+   * onPointClick 이 주어지면 series.data[i] 의 pointRefs[i] 를 인자로 받는다.
+   * landing 의 EvidencePanel drill-back 회로의 진입점.
+   *
+   * @type {{ spec: object, class?: string, onPointClick?: (ref: object) => void }}
    */
-  let { spec, class: className = '' } = $props();
+  let { spec, class: className = '', onPointClick } = $props();
 </script>
 
 {#if spec}
@@ -28,11 +33,11 @@
       {:catch}
         <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
       {/await}
-    {:else if spec.chartType === 'radar'}
+    {:else if spec.chartType === 'radar' || spec.chartType === 'six-act-radar'}
       {#await import('./RadarChart.svelte')}
         <p class="chart-loading">차트 준비 중</p>
       {:then { default: RadarChart }}
-        <RadarChart {spec} />
+        <RadarChart {spec} {onPointClick} />
       {:catch}
         <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
       {/await}
@@ -52,11 +57,11 @@
       {:catch}
         <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
       {/await}
-    {:else if spec.chartType === 'sparkline'}
+    {:else if spec.chartType === 'sparkline' || spec.chartType === 'hover-spark'}
       {#await import('./SparklineChart.svelte')}
         <p class="chart-loading">차트 준비 중</p>
       {:then { default: SparklineChart }}
-        <SparklineChart {spec} />
+        <SparklineChart {spec} {onPointClick} />
       {:catch}
         <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
       {/await}
@@ -65,6 +70,54 @@
         <p class="chart-loading">차트 준비 중</p>
       {:then { default: PieChart }}
         <PieChart {spec} />
+      {:catch}
+        <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
+      {/await}
+    {:else if spec.chartType === 'kpi-ribbon'}
+      {#await import('./KpiRibbonChart.svelte')}
+        <p class="chart-loading">차트 준비 중</p>
+      {:then { default: KpiRibbonChart }}
+        <KpiRibbonChart {spec} {onPointClick} />
+      {:catch}
+        <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
+      {/await}
+    {:else if spec.chartType === 'peer-matrix'}
+      {#await import('./PeerMatrixTable.svelte')}
+        <p class="chart-loading">차트 준비 중</p>
+      {:then { default: PeerMatrixTable }}
+        <PeerMatrixTable {spec} {onPointClick} />
+      {:catch}
+        <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
+      {/await}
+    {:else if spec.chartType === 'evidence-coverage'}
+      {#await import('./EvidenceCoverage.svelte')}
+        <p class="chart-loading">차트 준비 중</p>
+      {:then { default: EvidenceCoverage }}
+        <EvidenceCoverage {spec} {onPointClick} />
+      {:catch}
+        <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
+      {/await}
+    {:else if spec.chartType === 'income-trend-matrix'}
+      {#await import('./IncomeTrendMatrixChart.svelte')}
+        <p class="chart-loading">차트 준비 중</p>
+      {:then { default: IncomeTrendMatrixChart }}
+        <IncomeTrendMatrixChart {spec} {onPointClick} />
+      {:catch}
+        <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
+      {/await}
+    {:else if spec.chartType === 'balance-structure-trend'}
+      {#await import('./BalanceStructureTrendChart.svelte')}
+        <p class="chart-loading">차트 준비 중</p>
+      {:then { default: BalanceStructureTrendChart }}
+        <BalanceStructureTrendChart {spec} {onPointClick} />
+      {:catch}
+        <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
+      {/await}
+    {:else if spec.chartType === 'cashflow-signed-matrix'}
+      {#await import('./CashflowSignedMatrixChart.svelte')}
+        <p class="chart-loading">차트 준비 중</p>
+      {:then { default: CashflowSignedMatrixChart }}
+        <CashflowSignedMatrixChart {spec} {onPointClick} />
       {:catch}
         <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
       {/await}
