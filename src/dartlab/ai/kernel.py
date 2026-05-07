@@ -1,9 +1,12 @@
 """DartLab AI public ask entry point.
 
-본체는 `ai/agent.py` (runAgent — chat-native + LLM 자율 tool calling).
-분석 의도 (mode="analyze" 또는 종목코드 / 분석 키워드) 시 `WorkbenchLoop` 5 패스 활성.
+본체는 `ai/agent.py` (runAgent — chat-native + 모델 자율 tool calling).
+5 패스 작업대 활성 경로 2 가지 (feedback_no_graph_regression.md SSOT):
+1. 사용자 명시 `mode="analyze"` / `mode="workbench"`
+2. 모델이 자율적으로 `run_workbench` 도구 호출 (agent.runAgent 안에서)
 
-회귀 방지: memory/feedback_no_graph_regression.md.
+intent regex / 키워드 routing 폐기 (P-revised). 종목코드 자동 추출 / 분석 키워드 매치로
+암묵적 elevate 안 한다.
 """
 
 from __future__ import annotations
@@ -15,7 +18,6 @@ from .agent import runAgent
 from .contracts import TraceEvent, WorkbenchTask
 from .settings.provider_catalog import wired_provider_ids
 from .workbench import WorkbenchLoop
-from .workbench.intent import isAnalysisIntent
 
 
 def create_task(question: str, **_: Any) -> WorkbenchTask:
@@ -27,12 +29,13 @@ def create_task(question: str, **_: Any) -> WorkbenchTask:
 def _ask_events(question: str, **kwargs: Any) -> Iterator[TraceEvent]:
     """Internal event stream for server/CLI adapters.
 
-    Public callers should use :func:`ask`. agent_gateway 와 같은 분기 룰:
-    - 명시적 mode="analyze" / 종목코드 / 분석 키워드 → WorkbenchLoop (5 패스)
-    - 그 외 → runAgent (LLM 자율 tool calling)
+    분기 룰:
+    - 명시적 `mode="analyze" / "workbench"` → WorkbenchLoop (5 패스)
+    - 그 외 → runAgent (chat-native 자율 tool calling). 모델이 깊은 분석 필요 판단 시
+      `run_workbench` 도구를 자율 호출 — agent.py 안에서 처리.
     """
     mode = str(kwargs.get("mode") or kwargs.get("dialogueMode") or "").lower()
-    use_workbench = mode in {"analyze", "analysis", "research", "workbench"} or isAnalysisIntent(question, kwargs)
+    use_workbench = mode in {"analyze", "analysis", "research", "workbench"}
 
     if use_workbench:
         yield from WorkbenchLoop().stream(question, **kwargs)
@@ -42,7 +45,7 @@ def _ask_events(question: str, **kwargs: Any) -> Iterator[TraceEvent]:
     if provider_obj is None:
         provider_obj = _resolveProvider(kwargs)
     if provider_obj is None or not _isLLMProvider(provider_obj):
-        # provider 미해결 — workbench heuristic 으로 fallback (LLM 없이도 답)
+        # provider 미해결 — workbench heuristic 으로 fallback (모델 없이도 답).
         yield from WorkbenchLoop().stream(question, **kwargs)
         return
 

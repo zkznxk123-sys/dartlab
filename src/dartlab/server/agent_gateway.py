@@ -10,7 +10,6 @@ from typing import Any
 from dartlab.ai.agent import runAgent
 from dartlab.ai.contracts import TraceEvent
 from dartlab.ai.workbench import WorkbenchLoop
-from dartlab.ai.workbench.intent import isAnalysisIntent
 
 from . import agent_metrics
 from .models import AgentRunRequest
@@ -147,15 +146,17 @@ async def stream_agent_run(req: AgentRunRequest) -> AsyncIterator[dict[str, str]
 
 
 def _shouldUseWorkbench(req: AgentRunRequest, question: str, kernel_kwargs: dict[str, Any]) -> bool:
-    """명시적 분석 모드 / 종목 컨텍스트 / 분석 키워드 → workbench. 그 외 → agent."""
-    mode = ""
+    """명시적 분석 모드 → workbench. 그 외 → agent (모델이 자율로 run_workbench 호출 가능).
+
+    P-revised: intent regex 키워드 / 종목코드 자동 추출로 암묵 elevate 안 한다.
+    feedback_no_graph_regression.md SSOT — 정당 활성 경로 2 가지: (1) 사용자 명시 모드,
+    (2) 모델 자율 run_workbench 도구 호출 (agent.runAgent 안에서).
+    """
     context = req.workspaceContext if isinstance(req.workspaceContext, dict) else {}
     if isinstance(context, dict):
         mode = str(context.get("mode") or context.get("dialogueMode") or "").lower()
-    if mode in {"analyze", "analysis", "research", "workbench"}:
-        return True
-    if isAnalysisIntent(question, kernel_kwargs):
-        return True
+        if mode in {"analyze", "analysis", "research", "workbench"}:
+            return True
     return False
 
 

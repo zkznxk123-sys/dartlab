@@ -34,8 +34,9 @@ from .workbench.prompts import DARTLAB_CHAT_SYSTEM
 
 logger = logging.getLogger(__name__)
 
-# LLM 노출 도구 set — SSOT P-revised canonical 6 데이터 도구.
+# LLM 노출 도구 set — SSOT P-revised canonical 6 데이터 도구 + 1 meta (run_workbench).
 # `engine_call` 은 `run_python` 안에서 임의 dartlab 호출로 통합되어 폐기됨.
+# run_workbench 는 5 패스 elevate 명시 경로 — feedback_no_graph_regression.md 정당 활성 경로 (2).
 _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     "run_python",
     "read_skill",
@@ -43,6 +44,7 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     "web_search",
     "save_artifact",
     "compile_visual",
+    "run_workbench",
 )
 
 

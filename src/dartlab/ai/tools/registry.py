@@ -10,6 +10,7 @@ from .inspectDataset import inspectDataset
 from .readCapability import readCapability
 from .readSkill import readSkill
 from .runPython import runPython
+from .runWorkbench import runWorkbench
 from .saveArtifact import saveArtifact
 from .types import ToolResult, ToolSpec
 from .webSearch import webSearch
@@ -111,6 +112,19 @@ _SPECS: dict[str, ToolSpec] = {
             "required": ["target"],
         },
     ),
+    "run_workbench": ToolSpec(
+        "run_workbench",
+        "깊은 분석이 필요한 질문을 5 패스 (BRIEF/WORK/CRITIQUE/COMPOSE/GATE/HARVEST) 작업대로 elevate. 쓸 때: 회사 종합 분석, 스킬 절차 의존, ref 검증 강제 필요. 안 쓸 때: 단순 데이터 조회 (run_python 으로 충분), 메타 질문, 일반 대화.",
+        {
+            "type": "object",
+            "properties": {
+                "question": {"type": "string", "description": "재정식화한 분석 질문"},
+                "stockCode": {"type": "string", "description": "KR 6 자리 또는 US ticker (선택)"},
+                "market": {"type": "string", "enum": ["KR", "US"], "description": "시장 (선택)"},
+            },
+            "required": ["question"],
+        },
+    ),
 }
 
 _TOOLS: dict[str, ToolFn] = {
@@ -121,6 +135,7 @@ _TOOLS: dict[str, ToolFn] = {
     "save_artifact": saveArtifact,
     "inspect_dataset": inspectDataset,
     "compile_visual": compileVisual,
+    "run_workbench": runWorkbench,
 }
 
 CANONICAL_TOOL_NAMES = tuple(_SPECS.keys())
