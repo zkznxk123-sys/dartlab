@@ -57,9 +57,10 @@ def runAgent(
     max_iterations: int = 8,
     **_unused: Any,
 ) -> Iterator[TraceEvent]:
-    """본체 — LLM 자율 tool calling 루프. agent_gateway 가 본 함수의 TraceEvent 를 SSE 로 변환."""
+    """본체 — chat-native autonomous tool-calling 루프. agent_gateway 가 본 함수의 TraceEvent 를 SSE 로 변환."""
     history = history or []
-    messages: list[dict[str, Any]] = [{"role": "system", "content": DARTLAB_CHAT_SYSTEM}]
+    system_prompt = _injectPastContextIfAvailable(DARTLAB_CHAT_SYSTEM, _unused)
+    messages: list[dict[str, Any]] = [{"role": "system", "content": system_prompt}]
     for entry in history:
         if not isinstance(entry, dict):
             continue
@@ -230,6 +231,26 @@ def runAgent(
     )
 
 
+def _injectPastContextIfAvailable(systemPrompt: str, kwargs: dict[str, Any]) -> str:
+    """kwargs.stockCode 가 있으면 outcome_log past_context 를 system prompt 에 부착.
+
+    빈 문자열이면 섹션 헤더 자체 부재 — 환각 가드 (CHANGELOG #572 패턴).
+    """
+    stock_code = kwargs.get("stockCode")
+    if not stock_code:
+        return systemPrompt
+    market = kwargs.get("market") or "KR"
+    try:
+        from .memory.wiring import fetchPastContext
+
+        past = fetchPastContext(str(stock_code), market=str(market))
+    except Exception:  # noqa: BLE001
+        past = ""
+    if not past:
+        return systemPrompt
+    return f"{systemPrompt}\n\n## 과거 결정 회고 (참고 — 환각 금지, 위 사실에만 의존하라)\n{past}\n"
+
+
 def _wireChatNativeMemory(
     *, question: str, answerText: str, refs: list[dict[str, Any]], kwargs: dict[str, Any]
 ) -> None:
@@ -265,6 +286,8 @@ def _wireChatNativeMemory(
         selectedSkillRefs=(r for r in ref_objects if r.kind == "skillRef"),
         ok=True,
         extraTags=extra_tags,
+        stockCode=stock_code,
+        market=market,
     )
 
 

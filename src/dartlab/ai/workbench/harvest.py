@@ -29,8 +29,22 @@ def runHarvest(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[T
 
 
 def _wireMemory(state: WorkbenchState) -> None:
-    """선택 skill 사용 통계 + 결정 회상 자동 기록. 실패해도 조용히."""
+    """선택 skill 사용 통계 + 결정 회상 + outcome_log pending entry. 실패해도 조용히."""
+    from dartlab.ai.memory.wiring import inferStockCodeContext
+
     ok = not state.gateBlocked and state.failure is None
+    stock_code, market = inferStockCodeContext(state.refs)
+    if not stock_code:
+        # state.profile.targets 에서도 추출 시도 (BRIEF 가 채움)
+        targets = state.profile.get("targets") if isinstance(state.profile, dict) else None
+        if isinstance(targets, list) and targets:
+            stock_code = str(targets[0])
+    extra_tags: list[str] = []
+    if stock_code:
+        extra_tags.append(f"target:{stock_code}")
+    if market:
+        extra_tags.append(f"market:{market}")
+
     wireSessionMemory(
         question=state.question,
         answerText=state.answerText,
@@ -38,4 +52,7 @@ def _wireMemory(state: WorkbenchState) -> None:
         selectedSkillRefs=state.selectedSkillRefs,
         ok=ok,
         runId=state.runId,
+        extraTags=extra_tags,
+        stockCode=stock_code,
+        market=market,
     )

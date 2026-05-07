@@ -3,18 +3,26 @@
 세션 종료 시 호출:
 - recordSkillUsage(skillId, ok, valueRefs) — 사용 빈도 통계
 - remember(question + answer 요약, tags=[...]) — 다음 세션 recall 컨텍스트
+- outcome_log.store_decision(stockCode, market, ...) — stockCode 인식 시 pending entry 작성
 
 P-revised: chat-native runAgent 도 본 helper 호출 → SSOT.md Principle 6
-"session trace → HARVEST → decisions.jsonl" 의 정합 (이전엔 workbench 만 작성).
+"session trace → HARVEST → decisions.jsonl + outcome_log" 정합 (이전엔 workbench 만 작성).
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterable
+from datetime import date
 from typing import Any
 
 from dartlab.ai.contracts import Ref
-from dartlab.ai.memory import recordSkillUsage, remember
+from dartlab.ai.memory.decisions import recall, remember
+from dartlab.ai.memory.outcome_log import (
+    get_past_context,
+    safe_stockcode,
+    store_decision,
+)
+from dartlab.ai.memory.promotion import recordSkillUsage
 
 _DECISION_DIGEST_CAP = 280
 _QUESTION_CAP = 200
@@ -29,6 +37,9 @@ def wireSessionMemory(
     ok: bool = True,
     runId: str = "",
     extraTags: Iterable[str] = (),
+    stockCode: str | None = None,
+    market: str | None = None,
+    decisionTheme: str | None = None,
 ) -> None:
     """세션 종료 시 memory 작성. 실패해도 조용히 (사용자 흐름 보호).
 
@@ -36,10 +47,12 @@ def wireSessionMemory(
         question: 사용자 원 질문 (앞 200 char 사용)
         answerText: 답변 본문 (앞 280 char digest)
         refs: 누적 ref 목록 — valueRef 카운트 → skill_stats avgValueRefs
-        selectedSkillRefs: 사용된 skill ref (없으면 chat-native default 'chatNative')
+        selectedSkillRefs: 사용된 skill ref
         ok: GATE 통과 / failure 없음 여부
         runId: trace runId (tag 에 포함)
         extraTags: 추가 tag (예: 'target:005930', 'market:KR')
+        stockCode / market: 명시 시 outcome_log 에 pending entry 작성 (다음 같은 종목 호출 시 resolve)
+        decisionTheme: outcome_log entry tag 의 theme 컬럼 (예: "Buy", "Hold", "Concern"). 미지정 시 "Verdict".
     """
     refs_list = list(refs)
     selected_list = list(selectedSkillRefs)
@@ -77,6 +90,43 @@ def wireSessionMemory(
     except Exception:  # noqa: BLE001
         pass
 
+    # outcome_log 에 pending entry — stockCode 명시 + ok 시만.
+    if stockCode and ok:
+        try:
+            safe_code = safe_stockcode(stockCode)
+            store_decision(
+                stockCode=safe_code,
+                market=market or "KR",
+                date=date.today().isoformat(),
+                theme=(decisionTheme or "Verdict").strip()[:32],
+                decision_text=digest,
+            )
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def fetchPastContext(stockCode: str | None, market: str | None = None, *, n_same: int = 5, n_cross: int = 3) -> str:
+    """BRIEF / agent.runAgent 진입부에서 호출 — outcome_log past_context 조회.
+
+    빈 문자열 반환 시 호출자가 prompt 의 placeholder 섹션 자체를 부재화 (환각 가드).
+    stockCode 미지정 또는 가드 거부 시 빈 문자열.
+    """
+    if not stockCode:
+        return ""
+    try:
+        safe_code = safe_stockcode(stockCode)
+        return get_past_context(safe_code, market=market or "KR", n_same=n_same, n_cross=n_cross)
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def fetchRecallContext(question: str, *, k: int = 5) -> list[dict[str, Any]]:
+    """BM25 recall — 다음 세션 컨텍스트 주입용. 실패 시 빈 list."""
+    try:
+        return recall(question, k=k) or []
+    except Exception:  # noqa: BLE001
+        return []
+
 
 def _extractSkillIds(refs: list[Ref]) -> list[str]:
     out: list[str] = []
@@ -110,4 +160,4 @@ def inferStockCodeContext(
     return None, None
 
 
-__all__ = ["inferStockCodeContext", "wireSessionMemory"]
+__all__ = ["fetchPastContext", "fetchRecallContext", "inferStockCodeContext", "wireSessionMemory"]

@@ -107,7 +107,28 @@ def _buildBriefContext(state: WorkbenchState, lenses: list[str]) -> str:
     if state.recall:
         memo_lines = [f"- {row.get('text', '')[:160]}" for row in state.recall[:3]]
         parts.append("최근 기억 (recall):\n" + "\n".join(memo_lines))
+
+    # outcome_log past_context 비대칭 주입 — same-stock 5 + cross-stock 3.
+    # 빈 문자열이면 섹션 헤더 자체 부재 (환각 가드 — 차용: TauricResearch portfolio_manager.py CHANGELOG #572).
+    past = _fetchPastContext(state)
+    if past:
+        parts.append("## 과거 결정 회고 (참고 — 환각 금지, 위 사실에만 의존)\n" + past)
+
     if lenses:
         lens_lines = [f"[{name}] {LENSES[name]}" for name in lenses if name in LENSES]
         parts.append("활성 lens:\n" + "\n\n".join(lens_lines))
     return "\n\n".join(parts)
+
+
+def _fetchPastContext(state: WorkbenchState) -> str:
+    """state.profile.targets 에서 stockCode 추출 후 outcome_log 조회."""
+    targets = state.profile.get("targets") if isinstance(state.profile, dict) else None
+    if not isinstance(targets, list) or not targets:
+        return ""
+    stock_code = str(targets[0]).strip()
+    if not stock_code:
+        return ""
+    market = str(state.profile.get("market") or "KR")
+    from dartlab.ai.memory.wiring import fetchPastContext
+
+    return fetchPastContext(stock_code, market=market)
