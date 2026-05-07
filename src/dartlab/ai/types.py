@@ -1,9 +1,23 @@
-"""Small provider compatibility types for the Ask Workbench boundary."""
+"""DartLab AI 공통 타입 SSOT.
+
+Provider compatibility (LLMConfig / LLMResponse / ToolCall / ToolResponse) +
+contracts re-export (Ref / TraceEvent / WorkbenchTask / AnswerDraft / VerificationResult).
+새 import 는 본 파일 경로 사용. 옛 `from dartlab.ai.contracts import Ref` 도 호환.
+"""
 
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from typing import Any
+
+# contracts re-export — Phase D 점진 통합. 점진 마이그레이션 시 옛 경로 폐기.
+from .contracts import (  # noqa: F401
+    AnswerDraft,
+    Ref,
+    TraceEvent,
+    VerificationResult,
+    WorkbenchTask,
+)
 
 
 @dataclass(frozen=True)

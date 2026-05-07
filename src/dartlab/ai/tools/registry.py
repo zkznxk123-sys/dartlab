@@ -5,6 +5,7 @@ from __future__ import annotations
 import inspect
 from typing import Any, Callable
 
+from .compileVisual import compileVisual
 from .engineCall import engineCall
 from .generatedSpecSearch import generatedSpecSearch
 from .inspectDataset import inspectDataset
@@ -157,6 +158,30 @@ _SPECS: dict[str, ToolSpec] = {
             "required": ["skillId", "title", "purpose"],
         },
     ),
+    "compile_visual": ToolSpec(
+        "compile_visual",
+        "분석 결과를 차트/표 spec 으로 변환해 visualRef 를 발급한다. agent.py 가 visualRef 감지 시 VIEW_SPEC event 발행 → ChartRenderer 인라인. 쓸 때: 시계열·비교·분포 시각화. 안 쓸 때: 단순 텍스트 답변 (chartType 모를 때).",
+        {
+            "type": "object",
+            "properties": {
+                "chartType": {
+                    "type": "string",
+                    "enum": ["line", "bar", "table", "radar", "waterfall", "heatmap", "histogram"],
+                    "description": "line=시계열, bar=비교, table=표, radar=다축, waterfall=증감, heatmap=매트릭스, histogram=분포",
+                },
+                "data": {
+                    "type": "array",
+                    "description": "행 list (예: [{date:'2024-Q1', value:100}, ...])",
+                },
+                "title": {"type": "string"},
+                "xAxis": {"type": "string"},
+                "yAxis": {"type": "string"},
+                "subtitle": {"type": "string"},
+                "source": {"type": "string"},
+            },
+            "required": ["chartType", "data"],
+        },
+    ),
     "inspect_dataset": ToolSpec(
         "inspect_dataset",
         "dataset 의 schema, 행 수, 최신 관측, 샘플을 빠르게 확인해 datasetRef 를 만든다. WORK 에서 run_python 코드를 짜기 전 schema 확인용. 쓸 때: 처음 보는 dataset 의 컬럼·dtype·최신 시점 확인. 안 쓸 때: 한 번 본 dataset 의 다른 슬라이스 (run_python 안에서 직접).",
@@ -189,6 +214,7 @@ _TOOLS: dict[str, ToolFn] = {
     "save_artifact": saveArtifact,
     "propose_skill": proposeSkill,
     "inspect_dataset": inspectDataset,
+    "compile_visual": compileVisual,
 }
 
 CANONICAL_TOOL_NAMES = tuple(_SPECS.keys())

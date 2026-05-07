@@ -55,6 +55,14 @@ def runLLMPass(
         _trimMessagesIfNeeded(messages)
         try:
             turn = _generateWithRetry(provider, messages, tools_payload)
+        except RateLimitError as exc:
+            # rate limit 1회 retry 도 실패 — state.failure 에 명시 + 답변 합성을 loop 가 처리
+            state.failure = "rate_limit"
+            yield TraceEvent(
+                kind="llm_error",
+                data={"pass": passName, "round": round_idx, "error": str(exc), "type": "RateLimitError"},
+            )
+            break
         except Exception as exc:  # noqa: BLE001
             yield TraceEvent(
                 kind="llm_error",

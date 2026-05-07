@@ -219,7 +219,9 @@ def _raise_http_error(status: int, body: str) -> None:
     if status == 404:
         raise OAuthCodexError("endpoint", "ChatGPT OAuth backend 엔드포인트를 찾지 못했습니다.", detail=detail)
     if status == 429:
-        raise OAuthCodexError("rate_limit", "ChatGPT OAuth backend 요청 한도를 초과했습니다.", detail=detail)
+        from .base import RateLimitError
+
+        raise RateLimitError("oauth-codex", "ChatGPT OAuth backend 요청 한도를 초과했습니다.")
     raise OAuthCodexError("http_error", f"ChatGPT OAuth backend 오류입니다. HTTP {status}", detail=detail)
 
 

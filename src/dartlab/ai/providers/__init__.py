@@ -7,6 +7,7 @@ next action or final draft by using a small tool-calling surface.
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 from dataclasses import asdict, dataclass
 from typing import Any, Protocol
 
@@ -176,10 +177,35 @@ class ProviderTurn:
     raw: dict[str, Any] | None = None
 
 
+@dataclass(frozen=True)
+class StreamChunk:
+    """LLM streaming 델타. text 는 신규 부분만 (누적 X). final=True 가 종료 신호."""
+
+    text: str = ""
+    final: bool = False
+    turn: ProviderTurn | None = None
+
+
 class WorkbenchProvider(Protocol):
     config: ProviderConfig
 
     def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn: ...
+
+
+def stream_provider(
+    provider: Any, messages: list[dict[str, Any]], tools: list[dict[str, Any]]
+) -> "Iterator[StreamChunk]":
+    """Provider 의 generate_stream 사용. 미지원 provider 는 generate() wrap fallback.
+
+    chatNative / agent loop 가 본 helper 호출. UI 가 typing 효과 받음 (지원 provider).
+    """
+    from collections.abc import Iterator  # noqa: F401 — typing only
+
+    if hasattr(provider, "generate_stream") and callable(getattr(provider, "generate_stream")):
+        yield from provider.generate_stream(messages, tools)
+        return
+    turn = provider.generate(messages, tools)
+    yield StreamChunk(text=turn.content, final=True, turn=turn)
 
 
 class UnavailableProvider:
@@ -283,6 +309,76 @@ class OpenAICompatibleProvider:
         except Exception:
             raw = None
         return ProviderTurn(content=message.content or "", tool_calls=tool_calls, raw=raw)
+
+    def generate_stream(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]):
+        """Token-level streaming via OpenAI chat.completions stream=True.
+
+        text 델타를 즉시 yield → UI typing 효과. 마지막 chunk 는 final=True + ProviderTurn.
+        tool_calls streaming 처리는 Phase E 에서 — 현재는 final ProviderTurn 에서 한 번에.
+        """
+        try:
+            from openai import OpenAI
+        except Exception as exc:  # pragma: no cover
+            raise RuntimeError("openai package is required for tool-calling provider mode") from exc
+
+        client = self._client(OpenAI)
+        kwargs: dict[str, Any] = {
+            "model": self.resolved_model,
+            "messages": messages,
+            "stream": True,
+        }
+        if tools:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = "auto"
+
+        accumulated = ""
+        tool_calls_partial: dict[int, dict[str, Any]] = {}
+        try:
+            stream = client.chat.completions.create(**kwargs)
+        except Exception:
+            # streaming 미지원 provider (custom base_url 등) — non-stream fallback
+            turn = self._generate_chat_completions(client, messages, tools)
+            yield StreamChunk(text=turn.content, final=True, turn=turn)
+            return
+
+        for chunk in stream:
+            choices = getattr(chunk, "choices", None) or []
+            if not choices:
+                continue
+            delta = getattr(choices[0], "delta", None)
+            if delta is None:
+                continue
+            text = getattr(delta, "content", None) or ""
+            if text:
+                accumulated += text
+                yield StreamChunk(text=text)
+            for call_delta in getattr(delta, "tool_calls", None) or []:
+                idx = getattr(call_delta, "index", 0) or 0
+                slot = tool_calls_partial.setdefault(idx, {"id": None, "name": None, "args": ""})
+                if getattr(call_delta, "id", None):
+                    slot["id"] = call_delta.id
+                fn = getattr(call_delta, "function", None)
+                if fn is not None:
+                    if getattr(fn, "name", None):
+                        slot["name"] = fn.name
+                    if getattr(fn, "arguments", None):
+                        slot["args"] += fn.arguments
+
+        tool_calls: list[ToolCall] = []
+        for slot in tool_calls_partial.values():
+            if slot.get("name"):
+                tool_calls.append(
+                    ToolCall(
+                        id=str(slot.get("id") or ""),
+                        name=str(slot["name"]),
+                        args=_parse_tool_args(slot.get("args") or "{}"),
+                    )
+                )
+
+        yield StreamChunk(
+            final=True,
+            turn=ProviderTurn(content=accumulated, tool_calls=tool_calls, raw=None),
+        )
 
 
 def _parse_tool_args(raw_args: Any) -> dict[str, Any]:
@@ -397,9 +493,11 @@ def available_providers() -> list[str]:
 __all__ = [
     "ProviderConfig",
     "ProviderTurn",
+    "StreamChunk",
     "ToolCall",
     "WorkbenchProvider",
+    "available_providers",
     "create_provider",
     "get_config",
-    "available_providers",
+    "stream_provider",
 ]

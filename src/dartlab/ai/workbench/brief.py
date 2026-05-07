@@ -44,6 +44,40 @@ def runBrief(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[Tra
         elif ref.kind == "apiRef" and ref not in state.apiRefs:
             state.apiRefs.append(ref)
 
+    # BRIEF fallback — LLM 이 도구 호출 없이 종료해 ref 가 비어 있으면
+    # 휴리스틱으로 skill_search + generated_spec_search 강제 실행.
+    # ask_workbench.md "FINANCE 는 tool 1 회 이상 필수" 룰 강제.
+    if not state.selectedSkillRefs and not state.apiRefs and state.failure != "rate_limit":
+        from dartlab.ai.tools.generatedSpecSearch import generatedSpecSearch
+        from dartlab.ai.tools.skillSearch import skillSearch
+
+        skill_result = skillSearch(state.question, limit=5)
+        for ref in skill_result.refs:
+            state.refs.append(ref)
+            if ref not in state.selectedSkillRefs:
+                state.selectedSkillRefs.append(ref)
+                payload = ref.payload if isinstance(ref.payload, dict) else {}
+                for ev in payload.get("requiredEvidence") or []:
+                    if ev not in state.requiredEvidence:
+                        state.requiredEvidence.append(str(ev))
+        spec_result = generatedSpecSearch(state.question, limit=5)
+        for ref in spec_result.refs:
+            state.refs.append(ref)
+            if ref not in state.apiRefs:
+                state.apiRefs.append(ref)
+        state.toolCalls.append({"pass": "brief", "tool": "skill_search", "ok": skill_result.ok, "fallback": True})
+        state.toolCalls.append(
+            {"pass": "brief", "tool": "generated_spec_search", "ok": spec_result.ok, "fallback": True}
+        )
+        yield TraceEvent(
+            kind="brief_fallback",
+            data={
+                "skillRefs": [r.id for r in skill_result.refs],
+                "apiRefs": [r.id for r in spec_result.refs],
+                "reason": "LLM_no_tool_calls",
+            },
+        )
+
 
 # 단일 vs 패널 분기 — 질문 난이도 신호 휴리스틱.
 # 정량 기준은 P5.1 에서 데이터 기반으로 재조정.
