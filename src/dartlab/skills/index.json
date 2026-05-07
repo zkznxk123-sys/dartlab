@@ -713,7 +713,7 @@
       ],
       "procedure": [
         "배당성향 / 총환원율 만으로 결론 짓지 않는다. 위 3 축 결과가 모두 일관되어야 \"지속 가능\" claim 을 허용.",
-        "OCF < 배당총액인 기간이 있으면 그 자체를 evidence 로 남기고 \"차입 의존\" flag.",
+        "OCF &lt; 배당총액인 기간이 있으면 그 자체를 evidence 로 남기고 \"차입 의존\" flag.",
         "자사주 매입은 일회성 / 반복 정책 구분 — 최근 3~5 기간의 빈도 + 평균 규모를 함께 본다."
       ],
       "recipeSteps": [
@@ -14839,7 +14839,7 @@
       ],
       "requiredInputs": [],
       "outputs": [
-        "artifactRef (thesis 파일 ~/.dartlab/thesis/{ticker}.md)",
+        "artifactRef (thesis 파일 ~/.dartlab/thesis/`{ticker}.md`)",
         "tableRef (pillar status scorecard)",
         "한국어 thesis 점검 결과"
       ],
@@ -14869,9 +14869,9 @@
         "ticker 확정 + 신규/갱신 분기.",
         "신규 thesis — 본문 + pillar 3~5 + risk 3~5 + catalyst N 입력 받음.",
         "falsifiable 게이트 — 각 pillar 에 \"어떤 관측이면 반증되는가\" 명시 의무. vague claim 거부 + 사용자에 반증 조건 예시 안내.",
-        "갱신 — 기존 ~/.dartlab/thesis/{ticker}.md 로드 → 새 데이터 포인트가 어떤 pillar status 를 어떻게 바꾸는지 표시 (strengthen / weaken / neutral) + scorecard 갱신.",
+        "갱신 — 기존 ~/.dartlab/thesis/`{ticker}.md` 로드 → 새 데이터 포인트가 어떤 pillar status 를 어떻게 바꾸는지 표시 (strengthen / weaken / neutral) + scorecard 갱신.",
         "dartlab 기능 호출 — 재무 pillar 는 c.show 또는 c.analysis, 시장 pillar 는 gather 또는 quant, 산업 pillar 는 industry 엔진.",
-        "파일 저장 — save_artifact tool 또는 run_python 안에서 ~/.dartlab/thesis/{ticker}.md 작성.",
+        "파일 저장 — save_artifact tool 또는 run_python 안에서 ~/.dartlab/thesis/`{ticker}.md` 작성.",
         "본문 — 한국어 점검 결과 + scorecard 표 + 다음 cycle 갱신 시기 (보통 분기 단위)."
       ],
       "recipeSteps": [
