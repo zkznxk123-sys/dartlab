@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Data 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 capability/docstring으로 내려간다.
+purpose: Data 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 capability/docstring으로 내려간다. 트리거 — '데이터 다운로드', '데이터 수집', 'data 명세'.
 whenToUse:
   - Data
   - data
@@ -76,7 +76,7 @@ source:
   type: absorbed_skills
   absorbedKey: data
   format: markdown
-lastUpdated: '2026-05-03'
+lastUpdated: '2026-05-07'
 ---
 
 ## Skill OS 흡수 규칙

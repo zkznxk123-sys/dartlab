@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 단일 회사 부도 위험을 Altman Z″-Score (1968 비제조업 변형) + Ohlson O-Score (1980 logit) 2 학술 모델 동시 적용으로 합의 평가. analysis axis 와 credit 엔진 미사용, L1 raw (`c.show("BS"|"IS"|"CF")`) 만 사용.
+purpose: 단일 회사 부도 위험을 Altman Z″-Score (1968 비제조업 변형) + Ohlson O-Score (1980 logit) 2 학술 모델 동시 적용으로 합의 평가. analysis axis 와 credit 엔진 미사용, L1 raw (`c.show("BS"|"IS"|"CF")`) 만 사용. 트리거 — 'Altman + Ohlson', '부도 위험 2 모델 합의', 'Z-Score O-Score'.
 whenToUse:
   - Altman Z-Score 부도 위험
   - Ohlson O-Score 부도 logit

@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 회사의 valuation 을 DCF 절대평가 + 상대가치 (peer multiple) + valuation band (역사 평균 대비) 3 축으로 종합 점검하는 절차.
+purpose: 회사의 valuation 을 DCF 절대평가 + 상대가치 (peer multiple) + valuation band (역사 평균 대비) 3 축으로 종합 점검하는 절차. 트리거 — '밸류에이션 점검', 'fair value', '저평가 판단'.
 whenToUse:
   - 가치평가
   - 적정주가
@@ -37,7 +37,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 quant value 시계열 일부 한정
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

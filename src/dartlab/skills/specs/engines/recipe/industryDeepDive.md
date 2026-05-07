@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 단일 산업의 가치 사슬 + 매크로 영향 + 핵심 종목 3 축으로 산업 자체를 분석하는 절차. 종목 없이도 가능.
+purpose: 단일 산업의 가치 사슬 + 매크로 영향 + 핵심 종목 3 축으로 산업 자체를 분석하는 절차. 종목 없이도 가능. 트리거 — '산업 깊이 분석', '가치 사슬', '핵심 종목', '업종 분석'.
 whenToUse:
   - 산업 분석
   - 업종 분석
@@ -35,7 +35,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 industry stage 단일 호출만
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

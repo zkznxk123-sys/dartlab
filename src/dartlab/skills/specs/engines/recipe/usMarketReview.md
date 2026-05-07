@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 미국 상장 회사 (티커 기반) 의 EDGAR 공시 + 매크로 환경 + 기술적 신호를 종합 review 하는 절차. KR DART 와 다른 소스·접근.
+purpose: 미국 상장 회사 (티커 기반) 의 EDGAR 공시 + 매크로 환경 + 기술적 신호를 종합 review 하는 절차. KR DART 와 다른 소스·접근. 트리거 — '미국 시장 점검', 'US market review', 'EDGAR 분기'.
 whenToUse:
   - 미국 종목 분석
   - 미장 분석
@@ -36,7 +36,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 EDGAR API 직접 호출 제한
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

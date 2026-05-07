@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 매크로 유동성 환경을 금리 + 환율 + 유동성 지표 + 위기 신호 4 축으로 종합 판정하는 절차. 종목 없이 매크로 분석 가능.
+purpose: 매크로 유동성 환경을 금리 + 환율 + 유동성 지표 + 위기 신호 4 축으로 종합 판정하는 절차. 종목 없이 매크로 분석 가능. 트리거 — '매크로 유동성', '금리 환율 위기 신호', '거시 사이클'.
 whenToUse:
   - 매크로 유동성
   - 금리 환경
@@ -36,7 +36,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 macro 시계열 일부 한정
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 단일 종목의 수급 (외인/기관 매매) + 차트 패턴 + 모멘텀 신호를 결합해 단기 entry/exit 보조 신호를 만드는 절차.
+purpose: 단일 종목의 수급 (외인/기관 매매) + 차트 패턴 + 모멘텀 신호를 결합해 단기 entry/exit 보조 신호를 만드는 절차. 트리거 — '수급', '외인 기관 매매', '차트 패턴', '단기 entry/exit'.
 whenToUse:
   - 수급 분석
   - 외인 기관 매매
@@ -35,7 +35,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 flow KR 전용
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

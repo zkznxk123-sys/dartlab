@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: dartlab 의 기능·사용법·API 를 설명하는 질문에서 read_skill + read_capability 만 사용하고 run_python 가짜 evidence 를 만들지 않는 절차.
+purpose: dartlab 의 기능·사용법·API 를 설명하는 질문에서 read_skill + read_capability 만 사용하고 run_python 가짜 evidence 를 만들지 않는 절차. 트리거 — '사용법 안내', 'API 도움말', 'dartlab 호출 예시'.
 whenToUse:
   - dartlab 사용법
   - 어떤 기능이 있나
@@ -27,7 +27,7 @@ runtimeCompatibility:
     status: supported
   pyodide:
     status: supported
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

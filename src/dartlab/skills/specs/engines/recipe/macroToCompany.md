@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 매크로 환경 변화가 특정 회사의 매출·영업이익·이자비용·환산손익에 어떻게 전이되는지 단계별로 추적하는 절차.
+purpose: 매크로 환경 변화가 특정 회사의 매출·영업이익·이자비용·환산손익에 어떻게 전이되는지 단계별로 추적하는 절차. 트리거 — '매크로 → 회사 전이', '금리 환율 회사 영향', '단계별 추적'.
 whenToUse:
   - 금리가 회사에 미치는 영향
   - 환율이 회사에 미치는 영향
@@ -37,7 +37,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 macro snapshot 한정
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

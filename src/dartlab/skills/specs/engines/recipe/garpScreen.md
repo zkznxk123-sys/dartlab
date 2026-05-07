@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: Lynch GARP (Growth at Reasonable Price) — PEG = PER / 이익성장률 ≤ 1 을 dartlab 의 netProfitGrowth 로 근사하고 부채·매출성장 게이트 를 더해 성장+가치 결합 후보를 횡단으로 발굴하는 절차.
+purpose: Lynch GARP (Growth at Reasonable Price) — PEG = PER / 이익성장률 ≤ 1 을 dartlab 의 netProfitGrowth 로 근사하고 부채·매출성장 게이트 를 더해 성장+가치 결합 후보를 횡단으로 발굴하는 절차. 트리거 — 'GARP', 'PEG', 'Lynch 성장가치', 'PEG ≤ 1'.
 whenToUse:
   - GARP 성장+가치 결합
   - Lynch PEG 스크리닝
@@ -39,7 +39,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 valuation snapshot prebuild 의존
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 학술 근거

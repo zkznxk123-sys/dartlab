@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Analysis 엔진은 단일 기업의 재무제표, 가치평가, 지배구조, 전망, 기업 단위 매크로 민감도를 22개 분석 축으로 읽는 실행 스킬이다.
+purpose: Analysis 엔진은 단일 기업의 재무제표, 가치평가, 지배구조, 전망, 기업 단위 매크로 민감도를 22개 분석 축으로 읽는 실행 스킬이다. 트리거 — '재무 분석', '가치평가', '지배구조 점검', '전망'.
 whenToUse:
   - Analysis
   - analysis
@@ -115,7 +115,7 @@ linkedSkills:
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 엔진 역할

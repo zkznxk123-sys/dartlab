@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 두 회사의 재무제표를 같은 기준 기간에서 비교하고 핵심 차이를 분해해 평가하는 절차.
+purpose: 두 회사의 재무제표를 같은 기준 기간에서 비교하고 핵심 차이를 분해해 평가하는 절차. 트리거 — '재무제표 비교', '두 회사 차이', '회사 간 비교'.
 whenToUse:
   - 두 회사 재무제표 비교
   - A 와 B 비교
@@ -35,7 +35,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 두 회사 dataset snapshot 동시 로드 부담
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

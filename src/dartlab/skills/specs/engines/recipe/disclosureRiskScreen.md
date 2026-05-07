@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 전종목 횡단으로 공시 위험 신호 (정정 빈도, 자기자본 변동, 영업환경 변경 등) 가 높은 종목 후보를 추출하는 절차.
+purpose: 전종목 횡단으로 공시 위험 신호 (정정 빈도, 자기자본 변동, 영업환경 변경 등) 가 높은 종목 후보를 추출하는 절차. 트리거 — '공시 위험 스캔', '정정 빈도 횡단', '공시 위험 후보'.
 whenToUse:
   - 공시 위험
   - 정정 공시
@@ -33,7 +33,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 전종목 스캔 메모리 부담
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

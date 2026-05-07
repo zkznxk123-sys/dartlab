@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 단일 회사의 최근 공시 이벤트를 목록 + 원문 + 기간간 변화 3 축으로 분석하는 절차. 신규 공시/주요사항 발생 시 thesis 영향 평가.
+purpose: 단일 회사의 최근 공시 이벤트를 목록 + 원문 + 기간간 변화 3 축으로 분석하는 절차. 신규 공시/주요사항 발생 시 thesis 영향 평가. 트리거 — '최근 공시', '신규 공시 영향', '공시 본문 변화', 'thesis 영향 평가'.
 whenToUse:
   - 최근 공시 분석
   - 공시 이벤트 평가
@@ -35,7 +35,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 readFiling 본문 길이 한정
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

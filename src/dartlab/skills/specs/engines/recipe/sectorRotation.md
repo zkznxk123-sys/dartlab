@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 매크로 사이클 위치 + 섹터 횡단 스캔 + 산업 위치 3 축으로 섹터 로테이션 후보를 평가하는 절차. 종목 없이도 가능.
+purpose: 매크로 사이클 위치 + 섹터 횡단 스캔 + 산업 위치 3 축으로 섹터 로테이션 후보를 평가하는 절차. 종목 없이도 가능. 트리거 — '섹터 로테이션', '업종 순환', '경기 사이클별 섹터'.
 whenToUse:
   - 섹터 로테이션
   - 어떤 섹터가 좋아
@@ -35,7 +35,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 macro 사이클 시계열 일부 한정
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

@@ -59,7 +59,7 @@ examples:
 source:
   type: curated_markdown
   owner: dartlab
-lastUpdated: "2026-05-03"
+lastUpdated: "2026-05-07"
 ---
 
 ## 절차
@@ -70,4 +70,29 @@ lastUpdated: "2026-05-03"
 - 프로젝트별 실험은 `.dartlab/skills/**/*.md` user skill로 시작한다.
 - official 승격은 구조 lint, 서버 audit P, 사용자 확인이 모두 있을 때만 허용한다.
 - 승격 후에도 SkillSpec은 schema를 복사하지 않고 capabilityRefs와 sourceRefs로 원천을 연결한다.
+
+## Trigger phrase 작성 규칙
+
+`purpose:` 마지막 문장은 **trigger phrase** — 사용자가 자연어로 어떻게 부를지 1~3 가지 명시.
+
+형식 (em dash `—` 사용 — colon 사용하면 YAML mid-value mapping 으로 해석돼 ScannerError):
+```
+purpose: ...절차 설명. 트리거 — '오늘 아침', '야간 공시 정리', 'morning note'.
+```
+
+원칙:
+- 자연어 phrase (한국어 위주, 영문 보조 OK), 사용자가 채팅에 칠 만한 표현.
+- 기존 `whenToUse:` array 와 *중복 OK* — `whenToUse` 는 검색 인덱스, `purpose` 끝 문장은 LLM 이 skill 카탈로그를 펼침 시 매칭하는 자연어.
+- 1~3 개 — 너무 많으면 LLM 이 false positive 매칭. 가장 자주 칠 표현부터.
+- 동의어 그룹 (예: "재무제표 비교 / 회사 비교 / 두 종목 차이") 은 같은 trigger 안에 묶어서.
+
+이유:
+- LLM 이 `read_skill` 검색 결과를 펼쳐볼 때 `purpose` 본문이 가장 먼저 보이고, 자연어 phrase 매칭이 단어 array (`whenToUse`) 보다 우선 hit.
+- whenToUse 는 grep-style 인덱스이고, purpose trigger 는 LLM 의 의도 매칭에 직접 들어간다.
+
+SCHEMA 변경 없음 — `purpose:` 본문 끝에 한 문장 추가만. `lastUpdated` 는 갱신.
+
+신규 cadence recipe (dailyMorningNote · catalystCalendar · thesisTracker) 도 같은 규칙으로 작성.
+
+기존 skill 일괄 audit 은 `scripts/dev/audit_trigger_phrases.py` (idempotent, dry-run 지원).
 

@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 회사의 인력 (직원수·인건비·생산성) 과 자본 (배당·자사주·신주) 사이클을 결합해 자원 배분 전략을 분석하는 절차.
+purpose: 회사의 인력 (직원수·인건비·생산성) 과 자본 (배당·자사주·신주) 사이클을 결합해 자원 배분 전략을 분석하는 절차. 트리거 — '인력 자본', '종업원 신호', 'workforce'.
 whenToUse:
   - 인력 분석
   - 직원 수
@@ -37,7 +37,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 docs 일부 한정
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

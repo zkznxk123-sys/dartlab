@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Credit (dCR) 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 capability/docstring으로 내려간다.
+purpose: Credit (dCR) 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 capability/docstring으로 내려간다. 트리거 — '신용 분석', '부도 위험', '신용등급', 'dCR'.
 whenToUse:
   - Credit (dCR)
   - credit
@@ -80,7 +80,7 @@ source:
   type: absorbed_skills
   absorbedKey: credit
   format: markdown
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## Skill OS 흡수 규칙

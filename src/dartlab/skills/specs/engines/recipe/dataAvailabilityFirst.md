@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 분석 시작 전 필요한 데이터 (finance/docs/report/price) 가 local 에 있는지 확인하고 누락 시 수집을 트리거하는 절차. emit_result 실패 사이클 예방.
+purpose: 분석 시작 전 필요한 데이터 (finance/docs/report/price) 가 local 에 있는지 확인하고 누락 시 수집을 트리거하는 절차. emit_result 실패 사이클 예방. 트리거 — '데이터 있나 확인', '분석 전 데이터 점검', '수집 누락 체크'.
 whenToUse:
   - 데이터 가용성
   - 데이터 있는지
@@ -33,7 +33,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 update() 호출 제약
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 단일 종목의 기술적 신호를 지표 종합 + 모멘텀 + 변동성 + 차트 패턴 4 축으로 묶어 entry/exit 판단을 보강하는 절차.
+purpose: 단일 종목의 기술적 신호를 지표 종합 + 모멘텀 + 변동성 + 차트 패턴 4 축으로 묶어 entry/exit 판단을 보강하는 절차. 트리거 — '기술적 신호', '모멘텀 변동성', '차트 패턴 4 축'.
 whenToUse:
   - 기술적 분석
   - quant 분석
@@ -37,7 +37,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 price 시계열 일부 한정
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식

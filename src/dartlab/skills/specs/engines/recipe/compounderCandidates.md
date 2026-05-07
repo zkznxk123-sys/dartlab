@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: Buffett-style quality compounder 발굴 — ROE / revenueGrowth / grossMargin 의 5 년 평균과 표준편차로 사이클 무관 일관 quality 종목을 횡단으로 식별하는 절차.
+purpose: Buffett-style quality compounder 발굴 — ROE / revenueGrowth / grossMargin 의 5 년 평균과 표준편차로 사이클 무관 일관 quality 종목을 횡단으로 식별하는 절차. 트리거 — 'compounder 발굴', 'quality 일관 종목', 'Buffett 스타일 횡단'.
 whenToUse:
   - 장기 복리 종목 발굴
   - Buffett style quality
@@ -39,7 +39,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 freq="Y" 5 기간 시계열 일부 한정
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 학술 근거

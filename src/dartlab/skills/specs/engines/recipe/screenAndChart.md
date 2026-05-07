@@ -5,7 +5,7 @@ category: engines
 kind: recipe
 scope: builtin
 status: unverified
-purpose: scan 으로 후보를 스크리닝한 뒤 그 결과를 table-backed chart 로 시각화하는 절차. UI / 보고서 출력 직전 단계.
+purpose: scan 으로 후보를 스크리닝한 뒤 그 결과를 table-backed chart 로 시각화하는 절차. UI / 보고서 출력 직전 단계. 트리거 — '스캔 후 차트', 'table-backed chart', '보고서 직전 시각화'.
 whenToUse:
   - 스캔 차트
   - 후보 시각화
@@ -33,7 +33,7 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 chart artifact 저장 제약
-lastUpdated: '2026-05-06'
+lastUpdated: '2026-05-07'
 ---
 
 ## 공개 호출 방식
