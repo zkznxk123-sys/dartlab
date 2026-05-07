@@ -33,6 +33,7 @@ def runWork(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[Trac
             "save_artifact",
         ],
         maxRounds=_inferWorkRounds(state),
+        role="analysis",
     )
 
 

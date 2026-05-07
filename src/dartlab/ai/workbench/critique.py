@@ -23,6 +23,7 @@ def runCritique(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[
         userContext=user_ctx,
         allowedTools=[],
         maxRounds=2,
+        role="analysis",
     ):
         if ev.kind == "llm_text":
             text_collector.append(ev.data.get("text", ""))

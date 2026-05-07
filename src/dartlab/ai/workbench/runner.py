@@ -39,9 +39,20 @@ def runLLMPass(
     userContext: str,
     allowedTools: list[str],
     maxRounds: int = 6,
+    role: str | None = None,
 ) -> Iterator[TraceEvent]:
+    """5 패스 공용 모델-도구 루프.
+
+    role 인자: 사용자 profile 의 role binding 으로 모델 라우팅. 미지정 시 호출자 provider 그대로.
+    AI_ROLES = ("analysis", "summary", "coding", "ui_control"). 일반적으로:
+    - BRIEF/CRITIQUE/COMPOSE → role="analysis" (deep tier)
+    - 비싼 모델 비용 절감 시 BRIEF 만 role="summary" 등 fine-tune 가능
+    """
     state.currentPass = passName
     yield TraceEvent(kind="pass_enter", data={"pass": passName})
+
+    if role:
+        provider = _resolveProviderForRole(provider, role)
 
     tool_specs_objs = [TOOL_SPECS[name] for name in allowedTools if name in TOOL_SPECS]
     tools_payload = [_toolToOpenAIFormat(spec) for spec in tool_specs_objs]
@@ -161,6 +172,27 @@ def _generateWithRetry(
     except RateLimitError:
         time.sleep(_RATE_LIMIT_RETRY_DELAY_SEC)
         return provider.generate(messages, tools)
+
+
+def _resolveProviderForRole(currentProvider: WorkbenchProvider, role: str) -> WorkbenchProvider:
+    """role 별 별도 모델 binding 으로 provider 재해상.
+
+    Profile 에 role 이 등록되어 있고 모델이 다르면 새 provider 를 생성.
+    동일하거나 미등록이면 currentProvider 를 그대로 반환 (롤백 안전).
+    """
+    try:
+        from dartlab.ai.providers import create_provider, get_config
+
+        current_provider_id = (getattr(currentProvider.config, "provider", None) or "").lower()
+        current_model = getattr(currentProvider.config, "model", None)
+        new_config = get_config(role=role, provider=current_provider_id)
+        if (new_config.provider or "").lower() == current_provider_id and (new_config.model or "") == (
+            current_model or ""
+        ):
+            return currentProvider
+        return create_provider(new_config)
+    except Exception:  # noqa: BLE001
+        return currentProvider
 
 
 def _trimMessagesIfNeeded(messages: list[dict[str, Any]]) -> None:

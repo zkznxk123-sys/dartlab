@@ -32,6 +32,7 @@ def runBrief(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[Tra
         userContext=user_ctx,
         allowedTools=["read_skill", "read_capability"],
         maxRounds=4,
+        role="analysis",
     )
 
     for ref in state.refs:

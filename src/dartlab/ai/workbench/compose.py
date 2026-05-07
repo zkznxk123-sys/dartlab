@@ -22,6 +22,7 @@ def runCompose(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[T
         userContext=buildContextSummary(state),
         allowedTools=[],
         maxRounds=2,
+        role="analysis",
     ):
         if ev.kind == "llm_text":
             text_collector.append(ev.data.get("text", ""))
