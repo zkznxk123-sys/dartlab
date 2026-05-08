@@ -1,6 +1,6 @@
 """휴리스틱 흐름 — provider 가 LLM 이 아닐 때 5 패스 노드명을 발행하며 답을 합성.
 
-BRIEF (profile + read_skill + read_capability + planEvidence) → WORK (engine_call 루프)
+BRIEF (profile + ReadSkill + ReadCapability + planEvidence) → WORK (EngineCall 루프)
 → COMPOSE (휴리스틱 답안) → GATE (verifyAnswer programmatic) → HARVEST (no-op).
 
 본 모듈은 외부 LLM 의존 없음. targets / intent 의 정적 함수 + workbench tools 만 사용.
@@ -51,20 +51,20 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
     state.profile = _buildQuestionProfile(state.question, stockCode=kwargs.get("stockCode"))
     state.intent = str(state.profile.get("taskType") or "research")
 
-    yield _toolStart(state, "read_skill", {"query": state.question, "limit": 8})
-    skill_result = readSkill(state.question, limit=8)
+    yield _toolStart(state, "ReadSkill", {"query": state.question, "limit": 8})
+    skill_result = readSkill(state.question, limit=8, includeBody=True)
     state.selectedSkillRefs = skill_result.refs
     state.refs.extend(skill_result.refs)
-    state.toolCalls.append({"pass": "brief", "tool": "read_skill", "ok": skill_result.ok})
-    yield _toolResult(state, "read_skill", skill_result)
+    state.toolCalls.append({"pass": "brief", "tool": "ReadSkill", "ok": skill_result.ok})
+    yield _toolResult(state, "ReadSkill", skill_result)
     yield TraceEvent("reference", {"refs": [ref.to_dict() for ref in skill_result.refs], "query": state.question})
 
-    yield _toolStart(state, "read_capability", {"query": state.question, "limit": 10})
+    yield _toolStart(state, "ReadCapability", {"query": state.question, "limit": 10})
     spec_result = readCapability(state.question, limit=10)
     state.apiRefs = spec_result.refs
     state.refs.extend(spec_result.refs)
-    state.toolCalls.append({"pass": "brief", "tool": "read_capability", "ok": spec_result.ok})
-    yield _toolResult(state, "read_capability", spec_result)
+    state.toolCalls.append({"pass": "brief", "tool": "ReadCapability", "ok": spec_result.ok})
+    yield _toolResult(state, "ReadCapability", spec_result)
 
     # selectedSkillRefs 의 requiredEvidence 통합 → state.requiredEvidence
     for ref in state.selectedSkillRefs:
@@ -86,7 +86,7 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
     )
 
     # ── WORK ──
-    yield _node("work", "engine_call 실행 루프.", state)
+    yield _node("work", "EngineCall 실행 루프.", state)
     activity_count += 1
     results: list[dict[str, Any]] = []
     for index, plan in enumerate(state.plan, start=1):
@@ -219,9 +219,11 @@ def _toolResult(state: WorkbenchState, tool: str, result: ToolResult) -> TraceEv
 
 
 def _executePlan(plan: dict[str, Any]) -> ToolResult:
-    if plan["tool"] == "engine_call":
+    # plan dict 의 tool 필드는 PascalCase 가 정본. legacy snake (engine_call) 도 호환.
+    tool = plan["tool"]
+    if tool in ("EngineCall", "engine_call"):
         return engineCall(plan["args"].get("plan") or plan["args"])
-    raise ValueError(f"unsupported workbench tool: {plan['tool']}")
+    raise ValueError(f"unsupported workbench tool: {tool}")
 
 
 def _composeAnswer(state: WorkbenchState, results: list[dict[str, Any]]) -> str:
@@ -337,7 +339,7 @@ def _failureMessage(reason: str) -> str:
 
 
 def _toolSummary(tool: str, args: dict[str, Any]) -> str:
-    if tool == "engine_call":
+    if tool in ("EngineCall", "engine_call"):
         plan = args.get("plan") or args
         api_ref = plan.get("apiRef") or f"{plan.get('engine')}.{plan.get('method')}"
         target = plan.get("target") or plan.get("axis") or plan.get("path") or ""

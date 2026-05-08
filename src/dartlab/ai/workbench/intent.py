@@ -1,7 +1,7 @@
 """정규식·키워드 SSOT — 종목코드 / 티커 / show 주제 인식 helper.
 
 P-revised: `isAnalysisIntent` 함수 폐기. 작업대 elevate 는 사용자 명시 mode 또는
-모델 자율 `run_workbench` 도구 호출 두 경로만. 본 모듈은 회사 분리 / 종목코드
+모델 자율 `RunWorkbench` 도구 호출 두 경로만. 본 모듈은 회사 분리 / 종목코드
 정규식 + show 토픽 alias 제공만 — targets.py / heuristic.py 가 import.
 """
 

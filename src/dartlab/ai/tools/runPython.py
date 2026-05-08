@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import threading
 import time
@@ -22,6 +23,8 @@ from dartlab.ai.contracts import Ref
 from .formatting import short_text
 from .types import ToolResult
 
+logger = logging.getLogger(__name__)
+
 _TIMEOUT_SEC = float(os.environ.get("DARTLAB_RUNPYTHON_TIMEOUT_SEC", "60"))
 
 
@@ -30,9 +33,38 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
     stderr = StringIO()
     emitted: dict[str, Any] = {}
 
-    def emit_result(**kwargs: Any) -> None:
-        emitted.update(kwargs)
-        print("DARTLAB_RESULT_JSON=" + json.dumps(kwargs, ensure_ascii=False, default=str))
+    def _coerce_value(value: Any) -> Any:
+        """JSON 가능한 형태로 재귀 변환. polars DataFrame/Series, dict, list 안까지 walk."""
+        try:
+            import polars as _pl
+
+            if isinstance(value, _pl.DataFrame):
+                return [{k: _coerce_value(v) for k, v in row.items()} for row in value.to_dicts()]
+            if isinstance(value, _pl.Series):
+                return [_coerce_value(v) for v in value.to_list()]
+        except ImportError:
+            pass
+        if isinstance(value, dict):
+            return {k: _coerce_value(v) for k, v in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [_coerce_value(v) for v in value]
+        return value
+
+    def emit_result(*args: Any, **kwargs: Any) -> None:
+        """Result emitter — keyword args 권장. positional dict 도 dict 로 unpack 해서 받음."""
+        payload: dict[str, Any] = {}
+        for arg in args:
+            arg = _coerce_value(arg)
+            if isinstance(arg, dict):
+                payload.update(arg)
+            else:
+                payload.setdefault("values", {})
+                if isinstance(payload["values"], dict):
+                    payload["values"][f"value_{len(payload['values'])}"] = arg
+        for k, v in kwargs.items():
+            payload[k] = _coerce_value(v)
+        emitted.update(payload)
+        print("DARTLAB_RESULT_JSON=" + json.dumps(payload, ensure_ascii=False, default=str))
 
     globals_dict: dict[str, Any] = {"emit_result": emit_result, "__builtins__": __builtins__}
     container: dict[str, Any] = {}
@@ -86,6 +118,13 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
         )
     if "error" in container:
         duration = int((time.monotonic() - start) * 1000)
+        logger.warning(
+            "run_python failed (runId=%s, %dms)\n--- code ---\n%s\n--- traceback ---\n%s",
+            runId or "local",
+            duration,
+            (code or "")[:1500],
+            container["error"],
+        )
         return ToolResult(
             False,
             "run_python 실행 실패",
@@ -116,18 +155,20 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
             },
         )
     ]
-    if emitted.get("table"):
+    table_value = emitted.get("table")
+    if table_value is not None and (not hasattr(table_value, "__len__") or len(table_value) > 0):
         refs.append(
             Ref(
                 id=f"table:{runId or 'local'}:python",
                 kind="tableRef",
                 title="python table result",
                 source=refs[0].id,
-                payload={"rows": emitted.get("table")},
+                payload={"rows": table_value},
             )
         )
-    if emitted.get("values"):
-        values = emitted.get("values") if isinstance(emitted.get("values"), dict) else {}
+    values_raw = emitted.get("values")
+    if isinstance(values_raw, dict) and values_raw:
+        values = values_raw
         for key, value in values.items():
             refs.append(
                 Ref(

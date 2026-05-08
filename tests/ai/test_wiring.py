@@ -118,4 +118,4 @@ def test_brief_pass_invokes_read_skill() -> None:
     )
     state = WorkbenchState(question="회사 재무 분석")
     list(runBrief(state, provider))
-    assert any(c.get("tool") == "read_skill" for c in state.toolCalls)
+    assert any(c.get("tool") == "ReadSkill" for c in state.toolCalls)

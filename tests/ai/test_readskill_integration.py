@@ -73,4 +73,4 @@ def test_brief_pass_populates_required_evidence() -> None:
 
     state = WorkbenchState(question="회사 재무 분석")
     list(runBrief(state, _Provider(config=ProviderConfig(provider="openai", api_key="sk-test"))))
-    assert any(c.get("tool") == "read_skill" for c in state.toolCalls)
+    assert any(c.get("tool") == "ReadSkill" for c in state.toolCalls)

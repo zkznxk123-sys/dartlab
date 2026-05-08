@@ -27,24 +27,28 @@ BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST
 
 각 패스는 LLM 호출 가능한 별도 단계. system prompt 는 패스별 분리 (`workbench/prompts.py`). 같은 분석가 정체성 (외부 목소리) + 다른 인지 단계 (내부 작업).
 
-- **BRIEF**: 질문 해석, `read_skill`/`read_capability`/`recall(memory)` 로 작업 계획 수립
-- **WORK**: `run_python`/`web_search`/`save_artifact` 반복 실행
+- **BRIEF**: 질문 해석, `ReadSkill`/`GetSkillBody`/`ReadCapability`/`recall(memory)` 로 작업 계획 수립
+- **WORK**: `RunPython`/`EngineCall`/`InspectDataset`/`WebSearch`/`SaveArtifact` 반복 실행
 - **CRITIQUE**: 반대가설 강제, 누락 lens 점검 → 필요 시 WORK 회귀
 - **COMPOSE**: 답안 + ref 묶음
 - **GATE**: ref 검증 — 미달 시 차단/회귀
 - **HARVEST**: 세션 종료 시 memory wiring (recordSkillUsage + remember + outcome_log.store_decision)
 
-### 3. 도구 6 + 1 고정 (canonical 6 데이터 도구 + 1 meta-tool)
+### 3. 도구 9 + 1 고정 (canonical 9 데이터 도구 + 1 meta-tool, PascalCase — Claude 도구 체계)
 
-| API name (snake) | Python identifier (camel) | 카테고리 | 책임 |
-|---|---|---|---|
-| `run_python` | `runPython` | data | dartlab 라이브러리 + Polars 임의 코드 실행, ref 발급 |
-| `read_skill` | `readSkill` | data | `dartlab.skills.searchSkills` 호출, frontmatter + 본문 반환 |
-| `read_capability` | `readCapability` | data | `dartlab.core.capability.search` 호출, docstring 반환 |
-| `web_search` | `webSearch` | data | 외부 최신 정보, webRef |
-| `save_artifact` | `saveArtifact` | data | 산출물 저장, artifactRef |
-| `compile_visual` | `compileVisual` | data | 차트 spec codegen (line/bar/table/radar/waterfall/heatmap/histogram) → visualRef, agent.py 가 VIEW_SPEC 이벤트로 인라인 |
-| `run_workbench` | `runWorkbench` | meta | chat-native LLM 이 깊은 분석을 위해 5 패스 작업대로 elevate. 결과를 tool_result 로 받음 |
+| Tool (PascalCase) | Python identifier (camel) | 카테고리 | 책임 | 권장 순서 |
+|---|---|---|---|---|
+| `ReadSkill` | `readSkill` | data | Skill OS 후보 검색 — frontmatter + bodyPreview (1500 자). `includeBody=True` fallback 옵션. | 1 (분석 의도 시작점) |
+| `GetSkillBody` | `getSkillBody` | data | 단일 skillId 의 raw markdown 본문 fetch — ReadSkill 후 적합 skill 본문 전문 필요할 때. | 1.5 |
+| `ReadCapability` | `readCapability` | data | dartlab 공개 API/docstring 카탈로그 검색 (apiRef 후보). | 2 |
+| `EngineCall` | `engineCall` | data | 단일 capability 1 회 호출 (Company.show, scan, macro 등) → 정형 ref. 가공·계산 없음. | 3 (단일) |
+| `RunPython` | `runPython` | data | dartlab + Polars 임의 코드 실행 (다단 계산·랭킹·dataframe 가공·시계열). | 3 (다단) |
+| `InspectDataset` | `inspectDataset` | data | dataset schema/최신/샘플 빠른 확인 — RunPython 코드 짜기 전에. | 보조 |
+| `Read` | `readFile` | data | 안전 경로 (repo, ~/dartlab-artifacts, ~/.dartlab) 안의 텍스트 파일 → docRef. | 보조 |
+| `WebSearch` | `webSearch` | data | 외부 최신 정보 (오늘 종가·신규 공시·컨센서스), webRef. | 외부 한정 |
+| `SaveArtifact` | `saveArtifact` | data | 큰 표·차트·긴 텍스트 → artifactRef. | 산출 |
+| `CompileVisual` | `compileVisual` | data | 차트 spec codegen → visualRef → 메시지 인라인 렌더. | 시각화 |
+| `RunWorkbench` | `runWorkbench` | meta | chat-native LLM 이 깊은 분석을 위해 5 패스 작업대로 elevate. | meta |
 
 - 추가는 SSOT 갱신 PR 의무. registry 는 화이트리스트 강제 — 외 등록 거부 (`registerTool` 은 plugin 도구만 허용, `CANONICAL_TOOL_NAMES` 보호).
 - **이름 컨벤션**: API name (registry key, MCP tool name, LLM 에 보이는 이름) = snake_case. Python 식별자·파일명 = camelCase. `toolSpecs(provider)` 가 변환.

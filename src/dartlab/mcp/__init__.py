@@ -70,13 +70,13 @@ from dartlab.ai.tools.registry import toolSpecs as _aiToolSpecs  # noqa: E402
 
 _MCP_WORKSPACE_AGENT_TOOL_NAMES = (
     "ask",
-    # SSOT P-revised — canonical 6 데이터 도구
-    "read_skill",
-    "read_capability",
-    "run_python",
-    "web_search",
-    "save_artifact",
-    "compile_visual",
+    # registry SSOT — PascalCase canonical (snake_case 이름은 registry 에서 폐기됨)
+    "ReadSkill",
+    "ReadCapability",
+    "RunPython",
+    "WebSearch",
+    "SaveArtifact",
+    "CompileVisual",
 )
 
 _mcp_workspace_session: Any | None = None

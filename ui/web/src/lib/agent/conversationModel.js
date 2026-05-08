@@ -78,7 +78,9 @@ export function appendActivityPart(message, activity) {
 export function upsertToolPart(message, tool) {
 	const parts = Array.isArray(message.parts) ? [...message.parts] : [];
 	const idx = parts.findIndex((part) => part.type === "tool" && part.toolCallId === tool.toolCallId);
-	const next = {
+	// args/result 는 partial update — START 에는 args, RESULT 에는 result/error.
+	// 기존 값을 비우지 않고 이번 payload 가 명시적으로 준 키만 덮어쓴다.
+	const incoming = {
 		type: "tool",
 		id: tool.toolCallId || `tool-${Date.now()}`,
 		toolCallId: tool.toolCallId,
@@ -88,8 +90,11 @@ export function upsertToolPart(message, tool) {
 		refs: tool.refs || [],
 		artifacts: tool.artifacts || [],
 	};
-	if (idx >= 0) parts[idx] = { ...parts[idx], ...next };
-	else parts.push(next);
+	if (tool.args !== undefined) incoming.args = tool.args;
+	if (tool.result !== undefined) incoming.result = tool.result;
+	if (tool.error !== undefined) incoming.error = tool.error;
+	if (idx >= 0) parts[idx] = { ...parts[idx], ...incoming };
+	else parts.push(incoming);
 	return parts;
 }
 
@@ -100,9 +105,11 @@ export function upsertToolPart(message, tool) {
 function classifyPhase(summary) {
 	const s = String(summary || "");
 	if (/검증|verify|통과|숫자.*근거|날짜.*근거/.test(s)) return "verify";
-	if (/답변.*작성|answer|최종/.test(s)) return "compose";
-	if (/실행|tool|engine|run|run python|scan|compile/.test(s)) return "execute";
-	return "plan"; // 계획·skill·근거·spec·search 기본
+	if (/답변.*작성|answer|최종|응답.*생성|generate|composing/.test(s)) return "compose";
+	if (/계획|plan|brief|skill 검색|recipe/.test(s)) return "plan";
+	// default — 도구 사용·진행 중인 단계는 "실행" 으로 표시 (이전엔 fallback 이 "계획"
+	// 이라 도구 실행 중에도 "계획" 으로 보여 어색).
+	return "execute";
 }
 
 const PHASE_LABEL = {

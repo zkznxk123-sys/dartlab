@@ -110,7 +110,7 @@ def _planEvidence(state: WorkbenchState) -> list[dict[str, Any]]:
     if scan_ref is not None and not targets:
         plans.append(
             {
-                "tool": "engine_call",
+                "tool": "EngineCall",
                 "args": {"plan": {"apiRef": scan_ref, "axis": _scanAxis(scan_ref, state.selectedSkillRefs)}},
             }
         )
@@ -121,7 +121,7 @@ def _planEvidence(state: WorkbenchState) -> list[dict[str, Any]]:
         if company_ref == "Company.show" or _skillRequiresTable(state.selectedSkillRefs):
             return [
                 {
-                    "tool": "engine_call",
+                    "tool": "EngineCall",
                     "args": {
                         "plan": {
                             "apiRef": "Company.show",
@@ -136,7 +136,7 @@ def _planEvidence(state: WorkbenchState) -> list[dict[str, Any]]:
         if company_ref:
             return [
                 {
-                    "tool": "engine_call",
+                    "tool": "EngineCall",
                     "args": {
                         "plan": _companyPlan(company_ref, target, state.selectedSkillRefs, question=state.question)
                     },
@@ -150,7 +150,7 @@ def _planEvidence(state: WorkbenchState) -> list[dict[str, Any]]:
     capability_ref = _firstCapabilityRef(candidates)
     if capability_ref:
         key = _capabilityKeyFromSkills(state.selectedSkillRefs)
-        plans.append({"tool": "engine_call", "args": {"plan": {"apiRef": capability_ref, "path": key}}})
+        plans.append({"tool": "EngineCall", "args": {"plan": {"apiRef": capability_ref, "path": key}}})
     return plans
 
 
@@ -307,9 +307,9 @@ def _recipeRefForState(state: WorkbenchState) -> Ref | None:
 def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
     """recipe ref 의 step list 를 plan list 로 전개.
 
-    각 step 의 skillId 에 대해 Skill OS 에서 spec 을 찾고, 그 capabilityRefs 로
-    engine_call plan 을 생성한다. 한 번만 전개 (BRIEF retry 시 재전개 방지) —
-    명시적 `state.recipeExpanded` boolean.
+    한 번만 전개 (BRIEF retry 시 재전개 방지) —
+    명시적 `state.recipeExpanded` boolean. 각 step 의 skillId 에 대해 Skill OS 에서
+    spec 을 찾고 capabilityRefs 로 EngineCall plan 을 생성.
 
     회귀 보호: targets >= 2 인 두 회사 비교는 휴리스틱의 _composeStatementComparison
     분기가 더 정확한 답을 만들므로 recipe 발동을 양보 (빈 list 반환).
@@ -366,7 +366,7 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
 
         for target in targets[:2] if targets else [None]:
             plan = {
-                "tool": "engine_call",
+                "tool": "EngineCall",
                 "args": {
                     "plan": {
                         "apiRef": api_ref,

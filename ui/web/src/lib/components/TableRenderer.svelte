@@ -121,12 +121,44 @@
 
 	function isNumeric(val) {
 		if (typeof val === "number") return true;
-		return typeof val === "string" && /^-?[\d,]+(\.\d+)?$/.test(val.trim());
+		if (typeof val !== "string") return false;
+		const s = val.trim();
+		if (!s) return false;
+		// 일반 숫자: 1234, -1.5, 1,234.56
+		if (/^-?[\d,]+(\.\d+)?$/.test(s)) return true;
+		// % 또는 한글 단위 포함 (정렬 목적): "66.0%", "9,062억", "5.2배"
+		if (/^-?[\d,]+(\.\d+)?\s*(%|억|만|천|조|원|배|p)/.test(s)) return true;
+		// 복합 한글 단위: "1조 2,007억", "3조 6,360억"
+		if (/^-?[\d,]+(\.\d+)?\s*조\s*[\d,]+(\.\d+)?\s*억?/.test(s)) return true;
+		// 음수 괄호 표기: "(1,234)"
+		if (/^\([\d,]+(\.\d+)?\)$/.test(s)) return true;
+		return false;
 	}
 
 	function toNum(val) {
 		if (typeof val === "number") return val;
-		return parseFloat(String(val ?? "").replace(/,/g, ""));
+		const s = String(val ?? "").replace(/,/g, "").trim();
+		// 한글 단위 → 숫자 (정렬 비교용 근사값)
+		if (/조/.test(s)) {
+			const m = s.match(/^(-?[\d.]+)\s*조\s*([\d.]*)\s*억?/);
+			if (m) return parseFloat(m[1]) * 1e12 + (parseFloat(m[2] || "0") || 0) * 1e8;
+		}
+		if (/억/.test(s)) return parseFloat(s) * 1e8;
+		if (/%/.test(s)) return parseFloat(s);
+		return parseFloat(s);
+	}
+
+	// 컬럼별 dominant type 감지 — 헤더/데이터 정렬 일관성.
+	function isNumericCol(rows, col) {
+		if (!rows?.length) return false;
+		let num = 0;
+		const sample = Math.min(8, rows.length);
+		for (let i = 0; i < sample; i++) {
+			const v = rows[i]?.[col];
+			if (v == null || v === "") continue;
+			if (isNumeric(v)) num++;
+		}
+		return num >= Math.max(2, Math.floor(sample / 2));
 	}
 
 	function isFinanceBlock(b) {
@@ -192,6 +224,17 @@
 
 	let useVirtual = $derived(sortedRows.length > 100);
 	let displayRows = $derived(showAll || useVirtual ? sortedRows : sortedRows.slice(0, maxRows));
+
+	// 컬럼별 dominant numeric 여부 — 헤더/셀 일관 정렬용.
+	let numericCols = $derived.by(() => {
+		const cols = block?.data?.columns ?? [];
+		const rows = block?.data?.rows ?? [];
+		const out = {};
+		for (const col of cols) {
+			out[col] = isNumericCol(rows, col);
+		}
+		return out;
+	});
 
 	// ── 열 리사이즈 ──
 	let colWidths = $state({});
@@ -336,7 +379,7 @@
 					<tr>
 						{#each block.data.columns as col, ci}
 							<th
-								class="{ci === 0 && !isFinanceBlock(block) ? 'col-sticky' : ''} cursor-pointer select-none group relative"
+								class="{ci === 0 && !isFinanceBlock(block) ? 'col-sticky' : ''} {numericCols[col] && ci > 0 ? 'col-num' : ''} cursor-pointer select-none group relative"
 								style={colWidths[col] ? `width: ${colWidths[col]}px; min-width: ${colWidths[col]}px` : ""}
 								aria-sort={sortKeys.find(k => k.col === col)?.dir === "asc" ? "ascending" : sortKeys.find(k => k.col === col)?.dir === "desc" ? "descending" : "none"}
 							>
@@ -366,10 +409,11 @@
 						<tr class={isKey ? "row-key" : ""}>
 							{#each block.data.columns as col, ci}
 								{@const val = row[col]}
-								{@const isNum = ci > 0 && isNumeric(val)}
+								{@const colIsNum = numericCols[col] && ci > 0}
+								{@const isNum = colIsNum && isNumeric(val)}
 								{@const rate = isFinanceBlock(block) && isNum ? changeRate(row, block.data.columns, ci) : null}
 								<td
-									class="{ci === 0 && !isFinanceBlock(block) ? 'col-sticky' : ''} {isNum ? (isNegative(val) ? 'val-neg' : 'val-pos') : ''} {rate != null ? (rate > 0 ? 'yoy-up' : rate < 0 ? 'yoy-down' : '') : ''}"
+									class="{ci === 0 && !isFinanceBlock(block) ? 'col-sticky' : ''} {colIsNum ? 'col-num' : ''} {isNum ? (isNegative(val) ? 'val-neg' : 'val-pos') : ''} {rate != null ? (rate > 0 ? 'yoy-up' : rate < 0 ? 'yoy-down' : '') : ''}"
 									title={rate != null ? `YoY ${rate >= 0 ? '+' : ''}${rate.toFixed(1)}%` : undefined}
 								>
 									{#if ci === 0 && isFinanceBlock(block)}

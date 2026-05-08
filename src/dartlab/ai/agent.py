@@ -34,17 +34,20 @@ from .workbench.prompts import DARTLAB_CHAT_SYSTEM
 
 logger = logging.getLogger(__name__)
 
-# LLM 노출 도구 set — SSOT P-revised canonical 6 데이터 도구 + 1 meta (run_workbench).
-# `engine_call` 은 `run_python` 안에서 임의 dartlab 호출로 통합되어 폐기됨.
-# run_workbench 는 5 패스 elevate 명시 경로 — feedback_no_graph_regression.md 정당 활성 경로 (2).
+# LLM 노출 도구 set — PascalCase (Claude 도구 체계 호환). Skill 우선 → Capability → 실행 → 시각화.
+# EngineCall = 단일 capability 1 회. RunPython = 다단 계산. Read = 파일 직접 인용.
+# RunWorkbench 는 5 패스 elevate 명시 경로 — feedback_no_graph_regression.md 정당 활성 경로 (2).
 _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
-    "run_python",
-    "read_skill",
-    "read_capability",
-    "web_search",
-    "save_artifact",
-    "compile_visual",
-    "run_workbench",
+    "ReadSkill",
+    "GetSkillBody",
+    "ReadCapability",
+    "EngineCall",
+    "RunPython",
+    "Read",
+    "WebSearch",
+    "SaveArtifact",
+    "CompileVisual",
+    "RunWorkbench",
 )
 
 
@@ -154,6 +157,9 @@ def runAgent(
                         "evidenceRefs": [ref.get("id") for ref in tool_refs if ref.get("id")],
                         "artifacts": tool_artifacts,
                         "error": result_dict.get("error"),
+                        # raw data — agent_gateway._public_result_payload 가 stdout/values/table
+                        # preview 추출. UI expand 시 표시.
+                        "data": result_dict.get("data"),
                     },
                 )
                 # visualRef 발견 시 VIEW_SPEC event emit — ChartRenderer 가 메시지 흐름에 인라인.
@@ -189,6 +195,7 @@ def runAgent(
                                 "error": wrapped.get("error"),
                             },
                             ensure_ascii=False,
+                            default=str,
                         ),
                     }
                 )

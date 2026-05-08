@@ -18,22 +18,43 @@ from .streaming import _sync_gen_to_async
 logger = logging.getLogger(__name__)
 
 _TOOL_DISPLAY = {
-    "search_reference": "search reference",
-    "read_context": "read context",
-    "inspect_dataset": "inspect dataset",
-    "run_python": "run python",
-    "engine_call": "engine call",
-    "compile_visual": "compile visual",
-    "verify": "verify",
-    "read_skill": "read skill",
-    "read_capability": "read capability",
-    "web_search": "web search",
-    "save_artifact": "save artifact",
+    # PascalCase canonical → UI 표시 (Claude 도구 체계 일관성).
+    "ReadSkill": "ReadSkill",
+    "GetSkillBody": "GetSkillBody",
+    "ReadCapability": "ReadCapability",
+    "EngineCall": "EngineCall",
+    "RunPython": "RunPython",
+    "InspectDataset": "InspectDataset",
+    "Read": "Read",
+    "WebSearch": "WebSearch",
+    "SaveArtifact": "SaveArtifact",
+    "CompileVisual": "CompileVisual",
+    "RunWorkbench": "RunWorkbench",
+    # legacy snake_case alias (옛 모델/호출자 호환).
+    "run_python": "RunPython",
+    "engine_call": "EngineCall",
+    "read_skill": "ReadSkill",
+    "read_capability": "ReadCapability",
+    "web_search": "WebSearch",
+    "save_artifact": "SaveArtifact",
+    "compile_visual": "CompileVisual",
+    "inspect_dataset": "InspectDataset",
+    "verify": "Verify",
 }
 
-# UI 가 ToolBlock 카드로 표현할 도구 화이트리스트.
-# agent.py 가 자율 호출하는 6 개 + workbench 5 패스의 3 개.
+# UI 가 ToolBlock 카드로 표현할 도구 화이트리스트. PascalCase + legacy alias.
 _PUBLIC_TOOL_NAMES = {
+    "ReadSkill",
+    "GetSkillBody",
+    "ReadCapability",
+    "EngineCall",
+    "RunPython",
+    "InspectDataset",
+    "Read",
+    "WebSearch",
+    "SaveArtifact",
+    "CompileVisual",
+    "RunWorkbench",
     "run_python",
     "engine_call",
     "compile_visual",
@@ -224,6 +245,7 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
         if tool not in _PUBLIC_TOOL_NAMES:
             return []
         # ToolBlock 카드(TOOL_CALL_START)가 진행 표현 전담. activity 줄 중복 emit 금지.
+        # args 동봉 — UI 가 expand 시 RunPython 코드·EngineCall 인자 등 핵심 input 표시.
         return [
             _event(
                 "TOOL_CALL_START",
@@ -232,6 +254,7 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
                     "messageId": message_id,
                     "toolCallId": str(data.get("id") or tool),
                     "toolName": _display_tool(tool),
+                    "args": data.get("input") if isinstance(data.get("input"), dict) else {},
                     "status": "running",
                 },
             ),
@@ -258,6 +281,7 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
         if tool not in _PUBLIC_TOOL_NAMES:
             return []
         status = "error" if data.get("status") == "error" else "done"
+        result_payload = _public_result_payload(data)
         return [
             _event(
                 "TOOL_CALL_RESULT",
@@ -270,6 +294,8 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
                     "summary": str(data.get("outputSummary") or data.get("summary") or ""),
                     "refs": [str(v) for v in data.get("evidenceRefs") or []],
                     "artifacts": [a for a in data.get("artifacts") or [] if isinstance(a, dict)],
+                    "result": result_payload,
+                    "error": str(data.get("error") or "") if status == "error" else None,
                 },
             ),
             _event(
@@ -396,10 +422,11 @@ def _publicEventData(value):
 
 
 def _suggest_followups(done_data: dict[str, Any]) -> list[str]:
-    """답변 종료 시점 휴리스틱 follow-up 추천 질문 3 개.
+    """답변 종료 시점 follow-up 추천 — 종목/topic 컨텍스트 있을 때만.
 
-    Perplexity 식 — 사용자가 추가 탐색을 쉽게 할 수 있게. backend 컨텍스트
-    (responseMeta.stockCode, refs, evidenceRefs) 기반. LLM 추가 호출 없이 가벼움.
+    종목·topic 없는 일반 답변엔 generic 휴리스틱 박지 않는다 (답변과 무관한
+    "표·차트로 정리" 같은 옛 fallback 이 어색했음). 향후 LLM 이 답변 끝에
+    직접 followup 작성하는 구조로 발전 예정.
     """
     meta = done_data.get("responseMeta") if isinstance(done_data.get("responseMeta"), dict) else {}
     stock = meta.get("stockCode") or meta.get("company") or ""
@@ -416,11 +443,7 @@ def _suggest_followups(done_data: dict[str, Any]) -> list[str]:
             f"{topic} 의 최근 추세는 어떤가?",
             f"{topic} 와 가장 연관 있는 매크로 지표는?",
         ]
-    return [
-        "관련된 매크로 흐름을 보여줘",
-        "비슷한 사례를 더 보여줘",
-        "이 결과를 표·차트로 정리해줘",
-    ]
+    return []
 
 
 def _activity(summary: str, *, status: str = "done", refs: list[str] | None = None) -> dict[str, str]:
@@ -475,6 +498,48 @@ def _ref_ids(refs: list[Any]) -> list[str]:
         elif isinstance(ref, str):
             out.append(ref)
     return out
+
+
+_RESULT_PREVIEW_CHARS = 4000
+
+
+def _public_result_payload(data: dict[str, Any]) -> dict[str, Any] | None:
+    """tool_result 의 핵심 일부를 UI 가 expand 시 보여줄 수 있게 정제.
+
+    inline 표시는 짧게, 너무 길면 UI 가 모달 / "전체 보기" 로 위임.
+    """
+    raw = data.get("data") if isinstance(data.get("data"), dict) else {}
+    if not raw:
+        return None
+    out: dict[str, Any] = {}
+    # RunPython: stdout / stderr / values / table preview / durationMs
+    if "stdout" in raw or "stderr" in raw or "result" in raw:
+        stdout = str(raw.get("stdout") or "")
+        stderr = str(raw.get("stderr") or "")
+        if stdout:
+            out["stdout"] = stdout[:_RESULT_PREVIEW_CHARS]
+            out["stdoutTruncated"] = len(stdout) > _RESULT_PREVIEW_CHARS
+        if stderr:
+            out["stderr"] = stderr[:_RESULT_PREVIEW_CHARS]
+            out["stderrTruncated"] = len(stderr) > _RESULT_PREVIEW_CHARS
+        if "durationMs" in raw:
+            out["durationMs"] = raw.get("durationMs")
+        result = raw.get("result") if isinstance(raw.get("result"), dict) else {}
+        if isinstance(result.get("values"), dict):
+            out["values"] = result.get("values")
+        if isinstance(result.get("table"), list):
+            out["tableHead"] = result["table"][:10]
+            out["tableRows"] = len(result["table"])
+        if "date" in result:
+            out["date"] = result.get("date")
+    # Read: body preview
+    if "body" in raw and "stdout" not in raw:
+        body = str(raw.get("body") or "")
+        out["body"] = body[:_RESULT_PREVIEW_CHARS]
+        out["bodyTruncated"] = len(body) > _RESULT_PREVIEW_CHARS
+        if "path" in raw:
+            out["path"] = raw.get("path")
+    return out or None
 
 
 def _public_response_meta(meta: dict[str, Any]) -> dict[str, Any]:

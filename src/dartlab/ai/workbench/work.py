@@ -1,4 +1,4 @@
-"""WORK — run_python / inspect_dataset / engine_call / web_search / save_artifact 반복.
+"""WORK — RunPython / InspectDataset / EngineCall / WebSearch / SaveArtifact 반복.
 
 maxRounds 동적:
 - recipe 활성 → 12 (다단 분석)
@@ -27,10 +27,11 @@ def runWork(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[Trac
         systemPrompt=WORK_PROMPT,
         userContext=buildContextSummary(state),
         allowedTools=[
-            "run_python",
-            "inspect_dataset",
-            "web_search",
-            "save_artifact",
+            "RunPython",
+            "InspectDataset",
+            "EngineCall",
+            "WebSearch",
+            "SaveArtifact",
         ],
         maxRounds=_inferWorkRounds(state),
         role="analysis",
