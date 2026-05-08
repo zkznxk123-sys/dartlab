@@ -428,7 +428,15 @@ runtimeCompatibility:
     assert spec.status == "unverified"
 
 
-def test_skill_lint_rejects_unknown_capability(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_skill_lint_rejects_unknown_capability(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """user spec 의 unknown capability lint 실패 — warning + skip (raise X).
+
+    P-revised (registry.py graceful fallback): user spec 1 개의 lint 실패가 ReadSkill
+    tool 전체를 못 돌게 만들지 않도록 spec 단위 skip + warning. builtin spec 의 lint
+    실패는 여전히 raise (별도 경로).
+    """
     root = tmp_path / "repo"
     skill_dir = root / ".dartlab" / "skills"
     skill_dir.mkdir(parents=True)
@@ -455,8 +463,12 @@ runtimeCompatibility:
     )
     monkeypatch.chdir(root)
 
-    with pytest.raises(ValueError, match="unknown capabilities"):
-        skills.list()
+    with caplog.at_level("WARNING", logger="dartlab.skills.registry"):
+        result = skills.list()
+
+    # listSkills 가 raise 안 함, 결과에 bad spec 미포함, warning 로깅
+    assert all(spec.id != "badReview" for spec in result)
+    assert any("unknown capabilities" in record.message for record in caplog.records)
 
 
 def test_skill_lint_rejects_engine_skill_without_execution_contract() -> None:
