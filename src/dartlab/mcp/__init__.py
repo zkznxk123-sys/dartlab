@@ -118,8 +118,8 @@ def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
         }
     if name == "search_reference":
         query = str(args.get("query") or "")
-        skills = _executeAiTool("skill_search", {"query": query, "limit": args.get("limit") or 5})
-        specs = _executeAiTool("generated_spec_search", {"query": query, "limit": args.get("limit") or 5})
+        skills = _executeAiTool("ReadSkill", {"query": query, "limit": args.get("limit") or 5})
+        specs = _executeAiTool("ReadCapability", {"query": query, "limit": args.get("limit") or 5})
         return {
             "ok": bool(skills.get("ok") or specs.get("ok")),
             "refs": [*(skills.get("refs") or []), *(specs.get("refs") or [])],
@@ -130,7 +130,7 @@ def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
         return {"skills": [skill.to_dict() for skill in listSkills(includeUser=bool(args.get("includeUser", True)))]}
     if name in {"searchDartlabSkills", "skill_search"}:
         return _executeAiTool(
-            "skill_search",
+            "ReadSkill",
             {
                 "query": args.get("query", ""),
                 "limit": args.get("limit") or 8,
@@ -138,7 +138,7 @@ def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
             },
         )
     if name == "explainDartlabSkill":
-        return _executeAiTool("read", {"target": f"dartlab://skills/{args.get('skillId')}"})
+        return _executeAiTool("GetSkillBody", {"skillId": args.get("skillId")})
     if name == "checkDartlabSkillEvidence":
         from dartlab.skills import checkEvidence
 
@@ -194,7 +194,7 @@ def _resourcePayload(uri_str: str) -> tuple[str, str]:
     if uri_str == "dartlab://datasets":
         return (
             json.dumps(
-                {"datasets": [], "note": "dataset refs are produced by engine_call/run_python"},
+                {"datasets": [], "note": "dataset refs are produced by EngineCall/RunPython"},
                 ensure_ascii=False,
                 indent=2,
             ),
@@ -308,32 +308,32 @@ def _fmtDict(d: dict, depth: int = 0) -> str:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _MCP_INSTRUCTIONS = """\
-DartLab MCP의 기본 표면은 ask가 실행하는 Ask Workbench와 SSOT v2 6 종 도구다. 목적은 LLM이 DartLab을
-프롬프트 지식으로 외우게 하는 것이 아니라, 질문마다 먼저 skill을 고르고, capability docstring에서 호출 가능한 API를
-확인한 뒤 run_python으로 실행하고 ref 검증 후 답하게 하는 것이다.
+DartLab MCP의 기본 표면은 ask가 실행하는 Ask Workbench와 PascalCase canonical 6 종 도구다. 목적은
+호출자가 DartLab을 프롬프트 지식으로 외우게 하는 것이 아니라, 질문마다 먼저 skill을 고르고, capability docstring
+에서 호출 가능한 API를 확인한 뒤 RunPython으로 실행하고 ref 검증 후 답하게 하는 것이다.
 
-## SSOT P-revised — canonical 6 데이터 도구
+## canonical 6 데이터 도구 (PascalCase, snake_case 도 _LEGACY_NAME_MAP 으로 자동 정규화)
 - ask: Workbench 5 패스 (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) 일괄 실행.
-- read_skill: Skill OS 검색 + frontmatter (whenToUse, capabilityRefs, requiredEvidence) + 본문.
-- read_capability: dartlab 공개 API/docstring 검색.
-- run_python: dartlab + Polars 코드 실행, ref 발급 (executionRef/valueRef/tableRef/dateRef). 단일 capability 1 회 호출도 본 도구 안에서.
-- web_search: 외부 최신 정보 → webRef.
-- save_artifact: 큰 표·차트 별도 파일 저장 → artifactRef.
-- compile_visual: 차트 spec codegen → visualRef (인라인 렌더).
+- ReadSkill: Skill OS 검색 + frontmatter (whenToUse, capabilityRefs, requiredEvidence) + 본문.
+- ReadCapability: dartlab 공개 API/docstring 검색.
+- RunPython: dartlab + Polars 코드 실행, ref 발급 (executionRef/valueRef/tableRef/dateRef). 단일 capability 1 회 호출도 본 도구 안에서.
+- WebSearch: 외부 최신 정보 → webRef.
+- SaveArtifact: 큰 표·차트 별도 파일 저장 → artifactRef.
+- CompileVisual: 차트 spec codegen → visualRef (인라인 렌더).
 
 ## 기본 흐름
 1. ask로 전체 답변 루프 실행 (단순 질문은 이걸로 끝).
-2. 작업대 직접 사용 시: read_skill 로 절차 → read_capability 로 API → run_python 으로 실행 → 답변 + ref.
-3. 데이터셋 스키마·기간·행 수·최신 기준시점이 필요하면 run_python 안에서 dartlab.* 직접 호출로 확인한다.
+2. 작업대 직접 사용 시: ReadSkill 로 절차 → ReadCapability 로 API → RunPython 으로 실행 → 답변 + ref.
+3. 데이터셋 스키마·기간·행 수·최신 기준시점이 필요하면 RunPython 안에서 dartlab.* 직접 호출로 확인한다.
 4. 후보·상위·랭킹 답변은 bullet 나열로 끝내지 않고 입력/유니버스, 필터, 계산식/지표, 결과와 evidence table을 함께 낸다.
 
 ## 폐기 (P-revised)
 - propose_skill: 자기진화 사다리 0 promoted skill, dormant. outcome ground truth loop 가 대체.
-- skill_search / generated_spec_search / engine_call / verify_answer / read / write: registry 에서 제거.
+- skill_search / generated_spec_search / verify_answer / write: registry 에서 제거 (구식 표기 호출은 ReadSkill / ReadCapability / GetSkillBody 로 라우팅).
 
 ## 경계
 - Company, gather, scan, macro, analysis, quant, viz는 generated MCP tool로 직접 우회하지 않는다.
-  run_python 안에서 사용하는 DartLab 라이브러리다.
+  RunPython 안에서 사용하는 DartLab 라이브러리다.
 - Skills는 MCP 전용 규칙이 아니라 dartlab.skills 공용 runtime을 그대로 노출한다.
 - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다. 모든 절차는 Skill OS에서 찾는다.
 - companySections 같은 전체 sections 지도는 메모리 부담이 커서 기본 경로에서 쓰지 않는다.

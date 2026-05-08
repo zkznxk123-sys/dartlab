@@ -13,12 +13,12 @@ def test_mcp_tools_defined():
     from dartlab.mcp import _advertisedTools
 
     names = {tool["name"] for tool in _advertisedTools()}
-    # SSOT v2 6 종 (권장)
-    v2 = {"ask", "read_skill", "read_capability", "run_python", "web_search", "save_artifact", "propose_skill"}
+    # PascalCase canonical 6 종 + ask
+    v2 = {"ask", "ReadSkill", "ReadCapability", "RunPython", "WebSearch", "SaveArtifact", "CompileVisual"}
     assert v2.issubset(names)
-    # 호환 4 종 (deprecated)
-    compat = {"skill_search", "generated_spec_search", "engine_call", "read"}
-    assert compat.issubset(names)
+    # P-revised 폐기 도구는 advertised 에서 제거됨
+    deprecated = {"skill_search", "generated_spec_search", "engine_call", "verify_answer", "propose_skill"}
+    assert deprecated.isdisjoint(names)
     assert "companyInsights" not in names
     assert "search_reference" not in names
     assert "finalize_answer" not in names
@@ -37,19 +37,21 @@ def test_mcp_tool_schema_valid():
 
 
 def test_mcp_canonical_tools_execute():
+    # PascalCase canonical 직접 호출 + legacy alias (snake_case) 두 경로 모두 통과.
     from dartlab.mcp import _executeTool
 
-    found = json.loads(_executeTool("skill_search", {"query": "테스트 규칙", "limit": 3}))
+    found = json.loads(_executeTool("ReadSkill", {"query": "테스트 규칙", "limit": 3}))
     assert found["refs"][0]["id"] == "skill:operation.testing"
 
-    spec = json.loads(_executeTool("generated_spec_search", {"query": "재무상태표", "limit": 5}))
+    spec = json.loads(_executeTool("ReadCapability", {"query": "재무상태표", "limit": 5}))
     assert spec["refs"]
 
+    # EngineCall 은 legacy alias 도 _LEGACY_NAME_MAP 으로 정규화되어 동일 동작.
     private = json.loads(_executeTool("engine_call", {"plan": {"apiRef": "Company._private", "target": "005930"}}))
     assert private["ok"] is False
     assert private["error"] == "private_api_blocked"
 
-    executed = json.loads(_executeTool("run_python", {"code": "emit_result(values={'x': 1})"}))
+    executed = json.loads(_executeTool("RunPython", {"code": "emit_result(values={'x': 1})"}))
     assert executed["ok"] is True
     assert any(ref["kind"] == "executionRef" for ref in executed["refs"])
 

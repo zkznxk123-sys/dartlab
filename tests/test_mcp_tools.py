@@ -414,8 +414,8 @@ def test_mcp_instructions_contains_key_info():
     from dartlab.mcp import _MCP_INSTRUCTIONS
 
     assert "Ask Workbench" in _MCP_INSTRUCTIONS
-    assert "run_python" in _MCP_INSTRUCTIONS
-    assert "inspect_dataset" in _MCP_INSTRUCTIONS
+    assert "RunPython" in _MCP_INSTRUCTIONS
+    assert "ReadSkill" in _MCP_INSTRUCTIONS
     assert "Company" in _MCP_INSTRUCTIONS
 
 

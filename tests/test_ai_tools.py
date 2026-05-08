@@ -11,10 +11,8 @@ def test_canonical_tool_registry_exposes_expected_tools():
     names = set(CANONICAL_TOOL_NAMES)
     specs = {spec["name"] for spec in toolSpecs()}
 
-    # P-revised: deprecated tools (skill_search/generated_spec_search/engine_call/verify_answer/read/write) 삭제됨
-    assert {"run_python", "read_skill", "read_capability", "web_search", "save_artifact", "compile_visual"}.issubset(
-        names
-    )
+    # PascalCase canonical (snake_case alias 는 _LEGACY_NAME_MAP 에만, CANONICAL_TOOL_NAMES 미포함).
+    assert {"RunPython", "ReadSkill", "ReadCapability", "WebSearch", "SaveArtifact", "CompileVisual"}.issubset(names)
     assert names == specs
 
 

@@ -10,8 +10,8 @@ pytestmark = pytest.mark.unit
 def test_canonical_tools_registered_without_table_text_helpers():
     from dartlab.ai.tools import CANONICAL_TOOL_NAMES
 
-    assert "run_python" in CANONICAL_TOOL_NAMES
-    assert "verify_answer" in CANONICAL_TOOL_NAMES
+    assert "RunPython" in CANONICAL_TOOL_NAMES
+    assert "verify_answer" not in CANONICAL_TOOL_NAMES
     assert "table" not in CANONICAL_TOOL_NAMES
     assert "text" not in CANONICAL_TOOL_NAMES
 

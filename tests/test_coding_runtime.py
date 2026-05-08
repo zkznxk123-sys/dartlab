@@ -16,7 +16,8 @@ def test_legacy_coding_backend_module_is_removed():
 def test_run_python_is_registered_as_canonical_tool():
     from dartlab.ai.tools import CANONICAL_TOOL_NAMES, executeTool
 
-    assert "run_python" in CANONICAL_TOOL_NAMES
+    assert "RunPython" in CANONICAL_TOOL_NAMES
+    # legacy snake_case 입력도 _LEGACY_NAME_MAP 으로 정규화되어 그대로 동작.
     result = executeTool("run_python", {"code": "print('ok')", "runId": "unit"})
 
     assert result["ok"] is True
