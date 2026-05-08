@@ -1002,10 +1002,11 @@ class Analysis:
 
         import dartlab
         dartlab.analysis()                              # 전체 가이드
-        dartlab.analysis("financial", "수익구조")         # 항목 목록
+        dartlab.analysis("financial", "수익구조")                       # 항목 목록
         c = dartlab.Company("005930")
-        dartlab.analysis("financial", "수익구조", c)      # 삼성전자 수익구조
-        c.analysis("financial", "수익성")                 # Company 바인딩
+        dartlab.analysis("financial", "수익구조", company=c)            # 삼성전자 수익구조
+        dartlab.analysis("financial", "수익구조", stockCode="005930")   # 종목코드 단독
+        c.analysis("financial", "수익성")                               # Company 바인딩
     """
 
     def __call__(
@@ -1027,7 +1028,7 @@ class Analysis:
         ----------
         axis : str, optional
             분석 축 또는 그룹. None 이면 가이드 DataFrame 반환.
-            그룹: "financial", "valuation", "forecast", "opinion", "special".
+            그룹: "financial", "valuation", "governance", "forecast", "macro".
             축: "수익구조", "수익성", "성장성", "안정성", "현금흐름", "자본배분",
             "투자효율", "가치평가", "매출전망", "이익전망" 등 22 축.
         sub : str, optional
