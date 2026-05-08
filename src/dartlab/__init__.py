@@ -3,27 +3,56 @@
 import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 _IS_PYODIDE = sys.platform == "emscripten"
 
 from dartlab import config, core, skills  # noqa: F401 — 공용 분석 절차 런타임
-from dartlab.company import Company
-from dartlab.core.select import ChartResult, SelectResult
 
+# .env 자동 로드 — API 키 등 환경변수. 가벼움 (yaml 한 번 파싱) 이라 module-load time 에 eager.
+# AI provider / DART API 가 환경변수에 의존하므로 attribute access 까지 미루면 첫 호출 race.
 if not _IS_PYODIDE:
-    from dartlab import ai as llm  # noqa: F401 — 하위호환
     from dartlab.core.env import loadEnv as _loadEnv
-    from dartlab.gather.fred import Fred
-    from dartlab.gather.listing import codeToName, fuzzySearch, getKindList, nameToCode  # noqa: F401
-    from dartlab.listing import listing  # noqa: F401 — 목록 조회 단일 진입점
-    from dartlab.providers.dart.company import Company as _DartEngineCompany
-    from dartlab.providers.dart.openapi.dart import OpenDart
-    from dartlab.providers.edgar.openapi.edgar import OpenEdgar
-    from dartlab.story import Story
 
-    # .env 자동 로드 — API 키 등 환경변수
     _loadEnv()
+
+# Type checker (mypy / pyright / IDE 자동완성) 호환 — 실제 런타임에는 PEP 562 __getattr__ 가
+# 첫 attribute access 시점에 lazy import. import dartlab cold path 1.3 s → ~0.7 s.
+if TYPE_CHECKING:
+    from dartlab import ai as llm  # noqa: F401
+    from dartlab.company import Company  # noqa: F401
+    from dartlab.core.select import ChartResult, SelectResult  # noqa: F401
+    from dartlab.gather.fred import Fred  # noqa: F401
+    from dartlab.gather.listing import codeToName, fuzzySearch, getKindList, nameToCode  # noqa: F401
+    from dartlab.listing import listing  # noqa: F401
+    from dartlab.providers.dart.company import Company as _DartEngineCompany  # noqa: F401
+    from dartlab.providers.dart.openapi.dart import OpenDart  # noqa: F401
+    from dartlab.providers.edgar.openapi.edgar import OpenEdgar  # noqa: F401
+    from dartlab.story import Story  # noqa: F401
+
+# PEP 562 lazy attribute resolver — 이름 → (모듈경로, 속성명).
+# `from dartlab import Company` / `dartlab.Company` 두 패턴 모두 PEP 562 가 자동 처리.
+_LAZY_ATTRS: dict[str, tuple[str, str | None]] = {
+    "Company": ("dartlab.company", "Company"),
+    "ChartResult": ("dartlab.core.select", "ChartResult"),
+    "SelectResult": ("dartlab.core.select", "SelectResult"),
+}
+if not _IS_PYODIDE:
+    _LAZY_ATTRS.update(
+        {
+            "llm": ("dartlab.ai", None),  # 모듈 alias
+            "Fred": ("dartlab.gather.fred", "Fred"),
+            "codeToName": ("dartlab.gather.listing", "codeToName"),
+            "nameToCode": ("dartlab.gather.listing", "nameToCode"),
+            "fuzzySearch": ("dartlab.gather.listing", "fuzzySearch"),
+            "getKindList": ("dartlab.gather.listing", "getKindList"),
+            "listing": ("dartlab.listing", "listing"),
+            "OpenDart": ("dartlab.providers.dart.openapi.dart", "OpenDart"),
+            "OpenEdgar": ("dartlab.providers.edgar.openapi.edgar", "OpenEdgar"),
+            "Story": ("dartlab.story", "Story"),
+            "_DartEngineCompany": ("dartlab.providers.dart.company", "Company"),
+        }
+    )
 
 
 async def prefetch(*stockCodes: str, categories: list[str] | None = None) -> None:
@@ -278,6 +307,8 @@ def searchName(keyword: str):
             "searchName 의 keyword 가 비어 있습니다. 종목명/코드를 1자 이상 전달하세요. "
             "예: dartlab.searchName('삼성전자') 또는 dartlab.searchName('AAPL')"
         )
+    from dartlab.providers.dart.company import Company as _DartEngineCompany
+
     if any("\uac00" <= ch <= "\ud7a3" for ch in keyword):
         kr_result = _DartEngineCompany.search(keyword)
         # Phase 11 A3: 한글 alias → EDGAR 재검색 (예: "인텔" → "Intel")
@@ -832,6 +863,17 @@ class _Module(sys.modules[__name__].__class__):
         config.dataDir = str(value)
 
     def __getattr__(self, name):
+        # PEP 562 lazy — Company / Fred / OpenDart / OpenEdgar / Story / listing / codeToName 등.
+        # 첫 attribute access 까지 import 비용을 미룬다 (cold path 1.3 s → ~0.7 s 효과).
+        target = _LAZY_ATTRS.get(name)
+        if target is not None:
+            import importlib
+
+            mod_path, attr = target
+            mod = importlib.import_module(mod_path)
+            obj = mod if attr is None else getattr(mod, attr)
+            setattr(self, name, obj)
+            return obj
         if name == "scan":
             from dartlab.scan import Scan
 
