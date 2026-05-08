@@ -27,6 +27,7 @@ snakeId는 standardAccounts.json 기준 그대로 사용.
 
 from __future__ import annotations
 
+import functools
 import logging
 
 import polars as pl
@@ -136,7 +137,11 @@ def buildTimeseries(
     stockCode: str,
     fsDivPref: str = "CFS",
 ) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
-    """finance parquet → 분기별 standalone 시계열.
+    """finance parquet → 분기별 standalone 시계열. (캐시: 종목 × fsDiv 조합 8 개)
+
+    같은 종목/fsDiv 를 한 process 안에서 반복 호출해도 1 회만 매핑한다.
+    결과는 작은 dict (수 MB) 라 process-wide LRU 안전.
+    무효화: parquet 갱신 시 server 재기동 필요 (사용 패턴상 OK).
 
     Args:
             stockCode: 종목코드 (예: "005930")
@@ -147,14 +152,25 @@ def buildTimeseries(
             series = {"BS": {"snakeId": [값...]}, "IS": {...}, "CF": {...}}
             periods = ["2016-Q1", "2016-Q2", ..., "2024-Q4"]
     """
+    return _buildTimeseriesCached(str(stockCode).strip(), str(fsDivPref).strip() or "CFS")
+
+
+@functools.lru_cache(maxsize=8)
+def _buildTimeseriesCached(
+    stockCode: str,
+    fsDivPref: str,
+) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
     result = _loadAndNormalize(stockCode, fsDivPref)
     if result is None:
         return None
-
     df, periods = result
     series = _pivotToSeries(df, periods)
-
     return series, periods
+
+
+def clearFinanceCache() -> None:
+    """parquet 갱신 후 cached 결과 폐기. tests/dev 용."""
+    _buildTimeseriesCached.cache_clear()
 
 
 def buildAnnual(
@@ -387,6 +403,32 @@ _IFRS_TOP_LEVEL_IDS = frozenset(
 )
 
 
+_NONSTD_PREFIX = "nonstd_"
+
+
+def _fallbackSnakeId(accountNm: str) -> str | None:
+    """미매핑 계정의 fallback snake_id — 데이터 손실 방지.
+
+    DART 의 회사 사내 계정 (account_id = '-표준계정코드 미사용-') 은 표준 mapping 사전에
+    없을 수밖에 없다. 무시하면 분석 누락. 한글명을 그대로 키로 살리되 nonstd_ 접두로
+    표준 컬럼과 명확히 구분 (LLM/사용자가 비교 분석 시 비표준임을 인식).
+
+    표준화는 별도 — 자주 등장하는 한글명은 accountMappings.json 에 점진 추가.
+    """
+    clean = (accountNm or "").strip()
+    if not clean:
+        return None
+    # 공백·슬래시·괄호 제거 — 한글은 그대로 (LLM 이 의미 파악 가능).
+    for ch in (" ", "\t", "/", "(", ")", "[", "]", ",", "."):
+        clean = clean.replace(ch, "_")
+    while "__" in clean:
+        clean = clean.replace("__", "_")
+    clean = clean.strip("_")
+    if not clean:
+        return None
+    return f"{_NONSTD_PREFIX}{clean}"
+
+
 def _accountIdPriority(accountId: str) -> int:
     """account_id 기반 우선순위. 낮을수록 우선 (덮어쓰기 대상).
 
@@ -452,11 +494,17 @@ def _pivotToSeries(
         accountNm = row.get("account_nm", "") or ""
         snakeId = mapper.map(accountId, accountNm)
         if snakeId is None:
-            unmappedRows += 1
+            # fallback — DART 회사 사내 계정 (account_id 표준 X) 도 한글명으로 살린다.
+            # nonstd_ 접두로 표준 컬럼과 명시 구분. 데이터 손실 0.
+            snakeId = _fallbackSnakeId(accountNm)
+            if snakeId is None:
+                unmappedRows += 1
+                key = f"{accountId}|{accountNm}"
+                unmappedAccounts[key] = unmappedAccounts.get(key, 0) + 1
+                continue
+            # nonstd 도 카운트 — 운영자가 점진 표준화할 후보 식별.
             key = f"{accountId}|{accountNm}"
             unmappedAccounts[key] = unmappedAccounts.get(key, 0) + 1
-            _log.debug("미매핑 계정: id=%s nm=%s", accountId, accountNm)
-            continue
 
         amount = row.get("_normalized_amount")
 
@@ -486,15 +534,19 @@ def _pivotToSeries(
             priorityTrack[slotKey] = priority
 
     if unmappedAccounts:
+        nonstdRows = sum(unmappedAccounts.values()) - unmappedRows
         _log.info(
-            "finance 매핑: %d/%d 행 매핑 완료, %d 행 미매핑 (%d 고유 계정)",
-            totalRows - unmappedRows,
+            "finance 매핑: %d/%d 행 표준 매핑, %d 행 nonstd_ fallback, %d 행 손실 (%d 고유 비표준 계정)",
+            totalRows - unmappedRows - nonstdRows,
             totalRows,
+            nonstdRows,
             unmappedRows,
             len(unmappedAccounts),
         )
+        # 점진 표준화 후보 — 자주 등장하는 비표준 계정 상위 5 개를 INFO 로 노출.
+        # accountMappings.json 에 추가하면 표준 snake_id 로 승격되어 회사간 비교 가능.
         for acct, cnt in sorted(unmappedAccounts.items(), key=lambda x: -x[1])[:5]:
-            _log.debug("  미매핑 상위: %s (%d회)", acct, cnt)
+            _log.info("  표준화 후보: %s (%d회)", acct, cnt)
 
     _fillSnakeIdGaps(result)
     sortSeries(result)
