@@ -93,8 +93,17 @@ class SecretStore:
             self._save(data)
 
     def has(self, name: str) -> bool:
-        """비밀 값 존재 여부."""
-        return self.get(name) is not None
+        """비밀 값 존재 여부 — DPAPI decrypt 없이 키 존재만 체크.
+
+        과거 `self.get(name) is not None` 로 구현해 호출 1 회당 DPAPI CryptUnprotectData
+        ~10s 가 누적, /api/ai/profile 가 9 개 provider 에 대해 has() 9 번 호출 → 90s 블락.
+        존재 여부 판정에 복호화는 불필요.
+        """
+        return name in self._load()
+
+    def keys(self) -> set[str]:
+        """저장된 모든 비밀 이름 — _load() 1 회로 N 개 has() 일괄 판정용."""
+        return set(self._load().keys())
 
     def get_json(self, name: str) -> dict[str, Any] | None:
         """JSON으로 저장된 비밀 값을 dict로 파싱하여 반환."""

@@ -68,6 +68,15 @@ def readSkill(
                 payload=payload,
             )
         )
+        # Chain hint — 현재 skill 다음에 자연스러운 분석 흐름. linkedSkills 우선 +
+        # succeededBy 의 첫 항목 (있으면). LLM 이 이 list 를 보고 자율적으로
+        # 다음 ReadSkill 또는 GetSkillBody 호출.
+        next_skills = list(spec.linkedSkills or [])
+        for sid in spec.succeededBy or ():
+            if sid not in next_skills:
+                next_skills.append(sid)
+        # 너무 길면 LLM context 낭비 — top 5 로 제한.
+        next_skills = next_skills[:5]
         rows.append(
             {
                 "id": spec.id,
@@ -77,6 +86,7 @@ def readSkill(
                 "whenToUse": list(spec.whenToUse),
                 "capabilityRefs": list(spec.capabilityRefs),
                 "requiredEvidence": list(spec.requiredEvidence),
+                "nextSkills": next_skills,
                 "bodyPreview": body[:600] if body else "",
             }
         )

@@ -77,8 +77,9 @@ def runAgent(
 
     tools = _selectTools(tool_names)
 
-    yield TraceEvent("graph_node", {"node": "agent", "summary": "응답 생성 중", "status": "running"})
-
+    # chat-native 흐름은 phase (단계) 가 없다. 도구 카드 + 텍스트 streaming 이 모든 진행 표현.
+    # 무의미한 graph_node 1 회 emit 은 UI groupActivities 가 잘못된 phase ("작성") 라벨 붙이게 만들어 제거.
+    # 회귀 가드: memory/feedback_no_graph_regression.md.
     refs: list[dict[str, Any]] = []
     artifacts: list[dict[str, Any]] = []
     text_emitted = ""

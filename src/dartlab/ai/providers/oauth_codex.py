@@ -31,8 +31,12 @@ class OAuthCodexError(RuntimeError):
         super().__init__(message)
 
 
-def availableModels() -> list[str]:
-    """사용 가능한 OAuth 모델 목록 — 원격 모델 우선, 공식 fallback 사용."""
+def availableModels(*, allow_fetch: bool = True) -> list[str]:
+    """사용 가능한 OAuth 모델 목록 — 원격 모델 우선, 공식 fallback 사용.
+
+    allow_fetch=False → cache 만 조회 (없으면 빈 list). profile 화면 표시처럼
+    cold HTTP 비용 (DNS/TLS cold init 누적 ~40s) 을 절대 감당 못하는 경로용.
+    """
     configured = os.environ.get("DARTLAB_OAUTH_MODELS")
     if configured:
         return sort_openai_models([item.strip() for item in configured.split(",") if item.strip()])
@@ -41,6 +45,9 @@ def availableModels() -> list[str]:
     now = time.time()
     if _MODELS_CACHE and (now - _MODELS_CACHE_TS) < _MODELS_CACHE_TTL:
         return _MODELS_CACHE.copy()
+
+    if not allow_fetch:
+        return []
 
     token = _valid_token_or_none()
     if os.environ.get("DARTLAB_OAUTH_TOKEN") and os.environ.get("DARTLAB_OAUTH_FETCH_MODELS") != "1":

@@ -7,7 +7,7 @@
 provider.generate_stream 지원 시 token 단위 streaming → UI typing 효과.
 미지원 provider 는 stream_provider helper 가 generate() wrap fallback.
 
-agent_gateway 이벤트 어휘: chunk / done. (graph_node 1 회 — "chat" 노드.)
+agent_gateway 이벤트 어휘: chunk / done. (graph_node 없음 — chat 흐름은 phase 없음.)
 """
 
 from __future__ import annotations
@@ -35,8 +35,7 @@ def streamChatNative(question: str, provider: Any, **kwargs: Any) -> Iterator[Tr
     if user_text:
         messages.append({"role": "user", "content": user_text})
 
-    yield TraceEvent("graph_node", {"node": "chat", "summary": "응답 생성 중", "status": "running"})
-
+    # chat-native 흐름은 phase 라벨 없음. message.loading + chunk streaming 이 진행 표현 전담.
     accumulated = ""
     try:
         for chunk in stream_provider(provider, messages, []):

@@ -330,18 +330,25 @@ class AiProfileManager:
         return self.update(provider=normalized, updated_by=updated_by)
 
     def serialize(self) -> dict[str, Any]:
-        """프로필 + provider 카탈로그를 JSON-safe dict로 직렬화."""
+        """프로필 + provider 카탈로그를 JSON-safe dict로 직렬화.
+
+        allow_fetch=False — profile 화면 표시는 cold network HTTP (DNS/TLS cold
+        ~40s) 를 절대 감당 못한다. cache 있으면 backend latest, 없으면 정적 fallback.
+        실제 chat 호출은 별도 경로에서 평소대로 backend latest 사용.
+        """
         profile = self.load()
+        # secret 존재 판정은 _load() 1 회로 일괄 — provider 별 has() 호출 (9x file IO) 회피.
+        secret_keys = self.secret_store.keys()
         provider_settings: dict[str, dict[str, Any]] = {}
         for provider_id in public_provider_ids():
             settings = profile.providers.get(provider_id) or ProviderProfile()
             spec = get_provider_spec(provider_id)
             secret_configured = False
             if spec and spec.auth_kind == "api_key":
-                secret_configured = self.secret_store.has(api_key_secret_name(provider_id))
+                secret_configured = api_key_secret_name(provider_id) in secret_keys
             elif spec and spec.auth_kind == "oauth":
-                secret_configured = self.secret_store.has(oauth_secret_name(provider_id))
-            effective_model = resolve_default_model(provider_id, configured_model=settings.model)
+                secret_configured = oauth_secret_name(provider_id) in secret_keys
+            effective_model = resolve_default_model(provider_id, configured_model=settings.model, allow_fetch=False)
             provider_settings[provider_id] = {
                 "model": effective_model,
                 "baseUrl": settings.base_url,
@@ -359,7 +366,7 @@ class AiProfileManager:
             "roles": {
                 role: {
                     "provider": binding.provider,
-                    "model": resolve_default_model(binding.provider, configured_model=binding.model),
+                    "model": resolve_default_model(binding.provider, configured_model=binding.model, allow_fetch=False),
                 }
                 for role, binding in profile.roles.items()
             },

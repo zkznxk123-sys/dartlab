@@ -70,18 +70,19 @@ def _versionKey(name: str) -> tuple[int, ...]:
     return tuple(-part for part in parts)
 
 
-def _resolveBackendLatest() -> str | None:
+def _resolveBackendLatest(*, allow_fetch: bool = True) -> str | None:
     """Query the cached backend model catalog and return the highest version.
 
     Returns None when the backend is unreachable, no token is stored, or
     importing the OAuth helper raises (during isolated tests, for example).
+    allow_fetch=False forwards to availableModels(allow_fetch=False) — cache only.
     """
     try:
         from dartlab.ai.providers.oauth_codex import availableModels
     except Exception:  # noqa: BLE001
         return None
     try:
-        models = availableModels()
+        models = availableModels(allow_fetch=allow_fetch)
     except Exception:  # noqa: BLE001
         return None
     if not models:
@@ -93,16 +94,17 @@ def _resolveBackendLatest() -> str | None:
     return chat_models[0]
 
 
-def latest_openai_model() -> str:
+def latest_openai_model(*, allow_fetch: bool = True) -> str:
     """Return the default frontier model used by DartLab.
 
-    Resolution: env override → backend latest → static fallback.
+    Resolution: env override → backend latest (cached or fetched) → static fallback.
+    allow_fetch=False → backend HTTP 호출 금지. cache 만 사용.
     """
 
     override = os.environ.get("DARTLAB_LATEST_OPENAI_MODEL")
     if override and override.strip():
         return override.strip()
-    backend_latest = _resolveBackendLatest()
+    backend_latest = _resolveBackendLatest(allow_fetch=allow_fetch)
     if backend_latest:
         return backend_latest
     return _FALLBACK_LATEST_MODEL
@@ -114,17 +116,22 @@ def resolve_default_model(
     explicit_model: str | None = None,
     configured_model: str | None = None,
     fallback_model: str | None = None,
+    allow_fetch: bool = True,
 ) -> str | None:
     """Resolve the effective model for a provider.
 
     Explicit per-call input wins. For OpenAI-family providers, stale profile
     defaults are ignored so web/status cannot keep showing an old model.
+
+    allow_fetch=False → backend HTTP 호출 금지. profile 화면 같이 cold network
+    비용 (DNS/TLS cold ~40s) 못 감당하는 경로용. cache 있으면 그대로 사용,
+    없으면 정적 fallback.
     """
 
     if explicit_model:
         return explicit_model
     if is_openai_family_provider(provider):
-        return latest_openai_model()
+        return latest_openai_model(allow_fetch=allow_fetch)
     return configured_model or fallback_model
 
 
