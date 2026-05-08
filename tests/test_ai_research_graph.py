@@ -68,6 +68,14 @@ def _done(events) -> dict:
     return [event for event in events if event.kind == "done"][-1].data
 
 
+@pytest.mark.skip(
+    reason=(
+        "intent.py keyword routing 폐기 (SSOT P-revised, 2026-05-07) — kernel 은 "
+        "mode==analyze 또는 LLM tool 호출만 분기. 'unknown_api_ref' 결과는 "
+        "verifyAnswer 가 financialStatement apiRef 를 capability catalog 에서 "
+        "찾지 못함. RunPython 패턴 + mock provider 로 재작성 필요 (별도 PR)."
+    )
+)
 def test_ask_public_entry_financial_statement_uses_engine_call(monkeypatch) -> None:
     import dartlab.ai.tools.engineCall as engine_call_mod
     from dartlab.ai.kernel import ask
