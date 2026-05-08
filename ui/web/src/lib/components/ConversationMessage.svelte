@@ -16,6 +16,9 @@
 	let rawParts = $derived(Array.isArray(message.parts) ? message.parts : []);
 	let parts = $derived(groupActivities(rawParts));
 	let text = $derived(message.text || message.content || "");
+	// 푸터 indicator 는 다른 진행 표현이 없을 때만 (도구 spinner / streaming text 가 진행 전담).
+	let anyToolRunning = $derived(parts.some((p) => p.type === "tool" && p.status === "running"));
+	let showLoadingFooter = $derived(!!message.loading && !anyToolRunning && !text);
 
 	let openGroups = $state({});
 	function toggleGroup(id) {
@@ -245,10 +248,10 @@
 				{@html renderMarkdown(text)}
 			</div>
 		{/if}
-		{#if message.loading}
+		{#if showLoadingFooter}
 			<div class="assistant-loading">
 				<Loader2 size={12} class="animate-spin" />
-				<span>{text || parts.length ? "응답 생성 중..." : "준비 중..."}</span>
+				<span>준비 중...</span>
 			</div>
 		{/if}
 		{#if onOpenArtifact && message.artifacts?.length}
