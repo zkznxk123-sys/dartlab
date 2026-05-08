@@ -46,8 +46,8 @@ def test_mcp_canonical_tools_execute():
     spec = json.loads(_executeTool("ReadCapability", {"query": "재무상태표", "limit": 5}))
     assert spec["refs"]
 
-    # EngineCall 은 legacy alias 도 _LEGACY_NAME_MAP 으로 정규화되어 동일 동작.
-    private = json.loads(_executeTool("engine_call", {"plan": {"apiRef": "Company._private", "target": "005930"}}))
+    # EngineCall — apiRef + args 평면 schema. private API 차단 검증.
+    private = json.loads(_executeTool("EngineCall", {"apiRef": "Company._private", "args": {"target": "005930"}}))
     assert private["ok"] is False
     assert private["error"] == "private_api_blocked"
 
