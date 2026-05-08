@@ -48,9 +48,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 5 패턴 분류 (연속증가/안정/감소/시작/중단) 명시 없이 단정 금지.
+  - 배당 지속 가능성 검증 없이 추세만 인용 금지.
+failureModes:
+  - 일회성 특별배당을 정기 배당 추세로 오해
+  - 배당 시작 (신규) 회사 1 년 데이터로 추세 단정
+  - 배당 중단 시점 정확한 식별 누락
+  - 산업별 평균 DPS 차이 무시
+examples:
+  - 5 년 연속 증가 종목
+  - 배당 패턴 5 분류 분포
+  - 배당 시작 회사 1 년 후 추세
+  - payout + FCF 지속 가능성
+linkedSkills:
+  - engines.analysis.dividendCapitalReturn
+  - engines.analysis.cashflow
+  - engines.scan.capital
 source:
   type: manual_skill
   format: markdown

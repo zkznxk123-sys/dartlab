@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "사용자 정의 룰 (Rule + sizing + stop) 의 in-sample 결과를 OOS 예측으로 단정 금지."
+  - "sizing / stop 룰의 파라미터 (벤치마크 fix vs ATR 가변) 명시 없이 비교 금지."
+failureModes:
+  - "데이터 스누핑 (룰 과적합)"
+  - "거래비용 / 슬리피지 / 시장충격 미반영"
+  - "룰 발동 빈도 (turnover) 와 실제 운용 가능성"
+  - "stop 폭 (5% vs ATR×2) 별 결과 변동"
+  - "단일 종목 룰을 multi-asset 으로 확장 시 상관 무시"
+examples:
+  - "사용자 정의 boolean rule 백테스트"
+  - "Rule + position sizing + stop"
+  - "다양한 stop 조건 비교"
+  - "전략 결과 + walk-forward 검증"
+linkedSkills:
+  - engines.quant
+  - engines.quant.backtest
+  - engines.quant.walkforward
+  - engines.quant.signalReview
 source:
   type: manual_skill
   format: markdown

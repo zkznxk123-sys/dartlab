@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "골든크로스 / RSI / MACD / 볼린저 단일 신호로 매매 결정 금지 — 다지표 confirm."
+  - "기술적 지표 표준 파라미터 (RSI 14 / MACD 12-26-9) 명시 없이 인용 금지."
+failureModes:
+  - "지표 파라미터 선택 (RSI 14 vs 7) 별 신호 차이"
+  - "사이드웨이 (range-bound) 시장에서 추세추종 지표 false signal"
+  - "골든크로스 / 데드크로스 timing lag (lookback)"
+  - "지표 간 상관 (정합 vs 상충) 처리 누락"
+  - "거래량 동반 없는 신호의 신뢰도 저하"
+examples:
+  - "삼성전자 최근 매매 신호 이벤트"
+  - "골든크로스 + RSI 결합"
+  - "MACD divergence 검출"
+  - "볼린저밴드 squeeze + breakout"
+linkedSkills:
+  - engines.quant
+  - engines.quant.indicators
+  - engines.quant.entry
+  - engines.quant.signalReview
 source:
   type: manual_skill
   format: markdown

@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "earnings + 12-1 price 모멘텀 합성 결과를 단일 점수로 단정 금지 — 가중치 명시."
+  - "Chordia-Shivakumar 미국 표본 결과를 KR 시장 동일 가정으로 인용 금지."
+failureModes:
+  - "earnings 데이터 (분기 vs TTM) 빈도 차이 무시"
+  - "12-1 month return 의 short-term reversal 효과 미반영"
+  - "산업별 모멘텀 차이 (기술주 vs 금융주) 무시"
+  - "신규상장 / 일회성 이벤트로 인한 모멘텀 왜곡"
+  - "가중치 (earnings 50% + price 50%) 임의 선택"
+examples:
+  - "fund-mom 합성 랭킹 상위 30 종목"
+  - "earnings + price 모멘텀 결합"
+  - "산업별 fund-mom 효과 차이"
+  - "fund-mom + value 결합"
+linkedSkills:
+  - engines.quant
+  - engines.quant.momentum
+  - engines.quant.earnings
+  - engines.quant.factor
 source:
   type: manual_skill
   format: markdown

@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "CVaR / 최대낙폭 한 지표만으로 위험 단정 금지 — 다지표 결합."
+  - "VaR / CVaR 신뢰수준 (95% / 99%) 명시 없이 결과 비교 금지."
+failureModes:
+  - "정규분포 (gaussian VaR) 가정의 fat-tail 위험 과소평가"
+  - "역사적 VaR (historical) vs 모수적 VaR 차이"
+  - "최대낙폭 (max drawdown) 의 측정 윈도우 의존"
+  - "Sortino 의 minimum acceptable return (MAR) 정의 모호"
+  - "꼬리위험 추정 신뢰구간 미언급"
+examples:
+  - "삼성전자 CVaR 95% / 99%"
+  - "최대낙폭 시계열"
+  - "Sortino 비율 + 하방편차"
+  - "꼬리위험 + 변동성 결합"
+linkedSkills:
+  - engines.quant
+  - engines.quant.volatility
+  - engines.quant.riskparity
+  - engines.quant.benchmark
 source:
   type: manual_skill
   format: markdown

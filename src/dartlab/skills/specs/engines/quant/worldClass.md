@@ -1,52 +1,66 @@
 ---
 id: engines.quant.worldClass
-title: dartlab quant 세계 최강 — 사상 정합 + 성능 fix 플랜 (2026-04-25 v3)
+title: Quant - 세계 수준 quality bar
 kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: dartlab quant 세계 최강 — 사상 정합 + 성능 fix 플랜 (2026-04-25 v3) 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 capability/docstring으로 내려간다.
+purpose: quant 엔진 답변의 세계 수준 품질 게이트 — 학술 출처 / 가정 / OOS 검증 / Sharpe 인용 기준 + dartlab quant 의 사상 위반 회귀 가드.
 whenToUse:
-  - dartlab quant 세계 최강 — 사상 정합 + 성능 fix 플랜 (2026-04-25 v3)
-  - quantWorldClass
-  - 0. 재조사 결과 — 정확한 사상
-  - story 엔진 정확한 사상 (v3 정정)
-  - 1. 진짜 사상 위반 + 성능 버그 (v3)
-  - ❌ 폐기 진단
-  - 2. 8 Step 통합 플랜 — 진행 상태
+  - quant 답변 품질 게이트
+  - OOS / DSR / PBO 인용 기준 확인
+  - 학술 출처 + 표본 차이 명시 검증
+  - quant 사상 위반 회귀 (alpha 디렉터리 추가 / 5 패스 강박 등) 점검
 inputs:
-  - 작업 목적
-  - 대상 엔진 또는 실행 환경
-  - 검증 범위
+  - 검증 대상 quant 결과
+  - 검증 범위 (단일 axis / 결합 / 전략)
 outputs:
-  - selected skill
-  - capability/docstring handoff
-  - verification gate
+  - 품질 게이트 통과 여부
+  - 미흡 항목 list
+  - 보강 권장 axis
 capabilityRefs:
   - quant
 toolRefs:
   - search_reference
   - RunPython
 knowledgeRefs:
-  - start.dartlabSkillOs
+  - engines.quant
+  - engines.quant.signalReview
+  - engines.quant.walkforward
 sourceRefs:
-  - dartlab://skills/engines.quantWorldClass
-procedure:
-  - 0. 재조사 결과 — 정확한 사상 기준을 확인한다.
-  - story 엔진 정확한 사상 (v3 정정) 기준을 확인한다.
-  - 1. 진짜 사상 위반 + 성능 버그 (v3) 기준을 확인한다.
-  - ❌ 폐기 진단 기준을 확인한다.
-  - 2. 8 Step 통합 플랜 — 진행 상태 기준을 확인한다.
-  - '**V8** (story 6막 조립자 부재) — 완전 잘못. SECTIONS + buildBlocks + narrate 30+ 이미 완성'
-  - '**V3** (alphas/ 디렉터리) — architecture 기준상 명확한 위반 아님'
-  - ✅ Phase 2b 11/11 통과 (Step 1)
-  - ✅ `c.quant("altman", "005930")` 단일 / `c.quant("altman")` 횡단면 / `c.quant.altman("005930")` attr (Step 6/7)
+  - dartlab://skills/engines.quant.worldClass
 requiredEvidence:
-  - skillRef
+  - target
+  - period
+  - benchmark
+  - assumptions
+  - executionRef
 expectedOutputs:
-  - 작업 경로
-  - 확인한 근거
-  - 검증 결과
+  - 게이트 통과 / 미흡 항목
+  - 보강 권장 axis
+  - 학술 인용 검증
+forbidden:
+  - 학술 인용 (Fama-French / Asness / Frazzini-Pedersen 등) 없이 팩터 수익률 단정 금지.
+  - in-sample 결과를 OOS 약속으로 단정 금지 — walkforward / cpcv 검증 동반.
+  - 미국 표본 결과를 KR 시장 동일 가정으로 인용 금지 — reproducibility 차이 명시.
+  - 가정 (윈도우 / 가중치 / 리밸런싱) 명시 없이 Sharpe / IR 인용 금지.
+  - quant 본체 (engines.quant) 의 axis_registry 외 임의 디렉터리 (alpha / strategies / signals) 추가 금지.
+failureModes:
+  - 단일 학술 논문 결과를 KR 시장에 그대로 적용 (reproducibility crisis 무시)
+  - 가정 미명시 (lookback / rebalancing / cost) 로 결과 비교 불가
+  - 합성 점수 (composite) 의 가중치 임의 선택 + 노이즈로 보임
+  - factor zoo (300+ factor) 에서 사후 cherry-picking
+  - DSR / PBO / Reality Check 미수행으로 false discovery 위험
+examples:
+  - 신규 axis 추가 전 학술 출처 / OOS 검증 게이트
+  - quant 답변의 가정 / 표본 차이 명시 점검
+  - 합성 점수 가중치 결정 근거 검증
+  - quant 사상 위반 (디렉터리 추가 / 5 패스) 회귀 가드
+linkedSkills:
+  - engines.quant
+  - engines.quant.signalReview
+  - engines.quant.walkforward
+  - engines.quant.benchmark
 runtimeCompatibility:
   server:
     status: supported
@@ -58,64 +72,54 @@ runtimeCompatibility:
     status: supported
   pyodide:
     status: limited
-    notes:
-      - 실제 실행 가능 여부는 연결된 capability와 데이터 snapshot 범위를 따른다.
-failureModes:
-  - Skill OS 검색 없이 과거 문서 경로를 직접 찾음
-  - API schema를 skill 본문에 중복해 docstring/capability와 어긋남
-  - 검증 게이트 없이 변경 또는 답변을 완료 처리함
-forbidden:
-  - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.
-  - 공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다.
-examples:
-  - dartlab quant 세계 최강 — 사상 정합 + 성능 fix 플랜 (2026-04-25 v3) 규칙 확인
-  - quantWorldClass 작업을 Skill OS에서 시작
 source:
-  type: absorbed_skills
-  absorbedKey: quantWorldClass
+  type: manual_skill
   format: markdown
-lastUpdated: '2026-05-03'
+lastUpdated: '2026-05-08'
 ---
 
-## Skill OS 흡수 규칙
+## 엔진 역할
 
-- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.
-- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.
-- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.
-
-## 실행 순서
-
-- 0. 재조사 결과 — 정확한 사상 기준을 확인한다.
-- story 엔진 정확한 사상 (v3 정정) 기준을 확인한다.
-- 1. 진짜 사상 위반 + 성능 버그 (v3) 기준을 확인한다.
-- ❌ 폐기 진단 기준을 확인한다.
-- 2. 8 Step 통합 플랜 — 진행 상태 기준을 확인한다.
-- **V8** (story 6막 조립자 부재) — 완전 잘못. SECTIONS + buildBlocks + narrate 30+ 이미 완성
-- **V3** (alphas/ 디렉터리) — architecture 기준상 명확한 위반 아님
-- ✅ Phase 2b 11/11 통과 (Step 1)
-- ✅ `c.quant("altman", "005930")` 단일 / `c.quant("altman")` 횡단면 / `c.quant.altman("005930")` attr (Step 6/7)
+quant 엔진 답변의 세계 수준 품질 게이트. 본 skill 은 axis 응용이 아니라 *품질 검증 메타 skill* 이다. 답변 작성 후 본 게이트로 검증한 다음 finalize.
 
 ## 공개 호출 방식
 
-- `c = dartlab.Company("005930")`
-- `c.quant()`
-- `dartlab.quant("005930")`
+본 skill 은 직접 호출되는 axis 가 아니다. 다른 quant axis 결과를 검증할 때 본 skill 의 게이트 5 항목을 답변에 적용한다.
+
+```python
+import dartlab
+
+# quant axis 결과
+result = dartlab.quant("damodaranValuation", "005930")
+
+# 답변 finalize 전 본 skill 의 게이트 5 항목 (학술 출처 / 표본 / 가정 / OOS / 벤치마크) 확인
+```
 
 ## 호출 동작
 
-- 가격, 밸류에이션, 모멘텀, 변동성, DCF/민감도 신호를 계산한다.
-- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
-- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+게이트 5 항목 (학술 출처 / 표본 차이 / 가정 / OOS 검증 / 벤치마크) 의 통과 여부를 답변에 명시. 미통과 항목은 답변에 한계로 노출.
 
 ## 대표 반환 형태
 
-- dict 또는 DataFrame을 반환한다. 핵심 키는 valuation, momentum, volatility, assumptions, sensitivity, basis이며 가격은 원/달러, 비율은 %/배다.
-- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+본 skill 자체는 결과를 반환하지 않는다. 다른 quant axis 의 결과 답변 본문에 게이트 5 항목 통과 여부 표 (또는 한계 문장) 가 포함되어야 한다.
+
+## 게이트 항목
+
+1. **학술 출처 명시** — Sloan accruals / Beneish / Frazzini-Pedersen / Hou-Xue-Zhang / Asness QMJ 등 인용 시 논문 (저자 + 연도) 명시.
+2. **표본 차이 명시** — 미국 표본 결과를 KR 시장에 적용 시 reproducibility 차이 한 줄 명시.
+3. **가정 명시** — 윈도우 (60D / 252D), 리밸런싱 빈도 (월 / 분기), 거래비용 가정.
+4. **OOS 검증** — in-sample 백테스트 외 walkforward / cpcv / DSR / PBO 동반.
+5. **벤치마크 명시** — KOSPI / 동일가중 universe / 섹터 지수 — 어느 벤치마크 대비 outperformance.
+
+## quant 사상 위반 회귀 가드
+
+dartlab quant 의 진짜 사상 (engines.quant SKILL):
+
+- **단일 SSOT**: `_AXIS_REGISTRY` (`src/dartlab/quant/__init__.py`). 외부에서 임의 디렉터리 추가 금지 (alpha / strategies / signals).
+- **2 호출 경로**: `dartlab.quant(axis, target)` 문자열 / `dartlab.quant.axis(target)` accessor — 동등.
+- **3 형태 지원**: 단일 종목 / 횡단면 (universe) / 포트폴리오.
+- **story 조립**: 본 skill 은 axis 결과만 — narrative 조립은 `engines.story`.
 
 ## 기본 검증
 
-- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
-- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
-- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
-
-
+답변 finalize 전 본 게이트 5 항목 확인. 미흡 항목은 답변에 한계로 명시 + 보강 권장 axis 안내.

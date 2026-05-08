@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "벤치마크 (KOSPI vs KRX300 vs 섹터지수) 명시 없이 outperformance 인용 금지."
+  - "벤치마크 가중 (시총가중 vs 동일가중) 차이 무시 금지."
+examples:
+  - "삼성전자 vs KRX 반도체 섹터"
+  - "KOSPI200 + 스타일 (가치 / 성장) 비교"
+  - "기간별 (1Y / 3Y / 5Y) 벤치마크 추적오차"
+  - "벤치마크 스택 (시장 + 섹터 + 스타일)"
+failureModes:
+  - "단일 벤치마크 (KOSPI) 만 비교하면 섹터 / 스타일 효과 가려짐"
+  - "벤치마크 산출 시 시점 (월말 close) 차이로 수익률 왜곡"
+  - "배당 포함 (TR) vs 미포함 (PR) 차이 무시"
+  - "벤치마크 종목 변경 (rebalancing) 영향 미반영"
+  - "지수 가중치 (시총 vs 동일 vs 펀더멘털) 비교 혼동"
+linkedSkills:
+  - engines.quant
+  - engines.quant.style
+  - engines.quant.factor
+  - engines.scan.profitability
 source:
   type: manual_skill
   format: markdown

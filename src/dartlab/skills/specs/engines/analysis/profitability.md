@@ -7,9 +7,16 @@ status: unverified
 category: engines
 purpose: 매출, 마진, 이익의 변화를 기간·섹터 맥락과 함께 분석한다.
 whenToUse:
-  - 삼성전자 수익성 분석
-  - 이익률과 마진 추세
-  - 영업이익 개선 또는 악화 원인
+  - 수익성 분석
+  - 이익률 추세
+  - 마진 추세
+  - 영업이익 개선 원인
+  - ROE
+  - ROA
+  - 매출총이익률
+  - 영업이익률
+  - 순이익률
+  - 산업 평균 비교
 inputs:
   - 기업명 또는 종목코드
 outputs:
@@ -65,20 +72,31 @@ runtimeCompatibility:
     limitations:
       - live macro 보강은 서버 환경에서 수행한다.
 failureModes:
-  - 매출 증가만 보고 수익성 개선 단정
-  - 같은 기간이 아닌 마진 비교
-  - 업황 맥락 없는 이익률 판단
-  - finance-lite 계정명을 확인하지 않고 고정 계정 id만 가정
-  - Polars LazyFrame pivot 방식과 eager pivot 방식을 혼동해 실행 실패
-  - 단일 기업 질문에서 scan prebuild만 보고 Company 원자료 또는 Company.analysis 확인을 생략
-  - table ref는 만들었지만 material claim을 해당 table/value ref에 직접 묶지 않아 최종 검산 실패
+  - 매출 증가만 보고 수익성 개선 단정 — 단가 vs 물량 vs mix 분리 필요
+  - 같은 기간이 아닌 마진 비교 — Q vs YTD vs 연환산 혼용 시 답변에 period 명시
+  - 산업 분기 미고려 — 제조 평균 ROE 8% / 금융 7% / IT 12% / 바이오 음수. peer 비교 시 같은 industryHint 한정
+  - finance-lite 계정명을 확인하지 않고 고정 계정 id만 가정 — normalizeColumn(topic, hint) 사용
+  - 단일 기업 질문에서 scan prebuild만 보고 Company.analysis 확인을 생략
+  - 외화 매출 회사 (수출 비중 50%+) 의 환율 영향 미분리
+  - table ref 는 만들었지만 material claim 을 해당 table/value ref 에 직접 묶지 않아 최종 검산 실패
 forbidden:
-  - 숫자 없는 수익성 판단
-  - 결손값을 0으로 대체
-  - 단일 종목 수익성 질문을 저평가·후보 발굴 screen으로 바꿔 답하기
+  - 숫자 없는 수익성 판단 금지
+  - 결손값을 0 으로 대체 금지 — 빈 분기는 skip 또는 flag 표시
+  - 단일 종목 수익성 질문을 저평가·후보 발굴 screen 으로 바꿔 답하기 금지
+  - ROE 분모를 평균자본/기말자본 미명시 답변 금지 — 정의 명시 필수
+  - stale 기간 (3 분기 전) 데이터를 *현재* 로 단정 금지 — dataAsOf 명시
 examples:
-  - 삼성전자 수익성 분석해줘
-  - 영업이익률이 좋아졌는지 봐줘
+  - 삼성전자 수익성 분석
+  - 영업이익률이 좋아졌는지 분기별 추세
+  - 반도체 peer ROE 비교 (삼성전자 vs SK하이닉스)
+  - 매출 증가 vs 이익률 정체 원인 분리
+  - 분기별 마진 변화와 원자재 영향
+  - 산업 평균 ROE 대비 위치
+linkedSkills:
+  - engines.scan.profitability
+  - engines.analysis.growth
+  - engines.analysis.cashflow
+  - engines.analysis.macroSensitivity
 source:
   type: curated_markdown
   owner: dartlab

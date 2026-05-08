@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "GARCH(1,1) / HAR-RV 모델 가정 / 학습 윈도우 명시 없이 변동성 인용 금지."
+  - "역사적 변동성 (252D) 으로 미래 변동성 단정 금지 — 조건부 변동성 모델 동반."
+failureModes:
+  - "GARCH(1,1) 모수 추정의 lookback 의존성"
+  - "HAR-RV (Heterogeneous Autoregressive) 의 일별 / 주별 / 월별 가중 임의 선택"
+  - "변동성 클러스터링 (volatility clustering) 미반영"
+  - "intraday vs daily realized vol 차이"
+  - "시장 충격 (FOMC / 실적발표) 시 outlier 영향"
+examples:
+  - "삼성전자 GARCH(1,1) 변동성"
+  - "HAR-RV 실현변동성"
+  - "변동성 기간구조 (1M / 3M / 6M)"
+  - "변동성 + 꼬리위험 결합"
+linkedSkills:
+  - engines.quant
+  - engines.quant.tailrisk
+  - engines.quant.beta
+  - engines.quant.regime
 source:
   type: manual_skill
   format: markdown

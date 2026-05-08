@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "진입진단 결과를 백테스트 검증으로 오인 금지 — 본 axis 는 실시간 진단만."
+  - "스톱 / 청산 가격을 단일 룰만으로 단정 금지 — 변동성 / 리스크 한도 동반."
+failureModes:
+  - "현재 시점 진단 결과의 후행 검증 (OOS) 부재"
+  - "진입 / 청산 룰의 lookback 윈도우 (20D / 60D) 의존성"
+  - "스톱 폭 (ATR / 고정 %) 기준 차이"
+  - "거래비용 / 슬리피지 미반영"
+  - "단일 종목 진단을 포트폴리오 결정으로 단순 확장"
+examples:
+  - "삼성전자 현 시점 진입 진단"
+  - "스톱 가격 + 청산 가격 진단"
+  - "ATR 기반 스톱 폭 계산"
+  - "진입 진단 + 백테스트 후속"
+linkedSkills:
+  - engines.quant
+  - engines.quant.signals
+  - engines.quant.signalReview
+  - engines.quant.backtest
 source:
   type: manual_skill
   format: markdown

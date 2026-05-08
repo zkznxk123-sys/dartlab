@@ -52,9 +52,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "성과 보장 표현 금지."
-  - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
-  - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - 성과 보장 표현 금지.
+  - 기간 / benchmark / 가정 명시 없이 수익률 인용 금지.
+  - 정량 신호를 인과 분석 결론으로 제시 금지.
+  - 단일 신호 기반 verdict 단정 금지 — 5+ 신호 종합.
+  - 가격 기준일 (latestAsOf) 없이 verdict 답변 금지.
+failureModes:
+  - 단일 시점 verdict 만 보고 추세 단정 — 4 분기 시계열 권장
+  - 거래량 약한 종목의 verdict 신뢰도 명시 누락
+  - 사이클 phase 별 verdict 의미 변화 무시
+  - verdict 종합 시 신호 가중치 미명시
+examples:
+  - 삼성전자 종합 verdict
+  - 5+ 신호 종합 (RSI · MACD · 볼린저 · 상대강도 · 거래량)
+  - 사이클 phase 별 verdict
+  - 거래량 약한 종목 신뢰도
+linkedSkills:
+  - engines.quant.signalReview
+  - engines.quant.indicators
+  - engines.quant.regime
 source:
   type: manual_skill
   format: markdown

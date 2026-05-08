@@ -51,6 +51,24 @@ forbidden:
   - "기준일 / source 없는 매크로 숫자 인용 금지."
   - "기업 재무 분석을 macro 로 대체하지 않는다."
   - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - "ISM 재고순환 4 국면 (보충 / 축소 / 가속축적 / 강제축소) 단계 명시 없이 단정 금지."
+  - "재고 신호를 자동 자산배분 결정으로 전환 금지 — 가격 / 매출 환경 동반 검토."
+failureModes:
+  - "ISM 재고순환 미국 지표를 KR 제조업에 직접 적용"
+  - "재고/판매 비율 (I/S) 산업별 정상 수준 차이 무시"
+  - "공급망 충격 (코로나 / 반도체 부족) 시기의 재고 신호 왜곡"
+  - "재고순환 phase 와 자산 (주식 vs 채권) 영향 단순 인과"
+  - "기업 재고 (BS) 와 산업 재고 (ISM) 단위 혼동"
+examples:
+  - "ISM 재고순환 4 국면 평가"
+  - "KR 제조업 재고/판매 추이"
+  - "재고 phase 별 자산 영향 (참고용)"
+  - "재고 신호와 매출 / 가격 동반 검토"
+linkedSkills:
+  - engines.macro
+  - engines.macro.cycle
+  - engines.macro.summary
+  - engines.macro.assets
 source:
   type: manual_skill
   format: markdown

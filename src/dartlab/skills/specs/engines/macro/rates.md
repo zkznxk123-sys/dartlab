@@ -48,9 +48,26 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "기준일 / source 없는 매크로 숫자 인용 금지."
-  - "기업 재무 분석을 macro 로 대체하지 않는다."
-  - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - 기준일 / source 없는 매크로 숫자 인용 금지.
+  - 기업 재무 분석을 macro 로 대체하지 않는다.
+  - macro 결과를 analysis 내부 계산처럼 섞지 않는다.
+  - 정책 금리 (기준금리) 와 시장 금리 (10Y · 3M) 혼동 금지.
+  - 명목 금리 vs 실질 금리 (CPI 보정) 혼용 금지.
+failureModes:
+  - 수익률곡선 (10Y - 2Y) 역전을 즉시 *경기침체 신호* 로 단정
+  - 정책 금리 동결 vs 인하/인상 기대 (forward) 혼용
+  - 한국 vs 미국 금리 decoupling 가능성 무시
+  - 기간프리미엄 (term premium) 추정 모델 (Adrian-Crump-Moench 등) 미명시
+examples:
+  - 한국 기준금리 추세
+  - 미국 FOMC 점도표
+  - 수익률곡선 (10Y - 2Y · 10Y - 3M)
+  - KR vs US 금리 decoupling
+linkedSkills:
+  - engines.macro
+  - engines.macro.cycle
+  - engines.macro.liquidity
+  - engines.gather.macro
 source:
   type: manual_skill
   format: markdown

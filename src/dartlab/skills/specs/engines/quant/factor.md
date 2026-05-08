@@ -52,9 +52,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "성과 보장 표현 금지."
-  - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
-  - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - 성과 보장 표현 금지.
+  - 기간 / benchmark / 가정 명시 없이 수익률 인용 금지.
+  - 정량 신호를 인과 분석 결론으로 제시 금지.
+  - 팩터 (size · value · momentum · quality · vol) 분류 미명시 답변 금지.
+  - 단일 팩터 노출만으로 *전략* 단정 금지 — 멀티팩터 권장.
+failureModes:
+  - 팩터 정의 차이 (HML vs Book/Market) 무시
+  - 팩터 시장별 (KR vs US) 다른 효과 무시
+  - 팩터 decay (정보 효과 시간 감소) 무시
+  - 팩터 multicollinearity (size + value 상관)
+examples:
+  - 삼성전자 팩터 노출 (size · value · momentum)
+  - 멀티팩터 score
+  - 팩터별 산업 평균 노출
+  - KR vs US 팩터 차이
+linkedSkills:
+  - engines.quant.beta
+  - engines.quant.qfactor
+  - engines.quant.qmj
 source:
   type: manual_skill
   format: markdown

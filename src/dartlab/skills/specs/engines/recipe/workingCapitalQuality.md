@@ -37,6 +37,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 다년 시계열 일부 한정
+forbidden:
+  - CCC (DSO + DIO − DPO) 한 시점 결과로 영구 운전자본 efficiency 단정 금지.
+  - DSO / DIO / DPO 정의 (분기 vs 연간 환산) 명시 없이 인용 금지.
+  - 매출채권 회전율 단일 지표만으로 매출 신뢰도 단정 금지.
+  - 산업별 정상 CCC 수준 (단순 평균) 무시한 비교 금지.
+failureModes:
+  - DSO 분모 (매출 / 매출원가) 정의 모호
+  - 분기 환산 (×91 vs ×365 / 4) 차이
+  - 매출채권 / 재고의 일회성 (M&A) 변동 미보정
+  - 매입채무 (DPO) 의 국가 / 거래처 규약 차이
+  - 운전자본 부채 (단기차입) 분리 누락
+examples:
+  - 삼성전자 CCC + 5 년 추세
+  - DSO + DIO + DPO 시계열
+  - 매출 신뢰도 + 운전자본 quality
+  - 운전자본 + 분식 의심 결합
 lastUpdated: '2026-05-07'
 ---
 

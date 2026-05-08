@@ -37,6 +37,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 quant value 시계열 일부 한정
+forbidden:
+  - 적정주가 단일 값 단정 금지 — 범위 (best / base / worst).
+  - DCF 가정 (할인율 / 성장률 / terminal multiple) 명시 없이 fair value 단정 금지.
+  - peer multiple 비교 시 산업 동질성 + 단계 (성장기 / 성숙기) 일치 누락 금지.
+  - 저평가 / 고평가 단정 금지 — 가정 시나리오 + 신뢰도 동반.
+failureModes:
+  - DCF terminal value 가 전체 가치의 70%+ 일 때 가정 의존성 무시
+  - peer multiple 의 산업 / 단계 차이 무시한 단순 평균
+  - valuation band 의 역사 평균 윈도우 (3Y vs 10Y) 임의 선택"
+  - 4 방법론 (DCF / DDM / 상대가치 / RIM) 결과 불일치 시 단일 값 선택"
+  - 시장 환경 변화 (금리 / 유동성) 미반영한 역사 mean 비교"
+examples:
+  - 삼성전자 4 방법론 종합 적정주가 범위
+  - 가치평가 + valuation band 결합
+  - peer multiple + 산업 단계 일치
+  - DCF best / base / worst 시나리오
 lastUpdated: '2026-05-07'
 ---
 

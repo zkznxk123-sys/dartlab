@@ -35,6 +35,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 story 전체 조립 메모리 부담 (개별 섹션만)
+forbidden:
+  - 투자 추천 같은 단정 본문 금지 — analysis 결과 그대로 표현.
+  - 부분 섹션 호출 시 다른 섹션 추측 금지 — 그 섹션 한정.
+  - 인과 가중치 / scorecard 없이 단편 섹션 단정 금지.
+  - 보고서 본문 인용 시 출처 ref 누락 금지.
+failureModes:
+  - 14 섹션 중 일부 결손 시 silent skip
+  - causal weights 임의 가정 vs 실제 모델 가중치 차이
+  - 부분 섹션 (예 — 수익구조 만) 결과를 전체 회사 종합으로 오인
+  - 산업 / 시장 환경 미반영한 회사 단독 결론
+  - story narrative 의 사실 + 해석 경계 모호
+examples:
+  - 삼성전자 14 섹션 종합 보고서
+  - 신한지주 부분 섹션 (수익구조)
+  - causal weights + scorecard 결합
+  - story 보고서 + 출처 ref
 lastUpdated: '2026-05-07'
 ---
 

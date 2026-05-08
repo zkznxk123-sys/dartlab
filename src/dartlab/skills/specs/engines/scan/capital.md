@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 자사주 매입 vs 소각 동치 처리 금지.
+  - 유상증자 빈도와 *위험* 단순 인과 금지 — 사용처 (capex / 부채 상환) 확인.
+failureModes:
+  - 배당 / 자사주 / 증자 / 감자 분류 미명시
+  - 무상증자와 유상증자 차이 무시
+  - 환원율 (배당 + 자사주 / 순이익) 분모 정의 미명시
+  - 자사주 매입 후 소각 비율 누락
+examples:
+  - 환원율 상위 50 (배당+자사주)
+  - 자사주 매입 vs 소각 비율
+  - 유상증자 빈도 추세
+  - 산업 평균 배당성향 대비
+linkedSkills:
+  - engines.analysis.capitalAllocation
+  - engines.analysis.dividendCapitalReturn
+  - engines.scan.dividendTrend
 source:
   type: manual_skill
   format: markdown

@@ -7,8 +7,15 @@ status: unverified
 category: engines
 purpose: 여러 엔진의 근거를 thesis, evidence, risk, limit 구조로 조립한다.
 whenToUse:
-  - 기업을 이야기처럼 종합해달라는 질문
-  - 보고서형 분석 요청
+  - 보고서 생성
+  - 기업 이야기
+  - thesis evidence risk 조립
+  - dartlabStory
+  - story full
+  - reportType
+  - executive summary
+  - credit 보고서
+  - valuation 보고서
 capabilityRefs:
   - Company.story
   - Company.analysis
@@ -51,9 +58,31 @@ runtimeCompatibility:
     limitations:
       - 브라우저에서는 외부 API를 추가 호출하지 않고 prefetched parquet 기준으로만 작성한다.
 failureModes:
-  - 보고서 문장만 있고 수치 근거 없음
+  - 보고서 문장만 있고 수치 근거 없음 — analysis · credit · macro 결과 ref 필수
+  - reportType 자동 감지 실패 — 명시 호출 (`c.story(reportType="credit")`) 권장
+  - template (기업유형) 자동 감지 실패 — 신생/금융/지주 회사는 자동 분류 보수적
+  - 블록 evidence 비어 있는데 thesis 만 채움 — 빈 블록은 skip 또는 limits
+  - 외부 신평 (Moody's · KIS · NICE) 등급을 dartlab credit 결과처럼 인용
+  - 사용자 답변에 *story 내부 분업* 노출 (단일 분석가 목소리 위반)
 forbidden:
-  - 검산 없는 서사형 투자판단
+  - 검산 없는 서사형 투자판단 금지.
+  - 모든 숫자·날짜·랭킹은 ref token 으로 묶음 (`<valueRef:...>` 형식).
+  - story 가 직접 숫자 계산 금지 — 하위 엔진 (analysis · credit · quant · macro · industry) 결과만 인용.
+  - 외부 신평 등급을 dartlab 결과처럼 단정 금지.
+examples:
+  - 삼성전자 종합 보고서 (full)
+  - executive summary (경영자 1 페이지)
+  - 신용분석 전용 (credit reportType)
+  - 가치평가 전용 (valuation reportType)
+  - 자유 블록 조립 (Story([blocks]))
+  - markdown · html · json 출력 변환
+linkedSkills:
+  - engines.story
+  - engines.story.companyCausal
+  - engines.analysis
+  - engines.credit
+  - engines.industry
+  - engines.macro
 source:
   type: curated_markdown
   owner: dartlab

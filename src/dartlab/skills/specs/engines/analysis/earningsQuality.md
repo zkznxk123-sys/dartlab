@@ -7,16 +7,21 @@ status: observed
 category: engines
 purpose: "analysis 엔진의 이익품질 축 응용 — 이익이 진짜인가."
 whenToUse:
-  - "analysis"
-  - "이익품질"
-  - "이익이 진짜인가"
+  - 이익품질
+  - earningsQuality
+  - accrual
+  - OCF/NI
+  - 이익이 진짜인가
+  - 회계 보수성
+  - Sloan accrual ratio
 inputs:
-  - "Company 또는 종목코드"
-  - "기준 기간"
+  - Company 또는 종목코드
+  - 기준 기간
 outputs:
-  - "축별 dict"
-  - "evidence refs"
-  - "한계와 가정"
+  - 축별 dict (accrualRatio · ocfToNi · qualityFlags)
+  - evidence refs
+  - 의심 신호 list (이상치)
+  - 한계와 가정
 capabilityRefs:
   - "analysis"
   - "Company.analysis"
@@ -50,9 +55,29 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - accrual ratio 임계값 (산업 평균 대비) 명시 없이 *높음* 단정 금지.
+  - 한 분기 OCF 이상치로 *분식* 단정 금지 — 4 분기 시계열 + 패턴 확인.
+failureModes:
+  - OCF/NI < 0.7 을 즉시 *위험* 으로 단정 — 산업·성장 단계별 정상 범위 다름
+  - 일회성 매각 손익 (영업외) 을 운영 이익에 섞어 OCF/NI 왜곡
+  - 산업 평균 accrual ratio 미참조 — 절대값만으로 판단
+  - Beneish M-score 같은 기존 지표와 교차 검증 누락
+  - 신생/재생 회사의 OCF 음수를 분식 신호로 오해 — 성장 단계 capex 흡수 가능
+examples:
+  - 삼성전자 이익품질 점검
+  - OCF vs 순이익 차이 (accrual ratio)
+  - Sloan ratio 산업 평균 대비
+  - 분식 의심 신호 4 분기 점검
+  - Beneish M-score 와 교차 검증
+linkedSkills:
+  - engines.analysis.cashflow
+  - engines.quant.altman
+  - engines.quant.beneish
+  - engines.quant.accruals
+  - engines.scan.quality
 source:
   type: manual_skill
   format: markdown

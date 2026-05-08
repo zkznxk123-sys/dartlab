@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "포트폴리오 가중 (equal / inv_vol / risk_parity) 명시 없이 결과 비교 금지."
+  - "리밸런싱 주기 (monthly / quarterly) 명시 없이 누적수익률 인용 금지."
+failureModes:
+  - "포트폴리오 종목 수 (5 vs 30) 별 분산효과 차이 무시"
+  - "거래비용 / 슬리피지 미반영"
+  - "inv_vol / risk_parity 의 vol 추정 윈도우 (60D vs 252D) 차이"
+  - "리밸런싱 빈도와 거래비용 trade-off 미언급"
+  - "백테스트 기간이 한 가지 시장국면 (강세장 only) 으로 편향"
+examples:
+  - "5 종목 동일가중 포트폴리오 백테스트"
+  - "inverse-volatility 가중 포트폴리오"
+  - "risk-parity 가중 multi-asset"
+  - "월별 리밸런싱 효과"
+linkedSkills:
+  - engines.quant
+  - engines.quant.allocation
+  - engines.quant.riskparity
+  - engines.quant.backtest
 source:
   type: manual_skill
   format: markdown

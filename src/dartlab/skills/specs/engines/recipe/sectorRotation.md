@@ -35,6 +35,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 macro 사이클 시계열 일부 한정
+forbidden:
+  - 매크로 사이클 (확장 / 둔화 / 수축) 단계 명시 없이 섹터 단정 금지.
+  - 사이클별 유망 섹터 (확장 → 경기민감 / 둔화 → 방어주) 단순 적용 금지 — KR 시장 reproducibility.
+  - 섹터 횡단 스캔 결과 평균만 보고 섹터 단정 금지 — 분포 (편차) 동반.
+  - 단일 매크로 변수 (금리만) 기반 섹터 결정 금지 — 4 축 (cycle / 금리 / 환율 / 위기) 결합.
+failureModes:
+  - 사이클 phase 식별의 시점 (확장 / 둔화 경계) 모호
+  - KRX 산업 분류와 실제 섹터 동질성 차이
+  - 섹터 평균과 시총가중 (대형주 편향) 차이
+  - 외국 시장 (미국 sector rotation) 결과를 KR 에 동일 적용
+  - 사이클 식별 lag (3M / 6M) 무시한 즉시 결정"
+examples:
+  - KR 매크로 사이클 + 섹터 후보
+  - 사이클 phase + 섹터 횡단 스캔
+  - 미국 sector rotation 적합성 검증
+  - 섹터 + 산업 sub-segment 분리
 lastUpdated: '2026-05-07'
 ---
 

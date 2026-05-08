@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "Amihud 비유동성 한 지표만으로 시장 충격 비용 단정 금지."
+  - "Roll 스프레드의 가정 (자기상관 음수) 위배 시점 명시 없이 인용 금지."
+failureModes:
+  - "거래량 / 거래대금 일별 변동 무시 (event 직후 급증 등)"
+  - "intraday vs daily 빈도별 유동성 지표 차이"
+  - "Roll 스프레드의 음의 자기상관 가정이 KR 시장에서 깨지는 시기"
+  - "회전율 (turnover) 의 시총 (size) 의존성 무시"
+  - "ETF / 인덱스 편입 효과로 유동성 급변"
+examples:
+  - "삼성전자 Amihud 비유동성"
+  - "Roll 스프레드 시계열"
+  - "회전율 + 거래대금 결합"
+  - "size bucket 별 유동성 분포"
+linkedSkills:
+  - engines.quant
+  - engines.scan.liquidity
+  - engines.quant.volume
+  - engines.quant.flow
 source:
   type: manual_skill
   format: markdown

@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - account snake_id 임의 추측 금지 — scanAccountList 또는 normalizeColumn 으로 정확 매칭.
+  - 단일 계정 (매출액 만) 으로 비율 추정 금지 — 비율은 ratio axis.
+failureModes:
+  - snake_id 추측 (revenue vs sales vs total_revenue 혼용)
+  - freq (Q/Y) 명시 없이 결과 인용
+  - 산업별 정상 매출 규모 차이 무시
+  - 결손 분기 (재무제표 미공시) 처리 미명시
+examples:
+  - 매출액 시계열 횡단
+  - 영업이익 분기별
+  - 산업별 평균 매출 대비
+  - snake_id 정확 매칭 (normalizeColumn)
+linkedSkills:
+  - engines.scan.ratio
+  - engines.scan.fields
+  - engines.analysis
 source:
   type: manual_skill
   format: markdown

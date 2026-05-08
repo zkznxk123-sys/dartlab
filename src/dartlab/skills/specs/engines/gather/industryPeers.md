@@ -52,6 +52,24 @@ forbidden:
   - "API 키 / 인증정보 답변 노출 금지."
   - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
   - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - "KRX 산업 분류 외의 임의 peer 그룹 (시총 유사 등) 을 industryPeers 결과로 혼용 금지."
+  - "peer list 의 일부 종목만 골라 cherry-picking 금지 — 전체 또는 명시적 필터 기준."
+failureModes:
+  - "KRX 산업 분류와 실제 사업 동질성 차이 (지주사가 다른 산업 코드) 무시"
+  - "peer list 가 비어있을 때 (소형주 / 신규 상장) 일반 시장 평균을 peer 로 대체"
+  - "외국인 / 기관 보유 비중 차이 큰 peer 비교"
+  - "peer 의 회계연도 / 분기 결산일 차이 무시"
+  - "peer 산업 내 sub-segment (반도체 메모리 vs 비메모리) 무시한 단일 그룹화"
+examples:
+  - "삼성전자 KRX peer list"
+  - "동종업계 peer 후보로 비교분석 시작"
+  - "신한지주 금융지주 peer (KB · 하나 · 우리)"
+  - "peer 그룹의 산업 sub-segment 분리"
+linkedSkills:
+  - engines.gather
+  - engines.analysis.peerComparison
+  - engines.scan.profitability
+  - engines.industry
 source:
   type: manual_skill
   format: markdown

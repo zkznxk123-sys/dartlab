@@ -51,11 +51,30 @@ runtimeCompatibility:
     limitations:
       - 할인율, 금리, 시장가격 등 live macro/price 보강은 서버 환경에서 수행한다.
 failureModes:
-  - 할인율 근거 누락
-  - 단일 숫자 목표가 단정
+  - 할인율 (WACC · CoE · 무위험금리) 근거 ref 누락 → 답변에 출처 + 추정 모델 명시
+  - 단일 숫자 목표가 단정 → sensitivity 표 (할인율 ±1%p · 영구성장률 ±0.5%p) 동반
+  - 영구성장률 g 가 명목 GDP 초과 (수학적으로 비현실적)
+  - 베타 추정 기간 (3년 vs 5년 vs 10년) 미명시
+  - 사이클 회사 (반도체·정유) 의 정상화 이익 (normalized earnings) 미사용 시 cycle peak/trough 영향
+  - 적자 회사 + 신생 회사에 historical FCF 기반 DCF 적용
+  - 산업 평균 multiple 과 DCF 결과 교차 검증 누락
 forbidden:
-  - 출처 없는 할인율
-  - 민감도 없는 DCF 결론
+  - 출처 없는 할인율 / 영구성장률 답변 금지.
+  - 민감도 표 없이 단일 적정가 제시 금지.
+  - 단일 valuation 모델 (DCF only) 결과를 최종 결론으로 단정 금지 — DCF + multiples + RIM 교차.
+  - 적자 회사에 PER 기반 보정 없이 DCF 결과 단정 금지.
+examples:
+  - 삼성전자 Damodaran DCF (sensitivity 포함)
+  - WACC + 영구성장률 가정 변동 시 적정가 변화
+  - 산업 평균 multiple 과 DCF 결과 교차
+  - 사이클 회사 normalized FCF DCF
+  - 베타 추정 기간별 적정가 비교
+  - DCF + RIM + multiples 3 모델 교차
+linkedSkills:
+  - engines.analysis.valuation
+  - engines.analysis.valuationBand
+  - engines.quant.beta
+  - engines.macro.rates
 source:
   type: curated_markdown
   owner: dartlab

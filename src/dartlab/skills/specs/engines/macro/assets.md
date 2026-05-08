@@ -48,9 +48,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "기준일 / source 없는 매크로 숫자 인용 금지."
-  - "기업 재무 분석을 macro 로 대체하지 않는다."
-  - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - 기준일 / source 없는 매크로 숫자 인용 금지.
+  - 기업 재무 분석을 macro 로 대체하지 않는다.
+  - macro 결과를 analysis 내부 계산처럼 섞지 않는다.
+  - 5 대 자산 (주식·채권·원자재·통화·부동산) 분류 미명시 답변 금지.
+  - Cu/Au 비율 단일값으로 *경기 사이클* 단정 금지.
+failureModes:
+  - 5 대 자산의 시장 (KR vs US) 단위 혼용
+  - Cu/Au 비율의 cycle phase 별 의미 변화 무시
+  - BEI (breakeven inflation) 4 분면 (성장 vs 인플레) 단순 인과
+  - 자산 간 상관관계 동결 가정
+examples:
+  - 5 대 자산 동향
+  - Cu/Au 비율 cycle 분면
+  - BEI 4 분면 (성장·인플레)
+  - 자산 상관관계 변동
+linkedSkills:
+  - engines.macro
+  - engines.macro.summary
+  - engines.macro.sentiment
 source:
   type: manual_skill
   format: markdown

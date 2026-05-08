@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "in-sample 백테스트 결과를 out-of-sample 약속으로 제시 금지 — walk-forward / cpcv 동반."
+  - "look-ahead bias 점검 없이 점수 / verdict 노출 금지."
+failureModes:
+  - "데이터 스누핑 (data snooping) 으로 과적합된 룰"
+  - "거래비용 / 슬리피지 / 시장충격 미반영"
+  - "백테스트 기간이 단일 국면 (강세장 / 약세장 only) 편향"
+  - "리밸런싱 시점 (월말 close vs 월초 open) 정의 모호"
+  - "벤치마크 (KOSPI vs 동일가중 universe) 선택의 왜곡"
+examples:
+  - "스타일 (모멘텀) 백테스트"
+  - "Rule (CCI > 100) 백테스트"
+  - "cpcv 검증 + 결과 비교"
+  - "walk-forward 검증과 함께 백테스트"
+linkedSkills:
+  - engines.quant
+  - engines.quant.walkforward
+  - engines.quant.signalReview
+  - engines.quant.style
 source:
   type: manual_skill
   format: markdown

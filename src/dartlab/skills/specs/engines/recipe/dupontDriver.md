@@ -37,6 +37,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 다년 시계열 일부 한정
+forbidden:
+  - ROE 15% 단정 (좋다) 금지 — 5 동인 분포로 구조적 우위 vs 일시적 분리.
+  - 단일 동인 (예 — leverage 만 높음) 변동을 영구 우위로 단정 금지.
+  - 음수 영업이익 (적자) 회사에 본 framework 단순 적용 금지 — InterestBurden 무한대.
+  - 금융업 (은행 / 보험) 에 본 분해 그대로 적용 금지 — IS 구조 다름.
+failureModes:
+  - earnings_before_tax snakeId 가용성 차이로 InterestBurden 추정 실패
+  - 평균자산 (전년말 + 당년말 / 2) 보다 분기 가중평균이 정확
+  - 연결 vs 별도 회계 차이로 분해 결과 차이
+  - 일회성 손익으로 OperatingMargin 단발 변동
+  - 회계 기준 변경 (정책 자발적) 시점 영향 미보정
+examples:
+  - 삼성전자 5 년 ROE 5 동인 분해
+  - DuPont 동인 표준편차 큰 항목 식별
+  - 산업 평균 분해 + 회사 비교
+  - DuPont + working capital quality 결합
 lastUpdated: '2026-05-07'
 ---
 

@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 멀티팩터 spec 의 가중치 / 임계값 미명시 답변 금지.
+  - preset 결과를 *맞춤형* 으로 단정 금지.
+failureModes:
+  - preset (value · quality · momentum) 의 산업 분기 미적용
+  - spec filter 의 임계값을 산업별 통합 적용
+  - 시가총액 필터 없이 소형주 상단 점령
+  - 결손 종목 처리 미명시
+examples:
+  - value preset 상위
+  - quality preset 산업별
+  - 사용자 spec (filter list)
+  - 시총 1조 + ROE 15% 조건
+linkedSkills:
+  - engines.scan.fields
+  - engines.scan.crossSectionStockScreen
+  - engines.scan.profitability
 source:
   type: manual_skill
   format: markdown

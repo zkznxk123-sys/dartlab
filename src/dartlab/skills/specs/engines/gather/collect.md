@@ -52,6 +52,25 @@ forbidden:
   - "API 키 / 인증정보 답변 노출 금지."
   - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
   - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - "snapshot 의 일부 axis 결손 시 결손 axis 만 0/null 로 채우고 다른 axis 결과를 무시 금지."
+  - "병렬 수집 실패 axis 를 silent drop 하지 않는다 — 결과의 flags 에 명시."
+failureModes:
+  - "병렬 수집 중 일부 axis (예 — consensus / news) 실패 → 부분 결과만 보고 종합 판단"
+  - "snapshot 의 latestAsOf 가 axis 별로 다른데 단일 기준일로 인용"
+  - "캐시 hit 시 stale data (수일 전) 를 최신으로 오인"
+  - "provider 별 데이터 신선도 차이 (DART 분기 vs 가격 일별) 무시"
+  - "GatherSnapshot 의 모든 axis 가 항상 채워진다고 가정"
+examples:
+  - "삼성전자 한 번에 모든 데이터 수집"
+  - "신한지주 snapshot 매 분기 갱신"
+  - "하나의 호출로 6 막 분석 입력 준비"
+  - "snapshot 결손 axis 보강 (개별 gather 호출 추가)"
+linkedSkills:
+  - engines.gather
+  - engines.gather.price
+  - engines.gather.consensus
+  - engines.gather.flow
+  - engines.story.dartlabStory
 source:
   type: manual_skill
   format: markdown

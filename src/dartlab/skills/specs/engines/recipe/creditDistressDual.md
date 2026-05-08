@@ -37,6 +37,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 다년 시계열 일부 한정
+forbidden:
+  - Altman Z″ 단일 지표만으로 부도 위험 단정 금지 — Ohlson O 합의 동반.
+  - 1968 / 1980 미국 표본 thresholds 를 KR 시장에 그대로 적용 금지.
+  - 제조업 Z-Score 와 비제조업 Z″-Score 혼용 금지.
+  - 부도 확률 (probability) 점추정 단언 금지 — 신뢰구간 동반.
+failureModes:
+  - 산업 (제조업 / 비제조업 / 금융업) 별 모델 적합성 차이 무시
+  - 1980 미국 logit (Ohlson) thresholds 의 KR reproducibility
+  - 분기 vs 연간 데이터 빈도 차이"
+  - 회계 정책 변경 (정책 자발적) 시점 영향 미보정
+  - working capital 정의 (총 vs 영업) 차이
+examples:
+  - 삼성전자 Altman Z″ + Ohlson O 합의
+  - 비제조업 신용 위험 평가
+  - 2 모델 의견 일치 vs 불일치
+  - 부도 확률 + 신뢰구간
 lastUpdated: '2026-05-07'
 ---
 

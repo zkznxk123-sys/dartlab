@@ -48,9 +48,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "기준일 / source 없는 매크로 숫자 인용 금지."
-  - "기업 재무 분석을 macro 로 대체하지 않는다."
-  - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - 기준일 / source 없는 매크로 숫자 인용 금지.
+  - 기업 재무 분석을 macro 로 대체하지 않는다.
+  - macro 결과를 analysis 내부 계산처럼 섞지 않는다.
+  - M2 vs 광의 통화 (M3 / L) 혼용 금지.
+  - 연준 B/S (자산총액) 변동의 *QE/QT* 단순 인과 단정 금지.
+failureModes:
+  - 유동성 측정 지표 (M2 · 연준 B/S · NFCI · FCI) 동시 보고 단일 인과
+  - 한국 vs 미국 유동성 indicator 단위 혼동
+  - NFCI 중립값 (0) 과 *유동성 부족* 단순 인과
+  - 유동성 lag (정책 → 시장) 무시
+examples:
+  - M2 + 연준 B/S 추세
+  - NFCI 시장 유동성
+  - FCI (KR vs US)
+  - QE/QT 사이클
+linkedSkills:
+  - engines.macro
+  - engines.macro.crisis
+  - engines.macro.rates
 source:
   type: manual_skill
   format: markdown

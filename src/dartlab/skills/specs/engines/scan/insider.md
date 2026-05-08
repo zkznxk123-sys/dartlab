@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 임원 거래를 매수=긍정 / 매도=부정 단순 신호 금지.
+  - 자사주 보유와 임원 개인 거래 혼동 금지.
+failureModes:
+  - 최대주주 지분 변동 시점과 회사 사건 단순 인과 추정
+  - 자사주 (회사 보유) vs 임원 개인 거래 분리 누락
+  - 단일 매도 사건을 추세로 단정
+  - 경영권 안정성 (최대주주 + 특수관계인) 미명시
+examples:
+  - 최대주주 지분 변동 추세
+  - 자사주 + 임원 거래 분리
+  - 경영권 안정성
+  - 임원 매수 vs 매도 패턴
+linkedSkills:
+  - engines.analysis.governance
+  - engines.scan.governance
+  - engines.gather.insiderTrading
 source:
   type: manual_skill
   format: markdown

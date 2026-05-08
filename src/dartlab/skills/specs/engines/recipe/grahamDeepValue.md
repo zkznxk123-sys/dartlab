@@ -39,6 +39,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 scanAccount 5 기간 시계열 일부 한정
+forbidden:
+  - PBR ≤ 1 한 게이트만으로 가치 매력 단정 금지 — 4 게이트 + 5 년 흑자 동반.
+  - chaebol discount 의 안전마진 trap 회피 누락 금지 — 지주사 / 자회사 평가 분리.
+  - Graham 1949 미국 표본 thresholds 를 KR 시장에 그대로 적용 금지.
+  - 회계상 청산가치 (PBR) 와 실제 청산가치의 차이 무시 금지.
+failureModes:
+  - 한국 지주사 (holding) 의 PBR 디스카운트 + 자회사 가치 합산 차이
+  - Current Ratio 의 산업 (금융업 vs 제조업) 적합성 차이
+  - 5 년 흑자 후처리의 사이클성 종목 부적합
+  - 유동자산 - 부채 (NCAV) 음수일 때 deep value 정의 모호
+  - 자기자본 비중 게이트의 산업별 정상 수준 차이
+examples:
+  - KR 시장 Graham deep value 후보
+  - PBR ≤ 1 + 유동성 + 저레버리지
+  - 5 년 흑자 + 안전마진
+  - chaebol discount 회피 검증
 lastUpdated: '2026-05-07'
 ---
 

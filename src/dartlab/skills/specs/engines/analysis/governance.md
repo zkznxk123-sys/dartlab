@@ -50,9 +50,29 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - 최대주주 지분율만으로 *지배구조 양호* 단정 금지 — 사외이사·감사·소액주주 함께.
+  - 그룹사 (지주) 의 출자 사슬 무시 금지.
+failureModes:
+  - 최대주주 지분율 (절대값) 만 보고 *경영권 안정* 단정
+  - 사외이사 비율 (전체 이사 대비) 의 산업 평균 미참조
+  - 감사위원회 독립성 (사외이사 비율) 누락
+  - 그룹 출자 구조 (계열 출자 사슬) 미시각화
+  - 소액주주 분산도 (지분 5% 이상 외 비중) 누락
+  - 보수 (CEO/CFO 보수) 비중을 산업 평균 대비 비교 누락
+examples:
+  - 삼성전자 지배구조
+  - 최대주주 지분 + 사외이사 + 감사
+  - 그룹 출자 사슬 (지주 → 자회사)
+  - 소액주주 분산도
+  - CEO 보수 산업 평균 대비
+linkedSkills:
+  - engines.analysis.governanceAudit
+  - engines.scan.governance
+  - engines.scan.insider
+  - engines.gather.ownership
 source:
   type: manual_skill
   format: markdown

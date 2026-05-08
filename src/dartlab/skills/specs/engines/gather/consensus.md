@@ -49,9 +49,30 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "API 키 / 인증정보 답변 노출 금지."
-  - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
-  - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - API 키 / 인증정보 답변 노출 금지.
+  - provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다.
+  - 원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story.
+  - 컨센서스 수치를 *예측* 이 아닌 *현재 데이터* 로 오해 금지 — 애널리스트 추정치임 명시.
+  - 애널리스트 수 (n=) 명시 없이 컨센서스 단정 금지.
+failureModes:
+  - 컨센서스 갱신 시점 (보고서 발간일) 과 회사 실적 발표 시점 차이 무시
+  - 애널리스트 수 부족 (n < 5) 인데 컨센서스 신뢰성 인용
+  - 매출 컨센서스 (revenue_consensus) 와 영업이익 / 순이익 컨센서스 혼동
+  - 외화 매출 회사의 원화 vs USD 컨센서스 단위 혼용
+  - 보수적 / 공격적 추정 분포 (median vs mean) 미명시
+  - 직전 분기 실적 발표 후 컨센서스 미갱신 가능성
+examples:
+  - 삼성전자 매출 컨센서스
+  - 영업이익 컨센서스 + 애널리스트 수
+  - 컨센서스 vs 실적 차이 (서프라이즈)
+  - 컨센서스 갱신 추세 (revision)
+  - median vs mean 분포
+  - 매출 / 영업이익 / 순이익 분리
+linkedSkills:
+  - engines.gather.revenueConsensus
+  - engines.analysis.revenueForecast
+  - engines.analysis.predictionSignal
+  - engines.quant.surprise
 source:
   type: manual_skill
   format: markdown

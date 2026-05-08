@@ -7,8 +7,12 @@ status: unverified
 category: engines
 purpose: 한 기업을 경제, 섹터, 기업, 재무, 가치 신호의 연결로 검토한다.
 whenToUse:
-  - 특정 기업의 종합 분석
-  - 수익성, 안정성, 성장성, 경쟁력 판단
+  - 기업 종합 분석
+  - 6 막 인과
+  - 경제→섹터→기업→재무→가치
+  - 수익성 안정성 성장성
+  - 경쟁력 평가
+  - thesis 작성
 inputs:
   - 기업명 또는 종목코드
 outputs:
@@ -61,13 +65,30 @@ runtimeCompatibility:
     limitations:
       - live gather, 외부 macro API, OAuth ask는 브라우저 CORS/인증 제약으로 제외한다.
 failureModes:
-  - 단일 수치로 종합 판단
-  - 업황/섹터 맥락 없이 강한 경쟁력 판단
+  - 단일 수치 (ROE 만 또는 PER 만) 로 6 막 종합 판단 — 경제·섹터·기업·재무·가치·전망 모두 묶어야
+  - 업황/섹터 맥락 없이 경쟁력 판단 — engines.industry · engines.scan 결과와 연결 필수
+  - 같은 기간 정렬 무시 — analysis · scan · macro 결과 period 일치 확인
+  - 산업 분기 무시한 통합 평가 (제조 vs 금융 vs 바이오 차이)
+  - thesis 와 risk 의 *대척점* 제시 누락 — 균형감 결여
+  - 데이터 부재 항목을 *빈 자리* 로 둠 — limits 에 명시 필요
 forbidden:
-  - 근거 없는 투자판단
-  - 숫자 없는 재무 판단
+  - 근거 없는 투자판단 금지.
+  - 숫자 없는 재무 판단 금지.
+  - 6 막 중 일부만 보고 "종합" 단정 금지 — 모든 막의 evidence 또는 limits 명시.
+  - 산업 분기 무시한 peer 비교 금지.
 examples:
-  - 삼성전자 수익성 분석해줘
+  - 삼성전자 6 막 종합 분석
+  - 신한지주 (금융사) 6 막 — BIS·NIM·LCR 산업 분기
+  - 사이클 회사 (반도체) 의 cycle phase + 인과
+  - 신생 회사 (상장 2 년 미만) 6 막 한계 명시
+  - thesis vs risk 대척 (균형 평가)
+linkedSkills:
+  - engines.story
+  - engines.story.dartlabStory
+  - engines.analysis
+  - engines.macro
+  - engines.industry
+  - engines.scan
 source:
   type: curated_markdown
   owner: dartlab

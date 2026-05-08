@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "Markowitz MV 의 입력 (기대수익률 / 공분산) 추정 윈도우 명시 없이 결과 인용 금지."
+  - "기대수익률 추정 (sample mean) 의 노이즈를 MV 의 진짜 결과로 단정 금지."
+failureModes:
+  - "expected return 의 sample mean 추정 noise (노이즈) 가 corner-solution 야기"
+  - "공분산 행렬 추정 윈도우 (60D / 252D) 의존성"
+  - "constraint (long-only / weight cap) 명시 없이 결과 비교"
+  - "리밸런싱 빈도 변경 시 turnover 폭증"
+  - "전체 MV optimal 이 in-sample 과적합인 경우"
+examples:
+  - "5 종목 MV 최적화 weight"
+  - "constraint long-only + cap 30% MV"
+  - "shrinkage 적용 MV"
+  - "MV vs ERC vs equal-weight"
+linkedSkills:
+  - engines.quant
+  - engines.quant.allocation
+  - engines.quant.riskparity
+  - engines.quant.multi
 source:
   type: manual_skill
   format: markdown

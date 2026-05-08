@@ -7,16 +7,19 @@ status: observed
 category: engines
 purpose: "scan 엔진의 profitability 축 응용 — 영업이익률/순이익률/ROE/ROA + 등급."
 whenToUse:
-  - "scan"
-  - "profitability"
-  - "수익성"
-  - "영업이익률/순이익률/ROE/ROA + 등급"
+  - 수익성 스캔
+  - profitability 스크리닝
+  - 영업이익률 횡단
+  - ROE 랭킹
+  - 전종목 수익성 비교
+  - peer 그룹 수익성
 inputs:
-  - "축 이름 (axis)"
+  - 축 이름 (axis="profitability")
+  - 산업 필터 (선택)
 outputs:
-  - "DataFrame (전종목 횡단)"
-  - "evidence refs"
-  - "한계와 가정"
+  - DataFrame (전종목 횡단 — stockCode · metrics · grade)
+  - evidence refs (universe · datasetAsOf · filter · formula)
+  - 한계와 가정
 capabilityRefs:
   - "scan"
 knowledgeRefs:
@@ -48,9 +51,29 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지 (후보 → analysis 로 검증).
+  - 산업 분기 무시한 통합 랭킹 금지 (제조 vs 금융 ROE 직접 비교).
+  - 결손 종목 (재무제표 미공시) 을 0 으로 채워 랭킹 하단 배치 금지.
+failureModes:
+  - 산업별 정상 ROE 차이 무시 (제조 8% / 금융 7% / IT 12% / 바이오 음수) — 통합 랭킹은 산업 분기 후
+  - prebuild parquet stale (datasetAsOf 3 분기+ 전) — checkFreshness 권장
+  - 등급 (grade A-F) 임계값 산업별 미적용
+  - 시가총액 필터 없이 전종목 (ROE 100%+ 의 소형주가 상단 점령)
+  - 결손 종목 처리 — null 그대로 둘지 제외할지 명시 안 함
+examples:
+  - 전종목 ROE 상위 50
+  - 반도체 산업 수익성 랭킹
+  - 금융주 제외 영업이익률 횡단
+  - 시가총액 1조 이상 ROA 상위
+  - 분기 vs 연 ROE 변화
+  - 산업 평균 대비 위치 (peer 그룹)
+linkedSkills:
+  - engines.analysis.profitability
+  - engines.scan.quality
+  - engines.scan.valuation
+  - engines.industry
 source:
   type: manual_skill
   format: markdown

@@ -39,6 +39,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 valuation snapshot prebuild 의존, refresh=True 호출 불가
+forbidden:
+  - GP/A 한 지표만으로 quality 단정 금지 — value (PER / PBR) 결합.
+  - Novy-Marx 2013 미국 결과를 KR 시장 동일 가정으로 인용 금지.
+  - chaebol discount 트랩 회피 (지주사 분리) 누락 시 결과 단정 금지.
+  - PBR ≤ 1 가치주 선별 결과를 자동 매수 추천으로 단정 금지.
+failureModes:
+  - GP/A 분모 (총자산 vs 영업자산) 정의 모호
+  - 한국 지주사 (holding) 의 PBR 디스카운트로 false positive
+  - 산업별 정상 GP/A 분포 차이 무시
+  - 일회성 손익 (M&A) 의 GP 영향 미보정
+  - quality + value 결합 가중치 (50:50) 임의 선택
+examples:
+  - KR quality value 후보
+  - Novy-Marx GP/A + 가치 결합
+  - chaebol discount 회피 + 우량
+  - quality + value + distress 필터
 lastUpdated: '2026-05-07'
 ---
 

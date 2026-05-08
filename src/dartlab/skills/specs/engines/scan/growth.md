@@ -48,9 +48,31 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 6 종 성장 패턴 분류 (Acceleration / Steady / Deceleration / Cyclical / Recovery / Decline) 명시 없이 *고성장* 단정 금지.
+  - 단일 분기 YoY 로 성장 단정 금지 — 4 분기 평균 또는 CAGR 권장.
+  - 사이클 회사의 cycle peak/trough 영향 미고려 금지.
+failureModes:
+  - 신생 회사 (상장 2 년 미만) 의 5 년 CAGR 계산 시도 — 표본 부족
+  - M&A 효과 (인수 후 연결 재무제표 변화) 를 유기적 성장으로 오인
+  - 외화 매출 회사 환율 변동 영향 미분리
+  - 분기 매출 spike 를 구조적 성장으로 오해
+  - base effect (전년 동기 일회성) 미보정
+  - 산업 평균 성장률 미참조 — 절대 CAGR 만으로 *고성장* 단정
+examples:
+  - 매출 5 년 CAGR 상위 50
+  - 영업이익 가속 (Acceleration 패턴) 종목
+  - 산업 평균 성장률 대비 위치
+  - 사이클 회사 성장 패턴 분류
+  - YoY vs CAGR 시계열 비교
+  - 신생 회사 단기 성장률
+linkedSkills:
+  - engines.analysis.growth
+  - engines.analysis.revenueForecast
+  - engines.analysis.predictionSignal
+  - engines.scan.profitability
 source:
   type: manual_skill
   format: markdown

@@ -55,6 +55,25 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "스크리너 결과 상위 종목을 곧바로 매수 추천으로 제시 금지 — 정성 검토 + 분석 파이프라인 후속 필수."
+  - "스타일 (가치 / 모멘텀 / 퀄리티 / 저변동) 명시 없이 단일 시장 평균 비교 금지."
+failureModes:
+  - "단일 팩터 (PER 만 / PBR 만) 스크리닝의 가치함정 (value trap)"
+  - "외국 시장 발견된 팩터를 KR 시장에 그대로 적용"
+  - "스크리닝 universe (전종목 vs KOSPI200) 차이로 결과 변동"
+  - "팩터 정의 (사용자 가치 vs Fama-French) 차이 미명시"
+  - "리밸런싱 주기와 turnover (회전율 / 거래비용) 무시"
+examples:
+  - "가치 팩터 스크리닝 (PBR + ROE 결합)"
+  - "모멘텀 12-1 팩터 상위 50 종목"
+  - "저변동성 (vol min) + 퀄리티 결합"
+  - "스크리너 결과 + 정성 검토 권장"
+linkedSkills:
+  - engines.quant
+  - engines.quant.factor
+  - engines.scan.screen
+  - engines.quant.value
+  - engines.quant.quality
 source:
   type: manual_skill
   format: markdown

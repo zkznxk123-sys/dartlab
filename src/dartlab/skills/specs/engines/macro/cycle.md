@@ -48,9 +48,28 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "기준일 / source 없는 매크로 숫자 인용 금지."
-  - "기업 재무 분석을 macro 로 대체하지 않는다."
-  - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - 기준일 / source 없는 매크로 숫자 인용 금지.
+  - 기업 재무 분석을 macro 로 대체하지 않는다.
+  - macro 결과를 analysis 내부 계산처럼 섞지 않는다.
+  - 4 국면 (확장 · 정점 · 수축 · 저점) 자동 식별 결과를 *예측* 으로 단정 금지 — 회고적 신호.
+  - 단일 지표 (CLI 만) 로 사이클 단정 금지 — quadrant 종합.
+failureModes:
+  - cycle 4 국면 전환 시점 (lag) 무시 — 전환 6~12 개월 후 확인 가능
+  - quadrant 결과 (예: 확장 후반) 와 자산배분 시사점 연결 누락
+  - 사이클 회사 (반도체·정유) 의 *기업 사이클* 과 *경제 사이클* 혼동
+  - KR cycle 과 US cycle decoupling 가능성 무시
+  - cycle 시작/끝 정의 (NBER vs ECRI vs Cleveland Fed) 차이
+examples:
+  - 한국 경제 사이클 4 국면
+  - quadrant + 자산배분 시사점
+  - KR vs US cycle decoupling
+  - cycle peak 신호 점검
+  - 사이클 회사 (반도체) 와 경제 사이클 분리
+linkedSkills:
+  - engines.macro
+  - engines.macro.summary
+  - engines.macro.forecast
+  - engines.analysis.macroSensitivity
 source:
   type: manual_skill
   format: markdown

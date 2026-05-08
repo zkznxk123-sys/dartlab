@@ -72,15 +72,29 @@ runtimeCompatibility:
     limitations:
       - 공시 당일 신규 주주환원 이벤트는 live filings가 가능한 서버 경로에서 보강한다.
 failureModes:
-  - 배당수익률만 보고 매력 단정
-  - 이익과 현금흐름 지속 가능성 확인 누락
-  - 일회성 자사주 매입을 반복 정책으로 단정
+  - 배당수익률만 보고 매력 단정 — payout ratio + FCF 커버리지 동반
+  - 이익과 현금흐름 지속 가능성 확인 누락 — 분모를 EPS vs FCF 차이 명시
+  - 일회성 자사주 매입을 반복 정책으로 단정 — 5 년 시계열로 추세 확인
+  - 자사주 *매입* (treasury) vs *소각* (cancel) 차이 무시 — 소각만 EPS 영구 제거
+  - 배당락 주가 영향 미반영 — adjusted vs raw 가격 명시
+  - 외국인 보유 비중 변화에 따른 배당 압력 미고려
 forbidden:
-  - 근거 없는 배당 지속 가능성 단정
-  - 주가 기준일 없는 배당수익률 판단
+  - 근거 없는 배당 지속 가능성 단정 금지.
+  - 주가 기준일 없는 배당수익률 판단 금지.
+  - 배당성향 (payout ratio) 분모 (EPS vs FCF) 미명시 금지.
+  - 자사주 매입 vs 소각 동치 처리 금지.
 examples:
-  - 배당 매력 분석해줘
-  - 주주환원 정책 지속 가능한지 봐줘
+  - 삼성전자 주주환원 정책
+  - 배당성향 + 배당수익률 + 자사주 환원율
+  - 산업 평균 환원율 대비
+  - 자사주 매입 vs 소각 영향
+  - 5 년 환원 추세 + FCF 커버리지
+linkedSkills:
+  - engines.analysis.capitalAllocation
+  - engines.analysis.cashflow
+  - engines.analysis.profitability
+  - engines.scan.capital
+  - engines.scan.dividendTrend
 source:
   type: manual_skill
   format: markdown

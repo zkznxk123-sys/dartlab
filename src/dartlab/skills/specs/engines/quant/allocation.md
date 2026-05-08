@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "ERC (Equal Risk Contribution) 가중치 산정 윈도우 (60D vs 252D) 명시 없이 인용 금지."
+  - "covariance matrix shrinkage 방법 (ledoit-wolf 등) 명시 없이 결과 비교 금지."
+failureModes:
+  - "covariance matrix 추정 윈도우 의존성 무시"
+  - "변동성 / 상관관계 시계열 변화 (regime shift) 미반영"
+  - "ERC 결과를 절대 최적 배분으로 단정 — 입력 가정 의존 결과"
+  - "리밸런싱 빈도와 turnover trade-off 무시"
+  - "거래비용 / 시장충격 미반영"
+examples:
+  - "5 종목 ERC 가중 (Maillard)"
+  - "ERC 가중 + 월별 리밸런싱"
+  - "covariance shrinkage 적용 ERC"
+  - "ERC vs equal-weight 비교"
+linkedSkills:
+  - engines.quant
+  - engines.quant.multi
+  - engines.quant.riskparity
+  - engines.quant.meanvar
 source:
   type: manual_skill
   format: markdown

@@ -7,16 +7,28 @@ status: observed
 category: engines
 purpose: "analysis 엔진의 가치평가 축 응용 — 이 회사의 적정 가치는 얼마인가."
 whenToUse:
-  - "analysis"
-  - "가치평가"
-  - "이 회사의 적정 가치는 얼마인가"
+  - 가치평가
+  - valuation
+  - 적정가
+  - 목표가
+  - DCF
+  - DDM
+  - RIM
+  - PER
+  - PBR
+  - PSR
+  - 멀티플
+  - 적정 시가총액
+  - relative value
 inputs:
-  - "Company 또는 종목코드"
-  - "기준 기간"
+  - Company 또는 종목코드
+  - 기준 기간
+  - 할인율 / 성장률 가정 (overrides)
 outputs:
-  - "축별 dict"
-  - "evidence refs"
-  - "한계와 가정"
+  - 축별 dict (valuationSummary · targetPrice · relativeValue · dcf · ddm · rim · sensitivity)
+  - evidence refs
+  - 가정 표 (할인율 · 성장률 · 베타 · 영구성장률)
+  - 민감도 표
 capabilityRefs:
   - "analysis"
   - "Company.analysis"
@@ -50,9 +62,32 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - DCF 할인율·성장률·영구성장률 가정 ref 없이 적정가 단정 금지.
+  - 산업별 멀티플 차이 무시 금지 (제조 PER 평균 vs 금융 PBR 평균 vs 바이오 PSR 평균).
+  - 단일 멀티플 (PER) 만으로 적정가 결론 금지 — DCF + 멀티플 + RIM 교차 검증.
+failureModes:
+  - 가정 (할인율 · 성장률) ref 없이 DCF 결과 인용
+  - peer 멀티플 비교 시 같은 산업 분기 미적용 (제조사 vs 금융사 PER 단순 비교)
+  - 바이오/플랫폼 같은 적자 회사에 PER 적용 (PSR 또는 EV/Sales 권장)
+  - 지주회사에 단일 회사 DCF 적용 (NAV 기반 SOTP 권장)
+  - 영구성장률 g 가 명목 GDP 성장률 초과 (수학적으로 비현실적)
+  - sensitivity 표 없이 단일 적정가 — 가정 한 변수 흔들림에 취약
+examples:
+  - 삼성전자 적정 가치 산출
+  - DCF 가치평가 + 민감도
+  - PER PBR 멀티플 비교
+  - 산업 평균 PER 대비 위치
+  - 신한지주 PBR 기반 평가 (금융사 — PER 아님)
+  - 영구성장률 가정에 따른 적정가 변동
+linkedSkills:
+  - engines.quant.damodaranValuation
+  - engines.analysis.valuationBand
+  - engines.analysis.profitability
+  - engines.analysis.growth
+  - engines.scan.valuation
 source:
   type: manual_skill
   format: markdown

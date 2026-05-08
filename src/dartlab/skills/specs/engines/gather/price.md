@@ -49,9 +49,30 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "API 키 / 인증정보 답변 노출 금지."
-  - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
-  - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - API 키 / 인증정보 답변 노출 금지.
+  - provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다.
+  - 원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story.
+  - 시장 휴장일 / 미개장일을 일반 거래일로 잘못 인용 금지.
+  - 수정주가 (split adjusted) 와 raw 가격 혼용 금지.
+failureModes:
+  - 시장 미개장 시 (개장 전 또는 휴일) "오늘 종가" 답변 — 직전 거래일 명시 필요
+  - 시장 지수 (KOSPI · S&P500) 와 종목 가격 혼용
+  - market 자동 감지 실패 — 6 자리 코드 (KR) vs ticker (US) 명시
+  - indicators="basic" default 와 raw OHLCV 혼동
+  - 외국인 거래 데이터 (수급) 는 flow axis 별도 — price 에 포함 안 됨
+  - 빈 결과 (네트워크 오류 또는 종목 코드 오류) silent 처리 → ValueError 권장
+examples:
+  - 삼성전자 1년 OHLCV
+  - AAPL US 종가 + 모멘텀 지표
+  - KOSPI 시장 지수 추세
+  - 보조지표 30 종 자동 (indicators=True)
+  - 휴장일 처리 + 직전 거래일
+  - 수정주가 vs raw 비교
+linkedSkills:
+  - engines.gather.history
+  - engines.gather.flow
+  - engines.quant.signalReview
+  - engines.quant.momentum
 source:
   type: manual_skill
   format: markdown

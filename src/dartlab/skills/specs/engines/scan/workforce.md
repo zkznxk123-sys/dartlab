@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 직원수 / 평균급여 / 인건비율 분류 미명시 답변 금지.
+  - CEO/임원 보수와 평균 직원 보수 동치 처리 금지.
+failureModes:
+  - 산업별 정상 인건비율 차이 (IT 高 / 제조 中 / 자원 低) 무시
+  - 비정규직 비중 누락
+  - 1 인당 부가가치 분모 정의 미명시
+  - 고액보수 5 명 기준 산업별 차이 무시
+examples:
+  - 인건비율 상위 (인력 집약)
+  - 1 인당 부가가치 산업 평균 대비
+  - 평균 급여 + 직원수 추세
+  - CEO 보수 vs 평균 직원 보수
+linkedSkills:
+  - engines.analysis.costStructure
+  - engines.analysis.governance
+  - engines.scan.governance
 source:
   type: manual_skill
   format: markdown

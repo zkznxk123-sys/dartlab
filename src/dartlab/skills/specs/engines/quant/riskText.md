@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "리스크 팩터 텍스트 출현 / 소멸 한 신호로 가격 인과 단정 금지."
+  - "텍스트 분석 한국어 NLP 모델 / 사전 명시 없이 점수 인용 금지."
+failureModes:
+  - "리스크 팩터 정의 (정형 vs 비정형) 모호"
+  - "사업보고서 / 분기보고서 시점 갱신 차이"
+  - "한국어 NLP 의 도메인 어휘 (재무) 정확도 한계"
+  - "텍스트 길이 / 빈도 정규화 누락"
+  - "리스크 팩터 출현이 회사 의도 (defensive disclosure) 인지 실제 위험인지 구분 한계"
+examples:
+  - "삼성전자 리스크 팩터 시계열"
+  - "신규 리스크 출현 검출"
+  - "기존 리스크 소멸 검출"
+  - "텍스트 + 정량 지표 결합"
+linkedSkills:
+  - engines.quant
+  - engines.quant.toneChange
+  - engines.analysis.disclosureChange
+  - engines.gather.news
 source:
   type: manual_skill
   format: markdown

@@ -136,6 +136,12 @@ dartlab 내부 `ai.agent` 가 아니라 외부 LLM (Claude Code, Cursor, Codex, 
 
 `includeBody=True` 옵션은 `ReadSkill` 1 회 호출에 본문까지 동봉하는 fallback 경로 — 도구 호출이 어려운 환경 (workbench heuristic) 에서만 사용한다.
 
+### Chain hint — 다음 skill 자율 elevate
+
+`ReadSkill` 결과의 `data.skills[i].nextSkills` 는 *현재 skill 다음에 자연스러운 분석 흐름* 을 안내한다 (`linkedSkills` + `succeededBy` 합성, 최대 5 개). 단일 skill 호출에서 답변이 끊기지 않게 — 단일 회사 분석 후 → peer 비교 (`engines.scan.profitability`), 매크로 환경 (`engines.macro.cycle`), 신용 검증 (`engines.credit`) 등으로 자율 elevate 하는 경로의 데이터.
+
+예: `engines.analysis.profitability` 호출 후 `nextSkills` 는 `[engines.scan.profitability, engines.analysis.growth, engines.analysis.cashflow, engines.analysis.macroSensitivity]`. LLM 이 이 list 보고 추가 `ReadSkill` 또는 `GetSkillBody` 호출해 분석 폭 확장.
+
 ## skill `status` 의 의미
 
 | 상태 | 의미 | LLM 가이드 |

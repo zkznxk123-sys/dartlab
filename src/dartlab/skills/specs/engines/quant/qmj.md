@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "QMJ (Quality Minus Junk) 의 미국 표본 기준을 KR 시장 동일 가정으로 인용 금지."
+  - "Profitability + Safety 합성 점수의 가중치 명시 없이 결과 비교 금지."
+failureModes:
+  - "Profitability 분모 (자본 vs 자산) 정의 차이"
+  - "Safety 정의 (변동성 vs 베타 vs 부채) 모호"
+  - "산업별 정상 quality 분포 차이 무시"
+  - "size / liquidity 편향 (대형주 위주)"
+  - "QMJ 의 KR 시장 reproducibility 한계"
+examples:
+  - "QMJ 합성 랭킹 상위"
+  - "Profitability + Safety 결합"
+  - "산업별 QMJ 분포"
+  - "QMJ + Value 결합"
+linkedSkills:
+  - engines.quant
+  - engines.quant.quality
+  - engines.quant.factor
+  - engines.quant.style
 source:
   type: manual_skill
   format: markdown

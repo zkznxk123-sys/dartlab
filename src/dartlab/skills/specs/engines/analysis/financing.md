@@ -50,9 +50,27 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - 자기자본 / 단기차입 / 장기차입 / 사채 분류 미명시 답변 금지.
+  - 사채 만기 구조 (1년 내 vs 장기) 무시 금지.
+failureModes:
+  - 자기자본비율만 보고 안전 단정 — 만기 구조 (단기/장기) 미반영
+  - 사채 발행 금리 변화 (재조달 비용) 미고려
+  - 유상증자 vs 전환사채 vs 신주인수권부사채 영향 차이 무시 — 희석 효과 분리 필요
+  - 외화 차입 비중 (환율 변동 노출) 미언급
+  - 그룹사 (지주) 의 모회사 자금 지원 가능성 무시
+examples:
+  - 삼성전자 자금조달 구조
+  - 단기 vs 장기 차입 만기
+  - 사채 발행 금리 추세
+  - 유증 vs 전환사채 희석
+  - 외화 차입 환율 노출
+linkedSkills:
+  - engines.analysis.stability
+  - engines.scan.debt
+  - engines.credit
 source:
   type: manual_skill
   format: markdown

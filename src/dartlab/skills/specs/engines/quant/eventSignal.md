@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "이벤트 (M&A / 경영진 변경) 단일 신호로 가격 영향 단정 금지 — 시장 환경 + 기대 동반."
+  - "공시 발표 시점과 가격 반영 시점 차이 (intraday) 명시 없이 인용 금지."
+failureModes:
+  - "이벤트 발생 후 가격 반영 시차 (즉시 vs 며칠) 무시"
+  - "이벤트 자체의 분류 (긍정 / 부정 / 중립) 모호"
+  - "M&A / 분할 / 합병 효과 단순 동치 처리"
+  - "이벤트 직후 거래량 / 변동성 급증의 지속 가능성 무시"
+  - "Selection bias (높은 수익률 이벤트만 사후 선별)"
+examples:
+  - "삼성전자 경영진 변경 이벤트 신호"
+  - "M&A 발표 직후 가격 반응"
+  - "이벤트 + 공시 본문 분석"
+  - "이벤트 자체 + 매크로 환경 결합"
+linkedSkills:
+  - engines.quant
+  - engines.scan.disclosureRisk
+  - engines.analysis.disclosureChange
+  - engines.gather.news
 source:
   type: manual_skill
   format: markdown

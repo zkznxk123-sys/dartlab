@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "공적분 발견을 영구 관계로 단정 금지 — 구조 변화 시 재검증 필수."
+  - "spread mean reversion 가정의 시계열 조건 명시 없이 인용 금지."
+failureModes:
+  - "공적분 검정의 lookback 윈도우 (252D / 750D) 차이로 결과 변동"
+  - "산업 / 비즈니스 모델 변화 시 공적분 break"
+  - "spread half-life 추정 (Ornstein-Uhlenbeck) 의 가정 위배"
+  - "거래비용 / 슬리피지의 spread 수익 잠식"
+  - "선택 편향 (post-hoc cointegrated pairs only)"
+examples:
+  - "삼성전자 + SK하이닉스 페어"
+  - "은행지주 4 사 페어 후보"
+  - "spread mean-reversion 진단"
+  - "공적분 페어 발견 + 후속 검증"
+linkedSkills:
+  - engines.quant
+  - engines.quant.style
+  - engines.quant.signalReview
+  - engines.quant.regime
 source:
   type: manual_skill
   format: markdown

@@ -37,6 +37,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 다년 시계열 일부 한정
+forbidden:
+  - FCF 5 사용처 비중 명시 없이 자본배분 단정 금지.
+  - ROIIC 한 분기 결과로 영구 capital efficiency 단정 금지 — 5 년 시계열 동반.
+  - 자사주 매입 / 소각 동치 처리 금지 — 소각만 EPS 영구 제거.
+  - SGR 추정의 payoutRatio 정의 (배당 / 환원율) 명시 누락 금지.
+failureModes:
+  - FCF 정의 (OCF - CAPEX vs OCF - 총투자) 차이로 사용처 비중 변동
+  - ROIIC 분모 (NOPAT vs NI) 정의 모호
+  - 일회성 M&A / 자사주 큰 해의 비중 왜곡
+  - 산업별 정상 자본배분 (자본집약 vs 자본경량) 차이 무시
+  - 외환환산 / 헤지 효과 미보정
+examples:
+  - 삼성전자 FCF 5 사용처 5 년 비중
+  - ROIIC 시계열 (5Y)
+  - SGR + payoutRatio 결합
+  - capital allocation 점수카드
 lastUpdated: '2026-05-07'
 ---
 

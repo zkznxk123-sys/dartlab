@@ -52,9 +52,28 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "성과 보장 표현 금지."
-  - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
-  - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - 성과 보장 표현 금지.
+  - 기간 / benchmark / 가정 명시 없이 수익률 인용 금지.
+  - 정량 신호를 인과 분석 결론으로 제시 금지.
+  - 단일 lookback 기간 (3개월 또는 6개월) 모멘텀만으로 *추세* 단정 금지 — 다중 기간 cross-check.
+  - 거래량 약한 (ADTV 낮은) 종목의 모멘텀 신호 신뢰도 명시 없이 인용 금지.
+failureModes:
+  - 12-1 모멘텀 (academic) 과 단순 12 모멘텀 (산업) 혼동
+  - 벤치마크 (KOSPI · 섹터) 비교 (상대 모멘텀) 누락 — 시장 전체 추세와 분리 필요
+  - 사이클 회사의 cycle peak 모멘텀 = trough 시작 신호 가능성
+  - 거래량 spike 동반 안 한 모멘텀의 false signal
+  - 배당락 / 액면분할 영향 미보정
+examples:
+  - 삼성전자 12-1 모멘텀
+  - 다중 기간 (3개월·6개월·12개월) 비교
+  - 벤치마크 대비 상대 모멘텀
+  - 거래량 spike 동반 모멘텀
+  - 사이클 phase 별 모멘텀 해석
+linkedSkills:
+  - engines.quant.signalReview
+  - engines.quant.regime
+  - engines.quant.benchmark
+  - engines.gather.price
 source:
   type: manual_skill
   format: markdown

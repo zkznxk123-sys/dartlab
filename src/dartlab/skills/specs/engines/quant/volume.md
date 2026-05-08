@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "OBV 추세 한 지표만으로 매매 결정 단정 금지 — 가격 추세 동반."
+  - "거래량 / 가격 괴리 한 신호로 미래 가격 단정 금지."
+failureModes:
+  - "OBV (On-Balance Volume) 의 누적 시작점 의존성"
+  - "거래량 급증 (spike) 의 사후 매매 / 차익실현 구분 어려움"
+  - "ETF / 인덱스 편입 효과로 거래량 왜곡"
+  - "intraday vs daily 거래량 의미 차이"
+  - "거래량 - 가격 괴리의 시점 (1 일 lag) 별 결과 차이"
+examples:
+  - "삼성전자 OBV 추세"
+  - "거래량 - 가격 괴리 시계열"
+  - "누적분배선 (A/D) 추적"
+  - "거래량 + 모멘텀 결합"
+linkedSkills:
+  - engines.quant
+  - engines.quant.liquidity
+  - engines.quant.flow
+  - engines.quant.indicators
 source:
   type: manual_skill
   format: markdown

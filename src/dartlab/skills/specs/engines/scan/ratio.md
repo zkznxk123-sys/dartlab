@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 비율 정의 (분자/분모) 미명시 답변 금지.
+  - 산업별 비율 차이 무시한 통합 랭킹 금지.
+failureModes:
+  - ratioName 추측 (roe vs roa vs roic 혼용)
+  - 비율 분모 정의 차이 (평균 vs 기말) 미명시
+  - 산업 평균 비율 미참조
+  - 적자 회사 ROE 음수를 절대값 랭킹으로 처리
+examples:
+  - ROE 상위 50
+  - 부채비율 + ICR 교차
+  - 산업 평균 ROE 대비
+  - ratioName 정확 검색 (scanRatioList)
+linkedSkills:
+  - engines.scan.fields
+  - engines.scan.account
+  - engines.analysis
 source:
   type: manual_skill
   format: markdown

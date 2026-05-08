@@ -51,6 +51,24 @@ forbidden:
   - "기준일 / source 없는 매크로 숫자 인용 금지."
   - "기업 재무 분석을 macro 로 대체하지 않는다."
   - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - "Credit-to-GDP gap 한 지표로 위기 임박 단정 금지 — Minsky + GHS 동반 신호 필요."
+  - "역사적 위기 (1997 / 2008) 와 현 환경의 제도 / 정책 차이 무시 금지."
+failureModes:
+  - "역사적 위기 사례를 단순 비교로 반복 가능성 단정"
+  - "Credit-to-GDP gap 의 BIS 표준 thresholds (10% / 2%) 와 KR 특수성 차이 무시"
+  - "GHS (글로벌 헤지펀드 신호) 의 KR 시장 적용 적합성 미명시"
+  - "Minsky 모멘트 (안정 → 투기 → 폰지) 단계 명시 없이 단정"
+  - "위기 신호와 실제 발생 시점 간 시차 (12~24 개월) 미고려"
+examples:
+  - "KR 시장 Credit-to-GDP gap 추이"
+  - "Minsky 모멘트 단계 평가"
+  - "1997 외환위기 vs 현 시점 비교 (제도 차이 명시)"
+  - "GHS 시장 위험 신호"
+linkedSkills:
+  - engines.macro
+  - engines.macro.scenario
+  - engines.macro.cycle
+  - engines.macro.summary
 source:
   type: manual_skill
   format: markdown

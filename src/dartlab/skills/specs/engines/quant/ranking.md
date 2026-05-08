@@ -52,9 +52,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "성과 보장 표현 금지."
-  - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
-  - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - 성과 보장 표현 금지.
+  - 기간 / benchmark / 가정 명시 없이 수익률 인용 금지.
+  - 정량 신호를 인과 분석 결론으로 제시 금지.
+  - universe (전종목 vs 산업 한정) 명시 없이 랭킹 답변 금지.
+  - 결손 종목 처리 (skip vs flag) 미명시 금지.
+failureModes:
+  - 산업 평균 차이 무시한 통합 랭킹
+  - 시가총액 필터 없이 소형주 상단 점령
+  - 결손 종목을 0 으로 채워 하단 배치
+  - 분기 vs 연 신호 혼용
+examples:
+  - 모멘텀 랭킹 상위 50
+  - 산업별 분기 랭킹
+  - 시총 1조 + 모멘텀 상위
+  - 멀티팩터 종합 랭킹
+linkedSkills:
+  - engines.quant.factor
+  - engines.quant.screen
+  - engines.scan.profitability
 source:
   type: manual_skill
   format: markdown

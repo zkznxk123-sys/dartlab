@@ -49,9 +49,30 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "API 키 / 인증정보 답변 노출 금지."
-  - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
-  - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - API 키 / 인증정보 답변 노출 금지.
+  - provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다.
+  - 원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story.
+  - 시장 (KR/US) 자동 감지 무시 — 지표 코드 오류 시 명시적 market 인자 사용.
+  - HF SSOT 갱신 시점 (월/분기) 미명시 *최신* 단정 금지.
+failureModes:
+  - 지표 코드 (CPI, FEDFUNDS) 의 시장 자동 감지 실패 시 ValueError
+  - HF 카탈로그 외 지표 호출 — apiKey 명시 필요
+  - 분기 vs 월 vs 일 주기 혼용 — period 명시 필요
+  - 한국 KR macro 와 US macro 동시 표시 시 단위 혼용 (% vs bp 등)
+  - 명목 vs 실질 (CPI 보정) 혼용
+  - HF 데이터 최신성 (월말 갱신) 에 vs 직접 API (일 갱신) 차이
+examples:
+  - KR 거시지표 전체 (CPI · 기준금리 · USDKRW)
+  - US 거시지표 전체 (GDP · CPI · FEDFUNDS)
+  - 단일 지표 시계열 (CPI YoY)
+  - KR vs US 같은 지표 비교
+  - 명목 vs 실질
+  - HF SSOT vs 직접 API
+linkedSkills:
+  - engines.macro
+  - engines.macro.cycle
+  - engines.macro.summary
+  - engines.analysis.macroSensitivity
 source:
   type: manual_skill
   format: markdown

@@ -50,9 +50,27 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - BS = IS = CF 정합성 깨졌는데 *정상* 으로 답변 금지 — 의심 신호.
+  - 정합성 차이 (몇 % 미만) 임계값 미명시 답변 금지.
+failureModes:
+  - BS 자산총계 = 부채+자본 정합성 1% 이상 어긋날 때 회계 변경/오류 가능성 무시
+  - 분기 NI (손익계산서) ↔ CF 첫 항목 (영업현금흐름 시작점) 일치 검증 누락
+  - 별도 vs 연결 혼용으로 정합성 깨지는 경우 — scope 통일 후 재계산
+  - K-IFRS 와 US GAAP 차이 (회계 기준 변경) 미반영
+  - 비정상 정합성 차이를 *반올림* 으로 단정 — 1% 이상은 의심
+examples:
+  - 삼성전자 BS = IS = CF 정합성
+  - 정합성 차이 임계값 (1%)
+  - 회계 변경 시 정합성 변동
+  - 별도 vs 연결 정합성 차이
+  - 분식 의심 패턴 (정합성 + accrual 결합)
+linkedSkills:
+  - engines.analysis.earningsQuality
+  - engines.analysis.cashflow
+  - engines.quant.beneish
 source:
   type: manual_skill
   format: markdown

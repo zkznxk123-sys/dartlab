@@ -35,6 +35,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 flow KR 전용
+forbidden:
+  - 수급 한 방향 (외인 매수) 단일 신호로 매수 단정 금지 — 패턴 / 모멘텀 동반.
+  - 단기 entry / exit 신호를 장기 투자 추천으로 오인 금지.
+  - 수급 데이터 (외인 / 기관) 의 보고 시점 (T+1) 명시 없이 실시간으로 인용 금지.
+  - 단일 종목 수급 결과를 시장 전체 추세로 단정 금지.
+failureModes:
+  - 프로그램 매매 / 차익거래 / 자기자본 매매 분리 누락
+  - 외국인 비중 변화의 인덱스 리밸런싱 영향 미반영
+  - 차트 패턴의 false positive (사후 매칭) 위험
+  - 모멘텀 신호의 short-term reversal 효과 무시
+  - 단기 수급 + 장기 fundamental 혼동
+examples:
+  - 삼성전자 수급 + 패턴 + 모멘텀
+  - 단기 entry 보조 신호
+  - 수급 + 차트 패턴 결합
+  - 외인 매수 + 모멘텀 결합
 lastUpdated: '2026-05-07'
 ---
 

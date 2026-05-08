@@ -52,6 +52,24 @@ forbidden:
   - "API 키 / 인증정보 답변 노출 금지."
   - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
   - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - "컨센서스 mean 한 값으로 점추정 단정 금지 — high/low spread + 추정기관 수 동반."
+  - "consensus 와 실적 차이 (surprise) 를 자동 신호로 단정 금지 — 일회성 / 가이던스 차이 구분."
+failureModes:
+  - "추정기관 수 (2 곳 vs 20 곳) 와 신뢰도 차이 무시"
+  - "컨센서스 추정 시점 (실적발표 후 vs 분기 중) 미구분"
+  - "high/low spread 가 큰 (편차 30%+) 종목의 mean 인용"
+  - "회계 기준 변경 / 사업부 매각 후 컨센서스 재산정 미반영"
+  - "한국 회계 vs 글로벌 분석가 추정 (USD 기준) 환율 차이 미보정"
+examples:
+  - "삼성전자 매출 컨센서스 시계열"
+  - "분기별 매출 surprise 추적"
+  - "consensus 분산 (편차) 큰 종목 식별"
+  - "실적발표 후 consensus 재조정 폭"
+linkedSkills:
+  - engines.gather
+  - engines.gather.consensus
+  - engines.analysis.revenueForecast
+  - engines.analysis.growth
 source:
   type: manual_skill
   format: markdown

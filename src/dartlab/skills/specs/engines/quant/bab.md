@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "BAB (Betting Against Beta) 의 레버리지 가정 미명시로 수익률 인용 금지."
+  - "252 일 beta 가 미래 beta 와 일치한다고 가정 금지."
+failureModes:
+  - "beta 추정 윈도우 (60D / 252D / 750D) 별 결과 차이 무시"
+  - "산업 / 시총별 정상 beta 분포 차이 무시"
+  - "낮은 beta 종목의 size / liquidity 편향"
+  - "BAB 의 long/short 양방향 거래비용 미반영"
+  - "60 일 realized vol 보조 지표의 수렴 속도 차이"
+examples:
+  - "KR 시장 BAB 저베타 랭킹"
+  - "저베타 + 저변동성 결합"
+  - "KOSPI200 내 BAB 적용"
+  - "BAB 의 leverage 가정 명시"
+linkedSkills:
+  - engines.quant
+  - engines.quant.beta
+  - engines.quant.factor
+  - engines.quant.style
 source:
   type: manual_skill
   format: markdown

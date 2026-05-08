@@ -38,6 +38,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 다년 시계열 + 가격 snapshot 일부 한정
+forbidden:
+  - 3 anchor (Graham / EVA / CFROI) 중 1~2 만 합의해도 fair value 단정 금지 — 3 anchor 일관 시 band claim.
+  - WACC / 자본비용 가정 명시 없이 EVA spread 단정 금지.
+  - CFROI proxy 정의 (FCF / Invested Capital) 차이 명시 없이 인용 금지.
+  - 단일 anchor 결과를 본질가치 점추정 금지 — 범위 (3 anchor band).
+failureModes:
+  - Graham 수정공식 (1974 Y10 + 4.4) 의 KR 시장 적합성 차이
+  - EVA 의 WACC 추정 (CAPM 기반) 가정 의존성
+  - CFROI 의 inflation 보정 누락 시 결과 왜곡
+  - 3 anchor 의 가정 (성장률 / 자본비용) 차이로 band 폭 큼
+  - 시점 (분기말 vs 연말) 별 회계 정보 차이
+examples:
+  - 삼성전자 3 anchor 본질가치 band
+  - Graham + EVA + CFROI 결합
+  - 시장가 vs 본질가치 band 비교
+  - 3 anchor 합의 시 fair value claim
 lastUpdated: '2026-05-07'
 ---
 

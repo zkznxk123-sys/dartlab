@@ -35,6 +35,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 historic 시계열 일부 한정
+forbidden:
+  - valuation band 의 역사 평균 윈도우 (3Y vs 10Y) 명시 없이 위치 단정 금지.
+  - 단일 multiple (PER 만) 결과로 valuation 단정 금지 — 다지표 결합.
+  - 시장 환경 변화 (금리 / 유동성) 미반영한 역사 mean 비교 금지.
+  - band ±σ 위치만으로 매수 / 매도 자동 단정 금지.
+failureModes:
+  - 역사 평균 윈도우 시작점 (코로나 / 금융위기 포함 여부) 의 영향
+  - 분기 vs 연간 multiple 빈도 차이로 변동성 차이"
+  - mean reversion 가정의 KR 시장 적합성 차이"
+  - 산업 구조 변화 (사업 전환) 시 mean 의미 변동
+  - peer band 와 회사 band 의 산업 동질성 차이
+examples:
+  - 삼성전자 PER 5Y band
+  - PBR + EV/EBITDA + ±σ 위치
+  - 시장 환경 + band 결합
+  - 회사 band + peer band 비교
 lastUpdated: '2026-05-07'
 ---
 

@@ -50,9 +50,27 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - 자산회전율 / 재고회전 / 매출채권 회전 분류 미명시 답변 금지.
+  - 산업 평균 회전율 미참조 — 절대값만으로 *효율적* 단정 금지.
+failureModes:
+  - 산업별 정상 회전율 차이 무시 — 제조 (재고 高) vs 서비스 (재고 0) vs 금융 (자산회전 매우 낮음)
+  - 재고회전 분모를 매출 vs 매출원가 혼용
+  - DSO (매출채권 회수일) 계산식 명시 누락
+  - 운전자본 사이클 (CCC = DSO + DIO - DPO) 부분만 보고 종합 판단
+  - 일회성 자산 매각 영향 미보정
+examples:
+  - 삼성전자 자산회전율
+  - 재고회전 + DSO + DPO (CCC)
+  - 산업 평균 회전율 대비
+  - 운전자본 사이클 추세
+  - 자산 효율성 산업 비교
+linkedSkills:
+  - engines.analysis.assetStructure
+  - engines.analysis.cashflow
+  - engines.scan.efficiency
 source:
   type: manual_skill
   format: markdown

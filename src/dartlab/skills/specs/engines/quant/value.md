@@ -52,9 +52,26 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "성과 보장 표현 금지."
-  - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
-  - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - 성과 보장 표현 금지.
+  - 기간 / benchmark / 가정 명시 없이 수익률 인용 금지.
+  - 정량 신호를 인과 분석 결론으로 제시 금지.
+  - 단일 멀티플 (PER 만) 로 *value* 단정 금지 — PER · PBR · PSR · EV/EBITDA 종합.
+  - 사이클 회사 cycle peak PER 낮음 = *value trap* 가능성 명시.
+failureModes:
+  - 적자 회사 PER null 처리 누락
+  - 산업별 정상 멀티플 차이 무시
+  - cycle peak PER trap 위험 미언급
+  - PER trailing vs forward 혼용
+examples:
+  - 삼성전자 value score
+  - 다중 멀티플 종합
+  - 산업 평균 멀티플 대비
+  - cycle peak PER trap 점검
+linkedSkills:
+  - engines.quant.qmj
+  - engines.analysis.valuation
+  - engines.analysis.valuationBand
+  - engines.scan.valuation
 source:
   type: manual_skill
   format: markdown

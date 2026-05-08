@@ -49,9 +49,26 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 회귀 추정 기간 미명시 답변 금지.
+  - p-value 낮은 베타를 결론에 사용 금지.
+failureModes:
+  - 사이클 회사의 cycle phase 별 베타 변동 무시
+  - GDP / 금리 / 환율 베타 동시 보고 단일 인과 단정
+  - 산업별 매크로 노출 차이 무시
+  - 회귀 표본 부족 시 베타 추정
+examples:
+  - GDP 베타 상위 (사이클 노출)
+  - 금리 베타 (NIM 노출 금융주)
+  - 환율 베타 (수출 비중)
+  - 회귀 5y vs 10y 비교
+linkedSkills:
+  - engines.analysis.macroSensitivity
+  - engines.macro
+  - engines.macro.cycle
+  - engines.quant.beta
 source:
   type: manual_skill
   format: markdown

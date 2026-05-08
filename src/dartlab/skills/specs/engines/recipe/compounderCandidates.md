@@ -39,6 +39,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 freq="Y" 5 기간 시계열 일부 한정
+forbidden:
+  - 단년도 고-ROE 로 compounder 단정 금지 — 5 년 일관성 + 표준편차 작음 동반.
+  - 매출 역성장 1 회로 compounder 자격 박탈 단정 금지 — 사이클성 / 일회성 구분.
+  - ROE 평균만 보고 표준편차 (사이클 무관) 점검 누락 금지.
+  - 매출 / 마진 시계열 결손 분기 0 채워서 평균 단정 금지.
+failureModes:
+  - 5 년 윈도우의 시작점 (2020 코로나 vs 2019) 별 결과 차이
+  - 사업부 개편 / 분할로 인한 역사 연속성 단절
+  - 산업별 정상 ROE / 마진 분포 차이 (대형주 vs 중소형주)
+  - 일회성 M&A / 매각으로 ROE 단발 변동
+  - 회계 정책 변경 시점 영향 미보정
+examples:
+  - KR 시장 5 년 일관 compounder 후보"
+  - ROE >= 15% + 표준편차 작은 종목"
+  - 매출 안정 성장 + 고-margin
+  - compounder + valuation 결합
 lastUpdated: '2026-05-07'
 ---
 

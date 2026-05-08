@@ -58,12 +58,28 @@ runtimeCompatibility:
       - 여러 종목 parquet를 브라우저 메모리에 올리므로 대상 수를 작게 유지한다.
       - live market/macro 보강은 서버 환경에서만 한다.
 failureModes:
-  - partial comparison
-  - 서로 다른 기간/metric 혼합
+  - partial comparison — peer 그룹 일부만 보고 우열 단정
+  - 서로 다른 기간/metric 혼합 — 같은 분기 / 같은 통화 / 같은 scope (연결 vs 별도)
+  - peer 산업 분기 무시 — 같은 industryHint 그룹 한정 권장
+  - 일회성 손익 (M&A · 매각) 영향 미보정 → 정상화 (normalized) 후 비교
+  - 외환 매출 비중 다른 회사 비교 시 환율 영향 미분리
+  - 시가총액 격차 큰 (1조 vs 10조) 회사 비교 — 같은 size bucket 권장
 forbidden:
-  - 한쪽 수치만으로 우열 단정
+  - 한쪽 수치만으로 우열 단정 금지.
+  - peer 산업 분기 무시한 cross-industry 비교 금지.
+  - 같은 기간 / 같은 scope / 같은 통화 정렬 없이 답변 금지.
 examples:
-  - 삼성전자와 SK하이닉스 경쟁력 비교
+  - 삼성전자 vs SK하이닉스 (같은 산업)
+  - 신한 KB 하나 우리 (4 대 금융지주)
+  - 시가총액 같은 bucket 비교
+  - 일회성 손익 정상화 후 비교
+  - 외화 매출 비중 다른 회사 환율 영향 분리
+linkedSkills:
+  - engines.analysis.profitability
+  - engines.analysis.growth
+  - engines.analysis.valuation
+  - engines.scan
+  - engines.industry
 source:
   type: curated_markdown
   owner: dartlab

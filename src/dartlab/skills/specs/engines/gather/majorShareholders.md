@@ -52,6 +52,24 @@ forbidden:
   - "API 키 / 인증정보 답변 노출 금지."
   - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
   - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - "주요주주 (5% 룰) list 의 보고 기준일 (filing date) 명시 없이 현 시점 지분율로 인용 금지."
+  - "특수관계자 묶음 지분 (오너 + 가족 + 재단) 을 단일 주주 지분으로 단순 합산 금지."
+failureModes:
+  - "5% 보고 면제 (외인 펀드 익명 등) 영향 무시"
+  - "최근 변동 (5% → 4.99%) 보고 의무 해제로 추세 단절"
+  - "특수관계자 그룹 정의 (직계 / 친인척 / 재단 / 계열사) 모호"
+  - "차명 주식 / 의결권 위임 (위임장 대결권) 미반영"
+  - "분기말 vs 사업보고서 vs 5% 보고 시점 차이"
+examples:
+  - "삼성전자 5% 이상 주요주주 list"
+  - "오너 일가 합산 지분"
+  - "외국계 펀드 보유 5% 이상"
+  - "특수관계자 그룹별 지분율"
+linkedSkills:
+  - engines.gather
+  - engines.gather.ownership
+  - engines.gather.insiderTrading
+  - engines.analysis.governance
 source:
   type: manual_skill
   format: markdown

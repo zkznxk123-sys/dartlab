@@ -52,9 +52,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "성과 보장 표현 금지."
-  - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
-  - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - 성과 보장 표현 금지.
+  - 기간 / benchmark / 가정 명시 없이 수익률 인용 금지.
+  - 정량 신호를 인과 분석 결론으로 제시 금지.
+  - 지표 30+ 종 중 임의 선택 금지 — 분석 의도에 맞는 그룹 (모멘텀/추세/변동성) 선택.
+  - 같은 지표 다른 lookback (RSI 14 vs RSI 7) 혼용 금지.
+failureModes:
+  - lookback 기간 (RSI 14 / MACD 26-12-9) 변경 시 신호 변동 무시
+  - 거래량 보조 지표 (OBV · MFI) 누락
+  - 지표 간 multicollinearity (RSI + Stochastic) 무시
+  - 거래량 약한 종목의 지표 신뢰도 미명시
+examples:
+  - 삼성전자 30+ 지표
+  - 모멘텀 그룹 (RSI · MACD · ROC)
+  - 변동성 그룹 (ATR · 볼린저 · standard deviation)
+  - 거래량 그룹 (OBV · MFI)
+linkedSkills:
+  - engines.quant.signalReview
+  - engines.quant.verdict
+  - engines.quant.momentum
 source:
   type: manual_skill
   format: markdown

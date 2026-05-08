@@ -68,6 +68,7 @@ lastUpdated: "2026-05-07"
 - 새 내용이 여러 엔진을 조합하는 분석 절차면 curated skill 후보로 둔다.
 - 새 내용이 테스트, 릴리즈, 문서, UI, 데이터 같은 운영 규칙이면 operation skill로 둔다.
 - 프로젝트별 실험은 `.dartlab/skills/**/*.md` user skill로 시작한다.
+- 신규 분석 skill 을 자율 발굴·검증으로 만드는 사이클은 [operation.skillIncubator](/skills/operation.skillIncubator) 가 SSOT (gapSpot → protoSkill → selfRun → redTeam → graduate). 본 skill 은 graduate 단계의 *승격 규칙* 만 정의한다.
 - official 승격은 구조 lint, 서버 audit P, 사용자 확인이 모두 있을 때만 허용한다.
 - 승격 후에도 SkillSpec은 schema를 복사하지 않고 capabilityRefs와 sourceRefs로 원천을 연결한다.
 

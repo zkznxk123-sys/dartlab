@@ -36,6 +36,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 macro 시계열 일부 한정
+forbidden:
+  - 금리 한 변수만으로 매크로 사이클 단정 금지 — 4 축 (금리 + 환율 + 유동성 + 위기) 결합.
+  - 미국 금리와 KR 금리 시차 / 디커플링 무시 금지.
+  - 위기 신호 (Credit-to-GDP / Minsky) 한 지표로 위기 임박 단정 금지.
+  - 매크로 사이클 결과를 자동 자산배분 결정으로 단정 금지.
+failureModes:
+  - 금리 (정책 vs 시장 vs 회사 조달) 별 단계 차이
+  - 환율 (USDKRW vs DXY) 의 글로벌 / 양자 차이
+  - 유동성 (M2 vs 본원통화) 정의 차이
+  - 매크로 변수 간 상관 (금리 ↑ → 환율) 무시한 단순 인과
+  - 시점 (월 / 분기) 빈도 차이로 사이클 식별 변동
+examples:
+  - KR 매크로 유동성 사이클 진단
+  - 금리 + 환율 + 유동성 + 위기 4 축
+  - 미국 vs KR 사이클 디커플링
+  - 사이클 위치 + 자산 영향 (참고용)
 lastUpdated: '2026-05-07'
 ---
 

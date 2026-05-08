@@ -37,6 +37,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 forecast scenario 가정 grid 일부 한정
+forbidden:
+  - 시나리오 가정 (성장률 / 마진 / 매크로) 명시 없이 base / bull / bear 단정 금지.
+  - 단일 시나리오 (예 — base) 결과를 점추정 fair value 로 단정 금지.
+  - 시장 regime (HMM 2-state) 결과를 미래 regime 예측으로 단정 금지.
+  - 매크로 시나리오 (1997 / 2008) 직접 비교를 반복 가능성으로 단정 금지.
+failureModes:
+  - 시나리오 확률 (base 50% / bull 30% / bear 20%) 임의 부여
+  - 매크로 시나리오 (146 프리셋) 임의 선택
+  - regime 추정의 학습 윈도우 의존성"
+  - 회사 forecast 와 매크로 시나리오 일관성 누락
+  - 시나리오 결과 분포의 신뢰구간 미명시
+examples:
+  - 삼성전자 base / bull / bear 시나리오
+  - 매크로 (금리 인상) + 회사 forecast
+  - regime + 시나리오 결합
+  - 시나리오 + valuation band
 lastUpdated: '2026-05-07'
 ---
 

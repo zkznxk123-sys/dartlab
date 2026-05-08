@@ -50,9 +50,29 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - ROIC 분모 (투자자본) 정의 (영업자산 vs 순영업자산 vs IC) 미명시 금지.
+  - WACC 가정 ref 없이 ROIC - WACC 스프레드 단정 금지.
+failureModes:
+  - ROIC 분모 정의 차이 (영업자산 vs 순영업자산) 미명시
+  - NOPAT 계산 시 세율 (실효세율 vs 명목세율) 미명시
+  - 일회성 자산 손상 (impairment) 영향으로 ROIC 일시 왜곡
+  - 신생 회사 (capex 미흡수) 의 ROIC 음수를 단정으로 오해
+  - WACC 추정 베타 기간 (3년/5년) 미명시
+  - 영업권 포함/제외 (asset 분모) 회사간 차이 무시
+examples:
+  - 삼성전자 ROIC vs WACC 스프레드
+  - 5 년 ROIC 추세
+  - 산업 평균 ROIC 대비
+  - 영업권 포함 vs 제외 비교
+  - capex 사이클과 ROIC 변동
+linkedSkills:
+  - engines.analysis.profitability
+  - engines.analysis.capitalAllocation
+  - engines.analysis.valuation
+  - engines.quant.damodaranValuation
 source:
   type: manual_skill
   format: markdown

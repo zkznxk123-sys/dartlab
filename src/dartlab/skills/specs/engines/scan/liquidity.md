@@ -48,9 +48,28 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 금융사 (은행·보험) 에 일반 유동비율 적용 금지 — LCR · NSFR 별도 지표.
+  - 유동비율 단일 metric 으로 단정 금지 — 당좌비율 + 사채만기 교차.
+failureModes:
+  - 산업별 정상 유동비율 차이 무시 (제조 150~200% / 서비스 100~150%)
+  - 재고 비중 큰 회사의 유동비율이 *과대평가* — 당좌비율 (재고 제외) 함께
+  - 단기 차입금 만기 구조 무시
+  - 1 년 내 만기 사채 비중을 본 위험 신호 미반영
+  - 운전자본 동결 (매출채권 회수 지연) 영향 미고려
+examples:
+  - 단기 지급능력 하위 50 (위험 의심)
+  - 당좌비율 100% 미만 회사
+  - 산업 평균 유동비율 대비 위치
+  - 단기차입금 의존도 + 사채 만기
+  - 운전자본 회수 사이클
+linkedSkills:
+  - engines.analysis.stability
+  - engines.analysis.cashflow
+  - engines.credit
+  - engines.scan.cashflow
 source:
   type: manual_skill
   format: markdown

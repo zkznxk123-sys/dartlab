@@ -35,6 +35,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 dividend topic 단일 호출만
+forbidden:
+  - 배당수익률 (dividend yield) 단일 지표만으로 매력도 단정 금지 — payout + FCF 커버리지 동반.
+  - 배당성향 (payout ratio) 분모 (EPS vs FCF) 명시 없이 단정 금지.
+  - 자사주 매입 vs 소각 동치 처리 금지 — 소각만 EPS 영구 제거.
+  - 단년도 배당으로 지속 가능성 단정 금지 — 5 년 시계열 동반.
+failureModes:
+  - 배당수익률 산정의 주가 기준일 모호 (당일 vs 평균)
+  - 일회성 자사주 매입을 반복 정책으로 단정
+  - 외환 매출 비중 큰 회사의 환율 영향 + 배당 정책 미반영
+  - 외국인 보유 비중 변화에 따른 배당 압력 미고려
+  - 분기 배당 vs 연 배당 빈도 차이 무시
+examples:
+  - 삼성전자 배당 thesis (3 축)
+  - 배당수익률 + payout + FCF
+  - 자사주 매입 / 소각 영향 분리
+  - 5 년 환원 추세 + 지속 가능성
 lastUpdated: '2026-05-07'
 ---
 

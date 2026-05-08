@@ -50,9 +50,27 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - 단일 신호로 *상승/하락* 단정 금지 — 5+ 신호 종합 권장.
+  - 신호 정확도 (hit ratio) 명시 없이 *신뢰성* 단정 금지.
+failureModes:
+  - 단일 분기 신호로 향후 추세 단정 — 백테스트 기간 / hit ratio 동반
+  - 신호 분포 상관성 (multicollinearity) 미고려 — 비슷한 신호 5 개 = 1 개와 동등
+  - 사이클 phase 별 신호 의미 변화 무시
+  - lookback 기간 미명시 (3 분기 vs 4 분기) — 신호 강도 변동 가능
+  - in-sample vs out-of-sample 분리 누락
+examples:
+  - 삼성전자 예측 신호 종합
+  - 신호 5+ 분포 + hit ratio
+  - 사이클 phase 별 신호 해석
+  - in-sample vs out-of-sample 검증
+  - 신호 multicollinearity 점검
+linkedSkills:
+  - engines.analysis.revenueForecast
+  - engines.analysis.growth
+  - engines.quant.surprise
 source:
   type: manual_skill
   format: markdown

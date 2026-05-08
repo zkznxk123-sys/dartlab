@@ -49,9 +49,26 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 부채비율 단일 metric 으로 *위험* 단정 금지 — ICR + OCF/부채 교차.
+  - 사채 1 년 만기 비중 무시 금지.
+failureModes:
+  - 부채비율 산업별 차이 (제조 100~200% / 금융 1000%+) 무시
+  - ICR 음수 종목 일시적/구조적 구분 누락
+  - 외화 사채 비중 (환율 노출) 미반영
+  - 그룹사 보증 효과 미고려
+examples:
+  - 부채비율 + ICR 위험
+  - 사채 1 년 만기 비중
+  - 외화 차입 환율 노출
+  - 산업 평균 ICR 대비
+linkedSkills:
+  - engines.analysis.stability
+  - engines.analysis.financing
+  - engines.credit
+  - engines.scan.liquidity
 source:
   type: manual_skill
   format: markdown

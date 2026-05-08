@@ -38,6 +38,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 freq="Y" 5 기간 시계열 일부 한정
+forbidden:
+  - F-Score 9 항목 중 7 항목 사용 결과를 풀-Piotroski 결과로 단정 금지 — 학술 근사.
+  - 가치주 universe (BM 상위 quintile) 외에 F-Score 적용 단정 금지 — 가치주 한정.
+  - F-Score 단일 점수만으로 매수 추천 단정 금지.
+  - 1976-1996 미국 표본 thresholds 를 KR 시장 동일 적용 금지.
+failureModes:
+  - 9 항목 중 2 항목 (CFO 부호 / 외부자금조달) 누락 시 score 분포 변동
+  - F-Score 의 산업 (제조업 vs 서비스업) 적용성 차이
+  - 가치주 universe 정의 (PBR 상위 quintile vs 하위) 임의 선택
+  - 시계열 (4Q / 8Q) 빈도 차이로 점수 변동
+  - 일회성 손익 (M&A / 매각) 의 항목별 영향 미보정
+examples:
+  - KR 가치주 F-Score 7 항목
+  - F-Score 5+ 우량 가치주 후보
+  - 가치주 + F-Score + 매수
+  - F-Score + Piotroski 사후 검토
 lastUpdated: '2026-05-07'
 ---
 

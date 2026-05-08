@@ -8,8 +8,15 @@ category: engines
 purpose: 영업현금흐름, 투자, 재무활동, 이익의 현금 전환을 점검한다.
 whenToUse:
   - 현금흐름 분석
+  - OCF
+  - 영업현금흐름
+  - 잉여현금흐름
+  - FCF
+  - 운전자본
+  - 이익품질
+  - capex
   - 이익은 나는데 현금이 부족한지
-  - FCF와 운전자본 변화
+  - 현금 사이클
 inputs:
   - 기업명 또는 종목코드
 outputs:
@@ -61,15 +68,31 @@ runtimeCompatibility:
     limitations:
       - 세부 운전자본 주석이 없는 snapshot에서는 원인 판단을 제한한다.
 failureModes:
-  - 순이익만 보고 현금흐름 판단
-  - 투자현금흐름 지출을 모두 부정적으로 단정
-  - 일회성 운전자본 변동을 구조 변화로 단정
+  - 순이익만 보고 현금흐름 판단 — OCF/NI 비율 (이익품질) 검증 필요
+  - OCF 음수만 보고 부실 단정 — 성장형 capex (투자 +) 와 재무 위기 (재무 -) 패턴 분리
+  - 투자현금흐름 지출을 모두 부정적으로 단정 — capex/매출 비율로 산업 평균 대비 판단
+  - 일회성 운전자본 변동을 구조 변화로 단정 — 분기 적어도 4 개 이상 시계열 확인
+  - FCF 정의 차이 미명시 (OCF - capex vs OCF - capex - 인수합병)
+  - 분기 OCF 와 연 OCF 혼용 — period 표기 명시
+  - 운전자본 항목 (재고·매출채권·매입채무) 변동 원인 미분석
 forbidden:
-  - CF 표 없이 현금 창출력 단정
-  - 결손값을 0으로 대체
+  - CF 표 없이 현금 창출력 단정 금지
+  - 결손값 0 대체 금지 — 결손 분기는 skip 또는 flag
+  - OCF 정의 (간접법 vs 직접법) 미명시 답변 금지
+  - 투자/재무 활동 부호를 임의 해석 금지 — 회사가 명시한 부호 그대로
 examples:
-  - 삼양식품 현금흐름 분석해줘
-  - 이익의 질이 좋은지 현금흐름으로 봐줘
+  - 삼성전자 현금흐름 분석
+  - OCF vs 순이익 차이 (이익품질)
+  - capex 사이클과 FCF 추세
+  - 운전자본 증가 원인 (재고 vs 매출채권)
+  - 성장형 capex vs 재무 위기 패턴 구분
+  - 분기별 FCF 시계열
+linkedSkills:
+  - engines.analysis.earningsQuality
+  - engines.analysis.capitalAllocation
+  - engines.analysis.investmentEfficiency
+  - engines.scan.cashflow
+  - engines.credit
 source:
   type: curated_markdown
   owner: dartlab

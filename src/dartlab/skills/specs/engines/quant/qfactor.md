@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "Hou-Xue-Zhang q-factor 미국 표본 결과를 KR 시장 동일 가정으로 인용 금지."
+  - "ROE + (-assetGrowth) 합성 가중치 명시 없이 결과 비교 금지."
+failureModes:
+  - "ROE 의 분모 (평균자본 vs 기말자본) 차이로 점수 변동"
+  - "assetGrowth 정의 (총자산 vs 영업자산) 모호"
+  - "q-factor 의 KR 시장 reproducibility 차이"
+  - "합성 가중치 (50:50) 임의 선택"
+  - "산업별 정상 ROE / assetGrowth 분포 차이 무시"
+examples:
+  - "q-factor 합성 랭킹 상위"
+  - "ROE + (-assetGrowth) 결합"
+  - "산업별 q-factor 분포"
+  - "q-factor + value 결합"
+linkedSkills:
+  - engines.quant
+  - engines.quant.factor
+  - engines.quant.quality
+  - engines.quant.style
 source:
   type: manual_skill
   format: markdown

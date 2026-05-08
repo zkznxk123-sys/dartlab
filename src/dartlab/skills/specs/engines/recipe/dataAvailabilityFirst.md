@@ -33,6 +33,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 update() 호출 제약
+forbidden:
+  - 분석 시작 후 데이터 누락 발견하고 추측으로 메우기 금지 — 시작 전 점검.
+  - 결손 데이터 (None) 0 으로 채워서 분석 진행 금지.
+  - 데이터 가용성 점검 결과 명시 없이 분석 결과 단정 금지.
+  - InspectDataset 결과의 schema 확인 누락 금지.
+failureModes:
+  - 가용 토픽 list 만 보고 실제 데이터 결손 무시"
+  - schema 변경 (snakeId 매핑) 시점 차이로 mapping 실패
+  - update() / gather() 후 새 데이터 캐시 hit 못함
+  - 일부 분기 결손 (DART late filing) 무시"
+  - 데이터 가용성 점검 결과를 분석 본문에 누락
+examples:
+  - 분석 시작 전 토픽 / schema 점검
+  - 결손 데이터 발견 시 gather 트리거
+  - InspectDataset + schema 검증
+  - 데이터 점검 → 분석 → 결과
 lastUpdated: '2026-05-07'
 ---
 

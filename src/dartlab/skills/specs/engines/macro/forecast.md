@@ -51,6 +51,24 @@ forbidden:
   - "기준일 / source 없는 매크로 숫자 인용 금지."
   - "기업 재무 분석을 macro 로 대체하지 않는다."
   - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - "침체확률 한 모델 (Cleveland Fed) 결과를 다른 모델 (Sahm / GaR) 검증 없이 인용 금지."
+  - "LEI / Sahm 등 미국 지표를 KR 시장에 그대로 적용 금지 — KR composite leading index 분리."
+failureModes:
+  - "LEI 의 산업 구성 차이 (미국 vs 한국) 미반영"
+  - "Sahm 룰 (실업률 3 개월 평균 - 12 개월 최저) 의 KR 적용 적합성 미명시"
+  - "Hamilton RS (Regime Switching) 의 학습 기간 의존성 무시"
+  - "GaR (Growth-at-Risk) 분포 추정의 신뢰구간 미언급"
+  - "예측 모델 간 시그널 충돌 시 단일 모델 선택 사유 없음"
+examples:
+  - "Cleveland Fed 침체확률 추이"
+  - "Sahm 룰 + KR 실업률 적용"
+  - "LEI 6 개월 변화율 + 침체 신호"
+  - "GaR 5% 분위 충격 시나리오"
+linkedSkills:
+  - engines.macro
+  - engines.macro.cycle
+  - engines.macro.crisis
+  - engines.macro.summary
 source:
   type: manual_skill
   format: markdown

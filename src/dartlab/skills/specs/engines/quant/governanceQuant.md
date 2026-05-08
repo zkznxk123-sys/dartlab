@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "사외이사 비율 / 감사의견 단일 지표로 거버넌스 점수 단정 금지 — 다지표 결합."
+  - "거버넌스 정량 점수만으로 인과 (실적 / 가격) 단정 금지 — 정성 보고서 동반."
+failureModes:
+  - "사외이사 비율의 실효성 (독립성 vs 명목) 미반영"
+  - "감사의견 4 단계 (적정 / 한정 / 의견거절 / 부적정) 의 가중치 임의 지정"
+  - "보수 (executive compensation) 와 회사 규모 매핑 차이"
+  - "거버넌스 데이터 갱신 빈도 (연간 vs 분기) 차이"
+  - "KR 지배구조 특수성 (오너 / 재벌) 반영 누락"
+examples:
+  - "거버넌스 정량 점수 + 시계열"
+  - "사외이사 비율 + 감사 + 보수 결합"
+  - "산업 내 거버넌스 분포"
+  - "거버넌스 점수와 실적 상관"
+linkedSkills:
+  - engines.quant
+  - engines.analysis.governance
+  - engines.analysis.governanceAudit
+  - engines.scan.governance
 source:
   type: manual_skill
   format: markdown

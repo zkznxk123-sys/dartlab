@@ -49,9 +49,26 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "API 키 / 인증정보 답변 노출 금지."
-  - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
-  - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - API 키 / 인증정보 답변 노출 금지.
+  - provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다.
+  - 원자료를 그대로 분석 결론으로 포장 금지.
+  - 기관 보유 vs 외국인 보유 vs 임원 지분 혼동 금지.
+  - 보유 비율 (%) 과 보유 주수 (shares) 단위 혼용 금지.
+failureModes:
+  - 보고일 (snapshot date) 명시 누락 — 시점 차이로 비교 무리
+  - 전체 발행주식 vs 유통주식 분모 차이 무시
+  - 자사주 (회사 보유) 별도 분류 누락
+  - 5% 보고 의무 (대량보유) 변경 시점 추적 누락
+examples:
+  - 삼성전자 외국인 보유 추세
+  - 기관 vs 외국인 vs 임원 분포
+  - 5% 대량보유 변동 추적
+  - 자사주 보유 비중
+linkedSkills:
+  - engines.gather.flow
+  - engines.gather.majorShareholders
+  - engines.scan.insider
+  - engines.scan.governance
 source:
   type: manual_skill
   format: markdown

@@ -36,6 +36,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 multi-scan 메모리 부담
+forbidden:
+  - 시가총액 하위 종목 발굴 결과를 자동 매수 추천으로 단정 금지.
+  - 성장 + valuation + quality 3 축 교집합 명시 없이 후보 단정 금지.
+  - small-cap 발굴 결과의 유동성 위험 (낮은 거래량) 검토 누락 금지.
+  - 5 년 흑자 + 부도 위험 회피 게이트 누락 금지.
+failureModes:
+  - small-cap 의 유동성 부족으로 거래 비용 폭증
+  - 신규 / 비공시 / 폐업 종목의 시계열 길이 부족
+  - 산업 sub-segment 동질성 검증 부족
+  - 시총 정의 (보통주 vs 우선주 / 자기주식 차감 vs 미차감) 차이
+  - 유동성 risk premium 의 valuation 영향 미반영
+examples:
+  - KR 중소형주 발굴 후보
+  - 시총 하위 + 성장 + 저평가 + quality
+  - small-cap + distress 필터
+  - small-cap discovery + 깊이 분석
 lastUpdated: '2026-05-07'
 ---
 

@@ -37,6 +37,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 price 시계열 일부 한정
+forbidden:
+  - 단일 지표 (RSI / MACD / 볼린저) 만으로 entry / exit 단정 금지 — 4 축 결합.
+  - 지표 표준 파라미터 (RSI 14 / MACD 12-26-9) 명시 없이 결과 인용 금지.
+  - 차트 패턴 인식 결과를 자동 매수 / 매도 신호로 단정 금지.
+  - 단기 entry / exit 신호를 장기 투자 추천으로 오인 금지.
+failureModes:
+  - 지표 파라미터 (RSI 14 vs 7) 별 신호 차이"
+  - 사이드웨이 시장에서 추세추종 지표의 false signal
+  - 변동성 (GARCH / HAR) 추정 윈도우 의존성"
+  - 차트 패턴의 false positive (사후 매칭) 위험
+  - 거래량 동반 없는 신호의 신뢰도 저하
+examples:
+  - 삼성전자 4 축 기술적 review
+  - 지표 + 모멘텀 + 변동성 + 패턴
+  - 단기 entry 보조 신호
+  - 매크로 환경 + 기술적 결합
 lastUpdated: '2026-05-07'
 ---
 

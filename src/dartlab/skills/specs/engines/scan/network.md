@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 출자 사슬 단계 명시 없이 답변 금지.
+  - 계열사 내부거래 비중 무시한 *독립* 회사 답변 금지.
+failureModes:
+  - 그룹 출자 구조 (지주 vs 비지주) 차이 무시
+  - 특수관계자 거래 비중 누락
+  - 계열사 보증 효과 미고려
+  - 신규 출자 vs 기존 출자 분리 누락
+examples:
+  - 그룹 출자 사슬 (삼성/현대/SK/LG)
+  - 지주 → 자회사 출자 비율
+  - 계열사 내부거래 비중
+  - 신규 출자 vs 기존 출자
+linkedSkills:
+  - engines.analysis.governance
+  - engines.industry
+  - engines.scan.governance
 source:
   type: manual_skill
   format: markdown

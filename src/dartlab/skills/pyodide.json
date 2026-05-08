@@ -1150,7 +1150,7 @@
     },
     {
       "id": "engines.quant.worldClass",
-      "title": "dartlab quant 세계 최강 — 사상 정합 + 성능 fix 플랜 (2026-04-25 v3)",
+      "title": "Quant - 세계 수준 quality bar",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -2102,6 +2102,15 @@
       "title": "Refactor Checklist — 대규모 rename / API 변경 6 단계",
       "category": "operation",
       "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.skillIncubator",
+      "title": "Skill Incubator — AI 자율 분석 skill 개발 사이클",
+      "category": "operation",
+      "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []

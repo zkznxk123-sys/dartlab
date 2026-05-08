@@ -55,6 +55,25 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "8 검증된 스타일 프리셋 결과를 절대 점수로 단정 금지 — KR 시장 reproducibility 차이 고려."
+  - "스타일 (가치 / 모멘텀 / 퀄리티 / 저변동) 명시 없이 단일 결과 인용 금지."
+failureModes:
+  - "스타일 정의 (Fama-French vs MSCI) 차이"
+  - "리밸런싱 빈도 (월 / 분기) 별 결과 변동"
+  - "스타일 간 상관 (가치-모멘텀) 변화 무시"
+  - "백테스트 기간 (2010s vs 2020s) 의 스타일 효과 차이"
+  - "거래비용 / 슬리피지 미반영"
+examples:
+  - "8 스타일 프리셋 일괄 백테스트"
+  - "단일 스타일 (가치) 백테스트"
+  - "스타일 + size 결합"
+  - "스타일 결과 + 매크로 cycle 결합"
+linkedSkills:
+  - engines.quant
+  - engines.quant.factor
+  - engines.quant.value
+  - engines.quant.momentum
+  - engines.quant.quality
 source:
   type: manual_skill
   format: markdown

@@ -48,9 +48,29 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - accrual ratio 임계값 (산업 평균 대비) 미명시 *고품질* 단정 금지.
+  - 단일 분기 OCF/NI 로 이익품질 단정 금지 — 4 분기 평균 권장.
+failureModes:
+  - 산업별 정상 accrual ratio 차이 무시 (제조 vs 서비스)
+  - OCF 음수 회사 (성장형 capex) 와 분식 의심 회사 혼동
+  - 일회성 매각 손익 영향 미분리
+  - 신생/성장 회사의 OCF/NI 임시 음수를 분식 신호로 오해
+  - Beneish M-score · Sloan ratio 같은 기존 지표와 교차 검증 누락
+examples:
+  - 이익품질 상위 50 (OCF/NI 1.0+)
+  - accrual ratio 의심 종목 (분식 가능성)
+  - 산업 평균 대비 이익품질
+  - Beneish M-score 와 결합 랭킹
+  - OCF/NI 4 분기 평균 안정성
+linkedSkills:
+  - engines.analysis.earningsQuality
+  - engines.analysis.cashflow
+  - engines.quant.beneish
+  - engines.quant.accruals
+  - engines.scan.cashflow
 source:
   type: manual_skill
   format: markdown

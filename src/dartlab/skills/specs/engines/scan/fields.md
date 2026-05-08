@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 필드 카탈로그 결과를 *데이터 자체* 로 인용 금지 — 메타데이터.
+  - finance/report/docs/krx 4 source 분리 미명시 답변 금지.
+failureModes:
+  - 같은 한글 이름이 BS/IS/CF 여러 곳에 있을 때 source 미분리
+  - snake_id 부분 매칭 오답
+  - krx 와 finance source 의 단위 차이 (원 vs 백만원) 무시
+examples:
+  - roe 필드 검색 (4 source)
+  - finance topic ratio 카탈로그
+  - krx 가용 컬럼 (close · volume · marketCap)
+  - report 사업개요 keyword
+linkedSkills:
+  - engines.scan.screen
+  - engines.scan.account
+  - engines.scan.ratio
+  - engines.mappers
 source:
   type: manual_skill
   format: markdown

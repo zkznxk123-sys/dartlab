@@ -50,9 +50,29 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - scorecard 5 영역 (수익성·안정성·성장성·효율성·현금흐름) 가중치 미명시 금지.
+  - 등급 (A-F) 임계값을 산업 평균 미참조 적용 금지.
+failureModes:
+  - 5 영역 가중치를 동일 (20% × 5) 로 단정 — 산업·성장 단계별 가중치 다름
+  - 등급 임계값 (A=top 20% / B=21-40% / ...) 의 산업별 차이 무시
+  - 결손 영역 처리 — 빈 영역을 평균값으로 채우면 등급 왜곡
+  - 일회성 손익으로 *수익성* 영역만 일시 등급 변동
+  - 신생 회사 (5 영역 데이터 부족) scorecard 적용 무리
+examples:
+  - 삼성전자 scorecard A-F
+  - 5 영역 등급 분포
+  - 산업 평균 대비 등급
+  - 분기별 scorecard 변동
+  - 신생 회사 scorecard 한계
+linkedSkills:
+  - engines.analysis.profitability
+  - engines.analysis.stability
+  - engines.analysis.growth
+  - engines.analysis.cashflow
+  - engines.story
 source:
   type: manual_skill
   format: markdown

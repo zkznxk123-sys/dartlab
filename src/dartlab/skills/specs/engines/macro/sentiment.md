@@ -48,9 +48,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "기준일 / source 없는 매크로 숫자 인용 금지."
-  - "기업 재무 분석을 macro 로 대체하지 않는다."
-  - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - 기준일 / source 없는 매크로 숫자 인용 금지.
+  - 기업 재무 분석을 macro 로 대체하지 않는다.
+  - macro 결과를 analysis 내부 계산처럼 섞지 않는다.
+  - VIX 단일 값으로 *공포* 단정 금지 — VIX 구간 (15 미만 / 15-25 / 25+) 분류.
+  - 시장 sentiment 와 회사별 sentiment 혼동 금지.
+failureModes:
+  - VIX 와 JLN 실물 불확실성 동치 처리
+  - 공포탐욕 지수의 7 component 단순 평균
+  - 시장 sentiment lag (역사적 패턴 vs 현재 시장)
+  - 한국 vs 미국 sentiment indicator 단위 혼동
+examples:
+  - VIX + JLN + 공포탐욕
+  - VIX 구간 분류 (15 / 25)
+  - 한국 sentiment vs 미국
+  - 시장 sentiment lag
+linkedSkills:
+  - engines.macro
+  - engines.macro.assets
+  - engines.quant.sentiment
 source:
   type: manual_skill
   format: markdown

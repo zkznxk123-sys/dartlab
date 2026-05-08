@@ -92,3 +92,7 @@ lastUpdated: '2026-05-03'
 - compatibility 코드가 필요하면 새 `AuditPacket`/`ImprovementCandidate` 스키마로 어댑트한다.
 - I/O 실패 조용 무시 (응답 경로 보호).
 
+## 하위 사이클
+
+신규 분석 skill 을 자율 발굴·검증·등재하는 인큐베이션 사이클은 [operation.skillIncubator](/skills/operation.skillIncubator) 가 SSOT. coreloop 은 메타 흐름만 다루고, 5 단계 사이클 본문은 그쪽에서 정의한다.
+

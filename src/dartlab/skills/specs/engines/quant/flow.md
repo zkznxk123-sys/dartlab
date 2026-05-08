@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "기관 / 외국인 매매 한 종목 (단방향) 신호로 매수 / 매도 단정 금지."
+  - "수급 데이터의 보고 시점 (당일 vs T+1) 명시 없이 실시간으로 인용 금지."
+failureModes:
+  - "프로그램 매매 / 차익거래 / 자기자본 (proprietary) 매매 분리 누락"
+  - "외국인 비중 변화의 인덱스 리밸런싱 영향 미반영"
+  - "단방향 매매 (예 — 외국인 1 일 매도) 로 추세 단정"
+  - "기관 (연기금 vs 운용사 vs 보험) 세부 분류 무시"
+  - "옵션만기 / 선물만기 effect 와 일별 수급 혼동"
+examples:
+  - "삼성전자 외국인 매매 동향"
+  - "기관별 (연기금 / 운용사) 매매 분리"
+  - "외국인 + 기관 + 개인 3 자 비교"
+  - "수급 + 가격 모멘텀 결합"
+linkedSkills:
+  - engines.quant
+  - engines.gather.flow
+  - engines.gather.ownership
+  - engines.scan.insider
 source:
   type: manual_skill
   format: markdown

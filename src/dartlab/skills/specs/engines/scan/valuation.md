@@ -48,9 +48,31 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 단일 멀티플 (PER 만) 로 *저평가* 단정 금지 — PBR · PSR 교차 검증.
+  - 적자 회사에 PER 적용 금지 (음수 또는 NaN — PSR / EV/Sales 권장).
+  - 산업 분기 무시 통합 PER 랭킹 금지 (제조 평균 vs 금융 평균 다름).
+failureModes:
+  - 사이클 회사 (반도체·정유) PER 가 cycle peak 에 낮게 나옴 — *value trap* 위험
+  - 적자 회사 PER null 처리 안 함 — 랭킹 왜곡
+  - 시가총액 작은 종목 (소형주) 이 멀티플 상하단 점령 — 시총 필터 필요
+  - 산업 평균 멀티플 미참조 — 절대값만으로 판단
+  - PER trailing vs forward 혼용 — 명시 필요
+  - 배당주의 PBR 1 미만이 *진짜 저평가* 인지 ROE 함께 확인 필요
+examples:
+  - PER 하위 50 (저평가 후보)
+  - 산업 평균 PBR 대비 위치
+  - 시가총액 1조 이상 PER 5 미만
+  - 사이클 회사 PER trap 점검
+  - 배당주 PBR + ROE 교차
+  - 멀티플 분포 (PER · PBR · PSR)
+linkedSkills:
+  - engines.analysis.valuation
+  - engines.analysis.valuationBand
+  - engines.scan.profitability
+  - engines.quant.value
 source:
   type: manual_skill
   format: markdown

@@ -36,6 +36,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 docs/finance 일부 한정
+forbidden:
+  - 정식 ESG 데이터 부재 시에도 신호로만 표기 — 정식 점수 단정 금지.
+  - 지배구조 + 감사 + 종업원 + 자본배분 4 축 중 1~2 만 보고 ESG 단정 금지.
+  - 외부 ESG 평가사 (MSCI / 한국기업평가) 점수와 1:1 비교 금지.
+  - 환경 (E) 데이터 부재 시 사회 / 거버넌스만으로 ESG 종합 단정 금지.
+failureModes:
+  - 환경 (E) 신호의 dartlab 부재로 ESG 의 "S + G" 만 평가
+  - 종업원 (workforce) 데이터의 시점 / 빈도 차이"
+  - 지배구조 신호의 KR 특수성 (오너 / 재벌) 반영 한계
+  - 자본배분 일관성과 ESG 직접 매핑 모호"
+  - 단일 분기 신호로 영구 ESG 등급 단정
+examples:
+  - 삼성전자 ESG light 점검
+  - 지배구조 + 감사 + 종업원 결합
+  - 자본배분 + ESG 신호
+  - 정식 ESG 부재 시 light audit
 lastUpdated: '2026-05-07'
 ---
 

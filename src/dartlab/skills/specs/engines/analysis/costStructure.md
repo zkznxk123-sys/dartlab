@@ -50,9 +50,27 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - 매출원가 / 판관비 / 영업외 분류 미명시 답변 금지.
+  - 고정비 vs 변동비 임의 분류 금지 — disclosure 또는 회귀 권장.
+failureModes:
+  - 산업별 cost 구조 차이 무시 — 제조 (원재료) vs 서비스 (인건비) vs IT (서버·R&D)
+  - 원자재 가격 (LME · WTI) 영향 미분리
+  - 일회성 비용 (구조조정·소송) 정상화 미적용
+  - 고정비 / 변동비 분리 부정확 — 분기 회귀 (매출 vs 비용) 권장
+  - 환율 영향 (외화 매입 비용) 미분리
+examples:
+  - 삼성전자 비용 구조
+  - 원자재 가격 영향
+  - 고정비 vs 변동비 회귀
+  - 인건비 비중 추세
+  - 산업 평균 대비 위치
+linkedSkills:
+  - engines.analysis.profitability
+  - engines.analysis.macroSensitivity
+  - engines.analysis.revenueStructure
 source:
   type: manual_skill
   format: markdown

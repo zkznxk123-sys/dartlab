@@ -49,9 +49,26 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 최대주주 지분율만으로 *경영권 안정* 단정 금지.
+  - 사외이사 비율을 산업 평균과 비교 없이 답변 금지.
+failureModes:
+  - 최대주주 지분 절대값만 보고 안정성 단정
+  - 사외이사 비율 산업 평균 미참조
+  - 감사위원회 독립성 누락
+  - 보수비율 산업별 차이 무시
+  - 소액주주 분산도 무시
+examples:
+  - 최대주주 지분 + 사외이사
+  - 감사위원회 독립성 비율
+  - CEO 보수 산업 평균 대비
+  - 소액주주 분산도 상위
+linkedSkills:
+  - engines.analysis.governance
+  - engines.analysis.governanceAudit
+  - engines.scan.insider
 source:
   type: manual_skill
   format: markdown

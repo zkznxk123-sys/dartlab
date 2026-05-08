@@ -48,9 +48,28 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "기준일 / source 없는 매크로 숫자 인용 금지."
-  - "기업 재무 분석을 macro 로 대체하지 않는다."
-  - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - 기준일 / source 없는 매크로 숫자 인용 금지.
+  - 기업 재무 분석을 macro 로 대체하지 않는다.
+  - macro 결과를 analysis 내부 계산처럼 섞지 않는다.
+  - 6 막 종합 점수 (0-100) 만으로 *시장 상승/하락* 단정 금지 — 신호 분포 함께 인용.
+  - 40 개 투자전략 추천 결과를 *맞춤형* 으로 단정 금지 — 일반 매크로 환경 기반 시사점.
+failureModes:
+  - 6 막 (cycle · rates · liquidity · crisis · assets · sentiment) 중 일부만 보고 종합 답변
+  - 자산배분 시사점 (60/40 vs all-weather) 의 시장 적용 시점 lag 무시
+  - 투자전략 40 개 중 backtest 시점 / 가정 명시 누락
+  - KR vs US 종합 점수 혼용
+  - 단일 시점 결과를 trend 로 오해 — 4 분기+ 시계열 권장
+examples:
+  - 6 막 종합 점수
+  - 자산배분 시사점 (현재 환경)
+  - 40 개 투자전략 후보
+  - 6 막 신호 분포
+  - KR vs US 종합 비교
+linkedSkills:
+  - engines.macro
+  - engines.macro.cycle
+  - engines.macro.assets
+  - engines.macro.forecast
 source:
   type: manual_skill
   format: markdown

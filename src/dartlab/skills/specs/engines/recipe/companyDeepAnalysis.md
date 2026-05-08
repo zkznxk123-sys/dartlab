@@ -38,6 +38,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 macro/scan dataset snapshot 범위 한정
+forbidden:
+  - 6 단 절차 중 valuation 단계 (Step 6) 누락 시 종합 분석 미완료 — 절대 단정 금지.
+  - peer 없는 절대값 (예 — 매출 12 조) 단독 노출 금지 — peer median / 5 년 평균 동반.
+  - 단일 분기 결과를 영구 추세로 단정 금지 — 시계열 (5Y / 8Q) 동반.
+  - 매크로 / 산업 / 회사 결과 연결 없이 단편적 언급 금지.
+failureModes:
+  - 6 단 중 일부 step 실패 시 다음 step 으로 silent skip
+  - peer scan 결과 5 미만일 때 통계 의미 부족 무시
+  - ROE DuPont 분해의 분모 (평균자본 vs 기말자본) 명시 누락
+  - 회계 quality 점검을 단일 지표 (accruals 만) 로 단정
+  - valuation peer 의 산업 동질성 검증 부족
+examples:
+  - 삼성전자 6 단 종합 분석
+  - 신한지주 매크로 → 산업 → 회사 → quality → valuation
+  - 대형 종목 deep dive
+  - 6 막 인과 narrative 조립
 lastUpdated: '2026-05-07'
 ---
 

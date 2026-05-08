@@ -51,6 +51,24 @@ forbidden:
   - "기준일 / source 없는 매크로 숫자 인용 금지."
   - "기업 재무 분석을 macro 로 대체하지 않는다."
   - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - "교역조건 (수출가격/수입가격) 한 지표만으로 무역수지 / 경상수지 단정 금지."
+  - "한국 수출과 미국 / 중국 LEI 의 시차 (3~6 개월) 명시 없이 단정 금지."
+failureModes:
+  - "교역조건 산정 기준 (체인 / 라스파이레스 / 파셰) 미명시"
+  - "수출이익 선행 신호와 실제 기업 영업이익 차이 (환율 / 원자재 가격) 무시"
+  - "양국 선행지수 (KR + US 또는 KR + CN) 가중치 임의 적용"
+  - "반도체 / 자동차 등 KR 핵심 수출 산업 비중 변화 미반영"
+  - "중국 수입 (KR 입장) 과 중국 PMI 의 inventory 효과 단순화"
+examples:
+  - "KR 교역조건 추이"
+  - "수출이익 선행 + 미국 LEI 동반 신호"
+  - "반도체 수출 + 글로벌 PC 수요 cycle"
+  - "양국 선행지수 (KR + 중국) 추이"
+linkedSkills:
+  - engines.macro
+  - engines.macro.cycle
+  - engines.macro.summary
+  - engines.macro.corporate
 source:
   type: manual_skill
   format: markdown

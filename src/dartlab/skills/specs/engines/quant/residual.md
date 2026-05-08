@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "팩터 모델 (FF3 / FF5 / Carhart) 명시 없이 잔여 알파 인용 금지."
+  - "잔여 모멘텀 (residual momentum) 의 회귀 윈도우 명시 없이 결과 비교 금지."
+failureModes:
+  - "팩터 모델 선택 (3 / 5 / 7 factor) 별 잔여 정의 차이"
+  - "팩터 노출 (loading) 추정 윈도우 (60D / 252D) 의존성"
+  - "잔여수익의 신뢰구간 / t-stat 미언급"
+  - "수익률 자기상관과 모멘텀 효과 혼동"
+  - "팩터 미식별 위험 (omitted factor)"
+examples:
+  - "팩터 제거 후 잔여 모멘텀"
+  - "FF3 잔여 알파 시계열"
+  - "잔여 모멘텀 상위 종목 검증"
+  - "잔여수익 + 가격 모멘텀 결합"
+linkedSkills:
+  - engines.quant
+  - engines.quant.factor
+  - engines.quant.style
+  - engines.quant.signalReview
 source:
   type: manual_skill
   format: markdown

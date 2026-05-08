@@ -35,6 +35,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 두 회사 dataset snapshot 동시 로드 부담
+forbidden:
+  - 한쪽 회사 수치만으로 우열 단정 금지 — 양쪽 같은 기간 정렬.
+  - 같은 산업 / 같은 단계 비교 기준 명시 없이 결론 금지.
+  - 일회성 손익 (M&A / 매각) 정상화 없이 단순 비교 금지.
+  - 외환 매출 비중 다른 회사 환율 영향 분리 없이 비교 금지.
+failureModes:
+  - 같은 분기 (Q1 vs Q1) 정렬 누락
+  - 연결 vs 별도 회계 scope 혼용
+  - 시총 격차 (1 조 vs 10 조) 큰 비교의 size 효과 무시
+  - 산업 sub-segment (반도체 메모리 vs 비메모리) 구분 없는 단순 peer
+  - 회계 정책 변경 시점 차이 무시
+examples:
+  - 삼성전자 vs SK하이닉스 분기 비교
+  - 신한 vs KB 같은 분기 ROE
+  - 일회성 정상화 후 비교
+  - 외환 영향 분리 후 비교
 lastUpdated: '2026-05-07'
 ---
 

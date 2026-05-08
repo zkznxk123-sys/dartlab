@@ -52,6 +52,24 @@ forbidden:
   - "API 키 / 인증정보 답변 노출 금지."
   - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
   - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - "내부자 매도 1 건으로 회사 전망 부정 단정 금지 — 매매 의도 (자금 / 분산) 다양."
+  - "내부자 매수를 자동 매수 신호로 단정 금지 — 5% 룰 / 스톡옵션 행사 / 보유 의무 구분."
+failureModes:
+  - "임원 보유주식 변동의 사유 (스톡옵션 / 상속 / 증여) 미구분"
+  - "단발성 거래로 추세 단정 — 6 개월~1 년 시계열로 빈도 확인"
+  - "내부자 그룹 (임원 / 5% 주주 / 특수관계자) 분류 혼동"
+  - "공시 시점과 실제 거래 시점 차이 무시 (보고 시한 5 일)"
+  - "주가 변동성과 내부자 거래 인과 단순화"
+examples:
+  - "삼성전자 임원 매수/매도 동향"
+  - "오너가족 매매 패턴"
+  - "공시 직전 내부자 거래 검토"
+  - "스톡옵션 행사 vs 일반 매도 분리"
+linkedSkills:
+  - engines.gather
+  - engines.scan.insider
+  - engines.gather.majorShareholders
+  - engines.analysis.governance
 source:
   type: manual_skill
   format: markdown

@@ -48,9 +48,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "기준일 / source 없는 매크로 숫자 인용 금지."
-  - "기업 재무 분석을 macro 로 대체하지 않는다."
-  - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - 기준일 / source 없는 매크로 숫자 인용 금지.
+  - 기업 재무 분석을 macro 로 대체하지 않는다.
+  - macro 결과를 analysis 내부 계산처럼 섞지 않는다.
+  - 시나리오 (2008·1997·1973 등) 직접 비교를 *반복* 으로 단정 금지.
+  - 146 프리셋 임의 선택 금지 — 사용자 시나리오 명시 필수.
+failureModes:
+  - 역사적 시나리오와 현재 환경 차이 (제도 · 시장 구조) 무시
+  - 시나리오 충격 강도 (1 σ vs 3 σ) 미명시
+  - 시나리오 대상 자산 (주식 vs 채권) 별 영향 단일 인과
+  - 한국 vs 미국 시나리오 일치 가정
+examples:
+  - 2008 금융위기 시나리오
+  - 1997 외환위기 + 한국 재현
+  - 1973 오일쇼크 + 원자재
+  - 시나리오 stress test
+linkedSkills:
+  - engines.macro
+  - engines.macro.crisis
+  - engines.macro.summary
 source:
   type: manual_skill
   format: markdown

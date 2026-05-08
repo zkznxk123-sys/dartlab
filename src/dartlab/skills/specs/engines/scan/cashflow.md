@@ -48,9 +48,28 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 8 종 현금흐름 패턴 분류 (Healthy / Growing / Distressed / Mature / ...) 명시 없이 *위험* 단정 금지.
+  - capex 음수 vs 양수 의미 회사별 다름 — 부호 임의 해석 금지.
+failureModes:
+  - 성장형 capex (OCF + / ICF - / FCF -) 와 부실 (OCF - / ICF + / FCF -) 패턴 혼동
+  - FCF 정의 차이 (OCF - capex vs OCF - capex - 인수합병) 미명시
+  - 분기 vs 연 합산 혼용 — period 일치 필요
+  - 산업별 정상 capex 강도 차이 무시 (제조 高 / 서비스 低)
+  - 일회성 자산 매각 (ICF +) 을 정상 영업으로 오해
+examples:
+  - FCF 양수 + 성장 패턴 회사
+  - 8 종 현금흐름 패턴 분포
+  - capex/OCF 비율 (재투자 강도)
+  - 산업별 평균 FCF 마진
+  - Distressed 패턴 의심 종목
+linkedSkills:
+  - engines.analysis.cashflow
+  - engines.analysis.capitalAllocation
+  - engines.scan.quality
+  - engines.scan.liquidity
 source:
   type: manual_skill
   format: markdown

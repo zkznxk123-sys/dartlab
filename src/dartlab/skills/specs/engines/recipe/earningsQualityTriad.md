@@ -37,6 +37,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 다년 시계열 일부 한정
+forbidden:
+  - 3 모델 (Sloan / Beneish / Novy-Marx) 중 1~2 만 합의해도 분식 단정 금지 — 3 모델 일관 시 risk claim.
+  - 미국 표본 thresholds 를 KR 시장 동일 적용 금지.
+  - 일회성 손익 (M&A) 영향 미보정 으로 quality 단정 금지.
+  - 분기 한 번의 합의 결과를 영구 패턴으로 단정 금지.
+failureModes:
+  - 3 모델의 산업별 적합성 (제조업 vs 서비스업) 차이"
+  - Sloan accruals 정의 (BS-OCF approach) 차이
+  - Beneish 8 변수의 KR 회계 매핑 차이
+  - Novy-Marx GP/A 의 분모 (총자산 vs 영업자산) 모호
+  - 합의 게이트 (3 모델 일관) 의 false negative 위험"
+examples:
+  - 삼성전자 3 모델 합의 quality
+  - Sloan + Beneish + Novy-Marx 결합
+  - 시계열 + 3 모델 합의
+  - 분식 의심 신호 (3 모델 일관)
 lastUpdated: '2026-05-07'
 ---
 

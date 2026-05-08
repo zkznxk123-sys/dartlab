@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "HRP (Hierarchical Risk Parity) 의 클러스터링 거리 (correlation 기반) 명시 없이 결과 비교 금지."
+  - "리스크 패리티가 모든 시장 환경에서 우월하다고 단정 금지."
+failureModes:
+  - "공분산 행렬 추정 윈도우 의존성"
+  - "Lopez de Prado HRP 의 클러스터링 거리 함수 선택 차이"
+  - "상관관계 시계열 변화 (regime shift) 시 효과 변동"
+  - "leverage 가정과 실제 자금 운용 차이"
+  - "거래비용 / 슬리피지의 risk-parity 수익 잠식"
+examples:
+  - "HRP weight 산출"
+  - "HRP vs ERC vs MV 비교"
+  - "HRP + 월별 리밸런싱"
+  - "공분산 shrinkage 적용 HRP"
+linkedSkills:
+  - engines.quant
+  - engines.quant.allocation
+  - engines.quant.meanvar
+  - engines.quant.multi
 source:
   type: manual_skill
   format: markdown

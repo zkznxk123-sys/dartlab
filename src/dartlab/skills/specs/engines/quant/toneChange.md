@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "공시 톤 변화 (positive → negative) 한 신호로 가격 인과 단정 금지."
+  - "NLP 모델 / 사전 (한국어 LM) 명시 없이 톤 점수 인용 금지."
+failureModes:
+  - "한국어 NLP 사전의 도메인 (재무 vs 일반) 정확도 차이"
+  - "공시 종류 (사업 vs 분기 vs 감사) 별 톤 baseline 차이"
+  - "사후 데이터 스누핑 (post-hoc tone shift)"
+  - "텍스트 길이 / 빈도 정규화 누락"
+  - "톤 변화의 mediation (시장 환경 / 뉴스) 누락"
+examples:
+  - "삼성전자 공시 톤 변화 시계열"
+  - "분기 보고서 톤 추세"
+  - "감사보고서 톤 + 위험 신호"
+  - "톤 변화 + 가격 결합"
+linkedSkills:
+  - engines.quant
+  - engines.quant.riskText
+  - engines.analysis.disclosureChange
+  - engines.gather.news
 source:
   type: manual_skill
   format: markdown

@@ -61,15 +61,30 @@ runtimeCompatibility:
     limitations:
       - live FRED, 환율, 금리 API 호출은 브라우저 CORS/인증 제약으로 제외한다.
 failureModes:
-  - 최신 관측일을 오늘로 오인
-  - 단일 지표로 경기 판단
-  - 기업 영향 경로 없이 수치만 나열
+  - 최신 관측일 (latestAsOf) 을 오늘로 오인 — 데이터 갱신 주기 (월/분기) 명시 필요
+  - 단일 지표 (금리만 / 환율만) 로 경기 판단 — 6 막 인과 (cycle · rates · liquidity · sentiment) 종합 권장
+  - 기업 영향 경로 없이 수치만 나열 — 어떤 산업 / 회사가 영향받는지 연결
+  - KR vs US 매크로 혼용 — market 명시
+  - 명목 vs 실질 (CPI 보정) 혼용
+  - 일회성 정책 변경을 추세로 오해
 forbidden:
-  - 기준일 없는 최근 매크로 판단
-  - 데이터 없이 금리/환율 방향 단정
+  - 기준일 없는 최근 매크로 판단 금지.
+  - 데이터 없이 금리/환율 방향 단정 금지.
+  - live API 호출 가능성 (CORS/인증) 명시 없이 *실시간* 답변 금지.
+  - 기업 재무 분석을 macro 로 대체하지 않는다.
 examples:
-  - 금리 환율 매크로 상황 어때?
-  - 최근 한국 경기 사이클을 보고 삼성전자에 미치는 영향 알려줘
+  - 금리 환율 매크로 상황
+  - 한국 경기 사이클 + 삼성전자 영향 연결
+  - 미국 FOMC 영향 경로 (USDKRW · KOSPI)
+  - 6 막 인과 종합 (cycle · rates · liquidity · sentiment)
+  - 명목 vs 실질 GDP / CPI
+  - 정책 일회성 vs 추세 분리
+linkedSkills:
+  - engines.macro
+  - engines.macro.cycle
+  - engines.macro.summary
+  - engines.gather.macro
+  - engines.analysis.macroSensitivity
 source:
   type: curated_markdown
   owner: dartlab

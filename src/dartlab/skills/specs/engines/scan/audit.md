@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 감사의견 (한정/거절/부적정) 만으로 *분식* 단정 금지.
+  - 감사인 변경과 *지배구조 위험* 단순 인과 금지.
+failureModes:
+  - 감사의견 분포의 산업별 차이 무시
+  - 감사인 변경 (대형 vs 중소) 영향 추정 미명시
+  - 특기사항 (continuing concern) 본문 미확인
+  - 감사 보수 비중 추세 누락
+examples:
+  - 한정/거절 의견 종목
+  - 감사인 변경 3 년 빈도
+  - 특기사항 keyword
+  - 감사 보수 산업 평균
+linkedSkills:
+  - engines.analysis.governanceAudit
+  - engines.scan.disclosureRisk
+  - engines.analysis.earningsQuality
 source:
   type: manual_skill
   format: markdown

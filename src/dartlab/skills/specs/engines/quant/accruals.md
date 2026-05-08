@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "Sloan accruals 한 지표만으로 분식 단정 금지 — Beneish + 정합성 동반."
+  - "(NI−CFO)/TA 계산 시 분기 vs 연결 vs 별도 scope 혼용 금지."
+failureModes:
+  - "산업별 정상 accruals 수준 차이 (사이클성 vs 비사이클성) 무시"
+  - "M&A / 사업양수도 일회성 accruals 미보정"
+  - "분기 accruals 계절성 (재고 / 매출채권) 무시"
+  - "high/neutral/low 3 그룹의 KR 표본 분포 차이"
+  - "총 accruals vs 영업 accruals (working capital 분리) 차이"
+examples:
+  - "Sloan accruals 시계열 검증"
+  - "high accrual 그룹 위험 신호"
+  - "산업 평균 accruals 대비"
+  - "accruals + Beneish 결합"
+linkedSkills:
+  - engines.quant
+  - engines.analysis.earningsQuality
+  - engines.quant.beneish
+  - engines.analysis.financialConsistency
 source:
   type: manual_skill
   format: markdown

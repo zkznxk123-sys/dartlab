@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 공시 변화 신호와 확정 사실 혼동 금지.
+  - 단일 신호로 *위험* 단정 금지 — 5+ 신호 종합.
+failureModes:
+  - 우발부채 증가를 *반드시 부도* 위험으로 단정
+  - 감사인 변경 단일 시점만 보고 추세 무시
+  - 계열변화 영향 일률 부정/긍정 단정
+  - 사업전환 신호의 산업별 빈도 차이 무시
+examples:
+  - 우발부채 증가 종목
+  - 감사인 변경 빈도 상위
+  - 사업전환 (segment 재편) 신호
+  - 5+ 신호 종합
+linkedSkills:
+  - engines.analysis.disclosureChange
+  - engines.analysis.governanceAudit
+  - engines.recipe.disclosureEvent
 source:
   type: manual_skill
   format: markdown

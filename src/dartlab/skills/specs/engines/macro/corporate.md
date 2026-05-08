@@ -51,6 +51,24 @@ forbidden:
   - "기준일 / source 없는 매크로 숫자 인용 금지."
   - "기업 재무 분석을 macro 로 대체하지 않는다."
   - "macro 결과를 analysis 내부 계산처럼 섞지 않는다."
+  - "전종목 집계 평균 (mean) 으로 개별 기업 진단 단정 금지 — 개별 분석은 analysis 로 분리."
+  - "Ponzi 비율 한 지표만으로 시장 위험 단정 금지 — 레버리지 + 이익사이클 동반."
+failureModes:
+  - "전종목 평균과 시총가중 평균 차이 (대형주 편향) 무시"
+  - "이익사이클 phase (확장 / 둔화 / 수축) 의 산업별 차이 무시"
+  - "Ponzi 비율 분모 (이자비용 vs OCF) 정의 모호"
+  - "대형주 5 개가 전체 평균을 좌우하는 KR 시장 특성 미반영"
+  - "leverage 지표의 회계 기준 차이 (한국 GAAP vs IFRS) 무시"
+examples:
+  - "KR 시장 전종목 이익사이클 phase"
+  - "Ponzi 비율 시계열 시장 평균"
+  - "전종목 레버리지 분포 변화"
+  - "기업집계 신호와 산업별 차이 분리"
+linkedSkills:
+  - engines.macro
+  - engines.macro.cycle
+  - engines.macro.summary
+  - engines.scan.profitability
 source:
   type: manual_skill
   format: markdown

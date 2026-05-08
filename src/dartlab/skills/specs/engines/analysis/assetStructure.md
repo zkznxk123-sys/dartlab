@@ -7,16 +7,20 @@ status: observed
 category: engines
 purpose: "analysis 엔진의 자산구조 축 응용 — 조달한 돈으로 뭘 준비했는가."
 whenToUse:
-  - "analysis"
-  - "자산구조"
-  - "조달한 돈으로 뭘 준비했는가"
+  - 자산구조
+  - 자산 구성
+  - 현금성 자산
+  - 재고
+  - 매출채권
+  - 유형자산
+  - 투자자산 비중
 inputs:
-  - "Company 또는 종목코드"
-  - "기준 기간"
+  - Company 또는 종목코드
+  - 기준 기간
 outputs:
-  - "축별 dict"
-  - "evidence refs"
-  - "한계와 가정"
+  - 축별 dict (assetMix · liquidAssets · operatingAssets)
+  - evidence refs
+  - 자산 회전 시그널
 capabilityRefs:
   - "analysis"
   - "Company.analysis"
@@ -50,9 +54,27 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - 산업별 정상 자산 비중 차이 무시 금지 (제조 유형자산 高 / IT 무형자산 高 / 금융 금융자산 高).
+  - 별도 vs 연결 재무제표 혼용 금지 — scope 명시.
+failureModes:
+  - 산업별 자산 구성 차이 무시 — 제조사 (유형자산 40%+) vs IT (무형자산·현금) vs 금융 (대출채권)
+  - 재고 자산 증가를 *판매 부진* 또는 *생산 확대* 둘 중 하나로 단정 — 재고/매출 비율 + 유형 (원재료/재공품/제품) 분리 필요
+  - 매출채권 증가를 매출 성장 신호로 단정 — DSO 동시 확인
+  - 무형자산 증가가 *영업권 (인수 후)* 인지 *개발비 자본화* 인지 구분
+  - 일회성 자산 매각 (ICF +) 영향 미고려
+examples:
+  - 삼성전자 자산 구성 분석
+  - 재고 + 매출채권 운전자본 추세
+  - 유형자산 capex 강도
+  - 무형자산 (영업권 vs 개발비) 분리
+  - 산업 평균 대비 자산 회전
+linkedSkills:
+  - engines.analysis.cashflow
+  - engines.analysis.efficiency
+  - engines.analysis.investmentEfficiency
 source:
   type: manual_skill
   format: markdown

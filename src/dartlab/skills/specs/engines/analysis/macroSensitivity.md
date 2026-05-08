@@ -7,16 +7,22 @@ status: observed
 category: engines
 purpose: "analysis 엔진의 매크로민감도 축 응용 — 이 회사의 매출은 어떤 매크로 변수에 민감한가."
 whenToUse:
-  - "analysis"
-  - "매크로민감도"
-  - "이 회사의 매출은 어떤 매크로 변수에 민감한가"
+  - 매크로민감도
+  - macroSensitivity
+  - 거시 민감도
+  - 금리 영향
+  - 환율 영향
+  - GDP 베타
+  - 경기 사이클 노출
 inputs:
-  - "Company 또는 종목코드"
-  - "기준 기간"
+  - Company 또는 종목코드
+  - 기준 기간 (회귀 추정 기간)
+  - 거시 변수 (금리·환율·GDP·유가)
 outputs:
-  - "축별 dict"
-  - "evidence refs"
-  - "한계와 가정"
+  - 축별 dict (macroBeta · pValue · regressionPeriod)
+  - 거시 변수별 베타 표
+  - evidence refs
+  - 가정 (회귀 모델·기간·벤치마크)
 capabilityRefs:
   - "analysis"
   - "Company.analysis"
@@ -50,9 +56,30 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - 회귀 추정 기간·벤치마크·p-value 명시 없이 베타 단정 금지.
+  - 시장 매크로 (`engines.macro`) 와 *기업 단위* 민감도 (본 skill) 혼동 금지 — c.macro 는 시장, c.analysis("macro", "매크로민감도") 는 기업.
+failureModes:
+  - 회귀 기간 (3년/5년/10년) 변경 시 베타 큰 변동 — 단일 기간 결과로 단정 위험
+  - 사이클 회사 (반도체·정유) 의 베타가 cycle phase 에 따라 변함 — 평균 베타 한계 명시 필요
+  - p-value 낮은 (통계 유의성 미달) 베타를 결론에 사용
+  - 한국 회사인데 KOSPI 가 아닌 S&P 베타 사용 — benchmark 일치 필수
+  - 외화 매출 회사의 환율 베타가 *원화 기준* 과 *USD 기준* 다름 — currency 명시
+  - 신생 회사 (상장 1 년 미만) 베타 추정 시도 — 회귀 표본 부족
+examples:
+  - 삼성전자 환율 민감도
+  - 고려아연 LME 가격 베타
+  - 신한지주 금리 베타 (NIM 민감도)
+  - 회귀 기간별 베타 변동
+  - KOSPI vs SPY 벤치마크 비교
+  - 외화 매출 비중에 따른 환율 영향
+linkedSkills:
+  - engines.macro
+  - engines.macro.cycle
+  - engines.scan.macroBeta
+  - engines.quant.beta
 source:
   type: manual_skill
   format: markdown

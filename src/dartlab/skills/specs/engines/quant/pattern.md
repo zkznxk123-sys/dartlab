@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "캔들스틱 한 봉으로 추세 단정 금지 — 거래량 / 다음 봉 confirmation 필수."
+  - "지지 / 저항선 자동 탐지 결과를 단언 금지 — zigzag 파라미터 의존."
+failureModes:
+  - "캔들스틱 패턴 (도지 / 망치 / 잉걸리프 등) 의 false positive 비율"
+  - "zigzag depth 파라미터 (5% vs 10%) 별 지지 / 저항 상이"
+  - "intraday vs daily vs weekly 시간 프레임별 의미 차이"
+  - "거래량 동반 없는 패턴의 신뢰도 저하"
+  - "사후 패턴 매칭 / 과적합"
+examples:
+  - "캔들 10 종 패턴 시계열"
+  - "zigzag 지지 / 저항"
+  - "캔들 + 거래량 결합"
+  - "daily vs weekly 프레임 비교"
+linkedSkills:
+  - engines.quant
+  - engines.quant.chartPatterns
+  - engines.quant.indicators
+  - engines.quant.signals
 source:
   type: manual_skill
   format: markdown

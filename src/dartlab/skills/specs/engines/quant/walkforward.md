@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "Walk-forward OOS Sharpe 결과의 슬라이딩 윈도우 / 학습 기간 명시 없이 인용 금지."
+  - "DSR (Deflated Sharpe Ratio) / PBO (Probability of Backtest Overfitting) 미산출 시 OOS 결과 단정 금지."
+failureModes:
+  - "슬라이딩 윈도우 길이 (1Y vs 3Y) 의 학습 데이터 불충분 위험"
+  - "OOS 기간 (3M vs 1Y) 별 Sharpe 변동성"
+  - "PBO 계산의 partition 수 의존성"
+  - "DSR 의 trial 수 (number of strategies tried) 모호"
+  - "데이터 스누핑 (전체 룰 테스트 후 walk-forward 적용)"
+examples:
+  - "스타일 전략 walk-forward 검증"
+  - "슬라이딩 OOS Sharpe 계산"
+  - "PBO + DSR 결합 검증"
+  - "walk-forward + 백테스트 비교"
+linkedSkills:
+  - engines.quant
+  - engines.quant.backtest
+  - engines.quant.signalReview
+  - engines.quant.strategy
 source:
   type: manual_skill
   format: markdown

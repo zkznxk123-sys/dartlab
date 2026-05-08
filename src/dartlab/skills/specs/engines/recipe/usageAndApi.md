@@ -27,6 +27,22 @@ runtimeCompatibility:
     status: supported
   pyodide:
     status: supported
+forbidden:
+  - 사용법 / API 설명 답변에 RunPython 으로 가짜 evidence (숫자) 만들기 금지.
+  - skill 본문 / capability docstring 외 임의 사실 단언 금지.
+  - 외부 라이브러리 / 도메인 추천 (이건 dartlab 의 능력 외) 사용법 답변에 혼합 금지.
+  - 답변 본문에 직접 호출 코드 결과 (가짜 출력) 첨부 금지.
+failureModes:
+  - skill / capability 검색 결과 부족 시 추측 답변
+  - 사용자 질문 의도 (사용법 vs 분석) 모호 시 단정 답변
+  - 옛 API (deprecated) 와 현재 API 혼용
+  - capability docstring 의 예시 코드를 그대로 답변에 박지 않음
+  - 사용법 답변에 분석 결과 (숫자) 혼합으로 가짜 evidence
+examples:
+  - dartlab.gather 사용법
+  - Company.show API 도움말
+  - quant axis 호출 방법
+  - dartlab 능력 / 기능 안내
 lastUpdated: '2026-05-07'
 ---
 

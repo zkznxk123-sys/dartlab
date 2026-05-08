@@ -39,6 +39,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 valuation snapshot prebuild 의존
+forbidden:
+  - PEG (PER / 성장률) 단일 게이트만으로 GARP 단정 금지 — 부채 / 매출성장 게이트 동반.
+  - 성장률 정의 (netProfit vs OP vs revenue) 명시 없이 PEG 인용 금지.
+  - 일회성 성장 (M&A / 자산매각) 영향 미보정으로 PEG 단정 금지.
+  - PEG ≤ 1 결과를 자동 매수 추천으로 단정 금지.
+failureModes:
+  - 성장률 추정의 윈도우 (1Y vs 5Y) 별 PEG 변동
+  - 사이클성 종목의 분기별 성장률 변동성 무시
+  - PER 의 분모 (TTM EPS vs 컨센서스 EPS) 차이"
+  - 부채 게이트 (부채비율 200% 이하) 의 산업 / size 차이 무시
+  - 매출성장 게이트 (5% 이상) 의 KR 시장 적합성"
+examples:
+  - KR 시장 GARP 후보 횡단
+  - PEG ≤ 1 + 부채 안정 + 성장
+  - Lynch GARP 적용 KR
+  - PEG + valuation band 결합
 lastUpdated: '2026-05-07'
 ---
 

@@ -39,6 +39,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - 브라우저 안에서는 다년 시계열 일부 한정
+forbidden:
+  - Altman 5 변수 중 4 변수 + 음수 OCF 게이트 결과만으로 부도 단정 금지 — 학술 근사.
+  - 1968 미국 표본 thresholds 를 KR 시장에 그대로 적용 금지.
+  - 부도 위험 회피 필터를 매수 신호로 역해석 금지 — 회피용 블랙리스트.
+  - 가치 함정 (value trap) 안전 가드 누락 시 다른 스크리너 결과 단정 금지.
+failureModes:
+  - X5 (Sales / TA) 변수 누락 (5 변수 중 4 변수 사용) 의 정확도 영향
+  - 음수 OCF 가 일회성 (M&A) vs 반복 (영업 부실) 구분 어려움
+  - 산업 (제조업 vs 비제조업) 별 Z-Score 적용성 차이
+  - 분기 vs 연간 데이터 빈도 차이"
+  - 외화 부채 비중 영향 미보정
+examples:
+  - KR 시장 Altman-lite 필터
+  - 가치주 스크리너 + distress 필터 결합
+  - 음수 OCF + 부채비율 + Altman 합의
+  - 블랙리스트 회피 후속 검토
 lastUpdated: '2026-05-07'
 ---
 

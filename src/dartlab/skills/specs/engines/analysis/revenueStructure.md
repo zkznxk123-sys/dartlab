@@ -50,9 +50,27 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - 사업부별 / 지역별 / 제품별 매출 분리 미명시 답변 금지.
+  - 외화 매출 비중 무시 금지 — 환율 변동 영향 별도 표기.
+failureModes:
+  - 사업부 segment 정의 변경 (회사 재편) 시 시계열 단절 미반영
+  - 지역별 매출 분리에서 *수출* vs *해외 자회사* 차이 무시
+  - 제품 mix 변화 (신제품 출시) 영향을 가격 변동으로 오해
+  - 일회성 대형 계약 (M&A 인수 후 매출 통합) 영향 미분리
+  - 외화 매출 환율 영향 (환산 vs 거래) 미명시
+examples:
+  - 삼성전자 사업부별 매출
+  - 지역별 매출 (수출 비중)
+  - 제품 mix 변화 (반도체 vs 모바일 vs 가전)
+  - 환율 영향 분리
+  - 신규 사업 매출 비중 추세
+linkedSkills:
+  - engines.analysis.revenueForecast
+  - engines.analysis.growth
+  - engines.analysis.macroSensitivity
 source:
   type: manual_skill
   format: markdown

@@ -52,6 +52,24 @@ forbidden:
   - "API 키 / 인증정보 답변 노출 금지."
   - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
   - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - "분할/병합 이벤트 미반영 raw 가격 시계열로 추세 단정 금지 — adjusted price 사용 명시."
+  - "액면분할 vs 무상증자 vs 주식배당 효과 동치 처리 금지."
+failureModes:
+  - "분할 이벤트 미반영으로 EPS / BPS 시계열 단절"
+  - "분할 비율 (2:1 vs 5:1) 별 거래량 / 변동성 영향 차이 무시"
+  - "액면분할 직후 주가 변동을 분할 효과 이외 (기대감 / 차익실현) 와 혼동"
+  - "분할 + 무상증자 동반 이벤트의 합산 효과 단순화"
+  - "분할 이력 부재 (한 번도 분할 안한) 종목과 분할 종목의 가격 비교"
+examples:
+  - "삼성전자 2018 액면분할 효과"
+  - "분할 이력 시계열 (adjusted price)"
+  - "분할 직후 거래량 변동"
+  - "분할 vs 무상증자 영향 분리"
+linkedSkills:
+  - engines.gather
+  - engines.gather.price
+  - engines.gather.history
+  - engines.analysis.disclosureChange
 source:
   type: manual_skill
   format: markdown

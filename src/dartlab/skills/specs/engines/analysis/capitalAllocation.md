@@ -50,9 +50,28 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - capex / 배당 / 자사주 / M&A 분류 미명시 답변 금지.
+  - 자사주 매입과 자사주 소각 동치 처리 금지 — 소각만 EPS 영구 제거.
+failureModes:
+  - capex 강도 (capex/매출) 의 산업별 차이 무시 (제조 高 / 서비스 低)
+  - 일회성 M&A 지출을 정기 capex 로 분류 — 별도 표시 권장
+  - 자사주 *매입* (treasury) 과 *소각* (cancel) 영향 차이 무시
+  - 배당성향 (payout ratio) 의 분모를 EPS vs FCF 혼용
+  - 인수합병 영업권 발생 후 손상 (impairment) 위험 미언급
+examples:
+  - 삼성전자 자본배분 4 분류
+  - capex / 배당 / 자사주 / M&A 비중
+  - 배당성향 추세
+  - 자사주 매입 vs 소각 영향
+  - capex 사이클과 FCF
+linkedSkills:
+  - engines.analysis.cashflow
+  - engines.analysis.investmentEfficiency
+  - engines.analysis.dividendCapitalReturn
+  - engines.scan.capital
 source:
   type: manual_skill
   format: markdown

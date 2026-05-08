@@ -48,9 +48,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "universe / datasetAsOf 없이 후보 나열 금지."
-  - "기업명만 나열 금지 — 랭킹 / evidence 표 동반."
-  - "screening 결과를 심층 분석으로 제시 금지."
+  - universe / datasetAsOf 없이 후보 나열 금지.
+  - 기업명만 나열 금지 — 랭킹 / evidence 표 동반.
+  - screening 결과를 심층 분석으로 제시 금지.
+  - 자산회전율 / 재고회전 / 매출채권회전 분류 미명시 금지.
+  - CCC 분리 식 (DSO + DIO - DPO) 명시 없이 답변 금지.
+failureModes:
+  - 산업별 정상 자산회전율 차이 (제조 0.8x / 서비스 1.5x / 금융 0.05x) 무시
+  - 재고회전 분모 (매출 vs 매출원가) 혼용
+  - DSO 평균 vs 기말 잔액 혼용
+  - 일회성 자산 매각 영향 미보정
+examples:
+  - 자산회전율 상위 50
+  - CCC 단축 종목
+  - 산업 평균 회전율 대비
+  - 재고회전 + DSO + DPO 분리
+linkedSkills:
+  - engines.analysis.efficiency
+  - engines.analysis.cashflow
+  - engines.analysis.assetStructure
 source:
   type: manual_skill
   format: markdown

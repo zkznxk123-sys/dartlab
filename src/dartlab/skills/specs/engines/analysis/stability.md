@@ -7,16 +7,22 @@ status: observed
 category: engines
 purpose: "analysis 엔진의 안정성 축 응용 — 이 회사는 망하지 않는가."
 whenToUse:
-  - "analysis"
-  - "안정성"
-  - "이 회사는 망하지 않는가"
+  - 안정성
+  - 재무 안정성
+  - 부채비율
+  - 이자보상배율
+  - ICR
+  - 유동비율
+  - 당좌비율
+  - 차입금 의존도
+  - 망하지 않는가
 inputs:
-  - "Company 또는 종목코드"
-  - "기준 기간"
+  - Company 또는 종목코드
+  - 기준 기간
 outputs:
-  - "축별 dict"
-  - "evidence refs"
-  - "한계와 가정"
+  - 축별 dict (debtMetrics · interestCoverage · liquidity)
+  - evidence refs
+  - 한계와 가정
 capabilityRefs:
   - "analysis"
   - "Company.analysis"
@@ -50,9 +56,31 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - 금융사 (은행·보험) 에 일반 부채비율 적용 금지 — BIS 비율·유동성커버리지 (LCR) 사용.
+  - 부채비율 단일 metric 으로 위험 단정 금지 — 이자보상배율 (ICR) + OCF/부채 교차 검증.
+  - 우발부채·약정 (off-balance) 무시 금지.
+failureModes:
+  - 산업별 정상 부채비율 차이 무시 (제조 100~200% / 금융 1000%+ / 유틸 200~400%)
+  - 이자보상배율 (ICR) 1 미만인데 *일시적* 으로 단정 — 4 분기 시계열 확인 필수
+  - 사채 만기 구조 (1 년 내 만기 비중) 무시 — debt 시계열 확인
+  - 자산총계가 stale 인 경우 부채비율 잘못 계산
+  - 영업이익 음수 회사에 ICR 계산 시도 — flag 표시 필요
+  - 별도 vs 연결 재무제표 혼용 — scope 명시 필수
+examples:
+  - 삼성전자 재무 안정성 평가
+  - 부채비율 + 이자보상배율 추세
+  - 금융사 (신한지주) BIS 비율 평가
+  - 단기 차입 의존도 (유동성)
+  - 산업 평균 부채비율 대비 위치
+  - 영업이익 음수 회사의 안정성 판단
+linkedSkills:
+  - engines.credit
+  - engines.analysis.cashflow
+  - engines.analysis.financing
+  - engines.scan.liquidity
 source:
   type: manual_skill
   format: markdown

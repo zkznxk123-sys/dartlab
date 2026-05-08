@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "API 키 / 인증정보 답변 노출 금지."
-  - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
-  - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - API 키 / 인증정보 답변 노출 금지.
+  - provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다.
+  - 원자료를 그대로 분석 결론으로 포장 금지.
+  - sectorCode (KRX) vs industryCode (Yahoo) 혼동 금지.
+  - sector / industry 단계별 차이 무시 금지.
+failureModes:
+  - KRX 분류 (대분류 11 / 중분류 / 세부) 단계 명시 누락
+  - Yahoo asset profile (industry vs sector) 미국 분류와 한국 매칭 차이
+  - 신생 회사 sector 미분류 — None 처리 필요
+  - 다각화 회사 (지주) 의 sector 단일 분류 한계
+examples:
+  - 삼성전자 sector / industry
+  - KRX 분류 vs Yahoo
+  - 다각화 회사 sector 한계
+  - 신생 회사 None 처리
+linkedSkills:
+  - engines.industry
+  - engines.gather.industryPeers
+  - engines.scan.governance
 source:
   type: manual_skill
   format: markdown

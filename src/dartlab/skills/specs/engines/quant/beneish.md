@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "Beneish M > -1.78 한 신호로 분식 단정 금지 — accruals + 정합성 + 감사 동반."
+  - "1990 년대 미국 표본 기준 thresholds (-1.78) 를 KR 시장에 그대로 적용 금지."
+failureModes:
+  - "Beneish M-score 의 제조업 편향 (모델 학습 표본 차이)"
+  - "DSRI / GMI / AQI 등 8 변수 정의 모호 — KR 회계 매핑 차이"
+  - "산업별 정상 변동 (e.g. 사이클성 매출채권) 무시"
+  - "M 값 절대 기준만 보고 상대 (peer) 비교 누락"
+  - "분기 vs 연간 데이터 일관성 무시"
+examples:
+  - "삼성전자 Beneish M-score 시계열"
+  - "M > -1.78 red flag 종목 검출"
+  - "M-score + Sloan accruals 결합"
+  - "산업 평균 M-score 대비"
+linkedSkills:
+  - engines.quant
+  - engines.quant.accruals
+  - engines.analysis.earningsQuality
+  - engines.analysis.governanceAudit
 source:
   type: manual_skill
   format: markdown

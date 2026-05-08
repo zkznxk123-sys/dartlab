@@ -7,16 +7,21 @@ status: observed
 category: engines
 purpose: "analysis 엔진의 성장성 축 응용 — 이 회사는 얼마나 빨리 성장하는가."
 whenToUse:
-  - "analysis"
-  - "성장성"
-  - "이 회사는 얼마나 빨리 성장하는가"
+  - 성장성
+  - 매출 성장
+  - 영업이익 성장
+  - YoY
+  - CAGR
+  - 분기별 증가율
+  - 성장 패턴
 inputs:
-  - "Company 또는 종목코드"
-  - "기준 기간"
+  - Company 또는 종목코드
+  - 기준 기간 (분기·연)
 outputs:
-  - "축별 dict"
-  - "evidence refs"
-  - "한계와 가정"
+  - 축별 dict (revenueGrowth · profitGrowth · growthPattern)
+  - YoY · CAGR 시계열
+  - evidence refs
+  - 한계와 가정
 capabilityRefs:
   - "analysis"
   - "Company.analysis"
@@ -50,9 +55,30 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값 0 대체 금지 — 빈 분기는 skip + flag.
+  - 단일 axis 결과로 투자 결론 단정 금지.
+  - YoY 와 CAGR 정의 미명시 답변 금지 — 기준 기간 (3 년/5 년) + 시작 base 명시.
+  - 사이클 회사 (반도체·조선·정유) 의 단일 분기 YoY 로 추세 단정 금지 — 4 분기 이동 평균 권장.
+failureModes:
+  - YoY 가 base effect (전년 동기 일회성 비용/매출) 로 왜곡됨을 미고려
+  - CAGR 산정 시작 분기가 cycle peak/trough 인 경우 결과 왜곡
+  - 한 분기 spike 를 구조적 성장으로 오해
+  - 인수합병 (M&A) 영향 미분리 — 유기적 성장 vs 인수 성장 구분 필요
+  - 외화 매출 회사 환율 변동 영향 미분리 — 원화 매출 vs USD 매출 분리
+  - 신생 회사 (상장 2 년 이내) 에 5 년 CAGR 적용 시도
+examples:
+  - 삼성전자 성장성 분석
+  - 매출 YoY 추세 (분기별)
+  - 5 년 CAGR (매출 / 영업이익)
+  - 유기적 성장 vs M&A 성장 분리
+  - 사이클 peak/trough 영향 평가
+  - 신생 회사 (2 년 미만) 성장 분석
+linkedSkills:
+  - engines.analysis.profitability
+  - engines.analysis.revenueForecast
+  - engines.analysis.predictionSignal
+  - engines.scan.growth
 source:
   type: manual_skill
   format: markdown

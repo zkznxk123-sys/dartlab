@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "Bernard-Thomas PEAD 미국 결과를 KR 시장 동일 가정으로 인용 금지."
+  - "YoY NI growth z-score 의 분모 (sigma) 정의 명시 없이 결과 비교 금지."
+failureModes:
+  - "consensus 추정기관 수가 적은 (2~3 곳) 종목의 SUE 신뢰도 저하"
+  - "PEAD 효과 (post-earnings drift) 의 KR 시장 reproducibility 차이"
+  - "분기 회계 (지배 vs 비지배) 분리 누락"
+  - "일회성 손익 (M&A / 매각) 의 NI growth 영향 미보정"
+  - "산업별 정상 SUE 분포 차이 무시"
+examples:
+  - "삼성전자 SUE z-score 시계열"
+  - "positive SUE drift 후보 종목"
+  - "earnings surprise + 가격 모멘텀"
+  - "산업별 PEAD 효과 검증"
+linkedSkills:
+  - engines.quant
+  - engines.quant.earnings
+  - engines.quant.fundmom
+  - engines.gather.consensus
 source:
   type: manual_skill
   format: markdown

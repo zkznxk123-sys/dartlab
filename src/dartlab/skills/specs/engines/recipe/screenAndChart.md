@@ -33,6 +33,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 chart artifact 저장 제약
+forbidden:
+  - chart 는 항상 table 뒷받침 — 단일값 chart 금지.
+  - 차트 axis label / 단위 명시 없이 시각화 금지.
+  - 상위 N 추출 기준 (CAGR / score) 명시 없이 시각화 금지.
+  - 결손값 (None) 0 으로 채워 chart 금지 — 결손은 결손으로 표시.
+failureModes:
+  - 상위 N 의 sample size 통계 의미 부족 (N < 5)
+  - chart axis 의 시간 (분기 vs 연간) 차이로 시계열 왜곡
+  - 색상 / 마커 분류 (산업별 / size 별) 누락
+  - 단위 (백만원 vs 조 vs %) 혼용 차트
+  - 절대값 chart vs 변화율 chart 의미 차이 무시
+examples:
+  - 매출 CAGR 상위 10 종목 bar chart
+  - 수익성 scan 결과 시각화
+  - 산업별 색상 분류 chart
+  - 시계열 + scan 결합 chart
 lastUpdated: '2026-05-07'
 ---
 

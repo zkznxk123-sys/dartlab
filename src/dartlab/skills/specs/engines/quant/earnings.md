@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "SUE 한 분기 결과로 PEAD 효과 단정 금지 — 다분기 시계열 누적 검증."
+  - "EPS 컨센서스 추정기관 수 / 편차 명시 없이 surprise 점수 인용 금지."
+failureModes:
+  - "PEAD (post-earnings drift) 의 KR 시장 reproducibility 차이"
+  - "SUE 분모 (consensus std dev vs realized std dev) 정의 모호"
+  - "이익 수정 (revision) 모멘텀의 시점 (announce 직후 vs 1 개월 후) 차이"
+  - "분기 회계 (지배 vs 비지배) 분리 누락"
+  - "일회성 손익 (M&A / 매각) 의 EPS 영향 미보정"
+examples:
+  - "삼성전자 SUE 시계열"
+  - "PEAD 효과 KR 시장 검증"
+  - "이익 수정 모멘텀 + 가격 모멘텀 결합"
+  - "earnings surprise 상위 종목 후속 수익률"
+linkedSkills:
+  - engines.quant
+  - engines.quant.surprise
+  - engines.quant.fundmom
+  - engines.gather.consensus
 source:
   type: manual_skill
   format: markdown

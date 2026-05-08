@@ -35,6 +35,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 industry stage 단일 호출만
+forbidden:
+  - 가치 사슬 (upstream / midstream / downstream) 명시 없이 산업 단정 금지.
+  - 핵심 종목 5 미만 sample size 로 산업 평균 단정 금지.
+  - 매크로 영향 (산업 elasticity) 가정 없이 산업 영향 단정 금지.
+  - 단일 stage (예 — upstream 만) 결과로 전체 산업 결론 금지.
+failureModes:
+  - 가치 사슬 stage 정의 (KRX 산업 분류 vs 사업) 차이"
+  - 산업 sub-segment (반도체 메모리 vs 비메모리) 무시한 단일 평균
+  - 산업 전체와 KRX 시장 평균 비교 시 size weight 영향
+  - 산업 매크로 elasticity 의 시점 / 윈도우 차이"
+  - 신규 / 폐업 종목의 industry 매핑 시점 차이
+examples:
+  - 반도체 산업 deep dive
+  - 자동차 가치 사슬 + 핵심 종목
+  - 산업 매크로 영향 + peer 횡단
+  - 단계별 (upstream / downstream) 비교
 lastUpdated: '2026-05-07'
 ---
 

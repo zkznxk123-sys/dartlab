@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "API 키 / 인증정보 답변 노출 금지."
-  - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
-  - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - API 키 / 인증정보 답변 노출 금지.
+  - provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다.
+  - 원자료를 그대로 분석 결론으로 포장 금지.
+  - 시작/종료일 (start/end) 명시 없이 history 답변 금지.
+  - 수정주가 vs raw 가격 혼용 금지.
+failureModes:
+  - 휴장일 데이터 없음을 0 으로 표시
+  - market 자동 감지 실패 (KR vs US)
+  - fallback 체인 (Naver → Yahoo → FMP) 실패 시 silent 처리
+  - 배당락/분할 후 raw 가격 혼동
+examples:
+  - 삼성전자 1년 OHLCV
+  - 기간 지정 (2024Q1 - 2025Q1)
+  - 배당락 보정 vs raw
+  - US 종목 history (Yahoo)
+linkedSkills:
+  - engines.gather.price
+  - engines.quant.signalReview
+  - engines.quant.momentum
 source:
   type: manual_skill
   format: markdown

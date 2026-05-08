@@ -52,9 +52,28 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "성과 보장 표현 금지."
-  - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
-  - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - 성과 보장 표현 금지.
+  - 기간 / benchmark / 가정 명시 없이 수익률 인용 금지.
+  - 정량 신호를 인과 분석 결론으로 제시 금지.
+  - Piotroski F-score (0-9) 임계값 8+ 만으로 *우량* 단정 금지 — 시가총액 / 산업 분기 함께.
+  - 단일 분기 F-score 만으로 판단 금지 — 4+ 분기 시계열 권장.
+failureModes:
+  - 9 항목 중 산업 부적합 항목 (제조 외 회사의 자산회전율 등) 미보정
+  - 신생 회사의 YoY 성장 항목 base 부재로 점수 왜곡
+  - 일회성 손익이 ROA · CFO 항목 왜곡
+  - 사이클 회사의 cycle phase 별 F-score 변동 미반영
+  - F-score 단일 metric 만으로 *value* 결론 — 멀티플 (PER · PBR) 함께 필요
+examples:
+  - 삼성전자 Piotroski F-score
+  - F-score 8+ 우량 후보 + 멀티플 교차
+  - 4 분기 F-score 시계열
+  - 산업 평균 F-score 대비 위치
+  - 사이클 phase 별 F-score 변동
+linkedSkills:
+  - engines.quant.altman
+  - engines.quant.qmj
+  - engines.analysis.profitability
+  - engines.scan.quality
 source:
   type: manual_skill
   format: markdown

@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "API 키 / 인증정보 답변 노출 금지."
-  - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
-  - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - API 키 / 인증정보 답변 노출 금지.
+  - provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다.
+  - 원자료를 그대로 분석 결론으로 포장 금지.
+  - KR 전용 — US 종목에 flow 호출 금지.
+  - 외국인 / 기관 / 개인 분류 미명시 답변 금지.
+failureModes:
+  - US 시장 호출 시 None 반환 — 사용자에게 KR 전용임 안내 필요
+  - 외국인 보유비율과 외국인 순매수량 혼용
+  - 일별 vs 주별 vs 월별 합산 단위 혼동
+  - 일회성 외국인 매도 (배당락 직전 등) 추세로 단정
+examples:
+  - 삼성전자 외국인 순매수
+  - 기관 vs 개인 vs 외국인 분포
+  - 외국인 보유비율 추세
+  - 일별 수급 vs 누적
+linkedSkills:
+  - engines.gather.ownership
+  - engines.scan.insider
+  - engines.quant.flow
 source:
   type: manual_skill
   format: markdown

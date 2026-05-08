@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "차트 패턴 인식 결과를 자동 매수 / 매도 신호로 단정 금지 — 거래량 / 시장 환경 동반 검토."
+  - "목표가 (target price) 를 패턴만으로 단언 금지 — fundamental anchor 동반."
+failureModes:
+  - "패턴 인식 알고리즘의 false positive 비율 무시"
+  - "거래량 부족 (illiquid) 종목의 패턴 신뢰도 저하"
+  - "패턴 시점 (intraday vs daily vs weekly) 별 의미 차이"
+  - "사후 패턴 매칭 (data snooping) 의 과적합"
+  - "매크로 / 섹터 환경과 단일 차트 패턴의 인과 단순화"
+examples:
+  - "헤드앤숄더 패턴 자동 인식"
+  - "이중바닥 (W) + 거래량 동반"
+  - "삼각수렴 패턴 + breakout"
+  - "원형 패턴 형성 + 시장 환경"
+linkedSkills:
+  - engines.quant
+  - engines.quant.pattern
+  - engines.quant.indicators
+  - engines.quant.signals
 source:
   type: manual_skill
   format: markdown

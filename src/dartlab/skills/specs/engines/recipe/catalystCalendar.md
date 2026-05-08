@@ -22,7 +22,10 @@ outputs:
   - 한국어 weekly preview 본문
 linkedSkills:
   - engines.gather
+  - engines.gather.calendar
   - engines.recipe.dailyMorningNote
+  - engines.recipe.disclosureEvent
+  - engines.company
 toolRefs:
   - RunPython
   - EngineCall

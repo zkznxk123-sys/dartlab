@@ -52,9 +52,26 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "성과 보장 표현 금지."
-  - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
-  - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - 성과 보장 표현 금지.
+  - 기간 / benchmark / 가정 명시 없이 수익률 인용 금지.
+  - 정량 신호를 인과 분석 결론으로 제시 금지.
+  - quality score 산식 (ROE · GP/A · accrual ratio · debt) 분류 미명시 답변 금지.
+  - 단일 metric 으로 *quality* 단정 금지.
+failureModes:
+  - quality 정의 (Asness·Frazzini QMJ vs 일반 GP/A) 차이 무시
+  - 적자 회사 quality score 음수 — 산업 평균 비교 필수
+  - 사이클 회사 cycle peak quality 일시 고점
+  - 신생 회사 quality 데이터 부족
+examples:
+  - 삼성전자 quality score
+  - QMJ 기반 quality
+  - 산업 평균 quality 대비
+  - 적자 회사 quality 한계
+linkedSkills:
+  - engines.quant.qmj
+  - engines.quant.qfactor
+  - engines.scan.quality
+  - engines.analysis.earningsQuality
 source:
   type: manual_skill
   format: markdown

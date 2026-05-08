@@ -36,6 +36,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 finance 시계열 일부 한정
+forbidden:
+  - 부채비율 한 지표만으로 신용 위험 단정 금지 — 만기 분포 + 이자보상 동반.
+  - 단기 / 장기 부채 구분 명시 없이 부채 audit 결론 금지.
+  - 이자보상배율 단일 시점 결과로 부채 상환 능력 단정 금지.
+  - peer 산업 / size 차이 무시한 부채 ratio 단순 비교 금지.
+failureModes:
+  - 부채 정의 (총부채 vs 이자부 부채) 차이로 비율 변동
+  - 단기 부채의 roll-over 가정 명시 없이 만기 위험 단정"
+  - 이자보상배율 (EBIT / 이자비용) 의 EBIT 정의 차이"
+  - 외화 부채 비중 + 환율 변동 효과 미반영
+  - peer 산업 (자본집약 vs 자본경량) 정상 부채 수준 차이 무시
+examples:
+  - 삼성전자 부채 만기 분포 + 이자보상
+  - 부채 구조 + peer 횡단 (4 대 금융지주)
+  - 이자보상배율 시계열 + 5 년 평균
+  - 신용 등급 변화 + 부채 audit
 lastUpdated: '2026-05-07'
 ---
 

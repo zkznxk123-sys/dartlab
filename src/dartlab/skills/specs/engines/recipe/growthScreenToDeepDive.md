@@ -36,6 +36,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 scan dataset snapshot 한정
+forbidden:
+  - 성장 스캔 결과 상위 N 만 보고 매수 추천 금지 — 깊이 분석 후속 필수.
+  - CAGR 단일 기간 (3Y / 5Y) 만 보고 일관 성장 단정 금지 — 표준편차 동반.
+  - 성장률 정의 (매출 / 영업이익 / 순이익) 명시 없이 단정 금지.
+  - 일회성 성장 (M&A / 자산매각) 미보정 결과 인용 금지.
+failureModes:
+  - 성장 스캔의 universe (전종목 vs KOSPI200) 차이로 결과 변동
+  - 신규 상장 / 지정 종목의 시계열 길이 부족
+  - earningsQuality 후속 검증 누락 (성장 vs 분식 구분)
+  - 사이클성 산업 (반도체 / 화학) 의 단년도 고성장
+  - 성장률과 valuation (PER) 결합 누락
+examples:
+  - 성장 스캔 + 상위 5 종 깊이
+  - CAGR 30%+ 종목 후보 + earnings quality
+  - 성장 + valuation 결합
+  - 성장 + 일회성 정상화
 lastUpdated: '2026-05-07'
 ---
 

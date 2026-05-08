@@ -50,9 +50,28 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - 매출 전망의 가정 (수량 · 단가 · mix · 환율) 분리 미명시 금지.
+  - 단일 시나리오 (best case 만) 답변 금지 — base / upside / downside 3 시나리오.
+failureModes:
+  - 컨센서스 평균을 그대로 인용 — 분포 (median vs mean) + 애널리스트 수 분리 필요
+  - 가정 (수량 · 단가) 변경 시 매출 전망 민감도 미산출
+  - 사이클 회사의 cycle peak 기준 forecast → trough 시 큰 빗나감
+  - 신생 회사의 5 년 forecast — 표본 부족 한계 명시 필요
+  - 외화 매출 환율 가정 미명시
+examples:
+  - 삼성전자 매출 전망 base/upside/downside
+  - 가정 (수량/단가/환율) 민감도
+  - 컨센서스 분포 + 애널리스트 수
+  - 사이클 phase 별 forecast 한계
+  - 신생 회사 forecast 한계 명시
+linkedSkills:
+  - engines.analysis.predictionSignal
+  - engines.analysis.growth
+  - engines.gather.revenueConsensus
+  - engines.gather.consensus
 source:
   type: manual_skill
   format: markdown

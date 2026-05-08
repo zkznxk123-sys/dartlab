@@ -37,6 +37,22 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 macro snapshot 한정
+forbidden:
+  - elasticity 단위 (% / 배) 명시 없이 매크로 영향 단정 금지.
+  - 시나리오 (base / bull / bear) 가정 명시 없이 단일 elasticity 인용 금지.
+  - historical 추정 데이터 없이 단발 추측 elasticity 금지.
+  - 자본구조 (외화 부채 비중) 검토 없이 환율 영향 단정 금지.
+failureModes:
+  - elasticity 추정 윈도우 (1Y vs 5Y) 임의 선택"
+  - 매크로 변수 (금리 / 환율 / 유가) 간 상관 (금리 ↑ → 환율) 무시
+  - 회사 P&L 항목 (매출 / 원가 / 이자비용) 별 elasticity 다른 점 무시"
+  - 외화 부채 비중 자료의 시점 (분기말) 차이 무시
+  - 매크로 충격의 시차 (3M / 6M / 12M) 무시한 즉시 인과
+examples:
+  - 삼성전자 환율 + 금리 elasticity
+  - 신한지주 금리 인상 영향
+  - 환율 1% 변동 시 영업이익 영향
+  - 자본구조 + macro sensitivity 결합
 lastUpdated: '2026-05-07'
 ---
 

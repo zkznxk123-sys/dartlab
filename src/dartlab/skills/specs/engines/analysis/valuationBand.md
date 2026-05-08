@@ -50,9 +50,27 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "근거 없는 숫자를 만들지 않는다."
-  - "결손값을 0 으로 채우지 않는다."
-  - "단일 axis 결과를 최종 투자 결론으로 제시하지 않는다."
+  - 근거 없는 숫자를 만들지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - 단일 axis 결과를 최종 투자 결론으로 제시하지 않는다.
+  - 5y / 10y range 명시 없이 *밴드 상단/하단* 답변 금지.
+  - 산업 평균 멀티플과 밴드 동일시 금지 — 같은 회사 historical 밴드.
+failureModes:
+  - 5 년 vs 10 년 range 차이 미명시 — 사이클 1 회 (5 년) vs 2 회 (10 년)
+  - PER 음수 (적자 분기) 포함 시 range 왜곡 — 음수 분기 제외 표시
+  - cycle peak 시점 PER 낮음 = *저평가* 오해 (cycle 회사)
+  - 회계 기준 변경 (K-IFRS 도입) 후 멀티플 단절
+  - 분기 vs 연 멀티플 혼용
+examples:
+  - 삼성전자 PER 5y 밴드
+  - PER vs PBR 5y range
+  - cycle peak/trough 위치
+  - 산업 평균 멀티플과 historical 밴드 분리
+  - 회계 기준 변경 후 밴드 단절
+linkedSkills:
+  - engines.analysis.valuation
+  - engines.scan.valuation
+  - engines.quant.value
 source:
   type: manual_skill
   format: markdown

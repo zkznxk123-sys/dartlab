@@ -52,9 +52,28 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "성과 보장 표현 금지."
-  - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
-  - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - 성과 보장 표현 금지.
+  - 기간 / benchmark / 가정 명시 없이 수익률 인용 금지.
+  - 정량 신호를 인과 분석 결론으로 제시 금지.
+  - Altman Z 임계값 (제조 기준 1.81 / 2.99) 을 비제조 회사에 그대로 적용 금지 (Z' / Z'' 별도 모델).
+  - 단일 분기 Z-score 만으로 부도 위험 단정 금지 — 4 분기 시계열 권장.
+failureModes:
+  - 제조 vs 비제조 (서비스·금융) 임계값 차이 무시 — Z' (비제조), Z'' (이머징 마켓) 구분
+  - 사이클 회사의 cycle peak/trough 영향 — Z-score 변동 큼
+  - 일회성 손익으로 EBIT 왜곡 → Z-score 왜곡
+  - 자산총계 stale 시 Z-score 잘못 계산
+  - 신생 회사 (상장 2 년 미만) 의 retained earnings 음수 → Z-score 의도적 낮음
+examples:
+  - 삼성전자 Altman Z 부도 위험
+  - 4 분기 Z-score 시계열
+  - 제조 vs 비제조 (Z' 적용)
+  - 산업 평균 Z 대비 위치
+  - 사이클 phase 별 Z 변동
+linkedSkills:
+  - engines.quant.piotroski
+  - engines.quant.beneish
+  - engines.credit
+  - engines.analysis.stability
 source:
   type: manual_skill
   format: markdown

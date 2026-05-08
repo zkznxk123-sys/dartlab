@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "재무 vs 가격 괴리 한 신호로 매수 / 매도 단정 금지 — 산업 / 매크로 환경 동반."
+  - "괴리 정도 (mean reversion) 와 시장 효율성 가정 명시 없이 인용 금지."
+failureModes:
+  - "재무 (분기 / 연간) 와 가격 (일별) 데이터 빈도 차이"
+  - "괴리 신호 발생 시점과 mean reversion 시점 (3 개월~5 년) 차이"
+  - "산업별 정상 P/B 또는 P/E 분포 차이 무시"
+  - "자본구조 변경 (자사주 매입 / 증자) 영향 미반영"
+  - "장기 구조적 괴리 (가치함정) vs 단기 변동 혼동"
+examples:
+  - "삼성전자 재무 vs 가격 괴리"
+  - "P/B 와 ROE 의 mean reversion 추적"
+  - "EPS 추세 vs 주가 추세 분리"
+  - "괴리 신호 + 산업 환경 결합"
+linkedSkills:
+  - engines.quant
+  - engines.analysis.valuation
+  - engines.quant.signalReview
+  - engines.quant.value
 source:
   type: manual_skill
   format: markdown

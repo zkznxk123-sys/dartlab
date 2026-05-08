@@ -52,9 +52,26 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "성과 보장 표현 금지."
-  - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
-  - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - 성과 보장 표현 금지.
+  - 기간 / benchmark / 가정 명시 없이 수익률 인용 금지.
+  - 정량 신호를 인과 분석 결론으로 제시 금지.
+  - benchmarkMode (market / sector / style / auto) 명시 없이 베타 답변 금지.
+  - 회귀 추정 기간 (3y / 5y / 10y) 미명시 금지.
+failureModes:
+  - 단일 추정 기간 베타 변동 큼 — 다중 기간 비교 권장
+  - benchmark 일치 (KOSPI vs S&P) 무시 — 시장 일치 필수
+  - 사이클 회사의 cycle phase 별 베타 변동 무시
+  - 거래일 (250 일/년) vs 캘린더일 (365 일) 혼용
+examples:
+  - 삼성전자 시장 베타 (KOSPI)
+  - 섹터 베타 (반도체 섹터)
+  - benchmarkMode=auto 자동 감지
+  - 5y vs 10y 베타 비교
+linkedSkills:
+  - engines.quant.benchmark
+  - engines.quant.factor
+  - engines.scan.macroBeta
+  - engines.analysis.macroSensitivity
 source:
   type: manual_skill
   format: markdown

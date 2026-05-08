@@ -49,9 +49,25 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - "API 키 / 인증정보 답변 노출 금지."
-  - "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다."
-  - "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story."
+  - API 키 / 인증정보 답변 노출 금지.
+  - provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다.
+  - 원자료를 그대로 분석 결론으로 포장 금지.
+  - 배당락일 vs 배당지급일 혼동 금지.
+  - 특별배당 vs 정기배당 혼용 금지.
+failureModes:
+  - 일회성 특별배당을 정기 배당 추세로 합산
+  - 배당락 + 가격 보정 누락
+  - 분기배당 vs 연배당 합산 시 단위 혼동
+  - 미국 회사 분기배당 (Apple) vs 한국 연 1회 배당 차이
+examples:
+  - 삼성전자 5 년 배당 이력
+  - 분기배당 vs 연배당 합산
+  - 특별배당 분리
+  - 배당락 + 보정 가격
+linkedSkills:
+  - engines.scan.dividendTrend
+  - engines.analysis.dividendCapitalReturn
+  - engines.gather.splits
 source:
   type: manual_skill
   format: markdown

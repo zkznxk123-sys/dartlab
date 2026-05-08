@@ -55,6 +55,24 @@ forbidden:
   - "성과 보장 표현 금지."
   - "기간 / benchmark / 가정 명시 없이 수익률 인용 금지."
   - "정량 신호를 인과 분석 결론으로 제시 금지."
+  - "Hamilton 2-state HMM (bull / bear) 의 학습 윈도우 의존성 명시 없이 인용 금지."
+  - "현재 레짐 추정 (Viterbi) 결과를 미래 레짐 예측으로 단정 금지."
+failureModes:
+  - "HMM 모수 추정 (EM) 의 local optima 의존성"
+  - "학습 윈도우 길이 (5Y vs 10Y) 별 레짐 식별 차이"
+  - "2-state 가정의 KR 시장 적합성 (3-state 필요 가능성)"
+  - "레짐 전환 신호와 후행 검증 (lag) 무시"
+  - "벤치마크 (KOSPI vs 섹터) 별 레짐 차이"
+examples:
+  - "KR 시장 레짐 (bull / bear) 시계열"
+  - "현재 레짐 추정 (Viterbi)"
+  - "레짐별 자산 영향"
+  - "추세추종 신호 + 레짐 결합"
+linkedSkills:
+  - engines.quant
+  - engines.macro.cycle
+  - engines.quant.style
+  - engines.quant.signalReview
 source:
   type: manual_skill
   format: markdown
