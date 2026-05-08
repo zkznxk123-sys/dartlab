@@ -4,14 +4,18 @@
 - recordSkillUsage(skillId, ok, valueRefs) — 사용 빈도 통계
 - remember(question + answer 요약, tags=[...]) — 다음 세션 recall 컨텍스트
 - outcome_log.store_decision(stockCode, market, ...) — stockCode 인식 시 pending entry 작성
+- tryResolvePending(stockCode, market, pricer=...) — 같은 종목 다음 호출 진입부에서 pending → resolved 자동 변환
 
 P-revised: chat-native runAgent 도 본 helper 호출 → SSOT.md Principle 6
 "session trace → HARVEST → decisions.jsonl + outcome_log" 정합 (이전엔 workbench 만 작성).
+
+ai/ 정적 import 가드 (SSOT §1) — providers 호출이 필요한 default lookup 은 함수
+local lazy import. caller 는 더 정교한 pricer 를 주입할 수 있다.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from datetime import date
 from typing import Any
 
@@ -160,4 +164,80 @@ def inferStockCodeContext(
     return None, None
 
 
-__all__ = ["fetchPastContext", "fetchRecallContext", "inferStockCodeContext", "wireSessionMemory"]
+def defaultPriceLookup(symbol: str, asOf: str, *, market: str = "KR") -> float | None:
+    """KR 종목용 default pricer — Company.gather("price") + asOf 필터.
+
+    SSOT §6 의 `Company.price(asOf=...)` 명시는 본 helper 가 effective 의미를 충족.
+    US 는 EDGAR 측 미구현 (None 반환). 빈 데이터 / 예외 / asOf 이전 가격 0 건 → None
+    (resolver 가 pending 유지).
+
+    네트워크 호출 비용 큼. 운영 cron sweep 에서 사용 시 caller 가 캐시 wrap 권장.
+    """
+    if market != "KR":
+        return None
+    try:
+        import polars as pl  # noqa: PLC0415  (lazy: ai/ 정적 import 가드)
+
+        from dartlab.providers.dart.company import Company  # noqa: PLC0415
+
+        c = Company(symbol)
+        df = c.gather("price")
+        if df is None or df.is_empty():
+            return None
+        target = pl.lit(asOf).cast(pl.Date, strict=False)
+        filtered = df.filter(pl.col("date") <= target)
+        if filtered.is_empty():
+            return None
+        return float(filtered.sort("date").tail(1)["close"][0])
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def tryResolvePending(
+    stockCode: str | None,
+    market: str | None = None,
+    *,
+    pricer: Callable[[str, str], float | None] | None = None,
+    benchmarkPricer: Callable[[str, str], float | None] | None = None,
+    benchmarkSymbol: str | None = None,
+    today: str | None = None,
+    minHoldingDays: int = 30,
+) -> int:
+    """outcome_resolver 호출 wrapper — 진입부 1 줄 호출용.
+
+    pricer 미주입 시 noop (0). 실패 / 가드 거부 / 예외 시 안전 0.
+    caller 는 default 로 `defaultPriceLookup` 사용 가능 (KR 만 지원).
+
+    Returns:
+        resolved 갱신된 entry 수.
+    """
+    if not stockCode:
+        return 0
+    if pricer is None:
+        return 0
+    try:
+        from dartlab.ai.memory.outcome_resolver import resolvePending  # noqa: PLC0415
+
+        safe_code = safe_stockcode(stockCode)
+        report = resolvePending(
+            safe_code,
+            market=market or "KR",
+            pricer=pricer,
+            benchmarkPricer=benchmarkPricer,
+            benchmarkSymbol=benchmarkSymbol,
+            today=today,
+            minHoldingDays=minHoldingDays,
+        )
+        return report.resolvedCount
+    except Exception:  # noqa: BLE001
+        return 0
+
+
+__all__ = [
+    "defaultPriceLookup",
+    "fetchPastContext",
+    "fetchRecallContext",
+    "inferStockCodeContext",
+    "tryResolvePending",
+    "wireSessionMemory",
+]

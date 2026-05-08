@@ -282,9 +282,10 @@ def _parse_entry(block: str) -> Entry | None:
     reflection_match = _REFLECTION_RE.search(full + "\n<!-- ENTRY_END -->")
     reflection = reflection_match.group(1).strip() if reflection_match else ""
 
-    raw_return = fields[0] if status == "resolved" and len(fields) >= 1 else ""
-    alpha = fields[1] if status == "resolved" and len(fields) >= 2 else ""
-    holding = fields[2] if status == "resolved" and len(fields) >= 3 else ""
+    # fields[0] 은 status 문자열 자체. raw_return/alpha/holding 은 fields[1:].
+    raw_return = fields[1] if status == "resolved" and len(fields) >= 2 else ""
+    alpha = fields[2] if status == "resolved" and len(fields) >= 3 else ""
+    holding = fields[3] if status == "resolved" and len(fields) >= 4 else ""
 
     return Entry(
         date=date,
