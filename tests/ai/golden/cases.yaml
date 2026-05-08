@@ -1,0 +1,292 @@
+# 골든 trace 명세 — 회사 5 종 × 질문 3 유형 = 15 케이스.
+#
+# 사용 — OAuth Codex 토큰으로 1 회 호출:
+#   uv run python -X utf8 scripts/dev/runGoldenTrace.py
+#
+# 산출:
+#   - ~/.dartlab/decisions/{market}/{stockCode}.md (outcome_log entry)
+#   - tests/ai/golden/baseline_{version}.json (taxonomy 분류 결과 freeze)
+#
+# 회사 selection 기준 — 산업 분기 다양성:
+# - 005930 (삼성전자): 제조 / 반도체 / 사이클
+# - 055550 (신한지주): 금융 / 은행
+# - 207940 (삼성바이오로직스): 바이오 / 신약
+# - 035420 (네이버): 플랫폼 / IT 서비스
+# - 010130 (고려아연): 자원 / 정유·금속
+#
+# 질문 유형:
+# - simple_health: 재무 건전성 단답 — credit + analysis(stability) 호출 기대
+# - six_act_full: 6 막 종합 분석 — story (full reportType) 호출 기대
+# - peer_compare: peer 비교 — scan + industry + analysis(profitability) 호출 기대
+
+version: v1
+capturedAt: null  # runGoldenTrace 가 채움 (ISO 8601 UTC)
+dartlabVersion: null  # runGoldenTrace 가 채움
+
+cases:
+  # ── 005930 삼성전자 ──
+  - id: c1_samsung_health
+    stockCode: '005930'
+    market: KR
+    industryHint: manufacturing_semiconductor
+    questionType: simple_health
+    question: 삼성전자 재무 건전성 한 줄로 평가해줘
+    expectedTools:
+      - ReadSkill
+      - RunPython
+    expectedSkillRefs:
+      - engines.credit
+      - engines.analysis
+    expectedRefKinds:
+      - valueRef
+      - dateRef
+    forbiddenPatterns:
+      - 결손값 0
+      - 추정합니다  # ref 없는 추측
+    industryBranch:
+      mustMention: false  # simple_health 는 분기 안 따져도 OK
+
+  - id: c1_samsung_six_act
+    stockCode: '005930'
+    market: KR
+    industryHint: manufacturing_semiconductor
+    questionType: six_act_full
+    question: 삼성전자 6 막 종합 분석 보고서 만들어줘
+    expectedTools:
+      - ReadSkill
+      - RunPython
+      - GetSkillBody  # story 본문 필요
+    expectedSkillRefs:
+      - engines.story
+      - engines.analysis
+      - engines.macro
+      - engines.industry
+    expectedRefKinds:
+      - tableRef
+      - valueRef
+      - dateRef
+      - executionRef
+    industryBranch:
+      mustMention: true
+      keywords: [반도체, 사이클, capex]
+
+  - id: c1_samsung_peer
+    stockCode: '005930'
+    market: KR
+    industryHint: manufacturing_semiconductor
+    questionType: peer_compare
+    question: 삼성전자와 SK하이닉스 수익성 비교
+    expectedTools:
+      - ReadSkill
+      - RunPython
+    expectedSkillRefs:
+      - engines.scan
+      - engines.analysis.profitability
+    expectedRefKinds:
+      - tableRef
+    industryBranch:
+      mustMention: true
+      keywords: [반도체, peer]
+
+  # ── 055550 신한지주 (금융) ──
+  - id: c2_shinhan_health
+    stockCode: '055550'
+    market: KR
+    industryHint: finance_bank
+    questionType: simple_health
+    question: 신한지주 재무 건전성 평가
+    expectedTools:
+      - ReadSkill
+      - RunPython
+    expectedSkillRefs:
+      - engines.credit
+    expectedRefKinds:
+      - valueRef
+      - dateRef
+    industryBranch:
+      mustMention: true
+      keywords: [은행, BIS, NIM, 대손충당금]  # 금융사 전용 지표 — 일반 ratio 적용 시 industry_branch_missing
+
+  - id: c2_shinhan_six_act
+    stockCode: '055550'
+    market: KR
+    industryHint: finance_bank
+    questionType: six_act_full
+    question: 신한지주 종합 분석
+    expectedTools:
+      - ReadSkill
+      - RunPython
+      - GetSkillBody
+    expectedSkillRefs:
+      - engines.story
+      - engines.analysis
+      - engines.credit
+    industryBranch:
+      mustMention: true
+      keywords: [은행, BIS, NIM, 자기자본]
+
+  - id: c2_shinhan_peer
+    stockCode: '055550'
+    market: KR
+    industryHint: finance_bank
+    questionType: peer_compare
+    question: 신한지주 KB 하나 우리 4 대 금융지주 ROE 비교
+    expectedTools:
+      - ReadSkill
+      - RunPython
+    expectedSkillRefs:
+      - engines.scan
+    industryBranch:
+      mustMention: true
+      keywords: [은행, ROE]
+
+  # ── 207940 삼성바이오로직스 (바이오) ──
+  - id: c3_sb_health
+    stockCode: '207940'
+    market: KR
+    industryHint: bio_cdmo
+    questionType: simple_health
+    question: 삼성바이오로직스 재무 건전성
+    expectedTools:
+      - ReadSkill
+      - RunPython
+    expectedSkillRefs:
+      - engines.credit
+      - engines.analysis
+    industryBranch:
+      mustMention: true
+      keywords: [CDMO, capex, 수주]  # 바이오 capex 사이클 + 수주 가시성
+
+  - id: c3_sb_six_act
+    stockCode: '207940'
+    market: KR
+    industryHint: bio_cdmo
+    questionType: six_act_full
+    question: 삼성바이오 6 막 분석
+    expectedTools:
+      - ReadSkill
+      - RunPython
+      - GetSkillBody
+    expectedSkillRefs:
+      - engines.story
+      - engines.analysis
+      - engines.industry
+    industryBranch:
+      mustMention: true
+      keywords: [CDMO, 수주, capex, 신약]
+
+  - id: c3_sb_peer
+    stockCode: '207940'
+    market: KR
+    industryHint: bio_cdmo
+    questionType: peer_compare
+    question: 삼성바이오 셀트리온 SK바이오팜 비교
+    expectedTools:
+      - ReadSkill
+      - RunPython
+    expectedSkillRefs:
+      - engines.scan
+      - engines.analysis
+    industryBranch:
+      mustMention: true
+      keywords: [CDMO, 신약]
+
+  # ── 035420 네이버 (플랫폼) ──
+  - id: c4_naver_health
+    stockCode: '035420'
+    market: KR
+    industryHint: platform_it
+    questionType: simple_health
+    question: 네이버 재무 건전성
+    expectedTools:
+      - ReadSkill
+      - RunPython
+    expectedSkillRefs:
+      - engines.credit
+      - engines.analysis
+    industryBranch:
+      mustMention: false
+
+  - id: c4_naver_six_act
+    stockCode: '035420'
+    market: KR
+    industryHint: platform_it
+    questionType: six_act_full
+    question: 네이버 종합 분석 보고서
+    expectedTools:
+      - ReadSkill
+      - RunPython
+      - GetSkillBody
+    expectedSkillRefs:
+      - engines.story
+      - engines.analysis
+      - engines.industry
+    industryBranch:
+      mustMention: true
+      keywords: [광고, 커머스, 라인, 검색]
+
+  - id: c4_naver_peer
+    stockCode: '035420'
+    market: KR
+    industryHint: platform_it
+    questionType: peer_compare
+    question: 네이버 카카오 비교
+    expectedTools:
+      - ReadSkill
+      - RunPython
+    expectedSkillRefs:
+      - engines.scan
+      - engines.analysis
+    industryBranch:
+      mustMention: true
+      keywords: [광고, 커머스, 콘텐츠]
+
+  # ── 010130 고려아연 (자원/사이클) ──
+  - id: c5_kz_health
+    stockCode: '010130'
+    market: KR
+    industryHint: resource_metal
+    questionType: simple_health
+    question: 고려아연 재무 건전성
+    expectedTools:
+      - ReadSkill
+      - RunPython
+    expectedSkillRefs:
+      - engines.credit
+      - engines.analysis
+    industryBranch:
+      mustMention: true
+      keywords: [원자재, 가격, 사이클]
+
+  - id: c5_kz_six_act
+    stockCode: '010130'
+    market: KR
+    industryHint: resource_metal
+    questionType: six_act_full
+    question: 고려아연 종합 분석
+    expectedTools:
+      - ReadSkill
+      - RunPython
+      - GetSkillBody
+    expectedSkillRefs:
+      - engines.story
+      - engines.analysis
+      - engines.macro
+    industryBranch:
+      mustMention: true
+      keywords: [LME, 아연, 납, 사이클, 원자재]
+
+  - id: c5_kz_peer
+    stockCode: '010130'
+    market: KR
+    industryHint: resource_metal
+    questionType: peer_compare
+    question: 고려아연 영풍 풍산 비교
+    expectedTools:
+      - ReadSkill
+      - RunPython
+    expectedSkillRefs:
+      - engines.scan
+    industryBranch:
+      mustMention: true
+      keywords: [원자재, LME, 아연]
