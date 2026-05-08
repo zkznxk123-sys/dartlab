@@ -15,7 +15,7 @@ inputs:
 outputs:
   - visualRef
 toolRefs:
-  - compile_visual
+  - CompileVisual
 requiredEvidence:
   - table
   - metric
@@ -54,7 +54,7 @@ lastUpdated: "2026-05-02"
 
 - 먼저 실행 결과에서 tableRef가 있는지 확인한다.
 - category와 metric이 각각 2개 이상 비교 가능한지 확인한다.
-- `compile_visual`은 tableRef 기반으로만 호출한다.
+- `CompileVisual`은 tableRef 기반으로만 호출한다.
 - visual이 실패하면 답변에 차트를 주장하지 않는다.
 - ChartSpec 직접 만들 때는 `dartlab.viz.refs.chartEvidenceBinding(...)` 으로 `evidenceBinding` 을 채운다 — `emit_chart` 는 evidence 회로 진입점이 없는 spec 을 거부한다.
 - datapoint 단위 drill-back 이 필요한 series 는 `seriesPointRefs(...)` 로 `series[i].pointRefs` 를 채운다.

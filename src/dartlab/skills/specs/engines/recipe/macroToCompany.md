@@ -21,8 +21,8 @@ linkedSkills:
   - engines.company.researchStarter
   - engines.analysis.financing
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

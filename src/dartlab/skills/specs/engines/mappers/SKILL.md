@@ -1,50 +1,41 @@
 ---
 id: engines.mappers
-title: Mappers
+title: Mappers (계정 정규화)
 kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Mappers 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 capability/docstring으로 내려간다. 트리거 — '항목 매핑', '컬럼 정규화', 'snake_id 변환'.
+purpose: Mappers 는 DART/EDGAR 원문 계정명을 공통 snake_id 로 정규화하는 *내부 모듈* 이다. 사용자 직접 호출 capability 가 아니라, Company.show / scan 결과 안에서 자동 적용. 본 skill 은 매핑 규칙을 *AI 가 컬럼 정규화에 활용* 할 때 참조한다. 트리거 — '항목 매핑', '컬럼 정규화', 'snake_id 변환'.
 whenToUse:
-  - Mappers
   - mappers
-  - 1. 한눈에 보기
-  - 2. 절대 원칙 — 7 개로 간다
-  - 3. 아키텍처
-  - 4. 6 매퍼
-  - 5. 공통 유틸 (`common.py`) — 모든 파서·매퍼가 공유한다
+  - 계정 정규화
+  - snake_id
+  - 컬럼 매핑
+  - 한글 → 영문
+  - rawName → standardName
 inputs:
-  - 작업 목적
-  - 대상 엔진 또는 실행 환경
-  - 검증 범위
+  - 한국어 계정명 (예 — 총자산)
+  - topic (BS · IS · CF · CIS · SCE)
 outputs:
-  - selected skill
-  - capability/docstring handoff
-  - verification gate
+  - snake_id (예 — total_assets)
+  - 매핑 metadata (category · type · confidence)
 capabilityRefs: []
 toolRefs:
-  - search_reference
-  - run_python
+  - RunPython
 knowledgeRefs:
   - start.dartlabSkillOs
+  - engines.company
+  - engines.data.foundation
 sourceRefs:
   - dartlab://skills/engines.mappers
-procedure:
-  - 1. 한눈에 보기 기준을 확인한다.
-  - 2. 절대 원칙 — 7 개로 간다 기준을 확인한다.
-  - 3. 아키텍처 기준을 확인한다.
-  - 4. 6 매퍼 기준을 확인한다.
-  - 5. 공통 유틸 (`common.py`) — 모든 파서·매퍼가 공유한다 기준을 확인한다.
-  - '`_metadata.description` — AI 가 이 매핑의 목적을 이해.'
-  - key → value — 한국어 → 영문 canonical (일관된 패턴).
-  - category·type 분류 — AI 가 새 항목을 자동 분류하는 학습 데이터.
 requiredEvidence:
-  - skillRef
+  - topic
+  - rawName
+  - snakeId
+  - source
 expectedOutputs:
-  - 작업 경로
-  - 확인한 근거
-  - 검증 결과
+  - 정규화된 snake_id
+  - 매핑 신뢰도 (정확/부분/실패)
 runtimeCompatibility:
   server:
     status: supported
@@ -56,62 +47,99 @@ runtimeCompatibility:
     status: supported
   pyodide:
     status: limited
-    notes:
-      - 실제 실행 가능 여부는 연결된 capability와 데이터 snapshot 범위를 따른다.
 failureModes:
-  - Skill OS 검색 없이 과거 문서 경로를 직접 찾음
-  - API schema를 skill 본문에 중복해 docstring/capability와 어긋남
-  - 검증 게이트 없이 변경 또는 답변을 완료 처리함
+  - snake_id 추측 (반드시 `normalizeColumn(topic, hint)` 또는 `columnsFor(topic)` 결과 인용)
+  - topic 누락 — 같은 한글 이름이 BS/IS/CF 에 다 있을 수 있음 ("당기순이익" 등)
+  - rawName 의 한자/영문 변형 (`(주)` · `(연결)` · ` ` 공백) 미정규화
 forbidden:
-  - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.
-  - 공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다.
+  - 매핑 결과 없이 한글 계정명을 직접 컬럼명으로 사용 금지.
+  - 매핑 신뢰도 낮을 때 (`confidence < 0.8`) 답변에 그대로 쓰지 않는다.
 examples:
-  - Mappers 규칙 확인
-  - mappers 작업을 Skill OS에서 시작
+  - 총자산 → total_assets 정규화
+  - 당기순이익 (topic=IS) → net_income
+  - normalizeColumn 으로 RunPython 안에서 동적 정규화
+  - 새 사업보고서 항목 매핑 추가
+procedure:
+  - RunPython prelude 의 `normalizeColumn(topic, hint)` 사용 — 한글/snake/alias → 표준 snake_id.
+  - 가능 컬럼 목록은 `columnsFor(topic)` — snake_id · label · aliases.
+  - topic 자체는 `availableTopics()` (BS/IS/CF/CIS/SCE).
+  - 매핑 정의는 `src/dartlab/mappers/{topic}.json` — AI/사람이 JSON 직접 편집해 추가.
+  - 신규 매핑은 confidence + category + type 메타 함께 등록.
+linkedSkills:
+  - engines.company
+  - engines.data.foundation
 source:
-  type: absorbed_skills
-  absorbedKey: mappers
+  type: manual_skill
   format: markdown
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-08'
 ---
 
-## Skill OS 흡수 규칙
+## 엔진 역할
 
-- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.
-- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.
-- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.
+`mappers` 는 사용자 capability 가 아니라 *내부 모듈* 이다. DART 사업보고서·재무제표·주석의 한글 계정명을 dartlab 공통 snake_id 로 정규화한다. EDGAR 측은 SEC GAAP 태그 → 같은 snake_id (양쪽 SSOT 동등).
 
-## 실행 순서
-
-- 1. 한눈에 보기 기준을 확인한다.
-- 2. 절대 원칙 — 7 개로 간다 기준을 확인한다.
-- 3. 아키텍처 기준을 확인한다.
-- 4. 6 매퍼 기준을 확인한다.
-- 5. 공통 유틸 (`common.py`) — 모든 파서·매퍼가 공유한다 기준을 확인한다.
-- `_metadata.description` — AI 가 이 매핑의 목적을 이해.
-- key → value — 한국어 → 영문 canonical (일관된 패턴).
-- category·type 분류 — AI 가 새 항목을 자동 분류하는 학습 데이터.
+AI 가 직접 쓸 자리는 `RunPython` 안의 prelude 헬퍼 — `normalizeColumn(topic, hint)`, `columnsFor(topic)`, `availableTopics()`. 매핑 자체 편집은 운영자 절차 (`src/dartlab/mappers/{topic}.json` 직접 수정).
 
 ## 공개 호출 방식
 
-- `dartlab.Company("005930").show("BS")`
-- `내부 mapper는 공개 Company/show/gather 경로를 통해 사용`
+```python
+# RunPython 안에서 — prelude 자동 노출
+import dartlab
+c = dartlab.Company("005930")
+bs = c.show("BS", freq="Q")
+
+# 한글 → snake_id 정규화 (추측 금지)
+col = normalizeColumn("BS", "총자산")        # → "total_assets"
+col2 = normalizeColumn("IS", "영업")          # → "operating_profit"
+
+# 가능 컬럼 목록 (snake_id · label · aliases)
+cols = columnsFor("BS")
+print(cols)
+
+# 가능 topic
+print(availableTopics())   # BS / IS / CF / CIS / SCE
+```
 
 ## 호출 동작
 
-- 공시/재무 원문 계정과 표준 계정, 섹션, 테이블 매핑을 연결한다. 사용자는 직접 mapper보다 Company/show 결과로 검산한다.
-- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
-- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+`normalizeColumn(topic, hint)` — `topic` 안에서 `hint` 와 매칭되는 표준 snake_id 반환. 매칭 실패 시 `None` (또는 ValueError, 구현 따라). 한글 풀네임 · 부분 키워드 · snake_id 자기 자신 모두 받음.
+
+`columnsFor(topic)` — 해당 topic 의 모든 표준 컬럼 list. 각 항목은 `snake_id` · `label` (한글) · `aliases` (한글/영문 변형) · `category` · `type`.
+
+매핑 데이터는 `src/dartlab/mappers/{topic}.json` 의 `_metadata.description` + `key:value` (한글 → 영문 canonical) + `category/type` 분류.
+
+## 6 매퍼 (topic 별)
+
+| topic | 파일 | 책임 |
+| --- | --- | --- |
+| BS | `bs.json` | 재무상태표 — 자산·부채·자본 계정 |
+| IS | `is.json` | 손익계산서 — 매출·비용·이익 계정 |
+| CF | `cf.json` | 현금흐름표 — 영업·투자·재무 활동 |
+| CIS | `cis.json` | 포괄손익계산서 — OCI 항목 |
+| SCE | `sce.json` | 자본변동표 — 자본 구성 변동 |
+| ratios | `ratios.json` | 재무비율 — ROE · 부채비율 등 파생 |
+
+공통 유틸 (`mappers/common.py`) 가 모든 파서·매퍼에서 공유. 한자/영문/공백/괄호 변형 정규화.
 
 ## 대표 반환 형태
 
-- mapping table 또는 normalized DataFrame을 반환한다. 핵심 컬럼은 rawName, standardName, section, table, confidence, source다.
-- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+```text
+normalizeColumn("BS", "총자산")
+→ "total_assets"  (str)
+
+columnsFor("BS")
+→ list[dict]
+   snake_id : str
+   label : str         # 한글 표시명
+   aliases : list[str] # 변형 ("총 자산", "자산총계", "Total Assets")
+   category : str      # "asset" / "liability" / "equity"
+   type : str          # "current" / "non-current" / "total"
+```
+
+## evidence 기준
+
+매핑 결과는 `topic` · `rawName` · `snakeId` · `confidence` · `source` (DART/EDGAR) 를 남긴다. confidence 낮으면 답변에 명시.
 
 ## 기본 검증
 
-- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
-- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
-- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
-
-
+매핑 정의 변경은 `src/dartlab/mappers/{topic}.json` 직접 수정 + 본 skill 의 6 매퍼 표 동시 갱신. 신규 매핑 추가 시 `category` · `type` 메타 함께 — AI 가 새 항목을 자동 분류하는 학습 데이터로 작동.

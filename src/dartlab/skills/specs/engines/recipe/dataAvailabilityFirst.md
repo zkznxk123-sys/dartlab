@@ -19,8 +19,8 @@ linkedSkills:
   - engines.gather
   - engines.data.foundation
 toolRefs:
-  - inspect_dataset
-  - engine_call
+  - InspectDataset
+  - EngineCall
 requiredEvidence:
   - skillRef
   - datasetRef
@@ -44,17 +44,17 @@ import dartlab
 c = dartlab.Company("005930")
 
 topics = c.topics  # 가용 토픽 목록
-# inspect_dataset 으로 schema 확인
+# InspectDataset 으로 schema 확인
 # 누락 시 c.update() 또는 c.gather('price') 호출
 ```
 
 ## 호출 동작
 
-분석 의도 → 필요한 dataset 식별 → inspect_dataset 으로 schema/최신 시점 확인 → 누락 시 update/gather 트리거.
+분석 의도 → 필요한 dataset 식별 → InspectDataset 으로 schema/최신 시점 확인 → 누락 시 update/gather 트리거.
 
 1. 회사 진입
 2. c.topics — 가용 토픽 목록
-3. inspect_dataset — 핵심 dataset 확인 (Company.show:code:BS 등)
+3. InspectDataset — 핵심 dataset 확인 (Company.show:code:BS 등)
 4. (누락 시) c.update() — finance/docs/report 증분 수집
 5. (가격 필요 시) c.gather("price") — KR/US 주가
 

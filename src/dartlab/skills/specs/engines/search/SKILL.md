@@ -1,121 +1,161 @@
 ---
 id: engines.search
-title: Search *(beta — AI 사용 비권장)*
+title: Search (공시 본문/제목 검색, BETA)
 kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Search *(beta — AI 사용 비권장)* 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 capability/docstring으로 내려간다. 트리거 — '종목 검색', '회사명 검색' (AI 사용 비권장 — index 신선도 부족).
+purpose: Search 는 DART 공시의 *제목* (report_nm + section_title) 또는 *본문* (section_content) 을 로컬 인덱스로 검색한다. **BETA — 인덱스 신선도 부족, AI 사용 비권장**. 단일 종목 공시는 `Company.disclosure()` 우선. 트리거 — '공시 검색', '제목 매칭', '본문 BM25', 'search'.
 whenToUse:
-  - Search *(beta — AI 사용 비권장)*
   - search
-  - 1. scope — `title` 와 `content` 두 개로 간다
-  - 2. 호출 계약 — 네 패턴으로 간다
-  - 3. search vs listing — 내용 vs 카탈로그로 나눈다
-  - 4. 구조 — core/search/ 3 모듈로 간다
-  - 5. content 인덱스 — main + delta 세그먼트로 간다
+  - 공시 검색
+  - 제목 검색
+  - 본문 검색
+  - 유상증자
+  - 대표이사 변경
+  - 반도체 HBM 투자
+  - 환율 리스크
 inputs:
-  - 작업 목적
-  - 대상 엔진 또는 실행 환경
-  - 검증 범위
+  - 검색어 (한국어)
+  - corp 필터 (종목코드 또는 회사명)
+  - start / end (YYYYMMDD)
+  - scope (auto / title / content / both)
+  - topK
 outputs:
-  - selected skill
-  - capability/docstring handoff
-  - verification gate
+  - 검색 결과 DataFrame
+  - score · rcept_no · corp_name · report_nm · dartUrl
 capabilityRefs:
   - search
-  - Company.search
-toolRefs:
-  - search_reference
-  - run_python
 knowledgeRefs:
   - start.dartlabSkillOs
+  - engines.company
 sourceRefs:
   - dartlab://skills/engines.search
-procedure:
-  - 1. scope — `title` 와 `content` 두 개로 간다 기준을 확인한다.
-  - 2. 호출 계약 — 네 패턴으로 간다 기준을 확인한다.
-  - 3. search vs listing — 내용 vs 카탈로그로 나눈다 기준을 확인한다.
-  - 4. 구조 — core/search/ 3 모듈로 간다 기준을 확인한다.
-  - 5. content 인덱스 — main + delta 세그먼트로 간다 기준을 확인한다.
-  - '`scope="title"` (기본): report_nm + section_title ngram 검색. 제목형 쿼리 전용 ("유상증자", "대표이사 변경"). 95% precision · 1ms.'
-  - '`scope="content"`: section_content 본문 BM25 검색. 개념/내용형 쿼리 전용 ("반도체 HBM 투자", "환율 변동 리스크").'
-  - 두 엔진은 독립. **가중치 합산은 쓰지 않는다** — 실험 116 에서 합산 방식은 품질 저하 확인됨.
-  - 외부 모델/서버 불필요 — 로컬 numpy 역인덱스만으로 동작.
 requiredEvidence:
-  - skillRef
+  - query
+  - scope
+  - dataAsOf
+  - executionRef
 expectedOutputs:
-  - 작업 경로
-  - 확인한 근거
-  - 검증 결과
+  - 매칭 공시 목록
+  - DART 뷰어 URL
+  - BETA 한계 명시
 runtimeCompatibility:
   server:
     status: supported
   localPython:
     status: supported
   mcp:
-    status: supported
+    status: limited
   webAi:
-    status: supported
+    status: limited
   pyodide:
     status: limited
-    notes:
-      - 실제 실행 가능 여부는 연결된 capability와 데이터 snapshot 범위를 따른다.
 failureModes:
-  - Skill OS 검색 없이 과거 문서 경로를 직접 찾음
-  - API schema를 skill 본문에 중복해 docstring/capability와 어긋남
-  - 검증 게이트 없이 변경 또는 답변을 완료 처리함
+  - 단일 종목 공시 검색에 search 사용 (Company(code).disclosure() / liveFilings 우선)
+  - 0 건 반환 시 키워드 변형으로 round 반복 — 인덱스 stale 가능성, 즉시 다른 경로 fallback
+  - title 과 content 가중치 합산 — 실험 116 에서 품질 저하 확인됨, 합산 금지
+  - 최근 N 일 공시 누락 — 매일 자동 증분 미완성
 forbidden:
-  - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.
-  - 공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다.
+  - 인덱스 신선도 (dataAsOf) 명시 없이 검색 결과를 *최신* 으로 답변 금지.
+  - title scope 와 content scope 점수 합산 금지 (별도 엔진 — 합산은 품질 저하).
+  - search 0 건 시 키워드 변형 반복 호출 금지 (즉시 Company.disclosure 또는 scan 으로 전환).
 examples:
-  - Search *(beta — AI 사용 비권장)* 규칙 확인
-  - search 작업을 Skill OS에서 시작
+  - 유상증자 검색 (제목 매칭, "유상증자" 키워드)
+  - 반도체 HBM 투자 트렌드 (본문 BM25)
+  - 환율 리스크 언급 회사 찾기
+  - 단일 종목 공시는 Company.disclosure() (search 아님)
+procedure:
+  - 검색 의도 확인 — 제목형 (report_nm) vs 개념형 (본문 BM25).
+  - dartlab.search(query, scope=title) 또는 scope=content (auto 가 자동 판별).
+  - 결과의 `score`, `rcept_no`, `dartUrl` 인용. 본문 분석은 `Company(code).readFiling(rcept_no)`.
+  - 0 건이면 round 반복 X — `Company.disclosure()` 또는 `scan` 으로 즉시 전환.
+  - 최근 N 일 데이터는 인덱스 빌드 시점 이후 누락 가능 — DART API 직접 호출 (Company.liveFilings) 권장.
+linkedSkills:
+  - engines.company
+  - engines.scan
 source:
-  type: absorbed_skills
-  absorbedKey: search
+  type: manual_skill
   format: markdown
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-08'
 ---
 
-## Skill OS 흡수 규칙
+## 엔진 역할
 
-- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.
-- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.
-- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.
+`search` 는 DART 공시의 제목/본문을 로컬 인덱스로 검색하는 BETA 엔진이다. 외부 모델/서버 불필요 — 로컬 numpy 역인덱스만으로 동작. **AI 사용은 비권장** — 매일 자동 증분이 미완성이라 최근 N 일 데이터 누락 가능.
 
-## 실행 순서
-
-- 1. scope — `title` 와 `content` 두 개로 간다 기준을 확인한다.
-- 2. 호출 계약 — 네 패턴으로 간다 기준을 확인한다.
-- 3. search vs listing — 내용 vs 카탈로그로 나눈다 기준을 확인한다.
-- 4. 구조 — core/search/ 3 모듈로 간다 기준을 확인한다.
-- 5. content 인덱스 — main + delta 세그먼트로 간다 기준을 확인한다.
-- `scope="title"` (기본): report_nm + section_title ngram 검색. 제목형 쿼리 전용 ("유상증자", "대표이사 변경"). 95% precision · 1ms.
-- `scope="content"`: section_content 본문 BM25 검색. 개념/내용형 쿼리 전용 ("반도체 HBM 투자", "환율 변동 리스크").
-- 두 엔진은 독립. **가중치 합산은 쓰지 않는다** — 실험 116 에서 합산 방식은 품질 저하 확인됨.
-- 외부 모델/서버 불필요 — 로컬 numpy 역인덱스만으로 동작.
+단일 종목 공시는 `Company(code).disclosure()` (시계열) 또는 `Company(code).liveFilings()` (라이브) 가 안정 진입점. search 는 *횡단 키워드 검색* — "어떤 회사가 유상증자했나" 같은 질문 한정.
 
 ## 공개 호출 방식
 
-- `dartlab.search("삼성전자 공시")`
-- `dartlab.Company("005930").disclosure()`
+```python
+import dartlab
+
+# 1. 제목 검색 (default scope="auto" 가 자동 판별)
+result = dartlab.search("유상증자")
+# → DataFrame: score · rcept_no · corp_name · report_nm · scope · dartUrl
+
+# 2. 본문 검색 (개념/내용형 쿼리)
+result = dartlab.search("반도체 HBM 투자", scope="content")
+
+# 3. 명시적 scope
+result = dartlab.search("환율 리스크", scope="content")
+
+# 4. 종목/기간 필터
+result = dartlab.search("대표이사 변경", corp="005930",
+                        start="20240101", end="20251231")
+
+# 5. 단일 종목 공시는 search 가 아니라 Company
+c = dartlab.Company("005930")
+disclosures = c.disclosure()    # 전체 시계열
+recent = c.liveFilings()        # 라이브
+```
 
 ## 호출 동작
 
-- 공시/문서/참조 텍스트를 검색한다. 인덱스 신선도가 부족하면 beta 한계를 명시하고 단일 종목 공시는 Company 경유를 우선한다.
-- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
-- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+`scope="title"` (기본 — auto 가 제목형으로 판단 시): `report_nm + section_title` ngram 검색. 제목형 쿼리 ("유상증자" · "대표이사 변경") 전용. 95% precision · 1ms.
+
+`scope="content"`: `section_content` 본문 BM25 검색. 개념/내용형 쿼리 ("반도체 HBM 투자" · "환율 변동 리스크") 전용.
+
+`scope="auto"`: 쿼리 길이/단어 수로 title/content 자동 분기.
+
+`scope="both"`: 두 엔진 결과 별도 컬럼으로 묶음 — **점수 합산 금지** (실험 116 에서 합산은 품질 저하).
+
+`corp` 는 종목코드 ("005930") 또는 회사명 ("삼성전자"), `start`/`end` 는 YYYYMMDD, `topK` 기본 10.
+
+## 호출 패턴 4 종
+
+```python
+search("query")                              # auto · 전체 기간
+search("query", scope="content")             # 본문 강제
+search("query", corp="005930")               # 종목 필터
+search("query", start="20240101", end="20251231")  # 기간 필터
+```
 
 ## 대표 반환 형태
 
-- search result list/DataFrame을 반환한다. 핵심 컬럼은 title, snippet, source, date, score, url/ref다.
-- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+```text
+dartlab.search("유상증자")
+→ pl.DataFrame
+   score : float        # 매칭 점수
+   rcept_no : str       # 공시 접수번호 (Company.readFiling 입력용)
+   corp_name : str
+   report_nm : str      # 공시 유형명
+   scope : str          # "title" 또는 "content"
+   dartUrl : str        # DART 공시 뷰어 URL
+```
+
+## evidence 기준
+
+검색 답변은 `query` · `scope` · `dataAsOf` (인덱스 빌드 시점) · 결과 `rcept_no` 를 남긴다. **`dataAsOf` 가 최근 N 일 전이면 stale 가능성 답변에 명시**. 최신 공시 확인은 `Company(code).liveFilings()` (DART API 직접) 우선.
+
+## 기본 실행 순서
+
+1. 검색 의도 분류 — 제목형이면 `scope="auto"` 또는 `"title"`, 개념형이면 `scope="content"`.
+2. `dartlab.search(query, scope=)` 호출.
+3. 0 건 또는 stale 의심 시 → `Company.disclosure()` 또는 `scan` 으로 즉시 fallback (round 반복 X).
+4. 매칭 공시의 본문 분석은 `Company(code).readFiling(rcept_no)` — 외부 본문 가드 적용.
 
 ## 기본 검증
 
-- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
-- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
-- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
-
-
+`dartlab.search()` 시그니처 (query · corp · start · end · scope · topK) 가 변경되거나 인덱스 빌드 워크플로우 (`stemIndex` · `contentIndex`) 가 바뀌면 본 skill 갱신.

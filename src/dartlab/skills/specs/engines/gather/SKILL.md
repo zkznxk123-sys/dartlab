@@ -102,51 +102,71 @@ lastUpdated: '2026-05-07'
 
 ## 공개 호출 방식
 
+`dartlab.gather` 는 두 가지 형태로 쓴다 — 형태 A 가 권장 진입점, 형태 B 는 Gather 클래스 메서드를 직접 부를 때.
+
 ```python
+# 형태 A — 모듈 callable (권장). dartlab.gather 는 GatherEntry 인스턴스라 axis 디스패치.
 import dartlab
 
-g = dartlab.gather()
-
-price = g.price("005930", market="KR")
-consensus = g.consensus("005930", market="KR")
-flow = g.flow("005930", market="KR")
-history = g.history("005930", market="KR")
-news = g.news("삼성전자", market="KR", days=30)
-dividends = g.dividends("005930", market="KR")
-holders = g.majorShareholders("005930", market="KR")
-snapshot = g.collect("005930", market="KR")
+dartlab.gather()                              # 가이드 DataFrame (전체 axis 목록)
+dartlab.gather("price", "005930")             # KR OHLCV
+dartlab.gather("price", "AAPL", market="US")  # US OHLCV
+dartlab.gather("flow", "005930")              # 수급
+dartlab.gather("macro")                       # KR 거시지표 wide
+dartlab.gather("macro", "FEDFUNDS")           # FRED 자동 감지
+dartlab.gather("news", "삼성전자")             # Google News RSS
+dartlab.gather("calendar", "005930")          # 정기공시 due (DART_API_KEY)
+dartlab.gather("krxIndex", "close", market="KOSPI")  # 시장군 지수
 
 c = dartlab.Company("005930")
-company_price = c.gather("price")
+c.gather("price")                             # 종목코드/market 자동 주입
+
+# 형태 B — Gather 클래스 메서드 (consensus/dividends/majorShareholders 같은
+# axis 미등록 메서드, snapshot=True 등 세밀한 옵션 필요할 때).
+from dartlab.gather import getDefaultGather
+
+g = getDefaultGather()
+g.price("005930", market="KR")
+g.price("005930", snapshot=True)              # PriceSnapshot (현재가)
+g.consensus("005930"); g.dividends("005930")
+g.majorShareholders("005930")
+g.collect("005930")                           # 전체 도메인 병렬 수집 → GatherSnapshot
 ```
 
 ## 호출 동작
 
-`dartlab.gather()`는 기본 Gather 객체를 반환한다. 메서드 호출은 provider, cache, snapshot을 통해 데이터를 가져오며, API 키가 필요한 provider는 키 누락 시 안내 가능한 예외 또는 제한 상태를 반환한다.
+형태 A — `dartlab.gather` 는 `GatherEntry` 인스턴스 (모듈 callable). `dartlab.gather()` 는 axis=None → 가이드 DataFrame, `dartlab.gather(axis, target, **kwargs)` 는 11 개 정식 axis (`price/flow/macro/news/sector/insider/ownership/peers/krx/krxIndex/calendar`) 디스패치. 미등록 axis 는 `ValueError("알 수 없는 gather 축")`.
 
-Company-bound `c.gather(axis)`는 회사의 종목코드와 market을 자동으로 넣어 gather method를 실행한다.
+형태 B — `getDefaultGather()` 는 모듈 싱글턴 `Gather` 인스턴스를 반환. provider/cache/circuit breaker 가 붙은 풀 메서드 셋 (`price/consensus/flow/history/news/dividends/splits/sector/insiderTrading/majorShareholders/ownership/industryPeers/macro/collect/invalidate/close`). API 키가 필요한 provider 는 키 누락 시 안내 가능한 예외 또는 제한 상태 반환.
+
+Company-bound `c.gather(axis)` 는 회사의 종목코드와 market 을 자동으로 넣어 형태 A 로 호출한다.
 
 ## 전체 축/메서드 목록
 
-| method | 담당 데이터 | 대표 호출 |
-| --- | --- | --- |
-| price | 현재 가격 snapshot | `g.price("005930", market="KR")` |
-| consensus | 실적/목표가 컨센서스 | `g.consensus("005930", market="KR")` |
-| flow | 투자자별 수급 | `g.flow("005930", market="KR")` |
-| revenue_consensus | 매출 컨센서스 | `g.revenue_consensus("005930", market="KR")` |
-| history | 가격/거래량 시계열 | `g.history("005930", market="KR")` |
-| news | 뉴스 검색/수집 | `g.news("삼성전자", market="KR", days=30)` |
-| dividends | 배당 이력 | `g.dividends("005930", market="KR")` |
-| splits | 액면분할/주식분할 | `g.splits("005930", market="KR")` |
-| sector | 섹터/업종 정보 | `g.sector("005930", market="KR")` |
-| insiderTrading | 내부자 거래 | `g.insiderTrading("005930", market="KR")` |
-| majorShareholders | 주요주주 | `g.majorShareholders("005930", market="KR")` |
-| ownership | 기관/소유 구조 | `g.ownership("005930", market="KR")` |
-| industryPeers | 업종 peer | `g.industryPeers("005930", market="KR")` |
-| macro | 매크로 원자료 | `g.macro("GDP", market="KR")` |
-| collect | 종목 snapshot 일괄 수집 | `g.collect("005930", market="KR")` |
-| invalidate | cache 무효화 | `g.invalidate("005930")` |
-| close | client/session 종료 | `g.close()` |
+아래 표는 형태 B (`Gather` 클래스 메서드) 기준. 형태 A (`dartlab.gather(axis, ...)`) 는 11 개 정식 axis 만 받음 — `price · flow · macro · news · sector · insider · ownership · peers · krx · krxIndex · calendar`. `consensus / dividends / splits / majorShareholders / industryPeers / collect` 같은 항목은 형태 A 에서는 axis 가 아니라 형태 B 메서드로만 노출.
+
+| method (형태 B) | axis (형태 A) | 담당 데이터 | 대표 호출 |
+| --- | --- | --- | --- |
+| price | price | 가격 시계열 / snapshot | `g.price("005930", market="KR")` · `dartlab.gather("price", "005930")` |
+| consensus | — | 목표가/투자의견 컨센서스 | `g.consensus("005930", market="KR")` |
+| flow | flow | 투자자별 수급 | `g.flow("005930", market="KR")` · `dartlab.gather("flow", "005930")` |
+| revenue_consensus | — | 매출 컨센서스 | `g.revenue_consensus("005930", market="KR")` |
+| history | — | 기간 지정 OHLCV | `g.history("005930", start=, end=)` |
+| news | news | 뉴스 검색 (Google News) | `g.news("삼성전자", days=30)` · `dartlab.gather("news", "삼성전자")` |
+| dividends | — | 배당 이력 | `g.dividends("005930", market="KR")` |
+| splits | — | 액면분할/병합 이력 | `g.splits("005930", market="KR")` |
+| sector | sector | 섹터/업종 정보 | `g.sector("005930", market="KR")` · `dartlab.gather("sector", "005930")` |
+| insiderTrading | insider | 내부자 거래 (DART) | `g.insiderTrading("005930")` · `dartlab.gather("insider", "005930")` |
+| majorShareholders | — | 5% 대량보유 | `g.majorShareholders("005930", market="KR")` |
+| ownership | ownership | 기관/외국인 보유 | `g.ownership("005930", market="KR")` · `dartlab.gather("ownership", "005930")` |
+| industryPeers | peers | 업종 피어 종목 | `g.industryPeers("005930")` · `dartlab.gather("peers", "005930")` |
+| macro | macro | ECOS/FRED 거시지표 | `g.macro("GDP", market="KR")` · `dartlab.gather("macro", "FEDFUNDS")` |
+| — | krx | KRX 회사별 와이드 (지표 28+) | `dartlab.gather("krx", "close", start=, end=)` |
+| — | krxIndex | KRX 시장군 지수 OHLCV (KOSPI/KOSDAQ 등) | `dartlab.gather("krxIndex", "close", market="KOSPI")` |
+| — | calendar | 정기공시 due date (DART_API_KEY) | `dartlab.gather("calendar", "005930", horizon_days=30)` |
+| collect | — | 도메인 병렬 수집 → GatherSnapshot | `g.collect("005930", market="KR")` |
+| invalidate | — | 캐시 무효화 | `g.invalidate("005930")` |
+| close | — | client/session 종료 | `g.close()` |
 
 ## 대표 반환 형태
 

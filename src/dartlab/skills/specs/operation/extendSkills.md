@@ -87,7 +87,7 @@ purpose: ...절차 설명. 트리거 — '오늘 아침', '야간 공시 정리'
 - 동의어 그룹 (예: "재무제표 비교 / 회사 비교 / 두 종목 차이") 은 같은 trigger 안에 묶어서.
 
 이유:
-- LLM 이 `read_skill` 검색 결과를 펼쳐볼 때 `purpose` 본문이 가장 먼저 보이고, 자연어 phrase 매칭이 단어 array (`whenToUse`) 보다 우선 hit.
+- LLM 이 `ReadSkill` 검색 결과를 펼쳐볼 때 `purpose` 본문이 가장 먼저 보이고, 자연어 phrase 매칭이 단어 array (`whenToUse`) 보다 우선 hit.
 - whenToUse 는 grep-style 인덱스이고, purpose trigger 는 LLM 의 의도 매칭에 직접 들어간다.
 
 SCHEMA 변경 없음 — `purpose:` 본문 끝에 한 문장 추가만. `lastUpdated` 는 갱신.

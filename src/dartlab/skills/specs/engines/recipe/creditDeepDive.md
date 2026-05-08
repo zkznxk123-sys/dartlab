@@ -20,8 +20,8 @@ linkedSkills:
   - engines.analysis.cashflow
   - engines.macro.rates
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

@@ -21,8 +21,8 @@ linkedSkills:
   - engines.quant.regime
   - engines.analysis.macroSensitivity
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

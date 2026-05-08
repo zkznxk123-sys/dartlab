@@ -23,8 +23,8 @@ linkedSkills:
   - engines.recipe.compounderCandidates
   - engines.analysis.valuation
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

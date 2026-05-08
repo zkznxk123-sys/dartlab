@@ -17,7 +17,7 @@ capabilityRefs:
   - Company.readFiling
 toolRefs:
   - search_reference
-  - run_python
+  - RunPython
   - finalize_answer
 knowledgeRefs:
   - dartDisclosureStructure

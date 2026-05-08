@@ -20,8 +20,8 @@ linkedSkills:
   - engines.scan.workforce
   - engines.analysis.financialConsistency
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

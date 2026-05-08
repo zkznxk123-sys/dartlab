@@ -20,8 +20,8 @@ linkedSkills:
   - engines.story.dartlabStory
   - engines.analysis.scorecard
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

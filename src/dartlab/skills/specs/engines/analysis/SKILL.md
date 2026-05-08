@@ -148,9 +148,11 @@ forecast = c.analysis("forecast", "매출전망")
 # 4. 축 이름만으로 실행 가능한 경우
 profitability = c.analysis("수익성")
 
-# 5. 모듈 함수형 호출
-profitability = dartlab.analysis("financial", "수익성", c)
-valuation = dartlab.analysis("valuation", "가치평가", c)
+# 5. 모듈 함수형 호출 — Company 객체는 company= keyword (positional 3 번째 안 받음)
+profitability = dartlab.analysis("financial", "수익성", company=c)
+valuation = dartlab.analysis("valuation", "가치평가", company=c)
+# stockCode 단독 호출도 가능
+profitability = dartlab.analysis("financial", "수익성", stockCode="005930")
 ```
 
 노트북이나 MCP에서 사람이 따라 할 때도 같은 순서로 쓴다. 먼저 `c.analysis()`로 가능한 축을 확인하고, 그 다음 실제 축을 호출한다.

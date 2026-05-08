@@ -19,8 +19,8 @@ linkedSkills:
   - engines.analysis.efficiency
   - engines.macro.cycle
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

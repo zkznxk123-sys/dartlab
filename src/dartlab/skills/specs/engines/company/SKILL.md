@@ -130,7 +130,8 @@ analysis = c.analysis("financial", "수익성")
 credit = c.credit()
 price = c.gather("price")
 quant = c.quant("모멘텀")
-macro = c.macro("매크로민감도")
+macro = c.macro("사이클")                          # 시장 매크로 (사이클/위기/시나리오/유동성/심리)
+sensitivity = c.analysis("macro", "매크로민감도")  # 기업 단위 매크로 민감도는 analysis 엔진
 story = c.story()
 industry = c.industry()
 ```
@@ -155,7 +156,7 @@ Company 생성 시 target과 market/provider를 확정한다. 이후 `show/selec
 | credit | 신용/부실위험 | `c.credit()` |
 | gather | 외부/보조 데이터 | `c.gather("price")` |
 | quant | 정량 분석 | `c.quant("모멘텀")` |
-| macro | 기업 단위 매크로 연결 | `c.macro("매크로민감도")` |
+| macro | 시장 매크로 (사이클/위기/시나리오/유동성/심리, KR 자동) | `c.macro("사이클")` |
 | table/topics/sources/index/facts | 탐색 메타 | `c.index()` |
 | retrievalBlocks/contextSlices/ask | AI 컨텍스트/질의 | `c.ask("질문")` |
 | sector/rank/audit/market/currency/fiscalYearEnd | 회사 메타/검증 | `c.market()` |

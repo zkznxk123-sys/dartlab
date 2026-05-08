@@ -21,8 +21,8 @@ linkedSkills:
   - engines.recipe.intrinsicValueBand
   - engines.recipe.workingCapitalQuality
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

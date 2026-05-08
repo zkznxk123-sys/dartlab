@@ -22,8 +22,8 @@ linkedSkills:
   - engines.analysis.valuation
   - engines.analysis.valuationBand
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

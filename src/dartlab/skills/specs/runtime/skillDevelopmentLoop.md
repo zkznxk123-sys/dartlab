@@ -34,9 +34,9 @@ capabilityRefs:
   - ChartResult
 toolRefs:
   - search_reference
-  - inspect_dataset
-  - run_python
-  - compile_visual
+  - InspectDataset
+  - RunPython
+  - CompileVisual
   - finalize_answer
 knowledgeRefs:
   - dartlabCausalSixActs

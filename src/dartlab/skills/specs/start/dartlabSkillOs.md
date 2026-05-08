@@ -126,6 +126,28 @@ DartLab 은 한국 DART 와 미국 EDGAR 공시를 구조화해 코드와 AI 가
 
 검색에서 후보가 너무 많으면 (`engines.*` 만 148 개) 카테고리 트리에서 sub-group (`analysis`, `scan`, `macro`, `quant` 등) 을 좁힌다. 후보가 너무 적으면 (`engines.{group}` 기본만) whenToUse 키워드를 변형해 응용 skill 을 다시 검색한다.
 
+## 외부 LLM 의 첫 호출 절차
+
+dartlab 내부 `ai.agent` 가 아니라 외부 LLM (Claude Code, Cursor, Codex, MCP client 등) 이 dartlab 을 처음 만났을 때는 다음 두 단계로 본문을 받는다 — 한 번에 모든 skill 본문을 받지 말 것 (LLM context 폭발). 도구 이름은 PascalCase (Claude 도구 체계).
+
+1. **`ReadSkill(query, limit=8)`** — frontmatter + bodyPreview (앞 1500 자) 만 받아 후보 1~3 개로 좁힌다. 후보 비교는 `purpose` · `whenToUse` · `requiredEvidence` · `expectedOutputs` 만 본다.
+2. **`GetSkillBody(skillId)`** — 적합한 skill 의 raw markdown 본문 전체를 단일 호출로 fetch. 여기서 `## 공개 호출 방식` · `## 호출 동작` · `## 대표 반환 형태` 를 읽고 코드를 작성한다.
+3. **`RunPython(code)`** 또는 **`EngineCall(apiRef, args)`** — skill 의 호출 패턴을 따라 실행하고 `emit_result(table=, values=, date=)` (RunPython) 또는 정형 ref 직접 (EngineCall) 로 발급.
+
+`includeBody=True` 옵션은 `ReadSkill` 1 회 호출에 본문까지 동봉하는 fallback 경로 — 도구 호출이 어려운 환경 (workbench heuristic) 에서만 사용한다.
+
+## skill `status` 의 의미
+
+| 상태 | 의미 | LLM 가이드 |
+|---|---|---|
+| `observed` | 코드와 본문이 운영자에 의해 검증됨. 그대로 인용·실행 가능. |  |
+| `unverified` | 본문 검증 미완 — 호출 자체는 가능하나 인용 전 실제 출력 한번 점검 필요. | 답변에 인용할 때 *검증 전* 임을 명시 또는 `RunPython` 결과로 spot check. |
+| `archived` | 폐기 — 새 답변에 인용 금지. | 후속 skill (`succeededBy`) 로 이동. |
+
+`unverified` 가 다수 (전체 약 42%) 인 것은 정상 — capability/docstring 이 SSOT 이고 skill 본문은 운영자 페이스로 검증된다. 검증 미완 = 위험 아님 = 단순히 *이중 점검 권장*.
+
+응용 skill (예: `engines.analysis.cashflow`) 의 `failureModes` · `examples` 가 빈 list 면 "위험 모드 없음" 이 아니라 *해당 응용 skill 의 메타가 미작성* 이라는 뜻이다. 기본 skill (`engines.analysis`) 의 `failureModes` · `forbidden` 으로 보강 추론하고, 호출 결과는 `RunPython` 으로 spot check 한다.
+
 ## 검증 게이트
 
 답변 하기 전 다음을 확인한다:

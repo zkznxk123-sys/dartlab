@@ -17,7 +17,7 @@ linkedSkills:
   - operation.apiContract
 toolRefs:
   - read
-  - read_capability
+  - ReadCapability
 requiredEvidence:
   - skillRef
 runtimeCompatibility:
@@ -47,7 +47,7 @@ capability docstring 은 두 독자 — 사람 (개발자·기여자) + LLM (자
 **LLM용** (신규 — 본 표준):
 - `## LLM Specifications` 섹션 안 6 sub-key
 - 사람이 읽기 어려운 형식 OK (LLM 비교 선택용 메타)
-- `read_capability` payload 와 `mcp` tool description 자동 생성에 직접 사용
+- `ReadCapability` payload 와 `mcp` tool description 자동 생성에 직접 사용
 
 두 영역은 같은 docstring 안에 공존. SSOT 분리 X — 한 곳에서 두 독자를 모두 지원.
 

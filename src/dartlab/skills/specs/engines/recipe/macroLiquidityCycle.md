@@ -21,8 +21,8 @@ linkedSkills:
   - engines.macro.crisis
   - engines.macro.summary
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

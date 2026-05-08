@@ -21,8 +21,8 @@ linkedSkills:
   - engines.scan.valuation
   - engines.quant.value
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

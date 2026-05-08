@@ -19,8 +19,8 @@ linkedSkills:
   - engines.quant.momentum
   - engines.quant.flow
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

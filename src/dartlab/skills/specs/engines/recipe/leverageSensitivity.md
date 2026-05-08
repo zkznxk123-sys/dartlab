@@ -21,8 +21,8 @@ linkedSkills:
   - engines.recipe.distressFilter
   - engines.recipe.creditDistressDual
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

@@ -19,8 +19,8 @@ linkedSkills:
   - engines.analysis.profitability
   - engines.analysis.financing
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

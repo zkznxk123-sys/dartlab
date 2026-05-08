@@ -23,9 +23,9 @@ datasetRefs:
   - krx.prices
 toolRefs:
   - search_reference
-  - inspect_dataset
-  - run_python
-  - compile_visual
+  - InspectDataset
+  - RunPython
+  - CompileVisual
   - finalize_answer
 knowledgeRefs:
   - krxDatasetStructure
@@ -91,8 +91,8 @@ lastUpdated: "2026-05-02"
 ## 절차
 
 - RuntimeDatasetCatalog에서 KRX 가격 또는 종목 데이터셋 후보를 찾는다.
-- `inspect_dataset`으로 종목코드, 종목명, 날짜, 가격/거래대금/등락률 컬럼을 확인한다.
-- `run_python`으로 동일 기준의 횡단면 ranking 표를 만든다. 표에는 종목 식별자, 종목명, 기준일, 비교 시작일 또는 기간, ranking metric, rank가 있어야 한다.
+- `InspectDataset`으로 종목코드, 종목명, 날짜, 가격/거래대금/등락률 컬럼을 확인한다.
+- `RunPython`으로 동일 기준의 횡단면 ranking 표를 만든다. 표에는 종목 식별자, 종목명, 기준일, 비교 시작일 또는 기간, ranking metric, rank가 있어야 한다.
 - ranking 또는 “찾아줘” 유형의 결과는 답변 prose보다 table ref와 필요 시 CSV artifact가 우선이다. 산출물 ref가 없으면 후보 발굴을 완료한 것으로 보지 않는다.
 - 최종 답변 본문에는 입력/유니버스, 필터, 계산식/지표, 결과 섹션을 두고 markdown evidence table을 렌더링한다.
 - 상위 N개 숫자 claim은 ranking table/value ref에 직접 묶고, 기준일·기간·universe·metric을 답변에 함께 밝힌다.

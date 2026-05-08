@@ -20,8 +20,8 @@ linkedSkills:
   - engines.analysis.peerComparison
   - engines.scan.ratio
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

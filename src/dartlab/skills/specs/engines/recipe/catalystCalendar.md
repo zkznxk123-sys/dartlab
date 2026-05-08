@@ -24,8 +24,8 @@ linkedSkills:
   - engines.gather
   - engines.recipe.dailyMorningNote
 toolRefs:
-  - run_python
-  - engine_call
+  - RunPython
+  - EngineCall
 requiredEvidence:
   - skillRef
   - executionRef
@@ -117,4 +117,4 @@ emit_result(
 
 ## 외부 본문 가드
 
-본 recipe 는 dartlab internal capability (gather + Company.disclosure) 만 호출 — sourceType=internal. 외부 컨센서스 사이트 (FactSet/Bloomberg 등) 는 본 capability 가 호출하지 않는다. 사용자가 외부 confirmation 을 web_search 로 가져오면 그 결과는 [EXTERNAL CONTENT START/END] 마커로 감싸지고 *2 차 검증* 없이 인용 금지. 상세: `runtime.workbenchEvidenceFlow`.
+본 recipe 는 dartlab internal capability (gather + Company.disclosure) 만 호출 — sourceType=internal. 외부 컨센서스 사이트 (FactSet/Bloomberg 등) 는 본 capability 가 호출하지 않는다. 사용자가 외부 confirmation 을 WebSearch 로 가져오면 그 결과는 [EXTERNAL CONTENT START/END] 마커로 감싸지고 *2 차 검증* 없이 인용 금지. 상세: `runtime.workbenchEvidenceFlow`.

@@ -24,7 +24,7 @@ capabilityRefs:
   - macro
 toolRefs:
   - search_reference
-  - run_python
+  - RunPython
   - finalize_answer
 knowledgeRefs:
   - dartlabCausalSixActs

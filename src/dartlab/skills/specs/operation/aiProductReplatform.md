@@ -96,7 +96,7 @@ DartLab App
   -> /api/ask stream
   -> Agent Gateway
   -> DartLabResearchGraph
-  -> Skill OS / Data engines / run_python / verifier
+  -> Skill OS / Data engines / RunPython / verifier
   -> Evidence / Artifact store
 ```
 
@@ -112,7 +112,7 @@ DartLab App
 
 - `WorkbenchLoop.nodes` (= `DartLabResearchGraph.nodes`) 는 5 패스 단일 SSOT 로 고정한다.
   - `brief` — 질문 해석 + skill/capability 후보 + recall + 검증 기준 + lens 분기
-  - `work` — run_python / inspect_dataset / engine_call / web_search / save_artifact 반복
+  - `work` — RunPython / InspectDataset / EngineCall / WebSearch / SaveArtifact 반복
   - `critique` — 반대가설 / 누락 lens / 데이터 신선도 점검
   - `compose` — 답안 + claim 별 [refId] 묶음
   - `gate` — claim ↔ ref 매칭 검증 (programmatic)
@@ -121,8 +121,8 @@ DartLab App
 - 최종 실행 계획은 반드시 `dartlab.skills` 검색 결과와 generated capability/docstring 검색 결과로 만든다.
 - 질문 문구별 if/else 라우팅, 종목/엔진별 임시 helper, 템플릿 답변은 production 경로에 두지 않는다.
 - 정체성 prompt 에 6 막 인과 같은 분석 단계를 모든 질문에 강제하는 한 줄을 박지 않는다. 단계가 필요한 skill 은 그 skill 의 `requiredEvidence` 로 표현한다.
-- LLM 에게 DartLab API 수십 개를 직접 tool 로 노출하지 않는다. LLM 은 `read_skill`, `read_capability`, `run_python`, `engine_call`, `inspect_dataset`, `web_search`, `save_artifact`, `propose_skill` 수준의 작은 도구만 본다.
-- `run_python` 은 금융 데이터 계산의 중심 작업공간이다. Company, scan, macro, quant, analysis 는 Python 코드에서 조합하는 DartLab library 다.
+- LLM 에게 DartLab API 수십 개를 직접 tool 로 노출하지 않는다. LLM 은 `ReadSkill`, `ReadCapability`, `RunPython`, `EngineCall`, `InspectDataset`, `WebSearch`, `SaveArtifact`, `propose_skill` 수준의 작은 도구만 본다.
+- `RunPython` 은 금융 데이터 계산의 중심 작업공간이다. Company, scan, macro, quant, analysis 는 Python 코드에서 조합하는 DartLab library 다.
 - 모든 중간 산출물은 ref 로 남긴다. 최소 ref 종류는 `skillRef`, `apiRef`, `executionRef`, `tableRef`, `valueRef`, `dateRef`, `webRef`, `artifactRef`, `verifyRef` 다. ref kind 발급 책임은 `runtime.workbenchEvidenceFlow` 의 표가 SSOT.
 
 ## Release Gate

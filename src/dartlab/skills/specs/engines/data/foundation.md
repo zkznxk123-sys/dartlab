@@ -23,7 +23,7 @@ knowledgeRefs:
   - engines.scan
 toolRefs:
   - search_reference
-  - run_python
+  - RunPython
 datasetRefs:
   - dart.finance
   - dart.docs

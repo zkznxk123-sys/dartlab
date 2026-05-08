@@ -26,7 +26,7 @@ capabilityRefs:
   - quant
 toolRefs:
   - search_reference
-  - run_python
+  - RunPython
 knowledgeRefs:
   - start.dartlabSkillOs
 sourceRefs:

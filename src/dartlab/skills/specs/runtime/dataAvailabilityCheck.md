@@ -26,8 +26,8 @@ capabilityRefs:
   - scan
 toolRefs:
   - search_reference
-  - inspect_dataset
-  - run_python
+  - InspectDataset
+  - RunPython
 requiredEvidence:
   - latestAsOf
   - dataset

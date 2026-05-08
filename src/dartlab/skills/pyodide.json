@@ -358,7 +358,7 @@
     },
     {
       "id": "engines.dashboard",
-      "title": "대시보드 — 회사 종합 스냅샷 (v19 · 정보 깊이 확장)",
+      "title": "Dashboard (회사 종합 스냅샷)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -367,7 +367,7 @@
     },
     {
       "id": "engines.data",
-      "title": "Data",
+      "title": "Data (수집·프리빌드 파이프라인)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -390,7 +390,7 @@
     },
     {
       "id": "engines.edgar",
-      "title": "EDGAR 동기화 규칙",
+      "title": "EDGAR (US 공시·재무)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -685,7 +685,7 @@
     },
     {
       "id": "engines.mappers",
-      "title": "Mappers",
+      "title": "Mappers (계정 정규화)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -1610,7 +1610,7 @@
     },
     {
       "id": "engines.recipe.usageAndApi",
-      "title": "dartlab 사용법·API 설명 (run_python 우회)",
+      "title": "dartlab 사용법·API 설명 (RunPython 우회)",
       "category": "engines",
       "status": "supported",
       "dataSources": [],
@@ -1910,7 +1910,7 @@
     },
     {
       "id": "engines.search",
-      "title": "Search *(beta — AI 사용 비권장)*",
+      "title": "Search (공시 본문/제목 검색, BETA)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -1919,7 +1919,7 @@
     },
     {
       "id": "engines.story",
-      "title": "Story",
+      "title": "Story (보고서 빌더)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -1962,7 +1962,7 @@
     },
     {
       "id": "engines.viz",
-      "title": "Viz",
+      "title": "Viz (차트·다이어그램 spec)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],

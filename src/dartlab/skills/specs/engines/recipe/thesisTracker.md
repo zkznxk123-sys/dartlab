@@ -26,9 +26,9 @@ linkedSkills:
   - engines.recipe.companyDeepAnalysis
   - engines.recipe.dailyMorningNote
 toolRefs:
-  - run_python
-  - engine_call
-  - save_artifact
+  - RunPython
+  - EngineCall
+  - SaveArtifact
 requiredEvidence:
   - skillRef
   - artifactRef
@@ -70,7 +70,7 @@ procedure:
   - falsifiable 게이트 — 각 pillar 에 "어떤 관측이면 반증되는가" 명시 의무. vague claim 거부 + 사용자에 반증 조건 예시 안내.
   - 갱신 — 기존 ~/.dartlab/thesis/`{ticker}.md` 로드 → 새 데이터 포인트가 어떤 pillar status 를 어떻게 바꾸는지 표시 (strengthen / weaken / neutral) + scorecard 갱신.
   - dartlab capability 호출 — 재무 pillar 는 c.show 또는 c.analysis, 시장 pillar 는 gather 또는 quant, 산업 pillar 는 industry 엔진.
-  - 파일 저장 — save_artifact tool 또는 run_python 안에서 ~/.dartlab/thesis/`{ticker}.md` 작성.
+  - 파일 저장 — SaveArtifact tool 또는 RunPython 안에서 ~/.dartlab/thesis/`{ticker}.md` 작성.
   - 본문 — 한국어 점검 결과 + scorecard 표 + 다음 cycle 갱신 시기 (보통 분기 단위).
 sourceRefs:
   - dartlab://skills/engines.company

@@ -18,7 +18,7 @@ outputs:
   - 필요한 데이터 원천
 toolRefs:
   - search_reference
-  - inspect_dataset
+  - InspectDataset
 requiredEvidence:
   - runtimeCompatibility
   - dataset

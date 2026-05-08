@@ -5,45 +5,52 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Credit (dCR) 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 capability/docstring으로 내려간다. 트리거 — '신용 분석', '부도 위험', '신용등급', 'dCR'.
+purpose: Credit (dCR) 엔진은 단일 기업의 신용 위험을 7 축 (채무상환·자본구조·유동성·현금흐름·사업안정성·재무신뢰성·공시리스크) 으로 평가해 종합 등급 (dCR-AA+ ~ dCR-D) 을 산출한다. 트리거 — '신용 분석', '부도 위험', '신용등급', 'dCR'.
 whenToUse:
-  - Credit (dCR)
+  - Credit
   - credit
-  - 1. 호출 — `dartlab.credit` · `c.credit` 두 진입점으로 쓴다
-  - 2. 7 축 — 이 구조로 평가한다
-  - 3. 결과 구조 — 종합·축별·detail 3 형태로 반환한다
-  - 종합 등급 (axis 미지정)
-  - 축 단일 (axis 지정)
+  - dCR
+  - 신용등급
+  - 신용 분석
+  - 부도 위험
+  - 부실 위험
+  - 채무상환
+  - 자본구조
+  - 이자보상배율
+  - 부채비율
+  - 외부 신평 비교
 inputs:
-  - 작업 목적
-  - 대상 엔진 또는 실행 환경
-  - 검증 범위
+  - stockCode 또는 Company
+  - axis (7 축 중 하나 또는 미지정)
+  - basePeriod
+  - detail
 outputs:
-  - selected skill
-  - capability/docstring handoff
-  - verification gate
+  - 종합 등급 dict (grade · score · axes · outlook)
+  - 축별 dict (axis · score · weight · metrics)
+  - 가이드 DataFrame (axis 미지정 + stockCode 미지정)
+  - tableRef · valueRef · dateRef · executionRef
 capabilityRefs:
   - credit
   - Company.credit
-toolRefs:
-  - search_reference
-  - run_python
 knowledgeRefs:
   - start.dartlabSkillOs
+  - engines.company
+  - engines.analysis
 sourceRefs:
   - dartlab://skills/engines.credit
-procedure:
-  - dartlab.Company(code) 또는 dartlab.credit() 로 진입.
-  - 종합 등급 (axis 미지정) 또는 축 단일 (axis 지정) 호출 형태 결정.
-  - c.credit() 또는 dartlab.credit(c, axis?) 실행.
-  - 결과의 종합 등급 · 축별 metrics (시계열 YoY · 5 년 평균) · narrative · detail 검증.
-  - 외부 신용평가와 비교 시 표본 한계와 정성 요소 (시스템적 중요성) 차이를 함께 설명.
 requiredEvidence:
-  - skillRef
+  - target
+  - period
+  - metric
+  - tableRef
+  - valueRef
+  - dateRef
+  - executionRef
 expectedOutputs:
-  - 작업 경로
-  - 확인한 근거
-  - 검증 결과
+  - 종합 등급 (grade · score)
+  - 7 축 점수
+  - 핵심 지표 (debtRatio · interestCoverage · OCF/부채)
+  - 외부 신평 비교 한계
 runtimeCompatibility:
   server:
     status: supported
@@ -55,73 +62,136 @@ runtimeCompatibility:
     status: supported
   pyodide:
     status: limited
-    notes:
-      - 실제 실행 가능 여부는 연결된 capability와 데이터 snapshot 범위를 따른다.
 failureModes:
-  - Skill OS 검색 없이 과거 문서 경로를 직접 찾음
-  - API schema를 skill 본문에 중복해 docstring/capability와 어긋남
-  - 검증 게이트 없이 변경 또는 답변을 완료 처리함
+  - 외부 신평 (Moody's·KIS·NICE) 과 1:1 비교로 단정
+  - 시스템적 중요성·정성 요소를 dCR 단독으로 판단
+  - basePeriod 명시 없이 등급을 *현재* 로 단정
+  - 7 축 점수만 보고 종합 등급 추정 (가중치·notch 보정 무시)
 forbidden:
-  - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.
-  - 공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다.
+  - 외부 공식 신용평가를 대체한다고 주장하지 않는다.
+  - basePeriod·source 없이 등급 숫자를 답한다.
+  - analysis 엔진을 직접 import 해서 결합한다 (필요 시 Company / core 에서 직접 데이터 로드).
+  - 공개 API 호출 방식·반환 형태가 바뀌었는데 본 skill 갱신 없이 완료 처리한다.
 examples:
   - 삼성전자 신용 등급 산출
-  - 종합 등급과 7 축 분석
-  - 외부 신평과 비교 (표본 79 개사)
-  - 부실 위험 스코어카드
-  - 부채비율과 이자보상배율 계산
+  - SK하이닉스 7 축 분석
+  - 채무상환 축 단독 점수
+  - 외부 신평 등급과 dCR 비교 (표본 79 개사)
+  - 종합 등급 + 전망 (outlook)
+  - detail=True 로 모든 지표 시계열 + narrative
+procedure:
+  - 종목코드 또는 Company 인스턴스 확보 (`dartlab.Company("005930")` 또는 직접).
+  - 종합 등급은 `dartlab.credit("005930")` 또는 `c.credit()`. 가이드만이면 인자 없이.
+  - 축 단독은 `dartlab.credit("005930", "채무상환")` 또는 `c.credit("자본구조")`.
+  - 결과의 `grade` · `score` · `axes` · `outlook` · `metrics` 검증 후 답변에 묶음.
+  - 외부 신평과 비교 시 표본 한계·정성 요소·시점 차이를 함께 명시.
 linkedSkills:
   - engines.credit.creditRisk
   - engines.company
   - engines.analysis
   - engines.story
-  - operation.methodology
 source:
-  type: absorbed_skills
-  absorbedKey: credit
+  type: manual_skill
   format: markdown
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-08'
 ---
 
-## Skill OS 흡수 규칙
+## 엔진 역할
 
-- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.
-- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.
-- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.
+`credit` 은 단일 기업의 부도 위험·재무 건전성을 독립 평가하는 L2 엔진이다. 79 개사 검증 (대기업 87% · 중대형 82%) 의 dCR 등급 (dCR-AA+ ~ dCR-D) 을 DART 공시 기반으로 산출한다. 외부 신평사 (Moody's · KIS · NICE) 가 반영하는 시스템적 중요성·정성 요소는 dCR 만으로 판단하지 않는다.
 
-## 실행 순서
-
-- 1. 호출 — `dartlab.credit` · `c.credit` 두 진입점으로 쓴다 기준을 확인한다.
-- 2. 7 축 — 이 구조로 평가한다 기준을 확인한다.
-- 3. 결과 구조 — 종합·축별·detail 3 형태로 반환한다 기준을 확인한다.
-- 종합 등급 (axis 미지정) 기준을 확인한다.
-- 축 단일 (axis 지정) 기준을 확인한다.
-- 7 축 `metrics` 에 시계열 (YoY · 5 년 평균) 부착.
-- `narrative` 키 추가 — 한국어 인과 문장 (story 블록 재료).
-- `debtRatio` — 부채비율 (%)
-- `interestCoverage` — 이자보상배율 (배)
+`analysis` 엔진의 안정성·현금흐름 축과 상호 보완. credit 종합 등급 → analysis 로 인과 깊게, 또는 analysis 안정성 점수 → credit 으로 외부 신평 보정 비교.
 
 ## 공개 호출 방식
 
-- `c = dartlab.Company("005930")`
-- `c.credit()`
-- `dartlab.credit(c)`
+```python
+import dartlab
+
+# 1. 가이드 (7 축 목록)
+guide = dartlab.credit()
+
+# 2. 종합 등급 (axis 미지정)
+verdict = dartlab.credit("005930")
+# → {"grade": "dCR-AA+", "score": 12.4, "axes": [...], "outlook": "안정적"}
+
+# 3. 축 단독 (7 축 중 하나)
+repayment = dartlab.credit("005930", "채무상환")
+leverage = dartlab.credit("005930", "자본구조")
+# 영문 alias 도 지원: dartlab.credit("005930", "repayment")
+
+# 4. 상세 모드 — 모든 지표 시계열 + narrative
+detailed = dartlab.credit("005930", detail=True)
+
+# 5. Company 바인딩
+c = dartlab.Company("005930")
+verdict = c.credit()
+repayment = c.credit("채무상환")
+```
 
 ## 호출 동작
 
-- Company 재무 snapshot에서 차입, 현금흐름, 이자보상, 유동성 지표를 읽어 신용 위험을 계산한다. analysis와 상호 import하지 않고 필요한 데이터는 Company/core에서 직접 가져온다.
-- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
-- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+`stockCode` 미지정 → 7 축 가이드 DataFrame (axis · label · description · example · group).
+
+`stockCode` 만 지정 → 종합 등급 dict — 3-Track 모델 (일반·금융·지주) + Notch Adjustment + CHS 시장 보정 적용. `grade` (dCR 등급), `score` (위험 점수 0~100), `healthScore` (100-score), `axes` (7 축 list), `outlook` (안정적·긍정적·부정적).
+
+`stockCode` + `axis` → 해당 축 dict — `axis` (축 풀네임), `score` (해당 축 위험 점수), `weight` (가중치 %), `metrics` (개별 지표 name·value·score).
+
+`detail=True` → 7 축 상세 + 모든 지표 시계열 (YoY · 5 년 평균) + `narrative` (한국어 인과 문장, story 블록 재료).
+
+데이터 부족 (재무 결손·신생 상장·연결재무제표 부재) 시 결손을 0 으로 채우지 않고 `riskFlags` 와 제한 메시지로 표현.
+
+## 7 축 목록
+
+| axis | label | weight | 핵심 지표 |
+| --- | --- | --- | --- |
+| 채무상환 | 이자보상·DSCR | 25% | interestCoverage · DSCR · OCF/Debt |
+| 자본구조 | 부채비율·차입금/자본 | 20% | debtRatio · debtToEquity · netDebt/EBITDA |
+| 유동성 | 단기 지급능력 | 15% | currentRatio · quickRatio · cashRatio |
+| 현금흐름 | OCF 안정성 | 15% | ocfMargin · ocfYoY · fcfPositive |
+| 사업안정성 | 매출/이익 변동성 | 10% | revenueCV · operatingMarginCV |
+| 재무신뢰성 | 회계 보수성·이상치 | 10% | accrualRatio · auditOpinion |
+| 공시리스크 | 공시 변화 선행 신호 | 5% | disclosureChangeScore |
+
+영문 alias: `repayment` · `leverage` · `liquidity` · `cashflow` · `businessStability` · `financialReliability` · `disclosureRisk`.
 
 ## 대표 반환 형태
 
-- dict 또는 DataFrame 형태의 신용 지표를 반환한다. 핵심 키는 grade/score, leverage, interestCoverage, cashflowBuffer, riskFlags, basis이며 비율은 %, 배수는 배 단위다.
-- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+```text
+dartlab.credit("005930")
+→ dict
+   grade : str           # "dCR-AA+" 등 dCR 등급
+   score : float         # 0=최우량 ~ 100=최위험 (점)
+   healthScore : float   # 100 - score (점)
+   axes : list[dict]     # 7 축 상세 (name · score · weight · metrics)
+   eCR : str | None      # 현금흐름등급 (별도 산출)
+   outlook : str         # "안정적" / "긍정적" / "부정적"
+```
+
+```text
+dartlab.credit("005930", "채무상환")
+→ dict
+   axis : str            # "채무상환"
+   score : float         # 해당 축 위험 점수 (점)
+   weight : int          # 가중치 (% — 7 축 합 100)
+   metrics : list[dict]  # name · value · score · unit
+```
+
+`detail=True` 시 추가 키:
+- `metrics[].history` — 시계열 (YoY · 5 년 평균)
+- `narrative` — 한국어 인과 문장 (story 조립용)
+
+## evidence 기준
+
+신용 답변은 `target` (종목코드) · `basePeriod` · 7 축 score · 핵심 지표 valueRef · `dataAsOf` 를 남긴다. 외부 신평과 비교 시 비교 시점 dateRef + 표본 79 개사 한계를 함께 명시.
+
+## 기본 실행 순서
+
+1. 종목코드 확정 (`dartlab.searchName("회사명")` 또는 사용자 입력).
+2. `dartlab.credit("005930")` 으로 종합 등급 확인.
+3. score 가 50+ 이면 weak 축 식별 → 해당 축 단독 호출 (`dartlab.credit("005930", "채무상환")`).
+4. `analysis` 의 안정성·현금흐름 축과 교차 검증.
+5. 외부 신평 비교 시 시점·표본·정성 요소 차이를 답변에 명시.
 
 ## 기본 검증
 
-- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
-- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
-- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
-
-
+스킬은 공개 실행 문서다. `dartlab.credit()` / `Company.credit()` 의 호출 시그니처·반환 키·7 축 가중치가 바뀌면 본 파일과 [engines.credit.creditRisk](/skills/engines.credit.creditRisk) 응용 skill 을 같은 변경에서 갱신한다.

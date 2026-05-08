@@ -22,9 +22,9 @@ datasetRefs:
   - krx.indices
 toolRefs:
   - search_reference
-  - inspect_dataset
-  - run_python
-  - compile_visual
+  - InspectDataset
+  - RunPython
+  - CompileVisual
   - finalize_answer
 knowledgeRefs:
   - krxDatasetStructure
@@ -77,8 +77,8 @@ lastUpdated: "2026-05-02"
 ## 절차
 
 - RuntimeDatasetCatalog에서 KRX 지수 데이터셋 후보를 찾는다.
-- `inspect_dataset`으로 날짜 컬럼, 지수명 컬럼, 가격/등락률 컬럼, 최신 관측일을 확인한다.
-- `run_python`으로 최신일 기준 비교 가능한 지수별 수익률 또는 등락률 표를 계산한다.
+- `InspectDataset`으로 날짜 컬럼, 지수명 컬럼, 가격/등락률 컬럼, 최신 관측일을 확인한다.
+- `RunPython`으로 최신일 기준 비교 가능한 지수별 수익률 또는 등락률 표를 계산한다.
 - 강세 판단은 기준일, 기간, universe, metric이 모두 있는 표를 근거로 제한한다.
 - visual은 지수별 비교 표가 있을 때만 만든다.
 

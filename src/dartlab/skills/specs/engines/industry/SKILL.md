@@ -5,49 +5,46 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Industry 엔진의 목적, 경계, 조합 기준을 Skill OS에서 확인하고 실행은 capability/docstring으로 내려간다. 트리거 — '산업 분석', '섹터', '업종', 'industry'.
+purpose: Industry 엔진은 단일 종목을 산업 분류 (taxonomy.json) 의 공정 단계와 peer 그룹에 연결해 밸류체인 위치·동종 비교 맥락을 제공한다. 트리거 — '산업', '섹터', '업종', '밸류체인', 'industry'.
 whenToUse:
   - Industry
   - industry
-  - 1. 호출 계약 — 4 진입점으로 간다
-  - Company-bound 인터페이스
-  - 2. 핵심 원칙 — 분류체계는 데이터로, 코드는 파이프라인만
-  - 3. 데이터 구조 — 4 JSON 파일로 간다
-  - 3-1. taxonomy.json — 분류체계가 데이터다
+  - 산업 분석
+  - 섹터 분석
+  - 밸류체인
+  - 공정 단계
+  - peer 그룹
+  - 동종업종
+  - 산업 지도
 inputs:
-  - 작업 목적
-  - 대상 엔진 또는 실행 환경
-  - 검증 범위
+  - industryId 또는 종목코드 (Company-bound)
+  - stage 필터 (선택)
+  - summary / timeline 모드
 outputs:
-  - selected skill
-  - capability/docstring handoff
-  - verification gate
+  - 산업 가이드 DataFrame
+  - 공정·종목 DataFrame
+  - 산업 위치 dict (Company-bound)
+  - peer 종목 list
 capabilityRefs:
   - industry
   - Company.industry
-toolRefs:
-  - search_reference
-  - run_python
 knowledgeRefs:
   - start.dartlabSkillOs
+  - engines.company
+  - engines.scan
 sourceRefs:
   - dartlab://skills/engines.industry
-procedure:
-  - 1. 호출 계약 — 4 진입점으로 간다 기준을 확인한다.
-  - Company-bound 인터페이스 기준을 확인한다.
-  - 2. 핵심 원칙 — 분류체계는 데이터로, 코드는 파이프라인만 기준을 확인한다.
-  - 3. 데이터 구조 — 4 JSON 파일로 간다 기준을 확인한다.
-  - 3-1. taxonomy.json — 분류체계가 데이터다 기준을 확인한다.
-  - industries 키 = 산업 ID.
-  - stages 키 = 공정 ID.
-  - keywords = 빌드 파이프라인이 매칭에 사용.
-  - '**AI/사람이 JSON 을 직접 편집하여 산업 추가, 키워드 갱신, 공정 재정의**.'
 requiredEvidence:
-  - skillRef
+  - target
+  - industryId
+  - stage
+  - tableRef
+  - executionRef
 expectedOutputs:
-  - 작업 경로
-  - 확인한 근거
-  - 검증 결과
+  - 산업 ID / 산업명
+  - 공정 단계 + 종목 list
+  - 매출/영업이익 집계 (summary)
+  - 연도별 공정 매출 추이 (timeline)
 runtimeCompatibility:
   server:
     status: supported
@@ -59,65 +56,130 @@ runtimeCompatibility:
     status: supported
   pyodide:
     status: limited
-    notes:
-      - 실제 실행 가능 여부는 연결된 capability와 데이터 snapshot 범위를 따른다.
 failureModes:
-  - Skill OS 검색 없이 과거 문서 경로를 직접 찾음
-  - API schema를 skill 본문에 중복해 docstring/capability와 어긋남
-  - 검증 게이트 없이 변경 또는 답변을 완료 처리함
+  - 산업 ID 를 추측해 호출 — `dartlab.industry()` 가이드 미확인
+  - 공정 단계명을 추측 — `dartlab.industry(industryId)` 결과의 공정 컬럼 미확인
+  - summary 와 timeline 동시 호출 (둘 중 하나만)
+  - peer 의 산업 분류 신선도 미확인 (taxonomy 운영자 수동 갱신)
 forbidden:
-  - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.
-  - 공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다.
+  - 결손값을 0 으로 채우지 않는다.
+  - peer 그룹을 추측해 답변하지 않는다 (반드시 industry() 결과 또는 Company.industry().peers 인용).
+  - 공개 호출·반환 형태가 바뀌었는데 본 skill 갱신 없이 완료 처리하지 않는다.
 examples:
-  - Industry 규칙 확인
-  - industry 작업을 Skill OS에서 시작
+  - 반도체 산업 공정 단계 확인
+  - 삼성전자 밸류체인 위치 (전공정/후공정/장비)
+  - 자동차 산업 peer 그룹 추출
+  - 공정별 매출 집계 (summary)
+  - 연도별 공정 매출 추이 (timeline)
+procedure:
+  - 산업 목록 확인은 `dartlab.industry()` (가이드 DataFrame).
+  - 산업 ID 정한 뒤 `dartlab.industry("semiconductor")` 로 공정·종목 확인.
+  - 단일 기업 위치는 `dartlab.Company(code).industry()` — chainId·stage·confidence·peers dict.
+  - 공정 매출 집계는 `dartlab.industry(industryId, summary=True, year="2024")`.
+  - peer 그룹을 다른 엔진에 전달할 때는 종목코드 list 만 추출 (전체 dict 통째 전달 금지).
+linkedSkills:
+  - engines.company
+  - engines.analysis
+  - engines.scan
 source:
-  type: absorbed_skills
-  absorbedKey: industry
+  type: manual_skill
   format: markdown
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-08'
 ---
 
-## Skill OS 흡수 규칙
+## 엔진 역할
 
-- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.
-- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.
-- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.
+`industry` 는 단일 종목을 *밸류체인 공정 단계* 에 연결하는 매퍼 엔진이다. 산업 분류 (`taxonomy.json`) 와 종목→공정 매핑 (`nodes.json`) 을 데이터로 들고 있고, 코드는 매칭/조회 파이프라인만 담당한다. 분류체계는 운영자가 JSON 직접 편집해 갱신.
 
-## 실행 순서
-
-- 1. 호출 계약 — 4 진입점으로 간다 기준을 확인한다.
-- Company-bound 인터페이스 기준을 확인한다.
-- 2. 핵심 원칙 — 분류체계는 데이터로, 코드는 파이프라인만 기준을 확인한다.
-- 3. 데이터 구조 — 4 JSON 파일로 간다 기준을 확인한다.
-- 3-1. taxonomy.json — 분류체계가 데이터다 기준을 확인한다.
-- industries 키 = 산업 ID.
-- stages 키 = 공정 ID.
-- keywords = 빌드 파이프라인이 매칭에 사용.
-- **AI/사람이 JSON 을 직접 편집하여 산업 추가, 키워드 갱신, 공정 재정의**.
+회사 단위 분석은 `analysis`, 횡단 후보 발굴은 `scan`, 시장 매크로는 `macro` 가 담당. industry 는 *산업 컨텍스트* 만 제공.
 
 ## 공개 호출 방식
 
-- `c = dartlab.Company("005930")`
-- `c.industry()`
-- `dartlab.industry("semiconductor")`
-- `dartlab.scan("industry")`
+```python
+import dartlab
+
+# 1. 산업 목록 가이드
+guide = dartlab.industry()
+# → DataFrame: 산업ID · 산업명 · 공정수
+
+# 2. 특정 산업의 공정·종목
+nodes = dartlab.industry("semiconductor")
+# → DataFrame: 공정 · 공정명 · 종목코드 · 종목명 · 역할 · 위치
+
+# 3. 공정 단계 필터
+fab_only = dartlab.industry("semiconductor", stage="fab")
+
+# 4. 공정별 매출/영업이익 집계 (year 기준)
+summary = dartlab.industry("semiconductor", summary=True, year="2024")
+# → DataFrame: 공정 · 매출합계 · 영업이익합계
+
+# 5. 연도별 공정 매출 추이
+timeline = dartlab.industry("semiconductor", timeline=True)
+
+# 6. 단일 기업의 산업 위치 (Company-bound)
+c = dartlab.Company("005930")
+position = c.industry()
+# → dict: chainId · chainName · stage · stageLabel · confidence · matches · products · peers
+```
 
 ## 호출 동작
 
-- 기업을 산업/섹터 맥락에 연결하고 peer, 산업 지표, cycle 신호를 확인한다. 개별 재무 계산은 analysis가 담당한다.
-- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
-- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+`dartlab.industry()` (인자 없음) → 등록된 산업 목록 가이드 DataFrame.
+
+`dartlab.industry(industryId)` → 해당 산업의 공정·종목 DataFrame. `stage` 로 특정 공정만 필터.
+
+`summary=True` → year 기준 공정별 매출/영업이익 집계. `timeline=True` → 연도별 공정 매출 시계열. (둘 동시 사용 X.)
+
+`Company.industry()` → 단일 종목의 밸류체인 위치 dict — `chainId` (산업 ID), `stage` (공정), `confidence` (0~1 매칭 신뢰도), `peers` (같은 stage 종목코드 list). 매칭 실패 시 `None`.
+
+분류체계 신선도는 `taxonomy.json` 의 운영자 수동 갱신 시점 — 신생 산업·신규 상장 직후엔 매칭 누락 가능.
 
 ## 대표 반환 형태
 
-- industry profile dict 또는 peer DataFrame을 반환한다. 핵심 키는 industry, peers, cycle, indicators, rank, basis다.
-- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+```text
+dartlab.industry()
+→ DataFrame
+   산업ID : str         # 식별자 (semiconductor, automobile, ...)
+   산업명 : str         # 한글
+   공정수 : int         # 해당 산업의 공정 단계 수
+```
+
+```text
+dartlab.industry("semiconductor")
+→ DataFrame
+   공정 : str           # 공정 단계 ID (fab, oSat, equipment, ...)
+   공정명 : str         # 한글 공정명 (전공정 / 후공정 / 장비 / ...)
+   종목코드 : str       # 6자리
+   종목명 : str
+   역할 : str           # 해당 공정에서의 역할
+   위치 : str           # 밸류체인 상 위치
+```
+
+```text
+Company("005930").industry()
+→ dict
+   chainId : str             # "semiconductor"
+   chainName : str           # "반도체"
+   stage : str               # "fab" / "oSat" / "equipment" / "design" / ...
+   stageLabel : str          # 한글 공정명
+   confidence : float        # 0.0 ~ 1.0 매칭 신뢰도
+   matches : list[str]       # 매칭 키워드
+   products : list[str]      # 주요 제품
+   peers : list[str]         # 같은 stage 종목코드
+```
+
+## evidence 기준
+
+산업 답변은 `target` (종목코드) · `industryId` · `stage` · taxonomy `dataAsOf` (운영자 갱신 시점) 를 남긴다. `confidence < 0.5` 면 매칭 신뢰도 낮음을 답변에 명시.
+
+## 기본 실행 순서
+
+1. 산업 ID 모르면 `dartlab.industry()` 로 목록 확인.
+2. 단일 기업 위치는 `Company(code).industry()` — chainId·stage·peers 1 회로.
+3. 공정 매출 집계가 필요하면 `dartlab.industry(industryId, summary=True, year=...)`.
+4. peer 그룹은 `peers` list 만 추출해 `analysis` / `scan` / `quant` 에 전달.
+5. 매칭 실패 (None 반환) 시 추측하지 않고 산업 분류 미등록임을 답변에 명시.
 
 ## 기본 검증
 
-- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
-- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
-- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
-
-
+스킬은 공개 실행 문서다. `dartlab.industry()` 시그니처·반환 컬럼·`Company.industry()` 반환 키가 바뀌면 본 파일을 같은 변경에서 갱신한다.

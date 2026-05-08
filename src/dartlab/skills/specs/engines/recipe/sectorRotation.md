@@ -20,8 +20,8 @@ linkedSkills:
   - engines.scan.profitability
   - engines.scan.growth
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef

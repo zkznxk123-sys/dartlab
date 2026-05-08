@@ -14,8 +14,8 @@ capabilityRefs:
   - quant
 toolRefs:
   - search_reference
-  - run_python
-  - compile_visual
+  - RunPython
+  - CompileVisual
   - finalize_answer
 knowledgeRefs:
   - quantSignalConcepts

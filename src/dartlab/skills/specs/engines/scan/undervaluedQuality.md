@@ -24,8 +24,8 @@ datasetRefs:
   - dart.scan.financeLite
 toolRefs:
   - search_reference
-  - inspect_dataset
-  - run_python
+  - InspectDataset
+  - RunPython
   - finalize_answer
 knowledgeRefs:
   - valuationPrinciples
@@ -85,7 +85,7 @@ lastUpdated: "2026-05-02"
 
 - `engines.scan` 기본 skill로 가능한 횡단면 축을 확인한다.
 - valuation metric과 profitability metric이 같은 universe와 기준일에서 있는지 확인한다.
-- `run_python`으로 후보 표를 만들고 value metric만 아니라 profitability 보조 지표를 같이 둔다.
+- `RunPython`으로 후보 표를 만들고 value metric만 아니라 profitability 보조 지표를 같이 둔다.
 - 최종 답변은 입력/유니버스, 필터, 계산식/지표, 결과를 명시하고 후보별 valuation/profitability evidence table을 본문에 렌더링한다.
 - 낮은 valuation은 후보 조건이지 최종 투자 판단이 아니라고 한계를 남긴다.
 

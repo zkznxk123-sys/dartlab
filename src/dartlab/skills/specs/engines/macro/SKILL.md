@@ -108,7 +108,8 @@ scenario = dartlab.macro("시나리오", "2008 금융위기")
 summary = dartlab.macro("종합", market="KR")
 
 c = dartlab.Company("005930")
-company_macro = c.macro("매크로민감도")
+company_macro = c.macro("사이클")                    # 시장 매크로 (KR 자동) — c.macro 의 axis 는 macro 엔진 axis
+sensitivity = c.analysis("macro", "매크로민감도")   # 기업 단위 매크로 민감도는 analysis 엔진
 ```
 
 ## 호출 동작

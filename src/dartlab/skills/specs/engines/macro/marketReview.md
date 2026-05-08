@@ -24,8 +24,8 @@ capabilityRefs:
   - gather.macro
 toolRefs:
   - search_reference
-  - inspect_dataset
-  - run_python
+  - InspectDataset
+  - RunPython
   - finalize_answer
 knowledgeRefs:
   - dartlabCausalSixActs

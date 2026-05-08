@@ -18,8 +18,8 @@ linkedSkills:
   - engines.viz.tableBackedChart
   - engines.scan.crossSectionStockScreen
 toolRefs:
-  - engine_call
-  - run_python
+  - EngineCall
+  - RunPython
 requiredEvidence:
   - skillRef
   - tableRef
