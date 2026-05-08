@@ -358,7 +358,10 @@ def _executeTool(name: str, args: dict) -> str:
     code = args.get("stockCode")
 
     try:
-        if name in _MCP_WORKSPACE_AGENT_TOOL_NAMES:
+        # advertised set (_MCP_WORKSPACE_AGENT_TOOL_NAMES) 은 6 종이지만 executable 은
+        # PascalCase canonical 11 종 + ask 모두. EngineCall / GetSkillBody / Read 등도
+        # 직접 호출 가능해야 한다.
+        if name == "ask" or name in _AI_TOOL_NAMES:
             return _executeWorkspaceAgentTool(name, args)
         if os.environ.get("DARTLAB_MCP_COMPAT") != "1":
             return f"Unknown tool: {name}"
