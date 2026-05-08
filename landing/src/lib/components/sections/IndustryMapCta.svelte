@@ -29,7 +29,6 @@
 					<span class="dot r"></span>
 					<span class="dot y"></span>
 					<span class="dot g"></span>
-					<span class="url">dartlab.io/map</span>
 				</div>
 				<div class="preview-body">
 					<div class="preview-row">
@@ -137,12 +136,6 @@
 	}
 	.preview-head .dot.g {
 		background: #34d399;
-	}
-	.preview-head .url {
-		margin-left: auto;
-		font-family: monospace;
-		font-size: 11px;
-		color: #64748b;
 	}
 	.preview-body {
 		position: relative;

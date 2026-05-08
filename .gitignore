@@ -28,6 +28,9 @@ PLAN.md
 TODO.md
 .agent/
 .claude/
+# User skill 인큐베이션 영역 — registry.py:309 가 .dartlab/skills/ 를 user skill 로 로드.
+# 운영자별 실험 산출물이라 추적 X.
+.dartlab/
 
 # Misc local files (not for repo)
 /main.py

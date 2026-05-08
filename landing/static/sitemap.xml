@@ -1066,6 +1066,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/operation.skillIncubator</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/operation.stability</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>

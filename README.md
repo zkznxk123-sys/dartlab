@@ -489,13 +489,58 @@ c.diff("businessOverview")              c.diff("10-K::item7Mdna")
 
 ## MCP — AI 어시스턴트 연동
 
-[MCP](https://modelcontextprotocol.io/) 서버 내장. 25개 도구로 dartlab 전체 엔진에 접근.
+[MCP](https://modelcontextprotocol.io/) 서버 내장. **canonical 6 도구 + ask** 메타로 외부 LLM 이 dartlab 라이브러리를 RunPython 안에서 직접 호출하는 패턴 (도구 표면을 좁혀 토큰 비용 ↓, 도구 선택 정확도 ↑).
 
-### 설치 없이 사용 (원격 MCP)
+### Claude Desktop / Claude Code / Cursor (stdio, 권장)
 
-dartlab을 설치하지 않아도 됩니다. Claude Desktop `claude_desktop_config.json`:
+`uvx dartlab mcp` 의 cold start 가 Claude Desktop attach timeout 안에 들어가지 못하므로 **사전 설치 + entry point 직접 호출** 이 정본입니다. `command: "python"` 은 Microsoft Store Python 환경에서 spawn ENOENT 로 실패할 수 있어 (이슈 [#28](https://github.com/eddmpython/dartlab/issues/28)), `command: "dartlab"` 으로 entry point 를 직접 호출하는 게 가장 견고합니다.
 
-```json
+```bash
+# 1. 사전 설치 (한 번만) — .local/bin/dartlab(.exe) entry point 생성
+uv tool install dartlab        # 또는: pipx install dartlab
+```
+
+```jsonc
+// 2-A. Claude Desktop — %APPDATA%\Claude\claude_desktop_config.json
+{
+  "mcpServers": {
+    "dartlab": {
+      "command": "dartlab",
+      "args": ["mcp"],
+      "env": { "PYTHONUNBUFFERED": "1", "PYTHONUTF8": "1" }
+    }
+  }
+}
+```
+
+```bash
+# 2-B. Claude Code 한 줄 설정
+claude mcp add dartlab -- dartlab mcp
+
+# 2-C. Codex CLI
+codex mcp add dartlab -- dartlab mcp
+```
+
+`dartlab` 명령이 PATH 에 잡히지 않는 환경 (한정적) 이라면 절대 경로로 적어주세요:
+
+```jsonc
+{
+  "mcpServers": {
+    "dartlab": {
+      "command": "C:\\Users\\<user>\\.local\\bin\\dartlab.exe",   // Windows
+      // "command": "/Users/<user>/.local/bin/dartlab",              // macOS / Linux
+      "args": ["mcp"],
+      "env": { "PYTHONUNBUFFERED": "1", "PYTHONUTF8": "1" }
+    }
+  }
+}
+```
+
+> 같은 출력은 `dartlab mcp --config claude-desktop` / `dartlab mcp --config claude-code` 로도 받을 수 있습니다. 프로젝트 `.mcp.json` 자동 생성: `dartlab mcp --install`.
+
+### 원격 MCP (Claude Code · Cursor 등 SSE 지원 클라이언트만)
+
+```jsonc
 {
   "mcpServers": {
     "dartlab": {
@@ -505,47 +550,21 @@ dartlab을 설치하지 않아도 됩니다. Claude Desktop `claude_desktop_conf
 }
 ```
 
-HuggingFace Spaces에서 호스팅. DART API 키도 불필요. → [상세](/skills)
+HuggingFace Spaces 호스팅. DART API 키 불필요. **Claude Desktop 데스크톱 앱은 stdio 만 받으므로 이 URL 방식을 reject 합니다** — 위 stdio 경로를 사용하세요.
 
-### 로컬 설치 (stdio MCP)
+### 7 도구 표면
 
-```bash
-# Claude Code — 한 줄 설정
-claude mcp add dartlab -- uv run dartlab mcp
+| 도구 | 역할 |
+|------|------|
+| **ask** | DartLab Workbench 5 패스 (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) 일괄 |
+| **ReadSkill** | Skill OS 검색 + frontmatter + 본문 |
+| **ReadCapability** | dartlab 공개 API/docstring 검색 |
+| **RunPython** | dartlab + Polars 코드 실행 → executionRef/valueRef/tableRef |
+| **WebSearch** | 외부 최신 정보 → webRef |
+| **SaveArtifact** | 큰 표·차트 별도 저장 → artifactRef |
+| **CompileVisual** | 차트 spec codegen → visualRef |
 
-# Codex CLI
-codex mcp add dartlab -- uv run dartlab mcp
-```
-
-<details>
-<summary>Claude Desktop / Cursor 설정</summary>
-
-`claude_desktop_config.json` 또는 `.cursor/mcp.json`에 추가:
-
-```json
-{
-  "mcpServers": {
-    "dartlab": {
-      "command": "uv",
-      "args": ["run", "dartlab", "mcp"]
-    }
-  }
-}
-```
-
-자동 생성: `dartlab mcp --config claude-desktop`
-
-</details>
-
-### 25개 도구
-
-| 카테고리 | 도구 |
-|---------|------|
-| 종목 분석 | companyInsights, companyAnalysis, companyStory, companyValuation, companyForecast, companyCredit |
-| 데이터 | companyFinancials, companyRatios, companyShow, companyTopics, companyDiff, companyFilings |
-| 기업 정보 | companyGovernance, companyAudit, companyProfile, companySections, companyGather, companyQuant |
-| 시장/거시 | macroAnalysis, marketScan, gatherData, quantAnalysis, topdownScreen |
-| 검색 | searchCompany, dartlabSearch, dartlabListing |
+> 옛 33 generated 도구 (`companyAnalysis`/`companyStory`/`marketScan` 등) 는 0.10 부터 폐기 — 모두 `RunPython` 안에서 `dartlab.Company / dartlab.scan / dartlab.macro` 직접 호출. 마이그레이션은 [CHANGELOG](https://github.com/eddmpython/dartlab/releases) 참조.
 
 ## dartlab-lite — 브라우저·엑셀에서 설치 없이 (Pyodide)
 
