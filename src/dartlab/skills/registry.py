@@ -239,6 +239,65 @@ def _validate_execution_skill_contract(spec: SkillSpec) -> None:
         raise ValueError(f"engine skill {spec.id} missing execution sections: {', '.join(missing)}")
 
 
+def validateExecutionSkillSubstance(spec: SkillSpec) -> list[str]:
+    """엔진 skill 의 강제 섹션이 *실제 내용* 을 갖는지 추가 검사 — 신규/수정 파일 게이트용.
+
+    `lintSkill` 은 listSkills 안에서 174 개 기존 파일에 매번 호출되므로 너무 엄격한
+    검사를 넣으면 회귀가 난다 (`SCHEMA.md` "174 개 기존 파일에 일괄 강제하지 않는다").
+    이 함수는 `validateSkills.py` 가 신규/수정 파일에만 호출하는 *추가* 게이트 —
+    빈 placeholder 섹션이 신규로 들어오는 회귀를 잡는다.
+
+    Returns
+    -------
+    list[str]
+        위반 메시지 list. 빈 list 면 통과.
+    """
+    if spec.category != "engines":
+        return []
+    body = str(spec.source.get("body") or "")
+    required = ("## 공개 호출 방식", "## 호출 동작", "## 대표 반환 형태")
+    issues: list[str] = []
+    sections = _split_sections(body, required)
+    for heading, section_body in sections.items():
+        if not _section_has_substance(section_body, heading):
+            issues.append(f"engine skill {spec.id} section {heading} is empty or lacks code/table/prose substance")
+    return issues
+
+
+def _split_sections(body: str, headings: tuple[str, ...]) -> dict[str, str]:
+    """본문에서 각 강제 헤딩 아래의 텍스트 블록을 추출.
+
+    다음 H2 헤딩 (`## `) 이 나오기 전까지를 한 섹션으로 본다.
+    """
+    out: dict[str, str] = {}
+    for heading in headings:
+        idx = body.find(heading)
+        if idx < 0:
+            continue
+        start = idx + len(heading)
+        next_h2 = body.find("\n## ", start)
+        section = body[start:] if next_h2 < 0 else body[start:next_h2]
+        out[heading] = section.strip()
+    return out
+
+
+def _section_has_substance(section_body: str, heading: str) -> bool:
+    """섹션 본문이 빈 placeholder 가 아닌지 확인.
+
+    `## 공개 호출 방식` 은 ``` 코드블록 1 개 이상 — 없으면 AI 가 따라 실행할 수 없다.
+    `## 호출 동작` / `## 대표 반환 형태` 는 표 (`|...|---|...|`) 또는 코드블록 또는
+    최소 60 자 이상의 산문.
+    """
+    if not section_body:
+        return False
+    if heading == "## 공개 호출 방식":
+        return "```" in section_body
+    has_code = "```" in section_body
+    has_table = "|" in section_body and "---" in section_body
+    long_prose = len(section_body) >= 60
+    return bool(has_code or has_table or long_prose)
+
+
 def _builtin_spec_paths() -> list[Path]:
     root = _builtin_specs_root()
     if not root.exists():
@@ -610,33 +669,52 @@ def _skip_yaml_blank(lines: list[str], start: int) -> int:
     return index
 
 
+def _joinAny(values: Any) -> str:
+    """list 의 원소가 str / dict / 기타 섞여도 안전하게 join — 점수 계산용 검색 텍스트."""
+    if not values:
+        return ""
+    out: list[str] = []
+    for v in values:
+        if v is None:
+            continue
+        if isinstance(v, str):
+            out.append(v)
+        elif isinstance(v, dict):
+            out.append(" ".join(str(x) for x in v.values() if x is not None))
+        else:
+            out.append(str(v))
+    return " ".join(out)
+
+
 def _score(spec: SkillSpec, terms: list[str], *, query: str = "") -> tuple[float, list[str]]:
+    # list 안에 dict-form item (recipeSteps 또는 frontmatter 의 `- key: value`) 이 섞여도
+    # 점수 계산 텍스트 생성이 깨지지 않도록 모든 list 필드는 _joinAny 사용.
     haystacks = {
         "id": spec.id,
         "title": spec.title,
         "category": spec.category,
         "purpose": spec.purpose,
-        "whenToUse": " ".join(spec.whenToUse),
-        "inputs": " ".join(spec.inputs),
-        "outputs": " ".join(spec.outputs),
-        "capabilityRefs": " ".join(spec.capabilityRefs),
-        "datasetRefs": " ".join(spec.datasetRefs),
-        "visualRefs": " ".join(spec.visualRefs),
-        "knowledgeRefs": " ".join(spec.knowledgeRefs),
-        "linkedSkills": " ".join(spec.linkedSkills),
-        "requires": " ".join(spec.requires),
-        "alternatives": " ".join(spec.alternatives),
-        "succeededBy": " ".join(spec.succeededBy),
-        "deprecatedBy": " ".join(spec.deprecatedBy),
-        "sourceRefs": " ".join(spec.sourceRefs),
+        "whenToUse": _joinAny(spec.whenToUse),
+        "inputs": _joinAny(spec.inputs),
+        "outputs": _joinAny(spec.outputs),
+        "capabilityRefs": _joinAny(spec.capabilityRefs),
+        "datasetRefs": _joinAny(spec.datasetRefs),
+        "visualRefs": _joinAny(spec.visualRefs),
+        "knowledgeRefs": _joinAny(spec.knowledgeRefs),
+        "linkedSkills": _joinAny(spec.linkedSkills),
+        "requires": _joinAny(spec.requires),
+        "alternatives": _joinAny(spec.alternatives),
+        "succeededBy": _joinAny(spec.succeededBy),
+        "deprecatedBy": _joinAny(spec.deprecatedBy),
+        "sourceRefs": _joinAny(spec.sourceRefs),
         "runtimeCompatibility": json.dumps(spec.runtimeCompatibility, ensure_ascii=False),
         "docs": json.dumps(spec.docs, ensure_ascii=False),
-        "procedure": " ".join(spec.procedure),
-        "requiredEvidence": " ".join(spec.requiredEvidence),
-        "expectedOutputs": " ".join(spec.expectedOutputs),
-        "failureModes": " ".join(spec.failureModes),
-        "forbidden": " ".join(spec.forbidden),
-        "examples": " ".join(spec.examples),
+        "procedure": _joinAny(spec.procedure),
+        "requiredEvidence": _joinAny(spec.requiredEvidence),
+        "expectedOutputs": _joinAny(spec.expectedOutputs),
+        "failureModes": _joinAny(spec.failureModes),
+        "forbidden": _joinAny(spec.forbidden),
+        "examples": _joinAny(spec.examples),
         "body": str(spec.source.get("body") or ""),
     }
     score = 0.0

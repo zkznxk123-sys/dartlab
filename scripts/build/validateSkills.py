@@ -144,6 +144,46 @@ def validateOne(path: Path, *, knownSkillIds: set[str] | None = None) -> list[st
     else:
         errors.extend(_validateApplicationCallExample(path, text, block))
 
+    category = hasScalar(block, "category")
+    if category == "engines" and kind != "recipe":
+        errors.extend(_validateExecutionSubstance(path, text))
+
+    return errors
+
+
+_REQUIRED_ENGINE_HEADINGS = ("## 공개 호출 방식", "## 호출 동작", "## 대표 반환 형태")
+
+
+def _extractSection(text: str, heading: str) -> str:
+    idx = text.find(heading)
+    if idx < 0:
+        return ""
+    start = idx + len(heading)
+    next_h2 = text.find("\n## ", start)
+    section = text[start:] if next_h2 < 0 else text[start:next_h2]
+    return section.strip()
+
+
+def _validateExecutionSubstance(path: Path, text: str) -> list[str]:
+    """엔진 skill 의 강제 섹션이 빈 placeholder 가 아닌지 검사 — 신규/수정 파일 한정.
+
+    `## 공개 호출 방식` 은 ``` 코드블록 1 개 이상 필수.
+    `## 호출 동작` / `## 대표 반환 형태` 는 표 (`|...|`) 또는 코드블록 또는 60자+ 산문.
+    """
+    errors: list[str] = []
+    for heading in _REQUIRED_ENGINE_HEADINGS:
+        section = _extractSection(text, heading)
+        if not section:
+            continue  # heading 자체 누락은 별도 (registry.py) lint 에서.
+        if heading == "## 공개 호출 방식":
+            if "```" not in section:
+                errors.append(f"{path}: '{heading}' 섹션에 ``` 코드블록 1개 이상 필요 (AI 가 따라 실행할 수 있게)")
+            continue
+        has_code = "```" in section
+        has_table = "|" in section and "---" in section
+        long_prose = len(section) >= 60
+        if not (has_code or has_table or long_prose):
+            errors.append(f"{path}: '{heading}' 섹션이 빈 placeholder — 표/코드블록/60자+ 산문 중 하나 필요")
     return errors
 
 
