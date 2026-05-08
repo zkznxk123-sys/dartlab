@@ -6,6 +6,25 @@ import sys
 
 
 def _stdio_server_config() -> dict:
+    """uv tool install / pipx install 가 만든 entry point (`dartlab` / `dartlab.exe`) 직접 호출.
+
+    이슈 #28 follow-up: Microsoft Store Python 환경에선 `python` 이 PATH 의 App Execution
+    Alias stub 이라 Claude Desktop subprocess.spawn 이 ENOENT 로 실패. dartlab entry point
+    exe 직접 호출은 PATH 검색 의존이 가벼워 spawn 안전.
+    """
+    return {
+        "mcpServers": {
+            "dartlab": {
+                "command": "dartlab",
+                "args": ["mcp"],
+                "env": {"PYTHONUNBUFFERED": "1", "PYTHONUTF8": "1"},
+            }
+        }
+    }
+
+
+def _stdio_server_config_python_fallback() -> dict:
+    """python -m fallback. uv tool / pipx 미설치 환경 + python 이 PATH stub 아닐 때만."""
     return {
         "mcpServers": {
             "dartlab": {
@@ -37,35 +56,52 @@ def _print_config(client: str) -> None:
     """MCP 클라이언트 설정 예시 출력."""
     import json
 
+    primary = _stdio_server_config()
+    fallback = _stdio_server_config_python_fallback()
+    note = (
+        "# 사전 설치 필요: uv tool install dartlab   (또는: pipx install dartlab)\n"
+        "# 이 형식은 .local/bin/dartlab(.exe) entry point 를 직접 호출하므로 spawn 이 안전합니다.\n"
+        '# Microsoft Store Python 환경에서 `command: "python"` 이 ENOENT 로 실패하는 이슈를 회피합니다 (#28).\n'
+    )
+
     if client == "claude-desktop":
         # Claude Desktop: ~/AppData/Roaming/Claude/claude_desktop_config.json (Windows)
         #                  ~/Library/Application Support/Claude/claude_desktop_config.json (macOS)
-        config = _stdio_server_config()
         if sys.platform == "win32":
             path = r"%APPDATA%\Claude\claude_desktop_config.json"
         else:
             path = "~/Library/Application Support/Claude/claude_desktop_config.json"
         print(f"# Claude Desktop 설정 파일: {path}")
-        print("# 아래 내용을 mcpServers에 추가하세요.\n")
-        print(json.dumps(config, indent=2, ensure_ascii=False))
+        print("# 아래 내용을 mcpServers 에 추가하세요.\n")
+        print(note)
+        print(json.dumps(primary, indent=2, ensure_ascii=False))
+        print()
+        print("# 대안 — `dartlab` 명령이 PATH 에 없는 경우:")
+        print(json.dumps(fallback, indent=2, ensure_ascii=False))
 
     elif client == "claude-code":
         # Claude Code: ~/.claude/settings.json 또는 프로젝트 .claude/settings.json
-        config = _stdio_server_config()
         print("# Claude Code 설정")
         print("# 방법 1: 글로벌 설정 (~/.claude/settings.json)")
         print("# 방법 2: 프로젝트 설정 (.claude/settings.json)")
-        print("# 아래 내용을 mcpServers에 추가하세요.\n")
-        print(json.dumps(config, indent=2, ensure_ascii=False))
+        print("# 아래 내용을 mcpServers 에 추가하세요.\n")
+        print(note)
+        print(json.dumps(primary, indent=2, ensure_ascii=False))
         print()
-        print("# 또는 CLI에서 직접 추가:")
-        print("#   claude mcp add dartlab -- python -X utf8 -m dartlab.mcp")
+        print("# 또는 CLI 한 줄:")
+        print("#   claude mcp add dartlab -- dartlab mcp")
+        print()
+        print("# 대안 — `dartlab` 명령이 PATH 에 없는 경우:")
+        print(json.dumps(fallback, indent=2, ensure_ascii=False))
 
     elif client == "cursor":
-        config = _stdio_server_config()
         print("# Cursor 설정: .cursor/mcp.json")
         print("# 아래 내용을 추가하세요.\n")
-        print(json.dumps(config, indent=2, ensure_ascii=False))
+        print(note)
+        print(json.dumps(primary, indent=2, ensure_ascii=False))
+        print()
+        print("# 대안 — `dartlab` 명령이 PATH 에 없는 경우:")
+        print(json.dumps(fallback, indent=2, ensure_ascii=False))
 
 
 def _run(args) -> None:

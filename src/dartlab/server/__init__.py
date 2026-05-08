@@ -12,10 +12,22 @@ import logging
 import os
 from contextlib import asynccontextmanager, suppress
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
+# 0.10 — server 부속 (fastapi / uvicorn / sse-starlette / starlette) 은 base wheel 에서 격하됨.
+# `pip install dartlab` 만 한 사용자가 server 진입점을 import 하면 ImportError 가 나는데,
+# 어떤 extras 가 필요한지 안내 메시지로 즉시 변환한다.
+try:
+    from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.middleware.gzip import GZipMiddleware
+    from starlette.middleware.base import BaseHTTPMiddleware
+except ImportError as exc:
+    raise ImportError(
+        "DartLab HTTP server 기능은 별도 extras 가 필요합니다.\n"
+        "  pip install 'dartlab[server]'   # fastapi + uvicorn + sse-starlette\n"
+        "또는 모두 한 번에:\n"
+        "  pip install 'dartlab[all]'\n\n"
+        f"원본 에러: {exc}"
+    ) from exc
 
 import dartlab
 from dartlab.ai.trace import installProgressCapture
@@ -67,40 +79,12 @@ async def _preload_ollama_once() -> None:
         logger.debug("Ollama preload 실행 실패", exc_info=exc)
 
 
-def _prewarm_secret_store_sync() -> None:
-    """keyring (Windows Credential Manager) cold init 을 startup 으로 흡수한다.
-
-    문제: /api/ai/profile 첫 호출이 50s+ 블락 → UI dropdown "확인 중..." 멈춤.
-    원인: profile.serialize() 가 secret_store.has(provider) 9 회 호출, Windows keyring
-    첫 접근이 매우 느림 (수십 초).
-    해결: startup 에 백그라운드 thread 로 한 번 호출. 첫 HTTP 요청은 이미 warm.
-    """
-    try:
-        from dartlab.ai.settings import get_profile_manager
-
-        get_profile_manager().serialize()
-    except (ImportError, OSError, RuntimeError, ValueError) as exc:
-        logger.debug("profile pre-warm 실패", exc_info=exc)
-    try:
-        from dartlab.ai.providers.support import oauth_token
-
-        oauth_token.load_token()
-    except (ImportError, OSError, RuntimeError, ValueError) as exc:
-        logger.debug("oauth token pre-warm 실패", exc_info=exc)
-
-
-async def _prewarm_secret_store() -> None:
-    await asyncio.to_thread(_prewarm_secret_store_sync)
-    logger.info("secret store pre-warm 완료")
-
-
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     """앱 수명주기 관리 -- Ollama preload, 룸 생성/정리, 채널 종료."""
-    # secret store pre-warm 은 백그라운드 — keyring 이 GUI 인증창을 띄우거나
-    # 환경에 따라 무한 대기할 수 있어 startup 을 절대 블락하지 않는다.
-    # 첫 /api/ai/profile 호출이 동시에 prewarm 진행 중이면 그쪽이 cold 비용을 한 번 흡수.
-    prewarm_task = asyncio.create_task(_prewarm_secret_store())
+    # 과거 secret_store prewarm 은 SecretStore.has() 가 호출당 DPAPI decrypt ~10s 라서
+    # /api/ai/profile 가 9 회 has() 누적 90s 블락되던 워크어라운드. 근본 fix (has() 가
+    # decrypt 안 하고 serialize() 가 _load() 1 회만) 후 prewarm 자체 불필요해 제거.
     preload_task = asyncio.create_task(_preload_ollama_once()) if _should_preload_ollama() else None
 
     # 채널 모드: 협업 룸 자동 생성 + 백그라운드 정리
@@ -126,10 +110,6 @@ async def lifespan(_: FastAPI):
         with suppress(asyncio.CancelledError):
             if preload_task is not None:
                 await preload_task
-        if not prewarm_task.done():
-            prewarm_task.cancel()
-        with suppress(asyncio.CancelledError):
-            await prewarm_task
 
 
 # dartlab logger 초기화 후 tool 진행 라인을 SSE 로 흘리기 위한 capture 설치.

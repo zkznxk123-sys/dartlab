@@ -9,6 +9,7 @@ from typing import Any
 
 from dartlab.ai.agent import runAgent
 from dartlab.ai.contracts import TraceEvent
+from dartlab.ai.tools.registry import _LEGACY_NAME_MAP, CANONICAL_TOOL_NAMES
 from dartlab.ai.workbench import WorkbenchLoop
 
 from . import agent_metrics
@@ -17,54 +18,20 @@ from .streaming import _sync_gen_to_async
 
 logger = logging.getLogger(__name__)
 
-_TOOL_DISPLAY = {
-    # PascalCase canonical → UI 표시 (Claude 도구 체계 일관성).
-    "ReadSkill": "ReadSkill",
-    "GetSkillBody": "GetSkillBody",
-    "ReadCapability": "ReadCapability",
-    "EngineCall": "EngineCall",
-    "RunPython": "RunPython",
-    "InspectDataset": "InspectDataset",
-    "Read": "Read",
-    "WebSearch": "WebSearch",
-    "SaveArtifact": "SaveArtifact",
-    "CompileVisual": "CompileVisual",
-    "RunWorkbench": "RunWorkbench",
-    # legacy snake_case alias (옛 모델/호출자 호환).
-    "run_python": "RunPython",
-    "engine_call": "EngineCall",
-    "read_skill": "ReadSkill",
-    "read_capability": "ReadCapability",
-    "web_search": "WebSearch",
-    "save_artifact": "SaveArtifact",
-    "compile_visual": "CompileVisual",
-    "inspect_dataset": "InspectDataset",
-    "verify": "Verify",
-}
 
-# UI 가 ToolBlock 카드로 표현할 도구 화이트리스트. PascalCase + legacy alias.
-_PUBLIC_TOOL_NAMES = {
-    "ReadSkill",
-    "GetSkillBody",
-    "ReadCapability",
-    "EngineCall",
-    "RunPython",
-    "InspectDataset",
-    "Read",
-    "WebSearch",
-    "SaveArtifact",
-    "CompileVisual",
-    "RunWorkbench",
-    "run_python",
-    "engine_call",
-    "compile_visual",
-    "read_skill",
-    "read_capability",
-    "web_search",
-    "save_artifact",
-    "inspect_dataset",
-    "verify",
-}
+def _displayName(tool: str) -> str:
+    """도구 이름을 UI 표시용으로 정규화 — registry _LEGACY_NAME_MAP SSOT 위 wrapping."""
+    canonical = _LEGACY_NAME_MAP.get(tool, tool)
+    if canonical in CANONICAL_TOOL_NAMES:
+        return canonical
+    if tool == "verify":  # Workbench GATE 패스의 별칭 — registry canonical 외 display only.
+        return "Verify"
+    return str(tool).replace("_", " ")
+
+
+# UI 가 ToolBlock 카드로 표현할 도구 화이트리스트. registry SSOT 에서 derive — PascalCase canonical
+# + snake_case legacy alias 가 동시에 화이트리스트에 들어간다.
+_PUBLIC_TOOL_NAMES = set(CANONICAL_TOOL_NAMES) | set(_LEGACY_NAME_MAP.keys()) | {"verify"}
 
 _ALLOWED_EVENTS = {
     "TEXT_MESSAGE_START",
@@ -487,7 +454,7 @@ def _tool_name(data: dict[str, Any]) -> str:
 
 
 def _display_tool(tool: str) -> str:
-    return _TOOL_DISPLAY.get(tool, str(tool).replace("_", " "))
+    return _displayName(tool)
 
 
 def _ref_ids(refs: list[Any]) -> list[str]:

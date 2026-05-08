@@ -1,18 +1,17 @@
 """DartLab MCP 서버 -- Ask Workbench 표준 도구 표면.
 
-설치 후 바로 사용::
+설치 (한 번만)::
 
-    pip install dartlab
-    # MCP 클라이언트에서 Ask Workbench 도구 사용
+    uv tool install dartlab        # 또는: pipx install dartlab
 
 수동 설정 (.mcp.json)::
 
     {
         "mcpServers": {
             "dartlab": {
-                "command": "python",
-                "args": ["-X", "utf8", "-m", "dartlab.mcp"],
-                "env": {"PYTHONUNBUFFERED": "1"}
+                "command": "dartlab",
+                "args": ["mcp"],
+                "env": {"PYTHONUNBUFFERED": "1", "PYTHONUTF8": "1"}
             }
         }
     }
@@ -20,57 +19,30 @@
 자동 설정::
 
     dartlab mcp --install   # .mcp.json 자동 생성
+
+note: `command: "python"` 은 Microsoft Store Python 환경에서 spawn ENOENT 로 실패합니다
+(이슈 #28). dartlab entry point exe 직접 호출이 더 견고.
 """
 
 from __future__ import annotations
 
 import json
 import logging
-import os
 import sys
-import time
-import traceback
 from typing import Any
 
+# Logger — stderr 명시 라우팅 + handler 이중 등록 방지 (stream identity 까지 비교).
+# MCP stdio 는 stdout 을 JSON-RPC 프레이밍에 쓰므로 모든 로그는 stderr 로만.
 _log = logging.getLogger("dartlab.mcp")
-if not _log.handlers:
+_log.propagate = False
+if not any(isinstance(h, logging.StreamHandler) and getattr(h, "stream", None) is sys.stderr for h in _log.handlers):
     _log.addHandler(logging.StreamHandler(sys.stderr))
 _log.setLevel(logging.INFO)
-_log.propagate = False
 
-_CACHE_MAX = 5
-_CACHE_TTL = 600
-_cache: dict[str, tuple[Any, float]] = {}
-
-
-def _getCompany(stockCode: str) -> Any:
-    """종목코드로 Company 인스턴스 (캐싱)."""
-    entry = _cache.get(stockCode)
-    if entry:
-        obj, ts = entry
-        if (time.monotonic() - ts) < _CACHE_TTL:
-            return obj
-        del _cache[stockCode]
-    from dartlab import Company
-
-    _log.info("Company('%s') loading...", stockCode)
-    c = Company(stockCode)
-    if len(_cache) >= _CACHE_MAX:
-        del _cache[next(iter(_cache))]
-    _cache[stockCode] = (c, time.monotonic())
-    _log.info("Company('%s') ready", stockCode)
-    return c
-
-
-_MCP_MAX_RESULT_CHARS = 12000  # MCP 도구 결과 상한 (외부 AI 컨텍스트 절약)
-from dartlab.ai.kernel import ask as _ask  # noqa: E402
-from dartlab.ai.tools.registry import CANONICAL_TOOL_NAMES as _AI_TOOL_NAMES  # noqa: E402
-from dartlab.ai.tools.registry import executeTool as _executeAiTool  # noqa: E402
-from dartlab.ai.tools.registry import toolSpecs as _aiToolSpecs  # noqa: E402
 
 _MCP_WORKSPACE_AGENT_TOOL_NAMES = (
     "ask",
-    # registry SSOT — PascalCase canonical (snake_case 이름은 registry 에서 폐기됨)
+    # registry SSOT — PascalCase canonical
     "ReadSkill",
     "ReadCapability",
     "RunPython",
@@ -79,10 +51,10 @@ _MCP_WORKSPACE_AGENT_TOOL_NAMES = (
     "CompileVisual",
 )
 
-_mcp_workspace_session: Any | None = None
-
 
 def _askWorkbenchToolSpecs() -> list[dict[str, Any]]:
+    from dartlab.ai.tools.registry import toolSpecs as _aiToolSpecs
+
     specs = {spec["name"]: spec for spec in _aiToolSpecs()}
     specs["ask"] = {
         "name": "ask",
@@ -97,7 +69,12 @@ def _askWorkbenchToolSpecs() -> list[dict[str, Any]]:
 
 
 def _executeAskWorkbenchTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+    from dartlab.ai.tools.registry import CANONICAL_TOOL_NAMES as _AI_TOOL_NAMES
+    from dartlab.ai.tools.registry import executeTool as _executeAiTool
+
     if name == "ask":
+        from dartlab.ai.kernel import ask as _ask
+
         question = str(args.get("question") or "")
         kwargs = {key: value for key, value in args.items() if key != "question"}
         return {"ok": True, "answer": _ask(question, stream=False, **kwargs)}
@@ -107,6 +84,8 @@ def _executeAskWorkbenchTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
 
 
 def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+    from dartlab.ai.tools.registry import executeTool as _executeAiTool
+
     if name == "ask_kernel_status":
         from dartlab.ai.workbench.loop import GRAPH_NODES
 
@@ -145,28 +124,19 @@ def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
         return checkEvidence(
             str(args.get("skillId") or ""), args.get("refs") or [], includeUser=bool(args.get("includeUser", True))
         ).to_dict()
-    return {"ok": False, "error": f"Unknown tool: {name}"}
-
-
-def _fmt(obj) -> str:
-    """객체를 LLM이 읽기 좋은 텍스트로 변환. 결과가 크면 잘라냄."""
-    if obj is None:
-        return "데이터 없음"
-    if hasattr(obj, "to_pandas"):
-        result = obj.to_pandas().to_string()
-    elif isinstance(obj, dict):
-        result = _fmtDict(obj)
-    elif isinstance(obj, list):
-        result = "\n".join(str(item) for item in obj)
-    else:
-        result = str(obj)
-    if len(result) > _MCP_MAX_RESULT_CHARS:
-        return result[:_MCP_MAX_RESULT_CHARS] + f"\n\n...(결과 잘림, 전체 {len(result)}자. 범위를 좁혀 재조회하세요)"
-    return result
+    return {
+        "ok": False,
+        "error": (
+            f"Unknown tool: {name}. 0.10 부터 33 generated 도구 (companyStory / companyAnalysis / "
+            f"marketScan 등) 와 DARTLAB_MCP_COMPAT 환경변수가 제거되었습니다. RunPython 안에서 "
+            "dartlab.Company / dartlab.scan / dartlab.macro 직접 호출하세요. 자세한 마이그레이션은 "
+            "CHANGELOG 참조."
+        ),
+    }
 
 
 def _executeWorkspaceAgentTool(name: str, args: dict[str, Any]) -> str:
-    """Execute canonical Ask Workbench MCP tools."""
+    """canonical Ask Workbench MCP 도구 실행 → JSON 직렬화."""
     return json.dumps(_executeAskWorkbenchTool(name, args), ensure_ascii=False, indent=2, default=str)
 
 
@@ -179,7 +149,6 @@ def _resourcePayload(uri_str: str) -> tuple[str, str]:
                 {
                     "version": getattr(dartlab, "__version__", "unknown"),
                     "tools": len(_advertisedTools()),
-                    "cached": list(_cache.keys()),
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -234,85 +203,15 @@ def _resourcePayload(uri_str: str) -> tuple[str, str]:
         if not path.exists():
             return ("", "application/jsonl")
         return (path.read_text(encoding="utf-8"), "application/jsonl")
-    if os.environ.get("DARTLAB_MCP_COMPAT") != "1":
-        return ("Unknown resource", "text/plain")
-    if uri_str == "dartlab://graph":
-        from dartlab.core.capability.analysisGraph import loadAnalysisGraph
-
-        return (json.dumps(loadAnalysisGraph(), ensure_ascii=False, indent=2), "application/json")
-    if uri_str == "dartlab://graph/status":
-        from dartlab.core.capability.analysisGraph import graphStatus
-
-        return (json.dumps(graphStatus(), ensure_ascii=False, indent=2), "application/json")
-    if uri_str.startswith("dartlab://graph/"):
-        from dartlab.core.capability.analysisGraph import impactForGraphNode, loadAnalysisGraph
-
-        tail = uri_str.replace("dartlab://graph/", "", 1)
-        if "/" in tail:
-            kind, raw_id = tail.split("/", 1)
-            node_id = f"{kind}:{raw_id}"
-            graph = loadAnalysisGraph()
-            nodes = [node for node in graph.get("nodes") or [] if node.get("id") == node_id]
-            payload = {"nodes": nodes, "impact": impactForGraphNode(node_id)}
-            return (json.dumps(payload, ensure_ascii=False, indent=2), "application/json")
-    if uri_str.startswith("dartlab://company/"):
-        parts = uri_str.replace("dartlab://company/", "").split("/", 1)
-        if len(parts) == 2 and parts[1] == "topics":
-            return (json.dumps(_getCompany(parts[0]).topics, ensure_ascii=False, indent=2), "application/json")
-    if uri_str.startswith("dartlab://scan/"):
-        axis = uri_str.replace("dartlab://scan/", "")
-        import dartlab
-
-        return (_fmt(dartlab.scan(axis)), "application/json")
-    if uri_str.startswith("dartlab://macro/"):
-        axis = uri_str.replace("dartlab://macro/", "")
-        import dartlab
-
-        return (_fmt(dartlab.macro(axis)), "application/json")
     return ("Unknown resource", "text/plain")
 
 
-def _fmtDict(d: dict, depth: int = 0) -> str:
-    """dict를 마크다운 텍스트로 변환. analysis 결과용."""
-    parts: list[str] = []
-    prefix = "#" * min(depth + 3, 5)  # ###, ####, #####
-    for key, val in d.items():
-        if val is None:
-            continue
-        if isinstance(val, dict):
-            parts.append(f"{prefix} {key}")
-            parts.append(_fmtDict(val, depth + 1))
-        elif hasattr(val, "to_pandas"):
-            parts.append(f"{prefix} {key}")
-            parts.append(val.to_pandas().to_string())
-        elif isinstance(val, list):
-            if val and isinstance(val[0], str):
-                parts.append(f"{prefix} {key}")
-                for item in val:
-                    parts.append(f"- {item}")
-            elif val and isinstance(val[0], dict):
-                parts.append(f"{prefix} {key}")
-                for item in val:
-                    parts.append(str(item))
-            else:
-                parts.append(f"**{key}**: {val}")
-        elif isinstance(val, (int, float)):
-            parts.append(f"- **{key}**: {val}")
-        else:
-            parts.append(f"- **{key}**: {val}")
-    return "\n".join(parts)
-
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Instructions -- LLM에게 사용법을 알려준다
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 _MCP_INSTRUCTIONS = """\
-DartLab MCP의 기본 표면은 ask가 실행하는 Ask Workbench와 PascalCase canonical 6 종 도구다. 목적은
-호출자가 DartLab을 프롬프트 지식으로 외우게 하는 것이 아니라, 질문마다 먼저 skill을 고르고, capability docstring
-에서 호출 가능한 API를 확인한 뒤 RunPython으로 실행하고 ref 검증 후 답하게 하는 것이다.
+DartLab MCP의 기본 표면은 ask가 실행하는 Ask Workbench와 SSOT v2 6 종 도구다. 목적은 LLM이 DartLab을
+프롬프트 지식으로 외우게 하는 것이 아니라, 질문마다 먼저 skill을 고르고, capability docstring에서 호출 가능한 API를
+확인한 뒤 run_python으로 실행하고 ref 검증 후 답하게 하는 것이다.
 
-## canonical 6 데이터 도구 (PascalCase, snake_case 도 _LEGACY_NAME_MAP 으로 자동 정규화)
+## SSOT P-revised — canonical 6 데이터 도구
 - ask: Workbench 5 패스 (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) 일괄 실행.
 - ReadSkill: Skill OS 검색 + frontmatter (whenToUse, capabilityRefs, requiredEvidence) + 본문.
 - ReadCapability: dartlab 공개 API/docstring 검색.
@@ -327,417 +226,34 @@ DartLab MCP의 기본 표면은 ask가 실행하는 Ask Workbench와 PascalCase 
 3. 데이터셋 스키마·기간·행 수·최신 기준시점이 필요하면 RunPython 안에서 dartlab.* 직접 호출로 확인한다.
 4. 후보·상위·랭킹 답변은 bullet 나열로 끝내지 않고 입력/유니버스, 필터, 계산식/지표, 결과와 evidence table을 함께 낸다.
 
-## 폐기 (P-revised)
-- propose_skill: 자기진화 사다리 0 promoted skill, dormant. outcome ground truth loop 가 대체.
-- skill_search / generated_spec_search / verify_answer / write: registry 에서 제거 (구식 표기 호출은 ReadSkill / ReadCapability / GetSkillBody 로 라우팅).
+## 0.10 BREAKING — 옛 33 generated 도구 제거
+companyStory / companyAnalysis / companyValuation / companyForecast / companyShow / companyTopics /
+companyDiff / companyGovernance / companyAudit / companyProfile / companyCredit / companyGather /
+companyQuant / companyFilings / marketScan / macroAnalysis / gatherData / quantAnalysis /
+topdownScreen / dartlabSearch / dartlabListing / pastInsight / sectorInsights / industryMap /
+capabilities / listDartlabApi / searchDartlabApi / verifyDartlabApi / 그리고 Analysis Graph 도구
+(contextForQuestion / queryAnalysisGraph / impactForGraphNode / explainDartlabTool /
+planDartlabQuestion / validateDartlabPlan / listDartlabProcesses) 는 모두 RunPython 안에서
+직접 호출하는 패턴으로 통합되었다. DARTLAB_MCP_COMPAT 환경변수도 폐기. 마이그레이션 예:
+
+    # 옛: companyAnalysis(stockCode="005930", axis="수익성")
+    RunPython(code='''
+    c = dartlab.Company("005930")
+    print(c.analysis(axis="수익성"))
+    ''')
 
 ## 경계
 - Company, gather, scan, macro, analysis, quant, viz는 generated MCP tool로 직접 우회하지 않는다.
   RunPython 안에서 사용하는 DartLab 라이브러리다.
 - Skills는 MCP 전용 규칙이 아니라 dartlab.skills 공용 runtime을 그대로 노출한다.
 - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다. 모든 절차는 Skill OS에서 찾는다.
-- companySections 같은 전체 sections 지도는 메모리 부담이 커서 기본 경로에서 쓰지 않는다.
 - 도구로 확인되지 않은 수치, 날짜, 실행 성공 여부를 단정하지 않는다.
 - 후보·상위·랭킹 결과를 표 없이 종목명과 퍼센트만 나열하지 않는다.
 """
 
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# MCP 도구 정의 — 자동 생성 파일에서 import
-# generateSpec.py 실행 시 _generated_tools.py가 갱신됨
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-from dartlab.mcp._generated_tools import TOOL_FEATURE_MAP as _TOOL_FEATURE_MAP  # noqa: E402
-from dartlab.mcp._generated_tools import TOOLS as _TOOLS  # noqa: E402
-
-
-def _executeTool(name: str, args: dict) -> str:
-    """MCP 도구 실행."""
-    import dartlab
-
-    code = args.get("stockCode")
-
-    try:
-        # advertised set (_MCP_WORKSPACE_AGENT_TOOL_NAMES) 은 6 종이지만 executable 은
-        # PascalCase canonical 11 종 + ask 모두. EngineCall / GetSkillBody / Read 등도
-        # 직접 호출 가능해야 한다.
-        if name == "ask" or name in _AI_TOOL_NAMES:
-            return _executeWorkspaceAgentTool(name, args)
-        if os.environ.get("DARTLAB_MCP_COMPAT") != "1":
-            return f"Unknown tool: {name}"
-
-        if name == "companyStory":
-            c = _getCompany(code)
-            section = args.get("section")
-            if section:
-                return c.story(section).toMarkdown()
-            return c.story().toMarkdown()
-
-        if name == "companyInsights":
-            return str(_getCompany(code).insights)
-        if name == "searchCompany":
-            return _fmt(dartlab.searchName(args["query"]))
-
-        if name == "companyFinancials":
-            return _fmt(getattr(_getCompany(code), args["statement"], None))
-
-        if name == "companyRatios":
-            return _fmt(_getCompany(code).ratios)
-
-        if name == "companyAnalysis":
-            c = _getCompany(code)
-            axis = args.get("axis")
-            sub = args.get("sub")
-            if axis and sub:
-                return _fmt(c.analysis(axis, sub))
-            elif axis:
-                return _fmt(c.analysis(axis))
-            else:
-                return _fmt(c.analysis())
-
-        if name == "companyValuation":
-            return _fmt(_getCompany(code).analysis("valuation", "가치평가"))
-
-        if name == "companyForecast":
-            return _fmt(_getCompany(code).analysis("forecast", "매출전망"))
-
-        if name == "companyShow":
-            return str(_getCompany(code).show(args["topic"]))
-        if name == "companyTopics":
-            return json.dumps(_getCompany(code).topics, ensure_ascii=False, indent=2)
-
-        if name == "companyDiff":
-            c = _getCompany(code)
-            topic = args.get("topic")
-            return str(c.diff(topic) if topic else c.diff())
-        if name == "companyGovernance":
-            return _fmt(_getCompany(code).governance())
-
-        if name == "companyAudit":
-            return str(_getCompany(code).audit())
-        if name == "companyProfile":
-            c = _getCompany(code)
-            return json.dumps(
-                {"corpName": c.corpName, "stockCode": c.stockCode, "facts": str(c.facts)[:500]},
-                ensure_ascii=False,
-                indent=2,
-            )
-        if name == "companySections":
-            return (
-                "companySections는 MCP에서 직접 노출하지 않습니다. 메모리 사용량이 커서 "
-                "companyTopics, companyShow(topic), companyAnalysis, readFiling(sections=False) "
-                "경로를 사용하세요."
-            )
-
-        if name == "marketScan":
-            return _fmt(dartlab.scan(args["axis"]))
-
-        # ── P1: 시장/거시 ──
-        if name == "macroAnalysis":
-            axis = args.get("axis")
-            if axis:
-                return _fmt(dartlab.macro(axis))
-            return _fmt(dartlab.macro())
-
-        if name == "gatherData":
-            axis = args.get("axis")
-            target = args.get("target")
-            if axis and target:
-                return _fmt(dartlab.gather(axis, target))
-            elif axis:
-                return _fmt(dartlab.gather(axis))
-            return _fmt(dartlab.gather())
-
-        if name == "quantAnalysis":
-            c = _getCompany(code)
-            metric = args.get("metric")
-            if metric:
-                return _fmt(c.quant(metric))
-            return _fmt(c.quant())
-
-        if name == "topdownScreen":
-            market = args.get("market", "KR")
-            topN = args.get("topN", 5)
-            return _fmt(dartlab.topdown(market=market, topN=topN))
-
-        # ── P2: Company 확장 ──
-        if name == "companyCredit":
-            c = _getCompany(code)
-            axis = args.get("axis")
-            if axis:
-                return _fmt(c.credit(axis))
-            return _fmt(c.credit())
-
-        if name == "companyGather":
-            c = _getCompany(code)
-            return _fmt(c.gather(args["axis"]))
-
-        if name == "companyQuant":
-            c = _getCompany(code)
-            metric = args.get("metric")
-            if metric:
-                return _fmt(c.quant(metric))
-            return _fmt(c.quant())
-
-        if name == "companyFilings":
-            c = _getCompany(code)
-            topK = args.get("topK", 10)
-            return _fmt(c.filings(topK=topK))
-
-        if name == "dartlabSearch":
-            corp = args.get("corp")
-            if corp:
-                return _fmt(dartlab.search(args["query"], corp=corp))
-            return _fmt(dartlab.search(args["query"]))
-
-        if name == "dartlabListing":
-            kind = args["kind"]
-            corp = args.get("corp")
-            if kind == "companies":
-                return _fmt(dartlab.listing())
-            elif kind == "filings":
-                return _fmt(dartlab.listing("filings", corp=corp))
-            elif kind == "topics":
-                return _fmt(dartlab.listing("topics"))
-            return _fmt(dartlab.listing())
-
-        # ── AI 경험 자산 (블로그 insights + sector insights) ──
-        if name == "pastInsight":
-            return _fmt(dartlab.pastInsight(stockCode=code))
-
-        if name == "sectorInsights":
-            return _fmt(dartlab.sectorInsights(sector=args["sector"]))
-
-        # ── 산업지도 직접 조회 ──
-        if name == "industryMap":
-            industry = args.get("industry")
-            stage = args.get("stage")
-            if industry and stage:
-                return _fmt(dartlab.industry(industry, stage))
-            if industry:
-                return _fmt(dartlab.industry(industry))
-            return _fmt(dartlab.industry())
-
-        # ── dartlab 자체 메타 ──
-        if name == "capabilities":
-            path = args.get("path")
-            if path:
-                return _fmt(dartlab.capabilities(path))
-            return _fmt(dartlab.capabilities())
-
-        # ── API Discovery Tools (polars 방식 introspection) ──
-        if name == "listDartlabApi":
-            return _listDartlabApi()
-        if name == "searchDartlabApi":
-            return _searchDartlabApi(args.get("query", ""))
-        if name == "verifyDartlabApi":
-            return _verifyDartlabApi(args.get("apiRef", ""))
-
-        # ── Analysis Graph tools ──
-        if name == "contextForQuestion":
-            from dartlab.core.capability.analysisGraph import contextForQuestion
-
-            return json.dumps(
-                contextForQuestion(str(args.get("question") or ""), stockCode=args.get("stockCode")),
-                ensure_ascii=False,
-                indent=2,
-            )
-        if name == "queryAnalysisGraph":
-            from dartlab.core.capability.analysisGraph import queryAnalysisGraph
-
-            return json.dumps(
-                queryAnalysisGraph(
-                    str(args.get("query") or ""),
-                    kind=args.get("kind"),
-                    topK=int(args.get("topK") or 10),
-                ),
-                ensure_ascii=False,
-                indent=2,
-            )
-        if name == "impactForGraphNode":
-            from dartlab.core.capability.analysisGraph import impactForGraphNode
-
-            return json.dumps(impactForGraphNode(str(args.get("nodeId") or "")), ensure_ascii=False, indent=2)
-        if name == "explainDartlabTool":
-            from dartlab.core.capability.analysisGraph import explainDartlabTool
-
-            return json.dumps(explainDartlabTool(str(args.get("toolName") or "")), ensure_ascii=False, indent=2)
-        if name == "planDartlabQuestion":
-            from dartlab.core.capability.analysisGraph import planDartlabQuestion
-
-            return json.dumps(
-                planDartlabQuestion(str(args.get("question") or ""), stockCode=args.get("stockCode")),
-                ensure_ascii=False,
-                indent=2,
-            )
-        if name == "validateDartlabPlan":
-            from dartlab.core.capability.analysisGraph import validateDartlabPlan
-
-            return json.dumps(
-                validateDartlabPlan(str(args.get("question") or ""), args.get("proposedTools") or []),
-                ensure_ascii=False,
-                indent=2,
-            )
-        if name == "listDartlabProcesses":
-            from dartlab.core.capability.analysisGraph import listDartlabProcesses
-
-            return json.dumps(listDartlabProcesses(), ensure_ascii=False, indent=2)
-        return f"Unknown tool: {name}"
-
-    except Exception as e:  # noqa: BLE001
-        _log.error("Tool %s error: %s\n%s", name, e, traceback.format_exc())
-        try:
-            from dartlab.core.messaging import handleError
-
-            feature = _TOOL_FEATURE_MAP.get(name, "data")
-            guideMsg = handleError(e, feature=feature)
-            return f"Error: {e}\n\n{guideMsg}"
-        except ImportError:
-            return f"Error: {e}"
-
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# API Discovery — Python introspection 기반
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-
-def _listDartlabApi() -> str:
-    """dartlab 전체 공개 API — 런타임 introspection."""
-    import inspect
-
-    import dartlab
-    from dartlab.providers.dart.company import Company
-
-    lines: list[str] = ["# dartlab API\n"]
-
-    lines.append("## Module-level")
-    for name in sorted(getattr(dartlab, "__all__", [])):
-        obj = getattr(dartlab, name, None)
-        if obj is None:
-            continue
-        kind = "class" if inspect.isclass(obj) else "function" if callable(obj) else "module"
-        doc = inspect.getdoc(obj)
-        summary = doc.split("\n")[0] if doc else ""
-        lines.append(f"- `dartlab.{name}` ({kind}): {summary}")
-
-    lines.append("\n## Company methods")
-    for name in sorted(dir(Company)):
-        if name.startswith("_"):
-            continue
-        obj = getattr(Company, name, None)
-        if obj is None:
-            continue
-        if not callable(obj) and not isinstance(inspect.getattr_static(Company, name), property):
-            continue
-        impl = getattr(Company, f"_{name}Impl", None)
-        doc = inspect.getdoc(impl or obj) or ""
-        summary = doc.split("\n")[0] if doc else ""
-        lines.append(f"- `Company.{name}`: {summary}")
-
-    return "\n".join(lines)
-
-
-def _searchDartlabApi(query: str) -> str:
-    """dartlab API 검색 — 이름 + docstring 키워드 매칭."""
-    import inspect
-
-    import dartlab
-    from dartlab.providers.dart.company import Company
-
-    if not query.strip():
-        return "query 를 지정하세요. 예: '수익성', 'show', 'scan'"
-
-    q = query.lower()
-    results: list[str] = []
-
-    for name in getattr(dartlab, "__all__", []):
-        obj = getattr(dartlab, name, None)
-        if obj is None:
-            continue
-        doc = inspect.getdoc(obj) or ""
-        if q in name.lower() or q in doc.lower():
-            sig = ""
-            try:
-                sig = str(inspect.signature(obj))
-            except (ValueError, TypeError):
-                pass
-            results.append(f"## dartlab.{name}{sig}\n{doc[:500]}")
-
-    for name in sorted(dir(Company)):
-        if name.startswith("_"):
-            continue
-        obj = getattr(Company, name, None)
-        if obj is None:
-            continue
-        impl = getattr(Company, f"_{name}Impl", None)
-        doc = inspect.getdoc(impl or obj) or ""
-        if q in name.lower() or q in doc.lower():
-            results.append(f"## Company.{name}\n{doc[:500]}")
-
-    if not results:
-        return f"'{query}' 에 해당하는 API 를 찾지 못했습니다."
-    return "\n\n".join(results[:10])
-
-
-def _verifyDartlabApi(apiRef: str) -> str:
-    """dartlab API 존재 확인 + docstring 반환."""
-    import inspect
-
-    import dartlab
-    from dartlab.providers.dart.company import Company
-
-    if not apiRef.strip():
-        return "apiRef 를 지정하세요. 예: 'Company.show', 'dartlab.scan'"
-
-    if apiRef.startswith("Company."):
-        name = apiRef[8:]
-        obj = getattr(Company, name, None)
-        if obj is None:
-            return f"✗ {apiRef} 존재하지 않음"
-        impl = getattr(Company, f"_{name}Impl", None)
-        doc = inspect.getdoc(impl or obj) or ""
-        return f"✓ {apiRef}\n\n{doc[:1000]}"
-
-    name = apiRef.replace("dartlab.", "")
-    obj = getattr(dartlab, name, None)
-    if obj is None:
-        return f"✗ {apiRef} 존재하지 않음"
-    doc = inspect.getdoc(obj) or ""
-    return f"✓ dartlab.{name}\n\n{doc[:1000]}"
-
-
-# Discovery tool 정의. generated _TOOLS 는 직접 변경하지 않는다.
-_DISCOVERY_TOOLS = [
-    {
-        "name": "listDartlabApi",
-        "description": "dartlab 전체 공개 API 목록 (런타임 introspection). 어떤 함수/메서드가 있는지 확인.",
-        "params": {},
-        "required": [],
-    },
-    {
-        "name": "searchDartlabApi",
-        "description": "dartlab API 검색. 키워드로 관련 함수를 찾고 docstring(시그니처/파라미터/반환값) 반환.",
-        "params": {
-            "query": {"type": "string", "description": "검색어 (함수명, 키워드, 설명). 예: '수익성', 'show', 'scan'"},
-        },
-        "required": ["query"],
-    },
-    {
-        "name": "verifyDartlabApi",
-        "description": "dartlab API 존재 확인 + 전체 docstring. 함수가 실제로 있는지, 어떤 파라미터/반환값인지 확인.",
-        "params": {
-            "apiRef": {
-                "type": "string",
-                "description": "API 참조. 예: 'Company.show', 'dartlab.scan', 'Company.analysis'",
-            },
-        },
-        "required": ["apiRef"],
-    },
-]
-_COMPAT_TOOLS = [*_TOOLS, *_DISCOVERY_TOOLS]
-
-
-def _canonicalTools() -> list[dict[str, Any]]:
+def _advertisedTools() -> list[dict[str, Any]]:
+    """MCP list_tools 에 노출할 도구 — registry canonical 6 + ask."""
     tools: list[dict[str, Any]] = []
     for spec in _askWorkbenchToolSpecs():
         schema = spec.get("inputSchema") or {}
@@ -750,29 +266,6 @@ def _canonicalTools() -> list[dict[str, Any]]:
             }
         )
     return tools
-
-
-def _advertisedTools() -> list[dict[str, Any]]:
-    """MCP list_tools에 노출할 도구 목록."""
-    if os.environ.get("DARTLAB_MCP_COMPAT") == "1":
-        legacy = [tool for tool in _COMPAT_TOOLS if tool.get("name") != "companySections"]
-        seen = {tool["name"] for tool in _canonicalTools()}
-        return _canonicalTools() + [tool for tool in legacy if tool.get("name") not in seen]
-    return _canonicalTools()
-
-
-def _resolveInputParams(params: dict[str, Any]) -> dict[str, Any]:
-    """generated MCP schema placeholder를 실제 JSON schema로 보정."""
-    stock_schema = {"type": "string", "description": "종목코드 (005930) 또는 회사명 (삼성전자)"}
-    resolved: dict[str, Any] = {}
-    for key, value in params.items():
-        if value == "_STOCK":
-            resolved[key] = stock_schema
-        elif isinstance(value, dict):
-            resolved[key] = _resolveInputParams(value)
-        else:
-            resolved[key] = value
-    return resolved
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -790,7 +283,7 @@ def create_server():
         raise ImportError("MCP SDK 필요: pip install --upgrade dartlab") from exc
 
     app = Server("dartlab", instructions=_MCP_INSTRUCTIONS)
-    _log.info("MCP 서버 초기화 -- %d 도구", len(_advertisedTools()))
+    _log.info("MCP 서버 초기화 완료")
 
     @app.list_tools()
     async def list_tools() -> list[Tool]:
@@ -800,7 +293,7 @@ def create_server():
                 description=t["description"],
                 inputSchema={
                     "type": "object",
-                    "properties": _resolveInputParams(t["params"]),
+                    "properties": t["params"],
                     "required": t["required"],
                 },
             )
@@ -810,11 +303,11 @@ def create_server():
     @app.call_tool()
     async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         _log.info("call_tool: %s(%s)", name, list(arguments.keys()))
-        return [TextContent(type="text", text=_executeTool(name, arguments))]
+        return [TextContent(type="text", text=_executeWorkspaceAgentTool(name, arguments))]
 
     @app.list_resources()
     async def list_resources() -> list[Resource]:
-        resources = [
+        return [
             Resource(
                 uri="dartlab://info",
                 name="DartLab",
@@ -846,39 +339,6 @@ def create_server():
                 mimeType="application/json",
             ),
         ]
-        if os.environ.get("DARTLAB_MCP_COMPAT") == "1":
-            resources.extend(
-                [
-                    Resource(
-                        uri="dartlab://scan/profitability",
-                        name="전종목 수익성",
-                        description="호환 리소스: 전종목 영업이익률/순이익률/ROE/ROA 횡단 비교",
-                        mimeType="application/json",
-                    ),
-                    Resource(
-                        uri="dartlab://scan/growth",
-                        name="전종목 성장성",
-                        description="호환 리소스: 전종목 매출/영업이익 YoY 성장률 횡단 비교",
-                        mimeType="application/json",
-                    ),
-                    Resource(
-                        uri="dartlab://macro/종합",
-                        name="거시경제 종합",
-                        description="호환 리소스: 경제 사이클, 금리, 자산, 심리, 유동성 종합 판정",
-                        mimeType="application/json",
-                    ),
-                ]
-            )
-        for code in _cache:
-            resources.append(
-                Resource(
-                    uri=f"dartlab://company/{code}/topics",
-                    name=f"{code} topics",
-                    description=f"{code} 조회 가능 토픽",
-                    mimeType="application/json",
-                )
-            )
-        return resources
 
     @app.read_resource()
     async def read_resource(uri: str) -> list[ReadResourceContents]:
@@ -916,10 +376,13 @@ def installMcpConfig(targetDir: str | None = None) -> str:
     if "dartlab" in servers:
         return f"이미 등록됨: {mcpFile}"
 
+    # uv tool install / pipx install 가 만든 entry point (`dartlab` / `dartlab.exe`) 직접 호출.
+    # 이슈 #28 follow-up: Microsoft Store Python 의 `python` PATH stub 이 spawn ENOENT 로 실패하는
+    # 회피책. dartlab entry point exe 는 PATH 검색 의존이 가벼워 spawn 안전.
     servers["dartlab"] = {
-        "command": "python",
-        "args": ["-X", "utf8", "-m", "dartlab.mcp"],
-        "env": {"PYTHONUNBUFFERED": "1"},
+        "command": "dartlab",
+        "args": ["mcp"],
+        "env": {"PYTHONUNBUFFERED": "1", "PYTHONUTF8": "1"},
     }
     mcpFile.write_text(json.dumps(config, indent=2, ensure_ascii=False), encoding="utf-8")
     return f"생성 완료: {mcpFile}"

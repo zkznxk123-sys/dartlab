@@ -15,6 +15,27 @@ def _payload(event: dict[str, str]) -> dict:
     return json.loads(event["data"])
 
 
+def test_display_name_uses_registry_legacy_map() -> None:
+    """_displayName 은 registry._LEGACY_NAME_MAP SSOT 위에서 동작 — _TOOL_DISPLAY 중복 dict 폐기."""
+    from dartlab.server.agent_gateway import _PUBLIC_TOOL_NAMES, _displayName
+
+    # canonical PascalCase 그대로
+    assert _displayName("RunPython") == "RunPython"
+    assert _displayName("ReadSkill") == "ReadSkill"
+    # legacy snake → Pascal (registry SSOT)
+    assert _displayName("run_python") == "RunPython"
+    assert _displayName("engine_call") == "EngineCall"
+    assert _displayName("read_skill") == "ReadSkill"
+    # workbench GATE 별칭 (registry canonical 외 display only)
+    assert _displayName("verify") == "Verify"
+    # 미지 도구는 snake → space split fallback
+    assert _displayName("unknown_thing") == "unknown thing"
+    # whitelist 는 registry SSOT 에서 derive
+    assert "RunPython" in _PUBLIC_TOOL_NAMES
+    assert "run_python" in _PUBLIC_TOOL_NAMES
+    assert "verify" in _PUBLIC_TOOL_NAMES
+
+
 def test_agent_gateway_public_events_hide_internal_kernel_names(monkeypatch) -> None:
     import dartlab.server.agent_gateway as agent_gateway
 

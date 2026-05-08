@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import builtins
 import json
+import logging
 import re
 from pathlib import Path
 from typing import Any
 
 from .models import EvidenceCheckResult, SkillMatch, SkillSpec
+
+logger = logging.getLogger(__name__)
 
 _FORBIDDEN_TEMPLATE_MARKERS = ("final answer", "최종 답변:", "답변 템플릿", "{{answer", "{answer}")
 _MAX_PROCEDURE_ITEM_CHARS = 1200
@@ -100,12 +103,28 @@ def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
     searchSkills : 질의 기반 skill 검색.
     """
 
+    # builtin spec 은 우리 책임 — 실패 시 raise (개발자 즉시 인지).
     specs = [_load_spec(path, default_scope="builtin") for path in _builtin_spec_paths()]
     if includeUser:
-        specs.extend(_load_spec(path, default_scope="user", force_user=True) for path in _user_spec_paths())
+        # user spec 은 실험적 — 1 개 깨져도 전체 listSkills 가 무너지면 ReadSkill tool 자체가
+        # 못 돈다. spec 단위로 skip + 경고. lintSkill 도 동일 — user spec 1 개의 lint 실패가
+        # 전체 검색을 막지 않게.
+        for path in _user_spec_paths():
+            try:
+                spec = _load_spec(path, default_scope="user", force_user=True)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("user skill spec skipped (%s): %s", path.name, exc)
+                continue
+            try:
+                lintSkill(spec)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("user skill spec failed lint (%s): %s", path.name, exc)
+                continue
+            specs.append(spec)
     _validate_unique_ids(specs)
     for spec in specs:
-        lintSkill(spec)
+        if spec.scope == "builtin":
+            lintSkill(spec)
     return sorted(specs, key=lambda item: item.id)
 
 
@@ -387,6 +406,36 @@ def _procedure_from_markdown_body(body: str) -> list[str]:
     return items
 
 
+def _coerce_string_item(value: Any) -> str:
+    """frontmatter 의 list 항목이 dict / 숫자 / None 으로 들어와도 string 으로 강제.
+
+    근거: SkillSpec 의 string list 필드 (procedure / examples / inputs / ...) 는
+    downstream 에서 item.lower() · join 등 string 연산 가정. 운영자가 frontmatter 를
+    `- key: value` (dict) 또는 `- 1.5` (숫자) 로 작성하면 type 불일치로 폭발.
+    여기서 한 번 흡수해 모든 downstream (lintSkill / _joinAny / _score / 공개 dict) 안전.
+
+    dict 우선순위 키: step / description / text / summary / title / name → 의미 있는 줄 추출.
+    없으면 value 들 공백 join. 모두 실패 시 JSON 직렬화 (절대 폭발 X).
+    """
+    if isinstance(value, str):
+        return value
+    if value is None:
+        return ""
+    if isinstance(value, dict):
+        for key in ("step", "description", "text", "summary", "title", "name"):
+            v = value.get(key)
+            if isinstance(v, str) and v.strip():
+                return v
+        joined = " ".join(str(v) for v in value.values() if v is not None)
+        if joined.strip():
+            return joined
+        try:
+            return json.dumps(value, ensure_ascii=False)
+        except (TypeError, ValueError):
+            return str(value)
+    return str(value)
+
+
 def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
     list_fields = {
         "inputs",
@@ -420,7 +469,7 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
         elif isinstance(value, str):
             data[field] = [value]
         else:
-            data[field] = builtins.list(value)
+            data[field] = [_coerce_string_item(item) for item in builtins.list(value)]
     # recipeSteps 는 list[dict] — frontmatter 에 박혀 있을 수 있다 (운영자 명시).
     rs = data.get("recipeSteps")
     if rs is None:
