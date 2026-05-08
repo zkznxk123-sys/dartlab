@@ -67,7 +67,7 @@ def test_agent_gateway_public_events_hide_internal_kernel_names(monkeypatch) -> 
     assert "TEXT_MESSAGE_CONTENT" in {event["event"] for event in events}
     assert "TOOL_CALL_START" in {event["event"] for event in events}
     assert "RUN_FINISHED" in {event["event"] for event in events}
-    assert any(_payload(event).get("toolName") == "run python" for event in events)
+    assert any(_payload(event).get("toolName") == "RunPython" for event in events)
 
 
 def test_agent_gateway_failure_reason_is_public(monkeypatch) -> None:
