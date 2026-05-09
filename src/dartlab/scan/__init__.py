@@ -1,6 +1,8 @@
-"""시장 전체 횡단분석 통합 엔트리포인트.
+"""시장 전체 횡단분석 통합 엔트리포인트 — L1.5 횡단 엔진.
 
-Company = 기업 하나. Scan = 기업 밖 전부.
+Company = 기업 하나. Scan = 기업 밖 전부. L1 (company · gather) 위에서 전체 종목
+universe 를 스캔해 ranking · filter · candidate evidence table 을 만든다.
+단일 종목 심층 분석은 L2 분석엔진 (analysis · credit · macro · quant · industry).
 
 사용법::
 

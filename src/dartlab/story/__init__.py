@@ -1,6 +1,8 @@
-"""dartlab.story — 분석 보고서 패키지.
+"""dartlab.story — L3 조합기 (분석엔진 X, 보고서 스토리보드).
 
-c.story() 하나로 분석 보고서 생성 + 렌더링.
+c.story() 하나로 6 막 인과 보고서 생성 + 렌더링. 분석엔진 X — L2 5 분석엔진
+(analysis · credit · macro · quant · industry) 끼리의 import 순환을 방지하기 위해
+story 가 단독으로 다중 결합 책임을 짊어진다. 자체 계산 0, 모든 숫자는 하위 엔진 ref.
 AI 는 이 위에 올라간다 (L4).
 
 사용법::
