@@ -135,9 +135,15 @@ def resolve_default_model(
     return configured_model or fallback_model
 
 
-def fallback_models(provider: str | None) -> list[str]:
+def fallback_models(provider: str | None, *, allow_fetch: bool = True) -> list[str]:
+    """Provider fallback model 목록.
+
+    allow_fetch=False → backend HTTP 호출 금지. cache 또는 정적 fallback 만 사용.
+    cache-first endpoint (예: /api/models/<provider>) 가 fallback 호출 시 또 cold
+    HTTP 가 트리거되던 회귀 가드.
+    """
     if is_openai_family_provider(provider):
-        return [latest_openai_model()]
+        return [latest_openai_model(allow_fetch=allow_fetch)]
     return []
 
 

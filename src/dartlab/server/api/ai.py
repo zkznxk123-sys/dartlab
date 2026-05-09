@@ -122,6 +122,11 @@ def api_status(
             info["available"] = available
             info["model"] = model
             info["checked"] = checked
+        else:
+            # probe 안 했으면 secretConfigured 로 fallback — UI 가 null 을 "검증 실패" 로 잘못
+            # 해석해서 "설정 필요" 표시하던 문제 차단. probe 결과는 별도로 (백그라운드 또는
+            # Settings 패널 진입 시) 갱신.
+            info["available"] = info["secretConfigured"]
         results[prov] = info
 
     ollama_detail = build_ollama_detail(probe=probe and (target_provider is None or target_provider == "ollama"))
@@ -406,15 +411,24 @@ def api_models(provider: str):
 
             return {"models": get_codex_model_catalog()}
         except (ImportError, OSError, RuntimeError, ValueError):
-            return {"models": fallback_models("codex")}
+            return {"models": fallback_models("codex", allow_fetch=False)}
 
     if provider == "oauth-codex":
         try:
             from dartlab.ai.providers.oauth_codex import availableModels
 
-            return {"models": availableModels()}
+            # cache 우선 — 비어 있으면 정적 fallback 즉시 반환 + background thread 에서 warm.
+            # 이전: cold 1 회 ~43s (DNS/TLS cold + remote /codex/models fetch) 동안 UI 가
+            # "설정 필요" 표시. allow_fetch=False 로 fallback 도 cold HTTP 안 트리거.
+            cached = availableModels(allow_fetch=False)
+            if cached:
+                return {"models": cached}
+            import threading
+
+            threading.Thread(target=availableModels, daemon=True).start()
+            return {"models": fallback_models("oauth-codex", allow_fetch=False)}
         except (ImportError, OSError, RuntimeError, ValueError):
-            return {"models": fallback_models("oauth-codex")}
+            return {"models": fallback_models("oauth-codex", allow_fetch=False)}
 
     if provider in STATIC_MODELS:
         return {"models": STATIC_MODELS[provider]}
@@ -432,7 +446,7 @@ def api_models(provider: str):
         models = _fetch_openai_models()
         if models:
             return {"models": models}
-        return {"models": fallback_models("openai")}
+        return {"models": fallback_models("openai", allow_fetch=False)}
 
     return {"models": []}
 

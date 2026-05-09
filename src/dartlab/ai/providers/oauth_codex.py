@@ -53,7 +53,9 @@ def availableModels(*, allow_fetch: bool = True) -> list[str]:
     if os.environ.get("DARTLAB_OAUTH_TOKEN") and os.environ.get("DARTLAB_OAUTH_FETCH_MODELS") != "1":
         token = None
     remote = _fetch_remote_models(token) if token else None
-    _MODELS_CACHE = sort_openai_models(remote) if remote else fallback_models("oauth-codex")
+    # fallback 도 allow_fetch=False — 재귀 (latest_openai_model→_resolveBackendLatest→
+    # availableModels) 막기. 정적 fallback `gpt-5.5` 가 종착.
+    _MODELS_CACHE = sort_openai_models(remote) if remote else fallback_models("oauth-codex", allow_fetch=False)
     _MODELS_CACHE_TS = now
     return _MODELS_CACHE.copy()
 
@@ -68,11 +70,11 @@ class OAuthCodexProvider:
     @property
     def default_model(self) -> str:
         models = availableModels()
-        return (
-            models[0]
-            if models
-            else (fallback_models("oauth-codex")[0] if fallback_models("oauth-codex") else "gpt-5.2")
-        )
+        if models:
+            return models[0]
+        # fallback 도 allow_fetch=False — fallback path 안에서 또 cold HTTP 트리거 X.
+        fallback = fallback_models("oauth-codex", allow_fetch=False)
+        return fallback[0] if fallback else "gpt-5.2"
 
     def check_available(self) -> bool:
         try:

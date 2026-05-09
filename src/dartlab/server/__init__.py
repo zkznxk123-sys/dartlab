@@ -12,22 +12,10 @@ import logging
 import os
 from contextlib import asynccontextmanager, suppress
 
-# 0.10 — server 부속 (fastapi / uvicorn / sse-starlette / starlette) 은 base wheel 에서 격하됨.
-# `pip install dartlab` 만 한 사용자가 server 진입점을 import 하면 ImportError 가 나는데,
-# 어떤 extras 가 필요한지 안내 메시지로 즉시 변환한다.
-try:
-    from fastapi import FastAPI
-    from fastapi.middleware.cors import CORSMiddleware
-    from fastapi.middleware.gzip import GZipMiddleware
-    from starlette.middleware.base import BaseHTTPMiddleware
-except ImportError as exc:
-    raise ImportError(
-        "DartLab HTTP server 기능은 별도 extras 가 필요합니다.\n"
-        "  pip install 'dartlab[server]'   # fastapi + uvicorn + sse-starlette\n"
-        "또는 모두 한 번에:\n"
-        "  pip install 'dartlab[all]'\n\n"
-        f"원본 에러: {exc}"
-    ) from exc
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 import dartlab
 from dartlab.ai.trace import installProgressCapture
@@ -79,12 +67,31 @@ async def _preload_ollama_once() -> None:
         logger.debug("Ollama preload 실행 실패", exc_info=exc)
 
 
+async def _prewarm_oauth_codex_models() -> None:
+    """OAuth codex backend `/codex/models` cold call (~43s) 을 startup 으로 흡수.
+
+    UI 가 startup 직후 `/api/models/oauth-codex` 또는 settings 패널에서 호출하면
+    cache 가 비어있어 cold HTTP 1 회 (DNS/TLS cold + token validate + remote fetch)
+    가 ~40s 블락하던 문제. lifespan 에서 background 로 미리 깨워두면 사용자 첫
+    호출은 cache hit. 실패해도 무관 (UI 는 fallback 사용).
+    """
+    await asyncio.sleep(1)  # uvicorn startup 완료 후 시작 — 첫 화면 fetch 와 race 안 함.
+    try:
+        from dartlab.ai.providers.oauth_codex import availableModels
+
+        await asyncio.to_thread(availableModels)
+    except (ImportError, OSError, RuntimeError, ValueError) as exc:
+        logger.debug("oauth-codex models prewarm 실패", exc_info=exc)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    """앱 수명주기 관리 -- Ollama preload, 룸 생성/정리, 채널 종료."""
-    # 과거 secret_store prewarm 은 SecretStore.has() 가 호출당 DPAPI decrypt ~10s 라서
-    # /api/ai/profile 가 9 회 has() 누적 90s 블락되던 워크어라운드. 근본 fix (has() 가
-    # decrypt 안 하고 serialize() 가 _load() 1 회만) 후 prewarm 자체 불필요해 제거.
+    """앱 수명주기 관리 -- Ollama preload, oauth-codex models prewarm, 룸 생성/정리."""
+    # oauth-codex `/codex/models` cold HTTP ~43s 가 UI 의 "설정 필요" 1 분 체류 원인.
+    # background thread 로 미리 깨움 — 사용자 첫 호출은 cache hit (즉시 응답).
+    # 회귀 가드: 과거 secret_store prewarm 은 잘못된 DPAPI 가설 기반이라 제거됨.
+    # 이번 prewarm 은 측정 기반 (cold availableModels() = 43s 검증).
+    models_prewarm_task = asyncio.create_task(_prewarm_oauth_codex_models())
     preload_task = asyncio.create_task(_preload_ollama_once()) if _should_preload_ollama() else None
 
     # 채널 모드: 협업 룸 자동 생성 + 백그라운드 정리
@@ -110,6 +117,10 @@ async def lifespan(_: FastAPI):
         with suppress(asyncio.CancelledError):
             if preload_task is not None:
                 await preload_task
+        if not models_prewarm_task.done():
+            models_prewarm_task.cancel()
+        with suppress(asyncio.CancelledError):
+            await models_prewarm_task
 
 
 # dartlab logger 초기화 후 tool 진행 라인을 SSE 로 흘리기 위한 capture 설치.
