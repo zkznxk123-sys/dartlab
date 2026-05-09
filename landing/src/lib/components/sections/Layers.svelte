@@ -1,15 +1,36 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { Card } from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import { BarChart3, FileText, Link2 } from 'lucide-svelte';
 </script>
 
 <section id="features" class="py-24 px-6">
-	<div class="mx-auto max-w-5xl">
-		<div class="text-center mb-16">
-			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">아키텍처</span>
-			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-4">하나의 회사, 4 개 네임스페이스</h2>
-			<p class="text-dl-text-muted text-lg">지도는 그대로. 소스 책임만 다르다.</p>
+	<div class="mx-auto max-w-6xl">
+		<div class="text-center mb-12">
+			<span class="text-xs font-semibold uppercase tracking-widest text-dl-primary mb-3 block">통합 아키텍처</span>
+			<h2 class="text-3xl md:text-4xl font-bold text-dl-text mb-4">전문 금융 자율 작업대 + 분석 엔진 + Skill OS 환류</h2>
+			<p class="text-dl-text-muted text-lg">1 차 데이터 (DART · SEC EDGAR · 향후 EDINET) → 분석 엔진 → 자율 작업대 → 시장 검증 → 사람 환류.</p>
+		</div>
+
+		<div class="mb-20">
+			<img
+				src="{base}/architecture.svg"
+				alt="DartLab 통합 아키텍처 — 입구 · 자율 작업대 (chat-native + 운용 자원 3 종) · story 종합 · 공식 분석 5 (analysis · credit · macro · quant · industry) · 횡단 처리 3 (gather · company · scan) · core · 외부 1 차 소스 · 3 자 진화 루프"
+				class="w-full h-auto rounded-xl border border-dl-border bg-dl-bg-card shadow-2xl"
+				loading="lazy"
+				width="1200"
+				height="940"
+			/>
+			<p class="text-center text-xs text-dl-text-dim mt-4">
+				① 사람·외부 LLM (MCP) → ② 입구 두 갈래 → ③ 자율 작업대 + 운용 자원 3 종 (Skill OS · Capability · Tools 11) → ④ story 종합 → ⑤ 분석 엔진 5 → ⑥ 횡단 처리 3 → ⑦ core → ⑧ 외부 1 차 소스 · ⑨ 3 자 진화 루프
+			</p>
+		</div>
+
+		<div class="text-center mb-12">
+			<span class="text-xs font-semibold uppercase tracking-widest text-dl-accent mb-3 block">Company 레이어 — 4 네임스페이스</span>
+			<h3 class="text-2xl md:text-3xl font-bold text-dl-text mb-3">하나의 회사, 4 개 네임스페이스</h3>
+			<p class="text-dl-text-muted">지도는 그대로. 소스 책임만 다르다.</p>
 		</div>
 
 		<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
