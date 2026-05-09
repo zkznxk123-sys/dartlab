@@ -516,9 +516,16 @@ def available_providers() -> list[str]:
     return sorted(wired_provider_ids())
 
 
+from .base import BaseProvider, LLMEvent, LLMProvider, Msg, RateLimitError
+
 __all__ = [
+    "BaseProvider",
+    "LLMEvent",
+    "LLMProvider",
+    "Msg",
     "ProviderConfig",
     "ProviderTurn",
+    "RateLimitError",
     "StreamChunk",
     "ToolCall",
     "WorkbenchProvider",
