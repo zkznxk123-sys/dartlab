@@ -19,6 +19,10 @@ whenToUse:
   - 이자보상배율
   - 부채비율
   - 외부 신평 비교
+  - migration matrix
+  - 등급 전이 행렬
+  - PD ladder
+  - 누적 부도확률
 inputs:
   - stockCode 또는 Company
   - axis (7 축 중 하나 또는 미지정)
@@ -51,6 +55,8 @@ expectedOutputs:
   - 7 축 점수
   - 핵심 지표 (debtRatio · interestCoverage · OCF/부채)
   - 외부 신평 비교 한계
+  - migration matrix (등급 전이 확률 — credit.migration.buildTransitionMatrix)
+  - forward PD ladder (등급별 1y/3y/5y 누적 부도확률 — credit.migration.forwardPdLadder)
 runtimeCompatibility:
   server:
     status: supported
@@ -101,6 +107,20 @@ lastUpdated: '2026-05-08'
 `credit` 은 단일 기업의 부도 위험·재무 건전성을 독립 평가하는 L2 엔진이다. 79 개사 검증 (대기업 87% · 중대형 82%) 의 dCR 등급 (dCR-AA+ ~ dCR-D) 을 DART 공시 기반으로 산출한다. 외부 신평사 (Moody's · KIS · NICE) 가 반영하는 시스템적 중요성·정성 요소는 dCR 만으로 판단하지 않는다.
 
 `analysis` 엔진의 안정성·현금흐름 축과 상호 보완. credit 종합 등급 → analysis 로 인과 깊게, 또는 analysis 안정성 점수 → credit 으로 외부 신평 보정 비교.
+
+### 시간축 — 등급 이력 → 현재 dCR → 누적 PD
+
+`credit.migration` 모듈이 등급 전이 행렬과 forward PD ladder 를 제공한다. 학술 기반 — CreditMetrics (J.P. Morgan, 1997) Cohort 접근, Basel III IRB 표준. 관측 등급 변경 → row-stochastic transition matrix → 행렬 거듭제곱 (M^h) → 등급별 h 년 누적 부도확률.
+
+```python
+from dartlab.credit.migration import buildTransitionMatrix, forwardPdLadder
+
+matrix = buildTransitionMatrix()  # data/credit/transition.json 자동 로드
+ladder = forwardPdLadder(horizons=(1, 3, 5))
+# → DataFrame: rating · 1yPD · 3yPD · 5yPD (D 등급은 absorbing → PD = 1.0)
+```
+
+forecast precision = stable (observed transitions, 점예측 X). story 6 막에서 '등급 이력 회고 → 현재 dCR → n 년 누적 PD' 시간 narrative 결합.
 
 ## 공개 호출 방식
 
