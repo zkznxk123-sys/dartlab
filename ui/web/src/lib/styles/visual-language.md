@@ -145,10 +145,24 @@ rounded-md border border-dl-border/30 bg-dl-bg-card/40
 |---|---|
 | `.assistant-surface` | 응답 컨테이너 (gap 8px, max-w 100%) |
 | `.assistant-answer` | text 본문 (15px, line-height 1.75) |
-| `.assistant-activity` | activity 그리드 (11px, dim) |
-| `.assistant-activity-head` | activity 헤더 (24px min-height) |
-| `.assistant-activity-row` | activity 항목 한 줄 |
-| `.assistant-activity-details` | 펼침 details |
+
+### 루프 카드 (단일 컨테이너 — 박스 통합 SSOT)
+
+한 LLM 루프 (PassLoop pass / ChatNative iteration) 안의 모든 activity / tool / skill 호출을 **하나의 카드** 로 묶는다. 평면 5+ 종 박스 (activity-group · tool-research-group · tool-run-card · failure-notice · view-spec) 가 갈라지던 인지 부담을 단일 컨테이너 + 행 (kind: activity / tool / skill) 로 해소.
+
+| 클래스 | 용도 |
+|---|---|
+| `.loop-card` | 한 루프 = 한 카드 (border 1px / radius 6px / bg 0.40) |
+| `.loop-card-error` | 실패가 있는 루프 (red 변형) |
+| `.loop-card-header` | grid 헤더 (icon · label · count · summary · chevron) |
+| `.loop-card-rows` | row 컨테이너 (ul reset, gap 2px) |
+| `.loop-row-activity` | activity row — 한 줄 (num + text) |
+| `.loop-row-call` | tool / skill row — 헤더 + 펼침 본문 |
+| `.loop-row-head` | row 헤더 (dot/spinner · name · summary · maximize · chevron) |
+| `.loop-row-body` | row 펼침 본문 (들여쓰기 26px) |
+| `.loop-row-modal` | Maximize2 버튼 — 모달 trigger |
+| `.loop-row-pre` | raw 텍스트 (mono 11px, max-h 200px scroll) |
+| `.loop-row-out` | markdown 출력 (max-h 200px scroll, table 시 해제) |
 
 ### 도구 실행
 

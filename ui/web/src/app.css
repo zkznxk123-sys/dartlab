@@ -1540,6 +1540,249 @@ td:hover .yoy-badge { opacity: 1; }
 	transform: scale(1.05);
 }
 
+/* ── Loop card — 한 LLM 루프 (PassLoop pass / ChatNative iteration) 단일 컨테이너 ──
+   activity / tool / skill 행을 하나의 카드로 묶어 박스 일관성 회복.
+   visual-language §2 표준 컨테이너 1 종 + §6 의미 클래스 SSOT 정합. */
+.loop-card {
+	border: 1px solid rgba(148, 163, 184, 0.16);
+	border-radius: 6px;
+	background: rgba(13, 17, 23, 0.40);
+	overflow: hidden;
+	margin: 2px 0;
+}
+.loop-card-error {
+	border-color: rgba(248, 113, 113, 0.28);
+	background: rgba(248, 113, 113, 0.05);
+}
+.loop-card-header {
+	display: grid;
+	grid-template-columns: 16px max-content max-content minmax(0, 1fr) 14px;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 7px 10px;
+	border: none;
+	background: transparent;
+	color: var(--color-dl-text-muted);
+	text-align: left;
+	cursor: pointer;
+	font-size: 11px;
+}
+.loop-card-header:hover {
+	background: rgba(148, 163, 184, 0.04);
+}
+.loop-card-icon-running { color: var(--color-dl-accent); }
+.loop-card-icon-error { color: var(--color-dl-primary-light); }
+.loop-card-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--color-dl-success);
+	display: inline-block;
+	justify-self: center;
+}
+.loop-card-label {
+	font-weight: 600;
+	color: var(--color-dl-text);
+	letter-spacing: 0.01em;
+	white-space: nowrap;
+}
+.loop-card-count {
+	color: var(--color-dl-text-dim);
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.loop-card-summary {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--color-dl-text-dim);
+}
+.loop-card-chevron {
+	flex-shrink: 0;
+	color: var(--color-dl-text-dim);
+}
+
+.loop-card-rows {
+	list-style: none;
+	margin: 0;
+	padding: 4px;
+	border-top: 1px solid rgba(148, 163, 184, 0.08);
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.loop-row {
+	margin: 0;
+	padding: 0;
+	border-radius: 4px;
+}
+.loop-row-error { color: var(--color-dl-primary-light); }
+.loop-row-icon-error { color: var(--color-dl-primary-light); }
+
+/* activity row — 한 줄 텍스트 */
+.loop-row-activity {
+	display: grid;
+	grid-template-columns: 18px minmax(0, 1fr);
+	align-items: center;
+	gap: 7px;
+	padding: 3px 8px;
+	font-size: 11px;
+	color: var(--color-dl-text-dim);
+}
+.loop-row-num {
+	color: var(--color-dl-text-dim);
+	font-size: 10px;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+}
+.loop-row-text {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* tool / skill row — 헤더 + 펼침 본문 */
+.loop-row-call {
+	background: transparent;
+}
+.loop-row-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 5px 8px;
+	border: none;
+	background: transparent;
+	color: var(--color-dl-text-muted);
+	text-align: left;
+	cursor: pointer;
+	font-size: 11px;
+	border-radius: 4px;
+}
+.loop-row-head:hover {
+	background: rgba(148, 163, 184, 0.05);
+	color: var(--color-dl-text);
+}
+.loop-row-dot {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: var(--color-dl-success);
+	flex-shrink: 0;
+	display: inline-block;
+}
+.loop-row-name {
+	color: var(--color-dl-text);
+	font-weight: 600;
+	white-space: nowrap;
+	font-size: 11px;
+}
+.loop-row-summary {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--color-dl-text-dim);
+	flex: 1;
+}
+.loop-row-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin-left: auto;
+	flex-shrink: 0;
+}
+.loop-row-modal {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 2px 4px;
+	border-radius: 4px;
+	background: rgba(148, 163, 184, 0.08);
+	color: var(--color-dl-text-dim);
+	border: 0;
+	cursor: pointer;
+}
+.loop-row-modal:hover {
+	background: rgba(148, 163, 184, 0.16);
+	color: var(--color-dl-text);
+}
+.loop-row-chevron {
+	color: var(--color-dl-text-dim);
+}
+
+.loop-row-body {
+	padding: 6px 10px 8px 26px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	border-top: 1px solid rgba(148, 163, 184, 0.06);
+}
+.loop-row-section-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 10px;
+	font-weight: 600;
+	color: var(--color-dl-text-muted);
+	margin: 4px 0 2px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.loop-row-meta {
+	font-size: 10px;
+	color: var(--color-dl-text-dim);
+	margin-top: 2px;
+}
+.loop-row-stderr { color: var(--color-dl-primary-light); }
+.loop-row-meta-line {
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--color-dl-text-muted);
+}
+.loop-row-pre {
+	font-family: var(--font-mono);
+	font-size: 11px;
+	line-height: 1.5;
+	color: var(--color-dl-text-muted);
+	background: transparent;
+	border: none;
+	border-left: 2px solid rgba(234, 70, 71, 0.18);
+	border-radius: 0;
+	padding: 2px 0 2px 10px;
+	margin: 0;
+	white-space: pre-wrap;
+	word-break: break-word;
+	max-height: 200px;
+	overflow-y: auto;
+}
+.loop-row-out {
+	font-size: 11px;
+	max-height: 200px;
+	overflow-y: auto;
+	border: 0.5px solid rgba(148, 163, 184, 0.08);
+	border-radius: 4px;
+	padding: 6px 8px;
+	background: rgba(13, 17, 23, 0.25);
+}
+/* 표 출력일 때 — 바깥 스크롤 해제 (.prose-dartlab .table-wrap 가 담당). */
+.loop-row-out:has(table) {
+	max-height: none;
+	overflow: visible;
+	padding: 0;
+	border: none;
+	background: transparent;
+}
+.loop-row-artifacts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-top: 4px;
+}
+
 /* ── Mobile responsive ── */
 @media (max-width: 768px) {
 	.sidebar-overlay {

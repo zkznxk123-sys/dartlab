@@ -236,6 +236,120 @@ export function appendFailurePart(message, failure) {
 }
 
 /**
+ * 한 LLM 루프 (PassLoop pass / ChatNative iteration) 안의 모든 활동을 하나의
+ * 카드로 묶는다. activity / tool / skill (ReadSkill·ReadCapability·GetSkillBody)
+ * 이 평면으로 흩어져 5+ 종 박스로 갈라지던 구조를 단일 컨테이너 (loop-card) +
+ * 행 (loop-row, kind 별 분기) 으로 통합.
+ *
+ * 분리 경계:
+ *   1. 백엔드 메타 우선 — part.passLabel · part.iteration 이 있으면 같은 값끼리.
+ *   2. fallback — phase 전환 (classifyPhase) + view-spec / text / failure 가
+ *      들어오면 강제 종료.
+ *
+ * 출력 part: { type: "loop-card", id, label, status, running, errorCount, rows: [...] }
+ *   rows[i] = { kind: "activity"|"tool"|"skill", ...원본 part 키 그대로 보존 }
+ *
+ * view-spec / text / failure 는 그대로 통과 (loop-card 와 동위).
+ */
+const RESEARCH_TOOL_NAMES_FOR_LOOP = new Set(["ReadSkill", "ReadCapability", "GetSkillBody"]);
+
+export function groupLoops(parts) {
+	const source = Array.isArray(parts) ? parts : [];
+	const out = [];
+	let bucket = null;
+	let bucketKey = null;
+
+	function closeBucket() {
+		if (!bucket) return;
+		bucket.running = bucket.rows.some((r) => r.status === "running");
+		bucket.errorCount = bucket.rows.filter((r) => r.status === "error").length;
+		bucket.status = bucket.errorCount > 0 ? "error" : bucket.running ? "running" : "done";
+		const lastWithSummary = [...bucket.rows].reverse().find((r) => r.summary);
+		bucket.summary = lastWithSummary?.summary || "";
+		bucket.toolCount = bucket.rows.filter((r) => r.kind === "tool" || r.kind === "skill").length;
+		bucket.activityCount = bucket.rows.filter((r) => r.kind === "activity").length;
+		bucket = null;
+		bucketKey = null;
+	}
+
+	for (const part of source) {
+		if (!part || typeof part !== "object") continue;
+
+		// loop-card 동위 — 통과
+		if (part.type === "view-spec" || part.type === "text" || part.type === "failure") {
+			closeBucket();
+			out.push(part);
+			continue;
+		}
+
+		const kind = rowKindFromPart(part);
+		if (!kind) {
+			closeBucket();
+			out.push(part);
+			continue;
+		}
+
+		// 그루핑 키 — 백엔드 메타 우선, 없으면 phase / iteration fallback.
+		const key = loopKey(part);
+		if (!bucket || key !== bucketKey) {
+			closeBucket();
+			bucket = {
+				type: "loop-card",
+				id: `loop-${out.length}-${part.id || ""}`,
+				label: loopLabelFromKey(key, part),
+				avatar: PHASE_AVATAR[loopPhaseFromKey(key, part)] || "/avatar.png",
+				rows: [],
+				running: false,
+				status: "done",
+				errorCount: 0,
+				summary: "",
+				toolCount: 0,
+				activityCount: 0,
+			};
+			bucketKey = key;
+			out.push(bucket);
+		}
+		bucket.rows.push({ ...part, kind });
+	}
+	closeBucket();
+	return out;
+}
+
+function rowKindFromPart(part) {
+	if (part.type === "activity") return "activity";
+	if (part.type === "tool") {
+		return RESEARCH_TOOL_NAMES_FOR_LOOP.has(part.name) ? "skill" : "tool";
+	}
+	return null;
+}
+
+function loopKey(part) {
+	if (part.passLabel) return `pass:${part.passLabel}`;
+	if (part.iteration !== undefined && part.iteration !== null) return `iter:${part.iteration}`;
+	if (part.type === "activity") return `phase:${classifyPhase(part.summary)}`;
+	return `kind:${part.type === "tool" ? (RESEARCH_TOOL_NAMES_FOR_LOOP.has(part.name) ? "skill" : "tool") : part.type}`;
+}
+
+function loopLabelFromKey(key, part) {
+	if (key.startsWith("pass:")) return key.slice(5).toUpperCase();
+	if (key.startsWith("iter:")) return `iteration ${key.slice(5)}`;
+	if (key.startsWith("phase:")) {
+		const phase = key.slice(6);
+		return PHASE_LABEL[phase] || "단계";
+	}
+	if (key === "kind:skill") return "사전조사";
+	if (key === "kind:tool") return "도구 실행";
+	return part.type || "단계";
+}
+
+function loopPhaseFromKey(key, part) {
+	if (key.startsWith("phase:")) return key.slice(6);
+	if (part.type === "activity") return classifyPhase(part.summary);
+	if (key === "kind:skill") return "plan";
+	return "execute";
+}
+
+/**
  * View-spec part — 차트·표·대시보드 같은 시각 답변을 메시지 흐름에 인라인.
  * spec 은 viewSpec.normalizeViewSpec 가 받는 모양 (widgets[]/charts[]/component).
  * 분석 워크벤치 정체성의 주체 — tool/activity 보다 시각적 위계가 높다.
