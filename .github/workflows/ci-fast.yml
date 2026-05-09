@@ -82,17 +82,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .
-      - name: Import smoke test
+      # 공개 API (__all__) 만 touch — 내부 모듈 rename 에 brittle 하지 않게.
+      # `import dartlab` 자체가 __init__.py 의 모든 subsystem 로드를 강제하므로
+      # 공개 surface 무결성 + 패키지 wiring 검증을 동시에 한다.
+      - name: Import smoke test (public API)
         run: |
           python -c "
           import dartlab
+          missing = [n for n in dartlab.__all__ if not hasattr(dartlab, n)]
+          if missing:
+              raise SystemExit(f'public API missing from dartlab.__all__: {missing}')
           from dartlab import Company
-          from dartlab.core.registry import getEntries
-          from dartlab.core.finance.ratios import calcRatios
-          from dartlab.analysis.financial.insight.grading import analyzePerformance
-          from dartlab.providers.dart.finance.mapper import AccountMapper
-          entries = getEntries()
-          print(f'dartlab imported OK, {len(entries)} registry entries')
+          assert callable(Company), 'Company is not callable'
+          print(f'dartlab smoke OK — {len(dartlab.__all__)} public symbols, Company callable')
           "
 
   # Tier 1 의 핵심 — unit marker 만. 이전 test job 이 모든 non-realData 를 돌렸으나
