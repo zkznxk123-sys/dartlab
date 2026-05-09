@@ -474,11 +474,16 @@ def _public_result_payload(data: dict[str, Any]) -> dict[str, Any] | None:
     """tool_result 의 핵심 일부를 UI 가 expand 시 보여줄 수 있게 정제.
 
     inline 표시는 짧게, 너무 길면 UI 가 모달 / "전체 보기" 로 위임.
+    UI 는 `markdown` 키를 우선 렌더 — 도구 작성자가 채우거나, dispatch (format_engine_result)
+    가 자동 채움. 기존 stdout / stderr / values / tableHead 는 markdown 부재 시 fallback.
     """
     raw = data.get("data") if isinstance(data.get("data"), dict) else {}
     if not raw:
         return None
     out: dict[str, Any] = {}
+    # markdown 1 차 표면 — 도구 작성자가 직접 채운 키 우선 통과.
+    if isinstance(raw.get("markdown"), str) and raw["markdown"].strip():
+        out["markdown"] = raw["markdown"][: _RESULT_PREVIEW_CHARS * 4]
     # RunPython: stdout / stderr / values / table preview / durationMs
     if "stdout" in raw or "stderr" in raw or "result" in raw:
         stdout = str(raw.get("stdout") or "")
@@ -506,6 +511,16 @@ def _public_result_payload(data: dict[str, Any]) -> dict[str, Any] | None:
         out["bodyTruncated"] = len(body) > _RESULT_PREVIEW_CHARS
         if "path" in raw:
             out["path"] = raw.get("path")
+    # markdown 부재 + 위 핸드롤 분기 모두 적용 안 됐으면 dispatch 로 자동 변환 시도.
+    if not out.get("markdown") and not any(k in out for k in ("stdout", "tableHead", "body", "values")):
+        try:
+            from dartlab.ai.tools.formatting import format_engine_result
+
+            md = format_engine_result(raw)
+        except Exception:  # noqa: BLE001 — 마크다운 변환 실패가 도구 결과 흐름을 막지 않게
+            md = None
+        if md:
+            out["markdown"] = md[: _RESULT_PREVIEW_CHARS * 4]
     return out or None
 
 
