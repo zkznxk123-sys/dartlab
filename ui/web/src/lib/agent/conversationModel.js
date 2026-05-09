@@ -67,6 +67,9 @@ export function appendActivityPart(message, activity) {
 		refs: activity.refs || [],
 		timestamp: Date.now(),
 	};
+	// 백엔드 pass 메타 — groupLoops 가 같은 pass 끼리 묶기 위한 1 차 키.
+	if (activity.passLabel) next.passLabel = String(activity.passLabel);
+	if (activity.iteration !== undefined && activity.iteration !== null) next.iteration = activity.iteration;
 	if (idx >= 0) {
 		parts[idx] = { ...parts[idx], ...next };
 		return parts.slice(-80);
@@ -93,6 +96,9 @@ export function upsertToolPart(message, tool) {
 	if (tool.args !== undefined) incoming.args = tool.args;
 	if (tool.result !== undefined) incoming.result = tool.result;
 	if (tool.error !== undefined) incoming.error = tool.error;
+	// 백엔드 pass 메타 — groupLoops 가 같은 pass 끼리 묶기 위한 1 차 키.
+	if (tool.passLabel) incoming.passLabel = String(tool.passLabel);
+	if (tool.iteration !== undefined && tool.iteration !== null) incoming.iteration = tool.iteration;
 	if (idx >= 0) parts[idx] = { ...parts[idx], ...incoming };
 	else parts.push(incoming);
 	return parts;

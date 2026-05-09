@@ -206,26 +206,27 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
     if kind == "plan":
         skills = data.get("selectedSkillIds") if isinstance(data.get("selectedSkillIds"), list) else []
         target = ", ".join(str(item) for item in skills[:3])
-        return [_activity(f"분석 경로를 정했습니다{': ' + target if target else ''}", refs=[])]
+        return [
+            _activity(f"분석 경로를 정했습니다{': ' + target if target else ''}", refs=[], passLabel=_passLabel(data))
+        ]
     if kind in {"tool_start", "tool_call"}:
         tool = _tool_name(data)
         if tool not in _PUBLIC_TOOL_NAMES:
             return []
         # ToolBlock 카드(TOOL_CALL_START)가 진행 표현 전담. activity 줄 중복 emit 금지.
         # args 동봉 — UI 가 expand 시 RunPython 코드·EngineCall 인자 등 핵심 input 표시.
-        return [
-            _event(
-                "TOOL_CALL_START",
-                {
-                    "runId": run_id,
-                    "messageId": message_id,
-                    "toolCallId": str(data.get("id") or tool),
-                    "toolName": _display_tool(tool),
-                    "args": data.get("input") if isinstance(data.get("input"), dict) else {},
-                    "status": "running",
-                },
-            ),
-        ]
+        payload: dict[str, Any] = {
+            "runId": run_id,
+            "messageId": message_id,
+            "toolCallId": str(data.get("id") or tool),
+            "toolName": _display_tool(tool),
+            "args": data.get("input") if isinstance(data.get("input"), dict) else {},
+            "status": "running",
+        }
+        pass_label = _passLabel(data)
+        if pass_label:
+            payload["passLabel"] = pass_label
+        return [_event("TOOL_CALL_START", payload)]
     if kind == "view_spec":
         spec = data.get("spec")
         if not spec:
@@ -249,49 +250,53 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
             return []
         status = "error" if data.get("status") == "error" else "done"
         result_payload = _public_result_payload(data)
-        return [
-            _event(
-                "TOOL_CALL_RESULT",
-                {
-                    "runId": run_id,
-                    "messageId": message_id,
-                    "toolCallId": str(data.get("id") or tool),
-                    "toolName": _display_tool(tool),
-                    "status": status,
-                    "summary": str(data.get("outputSummary") or data.get("summary") or ""),
-                    "refs": [str(v) for v in data.get("evidenceRefs") or []],
-                    "artifacts": [a for a in data.get("artifacts") or [] if isinstance(a, dict)],
-                    "result": result_payload,
-                    "error": str(data.get("error") or "") if status == "error" else None,
-                },
-            ),
-            _event(
-                "TOOL_CALL_END",
-                {
-                    "runId": run_id,
-                    "messageId": message_id,
-                    "toolCallId": str(data.get("id") or tool),
-                    "toolName": _display_tool(tool),
-                    "status": status,
-                },
-            ),
-        ]
+        pass_label = _passLabel(data)
+        result_event: dict[str, Any] = {
+            "runId": run_id,
+            "messageId": message_id,
+            "toolCallId": str(data.get("id") or tool),
+            "toolName": _display_tool(tool),
+            "status": status,
+            "summary": str(data.get("outputSummary") or data.get("summary") or ""),
+            "refs": [str(v) for v in data.get("evidenceRefs") or []],
+            "artifacts": [a for a in data.get("artifacts") or [] if isinstance(a, dict)],
+            "result": result_payload,
+            "error": str(data.get("error") or "") if status == "error" else None,
+        }
+        end_event: dict[str, Any] = {
+            "runId": run_id,
+            "messageId": message_id,
+            "toolCallId": str(data.get("id") or tool),
+            "toolName": _display_tool(tool),
+            "status": status,
+        }
+        if pass_label:
+            result_event["passLabel"] = pass_label
+            end_event["passLabel"] = pass_label
+        return [_event("TOOL_CALL_RESULT", result_event), _event("TOOL_CALL_END", end_event)]
     if kind == "reference":
         refs = data.get("refs") if isinstance(data.get("refs"), list) else []
         if refs:
-            return [_activity(f"근거 {len(refs)}개를 확인했습니다.", refs=_ref_ids(refs))]
+            return [_activity(f"근거 {len(refs)}개를 확인했습니다.", refs=_ref_ids(refs), passLabel=_passLabel(data))]
         return []
     if kind == "verify":
         result = data.get("result") if isinstance(data.get("result"), dict) else {}
+        pass_label = _passLabel(data)
         if result.get("ok") is True:
-            return [_activity("근거 검증을 통과했습니다.", refs=[str(data.get("refId"))] if data.get("refId") else [])]
-        return [_activity("답변 초안을 다시 검증합니다.", status="running")]
+            return [
+                _activity(
+                    "근거 검증을 통과했습니다.",
+                    refs=[str(data.get("refId"))] if data.get("refId") else [],
+                    passLabel=pass_label,
+                )
+            ]
+        return [_activity("답변 초안을 다시 검증합니다.", status="running", passLabel=pass_label)]
     if kind == "chunk":
         text = str(data.get("text") or "")
         return [_event("TEXT_MESSAGE_CONTENT", {"messageId": message_id, "delta": text})] if text else []
     if kind == "answer":
         refs = [str(v) for v in data.get("evidenceRefs") or []]
-        return [_activity(f"근거 {len(refs)}개로 답변을 작성했습니다.", refs=refs)]
+        return [_activity(f"근거 {len(refs)}개로 답변을 작성했습니다.", refs=refs, passLabel=_passLabel(data))]
     if kind == "unable":
         message = str(data.get("message") or "") or _public_failure(str(data.get("reason") or ""))
         return [_event("RUN_ERROR", {"runId": run_id, "message": message})]
@@ -413,15 +418,29 @@ def _suggest_followups(done_data: dict[str, Any]) -> list[str]:
     return []
 
 
-def _activity(summary: str, *, status: str = "done", refs: list[str] | None = None) -> dict[str, str]:
-    return _event(
-        "ACTIVITY_DELTA",
-        {
-            "status": status,
-            "summary": summary,
-            "refs": refs or [],
-        },
-    )
+def _activity(
+    summary: str,
+    *,
+    status: str = "done",
+    refs: list[str] | None = None,
+    passLabel: str | None = None,
+) -> dict[str, str]:
+    payload: dict[str, Any] = {
+        "status": status,
+        "summary": summary,
+        "refs": refs or [],
+    }
+    if passLabel:
+        payload["passLabel"] = passLabel
+    return _event("ACTIVITY_DELTA", payload)
+
+
+def _passLabel(data: dict[str, Any]) -> str | None:
+    """TraceEvent.data 의 pass 키를 SSE 페이로드용 라벨로 정규화. brief → BRIEF."""
+    raw = data.get("pass")
+    if not raw:
+        return None
+    return str(raw).upper()
 
 
 def _view_spec(
