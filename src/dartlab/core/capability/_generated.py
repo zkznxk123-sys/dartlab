@@ -27,11 +27,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
     },
     "Company.analysis": {
         "aicontext": "ask()/chat()에서 분석 결과를 컨텍스트로 주입\nstory가 내부적으로 analysis 결과를 소비",
-        "args": "axis: 그룹 이름 (\"financial\", \"valuation\", \"forecast\") 또는 축 이름. None이면 가이드 반환.\nsub: 그룹 내 하위 축 이름 (\"수익성\", \"가치평가\", \"매출전망\" 등).\n**kwargs: 축별 추가 옵션.",
+        "args": "axis: 그룹 이름 (\"financial\", \"valuation\", \"governance\", \"forecast\", \"macro\") 또는 축 이름. None이면 가이드 반환.\nsub: 그룹 내 하위 축 이름 (\"수익성\", \"가치평가\", \"매출전망\", \"지배구조\", \"매크로민감도\" 등).\n**kwargs: 축별 추가 옵션.",
         "artifactPolicy": {
             "primaryCsv": true
         },
-        "capabilities": "14축 분석: 수익구조, 자금조달, 자산구조, 현금흐름, 수익성, 성장성, 안정성, 효율성, 종합평가, 이익품질, 비용구조, 자본배분, 투자효율, 재무정합성\n축 없이 호출 시 14축 가이드 반환\n개별 축 분석 시 Company 바인딩 (self 자동 전달)\n2-level 호출: c.analysis(\"financial\", \"수익성\"), c.analysis(\"valuation\", \"가치평가\")",
+        "capabilities": "22축 분석 (5 group)\nfinancial (14): 수익구조, 자금조달, 자산구조, 현금흐름, 수익성, 성장성, 안정성, 효율성, 종합평가, 이익품질, 비용구조, 자본배분, 투자효율, 재무정합성\nvaluation (1): 가치평가\ngovernance (3): 지배구조, 공시변화, 비교분석\nforecast (2): 매출전망, 예측신호\nmacro (2): 매크로민감도, 밸류에이션밴드\n축 없이 호출 시 22축 가이드 반환\n개별 축 분석 시 Company 바인딩 (self 자동 전달)\n2-level 호출: c.analysis(\"financial\", \"수익성\"), c.analysis(\"valuation\", \"가치평가\")",
         "contractId": "company.analysis",
         "evidenceSchema": {
             "metricKeys": [
@@ -55,8 +55,8 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "score"
             ]
         },
-        "example": "c = Company(\"005930\")\nc.analysis()                            # 전체 가이드\nc.analysis(\"financial\", \"수익구조\")       # 수익구조 분석\nc.analysis(\"valuation\", \"가치평가\")       # 가치평가\nc.analysis(\"forecast\", \"매출전망\")        # 매출전망",
-        "guide": "AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.\nWhen: 특정 종목의 재무 심층 분석이 필요할 때.\nHow: axis 로 분석 영역, sub 로 세부 축 지정.\n\"14축 분석 뭐가 있어?\" → c.analysis() (가이드 반환)\n\"수익구조 분석해줘\" → c.analysis(\"financial\", \"수익구조\")\n\"안정성 분석\" → c.analysis(\"financial\", \"안정성\")\n\"가치평가 해줘\" → c.analysis(\"valuation\", \"가치평가\")\n\"매출전망\" → c.analysis(\"forecast\", \"매출전망\")\nVerified:\n수익성 단독 → 마진 시계열 + 전환점 + 반도체 사이클 인과 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n이익품질 + 재무정합성 → 분식회계 가능성 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n가치평가 → 적정주가 범위 + 현재가 대비 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n자본배분 + 현금흐름 → 배당 매력 종합 판단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n지배구조 → 이사회 독립성 + 지배력 집중 점검 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
+        "example": "c = Company(\"005930\")\nc.analysis()                            # 전체 가이드 (22축)\nc.analysis(\"financial\", \"수익구조\")       # 수익구조 분석\nc.analysis(\"valuation\", \"가치평가\")       # 가치평가\nc.analysis(\"governance\", \"지배구조\")      # 지배구조\nc.analysis(\"forecast\", \"매출전망\")        # 매출전망\nc.analysis(\"macro\", \"매크로민감도\")        # 매크로 민감도",
+        "guide": "AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.\nWhen: 특정 종목의 재무 심층 분석이 필요할 때.\nHow: axis 로 분석 영역, sub 로 세부 축 지정.\n\"22축 분석 뭐가 있어?\" → c.analysis() (가이드 반환)\n\"수익구조 분석해줘\" → c.analysis(\"financial\", \"수익구조\")\n\"안정성 분석\" → c.analysis(\"financial\", \"안정성\")\n\"가치평가 해줘\" → c.analysis(\"valuation\", \"가치평가\")\n\"매출전망\" → c.analysis(\"forecast\", \"매출전망\")\nVerified:\n수익성 단독 → 마진 시계열 + 전환점 + 반도체 사이클 인과 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n이익품질 + 재무정합성 → 분식회계 가능성 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n가치평가 → 적정주가 범위 + 현재가 대비 판정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n자본배분 + 현금흐름 → 배당 매력 종합 판단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\n지배구조 → 이사회 독립성 + 지배력 집중 점검 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "property",
         "llmSpecs": {
             "antiPatterns": [
@@ -130,8 +130,8 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "pl.DataFrame | dict — axis=None이면 가이드 DataFrame (axis/label/description/example/group/items).\naxis 지정 시 dict:\n{calcName} : dict — 축별 계산 결과\nhistory : list[dict] — 시계열 ({period, ...지표})\ndisplayHints : dict — core 컬럼 목록\nturningPoints : list — 전환점 (있으면)\n{calcName}Flags : list[str] — 경고 플래그\ndataAsOf : dict — latestPeriod, retrievedAt\n_summary (autoEnrich 자동 주입) — 핵심 지표 요약 + [엔진가정] 블록.\nassumptions — 엔진 가정 (overrides 재호출용).",
-        "seeAlso": "story: 14축 분석을 14개 섹션 보고서로 조합\ninsights: 7영역 등급 요약 (analysis보다 요약적)\nratios: 재무비율 시계열 (analysis의 입력 데이터)",
-        "summary": "재무제표 완전 분석 — 14축, 단일 종목 심층 (내부 구현).",
+        "seeAlso": "story: 22축 분석을 섹션별 보고서로 조합\ninsights: 7영역 등급 요약 (analysis보다 요약적)\nratios: 재무비율 시계열 (analysis의 입력 데이터)",
+        "summary": "재무제표 완전 분석 — 22축, 단일 종목 심층 (내부 구현).",
         "tool": "analysis",
         "toolMatch": [
             {
@@ -2446,6 +2446,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "returns": "pl.DataFrame\naxis=None (가이드):\naxis : str — 축 이름\nlabel : str — 한글 레이블\ndescription : str — 설명\nexample : str — 사용 예시\naxis=\"price\":\ndate : date — 날짜\nopen : float — 시가\nhigh : float — 고가\nlow : float — 저가\nclose : float — 종가\nvolume : int — 거래량\naxis=\"flow\":\ndate : date — 날짜\n외국인순매수 : int — 외국인 순매수량\n기관순매수 : int — 기관 순매수량\naxis=\"macro\":\ndate : date — 날짜\n지표별 컬럼 : float — ECOS/FRED 거시지표 값\naxis=\"news\":\ntitle : str — 뉴스 제목\nlink : str — 기사 URL\npubDate : str — 발행일\naxis=\"sector\":\nsectorCode : str — 업종코드\nsectorName : str — 업종명\nindustryCode : str — 산업코드\nindustryName : str — 산업명\nmarket : str — 시장 (KR/US)\naxis=\"insider\":\ndate : str — 거래일\nname : str — 거래자명\nposition : str — 직위\ntradeType : str — 거래유형\nchangeShares : int — 변동 주수\n\nRaises\nValueError\n축 이름이 등록되지 않은 경우.\ntarget 필수 축에서 target 누락 시.\n\nExamples\n>>> dartlab.gather()                              # 가이드\n>>> dartlab.gather(\"price\", \"005930\")              # KR OHLCV\n>>> dartlab.gather(\"price\", \"AAPL\", market=\"US\")   # US 주가\n>>> dartlab.gather(\"macro\", \"FEDFUNDS\")            # 미국 기준금리\n>>> dartlab.gather(\"news\", \"삼성전자\")              # Google News\n\nNotes\nNaver(KR)/Yahoo(US)/FRED/ECOS/Google News 경유. API 키 불필요.\n결과는 Polars DataFrame — 분석 엔진 입력으로 바로 사용 가능.",
         "seeAlso": "quant : 주가 기반 정량 분석 — gather(\"price\") 데이터 소비.\nmacro : 거시 분석 — gather(\"macro\") raw 데이터의 분석 결과.\nscan : 전종목 비교 — 사전 빌드 데이터와 gather 실시간 데이터 상호 보완.",
         "summary": "외부 시장 데이터 수집 — 주가·수급·거시지표·뉴스 4 축."
+    },
+    "gather.calendar": {
+        "capabilities": "다가오는 정기공시 (사업/반기/분기보고서) due date 추론. 한국 fiscal cycle (FY=calendar year) 가정 + DART disclosure 시계열에서 last 보고서 → next due. P0: KR 정기공시만. AGM·만기·컨센서스·EDGAR 8-K 미포함 (P1+). API 키: DART_API_KEY (Company.disclosure 사용).",
+        "kind": "gather_axis",
+        "summary": "catalyst 일정"
     },
     "gather.flow": {
         "capabilities": "외국인/기관 순매수 동향 (KR 전용, 네이버 금융). US는 미지원 → None",

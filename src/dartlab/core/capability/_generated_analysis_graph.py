@@ -128,7 +128,7 @@ ANALYSIS_GRAPH: dict = json.loads(
             "artifactPolicy": {
                 "primaryCsv": true
             },
-            "capabilities": "14축 분석: 수익구조, 자금조달, 자산구조, 현금흐름, 수익성, 성장성, 안정성, 효율성, 종합평가, 이익품질, 비용구조, 자본배분, 투자효율, 재무정합성\n축 없이 호출 시 14축 가이드 반환\n개별 축 분석 시 Company 바인딩 (self 자동 전달)\n2-level 호출: c.analysis(\"financial\", \"수익성\"), c.analysis(\"valuation\", \"가치평가\")",
+            "capabilities": "22축 분석 (5 group)\nfinancial (14): 수익구조, 자금조달, 자산구조, 현금흐름, 수익성, 성장성, 안정성, 효율성, 종합평가, 이익품질, 비용구조, 자본배분, 투자효율, 재무정합성\nvaluation (1): 가치평가\ngovernance (3): 지배구조, 공시변화, 비교분석\nforecast (2): 매출전망, 예측신호\nmacro (2): 매크로민감도, 밸류에이션밴드\n축 없이 호출 시 22축 가이드 반환\n개별 축 분석 시 Company 바인딩 (self 자동 전달)\n2-level 호출: c.analysis(\"financial\", \"수익성\"), c.analysis(\"valuation\", \"가치평가\")",
             "contractId": "company.analysis",
             "evidenceSchema": {
                 "metricKeys": [
@@ -225,7 +225,7 @@ ANALYSIS_GRAPH: dict = json.loads(
                 }
             ],
             "sourceKey": "Company.analysis",
-            "summary": "재무제표 완전 분석 — 14축, 단일 종목 심층 (내부 구현).",
+            "summary": "재무제표 완전 분석 — 22축, 단일 종목 심층 (내부 구현).",
             "tool": "analysis",
             "toolMatch": [
                 {
@@ -1477,7 +1477,7 @@ ANALYSIS_GRAPH: dict = json.loads(
         {
             "id": "contract:company.analysis",
             "kind": "contract",
-            "label": "재무제표 완전 분석 — 14축, 단일 종목 심층 (내부 구현).",
+            "label": "재무제표 완전 분석 — 22축, 단일 종목 심층 (내부 구현).",
             "source": "Company.analysis"
         },
         {
@@ -2837,7 +2837,7 @@ ANALYSIS_GRAPH: dict = json.loads(
             }
         }
     ],
-    "sourceHash": "950469bb7263c0dc"
+    "sourceHash": "27d9c7c104a5724e"
 }
 """
 )
