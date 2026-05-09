@@ -416,15 +416,6 @@
       "limitations": []
     },
     {
-      "id": "engines.gather.consensus",
-      "title": "Gather - 컨센서스",
-      "category": "engines",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": []
-    },
-    {
       "id": "engines.gather.dividends",
       "title": "Gather - 배당",
       "category": "engines",
@@ -2107,13 +2098,16 @@
       "limitations": []
     },
     {
-      "id": "operation.skillIncubator",
-      "title": "Skill Incubator — AI 자율 분석 skill 개발 사이클",
+      "id": "operation.skillDevelopmentLoop",
+      "title": "Skill 개발 루프 — 자율 인큐베이션 + audit 회환",
       "category": "operation",
       "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
-      "limitations": []
+      "limitations": [
+        "live API 가 필요한 조합을 서버 audit 없이 official 로 승격하지 않는다.",
+        "일부 capability (대량 parquet, MCP) 미지원으로 selfRun 부분 실행만 가능."
+      ]
     },
     {
       "id": "operation.stability",
@@ -2204,17 +2198,6 @@
       "requiredSetup": [],
       "limitations": [
         "live KRX/DART/OpenAI OAuth 호출은 브라우저에서 제한된다."
-      ]
-    },
-    {
-      "id": "runtime.skillDevelopmentLoop",
-      "title": "Skill 개발과 엔진 조합 루프",
-      "category": "runtime",
-      "status": "limited",
-      "dataSources": [],
-      "requiredSetup": [],
-      "limitations": [
-        "Pyodide에서는 live API가 필요한 조합을 서버 audit 없이 official로 승격하지 않는다."
       ]
     },
     {

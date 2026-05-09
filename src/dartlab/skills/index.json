@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 229,
+    "skillCount": 227,
     "categories": [
       {
         "id": "start",
@@ -14,7 +14,7 @@
         "id": "runtime",
         "title": "Runtime",
         "description": "Local Python, Pyodide, Web AI, MCP, VSCode 같은 실행 환경별 제약과 근거 흐름.",
-        "count": 10
+        "count": 9
       },
       {
         "id": "operation",
@@ -26,7 +26,7 @@
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 195
+        "count": 194
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -2365,8 +2365,7 @@
       "linkedSkills": [
         "engines.analysis.predictionSignal",
         "engines.analysis.growth",
-        "engines.gather.revenueConsensus",
-        "engines.gather.consensus"
+        "engines.gather.revenueConsensus"
       ],
       "requires": [],
       "alternatives": [],
@@ -4366,7 +4365,7 @@
       ],
       "procedure": [
         "dartlab.gather() 또는 c.gather() 로 사용 가능한 method 가이드 확인.",
-        "method 선택 (price · consensus · news · supplyDemand · dividend · ownership · sector · insider · macro).",
+        "method 선택 (price · news · supplyDemand · dividend · ownership · sector · insider · macro · revenue_consensus).",
         "dartlab.gather(method, stockCode, period?, market?) 호출.",
         "결과의 provider · source · latestAsOf · executionRef 검증.",
         "분석 결합은 engines.analysis · engines.macro 가 담당. gather 결과를 결론으로 직접 포장 금지."
@@ -4429,12 +4428,12 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "gather 엔진의 전체 snapshot 응용 — 한 종목의 price · consensus · flow · sector · dividends · insider · majorShareholders · ownership · industryPeers 를 한 번에 병렬 수집한 GatherSnapshot.",
+      "purpose": "gather 엔진의 전체 snapshot 응용 — 한 종목의 price · flow · sector · dividends · insider · majorShareholders · ownership · industryPeers 를 한 번에 병렬 수집한 GatherSnapshot.",
       "whenToUse": [
         "gather",
         "collect",
         "전체 snapshot",
-        "한 종목의 price · consensus · flow · sector · dividends · insider · majorShareholders · ownership · industryPeers 를 한 번에 병렬 수집한 GatherSnapshot."
+        "한 종목의 price · flow · sector · dividends · insider · majorShareholders · ownership · industryPeers 를 한 번에 병렬 수집한 GatherSnapshot."
       ],
       "inputs": [
         "종목코드 또는 검색어",
@@ -4460,7 +4459,6 @@
       "linkedSkills": [
         "engines.gather",
         "engines.gather.price",
-        "engines.gather.consensus",
         "engines.gather.flow",
         "engines.story.dartlabStory"
       ],
@@ -4492,7 +4490,7 @@
       ],
       "visualGuidance": [],
       "failureModes": [
-        "병렬 수집 중 일부 axis (예 — consensus / news) 실패 → 부분 결과만 보고 종합 판단",
+        "병렬 수집 중 일부 axis (예 — news / dividends) 실패 → 부분 결과만 보고 종합 판단",
         "snapshot 의 latestAsOf 가 axis 별로 다른데 단일 기준일로 인용",
         "캐시 hit 시 stale data (수일 전) 를 최신으로 오인",
         "provider 별 데이터 신선도 차이 (DART 분기 vs 가격 일별) 무시",
@@ -4510,115 +4508,6 @@
         "신한지주 snapshot 매 분기 갱신",
         "하나의 호출로 6 막 분석 입력 준비",
         "snapshot 결손 axis 보강 (개별 gather 호출 추가)"
-      ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "supported"
-        },
-        "pyodide": {
-          "status": "limited"
-        }
-      }
-    },
-    {
-      "id": "engines.gather.consensus",
-      "title": "Gather - 컨센서스",
-      "category": "engines",
-      "categoryTitle": "Engines",
-      "kind": "curated",
-      "status": "observed",
-      "purpose": "gather 엔진의 컨센서스 응용 — 애널리스트 목표가 · EPS 추정 컨센서스.",
-      "whenToUse": [
-        "gather",
-        "consensus",
-        "컨센서스",
-        "애널리스트 목표가 · EPS 추정 컨센서스."
-      ],
-      "inputs": [
-        "종목코드 또는 검색어",
-        "market (KR / US, default KR)",
-        "기간 / 옵션 (해당 시)"
-      ],
-      "requiredInputs": [],
-      "outputs": [
-        "DataFrame · list · snapshot 객체",
-        "evidence refs",
-        "한계와 가정"
-      ],
-      "apiRefs": [
-        "gather",
-        "Company.gather"
-      ],
-      "toolRefs": [],
-      "datasetRefs": [],
-      "knowledgeRefs": [
-        "engines.gather",
-        "engines.data.foundation"
-      ],
-      "linkedSkills": [
-        "engines.gather.revenueConsensus",
-        "engines.analysis.revenueForecast",
-        "engines.analysis.predictionSignal",
-        "engines.quant.surprise"
-      ],
-      "requires": [],
-      "alternatives": [],
-      "succeededBy": [],
-      "deprecatedBy": [],
-      "sourceRefs": [
-        "dartlab://skills/engines.gather.consensus"
-      ],
-      "procedure": [
-        "`provider` / `source`: 데이터 출처 (Naver · ECOS · FRED · FMP 등)",
-        "`latestAsOf` / `date`: 데이터 기준일",
-        "`target` / `market`: 대상 종목 / 시장",
-        "축 고유 metric · value · unit · flags"
-      ],
-      "recipeSteps": [],
-      "requiredEvidence": [
-        "target",
-        "provider",
-        "latestAsOf",
-        "source",
-        "executionRef"
-      ],
-      "expectedOutputs": [
-        "공개 호출",
-        "대표 반환 형태",
-        "검증 결과"
-      ],
-      "visualGuidance": [],
-      "failureModes": [
-        "컨센서스 갱신 시점 (보고서 발간일) 과 회사 실적 발표 시점 차이 무시",
-        "애널리스트 수 부족 (n < 5) 인데 컨센서스 신뢰성 인용",
-        "매출 컨센서스 (revenue_consensus) 와 영업이익 / 순이익 컨센서스 혼동",
-        "외화 매출 회사의 원화 vs USD 컨센서스 단위 혼용",
-        "보수적 / 공격적 추정 분포 (median vs mean) 미명시",
-        "직전 분기 실적 발표 후 컨센서스 미갱신 가능성"
-      ],
-      "forbidden": [
-        "API 키 / 인증정보 답변 노출 금지.",
-        "provider · source · latestAsOf 명시 없이 최신 데이터라고 말하지 않는다.",
-        "원자료를 그대로 분석 결론으로 포장 금지 — 해석은 analysis · macro · scan · story.",
-        "컨센서스 수치를 *예측* 이 아닌 *현재 데이터* 로 오해 금지 — 애널리스트 추정치임 명시.",
-        "애널리스트 수 (n=) 명시 없이 컨센서스 단정 금지."
-      ],
-      "examples": [
-        "삼성전자 매출 컨센서스",
-        "영업이익 컨센서스 + 애널리스트 수",
-        "컨센서스 vs 실적 차이 (서프라이즈)",
-        "컨센서스 갱신 추세 (revision)",
-        "median vs mean 분포",
-        "매출 / 영업이익 / 순이익 분리"
       ],
       "runtimeCompatibility": {
         "server": {
@@ -5738,7 +5627,6 @@
       ],
       "linkedSkills": [
         "engines.gather",
-        "engines.gather.consensus",
         "engines.analysis.revenueForecast",
         "engines.analysis.growth"
       ],
@@ -9123,7 +9011,7 @@
         "engines.quant",
         "engines.quant.surprise",
         "engines.quant.fundmom",
-        "engines.gather.consensus"
+        "engines.gather.revenueConsensus"
       ],
       "requires": [],
       "alternatives": [],
@@ -9156,7 +9044,7 @@
       "visualGuidance": [],
       "failureModes": [
         "PEAD (post-earnings drift) 의 KR 시장 reproducibility 차이",
-        "SUE 분모 (consensus std dev vs realized std dev) 정의 모호",
+        "SUE 분모 (revenue_consensus std dev vs realized std dev) 정의 모호",
         "이익 수정 (revision) 모멘텀의 시점 (announce 직후 vs 1 개월 후) 차이",
         "분기 회계 (지배 vs 비지배) 분리 누락",
         "일회성 손익 (M&A / 매각) 의 EPS 영향 미보정"
@@ -12291,7 +12179,7 @@
         "engines.quant",
         "engines.quant.earnings",
         "engines.quant.fundmom",
-        "engines.gather.consensus"
+        "engines.gather.revenueConsensus"
       ],
       "requires": [],
       "alternatives": [],
@@ -12323,7 +12211,7 @@
       ],
       "visualGuidance": [],
       "failureModes": [
-        "consensus 추정기관 수가 적은 (2~3 곳) 종목의 SUE 신뢰도 저하",
+        "revenue_consensus 추정기관 수가 적은 (2~3 곳) 종목의 SUE 신뢰도 저하",
         "PEAD 효과 (post-earnings drift) 의 KR 시장 reproducibility 차이",
         "분기 회계 (지배 vs 비지배) 분리 누락",
         "일회성 손익 (M&A / 매각) 의 NI growth 영향 미보정",
@@ -22268,7 +22156,7 @@
         "새 내용이 여러 엔진을 조합하는 분석 절차면 curated skill 후보로 둔다.",
         "새 내용이 테스트, 릴리즈, 문서, UI, 데이터 같은 운영 규칙이면 operation skill로 둔다.",
         "프로젝트별 실험은 `.dartlab/skills/**/*.md` user skill로 시작한다.",
-        "신규 분석 skill 을 자율 발굴·검증으로 만드는 사이클은 [operation.skillIncubator](/skills/operation.skillIncubator) 가 SSOT (gapSpot → protoSkill → selfRun → redTeam → graduate). 본 skill 은 graduate 단계의 *승격 규칙* 만 정의한다.",
+        "신규 분석 skill 을 자율 발굴·검증으로 만드는 6 단계 사이클과 audit 회환은 [operation.skillDevelopmentLoop](/skills/operation.skillDevelopmentLoop) 가 SSOT (gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate → auditFeedback). 본 skill 은 graduate 단계의 *승격 규칙* 만 정의한다.",
         "official 승격은 구조 lint, 서버 audit P, 사용자 확인이 모두 있을 때만 허용한다.",
         "승격 후에도 SkillSpec은 schema를 복사하지 않고 사용 기능와 sourceRefs로 원천을 연결한다.",
         "자연어 phrase (한국어 위주, 영문 보조 OK), 사용자가 채팅에 칠 만한 표현.",
@@ -22878,34 +22766,50 @@
       }
     },
     {
-      "id": "operation.skillIncubator",
-      "title": "Skill Incubator — AI 자율 분석 skill 개발 사이클",
+      "id": "operation.skillDevelopmentLoop",
+      "title": "Skill 개발 루프 — 자율 인큐베이션 + audit 회환",
       "category": "operation",
       "categoryTitle": "Operation",
       "kind": "curated",
       "status": "unverified",
-      "purpose": "AI 가 분석 빈칸을 발굴해 skill 초안을 만들고, 같은 세션에서 자가 실행으로 품질을 검증한 뒤 정식 skill 로 굳히는 5 단계 사이클을 정의한다. 트리거 — '신규 분석 skill 만들자', '분석 빈칸 메우기', '효과적인 skill 굳히기'.",
+      "purpose": "AI 가 분석 빈칸을 발굴해 신규 skill 초안을 만들고 같은 세션에서 자가 실행으로 검증해 정식 등재까지 가는 6 단계 사이클과, 운영 중 audit 결과를 엔진 skill 또는 docstring 개선으로 되돌리는 회환 절차를 합쳐 한 곳에서 관리한다. 트리거 — 신규 분석 skill 만들자 / 분석 빈칸 메우기 / audit 결과 반영.",
       "whenToUse": [
         "신규 분석 skill 후보 발굴",
         "Company/gather/scan 원천 데이터로 빈칸 메우기",
         "skill 초안을 직접 써보고 품질 검증",
         "인큐베이팅 skill 을 정식 specs/ 로 승격",
         "분석 skill 의 ground-truth 비교",
-        "skillIncubator",
         "skill incubation",
-        "skill 자가 검증 파이프라인"
+        "skill 개발 사이클",
+        "엔진 조합으로 새 분석 만들기",
+        "엔진에 없는 분석을 응용",
+        "audit 결과를 skills 에 반영",
+        "독스트링 보강 후보 찾기"
       ],
       "inputs": [
-        "분석 빈칸 후보 (자유형 슬러그 또는 자동 발굴)",
+        "사용자 질문 또는 분석 빈칸 후보 (자유형 슬러그 또는 자동 발굴)",
+        "audit 결과",
         "ground-truth 종목 3 개 (성공 / 실패 / 위기 또는 등가 케이스)"
       ],
       "requiredInputs": [],
       "outputs": [
         "incubating skill markdown (.dartlab/skills/incubating/{id}.md)",
         "selfRun 결과 표 (3 케이스 × evidence)",
-        "graduate 결정 (정식 specs/ 등재 또는 회귀)"
+        "graduate 결정 (정식 specs/ 등재 또는 회귀)",
+        "docstring improvement candidate",
+        "curated SkillSpec candidate"
       ],
-      "apiRefs": [],
+      "apiRefs": [
+        "Company",
+        "Company.analysis",
+        "Company.show",
+        "Company.credit",
+        "Company.quant",
+        "gather",
+        "scan",
+        "macro",
+        "quant"
+      ],
       "toolRefs": [
         "ReadSkill",
         "GetSkillBody",
@@ -22913,7 +22817,9 @@
         "EngineCall",
         "RunPython",
         "SaveArtifact",
-        "RunWorkbench"
+        "RunWorkbench",
+        "InspectDataset",
+        "CompileVisual"
       ],
       "datasetRefs": [],
       "knowledgeRefs": [
@@ -22928,28 +22834,33 @@
       "succeededBy": [],
       "deprecatedBy": [],
       "sourceRefs": [
-        "dartlab://skills/operation.skillIncubator"
+        "dartlab://skills/operation.skillDevelopmentLoop"
       ],
       "procedure": [
-        "gapSpot — ReadCapability + ReadSkill 로 *현재 노출되지만 분석 skill 없는* axis 식별 후 후보 5~8 개 nominate (axis 명 / 사용 데이터 / 가설).",
-        "protoSkill — 후보 1 개 선택. SCHEMA.md 준수 markdown 초안을 `.dartlab/skills/incubating/{category}.{slug}.md` 에 SaveArtifact 로 저장. requiredEvidence[] 에 ground-truth 3 케이스 명시.",
-        "selfRun — 같은 세션에서 ReadSkill 로 재로드 후 사용 기능 를 EngineCall/RunPython 으로 3 케이스 전부 실행. 출력 ref + 정량 결과 누적.",
+        "gapSpot — 전 카테고리 dartlab.skills.search() 로 유사 skill 부재 확인 후 ReadCapability + ReadSkill 로 Company/gather/scan 노출 데이터 빈칸 식별. 후보 5~8 개 nominate (axis 명 / 사용 데이터 / 가설).",
+        "dataSanityCheck — protoSkill 작성 *전* 에 사용할 기능 를 1 종목 (대형 안정형) 으로 호출해 실제 반환 형태와 시계열 길이를 본다. 가정 어긋나면 후보 폐기 또는 신호 정의 재설계.",
+        "protoSkill — 후보 1 개 선택. SCHEMA.md 준수 markdown 초안을 .dartlab/skills/incubating/{category}.{slug}.md 에 SaveArtifact 로 저장. requiredEvidence[] 에 ground-truth 3 케이스 명시.",
+        "selfRun — 같은 세션에서 ReadSkill 로 재로드 후 사용 기능 를 EngineCall/RunPython 으로 3 케이스 전부 실행. 출력 ref + 정량 결과 누적. 종목 동시 로드 ≤ 2 (메모리 안전).",
         "redTeam — RunWorkbench 의 CRITIQUE 패스로 (a) 반대 가설 (b) 누락 데이터/edge case (c) 다른 axis 와 중복성 점검. 통과 못하면 protoSkill 재집필 1 회 회귀.",
-        "graduate — 통과 시 specs/{category}/{slug}.md 로 이동 + generateSkills.py 로 index.json 갱신 + 운영자 ack 1 줄 (ok 또는 reject 와 사유). 미통과 시 incubating 에 회귀 카운트 누적, 3 회 초과 폐기."
+        "graduate — 통과 시 specs/{category}/{slug}.md 로 이동 + 필요시 facade axis 등록 + 모듈 코드 작성 + generateSkills.py 로 index.json 갱신 + 운영자 ack 1 줄. engines.{scan|gather|analysis|quant|macro}.* 응용 skill 은 lint 가 facade 호출 예시를 강제하므로 코드 작업 동반.",
+        "auditFeedback — 운영 중 같은 skill 이 audit P 반복 또는 docstring 보강 후보 적발 시, public API 자체가 새 축을 요구할 정도로 반복되면 docstring Guide/AIContract 또는 공식 엔진 axis 로 승격, 관련 SkillSpec 의 공개 호출 방식과 대표 반환 형태를 같은 변경에서 갱신."
       ],
       "recipeSteps": [],
       "requiredEvidence": [
-        "groundTruthCases (3 종목)",
+        "skillRef",
+        "사용 기능",
+        "auditResult",
+        "groundTruthCases",
         "selfRunResultTable",
-        "redTeamCheck",
-        "skillRef (incubating + 승격 후 정식 id)"
+        "redTeamCheck"
       ],
       "expectedOutputs": [
         "빈칸 후보 표 (gapSpot 결과)",
         "incubating skill 본문",
-        "selfRun 결과 표 (3 케이스 × evidence ref)",
+        "selfRun 결과 표 (3 케이스 × evidence)",
         "redTeam 통과 여부 + 사유",
-        "graduate 최종 위치"
+        "graduate 최종 위치",
+        "audit 회환 후보 (docstring or 엔진 skill 보강)"
       ],
       "visualGuidance": [],
       "failureModes": [
@@ -22957,18 +22868,24 @@
         "incubating skill 을 selfRun 없이 바로 specs/ 로 등재",
         "1 종목으로만 검증 (3 케이스 강행규칙 위반)",
         "redTeam 회귀 횟수 누적 없이 무한 재집필",
-        "동일 axis 가 이미 analysis/scan/quant 에 존재함을 점검 안 함"
+        "동일 axis 가 이미 analysis/scan/quant 에 존재함을 점검 안 함",
+        "한 질문에 맞춘 runner 를 skill 로 고정",
+        "공개 API 변경 후 관련 skill 을 갱신하지 않음",
+        "자동 metric 만 보고 official 승격"
       ],
       "forbidden": [
         "운영자 ack 없이 graduate 실행",
         "specs/ 디렉터리에 검증 미통과 skill 직접 쓰기",
         "selfRun 결과를 외부 본문으로 인용 (sourceType=external 마커 누락)",
-        "종목 3 개 동시 메모리 로드 (CLAUDE.md 메모리 안전 위반)"
+        "종목 3 개 동시 메모리 로드 (CLAUDE.md 메모리 안전 위반)",
+        "질문별 실행 코드 저장",
+        "답변 템플릿 저장",
+        "skill 과 공개 API 호출/반환 설명 불일치 방치"
       ],
       "examples": [
-        "분석 axis 빈칸 메우자 — gapSpot 후보 표 → protoSkill 1 개 선정",
+        "분석 axis 빈칸 메우자 — gapSpot 후보 표 + dataSanityCheck → protoSkill 1 개 선정",
         "flowAnomaly skill 만들어보자 — protoSkill → selfRun (005930/047810/138930) → redTeam → graduate ack 대기",
-        "이번에 만든 incubating skill 정식으로 등재 — graduate 단계만 실행"
+        "audit 에서 실패한 질문을 skill 또는 docstring 개선으로 반영해줘 — auditFeedback 단계만 실행"
       ],
       "runtimeCompatibility": {
         "server": {
@@ -22988,7 +22905,8 @@
         },
         "pyodide": {
           "status": "limited",
-          "notes": [
+          "limitations": [
+            "live API 가 필요한 조합을 서버 audit 없이 official 로 승격하지 않는다.",
             "일부 capability (대량 parquet, MCP) 미지원으로 selfRun 부분 실행만 가능."
           ]
         }
@@ -23948,119 +23866,6 @@
           ],
           "limitations": [
             "live KRX/DART/OpenAI OAuth 호출은 브라우저에서 제한된다."
-          ]
-        }
-      }
-    },
-    {
-      "id": "runtime.skillDevelopmentLoop",
-      "title": "Skill 개발과 엔진 조합 루프",
-      "category": "runtime",
-      "categoryTitle": "Runtime",
-      "kind": "curated",
-      "status": "unverified",
-      "purpose": "엔진 기본 skill과 기능를 조합해 엔진에 직접 정의되지 않은 분석 절차를 만들고 audit 결과를 엔진 skill 또는 docstring 개선으로 되돌리는 체계다.",
-      "whenToUse": [
-        "스킬 개발 체계",
-        "엔진 조합으로 새 분석 만들기",
-        "엔진에 없는 분석을 응용",
-        "audit 결과를 skills에 반영",
-        "독스트링 보강 후보 찾기"
-      ],
-      "inputs": [
-        "사용자 질문",
-        "audit 결과",
-        "selectedSkill"
-      ],
-      "requiredInputs": [],
-      "outputs": [
-        "skill gap",
-        "composition plan",
-        "docstring improvement candidate",
-        "curated SkillSpec candidate"
-      ],
-      "apiRefs": [
-        "Company",
-        "Company.analysis",
-        "Company.show",
-        "Company.credit",
-        "Company.quant",
-        "gather",
-        "scan",
-        "macro",
-        "quant",
-        "ChartResult"
-      ],
-      "toolRefs": [
-        "search_reference",
-        "InspectDataset",
-        "RunPython",
-        "CompileVisual",
-        "finalize_answer"
-      ],
-      "datasetRefs": [],
-      "knowledgeRefs": [
-        "dartlabCausalSixActs"
-      ],
-      "linkedSkills": [],
-      "requires": [],
-      "alternatives": [],
-      "succeededBy": [],
-      "deprecatedBy": [],
-      "sourceRefs": [],
-      "procedure": [
-        "실패 또는 신규 질문을 목적어, 대상, 필요한 근거, runtime 제약으로 나눈다.",
-        "먼저 `search_reference`로 엔진 소유 skill을 찾고, 없으면 `engines.company`, `engines.scan`, `engines.macro`, `engines.quant`, `engines.viz` 중 필요한 엔진 조합을 선택한다.",
-        "조합이 기존 엔진 기본 skill과 기능의 Guide/AIContract만으로 충분히 설명되면 해당 skill/docstring 보강 후보로 둔다. 여러 기능를 묶는 반복 분석 절차가 필요하면 해당 엔진 폴더의 응용 SkillSpec 후보로 둔다.",
-        "서버 경유 `/api/ask` audit에서 같은 skill이 반복 P를 받으면 `auditP` 후보가 된다. `official`은 구조 lint, 서버 audit P, 사용자 확인을 모두 만족할 때만 허용한다.",
-        "public API 자체가 새 축을 요구할 정도로 반복되면 docstring Guide/AIContract 또는 공식 엔진 axis로 승격하고, 관련 SkillSpec의 공개 호출 방식과 대표 반환 형태를 같은 변경에서 갱신한다."
-      ],
-      "recipeSteps": [],
-      "requiredEvidence": [
-        "skillRef",
-        "사용 기능",
-        "auditResult",
-        "failureMode"
-      ],
-      "expectedOutputs": [
-        "반복 가능한 절차",
-        "필요한 사용 기능",
-        "승격 여부 판단"
-      ],
-      "visualGuidance": [],
-      "failureModes": [
-        "한 질문에 맞춘 runner를 skill로 고정",
-        "공개 API 변경 후 관련 skill을 갱신하지 않음",
-        "자동 metric만 보고 official 승격",
-        "한 번 실패한 사례를 곧바로 docstring 문제로 단정"
-      ],
-      "forbidden": [
-        "질문별 실행 코드 저장",
-        "답변 템플릿 저장",
-        "skill과 공개 API 호출/반환 설명 불일치 방치",
-        "사용자 확인 없는 official 승격"
-      ],
-      "examples": [
-        "엔진에 없는 분석도 skills만 보고 만들 수 있는지 확인해줘",
-        "audit에서 실패한 질문을 skill 또는 docstring 개선으로 반영해줘"
-      ],
-      "runtimeCompatibility": {
-        "server": {
-          "status": "supported"
-        },
-        "localPython": {
-          "status": "supported"
-        },
-        "mcp": {
-          "status": "supported"
-        },
-        "webAi": {
-          "status": "supported"
-        },
-        "pyodide": {
-          "status": "limited",
-          "limitations": [
-            "Pyodide에서는 live API가 필요한 조합을 서버 audit 없이 official로 승격하지 않는다."
           ]
         }
       }

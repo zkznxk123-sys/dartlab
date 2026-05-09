@@ -88,7 +88,7 @@ intentBoosts:
       - "공식 승격"
       - "독스트링 승격"
     boost: 16.0
-  - skillIds: ["runtime.skillDevelopmentLoop"]
+  - skillIds: ["operation.skillDevelopmentLoop"]
     terms:
       - "스킬 개발"
       - "skill 개발"
