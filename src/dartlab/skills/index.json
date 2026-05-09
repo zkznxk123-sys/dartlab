@@ -1502,8 +1502,7 @@
         "engines.analysis.earningsQuality",
         "engines.analysis.financialConsistency",
         "engines.analysis.disclosureChange",
-        "engines.scan.audit",
-        "감사 리스크와 내부통제 이슈 봐줘"
+        "engines.scan.audit"
       ],
       "requires": [],
       "alternatives": [],
@@ -13548,7 +13547,6 @@
       "knowledgeRefs": [],
       "linkedSkills": [
         "engines.gather",
-        "engines.gather.calendar",
         "engines.recipe.dailyMorningNote",
         "engines.recipe.disclosureEvent",
         "engines.company"
