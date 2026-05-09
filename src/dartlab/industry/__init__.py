@@ -79,6 +79,7 @@ class Industry:
         *,
         summary: bool = False,
         timeline: bool = False,
+        lifecycle: bool = False,
         year: str = "2024",
     ) -> pl.DataFrame:
         """산업지도를 조회한다.
@@ -93,6 +94,8 @@ class Industry:
             True이면 공정별 매출/이익 집계.
         timeline : bool
             True이면 연도별 공정 매출 추이.
+        lifecycle : bool
+            True이면 산업 라이프사이클 phase 시계열 (Vernon 3-phase + 쇠퇴).
         year : str
             재무 데이터 기준 연도 (summary 시 사용).
 
@@ -139,6 +142,8 @@ class Industry:
             return self._summary(industryId, year=year)
         if timeline:
             return self._timeline(industryId)
+        if lifecycle:
+            return self._lifecycle(industryId)
         return self._query(industryId, stage)
 
     def _guide(self) -> pl.DataFrame:
@@ -211,6 +216,12 @@ class Industry:
         from dartlab.industry.build.pipeline import loadNodes
 
         return buildTimelineSummary(loadNodes(), industryId)
+
+    def _lifecycle(self, industryId: str) -> pl.DataFrame:
+        """산업 라이프사이클 phase 시계열 (Vernon 3-phase + 쇠퇴)."""
+        from dartlab.industry.lifecycle import classifyLifecycle
+
+        return classifyLifecycle(industryId)
 
     def build(self, *, skipDocs: bool = False) -> None:
         """산업지도를 빌드한다 (4단계 파이프라인).
