@@ -76,6 +76,7 @@ class BacktestResult:
     period: tuple[date | None, date | None] = (None, None)
     oos: bool = False
     cpcv: dict | None = None
+    scanContext: dict | None = None  # scanBacktest 호출 시 universe 출처 추적
 
     # NotApplicable sentinel (KR-only style on US)
     status: str = "ok"  # "ok" | "not_applicable" | "error"

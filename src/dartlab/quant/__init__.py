@@ -876,6 +876,18 @@ class Quant:
         ]
         return "\n".join(lines)
 
+    # scan → quant 폐쇄 루프 — axis 미등록 (top-level helper)
+    def scanBacktest(self, scanResult, **kwargs):
+        """scan 결과 universe + signalFn / style → multi-asset backtest.
+
+        ``runScanBacktest`` 를 ``dartlab.quant`` attribute 로 노출. axis 미등록 —
+        registry dispatcher 의 ``fn(stockCode, **kw)`` 계약과 시그니처가 어긋나기 때문.
+        세부 시그니처는 ``dartlab.quant.scanBacktest.runScanBacktest`` 참고.
+        """
+        from dartlab.quant.scanBacktest import runScanBacktest
+
+        return runScanBacktest(scanResult, **kwargs)
+
     # accessor 패턴: quant.momentum("005930")
     def __getattr__(self, name: str) -> Any:
         if name.startswith("_"):
@@ -892,3 +904,8 @@ class Quant:
 
         _run.__doc__ = f"{entry.label}: {entry.description}"
         return _run
+
+
+# scanBacktest top-level helper — 서브모듈과 같은 이름이라 module attribute 를
+# 함수 binding 으로 덮어쓰기 (dl.quant.scanBacktest(scanResult, ...) 호출 가능).
+from dartlab.quant.scanBacktest import runScanBacktest as scanBacktest  # noqa: E402, F401

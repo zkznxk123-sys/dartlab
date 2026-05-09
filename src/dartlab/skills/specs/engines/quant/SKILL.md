@@ -193,6 +193,18 @@ metric, value, score/signal/rank, assumptions, flags
 
 백테스트/전략 축은 기간, 룰, 스타일, 포지션, 수익률, drawdown, Sharpe/DSR/PBO 성격의 검증 값을 포함할 수 있다. 포트폴리오 축은 종목별 weight, risk contribution, covariance/correlation 기반 가정을 포함할 수 있다.
 
+## Top-level helper (axis 미등록)
+
+`scanBacktest` 는 axis 가 아닌 attribute 로만 호출한다 (registry dispatcher 의 `fn(stockCode, **kw)` 계약과 시그니처가 어긋나기 때문 — 첫 인자가 DataFrame).
+
+```python
+top = dl.scan("valuation").filter(pl.col("등급") == "A").sort("PER").head(20)
+result = dl.quant.scanBacktest(top, style="trendFollow", topN=20)
+result.scanContext  # {'universeSize': 20, 'scanResultHash': '...', ...}
+```
+
+세부 sub-spec: `engines.quant.scanBacktest`.
+
 ## evidence 기준
 
 정량 결과는 target, period, benchmark, metric, value, dateRef, executionRef가 필요하다. 백테스트는 수수료, 슬리피지, 리밸런싱, in-sample/out-of-sample 구분을 확인한다.
