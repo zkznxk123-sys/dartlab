@@ -1783,6 +1783,27 @@ td:hover .yoy-badge { opacity: 1; }
 	margin-top: 4px;
 }
 
+/* 가로 긴 표 — 우측 워크벤치 라우팅 진입 (widthThreshold 임계 초과). */
+.loop-row-wide-route {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	margin: 4px 0;
+	border: 1px dashed rgba(148, 163, 184, 0.32);
+	border-radius: 6px;
+	background: rgba(148, 163, 184, 0.04);
+	color: var(--color-dl-text-muted);
+	font-size: 11px;
+	cursor: pointer;
+	transition: all var(--motion-fast);
+}
+.loop-row-wide-route:hover {
+	border-color: var(--color-dl-accent);
+	background: rgba(251, 146, 60, 0.06);
+	color: var(--color-dl-text);
+}
+
 /* ── Mobile responsive ── */
 @media (max-width: 768px) {
 	.sidebar-overlay {

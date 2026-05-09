@@ -2,6 +2,7 @@
 	import { AlertTriangle, ChevronDown, Loader2, Maximize2, X } from "lucide-svelte";
 	import { renderMarkdown } from "$lib/markdown.js";
 	import { groupLoops } from "$lib/agent/conversationModel.js";
+	import { isWideTable, countTableColumns } from "$lib/utils/widthThreshold.js";
 	import SuggestedQuestions from "./SuggestedQuestions.svelte";
 	import ViewSpecRenderer from "$lib/ai/ViewSpecRenderer.svelte";
 
@@ -196,10 +197,24 @@
 															<pre class="loop-row-pre">{jsonPretty(row.result.values)}</pre>
 														{/if}
 														{#if Array.isArray(row.result.tableHead) && row.result.tableHead.length}
+															{@const cols = countTableColumns(row.result.tableHead)}
+															{@const wide = isWideTable(row.result.tableHead)}
 															<div class="loop-row-meta">
-																테이블 {row.result.tableRows ?? row.result.tableHead.length}행 (앞 {row.result.tableHead.length} 표시)
+																테이블 {row.result.tableRows ?? row.result.tableHead.length}행 × {cols}열 (앞 {row.result.tableHead.length} 표시)
 															</div>
-															<pre class="loop-row-pre">{jsonPretty(row.result.tableHead, 800)}</pre>
+															{#if wide && onOpenMessageInWorkbench}
+																<button
+																	type="button"
+																	class="loop-row-wide-route"
+																	onclick={() => onOpenMessageInWorkbench(message)}
+																	title="가로가 긴 표 — 우측 워크벤치에서 보기"
+																>
+																	<Maximize2 size={11} />
+																	<span>{cols}열 표 — 워크벤치에서 열기 →</span>
+																</button>
+															{:else}
+																<pre class="loop-row-pre">{jsonPretty(row.result.tableHead, 800)}</pre>
+															{/if}
 														{/if}
 														{#if row.result.stdout}
 															<div class="loop-row-meta">stdout</div>
