@@ -3,9 +3,25 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Generator
+from dataclasses import dataclass, field
+from typing import Any, Generator
 
 from dartlab.ai.types import LLMConfig, LLMResponse, ToolResponse
+
+
+# 새 provider adapter 들 (anthropic / openai / google / dartlab) 이 stream API 로
+# yield 하는 단위 이벤트. kind ∈ {text, tool_call, stop, error} 등. data 는 kind 별
+# 의미 있는 dict (text→{"delta": str}, tool_call→{"id","name","arguments"}, stop→
+# {"reason","usage"}). agent loop 가 kind 로 분기.
+@dataclass(frozen=True)
+class LLMEvent:
+    kind: str
+    data: dict[str, Any] = field(default_factory=dict)
+
+
+# Provider 가 받는 message 의 type alias. role + content 를 가진 dict.
+# tool 호출 중간 메시지는 tool_call_id, tool_calls 등 추가 키 가질 수 있어 Any.
+Msg = dict[str, Any]
 
 
 class RateLimitError(Exception):
@@ -19,6 +35,8 @@ class RateLimitError(Exception):
 
 class BaseProvider(ABC):
     """모든 LLM provider의 추상 기반."""
+
+    name: str = "base"
 
     def __init__(self, config: LLMConfig):
         self.config = config
@@ -113,3 +131,8 @@ class BaseProvider(ABC):
             for tc in tool_calls
         ]
         return msg
+
+
+# 새 provider adapter 들이 사용하는 type alias. BaseProvider 와 동의어.
+# 새 코드는 LLMProvider 를 type 힌트로 선호하고, BaseProvider 는 상속용 베이스로 유지.
+LLMProvider = BaseProvider

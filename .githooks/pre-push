@@ -48,10 +48,13 @@ if [ -n "$CHANGED_PY" ]; then
   # 중복 제거된 테스트 파일 목록
   TEST_FILES=$(echo "$TEST_FILES" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
-  # 키워드 매칭으로 추가 테스트 파일 발견
+  # 키워드 매칭으로 추가 테스트 파일 발견.
+  # git ls-files 로 *tracked* 테스트만 — untracked WIP 테스트 (다른 작업의 미완성분) 가
+  # push 막는 false positive 차단. push 자체는 tracked 만 보내므로 untracked 가
+  # 통과시킬 의무 X. 회귀 가드는 commit 된 코드만 책임진다.
   for kw in $KEYWORDS; do
     [ -z "$kw" ] && continue
-    matched=$(ls tests/test_*${kw}* 2>/dev/null | tr '\n' ' ')
+    matched=$(git ls-files "tests/test_*${kw}*" 2>/dev/null | tr '\n' ' ')
     TEST_FILES="$TEST_FILES $matched"
   done
   TEST_FILES=$(echo "$TEST_FILES" | tr ' ' '\n' | sort -u | grep -v '^$' | tr '\n' ' ')
