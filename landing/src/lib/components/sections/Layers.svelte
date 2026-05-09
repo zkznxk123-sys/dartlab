@@ -20,7 +20,7 @@
 				class="max-w-3xl w-full h-auto rounded-xl border border-dl-border bg-dl-bg-card shadow-2xl"
 				loading="lazy"
 				width="800"
-				height="1500"
+				height="1340"
 			/>
 			<p class="text-center text-xs text-dl-text-dim mt-4">
 				① 사람·외부 LLM (MCP) → ② 입구 두 갈래 → ③ 자율 작업대 + 운용 자원 3 종 (Skill OS · Capability · Tools 11) → ④ story 종합 → ⑤ 분석 엔진 5 → ⑥ 횡단 처리 3 → ⑦ core → ⑧ 외부 1 차 소스 · ⑨ 3 자 진화 루프

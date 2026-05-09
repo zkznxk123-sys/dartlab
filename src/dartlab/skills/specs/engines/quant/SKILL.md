@@ -133,6 +133,7 @@ company_quant = c.quant("모멘텀")
 | momentum | 모멘텀 | 기술적 | `dartlab.quant("모멘텀", "005930")` |
 | volatility | 변동성 | 기술적 | `dartlab.quant("변동성", "005930")` |
 | forecast | 예측 | 기술적 | `dartlab.quant("예측", "005930", horizon=5)` |
+| marketContext | 시장맥락 | 리스크 | `dartlab.quant("시장맥락", "005930")` |
 | regime | 레짐 | 기술적 | `dartlab.quant("레짐", "005930")` |
 | pattern | 패턴 | 기술적 | `dartlab.quant("패턴", "005930")` |
 | chartPatterns | 차트패턴 | 기술적 | `dartlab.quant("차트패턴", "005930")` |
