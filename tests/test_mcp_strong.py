@@ -81,7 +81,17 @@ async def _run_probe() -> dict:
             except Exception as exc:
                 out["set_level_error"] = str(exc)
 
-            # 7. progress notification — 2.5 s sleep + progress_callback 으로 progress emit 카운트.
+            # 7. 분석 추론 도구 3 종 (S3) — registry SSOT 경유 호출.
+            grounding = await session.call_tool(
+                "GroundingCheck",
+                {"answer": "삼성전자 ROE 는 12.3% 수준이다.", "refs": []},
+            )
+            sc = grounding.structuredContent or {}
+            out["grounding_dispatch_ok"] = bool(sc)
+            # materialNumber 는 ToolResult.data 안 — structuredContent.data.materialNumber.
+            out["grounding_material_number"] = (sc.get("data") or {}).get("materialNumber")
+
+            # 8. progress notification — 2.5 s sleep + progress_callback 으로 progress emit 카운트.
             #    env 임계 1 s · 간격 0.4 s 로 override 했으므로 ≥ 2 회 emit 기대.
             progress_events: list[dict] = []
 
@@ -133,6 +143,15 @@ def test_mcp_strong_annotations_and_structured_and_prompts():
 
     # ── logging/setLevel ──
     assert out.get("set_level_ok") is True, f"setLevel 실패: {out.get('set_level_error')}"
+
+    # ── 분석 추론 도구 3 종 (S3) ──
+    assert "OutcomeLog" in ann, "OutcomeLog 가 tools/list 에 노출"
+    assert "LookAheadGuard" in ann, "LookAheadGuard 가 tools/list 에 노출"
+    assert "GroundingCheck" in ann, "GroundingCheck 가 tools/list 에 노출"
+    assert ann["OutcomeLog"]["readOnly"] is False, "OutcomeLog 는 write tool"
+    assert ann["LookAheadGuard"]["readOnly"] is True, "LookAheadGuard 는 read tool"
+    assert out.get("grounding_dispatch_ok"), "GroundingCheck 호출 ok + structuredContent"
+    assert out.get("grounding_material_number") is True, "12.3% 수치는 material number 분류"
 
     # ── progress notification ──
     # 2.5 s sleep + 임계 1 s + 간격 0.4 s → 약 4 회 emit 기대 (1.2/1.6/2.0/2.4 s 부근).

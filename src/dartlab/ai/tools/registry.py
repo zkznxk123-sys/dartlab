@@ -10,7 +10,10 @@ from typing import Any, Callable
 
 from .compileVisual import compileVisual
 from .engineCall import engineCall
+from .groundingCheck import groundingCheck
 from .inspectDataset import inspectDataset
+from .lookAheadGuard import lookAheadGuard
+from .outcomeLog import outcomeLog
 from .readCapability import readCapability
 from .readFile import readFile
 from .readSkill import getSkillBody, readSkill
@@ -205,6 +208,67 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    # ── 분석 추론 surfacing (workbench 내부 → registry SSOT) ──
+    "OutcomeLog": ToolSpec(
+        "OutcomeLog",
+        "분석 의사결정을 ~/.dartlab/decisions/{market}/{stockCode}.md 에 pending entry 로 기록. N 일 뒤 시장 가격으로 reflection — 진화 루프 입구.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCode": {"type": "string"},
+                "market": {"type": "string", "enum": ["KR", "US"]},
+                "date": {"type": "string"},
+                "decision": {"type": "string"},
+                "theme": {"type": "string"},
+            },
+            "required": ["stockCode", "date", "decision"],
+        },
+        # 디스크 쓰기 — write tool. 같은 (date, stockCode) 호출은 store_decision 이 skip 하지만
+        # 도구 시그니처상 idempotent 단정 X.
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=False,
+    ),
+    "LookAheadGuard": ToolSpec(
+        "LookAheadGuard",
+        "Company.show 의 asOf 강제 호출 — back-test/decision reflection 시 미래 데이터 누설 차단. asOf 누락 거부.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCode": {"type": "string"},
+                "asOf": {"type": "string"},
+                "topic": {"type": "string"},
+                "market": {"type": "string", "enum": ["KR", "US"]},
+                "block": {"type": "integer"},
+                "period": {},
+                "freq": {"type": "string"},
+                "scope": {"type": "string"},
+            },
+            "required": ["stockCode", "asOf"],
+        },
+        # 분석 read — 같은 입력 같은 결과 (provider cache).
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+    "GroundingCheck": ToolSpec(
+        "GroundingCheck",
+        "답변 본문의 material claim (수치/날짜/랭킹) 분류 + ref token 매칭 검증. fake ref token 감지. workbench GATE 휴리스틱 표면화.",
+        {
+            "type": "object",
+            "properties": {
+                "answer": {"type": "string"},
+                "refs": {"type": "array"},
+            },
+            "required": ["answer"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     # ── elevate (옵션 sub-agent) ──
     "RunWorkbench": ToolSpec(
         "RunWorkbench",
@@ -237,6 +301,9 @@ _TOOLS: dict[str, ToolFn] = {
     "WebSearch": webSearch,
     "SaveArtifact": saveArtifact,
     "CompileVisual": compileVisual,
+    "OutcomeLog": outcomeLog,
+    "LookAheadGuard": lookAheadGuard,
+    "GroundingCheck": groundingCheck,
     "RunWorkbench": runWorkbench,
 }
 
@@ -268,6 +335,9 @@ _LEGACY_NAME_MAP = {
     "web_search": "WebSearch",
     "save_artifact": "SaveArtifact",
     "compile_visual": "CompileVisual",
+    "outcome_log": "OutcomeLog",
+    "lookahead_guard": "LookAheadGuard",
+    "grounding_check": "GroundingCheck",
     "run_workbench": "RunWorkbench",
 }
 

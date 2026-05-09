@@ -844,6 +844,15 @@
       "limitations": []
     },
     {
+      "id": "engines.quant.forecast",
+      "title": "Quant Forecast 축",
+      "category": "engines",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.quant.fundmom",
       "title": "Quant - 펀더-가격 모멘텀",
       "category": "engines",

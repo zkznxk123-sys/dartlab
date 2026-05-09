@@ -49,6 +49,10 @@ _MCP_WORKSPACE_AGENT_TOOL_NAMES = (
     "WebSearch",
     "SaveArtifact",
     "CompileVisual",
+    # 분석 추론 surfacing — workbench 안에 갇혀 있던 도구를 외부 자율 호출 가능하게.
+    "OutcomeLog",
+    "LookAheadGuard",
+    "GroundingCheck",
 )
 
 

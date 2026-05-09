@@ -111,11 +111,12 @@ dartlab 엔진/Skill OS 가 진화해도 MCP 표면이 자동으로 따라가도
 
 | 위치 | 언제 |
 |---|---|
-| `ai/tools/registry._SPECS` | canonical tool 추가/제거 (드물게 — 현재 11) |
+| `ai/tools/registry._SPECS` | canonical tool 추가/제거 (현재 14: 메타 3 · 데이터 3 · 외부 2 · 출력 2 · 분석 추론 3 · elevate 1) |
 | `ai/tools/types.ToolSpec` 의 4 hint | 새 도구의 readOnly/destructive/idempotent/openWorld 분류 |
-| `mcp/__init__._LEGACY_NAME_MAP` | snake_case alias 추가/제거 |
+| `mcp/__init__._MCP_WORKSPACE_AGENT_TOOL_NAMES` | MCP 외부 노출 도구 (canonical 의 부분집합) — 현재 10 (canonical 9 + ask) |
+| `ai/tools/registry._LEGACY_NAME_MAP` | snake_case alias 추가/제거 |
 | `dartlab/__init__._LAZY_ATTRS` (PEP 562) | 새 top-level `dartlab.X` 모듈 추가 시 등록 |
-| `runtime/python.py` 화이트리스트 | RunPython 안에서 새 외부 의존 import 허용 |
+| `ai/tools/runPython_guard._BLOCKED_ATTR_CALLS` | RunPython 의 차단 호출 목록 — 새 dangerous attr 추가 시 |
 
 ### Silent drift — 조용히 깨질 수 있는 채널 (가드 1 종)
 

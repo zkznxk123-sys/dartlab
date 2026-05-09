@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 228,
+    "skillCount": 229,
     "categories": [
       {
         "id": "start",
@@ -26,7 +26,7 @@
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 194
+        "count": 195
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -9511,6 +9511,106 @@
         },
         "pyodide": {
           "status": "limited"
+        }
+      }
+    },
+    {
+      "id": "engines.quant.forecast",
+      "title": "Quant Forecast 축",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "dartlab.quant(\"예측\", \"005930\", horizon=5) 형태로 일별 수익률의 horizon-step 예측 + 90% Conformal prediction interval 을 산출한다. Naive · AR(1) · ETS-Holt · Theta 4 모델을 numpy-only 로 구현하고 ADF p-value 기반 dispatch 룰로 자동 선택한다. 트리거 — '예측', '수익률예측', 'forecast', 'forecastReturns', 'returnsForecast'.",
+      "whenToUse": [
+        "종목의 단기 (1~20 일) 수익률 점추정과 분포 가정 없는 신뢰구간이 함께 필요할 때",
+        "백테스트의 entry 시그널을 forecast pointForecast > costThreshold 룰로 만들 때",
+        "종목 시계열의 정상성 (mean-reversion vs trend) 진단이 함께 필요할 때",
+        "Naive baseline 대비 AR(1) / ETS-Holt / Theta 의 OOS 정확도 비교가 필요할 때"
+      ],
+      "inputs": [
+        "stockCode (str, 필수)",
+        "market (str, \"KR\" / \"US\" / \"auto\", 기본 \"auto\")",
+        "horizon (int, 기본 5)",
+        "models (list[str] 또는 None) — None 이면 dispatch 룰",
+        "calibFraction (float, 기본 0.2)",
+        "alpha (float, 기본 0.10 → 90% interval)"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "dict — stockCode, market, lastClose, lastDate, modelChosen, modelsConsidered, horizon, nObs, calibSize, pAdfStationary, conformalHalfWidth, forecastTable, summary"
+      ],
+      "apiRefs": [
+        "quant",
+        "Company.quant"
+      ],
+      "toolRefs": [],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.quant",
+        "engines.gather"
+      ],
+      "linkedSkills": [
+        "engines.quant",
+        "engines.quant.momentum",
+        "engines.quant.volatility"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.quant.forecast"
+      ],
+      "procedure": [
+        "dartlab.quant(\"예측\", \"005930\", horizon=5) 호출",
+        "결과의 modelChosen 으로 dispatch 결과 확인",
+        "forecastTable 에서 각 horizon 의 pointForecast / lowerBound / upperBound / pricePoint 인용",
+        "summary 한 줄로 요약 (signed % over Hd, 90% CI)",
+        "pAdfStationary < 0.05 면 평균회귀 시계열 (ar1 선택), 그 외는 trend 시계열 (etsHolt)"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "target (stockCode)",
+        "period (lastDate, nObs)",
+        "metric (modelChosen, conformalHalfWidth)",
+        "dateRef (lastDate)",
+        "executionRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "시계열 < 30 일 → \"데이터 부족\" error 반환",
+        "종목 OHLCV 수집 실패 → \"주가 데이터 없음\" error 반환",
+        "models 인자에 미등록 모델 → 후보 목록과 함께 error 반환",
+        "pointForecast 를 미래 성과 보장처럼 표현 (절대 금지 — 90% CI 와 함께 인용)"
+      ],
+      "forbidden": [
+        "점예측만 인용하고 conformalHalfWidth / interval 누락",
+        "\"이 모델이 가장 정확하다\" 식 모델 우월성 주장 — dispatch 는 휴리스틱",
+        "statsmodels / scipy / arch / pmdarima / sklearn import 추가",
+        "21 모델 vectrix 패턴 도입 — base install SSOT 위반"
+      ],
+      "examples": [
+        "005930 5 일 후 수익률 예측 + 신뢰구간",
+        "AAPL 20 일 후 수익률 예측 (US auto-detect)",
+        "models=[\"etsHolt\", \"theta\"] ensemble 평균"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
         }
       }
     },

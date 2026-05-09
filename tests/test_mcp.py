@@ -82,12 +82,26 @@ def test_mcp_unknown_tool_message():
 
 
 def test_mcp_advertised_tools_carry_annotations():
-    """0.11 — 모든 도구가 readOnly/destructive/idempotent/openWorld hint 를 노출."""
+    """0.11 — 모든 도구가 readOnly/destructive/idempotent/openWorld hint 를 노출.
+
+    0.12 부터 분석 추론 도구 3 종 (OutcomeLog / LookAheadGuard / GroundingCheck) 도 추가.
+    """
     from dartlab.mcp import _advertisedTools
 
     tools = {t["name"]: t for t in _advertisedTools()}
-    # canonical 6 + ask 모두 annotations 키 보유
-    for name in ("ask", "ReadSkill", "ReadCapability", "RunPython", "WebSearch", "SaveArtifact", "CompileVisual"):
+    # canonical 9 + ask 모두 annotations 키 보유
+    for name in (
+        "ask",
+        "ReadSkill",
+        "ReadCapability",
+        "RunPython",
+        "WebSearch",
+        "SaveArtifact",
+        "CompileVisual",
+        "OutcomeLog",
+        "LookAheadGuard",
+        "GroundingCheck",
+    ):
         ann = tools[name]["annotations"]
         for key in ("readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint"):
             assert key in ann, f"{name} 의 annotations 에 {key} 누락"
@@ -97,6 +111,10 @@ def test_mcp_advertised_tools_carry_annotations():
     assert tools["WebSearch"]["annotations"]["openWorldHint"] is True
     assert tools["SaveArtifact"]["annotations"]["readOnlyHint"] is False
     assert tools["RunPython"]["annotations"]["idempotentHint"] is False
+    # 분석 추론 surfacing — 분류 검증
+    assert tools["OutcomeLog"]["annotations"]["readOnlyHint"] is False  # write tool
+    assert tools["LookAheadGuard"]["annotations"]["readOnlyHint"] is True  # read tool
+    assert tools["GroundingCheck"]["annotations"]["idempotentHint"] is True
 
 
 def test_recipe_skills_all_exposed_as_prompts():
