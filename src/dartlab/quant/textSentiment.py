@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import load_docs_for_stock, resolve_market
+from dartlab.quant._helpers import loadDocsForStock, resolve_market
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ def calcSentiment(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
-    docs = load_docs_for_stock(stockCode)
+    docs = loadDocsForStock(stockCode)
     if isEmptyDf(docs):
         return {**result, "error": "docs 데이터 없음"}
 

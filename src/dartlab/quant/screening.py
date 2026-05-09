@@ -11,7 +11,7 @@ import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import load_scan_parquet
+from dartlab.quant._helpers import loadScanParquet
 
 log = logging.getLogger(__name__)
 
@@ -60,12 +60,12 @@ def _screen_price_based(preset: str, market: str, universe: list[str] | None = N
     if not universe:
         return {**result, "error": "종목 풀 로드 실패", "stocks": []}
 
-    from dartlab.quant._helpers import fetch_ohlcv
+    from dartlab.quant._helpers import fetchOhlcv
 
     passed = []
     for code in universe:
         try:
-            ohlcv = fetch_ohlcv(code)
+            ohlcv = fetchOhlcv(code)
             if isEmptyDf(ohlcv):
                 continue
             closes = ohlcv.get_column("close").to_list()
@@ -183,7 +183,7 @@ def calcScreen(*, market: str = "KR", preset: str = "quality", stockCode: str | 
     if preset == "dividend":
         return _screen_dividend(result, market, stockCode)
 
-    lf = load_scan_parquet("finance", market)
+    lf = loadScanParquet("finance", market)
     if lf is None:
         return {**result, "error": "finance.parquet 없음"}
 
@@ -292,7 +292,7 @@ def calcScreen(*, market: str = "KR", preset: str = "quality", stockCode: str | 
 
 
 def _screen_dividend(result: dict, market: str, stockCode: str | None) -> dict:
-    lf = load_scan_parquet("dividend", market)
+    lf = loadScanParquet("dividend", market)
     if lf is None:
         return {**result, "error": "dividend.parquet 없음"}
     try:

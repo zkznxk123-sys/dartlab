@@ -114,7 +114,7 @@ def patch_market_data(monkeypatch):
                     return flow_df if flow_df is not None else pl.DataFrame()
                 raise ValueError(f"unknown axis: {axis}")
 
-        monkeypatch.setattr(_mc_mod, "fetch_ohlcv", _fake_fetch_ohlcv)
+        monkeypatch.setattr(_mc_mod, "fetchOhlcv", _fake_fetch_ohlcv)
         monkeypatch.setattr(_benchmark_mod, "fetch_benchmark_ohlcv", _fake_fetch_benchmark)
         monkeypatch.setattr(_gather_entry, "GatherEntry", lambda: _FakeGather())
         return stock_df, bm_df, macro_df, flow_df
@@ -234,7 +234,7 @@ class TestCalcMarketContext:
     def test_no_data_returns_error(self, monkeypatch):
         from dartlab.quant.marketContext import calcMarketContext
 
-        monkeypatch.setattr("dartlab.quant.marketContext.fetch_ohlcv", lambda code, **kw: None)
+        monkeypatch.setattr("dartlab.quant.marketContext.fetchOhlcv", lambda code, **kw: None)
         r = calcMarketContext("FAIL", market="KR")
         assert "error" in r
 

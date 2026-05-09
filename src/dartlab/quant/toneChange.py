@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import load_changes_for_stock, resolve_market
+from dartlab.quant._helpers import loadChangesForStock, resolve_market
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ def calcToneChange(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
-    changes = load_changes_for_stock(stockCode)
+    changes = loadChangesForStock(stockCode)
     if isEmptyDf(changes):
         return {**result, "error": "changes 데이터 없음"}
 

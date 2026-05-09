@@ -25,7 +25,7 @@ import logging
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant._helpers import extract_account, load_scan_parquet
+from dartlab.quant._helpers import extractAccount, loadScanParquet
 from dartlab.quant.factorBuild import _fetch_year_end_marketcaps, _latest_year
 
 log = logging.getLogger(__name__)
@@ -111,7 +111,7 @@ def calcAltmanFactor(
         - Z < 1.81 이어도 회생 케이스 있음 — 단일 지표 판정 금지, Piotroski/Beneish 교차.
     """
     try:
-        lf = load_scan_parquet("finance", market)
+        lf = loadScanParquet("finance", market)
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())
@@ -140,14 +140,14 @@ def calcAltmanFactor(
         if not isinstance(code, str) or stock.is_empty():
             continue
 
-        ta = extract_account(stock, "total_assets")
-        tl = extract_account(stock, "total_liabilities")
-        ca = extract_account(stock, "current_assets")
-        cl = extract_account(stock, "current_liabilities")
-        re = extract_account(stock, "retained_earnings")
-        op = extract_account(stock, "operating_profit")
-        sales = extract_account(stock, "sales")
-        eq = extract_account(stock, "total_equity")
+        ta = extractAccount(stock, "total_assets")
+        tl = extractAccount(stock, "total_liabilities")
+        ca = extractAccount(stock, "current_assets")
+        cl = extractAccount(stock, "current_liabilities")
+        re = extractAccount(stock, "retained_earnings")
+        op = extractAccount(stock, "operating_profit")
+        sales = extractAccount(stock, "sales")
+        eq = extractAccount(stock, "total_equity")
         mc = market_caps.get(code)
 
         if not ta or ta <= 0 or not tl or tl <= 0:

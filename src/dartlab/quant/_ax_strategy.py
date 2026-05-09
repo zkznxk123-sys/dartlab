@@ -18,7 +18,7 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
 from dartlab.quant.strategy.backtest import (
     BacktestResult,
     multi_asset_backtest,
@@ -30,19 +30,19 @@ from dartlab.quant.strategy.backtest import (
 )
 from dartlab.quant.strategy.presets import (
     STYLE_REGISTRY,
-    list_styles,
-    resolve_style,
+    listStyles,
+    resolveStyle,
 )
 from dartlab.quant.strategy.rule import Rule
 
 
 @dataclass
 class _StubCompany:
-    """fetch_ohlcv 에 종목코드만 전달하는 임시 wrapper.
+    """fetchOhlcv 에 종목코드만 전달하는 임시 wrapper.
 
     runStrategy 등이 stockCode 만 받기 때문에, 스타일 build 가 요구하는
     company.stockCode 인터페이스를 흉내낸다.
-    `_strategy_start` 속성으로 styles/_common.get_arrays 가 장기 OHLCV 가져옴.
+    `_strategy_start` 속성으로 styles/_common.getArrays 가 장기 OHLCV 가져옴.
     """
 
     stockCode: str
@@ -75,15 +75,15 @@ class EntryVerdict:
 def _arrays(stockCode: str, *, start: str | None = None) -> dict:
     """OHLCV 가져오기. start='2020-01-01' 같이 명시하면 장기 데이터."""
     kwargs = {"start": start} if start else {}
-    df = fetch_ohlcv(stockCode, **kwargs)
+    df = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(df):
         return {}
-    return ohlcv_to_arrays(df)
+    return ohlcvToArrays(df)
 
 
 def _build_rule_from_style(style_name: str, stockCode: str, *, start: str | None = None) -> Rule | BacktestResult:
     """스타일명 → Rule 또는 NotApplicable sentinel."""
-    key = resolve_style(style_name)
+    key = resolveStyle(style_name)
     reg = STYLE_REGISTRY()
     if key not in reg:
         return BacktestResult(
@@ -194,7 +194,7 @@ def runBacktest(
 
     # KR-only 사전 체크 (OHLCV fetch 전) — _build_rule_from_style 이 NotApplicable 반환
     if isinstance(style, str):
-        key = resolve_style(style)
+        key = resolveStyle(style)
         if key in {"flowFollow", "seasonalKR"} and resolve_market(stockCode, "auto") != "KR":
             return BacktestResult.not_applicable(
                 style=key,
@@ -214,7 +214,7 @@ def runBacktest(
         if isinstance(result, BacktestResult):
             return result  # NotApplicable 또는 error sentinel
         rule = result
-        style_name = resolve_style(style)
+        style_name = resolveStyle(style)
 
     # Phase 4 R4 — flowFollow 등 데이터 부족 시 data_limited sentinel
     if rule.meta.get("error") == "data_limited":
@@ -260,7 +260,7 @@ def runStyle(
     """
     if stockCode is None:
         # 카탈로그 가이드 모드
-        return pl.DataFrame(list_styles())
+        return pl.DataFrame(listStyles())
 
     name = name or "all"
     start = kwargs.get("start")
@@ -306,7 +306,7 @@ def runEntry(
     last_price = float(close[-1])
     last_date_str = dates[-1].strftime("%Y-%m-%d") if dates else None
 
-    keys = list(STYLE_REGISTRY().keys()) if style == "all" else [resolve_style(style)]
+    keys = list(STYLE_REGISTRY().keys()) if style == "all" else [resolveStyle(style)]
     out: dict[str, EntryVerdict] = {}
     start = kwargs.get("start")
     for key in keys:
@@ -376,7 +376,7 @@ def runMultiAsset(
     if not style:
         return BacktestResult(status="error", reason="style= required", style=None)
 
-    key = resolve_style(style)
+    key = resolveStyle(style)
     reg = STYLE_REGISTRY()
     if key not in reg:
         return BacktestResult(status="error", reason=f"unknown style: {style}", style=None)

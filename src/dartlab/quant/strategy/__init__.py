@@ -28,13 +28,13 @@ from .metrics import (
     exposure,
     mdd,
     pbo,
-    profit_factor,
+    profitFactor,
     sharpe,
     sortino,
     turnover,
     winrate,
 )
-from .presets import STYLE_KR_ONLY, STYLE_REGISTRY, resolve_style
+from .presets import STYLE_KR_ONLY, STYLE_REGISTRY, resolveStyle
 from .rule import Rule
 from .signal import Signal
 
@@ -48,13 +48,13 @@ __all__ = [
     "multi_asset_backtest",
     "STYLE_REGISTRY",
     "STYLE_KR_ONLY",
-    "resolve_style",
+    "resolveStyle",
     # metrics
     "sharpe",
     "sortino",
     "mdd",
     "winrate",
-    "profit_factor",
+    "profitFactor",
     "expectancy",
     "turnover",
     "exposure",

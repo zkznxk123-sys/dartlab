@@ -18,7 +18,7 @@ import logging
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant._helpers import extract_account, load_scan_parquet, resolve_market
+from dartlab.quant._helpers import extractAccount, loadScanParquet, resolve_market
 
 log = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         result["info"] = "금융업은 부채 구조가 사업 본질이라 일반 quality 산식 부적절"
         return result
 
-    lf = load_scan_parquet("finance", market)
+    lf = loadScanParquet("finance", market)
     if lf is None:
         return {**result, "error": "finance.parquet 없음"}
 
@@ -133,12 +133,12 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         result["year"] = str(yr)
         if stock.is_empty():
             return {**result, "error": f"{yr} 데이터 없음"}
-    sales = extract_account(stock, "sales")
-    op = extract_account(stock, "operating_profit")
-    ni = extract_account(stock, "net_income")
-    assets = extract_account(stock, "total_assets")
-    debt = extract_account(stock, "total_liabilities")
-    equity = extract_account(stock, "total_equity")
+    sales = extractAccount(stock, "sales")
+    op = extractAccount(stock, "operating_profit")
+    ni = extractAccount(stock, "net_income")
+    assets = extractAccount(stock, "total_assets")
+    debt = extractAccount(stock, "total_liabilities")
+    equity = extractAccount(stock, "total_equity")
 
     metrics: dict = {}
     if sales and sales > 0 and op is not None:
@@ -216,12 +216,12 @@ def _build_universe_metrics(snap_yr: pl.DataFrame) -> dict[str, list[float]]:
         if _is_financial(code):
             continue
         stock = snap_yr.filter(pl.col("stockCode") == code)
-        sales = extract_account(stock, "sales")
-        op = extract_account(stock, "operating_profit")
-        ni = extract_account(stock, "net_income")
-        assets = extract_account(stock, "total_assets")
-        debt = extract_account(stock, "total_liabilities")
-        equity = extract_account(stock, "total_equity")
+        sales = extractAccount(stock, "sales")
+        op = extractAccount(stock, "operating_profit")
+        ni = extractAccount(stock, "net_income")
+        assets = extractAccount(stock, "total_assets")
+        debt = extractAccount(stock, "total_liabilities")
+        equity = extractAccount(stock, "total_equity")
 
         if sales and sales > 0 and op is not None:
             result["operatingMargin"].append(op / sales * 100)

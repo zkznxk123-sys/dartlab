@@ -39,7 +39,7 @@ import numpy as np
 
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
-from dartlab.quant.strategy.styles._common import get_arrays
+from dartlab.quant.strategy.styles._common import getArrays
 from dartlab.quant.tailrisk import _tailriskSeries
 from dartlab.quant.volatility import _volatilitySeries
 
@@ -67,7 +67,7 @@ def build(
         mdd_z_entry: rolling MDD self z-score 진입 임계 (높을수록 더 안정 시점)
         mdd_z_exit: 청산 임계
     """
-    arr = get_arrays(company)
+    arr = getArrays(company)
     close = arr.get("close")
     if close is None or len(close) < 252:
         n = len(close) if close is not None else 0

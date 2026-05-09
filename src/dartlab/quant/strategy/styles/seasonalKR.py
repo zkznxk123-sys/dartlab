@@ -27,21 +27,21 @@ day 4~24 (TOM 외 구간) → 청산. stop 없음.
 - Ariel (1987) 원조 monthly seasonality 발견
 
 [관련 dartlab 축]
-_helpers.tom_mask (KR 캘린더 SSOT)
+_helpers.tomMask (KR 캘린더 SSOT)
 
 [복제 + 수정 예시]
-    rule = tom_mask(dates)
-    Rule(rule, ~tom_mask(dates))
+    rule = tomMask(dates)
+    Rule(rule, ~tomMask(dates))
 """
 
 from __future__ import annotations
 
 import numpy as np
 
-from dartlab.quant._helpers import tom_mask
+from dartlab.quant._helpers import tomMask
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
-from dartlab.quant.strategy.styles._common import get_arrays, is_kr
+from dartlab.quant.strategy.styles._common import getArrays, isKr
 
 
 def build(company):
@@ -50,7 +50,7 @@ def build(company):
     Returns:
         Rule (KR) 또는 BacktestResult.not_applicable (US)
     """
-    if not is_kr(company):
+    if not isKr(company):
         from dartlab.quant.strategy.backtest import BacktestResult
 
         return BacktestResult.not_applicable(
@@ -58,7 +58,7 @@ def build(company):
             reason="KR-only: Korean calendar TOM effect (KOSPI/KOSDAQ specific)",
         )
 
-    arr = get_arrays(company)
+    arr = getArrays(company)
     dates = arr.get("date")
     close = arr.get("close")
     if dates is None or close is None or len(dates) < 60:
@@ -69,7 +69,7 @@ def build(company):
             meta={"style": "seasonalKR", "error": "insufficient data"},
         )
 
-    tom = tom_mask(dates)
+    tom = tomMask(dates)
 
     s = Signal()
     s.add("tom", tom)

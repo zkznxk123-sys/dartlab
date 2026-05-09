@@ -51,7 +51,7 @@ import numpy as np
 from dartlab.quant.flowAnalysis import calcFlow
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
-from dartlab.quant.strategy.styles._common import get_arrays, is_kr, stock_code
+from dartlab.quant.strategy.styles._common import getArrays, getStockCode, isKr
 
 
 def build(company, *, atr_k: float = 3.0):
@@ -61,7 +61,7 @@ def build(company, *, atr_k: float = 3.0):
         Rule (KR) 또는 BacktestResult.not_applicable (US)
     """
     # KR-only 방어
-    if not is_kr(company):
+    if not isKr(company):
         from dartlab.quant.strategy.backtest import BacktestResult
 
         return BacktestResult.not_applicable(
@@ -69,7 +69,7 @@ def build(company, *, atr_k: float = 3.0):
             reason="KR-only: foreign/institutional flow data not available for US",
         )
 
-    arr = get_arrays(company)
+    arr = getArrays(company)
     close = arr.get("close")
     dates = arr.get("date")
     if close is None or dates is None or len(close) < 60:
@@ -80,7 +80,7 @@ def build(company, *, atr_k: float = 3.0):
             meta={"style": "flowFollow", "error": "insufficient data"},
         )
 
-    code = stock_code(company)
+    code = getStockCode(company)
     fl = calcFlow(code, series=True)
     series = fl.get("_series") or {}
     flow_dates = series.get("date", [])

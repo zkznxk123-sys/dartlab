@@ -31,7 +31,7 @@ import logging
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_ohlcv, load_shares_outstanding, resolve_market
+from dartlab.quant._helpers import fetchOhlcv, loadSharesOutstanding, resolve_market
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ def _stockSharesSeries(stockCode: str, market: str) -> pl.DataFrame | None:
 
         데이터 없거나 파싱 실패 시 None.
     """
-    lf = load_shares_outstanding(market)
+    lf = loadSharesOutstanding(market)
     if lf is None:
         return None
     try:
@@ -151,7 +151,7 @@ def marketCap(
         ).sort("date")
 
     # US — 기존 sharesOutstanding × close 합성 (EDGAR XBRL)
-    px = fetch_ohlcv(stockCode)
+    px = fetchOhlcv(stockCode)
     if px is None or not isinstance(px, pl.DataFrame) or px.is_empty():
         log.warning("marketCap: 주가 없음 %s", stockCode)
         return None

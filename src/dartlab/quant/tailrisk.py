@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
 
 
 def _tailriskSeries(close: np.ndarray, window: int = 252) -> dict:
@@ -51,11 +51,11 @@ def calcTailrisk(
         - annualReturn = mean(daily log return) × 252 (산술평균 연환산, CAGR 아님)
     """
     market = resolve_market(stockCode, market)
-    ohlcv = fetch_ohlcv(stockCode, **kwargs)
+    ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음"}
 
-    arr = ohlcv_to_arrays(ohlcv)
+    arr = ohlcvToArrays(ohlcv)
     if "close" not in arr or len(arr["close"]) < 30:
         return {"error": f"{stockCode} 데이터 부족 (최소 30일 필요)"}
 

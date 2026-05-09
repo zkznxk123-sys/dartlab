@@ -16,7 +16,7 @@ US (EDGAR): 시총 데이터 미수집 → fallback book-equity proxy 유지.
 1. `_build_universe_metrics` — DART finance.parquet 단년도 펀더멘털 + KRX 연도말 시총 (`marketCapAll`)
 2. `_quintile_portfolios` — 5분위 상위/하위 (각 ~20%)
 3. `_portfolio_returns` — 동일가중 일별 log return
-4. `build_factors` — SMB/HML/RMW/CMA 시계열
+4. `buildFactors` — SMB/HML/RMW/CMA 시계열
 
 빌드된 시계열은 캐시되며, factor.py 의 decomposeFactor 가 회귀 입력으로 사용한다.
 calcFactorTearSheet 도 이걸 IC/ICIR/분위 평가에 사용.
@@ -32,10 +32,10 @@ import polars as pl
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.quant._helpers import (
-    extract_account,
-    fetch_ohlcv,
-    load_scan_parquet,
-    ohlcv_to_arrays,
+    extractAccount,
+    fetchOhlcv,
+    loadScanParquet,
+    ohlcvToArrays,
 )
 
 log = logging.getLogger(__name__)
@@ -101,7 +101,7 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
         - bookToMarket: equity / marketCap (진짜 BM, 시총 있을 때만)
         - bookRatio: equity / assets (자본구조 — fallback 용)
     """
-    lf = load_scan_parquet("finance", market)
+    lf = loadScanParquet("finance", market)
     if lf is None:
         return {}
 
@@ -137,9 +137,9 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
         if not isinstance(code, str) or stock.is_empty():
             continue
 
-        equity = extract_account(stock, "total_equity")
-        assets = extract_account(stock, "total_assets")
-        ni = extract_account(stock, "net_income")
+        equity = extractAccount(stock, "total_equity")
+        assets = extractAccount(stock, "total_assets")
+        ni = extractAccount(stock, "net_income")
         if not equity or not assets or equity <= 0 or assets <= 0:
             continue
 
@@ -149,7 +149,7 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
         asset_growth = None
         prev_stock = prev_parts.get(code_key)
         if prev_stock is not None and not prev_stock.is_empty():
-            prev_assets = extract_account(prev_stock, "total_assets")
+            prev_assets = extractAccount(prev_stock, "total_assets")
             if prev_assets and prev_assets > 0:
                 asset_growth = (assets - prev_assets) / prev_assets
 
@@ -191,7 +191,7 @@ def _portfolio_returns(codes: list[str], market: str, year: str, max_n: int = 30
     KR (Phase B0 정정): `_hfBulk.loadFiltered` 직접 사용 (Yahoo 우회 + 빠름).
     한 번에 종목 리스트 long fetch 후 group_by — 메모리 안전 + 1 query.
 
-    US: 기존 fetch_ohlcv (Yahoo) 유지.
+    US: 기존 fetchOhlcv (Yahoo) 유지.
 
     캐시: (market, year, hash(codes))
     """
@@ -226,15 +226,15 @@ def _portfolio_returns(codes: list[str], market: str, year: str, max_n: int = 30
             _PORTFOLIO_CACHE[key] = None
             return None
     else:
-        # US: 기존 fetch_ohlcv (Yahoo) 유지
+        # US: 기존 fetchOhlcv (Yahoo) 유지
         for c in codes[:max_n]:
             try:
-                o = fetch_ohlcv(c)
+                o = fetchOhlcv(c)
             except (ValueError, KeyError, OSError, AttributeError, RuntimeError):
                 continue
             if isEmptyDf(o):
                 continue
-            cl = ohlcv_to_arrays(o).get("close")
+            cl = ohlcvToArrays(o).get("close")
             if cl is None or len(cl) < 60:
                 continue
             rets.append(np.diff(np.log(cl)))
@@ -249,7 +249,7 @@ def _portfolio_returns(codes: list[str], market: str, year: str, max_n: int = 30
     return avg
 
 
-def build_factors(market: str = "KR") -> dict | None:
+def buildFactors(market: str = "KR") -> dict | None:
     """진짜 횡단면 SMB/HML/RMW/CMA 시계열 빌드 (캐시됨).
 
     Returns:
@@ -261,7 +261,7 @@ def build_factors(market: str = "KR") -> dict | None:
     if cache_key in _FACTOR_CACHE:
         return _FACTOR_CACHE[cache_key]
 
-    lf = load_scan_parquet("finance", market)
+    lf = loadScanParquet("finance", market)
     if lf is None:
         return None
     snap = extractAnnualConsolidated(lf.collect())
@@ -338,3 +338,9 @@ def build_factors(market: str = "KR") -> dict | None:
     }
     _FACTOR_CACHE[cache_key] = result
     return result
+
+
+# ── Deprecated snake_case aliases ────────────────────────
+from dartlab.quant._helpers import _deprecatedAlias as _dep
+
+build_factors = _dep(buildFactors, "build_factors")

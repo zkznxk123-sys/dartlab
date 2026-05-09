@@ -15,7 +15,7 @@ from __future__ import annotations
 import numpy as np
 
 
-def kelly_fraction(win_prob: float, win_loss_ratio: float, *, fraction: float = 1.0) -> float:
+def kellyFraction(win_prob: float, win_loss_ratio: float, *, fraction: float = 1.0) -> float:
     """Kelly criterion — 베팅 비율.
 
     f* = (p × b - (1-p)) / b
@@ -36,7 +36,7 @@ def kelly_fraction(win_prob: float, win_loss_ratio: float, *, fraction: float = 
     return float(max(0.0, min(1.0, full * fraction)))
 
 
-def kelly_continuous(mean_return: float, variance: float) -> float:
+def kellyContinuous(mean_return: float, variance: float) -> float:
     """연속 Kelly — μ/σ² (정규분포 가정).
 
     Thorp (2006), MacLean & Ziemba 등. log-utility maximizer.
@@ -53,7 +53,7 @@ def kelly_continuous(mean_return: float, variance: float) -> float:
     return float(max(0.0, mean_return / variance))
 
 
-def inverse_volatility_weights(volatilities: np.ndarray) -> np.ndarray:
+def inverseVolatilityWeights(volatilities: np.ndarray) -> np.ndarray:
     """역변동성 가중 — w_i ∝ 1/σ_i, 합=1.
 
     Maillard 2010 IVP. 가장 단순한 risk parity 베이스라인.
@@ -66,7 +66,7 @@ def inverse_volatility_weights(volatilities: np.ndarray) -> np.ndarray:
     return inv / s
 
 
-def volatility_target_leverage(
+def volatilityTargetLeverage(
     realized_vol: float,
     target_vol: float = 0.10,
     max_leverage: float = 3.0,
@@ -90,7 +90,7 @@ def volatility_target_leverage(
     return float(max(0.0, min(max_leverage, lev)))
 
 
-def sharpe_based_size(sharpe: float, target_sharpe: float = 1.0, *, cap: float = 1.0) -> float:
+def sharpeBasedSize(sharpe: float, target_sharpe: float = 1.0, *, cap: float = 1.0) -> float:
     """샤프비율 기반 단순 사이징 — sharpe / target_sharpe로 비율 결정.
 
     sharpe ≥ target → cap, 음수 → 0.
@@ -100,7 +100,7 @@ def sharpe_based_size(sharpe: float, target_sharpe: float = 1.0, *, cap: float =
     return float(min(cap, sharpe / max(target_sharpe, 1e-12) * cap))
 
 
-def risk_budget_leverage(
+def riskBudgetLeverage(
     portfolio_vol: float,
     risk_budget: float,
     max_leverage: float = 2.0,
@@ -112,3 +112,14 @@ def risk_budget_leverage(
     if portfolio_vol <= 0:
         return 0.0
     return float(max(0.0, min(max_leverage, risk_budget / portfolio_vol)))
+
+
+# ── Deprecated snake_case aliases ────────────────────────
+from dartlab.quant._helpers import _deprecatedAlias as _dep
+
+kelly_fraction = _dep(kellyFraction, "kelly_fraction")
+kelly_continuous = _dep(kellyContinuous, "kelly_continuous")
+inverse_volatility_weights = _dep(inverseVolatilityWeights, "inverse_volatility_weights")
+volatility_target_leverage = _dep(volatilityTargetLeverage, "volatility_target_leverage")
+sharpe_based_size = _dep(sharpeBasedSize, "sharpe_based_size")
+risk_budget_leverage = _dep(riskBudgetLeverage, "risk_budget_leverage")

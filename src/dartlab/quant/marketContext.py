@@ -24,7 +24,7 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
 
 _KR_MACRO_DEFAULT = ("USDKRW", "BASE_RATE", "CPI", "M2")
 _US_MACRO_DEFAULT = ("FEDFUNDS", "DGS10", "DCOILWTICO", "CPIAUCSL")
@@ -216,7 +216,7 @@ def calcMarketContext(
         거시 변수 명시. None 이면 KR 기본 ``("USDKRW", "BASE_RATE", "CPI", "M2")`` /
         US 기본 ``("FEDFUNDS", "DGS10", "DCOILWTICO", "CPIAUCSL")``.
     **kwargs
-        ``fetch_ohlcv`` 전달 (start, end 등).
+        ``fetchOhlcv`` 전달 (start, end 등).
 
     Returns
     -------
@@ -263,11 +263,11 @@ def calcMarketContext(
     market = resolve_market(stockCode, market)
 
     # 1. 종목 OHLCV
-    ohlcv = fetch_ohlcv(stockCode, **kwargs)
+    ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음", "stockCode": stockCode, "market": market}
 
-    arr = ohlcv_to_arrays(ohlcv)
+    arr = ohlcvToArrays(ohlcv)
     close = arr.get("close")
     dates = arr.get("date")
     if close is None or len(close) < 60:

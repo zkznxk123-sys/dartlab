@@ -20,7 +20,7 @@ from __future__ import annotations
 import numpy as np
 
 
-def brinson_attribution(
+def brinsonAttribution(
     portfolio_weights: np.ndarray,
     benchmark_weights: np.ndarray,
     portfolio_returns: np.ndarray,
@@ -83,7 +83,7 @@ def brinson_attribution(
     }
 
 
-def timing_effect(
+def timingEffect(
     weights_history: np.ndarray,
     returns_history: np.ndarray,
     avg_weights: np.ndarray,
@@ -104,3 +104,10 @@ def timing_effect(
     deviation = W - avg
     contribution = np.sum(deviation * R, axis=1)
     return float(contribution.sum())
+
+
+# ── Deprecated snake_case aliases ────────────────────────
+from dartlab.quant._helpers import _deprecatedAlias as _dep
+
+brinson_attribution = _dep(brinsonAttribution, "brinson_attribution")
+timing_effect = _dep(timingEffect, "timing_effect")

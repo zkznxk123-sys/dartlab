@@ -186,7 +186,7 @@ def winrate(trade_pnls: np.ndarray) -> float:
     return float(np.sum(p > 0) / len(p))
 
 
-def profit_factor(trade_pnls: np.ndarray) -> float:
+def profitFactor(trade_pnls: np.ndarray) -> float:
     """총 수익 / 총 손실 비율.
 
     Parameters
@@ -349,7 +349,7 @@ def pbo(in_sample: np.ndarray, out_of_sample: np.ndarray) -> float:
 # ── CPCV split 생성 (Lopez AFML) ────────────────────────────────────────────
 
 
-def cpcv_splits(n_obs: int, n_splits: int = 6, n_test: int = 2, embargo: int = 0):
+def cpcvSplits(n_obs: int, n_splits: int = 6, n_test: int = 2, embargo: int = 0):
     """Combinatorial Purged Cross-Validation 인덱스 분할.
 
     n_splits 그룹으로 나누고, n_test 개 그룹을 test 로 선택하는 모든 조합.
@@ -631,3 +631,10 @@ def impliedIRFromICDistribution(icSeries: np.ndarray, breadth: int) -> dict:
         "realizedICIR": real_icir,
         "efficiency": eff,
     }
+
+
+# ── Deprecated snake_case aliases ────────────────────────
+from dartlab.quant._helpers import _deprecatedAlias as _dep
+
+profit_factor = _dep(profitFactor, "profit_factor")
+cpcv_splits = _dep(cpcvSplits, "cpcv_splits")

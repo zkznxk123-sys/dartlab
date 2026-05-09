@@ -23,7 +23,7 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant._helpers import extract_account, load_scan_parquet
+from dartlab.quant._helpers import extractAccount, loadScanParquet
 from dartlab.quant.factorBuild import _latest_year
 
 log = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ def calcEarningsSurprise(
         dict — market / year / prevYear / universe / scores / topPos / topNeg / interpretation
     """
     try:
-        lf = load_scan_parquet("finance", market)
+        lf = loadScanParquet("finance", market)
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())
@@ -88,8 +88,8 @@ def calcEarningsSurprise(
         s_prev = prev_parts.get(code_key)
         if s_prev is None or s_prev.is_empty():
             continue
-        ni = extract_account(s_cur, "net_income")
-        ni_p = extract_account(s_prev, "net_income")
+        ni = extractAccount(s_cur, "net_income")
+        ni_p = extractAccount(s_prev, "net_income")
         if ni is None or ni_p is None or abs(ni_p) < 1:
             continue
         growth = (ni - ni_p) / abs(ni_p)

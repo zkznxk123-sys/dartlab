@@ -26,10 +26,10 @@ import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import (
-    extract_account,
-    fetch_ohlcv,
-    load_scan_parquet,
-    ohlcv_to_arrays,
+    extractAccount,
+    fetchOhlcv,
+    loadScanParquet,
+    ohlcvToArrays,
     resolve_market,
 )
 from dartlab.quant.qualityFactor import _is_financial
@@ -73,7 +73,7 @@ def _build_universe(market: str, year: str) -> dict[str, list[float]]:
     if cache_key in _UNIVERSE_CACHE:
         return _UNIVERSE_CACHE[cache_key]
 
-    lf = load_scan_parquet("finance", market)
+    lf = loadScanParquet("finance", market)
     if lf is None:
         return {}
     annual = extractAnnualConsolidated(lf.collect())
@@ -102,10 +102,10 @@ def _build_universe(market: str, year: str) -> dict[str, list[float]]:
         if _is_financial(code):
             continue
         stock = snap.filter(pl.col("stockCode") == code)
-        equity = extract_account(stock, "total_equity")
-        assets = extract_account(stock, "total_assets")
-        ni = extract_account(stock, "net_income")
-        sales = extract_account(stock, "sales")
+        equity = extractAccount(stock, "total_equity")
+        assets = extractAccount(stock, "total_assets")
+        ni = extractAccount(stock, "net_income")
+        sales = extractAccount(stock, "sales")
         if not equity or equity <= 0:
             continue
         if ni is not None:
@@ -164,7 +164,7 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         result["info"] = "금융업은 일반 가치 산식 부적절"
         return result
 
-    lf = load_scan_parquet("finance", market)
+    lf = loadScanParquet("finance", market)
     if lf is None:
         return {**result, "error": "finance.parquet 없음"}
 
@@ -200,10 +200,10 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         if stock.is_empty():
             return {**result, "error": f"{yr} 데이터 없음"}
 
-    equity = extract_account(stock, "total_equity")
-    assets = extract_account(stock, "total_assets")
-    ni = extract_account(stock, "net_income")
-    sales = extract_account(stock, "sales")
+    equity = extractAccount(stock, "total_equity")
+    assets = extractAccount(stock, "total_assets")
+    ni = extractAccount(stock, "net_income")
+    sales = extractAccount(stock, "sales")
 
     if not equity or equity <= 0:
         return {**result, "error": "자본총계 없음"}
@@ -236,9 +236,9 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
 
     # 가격 참고
     try:
-        ohlcv = fetch_ohlcv(stockCode)
+        ohlcv = fetchOhlcv(stockCode)
         if ohlcv is not None and not ohlcv.is_empty():
-            arr = ohlcv_to_arrays(ohlcv)
+            arr = ohlcvToArrays(ohlcv)
             if "close" in arr and len(arr["close"]) > 0:
                 components["latestPrice"] = round(float(arr["close"][-1]), 2)
     except (ValueError, KeyError, OSError, AttributeError, IndexError):

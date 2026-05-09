@@ -40,7 +40,7 @@ import numpy as np
 from dartlab.gather.indicators import vdonchian, vobv
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
-from dartlab.quant.strategy.styles._common import get_arrays
+from dartlab.quant.strategy.styles._common import getArrays
 
 
 def build(
@@ -65,7 +65,7 @@ def build(
         exit_period: 청산 채널 기간 (Turtle 10일, S1)
         atr_k: ATR stop 배수 (Turtle 2N)
     """
-    arr = get_arrays(company)
+    arr = getArrays(company)
     close = arr.get("close")
     high = arr.get("high")
     low = arr.get("low")

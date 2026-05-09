@@ -8,7 +8,7 @@ from __future__ import annotations
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
 
 
 def _cpDetect1DayPatterns(
@@ -159,11 +159,11 @@ def calcPattern(stockCode: str, *, market: str = "auto", lookback: int = 20, **k
         patternVerdict : str — "bullish"/"bearish"/"neutral"/"no_pattern"
     """
     market = resolve_market(stockCode, market)
-    ohlcv = fetch_ohlcv(stockCode, **kwargs)
+    ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음"}
 
-    arr = ohlcv_to_arrays(ohlcv)
+    arr = ohlcvToArrays(ohlcv)
     o = arr.get("open")
     h = arr.get("high")
     lo = arr.get("low")

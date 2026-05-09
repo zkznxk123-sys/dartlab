@@ -13,7 +13,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
 from dartlab.quant.pattern import _find_pivots
 
 
@@ -539,11 +539,11 @@ def calcChartPatterns(stockCode: str, *, market: str = "auto", **kwargs) -> dict
             name, label, formedAt, confidence, direction, targetPrice, description 포함.
     """
     market = resolve_market(stockCode, market)
-    ohlcv = fetch_ohlcv(stockCode, **kwargs)
+    ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음"}
 
-    arr = ohlcv_to_arrays(ohlcv)
+    arr = ohlcvToArrays(ohlcv)
     h = arr.get("high")
     lo = arr.get("low")
     c = arr.get("close")

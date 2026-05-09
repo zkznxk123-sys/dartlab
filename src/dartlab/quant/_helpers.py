@@ -25,7 +25,7 @@ STOCK_CODE_COLUMNS: tuple[str, ...] = ("stockCode", "종목코드", "stock_code"
 # ── OHLCV fetch ──────────────────────────────────────────
 
 
-def fetch_ohlcv(stockCode: str, **kwargs: Any):
+def fetchOhlcv(stockCode: str, **kwargs: Any):
     """gather("price")로 OHLCV 수집 — 실패 시 None.
 
     Parameters
@@ -55,7 +55,7 @@ def fetch_ohlcv(stockCode: str, **kwargs: Any):
         return None
 
 
-def fetch_benchmark(market: str = "KR", **kwargs: Any):
+def fetchBenchmark(market: str = "KR", **kwargs: Any):
     """벤치마크 OHLCV 수집 — KR=KRX 지수, US=S&P500.
 
     Parameters
@@ -103,7 +103,7 @@ def _scan_data_root() -> Path:
     return Path(_getDataRoot())
 
 
-def load_scan_parquet(name: str, market: str = "KR"):
+def loadScanParquet(name: str, market: str = "KR"):
     """scan 프리빌드 parquet lazy scan 로드.
 
     Args:
@@ -132,7 +132,7 @@ def load_scan_parquet(name: str, market: str = "KR"):
     return pl.scan_parquet(path)
 
 
-def load_shares_outstanding(market: str = "KR"):
+def loadSharesOutstanding(market: str = "KR"):
     """발행주식수 프리빌드 LazyFrame 로드.
 
     KR: data/dart/scan/sharesOutstanding.parquet (보통주/우선주 분리)
@@ -161,7 +161,7 @@ def load_shares_outstanding(market: str = "KR"):
     return pl.scan_parquet(path)
 
 
-def load_docs_for_stock(stockCode: str):
+def loadDocsForStock(stockCode: str):
     """단일 종목 docs parquet 로드.
 
     Returns:
@@ -178,7 +178,7 @@ def load_docs_for_stock(stockCode: str):
     return pl.read_parquet(path)
 
 
-def load_changes_for_stock(stockCode: str):
+def loadChangesForStock(stockCode: str):
     """changes.parquet에서 단일 종목 필터링.
 
     Returns:
@@ -203,7 +203,7 @@ def load_changes_for_stock(stockCode: str):
 # ── scan parquet에서 종목 백분위 계산 ────────────────────
 
 
-def stock_percentile(lf, stockCode: str, col: str, stock_col: str = "stockCode", reverse: bool = False):
+def stockPercentile(lf, stockCode: str, col: str, stock_col: str = "stockCode", reverse: bool = False):
     """scan lazy frame에서 특정 종목의 컬럼 백분위를 계산.
 
     Args:
@@ -251,7 +251,7 @@ def stock_percentile(lf, stockCode: str, col: str, stock_col: str = "stockCode",
         return None, None
 
 
-def load_allfilings_for_stock(stockCode: str, *, lookback_days: int | None = None):
+def loadAllfilingsForStock(stockCode: str, *, lookback_days: int | None = None):
     """allFilings parquet 에서 단일 종목 데이터 로드.
 
     `data/dart/allFilings/*.parquet` 일자별 전종목 파일에서 stock_code 로 필터.
@@ -408,7 +408,7 @@ _ACCOUNT_SJ: dict[str, list[str]] = {
 }
 
 
-def extract_account(df, key: str) -> float | None:
+def extractAccount(df, key: str) -> float | None:
     """단일 종목/단일 기간 DataFrame에서 표준 계정 추출 — DART/EDGAR 자동 분기.
 
     Args:
@@ -468,7 +468,7 @@ def extract_account(df, key: str) -> float | None:
     return None
 
 
-def extract_accounts(df, keys: list[str]) -> dict[str, float | None]:
+def extractAccounts(df, keys: list[str]) -> dict[str, float | None]:
     """여러 표준 계정 일괄 추출 — DART finance.parquet 용.
 
     Parameters
@@ -489,11 +489,11 @@ def extract_accounts(df, keys: list[str]) -> dict[str, float | None]:
 
     Examples
     --------
-    >>> extract_accounts(df, ["sales", "net_income"])"""
-    return {k: extract_account(df, k) for k in keys}
+    >>> extractAccounts(df, ["sales", "net_income"])"""
+    return {k: extractAccount(df, k) for k in keys}
 
 
-def ohlcv_to_arrays(df):
+def ohlcvToArrays(df):
     """Polars OHLCV DataFrame → numpy 배열 dict.
 
     Returns:
@@ -519,7 +519,7 @@ def ohlcv_to_arrays(df):
 # ── Strategy DSL 공용 헬퍼 (Phase B) ──────────────────────────────────────────
 
 
-def tom_mask(dates) -> "Any":
+def tomMask(dates) -> "Any":
     """Turn-of-the-Month boolean mask — KR 캘린더 시즌신호.
 
     KOSDAQ 에서 학술 검증된 월말 3거래일 + 월초 3거래일 효과를 boolean 시계열로 반환.
@@ -546,7 +546,7 @@ def extractSignalSeries(arr: dict, fn, *, key: str | None = None, **kwargs):
     공용 헬퍼. 다른 위치에 비슷한 wrapper 만들지 말 것.
 
     Args:
-        arr: ohlcv_to_arrays() 결과 dict (close/high/low/volume/date 포함)
+        arr: ohlcvToArrays() 결과 dict (close/high/low/volume/date 포함)
         fn: signals.py / indicators.py 의 v* 함수 (입력 시그니처 자동 감지)
         key: 결과 컬럼 명. None 이면 fn.__name__
         **kwargs: fn 에 전달할 추가 인자
@@ -569,3 +569,40 @@ def extractSignalSeries(arr: dict, fn, *, key: str | None = None, **kwargs):
             break  # 나머지는 kwargs 로 전달
     out = fn(*inputs, **kwargs)
     return {key or fn.__name__: out}
+
+
+# ── Deprecated snake_case aliases ────────────────────────
+# canonical 은 camelCase. snake_case 호출자는 0.10 이후 제거 예정 (operation.code.md
+# "snake_case shim 유지" 룰). DeprecationWarning 발생.
+
+import warnings as _warnings
+
+
+def _deprecatedAlias(newFn, oldName: str):
+    """snake_case alias factory — DeprecationWarning + 새 함수에 *args/**kwargs 통과."""
+
+    def _wrapper(*args, **kwargs):
+        _warnings.warn(
+            f"dartlab.quant._helpers.{oldName} 은 deprecated. {newFn.__name__} 을 사용하세요.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return newFn(*args, **kwargs)
+
+    _wrapper.__name__ = oldName
+    _wrapper.__doc__ = f"DEPRECATED — use {newFn.__name__}."
+    return _wrapper
+
+
+fetch_ohlcv = _deprecatedAlias(fetchOhlcv, "fetch_ohlcv")
+fetch_benchmark = _deprecatedAlias(fetchBenchmark, "fetch_benchmark")
+load_scan_parquet = _deprecatedAlias(loadScanParquet, "load_scan_parquet")
+load_shares_outstanding = _deprecatedAlias(loadSharesOutstanding, "load_shares_outstanding")
+load_docs_for_stock = _deprecatedAlias(loadDocsForStock, "load_docs_for_stock")
+load_changes_for_stock = _deprecatedAlias(loadChangesForStock, "load_changes_for_stock")
+load_allfilings_for_stock = _deprecatedAlias(loadAllfilingsForStock, "load_allfilings_for_stock")
+stock_percentile = _deprecatedAlias(stockPercentile, "stock_percentile")
+extract_account = _deprecatedAlias(extractAccount, "extract_account")
+extract_accounts = _deprecatedAlias(extractAccounts, "extract_accounts")
+ohlcv_to_arrays = _deprecatedAlias(ohlcvToArrays, "ohlcv_to_arrays")
+tom_mask = _deprecatedAlias(tomMask, "tom_mask")

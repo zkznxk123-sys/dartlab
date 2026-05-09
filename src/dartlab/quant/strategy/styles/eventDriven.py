@@ -44,7 +44,7 @@ from dartlab.gather.indicators import vsma
 from dartlab.quant.eventSignal import calcEventSignal
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
-from dartlab.quant.strategy.styles._common import get_arrays, stock_code
+from dartlab.quant.strategy.styles._common import getArrays, getStockCode
 
 
 def _date_to_filing_flag(dates: list, filing_date_strs: list[str], window: int = 20) -> np.ndarray:
@@ -98,7 +98,7 @@ def build(company, *, hold_window: int = 20, atr_k: float = 3.0) -> Rule:
         entry = filing_flag & above_sma5, exit = 보유기간 경과.
         allFilings 없으면 빈 룰 (entry/exit 전부 False).
     """
-    arr = get_arrays(company)
+    arr = getArrays(company)
     close = arr.get("close")
     dates = arr.get("date")
     if close is None or dates is None or len(close) < 60:
@@ -110,7 +110,7 @@ def build(company, *, hold_window: int = 20, atr_k: float = 3.0) -> Rule:
         )
 
     # eventSignal 시계열 추출
-    code = stock_code(company)
+    code = getStockCode(company)
     ev = calcEventSignal(code, series=True)
     series = ev.get("_series") or {}
     high_impact_dates = series.get("high_impact_dates", [])

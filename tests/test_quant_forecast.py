@@ -3,7 +3,7 @@
 합성 시계열 (uptrend, downtrend, sideways) 으로 4 모델 (Naive · AR(1) · ETS-Holt · Theta)
 + ADF + Conformal interval + dispatch 룰을 검증한다.
 
-fetch_ohlcv 는 monkeypatch 로 mocking — 외부 네트워크 의존 0.
+fetchOhlcv 는 monkeypatch 로 mocking — 외부 네트워크 의존 0.
 """
 
 from __future__ import annotations
@@ -68,7 +68,7 @@ def _make_ohlcv_df(close: np.ndarray) -> pl.DataFrame:
 
 @pytest.fixture
 def patch_fetch_ohlcv(monkeypatch):
-    """fetch_ohlcv 를 합성 시계열로 대체하는 fixture factory."""
+    """fetchOhlcv 를 합성 시계열로 대체하는 fixture factory."""
 
     def _patcher(close: np.ndarray):
         df = _make_ohlcv_df(close)
@@ -76,7 +76,7 @@ def patch_fetch_ohlcv(monkeypatch):
         def _fake_fetch(stockCode, **kwargs):
             return df
 
-        monkeypatch.setattr("dartlab.quant.forecast.fetch_ohlcv", _fake_fetch)
+        monkeypatch.setattr("dartlab.quant.forecast.fetchOhlcv", _fake_fetch)
         return df
 
     return _patcher
@@ -292,7 +292,7 @@ class TestForecastReturns:
     def test_no_data_returns_error(self, monkeypatch):
         from dartlab.quant.forecast import forecastReturns
 
-        monkeypatch.setattr("dartlab.quant.forecast.fetch_ohlcv", lambda code, **kw: None)
+        monkeypatch.setattr("dartlab.quant.forecast.fetchOhlcv", lambda code, **kw: None)
         r = forecastReturns("FAIL", market="KR", horizon=5)
         assert "error" in r
 

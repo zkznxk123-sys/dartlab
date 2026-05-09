@@ -21,7 +21,7 @@ import logging
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant._helpers import extract_account, load_scan_parquet
+from dartlab.quant._helpers import extractAccount, loadScanParquet
 from dartlab.quant.factorBuild import _latest_year
 
 log = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ def calcAccrualsFactor(
             interpretation : str
     """
     try:
-        lf = load_scan_parquet("finance", market)
+        lf = loadScanParquet("finance", market)
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())
@@ -92,9 +92,9 @@ def calcAccrualsFactor(
         code = code_key[0] if isinstance(code_key, tuple) else code_key
         if not isinstance(code, str) or stock.is_empty():
             continue
-        ni = extract_account(stock, "net_income")
-        ocf = extract_account(stock, "operating_cf")
-        ta = extract_account(stock, "total_assets")
+        ni = extractAccount(stock, "net_income")
+        ocf = extractAccount(stock, "operating_cf")
+        ta = extractAccount(stock, "total_assets")
         if ni is None or ocf is None or not ta or ta <= 0:
             continue
         accrual = ((ni - ocf) / ta) * 100

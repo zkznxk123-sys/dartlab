@@ -9,10 +9,10 @@ from __future__ import annotations
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
 
 
-def get_arrays(company, *, start: str | None = None) -> dict:
+def getArrays(company, *, start: str | None = None) -> dict:
     """Company 객체에서 OHLCV → numpy dict 변환.
 
     Args:
@@ -27,19 +27,19 @@ def get_arrays(company, *, start: str | None = None) -> dict:
         return {}
     # company 객체에 _strategy_start 속성 있으면 그것도 사용 (옵션)
     s = start or getattr(company, "_strategy_start", None)
-    df = fetch_ohlcv(code, **({"start": s} if s else {}))
+    df = fetchOhlcv(code, **({"start": s} if s else {}))
     if isEmptyDf(df):
         return {}
-    return ohlcv_to_arrays(df)
+    return ohlcvToArrays(df)
 
 
-def is_kr(company) -> bool:
+def isKr(company) -> bool:
     """KR 시장 여부."""
     code = getattr(company, "stockCode", None) or getattr(company, "stock_code", "")
     return resolve_market(code, "auto") == "KR"
 
 
-def stock_code(company) -> str:
+def getStockCode(company) -> str:
     """Company 객체에서 종목코드 추출.
 
     Parameters
@@ -55,9 +55,18 @@ def stock_code(company) -> str:
     return getattr(company, "stockCode", None) or getattr(company, "stock_code", "")
 
 
-def safe_quantile(arr: np.ndarray, q: float) -> float:
+def safeQuantile(arr: np.ndarray, q: float) -> float:
     """NaN-safe quantile."""
     a = arr[~np.isnan(arr)]
     if len(a) < 10:
         return float("nan")
     return float(np.quantile(a, q))
+
+
+# ── Deprecated snake_case aliases ────────────────────────
+from dartlab.quant._helpers import _deprecatedAlias as _dep
+
+get_arrays = _dep(getArrays, "get_arrays")
+is_kr = _dep(isKr, "is_kr")
+stock_code = _dep(getStockCode, "stock_code")
+safe_quantile = _dep(safeQuantile, "safe_quantile")

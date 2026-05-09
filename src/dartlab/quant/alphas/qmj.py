@@ -26,7 +26,7 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant._helpers import extract_account, load_scan_parquet
+from dartlab.quant._helpers import extractAccount, loadScanParquet
 from dartlab.quant.factorBuild import _latest_year
 
 log = logging.getLogger(__name__)
@@ -64,7 +64,7 @@ def calcQMJ(
         dict — market / year / universe / scores / components / topQuality / topJunk / interpretation
     """
     try:
-        lf = load_scan_parquet("finance", market)
+        lf = loadScanParquet("finance", market)
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())
@@ -89,11 +89,11 @@ def calcQMJ(
         code = code_key[0] if isinstance(code_key, tuple) else code_key
         if not isinstance(code, str) or stock.is_empty():
             continue
-        ni = extract_account(stock, "net_income")
-        eq = extract_account(stock, "total_equity")
-        ta = extract_account(stock, "total_assets")
-        tl = extract_account(stock, "total_liabilities")
-        ocf = extract_account(stock, "operating_cf")
+        ni = extractAccount(stock, "net_income")
+        eq = extractAccount(stock, "total_equity")
+        ta = extractAccount(stock, "total_assets")
+        tl = extractAccount(stock, "total_liabilities")
+        ocf = extractAccount(stock, "operating_cf")
         if not ta or ta <= 0 or not eq or eq <= 0 or tl is None:
             continue
         roe = ni / eq if ni is not None else None

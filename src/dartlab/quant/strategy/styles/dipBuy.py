@@ -38,7 +38,7 @@ from dartlab.gather.indicators import vema, vrsi
 from dartlab.quant.regime import _regimeSeries
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
-from dartlab.quant.strategy.styles._common import get_arrays
+from dartlab.quant.strategy.styles._common import getArrays
 
 
 def build(company, *, ema_period: int = 50, rsi_low: float = 50, rsi_high: float = 65, atr_k: float = 2.0) -> Rule:
@@ -51,7 +51,7 @@ def build(company, *, ema_period: int = 50, rsi_low: float = 50, rsi_high: float
     불가능 (bull&above_ema 시 RSI 최소 42.5 ~ 중앙값 59). RSI<50 이 학술적으로 정확.
     RSI 30 oversold 는 추세 종료 의미 — meanReversion 룰의 영역.
     """
-    arr = get_arrays(company)
+    arr = getArrays(company)
     close = arr.get("close")
     if close is None or len(close) < 100:
         n = len(close) if close is not None else 0

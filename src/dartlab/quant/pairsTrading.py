@@ -10,7 +10,7 @@ import logging
 import numpy as np
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, getAccountValue, isEdgarSchema
-from dartlab.quant._helpers import fetch_ohlcv, load_scan_parquet, ohlcv_to_arrays
+from dartlab.quant._helpers import fetchOhlcv, loadScanParquet, ohlcvToArrays
 
 log = logging.getLogger(__name__)
 
@@ -58,9 +58,9 @@ def calcPairs(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> 
     # OHLCV 수집 (순차, 메모리 안전)
     prices: dict[str, np.ndarray] = {}
     for code in top_codes:
-        ohlcv = fetch_ohlcv(code)
+        ohlcv = fetchOhlcv(code)
         if ohlcv is not None and not ohlcv.is_empty():
-            arr = ohlcv_to_arrays(ohlcv)
+            arr = ohlcvToArrays(ohlcv)
             if "close" in arr and len(arr["close"]) >= 60:
                 prices[code] = np.log(arr["close"])
 
@@ -152,7 +152,7 @@ def _get_top_stocks(market: str, n: int = 5) -> list[str]:
     """finance.parquet에서 자산 상위 N종목 — scanBridge 경유."""
     import polars as pl
 
-    lf = load_scan_parquet("finance", market)
+    lf = loadScanParquet("finance", market)
     if lf is None:
         return []
 

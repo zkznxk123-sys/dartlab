@@ -123,7 +123,7 @@ def loadFiltered(
           (events 데이터 미구축 단계엔 자동으로 raw + warning, 호출자 시그니처 불변)
 
     AIContext:
-        - quant/_helpers.py::fetch_ohlcv 가 이 함수를 호출 (사용자 키 안 봄)
+        - quant/_helpers.py::fetchOhlcv 가 이 함수를 호출 (사용자 키 안 봄)
         - 결과 재현성 보장 — 모든 사용자가 동일 HF snapshot 으로 동일 결과
         - 데이터셋 publish 전이면 빈 DataFrame + 로그 (ValueError 던지지 않음)
         - 수정주가 = `gather/_adjustPrice.applyAdjustment` 단일 SSOT 호출

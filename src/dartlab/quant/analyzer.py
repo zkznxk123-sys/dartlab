@@ -580,7 +580,7 @@ def _categoryEdgeAudit(
     """
     import math
 
-    from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays
+    from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays
 
     cat_fn = {
         "trend": _categoryTrend,
@@ -595,10 +595,10 @@ def _categoryEdgeAudit(
     baseline_returns: dict[int, list[float]] = {h: [] for h in horizons}
 
     for code in stockCodes:
-        ohlcv = fetch_ohlcv(code, start="2014-01-01")
+        ohlcv = fetchOhlcv(code, start="2014-01-01")
         if isEmptyDf(ohlcv):
             continue
-        arr = ohlcv_to_arrays(ohlcv)
+        arr = ohlcvToArrays(ohlcv)
         close = arr.get("close")
         high = arr.get("high")
         low = arr.get("low")

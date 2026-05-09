@@ -47,7 +47,7 @@ from dartlab.quant.momentum import _momentumSeries
 from dartlab.quant.signals import vmacdSignal
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
-from dartlab.quant.strategy.styles._common import get_arrays
+from dartlab.quant.strategy.styles._common import getArrays
 
 
 def build(
@@ -73,7 +73,7 @@ def build(
         atr_k: ATR Chandelier exit 배수
         use_macd_filter: MACD 추가 필터 (기본 True)
     """
-    arr = get_arrays(company)
+    arr = getArrays(company)
     close = arr.get("close")
     if close is None or len(close) < 252:
         n = len(close) if close is not None else 0

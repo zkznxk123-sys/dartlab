@@ -18,7 +18,7 @@ from __future__ import annotations
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
 
 _VALID_MODELS = ("naive", "ar1", "etsHolt", "theta")
 
@@ -306,7 +306,7 @@ def forecastReturns(
     alpha : float
         prediction interval 유의수준 (기본 0.10 → 90% coverage).
     **kwargs
-        ``fetch_ohlcv`` 전달 인자 (``start``, ``end`` 등).
+        ``fetchOhlcv`` 전달 인자 (``start``, ``end`` 등).
 
     Returns
     -------
@@ -357,11 +357,11 @@ def forecastReturns(
     - 의존성 0 (numpy 만). statsmodels / scipy / sklearn import 금지.
     """
     market = resolve_market(stockCode, market)
-    ohlcv = fetch_ohlcv(stockCode, **kwargs)
+    ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음", "stockCode": stockCode, "market": market}
 
-    arr = ohlcv_to_arrays(ohlcv)
+    arr = ohlcvToArrays(ohlcv)
     close = arr.get("close")
     if close is None or len(close) < 30:
         return {

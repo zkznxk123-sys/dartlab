@@ -15,7 +15,7 @@ from dartlab.core.cross.scanBridge import (
     getAccountValue,
     isEdgarSchema,
 )
-from dartlab.quant._helpers import load_scan_parquet
+from dartlab.quant._helpers import loadScanParquet
 from dartlab.quant.strategy.metrics import pearsonCorr, spearmanCorr
 
 log = logging.getLogger(__name__)
@@ -188,7 +188,7 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
     """
     result: dict = {"market": market}
 
-    lf = load_scan_parquet("finance", market)
+    lf = loadScanParquet("finance", market)
     if lf is None:
         return {**result, "error": "finance.parquet 없음"}
 

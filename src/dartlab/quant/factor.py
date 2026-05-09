@@ -10,7 +10,7 @@
   Residual Risk Decomposition: 이 파일 하단 (quant 엔진 내부).
 
 데이터 흐름:
-1. factorBuild.build_factors(market) — scan finance.parquet에서 5분위 포트폴리오
+1. factorBuild.buildFactors(market) — scan finance.parquet에서 5분위 포트폴리오
    구성, 동일가중 평균 일별 log return → SMB/HML/RMW/CMA 시계열
 2. decomposeFactor — 단일 종목 vs (MKT + 빌드된 팩터) 다변수 OLS
 
@@ -31,7 +31,7 @@ from typing import Any
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
 from dartlab.quant.strategy.metrics import TRADING_DAYS, calcIR, fundamentalLawIR
 
 log = logging.getLogger(__name__)
@@ -53,10 +53,10 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
     benchmark = kwargs.pop("benchmark", None)
     benchmarkMode = kwargs.pop("benchmarkMode", "market")
 
-    ohlcv = fetch_ohlcv(stockCode, **kwargs)
+    ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음"}
-    arr = ohlcv_to_arrays(ohlcv)
+    arr = ohlcvToArrays(ohlcv)
     close = arr.get("close")
     if close is None or len(close) < 60:
         return {"error": f"{stockCode} 데이터 부족 (최소 60일)"}
@@ -75,16 +75,16 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
     )
     if isEmptyDf(bench):
         return {"error": "벤치마크 데이터 없음"}
-    bench_close = ohlcv_to_arrays(bench).get("close")
+    bench_close = ohlcvToArrays(bench).get("close")
     if bench_close is None:
         return {"error": "벤치마크 close 없음"}
     bench_ret = np.diff(np.log(bench_close))
 
     # 진짜 횡단면 팩터 시계열 빌드/로드
     if market == "KR":
-        from dartlab.quant.factorBuild import build_factors
+        from dartlab.quant.factorBuild import buildFactors
 
-        factors = build_factors(market)
+        factors = buildFactors(market)
     else:
         factors = None  # US는 후순위
 
@@ -182,7 +182,7 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
     return result
 
 
-def factor_exposure_limits(loadings: dict, *, limits: dict | None = None) -> dict:
+def factorExposureLimits(loadings: dict, *, limits: dict | None = None) -> dict:
     """팩터 익스포저 한도 체크 (책 7장 — 팩터 리스크 관리).
 
     Args:
@@ -218,11 +218,11 @@ def factor_exposure_limits(loadings: dict, *, limits: dict | None = None) -> dic
     return {"limits": limits, "breaches": breaches, "compliant": len(breaches) == 0}
 
 
-def hedge_ratio(target_loading: float, hedge_loading: float) -> float:
+def hedgeRatio(target_loading: float, hedge_loading: float) -> float:
     """단일 팩터 헤지비율 — target / hedge.
 
     예: 포트의 SMB loading +0.8을 헤지하려면 SMB-vehicle의 SMB loading이
-    +1.0인 경우 hedge_ratio = -0.8 (포트 1당 hedge -0.8).
+    +1.0인 경우 hedgeRatio = -0.8 (포트 1당 hedge -0.8).
     """
     if hedge_loading == 0:
         return 0.0
@@ -462,7 +462,7 @@ def calcFactorTearSheet(
 
     Capabilities:
         - 4 표준 Fama-French 팩터 (smb / hml / rmw / cma) 의 정량 평가 metric
-        - Long-short 일별 시계열 (factorBuild.build_factors) 기반
+        - Long-short 일별 시계열 (factorBuild.buildFactors) 기반
         - 연환산 수익 / 변동성 / Sharpe / 누적수익 / Win Rate / Max Drawdown
         - 실/proxy 구분 (isRealFamaFrench) 노출 — KRX 시총 직접 vs book proxy
 
@@ -478,7 +478,7 @@ def calcFactorTearSheet(
         - "investment 팩터" → calcFactorTearSheet("cma")
 
     SeeAlso:
-        - factorBuild.build_factors : SMB/HML/RMW/CMA 시계열 빌드
+        - factorBuild.buildFactors : SMB/HML/RMW/CMA 시계열 빌드
         - decomposeFactor : 단일 종목 FF5 회귀 (loadings)
         - calcStrategySnapshot : 8 검증 스타일 백테스트
 
@@ -518,15 +518,15 @@ def calcFactorTearSheet(
           (현재는 long-short 기반 단순 metric — 후속 강화).
         - Sharpe 는 risk-free 0 가정 (한국 시장 단기 RF 무시).
         - Max Drawdown 은 누적 (1+r) 시계열의 peak-to-trough.
-        - factorBuild.build_factors() 가 캐시 → 같은 세션 재호출 빠름.
+        - factorBuild.buildFactors() 가 캐시 → 같은 세션 재호출 빠름.
     """
     fname = factorName.lower().strip()
     if fname not in {"smb", "hml", "rmw", "cma"}:
         raise ValueError(f"factorName 알 수 없음: {factorName!r} — 허용: smb, hml, rmw, cma")
 
-    from dartlab.quant.factorBuild import build_factors
+    from dartlab.quant.factorBuild import buildFactors
 
-    fb = build_factors(market)
+    fb = buildFactors(market)
     if fb is None:
         return None
     arr = fb.get(fname)
@@ -621,7 +621,7 @@ def calcMultiFactorRisk(stockCode: str, *, market: str = "auto") -> dict | None:
 
     SeeAlso:
         - decomposeFactor : 종목의 팩터 loadings (B)
-        - factorBuild.build_factors : SMB/HML/RMW/CMA 시계열 (Σ_f 원료)
+        - factorBuild.buildFactors : SMB/HML/RMW/CMA 시계열 (Σ_f 원료)
         - calcFactorTearSheet : 팩터별 long-short Sharpe 평가
 
     Args:
@@ -655,10 +655,10 @@ def calcMultiFactorRisk(stockCode: str, *, market: str = "auto") -> dict | None:
     if not decomp or "error" in decomp:
         return decomp
 
-    from dartlab.quant.factorBuild import build_factors
+    from dartlab.quant.factorBuild import buildFactors
 
     actual_market = decomp.get("market", market)
-    fb = build_factors(actual_market)
+    fb = buildFactors(actual_market)
     if fb is None:
         return None
 
@@ -745,7 +745,7 @@ def calcFactorTearSheetAll(*, market: str = "KR") -> dict | None:
     """4 표준 팩터 (SMB/HML/RMW/CMA) 의 tear sheet 종합 — story 시장분석 섹션 자동 사용.
 
     Capabilities:
-        - 4 팩터 동시 평가 (한 번 build_factors 호출 후 4개 metric)
+        - 4 팩터 동시 평가 (한 번 buildFactors 호출 후 4개 metric)
         - 각 팩터의 Sharpe 비교 → 한국 시장 강한 alpha 원천 즉시 식별
         - story 의 ``factorTearSheetBlock`` 가 직접 호출
 
@@ -878,14 +878,14 @@ def calcFactorIC(
     try:
         from dartlab.core.cross.scanBridge import extractAnnualConsolidated
         from dartlab.gather._hfBulk import loadFiltered
-        from dartlab.quant._helpers import load_scan_parquet
+        from dartlab.quant._helpers import loadScanParquet
         from dartlab.quant.factorBuild import _build_universe_metrics, _latest_year
     except Exception as exc:  # noqa: BLE001
         log.warning("calcFactorIC import 실패: %s", type(exc).__name__)
         return None
 
     try:
-        lf = load_scan_parquet("finance", market)
+        lf = loadScanParquet("finance", market)
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())
@@ -1075,3 +1075,10 @@ def calcFactorICAll(*, market: str = "KR", horizon: int = 5) -> dict | None:
             f"(ICIR={strongest.get('icir')}, {strongest.get('interpretation')})"
         ),
     }
+
+
+# ── Deprecated snake_case aliases ────────────────────────
+from dartlab.quant._helpers import _deprecatedAlias as _dep
+
+factor_exposure_limits = _dep(factorExposureLimits, "factor_exposure_limits")
+hedge_ratio = _dep(hedgeRatio, "hedge_ratio")

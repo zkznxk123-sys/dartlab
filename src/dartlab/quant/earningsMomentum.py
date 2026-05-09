@@ -11,7 +11,7 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant._helpers import load_scan_parquet, resolve_market
+from dartlab.quant._helpers import loadScanParquet, resolve_market
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ def calcEarnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
-    lf = load_scan_parquet("finance", market)
+    lf = loadScanParquet("finance", market)
     if lf is None:
         return {**result, "error": "finance.parquet 없음"}
     try:

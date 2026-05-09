@@ -29,7 +29,7 @@ import logging
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant._helpers import extract_account, load_scan_parquet
+from dartlab.quant._helpers import extractAccount, loadScanParquet
 from dartlab.quant.factorBuild import _latest_year
 
 log = logging.getLogger(__name__)
@@ -43,17 +43,17 @@ def _safeDiv(num: float | None, den: float | None) -> float | None:
 
 def _scoreOne(cur: pl.DataFrame, prev: pl.DataFrame | None) -> dict | None:
     """단일 종목의 9 신호 평가 → dict(components, total)."""
-    ta = extract_account(cur, "total_assets")
+    ta = extractAccount(cur, "total_assets")
     if not ta or ta <= 0:
         return None
-    ni = extract_account(cur, "net_income")
-    ocf = extract_account(cur, "operating_cf")
-    tl = extract_account(cur, "total_liabilities")
-    ca = extract_account(cur, "current_assets")
-    cl = extract_account(cur, "current_liabilities")
-    gp = extract_account(cur, "gross_profit")
-    sales = extract_account(cur, "sales")
-    eq = extract_account(cur, "total_equity")
+    ni = extractAccount(cur, "net_income")
+    ocf = extractAccount(cur, "operating_cf")
+    tl = extractAccount(cur, "total_liabilities")
+    ca = extractAccount(cur, "current_assets")
+    cl = extractAccount(cur, "current_liabilities")
+    gp = extractAccount(cur, "gross_profit")
+    sales = extractAccount(cur, "sales")
+    eq = extractAccount(cur, "total_equity")
 
     components: dict[str, bool] = {}
     roa = _safeDiv(ni, ta)
@@ -71,15 +71,15 @@ def _scoreOne(cur: pl.DataFrame, prev: pl.DataFrame | None) -> dict | None:
     sales_prev = None
     eq_prev = None
     if prev is not None and not prev.is_empty():
-        ta_prev = extract_account(prev, "total_assets")
-        ni_prev = extract_account(prev, "net_income")
-        ocf_prev = extract_account(prev, "operating_cf")
-        tl_prev = extract_account(prev, "total_liabilities")
-        ca_prev = extract_account(prev, "current_assets")
-        cl_prev = extract_account(prev, "current_liabilities")
-        gp_prev = extract_account(prev, "gross_profit")
-        sales_prev = extract_account(prev, "sales")
-        eq_prev = extract_account(prev, "total_equity")
+        ta_prev = extractAccount(prev, "total_assets")
+        ni_prev = extractAccount(prev, "net_income")
+        ocf_prev = extractAccount(prev, "operating_cf")
+        tl_prev = extractAccount(prev, "total_liabilities")
+        ca_prev = extractAccount(prev, "current_assets")
+        cl_prev = extractAccount(prev, "current_liabilities")
+        gp_prev = extractAccount(prev, "gross_profit")
+        sales_prev = extractAccount(prev, "sales")
+        eq_prev = extractAccount(prev, "total_equity")
 
     roa_prev = _safeDiv(ni_prev, ta_prev)
     components["roaIncreasing"] = bool(roa is not None and roa_prev is not None and roa > roa_prev)
@@ -174,7 +174,7 @@ def calcPiotroskiFactor(
         - 2년 연속 동일 F ≥ 8 stream = hedge fund 장기 롱 후보.
     """
     try:
-        lf = load_scan_parquet("finance", market)
+        lf = loadScanParquet("finance", market)
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())

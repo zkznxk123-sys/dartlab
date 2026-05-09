@@ -29,7 +29,7 @@ import logging
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant._helpers import extract_account, load_scan_parquet
+from dartlab.quant._helpers import extractAccount, loadScanParquet
 from dartlab.quant.factorBuild import _latest_year
 
 log = logging.getLogger(__name__)
@@ -44,25 +44,25 @@ def _safeDiv(num: float | None, den: float | None) -> float | None:
 def _computeM(cur: pl.DataFrame, prev: pl.DataFrame) -> float | None:
     """단일 종목의 Beneish M. prev 없으면 None (변수 대부분이 비율 변화 필요)."""
     # 현재
-    ta = extract_account(cur, "total_assets")
-    ca = extract_account(cur, "current_assets")
-    tl = extract_account(cur, "total_liabilities")
-    ar = extract_account(cur, "accounts_receivable")
-    sales = extract_account(cur, "sales")
-    gp = extract_account(cur, "gross_profit")
-    dep = extract_account(cur, "depreciation")
-    sga = extract_account(cur, "selling_admin")
-    ni = extract_account(cur, "net_income")
-    ocf = extract_account(cur, "operating_cf")
+    ta = extractAccount(cur, "total_assets")
+    ca = extractAccount(cur, "current_assets")
+    tl = extractAccount(cur, "total_liabilities")
+    ar = extractAccount(cur, "accounts_receivable")
+    sales = extractAccount(cur, "sales")
+    gp = extractAccount(cur, "gross_profit")
+    dep = extractAccount(cur, "depreciation")
+    sga = extractAccount(cur, "selling_admin")
+    ni = extractAccount(cur, "net_income")
+    ocf = extractAccount(cur, "operating_cf")
     # 전년
-    ta_p = extract_account(prev, "total_assets")
-    ca_p = extract_account(prev, "current_assets")
-    tl_p = extract_account(prev, "total_liabilities")
-    ar_p = extract_account(prev, "accounts_receivable")
-    sales_p = extract_account(prev, "sales")
-    gp_p = extract_account(prev, "gross_profit")
-    dep_p = extract_account(prev, "depreciation")
-    sga_p = extract_account(prev, "selling_admin")
+    ta_p = extractAccount(prev, "total_assets")
+    ca_p = extractAccount(prev, "current_assets")
+    tl_p = extractAccount(prev, "total_liabilities")
+    ar_p = extractAccount(prev, "accounts_receivable")
+    sales_p = extractAccount(prev, "sales")
+    gp_p = extractAccount(prev, "gross_profit")
+    dep_p = extractAccount(prev, "depreciation")
+    sga_p = extractAccount(prev, "selling_admin")
 
     if not ta or ta <= 0 or not sales or sales <= 0:
         return None
@@ -172,7 +172,7 @@ def calcBeneishFactor(
         - 단일 연도 M 만 신호 아님 — 2~3년 연속 red flag 가 실제 risk.
     """
     try:
-        lf = load_scan_parquet("finance", market)
+        lf = loadScanParquet("finance", market)
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())

@@ -78,7 +78,7 @@ def STYLE_REGISTRY() -> dict[str, Callable[..., Any]]:  # noqa: N802
     return _REGISTRY_CACHE
 
 
-def resolve_style(name: str) -> str:
+def resolveStyle(name: str) -> str:
     """한글/영문 alias → 정규 스타일 키 변환.
 
     Parameters
@@ -102,7 +102,7 @@ def resolve_style(name: str) -> str:
     return s
 
 
-def list_styles() -> list[dict]:
+def listStyles() -> list[dict]:
     """가이드 카탈로그 — c.quant("style") (인자 없이) 반환용.
 
     Returns
@@ -127,3 +127,10 @@ def list_styles() -> list[dict]:
             }
         )
     return items
+
+
+# ── Deprecated snake_case aliases ────────────────────────
+from dartlab.quant._helpers import _deprecatedAlias as _dep
+
+resolve_style = _dep(resolveStyle, "resolve_style")
+list_styles = _dep(listStyles, "list_styles")

@@ -27,7 +27,7 @@ from dartlab.quant.strategy.backtest import (
     BacktestResult,
     multi_asset_backtest,
 )
-from dartlab.quant.strategy.presets import STYLE_REGISTRY, resolve_style
+from dartlab.quant.strategy.presets import STYLE_REGISTRY, resolveStyle
 from dartlab.quant.strategy.rule import Rule
 
 # 하위호환 — 외부에서 _STOCK_CODE_CANDIDATES 직접 참조하던 코드 보존 (SSOT 는 STOCK_CODE_COLUMNS)
@@ -70,9 +70,9 @@ def _hashScanResult(df: pl.DataFrame, top_n: int) -> str:
 def _ruleFromStyle(style_key: str) -> Callable[[Any], Rule]:
     """style 문자열 → STYLE_REGISTRY 의 build 함수.
 
-    ``resolve_style`` 로 한글/영문 alias 처리. 미등록 시 KeyError.
+    ``resolveStyle`` 로 한글/영문 alias 처리. 미등록 시 KeyError.
     """
-    canonical = resolve_style(style_key)
+    canonical = resolveStyle(style_key)
     registry = STYLE_REGISTRY()
     if canonical not in registry:
         msg = f"미등록 style: '{style_key}'. 후보: {list(registry.keys())}"
@@ -86,7 +86,7 @@ def _ruleFromSignalFn(signalFn: Callable[[np.ndarray], np.ndarray]) -> Callable[
     signalFn 은 종목별 close 시계열을 받아 길이 N 의 boolean 배열 (True=long position) 을
     반환. exit 은 entry 의 보수적 끝점 (entry False 가 첫 등장하는 시점) 으로 자동 산출.
     """
-    from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays
+    from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays
 
     def _empty(n: int) -> Rule:
         return Rule(
@@ -98,10 +98,10 @@ def _ruleFromSignalFn(signalFn: Callable[[np.ndarray], np.ndarray]) -> Callable[
         code = getattr(company_stub, "stockCode", None)
         if code is None:
             return _empty(0)
-        ohlcv = fetch_ohlcv(code)
+        ohlcv = fetchOhlcv(code)
         if isEmptyDf(ohlcv):
             return _empty(0)
-        arr = ohlcv_to_arrays(ohlcv)
+        arr = ohlcvToArrays(ohlcv)
         close = arr.get("close")
         if close is None or len(close) < 30:
             return _empty(0)
@@ -222,7 +222,7 @@ def runScanBacktest(
         signal_source = "signalFn"
     else:
         rule_builder = _ruleFromStyle(style)  # type: ignore[arg-type]
-        signal_source = f"style:{resolve_style(style or '')}"
+        signal_source = f"style:{resolveStyle(style or '')}"
 
     bt = multi_asset_backtest(
         codes,

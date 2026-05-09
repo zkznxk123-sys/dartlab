@@ -24,13 +24,13 @@ import polars as pl
 from dartlab.core.polarsUtil import isEmptyDf
 
 from .metrics import (
-    cpcv_splits,
+    cpcvSplits,
     dsr,
     expectancy,
     exposure,
     mdd,
     pbo,
-    profit_factor,
+    profitFactor,
     sharpe,
     sortino,
     turnover,
@@ -62,7 +62,7 @@ class BacktestResult:
     sortino: float = 0.0
     mdd: float = 0.0
     winrate: float = 0.0
-    profit_factor: float = 0.0
+    profitFactor: float = 0.0
     expectancy: float = 0.0
     turnover: float = 0.0
     exposure: float = 0.0
@@ -296,7 +296,7 @@ def vector_backtest(
     so = sortino(daily_ret)
     md = mdd(equity)
     wr = winrate(pnls)
-    pf = profit_factor(pnls)
+    pf = profitFactor(pnls)
     ex = expectancy(pnls)
     to = turnover(pos.astype(np.float64))
     expo = exposure(pos.astype(np.float64))
@@ -315,7 +315,7 @@ def vector_backtest(
         sortino=so,
         mdd=md,
         winrate=wr,
-        profit_factor=pf,
+        profitFactor=pf,
         expectancy=ex,
         turnover=to,
         exposure=expo,
@@ -575,7 +575,7 @@ def multi_asset_backtest(
     """
     from dataclasses import dataclass
 
-    from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays
+    from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays
 
     if not stock_codes:
         return BacktestResult(status="error", reason="empty stock_codes", style=style)
@@ -590,10 +590,10 @@ def multi_asset_backtest(
     min_len = float("inf")
 
     for code in stock_codes:
-        ohlcv = fetch_ohlcv(code)
+        ohlcv = fetchOhlcv(code)
         if isEmptyDf(ohlcv):
             continue
-        arr = ohlcv_to_arrays(ohlcv)
+        arr = ohlcvToArrays(ohlcv)
         if "close" not in arr or len(arr["close"]) < 60:
             continue
         rule = rule_builder(_Stub(stockCode=code))
@@ -725,7 +725,7 @@ def cpcv(
     fold_sharpes: list[float] = []
     fold_returns: list[np.ndarray] = []
 
-    for train_idx, test_idx in cpcv_splits(n, n_splits, n_test, embargo):
+    for train_idx, test_idx in cpcvSplits(n, n_splits, n_test, embargo):
         if len(test_idx) < 30:
             continue
         sub_close = close[test_idx]

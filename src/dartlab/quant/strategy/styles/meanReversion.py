@@ -40,7 +40,7 @@ import numpy as np
 from dartlab.gather.indicators import vrsi
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
-from dartlab.quant.strategy.styles._common import get_arrays
+from dartlab.quant.strategy.styles._common import getArrays
 from dartlab.quant.volatility import _volatilitySeries
 
 
@@ -89,7 +89,7 @@ def build(
         rsi_confirm: RSI 추가 확인 임계 (false signal 감소)
         atr_k: ATR stop 배수
     """
-    arr = get_arrays(company)
+    arr = getArrays(company)
     close = arr.get("close")
     if close is None or len(close) < z_window + 20:
         n = len(close) if close is not None else 0

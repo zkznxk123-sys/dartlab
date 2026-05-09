@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_ohlcv
+from dartlab.quant._helpers import fetchOhlcv
 
 
 class _OHLCVWrapper:
@@ -23,7 +23,7 @@ class _OHLCVWrapper:
 
 def _get_ohlcv(stockCode: str, **kwargs):
     """OHLCV fetch + 검증."""
-    ohlcv = fetch_ohlcv(stockCode, **kwargs)
+    ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return None, {"error": f"{stockCode} 주가 데이터 없음"}
     return ohlcv, None
@@ -40,7 +40,7 @@ def calcIndicators(stockCode: str, **kwargs: Any) -> Any:
     stockCode : str
         종목코드 (예: "005930").
     **kwargs
-        fetch_ohlcv 전달 인자 (start, market 등).
+        fetchOhlcv 전달 인자 (start, market 등).
 
     Returns
     -------
@@ -78,7 +78,7 @@ def calcSignals(stockCode: str, **kwargs: Any) -> Any:
     stockCode : str
         종목코드 (예: "005930").
     **kwargs
-        fetch_ohlcv 전달 인자 (start, market 등).
+        fetchOhlcv 전달 인자 (start, market 등).
 
     Returns
     -------
@@ -120,7 +120,7 @@ def calcVerdict(stockCode: str, **kwargs: Any) -> dict:
     stockCode : str
         종목코드 (예: "005930").
     **kwargs
-        fetch_ohlcv 전달 인자 (start, market 등).
+        fetchOhlcv 전달 인자 (start, market 등).
 
     Returns
     -------
@@ -165,7 +165,7 @@ def calcBeta(stockCode: str, **kwargs: Any) -> dict:
     stockCode : str
         종목코드 (예: "005930").
     **kwargs
-        fetch_ohlcv 전달 인자 (start, market 등).
+        fetchOhlcv 전달 인자 (start, market 등).
 
     Returns
     -------
@@ -205,7 +205,7 @@ def calcDivergence(stockCode: str, **kwargs: Any) -> dict:
     stockCode : str
         종목코드 (예: "005930").
     **kwargs
-        fetch_ohlcv 전달 인자 (start, market 등).
+        fetchOhlcv 전달 인자 (start, market 등).
 
     Returns
     -------

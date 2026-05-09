@@ -8,7 +8,7 @@ from __future__ import annotations
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
 
 
 def calcVolume(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
@@ -22,11 +22,11 @@ def calcVolume(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         dict with obvTrend, volumePriceDivergence, adLine 등.
     """
     market = resolve_market(stockCode, market)
-    ohlcv = fetch_ohlcv(stockCode, **kwargs)
+    ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음"}
 
-    arr = ohlcv_to_arrays(ohlcv)
+    arr = ohlcvToArrays(ohlcv)
     close = arr.get("close")
     volume = arr.get("volume")
     high = arr.get("high", close)
