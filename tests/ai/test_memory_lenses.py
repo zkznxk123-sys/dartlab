@@ -36,13 +36,13 @@ def test_lenses_module_exposes_four_lenses() -> None:
     from dartlab.ai.lenses import LENSES
 
     assert set(LENSES.keys()) == {"fundamental", "macro", "technical", "sentiment"}
-    for prompt in LENSES.values():
-        assert "관점:" in prompt
+    for lens in LENSES.values():
+        assert "관점:" in lens.promptPatch
 
 
 @pytest.mark.unit
 def test_lens_prompts_distinct() -> None:
     from dartlab.ai.lenses import LENSES
 
-    prompts = list(LENSES.values())
+    prompts = [lens.promptPatch for lens in LENSES.values()]
     assert len(set(prompts)) == 4
