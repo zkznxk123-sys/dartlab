@@ -1,6 +1,6 @@
 """ai 메모리 — recall (BM25) + skill 사용 통계 + outcome ground truth log + wiring helper."""
 
-from .decisions import recall, remember
+from .decisions import DecisionMemo, recall, remember
 from .frontmatter import readStatus, updateStatus
 from .outcome_log import (
     Entry as OutcomeEntry,
@@ -16,10 +16,11 @@ from .outcome_log import (
     store_decision,
 )
 from .promotion import promotionCandidates, recordSkillUsage
-from .stats import SkillStats, getSkillStats, recordOutcome
+from .stats import SkillStats, getSkillStats, loadStats, recordOutcome
 from .wiring import inferStockCodeContext, wireSessionMemory
 
 __all__ = [
+    "DecisionMemo",
     "OutcomeEntry",
     "OutcomeUpdate",
     "SkillStats",
@@ -28,6 +29,7 @@ __all__ = [
     "get_pending_entries",
     "getSkillStats",
     "inferStockCodeContext",
+    "loadStats",
     "promotionCandidates",
     "readStatus",
     "recall",
