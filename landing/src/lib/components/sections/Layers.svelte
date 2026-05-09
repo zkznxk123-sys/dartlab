@@ -13,14 +13,14 @@
 			<p class="text-dl-text-muted text-lg">1 차 데이터 (DART · SEC EDGAR · 향후 EDINET) → 분석 엔진 → 자율 작업대 → 시장 검증 → 사람 환류.</p>
 		</div>
 
-		<div class="mb-20">
+		<div class="mb-20 flex justify-center">
 			<img
 				src="{base}/architecture.svg"
 				alt="DartLab 통합 아키텍처 — 입구 · 자율 작업대 (chat-native + 운용 자원 3 종) · story 종합 · 공식 분석 5 (analysis · credit · macro · quant · industry) · 횡단 처리 3 (gather · company · scan) · core · 외부 1 차 소스 · 3 자 진화 루프"
-				class="w-full h-auto rounded-xl border border-dl-border bg-dl-bg-card shadow-2xl"
+				class="max-w-3xl w-full h-auto rounded-xl border border-dl-border bg-dl-bg-card shadow-2xl"
 				loading="lazy"
-				width="1200"
-				height="940"
+				width="800"
+				height="1500"
 			/>
 			<p class="text-center text-xs text-dl-text-dim mt-4">
 				① 사람·외부 LLM (MCP) → ② 입구 두 갈래 → ③ 자율 작업대 + 운용 자원 3 종 (Skill OS · Capability · Tools 11) → ④ story 종합 → ⑤ 분석 엔진 5 → ⑥ 횡단 처리 3 → ⑦ core → ⑧ 외부 1 차 소스 · ⑨ 3 자 진화 루프

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 940" font-family="-apple-system,'Apple SD Gothic Neo',Pretendard,'Noto Sans KR',sans-serif" font-size="12">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1500" font-family="-apple-system,'Apple SD Gothic Neo',Pretendard,'Noto Sans KR',sans-serif" font-size="12">
   <defs>
     <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
@@ -15,175 +15,167 @@
     </linearGradient>
   </defs>
 
-  <!-- 배경 -->
-  <rect width="1200" height="940" fill="#050811"/>
+  <rect width="800" height="1500" fill="#050811"/>
 
   <!-- 표제 -->
-  <text x="40" y="32" fill="#f1f5f9" font-size="16" font-weight="800">DartLab — 전문 금융 AI 플랫폼</text>
-  <text x="40" y="50" fill="#94a3b8" font-size="11">1 차 데이터 (DART · SEC · 향후 EDINET) + 분석 엔진 + AI 자율 작업대 + Skill OS 환류</text>
+  <text x="40" y="32" fill="#f1f5f9" font-size="18" font-weight="800">DartLab — 전문 금융 AI 플랫폼</text>
+  <text x="40" y="52" fill="#94a3b8" font-size="11">1 차 데이터 (DART · SEC · 향후 EDINET) + 분석 엔진 + AI 자율 작업대 + Skill OS 환류</text>
 
   <!-- ① 사용자 -->
-  <rect x="460" y="68" width="280" height="40" rx="20" fill="#0f1219" stroke="#3b82f6" stroke-width="1.5"/>
-  <text x="600" y="93" text-anchor="middle" fill="#dbeafe" font-weight="700" font-size="13">① 사람 · 외부 LLM (MCP)</text>
+  <rect x="260" y="76" width="280" height="42" rx="21" fill="#0f1219" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="400" y="103" text-anchor="middle" fill="#dbeafe" font-weight="700" font-size="13">① 사람 · 외부 LLM (MCP)</text>
 
   <!-- ② 입구 두 갈래 -->
-  <rect x="240" y="130" width="290" height="58" rx="6" fill="#0f1219" stroke="#3b82f6"/>
-  <text x="385" y="153" text-anchor="middle" fill="#dbeafe" font-weight="700" font-size="14">dartlab.ask("…")</text>
-  <text x="385" y="173" text-anchor="middle" fill="#93c5fd" font-size="11">— AI · 외부 LLM 입구</text>
+  <rect x="30" y="148" width="350" height="64" rx="6" fill="#0f1219" stroke="#3b82f6"/>
+  <text x="205" y="174" text-anchor="middle" fill="#dbeafe" font-weight="700" font-size="15">dartlab.ask("…")</text>
+  <text x="205" y="195" text-anchor="middle" fill="#93c5fd" font-size="11">— AI · 외부 LLM 입구</text>
 
-  <rect x="670" y="130" width="290" height="58" rx="6" fill="#0f1219" stroke="#3b82f6"/>
-  <text x="815" y="153" text-anchor="middle" fill="#dbeafe" font-weight="700" font-size="14">dartlab.Company(code)</text>
-  <text x="815" y="173" text-anchor="middle" fill="#93c5fd" font-size="11">— 사람 파사드</text>
+  <rect x="420" y="148" width="350" height="64" rx="6" fill="#0f1219" stroke="#3b82f6"/>
+  <text x="595" y="174" text-anchor="middle" fill="#dbeafe" font-weight="700" font-size="15">dartlab.Company(code)</text>
+  <text x="595" y="195" text-anchor="middle" fill="#93c5fd" font-size="11">— 사람 파사드</text>
 
-  <line x1="540" y1="108" x2="385" y2="130" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arr)"/>
-  <line x1="660" y1="108" x2="815" y2="130" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arr)"/>
+  <line x1="350" y1="118" x2="210" y2="148" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arr)"/>
+  <line x1="450" y1="118" x2="590" y2="148" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arr)"/>
 
   <!-- ③ AI 자율 작업대 (큰 컨테이너) -->
-  <rect x="40" y="208" width="1120" height="220" rx="14" fill="url(#workbenchGrad)" stroke="#ea4647" stroke-width="2.5"/>
-  <text x="60" y="234" fill="#fca5a5" font-weight="800" font-size="15">③ AI 자율 작업대 — chat-native 루프</text>
-  <text x="60" y="254" fill="#94a3b8" font-size="11">LLM 이 매 iteration 도구 자율 호출 · Ref 검산 강제 · 외부 본문 untrusted 마커 · graph 강제 X</text>
+  <rect x="20" y="240" width="760" height="500" rx="14" fill="url(#workbenchGrad)" stroke="#ea4647" stroke-width="2.5"/>
+  <text x="40" y="270" fill="#fca5a5" font-weight="800" font-size="16">③ AI 자율 작업대 — chat-native 루프</text>
+  <text x="40" y="291" fill="#cbd5e1" font-size="11">LLM 이 매 iteration 도구 자율 호출 · Ref 검산 강제 · 외부 본문 untrusted · graph 강제 X</text>
 
-  <!-- 운용 자원 3 종 라벨 -->
-  <text x="60" y="282" fill="#fb923c" font-weight="700" font-size="11">운용 자원 3 종</text>
+  <text x="40" y="320" fill="#fb923c" font-weight="700" font-size="11">운용 자원 3 종 — 사람 자산이 자동으로 AI 의 도구가 된다</text>
 
-  <!-- Skill OS (운용 자원 1) -->
-  <rect x="60" y="294" width="345" height="118" rx="6" fill="#0f1219" stroke="#fb923c" stroke-width="1.3"/>
-  <text x="232" y="316" text-anchor="middle" fill="#fed7aa" font-weight="800" font-size="13">Skill OS</text>
-  <text x="232" y="334" text-anchor="middle" fill="#94a3b8" font-size="10">skills/specs/</text>
-  <text x="232" y="350" text-anchor="middle" fill="#cbd5e1" font-size="11">engines · operation · runtime · start · recipe</text>
-  <line x1="80" y1="362" x2="385" y2="362" stroke="#1f2937"/>
-  <text x="232" y="380" text-anchor="middle" fill="#fed7aa" font-size="11" font-weight="600">↑ 사람 문서 = AI 의 스킬</text>
-  <text x="232" y="396" text-anchor="middle" fill="#94a3b8" font-size="10" font-style="italic">"엔진이 다리 — 한 파일이 사람 분석엔진이자 AI skill 본문"</text>
+  <!-- Skill OS (top) -->
+  <rect x="40" y="332" width="720" height="118" rx="6" fill="#0f1219" stroke="#fb923c" stroke-width="1.3"/>
+  <text x="60" y="358" fill="#fed7aa" font-weight="800" font-size="14">Skill OS</text>
+  <text x="60" y="376" fill="#94a3b8" font-size="11">skills/specs/ — engines · operation · runtime · start · recipe</text>
+  <text x="60" y="402" fill="#cbd5e1" font-size="12" font-style="italic">"엔진이 다리 — 한 파일이 사람 분석엔진이자 AI skill 본문"</text>
+  <text x="60" y="424" fill="#fed7aa" font-size="11" font-weight="700">↑ 사람 문서 = AI 의 스킬 (이중 용도)</text>
+  <text x="60" y="442" fill="#94a3b8" font-size="10">사람 작성 → AI 검색·호출 → 시장 검증 → 사람 갱신</text>
 
-  <!-- Capability (운용 자원 2) -->
-  <rect x="425" y="294" width="345" height="118" rx="6" fill="#0f1219" stroke="#c084fc" stroke-width="1.3"/>
-  <text x="597" y="316" text-anchor="middle" fill="#e9d5ff" font-weight="800" font-size="13">Capability</text>
-  <text x="597" y="334" text-anchor="middle" fill="#94a3b8" font-size="10">core/capability/</text>
-  <text x="597" y="350" text-anchor="middle" fill="#cbd5e1" font-size="11">공개 API · docstring 인덱스</text>
-  <line x1="445" y1="362" x2="750" y2="362" stroke="#1f2937"/>
-  <text x="597" y="380" text-anchor="middle" fill="#e9d5ff" font-size="11" font-weight="600">함수 docstring = tool schema</text>
-  <text x="597" y="396" text-anchor="middle" fill="#94a3b8" font-size="10" font-style="italic">자동 생성 (_generated.py)</text>
+  <!-- Capability (middle) -->
+  <rect x="40" y="462" width="720" height="118" rx="6" fill="#0f1219" stroke="#c084fc" stroke-width="1.3"/>
+  <text x="60" y="488" fill="#e9d5ff" font-weight="800" font-size="14">Capability</text>
+  <text x="60" y="506" fill="#94a3b8" font-size="11">core/capability/ — 공개 API + docstring 인덱스</text>
+  <text x="60" y="532" fill="#cbd5e1" font-size="12" font-style="italic">함수 docstring = AI tool schema (자동 생성)</text>
+  <text x="60" y="554" fill="#e9d5ff" font-size="11" font-weight="700">_generated.py · _generated_analysis_graph.py</text>
+  <text x="60" y="572" fill="#94a3b8" font-size="10">RunPython 안에서 모든 capability 직접 호출 가능</text>
 
-  <!-- Tools (운용 자원 3) -->
-  <rect x="790" y="294" width="345" height="118" rx="6" fill="#0f1219" stroke="#38bdf8" stroke-width="1.3"/>
-  <text x="962" y="316" text-anchor="middle" fill="#bae6fd" font-weight="800" font-size="13">Tools — canonical 11</text>
-  <text x="962" y="334" text-anchor="middle" fill="#94a3b8" font-size="10">화이트리스트 강제</text>
-  <text x="800" y="354" fill="#cbd5e1" font-size="10">메타: ReadSkill · GetSkillBody · ReadCapability</text>
-  <text x="800" y="370" fill="#cbd5e1" font-size="10">실행: RunPython · EngineCall · InspectDataset</text>
-  <text x="800" y="386" fill="#cbd5e1" font-size="10">외부: WebSearch · Read</text>
-  <text x="800" y="402" fill="#cbd5e1" font-size="10">출력: SaveArtifact · CompileVisual · RunWorkbench</text>
+  <!-- Tools (bottom) -->
+  <rect x="40" y="592" width="720" height="138" rx="6" fill="#0f1219" stroke="#38bdf8" stroke-width="1.3"/>
+  <text x="60" y="618" fill="#bae6fd" font-weight="800" font-size="14">Tools — canonical 11 (화이트리스트 강제)</text>
+  <text x="60" y="644" fill="#cbd5e1" font-size="12">메타 읽기      ·  ReadSkill · GetSkillBody · ReadCapability</text>
+  <text x="60" y="666" fill="#cbd5e1" font-size="12">데이터 실행    ·  RunPython · EngineCall · InspectDataset</text>
+  <text x="60" y="688" fill="#cbd5e1" font-size="12">외부            ·  WebSearch · Read</text>
+  <text x="60" y="710" fill="#cbd5e1" font-size="12">출력 · 작업대   ·  SaveArtifact · CompileVisual · RunWorkbench</text>
 
-  <!-- 입구 → 작업대 -->
-  <line x1="385" y1="188" x2="385" y2="208" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arr)"/>
-  <line x1="815" y1="188" x2="815" y2="208" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arr)"/>
+  <!-- entry → workbench arrows -->
+  <line x1="205" y1="212" x2="205" y2="240" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arr)"/>
+  <line x1="595" y1="212" x2="595" y2="240" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arr)"/>
 
-  <!-- ④ L3 종합 — story -->
-  <rect x="380" y="450" width="440" height="50" rx="8" fill="#1a0b2e" stroke="#c084fc" stroke-width="1.5"/>
-  <text x="600" y="473" text-anchor="middle" fill="#e9d5ff" font-weight="800" font-size="13">④ L3 종합 — story</text>
-  <text x="600" y="490" text-anchor="middle" fill="#c084fc" font-size="11">6 막 인과 보고서 조립 (경제→섹터→기업→재무→가치→가격)</text>
+  <!-- ④ Story -->
+  <rect x="160" y="780" width="480" height="60" rx="8" fill="#1a0b2e" stroke="#c084fc" stroke-width="1.5"/>
+  <text x="400" y="804" text-anchor="middle" fill="#e9d5ff" font-weight="800" font-size="14">④ L3 종합 — story</text>
+  <text x="400" y="824" text-anchor="middle" fill="#c084fc" font-size="11">6 막 인과 보고서 조립 (경제→섹터→기업→재무→가치→가격)</text>
 
-  <line x1="600" y1="428" x2="600" y2="450" stroke="#ea4647" stroke-width="1.5" marker-end="url(#arrCall)"/>
-  <text x="612" y="444" fill="#ea4647" font-size="10" font-weight="600">호출</text>
+  <line x1="400" y1="740" x2="400" y2="780" stroke="#ea4647" stroke-width="1.5" marker-end="url(#arrCall)"/>
+  <text x="412" y="765" fill="#ea4647" font-size="11" font-weight="700">호출</text>
 
-  <!-- ⑤ L2 분석 5 -->
-  <text x="40" y="528" fill="#34d399" font-weight="700" font-size="12">⑤ L2 — 공식 분석 엔진 (1 차 데이터 → 신호 · 등급 · 팩터)</text>
+  <!-- ⑤ L2 분석 5 (3+2 grid) -->
+  <text x="20" y="876" fill="#34d399" font-weight="700" font-size="13">⑤ L2 — 공식 분석 엔진 (1 차 데이터 → 신호 · 등급 · 팩터)</text>
+
+  <!-- Row 1: analysis · credit · macro -->
   <g>
-    <rect x="40" y="538" width="216" height="62" rx="6" fill="#0a1f17" stroke="#34d399" stroke-width="1.3"/>
-    <text x="148" y="560" text-anchor="middle" fill="#a7f3d0" font-weight="800" font-size="13">analysis</text>
-    <text x="148" y="578" text-anchor="middle" fill="#6ee7b7" font-size="10">22 축 재무·정성</text>
-    <text x="148" y="592" text-anchor="middle" fill="#94a3b8" font-size="9">수익성·성장·현금흐름·세그먼트</text>
+    <rect x="20" y="888" width="245" height="78" rx="6" fill="#0a1f17" stroke="#34d399" stroke-width="1.3"/>
+    <text x="142" y="912" text-anchor="middle" fill="#a7f3d0" font-weight="800" font-size="14">analysis</text>
+    <text x="142" y="931" text-anchor="middle" fill="#6ee7b7" font-size="11">22 축 재무·정성</text>
+    <text x="142" y="950" text-anchor="middle" fill="#94a3b8" font-size="10">수익성·성장·현금흐름·세그먼트</text>
 
-    <rect x="266" y="538" width="216" height="62" rx="6" fill="#0a1f17" stroke="#34d399" stroke-width="1.3"/>
-    <text x="374" y="560" text-anchor="middle" fill="#a7f3d0" font-weight="800" font-size="13">credit</text>
-    <text x="374" y="578" text-anchor="middle" fill="#6ee7b7" font-size="10">7 축 dCR 신용 등급</text>
-    <text x="374" y="592" text-anchor="middle" fill="#94a3b8" font-size="9">독립 등급 · 부도 거리</text>
+    <rect x="277" y="888" width="245" height="78" rx="6" fill="#0a1f17" stroke="#34d399" stroke-width="1.3"/>
+    <text x="400" y="912" text-anchor="middle" fill="#a7f3d0" font-weight="800" font-size="14">credit</text>
+    <text x="400" y="931" text-anchor="middle" fill="#6ee7b7" font-size="11">7 축 dCR 신용 등급</text>
+    <text x="400" y="950" text-anchor="middle" fill="#94a3b8" font-size="10">독립 등급 · 부도 거리</text>
 
-    <rect x="492" y="538" width="216" height="62" rx="6" fill="#0a1f17" stroke="#34d399" stroke-width="1.3"/>
-    <text x="600" y="560" text-anchor="middle" fill="#a7f3d0" font-weight="800" font-size="13">macro</text>
-    <text x="600" y="578" text-anchor="middle" fill="#6ee7b7" font-size="10">6 막 거시</text>
-    <text x="600" y="592" text-anchor="middle" fill="#94a3b8" font-size="9">cycle · rates · crisis 국면</text>
-
-    <rect x="718" y="538" width="216" height="62" rx="6" fill="#0a1f17" stroke="#34d399" stroke-width="1.3"/>
-    <text x="826" y="560" text-anchor="middle" fill="#a7f3d0" font-weight="800" font-size="13">quant</text>
-    <text x="826" y="578" text-anchor="middle" fill="#6ee7b7" font-size="10">31 축 정량</text>
-    <text x="826" y="592" text-anchor="middle" fill="#94a3b8" font-size="9">모멘텀 · 변동성 · 팩터</text>
-
-    <rect x="944" y="538" width="216" height="62" rx="6" fill="#0a1f17" stroke="#34d399" stroke-width="1.3"/>
-    <text x="1052" y="560" text-anchor="middle" fill="#a7f3d0" font-weight="800" font-size="13">industry</text>
-    <text x="1052" y="578" text-anchor="middle" fill="#6ee7b7" font-size="10">산업 + 피어 비교</text>
-    <text x="1052" y="592" text-anchor="middle" fill="#94a3b8" font-size="9">taxonomy · 동종사 분포</text>
+    <rect x="534" y="888" width="245" height="78" rx="6" fill="#0a1f17" stroke="#34d399" stroke-width="1.3"/>
+    <text x="657" y="912" text-anchor="middle" fill="#a7f3d0" font-weight="800" font-size="14">macro</text>
+    <text x="657" y="931" text-anchor="middle" fill="#6ee7b7" font-size="11">6 막 거시</text>
+    <text x="657" y="950" text-anchor="middle" fill="#94a3b8" font-size="10">cycle · rates · crisis 국면</text>
   </g>
 
-  <line x1="600" y1="500" x2="600" y2="538" stroke="#c084fc" stroke-width="1.5" marker-end="url(#arrCall)"/>
+  <!-- Row 2: quant · industry (centered) -->
+  <g>
+    <rect x="148" y="978" width="245" height="78" rx="6" fill="#0a1f17" stroke="#34d399" stroke-width="1.3"/>
+    <text x="270" y="1002" text-anchor="middle" fill="#a7f3d0" font-weight="800" font-size="14">quant</text>
+    <text x="270" y="1021" text-anchor="middle" fill="#6ee7b7" font-size="11">31 축 정량</text>
+    <text x="270" y="1040" text-anchor="middle" fill="#94a3b8" font-size="10">모멘텀 · 변동성 · 팩터</text>
+
+    <rect x="406" y="978" width="245" height="78" rx="6" fill="#0a1f17" stroke="#34d399" stroke-width="1.3"/>
+    <text x="528" y="1002" text-anchor="middle" fill="#a7f3d0" font-weight="800" font-size="14">industry</text>
+    <text x="528" y="1021" text-anchor="middle" fill="#6ee7b7" font-size="11">산업 + 피어 비교</text>
+    <text x="528" y="1040" text-anchor="middle" fill="#94a3b8" font-size="10">taxonomy · 동종사 분포</text>
+  </g>
+
+  <line x1="400" y1="840" x2="400" y2="888" stroke="#c084fc" stroke-width="1.5" marker-end="url(#arrCall)"/>
 
   <!-- ⑥ L1.5 횡단 처리 3 -->
-  <text x="40" y="640" fill="#22d3ee" font-weight="700" font-size="12">⑥ L1.5 — 횡단 처리 엔진 (전 종목·전 시장 axis)</text>
+  <text x="20" y="1100" fill="#22d3ee" font-weight="700" font-size="13">⑥ L1.5 — 횡단 처리 엔진 (전 종목·전 시장 axis)</text>
+
   <g>
-    <rect x="40" y="650" width="365" height="78" rx="6" fill="#062028" stroke="#22d3ee" stroke-width="1.3"/>
-    <text x="223" y="672" text-anchor="middle" fill="#a5f3fc" font-weight="800" font-size="13">gather</text>
-    <text x="223" y="690" text-anchor="middle" fill="#67e8f9" font-size="10">11 축 멀티소스 외부 1 차 조달</text>
-    <text x="223" y="706" text-anchor="middle" fill="#94a3b8" font-size="9">가격 · 뉴스 · 거시 · 수급 · 배당 · 소유</text>
-    <text x="223" y="720" text-anchor="middle" fill="#94a3b8" font-size="9">FRED · ECOS · Naver · Google News</text>
+    <rect x="20" y="1112" width="245" height="100" rx="6" fill="#062028" stroke="#22d3ee" stroke-width="1.3"/>
+    <text x="142" y="1136" text-anchor="middle" fill="#a5f3fc" font-weight="800" font-size="14">gather</text>
+    <text x="142" y="1156" text-anchor="middle" fill="#67e8f9" font-size="10">11 축 멀티소스 외부 1 차 조달</text>
+    <text x="142" y="1174" text-anchor="middle" fill="#94a3b8" font-size="9">가격 · 뉴스 · 거시 · 수급 · 배당 · 소유</text>
+    <text x="142" y="1190" text-anchor="middle" fill="#94a3b8" font-size="9">FRED · ECOS · Naver · Google News</text>
 
-    <rect x="417" y="650" width="365" height="78" rx="6" fill="#062028" stroke="#22d3ee" stroke-width="1.3"/>
-    <text x="600" y="672" text-anchor="middle" fill="#a5f3fc" font-weight="800" font-size="13">company — 종목 파사드</text>
-    <text x="600" y="690" text-anchor="middle" fill="#67e8f9" font-size="10">provider 라우팅</text>
-    <text x="600" y="706" text-anchor="middle" fill="#94a3b8" font-size="9">DartCompany (DART) · EdgarCompany (SEC)</text>
-    <text x="600" y="720" text-anchor="middle" fill="#94a3b8" font-size="9">+ EdinetCompany (일본 · 확장 예정)</text>
+    <rect x="277" y="1112" width="245" height="100" rx="6" fill="#062028" stroke="#22d3ee" stroke-width="1.3"/>
+    <text x="400" y="1136" text-anchor="middle" fill="#a5f3fc" font-weight="800" font-size="14">company — 종목 파사드</text>
+    <text x="400" y="1156" text-anchor="middle" fill="#67e8f9" font-size="10">provider 라우팅</text>
+    <text x="400" y="1174" text-anchor="middle" fill="#94a3b8" font-size="9">DartCompany (DART) · EdgarCompany (SEC)</text>
+    <text x="400" y="1190" text-anchor="middle" fill="#94a3b8" font-size="9">+ EdinetCompany (일본 · 확장 예정)</text>
 
-    <rect x="794" y="650" width="365" height="78" rx="6" fill="#062028" stroke="#22d3ee" stroke-width="1.3"/>
-    <text x="977" y="672" text-anchor="middle" fill="#a5f3fc" font-weight="800" font-size="13">scan + search (BETA)</text>
-    <text x="977" y="690" text-anchor="middle" fill="#67e8f9" font-size="10">전 시장 횡단 ranking · 공시 검색</text>
-    <text x="977" y="706" text-anchor="middle" fill="#94a3b8" font-size="9">prebuilt parquet · BM25 인덱스</text>
-    <text x="977" y="720" text-anchor="middle" fill="#94a3b8" font-size="9">screen · governance · moat 등</text>
+    <rect x="534" y="1112" width="245" height="100" rx="6" fill="#062028" stroke="#22d3ee" stroke-width="1.3"/>
+    <text x="657" y="1136" text-anchor="middle" fill="#a5f3fc" font-weight="800" font-size="14">scan + search (BETA)</text>
+    <text x="657" y="1156" text-anchor="middle" fill="#67e8f9" font-size="10">전 시장 횡단 ranking · 공시 검색</text>
+    <text x="657" y="1174" text-anchor="middle" fill="#94a3b8" font-size="9">prebuilt parquet · BM25 인덱스</text>
+    <text x="657" y="1190" text-anchor="middle" fill="#94a3b8" font-size="9">screen · governance · moat 등</text>
   </g>
 
-  <line x1="148" y1="600" x2="223" y2="650" stroke="#34d399" stroke-width="1.3" marker-end="url(#arr)"/>
-  <line x1="600" y1="600" x2="600" y2="650" stroke="#34d399" stroke-width="1.3" marker-end="url(#arr)"/>
-  <line x1="1052" y1="600" x2="977" y2="650" stroke="#34d399" stroke-width="1.3" marker-end="url(#arr)"/>
+  <line x1="142" y1="1056" x2="142" y2="1112" stroke="#34d399" stroke-width="1.3" marker-end="url(#arr)"/>
+  <line x1="400" y1="1056" x2="400" y2="1112" stroke="#34d399" stroke-width="1.3" marker-end="url(#arr)"/>
+  <line x1="528" y1="1056" x2="657" y2="1112" stroke="#34d399" stroke-width="1.3" marker-end="url(#arr)"/>
 
-  <!-- ⑦ L0 core -->
-  <rect x="40" y="752" width="1120" height="58" rx="8" fill="#1a0e07" stroke="#fb923c" stroke-width="1.5"/>
-  <text x="600" y="774" text-anchor="middle" fill="#fed7aa" font-weight="800" font-size="13">⑦ L0 core/ — 공통 인프라</text>
-  <text x="600" y="794" text-anchor="middle" fill="#fdba74" font-size="11">mappers (95 / 97 % 매핑) · data · cache (polars · BoundedCache) · providers · viz (ChartSpec) · dashboard (SSR)</text>
+  <!-- ⑦ core -->
+  <rect x="20" y="1244" width="760" height="62" rx="8" fill="#1a0e07" stroke="#fb923c" stroke-width="1.5"/>
+  <text x="400" y="1268" text-anchor="middle" fill="#fed7aa" font-weight="800" font-size="14">⑦ L0 core/ — 공통 인프라</text>
+  <text x="400" y="1290" text-anchor="middle" fill="#fdba74" font-size="11">mappers (95 / 97 % 매핑) · data · cache (polars · BoundedCache) · providers · viz · dashboard</text>
 
-  <line x1="223" y1="728" x2="320" y2="752" stroke="#22d3ee" stroke-width="1.3" marker-end="url(#arr)"/>
-  <line x1="600" y1="728" x2="600" y2="752" stroke="#22d3ee" stroke-width="1.3" marker-end="url(#arr)"/>
-  <line x1="977" y1="728" x2="880" y2="752" stroke="#22d3ee" stroke-width="1.3" marker-end="url(#arr)"/>
+  <line x1="142" y1="1212" x2="200" y2="1244" stroke="#22d3ee" stroke-width="1.3" marker-end="url(#arr)"/>
+  <line x1="400" y1="1212" x2="400" y2="1244" stroke="#22d3ee" stroke-width="1.3" marker-end="url(#arr)"/>
+  <line x1="657" y1="1212" x2="600" y2="1244" stroke="#22d3ee" stroke-width="1.3" marker-end="url(#arr)"/>
 
   <!-- ⑧ 외부 1 차 소스 -->
-  <ellipse cx="600" cy="850" rx="340" ry="26" fill="#1f2937" stroke="#64748b" stroke-width="1.5"/>
-  <text x="600" y="846" text-anchor="middle" fill="#cbd5e1" font-weight="800" font-size="13">⑧ 외부 1 차 소스 — untrusted</text>
-  <text x="600" y="864" text-anchor="middle" fill="#94a3b8" font-size="11">DART · SEC EDGAR · 가격 · 뉴스 · (향후 EDINET)</text>
-  <line x1="600" y1="810" x2="600" y2="824" stroke="#fb923c" stroke-width="1.3" marker-end="url(#arr)"/>
+  <ellipse cx="400" cy="1346" rx="320" ry="28" fill="#1f2937" stroke="#64748b" stroke-width="1.5"/>
+  <text x="400" y="1342" text-anchor="middle" fill="#cbd5e1" font-weight="800" font-size="14">⑧ 외부 1 차 소스 — untrusted</text>
+  <text x="400" y="1362" text-anchor="middle" fill="#94a3b8" font-size="11">DART · SEC EDGAR · 가격 · 뉴스 · (향후 EDINET)</text>
+  <line x1="400" y1="1306" x2="400" y2="1318" stroke="#fb923c" stroke-width="1.3" marker-end="url(#arr)"/>
 
-  <!-- ⑨ 진화 루프 — 우측 세로 -->
-  <rect x="1175" y="208" width="20" height="668" rx="2" fill="none"/>
-  <text x="1166" y="464" fill="#fbbf24" font-size="11" font-weight="700" transform="rotate(-90 1166 464)">⑨ 3 자 진화 루프 — AI 자율 진화 아님</text>
-  <path d="M 1160 250 Q 1185 250, 1185 320 L 1185 800 Q 1185 870, 1160 870 L 800 870" fill="none" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#arrLoop)"/>
+  <!-- ⑨ 진화 루프 — 하단 가로 배너 -->
+  <rect x="20" y="1396" width="760" height="62" rx="8" fill="#1a1407" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="40" y="1420" fill="#fde68a" font-weight="800" font-size="13">⑨ 3 자 진화 루프 — AI 자율 진화 아님 (사람 + 시장 + AI)</text>
+  <text x="40" y="1442" fill="#fcd34d" font-size="11">답변 + Ref ──outcome_log──▶ 시장 N 일 후 reflection ──사람 검토──▶ Skill OS · 엔진 docstring 갱신 ──↻ 다음 호출 강화──▶ 작업대로 환류</text>
 
-  <text x="1198" y="350" fill="#fcd34d" font-size="10" font-weight="600" transform="rotate(90 1198 350)">답변 + Ref → outcome_log</text>
-  <text x="1198" y="540" fill="#fcd34d" font-size="10" font-weight="600" transform="rotate(90 1198 540)">시장 N 일 후 reflection</text>
-  <text x="1198" y="730" fill="#fcd34d" font-size="10" font-weight="600" transform="rotate(90 1198 730)">사람 검토 → skill 갱신</text>
+  <!-- 진화 루프 화살표 — 작업대 우측에서 출구, 내려와 배너로, 다시 작업대 좌상단으로 -->
+  <path d="M 780 470 Q 798 470, 798 1396" fill="none" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#arrLoop)"/>
+  <text x="788" y="930" fill="#fcd34d" font-size="10" font-weight="700" transform="rotate(90 788 930)">답변 → 시장 → 사람 검토</text>
 
-  <!-- 답변 출구 (작업대 좌측) -->
-  <rect x="20" y="430" width="180" height="40" rx="20" fill="#0f1219" stroke="#3b82f6" stroke-width="1.3"/>
-  <text x="110" y="448" text-anchor="middle" fill="#dbeafe" font-weight="700" font-size="11">답변 + Ref 검산</text>
-  <text x="110" y="462" text-anchor="middle" fill="#93c5fd" font-size="9">execution · table · value · web</text>
-  <line x1="200" y1="450" x2="380" y2="450" stroke="#94a3b8" stroke-width="1.3" marker-start="url(#arr)"/>
+  <path d="M 20 1426 Q 4 1426, 4 240 L 40 240" fill="none" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#arrLoop)"/>
+  <text x="14" y="830" fill="#fcd34d" font-size="10" font-weight="700" transform="rotate(-90 14 830)">갱신 → 다음 호출 강화</text>
 
-  <!-- 6 막 인과 강조 텍스트 -->
-  <text x="600" y="504" text-anchor="middle" fill="#94a3b8" font-size="10" font-style="italic">"AI 는 적극적 분석가 — Company 분석에도 macro·scan·industry 를 엮어 해석"</text>
-
-  <!-- 범례 -->
-  <g transform="translate(40, 895)">
+  <!-- 범례 + 푸터 -->
+  <g transform="translate(40, 1486)">
     <text x="0" y="0" fill="#94a3b8" font-size="10">실선 ▶ 데이터·제어 흐름</text>
-    <text x="170" y="0" fill="#94a3b8" font-size="10">빨강 ▶ 호출 (use)</text>
-    <text x="300" y="0" fill="#94a3b8" font-size="10">청록 ▶ 데이터 의존</text>
-    <text x="430" y="0" fill="#94a3b8" font-size="10">노랑 점선 ▶ 진화 루프 (반영·갱신)</text>
-    <text x="1100" y="0" fill="#475569" font-size="10" text-anchor="end">github.com/eddmpython/dartlab</text>
+    <text x="160" y="0" fill="#94a3b8" font-size="10">빨강 ▶ 호출 (use)</text>
+    <text x="280" y="0" fill="#94a3b8" font-size="10">청록 ▶ 데이터 의존</text>
+    <text x="400" y="0" fill="#94a3b8" font-size="10">노랑 점선 ▶ 진화 루프</text>
+    <text x="720" y="0" fill="#475569" font-size="10" text-anchor="end">github.com/eddmpython/dartlab</text>
   </g>
-
-  <!-- propose_skill 폐기 각주 -->
-  <text x="600" y="918" text-anchor="middle" fill="#475569" font-size="9" font-style="italic">propose_skill 폐기 (2026-05-07) — kind=generated 자기진화 사다리는 dormant. outcome ground truth 루프가 더 강한 신호.</text>
 </svg>

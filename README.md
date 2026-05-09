@@ -52,10 +52,12 @@ DartLab은 그 스토리를 읽는 두 가지 방법을 제공한다.
 
 DartLab 은 단순 금융 데이터 라이브러리가 아니다. **한국 (DART) · 미국 (SEC EDGAR) · 향후 일본 (EDINET) 공시를 정규화한 1 차 데이터 + 6 막 인과 분석 엔진 (`analysis · credit · macro · quant · industry`) + AI 자율 작업대 (chat-native + 운용 자원 3 종) + Skill OS 환류** 가 결합한 *전문 금융 AI 플랫폼*. 사람이 작성한 엔진 코드와 블로그가 자동으로 AI 의 skill 라이브러리가 되고, AI 의 분석 결정은 시장 결과로 검증돼 다시 사람의 자산으로 환류한다. 같은 도구 표면을 **MCP** 로 외부 LLM (Claude Desktop · Cursor · Codex) 도 그대로 사용.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/architecture-dark.svg">
-  <img src=".github/assets/architecture-light.svg" alt="DartLab 아키텍처 — 전문 금융 AI 플랫폼. 사용자 / 입구 (ask · Company) / AI 자율 작업대 (chat-native + 운용 자원 3 종 = Skill OS + Capability + Tools 11) / story 종합 / 분석 엔진 5 (analysis · credit · macro · quant · industry) / 횡단 처리 3 (gather · company · scan) / core / 외부 1 차 소스 / 3 자 진화 루프" width="1100">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/architecture-dark.svg">
+    <img src=".github/assets/architecture-light.svg" alt="DartLab 아키텍처 — 전문 금융 AI 플랫폼. 사용자 / 입구 (ask · Company) / AI 자율 작업대 (chat-native + 운용 자원 3 종 = Skill OS + Capability + Tools 11) / story 종합 / 분석 엔진 5 (analysis · credit · macro · quant · industry) / 횡단 처리 3 (gather · company · scan) / core / 외부 1 차 소스 / 3 자 진화 루프" width="720">
+  </picture>
+</p>
 
 > ① 사람·외부 LLM (MCP) → ② 입구 두 갈래 (`dartlab.ask` AI · `dartlab.Company` 사람) → ③ **AI 자율 작업대** (chat-native + 운용 자원 3 종: Skill OS · Capability · Tools 11) → ④ `story` 종합 → ⑤ 공식 분석 5 (`analysis · credit · macro · quant · industry`) → ⑥ 횡단 처리 3 (`gather · company · scan`) → ⑦ `core/` → ⑧ 외부 1 차 소스. ⑨ **3 자 진화 루프** — 답변 → 시장 N 일 후 reflection → 사람 검토 → Skill OS · 엔진 docstring 갱신 (AI 자율 진화 아님).
 
