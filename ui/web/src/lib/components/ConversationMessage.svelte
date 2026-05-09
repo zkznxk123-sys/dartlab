@@ -10,6 +10,7 @@
 		onRegenerate,
 		onEditResend,
 		onOpenArtifact,
+		onOpenMessageInWorkbench,
 		onSuggestionSelect,
 	} = $props();
 
@@ -289,9 +290,20 @@
 				onSelect={onSuggestionSelect}
 			/>
 		{/if}
-		{#if !message.loading && onRegenerate}
-			<div class="mt-2 flex gap-2 text-[11px] text-dl-text-dim">
-				<button class="hover:text-dl-text-muted" onclick={onRegenerate}>다시 생성</button>
+		{#if !message.loading && (onRegenerate || onOpenMessageInWorkbench)}
+			<div class="mt-2 flex gap-3 text-[11px] text-dl-text-dim">
+				{#if onRegenerate}
+					<button class="hover:text-dl-text-muted" onclick={onRegenerate}>다시 생성</button>
+				{/if}
+				{#if onOpenMessageInWorkbench}
+					<button
+						class="hover:text-dl-text-muted"
+						onclick={() => onOpenMessageInWorkbench(message)}
+						title="우측 워크벤치에서 타임라인·보고서 열기"
+					>
+						워크벤치 ↗
+					</button>
+				{/if}
 			</div>
 		{/if}
 	</div>

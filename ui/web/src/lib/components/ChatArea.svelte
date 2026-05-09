@@ -25,6 +25,7 @@
 		onOpenData,
 		onOpenEvidence,
 		onOpenArtifact,
+		onOpenMessageInWorkbench,
 		onEditResend,
 		onCompanySelect,
 		selectedCompany = null,
@@ -192,6 +193,7 @@
 						onRegenerate={isLastAssistant(msg) ? onRegenerate : undefined}
 						onEditResend={msg.role === "user" ? onEditResend : undefined}
 						{onOpenArtifact}
+						{onOpenMessageInWorkbench}
 						onSuggestionSelect={(q) => onSend?.(q)}
 					/>
 				{/each}

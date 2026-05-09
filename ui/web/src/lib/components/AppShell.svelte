@@ -62,6 +62,7 @@
 	let rightPanelOpen = $state(typeof window !== "undefined" && window.innerWidth >= 768);
 	let rightPanelTab = $state("chat"); // "chat" | "data" | "artifact"
 	let activeArtifact = $state(null); // {url, fileName, sizeBytes?}
+	let activeMessage = $state(null); // 메시지 보고서/타임라인 대상
 
 	function openArtifact(artifact) {
 		if (!artifact) return;
@@ -70,8 +71,16 @@
 		rightPanelOpen = true;
 	}
 
+	function openMessageInWorkbench(message) {
+		if (!message) return;
+		activeMessage = message;
+		rightPanelTab = "artifact";
+		rightPanelOpen = true;
+	}
+
 	function closeArtifact() {
 		activeArtifact = null;
+		activeMessage = null;
 		rightPanelTab = "chat";
 	}
 	let sidebarOpen = $state(false); // 모바일용
@@ -240,6 +249,7 @@
 								onOpenExplorer={() => setRightTab("data")}
 								onOpenEvidence={() => setRightTab("data")}
 								onOpenArtifact={openArtifact}
+								onOpenMessageInWorkbench={openMessageInWorkbench}
 								onOpenSettings={() => showSettings = true}
 								{onAskAboutModule}
 								{onNotify}
@@ -282,9 +292,9 @@
 					</div>
 
 				{:else if rightPanelTab === "artifact"}
-					<!-- Artifact 패널 (Claude.ai 식 우측 산출물 뷰어) -->
+					<!-- Artifact 패널 (Claude.ai 식 우측 산출물 뷰어 + Timeline / Report) -->
 					<div class="dl-panel-content">
-						<ArtifactView artifact={activeArtifact} onClose={closeArtifact} />
+						<ArtifactView artifact={activeArtifact} {activeMessage} onClose={closeArtifact} />
 					</div>
 				{/if}
 			</aside>
