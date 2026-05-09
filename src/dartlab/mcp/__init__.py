@@ -263,6 +263,78 @@ planDartlabQuestion / validateDartlabPlan / listDartlabProcesses) 는 모두 Run
 """
 
 
+def _progressThresholdSec() -> float:
+    """env override `DARTLAB_PROGRESS_THRESHOLD_SEC` (default 5.0). 짧은 도구는 emit 안 함."""
+    import os as _os
+
+    raw = _os.environ.get("DARTLAB_PROGRESS_THRESHOLD_SEC")
+    try:
+        return float(raw) if raw else 5.0
+    except (TypeError, ValueError):
+        return 5.0
+
+
+def _progressIntervalSec() -> float:
+    """env override `DARTLAB_PROGRESS_INTERVAL_SEC` (default 1.0)."""
+    import os as _os
+
+    raw = _os.environ.get("DARTLAB_PROGRESS_INTERVAL_SEC")
+    try:
+        return float(raw) if raw else 1.0
+    except (TypeError, ValueError):
+        return 1.0
+
+
+async def _runWithProgress(
+    name: str,
+    arguments: dict[str, Any],
+    progress_token: Any,
+    session: Any,
+) -> dict[str, Any]:
+    """sync 도구 실행을 thread 로 옮기고 임계 위에서 progress notification 주기적 emit.
+
+    클라이언트가 `_meta.progressToken` 으로 progress 요청한 경우만 호출. 짧은 도구 호출
+    (대부분의 ReadSkill / RunPython sanity 등) 은 임계 전에 끝나 overhead 0 — emit 안 함.
+    임계와 간격은 env (`DARTLAB_PROGRESS_THRESHOLD_SEC` · `DARTLAB_PROGRESS_INTERVAL_SEC`)
+    로 튠. 테스트는 이 env 로 1 s 임계 / 0.5 s 간격으로 빠르게 검증.
+    """
+    import asyncio
+    import time
+
+    threshold = _progressThresholdSec()
+    interval = _progressIntervalSec()
+    start = time.perf_counter()
+
+    async def _emit() -> None:
+        while True:
+            await asyncio.sleep(interval)
+            elapsed = time.perf_counter() - start
+            if elapsed < threshold:
+                continue
+            try:
+                await session.send_progress_notification(
+                    progress_token=progress_token,
+                    progress=elapsed,
+                    total=None,
+                    message=f"{name} 실행 중 ({elapsed:.0f} s)...",
+                )
+            except Exception:
+                # 클라이언트 disconnect / send 실패 — 다음 cycle 에서 재시도. 무한 루프 방지는
+                # cancel 로만 (try 본문 정상 종료).
+                pass
+
+    progress_task = asyncio.create_task(_emit())
+    try:
+        result = await asyncio.to_thread(_executeWorkspaceAgentTool, name, arguments)
+    finally:
+        progress_task.cancel()
+        try:
+            await progress_task
+        except (asyncio.CancelledError, Exception):
+            pass
+    return result
+
+
 def _recipeSkillsForPrompts() -> list[Any]:
     """MCP `prompts/list` 에 노출할 Skill OS skill 의 SSOT 필터.
 
@@ -355,7 +427,24 @@ def create_server():
         # SDK 가 dict 반환을 받으면 structuredContent + serialized text 양쪽 모두 자동 채움.
         # 외부 LLM 은 ref/values/table 등을 structured 로 파싱 가능 + 텍스트 클라이언트 호환.
         _log.info("call_tool: %s(%s)", name, list(arguments.keys()))
-        return _executeWorkspaceAgentTool(name, arguments)
+
+        # progressToken 이 있으면 5 s 임계 위 실행은 백그라운드 progress notification.
+        # 짧은 호출은 overhead 0 — sync 그대로. 클라이언트가 progress 미요청이면 emit skip.
+        progress_token = None
+        session = None
+        try:
+            ctx = app.request_context
+            meta = getattr(ctx, "meta", None)
+            if meta is not None:
+                progress_token = getattr(meta, "progressToken", None)
+            session = getattr(ctx, "session", None)
+        except (LookupError, RuntimeError):
+            pass
+
+        if progress_token is None or session is None:
+            return _executeWorkspaceAgentTool(name, arguments)
+
+        return await _runWithProgress(name, arguments, progress_token, session)
 
     @app.list_resources()
     async def list_resources() -> list[Resource]:

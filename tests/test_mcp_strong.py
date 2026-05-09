@@ -32,6 +32,9 @@ async def _run_probe() -> dict:
     env = os.environ.copy()
     env["PYTHONUTF8"] = "1"
     env["PYTHONUNBUFFERED"] = "1"
+    # progress notification 테스트 빠르게 — 임계 1 s · 간격 0.4 s 로 override.
+    env["DARTLAB_PROGRESS_THRESHOLD_SEC"] = "1.0"
+    env["DARTLAB_PROGRESS_INTERVAL_SEC"] = "0.4"
     server = StdioServerParameters(command="dartlab", args=["mcp"], env=env)
 
     out: dict = {}
@@ -78,6 +81,21 @@ async def _run_probe() -> dict:
             except Exception as exc:
                 out["set_level_error"] = str(exc)
 
+            # 7. progress notification — 2.5 s sleep + progress_callback 으로 progress emit 카운트.
+            #    env 임계 1 s · 간격 0.4 s 로 override 했으므로 ≥ 2 회 emit 기대.
+            progress_events: list[dict] = []
+
+            async def _on_progress(progress: float, total: float | None, message: str | None) -> None:
+                progress_events.append({"progress": progress, "total": total, "message": message})
+
+            slow = await session.call_tool(
+                "RunPython",
+                {"code": "import time\nfor _ in range(5): time.sleep(0.5)\nemit_result(values={'slept': True})"},
+                progress_callback=_on_progress,
+            )
+            out["slow_run_ok"] = (not slow.isError) and (slow.structuredContent or {}).get("ok") is True
+            out["progress_events_count"] = len(progress_events)
+
     return out
 
 
@@ -115,3 +133,10 @@ def test_mcp_strong_annotations_and_structured_and_prompts():
 
     # ── logging/setLevel ──
     assert out.get("set_level_ok") is True, f"setLevel 실패: {out.get('set_level_error')}"
+
+    # ── progress notification ──
+    # 2.5 s sleep + 임계 1 s + 간격 0.4 s → 약 4 회 emit 기대 (1.2/1.6/2.0/2.4 s 부근).
+    assert out.get("slow_run_ok"), "2.5 s RunPython 실행 자체가 ok"
+    assert out.get("progress_events_count", 0) >= 2, (
+        f"progress notification ≥ 2 회 emit 기대 (실제 {out.get('progress_events_count')})"
+    )
