@@ -99,6 +99,25 @@ def test_mcp_advertised_tools_carry_annotations():
     assert tools["RunPython"]["annotations"]["idempotentHint"] is False
 
 
+def test_recipe_skills_all_exposed_as_prompts():
+    """엔진 흡수 contract — silent drift 가드.
+
+    `list_prompts()` 는 `kind == "recipe"` 만 필터한다. 새 Skill OS 카테고리 (예: `playbook`,
+    `scenario`) 가 도입되면 prompts 에서 조용히 누락 + 외부 LLM 이 알아챌 수 없음. 이 invariant
+    가 깨지면 `_recipeSkillsForPrompts()` 의 필터를 갱신해야 한다는 신호.
+    """
+    from dartlab.mcp import _recipeSkillsForPrompts
+    from dartlab.skills import listSkills
+
+    recipe_files = {s.id for s in listSkills(includeUser=False) if s.kind == "recipe"}
+    exposed = {s.id for s in _recipeSkillsForPrompts()}
+
+    assert recipe_files == exposed, (
+        f"recipe 파일 ↔ prompts 노출 불일치. 파일에만: {recipe_files - exposed}. prompts 에만: {exposed - recipe_files}"
+    )
+    assert recipe_files, "recipe 카테고리 skill 이 최소 1 개 이상 있어야 (현재 0)"
+
+
 def test_mcp_skill_resources_are_readable():
     from dartlab.mcp import _resourcePayload
 

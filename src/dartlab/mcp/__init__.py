@@ -263,6 +263,18 @@ planDartlabQuestion / validateDartlabPlan / listDartlabProcesses) 는 모두 Run
 """
 
 
+def _recipeSkillsForPrompts() -> list[Any]:
+    """MCP `prompts/list` 에 노출할 Skill OS skill 의 SSOT 필터.
+
+    현재 정책: `kind == "recipe"` 카테고리만 노출. `engines/{engine}/recipe/*.md` 가 여기
+    해당. 새 Skill OS 카테고리 (예: `playbook`, `scenario`) 도입 시 이 필터 갱신 필요 —
+    `tests/test_mcp.py::test_recipe_skills_all_exposed_as_prompts` 가 silent drift 회귀를 막는다.
+    """
+    from dartlab.skills import listSkills
+
+    return [s for s in listSkills(includeUser=False) if s.kind == "recipe"]
+
+
 def _advertisedTools() -> list[dict[str, Any]]:
     """MCP list_tools 에 노출할 도구 — registry canonical 6 + ask.
 
@@ -392,11 +404,8 @@ def create_server():
 
     @app.list_prompts()
     async def list_prompts() -> list[Prompt]:
-        from dartlab.skills import listSkills
-
-        recipes = [s for s in listSkills(includeUser=False) if s.kind == "recipe"]
         prompts: list[Prompt] = []
-        for spec in recipes:
+        for spec in _recipeSkillsForPrompts():
             args = [
                 PromptArgument(name=f"input{idx + 1}", description=text, required=False)
                 for idx, text in enumerate(spec.inputs or [])

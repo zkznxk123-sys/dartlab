@@ -92,3 +92,43 @@ lastUpdated: '2026-05-03'
 - Company 로딩 자체가 수초 걸리므로 같은 종목 반복 질의에 유효.
 - `ask` · `Company` · `setup` · `collect` · `config` 등 비분석 API.
 
+## 엔진 흡수 contract — MCP 표면이 dartlab 엔진을 어떻게 따라가는가
+
+dartlab 엔진/Skill OS 가 진화해도 MCP 표면이 자동으로 따라가도록 설계된 자동 채널과,
+사람이 손대야 하는 수동 touchpoint, 그리고 회귀 가드의 위치를 한곳에 정리한다.
+
+### 자동 채널 — 엔진 변경하면 MCP 코드 손대지 않아도 자동 반영
+
+| 채널 | 어떻게 자동인가 |
+|---|---|
+| `RunPython` | 모든 새 dartlab 공개 API 즉시 호출 가능. 새 엔진/메서드 추가 시 별도 도구 정의 불필요. 가장 보편적 흡수 채널 |
+| `ReadCapability` | `core/capability/_generated.py` 의 `@capability` 를 자동 색인 |
+| `ReadSkill` | `skills/specs/**` 의 모든 skill markdown 자동 색인 (process-lifetime 캐시) |
+| `prompts/list` & `prompts/get` | Skill OS 의 `kind: recipe` 카테고리를 prompt 로 자동 노출. arguments 는 skill `inputs` frontmatter 에서 derive |
+| `dartlab://skills/{id}` resources | Skill OS 에서 런타임 derive |
+
+### 수동 touchpoint — 엔진 surface 변경 시 사람이 손대야 함
+
+| 위치 | 언제 |
+|---|---|
+| `ai/tools/registry._SPECS` | canonical tool 추가/제거 (드물게 — 현재 11) |
+| `ai/tools/types.ToolSpec` 의 4 hint | 새 도구의 readOnly/destructive/idempotent/openWorld 분류 |
+| `mcp/__init__._LEGACY_NAME_MAP` | snake_case alias 추가/제거 |
+| `dartlab/__init__._LAZY_ATTRS` (PEP 562) | 새 top-level `dartlab.X` 모듈 추가 시 등록 |
+| `runtime/python.py` 화이트리스트 | RunPython 안에서 새 외부 의존 import 허용 |
+
+### Silent drift — 조용히 깨질 수 있는 채널 (가드 1 종)
+
+- **새 Skill OS 카테고리** — `prompts/list` 는 `kind == "recipe"` 로 hardcode 필터. `playbook/`, `scenario/` 같은 새 카테고리 도입 시 prompts 에서 누락되며 외부 LLM 이 알아챌 수 없음.
+  - **가드**: `tests/test_mcp.py::test_recipe_skills_all_exposed_as_prompts` invariant. recipe 파일 set ↔ `_recipeSkillsForPrompts()` 반환 set 일치 검증. 이 테스트가 fail 하면 `_recipeSkillsForPrompts()` 의 필터를 새 카테고리 포함하도록 갱신.
+
+### 큰 변화 시 점검 (체크리스트)
+
+엔진 surface 가 큰 폭으로 바뀔 때 (새 엔진 추가 / 기존 엔진 폐기 / 새 Skill OS 카테고리 도입 / `_generated.py` schema 개편) 다음을 확인한다.
+
+1. `bash scripts/dev/test-lock.sh tests/test_mcp.py tests/test_mcp_strong.py -v` — 흡수 표면 회귀.
+2. 새 카테고리가 들어왔다면 `_recipeSkillsForPrompts()` 의 `kind` 필터 확장 여부 결정.
+3. 새 top-level 모듈이라면 `dartlab/__init__._LAZY_ATTRS` 등록 + RunPython 안에서 import 가능한지 확인.
+4. capability 추가/변경 시 `scripts/build/generateSpec.py` 재실행 후 `_generated.py` 커밋.
+5. canonical tool 추가/제거 시 `ToolSpec` 의 4 hint 채움 + `tests/test_mcp.py::test_mcp_advertised_tools_carry_annotations` 갱신.
+
