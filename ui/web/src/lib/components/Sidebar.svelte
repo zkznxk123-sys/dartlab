@@ -75,10 +75,10 @@
 >
 	{#if open}
 		<div class="flex flex-col h-full" style="min-width: {width}px">
-			<!-- Brand: 워드마크. 아바타 폐기. -->
-			<div class="px-4 pt-4 pb-3">
-				<div class="text-[15px] font-bold text-dl-text tracking-tight">DartLab</div>
-				<div class="text-[10px] uppercase tracking-[0.16em] text-dl-text-dim">Analysis Workspace</div>
+			<!-- Brand: 아바타 + 워드마크 (height-matched). -->
+			<div class="flex items-center gap-2 px-4 pt-4 pb-3">
+				<img src="/avatar.png" alt="" class="w-5 h-5 rounded-full flex-shrink-0" />
+				<div class="text-[15px] font-bold text-dl-text tracking-tight leading-none">DartLab</div>
 			</div>
 
 			<!-- New Chat + Delete All -->

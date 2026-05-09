@@ -145,6 +145,10 @@ html, body, #app {
 	outline-offset: 2px;
 }
 
+/* lucide Loader2 등 회전 아이콘은 currentColor 상속 — parent 가 dim/muted 라도
+   "로딩 중" 신호는 브랜드 색으로 즉시 인지되도록 강제. */
+.animate-spin { color: var(--color-dl-primary); }
+
 button, a, input, textarea {
 	-webkit-tap-highlight-color: transparent;
 }
@@ -581,10 +585,11 @@ button, a, input, textarea {
 	font-size: 11px;
 	line-height: 1.5;
 	color: var(--color-dl-text-muted);
-	background: rgba(15, 18, 25, 0.5);
-	border: 1px solid rgba(148, 163, 184, 0.08);
-	border-radius: 6px;
-	padding: 6px 8px;
+	background: transparent;
+	border: none;
+	border-left: 2px solid rgba(234, 70, 71, 0.18);
+	border-radius: 0;
+	padding: 2px 0 2px 10px;
 	margin: 0;
 	white-space: pre-wrap;
 	word-break: break-word;
@@ -594,6 +599,15 @@ button, a, input, textarea {
 .tool-out {
 	margin: 0;
 	font-size: 11px;
+}
+/* tool card 안의 코드 블록은 외부 prose-dartlab pre 의 dark 배경 + border 가
+   tool-run-card 와 겹쳐 "박스 안의 박스" 처럼 보이는 문제 차단 — flush 처리. */
+.tool-run-body .prose-dartlab pre {
+	background: rgba(0, 0, 0, 0.28);
+	border: none;
+	margin: 0;
+	padding: 8px 10px;
+	border-radius: 4px;
 }
 .tool-meta-line {
 	font-family: var(--font-mono);
