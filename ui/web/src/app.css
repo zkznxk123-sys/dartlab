@@ -528,7 +528,7 @@ button, a, input, textarea {
 	display: grid;
 	grid-template-columns: 16px max-content minmax(0, 1fr) 14px;
 	align-items: center;
-	gap: 7px;
+	gap: 12px;
 	width: 100%;
 	padding: 7px 10px;
 	border: none;
@@ -542,6 +542,15 @@ button, a, input, textarea {
 	font-size: 12px;
 	font-weight: 600;
 	white-space: nowrap;
+	letter-spacing: 0.01em;
+}
+/* 가독성 — 도구명과 요약 사이 시각 구분자 (·). dim 색 요약이 bold 도구명에
+   바로 붙어 보이던 한글/영문 mixed font baseline 어긋남 시각 버그 차단. */
+.tool-run-name + .tool-run-summary::before {
+	content: "·";
+	color: var(--color-dl-text-dim);
+	margin-right: 6px;
+	opacity: 0.6;
 }
 .tool-run-header {
 	cursor: pointer;

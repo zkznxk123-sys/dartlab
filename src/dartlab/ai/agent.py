@@ -28,6 +28,7 @@ from typing import Any
 
 from .contracts import TraceEvent
 from .providers import stream_provider
+from .tool_storage import buildPersistedContent, exceedsSizeCap, persistLargeResult
 from .tools.formatting import wrap_external_in_result
 from .tools.registry import executeTool, toolSpecs
 from .workbench.prompts import DARTLAB_CHAT_SYSTEM
@@ -83,8 +84,18 @@ def runAgent(
     refs: list[dict[str, Any]] = []
     artifacts: list[dict[str, Any]] = []
     text_emitted = ""
+    # 같은 도구 + 같은 error 코드 누적 카운트. 임계 도달 시 도구 호출 차단 +
+    # 다음 LLM turn 에 시스템 메시지로 "이 도구 그만 시도하고 답변 작성하라" 신호.
+    # max_iterations 까지 무의미 retry 하다 답변 못 만드는 회귀 방지.
+    failure_streak: dict[tuple[str, str], int] = {}
+    blocked_tools: set[str] = set()
+    _FAILURE_STREAK_LIMIT = 2
 
     for iteration in range(max_iterations):
+        # 옛 assistant reasoning 트리밍 (마지막 2 개 외 content → None). tool_calls 보존.
+        # 회귀 가드: 노드 추가 아님. 기계적 메모리 관리만.
+        _microcompact(messages, keep_last=2)
+
         try:
             chunks = list(stream_provider(provider, messages, tools))
         except Exception as exc:  # noqa: BLE001
@@ -134,6 +145,41 @@ def runAgent(
             messages.append(assistant_msg)
 
             for tc in turn.tool_calls:
+                # 동일 도구가 임계 회 연속 실패한 적 있으면 호출 차단 + LLM 에 안내.
+                if tc.name in blocked_tools:
+                    yield TraceEvent(
+                        "tool_start",
+                        {"id": tc.id, "tool": tc.name, "input": tc.args, "summary": f"{tc.name} 차단됨"},
+                    )
+                    yield TraceEvent(
+                        "tool_result",
+                        {
+                            "id": tc.id,
+                            "tool": tc.name,
+                            "status": "error",
+                            "outputSummary": f"{tc.name} 반복 실패 — 호출 차단",
+                            "evidenceRefs": [],
+                            "artifacts": [],
+                            "error": "tool_blocked_after_repeated_failures",
+                            "data": None,
+                        },
+                    )
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tc.id,
+                            "content": json.dumps(
+                                {
+                                    "ok": False,
+                                    "summary": f"{tc.name} 가 직전 turn 에서 반복 실패해 차단됨. 본 도구 다시 호출 금지. 지금까지 모은 정보로 답변 작성하거나 다른 도구 사용.",
+                                    "data": None,
+                                    "error": "tool_blocked_after_repeated_failures",
+                                },
+                                ensure_ascii=False,
+                            ),
+                        }
+                    )
+                    continue
                 yield TraceEvent(
                     "tool_start",
                     {
@@ -144,6 +190,16 @@ def runAgent(
                     },
                 )
                 result_dict = executeTool(tc.name, tc.args)
+                # 실패 streak 추적 — 같은 도구 + 같은 error 코드 N 회 → blocked.
+                if not result_dict.get("ok"):
+                    err_key = str(result_dict.get("error") or "unknown")
+                    streak_key = (tc.name, err_key)
+                    failure_streak[streak_key] = failure_streak.get(streak_key, 0) + 1
+                    if failure_streak[streak_key] >= _FAILURE_STREAK_LIMIT:
+                        blocked_tools.add(tc.name)
+                else:
+                    # 성공 시 해당 도구의 모든 streak 리셋.
+                    failure_streak = {k: v for k, v in failure_streak.items() if k[0] != tc.name}
                 tool_refs = list(result_dict.get("refs") or [])
                 refs.extend(tool_refs)
                 tool_artifacts = [ref for ref in tool_refs if ref.get("kind") == "artifactRef"]
@@ -184,20 +240,25 @@ def runAgent(
                 # 마커로 감싼다 — LLM 이 마커 안의 지시를 *데이터* 로만 다루게 한다.
                 # 상세: runtime.workbenchEvidenceFlow "외부 본문 처리".
                 wrapped = wrap_external_in_result(result_dict)
+                content_str = json.dumps(
+                    {
+                        "ok": wrapped.get("ok"),
+                        "summary": wrapped.get("summary", ""),
+                        "data": wrapped.get("data"),
+                        "error": wrapped.get("error"),
+                    },
+                    ensure_ascii=False,
+                    default=str,
+                )
+                # 큰 결과는 디스크 persist + preview 만 inject. LLM 이 Read 도구로 전체 재호출 가능.
+                if exceedsSizeCap(content_str):
+                    preview, file_path = persistLargeResult(tc.name, tc.id, content_str)
+                    content_str = buildPersistedContent(file_path, preview, len(content_str))
                 messages.append(
                     {
                         "role": "tool",
                         "tool_call_id": tc.id,
-                        "content": json.dumps(
-                            {
-                                "ok": wrapped.get("ok"),
-                                "summary": wrapped.get("summary", ""),
-                                "data": wrapped.get("data"),
-                                "error": wrapped.get("error"),
-                            },
-                            ensure_ascii=False,
-                            default=str,
-                        ),
+                        "content": content_str,
                     }
                 )
             continue  # 다시 LLM 호출
@@ -328,6 +389,24 @@ def _selectTools(tool_names: tuple[str, ...]) -> list[dict[str, Any]]:
 def _chunks(text: str, *, size: int = 240) -> Iterator[str]:
     for index in range(0, len(text), size):
         yield text[index : index + size]
+
+
+def _microcompact(messages: list[dict[str, Any]], *, keep_last: int = 2) -> None:
+    """오래된 assistant message 의 reasoning content 를 None 으로 (in-place).
+
+    tool_calls 구조는 보존 — provider 들이 tool result 매칭에 필요. 마지막 keep_last 개의
+    assistant message 는 reasoning 유지 (직전 추론 흐름 단절 방지).
+
+    회귀 가드: graph 노드 추가 아님. messages 배열 트리밍만.
+    memory/feedback_no_graph_regression.md 6 패턴과 무관.
+    """
+    ai_indices = [i for i, msg in enumerate(messages) if isinstance(msg, dict) and msg.get("role") == "assistant"]
+    if len(ai_indices) <= keep_last:
+        return
+    for idx in ai_indices[:-keep_last]:
+        msg = messages[idx]
+        if msg.get("tool_calls") and msg.get("content"):
+            msg["content"] = None
 
 
 __all__ = ["runAgent"]

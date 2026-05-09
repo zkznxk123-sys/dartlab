@@ -32,7 +32,11 @@ def webSearch(query: str, *, limit: int = 5) -> ToolResult:
         with urlopen(req, timeout=10) as res:  # noqa: S310
             payload = json.loads(res.read().decode("utf-8", errors="replace"))
     except Exception as exc:  # noqa: BLE001
-        return ToolResult(False, f"web_search 실패: {exc}", error="web_search_failed")
+        return ToolResult(
+            False,
+            "외부 검색 backend 호출 실패 — WebSearch 재시도 금지, 다른 도구 사용",
+            error=f"web_search_transport_failed: {exc}",
+        )
     refs: list[Ref] = []
     related = payload.get("RelatedTopics") if isinstance(payload, dict) else []
     for idx, item in enumerate(related[: max(1, int(limit or 5))], start=1):
@@ -62,7 +66,17 @@ def webSearch(query: str, *, limit: int = 5) -> ToolResult:
                 sourceType="external",
             )
         )
-    return ToolResult(bool(refs), f"web refs {len(refs)}개", refs=refs, data={"query": query})
+    if not refs:
+        # 결정적 실패 메시지 — query 변경 retry 권유 X. 본 backend 는 factual lookup
+        # (위키 정의·간단 사실) 한정. 탐색·추세·뉴스성 질문은 절대 backend 자체가
+        # 처리 못함. LLM 이 다음 turn 에 다른 query 로 재시도하지 않도록 명시.
+        return ToolResult(
+            False,
+            "외부 검색 0건 — DuckDuckGo Instant Answer 한계. 같은 도구 재시도 금지, ReadSkill / EngineCall 등 내부 도구 사용",
+            error="web_search_no_backend_for_exploratory_query",
+            data={"query": query, "hint": "internal tools (ReadSkill/EngineCall) only"},
+        )
+    return ToolResult(True, f"web refs {len(refs)}개", refs=refs, data={"query": query})
 
 
 def _sanitize_payload(item: dict[str, Any]) -> dict[str, Any]:
