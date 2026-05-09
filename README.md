@@ -53,20 +53,106 @@ DartLab은 그 스토리를 읽는 두 가지 방법을 제공한다.
 dartlab 은 *데이터 라이브러리 + AI 부속* 이 아니라 **engine ↔ AI ↔ skill 순환 루프** 자체. AI 는 외부 API 가 아니라 dartlab 의 데이터 엔진 (`Company` · `scan` · `macro`) + 분석 엔진 (`analysis` · `credit` · `quant` · `story`) 을 *RunPython 안에서 직접 호출* 한다. 같은 도구 표면을 **MCP** 로 외부 LLM (Claude Desktop · Cursor · Codex) 도 그대로 사용.
 
 ```mermaid
-flowchart LR
-    Q[질문] --> AI[chat-native 루프<br/>10 도구 자율 호출]
-    subgraph TOOLS[도구 표면]
-        direction TB
-        DATA["RunPython · EngineCall<br/>Company · scan · macro · analysis ..."]
-        DOCS["ReadSkill · ReadCapability<br/>skills/specs · API docstring"]
-        EXT["WebSearch · Read"]
-        OUT["SaveArtifact · CompileVisual"]
+flowchart TB
+    %% ━━ ① 입구 ━━
+    USER([사람 · 외부 LLM])
+    USER --> ASK["dartlab.ask('...')<br/><i>AI 입구</i>"]
+    USER --> CO["dartlab.Company(code)<br/><i>사람 파사드</i>"]
+    USER -. MCP .-> ASK
+
+    %% ━━ ② AI 루프 ━━
+    ASK --> AI{{"chat-native 루프<br/>LLM 자율 도구 호출 · Ref 검산 · untrusted 마커"}}
+
+    %% ━━ ③ 도구 표면 ━━
+    AI <==> TOOLS
+
+    subgraph TOOLS["도구 표면 — canonical 11 개"]
+        direction LR
+        T_META["메타 읽기<br/>ReadSkill · GetSkillBody<br/>ReadCapability"]
+        T_RUN["데이터 실행<br/>RunPython · EngineCall<br/>InspectDataset"]
+        T_EXT["외부<br/>WebSearch · Read"]
+        T_OUT["출력<br/>SaveArtifact · CompileVisual"]
+        T_WB["작업대<br/>RunWorkbench"]
     end
-    AI <--> TOOLS
-    AI --> ANSWER["답변 + Ref 검산<br/>외부 본문 untrusted 마커"]
-    ANSWER -. outcome_log .-> MARKET["시장 가격<br/>N 일 뒤 reflection"]
-    MARKET -.-> HUMAN[사람]
-    HUMAN -. skill / docstring 갱신 .-> DOCS
+
+    %% ━━ ④ 메타 계층 — 도구가 '읽는' 곳 ━━
+    T_META -.읽기.-> SKILL
+    T_META -.읽기.-> CAP
+
+    subgraph META["메타 계층"]
+        direction LR
+        SKILL["Skill OS<br/>skills/specs/<br/>engines · operation · runtime · start"]
+        CAP["Capability<br/>core/capability/<br/>공개 API + docstring 인덱스"]
+    end
+
+    %% ━━ ⑤ 엔진 계층 — 도구가 '실행하는' 곳 ━━
+    T_RUN -.호출.-> ANALYSIS
+    T_RUN -.호출.-> DATA
+    CO --> DATA
+    CO --> ANALYSIS
+
+    subgraph ANALYSIS["분석 엔진 — 생성"]
+        direction LR
+        A1[analysis<br/>재무·정성]
+        A2[credit<br/>신용]
+        A3[quant<br/>팩터·백테스트]
+        A4[story<br/>서사 6 막]
+        A5[industry<br/>산업]
+        A6[dashboard<br/>대시보드]
+        A7[recipe<br/>분석 절차]
+    end
+
+    subgraph DATA["데이터 엔진 — 조달·조회"]
+        direction LR
+        D1[company<br/>종목 파사드]
+        D2[scan<br/>전 시장]
+        D3[macro<br/>거시]
+        D4[gather<br/>뉴스·공시]
+        D5[search<br/>전문 검색]
+        D6[edgar<br/>SEC]
+        D7[viz<br/>시각화]
+    end
+
+    ANALYSIS --> CORE
+    DATA --> CORE
+
+    %% ━━ ⑥ 코어 ━━
+    subgraph CORE["core/ — 공통 인프라"]
+        direction LR
+        C1[mappers<br/>섹션·계정 정규화<br/>~95 / 97% 매핑]
+        C2[data · cache<br/>polars I/O · BoundedCache]
+        C3[providers<br/>DART · EDGAR · 가격 어댑터]
+    end
+
+    %% ━━ ⑦ 외부 소스 ━━
+    CORE --> EXT[("외부 소스<br/>DART · SEC EDGAR · 가격 · 뉴스")]
+
+    %% ━━ ⑧ 진화 루프 ━━
+    AI --> ANS([답변 + Ref 검산])
+    ANS -. outcome_log .-> MKT([시장 N 일 후 reflection])
+    MKT -. 사람 검토 .-> SKILL
+    MKT -. 사람 검토 .-> CAP
+
+    %% ━━ 스타일 ━━
+    classDef entry fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a
+    classDef ai fill:#1d4ed8,stroke:#1e40af,color:#fff,stroke-width:2px
+    classDef tool fill:#e0e7ff,stroke:#6366f1,color:#312e81
+    classDef meta fill:#fef3c7,stroke:#f59e0b,color:#78350f
+    classDef analysis fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef data fill:#f1f5f9,stroke:#475569,color:#0f172a
+    classDef core fill:#fed7aa,stroke:#ea580c,color:#7c2d12
+    classDef ext fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    classDef loop fill:#fef9c3,stroke:#ca8a04,color:#713f12
+
+    class USER,ASK,CO,ANS entry
+    class AI ai
+    class T_META,T_RUN,T_EXT,T_OUT,T_WB tool
+    class SKILL,CAP meta
+    class A1,A2,A3,A4,A5,A6,A7 analysis
+    class D1,D2,D3,D4,D5,D6,D7 data
+    class C1,C2,C3 core
+    class EXT ext
+    class MKT loop
 ```
 
 **한 줄 사용** — Python 또는 MCP:
