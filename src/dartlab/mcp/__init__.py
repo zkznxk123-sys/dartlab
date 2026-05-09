@@ -53,6 +53,8 @@ _MCP_WORKSPACE_AGENT_TOOL_NAMES = (
     "OutcomeLog",
     "LookAheadGuard",
     "GroundingCheck",
+    # MCP elicit — 사용자 입력 요청. session 의존이라 call_tool handler 가 직접 dispatch.
+    "RequestUserInput",
 )
 
 
@@ -289,6 +291,48 @@ def _progressIntervalSec() -> float:
         return 1.0
 
 
+async def _handleRequestUserInput(args: dict[str, Any], session: Any) -> dict[str, Any]:
+    """RequestUserInput dispatch — session.elicit_form 호출.
+
+    fields → JSON Schema 변환 후 elicit_form 으로 클라이언트에게 폼 요청. 클라이언트가
+    accept/decline/cancel 로 응답. 결과를 ToolResult dict 형태로 반환.
+
+    클라이언트 elicit 미지원이면 send_request 가 timeout / error 로 raise — 여기서 잡아
+    fallback dict 반환.
+    """
+    from dartlab.ai.tools.requestUserInput import buildElicitSchema
+
+    message = str(args.get("message") or "")
+    fields = args.get("fields") or []
+    if not isinstance(fields, list):
+        fields = []
+    schema = buildElicitSchema(fields)
+
+    try:
+        result = await session.elicit_form(message=message, requestedSchema=schema)
+    except Exception as exc:  # noqa: BLE001 — 클라이언트 transport 의 어떤 실패든 fallback.
+        return {
+            "ok": False,
+            "summary": f"RequestUserInput — 클라이언트 elicit 미지원 또는 실패: {type(exc).__name__}",
+            "data": {"message": message, "requestedSchema": schema, "fallback": True},
+            "error": "elicit_unsupported_or_failed",
+        }
+
+    action = getattr(result, "action", "decline")
+    content = getattr(result, "content", None)
+    return {
+        "ok": action == "accept",
+        "summary": f"elicit action={action}",
+        "data": {
+            "action": action,
+            "content": content if isinstance(content, dict) else None,
+            "message": message,
+            "requestedSchema": schema,
+        },
+        "error": None if action == "accept" else f"elicit_{action}",
+    }
+
+
 async def _runWithProgress(
     name: str,
     arguments: dict[str, Any],
@@ -444,6 +488,11 @@ def create_server():
             session = getattr(ctx, "session", None)
         except (LookupError, RuntimeError):
             pass
+
+        # RequestUserInput 은 session.elicit_form 직접 dispatch — sync registry executor 가
+        # async session 의존성을 끼워넣지 않도록.
+        if name == "RequestUserInput" and session is not None:
+            return await _handleRequestUserInput(arguments, session)
 
         if progress_token is None or session is None:
             return _executeWorkspaceAgentTool(name, arguments)

@@ -17,6 +17,7 @@ from .outcomeLog import outcomeLog
 from .readCapability import readCapability
 from .readFile import readFile
 from .readSkill import getSkillBody, readSkill
+from .requestUserInput import requestUserInput
 from .runPython import runPython
 from .runWorkbench import runWorkbench
 from .saveArtifact import saveArtifact
@@ -269,6 +270,36 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "RequestUserInput": ToolSpec(
+        "RequestUserInput",
+        "ambiguity 만났을 때 사용자에게 schema 있는 structured 입력 요청 (MCP elicit_form). MCP 컨텍스트 전용 — non-MCP 시 자연어 fallback 권장.",
+        {
+            "type": "object",
+            "properties": {
+                "message": {"type": "string"},
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                            "type": {"type": "string"},
+                            "enum": {"type": "array"},
+                            "required": {"type": "boolean"},
+                        },
+                        "required": ["name"],
+                    },
+                },
+            },
+            "required": ["message"],
+        },
+        # 사용자에게 묻기 — read tool 분류 (외부 의존성 있음 — 사용자 응답이 외부 입력).
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=False,
+    ),
     # ── elevate (옵션 sub-agent) ──
     "RunWorkbench": ToolSpec(
         "RunWorkbench",
@@ -304,6 +335,7 @@ _TOOLS: dict[str, ToolFn] = {
     "OutcomeLog": outcomeLog,
     "LookAheadGuard": lookAheadGuard,
     "GroundingCheck": groundingCheck,
+    "RequestUserInput": requestUserInput,
     "RunWorkbench": runWorkbench,
 }
 
@@ -338,6 +370,7 @@ _LEGACY_NAME_MAP = {
     "outcome_log": "OutcomeLog",
     "lookahead_guard": "LookAheadGuard",
     "grounding_check": "GroundingCheck",
+    "request_user_input": "RequestUserInput",
     "run_workbench": "RunWorkbench",
 }
 

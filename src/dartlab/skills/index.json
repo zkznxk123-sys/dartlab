@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 229,
+    "skillCount": 230,
     "categories": [
       {
         "id": "start",
@@ -26,7 +26,7 @@
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 195
+        "count": 196
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -10029,6 +10029,104 @@
         "Roll 스프레드 시계열",
         "회전율 + 거래대금 결합",
         "size bucket 별 유동성 분포"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      }
+    },
+    {
+      "id": "engines.quant.marketContext",
+      "title": "Quant Market Context 축",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "dartlab.quant(\"시장맥락\", \"005930\") 형태로 종목의 시장 베타 + 거시 민감도 (USDKRW/금리/CPI/M2) + 외국인+기관 수급 강도 1 행 evidence 를 산출한다. 가격-거시 OLS (일별 252 d). 펀더멘털-거시 OLS (`scan.macroBeta`, 연간 매출 vs 거시) 와 책임 분리. 트리거 — '시장맥락', 'marketContext', '맥락'.",
+      "whenToUse": [
+        "종목의 시장 민감도 + 환율/금리 베타 + 수급 강도를 한 번에 묻고 싶을 때",
+        "수출주 (USDKRW β > 0) 와 내수주 (β ≈ 0) 의 부호 검증",
+        "금리 인하/인상 시 종목 영향도 사전 진단",
+        "외국인+기관 수급의 60 d 누적 / z-score 조사"
+      ],
+      "inputs": [
+        "stockCode (str, 필수)",
+        "market (str, \"KR\" / \"US\" / \"auto\", 기본 \"auto\")",
+        "lookbackDays (int, 기본 252)",
+        "macroVars (list[str] 또는 None) — None 이면 KR 4 default / US 4 default"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "dict — stockCode, market, lookbackDays, dateRef, lastClose, marketBeta, marketAlpha, marketR2, nObsCAPM, {macro}Beta + _r2, smartMoneyNet60d, smartMoneyZ60d, flowMomentum20d, flowAvailable, summary"
+      ],
+      "apiRefs": [
+        "quant",
+        "Company.quant"
+      ],
+      "toolRefs": [],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.quant",
+        "engines.gather"
+      ],
+      "linkedSkills": [
+        "engines.quant",
+        "engines.scan.macroBeta",
+        "engines.gather"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.quant.marketContext"
+      ],
+      "procedure": [
+        "dartlab.quant(\"시장맥락\", \"005930\") 호출",
+        "결과의 marketBeta / marketR2 → CAPM 검증",
+        "각 매크로 β + _r2 쌍으로 인용 (R² 작으면 noise 표시)",
+        "smartMoneyZ60d > +1 (대형 매수) / < -1 (대형 매도) 해석",
+        "summary 한 줄 (β=, USDKRW β=, smartMoney Z=)"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "target (stockCode)",
+        "period (lookbackDays, dateRef)",
+        "benchmark (KOSPI/KOSDAQ/SPX)",
+        "metric (marketBeta, *Beta + _r2)",
+        "dateRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "종목 OHLCV < 60 일 → \"데이터 부족\" error 반환",
+        "거시 wide DF 수집 실패 → macroBetaError 키만 남김 (다른 키 정상 계산)",
+        "flow 데이터 없음 (US 종목 또는 수집 실패) → flowAvailable=False",
+        "β 만 인용하고 R² 누락 (의미 있는 베타인지 R² 로 검증)"
+      ],
+      "forbidden": [
+        "펀더멘털-거시 회귀 (재무 vs GDP) — `scan.macroBeta` 가 SSOT",
+        "β 부호만 보고 \"이 종목은 환율에 민감하다\" 단정 — R² < 0.05 면 noise 가능성",
+        "statsmodels / scipy import 추가"
+      ],
+      "examples": [
+        "005930 시장 맥락 (β + USDKRW + 수급)",
+        "035420 내수주 검증 (USDKRW β ≈ 0)",
+        "AAPL US 자동감지 + FEDFUNDS β"
       ],
       "runtimeCompatibility": {
         "server": {

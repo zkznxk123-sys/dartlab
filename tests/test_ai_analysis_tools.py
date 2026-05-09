@@ -154,3 +154,58 @@ def test_canonical_tool_names_includes_three_new_tools():
 
     for name in ("OutcomeLog", "LookAheadGuard", "GroundingCheck"):
         assert name in CANONICAL_TOOL_NAMES, f"{name} 가 CANONICAL_TOOL_NAMES 에 없음"
+
+
+# ── S4 RequestUserInput (elicit) ─────────────────────────────────────────────
+
+
+def test_request_user_input_non_mcp_fallback():
+    """non-MCP 컨텍스트 (CLI 직접 호출) — fallback dict 반환."""
+    from dartlab.ai.tools.requestUserInput import requestUserInput
+
+    result = requestUserInput(
+        message="회사를 선택하세요",
+        fields=[
+            {"name": "company", "description": "분석 대상", "enum": ["005930", "AAPL"]},
+        ],
+    )
+    assert result.ok is False
+    assert result.error == "elicit_unsupported_transport"
+    assert result.data.get("fallback") is True
+    schema = result.data.get("requestedSchema") or {}
+    assert schema.get("type") == "object"
+    assert "company" in schema.get("properties", {})
+    assert schema["properties"]["company"]["enum"] == ["005930", "AAPL"]
+
+
+def test_request_user_input_dispatch_via_registry():
+    from dartlab.ai.tools.registry import executeTool
+
+    result = executeTool(
+        "RequestUserInput",
+        {"message": "select", "fields": [{"name": "x"}]},
+    )
+    # registry path 는 sync — non-MCP fallback.
+    assert result.get("ok") is False
+    assert result.get("error") == "elicit_unsupported_transport"
+
+
+def test_build_elicit_schema_handles_missing_optional():
+    from dartlab.ai.tools.requestUserInput import buildElicitSchema
+
+    schema = buildElicitSchema(
+        [
+            {"name": "a"},
+            {"name": "b", "type": "integer", "required": False},
+        ]
+    )
+    assert schema["type"] == "object"
+    assert schema["properties"]["a"] == {"type": "string"}
+    assert schema["properties"]["b"] == {"type": "integer"}
+    assert schema.get("required") == ["a"]
+
+
+def test_request_user_input_in_legacy_alias_map():
+    from dartlab.ai.tools.registry import _LEGACY_NAME_MAP
+
+    assert _LEGACY_NAME_MAP.get("request_user_input") == "RequestUserInput"

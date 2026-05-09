@@ -101,6 +101,7 @@ def test_mcp_advertised_tools_carry_annotations():
         "OutcomeLog",
         "LookAheadGuard",
         "GroundingCheck",
+        "RequestUserInput",
     ):
         ann = tools[name]["annotations"]
         for key in ("readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint"):

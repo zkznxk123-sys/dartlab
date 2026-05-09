@@ -889,6 +889,15 @@
       "limitations": []
     },
     {
+      "id": "engines.quant.marketContext",
+      "title": "Quant Market Context 축",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.quant.meanvar",
       "title": "Quant - 평균분산",
       "category": "engines",

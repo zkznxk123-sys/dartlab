@@ -91,6 +91,16 @@ async def _run_probe() -> dict:
             # materialNumber 는 ToolResult.data 안 — structuredContent.data.materialNumber.
             out["grounding_material_number"] = (sc.get("data") or {}).get("materialNumber")
 
+            # 7b. RequestUserInput (S4) — 표준 ClientSession 은 elicit handler 없음 →
+            # 서버가 fallback dict 반환해야 함. dispatch 자체 회귀 가드.
+            elicit = await session.call_tool(
+                "RequestUserInput",
+                {"message": "회사 선택", "fields": [{"name": "company", "enum": ["005930"]}]},
+            )
+            elicit_sc = elicit.structuredContent or {}
+            out["elicit_dispatch_returned"] = bool(elicit_sc)
+            out["elicit_error_kind"] = elicit_sc.get("error")
+
             # 8. progress notification — 2.5 s sleep + progress_callback 으로 progress emit 카운트.
             #    env 임계 1 s · 간격 0.4 s 로 override 했으므로 ≥ 2 회 emit 기대.
             progress_events: list[dict] = []
@@ -152,6 +162,16 @@ def test_mcp_strong_annotations_and_structured_and_prompts():
     assert ann["LookAheadGuard"]["readOnly"] is True, "LookAheadGuard 는 read tool"
     assert out.get("grounding_dispatch_ok"), "GroundingCheck 호출 ok + structuredContent"
     assert out.get("grounding_material_number") is True, "12.3% 수치는 material number 분류"
+
+    # ── RequestUserInput (S4) — elicit dispatch ──
+    assert "RequestUserInput" in ann, "RequestUserInput 가 tools/list 에 노출"
+    assert out.get("elicit_dispatch_returned"), "RequestUserInput 호출이 응답 반환 (handler dispatch ok)"
+    # 표준 ClientSession 은 elicit handler 없음 → 서버가 fallback 반환.
+    assert out.get("elicit_error_kind") in {
+        "elicit_unsupported_or_failed",
+        "elicit_decline",
+        "elicit_cancel",
+    }, f"elicit fallback 또는 사용자 거부 기대 (실제 {out.get('elicit_error_kind')})"
 
     # ── progress notification ──
     # 2.5 s sleep + 임계 1 s + 간격 0.4 s → 약 4 회 emit 기대 (1.2/1.6/2.0/2.4 s 부근).
