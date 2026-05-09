@@ -120,7 +120,7 @@ r = dartlab.quant("시장맥락", "AAPL", macroVars=["FEDFUNDS", "DGS10"])
 
 ## 회귀 모델
 
-- **CAPM**: r_i = α + β r_m + ε. β = `marketBeta`, α (annualized) = `marketAlpha`, R² = `marketR2`. 시장 지수는 종목 상장 시장 (KOSPI/KOSDAQ) 또는 SPX. `fetch_benchmark_ohlcv` SSOT 재사용.
+- **CAPM**: r_i = α + β r_m + ε. β = `marketBeta`, α (annualized) = `marketAlpha`, R² = `marketR2`. 시장 지수는 종목 상장 시장 (KOSPI/KOSDAQ) 또는 SPX. `fetchBenchmarkOhlcv` SSOT 재사용.
 - **거시 회귀**: r_i = α + β · ΔX + ε. ΔX 는 변수에 따라:
   - 금리 (BASE_RATE/FEDFUNDS/DGS10) → 단순 차분 Δ
   - 그 외 (USDKRW/CPI/M2/oil) → Δlog
@@ -165,7 +165,7 @@ r = dartlab.quant("시장맥락", "AAPL", macroVars=["FEDFUNDS", "DGS10"])
 
 - target: `stockCode`
 - period: `lookbackDays`, `dateRef`
-- benchmark: 종목 상장 시장 (KOSPI/KOSDAQ/SPX) — `fetch_benchmark_ohlcv` 의 결과
+- benchmark: 종목 상장 시장 (KOSPI/KOSDAQ/SPX) — `fetchBenchmarkOhlcv` 의 결과
 - metric: `marketBeta`, `*Beta` 키 + `_r2` 쌍
 - value: 숫자 + R² 함께
 - dateRef: `dateRef`

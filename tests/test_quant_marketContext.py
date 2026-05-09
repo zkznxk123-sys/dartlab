@@ -115,7 +115,7 @@ def patch_market_data(monkeypatch):
                 raise ValueError(f"unknown axis: {axis}")
 
         monkeypatch.setattr(_mc_mod, "fetchOhlcv", _fake_fetch_ohlcv)
-        monkeypatch.setattr(_benchmark_mod, "fetch_benchmark_ohlcv", _fake_fetch_benchmark)
+        monkeypatch.setattr(_benchmark_mod, "fetchBenchmarkOhlcv", _fake_fetch_benchmark)
         monkeypatch.setattr(_gather_entry, "GatherEntry", lambda: _FakeGather())
         return stock_df, bm_df, macro_df, flow_df
 

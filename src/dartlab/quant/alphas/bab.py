@@ -26,9 +26,9 @@ def _dateStart(window: int) -> str:
 
 def _benchmarkReturns(indexMarket: str, start: str, *, indexName: str | None = None) -> dict[str, float]:
     """벤치마크 로그수익률 맵: return-date(YYYY-MM-DD) -> log return."""
-    from dartlab.quant.benchmark import fetch_benchmark_ohlcv
+    from dartlab.quant.benchmark import fetchBenchmarkOhlcv
 
-    bench = fetch_benchmark_ohlcv(market=indexMarket, benchmark=indexName, start=start)
+    bench = fetchBenchmarkOhlcv(market=indexMarket, benchmark=indexName, start=start)
     if bench is None or bench.is_empty() or "close" not in bench.columns:
         return {}
     b = bench.sort("date")
@@ -90,7 +90,7 @@ def calcBAB(
 
     try:
         from dartlab.gather._hfBulk import loadFiltered
-        from dartlab.quant.benchmark import resolve_benchmark
+        from dartlab.quant.benchmark import resolveBenchmark
     except ImportError:
         return None
 
@@ -119,7 +119,7 @@ def calcBAB(
         ("KOSDAQ", "코스닥"): _benchmarkReturns("KOSDAQ", start),
     }
     if benchmark:
-        bm = resolve_benchmark(None, market="KR", benchmark=benchmark)
+        bm = resolveBenchmark(None, market="KR", benchmark=benchmark)
         bench_maps[(bm["indexMarket"], bm["indexName"])] = _benchmarkReturns(
             bm["indexMarket"],
             start,
@@ -144,11 +144,11 @@ def calcBAB(
         r_beta = ret[-betaWindow:] if len(ret) >= betaWindow else ret
         d_beta = ret_dates[-len(r_beta) :]
         if benchmark:
-            bm_meta = resolve_benchmark(code, market="KR", benchmark=benchmark)
+            bm_meta = resolveBenchmark(code, market="KR", benchmark=benchmark)
         elif benchmarkMode == "market":
-            bm_meta = resolve_benchmark(code, market="KR")
+            bm_meta = resolveBenchmark(code, market="KR")
         else:
-            bm_meta = resolve_benchmark(code, market="KR", benchmarkMode=benchmarkMode)
+            bm_meta = resolveBenchmark(code, market="KR", benchmarkMode=benchmarkMode)
         bm_key = (bm_meta["indexMarket"], bm_meta["indexName"])
         if bm_key not in bench_maps:
             bench_maps[bm_key] = _benchmarkReturns(bm_key[0], start, indexName=bm_key[1])

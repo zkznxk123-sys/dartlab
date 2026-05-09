@@ -1,6 +1,6 @@
 """quant.scanBacktest top-level helper 단위 테스트.
 
-multi_asset_backtest 호출은 mock 하지 않고 실제 합성 OHLCV 시계열로 통합 검증.
+multiAssetBacktest 호출은 mock 하지 않고 실제 합성 OHLCV 시계열로 통합 검증.
 fetchOhlcv 만 monkeypatch.
 """
 
@@ -58,7 +58,7 @@ def patch_ohlcv(monkeypatch):
             close = _trending_close(n=250, seed=seed)
             return _make_ohlcv_df(close)
 
-        # 두 위치에서 fetchOhlcv 를 사용 (multi_asset_backtest + scanBacktest)
+        # 두 위치에서 fetchOhlcv 를 사용 (multiAssetBacktest + scanBacktest)
         monkeypatch.setattr(_helpers, "fetchOhlcv", _fake_fetch)
         monkeypatch.setattr(_backtest, "fetchOhlcv", _fake_fetch, raising=False)
         monkeypatch.setattr(_scan_bt, "fetchOhlcv", _fake_fetch, raising=False)

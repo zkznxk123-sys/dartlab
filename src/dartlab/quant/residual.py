@@ -57,9 +57,9 @@ def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
 
     sr = np.diff(np.log(close))
 
-    from dartlab.quant.benchmark import fetch_benchmark_ohlcv
+    from dartlab.quant.benchmark import fetchBenchmarkOhlcv
 
-    bench, benchmark_meta = fetch_benchmark_ohlcv(
+    bench, benchmark_meta = fetchBenchmarkOhlcv(
         stockCode,
         market=market,
         benchmark=benchmark,

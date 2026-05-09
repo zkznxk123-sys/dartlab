@@ -25,12 +25,12 @@ def _krx_listing() -> pl.DataFrame:
 def test_resolve_benchmark_uses_listing_market(monkeypatch):
     """KOSPI/KOSDAQ 종목은 상장시장 기준 기본 지수를 사용한다."""
     from dartlab.gather import listing
-    from dartlab.quant.benchmark import resolve_benchmark
+    from dartlab.quant.benchmark import resolveBenchmark
 
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
 
-    kospi = resolve_benchmark("005930", market="KR")
-    kosdaq = resolve_benchmark("247540", market="KR")
+    kospi = resolveBenchmark("005930", market="KR")
+    kosdaq = resolveBenchmark("247540", market="KR")
 
     assert kospi["source"] == "krxIndex"
     assert kospi["indexMarket"] == "KOSPI"
@@ -52,8 +52,8 @@ def test_resolve_benchmark_stack_adds_sector_candidate(monkeypatch):
     )
     monkeypatch.setattr(bm, "indexExists", lambda *_: True)
 
-    stack = bm.resolve_benchmark_stack("005930", market="KR", benchmarkMode="sector")
-    resolved = bm.resolve_benchmark("005930", market="KR", benchmarkMode="sector")
+    stack = bm.resolveBenchmarkStack("005930", market="KR", benchmarkMode="sector")
+    resolved = bm.resolveBenchmark("005930", market="KR", benchmarkMode="sector")
 
     assert stack["market"]["indexName"] == "코스피"
     assert stack["sector"]["indexName"] == "KRX 반도체"
@@ -74,7 +74,7 @@ def test_resolve_benchmark_stack_explicit_override_wins(monkeypatch):
         lambda _: {"industry": "semiconductor", "confidence": 0.9, "source": "test"},
     )
 
-    resolved = bm.resolve_benchmark("005930", market="KR", benchmark="코스피 200", benchmarkMode="sector")
+    resolved = bm.resolveBenchmark("005930", market="KR", benchmark="코스피 200", benchmarkMode="sector")
 
     assert resolved["benchmarkType"] == "explicit"
     assert resolved["indexMarket"] == "KOSPI"
@@ -90,7 +90,7 @@ def test_resolve_benchmark_stack_sector_fallbacks_to_market(monkeypatch):
     monkeypatch.setattr(bm, "primaryIndustryNode", lambda _: None)
     monkeypatch.setattr(bm, "_latest_sector_candidate", lambda *_: None)
 
-    resolved = bm.resolve_benchmark("005930", market="KR", benchmarkMode="sector")
+    resolved = bm.resolveBenchmark("005930", market="KR", benchmarkMode="sector")
 
     assert resolved["benchmarkType"] == "market"
     assert resolved["indexName"] == "코스피"
@@ -123,7 +123,7 @@ def test_resolve_benchmark_stack_adds_size_style_candidate(monkeypatch):
     monkeypatch.setattr(bm, "primaryIndustryNode", lambda _: None)
     monkeypatch.setattr(bm, "indexExists", lambda *_: True)
 
-    resolved = bm.resolve_benchmark("005930", market="KR", benchmarkMode="style")
+    resolved = bm.resolveBenchmark("005930", market="KR", benchmarkMode="style")
 
     assert resolved["benchmarkType"] == "style"
     assert resolved["indexName"] == "코스피 대형주"
@@ -154,7 +154,7 @@ def test_fetch_benchmark_ohlcv_standardizes_krx_raw(monkeypatch):
 
     hf = importlib.import_module("dartlab.gather._hfIndexBulk")
     from dartlab.gather import listing
-    from dartlab.quant.benchmark import fetch_benchmark_ohlcv
+    from dartlab.quant.benchmark import fetchBenchmarkOhlcv
 
     raw = pl.DataFrame(
         [
@@ -175,7 +175,7 @@ def test_fetch_benchmark_ohlcv_standardizes_krx_raw(monkeypatch):
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
     monkeypatch.setattr(hf, "loadFiltered", lambda **_: raw)
 
-    df, meta = fetch_benchmark_ohlcv("005930", market="KR", return_meta=True)
+    df, meta = fetchBenchmarkOhlcv("005930", market="KR", return_meta=True)
 
     assert meta["indexName"] == "코스피"
     assert meta["nObs"] == 1
@@ -271,7 +271,7 @@ def test_bab_ranks_by_beta_not_vol(monkeypatch):
         return bench_df
 
     monkeypatch.setattr(hf, "loadFiltered", lambda **_: pl.DataFrame(rows))
-    monkeypatch.setattr("dartlab.quant.benchmark.fetch_benchmark_ohlcv", fake_fetch)
+    monkeypatch.setattr("dartlab.quant.benchmark.fetchBenchmarkOhlcv", fake_fetch)
 
     result = calcBAB(betaWindow=252, volWindow=60)
 

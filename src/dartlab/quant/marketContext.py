@@ -258,7 +258,7 @@ def calcMarketContext(
       일별 정렬. 월별 변수 (CPI, M2) 는 R² 가 작을 수 있다 — 의도된 noise.
     - 금리 류 (BASE_RATE, FEDFUNDS, DGS10) 는 Δ (단순 차분), 그 외는 Δlog 로 회귀.
     - flow 는 KR 전용. US 종목은 flowAvailable=False 로 관련 키 누락.
-    - CAPM 의 시장 지수는 stockCode 의 상장 시장 (KOSPI/KOSDAQ) 또는 SPX (US) — `fetch_benchmark_ohlcv` SSOT 재사용.
+    - CAPM 의 시장 지수는 stockCode 의 상장 시장 (KOSPI/KOSDAQ) 또는 SPX (US) — `fetchBenchmarkOhlcv` SSOT 재사용.
     """
     market = resolve_market(stockCode, market)
 
@@ -297,9 +297,9 @@ def calcMarketContext(
 
     # 2. CAPM β / α (vs 시장 지수)
     try:
-        from dartlab.quant.benchmark import fetch_benchmark_ohlcv
+        from dartlab.quant.benchmark import fetchBenchmarkOhlcv
 
-        bm_df = fetch_benchmark_ohlcv(
+        bm_df = fetchBenchmarkOhlcv(
             stockCode,
             market=market,
             benchmarkMode="market",

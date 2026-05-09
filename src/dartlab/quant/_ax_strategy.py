@@ -21,8 +21,8 @@ from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
 from dartlab.quant.strategy.backtest import (
     BacktestResult,
-    multi_asset_backtest,
-    vector_backtest,
+    multiAssetBacktest,
+    vectorBacktest,
     walkForward,
 )
 from dartlab.quant.strategy.backtest import (
@@ -135,7 +135,7 @@ def runStrategy(
             low=arr.get("low"),
             dates=arr.get("date"),
         )
-    return vector_backtest(
+    return vectorBacktest(
         close,
         rule,
         open_=arr.get("open"),
@@ -236,7 +236,7 @@ def runBacktest(
             low=arr.get("low"),
             style=style_name,
         )
-    return vector_backtest(
+    return vectorBacktest(
         close,
         rule,
         open_=arr.get("open"),
@@ -381,7 +381,7 @@ def runMultiAsset(
     if key not in reg:
         return BacktestResult(status="error", reason=f"unknown style: {style}", style=None)
 
-    return multi_asset_backtest(
+    return multiAssetBacktest(
         list(stockCodes),
         reg[key],
         weighting=weighting,

@@ -209,7 +209,7 @@ def _select_primary(stack: dict[str, Any], benchmarkMode: str) -> dict[str, Any]
     return {**stack["market"], "fallbackReason": f"unknown_benchmarkMode:{benchmarkMode}"}
 
 
-def resolve_benchmark_stack(
+def resolveBenchmarkStack(
     stockCode: str | None = None,
     *,
     market: str = "auto",
@@ -300,7 +300,7 @@ def resolve_benchmark_stack(
     }
 
 
-def resolve_benchmark(
+def resolveBenchmark(
     stockCode: str | None = None,
     *,
     market: str = "auto",
@@ -331,7 +331,7 @@ def resolve_benchmark(
         reason : str
             explicit/listing/market/fallback.
     """
-    stack = resolve_benchmark_stack(
+    stack = resolveBenchmarkStack(
         stockCode,
         market=market,
         benchmark=benchmark,
@@ -368,7 +368,7 @@ def _krx_index_to_ohlcv(raw: pl.DataFrame, index_name: str) -> pl.DataFrame:
     return out
 
 
-def fetch_benchmark_ohlcv(
+def fetchBenchmarkOhlcv(
     stockCode: str | None = None,
     *,
     market: str = "auto",
@@ -385,7 +385,7 @@ def fetch_benchmark_ohlcv(
     ``return_meta=True``면 결과 DataFrame과 ``benchmarkUsed`` metadata를 함께
     반환한다.
     """
-    meta = resolve_benchmark(
+    meta = resolveBenchmark(
         stockCode,
         market=market,
         benchmark=benchmark,
@@ -424,7 +424,7 @@ def fetch_benchmark_ohlcv(
     return (df, meta) if return_meta else df
 
 
-def benchmark_snapshot(
+def benchmarkSnapshot(
     stockCode: str,
     *,
     market: str = "auto",
@@ -434,7 +434,7 @@ def benchmark_snapshot(
     end: str | None = None,
 ) -> dict[str, Any]:
     """``quant("benchmark")`` 축 구현 — 벤치마크와 기간 수익률 요약."""
-    df, meta = fetch_benchmark_ohlcv(
+    df, meta = fetchBenchmarkOhlcv(
         stockCode,
         market=market,
         benchmark=benchmark,
@@ -476,4 +476,13 @@ def benchmark_snapshot(
 
 def calcBenchmark(stockCode: str, **kwargs: Any) -> dict[str, Any]:
     """quant registry용 얇은 래퍼."""
-    return benchmark_snapshot(stockCode, **kwargs)
+    return benchmarkSnapshot(stockCode, **kwargs)
+
+
+# ── Deprecated snake_case aliases ────────────────────────
+from dartlab.quant._helpers import _deprecatedAlias as _dep
+
+resolve_benchmark_stack = _dep(resolveBenchmarkStack, "resolve_benchmark_stack")
+resolve_benchmark = _dep(resolveBenchmark, "resolve_benchmark")
+fetch_benchmark_ohlcv = _dep(fetchBenchmarkOhlcv, "fetch_benchmark_ohlcv")
+benchmark_snapshot = _dep(benchmarkSnapshot, "benchmark_snapshot")

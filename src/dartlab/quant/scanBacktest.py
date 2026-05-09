@@ -1,14 +1,14 @@
 """scan → quant 폐쇄 루프 — runScanBacktest top-level helper.
 
 scan 결과 DataFrame 을 외부 입력으로 받아 universe 추출 → signalFn 또는 style 로
-종목별 Rule 빌드 → ``multi_asset_backtest`` 호출 → BacktestResult.scanContext 에
+종목별 Rule 빌드 → ``multiAssetBacktest`` 호출 → BacktestResult.scanContext 에
 universe 출처 SHA-1 기록.
 
 설계 원칙 (architecture.md 준수):
 - quant → scan import 금지 (역방향). scan 결과는 ``pl.DataFrame`` 입력으로만 받음.
 - axis 등록 X (top-level helper) — registry dispatcher 의 ``fn(stockCode=stockCode, **kw)``
   계약과 시그니처 (첫 인자가 DataFrame) 가 어긋남.
-- numpy / polars only. multi_asset_backtest SSOT 재사용 (새 멀티자산 엔진 신설 X).
+- numpy / polars only. multiAssetBacktest SSOT 재사용 (새 멀티자산 엔진 신설 X).
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from dartlab.quant.strategy.backtest import (
     DEFAULT_FEE_BPS,
     DEFAULT_SLIP_BPS,
     BacktestResult,
-    multi_asset_backtest,
+    multiAssetBacktest,
 )
 from dartlab.quant.strategy.presets import STYLE_REGISTRY, resolveStyle
 from dartlab.quant.strategy.rule import Rule
@@ -152,14 +152,14 @@ def runScanBacktest(
     topN : int
         scanResult 의 상위 N 종목만 universe 로 사용 (사용자 사전 sort 가정).
     weighting : str
-        "equal" / "inv_vol" / "risk_parity" — multi_asset_backtest 인자.
+        "equal" / "inv_vol" / "risk_parity" — multiAssetBacktest 인자.
     fee_bps, slip_bps : float
         거래비용 (단위 bp). default 15 / 5.
 
     Returns
     -------
     BacktestResult
-        ``multi_asset_backtest`` 결과에 ``scanContext`` 필드만 추가:
+        ``multiAssetBacktest`` 결과에 ``scanContext`` 필드만 추가:
         ``{universeSize, universeCol, topN, scanResultHash, signalSource, weighting}``.
 
     When
@@ -224,7 +224,7 @@ def runScanBacktest(
         rule_builder = _ruleFromStyle(style)  # type: ignore[arg-type]
         signal_source = f"style:{resolveStyle(style or '')}"
 
-    bt = multi_asset_backtest(
+    bt = multiAssetBacktest(
         codes,
         rule_builder,
         weighting=weighting,

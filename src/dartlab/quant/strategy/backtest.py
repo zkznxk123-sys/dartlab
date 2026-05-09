@@ -101,7 +101,7 @@ class BacktestResult:
 # ── 핵심 백테스트 ───────────────────────────────────────────────────────────
 
 
-def vector_backtest(
+def vectorBacktest(
     close: np.ndarray,
     rule: Rule,
     *,
@@ -474,7 +474,7 @@ def walkForward(
                 meta=rule.meta,
             )
 
-        is_bt = vector_backtest(
+        is_bt = vectorBacktest(
             is_close,
             is_rule,
             open_=open_[start:is_end] if open_ is not None else None,
@@ -485,7 +485,7 @@ def walkForward(
         )
         is_sharpes.append(is_bt.sharpe)
 
-        oos_bt = vector_backtest(
+        oos_bt = vectorBacktest(
             oos_close,
             oos_rule,
             open_=open_[is_end:oos_end] if open_ is not None else None,
@@ -551,7 +551,7 @@ def walkForward(
     )
 
 
-def multi_asset_backtest(
+def multiAssetBacktest(
     stock_codes: list[str],
     rule_builder,
     *,
@@ -603,7 +603,7 @@ def multi_asset_backtest(
             continue
         if len(rule) != len(arr["close"]):
             continue
-        bt = vector_backtest(
+        bt = vectorBacktest(
             arr["close"],
             rule,
             open_=arr.get("open"),
@@ -736,7 +736,7 @@ def cpcv(
             stop=rule.stop,
             meta=rule.meta,
         )
-        sub_bt = vector_backtest(
+        sub_bt = vectorBacktest(
             sub_close,
             sub_rule,
             open_=open_[test_idx] if open_ is not None else None,
@@ -774,3 +774,5 @@ def cpcv(
 from dartlab.quant._helpers import _deprecatedAlias as _dep
 
 walk_forward = _dep(walkForward, "walk_forward")
+vector_backtest = _dep(vectorBacktest, "vector_backtest")
+multi_asset_backtest = _dep(multiAssetBacktest, "multi_asset_backtest")

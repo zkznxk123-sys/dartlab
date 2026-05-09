@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: dartlab.quant.scanBacktest(scanResult, signalFn=, style=, topN=, weighting=) 형태로 scan 결과 DataFrame 의 universe 를 받아 종목별 Rule 빌드 → multi_asset_backtest 호출 → BacktestResult.scanContext 에 universe 출처 SHA-1 기록. axis 미등록 (top-level helper). 트리거 — 'scanBacktest', 'scan→quant', 'universe → backtest'.
+purpose: dartlab.quant.scanBacktest(scanResult, signalFn=, style=, topN=, weighting=) 형태로 scan 결과 DataFrame 의 universe 를 받아 종목별 Rule 빌드 → multiAssetBacktest 호출 → BacktestResult.scanContext 에 universe 출처 SHA-1 기록. axis 미등록 (top-level helper). 트리거 — 'scanBacktest', 'scan→quant', 'universe → backtest'.
 whenToUse:
   - scan 으로 추린 universe 에 quant 백테스트를 직접 적용하고 싶을 때
   - signalFn (forecast / momentum / 사용자 정의) → 종목별 entry/exit 로 변환 후 멀티자산 백테스트
@@ -80,7 +80,7 @@ lastUpdated: '2026-05-09'
 
 ## 엔진 역할
 
-`scanBacktest` 는 scan 결과 universe + signalFn (또는 style) → ``multi_asset_backtest`` 호출의 wrapper. 내부 로직 0 — 모든 백테스트는 ``multi_asset_backtest`` SSOT 가 처리. 본 helper 의 책임은 ① universe 추출, ② signalFn → Rule 변환, ③ scanContext SHA-1 기록.
+`scanBacktest` 는 scan 결과 universe + signalFn (또는 style) → ``multiAssetBacktest`` 호출의 wrapper. 내부 로직 0 — 모든 백테스트는 ``multiAssetBacktest`` SSOT 가 처리. 본 helper 의 책임은 ① universe 추출, ② signalFn → Rule 변환, ③ scanContext SHA-1 기록.
 
 ## architecture 룰 준수
 
@@ -118,7 +118,7 @@ result = dl.quant.scanBacktest(top, signalFn=momentum_signal, topN=20)
 3. universeCol 자동 감지 (`stockCode` → `종목코드` → `stock_code` → `corp_code`)
 4. scanResult.head(topN) 로 universe 추출 — 사용자가 사전 sort/filter 책임
 5. signalFn 우선, fallback 으로 style → STYLE_REGISTRY 의 build 함수
-6. multi_asset_backtest 호출 (weighting=equal/inv_vol/risk_parity)
+6. multiAssetBacktest 호출 (weighting=equal/inv_vol/risk_parity)
 7. BacktestResult.scanContext 에 universe 출처 SHA-1 + signalSource 기록 후 dataclasses.replace
 
 ## signalFn / style 우선순위
@@ -187,12 +187,12 @@ BacktestResult(
 - 빈 scanResult → BacktestResult(status="error", reason="empty scanResult")
 - signalFn / style 둘 다 미지정 → error
 - 같은 universe 두 번 호출 → 같은 scanResultHash
-- multi_asset_backtest 직접 호출 vs scanBacktest 의 결과 sharpe ε 이내 일치 (회귀 가드)
+- multiAssetBacktest 직접 호출 vs scanBacktest 의 결과 sharpe ε 이내 일치 (회귀 가드)
 
 ## 한계 및 비목표
 
 - universe 의 등급/sort 자동 추출 X — 사용자가 사전에 ``scanResult.filter(...).sort(...).head(N)`` 책임
-- multi-period 백테스트 (월별 리밸런싱) 는 본 helper 범위 밖 — ``multi_asset_backtest`` 가 정적 가중치만 지원
+- multi-period 백테스트 (월별 리밸런싱) 는 본 helper 범위 밖 — ``multiAssetBacktest`` 가 정적 가중치만 지원
 - forecast 모델의 fold 마다 재학습 (walk-forward refit) 은 후속 PR
 
 ## 기본 검증
