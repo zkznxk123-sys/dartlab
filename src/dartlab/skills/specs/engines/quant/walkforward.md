@@ -99,6 +99,23 @@ result = dartlab.quant.walkforward("005930")
 
 종목 005930 의 가격 · 재무 · 시계열 snapshot 을 읽어 워크포워드 축 계산을 수행한다. Lopez de Prado 슬라이딩 OOS Sharpe + DSR + PBO. 결손 / 비교 불가 케이스는 결과 dict 또는 DataFrame 의 `flags` / null 로 표현하며 0 으로 채우지 않는다. 자세한 동작은 base SKILL `engines.quant` + `_AXIS_REGISTRY['walkforward'].fn` 함수 docstring 참조.
 
+### rule_factory 옵션 (forecast OOS 검증)
+
+기본 호출은 정적 Rule 슬라이스 — 같은 entry/exit 시계열을 IS/OOS 에 그대로 적용. forecast 모델처럼 *IS fit + OOS predict* 패턴은 ``walk_forward(close, rule=None, rule_factory=...)`` 로 호출.
+
+```python
+from dartlab.quant.forecast import forecastRuleFactory
+from dartlab.quant.strategy.backtest import walk_forward
+
+factory = forecastRuleFactory(threshold=0.002, models=["ar1"])
+bt = walk_forward(close, rule=None, rule_factory=factory, train=120, test=20, step=20)
+bt.cpcv["refit_count"]   # fold 마다 재학습 횟수 (= n_folds)
+bt.cpcv["is_sharpes"]    # IS 학습 fold 별 Sharpe
+bt.cpcv["oos_sharpes"]   # OOS 검증 fold 별 Sharpe
+```
+
+`rule_factory(is_close, oos_len) -> Rule` 시그니처. 반환 Rule 의 length 는 정확히 `train + test`. 어긋나면 `BacktestResult(status="error", reason="length 불일치")`.
+
 ## 대표 반환 형태
 
 strategy 그룹 표준에 따른 dict 또는 DataFrame 반환. 공통 키:

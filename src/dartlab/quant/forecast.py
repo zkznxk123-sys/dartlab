@@ -454,3 +454,71 @@ def forecastReturns(
         "forecastTable": forecast_table,
         "summary": summary,
     }
+
+
+# ── walk_forward refit helper (forecast → Rule 변환) ────────
+
+
+def forecastRuleFactory(
+    *,
+    models: list[str] | None = None,
+    threshold: float = 0.002,
+    calibFraction: float = 0.2,
+    alpha: float = 0.10,
+):
+    """forecast 모델 기반 walk_forward rule_factory 생성.
+
+    walk_forward(close, rule_factory=forecastRuleFactory(threshold=0.002), ...) 형태로
+    사용. fold 마다 IS 구간만 보고 forecast fit, OOS 일수만큼 점추정 + interval 산출,
+    threshold 룰로 entry/exit boolean 변환.
+
+    Entry 룰: pointForecast > threshold AND lowerBound > -threshold (양수 + 안전마진).
+    Exit 룰:  pointForecast < 0 OR lowerBound < -2*threshold.
+
+    Returns
+    -------
+    Callable[[is_close, oos_len], Rule]
+        반환 Rule 의 length = len(is_close) + oos_len. IS 구간은 entry/exit 모두 False
+        (학습용), OOS 구간만 forecast 신호.
+    """
+    from dartlab.quant.strategy.rule import Rule
+
+    def _factory(is_close: np.ndarray, oos_len: int) -> Rule:
+        n_is = len(is_close)
+        total = n_is + int(oos_len)
+        entry = np.zeros(total, dtype=bool)
+        exit_ = np.zeros(total, dtype=bool)
+
+        # IS 구간 log-return 시계열
+        if n_is < 30:
+            return Rule(entry_expr=entry, exit_expr=exit_)
+        log_ret = np.diff(np.log(is_close))
+        chosen = _pickModel(log_ret) if models is None else None
+        models_used = models if models is not None else [chosen]
+
+        forecasts_per: list[np.ndarray] = []
+        residuals_per: list[np.ndarray] = []
+        calib_k = max(int(len(log_ret) * calibFraction), 5)
+        for m in models_used:
+            fcst, in_sample = _MODEL_FNS[m](log_ret, oos_len)
+            forecasts_per.append(fcst)
+            residuals_per.append(log_ret[-calib_k:] - in_sample[-calib_k:])
+
+        point_forecasts = np.mean(np.stack(forecasts_per), axis=0)
+        residuals_pooled = np.concatenate(residuals_per)
+        half_width = _conformalHalfWidth(residuals_pooled, alpha=alpha)
+
+        # OOS 각 점에 대해 entry/exit 판정 (cumulative 가 아닌 1-step 기준)
+        for h in range(int(oos_len)):
+            point = float(point_forecasts[h])
+            lower = point - half_width
+            upper = point + half_width
+            idx = n_is + h
+            if point > threshold and lower > -threshold:
+                entry[idx] = True
+            if point < 0 or upper < -2 * threshold:
+                exit_[idx] = True
+
+        return Rule(entry_expr=entry, exit_expr=exit_)
+
+    return _factory

@@ -347,7 +347,7 @@ def _build_stop_series(close, high, low, stop_spec) -> np.ndarray:
 
 def walk_forward(
     close: np.ndarray,
-    rule: Rule,
+    rule: Rule | None = None,
     *,
     train: int = 252,
     test: int = 63,
@@ -359,6 +359,7 @@ def walk_forward(
     style: str | None = None,
     fee_bps: float = DEFAULT_FEE_BPS,
     slip_bps: float = DEFAULT_SLIP_BPS,
+    rule_factory=None,
 ) -> BacktestResult:
     """Walk-forward OOS 백테스트.
 
@@ -366,14 +367,42 @@ def walk_forward(
     OOS Sharpe/MDD/DSR 계산. PBO 는 segments 비교로 산출.
 
     Args:
-        close, rule: vector_backtest 와 동일
+        close: 가격 시계열
+        rule: 정적 Rule (전체 시계열에 한 번 빌드 — 기존 동작). rule_factory 가
+            우선 적용, rule 무시.
+        rule_factory: ``Callable[[is_close: np.ndarray, oos_len: int], Rule]`` —
+            fold 마다 IS 구간만 보고 fit, 반환 Rule 의 length 는 train+test.
+            forecast 모델처럼 IS fit + OOS predict 패턴에 사용. None 이면 기존
+            정적 rule 슬라이스 동작 유지 (backward compat).
         train: in-sample window 크기
         test: out-of-sample window 크기
         step: 다음 fold 시작 간격
 
     Returns:
         BacktestResult (oos=True, pbo 채워짐)
+
+    Notes
+    -----
+    rule_factory 사용 예 (forecast 모델 OOS 검증):
+
+    >>> def factory(is_close, oos_len):
+    ...     # IS 에서 forecast 모델 fit, 다음 oos_len 일 entry/exit 예측
+    ...     fcst = forecast_model.fit(is_close).predict(oos_len)
+    ...     entry = np.zeros(len(is_close) + oos_len, dtype=bool)
+    ...     entry[len(is_close):] = fcst > threshold  # OOS 만 entry
+    ...     exit_ = np.zeros_like(entry)
+    ...     return Rule(entry_expr=entry, exit_expr=exit_)
+    ...
+    >>> walk_forward(close, rule=None, rule_factory=factory, train=252, test=63)
     """
+    if rule is None and rule_factory is None:
+        return BacktestResult(
+            status="error",
+            reason="rule 또는 rule_factory 중 하나 필수",
+            style=style,
+            oos=True,
+        )
+
     n = len(close)
     if n < train + test:
         return BacktestResult(
@@ -386,21 +415,65 @@ def walk_forward(
     is_sharpes: list[float] = []
     oos_sharpes: list[float] = []
     oos_returns_all: list[np.ndarray] = []
+    refit_count = 0
 
     start = 0
     while start + train + test <= n:
         is_end = start + train
         oos_end = is_end + test
-
-        # IS 구간
         is_close = close[start:is_end]
-        is_rule = Rule(
-            entry_expr=rule.entry_expr[start:is_end],
-            exit_expr=rule.exit_expr[start:is_end],
-            sizing=rule.sizing,
-            stop=rule.stop,
-            meta=rule.meta,
-        )
+        oos_close = close[is_end:oos_end]
+
+        if rule_factory is not None:
+            # IS 마다 재학습 — Rule length 는 train+test 이어야 함 (IS+OOS 일관)
+            try:
+                fold_rule = rule_factory(is_close, test)
+            except Exception as exc:  # noqa: BLE001
+                return BacktestResult(
+                    status="error",
+                    reason=f"rule_factory 호출 실패 (fold start={start}): {type(exc).__name__}: {exc}",
+                    style=style,
+                    oos=True,
+                )
+            if not isinstance(fold_rule, Rule) or len(fold_rule) != train + test:
+                return BacktestResult(
+                    status="error",
+                    reason=f"rule_factory 반환 Rule length 가 train+test ({train + test}) 와 불일치",
+                    style=style,
+                    oos=True,
+                )
+            refit_count += 1
+            is_rule = Rule(
+                entry_expr=fold_rule.entry_expr[:train],
+                exit_expr=fold_rule.exit_expr[:train],
+                sizing=fold_rule.sizing,
+                stop=fold_rule.stop,
+                meta=fold_rule.meta,
+            )
+            oos_rule = Rule(
+                entry_expr=fold_rule.entry_expr[train:],
+                exit_expr=fold_rule.exit_expr[train:],
+                sizing=fold_rule.sizing,
+                stop=fold_rule.stop,
+                meta=fold_rule.meta,
+            )
+        else:
+            # 정적 rule 슬라이스 (기존 동작)
+            is_rule = Rule(
+                entry_expr=rule.entry_expr[start:is_end],
+                exit_expr=rule.exit_expr[start:is_end],
+                sizing=rule.sizing,
+                stop=rule.stop,
+                meta=rule.meta,
+            )
+            oos_rule = Rule(
+                entry_expr=rule.entry_expr[is_end:oos_end],
+                exit_expr=rule.exit_expr[is_end:oos_end],
+                sizing=rule.sizing,
+                stop=rule.stop,
+                meta=rule.meta,
+            )
+
         is_bt = vector_backtest(
             is_close,
             is_rule,
@@ -412,15 +485,6 @@ def walk_forward(
         )
         is_sharpes.append(is_bt.sharpe)
 
-        # OOS 구간
-        oos_close = close[is_end:oos_end]
-        oos_rule = Rule(
-            entry_expr=rule.entry_expr[is_end:oos_end],
-            exit_expr=rule.exit_expr[is_end:oos_end],
-            sizing=rule.sizing,
-            stop=rule.stop,
-            meta=rule.meta,
-        )
         oos_bt = vector_backtest(
             oos_close,
             oos_rule,
@@ -473,7 +537,12 @@ def walk_forward(
         style=style,
         period=period,
         oos=True,
-        cpcv={"is_sharpes": is_sharpes, "oos_sharpes": oos_sharpes, "n_folds": len(oos_sharpes)},
+        cpcv={
+            "is_sharpes": is_sharpes,
+            "oos_sharpes": oos_sharpes,
+            "n_folds": len(oos_sharpes),
+            "refit_count": refit_count,
+        },
     )
 
 

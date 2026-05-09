@@ -363,3 +363,95 @@ class TestAxisRegistry:
         # 한글 alias 도 동일 결과
         r2 = dartlab.quant("예측", "TEST_DISPATCH", horizon=3)
         assert r2["modelChosen"] == r["modelChosen"]
+
+
+# ═══════════════════════════════════════════════════════════
+# forecastRuleFactory + walk_forward(rule_factory=...) 결합
+# ═══════════════════════════════════════════════════════════
+
+
+class TestForecastRuleFactory:
+    def test_factory_returns_rule_of_correct_length(self):
+        from dartlab.quant.forecast import forecastRuleFactory
+        from dartlab.quant.strategy.rule import Rule
+
+        factory = forecastRuleFactory(threshold=0.002)
+        is_close = _uptrend_close(n=200)
+        rule = factory(is_close, oos_len=20)
+        assert isinstance(rule, Rule)
+        assert len(rule.entry_expr) == 200 + 20
+        assert len(rule.exit_expr) == 200 + 20
+
+    def test_is_region_all_false(self):
+        """IS 구간 (학습) 은 entry/exit 모두 False — 학습용."""
+        from dartlab.quant.forecast import forecastRuleFactory
+
+        factory = forecastRuleFactory(threshold=0.002)
+        is_close = _uptrend_close(n=200)
+        rule = factory(is_close, oos_len=20)
+        assert not rule.entry_expr[:200].any()
+        assert not rule.exit_expr[:200].any()
+
+    def test_short_is_returns_empty_rule(self):
+        from dartlab.quant.forecast import forecastRuleFactory
+
+        factory = forecastRuleFactory()
+        rule = factory(np.array([100.0, 101.0, 99.0]), oos_len=10)
+        # IS < 30 → 모두 False
+        assert not rule.entry_expr.any()
+        assert not rule.exit_expr.any()
+
+    def test_walk_forward_with_factory(self):
+        from dartlab.quant.forecast import forecastRuleFactory
+        from dartlab.quant.strategy.backtest import walk_forward
+
+        close = _uptrend_close(n=400)
+        factory = forecastRuleFactory(threshold=0.002, models=["ar1"])
+        bt = walk_forward(close, rule=None, rule_factory=factory, train=200, test=50, step=50)
+        assert bt.status == "ok"
+        assert bt.oos is True
+        assert bt.cpcv is not None
+        assert bt.cpcv.get("refit_count", 0) >= 2
+        assert "n_folds" in bt.cpcv
+
+    def test_walk_forward_static_rule_still_works(self):
+        """rule_factory 없이 정적 Rule 도 그대로 동작 (backward compat)."""
+        from dartlab.quant.strategy.backtest import walk_forward
+        from dartlab.quant.strategy.rule import Rule
+
+        close = _uptrend_close(n=400)
+        n = len(close)
+        # 단순 정적 entry/exit (절반 holding)
+        entry = np.zeros(n, dtype=bool)
+        exit_ = np.zeros(n, dtype=bool)
+        entry[10] = True
+        exit_[100] = True
+        rule = Rule(entry_expr=entry, exit_expr=exit_)
+        bt = walk_forward(close, rule, train=200, test=50, step=50)
+        # 정적 rule path 도 ok 상태
+        assert bt.status == "ok"
+        assert bt.cpcv.get("refit_count", 0) == 0
+
+    def test_walk_forward_missing_both_returns_error(self):
+        from dartlab.quant.strategy.backtest import walk_forward
+
+        close = _uptrend_close(n=400)
+        bt = walk_forward(close, rule=None, train=200, test=50, step=50)
+        assert bt.status == "error"
+        assert "rule" in (bt.reason or "")
+
+    def test_walk_forward_factory_wrong_length_returns_error(self):
+        from dartlab.quant.strategy.backtest import walk_forward
+        from dartlab.quant.strategy.rule import Rule
+
+        def bad_factory(is_close, oos_len):
+            # 잘못된 길이 (train + test 아닌 len(is_close) 만)
+            return Rule(
+                entry_expr=np.zeros(len(is_close), dtype=bool),
+                exit_expr=np.zeros(len(is_close), dtype=bool),
+            )
+
+        close = _uptrend_close(n=400)
+        bt = walk_forward(close, rule=None, rule_factory=bad_factory, train=200, test=50, step=50)
+        assert bt.status == "error"
+        assert "length" in (bt.reason or "")

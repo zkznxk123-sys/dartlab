@@ -176,6 +176,22 @@ forecast 결과를 인용할 때 다음을 함께 명시:
 - Cycle 1 회귀 (2026-05-09): 005930 실데이터에서 theta 가 +1.8%/day 비현실 점추정 →
   dispatch 룰을 ar1 로 변경. theta 는 명시 호출 시에만 사용 가능하도록 가드.
 
+## walk_forward 결합 (forecastRuleFactory)
+
+forecast 모델을 walk-forward 로 OOS 검증하려면 `forecastRuleFactory` 를 `walk_forward(rule_factory=...)` 에 전달:
+
+```python
+from dartlab.quant.forecast import forecastRuleFactory
+from dartlab.quant.strategy.backtest import walk_forward
+
+factory = forecastRuleFactory(threshold=0.002, models=["ar1"])
+bt = walk_forward(close, rule=None, rule_factory=factory, train=120, test=20, step=20)
+# bt.cpcv["refit_count"] = fold 마다 재학습 횟수
+# bt.pbo                 = OOS 의 PBO (overfitting probability)
+```
+
+fold 마다 IS 구간만 보고 forecast 모델 fit, OOS 일수만큼 점추정 + Conformal interval → threshold 룰 (point > threshold AND lower > -threshold) 로 entry 산출. forecast 의 OOS Sharpe / DSR / PBO 가 *진짜 forward-looking* 검증.
+
 ## 한계 및 비목표
 
 - AutoARIMA / TBATS / SARIMA / GARCH-fit 가격 예측은 본 축 범위 밖 (base install SSOT 보존)
