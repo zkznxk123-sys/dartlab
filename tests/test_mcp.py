@@ -47,16 +47,16 @@ def test_mcp_tool_schema_valid():
 
 
 def test_mcp_canonical_tools_execute():
-    """canonical tool dispatch (registry SSOT 경유)."""
+    """canonical tool dispatch (registry SSOT 경유). 0.11 부터 dict 직접 반환 (structuredContent 활용)."""
     from dartlab.mcp import _executeWorkspaceAgentTool
 
-    found = json.loads(_executeWorkspaceAgentTool("ReadSkill", {"query": "테스트 규칙", "limit": 3}))
+    found = _executeWorkspaceAgentTool("ReadSkill", {"query": "테스트 규칙", "limit": 3})
     assert found["refs"][0]["id"] == "skill:operation.testing"
 
-    spec = json.loads(_executeWorkspaceAgentTool("ReadCapability", {"query": "재무상태표", "limit": 5}))
+    spec = _executeWorkspaceAgentTool("ReadCapability", {"query": "재무상태표", "limit": 5})
     assert spec["refs"]
 
-    executed = json.loads(_executeWorkspaceAgentTool("RunPython", {"code": "emit_result(values={'x': 1})"}))
+    executed = _executeWorkspaceAgentTool("RunPython", {"code": "emit_result(values={'x': 1})"})
     assert executed["ok"] is True
     assert any(ref["kind"] == "executionRef" for ref in executed["refs"])
 
@@ -66,8 +66,8 @@ def test_mcp_legacy_snake_alias_dispatch():
     from dartlab.mcp import _executeWorkspaceAgentTool
 
     # skill_search alias → ReadSkill 로 정규화
-    via_alias = json.loads(_executeWorkspaceAgentTool("skill_search", {"query": "테스트 규칙", "limit": 3}))
-    direct = json.loads(_executeWorkspaceAgentTool("ReadSkill", {"query": "테스트 규칙", "limit": 3}))
+    via_alias = _executeWorkspaceAgentTool("skill_search", {"query": "테스트 규칙", "limit": 3})
+    direct = _executeWorkspaceAgentTool("ReadSkill", {"query": "테스트 규칙", "limit": 3})
     assert {ref["id"] for ref in via_alias["refs"]} == {ref["id"] for ref in direct["refs"]}
 
 
@@ -75,10 +75,28 @@ def test_mcp_unknown_tool_message():
     """0.10 에서 폐기된 옛 33 generated 도구 호출 시 마이그레이션 안내 포함 메시지 반환."""
     from dartlab.mcp import _executeWorkspaceAgentTool
 
-    payload = json.loads(_executeWorkspaceAgentTool("companyInsights", {"stockCode": "005930"}))
+    payload = _executeWorkspaceAgentTool("companyInsights", {"stockCode": "005930"})
     assert payload["ok"] is False
     assert "RunPython" in payload["error"]
     assert "0.10" in payload["error"]
+
+
+def test_mcp_advertised_tools_carry_annotations():
+    """0.11 — 모든 도구가 readOnly/destructive/idempotent/openWorld hint 를 노출."""
+    from dartlab.mcp import _advertisedTools
+
+    tools = {t["name"]: t for t in _advertisedTools()}
+    # canonical 6 + ask 모두 annotations 키 보유
+    for name in ("ask", "ReadSkill", "ReadCapability", "RunPython", "WebSearch", "SaveArtifact", "CompileVisual"):
+        ann = tools[name]["annotations"]
+        for key in ("readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint"):
+            assert key in ann, f"{name} 의 annotations 에 {key} 누락"
+            assert isinstance(ann[key], bool)
+    # 핵심 분류 검증
+    assert tools["ReadSkill"]["annotations"]["readOnlyHint"] is True
+    assert tools["WebSearch"]["annotations"]["openWorldHint"] is True
+    assert tools["SaveArtifact"]["annotations"]["readOnlyHint"] is False
+    assert tools["RunPython"]["annotations"]["idempotentHint"] is False
 
 
 def test_mcp_skill_resources_are_readable():

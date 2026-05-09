@@ -64,6 +64,11 @@ def _askWorkbenchToolSpecs() -> list[dict[str, Any]]:
             "properties": {"question": {"type": "string"}, "stockCode": {"type": "string"}},
             "required": ["question"],
         },
+        # ask 는 5 패스 elevate — 내부에서 RunPython / SaveArtifact 호출 가능. read-only 단정 X.
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": False,
+        "openWorldHint": False,
     }
     return [specs[name] for name in _MCP_WORKSPACE_AGENT_TOOL_NAMES]
 
@@ -135,9 +140,15 @@ def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _executeWorkspaceAgentTool(name: str, args: dict[str, Any]) -> str:
-    """canonical Ask Workbench MCP 도구 실행 → JSON 직렬화."""
-    return json.dumps(_executeAskWorkbenchTool(name, args), ensure_ascii=False, indent=2, default=str)
+def _executeWorkspaceAgentTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+    """canonical Ask Workbench MCP 도구 실행 → 정형 dict.
+
+    SDK 의 call_tool 은 dict 반환을 받으면 structuredContent + serialized text 양쪽
+    모두 채운다 (mcp.server.lowlevel.server.Server.call_tool docstring). 그래서 이 함수는
+    dict 만 반환하고 call_tool handler 가 그대로 return — 외부 LLM 이 ref/values/table 등을
+    structured 로 파싱 가능 + 텍스트 클라이언트도 호환.
+    """
+    return _executeAskWorkbenchTool(name, args)
 
 
 def _resourcePayload(uri_str: str) -> tuple[str, str]:
@@ -253,16 +264,26 @@ planDartlabQuestion / validateDartlabPlan / listDartlabProcesses) 는 모두 Run
 
 
 def _advertisedTools() -> list[dict[str, Any]]:
-    """MCP list_tools 에 노출할 도구 — registry canonical 6 + ask."""
+    """MCP list_tools 에 노출할 도구 — registry canonical 6 + ask.
+
+    각 도구의 ToolSpec annotations (readOnly/destructive/idempotent/openWorld hint) 도 함께
+    노출 — `list_tools()` handler 가 ToolAnnotations 로 매핑한다.
+    """
     tools: list[dict[str, Any]] = []
     for spec in _askWorkbenchToolSpecs():
         schema = spec.get("inputSchema") or {}
+        annotations: dict[str, bool] = {}
+        for key in ("readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint"):
+            value = spec.get(key)
+            if value is not None:
+                annotations[key] = bool(value)
         tools.append(
             {
                 "name": spec["name"],
                 "description": spec["description"],
                 "params": schema.get("properties") or {},
                 "required": schema.get("required") or [],
+                "annotations": annotations,
             }
         )
     return tools
@@ -278,32 +299,51 @@ def create_server():
     try:
         from mcp.server import Server
         from mcp.server.lowlevel.server import ReadResourceContents
-        from mcp.types import Resource, TextContent, Tool
+        from mcp.types import (
+            GetPromptResult,
+            Prompt,
+            PromptArgument,
+            PromptMessage,
+            Resource,
+            TextContent,
+            Tool,
+            ToolAnnotations,
+        )
     except ImportError as exc:
         raise ImportError("MCP SDK 필요: pip install --upgrade dartlab") from exc
 
     app = Server("dartlab", instructions=_MCP_INSTRUCTIONS)
     _log.info("MCP 서버 초기화 완료")
 
+    def _to_annotations(spec_annotations: dict[str, bool]) -> ToolAnnotations | None:
+        if not spec_annotations:
+            return None
+        return ToolAnnotations(**spec_annotations)
+
     @app.list_tools()
     async def list_tools() -> list[Tool]:
-        return [
-            Tool(
-                name=t["name"],
-                description=t["description"],
-                inputSchema={
-                    "type": "object",
-                    "properties": t["params"],
-                    "required": t["required"],
-                },
+        tools: list[Tool] = []
+        for t in _advertisedTools():
+            tools.append(
+                Tool(
+                    name=t["name"],
+                    description=t["description"],
+                    inputSchema={
+                        "type": "object",
+                        "properties": t["params"],
+                        "required": t["required"],
+                    },
+                    annotations=_to_annotations(t.get("annotations") or {}),
+                )
             )
-            for t in _advertisedTools()
-        ]
+        return tools
 
     @app.call_tool()
-    async def call_tool(name: str, arguments: dict) -> list[TextContent]:
+    async def call_tool(name: str, arguments: dict) -> dict[str, Any]:
+        # SDK 가 dict 반환을 받으면 structuredContent + serialized text 양쪽 모두 자동 채움.
+        # 외부 LLM 은 ref/values/table 등을 structured 로 파싱 가능 + 텍스트 클라이언트 호환.
         _log.info("call_tool: %s(%s)", name, list(arguments.keys()))
-        return [TextContent(type="text", text=_executeWorkspaceAgentTool(name, arguments))]
+        return _executeWorkspaceAgentTool(name, arguments)
 
     @app.list_resources()
     async def list_resources() -> list[Resource]:
@@ -345,6 +385,71 @@ def create_server():
         uri_str = str(uri)
         content, mime_type = _resourcePayload(uri_str)
         return [ReadResourceContents(content=content, mime_type=mime_type)]
+
+    # ── Prompts API — Skill OS recipe 카테고리를 prompt 로 노출 ─────────────────
+    # 외부 LLM 이 한 번의 prompt 호출로 multi-step 분석 시나리오를 받음. arguments 는
+    # skill 의 inputs frontmatter 에서 derive — required=False (LLM 이 채우거나 무시).
+
+    @app.list_prompts()
+    async def list_prompts() -> list[Prompt]:
+        from dartlab.skills import listSkills
+
+        recipes = [s for s in listSkills(includeUser=False) if s.kind == "recipe"]
+        prompts: list[Prompt] = []
+        for spec in recipes:
+            args = [
+                PromptArgument(name=f"input{idx + 1}", description=text, required=False)
+                for idx, text in enumerate(spec.inputs or [])
+            ]
+            prompts.append(
+                Prompt(
+                    name=spec.id,
+                    description=f"{spec.title} — {spec.purpose[:200]}" if spec.purpose else spec.title,
+                    arguments=args or None,
+                )
+            )
+        return prompts
+
+    # ── logging/setLevel — 클라이언트가 dartlab logger 레벨 동적 조정 ─────────
+    @app.set_logging_level()
+    async def set_logging_level(level: str) -> None:
+        # MCP LoggingLevel 은 RFC5424 (debug/info/notice/warning/error/critical/alert/emergency).
+        # Python logging 은 이 중 일부만 매칭. 그 외는 가장 가까운 표준 레벨로 매핑.
+        mapping = {
+            "debug": logging.DEBUG,
+            "info": logging.INFO,
+            "notice": logging.INFO,
+            "warning": logging.WARNING,
+            "error": logging.ERROR,
+            "critical": logging.CRITICAL,
+            "alert": logging.CRITICAL,
+            "emergency": logging.CRITICAL,
+        }
+        py_level = mapping.get(str(level).lower(), logging.INFO)
+        _log.setLevel(py_level)
+        _log.info("logger level set to %s (Python %d) by client", level, py_level)
+
+    @app.get_prompt()
+    async def get_prompt(name: str, arguments: dict[str, str] | None = None) -> GetPromptResult:
+        from dartlab.skills import getSkill
+
+        try:
+            spec = getSkill(name, includeUser=False)
+        except KeyError as exc:
+            raise ValueError(f"Unknown prompt: {name}") from exc
+
+        body = str(spec.source.get("body") or "")
+        # 사용자 arguments 가 있으면 본문 위에 컨텍스트 블록 prepend.
+        prefix = ""
+        if arguments:
+            lines = "\n".join(f"- {k}: {v}" for k, v in arguments.items())
+            prefix = f"## 사용자 입력\n{lines}\n\n---\n\n"
+        text = f"# {spec.title}\n\n{spec.purpose}\n\n{prefix}{body}"
+
+        return GetPromptResult(
+            description=spec.title,
+            messages=[PromptMessage(role="user", content=TextContent(type="text", text=text))],
+        )
 
     return app
 

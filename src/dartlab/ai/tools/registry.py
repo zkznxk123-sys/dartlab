@@ -36,6 +36,10 @@ _SPECS: dict[str, ToolSpec] = {
             },
             "required": ["query"],
         },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
     ),
     "GetSkillBody": ToolSpec(
         "GetSkillBody",
@@ -45,6 +49,10 @@ _SPECS: dict[str, ToolSpec] = {
             "properties": {"skillId": {"type": "string"}},
             "required": ["skillId"],
         },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
     ),
     "ReadCapability": ToolSpec(
         "ReadCapability",
@@ -54,6 +62,10 @@ _SPECS: dict[str, ToolSpec] = {
             "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}},
             "required": ["query"],
         },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
     ),
     # ── 데이터 호출 — 실행 도구 ──
     "EngineCall": ToolSpec(
@@ -74,6 +86,10 @@ _SPECS: dict[str, ToolSpec] = {
             },
             "required": ["apiRef"],
         },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
     ),
     "RunPython": ToolSpec(
         "RunPython",
@@ -83,6 +99,11 @@ _SPECS: dict[str, ToolSpec] = {
             "properties": {"code": {"type": "string"}, "runId": {"type": "string"}},
             "required": ["code"],
         },
+        # 임의 코드 실행 — read-only 라 단정 못 함 (사용자 코드가 SaveArtifact 같은 도구 우회 가능).
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=False,
     ),
     "InspectDataset": ToolSpec(
         "InspectDataset",
@@ -98,6 +119,10 @@ _SPECS: dict[str, ToolSpec] = {
             },
             "required": ["target"],
         },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
     ),
     # ── 파일·외부 ──
     "Read": ToolSpec(
@@ -112,6 +137,10 @@ _SPECS: dict[str, ToolSpec] = {
             },
             "required": ["target"],
         },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
     ),
     "WebSearch": ToolSpec(
         "WebSearch",
@@ -121,6 +150,11 @@ _SPECS: dict[str, ToolSpec] = {
             "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}},
             "required": ["query"],
         },
+        # 외부 검색 — 결과가 외부 환경 (web) 의존, idempotent 아님, openWorld True.
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=True,
     ),
     # ── 산출 ──
     "SaveArtifact": ToolSpec(
@@ -135,6 +169,12 @@ _SPECS: dict[str, ToolSpec] = {
             },
             "required": ["name", "content"],
         },
+        # 디스크 쓰기 — 사용자 홈 ~/.dartlab/artifacts/ 에 새 파일 생성. 같은 이름 두 번 호출 시
+        # 덮어쓰기 가능 (idempotent 아님). destructive 는 아니지만 read-only 도 아님.
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=False,
     ),
     "CompileVisual": ToolSpec(
         "CompileVisual",
@@ -159,6 +199,11 @@ _SPECS: dict[str, ToolSpec] = {
             },
             "required": ["chartType", "data"],
         },
+        # 메모리 spec 생성 — 디스크 쓰기 없음. 같은 입력은 같은 spec.
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
     ),
     # ── elevate (옵션 sub-agent) ──
     "RunWorkbench": ToolSpec(
@@ -173,6 +218,11 @@ _SPECS: dict[str, ToolSpec] = {
             },
             "required": ["question"],
         },
+        # 5 패스 elevate — 내부에서 RunPython / SaveArtifact 호출 가능. read-only 단정 X.
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=False,
     ),
 }
 

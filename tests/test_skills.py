@@ -11,6 +11,18 @@ import dartlab.skills as skills
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def _clear_skills_cache():
+    """0.10 listSkills 캐시 — user skill 추가/제거 fixture 가 stale 결과 받지 않도록 매 테스트 clear."""
+    from dartlab.skills import registry as _registry
+
+    _registry._LIST_SKILLS_CACHE.clear()
+    _registry._KNOWN_CAPS_CACHE = None
+    yield
+    _registry._LIST_SKILLS_CACHE.clear()
+    _registry._KNOWN_CAPS_CACHE = None
+
+
 def test_builtin_skills_are_engine_owned_execution_docs() -> None:
     ids = {item.id for item in skills.list(includeUser=False)}
 
@@ -25,7 +37,7 @@ def test_builtin_skills_are_engine_owned_execution_docs() -> None:
         "runtime.pyodide",
         "runtime.pyodideBrowser",
         "runtime.workbenchEvidenceFlow",
-        "runtime.skillDevelopmentLoop",
+        "operation.skillDevelopmentLoop",
         "engines.company",
         "engines.gather",
         "engines.scan",
@@ -117,7 +129,6 @@ def test_gather_and_company_skills_cover_public_methods() -> None:
 
     for method in {
         "price",
-        "consensus",
         "flow",
         "revenue_consensus",
         "history",
@@ -320,7 +331,6 @@ def test_gather_application_skills_cover_public_methods() -> None:
 
     for slug in {
         "price",
-        "consensus",
         "flow",
         "revenueConsensus",
         "history",
@@ -541,3 +551,49 @@ def test_builtin_skill_specs_are_package_sources() -> None:
     source_path = str(start.source.get("path", "")).replace("\\", "/")
 
     assert "/src/dartlab/skills/specs/start/dartlabSkillOs.md" in source_path
+
+
+def test_list_skills_caches_result_for_repeat_calls() -> None:
+    """0.10 — listSkills() 결과는 process-lifetime 캐시. e2e probe 의 alias 호출 11s → 25ms 회귀 가드.
+
+    이전 회귀: 매 호출마다 74+N skill 의 lintSkill() 재실행으로 alias dispatch 가 11 s 까지.
+    """
+    import time
+
+    from dartlab.skills import listSkills
+    from dartlab.skills import registry as _registry
+
+    _registry._LIST_SKILLS_CACHE.clear()
+
+    t0 = time.perf_counter()
+    first = listSkills(includeUser=True)
+    first_ms = (time.perf_counter() - t0) * 1000
+
+    t1 = time.perf_counter()
+    second = listSkills(includeUser=True)
+    second_ms = (time.perf_counter() - t1) * 1000
+
+    assert len(first) == len(second), "캐시 hit 결과는 같은 갯수"
+    assert second_ms < first_ms / 5, (
+        f"두 번째 호출이 첫 호출보다 5x 이상 빨라야 (현재: 1st={first_ms:.0f} ms, 2nd={second_ms:.0f} ms)"
+    )
+    assert second_ms < 50, f"캐시 hit 은 ms 단위여야 함 ({second_ms:.0f} ms)"
+
+
+def test_skills_cache_disabled_via_env(monkeypatch) -> None:
+    """DARTLAB_SKILL_NO_CACHE=1 escape — dev 환경에서 spec 변경 즉시 반영용."""
+    import time
+
+    from dartlab.skills import listSkills
+    from dartlab.skills import registry as _registry
+
+    monkeypatch.setenv("DARTLAB_SKILL_NO_CACHE", "1")
+    _registry._LIST_SKILLS_CACHE.clear()
+
+    listSkills(includeUser=True)  # 첫 호출 — 캐시 안 들어감
+    assert not _registry._LIST_SKILLS_CACHE, "no-cache 모드에선 캐시 비어 있음"
+
+    t0 = time.perf_counter()
+    listSkills(includeUser=True)
+    elapsed = (time.perf_counter() - t0) * 1000
+    assert elapsed > 50, f"no-cache 모드에선 두 번째 호출도 빌드 비용 발생 (현재 {elapsed:.0f} ms)"

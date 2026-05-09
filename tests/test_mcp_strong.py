@@ -1,0 +1,117 @@
+"""MCP 0.11 강화 사이클 e2e — Python MCP SDK client 로 실제 attach 후 표준 5 종 검증.
+
+검증 대상:
+- ToolAnnotations (readOnly/destructive/idempotent/openWorld) advertise
+- CallToolResult.structuredContent — RunPython 의 ref dict 직접 노출
+- prompts/list + prompts/get — Skill OS recipe 카테고리 노출
+- logging/setLevel — 클라이언트가 dartlab logger 동적 레벨 조정
+- alias 회귀 가드 — skill_search → ReadSkill 정규화 여전히 작동
+"""
+
+from __future__ import annotations
+
+import asyncio
+import os
+import sys
+
+import pytest
+
+pytestmark = pytest.mark.unit
+
+
+def _ensure_proactor_loop() -> None:
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
+
+async def _run_probe() -> dict:
+    """MCP stdio 서버 attach + 표준 5 종 호출. 결과를 dict 로 모아 assertion 영역에서 검증."""
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONUNBUFFERED"] = "1"
+    server = StdioServerParameters(command="dartlab", args=["mcp"], env=env)
+
+    out: dict = {}
+    async with stdio_client(server) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+
+            # 1. tools/list → annotations 확인
+            tools = await session.list_tools()
+            out["tool_annotations"] = {
+                t.name: {
+                    "readOnly": t.annotations.readOnlyHint if t.annotations else None,
+                    "destructive": t.annotations.destructiveHint if t.annotations else None,
+                    "idempotent": t.annotations.idempotentHint if t.annotations else None,
+                    "openWorld": t.annotations.openWorldHint if t.annotations else None,
+                }
+                for t in tools.tools
+            }
+
+            # 2. structuredContent 검증 (RunPython)
+            run_result = await session.call_tool("RunPython", {"code": "emit_result(values={'sanity': 1})"})
+            out["structured_content"] = run_result.structuredContent
+
+            # 3. alias 회귀 가드
+            alias_result = await session.call_tool("skill_search", {"query": "테스트"})
+            out["alias_dispatch_ok"] = alias_result.structuredContent is not None and not alias_result.isError
+
+            # 4. prompts/list — recipe 카테고리 노출
+            prompts = await session.list_prompts()
+            out["prompts"] = [(p.name, len(p.arguments or [])) for p in prompts.prompts]
+
+            # 5. prompts/get — recipe 본문 + arguments prefix
+            try:
+                got = await session.get_prompt("engines.recipe.dailyMorningNote", {"tickers": "005930"})
+                out["prompt_body_chars"] = len(got.messages[0].content.text) if got.messages else 0
+                out["prompt_includes_user_input"] = "사용자 입력" in (got.messages[0].content.text or "")
+            except Exception as exc:
+                out["prompt_get_error"] = str(exc)
+
+            # 6. logging/setLevel — 동적 조정
+            try:
+                await session.set_logging_level("debug")
+                out["set_level_ok"] = True
+            except Exception as exc:
+                out["set_level_error"] = str(exc)
+
+    return out
+
+
+def test_mcp_strong_annotations_and_structured_and_prompts():
+    """0.11 — ToolAnnotations + structuredContent + prompts + setLevel 모두 e2e 동작."""
+    _ensure_proactor_loop()
+    out = asyncio.run(_run_probe())
+
+    # ── ToolAnnotations ──
+    ann = out["tool_annotations"]
+    assert ann["ReadSkill"]["readOnly"] is True
+    assert ann["ReadSkill"]["idempotent"] is True
+    assert ann["WebSearch"]["openWorld"] is True
+    assert ann["SaveArtifact"]["readOnly"] is False
+    assert ann["RunPython"]["idempotent"] is False
+    assert ann["ask"]["readOnly"] is False
+
+    # ── structuredContent ──
+    sc = out["structured_content"]
+    assert sc is not None, "RunPython 응답에 structuredContent 가 있어야 함"
+    assert sc.get("ok") is True
+    refs = sc.get("refs") or []
+    assert any(r.get("kind") == "executionRef" for r in refs), "executionRef 가 dict 로 노출되어야 함"
+
+    # ── alias 회귀 가드 ──
+    assert out["alias_dispatch_ok"], "skill_search alias 가 ReadSkill 로 정규화 안 됨"
+
+    # ── prompts ──
+    assert len(out["prompts"]) >= 10, f"recipe 카테고리 prompts ≥ 10 노출 (실제 {len(out['prompts'])})"
+    prompt_names = {name for name, _ in out["prompts"]}
+    assert "engines.recipe.dailyMorningNote" in prompt_names
+
+    assert out.get("prompt_body_chars", 0) > 500, "recipe prompt 본문이 500 chars 이상"
+    assert out.get("prompt_includes_user_input"), "사용자 arguments 가 prompt 본문에 prefix 됨"
+
+    # ── logging/setLevel ──
+    assert out.get("set_level_ok") is True, f"setLevel 실패: {out.get('set_level_error')}"
