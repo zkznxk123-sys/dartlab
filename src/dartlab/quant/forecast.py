@@ -456,7 +456,7 @@ def forecastReturns(
     }
 
 
-# ── walk_forward refit helper (forecast → Rule 변환) ────────
+# ── walkForward refit helper (forecast → Rule 변환) ────────
 
 
 def forecastRuleFactory(
@@ -467,9 +467,9 @@ def forecastRuleFactory(
     alpha: float = 0.10,
     requireConfidence: bool = False,
 ):
-    """forecast 모델 기반 walk_forward rule_factory 생성.
+    """forecast 모델 기반 walkForward rule_factory 생성.
 
-    walk_forward(close, rule_factory=forecastRuleFactory(threshold=0.0005), ...) 형태로
+    walkForward(close, rule_factory=forecastRuleFactory(threshold=0.0005), ...) 형태로
     사용. fold 마다 IS 구간만 보고 forecast fit, OOS 일수만큼 점추정 + interval 산출,
     threshold 룰로 entry/exit boolean 변환.
 
@@ -517,9 +517,9 @@ def forecastRuleFactory(
     Examples
     --------
     >>> from dartlab.quant.forecast import forecastRuleFactory
-    >>> from dartlab.quant.strategy.backtest import walk_forward
+    >>> from dartlab.quant.strategy.backtest import walkForward
     >>> factory = forecastRuleFactory(threshold=0.0005, models=["ar1"])
-    >>> bt = walk_forward(close, rule=None, rule_factory=factory, train=180, test=30, step=30)
+    >>> bt = walkForward(close, rule=None, rule_factory=factory, train=180, test=30, step=30)
     >>> bt.cpcv["refit_count"]   # fold 별 재학습 횟수
     """
     from dartlab.quant.strategy.rule import Rule

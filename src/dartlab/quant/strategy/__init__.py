@@ -7,7 +7,7 @@
     Signal — key→numpy array 컨테이너 (getattr 접근)
     Rule   — entry/exit boolean expression + sizing/stop 명시 주입
     BacktestResult — equity/returns/trades + sharpe/sortino/mdd/dsr/pbo
-    walk_forward / cpcv — Lopez de Prado purged k-fold
+    walkForward / cpcv — Lopez de Prado purged k-fold
 
 사용 예:
     >>> import dartlab
@@ -21,7 +21,7 @@
     >>> print(f"Sharpe={bt.sharpe:.2f} DSR={bt.dsr:.2f}")
 """
 
-from .backtest import BacktestResult, cpcv, multi_asset_backtest, vector_backtest, walk_forward
+from .backtest import BacktestResult, cpcv, multi_asset_backtest, vector_backtest, walkForward
 from .metrics import (
     dsr,
     expectancy,
@@ -43,7 +43,7 @@ __all__ = [
     "Rule",
     "BacktestResult",
     "vector_backtest",
-    "walk_forward",
+    "walkForward",
     "cpcv",
     "multi_asset_backtest",
     "STYLE_REGISTRY",

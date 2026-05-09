@@ -101,14 +101,14 @@ result = dartlab.quant.walkforward("005930")
 
 ### rule_factory 옵션 (forecast OOS 검증)
 
-기본 호출은 정적 Rule 슬라이스 — 같은 entry/exit 시계열을 IS/OOS 에 그대로 적용. forecast 모델처럼 *IS fit + OOS predict* 패턴은 ``walk_forward(close, rule=None, rule_factory=...)`` 로 호출.
+기본 호출은 정적 Rule 슬라이스 — 같은 entry/exit 시계열을 IS/OOS 에 그대로 적용. forecast 모델처럼 *IS fit + OOS predict* 패턴은 ``walkForward(close, rule=None, rule_factory=...)`` 로 호출.
 
 ```python
 from dartlab.quant.forecast import forecastRuleFactory
-from dartlab.quant.strategy.backtest import walk_forward
+from dartlab.quant.strategy.backtest import walkForward
 
 factory = forecastRuleFactory(threshold=0.002, models=["ar1"])
-bt = walk_forward(close, rule=None, rule_factory=factory, train=120, test=20, step=20)
+bt = walkForward(close, rule=None, rule_factory=factory, train=120, test=20, step=20)
 bt.cpcv["refit_count"]   # fold 마다 재학습 횟수 (= n_folds)
 bt.cpcv["is_sharpes"]    # IS 학습 fold 별 Sharpe
 bt.cpcv["oos_sharpes"]   # OOS 검증 fold 별 Sharpe

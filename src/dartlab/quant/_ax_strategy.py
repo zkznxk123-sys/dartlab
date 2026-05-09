@@ -23,7 +23,7 @@ from dartlab.quant.strategy.backtest import (
     BacktestResult,
     multi_asset_backtest,
     vector_backtest,
-    walk_forward,
+    walkForward,
 )
 from dartlab.quant.strategy.backtest import (
     cpcv as cpcv_fn,
@@ -113,8 +113,8 @@ def runStrategy(
     Args:
         stockCode: 종목코드
         rule: Rule 객체 (필수)
-        oos: True 면 walk_forward
-        train/test/step: walk_forward 파라미터
+        oos: True 면 walkForward
+        train/test/step: walkForward 파라미터
     """
     if rule is None:
         return BacktestResult(status="error", reason="rule= is required", style=None)
@@ -124,7 +124,7 @@ def runStrategy(
         return BacktestResult(status="error", reason=f"insufficient OHLCV: {stockCode}", style=None)
 
     if oos:
-        return walk_forward(
+        return walkForward(
             close,
             rule,
             train=train,
@@ -456,7 +456,7 @@ def runWalkforward(
             return result
         rule = result
 
-    return walk_forward(
+    return walkForward(
         close,
         rule,
         train=train,

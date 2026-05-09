@@ -10,7 +10,7 @@ numpy/polars 만 사용. vectorbt/zipline/backtrader 의존 0.
 
 출력: BacktestResult dataclass — equity/returns/trades/sharpe/sortino/mdd/dsr/.../
 
-walk_forward + cpcv 로 OOS Sharpe + DSR + PBO 산출 가능.
+walkForward + cpcv 로 OOS Sharpe + DSR + PBO 산출 가능.
 """
 
 from __future__ import annotations
@@ -345,7 +345,7 @@ def _build_stop_series(close, high, low, stop_spec) -> np.ndarray:
 # ── Walk-forward + CPCV ─────────────────────────────────────────────────────
 
 
-def walk_forward(
+def walkForward(
     close: np.ndarray,
     rule: Rule | None = None,
     *,
@@ -393,7 +393,7 @@ def walk_forward(
     ...     exit_ = np.zeros_like(entry)
     ...     return Rule(entry_expr=entry, exit_expr=exit_)
     ...
-    >>> walk_forward(close, rule=None, rule_factory=factory, train=252, test=63)
+    >>> walkForward(close, rule=None, rule_factory=factory, train=252, test=63)
     """
     if rule is None and rule_factory is None:
         return BacktestResult(
@@ -768,3 +768,9 @@ def cpcv(
         oos=True,
         cpcv={"fold_sharpes": fold_sharpes, "n_folds": len(fold_sharpes), "n_splits": n_splits, "n_test": n_test},
     )
+
+
+# ── Deprecated snake_case aliases ────────────────────────
+from dartlab.quant._helpers import _deprecatedAlias as _dep
+
+walk_forward = _dep(walkForward, "walk_forward")

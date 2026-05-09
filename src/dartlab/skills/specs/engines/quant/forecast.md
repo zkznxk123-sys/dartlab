@@ -176,17 +176,17 @@ forecast 결과를 인용할 때 다음을 함께 명시:
 - Cycle 1 회귀 (2026-05-09): 005930 실데이터에서 theta 가 +1.8%/day 비현실 점추정 →
   dispatch 룰을 ar1 로 변경. theta 는 명시 호출 시에만 사용 가능하도록 가드.
 
-## walk_forward 결합 (forecastRuleFactory)
+## walkForward 결합 (forecastRuleFactory)
 
-forecast 모델을 walk-forward 로 OOS 검증하려면 `forecastRuleFactory` 를 `walk_forward(rule_factory=...)` 에 전달:
+forecast 모델을 walk-forward 로 OOS 검증하려면 `forecastRuleFactory` 를 `walkForward(rule_factory=...)` 에 전달:
 
 ```python
 from dartlab.quant.forecast import forecastRuleFactory
-from dartlab.quant.strategy.backtest import walk_forward
+from dartlab.quant.strategy.backtest import walkForward
 
 # Loose mode (default) — point only
 factory = forecastRuleFactory(threshold=0.0005, models=["ar1"])
-bt = walk_forward(close, rule=None, rule_factory=factory, train=180, test=30, step=30)
+bt = walkForward(close, rule=None, rule_factory=factory, train=180, test=30, step=30)
 # bt.cpcv["refit_count"] = fold 마다 재학습 횟수
 # bt.pbo                 = None (refit path 에서는 IS region all-False 설계라 PBO 무의미 → 자동 None)
 # bt.dsr                 = OOS Deflated Sharpe Ratio (Lopez de Prado)

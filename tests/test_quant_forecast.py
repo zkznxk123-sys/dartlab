@@ -366,7 +366,7 @@ class TestAxisRegistry:
 
 
 # ═══════════════════════════════════════════════════════════
-# forecastRuleFactory + walk_forward(rule_factory=...) 결합
+# forecastRuleFactory + walkForward(rule_factory=...) 결합
 # ═══════════════════════════════════════════════════════════
 
 
@@ -403,11 +403,11 @@ class TestForecastRuleFactory:
 
     def test_walk_forward_with_factory(self):
         from dartlab.quant.forecast import forecastRuleFactory
-        from dartlab.quant.strategy.backtest import walk_forward
+        from dartlab.quant.strategy.backtest import walkForward
 
         close = _uptrend_close(n=400)
         factory = forecastRuleFactory(threshold=0.0005, models=["ar1"])
-        bt = walk_forward(close, rule=None, rule_factory=factory, train=200, test=50, step=50)
+        bt = walkForward(close, rule=None, rule_factory=factory, train=200, test=50, step=50)
         assert bt.status == "ok"
         assert bt.oos is True
         assert bt.cpcv is not None
@@ -419,14 +419,14 @@ class TestForecastRuleFactory:
     def test_walk_forward_factory_loose_mode_entry_active(self):
         """loose mode (default) — 강한 trend 합성 데이터에서 entry 활성화 (쓸만함 검증)."""
         from dartlab.quant.forecast import forecastRuleFactory
-        from dartlab.quant.strategy.backtest import walk_forward
+        from dartlab.quant.strategy.backtest import walkForward
 
         # 강한 drift +0.3%/day
         rng = np.random.default_rng(11)
         n = 600
         close = 100.0 * np.exp(np.concatenate([[0.0], np.cumsum(0.003 + 0.005 * rng.standard_normal(n - 1))]))
         factory = forecastRuleFactory(threshold=0.0005, models=["ar1"])
-        bt = walk_forward(close, rule=None, rule_factory=factory, train=200, test=40, step=40)
+        bt = walkForward(close, rule=None, rule_factory=factory, train=200, test=40, step=40)
         assert bt.status == "ok"
         # 강한 trend → entry 일자 비율 > 50% (loose mode 검증)
         active_ratio = float(np.mean(bt.returns != 0))
@@ -437,23 +437,23 @@ class TestForecastRuleFactory:
     def test_walk_forward_factory_strict_mode(self):
         """strict mode — interval 검증 추가. 일별 conformal width 가 커서 entry 적음."""
         from dartlab.quant.forecast import forecastRuleFactory
-        from dartlab.quant.strategy.backtest import walk_forward
+        from dartlab.quant.strategy.backtest import walkForward
 
         close = _uptrend_close(n=400)
         factory = forecastRuleFactory(threshold=0.0005, models=["ar1"], requireConfidence=True)
-        bt = walk_forward(close, rule=None, rule_factory=factory, train=200, test=50, step=50)
+        bt = walkForward(close, rule=None, rule_factory=factory, train=200, test=50, step=50)
         assert bt.status == "ok"
         # strict 는 entry 가 매우 적거나 0 (예상된 동작)
         active_ratio = float(np.mean(bt.returns != 0))
         loose_factory = forecastRuleFactory(threshold=0.0005, models=["ar1"], requireConfidence=False)
-        bt_loose = walk_forward(close, rule=None, rule_factory=loose_factory, train=200, test=50, step=50)
+        bt_loose = walkForward(close, rule=None, rule_factory=loose_factory, train=200, test=50, step=50)
         loose_active = float(np.mean(bt_loose.returns != 0))
         # strict 는 loose 보다 entry 적거나 같다
         assert active_ratio <= loose_active
 
     def test_walk_forward_static_rule_still_works(self):
         """rule_factory 없이 정적 Rule 도 그대로 동작 (backward compat)."""
-        from dartlab.quant.strategy.backtest import walk_forward
+        from dartlab.quant.strategy.backtest import walkForward
         from dartlab.quant.strategy.rule import Rule
 
         close = _uptrend_close(n=400)
@@ -464,21 +464,21 @@ class TestForecastRuleFactory:
         entry[10] = True
         exit_[100] = True
         rule = Rule(entry_expr=entry, exit_expr=exit_)
-        bt = walk_forward(close, rule, train=200, test=50, step=50)
+        bt = walkForward(close, rule, train=200, test=50, step=50)
         # 정적 rule path 도 ok 상태
         assert bt.status == "ok"
         assert bt.cpcv.get("refit_count", 0) == 0
 
     def test_walk_forward_missing_both_returns_error(self):
-        from dartlab.quant.strategy.backtest import walk_forward
+        from dartlab.quant.strategy.backtest import walkForward
 
         close = _uptrend_close(n=400)
-        bt = walk_forward(close, rule=None, train=200, test=50, step=50)
+        bt = walkForward(close, rule=None, train=200, test=50, step=50)
         assert bt.status == "error"
         assert "rule" in (bt.reason or "")
 
     def test_walk_forward_factory_wrong_length_returns_error(self):
-        from dartlab.quant.strategy.backtest import walk_forward
+        from dartlab.quant.strategy.backtest import walkForward
         from dartlab.quant.strategy.rule import Rule
 
         def bad_factory(is_close, oos_len):
@@ -489,6 +489,6 @@ class TestForecastRuleFactory:
             )
 
         close = _uptrend_close(n=400)
-        bt = walk_forward(close, rule=None, rule_factory=bad_factory, train=200, test=50, step=50)
+        bt = walkForward(close, rule=None, rule_factory=bad_factory, train=200, test=50, step=50)
         assert bt.status == "error"
         assert "length" in (bt.reason or "")
