@@ -1187,6 +1187,15 @@
       ]
     },
     {
+      "id": "engines.recipe.cashflowGovernanceDualSignal",
+      "title": "현금흐름 품질 × 거버넌스 감사 동시 적신호",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.recipe.catalystCalendar",
       "title": "catalyst 일정 캘린더 (다가오는 정기공시 추론)",
       "category": "engines",
@@ -1209,6 +1218,15 @@
       ]
     },
     {
+      "id": "engines.recipe.companyMacroPathProjection",
+      "title": "회사 P&L × 매크로 시나리오 grid → 적정가치 분포 (p25/50/75)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.recipe.compounderCandidates",
       "title": "Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝",
       "category": "engines",
@@ -1218,6 +1236,15 @@
       "limitations": [
         "브라우저 안에서는 freq=\"Y\" 5 기간 시계열 일부 한정"
       ]
+    },
+    {
+      "id": "engines.recipe.creditCovenantStressTest",
+      "title": "차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.recipe.creditDeepDive",
@@ -1240,6 +1267,26 @@
       "limitations": [
         "브라우저 안에서는 다년 시계열 일부 한정"
       ]
+    },
+    {
+      "id": "engines.recipe.creditMacroStress",
+      "title": "신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "매크로 시계열 일부 한정"
+      ]
+    },
+    {
+      "id": "engines.recipe.creditQuantConsensus",
+      "title": "신용 dCR × 퀀트 부도 모델 3-source 합의 위험 종목",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.recipe.dailyMorningNote",
@@ -1297,6 +1344,24 @@
       ]
     },
     {
+      "id": "engines.recipe.disclosureToneToStoryRisk",
+      "title": "공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.recipe.distressCandidateScreen",
+      "title": "dCR 등급 전월비 하락 + 퀀트 sentiment 동시 약세 종목",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.recipe.distressFilter",
       "title": "Altman-lite 부도 위험 회피 필터 (역방향 블랙리스트)",
       "category": "engines",
@@ -1306,6 +1371,15 @@
       "limitations": [
         "브라우저 안에서는 다년 시계열 일부 한정"
       ]
+    },
+    {
+      "id": "engines.recipe.dividendStressTest",
+      "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.recipe.dividendThesis",
@@ -1363,6 +1437,15 @@
       ]
     },
     {
+      "id": "engines.recipe.filingTextSignal",
+      "title": "8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.recipe.financialStatementCompare",
       "title": "두 회사 재무제표 비교 (peer + show + 분해)",
       "category": "engines",
@@ -1407,6 +1490,15 @@
       ]
     },
     {
+      "id": "engines.recipe.governanceAuditNetwork",
+      "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.recipe.grahamDeepValue",
       "title": "Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)",
       "category": "engines",
@@ -1438,6 +1530,24 @@
       "limitations": [
         "browser 안에서는 industry stage 단일 호출만"
       ]
+    },
+    {
+      "id": "engines.recipe.industryStageScreen",
+      "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.recipe.insiderEarningsLeading",
+      "title": "내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.recipe.insiderEventCheck",
@@ -1484,6 +1594,15 @@
       ]
     },
     {
+      "id": "engines.recipe.macroBetaPeerScreen",
+      "title": "같은 산업 동종업체 macroBeta outlier — idiosyncratic 매크로 노출",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.recipe.macroLiquidityCycle",
       "title": "매크로 유동성 사이클 (금리 + 환율 + 유동성)",
       "category": "engines",
@@ -1493,6 +1612,15 @@
       "limitations": [
         "browser 안에서는 macro 시계열 일부 한정"
       ]
+    },
+    {
+      "id": "engines.recipe.macroQuantScenarioBacktest",
+      "title": "매크로 시나리오 (1997/2008/2020) × 퀀트 팩터 walk-forward backtest",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.recipe.macroToCompany",
@@ -1526,6 +1654,15 @@
       "limitations": [
         "브라우저 안에서는 freq=\"Y\" 5 기간 시계열 일부 한정"
       ]
+    },
+    {
+      "id": "engines.recipe.qualityMacroBeta",
+      "title": "퀄리티 (QMJ) × 매크로 사이클 — phase 의존 우량주",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     },
     {
       "id": "engines.recipe.qualityValueScreen",

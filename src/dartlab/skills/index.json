@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 231,
+    "skillCount": 246,
     "categories": [
       {
         "id": "start",
@@ -26,7 +26,7 @@
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 197
+        "count": 212
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -3613,7 +3613,11 @@
         "자본구조",
         "이자보상배율",
         "부채비율",
-        "외부 신평 비교"
+        "외부 신평 비교",
+        "migration matrix",
+        "등급 전이 행렬",
+        "PD ladder",
+        "누적 부도확률"
       ],
       "inputs": [
         "stockCode 또는 Company",
@@ -3673,7 +3677,9 @@
         "종합 등급 (grade · score)",
         "7 축 점수",
         "핵심 지표 (debtRatio · interestCoverage · OCF/부채)",
-        "외부 신평 비교 한계"
+        "외부 신평 비교 한계",
+        "migration matrix (등급 전이 확률 — credit.migration.buildTransitionMatrix)",
+        "forward PD ladder (등급별 1y/3y/5y 누적 부도확률 — credit.migration.forwardPdLadder)"
       ],
       "visualGuidance": [],
       "failureModes": [
@@ -5921,12 +5927,16 @@
         "공정 단계",
         "peer 그룹",
         "동종업종",
-        "산업 지도"
+        "산업 지도",
+        "산업 라이프사이클",
+        "lifecycle",
+        "Vernon phase",
+        "도입·성장·성숙·쇠퇴"
       ],
       "inputs": [
         "industryId 또는 종목코드 (Company-bound)",
         "stage 필터 (선택)",
-        "summary / timeline 모드"
+        "summary / timeline / lifecycle 모드"
       ],
       "requiredInputs": [],
       "outputs": [
@@ -5977,7 +5987,8 @@
         "산업 ID / 산업명",
         "공정 단계 + 종목 list",
         "매출/영업이익 집계 (summary)",
-        "연도별 공정 매출 추이 (timeline)"
+        "연도별 공정 매출 추이 (timeline)",
+        "라이프사이클 phase 시계열 (lifecycle — 도입·성장·성숙·쇠퇴)"
       ],
       "visualGuidance": [],
       "failureModes": [
@@ -5996,7 +6007,8 @@
         "삼성전자 밸류체인 위치 (전공정/후공정/장비)",
         "자동차 산업 peer 그룹 추출",
         "공정별 매출 집계 (summary)",
-        "연도별 공정 매출 추이 (timeline)"
+        "연도별 공정 매출 추이 (timeline)",
+        "산업 라이프사이클 phase 분류 (lifecycle — Vernon 3-phase + 쇠퇴)"
       ],
       "runtimeCompatibility": {
         "server": {
@@ -13513,6 +13525,81 @@
       }
     },
     {
+      "id": "engines.recipe.cashflowGovernanceDualSignal",
+      "title": "현금흐름 품질 × 거버넌스 감사 동시 적신호",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "accrual ratio (현금흐름 vs 회계이익 갭) + governance amber (이사회 독립성 / 특수관계자) + audit-change (감사인 변경) 3 신호 동시 발현 시 분식 / 회계 신뢰도 적신호. Dechow et al (2011) \"Predicting Material Accounting Misstatements\" 학술 결과 적용. analysis ↔ scan 격리 메우는 조합. 트리거 — '분식 의심', '회계 신뢰도', 'accrual governance audit'.",
+      "whenToUse": [
+        "분식 의심 종목",
+        "회계 신뢰도 적신호",
+        "accrual governance",
+        "감사 리스크"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.analysis.earningsQuality",
+        "engines.analysis.governance",
+        "engines.scan.audit"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`accrualRatio : float` · `highAccrual : bool`",
+        "`fcfNiRatio : float`",
+        "`boardIndependence : float` · `relatedPartyRatio : float` · `govAmber : bool`",
+        "`auditChanged : bool`",
+        "`flagCount : int (0~3)` · `tripleFlag : bool`"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "accrual ratio 가 산업 평균 (제조업 vs 서비스) 차이 무시.",
+        "governance amber 정의가 회사 size / industry 별 thresholds 다름."
+      ],
+      "forbidden": [
+        "단일 신호 (accrual 만) 로 분식 단정 금지.",
+        "감사인 변경 = 분식 단정 금지 — 정상 rotation 도 있음."
+      ],
+      "examples": [
+        "삼성전자 accrual + governance + audit triple",
+        "HMM 회계 신뢰도 적신호"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      }
+    },
+    {
       "id": "engines.recipe.catalystCalendar",
       "title": "catalyst 일정 캘린더 (다가오는 정기공시 추론)",
       "category": "engines",
@@ -13747,6 +13834,82 @@
       }
     },
     {
+      "id": "engines.recipe.companyMacroPathProjection",
+      "title": "회사 P&L × 매크로 시나리오 grid → 적정가치 분포 (p25/50/75)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "기존 base/bull/bear 3 path DCF 가 아니라 매크로 146 시나리오 (rate × FX × 사이클 × 침체) grid × 회사 elasticity → 146 P&L path → 146 fair value → 분포 (p25/p50/p75 + 현재가 대비 확률) 산출. 단일 점추정의 한계 보완. company ↔ macro ↔ analysis 격리 메우는 조합. 트리거 — '시나리오 적정가치 분포', 'fair value distribution', '146 시나리오 valuation'.",
+      "whenToUse": [
+        "시나리오 적정가치 분포",
+        "fair value distribution",
+        "146 macro path",
+        "DCF 분포"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.analysis.revenueForecast",
+        "engines.analysis.macroSensitivity",
+        "engines.macro.scenario",
+        "engines.analysis.valuation"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`scenarioCount : int`",
+        "`currentPrice : float`",
+        "`p25FairValue : float` · `p50FairValue : float` · `p75FairValue : float`",
+        "`probAboveCurrent : float`",
+        "`distributionStd : float`"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "146 시나리오가 너무 corner case 지향이면 분포 fat-tail 으로 왜곡.",
+        "DCF discount rate (WACC) 가 시나리오 별 변동 — 단순 일정 가정 시 분포 좁아짐."
+      ],
+      "forbidden": [
+        "단일 시나리오 (base) 만으로 적정가치 단정 금지 — 분포 필수.",
+        "elasticity 가 산업 평균만 사용 — 회사별 추정 신뢰도 차이 무시 금지."
+      ],
+      "examples": [
+        "삼성전자 146 시나리오 fair value 분포",
+        "현대차 시나리오 적정가치 p25/p50/p75"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      }
+    },
+    {
       "id": "engines.recipe.compounderCandidates",
       "title": "Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝",
       "category": "engines",
@@ -13841,6 +14004,81 @@
           "limitations": [
             "브라우저 안에서는 freq=\"Y\" 5 기간 시계열 일부 한정"
           ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.creditCovenantStressTest",
+      "title": "차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "차입금 covenant (DSCR ≥ 1.2 / Debt/Equity ≤ 2.0 등) 가 매크로 충격 (금리 path Monte Carlo) 에서 위반될 확률 추정. 비금융기업 quasi-CCAR. 단순 신용등급보다 covenant breach 가 더 정밀한 default 선행지표. analysis ↔ macro ↔ credit 격리 메우는 조합. 트리거 — 'covenant stress', 'DSCR 충격', '차입약정 위반'.",
+      "whenToUse": [
+        "covenant stress test",
+        "DSCR 충격",
+        "차입약정 위반 확률",
+        "매크로 covenant breach"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.analysis.financing",
+        "engines.macro.scenario",
+        "engines.credit"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`baseDSCR : float` · `dscrFloor : float`",
+        "`baseDE : float` · `deCeiling : float`",
+        "`shockedDSCR : float`",
+        "`covenantBreachProb : float` (0~1)",
+        "`bindingCovenant : str` — DSCR / Debt/Equity / (none)"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "covenant 정의 (보고서 안에 직접 기술 vs 차입 약정서) 차이.",
+        "rate path 가 단조 가정 (충격 후 회복 X) 시 conservative 편향."
+      ],
+      "forbidden": [
+        "명시 covenant 가 없는 회사 (소형주 일부) 에 implicit covenant 가정 단정 금지.",
+        "Monte Carlo path 1000 미만이면 tail 확률 신뢰도 낮음."
+      ],
+      "examples": [
+        "한국전력 covenant 위반 확률 매크로 충격",
+        "HMM DSCR 충격 시나리오"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
         }
       }
     },
@@ -14047,6 +14285,175 @@
           "limitations": [
             "브라우저 안에서는 다년 시계열 일부 한정"
           ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.creditMacroStress",
+      "title": "신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "단일 회사의 신용등급 (dCR + 7 axis) 가 매크로 충격 (금리 +200bp / 환율 +10% / 영업이익 -20%) 에서 유지 가능한지, 어떤 axis 가 먼저 깨지는지 판정. credit ↔ macro 격리 메우는 조합 — 정상 보고 dCR 은 시점 1 회 산출이라 미래 시나리오에서 어떻게 변하는지 보여주지 못한다. 트리거 — '신용 매크로 스트레스', '금리 충격 dCR', 'credit stress'.",
+      "whenToUse": [
+        "신용 매크로 스트레스",
+        "금리 충격 dCR",
+        "매크로 시나리오 신용",
+        "차입 금리 stress",
+        "부도 위험 매크로"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.credit",
+        "engines.macro",
+        "engines.analysis.macroSensitivity",
+        "engines.analysis.financing"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "**CCAR (Comprehensive Capital Analysis and Review)** — 미연방 은행 감독 매크로 시나리오 기반 자본 충분성 평가. 본 recipe 는 단일 비금융기업 적용 변형.",
+        "**EBA Stress Test** — 유럽은행감독청. baseline + adverse 두 path 비교 + 자본비율 시계열.",
+        "**Standard & Poor's Macro Sensitivity** — 신용등급 회사 cycle 위치 + 매크로 베타 종합.",
+        "비금융기업 stress test 는 학계·실무 통합 표준 없음. 본 recipe 는 dCR 7 axis 별 elasticity → shocked metric → 등급 재계산 휴리스틱.",
+        "금리 충격 → 이자비용 ↑ → 영업이익 ↓ → 채무상환 axis 약화 + 현금흐름 axis 약화 → dCR 등급 ↓.",
+        "환율 충격 → 원자재·수출비중 별 EBIT 변동 → 사업안정성 axis + 채무상환 axis 동시 영향.",
+        "`year : str`",
+        "`rateShockBp : int` — 충격 강도 (default 200bp)",
+        "`baseGrade : str` — 기본 dCR 등급",
+        "`shockedGrade : str` — 충격 후 등급",
+        "`baseICR : float` — 기본 Interest Coverage Ratio",
+        "`shockedICR : float` — 충격 후 ICR"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "금리 sensitivity 가 회사 specifics (변동/고정 비율) 무시한 단순 평균.",
+        "dCR 7 axis 중 어느 axis 가 binding 인지 분석 없이 등급만 보고.",
+        "macroSensitivity elasticity 가 회사별 추정 신뢰도 차이."
+      ],
+      "forbidden": [
+        "단일 시나리오 (200bp) 결과만 절대 단정 금지 — 100/200/300 다중 강도 비교.",
+        "macro 환경 변수 (금리만) 1 차원 충격 단정 금지 — 환율·영업이익 함께 흔들기.",
+        "1 분기 충격으로 dCR 영구 하락 단정 금지 — 회복 경로 (지속 vs 일시) 구분."
+      ],
+      "examples": [
+        "삼성전자 금리 +200bp 충격에서 dCR 유지?",
+        "현대차 환율 +10% 시 신용 axis 어디 깨지나",
+        "HMM 영업이익 -20% 시 dCR 등급 변동"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "매크로 시계열 일부 한정"
+          ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.creditQuantConsensus",
+      "title": "신용 dCR × 퀀트 부도 모델 3-source 합의 위험 종목",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "단일 회사 부도 위험을 dCR (정성·정량 종합) + Altman Z″ + Ohlson O + Beneish M 4-source 동시 평가. 단일 모델 false positive 줄이고 triple-agreement 시 강한 위험 신호. credit ↔ quant 격리 메우는 조합. 트리거 — '신용 퀀트 합의', '부도 4 모델', 'distress consensus'.",
+      "whenToUse": [
+        "신용 퀀트 합의",
+        "부도 4 모델",
+        "다중 모델 부도",
+        "quant credit 합의"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.credit",
+        "engines.recipe.creditDistressDual",
+        "engines.quant.altman",
+        "engines.quant.beneish",
+        "engines.quant.piotroski"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`dcrGrade : str` · `dcrDistress : bool`",
+        "`altmanZ : float` · `altmanDistress : bool`",
+        "`ohlsonProb : float` · `ohlsonFlag : bool`",
+        "`beneishM : float` · `beneishFlag : bool`",
+        "`sourcesFlagged : int` (0~4)",
+        "`consensus : str` — Safe / SingleAgreement / DualAgreement / TripleAgreement"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "dCR 등급과 quant model 의 시간 frequency 차이 (분기 vs 연간).",
+        "Beneish M 의 원자재기업 false positive (정상 inventory 변동을 분식 신호로 오인)."
+      ],
+      "forbidden": [
+        "4 모델 중 1 개 신호로 부도 임박 단정 금지.",
+        "1968/1980 미국 표본 thresholds 를 KR 시장에 그대로 적용 금지.",
+        "금융업 (은행·보험) 에 본 recipe 적용 금지 — 모델 대상 외."
+      ],
+      "examples": [
+        "삼성전자 4 모델 부도 합의",
+        "HMM dCR + Altman + Ohlson + Beneish 일치"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
         }
       }
     },
@@ -14587,6 +14994,155 @@
       }
     },
     {
+      "id": "engines.recipe.disclosureToneToStoryRisk",
+      "title": "공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "MD&A tone change + 뉴스 헤드라인 tone + 공시 fundamental shift 3 신호 composite \"narrative risk\" 점수 임계 초과 시 storyboard 신설 부담 없이 story.risk 섹션에 injection 가능한 markdown 블럭 자동 발행. storyboard 추가 부담 회피하면서 기존 story 의 risk 부분 보강. quant ↔ gather ↔ analysis ↔ story 격리 메우는 4-engine 조합. 트리거 — 'story risk auto', '공시 tone story 발행', 'narrative risk score'.",
+      "whenToUse": [
+        "story risk auto",
+        "공시 tone story 발행",
+        "narrative risk composite",
+        "자동 risk 블럭"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.quant.toneChange",
+        "engines.gather.news",
+        "engines.analysis.disclosureChange",
+        "engines.story"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`toneZScore : float`",
+        "`newsSentiment : float`",
+        "`fundamentalShift : float`",
+        "`narrativeRiskScore : float`",
+        "`trigger : bool`",
+        "`storyRiskBlock : str` — markdown (truncated to 200 char)"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "tone change 정의 (LM dictionary vs FinBERT) 차이.",
+        "뉴스 sentiment 가 공시 tone 과 시차 (lead/lag) 무시한 단순 합산."
+      ],
+      "forbidden": [
+        "단일 신호 (예 toneChange 만) 로 risk block 발행 금지 — 3 신호 composite 임계 필수.",
+        "자동 발행된 risk block 을 운영자 review 없이 production 에 노출 금지."
+      ],
+      "examples": [
+        "삼성전자 narrative risk composite",
+        "HMM 공시 tone + 뉴스 + 펀더멘털 동시 약화"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.distressCandidateScreen",
+      "title": "dCR 등급 전월비 하락 + 퀀트 sentiment 동시 약세 종목",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "KOSPI200 universe 안에서 (1) dCR 등급이 전월 대비 1 notch 이상 하락 (credit migration) + (2) quant sentiment z-score ≤ -1.5 (시장 신호 약세) 동시 발현 종목 발굴. 단일 신호는 false positive 많지만 cross-source 합의는 강함. credit ↔ quant ↔ scan 격리 메우는 조합. 트리거 — 'distress candidate', '신용 sentiment 약세', 'credit migration screen'.",
+      "whenToUse": [
+        "distress candidate",
+        "신용 sentiment 약세",
+        "credit migration",
+        "dCR 하락 종목"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan.profitability",
+        "engines.credit",
+        "engines.quant.sentiment",
+        "engines.recipe.creditQuantConsensus"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`stockCode : str`",
+        "`dcrGrade : str` · `distressGrade : bool`",
+        "`sentimentZ : float` · `weakSentiment : bool`",
+        "`distressFlag : bool`"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "1 개월 dCR archive 가 매번 운영자 manual 실행 (자동 monthly snapshot 필요).",
+        "sentiment z 의 lookback (60m vs 36m) 차이."
+      ],
+      "forbidden": [
+        "단일 등급 하락 (1 notch) 으로 부도 임박 단정 금지.",
+        "sentiment z 음수 = 자동 매도 단정 금지 — credit migration 동반 필요."
+      ],
+      "examples": [
+        "KOSPI200 distress candidate",
+        "dCR 하락 + sentiment 약세"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      }
+    },
+    {
       "id": "engines.recipe.distressFilter",
       "title": "Altman-lite 부도 위험 회피 필터 (역방향 블랙리스트)",
       "category": "engines",
@@ -14681,6 +15237,82 @@
           "limitations": [
             "브라우저 안에서는 다년 시계열 일부 한정"
           ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.dividendStressTest",
+      "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "배당 정책 회사가 1997 IMF / 2008 GFC / 2020 COVID 시나리오에서 FCF 커버리지가 무너지는 임계 + 배당 cut/suspend 가능성 산출. 정상 시점 dividend yield 만 보고 매수하는 전략의 매크로 위험 가시화. analysis ↔ macro 격리 메우는 조합. 트리거 — '배당 스트레스', 'dividend cut 위험', '경기침체 배당'.",
+      "whenToUse": [
+        "배당 스트레스 테스트",
+        "dividend cut 위험",
+        "경기침체 배당",
+        "FCF coverage 매크로"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.analysis.dividendCapitalReturn",
+        "engines.analysis.cashflow",
+        "engines.macro.scenario"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`scenario : str` — 1997-IMF / 2008-GFC / 2020-COVID",
+        "`revenueShock : float`",
+        "`shockedRevenue : float` · `shockedFCF : float`",
+        "`baseDividend : float`",
+        "`shockedCoverage : float`",
+        "`dividendSurvival : str` — Safe / Cut / Suspend"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "revenue 충격 일정 비율 가정 — 실제는 산업 별 매출 노출 다름 (금융 < 자동차 < 항공).",
+        "배당 정책 (target payout vs progressive) 별 cut threshold 차이."
+      ],
+      "forbidden": [
+        "시나리오 1 개 (2008) 결과로 일반 침체 단정 금지 — 1997 / 2020 함께 비교.",
+        "배당 cut = 회사 폭락 단정 금지 — 일시 cut 후 회복 사례도 다수."
+      ],
+      "examples": [
+        "삼성전자 2008 시나리오 배당 유지 가능?",
+        "KT&G 1997 시나리오 dividend cut 임계"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
         }
       }
     },
@@ -15200,6 +15832,80 @@
       }
     },
     {
+      "id": "engines.recipe.filingTextSignal",
+      "title": "8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "최근 365 일 공시 본문에서 \"going concern\" / \"의견거절\" / \"거짓서명\" / \"계속기업\" 같은 위험 키워드 빈도가 trailing 3y baseline 대비 z-score ≥ 2 이면 비정상 신호. predictionSignal feature 로 입력. Loughran-McDonald sentiment 의 일반 dictionary 와 다른 anomaly-on-rare-keywords 접근. search/edgar ↔ analysis 격리 메우는 조합. 트리거 — 'filing text signal', '공시 키워드 anomaly', '사업보고서 위험 신호'.",
+      "whenToUse": [
+        "filing text signal",
+        "공시 키워드 anomaly",
+        "위험 키워드 빈도",
+        "going concern signal"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.gather.collect",
+        "engines.search",
+        "engines.analysis.predictionSignal"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`keyword : str`",
+        "`recentCount : int` — 최근 365 일 등장 횟수",
+        "`baselineYearly : float` — 3y 평균 (연간 환산)",
+        "`keywordZScore : float`",
+        "`anomalyFlag : bool` — z ≥ 2"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "한국 공시 본문 OCR / parsing 품질이 회사 별 차이 — 키워드 매칭 누락.",
+        "보일러플레이트 (감사보고서 표준 문구) 가 안전 공시에서도 등장 — false positive."
+      ],
+      "forbidden": [
+        "단일 키워드 빈도 1 회 등장만으로 신호 단정 금지.",
+        "rare 키워드 dictionary 가 회사 산업 별 baseline 다름 — universal dictionary 강행 X."
+      ],
+      "examples": [
+        "삼성전자 365 일 공시 anomaly z",
+        "HMM going concern 빈도 추세"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      }
+    },
+    {
       "id": "engines.recipe.financialStatementCompare",
       "title": "두 회사 재무제표 비교 (peer + show + 분해)",
       "category": "engines",
@@ -15625,6 +16331,77 @@
       }
     },
     {
+      "id": "engines.recipe.governanceAuditNetwork",
+      "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "KOSPI universe 안에서 (1) governance composite (이사회 독립성·특수관계자) + (2) network density (계열사·affiliate ratio) + (3) audit-change (최근 2 년 감사인 변경) 3 신호 동시 적신호 종목 발굴. 한국 chaebol 구조 특유의 transfer-pricing / 일감몰아주기 위험을 단일 신호로 못 잡는 한계 보완. analysis ↔ scan 격리 메우는 cross-sectional 조합. 트리거 — 'governance audit network', 'chaebol risk screen'.",
+      "whenToUse": [
+        "governance audit network",
+        "chaebol 거버넌스 위험",
+        "계열사 + 감사 + 거버넌스"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.scan.governance",
+        "engines.scan.network",
+        "engines.scan.audit"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`stockCode : str`",
+        "`govAmber : bool` · `networkDensity : bool` · `auditChanged : bool`",
+        "`flagCount : int`",
+        "`tripleFlag : bool`"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "network density 정의 (단순 affiliate 매출 비중 vs 다층 지배 구조 정량화) 차이.",
+        "감사인 rotation 의무 (2018 도입) 시점 이후 감사인 변경이 normal 화 — 임계 재조정."
+      ],
+      "forbidden": [
+        "50%) 만으로 일감몰아주기 단정 금지.",
+        "chaebol 회사 = 자동 risk 단정 금지 — 동행 신호 (audit + governance) 필수."
+      ],
+      "examples": [
+        "KOSPI chaebol triple flag screen",
+        "계열사 의존도 + 감사인 변경 동행"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      }
+    },
+    {
       "id": "engines.recipe.grahamDeepValue",
       "title": "Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)",
       "category": "engines",
@@ -15935,6 +16712,157 @@
           "limitations": [
             "browser 안에서는 industry stage 단일 호출만"
           ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.industryStageScreen",
+      "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "도입기 / 후행기 산업 안에서 PER < 10 + Piotroski F ≥ 7 + Altman Z″ > 3 인 under-followed 종목 발굴. 일반 value screen 은 stage-blind 라 수확기 (mature) 산업의 value trap 에 빠짐. industry ↔ scan ↔ quant 격리 메우는 조합. 트리거 — '산업 stage screen', '도입기 가치', 'underfollowed value'.",
+      "whenToUse": [
+        "산업 stage 가치 screen",
+        "도입기 종목 발굴",
+        "underfollowed 가치",
+        "quality value 후행기"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.industry",
+        "engines.scan.crossSectionStockScreen",
+        "engines.quant.piotroski",
+        "engines.quant.altman"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`stockCode : str`",
+        "`stage : str` — 도입기 / 후행기",
+        "`piotroskiF : int` (0~9)",
+        "`altmanZ : float`",
+        "`tripleScreenPass : bool`"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "산업 stage 분류 (taxonomy.json) 가 외부 정의와 차이.",
+        "PER thresholds 가 KR 시장 평균 변동 미반영."
+      ],
+      "forbidden": [
+        "가치 (PER) 만으로 매수 단정 금지 — 퀄리티 + 부도 위험 동반.",
+        "도입기 산업 = 자동 outperform 단정 금지."
+      ],
+      "examples": [
+        "도입기 산업 가치 + 퀄리티 KOSPI screen",
+        "후행기 KOSPI200 underfollowed"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.insiderEarningsLeading",
+      "title": "내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "내부자 (임원·5% 이상 주주) 매수 거래가 *클러스터* 형태 (180 일 안 ≥ 3 명 동시) 일 때만 다음 분기 EPS surprise 와 양의 IC 가진다는 Cohen-Malloy-Pomorski (2012) \"Decoding Inside Information\" 결과 적용. 단순 net-buy 가 아닌 *집단 매수 동시성* 이 핵심. gather ↔ quant ↔ analysis 격리 메우는 조합. 트리거 — '내부자 매수 클러스터', 'insider cluster signal'.",
+      "whenToUse": [
+        "내부자 매수 클러스터",
+        "insider cluster signal",
+        "내부자 surprise 선행",
+        "cluster timing"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.gather.insiderTrading",
+        "engines.quant.surprise",
+        "engines.analysis.predictionSignal"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`windowDays : int` (default 180)",
+        "`uniqueBuyers : int`",
+        "`totalBuyShares : int`",
+        "`clusterDensity : float`",
+        "`clusterFlag : bool`",
+        "`recentSurpriseMean : float`",
+        "`icEstimate : float` — IC of cluster_flag vs forward 1Q surprise"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "내부자 정의 (임원만 vs 임원+주주) 별 cluster 임계 다름.",
+        "분기 surprise 정의 (consensus vs trailing) 차이."
+      ],
+      "forbidden": [
+        "단일 거래 (1 명 매수) 로 신호 단정 금지 — 클러스터 (≥ 3 명 / 180 일) 만 유효.",
+        "자사주 매입 / 파생 동시 행사는 net-buy 라도 information 가치 약함."
+      ],
+      "examples": [
+        "삼성전자 180 일 내부자 cluster + Q1 surprise IC",
+        "셀트리온 cluster 신호 다음 분기 EPS"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
         }
       }
     },
@@ -16341,6 +17269,80 @@
       }
     },
     {
+      "id": "engines.recipe.macroBetaPeerScreen",
+      "title": "같은 산업 동종업체 macroBeta outlier — idiosyncratic 매크로 노출",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "동일 산업 peer set 안에서 회사 별 macro beta (rate / FX / oil) 가 within-industry z ≥ |2| 인 outlier 식별. cross-market 단순 macro beta 는 \"유가 상승 = 정유주\" 같은 trivial 매핑만 잡지만, 같은 산업 안 outlier 는 회사 specifics (FX 헤지 / 변동금리 차입 / 원자재 다변화) 가 만든 idiosyncratic 노출을 드러냄. industry ↔ scan 격리 메우는 조합. 트리거 — 'macroBeta peer', 'idiosyncratic 매크로 노출', '같은 산업 outlier'.",
+      "whenToUse": [
+        "macroBeta peer",
+        "idiosyncratic 매크로",
+        "동종업체 outlier",
+        "within-industry 베타"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.gather.industryPeers",
+        "engines.scan.macroBeta",
+        "engines.industry"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`stockCode : str`",
+        "`betaType : str` — rateBeta / fxBeta / oilBeta",
+        "`betaValue : float`",
+        "`peerMean : float`",
+        "`withinIndustryZ : float`",
+        "`outlierFlag : bool`"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "peer set 이 너무 좁으면 (3-4 개) z 통계 신뢰도 약함.",
+        "60m rolling beta 가 regime change 가 있으면 평균 이동."
+      ],
+      "forbidden": [
+        "cross-market beta 만으로 \"매크로 sensitive 종목\" 단정 금지 — peer 정규화 필수.",
+        "peer set 정의 (좁은 vs 넓은 산업) 에 따라 outlier 변동 — 자의적 선택 금지."
+      ],
+      "examples": [
+        "화학업종 안 LG화학 oil-beta outlier",
+        "자동차업종 현대차 FX-beta z"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      }
+    },
+    {
       "id": "engines.recipe.macroLiquidityCycle",
       "title": "매크로 유동성 사이클 (금리 + 환율 + 유동성)",
       "category": "engines",
@@ -16447,6 +17449,80 @@
           "limitations": [
             "browser 안에서는 macro 시계열 일부 한정"
           ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.macroQuantScenarioBacktest",
+      "title": "매크로 시나리오 (1997/2008/2020) × 퀀트 팩터 walk-forward backtest",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "단순 full-sample 평균 IR 이 아니라 매크로 regime 별 (1997 IMF / 2008 GFC / 2020 COVID) 팩터 (value / quality / momentum) 의 walk-forward IR / Sharpe / max drawdown 산출. 투자자가 \"이번 사이클\" 에서의 팩터 작동 여부를 알 수 있게. macro ↔ quant 격리 메우는 조합. 트리거 — 'macro scenario backtest', '시나리오 별 팩터', 'regime backtest'.",
+      "whenToUse": [
+        "macro scenario backtest",
+        "시나리오 별 팩터",
+        "regime walk-forward",
+        "위기 시나리오 quant"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.macro.scenario",
+        "engines.quant.walkforward",
+        "engines.quant.backtest"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`scenario : str` — 1997-IMF / 2008-GFC / 2020-COVID",
+        "`factor : str` — value / quality / momentum",
+        "`start : str` · `end : str`",
+        "`regimeIR : float`",
+        "`regimeSharpe : float`",
+        "`regimeMDD : float`"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "시나리오 date range 정의 (예 1997 IMF 11~12월 vs 1997 7~12월) 차이.",
+        "factor 정의 (book/price vs ROE) 별 Sharpe 차이."
+      ],
+      "forbidden": [
+        "단일 regime 결과로 팩터 일반화 금지.",
+        "look-ahead bias — walk-forward refit 강제."
+      ],
+      "examples": [
+        "2008 시나리오 quality 팩터 IR",
+        "1997 시나리오 momentum 팩터 Sharpe"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
         }
       }
     },
@@ -16760,6 +17836,81 @@
           "limitations": [
             "브라우저 안에서는 freq=\"Y\" 5 기간 시계열 일부 한정"
           ]
+        }
+      }
+    },
+    {
+      "id": "engines.recipe.qualityMacroBeta",
+      "title": "퀄리티 (QMJ) × 매크로 사이클 — phase 의존 우량주",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "quality 팩터 (QMJ — Asness/Frazzini/Pedersen) 점수가 매크로 사이클 phase (early-recovery / mid-expansion / late-cycle / contraction) 별로 다르게 작동한다는 검증된 패턴을 단일 회사에 적용. quant ↔ macro 격리 메우는 조합. 트리거 — '퀄리티 사이클', 'QMJ 매크로', 'quality phase'.",
+      "whenToUse": [
+        "퀄리티 사이클",
+        "QMJ 매크로",
+        "quality phase",
+        "후행 우량주"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "apiRefs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.company",
+        "engines.quant.qmj",
+        "engines.scan.macroBeta",
+        "engines.macro.cycle"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`qualityScore : float` · `qualityDecile : int (1~10)`",
+        "`cyclePhase : str` — early-recovery / mid-expansion / late-cycle / contraction",
+        "`rateBeta : float` · `fxBeta : float`",
+        "`expectedWinner : str` — high / low / balanced",
+        "`phaseAlignment : bool`"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "사이클 phase 분류가 60-month rolling 등 lookback window 의존.",
+        "quality 측정 → ROE / 부채비율 / 매출 안정성 weighting 차이."
+      ],
+      "forbidden": [
+        "단일 phase 결과만으로 일반화 금지 — 4 phase 모두 검토.",
+        "QMJ 점수 ≥ 80 ≠ 절대 매수 신호 — phase context 필수."
+      ],
+      "examples": [
+        "삼성전자 QMJ + 사이클 phase",
+        "현대차 quality late-cycle 적합도"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
         }
       }
     },
