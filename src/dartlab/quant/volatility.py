@@ -32,17 +32,30 @@ def _volatilitySeries(close: np.ndarray, window: int = 20) -> dict:
     }
 
 
-def calcVolatility(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
+def calcVolatility(
+    stockCode: str,
+    *,
+    market: str = "auto",
+    series: bool = False,
+    forecast: bool = False,
+    forecastHorizon: int = 5,
+    **kwargs,
+) -> dict:
     """변동성 종합 분석.
 
     Args:
         stockCode: 종목코드 또는 ticker.
         market: "KR" | "US" | "auto".
         series: True 면 dict 에 `_series` 키 추가 — Strategy DSL 입력용 rolling vol 시계열.
+        forecast: True 면 GARCH(1,1) 의 h-step ahead variance forecast (Bollerslev 1986
+            closed form) 를 결과 dict 에 추가. GARCH 미적합 시 EWMA λ=0.94 stationary
+            fallback. 키: ``forecastVar_h{H}``, ``forecastVol_h{H}``, ``forecastVolModel``.
+        forecastHorizon: forecast=True 시 예측 일수 (기본 5).
 
     Returns:
         dict with garchVol, harRV, volTermStructure, volRegime.
         series=True 시: _series = {realized_vol, garch_vol} 길이 N.
+        forecast=True 시: forecastVar_h{H}, forecastVol_h{H} (annualized), forecastVolModel.
     """
     market = resolve_market(stockCode, market)
     ohlcv = fetch_ohlcv(stockCode, **kwargs)
@@ -155,6 +168,44 @@ def calcVolatility(stockCode: str, *, market: str = "auto", series: bool = False
             result["volRegime"] = "normal"
         else:
             result["volRegime"] = "low"
+
+    # ── h-step ahead 변동성 예측 (GARCH(1,1) closed form 또는 EWMA fallback) ──
+    if forecast:
+        h = max(1, int(forecastHorizon))
+        garch = result.get("garchParams")
+        forecast_var: float | None = None
+        model_used = None
+        if garch is not None and len(log_returns) > 0:
+            omega = float(garch["omega"])
+            alpha_g = float(garch["alpha"])
+            beta_g = float(garch["beta"])
+            persistence = alpha_g + beta_g
+            # σ²_t (마지막 in-sample variance) 추정
+            mean_r = float(np.mean(log_returns))
+            resid_last = float(log_returns[-1] - mean_r)
+            # 1-step ahead var (already computed by _fit_garch11 → forecastVol). 역산:
+            sigma2_t = (float(result["garchVol"]) ** 2 / 252.0) if "garchVol" in result else float(np.var(log_returns))
+            # h-step ahead: σ²_{t+h} = ω·Σ_{i=0..h-1}(α+β)^i + (α+β)^h · σ²_t
+            if persistence < 1.0 and persistence > 0:
+                geo_sum = (1.0 - persistence**h) / (1.0 - persistence)
+                forecast_var = omega * geo_sum + (persistence**h) * sigma2_t
+            else:
+                forecast_var = sigma2_t
+            model_used = "garch11"
+        elif len(log_returns) >= 20:
+            # EWMA fallback: σ²_{t+h} = σ²_t (RiskMetrics IGARCH)
+            ewma_lam = 0.94
+            sigma2_ewma = float(log_returns[-1] ** 2)
+            for i in range(max(0, len(log_returns) - 60), len(log_returns)):
+                sigma2_ewma = ewma_lam * sigma2_ewma + (1 - ewma_lam) * float(log_returns[i] ** 2)
+            forecast_var = sigma2_ewma
+            model_used = "ewma94"
+        if forecast_var is not None and forecast_var >= 0:
+            forecast_vol = float(np.sqrt(forecast_var * 252))
+            result[f"forecastVar_h{h}"] = round(forecast_var, 10)
+            result[f"forecastVol_h{h}"] = round(forecast_vol, 4)
+            result["forecastVolModel"] = model_used
+            result["forecastHorizon"] = h
 
     return result
 

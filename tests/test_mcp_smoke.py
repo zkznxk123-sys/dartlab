@@ -34,8 +34,9 @@ def test_mcp_stdio_starts_and_logs_each_message_once():
     """
     proc = _spawn_mcp_stdio()
     try:
-        # 부팅 후 stderr 가 모두 flush 될 시간 확보.
-        time.sleep(2.0)
+        # 부팅 후 stderr 가 모두 flush 될 시간 확보. Windows + Proactor 환경에서 flush
+        # 지연이 발생해 2 s 는 종종 비어 있는 stderr 로 false fail. 4 s 로 여유.
+        time.sleep(4.0)
     finally:
         proc.terminate()
         try:
