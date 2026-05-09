@@ -1,4 +1,4 @@
-"""네이버 금융 데이터 수집 — 주가 + 컨센서스 + 수급 + 업종PER.
+"""네이버 금융 데이터 수집 — 주가 + 수급 + 업종PER.
 
 네이버 금융 API에서 한국 시장 데이터를 수집한다.
 robots.txt 준수, 도메인당 30RPM 이하.
@@ -10,7 +10,6 @@ import logging
 from datetime import datetime, timezone
 
 from ..types import (
-    ConsensusData,
     FlowData,
     GatherResult,
     PriceSnapshot,
@@ -211,87 +210,6 @@ async def fetch_price(stock_code: str, client, **kwargs) -> PriceSnapshot | None
         fetched_at=datetime.now(timezone.utc).isoformat(),
         currency="KRW",
         market="KR",
-    )
-
-
-async def fetch_consensus(stock_code: str, client) -> ConsensusData | None:
-    """네이버 → 컨센서스 목표가 + 투자의견.
-
-    Parameters
-    ----------
-    stock_code : str
-        종목코드 (예: ``"005930"``).
-    client
-        비동기 HTTP 클라이언트.
-
-    Returns
-    -------
-    ConsensusData | None
-        컨센서스 데이터. 주요 필드:
-
-        - target_price : float — 목표주가 평균 (원)
-        - analyst_count : int — 추정 참여 애널리스트 수 (명)
-        - buy_ratio : float — 매수 의견 비율 (0.0~1.0)
-        - high : float — 목표가 최고 (원)
-        - low : float — 목표가 최저 (원)
-        - source : str — ``"naver"``
-
-        API 실패 또는 컨센서스 없으면 None.
-    """
-    # KR 종목코드 검증
-    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
-        return None
-
-    url = f"{_API_BASE}/{stock_code}/integration"
-    try:
-        resp = await client.get(url, headers={"Accept": "application/json"})
-        data = resp.json()
-    except (SourceUnavailableError, ValueError) as exc:
-        log.warning("naver consensus API 실패 (%s): %s", stock_code, exc)
-        return None
-
-    consensus_info = data.get("consensusInfo")
-    if not consensus_info:
-        return None
-
-    # 네이버 API v2: priceTargetMean / v1: targetPrice
-    target = _clean_number(consensus_info.get("priceTargetMean") or consensus_info.get("targetPrice"))
-    if not target or target <= 0:
-        return None
-
-    analyst_count = consensus_info.get("analystCount", 0)
-    if isinstance(analyst_count, str):
-        analyst_count = int(_clean_number(analyst_count) or 0)
-
-    # 투자의견: recommMean (1~5 스케일, 4+ ≈ 매수) 또는 investmentOpinion 리스트
-    buy_ratio = 0.0
-    recomm_mean = _clean_number(consensus_info.get("recommMean"))
-    if recomm_mean is not None and recomm_mean > 0:
-        buy_ratio = min(recomm_mean / 5.0, 1.0)
-    else:
-        total_opinions = 0
-        buy_count = 0
-        opinion_data = consensus_info.get("investmentOpinion")
-        if opinion_data and isinstance(opinion_data, list):
-            for item in opinion_data:
-                count = int(item.get("count", 0))
-                opinion = item.get("opinion", "")
-                total_opinions += count
-                if opinion in ("매수", "강력매수", "Buy", "StrongBuy"):
-                    buy_count += count
-            if total_opinions > 0:
-                buy_ratio = buy_count / total_opinions
-
-    high = _clean_number(consensus_info.get("targetPriceHigh") or consensus_info.get("priceTargetHigh"))
-    low = _clean_number(consensus_info.get("targetPriceLow") or consensus_info.get("priceTargetLow"))
-
-    return ConsensusData(
-        target_price=target,
-        analyst_count=analyst_count,
-        buy_ratio=buy_ratio,
-        high=high or target,
-        low=low or target,
-        source="naver",
     )
 
 
@@ -533,7 +451,6 @@ async def fetch_all(stock_code: str, client) -> GatherResult:
     GatherResult
         domain : str — ``"naver"``
         price : PriceSnapshot | None — 현재가 스냅샷
-        consensus : ConsensusData | None — 컨센서스 목표가
         flow : FlowData | None — 외국인/기관 수급 스냅샷
         sector_per : float | None — 동종업종 PER (배)
         error : str | None — 수집 실패 시 에러 메시지
@@ -541,7 +458,6 @@ async def fetch_all(stock_code: str, client) -> GatherResult:
     result = GatherResult(domain="naver")
     try:
         result.price = await fetch_price(stock_code, client)
-        result.consensus = await fetch_consensus(stock_code, client)
         # flow: 시계열 → 스냅샷 변환 (GatherResult 호환)
         flow_series = await fetch_flow(stock_code, client)
         if flow_series:

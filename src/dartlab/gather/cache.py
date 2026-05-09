@@ -9,7 +9,6 @@ from dataclasses import dataclass
 
 # TTL 기본값 (초)
 TTL_PRICE = 300  # 5분
-TTL_CONSENSUS = 24 * 3600  # 24시간
 TTL_FLOW = 3600  # 1시간
 TTL_SECTOR = 24 * 3600  # 24시간
 TTL_HISTORY = 6 * 3600  # 6시간
@@ -29,7 +28,6 @@ TTL_DEFAULT = 3600  # 1시간
 # 데이터 유형 → TTL 매핑
 _TTL_MAP: dict[str, int] = {
     "price": TTL_PRICE,
-    "consensus": TTL_CONSENSUS,
     "flow": TTL_FLOW,
     "sector_per": TTL_SECTOR,
     "sector_info": TTL_SECTOR,
@@ -163,7 +161,7 @@ class GatherCache:
         stock_code : str
             종목코드 또는 캐시 prefix ("005930", "KR:005930" 등).
         data_type : str
-            데이터 유형 ("price", "consensus", "flow", "snapshot" 등).
+            데이터 유형 ("price", "flow", "snapshot" 등).
         allow_stale : bool
             True이면 live 미스 시 만료 데이터도 반환. 기본 False.
 
@@ -189,7 +187,7 @@ class GatherCache:
         stock_code : str
             종목코드 또는 캐시 prefix.
         data_type : str
-            데이터 유형 ("price", "consensus" 등). _TTL_MAP에 없으면 TTL_DEFAULT (3600초).
+            데이터 유형 ("price", "flow" 등). _TTL_MAP에 없으면 TTL_DEFAULT (3600초).
         value : object
             저장할 데이터.
 
@@ -212,7 +210,7 @@ class GatherCache:
         Returns
         -------
         None
-            해당 종목의 price, consensus, flow 등 모든 데이터 유형 캐시를 삭제한다.
+            해당 종목의 price, flow 등 모든 데이터 유형 캐시를 삭제한다.
         """
         with self._lock:
             prefix = f"{stock_code}:"

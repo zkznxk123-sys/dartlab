@@ -116,42 +116,6 @@ class PriceSnapshot:
 
 
 @dataclass
-class ConsensusData:
-    """애널리스트 컨센서스.
-
-    Attributes
-    ----------
-    target_price : float
-        목표 주가 (원).
-    analyst_count : int
-        커버 애널리스트 수 (명).
-    buy_ratio : float
-        매수 의견 비율 (0~1).
-    high : float
-        최고 목표가 (원).
-    low : float
-        최저 목표가 (원).
-    source : str
-        데이터 출처.
-    """
-
-    target_price: float = 0.0
-    analyst_count: int = 0
-    buy_ratio: float = 0.0  # 매수 비율 (0~1)
-    high: float = 0.0
-    low: float = 0.0
-    source: str = ""
-
-    def __repr__(self) -> str:
-        return (
-            f"Consensus(target={self.target_price:,.0f}, "
-            f"analysts={self.analyst_count}, "
-            f"buy={self.buy_ratio:.0%}, "
-            f"range={self.low:,.0f}~{self.high:,.0f})"
-        )
-
-
-@dataclass
 class RevenueConsensus:
     """애널리스트 매출/이익 컨센서스 — 네이버 금융 finance/annual API.
 
@@ -455,8 +419,6 @@ class GatherResult:
         소스 도메인 이름.
     price : PriceSnapshot | None
         주가 스냅샷.
-    consensus : ConsensusData | None
-        애널리스트 컨센서스.
     flow : FlowData | None
         투자자별 수급.
     sector_per : float | None
@@ -473,7 +435,6 @@ class GatherResult:
 
     domain: str = ""
     price: PriceSnapshot | None = None
-    consensus: ConsensusData | None = None
     flow: FlowData | None = None
     sector_per: float | None = None
     sectorInfo: SectorInfo | None = None
@@ -506,20 +467,6 @@ class GatherSnapshot:
         for r in self.results.values():
             if r.price:
                 return r.price
-        return None
-
-    @property
-    def consensus(self) -> ConsensusData | None:
-        """수집된 컨센서스 데이터 반환.
-
-        Returns
-        -------
-        ConsensusData | None
-            첫 번째 유효한 컨센서스. 없으면 None.
-        """
-        for r in self.results.values():
-            if r.consensus:
-                return r.consensus
         return None
 
     @property
@@ -652,7 +599,6 @@ class GatherSnapshot:
         return MarketSnapshot(
             stock_code=self.stock_code,
             current_price=current_price,
-            consensus=self.consensus,
             multiples=multiples,
             supply_demand=supply_demand,
             price_range_52w=price_range,
@@ -665,8 +611,6 @@ class GatherSnapshot:
         lines = [f"[GatherSnapshot — {self.stock_code}]"]
         if self.price:
             lines.append(f"  {self.price}")
-        if self.consensus:
-            lines.append(f"  {self.consensus}")
         if self.flow:
             lines.append(f"  {self.flow}")
         lines.append(f"  소스: {', '.join(self.sources_available)}")
@@ -728,8 +672,6 @@ class MarketSnapshot:
         종목코드.
     current_price : float
         현재가 (원 또는 해당 통화).
-    consensus : ConsensusData | None
-        애널리스트 컨센서스.
     multiples : dict[str, float]
         멀티플 (per, pbr, dividend_yield, sector_per 등) (배 또는 %).
     peer_multiples : list[PeerData]
@@ -750,7 +692,6 @@ class MarketSnapshot:
 
     stock_code: str = ""
     current_price: float = 0.0
-    consensus: ConsensusData | None = None
     multiples: dict[str, float] = field(default_factory=dict)
     peer_multiples: list[PeerData] = field(default_factory=list)
     supply_demand: dict[str, float] = field(default_factory=dict)
@@ -763,8 +704,6 @@ class MarketSnapshot:
     def __repr__(self) -> str:
         lines = [f"[MarketSnapshot — {self.stock_code}]"]
         lines.append(f"  현재가: {self.current_price:,.0f}")
-        if self.consensus:
-            lines.append(f"  컨센서스: {self.consensus}")
         if self.multiples:
             mult_str = ", ".join(f"{k}={v:.2f}" for k, v in self.multiples.items())
             lines.append(f"  멀티플: {mult_str}")

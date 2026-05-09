@@ -67,7 +67,6 @@ examples:
   - "실적발표 후 consensus 재조정 폭"
 linkedSkills:
   - engines.gather
-  - engines.gather.consensus
   - engines.analysis.revenueForecast
   - engines.analysis.growth
 source:

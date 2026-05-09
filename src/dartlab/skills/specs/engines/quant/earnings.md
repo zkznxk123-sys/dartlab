@@ -59,7 +59,7 @@ forbidden:
   - "EPS 컨센서스 추정기관 수 / 편차 명시 없이 surprise 점수 인용 금지."
 failureModes:
   - "PEAD (post-earnings drift) 의 KR 시장 reproducibility 차이"
-  - "SUE 분모 (consensus std dev vs realized std dev) 정의 모호"
+  - "SUE 분모 (revenue_consensus std dev vs realized std dev) 정의 모호"
   - "이익 수정 (revision) 모멘텀의 시점 (announce 직후 vs 1 개월 후) 차이"
   - "분기 회계 (지배 vs 비지배) 분리 누락"
   - "일회성 손익 (M&A / 매각) 의 EPS 영향 미보정"
@@ -72,7 +72,7 @@ linkedSkills:
   - engines.quant
   - engines.quant.surprise
   - engines.quant.fundmom
-  - engines.gather.consensus
+  - engines.gather.revenueConsensus
 source:
   type: manual_skill
   format: markdown

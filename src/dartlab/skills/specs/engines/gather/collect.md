@@ -5,12 +5,12 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: "gather 엔진의 전체 snapshot 응용 — 한 종목의 price · consensus · flow · sector · dividends · insider · majorShareholders · ownership · industryPeers 를 한 번에 병렬 수집한 GatherSnapshot."
+purpose: "gather 엔진의 전체 snapshot 응용 — 한 종목의 price · flow · sector · dividends · insider · majorShareholders · ownership · industryPeers 를 한 번에 병렬 수집한 GatherSnapshot."
 whenToUse:
   - "gather"
   - "collect"
   - "전체 snapshot"
-  - "한 종목의 price · consensus · flow · sector · dividends · insider · majorShareholders · ownership · industryPeers 를 한 번에 병렬 수집한 GatherSnapshot."
+  - "한 종목의 price · flow · sector · dividends · insider · majorShareholders · ownership · industryPeers 를 한 번에 병렬 수집한 GatherSnapshot."
 inputs:
   - "종목코드 또는 검색어"
   - "market (KR / US, default KR)"
@@ -55,7 +55,7 @@ forbidden:
   - "snapshot 의 일부 axis 결손 시 결손 axis 만 0/null 로 채우고 다른 axis 결과를 무시 금지."
   - "병렬 수집 실패 axis 를 silent drop 하지 않는다 — 결과의 flags 에 명시."
 failureModes:
-  - "병렬 수집 중 일부 axis (예 — consensus / news) 실패 → 부분 결과만 보고 종합 판단"
+  - "병렬 수집 중 일부 axis (예 — news / dividends) 실패 → 부분 결과만 보고 종합 판단"
   - "snapshot 의 latestAsOf 가 axis 별로 다른데 단일 기준일로 인용"
   - "캐시 hit 시 stale data (수일 전) 를 최신으로 오인"
   - "provider 별 데이터 신선도 차이 (DART 분기 vs 가격 일별) 무시"
@@ -68,7 +68,6 @@ examples:
 linkedSkills:
   - engines.gather
   - engines.gather.price
-  - engines.gather.consensus
   - engines.gather.flow
   - engines.story.dartlabStory
 source:
@@ -79,7 +78,7 @@ lastUpdated: '2026-05-07'
 
 ## 엔진 역할
 
-gather 엔진의 전체 snapshot 응용 skill — 한 종목의 price · consensus · flow · sector · dividends · insider · majorShareholders · ownership · industryPeers 를 한 번에 병렬 수집한 GatherSnapshot. SSOT 는 `Gather` class (`src/dartlab/gather/__init__.py`).
+gather 엔진의 전체 snapshot 응용 skill — 한 종목의 price · flow · sector · dividends · insider · majorShareholders · ownership · industryPeers 를 한 번에 병렬 수집한 GatherSnapshot. SSOT 는 `Gather` class (`src/dartlab/gather/__init__.py`).
 
 ## 공개 호출 방식
 

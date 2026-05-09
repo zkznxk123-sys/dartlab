@@ -71,7 +71,6 @@ linkedSkills:
   - engines.analysis.predictionSignal
   - engines.analysis.growth
   - engines.gather.revenueConsensus
-  - engines.gather.consensus
 source:
   type: manual_skill
   format: markdown

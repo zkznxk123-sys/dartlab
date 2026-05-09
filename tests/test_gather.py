@@ -11,7 +11,6 @@ import pytest
 from dartlab.gather.cache import GatherCache
 from dartlab.gather.http import GatherHttpClient, _AsyncRateLimiter
 from dartlab.gather.types import (
-    ConsensusData,
     FlowData,
     GatherResult,
     GatherSnapshot,
@@ -68,19 +67,19 @@ class TestGatherCache:
 
     def test_typed_put_and_get(self):
         cache = GatherCache()
-        cache.put_typed("005930", "consensus", {"target": 300000})
-        result = cache.get_typed("005930", "consensus")
-        assert result == {"target": 300000}
+        cache.put_typed("005930", "flow", {"foreign_net": -2500000})
+        result = cache.get_typed("005930", "flow")
+        assert result == {"foreign_net": -2500000}
 
     def test_invalidate(self):
         cache = GatherCache()
-        cache.put_typed("005930", "consensus", {"target": 300000})
+        cache.put_typed("005930", "flow", {"foreign_net": -2500000})
         cache.put_typed("005930", "price", {"current": 200000})
-        cache.put_typed("000660", "consensus", {"target": 150000})
+        cache.put_typed("000660", "flow", {"foreign_net": 1200000})
         cache.invalidate("005930")
-        assert cache.get_typed("005930", "consensus") is None
+        assert cache.get_typed("005930", "flow") is None
         assert cache.get_typed("005930", "price") is None
-        assert cache.get_typed("000660", "consensus") is not None
+        assert cache.get_typed("000660", "flow") is not None
 
     def test_clear(self):
         cache = GatherCache()
@@ -141,18 +140,6 @@ class TestDataTypes:
         assert "200,000" in r
         assert "naver" in r
 
-    def test_consensus_repr(self):
-        c = ConsensusData(
-            target_price=300000,
-            analyst_count=15,
-            buy_ratio=0.8,
-            high=350000,
-            low=250000,
-            source="naver",
-        )
-        r = repr(c)
-        assert "300,000" in r
-
     def test_flow_repr(self):
         f = FlowData(foreign_net=-2500000, institution_net=1200000, foreign_holding_ratio=55.3)
         r = repr(f)
@@ -173,7 +160,6 @@ class TestDataTypes:
         snap = MarketSnapshot(
             stock_code="005930",
             current_price=200000,
-            consensus=ConsensusData(target_price=300000, analyst_count=10, source="naver"),
             multiples={"per": 12.5, "pbr": 1.3},
             sources_available=["naver"],
             collected_at="2026-03-22T00:00:00",
@@ -186,7 +172,6 @@ class TestDataTypes:
         snap = MarketSnapshot()
         assert snap.stock_code == ""
         assert snap.current_price == 0.0
-        assert snap.consensus is None
         assert snap.multiples == {}
 
     def test_gather_snapshot_properties(self):
@@ -196,7 +181,6 @@ class TestDataTypes:
                 "naver": GatherResult(
                     domain="naver",
                     price=PriceSnapshot(current=200000, source="naver"),
-                    consensus=ConsensusData(target_price=300000, source="naver"),
                     flow=FlowData(foreign_net=-1000, source="naver"),
                     sector_per=15.0,
                 ),
@@ -204,8 +188,6 @@ class TestDataTypes:
         )
         assert snap.price is not None
         assert snap.price.current == 200000
-        assert snap.consensus is not None
-        assert snap.consensus.target_price == 300000
         assert snap.flow is not None
         assert snap.sources_available == ["naver"]
 
@@ -223,7 +205,6 @@ class TestDataTypes:
                         low_52w=150000,
                         source="naver",
                     ),
-                    consensus=ConsensusData(target_price=300000, analyst_count=10, source="naver"),
                     flow=FlowData(foreign_net=-2500000, institution_net=1200000, foreign_holding_ratio=55.3),
                     sector_per=15.0,
                 ),
@@ -233,8 +214,6 @@ class TestDataTypes:
         ms = snap.to_market_snapshot()
         assert ms.stock_code == "005930"
         assert ms.current_price == 200000
-        assert ms.consensus is not None
-        assert ms.consensus.target_price == 300000
         assert ms.multiples["per"] == 12.5
         assert ms.multiples["sector_per"] == 15.0
         assert ms.price_range_52w == (150000, 250000)
@@ -281,40 +260,6 @@ class TestNaverSource:
         assert result.per == 12.5
         assert result.pbr == 1.3
         assert result.high_52w == 250000
-
-    def test_fetch_consensus_success(self):
-        from dartlab.gather.domains.naver import fetch_consensus
-
-        mock_client = _make_async_client(
-            {
-                "consensusInfo": {
-                    "targetPrice": "300,000",
-                    "analystCount": 15,
-                    "targetPriceHigh": "350,000",
-                    "targetPriceLow": "250,000",
-                    "investmentOpinion": [
-                        {"opinion": "매수", "count": 10},
-                        {"opinion": "중립", "count": 3},
-                        {"opinion": "매도", "count": 2},
-                    ],
-                }
-            }
-        )
-
-        result = asyncio.run(fetch_consensus("005930", mock_client))
-        assert result is not None
-        assert result.target_price == 300000
-        assert result.analyst_count == 15
-        assert abs(result.buy_ratio - 10 / 15) < 0.01
-        assert result.high == 350000
-        assert result.low == 250000
-
-    def test_fetch_consensus_no_data(self):
-        from dartlab.gather.domains.naver import fetch_consensus
-
-        mock_client = _make_async_client({})
-        result = asyncio.run(fetch_consensus("005930", mock_client))
-        assert result is None
 
     def test_fetch_flow_success(self):
         from dartlab.gather.domains.naver import fetch_flow
@@ -443,10 +388,9 @@ class TestGatherFacade:
             snapshot = g.collect("005930")
 
         assert snapshot.stock_code == "005930"
-        # price는 성공 (naver basic URL), consensus는 실패 (mock_get이 에러)
+        # price는 성공 (naver basic URL), 다른 도메인은 mock_get 에러로 빈 결과
         assert snapshot.price is not None
         assert snapshot.price.current == 200000
-        assert snapshot.consensus is None
 
     def test_price_fallback(self):
         """price(snapshot=True) — 스냅샷 개별 조회."""

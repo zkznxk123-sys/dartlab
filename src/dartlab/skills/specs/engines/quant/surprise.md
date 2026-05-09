@@ -58,7 +58,7 @@ forbidden:
   - "Bernard-Thomas PEAD 미국 결과를 KR 시장 동일 가정으로 인용 금지."
   - "YoY NI growth z-score 의 분모 (sigma) 정의 명시 없이 결과 비교 금지."
 failureModes:
-  - "consensus 추정기관 수가 적은 (2~3 곳) 종목의 SUE 신뢰도 저하"
+  - "revenue_consensus 추정기관 수가 적은 (2~3 곳) 종목의 SUE 신뢰도 저하"
   - "PEAD 효과 (post-earnings drift) 의 KR 시장 reproducibility 차이"
   - "분기 회계 (지배 vs 비지배) 분리 누락"
   - "일회성 손익 (M&A / 매각) 의 NI growth 영향 미보정"
@@ -72,7 +72,7 @@ linkedSkills:
   - engines.quant
   - engines.quant.earnings
   - engines.quant.fundmom
-  - engines.gather.consensus
+  - engines.gather.revenueConsensus
 source:
   type: manual_skill
   format: markdown

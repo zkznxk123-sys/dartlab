@@ -28,7 +28,6 @@ if TYPE_CHECKING:
 
 from dartlab.core.polarsUtil import isEmptyDf
 
-from . import consensus as _consensus
 from . import flow as _flow
 from . import history as _history
 from . import insider as _insider
@@ -41,7 +40,6 @@ from .domains import load_domain
 from .http import GatherHttpClient, run_async
 from .market_config import get_market_config
 from .types import (
-    ConsensusData,
     FlowData,
     GatherResult,
     GatherSnapshot,
@@ -197,43 +195,6 @@ class Gather:
         result = run_async(_price.fetch(stock_code, market=market, client=self._client))
         if result:
             self._cache.put_typed(stock_code, "price", result)
-        return result
-
-    def consensus(self, stock_code: str, *, market: str = "KR") -> ConsensusData | None:
-        """애널리스트 컨센서스 (목표가/투자의견) 조회.
-
-        Capabilities:
-            - KR: Naver -> Yahoo fallback
-            - US: Yahoo Finance
-            - 목표가, 투자의견, 애널리스트 수
-            - TTL 캐시
-
-        Args:
-            stock_code: 종목코드 ("005930") 또는 티커 ("AAPL").
-            market: "KR" 또는 "US". 기본 "KR".
-
-        Returns:
-            ConsensusData | None — 목표가/투자의견 데이터.
-
-        Requires:
-            없음 (공개 API).
-
-        Example::
-
-            g = getDefaultGather()
-            g.consensus("005930")              # 삼성전자 컨센서스
-            g.consensus("AAPL", market="US")   # Apple 컨센서스
-        """
-        from dartlab.core.market import resolveMarket
-
-        market = resolveMarket(stock_code, market)
-        cache_key = f"{stock_code}:{market}"
-        cached = self._cache.get_typed(cache_key, "consensus")
-        if cached is not None:
-            return cached  # type: ignore[return-value]
-        result = run_async(_consensus.fetch(stock_code, market=market, client=self._client))
-        if result:
-            self._cache.put_typed(cache_key, "consensus", result)
         return result
 
     def flow(self, stock_code: str, *, market: str = "KR") -> "pl.DataFrame | None":
@@ -1119,7 +1080,6 @@ class Gather:
         GatherResult
             domain : str — 도메인명.
             price : PriceSnapshot | None — 현재가 스냅샷.
-            consensus : ConsensusData | None — 컨센서스 (fetch_all 도메인만).
             flow : FlowData | None — 수급 (fetch_all 도메인만).
             error : str | None — 에러 메시지 (실패 시).
         """
@@ -1210,7 +1170,6 @@ __all__ = [
     "NewsItem",
     "PeerData",
     "PriceSnapshot",
-    "ConsensusData",
     "FlowData",
     "GatherResult",
     "RevenueConsensus",
