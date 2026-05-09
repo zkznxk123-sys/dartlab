@@ -62,7 +62,9 @@ def lookAheadGuard(
         if period is not None:
             kwargs["period"] = period
 
-        company = dartlab.Company(stockCode, market=market)
+        # market 은 stockCode 형식 (KR 6 자리 vs US ticker) 으로 dartlab 가 auto-detect.
+        # tool 의 market arg 는 advisory — provider 가 자체 분기.
+        company = dartlab.Company(stockCode)
         df = company.show(topic, **kwargs)
     except Exception as exc:  # noqa: BLE001 — 외부 provider 모든 예외 포착
         return ToolResult(
