@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 227,
+    "skillCount": 228,
     "categories": [
       {
         "id": "start",
@@ -14,7 +14,7 @@
         "id": "runtime",
         "title": "Runtime",
         "description": "Local Python, Pyodide, Web AI, MCP, VSCode 같은 실행 환경별 제약과 근거 흐름.",
-        "count": 9
+        "count": 10
       },
       {
         "id": "operation",
@@ -23866,6 +23866,98 @@
           ],
           "limitations": [
             "live KRX/DART/OpenAI OAuth 호출은 브라우저에서 제한된다."
+          ]
+        }
+      }
+    },
+    {
+      "id": "runtime.python",
+      "title": "RunPython 신뢰 경계",
+      "category": "runtime",
+      "categoryTitle": "Runtime",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "dartlab RunPython 도구 안에서 무엇이 허용되고 무엇이 차단되는지 명시한다. 외부 클라이언트가 attach 한 상태에서도 신뢰 경계가 회색 지대 없이 분명하도록 SSOT.",
+      "whenToUse": [
+        "RunPython 으로 분석 코드 작성 전 무엇이 가능한지 확인",
+        "외부 클라이언트로 dartlab MCP 사용 시 신뢰 경계 파악",
+        "sandbox 가 차단한 호출 메시지 받았을 때 대안 찾기"
+      ],
+      "inputs": [
+        "작성할 코드의 의도",
+        "파일 쓰기 필요 여부",
+        "외부 명령 실행 필요 여부"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "허용 / 차단 분류",
+        "우회 시도 시 에러 메시지",
+        "대안 도구 안내"
+      ],
+      "apiRefs": [],
+      "toolRefs": [
+        "RunPython",
+        "SaveArtifact"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "runtime.mcp",
+        "operation.testing"
+      ],
+      "linkedSkills": [],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/runtime.python"
+      ],
+      "procedure": [
+        "분석 의도를 1 문장으로 정의한다.",
+        "허용 표면 안에서 코드를 작성한다 (dartlab API · polars · pathlib 읽기 · 안전 경로 쓰기).",
+        "차단된 호출이 필요하면 해당 도구 (SaveArtifact 등) 로 대체한다.",
+        "차단 에러를 받으면 메시지의 안내에 따라 코드를 수정한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "emit_result 호출 결과",
+        "차단 시 PermissionError 메시지"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "dartlab API)",
+        "SaveArtifact 또는 ~/.dartlab/)",
+        "import 자체가 막힌다고 오인 (실제로는 호출 시점에만 차단)"
+      ],
+      "forbidden": [
+        "destructive shell 호출을 우회하려고 __import__ 사용 금지 — 동일 차단.",
+        "안전 경로 외 파일 쓰기를 시도하지 않는다 — SaveArtifact 도구 권장."
+      ],
+      "examples": [
+        "dartlab.Company('005930').show() 실행",
+        "polars 로 dataframe 가공",
+        "tempfile.gettempdir() 안에 임시 결과 저장"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "notes": [
+            "Pyodide 는 별도 sandbox — os/subprocess/socket 자체가 없거나 다른 의미."
           ]
         }
       }

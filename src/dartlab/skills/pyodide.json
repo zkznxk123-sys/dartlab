@@ -2201,6 +2201,15 @@
       ]
     },
     {
+      "id": "runtime.python",
+      "title": "RunPython 신뢰 경계",
+      "category": "runtime",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "runtime.vscode",
       "title": "VSCode Extension",
       "category": "runtime",

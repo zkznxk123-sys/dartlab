@@ -22,6 +22,7 @@ from typing import Any
 from dartlab.ai.contracts import Ref
 
 from .formatting import short_text
+from .runPython_guard import _assertSafeAst, _safeOpenFactory
 from .types import ToolResult
 
 logger = logging.getLogger(__name__)
@@ -126,7 +127,13 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
         emitted.update(payload)
         print("DARTLAB_RESULT_JSON=" + json.dumps(payload, ensure_ascii=False, default=str))
 
-    globals_dict: dict[str, Any] = {"emit_result": emit_result, "__builtins__": __builtins__}
+    # sandbox guard — write 가능 mode 의 open 은 안전 경로 prefix 로 제한.
+    # 차단 호출 (os.system / subprocess.run 등) 은 exec 직전 AST 검사로 거부.
+    globals_dict: dict[str, Any] = {
+        "emit_result": emit_result,
+        "__builtins__": __builtins__,
+        "open": _safeOpenFactory(),
+    }
     container: dict[str, Any] = {}
 
     def _runner() -> None:
@@ -154,6 +161,8 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
             # (한 줄만 indent 된 LLM 결함) 는 못 잡음 → IndentationError fallback 으로
             # 처리: 블록 키워드 없으면 모든 줄 lstrip 해서 재시도.
             normalized_code = textwrap.dedent(str(code or "")).strip()
+            # AST sandbox guard — destructive shell/import 호출 거부.
+            _assertSafeAst(normalized_code)
             with redirect_stdout(stdout), redirect_stderr(stderr):
                 try:
                     exec(normalized_code, globals_dict, globals_dict)  # noqa: S102
@@ -161,6 +170,7 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
                     fallback = _try_unindent_fallback(normalized_code)
                     if fallback is None:
                         raise
+                    _assertSafeAst(fallback)
                     exec(fallback, globals_dict, globals_dict)  # noqa: S102
         except Exception:  # noqa: BLE001
             container["error"] = traceback.format_exc()
