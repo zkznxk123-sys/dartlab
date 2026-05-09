@@ -154,9 +154,12 @@ r = dartlab.quant("시장맥락", "AAPL", macroVars=["FEDFUNDS", "DGS10"])
   "flowMomentum20d": 4567890,
   "flowAvailable": true,
   "flowNObs": 1006,
+  "macroSource": "wide",          # wide / singleFallback / none
   "summary": "β=1.12 · USDKRW β=-0.812 · smartMoney Z=+1.23"
 }
 ```
+
+`macroSource` 단일 키 — wide 호출 성공 시 `"wide"`, wide 실패 후 var 별 fetch 가 일부 성공하면 `"singleFallback"`, 둘 다 실패면 `"none"`. wide 실패 사유는 `macroWideErrorType` 진단 키로 별도 보존.
 
 ## evidence 기준
 

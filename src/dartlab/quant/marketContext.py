@@ -120,7 +120,12 @@ def _macroBetaSet(stock_df: pl.DataFrame, macro_df: pl.DataFrame, macro_vars: tu
 
 
 def _camelize(var: str) -> str:
-    """매크로 변수명 → camelCase 컬럼 prefix."""
+    """매크로 변수명 → camelCase 컬럼 prefix.
+
+    KR/US 의 같은 의미 변수 (CPI vs CPIAUCSL) 가 같은 출력 키를 만들면 사용자가
+    macroVars=["CPI","CPIAUCSL"] 동시 입력 시 silent dict 덮어쓰기. 따라서 US CPI 는
+    cpiUs 로 분리한다.
+    """
     aliases = {
         "USDKRW": "usdkrw",
         "BASE_RATE": "baseRate",
@@ -129,7 +134,7 @@ def _camelize(var: str) -> str:
         "FEDFUNDS": "fedFunds",
         "DGS10": "dgs10",
         "DCOILWTICO": "oil",
-        "CPIAUCSL": "cpi",
+        "CPIAUCSL": "cpiUs",  # KR CPI 와 키 충돌 방지
     }
     return aliases.get(var.upper(), var.lower())
 
@@ -327,13 +332,17 @@ def calcMarketContext(
         macro_vars = tuple(macroVars)
 
     macro_df = None
+    macro_source = "none"  # wide / singleFallback / none — 결과 키로 단일 노출
+    wide_error: str | None = None
     try:
         from dartlab.gather.entry import GatherEntry
 
         g = GatherEntry()
         macro_df = g("macro", market=market)
+        if not isEmptyDf(macro_df):
+            macro_source = "wide"
     except (ImportError, ValueError, TypeError, RuntimeError) as exc:
-        result["macroBetaError_wide"] = type(exc).__name__
+        wide_error = type(exc).__name__
         macro_df = None
 
     # wide 호출 실패 또는 빈 DF 시 var 별 단일 fetch fallback
@@ -361,9 +370,13 @@ def calcMarketContext(
                 for p in parts[1:]:
                     macro_df = macro_df.join(p, on="date", how="full", coalesce=True)
                 macro_df = macro_df.sort("date")
-        except (ImportError, ValueError, TypeError, RuntimeError) as exc:
-            result["macroBetaError_single"] = type(exc).__name__
+                macro_source = "singleFallback"
+        except (ImportError, ValueError, TypeError, RuntimeError):
+            pass
 
+    result["macroSource"] = macro_source
+    if wide_error is not None:
+        result["macroWideErrorType"] = wide_error  # 진단용 (singleFallback 성공해도 wide 실패 사유 보존)
     if not isEmptyDf(macro_df):
         macro_betas = _macroBetaSet(stock_df, macro_df, macro_vars)
         result.update(macro_betas)

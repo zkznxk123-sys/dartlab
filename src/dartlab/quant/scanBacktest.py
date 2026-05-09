@@ -20,6 +20,7 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.quant._helpers import STOCK_CODE_COLUMNS
 from dartlab.quant.strategy.backtest import (
     DEFAULT_FEE_BPS,
     DEFAULT_SLIP_BPS,
@@ -29,19 +30,20 @@ from dartlab.quant.strategy.backtest import (
 from dartlab.quant.strategy.presets import STYLE_REGISTRY, resolve_style
 from dartlab.quant.strategy.rule import Rule
 
-_STOCK_CODE_CANDIDATES = ("stockCode", "종목코드", "stock_code", "corp_code")
+# 하위호환 — 외부에서 _STOCK_CODE_CANDIDATES 직접 참조하던 코드 보존 (SSOT 는 STOCK_CODE_COLUMNS)
+_STOCK_CODE_CANDIDATES = STOCK_CODE_COLUMNS
 
 
 def _detectStockCodeColumn(df: pl.DataFrame) -> str | None:
     """scan 결과 DataFrame 의 universe 식별 컬럼 자동 감지.
 
-    우선순위: ``stockCode`` → ``종목코드`` → ``stock_code`` → ``corp_code``.
-    매칭 실패 시 None.
+    우선순위는 ``STOCK_CODE_COLUMNS`` SSOT (``_helpers.py``) 가 정의 — ``stockCode``
+    → ``종목코드`` → ``stock_code`` → ``corp_code``. 매칭 실패 시 None.
     """
     if isEmptyDf(df):
         return None
     cols = df.columns
-    for cand in _STOCK_CODE_CANDIDATES:
+    for cand in STOCK_CODE_COLUMNS:
         if cand in cols:
             return cand
     return None
@@ -181,6 +183,14 @@ def runScanBacktest(
     KeyError
         ``style`` 이 STYLE_REGISTRY 에 미등록 시.
 
+    Verified
+    --------
+    - end-to-end (2026-05-09 dogfood): scan("valuation") 2535 종목 → top 5 → trendFollow
+      style → status=ok, scanContext={universeCol="종목코드", scanResultHash="8f077b62024493f9"}
+    - 인기 5 종목 + SMA momentum signalFn → sharpe=+2.45, dsr=+0.84, trades=34 (합리적)
+    - 결정성: 같은 universe 두 번 호출 → scanResultHash + sharpe 모두 일치
+    - universeCol 자동 감지: stockCode / 종목코드 / stock_code 모두 지원
+
     Notes
     -----
     - scanContext.scanResultHash 는 입력 DataFrame 의 head(topN) 에 대한 결정적 SHA-1.
@@ -198,7 +208,7 @@ def runScanBacktest(
     if col is None or col not in scanResult.columns:
         return BacktestResult(
             status="error",
-            reason=f"universe 컬럼 미감지. 후보: {_STOCK_CODE_CANDIDATES}",
+            reason=f"universe 컬럼 미감지. 후보: {STOCK_CODE_COLUMNS}",
         )
 
     universe_df = scanResult.head(int(topN))

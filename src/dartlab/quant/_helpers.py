@@ -15,6 +15,13 @@ from dartlab.core.market import detectMarket as detect_market  # noqa: F401
 from dartlab.core.market import resolveMarket as resolve_market  # noqa: F401
 from dartlab.core.polarsUtil import isEmptyDf
 
+# ── 종목코드 컬럼 후보 SSOT ──────────────────────────────
+# scan/quant 의 DataFrame universe 식별 컬럼 우선순위. 여러 모듈에서 같은 후보를
+# 반복 정의하던 것 (scanBacktest._STOCK_CODE_CANDIDATES, _helpers.load_changes_for_stock 등)
+# 의 단일 출처. 새 코드는 이걸 import.
+STOCK_CODE_COLUMNS: tuple[str, ...] = ("stockCode", "종목코드", "stock_code", "corp_code")
+
+
 # ── OHLCV fetch ──────────────────────────────────────────
 
 
@@ -185,7 +192,7 @@ def load_changes_for_stock(stockCode: str):
         return None
 
     lf = pl.scan_parquet(path)
-    for col in ("stockCode", "종목코드", "corp_code"):
+    for col in STOCK_CODE_COLUMNS:
         try:
             return lf.filter(pl.col(col) == stockCode).collect()
         except pl.exceptions.ColumnNotFoundError:
@@ -277,8 +284,9 @@ def load_allfilings_for_stock(stockCode: str, *, lookback_days: int | None = Non
     if lookback_days is not None and lookback_days > 0:
         parquets = parquets[-lookback_days:]
 
-    # 컬럼명 우선순위: stock_code (snake) → stockCode → 종목코드 → corp_code
-    candidate_cols = ("stock_code", "stockCode", "종목코드", "corp_code")
+    # 컬럼명 우선순위: STOCK_CODE_COLUMNS SSOT (snake_case 우선이라 별도 순서 — 그러나
+    # SSOT 의 후보 셋과 동일). allFilings parquet 은 stock_code 가 일반적이라 첫 시도.
+    candidate_cols = ("stock_code", *(c for c in STOCK_CODE_COLUMNS if c != "stock_code"))
 
     frames: list = []
     for p in parquets:
