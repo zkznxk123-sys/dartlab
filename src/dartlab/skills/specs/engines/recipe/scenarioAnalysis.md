@@ -53,6 +53,12 @@ examples:
   - 매크로 (금리 인상) + 회사 forecast
   - regime + 시나리오 결합
   - 시나리오 + valuation band
+gap:
+  primary:
+    - analysis
+    - macro
+  secondary:
+    - quant
 lastUpdated: '2026-05-07'
 ---
 

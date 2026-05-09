@@ -51,6 +51,13 @@ examples:
   - 자동차 가치 사슬 + 핵심 종목
   - 산업 매크로 영향 + peer 횡단
   - 단계별 (upstream / downstream) 비교
+gap:
+  primary:
+    - industry
+    - macro
+  secondary:
+    - scan
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

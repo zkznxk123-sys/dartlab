@@ -51,6 +51,10 @@ examples:
   - 화학 산업 재고 + 회사 회전
   - ISM 4 국면 + 회사 영향
   - 사이클 위치 + 매크로 수요
+gap:
+  primary:
+    - macro
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

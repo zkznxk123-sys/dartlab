@@ -54,6 +54,10 @@ examples:
   - F-Score 5+ 우량 가치주 후보
   - 가치주 + F-Score + 매수
   - F-Score + Piotroski 사후 검토
+gap:
+  primary:
+    - scan
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

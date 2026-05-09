@@ -51,6 +51,10 @@ examples:
   - 사이클 phase + 섹터 횡단 스캔
   - 미국 sector rotation 적합성 검증
   - 섹터 + 산업 sub-segment 분리
+gap:
+  primary:
+    - macro
+    - scan
 lastUpdated: '2026-05-07'
 ---
 

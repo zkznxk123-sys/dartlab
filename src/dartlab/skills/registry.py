@@ -223,6 +223,9 @@ def _validate_recipe_skill(spec: SkillSpec) -> None:
 
     순환 의존 검사는 listSkills() 재귀 위험으로 본 단계에서 수행하지 않는다 — 별도
     validateRecipes() 후속 작업으로 분리. 여기서는 구조 검증만.
+
+    gap/falsifier 첫 wave 정책: 존재하면 구조 검증, 없으면 warn-only (logger.warning).
+    enforced lint 는 tests/test_recipe_lint.py 가 담당.
     """
     body = str(spec.source.get("body") or "")
     if "## 연계 절차" not in body:
@@ -231,6 +234,13 @@ def _validate_recipe_skill(spec: SkillSpec) -> None:
     has_body_steps = bool(_steps_from_recipe_body(body))
     if not (has_linked or has_body_steps):
         raise ValueError(f"recipe skill {spec.id} must declare linkedSkills frontmatter or '## 연계 절차' step list")
+    if spec.gap:
+        primary = spec.gap.get("primary")
+        if not isinstance(primary, list) or len(primary) < 2:
+            raise ValueError(f"recipe skill {spec.id} gap.primary must be a list of ≥2 engine names (got {primary!r})")
+    if spec.falsifier:
+        if not isinstance(spec.falsifier.get("description"), str) or not spec.falsifier["description"].strip():
+            raise ValueError(f"recipe skill {spec.id} falsifier.description must be non-empty string")
 
 
 _RECIPE_STEP_RE = re.compile(r"^\s*(?:\d+\.|-)\s*([\w.]+)(?:\s*[—\-:]\s*(.*))?$")
@@ -481,6 +491,7 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
         "forbidden",
         "examples",
         "verifiedBy",
+        "expectedNovelty",
     }
     for field in list_fields:
         value = data.get(field)
@@ -498,12 +509,29 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
         data["recipeSteps"] = [item if isinstance(item, dict) else {"skillId": str(item)} for item in rs]
     else:
         data["recipeSteps"] = []
-    for field in ("runtimeCompatibility", "pyodide", "docs", "quality", "source"):
+    for field in (
+        "runtimeCompatibility",
+        "pyodide",
+        "docs",
+        "quality",
+        "source",
+        "gap",
+        "testUniverse",
+        "falsifier",
+    ):
         value = data.get(field)
         if value is None:
             data[field] = {}
         elif not isinstance(value, dict):
             raise ValueError(f"skill field must be a mapping: {field}")
+    # validationRuns 는 list[dict] — ValidateRecipe 가 append. dict 가 아닌 항목은 drop.
+    vr = data.get("validationRuns")
+    if vr is None:
+        data["validationRuns"] = []
+    elif isinstance(vr, list):
+        data["validationRuns"] = [item for item in vr if isinstance(item, dict)]
+    else:
+        data["validationRuns"] = []
     if data.get("pyodide") and not data["runtimeCompatibility"].get("pyodide"):
         data["runtimeCompatibility"]["pyodide"] = data["pyodide"]
     # SkillSpec field 가 아닌 frontmatter 키는 drop — markdown 에 자유 메타 (intentBoosts 등) 허용.

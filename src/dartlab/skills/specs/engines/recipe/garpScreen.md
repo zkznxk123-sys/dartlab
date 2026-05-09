@@ -55,6 +55,10 @@ examples:
   - PEG ≤ 1 + 부채 안정 + 성장
   - Lynch GARP 적용 KR
   - PEG + valuation band 결합
+gap:
+  primary:
+    - scan
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

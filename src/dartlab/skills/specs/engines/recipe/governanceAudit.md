@@ -53,6 +53,10 @@ examples:
   - 이사회 + 지분 + 감사 + 분식 결합
   - 감사인 변경 빈도 점검
   - 거버넌스 위험 thesis (반대 근거 동반)
+gap:
+  primary:
+    - analysis
+    - scan
 lastUpdated: '2026-05-07'
 ---
 

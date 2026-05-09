@@ -54,6 +54,10 @@ examples:
   - Graham + EVA + CFROI 결합
   - 시장가 vs 본질가치 band 비교
   - 3 anchor 합의 시 fair value claim
+gap:
+  primary:
+    - gather
+    - scan
 lastUpdated: '2026-05-07'
 ---
 

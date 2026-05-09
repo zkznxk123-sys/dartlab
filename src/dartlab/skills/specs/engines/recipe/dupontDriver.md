@@ -53,6 +53,10 @@ examples:
   - DuPont 동인 표준편차 큰 항목 식별
   - 산업 평균 분해 + 회사 비교
   - DuPont + working capital quality 결합
+gap:
+  primary:
+    - gather
+    - scan
 lastUpdated: '2026-05-07'
 ---
 

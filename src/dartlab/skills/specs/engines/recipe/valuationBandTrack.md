@@ -51,6 +51,12 @@ examples:
   - PBR + EV/EBITDA + ±σ 위치
   - 시장 환경 + band 결합
   - 회사 band + peer band 비교
+gap:
+  primary:
+    - analysis
+    - quant
+  secondary:
+    - scan
 lastUpdated: '2026-05-07'
 ---
 

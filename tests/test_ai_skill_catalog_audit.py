@@ -22,7 +22,19 @@ def test_all_skill_specs_parse_into_dataclass():
         assert spec.id
         assert spec.title
         assert spec.kind in ("curated", "generated", "recipe", "user")
-        assert spec.status in ("unverified", "observed", "auditP", "official", "deprecated")
+        # recipe lifecycle: drafted → unverified → tested → verified → curated → deprecated.
+        # 비-recipe 의 기존 ladder (observed/auditP/official) 도 호환 유지.
+        assert spec.status in (
+            "drafted",
+            "unverified",
+            "observed",
+            "tested",
+            "verified",
+            "auditP",
+            "official",
+            "curated",
+            "deprecated",
+        )
 
 
 def test_skill_kind_status_distribution_is_reasonable():

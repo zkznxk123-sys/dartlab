@@ -52,6 +52,10 @@ examples:
   - 시총 하위 + 성장 + 저평가 + quality
   - small-cap + distress 필터
   - small-cap discovery + 깊이 분석
+gap:
+  primary:
+    - scan
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

@@ -52,6 +52,10 @@ examples:
   - 지배구조 + 감사 + 종업원 결합
   - 자본배분 + ESG 신호
   - 정식 ESG 부재 시 light audit
+gap:
+  primary:
+    - analysis
+    - scan
 lastUpdated: '2026-05-07'
 ---
 

@@ -53,6 +53,10 @@ examples:
   - 신한지주 금리 인상 영향
   - 환율 1% 변동 시 영업이익 영향
   - 자본구조 + macro sensitivity 결합
+gap:
+  primary:
+    - macro
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

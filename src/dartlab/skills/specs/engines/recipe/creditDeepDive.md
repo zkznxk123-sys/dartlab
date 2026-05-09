@@ -52,6 +52,12 @@ examples:
   - 신한지주 신용 위험 종합
   - 부채 만기 분포 + 이자보상 + 시장 금리
   - dCR 등급 변화 + 매크로 시점
+gap:
+  primary:
+    - analysis
+    - credit
+  secondary:
+    - macro
 lastUpdated: '2026-05-07'
 ---
 

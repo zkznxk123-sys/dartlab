@@ -53,6 +53,10 @@ examples:
   - 자사주 매입 / 소각 / 신주 발행 시계열
   - 인력 + 자본 사이클 결합
   - 인당 매출 / 영업이익 추적
+gap:
+  primary:
+    - scan
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

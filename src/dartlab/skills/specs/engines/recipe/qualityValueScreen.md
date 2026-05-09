@@ -55,6 +55,10 @@ examples:
   - Novy-Marx GP/A + 가치 결합
   - chaebol discount 회피 + 우량
   - quality + value + distress 필터
+gap:
+  primary:
+    - scan
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

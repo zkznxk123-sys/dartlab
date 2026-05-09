@@ -55,6 +55,10 @@ examples:
   - PBR ≤ 1 + 유동성 + 저레버리지
   - 5 년 흑자 + 안전마진
   - chaebol discount 회피 검증
+gap:
+  primary:
+    - scan
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

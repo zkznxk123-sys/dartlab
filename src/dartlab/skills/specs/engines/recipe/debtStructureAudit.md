@@ -52,6 +52,12 @@ examples:
   - 부채 구조 + peer 횡단 (4 대 금융지주)
   - 이자보상배율 시계열 + 5 년 평균
   - 신용 등급 변화 + 부채 audit
+gap:
+  primary:
+    - scan
+    - analysis
+  secondary:
+    - credit
 lastUpdated: '2026-05-07'
 ---
 

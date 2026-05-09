@@ -54,6 +54,12 @@ examples:
   - 신한지주 매크로 → 산업 → 회사 → quality → valuation
   - 대형 종목 deep dive
   - 6 막 인과 narrative 조립
+gap:
+  primary:
+    - analysis
+    - macro
+  secondary:
+    - scan
 lastUpdated: '2026-05-07'
 ---
 

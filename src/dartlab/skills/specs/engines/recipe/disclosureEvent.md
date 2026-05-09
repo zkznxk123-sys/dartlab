@@ -54,6 +54,12 @@ runtimeCompatibility:
     status: limited
     limitations:
       - browser 안에서는 readFiling 본문 길이 한정
+gap:
+  primary:
+    - analysis
+    - scan
+  secondary:
+    - gather
 lastUpdated: '2026-05-07'
 ---
 

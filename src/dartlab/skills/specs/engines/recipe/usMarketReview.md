@@ -52,6 +52,12 @@ examples:
   - 미국 종목 + 매크로 (FED 금리)
   - SEC 10-Q 분기 review
   - US peer 비교 (SIC 분류)
+gap:
+  primary:
+    - macro
+    - quant
+  secondary:
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

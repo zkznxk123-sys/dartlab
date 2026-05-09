@@ -102,7 +102,6 @@ linkedSkills:
   - engines.analysis.financialConsistency
   - engines.analysis.disclosureChange
   - engines.scan.audit
-  - 감사 리스크와 내부통제 이슈 봐줘
 source:
   type: manual_skill
   format: markdown

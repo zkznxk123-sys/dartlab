@@ -55,6 +55,12 @@ examples:
   - 가치주 스크리너 + distress 필터 결합
   - 음수 OCF + 부채비율 + Altman 합의
   - 블랙리스트 회피 후속 검토
+gap:
+  primary:
+    - scan
+    - credit
+  secondary:
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

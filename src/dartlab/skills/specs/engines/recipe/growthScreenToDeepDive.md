@@ -52,6 +52,10 @@ examples:
   - CAGR 30%+ 종목 후보 + earnings quality
   - 성장 + valuation 결합
   - 성장 + 일회성 정상화
+gap:
+  primary:
+    - scan
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

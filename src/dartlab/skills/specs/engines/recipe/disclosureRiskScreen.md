@@ -49,6 +49,10 @@ examples:
   - 정정 빈도 상위 종목
   - 공시 위험 + 본문 검증 결합
   - 위험 신호 후속 분석 권장
+gap:
+  primary:
+    - scan
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

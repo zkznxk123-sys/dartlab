@@ -51,6 +51,12 @@ examples:
   - 4 대 금융지주 ratio 횡단
   - 산업 평균 대비 ±σ 위치 명시
   - 같은 size bucket peer 비교
+gap:
+  primary:
+    - industry
+    - analysis
+  secondary:
+    - scan
 lastUpdated: '2026-05-07'
 ---
 

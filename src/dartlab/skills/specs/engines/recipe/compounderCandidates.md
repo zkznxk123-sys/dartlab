@@ -55,6 +55,10 @@ examples:
   - ROE >= 15% + 표준편차 작은 종목"
   - 매출 안정 성장 + 고-margin
   - compounder + valuation 결합
+gap:
+  primary:
+    - scan
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 

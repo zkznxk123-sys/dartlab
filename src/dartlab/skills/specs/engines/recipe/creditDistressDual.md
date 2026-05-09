@@ -53,6 +53,10 @@ examples:
   - 비제조업 신용 위험 평가
   - 2 모델 의견 일치 vs 불일치
   - 부도 확률 + 신뢰구간
+gap:
+  primary:
+    - gather
+    - credit
 lastUpdated: '2026-05-07'
 ---
 

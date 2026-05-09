@@ -13,7 +13,20 @@ from typing import Any, Literal
 
 SkillKind = Literal["generated", "curated", "user", "recipe"]
 SkillScope = Literal["builtin", "project", "user"]
-SkillStatus = Literal["unverified", "observed", "auditP", "official", "deprecated"]
+# recipe 6-stage lifecycle (drafted → unverified → tested → verified → curated → deprecated) 와
+# 비-recipe 의 기존 ladder (unverified → observed → auditP → official → deprecated) 를 합집합으로 보존.
+# 변환·승격은 scripts/dev/recipe_promote.py CLI 가 단독 권한.
+SkillStatus = Literal[
+    "drafted",
+    "unverified",
+    "observed",
+    "tested",
+    "verified",
+    "auditP",
+    "official",
+    "curated",
+    "deprecated",
+]
 SkillCategory = Literal[
     "start",
     "runtime",
@@ -124,6 +137,14 @@ class SkillSpec:
     source: dict[str, Any] = field(default_factory=dict)
     verifiedBy: list[str] = field(default_factory=list)
     lastUpdated: str | None = None
+    # ── recipe 메타데이터 (kind == "recipe" 일 때만 의미) ──
+    gap: dict[str, Any] = field(default_factory=dict)
+    testUniverse: dict[str, Any] = field(default_factory=dict)
+    falsifier: dict[str, Any] = field(default_factory=dict)
+    expectedNovelty: list[str] = field(default_factory=list)
+    validationRuns: list[dict[str, Any]] = field(default_factory=list)
+    validatedAt: str | None = None
+    storyboardKey: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

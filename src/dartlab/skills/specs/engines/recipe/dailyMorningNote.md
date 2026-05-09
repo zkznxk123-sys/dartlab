@@ -76,6 +76,10 @@ linkedSkills:
 sourceRefs:
   - dartlab://skills/engines.gather
   - dartlab://skills/engines.company
+gap:
+  primary:
+    - gather
+    - scan
 lastUpdated: '2026-05-07'
 ---
 

@@ -53,6 +53,12 @@ examples:
   - 가치평가 + valuation band 결합
   - peer multiple + 산업 단계 일치
   - DCF best / base / worst 시나리오
+gap:
+  primary:
+    - analysis
+    - scan
+  secondary:
+    - quant
 lastUpdated: '2026-05-07'
 ---
 

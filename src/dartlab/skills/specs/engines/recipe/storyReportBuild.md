@@ -51,6 +51,10 @@ examples:
   - 신한지주 부분 섹션 (수익구조)
   - causal weights + scorecard 결합
   - story 보고서 + 출처 ref
+gap:
+  primary:
+    - story
+    - analysis
 lastUpdated: '2026-05-07'
 ---
 
