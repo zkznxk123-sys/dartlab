@@ -12,8 +12,10 @@ from .compileVisual import compileVisual
 from .engineCall import engineCall
 from .groundingCheck import groundingCheck
 from .inspectDataset import inspectDataset
+from .listEngineGaps import listEngineGaps
 from .lookAheadGuard import lookAheadGuard
 from .outcomeLog import outcomeLog
+from .proposeRecipe import proposeRecipe
 from .readCapability import readCapability
 from .readFile import readFile
 from .readSkill import getSkillBody, readSkill
@@ -22,6 +24,7 @@ from .runPython import runPython
 from .runWorkbench import runWorkbench
 from .saveArtifact import saveArtifact
 from .types import ToolResult, ToolSpec
+from .validateRecipe import validateRecipe
 from .webSearch import webSearch
 
 ToolFn = Callable[..., ToolResult]
@@ -300,6 +303,66 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=False,
         openWorldHint=False,
     ),
+    # ── recipe lifecycle (chat-native, graph node X) ──
+    "ListEngineGaps": ToolSpec(
+        "ListEngineGaps",
+        "recipe 카탈로그에서 다리 ≤ minBridges 인 엔진 페어 + 샘플 질문 반환. ProposeRecipe 의 입력 가이드.",
+        {
+            "type": "object",
+            "properties": {
+                "engines": {"type": "array", "items": {"type": "string"}},
+                "minBridges": {"type": "integer", "default": 1},
+                "limit": {"type": "integer", "default": 30},
+            },
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+    "ProposeRecipe": ToolSpec(
+        "ProposeRecipe",
+        "engines.recipe.<slug> markdown spec 1 건 신규 작성 (status=drafted). gap.primary ≥ 2 + falsifier.description 강제. 승격은 운영자 CLI 단독.",
+        {
+            "type": "object",
+            "properties": {
+                "id": {"type": "string"},
+                "title": {"type": "string"},
+                "purpose": {"type": "string"},
+                "gap": {"type": "object"},
+                "falsifier": {"type": "object"},
+                "expectedNovelty": {"type": "array", "items": {"type": "string"}},
+                "testUniverse": {"type": "object"},
+                "linkedSkills": {"type": "array", "items": {"type": "string"}},
+                "requiredEvidence": {"type": "array", "items": {"type": "string"}},
+                "body": {"type": "string"},
+            },
+            "required": ["id", "title", "gap", "falsifier"],
+        },
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=False,
+    ),
+    "ValidateRecipe": ToolSpec(
+        "ValidateRecipe",
+        "recipe 1 건을 testUniverse target 들에 직렬 실행 (≤5 종목, Polars 메모리 가드) + 6 신호 scorecard. status 자동 변경 X — 승격은 운영자 CLI.",
+        {
+            "type": "object",
+            "properties": {
+                "skillId": {"type": "string"},
+                "targets": {"type": "array", "items": {"type": "string"}},
+                "asOf": {"type": "string"},
+                "maxTargets": {"type": "integer", "default": 5},
+                "capture": {"type": "boolean", "default": True},
+            },
+            "required": ["skillId"],
+        },
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=False,
+    ),
     # ── elevate (옵션 sub-agent) ──
     "RunWorkbench": ToolSpec(
         "RunWorkbench",
@@ -336,6 +399,9 @@ _TOOLS: dict[str, ToolFn] = {
     "LookAheadGuard": lookAheadGuard,
     "GroundingCheck": groundingCheck,
     "RequestUserInput": requestUserInput,
+    "ListEngineGaps": listEngineGaps,
+    "ProposeRecipe": proposeRecipe,
+    "ValidateRecipe": validateRecipe,
     "RunWorkbench": runWorkbench,
 }
 
@@ -372,6 +438,9 @@ _LEGACY_NAME_MAP = {
     "grounding_check": "GroundingCheck",
     "request_user_input": "RequestUserInput",
     "run_workbench": "RunWorkbench",
+    "list_engine_gaps": "ListEngineGaps",
+    "propose_recipe": "ProposeRecipe",
+    "validate_recipe": "ValidateRecipe",
 }
 
 

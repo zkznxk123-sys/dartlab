@@ -90,6 +90,10 @@ def runAgent(
     failure_streak: dict[tuple[str, str], int] = {}
     blocked_tools: set[str] = set()
     _FAILURE_STREAK_LIMIT = 2
+    # 동일 (name, args) 호출 결과 캐시 — LLM 이 같은 도구·인자를 반복하면 재실행하지 않고
+    # cached 결과 즉시 반환 + LLM 메시지에 "이미 호출됐음, 다시 부르지 마라" 명시.
+    # 사용자 audit 에서 ReadCapability 2 회 / 같은 Read 3 회 같은 비효율 루프 차단.
+    call_cache: dict[tuple[str, str], dict[str, Any]] = {}
 
     for iteration in range(max_iterations):
         # 옛 assistant reasoning 트리밍 (마지막 2 개 외 content → None). tool_calls 보존.
@@ -189,7 +193,45 @@ def runAgent(
                         "summary": f"{tc.name} 호출",
                     },
                 )
+                # 동일 (name, args) 호출이 한 run 에서 반복되면 cached 결과 즉시 재사용.
+                # LLM 에 "이미 호출됐음, 다시 부르지 마라" 명시 — 무의미 루프 차단.
+                cache_key = (tc.name, json.dumps(tc.args or {}, ensure_ascii=False, sort_keys=True, default=str))
+                cached = call_cache.get(cache_key)
+                if cached is not None:
+                    cached_summary = str(cached.get("summary") or "")
+                    note = f"(cached) 같은 인자로 이미 호출됨 — 다시 부르지 마라. 직전 결과: {cached_summary[:120]}"
+                    yield TraceEvent(
+                        "tool_result",
+                        {
+                            "id": tc.id,
+                            "tool": tc.name,
+                            "status": "done" if cached.get("ok") else "error",
+                            "outputSummary": note,
+                            "evidenceRefs": [ref.get("id") for ref in cached.get("refs") or [] if ref.get("id")],
+                            "artifacts": [r for r in cached.get("refs") or [] if r.get("kind") == "artifactRef"],
+                            "error": cached.get("error"),
+                            "data": cached.get("data"),
+                            "cached": True,
+                        },
+                    )
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tc.id,
+                            "content": json.dumps(
+                                {
+                                    "ok": cached.get("ok"),
+                                    "summary": note,
+                                    "data": None,
+                                    "error": cached.get("error"),
+                                },
+                                ensure_ascii=False,
+                            ),
+                        }
+                    )
+                    continue
                 result_dict = executeTool(tc.name, tc.args)
+                call_cache[cache_key] = result_dict
                 # 실패 streak 추적 — 같은 도구 + 같은 error 코드 N 회 → blocked.
                 if not result_dict.get("ok"):
                     err_key = str(result_dict.get("error") or "unknown")

@@ -242,20 +242,20 @@ export function appendFailurePart(message, failure) {
 }
 
 /**
- * 한 LLM 루프 (PassLoop pass / ChatNative iteration) 안의 모든 활동을 하나의
- * 카드로 묶는다. activity / tool / skill (ReadSkill·ReadCapability·GetSkillBody)
- * 이 평면으로 흩어져 5+ 종 박스로 갈라지던 구조를 단일 컨테이너 (loop-card) +
- * 행 (loop-row, kind 별 분기) 으로 통합.
+ * 한 메시지 = 한 loop-card. 사용자 정의: "질문 → 답변까지 = 한 루프".
  *
- * 분리 경계:
- *   1. 백엔드 메타 우선 — part.passLabel · part.iteration 이 있으면 같은 값끼리.
- *   2. fallback — phase 전환 (classifyPhase) + view-spec / text / failure 가
- *      들어오면 강제 종료.
+ * activity / tool / skill 모두 단일 카드 안의 row 로 흡수. phase·kind·passLabel
+ * 별 분리 폐기 — 평면 5+ 박스로 갈라지던 인지 부담 해소가 핵심.
  *
- * 출력 part: { type: "loop-card", id, label, status, running, errorCount, rows: [...] }
+ * 입력 parts (시간 순). 출력:
+ *   - 모든 activity / tool 는 단일 loop-card 1개로 묶임.
+ *   - view-spec / text / failure 가 끼면 bucket 닫고 그 part 통과 후 다음 bucket.
+ *
+ * 출력 part: { type: "loop-card", id, label, status, running, errorCount, toolCount, activityCount, rows: [...] }
  *   rows[i] = { kind: "activity"|"tool"|"skill", ...원본 part 키 그대로 보존 }
  *
- * view-spec / text / failure 는 그대로 통과 (loop-card 와 동위).
+ * RESEARCH 도구 (ReadSkill·ReadCapability·GetSkillBody) 도 같은 카드 안 row.
+ * kind="skill" 는 row 시각 표시용 (아이콘/라벨 분기) 만 보존.
  */
 const RESEARCH_TOOL_NAMES_FOR_LOOP = new Set(["ReadSkill", "ReadCapability", "GetSkillBody"]);
 
@@ -263,7 +263,6 @@ export function groupLoops(parts) {
 	const source = Array.isArray(parts) ? parts : [];
 	const out = [];
 	let bucket = null;
-	let bucketKey = null;
 
 	function closeBucket() {
 		if (!bucket) return;
@@ -274,14 +273,18 @@ export function groupLoops(parts) {
 		bucket.summary = lastWithSummary?.summary || "";
 		bucket.toolCount = bucket.rows.filter((r) => r.kind === "tool" || r.kind === "skill").length;
 		bucket.activityCount = bucket.rows.filter((r) => r.kind === "activity").length;
+		// label — 첫 phase 또는 "분석". 메시지 단위 1 카드라 단순.
+		const firstActivity = bucket.rows.find((r) => r.kind === "activity");
+		const phase = firstActivity ? classifyPhase(firstActivity.summary) : null;
+		bucket.label = phase ? PHASE_LABEL[phase] : "분석";
+		bucket.avatar = PHASE_AVATAR[phase] || "/avatar.png";
 		bucket = null;
-		bucketKey = null;
 	}
 
 	for (const part of source) {
 		if (!part || typeof part !== "object") continue;
 
-		// loop-card 동위 — 통과
+		// loop-card 동위 — 통과 (view-spec 시각 답변, text 최종 답변, failure 실패 알림).
 		if (part.type === "view-spec" || part.type === "text" || part.type === "failure") {
 			closeBucket();
 			out.push(part);
@@ -295,15 +298,13 @@ export function groupLoops(parts) {
 			continue;
 		}
 
-		// 그루핑 키 — 백엔드 메타 우선, 없으면 phase / iteration fallback.
-		const key = loopKey(part);
-		if (!bucket || key !== bucketKey) {
-			closeBucket();
+		// 한 메시지 안의 모든 도구·활동은 단일 loop-card 에 흡수.
+		if (!bucket) {
 			bucket = {
 				type: "loop-card",
-				id: `loop-${out.length}-${part.id || ""}`,
-				label: loopLabelFromKey(key, part),
-				avatar: PHASE_AVATAR[loopPhaseFromKey(key, part)] || "/avatar.png",
+				id: `loop-${out.length}`,
+				label: "분석",
+				avatar: "/avatar.png",
 				rows: [],
 				running: false,
 				status: "done",
@@ -312,7 +313,6 @@ export function groupLoops(parts) {
 				toolCount: 0,
 				activityCount: 0,
 			};
-			bucketKey = key;
 			out.push(bucket);
 		}
 		bucket.rows.push({ ...part, kind });
@@ -327,32 +327,6 @@ function rowKindFromPart(part) {
 		return RESEARCH_TOOL_NAMES_FOR_LOOP.has(part.name) ? "skill" : "tool";
 	}
 	return null;
-}
-
-function loopKey(part) {
-	if (part.passLabel) return `pass:${part.passLabel}`;
-	if (part.iteration !== undefined && part.iteration !== null) return `iter:${part.iteration}`;
-	if (part.type === "activity") return `phase:${classifyPhase(part.summary)}`;
-	return `kind:${part.type === "tool" ? (RESEARCH_TOOL_NAMES_FOR_LOOP.has(part.name) ? "skill" : "tool") : part.type}`;
-}
-
-function loopLabelFromKey(key, part) {
-	if (key.startsWith("pass:")) return key.slice(5).toUpperCase();
-	if (key.startsWith("iter:")) return `iteration ${key.slice(5)}`;
-	if (key.startsWith("phase:")) {
-		const phase = key.slice(6);
-		return PHASE_LABEL[phase] || "단계";
-	}
-	if (key === "kind:skill") return "사전조사";
-	if (key === "kind:tool") return "도구 실행";
-	return part.type || "단계";
-}
-
-function loopPhaseFromKey(key, part) {
-	if (key.startsWith("phase:")) return key.slice(6);
-	if (part.type === "activity") return classifyPhase(part.summary);
-	if (key === "kind:skill") return "plan";
-	return "execute";
 }
 
 /**

@@ -132,12 +132,14 @@ function renderTable(block) {
 	const lines = block.trim().split('\n').filter(l => l.trim());
 	let headerLine = null;
 	let sepIdx = -1;
+	let sepCells = [];
 	let dataLines = [];
 
 	for (let i = 0; i < lines.length; i++) {
 		const cells = lines[i].slice(1, -1).split('|').map(c => c.trim());
 		if (cells.every(c => /^[\-:]+$/.test(c))) {
 			sepIdx = i;
+			sepCells = cells;
 			break;
 		}
 	}
@@ -162,13 +164,53 @@ function renderTable(block) {
 		if (c.trim() === "…" || c.trim() === "...") skipCols.add(i);
 	});
 
+	// 컬럼별 alignment 결정 — separator 마커 우선, 부재 시 컬럼 numeric 휴리스틱.
+	// markdown 표준: |---:| 우측, |:---| 좌측, |:---:| 중앙, |---| 기본.
+	// 헤더와 바디가 어긋나던 시각 흠 (헤더 좌측·바디 우측) 의 근본 원인 — 본 함수에서
+	// th·td 가 *같은 컬럼 align 으로 통일* 되도록 같은 numericCols/alignFromMarker 참조.
+	const alignFromMarker = sepCells.map((cell) => {
+		if (!cell) return null;
+		const left = cell.startsWith(":");
+		const right = cell.endsWith(":");
+		if (left && right) return "center";
+		if (right) return "right";
+		if (left) return "left";
+		return null;
+	});
+
+	const dataCellsByCol = hCells.map((_, colIdx) =>
+		dataLines.map((line) => {
+			const cells = line.slice(1, -1).split('|').map(c => c.trim());
+			return cells[colIdx];
+		}),
+	);
+	const numericCols = new Set();
+	hCells.forEach((_, colIdx) => {
+		if (codeColSet.has(colIdx)) return;
+		const colCells = dataCellsByCol[colIdx] || [];
+		const valid = colCells.filter((c) => c !== undefined && c !== "");
+		if (!valid.length) return;
+		const numericCount = valid.filter((c) => isNumericCell(c)).length;
+		if (numericCount / valid.length >= 0.5) numericCols.add(colIdx);
+	});
+
+	function alignClass(colIdx) {
+		const marker = alignFromMarker[colIdx];
+		if (marker === "right") return "col-right";
+		if (marker === "left") return "col-left";
+		if (marker === "center") return "col-center";
+		if (numericCols.has(colIdx)) return "col-right";
+		return "";
+	}
+
 	let tableHtml = '<div class="table-wrap"><table>';
 	if (headerLine) {
 		tableHtml += '<thead><tr>';
 		hCells.forEach((c, i) => {
 			if (skipCols.has(i)) return;
-			let rendered = c.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-			tableHtml += `<th>${rendered}</th>`;
+			const rendered = c.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+			const cls = alignClass(i);
+			tableHtml += cls ? `<th class="${cls}">${rendered}</th>` : `<th>${rendered}</th>`;
 		});
 		tableHtml += '</tr></thead>';
 	}
@@ -181,13 +223,11 @@ function renderTable(block) {
 			cells.forEach((c, i) => {
 				if (skipCols.has(i)) return;
 				let rendered = c.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-				// 숫자 셀: 우측 정렬 + 콤마 포맷 (종목코드 컬럼 제외)
-				if (isNumericCell(c) && !codeColSet.has(i)) {
-					rendered = formatLargeNumbers(rendered);
-					tableHtml += `<td class="num">${rendered}</td>`;
-				} else {
-					tableHtml += `<td>${rendered}</td>`;
-				}
+				const cls = alignClass(i);
+				const isNumeric = isNumericCell(c) && !codeColSet.has(i);
+				if (isNumeric) rendered = formatLargeNumbers(rendered);
+				const finalCls = isNumeric ? `num ${cls}`.trim() : cls;
+				tableHtml += finalCls ? `<td class="${finalCls}">${rendered}</td>` : `<td>${rendered}</td>`;
 			});
 			tableHtml += '</tr>';
 		}

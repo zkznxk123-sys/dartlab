@@ -890,6 +890,25 @@ button, a, input, textarea {
 	font-size: 0.88em;
 	color: var(--color-dl-text);
 }
+/* 컬럼 단위 정렬 통일 — separator 마커 (|---:|) 또는 numeric 휴리스틱으로
+   같은 컬럼의 th 와 td 를 같은 align 으로 강제. 헤더 좌측 / 바디 우측이 어긋나던
+   시각 흠 (audit Q1 응답 표) 의 SSOT 수정. */
+.prose-dartlab th.col-right,
+.prose-dartlab td.col-right {
+	text-align: right;
+}
+.prose-dartlab th.col-left,
+.prose-dartlab td.col-left {
+	text-align: left;
+}
+.prose-dartlab th.col-center,
+.prose-dartlab td.col-center {
+	text-align: center;
+}
+/* th 가 col-right 면 numeric 셀과 동일 monospace + tabular-nums 로 baseline 통일. */
+.prose-dartlab th.col-right {
+	font-variant-numeric: tabular-nums;
+}
 .prose-dartlab thead { position: sticky; top: 0; z-index: 1; }
 .prose-dartlab tbody tr { transition: background-color var(--motion-fast); }
 .prose-dartlab tbody tr:nth-child(even) td { background: rgba(148, 163, 184, 0.03); }
