@@ -515,10 +515,15 @@ def walk_forward(
     md = mdd(equity)
     ds = dsr(sh, aggregated_returns, n_trials=len(oos_sharpes))
 
-    # PBO: IS 가 [trial=1, segment=k], OOS 도 동일
-    is_mat = np.array([is_sharpes])
-    oos_mat = np.array([oos_sharpes])
-    pbo_val = pbo(is_mat, oos_mat)
+    # PBO: IS 가 [trial=1, segment=k], OOS 도 동일.
+    # rule_factory path 에서는 IS region 이 보통 학습용 (entry/exit 모두 False) 이라
+    # IS sharpe = 0 → IS vs OOS 비교 무의미 → PBO 1.0 은 가짜. None 으로 표시.
+    if refit_count > 0:
+        pbo_val = None
+    else:
+        is_mat = np.array([is_sharpes])
+        oos_mat = np.array([oos_sharpes])
+        pbo_val = pbo(is_mat, oos_mat)
 
     period = (None, None)
     if dates and len(dates) >= 2:

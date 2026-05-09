@@ -462,18 +462,42 @@ def forecastReturns(
 def forecastRuleFactory(
     *,
     models: list[str] | None = None,
-    threshold: float = 0.002,
+    threshold: float = 0.0005,
     calibFraction: float = 0.2,
     alpha: float = 0.10,
+    requireConfidence: bool = False,
 ):
     """forecast 모델 기반 walk_forward rule_factory 생성.
 
-    walk_forward(close, rule_factory=forecastRuleFactory(threshold=0.002), ...) 형태로
+    walk_forward(close, rule_factory=forecastRuleFactory(threshold=0.0005), ...) 형태로
     사용. fold 마다 IS 구간만 보고 forecast fit, OOS 일수만큼 점추정 + interval 산출,
     threshold 룰로 entry/exit boolean 변환.
 
-    Entry 룰: pointForecast > threshold AND lowerBound > -threshold (양수 + 안전마진).
-    Exit 룰:  pointForecast < 0 OR lowerBound < -2*threshold.
+    Entry / Exit 룰 (default loose mode):
+        entry = pointForecast > threshold
+        exit  = pointForecast < -threshold
+
+    requireConfidence=True (strict mode):
+        entry = pointForecast > threshold AND (point - halfWidth) > -threshold
+        exit  = pointForecast < -threshold OR (point + halfWidth) < -2*threshold
+
+    일별 log-return 의 conformal half-width 는 일별 σ (~0.5~2%) 와 동급이라 strict 모드에서
+    `lower > -threshold` 조건이 사실상 영원히 False — entry 0. cycle 1 회귀 결과 (2026-05-09):
+    합성 strong trend (drift +0.3%/day) 에서도 strict 모드 entry 0 건. 따라서 default 는
+    loose (point only). strict 는 누적 horizon 시그널 검증할 때만 사용.
+
+    Parameters
+    ----------
+    models : list[str] | None
+        명시 시 ``["naive","ar1","etsHolt","theta"]`` 부분집합. None 이면 ``_pickModel``.
+    threshold : float
+        일별 log-return entry 임계 (기본 0.0005 = +0.05%/day ≈ 연 13%).
+    calibFraction : float
+        Conformal calib split 비율.
+    alpha : float
+        Prediction interval 유의수준 (default 0.10 → 90%).
+    requireConfidence : bool
+        True 면 strict mode (interval 도 검증). False (default) 면 loose (point only).
 
     Returns
     -------
@@ -489,7 +513,6 @@ def forecastRuleFactory(
         entry = np.zeros(total, dtype=bool)
         exit_ = np.zeros(total, dtype=bool)
 
-        # IS 구간 log-return 시계열
         if n_is < 30:
             return Rule(entry_expr=entry, exit_expr=exit_)
         log_ret = np.diff(np.log(is_close))
@@ -508,16 +531,21 @@ def forecastRuleFactory(
         residuals_pooled = np.concatenate(residuals_per)
         half_width = _conformalHalfWidth(residuals_pooled, alpha=alpha)
 
-        # OOS 각 점에 대해 entry/exit 판정 (cumulative 가 아닌 1-step 기준)
         for h in range(int(oos_len)):
             point = float(point_forecasts[h])
-            lower = point - half_width
-            upper = point + half_width
             idx = n_is + h
-            if point > threshold and lower > -threshold:
-                entry[idx] = True
-            if point < 0 or upper < -2 * threshold:
-                exit_[idx] = True
+            if requireConfidence:
+                lower = point - half_width
+                upper = point + half_width
+                if point > threshold and lower > -threshold:
+                    entry[idx] = True
+                if point < -threshold or upper < -2 * threshold:
+                    exit_[idx] = True
+            else:
+                if point > threshold:
+                    entry[idx] = True
+                if point < -threshold:
+                    exit_[idx] = True
 
         return Rule(entry_expr=entry, exit_expr=exit_)
 
