@@ -3,7 +3,7 @@
 섹터/산업그룹 Enum, 분류 파라미터, 시장 파라미터, 섹터 classification 로직 전부 이곳이 원본.
 데이터 파일(`sectorParams.json`, `thresholds.json`)은 `dartlab/industry/` 디렉토리에 위치.
 
-L0 규칙: 이 모듈은 `dartlab.industry` 나 다른 L1/L2 엔진을 import 하지 않는다.
+L0 규칙: 이 모듈은 상위 레이어 (L1 company · gather / L1.5 scan · search / L2 분석엔진 5 / L3 조합기 story) 를 import 하지 않는다.
 """
 
 from __future__ import annotations

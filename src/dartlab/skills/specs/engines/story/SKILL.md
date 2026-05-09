@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Story 는 6 막 인과 구조의 회사 보고서를 조립하는 빌더 엔진이다. analysis · credit · scan · quant · macro · industry 의 결과를 블록 단위로 조합 — 11 reportType × 7 기업유형 템플릿. 트리거 — '보고서', '기업 이야기', 'story', '6 막 인과'.
+purpose: Story 는 6 막 인과 구조의 회사 보고서를 조립하는 **L3 조합기**다. 분석엔진 X — L2 5 분석엔진 (analysis · credit · macro · quant · industry) 끼리의 import 순환을 방지하기 위해, story 가 단독으로 다중 결합 책임을 짊어진다. L2 5 엔진 + L1.5 (scan) 결과를 블록 단위로 조합 — 11 reportType × 7 기업유형 템플릿. 자체 계산 0, 모든 숫자는 하위 엔진 ref. 트리거 — '보고서', '기업 이야기', 'story', '6 막 인과'.
 whenToUse:
   - Story
   - story
@@ -91,9 +91,13 @@ lastUpdated: '2026-05-08'
 
 ## 엔진 역할
 
-`story` 는 *해석하지 않고 다양한 관점의 근거를 배치* 하는 보고서 조립기다. analysis (재무 인과) · credit (신용 위험) · scan (횡단 비교) · quant (정량 신호) · macro (시장 환경) · industry (밸류체인 위치) 결과를 블록 단위로 조합해 6 막 구조 보고서를 만든다.
+`story` 는 *해석하지 않고 다양한 관점의 근거를 배치* 하는 **L3 조합기**다. 분석엔진 X. L2 5 분석엔진 — analysis (재무 인과) · credit (신용 위험) · macro (시장 환경) · quant (정량 신호) · industry (밸류체인 위치) — 와 L1.5 scan (횡단 비교) 결과를 블록 단위로 조합해 6 막 구조 보고서를 만든다.
 
-숫자 계산은 하위 엔진 결과 ref 에 묶고, story 자체는 *thesis · evidence · risk · limit* 의 문장 골격만 제공.
+### story 가 L3 조합기인 이유 — 순환참조 방지
+
+L2 5 분석엔진은 도메인 격리 (analysis ⊥ credit ⊥ macro ⊥ quant ⊥ industry) 가 import 단방향으로 강제돼 있다. L2 끼리 직접 import 하면 순환참조가 생긴다. 이 결합 책임을 story 가 단독으로 짊어져 6 막 보고서로 직조한다 — 자체 숫자 계산 0, 모든 숫자는 하위 엔진 결과 ref 에 묶이고, story 자체는 *thesis · evidence · risk · limit* 의 문장 골격만 제공.
+
+이 구조 덕분에 새 L2 분석엔진을 추가해도 기존 L2 엔진은 수정 0 — story 의 블록 등록만 늘어난다.
 
 ## 공개 호출 방식
 

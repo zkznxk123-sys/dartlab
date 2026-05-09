@@ -97,7 +97,7 @@ lastUpdated: '2026-05-07'
 
 ## 엔진 역할
 
-`scan`은 여러 기업을 한 번에 훑어 후보를 찾는 L2 엔진이다. 질문의 단위가 "삼성전자를 분석해줘"이면 `Company`/`analysis`가 우선이고, "조건에 맞는 종목을 찾아줘", "전종목에서 상위 기업을 골라줘"이면 `scan`이 우선이다.
+`scan`은 여러 기업을 한 번에 훑어 후보를 찾는 **L1.5 횡단 엔진**이다. L1 (company · gather) 위에서 전체 종목 universe 를 스캔해 ranking · filter · candidate evidence table 을 만든다. 단일 종목 심층 분석은 L2 (analysis · credit · macro · quant · industry) 의 책임. 질문의 단위가 "삼성전자를 분석해줘"이면 `Company`/`analysis`가 우선이고, "조건에 맞는 종목을 찾아줘", "전종목에서 상위 기업을 골라줘"이면 `scan`이 우선이다.
 
 `account`와 `ratio`는 primitive다. 복합 투자 질문은 `screen` preset/spec 또는 `quality`, `valuation`, `growth`, `profitability` 같은 축으로 시작하고, 최종 판단은 후보별 `analysis`, `credit`, `quant`로 검증한다.
 

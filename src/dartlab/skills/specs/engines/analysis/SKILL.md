@@ -84,12 +84,12 @@ runtimeCompatibility:
 failureModes:
   - axis 가이드를 확인하지 않고 과거 스킬명이나 삭제된 문서 경로로 이동함
   - 결손값을 0으로 대체해 수익성/현금흐름/안정성 판단을 왜곡함
-  - analysis 안에서 credit/macro 같은 L2 엔진 결과를 직접 import해 결합함
+  - analysis 안에서 다른 L2 엔진 (credit · macro · quant · industry) 결과 또는 L1.5 (scan) · L3 조합기 (story) 를 직접 import 해 결합함
   - 스킬의 공개 호출 방식과 실제 공개 API가 어긋난 상태로 방치함
 forbidden:
   - 근거 없는 숫자를 만들지 않는다.
   - 결손값을 0으로 대체하지 않는다.
-  - analysis 엔진에서 credit, macro, scan, story 같은 L2 엔진을 직접 import하지 않는다.
+  - analysis 엔진에서 다른 L2 엔진 (credit · macro · quant · industry) 또는 L1.5 (scan) · L3 조합기 (story) 를 직접 import 하지 않는다 — 결합은 story 가 단독으로 담당.
   - 시장 레벨 매크로 해석을 analysis가 담당한다고 설명하지 않는다.
   - 공개 API 호출법, 반환 형태, 오류/제한 동작이 바뀌었는데 이 skill을 갱신하지 않은 상태로 완료 처리하지 않는다.
 examples:
@@ -105,7 +105,7 @@ procedure:
   - group (financial · valuation · forecast · governance) 과 axis 선택.
   - c.analysis(group, axis) 또는 dartlab.analysis(...) 호출.
   - 결과의 tableRef · valueRef · dateRef · executionRef 검증 후 답변에 묶음.
-  - L2 엔진 (credit · macro · scan · story) 와 직접 결합하지 않는다 — 결합은 story 가 담당.
+  - 다른 L2 (credit · macro · quant · industry) · L1.5 (scan) · L3 조합기 (story) 와 직접 결합하지 않는다 — 결합은 story 가 담당.
 linkedSkills:
   - engines.company
   - engines.analysis.cashflow
@@ -167,7 +167,7 @@ profitability = dartlab.analysis("financial", "수익성", stockCode="005930")
 
 데이터가 충분하면 축별 분석 dict를 반환한다. 데이터가 부족하면 결손을 0으로 채우지 않고, `flags`, `assumptions`, `dataAsOf`, 빈 history, null 값, 제한 메시지 등으로 표현한다. 호출한 group 또는 axis가 없으면 사용 가능한 group/axis를 확인할 수 있는 오류를 낸다.
 
-`analysis`는 같은 L2 엔진인 `credit`, `macro`, `scan`, `story`를 내부에서 import해 조합하지 않는다. 필요한 원천 데이터는 `Company`/core 계층에서 직접 읽고, 최종 조합은 `story`가 한다.
+`analysis`는 다른 L2 엔진 (`credit` · `macro` · `quant` · `industry`) 을 내부에서 import 해 조합하지 않으며, L1.5 (`scan`) · L3 조합기 (`story`) 도 직접 사용하지 않는다. 필요한 원천 데이터는 `Company` (L1) / core (L0) 계층에서 직접 읽고, 최종 조합은 `story` 가 단독으로 짊어진다 (L2 끼리의 import 가 만드는 순환참조 방지).
 
 ## 분석 축 전체
 
