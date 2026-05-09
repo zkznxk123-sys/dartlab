@@ -1024,6 +1024,15 @@
       "limitations": []
     },
     {
+      "id": "engines.quant.scanBacktest",
+      "title": "Quant scanBacktest top-level helper",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.quant.screen",
       "title": "Quant - 스크린",
       "category": "engines",

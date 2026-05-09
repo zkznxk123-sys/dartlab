@@ -22,8 +22,8 @@ inputs:
 outputs:
   - BacktestResult — equity / returns / trades / sharpe / sortino / mdd / dsr / pbo / scanContext (universeSize, universeCol, topN, scanResultHash, signalSource, weighting)
 capabilityRefs:
-  - quant.scanBacktest
-  - Company.quant.scanBacktest
+  - quant
+  - Company.quant
 knowledgeRefs:
   - engines.quant
   - engines.scan
@@ -109,6 +109,18 @@ def momentum_signal(close):
 result = dl.quant.scanBacktest(top, signalFn=momentum_signal, topN=20)
 ```
 
+## 호출 동작
+
+`dartlab.quant.scanBacktest(scanResult, ...)` 가 진입. 다음 순서:
+
+1. scanResult 빈 DataFrame / 누락 시 error 반환
+2. signalFn 또는 style 둘 중 하나 필수 — 미지정 시 error
+3. universeCol 자동 감지 (`stockCode` → `종목코드` → `stock_code` → `corp_code`)
+4. scanResult.head(topN) 로 universe 추출 — 사용자가 사전 sort/filter 책임
+5. signalFn 우선, fallback 으로 style → STYLE_REGISTRY 의 build 함수
+6. multi_asset_backtest 호출 (weighting=equal/inv_vol/risk_parity)
+7. BacktestResult.scanContext 에 universe 출처 SHA-1 + signalSource 기록 후 dataclasses.replace
+
 ## signalFn / style 우선순위
 
 1. `signalFn` 명시 → 우선 (signalFn 으로 Rule 빌드)
@@ -124,6 +136,27 @@ result = dl.quant.scanBacktest(top, signalFn=momentum_signal, topN=20)
 4. `corp_code`
 
 명시 override: `universeCol="myCustomCol"`.
+
+## 대표 반환 형태
+
+```text
+BacktestResult(
+    equity=np.ndarray,            # 누적 자산 시계열
+    returns=np.ndarray,           # 일별 포트폴리오 수익률
+    trades=pl.DataFrame | None,   # 종목별 trade 이력 (stock_code 컬럼 포함)
+    sharpe=float,                 # Sharpe ratio
+    sortino=float,
+    mdd=float,                    # 최대낙폭 (음수)
+    dsr=float,                    # Probabilistic Sharpe Ratio (Lopez de Prado)
+    pbo=float | None,
+    style=str,                    # "style:trendFollow" 또는 "signalFn"
+    scanContext=dict,             # universe 출처 추적 — 본 helper 신규 필드
+    status="ok" | "error",
+    reason=str | None,
+)
+```
+
+빈 universe / 미지정 signal / 잘못된 style → `BacktestResult(status="error", reason=...)` 반환.
 
 ## scanContext (BacktestResult 신규 필드)
 

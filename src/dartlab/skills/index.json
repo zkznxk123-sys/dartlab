@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 230,
+    "skillCount": 231,
     "categories": [
       {
         "id": "start",
@@ -26,7 +26,7 @@
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 196
+        "count": 197
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -11652,6 +11652,109 @@
         "HRP vs ERC vs MV 비교",
         "HRP + 월별 리밸런싱",
         "공분산 shrinkage 적용 HRP"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      }
+    },
+    {
+      "id": "engines.quant.scanBacktest",
+      "title": "Quant scanBacktest top-level helper",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "dartlab.quant.scanBacktest(scanResult, signalFn=, style=, topN=, weighting=) 형태로 scan 결과 DataFrame 의 universe 를 받아 종목별 Rule 빌드 → multi_asset_backtest 호출 → BacktestResult.scanContext 에 universe 출처 SHA-1 기록. axis 미등록 (top-level helper). 트리거 — 'scanBacktest', 'scan→quant', 'universe → backtest'.",
+      "whenToUse": [
+        "scan 으로 추린 universe 에 quant 백테스트를 직접 적용하고 싶을 때",
+        "signalFn (forecast / momentum / 사용자 정의) → 종목별 entry/exit 로 변환 후 멀티자산 백테스트",
+        "style preset (trendFollow / meanReversion 등 8 종) 을 universe 에 일괄 적용",
+        "universe 출처 추적 가능한 결정적 SHA-1 hash 가 필요할 때"
+      ],
+      "inputs": [
+        "scanResult (pl.DataFrame, 필수, stockCode/종목코드/stock_code 컬럼 보유)",
+        "signalFn (Callable[[close], np.ndarray[bool]] 또는 None)",
+        "style (str 또는 None) — STYLE_REGISTRY 8 styles 키",
+        "universeCol (str, \"auto\" 면 자동 감지)",
+        "topN (int, 기본 20)",
+        "weighting (str, \"equal\" / \"inv_vol\" / \"risk_parity\")",
+        "fee_bps · slip_bps (float)"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "BacktestResult — equity / returns / trades / sharpe / sortino / mdd / dsr / pbo / scanContext (universeSize, universeCol, topN, scanResultHash, signalSource, weighting)"
+      ],
+      "apiRefs": [
+        "quant",
+        "Company.quant"
+      ],
+      "toolRefs": [],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.quant",
+        "engines.scan",
+        "engines.gather"
+      ],
+      "linkedSkills": [
+        "engines.quant",
+        "engines.scan",
+        "engines.quant.forecast"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.quant.scanBacktest"
+      ],
+      "procedure": [
+        "scanResult = dartlab.scan(...) (사용자 사전 sort/filter)",
+        "dartlab.quant.scanBacktest(scanResult, style=..., topN=20, weighting=\"equal\")",
+        "result.scanContext 로 universe 출처 추적 + result.sharpe / mdd / dsr 인용",
+        "기간 (BacktestResult.period), 수수료 (fee_bps), 슬리피지 (slip_bps), 리밸런싱 (weighting) 명시"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "target (universe 종목 리스트)",
+        "period (BacktestResult.period)",
+        "benchmark (style 또는 signalFn)",
+        "metric (sharpe / mdd / dsr)",
+        "scanContext.scanResultHash (universe 출처)",
+        "executionRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "빈 scanResult → BacktestResult(status=\"error\", reason=\"empty scanResult\")",
+        "signalFn 과 style 둘 다 미지정 → error",
+        "universe 컬럼 미감지 → error (후보 4종 알려줌)",
+        "미등록 style → KeyError + 후보 목록",
+        "수수료/슬리피지/리밸런싱 가정 누락 인용 — 백테스트 가정 명시 의무"
+      ],
+      "forbidden": [
+        "axis dispatch 호출 시도 (`dartlab.quant(\"scanBacktest\", ...)`) — 미등록",
+        "quant → scan 금지)",
+        "백테스트 결과 미래 성과 보장처럼 표현",
+        "scanContext.scanResultHash 누락 인용 (universe 출처 추적 깨짐)"
+      ],
+      "examples": [
+        "scan(\"valuation\") → 등급 A → topN=20 → trendFollow 스타일 백테스트",
+        "scan(\"ranking\") → top10 → forecast signalFn 변환 → 백테스트",
+        "c > moving_avg(c, 20) (단순 모멘텀)"
       ],
       "runtimeCompatibility": {
         "server": {
