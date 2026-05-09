@@ -111,9 +111,9 @@ dartlab 엔진/Skill OS 가 진화해도 MCP 표면이 자동으로 따라가도
 
 | 위치 | 언제 |
 |---|---|
-| `ai/tools/registry._SPECS` | canonical tool 추가/제거 (현재 14: 메타 3 · 데이터 3 · 외부 2 · 출력 2 · 분석 추론 3 · elevate 1) |
+| `ai/tools/registry._SPECS` | canonical tool 추가/제거 (현재 15: 메타 3 · 데이터 3 · 외부 2 · 출력 2 · 분석 추론 3 · elicit 1 · elevate 1) |
 | `ai/tools/types.ToolSpec` 의 4 hint | 새 도구의 readOnly/destructive/idempotent/openWorld 분류 |
-| `mcp/__init__._MCP_WORKSPACE_AGENT_TOOL_NAMES` | MCP 외부 노출 도구 (canonical 의 부분집합) — 현재 10 (canonical 9 + ask) |
+| `mcp/__init__._MCP_WORKSPACE_AGENT_TOOL_NAMES` | MCP 외부 노출 도구 (canonical 의 부분집합) — 현재 11 (canonical 10 + ask) |
 | `ai/tools/registry._LEGACY_NAME_MAP` | snake_case alias 추가/제거 |
 | `dartlab/__init__._LAZY_ATTRS` (PEP 562) | 새 top-level `dartlab.X` 모듈 추가 시 등록 |
 | `ai/tools/runPython_guard._BLOCKED_ATTR_CALLS` | RunPython 의 차단 호출 목록 — 새 dangerous attr 추가 시 |
@@ -132,4 +132,5 @@ dartlab 엔진/Skill OS 가 진화해도 MCP 표면이 자동으로 따라가도
 3. 새 top-level 모듈이라면 `dartlab/__init__._LAZY_ATTRS` 등록 + RunPython 안에서 import 가능한지 확인.
 4. capability 추가/변경 시 `scripts/build/generateSpec.py` 재실행 후 `_generated.py` 커밋.
 5. canonical tool 추가/제거 시 `ToolSpec` 의 4 hint 채움 + `tests/test_mcp.py::test_mcp_advertised_tools_carry_annotations` 갱신.
+6. **도그푸드 verification** — `uv run python -X utf8 scripts/dev/mcp_dogfood_probe.py` 실행. 11 항목 OK 출력 확인. 단위 테스트가 dispatch / 거부 경로 위주라 실 호출 happy path 회귀를 못 잡는 발견 (2026-05-09 LookAheadGuard `Company(market=...)` 회귀) — 큰 변화 후엔 도그푸드 필수.
 

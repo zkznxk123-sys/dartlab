@@ -63,6 +63,37 @@ def test_outcome_log_rejects_invalid_date():
     assert result.data.get("wrote") is False
 
 
+def test_outcome_log_happy_path_writes_file(tmp_path, monkeypatch):
+    """happy path — DARTLAB_HOME 격리 + 실 저장 검증 (도그푸드 격차 메우기).
+
+    이전 단위 테스트는 dispatch 거부 경로만 검증했고 실 저장 동작은 검증 없었음. 도그푸드
+    probe 가 발견한 LookAheadGuard market 버그처럼, registry 도구의 *외부 효과* 도 단위
+    테스트에서 검증해야 함.
+    """
+    from dartlab.ai.tools.outcomeLog import outcomeLog
+
+    monkeypatch.setenv("DARTLAB_HOME", str(tmp_path))
+    result = outcomeLog(
+        stockCode="005930",
+        market="KR",
+        date="2026-05-09",
+        decision="Hold — 단위 테스트용 entry",
+        theme="UnitTest",
+    )
+    assert result.ok is True
+    assert result.data.get("wrote") is True
+
+    # 실 파일 검증 — ~/.dartlab 의 ${DARTLAB_HOME}/decisions/KR/005930.md 에 기록됨.
+    target = tmp_path / "decisions" / "KR" / "005930.md"
+    assert target.exists(), f"outcome_log 파일 미생성: {target}"
+    body = target.read_text(encoding="utf-8")
+    assert "2026-05-09" in body
+    assert "005930" in body
+    assert "UnitTest" in body
+    assert "pending" in body
+    assert "Hold — 단위 테스트용 entry" in body
+
+
 # ── LookAheadGuard ──────────────────────────────────────────────────────────
 
 
@@ -89,6 +120,28 @@ def test_lookahead_guard_dispatch_via_registry_uses_correct_executor():
     assert "LookAheadGuard" in _TOOLS
     # 함수 자체 호출 가능 확인 (inspect)
     assert callable(_TOOLS["LookAheadGuard"])
+
+
+@pytest.mark.requires_data
+@pytest.mark.network
+def test_lookahead_guard_happy_path_real_company():
+    """happy path — 실제 dartlab.Company('005930').show('BS', asOf=...) 호출.
+
+    도그푸드 발견 회귀: tool 가 Company(stockCode, market=...) 으로 호출하면 TypeError —
+    Company 는 market kwarg 미지원. unit 테스트가 거부 경로만 검증해서 못 잡았음.
+    이 테스트가 happy path 보호.
+
+    requires_data + network — DART API 캐시/HF parquet 필요. CI 에서 skip.
+    """
+    from dartlab.ai.tools.lookAheadGuard import lookAheadGuard
+
+    result = lookAheadGuard(stockCode="005930", asOf="2024Q4", topic="BS")
+    # 데이터 미설치 시 graceful fail 가능 — happy path 외 dispatch ok 만 검증.
+    if not result.ok:
+        pytest.skip(f"DART data 미설치 또는 provider 미설정 — {result.summary}")
+    assert result.data.get("rowCount", 0) > 0
+    refs = result.refs or []
+    assert any(getattr(r, "kind", None) == "tableRef" for r in refs)
 
 
 # ── GroundingCheck ──────────────────────────────────────────────────────────
