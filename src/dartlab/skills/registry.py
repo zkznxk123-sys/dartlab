@@ -5,6 +5,7 @@ from __future__ import annotations
 import builtins
 import json
 import logging
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,16 @@ _MAX_PROCEDURE_ITEM_CHARS = 1200
 _TICKER_QUERY_RE = re.compile(r"\b[A-Z]{1,5}\b")
 _INTENT_BOOSTS_CACHE: tuple[dict[str, Any], ...] | None = None
 _INTENT_BOOSTS_SOURCE = "specs/operation/intentBoosts.md"
+
+# 0.10 — listSkills() 가 호출마다 74+N skill 의 lint 재실행으로 e2e probe 에서 alias 호출이 11s
+# 까지 걸리는 회귀 발견. process-lifetime 캐시로 해소. dev 에서 spec 바로 반영 필요 시
+# DARTLAB_SKILL_NO_CACHE=1 환경변수로 우회. user spec 변경은 process restart 까지 미적용.
+_LIST_SKILLS_CACHE: dict[bool, tuple[SkillSpec, ...]] = {}
+_KNOWN_CAPS_CACHE: frozenset[str] | None = None
+
+
+def _skills_cache_disabled() -> bool:
+    return os.environ.get("DARTLAB_SKILL_NO_CACHE") == "1"
 
 
 def _load_intent_boosts() -> tuple[dict[str, Any], ...]:
@@ -103,6 +114,11 @@ def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
     searchSkills : 질의 기반 skill 검색.
     """
 
+    if not _skills_cache_disabled():
+        cached = _LIST_SKILLS_CACHE.get(includeUser)
+        if cached is not None:
+            return list(cached)
+
     # builtin spec 은 우리 책임 — 실패 시 raise (개발자 즉시 인지).
     specs = [_load_spec(path, default_scope="builtin") for path in _builtin_spec_paths()]
     if includeUser:
@@ -125,7 +141,11 @@ def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
     for spec in specs:
         if spec.scope == "builtin":
             lintSkill(spec)
-    return sorted(specs, key=lambda item: item.id)
+    result = sorted(specs, key=lambda item: item.id)
+
+    if not _skills_cache_disabled():
+        _LIST_SKILLS_CACHE[includeUser] = tuple(result)
+    return result
 
 
 def getSkill(skillId: str, *, includeUser: bool = True) -> SkillSpec:
@@ -540,11 +560,16 @@ def _short_text(text: str, *, limit: int = 500) -> str:
 
 
 def _known_capabilities() -> set[str]:
+    global _KNOWN_CAPS_CACHE
+    if _KNOWN_CAPS_CACHE is not None and not _skills_cache_disabled():
+        return set(_KNOWN_CAPS_CACHE)
     try:
         from dartlab.core.capability._generated import CAPABILITIES
     except Exception:
         return set()
-    return {str(key) for key in CAPABILITIES}
+    caps = frozenset(str(key) for key in CAPABILITIES)
+    _KNOWN_CAPS_CACHE = caps
+    return set(caps)
 
 
 def _validate_runtime_compatibility(spec: SkillSpec) -> None:
