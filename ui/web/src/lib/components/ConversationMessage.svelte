@@ -1,7 +1,7 @@
 <script>
-	import { AlertTriangle, ChevronDown, FileText, Loader2, Maximize2, X } from "lucide-svelte";
+	import { AlertTriangle, ChevronDown, FileText, Loader2, Maximize2, Search, X } from "lucide-svelte";
 	import { renderMarkdown } from "$lib/markdown.js";
-	import { groupActivities } from "$lib/agent/conversationModel.js";
+	import { groupActivities, groupTools } from "$lib/agent/conversationModel.js";
 	import SuggestedQuestions from "./SuggestedQuestions.svelte";
 	import ViewSpecRenderer from "$lib/ai/ViewSpecRenderer.svelte";
 
@@ -14,7 +14,8 @@
 	} = $props();
 
 	let rawParts = $derived(Array.isArray(message.parts) ? message.parts : []);
-	let parts = $derived(groupActivities(rawParts));
+	// activity-group 으로 묶은 후, 연속 조사도구 (ReadSkill/Capability/SkillBody) 도 묶음.
+	let parts = $derived(groupTools(groupActivities(rawParts)));
 	let text = $derived(message.text || message.content || "");
 	// 푸터 indicator 는 다른 진행 표현이 없을 때만 (도구 spinner / streaming text 가 진행 전담).
 	let anyToolRunning = $derived(parts.some((p) => p.type === "tool" && p.status === "running"));
@@ -113,6 +114,58 @@
 								</li>
 							{/each}
 						</ol>
+					{/if}
+				</div>
+			{:else if part.type === "tool-research-group"}
+				{@const isOpen = openGroups[part.id] ?? false}
+				<div class="tool-research-group {part.hasError ? 'tool-research-group-error' : ''}">
+					<button
+						type="button"
+						class="tool-research-head"
+						onclick={() => toggleGroup(part.id)}
+						title={isOpen ? "접기" : "펼치기"}
+					>
+						{#if part.running}
+							<Loader2 size={12} class="animate-spin" />
+						{:else}
+							<Search size={12} class="text-dl-text-dim" />
+						{/if}
+						<span class="tool-research-label">사전조사</span>
+						<span class="tool-research-count">{part.calls.length}회</span>
+						{#if part.lastSummary}
+							<span class="tool-research-latest">· {part.lastSummary}</span>
+						{/if}
+						<ChevronDown
+							size={11}
+							class="flex-shrink-0 ml-auto text-dl-text-dim transition-transform {isOpen ? '' : '-rotate-90'}"
+						/>
+					</button>
+					{#if isOpen}
+						<ul class="tool-research-list">
+							{#each part.calls as call (call.id)}
+								<li>
+									<button
+										type="button"
+										class="tool-research-row {call.status === 'error' ? 'tool-research-row-error' : ''}"
+										onclick={() => openToolModal(call)}
+										title="상세 보기"
+									>
+										{#if call.status === "running"}
+											<Loader2 size={11} class="animate-spin flex-shrink-0" />
+										{:else if call.status === "error"}
+											<AlertTriangle size={11} class="text-red-400 flex-shrink-0" />
+										{:else}
+											<span class="tool-research-row-dot"></span>
+										{/if}
+										<span class="tool-research-row-name">{visibleToolName(call.name)}</span>
+										{#if call.summary}
+											<span class="tool-research-row-summary">· {call.summary}</span>
+										{/if}
+										<Maximize2 size={10} class="flex-shrink-0 ml-auto text-dl-text-dim opacity-0 group-hover:opacity-100" />
+									</button>
+								</li>
+							{/each}
+						</ul>
 					{/if}
 				</div>
 			{:else if part.type === "tool"}

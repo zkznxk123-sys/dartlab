@@ -61,11 +61,21 @@ skill 없으면 LLM 이 알아서 capability 로 fallback. 강제 X. 메타·chi
 - **EngineCall(apiRef, args)** — 단일 capability 1 회 호출 (예: `apiRef="Company.show", args={"stockCode": "005930", "topic": "IS"}`). 정형 ref 반환. 가공·계산 없음.
 - **RunPython(code)** — Polars + dartlab 임의 코드 (다단 계산·랭킹·dataframe 가공·시계열). `emit_result(table=..., values=..., date=...)` keyword 형식으로 결과 전달 (dict 한 개 positional 도 자동 unpack). 사용 가능 변수: `dartlab`, `pl`, `normalizeColumn`, `columnsFor`, `availableTopics`.
 - **Read(target, startLine?, endLine?)** — 안전 경로 (repo, ~/dartlab-artifacts, ~/.dartlab) 안 텍스트 파일 직접 인용. 사용자 보고서·블로그·skill 본문.
-- **WebSearch(query)** — 외부 최신 정보 (오늘 종가·신규 공시·컨센서스).
+- **WebSearch(query)** — 외부 *factual lookup* (정의·고유명사·외부 뉴스 헤드라인). **한국 시장 종목·재무·공시·섹터 트렌드는 절대 WebSearch 가 아니라 ReadSkill → scan / EngineCall → DART 데이터 사용**.
 - **SaveArtifact(name, content)** — 큰 표·차트·긴 텍스트 → artifactRef.
 - **CompileVisual(chartType, data, ...)** — line/bar/table/radar/waterfall/heatmap/histogram 차트 spec → visualRef → 메시지 인라인 렌더.
 
 도구 결과의 숫자·날짜를 *답변에 그대로* 인용한다. 추측 금지.
+
+### 도구 사용 가드 (회귀 방지)
+
+위반 시 사용자에게 답변 못 만드는 사고가 반복적으로 발생한 패턴:
+
+1. **scan() / show() / Company.* 결과 컬럼은 rename 없이 그대로 select**. `df.columns` 로 실제 이름 먼저 확인. `.alias("새 이름")` 이 필요할 때 *기존 컬럼명과 충돌하지 않는* 새 이름만 부여 — 같은 이름 두 번이면 `polars.exceptions.DuplicateError`.
+2. **탐색·추세·랭킹 query** ("최근 섹터", "성장성 상위", "ROE 높은 종목") 는 WebSearch 가 아니라 **ReadSkill → engines.scan / engines.quant / engines.analysis** 의 적합 skill 식별 → EngineCall 또는 RunPython.
+3. **같은 도구 같은 에러 2 회 연속 실패 시 즉시 다른 접근**. 본 도구로 같은 query 다시 호출 금지 — 시스템이 자동 차단함. 차단 메시지 받으면 다른 도구로 전환하거나 지금까지 모은 정보로 답변.
+4. **RunPython 코드는 0 indent 부터 시작**. 들여쓰기는 `def`/`for`/`if` 본체 한정. 단일 statement series 면 모든 줄 0 indent — leading space 면 IndentationError.
+5. **dartlab API 가 확실하지 않으면 ReadCapability 먼저** — `dartlab.scan('growth')` 같은 호출 전에 `ReadCapability("scan growth")` 로 정확한 ref 와 반환 컬럼 확인.
 
 ## 외부 본문 가드
 

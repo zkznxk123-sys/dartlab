@@ -520,6 +520,98 @@ button, a, input, textarea {
 	background: rgba(13, 17, 23, 0.48);
 	overflow: hidden;
 }
+
+/* ── 조사형 도구 (ReadSkill / ReadCapability / GetSkillBody) 그룹 카드 ──
+   여러 호출을 1 개 collapsed 카드로 묶어 답변 영역 visual 부담 감소.
+   행 클릭 시 modal (기존 modalTool 활용). */
+.tool-research-group {
+	border: 1px solid rgba(148, 163, 184, 0.12);
+	border-radius: 6px;
+	background: rgba(13, 17, 23, 0.32);
+	overflow: hidden;
+}
+.tool-research-group-error {
+	border-color: rgba(248, 113, 113, 0.24);
+}
+.tool-research-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 6px 10px;
+	border: none;
+	background: transparent;
+	color: var(--color-dl-text-muted);
+	text-align: left;
+	cursor: pointer;
+	font-size: 11px;
+}
+.tool-research-head:hover {
+	background: rgba(148, 163, 184, 0.04);
+}
+.tool-research-label {
+	font-weight: 600;
+	color: var(--color-dl-text);
+}
+.tool-research-count {
+	color: var(--color-dl-text-dim);
+	font-variant-numeric: tabular-nums;
+}
+.tool-research-latest {
+	color: var(--color-dl-text-dim);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	min-width: 0;
+	flex: 1;
+}
+.tool-research-list {
+	list-style: none;
+	margin: 0;
+	padding: 4px 4px 6px 4px;
+	border-top: 1px solid rgba(148, 163, 184, 0.08);
+}
+.tool-research-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 4px 8px;
+	border: none;
+	background: transparent;
+	color: var(--color-dl-text-muted);
+	text-align: left;
+	cursor: pointer;
+	font-size: 11px;
+	border-radius: 4px;
+}
+.tool-research-row:hover {
+	background: rgba(148, 163, 184, 0.05);
+	color: var(--color-dl-text);
+}
+.tool-research-row-error {
+	color: var(--color-dl-primary-light);
+}
+.tool-research-row-name {
+	font-weight: 500;
+	white-space: nowrap;
+}
+.tool-research-row-summary {
+	color: var(--color-dl-text-dim);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	min-width: 0;
+	flex: 1;
+}
+.tool-research-row-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--color-dl-success);
+	flex-shrink: 0;
+	display: inline-block;
+}
 .tool-run-error {
 	border-color: rgba(248, 113, 113, 0.32);
 	background: rgba(248, 113, 113, 0.05);

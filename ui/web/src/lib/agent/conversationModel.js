@@ -177,6 +177,54 @@ export function groupActivities(parts) {
 	return out;
 }
 
+/**
+ * 연속된 *조사형* 도구 호출 (ReadSkill / ReadCapability / GetSkillBody) 을 1 개
+ * collapsed 카드로 fold. 실행형 도구 (RunPython / EngineCall / WebSearch / ...) 는
+ * 그대로 individual `tool` part 유지.
+ *
+ * 답변 위에 11+ 카드가 평면으로 쌓이는 visual noise 해결. 사전조사 = "LLM 이
+ * 무엇을 할지 결정" / 실행 = "실제 데이터 생성" 분리.
+ *
+ * 출력 part: { type: "tool-research-group", id, calls: [...individualTools],
+ *              running, lastSummary, hasError }.
+ */
+const RESEARCH_TOOL_NAMES = new Set(["ReadSkill", "ReadCapability", "GetSkillBody"]);
+
+export function groupTools(parts) {
+	const source = Array.isArray(parts) ? parts : [];
+	const out = [];
+	let bucket = null;
+	for (const part of source) {
+		if (part?.type === "tool" && RESEARCH_TOOL_NAMES.has(part.name)) {
+			if (!bucket) {
+				bucket = {
+					type: "tool-research-group",
+					id: `research-${part.id || out.length}`,
+					calls: [],
+					running: false,
+					hasError: false,
+					lastSummary: "",
+				};
+				out.push(bucket);
+			}
+			bucket.calls.push(part);
+		} else {
+			bucket = null;
+			out.push(part);
+		}
+	}
+	for (const item of out) {
+		if (item.type === "tool-research-group") {
+			item.running = item.calls.some((c) => c.status === "running");
+			item.hasError = item.calls.some((c) => c.status === "error");
+			const last = item.calls[item.calls.length - 1];
+			item.lastSummary = last?.summary || "";
+		}
+	}
+	return out;
+}
+
+
 export function appendFailurePart(message, failure) {
 	const parts = Array.isArray(message.parts) ? [...message.parts] : [];
 	parts.push({

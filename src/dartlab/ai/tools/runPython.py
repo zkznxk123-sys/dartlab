@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import textwrap
 import threading
 import time
 import traceback
@@ -26,6 +27,65 @@ from .types import ToolResult
 logger = logging.getLogger(__name__)
 
 _TIMEOUT_SEC = float(os.environ.get("DARTLAB_RUNPYTHON_TIMEOUT_SEC", "60"))
+
+
+_BLOCK_KEYWORDS = (
+    "def ",
+    "class ",
+    "for ",
+    "while ",
+    "if ",
+    "elif ",
+    "else:",
+    "try:",
+    "except",
+    "finally:",
+    "with ",
+)
+
+
+def _try_unindent_fallback(code: str) -> str | None:
+    """단일 statement series 코드면 모든 줄 lstrip — IndentationError 자동 복구.
+
+    블록 키워드 (def/for/if/...) 가 있으면 들여쓰기가 *의미 있다* — 안전상 None.
+    LLM 이 1 줄만 잘못 indent 한 경우 (사용자가 본 ` df = dartlab.scan(...)`) 정상화.
+    """
+    if any(kw in code for kw in _BLOCK_KEYWORDS):
+        return None
+    stripped = "\n".join(line.lstrip() for line in code.split("\n"))
+    if stripped == code:
+        return None  # 변화 없음 — 다시 try 의미 X.
+    return stripped
+
+
+def _diagnose_error_hint(traceback_text: str) -> str:
+    """LLM 코드 결함 분류 — 자주 보이는 polars / pandas / dartlab API 패턴.
+
+    LLM 다음 turn 에 같은 실수 안 하게 *짧은 한국어 hint* 반환. 매칭 안 되면 빈 문자열.
+    """
+    text = traceback_text or ""
+    # polars projection 시 같은 출력 컬럼명 두 번 — agent 가 alias 강제 rename 시 자주.
+    if "duplicate output name" in text or "DuplicateError" in text:
+        return (
+            "동일 컬럼명을 select 안에서 두 번 사용 — scan/show 결과 컬럼은 rename 없이 그대로 select. "
+            "alias 가 필요하면 *기존 이름과 다른* 이름만 부여."
+        )
+    # 컬럼 미존재 — agent 가 추측한 컬럼명이 실제 결과와 불일치.
+    if "ColumnNotFound" in text or "not found" in text.lower():
+        return "컬럼명 불일치 — df.columns 로 실제 이름 먼저 확인 후 select."
+    # IndentationError — leading space (이미 dedent 시도하지만 mixed indent 는 못 잡음).
+    if "IndentationError" in text or "TabError" in text:
+        return "코드 들여쓰기 결함 — 모든 라인을 0 indent 에서 시작 (def/for/if 본체만 4-space 들여쓰기)."
+    # SyntaxError — 일반.
+    if "SyntaxError" in text:
+        return "Python 구문 오류 — 코드 수정 후 재시도."
+    # NameError — 미정의 변수 (보통 import 누락).
+    if "NameError" in text:
+        return "정의되지 않은 이름 — import 또는 사전 변수 선언 누락. 사용 가능: dartlab, pl, normalizeColumn, columnsFor, availableTopics."
+    # AttributeError on dartlab — 잘못된 API 이름.
+    if "AttributeError" in text and "dartlab" in text:
+        return "dartlab 모듈에 없는 속성 호출 — ReadCapability 로 정확한 API 이름 확인."
+    return ""
 
 
 def runPython(code: str, *, runId: str | None = None) -> ToolResult:
@@ -90,8 +150,18 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
                     "availableTopics": availableTopics,
                 }
             )
+            # textwrap.dedent — *공통* leading whitespace 만 제거. mixed-indent
+            # (한 줄만 indent 된 LLM 결함) 는 못 잡음 → IndentationError fallback 으로
+            # 처리: 블록 키워드 없으면 모든 줄 lstrip 해서 재시도.
+            normalized_code = textwrap.dedent(str(code or "")).strip()
             with redirect_stdout(stdout), redirect_stderr(stderr):
-                exec(str(code or ""), globals_dict, globals_dict)  # noqa: S102
+                try:
+                    exec(normalized_code, globals_dict, globals_dict)  # noqa: S102
+                except IndentationError:
+                    fallback = _try_unindent_fallback(normalized_code)
+                    if fallback is None:
+                        raise
+                    exec(fallback, globals_dict, globals_dict)  # noqa: S102
         except Exception:  # noqa: BLE001
             container["error"] = traceback.format_exc()
 
@@ -125,19 +195,30 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
             (code or "")[:1500],
             container["error"],
         )
+        # 흔한 LLM 코드 결함 → LLM 다음 turn 에 같은 실수 안 하게 hint 부착.
+        # 단순 substring 매칭 — 정밀도보다 다음 attempt 의 가이드성 우선.
+        hint = _diagnose_error_hint(container["error"])
+        summary = "run_python 실행 실패"
+        if hint:
+            summary = f"run_python 실행 실패 — {hint}"
         return ToolResult(
             False,
-            "run_python 실행 실패",
+            summary,
             refs=[
                 Ref(
                     id=f"execution:{runId or 'local'}:failed",
                     kind="executionRef",
                     title="python execution failed",
                     source="run_python",
-                    payload={"durationMs": duration, "stderr": container["error"]},
+                    payload={"durationMs": duration, "stderr": container["error"], "hint": hint},
                 )
             ],
-            data={"stdout": stdout.getvalue(), "stderr": stderr.getvalue(), "durationMs": duration},
+            data={
+                "stdout": stdout.getvalue(),
+                "stderr": stderr.getvalue(),
+                "durationMs": duration,
+                "hint": hint,
+            },
             error="python_execution_failed",
         )
     duration = int((time.monotonic() - start) * 1000)
