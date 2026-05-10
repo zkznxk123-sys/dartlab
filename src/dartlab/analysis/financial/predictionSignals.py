@@ -19,6 +19,7 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 import logging
 import math
 
+from dartlab.core.financeDocAccessor import getFinanceDocAccessor
 from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
@@ -1809,9 +1810,8 @@ def _getLinkedCompanies(company, stockCode: str) -> list[dict]:
             and stockCode.isdigit()
             and getattr(company, "currency", None) == "KRW"
         ):
-            from dartlab.providers.dart.docs.finance.relatedPartyTx import relatedPartyTx
-
-            rpt = relatedPartyTx(stockCode)
+            accessor = getFinanceDocAccessor()
+            rpt = accessor.relatedPartyTx(stockCode) if accessor else None
             if rpt and rpt.revenueTxDf is not None:
                 for row in rpt.revenueTxDf.iter_rows(named=True):
                     entity = row.get("entity", "")

@@ -13,6 +13,7 @@ from typing import Any
 
 from dartlab.analysis.valuation.pricetarget import computePriceTarget
 from dartlab.analysis.valuation.residualIncome import calcResidualIncome as _rimCalc
+from dartlab.core.financeDocAccessor import getFinanceDocAccessor
 from dartlab.core.memory import memoizedCalc
 
 log = logging.getLogger(__name__)
@@ -296,10 +297,9 @@ def calcDdm(company: Any, *, basePeriod: str | None = None) -> dict | None:
     # 1순위: Report API DPS (가장 정확한 연간 주당배당금)
     annualDivs: list[float] | None = None
     try:
-        from dartlab.providers.dart.report.pivot import pivotDividend
-
+        accessor = getFinanceDocAccessor()
         stockCode = getattr(company, "stockCode", None)
-        divResult = pivotDividend(stockCode) if stockCode else None
+        divResult = accessor.pivotDividend(stockCode) if accessor and stockCode else None
         if divResult and divResult.dps:
             validDps = [d for d in divResult.dps if d is not None and d > 0]
             if validDps and shares and shares > 0:

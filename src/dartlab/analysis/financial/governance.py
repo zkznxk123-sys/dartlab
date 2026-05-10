@@ -10,6 +10,7 @@ DART 전용 섹션 기반 calc는 EDGAR Company에서 None을 반환한다 (SEC 
 
 from __future__ import annotations
 
+from dartlab.core.financeDocAccessor import getFinanceDocAccessor
 from dartlab.core.memory import memoizedCalc
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.core.utils.helpers import MAX_RATIO_YEARS, annualColsFromPeriods, toDictBySnakeId
@@ -511,12 +512,8 @@ def _loadSanction(company):
     code = _getDartStockCode(company)
     if not code:
         return None
-    try:
-        from dartlab.providers.dart.docs.finance.sanction import sanction
-
-        return sanction(code)
-    except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
-        return None
+    accessor = getFinanceDocAccessor()
+    return accessor.sanction(code) if accessor else None
 
 
 def _loadContingentLiability(company):
@@ -524,12 +521,8 @@ def _loadContingentLiability(company):
     code = _getDartStockCode(company)
     if not code:
         return None
-    try:
-        from dartlab.providers.dart.docs.finance.contingentLiability import contingentLiability
-
-        return contingentLiability(code)
-    except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
-        return None
+    accessor = getFinanceDocAccessor()
+    return accessor.contingentLiability(code) if accessor else None
 
 
 def _fetchLatestEquity(company, *, basePeriod: str | None = None) -> int | None:
@@ -704,12 +697,8 @@ def _loadExecutiveDocs(company):
     code = _getDartStockCode(company)
     if not code:
         return None
-    try:
-        from dartlab.providers.dart.docs.finance.executive import executive
-
-        return executive(code)
-    except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
-        return None
+    accessor = getFinanceDocAccessor()
+    return accessor.executive(code) if accessor else None
 
 
 # ── 대표이사 교체 ──
@@ -841,12 +830,8 @@ def _loadRelatedPartyTx(company):
     code = _getDartStockCode(company)
     if not code:
         return None
-    try:
-        from dartlab.providers.dart.docs.finance.relatedPartyTx import relatedPartyTx
-
-        return relatedPartyTx(code)
-    except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
-        return None
+    accessor = getFinanceDocAccessor()
+    return accessor.relatedPartyTx(code) if accessor else None
 
 
 # ── 특수관계자 거래 집중도 ──

@@ -23,10 +23,11 @@ from dartlab.analysis.financial.insight.grading import (
 from dartlab.analysis.financial.insight.summary import classifyProfile, generateSummary
 from dartlab.analysis.financial.insight.types import AnalysisResult, Anomaly, AuditDataForAnomaly, MarketDataForDistress
 from dartlab.analysis.financial.ratios import calcRatios
+from dartlab.core.financeDocAccessor import getFinanceDocAccessor
 from dartlab.industry import Sector
 
 if TYPE_CHECKING:
-    from dartlab.providers.dart.company import Company
+    from dartlab.core.protocols import CompanyProtocol as Company
 
 SeriesPair = tuple[dict, list[str]]
 
@@ -176,15 +177,16 @@ def analyzeFinancial(
         AnalysisResult 또는 데이터 부족 시 None.
     """
     if qSeriesPair is None or aSeriesPair is None:
-        from dartlab.providers.dart.finance.pivot import buildAnnual, buildTimeseries
-
+        accessor = getFinanceDocAccessor()
+        if accessor is None:
+            return None
         if qSeriesPair is None:
-            qResult = buildTimeseries(stockCode)
+            qResult = accessor.buildTimeseries(stockCode)
             if qResult is None:
                 return None
             qSeriesPair = qResult
         if aSeriesPair is None:
-            aResult = buildAnnual(stockCode)
+            aResult = accessor.buildAnnual(stockCode)
             if aResult is None:
                 return None
             aSeriesPair = aResult
@@ -201,7 +203,7 @@ def analyzeFinancial(
 
     if company is None and corpName is None:
         try:
-            from dartlab.providers.dart.company import Company
+            from dartlab.company import Company
 
             company = Company(stockCode)
         except ValueError:
