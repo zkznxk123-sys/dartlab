@@ -45,7 +45,7 @@ def _fetchAssetData(market: str, asOf: str | None = None) -> dict[str, float | N
         - gold_yoy : float — 금 가격 전년비 변화율 (%)
         - dxy_change_pct : float — 달러인덱스 3개월 변화율 (%)
     """
-    from dartlab.macro._helpers import fetchChangePct, fetchLatest, fetchYoy, getGather
+    from dartlab.macro.seriesFetch import fetchChangePct, fetchLatest, fetchYoy, getGather
 
     g = getGather(asOf)
     data: dict[str, float | None] = {}
@@ -90,7 +90,7 @@ def analyzeAssets(*, market: str = "US", asOf: str | None = None, overrides: dic
     """
     data = _fetchAssetData(market, asOf=asOf)
     if overrides:
-        from dartlab.macro._helpers import applyOverrides
+        from dartlab.macro.seriesFetch import applyOverrides
 
         data = applyOverrides(data, overrides)
     result: dict = {"market": market.upper()}
@@ -194,8 +194,8 @@ def analyzeAssets(*, market: str = "US", asOf: str | None = None, overrides: dic
     if fx_chg is not None:
         trade_yoy = None
         try:
-            from dartlab.macro._helpers import fetchYoy as _fy
-            from dartlab.macro._helpers import getGather as _gg
+            from dartlab.macro.seriesFetch import fetchYoy as _fy
+            from dartlab.macro.seriesFetch import getGather as _gg
 
             _g = _gg(asOf)
             trade_yoy = _fy(_g, "EXPORT") if market.upper() == "KR" else _fy(_g, "BOPGSTB")
@@ -248,8 +248,8 @@ def analyzeAssets(*, market: str = "US", asOf: str | None = None, overrides: dic
     result["marketValuation"] = None
     if market.upper() == "US":
         try:
-            from dartlab.macro._helpers import fetchLatest as _fl
-            from dartlab.macro._helpers import getGather as _gg
+            from dartlab.macro.seriesFetch import fetchLatest as _fl
+            from dartlab.macro.seriesFetch import getGather as _gg
 
             _g = _gg(asOf)
             mcap = _fl(_g, "WILL5000PRFC")

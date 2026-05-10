@@ -139,7 +139,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── 4막: 금융 시스템은 괜찮나 (신용/유동성) ──
     "liquidity": _AxisEntry(
-        module="dartlab.macro.liquidity",
+        module="dartlab.macro.cycles.liquidity",
         fn="calcLiquidity",
         label="유동성",
         description="M2 + 연준 B/S + NFCI + 자체 FCI",
@@ -156,7 +156,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── 5막: 시장은 어떻게 반응하나 (자산/심리) ──
     "assets": _AxisEntry(
-        module="dartlab.macro.assets",
+        module="dartlab.macro.corporate.assets",
         fn="analyzeAssets",
         label="자산",
         description="5대 자산 심층 해석 + Cu/Au + BEI 4분면",
@@ -164,7 +164,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         act=5,
     ),
     "sentiment": _AxisEntry(
-        module="dartlab.macro.sentiment",
+        module="dartlab.macro.cycles.sentiment",
         fn="calcSentiment",
         label="심리",
         description="공포탐욕 근사 + VIX 구간 + JLN 실물 불확실성",

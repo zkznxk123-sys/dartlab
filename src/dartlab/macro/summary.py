@@ -241,8 +241,8 @@ def _addGrowthAtRisk(forecastResult: dict | None, liquidity: dict, asOf: str | N
     if forecastResult is None:
         return
     try:
-        from dartlab.macro._helpers import fetchSeriesList, getGather
         from dartlab.macro.crisis.growthAtRisk import growthAtRisk as _gar
+        from dartlab.macro.seriesFetch import fetchSeriesList, getGather
 
         fci_data = liquidity.get("fci") if isinstance(liquidity, dict) else None
         fci_series = fci_data.get("history") if isinstance(fci_data, dict) else None
@@ -333,11 +333,11 @@ def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: di
                 confidence : float — 신뢰도 (0~1)
                 description : str — 해설
     """
-    from dartlab.macro.assets import analyzeAssets
+    from dartlab.macro.corporate.assets import analyzeAssets
     from dartlab.macro.cycles.cycle import analyzeCycle
-    from dartlab.macro.liquidity import calcLiquidity
+    from dartlab.macro.cycles.liquidity import calcLiquidity
+    from dartlab.macro.cycles.sentiment import calcSentiment
     from dartlab.macro.rates.rates import analyzeRates
-    from dartlab.macro.sentiment import calcSentiment
 
     # as_of/overrides를 전체 축에 전파
     _ax = {"market": market, "as_of": asOf, "overrides": overrides}

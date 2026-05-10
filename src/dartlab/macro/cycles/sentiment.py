@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from dartlab.macro._helpers import (
+from dartlab.macro.cycles.macroCycle import classifyVixRegime
+from dartlab.macro.seriesFetch import (
     applyOverrides,
     collectTimeseries,
     fetchChangePct,
@@ -12,7 +13,6 @@ from dartlab.macro._helpers import (
     fetchSeriesList,
     getGather,
 )
-from dartlab.macro.cycles.macroCycle import classifyVixRegime
 
 # ══════════════════════════════════════
 # 데이터 구조

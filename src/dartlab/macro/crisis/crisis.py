@@ -23,8 +23,8 @@ from dartlab.credit.monitoring.crisisDetector import (
     minskyPhase,
     recessionDashboard,
 )
-from dartlab.macro._helpers import getGather
-from dartlab.macro.liquidity import capexPressure
+from dartlab.macro.cycles.liquidity import capexPressure
+from dartlab.macro.seriesFetch import getGather
 
 
 def _frozenToDict(obj) -> dict | None:
@@ -83,7 +83,7 @@ def _fetchCrisisData(market: str, asOf: str | None = None) -> dict[str, float | 
         debt_service_yoy : float — 부채서비스율 전년 대비 변화 (%p)
         total_debt_to_gdp : float — 총부채/GDP (%)
     """
-    from dartlab.macro._helpers import fetchLatest, fetchSeriesList, fetchYoy
+    from dartlab.macro.seriesFetch import fetchLatest, fetchSeriesList, fetchYoy
 
     g = getGather(asOf)
     data: dict[str, float | list | None] = {}
@@ -251,8 +251,8 @@ def _crisisHistoricalContext(market: str, asOf: str | None) -> dict | None:
     if market.upper() != "US":
         return None
     try:
-        from dartlab.macro._helpers import fetchMonthlyDict
-        from dartlab.macro.historicalContext import buildHistoricalContext
+        from dartlab.macro.corporate.historicalContext import buildHistoricalContext
+        from dartlab.macro.seriesFetch import fetchMonthlyDict
 
         g_hist = getGather(asOf)
         hist_data: dict = {}
@@ -499,8 +499,8 @@ def _crisisExcessBondPremium(asOf: str | None) -> dict | None:
     """Gilchrist-Zakrajšek EBP. 반환: classifyEBP dict or None."""
     try:
         from dartlab.credit.models.excessBondPremium import approximateEBP, classifyEBP
-        from dartlab.macro._helpers import fetchLatest as _fl
-        from dartlab.macro._helpers import getGather as _gg
+        from dartlab.macro.seriesFetch import fetchLatest as _fl
+        from dartlab.macro.seriesFetch import getGather as _gg
 
         _g = _gg(asOf)
         _hy = _fl(_g, "BAMLH0A0HYM2")
@@ -519,8 +519,8 @@ def _crisisCreditCycle(asOf: str | None) -> dict | None:
     """Verdad Credit Cycle 4단계 (Greenwood-Hanson-Jin 2019). 반환: classifyCreditCycle dict."""
     try:
         from dartlab.credit.monitoring.creditCycle import classifyCreditCycle
-        from dartlab.macro._helpers import fetchLatest as _fl2
-        from dartlab.macro._helpers import getGather as _gg2
+        from dartlab.macro.seriesFetch import fetchLatest as _fl2
+        from dartlab.macro.seriesFetch import getGather as _gg2
 
         _g2 = _gg2(asOf)
         _hy2 = _fl2(_g2, "BAMLH0A0HYM2")
@@ -529,7 +529,7 @@ def _crisisCreditCycle(asOf: str | None) -> dict | None:
         hy_bp2 = _hy2 * 100
         hy_6m = None
         try:
-            from dartlab.macro._helpers import fetchSeriesList as _fsl
+            from dartlab.macro.seriesFetch import fetchSeriesList as _fsl
 
             hy_list = _fsl(_g2, "BAMLH0A0HYM2")
             if hy_list and len(hy_list) > 125:
@@ -627,7 +627,7 @@ def analyzeCrisis(*, market: str = "US", asOf: str | None = None, overrides: dic
     """
     data = _fetchCrisisData(market, asOf=asOf)
     if overrides:
-        from dartlab.macro._helpers import applyOverrides
+        from dartlab.macro.seriesFetch import applyOverrides
 
         data = applyOverrides(data, overrides)
     result: dict = {"market": market.upper()}
@@ -684,7 +684,7 @@ def analyzeCrisis(*, market: str = "US", asOf: str | None = None, overrides: dic
     result["excessBondPremium"] = _crisisExcessBondPremium(asOf)
     result["creditCycle"] = _crisisCreditCycle(asOf)
 
-    from dartlab.macro._helpers import collectTimeseries
+    from dartlab.macro.seriesFetch import collectTimeseries
 
     g_ts = getGather(asOf)
     result["timeseries"] = collectTimeseries(g_ts, {"hy_spread": "BAMLH0A0HYM2", "vix": "VIXCLS", "dxy": "DTWEXBGS"})

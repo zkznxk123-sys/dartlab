@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from dartlab.macro.cycles.inventoryCycle import classifyInventoryPhase, ismBarometer
-from dartlab.macro.sentiment import ismAssetAllocation
+from dartlab.macro.cycles.sentiment import ismAssetAllocation
 
 
 def _fetchIsmData(market: str, asOf: str | None = None) -> dict[str, float | None]:
@@ -40,7 +40,7 @@ def _fetchIsmData(market: str, asOf: str | None = None) -> dict[str, float | Non
             bsi : float — 기업경기실사지수 (pt, 100 기준)
             bsi_prev : float — 전기 BSI (pt)
     """
-    from dartlab.macro._helpers import fetchLatestWithPrev, getGather
+    from dartlab.macro.seriesFetch import fetchLatestWithPrev, getGather
 
     g = getGather(asOf)
     data: dict[str, float | None] = {}
@@ -116,7 +116,7 @@ def analyzeInventory(*, market: str = "US", asOf: str | None = None, overrides: 
     """
     data = _fetchIsmData(market, asOf=asOf)
     if overrides:
-        from dartlab.macro._helpers import applyOverrides
+        from dartlab.macro.seriesFetch import applyOverrides
 
         data = applyOverrides(data, overrides)
     result: dict = {"market": market.upper()}
@@ -225,7 +225,7 @@ def analyzeInventory(*, market: str = "US", asOf: str | None = None, overrides: 
         result["ismBarometer"] = None
         result["ismAllocation"] = None
 
-    from dartlab.macro._helpers import collectTimeseries, getGather
+    from dartlab.macro.seriesFetch import collectTimeseries, getGather
 
     g = getGather(asOf)
     if market.upper() == "US":

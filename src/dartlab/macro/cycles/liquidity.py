@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from dartlab.macro._helpers import (
+from dartlab.macro.seriesFetch import (
     applyOverrides,
     collectTimeseries,
     fetchChangePct,

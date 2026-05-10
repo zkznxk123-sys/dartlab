@@ -293,7 +293,7 @@ maturities = [1, 2, 3, 5, 7, 10, 20, 30]
 seriesIds = ["DGS1", "DGS2", "DGS3", "DGS5", "DGS7", "DGS10", "DGS20", "DGS30"]
 yields_list, valid_mats = [], []
 for mat, sid in zip(maturities, seriesIds):
-    from dartlab.macro._helpers import fetchLatest
+    from dartlab.macro.seriesFetch import fetchLatest
 
     val = fetchLatest(g, sid)
     if val is not None:
@@ -310,8 +310,8 @@ out()
 # ── FCI 현재 ──
 out("### 2.7 FCI 현재 상태")
 out()
-from dartlab.macro._helpers import fetchSeriesList
 from dartlab.macro.crisis.fci import calcFCI
+from dartlab.macro.seriesFetch import fetchSeriesList
 
 fci_vars = {}
 sid_map = {

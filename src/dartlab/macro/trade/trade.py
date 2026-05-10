@@ -100,7 +100,7 @@ def _fetchTradeData(market: str, asOf: str | None = None) -> dict[str, float | l
             oil_series : list[float] — 유가 시계열
             us_retail_series : list[float] — 미국 소매판매 시계열 (백만달러)
     """
-    from dartlab.macro._helpers import fetchSeriesList, getGather
+    from dartlab.macro.seriesFetch import fetchSeriesList, getGather
 
     g = getGather(asOf)
     data: dict[str, float | list | None] = {}
@@ -181,7 +181,7 @@ def analyzeTrade(*, market: str = "US", asOf: str | None = None, overrides: dict
     """
     data = _fetchTradeData(market, asOf=asOf)
     if overrides:
-        from dartlab.macro._helpers import applyOverrides
+        from dartlab.macro.seriesFetch import applyOverrides
 
         data = applyOverrides(data, overrides)
     result: dict = {"market": market.upper()}
@@ -294,7 +294,7 @@ def analyzeTrade(*, market: str = "US", asOf: str | None = None, overrides: dict
         result["leadingRelativeStrength"] = None
         result["usConsumptionLink"] = None
 
-    from dartlab.macro._helpers import collectTimeseries, getGather
+    from dartlab.macro.seriesFetch import collectTimeseries, getGather
 
     g_ts = getGather(asOf)
     ts_map = {"oil": "DCOILWTICO"}

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dartlab.macro._helpers import (
+from dartlab.macro.cycles.macroCycle import classifyCycle, detectTransitionSequence
+from dartlab.macro.seriesFetch import (
     applyOverrides,
     collectTimeseries,
     fetchChangePct,
@@ -11,7 +12,6 @@ from dartlab.macro._helpers import (
     getGather,
     recentTimeseries,
 )
-from dartlab.macro.cycles.macroCycle import classifyCycle, detectTransitionSequence
 
 
 def _fetchIndicators(market: str, asOf: str | None = None) -> dict[str, float | None]:
@@ -56,7 +56,7 @@ def _fetchIndicators(market: str, asOf: str | None = None) -> dict[str, float | 
         indicators["cpi_yoy"] = fetchYoy(g, "CPIAUCSL")
 
     elif market.upper() == "KR":
-        from dartlab.macro._helpers import fetchLatestWithPrev
+        from dartlab.macro.seriesFetch import fetchLatestWithPrev
 
         cli, cli_prev = fetchLatestWithPrev(g, "CLI")
         if cli is not None and cli_prev is not None:

@@ -51,7 +51,7 @@ def _fetchForecastData(market: str, asOf: str | None = None) -> dict[str, float 
             cli_lag : float — 경기후행지수 (pt)
             *_prev : float — 각 지표의 전기값
     """
-    from dartlab.macro._helpers import fetchWithHistory, getGather
+    from dartlab.macro.seriesFetch import fetchWithHistory, getGather
 
     g = getGather(asOf)
     data: dict[str, float | list | None] = {}
@@ -170,7 +170,7 @@ def analyzeForecast(*, market: str = "US", asOf: str | None = None, overrides: d
     """
     data = _fetchForecastData(market, asOf=asOf)
     if overrides:
-        from dartlab.macro._helpers import applyOverrides
+        from dartlab.macro.seriesFetch import applyOverrides
 
         data = applyOverrides(data, overrides)
     result: dict = {"market": market.upper()}
@@ -284,7 +284,7 @@ def analyzeForecast(*, market: str = "US", asOf: str | None = None, overrides: d
         result["lei"] = kr_forecast if kr_forecast else None
 
     # ── Sahm Rule ──
-    from dartlab.macro._helpers import collectTimeseries, fetchSeriesList, getGather
+    from dartlab.macro.seriesFetch import collectTimeseries, fetchSeriesList, getGather
 
     g = getGather(asOf)
     result["sahmRule"] = None
