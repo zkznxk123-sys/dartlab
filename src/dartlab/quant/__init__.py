@@ -84,7 +84,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="technical",
     ),
     "volatility": _AxisEntry(
-        module="dartlab.quant.volatility",
+        module="dartlab.quant.risk.volatility",
         fn="calcVolatility",
         label="변동성",
         description="GARCH(1,1), HAR-RV 실현변동성, 변동성 기간구조 (forecast=True 면 horizon 일 후 변동성 + 분산 예측 추가)",
@@ -157,7 +157,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="risk",
     ),
     "tailrisk": _AxisEntry(
-        module="dartlab.quant.tailrisk",
+        module="dartlab.quant.risk.tailrisk",
         fn="calcTailrisk",
         label="꼬리위험",
         description="CVaR, 최대낙폭, Sortino, 하방편차",

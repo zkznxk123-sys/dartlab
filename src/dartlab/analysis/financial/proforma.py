@@ -674,7 +674,7 @@ def computeCompanyWacc(
     beta = betaOverride
     if beta is None and bottomUpBeta:
         try:
-            from dartlab.quant.bottomUpBeta import calcBottomUpBeta
+            from dartlab.quant.risk.bottomUpBeta import calcBottomUpBeta
 
             stb_bu = getLatest(series, "BS", "shortterm_borrowings") or 0
             ltb_bu = getLatest(series, "BS", "longterm_borrowings") or 0

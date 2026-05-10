@@ -232,7 +232,7 @@ def phase2a_shrinkage():
 
 
 def phase2a_bubble():
-    from dartlab.quant.bubbleTest import calcGSADF, calcSADF
+    from dartlab.quant.risk.bubbleTest import calcGSADF, calcSADF
 
     # explosive series (= 버블 시뮬)
     rng = np.random.default_rng(42)
@@ -254,7 +254,7 @@ def phase2a_bubble():
 
 
 def phase2a_structuralBreak():
-    from dartlab.quant.structuralBreak import detectMultipleBreaks, detectStructuralBreak
+    from dartlab.quant.risk.structuralBreak import detectMultipleBreaks, detectStructuralBreak
 
     rng = np.random.default_rng(42)
     n = 200
@@ -275,7 +275,7 @@ def phase2a_structuralBreak():
 
 
 def phase2a_johansen():
-    from dartlab.quant.johansen import calcVECM, johansenTest
+    from dartlab.quant.risk.johansen import calcVECM, johansenTest
 
     rng = np.random.default_rng(42)
     n = 500
