@@ -72,7 +72,7 @@ async def fetch(
         try:
             module = loadDomain(source_name)
 
-            if hasattr(module, "fetch_history"):
+            if hasattr(module, "fetchHistory"):
                 result = await module.fetchHistory(
                     stockCode,
                     client,

@@ -1084,14 +1084,14 @@ class Gather:
             error : str | None — 에러 메시지 (실패 시).
         """
         module = loadDomain(domainName)
-        # fetch_all이 있는 도메인 (naver, naver_global)
-        if hasattr(module, "fetch_all"):
+        # fetchAll 이 있는 도메인 (naver, naverGlobal)
+        if hasattr(module, "fetchAll"):
             if domainName == "naver":
                 return await module.fetchAll(stockCode, self._client)
             return await module.fetchAll(stockCode, self._client, market=market)
-        # fetch_price만 있는 도메인 (naver_global, fmp)
+        # fetchPrice 만 있는 도메인 (naverGlobal, fmp)
         price = None
-        if hasattr(module, "fetch_price"):
+        if hasattr(module, "fetchPrice"):
             price = await module.fetchPrice(stockCode, self._client, market=market)
         return GatherResult(domain=domainName, price=price)
 

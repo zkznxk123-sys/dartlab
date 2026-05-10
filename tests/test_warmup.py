@@ -47,10 +47,10 @@ def test_handle_warmup_imports_core_modules(monkeypatch):
     warmed = set(msg["data"]["warmed"])
     skipped = set(msg["data"]["skipped"])
 
-    # 핵심 모듈은 import 가능해야 함
-    assert "core" in warmed, f"core 모듈 import 실패. skipped={skipped}"
-    assert "providers" in warmed, f"providers 모듈 import 실패. skipped={skipped}"
-    assert "viz_extract" in warmed, f"viz_extract 모듈 import 실패. skipped={skipped}"
+    # 핵심 모듈은 import 가능해야 함 — 현재 _handleWarmup 의 prewarm 항목.
+    # 회귀: core/providers prewarm 은 cold-start 비용 너무 커서 제외됨 (kernel 기준).
+    assert "kernel" in warmed, f"kernel prewarm 실패. skipped={skipped}"
+    assert "viz_extract" in warmed, f"viz_extract prewarm 실패. skipped={skipped}"
 
 
 def test_handle_warmup_is_idempotent(monkeypatch):
