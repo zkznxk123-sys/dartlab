@@ -84,17 +84,17 @@ def extractNetworkEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     c2n, n2c = _listingLookup()
 
     try:
-        from dartlab.scan.network.scanner import load_listing, scan_invested
+        from dartlab.scan.network.scanner import loadListing, scanInvested
 
-        raw = scan_invested()
+        raw = scanInvested()
         if raw is None or raw.height == 0:
             return edges
 
-        name_to_code, code_to_name, listing_codes, _ = load_listing()
+        name_to_code, code_to_name, listing_codes, _ = loadListing()
 
-        from dartlab.scan.network.edges import build_invest_edges
+        from dartlab.scan.network.edges import buildInvestEdges
 
-        investDf = build_invest_edges(raw, name_to_code, code_to_name)
+        investDf = buildInvestEdges(raw, name_to_code, code_to_name)
     except Exception as e:
         logger.warning("network 엣지 추출 실패: %s", e)
         return edges
