@@ -29,6 +29,18 @@ class ListingResolver(Protocol):
         """초성/Levenshtein fuzzy 검색."""
         ...
 
+    def codeToName(self, stockCode: str) -> "str | None":
+        """stockCode → 회사명 변환."""
+        ...
+
+    def nameToCode(self, corpName: str) -> "str | None":
+        """회사명 → stockCode 변환."""
+        ...
+
+    def kindList(self, *, forceRefresh: bool = False) -> "pl.DataFrame":
+        """KIND 상장법인 목록 DataFrame 반환."""
+        ...
+
 
 _RESOLVER: ListingResolver | None = None
 

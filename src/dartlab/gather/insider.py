@@ -42,10 +42,11 @@ async def fetchInsiderTrading(
     if market != "KR":
         return []
     try:
-        from .domains.dartApi import fetchInsiderTrading as _dartInsider
+        from dartlab.providers.dart.insiderTrades import fetchInsiderTradingRaw
 
-        return await _dartInsider(stockCode)
-    except (ImportError, OSError) as exc:
+        rawRows = await fetchInsiderTradingRaw(stockCode)
+        return [InsiderTrade(**row) for row in rawRows]
+    except (ImportError, OSError, TypeError) as exc:
         log.warning("insider KR 실패 (%s): %s", stockCode, exc)
         return []
 
@@ -81,9 +82,10 @@ async def fetchMajorShareholders(
     if market != "KR":
         return []
     try:
-        from .domains.dartApi import fetchMajorShareholders as _dartMajor
+        from dartlab.providers.dart.insiderTrades import fetchMajorShareholdersRaw
 
-        return await _dartMajor(stockCode)
-    except (ImportError, OSError) as exc:
+        rawRows = await fetchMajorShareholdersRaw(stockCode)
+        return [MajorHolder(**row) for row in rawRows]
+    except (ImportError, OSError, TypeError) as exc:
         log.warning("majorShareholders 실패 (%s): %s", stockCode, exc)
         return []

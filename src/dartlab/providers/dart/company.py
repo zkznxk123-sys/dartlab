@@ -36,12 +36,40 @@ _log = getLogger(__name__)
 # (모듈 import 경로, 함수명, 한글 라벨, primary DataFrame 추출)
 # fsSummary/statements는 내부 디스패치 전용 (BS/IS/CF property가 statements를 호출)
 from dartlab.core.registry import getModuleEntries as _getModuleEntries
-from dartlab.gather.listing import (
-    codeToName,
-    getKindList,
-    nameToCode,
-    searchName,
-)
+
+
+# listing 함수는 ListingResolver registry 경유 (정공법 B — DIP).
+# providers/dart 가 gather/listing 직접 import 0 (cycle 회피).
+def _listingResolver():
+    """ListingResolver lazy resolver — auto-discovery 가 gather/listing register."""
+    from dartlab.core.listingResolver import getListingResolver
+
+    resolver = getListingResolver()
+    if resolver is None:
+        raise RuntimeError("ListingResolver 미등록 — dartlab.gather.listing 모듈 로드 실패")
+    return resolver
+
+
+def codeToName(stockCode):
+    """ListingResolver 경유 stockCode → 회사명."""
+    return _listingResolver().codeToName(stockCode)
+
+
+def nameToCode(corpName):
+    """ListingResolver 경유 회사명 → stockCode."""
+    return _listingResolver().nameToCode(corpName)
+
+
+def getKindList(*, forceRefresh: bool = False):
+    """ListingResolver 경유 KIND 상장법인 목록."""
+    return _listingResolver().kindList(forceRefresh=forceRefresh)
+
+
+def searchName(keyword):
+    """ListingResolver 경유 회사명 검색."""
+    return _listingResolver().search(keyword)
+
+
 from dartlab.providers.dart._docs_accessor import _DocsAccessor
 from dartlab.providers.dart._finance_accessor import _FinanceAccessor
 from dartlab.providers.dart._finance_helpers import (
@@ -4155,3 +4183,40 @@ class Company:
             reflect=reflect,
             **kwargs,
         )
+
+    def calendar(self, *, horizonDays: int = 30) -> "pl.DataFrame":
+        """다가오는 정기공시 catalyst 일정 추론 (Korea 시장).
+
+        본 회사 disclosure history 를 수집해 providers/dart/calendar 에 위임.
+        intra-package import 라 cycle 0 (gather 의존 X).
+        """
+        from dartlab.providers.dart.calendar import OUTPUT_SCHEMA, predictCalendar
+
+        history = self.disclosure(days=400, type="A")
+        if history is None or history.is_empty():
+            return pl.DataFrame(schema=OUTPUT_SCHEMA)
+        return predictCalendar({self.stockCode: history}, horizonDays=horizonDays)
+
+
+# ── DisclosureFetcher 구현 + register (정공법 B — DIP) ─────────────
+
+
+class _DartDisclosureFetcher:
+    """gather/Calendar 가 사용할 DART 공시 수집 어댑터."""
+
+    def fetch(self, stockCode, *, days=400, type="A"):
+        """단일 종목 공시 history 반환. 실패 시 None."""
+        try:
+            return Company(stockCode).disclosure(days=days, type=type)
+        except (OSError, ValueError, RuntimeError):
+            return None
+
+
+def _registerDartDisclosureFetcher() -> None:
+    """import 시점 등록."""
+    from dartlab.core.disclosureFetcher import registerDisclosureFetcher
+
+    registerDisclosureFetcher(_DartDisclosureFetcher())
+
+
+_registerDartDisclosureFetcher()

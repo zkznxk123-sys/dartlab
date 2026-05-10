@@ -769,9 +769,9 @@ def getKrxList(*, forceRefresh: bool = False) -> pl.DataFrame:
 
 
 class GatherListingResolver:
-    """ListingResolver 구현 — core/resolve.py 가 이 인스턴스 사용 (registry 경유).
+    """ListingResolver 구현 — core/resolve.py + providers/dart/Company 가 이 인스턴스 사용 (registry 경유).
 
-    core 가 gather/listing.py 직접 import 안 함. module load 시점에 register.
+    core/providers 가 gather/listing.py 직접 import 안 함. module load 시점에 register.
     """
 
     def search(self, query: str) -> pl.DataFrame | None:
@@ -787,6 +787,24 @@ class GatherListingResolver:
             return fuzzySearch(query, maxResults=maxResults)
         except (ValueError, OSError):
             return None
+
+    def codeToName(self, stockCode: str) -> str | None:
+        """stockCode → 회사명 변환."""
+        try:
+            return codeToName(stockCode)
+        except (ValueError, OSError):
+            return None
+
+    def nameToCode(self, corpName: str) -> str | None:
+        """회사명 → stockCode 변환."""
+        try:
+            return nameToCode(corpName)
+        except (ValueError, OSError):
+            return None
+
+    def kindList(self, *, forceRefresh: bool = False) -> pl.DataFrame:
+        """KIND 상장법인 목록."""
+        return getKindList(forceRefresh=forceRefresh)
 
 
 def _registerGatherListingResolver() -> None:

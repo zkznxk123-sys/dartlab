@@ -612,16 +612,11 @@ class GatherEntry:
                 indicators=indicators,
             )
         if axis == "calendar":
-            from dartlab.gather.calendar import gatherCalendar
-
-            horizonDays = kwargs.pop("horizon_days", 30)
-            codes = kwargs.pop("codes", None) or target
-            if codes is None:
-                raise ValueError(
-                    "gather('calendar') 에는 종목코드가 필요합니다. "
-                    "예: gather('calendar', '005930') 또는 gather('calendar', codes=['005930', '000660'])."
-                )
-            return gatherCalendar(codes, horizonDays=horizonDays, market=market)
+            raise ValueError(
+                "gather('calendar') 는 0.10 부터 폐기됨. Company.calendar() 사용. "
+                "예: c = dartlab.Company('005930'); c.calendar(horizonDays=30). "
+                "이유: gather → providers cycle 회피 (책임 분리)."
+            )
 
         raise ValueError(f"미지원 gather 축: {axis}")
 
