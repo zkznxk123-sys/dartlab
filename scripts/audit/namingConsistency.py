@@ -45,6 +45,15 @@ SKIP_PATH_PARTS: tuple[str, ...] = (
     "dist",
 )
 
+# 외부 노출 route handler — 매개변수 = HTTP path/query/CLI flag.
+# 변경 시 URL/CLI 시그니처 BC 깨짐. namingConsistency 면제.
+SKIP_PATH_PREFIXES: tuple[str, ...] = (
+    "src/dartlab/server/api/",
+    "src/dartlab/server/services/",
+    "src/dartlab/cli/services/",
+    "src/dartlab/cli/commands/",
+)
+
 
 @dataclass(frozen=True)
 class Violation:
@@ -86,9 +95,16 @@ def _buildAliasIndex(aliases: dict[str, dict]) -> dict[str, tuple[str, str]]:
 
 
 def _isSkipped(p: Path) -> bool:
-    """면제 폴더 (tests/scripts/notebooks/blog/landing/sns) 인지."""
+    """면제 폴더 (tests/scripts/notebooks/blog/landing/sns + route handlers) 인지."""
     parts = {x.lower() for x in p.parts}
-    return any(s in parts for s in SKIP_PATH_PARTS)
+    if any(s in parts for s in SKIP_PATH_PARTS):
+        return True
+    # route handler 면제 (HTTP/CLI 시그니처 BC 영향)
+    try:
+        rel = p.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return False
+    return any(rel.startswith(prefix) for prefix in SKIP_PATH_PREFIXES)
 
 
 def _scanFile(path: Path, aliasIndex: dict[str, tuple[str, str]]) -> list[Violation]:
