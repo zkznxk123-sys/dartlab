@@ -70,7 +70,7 @@ async def main():
 
             # ── 1. ReadSkill — 분석 시작 ───────────────────────────────
             print("\n## 1. ReadSkill('quant 예측')")
-            res = await s.call_tool("ReadSkill", {"query": "quant 예측", "limit": 3})
+            res = await s.callTool("ReadSkill", {"query": "quant 예측", "limit": 3})
             sc = res.structuredContent or {}
             refs = sc.get("refs") or []
             print(f"  refs={len(refs)}, summary={_short(sc.get('summary'))}")
@@ -86,7 +86,7 @@ async def main():
 
             # ── 2. ReadCapability — 같은 의도 다른 채널 ─────────────────
             print("\n## 2. ReadCapability('quant')")
-            res = await s.call_tool("ReadCapability", {"query": "quant", "limit": 3})
+            res = await s.callTool("ReadCapability", {"query": "quant", "limit": 3})
             sc = res.structuredContent or {}
             refs = sc.get("refs") or []
             print(f"  refs={len(refs)}")
@@ -97,7 +97,7 @@ async def main():
 
             # ── 3. RunPython — 실제 분석 (sanity) ────────────────────────
             print("\n## 3. RunPython sanity")
-            res = await s.call_tool(
+            res = await s.callTool(
                 "RunPython",
                 {"code": "emit_result(values={'mode': 'dogfood', 'pid_alive': True})"},
             )
@@ -110,7 +110,7 @@ async def main():
             # ── 4. RunPython — 실제 dartlab 호출 (cold path 포함) ──────
             print("\n## 4. RunPython — dartlab.Company('005930').show('BS')")
             try:
-                res = await s.call_tool(
+                res = await s.callTool(
                     "RunPython",
                     {
                         "code": (
@@ -135,7 +135,7 @@ async def main():
 
             # ── 5. S2 sandbox 차단 ────────────────────────────────────
             print("\n## 5. S2 sandbox — os.system 차단 검증")
-            res = await s.call_tool(
+            res = await s.callTool(
                 "RunPython", {"code": "import os\nos.system('echo blocked')\nemit_result(values={'leak': True})"}
             )
             sc = res.structuredContent or {}
@@ -150,7 +150,7 @@ async def main():
             # ── 6. S3 GroundingCheck — 실 답변 검산 ──────────────────────
             print("\n## 6. GroundingCheck — 답변 검증")
             sample = "삼성전자 ROE 는 12.3% 다. 3 분기 연속 OPM > 15% 유지."
-            res = await s.call_tool("GroundingCheck", {"answer": sample, "refs": []})
+            res = await s.callTool("GroundingCheck", {"answer": sample, "refs": []})
             sc = res.structuredContent or {}
             data = sc.get("data") or {}
             print(f"  materialNumber={data.get('materialNumber')}, grounded={data.get('grounded')}")
@@ -160,7 +160,7 @@ async def main():
             # ── 7. S3 LookAheadGuard — asOf 강제 ──────────────────────
             print("\n## 7. LookAheadGuard — asOf 강제 (실호출)")
             try:
-                res = await s.call_tool(
+                res = await s.callTool(
                     "LookAheadGuard",
                     {"stockCode": "005930", "asOf": "2024Q4", "topic": "BS"},
                 )
@@ -175,14 +175,14 @@ async def main():
                 note("FAIL", f"LookAheadGuard exception: {e}")
 
             print("\n## 7b. LookAheadGuard — asOf 누락 거부 검증")
-            res = await s.call_tool("LookAheadGuard", {"stockCode": "005930", "asOf": ""})
+            res = await s.callTool("LookAheadGuard", {"stockCode": "005930", "asOf": ""})
             sc = res.structuredContent or {}
             if not sc.get("ok") and sc.get("error") == "lookahead_guard_missing_asof":
                 note("OK", "asOf 누락을 명시 에러 코드로 거부")
 
             # ── 8. S3 OutcomeLog — pending 기록 ───────────────────────
             print("\n## 8. OutcomeLog — pending entry")
-            res = await s.call_tool(
+            res = await s.callTool(
                 "OutcomeLog",
                 {
                     "stockCode": "005930",
@@ -198,7 +198,7 @@ async def main():
 
             # ── 9. S4 RequestUserInput — fallback ───────────────────────
             print("\n## 9. RequestUserInput — 표준 ClientSession 의 fallback")
-            res = await s.call_tool(
+            res = await s.callTool(
                 "RequestUserInput",
                 {
                     "message": "분석할 회사를 선택하세요",
@@ -219,7 +219,7 @@ async def main():
             async def on_progress(p, total, msg):
                 events.append((p, msg))
 
-            res = await s.call_tool(
+            res = await s.callTool(
                 "RunPython",
                 {"code": "import time\nfor _ in range(4): time.sleep(0.5)\nemit_result(values={'done': True})"},
                 progress_callback=on_progress,
@@ -234,7 +234,7 @@ async def main():
 
             # ── 11. prompts/list — 49 recipe ───────────────────────────
             print("\n## 11. prompts/list")
-            prompts = await s.list_prompts()
+            prompts = await s.listPrompts()
             recipe_count = sum(1 for p in prompts.prompts if ".recipe." in p.name)
             note("OK" if recipe_count >= 30 else "MEH", f"recipe prompt {recipe_count} (전체 {len(prompts.prompts)})")
 

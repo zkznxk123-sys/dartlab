@@ -137,7 +137,7 @@ def main() -> int:
                 "operatingMarginSeries": op_margins,
                 "revenueYoySeries": [],
             }
-            phase, conf, _ = _classify(signals, growth_adj=-5.0)
+            phase, conf, _ = _classify(signals, growthAdj=-5.0)
         except Exception:
             phase = "unknown"
             conf = 0.0

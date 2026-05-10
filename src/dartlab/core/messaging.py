@@ -134,7 +134,7 @@ _SIMPLE: dict[str, str] = {
 class _StructuredMsg:
     """structured 메시지 정의. actions_with_key / actions_without_key로 분기."""
 
-    __slots__ = ("template", "actions", "actions_with_key", "actions_without_key")
+    __slots__ = ("template", "actions", "actionsWithKey", "actionsWithoutKey")
 
     def __init__(
         self,

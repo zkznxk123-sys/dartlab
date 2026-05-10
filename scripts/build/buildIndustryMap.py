@@ -303,9 +303,9 @@ def _loadScanMetrics() -> dict[str, dict]:
 
     # governance (지배구조 A~E)
     try:
-        from dartlab.scan.governance import scan_governance
+        from dartlab.scan.governance import scanGovernance
 
-        gov = scan_governance()
+        gov = scanGovernance()
         for r in gov.iter_rows(named=True):
             code = r.get("종목코드") or r.get("stockCode")
             if not code:
@@ -373,9 +373,9 @@ def _loadScanMetrics() -> dict[str, dict]:
 
     # capital (주주환원 분류)
     try:
-        from dartlab.scan.capital import scan_capital
+        from dartlab.scan.capital import scanCapital
 
-        cap = scan_capital()
+        cap = scanCapital()
         for r in cap.iter_rows(named=True):
             code = r.get("종목코드") or r.get("stockCode")
             if not code:
@@ -387,9 +387,9 @@ def _loadScanMetrics() -> dict[str, dict]:
 
     # workforce (직원수)
     try:
-        from dartlab.scan.workforce import scan_workforce
+        from dartlab.scan.workforce import scanWorkforce
 
-        wf = scan_workforce()
+        wf = scanWorkforce()
         for r in wf.iter_rows(named=True):
             code = r.get("종목코드") or r.get("stockCode")
             if not code:

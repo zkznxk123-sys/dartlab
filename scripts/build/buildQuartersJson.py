@@ -192,18 +192,18 @@ def main() -> int:
     )
     print(f"  filtered: {df.shape}", flush=True)
 
-    stock_codes = sorted(df["stockCode"].unique().to_list())
-    print(f"  companies: {len(stock_codes)}", flush=True)
+    stockCodes = sorted(df["stockCode"].unique().to_list())
+    print(f"  companies: {len(stockCodes)}", flush=True)
 
     companies: dict[str, dict] = {}
     t1 = time.time()
-    for i, code in enumerate(stock_codes, 1):
+    for i, code in enumerate(stockCodes, 1):
         data = _extract_company(df, code)
         if data:
             companies[code] = data
         if i % 500 == 0:
             rate = i / (time.time() - t1)
-            print(f"  [{i}/{len(stock_codes)}] {rate:.0f}/s", flush=True)
+            print(f"  [{i}/{len(stockCodes)}] {rate:.0f}/s", flush=True)
 
     periods = _periods()
     output = {"version": "v19", "periods": periods, "companies": companies}

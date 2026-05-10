@@ -66,7 +66,7 @@ def main() -> int:
             import dartlab
 
             c = dartlab.Company(code)
-            corp_name = getattr(c, "corpName", code)
+            corpName = getattr(c, "corpName", code)
         except (FileNotFoundError, OSError, RuntimeError, KeyError, ValueError):
             fail += 1
             continue
@@ -99,7 +99,7 @@ def main() -> int:
             if not answer_parts:
                 continue
 
-            q = QUESTIONS[metric].replace("해줘", f"해줘. 회사: {corp_name}({code})")
+            q = QUESTIONS[metric].replace("해줘", f"해줘. 회사: {corpName}({code})")
             pairs.append(
                 _sharegpt(
                     SYSTEM_PROMPT,

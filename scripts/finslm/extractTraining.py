@@ -91,14 +91,14 @@ def extractAuditAnalysis() -> list[dict]:
         # 첫 줄에서 회사명 추출
         first_line = text.split("\n")[0] if text else ""
         corp_match = re.match(r"^##\s*(.+?)\s*\(", first_line)
-        corp_name = corp_match.group(1) if corp_match else code
+        corpName = corp_match.group(1) if corp_match else code
 
         # 전체 보고서
         if len(text) > 200:
             pairs.append(
                 _sharegpt(
                     SYSTEM_PROMPT,
-                    f"{corp_name}({code}) 종합 재무분석을 해줘.",
+                    f"{corpName}({code}) 종합 재무분석을 해줘.",
                     text[:8000],  # 8K cap
                     {"stock_code": code, "intent": "act_all", "source": "auditAnalysis", "type": "full"},
                 )
@@ -106,25 +106,25 @@ def extractAuditAnalysis() -> list[dict]:
 
         # 섹션별 QA
         _SECTION_QUESTIONS = {
-            "부문별 매출 구성": (f"{corp_name} 사업 구성과 매출 비중을 알려줘.", "act1_business"),
-            "부문별 매출 추이": (f"{corp_name} 부문별 매출 추세는?", "act1_business"),
-            "매출 성장률": (f"{corp_name} 매출 성장률과 CAGR은?", "act1_business"),
-            "매출 집중도": (f"{corp_name} 매출 집중도(HHI)는?", "act1_business"),
-            "마진 추이": (f"{corp_name} 영업이익률 추세를 분석해줘.", "act2_profit"),
-            "수익률 추이 (Return Trend)": (f"{corp_name} ROE와 ROIC 추이는?", "act2_profit"),
-            "DuPont 분해": (f"{corp_name} DuPont 분해 결과는?", "act2_profit"),
-            "현금흐름 개요": (f"{corp_name} 현금흐름 패턴은?", "act3_cash"),
-            "현금 품질 (Cash Quality)": (f"{corp_name} 이익품질 어때?", "act3_cash"),
-            "자금 원천": (f"{corp_name} 자금조달 구조는?", "act4_stability"),
-            "레버리지 추이": (f"{corp_name} 부채비율 추이는?", "act4_stability"),
-            "부실 판별 (Z-Score)": (f"{corp_name} Z-Score로 부실 위험 봐줘.", "act4_stability"),
-            "자산 구조": (f"{corp_name} 자산 구성은?", "act5_capital"),
-            "ROIC 추이": (f"{corp_name} ROIC vs WACC 추이는?", "act5_capital"),
-            "배당 정책": (f"{corp_name} 배당정책 알려줘.", "act5_capital"),
-            "비용구조": (f"{corp_name} 비용구조 분해해줘.", "act2_profit"),
-            "밸류에이션 요약": (f"{corp_name} 적정가 얼마야?", "act6_outlook"),
-            "스코어카드": (f"{corp_name} 재무 종합 등급은?", "act_all"),
-            "매출 품질": (f"{corp_name} 매출 품질은?", "act3_cash"),
+            "부문별 매출 구성": (f"{corpName} 사업 구성과 매출 비중을 알려줘.", "act1_business"),
+            "부문별 매출 추이": (f"{corpName} 부문별 매출 추세는?", "act1_business"),
+            "매출 성장률": (f"{corpName} 매출 성장률과 CAGR은?", "act1_business"),
+            "매출 집중도": (f"{corpName} 매출 집중도(HHI)는?", "act1_business"),
+            "마진 추이": (f"{corpName} 영업이익률 추세를 분석해줘.", "act2_profit"),
+            "수익률 추이 (Return Trend)": (f"{corpName} ROE와 ROIC 추이는?", "act2_profit"),
+            "DuPont 분해": (f"{corpName} DuPont 분해 결과는?", "act2_profit"),
+            "현금흐름 개요": (f"{corpName} 현금흐름 패턴은?", "act3_cash"),
+            "현금 품질 (Cash Quality)": (f"{corpName} 이익품질 어때?", "act3_cash"),
+            "자금 원천": (f"{corpName} 자금조달 구조는?", "act4_stability"),
+            "레버리지 추이": (f"{corpName} 부채비율 추이는?", "act4_stability"),
+            "부실 판별 (Z-Score)": (f"{corpName} Z-Score로 부실 위험 봐줘.", "act4_stability"),
+            "자산 구조": (f"{corpName} 자산 구성은?", "act5_capital"),
+            "ROIC 추이": (f"{corpName} ROIC vs WACC 추이는?", "act5_capital"),
+            "배당 정책": (f"{corpName} 배당정책 알려줘.", "act5_capital"),
+            "비용구조": (f"{corpName} 비용구조 분해해줘.", "act2_profit"),
+            "밸류에이션 요약": (f"{corpName} 적정가 얼마야?", "act6_outlook"),
+            "스코어카드": (f"{corpName} 재무 종합 등급은?", "act_all"),
+            "매출 품질": (f"{corpName} 매출 품질은?", "act3_cash"),
         }
 
         for sec_name, (question, intent) in _SECTION_QUESTIONS.items():

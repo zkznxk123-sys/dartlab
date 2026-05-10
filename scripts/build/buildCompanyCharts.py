@@ -95,7 +95,7 @@ def buildForCode(code: str, *, force: bool = False) -> dict[str, Any]:
         pass
 
     c = Company(code)
-    corp_name = getattr(c, "corpName", "")
+    corpName = getattr(c, "corpName", "")
     manifest_charts: list[dict[str, Any]] = []
     skipped: list[str] = []
 
@@ -120,10 +120,10 @@ def buildForCode(code: str, *, force: bool = False) -> dict[str, Any]:
     # hero — six-act-radar (story.sixAct + spec_six_act_radar)
     try:
         from dartlab.story import sixActScore
-        from dartlab.viz import spec_six_act_radar
+        from dartlab.viz import specSixActRadar
 
         score = sixActScore(c)
-        radar_spec = spec_six_act_radar(
+        radar_spec = specSixActRadar(
             score.asScoreDict(),
             stockCode=score.stockCode,
             corpName=score.corpName,
@@ -142,16 +142,16 @@ def buildForCode(code: str, *, force: bool = False) -> dict[str, Any]:
     # peer — industry.peers + spec_peer_matrix
     try:
         from dartlab.industry.peers import industryPeerMetricKeys, industryPeers
-        from dartlab.viz import spec_peer_matrix
+        from dartlab.viz import specPeerMatrix
 
         peer_rows = industryPeers(code, n=10)
         if peer_rows:
             metrics = industryPeerMetricKeys(peer_rows) or ["매출(억)"]
-            peer_spec = spec_peer_matrix(
+            peer_spec = specPeerMatrix(
                 rows=[r.asDict() for r in peer_rows],
                 metrics=metrics,
                 stockCode=code,
-                corpName=corp_name,
+                corpName=corpName,
             )
         else:
             peer_spec = None
@@ -170,7 +170,7 @@ def buildForCode(code: str, *, force: bool = False) -> dict[str, Any]:
     manifest = {
         "version": "v1",
         "stockCode": code,
-        "corpName": corp_name,
+        "corpName": corpName,
         "generatedAt": datetime.now(UTC).isoformat(timespec="seconds"),
         "charts": manifest_charts,
         "skipped": skipped,
@@ -205,15 +205,15 @@ def buildForCodes(codes: list[str], *, force: bool = False) -> list[dict[str, An
 def _resolveCodes(args: argparse.Namespace) -> list[str]:
     if args.code:
         return list(args.code)
-    if args.top_n:
+    if args.topN:
         # 시가총액 상위 N — scan 엔진의 marketCap 기반 선택. 빌드 스크립트는
         # 이 경로가 없으면 명시적으로 실패한다 (조용한 fallback 금지).
         try:
             import dartlab
 
-            top = dartlab.scan(metric="marketCap", n=args.top_n)
+            top = dartlab.scan(metric="marketCap", n=args.topN)
         except (AttributeError, ImportError, OSError, RuntimeError) as e:
-            raise SystemExit(f"--top-n {args.top_n} 모드는 dartlab.scan 사용 가능 환경에서만 동작: {e}") from e
+            raise SystemExit(f"--top-n {args.topN} 모드는 dartlab.scan 사용 가능 환경에서만 동작: {e}") from e
         return [str(row["stockCode"]) for row in top.iter_rows(named=True)]
     raise SystemExit("--code <코드> 또는 --top-n <N> 중 하나 필수")
 

@@ -41,13 +41,13 @@ def get_post_info(post_dir: Path):
     return {"num": num, "title": title, "slug": slug}
 
 
-def truncate_title(title: str, max_len: int = 28) -> list[str]:
+def truncate_title(title: str, maxLen: int = 28) -> list[str]:
     """긴 제목을 2줄로 분할."""
-    if len(title) <= max_len:
+    if len(title) <= maxLen:
         return [title]
     # 자연스러운 분할점 찾기
     for sep in ["은 ", "는 ", "이 ", "가 ", "를 ", "을 ", "와 ", "과 ", " 때 ", "에서 "]:
-        idx = title.find(sep, max_len // 2)
+        idx = title.find(sep, maxLen // 2)
         if 0 < idx < len(title) - 3:
             return [title[: idx + len(sep)].rstrip(), title[idx + len(sep) :]]
     # 강제 분할
@@ -55,7 +55,7 @@ def truncate_title(title: str, max_len: int = 28) -> list[str]:
     space = title.rfind(" ", 0, mid + 5)
     if space > 0:
         return [title[:space], title[space + 1 :]]
-    return [title[:max_len], title[max_len:]]
+    return [title[:maxLen], title[maxLen:]]
 
 
 def generate_svg(post_info: dict, svg_type: str, cat_colors: dict) -> str:

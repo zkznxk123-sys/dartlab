@@ -76,10 +76,10 @@ def page_text(page: Page) -> str:
         return ""
 
 
-def run_scan(page: Page, base_url: str, budget_ms: float) -> BenchResult:
+def run_scan(page: Page, baseUrl: str, budget_ms: float) -> BenchResult:
     t0 = perf_counter()
     try:
-        resp = page.goto(f"{base_url}/scan", wait_until="domcontentloaded", timeout=60_000)
+        resp = page.goto(f"{baseUrl}/scan", wait_until="domcontentloaded", timeout=60_000)
         page.get_by_text("Scan Studio").first.wait_for(timeout=30_000)
         duration_ms = (perf_counter() - t0) * 1000
         page.wait_for_timeout(1000)
@@ -204,10 +204,10 @@ def run_scan_detail(page: Page, budget_ms: float) -> BenchResult:
     return BenchResult("scan_detail", duration_ms <= budget_ms and not detail["hasInternalDbText"], duration_ms, detail)
 
 
-def run_company(page: Page, base_url: str, budget_ms: float) -> BenchResult:
+def run_company(page: Page, baseUrl: str, budget_ms: float) -> BenchResult:
     t0 = perf_counter()
     try:
-        resp = page.goto(f"{base_url}/company/005930", wait_until="domcontentloaded", timeout=60_000)
+        resp = page.goto(f"{baseUrl}/company/005930", wait_until="domcontentloaded", timeout=60_000)
         page.get_by_text("PER").first.wait_for(timeout=30_000)
         duration_ms = (perf_counter() - t0) * 1000
         text = page_text(page)
@@ -230,10 +230,10 @@ def run_company(page: Page, base_url: str, budget_ms: float) -> BenchResult:
         )
 
 
-def run_hf_range_lab(page: Page, base_url: str, budget_ms: float) -> BenchResult:
+def run_hf_range_lab(page: Page, baseUrl: str, budget_ms: float) -> BenchResult:
     t0 = perf_counter()
     try:
-        resp = page.goto(f"{base_url}/lab/hf-range", wait_until="domcontentloaded", timeout=60_000)
+        resp = page.goto(f"{baseUrl}/lab/hf-range", wait_until="domcontentloaded", timeout=60_000)
         page.get_by_text("HF Parquet Range Probe").first.wait_for(timeout=30_000)
         page.wait_for_timeout(1000)
         page.locator(".head button").first.click(timeout=10_000)
@@ -337,12 +337,12 @@ def main() -> int:
                 lambda resp: bad_responses.append(f"{resp.status} {resp.url}") if resp.status >= 400 else None,
             )
 
-            results.append(run_scan(page, args.base_url, args.scan_budget_ms))
+            results.append(run_scan(page, args.baseUrl, args.scan_budget_ms))
             results.append(run_finance_preset(page, args.finance_budget_ms))
             results.append(run_price_preset(page, args.price_wait_ms))
             results.append(run_report_preset(page, args.report_budget_ms))
             results.append(run_scan_detail(page, args.detail_budget_ms))
-            results.append(run_company(page, args.base_url, args.company_budget_ms))
+            results.append(run_company(page, args.baseUrl, args.company_budget_ms))
             page.wait_for_timeout(750)
             context.close()
             if args.include_hf_range_lab:
@@ -361,7 +361,7 @@ def main() -> int:
                     "response",
                     lambda resp: bad_responses.append(f"{resp.status} {resp.url}") if resp.status >= 400 else None,
                 )
-                results.append(run_hf_range_lab(lab_page, args.base_url, args.hf_range_budget_ms))
+                results.append(run_hf_range_lab(lab_page, args.baseUrl, args.hf_range_budget_ms))
                 lab_context.close()
         browser.close()
 

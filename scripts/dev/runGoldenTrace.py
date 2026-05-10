@@ -45,10 +45,10 @@ def _loadCases() -> dict[str, Any]:
 def _runCase(case: dict[str, Any]) -> dict[str, Any]:
     """단일 케이스 실행 — provider 호출 + trace 결과 dict 반환."""
     from dartlab.ai import ask
-    from dartlab.ai.providers import create_provider, get_config
+    from dartlab.ai.providers import createProvider, getConfig
 
-    config = get_config(provider="oauth-codex")
-    provider = create_provider(config)
+    config = getConfig(provider="oauth-codex")
+    provider = createProvider(config)
 
     case_id = case["id"]
     question = case["question"]

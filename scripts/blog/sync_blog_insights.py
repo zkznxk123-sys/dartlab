@@ -131,7 +131,7 @@ def sync() -> int:
         if not ai or not fm.get("stockCode"):
             continue
 
-        stock_code = fm["stockCode"]
+        stockCode = fm["stockCode"]
         sector = fm.get("sector", "")
         verdict = ai.get("verdict", "")
         direction = ai.get("direction", "")
@@ -158,7 +158,7 @@ def sync() -> int:
         weaknesses = ai.get("weaknesses", [])
 
         db.save_insight(
-            stock_code=stock_code,
+            stockCode=stockCode,
             narrative=narrative,
             strengths=strengths,
             weaknesses=weaknesses,

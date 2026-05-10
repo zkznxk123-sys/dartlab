@@ -257,7 +257,7 @@ def check_push() -> int:
     return failures
 
 
-def build_parser() -> argparse.ArgumentParser:
+def buildParser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check-commit-msg")
     parser.add_argument("--check-staged", action="store_true")
@@ -267,7 +267,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
-    args = build_parser().parse_args()
+    args = buildParser().parse_args()
     if args.check_commit_msg:
         return check_commit_message(args.check_commit_msg)
     if args.check_staged:

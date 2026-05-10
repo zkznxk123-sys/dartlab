@@ -14,7 +14,7 @@ pytestmark = pytest.mark.unit
 
 # ── 전략 정의 ──
 
-_float_or_none = st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False, min_value=-1e15, maxValue=1e15))
+_float_or_none = st.one_of(st.none(), st.floats(allow_nan=False, allow_infinity=False, min_value=-1e15, max_value=1e15))
 
 _value_list = st.lists(_float_or_none, min_size=0, max_size=20)
 
@@ -47,7 +47,7 @@ class TestGetTTMProperties:
 
     @given(
         vals=st.lists(
-            st.floats(min_value=0, maxValue=1e12, allow_nan=False, allow_infinity=False), min_size=4, max_size=20
+            st.floats(min_value=0, max_value=1e12, allow_nan=False, allow_infinity=False), min_size=4, max_size=20
         )
     )
     @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
@@ -59,7 +59,7 @@ class TestGetTTMProperties:
 
     @given(
         vals=st.lists(
-            st.floats(min_value=1, maxValue=1e12, allow_nan=False, allow_infinity=False), min_size=4, max_size=4
+            st.floats(min_value=1, max_value=1e12, allow_nan=False, allow_infinity=False), min_size=4, max_size=4
         )
     )
     @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
@@ -98,7 +98,7 @@ class TestGetLatestProperties:
 
     @given(
         vals=st.lists(
-            st.floats(min_value=-1e15, maxValue=1e15, allow_nan=False, allow_infinity=False), min_size=1, max_size=20
+            st.floats(min_value=-1e15, max_value=1e15, allow_nan=False, allow_infinity=False), min_size=1, max_size=20
         )
     )
     @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
@@ -109,7 +109,7 @@ class TestGetLatestProperties:
 
     @given(
         vals=st.lists(
-            st.floats(min_value=-1e15, maxValue=1e15, allow_nan=False, allow_infinity=False), min_size=1, max_size=20
+            st.floats(min_value=-1e15, max_value=1e15, allow_nan=False, allow_infinity=False), min_size=1, max_size=20
         )
     )
     @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
@@ -118,7 +118,7 @@ class TestGetLatestProperties:
         result = getLatest(_makeSeries("BS", "totalAssets", vals), "BS", "totalAssets")
         assert result in vals
 
-    @given(n=st.integers(min_value=1, maxValue=20))
+    @given(n=st.integers(min_value=1, max_value=20))
     @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_allNoneReturnsNone(self, n):
         """모든 값이 None이면 None 반환."""
@@ -154,7 +154,7 @@ class TestRevenueGrowth3YProperties:
 
     @given(
         vals=st.lists(
-            st.floats(min_value=1, maxValue=1e12, allow_nan=False, allow_infinity=False), min_size=4, max_size=20
+            st.floats(min_value=1, max_value=1e12, allow_nan=False, allow_infinity=False), min_size=4, max_size=20
         )
     )
     @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])

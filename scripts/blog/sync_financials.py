@@ -91,7 +91,7 @@ def build_table(rows: list[tuple[str, list[str]]], years: list[str], title: str)
     return "\n".join(lines)
 
 
-def extract_data(stock_code: str) -> dict | None:
+def extract_data(stockCode: str) -> dict | None:
     """dartlab으로 데이터 추출. Company 1개만 로드 후 해제.
 
     기간 라벨은 DART/EDGAR 모두 fiscal 라벨 그대로 사용 (예: UAA FY26 Q3 = "2026Q3").
@@ -100,13 +100,13 @@ def extract_data(stock_code: str) -> dict | None:
     import dartlab
 
     try:
-        c = dartlab.Company(stock_code)
+        c = dartlab.Company(stockCode)
     except Exception as e:
-        print(f"  [WARN] Company({stock_code}) 로드 실패: {e}")
+        print(f"  [WARN] Company({stockCode}) 로드 실패: {e}")
         return None
 
     is_edgar = getattr(c, "market", "KR") == "US"
-    result = {"stockCode": stock_code, "corpName": getattr(c, "corpName", stock_code), "isEdgar": is_edgar}
+    result = {"stockCode": stockCode, "corpName": getattr(c, "corpName", stockCode), "isEdgar": is_edgar}
     freq_kw = {} if is_edgar else {"freq": "Y"}
 
     # --- IS ---
@@ -208,7 +208,7 @@ def extract_data(stock_code: str) -> dict | None:
                     # 더 정확한 SEC 뷰어 URL
                     acc_dash = row.get("accession_no", "")
                     sec_url = (
-                        f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={stock_code}&type={row.get('form_type', '')}&dateb=&owner=include&count=10"
+                        f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={stockCode}&type={row.get('form_type', '')}&dateb=&owner=include&count=10"
                         if acc_dash
                         else ""
                     )
@@ -407,19 +407,19 @@ def sync_post(index_path: Path, target_code: str | None, dry_run: bool) -> bool:
     """단일 블로그 파일 동기화."""
     text = index_path.read_text(encoding="utf-8")
     fm = parse_frontmatter(text)
-    stock_code = fm.get("stockCode")
+    stockCode = fm.get("stockCode")
 
-    if not stock_code:
+    if not stockCode:
         return False
 
-    if target_code and stock_code != target_code:
+    if target_code and stockCode != target_code:
         return False
 
     slug = index_path.parent.name
-    print(f"\n[{slug}] stockCode={stock_code}")
+    print(f"\n[{slug}] stockCode={stockCode}")
 
     # 데이터 추출
-    data = extract_data(stock_code)
+    data = extract_data(stockCode)
     if data is None:
         print("  SKIP: 데이터 추출 실패")
         return False

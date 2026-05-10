@@ -49,10 +49,10 @@ def parse_all(audit_dir: Path) -> dict[str, list[str]]:
     if not audit_dir.is_dir():
         return out
     for md in audit_dir.glob("*.md"):
-        stock_code = md.stem
+        stockCode = md.stem
         bullets = parse_engine_improvement_bullets(md)
         if bullets:
-            out[stock_code] = bullets
+            out[stockCode] = bullets
     return out
 
 

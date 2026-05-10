@@ -64,16 +64,16 @@ def _write(outDir: Path, observations: list[pl.DataFrame], manifestRows: list[di
 
 def buildFred(outDir: Path) -> None:
     from dartlab.gather.fred import Fred
-    from dartlab.gather.fred.catalog import get_all_entries
+    from dartlab.gather.fred.catalog import getAllEntries
 
     key = _requireEnv("FRED_API_KEY")
-    fred = Fred(api_key=key)
+    fred = Fred(apiKey=key)
     existingObs, _ = _readExisting(outDir)
     updatedAt = _utcNow()
     observations: list[pl.DataFrame] = []
     manifestRows: list[dict] = []
 
-    for entry in get_all_entries():
+    for entry in getAllEntries():
         status = "ok"
         err = ""
         try:

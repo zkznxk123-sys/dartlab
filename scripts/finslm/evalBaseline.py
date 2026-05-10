@@ -65,7 +65,7 @@ QUESTIONS = [
 ]
 
 
-def run_question(stock_code: str, question: str, *, provider: str, model: str | None = None) -> dict:
+def run_question(stockCode: str, question: str, *, provider: str, model: str | None = None) -> dict:
     """단일 질문 실행 → {length, elapsed, error, has_code, has_table}."""
     import dartlab
     from dartlab.ai.runtime.core import analyze
@@ -73,7 +73,7 @@ def run_question(stock_code: str, question: str, *, provider: str, model: str | 
     os.environ["DARTLAB_CONTEXT_V2"] = "1"
 
     try:
-        c = dartlab.Company(stock_code)
+        c = dartlab.Company(stockCode)
     except (FileNotFoundError, OSError, RuntimeError) as e:
         return {"length": 0, "elapsed": 0, "error": str(e)[:200], "has_code": False, "has_table": False}
 

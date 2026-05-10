@@ -146,9 +146,9 @@ def _hash_q(q: str) -> str:
     return "sha256:" + hashlib.sha256(q.encode("utf-8")).hexdigest()[:16]
 
 
-def _infer_engine_axis(tool_calls: list[dict]) -> tuple[str, str]:
+def _infer_engine_axis(toolCalls: list[dict]) -> tuple[str, str]:
     """tool_calls 의 첫 엔진 호출에서 engine/axis 추론."""
-    for tc in tool_calls:
+    for tc in toolCalls:
         name = tc.get("name", "")
         if name in {"analysis", "credit", "quant", "macro", "industry", "scan", "gather"}:
             args = tc.get("args") or {}
@@ -157,10 +157,10 @@ def _infer_engine_axis(tool_calls: list[dict]) -> tuple[str, str]:
     return "unknown", ""
 
 
-def _summarize_pattern(tool_calls: list[dict]) -> list[dict]:
+def _summarize_pattern(toolCalls: list[dict]) -> list[dict]:
     """tool_calls 를 hash-friendly 요약으로."""
     out = []
-    for tc in tool_calls:
+    for tc in toolCalls:
         args = tc.get("args") or {}
         shape = {k: type(v).__name__ for k, v in args.items()}
         out.append({"name": tc.get("name"), "args_shape": shape})

@@ -1534,9 +1534,9 @@ def _parseAxisRegistry(entries: dict[str, dict[str, str]], path: Path, *, prefix
 
 def _applyAiContractMetadata(entries: dict[str, dict[str, Any]]) -> None:
     """Attach generated contract metadata from core capabilities SSOT."""
-    from dartlab.core.capability.registry import get_analysis_contract_specs
+    from dartlab.core.capability.registry import getAnalysisContractSpecs
 
-    for key, contract in get_analysis_contract_specs().items():
+    for key, contract in getAnalysisContractSpecs().items():
         entries.setdefault(key, {})
         for field, value in contract.items():
             entries[key].setdefault(field, value)
@@ -1553,23 +1553,23 @@ def _buildAnalysisGraph(entries: dict[str, dict[str, Any]]) -> dict[str, Any]:
     processMaps: dict[str, dict[str, Any]] = {}
 
     for key, entry in sorted(entries.items()):
-        contract_id = entry.get("contractId")
-        if not contract_id:
+        contractId = entry.get("contractId")
+        if not contractId:
             continue
         contract = {k: v for k, v in entry.items() if k not in {"args", "example", "guide", "returns", "seeAlso"}}
         contract["sourceKey"] = key
-        contracts[str(contract_id)] = contract
+        contracts[str(contractId)] = contract
         nodes.append(
             {
-                "id": f"contract:{contract_id}",
+                "id": f"contract:{contractId}",
                 "kind": "contract",
-                "label": entry.get("summary") or contract_id,
+                "label": entry.get("summary") or contractId,
                 "source": key,
             }
         )
         if tool := entry.get("tool"):
             nodes.append({"id": f"tool:{tool}", "kind": "tool", "label": tool, "source": key})
-            edges.append({"from": f"contract:{contract_id}", "to": f"tool:{tool}", "kind": "usesTool"})
+            edges.append({"from": f"contract:{contractId}", "to": f"tool:{tool}", "kind": "usesTool"})
         for question_type in entry.get("questionTypes") or []:
             route_id = f"route:{question_type}"
             if not any(route["id"] == route_id for route in routes):
@@ -1585,11 +1585,11 @@ def _buildAnalysisGraph(entries: dict[str, dict[str, Any]]) -> dict[str, Any]:
                 )
             route = next(route for route in routes if route["id"] == route_id)
             route["triggers"] = _mergeQuestionTriggers(route.get("triggers") or {}, entry.get("questionTriggers") or {})
-            route["contractIds"].append(str(contract_id))
+            route["contractIds"].append(str(contractId))
             for tool_name in entry.get("toolNames") or ([entry.get("tool")] if entry.get("tool") else []):
                 if tool_name and tool_name not in route["toolNames"]:
                     route["toolNames"].append(str(tool_name))
-            edges.append({"from": route_id, "to": f"contract:{contract_id}", "kind": "requiresContract"})
+            edges.append({"from": route_id, "to": f"contract:{contractId}", "kind": "requiresContract"})
 
     processMaps = _buildProcessMaps(contracts, routes)
     for process_id, process in processMaps.items():
@@ -1603,8 +1603,8 @@ def _buildAnalysisGraph(entries: dict[str, dict[str, Any]]) -> dict[str, Any]:
         )
         route_id = f"route:{process.get('questionType')}"
         edges.append({"from": route_id, "to": f"process:{process_id}", "kind": "usesProcess"})
-        for contract_id in process.get("contractIds") or []:
-            edges.append({"from": f"process:{process_id}", "to": f"contract:{contract_id}", "kind": "requiresContract"})
+        for contractId in process.get("contractIds") or []:
+            edges.append({"from": f"process:{process_id}", "to": f"contract:{contractId}", "kind": "requiresContract"})
         for step in process.get("steps") or []:
             tool = step.get("tool")
             if tool:
@@ -1663,46 +1663,46 @@ def _buildProcessMaps(contracts: dict[str, dict[str, Any]], routes: list[dict[st
             continue
         steps: list[dict[str, Any]] = []
         for contract in route_contracts:
-            contract_id = str(contract.get("contractId") or "")
+            contractId = str(contract.get("contractId") or "")
             for idx, action in enumerate(contract.get("preflightActions") or []):
                 if not isinstance(action, dict) or not action.get("tool"):
                     continue
                 steps.append(
                     {
-                        "id": f"{contract_id}.preflight.{idx + 1}",
+                        "id": f"{contractId}.preflight.{idx + 1}",
                         "tool": action.get("tool"),
                         "argsTemplate": action.get("argsTemplate") or {},
-                        "contractId": contract_id,
+                        "contractId": contractId,
                         "primaryEvidence": bool(action.get("primaryEvidence")),
                         "produces": "evidence",
-                        "purpose": f"{contract_id} primary evidence",
+                        "purpose": f"{contractId} primary evidence",
                     }
                 )
-            if not any(step.get("contractId") == contract_id for step in steps):
+            if not any(step.get("contractId") == contractId for step in steps):
                 for tool in contract.get("toolNames") or ([contract.get("tool")] if contract.get("tool") else []):
                     if not tool:
                         continue
                     steps.append(
                         {
-                            "id": f"{contract_id}.{tool}",
+                            "id": f"{contractId}.{tool}",
                             "tool": tool,
-                            "contractId": contract_id,
+                            "contractId": contractId,
                             "primaryEvidence": False,
                             "produces": "evidence",
-                            "purpose": f"{contract_id} evidence candidate",
+                            "purpose": f"{contractId} evidence candidate",
                         }
                     )
         required_evidence = _unique(v for c in route_contracts for v in c.get("requiredEvidence") or [])
-        artifact_policy = _merge_dicts(c.get("artifactPolicy") for c in route_contracts)
-        visual_policy = _merge_dicts(c.get("visualPolicy") for c in route_contracts)
-        freshness = _merge_dicts(c.get("freshness") for c in route_contracts)
+        artifact_policy = _mergeDicts(c.get("artifactPolicy") for c in route_contracts)
+        visual_policy = _mergeDicts(c.get("visualPolicy") for c in route_contracts)
+        freshness = _mergeDicts(c.get("freshness") for c in route_contracts)
         acceptance_criteria = _buildAcceptanceCriteria(
             route_contracts,
             required_evidence=required_evidence,
             artifact_policy=artifact_policy,
             visual_policy=visual_policy,
         )
-        failure_policy = _merge_dicts(c.get("failurePolicy") for c in route_contracts) or {
+        failure_policy = _mergeDicts(c.get("failurePolicy") for c in route_contracts) or {
             "onMissingEvidence": "repair_once",
             "onUnsupportedClaim": "disclose_or_repair",
         }
@@ -1740,7 +1740,7 @@ def _buildAcceptanceCriteria(
     visual_policy: dict[str, Any],
 ) -> dict[str, Any]:
     """Derive process acceptance criteria from contract metadata only."""
-    out = _merge_dicts(c.get("acceptanceCriteria") for c in contracts)
+    out = _mergeDicts(c.get("acceptanceCriteria") for c in contracts)
     if required_evidence:
         out.setdefault("requiredEvidence", list(required_evidence))
     if artifact_policy.get("primaryCsv"):
@@ -1762,7 +1762,7 @@ def _unique(values: Any) -> list[str]:
     return out
 
 
-def _merge_dicts(values: Any) -> dict[str, Any]:
+def _mergeDicts(values: Any) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for value in values:
         if isinstance(value, dict):

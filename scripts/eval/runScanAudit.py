@@ -114,8 +114,8 @@ def audit_one(axis: str) -> dict:
     # 수치 컬럼 기초통계
     numeric_summary = {}
     for col in columns:
-        dtype_str = str(result[col].dtype)
-        if any(t in dtype_str for t in ["Float", "Int", "UInt"]):
+        dtypeStr = str(result[col].dtype)
+        if any(t in dtypeStr for t in ["Float", "Int", "UInt"]):
             try:
                 series = result[col].drop_nulls()
                 if series.len() > 0:

@@ -246,18 +246,18 @@ def main() -> int:
         keep="first",
     )
 
-    stock_codes = sorted(df["stockCode"].unique().to_list())
-    print(f"  unique stockCodes: {len(stock_codes)}", flush=True)
+    stockCodes = sorted(df["stockCode"].unique().to_list())
+    print(f"  unique stockCodes: {len(stockCodes)}", flush=True)
 
     companies = {}
     t1 = time.time()
-    for i, code in enumerate(stock_codes, 1):
+    for i, code in enumerate(stockCodes, 1):
         data = _extract_annual(df, code)
         if data:
             companies[code] = data
         if i % 500 == 0:
             rate = i / (time.time() - t1)
-            print(f"  [{i}/{len(stock_codes)}] {rate:.0f}/s", flush=True)
+            print(f"  [{i}/{len(stockCodes)}] {rate:.0f}/s", flush=True)
 
     output = {
         "version": "v16",

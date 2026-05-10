@@ -290,12 +290,12 @@ out()
 from dartlab.macro.yieldCurve import nelsonSiegel
 
 maturities = [1, 2, 3, 5, 7, 10, 20, 30]
-series_ids = ["DGS1", "DGS2", "DGS3", "DGS5", "DGS7", "DGS10", "DGS20", "DGS30"]
+seriesIds = ["DGS1", "DGS2", "DGS3", "DGS5", "DGS7", "DGS10", "DGS20", "DGS30"]
 yields_list, valid_mats = [], []
-for mat, sid in zip(maturities, series_ids):
-    from dartlab.macro._helpers import fetch_latest
+for mat, sid in zip(maturities, seriesIds):
+    from dartlab.macro._helpers import fetchLatest
 
-    val = fetch_latest(g, sid)
+    val = fetchLatest(g, sid)
     if val is not None:
         yields_list.append(val)
         valid_mats.append(mat)
@@ -310,7 +310,7 @@ out()
 # ── FCI 현재 ──
 out("### 2.7 FCI 현재 상태")
 out()
-from dartlab.macro._helpers import fetch_series_list
+from dartlab.macro._helpers import fetchSeriesList
 from dartlab.macro.fci import calcFCI
 
 fci_vars = {}
@@ -322,7 +322,7 @@ sid_map = {
     "fx": "DTWEXBGS",
 }
 for key, sid in sid_map.items():
-    series = fetch_series_list(g, sid)
+    series = fetchSeriesList(g, sid)
     if series:
         fci_vars[key] = series
 

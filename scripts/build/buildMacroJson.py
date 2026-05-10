@@ -101,9 +101,9 @@ SECTOR_SENSITIVITY = {
 def _analyze_market(market: str) -> dict:
     """classifyCycle for market. 실패 시 기본값."""
     try:
-        from dartlab.macro.cycle import analyze_cycle
+        from dartlab.macro.cycle import analyzeCycle
 
-        result = analyze_cycle(market=market)
+        result = analyzeCycle(market=market)
         # 시계열은 제거 (용량 축소)
         result.pop("timeseries", None)
         return result

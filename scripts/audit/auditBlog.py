@@ -71,14 +71,14 @@ def is_internal_link(target: str) -> bool:
     return target.startswith(("/blog/", "/docs/", "/", "./", "../"))
 
 
-def _compute_top_repeated(blog_root: Path, top_n: int = 20) -> set[str]:
+def _compute_top_repeated(blog_root: Path, topN: int = 20) -> set[str]:
     """Pre-scan all posts to find the top-N most repeated H2 headings."""
     counter: Counter[str] = Counter()
     for file in sorted(blog_root.glob(POST_GLOB)):
         raw = file.read_text(encoding="utf-8")
         body = strip_frontmatter(raw)
         counter.update(h.strip() for h in re.findall(r"^##\s+(.+)$", body, re.M))
-    return {heading for heading, _ in counter.most_common(top_n)}
+    return {heading for heading, _ in counter.most_common(topN)}
 
 
 def audit_posts(blog_root: Path) -> list[PostAudit]:

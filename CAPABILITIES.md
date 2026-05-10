@@ -24,7 +24,7 @@
 | `collect` | function | 지정 종목 DART 데이터 수집 (OpenAPI). |
 | `collectAll` | function | 전체 상장종목 DART 데이터 일괄 수집. |
 | `downloadAll` | function | HuggingFace에서 전체 시장 데이터 다운로드. |
-| `scan` | function | 시장 전체 횡단분석 통합 엔트리포인트. |
+| `scan` | function | 시장 전체 횡단분석 통합 엔트리포인트 — L1.5 횡단 엔진. |
 | `analysis` | module | Analysis 엔진 — L2 분석 모듈 통합. |
 | `gather` | function | 외부 시장 데이터 통합 수집 — 8축, 전부 Polars DataFrame. |
 | `quant` | function | 종목 레벨 정량분석 엔진 — 31축 7그룹. |

@@ -63,25 +63,25 @@ SCENARIOS = [
 def runOne(scenario: dict) -> dict:
     t0 = time.time()
     chunks: list[str] = []
-    tool_calls: list[tuple[str, dict]] = []
+    toolCalls: list[tuple[str, dict]] = []
 
     for ev in runAsk(scenario["question"], stockCode=scenario.get("stockCode")):
         if ev.kind == "chunk":
             chunks.append(ev.data["text"])
         elif ev.kind == "tool_call":
             tc = ev.data
-            tool_calls.append((tc.get("name", ""), tc.get("arguments", {})))
+            toolCalls.append((tc.get("name", ""), tc.get("arguments", {})))
 
     elapsed = time.time() - t0
     answer = "".join(chunks)
 
-    names = [n for n, _ in tool_calls]
+    names = [n for n, _ in toolCalls]
     counter = Counter(names)
 
     # override 재호출 — 같은 tool 이 두 번 이상 + 한 번은 overrides 인자
     override_retry = False
     for name in set(names):
-        calls = [a for n, a in tool_calls if n == name]
+        calls = [a for n, a in toolCalls if n == name]
         if len(calls) >= 2:
             with_ov = sum(1 for a in calls if a.get("overrides"))
             if with_ov >= 1:
@@ -98,7 +98,7 @@ def runOne(scenario: dict) -> dict:
         "question": scenario["question"],
         "elapsed_sec": round(elapsed, 1),
         "answer_chars": len(answer),
-        "tool_total": len(tool_calls),
+        "tool_total": len(toolCalls),
         "unique_tools": sorted(set(names)),
         "tool_counts": dict(counter),
         "override_retry": override_retry,
@@ -109,7 +109,7 @@ def runOne(scenario: dict) -> dict:
         "expect": scenario["expect"],
         "answer_head": answer[:500],
         "answer_tail": answer[-500:] if len(answer) > 500 else "",
-        "tool_trace": [{"name": n, "args": {k: v for k, v in a.items() if k != "code"}} for n, a in tool_calls],
+        "tool_trace": [{"name": n, "args": {k: v for k, v in a.items() if k != "code"}} for n, a in toolCalls],
     }
 
 

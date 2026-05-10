@@ -262,18 +262,18 @@ def main() -> int:
         print(f"\n결과 저장: {args.out.relative_to(ROOT) if args.out.is_relative_to(ROOT) else args.out}")
 
     # Gate 판정
-    exit_code = 0
+    exitCode = 0
     if args.min > 0:
         failed = [s for s in stats if s.avg_ratio < args.min]
         if failed:
             print(f"\n[FAIL] {len(failed)} 엔진이 게이트 ({args.min:.1f}%) 미달:")
             for s in failed:
                 print(f"  {s.engine}: {s.avg_ratio:.1f}%")
-            exit_code = 1
+            exitCode = 1
         else:
             print(f"\n[PASS] 전 엔진 게이트 ({args.min:.1f}%) 통과")
 
-    return exit_code
+    return exitCode
 
 
 if __name__ == "__main__":

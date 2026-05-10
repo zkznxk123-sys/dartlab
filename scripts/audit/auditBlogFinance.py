@@ -156,10 +156,10 @@ def auditPost(code: str, path: str):
         unit = detectUnit(t.get("unitHint", "") + " " + t["table"])
 
         # build actual lookup: {label: {year: value}}
-        label_col = "항목" if "항목" in df.columns else df.columns[0]
+        labelCol = "항목" if "항목" in df.columns else df.columns[0]
         actual = {}
         for r in df.to_dicts():
-            lbl = r.get(label_col)
+            lbl = r.get(labelCol)
             actual[lbl] = {k: v for k, v in r.items() if k.isdigit() and len(k) == 4}
 
         for label, year_values in rows:
