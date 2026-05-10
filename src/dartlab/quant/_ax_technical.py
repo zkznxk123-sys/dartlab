@@ -65,7 +65,7 @@ def calcIndicators(stockCode: str, **kwargs: Any) -> Any:
     ohlcv, err = _getOhlcv(stockCode, **kwargs)
     if err:
         return err
-    from dartlab.quant.analyzer import enrichWithIndicators
+    from dartlab.quant.signal.analyzer import enrichWithIndicators
 
     return enrichWithIndicators(ohlcv)
 
@@ -145,7 +145,7 @@ def calcVerdict(stockCode: str, **kwargs: Any) -> dict:
     if err:
         return err
     from dartlab.quant._helpers import resolve_market
-    from dartlab.quant.analyzer import technicalVerdict
+    from dartlab.quant.signal.analyzer import technicalVerdict
 
     market = resolve_market(stockCode, kwargs.pop("market", "auto"))
     return technicalVerdict(

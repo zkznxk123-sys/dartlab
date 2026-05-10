@@ -12,7 +12,7 @@ import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.gather import indicators as ind
-from dartlab.quant import signals as sig
+from dartlab.quant.signal import generator as sig
 
 
 def enrichWithIndicators(df: pl.DataFrame) -> pl.DataFrame:

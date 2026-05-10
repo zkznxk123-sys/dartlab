@@ -48,7 +48,7 @@ from datetime import date as Date
 
 import numpy as np
 
-from dartlab.quant.flowAnalysis import calcFlow
+from dartlab.quant.signal.flow import calcFlow
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays, getStockCode, isKr

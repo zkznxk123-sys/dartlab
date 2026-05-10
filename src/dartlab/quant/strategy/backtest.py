@@ -331,7 +331,7 @@ def _buildStopSeries(close, high, low, stopSpec) -> np.ndarray:
     method = stopSpec.get("method", "atr")
     kw = stopSpec.get("kwargs", {})
     if method == "atr":
-        from dartlab.quant.signals import vAtrTrailingStop
+        from dartlab.quant.signal.generator import vAtrTrailingStop
 
         k = kw.get("k", 3.0)
         period = kw.get("period", 14)

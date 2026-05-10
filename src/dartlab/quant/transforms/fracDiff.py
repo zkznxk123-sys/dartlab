@@ -138,7 +138,7 @@ def findMinDForStationarity(
             results : list[dict] — 각 d 의 ADF stat, p-value, corr
             recommendation : str
     """
-    from dartlab.quant.pairsTrading import _adfTest
+    from dartlab.quant.signal.pairsTrading import _adfTest
 
     results = []
     optimal = None

@@ -26,7 +26,7 @@ from typing import Any
 
 import polars as pl
 
-from dartlab.quant.analyzer import enrichWithIndicators, technicalVerdict
+from dartlab.quant.signal.analyzer import enrichWithIndicators, technicalVerdict
 
 __all__ = ["Quant", "enrichWithIndicators", "technicalVerdict"]
 
@@ -76,7 +76,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="technical",
     ),
     "momentum": _AxisEntry(
-        module="dartlab.quant.momentum",
+        module="dartlab.quant.signal.momentum",
         fn="calcMomentum",
         label="모멘텀",
         description="12-1개월 횡단면, 시계열 모멘텀, 52주 신고가 비율",
@@ -182,7 +182,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="microstructure",
     ),
     "flow": _AxisEntry(
-        module="dartlab.quant.flowAnalysis",
+        module="dartlab.quant.signal.flow",
         fn="calcFlow",
         label="수급",
         description="기관/외국인 매매 분석 (KR전용)",
@@ -190,7 +190,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="microstructure",
     ),
     "volume": _AxisEntry(
-        module="dartlab.quant.volumeAnalysis",
+        module="dartlab.quant.signal.volume",
         fn="calcVolume",
         label="거래량",
         description="OBV 추세, 거래량-가격 괴리, 누적분배",
@@ -223,7 +223,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="fundamental",
     ),
     "earnings": _AxisEntry(
-        module="dartlab.quant.earningsMomentum",
+        module="dartlab.quant.signal.earningsMomentum",
         fn="calcEarnings",
         label="이익모멘텀",
         description="SUE, PEAD, 이익 수정 모멘텀",
@@ -248,7 +248,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="text",
     ),
     "eventSignal": _AxisEntry(
-        module="dartlab.quant.eventSignal",
+        module="dartlab.quant.signal.event",
         fn="calcEventSignal",
         label="이벤트신호",
         description="allFilings 이벤트 기반 신호 (경영진변경, M&A 등)",

@@ -39,7 +39,7 @@ jobs:
           uv run python -X utf8 -c "
           import logging; logging.basicConfig(level=logging.WARNING)
           import warnings; warnings.filterwarnings('ignore')
-          from dartlab.quant.analyzer import _categoryEdgeAudit
+          from dartlab.quant.signal.analyzer import _categoryEdgeAudit
 
           codes = ['005930','000660','005380','035720','068270']
           results = {}

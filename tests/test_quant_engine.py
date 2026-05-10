@@ -17,7 +17,7 @@ pytestmark = pytest.mark.unit
 # ── imports ──
 
 from dartlab.gather.indicators import vatr, vbollinger, vema, vmacd, vrsi, vsma
-from dartlab.quant.signals import vcross, vcrossover, vcrossunder, vgoldenCross, vrsiSignal
+from dartlab.quant.signal.generator import vcross, vcrossover, vcrossunder, vgoldenCross, vrsiSignal
 
 # ── helpers: synthetic OHLCV ──
 
@@ -278,7 +278,7 @@ class TestTechnicalVerdict:
 
     @patch("dartlab.quant.analyzer._fetchBenchmark", return_value=None)
     def test_uptrend_verdict(self, mock_bench):
-        from dartlab.quant.analyzer import technicalVerdict
+        from dartlab.quant.signal.analyzer import technicalVerdict
 
         close = _uptrend(200)
         df = self._make_df(close)
@@ -289,7 +289,7 @@ class TestTechnicalVerdict:
 
     @patch("dartlab.quant.analyzer._fetchBenchmark", return_value=None)
     def test_downtrend_verdict(self, mock_bench):
-        from dartlab.quant.analyzer import technicalVerdict
+        from dartlab.quant.signal.analyzer import technicalVerdict
 
         close = _downtrend(200)
         df = self._make_df(close)
@@ -299,7 +299,7 @@ class TestTechnicalVerdict:
 
     @patch("dartlab.quant.analyzer._fetchBenchmark", return_value=None)
     def test_verdict_has_required_keys(self, mock_bench):
-        from dartlab.quant.analyzer import technicalVerdict
+        from dartlab.quant.signal.analyzer import technicalVerdict
 
         close = _sideways(200)
         df = self._make_df(close)
@@ -309,7 +309,7 @@ class TestTechnicalVerdict:
 
     @patch("dartlab.quant.analyzer._fetchBenchmark", return_value=None)
     def test_score_range(self, mock_bench):
-        from dartlab.quant.analyzer import technicalVerdict
+        from dartlab.quant.signal.analyzer import technicalVerdict
 
         close = _sideways(200)
         df = self._make_df(close)
@@ -318,7 +318,7 @@ class TestTechnicalVerdict:
 
     @patch("dartlab.quant.analyzer._fetchBenchmark", return_value=None)
     def test_signals_dict_structure(self, mock_bench):
-        from dartlab.quant.analyzer import technicalVerdict
+        from dartlab.quant.signal.analyzer import technicalVerdict
 
         close = _uptrend(200)
         df = self._make_df(close)

@@ -126,7 +126,7 @@ def calcTechnicalVerdict(company) -> dict | None:
     if isEmptyDf(ohlcv) or len(ohlcv) < 30:
         return None
 
-    from dartlab.quant.analyzer import technicalVerdict
+    from dartlab.quant.signal.analyzer import technicalVerdict
 
     verdict = technicalVerdict(
         ohlcv,
@@ -226,7 +226,7 @@ def calcMarketBeta(company) -> dict | None:
     if isEmptyDf(benchmark):
         return None
 
-    from dartlab.quant.analyzer import _calcBeta, _relativeStrength
+    from dartlab.quant.signal.analyzer import _calcBeta, _relativeStrength
 
     beta_data = _calcBeta(ohlcv, benchmark)
     if beta_data is None:
@@ -269,7 +269,7 @@ def calcFundamentalDivergence(company, *, basePeriod: str | None = None) -> dict
     Returns:
         dict — financialGrade, technicalVerdict, divergence, diagnosis, matrix.
     """
-    from dartlab.quant.analyzer import technicalVerdict
+    from dartlab.quant.signal.analyzer import technicalVerdict
 
     # 재무 등급: Company._cache에서 읽기 (analysis가 이미 계산했다면 재사용).
     # analysis를 직접 import하지 않는다 (L2↔L2 금지).
@@ -408,7 +408,7 @@ def calcMarketAnalysisFlags(company) -> list[str]:
     Returns:
         list[str] — 경고/기회 플래그 문자열 목록.
     """
-    from dartlab.quant.analyzer import technicalVerdict
+    from dartlab.quant.signal.analyzer import technicalVerdict
 
     flags: list[str] = []
 

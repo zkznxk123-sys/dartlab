@@ -382,7 +382,7 @@ def phase2b_alphas():
 
 def phase2b_eventStudy():
     """Event study 가짜 시계열 검증."""
-    from dartlab.quant.eventStudy import calcBHAR, calcCAR
+    from dartlab.quant.signal.eventStudy import calcBHAR, calcCAR
 
     def _check():
         rng = np.random.default_rng(42)

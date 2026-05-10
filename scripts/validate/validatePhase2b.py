@@ -72,7 +72,7 @@ def main():
             r = fn(market="KR")
         elif ALPHA == "eventStudy":
             import numpy as np
-            from dartlab.quant.eventStudy import calcCAR
+            from dartlab.quant.signal.eventStudy import calcCAR
             rng = np.random.default_rng(42)
             n = 250
             s = rng.standard_normal(n) * 0.015
