@@ -52,7 +52,7 @@ class _AxisEntry:
 
 _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     "indicators": _AxisEntry(
-        module="dartlab.quant._ax_technical",
+        module="dartlab.quant.screen.axTechnical",
         fn="calcIndicators",
         label="지표",
         description="45개 기술적 지표 DataFrame (SMA, EMA, MACD, RSI, BB 등)",
@@ -60,7 +60,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="technical",
     ),
     "signals": _AxisEntry(
-        module="dartlab.quant._ax_technical",
+        module="dartlab.quant.screen.axTechnical",
         fn="calcSignals",
         label="신호",
         description="최근 매매 신호 이벤트 (골든크로스, RSI, MACD, 볼린저)",
@@ -68,7 +68,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="technical",
     ),
     "verdict": _AxisEntry(
-        module="dartlab.quant._ax_technical",
+        module="dartlab.quant.screen.axTechnical",
         fn="calcVerdict",
         label="판단",
         description="종합 기술적 판단 (강세/중립/약세) + RSI/SMA/BB",
@@ -133,7 +133,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── B: 리스크 (risk) — 가격 + 벤치마크 ────────────────
     "beta": _AxisEntry(
-        module="dartlab.quant._ax_technical",
+        module="dartlab.quant.screen.axTechnical",
         fn="calcBeta",
         label="베타",
         description="시장/섹터/스타일 벤치마크 선택형 베타 + CAPM + 알파 + R²",
@@ -165,7 +165,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="risk",
     ),
     "residual": _AxisEntry(
-        module="dartlab.quant.residual",
+        module="dartlab.quant.factor.residual",
         fn="calcResidual",
         label="잔여수익",
         description="팩터 제거 후 잔여 모멘텀/알파",
@@ -174,7 +174,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── C: 미시구조 (microstructure) — 가격 + 거래량/수급 ─
     "liquidity": _AxisEntry(
-        module="dartlab.quant.microstructure",
+        module="dartlab.quant.risk.microstructure",
         fn="calcLiquidity",
         label="유동성",
         description="Amihud 비유동성, Roll 스프레드, 회전율",
@@ -199,7 +199,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── D: 펀더멘털 퀀트 (fundamental) — scan 프리빌드 ────
     "divergence": _AxisEntry(
-        module="dartlab.quant._ax_technical",
+        module="dartlab.quant.screen.axTechnical",
         fn="calcDivergence",
         label="괴리",
         description="재무-기술적 괴리 진단",
@@ -282,7 +282,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         stockRequired=False,
     ),
     "pairs": _AxisEntry(
-        module="dartlab.quant.pairsTrading",
+        module="dartlab.quant.signal.pairsTrading",
         fn="calcPairs",
         label="페어",
         description="공적분 기반 페어 트레이딩 후보 탐색",
@@ -291,7 +291,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         stockRequired=False,
     ),
     "screen": _AxisEntry(
-        module="dartlab.quant.screening",
+        module="dartlab.quant.screen.preset",
         fn="calcScreen",
         label="스크린",
         description="팩터 스크리닝 프리셋 (가치/모멘텀/퀄리티/저변동)",
@@ -411,7 +411,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── H: Strategy DSL (사용자 컨트롤 boolean rule + 백테스트 + 검증) ────
     "strategy": _AxisEntry(
-        module="dartlab.quant._ax_strategy",
+        module="dartlab.quant.screen.axStrategy",
         fn="runStrategy",
         label="전략",
         description="사용자 정의 boolean rule 백테스트 (Rule + sizing + stop)",
@@ -419,7 +419,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="strategy",
     ),
     "backtest": _AxisEntry(
-        module="dartlab.quant._ax_strategy",
+        module="dartlab.quant.screen.axStrategy",
         fn="runBacktest",
         label="백테스트",
         description="스타일명 또는 Rule 백테스트 (cpcv 옵션)",
@@ -427,7 +427,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="strategy",
     ),
     "style": _AxisEntry(
-        module="dartlab.quant._ax_strategy",
+        module="dartlab.quant.screen.axStrategy",
         fn="runStyle",
         label="스타일",
         description="8 검증된 스타일 프리셋 일괄/단일 백테스트 (시총 의존 0)",
@@ -436,7 +436,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         stockRequired=False,  # name 없이 호출 시 카탈로그
     ),
     "entry": _AxisEntry(
-        module="dartlab.quant._ax_strategy",
+        module="dartlab.quant.screen.axStrategy",
         fn="runEntry",
         label="진입진단",
         description="현재 시점 진입/청산/스톱 진단 (백테스트 안 돌림)",
@@ -444,7 +444,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="strategy",
     ),
     "walkforward": _AxisEntry(
-        module="dartlab.quant._ax_strategy",
+        module="dartlab.quant.screen.axStrategy",
         fn="runWalkforward",
         label="워크포워드",
         description="Lopez de Prado 슬라이딩 OOS Sharpe + DSR + PBO",
@@ -452,7 +452,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="strategy",
     ),
     "multi": _AxisEntry(
-        module="dartlab.quant._ax_strategy",
+        module="dartlab.quant.screen.axStrategy",
         fn="runMultiAsset",
         label="멀티자산",
         description="멀티 종목 포트폴리오 백테스트 (equal/inv_vol/risk_parity 가중)",
@@ -882,9 +882,9 @@ class Quant:
 
         ``runScanBacktest`` 를 ``dartlab.quant`` attribute 로 노출. axis 미등록 —
         registry dispatcher 의 ``fn(stockCode, **kw)`` 계약과 시그니처가 어긋나기 때문.
-        세부 시그니처는 ``dartlab.quant.scanBacktest.runScanBacktest`` 참고.
+        세부 시그니처는 ``dartlab.quant.screen.scanBacktest.runScanBacktest`` 참고.
         """
-        from dartlab.quant.scanBacktest import runScanBacktest
+        from dartlab.quant.screen.scanBacktest import runScanBacktest
 
         return runScanBacktest(scanResult, **kwargs)
 
@@ -908,4 +908,4 @@ class Quant:
 
 # scanBacktest top-level helper — 서브모듈과 같은 이름이라 module attribute 를
 # 함수 binding 으로 덮어쓰기 (dl.quant.scanBacktest(scanResult, ...) 호출 가능).
-from dartlab.quant.scanBacktest import runScanBacktest as scanBacktest  # noqa: E402, F401
+from dartlab.quant.screen.scanBacktest import runScanBacktest as scanBacktest  # noqa: E402, F401

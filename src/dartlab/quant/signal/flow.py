@@ -9,7 +9,7 @@ import logging
 
 import numpy as np
 
-from dartlab.quant._helpers import resolve_market
+from dartlab.quant.screen.dataAccess import resolve_market
 
 log = logging.getLogger(__name__)
 

@@ -14,7 +14,7 @@ import logging
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 # ── 공분산 추정 ──────────────────────────────────────────
 

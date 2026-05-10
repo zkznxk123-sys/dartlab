@@ -20,7 +20,7 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import STOCK_CODE_COLUMNS
+from dartlab.quant.screen.dataAccess import STOCK_CODE_COLUMNS
 from dartlab.quant.strategy.backtest import (
     DEFAULT_FEE_BPS,
     DEFAULT_SLIP_BPS,
@@ -86,7 +86,7 @@ def _ruleFromSignalFn(signalFn: Callable[[np.ndarray], np.ndarray]) -> Callable[
     signalFn 은 종목별 close 시계열을 받아 길이 N 의 boolean 배열 (True=long position) 을
     반환. exit 은 entry 의 보수적 끝점 (entry False 가 첫 등장하는 시점) 으로 자동 산출.
     """
-    from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays
+    from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
     def _empty(n: int) -> Rule:
         return Rule(
@@ -196,7 +196,7 @@ def runScanBacktest(
     - scanContext.scanResultHash 는 입력 DataFrame 의 head(topN) 에 대한 결정적 SHA-1.
       같은 universe → 같은 hash. 사용자가 다른 sort/filter 적용 → 다른 hash.
     - signalFn 우선. 둘 다 미지정 시 ValueError.
-    - axis 미등록 — ``dartlab.quant("scanBacktest", ...)`` 호출 X. ``dartlab.quant.scanBacktest(...)``
+    - axis 미등록 — ``dartlab.quant("scanBacktest", ...)`` 호출 X. ``dartlab.quant.screen.scanBacktest(...)``
       attribute 호출만 지원.
     """
     if isEmptyDf(scanResult):

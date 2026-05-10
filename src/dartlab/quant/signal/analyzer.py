@@ -580,7 +580,7 @@ def _categoryEdgeAudit(
     """
     import math
 
-    from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays
+    from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
     cat_fn = {
         "trend": _categoryTrend,

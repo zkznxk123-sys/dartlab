@@ -19,8 +19,8 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant._helpers import extractAccount, loadScanParquet
 from dartlab.quant.factor.build import _latestYear
+from dartlab.quant.screen.dataAccess import extractAccount, loadScanParquet
 
 log = logging.getLogger(__name__)
 

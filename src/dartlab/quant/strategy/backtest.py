@@ -575,7 +575,7 @@ def multiAssetBacktest(
     """
     from dataclasses import dataclass
 
-    from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays
+    from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
     if not stockCodes:
         return BacktestResult(status="error", reason="empty stock_codes", style=style)

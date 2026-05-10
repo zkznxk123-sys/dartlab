@@ -91,7 +91,7 @@ def ohlcv_short():
 
 class TestCalcTechnicalSignals:
     def test_returns_signals(self, ohlcv_up):
-        from dartlab.quant.extended import calcTechnicalSignals
+        from dartlab.quant.screen.extended import calcTechnicalSignals
 
         co = _make_mock_company(ohlcv_up)
         result = calcTechnicalSignals(co)
@@ -101,7 +101,7 @@ class TestCalcTechnicalSignals:
         assert "recentEvents" in result
 
     def test_signal_keys(self, ohlcv_up):
-        from dartlab.quant.extended import calcTechnicalSignals
+        from dartlab.quant.screen.extended import calcTechnicalSignals
 
         co = _make_mock_company(ohlcv_up)
         result = calcTechnicalSignals(co)
@@ -112,7 +112,7 @@ class TestCalcTechnicalSignals:
         assert "bollingerSignal" in sigs
 
     def test_signal_summary_structure(self, ohlcv_up):
-        from dartlab.quant.extended import calcTechnicalSignals
+        from dartlab.quant.screen.extended import calcTechnicalSignals
 
         co = _make_mock_company(ohlcv_up)
         result = calcTechnicalSignals(co)
@@ -123,21 +123,21 @@ class TestCalcTechnicalSignals:
         assert isinstance(summary["bearish"], int)
 
     def test_returns_none_when_short(self, ohlcv_short):
-        from dartlab.quant.extended import calcTechnicalSignals
+        from dartlab.quant.screen.extended import calcTechnicalSignals
 
         co = _make_mock_company(ohlcv_short)
         result = calcTechnicalSignals(co)
         assert result is None
 
     def test_returns_none_when_no_data(self):
-        from dartlab.quant.extended import calcTechnicalSignals
+        from dartlab.quant.screen.extended import calcTechnicalSignals
 
         co = _make_mock_company(None)
         result = calcTechnicalSignals(co)
         assert result is None
 
     def test_recent_events_format(self, ohlcv_up):
-        from dartlab.quant.extended import calcTechnicalSignals
+        from dartlab.quant.screen.extended import calcTechnicalSignals
 
         co = _make_mock_company(ohlcv_up)
         result = calcTechnicalSignals(co)
@@ -155,22 +155,22 @@ class TestCalcTechnicalSignals:
 
 class TestCalcMarketBeta:
     def test_returns_none_when_no_data(self):
-        from dartlab.quant.extended import calcMarketBeta
+        from dartlab.quant.screen.extended import calcMarketBeta
 
         co = _make_mock_company(None)
         result = calcMarketBeta(co)
         assert result is None
 
     def test_returns_none_when_short(self, ohlcv_short):
-        from dartlab.quant.extended import calcMarketBeta
+        from dartlab.quant.screen.extended import calcMarketBeta
 
         co = _make_mock_company(ohlcv_short)
         result = calcMarketBeta(co)
         assert result is None
 
-    @patch("dartlab.quant.extended._fetchBenchmarkForCompany")
+    @patch("dartlab.quant.screen.extended._fetchBenchmarkForCompany")
     def test_returns_beta_with_benchmark(self, mock_bench, ohlcv_up):
-        from dartlab.quant.extended import calcMarketBeta
+        from dartlab.quant.screen.extended import calcMarketBeta
 
         benchmark = _make_ohlcv(200, "up")
         mock_bench.return_value = benchmark
@@ -182,9 +182,9 @@ class TestCalcMarketBeta:
             assert "interpretation" in result
             assert isinstance(result["value"], float)
 
-    @patch("dartlab.quant.extended._fetchBenchmarkForCompany")
+    @patch("dartlab.quant.screen.extended._fetchBenchmarkForCompany")
     def test_returns_none_when_no_benchmark(self, mock_bench, ohlcv_up):
-        from dartlab.quant.extended import calcMarketBeta
+        from dartlab.quant.screen.extended import calcMarketBeta
 
         mock_bench.return_value = None
         co = _make_mock_company(ohlcv_up)
@@ -201,15 +201,15 @@ class TestCalcFundamentalDivergence:
     def test_returns_none_when_no_data(self):
         co = _make_mock_company(None)
         # No OHLCV, no financial grade → None
-        with patch("dartlab.quant.extended.calcFundamentalDivergence") as mock_fn:
+        with patch("dartlab.quant.screen.extended.calcFundamentalDivergence") as mock_fn:
             mock_fn.return_value = None
             result = mock_fn(co)
             assert result is None
 
-    @patch("dartlab.quant.extended._fetchOHLCV")
+    @patch("dartlab.quant.screen.extended._fetchOHLCV")
     @patch("dartlab.analysis.financial.scorecard.calcScorecard")
     def test_with_mock_scorecard(self, mock_sc, mock_ohlcv, ohlcv_up):
-        from dartlab.quant.extended import calcFundamentalDivergence
+        from dartlab.quant.screen.extended import calcFundamentalDivergence
 
         mock_ohlcv.return_value = ohlcv_up
         mock_sc.return_value = {"overallGrade": "A"}
@@ -223,7 +223,7 @@ class TestCalcFundamentalDivergence:
             assert "matrix" in result
 
     def test_returns_none_when_both_absent(self):
-        from dartlab.quant.extended import calcFundamentalDivergence
+        from dartlab.quant.screen.extended import calcFundamentalDivergence
 
         co = _make_mock_company(None)
         # Mock scorecard to return None
@@ -239,22 +239,22 @@ class TestCalcFundamentalDivergence:
 
 class TestCalcMarketRisk:
     def test_returns_none_when_no_data(self):
-        from dartlab.quant.extended import calcMarketRisk
+        from dartlab.quant.screen.extended import calcMarketRisk
 
         co = _make_mock_company(None)
         result = calcMarketRisk(co)
         assert result is None
 
     def test_returns_none_when_short(self, ohlcv_short):
-        from dartlab.quant.extended import calcMarketRisk
+        from dartlab.quant.screen.extended import calcMarketRisk
 
         co = _make_mock_company(ohlcv_short)
         result = calcMarketRisk(co)
         assert result is None
 
-    @patch("dartlab.quant.extended.calcMarketBeta")
+    @patch("dartlab.quant.screen.extended.calcMarketBeta")
     def test_returns_risk_metrics(self, mock_beta, ohlcv_up):
-        from dartlab.quant.extended import calcMarketRisk
+        from dartlab.quant.screen.extended import calcMarketRisk
 
         mock_beta.return_value = {"value": 1.2, "relativeStrength": 0.05}
         co = _make_mock_company(ohlcv_up)
@@ -266,9 +266,9 @@ class TestCalcMarketRisk:
         assert "price" in result
         assert result["price"] > 0
 
-    @patch("dartlab.quant.extended.calcMarketBeta")
+    @patch("dartlab.quant.screen.extended.calcMarketBeta")
     def test_volatility_grade_present(self, mock_beta, ohlcv_up):
-        from dartlab.quant.extended import calcMarketRisk
+        from dartlab.quant.screen.extended import calcMarketRisk
 
         mock_beta.return_value = None
         co = _make_mock_company(ohlcv_up)
@@ -284,16 +284,16 @@ class TestCalcMarketRisk:
 
 class TestCalcMarketAnalysisFlags:
     def test_returns_list_when_no_data(self):
-        from dartlab.quant.extended import calcMarketAnalysisFlags
+        from dartlab.quant.screen.extended import calcMarketAnalysisFlags
 
         co = _make_mock_company(None)
         result = calcMarketAnalysisFlags(co)
         assert isinstance(result, list)
         assert len(result) == 0
 
-    @patch("dartlab.quant.extended.calcMarketRisk")
+    @patch("dartlab.quant.screen.extended.calcMarketRisk")
     def test_returns_flags_with_data(self, mock_risk, ohlcv_up):
-        from dartlab.quant.extended import calcMarketAnalysisFlags
+        from dartlab.quant.screen.extended import calcMarketAnalysisFlags
 
         mock_risk.return_value = {"beta": 1.2, "atrPercent": 2.5}
         co = _make_mock_company(ohlcv_up)
@@ -302,9 +302,9 @@ class TestCalcMarketAnalysisFlags:
         # With 200 data points and an uptrend, we should get some flags
         assert all(isinstance(f, str) for f in result)
 
-    @patch("dartlab.quant.extended.calcMarketRisk")
+    @patch("dartlab.quant.screen.extended.calcMarketRisk")
     def test_high_beta_flag(self, mock_risk, ohlcv_up):
-        from dartlab.quant.extended import calcMarketAnalysisFlags
+        from dartlab.quant.screen.extended import calcMarketAnalysisFlags
 
         mock_risk.return_value = {"beta": 2.0, "atrPercent": 6.0}
         co = _make_mock_company(ohlcv_up)
@@ -322,14 +322,14 @@ class TestCalcMarketAnalysisFlags:
 
 class TestCalcTechnicalVerdict:
     def test_returns_none_when_no_data(self):
-        from dartlab.quant.extended import calcTechnicalVerdict
+        from dartlab.quant.screen.extended import calcTechnicalVerdict
 
         co = _make_mock_company(None)
         result = calcTechnicalVerdict(co)
         assert result is None
 
     def test_returns_none_when_short(self, ohlcv_short):
-        from dartlab.quant.extended import calcTechnicalVerdict
+        from dartlab.quant.screen.extended import calcTechnicalVerdict
 
         co = _make_mock_company(ohlcv_short)
         result = calcTechnicalVerdict(co)

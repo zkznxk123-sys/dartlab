@@ -11,7 +11,7 @@ import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import loadScanParquet
+from dartlab.quant.screen.dataAccess import loadScanParquet
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ def _screenPriceBased(preset: str, market: str, universe: list[str] | None = Non
     if not universe:
         return {**result, "error": "종목 풀 로드 실패", "stocks": []}
 
-    from dartlab.quant._helpers import fetchOhlcv
+    from dartlab.quant.screen.dataAccess import fetchOhlcv
 
     passed = []
     for code in universe:

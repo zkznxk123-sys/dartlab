@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetchOhlcv
+from dartlab.quant.screen.dataAccess import fetchOhlcv
 
 
 class _OHLCVWrapper:
@@ -104,8 +104,8 @@ def calcSignals(stockCode: str, **kwargs: Any) -> Any:
     ohlcv, err = _getOhlcv(stockCode, **kwargs)
     if err:
         return err
-    from dartlab.quant._helpers import resolve_market
-    from dartlab.quant.extended import calcTechnicalSignals
+    from dartlab.quant.screen.dataAccess import resolve_market
+    from dartlab.quant.screen.extended import calcTechnicalSignals
 
     market = resolve_market(stockCode, kwargs.pop("market", "auto"))
     wrapper = _OHLCVWrapper(stockCode, ohlcv, market)
@@ -144,7 +144,7 @@ def calcVerdict(stockCode: str, **kwargs: Any) -> dict:
     ohlcv, err = _getOhlcv(stockCode, **kwargs)
     if err:
         return err
-    from dartlab.quant._helpers import resolve_market
+    from dartlab.quant.screen.dataAccess import resolve_market
     from dartlab.quant.signal.analyzer import technicalVerdict
 
     market = resolve_market(stockCode, kwargs.pop("market", "auto"))
@@ -186,8 +186,8 @@ def calcBeta(stockCode: str, **kwargs: Any) -> dict:
     ohlcv, err = _getOhlcv(stockCode, **kwargs)
     if err:
         return err
-    from dartlab.quant._helpers import resolve_market
-    from dartlab.quant.extended import calcMarketBeta
+    from dartlab.quant.screen.dataAccess import resolve_market
+    from dartlab.quant.screen.extended import calcMarketBeta
 
     market = resolve_market(stockCode, kwargs.pop("market", "auto"))
     wrapper = _OHLCVWrapper(stockCode, ohlcv, market)
@@ -225,8 +225,8 @@ def calcDivergence(stockCode: str, **kwargs: Any) -> dict:
     ohlcv, err = _getOhlcv(stockCode, **kwargs)
     if err:
         return err
-    from dartlab.quant._helpers import resolve_market
-    from dartlab.quant.extended import calcFundamentalDivergence
+    from dartlab.quant.screen.dataAccess import resolve_market
+    from dartlab.quant.screen.extended import calcFundamentalDivergence
 
     market = resolve_market(stockCode, kwargs.pop("market", "auto"))
     wrapper = _OHLCVWrapper(stockCode, ohlcv, market)

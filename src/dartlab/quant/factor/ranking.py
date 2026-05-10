@@ -15,7 +15,7 @@ from dartlab.core.cross.scanBridge import (
     getAccountValue,
     isEdgarSchema,
 )
-from dartlab.quant._helpers import loadScanParquet
+from dartlab.quant.screen.dataAccess import loadScanParquet
 from dartlab.quant.strategy.metrics import pearsonCorr, spearmanCorr
 
 log = logging.getLogger(__name__)

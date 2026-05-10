@@ -125,8 +125,8 @@ def calcCreditHistory(company, *, basePeriod: str | None = None) -> dict | None:
     if result is None:
         return None
 
-    from dartlab.credit.scoring.creditScorecard import mapTo20Grade, scoreMetric
     from dartlab.credit.features.sectorThresholds import getThresholds
+    from dartlab.credit.scoring.creditScorecard import mapTo20Grade, scoreMetric
 
     history_data = result.get("metricsHistory", [])
     if not history_data:
@@ -538,8 +538,8 @@ def calcGradeImprovement(company, *, basePeriod: str | None = None) -> dict | No
     if not grade or not metrics:
         return None
 
-    from dartlab.credit.scoring.creditScorecard import mapTo20Grade, scoreMetric
     from dartlab.credit.features.sectorThresholds import getThresholds
+    from dartlab.credit.scoring.creditScorecard import mapTo20Grade, scoreMetric
 
     sector, ig = None, None
     try:

@@ -198,7 +198,7 @@ def _buildStrategiesDashboard(
 ) -> dict | None:
     """40개 투자전략 대시보드 — evaluateStrategies → signals list."""
     try:
-        from dartlab.quant.strategyRules import evaluateStrategies
+        from dartlab.quant.screen.strategyRules import evaluateStrategies
 
         signals = evaluateStrategies(
             {

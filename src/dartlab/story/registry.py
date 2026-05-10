@@ -447,7 +447,7 @@ def _buildStabilityBlocks(company, keys, basePeriod, safe: Callable, need: Calla
                 _LOG.debug("improvementLevers: %s", _e)
                 out["improvementLevers"] = []
     if need("marketRisk"):
-        from dartlab.quant.extended import calcMarketRisk
+        from dartlab.quant.screen.extended import calcMarketRisk
         from dartlab.story.builders import marketRiskBlock
 
         out["marketRisk"] = safe(lambda: marketRiskBlock(calcMarketRisk(company)))
@@ -1191,7 +1191,7 @@ def _buildQuantTechnicalBlocks(company, keys, basePeriod, safe: Callable, need: 
     if keys is not None and not (keys & (_CORE_KEYS | _NARRATIVE_KEYS | _ALPHA_KEYS)):
         return
 
-    from dartlab.quant.extended import (
+    from dartlab.quant.screen.extended import (
         calcCrosscheckData,
         calcFundamentalDivergence,
         calcMarketAnalysisFlags,
@@ -1426,7 +1426,7 @@ def _buildScenarioBlocks(company, keys, basePeriod, safe: Callable, need: Callab
                 lambda: gradeUpgradePathBlock(calcGradeImprovement(company, basePeriod=basePeriod))
             )
         if need("technicalActionTargets"):
-            from dartlab.quant.extended import calcActionableTargets
+            from dartlab.quant.screen.extended import calcActionableTargets
 
             out["technicalActionTargets"] = safe(lambda: technicalActionTargetsBlock(calcActionableTargets(company)))
         if need("cyclicalActionPlan"):

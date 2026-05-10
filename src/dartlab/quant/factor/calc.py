@@ -31,7 +31,7 @@ from typing import Any
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
 from dartlab.quant.strategy.metrics import TRADING_DAYS, calcIR, fundamentalLawIR
 
 log = logging.getLogger(__name__)
@@ -878,8 +878,8 @@ def calcFactorIC(
     try:
         from dartlab.core.cross.scanBridge import extractAnnualConsolidated
         from dartlab.gather._hfBulk import loadFiltered
-        from dartlab.quant._helpers import loadScanParquet
         from dartlab.quant.factor.build import _buildUniverseMetrics, _latestYear
+        from dartlab.quant.screen.dataAccess import loadScanParquet
     except Exception as exc:  # noqa: BLE001
         log.warning("calcFactorIC import 실패: %s", type(exc).__name__)
         return None

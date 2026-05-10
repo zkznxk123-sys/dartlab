@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
 
 
 def getArrays(company, *, start: str | None = None) -> dict:

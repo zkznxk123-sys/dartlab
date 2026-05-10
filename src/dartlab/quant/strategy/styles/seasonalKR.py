@@ -38,7 +38,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from dartlab.quant._helpers import tomMask
+from dartlab.quant.screen.dataAccess import tomMask
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays, isKr

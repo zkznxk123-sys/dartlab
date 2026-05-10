@@ -694,7 +694,7 @@ def calcStrategySnapshot(company) -> dict | None:
     if isEmptyDf(ohlcv) or len(ohlcv) < 60:
         return None
 
-    from dartlab.quant._ax_strategy import runEntry, runStyle
+    from dartlab.quant.screen.axStrategy import runEntry, runStyle
     from dartlab.quant.strategy.presets import STYLE_REGISTRY
 
     code = getattr(company, "stockCode", None) or getattr(company, "stock_code", None)

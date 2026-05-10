@@ -49,7 +49,7 @@ def patch_ohlcv(monkeypatch):
 
         _helpers = importlib.import_module("dartlab.quant._helpers")
         _backtest = importlib.import_module("dartlab.quant.strategy.backtest")
-        _scan_bt = importlib.import_module("dartlab.quant.scanBacktest")
+        _scan_bt = importlib.import_module("dartlab.quant.screen.scanBacktest")
 
         seeds_per_code = seeds_per_code or {}
 
@@ -80,25 +80,25 @@ def _make_scan_result(codes: list[str], extra_cols: dict[str, list] | None = Non
 
 class TestUniverseDetection:
     def test_detect_stockcode(self):
-        from dartlab.quant.scanBacktest import _detectStockCodeColumn
+        from dartlab.quant.screen.scanBacktest import _detectStockCodeColumn
 
         df = pl.DataFrame({"stockCode": ["005930"], "score": [1.0]})
         assert _detectStockCodeColumn(df) == "stockCode"
 
     def test_detect_korean_column(self):
-        from dartlab.quant.scanBacktest import _detectStockCodeColumn
+        from dartlab.quant.screen.scanBacktest import _detectStockCodeColumn
 
         df = pl.DataFrame({"종목코드": ["005930"], "score": [1.0]})
         assert _detectStockCodeColumn(df) == "종목코드"
 
     def test_detect_snake_case(self):
-        from dartlab.quant.scanBacktest import _detectStockCodeColumn
+        from dartlab.quant.screen.scanBacktest import _detectStockCodeColumn
 
         df = pl.DataFrame({"stock_code": ["005930"], "score": [1.0]})
         assert _detectStockCodeColumn(df) == "stock_code"
 
     def test_no_match_returns_none(self):
-        from dartlab.quant.scanBacktest import _detectStockCodeColumn
+        from dartlab.quant.screen.scanBacktest import _detectStockCodeColumn
 
         df = pl.DataFrame({"foo": ["bar"]})
         assert _detectStockCodeColumn(df) is None
@@ -111,21 +111,21 @@ class TestUniverseDetection:
 
 class TestHash:
     def test_deterministic(self):
-        from dartlab.quant.scanBacktest import _hashScanResult
+        from dartlab.quant.screen.scanBacktest import _hashScanResult
 
         df1 = pl.DataFrame({"stockCode": ["005930", "000660"], "score": [1.0, 2.0]})
         df2 = pl.DataFrame({"stockCode": ["005930", "000660"], "score": [1.0, 2.0]})
         assert _hashScanResult(df1, 5) == _hashScanResult(df2, 5)
 
     def test_different_universe_different_hash(self):
-        from dartlab.quant.scanBacktest import _hashScanResult
+        from dartlab.quant.screen.scanBacktest import _hashScanResult
 
         df1 = pl.DataFrame({"stockCode": ["005930", "000660"]})
         df2 = pl.DataFrame({"stockCode": ["005930", "035420"]})
         assert _hashScanResult(df1, 5) != _hashScanResult(df2, 5)
 
     def test_empty(self):
-        from dartlab.quant.scanBacktest import _hashScanResult
+        from dartlab.quant.screen.scanBacktest import _hashScanResult
 
         assert _hashScanResult(pl.DataFrame(), 5) == "empty"
 
@@ -137,14 +137,14 @@ class TestHash:
 
 class TestRunScanBacktest:
     def test_empty_scan_result_returns_error(self):
-        from dartlab.quant.scanBacktest import runScanBacktest
+        from dartlab.quant.screen.scanBacktest import runScanBacktest
 
         bt = runScanBacktest(pl.DataFrame(), style="trendFollow")
         assert bt.status == "error"
         assert "empty" in (bt.reason or "")
 
     def test_missing_signal_and_style_returns_error(self, patch_ohlcv):
-        from dartlab.quant.scanBacktest import runScanBacktest
+        from dartlab.quant.screen.scanBacktest import runScanBacktest
 
         patch_ohlcv()
         scan = _make_scan_result(["005930", "000660"])
@@ -152,14 +152,14 @@ class TestRunScanBacktest:
         assert bt.status == "error"
 
     def test_missing_universe_column_returns_error(self):
-        from dartlab.quant.scanBacktest import runScanBacktest
+        from dartlab.quant.screen.scanBacktest import runScanBacktest
 
         bt = runScanBacktest(pl.DataFrame({"foo": [1, 2]}), style="trendFollow")
         assert bt.status == "error"
         assert "universe" in (bt.reason or "")
 
     def test_unknown_style_raises(self, patch_ohlcv):
-        from dartlab.quant.scanBacktest import runScanBacktest
+        from dartlab.quant.screen.scanBacktest import runScanBacktest
 
         patch_ohlcv()
         scan = _make_scan_result(["005930", "000660"])
@@ -167,7 +167,7 @@ class TestRunScanBacktest:
             runScanBacktest(scan, style="unknownStyle")
 
     def test_signalfn_path(self, patch_ohlcv):
-        from dartlab.quant.scanBacktest import runScanBacktest
+        from dartlab.quant.screen.scanBacktest import runScanBacktest
 
         patch_ohlcv({"005930": 1, "000660": 2, "035420": 3})
 
@@ -187,7 +187,7 @@ class TestRunScanBacktest:
         assert bt.scanContext["scanResultHash"] != "empty"
 
     def test_korean_column_universe(self, patch_ohlcv):
-        from dartlab.quant.scanBacktest import runScanBacktest
+        from dartlab.quant.screen.scanBacktest import runScanBacktest
 
         patch_ohlcv({"005930": 4, "000660": 5})
         scan = pl.DataFrame({"종목코드": ["005930", "000660"], "PER": [10.0, 12.0]})
@@ -196,7 +196,7 @@ class TestRunScanBacktest:
         assert bt.scanContext["universeCol"] == "종목코드"
 
     def test_topn_limits_universe(self, patch_ohlcv):
-        from dartlab.quant.scanBacktest import runScanBacktest
+        from dartlab.quant.screen.scanBacktest import runScanBacktest
 
         patch_ohlcv({code: i for i, code in enumerate(["005930", "000660", "035420", "207940", "068270"])})
         scan = _make_scan_result(["005930", "000660", "035420", "207940", "068270"])
@@ -205,7 +205,7 @@ class TestRunScanBacktest:
         assert bt.scanContext["universeSize"] == 2
 
     def test_hash_deterministic_across_calls(self, patch_ohlcv):
-        from dartlab.quant.scanBacktest import runScanBacktest
+        from dartlab.quant.screen.scanBacktest import runScanBacktest
 
         patch_ohlcv({"005930": 1, "000660": 2})
         scan = _make_scan_result(["005930", "000660"], {"score": [1.0, 2.0]})

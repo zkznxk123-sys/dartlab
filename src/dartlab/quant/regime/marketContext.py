@@ -24,7 +24,7 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
 
 _KR_MACRO_DEFAULT = ("USDKRW", "BASE_RATE", "CPI", "M2")
 _US_MACRO_DEFAULT = ("FEDFUNDS", "DGS10", "DCOILWTICO", "CPIAUCSL")
