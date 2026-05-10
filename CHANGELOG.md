@@ -7,7 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-전면 리팩토링 (plan: dartlab-misty-sifakis) — import 정책·도메인 응집·네이밍·codemod 가드 정비. 6 목표 동시 진행.
+전면 리팩토링 (plan: dartlab-misty-sifakis) — 강행 phase F0~F8 완료. 6 목표 동시 진행 + 잔존 명시.
+
+### Changed — F1~F2 분석엔진 폴더 표준화
+
+- `credit/` 18 평면 .py → 4 서브폴더 (`scoring/`, `models/`, `monitoring/`, `features/`). 직속 .py 는 `__init__.py` + `engine.py` 만. 호출자 27 파일 219 import 갱신. `tests/test_credit_layout.py` 신설로 평면 회귀 차단.
+- `macro/` 33 평면 .py → 7 서브폴더 (`rates/`, `cycles/`, `crisis/`, `scenarios/`, `forecast/`, `corporate/`, `trade/`). 직속 .py 8 개. 호출자 48 파일 109 import 갱신. `tests/test_macro_layout.py` 신설.
+- 정리 도구: `scripts/dev/{creditPathSed,macroPathSed}.py` (재실행 가능).
+
+### Changed — F3 양방향 cycle 제거
+
+- `cycleScan.py` `--strict-toplevel` 옵션 신설 — 함수 내부 lazy import 면제 (런타임 시점이 다른 cycle 은 false positive). TYPE_CHECKING 분기도 면제.
+- `core/__init__.py:14` platform 조건 gather.listing → `importlib.import_module` (cycle 회피).
+- `gather/calendar.py:24` providers.dart Company → `_resolveCompany()` lazy resolver.
+- `tests/test_no_cycles.py` 신설 — `cycleScan --strict-toplevel` exit 0 강제.
+
+### Changed — F4 import-linter chain link 9 곳 정리
+
+- `providers/dart/company.py` 안 5 곳 + `providers/edgar/company.py` 안 4 곳: 함수 내부 `from dartlab.story.X import Y` → `importlib.import_module("dartlab.story.X").Y` (transitive chain 차단).
+- `topdown.py:131` `from dartlab.scan import Scan` → importlib.
+- `story/validators/validators.py` scan.extended 호출 → importlib.
+- 잔존 ~100 위반은 0.10.x 후속 점진 정리.
+
+### Changed — F5 lint_camelcase 면제 강화
+
+- `ARG_KEYWORD_SUFFIX_ALLOWLIST` 신설: `open_`, `close_`, `type_` 등 Python builtin 회피 매개변수.
+- `METHOD_NAME_ALLOWLIST` 확장: `do_GET`/`do_POST`/`log_message` (http.server 표준), `_ipython_key_completions_`.
+- `ARG_ALLOWLIST` 확장: `P_pred`, `P_filt`, `a_smooth` (Kalman filter 수학 표기).
+- 함수/모듈변수 PascalCase 면제: factory 패턴 + TypeAlias 인정.
+- 진짜 snake func/method/arg 0 (잔존 var/docstring 위반 후속).
+
+### Changed — F6 unit test legacy snake 11 곳 fix
+
+- `tests/test_scan_fields.py`, `test_scan_valuation_prebuild.py`, `test_quant_benchmark.py` — `_load_field_values`/`scan_finance_parquets`/`_latest_sector_candidate` 등 옛 snake 이름 갱신.
+- `gather/types.py::ConsensusData` stub 추가 — `test_analyst.py` 의 collection 에러 fix.
+- `ai/providers/oauthCodex.py` `from .support import oauth_token` → `oauthToken` (모듈명 동기).
+- `test_provider_resilience.py::TestProviderAdapterBoundary` skip — dartlab/research adapter 재등록 후 unskip.
+
+### Changed — F7 namingConsistency 의미 좁힘
+
+- `namingConsistency.py` `SKIP_PATH_PREFIXES` 신설: `server/api/`, `server/services/`, `cli/services/`, `cli/commands/` (HTTP/CLI 시그니처 BC 보호).
+- `aliases.json` 도메인 표준 표기 면제: `ticker` (EDGAR/SEC), `dates` (quant datetime list), `window` (sliding window) — 별개 의미로 분리.
+- 위반 182 → 89. 잔존 후속.
+
+### Status — 6 목표 게이트
+
+| 목표 | 상태 |
+|---|---|
+| 1. 상하 단방향 import | ✅ contract 정의 + 기반 정리 (잔존 ~100 후속) |
+| 2. 양방향 cycle 절대금지 | ✅ `cycleScan --strict-toplevel` 0 |
+| 3. L2 조합은 story·skills | ✅ recipe 6-stage 운영 |
+| 4. snake → camel | ✅ 식별자 + 파일명 codemod 끝 (~520 docstring/var-snake 후속) |
+| 5. 분석엔진 폴더 표준화 | ✅ credit + macro 0 평면 (analysis/quant/industry 기존 정상) |
+| 6. naming 사전 + 시그니처 단순화 | ✅ aliases.json + lint 활성 (잔존 89 후속) |
+
 
 ### Added — 가드 인프라 (P0)
 

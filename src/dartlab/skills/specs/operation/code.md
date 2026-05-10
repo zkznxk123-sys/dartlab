@@ -36,7 +36,7 @@ procedure:
   - Returns 작성 규칙 — 키 + 타입 + 단위를 명시한다 기준을 확인한다.
   - 3. CAPABILITIES — 단일 진실의 원천으로 간다 기준을 확인한다.
   - 기존 코드의 네이밍 패턴을 따른다.
-  - 이동된 기존 snake_case 는 하위호환 유지 (shim).
+  - 0.10 부터 snake_case 절대금지 (식별자 + 파일명 모두). shim 없음.
   - '**최신 먼저 역순** — 데이터 정렬 기본값.'
   - '`AI role:` 또는 `AI 역할:` 로 시작하는 짧은 문장을 둔다.'
 requiredEvidence:
