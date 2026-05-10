@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.providers.dart._sections_source import _SectionsSource
+from dartlab.providers.dart.sectionsSource import _SectionsSource
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company

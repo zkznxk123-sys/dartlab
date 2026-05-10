@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
-from dartlab.providers.dart._utils import _isPeriodColumn
+from dartlab.providers.dart.checks import _isPeriodColumn
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
@@ -164,7 +164,7 @@ def reportFrame(company: Company, topic: str, *, raw: bool = False) -> pl.DataFr
 
 def reportFrameInner(company: Company, apiType: str, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
     """report apiType의 정제된 DataFrame 반환."""
-    from dartlab.providers.dart._report_accessor import reportFrameInner as _reportFrameInner
+    from dartlab.providers.dart.reportAccessor import reportFrameInner as _reportFrameInner
 
     return _reportFrameInner(company.stockCode, apiType, topic, raw=raw)
 
@@ -279,7 +279,7 @@ def horizontalizeTableBlock(
     period: str | None = None,
 ) -> pl.DataFrame | None:
     """table 블록을 기간 간 수평화 — 항목×기간 매트릭스."""
-    from dartlab.providers.dart._table_horizontalizer import (
+    from dartlab.providers.dart.tableHorizontalizer import (
         horizontalizeTableBlock as _horizontalize,
     )
 

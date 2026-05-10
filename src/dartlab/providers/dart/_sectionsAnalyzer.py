@@ -351,7 +351,7 @@ class SectionsAnalyzer:
             self._cache[cacheKey] = None
             return None
 
-        from dartlab.providers.dart._utils import _isPeriodColumn
+        from dartlab.providers.dart.checks import _isPeriodColumn
         from dartlab.providers.dart.docs.sections import displayPeriod, sortPeriods
 
         rawFrame = sectionsFrame.raw

@@ -72,7 +72,7 @@ _FACADE_PATTERNS = {
     ("dartlab.providers.dart.company", "dartlab.ai"),
     ("dartlab.providers.edgar.company", "dartlab.ai"),
     # dart/_finance_helpers → sector.types (sector 코드 참조)
-    ("dartlab.providers.dart._finance_helpers", "dartlab.analysis"),
+    ("dartlab.providers.dart.financeMappers", "dartlab.analysis"),
     # scan/network → rank/screen (벤치마크 데이터 참조)
     ("dartlab.providers.dart.scan", "dartlab.analysis"),
     # market → analysis (향후)

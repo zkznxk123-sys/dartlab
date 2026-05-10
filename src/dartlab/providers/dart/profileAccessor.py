@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.providers.dart._utils import _isPeriodColumn
+from dartlab.providers.dart.checks import _isPeriodColumn
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company

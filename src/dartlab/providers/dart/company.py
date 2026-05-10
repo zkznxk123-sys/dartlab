@@ -70,9 +70,16 @@ def searchName(keyword):
     return _listingResolver().search(keyword)
 
 
-from dartlab.providers.dart._docs_accessor import _DocsAccessor
-from dartlab.providers.dart._finance_accessor import _FinanceAccessor
-from dartlab.providers.dart._finance_helpers import (
+from dartlab.providers.dart.checks import (
+    _checkDartDocsFreshness,
+    _ensureAllData,
+    _importAndCall,
+    _shapeString,
+)
+from dartlab.providers.dart.docs.notes import Notes
+from dartlab.providers.dart.docsAccessor import _DocsAccessor
+from dartlab.providers.dart.financeAccessor import _FinanceAccessor
+from dartlab.providers.dart.financeMappers import (
     _RATIO_TEMPLATE_FIELDS,
     _ratioArchetypeOverrideForIndustryGroup,
     _ratioResultHasHeadlineSignal,
@@ -80,15 +87,8 @@ from dartlab.providers.dart._finance_helpers import (
     _ratioTemplateKeyForIndustryGroup,
     _shouldFallbackToAnnualRatios,
 )
-from dartlab.providers.dart._profile_accessor import _ProfileAccessor
-from dartlab.providers.dart._report_accessor import _ReportAccessor
-from dartlab.providers.dart._utils import (
-    _checkDartDocsFreshness,
-    _ensureAllData,
-    _importAndCall,
-    _shapeString,
-)
-from dartlab.providers.dart.docs.notes import Notes
+from dartlab.providers.dart.profileAccessor import _ProfileAccessor
+from dartlab.providers.dart.reportAccessor import _ReportAccessor
 
 # 플러그인 등록 후 재구축 가능하도록 lazy 초기화
 _MODULE_REGISTRY: list[tuple[str, str, str, Any]] | None = None

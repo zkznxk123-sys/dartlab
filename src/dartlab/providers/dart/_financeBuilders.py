@@ -26,7 +26,8 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.providers.dart._finance_helpers import (
+from dartlab.providers.dart.checks import _isPeriodColumn
+from dartlab.providers.dart.financeMappers import (
     _financeCisAnnual,
     _financeCisQuarterly,
     _financeToDataFrame,
@@ -34,7 +35,6 @@ from dartlab.providers.dart._finance_helpers import (
     _ratioSeriesToDataFrame,
     _sceToDataFrame,
 )
-from dartlab.providers.dart._utils import _isPeriodColumn
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company

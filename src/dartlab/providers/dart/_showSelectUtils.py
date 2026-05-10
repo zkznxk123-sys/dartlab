@@ -16,7 +16,7 @@ from typing import Any
 
 import polars as pl
 
-from dartlab.providers.dart._utils import _isPeriodColumn
+from dartlab.providers.dart.checks import _isPeriodColumn
 
 
 def cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
