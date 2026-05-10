@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+전면 리팩토링 (plan: dartlab-misty-sifakis) — import 정책·도메인 응집·네이밍·codemod 가드 정비. 6 목표 동시 진행.
+
+### Added — 가드 인프라 (P0)
+
+- `[tool.importlinter]` 3 contracts (상하 단방향 layered + L2→L3/L4 forbidden + L2→L1.5/L1 forbidden) — `pyproject.toml`.
+- `scripts/audit/cycleScan.py` — networkx 기반 양방향 cycle 검출 (lazy import 포함). pre-commit + CI Fast hook 등록.
+- `scripts/audit/namingConsistency.py` — `core/naming/aliases.json` 표준 사전 검사. 매개변수 의미 일관성 강제 (AI 추론 단순화).
+- `scripts/dev/lint_camelcase_ast.py` — `--no-shim` 옵션 + 환경변수 `DARTLAB_LINT_NO_SHIM`. ROOT 밖 path fallback (단위 테스트 지원).
+
+### Added — core 강등 SSOT (P1)
+
+- `core/providers/{registry, secrets, routing, setupGuide, __init__}.py` — provider 카탈로그·SecretStore·역할 상수·안내 문구 통합. `core/providers.getDefaultProvider()` 신설.
+- `core/render/{__init__, protocols, registry}.py` — `ChartHtmlRenderer` Protocol + 단일 슬롯 registry. viz 가 `register(PlotlyChartRenderer())` 등록, core/select 가 lookup. plotly 미설치 환경 graceful fallback.
+- `core/naming/{__init__, aliases.json}` — 매개변수 표준 사전 SSOT (10 의미: stockCode/market/period/periods/limit/verbose/freq/raw/lookback/topic).
+
+### Changed — import 정책 (P0~P3)
+
+- 새 정책: 상하 단방향 절대금지 + 양방향 cycle 절대금지. **동급 단방향 import 허용** (운영 문서에 의존성 그래프 명시).
+- core/credentials + core/messaging 의 settings 의존 5 건 정리 → core/providers 사용.
+- core/select 의 viz 의존 1 건 정리 → core/render Protocol + Registry.
+- gather/marketCap 의 quant._helpers 의존 → core.market + GatherEntry 직접 호출.
+- scan/rank + scan/watch/scanner 의 analysis/industry 의존 → core.utils.extract 인라인 + importlib 동적 호출.
+- credit/metrics + credit/chsFeatures 의 analysis 의존 → importlib 동적 호출 (analysis ↔ credit cycle 차단).
+
+### Changed — core → 도메인 복귀 (P3.6)
+
+cycle 회피로 core 강등됐던 도메인 SSOT 모듈을 도메인 엔진으로 복귀:
+
+- `core/cross/creditGradeTable.py` → `credit/gradeTable.py` (20 등급 매핑표 — credit 도메인).
+- `core/cross/{corporateAggregate,dalio48Match,dalioCaseMatch,scenario}.py` → `macro/` (전종목 집계·Dalio crisis compendium·시나리오 탄성 — macro 도메인).
+- `core/cross/{strategyRules,quadrant,portfolioMapping}.py` → `quant/` (투자전략·분면·포트폴리오 매핑 — quant 도메인).
+
+각 이전 위치에 `__getattr__` lazy 동적 lookup shim 유지 (0.10 까지 BC, 0.11 release 시 제거 예정).
+
+### Added — 폴더 표준화 (P4)
+
+- 5 L2 엔진 (analysis/credit/macro/quant/industry) 에 통일된 `manifest.json` 신설 — name/version/role/layer/dependencies(allowed/forbidden)/examples/stage/consumers/lastUpdated.
+
+### Added — codemod 도구 (P6)
+
+- `scripts/dev/codemodToCamel.py` — snake_case → camelCase 전수 변환 도구 Pass 1 (인덱스 빌드 + 충돌 검출). dry-run 결과: 4,131 식별자 변환 후보 (3,275 func/method + 856 arg) + 216 파일명 변환 후보 + 충돌 1 건 (수동 결정 필요).
+- Pass 2~5 (실제 변환) 는 follow-up PR 들 — libCST + rope 의존성 추가 후.
+
+### Added — 정합성 가드 (P7)
+
+- 가드 도구 12 unit test (`testCycleScan`, `testNamingConsistency`, `testLintCamelcaseNoShim`, `testCoreProviders` 15, `testCoreRender` 5).
+- pyproject.toml `python_files` 에 `test*.py` / `bench*.py` (camelCase) 패턴 추가 — pytest discovery 확장.
+- 신규 test 4 파일을 camelCase 로 rename (testCycleScan.py 등).
+
+### Cycle baseline 진척
+
+P0 16 → P7 10 (38% 감소). 잔존 cycle:
+ai↔providers · analysis↔providers · analysis↔viz · cli↔server · company↔core · core↔gather · core↔providers · gather↔providers · providers↔scan · providers↔viz.
+대부분 dartlab.providers (DART/EDGAR 외부 API) 의 layer 결정이 미명시 — follow-up PR 들에서 처리.
+
+### 미해결 (follow-up 명시)
+
+- P3.6 PR 4/5 (analysis/_entries/dataLoader 등 cross-cutting 모듈) 는 **core 잔존이 더 적합** 으로 결론 (영향 129 파일).
+- P6 Pass 2~5 (실제 codemod 적용) 는 libCST + rope 의존성 추가 후 별도 PR.
+- providers layer 결정 + cycle 10 건의 단계적 정리.
+- recipe 자동 승격 (engine_promote.py).
+- 운영 문서 architecture.md 의 새 정책 섹션 + L2 단방향 의존성 그래프 (별도 PR).
+
 ## [0.9.27] - 2026-04-30
 
 AI 품질 루프와 데이터 파이프라인 안정화.
