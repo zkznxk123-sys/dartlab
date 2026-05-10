@@ -221,6 +221,10 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "seeAlso": "governance: 지배구조 분석 (감사위원회 구성 포함)\ninsights: 종합 등급 (감사 리스크도 반영)\nstory: 재무정합성 섹션에서 감사 결과 활용",
         "summary": "감사 리스크 종합 분석."
     },
+    "Company.calendar": {
+        "kind": "method",
+        "summary": "다가오는 정기공시 catalyst 일정 추론 (Korea 시장)."
+    },
     "Company.canHandle": {
         "kind": "method",
         "returns": "bool\nTrue 면 DART provider 로 처리. 6자리 alphanumeric (KR 종목코드)\n또는 한글 포함 문자열이면 True.",
@@ -2042,7 +2046,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         }
     },
     "analysis": {
-        "guide": "AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.",
+        "guide": "AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.\n\n진입점 패턴: ``Company.analysis(axis)`` 또는 sub-module (``analysis.financial`` ·\n``analysis.valuation`` 등) 직접 import.",
         "kind": "module",
         "summary": "Analysis 엔진 — L2 분석 모듈 통합."
     },

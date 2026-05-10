@@ -168,6 +168,9 @@ collect: DART API로 직접 수집 (최신 데이터, API 키 필요)
 #### analysis
 **Guide:** AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.
 
+진입점 패턴: ``Company.analysis(axis)`` 또는 sub-module (``analysis.financial`` ·
+``analysis.valuation`` 등) 직접 import.
+
 #### gather
 **Capabilities:** price: OHLCV 시계열 (KR Naver/US Yahoo, 기본 1년, 최대 6000거래일)
 flow: 외국인/기관 수급 동향 (KR 전용, Naver)
@@ -630,13 +633,14 @@ us.market                    # "US"
 
 ### Company 메서드/프로퍼티
 
-DartCompany에서 동적 추출 (57개).
+DartCompany에서 동적 추출 (58개).
 
 | 이름 | 종류 | 설명 |
 |------|------|------|
 | `analysis` | property | 재무제표 완전 분석 — 22축 (5 group), 6막 인과 구조. dual access (api-contract). |
 | `ask` | method | LLM에게 이 기업에 대해 질문. |
 | `audit` | method | 감사 리스크 종합 분석. |
+| `calendar` | method | 다가오는 정기공시 catalyst 일정 추론 (Korea 시장). |
 | `canHandle` | method | DART 종목코드(6자) 또는 한글 회사명이면 처리 가능. |
 | `capital` | method | 주주환원 분석 (배당, 자사주, 총환원율). |
 | `causalWeights` | method | 6막 인과 가중치 — 수익구조→수익성→현금흐름→자금조달→자산배치→가치평가 amplify/dampen/neutral. |
@@ -1372,7 +1376,7 @@ show: c.show("employee")로 docs 기반 직원 상세
 
 ### SectorInfo
 
-SectorInfo(sector: 'Sector', industryGroup: 'IndustryGroup', confidence: 'float', source: 'str')
+SectorInfo — TODO 한국어 클래스 설명.
 
 | 필드 | 타입 | 기본값 |
 |------|------|--------|
@@ -1383,7 +1387,7 @@ SectorInfo(sector: 'Sector', industryGroup: 'IndustryGroup', confidence: 'float'
 
 ### SectorParams
 
-SectorParams(discountRate: 'float' = 10.0, growthRate: 'float' = 3.0, perMultiple: 'float' = 15, pbrMultiple: 'float' = 1.2, evEbitdaMultiple: 'float' = 8, beta: 'float' = 1.0, exitMultiple: 'float' = 8.0, label: 'str' = '')
+SectorParams — TODO 한국어 클래스 설명.
 
 | 필드 | 타입 | 기본값 |
 |------|------|--------|

@@ -7,6 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-05-10
+
+라이브러리 수준 아키텍처 정합화 — 양방향 cycle 0, layer 단방향 strict, snake_case 정리.
+
+### Added
+
+- 7 신규 Protocol — CredentialProvider · LoaderProvider · ListingResolver · DisclosureFetcher
+  · FinanceDocAccessor · HtmlRenderer · GatherProvider. core/ 안 정의 + auto-discovery
+  registry. analysis/scan/viz 가 provider 직접 의존 0 (정공법 B Protocol DIP).
+- core/ratioCategories.py — RATIO_CATEGORIES 데이터 (analysis/financial/ratios.py 에서
+  이전, 정공법 A Hierarchy + D Facade re-export).
+- core/htmlRenderer.py + viz/display/htmlRenderer.py — Jupyter mime/repr 추상화.
+- core/gatherProvider.py + gather/entry.py 의 _GatherProviderAdapter — Company.gather()
+  / Company.news() 의 provider 측 lazy 의존 제거.
+- providers/dart/calendar.py + providers/dart/insiderTrades.py — gather/calendar.py +
+  gather/domains/dartApi.py 본체 이전. KR 정기공시 catalyst 추론은 DART 도메인 적합.
+- core/financeDocAccessor.py — analysis/financial 이 사용하는 단발 doc 호출 통합 추상화.
+- 5 엔진 (analysis · credit · macro · quant · industry) `__all__` 명시.
+- 회귀 가드: tests/test_stdlib_camel_violation.py — asyncio · subprocess · threading ·
+  multiprocessing · mcp app/server/session 의 무차별 카멜 변환 검출.
+
+### Changed
+
+- 양방향 import cycle 5 → 0. core ↔ providers · analysis ↔ providers · analysis ↔ viz ·
+  cli ↔ server · gather ↔ providers · providers ↔ viz 모두 정공법 적용.
+- inferFeature 함수 cli/services/errors.py → core/messaging.py 이전 (server 가 cli 호출
+  못 하도록 — 정공법 A Hierarchy).
+- dartlab/__init__.py 의 TYPE_CHECKING import block 제거 — PEP 562 lazy 만 사용.
+- macro 의 _AXIS_REGISTRY fn 9 곳 동기화 (analyze_X → analyzeX).
+- gather domain fallback (snake) → loadDomain 의 _DOMAIN_ALIASES 매핑 (yahoo_chart →
+  yahooChart 등).
+
+### Removed
+
+- gather/calendar.py + gather/domains/dartApi.py 폐기 (providers/dart/* 로 본체 이전).
+- gather('calendar') axis dispatch deprecated → ValueError. Company.calendar() 사용.
+- deprecated snake_case alias 25 곳 (sizing/benchmark/factor/factorBuild/attribution/
+  strategy/* + quant/_helpers 의 12 alias + _deprecatedAlias 본체).
+
+### Fixed
+
+- stdlib 무차별 카멜 변환 회귀 30+ fix (P6 codemod sequels):
+  - asyncio.create_task 6 곳, mcp Server/ClientSession 7 데코레이터 + send_progress_
+    notification kwarg, HTMLParser.handle_starttag/endtag/data 3 곳
+  - hasattr fetch_* 4 곳 — silent fallback 운영 회귀
+  - industry/build/edges.py try/except 안 lazy import 4 곳 codemod miss
+- EdgarCompany.calendar 메서드 누락 (CompanyProtocol 일관성).
+
+### Internal
+
+- docstring 432 → 0 (자동 도구 + 수작업 16 곳).
+- var-snake 62 → 0 (private prefix 면제 13, deprecated alias 제거 25, public sed 8).
+- 자동 생성물 동기화.
+
+### Migration
+
+본 릴리스는 의도된 BC 깸 — 다음 사용처 갱신 필요:
+
+- snake_case alias 사용한 quant 함수: `fetch_ohlcv` → `fetchOhlcv` 등
+- `from dartlab.gather.calendar import gatherCalendar` → `Company.calendar()` 또는
+  `from dartlab.providers.dart.calendar import predictCalendar`
+- 8 public 모듈 변수 rename: provider_guide/no_provider_message/circuit_breaker/
+  health_tracker/company_cache/room_manager/channel_runtime/dev_channel_runtime
+  → camelCase
+
 ## [0.9.27] - 2026-04-30
 
 AI 품질 루프와 데이터 파이프라인 안정화.
