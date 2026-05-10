@@ -9,6 +9,8 @@ if TYPE_CHECKING:
 
 @dataclass
 class YearAccounts:
+    """YearAccounts — TODO 한국어 클래스 설명."""
+
     year: str  # "2024" 또는 "2024Q1"
     accounts: dict[str, list[float | None]]
     order: list[str]
@@ -16,6 +18,8 @@ class YearAccounts:
 
 @dataclass
 class BridgeResult:
+    """BridgeResult — TODO 한국어 클래스 설명."""
+
     curYear: str  # period key
     prevYear: str
     rate: float
@@ -27,6 +31,8 @@ class BridgeResult:
 
 @dataclass
 class Segment:
+    """Segment — TODO 한국어 클래스 설명."""
+
     startYear: str  # period key
     endYear: str
     nYears: int  # period 수
@@ -37,6 +43,8 @@ class Segment:
 
 @dataclass
 class AnalysisResult:
+    """AnalysisResult — TODO 한국어 클래스 설명."""
+
     corpName: str | None
     nYears: int  # period 수
     nPairs: int

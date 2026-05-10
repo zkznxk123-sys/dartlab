@@ -195,4 +195,4 @@ class ChannelRuntimeManager:
         return {"token": token}
 
 
-channel_runtime = ChannelRuntimeManager()
+channelRuntime = ChannelRuntimeManager()

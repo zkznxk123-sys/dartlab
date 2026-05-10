@@ -135,6 +135,7 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
     latestPeriod = validPeriods[-1]
 
     def representativePeriodRank(period: str | None) -> int:
+        """representativePeriodRank — TODO 한국어 동작 설명."""
         if not isinstance(period, str):
             return -1
         year = int(period[:4])
@@ -220,6 +221,7 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
     freqPriority = {"mixed": 0, "annual": 1, "quarterly": 2, "none": 3}
 
     def topicRowSortKey(key: tuple[str, str]) -> tuple[int, int, int, int, int, int, int, int, str]:
+        """topicRowSortKey — TODO 한국어 동작 설명."""
         topic, segmentKey = key
         majorNum, firstSeq = topicFirstSeq.get(topic, (99, 999999))
         topicIdx = topicIndex.get(topic, 999999)

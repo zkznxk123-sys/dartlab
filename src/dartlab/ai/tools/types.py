@@ -10,6 +10,8 @@ from dartlab.ai.contracts import Ref
 
 @dataclass(frozen=True)
 class ToolSpec:
+    """ToolSpec — TODO 한국어 클래스 설명."""
+
     name: str
     description: str
     inputSchema: dict[str, Any]
@@ -22,11 +24,14 @@ class ToolSpec:
     openWorldHint: bool | None = None
 
     def toDict(self) -> dict[str, Any]:
+        """toDict — TODO 한국어 동작 설명."""
         return asdict(self)
 
 
 @dataclass
 class ToolResult:
+    """ToolResult — TODO 한국어 클래스 설명."""
+
     ok: bool
     summary: str
     refs: list[Ref] = field(default_factory=list)
@@ -34,6 +39,7 @@ class ToolResult:
     error: str | None = None
 
     def toDict(self) -> dict[str, Any]:
+        """toDict — TODO 한국어 동작 설명."""
         return {
             "ok": self.ok,
             "summary": self.summary,

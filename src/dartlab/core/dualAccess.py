@@ -56,6 +56,7 @@ class CallableAccessor:
         fn = self._fn
 
         def bound(*args: Any, **kwargs: Any) -> Any:
+            """bound — TODO 한국어 동작 설명."""
             return fn(attr, *args, **kwargs)
 
         bound.__name__ = attr

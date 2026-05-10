@@ -9,6 +9,8 @@ if TYPE_CHECKING:
 
 @dataclass
 class StatementsResult:
+    """StatementsResult — TODO 한국어 클래스 설명."""
+
     corpName: str | None
     period: str  # "y" | "q" | "h"
     scope: str = "consolidated"  # "consolidated" | "separate"

@@ -49,8 +49,8 @@ def autoDetectProvider(*, verbose: bool = False) -> str | None:
             return providerId
 
     if verbose:
-        from dartlab.ai.settings.aiSetup import no_provider_message
+        from dartlab.ai.settings.aiSetup import noProviderMessage
 
-        _log.info(no_provider_message())
+        _log.info(noProviderMessage())
 
     return None

@@ -29,6 +29,7 @@ def _runsDirDefault() -> Path:
 
 # 함수 노출 — 매 호출마다 env 다시 평가 (테스트 monkeypatch 호환).
 def RECIPE_RUNS_DIR() -> Path:  # noqa: N802 - 의도적 SCREAMING_SNAKE 노출 (api 안정성)
+    """recipe runs 저장 디렉토리 — env 변경 호환 위해 매 호출 재평가."""
     return _runsDirDefault()
 
 
@@ -74,6 +75,7 @@ class RecipeRunRecord:
     capturedAt: str | None = None
 
     def toDict(self) -> dict[str, Any]:
+        """toDict — TODO 한국어 동작 설명."""
         d = asdict(self)
         if d["asOf"] is None:
             d["asOf"] = ""

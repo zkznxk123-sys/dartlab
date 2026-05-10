@@ -10,8 +10,8 @@ starlette = pytest.importorskip("starlette", reason="starlette not installed (op
 from starlette.testclient import TestClient  # noqa: E402
 
 from dartlab.server import app  # noqa: E402
-from dartlab.server.services.channelRuntime import channel_runtime  # noqa: E402
-from dartlab.server.services.devChannelRuntime import dev_channel_runtime  # noqa: E402
+from dartlab.server.services.channelRuntime import channelRuntime  # noqa: E402
+from dartlab.server.services.devChannelRuntime import devChannelRuntime  # noqa: E402
 
 pytestmark = pytest.mark.unit
 
@@ -43,12 +43,12 @@ class _FakeProcess:
 
 @pytest.fixture()
 def client():
-    channel_runtime.shutdownAll()
-    dev_channel_runtime.shutdown()
+    channelRuntime.shutdownAll()
+    devChannelRuntime.shutdown()
     with TestClient(app, raise_server_exceptions=False) as c:
         yield c
-    channel_runtime.shutdownAll()
-    dev_channel_runtime.shutdown()
+    channelRuntime.shutdownAll()
+    devChannelRuntime.shutdown()
 
 
 def test_status_includes_channels(client):

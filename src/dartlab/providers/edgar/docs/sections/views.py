@@ -23,6 +23,7 @@ def sortPeriods(periods: list[str], *, descending: bool = False) -> list[str]:
     """기간 문자열 리스트를 연도/분기 순서로 정렬."""
 
     def key(period: str) -> tuple[int, int]:
+        """key — TODO 한국어 동작 설명."""
         if "Q" not in period:
             return int(period), 4
         return int(period[:4]), int(period[-1])
@@ -34,6 +35,7 @@ def sortTopics(topics: list[str], topicOrder: dict[str, int]) -> list[str]:
     """topic 리스트를 topicOrder 우선순위에 따라 정렬."""
 
     def key(topic: str) -> tuple[int, str, str]:
+        """key — TODO 한국어 동작 설명."""
         match = _TOPIC_RE.match(topic)
         formType = match.group(1) if match else ""
         return topicOrder.get(topic, 999999), formType, topic

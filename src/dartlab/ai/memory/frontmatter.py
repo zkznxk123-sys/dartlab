@@ -27,6 +27,7 @@ def updateStatus(specPath: Path, newStatus: str) -> bool:
 
 
 def readStatus(specPath: Path) -> str | None:
+    """readStatus — TODO 한국어 동작 설명."""
     if not specPath.exists():
         return None
     text = specPath.read_text(encoding="utf-8")

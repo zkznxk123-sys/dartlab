@@ -69,6 +69,7 @@ class OAuthCodexProvider:
 
     @property
     def defaultModel(self) -> str:
+        """defaultModel — TODO 한국어 동작 설명."""
         models = availableModels()
         if models:
             return models[0]
@@ -77,12 +78,14 @@ class OAuthCodexProvider:
         return fallback[0] if fallback else "gpt-5.2"
 
     def checkAvailable(self) -> bool:
+        """checkAvailable — TODO 한국어 동작 설명."""
         try:
             return bool(oauthToken.isAuthenticated())
         except (OSError, RuntimeError, TokenRefreshError, ValueError):
             return False
 
     def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn:
+        """generate — TODO 한국어 동작 설명."""
         token = _validTokenOrRaise()
         body = _buildBody(messages, tools, model=self.resolvedModel)
         response_text = _requestWithRetry(token, body)
@@ -101,6 +104,7 @@ class OAuthCodexProvider:
         return _requestWithRetry(token, body)
 
     def stream(self, messages: list[dict[str, Any]]):
+        """stream — TODO 한국어 동작 설명."""
         token = self._getTokenOrRaise()
         body = self._buildBody(messages)
         response = self._requestWithRetry(token, body, stream=True)
@@ -176,6 +180,7 @@ def _requestWithRetry(token: str, body: dict[str, Any]) -> str:
     headers = _headers(token)
 
     def post(activeHeaders: dict[str, str]) -> httpx.Response:
+        """post — TODO 한국어 동작 설명."""
         return httpx.post(f"{CODEX_API_BASE}{CODEX_RESPONSES_PATH}", headers=activeHeaders, json=body, timeout=90)
 
     try:

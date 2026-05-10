@@ -111,6 +111,7 @@ _END_ALIASES = ("장부금액", "장부금액 합계", "순장부금액", "총�
 
 
 def splitCells(line: str) -> list[str]:
+    """splitCells — TODO 한국어 동작 설명."""
     parts = line.split("|")
     if parts and parts[0].strip() == "":
         parts = parts[1:]
@@ -120,6 +121,7 @@ def splitCells(line: str) -> list[str]:
 
 
 def isAssetCategory(text: str) -> bool:
+    """isAssetCategory — TODO 한국어 동작 설명."""
     keywords = [
         "토지",
         "건물",
@@ -147,16 +149,19 @@ def isAssetCategory(text: str) -> bool:
 
 
 def isMovementRow(label: str) -> bool:
+    """isMovementRow — TODO 한국어 동작 설명."""
     collapsed = label.replace(" ", "")
     return any(kw in collapsed for kw in MOVEMENT_MARKERS)
 
 
 def isDescriptionRow(cells: list[str]) -> bool:
+    """isDescriptionRow — TODO 한국어 동작 설명."""
     text = " ".join(cells)
     return any(kw in text for kw in DESCRIPTION_MARKERS) and len(text) > 100
 
 
 def normalizeLabel(label: str) -> str:
+    """normalizeLabel — TODO 한국어 동작 설명."""
     label = label.strip()
     label = re.sub(r",\s*유형자산$", "", label)
     label = re.sub(r"\s+", " ", label)

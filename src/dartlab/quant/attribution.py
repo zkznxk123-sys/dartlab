@@ -106,8 +106,4 @@ def timingEffect(
     return float(contribution.sum())
 
 
-# ── Deprecated snake_case aliases ────────────────────────
-from dartlab.quant._helpers import _deprecatedAlias as _dep
-
-brinson_attribution = _dep(brinsonAttribution, "brinson_attribution")
-timing_effect = _dep(timingEffect, "timing_effect")
+# 0.10 BC 깸 — snake_case alias 제거. brinsonAttribution / timingEffect 만 SSOT.

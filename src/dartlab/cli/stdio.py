@@ -331,6 +331,7 @@ def _handleOAuthLogin(msg: dict[str, Any]) -> None:
 
     class _Handler(BaseHTTPRequestHandler):
         def do_GET(self):
+            """do_GET — TODO 한국어 동작 설명."""
             parsed = urlparse(self.path)
             if parsed.path != "/auth/callback":
                 self.send_response(404)
@@ -369,6 +370,7 @@ def _handleOAuthLogin(msg: dict[str, Any]) -> None:
             self.wfile.write(markup.encode("utf-8"))
 
         def logMessage(self, *_args):
+            """logMessage — TODO 한국어 동작 설명."""
             pass
 
     server = HTTPServer(("127.0.0.1", OAUTH_REDIRECT_PORT), _Handler)

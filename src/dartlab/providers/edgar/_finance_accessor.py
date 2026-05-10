@@ -74,22 +74,27 @@ class _FinanceAccessor:
 
     @property
     def BS(self) -> pl.DataFrame | None:
+        """BS — TODO 한국어 동작 설명."""
         return self._stmtDf("BS")
 
     @property
     def IS(self) -> pl.DataFrame | None:
+        """IS — TODO 한국어 동작 설명."""
         return self._stmtDf("IS")
 
     @property
     def CF(self) -> pl.DataFrame | None:
+        """CF — TODO 한국어 동작 설명."""
         return self._stmtDf("CF")
 
     @property
     def CIS(self) -> pl.DataFrame | None:
+        """CIS — TODO 한국어 동작 설명."""
         return self._stmtDf("CI")
 
     @property
     def ratios(self):
+        """ratios — TODO 한국어 동작 설명."""
         val = self._company._cache.get("_ratios", _CACHE_MISSING)
         if val is _CACHE_MISSING:
             from dartlab.analysis.financial.ratios import calcRatios
@@ -105,6 +110,7 @@ class _FinanceAccessor:
 
     @property
     def ratioSeries(self):
+        """ratioSeries — TODO 한국어 동작 설명."""
         cacheKey = "_ratioSeries"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
@@ -121,6 +127,7 @@ class _FinanceAccessor:
 
     @property
     def SCE(self) -> pl.DataFrame | None:
+        """SCE — TODO 한국어 동작 설명."""
         cacheKey = "_finance_SCE"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]

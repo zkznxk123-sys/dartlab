@@ -454,6 +454,7 @@ def createServer():
 
     @app.list_tools()
     async def listTools() -> list[Tool]:
+        """tools/list — advertise 된 tool list (annotation 포함)."""
         tools: list[Tool] = []
         for t in _advertisedTools():
             tools.append(
@@ -472,6 +473,7 @@ def createServer():
 
     @app.call_tool()
     async def callTool(name: str, arguments: dict) -> dict[str, Any]:
+        """tools/call — tool name + arguments 를 받아 dispatch + structuredContent 반환."""
         # SDK 가 dict 반환을 받으면 structuredContent + serialized text 양쪽 모두 자동 채움.
         # 외부 LLM 은 ref/values/table 등을 structured 로 파싱 가능 + 텍스트 클라이언트 호환.
         _log.info("call_tool: %s(%s)", name, list(arguments.keys()))
@@ -501,6 +503,7 @@ def createServer():
 
     @app.list_resources()
     async def listResources() -> list[Resource]:
+        """resources/list — dartlab 노출 가능한 resource list (skill spec 등)."""
         return [
             Resource(
                 uri="dartlab://info",
@@ -536,6 +539,7 @@ def createServer():
 
     @app.read_resource()
     async def readResource(uri: str) -> list[ReadResourceContents]:
+        """resources/read — uri 로 resource 본문 읽기."""
         uriStr = str(uri)
         content, mime_type = _resourcePayload(uriStr)
         return [ReadResourceContents(content=content, mime_type=mime_type)]
@@ -546,6 +550,7 @@ def createServer():
 
     @app.list_prompts()
     async def listPrompts() -> list[Prompt]:
+        """prompts/list — recipe 카테고리 기반 prompt list."""
         prompts: list[Prompt] = []
         for spec in _recipeSkillsForPrompts():
             args = [
@@ -564,6 +569,7 @@ def createServer():
     # ── logging/setLevel — 클라이언트가 dartlab logger 레벨 동적 조정 ─────────
     @app.set_logging_level()
     async def setLoggingLevel(level: str) -> None:
+        """logging/setLevel — 클라이언트가 dartlab logger 레벨 동적 조정."""
         # MCP LoggingLevel 은 RFC5424 (debug/info/notice/warning/error/critical/alert/emergency).
         # Python logging 은 이 중 일부만 매칭. 그 외는 가장 가까운 표준 레벨로 매핑.
         mapping = {
@@ -582,6 +588,7 @@ def createServer():
 
     @app.get_prompt()
     async def getPrompt(name: str, arguments: dict[str, str] | None = None) -> GetPromptResult:
+        """prompts/get — recipe name + arguments 로 prompt 본문 반환."""
         from dartlab.skills import getSkill
 
         try:
@@ -678,6 +685,7 @@ def createSseApp():
     sse = SseServerTransport("/messages/")
 
     async def handleSse(request):
+        """SSE 연결 handshake — 클라이언트 → mcp_server 양방향 stream."""
         async with sse.connect_sse(request.scope, request.receive, request._send) as (read, write):
             await mcp_server.run(read, write, mcp_server.create_initialization_options())
 

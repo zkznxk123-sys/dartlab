@@ -67,6 +67,7 @@ class ParserMapper(BaseMapper):
 
     @property
     def name(self) -> str:
+        """name — TODO 한국어 동작 설명."""
         return "parser"
 
     # ── affiliate ──
@@ -145,6 +146,7 @@ class ParserMapper(BaseMapper):
         return None
 
     def stats(self) -> MapperStats:
+        """stats — TODO 한국어 동작 설명."""
         aff = loadAffiliate()
         cost = loadCostByNature()
         sec = loadSections()
@@ -164,6 +166,7 @@ class ParserMapper(BaseMapper):
         )
 
     def allKeys(self) -> list[str]:
+        """allKeys — TODO 한국어 동작 설명."""
         keys: list[str] = []
         aff = loadAffiliate()
         keys.extend(aff.get("movement", {}).keys())

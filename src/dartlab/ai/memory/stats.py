@@ -18,6 +18,8 @@ _STATS_PATH = Path.home() / ".dartlab" / "ai_memory" / "skill_stats.jsonl"
 
 @dataclass
 class SkillStats:
+    """SkillStats — TODO 한국어 클래스 설명."""
+
     skillId: str
     usageCount: int = 0
     successCount: int = 0
@@ -26,10 +28,12 @@ class SkillStats:
 
     @property
     def successRate(self) -> float:
+        """successRate — TODO 한국어 동작 설명."""
         return self.successCount / self.usageCount if self.usageCount else 0.0
 
     @property
     def avgValueRefs(self) -> float:
+        """avgValueRefs — TODO 한국어 동작 설명."""
         return self.valueRefSum / self.usageCount if self.usageCount else 0.0
 
     @property
@@ -74,6 +78,7 @@ def recordOutcome(skillId: str, *, ok: bool, valueRefs: int = 0) -> SkillStats:
 
 
 def getSkillStats(skillId: str) -> SkillStats:
+    """getSkillStats — TODO 한국어 동작 설명."""
     stats = SkillStats(skillId=skillId)
     path = _resolveStatsPath()
     if not path.exists():
@@ -91,6 +96,7 @@ def getSkillStats(skillId: str) -> SkillStats:
 
 
 def allStats() -> dict[str, SkillStats]:
+    """allStats — TODO 한국어 동작 설명."""
     result: dict[str, SkillStats] = {}
     path = _resolveStatsPath()
     if not path.exists():

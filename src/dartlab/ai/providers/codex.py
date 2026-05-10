@@ -19,9 +19,11 @@ class CodexProvider(BaseProvider):
 
     @property
     def defaultModel(self) -> str:
+        """defaultModel — TODO 한국어 동작 설명."""
         return codex_cli.getCodexConfiguredModel() or "gpt-4.1"
 
     def checkAvailable(self) -> bool:
+        """checkAvailable — TODO 한국어 동작 설명."""
         info = codex_cli.inspectCodexCli()
         return bool(info.get("installed") and info.get("authenticated"))
 
@@ -56,6 +58,7 @@ class CodexProvider(BaseProvider):
         return codex_cli.inferCodexSandbox(messages)
 
     def complete(self, messages: list[dict[str, str]]) -> LLMResponse:
+        """complete — TODO 한국어 동작 설명."""
         self._ensureAvailable()
         prompt = self._buildPrompt(messages)
         sandbox = self._selectSandbox(messages)
@@ -74,6 +77,7 @@ class CodexProvider(BaseProvider):
         )
 
     def stream(self, messages: list[dict[str, str]]) -> Generator[str, None, None]:
+        """stream — TODO 한국어 동작 설명."""
         self._ensureAvailable()
         prompt = self._buildPrompt(messages)
         sandbox = self._selectSandbox(messages)

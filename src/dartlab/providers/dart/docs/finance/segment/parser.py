@@ -141,6 +141,7 @@ def parseSegmentTables(text: str) -> list[SegmentTable]:
     hasData = False
 
     def flush():
+        """flush — TODO 한국어 동작 설명."""
         nonlocal currentColumns, currentRows, rowOrder, pendingHeaders, hasData
         if currentColumns and currentRows:
             keepIdx = [i for i, c in enumerate(currentColumns) if c and not _isMetaColumn(c)]

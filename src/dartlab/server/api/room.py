@@ -17,7 +17,7 @@ from ..models import (
     RoomNavigateRequest,
     RoomReactRequest,
 )
-from ..room import Room, RoomMember, room_manager
+from ..room import Room, RoomMember, roomManager
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ router = APIRouter()
 
 
 def _getRoom() -> Room:
-    room = room_manager.getRoom()
+    room = roomManager.getRoom()
     if room is None:
         raise HTTPException(status_code=404, detail="협업 세션이 활성화되지 않았습니다.")
     return room

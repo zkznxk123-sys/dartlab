@@ -10,6 +10,8 @@ from dartlab.channel import DevTunnelSetupError, setupDevtunnel
 
 
 class DevChannelRuntime:
+    """DevChannelRuntime — TODO 한국어 클래스 설명."""
+
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._url: str | None = None
@@ -17,6 +19,7 @@ class DevChannelRuntime:
         self._error: str | None = None
 
     def status(self) -> dict[str, Any]:
+        """status — TODO 한국어 동작 설명."""
         with self._lock:
             running = self._process is not None and self._process.poll() is None
             if not running:
@@ -25,6 +28,7 @@ class DevChannelRuntime:
             return self._buildStatus(url=url, running=running, error=self._error)
 
     def start(self, *, port: int, autoYes: bool = True) -> dict[str, Any]:
+        """start — TODO 한국어 동작 설명."""
         with self._lock:
             if self._process is not None and self._process.poll() is None and self._url:
                 return self._buildStatus(url=self._url, running=True, error=None)
@@ -44,6 +48,7 @@ class DevChannelRuntime:
             return self._buildStatus(url=url, running=True, error=None)
 
     def stop(self) -> dict[str, Any]:
+        """stop — TODO 한국어 동작 설명."""
         with self._lock:
             process = self._process
             self._process = None
@@ -54,6 +59,7 @@ class DevChannelRuntime:
         return self._buildStatus(url=None, running=False, error=None)
 
     def shutdown(self) -> None:
+        """shutdown — TODO 한국어 동작 설명."""
         self.stop()
 
     def _buildStatus(self, *, url: str | None, running: bool, error: str | None) -> dict[str, Any]:
@@ -87,4 +93,4 @@ def _qrDataUrl(url: str | None) -> str | None:
         return None
 
 
-dev_channel_runtime = DevChannelRuntime()
+devChannelRuntime = DevChannelRuntime()

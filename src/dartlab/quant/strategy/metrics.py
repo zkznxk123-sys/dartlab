@@ -633,8 +633,4 @@ def impliedIRFromICDistribution(icSeries: np.ndarray, breadth: int) -> dict:
     }
 
 
-# ── Deprecated snake_case aliases ────────────────────────
-from dartlab.quant._helpers import _deprecatedAlias as _dep
-
-profit_factor = _dep(profitFactor, "profit_factor")
-cpcv_splits = _dep(cpcvSplits, "cpcv_splits")
+# 0.10 BC 깸 — snake_case alias 제거.

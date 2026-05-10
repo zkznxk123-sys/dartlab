@@ -27,6 +27,7 @@ class PeerRow:
     isSelf: bool = False
 
     def asDict(self) -> dict[str, Any]:
+        """asDict — TODO 한국어 동작 설명."""
         return {
             "stockCode": self.stockCode,
             "corpName": self.corpName,

@@ -6,7 +6,7 @@ from typing import Any
 from dartlab import Company
 
 from ..api.common import HANDLED_API_ERRORS
-from ..cache import company_cache
+from ..cache import companyCache
 from ..models import TocChapter, TocResponse, TocTopic
 
 _VALID_CODE = _re.compile(r"^[A-Za-z0-9가-힣]{1,20}$")
@@ -16,11 +16,11 @@ def getCompany(code: str) -> Company:
     """종목코드로 Company를 조회하거나 생성한다 (캐시 활용)."""
     if not _VALID_CODE.match(code):
         raise ValueError(f"유효하지 않은 종목코드: {code!r}")
-    cached = company_cache.get(code)
+    cached = companyCache.get(code)
     if cached:
         return cached[0]
     company = Company(code)
-    company_cache.put(code, company, None)
+    companyCache.put(code, company, None)
     return company
 
 

@@ -11,8 +11,8 @@ import logging
 import time
 
 from .cache import GatherCache
-from .resilience import circuit_breaker as _cb
-from .resilience import health_tracker as _ht
+from .resilience import circuitBreaker as _cb
+from .resilience import healthTracker as _ht
 
 log = logging.getLogger(__name__)
 

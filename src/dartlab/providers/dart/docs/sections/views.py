@@ -150,6 +150,7 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
     blockIndex = 0
 
     def flushText() -> None:
+        """flushText — TODO 한국어 동작 설명."""
         nonlocal textBuffer, blockIndex
         text = "\n".join(textBuffer).strip()
         if text:
@@ -166,6 +167,7 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
         textBuffer = []
 
     def flushTable() -> None:
+        """flushTable — TODO 한국어 동작 설명."""
         nonlocal tableBuffer, blockIndex
         text = "\n".join(tableBuffer).strip()
         if text:
@@ -182,6 +184,7 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
         tableBuffer = []
 
     def flushAll() -> None:
+        """flushAll — TODO 한국어 동작 설명."""
         flushText()
         flushTable()
 

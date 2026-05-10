@@ -340,7 +340,4 @@ def buildFactors(market: str = "KR") -> dict | None:
     return result
 
 
-# ── Deprecated snake_case aliases ────────────────────────
-from dartlab.quant._helpers import _deprecatedAlias as _dep
-
-build_factors = _dep(buildFactors, "build_factors")
+# 0.10 BC 깸 — snake_case alias 제거.

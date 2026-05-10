@@ -123,7 +123,10 @@ def _doOauthLogin() -> None:
     result: dict = {"done": False, "error": None}
 
     class CallbackHandler(BaseHTTPRequestHandler):
+        """CallbackHandler — TODO 한국어 클래스 설명."""
+
         def do_GET(self):
+            """do_GET — TODO 한국어 동작 설명."""
             parsed = urlparse(self.path)
             if parsed.path != "/auth/callback":
                 self.send_response(404)
@@ -177,12 +180,14 @@ def _doOauthLogin() -> None:
             self.wfile.write(markup.encode("utf-8"))
 
         def logMessage(self, fmt, *args):
+            """logMessage — TODO 한국어 동작 설명."""
             pass
 
     server = HTTPServer(("127.0.0.1", OAUTH_REDIRECT_PORT), CallbackHandler)
     server.timeout = 120
 
     def serve():
+        """serve — TODO 한국어 동작 설명."""
         server.handle_request()
         server.server_close()
 

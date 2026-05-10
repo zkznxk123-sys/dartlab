@@ -49,13 +49,16 @@ class GeminiProvider(BaseProvider):
 
     @property
     def defaultModel(self) -> str:
+        """defaultModel — TODO 한국어 동작 설명."""
         return "gemini-2.5-flash"
 
     @property
     def supportsNativeTools(self) -> bool:
+        """supportsNativeTools — TODO 한국어 동작 설명."""
         return True
 
     def checkAvailable(self) -> bool:
+        """checkAvailable — TODO 한국어 동작 설명."""
         try:
             self._getClient()
             return True
@@ -63,6 +66,7 @@ class GeminiProvider(BaseProvider):
             return False
 
     def complete(self, messages: list[dict[str, str]]) -> LLMResponse:
+        """complete — TODO 한국어 동작 설명."""
         client = self._getClient()
         systemInstruction, contents = _splitSystemAndContents(messages)
 
@@ -97,6 +101,7 @@ class GeminiProvider(BaseProvider):
         )
 
     def stream(self, messages: list[dict[str, str]]) -> Generator[str, None, None]:
+        """stream — TODO 한국어 동작 설명."""
         client = self._getClient()
         systemInstruction, contents = _splitSystemAndContents(messages)
 
@@ -124,6 +129,7 @@ class GeminiProvider(BaseProvider):
         *,
         toolChoice: str | None = None,
     ) -> ToolResponse:
+        """completeWithTools — TODO 한국어 동작 설명."""
         client = self._getClient()
         from google.genai import types
 
@@ -200,6 +206,7 @@ class GeminiProvider(BaseProvider):
         answer: str | None,
         toolCalls: list,
     ) -> dict:
+        """formatAssistantToolCalls — TODO 한국어 동작 설명."""
         from google.genai import types
 
         parts = []
@@ -210,6 +217,7 @@ class GeminiProvider(BaseProvider):
         return {"role": "model", "parts": parts, "_gemini_native": True}
 
     def formatToolResult(self, toolCallId: str, result: str) -> dict:
+        """formatToolResult — TODO 한국어 동작 설명."""
         from google.genai import types
 
         name = toolCallId

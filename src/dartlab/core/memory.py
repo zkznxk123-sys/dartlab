@@ -51,6 +51,8 @@ def getMemoryMb() -> float:
         import ctypes.wintypes
 
         class PMC(ctypes.Structure):
+            """PMC — TODO 한국어 클래스 설명."""
+
             _fields_ = [
                 ("cb", ctypes.wintypes.DWORD),
                 ("PageFaultCount", ctypes.wintypes.DWORD),
@@ -102,6 +104,8 @@ def _getTotalMemoryMb() -> float:
         kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
 
         class MEMORYSTATUSEX(ctypes.Structure):
+            """MEMORYSTATUSEX — TODO 한국어 클래스 설명."""
+
             _fields_ = [
                 ("dwLength", ctypes.c_uint32),
                 ("dwMemoryLoad", ctypes.c_uint32),
@@ -416,20 +420,24 @@ class BoundedCache:
                 break  # 모두 pinned면 초과 허용
 
     def keys(self) -> list[str]:
+        """keys — TODO 한국어 동작 설명."""
         with self._lock:
             return list(self._store.keys())
 
     def pop(self, key: str, *args: Any) -> Any:
+        """pop — TODO 한국어 동작 설명."""
         with self._lock:
             return self._store.pop(key, *args)
 
     def clear(self) -> None:
+        """clear — TODO 한국어 동작 설명."""
         with self._lock:
             self._store.clear()
             self._max = self._default_max
             self._put_count = 0
 
     def get(self, key: str, default: Any = None) -> Any:
+        """get — TODO 한국어 동작 설명."""
         with self._lock:
             if key in self._store:
                 self._store.move_to_end(key)
@@ -455,8 +463,11 @@ def memoryGuard(thresholdPct: float = 60) -> Callable[[F], F]:
     total = _getTotalMemoryMb()
 
     def decorator(fn: F) -> F:
+        """decorator — TODO 한국어 동작 설명."""
+
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
+            """wrapper — TODO 한국어 동작 설명."""
             if total > 0:
                 current = getMemoryMb()
                 if current > 0 and (current / total * 100) > thresholdPct:
@@ -495,6 +506,7 @@ def memoizedCalc(fn: Callable[..., Any]) -> Callable[..., Any]:
         basePeriod: str | None = None,
         overrides: dict | None = None,
     ) -> Any:
+        """wrapper — TODO 한국어 동작 설명."""
         kw: dict[str, Any] = {}
         if _has_base_period:
             kw["basePeriod"] = basePeriod

@@ -95,22 +95,22 @@ async def lifespan(_: FastAPI):
     preload_task = asyncio.create_task(_preloadOllamaOnce()) if _should_preload_ollama() else None
 
     # 채널 모드: 협업 룸 자동 생성 + 백그라운드 정리
-    from .room import room_manager
+    from .room import roomManager
 
     if os.environ.get("DARTLAB_CHANNEL") == "1":
-        room_manager.createRoom()
-        room_manager.startBackgroundCleanup()
+        roomManager.createRoom()
+        roomManager.startBackgroundCleanup()
 
     try:
         yield
     finally:
-        from .services.channelRuntime import channel_runtime
-        from .services.devChannelRuntime import dev_channel_runtime
+        from .services.channelRuntime import channelRuntime
+        from .services.devChannelRuntime import devChannelRuntime
 
-        dev_channel_runtime.shutdown()
-        channel_runtime.shutdownAll()
-        room_manager.stopBackgroundCleanup()
-        room_manager.destroyRoom()
+        devChannelRuntime.shutdown()
+        channelRuntime.shutdownAll()
+        roomManager.stopBackgroundCleanup()
+        roomManager.destroyRoom()
 
         if preload_task is not None and not preload_task.done():
             preload_task.cancel()

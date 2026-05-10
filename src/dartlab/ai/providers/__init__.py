@@ -16,6 +16,8 @@ from dartlab.ai.settings.modelResolver import resolveDefaultModel
 
 @dataclass(frozen=True)
 class ProviderConfig:
+    """ProviderConfig — TODO 한국어 클래스 설명."""
+
     provider: str | None = None
     model: str | None = None
     baseUrl: str | None = None
@@ -25,12 +27,14 @@ class ProviderConfig:
     systemPrompt: str | None = None
 
     def merge(self, overrides: dict[str, Any]) -> ProviderConfig:
+        """merge — TODO 한국어 동작 설명."""
         values = asdict(self)
         values.update({key: value for key, value in overrides.items() if key in values and value is not None})
         return ProviderConfig(**values)
 
 
 def getConfig(provider: str | None = None, **kwargs: Any) -> ProviderConfig:
+    """getConfig — TODO 한국어 동작 설명."""
     normalized = _normalizeProvider(provider or kwargs.get("provider"))
     profile = _resolveProfile(normalized, kwargs.get("role"))
     if normalized is None:
@@ -165,6 +169,8 @@ def _oauthDefaultModel(*, configuredModel: str | None = None) -> str | None:
 
 @dataclass(frozen=True)
 class ToolCall:
+    """ToolCall — TODO 한국어 클래스 설명."""
+
     id: str
     name: str
     args: dict[str, Any]
@@ -172,6 +178,8 @@ class ToolCall:
 
 @dataclass(frozen=True)
 class ProviderTurn:
+    """ProviderTurn — TODO 한국어 클래스 설명."""
+
     content: str
     toolCalls: list[ToolCall]
     raw: dict[str, Any] | None = None
@@ -187,9 +195,13 @@ class StreamChunk:
 
 
 class WorkbenchProvider(Protocol):
+    """WorkbenchProvider — TODO 한국어 클래스 설명."""
+
     config: ProviderConfig
 
-    def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn: ...
+    def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn:
+        """messages + tools → ProviderTurn 생성. provider 별 LLM 호출 본체."""
+        ...
 
 
 def streamProvider(
@@ -209,14 +221,18 @@ def streamProvider(
 
 
 class UnavailableProvider:
+    """UnavailableProvider — TODO 한국어 클래스 설명."""
+
     def __init__(self, config: ProviderConfig | None = None) -> None:
         self.config = config or ProviderConfig()
         self.resolvedModel = self.config.model
 
     def generate(self, *_args: Any, **_kwargs: Any) -> ProviderTurn:
+        """generate — TODO 한국어 동작 설명."""
         raise RuntimeError("provider adapter is not configured for Ask Workbench Kernel v1")
 
     def checkAvailable(self) -> bool:
+        """checkAvailable — TODO 한국어 동작 설명."""
         return False
 
 
@@ -228,6 +244,7 @@ class OpenAICompatibleProvider:
         self.resolvedModel = config.model or _defaultModelFor(config.provider)
 
     def checkAvailable(self) -> bool:
+        """checkAvailable — TODO 한국어 동작 설명."""
         provider = (self.config.provider or "").lower()
         if provider == "oauth-codex":
             return bool(self.config.apiKey and self.config.baseUrl)
@@ -236,6 +253,7 @@ class OpenAICompatibleProvider:
         return bool(self.config.apiKey)
 
     def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn:
+        """generate — TODO 한국어 동작 설명."""
         try:
             from openai import OpenAI
         except Exception as exc:  # pragma: no cover - environment dependent
@@ -444,6 +462,7 @@ def _isResponsesUnsupported(exc: Exception) -> bool:
 
 
 def createProvider(*args: Any, **kwargs: Any) -> WorkbenchProvider:
+    """createProvider — TODO 한국어 동작 설명."""
     raw_provider = (
         getattr(args[0], "provider", None) if args and hasattr(args[0], "provider") else kwargs.get("provider")
     )

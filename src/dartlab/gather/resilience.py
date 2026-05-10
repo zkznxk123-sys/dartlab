@@ -271,5 +271,5 @@ class SourceHealthTracker:
 
 # ── 모듈 레벨 싱글턴 ──
 
-circuit_breaker = CircuitBreaker()
-health_tracker = SourceHealthTracker()
+circuitBreaker = CircuitBreaker()
+healthTracker = SourceHealthTracker()

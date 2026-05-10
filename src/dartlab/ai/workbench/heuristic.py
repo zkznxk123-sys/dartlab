@@ -276,6 +276,7 @@ def _composeStatementComparison(results: list[ToolResult]) -> str:
 
 def _assetRatio(left: dict[str, Any], right: dict[str, Any]) -> float | None:
     def find(summary: dict[str, Any]) -> float | None:
+        """find — TODO 한국어 동작 설명."""
         for row in summary.get("rows") or []:
             if row.get("snakeId") == "total_assets":
                 try:

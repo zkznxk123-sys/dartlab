@@ -19,12 +19,14 @@ RE_ANNUAL_Q4_ALIAS = re.compile(r"^(\d{4})Q4$")
 
 
 def detectContentCol(df: pl.DataFrame) -> str:
+    """detectContentCol — TODO 한국어 동작 설명."""
     if "section_content" in df.columns:
         return "section_content"
     return "content"
 
 
 def periodSortKey(period: str) -> tuple[int, int]:
+    """periodSortKey — TODO 한국어 동작 설명."""
     value = str(period)
     if "Q" in value:
         return int(value[:4]), int(value[-1])
@@ -32,19 +34,23 @@ def periodSortKey(period: str) -> tuple[int, int]:
 
 
 def sortPeriods(periods: list[str], *, descending: bool = False) -> list[str]:
+    """sortPeriods — TODO 한국어 동작 설명."""
     return sorted(periods, key=periodSortKey, reverse=descending)
 
 
 def periodOrderValue(period: str) -> int:
+    """periodOrderValue — TODO 한국어 동작 설명."""
     year, slot = periodSortKey(period)
     return year * 10 + slot
 
 
 def basePath(path: str) -> str:
+    """basePath — TODO 한국어 동작 설명."""
     return RE_SPLIT_SUFFIX.sub("", path)
 
 
 def rawPeriod(period: str) -> str:
+    """rawPeriod — TODO 한국어 동작 설명."""
     value = str(period).strip()
     match = RE_ANNUAL_Q4_ALIAS.fullmatch(value)
     if match:
@@ -53,6 +59,7 @@ def rawPeriod(period: str) -> str:
 
 
 def displayPeriod(period: str, *, annualAsQ4: bool = False) -> str:
+    """displayPeriod — TODO 한국어 동작 설명."""
     value = rawPeriod(period)
     if annualAsQ4 and RE_PERIOD.fullmatch(value) and "Q" not in value:
         return f"{value}Q4"
@@ -65,6 +72,7 @@ def periodColumns(
     descending: bool = False,
     annualAsQ4: bool = False,
 ) -> list[str]:
+    """periodColumns — TODO 한국어 동작 설명."""
     ordered = sortPeriods([str(col) for col in columns if RE_PERIOD.fullmatch(str(col))], descending=descending)
     return [displayPeriod(period, annualAsQ4=annualAsQ4) for period in ordered]
 
@@ -75,6 +83,7 @@ def formatPeriodRange(
     descending: bool = False,
     annualAsQ4: bool = False,
 ) -> str:
+    """formatPeriodRange — TODO 한국어 동작 설명."""
     ordered = sortPeriods([rawPeriod(period) for period in periods], descending=descending)
     if not ordered:
         return "-"
@@ -88,6 +97,7 @@ def reorderPeriodColumns(
     descending: bool = False,
     annualAsQ4: bool = False,
 ) -> pl.DataFrame:
+    """reorderPeriodColumns — TODO 한국어 동작 설명."""
     periodCols = [str(col) for col in df.columns if RE_PERIOD.fullmatch(str(col))]
     if not periodCols:
         return df

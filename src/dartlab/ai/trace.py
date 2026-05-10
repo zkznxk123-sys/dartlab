@@ -27,7 +27,9 @@ class AuditCollector:
     events: list[dict[str, Any]] = field(default_factory=list)
 
     def observe(self, kind: str, data: dict[str, Any] | None = None) -> None:
+        """observe — TODO 한국어 동작 설명."""
         self.events.append({"kind": kind, "data": dict(data or {})})
 
     def flush(self) -> None:
+        """flush — TODO 한국어 동작 설명."""
         return None

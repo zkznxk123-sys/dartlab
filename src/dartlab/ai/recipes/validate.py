@@ -50,6 +50,7 @@ class RefValidationResult:
     extras: list[str] = field(default_factory=list)
 
     def toDict(self) -> dict[str, Any]:
+        """toDict — TODO 한국어 동작 설명."""
         return asdict(self)
 
 

@@ -10,6 +10,8 @@ from dartlab.ai.tools.types import ToolSpec
 
 
 class GoogleProvider(BaseProvider):
+    """GoogleProvider — TODO 한국어 클래스 설명."""
+
     name = "google"
     defaultModel = "gemini-2.0-flash-exp"
 
@@ -24,6 +26,7 @@ class GoogleProvider(BaseProvider):
         return genai.Client(apiKey=apiKey)
 
     def checkAvailable(self) -> bool:
+        """checkAvailable — TODO 한국어 동작 설명."""
         if not (self.config.apiKey or os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")):
             return False
         try:
@@ -33,6 +36,7 @@ class GoogleProvider(BaseProvider):
         return True
 
     def toolSchema(self, spec: ToolSpec) -> dict[str, Any]:
+        """toolSchema — TODO 한국어 동작 설명."""
         return {
             "name": spec.name,
             "description": spec.description,
@@ -46,6 +50,7 @@ class GoogleProvider(BaseProvider):
         *,
         stream: bool = True,
     ) -> Iterator[LLMEvent]:
+        """complete — TODO 한국어 동작 설명."""
         client = self._client()
         contents = _toGenaiContents(messages)
         cfg: dict[str, Any] = {}

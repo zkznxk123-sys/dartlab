@@ -40,6 +40,7 @@ class DiscordAdapter(ChannelAdapter):
 
         @bot.event
         async def onReady():
+            """Discord 봇 ready event — bot 준비 완료 시 slash command 동기화."""
             logger.info("Discord 봇 준비 완료: %s", bot.user)
             try:
                 synced = await bot.tree.sync()
@@ -50,6 +51,7 @@ class DiscordAdapter(ChannelAdapter):
         @bot.tree.command(name="ask", description="DartLab 기업 분석")
         @app_commands.describe(query="종목명 + 질문 (예: 삼성전자 배당 분석)")
         async def askCmd(interaction: discord.Interaction, query: str):
+            """/ask slash command — interaction → DartLab 분석 위임."""
             await interaction.response.defer()
             channelId = str(interaction.channelId)
 
@@ -60,6 +62,7 @@ class DiscordAdapter(ChannelAdapter):
 
         @bot.event
         async def onMessage(message: discord.Message):
+            """Discord 메시지 event — DM 또는 mention 시 DartLab 분석 위임."""
             if message.author == bot.user:
                 return
             # DM이거나 봇이 멘션된 경우

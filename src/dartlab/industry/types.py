@@ -29,6 +29,7 @@ class IndustryDef:
     stages: list[StageInfo]
 
     def stageByKey(self, key: str) -> StageInfo | None:
+        """stageByKey — TODO 한국어 동작 설명."""
         for s in self.stages:
             if s.key == key:
                 return s
@@ -56,6 +57,7 @@ class IndustryNode:
     revenue: float | None = None  # 매출액 (원)
 
     def toDict(self) -> dict:
+        """toDict — TODO 한국어 동작 설명."""
         return {
             "stockCode": self.stockCode,
             "corpName": self.corpName,
@@ -72,6 +74,7 @@ class IndustryNode:
 
     @staticmethod
     def fromDict(d: dict) -> IndustryNode:
+        """fromDict — TODO 한국어 동작 설명."""
         return IndustryNode(
             stockCode=d.get("stockCode", ""),
             corpName=d.get("corpName", ""),
@@ -105,6 +108,7 @@ class IndustryEdge:
     ratio: float | None = None  # 매입비중 (%)
 
     def toDict(self) -> dict:
+        """toDict — TODO 한국어 동작 설명."""
         return {
             "fromCode": self.fromCode,
             "fromName": self.fromName,
@@ -122,6 +126,7 @@ class IndustryEdge:
 
     @staticmethod
     def fromDict(d: dict) -> IndustryEdge:
+        """fromDict — TODO 한국어 동작 설명."""
         return IndustryEdge(
             fromCode=d.get("fromCode", ""),
             fromName=d.get("fromName", ""),

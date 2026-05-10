@@ -88,6 +88,7 @@ class Entry:
     holding: str = ""
 
     def isPending(self) -> bool:
+        """isPending — TODO 한국어 동작 설명."""
         return self.status == "pending"
 
 

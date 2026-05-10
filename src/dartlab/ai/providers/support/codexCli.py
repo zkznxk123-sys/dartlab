@@ -81,6 +81,7 @@ def _runCodexMetaCommand(*args: str, timeout: int = 10) -> tuple[int, str, str] 
 
 
 def loadCodexConfig() -> dict[str, Any]:
+    """loadCodexConfig — TODO 한국어 동작 설명."""
     if not _CODEX_CONFIG_PATH.exists():
         return {}
     try:
@@ -92,6 +93,7 @@ def loadCodexConfig() -> dict[str, Any]:
 
 
 def getCodexConfiguredModel() -> str | None:
+    """getCodexConfiguredModel — TODO 한국어 동작 설명."""
     data = loadCodexConfig()
     root_model = data.get("model")
     if isinstance(root_model, str) and root_model.strip():
@@ -117,6 +119,7 @@ def getCodexConfiguredModel() -> str | None:
 
 
 def getCodexModelCatalog() -> list[str]:
+    """getCodexModelCatalog — TODO 한국어 동작 설명."""
     models: list[str] = []
     configured = getCodexConfiguredModel()
     if configured:
@@ -184,6 +187,7 @@ def _parseLoginStatus(stdout: str, stderr: str, returncode: int) -> tuple[bool, 
 
 
 def inspectCodexCli() -> dict[str, Any]:
+    """inspectCodexCli — TODO 한국어 동작 설명."""
     result: dict[str, Any] = {
         "installed": False,
         "version": None,
@@ -247,6 +251,7 @@ def inspectCodexCli() -> dict[str, Any]:
 
 
 def logoutCodexCli(timeout: int = 15) -> None:
+    """logoutCodexCli — TODO 한국어 동작 설명."""
     info = inspectCodexCli()
     if not info.get("installed"):
         raise FileNotFoundError("Codex CLI가 설치되어 있지 않습니다.")
@@ -261,6 +266,7 @@ def logoutCodexCli(timeout: int = 15) -> None:
 
 
 def inferCodexSandbox(messages: list[dict[str, str]], override: str | None = None) -> str:
+    """inferCodexSandbox — TODO 한국어 동작 설명."""
     info = inspectCodexCli()
     sandbox_modes = set(info.get("sandboxModes") or [])
 
@@ -282,6 +288,7 @@ def _looksLikeCodeTask(text: str) -> bool:
 
 
 def buildCodexExecCommand(*, model: str | None = None, sandbox: str = "read-only") -> list[str]:
+    """buildCodexExecCommand — TODO 한국어 동작 설명."""
     exe = codexPath() or "codex"
     cmd = [exe, "exec", "-", "--json", "--skip-git-repo-check", "--sandbox", sandbox]
     if model:
@@ -290,6 +297,7 @@ def buildCodexExecCommand(*, model: str | None = None, sandbox: str = "read-only
 
 
 def parseCodexJsonl(output: str) -> tuple[str, dict[str, int] | None]:
+    """parseCodexJsonl — TODO 한국어 동작 설명."""
     answer = ""
     usage: dict[str, int] = {}
 
@@ -328,6 +336,7 @@ def runCodexExec(
     cwd: str | None = None,
     timeout: int = 300,
 ) -> tuple[str, dict[str, int] | None]:
+    """runCodexExec — TODO 한국어 동작 설명."""
     cmd = buildCodexExecCommand(model=model, sandbox=sandbox)
 
     try:

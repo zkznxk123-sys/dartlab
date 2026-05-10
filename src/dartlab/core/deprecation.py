@@ -55,8 +55,11 @@ def deprecated(
     """
 
     def decorator(fn):
+        """decorator — TODO 한국어 동작 설명."""
+
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
+            """wrapper — TODO 한국어 동작 설명."""
             warnDeprecated(fn.__qualname__, removeVersion, alternative=alternative)
             return fn(*args, **kwargs)
 

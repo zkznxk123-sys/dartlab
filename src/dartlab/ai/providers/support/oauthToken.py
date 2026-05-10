@@ -53,6 +53,7 @@ def _saveToken(data: dict[str, Any]) -> None:
 
 
 def loadToken() -> dict[str, Any] | None:
+    """loadToken — TODO 한국어 동작 설명."""
     env_token = os.environ.get("DARTLAB_OAUTH_TOKEN")
     if env_token:
         return {"access_token": env_token, "source": "env"}
@@ -75,6 +76,7 @@ def loadToken() -> dict[str, Any] | None:
 
 
 def revokeToken() -> None:
+    """revokeToken — TODO 한국어 동작 설명."""
     getSecretStore().delete(_TOKEN_SECRET_NAME)
     for path in _tokenCandidates():
         try:
@@ -85,6 +87,7 @@ def revokeToken() -> None:
 
 
 def getAccountId() -> str | None:
+    """getAccountId — TODO 한국어 동작 설명."""
     token = loadToken()
     if not token:
         return None
@@ -96,6 +99,7 @@ def getAccountId() -> str | None:
 
 
 def isAuthenticated() -> bool:
+    """isAuthenticated — TODO 한국어 동작 설명."""
     return getValidToken() is not None
 
 
@@ -107,6 +111,7 @@ def _pkcePair() -> tuple[str, str]:
 
 
 def buildAuthUrl() -> tuple[str, str, str]:
+    """buildAuthUrl — TODO 한국어 동작 설명."""
     authorize_url = os.environ.get("DARTLAB_OAUTH_AUTHORIZE_URL", CHATGPT_AUTH_URL)
     client_id = os.environ.get("DARTLAB_OAUTH_CLIENT_ID", CHATGPT_CLIENT_ID)
     verifier, challenge = _pkcePair()
@@ -130,6 +135,7 @@ def buildAuthUrl() -> tuple[str, str, str]:
 
 
 def exchangeCode(code: str, verifier: str) -> dict[str, Any]:
+    """exchangeCode — TODO 한국어 동작 설명."""
     token_url = os.environ.get("DARTLAB_OAUTH_TOKEN_URL", CHATGPT_TOKEN_URL)
     client_id = os.environ.get("DARTLAB_OAUTH_CLIENT_ID", CHATGPT_CLIENT_ID)
     payload = urlencode(
@@ -152,6 +158,7 @@ def exchangeCode(code: str, verifier: str) -> dict[str, Any]:
 
 
 def refreshAccessToken() -> dict[str, Any] | None:
+    """refreshAccessToken — TODO 한국어 동작 설명."""
     token = loadToken()
     if not token or not token.get("refresh_token"):
         raise TokenRefreshError("저장된 refresh_token이 없습니다. 재로그인이 필요합니다.")
@@ -180,6 +187,7 @@ def refreshAccessToken() -> dict[str, Any] | None:
 
 
 def getValidToken() -> str | None:
+    """getValidToken — TODO 한국어 동작 설명."""
     token = loadToken()
     if not token:
         return None

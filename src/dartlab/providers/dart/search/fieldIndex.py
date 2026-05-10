@@ -79,6 +79,7 @@ class _IncrementalBuilder:
         self.docLengths: list[int] = []
 
     def addDoc(self, text: str) -> None:
+        """addDoc — TODO 한국어 동작 설명."""
         docId = len(self.docLengths)
         if not text:
             self.docLengths.append(0)
@@ -96,6 +97,7 @@ class _IncrementalBuilder:
             self.postings[sid].append((docId, c))
 
     def finalize(self) -> dict:
+        """finalize — TODO 한국어 동작 설명."""
         n = len(self.docLengths)
         nStems = len(self.stemToId)
         offsets = np.zeros(nStems + 1, dtype=np.int64)
@@ -388,6 +390,7 @@ def rebuildMain(
     totalDocs = 0
 
     def feedDf(df: pl.DataFrame, source: str) -> int:
+        """feedDf — TODO 한국어 동작 설명."""
         added = 0
         for row in df.iter_rows(named=True):
             content = (row.get("section_content") or "")[:contentLimit]

@@ -15,13 +15,17 @@ from dartlab.ai.tools.types import ToolSpec
 
 
 class DartLabProvider(BaseProvider):
+    """DartLabProvider — TODO 한국어 클래스 설명."""
+
     name = "dartlab"
     defaultModel = "dartlab-research-graph"
 
     def checkAvailable(self) -> bool:
+        """checkAvailable — TODO 한국어 동작 설명."""
         return True
 
     def toolSchema(self, spec: ToolSpec) -> dict[str, Any]:
+        """toolSchema — TODO 한국어 동작 설명."""
         return {
             "name": spec.name,
             "description": spec.description,
@@ -35,6 +39,7 @@ class DartLabProvider(BaseProvider):
         *,
         stream: bool = True,
     ) -> Iterator[LLMEvent]:
+        """complete — TODO 한국어 동작 설명."""
         yield LLMEvent(
             "stop",
             {"reason": "dartlab_research_graph", "usage": {}},

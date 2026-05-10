@@ -15,6 +15,8 @@ from dartlab.story.templates import TEMPLATE_ORDER
 
 @dataclass(frozen=True)
 class ReportType:
+    """ReportType — TODO 한국어 클래스 설명."""
+
     key: str
     label: str
     description: str

@@ -46,6 +46,7 @@ class TelegramAdapter(ChannelAdapter):
         adapter = self
 
         async def onStart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+            """/start command handler — 사용 안내 메시지 전송."""
             if update.effective_chat:
                 await adapter.sendText(
                     str(update.effective_chat.id),
@@ -53,6 +54,7 @@ class TelegramAdapter(ChannelAdapter):
                 )
 
         async def onAsk(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+            """/ask command handler — args 를 DartLab 분석으로 위임."""
             if update.effective_chat and context.args:
                 text = " ".join(context.args)
                 await adapter.handleAsk(str(update.effective_chat.id), text)
@@ -63,6 +65,7 @@ class TelegramAdapter(ChannelAdapter):
                 )
 
         async def onMessage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+            """일반 메시지 handler — / 로 시작하지 않으면 DartLab 분석으로 위임."""
             if update.effective_chat and update.message and update.message.text:
                 text = update.message.text.strip()
                 if text.startswith("/"):

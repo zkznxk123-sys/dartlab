@@ -629,6 +629,7 @@ def searchNgram(
 
 
 def ngramStats() -> dict:
+    """ngramStats — TODO 한국어 동작 설명."""
     outDir = _stemIndexDir()
     npzPath = outDir / "stemIndex.npz"
     dictPath = outDir / "stemDict.json"

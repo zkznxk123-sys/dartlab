@@ -70,6 +70,7 @@ class _EdgarNotesWrapper:
         raise AttributeError(f"EDGAR notes에 '{name}' 카테고리 없음. 지원: {availableCategories()}")
 
     def all(self) -> pl.DataFrame | None:
+        """all — TODO 한국어 동작 설명."""
         return self._company.docs.notes(None)
 
     def keys(self) -> list[str]:
@@ -83,6 +84,7 @@ class _EdgarNotesWrapper:
         return [CATEGORY_LABELS.get(k, k) for k in self.keys()]
 
     def quarterly(self, query: str | None = None) -> pl.DataFrame | None:
+        """quarterly — TODO 한국어 동작 설명."""
         return self._company.docs.notes(query)
 
 
@@ -217,6 +219,7 @@ def _sortDocTopics(topics: list[str]) -> list[str]:
     """docs topics를 form별 → item 순으로 정렬."""
 
     def sortKey(topic: str) -> tuple[int, int, str]:
+        """sortKey — TODO 한국어 동작 설명."""
         if "::" not in topic:
             return (99, 0, topic)
         formType, itemId = topic.split("::", 1)
@@ -2386,10 +2389,12 @@ class Company:
 
     @property
     def contextSlices(self) -> pl.DataFrame | None:
+        """contextSlices — TODO 한국어 동작 설명."""
         return self._docs.contextSlices if hasattr(self._docs, "contextSlices") else None
 
     @property
     def retrievalBlocks(self) -> pl.DataFrame | None:
+        """retrievalBlocks — TODO 한국어 동작 설명."""
         return self._docs.retrievalBlocks if hasattr(self._docs, "retrievalBlocks") else None
 
     @property
@@ -2413,6 +2418,7 @@ class Company:
 
     @property
     def rank(self):
+        """rank — TODO 한국어 동작 설명."""
         return None  # US 피어 랭킹 미지원 (향후 구현 예정)
 
     @property

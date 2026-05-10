@@ -45,6 +45,7 @@ def detectCodex() -> dict[str, Any]:
 
 
 def getCodexInstallGuide() -> str:
+    """getCodexInstallGuide — TODO 한국어 동작 설명."""
     return (
         "[ Codex CLI 설치 안내 ]\n\n"
         "1. npm install -g @openai/codex\n"

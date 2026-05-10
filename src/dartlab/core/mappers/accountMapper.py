@@ -14,6 +14,7 @@ class AccountMapper(BaseMapper):
 
     @property
     def name(self) -> str:
+        """name — TODO 한국어 동작 설명."""
         return "account"
 
     def _data(self) -> dict:
@@ -51,6 +52,7 @@ class AccountMapper(BaseMapper):
         return None
 
     def stats(self) -> MapperStats:
+        """stats — TODO 한국어 동작 설명."""
         data = self._data()
         mappings = data.get("mappings", {})
         standards = data.get("standardAccounts", {})
@@ -64,6 +66,7 @@ class AccountMapper(BaseMapper):
         )
 
     def allKeys(self) -> list[str]:
+        """allKeys — TODO 한국어 동작 설명."""
         return list(self._mappings().keys())
 
     def snakeIds(self) -> list[str]:

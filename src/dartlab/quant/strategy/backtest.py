@@ -770,9 +770,4 @@ def cpcv(
     )
 
 
-# ── Deprecated snake_case aliases ────────────────────────
-from dartlab.quant._helpers import _deprecatedAlias as _dep
-
-walk_forward = _dep(walkForward, "walk_forward")
-vector_backtest = _dep(vectorBacktest, "vector_backtest")
-multi_asset_backtest = _dep(multiAssetBacktest, "multi_asset_backtest")
+# 0.10 BC 깸 — snake_case alias 제거.

@@ -43,6 +43,7 @@ class SlackAdapter(ChannelAdapter):
 
         @app.event("app_mention")
         def onMention(event, _say):
+            """onMention — TODO 한국어 동작 설명."""
             text = event.get("text", "")
             # @bot 멘션 제거
             import re
@@ -56,6 +57,7 @@ class SlackAdapter(ChannelAdapter):
 
         @app.event("message")
         def onDm(event, _say):
+            """onDm — TODO 한국어 동작 설명."""
             # DM에서는 멘션 없이 바로 처리
             if event.get("channel_type") != "im":
                 return

@@ -42,6 +42,7 @@ class DartLabArgumentParser(argparse.ArgumentParser):
     """Parser that exits with stable CLI usage codes."""
 
     def error(self, message):
+        """error — TODO 한국어 동작 설명."""
         self.print_usage()
         raise SystemExit(f"{self.prog}: error: {message}")
 

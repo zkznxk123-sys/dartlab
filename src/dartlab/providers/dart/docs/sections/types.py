@@ -45,20 +45,25 @@ class YearSections:
 
     @property
     def savings(self) -> float:
+        """savings — TODO 한국어 동작 설명."""
         if self.totalOriginalChars == 0:
             return 0.0
         return 1 - (self.totalTextChars / self.totalOriginalChars)
 
     def byMajor(self, majorNum: int) -> list[SectionChunk]:
+        """byMajor — TODO 한국어 동작 설명."""
         return [c for c in self.chunks if c.majorNum == majorNum]
 
     def byKind(self, kind: str) -> list[SectionChunk]:
+        """byKind — TODO 한국어 동작 설명."""
         return [c for c in self.chunks if c.kind == kind]
 
     def textChunks(self) -> list[SectionChunk]:
+        """textChunks — TODO 한국어 동작 설명."""
         return [c for c in self.chunks if c.kind not in ("skipped", "table_only")]
 
     def search(self, keyword: str) -> list[SectionChunk]:
+        """search — TODO 한국어 동작 설명."""
         kw = keyword.lower()
         return [c for c in self.chunks if kw in c.path.lower() or kw in c.textContent.lower()]
 
@@ -138,16 +143,19 @@ class SectionResult:
 
     @property
     def topics(self) -> list[str]:
+        """topics — TODO 한국어 동작 설명."""
         return sorted(self._topicMap.keys())
 
     @property
     def latest(self) -> YearSections | None:
+        """latest — TODO 한국어 동작 설명."""
         if not self.periods:
             return None
         return self.yearSections.get(self.periods[0])
 
     @property
     def years(self) -> list[str]:
+        """years — TODO 한국어 동작 설명."""
         return self.periods
 
     def search(self, keyword: str) -> dict[str, dict[str, str]]:

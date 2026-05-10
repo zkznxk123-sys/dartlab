@@ -114,12 +114,4 @@ def riskBudgetLeverage(
     return float(max(0.0, min(maxLeverage, riskBudget / portfolioVol)))
 
 
-# ── Deprecated snake_case aliases ────────────────────────
-from dartlab.quant._helpers import _deprecatedAlias as _dep
-
-kelly_fraction = _dep(kellyFraction, "kelly_fraction")
-kelly_continuous = _dep(kellyContinuous, "kelly_continuous")
-inverse_volatility_weights = _dep(inverseVolatilityWeights, "inverse_volatility_weights")
-volatility_target_leverage = _dep(volatilityTargetLeverage, "volatility_target_leverage")
-sharpe_based_size = _dep(sharpeBasedSize, "sharpe_based_size")
-risk_budget_leverage = _dep(riskBudgetLeverage, "risk_budget_leverage")
+# 0.10 BC 깸 — snake_case alias 제거.

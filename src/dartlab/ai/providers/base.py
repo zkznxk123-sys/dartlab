@@ -15,6 +15,8 @@ from dartlab.ai.types import LLMConfig, LLMResponse, ToolResponse
 # {"reason","usage"}). agent loop 가 kind 로 분기.
 @dataclass(frozen=True)
 class LLMEvent:
+    """LLMEvent — TODO 한국어 클래스 설명."""
+
     kind: str
     data: dict[str, Any] = field(default_factory=dict)
 
@@ -84,6 +86,7 @@ class BaseProvider(ABC):
         *,
         toolChoice: str | None = None,
     ) -> ToolResponse:
+        """completeWithTools — TODO 한국어 동작 설명."""
         response = self.complete(messages)
         return ToolResponse(
             answer=response.answer,
@@ -101,10 +104,12 @@ class BaseProvider(ABC):
         *,
         toolChoice: str | None = None,
     ) -> Generator:
+        """streamWithTools — TODO 한국어 동작 설명."""
         resp = self.completeWithTools(messages, tools, toolChoice=toolChoice)
         yield resp
 
     def formatToolResult(self, toolCallId: str, result: str) -> dict:
+        """formatToolResult — TODO 한국어 동작 설명."""
         return {
             "role": "tool",
             "tool_call_id": toolCallId,
@@ -116,6 +121,7 @@ class BaseProvider(ABC):
         answer: str | None,
         toolCalls: list,
     ) -> dict:
+        """formatAssistantToolCalls — TODO 한국어 동작 설명."""
         import json
 
         msg: dict = {"role": "assistant", "content": answer}

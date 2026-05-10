@@ -92,6 +92,7 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
 
 
 def applyPeriodFilter(payload: Any, period: str | None) -> Any:
+    """applyPeriodFilter — TODO 한국어 동작 설명."""
     if period is None or not isinstance(payload, pl.DataFrame) or payload.is_empty():
         return payload
     requestedPeriod = str(period)
@@ -112,6 +113,7 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
 
 
 def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame | None:
+    """transposeToVertical — TODO 한국어 동작 설명."""
     from dartlab.core.show import transposeToVertical as _coreTranspose
 
     return _coreTranspose(wide, periods)
@@ -128,12 +130,14 @@ def buildBlockIndex(topicRows: pl.DataFrame) -> pl.DataFrame:
 
 
 def shapeStr(df: pl.DataFrame | None) -> str:
+    """shapeStr — TODO 한국어 동작 설명."""
     if df is None:
         return "-"
     return f"{df.height}x{df.width}"
 
 
 def periodsStr(df: pl.DataFrame | None) -> str:
+    """periodsStr — TODO 한국어 동작 설명."""
     if df is None:
         return "-"
     periodCols = [c for c in df.columns if _PERIOD_COLUMN_RE.fullmatch(c)]
@@ -143,12 +147,14 @@ def periodsStr(df: pl.DataFrame | None) -> str:
 
 
 def previewFinance(df: pl.DataFrame | None) -> str:
+    """previewFinance — TODO 한국어 동작 설명."""
     if isEmptyDf(df):
         return "-"
     return f"{df.height} accounts"
 
 
 def previewDocsCell(topicRows: pl.DataFrame, periodCols: list[str]) -> str:
+    """previewDocsCell — TODO 한국어 동작 설명."""
     for row in topicRows.iter_rows(named=True):
         for col in periodCols:
             val = row.get(col)

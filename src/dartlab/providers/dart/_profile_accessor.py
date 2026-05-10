@@ -91,6 +91,7 @@ class _ProfileAccessor:
 
     @property
     def facts(self) -> pl.DataFrame | None:
+        """facts — TODO 한국어 동작 설명."""
         cacheKey = "_profileFacts"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
@@ -264,10 +265,12 @@ class _ProfileAccessor:
 
     @property
     def sections(self) -> pl.DataFrame | None:
+        """sections — TODO 한국어 동작 설명."""
         return self._company._getPrimary("sections")
 
     @property
     def availableTopics(self) -> list[str]:
+        """availableTopics — TODO 한국어 동작 설명."""
         topics = set()
         if self.sections is not None and "topic" in self.sections.columns:
             topics.update(self.sections["topic"].to_list())
@@ -277,6 +280,7 @@ class _ProfileAccessor:
         return sorted(str(t) for t in topics if t is not None)
 
     def get(self, topic: str) -> Any:
+        """get — TODO 한국어 동작 설명."""
         import warnings
 
         warnings.warn("profile.get(topic) → show(topic) 경로 권장", DeprecationWarning, stacklevel=2)
@@ -294,6 +298,7 @@ class _ProfileAccessor:
         return sections.filter(pl.col("topic") == topic)
 
     def trace(self, topic: str, period: str | None = None) -> pl.DataFrame | dict[str, Any] | None:
+        """trace — TODO 한국어 동작 설명."""
         from dartlab.providers.dart.docs.sections import rawPeriod
 
         requestedPeriod = rawPeriod(period) if isinstance(period, str) else period

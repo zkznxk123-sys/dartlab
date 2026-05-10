@@ -11,6 +11,8 @@ from dartlab.ai.tools.types import ToolSpec
 
 
 class OpenAIProvider(BaseProvider):
+    """OpenAIProvider — TODO 한국어 클래스 설명."""
+
     name = "openai"
     defaultModel = "gpt-4o"
 
@@ -25,6 +27,7 @@ class OpenAIProvider(BaseProvider):
         return OpenAI(apiKey=apiKey, baseUrl=self.config.baseUrl or None)
 
     def checkAvailable(self) -> bool:
+        """checkAvailable — TODO 한국어 동작 설명."""
         if not (self.config.apiKey or os.getenv("OPENAI_API_KEY")):
             return False
         try:
@@ -34,6 +37,7 @@ class OpenAIProvider(BaseProvider):
         return True
 
     def toolSchema(self, spec: ToolSpec) -> dict[str, Any]:
+        """toolSchema — TODO 한국어 동작 설명."""
         return {
             "type": "function",
             "function": {
@@ -50,6 +54,7 @@ class OpenAIProvider(BaseProvider):
         *,
         stream: bool = True,
     ) -> Iterator[LLMEvent]:
+        """complete — TODO 한국어 동작 설명."""
         client = self._client()
         kwargs: dict[str, Any] = {
             "model": self.resolvedModel,

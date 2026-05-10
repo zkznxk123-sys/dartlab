@@ -76,6 +76,7 @@ def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None
     rows: list[tuple[str, str]] = []
 
     def collect(series: dict[str, list[Any]] | None, years: list[Any], payloadTopic: str) -> None:
+        """collect — TODO 한국어 동작 설명."""
         if not series:
             return
         for item, values in series.items():
@@ -142,6 +143,7 @@ def showReportTopic(
 
 
 def reportFrame(company: Company, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
+    """reportFrame — TODO 한국어 동작 설명."""
     if company._report is None:
         return None
     from dartlab.providers.dart.company import _apiTypeForTopic

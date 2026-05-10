@@ -14,6 +14,7 @@ class TopicMapper(BaseMapper):
 
     @property
     def name(self) -> str:
+        """name — TODO 한국어 동작 설명."""
         return "topic"
 
     def _keywords(self) -> dict[str, list[str]]:
@@ -40,6 +41,7 @@ class TopicMapper(BaseMapper):
         return None
 
     def stats(self) -> MapperStats:
+        """stats — TODO 한국어 동작 설명."""
         kw = self._keywords()
         total_keywords = sum(len(v) for v in kw.values())
         return MapperStats(
@@ -51,6 +53,7 @@ class TopicMapper(BaseMapper):
         )
 
     def allKeys(self) -> list[str]:
+        """allKeys — TODO 한국어 동작 설명."""
         return list(self._keywords().keys())
 
     def topicForKeyword(self, keyword: str) -> str | None:

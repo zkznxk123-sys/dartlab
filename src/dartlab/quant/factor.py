@@ -1077,8 +1077,4 @@ def calcFactorICAll(*, market: str = "KR", horizon: int = 5) -> dict | None:
     }
 
 
-# ── Deprecated snake_case aliases ────────────────────────
-from dartlab.quant._helpers import _deprecatedAlias as _dep
-
-factor_exposure_limits = _dep(factorExposureLimits, "factor_exposure_limits")
-hedge_ratio = _dep(hedgeRatio, "hedge_ratio")
+# 0.10 BC 깸 — snake_case alias 제거.

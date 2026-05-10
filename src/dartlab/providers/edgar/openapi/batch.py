@@ -410,6 +410,7 @@ def batchCollectEdgar(
         return tbl
 
     def completeFn(title: str, catSummary: str) -> None:
+        """completeFn — TODO 한국어 동작 설명."""
         with lock:
             completedCount[0] += 1
             for wIdx in range(numWorkers):
@@ -419,10 +420,12 @@ def batchCollectEdgar(
                     break
 
     def statusFn(workerIdx: int, ticker: str, title: str) -> None:
+        """statusFn — TODO 한국어 동작 설명."""
         with lock:
             workerLines[workerIdx] = f"{title} ({ticker})"
 
     def periodFn(workerIdx: int, title: str, detail: str) -> None:
+        """periodFn — TODO 한국어 동작 설명."""
         with lock:
             workerLines[workerIdx] = f"{title} | {detail}"
 

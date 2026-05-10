@@ -24,6 +24,8 @@ _DATA_DIR = Path(__file__).resolve().parent.parent.parent / "industry"
 
 
 class Sector(str, Enum):
+    """Sector — TODO 한국어 클래스 설명."""
+
     ENERGY = "에너지"
     MATERIALS = "소재"
     INDUSTRIALS = "산업재"
@@ -100,6 +102,8 @@ class IndustryGroup(str, Enum):
 
 @dataclass
 class SectorInfo:
+    """SectorInfo — TODO 한국어 클래스 설명."""
+
     sector: Sector
     industryGroup: IndustryGroup
     confidence: float
@@ -113,6 +117,8 @@ class SectorInfo:
 
 @dataclass
 class SectorParams:
+    """SectorParams — TODO 한국어 클래스 설명."""
+
     discountRate: float = 10.0
     growthRate: float = 3.0
     perMultiple: float = 15
@@ -317,9 +323,11 @@ class MarketParams:
 
     @property
     def totalErp(self) -> float:
+        """totalErp — TODO 한국어 동작 설명."""
         return self.equityRiskPremium + self.countryRiskPremium
 
     def ke(self, beta: float = 1.0) -> float:
+        """ke — TODO 한국어 동작 설명."""
         return self.riskFreeRate + beta * self.totalErp
 
 

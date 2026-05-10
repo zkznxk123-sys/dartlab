@@ -24,16 +24,20 @@ class _DocsAccessor:
 
     @property
     def raw(self) -> pl.DataFrame | None:
+        """raw — TODO 한국어 동작 설명."""
         return self._company.rawDocs
 
     def filings(self) -> pl.DataFrame:
+        """filings — TODO 한국어 동작 설명."""
         return self._company._filings()
 
     @property
     def sections(self) -> "_SectionsSource | None":
+        """sections — TODO 한국어 동작 설명."""
         return self._sectionsAccessor if self._company._hasDocs else None
 
     def sectionsOrdered(self, *, recentFirst: bool = True, annualAsQ4: bool = True) -> pl.DataFrame | None:
+        """sectionsOrdered — TODO 한국어 동작 설명."""
         sections = self.sections
         return None if sections is None else sections.ordered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
 
@@ -44,12 +48,14 @@ class _DocsAccessor:
         recentFirst: bool = True,
         annualAsQ4: bool = True,
     ) -> pl.DataFrame | None:
+        """sectionsCoverage — TODO 한국어 동작 설명."""
         sections = self.sections
         return (
             None if sections is None else sections.coverage(topic=topic, recentFirst=recentFirst, annualAsQ4=annualAsQ4)
         )
 
     def sectionsFreq(self, freqScope: str, *, includeMixed: bool = True) -> pl.DataFrame | None:
+        """sectionsFreq — TODO 한국어 동작 설명."""
         sections = self.sections
         return None if sections is None else sections.freq(freqScope, includeMixed=includeMixed)
 
@@ -60,6 +66,7 @@ class _DocsAccessor:
         freqScope: str = "all",
         includeMixed: bool = True,
     ) -> pl.DataFrame | None:
+        """sectionsSemanticRegistry — TODO 한국어 동작 설명."""
         sections = self.sections
         return (
             None
@@ -74,6 +81,7 @@ class _DocsAccessor:
         freqScope: str = "all",
         includeMixed: bool = True,
     ) -> pl.DataFrame | None:
+        """sectionsSemanticCollisions — TODO 한국어 동작 설명."""
         sections = self.sections
         return (
             None
@@ -89,6 +97,7 @@ class _DocsAccessor:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
+        """sectionsStructureRegistry — TODO 한국어 동작 설명."""
         sections = self.sections
         return (
             None
@@ -109,6 +118,7 @@ class _DocsAccessor:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
+        """sectionsStructureCollisions — TODO 한국어 동작 설명."""
         sections = self.sections
         return (
             None
@@ -130,6 +140,7 @@ class _DocsAccessor:
         changedOnly: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
+        """sectionsStructureEvents — TODO 한국어 동작 설명."""
         sections = self.sections
         return (
             None
@@ -151,6 +162,7 @@ class _DocsAccessor:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
+        """sectionsStructureSummary — TODO 한국어 동작 설명."""
         sections = self.sections
         return (
             None
@@ -173,6 +185,7 @@ class _DocsAccessor:
         latestOnly: bool = True,
         changedOnly: bool = True,
     ) -> pl.DataFrame | None:
+        """sectionsStructureChanges — TODO 한국어 동작 설명."""
         sections = self.sections
         return (
             None
@@ -189,18 +202,22 @@ class _DocsAccessor:
 
     @property
     def retrievalBlocks(self) -> pl.DataFrame | None:
+        """retrievalBlocks — TODO 한국어 동작 설명."""
         return self._company._retrievalBlocks()
 
     @property
     def contextSlices(self) -> pl.DataFrame | None:
+        """contextSlices — TODO 한국어 동작 설명."""
         return self._company._contextSlices()
 
     @property
     def notes(self):
+        """notes — TODO 한국어 동작 설명."""
         return self._company._notesAccessor
 
     @property
     def business(self):
+        """business — TODO 한국어 동작 설명."""
         import warnings
 
         warnings.warn("docs.business → show('business') 경로 권장", DeprecationWarning, stacklevel=2)
@@ -208,6 +225,7 @@ class _DocsAccessor:
 
     @property
     def mdna(self):
+        """mdna — TODO 한국어 동작 설명."""
         import warnings
 
         warnings.warn("docs.mdna → show('mdna') 경로 권장", DeprecationWarning, stacklevel=2)
@@ -215,10 +233,12 @@ class _DocsAccessor:
 
     @property
     def rawMaterial(self):
+        """rawMaterial — TODO 한국어 동작 설명."""
         import warnings
 
         warnings.warn("docs.rawMaterial → show('rawMaterial') 경로 권장", DeprecationWarning, stacklevel=2)
         return self._company._sectionsSubtopicWide("rawMaterial") or self._company._safePrimary("rawMaterial")
 
     def subtables(self, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
+        """subtables — TODO 한국어 동작 설명."""
         return self._company._sectionsSubtopicLong(topic) if raw else self._company._sectionsSubtopicWide(topic)

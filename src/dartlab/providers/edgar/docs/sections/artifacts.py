@@ -13,6 +13,7 @@ _ARTIFACT_PACKAGE = "dartlab.providers.edgar.docs.sections.artifactData"
 
 @contextmanager
 def packagedArtifactPath(name: str) -> Iterator[Path]:
+    """packagedArtifactPath — TODO 한국어 동작 설명."""
     ref = files(_ARTIFACT_PACKAGE) / name
     with as_file(ref) as path:
         yield path
@@ -23,6 +24,7 @@ def _outputDir() -> Path:
 
 
 def loadCanonicalRows() -> pl.DataFrame | None:
+    """loadCanonicalRows — TODO 한국어 동작 설명."""
     try:
         with packagedArtifactPath("canonicalRows.parquet") as path:
             return pl.read_parquet(path)
@@ -34,6 +36,7 @@ def loadCanonicalRows() -> pl.DataFrame | None:
 
 
 def loadCoverageSnapshot() -> dict[str, object] | None:
+    """loadCoverageSnapshot — TODO 한국어 동작 설명."""
     try:
         ref = files(_ARTIFACT_PACKAGE) / "mappingCoverage.latest.json"
         return json.loads(ref.read_text(encoding="utf-8"))
@@ -45,6 +48,7 @@ def loadCoverageSnapshot() -> dict[str, object] | None:
 
 
 def loadTopicDrafts() -> dict[str, object] | None:
+    """loadTopicDrafts — TODO 한국어 동작 설명."""
     try:
         ref = files(_ARTIFACT_PACKAGE) / "formTopicDrafts.json"
         return json.loads(ref.read_text(encoding="utf-8"))

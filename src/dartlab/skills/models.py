@@ -147,6 +147,7 @@ class SkillSpec:
     storyboardKey: str | None = None
 
     def toDict(self) -> dict[str, Any]:
+        """toDict — TODO 한국어 동작 설명."""
         return asdict(self)
 
 
@@ -159,6 +160,7 @@ class SkillMatch:
     reasons: list[str] = field(default_factory=list)
 
     def toDict(self) -> dict[str, Any]:
+        """toDict — TODO 한국어 동작 설명."""
         data = asdict(self)
         data["skill"] = self.skill.toDict()
         return data
@@ -174,4 +176,5 @@ class EvidenceCheckResult:
     missing: list[str] = field(default_factory=list)
 
     def toDict(self) -> dict[str, Any]:
+        """toDict — TODO 한국어 동작 설명."""
         return asdict(self)

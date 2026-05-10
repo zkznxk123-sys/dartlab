@@ -145,4 +145,5 @@ def topicAccountPriority(topic: str) -> tuple[tuple[str, str], ...]:
 
 
 def availableTopics() -> list[str]:
+    """availableTopics — TODO 한국어 동작 설명."""
     return list(_TOPIC_COLUMNS.keys())

@@ -617,9 +617,9 @@ def _setupApikeyInteractive(provider: str):
 
     spec = _PROVIDERS.get(provider)
     if spec is None or not spec.env_key:
-        from dartlab.ai.settings.aiSetup import provider_guide
+        from dartlab.ai.settings.aiSetup import providerGuide
 
-        print(provider_guide(provider))
+        print(providerGuide(provider))
         return
 
     from dartlab.core.env import promptAndSave
@@ -843,6 +843,7 @@ class _Module(sys.modules[__name__].__class__):
 
     @verbose.setter
     def verbose(self, value):
+        """verbose — TODO 한국어 동작 설명."""
         config.verbose = value
 
     @property
@@ -852,6 +853,7 @@ class _Module(sys.modules[__name__].__class__):
 
     @askLog.setter
     def askLog(self, value):
+        """askLog — TODO 한국어 동작 설명."""
         config.askLog = bool(value)
 
     @property
@@ -861,6 +863,7 @@ class _Module(sys.modules[__name__].__class__):
 
     @dataDir.setter
     def dataDir(self, value):
+        """dataDir — TODO 한국어 동작 설명."""
         config.dataDir = str(value)
 
     def __getattr__(self, name):

@@ -59,6 +59,7 @@ class AsyncEdgarClient:
 
     @property
     def headers(self) -> dict[str, str]:
+        """headers — TODO 한국어 동작 설명."""
         return {"User-Agent": self._userAgent}
 
     async def _throttle(self) -> None:

@@ -129,8 +129,4 @@ def listStyles() -> list[dict]:
     return items
 
 
-# ── Deprecated snake_case aliases ────────────────────────
-from dartlab.quant._helpers import _deprecatedAlias as _dep
-
-resolve_style = _dep(resolveStyle, "resolve_style")
-list_styles = _dep(listStyles, "list_styles")
+# 0.10 BC 깸 — snake_case alias 제거.

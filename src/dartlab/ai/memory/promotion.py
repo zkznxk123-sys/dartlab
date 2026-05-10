@@ -38,6 +38,7 @@ class PromotionCandidate:
         return getattr(self, key)
 
     def get(self, key: str, default: Any = None) -> Any:
+        """get — TODO 한국어 동작 설명."""
         return getattr(self, key, default)
 
 

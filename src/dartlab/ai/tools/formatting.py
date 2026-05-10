@@ -25,6 +25,7 @@ _HTML_TAG_RE = re.compile(r"<[^<>]+>")
 
 
 def formatMoney(value: Any) -> str:
+    """formatMoney — TODO 한국어 동작 설명."""
     try:
         number = float(value)
     except (TypeError, ValueError):
@@ -39,6 +40,7 @@ def formatMoney(value: Any) -> str:
 
 
 def formatPercent(value: Any) -> str:
+    """formatPercent — TODO 한국어 동작 설명."""
     try:
         number = float(value)
     except (TypeError, ValueError):
@@ -49,6 +51,7 @@ def formatPercent(value: Any) -> str:
 
 
 def shortText(value: Any, *, limit: int = 500) -> str:
+    """shortText — TODO 한국어 동작 설명."""
     text = " ".join(str(value or "").split())
     if len(text) <= limit:
         return text

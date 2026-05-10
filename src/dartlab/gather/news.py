@@ -10,8 +10,8 @@ from html import unescape
 
 import polars as pl
 
-from .resilience import circuit_breaker as _circuit_breaker
-from .resilience import health_tracker as _health_tracker
+from .resilience import circuitBreaker as _circuit_breaker
+from .resilience import healthTracker as _health_tracker
 from .types import NewsItem
 
 log = logging.getLogger(__name__)

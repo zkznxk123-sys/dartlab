@@ -140,9 +140,9 @@ def apiStatus(
     # Room 정보 (터널 모드에서 협업 세션 활성 시)
     room_info = None
     try:
-        from ..room import room_manager
+        from ..room import roomManager
 
-        active_room = room_manager.getRoom()
+        active_room = roomManager.getRoom()
         if active_room is not None:
             room_info = {
                 "roomId": active_room.roomId,
@@ -163,15 +163,15 @@ def apiStatus(
     if room_info is not None:
         resp["room"] = room_info
     try:
-        from ..services.channelRuntime import channel_runtime
+        from ..services.channelRuntime import channelRuntime
 
-        resp["channels"] = channel_runtime.status()
+        resp["channels"] = channelRuntime.status()
     except ImportError:
         resp["channels"] = {}
     try:
-        from ..services.devChannelRuntime import dev_channel_runtime
+        from ..services.devChannelRuntime import devChannelRuntime
 
-        resp["channel"] = dev_channel_runtime.status()
+        resp["channel"] = devChannelRuntime.status()
     except ImportError:
         resp["channel"] = {"kind": "devtunnel", "running": False, "url": None, "qrDataUrl": None, "error": None}
     return resp
@@ -312,10 +312,10 @@ def apiDeleteDartKey():
 def apiChannelStart(platform: str, req: ChannelConnectRequest):
     """외부 채널 어댑터 시작."""
     try:
-        from ..services.channelRuntime import channel_runtime
+        from ..services.channelRuntime import channelRuntime
 
         payload = req.model_dump(exclude_none=True)
-        return channel_runtime.start(platform, **payload)
+        return channelRuntime.start(platform, **payload)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=_guideDetail(e)) from e
     except _HANDLED_API_ERRORS as e:
@@ -326,9 +326,9 @@ def apiChannelStart(platform: str, req: ChannelConnectRequest):
 def apiChannelStop(platform: str):
     """외부 채널 어댑터 정지."""
     try:
-        from ..services.channelRuntime import channel_runtime
+        from ..services.channelRuntime import channelRuntime
 
-        return channel_runtime.stop(platform)
+        return channelRuntime.stop(platform)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=_guideDetail(e)) from e
     except _HANDLED_API_ERRORS as e:
@@ -345,9 +345,9 @@ def _requestPort(request: Request) -> int:
 def apiDevChannelStatus():
     """DevTunnels 모바일 접속 채널 상태를 반환한다."""
     try:
-        from ..services.devChannelRuntime import dev_channel_runtime
+        from ..services.devChannelRuntime import devChannelRuntime
 
-        return dev_channel_runtime.status()
+        return devChannelRuntime.status()
     except _HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=500, detail=_guideDetail(e)) from e
 
@@ -356,9 +356,9 @@ def apiDevChannelStatus():
 def apiDevChannelStart(request: Request):
     """현재 Web UI를 모바일에서 열 수 있는 DevTunnels 채널을 시작한다."""
     try:
-        from ..services.devChannelRuntime import dev_channel_runtime
+        from ..services.devChannelRuntime import devChannelRuntime
 
-        return dev_channel_runtime.start(port=_requestPort(request), autoYes=True)
+        return devChannelRuntime.start(port=_requestPort(request), autoYes=True)
     except _HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=500, detail=_guideDetail(e)) from e
 
@@ -367,9 +367,9 @@ def apiDevChannelStart(request: Request):
 def apiDevChannelStop():
     """DevTunnels 채널을 종료한다."""
     try:
-        from ..services.devChannelRuntime import dev_channel_runtime
+        from ..services.devChannelRuntime import devChannelRuntime
 
-        return dev_channel_runtime.stop()
+        return devChannelRuntime.stop()
     except _HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=500, detail=_guideDetail(e)) from e
 
@@ -545,7 +545,10 @@ def _startOauthCallbackServer(port: int):
     from urllib.parse import parse_qs, urlparse
 
     class CallbackHandler(BaseHTTPRequestHandler):
+        """CallbackHandler — TODO 한국어 클래스 설명."""
+
         def do_GET(self):
+            """do_GET — TODO 한국어 동작 설명."""
             parsed = urlparse(self.path)
             if parsed.path != "/auth/callback":
                 self.send_response(404)
@@ -610,6 +613,7 @@ def _startOauthCallbackServer(port: int):
             self.wfile.write(markup.encode("utf-8"))
 
         def logMessage(self, fmt, *args):
+            """logMessage — TODO 한국어 동작 설명."""
             pass
 
     def _runServer():

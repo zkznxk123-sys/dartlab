@@ -27,6 +27,7 @@ class _DocsAccessor:
 
     @property
     def sections(self) -> pl.DataFrame | None:
+        """sections — TODO 한국어 동작 설명."""
         key = "_docs_sections"
         val = self._company._cache.get(key, _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -38,6 +39,7 @@ class _DocsAccessor:
 
     @property
     def retrievalBlocks(self) -> pl.DataFrame | None:
+        """retrievalBlocks — TODO 한국어 동작 설명."""
         key = "_docs_retrievalBlocks"
         val = self._company._cache.get(key, _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -49,6 +51,7 @@ class _DocsAccessor:
 
     @property
     def contextSlices(self) -> pl.DataFrame | None:
+        """contextSlices — TODO 한국어 동작 설명."""
         key = "_docs_contextSlices"
         val = self._company._cache.get(key, _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -80,6 +83,7 @@ class _DocsAccessor:
         return noteCategories(self._company.cik)
 
     def freq(self) -> pl.DataFrame | None:
+        """freq — TODO 한국어 동작 설명."""
         key = "_docs_freq"
         val = self._company._cache.get(key, _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -90,6 +94,7 @@ class _DocsAccessor:
         return val
 
     def coverage(self) -> pl.DataFrame | None:
+        """coverage — TODO 한국어 동작 설명."""
         key = "_docs_coverage"
         val = self._company._cache.get(key, _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -100,6 +105,7 @@ class _DocsAccessor:
         return val
 
     def filings(self) -> pl.DataFrame | None:
+        """filings — TODO 한국어 동작 설명."""
         key = "_docs_filings"
         if key in self._company._cache:
             return self._company._cache[key]

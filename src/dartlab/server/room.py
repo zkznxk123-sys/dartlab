@@ -211,4 +211,4 @@ class RoomManager:
 
 
 # 싱글턴
-room_manager = RoomManager()
+roomManager = RoomManager()

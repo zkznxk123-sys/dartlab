@@ -72,6 +72,7 @@ def _status() -> int:
 
 
 def main() -> int:
+    """main — TODO 한국어 동작 설명."""
     ap = argparse.ArgumentParser(
         prog="dartlab-coreloop", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )

@@ -800,6 +800,7 @@ def _pivotTimeseries(selected: pl.DataFrame) -> pl.DataFrame:
     periodCols = [c for c in pivoted.columns if c != "tag"]
 
     def sortKey(col: str) -> tuple:
+        """sortKey — TODO 한국어 동작 설명."""
         parts = col.split("-")
         if len(parts) == 2:
             fy = int(parts[0])
@@ -844,6 +845,7 @@ def _computeQ4(pivoted: pl.DataFrame, stmtType: str) -> pl.DataFrame:
     allCols = [c for c in pivoted.columns if c != "tag"]
 
     def sortKey(col: str) -> tuple:
+        """sortKey — TODO 한국어 동작 설명."""
         parts = col.split("-")
         if len(parts) == 2:
             fy = int(parts[0])
@@ -915,6 +917,7 @@ def _sanitizeQ4(pivoted: pl.DataFrame, years: list[str]) -> pl.DataFrame:
 
 def _sortPeriods(periods: set[str]) -> list[str]:
     def sortKey(p: str) -> tuple:
+        """sortKey — TODO 한국어 동작 설명."""
         try:
             year, q = parsePeriod(p)
             return (int(year), q)

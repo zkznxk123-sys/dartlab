@@ -24,6 +24,7 @@ from .work import runWork
 def streamLLMPasses(
     question: str, provider: Any, *, graphNodes: tuple[str, ...], **kwargs: Any
 ) -> Iterator[TraceEvent]:
+    """streamLLMPasses — TODO 한국어 동작 설명."""
     state = WorkbenchState(
         question=str(question or "").strip(),
         threadId=str(kwargs.get("threadId") or ""),

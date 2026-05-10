@@ -104,4 +104,4 @@ class CompanyCache:
         return len(self._store)
 
 
-company_cache = CompanyCache()
+companyCache = CompanyCache()

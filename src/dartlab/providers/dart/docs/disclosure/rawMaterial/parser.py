@@ -323,6 +323,7 @@ def parseRawMaterials(content: str) -> list[dict] | None:
                     shift = 1
 
                 def si(idx: int | None, s: int = shift) -> int | None:
+                    """si — TODO 한국어 동작 설명."""
                     return idx - s if idx is not None and idx - s >= 0 else None
 
                 if si(itemIdx) is not None and si(itemIdx) < len(cells):

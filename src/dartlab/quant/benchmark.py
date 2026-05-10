@@ -479,10 +479,4 @@ def calcBenchmark(stockCode: str, **kwargs: Any) -> dict[str, Any]:
     return benchmarkSnapshot(stockCode, **kwargs)
 
 
-# ── Deprecated snake_case aliases ────────────────────────
-from dartlab.quant._helpers import _deprecatedAlias as _dep
-
-resolve_benchmark_stack = _dep(resolveBenchmarkStack, "resolve_benchmark_stack")
-resolve_benchmark = _dep(resolveBenchmark, "resolve_benchmark")
-fetch_benchmark_ohlcv = _dep(fetchBenchmarkOhlcv, "fetch_benchmark_ohlcv")
-benchmark_snapshot = _dep(benchmarkSnapshot, "benchmark_snapshot")
+# 0.10 BC 깸 — snake_case alias 제거.

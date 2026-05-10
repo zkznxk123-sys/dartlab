@@ -263,6 +263,7 @@ def _hzFilterJunkItems(allItems: list[str]) -> list[str]:
     """숫자만 있는 항목명 제거."""
 
     def isJunk(name: str) -> bool:
+        """isJunk — TODO 한국어 동작 설명."""
         stripped = re.sub(r"[,.\-\s]", "", name)
         return stripped.isdigit() or not stripped
 

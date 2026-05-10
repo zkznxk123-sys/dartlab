@@ -14,6 +14,7 @@ class AliasMapper(BaseMapper):
 
     @property
     def name(self) -> str:
+        """name — TODO 한국어 동작 설명."""
         return "alias"
 
     def _aliases(self) -> dict[str, str]:
@@ -40,6 +41,7 @@ class AliasMapper(BaseMapper):
         return None
 
     def stats(self) -> MapperStats:
+        """stats — TODO 한국어 동작 설명."""
         aliases = self._aliases()
         canonicals = set(aliases.values())
         return MapperStats(
@@ -51,6 +53,7 @@ class AliasMapper(BaseMapper):
         )
 
     def allKeys(self) -> list[str]:
+        """allKeys — TODO 한국어 동작 설명."""
         return list(self._aliases().keys())
 
     def resolve(self, snakeId: str) -> str:

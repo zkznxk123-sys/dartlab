@@ -46,6 +46,7 @@ class DecisionMemo:
         return self.question
 
     def get(self, key: str, default: Any = None) -> Any:
+        """get — TODO 한국어 동작 설명."""
         if key == "text":
             return self.text or default
         return getattr(self, key, default)
@@ -199,6 +200,7 @@ def _rowToMemo(row: dict) -> DecisionMemo:
 
 
 def recall(query: str, *, k: int = 5) -> list[DecisionMemo]:
+    """recall — TODO 한국어 동작 설명."""
     path = _resolveDecisionsPath()
     if not path.exists() or not query:
         return []

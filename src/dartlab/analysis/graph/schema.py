@@ -27,6 +27,8 @@ from typing import Any
 
 
 class NodeType(str, Enum):
+    """NodeType — TODO 한국어 클래스 설명."""
+
     METRIC = "metric"
     ACCOUNT = "account"
     SEGMENT = "segment"
@@ -36,6 +38,8 @@ class NodeType(str, Enum):
 
 
 class EdgeType(str, Enum):
+    """EdgeType — TODO 한국어 클래스 설명."""
+
     CAUSES = "causes"
     PART_OF = "partOf"
     DERIVED = "derived"
@@ -45,6 +49,8 @@ class EdgeType(str, Enum):
 
 @dataclass(frozen=True)
 class Node:
+    """Node — TODO 한국어 클래스 설명."""
+
     id: str  # unique — "metric:영업이익률:2024" 형태
     type: NodeType
     label: str  # 사람이 읽는 이름
@@ -56,6 +62,8 @@ class Node:
 
 @dataclass(frozen=True)
 class Edge:
+    """Edge — TODO 한국어 클래스 설명."""
+
     source: str  # node id
     target: str  # node id
     type: EdgeType

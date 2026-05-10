@@ -32,10 +32,12 @@ class _SectionsSource:
 
     @property
     def raw(self) -> pl.DataFrame | None:
+        """raw — TODO 한국어 동작 설명."""
         return self._company._getPrimary("sections")
 
     @property
     def frame(self) -> pl.DataFrame | None:
+        """frame — TODO 한국어 동작 설명."""
         return self.raw
 
     def forTopics(self, topics: set[str]) -> pl.DataFrame | None:
@@ -43,12 +45,15 @@ class _SectionsSource:
         return self._company._getPrimary("sections", topics=frozenset(topics))
 
     def topics(self) -> list[str]:
+        """topics — TODO 한국어 동작 설명."""
         return self._company._docsSectionTopics()
 
     def outline(self, topic: str | None = None) -> pl.DataFrame | None:
+        """outline — TODO 한국어 동작 설명."""
         return self._company._docsTopicOutline(topic=topic)
 
     def periods(self, *, recentFirst: bool = True, annualAsQ4: bool = True) -> list[str]:
+        """periods — TODO 한국어 동작 설명."""
         frame = self.raw
         if frame is None:
             return []
@@ -57,6 +62,7 @@ class _SectionsSource:
         return periodColumns(frame.columns, descending=recentFirst, annualAsQ4=annualAsQ4)
 
     def ordered(self, *, recentFirst: bool = True, annualAsQ4: bool = True) -> pl.DataFrame | None:
+        """ordered — TODO 한국어 동작 설명."""
         return self._company._docsSectionsOrdered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
 
     def coverage(
@@ -66,6 +72,7 @@ class _SectionsSource:
         recentFirst: bool = True,
         annualAsQ4: bool = True,
     ) -> pl.DataFrame | None:
+        """coverage — TODO 한국어 동작 설명."""
         return self._company._docsSectionsCoverage(
             topic=topic,
             recentFirst=recentFirst,
@@ -73,6 +80,7 @@ class _SectionsSource:
         )
 
     def freq(self, freqScope: str, *, includeMixed: bool = True) -> pl.DataFrame | None:
+        """freq — TODO 한국어 동작 설명."""
         return self._company._docsSectionsFreq(freqScope, includeMixed=includeMixed)
 
     def semanticRegistry(
@@ -82,6 +90,7 @@ class _SectionsSource:
         freqScope: str = "all",
         includeMixed: bool = True,
     ) -> pl.DataFrame | None:
+        """semanticRegistry — TODO 한국어 동작 설명."""
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
             freqScope=freqScope,
@@ -96,6 +105,7 @@ class _SectionsSource:
         freqScope: str = "all",
         includeMixed: bool = True,
     ) -> pl.DataFrame | None:
+        """semanticCollisions — TODO 한국어 동작 설명."""
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
             freqScope=freqScope,
@@ -111,6 +121,7 @@ class _SectionsSource:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
+        """structureRegistry — TODO 한국어 동작 설명."""
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
             freqScope=freqScope,
@@ -127,6 +138,7 @@ class _SectionsSource:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
+        """structureCollisions — TODO 한국어 동작 설명."""
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
             freqScope=freqScope,
@@ -144,6 +156,7 @@ class _SectionsSource:
         changedOnly: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
+        """structureEvents — TODO 한국어 동작 설명."""
         return self._company._docsSectionsStructureEvents(
             topic=topic,
             freqScope=freqScope,
@@ -160,6 +173,7 @@ class _SectionsSource:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
+        """structureSummary — TODO 한국어 동작 설명."""
         return self._company._docsSectionsStructureSummary(
             topic=topic,
             freqScope=freqScope,
@@ -177,6 +191,7 @@ class _SectionsSource:
         latestOnly: bool = True,
         changedOnly: bool = True,
     ) -> pl.DataFrame | None:
+        """structureChanges — TODO 한국어 동작 설명."""
         return self._company._docsSectionsStructureChanges(
             topic=topic,
             freqScope=freqScope,

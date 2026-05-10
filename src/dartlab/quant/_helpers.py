@@ -577,34 +577,5 @@ def extractSignalSeries(arr: dict, fn, *, key: str | None = None, **kwargs):
 # canonical 은 camelCase. snake_case 호출자는 0.10 이후 제거 예정 (operation.code.md
 # "snake_case shim 유지" 룰). DeprecationWarning 발생.
 
-import warnings as _warnings
-
-
-def _deprecatedAlias(newFn, oldName: str):
-    """snake_case alias factory — DeprecationWarning + 새 함수에 *args/**kwargs 통과."""
-
-    def _wrapper(*args, **kwargs):
-        _warnings.warn(
-            f"dartlab.quant._helpers.{oldName} 은 deprecated. {newFn.__name__} 을 사용하세요.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return newFn(*args, **kwargs)
-
-    _wrapper.__name__ = oldName
-    _wrapper.__doc__ = f"DEPRECATED — use {newFn.__name__}."
-    return _wrapper
-
-
-fetch_ohlcv = _deprecatedAlias(fetchOhlcv, "fetch_ohlcv")
-fetch_benchmark = _deprecatedAlias(fetchBenchmark, "fetch_benchmark")
-load_scan_parquet = _deprecatedAlias(loadScanParquet, "load_scan_parquet")
-load_shares_outstanding = _deprecatedAlias(loadSharesOutstanding, "load_shares_outstanding")
-load_docs_for_stock = _deprecatedAlias(loadDocsForStock, "load_docs_for_stock")
-load_changes_for_stock = _deprecatedAlias(loadChangesForStock, "load_changes_for_stock")
-load_allfilings_for_stock = _deprecatedAlias(loadAllfilingsForStock, "load_allfilings_for_stock")
-stock_percentile = _deprecatedAlias(stockPercentile, "stock_percentile")
-extract_account = _deprecatedAlias(extractAccount, "extract_account")
-extract_accounts = _deprecatedAlias(extractAccounts, "extract_accounts")
-ohlcv_to_arrays = _deprecatedAlias(ohlcvToArrays, "ohlcv_to_arrays")
-tom_mask = _deprecatedAlias(tomMask, "tom_mask")
+# 0.10 BC 깸 — 옛 snake_case alias (fetch_ohlcv 등 12 개) 삭제.
+# 새 이름 (fetchOhlcv · loadScanParquet · ohlcvToArrays 등) 만 SSOT.

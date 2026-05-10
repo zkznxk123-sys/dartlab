@@ -223,6 +223,7 @@ def parseTextStructureWithState(
     segmentOrder = 0
 
     def flushBody() -> None:
+        """flushBody — TODO 한국어 동작 설명."""
         nonlocal bodyLines, segmentOrder
         body = "\n".join(bodyLines).strip()
         bodyLines = []

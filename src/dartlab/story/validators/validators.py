@@ -34,6 +34,7 @@ class DamodaranResult:
 
     @property
     def summary(self) -> str:
+        """summary — TODO 한국어 동작 설명."""
         return f"Damodaran 3-test: {self.passCount}/{self.totalCount} 통과"
 
 
@@ -138,6 +139,7 @@ _INVARIANTS: list[tuple[str, callable]] = []
 
 def _register(desc: str):
     def deco(fn):
+        """deco — TODO 한국어 동작 설명."""
         _INVARIANTS.append((desc, fn))
         return fn
 

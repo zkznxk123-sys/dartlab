@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 
 from .domains import HISTORY_FALLBACK, loadDomain
-from .resilience import circuit_breaker
+from .resilience import circuitBreaker
 from .types import GatherError
 
 log = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ async def fetch(
         client = GatherHttpClient()
 
     for source_name in chain:
-        if circuit_breaker.isOpen(source_name):
+        if circuitBreaker.isOpen(source_name):
             continue
 
         try:

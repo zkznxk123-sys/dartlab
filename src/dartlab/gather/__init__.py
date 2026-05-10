@@ -454,7 +454,7 @@ class Gather:
         if cached is not None:
             return cached  # type: ignore[return-value]
         from .domains import DIVIDENDS_FALLBACK
-        from .resilience import circuit_breaker as _cb
+        from .resilience import circuitBreaker as _cb
 
         for source in DIVIDENDS_FALLBACK:
             if _cb.isOpen(source):
@@ -504,7 +504,7 @@ class Gather:
         if cached is not None:
             return cached  # type: ignore[return-value]
         from .domains import DIVIDENDS_FALLBACK
-        from .resilience import circuit_breaker as _cb
+        from .resilience import circuitBreaker as _cb
 
         for source in DIVIDENDS_FALLBACK:
             if _cb.isOpen(source):

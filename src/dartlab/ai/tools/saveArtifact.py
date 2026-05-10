@@ -22,6 +22,7 @@ def _resolveArtifactRoot() -> Path:
 
 
 def saveArtifact(name: str, content: str, *, kind: str = "text") -> ToolResult:
+    """saveArtifact — TODO 한국어 동작 설명."""
     safe = _SAFE_NAME_RE.sub("_", str(name or "").strip()) or "artifact"
     target = _resolveArtifactRoot() / safe
     try:

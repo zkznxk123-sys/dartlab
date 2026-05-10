@@ -13,6 +13,7 @@ _SKIP_KEYWORDS = set(_CBN.get("skipKeywords", []))
 
 
 def normalizeAccountName(raw: str) -> str:
+    """normalizeAccountName — TODO 한국어 동작 설명."""
     cleaned = raw.replace(" ", "")
     for stdName, keywords in NORMALIZE_MAP:
         for kw in keywords:
@@ -22,6 +23,7 @@ def normalizeAccountName(raw: str) -> str:
 
 
 def isTotalRow(name: str) -> bool:
+    """isTotalRow — TODO 한국어 동작 설명."""
     cleaned = name.replace(" ", "")
     for p in TOTAL_PATTERNS:
         if p in cleaned:

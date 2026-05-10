@@ -33,6 +33,7 @@ class DriftReport:
     suggestDeprecate: bool = False
 
     def toDict(self) -> dict[str, Any]:
+        """toDict — TODO 한국어 동작 설명."""
         return asdict(self)
 
 

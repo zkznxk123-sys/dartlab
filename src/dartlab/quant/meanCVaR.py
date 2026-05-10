@@ -71,6 +71,7 @@ def optimizeMeanCVaR(
     w = np.ones(N) / N
 
     def cvar(weights: np.ndarray) -> float:
+        """cvar — TODO 한국어 동작 설명."""
         port = R @ weights
         var_thresh = np.quantile(port, alpha)
         tail = port[port <= var_thresh]

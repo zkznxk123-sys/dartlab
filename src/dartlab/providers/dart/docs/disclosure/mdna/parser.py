@@ -50,6 +50,7 @@ def _isSectionHeader(line: str) -> tuple[int, str] | None:
 
 
 def classifySection(title: str) -> str:
+    """classifySection — TODO 한국어 동작 설명."""
     for key, keywords in SECTION_ALIASES.items():
         for kw in keywords:
             if kw in title:

@@ -43,6 +43,7 @@ _VRAM_MODEL_TIERS: list[tuple[int, str, str]] = [
 
 
 def recommendModel(vramMb: int | None = None) -> dict:
+    """recommendModel — TODO 한국어 동작 설명."""
     if vramMb is None:
         from dartlab.ai.providers.support.ollamaSetup import _detectGpu
 
@@ -60,6 +61,7 @@ class OllamaProvider(BaseProvider):
 
     @property
     def supportsNativeTools(self) -> bool:
+        """supportsNativeTools — TODO 한국어 동작 설명."""
         return True
 
     def __init__(self, config: LLMConfig):
@@ -69,12 +71,14 @@ class OllamaProvider(BaseProvider):
 
     @property
     def defaultModel(self) -> str:
+        """defaultModel — TODO 한국어 동작 설명."""
         models = self.getInstalledModels()
         if models:
             return models[0]
         return "llama3.1"
 
     def checkAvailable(self) -> bool:
+        """checkAvailable — TODO 한국어 동작 설명."""
         import httpx
 
         try:
@@ -84,6 +88,7 @@ class OllamaProvider(BaseProvider):
             return False
 
     def getInstalledModels(self) -> list[str]:
+        """getInstalledModels — TODO 한국어 동작 설명."""
         import httpx
 
         try:
@@ -100,6 +105,7 @@ class OllamaProvider(BaseProvider):
             return []
 
     def preload(self, *, keepAliveMinutes: int = 30) -> bool:
+        """preload — TODO 한국어 동작 설명."""
         import httpx
 
         options = _buildInferenceOptions()
@@ -121,6 +127,7 @@ class OllamaProvider(BaseProvider):
             return False
 
     def unload(self) -> bool:
+        """unload — TODO 한국어 동작 설명."""
         import httpx
 
         try:
@@ -134,6 +141,7 @@ class OllamaProvider(BaseProvider):
             return False
 
     def serverVersion(self) -> str | None:
+        """serverVersion — TODO 한국어 동작 설명."""
         import httpx
 
         try:
@@ -161,6 +169,7 @@ class OllamaProvider(BaseProvider):
         return self._client
 
     def complete(self, messages: list[dict[str, str]]) -> LLMResponse:
+        """complete — TODO 한국어 동작 설명."""
         client = self._getClient()
         response = client.chat.completions.create(
             model=self.resolvedModel,
@@ -174,6 +183,7 @@ class OllamaProvider(BaseProvider):
         )
 
     def stream(self, messages: list[dict[str, str]]) -> Generator[str, None, None]:
+        """stream — TODO 한국어 동작 설명."""
         client = self._getClient()
         stream = client.chat.completions.create(
             model=self.resolvedModel,
@@ -190,6 +200,7 @@ class OllamaProvider(BaseProvider):
         messages: list[dict[str, str]],
         schema: dict | None = None,
     ) -> LLMResponse:
+        """completeJson — TODO 한국어 동작 설명."""
         client = self._getClient()
         if schema:
             response_format = {
@@ -218,6 +229,7 @@ class OllamaProvider(BaseProvider):
         *,
         toolChoice: str | None = None,
     ) -> ToolResponse:
+        """completeWithTools — TODO 한국어 동작 설명."""
         import json
 
         client = self._getClient()

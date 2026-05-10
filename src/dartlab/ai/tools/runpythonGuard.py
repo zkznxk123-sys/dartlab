@@ -138,6 +138,7 @@ def _safeOpenFactory(safeRoots: list[str] | None = None) -> Callable[..., Any]:
     real_open = open  # 캡처 — 안에서 builtin 의존 안 하도록.
 
     def safeOpen(file: Any, mode: str = "r", *args: Any, **kwargs: Any) -> Any:
+        """safeOpen — TODO 한국어 동작 설명."""
         if any(ch in mode for ch in _WRITE_MODE_CHARS):
             try:
                 path_str = os.fspath(file)

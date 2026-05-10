@@ -20,8 +20,8 @@ from dartlab.core.providers.setupGuide import (
 
 # snake alias — 0.10 까지 backward-compat shim. 0.11 제거.
 resolveAlias = resolveAlias
-provider_guide = providerGuide
-no_provider_message = noProviderMessage
+providerGuide = providerGuide
+noProviderMessage = noProviderMessage
 _DISPLAY_ORDER = DISPLAY_ORDER
 
 
@@ -70,10 +70,10 @@ __all__ = [
     "_SETUP_GUIDES",
     "_checkProviderAvailable",
     "noProviderMessage",
-    "no_provider_message",
+    "noProviderMessage",
     "providerGuide",
     "providersStatus",
-    "provider_guide",
+    "providerGuide",
     "resolveAlias",
     "resolveAlias",
 ]

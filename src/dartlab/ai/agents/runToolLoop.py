@@ -28,6 +28,8 @@ from dartlab.ai.tools.types import ToolSpec
 
 @dataclass
 class AgentResult:
+    """AgentResult — TODO 한국어 클래스 설명."""
+
     text: str = ""
     refs: list[Ref] = field(default_factory=list)
     toolCalls: list[dict[str, Any]] = field(default_factory=list)

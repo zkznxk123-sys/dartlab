@@ -4,6 +4,7 @@ import re
 
 
 def splitCells(line: str) -> list[str]:
+    """splitCells — TODO 한국어 동작 설명."""
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -13,6 +14,7 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
+    """isSeparatorRow — TODO 한국어 동작 설명."""
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 

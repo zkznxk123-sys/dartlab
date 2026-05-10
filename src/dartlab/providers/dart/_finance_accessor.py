@@ -27,36 +27,45 @@ class _FinanceAccessor:
 
     @property
     def raw(self) -> pl.DataFrame | None:
+        """raw — TODO 한국어 동작 설명."""
         return self._company.rawFinance
 
     @property
     def BS(self) -> pl.DataFrame | None:
+        """BS — TODO 한국어 동작 설명."""
         return self._company._financeOrDocsStatement("BS")
 
     @property
     def IS(self) -> pl.DataFrame | None:
+        """IS — TODO 한국어 동작 설명."""
         return self._company._financeOrDocsStatement("IS")
 
     @property
     def CIS(self) -> pl.DataFrame | None:
+        """CIS — TODO 한국어 동작 설명."""
         return self._company._financeOrDocsStatement("CIS")
 
     @property
     def CF(self) -> pl.DataFrame | None:
+        """CF — TODO 한국어 동작 설명."""
         return self._company._financeOrDocsStatement("CF")
 
     @property
     def ratios(self):
+        """ratios — TODO 한국어 동작 설명."""
         return self._company._getRatiosInternal("CFS")
 
     @property
     def ratioSeries(self):
+        """ratioSeries — TODO 한국어 동작 설명."""
         return self._company._ratioSeries()
 
     @property
     def SCE(self):
+        """SCE — TODO 한국어 동작 설명."""
         return self._company._sce()
 
     @property
     def sceMatrix(self):
+        """sceMatrix — TODO 한국어 동작 설명."""
         return self._company._sceMatrix()

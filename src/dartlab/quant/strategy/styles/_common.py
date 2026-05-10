@@ -63,10 +63,4 @@ def safeQuantile(arr: np.ndarray, q: float) -> float:
     return float(np.quantile(a, q))
 
 
-# ── Deprecated snake_case aliases ────────────────────────
-from dartlab.quant._helpers import _deprecatedAlias as _dep
-
-get_arrays = _dep(getArrays, "get_arrays")
-is_kr = _dep(isKr, "is_kr")
-stockCode = _dep(getStockCode, "stock_code")
-safe_quantile = _dep(safeQuantile, "safe_quantile")
+# 0.10 BC 깸 — snake_case alias 제거.

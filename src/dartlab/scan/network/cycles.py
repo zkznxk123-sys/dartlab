@@ -45,6 +45,7 @@ def detectCycles(
     visited_global: set[str] = set()
 
     def dfs(node: str, path: list[str], pathSet: set[str]) -> None:
+        """dfs — TODO 한국어 동작 설명."""
         if len(path) > maxLength:
             return
         for nb in adj.get(node, []):

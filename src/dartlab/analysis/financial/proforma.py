@@ -318,9 +318,11 @@ def _ehrCollectSeries(series: dict, n: int) -> dict[str, list]:
     """IS/CF/BS 10+ 계정 시계열 일괄 수집. 반환: {key: list[float]}."""
 
     def ttm(sj: str, acc: str) -> list:
+        """ttm — TODO 한국어 동작 설명."""
         return _annualTtmValues(series, sj, acc, n)
 
     def bs(acc: str) -> list:
+        """bs — TODO 한국어 동작 설명."""
         return _annualLatestValues(series, "BS", acc, n)
 
     return {

@@ -39,5 +39,5 @@ class TestApiKeyMissingHint:
         text = apiKeyMissingHint("gemini")
         assert isinstance(text, str)
         assert len(text) > 0
-        # provider_guide 가 반환하는 안내에 gemini 관련 키워드가 포함되는지 느슨하게 확인
+        # providerGuide 가 반환하는 안내에 gemini 관련 키워드가 포함되는지 느슨하게 확인
         # (aiSetup 구현 변경에 strict 하지 않음 — delegate 자체가 목적)

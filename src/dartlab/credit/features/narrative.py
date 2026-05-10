@@ -30,6 +30,7 @@ class AxisNarrative:
 
     @property
     def severityKr(self) -> str:
+        """severityKr — TODO 한국어 동작 설명."""
         return {"strong": "우수", "adequate": "양호", "weak": "주의", "critical": "위험"}.get(
             self.severity, self.severity
         )

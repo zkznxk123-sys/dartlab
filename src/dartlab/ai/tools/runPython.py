@@ -90,6 +90,7 @@ def _diagnoseErrorHint(tracebackText: str) -> str:
 
 
 def runPython(code: str, *, runId: str | None = None) -> ToolResult:
+    """runPython — TODO 한국어 동작 설명."""
     stdout = StringIO()
     stderr = StringIO()
     emitted: dict[str, Any] = {}

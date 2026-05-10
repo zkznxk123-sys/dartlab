@@ -280,6 +280,7 @@ class SelectResult:
         )
 
     def toHtml(self) -> str:
+        """toHtml — TODO 한국어 동작 설명."""
         return self.render("html")
 
     # ── 체이닝 ──
@@ -411,4 +412,5 @@ class ChartResult:
         return json.dumps(self.spec, ensure_ascii=False, default=str)
 
     def toHtml(self) -> str:
+        """toHtml — TODO 한국어 동작 설명."""
         return self.render("html")

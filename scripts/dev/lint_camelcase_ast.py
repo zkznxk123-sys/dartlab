@@ -73,7 +73,7 @@ CAMEL_RE = re.compile(r"^_?[a-z][a-zA-Z0-9]*$")
 # PascalCase: Upper 또는 _Upper 시작
 PASCAL_RE = re.compile(r"^_?[A-Z][a-zA-Z0-9]*$")
 # ALL_CAPS_CONST (밑줄 허용)
-ALL_CAPS_RE = re.compile(r"^_?[A-Z][A-Z0-9_]*$")
+ALL_CAPS_RE = re.compile(r"^_?[A-Z0-9][A-Z0-9_]*$")
 # dunder
 DUNDER_RE = re.compile(r"^__[a-z][a-zA-Z0-9_]*__$")
 # 명시적 private (_lower 시작 — single underscore)
@@ -526,6 +526,11 @@ def _check_naming(ident: Identifier) -> str | None:
             return None
         # PascalCase 모듈 변수 = TypeAlias 또는 클래스 alias 인정 (Pydantic Literal 타입 등)
         if PASCAL_RE.match(name):
+            return None
+        # private (_xxx_yyy single underscore prefix) 모듈 변수는 의도된 internal —
+        # operation.code 룰 면제. 외부 사용 안 되니 snake 로 두는 게 더 안전 (rename
+        # 영향이 module 안에 갇힘). plan F5 정책.
+        if name.startswith("_") and not name.startswith("__"):
             return None
         return "naming/var-snake"
 

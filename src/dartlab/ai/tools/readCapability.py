@@ -11,6 +11,7 @@ from .types import ToolResult
 
 
 def readCapability(query: str, *, limit: int = 8) -> ToolResult:
+    """readCapability — TODO 한국어 동작 설명."""
     from dartlab.core.capability.search import searchCapabilities
 
     results = searchCapabilities(query or "", topK=max(1, int(limit or 8)), minScore=0.0)

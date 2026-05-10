@@ -22,6 +22,8 @@ from .contracts import (  # noqa: F401
 
 @dataclass(frozen=True)
 class LLMConfig:
+    """LLMConfig — TODO 한국어 클래스 설명."""
+
     provider: str | None = None
     model: str | None = None
     apiKey: str | None = None
@@ -31,6 +33,7 @@ class LLMConfig:
     systemPrompt: str | None = None
 
     def merge(self, overrides: dict[str, Any]) -> LLMConfig:
+        """merge — TODO 한국어 동작 설명."""
         values = asdict(self)
         values.update({key: value for key, value in overrides.items() if key in values and value is not None})
         return LLMConfig(**values)
@@ -38,6 +41,8 @@ class LLMConfig:
 
 @dataclass(frozen=True)
 class LLMResponse:
+    """LLMResponse — TODO 한국어 클래스 설명."""
+
     content: str = ""
     raw: dict[str, Any] | None = None
     answer: str = ""
@@ -55,6 +60,8 @@ class LLMResponse:
 
 @dataclass(frozen=True)
 class ToolCall:
+    """ToolCall — TODO 한국어 클래스 설명."""
+
     id: str
     name: str
     arguments: dict[str, Any]
@@ -62,6 +69,8 @@ class ToolCall:
 
 @dataclass(frozen=True)
 class ToolResponse:
+    """ToolResponse — TODO 한국어 클래스 설명."""
+
     answer: str
     provider: str
     model: str

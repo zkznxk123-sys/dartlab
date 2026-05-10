@@ -928,6 +928,7 @@ def batchCollect(
         return tbl
 
     def completeFn(corpName: str, catSummary: str) -> None:
+        """completeFn — TODO 한국어 동작 설명."""
         with lock:
             completedCount[0] += 1
             for wIdx in range(numWorkers):
@@ -937,10 +938,12 @@ def batchCollect(
                     break
 
     def statusFn(workerIdx: int, stockCode: str, corpName: str) -> None:
+        """statusFn — TODO 한국어 동작 설명."""
         with lock:
             workerLines[workerIdx] = f"{corpName} ({stockCode})"
 
     def periodFn(workerIdx: int, corpName: str, detail: str) -> None:
+        """periodFn — TODO 한국어 동작 설명."""
         with lock:
             workerLines[workerIdx] = f"{corpName} | {detail}"
 

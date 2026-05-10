@@ -49,6 +49,7 @@ _QUARTER_COL_RE = re.compile(r"^(\d{4})Q[1-4]$")
 
 
 def sceMatrix(company: Company):
+    """sceMatrix — TODO 한국어 동작 설명."""
     if not company._hasFinance:
         return None
     cacheKey = "_sceMatrix_CFS"
@@ -62,6 +63,7 @@ def sceMatrix(company: Company):
 
 
 def sceSeriesAnnual(company: Company):
+    """sceSeriesAnnual — TODO 한국어 동작 설명."""
     if not company._hasFinance:
         return None
     cacheKey = "_sceAnnual_CFS"
@@ -75,6 +77,7 @@ def sceSeriesAnnual(company: Company):
 
 
 def sce(company: Company) -> pl.DataFrame | None:
+    """sce — TODO 한국어 동작 설명."""
     cacheKey = "_sceDataFrame_CFS"
     if cacheKey in company._cache:
         return company._cache[cacheKey]
@@ -97,6 +100,7 @@ def sce(company: Company) -> pl.DataFrame | None:
 
 
 def financeCisAnnual(company: Company):
+    """financeCisAnnual — TODO 한국어 동작 설명."""
     if not company._hasFinance:
         return None
     cacheKey = "_financeCISAnnual_CFS"
@@ -144,6 +148,7 @@ def aggregateCisAnnual(qDf: pl.DataFrame) -> pl.DataFrame | None:
 
 
 def ratioSeries(company: Company):
+    """ratioSeries — TODO 한국어 동작 설명."""
     if not company._hasFinance:
         return None
     cacheKey = "_ratioSeries_Q_CFS"
@@ -208,6 +213,7 @@ def financeStmt(company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "
 def financeOrDocsStatement(
     company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated"
 ) -> pl.DataFrame | None:
+    """financeOrDocsStatement — TODO 한국어 동작 설명."""
     # CIS 는 별도 quarterly 캐시 — annual 은 4분기 합산 합성
     if sjDiv == "CIS" and scope == "consolidated":
         cisQ = financeCisQuarterly(company) if company._hasFinance else None

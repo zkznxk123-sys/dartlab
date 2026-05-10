@@ -81,10 +81,12 @@ def _makeProgress(total: int, title: str, *, disable: bool = False):
     class _Bar:
         @property
         def title(self):
+            """title — TODO 한국어 동작 설명."""
             return ""
 
         @title.setter
         def title(self, v):
+            """title — TODO 한국어 동작 설명."""
             p.update(tid, description=v)
 
         def __call__(self):
@@ -199,6 +201,7 @@ def fetchEdgarDocs(
     sourceMode: str = "sec_api",
     strictQuality: bool = False,
 ) -> Path:
+    """fetchEdgarDocs — TODO 한국어 동작 설명."""
     ticker = ticker.upper()
     meta = _resolveTickerMeta(ticker)
     submissions = _getSubmissions(meta["cik"])
@@ -240,6 +243,7 @@ def fetchEdgarDocs(
 
 
 def summarizeEdgarDocsFrame(df: pl.DataFrame) -> dict[str, object]:
+    """summarizeEdgarDocsFrame — TODO 한국어 동작 설명."""
     if df.is_empty():
         return {
             "rows_saved": 0,
@@ -302,6 +306,7 @@ def summarizeEdgarDocsFrame(df: pl.DataFrame) -> dict[str, object]:
 
 
 def summarizeEdgarDocsParquet(path: Path) -> dict[str, object]:
+    """summarizeEdgarDocsParquet — TODO 한국어 동작 설명."""
     summary = summarizeEdgarDocsFrame(pl.read_parquet(path))
     summary["path"] = str(path)
     summary["ticker"] = path.stem
@@ -434,6 +439,7 @@ def downloadListedEdgarDocs(
     cooldownSeconds: float = BATCH_COOLDOWN_SECONDS,
     skipExisting: bool = True,
 ) -> pl.DataFrame:
+    """downloadListedEdgarDocs — TODO 한국어 동작 설명."""
     from dartlab import config
 
     docsDir = Path(config.dataDir) / "edgar" / "docs"
@@ -487,6 +493,7 @@ def buildEdgarCollectibleUniverse(
     sinceYear: int = SINCE_YEAR,
     forceRefresh: bool = False,
 ) -> pl.DataFrame:
+    """buildEdgarCollectibleUniverse — TODO 한국어 동작 설명."""
     return prepareEdgarCollectibleUniverse(
         limit=limit,
         sinceYear=sinceYear,
@@ -503,6 +510,7 @@ def prepareEdgarCollectibleUniverse(
     flushEvery: int = 25,
     heartbeat: Callable[..., None] | None = None,
 ) -> pl.DataFrame:
+    """prepareEdgarCollectibleUniverse — TODO 한국어 동작 설명."""
     from dartlab import config
     from dartlab.core.dataLoader import loadEdgarListedUniverse
 

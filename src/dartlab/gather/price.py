@@ -9,7 +9,7 @@ import time
 from .cache import GatherCache
 from .domains import getPriceFallback, loadDomain
 from .marketConfig import getMarketConfig
-from .resilience import circuit_breaker, health_tracker
+from .resilience import circuitBreaker, healthTracker
 from .types import GatherError, PriceSnapshot
 
 log = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ async def fetch(
     """
     config = getMarketConfig(market)
     chain = getPriceFallback(market)
-    chain = health_tracker.reorder(chain)
+    chain = healthTracker.reorder(chain)
 
     # client=None이면 자체 생성
     if client is None:
@@ -71,7 +71,7 @@ async def fetch(
         client = GatherHttpClient()
 
     for source_name in chain:
-        if circuit_breaker.isOpen(source_name):
+        if circuitBreaker.isOpen(source_name):
             log.debug("price skip %s (circuit open)", source_name)
             continue
 
@@ -88,19 +88,19 @@ async def fetch(
             if result:
                 result.currency = config.currency
                 result.market = market
-                circuit_breaker.recordSuccess(source_name)
-                health_tracker.record(source_name, success=True, latency=latency)
+                circuitBreaker.recordSuccess(source_name)
+                healthTracker.record(source_name, success=True, latency=latency)
                 # stale cache에도 저장 (fallback용)
                 _stale_cache.putTyped(stockCode, "price", result)
                 return result
 
             # None 반환 = 데이터 없음 (에러는 아님)
-            health_tracker.record(source_name, success=True, latency=latency)
+            healthTracker.record(source_name, success=True, latency=latency)
 
         except (GatherError, ImportError, OSError) as exc:
             latency = time.monotonic() - t0
-            circuit_breaker.recordFailure(source_name)
-            health_tracker.record(source_name, success=False, latency=latency)
+            circuitBreaker.recordFailure(source_name)
+            healthTracker.record(source_name, success=False, latency=latency)
             log.debug("price fallback %s 실패: %s", source_name, exc)
             continue
 

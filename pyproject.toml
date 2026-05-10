@@ -351,7 +351,9 @@ layers = [
 exhaustive = false  # L2 5 엔진은 이 contract 에서 무시 (sibling 단방향 허용)
 ignore_imports = []  # 후속 정리 — 진행하며 한 줄씩 비움
 
-# ── Contract 2: L2 가 상위 (L3/L4) import 금지
+# ── Contract 2: L2 가 상위 (L3/L4) import 금지 (direct only)
+# allow_indirect_imports: true — direct 만 차단. transitive 는 root facade 정공법 D
+# (dartlab/__init__.py 의 PEP 562 lazy + function-local import) 의 본질이라 도구 검사 외.
 [[tool.importlinter.contracts]]
 name = "L2 must not import L3/L4"
 type = "forbidden"
@@ -367,9 +369,10 @@ forbidden_modules = [
     "dartlab.ai",
     "dartlab.company",
 ]
+allow_indirect_imports = true
 ignore_imports = []
 
-# ── Contract 3: L2 가 하위 (L1.5/L1) 우회 import 금지 — L2 는 L0 만 직접 import
+# ── Contract 3: L2 가 하위 (L1.5/L1) 우회 import 금지 — L2 는 L0 만 직접 import (direct only)
 [[tool.importlinter.contracts]]
 name = "L2 must not import L1.5/L1"
 type = "forbidden"
@@ -384,4 +387,5 @@ forbidden_modules = [
     "dartlab.scan",
     "dartlab.gather",
 ]
+allow_indirect_imports = true
 ignore_imports = []

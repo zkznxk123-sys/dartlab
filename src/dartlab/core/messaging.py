@@ -230,6 +230,7 @@ class _Context:
 
     @property
     def hasDartKey(self) -> bool:
+        """hasDartKey — TODO 한국어 동작 설명."""
         if self._dart_key is None:
             # CredentialProvider registry 사용 (정공법 B — DIP). providers 직접 import 0.
             try:
@@ -243,6 +244,7 @@ class _Context:
 
     @property
     def verbose(self) -> bool:
+        """verbose — TODO 한국어 동작 설명."""
         if self._verbose is None:
             from dartlab import config
 

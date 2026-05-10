@@ -65,6 +65,7 @@ _STATIC_CHAPTER_MAP: dict[str, str] = {
 
 
 def profileTable(company: Company) -> pl.DataFrame | None:
+    """profileTable — TODO 한국어 동작 설명."""
     cacheKey = "_sectionProfileTable"
     if cacheKey in company._cache:
         return company._cache[cacheKey]
@@ -76,6 +77,7 @@ def profileTable(company: Company) -> pl.DataFrame | None:
 
 
 def chapterMap(company: Company) -> dict[str, str]:
+    """chapterMap — TODO 한국어 동작 설명."""
     cacheKey = "_chapterMap"
     if cacheKey in company._cache:
         return company._cache[cacheKey]
@@ -102,6 +104,7 @@ def chapterMap(company: Company) -> dict[str, str]:
 
 
 def chapterForTopic(company: Company, topic: str) -> str:
+    """chapterForTopic — TODO 한국어 동작 설명."""
     cm = chapterMap(company)
     if topic in cm:
         return cm[topic]
@@ -114,6 +117,7 @@ def chapterForTopic(company: Company, topic: str) -> str:
 
 
 def topicLabel(company: Company, topic: str) -> str:
+    """topicLabel — TODO 한국어 동작 설명."""
     from dartlab.core.registry import getEntry as _getEntry
     from dartlab.providers.dart.company import _TOPIC_LABELS, _getAllProperties
 

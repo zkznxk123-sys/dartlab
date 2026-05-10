@@ -17,6 +17,7 @@ class FlowMapper(BaseMapper):
 
     @property
     def name(self) -> str:
+        """name — TODO 한국어 동작 설명."""
         return "flow"
 
     def _eventAccounts(self) -> frozenset:
@@ -40,6 +41,7 @@ class FlowMapper(BaseMapper):
         return key in self._eventAccounts()
 
     def stats(self) -> MapperStats:
+        """stats — TODO 한국어 동작 설명."""
         events = self._eventAccounts()
         return MapperStats(
             name=self.name,
@@ -50,6 +52,7 @@ class FlowMapper(BaseMapper):
         )
 
     def allKeys(self) -> list[str]:
+        """allKeys — TODO 한국어 동작 설명."""
         return sorted(self._eventAccounts())
 
     def eventAccounts(self) -> list[str]:

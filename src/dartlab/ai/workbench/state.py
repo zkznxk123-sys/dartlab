@@ -11,6 +11,8 @@ from dartlab.ai.contracts import Ref
 
 @dataclass
 class WorkbenchState:
+    """WorkbenchState — TODO 한국어 클래스 설명."""
+
     question: str
     threadId: str = ""
     runId: str = field(default_factory=lambda: uuid4().hex[:12])
@@ -53,6 +55,7 @@ class WorkbenchState:
     recipeExpanded: bool = False
 
     def public(self, *, currentNode: str) -> dict[str, Any]:
+        """public — TODO 한국어 동작 설명."""
         return {
             "threadId": self.threadId,
             "runId": self.runId,
