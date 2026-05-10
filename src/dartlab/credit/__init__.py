@@ -32,6 +32,9 @@ from dartlab.core.logger import getLogger
 
 _log = getLogger(__name__)
 
+# Public surface — Company.credit() 와 단독 호출 양쪽 진입.
+__all__ = ["axes", "credit", "creditCompany", "guide"]
+
 
 # ── 7축 레지스트리 (Phase 8 A4: 4엔진 통일 — @dataclass _AxisEntry) ──
 

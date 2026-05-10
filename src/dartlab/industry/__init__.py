@@ -64,6 +64,10 @@ from dartlab.core.sector import (
 
 _DATA_DIR = Path(__file__).parent
 
+# Public surface — Industry callable + addOverride. Sector/IndustryGroup 등은 core.sector
+# 에서 re-export (위 import) — __all__ 자체에는 포함하지 않고 from-import 만 노출.
+__all__ = ["Industry", "addOverride"]
+
 
 class Industry:
     """산업 매퍼엔진 진입점.

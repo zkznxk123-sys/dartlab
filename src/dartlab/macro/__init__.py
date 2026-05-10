@@ -59,6 +59,9 @@ _ACT_LABELS: dict[int, str] = {
     0: "종합",
 }
 
+# Public surface — Macro callable + sub-axis 진입.
+__all__ = ["Macro"]
+
 # ── Axis Registry ────────────────────────────────────────
 
 
