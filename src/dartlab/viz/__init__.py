@@ -36,6 +36,10 @@ _log = getLogger(__name__)
 
 # ── 팔레트 ──
 from dartlab.core.palette import COLORS  # noqa: F401
+
+# core/select.py 가 viz 의존 없이 HTML 렌더 — viz import 시점에 자동 등록.
+# pyodide 등 plotly 미설치 환경은 viz import 자체가 실패해 register 도 안 됨.
+from dartlab.core.render import register as _registerRenderer
 from dartlab.viz.charts import (
     balance_sheet as balance_sheet_chart,
 )
@@ -97,7 +101,10 @@ from dartlab.viz.generators import (  # noqa: F401
 from dartlab.viz.intents import VIZ_INTENTS, VizIntent, listVizIntents  # noqa: F401
 
 # ── ChartSpec → Plotly Figure 변환 ──
+from dartlab.viz.plotly import PlotlyChartRenderer
 from dartlab.viz.plotly import from_spec as chart_from_spec  # noqa: F401
+
+_registerRenderer(PlotlyChartRenderer())
 
 # ── evidence ref 빌더 ──
 from dartlab.viz.refs import (  # noqa: F401

@@ -52,6 +52,19 @@ def _hex_to_rgba(hex_color: str, alpha: float = 0.2) -> str:
     return hex_color
 
 
+class PlotlyChartRenderer:
+    """ChartHtmlRenderer Protocol 구현 — viz/__init__.py 가 등록.
+
+    core/render registry 가 보유. core/select.py 가 lookup 후 호출.
+    plotly 미설치 환경 (pyodide 등) 에서는 viz import 자체가 실패해 등록 안 됨.
+    """
+
+    def htmlFromSpec(self, spec: dict) -> str:
+        """ChartSpec → Plotly Figure → HTML 문자열."""
+        fig = from_spec(spec)
+        return fig.to_html(include_plotlyjs="cdn", full_html=False)
+
+
 def from_spec(spec: dict) -> Any:
     """ChartSpec JSON → Plotly Figure.
 

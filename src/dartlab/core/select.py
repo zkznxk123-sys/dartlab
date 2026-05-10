@@ -393,13 +393,18 @@ class ChartResult:
         return self.render("markdown")
 
     def _renderHtml(self) -> str:
-        """Plotly HTML."""
+        """Plotly HTML — viz 가 등록한 ChartHtmlRenderer 사용 (core/render registry).
+
+        viz 가 import 안 된 환경 (pyodide·viz 미설치) 은 markdown fallback.
+        """
         if not self._select.isNumeric:
             return self._select.render("html")
-        from dartlab.viz.plotly import from_spec
+        from dartlab.core.render import getRenderer
 
-        fig = from_spec(self.spec)
-        return fig.to_html(include_plotlyjs="cdn", full_html=False)
+        renderer = getRenderer()
+        if renderer is None:
+            return self._select.render("markdown")
+        return renderer.htmlFromSpec(self.spec)
 
     def toJson(self) -> str:
         """ChartSpec JSON."""
