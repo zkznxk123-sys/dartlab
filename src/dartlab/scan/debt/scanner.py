@@ -6,10 +6,10 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan._helpers import parse_num, scan_parquets
+from dartlab.scan._helpers import parse_num, scanParquets
 
 
-def scan_bonds() -> dict[str, dict]:
+def scanBonds() -> dict[str, dict]:
     """전종목 사채 잔액 스캔.
 
     합계(remndr_exprtn2) 행 기준. 잔액이 0보다 큰 기업만 반환.
@@ -22,7 +22,7 @@ def scan_bonds() -> dict[str, dict]:
             단기잔액 : float — 1년 이내 만기 잔액 (백만원)
             단기비중 : float — 단기잔액/사채잔액 (%)
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "corporateBond",
         ["stockCode", "year", "quarter", "remndr_exprtn2", "sm", "yy1_below"],
     )
@@ -74,7 +74,7 @@ EQUITY_IDS = {"Equity", "equity", "ifrs-full_Equity", "dart_Equity"}
 EQUITY_NMS = {"자본총계", "자본 총계"}
 
 
-def scan_short_debt() -> dict[str, dict]:
+def scanShortDebt() -> dict[str, dict]:
     """전종목 단기사채 + 기업어음 스캔.
 
     회사채(corporateBond)와 별도로, 기업어음/단기사채의 실질 단기 부채 노출을 측정한다.
@@ -87,11 +87,11 @@ def scan_short_debt() -> dict[str, dict]:
             CP잔액 : float — 기업어음 잔액 (백만원)
             단기채무합계 : float — 단기사채 + CP 합산 (백만원)
     """
-    stb = scan_parquets(
+    stb = scanParquets(
         "shortTermBond",
         ["stockCode", "year", "quarter", "sm"],
     )
-    cp = scan_parquets(
+    cp = scanParquets(
         "commercialPaper",
         ["stockCode", "year", "quarter", "sm"],
     )
@@ -129,7 +129,7 @@ def scan_short_debt() -> dict[str, dict]:
     return result
 
 
-def scan_debt_mix() -> dict[str, dict]:
+def scanDebtMix() -> dict[str, dict]:
     """전종목 부채 구성 스캔.
 
     부채비율 = 총부채 / 자본총계 x 100.

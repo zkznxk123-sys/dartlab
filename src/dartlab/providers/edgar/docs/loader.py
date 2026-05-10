@@ -206,7 +206,7 @@ def incrementalUpdateEdgarDocs(
         _collectFilingRows,
         _findFilings,
         _getSubmissions,
-        _make_progress,
+        _makeProgress,
         _resolveTickerMeta,
     )
 
@@ -225,7 +225,7 @@ def incrementalUpdateEdgarDocs(
 
     rows: list[dict] = []
     skipped: list[str] = []
-    _prog, _bar = _make_progress(len(newFilings), f"EDGAR 증분 | {stockCode.upper()}")
+    _prog, _bar = _makeProgress(len(newFilings), f"EDGAR 증분 | {stockCode.upper()}")
     with _prog:
         _collectFilingRows(rows, newFilings, meta, stockCode.upper(), _bar, FILING_TIMEOUT_SECONDS, skipped)
 

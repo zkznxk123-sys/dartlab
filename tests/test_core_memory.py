@@ -37,9 +37,9 @@ def test_polars_thread_pool_respects_cap():
 class TestGetMemoryMb:
     def test_returns_positive_on_supported_os(self):
         """Windows / Linux 에서 RSS > 0 반환."""
-        from dartlab.core.memory import get_memory_mb
+        from dartlab.core.memory import getMemoryMb
 
-        mem = get_memory_mb()
+        mem = getMemoryMb()
         assert mem > 0, f"RSS 측정 실패 (-1 반환): {mem}"
         assert mem < 100_000, f"비현실적인 RSS: {mem} MB"
 

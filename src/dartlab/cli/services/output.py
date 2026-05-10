@@ -17,43 +17,43 @@ _console = Console()
 _err_console = Console(stderr=True)
 
 
-def get_console() -> Console:
+def getConsole() -> Console:
     """공용 Rich Console 반환."""
     return _console
 
 
-def print_error(message: str) -> None:
+def printError(message: str) -> None:
     """오류 메시지를 stderr에 출력."""
     from rich.markup import escape
 
     _err_console.print(f"[bold red]오류:[/] {escape(message)}")
 
 
-def print_info(message: str = "") -> None:
+def printInfo(message: str = "") -> None:
     """일반 정보 메시지 출력."""
     _console.print(message)
 
 
-def print_warning(message: str) -> None:
+def printWarning(message: str) -> None:
     """경고 메시지를 stderr에 출력."""
     _err_console.print(f"[bold yellow]경고:[/] {message}")
 
 
-def _is_numeric_col(dtype_str: str) -> bool:
+def _isNumericCol(dtypeStr: str) -> bool:
     """Polars dtype 문자열이 숫자형인지 판별."""
-    return bool(re.search(r"(Int|UInt|Float|Decimal)", dtype_str))
+    return bool(re.search(r"(Int|UInt|Float|Decimal)", dtypeStr))
 
 
-def _format_number(val) -> str:
+def _formatNumber(val) -> str:
     """숫자 포맷: 천단위 쉼표, 소수점 유지 (None/NaN → 빈 문자열)."""
     return formatComma(val, decimals=2, nullStr="")
 
 
-def print_dataframe(
+def printDataframe(
     df: "pl.DataFrame",
     *,
     title: str | None = None,
-    max_rows: int = 50,
+    maxRows: int = 50,
 ) -> None:
     """Polars DataFrame을 Rich Table로 렌더링.
 
@@ -69,18 +69,18 @@ def print_dataframe(
     schema = df.schema
 
     for col_name in df.columns:
-        dtype_str = str(schema[col_name])
-        justify = "right" if _is_numeric_col(dtype_str) else "left"
+        dtypeStr = str(schema[col_name])
+        justify = "right" if _isNumericCol(dtypeStr) else "left"
         table.add_column(col_name, justify=justify, no_wrap=True)
 
-    display_df = df.head(max_rows)
+    display_df = df.head(maxRows)
     for row in display_df.iter_rows(named=True):
         cells = []
         for col_name in df.columns:
             val = row[col_name]
-            dtype_str = str(schema[col_name])
-            if _is_numeric_col(dtype_str):
-                formatted = _format_number(val)
+            dtypeStr = str(schema[col_name])
+            if _isNumericCol(dtypeStr):
+                formatted = _formatNumber(val)
                 if isinstance(val, (int, float)) and val is not None:
                     if isinstance(val, float) and val != val:
                         cells.append("")
@@ -97,10 +97,10 @@ def print_dataframe(
         table.add_row(*cells)
 
     _console.print(table)
-    if len(df) > max_rows:
-        _console.print(f"[dim]... {len(df) - max_rows}행 추가 (총 {len(df)}행)[/]")
+    if len(df) > maxRows:
+        _console.print(f"[dim]... {len(df) - maxRows}행 추가 (총 {len(df)}행)[/]")
 
 
-def print_search_results(results: "pl.DataFrame") -> None:
+def printSearchResults(results: "pl.DataFrame") -> None:
     """dartlab.search() 결과를 Rich Table로 표시."""
-    print_dataframe(results, title="검색 결과")
+    printDataframe(results, title="검색 결과")

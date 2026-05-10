@@ -20,68 +20,68 @@ pytestmark = pytest.mark.unit
 
 class TestSanitizeError:
     def test_masks_file_path(self):
-        from dartlab.server.api.common import sanitize_error
+        from dartlab.server.api.common import sanitizeError
 
-        msg = sanitize_error(ValueError("file not found: C:\\Users\\admin\\secret\\data.txt"))
+        msg = sanitizeError(ValueError("file not found: C:\\Users\\admin\\secret\\data.txt"))
         assert "admin" not in msg
         assert "<path>" in msg
 
     def test_masks_unix_path(self):
-        from dartlab.server.api.common import sanitize_error
+        from dartlab.server.api.common import sanitizeError
 
-        msg = sanitize_error(ValueError("error at /home/user/secret.key"))
+        msg = sanitizeError(ValueError("error at /home/user/secret.key"))
         assert "secret.key" not in msg
         assert "<path>" in msg
 
     def test_masks_credentials(self):
-        from dartlab.server.api.common import sanitize_error
+        from dartlab.server.api.common import sanitizeError
 
-        msg = sanitize_error(ValueError("api_key=sk-abc123 failed"))
+        msg = sanitizeError(ValueError("api_key=sk-abc123 failed"))
         assert "sk-abc123" not in msg
         assert "***" in msg
 
     def test_masks_token(self):
-        from dartlab.server.api.common import sanitize_error
+        from dartlab.server.api.common import sanitizeError
 
-        msg = sanitize_error(ValueError("token: mytoken123"))
+        msg = sanitizeError(ValueError("token: mytoken123"))
         assert "mytoken123" not in msg
 
     def test_safe_message_unchanged(self):
-        from dartlab.server.api.common import sanitize_error
+        from dartlab.server.api.common import sanitizeError
 
-        msg = sanitize_error(ValueError("simple error"))
+        msg = sanitizeError(ValueError("simple error"))
         assert msg == "simple error"
 
 
 class TestSerializePayload:
     def test_none(self):
-        from dartlab.server.api.common import serialize_payload
+        from dartlab.server.api.common import serializePayload
 
-        result = serialize_payload(None)
+        result = serializePayload(None)
         assert result["type"] == "none"
         assert result["data"] is None
 
     def test_dict(self):
-        from dartlab.server.api.common import serialize_payload
+        from dartlab.server.api.common import serializePayload
 
-        result = serialize_payload({"key": "value"})
+        result = serializePayload({"key": "value"})
         assert result["type"] == "dict"
         assert result["data"]["key"] == "value"
 
     def test_string(self):
-        from dartlab.server.api.common import serialize_payload
+        from dartlab.server.api.common import serializePayload
 
-        result = serialize_payload("hello")
+        result = serializePayload("hello")
         assert result["type"] == "text"
         assert result["data"] == "hello"
 
     def test_polars_dataframe(self):
         import polars as pl
 
-        from dartlab.server.api.common import serialize_payload
+        from dartlab.server.api.common import serializePayload
 
         df = pl.DataFrame({"a": [1, 2, 3], "b": ["x", "y", "z"]})
-        result = serialize_payload(df)
+        result = serializePayload(df)
         assert result["type"] == "table"
         assert result["columns"] == ["a", "b"]
         assert len(result["rows"]) == 3
@@ -89,30 +89,30 @@ class TestSerializePayload:
     def test_max_rows_limit(self):
         import polars as pl
 
-        from dartlab.server.api.common import serialize_payload
+        from dartlab.server.api.common import serializePayload
 
         df = pl.DataFrame({"a": list(range(500))})
-        result = serialize_payload(df, max_rows=10)
+        result = serializePayload(df, maxRows=10)
         assert len(result["rows"]) == 10
 
     def test_list_payload(self):
-        from dartlab.server.api.common import serialize_payload
+        from dartlab.server.api.common import serializePayload
 
-        result = serialize_payload([1, 2, 3])
+        result = serializePayload([1, 2, 3])
         assert result["data"] is not None
 
 
 class TestNormalizeProviderName:
     def test_basic(self):
-        from dartlab.server.api.common import normalize_provider_name
+        from dartlab.server.api.common import normalizeProviderName
 
         # None → None
-        assert normalize_provider_name(None) is None
+        assert normalizeProviderName(None) is None
 
     def test_known_provider(self):
-        from dartlab.server.api.common import normalize_provider_name
+        from dartlab.server.api.common import normalizeProviderName
 
-        result = normalize_provider_name("gemini")
+        result = normalizeProviderName("gemini")
         assert result is not None
 
 
@@ -124,24 +124,24 @@ class TestNormalizeProviderName:
 class TestCorsOrigins:
     def test_default_origins(self, monkeypatch):
         monkeypatch.delenv("DARTLAB_CORS_ORIGINS", raising=False)
-        from dartlab.server import _cors_origins
+        from dartlab.server import _corsOrigins
 
-        origins = _cors_origins()
+        origins = _corsOrigins()
         assert isinstance(origins, list)
         assert len(origins) >= 2
         assert any("8400" in o for o in origins)
 
     def test_wildcard(self, monkeypatch):
         monkeypatch.setenv("DARTLAB_CORS_ORIGINS", "*")
-        from dartlab.server import _cors_origins
+        from dartlab.server import _corsOrigins
 
-        assert _cors_origins() == ["*"]
+        assert _corsOrigins() == ["*"]
 
     def test_custom_origins(self, monkeypatch):
         monkeypatch.setenv("DARTLAB_CORS_ORIGINS", "http://a.com, http://b.com")
-        from dartlab.server import _cors_origins
+        from dartlab.server import _corsOrigins
 
-        origins = _cors_origins()
+        origins = _corsOrigins()
         assert "http://a.com" in origins
         assert "http://b.com" in origins
 

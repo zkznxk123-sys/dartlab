@@ -49,13 +49,13 @@ def _detectStockCodeColumn(df: pl.DataFrame) -> str | None:
     return None
 
 
-def _hashScanResult(df: pl.DataFrame, top_n: int) -> str:
+def _hashScanResult(df: pl.DataFrame, topN: int) -> str:
     """결정적 SHA-1 hash — universe 출처 추적용 (universe 같으면 hash 같다)."""
     import hashlib
 
     if isEmptyDf(df):
         return "empty"
-    sub = df.head(top_n)
+    sub = df.head(topN)
     h = hashlib.sha1()
     h.update(str(sub.shape).encode("utf-8"))
     h.update(",".join(sub.columns).encode("utf-8"))
@@ -67,15 +67,15 @@ def _hashScanResult(df: pl.DataFrame, top_n: int) -> str:
     return h.hexdigest()[:16]
 
 
-def _ruleFromStyle(style_key: str) -> Callable[[Any], Rule]:
+def _ruleFromStyle(styleKey: str) -> Callable[[Any], Rule]:
     """style 문자열 → STYLE_REGISTRY 의 build 함수.
 
     ``resolveStyle`` 로 한글/영문 alias 처리. 미등록 시 KeyError.
     """
-    canonical = resolveStyle(style_key)
+    canonical = resolveStyle(styleKey)
     registry = STYLE_REGISTRY()
     if canonical not in registry:
-        msg = f"미등록 style: '{style_key}'. 후보: {list(registry.keys())}"
+        msg = f"미등록 style: '{styleKey}'. 후보: {list(registry.keys())}"
         raise KeyError(msg)
     return registry[canonical]
 
@@ -94,8 +94,8 @@ def _ruleFromSignalFn(signalFn: Callable[[np.ndarray], np.ndarray]) -> Callable[
             exit_expr=np.zeros(max(1, n), dtype=bool),
         )
 
-    def _builder(company_stub: Any) -> Rule:
-        code = getattr(company_stub, "stockCode", None)
+    def _builder(companyStub: Any) -> Rule:
+        code = getattr(companyStub, "stockCode", None)
         if code is None:
             return _empty(0)
         ohlcv = fetchOhlcv(code)
@@ -133,8 +133,8 @@ def runScanBacktest(
     universeCol: str = "auto",
     topN: int = 20,
     weighting: str = "equal",
-    fee_bps: float = DEFAULT_FEE_BPS,
-    slip_bps: float = DEFAULT_SLIP_BPS,
+    feeBps: float = DEFAULT_FEE_BPS,
+    slipBps: float = DEFAULT_SLIP_BPS,
 ) -> BacktestResult:
     """scan 결과 universe + signalFn (또는 style) → multi-asset backtest 폐쇄 루프.
 
@@ -218,18 +218,18 @@ def runScanBacktest(
         return BacktestResult(status="error", reason="universe 코드 추출 실패")
 
     if signalFn is not None:
-        rule_builder = _ruleFromSignalFn(signalFn)
+        ruleBuilder = _ruleFromSignalFn(signalFn)
         signal_source = "signalFn"
     else:
-        rule_builder = _ruleFromStyle(style)  # type: ignore[arg-type]
+        ruleBuilder = _ruleFromStyle(style)  # type: ignore[arg-type]
         signal_source = f"style:{resolveStyle(style or '')}"
 
     bt = multiAssetBacktest(
         codes,
-        rule_builder,
+        ruleBuilder,
         weighting=weighting,
-        fee_bps=fee_bps,
-        slip_bps=slip_bps,
+        feeBps=feeBps,
+        slipBps=slipBps,
         style=signal_source,
     )
 

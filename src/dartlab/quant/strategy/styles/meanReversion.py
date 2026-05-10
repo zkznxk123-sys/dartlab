@@ -66,11 +66,11 @@ def _residualZScore(close: np.ndarray, window: int = 60) -> np.ndarray:
 def build(
     company,
     *,
-    z_entry: float = -1.25,
-    z_exit: float = -0.5,
-    z_window: int = 60,
-    rsi_confirm: float = 35,
-    atr_k: float = 2.0,
+    zEntry: float = -1.25,
+    zExit: float = -0.5,
+    zWindow: int = 60,
+    rsiConfirm: float = 35,
+    atrK: float = 2.0,
 ) -> Rule:
     """평균회귀 룰 빌드 — Avellaneda-Lee 2008 statistical arbitrage 정의.
 
@@ -91,7 +91,7 @@ def build(
     """
     arr = getArrays(company)
     close = arr.get("close")
-    if close is None or len(close) < z_window + 20:
+    if close is None or len(close) < zWindow + 20:
         n = len(close) if close is not None else 0
         return Rule(
             entry_expr=np.zeros(max(n, 1), dtype=np.bool_),
@@ -99,20 +99,20 @@ def build(
             meta={"style": "meanReversion", "error": "insufficient data"},
         )
 
-    z = _residualZScore(close, window=z_window)
+    z = _residualZScore(close, window=zWindow)
     rsi = vrsi(close, period=14)
     vol_series = _volatilitySeries(close)
     realized = vol_series["realized_vol"]
     vol_q70 = float(np.nanquantile(realized, 0.70)) if not np.all(np.isnan(realized)) else float("inf")
 
     s = Signal()
-    s.add("z_low", (z < z_entry) & ~np.isnan(z))
-    s.add("z_recover", (z > z_exit) & ~np.isnan(z))
-    s.add("rsi_oversold", (rsi < rsi_confirm) & ~np.isnan(rsi))
+    s.add("z_low", (z < zEntry) & ~np.isnan(z))
+    s.add("z_recover", (z > zExit) & ~np.isnan(z))
+    s.add("rsi_oversold", (rsi < rsiConfirm) & ~np.isnan(rsi))
     s.add("vol_normal", (realized < vol_q70) & ~np.isnan(realized))
 
     return Rule(
         entry_expr=s.z_low & s.rsi_oversold & s.vol_normal,
         exit_expr=s.z_recover,
         meta={"style": "meanReversion", "definition": "Avellaneda-Lee_2008"},
-    ).with_stop("atr", k=atr_k, period=14)
+    ).withStop("atr", k=atrK, period=14)

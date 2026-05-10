@@ -29,7 +29,7 @@ def yoy(df: pl.DataFrame, col: str = "value") -> pl.DataFrame:
     pl.DataFrame
         원본 컬럼 + ``{col}_yoy`` (Float64) — 전년 동기 대비 변화율 (%).
     """
-    period = _infer_period(df)
+    period = _inferPeriod(df)
     return df.with_columns(((pl.col(col) / pl.col(col).shift(period) - 1) * 100).alias(f"{col}_yoy"))
 
 
@@ -71,7 +71,7 @@ def diff(df: pl.DataFrame, col: str = "value", periods: int = 1) -> pl.DataFrame
     return df.with_columns((pl.col(col) - pl.col(col).shift(periods)).alias(f"{col}_diff{periods}"))
 
 
-def moving_average(df: pl.DataFrame, col: str = "value", window: int = 12) -> pl.DataFrame:
+def movingAverage(df: pl.DataFrame, col: str = "value", window: int = 12) -> pl.DataFrame:
     """이동평균.
 
     Parameters
@@ -91,7 +91,7 @@ def moving_average(df: pl.DataFrame, col: str = "value", window: int = 12) -> pl
     return df.with_columns(pl.col(col).rolling_mean(window_size=window).alias(f"{col}_ma{window}"))
 
 
-def normalize(df: pl.DataFrame, col: str = "value", base_date: str | None = None) -> pl.DataFrame:
+def normalize(df: pl.DataFrame, col: str = "value", baseDate: str | None = None) -> pl.DataFrame:
     """기준일 = 100 정규화.
 
     Parameters
@@ -109,30 +109,30 @@ def normalize(df: pl.DataFrame, col: str = "value", base_date: str | None = None
         원본 컬럼 + ``{col}_norm`` (Float64) — 기준일 = 100 정규화 값.
         기준값이 0 또는 None이면 ``{col}_norm`` = None.
     """
-    if base_date is not None:
+    if baseDate is not None:
         from datetime import datetime
 
-        target = datetime.strptime(base_date, "%Y-%m-%d").date()
+        target = datetime.strptime(baseDate, "%Y-%m-%d").date()
         base_row = df.filter(pl.col("date") == target)
         if base_row.is_empty():
             # 가장 가까운 날짜
             base_row = df.filter(pl.col("date") <= target).tail(1)
         if base_row.is_empty():
             base_row = df.head(1)
-        base_val = base_row[col][0]
+        baseVal = base_row[col][0]
     else:
         non_null = df.filter(pl.col(col).is_not_null())
         if non_null.is_empty():
             return df.with_columns(pl.lit(None).alias(f"{col}_norm"))
-        base_val = non_null[col][0]
+        baseVal = non_null[col][0]
 
-    if base_val is None or base_val == 0:
+    if baseVal is None or baseVal == 0:
         return df.with_columns(pl.lit(None).alias(f"{col}_norm"))
 
-    return df.with_columns((pl.col(col) / base_val * 100).alias(f"{col}_norm"))
+    return df.with_columns((pl.col(col) / baseVal * 100).alias(f"{col}_norm"))
 
 
-def normalize_multi(df: pl.DataFrame, base_date: str | None = None) -> pl.DataFrame:
+def normalizeMulti(df: pl.DataFrame, baseDate: str | None = None) -> pl.DataFrame:
     """wide DataFrame의 모든 값 컬럼을 기준일=100 정규화.
 
     date 컬럼 제외한 모든 수치 컬럼을 정규화.
@@ -155,7 +155,7 @@ def normalize_multi(df: pl.DataFrame, base_date: str | None = None) -> pl.DataFr
             continue
         if df[col].dtype in (pl.Float64, pl.Float32, pl.Int64, pl.Int32):
             temp = df.select("date", col)
-            normed = normalize(temp, col=col, base_date=base_date)
+            normed = normalize(temp, col=col, baseDate=baseDate)
             norm_col = f"{col}_norm"
             if norm_col in normed.columns:
                 result = result.with_columns(normed[norm_col].alias(col))
@@ -194,12 +194,12 @@ def correlation(df: pl.DataFrame, method: str = "pearson") -> pl.DataFrame:
     return pl.DataFrame(rows)
 
 
-def lead_lag(
+def leadLag(
     df: pl.DataFrame,
-    col_a: str,
-    col_b: str,
+    colA: str,
+    colB: str,
     *,
-    max_lag: int = 12,
+    maxLag: int = 12,
 ) -> pl.DataFrame:
     """선행/후행 상관분석.
 
@@ -209,29 +209,29 @@ def lead_lag(
     Returns:
         DataFrame (lag, correlation).
     """
-    clean = df.select(col_a, col_b).drop_nulls()
-    a = clean[col_a]
-    b = clean[col_b]
+    clean = df.select(colA, colB).drop_nulls()
+    a = clean[colA]
+    b = clean[colB]
 
     lags: list[int] = []
     corrs: list[float | None] = []
 
-    for lag in range(-max_lag, max_lag + 1):
+    for lag in range(-maxLag, maxLag + 1):
         if lag == 0:
-            corr_val = clean.select(pl.corr(col_a, col_b)).item()
+            corr_val = clean.select(pl.corr(colA, colB)).item()
         elif lag > 0:
-            shifted = pl.DataFrame({col_a: a[lag:], col_b: b[: len(b) - lag]})
+            shifted = pl.DataFrame({colA: a[lag:], colB: b[: len(b) - lag]})
             if shifted.height < 3:
                 corr_val = None
             else:
-                corr_val = shifted.select(pl.corr(col_a, col_b)).item()
+                corr_val = shifted.select(pl.corr(colA, colB)).item()
         else:
             shift_abs = abs(lag)
-            shifted = pl.DataFrame({col_a: a[: len(a) - shift_abs], col_b: b[shift_abs:]})
+            shifted = pl.DataFrame({colA: a[: len(a) - shift_abs], colB: b[shift_abs:]})
             if shifted.height < 3:
                 corr_val = None
             else:
-                corr_val = shifted.select(pl.corr(col_a, col_b)).item()
+                corr_val = shifted.select(pl.corr(colA, colB)).item()
 
         lags.append(lag)
         corrs.append(round(corr_val, 4) if corr_val is not None else None)
@@ -242,7 +242,7 @@ def lead_lag(
 # ── internal ──
 
 
-def _infer_period(df: pl.DataFrame) -> int:
+def _inferPeriod(df: pl.DataFrame) -> int:
     """데이터 간격 추론 → YoY 기간 결정.
 
     date 컬럼의 중앙 간격(일)으로 주기를 판별한다.

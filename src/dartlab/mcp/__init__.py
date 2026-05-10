@@ -117,7 +117,7 @@ def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     if name == "listDartlabSkills":
         from dartlab.skills import listSkills
 
-        return {"skills": [skill.to_dict() for skill in listSkills(includeUser=bool(args.get("includeUser", True)))]}
+        return {"skills": [skill.toDict() for skill in listSkills(includeUser=bool(args.get("includeUser", True)))]}
     if name in {"searchDartlabSkills", "skill_search"}:
         return _executeAiTool(
             "ReadSkill",
@@ -134,7 +134,7 @@ def _executeCompatAskTool(name: str, args: dict[str, Any]) -> dict[str, Any]:
 
         return checkEvidence(
             str(args.get("skillId") or ""), args.get("refs") or [], includeUser=bool(args.get("includeUser", True))
-        ).to_dict()
+        ).toDict()
     return {
         "ok": False,
         "error": (
@@ -157,8 +157,8 @@ def _executeWorkspaceAgentTool(name: str, args: dict[str, Any]) -> dict[str, Any
     return _executeAskWorkbenchTool(name, args)
 
 
-def _resourcePayload(uri_str: str) -> tuple[str, str]:
-    if uri_str == "dartlab://info":
+def _resourcePayload(uriStr: str) -> tuple[str, str]:
+    if uriStr == "dartlab://info":
         import dartlab
 
         return (
@@ -172,12 +172,12 @@ def _resourcePayload(uri_str: str) -> tuple[str, str]:
             ),
             "application/json",
         )
-    if uri_str == "dartlab://ask-workbench":
+    if uriStr == "dartlab://ask-workbench":
         return (
             json.dumps(_executeAskWorkbenchTool("ask_kernel_status", {}), ensure_ascii=False, indent=2),
             "application/json",
         )
-    if uri_str == "dartlab://datasets":
+    if uriStr == "dartlab://datasets":
         return (
             json.dumps(
                 {"datasets": [], "note": "dataset refs are produced by EngineCall/RunPython"},
@@ -186,7 +186,7 @@ def _resourcePayload(uri_str: str) -> tuple[str, str]:
             ),
             "application/json",
         )
-    if uri_str == "dartlab://reference":
+    if uriStr == "dartlab://reference":
         return (
             json.dumps(
                 _executeAskWorkbenchTool("search_reference", {"query": "DartLab Ask Workbench", "limit": 5}),
@@ -195,7 +195,7 @@ def _resourcePayload(uri_str: str) -> tuple[str, str]:
             ),
             "application/json",
         )
-    if uri_str == "dartlab://skills":
+    if uriStr == "dartlab://skills":
         return (
             json.dumps(
                 _executeAskWorkbenchTool("listDartlabSkills", {"includeUser": False}),
@@ -204,19 +204,19 @@ def _resourcePayload(uri_str: str) -> tuple[str, str]:
             ),
             "application/json",
         )
-    if uri_str.startswith("dartlab://skills/"):
-        skill_id = uri_str.replace("dartlab://skills/", "", 1)
+    if uriStr.startswith("dartlab://skills/"):
+        skill_id = uriStr.replace("dartlab://skills/", "", 1)
         from dartlab.skills import describeSkill
 
         return (
             json.dumps(describeSkill(skill_id, includeUser=False), ensure_ascii=False, indent=2),
             "application/json",
         )
-    if uri_str.startswith("dartlab://runs/") and uri_str.endswith("/scratchpad"):
+    if uriStr.startswith("dartlab://runs/") and uriStr.endswith("/scratchpad"):
         from pathlib import Path
 
-        run_id = uri_str.removeprefix("dartlab://runs/").removesuffix("/scratchpad")
-        path = Path.home() / ".dartlab" / "ask_runs" / f"{run_id}.jsonl"
+        runId = uriStr.removeprefix("dartlab://runs/").removesuffix("/scratchpad")
+        path = Path.home() / ".dartlab" / "ask_runs" / f"{runId}.jsonl"
         if not path.exists():
             return ("", "application/jsonl")
         return (path.read_text(encoding="utf-8"), "application/jsonl")
@@ -336,7 +336,7 @@ async def _handleRequestUserInput(args: dict[str, Any], session: Any) -> dict[st
 async def _runWithProgress(
     name: str,
     arguments: dict[str, Any],
-    progress_token: Any,
+    progressToken: Any,
     session: Any,
 ) -> dict[str, Any]:
     """sync 도구 실행을 thread 로 옮기고 임계 위에서 progress notification 주기적 emit.
@@ -361,7 +361,7 @@ async def _runWithProgress(
                 continue
             try:
                 await session.send_progress_notification(
-                    progress_token=progress_token,
+                    progressToken=progressToken,
                     progress=elapsed,
                     total=None,
                     message=f"{name} 실행 중 ({elapsed:.0f} s)...",
@@ -371,7 +371,7 @@ async def _runWithProgress(
                 # cancel 로만 (try 본문 정상 종료).
                 pass
 
-    progress_task = asyncio.create_task(_emit())
+    progress_task = asyncio.createTask(_emit())
     try:
         result = await asyncio.to_thread(_executeWorkspaceAgentTool, name, arguments)
     finally:
@@ -426,7 +426,7 @@ def _advertisedTools() -> list[dict[str, Any]]:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
-def create_server():
+def createServer():
     """MCP 서버 인스턴스 생성."""
     try:
         from mcp.server import Server
@@ -447,13 +447,13 @@ def create_server():
     app = Server("dartlab", instructions=_MCP_INSTRUCTIONS)
     _log.info("MCP 서버 초기화 완료")
 
-    def _to_annotations(spec_annotations: dict[str, bool]) -> ToolAnnotations | None:
-        if not spec_annotations:
+    def _toAnnotations(specAnnotations: dict[str, bool]) -> ToolAnnotations | None:
+        if not specAnnotations:
             return None
-        return ToolAnnotations(**spec_annotations)
+        return ToolAnnotations(**specAnnotations)
 
-    @app.list_tools()
-    async def list_tools() -> list[Tool]:
+    @app.listTools()
+    async def listTools() -> list[Tool]:
         tools: list[Tool] = []
         for t in _advertisedTools():
             tools.append(
@@ -465,26 +465,26 @@ def create_server():
                         "properties": t["params"],
                         "required": t["required"],
                     },
-                    annotations=_to_annotations(t.get("annotations") or {}),
+                    annotations=_toAnnotations(t.get("annotations") or {}),
                 )
             )
         return tools
 
-    @app.call_tool()
-    async def call_tool(name: str, arguments: dict) -> dict[str, Any]:
+    @app.callTool()
+    async def callTool(name: str, arguments: dict) -> dict[str, Any]:
         # SDK 가 dict 반환을 받으면 structuredContent + serialized text 양쪽 모두 자동 채움.
         # 외부 LLM 은 ref/values/table 등을 structured 로 파싱 가능 + 텍스트 클라이언트 호환.
         _log.info("call_tool: %s(%s)", name, list(arguments.keys()))
 
         # progressToken 이 있으면 5 s 임계 위 실행은 백그라운드 progress notification.
         # 짧은 호출은 overhead 0 — sync 그대로. 클라이언트가 progress 미요청이면 emit skip.
-        progress_token = None
+        progressToken = None
         session = None
         try:
             ctx = app.request_context
             meta = getattr(ctx, "meta", None)
             if meta is not None:
-                progress_token = getattr(meta, "progressToken", None)
+                progressToken = getattr(meta, "progressToken", None)
             session = getattr(ctx, "session", None)
         except (LookupError, RuntimeError):
             pass
@@ -494,13 +494,13 @@ def create_server():
         if name == "RequestUserInput" and session is not None:
             return await _handleRequestUserInput(arguments, session)
 
-        if progress_token is None or session is None:
+        if progressToken is None or session is None:
             return _executeWorkspaceAgentTool(name, arguments)
 
-        return await _runWithProgress(name, arguments, progress_token, session)
+        return await _runWithProgress(name, arguments, progressToken, session)
 
-    @app.list_resources()
-    async def list_resources() -> list[Resource]:
+    @app.listResources()
+    async def listResources() -> list[Resource]:
         return [
             Resource(
                 uri="dartlab://info",
@@ -534,18 +534,18 @@ def create_server():
             ),
         ]
 
-    @app.read_resource()
-    async def read_resource(uri: str) -> list[ReadResourceContents]:
-        uri_str = str(uri)
-        content, mime_type = _resourcePayload(uri_str)
+    @app.readResource()
+    async def readResource(uri: str) -> list[ReadResourceContents]:
+        uriStr = str(uri)
+        content, mime_type = _resourcePayload(uriStr)
         return [ReadResourceContents(content=content, mime_type=mime_type)]
 
     # ── Prompts API — Skill OS recipe 카테고리를 prompt 로 노출 ─────────────────
     # 외부 LLM 이 한 번의 prompt 호출로 multi-step 분석 시나리오를 받음. arguments 는
     # skill 의 inputs frontmatter 에서 derive — required=False (LLM 이 채우거나 무시).
 
-    @app.list_prompts()
-    async def list_prompts() -> list[Prompt]:
+    @app.listPrompts()
+    async def listPrompts() -> list[Prompt]:
         prompts: list[Prompt] = []
         for spec in _recipeSkillsForPrompts():
             args = [
@@ -562,8 +562,8 @@ def create_server():
         return prompts
 
     # ── logging/setLevel — 클라이언트가 dartlab logger 레벨 동적 조정 ─────────
-    @app.set_logging_level()
-    async def set_logging_level(level: str) -> None:
+    @app.setLoggingLevel()
+    async def setLoggingLevel(level: str) -> None:
         # MCP LoggingLevel 은 RFC5424 (debug/info/notice/warning/error/critical/alert/emergency).
         # Python logging 은 이 중 일부만 매칭. 그 외는 가장 가까운 표준 레벨로 매핑.
         mapping = {
@@ -580,8 +580,8 @@ def create_server():
         _log.setLevel(py_level)
         _log.info("logger level set to %s (Python %d) by client", level, py_level)
 
-    @app.get_prompt()
-    async def get_prompt(name: str, arguments: dict[str, str] | None = None) -> GetPromptResult:
+    @app.getPrompt()
+    async def getPrompt(name: str, arguments: dict[str, str] | None = None) -> GetPromptResult:
         from dartlab.skills import getSkill
 
         try:
@@ -649,7 +649,7 @@ def installMcpConfig(targetDir: str | None = None) -> str:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
-def run_stdio():
+def runStdio():
     """stdio 모드로 MCP 서버 실행."""
     import asyncio
 
@@ -658,7 +658,7 @@ def run_stdio():
     except ImportError as exc:
         raise ImportError("MCP SDK 필요: pip install --upgrade dartlab") from exc
 
-    app = create_server()
+    app = createServer()
 
     async def _main():
         async with stdio_server() as (read_stream, write_stream):
@@ -668,34 +668,34 @@ def run_stdio():
     asyncio.run(_main())
 
 
-def create_sse_app():
+def createSseApp():
     """SSE 전송 기반 ASGI 앱 생성. FastAPI에 마운트하거나 독립 실행 가능."""
     from mcp.server.sse import SseServerTransport
     from starlette.applications import Starlette
     from starlette.routing import Mount, Route
 
-    mcp_server = create_server()
+    mcp_server = createServer()
     sse = SseServerTransport("/messages/")
 
-    async def handle_sse(request):
+    async def handleSse(request):
         async with sse.connect_sse(request.scope, request.receive, request._send) as (read, write):
             await mcp_server.run(read, write, mcp_server.create_initialization_options())
 
     return Starlette(
         routes=[
-            Route("/sse", endpoint=handle_sse),
+            Route("/sse", endpoint=handleSse),
             Mount("/messages/", app=sse.handle_post_message),
         ],
     )
 
 
-def run_sse(host: str = "0.0.0.0", port: int = 8001):
+def runSse(host: str = "0.0.0.0", port: int = 8001):
     """SSE 모드로 MCP 서버 실행 (HTTP)."""
     import uvicorn
 
     _log.info("DartLab MCP 서버 시작 (SSE http://%s:%d/sse)", host, port)
-    uvicorn.run(create_sse_app(), host=host, port=port)
+    uvicorn.run(createSseApp(), host=host, port=port)
 
 
 if __name__ == "__main__":
-    run_stdio()
+    runStdio()

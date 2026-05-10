@@ -50,7 +50,7 @@ _EXCLUDED_MODEL_PARTS = (
 )
 
 
-def normalize_provider_id(provider: str | None) -> str | None:
+def normalizeProviderId(provider: str | None) -> str | None:
     if not provider:
         return None
     lowered = provider.strip().lower()
@@ -59,8 +59,8 @@ def normalize_provider_id(provider: str | None) -> str | None:
     return lowered
 
 
-def is_openai_family_provider(provider: str | None) -> bool:
-    normalized = normalize_provider_id(provider)
+def isOpenaiFamilyProvider(provider: str | None) -> bool:
+    normalized = normalizeProviderId(provider)
     return normalized in _OPENAI_FAMILY_PROVIDERS or normalized is None
 
 
@@ -70,7 +70,7 @@ def _versionKey(name: str) -> tuple[int, ...]:
     return tuple(-part for part in parts)
 
 
-def _resolveBackendLatest(*, allow_fetch: bool = True) -> str | None:
+def _resolveBackendLatest(*, allowFetch: bool = True) -> str | None:
     """Query the cached backend model catalog and return the highest version.
 
     Returns None when the backend is unreachable, no token is stored, or
@@ -82,19 +82,19 @@ def _resolveBackendLatest(*, allow_fetch: bool = True) -> str | None:
     except Exception:  # noqa: BLE001
         return None
     try:
-        models = availableModels(allow_fetch=allow_fetch)
+        models = availableModels(allowFetch=allowFetch)
     except Exception:  # noqa: BLE001
         return None
     if not models:
         return None
-    chat_models = [m for m in models if is_openai_chat_model(m)]
+    chat_models = [m for m in models if isOpenaiChatModel(m)]
     if not chat_models:
         return None
     chat_models.sort(key=_versionKey)
     return chat_models[0]
 
 
-def latest_openai_model(*, allow_fetch: bool = True) -> str:
+def latestOpenaiModel(*, allowFetch: bool = True) -> str:
     """Return the default frontier model used by DartLab.
 
     Resolution: env override → backend latest (cached or fetched) → static fallback.
@@ -104,19 +104,19 @@ def latest_openai_model(*, allow_fetch: bool = True) -> str:
     override = os.environ.get("DARTLAB_LATEST_OPENAI_MODEL")
     if override and override.strip():
         return override.strip()
-    backend_latest = _resolveBackendLatest(allow_fetch=allow_fetch)
+    backend_latest = _resolveBackendLatest(allowFetch=allowFetch)
     if backend_latest:
         return backend_latest
     return _FALLBACK_LATEST_MODEL
 
 
-def resolve_default_model(
+def resolveDefaultModel(
     provider: str | None,
     *,
-    explicit_model: str | None = None,
-    configured_model: str | None = None,
-    fallback_model: str | None = None,
-    allow_fetch: bool = True,
+    explicitModel: str | None = None,
+    configuredModel: str | None = None,
+    fallbackModel: str | None = None,
+    allowFetch: bool = True,
 ) -> str | None:
     """Resolve the effective model for a provider.
 
@@ -128,31 +128,31 @@ def resolve_default_model(
     없으면 정적 fallback.
     """
 
-    if explicit_model:
-        return explicit_model
-    if is_openai_family_provider(provider):
-        return latest_openai_model(allow_fetch=allow_fetch)
-    return configured_model or fallback_model
+    if explicitModel:
+        return explicitModel
+    if isOpenaiFamilyProvider(provider):
+        return latestOpenaiModel(allowFetch=allowFetch)
+    return configuredModel or fallbackModel
 
 
-def fallback_models(provider: str | None, *, allow_fetch: bool = True) -> list[str]:
+def fallbackModels(provider: str | None, *, allowFetch: bool = True) -> list[str]:
     """Provider fallback model 목록.
 
     allow_fetch=False → backend HTTP 호출 금지. cache 또는 정적 fallback 만 사용.
     cache-first endpoint (예: /api/models/<provider>) 가 fallback 호출 시 또 cold
     HTTP 가 트리거되던 회귀 가드.
     """
-    if is_openai_family_provider(provider):
-        return [latest_openai_model(allow_fetch=allow_fetch)]
+    if isOpenaiFamilyProvider(provider):
+        return [latestOpenaiModel(allowFetch=allowFetch)]
     return []
 
 
-def is_openai_chat_model(model_id: str) -> bool:
-    lowered = model_id.lower()
+def isOpenaiChatModel(modelId: str) -> bool:
+    lowered = modelId.lower()
     return lowered.startswith(_OPENAI_MODEL_PREFIXES) and not any(part in lowered for part in _EXCLUDED_MODEL_PARTS)
 
 
-def sort_openai_models(model_ids: list[str]) -> list[str]:
+def sortOpenaiModels(modelIds: list[str]) -> list[str]:
     """Sort available OpenAI chat models by version (newest first).
 
     The static fallback is appended only when the input list is missing it,
@@ -160,7 +160,7 @@ def sort_openai_models(model_ids: list[str]) -> list[str]:
     back of the list.
     """
 
-    unique = sorted(set(model_ids))
+    unique = sorted(set(modelIds))
     sorted_models = sorted(unique, key=_versionKey)
     fallback = _FALLBACK_LATEST_MODEL
     if fallback and fallback not in sorted_models:

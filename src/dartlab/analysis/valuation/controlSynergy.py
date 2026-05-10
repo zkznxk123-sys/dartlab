@@ -89,8 +89,8 @@ def calcControlValue(
 
     # Restructured — multiStageDcf 재실행
     ts = status_quo.get("twoStage", {})
-    base_fcf = _estimateBaseFcf(company)
-    if not base_fcf or base_fcf <= 0:
+    baseFcf = _estimateBaseFcf(company)
+    if not baseFcf or baseFcf <= 0:
         warnings.append("baseFcf 추출 실패 — 기본 DCF 사용")
         return {
             "statusQuoValue": status_quo_value,
@@ -109,7 +109,7 @@ def calcControlValue(
 
     # Restructured DCF: 더 높은 성장률로 multi-stage
     restructured = multiStageDcf(
-        baseFcf=base_fcf,
+        baseFcf=baseFcf,
         growthYears=[5, 5],
         growthRates=[optimal_g, optimal_g * 0.5],
         terminalGrowthRate=tg,

@@ -7,19 +7,19 @@ import logging
 import time
 
 from .cache import GatherCache
-from .domains import get_price_fallback, load_domain
-from .marketConfig import get_market_config
+from .domains import getPriceFallback, loadDomain
+from .marketConfig import getMarketConfig
 from .resilience import circuit_breaker, health_tracker
 from .types import GatherError, PriceSnapshot
 
 log = logging.getLogger(__name__)
 
 # 모듈 레벨 stale cache (price.py 단독 사용 시)
-_stale_cache = GatherCache(max_entries=100)
+_stale_cache = GatherCache(maxEntries=100)
 
 
 async def fetch(
-    stock_code: str,
+    stockCode: str,
     *,
     market: str = "KR",
     client=None,
@@ -60,8 +60,8 @@ async def fetch(
 
         전체 fallback + stale cache 모두 실패 시 None.
     """
-    config = get_market_config(market)
-    chain = get_price_fallback(market)
+    config = getMarketConfig(market)
+    chain = getPriceFallback(market)
     chain = health_tracker.reorder(chain)
 
     # client=None이면 자체 생성
@@ -71,27 +71,27 @@ async def fetch(
         client = GatherHttpClient()
 
     for source_name in chain:
-        if circuit_breaker.is_open(source_name):
+        if circuit_breaker.isOpen(source_name):
             log.debug("price skip %s (circuit open)", source_name)
             continue
 
         t0 = time.monotonic()
         try:
-            module = load_domain(source_name)
+            module = loadDomain(source_name)
             if not hasattr(module, "fetch_price"):
                 continue
 
-            result = await module.fetch_price(stock_code, client, market=market)
+            result = await module.fetchPrice(stockCode, client, market=market)
 
             latency = time.monotonic() - t0
 
             if result:
                 result.currency = config.currency
                 result.market = market
-                circuit_breaker.record_success(source_name)
+                circuit_breaker.recordSuccess(source_name)
                 health_tracker.record(source_name, success=True, latency=latency)
                 # stale cache에도 저장 (fallback용)
-                _stale_cache.put_typed(stock_code, "price", result)
+                _stale_cache.putTyped(stockCode, "price", result)
                 return result
 
             # None 반환 = 데이터 없음 (에러는 아님)
@@ -99,17 +99,17 @@ async def fetch(
 
         except (GatherError, ImportError, OSError) as exc:
             latency = time.monotonic() - t0
-            circuit_breaker.record_failure(source_name)
+            circuit_breaker.recordFailure(source_name)
             health_tracker.record(source_name, success=False, latency=latency)
             log.debug("price fallback %s 실패: %s", source_name, exc)
             continue
 
     # 모든 소스 실패 → stale cache 시도
-    stale = _stale_cache.get_typed(stock_code, "price", allow_stale=True)
+    stale = _stale_cache.getTyped(stockCode, "price", allowStale=True)
     if stale is not None and isinstance(stale, PriceSnapshot):
         stale_copy = copy.copy(stale)
         stale_copy.is_stale = True
-        log.info("price %s: stale cache 반환", stock_code)
+        log.info("price %s: stale cache 반환", stockCode)
         return stale_copy
 
     return None

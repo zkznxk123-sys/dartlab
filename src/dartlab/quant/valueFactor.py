@@ -32,7 +32,7 @@ from dartlab.quant._helpers import (
     ohlcvToArrays,
     resolve_market,
 )
-from dartlab.quant.qualityFactor import _is_financial
+from dartlab.quant.qualityFactor import _isFinancial
 
 log = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ log = logging.getLogger(__name__)
 _UNIVERSE_CACHE: dict[tuple[str, str], dict[str, list[float]]] = {}
 
 
-def _fetch_year_end_marketcaps(market: str, year: str) -> dict[str, float]:
+def _fetchYearEndMarketcaps(market: str, year: str) -> dict[str, float]:
     """연도말 시총 (KR 만 — KRX MKTCAP, US 는 빈 dict). factorBuild 와 동일 SSOT."""
     if market != "KR":
         return {}
@@ -63,7 +63,7 @@ def _fetch_year_end_marketcaps(market: str, year: str) -> dict[str, float]:
         return {}
 
 
-def _build_universe(market: str, year: str) -> dict[str, list[float]]:
+def _buildUniverse(market: str, year: str) -> dict[str, list[float]]:
     """전종목 단년도 value 지표 분포 (횡단면 z용).
 
     KR: 진짜 PBR/PER/PSR (시총 + DART 재무) + book proxy.
@@ -78,13 +78,13 @@ def _build_universe(market: str, year: str) -> dict[str, list[float]]:
         return {}
     annual = extractAnnualConsolidated(lf.collect())
     edgar = isEdgarSchema(annual)
-    year_col = "fy" if edgar else "bsns_year"
+    yearCol = "fy" if edgar else "bsns_year"
     year_val = int(year) if edgar else year
-    snap = annual.filter(pl.col(year_col) == year_val)
+    snap = annual.filter(pl.col(yearCol) == year_val)
     if snap.is_empty():
         return {}
 
-    market_caps = _fetch_year_end_marketcaps(market, year)
+    market_caps = _fetchYearEndMarketcaps(market, year)
 
     out = {
         "earningsToBook": [],
@@ -99,7 +99,7 @@ def _build_universe(market: str, year: str) -> dict[str, list[float]]:
     for code in codes:
         if not isinstance(code, str):
             continue
-        if _is_financial(code):
+        if _isFinancial(code):
             continue
         stock = snap.filter(pl.col("stockCode") == code)
         equity = extractAccount(stock, "total_equity")
@@ -128,10 +128,10 @@ def _build_universe(market: str, year: str) -> dict[str, list[float]]:
     return out
 
 
-def _zscore(value: float, all_values: list[float]) -> float:
+def _zscore(value: float, allValues: list[float]) -> float:
     import numpy as np
 
-    arr = np.array([v for v in all_values if v is not None])
+    arr = np.array([v for v in allValues if v is not None])
     if len(arr) < 10:
         return 0.0
     mu = float(np.mean(arr))
@@ -158,7 +158,7 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
-    if _is_financial(stockCode):
+    if _isFinancial(stockCode):
         result["sector"] = "financial"
         result["grade"] = None
         result["info"] = "금융업은 일반 가치 산식 부적절"
@@ -176,26 +176,26 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         return {**result, "error": "연결 4분기 데이터 없음"}
 
     edgar = isEdgarSchema(snap)
-    year_col = "fy" if edgar else "bsns_year"
-    year_counts = snap.group_by(year_col).len().sort(year_col, descending=True)
+    yearCol = "fy" if edgar else "bsns_year"
+    year_counts = snap.group_by(yearCol).len().sort(yearCol, descending=True)
     yr = None
     for row in year_counts.iter_rows(named=True):
         if row["len"] >= 1000:
-            yr = row[year_col]
+            yr = row[yearCol]
             break
     if yr is None:
         return {**result, "error": "충분한 universe 연도 없음"}
 
-    snap_yr = snap.filter(pl.col(year_col) == yr)
-    stock = snap_yr.filter(pl.col("stockCode") == stockCode)
+    snapYr = snap.filter(pl.col(yearCol) == yr)
+    stock = snapYr.filter(pl.col("stockCode") == stockCode)
     if stock.is_empty():
         # 회계연도 비표준 종목 (예: NVDA fy=2026, 1월결산) — 해당 종목의 최신 fy 로 fallback.
-        company_years = snap.filter(pl.col("stockCode") == stockCode).select(year_col).unique().to_series().to_list()
+        company_years = snap.filter(pl.col("stockCode") == stockCode).select(yearCol).unique().to_series().to_list()
         if not company_years:
             return {**result, "error": f"{stockCode} scan parquet 데이터 없음"}
         yr = max(company_years)
-        snap_yr = snap.filter(pl.col(year_col) == yr)
-        stock = snap_yr.filter(pl.col("stockCode") == stockCode)
+        snapYr = snap.filter(pl.col(yearCol) == yr)
+        stock = snapYr.filter(pl.col("stockCode") == stockCode)
         result["year"] = str(yr)
         if stock.is_empty():
             return {**result, "error": f"{yr} 데이터 없음"}
@@ -218,7 +218,7 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         components["bookToAsset"] = round(equity / assets, 4)
 
     # 시총 fetch (KR 만 — Phase B1)
-    market_caps = _fetch_year_end_marketcaps(market, str(yr))
+    market_caps = _fetchYearEndMarketcaps(market, str(yr))
     mc = market_caps.get(stockCode)
     if mc and mc > 0:
         components["marketCap"] = round(float(mc), 0)
@@ -246,7 +246,7 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
 
     result["components"] = components
 
-    universe = _build_universe(market, str(yr))
+    universe = _buildUniverse(market, str(yr))
 
     zs: list[float] = []
     # 진짜 yield 우선 (시총 있을 때) — KR 만

@@ -12,7 +12,7 @@ import pytest
 def _scanAxes() -> list[str]:
     import dartlab
 
-    return sorted(dartlab.scan.available_scans())
+    return sorted(dartlab.scan.availableScans())
 
 
 SCAN_AXES = _scanAxes()

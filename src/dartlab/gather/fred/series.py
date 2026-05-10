@@ -11,9 +11,9 @@ from .client import FredClient
 from .types import SeriesMeta
 
 
-def fetch_series(
+def fetchSeries(
     client: FredClient,
-    series_id: str,
+    seriesId: str,
     *,
     start: str | None = None,
     end: str | None = None,
@@ -46,11 +46,11 @@ def fetch_series(
         컬럼: ``date`` (Date) — 관측일, ``value`` (Float64) — 지표값.
         enrich=True 시 변화율 컬럼 추가.
     """
-    cached = _cache.get(series_id, start, end, frequency, aggregation)
+    cached = _cache.get(seriesId, start, end, frequency, aggregation)
     if cached is not None:
         return cached
 
-    params: dict = {"series_id": series_id}
+    params: dict = {"series_id": seriesId}
     if start:
         params["observation_start"] = start
     if end:
@@ -88,19 +88,19 @@ def fetch_series(
     )
 
     is_daily = frequency == "d" or (frequency is None and len(df) > 500)
-    _cache.put(series_id, start, end, frequency, aggregation, df, daily=is_daily)
+    _cache.put(seriesId, start, end, frequency, aggregation, df, daily=is_daily)
 
     if enrich:
         from dartlab.gather.macro import enrichAndCache
 
-        df = enrichAndCache(series_id, df, source="fred")
+        df = enrichAndCache(seriesId, df, source="fred")
 
     return df
 
 
-def fetch_multi(
+def fetchMulti(
     client: FredClient,
-    series_ids: list[str],
+    seriesIds: list[str],
     *,
     start: str | None = None,
     end: str | None = None,
@@ -129,7 +129,7 @@ def fetch_multi(
         컬럼: ``date`` (Date) — 관측일, 각 시리즈 ID (Float64) — 지표값.
         빈 리스트 입력 시 빈 DataFrame.
     """
-    if not series_ids:
+    if not seriesIds:
         return pl.DataFrame()
 
     # 메모리 spike 방어 (5 질문 batch 매크로 7771 MB 경험):
@@ -139,8 +139,8 @@ def fetch_multi(
     # - frames 리스트는 join 누적 후 명시적 del + gc.collect 로 Polars Rust 힙 회수
     #   유도 (Python GC 만으로는 회수 불가 — CLAUDE.md "[최우선] 메모리 안전 규칙").
     frames: list[pl.DataFrame] = []
-    for sid in series_ids:
-        df = fetch_series(client, sid, start=start, end=end, frequency=frequency)
+    for sid in seriesIds:
+        df = fetchSeries(client, sid, start=start, end=end, frequency=frequency)
         df = df.rename({"value": sid})
         frames.append(df)
 
@@ -164,7 +164,7 @@ def fetch_multi(
     return result
 
 
-def search_series(
+def searchSeries(
     client: FredClient,
     query: str,
     *,
@@ -233,7 +233,7 @@ def search_series(
     )
 
 
-def fetch_meta(client: FredClient, series_id: str) -> SeriesMeta:
+def fetchMeta(client: FredClient, seriesId: str) -> SeriesMeta:
     """시계열 메타데이터 조회.
 
     Parameters
@@ -254,16 +254,16 @@ def fetch_meta(client: FredClient, series_id: str) -> SeriesMeta:
     SeriesNotFoundError
         시리즈를 찾을 수 없을 때.
     """
-    data = client.get("/series", series_id=series_id)
+    data = client.get("/series", seriesId=seriesId)
     serieses = data.get("seriess", [])
     if not serieses:
         from .types import SeriesNotFoundError
 
-        raise SeriesNotFoundError(f"시리즈를 찾을 수 없습니다: {series_id}")
+        raise SeriesNotFoundError(f"시리즈를 찾을 수 없습니다: {seriesId}")
 
     s = serieses[0]
     return SeriesMeta(
-        id=s.get("id", series_id),
+        id=s.get("id", seriesId),
         title=s.get("title", ""),
         frequency=s.get("frequency", ""),
         units=s.get("units", ""),
@@ -275,7 +275,7 @@ def fetch_meta(client: FredClient, series_id: str) -> SeriesMeta:
     )
 
 
-def fetch_releases(client: FredClient, *, limit: int = 20) -> pl.DataFrame:
+def fetchReleases(client: FredClient, *, limit: int = 20) -> pl.DataFrame:
     """최근 데이터 릴리즈 일정.
 
     Parameters

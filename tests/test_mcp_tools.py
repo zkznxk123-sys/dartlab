@@ -68,9 +68,9 @@ def test_install_mcp_config_merges_with_existing(tmp_path):
 
 def test_cli_mcp_config_uses_dartlab_entry_point(capsys):
     """이슈 #28 follow-up: 1 순위 = command='dartlab' entry point. python -m 은 fallback."""
-    from dartlab.cli.commands.mcp import _print_config
+    from dartlab.cli.commands.mcp import _printConfig
 
-    _print_config("claude-code")
+    _printConfig("claude-code")
     out = capsys.readouterr().out
 
     # 1 순위 — entry point
@@ -83,9 +83,9 @@ def test_cli_mcp_config_uses_dartlab_entry_point(capsys):
 
 def test_cli_mcp_config_claude_desktop(capsys):
     """claude-desktop 출력은 README 인라인 대상 — entry point + fallback + PYTHONUNBUFFERED."""
-    from dartlab.cli.commands.mcp import _print_config
+    from dartlab.cli.commands.mcp import _printConfig
 
-    _print_config("claude-desktop")
+    _printConfig("claude-desktop")
     out = capsys.readouterr().out
 
     assert '"command": "dartlab"' in out

@@ -12,7 +12,7 @@ from dartlab.macro.inventoryCycle import classifyInventoryPhase, ismBarometer
 from dartlab.macro.sentiment import ismAssetAllocation
 
 
-def _fetch_ism_data(market: str, as_of: str | None = None) -> dict[str, float | None]:
+def _fetchIsmData(market: str, asOf: str | None = None) -> dict[str, float | None]:
     """gather에서 ISM/재고 지표 수집.
 
     Parameters
@@ -40,9 +40,9 @@ def _fetch_ism_data(market: str, as_of: str | None = None) -> dict[str, float | 
             bsi : float — 기업경기실사지수 (pt, 100 기준)
             bsi_prev : float — 전기 BSI (pt)
     """
-    from dartlab.macro._helpers import fetch_latest_with_prev, get_gather
+    from dartlab.macro._helpers import fetchLatestWithPrev, getGather
 
-    g = get_gather(as_of)
+    g = getGather(asOf)
     data: dict[str, float | None] = {}
 
     if market.upper() == "US":
@@ -53,14 +53,14 @@ def _fetch_ism_data(market: str, as_of: str | None = None) -> dict[str, float | 
             ("new_orders", "NEWORDER"),
             ("inventories", "BUSINV"),
         ]:
-            val, prev = fetch_latest_with_prev(g, sid)
+            val, prev = fetchLatestWithPrev(g, sid)
             if val is not None:
                 data[label] = val
             if prev is not None:
                 data[f"{label}_prev"] = prev
     else:
         for label, sid in [("manufacturing", "MANUFACTURING"), ("bsi", "BSI_ALL")]:
-            val, prev = fetch_latest_with_prev(g, sid)
+            val, prev = fetchLatestWithPrev(g, sid)
             if val is not None:
                 data[label] = val
             if prev is not None:
@@ -69,7 +69,7 @@ def _fetch_ism_data(market: str, as_of: str | None = None) -> dict[str, float | 
     return data
 
 
-def analyze_inventory(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
+def analyzeInventory(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """재고순환 종합 분석.
 
     ISM 신규주문/재고 비율로 재고순환 4국면을 판별하고,
@@ -114,11 +114,11 @@ def analyze_inventory(*, market: str = "US", as_of: str | None = None, overrides
             description : str — 해설
         timeseries : dict — 주요 시계열 (ism_pmi, new_orders, inventories)
     """
-    data = _fetch_ism_data(market, as_of=as_of)
+    data = _fetchIsmData(market, asOf=asOf)
     if overrides:
-        from dartlab.macro._helpers import apply_overrides
+        from dartlab.macro._helpers import applyOverrides
 
-        data = apply_overrides(data, overrides)
+        data = applyOverrides(data, overrides)
     result: dict = {"market": market.upper()}
 
     if market.upper() == "US":
@@ -225,14 +225,14 @@ def analyze_inventory(*, market: str = "US", as_of: str | None = None, overrides
         result["ismBarometer"] = None
         result["ismAllocation"] = None
 
-    from dartlab.macro._helpers import collect_timeseries, get_gather
+    from dartlab.macro._helpers import collectTimeseries, getGather
 
-    g = get_gather(as_of)
+    g = getGather(asOf)
     if market.upper() == "US":
-        result["timeseries"] = collect_timeseries(
+        result["timeseries"] = collectTimeseries(
             g, {"ism_pmi": "AMTMNO", "new_orders": "AMTMNO", "inventories": "AMTMUO"}
         )
     else:
-        result["timeseries"] = collect_timeseries(g, {"manufacturing": "MANUFACTURING", "bsi": "BSI_ALL"})
+        result["timeseries"] = collectTimeseries(g, {"manufacturing": "MANUFACTURING", "bsi": "BSI_ALL"})
 
     return result

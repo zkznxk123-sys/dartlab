@@ -32,7 +32,7 @@ _AREA_LABELS = {
 _GRADE_MAP = {"A": 5, "B": 4, "C": 3, "D": 2, "F": 0}
 
 
-def _safe_val(v: Any) -> float:
+def _safeVal(v: Any) -> float:
     """None → 0, 나머지 float 변환."""
     if v is None:
         return 0.0
@@ -51,7 +51,7 @@ def _meta(company: Any, source: str) -> dict:
     }
 
 
-def _with_visual_context(
+def _withVisualContext(
     spec: dict,
     *,
     purpose: str,
@@ -75,7 +75,7 @@ def _with_visual_context(
 # ── spec 생성기 8종 ──
 
 
-def spec_revenue_trend(company: Any, *, n_years: int = 5) -> dict | None:
+def specRevenueTrend(company: Any, *, nYears: int = 5) -> dict | None:
     """IS 매출·영업이익·순이익 combo 차트 ChartSpec."""
     ann = getattr(company, "annual", None)
     if not ann:
@@ -100,11 +100,11 @@ def spec_revenue_trend(company: Any, *, n_years: int = 5) -> dict | None:
                 break
         if vals is None:
             continue
-        recent = vals[-n_years:]
+        recent = vals[-nYears:]
         series.append(
             {
                 "name": label,
-                "data": [_safe_val(v) for v in recent],
+                "data": [_safeVal(v) for v in recent],
                 "color": colors[i],
                 "type": chart_types[i],
             }
@@ -112,8 +112,8 @@ def spec_revenue_trend(company: Any, *, n_years: int = 5) -> dict | None:
 
     if not series:
         return None
-    periods = list(ann_years[-n_years:])
-    return _with_visual_context(
+    periods = list(ann_years[-nYears:])
+    return _withVisualContext(
         {
             "chartType": "combo",
             "title": f"{company.corpName} 손익 추이",
@@ -134,7 +134,7 @@ def spec_revenue_trend(company: Any, *, n_years: int = 5) -> dict | None:
     )
 
 
-def spec_cashflow_waterfall(company: Any) -> dict | None:
+def specCashflowWaterfall(company: Any) -> dict | None:
     """CF 워터폴 브릿지 ChartSpec."""
     ann = getattr(company, "annual", None)
     if not ann:
@@ -152,7 +152,7 @@ def spec_cashflow_waterfall(company: Any) -> dict | None:
     vals = {}
     for key, label in accts.items():
         arr = cf_data.get(key, [])
-        vals[label] = _safe_val(arr[-1]) if arr else 0.0
+        vals[label] = _safeVal(arr[-1]) if arr else 0.0
 
     if vals["기초현금"] == 0 and vals["영업활동"] == 0:
         return None
@@ -160,7 +160,7 @@ def spec_cashflow_waterfall(company: Any) -> dict | None:
     labels = ["기초현금", "영업활동", "투자활동", "재무활동", "기말현금"]
     data = [vals[lb] for lb in labels]
 
-    return _with_visual_context(
+    return _withVisualContext(
         {
             "chartType": "waterfall",
             "title": f"{company.corpName} 현금흐름 브릿지 ({ann_years[-1]})",
@@ -181,7 +181,7 @@ def spec_cashflow_waterfall(company: Any) -> dict | None:
     )
 
 
-def spec_balance_sheet(company: Any, *, n_years: int = 5) -> dict | None:
+def specBalanceSheet(company: Any, *, nYears: int = 5) -> dict | None:
     """BS 유동/비유동 자산 stacked bar ChartSpec."""
     ann = getattr(company, "annual", None)
     if not ann:
@@ -198,11 +198,11 @@ def spec_balance_sheet(company: Any, *, n_years: int = 5) -> dict | None:
         arr = bs_data.get(key, [])
         if not arr:
             continue
-        recent = arr[-n_years:]
+        recent = arr[-nYears:]
         series.append(
             {
                 "name": label,
-                "data": [_safe_val(v) for v in recent],
+                "data": [_safeVal(v) for v in recent],
                 "color": color,
                 "type": "bar",
                 "stack": "assets",
@@ -211,8 +211,8 @@ def spec_balance_sheet(company: Any, *, n_years: int = 5) -> dict | None:
 
     if not series:
         return None
-    periods = list(ann_years[-n_years:])
-    return _with_visual_context(
+    periods = list(ann_years[-nYears:])
+    return _withVisualContext(
         {
             "chartType": "bar",
             "title": f"{company.corpName} 자산 구성",
@@ -233,7 +233,7 @@ def spec_balance_sheet(company: Any, *, n_years: int = 5) -> dict | None:
     )
 
 
-def spec_profitability(company: Any, *, n_years: int = 5) -> dict | None:
+def specProfitability(company: Any, *, nYears: int = 5) -> dict | None:
     """수익성 비율 라인 ChartSpec (ratioSeries 기반)."""
     rs = getattr(company, "ratioSeries", None)
     if rs is None:
@@ -254,11 +254,11 @@ def spec_profitability(company: Any, *, n_years: int = 5) -> dict | None:
         vals = ratio_dict.get(key, [])
         if not vals or not any(v is not None for v in vals):
             continue
-        recent = vals[-n_years * 4 :]  # 분기별
+        recent = vals[-nYears * 4 :]  # 분기별
         series.append(
             {
                 "name": label,
-                "data": [_safe_val(v) for v in recent],
+                "data": [_safeVal(v) for v in recent],
                 "color": color,
                 "type": "line",
             }
@@ -267,7 +267,7 @@ def spec_profitability(company: Any, *, n_years: int = 5) -> dict | None:
     if not series:
         return None
     chart_periods = list(periods[-len(series[0]["data"]) :])
-    return _with_visual_context(
+    return _withVisualContext(
         {
             "chartType": "line",
             "title": f"{company.corpName} 수익성 추이",
@@ -288,7 +288,7 @@ def spec_profitability(company: Any, *, n_years: int = 5) -> dict | None:
     )
 
 
-def spec_dividend(company: Any) -> dict | None:
+def specDividend(company: Any) -> dict | None:
     """배당 시계열 combo ChartSpec."""
     div_df = None
     report = getattr(company, "report", None)
@@ -310,7 +310,7 @@ def spec_dividend(company: Any) -> dict | None:
 
     df = div_df.sort("year")
     years = [str(y) for y in df["year"].to_list()]
-    dps_vals = [_safe_val(v) for v in df["dps"].to_list()]
+    dps_vals = [_safeVal(v) for v in df["dps"].to_list()]
 
     if not years or all(v == 0 for v in dps_vals):
         return None
@@ -321,13 +321,13 @@ def spec_dividend(company: Any) -> dict | None:
         series.append(
             {
                 "name": "배당수익률(%)",
-                "data": [_safe_val(v) for v in df["dividendYield"].to_list()],
+                "data": [_safeVal(v) for v in df["dividendYield"].to_list()],
                 "color": COLORS[0],
                 "type": "line",
             }
         )
 
-    return _with_visual_context(
+    return _withVisualContext(
         {
             "chartType": "combo",
             "title": f"{company.corpName} 배당 분석",
@@ -348,7 +348,7 @@ def spec_dividend(company: Any) -> dict | None:
     )
 
 
-def spec_insight_radar(company: Any) -> dict | None:
+def specInsightRadar(company: Any) -> dict | None:
     """7영역 인사이트 레이더 ChartSpec."""
     insights = getattr(company, "insights", None)
     if insights is None or not hasattr(insights, "performance"):
@@ -362,7 +362,7 @@ def spec_insight_radar(company: Any) -> dict | None:
     categories = [_AREA_LABELS.get(n, n) for n in _AREA_NAMES]
     data = [_GRADE_MAP.get(grades[n], 0) for n in _AREA_NAMES]
 
-    return _with_visual_context(
+    return _withVisualContext(
         {
             "chartType": "radar",
             "title": f"{company.corpName} 투자 인사이트",
@@ -382,7 +382,7 @@ def spec_insight_radar(company: Any) -> dict | None:
     )
 
 
-def spec_ratio_sparklines(company: Any) -> dict | None:
+def specRatioSparklines(company: Any) -> dict | None:
     """비율 스파크라인 배열 ChartSpec."""
     from dartlab.analysis.financial.ratios import RATIO_CATEGORIES
 
@@ -415,7 +415,7 @@ def spec_ratio_sparklines(company: Any) -> dict | None:
             cat_items.append(
                 {
                     "field": field_name,
-                    "values": [_safe_val(v) for v in vals[-20:]],
+                    "values": [_safeVal(v) for v in vals[-20:]],
                     "latest": latest,
                     "trend": trend,
                 }
@@ -426,7 +426,7 @@ def spec_ratio_sparklines(company: Any) -> dict | None:
     if not sparklines:
         return None
     chart_periods = list(periods[-20:])
-    return _with_visual_context(
+    return _withVisualContext(
         {
             "chartType": "sparkline",
             "title": f"{company.corpName} 비율 스파크라인",
@@ -447,7 +447,7 @@ def spec_ratio_sparklines(company: Any) -> dict | None:
     )
 
 
-def spec_diff_heatmap(company: Any) -> dict | None:
+def specDiffHeatmap(company: Any) -> dict | None:
     """diff 변화 밀도 히트맵 ChartSpec."""
     try:
         diff_df = company.diff()
@@ -468,7 +468,7 @@ def spec_diff_heatmap(company: Any) -> dict | None:
         intensity = "high" if rate >= 0.5 else ("medium" if rate >= 0.2 else "low")
         heatmap_data.append({"topic": topic, "changeRate": round(rate, 4), "intensity": intensity})
 
-    return _with_visual_context(
+    return _withVisualContext(
         {
             "chartType": "heatmap",
             "title": f"{company.corpName} 공시 변화 밀도",
@@ -493,16 +493,16 @@ def spec_diff_heatmap(company: Any) -> dict | None:
 # ── Phase A 신규 spec ──
 
 
-def spec_peer_radar(peer_data: dict) -> dict | None:
+def specPeerRadar(peerData: dict) -> dict | None:
     """4축(수익성/성장/품질/부채) 백분위 레이더 차트 spec.
 
     peer_data: calcPeerPosition 반환 dict.
     """
     axes = [
-        ("수익성", peer_data.get("profitability_pct")),
-        ("성장성", peer_data.get("growth_pct")),
-        ("이익품질", peer_data.get("quality_pct")),
-        ("안정성", 100 - peer_data.get("debt_pct", 50) if peer_data.get("debt_pct") is not None else None),
+        ("수익성", peerData.get("profitability_pct")),
+        ("성장성", peerData.get("growth_pct")),
+        ("이익품질", peerData.get("quality_pct")),
+        ("안정성", 100 - peerData.get("debt_pct", 50) if peerData.get("debt_pct") is not None else None),
     ]
     vals = [v if v is not None else 50 for _, v in axes]
     labels = [a[0] for a in axes]
@@ -518,18 +518,18 @@ def spec_peer_radar(peer_data: dict) -> dict | None:
         "meta": {
             "source": "scan/extended::calcPeerPosition",
             "statement": "PEER",
-            "total_stocks": peer_data.get("total_stocks"),
+            "total_stocks": peerData.get("total_stocks"),
         },
         "evidenceBinding": chartEvidenceBinding(
-            stockCode=peer_data.get("stockCode", ""),
+            stockCode=peerData.get("stockCode", ""),
             source="scan",
             topic="peerPosition",
-            extra={"axes": labels, "totalStocks": peer_data.get("total_stocks")},
+            extra={"axes": labels, "totalStocks": peerData.get("total_stocks")},
         ),
     }
 
 
-def spec_sensitivity_heatmap(grid: list[dict]) -> dict | None:
+def specSensitivityHeatmap(grid: list[dict]) -> dict | None:
     """DCF 민감도 히트맵 spec.
 
     grid: sensitivityAnalysis 반환 list[{wacc, g, fairValue}].
@@ -564,7 +564,7 @@ def spec_sensitivity_heatmap(grid: list[dict]) -> dict | None:
     }
 
 
-def spec_margin_trend(history: list[dict]) -> dict | None:
+def specMarginTrend(history: list[dict]) -> dict | None:
     """마진 3축(매출총이익/영업이익/순이익률) 시계열 line spec."""
     if not history:
         return None
@@ -603,7 +603,7 @@ def spec_margin_trend(history: list[dict]) -> dict | None:
     }
 
 
-def spec_leverage_trend(history: list[dict]) -> dict | None:
+def specLeverageTrend(history: list[dict]) -> dict | None:
     """부채비율 시계열 line spec."""
     if not history:
         return None
@@ -630,7 +630,7 @@ def spec_leverage_trend(history: list[dict]) -> dict | None:
     }
 
 
-def spec_growth_yoy_bar(history: list[dict]) -> dict | None:
+def specGrowthYoyBar(history: list[dict]) -> dict | None:
     """매출/영업이익/순이익 YoY bar chart spec."""
     if not history:
         return None
@@ -658,7 +658,7 @@ def spec_growth_yoy_bar(history: list[dict]) -> dict | None:
     }
 
 
-def spec_revenue_scenario_band(history: list[dict], forecasts: dict | None) -> dict | None:
+def specRevenueScenarioBand(history: list[dict], forecasts: dict | None) -> dict | None:
     """매출 과거 실적 + Base/Bull/Bear 전망 밴드 spec."""
     if not history:
         return None
@@ -706,7 +706,7 @@ def spec_revenue_scenario_band(history: list[dict], forecasts: dict | None) -> d
 # ── Phase 1.5 신규 chartType 8 종 ─────────────────────────────────────────
 
 
-def spec_six_act_radar(
+def specSixActRadar(
     score: dict[str, float],
     *,
     stockCode: str,
@@ -730,7 +730,7 @@ def spec_six_act_radar(
         "value": "가치",
         "risk": "리스크",
     }
-    data = [_safe_val(score.get(k)) for k in axes_order]
+    data = [_safeVal(score.get(k)) for k in axes_order]
     categories = [labels[k] for k in axes_order]
     evidence_ids = []
     for k in axes_order:
@@ -753,7 +753,7 @@ def spec_six_act_radar(
     }
 
 
-def spec_peer_matrix(
+def specPeerMatrix(
     rows: list[dict],
     metrics: list[str],
     *,
@@ -773,7 +773,7 @@ def spec_peer_matrix(
         series.append(
             {
                 "name": metric,
-                "data": [_safe_val(r.get("values", {}).get(metric)) for r in rows],
+                "data": [_safeVal(r.get("values", {}).get(metric)) for r in rows],
             }
         )
     return {
@@ -798,7 +798,7 @@ def spec_peer_matrix(
     }
 
 
-def spec_kpi_ribbon(
+def specKpiRibbon(
     items: list[dict],
     *,
     stockCode: str,
@@ -852,7 +852,7 @@ def spec_kpi_ribbon(
     }
 
 
-def spec_hover_spark(
+def specHoverSpark(
     *,
     stockCode: str,
     source: str,
@@ -879,7 +879,7 @@ def spec_hover_spark(
         "series": [
             {
                 "name": accountLabel or account,
-                "data": [_safe_val(v) for v in values],
+                "data": [_safeVal(v) for v in values],
                 "color": COLORS[0],
                 "type": "line",
                 "pointRefs": seriesPointRefs(
@@ -907,7 +907,7 @@ def spec_hover_spark(
     }
 
 
-def spec_income_trend_matrix(
+def specIncomeTrendMatrix(
     view: dict,
     *,
     stockCode: str,
@@ -938,7 +938,7 @@ def spec_income_trend_matrix(
         series.append(
             {
                 "name": label,
-                "data": [_safe_val(v) for v in vals],
+                "data": [_safeVal(v) for v in vals],
                 "color": color,
                 "type": kind,
                 "axis": "margin" if key.endswith("Margin") else "amount",
@@ -972,7 +972,7 @@ def spec_income_trend_matrix(
     }
 
 
-def spec_balance_structure_trend(
+def specBalanceStructureTrend(
     view: dict,
     *,
     stockCode: str,
@@ -995,8 +995,8 @@ def spec_balance_structure_trend(
             series.append(
                 {
                     "name": f"{group_label}::{part.get('label', part.get('id', ''))}",
-                    "data": [_safe_val(v) for v in (part.get("values") or [])],
-                    "shares": [_safe_val(v) for v in (part.get("shares") or [])],
+                    "data": [_safeVal(v) for v in (part.get("values") or [])],
+                    "shares": [_safeVal(v) for v in (part.get("shares") or [])],
                     "color": part.get("color", COLORS[0]),
                     "type": "bar",
                     "stack": parts_key,
@@ -1013,8 +1013,8 @@ def spec_balance_structure_trend(
         "series": series,
         "categories": periods,
         "options": {
-            "totalAssetsSeries": [_safe_val(v) for v in view.get("totalAssetsSeries") or []],
-            "totalFundingSeries": [_safe_val(v) for v in view.get("totalFundingSeries") or []],
+            "totalAssetsSeries": [_safeVal(v) for v in view.get("totalAssetsSeries") or []],
+            "totalFundingSeries": [_safeVal(v) for v in view.get("totalFundingSeries") or []],
             "assetDeltaParts": view.get("assetDeltaParts", []),
             "debtRatio": view.get("debtRatio"),
             "sourceMode": view.get("sourceMode", ""),
@@ -1034,7 +1034,7 @@ def spec_balance_structure_trend(
     }
 
 
-def spec_cashflow_signed_matrix(
+def specCashflowSignedMatrix(
     view: dict,
     *,
     stockCode: str,
@@ -1057,7 +1057,7 @@ def spec_cashflow_signed_matrix(
         series.append(
             {
                 "name": s.get("label", s.get("id", f"series_{i}")),
-                "data": [_safe_val(v) for v in vals],
+                "data": [_safeVal(v) for v in vals],
                 "color": palette[i % len(palette)],
                 "type": "bar",
                 "signed": True,
@@ -1091,7 +1091,7 @@ def spec_cashflow_signed_matrix(
     }
 
 
-def spec_evidence_coverage(
+def specEvidenceCoverage(
     items: list[dict],
     *,
     stockCode: str,
@@ -1129,32 +1129,32 @@ def spec_evidence_coverage(
 
 
 SPEC_GENERATORS = {
-    "revenue_trend": spec_revenue_trend,
-    "cashflow": spec_cashflow_waterfall,
-    "balance_sheet": spec_balance_sheet,
-    "profitability": spec_profitability,
-    "dividend": spec_dividend,
-    "insight_radar": spec_insight_radar,
-    "ratio_sparklines": spec_ratio_sparklines,
-    "diff_heatmap": spec_diff_heatmap,
+    "revenue_trend": specRevenueTrend,
+    "cashflow": specCashflowWaterfall,
+    "balance_sheet": specBalanceSheet,
+    "profitability": specProfitability,
+    "dividend": specDividend,
+    "insight_radar": specInsightRadar,
+    "ratio_sparklines": specRatioSparklines,
+    "diff_heatmap": specDiffHeatmap,
 }
 
 
-def auto_chart(company: Any) -> list[dict]:
+def autoChart(company: Any) -> list[dict]:
     """사용 가능한 모든 ChartSpec 리스트를 자동 생성.
 
     데이터가 없는 차트는 건너뛴다.
     """
     specs = []
     for gen in [
-        spec_revenue_trend,
-        spec_balance_sheet,
-        spec_profitability,
-        spec_cashflow_waterfall,
-        spec_dividend,
-        spec_insight_radar,
-        spec_ratio_sparklines,
-        spec_diff_heatmap,
+        specRevenueTrend,
+        specBalanceSheet,
+        specProfitability,
+        specCashflowWaterfall,
+        specDividend,
+        specInsightRadar,
+        specRatioSparklines,
+        specDiffHeatmap,
     ]:
         try:
             s = gen(company)

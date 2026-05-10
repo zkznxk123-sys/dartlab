@@ -32,8 +32,8 @@ def _available() -> bool:
         return False
 
 
-async def fetch_history(
-    stock_code: str,
+async def fetchHistory(
+    stockCode: str,
     client=None,
     *,
     start: str = "",
@@ -61,7 +61,7 @@ async def fetch_history(
     endDate = end or (date.today() + timedelta(days=1)).isoformat()
 
     # Parquet 캐시 확인
-    cached = _loadCache(stock_code, market)
+    cached = _loadCache(stockCode, market)
     if cached is not None:
         # 캐시 필터링
         filtered = [r for r in cached if (not start or r["date"] >= start) and (not end or r["date"] <= end)]
@@ -69,9 +69,9 @@ async def fetch_history(
             return filtered
 
     try:
-        df = fdr.DataReader(stock_code, startDate, endDate)
+        df = fdr.DataReader(stockCode, startDate, endDate)
     except (ImportError, OSError, ValueError, KeyError, TypeError) as exc:
-        log.warning("FDR fetch 실패 (%s): %s", stock_code, exc)
+        log.warning("FDR fetch 실패 (%s): %s", stockCode, exc)
         return []
 
     if df.empty:
@@ -92,7 +92,7 @@ async def fetch_history(
         )
 
     # Parquet 캐시 저장
-    _saveCache(stock_code, market, rows)
+    _saveCache(stockCode, market, rows)
 
     return rows
 

@@ -614,14 +614,14 @@ class GatherEntry:
         if axis == "calendar":
             from dartlab.gather.calendar import gatherCalendar
 
-            horizon_days = kwargs.pop("horizon_days", 30)
+            horizonDays = kwargs.pop("horizon_days", 30)
             codes = kwargs.pop("codes", None) or target
             if codes is None:
                 raise ValueError(
                     "gather('calendar') 에는 종목코드가 필요합니다. "
                     "예: gather('calendar', '005930') 또는 gather('calendar', codes=['005930', '000660'])."
                 )
-            return gatherCalendar(codes, horizon_days=horizon_days, market=market)
+            return gatherCalendar(codes, horizonDays=horizonDays, market=market)
 
         raise ValueError(f"미지원 gather 축: {axis}")
 

@@ -9,10 +9,10 @@ import pytest
 from dartlab.ai.agent import _microcompact
 
 
-def _ai(content: str | None, *, tool_calls: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+def _ai(content: str | None, *, toolCalls: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     msg: dict[str, Any] = {"role": "assistant", "content": content}
-    if tool_calls is not None:
-        msg["tool_calls"] = tool_calls
+    if toolCalls is not None:
+        msg["tool_calls"] = toolCalls
     return msg
 
 
@@ -25,15 +25,15 @@ def test_keeps_last_two_assistant_messages_intact() -> None:
     messages = [
         {"role": "system", "content": "sys"},
         {"role": "user", "content": "q"},
-        _ai("reasoning A", tool_calls=[_tc("a")]),
+        _ai("reasoning A", toolCalls=[_tc("a")]),
         {"role": "tool", "tool_call_id": "a", "content": "result"},
-        _ai("reasoning B", tool_calls=[_tc("b")]),
+        _ai("reasoning B", toolCalls=[_tc("b")]),
         {"role": "tool", "tool_call_id": "b", "content": "result"},
-        _ai("reasoning C", tool_calls=[_tc("c")]),
+        _ai("reasoning C", toolCalls=[_tc("c")]),
         {"role": "tool", "tool_call_id": "c", "content": "result"},
     ]
 
-    _microcompact(messages, keep_last=2)
+    _microcompact(messages, keepLast=2)
 
     # A 는 트리밍, B/C 는 보존
     assert messages[2]["content"] is None
@@ -45,12 +45,12 @@ def test_keeps_last_two_assistant_messages_intact() -> None:
 def test_preserves_tool_calls_structure() -> None:
     tc_a = _tc("a")
     messages = [
-        _ai("old reasoning", tool_calls=[tc_a]),
-        _ai("mid", tool_calls=[_tc("b")]),
-        _ai("new", tool_calls=[_tc("c")]),
+        _ai("old reasoning", toolCalls=[tc_a]),
+        _ai("mid", toolCalls=[_tc("b")]),
+        _ai("new", toolCalls=[_tc("c")]),
     ]
 
-    _microcompact(messages, keep_last=2)
+    _microcompact(messages, keepLast=2)
 
     # 옛 message 의 content 는 None, tool_calls 는 동일 객체
     assert messages[0]["content"] is None
@@ -61,10 +61,10 @@ def test_preserves_tool_calls_structure() -> None:
 def test_noop_when_few_assistant_messages() -> None:
     messages = [
         {"role": "user", "content": "q"},
-        _ai("only one", tool_calls=[_tc("a")]),
+        _ai("only one", toolCalls=[_tc("a")]),
     ]
 
-    _microcompact(messages, keep_last=2)
+    _microcompact(messages, keepLast=2)
 
     assert messages[1]["content"] == "only one"
 
@@ -72,11 +72,11 @@ def test_noop_when_few_assistant_messages() -> None:
 @pytest.mark.unit
 def test_noop_when_exactly_keep_last() -> None:
     messages = [
-        _ai("first", tool_calls=[_tc("a")]),
-        _ai("second", tool_calls=[_tc("b")]),
+        _ai("first", toolCalls=[_tc("a")]),
+        _ai("second", toolCalls=[_tc("b")]),
     ]
 
-    _microcompact(messages, keep_last=2)
+    _microcompact(messages, keepLast=2)
 
     assert messages[0]["content"] == "first"
     assert messages[1]["content"] == "second"
@@ -87,12 +87,12 @@ def test_does_not_strip_assistant_without_tool_calls() -> None:
     # 최종 답변 (tool_calls 없는 assistant) 은 reasoning 이 본문 — 트리밍하면 답이 사라짐
     messages = [
         _ai("final answer 1"),
-        _ai("mid", tool_calls=[_tc("b")]),
-        _ai("mid 2", tool_calls=[_tc("c")]),
+        _ai("mid", toolCalls=[_tc("b")]),
+        _ai("mid 2", toolCalls=[_tc("c")]),
         _ai("final answer 2"),
     ]
 
-    _microcompact(messages, keep_last=2)
+    _microcompact(messages, keepLast=2)
 
     # tool_calls 없는 assistant 는 항상 보존 (조건: tool_calls and content)
     assert messages[0]["content"] == "final answer 1"
@@ -104,13 +104,13 @@ def test_does_not_touch_user_or_system_messages() -> None:
     messages = [
         {"role": "system", "content": "sys"},
         {"role": "user", "content": "u1"},
-        _ai("a1", tool_calls=[_tc("a")]),
+        _ai("a1", toolCalls=[_tc("a")]),
         {"role": "user", "content": "u2"},
-        _ai("a2", tool_calls=[_tc("b")]),
-        _ai("a3", tool_calls=[_tc("c")]),
+        _ai("a2", toolCalls=[_tc("b")]),
+        _ai("a3", toolCalls=[_tc("c")]),
     ]
 
-    _microcompact(messages, keep_last=2)
+    _microcompact(messages, keepLast=2)
 
     assert messages[0]["content"] == "sys"
     assert messages[1]["content"] == "u1"
@@ -125,11 +125,11 @@ def test_does_not_touch_user_or_system_messages() -> None:
 def test_preserves_none_content() -> None:
     # 이미 None 인 content 는 그대로
     messages = [
-        _ai(None, tool_calls=[_tc("a")]),
-        _ai("b", tool_calls=[_tc("b")]),
-        _ai("c", tool_calls=[_tc("c")]),
+        _ai(None, toolCalls=[_tc("a")]),
+        _ai("b", toolCalls=[_tc("b")]),
+        _ai("c", toolCalls=[_tc("c")]),
     ]
 
-    _microcompact(messages, keep_last=2)
+    _microcompact(messages, keepLast=2)
 
     assert messages[0]["content"] is None

@@ -11,18 +11,18 @@ from collections.abc import Iterator
 from dataclasses import asdict, dataclass
 from typing import Any, Protocol
 
-from dartlab.ai.settings.modelResolver import resolve_default_model
+from dartlab.ai.settings.modelResolver import resolveDefaultModel
 
 
 @dataclass(frozen=True)
 class ProviderConfig:
     provider: str | None = None
     model: str | None = None
-    base_url: str | None = None
-    api_key: str | None = None
+    baseUrl: str | None = None
+    apiKey: str | None = None
     temperature: float | None = None
-    max_tokens: int | None = None
-    system_prompt: str | None = None
+    maxTokens: int | None = None
+    systemPrompt: str | None = None
 
     def merge(self, overrides: dict[str, Any]) -> ProviderConfig:
         values = asdict(self)
@@ -30,40 +30,40 @@ class ProviderConfig:
         return ProviderConfig(**values)
 
 
-def get_config(provider: str | None = None, **kwargs: Any) -> ProviderConfig:
-    normalized = _normalize_provider(provider or kwargs.get("provider"))
-    profile = _resolve_profile(normalized, kwargs.get("role"))
+def getConfig(provider: str | None = None, **kwargs: Any) -> ProviderConfig:
+    normalized = _normalizeProvider(provider or kwargs.get("provider"))
+    profile = _resolveProfile(normalized, kwargs.get("role"))
     if normalized is None:
-        normalized = _normalize_provider(profile.get("provider"))
-    explicit_model = kwargs.get("model")
+        normalized = _normalizeProvider(profile.get("provider"))
+    explicitModel = kwargs.get("model")
     explicit_base = kwargs.get("base_url") or kwargs.get("baseUrl")
     explicit_key = kwargs.get("api_key") or kwargs.get("apiKey")
-    env_key = _env_key_for(normalized)
-    api_key = explicit_key or profile.get("api_key") or (os.environ.get(env_key) if env_key else None)
-    base_url = explicit_base or profile.get("base_url") or _base_url_for(normalized)
-    if normalized == "oauth-codex" and explicit_model is None:
-        model = _oauth_default_model(configured_model=profile.get("model"))
+    env_key = _envKeyFor(normalized)
+    apiKey = explicit_key or profile.get("api_key") or (os.environ.get(env_key) if env_key else None)
+    baseUrl = explicit_base or profile.get("base_url") or _baseUrlFor(normalized)
+    if normalized == "oauth-codex" and explicitModel is None:
+        model = _oauthDefaultModel(configuredModel=profile.get("model"))
     else:
-        model = resolve_default_model(
+        model = resolveDefaultModel(
             normalized,
-            explicit_model=explicit_model,
-            configured_model=profile.get("model"),
-            fallback_model=_default_model_for(normalized),
+            explicitModel=explicitModel,
+            configuredModel=profile.get("model"),
+            fallbackModel=_defaultModelFor(normalized),
         )
-    if normalized in {"oauth-codex", "chatgpt", "gpt"} and not api_key:
-        api_key = _oauth_access_token()
-    if normalized == "ollama" and not api_key:
-        api_key = "ollama"
+    if normalized in {"oauth-codex", "chatgpt", "gpt"} and not apiKey:
+        apiKey = _oauthAccessToken()
+    if normalized == "ollama" and not apiKey:
+        apiKey = "ollama"
     return ProviderConfig(
         provider=normalized,
         model=model,
-        base_url=base_url,
-        api_key=api_key,
+        baseUrl=baseUrl,
+        apiKey=apiKey,
         temperature=kwargs.get("temperature") if kwargs.get("temperature") is not None else profile.get("temperature"),
     )
 
 
-def _normalize_provider(provider: str | None) -> str | None:
+def _normalizeProvider(provider: str | None) -> str | None:
     if not provider:
         return None
     lowered = provider.strip().lower()
@@ -74,16 +74,16 @@ def _normalize_provider(provider: str | None) -> str | None:
     return lowered
 
 
-def _resolve_profile(provider: str | None, role: str | None) -> dict[str, Any]:
+def _resolveProfile(provider: str | None, role: str | None) -> dict[str, Any]:
     try:
-        from dartlab.ai.settings.profile import get_profile_manager
+        from dartlab.ai.settings.profile import getProfileManager
 
-        return get_profile_manager().resolve(provider=provider, role=role)
+        return getProfileManager().resolve(provider=provider, role=role)
     except Exception:
         return {}
 
 
-def _env_key_for(provider: str | None) -> str | None:
+def _envKeyFor(provider: str | None) -> str | None:
     return {
         "openai": "OPENAI_API_KEY",
         "custom": "OPENAI_API_KEY",
@@ -93,7 +93,7 @@ def _env_key_for(provider: str | None) -> str | None:
     }.get(provider or "")
 
 
-def _base_url_for(provider: str | None) -> str | None:
+def _baseUrlFor(provider: str | None) -> str | None:
     if provider == "custom":
         return os.environ.get("DARTLAB_OPENAI_COMPAT_BASE_URL") or os.environ.get("OPENAI_BASE_URL")
     if provider == "groq":
@@ -115,12 +115,12 @@ def _base_url_for(provider: str | None) -> str | None:
     return os.environ.get("OPENAI_BASE_URL") if provider == "openai" else None
 
 
-def _default_model_for(provider: str | None) -> str | None:
+def _defaultModelFor(provider: str | None) -> str | None:
     env_model = os.environ.get("DARTLAB_DEFAULT_MODEL")
     if env_model and provider not in {"openai", "oauth-codex", None}:
         return env_model
     if provider in {"openai", "oauth-codex", None}:
-        return resolve_default_model(provider)
+        return resolveDefaultModel(provider)
     if provider == "groq":
         return os.environ.get("GROQ_MODEL") or "llama-3.3-70b-versatile"
     if provider == "cerebras":
@@ -132,14 +132,14 @@ def _default_model_for(provider: str | None) -> str | None:
     return None
 
 
-def _oauth_access_token() -> str | None:
+def _oauthAccessToken() -> str | None:
     try:
-        from .support.oauthToken import get_valid_token, load_token
+        from .support.oauthToken import getValidToken, loadToken
 
-        value = get_valid_token()
+        value = getValidToken()
         if isinstance(value, str) and value:
             return value
-        token = load_token()
+        token = loadToken()
         if isinstance(token, dict):
             value = token.get("access_token")
             if isinstance(value, str) and value:
@@ -149,9 +149,9 @@ def _oauth_access_token() -> str | None:
     return None
 
 
-def _oauth_default_model(*, configured_model: str | None = None) -> str | None:
-    if configured_model and os.environ.get("DARTLAB_ALLOW_STALE_OAUTH_MODEL") == "1":
-        return configured_model
+def _oauthDefaultModel(*, configuredModel: str | None = None) -> str | None:
+    if configuredModel and os.environ.get("DARTLAB_ALLOW_STALE_OAUTH_MODEL") == "1":
+        return configuredModel
     try:
         from .oauthCodex import availableModels
 
@@ -160,7 +160,7 @@ def _oauth_default_model(*, configured_model: str | None = None) -> str | None:
             return models[0]
     except Exception:
         pass
-    return resolve_default_model("oauth-codex")
+    return resolveDefaultModel("oauth-codex")
 
 
 @dataclass(frozen=True)
@@ -173,7 +173,7 @@ class ToolCall:
 @dataclass(frozen=True)
 class ProviderTurn:
     content: str
-    tool_calls: list[ToolCall]
+    toolCalls: list[ToolCall]
     raw: dict[str, Any] | None = None
 
 
@@ -192,7 +192,7 @@ class WorkbenchProvider(Protocol):
     def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn: ...
 
 
-def stream_provider(
+def streamProvider(
     provider: Any, messages: list[dict[str, Any]], tools: list[dict[str, Any]]
 ) -> "Iterator[StreamChunk]":
     """Provider 의 generate_stream 사용. 미지원 provider 는 generate() wrap fallback.
@@ -202,7 +202,7 @@ def stream_provider(
     from collections.abc import Iterator  # noqa: F401 — typing only
 
     if hasattr(provider, "generate_stream") and callable(getattr(provider, "generate_stream")):
-        yield from provider.generate_stream(messages, tools)
+        yield from provider.generateStream(messages, tools)
         return
     turn = provider.generate(messages, tools)
     yield StreamChunk(text=turn.content, final=True, turn=turn)
@@ -211,12 +211,12 @@ def stream_provider(
 class UnavailableProvider:
     def __init__(self, config: ProviderConfig | None = None) -> None:
         self.config = config or ProviderConfig()
-        self.resolved_model = self.config.model
+        self.resolvedModel = self.config.model
 
     def generate(self, *_args: Any, **_kwargs: Any) -> ProviderTurn:
         raise RuntimeError("provider adapter is not configured for Ask Workbench Kernel v1")
 
-    def check_available(self) -> bool:
+    def checkAvailable(self) -> bool:
         return False
 
 
@@ -225,15 +225,15 @@ class OpenAICompatibleProvider:
 
     def __init__(self, config: ProviderConfig) -> None:
         self.config = config
-        self.resolved_model = config.model or _default_model_for(config.provider)
+        self.resolvedModel = config.model or _defaultModelFor(config.provider)
 
-    def check_available(self) -> bool:
+    def checkAvailable(self) -> bool:
         provider = (self.config.provider or "").lower()
         if provider == "oauth-codex":
-            return bool(self.config.api_key and self.config.base_url)
+            return bool(self.config.apiKey and self.config.baseUrl)
         if provider in {"custom", "ollama"}:
-            return bool(self.config.base_url and self.config.api_key)
-        return bool(self.config.api_key)
+            return bool(self.config.baseUrl and self.config.apiKey)
+        return bool(self.config.apiKey)
 
     def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn:
         try:
@@ -244,30 +244,30 @@ class OpenAICompatibleProvider:
         client = self._client(OpenAI)
         if (self.config.provider or "").lower() in {"openai", "oauth-codex"}:
             try:
-                return self._generate_responses(client, messages, tools)
+                return self._generateResponses(client, messages, tools)
             except Exception as exc:
-                if not _is_responses_unsupported(exc):
+                if not _isResponsesUnsupported(exc):
                     raise
-        return self._generate_chat_completions(client, messages, tools)
+        return self._generateChatCompletions(client, messages, tools)
 
-    def _client(self, client_cls: Any) -> Any:
+    def _client(self, clientCls: Any) -> Any:
         client_kwargs: dict[str, Any] = {}
-        if self.config.api_key:
-            client_kwargs["api_key"] = self.config.api_key
-        if self.config.base_url:
-            client_kwargs["base_url"] = self.config.base_url
-        return client_cls(**client_kwargs)
+        if self.config.apiKey:
+            client_kwargs["api_key"] = self.config.apiKey
+        if self.config.baseUrl:
+            client_kwargs["base_url"] = self.config.baseUrl
+        return clientCls(**client_kwargs)
 
-    def _generate_responses(
+    def _generateResponses(
         self, client: Any, messages: list[dict[str, Any]], tools: list[dict[str, Any]]
     ) -> ProviderTurn:
         response = client.responses.create(
-            model=self.resolved_model,
-            input=_responses_input(messages),
-            tools=_responses_tools(tools),
-            tool_choice="auto",
+            model=self.resolvedModel,
+            input=_responsesInput(messages),
+            tools=_responsesTools(tools),
+            toolChoice="auto",
         )
-        tool_calls: list[ToolCall] = []
+        toolCalls: list[ToolCall] = []
         output_items = getattr(response, "output", None) or []
         for item in output_items:
             item_type = getattr(item, "type", None) or (item.get("type") if isinstance(item, dict) else None)
@@ -279,38 +279,38 @@ class OpenAICompatibleProvider:
                 or getattr(item, "id", None)
                 or (item.get("call_id") or item.get("id") if isinstance(item, dict) else "")
             )
-            raw_args = getattr(item, "arguments", None) or (item.get("arguments") if isinstance(item, dict) else "{}")
-            tool_calls.append(ToolCall(id=str(call_id), name=str(name), args=_parse_tool_args(raw_args)))
+            rawArgs = getattr(item, "arguments", None) or (item.get("arguments") if isinstance(item, dict) else "{}")
+            toolCalls.append(ToolCall(id=str(call_id), name=str(name), args=_parseToolArgs(rawArgs)))
         raw: dict[str, Any] | None = None
         try:
             raw = response.model_dump()
         except Exception:
             raw = None
-        return ProviderTurn(content=getattr(response, "output_text", "") or "", tool_calls=tool_calls, raw=raw)
+        return ProviderTurn(content=getattr(response, "output_text", "") or "", toolCalls=toolCalls, raw=raw)
 
-    def _generate_chat_completions(
+    def _generateChatCompletions(
         self, client: Any, messages: list[dict[str, Any]], tools: list[dict[str, Any]]
     ) -> ProviderTurn:
         response = client.chat.completions.create(
-            model=self.resolved_model,
+            model=self.resolvedModel,
             messages=messages,
             tools=tools,
-            tool_choice="auto",
+            toolChoice="auto",
         )
         message = response.choices[0].message
-        tool_calls: list[ToolCall] = []
-        for call in message.tool_calls or []:
-            raw_args = getattr(call.function, "arguments", "") or "{}"
-            args = _parse_tool_args(raw_args)
-            tool_calls.append(ToolCall(id=call.id, name=call.function.name, args=args))
+        toolCalls: list[ToolCall] = []
+        for call in message.toolCalls or []:
+            rawArgs = getattr(call.function, "arguments", "") or "{}"
+            args = _parseToolArgs(rawArgs)
+            toolCalls.append(ToolCall(id=call.id, name=call.function.name, args=args))
         raw: dict[str, Any] | None = None
         try:
             raw = response.model_dump()
         except Exception:
             raw = None
-        return ProviderTurn(content=message.content or "", tool_calls=tool_calls, raw=raw)
+        return ProviderTurn(content=message.content or "", toolCalls=toolCalls, raw=raw)
 
-    def generate_stream(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]):
+    def generateStream(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]):
         """Token-level streaming via OpenAI chat.completions stream=True.
 
         text 델타를 즉시 yield → UI typing 효과. 마지막 chunk 는 final=True + ProviderTurn.
@@ -323,7 +323,7 @@ class OpenAICompatibleProvider:
 
         client = self._client(OpenAI)
         kwargs: dict[str, Any] = {
-            "model": self.resolved_model,
+            "model": self.resolvedModel,
             "messages": messages,
             "stream": True,
         }
@@ -337,7 +337,7 @@ class OpenAICompatibleProvider:
             stream = client.chat.completions.create(**kwargs)
         except Exception:
             # streaming 미지원 provider (custom base_url 등) — non-stream fallback
-            turn = self._generate_chat_completions(client, messages, tools)
+            turn = self._generateChatCompletions(client, messages, tools)
             yield StreamChunk(text=turn.content, final=True, turn=turn)
             return
 
@@ -364,39 +364,39 @@ class OpenAICompatibleProvider:
                     if getattr(fn, "arguments", None):
                         slot["args"] += fn.arguments
 
-        tool_calls: list[ToolCall] = []
+        toolCalls: list[ToolCall] = []
         for slot in tool_calls_partial.values():
             if slot.get("name"):
-                tool_calls.append(
+                toolCalls.append(
                     ToolCall(
                         id=str(slot.get("id") or ""),
                         name=str(slot["name"]),
-                        args=_parse_tool_args(slot.get("args") or "{}"),
+                        args=_parseToolArgs(slot.get("args") or "{}"),
                     )
                 )
 
         yield StreamChunk(
             final=True,
-            turn=ProviderTurn(content=accumulated, tool_calls=tool_calls, raw=None),
+            turn=ProviderTurn(content=accumulated, toolCalls=toolCalls, raw=None),
         )
 
 
-def _parse_tool_args(raw_args: Any) -> dict[str, Any]:
-    if isinstance(raw_args, dict):
-        return raw_args
-    if isinstance(raw_args, str):
+def _parseToolArgs(rawArgs: Any) -> dict[str, Any]:
+    if isinstance(rawArgs, dict):
+        return rawArgs
+    if isinstance(rawArgs, str):
         import json
 
         try:
-            parsed = json.loads(raw_args or "{}")
+            parsed = json.loads(rawArgs or "{}")
             if isinstance(parsed, dict):
                 return parsed
         except json.JSONDecodeError:
-            return {"_raw": raw_args}
+            return {"_raw": rawArgs}
     return {}
 
 
-def _responses_tools(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _responsesTools(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for tool in tools:
         function = tool.get("function") if isinstance(tool, dict) else None
@@ -413,7 +413,7 @@ def _responses_tools(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
-def _responses_input(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _responsesInput(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     for message in messages:
         role = message.get("role")
@@ -433,7 +433,7 @@ def _responses_input(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return items
 
 
-def _is_responses_unsupported(exc: Exception) -> bool:
+def _isResponsesUnsupported(exc: Exception) -> bool:
     status_code = getattr(exc, "status_code", None)
     if status_code in {400, 404, 405}:
         text = str(exc).lower()
@@ -443,7 +443,7 @@ def _is_responses_unsupported(exc: Exception) -> bool:
     return isinstance(exc, (AttributeError, TypeError, ValueError))
 
 
-def create_provider(*args: Any, **kwargs: Any) -> WorkbenchProvider:
+def createProvider(*args: Any, **kwargs: Any) -> WorkbenchProvider:
     raw_provider = (
         getattr(args[0], "provider", None) if args and hasattr(args[0], "provider") else kwargs.get("provider")
     )
@@ -453,15 +453,15 @@ def create_provider(*args: Any, **kwargs: Any) -> WorkbenchProvider:
         config = args[0]
     elif args and hasattr(args[0], "provider"):
         raw = args[0]
-        config = get_config(
+        config = getConfig(
             provider=getattr(raw, "provider", None),
             model=getattr(raw, "model", None),
-            base_url=getattr(raw, "base_url", None) or getattr(raw, "baseUrl", None),
-            api_key=getattr(raw, "api_key", None) or getattr(raw, "apiKey", None),
+            baseUrl=getattr(raw, "base_url", None) or getattr(raw, "baseUrl", None),
+            apiKey=getattr(raw, "api_key", None) or getattr(raw, "apiKey", None),
             temperature=getattr(raw, "temperature", None),
         )
     else:
-        config = get_config(**kwargs)
+        config = getConfig(**kwargs)
     provider = (config.provider or "").lower()
     factory = _PROVIDER_FACTORIES.get(provider)
     if factory is None:
@@ -469,47 +469,47 @@ def create_provider(*args: Any, **kwargs: Any) -> WorkbenchProvider:
     return factory(config)
 
 
-def _make_oauth_codex(config: ProviderConfig) -> WorkbenchProvider:
+def _makeOauthCodex(config: ProviderConfig) -> WorkbenchProvider:
     from .oauthCodex import OAuthCodexProvider
 
     return OAuthCodexProvider(config)
 
 
-def _make_codex(config: ProviderConfig) -> WorkbenchProvider:
+def _makeCodex(config: ProviderConfig) -> WorkbenchProvider:
     from .codex import CodexProvider
 
     return CodexProvider(config)
 
 
-def _make_gemini(config: ProviderConfig) -> WorkbenchProvider:
+def _makeGemini(config: ProviderConfig) -> WorkbenchProvider:
     from .gemini import GeminiProvider
 
     return GeminiProvider(config)
 
 
-def _make_openai_compat(config: ProviderConfig) -> WorkbenchProvider:
+def _makeOpenaiCompat(config: ProviderConfig) -> WorkbenchProvider:
     return OpenAICompatibleProvider(config)
 
 
 # Provider id → factory. provider_catalog._PROVIDERS 와 1:1 일치해야 한다.
 # wiredProviderIds() 가 본 dict 의 keys 와 catalog keys 의 정합을 보장.
 _PROVIDER_FACTORIES: dict[str, Any] = {
-    "oauth-codex": _make_oauth_codex,
-    "codex": _make_codex,
-    "gemini": _make_gemini,
-    "openai": _make_openai_compat,
-    "custom": _make_openai_compat,
-    "groq": _make_openai_compat,
-    "cerebras": _make_openai_compat,
-    "mistral": _make_openai_compat,
-    "ollama": _make_openai_compat,
+    "oauth-codex": _makeOauthCodex,
+    "codex": _makeCodex,
+    "gemini": _makeGemini,
+    "openai": _makeOpenaiCompat,
+    "custom": _makeOpenaiCompat,
+    "groq": _makeOpenaiCompat,
+    "cerebras": _makeOpenaiCompat,
+    "mistral": _makeOpenaiCompat,
+    "ollama": _makeOpenaiCompat,
     # legacy aliases — get_config normalizes but kept for safety.
-    "openai-compatible": _make_openai_compat,
-    "openai_compat": _make_openai_compat,
+    "openai-compatible": _makeOpenaiCompat,
+    "openai_compat": _makeOpenaiCompat,
 }
 
 
-def available_providers() -> list[str]:
+def availableProviders() -> list[str]:
     """카탈로그 등록 provider id 목록. legacy alias 제외."""
     from ..settings.providerCatalog import wiredProviderIds
 
@@ -529,8 +529,8 @@ __all__ = [
     "StreamChunk",
     "ToolCall",
     "WorkbenchProvider",
-    "available_providers",
-    "create_provider",
+    "availableProviders",
+    "createProvider",
     "get_config",
     "stream_provider",
 ]

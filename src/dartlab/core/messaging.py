@@ -140,49 +140,49 @@ class _StructuredMsg:
         self,
         template: str,
         actions: list[str] | None = None,
-        actions_with_key: list[str] | None = None,
-        actions_without_key: list[str] | None = None,
+        actionsWithKey: list[str] | None = None,
+        actionsWithoutKey: list[str] | None = None,
     ):
         self.template = template
         self.actions = actions or []
-        self.actions_with_key = actions_with_key or []
-        self.actions_without_key = actions_without_key or []
+        self.actionsWithKey = actionsWithKey or []
+        self.actionsWithoutKey = actionsWithoutKey or []
 
 
 _STRUCTURED: dict[str, _StructuredMsg] = {
     "hint:missing_docs": _StructuredMsg(
         template="{stockCode} ({label}) \u2192 사전 수집 데이터에 없습니다.",
-        actions_with_key=[
+        actionsWithKey=[
             "DART API 키가 설정되어 있으므로 직접 수집이 가능합니다:\n    dartlab collect {stockCode}",
         ],
-        actions_without_key=[
+        actionsWithoutKey=[
             "DART API 키를 설정하면 직접 수집할 수 있습니다:\n    dartlab setup dart-key\n    dartlab collect {stockCode}",
         ],
     ),
     "hint:missing_other": _StructuredMsg(
         template="{stockCode} ({label}) \u2192 사전 수집 데이터에 없습니다.",
         actions=["해당 종목이 dartlab 데이터셋에 포함되어 있는지 확인하세요."],
-        actions_with_key=[
+        actionsWithKey=[
             "DART API 키가 설정되어 있으므로 직접 수집이 가능합니다:\n    dartlab collect {stockCode}\n    dartlab collect --batch {stockCode}  (전 카테고리 병렬)",
         ],
-        actions_without_key=[
+        actionsWithoutKey=[
             "DART API 키를 설정하면 직접 수집할 수 있습니다:\n    dartlab setup dart-key",
         ],
     ),
     "hint:newFilingsAvailable": _StructuredMsg(
         template="{stockCode} \u2014 새 공시 {count}건 발견 ({latestReport})",
-        actions_with_key=[
+        actionsWithKey=[
             "증분 수집: dartlab collect --incremental {stockCode}",
             "또는 Python: c.update()",
         ],
-        actions_without_key=[
+        actionsWithoutKey=[
             "DART API 키를 설정하면 자동 수집 가능:\n    dartlab setup dart-key",
         ],
     ),
     "hint:stale": _StructuredMsg(
         template="{stockCode} docs 데이터가 {ageStr} 전 기준입니다.",
-        actions_with_key=["최신 공시 반영: dartlab collect {stockCode}"],
-        actions_without_key=[
+        actionsWithKey=["최신 공시 반영: dartlab collect {stockCode}"],
+        actionsWithoutKey=[
             "갱신하려면 DART API 키 설정이 필요합니다:\n    dartlab setup dart-key",
         ],
     ),
@@ -192,10 +192,10 @@ _STRUCTURED: dict[str, _StructuredMsg] = {
             "인터넷 연결을 확인하세요",
             "해당 종목이 dartlab 데이터셋에 포함되어 있는지 확인하세요\n  \u2192 DART: 한국 상장기업 ~2,700개 / EDGAR: 미국 상장기업 ~970개",
         ],
-        actions_with_key=[
+        actionsWithKey=[
             "DART 공시 문서는 직접 수집 가능합니다:\n  dartlab collect {stockCode}",
         ],
-        actions_without_key=[
+        actionsWithoutKey=[
             "DART API 키를 설정하면 직접 수집할 수 있습니다:\n  dartlab setup dart-key\n  dartlab collect {stockCode}",
         ],
     ),
@@ -206,11 +206,11 @@ _STRUCTURED: dict[str, _StructuredMsg] = {
             "비상장 또는 dartlab 데이터셋에 미포함 종목일 수 있습니다",
             "인터넷 연결을 확인하세요 (첫 사용 시 자동 다운로드 필요)",
         ],
-        actions_with_key=[
+        actionsWithKey=[
             "DART API 키가 설정되어 있으므로 직접 수집이 가능합니다:\n  dartlab collect {stockCode}",
             "종목 검색: dartlab.searchName('\uc0bc\uc131') 또는 dartlab.listing()",
         ],
-        actions_without_key=[
+        actionsWithoutKey=[
             "DART API 키를 설정하면 직접 수집할 수 있습니다:\n  dartlab setup dart-key\n  dartlab collect {stockCode}",
             "종목 검색: dartlab.searchName('\uc0bc\uc131') 또는 dartlab.listing()",
         ],
@@ -229,7 +229,7 @@ class _Context:
         self._verbose: bool | None = None
 
     @property
-    def has_dart_key(self) -> bool:
+    def hasDartKey(self) -> bool:
         if self._dart_key is None:
             try:
                 from dartlab.providers.dart.openapi.client import hasDartApiKey
@@ -259,19 +259,19 @@ _ctx = _Context()
 # ── Internal Formatting ──────────────────────────────────────────
 
 
-def _format_simple(key: str, **kwargs: Any) -> str:
+def _formatSimple(key: str, **kwargs: Any) -> str:
     return _SIMPLE[key].format(**kwargs)
 
 
-def _format_structured(msg: _StructuredMsg, **kwargs: Any) -> str:
+def _formatStructured(msg: _StructuredMsg, **kwargs: Any) -> str:
     lines = [msg.template.format(**kwargs)]
 
     actions: list[str] = list(msg.actions)
-    if msg.actions_with_key or msg.actions_without_key:
-        if _ctx.has_dart_key:
-            actions.extend(msg.actions_with_key)
+    if msg.actionsWithKey or msg.actionsWithoutKey:
+        if _ctx.hasDartKey:
+            actions.extend(msg.actionsWithKey)
         else:
-            actions.extend(msg.actions_without_key)
+            actions.extend(msg.actionsWithoutKey)
 
     if actions:
         lines.append("")
@@ -284,7 +284,7 @@ def _format_structured(msg: _StructuredMsg, **kwargs: Any) -> str:
 # ── Public API ───────────────────────────────────────────────────
 
 
-def emit(key: str, *, raise_as: type | None = None, **kwargs: Any) -> str:
+def emit(key: str, *, raiseAs: type | None = None, **kwargs: Any) -> str:
     """메시지 조립 + 출력 (또는 예외).
 
     Parameters
@@ -303,8 +303,8 @@ def emit(key: str, *, raise_as: type | None = None, **kwargs: Any) -> str:
     """
     text = format(key, **kwargs)
 
-    if raise_as is not None:
-        raise raise_as(text)
+    if raiseAs is not None:
+        raise raiseAs(text)
 
     # structured 메시지(hint/error) + collect/download 안내는 항상 출력
     _ALWAYS_SHOW = (
@@ -331,8 +331,8 @@ def emit(key: str, *, raise_as: type | None = None, **kwargs: Any) -> str:
 def format(key: str, **kwargs: Any) -> str:
     """메시지만 조립하고 출력하지 않음. Server SSE, RuntimeError 등에서 사용."""
     if key in _STRUCTURED:
-        return _format_structured(_STRUCTURED[key], **kwargs)
-    return _format_simple(key, **kwargs)
+        return _formatStructured(_STRUCTURED[key], **kwargs)
+    return _formatSimple(key, **kwargs)
 
 
 def progress(text: str) -> None:
@@ -576,21 +576,21 @@ def onKeyRequired(service: str) -> str:
 # ── 외부 공유(channel) 안내 ─────────────────────────────────────────
 
 
-def onCloudflaredMissing(os_name: str = "") -> str:
+def onCloudflaredMissing(osName: str = "") -> str:
     """cloudflared 자동 설치 실패 시 수동 설치 안내."""
     lines = ["\n  cloudflared 바이너리를 찾을 수 없습니다."]
-    if os_name == "Windows":
+    if osName == "Windows":
         lines.append("  설치(택1):")
         lines.append("    a) winget install --id Cloudflare.cloudflared -e")
         lines.append(
             "    b) https://github.com/cloudflare/cloudflared/releases 에서 cloudflared-windows-amd64.exe 다운로드"
         )
         lines.append("       → ~/.dartlab/bin/cloudflared.exe 로 저장")
-    elif os_name == "Darwin":
+    elif osName == "Darwin":
         lines.append("  설치(택1):")
         lines.append("    a) brew install cloudflared")
         lines.append("    b) https://github.com/cloudflare/cloudflared/releases 에서 darwin 빌드 다운로드")
-    elif os_name == "Linux":
+    elif osName == "Linux":
         lines.append("  설치(택1):")
         lines.append("    a) https://pkg.cloudflare.com 의 apt/yum 저장소 등록")
         lines.append("    b) https://github.com/cloudflare/cloudflared/releases 에서 linux 빌드 다운로드")
@@ -625,19 +625,19 @@ _CLOUDFLARED_ERROR_HINTS: list[tuple[str, str]] = [
 ]
 
 
-def onTunnelStartFailed(stderr_excerpt: str) -> str:
+def onTunnelStartFailed(stderrExcerpt: str) -> str:
     """cloudflared 시작 실패 시 stderr를 분석해 안내."""
     lines = ["\n  cloudflared 터널 시작에 실패했습니다."]
     matched = []
     for needle, hint in _CLOUDFLARED_ERROR_HINTS:
-        if needle.lower() in stderr_excerpt.lower():
+        if needle.lower() in stderrExcerpt.lower():
             matched.append(f"    • {hint}")
     if matched:
         lines.append("  추정 원인:")
         lines.extend(matched)
     else:
         lines.append("  원본 에러:")
-        for line in stderr_excerpt.strip().splitlines()[-5:]:
+        for line in stderrExcerpt.strip().splitlines()[-5:]:
             lines.append(f"    {line}")
     lines.append("\n  추가 점검:")
     lines.append("    • dartlab channel --persistent --dry-run 으로 단계 확인")

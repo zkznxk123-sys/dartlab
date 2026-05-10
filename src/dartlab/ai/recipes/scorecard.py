@@ -75,11 +75,11 @@ class RecipeScorecard:
     meetsThresholds: bool
     notes: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         return asdict(self)
 
 
-def _safe_float(value: Any) -> float | None:
+def _safeFloat(value: Any) -> float | None:
     if value is None:
         return None
     if isinstance(value, (int, float)):
@@ -163,7 +163,7 @@ def computeScorecard(
         notes.append("requiredEvidence empty → completeness vacuous-true")
 
     # crossTargetStability — run 의 headline 수치값 std-dev. target 별 평균을 먼저 묶고 그 위에서 std.
-    headline_floats = [_safe_float(v) for v in runs["headlineValue"].to_list()]
+    headline_floats = [_safeFloat(v) for v in runs["headlineValue"].to_list()]
     valid_floats = [v for v in headline_floats if v is not None]
     if len(valid_floats) >= 2:
         # target 별 평균 → 그 위 std (target 간 분산이 핵심).

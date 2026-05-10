@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import os
 
-from .runtime import default_host, ensure_port, run_server
+from .runtime import defaultHost, ensurePort, runServer
 
 
 def main() -> None:
@@ -17,14 +17,14 @@ def main() -> None:
 
     # HuggingFace Spaces 자동 감지
     isHfSpace = os.environ.get("SPACE_ID") is not None
-    host = args.host or ("0.0.0.0" if isHfSpace else default_host())
+    host = args.host or ("0.0.0.0" if isHfSpace else defaultHost())
     port = args.port or (7860 if isHfSpace else 8400)
 
-    status = ensure_port(port)
+    status = ensurePort(port)
     if status == "failed":
         raise SystemExit(1)
 
-    run_server(host=host, port=port)
+    runServer(host=host, port=port)
 
 
 if __name__ == "__main__":

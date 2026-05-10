@@ -87,7 +87,7 @@ HEALTHY_SERIES = _make_series(
 
 
 @pytest.fixture
-def sector_params():
+def sectorParams():
     from dartlab.core.sector.types import SectorParams
 
     return SectorParams(
@@ -188,14 +188,14 @@ class TestSectorElasticity:
 
 @pytest.mark.unit
 class TestSimulateScenario:
-    def test_baseline(self, sector_params):
+    def test_baseline(self, sectorParams):
         from dartlab.analysis.forecast.simulation import simulateScenario as simulate_scenario
 
         result = simulate_scenario(
             HEALTHY_SERIES,
             scenario="baseline",
             sectorKey="반도체",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
             shares=1_000_000,
         )
         assert result.scenarioName == "baseline"
@@ -206,66 +206,66 @@ class TestSimulateScenario:
         assert result.perShareValue is not None
         assert result.dcfValue > 0
 
-    def test_adverse(self, sector_params):
+    def test_adverse(self, sectorParams):
         from dartlab.analysis.forecast.simulation import simulateScenario as simulate_scenario
 
         result = simulate_scenario(
             HEALTHY_SERIES,
             scenario="adverse",
             sectorKey="반도체",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         # 경기침체 → 매출 감소 (반도체 β=1.8이므로 큰 하락)
         assert result.revenueChangePct < 0
 
-    def test_adverse_vs_baseline_revenue(self, sector_params):
+    def test_adverse_vs_baseline_revenue(self, sectorParams):
         from dartlab.analysis.forecast.simulation import simulateScenario as simulate_scenario
 
         baseline = simulate_scenario(
             HEALTHY_SERIES,
             scenario="baseline",
             sectorKey="반도체",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         adverse = simulate_scenario(
             HEALTHY_SERIES,
             scenario="adverse",
             sectorKey="반도체",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         # 경기침체 매출이 기준 매출보다 낮아야 함
         assert adverse.revenuePath[-1] < baseline.revenuePath[-1]
 
-    def test_defensive_sector_less_impact(self, sector_params):
+    def test_defensive_sector_less_impact(self, sectorParams):
         from dartlab.analysis.forecast.simulation import simulateScenario as simulate_scenario
 
         semi = simulate_scenario(
             HEALTHY_SERIES,
             scenario="adverse",
             sectorKey="반도체",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         food = simulate_scenario(
             HEALTHY_SERIES,
             scenario="adverse",
             sectorKey="식품",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         # 식품(방어적)이 반도체보다 매출 타격 작아야 함
         assert abs(food.revenueChangePct) < abs(semi.revenueChangePct)
 
-    def test_no_shares(self, sector_params):
+    def test_no_shares(self, sectorParams):
         from dartlab.analysis.forecast.simulation import simulateScenario as simulate_scenario
 
         result = simulate_scenario(
             HEALTHY_SERIES,
             scenario="baseline",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         assert result.perShareValue is None
         assert result.dcfValue > 0
 
-    def test_scenario_str_or_object(self, sector_params):
+    def test_scenario_str_or_object(self, sectorParams):
         from dartlab.analysis.forecast.simulation import (
             PRESET_SCENARIOS,
         )
@@ -273,23 +273,23 @@ class TestSimulateScenario:
             simulateScenario as simulate_scenario,
         )
 
-        r1 = simulate_scenario(HEALTHY_SERIES, scenario="baseline", sectorParams=sector_params)
+        r1 = simulate_scenario(HEALTHY_SERIES, scenario="baseline", sectorParams=sectorParams)
         r2 = simulate_scenario(
             HEALTHY_SERIES,
             scenario=PRESET_SCENARIOS["baseline"],
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         assert r1.scenarioName == r2.scenarioName
         assert r1.revenuePath == r2.revenuePath
 
-    def test_repr(self, sector_params):
+    def test_repr(self, sectorParams):
         from dartlab.analysis.forecast.simulation import simulateScenario as simulate_scenario
 
         result = simulate_scenario(
             HEALTHY_SERIES,
             scenario="baseline",
             sectorKey="반도체",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         text = repr(result)
         assert "시뮬레이션" in text
@@ -304,13 +304,13 @@ class TestSimulateScenario:
 
 @pytest.mark.unit
 class TestSimulateAll:
-    def test_all_scenarios(self, sector_params):
+    def test_all_scenarios(self, sectorParams):
         from dartlab.analysis.forecast.simulation import simulateAllScenarios as simulate_all_scenarios
 
         results = simulate_all_scenarios(
             HEALTHY_SERIES,
             sectorKey="반도체",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         assert len(results) == 5
         assert "baseline" in results
@@ -318,12 +318,12 @@ class TestSimulateAll:
         for name, r in results.items():
             assert len(r.revenuePath) == 3
 
-    def test_selective_scenarios(self, sector_params):
+    def test_selective_scenarios(self, sectorParams):
         from dartlab.analysis.forecast.simulation import simulateAllScenarios as simulate_all_scenarios
 
         results = simulate_all_scenarios(
             HEALTHY_SERIES,
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
             scenarios=["baseline", "adverse"],
         )
         assert len(results) == 2
@@ -336,13 +336,13 @@ class TestSimulateAll:
 
 @pytest.mark.unit
 class TestMonteCarlo:
-    def test_basic(self, sector_params):
+    def test_basic(self, sectorParams):
         from dartlab.analysis.forecast.simulation import monteCarloForecast as monte_carlo_forecast
 
         result = monte_carlo_forecast(
             HEALTHY_SERIES,
             sectorKey="반도체",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
             shares=1_000_000,
             iterations=1000,  # 테스트용으로 줄임
         )
@@ -353,43 +353,43 @@ class TestMonteCarlo:
         assert result.expectedValue > 0
         assert result.stdDev > 0
 
-    def test_percentile_ordering(self, sector_params):
+    def test_percentile_ordering(self, sectorParams):
         from dartlab.analysis.forecast.simulation import monteCarloForecast as monte_carlo_forecast
 
         result = monte_carlo_forecast(
             HEALTHY_SERIES,
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
             iterations=500,
         )
         for metric, pcts in result.percentiles.items():
             assert pcts["p5"] <= pcts["p25"] <= pcts["p50"] <= pcts["p75"] <= pcts["p95"]
 
-    def test_adverse_lower_than_baseline(self, sector_params):
+    def test_adverse_lower_than_baseline(self, sectorParams):
         from dartlab.analysis.forecast.simulation import monteCarloForecast as monte_carlo_forecast
 
         base = monte_carlo_forecast(
             HEALTHY_SERIES,
             sectorKey="반도체",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
             scenario="baseline",
             iterations=2000,
         )
         adv = monte_carlo_forecast(
             HEALTHY_SERIES,
             sectorKey="반도체",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
             scenario="adverse",
             iterations=2000,
         )
         # 경기침체 시 기대값이 기준보다 낮아야 함
         assert adv.expectedValue < base.expectedValue
 
-    def test_repr(self, sector_params):
+    def test_repr(self, sectorParams):
         from dartlab.analysis.forecast.simulation import monteCarloForecast as monte_carlo_forecast
 
         result = monte_carlo_forecast(
             HEALTHY_SERIES,
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
             iterations=500,
         )
         text = repr(result)
@@ -406,46 +406,46 @@ class TestMonteCarlo:
 
 @pytest.mark.unit
 class TestStressTest:
-    def test_basic(self, sector_params):
+    def test_basic(self, sectorParams):
         from dartlab.analysis.forecast.simulation import stressTest as stress_test
 
         result = stress_test(
             HEALTHY_SERIES,
             sectorKey="반도체",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         assert result.scenarioName == "adverse"
         assert result.year3RevenueChange < 0  # 경기침체 → 매출 감소
         assert result.survivalRisk in ("low", "medium", "high", "critical")
         assert isinstance(result.dividendSustainable, bool)
 
-    def test_healthy_company_low_risk(self, sector_params):
+    def test_healthy_company_low_risk(self, sectorParams):
         from dartlab.analysis.forecast.simulation import stressTest as stress_test
 
         result = stress_test(
             HEALTHY_SERIES,
             sectorKey="식품",  # 방어적 업종
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         # 건전한 기업 + 방어적 업종 → 생존 위험 낮음
         assert result.survivalRisk in ("low", "medium")
 
-    def test_debt_ratio_computed(self, sector_params):
+    def test_debt_ratio_computed(self, sectorParams):
         from dartlab.analysis.forecast.simulation import stressTest as stress_test
 
         result = stress_test(
             HEALTHY_SERIES,
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         assert result.year3DebtRatio is not None
         assert result.year3DebtRatio > 0
 
-    def test_repr(self, sector_params):
+    def test_repr(self, sectorParams):
         from dartlab.analysis.forecast.simulation import stressTest as stress_test
 
         result = stress_test(
             HEALTHY_SERIES,
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         text = repr(result)
         assert "스트레스 테스트" in text
@@ -453,12 +453,12 @@ class TestStressTest:
         assert "배당" in text
         assert "참고용" in text
 
-    def test_custom_scenario(self, sector_params):
+    def test_custom_scenario(self, sectorParams):
         from dartlab.analysis.forecast.simulation import stressTest as stress_test
 
         result = stress_test(
             HEALTHY_SERIES,
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
             scenario="semiconductor_down",
         )
         assert result.scenarioName == "semiconductor_down"
@@ -518,12 +518,12 @@ class TestInternalUtils:
         # 금리 인하 → WACC 하락
         assert wacc < 10.0
 
-    def test_empty_series(self, sector_params):
+    def test_empty_series(self, sectorParams):
         from dartlab.analysis.forecast.simulation import simulateScenario as simulate_scenario
 
         result = simulate_scenario(
             {"IS": {}, "BS": {}, "CF": {}},
             scenario="baseline",
-            sectorParams=sector_params,
+            sectorParams=sectorParams,
         )
         assert len(result.warnings) > 0

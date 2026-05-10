@@ -19,7 +19,7 @@ from typing import Any
 from dartlab.ai.contracts import Ref, TraceEvent
 from dartlab.ai.providers import ProviderTurn, WorkbenchProvider
 from dartlab.ai.providers.base import RateLimitError
-from dartlab.ai.tools.formatting import wrap_external_in_result
+from dartlab.ai.tools.formatting import wrapExternalInResult
 from dartlab.ai.tools.registry import _SPECS as TOOL_SPECS
 from dartlab.ai.tools.registry import executeTool
 
@@ -88,7 +88,7 @@ def runLLMPass(
                 data={"pass": passName, "round": round_idx, "text": turn.content},
             )
 
-        for call in turn.tool_calls:
+        for call in turn.toolCalls:
             yield TraceEvent(
                 kind="llm_tool_use",
                 data={
@@ -102,22 +102,22 @@ def runLLMPass(
 
         # assistant 메시지 추가 (tool_calls 포함)
         assistant_msg: dict[str, Any] = {"role": "assistant", "content": turn.content or ""}
-        if turn.tool_calls:
+        if turn.toolCalls:
             assistant_msg["tool_calls"] = [
                 {
                     "id": c.id,
                     "type": "function",
                     "function": {"name": c.name, "arguments": json.dumps(c.args, ensure_ascii=False)},
                 }
-                for c in turn.tool_calls
+                for c in turn.toolCalls
             ]
         messages.append(assistant_msg)
 
-        if not turn.tool_calls:
+        if not turn.toolCalls:
             yield TraceEvent(kind="llm_stop", data={"pass": passName, "round": round_idx, "reason": "no_tool_calls"})
             break
 
-        for call in turn.tool_calls:
+        for call in turn.toolCalls:
             tool_start = time.monotonic()
             result = executeTool(call.name, call.args or {})
             tool_duration_ms = int((time.monotonic() - tool_start) * 1000)
@@ -148,7 +148,7 @@ def runLLMPass(
             # 외부 본문 (sourceType=external) 인 ref 의 payload·data 텍스트 필드를
             # [EXTERNAL CONTENT START/END] 마커로 감싼다.
             # 상세: runtime.workbenchEvidenceFlow "외부 본문 처리".
-            wrapped = wrap_external_in_result(result)
+            wrapped = wrapExternalInResult(result)
             content = json.dumps(wrapped, ensure_ascii=False, default=str)
             if len(content) > _MAX_TOOL_RESULT_CHARS:
                 content = content[:_MAX_TOOL_RESULT_CHARS] + f"\n...(truncated, full {len(content)} chars)"
@@ -181,16 +181,16 @@ def _resolveProviderForRole(currentProvider: WorkbenchProvider, role: str) -> Wo
     동일하거나 미등록이면 currentProvider 를 그대로 반환 (롤백 안전).
     """
     try:
-        from dartlab.ai.providers import create_provider, get_config
+        from dartlab.ai.providers import createProvider, getConfig
 
         current_provider_id = (getattr(currentProvider.config, "provider", None) or "").lower()
         current_model = getattr(currentProvider.config, "model", None)
-        new_config = get_config(role=role, provider=current_provider_id)
+        new_config = getConfig(role=role, provider=current_provider_id)
         if (new_config.provider or "").lower() == current_provider_id and (new_config.model or "") == (
             current_model or ""
         ):
             return currentProvider
-        return create_provider(new_config)
+        return createProvider(new_config)
     except Exception:  # noqa: BLE001
         return currentProvider
 
@@ -296,10 +296,10 @@ def _truncate(text: str, limit: int) -> str:
     return text[: max(0, limit - 1)] + "…"
 
 
-def _withRefSuffix(prefix: str, ref: Ref, total_cap: int) -> str:
+def _withRefSuffix(prefix: str, ref: Ref, totalCap: int) -> str:
     """ref id 는 절대 자르지 않고 prefix 만 cap 안에 맞춘다."""
     suffix = f" <{ref.kind}:{ref.id}>"
-    max_prefix = max(20, total_cap - len(suffix))
+    max_prefix = max(20, totalCap - len(suffix))
     return _truncate(prefix, max_prefix) + suffix
 
 
@@ -330,11 +330,11 @@ def _summarizeTableRef(ref: Ref) -> str:
     if period:
         parts.append(f"@{period}")
     rows = payload.get("rows")
-    row_count = payload.get("rowCount")
-    if row_count is None and isinstance(rows, list):
-        row_count = len(rows)
-    if row_count is not None:
-        parts.append(f"rows={row_count}")
+    rowCount = payload.get("rowCount")
+    if rowCount is None and isinstance(rows, list):
+        rowCount = len(rows)
+    if rowCount is not None:
+        parts.append(f"rows={rowCount}")
     columns = payload.get("columns")
     if isinstance(columns, list) and columns:
         sample_cols = ", ".join(str(c) for c in columns[:3])
@@ -386,13 +386,13 @@ def _summarizeDatasetRef(ref: Ref) -> str:
     payload = ref.payload if isinstance(ref.payload, dict) else {}
     target = payload.get("target") or ref.title or ""
     source = payload.get("source") or ""
-    row_count = payload.get("rowCount")
+    rowCount = payload.get("rowCount")
     latest = payload.get("latest")
     parts = [str(target)]
     if source:
         parts.append(f"src={source}")
-    if row_count is not None:
-        parts.append(f"rows={row_count}")
+    if rowCount is not None:
+        parts.append(f"rows={rowCount}")
     if latest:
         parts.append(f"latest={latest}")
     return _withRefSuffix(" ".join(parts), ref, 140)
@@ -409,9 +409,9 @@ def _formatRecipeSteps(refs: list[Ref]) -> str:
             continue
         steps = payload.get("recipeSteps") or []
         if not steps:
-            from dartlab.skills.registry import _steps_from_recipe_body
+            from dartlab.skills.registry import _stepsFromRecipeBody
 
-            steps = _steps_from_recipe_body(str(payload.get("body") or ""))
+            steps = _stepsFromRecipeBody(str(payload.get("body") or ""))
         if not steps:
             steps = [{"skillId": sid, "note": ""} for sid in payload.get("linkedSkills") or []]
         if not steps:

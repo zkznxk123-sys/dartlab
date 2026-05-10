@@ -122,7 +122,7 @@ async def _fetchAsync(
         url : str — 기사 링크
         circuit breaker open 또는 수집 실패 시 빈 리스트.
     """
-    if _circuit_breaker.is_open(_SOURCE_NAME):
+    if _circuit_breaker.isOpen(_SOURCE_NAME):
         log.debug("news circuit breaker open — skip")
         return []
 
@@ -144,12 +144,12 @@ async def _fetchAsync(
 
         items = _parseRss(data, days=days)
         latency = time.monotonic() - t0
-        _circuit_breaker.record_success(_SOURCE_NAME)
+        _circuit_breaker.recordSuccess(_SOURCE_NAME)
         _health_tracker.record(_SOURCE_NAME, success=True, latency=latency)
         return items
     except (ImportError, OSError, TimeoutError, ValueError, ConnectionError) as exc:
         latency = time.monotonic() - t0
-        _circuit_breaker.record_failure(_SOURCE_NAME)
+        _circuit_breaker.recordFailure(_SOURCE_NAME)
         _health_tracker.record(_SOURCE_NAME, success=False, latency=latency)
         log.debug("news fetch 실패: %s", exc)
         return []
@@ -198,7 +198,7 @@ def fetchNews(
     Returns:
         (date, title, source, url) DataFrame.
     """
-    from .http import run_async
+    from .http import runAsync
 
-    items = run_async(_fetchAsync(query, market=market, days=days))
+    items = runAsync(_fetchAsync(query, market=market, days=days))
     return toDataFrame(items)

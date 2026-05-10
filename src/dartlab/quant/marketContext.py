@@ -58,53 +58,51 @@ def _ols(y: np.ndarray, x: np.ndarray) -> dict[str, float]:
     return {"beta": beta, "alpha": alpha, "r2": float(r2), "n": int(len(y))}
 
 
-def _capmBetaAlpha(stock_close: np.ndarray, bm_close: np.ndarray) -> tuple[float, float, float, int] | None:
+def _capmBetaAlpha(stockClose: np.ndarray, bmClose: np.ndarray) -> tuple[float, float, float, int] | None:
     """CAPM 회귀 — r_i = α + β r_m + ε. (β, α annualized, R², nObs)."""
-    if len(stock_close) < 30 or len(bm_close) < 30:
+    if len(stockClose) < 30 or len(bmClose) < 30:
         return None
-    r_i = np.diff(np.log(stock_close))
-    r_m = np.diff(np.log(bm_close))
+    r_i = np.diff(np.log(stockClose))
+    r_m = np.diff(np.log(bmClose))
     ols = _ols(r_i, r_m)
     if not np.isfinite(ols["beta"]):
         return None
     return ols["beta"], ols["alpha"] * 252.0, ols["r2"], ols["n"]
 
 
-def _alignDates(
-    stock_df: pl.DataFrame, other_df: pl.DataFrame, *, other_value_col: str
-) -> tuple[np.ndarray, np.ndarray]:
+def _alignDates(stockDf: pl.DataFrame, otherDf: pl.DataFrame, *, otherValueCol: str) -> tuple[np.ndarray, np.ndarray]:
     """date 기준 inner join → (stock_close, other_value) 같은 길이 array.
 
     other_df 의 결측은 forward-fill 로 보간 (월별 거시 변수 호환).
     """
-    if isEmptyDf(stock_df) or isEmptyDf(other_df):
+    if isEmptyDf(stockDf) or isEmptyDf(otherDf):
         return np.array([]), np.array([])
-    if "date" not in stock_df.columns or "date" not in other_df.columns:
+    if "date" not in stockDf.columns or "date" not in otherDf.columns:
         return np.array([]), np.array([])
-    s = stock_df.select(["date", "close"]).sort("date")
-    o = other_df.select(["date", other_value_col]).sort("date")
-    o = o.with_columns(pl.col(other_value_col).forward_fill())
-    joined = s.join_asof(o, on="date", strategy="backward").drop_nulls(subset=[other_value_col])
+    s = stockDf.select(["date", "close"]).sort("date")
+    o = otherDf.select(["date", otherValueCol]).sort("date")
+    o = o.with_columns(pl.col(otherValueCol).forward_fill())
+    joined = s.join_asof(o, on="date", strategy="backward").drop_nulls(subset=[otherValueCol])
     if joined.height < 5:
         return np.array([]), np.array([])
     return (
         joined["close"].to_numpy().astype(np.float64),
-        joined[other_value_col].to_numpy().astype(np.float64),
+        joined[otherValueCol].to_numpy().astype(np.float64),
     )
 
 
-def _macroBetaSet(stock_df: pl.DataFrame, macro_df: pl.DataFrame, macro_vars: tuple[str, ...]) -> dict[str, float]:
+def _macroBetaSet(stockDf: pl.DataFrame, macroDf: pl.DataFrame, macroVars: tuple[str, ...]) -> dict[str, float]:
     """거시 wide DF 의 각 컬럼별 β 산출 — Δlog stock vs Δ macro (변수에 따라 Δ 또는 Δlog)."""
     out: dict[str, float] = {}
-    if isEmptyDf(stock_df) or isEmptyDf(macro_df):
+    if isEmptyDf(stockDf) or isEmptyDf(macroDf):
         return out
-    cols_present = [c for c in macro_vars if c in macro_df.columns]
+    cols_present = [c for c in macroVars if c in macroDf.columns]
     for var in cols_present:
-        stock_close, macro_val = _alignDates(stock_df, macro_df, other_value_col=var)
-        if len(stock_close) < 30:
+        stockClose, macro_val = _alignDates(stockDf, macroDf, otherValueCol=var)
+        if len(stockClose) < 30:
             continue
         # Δlog stock_close (일별 수익률)
-        r_i = np.diff(np.log(stock_close))
+        r_i = np.diff(np.log(stockClose))
         # 거시 변수 변화: USDKRW / FX → Δlog, 금리 (BASE_RATE/FEDFUNDS/DGS10) → Δ, 그 외 → Δlog
         if var.upper() in {"BASE_RATE", "FEDFUNDS", "DGS10"}:
             macro_delta = np.diff(macro_val)
@@ -285,7 +283,7 @@ def calcMarketContext(
     end_date = last_date
 
     # 종목 DataFrame 슬라이스 (lookbackDays)
-    stock_df = ohlcv.tail(n_use).select(["date", "close"]).sort("date")
+    stockDf = ohlcv.tail(n_use).select(["date", "close"]).sort("date")
 
     result: dict[str, Any] = {
         "stockCode": stockCode,
@@ -307,7 +305,7 @@ def calcMarketContext(
             end=end_date,
         )
         if not isEmptyDf(bm_df):
-            joined = stock_df.join(
+            joined = stockDf.join(
                 bm_df.select(["date", "close"]).rename({"close": "bmClose"}),
                 on="date",
                 how="inner",
@@ -327,32 +325,32 @@ def calcMarketContext(
 
     # 3. 거시 민감도
     if macroVars is None:
-        macro_vars: tuple[str, ...] = _KR_MACRO_DEFAULT if market == "KR" else _US_MACRO_DEFAULT
+        macroVars: tuple[str, ...] = _KR_MACRO_DEFAULT if market == "KR" else _US_MACRO_DEFAULT
     else:
-        macro_vars = tuple(macroVars)
+        macroVars = tuple(macroVars)
 
-    macro_df = None
+    macroDf = None
     macro_source = "none"  # wide / singleFallback / none — 결과 키로 단일 노출
     wide_error: str | None = None
     try:
         from dartlab.gather.entry import GatherEntry
 
         g = GatherEntry()
-        macro_df = g("macro", market=market)
-        if not isEmptyDf(macro_df):
+        macroDf = g("macro", market=market)
+        if not isEmptyDf(macroDf):
             macro_source = "wide"
     except (ImportError, ValueError, TypeError, RuntimeError) as exc:
         wide_error = type(exc).__name__
-        macro_df = None
+        macroDf = None
 
     # wide 호출 실패 또는 빈 DF 시 var 별 단일 fetch fallback
-    if isEmptyDf(macro_df):
+    if isEmptyDf(macroDf):
         try:
             from dartlab.gather.entry import GatherEntry
 
             g = GatherEntry()
             parts: list[pl.DataFrame] = []
-            for var in macro_vars:
+            for var in macroVars:
                 try:
                     single = g("macro", var)
                 except (ImportError, ValueError, TypeError, RuntimeError):
@@ -366,10 +364,10 @@ def calcMarketContext(
                     parts.append(single.select(["date", var]))
             if parts:
                 # outer join on date (forward-fill 호환)
-                macro_df = parts[0]
+                macroDf = parts[0]
                 for p in parts[1:]:
-                    macro_df = macro_df.join(p, on="date", how="full", coalesce=True)
-                macro_df = macro_df.sort("date")
+                    macroDf = macroDf.join(p, on="date", how="full", coalesce=True)
+                macroDf = macroDf.sort("date")
                 macro_source = "singleFallback"
         except (ImportError, ValueError, TypeError, RuntimeError):
             pass
@@ -377,10 +375,10 @@ def calcMarketContext(
     result["macroSource"] = macro_source
     if wide_error is not None:
         result["macroWideErrorType"] = wide_error  # 진단용 (singleFallback 성공해도 wide 실패 사유 보존)
-    if not isEmptyDf(macro_df):
-        macro_betas = _macroBetaSet(stock_df, macro_df, macro_vars)
+    if not isEmptyDf(macroDf):
+        macro_betas = _macroBetaSet(stockDf, macroDf, macroVars)
         result.update(macro_betas)
-        result["macroVarsUsed"] = list(macro_vars)
+        result["macroVarsUsed"] = list(macroVars)
 
     # 4. 수급 (KR only)
     flow_metrics = _flowMetrics(stockCode, market)

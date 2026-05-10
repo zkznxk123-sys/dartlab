@@ -118,10 +118,10 @@ def _classify(value: float, key: str) -> str:
 # ── 추세 감지 유틸 ──
 
 
-def _detectTrend(values: list, min_count: int = 3) -> str | None:
+def _detectTrend(values: list, minCount: int = 3) -> str | None:
     """숫자 리스트에서 추세 감지. 최신이 앞(index 0)."""
     valid = [v for v in values if v is not None]
-    if len(valid) < min_count:
+    if len(valid) < minCount:
         return None
     improving = all(valid[i] >= valid[i + 1] for i in range(len(valid) - 1))
     declining = all(valid[i] <= valid[i + 1] for i in range(len(valid) - 1))
@@ -140,18 +140,18 @@ def _detectTrend(values: list, min_count: int = 3) -> str | None:
 # 5 분석 엔진 공통 패턴: 데이터 소비 → 분석기준·서사·관점·근거 → story 도구.
 
 
-def narrateTrend(verdict_data: dict | None) -> str:
+def narrateTrend(verdictData: dict | None) -> str:
     """추세 서사 — MA 정배열 + ADX + 12년 audit 근거."""
-    if not verdict_data:
+    if not verdictData:
         return "추세 데이터 없음."
-    cats = verdict_data.get("categories", {})
+    cats = verdictData.get("categories", {})
     trend = cats.get("trend", {})
     inds = trend.get("indicators", {})
 
     label = trend.get("label", "")
     ma = inds.get("ma_alignment", "혼조")
     ma_score = inds.get("ma_alignment_score", 0)
-    adx = verdict_data.get("adx") or inds.get("adx", 0)
+    adx = verdictData.get("adx") or inds.get("adx", 0)
     st = inds.get("supertrend", "")
     psar = inds.get("psar", "")
 
@@ -166,15 +166,15 @@ def narrateTrend(verdict_data: dict | None) -> str:
     return text
 
 
-def narrateQuantRisk(risk_data: dict | None, verdict_data: dict | None) -> str:
+def narrateQuantRisk(riskData: dict | None, verdictData: dict | None) -> str:
     """리스크 서사 — ATR + 베타 + 변동성 등급."""
-    if not risk_data:
+    if not riskData:
         return "리스크 데이터 없음."
-    atr_pct = risk_data.get("atrPercent", 0)
-    vol_grade = risk_data.get("volatilityGrade", "")
-    beta_dict = risk_data.get("beta") or (verdict_data or {}).get("beta") or {}
+    atr_pct = riskData.get("atrPercent", 0)
+    vol_grade = riskData.get("volatilityGrade", "")
+    beta_dict = riskData.get("beta") or (verdictData or {}).get("beta") or {}
     beta_val = beta_dict.get("value") if isinstance(beta_dict, dict) else beta_dict
-    rsi = (verdict_data or {}).get("rsi")
+    rsi = (verdictData or {}).get("rsi")
 
     parts = []
     if atr_pct:
@@ -197,14 +197,14 @@ def narrateQuantRisk(risk_data: dict | None, verdict_data: dict | None) -> str:
     return ". ".join(parts) + "." if parts else "리스크 데이터 부족."
 
 
-def narrateSignals(signals_data: dict | None) -> str:
+def narrateSignals(signalsData: dict | None) -> str:
     """수급 신호 서사 — 최근 20일 매수/매도 신호 집계."""
-    if not signals_data:
+    if not signalsData:
         return "신호 데이터 없음."
-    summary = signals_data.get("signalSummary", {})
+    summary = signalsData.get("signalSummary", {})
     bullish = summary.get("bullish", 0)
     bearish = summary.get("bearish", 0)
-    events = signals_data.get("recentEvents", [])
+    events = signalsData.get("recentEvents", [])
 
     parts = [f"최근 20일 매수 {bullish}건 / 매도 {bearish}건"]
     # 가장 최근 이벤트 1~2개 언급
@@ -221,9 +221,9 @@ def narrateSignals(signals_data: dict | None) -> str:
     return ". ".join(parts) + "."
 
 
-def narrateStrategyVerdict(strategy_data: dict | None) -> str:
+def narrateStrategyVerdict(strategyData: dict | None) -> str:
     """전략 검증 서사 — 스타일별 Sharpe + 오늘 진입 신호."""
-    if not strategy_data:
+    if not strategyData:
         return "전략 데이터 없음."
     style_ko = {
         "trendFollow": "추세추종",
@@ -238,7 +238,7 @@ def narrateStrategyVerdict(strategy_data: dict | None) -> str:
     strong = []
     active = []
     for key, ko in style_ko.items():
-        snap = strategy_data.get(key)
+        snap = strategyData.get(key)
         if not snap or snap.get("status") != "ok":
             continue
         sharpe = snap.get("sharpe", 0)
@@ -258,13 +258,13 @@ def narrateStrategyVerdict(strategy_data: dict | None) -> str:
     return ". ".join(parts) + "."
 
 
-def narrateCrosscheck(divergence_data: dict | None) -> str:
+def narrateCrosscheck(divergenceData: dict | None) -> str:
     """재무-시장 교차 서사 — analysis 등급 vs 기술적 판단 일치/불일치."""
-    if not divergence_data:
+    if not divergenceData:
         return "교차진단 데이터 없음."
-    diagnosis = divergence_data.get("diagnosis", "")
-    fin_grade = divergence_data.get("financialGrade", "")
-    tech_verdict = divergence_data.get("technicalVerdict", "")
+    diagnosis = divergenceData.get("diagnosis", "")
+    fin_grade = divergenceData.get("financialGrade", "")
+    tech_verdict = divergenceData.get("technicalVerdict", "")
 
     if diagnosis:
         return f"재무-시장 교차: {diagnosis}."
@@ -279,26 +279,26 @@ def narrateCrosscheck(divergence_data: dict | None) -> str:
 
 
 def narrateQuantConclusion(
-    trend_label: str,
-    bullish_signals: int,
-    bearish_signals: int,
-    active_styles: list[str],
+    trendLabel: str,
+    bullishSignals: int,
+    bearishSignals: int,
+    activeStyles: list[str],
     diagnosis: str,
 ) -> str:
     """결론 — 5 서사 방향 카운트 (가중치 X)."""
     bull = 0
     bear = 0
-    if trend_label == "강한 상승":
+    if trendLabel == "강한 상승":
         bull += 1
-    elif trend_label == "횡보":
+    elif trendLabel == "횡보":
         pass  # 중립
     else:
         bear += 1
-    if bullish_signals > bearish_signals + 1:
+    if bullishSignals > bearishSignals + 1:
         bull += 1
-    elif bearish_signals > bullish_signals + 1:
+    elif bearishSignals > bullishSignals + 1:
         bear += 1
-    if active_styles:
+    if activeStyles:
         bull += 1
     if "정합" in diagnosis or "일치" in diagnosis:
         bull += 1

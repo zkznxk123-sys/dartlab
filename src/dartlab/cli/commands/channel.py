@@ -36,7 +36,7 @@ _TX = "#cdd6f4"
 _CONFIG_PATH = Path.home() / ".dartlab" / "channel.json"
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """channel 서브커맨드 등록."""
     parser = subparsers.add_parser(
         "channel",
@@ -74,7 +74,7 @@ def configure_parser(subparsers) -> None:
 # ── QR ──────────────────────────────────────────────────────────────────
 
 
-def _ensure_qrcode() -> bool:
+def _ensureQrcode() -> bool:
     """qrcode 패키지가 없으면 설치 여부를 묻는다."""
     try:
         import qrcode  # noqa: F401
@@ -103,7 +103,7 @@ def _ensure_qrcode() -> bool:
     return True
 
 
-def _render_qr(url: str) -> str:
+def _renderQr(url: str) -> str:
     """URL을 QR 코드 ASCII로 렌더링."""
     import qrcode  # type: ignore[import-untyped]
 
@@ -118,28 +118,28 @@ def _render_qr(url: str) -> str:
 # ── 출력 패널 ────────────────────────────────────────────────────────────
 
 
-def _print_channel_info(*, tunnel_url: str, has_qr: bool) -> None:
+def _printChannelInfo(*, tunnelUrl: str, hasQr: bool) -> None:
     from rich.console import Group
     from rich.panel import Panel
     from rich.table import Table
     from rich.text import Text
 
-    from dartlab.cli.services.output import get_console
+    from dartlab.cli.services.output import getConsole
 
-    console = get_console()
+    console = getConsole()
 
     info = Table.grid(padding=(0, 2))
     info.add_column(style=f"bold {_TM}", justify="right")
     info.add_column(style=f"bold {_TX}")
 
-    info.add_row("URL", tunnel_url)
+    info.add_row("URL", tunnelUrl)
     info.add_row("Backend", "Microsoft DevTunnels (영구)")
     info.add_row("미들웨어", "비활성 — 토큰 없이 직접 접근")
 
     group_items = []
-    if has_qr:
+    if hasQr:
         try:
-            qr_text = _render_qr(tunnel_url)
+            qr_text = _renderQr(tunnelUrl)
             group_items.append(Text.from_ansi(qr_text))
         except (ImportError, OSError):
             pass
@@ -171,47 +171,47 @@ def _print_channel_info(*, tunnel_url: str, has_qr: bool) -> None:
 # ── 메시징 어댑터 ────────────────────────────────────────────────────────
 
 
-def _start_messaging_adapters(args) -> list:
+def _startMessagingAdapters(args) -> list:
     """CLI 인자에 따라 메시징 어댑터를 백그라운드로 시작한다."""
     import threading
 
     adapters = []
 
     if getattr(args, "telegram", None):
-        from dartlab.channel.adapters import create_adapter
+        from dartlab.channel.adapters import createAdapter
 
-        adapter = create_adapter("telegram", token=args.telegram)
+        adapter = createAdapter("telegram", token=args.telegram)
         adapters.append(adapter)
-        t = threading.Thread(target=_run_adapter, args=(adapter,), daemon=True)
+        t = threading.Thread(target=_runAdapter, args=(adapter,), daemon=True)
         t.start()
         print("  Telegram 봇 시작됨")
 
     if getattr(args, "slack", None):
-        app_token = getattr(args, "slack_app_token", None)
-        if not app_token:
+        appToken = getattr(args, "slack_app_token", None)
+        if not appToken:
             print("  Slack은 --slack-app-token 이 필요합니다 (Socket Mode)", file=sys.stderr)
         else:
-            from dartlab.channel.adapters import create_adapter
+            from dartlab.channel.adapters import createAdapter
 
-            adapter = create_adapter("slack", bot_token=args.slack, app_token=app_token)
+            adapter = createAdapter("slack", botToken=args.slack, appToken=appToken)
             adapters.append(adapter)
-            t = threading.Thread(target=_run_adapter, args=(adapter,), daemon=True)
+            t = threading.Thread(target=_runAdapter, args=(adapter,), daemon=True)
             t.start()
             print("  Slack 봇 시작됨")
 
     if getattr(args, "discord", None):
-        from dartlab.channel.adapters import create_adapter
+        from dartlab.channel.adapters import createAdapter
 
-        adapter = create_adapter("discord", token=args.discord)
+        adapter = createAdapter("discord", token=args.discord)
         adapters.append(adapter)
-        t = threading.Thread(target=_run_adapter, args=(adapter,), daemon=True)
+        t = threading.Thread(target=_runAdapter, args=(adapter,), daemon=True)
         t.start()
         print("  Discord 봇 시작됨")
 
     return adapters
 
 
-def _run_adapter(adapter) -> None:
+def _runAdapter(adapter) -> None:
     import asyncio
 
     loop = asyncio.new_event_loop()
@@ -257,38 +257,38 @@ def run(args) -> int:
     # DevTunnels 셋업
     print("\n  Channel 시작 — Microsoft DevTunnels")
     try:
-        from dartlab.channel.devtunnel import DevTunnelSetupError, setup_devtunnel
+        from dartlab.channel.devtunnel import DevTunnelSetupError, setupDevtunnel
     except (ImportError, ModuleNotFoundError) as exc:
         print(f"\n  DevTunnel 모듈 로드 실패: {exc}", file=sys.stderr)
         return 1
 
     try:
-        tunnel_url, host_proc = setup_devtunnel(port=port, auto_yes=args.yes)
+        tunnelUrl, host_proc = setupDevtunnel(port=port, autoYes=args.yes)
     except DevTunnelSetupError as exc:
         print(f"\n  DevTunnels 셋업 실패: {exc}", file=sys.stderr)
         return 1
 
-    print(f"\n  ✓ Channel 활성: {tunnel_url}")
+    print(f"\n  ✓ Channel 활성: {tunnelUrl}")
 
     # 포트 확보
-    from dartlab.server import ensure_port
+    from dartlab.server import ensurePort
 
-    status = ensure_port(port)
+    status = ensurePort(port)
     if status == "failed":
         return 1
 
     # ── 접속 정보 출력 ──
-    has_qr = _ensure_qrcode()
-    _print_channel_info(tunnel_url=tunnel_url, has_qr=has_qr)
+    hasQr = _ensureQrcode()
+    _printChannelInfo(tunnelUrl=tunnelUrl, hasQr=hasQr)
 
     # 메시징 어댑터 시작 (백그라운드)
-    adapters = _start_messaging_adapters(args)
+    adapters = _startMessagingAdapters(args)
 
     # 서버 시작 (미들웨어 비활성 — DARTLAB_TUNNEL 안 켬)
-    from dartlab.server import run_server
+    from dartlab.server import runServer
 
     try:
-        run_server(host=host, port=port)
+        runServer(host=host, port=port)
     except KeyboardInterrupt:
         pass
     finally:

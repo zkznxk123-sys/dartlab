@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 from dartlab.gather.types import MarketSnapshot
 
-from .types import AnalystReport, ValuationMethod, _classify_opinion
+from .types import AnalystReport, ValuationMethod, _classifyOpinion
 
 log = logging.getLogger(__name__)
 
@@ -26,15 +26,15 @@ DEFAULT_WEIGHTS: dict[str, float] = {
 
 def synthesize(
     *,
-    dcf_target: float | None = None,
-    dcf_confidence: float = 0.5,
+    dcfTarget: float | None = None,
+    dcfConfidence: float = 0.5,
     market: MarketSnapshot | None = None,
-    company_financials: dict | None = None,
+    companyFinancials: dict | None = None,
     shares: int = 0,
-    current_price: float = 0.0,
-    company_name: str = "",
-    stock_code: str = "",
-    custom_weights: dict[str, float] | None = None,
+    currentPrice: float = 0.0,
+    companyName: str = "",
+    stockCode: str = "",
+    customWeights: dict[str, float] | None = None,
 ) -> AnalystReport:
     """복수 밸류에이션 → 가중평균 목표가 + 종합 의견.
 
@@ -55,16 +55,16 @@ def synthesize(
     methods: list[ValuationMethod] = []
     reasoning: list[str] = []
     warnings: list[str] = []
-    weights = dict(custom_weights or DEFAULT_WEIGHTS)
+    weights = dict(customWeights or DEFAULT_WEIGHTS)
 
     # ── 1. DCF 밸류에이션 ──
-    if dcf_target and dcf_target > 0:
+    if dcfTarget and dcfTarget > 0:
         methods.append(
             ValuationMethod(
                 name="dcf",
-                value=dcf_target,
+                value=dcfTarget,
                 weight=weights.get("dcf", 0.30),
-                confidence=dcf_confidence,
+                confidence=dcfConfidence,
                 reasoning="자체 DCF 엔진 (MC 시뮬레이션 + 시나리오 가중)",
             )
         )
@@ -76,21 +76,21 @@ def synthesize(
             warnings.append("DCF 결과 미가용 — 가중치 재배분")
 
     # ── 2. 컨센서스 밸류에이션 ──
-    consensus_target = _extract_consensus(market, weights, methods, reasoning, warnings)
+    consensus_target = _extractConsensus(market, weights, methods, reasoning, warnings)
 
     # ── 3. 피어 멀티플 밸류에이션 ──
-    _extract_peer_multiple(market, company_financials, shares, weights, methods, reasoning, warnings)
+    _extractPeerMultiple(market, companyFinancials, shares, weights, methods, reasoning, warnings)
 
     # ── 4. 상대가치 (역사적 밴드) ──
-    _extract_relative(market, company_financials, weights, methods, reasoning, warnings)
+    _extractRelative(market, companyFinancials, weights, methods, reasoning, warnings)
 
     # ── 가중평균 계산 ──
     if not methods:
         warnings.append("사용 가능한 밸류에이션 방법이 없습니다")
         return AnalystReport(
-            stock_code=stock_code,
-            company_name=company_name,
-            current_price=current_price,
+            stockCode=stockCode,
+            companyName=companyName,
+            currentPrice=currentPrice,
             warnings=warnings,
             generated_at=datetime.now(timezone.utc).isoformat(),
         )
@@ -109,18 +109,18 @@ def synthesize(
 
     # 업사이드
     upside = 0.0
-    if current_price > 0:
-        upside = (target_price - current_price) / current_price
+    if currentPrice > 0:
+        upside = (target_price - currentPrice) / currentPrice
 
     # 투자의견
-    opinion = _classify_opinion(upside)
+    opinion = _classifyOpinion(upside)
 
     # DCF-컨센서스 괴리 체크
-    if dcf_target and consensus_target and dcf_target > 0 and consensus_target > 0:
-        gap = abs(dcf_target - consensus_target) / max(dcf_target, consensus_target)
+    if dcfTarget and consensus_target and dcfTarget > 0 and consensus_target > 0:
+        gap = abs(dcfTarget - consensus_target) / max(dcfTarget, consensus_target)
         if gap > 0.5:
             reasoning.append(
-                f"DCF({dcf_target:,.0f})와 컨센서스({consensus_target:,.0f}) 괴리 {gap:.0%} — DCF 가중치 하향 적용"
+                f"DCF({dcfTarget:,.0f})와 컨센서스({consensus_target:,.0f}) 괴리 {gap:.0%} — DCF 가중치 하향 적용"
             )
             # DCF 가중치 ×0.7 재조정
             for m in methods:
@@ -132,9 +132,9 @@ def synthesize(
                 for m in methods:
                     m.weight /= total_weight
             target_price = sum(m.value * m.weight for m in methods)
-            if current_price > 0:
-                upside = (target_price - current_price) / current_price
-            opinion = _classify_opinion(upside)
+            if currentPrice > 0:
+                upside = (target_price - currentPrice) / currentPrice
+            opinion = _classifyOpinion(upside)
 
     # 판단 근거 생성
     reasoning.append(
@@ -142,10 +142,10 @@ def synthesize(
     )
 
     return AnalystReport(
-        stock_code=stock_code,
-        company_name=company_name,
+        stockCode=stockCode,
+        companyName=companyName,
         target_price=target_price,
-        current_price=current_price,
+        currentPrice=currentPrice,
         upside=upside,
         opinion=opinion,
         methods=methods,
@@ -170,7 +170,7 @@ def _redistribute(weights: dict[str, float], removed: float) -> None:
         weights[k] += removed * (weights[k] / total)
 
 
-def _extract_consensus(
+def _extractConsensus(
     market: MarketSnapshot | None,
     weights: dict[str, float],
     methods: list[ValuationMethod],
@@ -215,7 +215,7 @@ def _extract_consensus(
     return c.target_price
 
 
-def _extract_peer_multiple(
+def _extractPeerMultiple(
     market: MarketSnapshot | None,
     financials: dict | None,
     shares: int,
@@ -255,7 +255,7 @@ def _extract_peer_multiple(
     reasoning.append(f"피어 멀티플 목표가 {peer_target:,.0f}원 (업종PER {sector_per:.1f}×EPS {eps:,.0f})")
 
 
-def _extract_relative(
+def _extractRelative(
     market: MarketSnapshot | None,
     financials: dict | None,
     weights: dict[str, float],

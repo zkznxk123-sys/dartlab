@@ -596,7 +596,7 @@ DFAST_SCENARIOS: dict[str, dict] = {
 # ══════════════════════════════════════
 
 
-def get_scenario(name: str, *, severity: str | None = None, market: str = "US") -> dict | None:
+def getScenario(name: str, *, severity: str | None = None, market: str = "US") -> dict | None:
     """시나리오 이름으로 프리셋 조회.
 
     역사적 재현 → DFAST → 현대적 리스크 → 구조적 → 유형별 → 한국 특화
@@ -706,7 +706,7 @@ def get_scenario(name: str, *, severity: str | None = None, market: str = "US") 
         combined_overrides: dict = {}
         descriptions: list[str] = []
         for part in parts:
-            sub = get_scenario(part, severity=severity, market=market)
+            sub = getScenario(part, severity=severity, market=market)
             if sub:
                 combined_overrides.update(sub["overrides"])
                 descriptions.append(sub.get("description", part))
@@ -721,7 +721,7 @@ def get_scenario(name: str, *, severity: str | None = None, market: str = "US") 
     return None
 
 
-def list_all_scenarios(market: str = "US") -> list[dict]:
+def listAllScenarios(market: str = "US") -> list[dict]:
     """모든 시나리오 목록.
 
     역사적 재현, DFAST, 유형별, 현대적 리스크, 구조적, 한국 특화

@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import polars as pl
 
-from .presets import list_all_scenarios
+from .presets import listAllScenarios
 
 
-def scenario_guide(market: str = "US") -> pl.DataFrame:
+def scenarioGuide(market: str = "US") -> pl.DataFrame:
     """사용 가능한 시나리오 목록 DataFrame.
 
     ``dartlab.macro("시나리오")`` 무인자 호출 시 반환.
@@ -26,7 +26,7 @@ def scenario_guide(market: str = "US") -> pl.DataFrame:
         severity : str — 심각도 (mild/moderate/severe/extreme)
         description : str — 시나리오 설명
     """
-    items = list_all_scenarios(market=market)
+    items = listAllScenarios(market=market)
     if not items:
         return pl.DataFrame(
             schema={"name": pl.Utf8, "category": pl.Utf8, "type": pl.Utf8, "severity": pl.Utf8, "description": pl.Utf8}

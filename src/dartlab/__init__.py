@@ -583,28 +583,28 @@ def setup(provider: str | None = None):
         dartlab.setup("ollama")      # Ollama 설치 안내
     """
     from dartlab.ai.settings.aiSetup import (
-        providers_status,
-        resolve_alias,
+        providersStatus,
+        resolveAlias,
     )
 
     if provider is None:
-        print(providers_status())
+        print(providersStatus())
         return
 
-    provider = resolve_alias(provider)
+    provider = resolveAlias(provider)
 
     if provider == "oauth-codex":
-        _setup_oauth_interactive()
+        _setupOauthInteractive()
     else:
-        _setup_apikey_interactive(provider)
+        _setupApikeyInteractive(provider)
 
 
-def _setup_oauth_interactive():
+def _setupOauthInteractive():
     """노트북/CLI에서 ChatGPT OAuth 브라우저 로그인."""
     try:
-        from dartlab.ai.providers.support.oauthToken import is_authenticated
+        from dartlab.ai.providers.support.oauthToken import isAuthenticated
 
-        if is_authenticated():
+        if isAuthenticated():
             print("\n  ✓ ChatGPT OAuth 이미 인증되어 있습니다.")
             print('  재인증: dartlab.setup("chatgpt")  # 재실행하면 갱신\n')
             return
@@ -612,15 +612,15 @@ def _setup_oauth_interactive():
         pass
 
     try:
-        from dartlab.cli.commands.setup import _do_oauth_login
+        from dartlab.cli.commands.setup import _doOauthLogin
 
-        _do_oauth_login()
+        _doOauthLogin()
     except ImportError:
         print("\n  ChatGPT OAuth 브라우저 로그인:")
         print("  CLI에서 실행: dartlab setup oauth-codex\n")
 
 
-def _setup_apikey_interactive(provider: str):
+def _setupApikeyInteractive(provider: str):
     """API 키 기반 provider 인터랙티브 설정."""
     from dartlab.ai.settings.providerCatalog import _PROVIDERS
 
@@ -640,7 +640,7 @@ def _setup_apikey_interactive(provider: str):
     )
 
 
-def _auto_stream(gen) -> str:
+def _autoStream(gen) -> str:
     """Generator를 소비하면서 stdout에 스트리밍 출력, 전체 텍스트 반환."""
     import sys
 
@@ -729,7 +729,7 @@ def ask(
         return _ask(question, stream=False, **_call_kwargs)
 
     gen = _ask(question, stream=True, **_call_kwargs)
-    return _auto_stream(gen)
+    return _autoStream(gen)
 
 
 def templates(name: str | None = None):
@@ -792,10 +792,10 @@ def plugins():
         import dartlab
         dartlab.plugins()  # [PluginMeta(name="esg-scores", ...)]
     """
-    from dartlab.plugins import discover, get_loaded_plugins
+    from dartlab.plugins import discover, getLoadedPlugins
 
     discover()
-    return get_loaded_plugins()
+    return getLoadedPlugins()
 
 
 def reloadPlugins():

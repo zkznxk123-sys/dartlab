@@ -16,20 +16,20 @@ from dartlab.story.blocks import TextBlock
 from dartlab.story.section import Section
 
 from .builders import (
-    build_causation_blocks,
-    build_dashboard_blocks,
-    build_outlook_blocks,
-    build_phase_blocks,
+    buildCausationBlocks,
+    buildDashboardBlocks,
+    buildOutlookBlocks,
+    buildPhaseBlocks,
 )
 from .catalog import SECTIONS
 from .narrative import (
-    generate_act_transition,
-    generate_circulation_summary,
-    narrate_overall_story,
+    generateActTransition,
+    generateCirculationSummary,
+    narrateOverallStory,
 )
 
 
-def _detect_template(summary: dict) -> str:
+def _detectTemplate(summary: dict) -> str:
     """상황별 템플릿 결정."""
     market = summary.get("market", "US")
     if market == "KR":
@@ -46,7 +46,7 @@ def _detect_template(summary: dict) -> str:
 def macroReport(
     *,
     market: str = "US",
-    as_of: str | None = None,
+    asOf: str | None = None,
     fmt: str | None = "rich",
 ):
     """경제분석 보고서 — 6막 인과 서사.
@@ -59,10 +59,10 @@ def macroReport(
     Returns:
         str (fmt 지정 시) 또는 Story 객체
     """
-    from dartlab.macro.summary import analyze_summary
+    from dartlab.macro.summary import analyzeSummary
 
-    summary = analyze_summary(market=market, as_of=as_of)
-    template = _detect_template(summary)
+    summary = analyzeSummary(market=market, asOf=asOf)
+    template = _detectTemplate(summary)
 
     meta = {s.key: s for s in SECTIONS}
     sections = []
@@ -74,7 +74,7 @@ def macroReport(
             key=m.key,
             partId=m.partId,
             title=m.title,
-            blocks=build_dashboard_blocks(summary),
+            blocks=buildDashboardBlocks(summary),
             helper=m.helper,
             aiGuide=m.aiGuide,
         )
@@ -83,8 +83,8 @@ def macroReport(
     # ── 1막: 경제는 어디에 있나 (cycle + inventory) ──
     # 기존 build_phase_blocks에서 cycle + inventory 부분 사용
     m = meta["phase"]
-    phase_blocks = build_phase_blocks(summary)
-    t1 = generate_act_transition(1, summary)
+    phase_blocks = buildPhaseBlocks(summary)
+    t1 = generateActTransition(1, summary)
     if t1:
         phase_blocks.append(TextBlock(t1, style="transition"))
     sections.append(
@@ -101,8 +101,8 @@ def macroReport(
     # ── 2막: 왜 여기에 있나 (corporate + trade) ──
     # 기존 build_causation_blocks에서 corporate + trade 부분
     m = meta["causation"]
-    causation_blocks = build_causation_blocks(summary)
-    t2 = generate_act_transition(2, summary)
+    causation_blocks = buildCausationBlocks(summary)
+    t2 = generateActTransition(2, summary)
     if t2:
         causation_blocks.append(TextBlock(t2, style="transition"))
     sections.append(
@@ -120,7 +120,7 @@ def macroReport(
     # rates 블록은 현재 build_phase_blocks 안에 포함되어 있음
     # 6막 전면 분리는 다음 단계 — 현재는 M3에 빈 섹션 추가 방지
     m = meta["policy"]
-    t3 = generate_act_transition(3, summary)
+    t3 = generateActTransition(3, summary)
     policy_blocks = []
     if t3:
         policy_blocks.append(TextBlock(t3, style="transition"))
@@ -138,7 +138,7 @@ def macroReport(
     # ── 4막: 금융 시스템은 괜찮나 (liquidity + crisis) ──
     # 기존 build_causation_blocks에 이미 포함
     m = meta["financial"]
-    t4 = generate_act_transition(4, summary)
+    t4 = generateActTransition(4, summary)
     financial_blocks = []
     if t4:
         financial_blocks.append(TextBlock(t4, style="transition"))
@@ -155,7 +155,7 @@ def macroReport(
 
     # ── 5막: 시장은 어떻게 반응하나 (assets + sentiment) ──
     m = meta["market"]
-    t5 = generate_act_transition(5, summary)
+    t5 = generateActTransition(5, summary)
     market_blocks = []
     if t5:
         market_blocks.append(TextBlock(t5, style="transition"))
@@ -172,7 +172,7 @@ def macroReport(
 
     # ── 6막: 앞으로 어떻게 되나 (forecast + scenario) ──
     m = meta["outlook"]
-    outlook_blocks = build_outlook_blocks(summary)
+    outlook_blocks = buildOutlookBlocks(summary)
     sections.append(
         Section(
             key=m.key,
@@ -191,7 +191,7 @@ def macroReport(
         stockCode="MACRO",
         corpName=f"{market} 경제",
         sections=sections,
-        circulationSummary=narrate_overall_story(summary) or generate_circulation_summary(summary, template),
+        circulationSummary=narrateOverallStory(summary) or generateCirculationSummary(summary, template),
     )
 
     if fmt is None:

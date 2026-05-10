@@ -70,7 +70,7 @@ class RecessionDashboard:
 # ══════════════════════════════════════
 
 
-def _one_sided_hp_trend(series: list[float], lamb: float = 400_000.0) -> list[float]:
+def _oneSidedHpTrend(series: list[float], lamb: float = 400_000.0) -> list[float]:
     """단측 HP 필터 (재귀적, numpy 불필요).
 
     BIS 기준 lambda=400,000 (분기 데이터).
@@ -111,7 +111,7 @@ def creditToGDPGap(creditGDPSeries: list[float]) -> CreditGapResult:
             description="Credit-to-GDP 시계열 데이터 부족",
         )
 
-    trend_series = _one_sided_hp_trend(creditGDPSeries, lamb=400_000.0)
+    trend_series = _oneSidedHpTrend(creditGDPSeries, lamb=400_000.0)
     actual = creditGDPSeries[-1]
     trend = trend_series[-1]
     gap = actual - trend
@@ -556,28 +556,28 @@ def fisherDebtDeflation(
         cpiYoy: CPI 전년대비 변화율 (%)
         nplRate: 부실대출비율 (%)
     """
-    risk_score = 0
+    riskScore = 0
 
     if dsr > 14:
-        risk_score += 2  # 역사적 고수준
+        riskScore += 2  # 역사적 고수준
     elif dsr > 11:
-        risk_score += 1
+        riskScore += 1
 
     if cpiYoy < 0:
-        risk_score += 3  # 디플레이션
+        riskScore += 3  # 디플레이션
     elif cpiYoy < 1:
-        risk_score += 1  # 준디플레
+        riskScore += 1  # 준디플레
 
     if nplRate is not None:
         if nplRate > 5:
-            risk_score += 2
+            riskScore += 2
         elif nplRate > 2:
-            risk_score += 1
+            riskScore += 1
 
-    if risk_score >= 4:
+    if riskScore >= 4:
         risk, risk_label = "high", "높음"
         desc = f"DSR {dsr:.1f}% + CPI {cpiYoy:.1f}% — 부채 디플레이션 악순환 위험"
-    elif risk_score >= 2:
+    elif riskScore >= 2:
         risk, risk_label = "moderate", "보통"
         desc = f"DSR {dsr:.1f}% + CPI {cpiYoy:.1f}% — 부분적 디플레이션 압력"
     else:

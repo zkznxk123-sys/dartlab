@@ -39,12 +39,12 @@ _RE_SENTENCE_LIKE = re.compile(
 _MAX_HEADING_LEN = 65
 
 
-def _is_heading(
+def _isHeading(
     line: str,
     *,
-    prev_blank: bool,
-    next_blank: bool,
-    next_line: str | None = None,
+    prevBlank: bool,
+    nextBlank: bool,
+    nextLine: str | None = None,
 ) -> tuple[bool, int]:
     """라인이 heading인지 감지. (is_heading, level) 반환."""
     stripped = line.strip()
@@ -61,7 +61,7 @@ def _is_heading(
         return False, 0
 
     # 다음 라인이 긴 본문이면 heading 확률 높음
-    next_is_body = next_line is not None and len(next_line.strip()) > _MAX_HEADING_LEN
+    next_is_body = nextLine is not None and len(nextLine.strip()) > _MAX_HEADING_LEN
 
     # ALL CAPS → level 1
     if _RE_ALL_CAPS_HEADING.fullmatch(stripped):
@@ -72,7 +72,7 @@ def _is_heading(
         return True, 2
 
     # 짧은 단독 라인 (25자 이하) + 대문자 시작 + 다음 라인이 본문
-    if len(stripped) <= 25 and stripped[0].isupper() and (next_is_body or next_blank):
+    if len(stripped) <= 25 and stripped[0].isupper() and (next_is_body or nextBlank):
         return True, 2
 
     return False, 0
@@ -103,15 +103,15 @@ def parseTextStructure(
         if _RE_PAGE_MARKER.fullmatch(stripped):
             continue
 
-        prev_blank = i == 0 or not lines[i - 1].strip()
-        next_blank = i == len(lines) - 1 or (not lines[i + 1].strip() if i + 1 < len(lines) else True)
-        next_line = lines[i + 1] if i + 1 < len(lines) else None
+        prevBlank = i == 0 or not lines[i - 1].strip()
+        nextBlank = i == len(lines) - 1 or (not lines[i + 1].strip() if i + 1 < len(lines) else True)
+        nextLine = lines[i + 1] if i + 1 < len(lines) else None
 
-        is_heading, level = _is_heading(
+        is_heading, level = _isHeading(
             line,
-            prev_blank=prev_blank,
-            next_blank=next_blank,
-            next_line=next_line,
+            prevBlank=prevBlank,
+            nextBlank=nextBlank,
+            nextLine=nextLine,
         )
 
         if is_heading:

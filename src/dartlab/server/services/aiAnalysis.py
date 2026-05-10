@@ -7,12 +7,12 @@ import json
 from fastapi import HTTPException
 
 from dartlab import Company
-from dartlab.server.chat import build_topic_summary_question
+from dartlab.server.chat import buildTopicSummaryQuestion
 from dartlab.server.models import AskRequest
-from dartlab.server.streaming import AnalysisStreamError, collect_analysis_result, stream_analysis
+from dartlab.server.streaming import AnalysisStreamError, collectAnalysisResult, streamAnalysis
 
 
-def build_topic_summary_view_context(company: Company, topic: str) -> dict:
+def buildTopicSummaryViewContext(company: Company, topic: str) -> dict:
     """topic 요약용 뷰 컨텍스트를 구성한다."""
     return {
         "type": "viewer",
@@ -26,7 +26,7 @@ def build_topic_summary_view_context(company: Company, topic: str) -> dict:
     }
 
 
-async def stream_topic_summary(
+async def streamTopicSummary(
     company: Company,
     topic: str,
     *,
@@ -35,8 +35,8 @@ async def stream_topic_summary(
 ):
     """topic 요약을 SSE 스트리밍으로 생성한다."""
     try:
-        async for event in stream_analysis(
-            build_topic_summary_question(topic),
+        async for event in streamAnalysis(
+            buildTopicSummaryQuestion(topic),
             role="summary",
             use_tools=False,
             validate=False,
@@ -44,7 +44,7 @@ async def stream_topic_summary(
             emit_system_prompt=False,
             auto_snapshot=False,
             auto_diff=False,
-            view_context=build_topic_summary_view_context(company, topic),
+            view_context=buildTopicSummaryViewContext(company, topic),
         ):
             yield event
     except AnalysisStreamError as e:
@@ -56,14 +56,14 @@ async def stream_topic_summary(
     yield {"event": "done", "data": "{}"}
 
 
-async def run_plain_chat(req: AskRequest) -> dict:
+async def runPlainChat(req: AskRequest) -> dict:
     """회사 컨텍스트 없이 일반 AI 채팅을 실행한다."""
     try:
         hintCode = req.company
         if not hintCode and req.viewContext and req.viewContext.company:
             vc = req.viewContext.company
             hintCode = vc.stockCode or vc.corpName or vc.company
-        result = await collect_analysis_result(
+        result = await collectAnalysisResult(
             req.question,
             role=req.role or "summary",
             stockCode=hintCode,

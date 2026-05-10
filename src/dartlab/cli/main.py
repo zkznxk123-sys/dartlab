@@ -6,12 +6,12 @@ import io
 import sys
 
 from dartlab.cli.context import EXIT_INTERRUPTED, EXIT_OK, EXIT_RUNTIME, EXIT_USAGE
-from dartlab.cli.parser import build_parser
+from dartlab.cli.parser import buildParser
 from dartlab.cli.services.errors import CLIError
-from dartlab.cli.services.output import print_error, print_warning
+from dartlab.cli.services.output import printError, printWarning
 
 
-def _ensure_utf8() -> None:
+def _ensureUtf8() -> None:
     """Force UTF-8 console output on Windows cp949 shells."""
     if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
@@ -29,7 +29,7 @@ def _looksLikeCompany(token: str) -> bool:
 
 def main(argv: list[str] | None = None) -> int:
     """CLI 메인 함수 -- 인자 파싱 후 서브커맨드 실행."""
-    _ensure_utf8()
+    _ensureUtf8()
 
     raw = argv if argv is not None else sys.argv[1:]
 
@@ -38,13 +38,13 @@ def main(argv: list[str] | None = None) -> int:
     if raw and _looksLikeCompany(raw[0]):
         raw = ["story"] + raw
 
-    parser = build_parser()
+    parser = buildParser()
     try:
         args = parser.parse_args(raw)
     except SystemExit as exc:
         if exc.code in (0, None):
             raise
-        print_error(str(exc))
+        printError(str(exc))
         return EXIT_USAGE
 
     handler = getattr(args, "handler", None)
@@ -55,10 +55,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return int(handler(args) or EXIT_OK)
     except CLIError as exc:
-        print_error(str(exc))
-        return exc.exit_code
+        printError(str(exc))
+        return exc.exitCode
     except KeyboardInterrupt:
-        print_warning("사용자가 작업을 중단했습니다.")
+        printWarning("사용자가 작업을 중단했습니다.")
         return EXIT_INTERRUPTED
     except BrokenPipeError:
         return EXIT_OK
@@ -66,9 +66,9 @@ def main(argv: list[str] | None = None) -> int:
         try:
             from dartlab.cli.services.errors import wrapError
 
-            print_error(wrapError(exc))
+            printError(wrapError(exc))
         except ImportError:
-            print_error(f"예상하지 못한 오류가 발생했습니다: {exc}")
+            printError(f"예상하지 못한 오류가 발생했습니다: {exc}")
         return EXIT_RUNTIME
 
 

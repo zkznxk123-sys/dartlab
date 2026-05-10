@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 
 
-def _stdio_server_config() -> dict:
+def _stdioServerConfig() -> dict:
     """uv tool install / pipx install 가 만든 entry point (`dartlab` / `dartlab.exe`) 직접 호출.
 
     이슈 #28 follow-up: Microsoft Store Python 환경에선 `python` 이 PATH 의 App Execution
@@ -23,7 +23,7 @@ def _stdio_server_config() -> dict:
     }
 
 
-def _stdio_server_config_python_fallback() -> dict:
+def _stdioServerConfigPythonFallback() -> dict:
     """python -m fallback. uv tool / pipx 미설치 환경 + python 이 PATH stub 아닐 때만."""
     return {
         "mcpServers": {
@@ -36,7 +36,7 @@ def _stdio_server_config_python_fallback() -> dict:
     }
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """mcp 서브커맨드 등록 — MCP 서버 stdio 실행."""
     parser = subparsers.add_parser("mcp", help="MCP 서버 실행 (stdio)")
     parser.add_argument(
@@ -52,12 +52,12 @@ def configure_parser(subparsers) -> None:
     parser.set_defaults(handler=_run)
 
 
-def _print_config(client: str) -> None:
+def _printConfig(client: str) -> None:
     """MCP 클라이언트 설정 예시 출력."""
     import json
 
-    primary = _stdio_server_config()
-    fallback = _stdio_server_config_python_fallback()
+    primary = _stdioServerConfig()
+    fallback = _stdioServerConfigPythonFallback()
     note = (
         "# 사전 설치 필요: uv tool install dartlab   (또는: pipx install dartlab)\n"
         "# 이 형식은 .local/bin/dartlab(.exe) entry point 를 직접 호출하므로 spawn 이 안전합니다.\n"
@@ -107,7 +107,7 @@ def _print_config(client: str) -> None:
 def _run(args) -> None:
     """설정 출력, 자동 설치, 또는 MCP stdio 서버를 시작한다."""
     if args.config:
-        _print_config(args.config)
+        _printConfig(args.config)
         return
 
     if args.install:
@@ -117,6 +117,6 @@ def _run(args) -> None:
         print(result)
         return
 
-    from dartlab.mcp import run_stdio
+    from dartlab.mcp import runStdio
 
-    run_stdio()
+    runStdio()

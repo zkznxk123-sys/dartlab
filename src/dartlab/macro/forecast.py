@@ -16,7 +16,7 @@ from dartlab.macro.nowcast import gdpNowcast
 from dartlab.macro.regimeSwitching import clevelandProbit, conferenceBoardLEI, hamiltonRegime, sahmRule
 
 
-def _fetch_forecast_data(market: str, as_of: str | None = None) -> dict[str, float | list | None]:
+def _fetchForecastData(market: str, asOf: str | None = None) -> dict[str, float | list | None]:
     """gather에서 LEI 구성요소 + 프로빗 입력 수집.
 
     Parameters
@@ -51,9 +51,9 @@ def _fetch_forecast_data(market: str, as_of: str | None = None) -> dict[str, flo
             cli_lag : float — 경기후행지수 (pt)
             *_prev : float — 각 지표의 전기값
     """
-    from dartlab.macro._helpers import fetch_with_history, get_gather
+    from dartlab.macro._helpers import fetchWithHistory, getGather
 
-    g = get_gather(as_of)
+    g = getGather(asOf)
     data: dict[str, float | list | None] = {}
 
     if market.upper() == "US":
@@ -71,7 +71,7 @@ def _fetch_forecast_data(market: str, as_of: str | None = None) -> dict[str, flo
             ("fedfunds", "FEDFUNDS"),
             ("dgs10", "DGS10"),
         ]:
-            hist = fetch_with_history(g, sid)
+            hist = fetchWithHistory(g, sid)
             if "current" in hist:
                 data[label] = hist["current"]
             if "prev" in hist:
@@ -81,7 +81,7 @@ def _fetch_forecast_data(market: str, as_of: str | None = None) -> dict[str, flo
 
     elif market.upper() == "KR":
         for label, sid in [("cli", "CLI"), ("cci", "CCI"), ("cli_lag", "CLI_LAG")]:
-            hist = fetch_with_history(g, sid)
+            hist = fetchWithHistory(g, sid)
             if "current" in hist:
                 data[label] = hist["current"]
             if "prev" in hist:
@@ -92,7 +92,7 @@ def _fetch_forecast_data(market: str, as_of: str | None = None) -> dict[str, flo
     return data
 
 
-def _pct_change(current: float | None, prev: float | None) -> float | None:
+def _pctChange(current: float | None, prev: float | None) -> float | None:
     """전기대비 변화율 계산.
 
     Parameters
@@ -112,7 +112,7 @@ def _pct_change(current: float | None, prev: float | None) -> float | None:
     return ((current - prev) / abs(prev)) * 100
 
 
-def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
+def analyzeForecast(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """경제 예측 종합 분석.
 
     LEI 복제, Cleveland Fed 프로빗 침체확률, Sahm Rule,
@@ -168,11 +168,11 @@ def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides:
             description : str — 해설
         timeseries : dict — 주요 시계열 (t10y3m, sp500, permit 등)
     """
-    data = _fetch_forecast_data(market, as_of=as_of)
+    data = _fetchForecastData(market, asOf=asOf)
     if overrides:
-        from dartlab.macro._helpers import apply_overrides
+        from dartlab.macro._helpers import applyOverrides
 
-        data = apply_overrides(data, overrides)
+        data = applyOverrides(data, overrides)
     result: dict = {"market": market.upper()}
 
     if market.upper() == "US":
@@ -196,27 +196,27 @@ def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides:
         # 각 구성요소 변화율 계산
         awhman = data.get("awhman")
         awhman_prev = data.get("awhman_prev")
-        components["avg_weekly_hours"] = _pct_change(awhman, awhman_prev)
+        components["avg_weekly_hours"] = _pctChange(awhman, awhman_prev)
 
         icsa = data.get("icsa")
         icsa_prev = data.get("icsa_prev")
         if icsa is not None and icsa_prev is not None and icsa_prev > 0:
-            components["initial_claims"] = -_pct_change(icsa, icsa_prev)  # 역수
+            components["initial_claims"] = -_pctChange(icsa, icsa_prev)  # 역수
         else:
             components["initial_claims"] = None
 
-        components["new_orders_consumer"] = _pct_change(data.get("acogno"), data.get("acogno_prev"))
+        components["new_orders_consumer"] = _pctChange(data.get("acogno"), data.get("acogno_prev"))
 
         # ISM 신규수주: 50 기준 편차
         napmnoi = data.get("napmnoi")
         components["ism_new_orders"] = napmnoi - 50 if napmnoi is not None else None
 
-        components["new_orders_nondefense_cap"] = _pct_change(data.get("acdgno"), data.get("acdgno_prev"))
-        components["building_permits"] = _pct_change(data.get("permit"), data.get("permit_prev"))
-        components["sp500"] = _pct_change(data.get("sp500"), data.get("sp500_prev"))
+        components["new_orders_nondefense_cap"] = _pctChange(data.get("acdgno"), data.get("acdgno_prev"))
+        components["building_permits"] = _pctChange(data.get("permit"), data.get("permit_prev"))
+        components["sp500"] = _pctChange(data.get("sp500"), data.get("sp500_prev"))
 
         # leading credit: 간소화 (M2 실질 변화율로 근사)
-        components["leading_credit"] = _pct_change(data.get("m2real"), data.get("m2real_prev"))
+        components["leading_credit"] = _pctChange(data.get("m2real"), data.get("m2real_prev"))
 
         # term spread: 10Y - FF 수준
         dgs10 = data.get("dgs10")
@@ -226,7 +226,7 @@ def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides:
         else:
             components["term_spread"] = None
 
-        components["consumer_expectations"] = _pct_change(data.get("umcsent"), data.get("umcsent_prev"))
+        components["consumer_expectations"] = _pctChange(data.get("umcsent"), data.get("umcsent_prev"))
 
         lei = conferenceBoardLEI(components)
         result["lei"] = {
@@ -284,12 +284,12 @@ def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides:
         result["lei"] = kr_forecast if kr_forecast else None
 
     # ── Sahm Rule ──
-    from dartlab.macro._helpers import collect_timeseries, fetch_series_list, get_gather
+    from dartlab.macro._helpers import collectTimeseries, fetchSeriesList, getGather
 
-    g = get_gather(as_of)
+    g = getGather(asOf)
     result["sahmRule"] = None
     if market.upper() == "US":
-        ur_vals = fetch_series_list(g, "UNRATE")
+        ur_vals = fetchSeriesList(g, "UNRATE")
         if ur_vals and len(ur_vals) >= 15:
             sr = sahmRule(ur_vals)
             result["sahmRule"] = {
@@ -303,7 +303,7 @@ def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides:
     # ── Hamilton Regime Switching ──
     result["hamiltonRegime"] = None
     gdp_id = "A191RL1Q225SBEA" if market.upper() == "US" else "GROWTH"
-    gdp_vals = fetch_series_list(g, gdp_id)
+    gdp_vals = fetchSeriesList(g, gdp_id)
     if gdp_vals and len(gdp_vals) >= 20:
         try:
             hr = hamiltonRegime(gdp_vals, maxIter=50)
@@ -329,7 +329,7 @@ def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides:
     result["nowcast"] = None
     if market.upper() == "US":
         indicator_ids = ["INDPRO", "PAYEMS", "RSAFS", "ICSA", "PERMIT", "SP500"]
-        series_list = [fetch_series_list(g, sid) for sid in indicator_ids]
+        series_list = [fetchSeriesList(g, sid) for sid in indicator_ids]
         valid = [s for s in series_list if s is not None]
         if len(valid) == len(indicator_ids):
             min_len = min(len(s) for s in valid)
@@ -346,8 +346,8 @@ def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides:
 
     # 시계열
     if market.upper() == "US":
-        result["timeseries"] = collect_timeseries(g, {"t10y3m": "T10Y3M", "sp500": "SP500", "permit": "PERMIT"})
+        result["timeseries"] = collectTimeseries(g, {"t10y3m": "T10Y3M", "sp500": "SP500", "permit": "PERMIT"})
     else:
-        result["timeseries"] = collect_timeseries(g, {"cli": "CLI", "cci": "CCI"})
+        result["timeseries"] = collectTimeseries(g, {"cli": "CLI", "cci": "CCI"})
 
     return result

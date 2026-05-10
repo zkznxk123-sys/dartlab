@@ -14,23 +14,23 @@ _log = getLogger(__name__)
 
 
 from dartlab.scan.governance.scanner import (
-    scan_audit_opinion,
-    scan_major_holder_pct,
-    scan_minority_holder,
-    scan_outside_directors,
-    scan_pay_ratio,
+    scanAuditOpinion,
+    scanMajorHolderPct,
+    scanMinorityHolder,
+    scanOutsideDirectors,
+    scanPayRatio,
 )
 from dartlab.scan.governance.scorer import (
     grade,
-    score_audit,
-    score_minority,
-    score_outside_ratio,
-    score_ownership,
-    score_pay_ratio,
+    scoreAudit,
+    scoreMinority,
+    scoreOutsideRatio,
+    scoreOwnership,
+    scorePayRatio,
 )
 
 
-def scan_governance(*, verbose: bool = True) -> pl.DataFrame:
+def scanGovernance(*, verbose: bool = True) -> pl.DataFrame:
     """전체 상장사 거버넌스 스캔 → 종합 등급 DataFrame.
 
     컬럼: 종목코드, 지분율, 사외이사비율, 중도사임, 겸직, pay_ratio,
@@ -43,23 +43,23 @@ def scan_governance(*, verbose: bool = True) -> pl.DataFrame:
             _log.info(msg)
 
     _say("1/5 최대주주 지분율...")
-    holder_map = scan_major_holder_pct()
+    holder_map = scanMajorHolderPct()
     _say(f"  → {len(holder_map)}종목")
 
     _say("2/5 사외이사 비율...")
-    outside_map = scan_outside_directors()
+    outside_map = scanOutsideDirectors()
     _say(f"  → {len(outside_map)}종목")
 
     _say("3/5 pay ratio...")
-    pay_ratio_map = scan_pay_ratio()
+    pay_ratio_map = scanPayRatio()
     _say(f"  → {len(pay_ratio_map)}종목")
 
     _say("4/5 감사의견...")
-    audit_map = scan_audit_opinion()
+    audit_map = scanAuditOpinion()
     _say(f"  → {len(audit_map)}종목")
 
     _say("5/5 소액주주 지분율...")
-    minority_map = scan_minority_holder()
+    minority_map = scanMinorityHolder()
     _say(f"  → {len(minority_map)}종목")
 
     all_codes = set(holder_map) | set(outside_map) | set(pay_ratio_map) | set(audit_map) | set(minority_map)
@@ -75,11 +75,11 @@ def scan_governance(*, verbose: bool = True) -> pl.DataFrame:
         audit = audit_map.get(code)
         minority = minority_map.get(code)
 
-        s1 = score_ownership(ownership)
-        s2 = score_outside_ratio(outside_ratio, resign=resign, concurrent=concurrent)
-        s3 = score_pay_ratio(pay_r)
-        s4 = score_audit(audit)
-        s5 = score_minority(minority)
+        s1 = scoreOwnership(ownership)
+        s2 = scoreOutsideRatio(outside_ratio, resign=resign, concurrent=concurrent)
+        s3 = scorePayRatio(pay_r)
+        s4 = scoreAudit(audit)
+        s5 = scoreMinority(minority)
         total = s1 + s2 + s3 + s4 + s5
         g = grade(total)
         n_valid = sum(1 for v in [ownership, outside_ratio, pay_r, audit, minority] if v is not None)

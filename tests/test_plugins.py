@@ -168,7 +168,7 @@ class TestPluginContext:
 
     def test_add_data_entry(self):
         from dartlab.core.registry import DataEntry, getEntry, unregisterEntry
-        from dartlab.plugins import PluginContext, PluginMeta, reset_for_testing
+        from dartlab.plugins import PluginContext, PluginMeta, resetForTesting
 
         meta = PluginMeta(
             name="test-data-plugin",
@@ -187,15 +187,15 @@ class TestPluginContext:
         )
         ctx = PluginContext()
         try:
-            ctx.add_data_entry(entry, meta=meta)
+            ctx.addDataEntry(entry, meta=meta)
             assert getEntry("__test_ctx_data") is not None
         finally:
             unregisterEntry("__test_ctx_data")
-            reset_for_testing()
+            resetForTesting()
 
     def test_add_tool(self):
         from dartlab.ai.tools import listToolNames, unregisterTool
-        from dartlab.plugins import PluginContext, PluginMeta, reset_for_testing
+        from dartlab.plugins import PluginContext, PluginMeta, resetForTesting
 
         meta = PluginMeta(
             name="test-tool-plugin",
@@ -211,15 +211,15 @@ class TestPluginContext:
 
         ctx = PluginContext()
         try:
-            ctx.add_tool(my_test_tool, meta=meta, name="__test_ctx_tool")
+            ctx.addTool(my_test_tool, meta=meta, name="__test_ctx_tool")
             assert "__test_ctx_tool" in listToolNames()
         finally:
             unregisterTool("__test_ctx_tool")
-            reset_for_testing()
+            resetForTesting()
 
     def test_add_engine(self):
         from dartlab.core.registry import getEntry, unregisterEntry
-        from dartlab.plugins import PluginContext, PluginMeta, reset_for_testing
+        from dartlab.plugins import PluginContext, PluginMeta, resetForTesting
 
         meta = PluginMeta(
             name="test-engine-plugin",
@@ -234,7 +234,7 @@ class TestPluginContext:
 
         ctx = PluginContext()
         try:
-            ctx.add_engine(
+            ctx.addEngine(
                 "__test_ctx_engine",
                 analyze_test,
                 meta=meta,
@@ -246,7 +246,7 @@ class TestPluginContext:
             assert found.category == "plugin"
         finally:
             unregisterEntry("__test_ctx_engine")
-            reset_for_testing()
+            resetForTesting()
 
 
 # ══════════════════════════════════════
@@ -258,27 +258,27 @@ class TestDiscovery:
     """discover() 함수 동작 검증."""
 
     def test_discover_returns_list(self):
-        from dartlab.plugins import discover, reset_for_testing
+        from dartlab.plugins import discover, resetForTesting
 
-        reset_for_testing()
+        resetForTesting()
         result = discover()
         assert isinstance(result, list)
         # 플러그인 미설치 상태에서 빈 리스트
-        reset_for_testing()
+        resetForTesting()
 
     def test_discover_idempotent(self):
-        from dartlab.plugins import discover, reset_for_testing
+        from dartlab.plugins import discover, resetForTesting
 
-        reset_for_testing()
+        resetForTesting()
         r1 = discover()
         r2 = discover()
         assert r1 == r2
-        reset_for_testing()
+        resetForTesting()
 
     def test_plugin_tracking_no_duplicates(self):
-        from dartlab.plugins import PluginMeta, _track_plugin, get_loaded_plugins, reset_for_testing
+        from dartlab.plugins import PluginMeta, _trackPlugin, getLoadedPlugins, resetForTesting
 
-        reset_for_testing()
+        resetForTesting()
         meta = PluginMeta(
             name="test-tracking",
             version="0.1.0",
@@ -286,12 +286,12 @@ class TestDiscovery:
             description="트래킹 테스트",
             plugin_type="data",
         )
-        _track_plugin(meta)
-        _track_plugin(meta)  # 중복 호출
-        plugins = get_loaded_plugins()
+        _trackPlugin(meta)
+        _trackPlugin(meta)  # 중복 호출
+        plugins = getLoadedPlugins()
         names = [p.name for p in plugins]
         assert names.count("test-tracking") == 1
-        reset_for_testing()
+        resetForTesting()
 
 
 # ══════════════════════════════════════
@@ -304,29 +304,29 @@ class TestModuleRegistryRebuild:
 
     def test_rebuild_invalidates_cache(self):
         from dartlab.providers.dart.company import (
-            _get_module_registry,
-            rebuild_module_registry,
+            _getModuleRegistry,
+            rebuildModuleRegistry,
         )
 
         # 최초 구축
-        reg1 = _get_module_registry()
+        reg1 = _getModuleRegistry()
         assert reg1 is not None
         assert len(reg1) > 0
 
         # 무효화 후 재구축
-        rebuild_module_registry()
-        reg2 = _get_module_registry()
+        rebuildModuleRegistry()
+        reg2 = _getModuleRegistry()
         assert reg2 is not None
         assert len(reg2) == len(reg1)  # 플러그인 미추가 시 동일 크기
 
     def test_get_module_index_consistent(self):
         from dartlab.providers.dart.company import (
-            _get_module_index,
-            _get_module_registry,
+            _getModuleIndex,
+            _getModuleRegistry,
         )
 
-        registry = _get_module_registry()
-        index = _get_module_index()
+        registry = _getModuleRegistry()
+        index = _getModuleIndex()
         # 인덱스 크기 == 레지스트리 크기
         assert len(index) == len(registry)
         # 모든 인덱스 값이 유효 범위

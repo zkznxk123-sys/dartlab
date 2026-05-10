@@ -14,7 +14,7 @@ from typing import Any
 from dartlab.analysis.financial.valuation import _IG_TO_SECTOR_KEY
 from dartlab.analysis.forecast.revenueForecast import CompanyDataBundle, forecastRevenue
 from dartlab.analysis.forecast.simulation import simulateAllScenarios
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 
 log = logging.getLogger(__name__)
 
@@ -132,7 +132,7 @@ def _runForecastRevenue(company: Any):
 # ── calc 함수 7개 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcRevenueForecast(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """7-소스 앙상블 3-시나리오 매출 전망.
 
@@ -199,7 +199,7 @@ def calcRevenueForecast(company: Any, *, basePeriod: str | None = None) -> dict 
     return out
 
 
-@memoized_calc
+@memoizedCalc
 def calcSegmentForecast(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """세그먼트별 개별 매출 성장 전망.
 
@@ -243,7 +243,7 @@ def calcSegmentForecast(company: Any, *, basePeriod: str | None = None) -> dict 
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcProFormaHighlights(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """Pro-Forma IS 주요 항목 전망.
 
@@ -277,15 +277,15 @@ def calcProFormaHighlights(company: Any, *, basePeriod: str | None = None) -> di
     if not growthPath:
         return None
 
-    from dartlab.analysis.financial.proforma import build_proforma
+    from dartlab.analysis.financial.proforma import buildProforma
 
     try:
-        pf = build_proforma(
+        pf = buildProforma(
             series,
-            revenue_growth_path=growthPath,
-            sector_params=sp,
+            revenueGrowthPath=growthPath,
+            sectorParams=sp,
             shares=shares,
-            scenario_name="base",
+            scenarioName="base",
         )
     except (KeyError, ValueError, ZeroDivisionError, TypeError) as exc:
         log.debug("pro-forma 생성 실패: %s", exc)
@@ -311,14 +311,14 @@ def calcProFormaHighlights(company: Any, *, basePeriod: str | None = None) -> di
         "isEstimate": True,
         "currency": currency,
         "wacc": pf.wacc,
-        "revenueGrowthPath": pf.revenue_growth_path,
+        "revenueGrowthPath": pf.revenueGrowthPath,
         "years": years,
         "warnings": pf.warnings,
         "disclaimer": pf.DISCLAIMER,
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcScenarioImpact(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """매크로 시나리오별 매출/마진 영향.
 
@@ -371,7 +371,7 @@ def calcScenarioImpact(company: Any, *, basePeriod: str | None = None) -> dict |
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcForecastMethodology(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """예측 방법론 투명성 공개.
 
@@ -401,7 +401,7 @@ def calcForecastMethodology(company: Any, *, basePeriod: str | None = None) -> d
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcHistoricalRatios(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """Pro-Forma 기반 과거 구조 비율.
 
@@ -423,10 +423,10 @@ def calcHistoricalRatios(company: Any, *, basePeriod: str | None = None) -> dict
     """
     series, _, _, _, _ = _getSeriesAndMeta(company)
 
-    from dartlab.analysis.financial.proforma import extract_historical_ratios
+    from dartlab.analysis.financial.proforma import extractHistoricalRatios
 
     try:
-        ratios = extract_historical_ratios(series)
+        ratios = extractHistoricalRatios(series)
     except (KeyError, ValueError, ZeroDivisionError, TypeError) as exc:
         log.debug("과거 비율 추출 실패: %s", exc)
         return None
@@ -447,7 +447,7 @@ def calcHistoricalRatios(company: Any, *, basePeriod: str | None = None) -> dict
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcForecastFlags(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """매출전망 플래그.
 
@@ -499,7 +499,7 @@ def calcForecastFlags(company: Any, *, basePeriod: str | None = None) -> dict | 
     return {"flags": flags}
 
 
-@memoized_calc
+@memoizedCalc
 def calcCalibrationReport(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """예측 캘리브레이션 리포트 — 이 종목의 과거 예측 정확도.
 
@@ -547,7 +547,7 @@ def calcCalibrationReport(company: Any, *, basePeriod: str | None = None) -> dic
 # ── calc 8: 시나리오 시뮬레이션 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcScenarioSimulation(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """시나리오 시뮬레이션 — 과거 CAGR 기반 자동 3시나리오 ProForma + 분기 목표.
 

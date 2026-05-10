@@ -45,20 +45,20 @@ _FACTOR_CACHE: dict[tuple[str, str], dict] = {}
 _PORTFOLIO_CACHE: dict[tuple[str, str, int], np.ndarray] = {}
 
 
-def _latest_year(snap: pl.DataFrame, min_count: int = 1000) -> str | None:
+def _latestYear(snap: pl.DataFrame, minCount: int = 1000) -> str | None:
     """충분한 universe를 가진 가장 최근 연도."""
     if snap.is_empty():
         return None
-    year_col = "fy" if isEdgarSchema(snap) else "bsns_year"
-    counts = snap.group_by(year_col).len().sort(year_col, descending=True)
+    yearCol = "fy" if isEdgarSchema(snap) else "bsns_year"
+    counts = snap.group_by(yearCol).len().sort(yearCol, descending=True)
     for row in counts.iter_rows(named=True):
-        if row["len"] >= min_count:
-            y = row[year_col]
+        if row["len"] >= minCount:
+            y = row[yearCol]
             return str(y) if y is not None else None
     return None
 
 
-def _fetch_year_end_marketcaps(market: str, year: str) -> dict[str, float]:
+def _fetchYearEndMarketcaps(market: str, year: str) -> dict[str, float]:
     """연도말 (12월 마지막 거래일) 종목별 시가총액.
 
     KR: KRX OpenAPI ``MKTCAP`` 컬럼 직접 (gather/_hfBulk.loadFiltered).
@@ -91,7 +91,7 @@ def _fetch_year_end_marketcaps(market: str, year: str) -> dict[str, float]:
         return {}
 
 
-def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float]]:
+def _buildUniverseMetrics(market: str, year: str) -> dict[str, dict[str, float]]:
     """전종목 단년도 펀더멘털 + 시총 dict.
 
     Returns:
@@ -110,9 +110,9 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
         return {}
 
     edgar = isEdgarSchema(snap)
-    year_col = "fy" if edgar else "bsns_year"
+    yearCol = "fy" if edgar else "bsns_year"
     year_val = int(year) if edgar else year
-    cur = snap.filter(pl.col(year_col) == year_val)
+    cur = snap.filter(pl.col(yearCol) == year_val)
     # 전기 (asset growth용)
     try:
         prev_year_val = int(year) - 1
@@ -120,12 +120,12 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
         prev_year_val = None
     if prev_year_val is not None:
         pv = prev_year_val if edgar else str(prev_year_val)
-        prev = snap.filter(pl.col(year_col) == pv)
+        prev = snap.filter(pl.col(yearCol) == pv)
     else:
         prev = None
 
     # 연도말 시총 (KR 만 채워짐)
-    market_caps = _fetch_year_end_marketcaps(market, year)
+    market_caps = _fetchYearEndMarketcaps(market, year)
 
     out: dict[str, dict[str, float]] = {}
     # 성능 fix (G5): partition_by 한 번 호출 → O(n) lookup. 기존 filter 는 O(n²) 라
@@ -169,7 +169,7 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
     return out
 
 
-def _quintile_portfolios(metrics: dict[str, dict[str, float]], key: str, reverse: bool) -> tuple[list[str], list[str]]:
+def _quintilePortfolios(metrics: dict[str, dict[str, float]], key: str, reverse: bool) -> tuple[list[str], list[str]]:
     """지표 5분위 → 상위 20% / 하위 20% 종목군.
 
     reverse=True면 상위가 작은 값.
@@ -185,7 +185,7 @@ def _quintile_portfolios(metrics: dict[str, dict[str, float]], key: str, reverse
     return top, bot
 
 
-def _portfolio_returns(codes: list[str], market: str, year: str, max_n: int = 30) -> np.ndarray | None:
+def _portfolioReturns(codes: list[str], market: str, year: str, maxN: int = 30) -> np.ndarray | None:
     """종목 리스트의 동일가중 평균 일별 log return 시계열.
 
     KR (Phase B0 정정): `_hfBulk.loadFiltered` 직접 사용 (Yahoo 우회 + 빠름).
@@ -197,7 +197,7 @@ def _portfolio_returns(codes: list[str], market: str, year: str, max_n: int = 30
     """
     if not codes:
         return None
-    key = (market, year, hash(tuple(sorted(codes[:max_n]))))
+    key = (market, year, hash(tuple(sorted(codes[:maxN]))))
     if key in _PORTFOLIO_CACHE:
         return _PORTFOLIO_CACHE[key]
 
@@ -207,7 +207,7 @@ def _portfolio_returns(codes: list[str], market: str, year: str, max_n: int = 30
         try:
             from dartlab.gather._hfBulk import loadFiltered
 
-            target_codes = codes[:max_n]
+            target_codes = codes[:maxN]
             long_df = loadFiltered(start=f"{year}-01-01", end=f"{year}-12-31", adjustment="raw")
             if long_df is None or long_df.is_empty():
                 _PORTFOLIO_CACHE[key] = None
@@ -227,7 +227,7 @@ def _portfolio_returns(codes: list[str], market: str, year: str, max_n: int = 30
             return None
     else:
         # US: 기존 fetchOhlcv (Yahoo) 유지
-        for c in codes[:max_n]:
+        for c in codes[:maxN]:
             try:
                 o = fetchOhlcv(c)
             except (ValueError, KeyError, OSError, AttributeError, RuntimeError):
@@ -265,39 +265,39 @@ def buildFactors(market: str = "KR") -> dict | None:
     if lf is None:
         return None
     snap = extractAnnualConsolidated(lf.collect())
-    year = _latest_year(snap)
+    year = _latestYear(snap)
     if year is None:
         return None
 
-    metrics = _build_universe_metrics(market, year)
+    metrics = _buildUniverseMetrics(market, year)
     if len(metrics) < 100:
         return None
 
     # 5분위 포트폴리오 — 시총 있으면 진짜 SMB/HML, 없으면 book proxy fallback
     has_mcap = sum(1 for m in metrics.values() if m.get("marketCap") is not None) >= 100
     if has_mcap:
-        small, big = _quintile_portfolios(metrics, "marketCap", reverse=False)
-        high_bm, low_bm = _quintile_portfolios(metrics, "bookToMarket", reverse=True)
+        small, big = _quintilePortfolios(metrics, "marketCap", reverse=False)
+        high_bm, low_bm = _quintilePortfolios(metrics, "bookToMarket", reverse=True)
         size_source = "KRX_MKTCAP"
         bm_source = "equity/marketCap"
     else:
-        small, big = _quintile_portfolios(metrics, "bookEquity", reverse=False)
-        high_bm, low_bm = _quintile_portfolios(metrics, "bookRatio", reverse=True)
+        small, big = _quintilePortfolios(metrics, "bookEquity", reverse=False)
+        high_bm, low_bm = _quintilePortfolios(metrics, "bookRatio", reverse=True)
         size_source = "book_equity_proxy"
         bm_source = "equity/assets_proxy"
-    high_roe, low_roe = _quintile_portfolios(metrics, "roe", reverse=True)
-    low_ag, high_ag = _quintile_portfolios(metrics, "assetGrowth", reverse=False)
+    high_roe, low_roe = _quintilePortfolios(metrics, "roe", reverse=True)
+    low_ag, high_ag = _quintilePortfolios(metrics, "assetGrowth", reverse=False)
     # CMA = conservative(low growth) - aggressive(high growth)
 
     # 시계열
-    s_ret = _portfolio_returns(small, market, year)
-    b_ret = _portfolio_returns(big, market, year)
-    h_ret = _portfolio_returns(high_bm, market, year)
-    l_ret = _portfolio_returns(low_bm, market, year)
-    hr_ret = _portfolio_returns(high_roe, market, year)
-    lr_ret = _portfolio_returns(low_roe, market, year)
-    cn_ret = _portfolio_returns(low_ag, market, year)
-    ag_ret = _portfolio_returns(high_ag, market, year)
+    s_ret = _portfolioReturns(small, market, year)
+    b_ret = _portfolioReturns(big, market, year)
+    h_ret = _portfolioReturns(high_bm, market, year)
+    l_ret = _portfolioReturns(low_bm, market, year)
+    hr_ret = _portfolioReturns(high_roe, market, year)
+    lr_ret = _portfolioReturns(low_roe, market, year)
+    cn_ret = _portfolioReturns(low_ag, market, year)
+    ag_ret = _portfolioReturns(high_ag, market, year)
 
     if any(x is None for x in [s_ret, b_ret, h_ret, l_ret]):
         return None

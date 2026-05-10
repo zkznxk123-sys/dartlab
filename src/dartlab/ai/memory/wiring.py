@@ -3,7 +3,7 @@
 세션 종료 시 호출:
 - recordSkillUsage(skillId, ok, valueRefs) — 사용 빈도 통계
 - remember(question + answer 요약, tags=[...]) — 다음 세션 recall 컨텍스트
-- outcome_log.store_decision(stockCode, market, ...) — stockCode 인식 시 pending entry 작성
+- outcome_log.storeDecision(stockCode, market, ...) — stockCode 인식 시 pending entry 작성
 - tryResolvePending(stockCode, market, pricer=...) — 같은 종목 다음 호출 진입부에서 pending → resolved 자동 변환
 
 P-revised: chat-native runAgent 도 본 helper 호출 → SSOT.md Principle 6
@@ -22,9 +22,9 @@ from typing import Any
 from dartlab.ai.contracts import Ref
 from dartlab.ai.memory.decisions import recall, remember
 from dartlab.ai.memory.outcomeLog import (
-    get_past_context,
-    safe_stockcode,
-    store_decision,
+    getPastContext,
+    safeStockcode,
+    storeDecision,
 )
 from dartlab.ai.memory.promotion import recordSkillUsage
 
@@ -62,11 +62,11 @@ def wireSessionMemory(
     selected_list = list(selectedSkillRefs)
     value_refs = sum(1 for r in refs_list if r.kind == "valueRef")
 
-    skill_ids = _extractSkillIds(selected_list)
-    if not skill_ids:
-        skill_ids = ["chatNative"]
+    skillIds = _extractSkillIds(selected_list)
+    if not skillIds:
+        skillIds = ["chatNative"]
 
-    for skill_id in skill_ids:
+    for skill_id in skillIds:
         try:
             recordSkillUsage(skill_id, ok=ok, valueRefs=value_refs)
         except Exception:  # noqa: BLE001
@@ -82,7 +82,7 @@ def wireSessionMemory(
     if runId:
         tags.append(f"runId:{runId}")
     tags.append(f"status:{'ok' if ok else 'failed'}")
-    for skill_id in skill_ids[:3]:
+    for skill_id in skillIds[:3]:
         tags.append(f"skill:{skill_id}")
     for tag in extraTags:
         tag_str = str(tag or "").strip()
@@ -97,19 +97,19 @@ def wireSessionMemory(
     # outcome_log 에 pending entry — stockCode 명시 + ok 시만.
     if stockCode and ok:
         try:
-            safe_code = safe_stockcode(stockCode)
-            store_decision(
+            safe_code = safeStockcode(stockCode)
+            storeDecision(
                 stockCode=safe_code,
                 market=market or "KR",
                 date=date.today().isoformat(),
                 theme=(decisionTheme or "Verdict").strip()[:32],
-                decision_text=digest,
+                decisionText=digest,
             )
         except Exception:  # noqa: BLE001
             pass
 
 
-def fetchPastContext(stockCode: str | None, market: str | None = None, *, n_same: int = 5, n_cross: int = 3) -> str:
+def fetchPastContext(stockCode: str | None, market: str | None = None, *, nSame: int = 5, nCross: int = 3) -> str:
     """BRIEF / agent.runAgent 진입부에서 호출 — outcome_log past_context 조회.
 
     빈 문자열 반환 시 호출자가 prompt 의 placeholder 섹션 자체를 부재화 (환각 가드).
@@ -118,8 +118,8 @@ def fetchPastContext(stockCode: str | None, market: str | None = None, *, n_same
     if not stockCode:
         return ""
     try:
-        safe_code = safe_stockcode(stockCode)
-        return get_past_context(safe_code, market=market or "KR", n_same=n_same, n_cross=n_cross)
+        safe_code = safeStockcode(stockCode)
+        return getPastContext(safe_code, market=market or "KR", nSame=nSame, nCross=nCross)
     except Exception:  # noqa: BLE001
         return ""
 
@@ -148,7 +148,7 @@ def inferStockCodeContext(
 ) -> tuple[str | None, str | None]:
     """누적 refs / kernel kwargs 에서 stockCode + market 추출 시도.
 
-    chat-native HARVEST bridge 가 outcome_log.store_decision 호출 시 사용 (다음 commit).
+    chat-native HARVEST bridge 가 outcome_log.storeDecision 호출 시 사용 (다음 commit).
     """
     if kwargs:
         sc = kwargs.get("stockCode")
@@ -218,7 +218,7 @@ def tryResolvePending(
     try:
         from dartlab.ai.memory.outcomeResolver import resolvePending  # noqa: PLC0415
 
-        safe_code = safe_stockcode(stockCode)
+        safe_code = safeStockcode(stockCode)
         report = resolvePending(
             safe_code,
             market=market or "KR",

@@ -28,7 +28,7 @@ from dartlab.scan._helpers import (
     TA_NMS as _TA_NMS,
 )
 from dartlab.scan._helpers import (
-    scan_finance_parquets,
+    scanFinanceParquets,
 )
 
 # ── 계정 매핑 (모듈 고유) ──
@@ -88,13 +88,13 @@ def scanEfficiency(*, verbose: bool = True) -> pl.DataFrame:
     if verbose:
         _log.info("효율성 스캔: 계정 수집 중...")
 
-    revMap = scan_finance_parquets("IS", _REVENUE_IDS, _REVENUE_NMS)
-    taMap = scan_finance_parquets("BS", _TA_IDS, _TA_NMS)
-    invMap = scan_finance_parquets("BS", _INV_IDS, _INV_NMS)
-    arMap = scan_finance_parquets("BS", _AR_IDS, _AR_NMS)
-    ppeMap = scan_finance_parquets("BS", _PPE_IDS, _PPE_NMS)
-    cogsMap = scan_finance_parquets("IS", _COGS_IDS, _COGS_NMS)
-    apMap = scan_finance_parquets("BS", _AP_IDS, _AP_NMS)
+    revMap = scanFinanceParquets("IS", _REVENUE_IDS, _REVENUE_NMS)
+    taMap = scanFinanceParquets("BS", _TA_IDS, _TA_NMS)
+    invMap = scanFinanceParquets("BS", _INV_IDS, _INV_NMS)
+    arMap = scanFinanceParquets("BS", _AR_IDS, _AR_NMS)
+    ppeMap = scanFinanceParquets("BS", _PPE_IDS, _PPE_NMS)
+    cogsMap = scanFinanceParquets("IS", _COGS_IDS, _COGS_NMS)
+    apMap = scanFinanceParquets("BS", _AP_IDS, _AP_NMS)
 
     allCodes = set(revMap) | set(taMap) | set(invMap) | set(arMap)
 

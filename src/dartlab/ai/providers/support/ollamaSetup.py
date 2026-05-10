@@ -7,7 +7,7 @@ import subprocess
 from typing import Any
 
 
-def _detect_gpu() -> dict[str, Any]:
+def _detectGpu() -> dict[str, Any]:
     """GPU 가용성 + VRAM 감지 (간단 휴리스틱).
 
     nvidia-smi 사용 (NVIDIA). 미설치/실패 시 CPU 전용 가정.
@@ -35,7 +35,7 @@ def _detect_gpu() -> dict[str, Any]:
         return {"available": False, "vram_mb": 0}
 
 
-def detect_ollama() -> dict[str, Any]:
+def detectOllama() -> dict[str, Any]:
     executable = shutil.which("ollama")
     version = None
     models: list[str] = []
@@ -63,5 +63,5 @@ def detect_ollama() -> dict[str, Any]:
     }
 
 
-def get_install_guide() -> str:
+def getInstallGuide() -> str:
     return "Ollama가 필요하면 https://ollama.com 에서 설치한 뒤 다시 시도하세요."

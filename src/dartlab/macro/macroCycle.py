@@ -189,10 +189,10 @@ def classifyCycle(indicators: dict[str, float | None]) -> CyclePhase:
     hy_chg = indicators.get("hy_spread_3m_change")
     ts = indicators.get("term_spread")
     vix = indicators.get("vix")
-    gold_yoy = indicators.get("gold_yoy")
+    goldYoy = indicators.get("gold_yoy")
     cli_mom = indicators.get("cli_mom")
-    cpi_yoy = indicators.get("cpi_yoy")
-    bei_10y = indicators.get("bei_10y")
+    cpiYoy = indicators.get("cpi_yoy")
+    bei10y = indicators.get("bei_10y")
 
     # 1. 하이일드 스프레드 — 레벨 + 변화 속도
     if hy is not None:
@@ -249,15 +249,15 @@ def classifyCycle(indicators: dict[str, float | None]) -> CyclePhase:
             scores["expansion"] += 1
 
     # 4. 금 YoY
-    if gold_yoy is not None:
-        if gold_yoy > 15:
+    if goldYoy is not None:
+        if goldYoy > 15:
             scores["contraction"] += 1
             scores["slowdown"] += 1
-            signals.append(f"금 급등 (YoY {gold_yoy:+.1f}%)")
-        elif gold_yoy < -5:
+            signals.append(f"금 급등 (YoY {goldYoy:+.1f}%)")
+        elif goldYoy < -5:
             scores["recovery"] += 1
             scores["expansion"] += 1
-            signals.append(f"금 하락 (YoY {gold_yoy:+.1f}%)")
+            signals.append(f"금 하락 (YoY {goldYoy:+.1f}%)")
 
     # 5. CLI 모멘텀 — 반전 강화 (실험 01 피드백)
     if cli_mom is not None:
@@ -276,25 +276,25 @@ def classifyCycle(indicators: dict[str, float | None]) -> CyclePhase:
             signals.append(f"CLI 상승 ({cli_mom:+.2f})")
 
     # 6. 인플레이션 — 사이클 3대 힘 중 하나 (통화/재정/물가)
-    if cpi_yoy is not None:
-        if cpi_yoy > 4.0:
+    if cpiYoy is not None:
+        if cpiYoy > 4.0:
             scores["slowdown"] += 2
-            signals.append(f"CPI {cpi_yoy:.1f}% — 물가 과열, 둔화 전조")
-        elif cpi_yoy > 3.0:
+            signals.append(f"CPI {cpiYoy:.1f}% — 물가 과열, 둔화 전조")
+        elif cpiYoy > 3.0:
             scores["expansion"] += 1
-            signals.append(f"CPI {cpi_yoy:.1f}% — 인플레 동반 확장")
-        elif cpi_yoy < 1.5:
+            signals.append(f"CPI {cpiYoy:.1f}% — 인플레 동반 확장")
+        elif cpiYoy < 1.5:
             scores["contraction"] += 1
-            signals.append(f"CPI {cpi_yoy:.1f}% — 디플레 우려")
+            signals.append(f"CPI {cpiYoy:.1f}% — 디플레 우려")
 
-    if bei_10y is not None:
-        if bei_10y > 2.8:
+    if bei10y is not None:
+        if bei10y > 2.8:
             scores["slowdown"] += 1
-            signals.append(f"BEI {bei_10y:.2f}% — 기대인플레 상승, 긴축 압력")
-        elif bei_10y < 1.8:
+            signals.append(f"BEI {bei10y:.2f}% — 기대인플레 상승, 긴축 압력")
+        elif bei10y < 1.8:
             scores["contraction"] += 1
             scores["recovery"] += 1
-            signals.append(f"BEI {bei_10y:.2f}% — 기대인플레 하락")
+            signals.append(f"BEI {bei10y:.2f}% — 기대인플레 하락")
 
     # 최고 점수 국면 선택
     phase = max(scores, key=lambda k: scores[k])
@@ -419,18 +419,18 @@ def interpretAssets(indicators: dict[str, float | None]) -> list[AssetSignal]:
 
     # 4. 금
     gold = indicators.get("gold")
-    gold_yoy = indicators.get("gold_yoy")
+    goldYoy = indicators.get("gold_yoy")
     if gold is not None:
-        if gold_yoy is not None and gold_yoy > 15:
-            interp = f"금 급등 (${gold:,.0f}, YoY {gold_yoy:+.1f}%) — 인플레·불안심리"
+        if goldYoy is not None and goldYoy > 15:
+            interp = f"금 급등 (${gold:,.0f}, YoY {goldYoy:+.1f}%) — 인플레·불안심리"
             impl = "위험회피"
-        elif gold_yoy is not None and gold_yoy < -5:
-            interp = f"금 하락 (${gold:,.0f}, YoY {gold_yoy:+.1f}%) — 위험자산 선호"
+        elif goldYoy is not None and goldYoy < -5:
+            interp = f"금 하락 (${gold:,.0f}, YoY {goldYoy:+.1f}%) — 위험자산 선호"
             impl = "위험선호"
         else:
             interp = f"금 안정 (${gold:,.0f})"
             impl = "중립"
-        results.append(AssetSignal("gold", "금", gold, gold_yoy, interp, impl))
+        results.append(AssetSignal("gold", "금", gold, goldYoy, interp, impl))
 
     # 5. VIX
     vix = indicators.get("vix")
@@ -489,7 +489,7 @@ def calcMultipleBand(
     z = (current - mean) / std
 
     # 정규분포 CDF 근사 (Abramowitz & Stegun)
-    percentile = _norm_cdf(z) * 100
+    percentile = _normCdf(z) * 100
 
     # zone 판정 (+-1 표준편차)
     if z < -1:
@@ -510,7 +510,7 @@ def calcMultipleBand(
     )
 
 
-def _norm_cdf(z: float) -> float:
+def _normCdf(z: float) -> float:
     """표준정규분포 CDF 근사 (|오차| < 7.5e-8)."""
     # Abramowitz & Stegun 26.2.17
     if z < -6:
@@ -683,18 +683,18 @@ def detectTransitionSequence(
     pending: list[str] = []
 
     hy_chg = indicators.get("hy_spread_3m_change")
-    gold_yoy = indicators.get("gold_yoy")
+    goldYoy = indicators.get("gold_yoy")
     lr_chg = indicators.get("long_rate_change")
     vix = indicators.get("vix")
     ts = indicators.get("term_spread")
     bei = indicators.get("bei_10y")
 
-    signal_checks: dict[str, bool] = {
+    signalChecks: dict[str, bool] = {
         "hy_spread_declining": hy_chg is not None and hy_chg < -30,
         "hy_spread_widening": hy_chg is not None and hy_chg > 50,
         "hy_spread_stable": hy_chg is not None and abs(hy_chg) < 30,
-        "gold_declining": gold_yoy is not None and gold_yoy < -3,
-        "gold_surging": gold_yoy is not None and gold_yoy > 15,
+        "gold_declining": goldYoy is not None and goldYoy < -3,
+        "gold_surging": goldYoy is not None and goldYoy > 15,
         "long_rate_rising": lr_chg is not None and lr_chg > 0.2,
         "vix_stable": vix is not None and vix < 18,
         "vix_rising": vix is not None and vix > 22,
@@ -708,7 +708,7 @@ def detectTransitionSequence(
     }
 
     for signal_name in sequence:
-        if signal_checks.get(signal_name, False):
+        if signalChecks.get(signal_name, False):
             triggered.append(signal_name)
         else:
             pending.append(signal_name)
@@ -723,7 +723,7 @@ def detectTransitionSequence(
     order_valid: bool | None = None
 
     if history and len(triggered) >= 2:
-        first_dates = _find_first_trigger_dates(sequence, signal_checks, history)
+        first_dates = _findFirstTriggerDates(sequence, signalChecks, history)
         sequence_order = [(sig, first_dates.get(sig)) for sig in triggered]
         # 발현 시점이 있는 신호들만 순서 검증
         dated = [(sig, d) for sig, d in sequence_order if d is not None]
@@ -762,15 +762,15 @@ _SIGNAL_SERIES_MAP: dict[str, tuple[str, str, float]] = {
 }
 
 
-def _find_first_trigger_dates(
+def _findFirstTriggerDates(
     sequence: tuple[str, ...],
-    signal_checks: dict[str, bool],
+    signalChecks: dict[str, bool],
     history: dict[str, list[tuple[str, float]]],
 ) -> dict[str, str]:
     """발현된 신호의 최초 트리거 날짜를 시계열에서 역추적."""
     result: dict[str, str] = {}
     for signal_name in sequence:
-        if not signal_checks.get(signal_name, False):
+        if not signalChecks.get(signal_name, False):
             continue
         mapping = _SIGNAL_SERIES_MAP.get(signal_name)
         if mapping is None:
@@ -780,15 +780,15 @@ def _find_first_trigger_dates(
         if not ts_data:
             continue
         # 시계열을 순방향으로 탐색하여 조건이 처음 충족된 날짜 찾기
-        for date_str, value in ts_data:
+        for dateStr, value in ts_data:
             if comparison == "lt" and value < threshold:
-                result[signal_name] = date_str
+                result[signal_name] = dateStr
                 break
             elif comparison == "gt" and value > threshold:
-                result[signal_name] = date_str
+                result[signal_name] = dateStr
                 break
             elif comparison == "abs_lt" and abs(value) < threshold:
-                result[signal_name] = date_str
+                result[signal_name] = dateStr
                 break
     return result
 
@@ -802,7 +802,7 @@ def decomposeLongRate(
     nominal: float,
     bei: float,
     tips: float,
-    acm_term_premium: float | None = None,
+    acmTermPremium: float | None = None,
 ) -> RateDecomposition:
     """10년 명목금리를 3요소로 분해 (DKW 모델 근사).
 
@@ -816,9 +816,9 @@ def decomposeLongRate(
     Returns:
         RateDecomposition
     """
-    if acm_term_premium is not None:
+    if acmTermPremium is not None:
         # ACM 모델 기간프리미엄 사용 (NY Fed 추정치)
-        term_premium = acm_term_premium
+        term_premium = acmTermPremium
     else:
         # 잔차 근사: 명목 - BEI - TIPS
         term_premium = nominal - bei - tips
@@ -836,9 +836,9 @@ def decomposeLongRate(
 
 
 def interpretGoldDrivers(
-    gold_yoy: float,
-    real_rate_change: float,
-    dxy_change_pct: float,
+    goldYoy: float,
+    realRateChange: float,
+    dxyChangePct: float,
     vix: float,
 ) -> GoldDrivers:
     """금 가격의 3요인 분해 해석.
@@ -853,17 +853,17 @@ def interpretGoldDrivers(
         GoldDrivers
     """
     # 실질금리 역상관: 실질금리 하락 → 금 상승압력
-    if real_rate_change < -0.3:
+    if realRateChange < -0.3:
         rr = "상승압력"
-    elif real_rate_change > 0.3:
+    elif realRateChange > 0.3:
         rr = "하락압력"
     else:
         rr = "중립"
 
     # 달러 역상관: 달러 약세 → 금 상승압력
-    if dxy_change_pct < -2:
+    if dxyChangePct < -2:
         dx = "상승압력"
-    elif dxy_change_pct > 2:
+    elif dxyChangePct > 2:
         dx = "하락압력"
     else:
         dx = "중립"
@@ -984,9 +984,9 @@ def copperGoldRatio(
 
 
 def interpretFxDrivers(
-    fx_change_pct: float,
-    rate_diff_change: float | None = None,
-    trade_balance_yoy: float | None = None,
+    fxChangePct: float,
+    rateDiffChange: float | None = None,
+    tradeBalanceYoy: float | None = None,
     vix: float | None = None,
 ) -> FxDrivers:
     """환율 변동의 3요인 분해 해석.
@@ -1006,17 +1006,17 @@ def interpretFxDrivers(
         FxDrivers
     """
     # 1) 금리차 요인
-    if rate_diff_change is not None and rate_diff_change > 0.2:
+    if rateDiffChange is not None and rateDiffChange > 0.2:
         rd_effect = "원화약세"
-    elif rate_diff_change is not None and rate_diff_change < -0.2:
+    elif rateDiffChange is not None and rateDiffChange < -0.2:
         rd_effect = "원화강세"
     else:
         rd_effect = "중립"
 
     # 2) 무역수지 요인
-    if trade_balance_yoy is not None and trade_balance_yoy > 10:
+    if tradeBalanceYoy is not None and tradeBalanceYoy > 10:
         trade_effect = "원화강세"
-    elif trade_balance_yoy is not None and trade_balance_yoy < -10:
+    elif tradeBalanceYoy is not None and tradeBalanceYoy < -10:
         trade_effect = "원화약세"
     else:
         trade_effect = "중립"
@@ -1032,7 +1032,7 @@ def interpretFxDrivers(
     # 지배적 요인 판별
     effects = {"금리차": rd_effect, "무역수지": trade_effect, "위험선호도": risk_effect}
     # fx_change_pct가 양수(약세)인데 어느 요인이 약세 방향인지
-    fx_direction = "원화약세" if fx_change_pct > 0 else "원화강세"
+    fx_direction = "원화약세" if fxChangePct > 0 else "원화강세"
     matching = [name for name, eff in effects.items() if eff == fx_direction and eff != "중립"]
     if matching:
         dominant = matching[0]  # 일치하는 첫 요인
@@ -1043,8 +1043,8 @@ def interpretFxDrivers(
 
     # 금리차-환율 방향 불일치 감지
     divergence = None
-    if rate_diff_change is not None and abs(fx_change_pct) > 2:
-        rd_implied = "원화약세" if rate_diff_change > 0.2 else ("원화강세" if rate_diff_change < -0.2 else "중립")
+    if rateDiffChange is not None and abs(fxChangePct) > 2:
+        rd_implied = "원화약세" if rateDiffChange > 0.2 else ("원화강세" if rateDiffChange < -0.2 else "중립")
         if rd_implied != "중립" and rd_implied != fx_direction:
             divergence = f"금리차는 {rd_implied} 방향이나 환율은 {fx_direction} → 비금리 요인(무역수지, 자본유입) 지배"
 
@@ -1063,7 +1063,7 @@ def interpretFxDrivers(
 
 
 def marketLevelValuation(
-    total_market_cap: float,
+    totalMarketCap: float,
     gdp: float,
 ) -> MarketValuation:
     """Buffett Indicator: 시가총액/GDP 비율로 시장 전체 밸류에이션 판정.
@@ -1088,7 +1088,7 @@ def marketLevelValuation(
     if gdp <= 0:
         return MarketValuation(0, "fair", "판별불가", "GDP 데이터 없음")
 
-    ratio = (total_market_cap / gdp) * 100
+    ratio = (totalMarketCap / gdp) * 100
 
     if ratio < 70:
         zone, label = "deep_value", "극단저평가"

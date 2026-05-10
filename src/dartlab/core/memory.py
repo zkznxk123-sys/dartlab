@@ -40,7 +40,7 @@ PRESSURE_EMERGENCY_MB = 2500.0  # 응급: pinned 까지 비우기 + polars strin
 _CACHE_MISSING: Any = object()
 
 
-def get_memory_mb() -> float:
+def getMemoryMb() -> float:
     """현재 프로세스 RSS(Resident Set Size)를 MB로 반환.
 
     Polars Rust 힙을 포함한 실제 물리 메모리 사용량.
@@ -94,7 +94,7 @@ def get_memory_mb() -> float:
     return -1.0
 
 
-def _get_total_memory_mb() -> float:
+def _getTotalMemoryMb() -> float:
     """시스템 전체 물리 메모리(MB)."""
     try:
         import ctypes
@@ -133,22 +133,22 @@ def _get_total_memory_mb() -> float:
     return -1.0
 
 
-def check_memory_and_gc(label: str = "") -> float:
+def checkMemoryAndGc(label: str = "") -> float:
     """현재 메모리 확인 + 위험 시 GC 강제 실행. RSS(MB) 반환.
 
     테스트/데이터 로드 전후에 호출하여 OOM 사전 방지.
     """
-    mem = get_memory_mb()
+    mem = getMemoryMb()
     if mem <= 0:
         return mem
     if mem > PRESSURE_FATAL_MB:
         log.warning("[memory] FATAL %s: %.0fMB > %.0fMB — full GC", label, mem, PRESSURE_FATAL_MB)
         gc.collect()
-        mem = get_memory_mb()
+        mem = getMemoryMb()
     elif mem > PRESSURE_CRITICAL_MB:
         log.warning("[memory] CRITICAL %s: %.0fMB > %.0fMB — GC", label, mem, PRESSURE_CRITICAL_MB)
         gc.collect()
-        mem = get_memory_mb()
+        mem = getMemoryMb()
     elif mem > PRESSURE_WARNING_MB:
         log.debug("[memory] WARNING %s: %.0fMB > %.0fMB", label, mem, PRESSURE_WARNING_MB)
     return mem
@@ -182,7 +182,7 @@ def cleanupBetweenCompanies(label: str = "") -> tuple[float, float]:
             analyze(company)
             cleanupBetweenCompanies(label=code)
     """
-    before = get_memory_mb()
+    before = getMemoryMb()
     try:
         from dartlab.core.dataLoader import _clearLoadCache
 
@@ -196,7 +196,7 @@ def cleanupBetweenCompanies(label: str = "") -> tuple[float, float]:
     except (ImportError, AttributeError):
         pass
     gc.collect()
-    after = get_memory_mb()
+    after = getMemoryMb()
     if before > 0 and after > 0:
         log.info(
             "[memory] cleanupBetweenCompanies %s: %.0f → %.0f MB (-%.0f)",
@@ -236,13 +236,13 @@ class BoundedCache:
         "_emergency_at",
     )
 
-    def __init__(self, max_entries: int = 30, pressure_mb: float = 800.0):
+    def __init__(self, maxEntries: int = 30, pressureMb: float = 800.0):
         import threading
 
         self._store: OrderedDict[str, Any] = OrderedDict()
-        self._max = max_entries
-        self._default_max = max_entries
-        self._pressure_mb = pressure_mb
+        self._max = maxEntries
+        self._default_max = maxEntries
+        self._pressure_mb = pressureMb
         self._put_count = 0
         self._lock = threading.RLock()
         self._emergency_at = 0.0  # EMERGENCY 발생 시각 — cool-down 용
@@ -308,7 +308,7 @@ class BoundedCache:
             "_calcKeyTopicChanges",
         )
 
-    def _is_pinned(self, key: str) -> bool:
+    def _isPinned(self, key: str) -> bool:
         return any(key.startswith(p) for p in self._pinned_prefixes)
 
     def __contains__(self, key: str) -> bool:
@@ -331,13 +331,13 @@ class BoundedCache:
             # 매 put마다 압박 체크 — get_memory_mb는 ~µs 수준의 OS API라 overhead 무시 가능.
             # 이전 5번에 1번 체크는 burst write 중 8GB까지 폭증하는 케이스 못 잡음.
             # just_set_key 전달 — EMERGENCY 시 방금 넣은 key 가 clear 되어 직후 read 가 KeyError 나는 race 방지.
-            self._check_pressure(just_set_key=key)
+            self._checkPressure(justSetKey=key)
             # LRU evict — pinned 키는 건너뜀
             while len(self._store) > self._max:
                 # 가장 오래된 unpinned 키 찾기
                 evicted = False
                 for k in list(self._store.keys()):
-                    if not self._is_pinned(k):
+                    if not self._isPinned(k):
                         del self._store[k]
                         evicted = True
                         break
@@ -348,9 +348,9 @@ class BoundedCache:
         with self._lock:
             return len(self._store)
 
-    def _check_pressure(self, just_set_key: str | None = None) -> None:
+    def _checkPressure(self, justSetKey: str | None = None) -> None:
         # caller already holds _lock (called from __setitem__)
-        mem = get_memory_mb()
+        mem = getMemoryMb()
         if mem <= 0:
             return
         if mem > PRESSURE_EMERGENCY_MB:
@@ -366,7 +366,7 @@ class BoundedCache:
                 mem,
             )
             for k in list(self._store.keys()):
-                if k == just_set_key:
+                if k == justSetKey:
                     continue  # 방금 set 한 키는 보존 — 직후 read race 방지
                 if not any(k.startswith(p) for p in self._critical_prefixes):
                     del self._store[k]
@@ -389,7 +389,7 @@ class BoundedCache:
             # 치명: pinned 제외 모두 비우기
             log.warning("[BoundedCache] FATAL: %.0fMB — clearing unpinned entries", mem)
             for k in list(self._store.keys()):
-                if not self._is_pinned(k):
+                if not self._isPinned(k):
                     del self._store[k]
             self._max = max(self._default_max // 4, 2)
             gc.collect()
@@ -408,7 +408,7 @@ class BoundedCache:
         while len(self._store) > self._max:
             evicted = False
             for k in list(self._store.keys()):
-                if not self._is_pinned(k):
+                if not self._isPinned(k):
                     del self._store[k]
                     evicted = True
                     break
@@ -443,7 +443,7 @@ class BoundedCache:
             pass
 
 
-def memory_guard(threshold_pct: float = 60) -> Callable[[F], F]:
+def memoryGuard(thresholdPct: float = 60) -> Callable[[F], F]:
     """메모리 사용률이 threshold_pct 초과 시 GC 강제 실행하는 데코레이터.
 
     Usage::
@@ -452,14 +452,14 @@ def memory_guard(threshold_pct: float = 60) -> Callable[[F], F]:
         def heavy_computation():
             ...
     """
-    total = _get_total_memory_mb()
+    total = _getTotalMemoryMb()
 
     def decorator(fn: F) -> F:
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
             if total > 0:
-                current = get_memory_mb()
-                if current > 0 and (current / total * 100) > threshold_pct:
+                current = getMemoryMb()
+                if current > 0 and (current / total * 100) > thresholdPct:
                     gc.collect()
             return fn(*args, **kwargs)
 
@@ -471,7 +471,7 @@ def memory_guard(threshold_pct: float = 60) -> Callable[[F], F]:
 # ── calc 함수 메모이제이션 ──
 
 
-def memoized_calc(fn: Callable[..., Any]) -> Callable[..., Any]:
+def memoizedCalc(fn: Callable[..., Any]) -> Callable[..., Any]:
     """calc 함수 결과를 Company._cache에 메모이제이션.
 
     analysis/credit/quant의 calc 함수가 공통으로 사용.

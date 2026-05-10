@@ -19,10 +19,10 @@ import polars as pl
 import pytest
 
 from dartlab.gather.calendar import (
-    _next_kr_cycle,
-    _normalize_codes,
-    _parse_date,
-    _predict_next_filing,
+    _nextKrCycle,
+    _normalizeCodes,
+    _parseDate,
+    _predictNextFiling,
     gatherCalendar,
 )
 
@@ -31,39 +31,39 @@ pytestmark = pytest.mark.unit
 
 class TestNormalizeCodes:
     def test_string_input(self):
-        assert _normalize_codes("005930") == ["005930"]
+        assert _normalizeCodes("005930") == ["005930"]
 
     def test_list_input(self):
-        assert _normalize_codes(["005930", "000660"]) == ["005930", "000660"]
+        assert _normalizeCodes(["005930", "000660"]) == ["005930", "000660"]
 
     def test_empty(self):
-        assert _normalize_codes("") == []
-        assert _normalize_codes(None) == []
-        assert _normalize_codes([]) == []
+        assert _normalizeCodes("") == []
+        assert _normalizeCodes(None) == []
+        assert _normalizeCodes([]) == []
 
     def test_strip_whitespace(self):
-        assert _normalize_codes(["  005930  ", "000660"]) == ["005930", "000660"]
+        assert _normalizeCodes(["  005930  ", "000660"]) == ["005930", "000660"]
 
 
 class TestParseDate:
     def test_iso_string(self):
-        assert _parse_date("2026-05-07") == date(2026, 5, 7)
+        assert _parseDate("2026-05-07") == date(2026, 5, 7)
 
     def test_yyyymmdd(self):
-        assert _parse_date("20260507") == date(2026, 5, 7)
+        assert _parseDate("20260507") == date(2026, 5, 7)
 
     def test_date_object(self):
         d = date(2026, 5, 7)
-        assert _parse_date(d) == d
+        assert _parseDate(d) == d
 
     def test_datetime_object(self):
         dt = datetime(2026, 5, 7, 10, 30)
-        assert _parse_date(dt) == date(2026, 5, 7)
+        assert _parseDate(dt) == date(2026, 5, 7)
 
     def test_none_or_empty(self):
-        assert _parse_date(None) is None
-        assert _parse_date("") is None
-        assert _parse_date("invalid") is None
+        assert _parseDate(None) is None
+        assert _parseDate("") is None
+        assert _parseDate("invalid") is None
 
 
 class TestNextKrCycle:
@@ -72,28 +72,28 @@ class TestNextKrCycle:
         mock_date.today.return_value = date(2026, 1, 15)
         # Required: same module's date class still works for other dates
         mock_date.side_effect = lambda *args: date(*args)
-        result = _next_kr_cycle({"QUARTERLY_REPORT": date(2025, 11, 14)})
+        result = _nextKrCycle({"QUARTERLY_REPORT": date(2025, 11, 14)})
         assert result is not None
-        event_type, predicted = result
-        assert event_type == "QUARTERLY_REPORT"
+        eventType, predicted = result
+        assert eventType == "QUARTERLY_REPORT"
         # 가장 가까운 cycle: 2026 Q1 (5 월 15 일)
         assert predicted.month == 5
 
     def test_returns_none_when_history_too_old(self):
         # 마지막 보고서가 2 년 전 → 비활성/폐지 가능, 예측 안 함
         old = date(date.today().year - 2, 5, 15)
-        result = _next_kr_cycle({"QUARTERLY_REPORT": old})
+        result = _nextKrCycle({"QUARTERLY_REPORT": old})
         # 모든 후보가 너무 오래됨 → None
         assert result is None or result[0] != "QUARTERLY_REPORT"
 
     def test_empty_history(self):
-        assert _next_kr_cycle({}) is None
+        assert _nextKrCycle({}) is None
 
 
 class TestPredictNextFiling:
     def test_handles_missing_columns(self):
         df = pl.DataFrame({"foo": [1, 2]})
-        assert _predict_next_filing(df, code="005930") is None
+        assert _predictNextFiling(df, code="005930") is None
 
     def test_predicts_from_recent_quarterly_history(self):
         # 최근 1 년 분기보고서 2 회 (HIGH confidence)
@@ -106,7 +106,7 @@ class TestPredictNextFiling:
                 "filedAt": [recent_q.isoformat(), prev_q.isoformat()],
             }
         )
-        result = _predict_next_filing(df, code="005930")
+        result = _predictNextFiling(df, code="005930")
         if result is None:
             # cycle 가 모두 과거면 None — OK (오늘 날짜에 따라 달라짐)
             pytest.skip("today 시점 cycle 모두 과거")
@@ -117,7 +117,7 @@ class TestPredictNextFiling:
 
     def test_no_kr_filing_types_in_history(self):
         df = pl.DataFrame({"title": ["임원 변경"], "filedAt": ["2025-01-01"]})
-        assert _predict_next_filing(df, code="005930") is None
+        assert _predictNextFiling(df, code="005930") is None
 
 
 class TestGatherCalendarEntry:
@@ -150,7 +150,7 @@ class TestGatherCalendarEntry:
     def test_returns_schema_when_empty(self):
         # 더미 종목코드 → DART API 호출 실패 (또는 빈 history) → 빈 DataFrame schema
         try:
-            result = gatherCalendar("999999", horizon_days=30)
+            result = gatherCalendar("999999", horizonDays=30)
         except Exception:
             pytest.skip("DART API 미설정 — 단순 schema 검증 skip")
         # schema 가 정의된 6 컬럼
@@ -176,7 +176,7 @@ class TestGatherCalendarMockedDisclosure:
         with patch("dartlab.gather.calendar.Company") as mock_company_cls:
             instance = mock_company_cls.return_value
             instance.disclosure.return_value = mock_history
-            result = gatherCalendar("005930", horizon_days=400)
+            result = gatherCalendar("005930", horizonDays=400)
 
         assert isinstance(result, pl.DataFrame)
         # horizon=400 일이면 향후 1 년 안 cycle 1 개 이상 예상

@@ -257,7 +257,7 @@ def _intCollection(values: object) -> list[int]:
     return result
 
 
-def _path_leafs(paths: object) -> list[str]:
+def _pathLeafs(paths: object) -> list[str]:
     values = _pathCollection(paths)
     leafs = sorted({segments[-1] for path in values if (segments := _splitPathSegments(path))})
     return leafs
@@ -294,8 +294,8 @@ def _structureTransitionType(comparablePathKey: str | None, fromPaths: list[str]
 
     fromCount = len(fromPaths)
     toCount = len(toPaths)
-    fromLeafs = _path_leafs(fromPaths)
-    toLeafs = _path_leafs(toPaths)
+    fromLeafs = _pathLeafs(fromPaths)
+    toLeafs = _pathLeafs(toPaths)
     fromParents = {_joinPathSegments(_splitPathSegments(path)[:-1]) for path in fromPaths if _splitPathSegments(path)}
     toParents = {_joinPathSegments(_splitPathSegments(path)[:-1]) for path in toPaths if _splitPathSegments(path)}
     fromParents.discard(None)
@@ -329,7 +329,7 @@ def _structurePattern(payload: object) -> str:
 
     parents = {_joinPathSegments(_splitPathSegments(path)[:-1]) for path in values if _splitPathSegments(path)}
     parents.discard(None)
-    leafs = _path_leafs(values)
+    leafs = _pathLeafs(values)
 
     if activeCounts and max(activeCounts) <= 1:
         if len(leafs) == 1 and len(parents) > 1:
@@ -555,7 +555,7 @@ def structureRegistry(
             [
                 pl.col("rawSemanticPaths").list.len().alias("rawSemanticPathCount"),
                 pl.col("rawSemanticPaths")
-                .map_elements(_path_leafs, return_dtype=pl.List(pl.Utf8))
+                .map_elements(_pathLeafs, return_dtype=pl.List(pl.Utf8))
                 .alias("rawSemanticLeafs"),
             ]
         )

@@ -42,7 +42,7 @@ _EXCHANGE_SUFFIX: dict[str, str] = {
 }
 
 
-def _build_symbol(stock_code: str, market: str) -> str:
+def _buildSymbol(stockCode: str, market: str) -> str:
     """종목코드 + 시장 → Yahoo 심볼.
 
     Parameters
@@ -58,10 +58,10 @@ def _build_symbol(stock_code: str, market: str) -> str:
         Yahoo 심볼 (예: "AAPL", "7203.T").
     """
     suffix = _EXCHANGE_SUFFIX.get(market, "")
-    return f"{stock_code}{suffix}"
+    return f"{stockCode}{suffix}"
 
 
-async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSnapshot | None:
+async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnapshot | None:
     """Yahoo v8 Chart API → 현재가 스냅샷.
 
     최근 5거래일 데이터를 요청하여 최신 regularMarketPrice를 추출한다.
@@ -89,7 +89,7 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
         source : str — "yahoo_chart"
         API 실패 또는 데이터 없으면 None → fallback 체인 진행.
     """
-    symbol = _build_symbol(stock_code, market)
+    symbol = _buildSymbol(stockCode, market)
     url = f"{_BASE_URL}/{symbol}"
     params = {
         "interval": "1d",
@@ -101,7 +101,7 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
         resp = await client.get(url, params=params)
         data = resp.json()
     except (SourceUnavailableError, ValueError, OSError) as exc:
-        log.debug("yahoo_chart price 실패 (%s): %s", stock_code, exc)
+        log.debug("yahoo_chart price 실패 (%s): %s", stockCode, exc)
         return None
 
     result = data.get("chart", {}).get("result")
@@ -126,7 +126,7 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
         high_52w=0.0,
         low_52w=0.0,
         volume=int(volume),
-        market_cap=0.0,
+        marketCap=0.0,
         per=None,
         pbr=None,
         dividend_yield=None,
@@ -137,8 +137,8 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
     )
 
 
-async def fetch_history(
-    stock_code: str,
+async def fetchHistory(
+    stockCode: str,
     client,
     *,
     start: str = "",
@@ -185,7 +185,7 @@ async def fetch_history(
     """
     from datetime import datetime as _dt
 
-    symbol = _build_symbol(stock_code, market)
+    symbol = _buildSymbol(stockCode, market)
 
     # Unix timestamp 변환
     if start:
@@ -210,7 +210,7 @@ async def fetch_history(
         resp = await client.get(url, params=params)
         data = resp.json()
     except (SourceUnavailableError, ValueError, OSError) as exc:
-        log.debug("yahoo_chart history 실패 (%s): %s", stock_code, exc)
+        log.debug("yahoo_chart history 실패 (%s): %s", stockCode, exc)
         return []
 
     result = data.get("chart", {}).get("result")

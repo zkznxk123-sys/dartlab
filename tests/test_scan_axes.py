@@ -13,57 +13,57 @@ pytestmark = pytest.mark.integration
 
 
 def test_available_scans():
-    from dartlab.scan import available_scans
+    from dartlab.scan import availableScans
 
-    scans = available_scans()
+    scans = availableScans()
     assert isinstance(scans, list)
     assert set(scans) >= {"network", "governance", "workforce", "capital", "debt"}
 
 
 def test_governance_imports():
-    from dartlab.scan.governance import scan_governance
-    from dartlab.scan.governance.scorer import grade, score_ownership
+    from dartlab.scan.governance import scanGovernance
+    from dartlab.scan.governance.scorer import grade, scoreOwnership
 
-    assert callable(scan_governance)
+    assert callable(scanGovernance)
     assert grade(90) == "A"
     assert grade(75) == "B"
     assert grade(60) == "C"
     assert grade(45) == "D"
     assert grade(30) == "E"
-    assert score_ownership(40) == 20
+    assert scoreOwnership(40) == 20
 
 
 def test_capital_imports():
-    from dartlab.scan.capital import scan_capital
-    from dartlab.scan.capital.classifier import classify_return
+    from dartlab.scan.capital import scanCapital
+    from dartlab.scan.capital.classifier import classifyReturn
 
-    assert callable(scan_capital)
-    cat, contra = classify_return(True, True, False)
+    assert callable(scanCapital)
+    cat, contra = classifyReturn(True, True, False)
     assert cat == "적극환원"
     assert contra is False
-    cat2, contra2 = classify_return(True, False, True)
+    cat2, contra2 = classifyReturn(True, False, True)
     assert cat2 == "중립"
     assert contra2 is True
 
 
 def test_workforce_imports():
-    from dartlab.scan.workforce import scan_workforce
+    from dartlab.scan.workforce import scanWorkforce
 
-    assert callable(scan_workforce)
+    assert callable(scanWorkforce)
 
 
 def test_debt_imports():
-    from dartlab.scan.debt import scan_debt
-    from dartlab.scan.debt.risk import classify_risk
+    from dartlab.scan.debt import scanDebt
+    from dartlab.scan.debt.risk import classifyRisk
 
-    assert callable(scan_debt)
-    assert classify_risk(0.5, 60) == "고위험"
-    assert classify_risk(0.5, 30) == "주의"
-    assert classify_risk(2, 60) == "주의"
-    assert classify_risk(5, 30) == "안전"
-    assert classify_risk(2, 30) == "관찰"
-    assert classify_risk(None, 60) == "주의"
-    assert classify_risk(None, 30) == "관찰"
+    assert callable(scanDebt)
+    assert classifyRisk(0.5, 60) == "고위험"
+    assert classifyRisk(0.5, 30) == "주의"
+    assert classifyRisk(2, 60) == "주의"
+    assert classifyRisk(5, 30) == "안전"
+    assert classifyRisk(2, 30) == "관찰"
+    assert classifyRisk(None, 60) == "주의"
+    assert classifyRisk(None, 30) == "관찰"
 
 
 def test_helpers_parse_num():

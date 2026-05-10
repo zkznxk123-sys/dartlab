@@ -141,10 +141,10 @@ def test_vizspec_from_dict_diagram():
 
 
 def test_emit_chart_marker_format(capsys):
-    from dartlab.viz import emit_chart
+    from dartlab.viz import emitChart
 
     spec = {"chartType": "bar", "title": "Test", "evidenceIds": ["test:fixture"]}
-    emit_chart(spec)
+    emitChart(spec)
     captured = capsys.readouterr().out.strip()
 
     assert captured.startswith("<!--DARTLAB_VIZ:")
@@ -158,10 +158,10 @@ def test_emit_chart_marker_format(capsys):
 
 
 def test_emit_chart_adds_viztype(capsys):
-    from dartlab.viz import emit_chart
+    from dartlab.viz import emitChart
 
     spec = {"chartType": "line", "title": "X", "evidenceIds": ["test:fixture"]}
-    emit_chart(spec)
+    emitChart(spec)
     captured = capsys.readouterr().out.strip()
     json_str = captured[len("<!--DARTLAB_VIZ:") : -len(":VIZ_END-->")]
     parsed = json.loads(json_str)
@@ -169,9 +169,9 @@ def test_emit_chart_adds_viztype(capsys):
 
 
 def test_emit_diagram_marker_format(capsys):
-    from dartlab.viz import emit_diagram
+    from dartlab.viz import emitDiagram
 
-    emit_diagram("mermaid", "graph LR\n  A-->B", title="다이어그램")
+    emitDiagram("mermaid", "graph LR\n  A-->B", title="다이어그램")
     captured = capsys.readouterr().out.strip()
 
     assert captured.startswith("<!--DARTLAB_VIZ:")
@@ -186,9 +186,9 @@ def test_emit_diagram_marker_format(capsys):
 
 
 def test_emit_diagram_default_title(capsys):
-    from dartlab.viz import emit_diagram
+    from dartlab.viz import emitDiagram
 
-    emit_diagram("mermaid", "graph TD")
+    emitDiagram("mermaid", "graph TD")
     captured = capsys.readouterr().out.strip()
     json_str = captured[len("<!--DARTLAB_VIZ:") : -len(":VIZ_END-->")]
     parsed = json.loads(json_str)
@@ -205,7 +205,7 @@ def test_emit_chart_rejects_meta_guide_axis_items(capsys, caplog):
     """
     import logging
 
-    from dartlab.viz import emit_chart
+    from dartlab.viz import emitChart
 
     spec = {
         "chartType": "bar",
@@ -229,7 +229,7 @@ def test_emit_chart_rejects_meta_guide_axis_items(capsys, caplog):
         "series": [{"name": "items", "data": [8, 9, 4, 4, 6, 5, 6, 2, 6, 5, 7, 5, 6, 9]}],
     }
     with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
-        emit_chart(spec)
+        emitChart(spec)
     out = capsys.readouterr().out
     # 마커 emit 안 되고 (stdout), 거부 메시지 출력 (logger.warning)
     assert "DARTLAB_VIZ" not in out
@@ -241,7 +241,7 @@ def test_emit_chart_passes_real_data(capsys, caplog):
     """진짜 종목 시계열 데이터는 통과."""
     import logging
 
-    from dartlab.viz import emit_chart
+    from dartlab.viz import emitChart
 
     spec = {
         "chartType": "line",
@@ -251,7 +251,7 @@ def test_emit_chart_passes_real_data(capsys, caplog):
         "evidenceIds": ["test:fixture"],
     }
     with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
-        emit_chart(spec)
+        emitChart(spec)
     out = capsys.readouterr().out
     assert "DARTLAB_VIZ" in out
     assert "차트 거부" not in caplog.text
@@ -259,7 +259,7 @@ def test_emit_chart_passes_real_data(capsys, caplog):
 
 def test_emit_chart_passes_axis_categories_with_real_values(capsys):
     """축 이름은 같지만 진짜 분석 값(큰 숫자)은 통과 — false positive 방지."""
-    from dartlab.viz import emit_chart
+    from dartlab.viz import emitChart
 
     spec = {
         "chartType": "bar",
@@ -268,7 +268,7 @@ def test_emit_chart_passes_axis_categories_with_real_values(capsys):
         "series": [{"name": "점수", "data": [85.3, 72.1, 91.4, 68.7, 77.9]}],
         "evidenceIds": ["test:fixture"],
     }
-    emit_chart(spec)
+    emitChart(spec)
     captured = capsys.readouterr().out
     # 데이터가 25 초과라 가이드 패턴 아님 → 통과
     assert "DARTLAB_VIZ" in captured
@@ -278,13 +278,13 @@ def test_emit_chart_passes_axis_categories_with_real_values(capsys):
 
 
 def test_extract_single_spec():
-    from dartlab.viz.extract import extract_viz_specs
+    from dartlab.viz.extract import extractVizSpecs
 
     spec_dict = {"chartType": "bar", "title": "T"}
     marker = f"<!--DARTLAB_VIZ:{json.dumps(spec_dict)}:VIZ_END-->"
     stdout = f"Hello\n{marker}\nWorld"
 
-    cleaned, specs = extract_viz_specs(stdout)
+    cleaned, specs = extractVizSpecs(stdout)
     assert len(specs) == 1
     assert specs[0]["chartType"] == "bar"
     assert "DARTLAB_VIZ" not in cleaned
@@ -293,42 +293,42 @@ def test_extract_single_spec():
 
 
 def test_extract_multiple_specs():
-    from dartlab.viz.extract import extract_viz_specs
+    from dartlab.viz.extract import extractVizSpecs
 
     m1 = f"<!--DARTLAB_VIZ:{json.dumps({'chartType': 'bar'})}:VIZ_END-->"
     m2 = f"<!--DARTLAB_VIZ:{json.dumps({'vizType': 'diagram', 'diagramType': 'mermaid'})}:VIZ_END-->"
     stdout = f"A\n{m1}\nB\n{m2}\nC"
 
-    cleaned, specs = extract_viz_specs(stdout)
+    cleaned, specs = extractVizSpecs(stdout)
     assert len(specs) == 2
     assert specs[0]["chartType"] == "bar"
     assert specs[1]["diagramType"] == "mermaid"
 
 
 def test_extract_no_specs():
-    from dartlab.viz.extract import extract_viz_specs
+    from dartlab.viz.extract import extractVizSpecs
 
-    cleaned, specs = extract_viz_specs("plain text without markers")
+    cleaned, specs = extractVizSpecs("plain text without markers")
     assert specs == []
     assert cleaned == "plain text without markers"
 
 
 def test_extract_invalid_json_ignored():
-    from dartlab.viz.extract import extract_viz_specs
+    from dartlab.viz.extract import extractVizSpecs
 
     stdout = "pre <!--DARTLAB_VIZ:not-valid-json:VIZ_END--> post"
-    cleaned, specs = extract_viz_specs(stdout)
+    cleaned, specs = extractVizSpecs(stdout)
     assert specs == []
     assert "DARTLAB_VIZ" not in cleaned
 
 
 def test_extract_mixed_valid_invalid():
-    from dartlab.viz.extract import extract_viz_specs
+    from dartlab.viz.extract import extractVizSpecs
 
     valid = f"<!--DARTLAB_VIZ:{json.dumps({'ok': True})}:VIZ_END-->"
     invalid = "<!--DARTLAB_VIZ:{broken:VIZ_END-->"
     stdout = f"{valid}\n{invalid}"
 
-    cleaned, specs = extract_viz_specs(stdout)
+    cleaned, specs = extractVizSpecs(stdout)
     assert len(specs) == 1
     assert specs[0]["ok"] is True

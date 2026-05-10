@@ -99,9 +99,9 @@ class TestCriticalAccounts:
         return set(data["mappings"].values())
 
     @pytest.mark.parametrize("snake_id", _CRITICAL_SNAKE_IDS)
-    def test_critical_account_reachable(self, snake_id, target_snake_ids):
+    def test_critical_account_reachable(self, snakeId, target_snake_ids):
         """핵심 계정 snakeId가 매핑 결과에 최소 1번 등장."""
-        assert snake_id in target_snake_ids, f"핵심 계정 '{snake_id}'가 매핑 결과에 없음"
+        assert snakeId in target_snake_ids, f"핵심 계정 '{snakeId}'가 매핑 결과에 없음"
 
 
 # ══════════════════════════════════════

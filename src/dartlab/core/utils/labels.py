@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 @lru_cache(maxsize=1)
-def _load_account_mappings() -> dict:
+def _loadAccountMappings() -> dict:
     """K-IFRS account mappings — core SSOT (`core/data/accountMappings.json`).
 
     과거 사고 (2026-04-19): wheel 에 data/ 디렉토리가 누락된 채 publish 되어
@@ -30,13 +30,13 @@ def _load_account_mappings() -> dict:
     return json.loads(mapper_path.read_text(encoding="utf-8"))
 
 
-def _load_standard_accounts() -> dict[str, dict]:
+def _loadStandardAccounts() -> dict[str, dict]:
     """{snakeId: {korName, code, level, sj}}."""
-    return _load_account_mappings().get("standardAccounts", {})
+    return _loadAccountMappings().get("standardAccounts", {})
 
 
 @lru_cache(maxsize=1)
-def _load_label_supplements() -> dict[str, str]:
+def _loadLabelSupplements() -> dict[str, str]:
     """labelSupplements.json — standardAccounts 외 보충 라벨 SSOT.
 
     번들 필수 리소스 — 누락 시 loud-fail (2026-04-19 사고 class).
@@ -48,7 +48,7 @@ def _load_label_supplements() -> dict[str, str]:
 
 
 @lru_cache(maxsize=1)
-def _load_edgar_standard_accounts() -> dict[str, str]:
+def _loadEdgarStandardAccounts() -> dict[str, str]:
     """EDGAR standardAccounts.json에서 snakeId → korName.
 
     번들 필수 리소스 — 누락 시 loud-fail.
@@ -61,7 +61,7 @@ def _load_edgar_standard_accounts() -> dict[str, str]:
 
 
 @lru_cache(maxsize=1)
-def get_korean_labels() -> dict[str, str]:
+def getKoreanLabels() -> dict[str, str]:
     """snakeId → 한글 라벨 SSOT.
 
     우선순위:
@@ -69,7 +69,7 @@ def get_korean_labels() -> dict[str, str]:
     2. mappings 역인덱스 — 한국어 → snakeId 의 가장 짧은 한국어명 (1:N 충돌 시 alt 탐색)
     3. _KR_SUPPLEMENTS 보충 (자주 쓰는 미등록 snakeId)
     """
-    data = _load_account_mappings()
+    data = _loadAccountMappings()
     stdAccounts: dict[str, dict] = data.get("standardAccounts", {})
     mappings: dict[str, str] = data.get("mappings", {})
 
@@ -105,7 +105,7 @@ def get_korean_labels() -> dict[str, str]:
     # 3. EDGAR standardAccounts korName (DART에 없는 US-GAAP 계정)
     # 2단계에서 충돌로 snakeId 그대로 들어간 경우도 EDGAR korName으로 덮어씀
     try:
-        _edgar_labels = _load_edgar_standard_accounts()
+        _edgar_labels = _loadEdgarStandardAccounts()
         for snakeId, korName in _edgar_labels.items():
             if not korName:
                 continue
@@ -116,7 +116,7 @@ def get_korean_labels() -> dict[str, str]:
         pass
 
     # 4. 보충 (labelSupplements.json SSOT)
-    for sid, name in _load_label_supplements().items():
+    for sid, name in _loadLabelSupplements().items():
         if sid not in result:
             result[sid] = name
 
@@ -141,9 +141,9 @@ def get_korean_labels() -> dict[str, str]:
     return result
 
 
-def _snake_to_title(snake_id: str) -> str:
+def _snakeToTitle(snakeId: str) -> str:
     """snake_case → Title Case. 영문 fallback."""
-    words = snake_id.replace("_", " ").strip()
+    words = snakeId.replace("_", " ").strip()
     return words.title()
 
 
@@ -206,12 +206,12 @@ _EDGAR_LABELS: dict[str, str] = {
 
 
 @lru_cache(maxsize=1)
-def get_english_labels() -> dict[str, str]:
+def getEnglishLabels() -> dict[str, str]:
     """snakeId → 영문 readable 라벨. 하드코딩 + snake_to_title fallback."""
     return dict(_EDGAR_LABELS)
 
 
-def get_account_labels(locale: str = "kr") -> dict[str, str]:
+def getAccountLabels(locale: str = "kr") -> dict[str, str]:
     """snakeId → 사람이 읽기 쉬운 라벨.
 
     Args:
@@ -221,8 +221,8 @@ def get_account_labels(locale: str = "kr") -> dict[str, str]:
         {snakeId: label} dict.
     """
     if locale == "kr":
-        return get_korean_labels()
-    return get_english_labels()
+        return getKoreanLabels()
+    return getEnglishLabels()
 
 
 # 사용자가 자주 쓰는 줄임말/변형 → 정규 snakeId 매핑
@@ -243,7 +243,7 @@ _KR_SYNONYMS: dict[str, str] = {
 
 
 @lru_cache(maxsize=1)
-def get_reverse_korean_labels() -> dict[str, str]:
+def getReverseKoreanLabels() -> dict[str, str]:
     """한글 라벨 → snakeId 역조회. get_korean_labels()의 역방향.
 
     동일 한글 라벨이 여러 snakeId에 매핑될 경우 첫 번째를 유지한다.
@@ -253,7 +253,7 @@ def get_reverse_korean_labels() -> dict[str, str]:
     import re
     import unicodedata
 
-    forward = get_korean_labels()
+    forward = getKoreanLabels()
     reverse: dict[str, str] = {}
     for sid, kr in forward.items():
         if kr not in reverse:
@@ -270,15 +270,15 @@ def get_reverse_korean_labels() -> dict[str, str]:
     return reverse
 
 
-def resolve_label(snake_id: str, market: str = "KR") -> str:
+def resolveLabel(snakeId: str, market: str = "KR") -> str:
     """단일 snakeId를 라벨로 변환. 매칭 실패 시 snake_to_title fallback."""
-    labels = get_account_labels("kr" if market == "KR" else "en")
-    label = labels.get(snake_id)
+    labels = getAccountLabels("kr" if market == "KR" else "en")
+    label = labels.get(snakeId)
     if label:
         return label
     if market != "KR":
-        return _snake_to_title(snake_id)
-    return snake_id
+        return _snakeToTitle(snakeId)
+    return snakeId
 
 
 # ── DART ↔ EDGAR snakeId alias (L0에 배치 — import 방향 준수) ──

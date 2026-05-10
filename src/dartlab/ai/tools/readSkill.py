@@ -48,7 +48,7 @@ def readSkill(
         except Exception:  # noqa: BLE001
             body = ""
 
-        payload = spec.to_dict()
+        payload = spec.toDict()
         payload["score"] = match.score
         payload["reasons"] = list(match.reasons)
         body_preview = body[:_BODY_PREVIEW_CHARS] if body else ""
@@ -128,7 +128,7 @@ def getSkillBody(skillId: str, *, includeUser: bool = True) -> ToolResult:
         body = ((described or {}).get("source") or {}).get("body", "") if isinstance(described, dict) else ""
     except Exception:  # noqa: BLE001
         body = ""
-    payload = spec.to_dict()
+    payload = spec.toDict()
     payload["body"] = body
     return ToolResult(
         ok=True,

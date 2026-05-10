@@ -13,7 +13,7 @@ def causes(
     graph: CompanyGraph,
     label: str,
     *,
-    max_depth: int = 3,
+    maxDepth: int = 3,
 ) -> list[tuple[Node, Edge, int]]:
     """label 매칭 노드의 원인 트리 (역방향 BFS).
 
@@ -41,7 +41,7 @@ def causes(
 
     while queue:
         nid, depth = queue.pop(0)
-        if depth >= max_depth:
+        if depth >= maxDepth:
             continue
         for edge in graph.incoming(nid):
             if edge.source in visited:
@@ -59,7 +59,7 @@ def ancestors(
     graph: CompanyGraph,
     label: str,
     *,
-    max_depth: int = 5,
+    maxDepth: int = 5,
 ) -> list[Node]:
     """label 매칭 노드의 조상 체인 (PART_OF 엣지만).
 
@@ -87,7 +87,7 @@ def ancestors(
 
     while queue:
         nid = queue.pop(0)
-        if len(result) >= max_depth:
+        if len(result) >= maxDepth:
             break
         for edge in graph.incoming(nid):
             if edge.type != EdgeType.PART_OF:
@@ -129,7 +129,7 @@ def related(
     graph: CompanyGraph,
     label: str,
     *,
-    edge_type: EdgeType | None = None,
+    edgeType: EdgeType | None = None,
 ) -> list[tuple[Node, Edge]]:
     """label 매칭 노드의 연결된 노드 (forward + backward).
 
@@ -156,7 +156,7 @@ def related(
 
     for t in targets:
         for edge in graph.outgoing(t.id):
-            if edge_type and edge.type != edge_type:
+            if edgeType and edge.type != edgeType:
                 continue
             if edge.target not in seen:
                 node = graph.getNode(edge.target)
@@ -164,7 +164,7 @@ def related(
                     results.append((node, edge))
                     seen.add(edge.target)
         for edge in graph.incoming(t.id):
-            if edge_type and edge.type != edge_type:
+            if edgeType and edge.type != edgeType:
                 continue
             if edge.source not in seen:
                 node = graph.getNode(edge.source)

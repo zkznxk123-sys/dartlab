@@ -62,12 +62,12 @@ class AnalysisStreamError(RuntimeError):
     detail: str | None = None
 
 
-async def stream_ask(req: AskRequest):
+async def streamAsk(req: AskRequest):
     """ask 이벤트 → SSE 변환.
 
     모든 분석 로직은 ask workbench 에 위임. 종목 resolve 는 AI 가 자율 판단.
     """
-    kwargs = _build_kwargs(req)
+    kwargs = _buildKwargs(req)
     auditor = AuditCollector(
         question=req.question,
         stockCode_hint=kwargs.get("stockCode"),
@@ -75,21 +75,21 @@ async def stream_ask(req: AskRequest):
         model=None,
     )
     try:
-        async for item in stream_analysis(req.question, _audit=auditor, **kwargs):
+        async for item in streamAnalysis(req.question, _audit=auditor, **kwargs):
             yield item
     finally:
         auditor.flush()
 
 
-async def stream_analysis(question: str = "", *, _audit: AuditCollector | None = None, **kwargs):
+async def streamAnalysis(question: str = "", *, _audit: AuditCollector | None = None, **kwargs):
     """ask internal events → SSE adapter."""
-    from dartlab.ai.kernel import _ask_events
+    from dartlab.ai.kernel import _askEvents
 
     activity_count = 0
-    async for event in _sync_gen_to_async(_ask_events, question, **kwargs):
+    async for event in _syncGenToAsync(_askEvents, question, **kwargs):
         if _audit is not None:
             _audit.observe(event.kind, event.data)
-        activity = _activity_from_event(event.kind, event.data)
+        activity = _activityFromEvent(event.kind, event.data)
         if activity is not None:
             activity_count += 1
             activity["index"] = activity_count
@@ -103,15 +103,15 @@ async def stream_analysis(question: str = "", *, _audit: AuditCollector | None =
         yield _sse(event.kind, event.data)
 
 
-async def collect_analysis_text(question: str = "", **kwargs) -> str:
+async def collectAnalysisText(question: str = "", **kwargs) -> str:
     """ask 실행 후 chunk 텍스트 수집 (non-stream HTTP endpoint 용)."""
-    result = await collect_analysis_result(question, **kwargs)
+    result = await collectAnalysisResult(question, **kwargs)
     return result["answer"]
 
 
-async def collect_analysis_result(question: str = "", **kwargs) -> dict:
+async def collectAnalysisResult(question: str = "", **kwargs) -> dict:
     """ask 실행 후 답변과 tool CSV 아티팩트를 함께 수집한다."""
-    from dartlab.ai.kernel import _ask_events
+    from dartlab.ai.kernel import _askEvents
 
     auditor = AuditCollector(
         question=question,
@@ -131,9 +131,9 @@ async def collect_analysis_result(question: str = "", **kwargs) -> dict:
     responseMeta: dict = {}
     activity_count = 0
     try:
-        async for event in _sync_gen_to_async(_ask_events, question, **kwargs):
+        async for event in _syncGenToAsync(_askEvents, question, **kwargs):
             auditor.observe(event.kind, event.data)
-            if _activity_from_event(event.kind, event.data) is not None:
+            if _activityFromEvent(event.kind, event.data) is not None:
                 activity_count += 1
             if event.kind == "chunk":
                 chunks.append(event.data.get("text", ""))
@@ -208,7 +208,7 @@ def _sanitizeNanInf(obj):
     return obj
 
 
-def _build_kwargs(req: AskRequest) -> dict:
+def _buildKwargs(req: AskRequest) -> dict:
     """AskRequest → ask workbench kwargs 변환."""
     kwargs: dict = {
         "include": req.include,
@@ -322,7 +322,7 @@ def _publicSseData(value):
     return value
 
 
-def _activity_from_event(kind: str, data: dict) -> dict | None:
+def _activityFromEvent(kind: str, data: dict) -> dict | None:
     """TraceEvent → 사용자용 activity payload.
 
     채팅 본문은 raw trace를 직접 보지 않고 이 1줄 payload만 렌더한다.
@@ -368,7 +368,7 @@ def _activity_from_event(kind: str, data: dict) -> dict | None:
             "running",
             f"{_displayToolName(name)} 실행함{': ' + target if target else ''}",
             target,
-            activity_id=_toolActivityId(data, name),
+            activityId=_toolActivityId(data, name),
         )
     if kind == "tool_result":
         name = str(data.get("name") or data.get("tool") or "tool")
@@ -386,7 +386,7 @@ def _activity_from_event(kind: str, data: dict) -> dict | None:
             target,
             refs=[str(v) for v in data.get("evidenceRefs") or []],
             error=_errorFromPayload(data) if status == "error" else None,
-            activity_id=_toolActivityId(data, name),
+            activityId=_toolActivityId(data, name),
         )
     if kind == "verify":
         result = data.get("result") if isinstance(data.get("result"), dict) else {}
@@ -438,7 +438,7 @@ def _activity(
     refs: list[str] | None = None,
     artifactRefs: list[str] | None = None,
     error: str | None = None,
-    activity_id: str | None = None,
+    activityId: str | None = None,
 ) -> dict:
     digest = hashlib.sha1(
         json.dumps([kind, summary, target, refs or [], artifactRefs or []], ensure_ascii=False, sort_keys=True).encode(
@@ -446,7 +446,7 @@ def _activity(
         )
     ).hexdigest()[:12]
     return {
-        "id": activity_id or f"activity:{kind}:{digest}",
+        "id": activityId or f"activity:{kind}:{digest}",
         "kind": kind,
         "displayName": displayName,
         "status": status,
@@ -591,7 +591,7 @@ def _failureReasonFromDone(data: dict) -> str:
     return _readableFailure(str(limits[0])) if limits else "최종 답변 생성 실패"
 
 
-async def _sync_gen_to_async(gen_fn, *args, **kwargs):
+async def _syncGenToAsync(genFn, *args, **kwargs):
     """동기 제너레이터 → async 큐 브릿지 (timeout · cancel 대응).
 
     요청 종료(정상·예외·소비자 break·asyncio cancel 모두) 시 Polars string cache 를
@@ -615,7 +615,7 @@ async def _sync_gen_to_async(gen_fn, *args, **kwargs):
 
     def _run():
         try:
-            for item in gen_fn(*args, **kwargs):
+            for item in genFn(*args, **kwargs):
                 if cancelled.is_set():
                     break
                 try:

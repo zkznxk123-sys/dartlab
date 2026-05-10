@@ -11,8 +11,8 @@ class LLMConfig:
 
     provider: str = "dartlab"
     model: str | None = None
-    api_key: str | None = None
-    base_url: str | None = None
+    apiKey: str | None = None
+    baseUrl: str | None = None
     temperature: float | None = None
-    max_tokens: int | None = None
-    system_prompt: str | None = None
+    maxTokens: int | None = None
+    systemPrompt: str | None = None

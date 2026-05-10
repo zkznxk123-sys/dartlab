@@ -38,8 +38,8 @@ class CircuitBreaker:
 
     def __init__(
         self,
-        failure_threshold: int = 5,
-        recovery_timeout: float = 300.0,
+        failureThreshold: int = 5,
+        recoveryTimeout: float = 300.0,
     ) -> None:
         """CircuitBreaker 초기화.
 
@@ -50,8 +50,8 @@ class CircuitBreaker:
         recovery_timeout : float
             open 상태에서 half_open 시도까지 대기 시간 (초). 기본 300.0.
         """
-        self._failure_threshold = failure_threshold
-        self._recovery_timeout = recovery_timeout
+        self._failure_threshold = failureThreshold
+        self._recovery_timeout = recoveryTimeout
         self._circuits: dict[str, _CircuitState] = {}
         self._lock = threading.Lock()
 
@@ -74,7 +74,7 @@ class CircuitBreaker:
             self._circuits[source] = _CircuitState()
         return self._circuits[source]
 
-    def is_open(self, source: str) -> bool:
+    def isOpen(self, source: str) -> bool:
         """소스가 차단 상태인지 확인. half_open 전환도 처리.
 
         half_open은 1회만 허용 — 첫 호출이 허용되면 즉시 OPEN으로 되돌려
@@ -106,7 +106,7 @@ class CircuitBreaker:
                 return False
             return True
 
-    def record_success(self, source: str) -> None:
+    def recordSuccess(self, source: str) -> None:
         """소스 성공 기록 및 서킷 닫기.
 
         Parameters
@@ -119,7 +119,7 @@ class CircuitBreaker:
             cs.state = _State.CLOSED
             cs.failure_count = 0
 
-    def record_failure(self, source: str) -> None:
+    def recordFailure(self, source: str) -> None:
         """소스 실패 기록 및 임계치 초과 시 서킷 열기.
 
         Parameters

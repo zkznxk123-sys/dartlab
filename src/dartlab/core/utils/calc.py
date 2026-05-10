@@ -88,7 +88,7 @@ def decomposeRoic(
     retention = 1.0 - tax
 
     roic = margin * turnover * retention
-    wacc_pct = wacc if wacc is not None else 0.0
+    waccPct = wacc if wacc is not None else 0.0
 
     # 기여도 분해 — log 공간이 아닌 선형 분해 (Damodaran 권고 단순화)
     # 각 기여분은 "평균값 대비 이 기업의 초과" 가 아니라
@@ -106,15 +106,15 @@ def decomposeRoic(
         dominant = "balanced"
 
     invested_abs = investedCapital
-    excess_pct = (roic - wacc_pct / 100.0) * 100.0 if wacc else None
-    excess_abs = (roic - wacc_pct / 100.0) * invested_abs if wacc else None
+    excess_pct = (roic - waccPct / 100.0) * 100.0 if wacc else None
+    excess_abs = (roic - waccPct / 100.0) * invested_abs if wacc else None
 
     return {
         "operatingMargin": round(margin * 100, 2),
         "assetTurnover": round(turnover, 3),
         "taxRetention": round(retention, 3),
         "roicReconstructed": round(roic * 100, 2),
-        "waccPct": round(wacc_pct, 2) if wacc else None,
+        "waccPct": round(waccPct, 2) if wacc else None,
         "excessReturnPct": round(excess_pct, 2) if excess_pct is not None else None,
         "excessReturnAbs": excess_abs,
         "marginContribution": round(margin_contrib * 100, 2),

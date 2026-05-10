@@ -13,9 +13,9 @@ pytestmark = pytest.mark.unit
 
 def test_cli_parser_has_15_commands():
     """공개 CLI 명령 15개 보호."""
-    from dartlab.cli.parser import build_parser
+    from dartlab.cli.parser import buildParser
 
-    parser = build_parser()
+    parser = buildParser()
     subparsers_action = None
     for action in parser._actions:
         if hasattr(action, "choices") and isinstance(action.choices, dict):

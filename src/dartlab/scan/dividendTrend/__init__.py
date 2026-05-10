@@ -9,7 +9,7 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 
-from dartlab.scan._helpers import parse_num, scan_parquets
+from dartlab.scan._helpers import parse_num, scanParquets
 
 
 def _classifyPattern(
@@ -115,7 +115,7 @@ def scanDividendTrend(*, verbose: bool = True) -> pl.DataFrame:
         pattern : str — 배당 패턴 (무배당/시작/중단/연속증가/연속감소/안정/증가/감소/불규칙)
         grade : str — 배당 등급 (우수/양호/보통/주의/위험/무배당)
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "dividend",
         ["stockCode", "year", "quarter", "se", "thstrm", "frmtrm", "lwfr", "stock_knd"],
     )

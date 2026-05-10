@@ -18,29 +18,29 @@ _log = getLogger(__name__)
 
 import polars as pl
 
-from dartlab.scan.network.classifier import classify_balanced
-from dartlab.scan.network.cycles import detect_cycles
+from dartlab.scan.network.classifier import classifyBalanced
+from dartlab.scan.network.cycles import detectCycles
 from dartlab.scan.network.edges import (
-    build_holder_edges,
-    build_invest_edges,
-    deduplicate_edges,
+    buildHolderEdges,
+    buildInvestEdges,
+    deduplicateEdges,
 )
 from dartlab.scan.network.export import (
-    export_ego,
-    export_full,
-    export_overview,
+    exportEgo,
+    exportFull,
+    exportOverview,
 )
 from dartlab.scan.network.scanner import (
-    load_listing,
-    scan_invested,
-    scan_major_holders,
+    loadListing,
+    scanInvested,
+    scanMajorHolders,
 )
 from dartlab.scan.network.scanner import (
-    scan_affiliate_docs as _scan_affiliate_docs_fn,
+    scanAffiliateDocs as _scan_affiliate_docs_fn,
 )
 
 
-def build_graph(*, verbose: bool = True) -> dict:
+def buildGraph(*, verbose: bool = True) -> dict:
     """전체 파이프라인 실행 → data dict.
 
     Returns:
@@ -54,50 +54,50 @@ def build_graph(*, verbose: bool = True) -> dict:
             _log.info(msg)
 
     _say("1. 상장사 목록...")
-    name_to_code, code_to_name, listing_codes, listing_meta = load_listing()
+    nameToCode, codeToName, listing_codes, listing_meta = loadListing()
 
     _say("2. investedCompany 스캔...")
-    raw_inv = scan_invested()
-    invest_edges = build_invest_edges(raw_inv, name_to_code, code_to_name)
-    invest_deduped = deduplicate_edges(invest_edges)
+    raw_inv = scanInvested()
+    investEdges = buildInvestEdges(raw_inv, nameToCode, codeToName)
+    invest_deduped = deduplicateEdges(investEdges)
     invest_deduped = invest_deduped.filter(pl.col("from_code") != pl.col("to_code"))
     _say(f"   → {len(invest_deduped):,} edges")
 
     _say("3. majorHolder 스캔...")
-    raw_mh = scan_major_holders()
-    corp_edges, person_edges = build_holder_edges(raw_mh, name_to_code)
-    _say(f"   → corp {len(corp_edges):,}, person {len(person_edges):,}")
+    raw_mh = scanMajorHolders()
+    corpEdges, personEdges = buildHolderEdges(raw_mh, nameToCode)
+    _say(f"   → corp {len(corpEdges):,}, person {len(personEdges):,}")
 
     # 노드 수집
-    all_node_ids: set[str] = set()
+    allNodeIds: set[str] = set()
     listed_only = invest_deduped.filter(pl.col("is_listed") & pl.col("to_code").is_not_null())
     for row in listed_only.iter_rows(named=True):
-        all_node_ids.add(row["from_code"])
-        all_node_ids.add(row["to_code"])
-    matched_corp = corp_edges.filter(pl.col("from_code").is_not_null())
+        allNodeIds.add(row["from_code"])
+        allNodeIds.add(row["to_code"])
+    matched_corp = corpEdges.filter(pl.col("from_code").is_not_null())
     for row in matched_corp.iter_rows(named=True):
-        all_node_ids.add(row["from_code"])
-        all_node_ids.add(row["to_code"])
-    all_node_ids = all_node_ids & listing_codes
-    _say(f"   → {len(all_node_ids)} 상장사 노드")
+        allNodeIds.add(row["from_code"])
+        allNodeIds.add(row["to_code"])
+    allNodeIds = allNodeIds & listing_codes
+    _say(f"   → {len(allNodeIds)} 상장사 노드")
 
     _say("4. docs ground truth...")
-    docs_gt = _scan_affiliate_docs_fn(name_to_code, code_to_name)
+    docs_gt = _scan_affiliate_docs_fn(nameToCode, codeToName)
     _say(f"   → {len(docs_gt)} 종목 매핑")
 
     _say("5. 균형 분류...")
-    code_to_group = classify_balanced(
+    codeToGroup = classifyBalanced(
         invest_deduped,
-        corp_edges,
-        person_edges,
-        all_node_ids,
-        code_to_name,
+        corpEdges,
+        personEdges,
+        allNodeIds,
+        codeToName,
         docs_gt,
         verbose=verbose,
     )
 
     _say("6. 순환출자 탐지...")
-    cycles = detect_cycles(invest_deduped, code_to_name, max_length=6)
+    cycles = detectCycles(invest_deduped, codeToName, maxLength=6)
     _say(f"   → {len(cycles)}개")
 
     elapsed = time.perf_counter() - t0
@@ -105,12 +105,12 @@ def build_graph(*, verbose: bool = True) -> dict:
 
     return {
         "listing_meta": listing_meta,
-        "code_to_name": code_to_name,
-        "code_to_group": code_to_group,
+        "code_to_name": codeToName,
+        "code_to_group": codeToGroup,
         "invest_edges": invest_deduped,
-        "corp_edges": corp_edges,
-        "person_edges": person_edges,
-        "all_node_ids": all_node_ids,
+        "corp_edges": corpEdges,
+        "person_edges": personEdges,
+        "all_node_ids": allNodeIds,
         "cycles": cycles,
     }
 

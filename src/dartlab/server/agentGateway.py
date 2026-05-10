@@ -12,9 +12,9 @@ from dartlab.ai.contracts import TraceEvent
 from dartlab.ai.tools.registry import _LEGACY_NAME_MAP, CANONICAL_TOOL_NAMES
 from dartlab.ai.workbench import WorkbenchLoop
 
-from . import agent_metrics
+from . import agentMetrics
 from .models import AgentRunRequest
-from .streaming import _sync_gen_to_async
+from .streaming import _syncGenToAsync
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ _ALLOWED_EVENTS = {
 }
 
 
-async def stream_agent_run(req: AgentRunRequest) -> AsyncIterator[dict[str, str]]:
+async def streamAgentRun(req: AgentRunRequest) -> AsyncIterator[dict[str, str]]:
     """Stream one DartLab run using the public AG-UI event contract.
 
     분기:
@@ -61,21 +61,21 @@ async def stream_agent_run(req: AgentRunRequest) -> AsyncIterator[dict[str, str]
 
     회귀 방지: memory/feedback_no_graph_regression.md — runAgent 가 본체. WorkbenchLoop 는 옵션.
     """
-    question = _last_user_message(req)
-    run_id = req.threadId or "dartlab-thread"
-    message_id = f"msg-{run_id}"
+    question = _lastUserMessage(req)
+    runId = req.threadId or "dartlab-thread"
+    messageId = f"msg-{runId}"
     text_started = False
 
-    kernel_kwargs = _kernel_kwargs(req)
-    use_workbench = _shouldUseWorkbench(req, question, kernel_kwargs)
+    kernelKwargs = _kernelKwargs(req)
+    use_workbench = _shouldUseWorkbench(req, question, kernelKwargs)
 
     if use_workbench:
         graph = WorkbenchLoop()
-        agent_metrics.record("workbench")
+        agentMetrics.record("workbench")
         yield _event(
             "STATE_SNAPSHOT",
             {
-                "runId": run_id,
+                "runId": runId,
                 "agentId": req.agentId or "dartlab-research",
                 "status": "running",
                 "graph": {"name": "DartLabWorkbench", "nodes": list(graph.nodes)},
@@ -83,57 +83,57 @@ async def stream_agent_run(req: AgentRunRequest) -> AsyncIterator[dict[str, str]
             },
         )
         yield _activity("계획을 세우고 필요한 근거를 확인합니다.", status="done")
-        producer = lambda: graph.stream(question, **kernel_kwargs)  # noqa: E731
+        producer = lambda: graph.stream(question, **kernelKwargs)  # noqa: E731
     else:
-        provider_obj = _resolveProvider(kernel_kwargs)
+        provider_obj = _resolveProvider(kernelKwargs)
         if provider_obj is None or not _isLLMProvider(provider_obj):
             # provider 미해결 — workbench 휴리스틱 fallback
             graph = WorkbenchLoop()
-            agent_metrics.record("workbench-heuristic")
+            agentMetrics.record("workbench-heuristic")
             yield _event(
                 "STATE_SNAPSHOT",
                 {
-                    "runId": run_id,
+                    "runId": runId,
                     "agentId": req.agentId or "dartlab-research",
                     "status": "running",
                     "graph": {"name": "DartLabWorkbench", "nodes": list(graph.nodes)},
                     "mode": "workbench-heuristic",
                 },
             )
-            producer = lambda: graph.stream(question, **kernel_kwargs)  # noqa: E731
+            producer = lambda: graph.stream(question, **kernelKwargs)  # noqa: E731
         else:
-            agent_metrics.record("agent")
+            agentMetrics.record("agent")
             yield _event(
                 "STATE_SNAPSHOT",
                 {
-                    "runId": run_id,
+                    "runId": runId,
                     "agentId": req.agentId or "dartlab-agent",
                     "status": "running",
                     "graph": {"name": "DartLabAgent", "nodes": ["agent"]},
                     "mode": "agent",
                 },
             )
-            agent_kwargs = {**kernel_kwargs, "provider": provider_obj}
+            agent_kwargs = {**kernelKwargs, "provider": provider_obj}
             producer = lambda: runAgent(question, **agent_kwargs)  # noqa: E731
 
     try:
-        async for internal in _sync_gen_to_async(producer):
-            for public in _public_events(internal, run_id=run_id, message_id=message_id):
+        async for internal in _syncGenToAsync(producer):
+            for public in _publicEvents(internal, runId=runId, messageId=messageId):
                 if public["event"] == "TEXT_MESSAGE_CONTENT" and not text_started:
                     text_started = True
-                    yield _event("TEXT_MESSAGE_START", {"messageId": message_id, "role": "assistant"})
+                    yield _event("TEXT_MESSAGE_START", {"messageId": messageId, "role": "assistant"})
                 yield public
         if text_started:
-            yield _event("TEXT_MESSAGE_END", {"messageId": message_id})
+            yield _event("TEXT_MESSAGE_END", {"messageId": messageId})
     except Exception as exc:  # noqa: BLE001
-        logger.exception("agent run failed (runId=%s)", run_id)
+        logger.exception("agent run failed (runId=%s)", runId)
         yield _event(
             "RUN_ERROR",
-            {"runId": run_id, "message": _public_failure(str(exc)), "code": "agent_run_failed"},
+            {"runId": runId, "message": _publicFailure(str(exc)), "code": "agent_run_failed"},
         )
 
 
-def _shouldUseWorkbench(req: AgentRunRequest, question: str, kernel_kwargs: dict[str, Any]) -> bool:
+def _shouldUseWorkbench(req: AgentRunRequest, question: str, kernelKwargs: dict[str, Any]) -> bool:
     """명시적 분석 모드 → workbench. 그 외 → agent (모델이 자율로 run_workbench 호출 가능).
 
     P-revised: intent regex 키워드 / 종목코드 자동 추출로 암묵 elevate 안 한다.
@@ -148,16 +148,16 @@ def _shouldUseWorkbench(req: AgentRunRequest, question: str, kernel_kwargs: dict
     return False
 
 
-def _resolveProvider(kernel_kwargs: dict[str, Any]) -> Any:
+def _resolveProvider(kernelKwargs: dict[str, Any]) -> Any:
     try:
-        from dartlab.ai.providers import create_provider
+        from dartlab.ai.providers import createProvider
 
-        return create_provider(
-            provider=kernel_kwargs.get("provider"),
-            model=kernel_kwargs.get("model"),
+        return createProvider(
+            provider=kernelKwargs.get("provider"),
+            model=kernelKwargs.get("model"),
         )
     except Exception:  # noqa: BLE001
-        logger.exception("provider resolve failed (provider=%s)", kernel_kwargs.get("provider"))
+        logger.exception("provider resolve failed (provider=%s)", kernelKwargs.get("provider"))
         return None
 
 
@@ -166,8 +166,8 @@ def _isLLMProvider(obj: Any) -> bool:
     if obj is None or not callable(getattr(obj, "generate", None)):
         return False
     config = getattr(obj, "config", None)
-    provider_id = (getattr(config, "provider", None) or "").lower()
-    if provider_id not in {
+    providerId = (getattr(config, "provider", None) or "").lower()
+    if providerId not in {
         "oauth-codex",
         "openai",
         "gemini",
@@ -180,13 +180,13 @@ def _isLLMProvider(obj: Any) -> bool:
     }:
         return False
     try:
-        return bool(obj.check_available())
+        return bool(obj.checkAvailable())
     except Exception:  # noqa: BLE001
-        logger.exception("provider check_available failed (provider=%s)", provider_id)
+        logger.exception("provider check_available failed (provider=%s)", providerId)
         return False
 
 
-def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[dict[str, str]]:
+def _publicEvents(event: TraceEvent, *, runId: str, messageId: str) -> list[dict[str, str]]:
     kind = event.kind
     data = event.data
     if kind == "graph_node":
@@ -195,10 +195,10 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
             _event(
                 "STATE_DELTA",
                 {
-                    "runId": run_id,
+                    "runId": runId,
                     "status": data.get("status") or "running",
                     "currentNode": data.get("node"),
-                    "state": _public_graph_state(state),
+                    "state": _publicGraphState(state),
                 },
             ),
             _activity(str(data.get("summary") or "분석 단계를 진행합니다."), status="done"),
@@ -210,16 +210,16 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
             _activity(f"분석 경로를 정했습니다{': ' + target if target else ''}", refs=[], passLabel=_passLabel(data))
         ]
     if kind in {"tool_start", "tool_call"}:
-        tool = _tool_name(data)
+        tool = _toolName(data)
         if tool not in _PUBLIC_TOOL_NAMES:
             return []
         # ToolBlock 카드(TOOL_CALL_START)가 진행 표현 전담. activity 줄 중복 emit 금지.
         # args 동봉 — UI 가 expand 시 RunPython 코드·EngineCall 인자 등 핵심 input 표시.
         payload: dict[str, Any] = {
-            "runId": run_id,
-            "messageId": message_id,
+            "runId": runId,
+            "messageId": messageId,
             "toolCallId": str(data.get("id") or tool),
-            "toolName": _display_tool(tool),
+            "toolName": _displayTool(tool),
             "args": data.get("input") if isinstance(data.get("input"), dict) else {},
             "status": "running",
         }
@@ -235,8 +235,8 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
             _event(
                 "VIEW_SPEC",
                 {
-                    "runId": run_id,
-                    "messageId": message_id,
+                    "runId": runId,
+                    "messageId": messageId,
                     "id": data.get("id"),
                     "spec": spec,
                     "title": data.get("title"),
@@ -245,17 +245,17 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
             )
         ]
     if kind == "tool_result":
-        tool = _tool_name(data)
+        tool = _toolName(data)
         if tool not in _PUBLIC_TOOL_NAMES:
             return []
         status = "error" if data.get("status") == "error" else "done"
-        result_payload = _public_result_payload(data)
+        result_payload = _publicResultPayload(data)
         pass_label = _passLabel(data)
         result_event: dict[str, Any] = {
-            "runId": run_id,
-            "messageId": message_id,
+            "runId": runId,
+            "messageId": messageId,
             "toolCallId": str(data.get("id") or tool),
-            "toolName": _display_tool(tool),
+            "toolName": _displayTool(tool),
             "status": status,
             "summary": str(data.get("outputSummary") or data.get("summary") or ""),
             "refs": [str(v) for v in data.get("evidenceRefs") or []],
@@ -264,10 +264,10 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
             "error": str(data.get("error") or "") if status == "error" else None,
         }
         end_event: dict[str, Any] = {
-            "runId": run_id,
-            "messageId": message_id,
+            "runId": runId,
+            "messageId": messageId,
             "toolCallId": str(data.get("id") or tool),
-            "toolName": _display_tool(tool),
+            "toolName": _displayTool(tool),
             "status": status,
         }
         if pass_label:
@@ -277,7 +277,7 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
     if kind == "reference":
         refs = data.get("refs") if isinstance(data.get("refs"), list) else []
         if refs:
-            return [_activity(f"근거 {len(refs)}개를 확인했습니다.", refs=_ref_ids(refs), passLabel=_passLabel(data))]
+            return [_activity(f"근거 {len(refs)}개를 확인했습니다.", refs=_refIds(refs), passLabel=_passLabel(data))]
         return []
     if kind == "verify":
         result = data.get("result") if isinstance(data.get("result"), dict) else {}
@@ -293,26 +293,26 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
         return [_activity("답변 초안을 다시 검증합니다.", status="running", passLabel=pass_label)]
     if kind == "chunk":
         text = str(data.get("text") or "")
-        return [_event("TEXT_MESSAGE_CONTENT", {"messageId": message_id, "delta": text})] if text else []
+        return [_event("TEXT_MESSAGE_CONTENT", {"messageId": messageId, "delta": text})] if text else []
     if kind == "answer":
         refs = [str(v) for v in data.get("evidenceRefs") or []]
         return [_activity(f"근거 {len(refs)}개로 답변을 작성했습니다.", refs=refs, passLabel=_passLabel(data))]
     if kind == "unable":
-        message = str(data.get("message") or "") or _public_failure(str(data.get("reason") or ""))
-        return [_event("RUN_ERROR", {"runId": run_id, "message": message})]
+        message = str(data.get("message") or "") or _publicFailure(str(data.get("reason") or ""))
+        return [_event("RUN_ERROR", {"runId": runId, "message": message})]
     if kind == "done":
         status = "ok" if (data.get("responseMeta") or {}).get("finalEvent") == "answer" else "failed"
-        refs = _ref_ids(data.get("refs") if isinstance(data.get("refs"), list) else [])
+        refs = _refIds(data.get("refs") if isinstance(data.get("refs"), list) else [])
         artifacts = [a for a in data.get("artifacts") or [] if isinstance(a, dict)]
-        suggested_questions = _suggest_followups(data) if status == "ok" else []
+        suggested_questions = _suggestFollowups(data) if status == "ok" else []
         finished = _event(
             "RUN_FINISHED",
             {
-                "runId": run_id,
+                "runId": runId,
                 "status": status,
                 "refs": refs,
                 "artifacts": artifacts,
-                "responseMeta": _public_response_meta(data.get("responseMeta") or {}),
+                "responseMeta": _publicResponseMeta(data.get("responseMeta") or {}),
                 "suggestedQuestions": suggested_questions,
             },
         )
@@ -322,18 +322,18 @@ def _public_events(event: TraceEvent, *, run_id: str, message_id: str) -> list[d
             _event(
                 "RUN_ERROR",
                 {
-                    "runId": run_id,
-                    "message": _public_failure(str((data.get("responseMeta") or {}).get("failureReason") or "")),
+                    "runId": runId,
+                    "message": _publicFailure(str((data.get("responseMeta") or {}).get("failureReason") or "")),
                 },
             ),
             finished,
         ]
     if kind == "error":
-        return [_event("RUN_ERROR", {"runId": run_id, "message": _public_failure(str(data.get("error") or ""))})]
+        return [_event("RUN_ERROR", {"runId": runId, "message": _publicFailure(str(data.get("error") or ""))})]
     return []
 
 
-def _kernel_kwargs(req: AgentRunRequest) -> dict[str, Any]:
+def _kernelKwargs(req: AgentRunRequest) -> dict[str, Any]:
     context = req.workspaceContext or {}
     kwargs: dict[str, Any] = {
         "provider": req.provider,
@@ -362,18 +362,18 @@ def _kernel_kwargs(req: AgentRunRequest) -> dict[str, Any]:
     return {k: v for k, v in kwargs.items() if v is not None}
 
 
-def _last_user_message(req: AgentRunRequest) -> str:
+def _lastUserMessage(req: AgentRunRequest) -> str:
     for message in reversed(req.messages):
         if message.role == "user" and message.content.strip():
             return message.content.strip()
     return ""
 
 
-def _event(event_type: str, data: dict[str, Any]) -> dict[str, str]:
-    if event_type not in _ALLOWED_EVENTS:
-        raise ValueError(f"unsupported AG-UI event: {event_type}")
-    payload = {"type": event_type, **_publicEventData(data)}
-    return {"event": event_type, "data": json.dumps(payload, ensure_ascii=False, default=str)}
+def _event(eventType: str, data: dict[str, Any]) -> dict[str, str]:
+    if eventType not in _ALLOWED_EVENTS:
+        raise ValueError(f"unsupported AG-UI event: {eventType}")
+    payload = {"type": eventType, **_publicEventData(data)}
+    return {"event": eventType, "data": json.dumps(payload, ensure_ascii=False, default=str)}
 
 
 def _publicEventData(value):
@@ -393,14 +393,14 @@ def _publicEventData(value):
     return value
 
 
-def _suggest_followups(done_data: dict[str, Any]) -> list[str]:
+def _suggestFollowups(doneData: dict[str, Any]) -> list[str]:
     """답변 종료 시점 follow-up 추천 — 종목/topic 컨텍스트 있을 때만.
 
     종목·topic 없는 일반 답변엔 generic 휴리스틱 박지 않는다 (답변과 무관한
     "표·차트로 정리" 같은 옛 fallback 이 어색했음). 향후 LLM 이 답변 끝에
     직접 followup 작성하는 구조로 발전 예정.
     """
-    meta = done_data.get("responseMeta") if isinstance(done_data.get("responseMeta"), dict) else {}
+    meta = doneData.get("responseMeta") if isinstance(doneData.get("responseMeta"), dict) else {}
     stock = meta.get("stockCode") or meta.get("company") or ""
     if stock:
         return [
@@ -443,11 +443,11 @@ def _passLabel(data: dict[str, Any]) -> str | None:
     return str(raw).upper()
 
 
-def _view_spec(
+def _viewSpec(
     spec: dict[str, Any],
     *,
-    run_id: str,
-    message_id: str,
+    runId: str,
+    messageId: str,
     source: str | None = None,
     title: str | None = None,
 ) -> dict[str, str]:
@@ -457,8 +457,8 @@ def _view_spec(
     분석 워크벤치 정체성의 주체. tool/activity 보다 시각적 위계가 높다.
     """
     payload: dict[str, Any] = {
-        "runId": run_id,
-        "messageId": message_id,
+        "runId": runId,
+        "messageId": messageId,
         "spec": spec,
     }
     if source:
@@ -468,15 +468,15 @@ def _view_spec(
     return _event("VIEW_SPEC", payload)
 
 
-def _tool_name(data: dict[str, Any]) -> str:
+def _toolName(data: dict[str, Any]) -> str:
     return str(data.get("name") or data.get("tool") or "tool")
 
 
-def _display_tool(tool: str) -> str:
+def _displayTool(tool: str) -> str:
     return _displayName(tool)
 
 
-def _ref_ids(refs: list[Any]) -> list[str]:
+def _refIds(refs: list[Any]) -> list[str]:
     out: list[str] = []
     for ref in refs:
         if isinstance(ref, dict) and ref.get("id"):
@@ -489,7 +489,7 @@ def _ref_ids(refs: list[Any]) -> list[str]:
 _RESULT_PREVIEW_CHARS = 4000
 
 
-def _public_result_payload(data: dict[str, Any]) -> dict[str, Any] | None:
+def _publicResultPayload(data: dict[str, Any]) -> dict[str, Any] | None:
     """tool_result 의 핵심 일부를 UI 가 expand 시 보여줄 수 있게 정제.
 
     inline 표시는 짧게, 너무 길면 UI 가 모달 / "전체 보기" 로 위임.
@@ -533,9 +533,9 @@ def _public_result_payload(data: dict[str, Any]) -> dict[str, Any] | None:
     # markdown 부재 + 위 핸드롤 분기 모두 적용 안 됐으면 dispatch 로 자동 변환 시도.
     if not out.get("markdown") and not any(k in out for k in ("stdout", "tableHead", "body", "values")):
         try:
-            from dartlab.ai.tools.formatting import format_engine_result
+            from dartlab.ai.tools.formatting import formatEngineResult
 
-            md = format_engine_result(raw)
+            md = formatEngineResult(raw)
         except Exception:  # noqa: BLE001 — 마크다운 변환 실패가 도구 결과 흐름을 막지 않게
             md = None
         if md:
@@ -543,12 +543,12 @@ def _public_result_payload(data: dict[str, Any]) -> dict[str, Any] | None:
     return out or None
 
 
-def _public_response_meta(meta: dict[str, Any]) -> dict[str, Any]:
+def _publicResponseMeta(meta: dict[str, Any]) -> dict[str, Any]:
     allowed = {"refCount", "verificationOk", "artifactCount", "activityCount", "responseStatus"}
     return {key: meta.get(key) for key in allowed if key in meta}
 
 
-def _public_graph_state(state: dict[str, Any]) -> dict[str, Any]:
+def _publicGraphState(state: dict[str, Any]) -> dict[str, Any]:
     allowed = {
         "currentNode",
         "selectedSkills",
@@ -569,7 +569,7 @@ _FAILURE_LABELS = {
 _FAILURE_MAX = 200
 
 
-def _public_failure(reason: str) -> str:
+def _publicFailure(reason: str) -> str:
     """workbench 내부 reason 코드는 라벨링, 그 외 (provider/스택 메시지) 는 원문 보존."""
     text = reason.strip()
     if not text:

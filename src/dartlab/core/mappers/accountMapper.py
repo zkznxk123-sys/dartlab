@@ -17,9 +17,9 @@ class AccountMapper(BaseMapper):
         return "account"
 
     def _data(self) -> dict:
-        from dartlab.core.utils.labels import _load_account_mappings
+        from dartlab.core.utils.labels import _loadAccountMappings
 
-        return _load_account_mappings()
+        return _loadAccountMappings()
 
     def _mappings(self) -> dict[str, str]:
         """korName → snakeId 매핑."""

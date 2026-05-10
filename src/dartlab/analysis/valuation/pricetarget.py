@@ -13,9 +13,9 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from dartlab.analysis.financial.proforma import (
-    build_proforma,
-    compute_company_wacc,
-    extract_historical_ratios,
+    buildProforma,
+    computeCompanyWacc,
+    extractHistoricalRatios,
 )
 from dartlab.analysis.forecast.prediction import adjustProbabilities
 from dartlab.core.utils.extract import getLatest, getTTM
@@ -70,14 +70,14 @@ def _choleskyMultiply(L: list[list[float]], z: list[float]) -> list[float]:
 class ScenarioPriceTarget:
     """단일 시나리오의 주가 목표."""
 
-    scenario_name: str
+    scenarioName: str
     probability: float
     proforma: ProFormaResult
     enterprise_value: float
     equity_value: float
     per_share_value: float
     wacc_used: float
-    terminal_growth: float
+    terminalGrowth: float
     implied_per: float | None
 
 
@@ -89,8 +89,8 @@ class PriceTargetResult:
     weighted_target: float
     percentiles: dict[str, float]  # p10, p25, p50, p75, p90
     expected_value: float
-    current_price: float | None
-    upside_pct: float | None
+    currentPrice: float | None
+    upsidePct: float | None
     probability_above_current: float | None
     signal: str  # strong_buy / buy / hold / sell / strong_sell
     confidence: str  # high / medium / low
@@ -102,10 +102,10 @@ class PriceTargetResult:
     def __repr__(self) -> str:
         lines = ["[확률 가중 주가 목표가]"]
         lines.append(f"  가중 목표가: {self.weighted_target:,.0f}원")
-        if self.current_price:
-            lines.append(f"  현재가: {self.current_price:,.0f}원")
-            if self.upside_pct is not None:
-                lines.append(f"  업사이드: {self.upside_pct:+.1f}%")
+        if self.currentPrice:
+            lines.append(f"  현재가: {self.currentPrice:,.0f}원")
+            if self.upsidePct is not None:
+                lines.append(f"  업사이드: {self.upsidePct:+.1f}%")
             if self.probability_above_current is not None:
                 lines.append(f"  현재가 상회 확률: {self.probability_above_current:.0f}%")
         lines.append(f"  투자 신호: {self.signal}")
@@ -118,7 +118,7 @@ class PriceTargetResult:
         lines.append("  -----------------|-------|--------------|----------")
         for s in self.scenarios:
             lines.append(
-                f"  {s.scenario_name:<16s} | {s.probability * 100:4.0f}% "
+                f"  {s.scenarioName:<16s} | {s.probability * 100:4.0f}% "
                 f"| {s.per_share_value:>12,.0f}원 | {s.enterprise_value / 1e8:>8,.0f}억"
             )
 
@@ -154,8 +154,8 @@ SCENARIO_PROBABILITIES: dict[str, float] = {
 # ══════════════════════════════════════
 
 
-def _derive_revenue_path_from_macro(
-    base_growth: float,
+def _deriveRevenuePathFromMacro(
+    baseGrowth: float,
     scenario: MacroScenario,
     elasticity: SectorElasticity,
     years: int = 5,
@@ -176,21 +176,21 @@ def _derive_revenue_path_from_macro(
             fx_pct = (scenario.krwUsd[min(i, len(scenario.krwUsd) - 1)] / scenario.krwUsd[0] - 1) * 100
             fx_delta = fx_pct / 10 * elasticity.revenueToFx  # 환율 10% 변화당
 
-        growth = base_growth + gdp_delta * elasticity.revenueToGdp + fx_delta
+        growth = baseGrowth + gdp_delta * elasticity.revenueToGdp + fx_delta
         # mean reversion: 극단 시나리오는 3~5년차에 baseline 복귀 경향
         if i >= 2:
-            growth = growth * 0.7 + base_growth * 0.3
+            growth = growth * 0.7 + baseGrowth * 0.3
         if i >= 4:
-            growth = growth * 0.5 + base_growth * 0.5
+            growth = growth * 0.5 + baseGrowth * 0.5
 
         path.append(round(growth, 2))
     return path
 
 
-def _dcf_from_proforma(
+def _dcfFromProforma(
     proforma: ProFormaResult,
     wacc: float,
-    terminal_growth: float = 2.0,
+    terminalGrowth: float = 2.0,
     shares: int | None = None,
 ) -> tuple[float, float, float]:
     """Pro-forma FCF → Terminal Value → EV → Equity → 주당가치.
@@ -202,7 +202,7 @@ def _dcf_from_proforma(
         return 0.0, 0.0, 0.0
 
     discount_rate = wacc / 100
-    tg = terminal_growth / 100
+    tg = terminalGrowth / 100
 
     # FCF 현가 합
     pv_fcf = 0.0
@@ -255,16 +255,16 @@ def _dcf_from_proforma(
     return enterprise_value, equity_value, max(per_share, 0)
 
 
-def _monte_carlo_price_distribution(
+def _monteCarloPriceDistribution(
     series: dict,
-    base_growth: float,
+    baseGrowth: float,
     elasticity: SectorElasticity,
     wacc: float,
-    terminal_growth: float,
+    terminalGrowth: float,
     shares: int | None,
     iterations: int = 5000,
     seed: int | None = None,
-    size_class: str = "Mid",
+    sizeClass: str = "Mid",
 ) -> tuple[dict[str, float], float | None, list[float]]:
     """v2 Multi-Noise MC — 5변수 동시 noise + NWC + sizeClass σ.
 
@@ -277,7 +277,7 @@ def _monte_carlo_price_distribution(
     if seed is not None:
         random.seed(seed)
 
-    ratios = extract_historical_ratios(series)
+    ratios = extractHistoricalRatios(series)
     base = {
         "revenue": getTTM(series, "IS", "sales") or 0,
         "cash": getLatest(series, "BS", "cash_and_cash_equivalents") or 0,
@@ -291,15 +291,15 @@ def _monte_carlo_price_distribution(
         return {}, None, []
 
     discount_rate = wacc / 100
-    tg = terminal_growth / 100
+    tg = terminalGrowth / 100
     values: list[float] = []
 
     # v3: sizeClass별 sigma + Cholesky 상관
-    sigma_growth = getNoiseSigma("growth", size_class)
-    sigma_margin = getNoiseSigma("margin", size_class)
-    sigma_wacc = getNoiseSigma("wacc", size_class)
-    sigma_capex = getNoiseSigma("capex", size_class)
-    sigma_tax = getNoiseSigma("tax", size_class)
+    sigma_growth = getNoiseSigma("growth", sizeClass)
+    sigma_margin = getNoiseSigma("margin", sizeClass)
+    sigma_wacc = getNoiseSigma("wacc", sizeClass)
+    sigma_capex = getNoiseSigma("capex", sizeClass)
+    sigma_tax = getNoiseSigma("tax", sizeClass)
     sigmas = [sigma_growth, sigma_margin, sigma_wacc, sigma_capex, sigma_tax]
 
     # 상관행렬: growth-margin 동조, wacc-growth 역상관
@@ -323,7 +323,7 @@ def _monte_carlo_price_distribution(
         capex_noise = correlated[3] * sigmas[3]
         tax_noise = correlated[4] * sigmas[4]
 
-        noisy_growth = base_growth + growth_noise
+        noisy_growth = baseGrowth + growth_noise
         noisy_margin = max(5.0, min(ratios.gross_margin + margin_noise, 80.0))
         noisy_wacc = max(0.03, min(discount_rate + wacc_noise / 100, 0.25))
         noisy_capex = max(0.5, ratios.capex_to_revenue + capex_noise)
@@ -345,11 +345,11 @@ def _monte_carlo_price_distribution(
             dep = rev * ratios.depreciation_ratio / 100
             # v3: IS 구조 분기 — D&A가 SGA에 포함된 경우 별도 차감하지 않음
             if ratios.dep_in_sga:
-                op_income = gross - rev * ratios.sga_ratio / 100
+                opIncome = gross - rev * ratios.sga_ratio / 100
             else:
-                op_income = gross - rev * ratios.sga_ratio / 100 - dep
-            ebitda = op_income + dep
-            ebt = max(op_income, 0)
+                opIncome = gross - rev * ratios.sga_ratio / 100 - dep
+            ebitda = opIncome + dep
+            ebt = max(opIncome, 0)
             ni = ebt * (1 - noisy_tax / 100)
             capex = rev * noisy_capex / 100
             # v2: NWC 변동 반영
@@ -421,40 +421,40 @@ def _monte_carlo_price_distribution(
     return percentiles, None, values
 
 
-def _classify_signal(
-    upside_pct: float | None,
+def _classifySignal(
+    upsidePct: float | None,
     percentiles: dict[str, float],
-    current_price: float | None,
+    currentPrice: float | None,
 ) -> str:
     """upside와 분포로 투자 신호 판정."""
-    if upside_pct is None:
+    if upsidePct is None:
         return "hold"
 
     p10 = percentiles.get("p10", 0)
     p90 = percentiles.get("p90", float("inf"))
 
-    if upside_pct > 30 and current_price and p10 > current_price:
+    if upsidePct > 30 and currentPrice and p10 > currentPrice:
         return "strong_buy"
-    if upside_pct > 15:
+    if upsidePct > 15:
         return "buy"
-    if upside_pct < -30 and current_price and p90 < current_price:
+    if upsidePct < -30 and currentPrice and p90 < currentPrice:
         return "strong_sell"
-    if upside_pct < -15:
+    if upsidePct < -15:
         return "sell"
     return "hold"
 
 
-def compute_price_target(
+def computePriceTarget(
     series: dict,
-    sector_key: str | None = None,
-    current_price: float | None = None,
+    sectorKey: str | None = None,
+    currentPrice: float | None = None,
     shares: int | None = None,
-    market_cap: float | None = None,
-    terminal_growth: float = 2.0,
-    mc_iterations: int = 5000,
-    mc_seed: int | None = None,
-    scenario_probabilities: dict[str, float] | None = None,
-    context_signals: ContextSignals | None = None,
+    marketCap: float | None = None,
+    terminalGrowth: float = 2.0,
+    mcIterations: int = 5000,
+    mcSeed: int | None = None,
+    scenarioProbabilities: dict[str, float] | None = None,
+    contextSignals: ContextSignals | None = None,
 ) -> PriceTargetResult:
     """메인 — 5시나리오 × pro-forma → DCF → Monte Carlo → 확률 분포 → signal.
 
@@ -493,34 +493,34 @@ def compute_price_target(
         percentiles : dict — Monte Carlo 백분위 분포
     """
     warnings: list[str] = []
-    probs = scenario_probabilities or dict(SCENARIO_PROBABILITIES)
-    elasticity = getElasticity(sector_key)
+    probs = scenarioProbabilities or dict(SCENARIO_PROBABILITIES)
+    elasticity = getElasticity(sectorKey)
 
     # v2: context_signals가 있으면 확률 재가중
-    size_class = "Mid"
-    if context_signals:
-        size_class = context_signals.sizeClass
-        probs = adjustProbabilities(probs, context_signals)
-        if context_signals.reasoning:
-            warnings.append(f"맥락 기반 확률 재가중 ({len(context_signals.reasoning)}개 규칙 적용)")
+    sizeClass = "Mid"
+    if contextSignals:
+        sizeClass = contextSignals.sizeClass
+        probs = adjustProbabilities(probs, contextSignals)
+        if contextSignals.reasoning:
+            warnings.append(f"맥락 기반 확률 재가중 ({len(contextSignals.reasoning)}개 규칙 적용)")
 
     # WACC 계산 — v2: 업종 β 활용
-    wacc, wacc_details = compute_company_wacc(
+    wacc, wacc_details = computeCompanyWacc(
         series,
-        sector_elasticity=elasticity,
-        market_cap=market_cap,
+        sectorElasticity=elasticity,
+        marketCap=marketCap,
     )
 
     # 기준 매출 성장률 (3년 CAGR)
     from dartlab.core.utils.extract import getRevenueGrowth3Y
 
-    base_growth = getRevenueGrowth3Y(series)
-    if base_growth is None:
-        base_growth = 3.0
+    baseGrowth = getRevenueGrowth3Y(series)
+    if baseGrowth is None:
+        baseGrowth = 3.0
         warnings.append("매출 성장률 데이터 부족 — 기본값 3% 사용")
 
     # 반도체 아닌 업종은 semiconductor_down 확률을 baseline에 재배분
-    if sector_key and sector_key != "반도체" and "semiconductor_down" in probs:
+    if sectorKey and sectorKey != "반도체" and "semiconductor_down" in probs:
         semi_prob = probs.pop("semiconductor_down")
         probs["baseline"] = probs.get("baseline", 0.4) + semi_prob
 
@@ -537,15 +537,15 @@ def compute_price_target(
             warnings.append(f"미지원 시나리오: {name}")
             continue
 
-        rev_path = _derive_revenue_path_from_macro(base_growth, scenario, elasticity)
-        pf = build_proforma(
+        rev_path = _deriveRevenuePathFromMacro(baseGrowth, scenario, elasticity)
+        pf = buildProforma(
             series,
-            revenue_growth_path=rev_path,
-            sector_elasticity=elasticity,
-            market_cap=market_cap,
-            scenario_name=scenario.label,
+            revenueGrowthPath=rev_path,
+            sectorElasticity=elasticity,
+            marketCap=marketCap,
+            scenarioName=scenario.label,
         )
-        ev, eq, per_share = _dcf_from_proforma(pf, wacc, terminal_growth, shares)
+        ev, eq, per_share = _dcfFromProforma(pf, wacc, terminalGrowth, shares)
 
         # Implied P/E
         last_ni = pf.projections[-1].net_income if pf.projections else 0
@@ -553,14 +553,14 @@ def compute_price_target(
 
         scenario_targets.append(
             ScenarioPriceTarget(
-                scenario_name=name,
+                scenarioName=name,
                 probability=prob,
                 proforma=pf,
                 enterprise_value=ev,
                 equity_value=eq,
                 per_share_value=per_share,
                 wacc_used=wacc,
-                terminal_growth=terminal_growth,
+                terminalGrowth=terminalGrowth,
                 implied_per=implied_per,
             )
         )
@@ -569,35 +569,35 @@ def compute_price_target(
     weighted_target = sum(s.per_share_value * s.probability for s in scenario_targets)
 
     # Monte Carlo 분포
-    percentiles, _, mc_values = _monte_carlo_price_distribution(
+    percentiles, _, mc_values = _monteCarloPriceDistribution(
         series,
-        base_growth,
+        baseGrowth,
         elasticity,
         wacc,
-        terminal_growth,
+        terminalGrowth,
         shares,
-        mc_iterations,
-        mc_seed,
-        size_class=size_class,
+        mcIterations,
+        mcSeed,
+        sizeClass=sizeClass,
     )
 
     # upside
-    upside_pct: float | None = None
+    upsidePct: float | None = None
     prob_above: float | None = None
-    if current_price and current_price > 0:
-        upside_pct = (weighted_target / current_price - 1) * 100
+    if currentPrice and currentPrice > 0:
+        upsidePct = (weighted_target / currentPrice - 1) * 100
         if mc_values:
-            above_count = sum(1 for v in mc_values if v > current_price)
+            above_count = sum(1 for v in mc_values if v > currentPrice)
             prob_above = above_count / len(mc_values) * 100
 
     # expected value (MC 평균)
     expected_value = sum(mc_values) / len(mc_values) if mc_values else weighted_target
 
     # signal
-    signal = _classify_signal(upside_pct, percentiles, current_price)
+    signal = _classifySignal(upsidePct, percentiles, currentPrice)
 
     # 신뢰도
-    ratios = extract_historical_ratios(series)
+    ratios = extractHistoricalRatios(series)
     confidence = ratios.confidence
 
     return PriceTargetResult(
@@ -605,8 +605,8 @@ def compute_price_target(
         weighted_target=weighted_target,
         percentiles=percentiles,
         expected_value=expected_value,
-        current_price=current_price,
-        upside_pct=upside_pct,
+        currentPrice=currentPrice,
+        upsidePct=upsidePct,
         probability_above_current=prob_above,
         signal=signal,
         confidence=confidence,

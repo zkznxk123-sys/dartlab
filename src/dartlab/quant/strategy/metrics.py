@@ -26,12 +26,12 @@ TRADING_DAYS = 252
 # ── 정규분포 자체 구현 (scipy 의존 0) ───────────────────────────────────────
 
 
-def _norm_cdf(x: float) -> float:
+def _normCdf(x: float) -> float:
     """표준정규 CDF (math.erf 기반)."""
     return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
 
-def _norm_ppf(p: float) -> float:
+def _normPpf(p: float) -> float:
     """표준정규 inverse CDF — Beasley-Springer-Moro 근사 (Acklam 2000)."""
     if p <= 0.0:
         return -float("inf")
@@ -167,7 +167,7 @@ def mdd(equity: np.ndarray) -> float:
     return float(np.min(dd))
 
 
-def winrate(trade_pnls: np.ndarray) -> float:
+def winrate(tradePnls: np.ndarray) -> float:
     """승률 — pnl > 0 비율.
 
     Parameters
@@ -180,13 +180,13 @@ def winrate(trade_pnls: np.ndarray) -> float:
     float
         승률 (비율, 0~1). 거래 없으면 0.0.
     """
-    p = np.asarray(trade_pnls, dtype=np.float64)
+    p = np.asarray(tradePnls, dtype=np.float64)
     if len(p) == 0:
         return 0.0
     return float(np.sum(p > 0) / len(p))
 
 
-def profitFactor(trade_pnls: np.ndarray) -> float:
+def profitFactor(tradePnls: np.ndarray) -> float:
     """총 수익 / 총 손실 비율.
 
     Parameters
@@ -199,7 +199,7 @@ def profitFactor(trade_pnls: np.ndarray) -> float:
     float
         Profit Factor (배). 손실 0 이면 inf (수익 있을 때) 또는 0.0.
     """
-    p = np.asarray(trade_pnls, dtype=np.float64)
+    p = np.asarray(tradePnls, dtype=np.float64)
     if len(p) == 0:
         return 0.0
     gains = float(np.sum(p[p > 0]))
@@ -209,7 +209,7 @@ def profitFactor(trade_pnls: np.ndarray) -> float:
     return gains / losses
 
 
-def expectancy(trade_pnls: np.ndarray) -> float:
+def expectancy(tradePnls: np.ndarray) -> float:
     """1 거래당 기대수익.
 
     Parameters
@@ -222,7 +222,7 @@ def expectancy(trade_pnls: np.ndarray) -> float:
     float
         거래당 평균 손익 (원). 거래 없으면 0.0.
     """
-    p = np.asarray(trade_pnls, dtype=np.float64)
+    p = np.asarray(tradePnls, dtype=np.float64)
     if len(p) == 0:
         return 0.0
     return float(np.mean(p))
@@ -269,7 +269,7 @@ def exposure(positions: np.ndarray) -> float:
 # ── Overfitting Guards ──────────────────────────────────────────────────────
 
 
-def dsr(observed_sharpe: float, returns: np.ndarray, n_trials: int = 1) -> float:
+def dsr(observedSharpe: float, returns: np.ndarray, nTrials: int = 1) -> float:
     """Deflated Sharpe Ratio (Bailey-López de Prado 2014).
 
     백테스트 시도 횟수(n_trials) 와 returns 의 skewness/kurtosis 를 정정해서
@@ -299,14 +299,14 @@ def dsr(observed_sharpe: float, returns: np.ndarray, n_trials: int = 1) -> float
     skew = float(np.mean(z**3))
     kurt = float(np.mean(z**4) - 3.0)
     # SR (일별)
-    sr = observed_sharpe / np.sqrt(TRADING_DAYS)
+    sr = observedSharpe / np.sqrt(TRADING_DAYS)
     # 기대 max Sharpe under null (Bailey-Lopez)
     em = np.euler_gamma
-    if n_trials < 2:
+    if nTrials < 2:
         sr0 = 0.0
     else:
-        z1 = _norm_ppf(1 - 1.0 / n_trials)
-        z2 = _norm_ppf(1 - 1.0 / (n_trials * math.e))
+        z1 = _normPpf(1 - 1.0 / nTrials)
+        z2 = _normPpf(1 - 1.0 / (nTrials * math.e))
         sr0 = (1 - em) * z1 + em * z2
         sr0 /= np.sqrt(TRADING_DAYS)
     # SR 의 표준오차 (정정 — 정규성 위반)
@@ -314,10 +314,10 @@ def dsr(observed_sharpe: float, returns: np.ndarray, n_trials: int = 1) -> float
     if var_sr <= 0:
         return 0.0
     z_dsr = (sr - sr0) / np.sqrt(var_sr)
-    return float(_norm_cdf(z_dsr))
+    return float(_normCdf(z_dsr))
 
 
-def pbo(in_sample: np.ndarray, out_of_sample: np.ndarray) -> float:
+def pbo(inSample: np.ndarray, outOfSample: np.ndarray) -> float:
     """Probability of Backtest Overfitting (Bailey-Borwein-López de Prado-Zhu 2015).
 
     in-sample 에서 최고 성과를 낸 전략이 out-of-sample 에서 중간값 이하일 확률.
@@ -330,17 +330,17 @@ def pbo(in_sample: np.ndarray, out_of_sample: np.ndarray) -> float:
     Returns:
         PBO ∈ [0, 1]
     """
-    is_arr = np.asarray(in_sample, dtype=np.float64)
-    oos_arr = np.asarray(out_of_sample, dtype=np.float64)
+    is_arr = np.asarray(inSample, dtype=np.float64)
+    oos_arr = np.asarray(outOfSample, dtype=np.float64)
     if is_arr.ndim != 2 or oos_arr.ndim != 2 or is_arr.shape != oos_arr.shape:
         return 0.0
-    n_trials, n_segments = is_arr.shape
+    nTrials, n_segments = is_arr.shape
     if n_segments < 2:
         return 0.0
     overfit_count = 0
     for s in range(n_segments):
         best_trial = int(np.argmax(is_arr[:, s]))
-        oos_rank = float(np.sum(oos_arr[:, s] >= oos_arr[best_trial, s])) / n_trials
+        oos_rank = float(np.sum(oos_arr[:, s] >= oos_arr[best_trial, s])) / nTrials
         if oos_rank > 0.5:
             overfit_count += 1
     return float(overfit_count / n_segments)
@@ -349,7 +349,7 @@ def pbo(in_sample: np.ndarray, out_of_sample: np.ndarray) -> float:
 # ── CPCV split 생성 (Lopez AFML) ────────────────────────────────────────────
 
 
-def cpcvSplits(n_obs: int, n_splits: int = 6, n_test: int = 2, embargo: int = 0):
+def cpcvSplits(nObs: int, nSplits: int = 6, nTest: int = 2, embargo: int = 0):
     """Combinatorial Purged Cross-Validation 인덱스 분할.
 
     n_splits 그룹으로 나누고, n_test 개 그룹을 test 로 선택하는 모든 조합.
@@ -364,20 +364,20 @@ def cpcvSplits(n_obs: int, n_splits: int = 6, n_test: int = 2, embargo: int = 0)
     Yields:
         (train_idx, test_idx) tuples
     """
-    if n_obs < n_splits * 2:
+    if nObs < nSplits * 2:
         return
-    bins = np.array_split(np.arange(n_obs), n_splits)
-    for combo in combinations(range(n_splits), n_test):
+    bins = np.array_split(np.arange(nObs), nSplits)
+    for combo in combinations(range(nSplits), nTest):
         test_groups = [bins[i] for i in combo]
         test_idx = np.concatenate(test_groups)
         # purge: test 양 끝에 embargo
         purged = set(test_idx.tolist())
         for tg in test_groups:
             lo = max(0, tg[0] - embargo)
-            hi = min(n_obs, tg[-1] + 1 + embargo)
+            hi = min(nObs, tg[-1] + 1 + embargo)
             for k in range(lo, hi):
                 purged.add(k)
-        train_idx = np.array([i for i in range(n_obs) if i not in purged], dtype=np.int64)
+        train_idx = np.array([i for i in range(nObs) if i not in purged], dtype=np.int64)
         yield train_idx, test_idx
 
 

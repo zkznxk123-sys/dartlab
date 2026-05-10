@@ -309,11 +309,11 @@ class Story:
         if fmt == "html":
             from dartlab.story.formats import renderHtml
 
-            return renderHtml(self, chart_dir=getattr(self, "chartDir", None))
+            return renderHtml(self, chartDir=getattr(self, "chartDir", None))
         if fmt == "markdown":
             from dartlab.story.formats import renderMarkdown
 
-            return renderMarkdown(self, chart_dir=getattr(self, "chartDir", None))
+            return renderMarkdown(self, chartDir=getattr(self, "chartDir", None))
         if fmt == "json":
             from dartlab.story.formats import renderJson
 

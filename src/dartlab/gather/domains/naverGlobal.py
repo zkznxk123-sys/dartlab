@@ -64,7 +64,7 @@ async def _throttle() -> None:
         _last_call_time = time.monotonic()
 
 
-def _clean_number(val) -> float | None:
+def _cleanNumber(val) -> float | None:
     """문자열/숫자 → float 변환. 콤마 제거 포함.
 
     Parameters
@@ -88,7 +88,7 @@ def _clean_number(val) -> float | None:
         return None
 
 
-async def _resolve_reuters_code(ticker: str, client) -> str | None:
+async def _resolveReutersCode(ticker: str, client) -> str | None:
     """ticker → 네이버 Reuters Code (캐시 우선).
 
     Parameters
@@ -123,7 +123,7 @@ async def _resolve_reuters_code(ticker: str, client) -> str | None:
     return None
 
 
-async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSnapshot | None:
+async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnapshot | None:
     """네이버 글로벌 → 현재가 스냅샷.
 
     Parameters
@@ -146,9 +146,9 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
         source : str — ``"naver_global"``
         매핑 실패 또는 API 오류 시 None.
     """
-    code = await _resolve_reuters_code(stock_code, client)
+    code = await _resolveReutersCode(stockCode, client)
     if not code:
-        log.warning("naver_global: %s 매핑 실패", stock_code)
+        log.warning("naver_global: %s 매핑 실패", stockCode)
         return None
 
     await _throttle()
@@ -157,24 +157,24 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
         resp = await client.get(url, headers={"Accept": "application/json"})
         data = resp.json()
     except (SourceUnavailableError, ValueError) as exc:
-        log.warning("naver_global price 실패 (%s): %s", stock_code, exc)
+        log.warning("naver_global price 실패 (%s): %s", stockCode, exc)
         return None
 
-    current = _clean_number(data.get("closePrice"))
+    current = _cleanNumber(data.get("closePrice"))
     if not current:
         return None
 
-    change = _clean_number(data.get("compareToPreviousClosePrice")) or 0.0
-    change_pct = _clean_number(data.get("fluctuationsRatio")) or 0.0
-    volume = int(_clean_number(data.get("accumulatedTradingVolume")) or 0)
+    change = _cleanNumber(data.get("compareToPreviousClosePrice")) or 0.0
+    change_pct = _cleanNumber(data.get("fluctuationsRatio")) or 0.0
+    volume = int(_cleanNumber(data.get("accumulatedTradingVolume")) or 0)
 
     # 시가총액 (억 달러 → 달러)
-    market_cap = 0.0
+    marketCap = 0.0
     market_cap_raw = data.get("marketValue")
     if market_cap_raw:
-        mc = _clean_number(market_cap_raw)
+        mc = _cleanNumber(market_cap_raw)
         if mc:
-            market_cap = mc  # 네이버 API가 원단위로 줄 수 있음
+            marketCap = mc  # 네이버 API가 원단위로 줄 수 있음
 
     # 52주 고저, PER 등은 별도 API 필요 — 기본값
     exchange_name = ""
@@ -189,7 +189,7 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
         high_52w=0.0,
         low_52w=0.0,
         volume=volume,
-        market_cap=market_cap,
+        marketCap=marketCap,
         per=None,
         pbr=None,
         dividend_yield=None,
@@ -201,8 +201,8 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
     )
 
 
-async def fetch_history(
-    stock_code: str,
+async def fetchHistory(
+    stockCode: str,
     client,
     *,
     start: str = "",
@@ -246,7 +246,7 @@ async def fetch_history(
 
         매핑 실패 또는 조회 실패 시 빈 리스트.
     """
-    code = await _resolve_reuters_code(stock_code, client)
+    code = await _resolveReutersCode(stockCode, client)
     if not code:
         return []
 
@@ -281,7 +281,7 @@ async def fetch_history(
             resp = await client.get(url, headers={"Accept": "application/json"})
             data = resp.json()
         except (SourceUnavailableError, ValueError) as exc:
-            log.warning("naver_global history 실패 (%s): %s", stock_code, exc)
+            log.warning("naver_global history 실패 (%s): %s", stockCode, exc)
             break
 
         infos = data.get("priceInfos", [])
@@ -290,12 +290,12 @@ async def fetch_history(
 
         page_rows: list[dict] = []
         for p in infos:
-            date_str = p.get("localDate", "")
-            if len(date_str) == 8:
-                date_str = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
+            dateStr = p.get("localDate", "")
+            if len(dateStr) == 8:
+                dateStr = f"{dateStr[:4]}-{dateStr[4:6]}-{dateStr[6:8]}"
             page_rows.append(
                 {
-                    "date": date_str,
+                    "date": dateStr,
                     "open": p.get("openPrice"),
                     "high": p.get("highPrice"),
                     "low": p.get("lowPrice"),

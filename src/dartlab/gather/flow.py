@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import logging
 
-from .domains import FLOW_FALLBACK, load_domain
+from .domains import FLOW_FALLBACK, loadDomain
 from .types import GatherError
 
 log = logging.getLogger(__name__)
 
 
 async def fetch(
-    stock_code: str,
+    stockCode: str,
     *,
     market: str = "KR",
     client=None,
@@ -42,13 +42,13 @@ async def fetch(
     if market != "KR":
         return None
 
-    for domain_name in FLOW_FALLBACK:
+    for domainName in FLOW_FALLBACK:
         try:
-            module = load_domain(domain_name)
-            result = await module.fetch_flow(stock_code, client)
+            module = loadDomain(domainName)
+            result = await module.fetchFlow(stockCode, client)
             if result:
                 return result
         except (GatherError, ImportError, OSError) as exc:
-            log.debug("flow fallback %s 실패: %s", domain_name, exc)
+            log.debug("flow fallback %s 실패: %s", domainName, exc)
             continue
     return None

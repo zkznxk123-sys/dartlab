@@ -212,7 +212,7 @@ CATALOG: dict[str, list[CatalogEntry]] = {
 # ── 헬퍼 ──
 
 
-def get_groups() -> list[str]:
+def getGroups() -> list[str]:
     """카탈로그 그룹 이름 목록.
 
     Returns
@@ -223,7 +223,7 @@ def get_groups() -> list[str]:
     return list(CATALOG.keys())
 
 
-def get_group(name: str) -> list[CatalogEntry]:
+def getGroup(name: str) -> list[CatalogEntry]:
     """그룹 내 시리즈 목록.
 
     Parameters
@@ -239,7 +239,7 @@ def get_group(name: str) -> list[CatalogEntry]:
     return CATALOG.get(name, [])
 
 
-def get_group_ids(name: str) -> list[str]:
+def getGroupIds(name: str) -> list[str]:
     """그룹 내 시리즈 ID 목록.
 
     Parameters
@@ -255,7 +255,7 @@ def get_group_ids(name: str) -> list[str]:
     return [e.id for e in CATALOG.get(name, [])]
 
 
-def get_all_ids() -> list[str]:
+def getAllIds() -> list[str]:
     """전체 카탈로그 시리즈 ID.
 
     Returns
@@ -266,7 +266,7 @@ def get_all_ids() -> list[str]:
     return [e.id for entries in CATALOG.values() for e in entries]
 
 
-def get_all_entries() -> list[CatalogEntry]:
+def getAllEntries() -> list[CatalogEntry]:
     """전체 카탈로그 엔트리.
 
     Returns
@@ -277,7 +277,7 @@ def get_all_entries() -> list[CatalogEntry]:
     return [e for entries in CATALOG.values() for e in entries]
 
 
-def find_entry(series_id: str) -> CatalogEntry | None:
+def findEntry(seriesId: str) -> CatalogEntry | None:
     """시리즈 ID로 카탈로그 엔트리 검색.
 
     Parameters
@@ -292,12 +292,12 @@ def find_entry(series_id: str) -> CatalogEntry | None:
     """
     for entries in CATALOG.values():
         for e in entries:
-            if e.id == series_id:
+            if e.id == seriesId:
                 return e
     return None
 
 
-def to_dataframe(group: str | None = None) -> pl.DataFrame:
+def toDataframe(group: str | None = None) -> pl.DataFrame:
     """카탈로그 → Polars DataFrame.
 
     Parameters
@@ -312,7 +312,7 @@ def to_dataframe(group: str | None = None) -> pl.DataFrame:
         ``group`` (Utf8) — 그룹명, ``frequency`` (Utf8) — 주기,
         ``unit`` (Utf8) — 단위, ``description`` (Utf8) — 설명.
     """
-    entries = get_group(group) if group else get_all_entries()
+    entries = getGroup(group) if group else getAllEntries()
     if not entries:
         return pl.DataFrame(
             schema={

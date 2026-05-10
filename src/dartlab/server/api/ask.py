@@ -13,9 +13,9 @@ from sse_starlette.sse import EventSourceResponse
 import dartlab
 from dartlab import config as dartlab_config
 
-from ..agentGateway import stream_agent_run
+from ..agentGateway import streamAgentRun
 from ..models import AgentRunMessage, AgentRunRequest, AskRequest
-from ..services.aiAnalysis import run_plain_chat
+from ..services.aiAnalysis import runPlainChat
 
 router = APIRouter()
 
@@ -32,7 +32,7 @@ class CopilotRequest(BaseModel):
     accountKey: str | None = None
     valueRef: str | None = None
     period: str | None = None
-    rcept_no: str | None = None
+    rceptNo: str | None = None
     extra: dict[str, Any] = Field(default_factory=dict)
     stream: bool = True
     provider: str | None = None
@@ -41,7 +41,7 @@ class CopilotRequest(BaseModel):
 
 
 @router.post("/api/ask")
-async def api_ask(req: AskRequest):
+async def apiAsk(req: AskRequest):
     """LLM 질문 — AI가 질문 의도를 자율 판단하고 종목/매크로/비교를 결정한다."""
     dartlab.verbose = False
 
@@ -51,7 +51,7 @@ async def api_ask(req: AskRequest):
             media_type="text/event-stream",
         )
 
-    return await run_plain_chat(req)
+    return await runPlainChat(req)
 
 
 async def _streamPublicAsk(req: AskRequest):
@@ -73,12 +73,12 @@ async def _streamPublicAsk(req: AskRequest):
         workspaceContext=context,
         stream=True,
     )
-    async for event in stream_agent_run(agent_req):
+    async for event in streamAgentRun(agent_req):
         yield event
 
 
 @router.post("/api/company/{stockCode}/copilot")
-async def api_company_copilot(stockCode: str, req: CopilotRequest):
+async def apiCompanyCopilot(stockCode: str, req: CopilotRequest):
     """landing/company 인라인 Copilot dock — citation-first 답변.
 
     사용자가 차트/표 selection 을 했으면 chartId/accountKey/valueRef/period 를
@@ -96,7 +96,7 @@ async def api_company_copilot(stockCode: str, req: CopilotRequest):
     # non-stream fallback — 컨텍스트 주입 후 plain_chat
     augmented_q = _augmentCopilotQuestion(stockCode, req)
     plain_req = AskRequest(question=augmented_q, company=stockCode, stream=False)
-    return await run_plain_chat(plain_req)
+    return await runPlainChat(plain_req)
 
 
 def _augmentCopilotQuestion(stockCode: str, req: CopilotRequest) -> str:
@@ -113,8 +113,8 @@ def _augmentCopilotQuestion(stockCode: str, req: CopilotRequest) -> str:
         ctx_lines.append(f"기간: {req.period}")
     if req.valueRef:
         ctx_lines.append(f"valueRef: {req.valueRef}")
-    if req.rcept_no:
-        ctx_lines.append(f"rcept_no: {req.rcept_no}")
+    if req.rceptNo:
+        ctx_lines.append(f"rcept_no: {req.rceptNo}")
     if ctx_lines:
         parts.append("\n[selection 컨텍스트]\n" + "\n".join(ctx_lines))
     return "\n".join(parts)
@@ -131,7 +131,7 @@ async def _streamCompanyCopilot(stockCode: str, req: CopilotRequest):
             "accountKey": req.accountKey,
             "valueRef": req.valueRef,
             "period": req.period,
-            "rcept_no": req.rcept_no,
+            "rcept_no": req.rceptNo,
             **req.extra,
         },
     }
@@ -143,12 +143,12 @@ async def _streamCompanyCopilot(stockCode: str, req: CopilotRequest):
         workspaceContext=context,
         stream=True,
     )
-    async for event in stream_agent_run(agent_req):
+    async for event in streamAgentRun(agent_req):
         yield event
 
 
 @router.get("/api/ask/artifacts/{day}/{filename}")
-async def download_ask_artifact(day: str, filename: str):
+async def downloadAskArtifact(day: str, filename: str):
     """AI tool_result 에서 생성된 CSV/JSON/JSONL 아티팩트를 내려준다."""
     path = _artifactPath(day, filename)
     if path is None or not path.is_file():

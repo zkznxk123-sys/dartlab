@@ -7,7 +7,7 @@ from unittest.mock import patch
 import polars as pl
 import pytest
 
-from dartlab.ai.tools.engineCall import _company_show
+from dartlab.ai.tools.engineCall import _companyShow
 
 
 class _MockCompany:
@@ -43,7 +43,7 @@ def test_auto_gather_retries_after_empty_result() -> None:
     """첫 show() 가 빈 → update() 자동 호출 → 두 번째 show() 가 정상 → autoGatherUsed=True."""
     company = _MockCompany(second_call_rows=1, update_returns={"finance": 12})
     with patch("dartlab.ai.tools.engineCall._resolve_company", return_value=company):
-        result = _company_show({"target": "005930", "topic": "BS"})
+        result = _companyShow({"target": "005930", "topic": "BS"})
     assert result.ok is True
     assert company.update_called is True
     assert result.data is not None
@@ -68,7 +68,7 @@ def test_auto_gather_skipped_when_first_call_succeeds() -> None:
 
     company = _StableCompany()
     with patch("dartlab.ai.tools.engineCall._resolve_company", return_value=company):
-        result = _company_show({"target": "005930", "topic": "BS"})
+        result = _companyShow({"target": "005930", "topic": "BS"})
     assert result.ok is True
     assert company.update_called is False
     assert result.data is not None
@@ -83,7 +83,7 @@ def test_auto_gather_disabled_via_env_var(monkeypatch: pytest.MonkeyPatch) -> No
     with patch("dartlab.ai.tools.engineCall._AUTO_GATHER_ENABLED", False):
         company = _MockCompany(second_call_rows=1)
         with patch("dartlab.ai.tools.engineCall._resolve_company", return_value=company):
-            result = _company_show({"target": "005930", "topic": "BS"})
+            result = _companyShow({"target": "005930", "topic": "BS"})
     assert result.ok is False
     assert result.error == "empty_result"
     assert company.update_called is False

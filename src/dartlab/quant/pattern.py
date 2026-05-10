@@ -13,58 +13,58 @@ from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
 
 def _cpDetect1DayPatterns(
     body: float,
-    abs_body: float,
-    upper_shadow: float,
-    lower_shadow: float,
-    body_ratio: float,
-    date_str: str,
+    absBody: float,
+    upperShadow: float,
+    lowerShadow: float,
+    bodyRatio: float,
+    dateStr: str,
 ) -> dict | None:
     """1일 캔들 패턴 (Doji/Hammer/InvHammer/HangingMan/ShootingStar). 반환: dict or None."""
-    if body_ratio < 0.1:
-        return {"date": date_str, "pattern": "doji", "label": "도지", "signal": "반전 가능"}
-    if lower_shadow >= abs_body * 2 and upper_shadow < abs_body * 0.5 and body > 0:
-        return {"date": date_str, "pattern": "hammer", "label": "망치형", "signal": "상승 반전"}
-    if upper_shadow >= abs_body * 2 and lower_shadow < abs_body * 0.5 and body > 0:
-        return {"date": date_str, "pattern": "invertedHammer", "label": "역망치형", "signal": "상승 반전"}
-    if lower_shadow >= abs_body * 2 and upper_shadow < abs_body * 0.5 and body < 0:
-        return {"date": date_str, "pattern": "hangingMan", "label": "교수형", "signal": "하락 반전"}
-    if upper_shadow >= abs_body * 2 and lower_shadow < abs_body * 0.5 and body < 0:
-        return {"date": date_str, "pattern": "shootingStar", "label": "유성형", "signal": "하락 반전"}
+    if bodyRatio < 0.1:
+        return {"date": dateStr, "pattern": "doji", "label": "도지", "signal": "반전 가능"}
+    if lowerShadow >= absBody * 2 and upperShadow < absBody * 0.5 and body > 0:
+        return {"date": dateStr, "pattern": "hammer", "label": "망치형", "signal": "상승 반전"}
+    if upperShadow >= absBody * 2 and lowerShadow < absBody * 0.5 and body > 0:
+        return {"date": dateStr, "pattern": "invertedHammer", "label": "역망치형", "signal": "상승 반전"}
+    if lowerShadow >= absBody * 2 and upperShadow < absBody * 0.5 and body < 0:
+        return {"date": dateStr, "pattern": "hangingMan", "label": "교수형", "signal": "하락 반전"}
+    if upperShadow >= absBody * 2 and lowerShadow < absBody * 0.5 and body < 0:
+        return {"date": dateStr, "pattern": "shootingStar", "label": "유성형", "signal": "하락 반전"}
     return None
 
 
-def _cpDetect2DayPatterns(i: int, o, c, body: float, abs_body: float, date_str: str) -> list[dict]:
+def _cpDetect2DayPatterns(i: int, o, c, body: float, absBody: float, dateStr: str) -> list[dict]:
     """2일 패턴 (Engulfing / Piercing / DarkCloud)."""
     out: list[dict] = []
     prev_body = c[i - 1] - o[i - 1]
     abs_prev = abs(prev_body)
-    if prev_body < 0 and body > 0 and abs_body > abs_prev and o[i] <= c[i - 1] and c[i] >= o[i - 1]:
-        out.append({"date": date_str, "pattern": "bullishEngulfing", "label": "상승장악형", "signal": "상승 반전"})
-    elif prev_body > 0 and body < 0 and abs_body > abs_prev and o[i] >= c[i - 1] and c[i] <= o[i - 1]:
-        out.append({"date": date_str, "pattern": "bearishEngulfing", "label": "하락장악형", "signal": "하락 반전"})
+    if prev_body < 0 and body > 0 and absBody > abs_prev and o[i] <= c[i - 1] and c[i] >= o[i - 1]:
+        out.append({"date": dateStr, "pattern": "bullishEngulfing", "label": "상승장악형", "signal": "상승 반전"})
+    elif prev_body > 0 and body < 0 and absBody > abs_prev and o[i] >= c[i - 1] and c[i] <= o[i - 1]:
+        out.append({"date": dateStr, "pattern": "bearishEngulfing", "label": "하락장악형", "signal": "하락 반전"})
     if prev_body < 0 and body > 0:
         mid = (o[i - 1] + c[i - 1]) / 2
         if o[i] < c[i - 1] and c[i] > mid and c[i] < o[i - 1]:
-            out.append({"date": date_str, "pattern": "piercingLine", "label": "관통형", "signal": "상승 반전"})
+            out.append({"date": dateStr, "pattern": "piercingLine", "label": "관통형", "signal": "상승 반전"})
     if prev_body > 0 and body < 0:
         mid = (o[i - 1] + c[i - 1]) / 2
         if o[i] > c[i - 1] and c[i] < mid and c[i] > o[i - 1]:
-            out.append({"date": date_str, "pattern": "darkCloudCover", "label": "먹구름형", "signal": "하락 반전"})
+            out.append({"date": dateStr, "pattern": "darkCloudCover", "label": "먹구름형", "signal": "하락 반전"})
     return out
 
 
-def _cpDetect3DayPatterns(i: int, o, c, body: float, abs_body: float, full_range: float, date_str: str) -> dict | None:
+def _cpDetect3DayPatterns(i: int, o, c, body: float, absBody: float, fullRange: float, dateStr: str) -> dict | None:
     """3일 패턴 (Morning Star)."""
     prev2 = c[i - 2] - o[i - 2]
     prev1 = c[i - 1] - o[i - 1]
     if (
         prev2 < 0
-        and abs(prev2) > full_range * 0.3
+        and abs(prev2) > fullRange * 0.3
         and abs(prev1) < abs(prev2) * 0.3
         and body > 0
-        and abs_body > abs(prev2) * 0.5
+        and absBody > abs(prev2) * 0.5
     ):
-        return {"date": date_str, "pattern": "morningStar", "label": "샛별형", "signal": "상승 반전"}
+        return {"date": dateStr, "pattern": "morningStar", "label": "샛별형", "signal": "상승 반전"}
     return None
 
 
@@ -73,21 +73,21 @@ def _cpScanPatterns(o, h, lo, c, dates, start: int, n: int) -> list[dict]:
     patterns: list[dict] = []
     for i in range(start, n):
         body = c[i] - o[i]
-        abs_body = abs(body)
-        upper_shadow = h[i] - max(o[i], c[i])
-        lower_shadow = min(o[i], c[i]) - lo[i]
-        full_range = h[i] - lo[i]
-        if full_range == 0:
+        absBody = abs(body)
+        upperShadow = h[i] - max(o[i], c[i])
+        lowerShadow = min(o[i], c[i]) - lo[i]
+        fullRange = h[i] - lo[i]
+        if fullRange == 0:
             continue
-        date_str = str(dates[i])[:10] if i < len(dates) else str(i)
-        body_ratio = abs_body / full_range
-        one = _cpDetect1DayPatterns(body, abs_body, upper_shadow, lower_shadow, body_ratio, date_str)
+        dateStr = str(dates[i])[:10] if i < len(dates) else str(i)
+        bodyRatio = absBody / fullRange
+        one = _cpDetect1DayPatterns(body, absBody, upperShadow, lowerShadow, bodyRatio, dateStr)
         if one:
             patterns.append(one)
         if i >= 1:
-            patterns.extend(_cpDetect2DayPatterns(i, o, c, body, abs_body, date_str))
+            patterns.extend(_cpDetect2DayPatterns(i, o, c, body, absBody, dateStr))
         if i >= 2:
-            three = _cpDetect3DayPatterns(i, o, c, body, abs_body, full_range, date_str)
+            three = _cpDetect3DayPatterns(i, o, c, body, absBody, fullRange, dateStr)
             if three:
                 patterns.append(three)
     return patterns
@@ -95,26 +95,26 @@ def _cpScanPatterns(o, h, lo, c, dates, start: int, n: int) -> list[dict]:
 
 def _cpSupportResistance(h, lo, c) -> dict:
     """지지/저항 zigzag pivot 분석. 반환: levels/current/nearest* dict."""
-    pivots = _find_pivots(h, lo, threshold=0.05)
+    pivots = _findPivots(h, lo, threshold=0.05)
     if not pivots:
         return {}
-    current_price = float(c[-1])
+    currentPrice = float(c[-1])
     supports = sorted(
-        [p["price"] for p in pivots if p["type"] == "low" and p["price"] < current_price],
+        [p["price"] for p in pivots if p["type"] == "low" and p["price"] < currentPrice],
         reverse=True,
     )
-    resistances = sorted([p["price"] for p in pivots if p["type"] == "high" and p["price"] > current_price])
+    resistances = sorted([p["price"] for p in pivots if p["type"] == "high" and p["price"] > currentPrice])
     out: dict = {
         "supportLevels": [round(s, 2) for s in supports[:3]],
         "resistanceLevels": [round(r, 2) for r in resistances[:3]],
-        "currentPrice": round(current_price, 2),
+        "currentPrice": round(currentPrice, 2),
     }
     if supports:
         out["nearestSupport"] = round(supports[0], 2)
-        out["supportDistance"] = round((current_price - supports[0]) / current_price * 100, 2)
+        out["supportDistance"] = round((currentPrice - supports[0]) / currentPrice * 100, 2)
     if resistances:
         out["nearestResistance"] = round(resistances[0], 2)
-        out["resistanceDistance"] = round((resistances[0] - current_price) / current_price * 100, 2)
+        out["resistanceDistance"] = round((resistances[0] - currentPrice) / currentPrice * 100, 2)
     return out
 
 
@@ -185,7 +185,7 @@ def calcPattern(stockCode: str, *, market: str = "auto", lookback: int = 20, **k
     return result
 
 
-def _find_pivots(high: np.ndarray, low: np.ndarray, threshold: float = 0.05) -> list[dict]:
+def _findPivots(high: np.ndarray, low: np.ndarray, threshold: float = 0.05) -> list[dict]:
     """간이 zigzag로 pivot points 탐색.
 
     Args:

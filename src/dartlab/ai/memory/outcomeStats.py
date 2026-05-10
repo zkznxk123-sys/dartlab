@@ -20,11 +20,11 @@ from typing import Any
 
 from dartlab.ai.memory.outcomeLog import (
     Entry,
-    _decisions_root,
-    _load_entries,
-    _log_path,
-    _normalize_market,
-    safe_stockcode,
+    _decisionsRoot,
+    _loadEntries,
+    _logPath,
+    _normalizeMarket,
+    safeStockcode,
 )
 
 _ALPHA_NUM_RE = re.compile(r"([+-]?\d+(?:\.\d+)?)\s*%")
@@ -33,16 +33,16 @@ _HOLDING_RE = re.compile(r"^\s*(\d+)\s*([a-zA-Z]+)\s*$")
 
 def getEntries(market: str, stockCode: str | None = None) -> list[Entry]:
     """단일 종목 또는 전 종목 entry list. 안전 read 만."""
-    safe_market = _normalize_market(market)
+    safe_market = _normalizeMarket(market)
     if stockCode:
-        safe_code = safe_stockcode(stockCode)
-        return _load_entries(_log_path(safe_market, safe_code))
-    base = _decisions_root() / safe_market
+        safe_code = safeStockcode(stockCode)
+        return _loadEntries(_logPath(safe_market, safe_code))
+    base = _decisionsRoot() / safe_market
     if not base.is_dir():
         return []
     out: list[Entry] = []
     for path in sorted(base.glob("*.md")):
-        out.extend(_load_entries(path))
+        out.extend(_loadEntries(path))
     return out
 
 
@@ -75,7 +75,7 @@ def getRegressionRate(stockCode: str, *, market: str = "KR") -> float | None:
 
     None: resolved entry 0 건 (계산 불가).
     """
-    entries = [e for e in getEntries(market, stockCode) if not e.is_pending()]
+    entries = [e for e in getEntries(market, stockCode) if not e.isPending()]
     if not entries:
         return None
     negatives = sum(1 for e in entries if _parseAlpha(e.alpha) is not None and _parseAlpha(e.alpha) < 0)  # type: ignore[operator]
@@ -88,8 +88,8 @@ def getMarketSummary(market: str = "KR") -> dict[str, Any]:
     Returns:
         {market, tickerCount, perTicker: {stockCode: stats}, marketStats}
     """
-    safe_market = _normalize_market(market)
-    base = _decisions_root() / safe_market
+    safe_market = _normalizeMarket(market)
+    base = _decisionsRoot() / safe_market
     if not base.is_dir():
         return {"market": safe_market, "tickerCount": 0, "perTicker": {}, "marketStats": _emptyStats()}
     perTicker: dict[str, dict[str, Any]] = {}
@@ -97,10 +97,10 @@ def getMarketSummary(market: str = "KR") -> dict[str, Any]:
     for path in sorted(base.glob("*.md")):
         code = path.stem
         try:
-            safe_code = safe_stockcode(code)
+            safe_code = safeStockcode(code)
         except ValueError:
             continue
-        entries = _load_entries(path)
+        entries = _loadEntries(path)
         if not entries:
             continue
         perTicker[safe_code] = _summarize(entries)
@@ -132,8 +132,8 @@ def _filterByDate(entries: list[Entry], startDate: str | None, endDate: str | No
 def _summarize(entries: list[Entry]) -> dict[str, Any]:
     if not entries:
         return _emptyStats()
-    pending = [e for e in entries if e.is_pending()]
-    resolved = [e for e in entries if not e.is_pending()]
+    pending = [e for e in entries if e.isPending()]
+    resolved = [e for e in entries if not e.isPending()]
     alphas = [v for v in (_parseAlpha(e.alpha) for e in resolved) if v is not None]
     rawReturns = [v for v in (_parseAlpha(e.raw_return) for e in resolved) if v is not None]
     positiveAlpha = sum(1 for a in alphas if a > 0)

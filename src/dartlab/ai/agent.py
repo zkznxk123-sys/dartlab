@@ -27,8 +27,8 @@ from collections.abc import Iterator
 from typing import Any
 
 from .contracts import TraceEvent
-from .providers import stream_provider
-from .tools.formatting import wrap_external_in_result
+from .providers import streamProvider
+from .tools.formatting import wrapExternalInResult
 from .tools.registry import executeTool, toolSpecs
 from .toolStorage import buildPersistedContent, exceedsSizeCap, persistLargeResult
 from .workbench.prompts import DARTLAB_CHAT_SYSTEM
@@ -57,14 +57,14 @@ def runAgent(
     *,
     provider: Any,
     history: list[dict[str, Any]] | None = None,
-    tool_names: tuple[str, ...] = _DEFAULT_TOOL_NAMES,
-    max_iterations: int = 8,
+    toolNames: tuple[str, ...] = _DEFAULT_TOOL_NAMES,
+    maxIterations: int = 8,
     **_unused: Any,
 ) -> Iterator[TraceEvent]:
     """본체 — chat-native autonomous tool-calling 루프. agent_gateway 가 본 함수의 TraceEvent 를 SSE 로 변환."""
     history = history or []
-    system_prompt = _injectPastContextIfAvailable(DARTLAB_CHAT_SYSTEM, _unused)
-    messages: list[dict[str, Any]] = [{"role": "system", "content": system_prompt}]
+    systemPrompt = _injectPastContextIfAvailable(DARTLAB_CHAT_SYSTEM, _unused)
+    messages: list[dict[str, Any]] = [{"role": "system", "content": systemPrompt}]
     for entry in history:
         if not isinstance(entry, dict):
             continue
@@ -72,11 +72,11 @@ def runAgent(
         content = entry.get("content") or entry.get("text") or ""
         if role in {"user", "assistant"} and content:
             messages.append({"role": role, "content": str(content)})
-    user_text = str(question or "").strip()
-    if user_text:
-        messages.append({"role": "user", "content": user_text})
+    userText = str(question or "").strip()
+    if userText:
+        messages.append({"role": "user", "content": userText})
 
-    tools = _selectTools(tool_names)
+    tools = _selectTools(toolNames)
 
     # chat-native 흐름은 phase (단계) 가 없다. 도구 카드 + 텍스트 streaming 이 모든 진행 표현.
     # 무의미한 graph_node 1 회 emit 은 UI groupActivities 가 잘못된 phase ("작성") 라벨 붙이게 만들어 제거.
@@ -95,13 +95,13 @@ def runAgent(
     # 사용자 audit 에서 ReadCapability 2 회 / 같은 Read 3 회 같은 비효율 루프 차단.
     call_cache: dict[tuple[str, str], dict[str, Any]] = {}
 
-    for iteration in range(max_iterations):
+    for iteration in range(maxIterations):
         # 옛 assistant reasoning 트리밍 (마지막 2 개 외 content → None). tool_calls 보존.
         # 회귀 가드: 노드 추가 아님. 기계적 메모리 관리만.
-        _microcompact(messages, keep_last=2)
+        _microcompact(messages, keepLast=2)
 
         try:
-            chunks = list(stream_provider(provider, messages, tools))
+            chunks = list(streamProvider(provider, messages, tools))
         except Exception as exc:  # noqa: BLE001
             logger.exception(
                 "stream_provider failed (provider=%s, iter=%d)",
@@ -123,7 +123,7 @@ def runAgent(
             yield TraceEvent("error", {"error": "no_final_turn"})
             return
 
-        if turn.tool_calls:
+        if turn.toolCalls:
             # streaming 미지원 provider 가 final 만 emit 하면 turn.content 가 그대로 텍스트일 수 있음.
             # 단 tool_calls 가 있으면 사용자에게 텍스트보다 도구 결과가 본체 — 텍스트는 일단 보존.
             if turn.content and not text_emitted:
@@ -143,12 +143,12 @@ def runAgent(
                             "arguments": json.dumps(tc.args, ensure_ascii=False),
                         },
                     }
-                    for tc in turn.tool_calls
+                    for tc in turn.toolCalls
                 ],
             }
             messages.append(assistant_msg)
 
-            for tc in turn.tool_calls:
+            for tc in turn.toolCalls:
                 # 동일 도구가 임계 회 연속 실패한 적 있으면 호출 차단 + LLM 에 안내.
                 if tc.name in blocked_tools:
                     yield TraceEvent(
@@ -230,11 +230,11 @@ def runAgent(
                         }
                     )
                     continue
-                result_dict = executeTool(tc.name, tc.args)
-                call_cache[cache_key] = result_dict
+                resultDict = executeTool(tc.name, tc.args)
+                call_cache[cache_key] = resultDict
                 # 실패 streak 추적 — 같은 도구 + 같은 error 코드 N 회 → blocked.
-                if not result_dict.get("ok"):
-                    err_key = str(result_dict.get("error") or "unknown")
+                if not resultDict.get("ok"):
+                    err_key = str(resultDict.get("error") or "unknown")
                     streak_key = (tc.name, err_key)
                     failure_streak[streak_key] = failure_streak.get(streak_key, 0) + 1
                     if failure_streak[streak_key] >= _FAILURE_STREAK_LIMIT:
@@ -242,7 +242,7 @@ def runAgent(
                 else:
                     # 성공 시 해당 도구의 모든 streak 리셋.
                     failure_streak = {k: v for k, v in failure_streak.items() if k[0] != tc.name}
-                tool_refs = list(result_dict.get("refs") or [])
+                tool_refs = list(resultDict.get("refs") or [])
                 refs.extend(tool_refs)
                 tool_artifacts = [ref for ref in tool_refs if ref.get("kind") == "artifactRef"]
                 artifacts.extend(tool_artifacts)
@@ -251,14 +251,14 @@ def runAgent(
                     {
                         "id": tc.id,
                         "tool": tc.name,
-                        "status": "done" if result_dict.get("ok") else "error",
-                        "outputSummary": result_dict.get("summary", ""),
+                        "status": "done" if resultDict.get("ok") else "error",
+                        "outputSummary": resultDict.get("summary", ""),
                         "evidenceRefs": [ref.get("id") for ref in tool_refs if ref.get("id")],
                         "artifacts": tool_artifacts,
-                        "error": result_dict.get("error"),
+                        "error": resultDict.get("error"),
                         # raw data — agent_gateway._public_result_payload 가 stdout/values/table
                         # preview 추출. UI expand 시 표시.
-                        "data": result_dict.get("data"),
+                        "data": resultDict.get("data"),
                     },
                 )
                 # visualRef 발견 시 VIEW_SPEC event emit — ChartRenderer 가 메시지 흐름에 인라인.
@@ -281,7 +281,7 @@ def runAgent(
                 # 외부 본문 (sourceType=external) 인 ref 가 있으면 data 텍스트 필드를 [EXTERNAL CONTENT START/END]
                 # 마커로 감싼다 — LLM 이 마커 안의 지시를 *데이터* 로만 다루게 한다.
                 # 상세: runtime.workbenchEvidenceFlow "외부 본문 처리".
-                wrapped = wrap_external_in_result(result_dict)
+                wrapped = wrapExternalInResult(resultDict)
                 content_str = json.dumps(
                     {
                         "ok": wrapped.get("ok"),
@@ -319,7 +319,7 @@ def runAgent(
     # chat-native HARVEST bridge — workbench HARVEST 와 동일 helper 로 memory 작성.
     # SSOT.md Principle 6 정합 (모든 종료 경로 → decisions.jsonl + skill_stats.jsonl).
     _wireChatNativeMemory(
-        question=user_text,
+        question=userText,
         answerText=text_emitted,
         refs=refs,
         kwargs=_unused,
@@ -347,14 +347,14 @@ def _injectPastContextIfAvailable(systemPrompt: str, kwargs: dict[str, Any]) -> 
 
     빈 문자열이면 섹션 헤더 자체 부재 — 환각 가드 (CHANGELOG #572 패턴).
     """
-    stock_code = kwargs.get("stockCode")
-    if not stock_code:
+    stockCode = kwargs.get("stockCode")
+    if not stockCode:
         return systemPrompt
     market = kwargs.get("market") or "KR"
     try:
         from .memory.wiring import fetchPastContext
 
-        past = fetchPastContext(str(stock_code), market=str(market))
+        past = fetchPastContext(str(stockCode), market=str(market))
     except Exception:  # noqa: BLE001
         past = ""
     if not past:
@@ -384,9 +384,9 @@ def _wireChatNativeMemory(
         )
 
     extra_tags: list[str] = []
-    stock_code, market = inferStockCodeContext(ref_objects, kwargs=kwargs)
-    if stock_code:
-        extra_tags.append(f"target:{stock_code}")
+    stockCode, market = inferStockCodeContext(ref_objects, kwargs=kwargs)
+    if stockCode:
+        extra_tags.append(f"target:{stockCode}")
     if market:
         extra_tags.append(f"market:{market}")
 
@@ -397,17 +397,17 @@ def _wireChatNativeMemory(
         selectedSkillRefs=(r for r in ref_objects if r.kind == "skillRef"),
         ok=True,
         extraTags=extra_tags,
-        stockCode=stock_code,
+        stockCode=stockCode,
         market=market,
     )
 
 
-def _selectTools(tool_names: tuple[str, ...]) -> list[dict[str, Any]]:
+def _selectTools(toolNames: tuple[str, ...]) -> list[dict[str, Any]]:
     """toolSpecs() raw dict ({name, description, inputSchema}) → OpenAI function calling 형식.
 
     각 provider 가 자체 toolSchema 변환 가지면 호출자가 별도 처리. 본 helper 는 OpenAI 호환만.
     """
-    allowed = set(tool_names)
+    allowed = set(toolNames)
     out: list[dict[str, Any]] = []
     for spec in toolSpecs():
         if not isinstance(spec, dict):
@@ -433,7 +433,7 @@ def _chunks(text: str, *, size: int = 240) -> Iterator[str]:
         yield text[index : index + size]
 
 
-def _microcompact(messages: list[dict[str, Any]], *, keep_last: int = 2) -> None:
+def _microcompact(messages: list[dict[str, Any]], *, keepLast: int = 2) -> None:
     """오래된 assistant message 의 reasoning content 를 None 으로 (in-place).
 
     tool_calls 구조는 보존 — provider 들이 tool result 매칭에 필요. 마지막 keep_last 개의
@@ -443,9 +443,9 @@ def _microcompact(messages: list[dict[str, Any]], *, keep_last: int = 2) -> None
     memory/feedback_no_graph_regression.md 6 패턴과 무관.
     """
     ai_indices = [i for i, msg in enumerate(messages) if isinstance(msg, dict) and msg.get("role") == "assistant"]
-    if len(ai_indices) <= keep_last:
+    if len(ai_indices) <= keepLast:
         return
-    for idx in ai_indices[:-keep_last]:
+    for idx in ai_indices[:-keepLast]:
         msg = messages[idx]
         if msg.get("tool_calls") and msg.get("content"):
             msg["content"] = None

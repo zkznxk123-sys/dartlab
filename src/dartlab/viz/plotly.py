@@ -19,7 +19,7 @@ from typing import Any
 from dartlab.core.palette import COLORS
 
 
-def _ensure_plotly():
+def _ensurePlotly():
     """Lazy import with clear error."""
     try:
         import plotly.graph_objects as go
@@ -29,7 +29,7 @@ def _ensure_plotly():
         raise ImportError("plotly 패키지가 필요합니다.\n  pip install --upgrade dartlab") from None
 
 
-def _apply_theme(fig) -> None:
+def _applyTheme(fig) -> None:
     """DartLab 테마 적용."""
     fig.update_layout(
         font_family="Pretendard, -apple-system, sans-serif",
@@ -43,13 +43,13 @@ def _apply_theme(fig) -> None:
     fig.update_yaxes(showgrid=True, gridcolor="#f0f0f0", gridwidth=1)
 
 
-def _hex_to_rgba(hex_color: str, alpha: float = 0.2) -> str:
+def _hexToRgba(hexColor: str, alpha: float = 0.2) -> str:
     """#RRGGBB → rgba(R,G,B,alpha) 변환."""
-    h = hex_color.lstrip("#")
+    h = hexColor.lstrip("#")
     if len(h) == 6:
         r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
         return f"rgba({r},{g},{b},{alpha})"
-    return hex_color
+    return hexColor
 
 
 class PlotlyChartRenderer:
@@ -61,11 +61,11 @@ class PlotlyChartRenderer:
 
     def htmlFromSpec(self, spec: dict) -> str:
         """ChartSpec → Plotly Figure → HTML 문자열."""
-        fig = from_spec(spec)
+        fig = fromSpec(spec)
         return fig.to_html(include_plotlyjs="cdn", full_html=False)
 
 
-def from_spec(spec: dict) -> Any:
+def fromSpec(spec: dict) -> Any:
     """ChartSpec JSON → Plotly Figure.
 
     Args:
@@ -74,7 +74,7 @@ def from_spec(spec: dict) -> Any:
     Returns:
         Plotly Figure 객체.
     """
-    go = _ensure_plotly()
+    go = _ensurePlotly()
     ct = spec.get("chartType", "")
 
     if ct in ("combo", "bar", "line"):
@@ -145,7 +145,7 @@ def _combo(go, spec: dict) -> Any:
         barmode=barmode,
         yaxis_title=f"({opts.get('unit', '')})" if opts.get("unit") else "",
     )
-    _apply_theme(fig)
+    _applyTheme(fig)
     return fig
 
 
@@ -159,7 +159,7 @@ def _radar(go, spec: dict) -> Any:
     for s in series_list:
         data = s.get("data", [])
         color = s.get("color", COLORS[0])
-        fill_rgba = _hex_to_rgba(color, 0.2)
+        fill_rgba = _hexToRgba(color, 0.2)
         fig.add_trace(
             go.Scatterpolar(
                 r=data + [data[0]] if data else [],
@@ -175,7 +175,7 @@ def _radar(go, spec: dict) -> Any:
         title=spec.get("title", ""),
         polar=dict(radialaxis=dict(visible=True, range=[0, max_val])),
     )
-    _apply_theme(fig)
+    _applyTheme(fig)
     return fig
 
 
@@ -208,7 +208,7 @@ def _waterfall(go, spec: dict) -> Any:
         title=spec.get("title", ""),
         yaxis_title=f"({unit})" if unit else "",
     )
-    _apply_theme(fig)
+    _applyTheme(fig)
     return fig
 
 
@@ -234,7 +234,7 @@ def _heatmap(go, spec: dict) -> Any:
         yaxis=dict(autorange="reversed"),
         height=max(400, len(topics) * 25),
     )
-    _apply_theme(fig)
+    _applyTheme(fig)
     return fig
 
 
@@ -280,7 +280,7 @@ def _sparkline(go, spec: dict) -> Any:
         height=max(300, rows * 120),
         showlegend=False,
     )
-    _apply_theme(fig)
+    _applyTheme(fig)
     return fig
 
 
@@ -299,5 +299,5 @@ def _pie(go, spec: dict) -> Any:
         )
     )
     fig.update_layout(title=spec.get("title", ""))
-    _apply_theme(fig)
+    _applyTheme(fig)
     return fig

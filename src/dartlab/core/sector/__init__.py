@@ -274,7 +274,7 @@ def getParams(sectorInfo: SectorInfo | None = None) -> SectorParams:
     return SectorParams()
 
 
-def get_sector_params_by_name(name: str) -> SectorParams | None:
+def getSectorParamsByName(name: str) -> SectorParams | None:
     """섹터/산업그룹 이름(문자열)으로 SectorParams 직접 조회.
 
     bottomUpBeta 등 섹터 이름만 알고 있는 호출처 편의용.

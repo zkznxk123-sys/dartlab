@@ -380,7 +380,7 @@ def diffSummaryDataFrame(diffResult: DiffResult) -> pl.DataFrame:
     )
 
 
-def build_diff_matrix(
+def buildDiffMatrix(
     sections: pl.DataFrame,
     *,
     textOnly: bool = False,
@@ -429,11 +429,11 @@ def build_diff_matrix(
     }
 
 
-def build_heatmap_spec(
-    matrix_data: dict,
-    company_name: str,
+def buildHeatmapSpec(
+    matrixData: dict,
+    companyName: str,
     *,
-    top_n: int = 20,
+    topN: int = 20,
 ) -> dict:
     """변화 매트릭스 → HeatmapChart ChartSpec dict.
 
@@ -445,12 +445,12 @@ def build_heatmap_spec(
     Returns:
         {chartType, title, xLabels, yLabels, data, meta}
     """
-    rows = matrix_data["matrix"][:top_n]
-    periods = matrix_data["periods"]
+    rows = matrixData["matrix"][:topN]
+    periods = matrixData["periods"]
 
     return {
         "chartType": "heatmap",
-        "title": f"{company_name} topic 변화 히트맵 (상위 {len(rows)}개)",
+        "title": f"{companyName} topic 변화 히트맵 (상위 {len(rows)}개)",
         "xLabels": periods,
         "yLabels": [r["topic"] for r in rows],
         "data": [[r.get(p, -1) for p in periods] for r in rows],

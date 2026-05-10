@@ -115,7 +115,7 @@ class CompanyGraph:
             self.reverse[edge.target] = {}
         self.reverse[edge.target][edge.source] = edge
 
-    def getNode(self, node_id: str) -> Node | None:
+    def getNode(self, nodeId: str) -> Node | None:
         """노드 ID로 조회.
 
         Parameters
@@ -128,9 +128,9 @@ class CompanyGraph:
         Node | None
             해당 노드. 없으면 None.
         """
-        return self.nodes.get(node_id)
+        return self.nodes.get(nodeId)
 
-    def outgoing(self, node_id: str) -> list[Edge]:
+    def outgoing(self, nodeId: str) -> list[Edge]:
         """node_id에서 나가는 엣지들 (forward).
 
         Parameters
@@ -143,9 +143,9 @@ class CompanyGraph:
         list[Edge]
             해당 노드에서 나가는 엣지 리스트.
         """
-        return list(self.edges.get(node_id, {}).values())
+        return list(self.edges.get(nodeId, {}).values())
 
-    def incoming(self, node_id: str) -> list[Edge]:
+    def incoming(self, nodeId: str) -> list[Edge]:
         """node_id로 들어오는 엣지들 (역방향).
 
         Parameters
@@ -158,7 +158,7 @@ class CompanyGraph:
         list[Edge]
             해당 노드로 들어오는 엣지 리스트.
         """
-        return list(self.reverse.get(node_id, {}).values())
+        return list(self.reverse.get(nodeId, {}).values())
 
     def findNodes(self, *, type: NodeType | None = None, label: str = "") -> list[Node]:
         """조건 매칭 노드 검색.

@@ -19,7 +19,7 @@ except ImportError:
     _HAS_OPENAI = False
 
 
-def _wrap_rate_limit(provider: str, e: Exception) -> Exception:
+def _wrapRateLimit(provider: str, e: Exception) -> Exception:
     """OpenAI SDK의 RateLimitError를 dartlab RateLimitError로 래핑."""
     if _HAS_OPENAI and isinstance(e, _OpenAIRateLimitError):
         retryAfter = None
@@ -60,17 +60,17 @@ class OpenAICompatProvider(BaseProvider):
         super().__init__(config)
         self._client = None
         self._defaults = _COMPAT_DEFAULTS.get(config.provider, {})
-        if self._defaults and not config.base_url:
-            self.config.base_url = self._defaults["base_url"]
+        if self._defaults and not config.baseUrl:
+            self.config.baseUrl = self._defaults["base_url"]
 
-    def _get_client(self):
+    def _getClient(self):
         if self._client is None:
             try:
                 from openai import OpenAI
             except ImportError:
                 raise ImportError("openai 패키지가 필요합니다.\n  pip install --upgrade dartlab")
             kwargs = {}
-            apiKey = self.config.api_key
+            apiKey = self.config.apiKey
             if not apiKey:
                 import os
 
@@ -81,37 +81,37 @@ class OpenAICompatProvider(BaseProvider):
                     apiKey = os.environ.get(spec.env_key)
             if apiKey:
                 kwargs["api_key"] = apiKey
-            if self.config.base_url:
-                kwargs["base_url"] = self.config.base_url
+            if self.config.baseUrl:
+                kwargs["base_url"] = self.config.baseUrl
             self._client = OpenAI(**kwargs)
         return self._client
 
     @property
-    def default_model(self) -> str:
+    def defaultModel(self) -> str:
         return self._defaults.get("default_model", "gpt-4o")
 
     @property
-    def supports_native_tools(self) -> bool:
+    def supportsNativeTools(self) -> bool:
         return True
 
-    def check_available(self) -> bool:
+    def checkAvailable(self) -> bool:
         try:
-            self._get_client()
+            self._getClient()
             return True
         except _OPENAI_COMPAT_ERRORS:
             return False
 
     def complete(self, messages: list[dict[str, str]]) -> LLMResponse:
-        client = self._get_client()
+        client = self._getClient()
         try:
             response = client.chat.completions.create(
-                model=self.resolved_model,
+                model=self.resolvedModel,
                 messages=messages,
                 temperature=self.config.temperature,
-                max_tokens=self.config.max_tokens,
+                maxTokens=self.config.maxTokens,
             )
         except Exception as e:  # noqa: BLE001
-            raise _wrap_rate_limit(self.config.provider, e) from e
+            raise _wrapRateLimit(self.config.provider, e) from e
         choice = response.choices[0]
         usage = None
         if response.usage:
@@ -128,47 +128,47 @@ class OpenAICompatProvider(BaseProvider):
         )
 
     def stream(self, messages: list[dict[str, str]]) -> Generator[str, None, None]:
-        client = self._get_client()
+        client = self._getClient()
         try:
             response = client.chat.completions.create(
-                model=self.resolved_model,
+                model=self.resolvedModel,
                 messages=messages,
                 temperature=self.config.temperature,
-                max_tokens=self.config.max_tokens,
+                maxTokens=self.config.maxTokens,
                 stream=True,
             )
         except Exception as e:  # noqa: BLE001
-            raise _wrap_rate_limit(self.config.provider, e) from e
+            raise _wrapRateLimit(self.config.provider, e) from e
         for chunk in response:
             if chunk.choices and chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
 
-    def complete_with_tools(
+    def completeWithTools(
         self,
         messages: list[dict],
         tools: list[dict],
         *,
-        tool_choice: str | None = None,
+        toolChoice: str | None = None,
     ) -> ToolResponse:
-        client = self._get_client()
+        client = self._getClient()
         kwargs: dict = {
-            "model": self.resolved_model,
+            "model": self.resolvedModel,
             "messages": messages,
             "temperature": self.config.temperature,
-            "max_tokens": self.config.max_tokens,
+            "max_tokens": self.config.maxTokens,
         }
         if tools:
             kwargs["tools"] = tools
             kwargs["parallel_tool_calls"] = False
-            if tool_choice == "any":
+            if toolChoice == "any":
                 kwargs["tool_choice"] = "required"
-            elif tool_choice == "none":
+            elif toolChoice == "none":
                 kwargs["tool_choice"] = "none"
 
         try:
             response = client.chat.completions.create(**kwargs)
         except Exception as e:  # noqa: BLE001
-            raise _wrap_rate_limit(self.config.provider, e) from e
+            raise _wrapRateLimit(self.config.provider, e) from e
         choice = response.choices[0]
 
         usage = None
@@ -179,10 +179,10 @@ class OpenAICompatProvider(BaseProvider):
                 "total_tokens": response.usage.total_tokens,
             }
 
-        tool_calls = []
-        if choice.message.tool_calls:
-            for tc in choice.message.tool_calls:
-                tool_calls.append(
+        toolCalls = []
+        if choice.message.toolCalls:
+            for tc in choice.message.toolCalls:
+                toolCalls.append(
                     ToolCall(
                         id=tc.id,
                         name=tc.function.name,
@@ -194,7 +194,7 @@ class OpenAICompatProvider(BaseProvider):
             answer=choice.message.content or "",
             provider=self.config.provider,
             model=response.model,
-            tool_calls=tool_calls,
+            toolCalls=toolCalls,
             finish_reason=choice.finish_reason or "stop",
             usage=usage,
         )

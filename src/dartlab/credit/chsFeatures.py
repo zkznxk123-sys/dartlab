@@ -67,8 +67,8 @@ def extractChsFeatures(company: Any) -> dict | None:
         return None
 
     # 주가 수집 (시가총액, 변동성, excessReturn)
-    market_cap, sigma, exret, stock_price = _gatherMarketData(company)
-    if market_cap is None:
+    marketCap, sigma, exret, stock_price = _gatherMarketData(company)
+    if marketCap is None:
         return None
 
     return {
@@ -76,7 +76,7 @@ def extractChsFeatures(company: Any) -> dict | None:
         "totalLiabilities": tl,
         "cash": cash,
         "totalAssets": ta,
-        "marketCap": market_cap,
+        "marketCap": marketCap,
         "equityVolatility": sigma,
         "excessReturn": exret,
         "stockPrice": stock_price,
@@ -135,8 +135,8 @@ def _gatherMarketData(company: Any) -> tuple[float | None, float | None, float |
 
         # 주식수는 calcDcf 역산 또는 BS 시도 — 여기서는 proxy
         shares = _estimateShares(company, latest_price)
-        market_cap = shares * latest_price if shares else None
-        return market_cap, sigma, exret, latest_price
+        marketCap = shares * latest_price if shares else None
+        return marketCap, sigma, exret, latest_price
     except (ImportError, AttributeError, KeyError, TypeError, ValueError, IndexError):
         return None, None, None, None
 

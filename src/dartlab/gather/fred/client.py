@@ -27,8 +27,8 @@ class FredClient:
     - 429/5xx 지수 백오프 재시도 (최대 3회)
     """
 
-    def __init__(self, api_key: str | None = None) -> None:
-        raw = api_key or os.environ.get("FRED_API_KEY", "")
+    def __init__(self, apiKey: str | None = None) -> None:
+        raw = apiKey or os.environ.get("FRED_API_KEY", "")
         self._keys: list[str] = [k.strip() for k in raw.split(",") if k.strip()]
         if not self._keys:
             raise AuthenticationError(
@@ -68,12 +68,12 @@ class FredClient:
             기타 API 오류 또는 3회 재시도 초과.
         """
         params.setdefault("file_type", "json")
-        params["api_key"] = self._resolve_key()
+        params["api_key"] = self._resolveKey()
         url = f"{_BASE_URL}{endpoint}"
 
         last_exc: Exception | None = None
         for attempt in range(3):
-            self._rate_limit()
+            self._rateLimit()
             try:
                 resp = self._session.get(url, params=params, timeout=30)
             except httpx.HTTPError as exc:
@@ -86,7 +86,7 @@ class FredClient:
 
             if resp.status_code == 429:
                 log.warning("FRED rate limit hit, backing off (attempt %d)", attempt + 1)
-                self._rotate_key()
+                self._rotateKey()
                 self._backoff(attempt)
                 last_exc = RateLimitError(f"429 Too Many Requests (attempt {attempt + 1})")
                 continue
@@ -118,7 +118,7 @@ class FredClient:
 
     # ── internal ──
 
-    def _resolve_key(self) -> str:
+    def _resolveKey(self) -> str:
         """현재 인덱스의 API 키 반환.
 
         Returns
@@ -128,7 +128,7 @@ class FredClient:
         """
         return self._keys[self._key_idx % len(self._keys)]
 
-    def _rotate_key(self) -> None:
+    def _rotateKey(self) -> None:
         """다음 API 키로 로테이션 (multi-key 지원).
 
         Returns
@@ -139,7 +139,7 @@ class FredClient:
         if len(self._keys) > 1:
             self._key_idx = (self._key_idx + 1) % len(self._keys)
 
-    def _rate_limit(self) -> None:
+    def _rateLimit(self) -> None:
         """슬라이딩 윈도우 120 RPM 제한.
 
         Returns

@@ -15,7 +15,7 @@ requires_plotly = pytest.mark.skipif(not HAS_PLOTLY, reason="plotly not installe
 @requires_plotly
 class TestAutoNumericCols:
     def test_basic(self):
-        from dartlab.viz.charts import _auto_numeric_cols
+        from dartlab.viz.charts import _autoNumericCols
 
         df = pl.DataFrame(
             {
@@ -25,7 +25,7 @@ class TestAutoNumericCols:
                 "ratio": [0.5],
             }
         )
-        cols = _auto_numeric_cols(df, exclude=["year"])
+        cols = _autoNumericCols(df, exclude=["year"])
         assert "revenue" in cols
         assert "ratio" in cols
         assert "year" not in cols

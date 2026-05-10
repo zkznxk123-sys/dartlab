@@ -90,11 +90,11 @@ def test_edgar_filter_period_columns_by_asof_2023() -> None:
 
 @pytest.mark.unit
 def test_dart_parse_asof_iso_quarter_year() -> None:
-    from dartlab.providers.dart.company import _parse_asof
+    from dartlab.providers.dart.company import _parseAsof
 
-    assert _parse_asof("2024Q1") == (2024, 1)
-    assert _parse_asof("2024q3") == (2024, 3)
-    assert _parse_asof("2024-06-30") == (2024, 2)
-    assert _parse_asof("2024") == (2024, None)
-    assert _parse_asof("garbage") == (None, None)
-    assert _parse_asof("") == (None, None)
+    assert _parseAsof("2024Q1") == (2024, 1)
+    assert _parseAsof("2024q3") == (2024, 3)
+    assert _parseAsof("2024-06-30") == (2024, 2)
+    assert _parseAsof("2024") == (2024, None)
+    assert _parseAsof("garbage") == (None, None)
+    assert _parseAsof("") == (None, None)

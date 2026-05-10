@@ -16,7 +16,7 @@ from dartlab.macro.macroCycle import (
 )
 
 
-def _fetch_asset_data(market: str, as_of: str | None = None) -> dict[str, float | None]:
+def _fetchAssetData(market: str, asOf: str | None = None) -> dict[str, float | None]:
     """gather에서 5대 자산 지표 수집.
 
     Parameters
@@ -45,27 +45,27 @@ def _fetch_asset_data(market: str, as_of: str | None = None) -> dict[str, float 
         - gold_yoy : float — 금 가격 전년비 변화율 (%)
         - dxy_change_pct : float — 달러인덱스 3개월 변화율 (%)
     """
-    from dartlab.macro._helpers import fetch_change_pct, fetch_latest, fetch_yoy, get_gather
+    from dartlab.macro._helpers import fetchChangePct, fetchLatest, fetchYoy, getGather
 
-    g = get_gather(as_of)
+    g = getGather(asOf)
     data: dict[str, float | None] = {}
 
     for key, sid in [("short_rate", "DGS2"), ("long_rate", "DGS10"), ("vix", "VIXCLS"), ("dfii10", "DFII10")]:
-        data[key] = fetch_latest(g, sid)
-        data[f"{key}_change"] = fetch_change_pct(g, sid, 63)
+        data[key] = fetchLatest(g, sid)
+        data[f"{key}_change"] = fetchChangePct(g, sid, 63)
 
     fx_id = "USDKRW" if market.upper() == "KR" else "DTWEXBGS"
-    data["fx_usdkrw"] = fetch_latest(g, fx_id)
-    data["fx_change_pct"] = fetch_change_pct(g, fx_id, 63)
+    data["fx_usdkrw"] = fetchLatest(g, fx_id)
+    data["fx_change_pct"] = fetchChangePct(g, fx_id, 63)
 
-    data["gold"] = fetch_latest(g, "IR14270")
-    data["gold_yoy"] = fetch_yoy(g, "IR14270")
-    data["dxy_change_pct"] = fetch_change_pct(g, "DTWEXBGS", 63)
+    data["gold"] = fetchLatest(g, "IR14270")
+    data["gold_yoy"] = fetchYoy(g, "IR14270")
+    data["dxy_change_pct"] = fetchChangePct(g, "DTWEXBGS", 63)
 
     return {k: v for k, v in data.items() if v is not None}
 
 
-def analyze_assets(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
+def analyzeAssets(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """5대 자산 종합 해석 — 주식/채권/원자재/환율/금 + 심층 드라이버.
 
     Parameters
@@ -88,11 +88,11 @@ def analyze_assets(*, market: str = "US", as_of: str | None = None, overrides: d
         - copperGold : dict | None — 구리/금 비율 (ratio:float(배), direction:str, directionLabel:str, implication:str, description:str)
         - marketValuation : dict | None — Buffett Indicator (buffettIndicator:float(%), zone:str, zoneLabel:str, description:str). US 전용.
     """
-    data = _fetch_asset_data(market, as_of=as_of)
+    data = _fetchAssetData(market, asOf=asOf)
     if overrides:
-        from dartlab.macro._helpers import apply_overrides
+        from dartlab.macro._helpers import applyOverrides
 
-        data = apply_overrides(data, overrides)
+        data = applyOverrides(data, overrides)
     result: dict = {"market": market.upper()}
 
     # 기본 5대 자산 해석 — DKW 분해 + 금리차 교차 해석 포함
@@ -161,12 +161,12 @@ def analyze_assets(*, market: str = "US", as_of: str | None = None, overrides: d
     ]
 
     # 금 3요인 심층 해석
-    gold_yoy = data.get("gold_yoy")
+    goldYoy = data.get("gold_yoy")
     real_rate_chg = data.get("dfii10_change")
     dxy_chg = data.get("dxy_change_pct")
     vix = data.get("vix")
-    if gold_yoy is not None and real_rate_chg is not None and dxy_chg is not None and vix is not None:
-        gd = interpretGoldDrivers(gold_yoy, real_rate_chg, dxy_chg, vix)
+    if goldYoy is not None and real_rate_chg is not None and dxy_chg is not None and vix is not None:
+        gd = interpretGoldDrivers(goldYoy, real_rate_chg, dxy_chg, vix)
         result["goldDrivers"] = {
             "realRateEffect": gd.realRateEffect,
             "dollarEffect": gd.dollarEffect,
@@ -194,18 +194,18 @@ def analyze_assets(*, market: str = "US", as_of: str | None = None, overrides: d
     if fx_chg is not None:
         trade_yoy = None
         try:
-            from dartlab.macro._helpers import fetch_yoy as _fy
-            from dartlab.macro._helpers import get_gather as _gg
+            from dartlab.macro._helpers import fetchYoy as _fy
+            from dartlab.macro._helpers import getGather as _gg
 
-            _g = _gg(as_of)
+            _g = _gg(asOf)
             trade_yoy = _fy(_g, "EXPORT") if market.upper() == "KR" else _fy(_g, "BOPGSTB")
         except (KeyError, ValueError, TypeError, AttributeError, ImportError):
             pass
 
         fd = interpretFxDrivers(
-            fx_change_pct=fx_chg,
-            rate_diff_change=asset_input.get("rate_diff_change"),
-            trade_balance_yoy=trade_yoy,
+            fxChangePct=fx_chg,
+            rateDiffChange=asset_input.get("rate_diff_change"),
+            tradeBalanceYoy=trade_yoy,
             vix=data.get("vix"),
         )
         result["fxDrivers"] = {
@@ -248,10 +248,10 @@ def analyze_assets(*, market: str = "US", as_of: str | None = None, overrides: d
     result["marketValuation"] = None
     if market.upper() == "US":
         try:
-            from dartlab.macro._helpers import fetch_latest as _fl
-            from dartlab.macro._helpers import get_gather as _gg
+            from dartlab.macro._helpers import fetchLatest as _fl
+            from dartlab.macro._helpers import getGather as _gg
 
-            _g = _gg(as_of)
+            _g = _gg(asOf)
             mcap = _fl(_g, "WILL5000PRFC")
             gdp = _fl(_g, "GDP")
             if mcap is not None and gdp is not None:

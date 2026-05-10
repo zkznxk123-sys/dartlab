@@ -36,9 +36,9 @@ from . import ownership as _ownership
 from . import price as _price
 from . import sector as _sector
 from .cache import GatherCache
-from .domains import load_domain
-from .http import GatherHttpClient, run_async
-from .marketConfig import get_market_config
+from .domains import loadDomain
+from .http import GatherHttpClient, runAsync
+from .marketConfig import getMarketConfig
 from .types import (
     FlowData,
     GatherResult,
@@ -113,7 +113,7 @@ class Gather:
 
     def price(
         self,
-        stock_code: str,
+        stockCode: str,
         *,
         market: str = "KR",
         start: str | None = None,
@@ -154,10 +154,10 @@ class Gather:
         # market 자동 감지 (core SSOT)
         from dartlab.core.market import resolveMarket
 
-        market = resolveMarket(stock_code, market)
+        market = resolveMarket(stockCode, market)
 
         if snapshot:
-            return self._priceSnapshot(stock_code, market=market)
+            return self._priceSnapshot(stockCode, market=market)
         from datetime import date, timedelta
 
         if start is None:
@@ -165,9 +165,9 @@ class Gather:
             start = (date.today() - timedelta(days=365)).isoformat()
         elif end is None:
             end = date.today().isoformat()
-        return self.history(stock_code, start=start, end=end, market=market)
+        return self.history(stockCode, start=start, end=end, market=market)
 
-    def _priceSnapshot(self, stock_code: str, *, market: str = "KR") -> PriceSnapshot | None:
+    def _priceSnapshot(self, stockCode: str, *, market: str = "KR") -> PriceSnapshot | None:
         """현재가 스냅샷 — naver → naver_global fallback.
 
         Parameters
@@ -188,16 +188,16 @@ class Gather:
         """
         from dartlab.core.market import resolveMarket
 
-        market = resolveMarket(stock_code, market)
-        cached = self._cache.get_typed(stock_code, "price")
+        market = resolveMarket(stockCode, market)
+        cached = self._cache.getTyped(stockCode, "price")
         if cached is not None:
             return cached  # type: ignore[return-value]
-        result = run_async(_price.fetch(stock_code, market=market, client=self._client))
+        result = runAsync(_price.fetch(stockCode, market=market, client=self._client))
         if result:
-            self._cache.put_typed(stock_code, "price", result)
+            self._cache.putTyped(stockCode, "price", result)
         return result
 
-    def flow(self, stock_code: str, *, market: str = "KR") -> "pl.DataFrame | None":
+    def flow(self, stockCode: str, *, market: str = "KR") -> "pl.DataFrame | None":
         """투자자별 수급 시계열 조회 (KR 전용).
 
         Capabilities:
@@ -224,25 +224,25 @@ class Gather:
         """
         from dartlab.core.market import resolveMarket
 
-        market = resolveMarket(stock_code, market)
+        market = resolveMarket(stockCode, market)
         import polars as pl
 
         if market != "KR":
             return None
-        cache_key = f"{stock_code}:flow_series"
-        cached = self._cache.get_typed(cache_key, "flow")
+        cache_key = f"{stockCode}:flow_series"
+        cached = self._cache.getTyped(cache_key, "flow")
         if cached is not None:
             return cached  # type: ignore[return-value]
-        raw = run_async(_flow.fetch(stock_code, market=market, client=self._client))
+        raw = runAsync(_flow.fetch(stockCode, market=market, client=self._client))
         if not raw:
             return None
         df = pl.DataFrame(raw)
         if "date" in df.columns and df["date"].dtype == pl.Utf8:
             df = df.with_columns(pl.col("date").str.to_date("%Y%m%d").alias("date"))
-        self._cache.put_typed(cache_key, "flow", df)
+        self._cache.putTyped(cache_key, "flow", df)
         return df
 
-    def _flowSnapshot(self, stock_code: str, *, market: str = "KR") -> FlowData | None:
+    def _flowSnapshot(self, stockCode: str, *, market: str = "KR") -> FlowData | None:
         """수급 스냅샷 — flow() 시계열의 최신 행을 FlowData로 변환 (GatherSnapshot 내부용).
 
         Parameters
@@ -261,7 +261,7 @@ class Gather:
             source : str — 데이터 출처 ("naver").
             None — KR 외 시장이거나 데이터 없을 때.
         """
-        df = self.flow(stock_code, market=market)
+        df = self.flow(stockCode, market=market)
         if isEmptyDf(df):
             return None
         row = df.row(0, named=True)
@@ -272,9 +272,9 @@ class Gather:
             source="naver",
         )
 
-    def revenue_consensus(
+    def revenueConsensus(
         self,
-        stock_code: str,
+        stockCode: str,
         *,
         market: str = "KR",
     ) -> list[RevenueConsensus]:
@@ -302,27 +302,27 @@ class Gather:
             g.revenue_consensus("005930")              # 삼성전자
             g.revenue_consensus("AAPL", market="US")   # Apple
         """
-        cache_key = f"{stock_code}_{market}"
-        cached = self._cache.get_typed(cache_key, "revenue_consensus")
+        cache_key = f"{stockCode}_{market}"
+        cached = self._cache.getTyped(cache_key, "revenue_consensus")
         if cached is not None:
             return cached  # type: ignore[return-value]
         try:
             if market == "KR":
-                module = load_domain("naver")
-                result = run_async(module.fetch_revenue_consensus(stock_code, self._client))
+                module = loadDomain("naver")
+                result = runAsync(module.fetchRevenueConsensus(stockCode, self._client))
             else:
                 # US/글로벌: revenue consensus 소스 없음 (네이버 KR 전용)
                 result = []
         except (SourceUnavailableError, ImportError, OSError, AttributeError) as exc:
-            log.warning("revenue_consensus 실패 (%s, %s): %s", stock_code, market, exc)
+            log.warning("revenue_consensus 실패 (%s, %s): %s", stockCode, market, exc)
             result = []
         if result:
-            self._cache.put_typed(cache_key, "revenue_consensus", result)
+            self._cache.putTyped(cache_key, "revenue_consensus", result)
         return result
 
     def history(
         self,
-        stock_code: str,
+        stockCode: str,
         *,
         start: str,
         end: str,
@@ -358,17 +358,17 @@ class Gather:
         # market 자동 감지 (core SSOT)
         from dartlab.core.market import resolveMarket
 
-        market = resolveMarket(stock_code, market)
+        market = resolveMarket(stockCode, market)
 
         import polars as pl
 
-        cache_key = f"{stock_code}:history:{start}:{end}"
+        cache_key = f"{stockCode}:history:{start}:{end}"
         cached = self._cache.get(cache_key)
         if cached is not None:
             return cached  # type: ignore[return-value]
-        raw = run_async(
+        raw = runAsync(
             _history.fetch(
-                stock_code,
+                stockCode,
                 start=start,
                 end=end,
                 market=market,
@@ -415,16 +415,16 @@ class Gather:
             g.news("반도체", days=7)          # 최근 7일
         """
         cache_key = f"{query}:{market}:news"
-        cached = self._cache.get_typed(cache_key, "news")
+        cached = self._cache.getTyped(cache_key, "news")
         if cached is not None:
             return cached  # type: ignore[return-value]
-        items = run_async(_news._fetchAsync(query, market=market, days=days, client=self._client))
+        items = runAsync(_news._fetchAsync(query, market=market, days=days, client=self._client))
         df = _news.toDataFrame(items)
         if not df.is_empty():
-            self._cache.put_typed(cache_key, "news", df)
+            self._cache.putTyped(cache_key, "news", df)
         return df
 
-    def dividends(self, stock_code: str, *, market: str = "KR") -> list[dict]:
+    def dividends(self, stockCode: str, *, market: str = "KR") -> list[dict]:
         """배당 이력 조회.
 
         Capabilities:
@@ -449,32 +449,32 @@ class Gather:
             g.dividends("005930")              # 삼성전자 배당 이력
             g.dividends("AAPL", market="US")   # Apple 배당 이력
         """
-        cache_key = f"{stock_code}:{market}:dividends"
-        cached = self._cache.get_typed(cache_key, "dividends")
+        cache_key = f"{stockCode}:{market}:dividends"
+        cached = self._cache.getTyped(cache_key, "dividends")
         if cached is not None:
             return cached  # type: ignore[return-value]
         from .domains import DIVIDENDS_FALLBACK
         from .resilience import circuit_breaker as _cb
 
         for source in DIVIDENDS_FALLBACK:
-            if _cb.is_open(source):
+            if _cb.isOpen(source):
                 continue
             try:
-                module = load_domain(source)
+                module = loadDomain(source)
                 if not hasattr(module, "fetchDividends"):
                     continue
-                result = run_async(module.fetchDividends(stock_code, self._client, market=market))
+                result = runAsync(module.fetchDividends(stockCode, self._client, market=market))
                 if result:
-                    _cb.record_success(source)
-                    self._cache.put_typed(cache_key, "dividends", result)
+                    _cb.recordSuccess(source)
+                    self._cache.putTyped(cache_key, "dividends", result)
                     return result
             except (SourceUnavailableError, ImportError, OSError, AttributeError) as exc:
-                _cb.record_failure(source)
-                log.warning("dividends %s 실패 (%s): %s", source, stock_code, exc)
+                _cb.recordFailure(source)
+                log.warning("dividends %s 실패 (%s): %s", source, stockCode, exc)
                 continue
         return []
 
-    def splits(self, stock_code: str, *, market: str = "KR") -> list[dict]:
+    def splits(self, stockCode: str, *, market: str = "KR") -> list[dict]:
         """액면분할/병합 이력 조회.
 
         Capabilities:
@@ -499,34 +499,34 @@ class Gather:
             g.splits("005930")              # 삼성전자 분할 이력
             g.splits("AAPL", market="US")   # Apple 분할 이력
         """
-        cache_key = f"{stock_code}:{market}:splits"
-        cached = self._cache.get_typed(cache_key, "splits")
+        cache_key = f"{stockCode}:{market}:splits"
+        cached = self._cache.getTyped(cache_key, "splits")
         if cached is not None:
             return cached  # type: ignore[return-value]
         from .domains import DIVIDENDS_FALLBACK
         from .resilience import circuit_breaker as _cb
 
         for source in DIVIDENDS_FALLBACK:
-            if _cb.is_open(source):
+            if _cb.isOpen(source):
                 continue
             try:
-                module = load_domain(source)
+                module = loadDomain(source)
                 if not hasattr(module, "fetchSplits"):
                     continue
-                result = run_async(module.fetchSplits(stock_code, self._client, market=market))
+                result = runAsync(module.fetchSplits(stockCode, self._client, market=market))
                 if result:
-                    _cb.record_success(source)
-                    self._cache.put_typed(cache_key, "splits", result)
+                    _cb.recordSuccess(source)
+                    self._cache.putTyped(cache_key, "splits", result)
                     return result
             except (SourceUnavailableError, ImportError, OSError, AttributeError) as exc:
-                _cb.record_failure(source)
-                log.warning("splits %s 실패 (%s): %s", source, stock_code, exc)
+                _cb.recordFailure(source)
+                log.warning("splits %s 실패 (%s): %s", source, stockCode, exc)
                 continue
         return []
 
     # ── 업종 분류 ──
 
-    def sector(self, stock_code: str, *, market: str = "KR") -> SectorInfo | None:
+    def sector(self, stockCode: str, *, market: str = "KR") -> SectorInfo | None:
         """업종 분류 조회 -- KR(KIND+Naver) / US(Yahoo assetProfile).
 
         Args:
@@ -542,18 +542,18 @@ class Gather:
             g.sector("005930")              # 삼성전자 업종
             g.sector("AAPL", market="US")   # Apple 업종
         """
-        cache_key = f"{stock_code}:{market}"
-        cached = self._cache.get_typed(cache_key, "sector_info")
+        cache_key = f"{stockCode}:{market}"
+        cached = self._cache.getTyped(cache_key, "sector_info")
         if cached is not None:
             return cached  # type: ignore[return-value]
-        result = run_async(_sector.fetch(stock_code, market=market, client=self._client))
+        result = runAsync(_sector.fetch(stockCode, market=market, client=self._client))
         if result:
-            self._cache.put_typed(cache_key, "sector_info", result)
+            self._cache.putTyped(cache_key, "sector_info", result)
         return result
 
     # ── 내부자 거래 ──
 
-    def insiderTrading(self, stock_code: str, *, market: str = "KR") -> list[InsiderTrade]:
+    def insiderTrading(self, stockCode: str, *, market: str = "KR") -> list[InsiderTrade]:
         """내부자(임원/주요주주) 거래 내역 조회.
 
         Args:
@@ -571,17 +571,17 @@ class Gather:
         """
         from dartlab.core.market import resolveMarket
 
-        market = resolveMarket(stock_code, market)
-        cache_key = f"{stock_code}:{market}:insider"
-        cached = self._cache.get_typed(cache_key, "insider")
+        market = resolveMarket(stockCode, market)
+        cache_key = f"{stockCode}:{market}:insider"
+        cached = self._cache.getTyped(cache_key, "insider")
         if cached is not None:
             return cached  # type: ignore[return-value]
-        result = run_async(_insider.fetchInsiderTrading(stock_code, market=market, client=self._client))
+        result = runAsync(_insider.fetchInsiderTrading(stockCode, market=market, client=self._client))
         if result:
-            self._cache.put_typed(cache_key, "insider", result)
+            self._cache.putTyped(cache_key, "insider", result)
         return result
 
-    def majorShareholders(self, stock_code: str, *, market: str = "KR") -> list[MajorHolder]:
+    def majorShareholders(self, stockCode: str, *, market: str = "KR") -> list[MajorHolder]:
         """5% 이상 대량보유 주주 변동 조회 (KR 전용).
 
         Args:
@@ -596,18 +596,18 @@ class Gather:
             g = getDefaultGather()
             g.majorShareholders("005930")   # 삼성전자 대량보유
         """
-        cache_key = f"{stock_code}:{market}:major_holder"
-        cached = self._cache.get_typed(cache_key, "major_holder")
+        cache_key = f"{stockCode}:{market}:major_holder"
+        cached = self._cache.getTyped(cache_key, "major_holder")
         if cached is not None:
             return cached  # type: ignore[return-value]
-        result = run_async(_insider.fetchMajorShareholders(stock_code, market=market, client=self._client))
+        result = runAsync(_insider.fetchMajorShareholders(stockCode, market=market, client=self._client))
         if result:
-            self._cache.put_typed(cache_key, "major_holder", result)
+            self._cache.putTyped(cache_key, "major_holder", result)
         return result
 
     # ── 지분 보유 ──
 
-    def ownership(self, stock_code: str, *, market: str = "KR") -> list[InstitutionOwnership]:
+    def ownership(self, stockCode: str, *, market: str = "KR") -> list[InstitutionOwnership]:
         """기관/외국인 지분 보유 조회.
 
         Args:
@@ -625,19 +625,19 @@ class Gather:
         """
         from dartlab.core.market import resolveMarket
 
-        market = resolveMarket(stock_code, market)
-        cache_key = f"{stock_code}:{market}:ownership"
-        cached = self._cache.get_typed(cache_key, "ownership")
+        market = resolveMarket(stockCode, market)
+        cache_key = f"{stockCode}:{market}:ownership"
+        cached = self._cache.getTyped(cache_key, "ownership")
         if cached is not None:
             return cached  # type: ignore[return-value]
-        result = run_async(_ownership.fetch(stock_code, market=market, client=self._client))
+        result = runAsync(_ownership.fetch(stockCode, market=market, client=self._client))
         if result:
-            self._cache.put_typed(cache_key, "ownership", result)
+            self._cache.putTyped(cache_key, "ownership", result)
         return result
 
     # ── 업종 피어 ──
 
-    def industryPeers(self, stock_code: str, *, market: str = "KR") -> list[dict]:
+    def industryPeers(self, stockCode: str, *, market: str = "KR") -> list[dict]:
         """같은 업종 내 피어 종목 목록 (시총 포함).
 
         Args:
@@ -652,13 +652,13 @@ class Gather:
             g = getDefaultGather()
             g.industryPeers("005930")   # 삼성전자 동종업종
         """
-        sectorInfo = self.sector(stock_code, market=market)
+        sectorInfo = self.sector(stockCode, market=market)
         if not sectorInfo or not sectorInfo.industryCode:
             return []
         if market == "KR":
             from .domains.krx import fetchIndustryPeers
 
-            return run_async(fetchIndustryPeers(sectorInfo.industryCode, self._client))
+            return runAsync(fetchIndustryPeers(sectorInfo.industryCode, self._client))
         return []
 
     # ── 거시지표 (eddmpython 검증 목록) ──
@@ -910,7 +910,7 @@ class Gather:
                 from dartlab.gather import _macroHf
                 from dartlab.gather.fred import catalog as fred_catalog
 
-                ids = fred_catalog.get_all_ids() if scope == "catalog" else self._MACRO_US
+                ids = fred_catalog.getAllIds() if scope == "catalog" else self._MACRO_US
                 if indicator:
                     return _macroHf.fetchSeries("fred", indicator, start=start, end=end)
                 return _macroHf.fetchMulti("fred", ids, start=start, end=end)
@@ -927,7 +927,7 @@ class Gather:
             log.debug("fred 모듈 없음 — US macro 수집 생략")
             return None
         try:
-            fred = Fred(api_key=apiKey)
+            fred = Fred(apiKey=apiKey)
         except FredError:
             from dartlab.core.env import promptAndSave
 
@@ -939,7 +939,7 @@ class Gather:
             if not key:
                 log.info("FRED_API_KEY 미설정 — US macro 조회 불가")
                 return None
-            fred = Fred(api_key=key)
+            fred = Fred(apiKey=key)
         kwargs: dict = {}
         if start:
             kwargs["start"] = start
@@ -955,7 +955,7 @@ class Gather:
 
     # ── 전체 병렬 수집 ──
 
-    def collect(self, stock_code: str, *, market: str = "KR") -> GatherSnapshot:
+    def collect(self, stockCode: str, *, market: str = "KR") -> GatherSnapshot:
         """전체 도메인 병렬 수집 -> GatherSnapshot.
 
         Capabilities:
@@ -984,16 +984,16 @@ class Gather:
         """
         from dartlab.core.market import resolveMarket
 
-        market = resolveMarket(stock_code, market)
-        cached = self._cache.get_typed(stock_code, "snapshot")
+        market = resolveMarket(stockCode, market)
+        cached = self._cache.getTyped(stockCode, "snapshot")
         if cached is not None:
             return cached  # type: ignore[return-value]
 
-        snapshot = run_async(self._collect_async(stock_code, market))
-        self._cache.put_typed(stock_code, "snapshot", snapshot)
+        snapshot = runAsync(self._collectAsync(stockCode, market))
+        self._cache.putTyped(stockCode, "snapshot", snapshot)
         return snapshot
 
-    async def _collect_async(self, stock_code: str, market: str) -> GatherSnapshot:
+    async def _collectAsync(self, stockCode: str, market: str) -> GatherSnapshot:
         """내부 async 수집 — 도메인별 + 보조 데이터 병렬, 10초 타임아웃.
 
         Parameters
@@ -1013,13 +1013,13 @@ class Gather:
             _sectorInfo : SectorInfo | None — 업종 분류.
             _insiderTrades : list[InsiderTrade] — 내부자 거래.
         """
-        config = get_market_config(market)
+        config = getMarketConfig(market)
         domains = list(dict.fromkeys(config.fallback_chain))  # 순서 유지 중복 제거
 
-        domainTasks = [self._fetch_domain_async(name, stock_code, market) for name in domains]
-        newsTask = _news._fetchAsync(stock_code, market=market, days=7, client=self._client)
-        sectorTask = _sector.fetch(stock_code, market=market, client=self._client)
-        insiderTask = _insider.fetchInsiderTrading(stock_code, market=market, client=self._client)
+        domainTasks = [self._fetchDomainAsync(name, stockCode, market) for name in domains]
+        newsTask = _news._fetchAsync(stockCode, market=market, days=7, client=self._client)
+        sectorTask = _sector.fetch(stockCode, market=market, client=self._client)
+        insiderTask = _insider.fetchInsiderTrading(stockCode, market=market, client=self._client)
 
         try:
             allResults = await asyncio.wait_for(
@@ -1055,7 +1055,7 @@ class Gather:
             newsItems = newsResult
 
         return GatherSnapshot(
-            stock_code=stock_code,
+            stockCode=stockCode,
             results=results,
             collected_at=datetime.now(timezone.utc).isoformat(),
             _news=newsItems,
@@ -1063,7 +1063,7 @@ class Gather:
             _insiderTrades=insiderResult if isinstance(insiderResult, list) else [],
         )
 
-    async def _fetch_domain_async(self, domain_name: str, stock_code: str, market: str) -> GatherResult:
+    async def _fetchDomainAsync(self, domainName: str, stockCode: str, market: str) -> GatherResult:
         """단일 도메인에서 모든 데이터 수집 (async).
 
         Parameters
@@ -1083,19 +1083,19 @@ class Gather:
             flow : FlowData | None — 수급 (fetch_all 도메인만).
             error : str | None — 에러 메시지 (실패 시).
         """
-        module = load_domain(domain_name)
+        module = loadDomain(domainName)
         # fetch_all이 있는 도메인 (naver, naver_global)
         if hasattr(module, "fetch_all"):
-            if domain_name == "naver":
-                return await module.fetch_all(stock_code, self._client)
-            return await module.fetch_all(stock_code, self._client, market=market)
+            if domainName == "naver":
+                return await module.fetchAll(stockCode, self._client)
+            return await module.fetchAll(stockCode, self._client, market=market)
         # fetch_price만 있는 도메인 (naver_global, fmp)
         price = None
         if hasattr(module, "fetch_price"):
-            price = await module.fetch_price(stock_code, self._client, market=market)
-        return GatherResult(domain=domain_name, price=price)
+            price = await module.fetchPrice(stockCode, self._client, market=market)
+        return GatherResult(domain=domainName, price=price)
 
-    def invalidate(self, stock_code: str) -> None:
+    def invalidate(self, stockCode: str) -> None:
         """특정 종목의 캐시 무효화 — live + stale 모두 제거.
 
         Parameters
@@ -1113,7 +1113,7 @@ class Gather:
             g = getDefaultGather()
             g.invalidate("005930")   # 삼성전자 캐시 제거
         """
-        self._cache.invalidate(stock_code)
+        self._cache.invalidate(stockCode)
 
     def close(self) -> None:
         """HTTP 클라이언트 등 리소스 정리 — 자체 생성한 클라이언트만 닫는다.
@@ -1124,7 +1124,7 @@ class Gather:
             _owns_client=True일 때만 내부 GatherHttpClient 세션을 종료한다.
         """
         if self._owns_client:
-            run_async(self._client.close())
+            runAsync(self._client.close())
 
     def __repr__(self) -> str:
         return f"Gather(cache={self._cache})"

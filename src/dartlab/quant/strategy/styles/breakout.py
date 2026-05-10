@@ -46,9 +46,9 @@ from dartlab.quant.strategy.styles._common import getArrays
 def build(
     company,
     *,
-    entry_period: int = 20,
-    exit_period: int = 10,
-    atr_k: float = 2.0,
+    entryPeriod: int = 20,
+    exitPeriod: int = 10,
+    atrK: float = 2.0,
 ) -> Rule:
     """돌파 룰 빌드 — Faith Turtle System 1 정확한 룰셋.
 
@@ -70,7 +70,7 @@ def build(
     high = arr.get("high")
     low = arr.get("low")
     volume = arr.get("volume")
-    if close is None or high is None or low is None or volume is None or len(close) < entry_period + 20:
+    if close is None or high is None or low is None or volume is None or len(close) < entryPeriod + 20:
         n = len(close) if close is not None else 0
         return Rule(
             entry_expr=np.zeros(max(n, 1), dtype=np.bool_),
@@ -79,9 +79,9 @@ def build(
         )
 
     # Turtle 진입 채널 (20일)
-    entry_upper, _, _ = vdonchian(high, low, period=entry_period)
+    entry_upper, _, _ = vdonchian(high, low, period=entryPeriod)
     # Turtle 청산 채널 (10일)
-    _, _, exit_lower = vdonchian(high, low, period=exit_period)
+    _, _, exit_lower = vdonchian(high, low, period=exitPeriod)
 
     obv = vobv(close, volume)
     obv_5d = np.diff(obv, prepend=obv[0])
@@ -96,4 +96,4 @@ def build(
         entry_expr=s.above_entry_high & s.obv_up,
         exit_expr=s.below_exit_low,
         meta={"style": "breakout", "definition": "Turtle_System1"},
-    ).with_stop("atr", k=atr_k, period=14)
+    ).withStop("atr", k=atrK, period=14)

@@ -7,7 +7,7 @@ select()로 IS/BS 원본 계정을 가져와서
 
 from __future__ import annotations
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import MAX_RATIO_YEARS, toDictBySnakeId
 from dartlab.core.utils.helpers import annualColsFromPeriods as _annualColsFromPeriods
 
@@ -56,7 +56,7 @@ def _days(revenue, balance) -> float | None:
 # ── 자산 회전 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcTurnoverTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """자산 회전 시계열 -- 자산을 얼마나 효율적으로 쓰는가.
 
@@ -153,7 +153,7 @@ def calcTurnoverTrend(company, *, basePeriod: str | None = None) -> dict | None:
 # ── 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcEfficiencyFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """효율성 경고/기회 플래그.
 

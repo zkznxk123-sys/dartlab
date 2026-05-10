@@ -16,7 +16,7 @@ from collections.abc import Iterator
 from typing import Any
 
 from dartlab.ai.contracts import TraceEvent
-from dartlab.ai.providers import stream_provider
+from dartlab.ai.providers import streamProvider
 
 from .prompts import DARTLAB_CHAT_SYSTEM
 
@@ -31,14 +31,14 @@ def streamChatNative(question: str, provider: Any, **kwargs: Any) -> Iterator[Tr
         content = entry.get("content") or entry.get("text") or ""
         if role in {"user", "assistant"} and content:
             messages.append({"role": role, "content": str(content)})
-    user_text = str(question or "").strip()
-    if user_text:
-        messages.append({"role": "user", "content": user_text})
+    userText = str(question or "").strip()
+    if userText:
+        messages.append({"role": "user", "content": userText})
 
     # chat-native 흐름은 phase 라벨 없음. message.loading + chunk streaming 이 진행 표현 전담.
     accumulated = ""
     try:
-        for chunk in stream_provider(provider, messages, []):
+        for chunk in streamProvider(provider, messages, []):
             if chunk.text:
                 accumulated += chunk.text
                 yield TraceEvent("chunk", {"text": chunk.text})

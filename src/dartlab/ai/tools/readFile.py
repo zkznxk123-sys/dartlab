@@ -41,7 +41,7 @@ def readFile(target: str, *, startLine: int | None = None, endLine: int | None =
     except OSError as exc:
         return ToolResult(False, f"경로 해석 실패: {exc}", error="resolve_failed")
 
-    if not _is_under_safe_root(resolved):
+    if not _isUnderSafeRoot(resolved):
         return ToolResult(
             False,
             f"안전 경로 외 접근 차단: {resolved}",
@@ -84,10 +84,10 @@ def readFile(target: str, *, startLine: int | None = None, endLine: int | None =
         body = body[:_MAX_BYTES]
         slice_label += " [truncated by bytes]"
 
-    rel = _try_relative(resolved)
-    ref_id = f"doc:{rel}"
+    rel = _tryRelative(resolved)
+    refId = f"doc:{rel}"
     ref = Ref(
-        id=ref_id,
+        id=refId,
         kind="docRef",
         title=resolved.name,
         source=str(resolved),
@@ -104,7 +104,7 @@ def readFile(target: str, *, startLine: int | None = None, endLine: int | None =
     return ToolResult(True, summary, refs=[ref], data={"path": str(resolved), "body": body})
 
 
-def _is_under_safe_root(path: Path) -> bool:
+def _isUnderSafeRoot(path: Path) -> bool:
     for root in _SAFE_ROOTS:
         try:
             path.relative_to(root)
@@ -114,7 +114,7 @@ def _is_under_safe_root(path: Path) -> bool:
     return False
 
 
-def _try_relative(path: Path) -> str:
+def _tryRelative(path: Path) -> str:
     for root in _SAFE_ROOTS:
         try:
             return str(path.relative_to(root))

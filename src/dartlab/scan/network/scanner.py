@@ -14,7 +14,7 @@ _SCAN_REGNUM_RE = re.compile(r"\d{6}-?\d{7}")
 # ── 공통 유틸 ──────────────────────────────────────────────
 
 
-def _normalize_company_name(name: str) -> str:
+def _normalizeCompanyName(name: str) -> str:
     """법인명 정규화: 접두/접미사 제거."""
     if not name:
         return name
@@ -36,7 +36,7 @@ def _normalize_company_name(name: str) -> str:
     return s.strip()
 
 
-def load_listing() -> tuple[dict[str, str], dict[str, str], set[str], dict[str, dict]]:
+def loadListing() -> tuple[dict[str, str], dict[str, str], set[str], dict[str, dict]]:
     """상장사 목록 로드.
 
     Returns:
@@ -45,22 +45,22 @@ def load_listing() -> tuple[dict[str, str], dict[str, str], set[str], dict[str, 
     import dartlab
 
     listing = dartlab.listing()
-    name_to_code: dict[str, str] = {}
-    code_to_name: dict[str, str] = {}
+    nameToCode: dict[str, str] = {}
+    codeToName: dict[str, str] = {}
     listing_meta: dict[str, dict] = {}
 
     for row in listing.iter_rows(named=True):
         name = row["회사명"]
         code = row["종목코드"]
-        code_to_name[code] = name
-        name_to_code[name] = code
-        norm = _normalize_company_name(name)
+        codeToName[code] = name
+        nameToCode[name] = code
+        norm = _normalizeCompanyName(name)
         if norm != name:
-            name_to_code[norm] = code
+            nameToCode[norm] = code
         for prefix in ["㈜", "(주)", "주식회사 ", "주식회사"]:
-            name_to_code[f"{prefix}{name}"] = code
+            nameToCode[f"{prefix}{name}"] = code
         for suffix in [" ㈜", "㈜", " (주)", "(주)", " 주식회사", "주식회사"]:
-            name_to_code[f"{name}{suffix}"] = code
+            nameToCode[f"{name}{suffix}"] = code
         listing_meta[code] = {
             "name": name,
             "market": row.get("시장구분", ""),
@@ -68,13 +68,13 @@ def load_listing() -> tuple[dict[str, str], dict[str, str], set[str], dict[str, 
         }
 
     listing_codes = set(listing["종목코드"].to_list())
-    return name_to_code, code_to_name, listing_codes, listing_meta
+    return nameToCode, codeToName, listing_codes, listing_meta
 
 
 # ── parquet 스캔 ───────────────────────────────────────────
 
 
-def _scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
+def _scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
     """report parquet에서 특정 apiType만 LazyFrame 스캔."""
     from dartlab.core.dataLoader import _dataDir
 
@@ -87,8 +87,8 @@ def _scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
             lf = pl.scan_parquet(str(pf))
             if "apiType" not in lf.collect_schema().names():
                 continue
-            lf = lf.filter(pl.col("apiType") == api_type)
-            available = [c for c in keep_cols if c in lf.collect_schema().names()]
+            lf = lf.filter(pl.col("apiType") == apiType)
+            available = [c for c in keepCols if c in lf.collect_schema().names()]
             lf = lf.select(available)
             frames.append(lf)
         except (pl.exceptions.ComputeError, OSError):
@@ -107,9 +107,9 @@ def _scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
     return pl.concat(unified).collect()
 
 
-def scan_invested() -> pl.DataFrame:
+def scanInvested() -> pl.DataFrame:
     """전종목 investedCompany 스캔."""
-    return _scan_parquets(
+    return _scanParquets(
         "investedCompany",
         [
             "stockCode",
@@ -123,9 +123,9 @@ def scan_invested() -> pl.DataFrame:
     )
 
 
-def scan_major_holders() -> pl.DataFrame:
+def scanMajorHolders() -> pl.DataFrame:
     """전종목 majorHolder 스캔."""
-    return _scan_parquets(
+    return _scanParquets(
         "majorHolder",
         [
             "stockCode",
@@ -179,9 +179,9 @@ class UnionFind:
         return dict(groups)
 
 
-def scan_affiliate_docs(
-    name_to_code: dict[str, str],
-    code_to_name: dict[str, str],
+def scanAffiliateDocs(
+    nameToCode: dict[str, str],
+    codeToName: dict[str, str],
 ) -> dict[str, str]:
     """docs parquet의 '계열회사 현황'에서 ground truth 그룹 매핑 추출."""
     from dartlab.core.dataLoader import _dataDir
@@ -206,7 +206,7 @@ def scan_affiliate_docs(
         "본문",
     }
 
-    def _extract_companies(text: str) -> list[str]:
+    def _extractCompanies(text: str) -> list[str]:
         companies: list[str] = []
         for line in text.split("\n"):
             if "|" not in line:
@@ -233,7 +233,7 @@ def scan_affiliate_docs(
                             companies.append(cell)
         return companies
 
-    def _normalize_corp(name: str) -> str:
+    def _normalizeCorp(name: str) -> str:
         name = re.sub(r"[\(（]주[\)）]", "", name)
         return name.replace("㈜", "").replace("주식회사", "").strip()
 
@@ -258,11 +258,11 @@ def scan_affiliate_docs(
         full_text = "\n".join(c for c in affiliate["section_content"].to_list() if c)
         if not full_text:
             continue
-        companies = _extract_companies(full_text)
+        companies = _extractCompanies(full_text)
         matched: set[str] = {code}
         for comp in companies:
-            norm = _normalize_corp(comp)
-            c = name_to_code.get(comp) or name_to_code.get(norm)
+            norm = _normalizeCorp(comp)
+            c = nameToCode.get(comp) or nameToCode.get(norm)
             if c:
                 matched.add(c)
         code_to_affiliate_set[code] = matched
@@ -331,7 +331,7 @@ def scan_affiliate_docs(
         "316140": "우리",
     }
 
-    code_to_group: dict[str, str] = {}
+    codeToGroup: dict[str, str] = {}
     for _root, members in uf.components().items():
         all_affiliates: set[str] = set()
         for m in members:
@@ -345,7 +345,7 @@ def scan_affiliate_docs(
                 group_name = _WELL_KNOWN_LABELS[c]
                 break
         if not group_name:
-            names = sorted(code_to_name.get(c, "") for c in all_affiliates if c in code_to_name)
+            names = sorted(codeToName.get(c, "") for c in all_affiliates if c in codeToName)
             if len(names) >= 2:
                 prefix = names[0]
                 for n in names[1:]:
@@ -354,9 +354,9 @@ def scan_affiliate_docs(
                 if len(prefix) >= 2:
                     group_name = prefix.rstrip()
             if not group_name:
-                group_name = code_to_name.get(members[0], members[0])
+                group_name = codeToName.get(members[0], members[0])
 
         for c in all_affiliates:
-            code_to_group[c] = group_name
+            codeToGroup[c] = group_name
 
-    return code_to_group
+    return codeToGroup

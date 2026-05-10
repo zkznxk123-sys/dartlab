@@ -11,7 +11,7 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from dartlab.core.memory import memoized_calc as _memoized_calc
+from dartlab.core.memory import memoizedCalc as _memoized_calc
 from dartlab.core.polarsUtil import isEmptyDf
 
 # ── OHLCV 캐싱 헬퍼 ──
@@ -33,10 +33,10 @@ def _fetchOHLCV(company: Any) -> pl.DataFrame | None:
 
     result = None
     try:
-        from dartlab.gather.http import run_async
+        from dartlab.gather.http import runAsync
         from dartlab.gather.price import fetch as fetchPrice
 
-        snapshot = run_async(fetchPrice(stockCode, market=_detectMarket(company)))
+        snapshot = runAsync(fetchPrice(stockCode, market=_detectMarket(company)))
         if snapshot is not None and hasattr(snapshot, "ohlcv"):
             result = snapshot.ohlcv
         elif isinstance(snapshot, pl.DataFrame) and "close" in snapshot.columns:
@@ -81,7 +81,7 @@ def _fetchBenchmarkForCompany(company: Any) -> pl.DataFrame | None:
             market=_detectMarket(company),
             benchmark=benchmark,
             benchmarkMode=benchmarkMode,
-            return_meta=True,
+            returnMeta=True,
         )
     except (ImportError, ValueError, TypeError, RuntimeError):
         pass
@@ -658,21 +658,21 @@ def calcQuantConclusionData(company) -> dict | None:
         return None
 
     cats = verdict.get("categories", {})
-    trend_label = cats.get("trend", {}).get("label", "")
+    trendLabel = cats.get("trend", {}).get("label", "")
     summary = (signals or {}).get("signalSummary", {})
     bullish = summary.get("bullish", 0)
     bearish = summary.get("bearish", 0)
-    active_styles = []
+    activeStyles = []
     if strategy:
         for k, v in strategy.items():
             if isinstance(v, dict) and v.get("entry_today") and v.get("status") == "ok":
-                active_styles.append(k)
+                activeStyles.append(k)
     diagnosis = (divergence or {}).get("diagnosis", "")
     return {
-        "trend_label": trend_label,
+        "trend_label": trendLabel,
         "bullish": bullish,
         "bearish": bearish,
-        "active_styles": active_styles,
+        "active_styles": activeStyles,
         "diagnosis": diagnosis,
     }
 

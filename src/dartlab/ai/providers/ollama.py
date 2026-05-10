@@ -12,9 +12,9 @@ OLLAMA_DEFAULT_URL = "http://localhost:11434"
 
 def _buildInferenceOptions() -> dict:
     """GPU VRAM 기반 Ollama 추론 옵션 자동 결정."""
-    from dartlab.ai.providers.support.ollamaSetup import _detect_gpu
+    from dartlab.ai.providers.support.ollamaSetup import _detectGpu
 
-    gpu = _detect_gpu()
+    gpu = _detectGpu()
     options: dict = {"num_gpu": 999 if gpu["available"] else 0}
 
     vram = gpu.get("vram_mb") or 0
@@ -44,9 +44,9 @@ _VRAM_MODEL_TIERS: list[tuple[int, str, str]] = [
 
 def recommendModel(vramMb: int | None = None) -> dict:
     if vramMb is None:
-        from dartlab.ai.providers.support.ollamaSetup import _detect_gpu
+        from dartlab.ai.providers.support.ollamaSetup import _detectGpu
 
-        gpu = _detect_gpu()
+        gpu = _detectGpu()
         vramMb = gpu.get("vram_mb") or 0
 
     for minVram, model, desc in _VRAM_MODEL_TIERS:
@@ -59,22 +59,22 @@ class OllamaProvider(BaseProvider):
     """Ollama 로컬 provider."""
 
     @property
-    def supports_native_tools(self) -> bool:
+    def supportsNativeTools(self) -> bool:
         return True
 
     def __init__(self, config: LLMConfig):
         super().__init__(config)
         self._client = None
-        self._base_url = config.base_url or f"{OLLAMA_DEFAULT_URL}/v1"
+        self._base_url = config.baseUrl or f"{OLLAMA_DEFAULT_URL}/v1"
 
     @property
-    def default_model(self) -> str:
-        models = self.get_installed_models()
+    def defaultModel(self) -> str:
+        models = self.getInstalledModels()
         if models:
             return models[0]
         return "llama3.1"
 
-    def check_available(self) -> bool:
+    def checkAvailable(self) -> bool:
         import httpx
 
         try:
@@ -83,7 +83,7 @@ class OllamaProvider(BaseProvider):
         except (httpx.ConnectError, httpx.TimeoutException):
             return False
 
-    def get_installed_models(self) -> list[str]:
+    def getInstalledModels(self) -> list[str]:
         import httpx
 
         try:
@@ -108,7 +108,7 @@ class OllamaProvider(BaseProvider):
             resp = httpx.post(
                 f"{OLLAMA_DEFAULT_URL}/api/generate",
                 json={
-                    "model": self.resolved_model,
+                    "model": self.resolvedModel,
                     "prompt": "",
                     "keep_alive": keepAlive,
                     "stream": False,
@@ -126,7 +126,7 @@ class OllamaProvider(BaseProvider):
         try:
             resp = httpx.post(
                 f"{OLLAMA_DEFAULT_URL}/api/generate",
-                json={"model": self.resolved_model, "prompt": "", "keep_alive": 0, "stream": False},
+                json={"model": self.resolvedModel, "prompt": "", "keep_alive": 0, "stream": False},
                 timeout=10,
             )
             return resp.status_code == 200
@@ -144,39 +144,39 @@ class OllamaProvider(BaseProvider):
             pass
         return None
 
-    def _ensure_available(self):
-        if not self.check_available():
-            from dartlab.ai.providers.support.ollamaSetup import get_install_guide
+    def _ensureAvailable(self):
+        if not self.checkAvailable():
+            from dartlab.ai.providers.support.ollamaSetup import getInstallGuide
 
-            raise ConnectionError(f"Ollama 서버에 접근할 수 없습니다 ({OLLAMA_DEFAULT_URL}).\n\n{get_install_guide()}")
+            raise ConnectionError(f"Ollama 서버에 접근할 수 없습니다 ({OLLAMA_DEFAULT_URL}).\n\n{getInstallGuide()}")
 
-    def _get_client(self):
+    def _getClient(self):
         if self._client is None:
-            self._ensure_available()
+            self._ensureAvailable()
             try:
                 from openai import OpenAI
             except ImportError:
                 raise ImportError("openai 패키지가 필요합니다.\n  pip install --upgrade dartlab")
-            self._client = OpenAI(base_url=self._base_url, api_key="ollama")
+            self._client = OpenAI(baseUrl=self._base_url, apiKey="ollama")
         return self._client
 
     def complete(self, messages: list[dict[str, str]]) -> LLMResponse:
-        client = self._get_client()
+        client = self._getClient()
         response = client.chat.completions.create(
-            model=self.resolved_model,
+            model=self.resolvedModel,
             messages=messages,
             temperature=self.config.temperature,
         )
         return LLMResponse(
             answer=response.choices[0].message.content or "",
             provider="ollama",
-            model=self.resolved_model,
+            model=self.resolvedModel,
         )
 
     def stream(self, messages: list[dict[str, str]]) -> Generator[str, None, None]:
-        client = self._get_client()
+        client = self._getClient()
         stream = client.chat.completions.create(
-            model=self.resolved_model,
+            model=self.resolvedModel,
             messages=messages,
             temperature=self.config.temperature,
             stream=True,
@@ -185,12 +185,12 @@ class OllamaProvider(BaseProvider):
             if chunk.choices and chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
 
-    def complete_json(
+    def completeJson(
         self,
         messages: list[dict[str, str]],
         schema: dict | None = None,
     ) -> LLMResponse:
-        client = self._get_client()
+        client = self._getClient()
         if schema:
             response_format = {
                 "type": "json_schema",
@@ -200,7 +200,7 @@ class OllamaProvider(BaseProvider):
             response_format = {"type": "json_object"}
 
         response = client.chat.completions.create(
-            model=self.resolved_model,
+            model=self.resolvedModel,
             messages=messages,
             temperature=self.config.temperature,
             response_format=response_format,
@@ -208,21 +208,21 @@ class OllamaProvider(BaseProvider):
         return LLMResponse(
             answer=response.choices[0].message.content or "",
             provider="ollama",
-            model=self.resolved_model,
+            model=self.resolvedModel,
         )
 
-    def complete_with_tools(
+    def completeWithTools(
         self,
         messages: list[dict],
         tools: list[dict],
         *,
-        tool_choice: str | None = None,
+        toolChoice: str | None = None,
     ) -> ToolResponse:
         import json
 
-        client = self._get_client()
+        client = self._getClient()
         kwargs: dict = {
-            "model": self.resolved_model,
+            "model": self.resolvedModel,
             "messages": messages,
             "temperature": self.config.temperature,
         }
@@ -232,10 +232,10 @@ class OllamaProvider(BaseProvider):
         response = client.chat.completions.create(**kwargs)
         choice = response.choices[0]
 
-        tool_calls = []
-        if choice.message.tool_calls:
-            for tc in choice.message.tool_calls:
-                tool_calls.append(
+        toolCalls = []
+        if choice.message.toolCalls:
+            for tc in choice.message.toolCalls:
+                toolCalls.append(
                     ToolCall(
                         id=tc.id,
                         name=tc.function.name,
@@ -246,7 +246,7 @@ class OllamaProvider(BaseProvider):
         return ToolResponse(
             answer=choice.message.content or "",
             provider="ollama",
-            model=self.resolved_model,
-            tool_calls=tool_calls,
+            model=self.resolvedModel,
+            toolCalls=toolCalls,
             finish_reason=choice.finish_reason or "stop",
         )

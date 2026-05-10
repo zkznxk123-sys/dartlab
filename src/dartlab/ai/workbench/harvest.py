@@ -33,15 +33,15 @@ def _wireMemory(state: WorkbenchState) -> None:
     from dartlab.ai.memory.wiring import inferStockCodeContext
 
     ok = not state.gateBlocked and state.failure is None
-    stock_code, market = inferStockCodeContext(state.refs)
-    if not stock_code:
+    stockCode, market = inferStockCodeContext(state.refs)
+    if not stockCode:
         # state.profile.targets 에서도 추출 시도 (BRIEF 가 채움)
         targets = state.profile.get("targets") if isinstance(state.profile, dict) else None
         if isinstance(targets, list) and targets:
-            stock_code = str(targets[0])
+            stockCode = str(targets[0])
     extra_tags: list[str] = []
-    if stock_code:
-        extra_tags.append(f"target:{stock_code}")
+    if stockCode:
+        extra_tags.append(f"target:{stockCode}")
     if market:
         extra_tags.append(f"market:{market}")
 
@@ -53,6 +53,6 @@ def _wireMemory(state: WorkbenchState) -> None:
         ok=ok,
         runId=state.runId,
         extraTags=extra_tags,
-        stockCode=stock_code,
+        stockCode=stockCode,
         market=market,
     )

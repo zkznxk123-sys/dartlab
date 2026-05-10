@@ -7,7 +7,7 @@ from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as pkg_version
 
 from dartlab.cli.context import DEPRECATED_ALIASES, CommandSpec
-from dartlab.cli.services.runtime import load_command_module
+from dartlab.cli.services.runtime import loadCommandModule
 
 COMMAND_SPECS = (
     # 데이터 조회
@@ -46,7 +46,7 @@ class DartLabArgumentParser(argparse.ArgumentParser):
         raise SystemExit(f"{self.prog}: error: {message}")
 
 
-def build_parser() -> argparse.ArgumentParser:
+def buildParser() -> argparse.ArgumentParser:
     """CLI ArgumentParser 생성 및 서브커맨드 등록."""
     parser = DartLabArgumentParser(
         prog="dartlab",
@@ -61,8 +61,8 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", metavar=f"{{{visible_commands}}}")
 
     for spec in COMMAND_SPECS:
-        command_module = load_command_module(spec)
-        command_module.configure_parser(subparsers)
+        command_module = loadCommandModule(spec)
+        command_module.configureParser(subparsers)
 
     for alias, target in DEPRECATED_ALIASES.items():
         if alias in subparsers.choices:

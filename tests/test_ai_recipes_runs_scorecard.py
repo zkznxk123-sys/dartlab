@@ -22,7 +22,7 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
-def runs_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+def runsDir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.setenv("DARTLAB_RECIPE_RUNS_DIR", str(tmp_path))
     return tmp_path
 
@@ -47,7 +47,7 @@ def _make_record(skillId: str = "engines.recipe.x", **overrides) -> RecipeRunRec
     return RecipeRunRecord(**base)
 
 
-def test_append_run_creates_file_then_appends(runs_dir: Path) -> None:
+def test_append_run_creates_file_then_appends(runsDir: Path) -> None:
     rec = _make_record()
     path = appendRun(rec)
     assert path.exists()
@@ -61,13 +61,13 @@ def test_append_run_creates_file_then_appends(runs_dir: Path) -> None:
     assert sorted(df_second["runId"].to_list()) == ["r1", "r2"]
 
 
-def test_load_runs_returns_empty_for_unknown_skill(runs_dir: Path) -> None:
+def test_load_runs_returns_empty_for_unknown_skill(runsDir: Path) -> None:
     df = loadRuns("engines.recipe.nonexistent")
     assert df.is_empty()
     assert "runId" in df.columns
 
 
-def test_scorecard_pass_rate_and_completeness(runs_dir: Path) -> None:
+def test_scorecard_pass_rate_and_completeness(runsDir: Path) -> None:
     appendRun(_make_record(runId="r1", target="A", headlineValue="0.4", ok=True))
     appendRun(_make_record(runId="r2", target="B", headlineValue="0.6", ok=True))
     appendRun(_make_record(runId="r3", target="C", headlineValue="0.5", ok=True))
@@ -92,7 +92,7 @@ def test_scorecard_pass_rate_and_completeness(runs_dir: Path) -> None:
     assert sc.falsifierEvaluated
 
 
-def test_scorecard_meets_thresholds_only_when_all_signals_pass(runs_dir: Path) -> None:
+def test_scorecard_meets_thresholds_only_when_all_signals_pass(runsDir: Path) -> None:
     # 5 target × 모든 ok=True × 다양한 headline.
     for i, code in enumerate(["005930", "000660", "035420", "051910", "055550"]):
         appendRun(_make_record(runId=f"r{i}", target=code, headlineValue=str(0.3 + i * 0.15), ok=True))
@@ -115,7 +115,7 @@ def test_scorecard_meets_thresholds_only_when_all_signals_pass(runs_dir: Path) -
     assert sc.meetsThresholds
 
 
-def test_scorecard_fails_threshold_when_no_novelty(runs_dir: Path) -> None:
+def test_scorecard_fails_threshold_when_no_novelty(runsDir: Path) -> None:
     appendRun(_make_record(runId="r1", target="A", headlineValue="0.5"))
     runs = loadRuns("engines.recipe.x")
     sc = computeScorecard(
@@ -129,7 +129,7 @@ def test_scorecard_fails_threshold_when_no_novelty(runs_dir: Path) -> None:
     assert not sc.meetsThresholds
 
 
-def test_scorecard_handles_empty_runs(runs_dir: Path) -> None:
+def test_scorecard_handles_empty_runs(runsDir: Path) -> None:
     sc = computeScorecard(
         "engines.recipe.empty",
         loadRuns("engines.recipe.empty"),
@@ -142,7 +142,7 @@ def test_scorecard_handles_empty_runs(runs_dir: Path) -> None:
     assert "no runs" in sc.notes
 
 
-def test_drift_suggests_deprecate_on_high_schema_error_rate(runs_dir: Path) -> None:
+def test_drift_suggests_deprecate_on_high_schema_error_rate(runsDir: Path) -> None:
     # 30 baseline ok + 10 recent KeyError
     for i in range(30):
         appendRun(
@@ -171,7 +171,7 @@ def test_drift_suggests_deprecate_on_high_schema_error_rate(runs_dir: Path) -> N
     assert report.suggestDeprecate
 
 
-def test_drift_returns_pending_when_run_count_low(runs_dir: Path) -> None:
+def test_drift_returns_pending_when_run_count_low(runsDir: Path) -> None:
     for i in range(3):
         appendRun(_make_record(runId=f"r{i}"))
     runs = loadRuns("engines.recipe.x")

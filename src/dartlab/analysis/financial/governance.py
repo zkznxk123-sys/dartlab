@@ -10,14 +10,14 @@ DART 전용 섹션 기반 calc는 EDGAR Company에서 None을 반환한다 (SEC 
 
 from __future__ import annotations
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.core.utils.helpers import MAX_RATIO_YEARS, annualColsFromPeriods, toDictBySnakeId
 
 # ── 최대주주 지분 시계열 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcOwnershipTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """최대주주 지분율 시계열 + 최근 주주 구성.
 
@@ -67,7 +67,7 @@ def calcOwnershipTrend(company, *, basePeriod: str | None = None) -> dict | None
 # ── 이사회 구성 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcBoardComposition(company, *, basePeriod: str | None = None) -> dict | None:
     """이사회 구성 -- 사외이사비율, 전체 임원 수.
 
@@ -104,7 +104,7 @@ def calcBoardComposition(company, *, basePeriod: str | None = None) -> dict | No
 # ── 감사의견 시계열 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcAuditOpinionTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """감사의견 + 감사인 시계열.
 
@@ -150,7 +150,7 @@ def calcAuditOpinionTrend(company, *, basePeriod: str | None = None) -> dict | N
 # ── 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]]:
     """지배구조 경고/기회 플래그.
 
@@ -294,7 +294,7 @@ def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple
 # ── 임원보수 괴리 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcExecutivePayDivergence(company, *, basePeriod: str | None = None) -> dict | None:
     """임원 총보수 5Y 증가율 vs 매출/순이익 증가율 괴리.
 
@@ -394,7 +394,7 @@ def calcExecutivePayDivergence(company, *, basePeriod: str | None = None) -> dic
 # ── 외부이사 독립성 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcIndependentDirectorQuality(company, *, basePeriod: str | None = None) -> dict | None:
     """외부이사 독립성 — 비율 시계열 + 독립성 플래그.
 
@@ -558,7 +558,7 @@ def _fetchLatestEquity(company, *, basePeriod: str | None = None) -> int | None:
 # ── 오너 집중도 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcOwnerConcentration(company, *, basePeriod: str | None = None) -> dict | None:
     """오너 집중도 — 본인/특수관계 분리 지분 시계열.
 
@@ -718,7 +718,7 @@ def _loadExecutiveDocs(company):
 CEO_TURNOVER_WINDOW_YEARS = 5
 
 
-@memoized_calc
+@memoizedCalc
 def calcCEOTurnover(company, *, basePeriod: str | None = None) -> dict | None:
     """대표이사 교체 — 최근 5년 교체 건수·평균 재임·현 CEO.
 
@@ -855,7 +855,7 @@ def _loadRelatedPartyTx(company):
 RELATED_PARTY_PARSER_UNIT = 1_000_000  # 사업보고서 표준 단위(백만원) → 원
 
 
-@memoized_calc
+@memoizedCalc
 def calcRelatedPartyIntensity(company, *, basePeriod: str | None = None) -> dict | None:
     """특수관계자 거래 집중도 — 매출·매입·보증의 내부거래 비율 시계열.
 
@@ -1039,7 +1039,7 @@ def calcRelatedPartyIntensity(company, *, basePeriod: str | None = None) -> dict
 LEGAL_EVENT_WINDOW_YEARS = 3
 
 
-@memoized_calc
+@memoizedCalc
 def calcLegalEventRisk(company, *, basePeriod: str | None = None) -> dict | None:
     """법적 이벤트 리스크 — 최근 3년 제재·소송 + 채무보증/자기자본 집계.
 

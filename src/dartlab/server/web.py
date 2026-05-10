@@ -6,19 +6,19 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from ._ui_path import resolve_ui_build_dir
+from ._ui_path import resolveUiBuildDir
 
-_UI_DIR = resolve_ui_build_dir()
+_UI_DIR = resolveUiBuildDir()
 
 
-def register_spa(app: FastAPI) -> None:
+def registerSpa(app: FastAPI) -> None:
     """Svelte SPA 정적 파일 서빙과 fallback 라우트를 등록한다."""
     if _UI_DIR.exists():
         app.mount("/assets", StaticFiles(directory=str(_UI_DIR / "assets")), name="assets")
-    app.add_api_route("/{path:path}", serve_spa, methods=["GET"])
+    app.add_api_route("/{path:path}", serveSpa, methods=["GET"])
 
 
-def serve_spa(path: str = ""):
+def serveSpa(path: str = ""):
     """SPA fallback — index.html 반환."""
     if not _UI_DIR.exists():
         return HTMLResponse(

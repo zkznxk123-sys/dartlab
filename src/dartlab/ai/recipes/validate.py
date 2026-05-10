@@ -49,7 +49,7 @@ class RefValidationResult:
     missing: list[str] = field(default_factory=list)
     extras: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -61,9 +61,9 @@ def _refKindOf(ref: Any) -> str | None:
         kind = ref.get("kind")
         if isinstance(kind, str) and kind.strip():
             return kind.strip()
-        ref_id = ref.get("id")
-        if isinstance(ref_id, str):
-            return _kindFromId(ref_id)
+        refId = ref.get("id")
+        if isinstance(refId, str):
+            return _kindFromId(refId)
         return None
     kind_attr = getattr(ref, "kind", None)
     if isinstance(kind_attr, str) and kind_attr.strip():
@@ -76,9 +76,9 @@ def _refKindOf(ref: Any) -> str | None:
     return None
 
 
-def _kindFromId(ref_id: str) -> str | None:
+def _kindFromId(refId: str) -> str | None:
     for prefix, kind in _REF_PREFIX_TO_KIND.items():
-        if ref_id.startswith(prefix):
+        if refId.startswith(prefix):
             return kind
     return None
 

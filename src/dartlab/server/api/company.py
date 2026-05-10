@@ -10,28 +10,28 @@ from dartlab.core.polarsUtil import isEmptyDf
 
 _PERIOD_COL_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
-from ..services.aiAnalysis import stream_topic_summary
+from ..services.aiAnalysis import streamTopicSummary
 from ..services.companyApi import (
-    build_diff_summary,
-    build_toc,
-    build_viewer,
-    filter_blocks_by_period,
-    get_company,
-    safe_topic_label,
+    buildDiffSummary,
+    buildToc,
+    buildViewer,
+    filterBlocksByPeriod,
+    getCompany,
+    safeTopicLabel,
 )
 from .common import (
     HANDLED_API_ERRORS,
-    etag_response,
+    etagResponse,
     guideDetail,
-    normalize_provider_name,
-    serialize_payload,
+    normalizeProviderName,
+    serializePayload,
 )
 
 router = APIRouter()
 
 
 @router.get("/api/search")
-def api_search(q: str = Query(..., min_length=1)):
+def apiSearch(q: str = Query(..., min_length=1)):
     """종목 검색 — substring 우선, 결과 없으면 fuzzy(초성/Levenshtein) fallback."""
     try:
         df = dartlab.searchName(q)
@@ -61,10 +61,10 @@ def api_search(q: str = Query(..., min_length=1)):
 
 
 @router.get("/api/company/{code}")
-def api_company(code: str):
+def apiCompany(code: str):
     """종목 기본 정보 + 사용 가능 API surface 목록."""
     try:
-        company = get_company(code)
+        company = getCompany(code)
         return {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
@@ -83,41 +83,41 @@ def api_company(code: str):
 
 
 @router.get("/api/company/{code}/index")
-def api_company_index(code: str, request: Request, response: Response):
+def apiCompanyIndex(code: str, request: Request, response: Response):
     """회사 데이터 구조 인덱스 DataFrame."""
     try:
-        company = get_company(code)
+        company = getCompany(code)
         data = {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
-            "payload": serialize_payload(company.index),
+            "payload": serializePayload(company.index),
         }
-        return etag_response(request, response, data, max_age=300, swr=1800)
+        return etagResponse(request, response, data, maxAge=300, swr=1800)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
 @router.get("/api/company/{code}/sections")
-def api_company_sections(code: str, request: Request, response: Response):
+def apiCompanySections(code: str, request: Request, response: Response):
     """merged topic x period 수평화 테이블."""
     try:
-        company = get_company(code)
+        company = getCompany(code)
         data = {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
-            "payload": serialize_payload(company.sections, max_rows=5000),
+            "payload": serializePayload(company.sections, maxRows=5000),
         }
-        return etag_response(request, response, data, max_age=300, swr=1800)
+        return etagResponse(request, response, data, maxAge=300, swr=1800)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
 @router.get("/api/company/{code}/init")
-def api_company_init(code: str, request: Request, response: Response):
+def apiCompanyInit(code: str, request: Request, response: Response):
     """SPA 초기 로드용 번들 — toc + 첫 topic viewer + diff 요약."""
     try:
-        company = get_company(code)
-        toc_data = build_toc(company)
+        company = getCompany(code)
+        toc_data = buildToc(company)
 
         first_topic: str | None = None
         first_chapter: str | None = None
@@ -131,8 +131,8 @@ def api_company_init(code: str, request: Request, response: Response):
         viewer_data = None
         diff_data = None
         if first_topic:
-            viewer_data = build_viewer(company, first_topic)
-            diff_data = build_diff_summary(company, first_topic)
+            viewer_data = buildViewer(company, first_topic)
+            diff_data = buildDiffSummary(company, first_topic)
 
         result = {
             "stockCode": company.stockCode,
@@ -143,24 +143,24 @@ def api_company_init(code: str, request: Request, response: Response):
             "viewer": viewer_data,
             "diffSummary": diff_data,
         }
-        return etag_response(request, response, result, max_age=300, swr=1800)
+        return etagResponse(request, response, result, maxAge=300, swr=1800)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
 @router.get("/api/company/{code}/toc")
-def api_company_toc(code: str, request: Request, response: Response):
+def apiCompanyToc(code: str, request: Request, response: Response):
     """목차(TOC) — chapter/topic 트리 구조."""
     try:
-        company = get_company(code)
-        data = build_toc(company)
-        return etag_response(request, response, data, max_age=300, swr=1800)
+        company = getCompany(code)
+        data = buildToc(company)
+        return etagResponse(request, response, data, maxAge=300, swr=1800)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
 @router.get("/api/company/{code}/viewer/{topic}")
-def api_company_viewer_topic(
+def apiCompanyViewerTopic(
     code: str,
     topic: str,
     request: Request,
@@ -169,7 +169,7 @@ def api_company_viewer_topic(
 ):
     """단일 topic의 viewer 데이터 — sections 블록 + 텍스트 문서."""
     try:
-        company = get_company(code)
+        company = getCompany(code)
 
         if period is not None:
             from dartlab.providers.dart.docs.viewer import (
@@ -186,20 +186,20 @@ def api_company_viewer_topic(
             else:
                 blocks = viewerBlocks(company, topic)
                 company._viewer_cache[topic] = blocks
-            blocks = filter_blocks_by_period(blocks, period)
+            blocks = filterBlocksByPeriod(blocks, period)
             data = {
                 "stockCode": company.stockCode,
                 "corpName": company.corpName,
                 "topic": topic,
-                "topicLabel": safe_topic_label(company, topic),
+                "topicLabel": safeTopicLabel(company, topic),
                 "period": period,
                 "blocks": [serializeViewerBlock(block) for block in blocks],
                 "textDocument": serializeViewerTextDocument(viewerTextDocument(topic, blocks)),
             }
         else:
-            data = build_viewer(company, topic)
+            data = buildViewer(company, topic)
 
-        return etag_response(request, response, data, max_age=120, swr=600)
+        return etagResponse(request, response, data, maxAge=120, swr=600)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
@@ -215,7 +215,7 @@ def apiViewerDoc(
 ):
     """sections 기반 신구대조 뷰어 — viewer() dict 반환."""
     try:
-        company = get_company(code)
+        company = getCompany(code)
         sec = company._docs.sections.raw
         if sec is None:
             raise HTTPException(status_code=404, detail="sections 없음")
@@ -232,14 +232,14 @@ def apiViewerDoc(
         doc = viewer(sec, topic, base, compare)
         doc["stockCode"] = company.stockCode
         doc["corpName"] = company.corpName
-        doc["topicLabel"] = safe_topic_label(company, topic)
-        return etag_response(request, response, doc, max_age=120, swr=600)
+        doc["topicLabel"] = safeTopicLabel(company, topic)
+        return etagResponse(request, response, doc, maxAge=120, swr=600)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
 @router.post("/api/company/{code}/viewer/batch")
-async def api_company_viewer_batch(code: str, request: Request, response: Response):
+async def apiCompanyViewerBatch(code: str, request: Request, response: Response):
     """여러 topic의 viewer 데이터를 한 번에 반환 — chapter 확장 시 N+1 제거."""
     body = await request.json()
     topics = body.get("topics", [])
@@ -248,22 +248,22 @@ async def api_company_viewer_batch(code: str, request: Request, response: Respon
     topics = topics[:20]  # 최대 20개 제한
 
     try:
-        company = get_company(code)
+        company = getCompany(code)
         results = {}
         for topic in topics:
             if not isinstance(topic, str):
                 continue
             try:
-                results[topic] = build_viewer(company, topic)
+                results[topic] = buildViewer(company, topic)
             except HANDLED_API_ERRORS:
                 results[topic] = None
-        return etag_response(request, response, {"results": results}, max_age=120, swr=600)
+        return etagResponse(request, response, {"results": results}, maxAge=120, swr=600)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
 @router.get("/api/company/{code}/show/{topic}/all")
-def api_company_show_all(code: str, topic: str, raw: bool = Query(False)):
+def apiCompanyShowAll(code: str, topic: str, raw: bool = Query(False)):
     """topic의 전 기간 viewer 블록 일괄 반환."""
     try:
         from dartlab.providers.dart.docs.viewer import (
@@ -273,7 +273,7 @@ def api_company_show_all(code: str, topic: str, raw: bool = Query(False)):
             viewerTextDocument,
         )
 
-        company = get_company(code)
+        company = getCompany(code)
         blocks = viewerBlocks(company, topic)
         return {
             "stockCode": company.stockCode,
@@ -287,17 +287,17 @@ def api_company_show_all(code: str, topic: str, raw: bool = Query(False)):
 
 
 @router.post("/api/company/{code}/show/{topic}/{block_idx}/parse")
-async def api_parse_raw_table(code: str, topic: str, block_idx: int):
+async def apiParseRawTable(code: str, topic: str, blockIdx: int):
     """원문 테이블 블록을 구조화 DataFrame으로 파싱."""
     try:
         from dartlab.providers.dart.docs.tableAI import parseRawMarkdownBlock
         from dartlab.providers.dart.docs.viewer import viewerBlocks
 
-        company = get_company(code)
+        company = getCompany(code)
         blocks = viewerBlocks(company, topic)
         target = None
         for block in blocks:
-            if block.block == block_idx and block.kind == "raw_markdown":
+            if block.block == blockIdx and block.kind == "raw_markdown":
                 target = block
                 break
         if target is None:
@@ -307,7 +307,7 @@ async def api_parse_raw_table(code: str, topic: str, block_idx: int):
         return {
             "stockCode": company.stockCode,
             "topic": topic,
-            "block": block_idx,
+            "block": blockIdx,
             "parsed": result,
         }
     except HTTPException:
@@ -317,10 +317,10 @@ async def api_parse_raw_table(code: str, topic: str, block_idx: int):
 
 
 @router.get("/api/company/{code}/show/{topic}")
-def api_company_show(code: str, topic: str, block: int | None = Query(None), raw: bool = Query(False)):
+def apiCompanyShow(code: str, topic: str, block: int | None = Query(None), raw: bool = Query(False)):
     """topic payload 조회 — show(topic) API 대응."""
     try:
-        company = get_company(code)
+        company = getCompany(code)
         if block is not None:
             result = company.show(topic, block, period=None, raw=raw)
         else:
@@ -330,29 +330,29 @@ def api_company_show(code: str, topic: str, block: int | None = Query(None), raw
             "corpName": company.corpName,
             "topic": topic,
             "block": block,
-            "payload": serialize_payload(result),
+            "payload": serializePayload(result),
         }
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
 @router.get("/api/company/{code}/trace/{topic}")
-def api_company_trace(code: str, topic: str):
+def apiCompanyTrace(code: str, topic: str):
     """source provenance 조회 — trace(topic) API 대응."""
     try:
-        company = get_company(code)
+        company = getCompany(code)
         return {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
             "topic": topic,
-            "payload": serialize_payload(company.trace(topic)),
+            "payload": serializePayload(company.trace(topic)),
         }
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
 
 @router.get("/api/company/{code}/summary/{topic}")
-async def api_company_topic_summary(
+async def apiCompanyTopicSummary(
     code: str,
     topic: str,
     provider: str | None = None,
@@ -360,7 +360,7 @@ async def api_company_topic_summary(
 ):
     """topic 데이터를 LLM으로 요약하여 SSE 스트리밍 반환."""
     try:
-        company = get_company(code)
+        company = getCompany(code)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
@@ -372,20 +372,20 @@ async def api_company_topic_summary(
         raise HTTPException(status_code=404, detail=f"topic '{topic}' 데이터 없음")
 
     return EventSourceResponse(
-        stream_topic_summary(
+        streamTopicSummary(
             company,
             topic,
-            provider=normalize_provider_name(provider) or provider,
+            provider=normalizeProviderName(provider) or provider,
             model=model,
         )
     )
 
 
 @router.get("/api/company/{code}/insights")
-def api_company_insights(code: str):
+def apiCompanyInsights(code: str):
     """7영역 인사이트 등급 (A~F) + 이상 징후."""
     try:
-        company = get_company(code)
+        company = getCompany(code)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
@@ -399,19 +399,19 @@ def api_company_insights(code: str):
     if result is None:
         return {"stockCode": company.stockCode, "corpName": company.corpName, "available": False}
 
-    def _flag_dict(flag):
+    def _flagDict(flag):
         return {"level": flag.level, "category": flag.category, "text": flag.text}
 
-    def _insight_dict(insight):
+    def _insightDict(insight):
         return {
             "grade": insight.grade,
             "summary": insight.summary,
             "details": insight.details,
-            "risks": [_flag_dict(risk) for risk in insight.risks],
-            "opportunities": [_flag_dict(opportunity) for opportunity in insight.opportunities],
+            "risks": [_flagDict(risk) for risk in insight.risks],
+            "opportunities": [_flagDict(opportunity) for opportunity in insight.opportunities],
         }
 
-    def _anomaly_dict(anomaly):
+    def _anomalyDict(anomaly):
         return {
             "severity": anomaly.severity,
             "category": anomaly.category,
@@ -426,26 +426,26 @@ def api_company_insights(code: str):
         "isFinancial": result.isFinancial,
         "grades": result.grades(),
         "areas": {
-            "performance": _insight_dict(result.performance),
-            "profitability": _insight_dict(result.profitability),
-            "health": _insight_dict(result.health),
-            "cashflow": _insight_dict(result.cashflow),
-            "governance": _insight_dict(result.governance),
-            "risk": _insight_dict(result.risk),
-            "opportunity": _insight_dict(result.opportunity),
+            "performance": _insightDict(result.performance),
+            "profitability": _insightDict(result.profitability),
+            "health": _insightDict(result.health),
+            "cashflow": _insightDict(result.cashflow),
+            "governance": _insightDict(result.governance),
+            "risk": _insightDict(result.risk),
+            "opportunity": _insightDict(result.opportunity),
         },
-        "anomalies": [_anomaly_dict(anomaly) for anomaly in result.anomalies],
+        "anomalies": [_anomalyDict(anomaly) for anomaly in result.anomalies],
         "summary": result.summary,
         "profile": result.profile,
     }
 
 
 @router.get("/api/company/{code}/network")
-def api_company_network(code: str, hops: int = 1):
+def apiCompanyNetwork(code: str, hops: int = 1):
     """관계사 네트워크 그래프 — ego 중심 N-hop."""
     hops = max(1, min(hops, 3))
     try:
-        company = get_company(code)
+        company = getCompany(code)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
@@ -455,9 +455,9 @@ def api_company_network(code: str, hops: int = 1):
             return {"stockCode": company.stockCode, "corpName": company.corpName, "available": False}
         data, full = result
 
-        from dartlab.scan.network.export import export_ego
+        from dartlab.scan.network.export import exportEgo
 
-        ego = export_ego(data, full, company.stockCode, hops=hops)
+        ego = exportEgo(data, full, company.stockCode, hops=hops)
         return {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
@@ -469,10 +469,10 @@ def api_company_network(code: str, hops: int = 1):
 
 
 @router.get("/api/company/{code}/scan/{axis}")
-def api_company_scan(code: str, axis: str):
+def apiCompanyScan(code: str, axis: str):
     """6-Axis 스캔 단일 축 결과 + 시장 내 위치."""
     try:
-        company = get_company(code)
+        company = getCompany(code)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
@@ -487,7 +487,7 @@ def api_company_scan(code: str, axis: str):
             try:
                 df = method()
                 if df is not None and not df.is_empty():
-                    results[current_axis] = serialize_payload(df)
+                    results[current_axis] = serializePayload(df)
             except HANDLED_API_ERRORS:
                 continue
         return {
@@ -513,14 +513,14 @@ def api_company_scan(code: str, axis: str):
             "corpName": company.corpName,
             "available": True,
             "scanType": axis,
-            "payload": serialize_payload(df),
+            "payload": serializePayload(df),
         }
     except HANDLED_API_ERRORS:
         return {"stockCode": company.stockCode, "corpName": company.corpName, "available": False}
 
 
 @router.get("/api/company/{code}/scan/position")
-def api_company_scan_position(code: str):
+def apiCompanyScanPosition(code: str):
     """6-Axis 전체 포지션 요약 — 사전 빌드 스냅샷 기반."""
     from dartlab.scan.snapshot import getScanPosition
 
@@ -536,17 +536,17 @@ def api_company_scan_position(code: str):
 
 
 @router.get("/api/company/{code}/insights/unified")
-def api_company_insights_unified(code: str):
+def apiCompanyInsightsUnified(code: str):
     """통합 인사이트 — 등급 + 스캔 + 피어 결합."""
     try:
-        company = get_company(code)
+        company = getCompany(code)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
-    from dartlab.scan.payload import build_unified_payload
+    from dartlab.scan.payload import buildUnifiedPayload
 
     try:
-        unified = build_unified_payload(company)
+        unified = buildUnifiedPayload(company)
     except HANDLED_API_ERRORS:
         unified = {}
 

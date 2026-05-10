@@ -54,7 +54,7 @@ from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays, getStockCode, isKr
 
 
-def build(company, *, atr_k: float = 3.0):
+def build(company, *, atrK: float = 3.0):
     """수급추종 룰 빌드. KR 전용 — US 면 NotApplicable sentinel.
 
     Returns:
@@ -64,7 +64,7 @@ def build(company, *, atr_k: float = 3.0):
     if not isKr(company):
         from dartlab.quant.strategy.backtest import BacktestResult
 
-        return BacktestResult.not_applicable(
+        return BacktestResult.notApplicable(
             style="flowFollow",
             reason="KR-only: foreign/institutional flow data not available for US",
         )
@@ -130,4 +130,4 @@ def build(company, *, atr_k: float = 3.0):
         entry_expr=s.foreign_up & s.inst_up,
         exit_expr=s.foreign_dn,
         meta={"style": "flowFollow"},
-    ).with_stop("atr", k=atr_k, period=14)
+    ).withStop("atr", k=atrK, period=14)

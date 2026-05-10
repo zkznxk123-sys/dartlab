@@ -9,7 +9,7 @@ import polars as pl
 # ── 내부 빌더 ─────────────────────────────────────────────
 
 
-def _build_enriched_edges(data: dict) -> list[dict]:
+def _buildEnrichedEdges(data: dict) -> list[dict]:
     """회사 엣지 — 모든 투자 목적(경영참여+단순투자+기타) 포함."""
     edges: list[dict] = []
     seen: set[tuple[str, str, str]] = set()
@@ -50,7 +50,7 @@ def _build_enriched_edges(data: dict) -> list[dict]:
     return edges
 
 
-def _build_enriched_nodes(data: dict, edges: list[dict]) -> list[dict]:
+def _buildEnrichedNodes(data: dict, edges: list[dict]) -> list[dict]:
     """엣지 기반 degree 재계산 + listing 메타(시장/업종) 부착.
 
     Parameters
@@ -92,14 +92,14 @@ def _build_enriched_nodes(data: dict, edges: list[dict]) -> list[dict]:
     return nodes
 
 
-def _build_person_data(data: dict) -> tuple[list[dict], list[dict]]:
+def _buildPersonData(data: dict) -> tuple[list[dict], list[dict]]:
     """인물 노드 + 인물→회사 엣지."""
-    person_edges = data["person_edges"]
-    code_to_group = data["code_to_group"]
+    personEdges = data["person_edges"]
+    codeToGroup = data["code_to_group"]
     all_nodes = data["all_node_ids"]
     company_names = set(data["code_to_name"].values())
 
-    latest = person_edges.sort("year", descending=True).unique(subset=["person_name", "to_code"], keep="first")
+    latest = personEdges.sort("year", descending=True).unique(subset=["person_name", "to_code"], keep="first")
 
     person_map: dict[str, list[dict]] = defaultdict(list)
     for row in latest.iter_rows(named=True):
@@ -111,7 +111,7 @@ def _build_person_data(data: dict) -> tuple[list[dict], list[dict]]:
         person_map[row["person_name"]].append(
             {
                 "code": tc,
-                "group": code_to_group.get(tc, ""),
+                "group": codeToGroup.get(tc, ""),
                 "pct": row.get("ownership_pct"),
                 "relate": row.get("relate", ""),
             }
@@ -162,13 +162,13 @@ def _build_person_data(data: dict) -> tuple[list[dict], list[dict]]:
 # ── public export 함수 ────────────────────────────────────
 
 
-def export_full(data: dict) -> dict:
+def exportFull(data: dict) -> dict:
     """full JSON — 전체 노드+엣지+그룹+업종+인물+순환출자."""
-    edges = _build_enriched_edges(data)
-    nodes = _build_enriched_nodes(data, edges)
+    edges = _buildEnrichedEdges(data)
+    nodes = _buildEnrichedNodes(data, edges)
 
     # 인물 노드/엣지
-    pn, pe = _build_person_data(data)
+    pn, pe = _buildPersonData(data)
     nodes.extend(pn)
     edges.extend(pe)
 
@@ -226,7 +226,7 @@ def export_full(data: dict) -> dict:
     }
 
 
-def export_overview(data: dict, full: dict) -> dict:
+def exportOverview(data: dict, full: dict) -> dict:
     """overview JSON — 그룹 슈퍼노드."""
     gi: dict[str, dict] = {}
     for node in full["nodes"]:
@@ -268,14 +268,14 @@ def export_overview(data: dict, full: dict) -> dict:
     }
 
 
-def export_ego(
+def exportEgo(
     data: dict,
     full: dict,
     code: str,
     *,
     hops: int = 1,
-    include_industry: bool = True,
-    max_industry_peers: int = 10,
+    includeIndustry: bool = True,
+    maxIndustryPeers: int = 10,
 ) -> dict:
     """ego 뷰 — 독립 회사면 같은 업종 이웃도 포함."""
     # BFS ego
@@ -297,7 +297,7 @@ def export_ego(
 
     # 업종 이웃 추가 (연결 적은 회사)
     industry_peers_added = 0
-    if include_industry and len(visited) <= 3:
+    if includeIndustry and len(visited) <= 3:
         center_meta = data["listing_meta"].get(code, {})
         center_industry = center_meta.get("industry", "")
         if center_industry:
@@ -310,7 +310,7 @@ def export_ego(
                 and n["id"] not in visited
             ]
             peers.sort(key=lambda n: n["degree"], reverse=True)
-            for p in peers[:max_industry_peers]:
+            for p in peers[:maxIndustryPeers]:
                 visited.add(p["id"])
                 industry_peers_added += 1
 

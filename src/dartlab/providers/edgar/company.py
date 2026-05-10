@@ -76,7 +76,7 @@ class _EdgarNotesWrapper:
         """데이터가 있는 카테고리 목록."""
         return self._company.docs.noteCategories()
 
-    def keys_kr(self) -> list[str]:
+    def keysKr(self) -> list[str]:
         """한국어 카테고리 목록."""
         from dartlab.providers.edgar.docs.notesParsers import CATEGORY_LABELS
 
@@ -377,23 +377,23 @@ def _filterPeriodColumnsByAsOf(df: "pl.DataFrame", asOf: str) -> "pl.DataFrame":
     EDGAR finance topic 의 horizontal view 는 컬럼명이 fiscal period
     (예: "2024", "2024Q3"). asOf 이후 컬럼 drop 으로 미래 정보 누설 차단.
     """
-    asof_year, asof_quarter = _parse_asof(asOf)
+    asof_year, asof_quarter = _parseAsof(asOf)
     if asof_year is None:
         return df
-    keep_cols: list[str] = []
+    keepCols: list[str] = []
     for col in df.columns:
-        col_year, col_quarter = _parse_asof(col)
+        col_year, col_quarter = _parseAsof(col)
         if col_year is None:
-            keep_cols.append(col)
+            keepCols.append(col)
             continue
         if col_year < asof_year:
-            keep_cols.append(col)
+            keepCols.append(col)
         elif col_year == asof_year and (col_quarter is None or asof_quarter is None or col_quarter <= asof_quarter):
-            keep_cols.append(col)
-    return df.select(keep_cols) if len(keep_cols) < len(df.columns) else df
+            keepCols.append(col)
+    return df.select(keepCols) if len(keepCols) < len(df.columns) else df
 
 
-def _parse_asof(value: str) -> tuple[int | None, int | None]:
+def _parseAsof(value: str) -> tuple[int | None, int | None]:
     """fiscal period or ISO date → (year, quarter or None). 미인식 → (None, None)."""
     raw = str(value or "").strip()
     if not raw:
@@ -450,7 +450,7 @@ class Company:
         self.ticker = cleaned
         from dartlab.core.memory import BoundedCache
 
-        self._cache: BoundedCache = BoundedCache(max_entries=30)
+        self._cache: BoundedCache = BoundedCache(maxEntries=30)
 
         tickerRow = self._resolveTickerRow(self.ticker)
         if tickerRow is None:
@@ -2273,12 +2273,12 @@ class Company:
             c.watch()                              # 전체 topic 중요도 순 요약
             c.watch("10-K::item1ARiskFactors")     # Risk Factors 상세
         """
-        from dartlab.scan.watch.scanner import scan_company
+        from dartlab.scan.watch.scanner import scanCompany
 
-        result = scan_company(self, topic=topic)
+        result = scanCompany(self, topic=topic)
         if result is None:
             return None
-        return result.to_dataframe()
+        return result.toDataframe()
 
     # ── AI 분석 ──
 
@@ -2555,11 +2555,11 @@ class Company:
             return None
         # 1인당 매출 계산
         rev_per_employee = None
-        is_df = self.show("IS")
-        if is_df is not None:
+        isDf = self.show("IS")
+        if isDf is not None:
             from dartlab.core.show import isPeriodColumn, selectFromShow
 
-            rev_row = selectFromShow(is_df, ["sales"])
+            rev_row = selectFromShow(isDf, ["sales"])
             if rev_row is not None:
                 pcols = [c for c in rev_row.columns if isPeriodColumn(c)]
                 if pcols:

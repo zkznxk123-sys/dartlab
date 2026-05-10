@@ -9,7 +9,7 @@ from __future__ import annotations
 import polars as pl
 
 
-def scan_edgar_accounts(snake_ids: list[str], *, annual: bool = True) -> pl.DataFrame:
+def scanEdgarAccounts(snakeIds: list[str], *, annual: bool = True) -> pl.DataFrame:
     """여러 EDGAR 계정을 한번에 스캔하여 wide DataFrame으로 반환.
 
     Parameters
@@ -30,7 +30,7 @@ def scan_edgar_accounts(snake_ids: list[str], *, annual: bool = True) -> pl.Data
     from dartlab.providers.edgar.finance.scanAccount import scanAccount
 
     base: pl.DataFrame | None = None
-    for sid in snake_ids:
+    for sid in snakeIds:
         df = scanAccount(sid, annual=annual)
         if df.is_empty():
             continue
@@ -56,7 +56,7 @@ def scan_edgar_accounts(snake_ids: list[str], *, annual: bool = True) -> pl.Data
     return base if base is not None else pl.DataFrame({"stockCode": []})
 
 
-def safe_div(num: pl.Expr, den: pl.Expr) -> pl.Expr:
+def safeDiv(num: pl.Expr, den: pl.Expr) -> pl.Expr:
     """안전한 나눗셈 — 분모 0이면 None.
 
     Returns
@@ -75,10 +75,10 @@ def pct(num: pl.Expr, den: pl.Expr) -> pl.Expr:
     pl.Expr
         비율 (%). 분모 0이면 None.
     """
-    return (safe_div(num, den) * 100).round(2)
+    return (safeDiv(num, den) * 100).round(2)
 
 
-def scan_edgar_raw_tags(tags: list[str], *, annual: bool = True) -> pl.DataFrame:
+def scanEdgarRawTags(tags: list[str], *, annual: bool = True) -> pl.DataFrame:
     """XBRL 태그명으로 직접 전종목 스캔 (snakeId 매핑 없이).
 
     Parameters
@@ -134,7 +134,7 @@ def scan_edgar_raw_tags(tags: list[str], *, annual: bool = True) -> pl.DataFrame
     return pl.DataFrame(records) if records else pl.DataFrame()
 
 
-def grade_by_value(val: pl.Expr, thresholds: list[tuple[float, str]], default: str = "해당없음") -> pl.Expr:
+def gradeByValue(val: pl.Expr, thresholds: list[tuple[float, str]], default: str = "해당없음") -> pl.Expr:
     """값 기반 등급 분류.
 
     Parameters

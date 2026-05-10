@@ -15,7 +15,7 @@ from dartlab.quant._helpers import loadScanParquet, resolve_market
 log = logging.getLogger(__name__)
 
 
-def _filter_stock(lf, stockCode: str):
+def _filterStock(lf, stockCode: str):
     """LazyFrame에서 종목코드 필터링 → DataFrame."""
     if lf is None:
         return None
@@ -31,7 +31,7 @@ def _filter_stock(lf, stockCode: str):
     return None
 
 
-def _safe_float(val) -> float | None:
+def _safeFloat(val) -> float | None:
     if val is None:
         return None
     try:
@@ -77,13 +77,13 @@ def calcGovernanceQuant(stockCode: str, *, market: str = "auto", **kwargs) -> di
     available = []
 
     # 1) majorHolder — 소유집중도
-    mh = _filter_stock(loadScanParquet("majorHolder", market), stockCode)
+    mh = _filterStock(loadScanParquet("majorHolder", market), stockCode)
     if mh is not None:
         available.append("majorHolder")
         # 최대주주 지분율 찾기
         for col in mh.columns:
             if "지분" in col or "율" in col or "percent" in col.lower():
-                vals = [_safe_float(v) for v in mh.get_column(col).to_list()]
+                vals = [_safeFloat(v) for v in mh.get_column(col).to_list()]
                 vals = [v for v in vals if v is not None]
                 if vals:
                     max_pct = max(vals)
@@ -100,7 +100,7 @@ def calcGovernanceQuant(stockCode: str, *, market: str = "auto", **kwargs) -> di
                     break
 
     # 2) auditOpinion — 감사의견 품질
-    ao = _filter_stock(loadScanParquet("auditOpinion", market), stockCode)
+    ao = _filterStock(loadScanParquet("auditOpinion", market), stockCode)
     if ao is not None:
         available.append("auditOpinion")
         for col in ao.columns:
@@ -119,7 +119,7 @@ def calcGovernanceQuant(stockCode: str, *, market: str = "auto", **kwargs) -> di
                 break
 
     # 3) executive — 이사회 구성
-    ex = _filter_stock(loadScanParquet("executive", market), stockCode)
+    ex = _filterStock(loadScanParquet("executive", market), stockCode)
     if ex is not None:
         available.append("executive")
         n_total = len(ex)
@@ -135,7 +135,7 @@ def calcGovernanceQuant(stockCode: str, *, market: str = "auto", **kwargs) -> di
             result["outsideDirectorRatio"] = round(ratio, 1)
 
     # 4) executivePayAllTotal — 보수
-    ep = _filter_stock(loadScanParquet("executivePayAllTotal", market), stockCode)
+    ep = _filterStock(loadScanParquet("executivePayAllTotal", market), stockCode)
     if ep is not None:
         available.append("executivePayAllTotal")
         # 보수 데이터가 있으면 적정 수준 평가 (존재 자체가 투명성)

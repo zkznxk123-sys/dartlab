@@ -6,7 +6,7 @@ import subprocess
 import threading
 from typing import Any
 
-from dartlab.channel import DevTunnelSetupError, setup_devtunnel
+from dartlab.channel import DevTunnelSetupError, setupDevtunnel
 
 
 class DevChannelRuntime:
@@ -22,26 +22,26 @@ class DevChannelRuntime:
             if not running:
                 self._process = None
             url = self._url if running else None
-            return self._build_status(url=url, running=running, error=self._error)
+            return self._buildStatus(url=url, running=running, error=self._error)
 
-    def start(self, *, port: int, auto_yes: bool = True) -> dict[str, Any]:
+    def start(self, *, port: int, autoYes: bool = True) -> dict[str, Any]:
         with self._lock:
             if self._process is not None and self._process.poll() is None and self._url:
-                return self._build_status(url=self._url, running=True, error=None)
+                return self._buildStatus(url=self._url, running=True, error=None)
             self._error = None
 
         try:
-            url, process = setup_devtunnel(port=port, auto_yes=auto_yes)
+            url, process = setupDevtunnel(port=port, autoYes=autoYes)
         except DevTunnelSetupError as exc:
             with self._lock:
                 self._error = str(exc)
-            return self._build_status(url=None, running=False, error=str(exc))
+            return self._buildStatus(url=None, running=False, error=str(exc))
 
         with self._lock:
             self._url = url
             self._process = process
             self._error = None
-            return self._build_status(url=url, running=True, error=None)
+            return self._buildStatus(url=url, running=True, error=None)
 
     def stop(self) -> dict[str, Any]:
         with self._lock:
@@ -51,13 +51,13 @@ class DevChannelRuntime:
             self._error = None
         if process is not None and process.poll() is None:
             process.terminate()
-        return self._build_status(url=None, running=False, error=None)
+        return self._buildStatus(url=None, running=False, error=None)
 
     def shutdown(self) -> None:
         self.stop()
 
-    def _build_status(self, *, url: str | None, running: bool, error: str | None) -> dict[str, Any]:
-        qr_data_url = _qr_data_url(url) if url else None
+    def _buildStatus(self, *, url: str | None, running: bool, error: str | None) -> dict[str, Any]:
+        qr_data_url = _qrDataUrl(url) if url else None
         return {
             "kind": "devtunnel",
             "label": "Dev Channel",
@@ -68,7 +68,7 @@ class DevChannelRuntime:
         }
 
 
-def _qr_data_url(url: str | None) -> str | None:
+def _qrDataUrl(url: str | None) -> str | None:
     if not url:
         return None
     try:

@@ -62,14 +62,14 @@ class Analyst:
         self,
         company=None,
         *,
-        stock_code: str = "",
-        company_name: str = "",
-        current_price: float = 0.0,
-        dcf_target: float | None = None,
-        dcf_confidence: float = 0.5,
+        stockCode: str = "",
+        companyName: str = "",
+        currentPrice: float = 0.0,
+        dcfTarget: float | None = None,
+        dcfConfidence: float = 0.5,
         shares: int = 0,
-        company_financials: dict | None = None,
-        market_snapshot: MarketSnapshot | None = None,
+        companyFinancials: dict | None = None,
+        marketSnapshot: MarketSnapshot | None = None,
     ) -> AnalystReport:
         """종합 애널리스트 리포트 생성.
 
@@ -89,35 +89,35 @@ class Analyst:
         """
         # Company 객체에서 자동 추출
         if company is not None:
-            stock_code, company_name, shares, company_financials = _extract_from_company(
-                company, stock_code, company_name, shares, company_financials
+            stockCode, companyName, shares, companyFinancials = _extractFromCompany(
+                company, stockCode, companyName, shares, companyFinancials
             )
 
         # 시장 데이터 수집
-        if market_snapshot is None and stock_code:
+        if marketSnapshot is None and stockCode:
             try:
-                snap = self._gather.collect(stock_code)
-                market_snapshot = snap.to_market_snapshot()
+                snap = self._gather.collect(stockCode)
+                marketSnapshot = snap.toMarketSnapshot()
             except OSError as exc:
                 log.warning("시장 데이터 수집 실패: %s", exc)
 
         # 현재가 — 시장에서 가져오기
-        if current_price <= 0 and market_snapshot and market_snapshot.current_price > 0:
-            current_price = market_snapshot.current_price
+        if currentPrice <= 0 and marketSnapshot and marketSnapshot.currentPrice > 0:
+            currentPrice = marketSnapshot.currentPrice
 
         # 합성
         return synthesize(
-            dcf_target=dcf_target,
-            dcf_confidence=dcf_confidence,
-            market=market_snapshot,
-            company_financials=company_financials,
+            dcfTarget=dcfTarget,
+            dcfConfidence=dcfConfidence,
+            market=marketSnapshot,
+            companyFinancials=companyFinancials,
             shares=shares,
-            current_price=current_price,
-            company_name=company_name,
-            stock_code=stock_code,
+            currentPrice=currentPrice,
+            companyName=companyName,
+            stockCode=stockCode,
         )
 
-    def collect_market(self, stock_code: str) -> MarketSnapshot:
+    def collectMarket(self, stockCode: str) -> MarketSnapshot:
         """시장 데이터만 수집.
 
         Parameters
@@ -130,7 +130,7 @@ class Analyst:
         MarketSnapshot
             현재가, 시가총액, 거래량 등 시장 스냅샷.
         """
-        return self._gather.collect(stock_code).to_market_snapshot()
+        return self._gather.collect(stockCode).toMarketSnapshot()
 
     def close(self) -> None:
         """리소스 정리.
@@ -146,25 +146,25 @@ class Analyst:
         return "Analyst()"
 
 
-def _extract_from_company(
+def _extractFromCompany(
     company,
-    stock_code: str,
-    company_name: str,
+    stockCode: str,
+    companyName: str,
     shares: int,
     financials: dict | None,
 ) -> tuple[str, str, int, dict | None]:
     """Company 객체에서 필요한 정보 추출."""
     # 종목코드
-    if not stock_code:
+    if not stockCode:
         try:
-            stock_code = getattr(company, "stockCode", "") or getattr(company, "stock_code", "")
+            stockCode = getattr(company, "stockCode", "") or getattr(company, "stock_code", "")
         except AttributeError:
             pass
 
     # 회사명
-    if not company_name:
+    if not companyName:
         try:
-            company_name = getattr(company, "name", "") or ""
+            companyName = getattr(company, "name", "") or ""
         except AttributeError:
             pass
 
@@ -194,7 +194,7 @@ def _extract_from_company(
         except (AttributeError, TypeError, ValueError):
             pass
 
-    return stock_code, company_name, shares, financials or None
+    return stockCode, companyName, shares, financials or None
 
 
 __all__ = [

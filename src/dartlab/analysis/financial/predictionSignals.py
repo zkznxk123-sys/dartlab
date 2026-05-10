@@ -19,7 +19,7 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 import logging
 import math
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 log = logging.getLogger(__name__)
@@ -81,7 +81,7 @@ def _getSectorKey(company) -> str | None:
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcEarningsMomentum(company, *, basePeriod: str | None = None) -> dict | None:
     """이익 모멘텀 — Sloan 분해(현금 vs 발생액) + DuPont 추세.
 
@@ -220,7 +220,7 @@ def calcEarningsMomentum(company, *, basePeriod: str | None = None) -> dict | No
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcPeerPrediction(company, *, basePeriod: str | None = None) -> dict | None:
     """횡단면 피어 예측 — scan 데이터 기반 cross-section 회귀.
 
@@ -371,7 +371,7 @@ def _getHistoricalRevenueGrowth(company, *, basePeriod: str | None = None) -> fl
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcStructuralBreak(company, *, basePeriod: str | None = None) -> dict | None:
     """구조변화 감지 — 매출/영업이익/마진/ROE 4대 지표.
 
@@ -526,7 +526,7 @@ def _avgGrowth(vals: list[float]) -> float | None:
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | None:
     """거시경제 민감도 — 섹터별 탄성치 + 관련 지표 매핑.
 
@@ -637,7 +637,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcMacroRegression(company, *, basePeriod: str | None = None) -> dict | None:
     """거시-재무 동적 회귀 — 기업별 거시 베타를 과거 데이터에서 학습.
 
@@ -1125,7 +1125,7 @@ def _buildMacroTable(
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcEventImpact(company, *, basePeriod: str | None = None) -> dict | None:
     """이벤트 충격 분석 — 공시 급변/지배구조 변화 시점 전후 재무 패턴.
 
@@ -1334,7 +1334,7 @@ def _findPeriodIdx(cols: list[str], year: int) -> int | None:
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcDisclosureDelta(company, *, basePeriod: str | None = None) -> dict | None:
     """공시 변화 신호 — diff 결과를 예측 신호로 변환.
 
@@ -1423,7 +1423,7 @@ def calcDisclosureDelta(company, *, basePeriod: str | None = None) -> dict | Non
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcInventoryDivergence(company, *, basePeriod: str | None = None) -> dict | None:
     """재고/매출채권 괴리 — 수요 둔화 선행 지표.
 
@@ -1578,7 +1578,7 @@ def calcInventoryDivergence(company, *, basePeriod: str | None = None) -> dict |
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcAnnouncementTiming(company, *, basePeriod: str | None = None) -> dict | None:
     """동종업계 공시 타이밍 — 선발 기업 실적으로 후발 예측.
 
@@ -1696,7 +1696,7 @@ def calcAnnouncementTiming(company, *, basePeriod: str | None = None) -> dict | 
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcSupplyChainSignal(company, *, basePeriod: str | None = None) -> dict | None:
     """공급망 모멘텀 — 관계사 실적이 이 회사를 선행.
 
@@ -1781,9 +1781,9 @@ def _getLinkedCompanies(company, stockCode: str) -> list[dict]:
 
     # 1. 투자관계 (network edges에서)
     try:
-        from dartlab.scan.network.edges import build_invest_edges
+        from dartlab.scan.network.edges import buildInvestEdges
 
-        investDf = build_invest_edges(stockCode)
+        investDf = buildInvestEdges(stockCode)
         if investDf is not None and hasattr(investDf, "height") and investDf.height > 0:
             for row in investDf.iter_rows(named=True):
                 toCode = row.get("to_code", "")
@@ -1896,7 +1896,7 @@ _DIRECTION_SCORES = {
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcConsensusDirection(company, *, basePeriod: str | None = None) -> dict | None:
     """컨센서스 매출 방향 — 애널리스트 추정 매출 vs 직전 실적.
 
@@ -1989,7 +1989,7 @@ def calcConsensusDirection(company, *, basePeriod: str | None = None) -> dict | 
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcFlowDirection(company, *, basePeriod: str | None = None) -> dict | None:
     """수급 누적 방향 — 기관/외국인 순매수 분기 집계.
 
@@ -2057,7 +2057,7 @@ def calcFlowDirection(company, *, basePeriod: str | None = None) -> dict | None:
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcRevenueDirection(company, *, basePeriod: str | None = None) -> dict | None:
     """매출 방향 예측 — 모멘텀 + 영업이익률 확인 + OLS 확인.
 
@@ -2258,7 +2258,7 @@ def _bayesUpdate(prior: float, evidence: float, damping: float = 0.3) -> float:
     return posterior_odds / (1 + posterior_odds)
 
 
-@memoized_calc
+@memoizedCalc
 def calcPredictionSynthesis(company, *, basePeriod: str | None = None) -> dict | None:
     """다중 신호 종합 — 5개 신호의 단순 평균 앙상블.
 
@@ -2554,7 +2554,7 @@ def calcPredictionSynthesis(company, *, basePeriod: str | None = None) -> dict |
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcPredictionFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]] | None:
     """예측신호 경고 플래그.
 

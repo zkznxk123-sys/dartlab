@@ -20,10 +20,10 @@ requires_oauth_codex = pytest.mark.skipif(
 @requires_oauth_codex
 def test_real_oauth_codex_simple_question_returns_text() -> None:
     from dartlab.ai import ask
-    from dartlab.ai.providers import create_provider, get_config
+    from dartlab.ai.providers import createProvider, getConfig
 
-    config = get_config(provider="oauth-codex")
-    provider = create_provider(config)
+    config = getConfig(provider="oauth-codex")
+    provider = createProvider(config)
     text = ask(
         "DartLab 라이브러리는 무엇이고 어떤 분석을 할 수 있는지 한 문단으로 설명",
         stream=False,
@@ -36,11 +36,11 @@ def test_real_oauth_codex_simple_question_returns_text() -> None:
 @pytest.mark.heavy
 @requires_oauth_codex
 def test_real_oauth_codex_5_passes_invoked() -> None:
-    from dartlab.ai.providers import create_provider, get_config
+    from dartlab.ai.providers import createProvider, getConfig
     from dartlab.ai.workbench.loop import WorkbenchLoop
 
-    config = get_config(provider="oauth-codex")
-    provider = create_provider(config)
+    config = getConfig(provider="oauth-codex")
+    provider = createProvider(config)
     loop = WorkbenchLoop()
     passes_seen: list[str] = []
     for ev in loop.stream("hi", provider=provider):

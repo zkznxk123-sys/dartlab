@@ -95,7 +95,7 @@ _TOPIC_COLUMNS: dict[str, tuple[ColumnEntry, ...]] = {
 }
 
 
-def _normalize_text(value: str) -> str:
+def _normalizeText(value: str) -> str:
     return "".join(ch.lower() for ch in str(value or "") if not ch.isspace())
 
 
@@ -114,14 +114,14 @@ def normalizeColumn(topic: str, hint: str) -> str | None:
     raw = str(hint or "").strip()
     if not raw:
         return None
-    norm = _normalize_text(raw)
-    for snake_id, label, aliases in columns:
-        if raw == snake_id or raw == label or raw in aliases:
-            return snake_id
-        if _normalize_text(snake_id) == norm or _normalize_text(label) == norm:
-            return snake_id
-        if any(_normalize_text(a) == norm for a in aliases):
-            return snake_id
+    norm = _normalizeText(raw)
+    for snakeId, label, aliases in columns:
+        if raw == snakeId or raw == label or raw in aliases:
+            return snakeId
+        if _normalizeText(snakeId) == norm or _normalizeText(label) == norm:
+            return snakeId
+        if any(_normalizeText(a) == norm for a in aliases):
+            return snakeId
     return None
 
 

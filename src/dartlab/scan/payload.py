@@ -17,7 +17,7 @@ scan 엔진(governance/workforce/capital/debt) 결과를 insight 7영역과
 from __future__ import annotations
 
 
-def governance_to_insight(row: dict) -> dict | None:
+def governanceToInsight(row: dict) -> dict | None:
     """governance 1행 → InsightResult 호환 dict.
 
     Parameters
@@ -83,7 +83,7 @@ def governance_to_insight(row: dict) -> dict | None:
     }
 
 
-def workforce_to_insight(row: dict) -> dict | None:
+def workforceToInsight(row: dict) -> dict | None:
     """workforce 1행 → InsightResult 호환 dict.
 
     Parameters
@@ -159,7 +159,7 @@ def workforce_to_insight(row: dict) -> dict | None:
     }
 
 
-def capital_to_insight(row: dict) -> dict | None:
+def capitalToInsight(row: dict) -> dict | None:
     """capital 1행 → InsightResult 호환 dict.
 
     Parameters
@@ -226,7 +226,7 @@ def capital_to_insight(row: dict) -> dict | None:
     }
 
 
-def debt_to_insight(row: dict) -> dict | None:
+def debtToInsight(row: dict) -> dict | None:
     """debt 1행 → InsightResult 호환 dict.
 
     Parameters
@@ -286,14 +286,14 @@ def debt_to_insight(row: dict) -> dict | None:
 
 
 _SCAN_CONVERTERS = {
-    "governance": governance_to_insight,
-    "workforce": workforce_to_insight,
-    "capital": capital_to_insight,
-    "debt": debt_to_insight,
+    "governance": governanceToInsight,
+    "workforce": workforceToInsight,
+    "capital": capitalToInsight,
+    "debt": debtToInsight,
 }
 
 
-def build_scan_payload(company) -> dict[str, dict | None]:
+def buildScanPayload(company) -> dict[str, dict | None]:
     """scan 4축 → InsightResult 호환 dict들.
 
     Parameters
@@ -327,7 +327,7 @@ def build_scan_payload(company) -> dict[str, dict | None]:
     return result
 
 
-def build_unified_payload(company) -> dict[str, dict | None]:
+def buildUnifiedPayload(company) -> dict[str, dict | None]:
     """insight 7영역 + scan 4축 = 11영역 통합 payload.
 
     Parameters
@@ -379,7 +379,7 @@ def build_unified_payload(company) -> dict[str, dict | None]:
         pass
 
     # scan 4축
-    scan_areas = build_scan_payload(company)
+    scan_areas = buildScanPayload(company)
 
     # 통합 (insight.governance와 scan.governance 충돌 → scan_governance)
     unified: dict[str, dict | None] = {}

@@ -59,10 +59,10 @@ class TimeseriesCache:
 
     __slots__ = ("_cache", "_ttl_daily", "_ttl_other")
 
-    def __init__(self, *, ttl_daily: int, ttl_other: int, max_entries: int = 256):
-        self._cache = BoundedCache(max_entries=max_entries)
-        self._ttl_daily = ttl_daily
-        self._ttl_other = ttl_other
+    def __init__(self, *, ttlDaily: int, ttlOther: int, maxEntries: int = 256):
+        self._cache = BoundedCache(maxEntries=maxEntries)
+        self._ttl_daily = ttlDaily
+        self._ttl_other = ttlOther
 
     def get(self, *parts: Any) -> Any | None:
         """캐시 조회. TTL 만료 시 자동 삭제 후 None 반환.

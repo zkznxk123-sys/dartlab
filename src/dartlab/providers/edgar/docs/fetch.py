@@ -67,7 +67,7 @@ FORTY_F_HEADINGS = {
 }
 
 
-def _make_progress(total: int, title: str, *, disable: bool = False):
+def _makeProgress(total: int, title: str, *, disable: bool = False):
     """alive_bar 호환 (progress, bar) 쌍을 반환하는 헬퍼."""
     p = Progress(
         SpinnerColumn(),
@@ -218,7 +218,7 @@ def fetchEdgarDocs(
     rows: list[dict] = []
     skippedFilings: list[str] = []
     if showProgress:
-        _prog, _bar = _make_progress(len(filings), f"EDGAR 원문 수집 | {ticker}")
+        _prog, _bar = _makeProgress(len(filings), f"EDGAR 원문 수집 | {ticker}")
         with _prog:
             _collectFilingRows(rows, filings, meta, ticker, _bar, filingTimeout, skippedFilings)
     else:
@@ -408,7 +408,7 @@ class _FilingTimeout:
             self._timer.start()
         return self
 
-    def __exit__(self, _exc_type, exc, tb):
+    def __exit__(self, _excType, exc, tb):
         if self.seconds > 0:
             if _HAS_SIGALRM:
                 signal.alarm(0)
@@ -450,7 +450,7 @@ def downloadListedEdgarDocs(
     results: list[dict] = []
     successCount = 0
     failCount = 0
-    _prog, _bar = _make_progress(total, "EDGAR 배치 수집")
+    _prog, _bar = _makeProgress(total, "EDGAR 배치 수집")
     with _prog:
         for idx, ticker in enumerate(tickers, start=1):
             _bar.title = f"EDGAR 배치 | {ticker}"

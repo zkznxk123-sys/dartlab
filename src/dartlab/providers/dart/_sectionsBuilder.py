@@ -115,7 +115,7 @@ def chapterForTopic(company: Company, topic: str) -> str:
 
 def topicLabel(company: Company, topic: str) -> str:
     from dartlab.core.registry import getEntry as _getEntry
-    from dartlab.providers.dart.company import _TOPIC_LABELS, _get_all_properties
+    from dartlab.providers.dart.company import _TOPIC_LABELS, _getAllProperties
 
     if topic == "CIS":
         return "포괄손익계산서"
@@ -126,7 +126,7 @@ def topicLabel(company: Company, topic: str) -> str:
     entry = _getEntry(topic)
     if entry is not None:
         return entry.label
-    for name, label in _get_all_properties():
+    for name, label in _getAllProperties():
         if name == topic:
             return label
     return topic

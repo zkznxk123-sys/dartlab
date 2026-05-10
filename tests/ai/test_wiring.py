@@ -87,7 +87,7 @@ class _MockProvider:
     script_idx: int = 0
     script: list = field(default_factory=list)
 
-    def check_available(self) -> bool:
+    def checkAvailable(self) -> bool:
         return True
 
     def generate(self, messages, tools):
@@ -97,7 +97,7 @@ class _MockProvider:
             turn = self.script[self.script_idx]
             self.script_idx += 1
             return turn
-        return ProviderTurn(content="", tool_calls=[])
+        return ProviderTurn(content="", toolCalls=[])
 
 
 @pytest.mark.unit
@@ -107,13 +107,13 @@ def test_brief_pass_invokes_read_skill() -> None:
     from dartlab.ai.workbench.state import WorkbenchState
 
     provider = _MockProvider(
-        config=ProviderConfig(provider="openai", api_key="sk-test"),
+        config=ProviderConfig(provider="openai", apiKey="sk-test"),
         script=[
             ProviderTurn(
                 content="",
-                tool_calls=[ToolCall(id="t1", name="read_skill", args={"query": "회사"})],
+                toolCalls=[ToolCall(id="t1", name="read_skill", args={"query": "회사"})],
             ),
-            ProviderTurn(content="BRIEF 완료", tool_calls=[]),
+            ProviderTurn(content="BRIEF 완료", toolCalls=[]),
         ],
     )
     state = WorkbenchState(question="회사 재무 분석")

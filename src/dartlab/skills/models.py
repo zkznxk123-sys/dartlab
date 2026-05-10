@@ -146,7 +146,7 @@ class SkillSpec:
     validatedAt: str | None = None
     storyboardKey: str | None = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -158,9 +158,9 @@ class SkillMatch:
     score: float
     reasons: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         data = asdict(self)
-        data["skill"] = self.skill.to_dict()
+        data["skill"] = self.skill.toDict()
         return data
 
 
@@ -173,5 +173,5 @@ class EvidenceCheckResult:
     present: list[str] = field(default_factory=list)
     missing: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         return asdict(self)

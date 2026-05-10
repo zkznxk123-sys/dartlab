@@ -41,7 +41,7 @@ from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays
 
 
-def build(company, *, ema_period: int = 50, rsi_low: float = 50, rsi_high: float = 65, atr_k: float = 2.0) -> Rule:
+def build(company, *, emaPeriod: int = 50, rsiLow: float = 50, rsiHigh: float = 65, atrK: float = 2.0) -> Rule:
     """눌림목매수 룰 빌드.
 
     [학술 정의] BTFD (Buy The F***ing Dip) — 강세장(bull regime) + 장기 추세 위(EMA50)
@@ -62,18 +62,18 @@ def build(company, *, ema_period: int = 50, rsi_low: float = 50, rsi_high: float
         )
 
     rsi = vrsi(close, period=14)
-    ema = vema(close, ema_period)
+    ema = vema(close, emaPeriod)
     reg = _regimeSeries(close)
     state = reg["state"]
 
     s = Signal()
     s.add("bull", state == 2)
     s.add("above_ema", (close > ema) & ~np.isnan(ema))
-    s.add("rsi_low", (rsi < rsi_low) & ~np.isnan(rsi))
-    s.add("rsi_high", (rsi > rsi_high) & ~np.isnan(rsi))
+    s.add("rsi_low", (rsi < rsiLow) & ~np.isnan(rsi))
+    s.add("rsi_high", (rsi > rsiHigh) & ~np.isnan(rsi))
 
     return Rule(
-        entry_expr=s.bull & s.above_ema & s.rsi_low,
-        exit_expr=s.rsi_high,
+        entry_expr=s.bull & s.above_ema & s.rsiLow,
+        exit_expr=s.rsiHigh,
         meta={"style": "dipBuy"},
-    ).with_stop("atr", k=atr_k, period=14)
+    ).withStop("atr", k=atrK, period=14)

@@ -12,7 +12,7 @@ from ..models import TocChapter, TocResponse, TocTopic
 _VALID_CODE = _re.compile(r"^[A-Za-z0-9가-힣]{1,20}$")
 
 
-def get_company(code: str) -> Company:
+def getCompany(code: str) -> Company:
     """종목코드로 Company를 조회하거나 생성한다 (캐시 활용)."""
     if not _VALID_CODE.match(code):
         raise ValueError(f"유효하지 않은 종목코드: {code!r}")
@@ -24,7 +24,7 @@ def get_company(code: str) -> Company:
     return company
 
 
-def safe_topic_label(company, topic: str) -> str:
+def safeTopicLabel(company, topic: str) -> str:
     """topic의 한글 라벨을 안전하게 반환한다."""
     try:
         return company._topicLabel(topic)
@@ -32,7 +32,7 @@ def safe_topic_label(company, topic: str) -> str:
         return topic
 
 
-def _find_prev_comparable(periods: list[str], target: str) -> str | None:
+def _findPrevComparable(periods: list[str], target: str) -> str | None:
     import re
 
     match = re.fullmatch(r"(\d{4})(Q[1-4])?", target)
@@ -54,7 +54,7 @@ def _find_prev_comparable(periods: list[str], target: str) -> str | None:
     return best
 
 
-def filter_blocks_by_period(blocks: list, period: str) -> list:
+def filterBlocksByPeriod(blocks: list, period: str) -> list:
     """뷰어 블록을 지정 기간과 직전 비교 기간만 남기도록 필터링한다."""
     filtered = []
     for block in blocks:
@@ -67,7 +67,7 @@ def filter_blocks_by_period(blocks: list, period: str) -> list:
             filtered.append(block)
             continue
 
-        prev = _find_prev_comparable(all_periods, period)
+        prev = _findPrevComparable(all_periods, period)
         keep_periods = [p for p in [period, prev] if p is not None and p in block.data.columns]
         non_period_cols = [column for column in block.data.columns if column not in all_periods]
         select_cols = non_period_cols + keep_periods
@@ -88,7 +88,7 @@ def filter_blocks_by_period(blocks: list, period: str) -> list:
     return filtered
 
 
-def build_toc(company: Company) -> dict[str, Any]:
+def buildToc(company: Company) -> dict[str, Any]:
     """뷰어 목차(Table of Contents)를 구성한다."""
     sec = company.sections
     if sec is None:
@@ -120,7 +120,7 @@ def build_toc(company: Company) -> dict[str, Any]:
             chapter_map[finance_chapter] = []
             chapter_order.append(finance_chapter)
         chapter_map[finance_chapter].append(
-            TocTopic(topic=topic, label=safe_topic_label(company, topic), textCount=0, tableCount=1)
+            TocTopic(topic=topic, label=safeTopicLabel(company, topic), textCount=0, tableCount=1)
         )
 
     period_re = _re.compile(r"^\d{4}(Q[1-4])?$")
@@ -157,7 +157,7 @@ def build_toc(company: Company) -> dict[str, Any]:
             chapter_map[chapter].append(
                 TocTopic(
                     topic=topic,
-                    label=safe_topic_label(company, topic),
+                    label=safeTopicLabel(company, topic),
                     textCount=int(text_count),
                     tableCount=int(table_count),
                     hasChanges=has_changes,
@@ -179,16 +179,16 @@ def build_toc(company: Company) -> dict[str, Any]:
         "XII": 12,
     }
 
-    def _chapter_sort_key(chapter: str) -> tuple[int, str]:
+    def _chapterSortKey(chapter: str) -> tuple[int, str]:
         prefix = chapter.split(".")[0].strip()
         return (roman_order.get(prefix, 99), chapter)
 
-    sorted_chapters = sorted(chapter_order, key=_chapter_sort_key)
+    sorted_chapters = sorted(chapter_order, key=_chapterSortKey)
     chapters = [TocChapter(chapter=chapter, topics=chapter_map[chapter]) for chapter in sorted_chapters]
     return TocResponse(stockCode=company.stockCode, corpName=company.corpName, chapters=chapters).model_dump()
 
 
-def build_viewer(company: Company, topic: str) -> dict[str, Any]:
+def buildViewer(company: Company, topic: str) -> dict[str, Any]:
     """topic별 뷰어 블록과 텍스트 문서를 직렬화하여 반환한다."""
     from dartlab.providers.dart.docs.viewer import (
         serializeViewerBlock,
@@ -209,14 +209,14 @@ def build_viewer(company: Company, topic: str) -> dict[str, Any]:
         "stockCode": company.stockCode,
         "corpName": company.corpName,
         "topic": topic,
-        "topicLabel": safe_topic_label(company, topic),
+        "topicLabel": safeTopicLabel(company, topic),
         "period": None,
         "blocks": [serializeViewerBlock(block) for block in blocks],
         "textDocument": serializeViewerTextDocument(viewerTextDocument(topic, blocks)),
     }
 
 
-def build_diff_summary(company: Company, topic: str) -> dict[str, Any] | None:
+def buildDiffSummary(company: Company, topic: str) -> dict[str, Any] | None:
     """topic의 기간 간 변경 요약(변경률, 추가/삭제 발췌)을 생성한다."""
     try:
         from dartlab.core.docs.diff import sectionsDiff
@@ -225,15 +225,15 @@ def build_diff_summary(company: Company, topic: str) -> dict[str, Any] | None:
         if sec is None:
             return None
 
-        diff_result = sectionsDiff(sec)
-        topic_summaries = [summary for summary in diff_result.summaries if summary.topic == topic]
+        diffResult = sectionsDiff(sec)
+        topic_summaries = [summary for summary in diffResult.summaries if summary.topic == topic]
         total_changed = sum(summary.changedCount for summary in topic_summaries)
         max_periods = max((summary.totalPeriods for summary in topic_summaries), default=0)
         change_rate = (
             round(total_changed / max(1, (max_periods - 1) * len(topic_summaries)), 3) if topic_summaries else 0.0
         )
 
-        topic_entries = [entry for entry in diff_result.entries if entry.topic == topic]
+        topic_entries = [entry for entry in diffResult.entries if entry.topic == topic]
         added: list[str] = []
         removed: list[str] = []
         latest_from: str | None = None

@@ -100,7 +100,7 @@ def test_allow_polars_basic():
 
     result = runPython("import polars as pl\nemit_result(values={'rows': pl.DataFrame({'a':[1,2]}).height})")
     assert result.ok
-    refs_dict = [r.to_dict() for r in (result.refs or [])]
+    refs_dict = [r.toDict() for r in (result.refs or [])]
     assert any(r.get("kind") == "executionRef" for r in refs_dict)
 
 
@@ -200,14 +200,14 @@ def test_assert_safe_ast_blocks_each_pattern():
 def test_safe_open_factory_blocks_outside_roots(tmp_path):
     from dartlab.ai.tools.runpythonGuard import _safeOpenFactory
 
-    safe_open = _safeOpenFactory(safe_roots=[str(tmp_path)])
+    safeOpen = _safeOpenFactory(safeRoots=[str(tmp_path)])
     # 안전 경로 안 — write 통과
-    f = safe_open(str(tmp_path / "ok.txt"), "w", encoding="utf-8")
+    f = safeOpen(str(tmp_path / "ok.txt"), "w", encoding="utf-8")
     f.write("ok")
     f.close()
     # 안전 경로 밖 — write 차단
     with pytest.raises(PermissionError, match="안전 경로"):
-        safe_open(str(tmp_path.parent / "outside.txt"), "w", encoding="utf-8")
+        safeOpen(str(tmp_path.parent / "outside.txt"), "w", encoding="utf-8")
 
 
 def test_safe_open_factory_allows_read_anywhere(tmp_path):
@@ -217,8 +217,8 @@ def test_safe_open_factory_allows_read_anywhere(tmp_path):
     target = tmp_path.parent / "outside_read.txt"
     target.write_text("hello", encoding="utf-8")
     try:
-        safe_open = _safeOpenFactory(safe_roots=[str(tmp_path)])
-        f = safe_open(str(target), "r", encoding="utf-8")
+        safeOpen = _safeOpenFactory(safeRoots=[str(tmp_path)])
+        f = safeOpen(str(target), "r", encoding="utf-8")
         assert f.read() == "hello"
         f.close()
     finally:

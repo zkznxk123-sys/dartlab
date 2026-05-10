@@ -48,15 +48,15 @@ _KR_FINANCIAL = {
 }
 
 
-def _is_financial(stockCode: str) -> bool:
+def _isFinancial(stockCode: str) -> bool:
     return stockCode in _KR_FINANCIAL
 
 
-def _crosssec_zscore(value: float, all_values: list[float]) -> float:
+def _crosssecZscore(value: float, allValues: list[float]) -> float:
     """횡단면 z-score (winsorized clip ±3)."""
     import numpy as np
 
-    arr = np.array([v for v in all_values if v is not None and not np.isnan(v)])
+    arr = np.array([v for v in allValues if v is not None and not np.isnan(v)])
     if len(arr) < 10:
         return 0.0
     mu = float(np.mean(arr))
@@ -80,7 +80,7 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
-    if _is_financial(stockCode):
+    if _isFinancial(stockCode):
         result["sector"] = "financial"
         result["grade"] = None
         result["info"] = "금융업은 부채 구조가 사업 본질이라 일반 quality 산식 부적절"
@@ -99,37 +99,37 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         return {**result, "error": "연결 4분기 데이터 없음"}
 
     edgar = isEdgarSchema(snap)
-    year_col = "fy" if edgar else "bsns_year"
+    yearCol = "fy" if edgar else "bsns_year"
 
     # 가장 최근 충분한 데이터를 가진 연도
-    year_counts = snap.group_by(year_col).len().sort(year_col, descending=True)
+    year_counts = snap.group_by(yearCol).len().sort(yearCol, descending=True)
     yr = None
     for row in year_counts.iter_rows(named=True):
         if row["len"] >= 1000:
-            yr = row[year_col]
+            yr = row[yearCol]
             break
     if yr is None:
         return {**result, "error": "충분한 universe 연도 없음"}
 
-    snap_yr = snap.filter(pl.col(year_col) == yr)
+    snapYr = snap.filter(pl.col(yearCol) == yr)
     result["year"] = str(yr)
 
     # universe metric 캐시 (연도별)
-    universe_metrics = _get_universe_metrics_cached(market, str(yr))
+    universe_metrics = _getUniverseMetricsCached(market, str(yr))
     if universe_metrics is None:
-        universe_metrics = _build_universe_metrics(snap_yr)
-        _set_universe_metrics_cached(market, str(yr), universe_metrics)
+        universe_metrics = _buildUniverseMetrics(snapYr)
+        _setUniverseMetricsCached(market, str(yr), universe_metrics)
 
     # 단일 종목 추출
-    stock = snap_yr.filter(pl.col("stockCode") == stockCode)
+    stock = snapYr.filter(pl.col("stockCode") == stockCode)
     if stock.is_empty():
         # 회계연도 비표준 종목 (예: NVDA fy=2026, 1월결산) — 해당 종목의 최신 fy 로 fallback.
-        company_years = snap.filter(pl.col("stockCode") == stockCode).select(year_col).unique().to_series().to_list()
+        company_years = snap.filter(pl.col("stockCode") == stockCode).select(yearCol).unique().to_series().to_list()
         if not company_years:
             return {**result, "error": f"{stockCode} scan parquet 데이터 없음"}
         yr = max(company_years)
-        snap_yr = snap.filter(pl.col(year_col) == yr)
-        stock = snap_yr.filter(pl.col("stockCode") == stockCode)
+        snapYr = snap.filter(pl.col(yearCol) == yr)
+        stock = snapYr.filter(pl.col("stockCode") == stockCode)
         result["year"] = str(yr)
         if stock.is_empty():
             return {**result, "error": f"{yr} 데이터 없음"}
@@ -154,11 +154,11 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
 
     prof_zs = []
     if "operatingMargin" in metrics:
-        prof_zs.append(_crosssec_zscore(metrics["operatingMargin"], universe_metrics["operatingMargin"]))
+        prof_zs.append(_crosssecZscore(metrics["operatingMargin"], universe_metrics["operatingMargin"]))
     if "ROA" in metrics:
-        prof_zs.append(_crosssec_zscore(metrics["ROA"], universe_metrics["ROA"]))
+        prof_zs.append(_crosssecZscore(metrics["ROA"], universe_metrics["ROA"]))
     if "ROE" in metrics:
-        prof_zs.append(_crosssec_zscore(metrics["ROE"], universe_metrics["ROE"]))
+        prof_zs.append(_crosssecZscore(metrics["ROE"], universe_metrics["ROE"]))
 
     if prof_zs:
         prof_z = sum(prof_zs) / len(prof_zs)
@@ -168,7 +168,7 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     safety_z = 0.0
     if "debtRatio" in metrics:
         # 부채 낮을수록 안전 → z의 부호 반전
-        raw = _crosssec_zscore(metrics["debtRatio"], universe_metrics["debtRatio"])
+        raw = _crosssecZscore(metrics["debtRatio"], universe_metrics["debtRatio"])
         safety_z = -raw
 
     composite = prof_z * 0.6 + safety_z * 0.4
@@ -193,15 +193,15 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
 _UNIVERSE_CACHE: dict[tuple[str, str], dict[str, list[float]]] = {}
 
 
-def _get_universe_metrics_cached(market: str, year: str):
+def _getUniverseMetricsCached(market: str, year: str):
     return _UNIVERSE_CACHE.get((market, year))
 
 
-def _set_universe_metrics_cached(market: str, year: str, metrics):
+def _setUniverseMetricsCached(market: str, year: str, metrics):
     _UNIVERSE_CACHE[(market, year)] = metrics
 
 
-def _build_universe_metrics(snap_yr: pl.DataFrame) -> dict[str, list[float]]:
+def _buildUniverseMetrics(snapYr: pl.DataFrame) -> dict[str, list[float]]:
     """연도 스냅샷에서 모든 종목의 4지표 분포 빌드."""
     result: dict[str, list[float]] = {
         "operatingMargin": [],
@@ -209,13 +209,13 @@ def _build_universe_metrics(snap_yr: pl.DataFrame) -> dict[str, list[float]]:
         "ROE": [],
         "debtRatio": [],
     }
-    codes = snap_yr.get_column("stockCode").unique().to_list()
+    codes = snapYr.get_column("stockCode").unique().to_list()
     for code in codes:
         if not isinstance(code, str):
             continue
-        if _is_financial(code):
+        if _isFinancial(code):
             continue
-        stock = snap_yr.filter(pl.col("stockCode") == code)
+        stock = snapYr.filter(pl.col("stockCode") == code)
         sales = extractAccount(stock, "sales")
         op = extractAccount(stock, "operating_profit")
         ni = extractAccount(stock, "net_income")

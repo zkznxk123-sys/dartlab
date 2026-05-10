@@ -35,7 +35,7 @@ class SearchResult:
 
 # ── 모듈 레벨 캐시 싱글턴 ──
 
-_cache = GatherCache(max_entries=100)
+_cache = GatherCache(maxEntries=100)
 
 
 # ── Tavily 백엔드 ──
@@ -88,7 +88,7 @@ def _searchTavily(
     """
     from tavily import TavilyClient
 
-    client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
+    client = TavilyClient(apiKey=os.environ["TAVILY_API_KEY"])
     kwargs: dict = {
         "query": query,
         "max_results": maxResults,
@@ -152,15 +152,15 @@ def webSearch(
 
     results: list[SearchResult] = []
 
-    if _tavilyAvailable() and not _cb.is_open("tavily"):
+    if _tavilyAvailable() and not _cb.isOpen("tavily"):
         t0 = time.monotonic()
         try:
             results = _searchTavily(query, maxResults=maxResults, days=days)
-            _cb.record_success("tavily")
+            _cb.recordSuccess("tavily")
             _ht.record(source="tavily", success=True, latency=time.monotonic() - t0)
         except (OSError, ValueError, KeyError, RuntimeError) as e:
             log.warning("Tavily 검색 실패: %s", e)
-            _cb.record_failure("tavily")
+            _cb.recordFailure("tavily")
             _ht.record(source="tavily", success=False, latency=time.monotonic() - t0)
 
     if results:
@@ -203,15 +203,15 @@ def newsSearch(
 
     results: list[SearchResult] = []
 
-    if _tavilyAvailable() and not _cb.is_open("tavily"):
+    if _tavilyAvailable() and not _cb.isOpen("tavily"):
         t0 = time.monotonic()
         try:
             results = _searchTavily(query, maxResults=maxResults, days=days, topic="news")
-            _cb.record_success("tavily")
+            _cb.recordSuccess("tavily")
             _ht.record(source="tavily", success=True, latency=time.monotonic() - t0)
         except (OSError, ValueError, KeyError, RuntimeError) as e:
             log.warning("Tavily 뉴스 검색 실패: %s", e)
-            _cb.record_failure("tavily")
+            _cb.recordFailure("tavily")
             _ht.record(source="tavily", success=False, latency=time.monotonic() - t0)
 
     if results:

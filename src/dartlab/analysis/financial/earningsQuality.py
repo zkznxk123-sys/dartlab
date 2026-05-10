@@ -11,7 +11,7 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 
 import math
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 _MAX_YEARS = 8
@@ -26,7 +26,7 @@ from dartlab.core.utils.calc import safeDiv as _safe
 # ── 발생액 분석 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcBeneishMScore(
     *,
     salesT: float,
@@ -81,9 +81,9 @@ def calcBeneishMScore(
         # SGI: Sales Growth Index
         sgi = salesT / salesT1
         # DEPI: Depreciation Index
-        dep_t = depreciationT / (depreciationT + grossPropertyT) if (depreciationT + grossPropertyT) > 0 else 0.05
+        depT = depreciationT / (depreciationT + grossPropertyT) if (depreciationT + grossPropertyT) > 0 else 0.05
         dep_t1 = depreciationT1 / (depreciationT1 + grossPropertyT1) if (depreciationT1 + grossPropertyT1) > 0 else 0.05
-        depi = dep_t1 / dep_t if dep_t > 0 else 1
+        depi = dep_t1 / depT if depT > 0 else 1
         # SGAI: SGA Index
         sgai = (sgaT / salesT) / (sgaT1 / salesT1) if salesT1 > 0 else 1
         # TATA: Total Accruals to Total Assets
@@ -425,7 +425,7 @@ def calcAccrualAnalysis(company, *, basePeriod: str | None = None) -> dict | Non
 # ── 이익 지속성 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcEarningsPersistence(company, *, basePeriod: str | None = None) -> dict | None:
     """이익 지속성 — 영업이익 vs 영업외손익, 변동성.
 
@@ -492,7 +492,7 @@ def calcEarningsPersistence(company, *, basePeriod: str | None = None) -> dict |
 # ── Beneish M-Score 시계열 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """Beneish M-Score 시계열 — annual 데이터에서 직접 8변수 계산.
 
@@ -648,7 +648,7 @@ def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | Non
 # ── 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcEarningsQualityFlags(company, *, basePeriod: str | None = None) -> dict:
     """이익 품질 경고 신호.
 
@@ -720,7 +720,7 @@ def calcEarningsQualityFlags(company, *, basePeriod: str | None = None) -> dict:
 # ── Richardson 3계층 발생액 분해 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcRichardsonAccrual(company, *, basePeriod: str | None = None) -> dict | None:
     """Richardson et al. (2005) 3계층 발생액 분해.
 
@@ -845,7 +845,7 @@ def calcRichardsonAccrual(company, *, basePeriod: str | None = None) -> dict | N
 # ── 영업외손익 분해 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcNonOperatingBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
     """영업외손익 항목별 분해 — 영업이익과 세전이익 사이의 갭.
 
@@ -937,7 +937,7 @@ def calcNonOperatingBreakdown(company, *, basePeriod: str | None = None) -> dict
 # ── EPS 희석 분석 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcDilutionTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """기본 EPS vs 희석 EPS 괴리율 시계열 — 스톡옵션/전환사채 희석 리스크.
 
@@ -1030,7 +1030,7 @@ def calcDilutionTrend(company, *, basePeriod: str | None = None) -> dict | None:
 # ── Phase 7 G26: Damodaran Ch.4 회계 품질 이상치 (Beneish + Sloan + 5 카테고리) ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcQualityAnomalies(company, *, basePeriod: str | None = None) -> dict | None:
     """Damodaran Ch.4 + Beneish (1999) + Sloan (1996) 학술 표준 회계 품질.
 
@@ -1072,10 +1072,10 @@ def calcQualityAnomalies(company, *, basePeriod: str | None = None) -> dict | No
         return None
     t, t1 = annual_years[0], annual_years[1]
 
-    def _ga(row_dict: dict, period: str, *keys: str) -> float | None:
+    def _ga(rowDict: dict, period: str, *keys: str) -> float | None:
         """다중 키 fallback으로 특정 기간 값 추출."""
         for k in keys:
-            row = row_dict.get(k) or {}
+            row = rowDict.get(k) or {}
             v = row.get(period)
             if v is not None:
                 return float(v)
@@ -1083,9 +1083,9 @@ def calcQualityAnomalies(company, *, basePeriod: str | None = None) -> dict | No
 
     sales_t = _ga(is_data, t, "sales", "매출액")
     sales_t1 = _ga(is_data, t1, "sales", "매출액")
-    cogs_t = _ga(is_data, t, "cost_of_sales", "매출원가")
+    cogsT = _ga(is_data, t, "cost_of_sales", "매출원가")
     cogs_t1 = _ga(is_data, t1, "cost_of_sales", "매출원가")
-    sga_t = _ga(is_data, t, "selling_and_administrative_expenses", "판매비와관리비")
+    sgaT = _ga(is_data, t, "selling_and_administrative_expenses", "판매비와관리비")
     sga_t1 = _ga(is_data, t1, "selling_and_administrative_expenses", "판매비와관리비")
     ni_t = _ga(is_data, t, "net_profit", "net_income", "당기순이익")
     assets_t = _ga(bs_data, t, "total_assets", "자산총계")
@@ -1097,7 +1097,7 @@ def calcQualityAnomalies(company, *, basePeriod: str | None = None) -> dict | No
     liabilities_t1 = _ga(bs_data, t1, "total_liabilities", "부채총계")
     ppe_t = _ga(bs_data, t, "tangible_assets", "유형자산")
     ppe_t1 = _ga(bs_data, t1, "tangible_assets", "유형자산")
-    ocf_t = _ga(cf_data, t, "operating_cashflow")
+    ocfT = _ga(cf_data, t, "operating_cashflow")
 
     quality = _calcEarningsQualityFlagsBase(
         salesT=sales_t or 0,
@@ -1105,28 +1105,28 @@ def calcQualityAnomalies(company, *, basePeriod: str | None = None) -> dict | No
         receivablesT=receivables_t or 0,
         receivablesT1=receivables_t1 or 0,
         netIncomeT=ni_t or 0,
-        ocfT=ocf_t or 0,
+        ocfT=ocfT or 0,
         totalAssetsT=assets_t or 0,
         goodwillT=goodwill_t,
     )
 
     beneish = None
-    if all(v is not None for v in (sales_t, sales_t1, cogs_t, cogs_t1, sga_t, sga_t1, assets_t, assets_t1)):
+    if all(v is not None for v in (sales_t, sales_t1, cogsT, cogs_t1, sgaT, sga_t1, assets_t, assets_t1)):
         beneish = calcBeneishMScore(
             salesT=sales_t,
             salesT1=sales_t1,
             receivablesT=receivables_t or 0,
             receivablesT1=receivables_t1 or 0,
-            cogsT=cogs_t,
+            cogsT=cogsT,
             cogsT1=cogs_t1,
-            sgaT=sga_t,
+            sgaT=sgaT,
             sgaT1=sga_t1,
             grossPropertyT=ppe_t or 0,
             grossPropertyT1=ppe_t1 or 0,
             totalAssetsT=assets_t,
             totalAssetsT1=assets_t1,
             netIncomeT=ni_t or 0,
-            ocfT=ocf_t or 0,
+            ocfT=ocfT or 0,
             leverageT=(liabilities_t / assets_t) if assets_t else 0,
             leverageT1=(liabilities_t1 / assets_t1) if assets_t1 else 0,
             depreciationT=0,

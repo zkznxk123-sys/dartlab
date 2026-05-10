@@ -183,7 +183,7 @@ def _ensureScanData() -> Path:
     return scanDir
 
 
-def scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
+def scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
     """report parquet에서 특정 apiType만 LazyFrame 스캔.
 
     scan/report/{apiType}.parquet 프리빌드가 있으면 단일 파일에서 즉시 로드.
@@ -204,12 +204,12 @@ def scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
     """
     # 1순위: 프리빌드 scan parquet (없으면 자동 다운로드 시도)
     scanDir = _ensureScanData()
-    scan_path = scanDir / "report" / f"{api_type}.parquet"
+    scan_path = scanDir / "report" / f"{apiType}.parquet"
     if scan_path.exists():
         try:
             lf = pl.scan_parquet(str(scan_path))
             schema_names = lf.collect_schema().names()
-            available = [c for c in keep_cols if c in schema_names]
+            available = [c for c in keepCols if c in schema_names]
             non_meta = [c for c in available if c not in ("stockCode", "year", "quarter")]
             if non_meta:
                 return lf.select(available).collect()
@@ -225,7 +225,7 @@ def scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
     if not parquet_files:
         from dartlab.core.messaging import emit
 
-        emit("hint:market_data_needed", category="report", fn=api_type)
+        emit("hint:market_data_needed", category="report", fn=apiType)
         return pl.DataFrame()
 
     frames: list[pl.LazyFrame] = []
@@ -235,11 +235,11 @@ def scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
             schema_names = lf.collect_schema().names()
             if "apiType" not in schema_names:
                 continue
-            available = [c for c in keep_cols if c in schema_names]
+            available = [c for c in keepCols if c in schema_names]
             non_meta = [c for c in available if c not in ("stockCode", "year", "quarter")]
             if not non_meta:
                 continue
-            lf = lf.filter(pl.col("apiType") == api_type).select(available)
+            lf = lf.filter(pl.col("apiType") == apiType).select(available)
             frames.append(lf)
         except (pl.exceptions.ComputeError, OSError):
             continue
@@ -292,7 +292,7 @@ def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_
     return None
 
 
-def find_latest_year(raw: pl.DataFrame, check_col: str, min_count: int = 500) -> str | None:
+def findLatestYear(raw: pl.DataFrame, checkCol: str, minCount: int = 500) -> str | None:
     """check_col에 유효 데이터가 min_count 이상인 가장 최근 연도 반환.
 
     Parameters
@@ -312,10 +312,8 @@ def find_latest_year(raw: pl.DataFrame, check_col: str, min_count: int = 500) ->
     years_desc = sorted(raw["year"].unique().to_list(), reverse=True)
     for y in years_desc:
         sub = raw.filter(pl.col("year") == y)
-        ok = sub.filter(pl.col(check_col).is_not_null() & (pl.col(check_col) != "-") & (pl.col(check_col) != "")).shape[
-            0
-        ]
-        if ok >= min_count:
+        ok = sub.filter(pl.col(checkCol).is_not_null() & (pl.col(checkCol) != "-") & (pl.col(checkCol) != "")).shape[0]
+        if ok >= minCount:
             return y
     return None
 
@@ -323,7 +321,7 @@ def find_latest_year(raw: pl.DataFrame, check_col: str, min_count: int = 500) ->
 QUARTER_ORDER = {"2분기": 1, "4분기": 2, "3분기": 3, "1분기": 4}
 
 
-def pick_best_quarter(df: pl.DataFrame) -> pl.DataFrame:
+def pickBestQuarter(df: pl.DataFrame) -> pl.DataFrame:
     """가장 선호하는 분기만 필터 (Q2 > Q4 > Q3 > Q1).
 
     Parameters
@@ -341,7 +339,7 @@ def pick_best_quarter(df: pl.DataFrame) -> pl.DataFrame:
     return df.filter(pl.col("quarter") == best[0]) if best else df
 
 
-def load_listing():
+def loadListing():
     """상장사 목록 로드.
 
     Returns
@@ -353,12 +351,12 @@ def load_listing():
     -----
     network/scanner.py 의 load_listing 에 위임.
     """
-    from dartlab.scan.network.scanner import load_listing as _ll
+    from dartlab.scan.network.scanner import loadListing as _ll
 
     return _ll()
 
 
-def parse_date_year(s) -> int | None:
+def parseDateYear(s) -> int | None:
     """날짜 문자열에서 연도 추출.
 
     Parameters
@@ -535,12 +533,12 @@ def loadValuationSnapshot() -> tuple[pl.DataFrame | None, datetime | None]:
     return frame, snapshotAt
 
 
-def scan_finance_parquets(
+def scanFinanceParquets(
     statement: str,
-    account_ids: set[str],
-    account_nms: set[str],
+    accountIds: set[str],
+    accountNms: set[str],
     *,
-    amount_col: str = "thstrm_amount",
+    amountCol: str = "thstrm_amount",
 ) -> dict[str, float]:
     """finance parquet 전수 스캔 → 종목별 계정 값.
 
@@ -570,7 +568,7 @@ def scan_finance_parquets(
     scan_path = scanDir / "finance.parquet"
     if scan_path.exists():
         try:
-            return _scanFinanceFromMerged(scan_path, sj_divs, account_ids, account_nms, amount_col)
+            return _scanFinanceFromMerged(scan_path, sj_divs, accountIds, accountNms, amountCol)
         except (pl.exceptions.PolarsError, OSError):
             pass  # fallback
 
@@ -610,8 +608,8 @@ def scan_finance_parquets(
         for row in latest.iter_rows(named=True):
             aid = row.get("account_id", "")
             anm = row.get("account_nm", "")
-            val = parse_num(row.get(amount_col))
-            if (aid in account_ids or anm in account_nms) and val is not None:
+            val = parse_num(row.get(amountCol))
+            if (aid in accountIds or anm in accountNms) and val is not None:
                 result[code] = val
                 break
 

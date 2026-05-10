@@ -6,11 +6,11 @@ from typing import Any
 
 from dartlab.core.cache import TimeseriesCache
 
-_cache = TimeseriesCache(ttl_daily=6 * 3600, ttl_other=24 * 3600)
+_cache = TimeseriesCache(ttlDaily=6 * 3600, ttlOther=24 * 3600)
 
 
 def get(
-    series_id: str, start: str | None, end: str | None, frequency: str | None, aggregation: str | None
+    seriesId: str, start: str | None, end: str | None, frequency: str | None, aggregation: str | None
 ) -> Any | None:
     """캐시 조회. TTL 만료 시 None.
 
@@ -22,11 +22,11 @@ def get(
     frequency : str | None — 주기 ("d"/"w"/"m"/"q"/"a").
     aggregation : str | None — 집계 방법 ("avg"/"sum"/"eop").
     """
-    return _cache.get(series_id, start, end, frequency, aggregation)
+    return _cache.get(seriesId, start, end, frequency, aggregation)
 
 
 def put(
-    series_id: str,
+    seriesId: str,
     start: str | None,
     end: str | None,
     frequency: str | None,
@@ -36,7 +36,7 @@ def put(
     daily: bool = False,
 ) -> None:
     """캐시 저장. daily=True 면 TTL 6시간, 아니면 24시간."""
-    _cache.put(value, series_id, start, end, frequency, aggregation, daily=daily)
+    _cache.put(value, seriesId, start, end, frequency, aggregation, daily=daily)
 
 
 def clear() -> None:

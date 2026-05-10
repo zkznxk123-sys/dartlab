@@ -66,9 +66,9 @@ class WorkbenchLoop:
 def _resolveProvider(config: Any = None) -> Any:
     """config 으로부터 provider 객체 시도. 실패 시 None."""
     try:
-        from dartlab.ai.providers import create_provider
+        from dartlab.ai.providers import createProvider
 
-        return create_provider(config)
+        return createProvider(config)
     except Exception:  # noqa: BLE001
         return None
 
@@ -85,10 +85,10 @@ def _isLLMProvider(obj: Any) -> bool:
     if not callable(getattr(obj, "generate", None)):
         return False
     config = getattr(obj, "config", None)
-    provider_id = (getattr(config, "provider", None) or "").lower()
-    if provider_id not in wiredProviderIds():
+    providerId = (getattr(config, "provider", None) or "").lower()
+    if providerId not in wiredProviderIds():
         return False
     try:
-        return bool(obj.check_available())
+        return bool(obj.checkAvailable())
     except Exception:  # noqa: BLE001
         return False

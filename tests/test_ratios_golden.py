@@ -420,26 +420,26 @@ class TestComposite:
         from dartlab.analysis.financial.ratios import _calcBeneishForPeriod
 
         score = _calcBeneishForPeriod(
-            rev_t=100.0,
-            rev_p=100.0,
-            rec_t=10.0,
-            rec_p=10.0,
-            cogs_t=60.0,
-            cogs_p=120.0,
-            ta_t=200.0,
-            ta_p=180.0,
-            ca_t=50.0,
-            ca_p=45.0,
-            sga_t=10.0,
-            sga_p=9.0,
-            dep_t=5.0,
-            dep_p=4.0,
-            tan_t=70.0,
-            tan_p=65.0,
-            np_t=10.0,
-            ocf_t=8.0,
-            tl_t=80.0,
-            tl_p=75.0,
+            revT=100.0,
+            revP=100.0,
+            recT=10.0,
+            recP=10.0,
+            cogsT=60.0,
+            cogsP=120.0,
+            taT=200.0,
+            taP=180.0,
+            caT=50.0,
+            caP=45.0,
+            sgaT=10.0,
+            sgaP=9.0,
+            depT=5.0,
+            depP=4.0,
+            tanT=70.0,
+            tanP=65.0,
+            npT=10.0,
+            ocfT=8.0,
+            tlT=80.0,
+            tlP=75.0,
         )
         assert score is None
 
@@ -486,45 +486,45 @@ class TestYoyPct:
     """yoy_pct() 부호 전환, 경계값 검증."""
 
     def test_positive_to_positive(self):
-        from dartlab.analysis.financial.ratios import yoy_pct
+        from dartlab.analysis.financial.ratios import yoyPct
 
-        assert yoy_pct(120, 100) == pytest.approx(20.0)
+        assert yoyPct(120, 100) == pytest.approx(20.0)
 
     def test_negative_to_negative_improving(self):
         """적자 축소: -50 ← -100 → +50% (손실 축소는 양수)."""
-        from dartlab.analysis.financial.ratios import yoy_pct
+        from dartlab.analysis.financial.ratios import yoyPct
 
-        assert yoy_pct(-50, -100) == pytest.approx(50.0)
+        assert yoyPct(-50, -100) == pytest.approx(50.0)
 
     def test_negative_to_negative_worsening(self):
         """적자 확대: -150 ← -100 → -50% (손실 확대는 음수)."""
-        from dartlab.analysis.financial.ratios import yoy_pct
+        from dartlab.analysis.financial.ratios import yoyPct
 
-        assert yoy_pct(-150, -100) == pytest.approx(-50.0)
+        assert yoyPct(-150, -100) == pytest.approx(-50.0)
 
     def test_sign_change_profit_to_loss(self):
         """흑자→적자: None (비교 불가)."""
-        from dartlab.analysis.financial.ratios import yoy_pct
+        from dartlab.analysis.financial.ratios import yoyPct
 
-        assert yoy_pct(-50, 100) is None
+        assert yoyPct(-50, 100) is None
 
     def test_sign_change_loss_to_profit(self):
         """적자→흑자: None (비교 불가)."""
-        from dartlab.analysis.financial.ratios import yoy_pct
+        from dartlab.analysis.financial.ratios import yoyPct
 
-        assert yoy_pct(50, -100) is None
+        assert yoyPct(50, -100) is None
 
     def test_zero_denominator(self):
-        from dartlab.analysis.financial.ratios import yoy_pct
+        from dartlab.analysis.financial.ratios import yoyPct
 
-        assert yoy_pct(100, 0) is None
+        assert yoyPct(100, 0) is None
 
     def test_none_inputs(self):
-        from dartlab.analysis.financial.ratios import yoy_pct
+        from dartlab.analysis.financial.ratios import yoyPct
 
-        assert yoy_pct(None, 100) is None
-        assert yoy_pct(100, None) is None
-        assert yoy_pct(None, None) is None
+        assert yoyPct(None, 100) is None
+        assert yoyPct(100, None) is None
+        assert yoyPct(None, None) is None
 
 
 # ══════════════════════════════════════

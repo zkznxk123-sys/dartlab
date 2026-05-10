@@ -39,8 +39,8 @@ def _benchmarkReturns(indexMarket: str, start: str, *, indexName: str | None = N
     return {dates[i + 1]: float(ret[i]) for i in range(len(ret)) if np.isfinite(ret[i])}
 
 
-def _olsBeta(stock_dates: list[str], stock_ret: np.ndarray, bench_ret: dict[str, float]) -> tuple[float | None, int]:
-    pairs = [(float(r), bench_ret[d]) for d, r in zip(stock_dates, stock_ret) if d in bench_ret and np.isfinite(r)]
+def _olsBeta(stockDates: list[str], stockRet: np.ndarray, benchRet: dict[str, float]) -> tuple[float | None, int]:
+    pairs = [(float(r), benchRet[d]) for d, r in zip(stockDates, stockRet) if d in benchRet and np.isfinite(r)]
     if len(pairs) < 60:
         return None, len(pairs)
     y = np.asarray([p[0] for p in pairs], dtype=np.float64)
@@ -152,11 +152,11 @@ def calcBAB(
         bm_key = (bm_meta["indexMarket"], bm_meta["indexName"])
         if bm_key not in bench_maps:
             bench_maps[bm_key] = _benchmarkReturns(bm_key[0], start, indexName=bm_key[1])
-        bench_ret = bench_maps.get(bm_key, {})
-        beta, n_obs = _olsBeta(d_beta, r_beta, bench_ret or {})
+        benchRet = bench_maps.get(bm_key, {})
+        beta, nObs = _olsBeta(d_beta, r_beta, benchRet or {})
         if beta is not None and np.isfinite(beta):
             beta_scores[code] = float(beta)
-            obs[code] = int(n_obs)
+            obs[code] = int(nObs)
             benchmark_used[code] = bm_meta
 
         if len(ret) >= min(30, volWindow):

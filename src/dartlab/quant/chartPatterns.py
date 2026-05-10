@@ -14,7 +14,7 @@ import numpy as np
 
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays, resolve_market
-from dartlab.quant.pattern import _find_pivots
+from dartlab.quant.pattern import _findPivots
 
 
 @dataclass(frozen=True)
@@ -463,7 +463,7 @@ def detectChartPatterns(
     low: np.ndarray,
     close: np.ndarray,
     dates: list,
-    pivot_threshold: float = 0.05,
+    pivotThreshold: float = 0.05,
 ) -> list[ChartPattern]:
     """모든 거시 차트 패턴을 한 번에 탐지.
 
@@ -488,7 +488,7 @@ def detectChartPatterns(
     if len(close) < 30:
         return []
 
-    pivots = _find_pivots(high, low, threshold=pivot_threshold)
+    pivots = _findPivots(high, low, threshold=pivotThreshold)
     detected: list[ChartPattern] = []
 
     detectors = [

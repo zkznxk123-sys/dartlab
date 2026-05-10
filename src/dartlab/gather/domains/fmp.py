@@ -9,7 +9,7 @@ import logging
 import os
 from datetime import datetime, timezone
 
-from ..marketConfig import resolve_ticker
+from ..marketConfig import resolveTicker
 from ..types import GatherError, PriceSnapshot
 
 log = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 _BASE = "https://financialmodelingprep.com/api/v3"
 
 
-def _get_api_key() -> str | None:
+def _getApiKey() -> str | None:
     """환경변수에서 FMP API 키를 조회.
 
     Returns
@@ -28,7 +28,7 @@ def _get_api_key() -> str | None:
     return os.environ.get("FMP_API_KEY")
 
 
-async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSnapshot | None:
+async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnapshot | None:
     """현재가 — FMP /quote/{ticker}.
 
     Parameters
@@ -57,11 +57,11 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
 
         API 키 미설정이거나 조회 실패 시 None.
     """
-    key = _get_api_key()
+    key = _getApiKey()
     if not key:
         return None  # 키 없으면 skip
 
-    ticker = resolve_ticker(stock_code, market, "fmp")
+    ticker = resolveTicker(stockCode, market, "fmp")
 
     try:
         resp = await client.get(
@@ -91,7 +91,7 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
         high_52w=q.get("yearHigh", 0.0),
         low_52w=q.get("yearLow", 0.0),
         volume=q.get("volume", 0),
-        market_cap=q.get("marketCap", 0.0),
+        marketCap=q.get("marketCap", 0.0),
         per=q.get("pe") if q.get("pe") else None,
         pbr=None,
         dividend_yield=None,
@@ -103,8 +103,8 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
     )
 
 
-async def fetch_history(
-    stock_code: str,
+async def fetchHistory(
+    stockCode: str,
     client,
     *,
     start: str,
@@ -140,11 +140,11 @@ async def fetch_history(
 
         API 키 미설정이거나 조회 실패 시 빈 리스트.
     """
-    key = _get_api_key()
+    key = _getApiKey()
     if not key:
         return []
 
-    ticker = resolve_ticker(stock_code, market, "fmp")
+    ticker = resolveTicker(stockCode, market, "fmp")
 
     try:
         resp = await client.get(
@@ -180,7 +180,7 @@ async def fetch_history(
 
 
 async def fetchDividends(
-    stock_code: str,
+    stockCode: str,
     client,
     *,
     market: str = "US",
@@ -206,11 +206,11 @@ async def fetchDividends(
 
         API 키 미설정이거나 조회 실패 시 빈 리스트.
     """
-    key = _get_api_key()
+    key = _getApiKey()
     if not key:
         return []
 
-    ticker = resolve_ticker(stock_code, market, "fmp")
+    ticker = resolveTicker(stockCode, market, "fmp")
     try:
         resp = await client.get(
             f"{_BASE}/historical-price-full/stock_dividend/{ticker}",
@@ -235,7 +235,7 @@ async def fetchDividends(
 
 
 async def fetchSplits(
-    stock_code: str,
+    stockCode: str,
     client,
     *,
     market: str = "US",
@@ -262,11 +262,11 @@ async def fetchSplits(
 
         API 키 미설정이거나 조회 실패 시 빈 리스트.
     """
-    key = _get_api_key()
+    key = _getApiKey()
     if not key:
         return []
 
-    ticker = resolve_ticker(stock_code, market, "fmp")
+    ticker = resolveTicker(stockCode, market, "fmp")
     try:
         resp = await client.get(
             f"{_BASE}/historical-price-full/stock_split/{ticker}",

@@ -26,7 +26,7 @@ _log = getLogger(__name__)
 import polars as pl
 
 from dartlab.core.docs.diff import DiffResult, sectionsDiff
-from dartlab.scan.watch.scorer import ScoredChange, score_changes, scored_to_dataframe
+from dartlab.scan.watch.scorer import ScoredChange, scoreChanges, scoredToDataframe
 
 
 @dataclass
@@ -45,9 +45,9 @@ class ScanResult:
             return 0.0
         return self.scored[0].score
 
-    def to_dataframe(self) -> pl.DataFrame:
+    def toDataframe(self) -> pl.DataFrame:
         """스코어링 결과를 DataFrame으로."""
-        df = scored_to_dataframe(self.scored)
+        df = scoredToDataframe(self.scored)
         if df.height > 0:
             df = df.with_columns(
                 pl.lit(self.stockCode).alias("stockCode"),
@@ -56,7 +56,7 @@ class ScanResult:
         return df
 
 
-def scan_company(
+def scanCompany(
     company: object,
     *,
     topic: str | None = None,
@@ -79,24 +79,24 @@ def scan_company(
         if docs_sections.height == 0:
             return None
 
-    diff_result = sectionsDiff(docs_sections)
-    if not diff_result.summaries:
+    diffResult = sectionsDiff(docs_sections)
+    if not diffResult.summaries:
         return None
 
-    scored = score_changes(diff_result, sections=docs_sections)
+    scored = scoreChanges(diffResult, sections=docs_sections)
 
-    stock_code = getattr(company, "stockCode", "")
-    corp_name = getattr(company, "corpName", None)
+    stockCode = getattr(company, "stockCode", "")
+    corpName = getattr(company, "corpName", None)
 
     return ScanResult(
-        stockCode=stock_code,
-        corpName=corp_name,
-        diffResult=diff_result,
+        stockCode=stockCode,
+        corpName=corpName,
+        diffResult=diffResult,
         scored=scored,
     )
 
 
-def _list_local_docs() -> list[str]:
+def _listLocalDocs() -> list[str]:
     """로컬에 다운로드된 docs parquet 종목코드 목록.
 
     Returns
@@ -113,12 +113,12 @@ def _list_local_docs() -> list[str]:
     return sorted(p.stem for p in docs_dir.glob("*.parquet"))
 
 
-def scan_market(
+def scanMarket(
     *,
     sector: str | None = None,
-    top_n: int = 20,
-    min_score: float = 10.0,
-    stock_codes: list[str] | None = None,
+    topN: int = 20,
+    minScore: float = 10.0,
+    stockCodes: list[str] | None = None,
     verbose: bool = False,
 ) -> pl.DataFrame:
     """시장 전체 또는 섹터별 변화 감지 스캔.
@@ -136,10 +136,10 @@ def scan_market(
     Returns:
         stockCode, corpName, topic, score, changeRate, reason 등 컬럼의 DataFrame.
     """
-    if stock_codes is None:
-        codes = _list_local_docs()
+    if stockCodes is None:
+        codes = _listLocalDocs()
     else:
-        codes = list(stock_codes)
+        codes = list(stockCodes)
 
     if not codes:
         from dartlab.core.messaging import emit
@@ -159,7 +159,7 @@ def scan_market(
         )
 
     # 섹터 필터링 — industry classifier 는 lazy importlib (scan 이 industry 직접 import 안 함, 단방향 정책).
-    if sector is not None and stock_codes is None:
+    if sector is not None and stockCodes is None:
         classifier = None
         try:
             import importlib
@@ -167,7 +167,7 @@ def scan_market(
             classifier = getattr(importlib.import_module("dartlab.industry"), "classify", None)
         except ImportError:
             pass
-        codes = _filter_by_sector(codes, sector, classifier=classifier)
+        codes = _filterBySector(codes, sector, classifier=classifier)
 
     from dartlab.providers.dart.company import Company as DartCompany
 
@@ -177,9 +177,9 @@ def scan_market(
     for code in codes:
         try:
             c = DartCompany(code)
-            result = scan_company(c)
+            result = scanCompany(c)
             if result is not None and result.scored:
-                df = result.to_dataframe()
+                df = result.toDataframe()
                 if df.height > 0:
                     frames.append(df)
             scanned += 1
@@ -203,8 +203,8 @@ def scan_market(
         )
 
     combined = pl.concat(frames, how="diagonal_relaxed")
-    combined = combined.filter(pl.col("score") >= min_score)
-    combined = combined.sort("score", descending=True).head(top_n)
+    combined = combined.filter(pl.col("score") >= minScore)
+    combined = combined.sort("score", descending=True).head(topN)
 
     if verbose:
         _log.info(f"[watch] 스캔 완료: {scanned}개 기업, {combined.height}개 변화 감지")
@@ -212,7 +212,7 @@ def scan_market(
     return combined
 
 
-def _filter_by_sector(codes: list[str], sector: str, *, classifier=None) -> list[str]:
+def _filterBySector(codes: list[str], sector: str, *, classifier=None) -> list[str]:
     """종목코드 목록에서 특정 섹터에 해당하는 것만 필터.
 
     classifier: name → SectorInfo callable (예: industry.classify). 호출자가 주입.

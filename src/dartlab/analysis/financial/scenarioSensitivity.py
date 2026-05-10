@@ -15,10 +15,10 @@ dict
 
 from __future__ import annotations
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 
 
-@memoized_calc
+@memoizedCalc
 def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict | None:
     """핵심 지표 3-shock 민감도 분석.
 
@@ -61,23 +61,23 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
 
     col = yCols[0]
 
-    def _get(row_key: str) -> float | None:
+    def _get(rowKey: str) -> float | None:
         """IS 데이터에서 최신 기간 값 추출."""
-        v = isData.get(row_key, {}).get(col)
+        v = isData.get(rowKey, {}).get(col)
         return float(v) if v is not None else None
 
     revenue = _get("sales")
-    op_income = _get("operating_income")
+    opIncome = _get("operating_income")
     ni = _get("net_profit")
     # 이자비용 다중 키 fallback
     interest = _get("interest_expense") or _get("finance_cost")
-    if interest is None and op_income is not None and ni is not None:
-        interest = op_income - ni  # 조세+이자 합산 근사
+    if interest is None and opIncome is not None and ni is not None:
+        interest = opIncome - ni  # 조세+이자 합산 근사
 
-    if revenue is None or op_income is None:
+    if revenue is None or opIncome is None:
         return None
 
-    opm = op_income / revenue * 100 if revenue else None
+    opm = opIncome / revenue * 100 if revenue else None
 
     bs_parsed = toDictBySnakeId(company.select("BS", ["total_equity", "total_liabilities"]))
     equity = None
@@ -96,8 +96,8 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
 
     roe = ni / equity * 100 if ni and equity and equity > 0 else None
     debt_ratio = debt_total / equity * 100 if debt_total and equity and equity > 0 else None
-    interest_abs = abs(float(interest)) if interest else 0
-    ic = op_income / interest_abs if interest_abs > 0 else None
+    interestAbs = abs(float(interest)) if interest else 0
+    ic = opIncome / interestAbs if interestAbs > 0 else None
 
     cf_parsed = toDictBySnakeId(
         company.select("CF", ["operating_cashflow", "purchase_of_property_plant_and_equipment"])
@@ -121,9 +121,9 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
         "fcf": fcf,
         # 내부 값 (calcImprovementLevers에서 재사용)
         "_revenue": revenue,
-        "_op_income": op_income,
+        "_op_income": opIncome,
         "_equity": equity,
-        "_interest_abs": interest_abs,
+        "_interest_abs": interestAbs,
         "_cash": None,  # 추후 BS에서 채움
     }
 
@@ -133,43 +133,43 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
     if opm is not None and revenue:
         shocked_opm = opm - 5
         shocked_op = revenue * shocked_opm / 100
-        shocked_ni_est = shocked_op - interest_abs if interest_abs else shocked_op * 0.75
+        shocked_ni_est = shocked_op - interestAbs if interestAbs else shocked_op * 0.75
         shocked_roe = shocked_ni_est / equity * 100 if equity and equity > 0 else None
-        shocked_ic = shocked_op / interest_abs if interest_abs > 0 else None
+        shocked_ic = shocked_op / interestAbs if interestAbs > 0 else None
         shocks["opm_minus_5pp"] = {
             "opm": round(shocked_opm, 1),
             "roe": round(shocked_roe, 1) if shocked_roe else None,
             "interestCoverage": round(shocked_ic, 1) if shocked_ic else None,
-            "verdict": _verdict_opm(shocked_opm, shocked_ic),
+            "verdict": _verdictOpm(shocked_opm, shocked_ic),
         }
 
     # Shock 2: Revenue -15%
     if revenue and opm is not None:
         shocked_rev = revenue * 0.85
         shocked_op2 = shocked_rev * opm / 100
-        shocked_ni2 = shocked_op2 - interest_abs if interest_abs else shocked_op2 * 0.75
+        shocked_ni2 = shocked_op2 - interestAbs if interestAbs else shocked_op2 * 0.75
         shocked_roe2 = shocked_ni2 / equity * 100 if equity and equity > 0 else None
-        shocked_ic2 = shocked_op2 / interest_abs if interest_abs > 0 else None
+        shocked_ic2 = shocked_op2 / interestAbs if interestAbs > 0 else None
         shocks["revenue_minus_15pct"] = {
             "revenue_change": "-15%",
             "opm": round(opm, 1),
             "roe": round(shocked_roe2, 1) if shocked_roe2 else None,
             "interestCoverage": round(shocked_ic2, 1) if shocked_ic2 else None,
-            "verdict": _verdict_rev(shocked_ic2),
+            "verdict": _verdictRev(shocked_ic2),
         }
 
     # Shock 3: Interest +2%p (금리 인상 → 이자비용 증가)
-    if interest_abs > 0 and debt_total and debt_total > 0:
+    if interestAbs > 0 and debt_total and debt_total > 0:
         additional_interest = debt_total * 0.02
-        shocked_interest = interest_abs + additional_interest
-        shocked_ic3 = op_income / shocked_interest if shocked_interest > 0 else None
-        shocked_ni3 = op_income - shocked_interest
+        shocked_interest = interestAbs + additional_interest
+        shocked_ic3 = opIncome / shocked_interest if shocked_interest > 0 else None
+        shocked_ni3 = opIncome - shocked_interest
         shocked_roe3 = shocked_ni3 / equity * 100 if equity and equity > 0 else None
         shocks["interest_plus_2pp"] = {
             "additionalInterest": round(additional_interest),
             "interestCoverage": round(shocked_ic3, 1) if shocked_ic3 else None,
             "roe": round(shocked_roe3, 1) if shocked_roe3 else None,
-            "verdict": _verdict_rate(shocked_ic3),
+            "verdict": _verdictRate(shocked_ic3),
         }
 
     # 핵심 가정
@@ -183,8 +183,8 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
 
     # Breakdown point (OPM)
     breakdown = None
-    if revenue and interest_abs > 0:
-        bp_opm = interest_abs / revenue * 100
+    if revenue and interestAbs > 0:
+        bp_opm = interestAbs / revenue * 100
         safety = opm - bp_opm if opm else None
         breakdown = {
             "metric": "opm",
@@ -228,9 +228,9 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
         return None
 
     revenue = base.get("_revenue")
-    op_income = base.get("_op_income")
+    opIncome = base.get("_op_income")
     equity = base.get("_equity")
-    interest_abs = base.get("_interest_abs", 0)
+    interestAbs = base.get("_interest_abs", 0)
     fcf = base.get("fcf")
     opm = base.get("opm")
     roe = base.get("roe")
@@ -248,9 +248,9 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
     if opm is not None:
         improved_opm = opm + 3
         improved_op = revenue * improved_opm / 100
-        improved_ni = improved_op - interest_abs if interest_abs else improved_op * 0.75
+        improved_ni = improved_op - interestAbs if interestAbs else improved_op * 0.75
         improved_roe = improved_ni / equity * 100 if equity and equity > 0 else None
-        fcf_change = ((improved_op - op_income) / abs(fcf) * 100) if fcf and fcf != 0 else None
+        fcf_change = ((improved_op - opIncome) / abs(fcf) * 100) if fcf and fcf != 0 else None
         levers.append(
             {
                 "name": "매출원가 3%p 절감",
@@ -270,9 +270,9 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
     if opm is not None:
         improved_opm2 = opm + 2
         improved_op2 = revenue * improved_opm2 / 100
-        improved_ni2 = improved_op2 - interest_abs if interest_abs else improved_op2 * 0.75
+        improved_ni2 = improved_op2 - interestAbs if interestAbs else improved_op2 * 0.75
         improved_roe2 = improved_ni2 / equity * 100 if equity and equity > 0 else None
-        fcf_change2 = ((improved_op2 - op_income) / abs(fcf) * 100) if fcf and fcf != 0 else None
+        fcf_change2 = ((improved_op2 - opIncome) / abs(fcf) * 100) if fcf and fcf != 0 else None
         levers.append(
             {
                 "name": "판관비 2%p 절감",
@@ -295,7 +295,7 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
         variable_cost = revenue * (1 - opm / 100)
         grown_op = grown_rev - variable_cost * 1.10  # 변동비 비례 증가
         grown_opm = grown_op / grown_rev * 100
-        grown_ni = grown_op - interest_abs if interest_abs else grown_op * 0.75
+        grown_ni = grown_op - interestAbs if interestAbs else grown_op * 0.75
         grown_roe = grown_ni / equity * 100 if equity and equity > 0 else None
         levers.append(
             {
@@ -312,10 +312,10 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
         )
 
     # 레버 4: 부채 30% 감축
-    if interest_abs > 0 and op_income:
-        reduced_interest = interest_abs * 0.70
-        improved_ic = op_income / reduced_interest if reduced_interest > 0 else None
-        saved = interest_abs - reduced_interest
+    if interestAbs > 0 and opIncome:
+        reduced_interest = interestAbs * 0.70
+        improved_ic = opIncome / reduced_interest if reduced_interest > 0 else None
+        saved = interestAbs - reduced_interest
         levers.append(
             {
                 "name": "부채 30% 감축",
@@ -331,7 +331,7 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
         )
 
     # ── 기업유형별 특수 레버 (storyTemplate 연동) ──
-    situational = _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, interest_abs)
+    situational = _situationalLevers(company, base, revenue, opIncome, opm, fcf, equity, interestAbs)
     levers.extend(situational)
 
     # 영향도 순 정렬
@@ -356,13 +356,13 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
     }
 
 
-def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, interest_abs) -> list[dict]:
+def _situationalLevers(company, base, revenue, opIncome, opm, fcf, equity, interestAbs) -> list[dict]:
     """기업 상태에 따른 특수 레버 — 7종 유형별 분기."""
     levers: list[dict] = []
 
     # ── 적자 기업: 흑자 전환 breakeven ──
     if opm is not None and opm < 0 and revenue:
-        breakeven_rev = interest_abs / 0.05 if interest_abs > 0 else abs(op_income) / 0.10  # OPM 5% 가정
+        breakeven_rev = interestAbs / 0.05 if interestAbs > 0 else abs(opIncome) / 0.10  # OPM 5% 가정
         growth_needed = (breakeven_rev - revenue) / revenue * 100 if revenue > 0 else None
         levers.append(
             {
@@ -432,8 +432,8 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
             )
 
     # ── 사이클 기업: 다운턴 방어 OPM ──
-    if opm is not None and opm > 10 and interest_abs > 0 and revenue:
-        min_opm = interest_abs / revenue * 100  # 이자비용 감당 최소 OPM
+    if opm is not None and opm > 10 and interestAbs > 0 and revenue:
+        min_opm = interestAbs / revenue * 100  # 이자비용 감당 최소 OPM
         buffer = opm - min_opm
         if buffer < 10:
             levers.append(
@@ -480,7 +480,7 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
     return levers
 
 
-def _verdict_opm(opm: float, ic: float | None) -> str:
+def _verdictOpm(opm: float, ic: float | None) -> str:
     """OPM shock 후 위험 판단문 반환.
 
     Returns
@@ -497,7 +497,7 @@ def _verdict_opm(opm: float, ic: float | None) -> str:
     return "감내 가능"
 
 
-def _verdict_rev(ic: float | None) -> str:
+def _verdictRev(ic: float | None) -> str:
     """매출 shock 후 위험 판단문 반환.
 
     Returns
@@ -510,7 +510,7 @@ def _verdict_rev(ic: float | None) -> str:
     return "감내 가능"
 
 
-def _verdict_rate(ic: float | None) -> str:
+def _verdictRate(ic: float | None) -> str:
     """금리 shock 후 위험 판단문 반환.
 
     Returns

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 
-def detect_provider() -> str:
+def detectProvider() -> str:
     """Return the first available provider (smart detection)."""
-    from dartlab.ai.settings.detect import auto_detect_provider
+    from dartlab.ai.settings.detect import autoDetectProvider
 
-    return auto_detect_provider() or "ollama"
+    return autoDetectProvider() or "ollama"

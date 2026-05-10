@@ -68,5 +68,5 @@ from dartlab.quant._helpers import _deprecatedAlias as _dep
 
 get_arrays = _dep(getArrays, "get_arrays")
 is_kr = _dep(isKr, "is_kr")
-stock_code = _dep(getStockCode, "stock_code")
+stockCode = _dep(getStockCode, "stock_code")
 safe_quantile = _dep(safeQuantile, "safe_quantile")

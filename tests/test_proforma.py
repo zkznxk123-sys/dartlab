@@ -9,14 +9,14 @@ import pytest
 
 from dartlab.analysis.financial.proforma import (
     ProFormaResult,
-    _extract_base_year,
+    _extractBaseYear,
     _median,
-    _remove_outliers_iqr,
-    _safe_ratio_list,
-    _weighted_ratio,
-    build_proforma,
-    compute_company_wacc,
-    extract_historical_ratios,
+    _removeOutliersIqr,
+    _safeRatioList,
+    _weightedRatio,
+    buildProforma,
+    computeCompanyWacc,
+    extractHistoricalRatios,
 )
 from dartlab.analysis.forecast.simulation import SectorElasticity
 
@@ -85,16 +85,16 @@ class TestMedian:
 
 class TestSafeRatioList:
     def test_basic(self):
-        result = _safe_ratio_list([30, 60], [100, 200])
+        result = _safeRatioList([30, 60], [100, 200])
         assert result == [30.0, 30.0]
 
     def test_zero_denominator(self):
-        result = _safe_ratio_list([30, 60], [0, 200])
+        result = _safeRatioList([30, 60], [0, 200])
         assert len(result) == 1
         assert result[0] == 30.0
 
     def test_no_pct(self):
-        result = _safe_ratio_list([10], [100], pct=False)
+        result = _safeRatioList([10], [100], pct=False)
         assert result == [0.1]
 
 
@@ -104,7 +104,7 @@ class TestSafeRatioList:
 class TestExtractHistoricalRatios:
     @pytest.mark.unit
     def test_basic_extraction(self):
-        ratios = extract_historical_ratios(SERIES, years=5)
+        ratios = extractHistoricalRatios(SERIES, years=5)
 
         # 매출총이익률 = 75/250=30%, 90/300=30% → 중위 30%
         assert 29 < ratios.gross_margin < 31
@@ -127,7 +127,7 @@ class TestExtractHistoricalRatios:
     @pytest.mark.unit
     def test_missing_data_uses_defaults(self):
         empty = {"IS": {}, "CF": {}, "BS": {}}
-        ratios = extract_historical_ratios(empty, years=5)
+        ratios = extractHistoricalRatios(empty, years=5)
         # 기본값 사용
         assert ratios.gross_margin == 30.0
         assert ratios.sga_ratio == 15.0
@@ -139,7 +139,7 @@ class TestExtractHistoricalRatios:
 
     @pytest.mark.unit
     def test_repr(self):
-        ratios = extract_historical_ratios(SERIES)
+        ratios = extractHistoricalRatios(SERIES)
         text = repr(ratios)
         assert "과거 비율 분석" in text
         assert "매출총이익률" in text
@@ -151,7 +151,7 @@ class TestExtractHistoricalRatios:
 class TestComputeWACC:
     @pytest.mark.unit
     def test_basic_wacc(self):
-        wacc, details = compute_company_wacc(SERIES)
+        wacc, details = computeCompanyWacc(SERIES)
         # WACC = 5~20% 범위 내
         assert 5.0 <= wacc <= 20.0
         assert "ke" in details
@@ -173,15 +173,15 @@ class TestComputeWACC:
                 "total_stockholders_equity": SERIES["BS"]["total_stockholders_equity"],
             },
         }
-        wacc, details = compute_company_wacc(no_debt)
+        wacc, details = computeCompanyWacc(no_debt)
         # 부채 없으면 equity 100%, WACC ≈ Ke
         assert details["debt_weight"] < 1.0
         assert details["equity_weight"] > 99.0
 
     @pytest.mark.unit
     def test_with_market_cap(self):
-        wacc1, _ = compute_company_wacc(SERIES)
-        wacc2, details2 = compute_company_wacc(SERIES, market_cap=5000)
+        wacc1, _ = computeCompanyWacc(SERIES)
+        wacc2, details2 = computeCompanyWacc(SERIES, marketCap=5000)
         # 시가총액이 장부가보다 크면 equity weight 증가 → WACC 변화
         assert isinstance(wacc2, float)
         assert details2["equity_value"] == 5000
@@ -193,7 +193,7 @@ class TestComputeWACC:
 class TestExtractBaseYear:
     @pytest.mark.unit
     def test_basic(self):
-        base = _extract_base_year(SERIES)
+        base = _extractBaseYear(SERIES)
         # TTM 매출 = 300*4 = 1200
         assert base["revenue"] == 1200
         # 최신 현금 = 120
@@ -205,7 +205,7 @@ class TestExtractBaseYear:
 
     @pytest.mark.unit
     def test_empty_series(self):
-        base = _extract_base_year(EMPTY_SERIES)
+        base = _extractBaseYear(EMPTY_SERIES)
         assert base["revenue"] == 0
 
 
@@ -215,14 +215,14 @@ class TestExtractBaseYear:
 class TestBuildProforma:
     @pytest.mark.unit
     def test_basic_build(self):
-        result = build_proforma(SERIES, revenue_growth_path=[5.0, 4.0, 3.0])
+        result = buildProforma(SERIES, revenueGrowthPath=[5.0, 4.0, 3.0])
         assert isinstance(result, ProFormaResult)
         assert len(result.projections) == 3
-        assert result.scenario_name == "base"
+        assert result.scenarioName == "base"
 
     @pytest.mark.unit
     def test_revenue_growth(self):
-        result = build_proforma(SERIES, revenue_growth_path=[10.0, 10.0])
+        result = buildProforma(SERIES, revenueGrowthPath=[10.0, 10.0])
         p1, p2 = result.projections
         base_rev = result.base_year["revenue"]
         assert abs(p1.revenue - base_rev * 1.1) < 1
@@ -230,7 +230,7 @@ class TestBuildProforma:
 
     @pytest.mark.unit
     def test_zero_growth(self):
-        result = build_proforma(SERIES, revenue_growth_path=[0.0, 0.0])
+        result = buildProforma(SERIES, revenueGrowthPath=[0.0, 0.0])
         p1, p2 = result.projections
         base_rev = result.base_year["revenue"]
         assert abs(p1.revenue - base_rev) < 1
@@ -239,7 +239,7 @@ class TestBuildProforma:
     @pytest.mark.unit
     def test_bs_balance(self):
         """BS 항등식: 총자산 = 총부채 + 총자본."""
-        result = build_proforma(SERIES, revenue_growth_path=[5.0, 4.0, 3.0, 2.0, 1.0])
+        result = buildProforma(SERIES, revenueGrowthPath=[5.0, 4.0, 3.0, 2.0, 1.0])
         for p in result.projections:
             assert p.bs_balanced, (
                 f"+{p.year_offset}년 BS 불균형: {p.total_assets} != {p.total_liabilities} + {p.total_equity}"
@@ -250,7 +250,7 @@ class TestBuildProforma:
     @pytest.mark.unit
     def test_cf_consistency(self):
         """CF: delta_cash ≈ OCF + ICF + FinCF (plug 방식이라 정확하지 않을 수 있지만 방향 확인)."""
-        result = build_proforma(SERIES, revenue_growth_path=[5.0, 3.0])
+        result = buildProforma(SERIES, revenueGrowthPath=[5.0, 3.0])
         for p in result.projections:
             # OCF + CAPEX + FinCF = net_cash_change
             computed = p.ocf + p.capex + p.financing_cf
@@ -261,7 +261,7 @@ class TestBuildProforma:
     @pytest.mark.unit
     def test_is_consistency(self):
         """IS 항등식: gross_profit = revenue - cogs, ebt = oi - interest."""
-        result = build_proforma(SERIES, revenue_growth_path=[5.0])
+        result = buildProforma(SERIES, revenueGrowthPath=[5.0])
         p = result.projections[0]
         assert abs(p.gross_profit - (p.revenue - p.cogs)) < 1
         assert abs(p.ebt - (p.operating_income - p.interest_expense)) < 1
@@ -270,22 +270,22 @@ class TestBuildProforma:
 
     @pytest.mark.unit
     def test_zero_revenue_returns_empty(self):
-        result = build_proforma(EMPTY_SERIES, revenue_growth_path=[5.0])
+        result = buildProforma(EMPTY_SERIES, revenueGrowthPath=[5.0])
         assert len(result.projections) == 0
         assert any("매출이 0" in w for w in result.warnings)
 
     @pytest.mark.unit
     def test_negative_growth(self):
-        result = build_proforma(SERIES, revenue_growth_path=[-10.0, -5.0])
+        result = buildProforma(SERIES, revenueGrowthPath=[-10.0, -5.0])
         p1 = result.projections[0]
         base_rev = result.base_year["revenue"]
         assert p1.revenue < base_rev
 
     @pytest.mark.unit
     def test_overrides(self):
-        result = build_proforma(
+        result = buildProforma(
             SERIES,
-            revenue_growth_path=[5.0],
+            revenueGrowthPath=[5.0],
             overrides={"gross_margin": 50.0},
         )
         p = result.projections[0]
@@ -294,7 +294,7 @@ class TestBuildProforma:
 
     @pytest.mark.unit
     def test_repr(self):
-        result = build_proforma(SERIES, revenue_growth_path=[5.0, 4.0])
+        result = buildProforma(SERIES, revenueGrowthPath=[5.0, 4.0])
         text = repr(result)
         assert "Pro-Forma" in text
         assert "손익계산서" in text
@@ -304,14 +304,14 @@ class TestBuildProforma:
     @pytest.mark.unit
     def test_fcf_sign(self):
         """FCF = OCF + CAPEX (CAPEX 음수) → OCF > |CAPEX| 이면 FCF 양수."""
-        result = build_proforma(SERIES, revenue_growth_path=[5.0])
+        result = buildProforma(SERIES, revenueGrowthPath=[5.0])
         p = result.projections[0]
         assert p.capex < 0  # CAPEX는 음수
         assert p.fcf == p.ocf + p.capex
 
     @pytest.mark.unit
     def test_wacc_in_result(self):
-        result = build_proforma(SERIES, revenue_growth_path=[5.0])
+        result = buildProforma(SERIES, revenueGrowthPath=[5.0])
         assert 5.0 <= result.wacc <= 20.0
         assert "ke" in result.wacc_details
 
@@ -322,17 +322,17 @@ class TestBuildProforma:
 class TestRemoveOutliersIQR:
     def test_no_outliers(self):
         data = [10.0, 11.0, 12.0, 13.0, 14.0]
-        assert _remove_outliers_iqr(data) == data
+        assert _removeOutliersIqr(data) == data
 
     def test_with_outlier(self):
         data = [10.0, 11.0, 12.0, 13.0, 100.0]
-        cleaned = _remove_outliers_iqr(data)
+        cleaned = _removeOutliersIqr(data)
         assert 100.0 not in cleaned
         assert len(cleaned) < len(data)
 
     def test_small_list_untouched(self):
         data = [1.0, 2.0, 3.0]
-        assert _remove_outliers_iqr(data) == data
+        assert _removeOutliersIqr(data) == data
 
 
 # ── v2: _weighted_ratio ───────────────────────────────────
@@ -340,22 +340,22 @@ class TestRemoveOutliersIQR:
 
 class TestWeightedRatio:
     def test_empty(self):
-        val, trend = _weighted_ratio([])
+        val, trend = _weightedRatio([])
         assert val == 0.0
         assert trend == 0.0
 
     def test_single(self):
-        val, trend = _weighted_ratio([42.0])
+        val, trend = _weightedRatio([42.0])
         assert val == 42.0
         assert trend == 0.0
 
     def test_constant_no_trend(self):
-        val, trend = _weighted_ratio([30.0, 30.0, 30.0, 30.0])
+        val, trend = _weightedRatio([30.0, 30.0, 30.0, 30.0])
         assert abs(val - 30.0) < 1.0
         assert abs(trend) < 0.1
 
     def test_upward_trend(self):
-        val, trend = _weighted_ratio([20.0, 22.0, 24.0, 26.0, 28.0])
+        val, trend = _weightedRatio([20.0, 22.0, 24.0, 26.0, 28.0])
         # 최근 가중 → 28에 가까움
         assert val > 24.0
         # 상승 트렌드
@@ -364,7 +364,7 @@ class TestWeightedRatio:
     def test_recent_weighted_higher(self):
         """최근 값이 높으면 가중 평균이 단순 중위값보다 높아야 함."""
         vals = [20.0, 22.0, 25.0, 28.0, 30.0]
-        weighted_val, _ = _weighted_ratio(vals)
+        weighted_val, _ = _weightedRatio(vals)
         simple_median = sorted(vals)[len(vals) // 2]
         assert weighted_val > simple_median
 
@@ -375,14 +375,14 @@ class TestWeightedRatio:
 class TestTrendInHistoricalRatios:
     @pytest.mark.unit
     def test_trends_populated(self):
-        ratios = extract_historical_ratios(SERIES)
+        ratios = extractHistoricalRatios(SERIES)
         assert isinstance(ratios.trends, dict)
         # 최소한 gross_margin 트렌드가 있어야 함
         assert "gross_margin" in ratios.trends
 
     @pytest.mark.unit
     def test_trends_in_repr(self):
-        ratios = extract_historical_ratios(SERIES)
+        ratios = extractHistoricalRatios(SERIES)
         # SERIES는 비율 변동이 없으므로 트렌드 == 0 → repr에 안 나올 수 있음
         text = repr(ratios)
         assert "과거 비율 분석" in text
@@ -395,9 +395,9 @@ class TestAutoBorrowing:
     @pytest.mark.unit
     def test_auto_borrow_triggers(self):
         """극단적 CAPEX ratio 오버라이드 → 현금 음수 → 자동 차입."""
-        result = build_proforma(
+        result = buildProforma(
             SERIES,
-            revenue_growth_path=[5.0, 5.0],
+            revenueGrowthPath=[5.0, 5.0],
             overrides={"capex_to_revenue": 80.0},  # 매출의 80% CAPEX → 현금 부족 유발
         )
         # 자동 차입 경고가 있어야 함
@@ -414,7 +414,7 @@ class TestAutoBorrowing:
     @pytest.mark.unit
     def test_no_borrow_when_cash_positive(self):
         """정상 CAPEX면 자동 차입 없음."""
-        result = build_proforma(SERIES, revenue_growth_path=[5.0, 5.0])
+        result = buildProforma(SERIES, revenueGrowthPath=[5.0, 5.0])
         auto_borrow_warnings = [w for w in result.warnings if "자동 차입" in w]
         assert len(auto_borrow_warnings) == 0
 
@@ -429,8 +429,8 @@ class TestBetaWACC:
         low_beta = SectorElasticity(0.3, 0.1, 10, 0, "defensive")
         high_beta = SectorElasticity(1.8, 0.8, 50, 0, "high")
 
-        wacc_low, _ = compute_company_wacc(SERIES, sector_elasticity=low_beta)
-        wacc_high, _ = compute_company_wacc(SERIES, sector_elasticity=high_beta)
+        wacc_low, _ = computeCompanyWacc(SERIES, sectorElasticity=low_beta)
+        wacc_high, _ = computeCompanyWacc(SERIES, sectorElasticity=high_beta)
         assert wacc_high > wacc_low
 
     @pytest.mark.unit
@@ -441,10 +441,10 @@ class TestBetaWACC:
             discountRate = 15.0
             beta = 2.0
 
-        wacc, details = compute_company_wacc(
+        wacc, details = computeCompanyWacc(
             SERIES,
-            sector_params=MockParams(),
-            sector_elasticity=SectorElasticity(0.3, 0.1, 10, 0, "defensive"),
+            sectorParams=MockParams(),
+            sectorElasticity=SectorElasticity(0.3, 0.1, 10, 0, "defensive"),
         )
         # Ke = Rf(3.5) + beta(2.0) * totalErp(6.4) = 16.3
         assert details["beta"] == 2.0
@@ -531,32 +531,32 @@ class TestDepInSgaDetection:
     @pytest.mark.unit
     def test_dep_in_sga_detected(self):
         """GP - SGA ≈ OP → dep_in_sga = True."""
-        ratios = extract_historical_ratios(SERIES_DEP_IN_SGA)
+        ratios = extractHistoricalRatios(SERIES_DEP_IN_SGA)
         assert ratios.dep_in_sga is True
 
     @pytest.mark.unit
     def test_dep_separate_detected(self):
         """GP - SGA ≠ OP (차이 큼) → dep_in_sga = False."""
-        ratios = extract_historical_ratios(SERIES_DEP_SEPARATE)
+        ratios = extractHistoricalRatios(SERIES_DEP_SEPARATE)
         assert ratios.dep_in_sga is False
 
     @pytest.mark.unit
     def test_no_op_data_defaults_false(self):
         """operating_profit 데이터 없으면 dep_in_sga = False."""
-        ratios = extract_historical_ratios(SERIES)  # 기존 SERIES는 OP 없음
+        ratios = extractHistoricalRatios(SERIES)  # 기존 SERIES는 OP 없음
         assert ratios.dep_in_sga is False
 
     @pytest.mark.unit
     def test_dep_in_sga_warning(self):
         """dep_in_sga=True이면 경고 메시지 포함."""
-        ratios = extract_historical_ratios(SERIES_DEP_IN_SGA)
+        ratios = extractHistoricalRatios(SERIES_DEP_IN_SGA)
         has_warning = any("D&A가 SGA에 포함" in w for w in ratios.warnings)
         assert has_warning
 
     @pytest.mark.unit
     def test_dep_in_sga_repr(self):
         """dep_in_sga=True이면 repr에 '(D&A 포함)' 표시."""
-        ratios = extract_historical_ratios(SERIES_DEP_IN_SGA)
+        ratios = extractHistoricalRatios(SERIES_DEP_IN_SGA)
         text = repr(ratios)
         assert "D&A 포함" in text
 
@@ -565,8 +565,8 @@ class TestDepInSgaProforma:
     @pytest.mark.unit
     def test_dep_in_sga_higher_operating_income(self):
         """dep_in_sga=True이면 D&A를 별도 차감하지 않아 영업이익이 더 높음."""
-        result_sga = build_proforma(SERIES_DEP_IN_SGA, revenue_growth_path=[5.0, 5.0])
-        result_sep = build_proforma(SERIES_DEP_SEPARATE, revenue_growth_path=[5.0, 5.0])
+        result_sga = buildProforma(SERIES_DEP_IN_SGA, revenueGrowthPath=[5.0, 5.0])
+        result_sep = buildProforma(SERIES_DEP_SEPARATE, revenueGrowthPath=[5.0, 5.0])
 
         assert result_sga.historical_ratios.dep_in_sga is True
         assert result_sep.historical_ratios.dep_in_sga is False
@@ -579,7 +579,7 @@ class TestDepInSgaProforma:
     @pytest.mark.unit
     def test_dep_separate_deducts_depreciation(self):
         """dep_in_sga=False이면 D&A를 별도 차감."""
-        result = build_proforma(SERIES_DEP_SEPARATE, revenue_growth_path=[5.0, 5.0])
+        result = buildProforma(SERIES_DEP_SEPARATE, revenueGrowthPath=[5.0, 5.0])
         for p in result.projections:
             expected_oi = p.gross_profit - p.sga - p.depreciation
             assert abs(p.operating_income - expected_oi) < 1
@@ -588,7 +588,7 @@ class TestDepInSgaProforma:
     def test_ebitda_consistent_both_modes(self):
         """두 모드 모두 EBITDA = OP + D&A."""
         for series in [SERIES_DEP_IN_SGA, SERIES_DEP_SEPARATE]:
-            result = build_proforma(series, revenue_growth_path=[5.0])
+            result = buildProforma(series, revenueGrowthPath=[5.0])
             for p in result.projections:
                 assert abs(p.ebitda - (p.operating_income + p.depreciation)) < 1
 
@@ -596,6 +596,6 @@ class TestDepInSgaProforma:
     def test_bs_balanced_both_modes(self):
         """두 모드 모두 BS 균형 유지."""
         for series in [SERIES_DEP_IN_SGA, SERIES_DEP_SEPARATE]:
-            result = build_proforma(series, revenue_growth_path=[5.0, 5.0])
+            result = buildProforma(series, revenueGrowthPath=[5.0, 5.0])
             for p in result.projections:
                 assert p.bs_balanced

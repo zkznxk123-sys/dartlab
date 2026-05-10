@@ -13,7 +13,7 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 from typing import Any
 
 from dartlab.analysis.financial.accountSums import sumBorrowings
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import MAX_RATIO_YEARS, annualColsFromPeriods, toDictBySnakeId
 
 _MAX_YEARS = MAX_RATIO_YEARS
@@ -51,7 +51,7 @@ def _isFinancialSector(company) -> bool:
     return False
 
 
-@memoized_calc
+@memoizedCalc
 def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """이익 구조 시계열 -- 매출에서 순이익까지 금액과 마진.
 
@@ -161,19 +161,19 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
             for i in range(len(history) - 1):
                 cur = history[i]
                 prev = history[i + 1]
-                rev_t = cur.get("revenue")
+                revT = cur.get("revenue")
                 rev_t1 = prev.get("revenue")
-                cogs_t = cur.get("cogs")
+                cogsT = cur.get("cogs")
                 cogs_t1 = prev.get("cogs")
-                sga_t = cur.get("sga")
+                sgaT = cur.get("sga")
                 sga_t1 = prev.get("sga")
-                if all(isinstance(v, (int, float)) for v in (rev_t, rev_t1, cogs_t, cogs_t1, sga_t, sga_t1)):
+                if all(isinstance(v, (int, float)) for v in (revT, rev_t1, cogsT, cogs_t1, sgaT, sga_t1)):
                     attribution = decomposeMarginChange(
-                        revenueT=rev_t,
+                        revenueT=revT,
                         revenueT1=rev_t1,
-                        cogsT=cogs_t,
+                        cogsT=cogsT,
                         cogsT1=cogs_t1,
-                        sgaT=sga_t,
+                        sgaT=sgaT,
                         sgaT1=sga_t1,
                     )
                     cur["drivers"] = attribution.get("drivers") or []
@@ -200,7 +200,7 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
 # ── ROE 분해 (듀퐁 5요소) ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcReturnTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """ROE 구조 분해 -- 수익을 어떻게 만드는가.
 
@@ -286,7 +286,7 @@ def calcReturnTrend(company, *, basePeriod: str | None = None) -> dict | None:
 # ── 마진 워터폴 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | None:
     """매출 -> 순이익 마진 워터폴 분해.
 
@@ -425,7 +425,7 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
 # ── 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcProfitabilityFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """수익성 경고/기회 플래그.
 
@@ -506,7 +506,7 @@ def calcProfitabilityFlags(company, *, basePeriod: str | None = None) -> list[st
 # ── Penman RNOA + FLEV/SPREAD 분해 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict | None:
     """Penman 분해 -- ROE가 영업력인지 레버리지인지 분리.
 
@@ -651,7 +651,7 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
 # ── McKinsey ROIC Tree ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
     """McKinsey ROIC Tree — ROIC가 높은/낮은 이유를 원인까지 추적.
 

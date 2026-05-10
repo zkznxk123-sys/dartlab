@@ -10,7 +10,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def run_scenario(
+def runScenario(
     name: str,
     *,
     severity: str | None = None,
@@ -45,9 +45,9 @@ def run_scenario(
             type:str, severity:str, transmission:str, reference:str,
             outcome:str, overrides:dict)
     """
-    from .presets import get_scenario
+    from .presets import getScenario
 
-    preset = get_scenario(name, severity=severity, market=market)
+    preset = getScenario(name, severity=severity, market=market)
     if preset is None:
         msg = f"시나리오 '{name}'을 찾을 수 없습니다. dartlab.macro.scenario()로 목록을 확인하세요."
         raise ValueError(msg)
@@ -55,9 +55,9 @@ def run_scenario(
     overrides = preset["overrides"]
 
     # 시나리오 적용 실행
-    from dartlab.macro.summary import analyze_summary
+    from dartlab.macro.summary import analyzeSummary
 
-    scenario_result = analyze_summary(market=market, overrides=overrides)
+    scenario_result = analyzeSummary(market=market, overrides=overrides)
 
     result: dict = {
         "scenario": scenario_result,
@@ -75,14 +75,14 @@ def run_scenario(
 
     # baseline 비교
     if compare:
-        baseline_result = analyze_summary(market=market)
+        baseline_result = analyzeSummary(market=market)
         result["baseline"] = baseline_result
-        result["delta"] = _compute_delta(baseline_result, scenario_result)
+        result["delta"] = _computeDelta(baseline_result, scenario_result)
 
     return result
 
 
-def compare_scenarios(
+def compareScenarios(
     scenarios: list[str],
     *,
     severity: str | None = None,
@@ -121,14 +121,14 @@ def compare_scenarios(
             transmission : str — 전파 경로
             outcome : str — 예상 결과
     """
-    from dartlab.macro.summary import analyze_summary
+    from dartlab.macro.summary import analyzeSummary
 
-    baseline = analyze_summary(market=market)
+    baseline = analyzeSummary(market=market)
     results: dict[str, dict] = {}
 
     for name in scenarios:
         try:
-            r = run_scenario(name, severity=severity, market=market, compare=False)
+            r = runScenario(name, severity=severity, market=market, compare=False)
             results[name] = r
         except ValueError:
             log.warning("시나리오 '%s' 실행 실패", name)
@@ -166,7 +166,7 @@ def compare_scenarios(
     }
 
 
-def _compute_delta(baseline: dict, scenario: dict) -> dict:
+def _computeDelta(baseline: dict, scenario: dict) -> dict:
     """baseline vs scenario 주요 지표 변화량.
 
     Parameters

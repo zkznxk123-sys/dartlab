@@ -50,13 +50,13 @@ def calcVolume(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         obv_20 = obv[-20:]
         # OBV 선형회귀 기울기로 추세 판단
         x = np.arange(20, dtype=np.float64)
-        slope = _linreg_slope(x, obv_20)
+        slope = _linregSlope(x, obv_20)
         result["obvSlope"] = round(float(slope), 2)
         result["obvTrend"] = "상승" if slope > 0 else "하락"
 
         # OBV vs 가격 괴리
         price_20 = close[-20:]
-        price_slope = _linreg_slope(x, price_20)
+        price_slope = _linregSlope(x, price_20)
         if slope > 0 and price_slope < 0:
             result["obvDivergence"] = "bullish_divergence"
         elif slope < 0 and price_slope > 0:
@@ -71,7 +71,7 @@ def calcVolume(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     if len(adl) >= 20:
         adl_20 = adl[-20:]
         x = np.arange(20, dtype=np.float64)
-        adl_slope = _linreg_slope(x, adl_20)
+        adl_slope = _linregSlope(x, adl_20)
         result["adLineTrend"] = "누적" if adl_slope > 0 else "분배"
 
     # ── 거래량 이동평균 비율 ──
@@ -159,7 +159,7 @@ def calcVolume(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     return result
 
 
-def _linreg_slope(x: np.ndarray, y: np.ndarray) -> float:
+def _linregSlope(x: np.ndarray, y: np.ndarray) -> float:
     """단순 선형회귀 기울기."""
     n = len(x)
     if n < 2:

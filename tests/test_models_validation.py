@@ -111,7 +111,7 @@ class TestAiProfileUpdateRequest:
         assert req.temperature is None
 
     def test_with_values(self):
-        req = AiProfileUpdateRequest(provider="openai", temperature=0.7, max_tokens=4096)
+        req = AiProfileUpdateRequest(provider="openai", temperature=0.7, maxTokens=4096)
         assert req.temperature == 0.7
 
 
@@ -127,8 +127,8 @@ class TestAiSecretUpdateRequest:
 
 class TestDartKeyUpdateRequest:
     def test_basic(self):
-        req = DartKeyUpdateRequest(api_key="dart-test-key")
-        assert req.api_key == "dart-test-key"
+        req = DartKeyUpdateRequest(apiKey="dart-test-key")
+        assert req.apiKey == "dart-test-key"
 
 
 class TestTocModels:

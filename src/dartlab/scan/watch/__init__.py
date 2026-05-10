@@ -17,15 +17,15 @@ Bloomberg에 없는 기능: 서술형 공시 텍스트의 자동 변화 추적.
     dartlab.digest(sector="반도체")  # 섹터별
 """
 
-from dartlab.scan.watch.digest import build_digest
-from dartlab.scan.watch.scanner import scan_company, scan_market
-from dartlab.scan.watch.scorer import score_changes
+from dartlab.scan.watch.digest import buildDigest
+from dartlab.scan.watch.scanner import scanCompany, scanMarket
+from dartlab.scan.watch.scorer import scoreChanges
 
 
-def scanDigest(*, format: str = "dataframe", top_n: int = 30, **kwargs) -> object:
+def scanDigest(*, format: str = "dataframe", topN: int = 30, **kwargs) -> object:
     """시장 전체 공시 변화 다이제스트 (scan_market + build_digest 래핑)."""
-    df = scan_market(top_n=top_n, **kwargs)
-    return build_digest(df, format=format, top_n=top_n)
+    df = scanMarket(topN=topN, **kwargs)
+    return buildDigest(df, format=format, topN=topN)
 
 
 __all__ = ["scan_company", "scan_market", "score_changes", "build_digest", "scanDigest"]

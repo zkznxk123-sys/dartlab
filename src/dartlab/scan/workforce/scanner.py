@@ -7,14 +7,14 @@ from pathlib import Path
 import polars as pl
 
 from dartlab.scan._helpers import (
-    find_latest_year,
+    findLatestYear,
     parse_num,
-    pick_best_quarter,
-    scan_parquets,
+    pickBestQuarter,
+    scanParquets,
 )
 
 
-def scan_employee() -> dict[str, dict]:
+def scanEmployee() -> dict[str, dict]:
     """employee 공시에서 종목별 인력 현황을 추출한다.
 
     최신 연도 + 최적 분기(Q2) 기준. 급여는 직원수 가중평균.
@@ -29,14 +29,14 @@ def scan_employee() -> dict[str, dict]:
         - 남녀격차 : float | None — (남성평균 - 여성평균) / 남성평균 (%)
         - 근속_년 : float | None — 직원수 가중평균 근속연수 (년)
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "employee",
         ["stockCode", "year", "quarter", "sexdstn", "sm", "jan_salary_am", "avrg_cnwk_sdytrn"],
     )
     if raw.is_empty():
         return {}
 
-    latest_year = find_latest_year(raw, "jan_salary_am", 500)
+    latest_year = findLatestYear(raw, "jan_salary_am", 500)
     if latest_year is None:
         return {}
 
@@ -45,7 +45,7 @@ def scan_employee() -> dict[str, dict]:
 
     for code, group in sub.group_by("stockCode"):
         code_val = code[0]
-        qdf = pick_best_quarter(group)
+        qdf = pickBestQuarter(group)
 
         total_emp, total_wsum = 0, 0.0
         male_emp, male_wsum = 0, 0.0
@@ -100,7 +100,7 @@ def scan_employee() -> dict[str, dict]:
     return result
 
 
-def scan_total_payroll() -> dict[str, float]:
+def scanTotalPayroll() -> dict[str, float]:
     """employee 공시에서 종목별 연간 총급여를 추출한다.
 
     fyer_salary_totamt 합산 우선, 없으면 sm*jan_salary_am fallback.
@@ -113,14 +113,14 @@ def scan_total_payroll() -> dict[str, float]:
     """
     PAYROLL_QUARTER_ORDER = {"4분기": 1, "2분기": 2, "3분기": 3, "1분기": 4}
 
-    raw = scan_parquets(
+    raw = scanParquets(
         "employee",
         ["stockCode", "year", "quarter", "sm", "jan_salary_am", "fyer_salary_totamt"],
     )
     if raw.is_empty():
         return {}
 
-    latestYear = find_latest_year(raw, "jan_salary_am", 500)
+    latestYear = findLatestYear(raw, "jan_salary_am", 500)
     if latestYear is None:
         return {}
 
@@ -155,7 +155,7 @@ def scan_total_payroll() -> dict[str, float]:
     return result
 
 
-def scan_revenue_per_employee() -> dict[str, float]:
+def scanRevenuePerEmployee() -> dict[str, float]:
     """employee + finance IS에서 종목별 직원당 매출을 산출한다.
 
     scan/finance.parquet 프리빌드가 있으면 단일 파일에서 매출 추출,
@@ -166,7 +166,7 @@ def scan_revenue_per_employee() -> dict[str, float]:
     dict[str, float]
         {종목코드: 직원당 매출(억)}.
     """
-    emp_map = scan_employee()
+    emp_map = scanEmployee()
 
     REVENUE_IDS = {
         "Revenue",
@@ -186,18 +186,18 @@ def scan_revenue_per_employee() -> dict[str, float]:
 
     if scanPath.exists():
         try:
-            rev_map = _revenueFromMerged(scanPath, REVENUE_IDS, REVENUE_NMS)
+            revMap = _revenueFromMerged(scanPath, REVENUE_IDS, REVENUE_NMS)
         except (pl.exceptions.PolarsError, OSError):
-            rev_map = _revenueFallback(REVENUE_IDS, REVENUE_NMS)
+            revMap = _revenueFallback(REVENUE_IDS, REVENUE_NMS)
     else:
-        rev_map = _revenueFallback(REVENUE_IDS, REVENUE_NMS)
+        revMap = _revenueFallback(REVENUE_IDS, REVENUE_NMS)
 
     result: dict[str, float] = {}
     for code in emp_map:
-        if code in rev_map:
+        if code in revMap:
             emp_count = emp_map[code]["직원수"]
             if emp_count > 0:
-                result[code] = round(rev_map[code] / emp_count / 1e8, 1)
+                result[code] = round(revMap[code] / emp_count / 1e8, 1)
     return result
 
 
@@ -243,15 +243,15 @@ def _revenueFromMerged(scanPath: Path, revIds: set[str], revNms: set[str]) -> di
 
     matched = target.filter(pl.col("account_id").is_in(list(revIds)) | pl.col("account_nm").is_in(list(revNms)))
 
-    rev_map: dict[str, float] = {}
+    revMap: dict[str, float] = {}
     for row in matched.iter_rows(named=True):
         code = row.get(scCol, "")
         val = parse_num(row.get("thstrm_amount"))
-        if code and val and val > 0 and code not in rev_map:
-            rev_map[code] = val
+        if code and val and val > 0 and code not in revMap:
+            revMap[code] = val
 
     # 1차 매칭 실패 종목은 "매출" 포함 fallback
-    matchedCodes = set(rev_map.keys())
+    matchedCodes = set(revMap.keys())
     allCodes = set(target[scCol].unique().to_list())
     missingCodes = allCodes - matchedCodes
     if missingCodes:
@@ -261,10 +261,10 @@ def _revenueFromMerged(scanPath: Path, revIds: set[str], revNms: set[str]) -> di
         for row in fallbackRows.iter_rows(named=True):
             code = row.get(scCol, "")
             val = parse_num(row.get("thstrm_amount"))
-            if code and val and val > 0 and code not in rev_map:
-                rev_map[code] = val
+            if code and val and val > 0 and code not in revMap:
+                revMap[code] = val
 
-    return rev_map
+    return revMap
 
 
 def _revenueFallback(revIds: set[str], revNms: set[str]) -> dict[str, float]:
@@ -290,11 +290,11 @@ def _revenueFallback(revIds: set[str], revNms: set[str]) -> dict[str, float]:
     finance_dir = Path(_dataDir("finance"))
     parquet_files = sorted(finance_dir.glob("*.parquet"))
 
-    rev_map: dict[str, float] = {}
+    revMap: dict[str, float] = {}
     for pf in parquet_files:
         code = pf.stem
         try:
-            is_df = (
+            isDf = (
                 pl.scan_parquet(str(pf))
                 .filter(
                     pl.col("sj_div").is_in(["IS", "CIS"])
@@ -304,10 +304,10 @@ def _revenueFallback(revIds: set[str], revNms: set[str]) -> dict[str, float]:
             )
         except (pl.exceptions.PolarsError, OSError):
             continue
-        if is_df.is_empty() or "account_id" not in is_df.columns:
+        if isDf.is_empty() or "account_id" not in isDf.columns:
             continue
-        cfs = is_df.filter(pl.col("fs_nm").str.contains("연결"))
-        target = cfs if not cfs.is_empty() else is_df
+        cfs = isDf.filter(pl.col("fs_nm").str.contains("연결"))
+        target = cfs if not cfs.is_empty() else isDf
 
         rev_rows = target.filter(pl.col("account_id").is_in(list(revIds)) | pl.col("account_nm").is_in(list(revNms)))
         if rev_rows.is_empty():
@@ -322,12 +322,12 @@ def _revenueFallback(revIds: set[str], revNms: set[str]) -> dict[str, float]:
         for row in latest.iter_rows(named=True):
             val = parse_num(row.get("thstrm_amount"))
             if val and val > 0:
-                rev_map[code] = val
+                revMap[code] = val
                 break
-    return rev_map
+    return revMap
 
 
-def scan_top_pay() -> dict[str, dict]:
+def scanTopPay() -> dict[str, dict]:
     """executivePayIndividual 공시에서 종목별 고액 보수자 현황을 추출한다.
 
     5억 이상 의무공개 대상. 최신 연도(유효 종목 200개 이상인 해) 기준.
@@ -340,7 +340,7 @@ def scan_top_pay() -> dict[str, dict]:
         - 공개인원 : int — 5억 이상 보수 공개 대상 인원 (명)
         - 최고보수_억 : float — 최고 개인 보수 (억)
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "executivePayIndividual",
         ["stockCode", "year", "quarter", "nm", "ofcps", "mendng_totamt"],
     )

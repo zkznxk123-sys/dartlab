@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dartlab.scan._helpers import scan_finance_parquets
-from dartlab.scan.workforce.scanner import scan_employee, scan_total_payroll
+from dartlab.scan._helpers import scanFinanceParquets
+from dartlab.scan.workforce.scanner import scanEmployee, scanTotalPayroll
 
 REVENUE_IDS = {
     "Revenue",
@@ -33,7 +33,7 @@ def _revenueMap() -> dict[str, float]:
         {종목코드: 매출액(원)}. 손익계산서(IS)에서 매출 관련
         account_id/account_nm에 매칭되는 값을 반환한다.
     """
-    return scan_finance_parquets("IS", REVENUE_IDS, REVENUE_NMS)
+    return scanFinanceParquets("IS", REVENUE_IDS, REVENUE_NMS)
 
 
 def _opIncomeMap() -> dict[str, float]:
@@ -45,15 +45,15 @@ def _opIncomeMap() -> dict[str, float]:
         {종목코드: 영업이익(원)}. 손익계산서(IS)에서 영업이익 관련
         account_id/account_nm에 매칭되는 값을 반환한다.
     """
-    return scan_finance_parquets("IS", OP_IDS, OP_NMS)
+    return scanFinanceParquets("IS", OP_IDS, OP_NMS)
 
 
-def scan_labor_ratio() -> dict[str, float]:
+def scanLaborRatio() -> dict[str, float]:
     """총급여/매출 → {종목코드: 인건비율(%)}.
 
     인건비율이 높을수록 매출 중 인건비 비중이 크다.
     """
-    payrollMap = scan_total_payroll()
+    payrollMap = scanTotalPayroll()
     revMap = _revenueMap()
 
     result: dict[str, float] = {}
@@ -66,14 +66,14 @@ def scan_labor_ratio() -> dict[str, float]:
     return result
 
 
-def scan_value_added() -> dict[str, float]:
+def scanValueAdded() -> dict[str, float]:
     """(영업이익+총급여)/직원수 → {종목코드: 1인당부가가치(억)}.
 
     부가가치 = 영업이익 + 인건비.  직원 1명이 만들어내는 가치.
     """
-    payrollMap = scan_total_payroll()
+    payrollMap = scanTotalPayroll()
     opMap = _opIncomeMap()
-    empMap = scan_employee()
+    empMap = scanEmployee()
 
     result: dict[str, float] = {}
     for code, payroll in payrollMap.items():

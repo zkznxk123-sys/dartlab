@@ -24,8 +24,8 @@ def buildSpec() -> dict:
         tools : list[dict] — AI tool 정의 목록 (name, description)
     """
     groups = {}
-    for name in _catalog.get_groups():
-        entries = _catalog.get_group(name)
+    for name in _catalog.getGroups():
+        entries = _catalog.getGroup(name)
         groups[name] = {
             "count": len(entries),
             "series": [{"id": e.id, "label": e.label} for e in entries],
@@ -47,7 +47,7 @@ def buildSpec() -> dict:
             "주요 지표 카탈로그 (7개 그룹)",
         ],
         "catalog_groups": groups,
-        "total_catalog_series": len(_catalog.get_all_ids()),
+        "total_catalog_series": len(_catalog.getAllIds()),
         "tools": [
             {"name": "fred_series", "description": "FRED 시계열 조회 + 변환"},
             {"name": "fred_search", "description": "FRED 시리즈 키워드 검색"},

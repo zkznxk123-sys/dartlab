@@ -88,20 +88,20 @@ def patch_market_data(monkeypatch):
     를 함수로 해석해 모듈 attr 접근을 막는다. 따라서 import 후 객체 setattr 사용.
     """
 
-    def _patcher(stock_close, market="KR", with_flow=True):
+    def _patcher(stockClose, market="KR", with_flow=True):
         import importlib
 
         _gather_entry = importlib.import_module("dartlab.gather.entry")
         _benchmark_mod = importlib.import_module("dartlab.quant.benchmark")
         _mc_mod = importlib.import_module("dartlab.quant.marketContext")
 
-        stock_df = _make_ohlcv_df(stock_close)
-        bm_df = _make_ohlcv_df(_index_close(n=len(stock_close)))
-        macro_df = _make_macro_df(n=len(stock_close))
-        flow_df = _make_flow_df(n=len(stock_close)) if with_flow else None
+        stockDf = _make_ohlcv_df(stockClose)
+        bm_df = _make_ohlcv_df(_index_close(n=len(stockClose)))
+        macroDf = _make_macro_df(n=len(stockClose))
+        flow_df = _make_flow_df(n=len(stockClose)) if with_flow else None
 
         def _fake_fetch_ohlcv(code, **kwargs):
-            return stock_df
+            return stockDf
 
         def _fake_fetch_benchmark(code, **kwargs):
             return bm_df
@@ -109,7 +109,7 @@ def patch_market_data(monkeypatch):
         class _FakeGather:
             def __call__(self, axis, *args, **kwargs):
                 if axis == "macro":
-                    return macro_df
+                    return macroDf
                 if axis == "flow":
                     return flow_df if flow_df is not None else pl.DataFrame()
                 raise ValueError(f"unknown axis: {axis}")
@@ -117,7 +117,7 @@ def patch_market_data(monkeypatch):
         monkeypatch.setattr(_mc_mod, "fetchOhlcv", _fake_fetch_ohlcv)
         monkeypatch.setattr(_benchmark_mod, "fetchBenchmarkOhlcv", _fake_fetch_benchmark)
         monkeypatch.setattr(_gather_entry, "GatherEntry", lambda: _FakeGather())
-        return stock_df, bm_df, macro_df, flow_df
+        return stockDf, bm_df, macroDf, flow_df
 
     return _patcher
 
@@ -166,12 +166,12 @@ class TestCapm:
         # 종목 = 1.5 * 시장 + noise
         rng = np.random.default_rng(123)
         n = 250
-        bm_close = 2000.0 * np.exp(np.cumsum(0.0005 + 0.003 * rng.standard_normal(n)))
+        bmClose = 2000.0 * np.exp(np.cumsum(0.0005 + 0.003 * rng.standard_normal(n)))
         # 종목은 시장 일별 수익률의 1.5 배 + 작은 noise
-        bm_ret = np.diff(np.log(bm_close))
-        stock_ret = 0.0001 + 1.5 * bm_ret + 0.001 * rng.standard_normal(len(bm_ret))
-        stock_close = 100.0 * np.exp(np.concatenate([[0.0], np.cumsum(stock_ret)]))
-        out = _capmBetaAlpha(stock_close, bm_close)
+        bm_ret = np.diff(np.log(bmClose))
+        stockRet = 0.0001 + 1.5 * bm_ret + 0.001 * rng.standard_normal(len(bm_ret))
+        stockClose = 100.0 * np.exp(np.concatenate([[0.0], np.cumsum(stockRet)]))
+        out = _capmBetaAlpha(stockClose, bmClose)
         assert out is not None
         beta, alpha_ann, r2, n_capm = out
         assert beta == pytest.approx(1.5, abs=0.1)

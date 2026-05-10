@@ -5,10 +5,10 @@ from __future__ import annotations
 import polars as pl
 
 from dartlab.cli.services.errors import CLIError
-from dartlab.cli.services.runtime import configure_dartlab
+from dartlab.cli.services.runtime import configureDartlab
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """profile 서브커맨드 등록 — Company index/facts 출력."""
     parser = subparsers.add_parser("profile", help="company index 및 facts 출력")
     parser.add_argument("company", help="종목코드 (005930) 또는 회사명 (삼성전자)")
@@ -22,10 +22,10 @@ def configure_parser(subparsers) -> None:
 
 def run(args) -> int:
     """Company index 또는 facts 테이블을 콘솔에 출력한다."""
-    from dartlab.cli.services.output import get_console, print_dataframe
+    from dartlab.cli.services.output import getConsole, printDataframe
 
-    dartlab = configure_dartlab()
-    console = get_console()
+    dartlab = configureDartlab()
+    console = getConsole()
 
     try:
         company = dartlab.Company(args.company)
@@ -43,7 +43,7 @@ def run(args) -> int:
         console.print(f"[dim]{company.corpName} {mode} 데이터가 없습니다.[/]")
         return 0
     if isinstance(payload, pl.DataFrame):
-        print_dataframe(payload, title=mode.capitalize())
+        printDataframe(payload, title=mode.capitalize())
         return 0
     if isinstance(payload, dict):
         from rich.table import Table

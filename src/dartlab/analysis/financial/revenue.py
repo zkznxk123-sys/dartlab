@@ -11,7 +11,7 @@
 
 from __future__ import annotations
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import (
     annualColsFromPeriods as _annualColsFromPeriods,
 )
@@ -176,7 +176,7 @@ def _selectDocsSalesOrder(company, keyword: str | None = None):
 # ── 계산 함수들 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcCompanyProfile(company, *, basePeriod: str | None = None) -> dict | None:
     """업종/주요제품 맥락.
 
@@ -251,7 +251,7 @@ def calcCompanyProfile(company, *, basePeriod: str | None = None) -> dict | None
     return parts if parts else None
 
 
-@memoized_calc
+@memoizedCalc
 def calcSegmentComposition(company, *, basePeriod: str | None = None) -> dict | None:
     """부문별 매출 구성 (최신 기간).
 
@@ -332,7 +332,7 @@ def calcSegmentComposition(company, *, basePeriod: str | None = None) -> dict | 
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcSegmentTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """다년간 부문별 매출 추이 + YoY + 영업이익률 추세.
 
@@ -417,7 +417,7 @@ def calcSegmentTrend(company, *, basePeriod: str | None = None) -> dict | None:
     return {"yearCols": yCols, "rows": rows[:_MAX_SEGMENTS]}
 
 
-@memoized_calc
+@memoizedCalc
 def calcBreakdown(company, sub: str, *, basePeriod: str | None = None) -> dict | None:
     """지역별/제품별 매출 비중 + 다년간 비중 변화.
 
@@ -476,16 +476,16 @@ def calcBreakdown(company, sub: str, *, basePeriod: str | None = None) -> dict |
     for i in items:
         i["pct"] = i["value"] / total * 100
 
-    result_dict: dict = {"items": items[:_MAX_SEGMENTS], "total": total}
+    resultDict: dict = {"items": items[:_MAX_SEGMENTS], "total": total}
 
     history = _calcBreakdownHistoryFromDocs(company, basePeriod=basePeriod)
     if history:
-        result_dict["breakdownHistory"] = history
+        resultDict["breakdownHistory"] = history
 
-    return result_dict
+    return resultDict
 
 
-@memoized_calc
+@memoizedCalc
 def calcRevenueGrowth(company, *, basePeriod: str | None = None) -> dict | None:
     """매출 성장 지표.
 
@@ -537,7 +537,7 @@ def calcRevenueGrowth(company, *, basePeriod: str | None = None) -> dict | None:
     return {"yoy": yoy, "cagr3y": cagr, "quarterlySelect": quarterly}
 
 
-@memoized_calc
+@memoizedCalc
 def calcConcentration(company, *, basePeriod: str | None = None) -> dict | None:
     """매출 집중도.
 
@@ -590,7 +590,7 @@ def calcConcentration(company, *, basePeriod: str | None = None) -> dict | None:
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcRevenueQuality(company, *, basePeriod: str | None = None) -> dict | None:
     """매출 품질 — 현금 뒷받침과 마진 추세.
 
@@ -660,7 +660,7 @@ def calcRevenueQuality(company, *, basePeriod: str | None = None) -> dict | None
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcGrowthContribution(company, *, basePeriod: str | None = None) -> dict | None:
     """부문별 성장 기여 분해 — 성장이 어디에서 왔는가.
 
@@ -737,7 +737,7 @@ def calcGrowthContribution(company, *, basePeriod: str | None = None) -> dict | 
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]]:
     """수익 관련 경고/기회 플래그.
 

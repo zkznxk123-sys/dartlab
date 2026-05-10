@@ -224,7 +224,7 @@ def financeOrDocsStatement(
         return df
     # docs fallback 은 분기 연결만 지원
     if freq == "Q" and scope == "consolidated":
-        r = company._call_module("statements")
+        r = company._callModule("statements")
         return getattr(r, sjDiv, None) if r else None
     return None
 

@@ -1,4 +1,4 @@
-"""Provider 시스템 (ProviderConfig / ProviderTurn / WorkbenchProvider / create_provider)."""
+"""Provider 시스템 (ProviderConfig / ProviderTurn / WorkbenchProvider / createProvider)."""
 
 from __future__ import annotations
 
@@ -10,15 +10,15 @@ from dartlab.ai.providers import (
     ProviderTurn,
     ToolCall,
     UnavailableProvider,
-    available_providers,
-    create_provider,
-    get_config,
+    availableProviders,
+    createProvider,
+    getConfig,
 )
 
 
 @pytest.mark.unit
 def test_available_providers_excludes_anthropic_includes_oauth_codex() -> None:
-    names = set(available_providers())
+    names = set(availableProviders())
     # anthropic 직접 사용 금지 (ToS)
     assert "anthropic" not in names
     assert "claude" not in names
@@ -31,13 +31,13 @@ def test_available_providers_excludes_anthropic_includes_oauth_codex() -> None:
 
 @pytest.mark.unit
 def test_get_config_normalizes_chatgpt_to_oauth_codex() -> None:
-    cfg = get_config(provider="chatgpt")
+    cfg = getConfig(provider="chatgpt")
     assert cfg.provider == "oauth-codex"
 
 
 @pytest.mark.unit
 def test_get_config_normalizes_openai_compat_aliases() -> None:
-    cfg = get_config(provider="openai-compatible")
+    cfg = getConfig(provider="openai-compatible")
     assert cfg.provider == "custom"
 
 
@@ -45,42 +45,42 @@ def test_get_config_normalizes_openai_compat_aliases() -> None:
 def test_create_provider_oauth_codex_returns_oauth_provider() -> None:
     from dartlab.ai.providers.oauthCodex import OAuthCodexProvider
 
-    provider = create_provider(ProviderConfig(provider="oauth-codex"))
+    provider = createProvider(ProviderConfig(provider="oauth-codex"))
     assert isinstance(provider, OAuthCodexProvider)
 
 
 @pytest.mark.unit
 def test_create_provider_openai_returns_compat_provider() -> None:
-    provider = create_provider(ProviderConfig(provider="openai", api_key="sk-test"))
+    provider = createProvider(ProviderConfig(provider="openai", apiKey="sk-test"))
     assert isinstance(provider, OpenAICompatibleProvider)
 
 
 @pytest.mark.unit
 def test_create_provider_groq_cerebras_mistral_custom_use_compat() -> None:
     for pid in ("groq", "cerebras", "mistral", "custom", "ollama"):
-        provider = create_provider(ProviderConfig(provider=pid, api_key="x"))
+        provider = createProvider(ProviderConfig(provider=pid, apiKey="x"))
         assert isinstance(provider, OpenAICompatibleProvider), f"{pid} not compat"
 
 
 @pytest.mark.unit
 def test_create_provider_chatgpt_alias_blocked() -> None:
     with pytest.raises(ValueError):
-        create_provider(provider="chatgpt")
+        createProvider(provider="chatgpt")
 
 
 @pytest.mark.unit
 def test_create_provider_unknown_returns_unavailable() -> None:
-    provider = create_provider(ProviderConfig(provider="nonexistent_xyz"))
+    provider = createProvider(ProviderConfig(provider="nonexistent_xyz"))
     assert isinstance(provider, UnavailableProvider)
-    assert provider.check_available() is False
+    assert provider.checkAvailable() is False
 
 
 @pytest.mark.unit
 def test_provider_turn_dataclass_shape() -> None:
     tc = ToolCall(id="c1", name="run_python", args={"code": "1+1"})
-    turn = ProviderTurn(content="ok", tool_calls=[tc])
+    turn = ProviderTurn(content="ok", toolCalls=[tc])
     assert turn.content == "ok"
-    assert turn.tool_calls[0].name == "run_python"
+    assert turn.toolCalls[0].name == "run_python"
 
 
 @pytest.mark.unit

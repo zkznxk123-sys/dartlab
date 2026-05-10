@@ -175,7 +175,7 @@ def test_fetch_benchmark_ohlcv_standardizes_krx_raw(monkeypatch):
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
     monkeypatch.setattr(hf, "loadFiltered", lambda **_: raw)
 
-    df, meta = fetchBenchmarkOhlcv("005930", market="KR", return_meta=True)
+    df, meta = fetchBenchmarkOhlcv("005930", market="KR", returnMeta=True)
 
     assert meta["indexName"] == "코스피"
     assert meta["nObs"] == 1
@@ -230,12 +230,12 @@ def test_bab_ranks_by_beta_not_vol(monkeypatch):
 
     start = date(2025, 1, 1)
     dates = [start + timedelta(days=i) for i in range(270)]
-    bench_ret = 0.001 + np.sin(np.arange(len(dates) - 1) / 7.0) * 0.002
-    bench_price = 100 * np.exp(np.r_[0.0, np.cumsum(bench_ret)])
+    benchRet = 0.001 + np.sin(np.arange(len(dates) - 1) / 7.0) * 0.002
+    bench_price = 100 * np.exp(np.r_[0.0, np.cumsum(benchRet)])
 
     def stock_prices(beta: float, noise_amp: float) -> np.ndarray:
-        noise = np.sin(np.arange(len(bench_ret))) * noise_amp
-        ret = beta * bench_ret + noise
+        noise = np.sin(np.arange(len(benchRet))) * noise_amp
+        ret = beta * benchRet + noise
         return 100 * np.exp(np.r_[0.0, np.cumsum(ret)])
 
     panel = {

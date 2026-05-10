@@ -76,7 +76,7 @@ def test_agent_gateway_public_events_hide_internal_kernel_names(monkeypatch) -> 
     )
 
     async def collect():
-        return [event async for event in agent_gateway.stream_agent_run(req)]
+        return [event async for event in agent_gateway.streamAgentRun(req)]
 
     events = asyncio.run(collect())
     public_text = "\n".join(event["event"] + " " + event["data"] for event in events)
@@ -107,7 +107,7 @@ def test_agent_gateway_failure_reason_is_public(monkeypatch) -> None:
     )
 
     async def collect():
-        return [event async for event in agent_gateway.stream_agent_run(req)]
+        return [event async for event in agent_gateway.streamAgentRun(req)]
 
     events = asyncio.run(collect())
     errors = [_payload(event) for event in events if event["event"] == "RUN_ERROR"]
@@ -143,7 +143,7 @@ def test_agent_gateway_failed_done_emits_public_error_without_internal_meta(monk
     )
 
     async def collect():
-        return [event async for event in agent_gateway.stream_agent_run(req)]
+        return [event async for event in agent_gateway.streamAgentRun(req)]
 
     events = asyncio.run(collect())
     public_text = json.dumps([_payload(event) for event in events], ensure_ascii=False)

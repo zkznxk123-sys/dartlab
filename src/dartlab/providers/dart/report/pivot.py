@@ -16,9 +16,9 @@ from dartlab.providers.dart.report.types import (
 )
 
 
-def pivotDividend(stockCode: str, *, base_df: pl.DataFrame | None = None) -> DividendResult | None:
+def pivotDividend(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> DividendResult | None:
     """배당 시계열 (Q4 사업보고서 기준, 보통주)."""
-    df = extractAnnual(stockCode, "dividend", quarterNum=4, base_df=base_df)
+    df = extractAnnual(stockCode, "dividend", quarterNum=4, baseDf=baseDf)
     if df is None:
         return None
 
@@ -48,9 +48,9 @@ def pivotDividend(stockCode: str, *, base_df: pl.DataFrame | None = None) -> Div
     )
 
 
-def pivotEmployee(stockCode: str, *, base_df: pl.DataFrame | None = None) -> EmployeeResult | None:
+def pivotEmployee(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> EmployeeResult | None:
     """직원현황 시계열 (Q2 반기보고서 기준)."""
-    df = extractAnnual(stockCode, "employee", quarterNum=2, base_df=base_df)
+    df = extractAnnual(stockCode, "employee", quarterNum=2, baseDf=baseDf)
     if df is None:
         return None
 
@@ -95,9 +95,9 @@ def pivotEmployee(stockCode: str, *, base_df: pl.DataFrame | None = None) -> Emp
     )
 
 
-def pivotMajorHolder(stockCode: str, *, base_df: pl.DataFrame | None = None) -> MajorHolderResult | None:
+def pivotMajorHolder(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> MajorHolderResult | None:
     """최대주주현황 시계열 (Q2 반기보고서 기준, 보통주)."""
-    df = extractAnnual(stockCode, "majorHolder", quarterNum=2, base_df=base_df)
+    df = extractAnnual(stockCode, "majorHolder", quarterNum=2, baseDf=baseDf)
     if df is None:
         return None
 
@@ -154,9 +154,9 @@ def pivotMajorHolder(stockCode: str, *, base_df: pl.DataFrame | None = None) -> 
     )
 
 
-def pivotExecutive(stockCode: str, *, base_df: pl.DataFrame | None = None) -> ExecutiveResult | None:
+def pivotExecutive(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> ExecutiveResult | None:
     """임원현황 (최신 분기 기준)."""
-    df = extractClean(stockCode, "executive", base_df=base_df)
+    df = extractClean(stockCode, "executive", baseDf=baseDf)
     if df is None:
         return None
 
@@ -179,9 +179,9 @@ def pivotExecutive(stockCode: str, *, base_df: pl.DataFrame | None = None) -> Ex
     )
 
 
-def pivotAudit(stockCode: str, *, base_df: pl.DataFrame | None = None) -> AuditResult | None:
+def pivotAudit(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> AuditResult | None:
     """감사의견 시계열 (Q4 사업보고서 기준)."""
-    df = extractAnnual(stockCode, "auditOpinion", quarterNum=4, base_df=base_df)
+    df = extractAnnual(stockCode, "auditOpinion", quarterNum=4, baseDf=baseDf)
     if df is None:
         return None
 

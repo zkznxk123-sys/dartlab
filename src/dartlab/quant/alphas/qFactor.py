@@ -22,7 +22,7 @@ import numpy as np
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated
 from dartlab.quant._helpers import loadScanParquet
-from dartlab.quant.factorBuild import _build_universe_metrics, _latest_year
+from dartlab.quant.factorBuild import _buildUniverseMetrics, _latestYear
 
 log = logging.getLogger(__name__)
 
@@ -71,14 +71,14 @@ def calcQFactor(
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())
-        year = _latest_year(snap)
+        year = _latestYear(snap)
         if year is None:
             return None
     except (OSError, ValueError, KeyError, AttributeError) as exc:
         log.warning("calcQFactor year 실패: %s", type(exc).__name__)
         return None
 
-    metrics = _build_universe_metrics(market, str(year))
+    metrics = _buildUniverseMetrics(market, str(year))
     if not metrics:
         return None
 

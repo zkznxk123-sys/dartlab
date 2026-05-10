@@ -32,7 +32,7 @@ _OPINION_MAP = {
 }
 
 
-def _classify_opinion(upside: float) -> str:
+def _classifyOpinion(upside: float) -> str:
     """업사이드 → 투자의견 분류.
 
     Args:
@@ -56,10 +56,10 @@ def _classify_opinion(upside: float) -> str:
 class AnalystReport:
     """종합 애널리스트 리포트."""
 
-    stock_code: str = ""
-    company_name: str = ""
+    stockCode: str = ""
+    companyName: str = ""
     target_price: float = 0.0  # 가중평균 목표가
-    current_price: float = 0.0
+    currentPrice: float = 0.0
     upside: float = 0.0  # (target - current) / current
     opinion: str = ""  # "강력매수" | "매수" | "중립" | "매도" | "강력매도"
     methods: list[ValuationMethod] = field(default_factory=list)
@@ -72,9 +72,9 @@ class AnalystReport:
     DISCLAIMER: str = "본 분석은 투자 참고용이며 투자 권유가 아닙니다."
 
     def __repr__(self) -> str:
-        lines = [f"[애널리스트 리포트 — {self.company_name or self.stock_code}]"]
+        lines = [f"[애널리스트 리포트 — {self.companyName or self.stockCode}]"]
         lines.append(f"  종합 목표가: {fmtPrice(self.target_price, self.currency)}")
-        lines.append(f"  현재가: {fmtPrice(self.current_price, self.currency)}")
+        lines.append(f"  현재가: {fmtPrice(self.currentPrice, self.currency)}")
         lines.append(f"  업사이드: {self.upside:+.1%}")
         lines.append(f"  투자의견: {self.opinion}")
         lines.append(f"  신뢰도: {self.confidence:.0%}")

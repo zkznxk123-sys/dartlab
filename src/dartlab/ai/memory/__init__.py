@@ -9,11 +9,11 @@ from .outcomeLog import (
     Update as OutcomeUpdate,
 )
 from .outcomeLog import (
-    batch_update_with_outcomes,
-    get_past_context,
-    get_pending_entries,
-    safe_stockcode,
-    store_decision,
+    batchUpdateWithOutcomes,
+    getPastContext,
+    getPendingEntries,
+    safeStockcode,
+    storeDecision,
 )
 from .promotion import promotionCandidates, recordSkillUsage
 from .stats import SkillStats, getSkillStats, loadStats, recordOutcome
@@ -24,9 +24,9 @@ __all__ = [
     "OutcomeEntry",
     "OutcomeUpdate",
     "SkillStats",
-    "batch_update_with_outcomes",
-    "get_past_context",
-    "get_pending_entries",
+    "batchUpdateWithOutcomes",
+    "getPastContext",
+    "getPendingEntries",
     "getSkillStats",
     "inferStockCodeContext",
     "loadStats",
@@ -36,8 +36,8 @@ __all__ = [
     "recordOutcome",
     "recordSkillUsage",
     "remember",
-    "safe_stockcode",
-    "store_decision",
+    "safeStockcode",
+    "storeDecision",
     "updateStatus",
     "wireSessionMemory",
 ]

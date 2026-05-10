@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Any, Literal
 
 
-def _now_iso() -> str:
+def _nowIso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
@@ -34,7 +34,7 @@ class Ref:
     payload: dict[str, Any] = field(default_factory=dict)
     sourceType: SourceType = "internal"
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -47,9 +47,9 @@ class TraceEvent:
 
     kind: str
     data: dict[str, Any] = field(default_factory=dict)
-    ts: str = field(default_factory=_now_iso)
+    ts: str = field(default_factory=_nowIso)
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         return {"kind": self.kind, "data": self.data, "ts": self.ts}
 
 
@@ -80,5 +80,5 @@ class VerificationResult:
     refId: str
     issues: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         return asdict(self)

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 
 log = logging.getLogger(__name__)
 
@@ -84,7 +84,7 @@ def _getYoYChange(df, col: str = "value"):
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | None:
     """기업 매출 vs 외생변수 회귀 — 업종 최적 + 범용 병행.
 
@@ -295,7 +295,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
 # ══════════════════════════════════════
 
 
-@memoized_calc
+@memoizedCalc
 def calcValuationBand(company, *, basePeriod: str | None = None) -> dict | None:
     """PER/PBR 정규분포 밴드에서 현재 위치.
 

@@ -75,8 +75,8 @@ class CreditMockCompany:
     corpName = "테스트"
     market = "KOSPI"
 
-    def __init__(self, *, ratios=None, sector=None, corp_name="테스트"):
-        self.corpName = corp_name
+    def __init__(self, *, ratios=None, sector=None, corpName="테스트"):
+        self.corpName = corpName
         self._sector = sector
         self._finance = _MockFinance(ratios)
         self._cache = {}
@@ -629,7 +629,7 @@ class TestEvaluateCompany:
     def test_holding_company(self):
         from dartlab.credit.engine import evaluateCompany
 
-        co = CreditMockCompany(corp_name="테스트홀딩스", ratios=_MockRatios())
+        co = CreditMockCompany(corpName="테스트홀딩스", ratios=_MockRatios())
         result = evaluateCompany(co)
         if result is not None:
             assert result["holding"] is True

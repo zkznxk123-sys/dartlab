@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from dartlab.analysis.financial.proforma import build_proforma
+from dartlab.analysis.financial.proforma import buildProforma
 from dartlab.analysis.forecast.prediction import ContextSignals
 from dartlab.analysis.forecast.simulation import (
     DEFAULT_ELASTICITY,
@@ -17,11 +17,11 @@ from dartlab.analysis.forecast.simulation import (
 )
 from dartlab.analysis.valuation.pricetarget import (
     PriceTargetResult,
-    _classify_signal,
-    _dcf_from_proforma,
-    _derive_revenue_path_from_macro,
-    _monte_carlo_price_distribution,
-    compute_price_target,
+    _classifySignal,
+    _dcfFromProforma,
+    _deriveRevenuePathFromMacro,
+    _monteCarloPriceDistribution,
+    computePriceTarget,
 )
 
 # ── Mock 시계열 (test_proforma와 동일) ──────────────────
@@ -66,7 +66,7 @@ class TestDeriveRevenuePath:
     @pytest.mark.unit
     def test_baseline_returns_near_base_growth(self):
         scenario = PRESET_SCENARIOS["baseline"]
-        path = _derive_revenue_path_from_macro(5.0, scenario, DEFAULT_ELASTICITY)
+        path = _deriveRevenuePathFromMacro(5.0, scenario, DEFAULT_ELASTICITY)
         assert len(path) == 5
         # baseline은 GDP delta ≈ 0이므로 base_growth 근처
         for g in path:
@@ -74,8 +74,8 @@ class TestDeriveRevenuePath:
 
     @pytest.mark.unit
     def test_adverse_lowers_growth(self):
-        baseline_path = _derive_revenue_path_from_macro(5.0, PRESET_SCENARIOS["baseline"], DEFAULT_ELASTICITY)
-        adverse_path = _derive_revenue_path_from_macro(5.0, PRESET_SCENARIOS["adverse"], DEFAULT_ELASTICITY)
+        baseline_path = _deriveRevenuePathFromMacro(5.0, PRESET_SCENARIOS["baseline"], DEFAULT_ELASTICITY)
+        adverse_path = _deriveRevenuePathFromMacro(5.0, PRESET_SCENARIOS["adverse"], DEFAULT_ELASTICITY)
         # 경기침체 시 첫 해 성장률이 baseline보다 낮아야 함
         assert adverse_path[0] < baseline_path[0]
 
@@ -84,8 +84,8 @@ class TestDeriveRevenuePath:
         scenario = PRESET_SCENARIOS["adverse"]
         low_beta = SectorElasticity(0.3, 0.1, 10, 0, "defensive")
         high_beta = SectorElasticity(1.8, 0.8, 50, 0, "high")
-        path_low = _derive_revenue_path_from_macro(5.0, scenario, low_beta)
-        path_high = _derive_revenue_path_from_macro(5.0, scenario, high_beta)
+        path_low = _deriveRevenuePathFromMacro(5.0, scenario, low_beta)
+        path_high = _deriveRevenuePathFromMacro(5.0, scenario, high_beta)
         # 높은 β는 충격을 더 증폭
         assert path_high[0] < path_low[0]
 
@@ -93,7 +93,7 @@ class TestDeriveRevenuePath:
     def test_mean_reversion(self):
         """4~5년차에 base_growth 방향으로 복귀."""
         scenario = PRESET_SCENARIOS["adverse"]
-        path = _derive_revenue_path_from_macro(5.0, scenario, DEFAULT_ELASTICITY)
+        path = _deriveRevenuePathFromMacro(5.0, scenario, DEFAULT_ELASTICITY)
         # 마지막 연도가 첫 연도보다 base_growth에 가까움
         delta_first = abs(path[0] - 5.0)
         delta_last = abs(path[4] - 5.0)
@@ -106,8 +106,8 @@ class TestDeriveRevenuePath:
 class TestDCFFromProforma:
     @pytest.mark.unit
     def test_basic_dcf(self):
-        pf = build_proforma(SERIES, revenue_growth_path=[5.0, 4.0, 3.0, 2.5, 2.0])
-        ev, eq, per_share = _dcf_from_proforma(pf, wacc=10.0, shares=1000)
+        pf = buildProforma(SERIES, revenueGrowthPath=[5.0, 4.0, 3.0, 2.5, 2.0])
+        ev, eq, per_share = _dcfFromProforma(pf, wacc=10.0, shares=1000)
         assert ev > 0
         assert eq > 0
         assert per_share > 0
@@ -115,22 +115,22 @@ class TestDCFFromProforma:
 
     @pytest.mark.unit
     def test_higher_wacc_lower_value(self):
-        pf = build_proforma(SERIES, revenue_growth_path=[5.0, 4.0, 3.0])
-        _, _, ps_low = _dcf_from_proforma(pf, wacc=8.0, shares=100)
-        _, _, ps_high = _dcf_from_proforma(pf, wacc=15.0, shares=100)
+        pf = buildProforma(SERIES, revenueGrowthPath=[5.0, 4.0, 3.0])
+        _, _, ps_low = _dcfFromProforma(pf, wacc=8.0, shares=100)
+        _, _, ps_high = _dcfFromProforma(pf, wacc=15.0, shares=100)
         assert ps_low > ps_high
 
     @pytest.mark.unit
     def test_no_shares(self):
-        pf = build_proforma(SERIES, revenue_growth_path=[5.0])
-        ev, eq, per_share = _dcf_from_proforma(pf, wacc=10.0, shares=None)
+        pf = buildProforma(SERIES, revenueGrowthPath=[5.0])
+        ev, eq, per_share = _dcfFromProforma(pf, wacc=10.0, shares=None)
         # shares 없으면 per_share = equity_value
         assert per_share == eq
 
     @pytest.mark.unit
     def test_empty_proforma(self):
-        pf = build_proforma({"IS": {"sales": [0]}, "CF": {}, "BS": {}}, revenue_growth_path=[5.0])
-        ev, eq, ps = _dcf_from_proforma(pf, wacc=10.0)
+        pf = buildProforma({"IS": {"sales": [0]}, "CF": {}, "BS": {}}, revenueGrowthPath=[5.0])
+        ev, eq, ps = _dcfFromProforma(pf, wacc=10.0)
         assert ev == 0.0
         assert eq == 0.0
 
@@ -141,27 +141,27 @@ class TestDCFFromProforma:
 class TestClassifySignal:
     @pytest.mark.unit
     def test_strong_buy(self):
-        assert _classify_signal(35.0, {"p10": 110}, 100) == "strong_buy"
+        assert _classifySignal(35.0, {"p10": 110}, 100) == "strong_buy"
 
     @pytest.mark.unit
     def test_buy(self):
-        assert _classify_signal(20.0, {"p10": 90}, 100) == "buy"
+        assert _classifySignal(20.0, {"p10": 90}, 100) == "buy"
 
     @pytest.mark.unit
     def test_hold(self):
-        assert _classify_signal(5.0, {}, 100) == "hold"
+        assert _classifySignal(5.0, {}, 100) == "hold"
 
     @pytest.mark.unit
     def test_sell(self):
-        assert _classify_signal(-20.0, {}, 100) == "sell"
+        assert _classifySignal(-20.0, {}, 100) == "sell"
 
     @pytest.mark.unit
     def test_strong_sell(self):
-        assert _classify_signal(-35.0, {"p90": 80}, 100) == "strong_sell"
+        assert _classifySignal(-35.0, {"p90": 80}, 100) == "strong_sell"
 
     @pytest.mark.unit
     def test_none_upside(self):
-        assert _classify_signal(None, {}, None) == "hold"
+        assert _classifySignal(None, {}, None) == "hold"
 
 
 # ── _monte_carlo_price_distribution ──────────────────────
@@ -170,7 +170,7 @@ class TestClassifySignal:
 class TestMonteCarlo:
     @pytest.mark.unit
     def test_basic_distribution(self):
-        pcts, _, values = _monte_carlo_price_distribution(
+        pcts, _, values = _monteCarloPriceDistribution(
             SERIES,
             5.0,
             DEFAULT_ELASTICITY,
@@ -188,7 +188,7 @@ class TestMonteCarlo:
 
     @pytest.mark.unit
     def test_reproducible_with_seed(self):
-        pcts1, _, _ = _monte_carlo_price_distribution(
+        pcts1, _, _ = _monteCarloPriceDistribution(
             SERIES,
             5.0,
             DEFAULT_ELASTICITY,
@@ -198,7 +198,7 @@ class TestMonteCarlo:
             iterations=200,
             seed=123,
         )
-        pcts2, _, _ = _monte_carlo_price_distribution(
+        pcts2, _, _ = _monteCarloPriceDistribution(
             SERIES,
             5.0,
             DEFAULT_ELASTICITY,
@@ -217,12 +217,12 @@ class TestMonteCarlo:
 class TestComputePriceTarget:
     @pytest.mark.unit
     def test_basic(self):
-        result = compute_price_target(
+        result = computePriceTarget(
             SERIES,
-            current_price=500,
+            currentPrice=500,
             shares=100,
-            mc_iterations=500,
-            mc_seed=42,
+            mcIterations=500,
+            mcSeed=42,
         )
         assert isinstance(result, PriceTargetResult)
         assert result.weighted_target > 0
@@ -231,66 +231,66 @@ class TestComputePriceTarget:
 
     @pytest.mark.unit
     def test_probabilities_sum_to_one(self):
-        result = compute_price_target(SERIES, mc_iterations=100, mc_seed=1)
+        result = computePriceTarget(SERIES, mcIterations=100, mcSeed=1)
         total = sum(s.probability for s in result.scenarios)
         assert abs(total - 1.0) < 0.01
 
     @pytest.mark.unit
     def test_percentile_order(self):
-        result = compute_price_target(SERIES, shares=100, mc_iterations=500, mc_seed=42)
+        result = computePriceTarget(SERIES, shares=100, mcIterations=500, mcSeed=42)
         pcts = result.percentiles
         if pcts:
             assert pcts["p10"] <= pcts["p25"] <= pcts["p50"] <= pcts["p75"] <= pcts["p90"]
 
     @pytest.mark.unit
     def test_upside_with_current_price(self):
-        result = compute_price_target(
+        result = computePriceTarget(
             SERIES,
-            current_price=100,
+            currentPrice=100,
             shares=100,
-            mc_iterations=100,
-            mc_seed=1,
+            mcIterations=100,
+            mcSeed=1,
         )
-        assert result.upside_pct is not None
+        assert result.upsidePct is not None
         assert result.probability_above_current is not None
 
     @pytest.mark.unit
     def test_no_current_price(self):
-        result = compute_price_target(SERIES, mc_iterations=100, mc_seed=1)
-        assert result.upside_pct is None
+        result = computePriceTarget(SERIES, mcIterations=100, mcSeed=1)
+        assert result.upsidePct is None
         assert result.signal == "hold"
 
     @pytest.mark.unit
     def test_non_semiconductor_redistributes(self):
         """비반도체 업종은 semiconductor_down 확률이 baseline에 재배분."""
-        result = compute_price_target(
+        result = computePriceTarget(
             SERIES,
-            sector_key="자동차",
-            mc_iterations=100,
-            mc_seed=1,
+            sectorKey="자동차",
+            mcIterations=100,
+            mcSeed=1,
         )
-        names = [s.scenario_name for s in result.scenarios]
+        names = [s.scenarioName for s in result.scenarios]
         assert "semiconductor_down" not in names
 
     @pytest.mark.unit
     def test_semiconductor_keeps_scenario(self):
-        result = compute_price_target(
+        result = computePriceTarget(
             SERIES,
-            sector_key="반도체",
-            mc_iterations=100,
-            mc_seed=1,
+            sectorKey="반도체",
+            mcIterations=100,
+            mcSeed=1,
         )
-        names = [s.scenario_name for s in result.scenarios]
+        names = [s.scenarioName for s in result.scenarios]
         assert "semiconductor_down" in names
 
     @pytest.mark.unit
     def test_repr(self):
-        result = compute_price_target(
+        result = computePriceTarget(
             SERIES,
-            current_price=500,
+            currentPrice=500,
             shares=100,
-            mc_iterations=100,
-            mc_seed=1,
+            mcIterations=100,
+            mcSeed=1,
         )
         text = repr(result)
         assert "주가 목표가" in text
@@ -298,7 +298,7 @@ class TestComputePriceTarget:
 
     @pytest.mark.unit
     def test_all_scenarios_have_proforma(self):
-        result = compute_price_target(SERIES, mc_iterations=100, mc_seed=1)
+        result = computePriceTarget(SERIES, mcIterations=100, mcSeed=1)
         for s in result.scenarios:
             assert s.proforma is not None
             assert len(s.proforma.projections) > 0
@@ -306,7 +306,7 @@ class TestComputePriceTarget:
 
     @pytest.mark.unit
     def test_confidence(self):
-        result = compute_price_target(SERIES, mc_iterations=100, mc_seed=1)
+        result = computePriceTarget(SERIES, mcIterations=100, mcSeed=1)
         assert result.confidence in ("high", "medium", "low")
 
 
@@ -317,7 +317,7 @@ class TestMultiNoiseMC:
     @pytest.mark.unit
     def test_size_class_affects_spread(self):
         """Small이 Large보다 분포가 넓어야 함 (σ 차등)."""
-        pcts_small, _, vals_small = _monte_carlo_price_distribution(
+        pcts_small, _, vals_small = _monteCarloPriceDistribution(
             SERIES,
             5.0,
             DEFAULT_ELASTICITY,
@@ -326,9 +326,9 @@ class TestMultiNoiseMC:
             100,
             iterations=500,
             seed=42,
-            size_class="Small",
+            sizeClass="Small",
         )
-        pcts_large, _, vals_large = _monte_carlo_price_distribution(
+        pcts_large, _, vals_large = _monteCarloPriceDistribution(
             SERIES,
             5.0,
             DEFAULT_ELASTICITY,
@@ -337,7 +337,7 @@ class TestMultiNoiseMC:
             100,
             iterations=500,
             seed=42,
-            size_class="Large",
+            sizeClass="Large",
         )
         # 표준편차로 비교 (max(v, 0) 클램프로 P10이 0일 수 있으므로)
         import statistics
@@ -349,7 +349,7 @@ class TestMultiNoiseMC:
     @pytest.mark.unit
     def test_nwc_reflected(self):
         """NWC가 FCF에 반영되면 결과 분포에 값이 있어야 함."""
-        pcts, _, values = _monte_carlo_price_distribution(
+        pcts, _, values = _monteCarloPriceDistribution(
             SERIES,
             5.0,
             DEFAULT_ELASTICITY,
@@ -358,7 +358,7 @@ class TestMultiNoiseMC:
             100,
             iterations=200,
             seed=42,
-            size_class="Mid",
+            sizeClass="Mid",
         )
         assert len(values) == 200
         # shares가 100이면 mock 데이터에서도 양의 값 존재
@@ -375,22 +375,22 @@ class TestContextSignalsIntegration:
     @pytest.mark.unit
     def test_context_signals_changes_result(self):
         """맥락 신호가 있으면 결과가 달라져야 함."""
-        compute_price_target(
+        computePriceTarget(
             SERIES,
             shares=100,
-            mc_iterations=200,
-            mc_seed=42,
+            mcIterations=200,
+            mcSeed=42,
         )
         signals = ContextSignals(
             insightGrades={"profitability": "F", "health": "D"},
             sectorCyclicality="high",
         )
-        result_with_ctx = compute_price_target(
+        result_with_ctx = computePriceTarget(
             SERIES,
             shares=100,
-            mc_iterations=200,
-            mc_seed=42,
-            context_signals=signals,
+            mcIterations=200,
+            mcSeed=42,
+            contextSignals=signals,
         )
         # 확률이 재가중되었으므로 weighted_target이 다를 수 있음
         # (적어도 경고가 추가되어야 함)
@@ -403,11 +403,11 @@ class TestContextSignalsIntegration:
             insightGrades={"profitability": "F"},
             riskChangeRate=90.0,
         )
-        result = compute_price_target(
+        result = computePriceTarget(
             SERIES,
-            mc_iterations=100,
-            mc_seed=1,
-            context_signals=signals,
+            mcIterations=100,
+            mcSeed=1,
+            contextSignals=signals,
         )
         total = sum(s.probability for s in result.scenarios)
         assert abs(total - 1.0) < 0.01
@@ -416,11 +416,11 @@ class TestContextSignalsIntegration:
     def test_context_signals_passed_to_mc(self):
         """context_signals 전달 시 경고가 포함됨."""
         signals = ContextSignals(sizeClass="Small", insightGrades={"profitability": "D"})
-        result = compute_price_target(
+        result = computePriceTarget(
             SERIES,
             shares=100,
-            mc_iterations=100,
-            mc_seed=42,
-            context_signals=signals,
+            mcIterations=100,
+            mcSeed=42,
+            contextSignals=signals,
         )
         assert any("맥락" in w for w in result.warnings)

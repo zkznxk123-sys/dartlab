@@ -12,7 +12,7 @@ HY 스프레드와 기대 부도 프리미엄의 차이로 근사한다.
 from __future__ import annotations
 
 
-def classifyEBP(ebp: float, ebp_prev: float | None = None) -> dict:
+def classifyEBP(ebp: float, ebpPrev: float | None = None) -> dict:
     """EBP 수준 + 변화 → 신용 스트레스 판별.
 
     Args:
@@ -37,8 +37,8 @@ def classifyEBP(ebp: float, ebp_prev: float | None = None) -> dict:
 
     change_3m = None
     direction = "stable"
-    if ebp_prev is not None:
-        change_3m = round(ebp - ebp_prev, 3)
+    if ebpPrev is not None:
+        change_3m = round(ebp - ebpPrev, 3)
         if change_3m > 0.2:
             direction = "worsening"
         elif change_3m < -0.2:
@@ -56,8 +56,8 @@ def classifyEBP(ebp: float, ebp_prev: float | None = None) -> dict:
 
 
 def approximateEBP(
-    hy_spread: float,
-    default_spread_proxy: float,
+    hySpread: float,
+    defaultSpreadProxy: float,
 ) -> float:
     """EBP 근사: HY OAS - 기대 부도 프리미엄.
 
@@ -73,4 +73,4 @@ def approximateEBP(
     Returns:
         EBP 근사값 (%p 단위, 예: 0.5 = 50bp)
     """
-    return round((hy_spread - default_spread_proxy) / 100, 3)
+    return round((hySpread - defaultSpreadProxy) / 100, 3)

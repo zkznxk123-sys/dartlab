@@ -224,7 +224,7 @@ class _ReportAccessor:
 
     def __init__(self, company: "Company"):
         self._company = company
-        self._cache: BoundedCache = BoundedCache(max_entries=50, pressure_mb=1200.0)
+        self._cache: BoundedCache = BoundedCache(maxEntries=50, pressureMb=1200.0)
 
     def _pivot(self, name: str) -> Any:
         if name in self._cache:
@@ -247,7 +247,7 @@ class _ReportAccessor:
         func = funcs.get(name)
         if func is None:
             return None
-        result = func(self._company.stockCode, base_df=self._company.rawReport)
+        result = func(self._company.stockCode, baseDf=self._company.rawReport)
         self._cache[name] = result
         return result
 
@@ -259,7 +259,7 @@ class _ReportAccessor:
         from dartlab.providers.dart.report import extractClean
 
         try:
-            result = extractClean(self._company.stockCode, apiType, base_df=self._company.rawReport)
+            result = extractClean(self._company.stockCode, apiType, baseDf=self._company.rawReport)
         except (KeyError, ValueError, TypeError, FileNotFoundError):
             result = None
         self._cache[cacheKey] = result
@@ -273,7 +273,7 @@ class _ReportAccessor:
         from dartlab.providers.dart.report import extractAnnual as _extractAnnual
 
         try:
-            result = _extractAnnual(self._company.stockCode, apiType, quarterNum, base_df=self._company.rawReport)
+            result = _extractAnnual(self._company.stockCode, apiType, quarterNum, baseDf=self._company.rawReport)
         except (KeyError, ValueError, TypeError, FileNotFoundError):
             result = None
         self._cache[cacheKey] = result
@@ -293,7 +293,7 @@ class _ReportAccessor:
         from dartlab.providers.dart.report import extractResult
 
         try:
-            result = extractResult(self._company.stockCode, apiType, quarterNum, base_df=self._company.rawReport)
+            result = extractResult(self._company.stockCode, apiType, quarterNum, baseDf=self._company.rawReport)
         except (KeyError, ValueError, TypeError, FileNotFoundError):
             result = None
         self._cache[cacheKey] = result

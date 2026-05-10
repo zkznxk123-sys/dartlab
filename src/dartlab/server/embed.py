@@ -16,7 +16,7 @@ _EMBED_PATH = Path(__file__).resolve().parents[3] / "ui" / "web" / "build" / "em
 
 
 @router.get("/embed.js")
-def serve_embed():
+def serveEmbed():
     """위젯 JS 번들 — CORS 전체 허용, 1시간 캐시."""
     if not _EMBED_PATH.exists():
         return PlainTextResponse(

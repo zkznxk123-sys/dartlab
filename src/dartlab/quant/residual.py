@@ -66,7 +66,7 @@ def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         benchmarkMode=benchmarkMode,
         start=kwargs.get("start"),
         end=kwargs.get("end"),
-        return_meta=True,
+        returnMeta=True,
     )
     if bench is None:
         return {**result, "error": "벤치마크 없음"}

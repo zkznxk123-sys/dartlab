@@ -181,4 +181,4 @@ def test_create_server_requires_mcp_sdk(monkeypatch):
     monkeypatch.setattr("builtins.__import__", mock_import)
 
     with pytest.raises(ImportError, match="MCP SDK"):
-        mcp_mod.create_server()
+        mcp_mod.createServer()

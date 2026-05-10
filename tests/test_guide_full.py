@@ -57,7 +57,7 @@ class TestMessaging:
         from dartlab.core.messaging import emit
 
         with pytest.raises(ValueError, match="005930"):
-            emit("error:no_data", stockCode="005930", raise_as=ValueError)
+            emit("error:no_data", stockCode="005930", raiseAs=ValueError)
 
     def test_progress_silent_when_not_verbose(self, capsys):
         from dartlab.core.messaging import _ctx, progress
@@ -182,7 +182,7 @@ class TestCapabilities:
         from dartlab.core.capability.registry import WidgetSpec
 
         ws = WidgetSpec(widget="chart", props={"type": "line"}, key="c1", title="매출")
-        payload = ws.to_payload()
+        payload = ws.toPayload()
         assert payload["widget"] == "chart"
         assert payload["props"]["type"] == "line"
         assert payload["key"] == "c1"
@@ -192,7 +192,7 @@ class TestCapabilities:
         from dartlab.core.capability.registry import WidgetSpec
 
         ws = WidgetSpec(widget="table")
-        payload = ws.to_payload()
+        payload = ws.toPayload()
         assert "key" not in payload
         assert payload["widget"] == "table"
 
@@ -204,7 +204,7 @@ class TestCapabilities:
             widgets=[WidgetSpec(widget="chart")],
             title="테스트",
         )
-        payload = vs.to_payload()
+        payload = vs.toPayload()
         assert payload["layout"] == "grid"
         assert len(payload["widgets"]) == 1
         assert payload["title"] == "테스트"
@@ -212,8 +212,8 @@ class TestCapabilities:
     def test_view_spec_single_widget(self):
         from dartlab.core.capability.registry import ViewSpec
 
-        vs = ViewSpec.single_widget("table", {"data": []}, key="t1", view_title="뷰")
-        payload = vs.to_payload()
+        vs = ViewSpec.singleWidget("table", {"data": []}, key="t1", viewTitle="뷰")
+        payload = vs.toPayload()
         assert len(payload["widgets"]) == 1
         assert payload["widgets"][0]["widget"] == "table"
         assert payload["title"] == "뷰"
@@ -222,7 +222,7 @@ class TestCapabilities:
         from dartlab.core.capability.registry import UiAction
 
         action = UiAction.navigate(view="viewer", topic="IS", period="2023")
-        payload = action.to_payload()
+        payload = action.toPayload()
         assert payload["action"] == "navigate"
         assert payload["view"] == "viewer"
         assert payload["topic"] == "IS"
@@ -231,7 +231,7 @@ class TestCapabilities:
         from dartlab.core.capability.registry import UiAction
 
         action = UiAction.toast("테스트 알림", level="warning")
-        payload = action.to_payload()
+        payload = action.toPayload()
         assert payload["action"] == "toast"
         assert payload["message"] == "테스트 알림"
         assert payload["level"] == "warning"
@@ -239,8 +239,8 @@ class TestCapabilities:
     def test_ui_action_select_company(self):
         from dartlab.core.capability.registry import UiAction
 
-        action = UiAction.select_company("005930", "삼성전자", "KOSPI")
-        payload = action.to_payload()
+        action = UiAction.selectCompany("005930", "삼성전자", "KOSPI")
+        payload = action.toPayload()
         assert payload["action"] == "select_company"
         assert payload["stockCode"] == "005930"
         assert payload["corpName"] == "삼성전자"
@@ -249,7 +249,7 @@ class TestCapabilities:
         from dartlab.core.capability.registry import UiAction
 
         action = UiAction.layout("sidebar", "open")
-        payload = action.to_payload()
+        payload = action.toPayload()
         assert payload["action"] == "layout"
         assert payload["target"] == "sidebar"
 
@@ -262,18 +262,18 @@ class TestCapabilities:
             description="테스트 설명",
             input_schema={"type": "object"},
         )
-        d = spec.to_dict()
+        d = spec.toDict()
         assert d["id"] == "test"
         assert d["label"] == "테스트"
 
     def test_build_capability_summary(self):
-        from dartlab.core.capability.registry import CapabilitySpec, build_capability_summary
+        from dartlab.core.capability.registry import CapabilitySpec, buildCapabilitySummary
 
         specs = [
             CapabilitySpec(id="a", label="A", description="", input_schema={}, kind="data"),
             CapabilitySpec(id="b", label="B", description="", input_schema={}, kind="analysis"),
         ]
-        summary = build_capability_summary(specs)
+        summary = buildCapabilitySummary(specs)
         assert summary["total"] == 2
         assert summary["byKind"]["data"] == 1
         assert summary["byKind"]["analysis"] == 1

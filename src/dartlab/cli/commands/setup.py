@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 _SETUP_CHOICES = [*CLI_PROVIDERS, "dart-key"]
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """setup 서브커맨드 등록 — LLM provider/API 키 설정."""
     parser = subparsers.add_parser("setup", help="LLM provider 및 API 키 설정 안내")
     parser.add_argument(
@@ -32,17 +32,17 @@ def run(args) -> int:
         return 0
 
     if args.provider == "dart-key":
-        return _setup_dart_key()
+        return _setupDartKey()
 
     if args.provider == "oauth-codex" and getattr(args, "login", False):
-        handler = _do_oauth_login
+        handler = _doOauthLogin
     else:
         handler = {
-            "oauth-codex": _setup_oauth_codex,
-            "codex": _setup_codex,
-            "ollama": _setup_ollama,
-            "openai": _setup_openai,
-            "custom": _setup_custom,
+            "oauth-codex": _setupOauthCodex,
+            "codex": _setupCodex,
+            "ollama": _setupOllama,
+            "openai": _setupOpenai,
+            "custom": _setupCustom,
             "gemini": lambda: _setupApiKeyProvider("gemini"),
             "groq": lambda: _setupApiKeyProvider("groq"),
             "cerebras": lambda: _setupApiKeyProvider("cerebras"),
@@ -93,13 +93,13 @@ def _setupApiKeyProvider(providerId: str) -> None:
     print()
 
 
-def _setup_oauth_codex() -> None:
+def _setupOauthCodex() -> None:
     print("\n[ provider 설정 ]\n")
     print("  provider 연결은 현재 Workbench 외부 제품 설정 영역에서 관리됩니다.")
     print("  공식 답변 진입점은 dartlab.ask(...) 와 /api/ask 입니다.\n")
 
 
-def _do_oauth_login() -> None:
+def _doOauthLogin() -> None:
     """브라우저에서 ChatGPT OAuth 로그인 실행."""
     import sys
     import threading
@@ -111,15 +111,15 @@ def _do_oauth_login() -> None:
     try:
         from dartlab.ai.providers.support.oauthToken import (
             OAUTH_REDIRECT_PORT,
-            build_auth_url,
-            exchange_code,
+            buildAuthUrl,
+            exchangeCode,
         )
     except ImportError:
         print("  OAuth 모듈을 불러올 수 없습니다.")
         print("  pip install --upgrade dartlab\n")
         return
 
-    auth_url, verifier, state = build_auth_url()
+    auth_url, verifier, state = buildAuthUrl()
     result: dict = {"done": False, "error": None}
 
     class CallbackHandler(BaseHTTPRequestHandler):
@@ -152,7 +152,7 @@ def _do_oauth_login() -> None:
                 return
 
             try:
-                exchange_code(code, verifier)
+                exchangeCode(code, verifier)
                 result["done"] = True
                 self._respond("인증 성공", "DartLab 인증이 완료되었습니다. 이 창을 닫아주세요.")
             except (ConnectionError, OSError, RuntimeError, ValueError) as exc:
@@ -176,7 +176,7 @@ def _do_oauth_login() -> None:
             self.end_headers()
             self.wfile.write(markup.encode("utf-8"))
 
-        def log_message(self, fmt, *args):
+        def logMessage(self, fmt, *args):
             pass
 
     server = HTTPServer(("127.0.0.1", OAUTH_REDIRECT_PORT), CallbackHandler)
@@ -222,7 +222,7 @@ def _do_oauth_login() -> None:
         print("  또는 다시 시도: dartlab.setup('chatgpt')\n")
 
 
-def _setup_codex(info: dict | None = None) -> None:
+def _setupCodex(info: dict | None = None) -> None:
     info = info or {"installed": False}
     print("\n[ Codex CLI 설정 — ChatGPT Plus/Pro 구독 ]\n")
 
@@ -248,7 +248,7 @@ def _setup_codex(info: dict | None = None) -> None:
     print()
 
 
-def _setup_ollama() -> None:
+def _setupOllama() -> None:
     print("\n[ Ollama 설정 — 로컬 LLM ]\n")
 
     print("  1. 설치")
@@ -268,7 +268,7 @@ def _setup_ollama() -> None:
     print()
 
 
-def _setup_openai() -> None:
+def _setupOpenai() -> None:
     print("\n[ OpenAI API 설정 — 최신 GPT 모델 ]\n")
 
     print("  1. API 키 발급")
@@ -288,7 +288,7 @@ def _setup_openai() -> None:
     print()
 
 
-def _setup_custom() -> None:
+def _setupCustom() -> None:
     print("\n[ Custom OpenAI-Compatible API 설정 ]\n")
     print("  vLLM, Together, Groq 등 OpenAI 호환 API를 사용합니다.\n")
 
@@ -307,7 +307,7 @@ def _setup_custom() -> None:
 # ── DART API 키 설정 ──────────────────────────────────
 
 
-def _setup_dart_key() -> int:
+def _setupDartKey() -> int:
     """DART OpenAPI 키 설정 — 대화형 입력 → .env 저장."""
     from dartlab.providers.dart.openapi.client import hasDartApiKey
 
@@ -335,7 +335,7 @@ def _setup_dart_key() -> int:
         print("\n  취소됨.\n")
         return 1
 
-    _save_dart_key_to_dotenv(key)
+    _saveDartKeyToDotenv(key)
 
     print("\n  ✓ .env에 DART_API_KEY 저장 완료")
     print("    (이 키는 git에 공유되지 않습니다)\n")
@@ -347,7 +347,7 @@ def _setup_dart_key() -> int:
     return 0
 
 
-def _save_dart_key_to_dotenv(key: str) -> None:
+def _saveDartKeyToDotenv(key: str) -> None:
     """프로젝트 루트의 .env에 DART_API_KEY 추가/갱신."""
     from dartlab.providers.dart.openapi.dartKey import saveDartKeyToDotenv
 

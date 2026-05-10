@@ -16,9 +16,9 @@ from dartlab.ai.tools.types import ToolSpec
 
 class DartLabProvider(BaseProvider):
     name = "dartlab"
-    default_model = "dartlab-research-graph"
+    defaultModel = "dartlab-research-graph"
 
-    def check_available(self) -> bool:
+    def checkAvailable(self) -> bool:
         return True
 
     def toolSchema(self, spec: ToolSpec) -> dict[str, Any]:

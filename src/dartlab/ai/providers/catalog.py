@@ -12,11 +12,11 @@ ProviderConfig = LLMConfig
 _PROVIDERS = ("anthropic", "openai", "google", "xai", "ollama", "dartlab")
 
 
-def available_providers() -> list[str]:
+def availableProviders() -> list[str]:
     return list(_PROVIDERS)
 
 
-def create_provider(config: LLMConfig | dict[str, Any] | None = None) -> LLMProvider:
+def createProvider(config: LLMConfig | dict[str, Any] | None = None) -> LLMProvider:
     cfg = _coerceConfig(config)
     name = (cfg.provider or "dartlab").lower()
     if name == "anthropic":
@@ -53,4 +53,4 @@ def _coerceConfig(config: LLMConfig | dict[str, Any] | None) -> LLMConfig:
     return LLMConfig()
 
 
-__all__ = ["available_providers", "create_provider", "ProviderConfig"]
+__all__ = ["availableProviders", "createProvider", "ProviderConfig"]

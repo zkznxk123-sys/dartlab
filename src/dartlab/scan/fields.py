@@ -208,9 +208,9 @@ def executeScreenSpec(spec: dict[str, Any]) -> pl.DataFrame:
     if not isinstance(spec, dict):
         raise ValueError("screen spec 은 dict 여야 합니다.")
 
-    where = _ensure_condition_list(spec.get("where", []), key="where")
-    any_conditions = _ensure_condition_list(spec.get("any", []), key="any")
-    select = _ensure_str_list(spec.get("select", []), key="select")
+    where = _ensureConditionList(spec.get("where", []), key="where")
+    any_conditions = _ensureConditionList(spec.get("any", []), key="any")
+    select = _ensureStrList(spec.get("select", []), key="select")
     sort = spec.get("sort")
     limit = int(spec.get("limit", 50))
     if limit <= 0:
@@ -218,17 +218,17 @@ def executeScreenSpec(spec: dict[str, Any]) -> pl.DataFrame:
 
     frames: list[pl.DataFrame] = []
     for cond in where:
-        frames.append(_condition_frame(cond, spec))
+        frames.append(_conditionFrame(cond, spec))
 
     if any_conditions:
-        any_frames = [_condition_frame(cond, spec) for cond in any_conditions]
+        any_frames = [_conditionFrame(cond, spec) for cond in any_conditions]
         any_frames = [f for f in any_frames if not f.is_empty()]
         if any_frames:
-            frames.append(_union_on_stock(any_frames))
+            frames.append(_unionOnStock(any_frames))
         else:
             return pl.DataFrame({"stockCode": []})
 
-    result = _inner_join_on_stock(frames)
+    result = _innerJoinOnStock(frames)
 
     requested = list(dict.fromkeys(select))
     if sort:
@@ -238,15 +238,15 @@ def executeScreenSpec(spec: dict[str, Any]) -> pl.DataFrame:
 
     if result.is_empty() and not frames and requested:
         first = requested[0]
-        result = _load_field_values(first, spec)
+        result = _loadFieldValues(first, spec)
         requested = requested[1:]
 
     for field in requested:
-        if _is_context_field(field):
+        if _isContextField(field):
             continue
         if field in result.columns:
             continue
-        values = _load_field_values(field, spec)
+        values = _loadFieldValues(field, spec)
         result = (
             values
             if result.is_empty() and "stockCode" not in result.columns
@@ -256,7 +256,7 @@ def executeScreenSpec(spec: dict[str, Any]) -> pl.DataFrame:
     if result.is_empty() and not frames:
         result = pl.DataFrame({"stockCode": []})
 
-    result = _attach_context_fields(result, select + ([str(sort["field"])] if sort else []), spec)
+    result = _attachContextFields(result, select + ([str(sort["field"])] if sort else []), spec)
 
     if sort:
         sort_field = str(sort["field"])
@@ -269,12 +269,12 @@ def executeScreenSpec(spec: dict[str, Any]) -> pl.DataFrame:
 @lru_cache(maxsize=1)
 def _catalog() -> pl.DataFrame:
     rows: list[dict[str, str]] = []
-    rows.extend(_finance_catalog_rows())
-    rows.extend(_valuation_catalog_rows())
-    rows.extend(_report_catalog_rows())
-    rows.extend(_docs_catalog_rows())
-    rows.extend(_krx_catalog_rows())
-    rows.extend(_krx_index_catalog_rows())
+    rows.extend(_financeCatalogRows())
+    rows.extend(_valuationCatalogRows())
+    rows.extend(_reportCatalogRows())
+    rows.extend(_docsCatalogRows())
+    rows.extend(_krxCatalogRows())
+    rows.extend(_krxIndexCatalogRows())
     return pl.DataFrame(rows).sort(["source", "field"])
 
 
@@ -284,7 +284,7 @@ def _row(
     source: str,
     kind: str,
     unit: str,
-    operator_set: str,
+    operatorSet: str,
     coverage: str,
     notes: str,
 ) -> dict[str, str]:
@@ -302,14 +302,14 @@ def _row(
         "source": source,
         "kind": kind,
         "unit": unit,
-        "operatorSet": operator_set,
+        "operatorSet": operatorSet,
         "coverage": coverage,
         "example": example,
         "notes": notes,
     }
 
 
-def _finance_catalog_rows() -> list[dict[str, str]]:
+def _financeCatalogRows() -> list[dict[str, str]]:
     from dartlab.providers.dart.finance.scanAccount import scanAccountList, scanRatioList
 
     rows: list[dict[str, str]] = []
@@ -348,7 +348,7 @@ def _finance_catalog_rows() -> list[dict[str, str]]:
     return rows
 
 
-def _valuation_catalog_rows() -> list[dict[str, str]]:
+def _valuationCatalogRows() -> list[dict[str, str]]:
     fields = {
         "marketCap": ("시가총액", "원"),
         "per": ("PER", "배"),
@@ -372,18 +372,18 @@ def _valuation_catalog_rows() -> list[dict[str, str]]:
     ]
 
 
-def _report_catalog_rows() -> list[dict[str, str]]:
+def _reportCatalogRows() -> list[dict[str, str]]:
     from dartlab.core.dataLoader import _dataDir
     from dartlab.providers.dart.report.types import API_TYPE_LABELS, API_TYPES
 
     rows: list[dict[str, str]] = []
     scan_dir = Path(_dataDir("scan"))
     report_dir = scan_dir / "report"
-    for api_type in API_TYPES:
-        label = API_TYPE_LABELS.get(api_type, api_type)
+    for apiType in API_TYPES:
+        label = API_TYPE_LABELS.get(apiType, apiType)
         rows.append(
             _row(
-                f"report.{api_type}.__exists__",
+                f"report.{apiType}.__exists__",
                 f"{label} 존재",
                 "report",
                 "boolean",
@@ -393,7 +393,7 @@ def _report_catalog_rows() -> list[dict[str, str]]:
                 "OpenDART 구조화 공시 API type 존재 여부.",
             )
         )
-        path = report_dir / f"{api_type}.parquet"
+        path = report_dir / f"{apiType}.parquet"
         if not path.exists():
             continue
         try:
@@ -405,7 +405,7 @@ def _report_catalog_rows() -> list[dict[str, str]]:
                 continue
             rows.append(
                 _row(
-                    f"report.{api_type}.{col}",
+                    f"report.{apiType}.{col}",
                     f"{label}.{col}",
                     "report",
                     "text",
@@ -418,7 +418,7 @@ def _report_catalog_rows() -> list[dict[str, str]]:
     return rows
 
 
-def _docs_catalog_rows() -> list[dict[str, str]]:
+def _docsCatalogRows() -> list[dict[str, str]]:
     return [
         _row(
             "docs.content",
@@ -453,7 +453,7 @@ def _docs_catalog_rows() -> list[dict[str, str]]:
     ]
 
 
-def _krx_catalog_rows() -> list[dict[str, str]]:
+def _krxCatalogRows() -> list[dict[str, str]]:
     from dartlab.gather._indicatorDispatch import _DEFAULT_INDICATORS_ALL
 
     rows = [
@@ -485,7 +485,7 @@ def _krx_catalog_rows() -> list[dict[str, str]]:
     return rows
 
 
-def _krx_index_catalog_rows() -> list[dict[str, str]]:
+def _krxIndexCatalogRows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     for market in ("KRX", "KOSPI", "KOSDAQ"):
         for name, (label, unit) in _KRX_INDEX_FIELDS.items():
@@ -504,7 +504,7 @@ def _krx_index_catalog_rows() -> list[dict[str, str]]:
     return rows
 
 
-def _ensure_condition_list(value: Any, *, key: str) -> list[dict[str, Any]]:
+def _ensureConditionList(value: Any, *, key: str) -> list[dict[str, Any]]:
     if value is None:
         return []
     if not isinstance(value, list):
@@ -515,7 +515,7 @@ def _ensure_condition_list(value: Any, *, key: str) -> list[dict[str, Any]]:
     return value
 
 
-def _ensure_str_list(value: Any, *, key: str) -> list[str]:
+def _ensureStrList(value: Any, *, key: str) -> list[str]:
     if value is None:
         return []
     if not isinstance(value, list):
@@ -523,9 +523,9 @@ def _ensure_str_list(value: Any, *, key: str) -> list[str]:
     return [str(v) for v in value]
 
 
-def _condition_frame(cond: dict[str, Any], spec: dict[str, Any]) -> pl.DataFrame:
-    field = _normalize_field(str(cond.get("field", "")))
-    meta = _field_meta(field)
+def _conditionFrame(cond: dict[str, Any], spec: dict[str, Any]) -> pl.DataFrame:
+    field = _normalizeField(str(cond.get("field", "")))
+    meta = _fieldMeta(field)
     if meta["kind"] == "context":
         raise ValueError(
             f"{field!r} 는 시장 컨텍스트 필드라 종목 필터 조건으로 사용할 수 없습니다. select 에 넣으세요."
@@ -533,12 +533,12 @@ def _condition_frame(cond: dict[str, Any], spec: dict[str, Any]) -> pl.DataFrame
     if "unit" in cond and str(cond["unit"]) != meta["unit"]:
         raise ValueError(f"{field!r} 단위는 {meta['unit']} 입니다. 받은 unit={cond['unit']!r}")
     if field.startswith("docs."):
-        return _docs_condition_values(cond, spec)
-    values = _load_field_values(field, spec)
-    return _apply_condition(values, field, cond, meta)
+        return _docsConditionValues(cond, spec)
+    values = _loadFieldValues(field, spec)
+    return _applyCondition(values, field, cond, meta)
 
 
-def _normalize_field(field: str) -> str:
+def _normalizeField(field: str) -> str:
     f = field.strip()
     if not f:
         raise ValueError("condition field 가 비어 있습니다.")
@@ -555,7 +555,7 @@ def _normalize_field(field: str) -> str:
     return aliases.get(f, f)
 
 
-def _field_meta(field: str) -> dict[str, str]:
+def _fieldMeta(field: str) -> dict[str, str]:
     catalog = _catalog()
     hit = catalog.filter(pl.col("field") == field)
     if hit.is_empty():
@@ -564,43 +564,43 @@ def _field_meta(field: str) -> dict[str, str]:
     return hit.row(0, named=True)
 
 
-def _load_field_values(field: str, spec: dict[str, Any]) -> pl.DataFrame:
-    field = _normalize_field(field)
-    _field_meta(field)
+def _loadFieldValues(field: str, spec: dict[str, Any]) -> pl.DataFrame:
+    field = _normalizeField(field)
+    _fieldMeta(field)
     if field.startswith("finance.account."):
-        return _load_finance_account(field)
+        return _loadFinanceAccount(field)
     if field.startswith("finance.ratio."):
-        return _load_finance_ratio(field)
+        return _loadFinanceRatio(field)
     if field.startswith("valuation."):
-        return _load_valuation(field)
+        return _loadValuation(field)
     if field.startswith("report."):
-        return _load_report(field)
+        return _loadReport(field)
     if field.startswith("docs."):
         raise ValueError("docs 필드는 where 조건의 value 로 검색어를 지정해야 합니다.")
     if field.startswith("krx."):
-        return _load_krx(field, spec)
+        return _loadKrx(field, spec)
     if field.startswith("krxIndex."):
         raise ValueError("krxIndex 필드는 select 전용 시장 컨텍스트입니다.")
     raise ValueError(f"지원하지 않는 field source: {field!r}")
 
 
-def _load_finance_account(field: str) -> pl.DataFrame:
+def _loadFinanceAccount(field: str) -> pl.DataFrame:
     from dartlab.providers.dart.finance.scanAccount import scanAccount
 
     name = field.split(".", 2)[2]
     df = scanAccount(name)
-    return _latest_wide_value(df, field)
+    return _latestWideValue(df, field)
 
 
-def _load_finance_ratio(field: str) -> pl.DataFrame:
+def _loadFinanceRatio(field: str) -> pl.DataFrame:
     from dartlab.providers.dart.finance.scanAccount import scanRatio
 
     name = field.split(".", 2)[2]
     df = scanRatio(name)
-    return _latest_wide_value(df, field)
+    return _latestWideValue(df, field)
 
 
-def _latest_wide_value(df: pl.DataFrame, field: str) -> pl.DataFrame:
+def _latestWideValue(df: pl.DataFrame, field: str) -> pl.DataFrame:
     if df is None or df.is_empty() or "stockCode" not in df.columns:
         return pl.DataFrame({"stockCode": [], field: []})
     period_cols = sorted([c for c in df.columns if c != "stockCode"], reverse=True)
@@ -609,7 +609,7 @@ def _latest_wide_value(df: pl.DataFrame, field: str) -> pl.DataFrame:
     return df.select("stockCode", pl.coalesce([pl.col(c) for c in period_cols]).alias(field))
 
 
-def _load_valuation(field: str) -> pl.DataFrame:
+def _loadValuation(field: str) -> pl.DataFrame:
     name = field.split(".", 1)[1]
     if name != "psr":
         from dartlab.scan._helpers import loadValuationSnapshot
@@ -626,28 +626,28 @@ def _load_valuation(field: str) -> pl.DataFrame:
     return df.select("stockCode", pl.col(name).alias(field))
 
 
-def _load_report(field: str) -> pl.DataFrame:
-    from dartlab.scan._helpers import scan_parquets
+def _loadReport(field: str) -> pl.DataFrame:
+    from dartlab.scan._helpers import scanParquets
 
-    _, api_type, col = field.split(".", 2)
+    _, apiType, col = field.split(".", 2)
     if col == "__exists__":
-        raw = _load_report_exists(api_type)
+        raw = _loadReportExists(apiType)
         if raw.is_empty():
             return pl.DataFrame({"stockCode": [], field: []})
         return raw.select("stockCode").unique().with_columns(pl.lit(True).alias(field))
 
-    raw = scan_parquets(api_type, ["stockCode", "year", "quarter", col])
+    raw = scanParquets(apiType, ["stockCode", "year", "quarter", col])
     if raw.is_empty() or col not in raw.columns or "stockCode" not in raw.columns:
         return pl.DataFrame({"stockCode": [], field: []})
-    raw = _latest_by_stock(raw)
+    raw = _latestByStock(raw)
     return raw.select("stockCode", pl.col(col).alias(field))
 
 
-def _load_report_exists(api_type: str) -> pl.DataFrame:
+def _loadReportExists(apiType: str) -> pl.DataFrame:
     from dartlab.core.dataLoader import _dataDir
     from dartlab.scan._helpers import _ensureScanData
 
-    scan_path = _ensureScanData() / "report" / f"{api_type}.parquet"
+    scan_path = _ensureScanData() / "report" / f"{apiType}.parquet"
     if scan_path.exists():
         try:
             return pl.scan_parquet(str(scan_path)).select("stockCode").collect()
@@ -661,7 +661,7 @@ def _load_report_exists(api_type: str) -> pl.DataFrame:
             lf = pl.scan_parquet(str(pf))
             if "apiType" not in lf.collect_schema().names():
                 continue
-            frames.append(lf.filter(pl.col("apiType") == api_type).select("stockCode"))
+            frames.append(lf.filter(pl.col("apiType") == apiType).select("stockCode"))
         except (OSError, pl.exceptions.PolarsError):
             continue
     if not frames:
@@ -669,15 +669,15 @@ def _load_report_exists(api_type: str) -> pl.DataFrame:
     return pl.concat(frames).collect()
 
 
-def _latest_by_stock(df: pl.DataFrame) -> pl.DataFrame:
+def _latestByStock(df: pl.DataFrame) -> pl.DataFrame:
     sort_cols = [c for c in ("stockCode", "year", "quarter") if c in df.columns]
     if "stockCode" not in sort_cols:
         return df
     return df.sort(sort_cols).group_by("stockCode").tail(1)
 
 
-def _docs_condition_values(cond: dict[str, Any], spec: dict[str, Any]) -> pl.DataFrame:
-    field = _normalize_field(str(cond.get("field", "")))
+def _docsConditionValues(cond: dict[str, Any], spec: dict[str, Any]) -> pl.DataFrame:
+    field = _normalizeField(str(cond.get("field", "")))
     op = str(cond.get("op", "contains"))
     if op not in {"contains", "=="}:
         raise ValueError("docs 조건은 contains 또는 == 만 지원합니다.")
@@ -715,24 +715,24 @@ def _docs_condition_values(cond: dict[str, Any], spec: dict[str, Any]) -> pl.Dat
     )
 
 
-def _load_krx(field: str, spec: dict[str, Any]) -> pl.DataFrame:
+def _loadKrx(field: str, spec: dict[str, Any]) -> pl.DataFrame:
     name = field.split(".", 1)[1]
     start = spec.get("start")
     end = spec.get("end")
     if start is None and end is None and name in _KRX_FIELDS:
-        raw = _load_krx_latest_year()
+        raw = _loadKrxLatestYear()
     else:
         end_date = date.today()
         if start is None and end is None:
             start = (end_date - timedelta(days=int(spec.get("windowDays", 420)))).isoformat()
             end = end_date.isoformat()
-        raw = _load_krx_window(start=start, end=end)
+        raw = _loadKrxWindow(start=start, end=end)
     if raw is None or raw.is_empty():
         return pl.DataFrame({"stockCode": [], field: []})
-    return _finalize_krx_values(raw, name, field)
+    return _finalizeKrxValues(raw, name, field)
 
 
-def _load_krx_latest_year() -> pl.DataFrame:
+def _loadKrxLatestYear() -> pl.DataFrame:
     from dartlab.gather._hfBulk import loadFiltered
 
     this_year = date.today().year
@@ -742,13 +742,13 @@ def _load_krx_latest_year() -> pl.DataFrame:
     return raw
 
 
-def _load_krx_window(*, start: str | None, end: str | None) -> pl.DataFrame:
+def _loadKrxWindow(*, start: str | None, end: str | None) -> pl.DataFrame:
     from dartlab.gather._hfBulk import loadFiltered
 
     return loadFiltered(start=start, end=end, adjustment="raw")
 
 
-def _finalize_krx_values(raw: pl.DataFrame, name: str, field: str) -> pl.DataFrame:
+def _finalizeKrxValues(raw: pl.DataFrame, name: str, field: str) -> pl.DataFrame:
     from dartlab.gather.krxApi import _KRX_TO_STD
 
     rename = {k: v for k, v in _KRX_TO_STD.items() if k in raw.columns}
@@ -762,7 +762,7 @@ def _finalize_krx_values(raw: pl.DataFrame, name: str, field: str) -> pl.DataFra
     return df.group_by("stockCode").agg(pl.col(name).last().alias(field))
 
 
-def _apply_condition(df: pl.DataFrame, field: str, cond: dict[str, Any], meta: dict[str, str]) -> pl.DataFrame:
+def _applyCondition(df: pl.DataFrame, field: str, cond: dict[str, Any], meta: dict[str, str]) -> pl.DataFrame:
     if df.is_empty():
         return df
     op = str(cond.get("op", "=="))
@@ -777,8 +777,8 @@ def _apply_condition(df: pl.DataFrame, field: str, cond: dict[str, Any], meta: d
         raise ValueError(f"{field!r} 조건에는 value 가 필요합니다.")
 
     value = cond["value"]
-    if meta["kind"] == "number" or _looks_numeric(value):
-        expr = _numeric_expr(field)
+    if meta["kind"] == "number" or _looksNumeric(value):
+        expr = _numericExpr(field)
         if op == ">":
             return df.filter(expr > float(value))
         if op == ">=":
@@ -806,7 +806,7 @@ def _apply_condition(df: pl.DataFrame, field: str, cond: dict[str, Any], meta: d
     raise ValueError(f"{field!r} 에서 op={op!r} 를 적용할 수 없습니다.")
 
 
-def _numeric_expr(field: str) -> pl.Expr:
+def _numericExpr(field: str) -> pl.Expr:
     return (
         pl.col(field)
         .cast(pl.Utf8, strict=False)
@@ -817,7 +817,7 @@ def _numeric_expr(field: str) -> pl.Expr:
     )
 
 
-def _looks_numeric(value: Any) -> bool:
+def _looksNumeric(value: Any) -> bool:
     try:
         float(value)
         return True
@@ -825,7 +825,7 @@ def _looks_numeric(value: Any) -> bool:
         return False
 
 
-def _inner_join_on_stock(frames: list[pl.DataFrame]) -> pl.DataFrame:
+def _innerJoinOnStock(frames: list[pl.DataFrame]) -> pl.DataFrame:
     frames = [f for f in frames if f is not None]
     if not frames:
         return pl.DataFrame()
@@ -835,7 +835,7 @@ def _inner_join_on_stock(frames: list[pl.DataFrame]) -> pl.DataFrame:
     return result
 
 
-def _union_on_stock(frames: list[pl.DataFrame]) -> pl.DataFrame:
+def _unionOnStock(frames: list[pl.DataFrame]) -> pl.DataFrame:
     all_cols = sorted({c for frame in frames for c in frame.columns})
     padded = []
     for frame in frames:
@@ -846,28 +846,28 @@ def _union_on_stock(frames: list[pl.DataFrame]) -> pl.DataFrame:
     return pl.concat(padded, how="diagonal_relaxed").unique(subset=["stockCode"], keep="first")
 
 
-def _is_context_field(field: str) -> bool:
-    return _normalize_field(field).startswith("krxIndex.")
+def _isContextField(field: str) -> bool:
+    return _normalizeField(field).startswith("krxIndex.")
 
 
-def _attach_context_fields(df: pl.DataFrame, fields: list[str], spec: dict[str, Any]) -> pl.DataFrame:
-    for field in dict.fromkeys(_normalize_field(f) for f in fields if f):
+def _attachContextFields(df: pl.DataFrame, fields: list[str], spec: dict[str, Any]) -> pl.DataFrame:
+    for field in dict.fromkeys(_normalizeField(f) for f in fields if f):
         if not field.startswith("krxIndex."):
             continue
-        value = _load_krx_index_scalar(field, spec)
+        value = _loadKrxIndexScalar(field, spec)
         df = df.with_columns(pl.lit(value).alias(field))
     return df
 
 
-def _load_krx_index_scalar(field: str, spec: dict[str, Any]) -> float | int | str | None:
+def _loadKrxIndexScalar(field: str, spec: dict[str, Any]) -> float | int | str | None:
     _, market, name = field.split(".", 2)
     start = spec.get("start")
     end = spec.get("end")
     if start is None and end is None:
         year = date.today().year
-        raw = _load_krx_index_year(market=market, year=year)
+        raw = _loadKrxIndexYear(market=market, year=year)
         if raw is None or raw.is_empty():
-            raw = _load_krx_index_year(market=market, year=year - 1)
+            raw = _loadKrxIndexYear(market=market, year=year - 1)
     else:
         from dartlab.gather._hfIndexBulk import loadFiltered
 
@@ -875,16 +875,16 @@ def _load_krx_index_scalar(field: str, spec: dict[str, Any]) -> float | int | st
     if raw is None or raw.is_empty():
         return None
 
-    return _finalize_krx_index_scalar(raw, name, spec)
+    return _finalizeKrxIndexScalar(raw, name, spec)
 
 
-def _load_krx_index_year(*, market: str, year: int) -> pl.DataFrame:
+def _loadKrxIndexYear(*, market: str, year: int) -> pl.DataFrame:
     from dartlab.gather._hfIndexBulk import loadFiltered
 
     return loadFiltered(market=market, year=year)
 
 
-def _finalize_krx_index_scalar(raw: pl.DataFrame, name: str, spec: dict[str, Any]) -> float | int | str | None:
+def _finalizeKrxIndexScalar(raw: pl.DataFrame, name: str, spec: dict[str, Any]) -> float | int | str | None:
     from dartlab.gather.krxIndex import _KRX_TO_STD
 
     rename = {k: v for k, v in _KRX_TO_STD.items() if k in raw.columns}

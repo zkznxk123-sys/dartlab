@@ -30,7 +30,7 @@ class NelsonSiegelResult:
     description: str
 
 
-def _ns_factor_loadings(tau: np.ndarray, lamb: float) -> np.ndarray:
+def _nsFactorLoadings(tau: np.ndarray, lamb: float) -> np.ndarray:
     """Nelson-Siegel 팩터 로딩 행렬 (T×3).
 
     y(τ) = β0 × 1 + β1 × [(1-e^(-τ/λ))/(τ/λ)] + β2 × [(1-e^(-τ/λ))/(τ/λ) - e^(-τ/λ)]
@@ -77,7 +77,7 @@ def nelsonSiegel(
     best_lamb = 1.5
 
     for lamb in np.arange(0.3, 6.0, 0.1):
-        X = _ns_factor_loadings(tau, lamb)
+        X = _nsFactorLoadings(tau, lamb)
         # OLS: β = (X'X)^{-1} X'y
         try:
             beta = np.linalg.lstsq(X, y, rcond=None)[0]
@@ -91,7 +91,7 @@ def nelsonSiegel(
             best_lamb = lamb
 
     b0, b1, b2 = best_beta
-    X_best = _ns_factor_loadings(tau, best_lamb)
+    X_best = _nsFactorLoadings(tau, best_lamb)
     fitted = X_best @ best_beta
     residuals = y - fitted
 

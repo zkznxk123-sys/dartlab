@@ -54,9 +54,9 @@ def _extractTargets(question: str, *, stockCode: Any = None) -> list[str]:
     if stockCode:
         return [str(stockCode)]
     text = str(question or "").strip()
-    stock_codes = _STOCK_CODE_RE.findall(text)
-    if stock_codes:
-        return list(dict.fromkeys(stock_codes))
+    stockCodes = _STOCK_CODE_RE.findall(text)
+    if stockCodes:
+        return list(dict.fromkeys(stockCodes))
     ticker_hits = [value for value in _TICKER_RE.findall(text) if value not in {"BS", "IS", "CF", "FCF"}]
     if ticker_hits:
         return list(dict.fromkeys(ticker_hits))
@@ -161,36 +161,36 @@ def _candidateApiRefs(state: WorkbenchState) -> list[str]:
         refs.extend(str(item) for item in payload.get("capabilityRefs") or [])
     for ref in state.apiRefs:
         payload = ref.payload if isinstance(ref.payload, dict) else {}
-        api_ref = payload.get("apiRef") or ref.id.removeprefix("api:")
-        if api_ref:
-            refs.append(str(api_ref))
+        apiRef = payload.get("apiRef") or ref.id.removeprefix("api:")
+        if apiRef:
+            refs.append(str(apiRef))
     return [ref for ref in dict.fromkeys(refs) if _isExecutableApiRef(ref)]
 
 
-def _isExecutableApiRef(api_ref: str) -> bool:
-    if not api_ref or api_ref in _NON_EXECUTABLE_API_REFS:
+def _isExecutableApiRef(apiRef: str) -> bool:
+    if not apiRef or apiRef in _NON_EXECUTABLE_API_REFS:
         return False
-    if api_ref.startswith("aiContract."):
+    if apiRef.startswith("aiContract."):
         return False
     return True
 
 
-def _firstScanRef(candidates: list[str], skill_refs: list[Ref]) -> str | None:
-    skill_ids = [_skillId(ref) for ref in skill_refs]
-    if not any(skill_id.startswith("engines.scan") for skill_id in skill_ids):
+def _firstScanRef(candidates: list[str], skillRefs: list[Ref]) -> str | None:
+    skillIds = [_skillId(ref) for ref in skillRefs]
+    if not any(skill_id.startswith("engines.scan") for skill_id in skillIds):
         return None
-    for api_ref in candidates:
-        if api_ref.startswith("scan."):
-            return api_ref
+    for apiRef in candidates:
+        if apiRef.startswith("scan."):
+            return apiRef
     if "scan" in candidates:
         return "scan"
     return None
 
 
-def _scanAxis(api_ref: str, skill_refs: list[Ref]) -> str:
-    if api_ref.startswith("scan."):
-        return api_ref.split(".", 1)[1]
-    for ref in skill_refs:
+def _scanAxis(apiRef: str, skillRefs: list[Ref]) -> str:
+    if apiRef.startswith("scan."):
+        return apiRef.split(".", 1)[1]
+    for ref in skillRefs:
         skill_id = _skillId(ref)
         if skill_id.startswith("engines.scan."):
             return skill_id.rsplit(".", 1)[1]
@@ -200,21 +200,21 @@ def _scanAxis(api_ref: str, skill_refs: list[Ref]) -> str:
 def _firstCompanyRef(candidates: list[str]) -> str | None:
     if "Company.show" in candidates:
         return "Company.show"
-    for api_ref in candidates:
-        if api_ref.startswith("Company.") and api_ref not in {"Company", "Company.ask"}:
-            return api_ref
+    for apiRef in candidates:
+        if apiRef.startswith("Company.") and apiRef not in {"Company", "Company.ask"}:
+            return apiRef
     return None
 
 
 def _firstCapabilityRef(candidates: list[str]) -> str | None:
-    for api_ref in candidates:
-        if api_ref in {"capabilities", "dartlab.capabilities"}:
-            return api_ref
+    for apiRef in candidates:
+        if apiRef in {"capabilities", "dartlab.capabilities"}:
+            return apiRef
     return None
 
 
-def _skillRequiresTable(skill_refs: list[Ref]) -> bool:
-    for ref in skill_refs:
+def _skillRequiresTable(skillRefs: list[Ref]) -> bool:
+    for ref in skillRefs:
         payload = ref.payload if isinstance(ref.payload, dict) else {}
         required = {str(item) for item in payload.get("requiredEvidence") or []}
         if required & {"table", "tableRef", "valueRef", "dateRef"}:
@@ -222,8 +222,8 @@ def _skillRequiresTable(skill_refs: list[Ref]) -> bool:
     return False
 
 
-def _skillRequiresTarget(skill_refs: list[Ref]) -> bool:
-    for ref in skill_refs:
+def _skillRequiresTarget(skillRefs: list[Ref]) -> bool:
+    for ref in skillRefs:
         payload = ref.payload if isinstance(ref.payload, dict) else {}
         required = {str(item) for item in payload.get("requiredEvidence") or []}
         inputs = {str(item).lower() for item in payload.get("inputs") or []}
@@ -232,16 +232,16 @@ def _skillRequiresTarget(skill_refs: list[Ref]) -> bool:
     return False
 
 
-def _companyPlan(api_ref: str, target: str, skill_refs: list[Ref], *, question: str) -> dict[str, Any]:
-    if api_ref == "Company.analysis":
-        subaxis = _analysisSubaxis(skill_refs)
+def _companyPlan(apiRef: str, target: str, skillRefs: list[Ref], *, question: str) -> dict[str, Any]:
+    if apiRef == "Company.analysis":
+        subaxis = _analysisSubaxis(skillRefs)
         args = ["financial", subaxis] if subaxis else []
-        return {"apiRef": api_ref, "target": target, "args": args, "question": question}
-    return {"apiRef": api_ref, "target": target, "question": question}
+        return {"apiRef": apiRef, "target": target, "args": args, "question": question}
+    return {"apiRef": apiRef, "target": target, "question": question}
 
 
-def _analysisSubaxis(skill_refs: list[Ref]) -> str:
-    for ref in skill_refs:
+def _analysisSubaxis(skillRefs: list[Ref]) -> str:
+    for ref in skillRefs:
         skill_id = _skillId(ref)
         if not skill_id.startswith("engines.analysis."):
             continue
@@ -253,8 +253,8 @@ def _analysisSubaxis(skill_refs: list[Ref]) -> str:
     return ""
 
 
-def _capabilityKeyFromSkills(skill_refs: list[Ref]) -> str:
-    for ref in skill_refs:
+def _capabilityKeyFromSkills(skillRefs: list[Ref]) -> str:
+    for ref in skillRefs:
         skill_id = _skillId(ref)
         parts = skill_id.split(".")
         if len(parts) >= 2 and parts[0] == "engines":
@@ -280,8 +280,8 @@ def _requiresExecution(state: WorkbenchState) -> bool:
     required = set(_requiredEvidence(state))
     if required & _EVIDENCE_EXECUTION_NAMES:
         return True
-    skill_ids = [_skillId(ref) for ref in state.selectedSkillRefs]
-    return any(skill_id.startswith("engines.") for skill_id in skill_ids)
+    skillIds = [_skillId(ref) for ref in state.selectedSkillRefs]
+    return any(skill_id.startswith("engines.") for skill_id in skillIds)
 
 
 def _hasRecipe(state: WorkbenchState) -> bool:
@@ -329,9 +329,9 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
     steps = payload.get("recipeSteps") or []
     if not steps:
         # body 에서 직접 추출 fallback
-        from dartlab.skills.registry import _steps_from_recipe_body
+        from dartlab.skills.registry import _stepsFromRecipeBody
 
-        steps = _steps_from_recipe_body(str(payload.get("body") or ""))
+        steps = _stepsFromRecipeBody(str(payload.get("body") or ""))
     if not steps:
         # linkedSkills 만 있고 body step 없으면 단순 전개
         steps = [{"skillId": sid, "note": ""} for sid in payload.get("linkedSkills") or []]
@@ -360,16 +360,16 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
         capability_refs = method_refs or executable_refs
         if not capability_refs:
             continue
-        api_ref = capability_refs[0]
-        is_scan_step = api_ref.startswith("scan.") or api_ref in {"scan", "dartlab.scan"}
-        is_company_step = api_ref.startswith("Company.")
+        apiRef = capability_refs[0]
+        is_scan_step = apiRef.startswith("scan.") or apiRef in {"scan", "dartlab.scan"}
+        is_company_step = apiRef.startswith("Company.")
 
         for target in targets[:2] if targets else [None]:
             plan = {
                 "tool": "EngineCall",
                 "args": {
                     "plan": {
-                        "apiRef": api_ref,
+                        "apiRef": apiRef,
                         "target": target,
                         "question": state.question,
                         "_recipeStep": skill_id,
@@ -388,7 +388,7 @@ def _expandRecipe(state: WorkbenchState) -> list[dict[str, Any]]:
     return plans
 
 
-def _injectStepDependency(plan: dict[str, Any], prev_results: list[dict[str, Any]]) -> dict[str, Any]:
+def _injectStepDependency(plan: dict[str, Any], prevResults: list[dict[str, Any]]) -> dict[str, Any]:
     """plan 의 _inheritTargetsFrom 메타가 가리키는 prev step 결과 ref 에서 stockCode 추출 후 target 으로 inject.
 
     매칭 안 되면 원본 그대로 반환 (회귀 보호).
@@ -398,9 +398,9 @@ def _injectStepDependency(plan: dict[str, Any], prev_results: list[dict[str, Any
     src_idx = inner.get("_inheritTargetsFrom")
     if src_idx is None or not isinstance(src_idx, int):
         return plan
-    if src_idx < 0 or src_idx >= len(prev_results):
+    if src_idx < 0 or src_idx >= len(prevResults):
         return plan
-    prev = prev_results[src_idx]
+    prev = prevResults[src_idx]
     prev_refs = (prev.get("result") or {}).refs if hasattr(prev.get("result") or {}, "refs") else []
     # ref payload 안 stockCode 후보 추출
     candidates: list[str] = []

@@ -88,9 +88,9 @@ def calcVolatility(
     # RV_t+1 = β0 + β1*RV_d + β2*RV_w + β3*RV_m + ε
     if len(log_returns) >= 66:
         rv_daily = log_returns**2
-        rv_d = _rolling_mean(rv_daily, 1)
-        rv_w = _rolling_mean(rv_daily, 5)
-        rv_m = _rolling_mean(rv_daily, 22)
+        rv_d = _rollingMean(rv_daily, 1)
+        rv_w = _rollingMean(rv_daily, 5)
+        rv_m = _rollingMean(rv_daily, 22)
 
         # OLS fit (최근 44일 사용)
         valid_start = 22  # rv_m이 유효한 시점부터
@@ -124,7 +124,7 @@ def calcVolatility(
     # ── GARCH(1,1) (Bollerslev 1986) ──
     # σ²_t = ω + α·ε²_{t-1} + β·σ²_{t-1}
     if len(log_returns) >= 100:
-        garch_result = _fit_garch11(log_returns[-252:] if len(log_returns) >= 252 else log_returns)
+        garch_result = _fitGarch11(log_returns[-252:] if len(log_returns) >= 252 else log_returns)
         if garch_result:
             result["garchVol"] = round(garch_result["forecastVol"], 4)
             result["garchParams"] = {
@@ -210,7 +210,7 @@ def calcVolatility(
     return result
 
 
-def _rolling_mean(arr: np.ndarray, window: int) -> np.ndarray:
+def _rollingMean(arr: np.ndarray, window: int) -> np.ndarray:
     """간단 rolling mean."""
     if window <= 1:
         return arr.copy()
@@ -218,7 +218,7 @@ def _rolling_mean(arr: np.ndarray, window: int) -> np.ndarray:
     return np.convolve(arr, kernel, mode="same")
 
 
-def _fit_garch11(returns: np.ndarray) -> dict | None:
+def _fitGarch11(returns: np.ndarray) -> dict | None:
     """GARCH(1,1) numpy MLE — Nelder-Mead simplex.
 
     σ²_t = ω + α·ε²_{t-1} + β·σ²_{t-1}
@@ -231,7 +231,7 @@ def _fit_garch11(returns: np.ndarray) -> dict | None:
     resid = returns - mean_r
     var_init = float(np.var(resid))
 
-    def neg_log_likelihood(params):
+    def negLogLikelihood(params):
         """GARCH(1,1) 음의 로그우도 — Nelder-Mead 최적화 목적함수.
 
         Parameters
@@ -260,10 +260,10 @@ def _fit_garch11(returns: np.ndarray) -> dict | None:
         return -ll
 
     # Nelder-Mead simplex optimization
-    best_params = _nelder_mead(
-        neg_log_likelihood,
+    best_params = _nelderMead(
+        negLogLikelihood,
         x0=np.array([var_init * 0.05, 0.08, 0.85]),
-        max_iter=500,
+        maxIter=500,
     )
 
     if best_params is None:
@@ -290,7 +290,7 @@ def _fit_garch11(returns: np.ndarray) -> dict | None:
     }
 
 
-def _nelder_mead(fn, x0: np.ndarray, max_iter: int = 500, tol: float = 1e-8) -> np.ndarray | None:
+def _nelderMead(fn, x0: np.ndarray, maxIter: int = 500, tol: float = 1e-8) -> np.ndarray | None:
     """간이 Nelder-Mead simplex optimizer (numpy only)."""
     n = len(x0)
     # simplex 초기화
@@ -303,7 +303,7 @@ def _nelder_mead(fn, x0: np.ndarray, max_iter: int = 500, tol: float = 1e-8) -> 
 
     f_values = np.array([fn(simplex[i]) for i in range(n + 1)])
 
-    for _ in range(max_iter):
+    for _ in range(maxIter):
         # 정렬
         order = np.argsort(f_values)
         simplex = simplex[order]

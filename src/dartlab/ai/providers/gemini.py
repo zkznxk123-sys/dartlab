@@ -23,7 +23,7 @@ class GeminiProvider(BaseProvider):
         super().__init__(config)
         self._client = None
 
-    def _get_client(self):
+    def _getClient(self):
         if self._client is not None:
             return self._client
         try:
@@ -33,7 +33,7 @@ class GeminiProvider(BaseProvider):
 
         import os
 
-        apiKey = self.config.api_key
+        apiKey = self.config.apiKey
         if not apiKey:
             apiKey = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
 
@@ -44,39 +44,39 @@ class GeminiProvider(BaseProvider):
                 "  설정: GEMINI_API_KEY 환경변수 또는 설정 패널에서 입력"
             )
 
-        self._client = genai.Client(api_key=apiKey)
+        self._client = genai.Client(apiKey=apiKey)
         return self._client
 
     @property
-    def default_model(self) -> str:
+    def defaultModel(self) -> str:
         return "gemini-2.5-flash"
 
     @property
-    def supports_native_tools(self) -> bool:
+    def supportsNativeTools(self) -> bool:
         return True
 
-    def check_available(self) -> bool:
+    def checkAvailable(self) -> bool:
         try:
-            self._get_client()
+            self._getClient()
             return True
         except (ImportError, ValueError, OSError):
             return False
 
     def complete(self, messages: list[dict[str, str]]) -> LLMResponse:
-        client = self._get_client()
+        client = self._getClient()
         systemInstruction, contents = _splitSystemAndContents(messages)
 
         from google.genai import types
 
         config = types.GenerateContentConfig(
             temperature=self.config.temperature,
-            max_output_tokens=self.config.max_tokens,
+            max_output_tokens=self.config.maxTokens,
         )
         if systemInstruction:
             config.system_instruction = systemInstruction
 
         response = client.models.generate_content(
-            model=self.resolved_model,
+            model=self.resolvedModel,
             contents=contents,
             config=config,
         )
@@ -92,57 +92,57 @@ class GeminiProvider(BaseProvider):
         return LLMResponse(
             answer=response.text or "",
             provider="gemini",
-            model=self.resolved_model,
+            model=self.resolvedModel,
             usage=usage,
         )
 
     def stream(self, messages: list[dict[str, str]]) -> Generator[str, None, None]:
-        client = self._get_client()
+        client = self._getClient()
         systemInstruction, contents = _splitSystemAndContents(messages)
 
         from google.genai import types
 
         config = types.GenerateContentConfig(
             temperature=self.config.temperature,
-            max_output_tokens=self.config.max_tokens,
+            max_output_tokens=self.config.maxTokens,
         )
         if systemInstruction:
             config.system_instruction = systemInstruction
 
         for chunk in client.models.generate_content_stream(
-            model=self.resolved_model,
+            model=self.resolvedModel,
             contents=contents,
             config=config,
         ):
             if chunk.text:
                 yield chunk.text
 
-    def complete_with_tools(
+    def completeWithTools(
         self,
         messages: list[dict],
         tools: list[dict],
         *,
-        tool_choice: str | None = None,
+        toolChoice: str | None = None,
     ) -> ToolResponse:
-        client = self._get_client()
+        client = self._getClient()
         from google.genai import types
 
         systemInstruction, contents = _splitSystemAndContents(messages)
         geminiTools = _convertToolsToGemini(tools)
 
         toolConfig = None
-        if tool_choice == "any":
+        if toolChoice == "any":
             toolConfig = types.ToolConfig(
                 function_calling_config=types.FunctionCallingConfig(mode="ANY"),
             )
-        elif tool_choice == "none":
+        elif toolChoice == "none":
             toolConfig = types.ToolConfig(
                 function_calling_config=types.FunctionCallingConfig(mode="NONE"),
             )
 
         config = types.GenerateContentConfig(
             temperature=self.config.temperature,
-            max_output_tokens=self.config.max_tokens,
+            max_output_tokens=self.config.maxTokens,
             tools=geminiTools,
         )
         if toolConfig is not None:
@@ -151,7 +151,7 @@ class GeminiProvider(BaseProvider):
             config.system_instruction = systemInstruction
 
         response = client.models.generate_content(
-            model=self.resolved_model,
+            model=self.resolvedModel,
             contents=contents,
             config=config,
         )
@@ -189,30 +189,30 @@ class GeminiProvider(BaseProvider):
         return ToolResponse(
             answer=answer,
             provider="gemini",
-            model=self.resolved_model,
+            model=self.resolvedModel,
             usage=usage,
-            tool_calls=toolCalls,
+            toolCalls=toolCalls,
             finish_reason=finishReason,
         )
 
-    def format_assistant_tool_calls(
+    def formatAssistantToolCalls(
         self,
         answer: str | None,
-        tool_calls: list,
+        toolCalls: list,
     ) -> dict:
         from google.genai import types
 
         parts = []
         if answer:
             parts.append(types.Part(text=answer))
-        for tc in tool_calls:
+        for tc in toolCalls:
             parts.append(types.Part(function_call=types.FunctionCall(name=tc.name, args=tc.arguments)))
         return {"role": "model", "parts": parts, "_gemini_native": True}
 
-    def format_tool_result(self, tool_call_id: str, result: str) -> dict:
+    def formatToolResult(self, toolCallId: str, result: str) -> dict:
         from google.genai import types
 
-        name = tool_call_id
+        name = toolCallId
         if name.startswith("call_") and "_" in name[5:]:
             name = name[5:].rsplit("_", 1)[0]
         parts = [types.Part(function_response=types.FunctionResponse(name=name, response={"result": result}))]

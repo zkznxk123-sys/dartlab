@@ -28,7 +28,7 @@ OLLAMA_MODEL_GUIDE: list[dict[str, str]] = [
 ]
 
 
-def extract_last_stock_code(history: list[HistoryMessage] | None) -> str | None:
+def extractLastStockCode(history: list[HistoryMessage] | None) -> str | None:
     """히스토리에서 가장 최근 분석된 종목코드를 추출."""
     if not history:
         return None
@@ -38,7 +38,7 @@ def extract_last_stock_code(history: list[HistoryMessage] | None) -> str | None:
     return None
 
 
-def build_topic_summary_question(topic: str) -> str:
+def buildTopicSummaryQuestion(topic: str) -> str:
     """Topic summary를 core.analyze()에 요청할 때 쓰는 canonical 질문."""
     return (
         f"현재 보고 있는 '{topic}' 섹션만 기준으로 핵심을 3~5문장으로 요약해줘. "
@@ -48,6 +48,6 @@ def build_topic_summary_question(topic: str) -> str:
 
 __all__ = [
     "OLLAMA_MODEL_GUIDE",
-    "build_topic_summary_question",
-    "extract_last_stock_code",
+    "buildTopicSummaryQuestion",
+    "extractLastStockCode",
 ]

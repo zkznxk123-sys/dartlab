@@ -12,20 +12,20 @@ from dartlab.ai.tools.types import ToolSpec
 
 class OpenAIProvider(BaseProvider):
     name = "openai"
-    default_model = "gpt-4o"
+    defaultModel = "gpt-4o"
 
     def _client(self) -> Any:
         try:
             from openai import OpenAI
         except ImportError as exc:
             raise RuntimeError("openai SDK 가 설치되지 않았다") from exc
-        api_key = self.config.api_key or os.getenv("OPENAI_API_KEY")
-        if not api_key:
+        apiKey = self.config.apiKey or os.getenv("OPENAI_API_KEY")
+        if not apiKey:
             raise RuntimeError("OPENAI_API_KEY 가 없다")
-        return OpenAI(api_key=api_key, base_url=self.config.base_url or None)
+        return OpenAI(apiKey=apiKey, baseUrl=self.config.baseUrl or None)
 
-    def check_available(self) -> bool:
-        if not (self.config.api_key or os.getenv("OPENAI_API_KEY")):
+    def checkAvailable(self) -> bool:
+        if not (self.config.apiKey or os.getenv("OPENAI_API_KEY")):
             return False
         try:
             from openai import OpenAI  # noqa: F401
@@ -52,13 +52,13 @@ class OpenAIProvider(BaseProvider):
     ) -> Iterator[LLMEvent]:
         client = self._client()
         kwargs: dict[str, Any] = {
-            "model": self.resolved_model,
+            "model": self.resolvedModel,
             "messages": _toOpenAIMessages(messages),
         }
         if self.config.temperature is not None:
             kwargs["temperature"] = self.config.temperature
-        if self.config.max_tokens is not None:
-            kwargs["max_tokens"] = self.config.max_tokens
+        if self.config.maxTokens is not None:
+            kwargs["max_tokens"] = self.config.maxTokens
         if tools:
             kwargs["tools"] = [self.toolSchema(t) for t in tools]
 
@@ -118,7 +118,7 @@ def _toOpenAIMessages(messages: list[Msg]) -> list[dict[str, Any]]:
             continue
         if role == "assistant":
             text_parts: list[str] = []
-            tool_calls: list[dict[str, Any]] = []
+            toolCalls: list[dict[str, Any]] = []
             if isinstance(content, list):
                 for block in content:
                     if not isinstance(block, dict):
@@ -126,7 +126,7 @@ def _toOpenAIMessages(messages: list[Msg]) -> list[dict[str, Any]]:
                     if block.get("type") == "text":
                         text_parts.append(str(block.get("text", "")))
                     elif block.get("type") == "tool_use":
-                        tool_calls.append(
+                        toolCalls.append(
                             {
                                 "id": str(block.get("id") or ""),
                                 "type": "function",
@@ -140,8 +140,8 @@ def _toOpenAIMessages(messages: list[Msg]) -> list[dict[str, Any]]:
                 text_parts.append(str(content or ""))
             entry: dict[str, Any] = {"role": "assistant"}
             entry["content"] = "\n".join(text_parts) if text_parts else None
-            if tool_calls:
-                entry["tool_calls"] = tool_calls
+            if toolCalls:
+                entry["tool_calls"] = toolCalls
             out.append(entry)
             continue
         if role == "tool":

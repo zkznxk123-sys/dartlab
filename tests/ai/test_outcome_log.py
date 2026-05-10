@@ -13,41 +13,41 @@ def tmp_dartlab_home(tmp_path, monkeypatch):
 
 @pytest.mark.unit
 def test_safe_stockcode_kr_us_generic_path_traversal_blocked(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcomeLog import safe_stockcode
+    from dartlab.ai.memory.outcomeLog import safeStockcode
 
-    assert safe_stockcode("005930") == "005930"
-    assert safe_stockcode("AAPL") == "AAPL"
-    assert safe_stockcode("BRK.B") == "BRK.B"
-    assert safe_stockcode("foo_bar") == "foo_bar"
+    assert safeStockcode("005930") == "005930"
+    assert safeStockcode("AAPL") == "AAPL"
+    assert safeStockcode("BRK.B") == "BRK.B"
+    assert safeStockcode("foo_bar") == "foo_bar"
 
     for bad in ["..", "../etc", "/abs/path", "...", "a" * 17, "", "  "]:
         with pytest.raises(ValueError):
-            safe_stockcode(bad)
+            safeStockcode(bad)
 
 
 @pytest.mark.unit
 def test_store_decision_appends_pending_entry_and_idempotent(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeLog import getPendingEntries, storeDecision
 
-    written_first = store_decision(
+    written_first = storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-05-07",
         theme="Buy",
-        decision_text="ROE 회복 + 메모리 업황 변곡점.",
+        decisionText="ROE 회복 + 메모리 업황 변곡점.",
     )
     assert written_first is True
 
-    written_again = store_decision(
+    written_again = storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-05-07",
         theme="Buy",
-        decision_text="중복 호출 — idempotency guard.",
+        decisionText="중복 호출 — idempotency guard.",
     )
     assert written_again is False
 
-    entries = get_pending_entries("005930", market="KR")
+    entries = getPendingEntries("005930", market="KR")
     assert len(entries) == 1
     assert entries[0].decision.startswith("ROE 회복")
 
@@ -56,21 +56,21 @@ def test_store_decision_appends_pending_entry_and_idempotent(tmp_dartlab_home) -
 def test_batch_update_with_outcomes_atomic_rewrite_pending_to_resolved(tmp_dartlab_home) -> None:
     from dartlab.ai.memory.outcomeLog import (
         Update,
-        batch_update_with_outcomes,
-        get_pending_entries,
-        store_decision,
+        batchUpdateWithOutcomes,
+        getPendingEntries,
+        storeDecision,
     )
 
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-04-01",
         theme="Buy",
-        decision_text="3 개월 보유 시 + 알파 예상.",
+        decisionText="3 개월 보유 시 + 알파 예상.",
     )
-    assert len(get_pending_entries("005930")) == 1
+    assert len(getPendingEntries("005930")) == 1
 
-    count = batch_update_with_outcomes(
+    count = batchUpdateWithOutcomes(
         [
             Update(
                 stockCode="005930",
@@ -84,7 +84,7 @@ def test_batch_update_with_outcomes_atomic_rewrite_pending_to_resolved(tmp_dartl
         ]
     )
     assert count == 1
-    pending = get_pending_entries("005930")
+    pending = getPendingEntries("005930")
     assert len(pending) == 0
 
 
@@ -92,13 +92,13 @@ def test_batch_update_with_outcomes_atomic_rewrite_pending_to_resolved(tmp_dartl
 def test_get_past_context_asymmetric_same_vs_cross(tmp_dartlab_home) -> None:
     from dartlab.ai.memory.outcomeLog import (
         Update,
-        batch_update_with_outcomes,
-        get_past_context,
-        store_decision,
+        batchUpdateWithOutcomes,
+        getPastContext,
+        storeDecision,
     )
 
-    store_decision(stockCode="005930", market="KR", date="2025-03-31", theme="Buy", decision_text="A 회사 결정.")
-    batch_update_with_outcomes(
+    storeDecision(stockCode="005930", market="KR", date="2025-03-31", theme="Buy", decisionText="A 회사 결정.")
+    batchUpdateWithOutcomes(
         [
             Update(
                 stockCode="005930",
@@ -112,8 +112,8 @@ def test_get_past_context_asymmetric_same_vs_cross(tmp_dartlab_home) -> None:
         ]
     )
 
-    store_decision(stockCode="000660", market="KR", date="2025-03-31", theme="Hold", decision_text="B 회사 결정.")
-    batch_update_with_outcomes(
+    storeDecision(stockCode="000660", market="KR", date="2025-03-31", theme="Hold", decisionText="B 회사 결정.")
+    batchUpdateWithOutcomes(
         [
             Update(
                 stockCode="000660",
@@ -127,7 +127,7 @@ def test_get_past_context_asymmetric_same_vs_cross(tmp_dartlab_home) -> None:
         ]
     )
 
-    ctx = get_past_context("005930", market="KR", n_same=5, n_cross=3)
+    ctx = getPastContext("005930", market="KR", nSame=5, nCross=3)
     assert "Same-stock reflection 본문" in ctx
     assert "DECISION: A 회사 결정" in ctx  # full format
     assert "Cross-stock reflection 본문" in ctx
@@ -137,16 +137,16 @@ def test_get_past_context_asymmetric_same_vs_cross(tmp_dartlab_home) -> None:
 @pytest.mark.unit
 def test_html_separator_immune_to_prose_contamination(tmp_dartlab_home) -> None:
     """`---` 같은 markdown horizontal rule 이 entry 본문 안에 있어도 split 안 깨짐."""
-    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeLog import getPendingEntries, storeDecision
 
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-05-07",
         theme="Hold",
-        decision_text="thesis 1\n---\nthesis 2 (markdown horizontal rule 포함).",
+        decisionText="thesis 1\n---\nthesis 2 (markdown horizontal rule 포함).",
     )
-    entries = get_pending_entries("005930")
+    entries = getPendingEntries("005930")
     assert len(entries) == 1
     assert "thesis 1" in entries[0].decision
     assert "thesis 2" in entries[0].decision
@@ -154,14 +154,14 @@ def test_html_separator_immune_to_prose_contamination(tmp_dartlab_home) -> None:
 
 @pytest.mark.unit
 def test_atomic_write_no_dangling_tmp_file(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcomeLog import store_decision
+    from dartlab.ai.memory.outcomeLog import storeDecision
 
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-05-07",
         theme="Buy",
-        decision_text="atomic write 검증.",
+        decisionText="atomic write 검증.",
     )
     log_dir = tmp_dartlab_home / "decisions" / "KR"
     tmp_files = [p for p in log_dir.iterdir() if p.suffix not in {".md"}]
@@ -171,6 +171,6 @@ def test_atomic_write_no_dangling_tmp_file(tmp_dartlab_home) -> None:
 @pytest.mark.unit
 def test_empty_past_context_returns_empty_string(tmp_dartlab_home) -> None:
     """env 새 세션 — pending/resolved 0 건이면 빈 문자열 반환 (placeholder 부재 전제)."""
-    from dartlab.ai.memory.outcomeLog import get_past_context
+    from dartlab.ai.memory.outcomeLog import getPastContext
 
-    assert get_past_context("005930", market="KR") == ""
+    assert getPastContext("005930", market="KR") == ""

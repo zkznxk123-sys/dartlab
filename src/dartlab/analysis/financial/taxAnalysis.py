@@ -9,7 +9,7 @@ from dartlab.core.utils.safe import get as _get
 
 _getF = _getF2 = _getF3 = _getF4 = _get
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 _MAX_YEARS = 8
@@ -20,7 +20,7 @@ from dartlab.core.utils.calc import safePct as _pct  # noqa: E402
 # ── 유효세율 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcEffectiveTaxRate(company, *, basePeriod: str | None = None) -> dict | None:
     """유효세율 시계열 — 법인세비용/세전이익.
 
@@ -90,7 +90,7 @@ def calcEffectiveTaxRate(company, *, basePeriod: str | None = None) -> dict | No
 # ── 세금 현금화 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcTaxCashConversion(company, *, basePeriod: str | None = None) -> dict | None:
     """세금 현금화 시계열 — IS 법인세비용 vs CF 법인세납부.
 
@@ -161,7 +161,7 @@ def calcTaxCashConversion(company, *, basePeriod: str | None = None) -> dict | N
 # ── 이연법인세 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcDeferredTax(company, *, basePeriod: str | None = None) -> dict | None:
     """이연법인세 시계열 — 이연자산/부채 추세.
 
@@ -219,7 +219,7 @@ def calcDeferredTax(company, *, basePeriod: str | None = None) -> dict | None:
 # ── 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcTaxFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """세금 관련 경고 신호.
 

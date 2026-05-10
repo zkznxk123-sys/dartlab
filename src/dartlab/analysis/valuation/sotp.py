@@ -196,8 +196,8 @@ def calcHoldingDFV(company: Any, *, basePeriod: str | None = None, overrides: di
         return None
 
     per_share = sotp["perShare"]
-    current_price = _getCurrentPriceLight(company)
-    upside = (per_share - current_price) / current_price * 100 if current_price and current_price > 0 else None
+    currentPrice = _getCurrentPriceLight(company)
+    upside = (per_share - currentPrice) / currentPrice * 100 if currentPrice and currentPrice > 0 else None
 
     bull = per_share * 1.15
     bear = per_share * 0.85
@@ -205,7 +205,7 @@ def calcHoldingDFV(company: Any, *, basePeriod: str | None = None, overrides: di
     return {
         "dFV": round(per_share),
         "scenarios": {"bull": round(bull), "base": round(per_share), "bear": round(bear)},
-        "currentPrice": round(current_price) if current_price else None,
+        "currentPrice": round(currentPrice) if currentPrice else None,
         "upside": round(upside, 1) if upside is not None else None,
         "opinion": _opinion(upside),
         "confidence": "medium",

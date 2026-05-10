@@ -380,7 +380,7 @@ def loadData(
     """
     if _IS_PYODIDE:
         return _loadDataPyodide(stockCode, category, sinceYear=sinceYear, columns=columns)
-    from dartlab.core.memory import check_memory_and_gc
+    from dartlab.core.memory import checkMemoryAndGc
 
     dataDir = _dataDir(category)
     path = dataDir / f"{stockCode}.parquet"
@@ -400,7 +400,7 @@ def loadData(
             _LOAD_CACHE.move_to_end(cacheKey)
             return cached
 
-    check_memory_and_gc(f"loadData({stockCode},{category})")
+    checkMemoryAndGc(f"loadData({stockCode},{category})")
     effectiveSinceYear = sinceYear
     if category == "edgarDocs" and effectiveSinceYear is None:
         effectiveSinceYear = 2009

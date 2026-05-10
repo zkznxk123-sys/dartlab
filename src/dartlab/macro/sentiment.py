@@ -5,12 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from dartlab.macro._helpers import (
-    apply_overrides,
-    collect_timeseries,
-    fetch_change_pct,
-    fetch_latest,
-    fetch_series_list,
-    get_gather,
+    applyOverrides,
+    collectTimeseries,
+    fetchChangePct,
+    fetchLatest,
+    fetchSeriesList,
+    getGather,
 )
 from dartlab.macro.macroCycle import classifyVixRegime
 
@@ -73,10 +73,10 @@ def _normalize(value: float, low: float, high: float) -> float:
 
 def calcFearGreedProxy(
     vix: float,
-    sp500_vs_ma125: float,
-    hy_spread: float,
-    gold_equity_ratio: float | None = None,
-    crypto_momentum: float | None = None,
+    sp500VsMa125: float,
+    hySpread: float,
+    goldEquityRatio: float | None = None,
+    cryptoMomentum: float | None = None,
 ) -> SentimentScore:
     """FRED 4~5요소로 CNN Fear & Greed Index 근사.
 
@@ -97,19 +97,19 @@ def calcFearGreedProxy(
     components["vix"] = 100 - _normalize(vix, 10, 40)
 
     # S&P500 모멘텀: 0.9(공포) ~ 1.1(탐욕)
-    components["momentum"] = _normalize(sp500_vs_ma125, 0.90, 1.10)
+    components["momentum"] = _normalize(sp500VsMa125, 0.90, 1.10)
 
     # HY 스프레드: 300(탐욕) ~ 700(공포) → 반전
-    components["credit"] = 100 - _normalize(hy_spread, 300, 700)
+    components["credit"] = 100 - _normalize(hySpread, 300, 700)
 
     # 금/주식 비율 (선택): 높으면 공포
-    if gold_equity_ratio is not None:
-        components["safe_haven"] = 100 - _normalize(gold_equity_ratio, 0.3, 0.6)
+    if goldEquityRatio is not None:
+        components["safe_haven"] = 100 - _normalize(goldEquityRatio, 0.3, 0.6)
 
     # 비트코인 모멘텀 (선택): 유동성 과잉/긴축의 극단 지표
     # -30%(공포) ~ +50%(탐욕) 범위 정규화
-    if crypto_momentum is not None:
-        components["crypto"] = _normalize(crypto_momentum, -30, 50)
+    if cryptoMomentum is not None:
+        components["crypto"] = _normalize(cryptoMomentum, -30, 50)
 
     score = sum(components.values()) / len(components)
     score = max(0, min(100, score))
@@ -139,7 +139,7 @@ def calcFearGreedProxy(
 
 
 def estimateRateExpectation(
-    ff_rate: float,
+    ffRate: float,
     dgs2: float,
     dgs10: float | None = None,
 ) -> RateExpectation:
@@ -157,7 +157,7 @@ def estimateRateExpectation(
     Returns:
         RateExpectation
     """
-    spread = dgs2 - ff_rate
+    spread = dgs2 - ffRate
     spread_10y2y = (dgs10 - dgs2) if dgs10 is not None else None
 
     if spread < -0.50:
@@ -191,7 +191,7 @@ def estimateRateExpectation(
 
 def interpretEmployment(
     unrate: float,
-    payrolls_3m_avg: float | None = None,
+    payrolls3mAvg: float | None = None,
 ) -> EmploymentSignal:
     """고용 지표 해석.
 
@@ -218,18 +218,18 @@ def interpretEmployment(
         score -= 2
         reasons.append(f"실업률 {unrate:.1f}% — 고용 악화")
 
-    if payrolls_3m_avg is not None:
-        if payrolls_3m_avg > 200:
+    if payrolls3mAvg is not None:
+        if payrolls3mAvg > 200:
             score += 2
-            reasons.append(f"고용 증가 3M평균 +{payrolls_3m_avg:.0f}K — 강함")
-        elif payrolls_3m_avg > 100:
+            reasons.append(f"고용 증가 3M평균 +{payrolls3mAvg:.0f}K — 강함")
+        elif payrolls3mAvg > 100:
             score += 1
-            reasons.append(f"고용 증가 3M평균 +{payrolls_3m_avg:.0f}K — 적정")
-        elif payrolls_3m_avg > 0:
-            reasons.append(f"고용 증가 3M평균 +{payrolls_3m_avg:.0f}K — 둔화")
+            reasons.append(f"고용 증가 3M평균 +{payrolls3mAvg:.0f}K — 적정")
+        elif payrolls3mAvg > 0:
+            reasons.append(f"고용 증가 3M평균 +{payrolls3mAvg:.0f}K — 둔화")
         else:
             score -= 2
-            reasons.append(f"고용 감소 3M평균 {payrolls_3m_avg:.0f}K — 경고")
+            reasons.append(f"고용 감소 3M평균 {payrolls3mAvg:.0f}K — 경고")
 
     if score >= 3:
         state, label = "strong", "강함"
@@ -249,10 +249,10 @@ def interpretEmployment(
 
 
 def interpretInflation(
-    cpi_yoy: float,
-    core_cpi_yoy: float | None = None,
-    bei_5y: float | None = None,
-    bei_10y: float | None = None,
+    cpiYoy: float,
+    coreCpiYoy: float | None = None,
+    bei5y: float | None = None,
+    bei10y: float | None = None,
 ) -> InflationSignal:
     """물가 지표 해석.
 
@@ -268,36 +268,36 @@ def interpretInflation(
     reasons: list[str] = []
     heat = 0  # 양수=과열, 음수=냉각
 
-    if cpi_yoy > 4.0:
+    if cpiYoy > 4.0:
         heat += 3
-        reasons.append(f"CPI {cpi_yoy:.1f}% — 인플레이션 과열")
-    elif cpi_yoy > 3.0:
+        reasons.append(f"CPI {cpiYoy:.1f}% — 인플레이션 과열")
+    elif cpiYoy > 3.0:
         heat += 2
-        reasons.append(f"CPI {cpi_yoy:.1f}% — 목표 상회")
-    elif cpi_yoy > 1.5:
-        reasons.append(f"CPI {cpi_yoy:.1f}% — 목표 부근")
-    elif cpi_yoy > 0:
+        reasons.append(f"CPI {cpiYoy:.1f}% — 목표 상회")
+    elif cpiYoy > 1.5:
+        reasons.append(f"CPI {cpiYoy:.1f}% — 목표 부근")
+    elif cpiYoy > 0:
         heat -= 1
-        reasons.append(f"CPI {cpi_yoy:.1f}% — 둔화")
+        reasons.append(f"CPI {cpiYoy:.1f}% — 둔화")
     else:
         heat -= 2
-        reasons.append(f"CPI {cpi_yoy:.1f}% — 디플레이션 우려")
+        reasons.append(f"CPI {cpiYoy:.1f}% — 디플레이션 우려")
 
-    if core_cpi_yoy is not None:
-        if core_cpi_yoy > 3.5:
+    if coreCpiYoy is not None:
+        if coreCpiYoy > 3.5:
             heat += 1
-            reasons.append(f"Core CPI {core_cpi_yoy:.1f}% — 기조적 인플레")
-        elif core_cpi_yoy < 2.0:
+            reasons.append(f"Core CPI {coreCpiYoy:.1f}% — 기조적 인플레")
+        elif coreCpiYoy < 2.0:
             heat -= 1
-            reasons.append(f"Core CPI {core_cpi_yoy:.1f}% — 기조 둔화")
+            reasons.append(f"Core CPI {coreCpiYoy:.1f}% — 기조 둔화")
 
-    if bei_5y is not None:
-        if bei_5y > 2.8:
+    if bei5y is not None:
+        if bei5y > 2.8:
             heat += 1
-            reasons.append(f"5Y BEI {bei_5y:.2f}% — 기대인플레 상승")
-        elif bei_5y < 1.8:
+            reasons.append(f"5Y BEI {bei5y:.2f}% — 기대인플레 상승")
+        elif bei5y < 1.8:
             heat -= 1
-            reasons.append(f"5Y BEI {bei_5y:.2f}% — 기대인플레 하락")
+            reasons.append(f"5Y BEI {bei5y:.2f}% — 기대인플레 하락")
 
     if heat >= 3:
         state, label = "hot", "과열"
@@ -423,7 +423,7 @@ def krInflationModel(fxYoy: float, oilYoy: float) -> KRInflationEstimate:
     )
 
 
-def _fetch_sentiment_data(market: str, as_of: str | None = None) -> dict[str, float | None]:
+def _fetchSentimentData(market: str, asOf: str | None = None) -> dict[str, float | None]:
     """gather에서 심리 지표 수집.
 
     Parameters
@@ -444,36 +444,36 @@ def _fetch_sentiment_data(market: str, as_of: str | None = None) -> dict[str, fl
         - gold_equity_ratio : float — 금/S&P 500 비율 (배)
         - crypto_momentum : float — BTC 90일 변화율 (%)
     """
-    g = get_gather(as_of)
+    g = getGather(asOf)
     data: dict[str, float | None] = {}
 
-    data["vix"] = fetch_latest(g, "VIXCLS")
+    data["vix"] = fetchLatest(g, "VIXCLS")
 
-    sp_list = fetch_series_list(g, "SP500")
+    sp_list = fetchSeriesList(g, "SP500")
     if sp_list and len(sp_list) >= 125:
         current = sp_list[-1]
         ma125 = sum(sp_list[-125:]) / 125
         if ma125 > 0:
             data["sp500_vs_ma125"] = current / ma125
 
-    hy = fetch_latest(g, "BAMLH0A0HYM2")
+    hy = fetchLatest(g, "BAMLH0A0HYM2")
     if hy is not None:
         data["hy_spread"] = hy * 100
 
-    gold = fetch_latest(g, "IR14270")
-    sp = fetch_latest(g, "SP500")
+    gold = fetchLatest(g, "IR14270")
+    sp = fetchLatest(g, "SP500")
     if gold is not None and sp is not None and sp > 0:
         data["gold_equity_ratio"] = gold / sp
 
     # BTC 90일 모멘텀 — 위험자산 선호도의 극단 지표
-    btc_chg = fetch_change_pct(g, "CBBTCUSD", 90)
+    btc_chg = fetchChangePct(g, "CBBTCUSD", 90)
     if btc_chg is not None:
         data["crypto_momentum"] = btc_chg
 
     return data
 
 
-def calcSentiment(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
+def calcSentiment(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """시장 심리 종합 분석 — 공포탐욕 근사 + VIX 구간 + JLN 불확실성.
 
     Parameters
@@ -494,9 +494,9 @@ def calcSentiment(*, market: str = "US", as_of: str | None = None, overrides: di
         - timeseries : dict — vix / sp500 / hy_spread 시계열
         - macroUncertainty : dict | None — JLN 실물 불확실성 (value:float, zone:str, zoneLabel:str, vsVix:str, description:str)
     """
-    data = _fetch_sentiment_data(market, as_of=as_of)
+    data = _fetchSentimentData(market, asOf=asOf)
     if overrides:
-        data = apply_overrides(data, overrides)
+        data = applyOverrides(data, overrides)
     result: dict = {"market": market.upper()}
 
     vix = data.get("vix")
@@ -507,8 +507,8 @@ def calcSentiment(*, market: str = "US", as_of: str | None = None, overrides: di
             vix,
             sp_ratio,
             hy,
-            gold_equity_ratio=data.get("gold_equity_ratio"),
-            crypto_momentum=data.get("crypto_momentum"),
+            goldEquityRatio=data.get("gold_equity_ratio"),
+            cryptoMomentum=data.get("crypto_momentum"),
         )
         result["fearGreed"] = {
             "score": fg.score,
@@ -525,13 +525,13 @@ def calcSentiment(*, market: str = "US", as_of: str | None = None, overrides: di
     else:
         result["vixRegime"] = None
 
-    g = get_gather(as_of)
-    result["timeseries"] = collect_timeseries(g, {"vix": "VIXCLS", "sp500": "SP500", "hy_spread": "BAMLH0A0HYM2"})
+    g = getGather(asOf)
+    result["timeseries"] = collectTimeseries(g, {"vix": "VIXCLS", "sp500": "SP500", "hy_spread": "BAMLH0A0HYM2"})
 
     # ── JLN Macro Uncertainty Index — Jurado, Ludvigson, Ng (2015) AER ──
     # VIX = 금융 불확실성 (옵션 내재), JLN = 실물 불확실성 (132개 시계열 예측오차)
     try:
-        jln = fetch_latest(g, "WLEMUINDXD")
+        jln = fetchLatest(g, "WLEMUINDXD")
         if jln is not None:
             if jln < 0.8:
                 zone, zone_label = "low", "낮음"

@@ -21,7 +21,7 @@ class _OHLCVWrapper:
         self._cache = {"_quant_ohlcv": ohlcv}
 
 
-def _get_ohlcv(stockCode: str, **kwargs):
+def _getOhlcv(stockCode: str, **kwargs):
     """OHLCV fetch + 검증."""
     ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
@@ -62,7 +62,7 @@ def calcIndicators(stockCode: str, **kwargs: Any) -> Any:
     Examples
     --------
     >>> c.quant("indicators")"""
-    ohlcv, err = _get_ohlcv(stockCode, **kwargs)
+    ohlcv, err = _getOhlcv(stockCode, **kwargs)
     if err:
         return err
     from dartlab.quant.analyzer import enrichWithIndicators
@@ -101,7 +101,7 @@ def calcSignals(stockCode: str, **kwargs: Any) -> Any:
     Examples
     --------
     >>> c.quant("signals")"""
-    ohlcv, err = _get_ohlcv(stockCode, **kwargs)
+    ohlcv, err = _getOhlcv(stockCode, **kwargs)
     if err:
         return err
     from dartlab.quant._helpers import resolve_market
@@ -141,7 +141,7 @@ def calcVerdict(stockCode: str, **kwargs: Any) -> dict:
     >>> c.quant("verdict")"""
     benchmark = kwargs.pop("benchmark", None)
     benchmarkMode = kwargs.pop("benchmarkMode", "market")
-    ohlcv, err = _get_ohlcv(stockCode, **kwargs)
+    ohlcv, err = _getOhlcv(stockCode, **kwargs)
     if err:
         return err
     from dartlab.quant._helpers import resolve_market
@@ -183,7 +183,7 @@ def calcBeta(stockCode: str, **kwargs: Any) -> dict:
     >>> c.quant("beta")"""
     benchmark = kwargs.pop("benchmark", None)
     benchmarkMode = kwargs.pop("benchmarkMode", "market")
-    ohlcv, err = _get_ohlcv(stockCode, **kwargs)
+    ohlcv, err = _getOhlcv(stockCode, **kwargs)
     if err:
         return err
     from dartlab.quant._helpers import resolve_market
@@ -222,7 +222,7 @@ def calcDivergence(stockCode: str, **kwargs: Any) -> dict:
     Examples
     --------
     >>> c.quant("divergence")"""
-    ohlcv, err = _get_ohlcv(stockCode, **kwargs)
+    ohlcv, err = _getOhlcv(stockCode, **kwargs)
     if err:
         return err
     from dartlab.quant._helpers import resolve_market

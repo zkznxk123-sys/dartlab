@@ -13,10 +13,10 @@ from __future__ import annotations
 
 
 def classifyCreditCycle(
-    hy_spread: float,
-    hy_spread_6m_ago: float | None = None,
-    loan_tightening: float | None = None,
-    charge_off: float | None = None,
+    hySpread: float,
+    hySpread6mAgo: float | None = None,
+    loanTightening: float | None = None,
+    chargeOff: float | None = None,
 ) -> dict:
     """신용사이클 4단계 판별.
 
@@ -30,20 +30,20 @@ def classifyCreditCycle(
         dict with phase, phaseLabel, components, investmentImplication
     """
     # ── HY 스프레드 수준 + 방향 ──
-    if hy_spread < 350:
+    if hySpread < 350:
         hy_level = "very_tight"
-    elif hy_spread < 450:
+    elif hySpread < 450:
         hy_level = "tight"
-    elif hy_spread < 600:
+    elif hySpread < 600:
         hy_level = "normal"
-    elif hy_spread < 800:
+    elif hySpread < 800:
         hy_level = "wide"
     else:
         hy_level = "very_wide"
 
     hy_direction = "stable"
-    if hy_spread_6m_ago is not None:
-        diff = hy_spread - hy_spread_6m_ago
+    if hySpread6mAgo is not None:
+        diff = hySpread - hySpread6mAgo
         if diff > 50:
             hy_direction = "widening"
         elif diff < -50:
@@ -51,20 +51,20 @@ def classifyCreditCycle(
 
     # ── 대출태도 ──
     loan_stance = "unknown"
-    if loan_tightening is not None:
-        if loan_tightening > 20:
+    if loanTightening is not None:
+        if loanTightening > 20:
             loan_stance = "tightening"
-        elif loan_tightening < -10:
+        elif loanTightening < -10:
             loan_stance = "easing"
         else:
             loan_stance = "neutral"
 
     # ── Charge-off 추세 ──
     co_trend = "unknown"
-    if charge_off is not None:
-        if charge_off < 0.3:
+    if chargeOff is not None:
+        if chargeOff < 0.3:
             co_trend = "low"
-        elif charge_off < 0.6:
+        elif chargeOff < 0.6:
             co_trend = "moderate"
         else:
             co_trend = "elevated"
@@ -126,13 +126,13 @@ def classifyCreditCycle(
     return {
         "phase": phase,
         "phaseLabel": _LABELS[phase],
-        "hySpread": round(hy_spread, 1),
+        "hySpread": round(hySpread, 1),
         "hyLevel": hy_level,
         "hyDirection": hy_direction,
         "loanStandards": loan_stance,
         "chargeOffTrend": co_trend,
         "scores": {k: v for k, v in scores.items() if v > 0},
         "investmentImplication": _IMPLICATIONS[phase],
-        "description": f"신용사이클 {_LABELS[phase]}. HY {hy_spread:.0f}bp ({hy_level}), "
+        "description": f"신용사이클 {_LABELS[phase]}. HY {hySpread:.0f}bp ({hy_level}), "
         f"대출태도 {loan_stance}, 부실률 {co_trend}.",
     }

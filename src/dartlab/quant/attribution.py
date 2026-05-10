@@ -21,11 +21,11 @@ import numpy as np
 
 
 def brinsonAttribution(
-    portfolio_weights: np.ndarray,
-    benchmark_weights: np.ndarray,
-    portfolio_returns: np.ndarray,
-    benchmark_returns: np.ndarray,
-    group_labels: list[str] | None = None,
+    portfolioWeights: np.ndarray,
+    benchmarkWeights: np.ndarray,
+    portfolioReturns: np.ndarray,
+    benchmarkReturns: np.ndarray,
+    groupLabels: list[str] | None = None,
 ) -> dict:
     """BHB Brinson-Hood-Beebower 성과귀속.
 
@@ -40,10 +40,10 @@ def brinsonAttribution(
         dict — totalActive, allocation, selection, interaction +
                그룹별 분해 표.
     """
-    wp = np.asarray(portfolio_weights, dtype=float)
-    wb = np.asarray(benchmark_weights, dtype=float)
-    rp = np.asarray(portfolio_returns, dtype=float)
-    rb = np.asarray(benchmark_returns, dtype=float)
+    wp = np.asarray(portfolioWeights, dtype=float)
+    wb = np.asarray(benchmarkWeights, dtype=float)
+    rp = np.asarray(portfolioReturns, dtype=float)
+    rb = np.asarray(benchmarkReturns, dtype=float)
     n = len(wp)
     if not (len(wb) == len(rp) == len(rb) == n):
         return {"error": "길이 불일치"}
@@ -56,7 +56,7 @@ def brinsonAttribution(
     sel = wb * (rp - rb)
     inter = (wp - wb) * (rp - rb)
 
-    labels = group_labels if group_labels else [f"g{i}" for i in range(n)]
+    labels = groupLabels if groupLabels else [f"g{i}" for i in range(n)]
     rows = []
     for i in range(n):
         rows.append(
@@ -84,9 +84,9 @@ def brinsonAttribution(
 
 
 def timingEffect(
-    weights_history: np.ndarray,
-    returns_history: np.ndarray,
-    avg_weights: np.ndarray,
+    weightsHistory: np.ndarray,
+    returnsHistory: np.ndarray,
+    avgWeights: np.ndarray,
 ) -> float:
     """Timing effect — 가중치 변화가 수익률과 일치했는가.
 
@@ -98,9 +98,9 @@ def timingEffect(
 
     양수면 timing 능력 있음 (rebalancing이 수익률 방향과 일치).
     """
-    W = np.asarray(weights_history, dtype=float)
-    R = np.asarray(returns_history, dtype=float)
-    avg = np.asarray(avg_weights, dtype=float)
+    W = np.asarray(weightsHistory, dtype=float)
+    R = np.asarray(returnsHistory, dtype=float)
+    avg = np.asarray(avgWeights, dtype=float)
     deviation = W - avg
     contribution = np.sum(deviation * R, axis=1)
     return float(contribution.sum())

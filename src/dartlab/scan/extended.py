@@ -94,9 +94,9 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
 
     total = cur["stockCode"].n_unique()
 
-    def _extract(df, account_nms):
+    def _extract(df, accountNms):
         """계정명 매칭 → 금액 추출."""
-        for nm in account_nms:
+        for nm in accountNms:
             rows = df.filter(pl.col("account_nm") == nm)
             if not rows.is_empty():
                 v = parse_num(rows["thstrm_amount"][0])
@@ -104,19 +104,19 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
                     return v
         return None
 
-    def _percentile(df, account_nms, stock_val):
+    def _percentile(df, accountNms, stockVal):
         """전종목 대비 백분위."""
-        if stock_val is None:
+        if stockVal is None:
             return None
         vals = []
         for sc in df["stockCode"].unique().to_list():
             s = df.filter(pl.col("stockCode") == sc)
-            v = _extract(s, account_nms)
+            v = _extract(s, accountNms)
             if v is not None:
                 vals.append(v)
         if len(vals) < 50:
             return None
-        below = sum(1 for v in vals if v < stock_val)
+        below = sum(1 for v in vals if v < stockVal)
         return round(below / len(vals) * 100, 1)
 
     # 4축 계정명

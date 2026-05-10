@@ -10,7 +10,7 @@ Entry tag 형식:
 atomic temp+replace 쓰기 — 크래시 mid-write 시 원본 보존. pending 영구 보존, resolved 만 rotation.
 
 Threat model: stockCode 가 모델이 web_search 결과에서 추출한 값일 수 있어 path 에 들어가기
-전 safe_stockcode() 가드 통과 필수.
+전 safeStockcode() 가드 통과 필수.
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ _GENERIC_SAFE_RE = re.compile(r"^[A-Za-z0-9._\-]+$")
 _MAX_STOCKCODE_LEN = 16
 
 
-def safe_stockcode(value: str) -> str:
+def safeStockcode(value: str) -> str:
     """path 에 들어가기 전 stockCode 검증.
 
     KR 6 자리 / US ticker / generic safe (영숫자·점·하이픈·언더스코어) 외 거부.
@@ -56,21 +56,21 @@ def safe_stockcode(value: str) -> str:
     raise ValueError(f"stockCode 형식 거부: {raw!r}")
 
 
-def _normalize_market(market: str | None) -> str:
+def _normalizeMarket(market: str | None) -> str:
     raw = (market or "").strip().upper()
     return raw if raw in {"KR", "US"} else "KR"
 
 
-def _decisions_root() -> Path:
+def _decisionsRoot() -> Path:
     raw = os.environ.get("DARTLAB_HOME")
     base = Path(raw) if raw else Path.home() / ".dartlab"
     return base / "decisions"
 
 
-def _log_path(market: str, stockCode: str) -> Path:
-    safe_market = _normalize_market(market)
-    safe_code = safe_stockcode(stockCode)
-    return _decisions_root() / safe_market / f"{safe_code}.md"
+def _logPath(market: str, stockCode: str) -> Path:
+    safe_market = _normalizeMarket(market)
+    safe_code = safeStockcode(stockCode)
+    return _decisionsRoot() / safe_market / f"{safe_code}.md"
 
 
 @dataclass
@@ -87,80 +87,80 @@ class Entry:
     alpha: str = ""
     holding: str = ""
 
-    def is_pending(self) -> bool:
+    def isPending(self) -> bool:
         return self.status == "pending"
 
 
-def store_decision(
+def storeDecision(
     *,
     stockCode: str,
     market: str,
     date: str,
     theme: str,
-    decision_text: str,
+    decisionText: str,
 ) -> bool:
     """pending entry 추가. 같은 (date, stockCode) pending 이미 있으면 skip (idempotency).
 
     Returns:
         True 신규 작성. False idempotency skip.
     """
-    safe_code = safe_stockcode(stockCode)
-    safe_date = _normalize_date(date)
+    safe_code = safeStockcode(stockCode)
+    safe_date = _normalizeDate(date)
     if not safe_date:
         return False
-    target = _log_path(market, safe_code)
-    if _has_pending_entry(target, safe_date, safe_code):
+    target = _logPath(market, safe_code)
+    if _hasPendingEntry(target, safe_date, safe_code):
         return False
 
-    body = f"[{safe_date} | {safe_code} | {theme.strip() or 'Verdict'} | pending]\nDECISION:\n{decision_text.strip()}\n"
+    body = f"[{safe_date} | {safe_code} | {theme.strip() or 'Verdict'} | pending]\nDECISION:\n{decisionText.strip()}\n"
     _append(target, body)
     return True
 
 
-def get_pending_entries(stockCode: str, *, market: str = "KR") -> list[Entry]:
+def getPendingEntries(stockCode: str, *, market: str = "KR") -> list[Entry]:
     """같은 종목의 pending entry 목록. 없으면 빈 list."""
-    safe_code = safe_stockcode(stockCode)
-    target = _log_path(market, safe_code)
-    return [e for e in _load_entries(target) if e.is_pending() and e.stockCode == safe_code]
+    safe_code = safeStockcode(stockCode)
+    target = _logPath(market, safe_code)
+    return [e for e in _loadEntries(target) if e.isPending() and e.stockCode == safe_code]
 
 
-def get_past_context(
+def getPastContext(
     stockCode: str,
     *,
     market: str = "KR",
-    n_same: int = 5,
-    n_cross: int = 3,
+    nSame: int = 5,
+    nCross: int = 3,
 ) -> str:
     """비대칭 주입 — same-stockCode {n_same} (full DECISION + REFLECTION) +
     cross-stockCode {n_cross} (REFLECTION 만, decision 300 char truncate).
     역시간순 greedy fill. 빈 문자열이면 호출자가 placeholder 섹션 자체 부재화.
     """
-    safe_code = safe_stockcode(stockCode)
-    safe_market = _normalize_market(market)
-    same_entries = _load_entries(_log_path(safe_market, safe_code))
-    same_resolved = [e for e in reversed(same_entries) if not e.is_pending()][:n_same]
+    safe_code = safeStockcode(stockCode)
+    safe_market = _normalizeMarket(market)
+    same_entries = _loadEntries(_logPath(safe_market, safe_code))
+    same_resolved = [e for e in reversed(same_entries) if not e.isPending()][:nSame]
 
     cross_entries: list[Entry] = []
-    base = _decisions_root() / safe_market
+    base = _decisionsRoot() / safe_market
     if base.is_dir():
         for path in sorted(base.glob("*.md")):
             other_code = path.stem
             if other_code == safe_code:
                 continue
-            for entry in reversed(_load_entries(path)):
-                if not entry.is_pending() and entry.reflection:
+            for entry in reversed(_loadEntries(path)):
+                if not entry.isPending() and entry.reflection:
                     cross_entries.append(entry)
-                    if len(cross_entries) >= n_cross * 4:
+                    if len(cross_entries) >= nCross * 4:
                         break
-            if len(cross_entries) >= n_cross * 4:
+            if len(cross_entries) >= nCross * 4:
                 break
-    cross_resolved = sorted(cross_entries, key=lambda e: e.date, reverse=True)[:n_cross]
+    cross_resolved = sorted(cross_entries, key=lambda e: e.date, reverse=True)[:nCross]
 
     parts: list[str] = []
     for entry in same_resolved:
-        parts.append(_format_full(entry))
+        parts.append(_formatFull(entry))
     for entry in cross_resolved:
-        parts.append(_format_reflection_only(entry))
+        parts.append(_formatReflectionOnly(entry))
     return "\n\n".join(parts).strip()
 
 
@@ -177,7 +177,7 @@ class Update:
     reflection: str
 
 
-def batch_update_with_outcomes(updates: list[Update]) -> int:
+def batchUpdateWithOutcomes(updates: list[Update]) -> int:
     """pending entry 들을 resolved 로 일괄 갱신. atomic temp+replace.
 
     Returns:
@@ -188,7 +188,7 @@ def batch_update_with_outcomes(updates: list[Update]) -> int:
     by_path: dict[Path, list[Update]] = {}
     for upd in updates:
         try:
-            target = _log_path(upd.market, upd.stockCode)
+            target = _logPath(upd.market, upd.stockCode)
         except ValueError:
             continue
         by_path.setdefault(target, []).append(upd)
@@ -198,10 +198,10 @@ def batch_update_with_outcomes(updates: list[Update]) -> int:
         if not path.exists():
             continue
         text = path.read_text(encoding="utf-8")
-        new_text, count = _apply_updates(text, path_updates)
+        new_text, count = _applyUpdates(text, path_updates)
         if count == 0:
             continue
-        _atomic_write(path, new_text)
+        _atomicWrite(path, new_text)
         updated_total += count
     return updated_total
 
@@ -209,7 +209,7 @@ def batch_update_with_outcomes(updates: list[Update]) -> int:
 # ── 내부 helper ──
 
 
-def _has_pending_entry(path: Path, date: str, stockCode: str) -> bool:
+def _hasPendingEntry(path: Path, date: str, stockCode: str) -> bool:
     if not path.exists():
         return False
     needle = f"[{date} | {stockCode} |"
@@ -228,10 +228,10 @@ def _append(path: Path, body: str) -> None:
         new_text = existing + _SEPARATOR + body.rstrip() + _SEPARATOR
     else:
         new_text = body.rstrip() + _SEPARATOR
-    _atomic_write(path, new_text)
+    _atomicWrite(path, new_text)
 
 
-def _atomic_write(path: Path, content: str) -> None:
+def _atomicWrite(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_path = tempfile.mkstemp(prefix=path.name + ".", dir=str(path.parent), text=True)
     try:
@@ -247,7 +247,7 @@ def _atomic_write(path: Path, content: str) -> None:
         raise
 
 
-def _load_entries(path: Path) -> list[Entry]:
+def _loadEntries(path: Path) -> list[Entry]:
     if not path.exists():
         return []
     text = path.read_text(encoding="utf-8").strip()
@@ -256,13 +256,13 @@ def _load_entries(path: Path) -> list[Entry]:
     blocks = [block.strip() for block in text.split(_SEPARATOR.strip()) if block.strip()]
     out: list[Entry] = []
     for block in blocks:
-        entry = _parse_entry(block)
+        entry = _parseEntry(block)
         if entry is not None:
             out.append(entry)
     return out
 
 
-def _parse_entry(block: str) -> Entry | None:
+def _parseEntry(block: str) -> Entry | None:
     lines = block.strip().splitlines()
     if not lines:
         return None
@@ -270,7 +270,7 @@ def _parse_entry(block: str) -> Entry | None:
     if not tag_match:
         return None
     date = tag_match.group(1).strip()
-    stock_code = tag_match.group(2).strip()
+    stockCode = tag_match.group(2).strip()
     theme = tag_match.group(3).strip()
     rest = tag_match.group(4).strip()
     fields = [f.strip() for f in rest.split("|")]
@@ -289,7 +289,7 @@ def _parse_entry(block: str) -> Entry | None:
 
     return Entry(
         date=date,
-        stockCode=stock_code,
+        stockCode=stockCode,
         theme=theme,
         status=status,
         decision=decision,
@@ -300,9 +300,9 @@ def _parse_entry(block: str) -> Entry | None:
     )
 
 
-def _apply_updates(text: str, updates: list[Update]) -> tuple[str, int]:
+def _applyUpdates(text: str, updates: list[Update]) -> tuple[str, int]:
     """text 안 pending entry 를 (date, stockCode) 매칭으로 resolved 갱신."""
-    update_map: dict[tuple[str, str], Update] = {(u.date, _safe_or_skip(u.stockCode)): u for u in updates}
+    update_map: dict[tuple[str, str], Update] = {(u.date, _safeOrSkip(u.stockCode)): u for u in updates}
     update_map = {k: v for k, v in update_map.items() if k[1] is not None}
     if not update_map:
         return text, 0
@@ -314,8 +314,8 @@ def _apply_updates(text: str, updates: list[Update]) -> tuple[str, int]:
         stripped = block.strip()
         if not stripped:
             continue
-        entry = _parse_entry(stripped)
-        if entry is None or not entry.is_pending():
+        entry = _parseEntry(stripped)
+        if entry is None or not entry.isPending():
             rewritten.append(stripped)
             continue
         key = (entry.date, entry.stockCode)
@@ -335,14 +335,14 @@ def _apply_updates(text: str, updates: list[Update]) -> tuple[str, int]:
     return new_text.lstrip("\n"), count
 
 
-def _safe_or_skip(stockCode: str) -> str | None:
+def _safeOrSkip(stockCode: str) -> str | None:
     try:
-        return safe_stockcode(stockCode)
+        return safeStockcode(stockCode)
     except ValueError:
         return None
 
 
-def _format_full(entry: Entry) -> str:
+def _formatFull(entry: Entry) -> str:
     head = f"[{entry.date} | {entry.stockCode} | {entry.theme} | {entry.status}"
     if entry.status == "resolved":
         head += f" | {entry.raw_return} | {entry.alpha} | {entry.holding}"
@@ -355,7 +355,7 @@ def _format_full(entry: Entry) -> str:
     return "\n".join(parts)
 
 
-def _format_reflection_only(entry: Entry) -> str:
+def _formatReflectionOnly(entry: Entry) -> str:
     head = f"[{entry.date} | {entry.stockCode} | {entry.theme}]"
     if entry.reflection:
         return f"{head}\nREFLECTION: {entry.reflection}"
@@ -363,7 +363,7 @@ def _format_reflection_only(entry: Entry) -> str:
     return f"{head}\n{decision_short}"
 
 
-def _normalize_date(value: str) -> str:
+def _normalizeDate(value: str) -> str:
     raw = (value or "").strip()
     if re.match(r"^\d{4}-\d{2}-\d{2}$", raw):
         return raw
@@ -373,9 +373,9 @@ def _normalize_date(value: str) -> str:
 __all__ = [
     "Entry",
     "Update",
-    "batch_update_with_outcomes",
-    "get_past_context",
-    "get_pending_entries",
-    "safe_stockcode",
-    "store_decision",
+    "batchUpdateWithOutcomes",
+    "getPastContext",
+    "getPendingEntries",
+    "safeStockcode",
+    "storeDecision",
 ]

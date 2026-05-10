@@ -15,11 +15,11 @@ from dartlab.ai.workbench.loop import WorkbenchLoop
 class _MockProvider:
     """지정한 ProviderTurn 시퀀스를 round-robin 으로 반환."""
 
-    config: ProviderConfig = field(default_factory=lambda: ProviderConfig(provider="openai", api_key="sk-test"))
+    config: ProviderConfig = field(default_factory=lambda: ProviderConfig(provider="openai", apiKey="sk-test"))
     script: list[ProviderTurn] = field(default_factory=list)
     _idx: int = 0
 
-    def check_available(self) -> bool:
+    def checkAvailable(self) -> bool:
         return True
 
     def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn:
@@ -27,11 +27,11 @@ class _MockProvider:
             turn = self.script[self._idx]
             self._idx += 1
             return turn
-        return ProviderTurn(content="(no more script)", tool_calls=[])
+        return ProviderTurn(content="(no more script)", toolCalls=[])
 
 
 def _text(content: str) -> ProviderTurn:
-    return ProviderTurn(content=content, tool_calls=[])
+    return ProviderTurn(content=content, toolCalls=[])
 
 
 @pytest.mark.unit
@@ -128,12 +128,12 @@ def test_inject_step_dependency_inherits_target_from_scan() -> None:
             )
         ]
     )
-    prev_results = [{"plan": {"args": {"plan": {"apiRef": "scan.growth"}}}, "result": scan_result}]
+    prevResults = [{"plan": {"args": {"plan": {"apiRef": "scan.growth"}}}, "result": scan_result}]
     plan = {
         "tool": "engine_call",
         "args": {"plan": {"apiRef": "Company.show", "_inheritTargetsFrom": 0}},
     }
-    injected = _injectStepDependency(plan, prev_results)
+    injected = _injectStepDependency(plan, prevResults)
     assert injected["args"]["plan"].get("target") == "005930"
 
 

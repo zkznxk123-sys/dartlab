@@ -33,7 +33,7 @@ class TokenRefreshError(RuntimeError):
     """Raised when a stored OAuth token cannot be refreshed."""
 
 
-def _token_candidates() -> list[Path]:
+def _tokenCandidates() -> list[Path]:
     return [
         TOKEN_PATH,
         Path.home() / ".dartlab" / "oauth_token.json",
@@ -41,7 +41,7 @@ def _token_candidates() -> list[Path]:
     ]
 
 
-def _save_token(data: dict[str, Any]) -> None:
+def _saveToken(data: dict[str, Any]) -> None:
     expires_in = data.get("expires_in")
     if isinstance(expires_in, (int, float)):
         data["expires_at"] = time.time() + float(expires_in)
@@ -52,14 +52,14 @@ def _save_token(data: dict[str, Any]) -> None:
     tmp.replace(TOKEN_PATH)
 
 
-def load_token() -> dict[str, Any] | None:
+def loadToken() -> dict[str, Any] | None:
     env_token = os.environ.get("DARTLAB_OAUTH_TOKEN")
     if env_token:
         return {"access_token": env_token, "source": "env"}
     data = getSecretStore().get_json(_TOKEN_SECRET_NAME)
     if isinstance(data, dict):
         return data
-    for path in _token_candidates():
+    for path in _tokenCandidates():
         if not path.exists():
             continue
         raw = path.read_text(encoding="utf-8")
@@ -74,9 +74,9 @@ def load_token() -> dict[str, Any] | None:
     return None
 
 
-def revoke_token() -> None:
+def revokeToken() -> None:
     getSecretStore().delete(_TOKEN_SECRET_NAME)
-    for path in _token_candidates():
+    for path in _tokenCandidates():
         try:
             if path.exists():
                 path.unlink()
@@ -84,8 +84,8 @@ def revoke_token() -> None:
             pass
 
 
-def get_account_id() -> str | None:
-    token = load_token()
+def getAccountId() -> str | None:
+    token = loadToken()
     if not token:
         return None
     for key in ("account_id", "accountId", "sub", "email"):
@@ -95,21 +95,21 @@ def get_account_id() -> str | None:
     return None
 
 
-def is_authenticated() -> bool:
-    return get_valid_token() is not None
+def isAuthenticated() -> bool:
+    return getValidToken() is not None
 
 
-def _pkce_pair() -> tuple[str, str]:
+def _pkcePair() -> tuple[str, str]:
     verifier = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode("ascii").rstrip("=")
     digest = hashlib.sha256(verifier.encode("ascii")).digest()
     challenge = base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
     return verifier, challenge
 
 
-def build_auth_url() -> tuple[str, str, str]:
+def buildAuthUrl() -> tuple[str, str, str]:
     authorize_url = os.environ.get("DARTLAB_OAUTH_AUTHORIZE_URL", CHATGPT_AUTH_URL)
     client_id = os.environ.get("DARTLAB_OAUTH_CLIENT_ID", CHATGPT_CLIENT_ID)
-    verifier, challenge = _pkce_pair()
+    verifier, challenge = _pkcePair()
     state = secrets.token_urlsafe(24)
     scope = os.environ.get("DARTLAB_OAUTH_SCOPE", CHATGPT_SCOPE)
     query = urlencode(
@@ -129,7 +129,7 @@ def build_auth_url() -> tuple[str, str, str]:
     return f"{authorize_url}?{query}", verifier, state
 
 
-def exchange_code(code: str, verifier: str) -> dict[str, Any]:
+def exchangeCode(code: str, verifier: str) -> dict[str, Any]:
     token_url = os.environ.get("DARTLAB_OAUTH_TOKEN_URL", CHATGPT_TOKEN_URL)
     client_id = os.environ.get("DARTLAB_OAUTH_CLIENT_ID", CHATGPT_CLIENT_ID)
     payload = urlencode(
@@ -147,12 +147,12 @@ def exchange_code(code: str, verifier: str) -> dict[str, Any]:
     token = json.loads(body)
     if not isinstance(token, dict) or "access_token" not in token:
         raise RuntimeError("OAuth token response did not include access_token.")
-    _save_token(token)
+    _saveToken(token)
     return token
 
 
-def refresh_access_token() -> dict[str, Any] | None:
-    token = load_token()
+def refreshAccessToken() -> dict[str, Any] | None:
+    token = loadToken()
     if not token or not token.get("refresh_token"):
         raise TokenRefreshError("저장된 refresh_token이 없습니다. 재로그인이 필요합니다.")
     token_url = os.environ.get("DARTLAB_OAUTH_TOKEN_URL", CHATGPT_TOKEN_URL)
@@ -175,12 +175,12 @@ def refresh_access_token() -> dict[str, Any] | None:
         raise TokenRefreshError("OAuth refresh response did not include access_token.")
     if "refresh_token" not in refreshed:
         refreshed["refresh_token"] = token["refresh_token"]
-    _save_token(refreshed)
+    _saveToken(refreshed)
     return refreshed
 
 
-def get_valid_token() -> str | None:
-    token = load_token()
+def getValidToken() -> str | None:
+    token = loadToken()
     if not token:
         return None
     expires_at = token.get("expires_at")
@@ -188,5 +188,5 @@ def get_valid_token() -> str | None:
         not isinstance(expires_at, (int, float)) or time.time() < float(expires_at) - 300
     ):
         return token.get("access_token")
-    refreshed = refresh_access_token()
+    refreshed = refreshAccessToken()
     return refreshed.get("access_token") if refreshed else None

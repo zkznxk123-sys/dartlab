@@ -33,24 +33,24 @@ from .api import (
     room_router,
 )
 from .embed import router as embed_router
-from .runtime import ensure_port, run_server  # noqa: F401 — re-exported
-from .services.aiProfile import should_preload_ollama as _should_preload_ollama
-from .web import register_spa
+from .runtime import ensurePort, runServer  # noqa: F401 — re-exported
+from .services.aiProfile import shouldPreloadOllama as _should_preload_ollama
+from .web import registerSpa
 
 logger = logging.getLogger(__name__)
 
 
-async def _preload_ollama_once() -> None:
+async def _preloadOllamaOnce() -> None:
     """서버 시작 직후 Ollama 모델을 미리 깨워 cold start를 줄인다."""
 
     await asyncio.sleep(2)
 
     try:
-        from dartlab.ai import get_config
-        from dartlab.ai.providers import create_provider
+        from dartlab.ai import getConfig
+        from dartlab.ai.providers import createProvider
 
-        config = get_config("ollama")
-        provider = create_provider(config)
+        config = getConfig("ollama")
+        provider = createProvider(config)
     except (ImportError, OSError, RuntimeError, ValueError) as exc:
         logger.debug("Ollama preload 준비 실패", exc_info=exc)
         return
@@ -59,15 +59,15 @@ async def _preload_ollama_once() -> None:
         return
 
     try:
-        if provider.check_available():
+        if provider.checkAvailable():
             ok = await asyncio.to_thread(provider.preload)
             if ok:
-                logger.info("Ollama 모델 preload 완료: %s", provider.resolved_model)
+                logger.info("Ollama 모델 preload 완료: %s", provider.resolvedModel)
     except (ConnectionError, OSError, RuntimeError, TimeoutError, ValueError) as exc:
         logger.debug("Ollama preload 실행 실패", exc_info=exc)
 
 
-async def _prewarm_oauth_codex_models() -> None:
+async def _prewarmOauthCodexModels() -> None:
     """OAuth codex backend `/codex/models` cold call (~43s) 을 startup 으로 흡수.
 
     UI 가 startup 직후 `/api/models/oauth-codex` 또는 settings 패널에서 호출하면
@@ -91,15 +91,15 @@ async def lifespan(_: FastAPI):
     # background thread 로 미리 깨움 — 사용자 첫 호출은 cache hit (즉시 응답).
     # 회귀 가드: 과거 secret_store prewarm 은 잘못된 DPAPI 가설 기반이라 제거됨.
     # 이번 prewarm 은 측정 기반 (cold availableModels() = 43s 검증).
-    models_prewarm_task = asyncio.create_task(_prewarm_oauth_codex_models())
-    preload_task = asyncio.create_task(_preload_ollama_once()) if _should_preload_ollama() else None
+    models_prewarm_task = asyncio.createTask(_prewarmOauthCodexModels())
+    preload_task = asyncio.createTask(_preloadOllamaOnce()) if _should_preload_ollama() else None
 
     # 채널 모드: 협업 룸 자동 생성 + 백그라운드 정리
     from .room import room_manager
 
     if os.environ.get("DARTLAB_CHANNEL") == "1":
-        room_manager.create_room()
-        room_manager.start_background_cleanup()
+        room_manager.createRoom()
+        room_manager.startBackgroundCleanup()
 
     try:
         yield
@@ -108,9 +108,9 @@ async def lifespan(_: FastAPI):
         from .services.devChannelRuntime import dev_channel_runtime
 
         dev_channel_runtime.shutdown()
-        channel_runtime.shutdown_all()
-        room_manager.stop_background_cleanup()
-        room_manager.destroy_room()
+        channel_runtime.shutdownAll()
+        room_manager.stopBackgroundCleanup()
+        room_manager.destroyRoom()
 
         if preload_task is not None and not preload_task.done():
             preload_task.cancel()
@@ -131,7 +131,7 @@ installProgressCapture()
 app = FastAPI(title="DartLab", version=dartlab.__version__, lifespan=lifespan)
 
 
-def _cors_origins() -> list[str]:
+def _corsOrigins() -> list[str]:
     raw = os.environ.get("DARTLAB_CORS_ORIGINS")
     if raw:
         raw = raw.strip()
@@ -150,9 +150,9 @@ def _cors_origins() -> list[str]:
 
 
 class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
+    async def dispatch(self, request, callNext):
         """보안 헤더(X-Content-Type-Options 등)를 모든 응답에 추가한다."""
-        response = await call_next(request)
+        response = await callNext(request)
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "DENY")
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
@@ -162,7 +162,7 @@ class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
 app.add_middleware(_SecurityHeadersMiddleware)
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
-_origins = _cors_origins()
+_origins = _corsOrigins()
 if _origins == ["*"]:
     logger.warning("CORS allow_origins='*' — 프로덕션에서는 명시적 origin을 설정하세요")
 app.add_middleware(
@@ -186,12 +186,12 @@ app.include_router(embed_router)
 # ── MCP SSE 마운트 (HF Spaces 또는 명시적 활성화 시) ──
 if os.environ.get("SPACE_ID") or os.environ.get("DARTLAB_MCP_HTTP") == "1":
     try:
-        from dartlab.mcp import create_sse_app
+        from dartlab.mcp import createSseApp
 
-        _mcp_sse = create_sse_app()
+        _mcp_sse = createSseApp()
         app.mount("/mcp", _mcp_sse)
         logger.info("MCP SSE 엔드포인트 활성화: /mcp/sse")
     except ImportError:
         logger.info("MCP SDK 미설치 — MCP SSE 비활성")
 
-register_spa(app)
+registerSpa(app)

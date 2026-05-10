@@ -20,10 +20,10 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def _zScore(v: float, ref_mean: float, ref_std: float) -> float:
-    if ref_std <= 0:
+def _zScore(v: float, refMean: float, refStd: float) -> float:
+    if refStd <= 0:
         return 0.0
-    return (v - ref_mean) / ref_std
+    return (v - refMean) / refStd
 
 
 def calcTextComposite(

@@ -67,7 +67,7 @@ class Rule:
         """
         return _RuleBuilder(entry=expr)
 
-    def with_sizing(self, method: str, **kwargs) -> "Rule":
+    def withSizing(self, method: str, **kwargs) -> "Rule":
         """포지션 사이징 명시 — kelly / vol_target / risk_budget / equal.
 
         명시 안 하면 equal 1.0 (전 자본 진입).
@@ -80,7 +80,7 @@ class Rule:
             meta=self.meta,
         )
 
-    def with_stop(self, method: str, **kwargs) -> "Rule":
+    def withStop(self, method: str, **kwargs) -> "Rule":
         """손절 명시 — atr / fixed_pct / chandelier.
 
         명시 안 하면 no stop (entry/exit 시그널만 사용, 홀드).
@@ -93,7 +93,7 @@ class Rule:
             meta=self.meta,
         )
 
-    def with_meta(self, **kw) -> "Rule":
+    def withMeta(self, **kw) -> "Rule":
         """메타데이터 주입 — 백테스트 결과에 식별자/주석 포함.
 
         Parameters
@@ -115,7 +115,7 @@ class Rule:
             meta=merged,
         )
 
-    def shift_lag(self, lag: int = 1) -> "Rule":
+    def shiftLag(self, lag: int = 1) -> "Rule":
         """Lookahead 가드 — entry/exit boolean 을 lag 봉만큼 미루기.
 
         사용자가 만든 신호가 t 시점 정보를 사용했는지 확신 없을 때 paranoid mode.
@@ -139,7 +139,7 @@ class Rule:
             meta={**self.meta, "shift_lag": lag},
         )
 
-    def lookahead_check(self, close: np.ndarray) -> dict:
+    def lookaheadCheck(self, close: np.ndarray) -> dict:
         """Lookahead leakage sanity test — entries 가 미래 정보 누설했나 통계 검증.
 
         방법:

@@ -12,7 +12,7 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 from typing import Any
 
 from dartlab.analysis.financial.accountSums import sumCostOfSales, sumSGA
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 _MAX_YEARS = 8
@@ -26,7 +26,7 @@ from dartlab.core.utils.calc import safePct as _pct  # noqa: E402
 # ── 비용 비중 분해 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
     """매출원가율, 판관비율, 영업비용률 시계열.
 
@@ -96,7 +96,7 @@ def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
 # ── 영업레버리지 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | None:
     """영업레버리지(DOL) 시계열 — 매출 변동 대비 영업이익 민감도.
 
@@ -169,7 +169,7 @@ def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | N
 # ── 손익분기점 추정 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | None:
     """BEP 추정 — 고정비/(1-변동비율) 기반 손익분기 매출.
 
@@ -234,7 +234,7 @@ def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | N
 # ── 비용의 성격별 분류 분석 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict | None:
     """비용의 성격별 분류(notes) — 인건비/원재료/감가상각 비중 추세.
 
@@ -391,7 +391,7 @@ def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict 
 # ── 원재료 비중 (docs 보강) ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcRawMaterialBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
     """주요 원재료 품목별 매입액 비중 — rawMaterial docs 토픽 기반.
 
@@ -478,7 +478,7 @@ def calcRawMaterialBreakdown(company, *, basePeriod: str | None = None) -> dict 
 # ── 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcCostStructureFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """비용 구조 경고 신호.
 

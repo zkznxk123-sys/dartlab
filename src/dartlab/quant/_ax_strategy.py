@@ -81,15 +81,15 @@ def _arrays(stockCode: str, *, start: str | None = None) -> dict:
     return ohlcvToArrays(df)
 
 
-def _build_rule_from_style(style_name: str, stockCode: str, *, start: str | None = None) -> Rule | BacktestResult:
+def _buildRuleFromStyle(styleName: str, stockCode: str, *, start: str | None = None) -> Rule | BacktestResult:
     """스타일명 → Rule 또는 NotApplicable sentinel."""
-    key = resolveStyle(style_name)
+    key = resolveStyle(styleName)
     reg = STYLE_REGISTRY()
     if key not in reg:
         return BacktestResult(
             status="error",
-            reason=f"unknown style: {style_name!r} (available: {list(reg.keys())})",
-            style=style_name,
+            reason=f"unknown style: {styleName!r} (available: {list(reg.keys())})",
+            style=styleName,
         )
     company = _StubCompany(stockCode=stockCode, _strategy_start=start)
     return reg[key](company)
@@ -150,8 +150,8 @@ def runBacktest(
     *,
     style: str | Rule | None = None,
     cpcv: bool = False,
-    n_splits: int = 6,
-    n_test: int = 2,
+    nSplits: int = 6,
+    nTest: int = 2,
     embargo: int = 5,
     **kwargs,
 ) -> BacktestResult:
@@ -196,7 +196,7 @@ def runBacktest(
     if isinstance(style, str):
         key = resolveStyle(style)
         if key in {"flowFollow", "seasonalKR"} and resolve_market(stockCode, "auto") != "KR":
-            return BacktestResult.not_applicable(
+            return BacktestResult.notApplicable(
                 style=key,
                 reason=f"KR-only style: {key} (data not available for non-KR markets)",
             )
@@ -208,33 +208,33 @@ def runBacktest(
 
     if isinstance(style, Rule):
         rule = style
-        style_name = rule.meta.get("style")
+        styleName = rule.meta.get("style")
     else:
-        result = _build_rule_from_style(style, stockCode, start=kwargs.get("start"))
+        result = _buildRuleFromStyle(style, stockCode, start=kwargs.get("start"))
         if isinstance(result, BacktestResult):
             return result  # NotApplicable 또는 error sentinel
         rule = result
-        style_name = resolveStyle(style)
+        styleName = resolveStyle(style)
 
     # Phase 4 R4 — flowFollow 등 데이터 부족 시 data_limited sentinel
     if rule.meta.get("error") == "data_limited":
         return BacktestResult(
             status="data_limited",
             reason=rule.meta.get("reason", "data limited"),
-            style=style_name,
+            style=styleName,
         )
 
     if cpcv:
         return cpcv_fn(
             close,
             rule,
-            n_splits=n_splits,
-            n_test=n_test,
+            nSplits=nSplits,
+            nTest=nTest,
             embargo=embargo,
             open_=arr.get("open"),
             high=arr.get("high"),
             low=arr.get("low"),
-            style=style_name,
+            style=styleName,
         )
     return vectorBacktest(
         close,
@@ -243,7 +243,7 @@ def runBacktest(
         high=arr.get("high"),
         low=arr.get("low"),
         dates=arr.get("date"),
-        style=style_name,
+        style=styleName,
     )
 
 
@@ -310,7 +310,7 @@ def runEntry(
     out: dict[str, EntryVerdict] = {}
     start = kwargs.get("start")
     for key in keys:
-        result = _build_rule_from_style(key, stockCode, start=start)
+        result = _buildRuleFromStyle(key, stockCode, start=start)
         if isinstance(result, BacktestResult):
             out[key] = EntryVerdict(
                 style=key,
@@ -341,9 +341,9 @@ def runEntry(
         # ATR stop level (옵션)
         stop_level = None
         if rule.stop and high is not None and low is not None:
-            from dartlab.quant.strategy.backtest import _build_stop_series
+            from dartlab.quant.strategy.backtest import _buildStopSeries
 
-            stops = _build_stop_series(close, high, low, rule.stop)
+            stops = _buildStopSeries(close, high, low, rule.stop)
             if not np.isnan(stops[-1]):
                 stop_level = float(stops[-1])
         out[key] = EntryVerdict(
@@ -451,7 +451,7 @@ def runWalkforward(
         )
 
     if rule is None:
-        result = _build_rule_from_style(style, stockCode)
+        result = _buildRuleFromStyle(style, stockCode)
         if isinstance(result, BacktestResult):
             return result
         rule = result

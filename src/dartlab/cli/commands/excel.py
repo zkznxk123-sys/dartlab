@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from dartlab.cli.services.errors import CLIError
-from dartlab.cli.services.runtime import configure_dartlab
+from dartlab.cli.services.runtime import configureDartlab
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """excel 서브커맨드 등록 — 기업 데이터 Excel 내보내기."""
     parser = subparsers.add_parser("excel", help="Excel 파일로 내보내기")
     parser.add_argument("company", help="종목코드 (005930) 또는 회사명 (삼성전자)")
@@ -17,7 +17,7 @@ def configure_parser(subparsers) -> None:
 
 def run(args) -> int:
     """Company 생성 후 지정 모듈을 Excel 파일로 내보낸다."""
-    dartlab = configure_dartlab()
+    dartlab = configureDartlab()
 
     try:
         company = dartlab.Company(args.company)
@@ -33,7 +33,7 @@ def run(args) -> int:
     except (OSError, ValueError, RuntimeError) as exc:
         raise CLIError(str(exc)) from exc
 
-    from dartlab.cli.services.output import get_console
+    from dartlab.cli.services.output import getConsole
 
-    get_console().print(f"  [bold green]완료[/] {company.corpName} ({company.stockCode}) → {path}")
+    getConsole().print(f"  [bold green]완료[/] {company.corpName} ({company.stockCode}) → {path}")
     return 0

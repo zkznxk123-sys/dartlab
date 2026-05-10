@@ -5,7 +5,7 @@
 2. 벤치마크 (KOSPI / S&P500) 가 함께 주어지면 alpha 산출
 3. minHoldingDays 미달 시 pending 유지 (intraday noise 차단)
 4. 가격 lookup 실패 시 pending 유지 (다음 호출까지 굴림)
-5. batch_update_with_outcomes 로 atomic 갱신
+5. batchUpdateWithOutcomes 로 atomic 갱신
 
 `Company.price` 직접 import 금지 — caller 가 callable 주입 (SSOT §1 ai/ 정적
 import 가드 정신). wiring.py 의 default lookup 이 lazy import 로 providers 호출.
@@ -23,12 +23,12 @@ from datetime import date, datetime
 from dartlab.ai.memory.outcomeLog import (
     Entry,
     Update,
-    _decisions_root,
-    _load_entries,
-    _log_path,
-    _normalize_market,
-    batch_update_with_outcomes,
-    safe_stockcode,
+    _decisionsRoot,
+    _loadEntries,
+    _logPath,
+    _normalizeMarket,
+    batchUpdateWithOutcomes,
+    safeStockcode,
 )
 
 PriceLookup = Callable[[str, str], float | None]
@@ -62,7 +62,7 @@ def resolvePending(
     """단일 종목 pending entry 들을 가격 lookup 으로 resolved 변환.
 
     Args:
-        stockCode: 단일 종목 (safe_stockcode 가드 통과 필수).
+        stockCode: 단일 종목 (safeStockcode 가드 통과 필수).
         market: "KR" or "US".
         pricer: (symbol, asOf) -> close price or None. SSOT §6 의
             `Company.price(asOf=...)` look-ahead 가드 결합.
@@ -74,15 +74,15 @@ def resolvePending(
     Returns:
         ResolveReport — pending 검사 수, resolved 수, skip 사유별 분포.
     """
-    safe_code = safe_stockcode(stockCode)
-    safe_market = _normalize_market(market)
-    today_str = today or date.today().isoformat()
-    today_dt = _parseDate(today_str)
+    safe_code = safeStockcode(stockCode)
+    safe_market = _normalizeMarket(market)
+    todayStr = today or date.today().isoformat()
+    today_dt = _parseDate(todayStr)
     if today_dt is None:
         return ResolveReport(safe_code, safe_market, 0, 0, 0, 0)
 
-    target = _log_path(safe_market, safe_code)
-    pending = [e for e in _load_entries(target) if e.is_pending() and e.stockCode == safe_code]
+    target = _logPath(safe_market, safe_code)
+    pending = [e for e in _loadEntries(target) if e.isPending() and e.stockCode == safe_code]
     if not pending:
         return ResolveReport(safe_code, safe_market, 0, 0, 0, 0)
 
@@ -96,43 +96,43 @@ def resolvePending(
         if entry_dt is None:
             skip_missing += 1
             continue
-        holding_days = (today_dt - entry_dt).days
-        if holding_days < minHoldingDays:
+        holdingDays = (today_dt - entry_dt).days
+        if holdingDays < minHoldingDays:
             skip_short += 1
             continue
         entry_price = pricer(safe_code, entry.date)
-        exit_price = pricer(safe_code, today_str)
+        exit_price = pricer(safe_code, todayStr)
         if entry_price is None or exit_price is None or entry_price <= 0:
             skip_missing += 1
             continue
-        raw_return_pct = (exit_price / entry_price - 1.0) * 100.0
-        alpha_pct: float | None = None
+        rawReturnPct = (exit_price / entry_price - 1.0) * 100.0
+        alphaPct: float | None = None
         if benchmarkPricer is not None and benchmark:
             b_entry = benchmarkPricer(benchmark, entry.date)
-            b_exit = benchmarkPricer(benchmark, today_str)
+            b_exit = benchmarkPricer(benchmark, todayStr)
             if b_entry is not None and b_exit is not None and b_entry > 0:
                 b_return = (b_exit / b_entry - 1.0) * 100.0
-                alpha_pct = raw_return_pct - b_return
+                alphaPct = rawReturnPct - b_return
         updates.append(
             Update(
                 stockCode=safe_code,
                 market=safe_market,
                 date=entry.date,
-                raw_return=_formatPct(raw_return_pct),
-                alpha=_formatAlpha(alpha_pct, benchmark) if alpha_pct is not None else "",
-                holding=f"{holding_days}d",
+                raw_return=_formatPct(rawReturnPct),
+                alpha=_formatAlpha(alphaPct, benchmark) if alphaPct is not None else "",
+                holding=f"{holdingDays}d",
                 reflection=_buildReflection(
                     entry=entry,
-                    raw_return_pct=raw_return_pct,
-                    alpha_pct=alpha_pct,
+                    rawReturnPct=rawReturnPct,
+                    alphaPct=alphaPct,
                     benchmark=benchmark,
-                    holding_days=holding_days,
-                    today_str=today_str,
+                    holdingDays=holdingDays,
+                    todayStr=todayStr,
                 ),
             )
         )
 
-    resolved_count = batch_update_with_outcomes(updates) if updates else 0
+    resolved_count = batchUpdateWithOutcomes(updates) if updates else 0
     return ResolveReport(
         stockCode=safe_code,
         market=safe_market,
@@ -157,15 +157,15 @@ def resolvePendingMarket(
     Returns:
         per-stockCode ResolveReport list (resolved 0 인 종목 포함, 빈 디렉토리만 제외).
     """
-    safe_market = _normalize_market(market)
-    base = _decisions_root() / safe_market
+    safe_market = _normalizeMarket(market)
+    base = _decisionsRoot() / safe_market
     if not base.is_dir():
         return []
     reports: list[ResolveReport] = []
     for path in sorted(base.glob("*.md")):
         code = path.stem
         try:
-            safe_code = safe_stockcode(code)
+            safe_code = safeStockcode(code)
         except ValueError:
             continue
         report = resolvePending(
@@ -204,21 +204,21 @@ def _formatAlpha(value: float, benchmark: str) -> str:
 def _buildReflection(
     *,
     entry: Entry,
-    raw_return_pct: float,
-    alpha_pct: float | None,
+    rawReturnPct: float,
+    alphaPct: float | None,
     benchmark: str,
-    holding_days: int,
-    today_str: str,
+    holdingDays: int,
+    todayStr: str,
 ) -> str:
     """SSOT §6 reflection — 사실 진술만. thesis 평가 2/3 항목은 다음 LLM 보강."""
-    direction = "유지" if raw_return_pct >= 0 else "반대"
-    raw_str = _formatPct(raw_return_pct)
-    if alpha_pct is None:
+    direction = "유지" if rawReturnPct >= 0 else "반대"
+    raw_str = _formatPct(rawReturnPct)
+    if alphaPct is None:
         alpha_clause = "벤치마크 미주입"
     else:
-        alpha_clause = f"alpha {_formatAlpha(alpha_pct, benchmark)} ({'적중' if alpha_pct > 0 else '회귀'})"
+        alpha_clause = f"alpha {_formatAlpha(alphaPct, benchmark)} ({'적중' if alphaPct > 0 else '회귀'})"
     return (
-        f"Resolved {today_str} ({holding_days}d hold). Raw return {raw_str}, {alpha_clause}. "
+        f"Resolved {todayStr} ({holdingDays}d hold). Raw return {raw_str}, {alpha_clause}. "
         f"Theme={entry.theme}, decision direction {direction}. "
         f"Thesis 어느 부분 유지/실패 + 다음 lesson 은 후속 분석 past_context 주입 시 LLM 이 보강."
     )

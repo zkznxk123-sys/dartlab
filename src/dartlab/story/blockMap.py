@@ -87,7 +87,7 @@ class BlockMap:
     def __dir__(self):
         return list(self._data.keys()) + list(super().__dir__())
 
-    def _ipython_key_completions_(self):
+    def _ipythonKeyCompletions_(self):
         """Jupyter에서 b["<TAB>"] 시 한글 label 포함 전체 키 제안."""
         return list(self._data.keys()) + list(self._labelToKey.keys())
 

@@ -10,11 +10,11 @@ pytestmark = pytest.mark.unit
 
 from dartlab.cli.context import EXIT_INTERRUPTED, EXIT_RUNTIME, EXIT_USAGE
 from dartlab.cli.main import main
-from dartlab.cli.parser import build_parser
+from dartlab.cli.parser import buildParser
 
 
 def test_build_parser_registers_all_commands():
-    parser = build_parser()
+    parser = buildParser()
 
     choices = parser._subparsers._group_actions[0].choices
     assert set(
@@ -24,7 +24,7 @@ def test_build_parser_registers_all_commands():
 
 
 def test_parse_ask_options():
-    parser = build_parser()
+    parser = buildParser()
 
     args = parser.parse_args(["ask", "005930", "분석", "--provider", "codex", "--include", "BS", "IS", "--stream"])
 
@@ -93,7 +93,7 @@ def test_excel_returns_non_zero_on_company_error(capsys):
 
 
 def test_parse_profile_options():
-    parser = build_parser()
+    parser = buildParser()
 
     args = parser.parse_args(["profile", "005930", "--facts"])
 
@@ -103,7 +103,7 @@ def test_parse_profile_options():
 
 
 def test_parse_statement_options():
-    parser = build_parser()
+    parser = buildParser()
 
     args = parser.parse_args(["statement", "005930", "CIS"])
 

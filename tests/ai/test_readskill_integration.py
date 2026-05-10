@@ -50,7 +50,7 @@ class _Provider:
     config: Any
     _idx: int = 0
 
-    def check_available(self) -> bool:
+    def checkAvailable(self) -> bool:
         return True
 
     def generate(self, messages, tools):
@@ -60,9 +60,9 @@ class _Provider:
         if self._idx == 1:
             return ProviderTurn(
                 content="",
-                tool_calls=[ToolCall(id="t1", name="read_skill", args={"query": "회사"})],
+                toolCalls=[ToolCall(id="t1", name="read_skill", args={"query": "회사"})],
             )
-        return ProviderTurn(content="BRIEF 완료", tool_calls=[])
+        return ProviderTurn(content="BRIEF 완료", toolCalls=[])
 
 
 @pytest.mark.unit
@@ -72,5 +72,5 @@ def test_brief_pass_populates_required_evidence() -> None:
     from dartlab.ai.workbench.state import WorkbenchState
 
     state = WorkbenchState(question="회사 재무 분석")
-    list(runBrief(state, _Provider(config=ProviderConfig(provider="openai", api_key="sk-test"))))
+    list(runBrief(state, _Provider(config=ProviderConfig(provider="openai", apiKey="sk-test"))))
     assert any(c.get("tool") == "ReadSkill" for c in state.toolCalls)

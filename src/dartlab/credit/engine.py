@@ -599,7 +599,7 @@ def _blendOFS(consolidated: float | None, separate: float | None) -> float | Non
 # ═══════════════════════════════════════════════════════════
 
 
-def _normalizeMetricsForOutput(metric_items: list) -> list[dict]:
+def _normalizeMetricsForOutput(metricItems: list) -> list[dict]:
     """축의 metric 항목을 출력용 dict 로 정규화.
 
     - dict 입력 (R21-1 신규): {"name", "value", "score"} 그대로 유지 (None score 포함, value 표시 위해)
@@ -611,7 +611,7 @@ def _normalizeMetricsForOutput(metric_items: list) -> list[dict]:
     - score: 위험 점수 (0=최우량, 100=최위험) — 절대 metric value 아님
     """
     out: list[dict] = []
-    for item in metric_items:
+    for item in metricItems:
         if isinstance(item, dict):
             entry = {"name": item.get("name", "")}
             if "value" in item:

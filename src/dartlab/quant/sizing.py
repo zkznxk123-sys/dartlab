@@ -15,7 +15,7 @@ from __future__ import annotations
 import numpy as np
 
 
-def kellyFraction(win_prob: float, win_loss_ratio: float, *, fraction: float = 1.0) -> float:
+def kellyFraction(winProb: float, winLossRatio: float, *, fraction: float = 1.0) -> float:
     """Kelly criterion — 베팅 비율.
 
     f* = (p × b - (1-p)) / b
@@ -30,13 +30,13 @@ def kellyFraction(win_prob: float, win_loss_ratio: float, *, fraction: float = 1
     Returns:
         포지션 비율 (0~1, 음수면 베팅 안 함).
     """
-    if win_prob <= 0 or win_prob >= 1 or win_loss_ratio <= 0:
+    if winProb <= 0 or winProb >= 1 or winLossRatio <= 0:
         return 0.0
-    full = (win_prob * win_loss_ratio - (1 - win_prob)) / win_loss_ratio
+    full = (winProb * winLossRatio - (1 - winProb)) / winLossRatio
     return float(max(0.0, min(1.0, full * fraction)))
 
 
-def kellyContinuous(mean_return: float, variance: float) -> float:
+def kellyContinuous(meanReturn: float, variance: float) -> float:
     """연속 Kelly — μ/σ² (정규분포 가정).
 
     Thorp (2006), MacLean & Ziemba 등. log-utility maximizer.
@@ -50,7 +50,7 @@ def kellyContinuous(mean_return: float, variance: float) -> float:
     """
     if variance <= 0:
         return 0.0
-    return float(max(0.0, mean_return / variance))
+    return float(max(0.0, meanReturn / variance))
 
 
 def inverseVolatilityWeights(volatilities: np.ndarray) -> np.ndarray:
@@ -67,9 +67,9 @@ def inverseVolatilityWeights(volatilities: np.ndarray) -> np.ndarray:
 
 
 def volatilityTargetLeverage(
-    realized_vol: float,
-    target_vol: float = 0.10,
-    max_leverage: float = 3.0,
+    realizedVol: float,
+    targetVol: float = 0.10,
+    maxLeverage: float = 3.0,
 ) -> float:
     """변동성 타겟팅 레버리지 — target_vol / realized_vol.
 
@@ -84,34 +84,34 @@ def volatilityTargetLeverage(
     Returns:
         포지션 사이즈 곱수 (0 ~ max_leverage)
     """
-    if realized_vol <= 0:
+    if realizedVol <= 0:
         return 0.0
-    lev = target_vol / realized_vol
-    return float(max(0.0, min(max_leverage, lev)))
+    lev = targetVol / realizedVol
+    return float(max(0.0, min(maxLeverage, lev)))
 
 
-def sharpeBasedSize(sharpe: float, target_sharpe: float = 1.0, *, cap: float = 1.0) -> float:
+def sharpeBasedSize(sharpe: float, targetSharpe: float = 1.0, *, cap: float = 1.0) -> float:
     """샤프비율 기반 단순 사이징 — sharpe / target_sharpe로 비율 결정.
 
     sharpe ≥ target → cap, 음수 → 0.
     """
     if sharpe <= 0:
         return 0.0
-    return float(min(cap, sharpe / max(target_sharpe, 1e-12) * cap))
+    return float(min(cap, sharpe / max(targetSharpe, 1e-12) * cap))
 
 
 def riskBudgetLeverage(
-    portfolio_vol: float,
-    risk_budget: float,
-    max_leverage: float = 2.0,
+    portfolioVol: float,
+    riskBudget: float,
+    maxLeverage: float = 2.0,
 ) -> float:
     """리스크 버짓 레버리지 — 포트폴리오 변동성을 risk_budget에 맞춤.
 
     책 10장: 자본의 % 단위로 risk_budget을 정하고 그 한도 안에서 portfolio leverage 결정.
     """
-    if portfolio_vol <= 0:
+    if portfolioVol <= 0:
         return 0.0
-    return float(max(0.0, min(max_leverage, risk_budget / portfolio_vol)))
+    return float(max(0.0, min(maxLeverage, riskBudget / portfolioVol)))
 
 
 # ── Deprecated snake_case aliases ────────────────────────

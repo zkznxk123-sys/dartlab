@@ -16,7 +16,7 @@ from urllib.request import Request, urlopen
 
 from dartlab.ai.contracts import Ref
 
-from .formatting import strip_html
+from .formatting import stripHtml
 from .types import ToolResult
 
 _HTML_ENDPOINT = "https://html.duckduckgo.com/html/"
@@ -75,12 +75,12 @@ def webSearch(query: str, *, limit: int = 5) -> ToolResult:
     refs: list[Ref] = []
     seen: set[str] = set()
     for raw_url, raw_title, raw_snippet in _RESULT_BLOCK_RE.findall(html):
-        target = _resolve_redirect(raw_url)
+        target = _resolveRedirect(raw_url)
         if not target or target in seen:
             continue
         seen.add(target)
-        title = strip_html(raw_title or "").strip()
-        snippet = strip_html(raw_snippet or "").strip()
+        title = stripHtml(raw_title or "").strip()
+        snippet = stripHtml(raw_snippet or "").strip()
         if not title and not snippet:
             continue
         idx = len(refs) + 1
@@ -109,7 +109,7 @@ def webSearch(query: str, *, limit: int = 5) -> ToolResult:
     return ToolResult(True, f"web refs {len(refs)}개", refs=refs, data={"query": query})
 
 
-def _resolve_redirect(href: str) -> str:
+def _resolveRedirect(href: str) -> str:
     """DDG HTML 결과의 href 는 `//duckduckgo.com/l/?uddg=<encoded>` 형태 redirect.
 
     실제 target URL 은 query string 의 `uddg` 파라미터. 일반 URL 이면 그대로.

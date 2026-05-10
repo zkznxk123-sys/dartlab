@@ -33,14 +33,14 @@ class TestCompanyFacade:
         assert "chapter" in sec.columns
 
     def test_show_IS_hasPeriodColumns(self, samsungRealData):
-        is_df = samsungRealData.show("IS")
-        assert is_df is not None
-        assert isinstance(is_df, pl.DataFrame)
-        periodCols = [c for c in is_df.columns if len(c) >= 4 and c[:4].isdigit()]
+        isDf = samsungRealData.show("IS")
+        assert isDf is not None
+        assert isinstance(isDf, pl.DataFrame)
+        periodCols = [c for c in isDf.columns if len(c) >= 4 and c[:4].isdigit()]
         assert periodCols, "IS 기간 컬럼이 하나도 없음 — select() 빈칸 버그 재현"
         # 실제 값이 존재하는지 — 최소 1개 cell non-null
         latest = periodCols[0]
-        nonNull = is_df[latest].is_not_null().sum()
+        nonNull = isDf[latest].is_not_null().sum()
         assert nonNull > 0, f"IS {latest} 전부 null — 데이터 빔"
 
     def test_show_BS_basic(self, samsungRealData):

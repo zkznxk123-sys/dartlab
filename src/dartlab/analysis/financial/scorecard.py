@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 
 _GRADE_MAP = {
     "performance": "성장성",
@@ -48,7 +48,7 @@ def _sectorRelativeScore(company, value: float, metric: str) -> int:
     return 0
 
 
-@memoized_calc
+@memoizedCalc
 def calcScorecard(company, *, basePeriod: str | None = None) -> dict | None:
     """8영역 등급 요약.
 
@@ -268,7 +268,7 @@ def _calcCrossStatementGrade(company, *, basePeriod: str | None = None) -> str |
         return None
 
 
-@memoized_calc
+@memoizedCalc
 def calcPiotroskiDetail(company, *, basePeriod: str | None = None) -> dict | None:
     """Piotroski F-Score 9개 항목 상세.
 
@@ -313,7 +313,7 @@ def calcPiotroskiDetail(company, *, basePeriod: str | None = None) -> dict | Non
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcSummaryFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """전체 경고/기회 요약 -- 8영역 플래그 수집.
 

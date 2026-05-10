@@ -27,7 +27,7 @@ _CHART_URL = "https://fchart.stock.naver.com/sise.nhn"
 _INTRADAY_URL = "https://api.stock.naver.com/chart/domestic/item/{code}/minute"
 
 
-def _clean_number(text: str | None) -> float | None:
+def _cleanNumber(text: str | None) -> float | None:
     """숫자 텍스트 파싱 — 콤마, 공백, +/- 처리.
 
     Parameters
@@ -93,11 +93,11 @@ def _parseMarketCap(text: str) -> float:
     text = text.replace(",", "")
     if "조" in text:
         parts = text.split("조")
-        total += (_clean_number(parts[0]) or 0.0) * 1_0000_0000_0000
+        total += (_cleanNumber(parts[0]) or 0.0) * 1_0000_0000_0000
         text = parts[1] if len(parts) > 1 else ""
     if "억" in text:
         parts = text.split("억")
-        total += (_clean_number(parts[0]) or 0.0) * 1_0000_0000
+        total += (_cleanNumber(parts[0]) or 0.0) * 1_0000_0000
     return total
 
 
@@ -121,7 +121,7 @@ def _cleanSuffix(text: str, *suffixes: str) -> str:
     return text.strip()
 
 
-async def fetch_price(stock_code: str, client, **kwargs) -> PriceSnapshot | None:
+async def fetchPrice(stockCode: str, client, **kwargs) -> PriceSnapshot | None:
     """네이버 -> 현재가 + PER/PBR + 52주 범위 + 시총 (KR 전용).
 
     KR 종목코드(6자리 숫자)가 아니면 None 반환 — naver KR API에 잘못된
@@ -154,19 +154,19 @@ async def fetch_price(stock_code: str, client, **kwargs) -> PriceSnapshot | None
         API 실패 또는 현재가 없으면 None.
     """
     # KR 종목코드 검증 — 6자리 숫자 아니면 차단 (US/글로벌 티커 → naver_global로)
-    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
+    if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
         return None
 
     # basic: 현재가, 등락
-    url = f"{_API_BASE}/{stock_code}/basic"
+    url = f"{_API_BASE}/{stockCode}/basic"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
         data = resp.json()
     except (SourceUnavailableError, ValueError) as exc:
-        log.warning("naver price API 실패 (%s): %s", stock_code, exc)
+        log.warning("naver price API 실패 (%s): %s", stockCode, exc)
         return None
 
-    current = _clean_number(data.get("closePrice"))
+    current = _cleanNumber(data.get("closePrice"))
     if not current:
         return None
 
@@ -176,33 +176,33 @@ async def fetch_price(stock_code: str, client, **kwargs) -> PriceSnapshot | None
     pbr = None
     high52w = 0.0
     low52w = 0.0
-    volume = int(_clean_number(data.get("accumulatedTradingVolume")) or 0)
+    volume = int(_cleanNumber(data.get("accumulatedTradingVolume")) or 0)
     dividendYield = None
 
     try:
-        intUrl = f"{_API_BASE}/{stock_code}/integration"
+        intUrl = f"{_API_BASE}/{stockCode}/integration"
         intResp = await client.get(intUrl, headers={"Accept": "application/json"})
         intData = intResp.json()
         infos = _parseInfos(intData.get("totalInfos", []))
 
         marketCap = _parseMarketCap(infos.get("marketValue", ""))
-        per = _clean_number(_cleanSuffix(infos.get("per", ""), "배"))
-        pbr = _clean_number(_cleanSuffix(infos.get("pbr", ""), "배"))
-        high52w = _clean_number(_cleanSuffix(infos.get("highPriceOf52Weeks", ""), "원")) or 0.0
-        low52w = _clean_number(_cleanSuffix(infos.get("lowPriceOf52Weeks", ""), "원")) or 0.0
-        volume = int(_clean_number(infos.get("accumulatedTradingVolume", "").replace("백만", "")) or volume)
-        dividendYield = _clean_number(_cleanSuffix(infos.get("dividendYieldRatio", ""), "%"))
+        per = _cleanNumber(_cleanSuffix(infos.get("per", ""), "배"))
+        pbr = _cleanNumber(_cleanSuffix(infos.get("pbr", ""), "배"))
+        high52w = _cleanNumber(_cleanSuffix(infos.get("highPriceOf52Weeks", ""), "원")) or 0.0
+        low52w = _cleanNumber(_cleanSuffix(infos.get("lowPriceOf52Weeks", ""), "원")) or 0.0
+        volume = int(_cleanNumber(infos.get("accumulatedTradingVolume", "").replace("백만", "")) or volume)
+        dividendYield = _cleanNumber(_cleanSuffix(infos.get("dividendYieldRatio", ""), "%"))
     except (SourceUnavailableError, ValueError, KeyError):
-        log.debug("naver integration fallback 실패 (%s)", stock_code)
+        log.debug("naver integration fallback 실패 (%s)", stockCode)
 
     return PriceSnapshot(
         current=current,
-        change=_clean_number(data.get("compareToPreviousClosePrice")) or 0.0,
-        change_pct=_clean_number(data.get("fluctuationsRatio")) or 0.0,
+        change=_cleanNumber(data.get("compareToPreviousClosePrice")) or 0.0,
+        change_pct=_cleanNumber(data.get("fluctuationsRatio")) or 0.0,
         high_52w=high52w,
         low_52w=low52w,
         volume=volume,
-        market_cap=marketCap,
+        marketCap=marketCap,
         per=per,
         pbr=pbr,
         dividend_yield=dividendYield,
@@ -213,7 +213,7 @@ async def fetch_price(stock_code: str, client, **kwargs) -> PriceSnapshot | None
     )
 
 
-async def fetch_flow(stock_code: str, client) -> list[dict] | None:
+async def fetchFlow(stockCode: str, client) -> list[dict] | None:
     """네이버 → 외국인/기관 수급 시계열.
 
     Parameters
@@ -237,15 +237,15 @@ async def fetch_flow(stock_code: str, client) -> list[dict] | None:
         데이터 없으면 None.
     """
     # KR 종목코드 검증
-    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
+    if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
         return None
 
-    url = f"{_API_BASE}/{stock_code}/integration"
+    url = f"{_API_BASE}/{stockCode}/integration"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
         data = resp.json()
     except (SourceUnavailableError, ValueError) as exc:
-        log.warning("naver flow API 실패 (%s): %s", stock_code, exc)
+        log.warning("naver flow API 실패 (%s): %s", stockCode, exc)
         return None
 
     # v2: dealTrendInfos 배열 전체 활용 (최신순)
@@ -253,13 +253,13 @@ async def fetch_flow(stock_code: str, client) -> list[dict] | None:
     if deal_trends and isinstance(deal_trends, list):
         result = []
         for item in deal_trends:
-            fn = _clean_number(item.get("foreignerPureBuyQuant"))
-            on = _clean_number(item.get("organPureBuyQuant"))
-            ind = _clean_number(item.get("individualPureBuyQuant"))
+            fn = _cleanNumber(item.get("foreignerPureBuyQuant"))
+            on = _cleanNumber(item.get("organPureBuyQuant"))
+            ind = _cleanNumber(item.get("individualPureBuyQuant"))
             ratio_str = item.get("foreignerHoldRatio", "")
             ratio = None
             if ratio_str:
-                ratio = _clean_number(str(ratio_str).replace("%", ""))
+                ratio = _cleanNumber(str(ratio_str).replace("%", ""))
             row = {
                 "date": item.get("bizdate", ""),
                 "foreignNet": fn or 0.0,
@@ -278,7 +278,7 @@ async def fetch_flow(stock_code: str, client) -> list[dict] | None:
 
     foreign_info = data.get("foreignSummary")
     if foreign_info:
-        ratio = _clean_number(foreign_info.get("foreignOwnershipRatio"))
+        ratio = _cleanNumber(foreign_info.get("foreignOwnershipRatio"))
         if ratio is not None:
             foreign_holding_ratio = ratio
 
@@ -286,7 +286,7 @@ async def fetch_flow(stock_code: str, client) -> list[dict] | None:
     if investor_info and isinstance(investor_info, list):
         for item in investor_info:
             investor_type = item.get("investorType", "")
-            net_buy = _clean_number(item.get("accumulatedNetBuyVolume"))
+            net_buy = _cleanNumber(item.get("accumulatedNetBuyVolume"))
             if net_buy is None:
                 continue
             if "외국인" in investor_type or investor_type == "FOREIGNER":
@@ -307,7 +307,7 @@ async def fetch_flow(stock_code: str, client) -> list[dict] | None:
     ]
 
 
-async def fetch_revenue_consensus(stock_code: str, client) -> list[RevenueConsensus]:
+async def fetchRevenueConsensus(stockCode: str, client) -> list[RevenueConsensus]:
     """네이버 → 연간 매출/영업이익/순이익 컨센서스.
 
     finance/annual API에서 isConsensus='Y'인 기간의 재무 추정치를 추출한다.
@@ -336,15 +336,15 @@ async def fetch_revenue_consensus(stock_code: str, client) -> list[RevenueConsen
         API 실패 또는 데이터 없으면 빈 리스트.
     """
     # KR 종목코드 검증
-    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
+    if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
         return []
 
-    url = f"{_API_BASE}/{stock_code}/finance/annual"
+    url = f"{_API_BASE}/{stockCode}/finance/annual"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
         data = resp.json()
     except (SourceUnavailableError, ValueError) as exc:
-        log.warning("naver finance/annual API 실패 (%s): %s", stock_code, exc)
+        log.warning("naver finance/annual API 실패 (%s): %s", stockCode, exc)
         return []
 
     fi = data.get("financeInfo")
@@ -373,11 +373,11 @@ async def fetch_revenue_consensus(stock_code: str, client) -> list[RevenueConsen
 
         fiscal_year = int(key[:4])
 
-        revenue = _clean_number(row_map.get("매출액", {}).get(key, {}).get("value"))
-        op_profit = _clean_number(row_map.get("영업이익", {}).get(key, {}).get("value"))
-        net_income = _clean_number(row_map.get("당기순이익", {}).get(key, {}).get("value"))
-        eps = _clean_number(row_map.get("EPS", {}).get(key, {}).get("value"))
-        per = _clean_number(row_map.get("PER", {}).get(key, {}).get("value"))
+        revenue = _cleanNumber(row_map.get("매출액", {}).get(key, {}).get("value"))
+        op_profit = _cleanNumber(row_map.get("영업이익", {}).get(key, {}).get("value"))
+        net_income = _cleanNumber(row_map.get("당기순이익", {}).get(key, {}).get("value"))
+        eps = _cleanNumber(row_map.get("EPS", {}).get(key, {}).get("value"))
+        per = _cleanNumber(row_map.get("PER", {}).get(key, {}).get("value"))
 
         if revenue is None and op_profit is None:
             continue
@@ -397,7 +397,7 @@ async def fetch_revenue_consensus(stock_code: str, client) -> list[RevenueConsen
     return results
 
 
-async def fetch_sector_per(stock_code: str, client) -> float | None:
+async def fetchSectorPer(stockCode: str, client) -> float | None:
     """네이버 → 동종업종 PER.
 
     Parameters
@@ -413,22 +413,22 @@ async def fetch_sector_per(stock_code: str, client) -> float | None:
         동종업종 평균 PER (배). API 실패 또는 데이터 없으면 None.
     """
     # KR 종목코드 검증
-    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
+    if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
         return None
 
-    url = f"{_API_BASE}/{stock_code}/integration"
+    url = f"{_API_BASE}/{stockCode}/integration"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
         data = resp.json()
     except (SourceUnavailableError, ValueError) as exc:
-        log.warning("naver sector PER API 실패 (%s): %s", stock_code, exc)
+        log.warning("naver sector PER API 실패 (%s): %s", stockCode, exc)
         return None
 
     industry_info = data.get("industryInfo")
     if not industry_info:
         return None
 
-    return _clean_number(industry_info.get("per"))
+    return _cleanNumber(industry_info.get("per"))
 
 
 # ══════════════════════════════════════
@@ -436,7 +436,7 @@ async def fetch_sector_per(stock_code: str, client) -> float | None:
 # ══════════════════════════════════════
 
 
-async def fetch_all(stock_code: str, client) -> GatherResult:
+async def fetchAll(stockCode: str, client) -> GatherResult:
     """네이버에서 가져올 수 있는 모든 데이터를 수집.
 
     Parameters
@@ -457,9 +457,9 @@ async def fetch_all(stock_code: str, client) -> GatherResult:
     """
     result = GatherResult(domain="naver")
     try:
-        result.price = await fetch_price(stock_code, client)
+        result.price = await fetchPrice(stockCode, client)
         # flow: 시계열 → 스냅샷 변환 (GatherResult 호환)
-        flow_series = await fetch_flow(stock_code, client)
+        flow_series = await fetchFlow(stockCode, client)
         if flow_series:
             latest = flow_series[0]
             result.flow = FlowData(
@@ -468,14 +468,14 @@ async def fetch_all(stock_code: str, client) -> GatherResult:
                 foreign_holding_ratio=latest.get("foreignHoldingRatio") or 0.0,
                 source="naver",
             )
-        result.sector_per = await fetch_sector_per(stock_code, client)
+        result.sector_per = await fetchSectorPer(stockCode, client)
     except SourceUnavailableError as exc:
         result.error = str(exc)
     return result
 
 
-async def fetch_intraday(
-    stock_code: str,
+async def fetchIntraday(
+    stockCode: str,
     client,
     *,
     market: str = "KR",
@@ -513,15 +513,15 @@ async def fetch_intraday(
     if market != "KR":
         return []
     # KR 종목코드 검증
-    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
+    if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
         return []
 
-    url = _INTRADAY_URL.format(code=stock_code)
+    url = _INTRADAY_URL.format(code=stockCode)
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
         data = resp.json()
     except (SourceUnavailableError, ValueError) as exc:
-        log.warning("naver intraday API 실패 (%s): %s", stock_code, exc)
+        log.warning("naver intraday API 실패 (%s): %s", stockCode, exc)
         return []
 
     if not isinstance(data, list):
@@ -548,8 +548,8 @@ async def fetch_intraday(
     return rows
 
 
-async def fetch_history(
-    stock_code: str,
+async def fetchHistory(
+    stockCode: str,
     client,
     *,
     start: str = "",
@@ -588,7 +588,7 @@ async def fetch_history(
     if market != "KR":
         return []
     # KR 종목코드 검증 (지수 심볼 KOSPI/KOSDAQ 등도 허용)
-    sc = stock_code.strip() if stock_code else ""
+    sc = stockCode.strip() if stockCode else ""
     if not (sc.isdigit() and len(sc) == 6) and sc not in ("KOSPI", "KOSDAQ", "KPI200"):
         return []
     import re
@@ -600,7 +600,7 @@ async def fetch_history(
                 "timeframe": "day",
                 "count": "6000",
                 "requestType": "0",
-                "symbol": stock_code,
+                "symbol": stockCode,
             },
         )
         text = resp.text

@@ -76,7 +76,7 @@ def _bridgeKoreanSnakeId(
     - 쿼리가 snakeId이고 컬럼 값이 한국어 → snakeId→한국어 정조회
     - 혼합 쿼리(한국어+snakeId)도 지원: 각 항목을 개별 번역
     """
-    from dartlab.core.utils.labels import get_korean_labels, get_reverse_korean_labels
+    from dartlab.core.utils.labels import getKoreanLabels, getReverseKoreanLabels
 
     hasKoreanQuery = any(_HAS_KOREAN_RE.search(q) for q in indList)
     hasNonKoreanQuery = any(not _HAS_KOREAN_RE.search(q) for q in indList)
@@ -85,7 +85,7 @@ def _bridgeKoreanSnakeId(
 
     if hasKoreanQuery and not colIsKorean:
         # 한국어 쿼리 → snakeId로 번역 + 이미 snakeId인 항목은 그대로 유지
-        rev = get_reverse_korean_labels()
+        rev = getReverseKoreanLabels()
         translated: list[str] = []
         for q in indList:
             if _HAS_KOREAN_RE.search(q):
@@ -104,8 +104,8 @@ def _bridgeKoreanSnakeId(
     elif hasKoreanQuery and colIsKorean:
         # 한국어 쿼리 + 한국어 컬럼 — 동의어 확장 (회사마다 항목이 다름)
         # 경로: 한국어 → snakeId → alias 확장 → 한국어 역변환 → 컬럼 매칭
-        rev = get_reverse_korean_labels()
-        fwd = get_korean_labels()
+        rev = getReverseKoreanLabels()
+        fwd = getKoreanLabels()
         synonyms: list[str] = list(indList)  # 원본 유지
         for q in indList:
             sid = rev.get(q) or rev.get(normalizeItemKey(q))
@@ -144,7 +144,7 @@ def _bridgeKoreanSnakeId(
 
     elif hasNonKoreanQuery and colIsKorean:
         # snakeId 쿼리 → 한국어로 번역 + 이미 한국어인 항목은 그대로 유지
-        fwd = get_korean_labels()
+        fwd = getKoreanLabels()
         translated = []
         for q in indList:
             if not _HAS_KOREAN_RE.search(q):

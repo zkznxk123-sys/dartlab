@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.scan._helpers import find_latest_year, parse_num, scan_parquets
+from dartlab.scan._helpers import findLatestYear, parse_num, scanParquets
 
 
 def _scanHolderChange() -> dict[str, dict]:
@@ -22,7 +22,7 @@ def _scanHolderChange() -> dict[str, dict]:
             change : float — 지분 변동폭 (%p), 2개년 비교 가능 시
         빈 dict — 데이터 없음
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "majorHolder",
         ["stockCode", "year", "quarter", "bsis_posesn_stock_qota_rt"],
     )
@@ -88,14 +88,14 @@ def _scanTreasuryStock() -> dict[str, dict]:
             treasuryShares : int — 자기주식 보유수량 (주)
         빈 dict — 데이터 없음
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "treasuryStock",
         ["stockCode", "year", "quarter", "stock_knd", "trmend_qy"],
     )
     if raw.is_empty():
         return {}
 
-    latestYear = find_latest_year(raw, "trmend_qy", 100)
+    latestYear = findLatestYear(raw, "trmend_qy", 100)
     if latestYear is None:
         return {}
 

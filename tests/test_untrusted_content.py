@@ -21,9 +21,9 @@ from dartlab.ai.contracts import Ref
 from dartlab.ai.tools.formatting import (
     EXTERNAL_END,
     EXTERNAL_START,
-    strip_html,
-    wrap_external,
-    wrap_external_in_result,
+    stripHtml,
+    wrapExternal,
+    wrapExternalInResult,
 )
 
 pytestmark = pytest.mark.unit
@@ -31,24 +31,24 @@ pytestmark = pytest.mark.unit
 
 class TestFormatting:
     def test_strip_html_removes_tags(self):
-        assert strip_html("<script>alert(1)</script>hello") == "alert(1)hello"
-        assert strip_html("<b>bold</b> and <i>italic</i>") == "bold and italic"
-        assert strip_html("plain text") == "plain text"
-        assert strip_html("") == ""
+        assert stripHtml("<script>alert(1)</script>hello") == "alert(1)hello"
+        assert stripHtml("<b>bold</b> and <i>italic</i>") == "bold and italic"
+        assert stripHtml("plain text") == "plain text"
+        assert stripHtml("") == ""
 
     def test_strip_html_collapses_whitespace(self):
-        assert strip_html("<p>  spaced   <span> word</span></p>") == "spaced word"
+        assert stripHtml("<p>  spaced   <span> word</span></p>") == "spaced word"
 
     def test_wrap_external_idempotent(self):
-        wrapped_once = wrap_external("hello")
-        wrapped_twice = wrap_external(wrapped_once)
+        wrapped_once = wrapExternal("hello")
+        wrapped_twice = wrapExternal(wrapped_once)
         assert wrapped_once == wrapped_twice
         assert EXTERNAL_START in wrapped_once
         assert EXTERNAL_END in wrapped_once
 
     def test_wrap_external_empty(self):
-        assert wrap_external("") == ""
-        assert wrap_external(None) is None  # type: ignore[arg-type]
+        assert wrapExternal("") == ""
+        assert wrapExternal(None) is None  # type: ignore[arg-type]
 
     def test_wrap_external_in_result_no_external_refs(self):
         result = {
@@ -58,7 +58,7 @@ class TestFormatting:
             "refs": [{"id": "r1", "kind": "valueRef", "sourceType": "internal", "payload": {"text": "x"}}],
             "error": None,
         }
-        wrapped = wrap_external_in_result(result)
+        wrapped = wrapExternalInResult(result)
         # external ref 없음 → 원본 그대로 (포인터 동일성까지는 보장 X, 내용 동일)
         assert wrapped["data"] == {"text": "internal data"}
         assert wrapped["refs"][0]["payload"] == {"text": "x"}
@@ -78,7 +78,7 @@ class TestFormatting:
             ],
             "error": None,
         }
-        wrapped = wrap_external_in_result(result)
+        wrapped = wrapExternalInResult(result)
         external_ref = wrapped["refs"][0]
         assert EXTERNAL_START in external_ref["payload"]["text"]
         assert EXTERNAL_END in external_ref["payload"]["text"]
@@ -101,7 +101,7 @@ class TestFormatting:
             ],
             "error": None,
         }
-        wrapped = wrap_external_in_result(result)
+        wrapped = wrapExternalInResult(result)
         assert EXTERNAL_START in wrapped["data"]["text"]
         assert EXTERNAL_START in wrapped["refs"][0]["payload"]["text"]
 
@@ -117,7 +117,7 @@ class TestRefSourceType:
 
     def test_to_dict_includes_sourceType(self):
         ref = Ref(id="x", kind="webRef", title="t", sourceType="external")
-        d = ref.to_dict()
+        d = ref.toDict()
         assert d["sourceType"] == "external"
 
 
@@ -262,8 +262,8 @@ class TestSerializationE2E:
             ],
             data={"query": "samsung"},
         )
-        result_dict = result.to_dict()
-        wrapped = wrap_external_in_result(result_dict)
+        resultDict = result.toDict()
+        wrapped = wrapExternalInResult(resultDict)
         content = json.dumps(wrapped, ensure_ascii=False)
         # 마커가 직렬화된 JSON 안에 박혀 있어야 함
         assert "EXTERNAL CONTENT START" in content

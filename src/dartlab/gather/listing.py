@@ -80,7 +80,7 @@ class _TableParser(HTMLParser):
         self._row: list[str] = []
         self._cell = ""
 
-    def handle_starttag(self, tag: str, _attrs):
+    def handleStarttag(self, tag: str, _attrs):
         """HTML 여는 태그 처리."""
         if tag == "table":
             self._inTable = True
@@ -91,7 +91,7 @@ class _TableParser(HTMLParser):
             self._inCell = True
             self._cell = ""
 
-    def handle_endtag(self, tag: str):
+    def handleEndtag(self, tag: str):
         """HTML 닫는 태그 처리."""
         if tag in ("td", "th") and self._inCell:
             self._inCell = False
@@ -103,7 +103,7 @@ class _TableParser(HTMLParser):
         elif tag == "table":
             self._inTable = False
 
-    def handle_data(self, data: str):
+    def handleData(self, data: str):
         """HTML 텍스트 데이터 처리."""
         if self._inCell:
             self._cell += data
@@ -274,7 +274,7 @@ def _getSearchCache() -> dict[str, object]:
     df = getKindList()
     names = df["회사명"].to_list()
     names_lower = [n.lower() for n in names]
-    names_chosung = [_extract_chosung(n) for n in names]
+    names_chosung = [_extractChosung(n) for n in names]
     _searchCache = {
         "names": names,
         "names_lower": names_lower,
@@ -336,7 +336,7 @@ _CHO_BASE = 0xAC00
 _CHO_PERIOD = 588  # 21 * 28
 
 
-def _decompose_char(ch: str) -> str:
+def _decomposeChar(ch: str) -> str:
     """한글 음절 → 초성 추출. 이미 자모이거나 비한글이면 그대로.
 
     Parameters
@@ -357,7 +357,7 @@ def _decompose_char(ch: str) -> str:
     return ch
 
 
-def _extract_chosung(text: str) -> str:
+def _extractChosung(text: str) -> str:
     """문자열의 초성만 추출. 비한글은 원문 그대로.
 
     Parameters
@@ -370,10 +370,10 @@ def _extract_chosung(text: str) -> str:
     str
         초성 문자열 (예: "ㅅㅅㅈㅈ").
     """
-    return "".join(_decompose_char(c) for c in text)
+    return "".join(_decomposeChar(c) for c in text)
 
 
-def _is_all_chosung(text: str) -> bool:
+def _isAllChosung(text: str) -> bool:
     """입력이 모두 자음(초성)으로만 이루어졌는지 확인.
 
     Parameters
@@ -448,8 +448,8 @@ def fuzzySearch(keyword: str, *, maxResults: int = 10) -> pl.DataFrame:
     names_chosung: list[str] = cache["names_chosung"]
 
     kw_lower = kw.lower()
-    kw_chosung = _extract_chosung(kw)
-    is_chosung_query = _is_all_chosung(kw)
+    kw_chosung = _extractChosung(kw)
+    is_chosung_query = _isAllChosung(kw)
 
     scored: list[tuple[int, float, int]] = []  # (idx, score, order)
 

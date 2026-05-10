@@ -469,7 +469,7 @@ def _safeRound(v: float | None, n: int = 2) -> float | None:
     return round(v, n)
 
 
-def yoy_pct(cur: float | None, prev: float | None) -> float | None:
+def yoyPct(cur: float | None, prev: float | None) -> float | None:
     """전년 대비 증감률(%). 부호 전환 시 None 반환.
 
     - 양수→양수 또는 음수→음수: 정상 계산
@@ -488,7 +488,7 @@ def yoy_pct(cur: float | None, prev: float | None) -> float | None:
 def _yoy(vals: list[float | None], i: int, lag: int = 1) -> float | None:
     if i < lag:
         return None
-    return yoy_pct(vals[i], vals[i - lag])
+    return yoyPct(vals[i], vals[i - lag])
 
 
 def _get(series: dict, sjDiv: str, snakeId: str) -> list[float | None]:
@@ -666,7 +666,7 @@ def _applyArchetypePolicySeries(result: RatioSeriesResult, archetype: str) -> No
         )
 
 
-def _pick_first(
+def _pickFirst(
     series: dict[str, dict[str, list[float | None]]],
     sjDiv: str,
     snakeIds: list[str],
@@ -691,7 +691,7 @@ def _pick_first(
     return None
 
 
-def _pick_series(
+def _pickSeries(
     series: dict[str, dict[str, list[float | None]]],
     sjDiv: str,
     snakeIds: list[str],
@@ -743,15 +743,15 @@ def calcRatios(
         _flow = _flowTtm
         ttmMaxTrailingNones = 0
 
-    r.revenueTTM = _pick_first(series, "IS", ["sales", "revenue"], annual=annual, maxTrailingNones=ttmMaxTrailingNones)
-    r.operatingIncomeTTM = _pick_first(
+    r.revenueTTM = _pickFirst(series, "IS", ["sales", "revenue"], annual=annual, maxTrailingNones=ttmMaxTrailingNones)
+    r.operatingIncomeTTM = _pickFirst(
         series,
         "IS",
         ["operating_profit", "operating_income"],
         annual=annual,
         maxTrailingNones=ttmMaxTrailingNones,
     )
-    r.netIncomeTTM = _pick_first(
+    r.netIncomeTTM = _pickFirst(
         series,
         "IS",
         ["net_profit", "net_income"],
@@ -765,7 +765,7 @@ def calcRatios(
     r.costOfSales = _flow(series, "IS", "cost_of_sales")
     r.sga = _flow(series, "IS", "selling_and_administrative_expenses")
     r.financeIncome = _flow(series, "IS", "finance_income")
-    r.financeCosts = _pick_first(
+    r.financeCosts = _pickFirst(
         series,
         "IS",
         ["finance_costs", "interest_expense"],
@@ -775,7 +775,7 @@ def calcRatios(
 
     r.capex = _flow(series, "CF", "purchase_of_property_plant_and_equipment")
     r.dividendsPaid = _flow(series, "CF", "dividends_paid")
-    r.depreciationExpense = _pick_first(
+    r.depreciationExpense = _pickFirst(
         series,
         "CF",
         ["depreciation_and_amortization", "depreciation_cf", "depreciation"],
@@ -784,7 +784,7 @@ def calcRatios(
     )
     # CF에 없으면 IS의 D&A 시도 (EDGAR는 IS에 별도 기재하는 경우 있음)
     if r.depreciationExpense is None:
-        r.depreciationExpense = _pick_first(
+        r.depreciationExpense = _pickFirst(
             series,
             "IS",
             ["depreciation_amortization", "depreciation_and_amortization"],
@@ -813,14 +813,14 @@ def calcRatios(
     r.noncurrentAssets = getLatest(series, "BS", "noncurrent_assets")
     r.noncurrentLiabilities = getLatest(series, "BS", "noncurrent_liabilities")
 
-    r.profitBeforeTax = _pick_first(
+    r.profitBeforeTax = _pickFirst(
         series,
         "IS",
         ["profit_before_tax", "income_before_tax"],
         annual=annual,
         maxTrailingNones=ttmMaxTrailingNones,
     )
-    r.incomeTaxExpense = _pick_first(
+    r.incomeTaxExpense = _pickFirst(
         series,
         "IS",
         ["income_tax_expense", "income_taxes"],
@@ -1081,7 +1081,7 @@ def _piotroskiTimeSeries(
     series: dict[str, dict[str, list[float | None]]],
 ) -> dict[str, list[float | None]]:
     """Piotroski 시계열 추출 — 전기 비교용."""
-    npSeries = _pick_series(series, "IS", ["net_profit", "net_income"])
+    npSeries = _pickSeries(series, "IS", ["net_profit", "net_income"])
     taSeries = _get(series, "BS", "total_assets")
     tlSeries = _get(series, "BS", "total_liabilities")
     teSeries = _get(series, "BS", "total_stockholders_equity")
@@ -1093,7 +1093,7 @@ def _piotroskiTimeSeries(
     if not any(v is not None for v in issuedCapital):
         issuedCapital = _get(series, "BS", "capital_stock")
     gpSeries = _get(series, "IS", "gross_profit")
-    revSeries = _pick_series(series, "IS", ["sales", "revenue"])
+    revSeries = _pickSeries(series, "IS", ["sales", "revenue"])
     return {
         "np": npSeries,
         "ta": taSeries,
@@ -1245,7 +1245,7 @@ def _calcOhlsonO(
     nita = ni / r.totalAssets
     futl = 0  # FFO 간이 대체 (보수적)
 
-    npSeries = _pick_series(series, "IS", ["net_profit", "net_income"])
+    npSeries = _pickSeries(series, "IS", ["net_profit", "net_income"])
     intwo = 0
     if len(npSeries) >= 2:
         n1 = npSeries[-1]
@@ -1312,108 +1312,108 @@ def _calcZmijewski(r: RatioResult) -> None:
     r.zmijewskiXScore = _safeRound(x, 4)
 
 
-def _beneishDsri(rev_t: float | None, rec_t: float | None, rev_p: float | None, rec_p: float | None) -> float | None:
-    if rec_t is None or rec_p is None or not rev_t or rev_t <= 0 or not rev_p or rev_p == 0:
+def _beneishDsri(revT: float | None, recT: float | None, revP: float | None, recP: float | None) -> float | None:
+    if recT is None or recP is None or not revT or revT <= 0 or not revP or revP == 0:
         return None
-    dsr_t = rec_t / rev_t
-    dsr_p = rec_p / rev_p
+    dsr_t = recT / revT
+    dsr_p = recP / revP
     return dsr_t / dsr_p if dsr_p > 0 else None
 
 
-def _beneishGmi(rev_t: float, cogs_t: float | None, rev_p: float, cogs_p: float | None) -> float | None:
-    if cogs_t is None or cogs_p is None or rev_t <= 0 or rev_p == 0:
+def _beneishGmi(revT: float, cogsT: float | None, revP: float, cogsP: float | None) -> float | None:
+    if cogsT is None or cogsP is None or revT <= 0 or revP == 0:
         return None
-    gm_t = (rev_t - cogs_t) / rev_t
-    gm_p = (rev_p - cogs_p) / rev_p
+    gm_t = (revT - cogsT) / revT
+    gm_p = (revP - cogsP) / revP
     return gm_p / gm_t if gm_t > 0 and gm_p > 0 else None
 
 
 def _beneishAqi(
-    ta_t: float,
-    ca_t: float | None,
-    tan_t: float | None,
-    ta_p: float,
-    ca_p: float | None,
-    tan_p: float | None,
+    taT: float,
+    caT: float | None,
+    tanT: float | None,
+    taP: float,
+    caP: float | None,
+    tanP: float | None,
 ) -> float | None:
-    if ca_t is None or ca_p is None or ta_t <= 0 or ta_p <= 0:
+    if caT is None or caP is None or taT <= 0 or taP <= 0:
         return None
-    aq_t = 1 - (ca_t + (tan_t or 0)) / ta_t
-    aq_p = 1 - (ca_p + (tan_p or 0)) / ta_p
+    aq_t = 1 - (caT + (tanT or 0)) / taT
+    aq_p = 1 - (caP + (tanP or 0)) / taP
     return aq_t / aq_p if aq_p != 0 else None
 
 
-def _beneishDepi(dep_t: float | None, tan_t: float | None, dep_p: float | None, tan_p: float | None) -> float | None:
-    if dep_t is None or dep_p is None:
+def _beneishDepi(depT: float | None, tanT: float | None, depP: float | None, tanP: float | None) -> float | None:
+    if depT is None or depP is None:
         return None
-    ppe_t = (tan_t or 0) + dep_t
-    ppe_p = (tan_p or 0) + dep_p
+    ppe_t = (tanT or 0) + depT
+    ppe_p = (tanP or 0) + depP
     if ppe_t <= 0 or ppe_p <= 0:
         return None
-    dr_t = dep_t / ppe_t
-    dr_p = dep_p / ppe_p
+    dr_t = depT / ppe_t
+    dr_p = depP / ppe_p
     return dr_p / dr_t if dr_t > 0 else None
 
 
-def _beneishSgai(rev_t: float, sga_t: float | None, rev_p: float, sga_p: float | None) -> float | None:
-    if sga_t is None or sga_p is None or rev_t <= 0 or rev_p <= 0:
+def _beneishSgai(revT: float, sgaT: float | None, revP: float, sgaP: float | None) -> float | None:
+    if sgaT is None or sgaP is None or revT <= 0 or revP <= 0:
         return None
-    sga_r_t = sga_t / rev_t
-    sga_r_p = sga_p / rev_p
+    sga_r_t = sgaT / revT
+    sga_r_p = sgaP / revP
     return sga_r_t / sga_r_p if sga_r_p > 0 else None
 
 
-def _beneishTata(np_t: float | None, ocf_t: float | None, ta_t: float) -> float | None:
-    if np_t is None or ocf_t is None or ta_t <= 0:
+def _beneishTata(npT: float | None, ocfT: float | None, taT: float) -> float | None:
+    if npT is None or ocfT is None or taT <= 0:
         return None
-    return (np_t - ocf_t) / ta_t
+    return (npT - ocfT) / taT
 
 
-def _beneishLvgi(tl_t: float | None, ta_t: float, tl_p: float | None, ta_p: float) -> float | None:
-    if tl_t is None or tl_p is None or ta_t <= 0 or ta_p <= 0:
+def _beneishLvgi(tlT: float | None, taT: float, tlP: float | None, taP: float) -> float | None:
+    if tlT is None or tlP is None or taT <= 0 or taP <= 0:
         return None
-    lev_t = tl_t / ta_t
-    lev_p = tl_p / ta_p
+    lev_t = tlT / taT
+    lev_p = tlP / taP
     return lev_t / lev_p if lev_p > 0 else None
 
 
 def _calcBeneishForPeriod(
     *,
-    rev_t: float | None,
-    rev_p: float | None,
-    rec_t: float | None,
-    rec_p: float | None,
-    cogs_t: float | None,
-    cogs_p: float | None,
-    ta_t: float | None,
-    ta_p: float | None,
-    ca_t: float | None,
-    ca_p: float | None,
-    sga_t: float | None,
-    sga_p: float | None,
-    dep_t: float | None,
-    dep_p: float | None,
-    tan_t: float | None,
-    tan_p: float | None,
-    np_t: float | None,
-    ocf_t: float | None,
-    tl_t: float | None,
-    tl_p: float | None,
+    revT: float | None,
+    revP: float | None,
+    recT: float | None,
+    recP: float | None,
+    cogsT: float | None,
+    cogsP: float | None,
+    taT: float | None,
+    taP: float | None,
+    caT: float | None,
+    caP: float | None,
+    sgaT: float | None,
+    sgaP: float | None,
+    depT: float | None,
+    depP: float | None,
+    tanT: float | None,
+    tanP: float | None,
+    npT: float | None,
+    ocfT: float | None,
+    tlT: float | None,
+    tlP: float | None,
 ) -> float | None:
     """Beneish M-Score 단일 기간 계산 (현재 t vs 전기 p). 8 sub-index orchestrator."""
-    if rev_t is None or rev_p is None or rev_p == 0:
+    if revT is None or revP is None or revP == 0:
         return None
-    if ta_t is None or ta_p is None or ta_p == 0:
+    if taT is None or taP is None or taP == 0:
         return None
 
-    dsri = _beneishDsri(rev_t, rec_t, rev_p, rec_p)
-    gmi = _beneishGmi(rev_t, cogs_t, rev_p, cogs_p)
-    aqi = _beneishAqi(ta_t, ca_t, tan_t, ta_p, ca_p, tan_p)
-    sgi = rev_t / rev_p
-    depi = _beneishDepi(dep_t, tan_t, dep_p, tan_p)
-    sgai = _beneishSgai(rev_t, sga_t, rev_p, sga_p)
-    tata = _beneishTata(np_t, ocf_t, ta_t)
-    lvgi = _beneishLvgi(tl_t, ta_t, tl_p, ta_p)
+    dsri = _beneishDsri(revT, recT, revP, recP)
+    gmi = _beneishGmi(revT, cogsT, revP, cogsP)
+    aqi = _beneishAqi(taT, caT, tanT, taP, caP, tanP)
+    sgi = revT / revP
+    depi = _beneishDepi(depT, tanT, depP, tanP)
+    sgai = _beneishSgai(revT, sgaT, revP, sgaP)
+    tata = _beneishTata(npT, ocfT, taT)
+    lvgi = _beneishLvgi(tlT, taT, tlP, taP)
 
     vs = [dsri, gmi, aqi, sgi, depi, sgai, tata, lvgi]
     if any(v is None for v in vs):
@@ -1438,7 +1438,7 @@ def _calcBeneish(
     annual: bool = False,
 ) -> None:
     """Beneish M-Score 8변수 모델 — _calcBeneishForPeriod에 위임."""
-    revSeries = _pick_series(series, "IS", ["sales", "revenue"])
+    revSeries = _pickSeries(series, "IS", ["sales", "revenue"])
     taSeries = _get(series, "BS", "total_assets")
 
     if len(revSeries) < 2 or len(taSeries) < 2:
@@ -1449,32 +1449,32 @@ def _calcBeneish(
     def _val(s: list, i: int) -> float | None:
         return s[i] if i < len(s) and s[i] is not None else None
 
-    depSeries = _pick_series(series, "CF", ["depreciation_and_amortization", "depreciation_cf", "depreciation"])
-    npSeries = _pick_series(series, "IS", ["net_profit", "net_income"])
+    depSeries = _pickSeries(series, "CF", ["depreciation_and_amortization", "depreciation_cf", "depreciation"])
+    npSeries = _pickSeries(series, "IS", ["net_profit", "net_income"])
     tlSeries = _get(series, "BS", "total_liabilities")
     tanSeries = _get(series, "BS", "tangible_assets")
 
     r.beneishMScore = _calcBeneishForPeriod(
-        rev_t=_val(revSeries, t),
-        rev_p=_val(revSeries, p),
-        rec_t=_val(_get(series, "BS", "trade_and_other_receivables"), t),
-        rec_p=_val(_get(series, "BS", "trade_and_other_receivables"), p),
-        cogs_t=_val(_get(series, "IS", "cost_of_sales"), t),
-        cogs_p=_val(_get(series, "IS", "cost_of_sales"), p),
-        ta_t=_val(taSeries, t),
-        ta_p=_val(taSeries, p),
-        ca_t=_val(_get(series, "BS", "current_assets"), t),
-        ca_p=_val(_get(series, "BS", "current_assets"), p),
-        sga_t=_val(_get(series, "IS", "selling_and_administrative_expenses"), t),
-        sga_p=_val(_get(series, "IS", "selling_and_administrative_expenses"), p),
-        dep_t=_val(depSeries, t),
-        dep_p=_val(depSeries, p),
-        tan_t=_val(tanSeries, t),
-        tan_p=_val(tanSeries, p),
-        np_t=_val(npSeries, t),
-        ocf_t=_val(_get(series, "CF", "operating_cashflow"), t),
-        tl_t=_val(tlSeries, t),
-        tl_p=_val(tlSeries, p),
+        revT=_val(revSeries, t),
+        revP=_val(revSeries, p),
+        recT=_val(_get(series, "BS", "trade_and_other_receivables"), t),
+        recP=_val(_get(series, "BS", "trade_and_other_receivables"), p),
+        cogsT=_val(_get(series, "IS", "cost_of_sales"), t),
+        cogsP=_val(_get(series, "IS", "cost_of_sales"), p),
+        taT=_val(taSeries, t),
+        taP=_val(taSeries, p),
+        caT=_val(_get(series, "BS", "current_assets"), t),
+        caP=_val(_get(series, "BS", "current_assets"), p),
+        sgaT=_val(_get(series, "IS", "selling_and_administrative_expenses"), t),
+        sgaP=_val(_get(series, "IS", "selling_and_administrative_expenses"), p),
+        depT=_val(depSeries, t),
+        depP=_val(depSeries, p),
+        tanT=_val(tanSeries, t),
+        tanP=_val(tanSeries, p),
+        npT=_val(npSeries, t),
+        ocfT=_val(_get(series, "CF", "operating_cashflow"), t),
+        tlT=_val(tlSeries, t),
+        tlP=_val(tlSeries, p),
     )
 
 
@@ -1542,13 +1542,13 @@ def _extractRatioSeriesInputs(
     if not any(v is not None for v in depreciation):
         depreciation = _get(annualSeries, "CF", "depreciation")
     return {
-        "revenue": _pick_series(annualSeries, "IS", ["sales", "revenue"]),
+        "revenue": _pickSeries(annualSeries, "IS", ["sales", "revenue"]),
         "costOfSales": _get(annualSeries, "IS", "cost_of_sales"),
         "grossProfit": _get(annualSeries, "IS", "gross_profit"),
-        "opProfit": _pick_series(annualSeries, "IS", ["operating_profit", "operating_income"]),
-        "netProfit": _pick_series(annualSeries, "IS", ["net_profit", "net_income"]),
+        "opProfit": _pickSeries(annualSeries, "IS", ["operating_profit", "operating_income"]),
+        "netProfit": _pickSeries(annualSeries, "IS", ["net_profit", "net_income"]),
         "sga": _get(annualSeries, "IS", "selling_and_administrative_expenses"),
-        "finCosts": _pick_series(annualSeries, "IS", ["finance_costs", "interest_expense"]),
+        "finCosts": _pickSeries(annualSeries, "IS", ["finance_costs", "interest_expense"]),
         "totalAssets": _get(annualSeries, "BS", "total_assets"),
         "totalEquity": totalEquity,
         "ownersEquity": ownersEquity,
@@ -1952,26 +1952,26 @@ def _appendBeneishSeries(rs: RatioSeriesResult, i: int, S: dict[str, list]) -> N
         rs.beneishMScore.append(None)
         return
     m = _calcBeneishForPeriod(
-        rev_t=_sv(S["revenue"], i),
-        rev_p=_sv(S["revenue"], i - 1),
-        rec_t=_sv(S["receivables"], i),
-        rec_p=_sv(S["receivables"], i - 1),
-        cogs_t=_sv(S["costOfSales"], i),
-        cogs_p=_sv(S["costOfSales"], i - 1),
-        ta_t=_sv(S["totalAssets"], i),
-        ta_p=_sv(S["totalAssets"], i - 1),
-        ca_t=_sv(S["curAssets"], i),
-        ca_p=_sv(S["curAssets"], i - 1),
-        sga_t=_sv(S["sga"], i),
-        sga_p=_sv(S["sga"], i - 1),
-        dep_t=_sv(S["depreciation"], i),
-        dep_p=_sv(S["depreciation"], i - 1),
-        tan_t=_sv(S["tangible"], i),
-        tan_p=_sv(S["tangible"], i - 1),
-        np_t=_sv(S["netProfit"], i),
-        ocf_t=_sv(S["opCf"], i),
-        tl_t=_sv(S["totalLiab"], i),
-        tl_p=_sv(S["totalLiab"], i - 1),
+        revT=_sv(S["revenue"], i),
+        revP=_sv(S["revenue"], i - 1),
+        recT=_sv(S["receivables"], i),
+        recP=_sv(S["receivables"], i - 1),
+        cogsT=_sv(S["costOfSales"], i),
+        cogsP=_sv(S["costOfSales"], i - 1),
+        taT=_sv(S["totalAssets"], i),
+        taP=_sv(S["totalAssets"], i - 1),
+        caT=_sv(S["curAssets"], i),
+        caP=_sv(S["curAssets"], i - 1),
+        sgaT=_sv(S["sga"], i),
+        sgaP=_sv(S["sga"], i - 1),
+        depT=_sv(S["depreciation"], i),
+        depP=_sv(S["depreciation"], i - 1),
+        tanT=_sv(S["tangible"], i),
+        tanP=_sv(S["tangible"], i - 1),
+        npT=_sv(S["netProfit"], i),
+        ocfT=_sv(S["opCf"], i),
+        tlT=_sv(S["totalLiab"], i),
+        tlP=_sv(S["totalLiab"], i - 1),
     )
     rs.beneishMScore.append(m)
 

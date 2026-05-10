@@ -64,23 +64,23 @@ _KR_PARTICLES = re.compile(
 )
 
 
-def strip_particles(text: str) -> str:
+def stripParticles(text: str) -> str:
     """한국어 조사를 제거한다. 예: '하이닉스의' → '하이닉스'."""
     return _KR_PARTICLES.sub("", text)
 
 
-def resolve_alias(text: str) -> str | None:
+def resolveAlias(text: str) -> str | None:
     """COMMON_ALIASES에서 매칭되는 정식 종목명 반환. 조사 제거 후 재시도. 없으면 None."""
     result = COMMON_ALIASES.get(text)
     if result:
         return result
-    stripped = strip_particles(text)
+    stripped = stripParticles(text)
     if stripped != text:
         return COMMON_ALIASES.get(stripped)
     return None
 
 
-def collect_candidates(query: str, *, strict: bool) -> list[dict[str, str]]:
+def collectCandidates(query: str, *, strict: bool) -> list[dict[str, str]]:
     """검색 결과에서 매칭되는 후보를 수집한다.
 
     strict=True: 정확히 일치하거나 prefix 관계만 허용
@@ -137,7 +137,7 @@ def collect_candidates(query: str, *, strict: bool) -> list[dict[str, str]]:
     return result
 
 
-def search_suggestions(question: str) -> list[dict[str, str]]:
+def searchSuggestions(question: str) -> list[dict[str, str]]:
     """질문에서 단어를 추출하여 비슷한 종목 후보를 검색한다."""
     import dartlab
 
@@ -168,7 +168,7 @@ def search_suggestions(question: str) -> list[dict[str, str]]:
     return suggestions
 
 
-def resolve_from_text(text: str) -> tuple[Company | None, str]:
+def resolveFromText(text: str) -> tuple[Company | None, str]:
     """자연어 텍스트에서 종목과 질문을 분리한다.
 
     Returns:
@@ -222,7 +222,7 @@ def resolve_from_text(text: str) -> tuple[Company | None, str]:
             remaining = " ".join(remaining_parts).strip()
 
             # 조사 제거 버전 우선 시도 ("하이닉스의" → "하이닉스")
-            stripped = strip_particles(candidate)
+            stripped = stripParticles(candidate)
             for term in dict.fromkeys([stripped, candidate]):
                 alias = COMMON_ALIASES.get(term)
                 if alias:
@@ -234,7 +234,7 @@ def resolve_from_text(text: str) -> tuple[Company | None, str]:
 
             # 직접 매칭 시도
             for term in dict.fromkeys([stripped, candidate]):
-                candidates = collect_candidates(term, strict=True)
+                candidates = collectCandidates(term, strict=True)
                 if candidates:
                     break
             else:

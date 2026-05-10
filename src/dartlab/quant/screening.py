@@ -34,7 +34,7 @@ _PRESETS = {
 }
 
 
-def _screen_price_based(preset: str, market: str, universe: list[str] | None = None) -> dict:
+def _screenPriceBased(preset: str, market: str, universe: list[str] | None = None) -> dict:
     """가격 기반 프리셋 — 종목 풀에 대해 SMA 계산.
 
     universe가 None이면 시총 상위 100종목으로 제한 (성능).
@@ -178,10 +178,10 @@ def calcScreen(*, market: str = "KR", preset: str = "quality", stockCode: str | 
         return {**result, "info": cfg["desc"]}
 
     if cfg.get("price_based"):
-        return _screen_price_based(preset, market)
+        return _screenPriceBased(preset, market)
 
     if preset == "dividend":
-        return _screen_dividend(result, market, stockCode)
+        return _screenDividend(result, market, stockCode)
 
     lf = loadScanParquet("finance", market)
     if lf is None:
@@ -196,10 +196,10 @@ def calcScreen(*, market: str = "KR", preset: str = "quality", stockCode: str | 
         return {**result, "error": str(e)}
 
     edgar = isEdgarSchema(df)
-    year_col = "fy" if edgar else "bsns_year"
-    yr = str(df.get_column(year_col).sort(descending=True).to_list()[0])
+    yearCol = "fy" if edgar else "bsns_year"
+    yr = str(df.get_column(yearCol).sort(descending=True).to_list()[0])
     year_val = int(yr) if edgar else yr
-    df = df.filter(pl.col(year_col) == year_val)
+    df = df.filter(pl.col(yearCol) == year_val)
 
     # 종목별 지표
     stocks: dict[str, dict] = {}
@@ -291,7 +291,7 @@ def calcScreen(*, market: str = "KR", preset: str = "quality", stockCode: str | 
     return result
 
 
-def _screen_dividend(result: dict, market: str, stockCode: str | None) -> dict:
+def _screenDividend(result: dict, market: str, stockCode: str | None) -> dict:
     lf = loadScanParquet("dividend", market)
     if lf is None:
         return {**result, "error": "dividend.parquet 없음"}

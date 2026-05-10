@@ -4,7 +4,7 @@ dartlab 의 *진화 루프* 는 분석 결과를 시간 stamp 와 함께 기록 
 지금까지 이 흐름은 workbench HARVEST 패스 안에 갇혀 있어 외부 클라이언트 또는 chat-native
 agent 가 자율적으로 호출 못 했음. 이 도구가 registry SSOT 로 표면화하여 둘 다 사용 가능.
 
-idempotent=False — 같은 (date, stockCode) 호출은 store_decision 이 skip 하지만 도구 자체
+idempotent=False — 같은 (date, stockCode) 호출은 storeDecision 이 skip 하지만 도구 자체
 시그니처상 write 인식. annotations: readOnly=False, idempotent=False.
 """
 
@@ -26,21 +26,21 @@ def outcomeLog(
     """pending entry 를 ~/.dartlab/decisions/{market}/{stockCode}.md 에 추가.
 
     Args:
-        stockCode: KR 6 자리 / US ticker / generic safe 식별자. safe_stockcode 가드 필수.
+        stockCode: KR 6 자리 / US ticker / generic safe 식별자. safeStockcode 가드 필수.
         market: "KR" 또는 "US" — 그 외는 KR 로 정규화.
         date: YYYY-MM-DD 형식.
         decision: 의사결정 본문 — Buy / Hold / Sell + 근거.
         theme: 라벨 (default "Verdict").
     """
-    from dartlab.ai.memory.outcomeLog import store_decision
+    from dartlab.ai.memory.outcomeLog import storeDecision
 
     try:
-        wrote = store_decision(
+        wrote = storeDecision(
             stockCode=stockCode,
             market=market,
             date=date,
             theme=theme,
-            decision_text=decision,
+            decisionText=decision,
         )
     except ValueError as exc:
         return ToolResult(

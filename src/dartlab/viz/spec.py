@@ -125,9 +125,9 @@ class VizSpec:
         Raises:
             ImportError: plotly 미설치 시.
         """
-        from dartlab.viz.plotly import from_spec
+        from dartlab.viz.plotly import fromSpec
 
-        return from_spec(self.toDict())
+        return fromSpec(self.toDict())
 
     def toHtml(self) -> str:
         """Plotly HTML (CDN, fragment)."""
@@ -151,18 +151,18 @@ class VizSpec:
 
         landing 컴포넌트와 유사한 간결한 SVG. bar/line/sparkline/pie/combo 지원.
         """
-        from dartlab.viz.svg import render_svg
+        from dartlab.viz.svg import renderSvg
 
-        return render_svg(self.toDict(), width=width, height=height)
+        return renderSvg(self.toDict(), width=width, height=height)
 
     def toAscii(self, width: int = 80, height: int = 20) -> str:
         """터미널용 ASCII/ANSI 차트.
 
         bar/line/sparkline 지원. plotext 우선, 없으면 fallback.
         """
-        from dartlab.viz.ascii import render_ascii
+        from dartlab.viz.ascii import renderAscii
 
-        return render_ascii(self.toDict(), width=width, height=height)
+        return renderAscii(self.toDict(), width=width, height=height)
 
     def _repr_html_(self) -> str:
         """Jupyter/IPython 자동 렌더 훅."""

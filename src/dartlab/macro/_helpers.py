@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 log = logging.getLogger(__name__)
 
 
-def recent_timeseries(df, months: int = 6, value_col: str = "value") -> list[dict] | None:
+def recentTimeseries(df, months: int = 6, valueCol: str = "value") -> list[dict] | None:
     """gather DataFrame에서 최근 N개월분 시계열 추출.
 
     Parameters
@@ -33,7 +33,7 @@ def recent_timeseries(df, months: int = 6, value_col: str = "value") -> list[dic
         if len(filtered) == 0:
             return None
         dates = filtered.get_column("date").to_list()
-        vals = filtered.get_column(value_col).to_list()
+        vals = filtered.get_column(valueCol).to_list()
         return [
             {"date": str(d)[:10], "value": float(v) if v is not None else None}
             for d, v in zip(dates, vals)
@@ -43,7 +43,7 @@ def recent_timeseries(df, months: int = 6, value_col: str = "value") -> list[dic
         return None
 
 
-def apply_as_of(df, as_of: str | None):
+def applyAsOf(df, asOf: str | None):
     """as_of 날짜까지만 필터링 — 백테스트용.
 
     Parameters
@@ -58,16 +58,16 @@ def apply_as_of(df, as_of: str | None):
     pl.DataFrame | None
         as_of 이하 행만 남긴 DataFrame. df가 None이면 None.
     """
-    if as_of is None or df is None or len(df) == 0:
+    if asOf is None or df is None or len(df) == 0:
         return df
     try:
-        cutoff = datetime.strptime(as_of, "%Y-%m-%d").date() if isinstance(as_of, str) else as_of
+        cutoff = datetime.strptime(asOf, "%Y-%m-%d").date() if isinstance(asOf, str) else asOf
         return df.filter(df["date"] <= cutoff)
     except (ValueError, TypeError):
         return df
 
 
-def apply_overrides(data: dict, overrides: dict | None) -> dict:
+def applyOverrides(data: dict, overrides: dict | None) -> dict:
     """overrides dict를 data에 병합 — 시나리오 시뮬레이션용.
 
     Parameters
@@ -92,7 +92,7 @@ def apply_overrides(data: dict, overrides: dict | None) -> dict:
 # ══════════════════════════════════════
 
 
-def get_gather(as_of: str | None = None):
+def getGather(asOf: str | None = None):
     """gather 인스턴스 생성 — as_of 있으면 자동 필터링 래핑.
 
     모든 L2 모듈의 _fetch_* 함수에서 이것을 사용.
@@ -110,13 +110,13 @@ def get_gather(as_of: str | None = None):
     from dartlab.gather import getDefaultGather
 
     g = getDefaultGather()
-    if as_of is None:
+    if asOf is None:
         return g
 
     _orig = g.macro
 
     def _filtered(sid):
-        return apply_as_of(_orig(sid), as_of)
+        return applyAsOf(_orig(sid), asOf)
 
     import copy
 
@@ -125,7 +125,7 @@ def get_gather(as_of: str | None = None):
     return gc
 
 
-def fetch_latest(g, series_id: str) -> float | None:
+def fetchLatest(g, seriesId: str) -> float | None:
     """시리즈의 최신값 1개 조회.
 
     Parameters
@@ -141,17 +141,17 @@ def fetch_latest(g, series_id: str) -> float | None:
         최신 관측값. 실패 시 None (debug 로깅).
     """
     try:
-        df = g.macro(series_id)
+        df = g.macro(seriesId)
         if df is not None and len(df) > 0:
             vals = df.get_column("value").drop_nulls()
             if len(vals) > 0:
                 return float(vals[-1])
     except (KeyError, ValueError, TypeError, AttributeError) as e:
-        log.debug("fetch_latest(%s) 실패: %s", series_id, e)
+        log.debug("fetch_latest(%s) 실패: %s", seriesId, e)
     return None
 
 
-def fetch_latest_with_prev(g, series_id: str) -> tuple[float | None, float | None]:
+def fetchLatestWithPrev(g, seriesId: str) -> tuple[float | None, float | None]:
     """최신값 + 직전값 조회 — 모멘텀 계산용.
 
     Parameters
@@ -167,7 +167,7 @@ def fetch_latest_with_prev(g, series_id: str) -> tuple[float | None, float | Non
         (최신값, 직전값). 데이터 부족 시 (None, None).
     """
     try:
-        df = g.macro(series_id)
+        df = g.macro(seriesId)
         if df is not None and len(df) > 0:
             vals = df.get_column("value").drop_nulls()
             if len(vals) >= 2:
@@ -175,11 +175,11 @@ def fetch_latest_with_prev(g, series_id: str) -> tuple[float | None, float | Non
             if len(vals) == 1:
                 return float(vals[-1]), None
     except (KeyError, ValueError, TypeError, AttributeError) as e:
-        log.debug("fetch_latest_with_prev(%s) 실패: %s", series_id, e)
+        log.debug("fetch_latest_with_prev(%s) 실패: %s", seriesId, e)
     return None, None
 
 
-def fetch_series_list(g, series_id: str) -> list[float] | None:
+def fetchSeriesList(g, seriesId: str) -> list[float] | None:
     """전체 시계열을 float 리스트로 조회.
 
     Parameters
@@ -196,17 +196,17 @@ def fetch_series_list(g, series_id: str) -> list[float] | None:
         데이터 없으면 None.
     """
     try:
-        df = g.macro(series_id)
+        df = g.macro(seriesId)
         if df is not None and len(df) > 0:
             vals = df.get_column("value").drop_nulls().to_list()
             if vals:
                 return [float(v) for v in vals]
     except (KeyError, ValueError, TypeError, AttributeError) as e:
-        log.debug("fetch_series_list(%s) 실패: %s", series_id, e)
+        log.debug("fetch_series_list(%s) 실패: %s", seriesId, e)
     return None
 
 
-def fetch_yoy(g, series_id: str) -> float | None:
+def fetchYoy(g, seriesId: str) -> float | None:
     """12개월 전 대비 YoY 변화율.
 
     Parameters
@@ -222,7 +222,7 @@ def fetch_yoy(g, series_id: str) -> float | None:
         전년동월대비 변화율 (%). 관측치 13개 미만이면 None.
     """
     try:
-        df = g.macro(series_id)
+        df = g.macro(seriesId)
         if df is not None and len(df) > 0:
             vals = df.get_column("value").drop_nulls()
             if len(vals) >= 13:
@@ -231,11 +231,11 @@ def fetch_yoy(g, series_id: str) -> float | None:
                 if prev != 0:
                     return ((current - prev) / abs(prev)) * 100
     except (KeyError, ValueError, TypeError, AttributeError) as e:
-        log.debug("fetch_yoy(%s) 실패: %s", series_id, e)
+        log.debug("fetch_yoy(%s) 실패: %s", seriesId, e)
     return None
 
 
-def fetch_change_pct(g, series_id: str, lookback: int = 63) -> float | None:
+def fetchChangePct(g, seriesId: str, lookback: int = 63) -> float | None:
     """lookback 관측치 전 대비 변화율.
 
     Parameters
@@ -253,7 +253,7 @@ def fetch_change_pct(g, series_id: str, lookback: int = 63) -> float | None:
         변화율 (%). 데이터 부족 시 None.
     """
     try:
-        df = g.macro(series_id)
+        df = g.macro(seriesId)
         if df is not None and len(df) > 0:
             vals = df.get_column("value").drop_nulls()
             if len(vals) > lookback:
@@ -262,11 +262,11 @@ def fetch_change_pct(g, series_id: str, lookback: int = 63) -> float | None:
                 if old != 0:
                     return ((current - old) / abs(old)) * 100
     except (KeyError, ValueError, TypeError, AttributeError) as e:
-        log.debug("fetch_change_pct(%s) 실패: %s", series_id, e)
+        log.debug("fetch_change_pct(%s) 실패: %s", seriesId, e)
     return None
 
 
-def fetch_with_history(g, series_id: str) -> dict[str, float | None]:
+def fetchWithHistory(g, seriesId: str) -> dict[str, float | None]:
     """최신 + 직전 + 6개월전 값을 한 번에 조회.
 
     Parameters
@@ -285,7 +285,7 @@ def fetch_with_history(g, series_id: str) -> dict[str, float | None]:
     """
     result: dict[str, float | None] = {}
     try:
-        df = g.macro(series_id)
+        df = g.macro(seriesId)
         if df is not None and len(df) > 0:
             vals = df.get_column("value").drop_nulls().to_list()
             if vals:
@@ -295,11 +295,11 @@ def fetch_with_history(g, series_id: str) -> dict[str, float | None]:
                 if len(vals) > 6:
                     result["6m"] = float(vals[-7])
     except (KeyError, ValueError, TypeError, AttributeError) as e:
-        log.debug("fetch_with_history(%s) 실패: %s", series_id, e)
+        log.debug("fetch_with_history(%s) 실패: %s", seriesId, e)
     return result
 
 
-def fetch_monthly_dict(g, series_id: str) -> dict[str, float] | None:
+def fetchMonthlyDict(g, seriesId: str) -> dict[str, float] | None:
     """시리즈를 월간 dict로 변환 — 역사적 분석용.
 
     같은 달에 여러 값이면 마지막 값.
@@ -317,7 +317,7 @@ def fetch_monthly_dict(g, series_id: str) -> dict[str, float] | None:
         {"YYYY-MM": value} 매핑. 데이터 없으면 None.
     """
     try:
-        df = g.macro(series_id)
+        df = g.macro(seriesId)
         if df is None or len(df) == 0:
             return None
         dates = df.get_column("date").to_list()
@@ -328,11 +328,11 @@ def fetch_monthly_dict(g, series_id: str) -> dict[str, float] | None:
                 monthly[str(d)[:7]] = float(v)
         return monthly if monthly else None
     except (KeyError, ValueError, TypeError, AttributeError) as e:
-        log.debug("fetch_monthly_dict(%s) 실패: %s", series_id, e)
+        log.debug("fetch_monthly_dict(%s) 실패: %s", seriesId, e)
         return None
 
 
-def collect_timeseries(g, series_map: dict[str, str]) -> dict[str, list[dict] | None]:
+def collectTimeseries(g, seriesMap: dict[str, str]) -> dict[str, list[dict] | None]:
     """여러 시리즈의 최근 시계열을 일괄 수집.
 
     Parameters
@@ -348,9 +348,9 @@ def collect_timeseries(g, series_map: dict[str, str]) -> dict[str, list[dict] | 
         {라벨: [{date: str, value: float}] | None} — 실패한 시리즈는 None.
     """
     ts: dict[str, list[dict] | None] = {}
-    for label, sid in series_map.items():
+    for label, sid in seriesMap.items():
         try:
-            ts[label] = recent_timeseries(g.macro(sid))
+            ts[label] = recentTimeseries(g.macro(sid))
         except (KeyError, ValueError, TypeError, AttributeError):
             ts[label] = None
     return ts

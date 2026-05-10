@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
-from ..marketConfig import get_market_config
+from ..marketConfig import getMarketConfig
 
 # 데이터 유형별 fallback 순서 (KR 기본값 — 하위호환)
-PRICE_FALLBACK = ["naver", "naver_global"]
+PRICE_FALLBACK = ["naver", "naverGlobal"]
 CONSENSUS_FALLBACK = ["naver"]
 FLOW_FALLBACK = ["naver"]
 DIVIDENDS_FALLBACK = ["fmp"]
-HISTORY_FALLBACK = ["fdr", "yahoo_chart", "naver_global", "fmp"]
+HISTORY_FALLBACK = ["fdr", "yahooChart", "naverGlobal", "fmp"]
 
 
-def get_price_fallback(market: str = "KR") -> list[str]:
+def getPriceFallback(market: str = "KR") -> list[str]:
     """시장별 주가 fallback 체인.
 
     Parameters
@@ -24,20 +24,20 @@ def get_price_fallback(market: str = "KR") -> list[str]:
     -------
     list[str]
         도메인 이름 목록 (우선순위 순).
-        예: ``["naver", "naver_global"]`` (KR), ``["fmp"]`` (US).
+        예: ``["naver", "naverGlobal"]`` (KR), ``["fmp"]`` (US).
     """
-    config = get_market_config(market)
+    config = getMarketConfig(market)
     return list(config.fallback_chain)
 
 
-def load_domain(name: str):
+def loadDomain(name: str):
     """도메인 모듈 lazy import.
 
     Parameters
     ----------
     name : str
         도메인 식별자. ``"naver"`` | ``"fmp"`` | ``"krx"`` | ``"fdr"``
-        | ``"naver_global"`` | ``"yahoo_chart"``.
+        | ``"naverGlobal"`` | ``"yahooChart"``.
 
     Returns
     -------
@@ -66,12 +66,12 @@ def load_domain(name: str):
         from . import fdr
 
         return fdr
-    if name == "naver_global":
-        from . import naver_global
+    if name == "naverGlobal":
+        from . import naverGlobal
 
-        return naver_global
-    if name == "yahoo_chart":
-        from . import yahoo_chart
+        return naverGlobal
+    if name == "yahooChart":
+        from . import yahooChart
 
-        return yahoo_chart
+        return yahooChart
     raise ValueError(f"알 수 없는 도메인: {name}")

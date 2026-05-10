@@ -25,7 +25,7 @@ from dartlab.scan._helpers import (
 )
 from dartlab.scan._helpers import (
     loadValuationSnapshot,
-    scan_finance_parquets,
+    scanFinanceParquets,
 )
 
 _CONCURRENCY = 50  # 동시 요청 제한
@@ -85,7 +85,7 @@ async def _fetchAll(codes: list[str], verbose: bool) -> dict[str, dict]:
     """
     import httpx
 
-    from dartlab.gather.domains.naver import fetch_price
+    from dartlab.gather.domains.naver import fetchPrice
 
     result: dict[str, dict] = {}
     sem = asyncio.Semaphore(_CONCURRENCY)
@@ -93,10 +93,10 @@ async def _fetchAll(codes: list[str], verbose: bool) -> dict[str, dict]:
     async def _fetch(code: str, client: httpx.AsyncClient) -> None:
         async with sem:
             try:
-                snap = await fetch_price(code, client)
-                if snap and snap.market_cap and snap.market_cap > 0:
+                snap = await fetchPrice(code, client)
+                if snap and snap.marketCap and snap.marketCap > 0:
                     result[code] = {
-                        "marketCap": snap.market_cap,
+                        "marketCap": snap.marketCap,
                         "per": snap.per if snap.per else None,
                         "pbr": snap.pbr if snap.pbr else None,
                         "dividendYield": snap.dividend_yield if snap.dividend_yield else None,
@@ -180,7 +180,7 @@ def _enrichValuation(raw: pl.DataFrame, *, verbose: bool) -> pl.DataFrame:
     if raw.is_empty():
         return pl.DataFrame(schema=_FINAL_SCHEMA)
 
-    revMap = scan_finance_parquets("IS", _REVENUE_IDS, _REVENUE_NMS)
+    revMap = scanFinanceParquets("IS", _REVENUE_IDS, _REVENUE_NMS)
 
     rows: list[dict] = []
     for rec in raw.iter_rows(named=True):

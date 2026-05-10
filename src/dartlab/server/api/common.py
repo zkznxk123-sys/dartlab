@@ -31,7 +31,7 @@ _CREDENTIAL_PATTERN = _re.compile(
 )
 
 
-def sanitize_error(exc: BaseException) -> str:
+def sanitizeError(exc: BaseException) -> str:
     """에러 메시지에서 파일 경로와 인증 정보를 마스킹한다."""
     msg = _PATH_PATTERN.sub("<path>", str(exc))
     msg = _CREDENTIAL_PATTERN.sub(r"\1=***", msg)
@@ -40,7 +40,7 @@ def sanitize_error(exc: BaseException) -> str:
 
 def guideDetail(exc: BaseException, *, feature: str | None = None) -> str:
     """sanitize_error + 친절 안내 포함. Server API 에러 응답 표준."""
-    detail = sanitize_error(exc)
+    detail = sanitizeError(exc)
     try:
         from dartlab.cli.services.errors import inferFeature
         from dartlab.core.messaging import handleError
@@ -54,12 +54,12 @@ def guideDetail(exc: BaseException, *, feature: str | None = None) -> str:
     return detail
 
 
-def normalize_provider_name(provider: str | None) -> str | None:
+def normalizeProviderName(provider: str | None) -> str | None:
     """Provider 이름을 정규화한다."""
     return normalizeProvider(provider)
 
 
-def serialize_payload(payload: Any, *, max_rows: int = 200) -> dict[str, Any]:
+def serializePayload(payload: Any, *, maxRows: int = 200) -> dict[str, Any]:
     """DataFrame/dict/str 등 다양한 페이로드를 JSON 직렬화 가능한 dict로 변환한다."""
     import polars as pl
 
@@ -67,7 +67,7 @@ def serialize_payload(payload: Any, *, max_rows: int = 200) -> dict[str, Any]:
         return {"type": "none", "data": None}
 
     if isinstance(payload, pl.DataFrame):
-        preview = payload.head(max_rows)
+        preview = payload.head(maxRows)
         rows = preview.to_dicts()
         for row in rows:
             for key, value in row.items():
@@ -78,7 +78,7 @@ def serialize_payload(payload: Any, *, max_rows: int = 200) -> dict[str, Any]:
             "columns": preview.columns,
             "rows": rows,
             "totalRows": payload.height,
-            "truncated": payload.height > max_rows,
+            "truncated": payload.height > maxRows,
         }
 
     if isinstance(payload, dict):
@@ -90,23 +90,23 @@ def serialize_payload(payload: Any, *, max_rows: int = 200) -> dict[str, Any]:
     return {"type": "unknown", "data": str(payload)}
 
 
-def compute_etag(data: Any) -> str:
+def computeEtag(data: Any) -> str:
     """데이터의 MD5 기반 ETag 해시를 계산한다."""
     raw = json.dumps(data, sort_keys=True, ensure_ascii=False).encode()
     return f'"{hashlib.md5(raw, usedforsecurity=False).hexdigest()[:16]}"'
 
 
-def etag_response(
+def etagResponse(
     request: Request,
     response: Response,
     data: dict[str, Any],
     *,
-    max_age: int = 300,
+    maxAge: int = 300,
     swr: int = 1800,
 ) -> dict[str, Any] | Response:
     """ETag/Cache-Control 헤더를 설정하고 304 응답을 처리한다."""
-    etag = compute_etag(data)
-    cache_control = f"private, max-age={max_age}, stale-while-revalidate={swr}"
+    etag = computeEtag(data)
+    cache_control = f"private, max-age={maxAge}, stale-while-revalidate={swr}"
 
     if_none_match = request.headers.get("if-none-match")
     if if_none_match == etag:

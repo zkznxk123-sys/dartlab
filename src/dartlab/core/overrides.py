@@ -292,11 +292,11 @@ def validateOverrides(overrides: dict | None, engine: str | None = None) -> dict
     return clean
 
 
-def applyOverride(auto_value: Any, override_key: str, overrides: dict) -> Any:
+def applyOverride(autoValue: Any, overrideKey: str, overrides: dict) -> Any:
     """자동 계산 값에 override 적용. override 없으면 auto_value 반환."""
-    if not overrides or override_key not in overrides:
-        return auto_value
-    return overrides[override_key]
+    if not overrides or overrideKey not in overrides:
+        return autoValue
+    return overrides[overrideKey]
 
 
 def detectExtremeFlags(assumptions: dict | None) -> list[dict]:

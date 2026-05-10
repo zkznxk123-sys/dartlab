@@ -52,7 +52,7 @@ class LEIResult:
 # ══════════════════════════════════════
 
 
-def _normal_cdf(x: float) -> float:
+def _normalCdf(x: float) -> float:
     """표준정규분포 누적분포함수 (scipy 없이 구현)."""
     return 0.5 * (1.0 + erf(x / sqrt(2.0)))
 
@@ -73,7 +73,7 @@ def clevelandProbit(spread10y3m: float) -> RecessionProb:
     alpha = -0.5333
     beta = -0.6330
     z = alpha + beta * spread10y3m
-    prob = _normal_cdf(z)
+    prob = _normalCdf(z)
 
     if prob < 0.15:
         zone, zone_label = "low", "낮음"
@@ -261,7 +261,7 @@ class HamiltonResult:
     iterations: int
 
 
-def _gaussian_density(y: float, mu: float, sigma: float) -> float:
+def _gaussianDensity(y: float, mu: float, sigma: float) -> float:
     """정규분포 밀도 f(y | mu, sigma). 언더플로 방지를 위해 로그로 계산."""
     if sigma <= 0:
         return 1e-300
@@ -270,7 +270,7 @@ def _gaussian_density(y: float, mu: float, sigma: float) -> float:
     return max(np.exp(log_density), 1e-300)
 
 
-def _ergodic_probs(p00: float, p11: float) -> np.ndarray:
+def _ergodicProbs(p00: float, p11: float) -> np.ndarray:
     """정상 상태(ergodic) 확률: πP = π."""
     denom = 2.0 - p00 - p11
     if abs(denom) < 1e-10:
@@ -279,7 +279,7 @@ def _ergodic_probs(p00: float, p11: float) -> np.ndarray:
     return np.array([pi0, 1.0 - pi0])
 
 
-def _hamilton_filter(
+def _hamiltonFilter(
     y: np.ndarray,
     mu: np.ndarray,
     sigma: np.ndarray,
@@ -307,7 +307,7 @@ def _hamilton_filter(
     filtered = np.zeros((T, 2))
     predicted = np.zeros((T, 2))
 
-    xi = _ergodic_probs(p00, p11)
+    xi = _ergodicProbs(p00, p11)
     log_lik = 0.0
 
     for t in range(T):
@@ -322,8 +322,8 @@ def _hamilton_filter(
         y[t] - mu[1] - (phi * y[t - 1] if t > 0 else 0.0)
         eta = np.array(
             [
-                _gaussian_density(y[t], mu[0] + (phi * y[t - 1] if t > 0 else 0.0), sigma[0]),
-                _gaussian_density(y[t], mu[1] + (phi * y[t - 1] if t > 0 else 0.0), sigma[1]),
+                _gaussianDensity(y[t], mu[0] + (phi * y[t - 1] if t > 0 else 0.0), sigma[0]),
+                _gaussianDensity(y[t], mu[1] + (phi * y[t - 1] if t > 0 else 0.0), sigma[1]),
             ]
         )
 
@@ -343,7 +343,7 @@ def _hamilton_filter(
     return filtered, predicted, log_lik
 
 
-def _kim_smoother(
+def _kimSmoother(
     filtered: np.ndarray,
     predicted: np.ndarray,
     p00: float,
@@ -427,8 +427,8 @@ def hamiltonRegime(
 
     for iteration in range(maxIter):
         # ── E-step ──
-        filtered, predicted, log_lik = _hamilton_filter(y, mu, sigma, phi, p00, p11)
-        smoothed = _kim_smoother(filtered, predicted, p00, p11)
+        filtered, predicted, log_lik = _hamiltonFilter(y, mu, sigma, phi, p00, p11)
+        smoothed = _kimSmoother(filtered, predicted, p00, p11)
 
         # 수렴 체크
         if abs(log_lik - prev_ll) < tol:
@@ -511,8 +511,8 @@ def hamiltonRegime(
             predicted = predicted[:, ::-1]
 
     # 최종 필터/스무더
-    filtered, predicted, log_lik = _hamilton_filter(y, mu, sigma, phi, p00, p11)
-    smoothed = _kim_smoother(filtered, predicted, p00, p11)
+    filtered, predicted, log_lik = _hamiltonFilter(y, mu, sigma, phi, p00, p11)
+    smoothed = _kimSmoother(filtered, predicted, p00, p11)
 
     current_regime = int(np.argmax(smoothed[-1]))
     current_prob = float(smoothed[-1, current_regime])

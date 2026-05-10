@@ -40,9 +40,6 @@ from dartlab.core.palette import COLORS  # noqa: F401
 # core/select.py 가 viz 의존 없이 HTML 렌더 — viz import 시점에 자동 등록.
 # pyodide 등 plotly 미설치 환경은 viz import 자체가 실패해 register 도 안 됨.
 from dartlab.core.render import register as _registerRenderer
-from dartlab.viz.charts import (
-    balance_sheet as balance_sheet_chart,
-)
 
 # ── DataFrame → Plotly Figure (Jupyter) ──
 from dartlab.viz.charts import (  # noqa: F401
@@ -60,6 +57,9 @@ from dartlab.viz.charts import (  # noqa: F401
     waterfall,
 )
 from dartlab.viz.charts import (
+    balanceSheet as balance_sheet_chart,
+)
+from dartlab.viz.charts import (
     dividend as dividend_chart,
 )
 from dartlab.viz.charts import (
@@ -67,34 +67,34 @@ from dartlab.viz.charts import (
 )
 
 # ── AI stdout 마커 추출 ──
-from dartlab.viz.extract import extract_viz_specs  # noqa: F401
+from dartlab.viz.extract import extractVizSpecs  # noqa: F401
 
 # ── Company → ChartSpec 생성기 ──
 from dartlab.viz.generators import (  # noqa: F401
     SPEC_GENERATORS,
-    auto_chart,
-    spec_balance_sheet,
-    spec_balance_structure_trend,
-    spec_cashflow_signed_matrix,
-    spec_cashflow_waterfall,
-    spec_diff_heatmap,
-    spec_dividend,
-    spec_evidence_coverage,
-    spec_growth_yoy_bar,
-    spec_hover_spark,
-    spec_income_trend_matrix,
-    spec_insight_radar,
-    spec_kpi_ribbon,
-    spec_leverage_trend,
-    spec_margin_trend,
-    spec_peer_matrix,
-    spec_peer_radar,
-    spec_profitability,
-    spec_ratio_sparklines,
-    spec_revenue_scenario_band,
-    spec_revenue_trend,
-    spec_sensitivity_heatmap,
-    spec_six_act_radar,
+    autoChart,
+    specBalanceSheet,
+    specBalanceStructureTrend,
+    specCashflowSignedMatrix,
+    specCashflowWaterfall,
+    specDiffHeatmap,
+    specDividend,
+    specEvidenceCoverage,
+    specGrowthYoyBar,
+    specHoverSpark,
+    specIncomeTrendMatrix,
+    specInsightRadar,
+    specKpiRibbon,
+    specLeverageTrend,
+    specMarginTrend,
+    specPeerMatrix,
+    specPeerRadar,
+    specProfitability,
+    specRatioSparklines,
+    specRevenueScenarioBand,
+    specRevenueTrend,
+    specSensitivityHeatmap,
+    specSixActRadar,
 )
 
 # ── Dashboard visual intent catalog ──
@@ -102,7 +102,7 @@ from dartlab.viz.intents import VIZ_INTENTS, VizIntent, listVizIntents  # noqa: 
 
 # ── ChartSpec → Plotly Figure 변환 ──
 from dartlab.viz.plotly import PlotlyChartRenderer
-from dartlab.viz.plotly import from_spec as chart_from_spec  # noqa: F401
+from dartlab.viz.plotly import fromSpec as chart_from_spec  # noqa: F401
 
 _registerRenderer(PlotlyChartRenderer())
 
@@ -155,7 +155,7 @@ _GUIDE_AXIS_NAMES = frozenset(
 )
 
 
-def _is_meta_guide_chart(spec: dict) -> bool:
+def _isMetaGuideChart(spec: dict) -> bool:
     """analysis() 가이드 dataframe 으로 만든 의미 없는 메타 차트 감지.
 
     시그널: categories 가 dartlab 22축 이름과 5개 이상 겹치고
@@ -181,7 +181,7 @@ def _is_meta_guide_chart(spec: dict) -> bool:
     return False
 
 
-def _has_evidence(spec: dict) -> bool:
+def _hasEvidence(spec: dict) -> bool:
     """evidence 회로 진입점이 있는지 확인.
 
     1.0.0 정식 계약: evidenceBinding (chart-level structured) 채워져야 한다.
@@ -199,7 +199,7 @@ def _has_evidence(spec: dict) -> bool:
     return False
 
 
-def emit_chart(spec: dict) -> None:
+def emitChart(spec: dict) -> None:
     """AI 코드에서 차트 출력.
 
     런타임이 stdout에서 마커를 자동 추출하여 CHART 이벤트로 전환한다.
@@ -227,7 +227,7 @@ def emit_chart(spec: dict) -> None:
 
     # 메타 가이드 차트 거부 — AI 가 dartlab.analysis() 가이드 dataframe 의
     # items 컬럼을 막대로 그리는 패턴 차단. 사용자 가치 0.
-    if _is_meta_guide_chart(spec):
+    if _isMetaGuideChart(spec):
         _log.warning(
             "[차트 거부] analysis() 가이드 dataframe 의 'items' 컬럼은 사용자에게 "
             "가치 없는 메타데이터입니다. 차트를 그리지 말고, 진짜 종목 데이터로 "
@@ -241,7 +241,7 @@ def emit_chart(spec: dict) -> None:
         return
 
     # evidence 회로 진입점 누락 거부 — 모든 차트는 tableRef 까지 drill 가능해야 한다.
-    if not _has_evidence(spec):
+    if not _hasEvidence(spec):
         _log.warning(
             "[차트 거부] evidenceBinding 또는 evidenceIds 가 비어 있습니다. "
             "모든 차트는 어떤 표·계정·기간에서 파생되었는지 명시해야 합니다. 예시:\n"
@@ -262,7 +262,7 @@ def emit_chart(spec: dict) -> None:
     print(f"{_MARKER_START}{json.dumps(spec, ensure_ascii=False)}{_MARKER_END}")
 
 
-def emit_diagram(diagram_type: str, source: str, *, title: str = "") -> None:
+def emitDiagram(diagramType: str, source: str, *, title: str = "") -> None:
     """AI 코드에서 다이어그램 출력.
 
     Args:
@@ -276,7 +276,7 @@ def emit_diagram(diagram_type: str, source: str, *, title: str = "") -> None:
     """
     spec = {
         "vizType": "diagram",
-        "diagramType": diagram_type,
+        "diagramType": diagramType,
         "source": source,
         "title": title,
     }

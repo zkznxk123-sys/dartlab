@@ -6,7 +6,7 @@ select()로 IS/BS/CF 원본 계정을 가져와서
 
 from __future__ import annotations
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import MAX_RATIO_YEARS, toDictBySnakeId
 from dartlab.core.utils.helpers import annualColsFromPeriods as _annualColsFromPeriods
 
@@ -46,7 +46,7 @@ def _cagrFromList(values: list[float | None], periods: int) -> float | None:
 # ── 성장 추이 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """성장 추이 -- 매출/영업이익/순이익/자산의 금액과 YoY.
 
@@ -141,7 +141,7 @@ def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
 # ── 성장 품질 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcGrowthQuality(company, *, basePeriod: str | None = None) -> dict | None:
     """성장 품질 -- 매출 성장이 이익으로 이어지는가.
 
@@ -214,7 +214,7 @@ def calcGrowthQuality(company, *, basePeriod: str | None = None) -> dict | None:
 # ── SGR + 갭 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcSustainableGrowthRate(company, *, basePeriod: str | None = None) -> dict | None:
     """지속가능성장률(SGR) vs 실제 매출성장률 갭.
 
@@ -304,7 +304,7 @@ def calcSustainableGrowthRate(company, *, basePeriod: str | None = None) -> dict
 # ── 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcGrowthFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """성장성 경고/기회 플래그.
 
@@ -348,7 +348,7 @@ def calcGrowthFlags(company, *, basePeriod: str | None = None) -> list[str]:
 from dartlab.core.utils.calc import cagr as _cagr  # noqa: E402
 
 
-@memoized_calc
+@memoizedCalc
 def calcCagrComparison(company, *, basePeriod: str | None = None) -> dict | None:
     """계정별 CAGR 비교 — 절대값 장기 추세로 구조적 변화 감지.
 

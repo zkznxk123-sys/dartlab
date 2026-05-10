@@ -1131,9 +1131,9 @@ def marginTrendBlock(data: dict) -> list:
     history = data.get("history", [])
     if history:
         from dartlab.story.blocks import ChartBlock
-        from dartlab.viz.generators import spec_margin_trend
+        from dartlab.viz.generators import specMarginTrend
 
-        chart = spec_margin_trend(history)
+        chart = specMarginTrend(history)
         if chart:
             blocks.append(ChartBlock(spec=chart))
     return blocks
@@ -1228,9 +1228,9 @@ def growthTrendBlock(data: dict) -> list:
     history = data.get("history", [])
     if history:
         from dartlab.story.blocks import ChartBlock
-        from dartlab.viz.generators import spec_growth_yoy_bar
+        from dartlab.viz.generators import specGrowthYoyBar
 
-        chart = spec_growth_yoy_bar(history)
+        chart = specGrowthYoyBar(history)
         if chart:
             blocks.append(ChartBlock(spec=chart))
     return blocks
@@ -1314,9 +1314,9 @@ def leverageTrendBlock(data: dict) -> list:
     history = data.get("history", [])
     if history:
         from dartlab.story.blocks import ChartBlock
-        from dartlab.viz.generators import spec_leverage_trend
+        from dartlab.viz.generators import specLeverageTrend
 
-        chart = spec_leverage_trend(history)
+        chart = specLeverageTrend(history)
         if chart:
             blocks.append(ChartBlock(spec=chart))
     return blocks
@@ -2624,12 +2624,12 @@ def sensitivityBlock(data: dict) -> list:
     # heatmap ChartBlock
     if grid:
         from dartlab.story.blocks import ChartBlock
-        from dartlab.viz.generators import spec_sensitivity_heatmap
+        from dartlab.viz.generators import specSensitivityHeatmap
 
         hm_grid = [
             {"wacc": g["wacc"], "g": g.get("terminalGrowth", 0), "fairValue": g.get("perShareValue")} for g in grid
         ]
-        hm = spec_sensitivity_heatmap(hm_grid)
+        hm = specSensitivityHeatmap(hm_grid)
         if hm:
             blocks.append(ChartBlock(spec=hm))
 
@@ -2983,7 +2983,7 @@ def peerPositionBlock(data: dict | None) -> list:
         return []
 
     from dartlab.story.blocks import ChartBlock
-    from dartlab.viz.generators import spec_peer_radar
+    from dartlab.viz.generators import specPeerRadar
 
     blocks: list = [
         HeadingBlock(_meta("peerPosition").label, level=2, helper="전종목 횡단 비교 — 4축 백분위 + 교차 관점")
@@ -3024,7 +3024,7 @@ def peerPositionBlock(data: dict | None) -> list:
 
     # radar chart
     try:
-        radar = spec_peer_radar(data)
+        radar = specPeerRadar(data)
         if radar:
             blocks.append(ChartBlock(spec=radar))
     except (KeyError, TypeError, ValueError):
@@ -3179,7 +3179,7 @@ def revenueForecastBlock(data: dict) -> list:
     scenarios = data.get("scenarios", {})
     if scenarios:
         from dartlab.story.blocks import ChartBlock
-        from dartlab.viz.generators import spec_revenue_scenario_band
+        from dartlab.viz.generators import specRevenueScenarioBand
 
         # historical: calc가 반환하는 과거 매출 시계열 (list[float])
         hist_vals = data.get("historical", []) or []
@@ -3197,7 +3197,7 @@ def revenueForecastBlock(data: dict) -> list:
                     forecasts["periods"] = [f"+{i + 1}Y" for i in range(len(sc["projected"]))]
 
         if history_dicts or forecasts:
-            band_spec = spec_revenue_scenario_band(history_dicts, forecasts if forecasts else None)
+            band_spec = specRevenueScenarioBand(history_dicts, forecasts if forecasts else None)
             if band_spec:
                 blocks.append(ChartBlock(spec=band_spec))
 
@@ -4124,14 +4124,14 @@ def quantModuleBlock(key: str, data: dict | None) -> list:
     narrative = data.get("narrative", "")
     if not narrative or narrative.endswith("데이터 없음.") or narrative.endswith("데이터 부족."):
         return []
-    label = _meta(key).label if _has_meta(key) else key
+    label = _meta(key).label if _hasMeta(key) else key
     return [
         HeadingBlock(label, level=3),
         TextBlock(narrative),
     ]
 
 
-def _has_meta(key: str) -> bool:
+def _hasMeta(key: str) -> bool:
     """catalog 에 해당 key 의 BlockMeta 가 있는지."""
     try:
         _meta(key)
@@ -4208,13 +4208,13 @@ def strategySnapshotBlock(data: dict) -> list:
     )
 
     # 활성 진입 신호 narrate (1줄)
-    active_styles = [style_labels[k] for k, v in data.items() if v.get("entry_today") and v.get("status") == "ok"]
+    activeStyles = [style_labels[k] for k, v in data.items() if v.get("entry_today") and v.get("status") == "ok"]
     helper = (
         "8 검증 스타일 백테스트 결과 + 오늘 시점 진입/청산 진단. "
         "Sharpe ≥ 1.2 강함, ≥ 0.6 양호, < 0.2 약함. DSR (Bailey-Lopez) 가 우연성 검증."
     )
-    if active_styles:
-        helper += f"\n오늘 진입 신호 활성 스타일: {', '.join(active_styles)}"
+    if activeStyles:
+        helper += f"\n오늘 진입 신호 활성 스타일: {', '.join(activeStyles)}"
 
     blocks: list = [
         HeadingBlock(
@@ -4920,7 +4920,7 @@ def macroRatesBlock(data: dict) -> list:
     outlook = data.get("outlook") or {}
     expectation = data.get("expectation") or {}
     yield_curve = data.get("yieldCurve") or {}
-    real_rate = data.get("realRateRegime", "")
+    realRate = data.get("realRateRegime", "")
 
     direction = outlook.get("direction", "")
     if not direction:
@@ -4940,11 +4940,11 @@ def macroRatesBlock(data: dict) -> list:
         shape = "정상" if slope > 0 else "역전"
         metrics.append(("수익률곡선", f"{shape} (Slope {slope:+.2f}%p)"))
 
-    if real_rate:
-        if isinstance(real_rate, dict):
-            metrics.append(("실질금리 국면", real_rate.get("regimeLabel", "")))
+    if realRate:
+        if isinstance(realRate, dict):
+            metrics.append(("실질금리 국면", realRate.get("regimeLabel", "")))
         else:
-            metrics.append(("실질금리 국면", str(real_rate)))
+            metrics.append(("실질금리 국면", str(realRate)))
 
     # ACM Term Premium
     tp = data.get("termPremium")

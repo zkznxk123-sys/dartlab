@@ -26,7 +26,7 @@ import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import extractAccount, loadScanParquet
-from dartlab.quant.factorBuild import _fetch_year_end_marketcaps, _latest_year
+from dartlab.quant.factorBuild import _fetchYearEndMarketcaps, _latestYear
 
 log = logging.getLogger(__name__)
 
@@ -115,7 +115,7 @@ def calcAltmanFactor(
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())
-        year = _latest_year(snap)
+        year = _latestYear(snap)
         if year is None:
             return None
     except (OSError, ValueError, KeyError, AttributeError) as exc:
@@ -123,13 +123,13 @@ def calcAltmanFactor(
         return None
 
     edgar = isEdgarSchema(snap)
-    year_col = "fy" if edgar else "bsns_year"
+    yearCol = "fy" if edgar else "bsns_year"
     year_val = int(year) if edgar else year
-    cur = snap.filter(pl.col(year_col) == year_val)
+    cur = snap.filter(pl.col(yearCol) == year_val)
     if cur.is_empty():
         return None
 
-    market_caps = _fetch_year_end_marketcaps(market, str(year))
+    market_caps = _fetchYearEndMarketcaps(market, str(year))
 
     scores: dict[str, float] = {}
     # 성능 fix (G5): partition_by 한 번 호출 → 종목당 O(1) lookup. 기존 filter 는 O(n²).

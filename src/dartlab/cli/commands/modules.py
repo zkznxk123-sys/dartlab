@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """modules 서브커맨드 등록 — DataEntry 기반 모듈 목록."""
     parser = subparsers.add_parser("modules", help="사용 가능한 모듈 목록 보기")
     parser.add_argument("--category", "-c", help="카테고리 필터 (finance, report, notes, disclosure, analysis, raw)")

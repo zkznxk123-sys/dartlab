@@ -21,7 +21,7 @@ class ToolSpec:
     idempotentHint: bool | None = None
     openWorldHint: bool | None = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -33,11 +33,11 @@ class ToolResult:
     data: dict[str, Any] = field(default_factory=dict)
     error: str | None = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         return {
             "ok": self.ok,
             "summary": self.summary,
-            "refs": [ref.to_dict() for ref in self.refs],
+            "refs": [ref.toDict() for ref in self.refs],
             "data": self.data,
             "error": self.error,
         }

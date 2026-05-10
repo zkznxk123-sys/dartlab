@@ -75,7 +75,7 @@ def _addMetricNode(
     return nid
 
 
-def _addCauses(g: CompanyGraph, source_id: str, target_id: str, label: str = "") -> None:
+def _addCauses(g: CompanyGraph, sourceId: str, targetId: str, label: str = "") -> None:
     """인과 엣지 추가 — source 가 target 의 원인.
 
     Parameters
@@ -89,10 +89,10 @@ def _addCauses(g: CompanyGraph, source_id: str, target_id: str, label: str = "")
     label : str
         엣지 설명.
     """
-    g.addEdge(Edge(source=source_id, target=target_id, type=EdgeType.CAUSES, label=label))
+    g.addEdge(Edge(source=sourceId, target=targetId, type=EdgeType.CAUSES, label=label))
 
 
-def _addPartOf(g: CompanyGraph, part_id: str, whole_id: str, label: str = "") -> None:
+def _addPartOf(g: CompanyGraph, partId: str, wholeId: str, label: str = "") -> None:
     """구성 엣지 추가 — part 가 whole 의 구성 요소.
 
     Parameters
@@ -106,10 +106,10 @@ def _addPartOf(g: CompanyGraph, part_id: str, whole_id: str, label: str = "") ->
     label : str
         엣지 설명 (비중 등).
     """
-    g.addEdge(Edge(source=part_id, target=whole_id, type=EdgeType.PART_OF, label=label))
+    g.addEdge(Edge(source=partId, target=wholeId, type=EdgeType.PART_OF, label=label))
 
 
-def _addDerived(g: CompanyGraph, base_id: str, derived_id: str, label: str = "") -> None:
+def _addDerived(g: CompanyGraph, baseId: str, derivedId: str, label: str = "") -> None:
     """파생 엣지 추가 — base 에서 derived 가 계산됨.
 
     Parameters
@@ -123,10 +123,10 @@ def _addDerived(g: CompanyGraph, base_id: str, derived_id: str, label: str = "")
     label : str
         계산 설명.
     """
-    g.addEdge(Edge(source=base_id, target=derived_id, type=EdgeType.DERIVED, label=label))
+    g.addEdge(Edge(source=baseId, target=derivedId, type=EdgeType.DERIVED, label=label))
 
 
-def _addAnomaly(g: CompanyGraph, source_id: str, target_id: str, label: str = "") -> None:
+def _addAnomaly(g: CompanyGraph, sourceId: str, targetId: str, label: str = "") -> None:
     """이상치 엣지 추가 — source 에서 target 으로의 이상 신호.
 
     Parameters
@@ -140,7 +140,7 @@ def _addAnomaly(g: CompanyGraph, source_id: str, target_id: str, label: str = ""
     label : str
         이상 내용 설명.
     """
-    g.addEdge(Edge(source=source_id, target=target_id, type=EdgeType.ANOMALY, label=label))
+    g.addEdge(Edge(source=sourceId, target=targetId, type=EdgeType.ANOMALY, label=label))
 
 
 # ── 1막: 수익구조 ─────────────────────────────────────────

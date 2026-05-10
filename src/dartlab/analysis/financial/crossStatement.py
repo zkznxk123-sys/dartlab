@@ -9,7 +9,7 @@ from dartlab.core.utils.safe import get as _get
 
 _getF = _getF2 = _getF3 = _getF4 = _get
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 _MAX_YEARS = 8
@@ -23,7 +23,7 @@ from dartlab.core.utils.safe import getFirst as _getFirst  # SSOT
 # ── IS-CF 괴리 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcIsCfDivergence(company, *, basePeriod: str | None = None) -> dict | None:
     """IS-CF 괴리 시계열 — 순이익 vs 영업CF.
 
@@ -104,7 +104,7 @@ def calcIsCfDivergence(company, *, basePeriod: str | None = None) -> dict | None
 # ── IS-BS 괴리 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcIsBsDivergence(company, *, basePeriod: str | None = None) -> dict | None:
     """IS-BS 괴리 시계열 — 매출 성장 vs 매출채권/재고 성장.
 
@@ -194,7 +194,7 @@ def calcIsBsDivergence(company, *, basePeriod: str | None = None) -> dict | None
 # ── 종합 이상 점수 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcAnomalyScore(company, *, basePeriod: str | None = None) -> dict | None:
     """종합 이상 점수 시계열 — 교차검증 결과 종합.
 
@@ -297,7 +297,7 @@ def calcAnomalyScore(company, *, basePeriod: str | None = None) -> dict | None:
 # ── 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcCrossStatementFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """교차검증 경고 신호.
 
@@ -338,7 +338,7 @@ def calcCrossStatementFlags(company, *, basePeriod: str | None = None) -> list[s
 # ── BS-CF Articulation Check ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcArticulationCheck(company, *, basePeriod: str | None = None) -> dict | None:
     """BS-CF 정합성 검증 — 재무제표 3표가 수학적으로 연결되는지.
 

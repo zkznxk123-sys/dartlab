@@ -57,8 +57,8 @@ class AskRequest(BaseModel):
     provider: str | None = Field(None, max_length=50)
     role: str | None = Field(None, max_length=50)
     model: str | None = Field(None, max_length=100)
-    api_key: str | None = Field(None, max_length=500)
-    base_url: str | None = Field(None, max_length=500)
+    apiKey: str | None = Field(None, max_length=500)
+    baseUrl: str | None = Field(None, max_length=500)
     include: list[str] | None = None
     exclude: list[str] | None = None
     stream: bool = False
@@ -97,8 +97,8 @@ class ConfigureRequest(BaseModel):
     provider: str = "codex"
     role: str | None = None
     model: str | None = None
-    api_key: str | None = None
-    base_url: str | None = None
+    apiKey: str | None = None
+    baseUrl: str | None = None
 
 
 class AiProfileUpdateRequest(BaseModel):
@@ -107,24 +107,24 @@ class AiProfileUpdateRequest(BaseModel):
     provider: str | None = None
     role: str | None = None
     model: str | None = None
-    base_url: str | None = None
+    baseUrl: str | None = None
     temperature: float | None = None
-    max_tokens: int | None = None
-    system_prompt: str | None = None
+    maxTokens: int | None = None
+    systemPrompt: str | None = None
 
 
 class AiSecretUpdateRequest(BaseModel):
     """Provider API 키 저장/삭제 요청."""
 
     provider: str
-    api_key: str | None = None
+    apiKey: str | None = None
     clear: bool = False
 
 
 class DartKeyUpdateRequest(BaseModel):
     """OpenDART API 키 저장/삭제 요청."""
 
-    api_key: str | None = Field(None, max_length=500)
+    apiKey: str | None = Field(None, max_length=500)
 
 
 class ChannelConnectRequest(BaseModel):

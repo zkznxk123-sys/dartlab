@@ -98,10 +98,10 @@ def _modelNaive(y: np.ndarray, horizon: int) -> tuple[np.ndarray, np.ndarray]:
     in_sample : np.ndarray length len(y) — 1-step ahead in-sample (drift constant)
     """
     drift = float(np.mean(y))
-    in_sample = np.full(len(y), drift)
-    in_sample[0] = float(y[0])
+    inSample = np.full(len(y), drift)
+    inSample[0] = float(y[0])
     forecasts = np.full(horizon, drift)
-    return forecasts, in_sample
+    return forecasts, inSample
 
 
 def _modelAr1(y: np.ndarray, horizon: int) -> tuple[np.ndarray, np.ndarray]:
@@ -124,15 +124,15 @@ def _modelAr1(y: np.ndarray, horizon: int) -> tuple[np.ndarray, np.ndarray]:
     rho = float(np.dot(x_centered, y_centered) / denom)
     rho = max(min(rho, 0.99), -0.99)
     alpha = mean_yt - rho * mean_prev
-    in_sample = np.empty(n)
-    in_sample[0] = float(y[0])
-    in_sample[1:] = alpha + rho * y[:-1]
+    inSample = np.empty(n)
+    inSample[0] = float(y[0])
+    inSample[1:] = alpha + rho * y[:-1]
     forecasts = np.empty(horizon)
     last = float(y[-1])
     for h in range(horizon):
         last = alpha + rho * last
         forecasts[h] = last
-    return forecasts, in_sample
+    return forecasts, inSample
 
 
 def _modelEtsHolt(y: np.ndarray, horizon: int) -> tuple[np.ndarray, np.ndarray]:
@@ -158,18 +158,18 @@ def _modelEtsHolt(y: np.ndarray, horizon: int) -> tuple[np.ndarray, np.ndarray]:
             for t in range(1, n):
                 L[t] = a * y[t] + (1 - a) * (L[t - 1] + T[t - 1])
                 T[t] = b * (L[t] - L[t - 1]) + (1 - b) * T[t - 1]
-            in_sample = np.empty(n)
-            in_sample[0] = float(y[0])
-            in_sample[1:] = L[:-1] + T[:-1]
-            sse = float(np.sum((y[1:] - in_sample[1:]) ** 2))
+            inSample = np.empty(n)
+            inSample[0] = float(y[0])
+            inSample[1:] = L[:-1] + T[:-1]
+            sse = float(np.sum((y[1:] - inSample[1:]) ** 2))
             if sse < best_sse:
                 best_sse = sse
-                best = (a, b, L.copy(), T.copy(), in_sample.copy())
+                best = (a, b, L.copy(), T.copy(), inSample.copy())
     if best is None:
         return _modelNaive(y, horizon)
-    _, _, L, T, in_sample = best
+    _, _, L, T, inSample = best
     forecasts = np.array([L[-1] + (h + 1) * T[-1] for h in range(horizon)], dtype=np.float64)
-    return forecasts, in_sample
+    return forecasts, inSample
 
 
 def _modelTheta(y: np.ndarray, horizon: int) -> tuple[np.ndarray, np.ndarray]:
@@ -210,14 +210,14 @@ def _modelTheta(y: np.ndarray, horizon: int) -> tuple[np.ndarray, np.ndarray]:
     if best is None:
         return _modelNaive(y, horizon)
     ses, in_sample_theta2 = best
-    in_sample = (line0 + in_sample_theta2) / 2.0
-    in_sample[0] = float(y[0])
+    inSample = (line0 + in_sample_theta2) / 2.0
+    inSample[0] = float(y[0])
     last_ses = float(ses[-1])
     forecasts = np.empty(horizon)
     for h in range(horizon):
         line0_fwd = intercept + slope * (n + h)
         forecasts[h] = (line0_fwd + last_ses) / 2.0
-    return forecasts, in_sample
+    return forecasts, inSample
 
 
 _MODEL_FNS = {
@@ -400,8 +400,8 @@ def forecastReturns(
     forecasts_per_model: list[np.ndarray] = []
     residuals_calib: list[np.ndarray] = []
     for m in models_used:
-        fcst, in_sample = _MODEL_FNS[m](log_ret, horizon)
-        resid = log_ret[-calib_k:] - in_sample[-calib_k:]
+        fcst, inSample = _MODEL_FNS[m](log_ret, horizon)
+        resid = log_ret[-calib_k:] - inSample[-calib_k:]
         forecasts_per_model.append(fcst)
         residuals_calib.append(resid)
 
@@ -524,30 +524,30 @@ def forecastRuleFactory(
     """
     from dartlab.quant.strategy.rule import Rule
 
-    def _factory(is_close: np.ndarray, oos_len: int) -> Rule:
-        n_is = len(is_close)
-        total = n_is + int(oos_len)
+    def _factory(isClose: np.ndarray, oosLen: int) -> Rule:
+        n_is = len(isClose)
+        total = n_is + int(oosLen)
         entry = np.zeros(total, dtype=bool)
         exit_ = np.zeros(total, dtype=bool)
 
         if n_is < 30:
             return Rule(entry_expr=entry, exit_expr=exit_)
-        log_ret = np.diff(np.log(is_close))
+        log_ret = np.diff(np.log(isClose))
         models_used = list(models) if models is not None else [_pickModel(log_ret)]
 
         forecasts_per: list[np.ndarray] = []
         residuals_per: list[np.ndarray] = []
         calib_k = max(int(len(log_ret) * calibFraction), 5)
         for m in models_used:
-            fcst, in_sample = _MODEL_FNS[m](log_ret, oos_len)
+            fcst, inSample = _MODEL_FNS[m](log_ret, oosLen)
             forecasts_per.append(fcst)
-            residuals_per.append(log_ret[-calib_k:] - in_sample[-calib_k:])
+            residuals_per.append(log_ret[-calib_k:] - inSample[-calib_k:])
 
         point_forecasts = np.mean(np.stack(forecasts_per), axis=0)
         residuals_pooled = np.concatenate(residuals_per)
         half_width = _conformalHalfWidth(residuals_pooled, alpha=alpha)
 
-        for h in range(int(oos_len)):
+        for h in range(int(oosLen)):
             point = float(point_forecasts[h])
             idx = n_is + h
             if requireConfidence:

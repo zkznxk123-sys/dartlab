@@ -18,7 +18,7 @@ _CP_GAMMA = [-2.14, 0.81, 3.00, 0.80, -2.08]
 _CP_INTERCEPT = -3.38  # 상수항
 
 
-def forwardRatesFromSpot(spot_rates: dict[int, float]) -> list[float]:
+def forwardRatesFromSpot(spotRates: dict[int, float]) -> list[float]:
     """현물 수익률 → 1Y~5Y 선도금리 계산.
 
     Args:
@@ -30,17 +30,17 @@ def forwardRatesFromSpot(spot_rates: dict[int, float]) -> list[float]:
     forwards = []
     for n in range(1, 6):
         if n == 1:
-            forwards.append(spot_rates[1])
+            forwards.append(spotRates[1])
         else:
-            y_n = spot_rates[n]
-            y_n1 = spot_rates[n - 1]
+            y_n = spotRates[n]
+            y_n1 = spotRates[n - 1]
             # f(n-1, n) = n*y(n) - (n-1)*y(n-1)
             fwd = n * y_n - (n - 1) * y_n1
             forwards.append(fwd)
     return forwards
 
 
-def cochranePiazzesiFactor(forward_rates: list[float]) -> dict:
+def cochranePiazzesiFactor(forwardRates: list[float]) -> dict:
     """CP 단일 팩터 계산 + 해석.
 
     Args:
@@ -49,12 +49,12 @@ def cochranePiazzesiFactor(forward_rates: list[float]) -> dict:
     Returns:
         dict with cpFactor, expectedExcessReturn, zone, description
     """
-    if len(forward_rates) < 5:
+    if len(forwardRates) < 5:
         return {}
 
     # CP factor = intercept + γ₁f₁ + γ₂f₂ + γ₃f₃ + γ₄f₄ + γ₅f₅
     cp = _CP_INTERCEPT
-    for gamma, fwd in zip(_CP_GAMMA, forward_rates[:5]):
+    for gamma, fwd in zip(_CP_GAMMA, forwardRates[:5]):
         if fwd is None or math.isnan(fwd):
             return {}
         cp += gamma * fwd

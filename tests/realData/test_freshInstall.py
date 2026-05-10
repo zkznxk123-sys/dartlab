@@ -76,11 +76,11 @@ class TestFreshInstallSmoke:
         from dartlab import Company
 
         c = Company(SAMSUNG)
-        is_df = c.show("IS")
-        assert is_df is not None
-        assert isinstance(is_df, pl.DataFrame)
-        assert is_df.height > 0
-        periodCols = [col for col in is_df.columns if len(col) >= 4 and col[:4].isdigit()]
+        isDf = c.show("IS")
+        assert isDf is not None
+        assert isinstance(isDf, pl.DataFrame)
+        assert isDf.height > 0
+        periodCols = [col for col in isDf.columns if len(col) >= 4 and col[:4].isdigit()]
         assert periodCols, "IS 기간 컬럼이 없음 — show() 메타 컬럼만 반환하는 회귀"
 
     def test_selectIS_renderHtml_hasPeriodColumns(self, freshSectionsCache):

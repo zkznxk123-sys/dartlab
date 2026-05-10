@@ -26,21 +26,21 @@ class TestEmbedRoute:
 
     def test_serve_embed_not_built(self):
         """embed.js가 없으면 경고 JS를 반환한다."""
-        from dartlab.server.embed import serve_embed
+        from dartlab.server.embed import serveEmbed
 
         with patch("dartlab.server.embed._EMBED_PATH", Path("/nonexistent/embed.js")):
-            response = serve_embed()
+            response = serveEmbed()
             assert response.status_code == 200
             assert "application/javascript" in response.media_type
 
     def test_serve_embed_built(self):
         """embed.js가 존재하면 FileResponse를 반환한다."""
-        from dartlab.server.embed import _EMBED_PATH, serve_embed
+        from dartlab.server.embed import _EMBED_PATH, serveEmbed
 
         if not _EMBED_PATH.exists():
             pytest.skip("embed.js not built — run: cd ui && npm run build:widget")
 
-        response = serve_embed()
+        response = serveEmbed()
         # FileResponse 확인
         assert response.status_code == 200
         assert "Cache-Control" in response.headers

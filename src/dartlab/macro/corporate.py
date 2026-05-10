@@ -23,7 +23,7 @@ from dartlab.macro.corporateAggregate import (
 _SCAN_CACHE: dict[str, pl.DataFrame] = {}
 
 
-def _load_scan_finance(market: str) -> pl.DataFrame | None:
+def _loadScanFinance(market: str) -> pl.DataFrame | None:
     """scan/finance.parquet 로드. 모듈 레벨 캐시로 반복 호출 최적화.
 
     Parameters
@@ -73,7 +73,7 @@ def _load_scan_finance(market: str) -> pl.DataFrame | None:
         return None
 
 
-def analyze_corporate(*, market: str = "KR", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
+def analyzeCorporate(*, market: str = "KR", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """기업집계 매크로 분석.
 
     전종목 재무제표(scan/finance.parquet)를 집계하여
@@ -118,7 +118,7 @@ def analyze_corporate(*, market: str = "KR", as_of: str | None = None, overrides
     """
     result: dict = {"market": market.upper()}
 
-    df = _load_scan_finance(market)
+    df = _loadScanFinance(market)
     if df is None or len(df) == 0:
         result["earningsCycle"] = None
         result["ponziRatio"] = None

@@ -44,7 +44,7 @@ class _ScriptedProvider:
     def generate(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ProviderTurn:
         self.calls += 1
         if self._index >= len(self._turns):
-            return ProviderTurn(content="(scripted exhausted)", tool_calls=[], raw=None)
+            return ProviderTurn(content="(scripted exhausted)", toolCalls=[], raw=None)
         turn = self._turns[self._index]
         self._index += 1
         return turn
@@ -64,8 +64,8 @@ def _tool_results(events: list[TraceEvent]) -> list[dict[str, Any]]:
 
 # ── 1. 텍스트만, 도구 0 회 ──────────────────────────────────────────────
 def test_runAgent_text_only_no_tools(monkeypatch: pytest.MonkeyPatch) -> None:
-    provider = _ScriptedProvider([ProviderTurn(content="안녕하세요. 무엇을 도와드릴까요?", tool_calls=[], raw=None)])
-    events = _collect(runAgent("안녕", provider=provider, tool_names=()))
+    provider = _ScriptedProvider([ProviderTurn(content="안녕하세요. 무엇을 도와드릴까요?", toolCalls=[], raw=None)])
+    events = _collect(runAgent("안녕", provider=provider, toolNames=()))
 
     chunks = [e for e in events if e.kind == "chunk"]
     done = [e for e in events if e.kind == "done"]
@@ -97,14 +97,14 @@ def test_runAgent_tool_chain(monkeypatch: pytest.MonkeyPatch) -> None:
         [
             ProviderTurn(
                 content="",
-                tool_calls=[ToolCall(id="t1", name="ReadSkill", args={"query": "company"})],
+                toolCalls=[ToolCall(id="t1", name="ReadSkill", args={"query": "company"})],
                 raw=None,
             ),
-            ProviderTurn(content="삼성전자 분석 결과 ...", tool_calls=[], raw=None),
+            ProviderTurn(content="삼성전자 분석 결과 ...", toolCalls=[], raw=None),
         ]
     )
 
-    events = _collect(runAgent("삼성전자 매출", provider=provider, tool_names=("ReadSkill",)))
+    events = _collect(runAgent("삼성전자 매출", provider=provider, toolNames=("ReadSkill",)))
 
     assert ("ReadSkill", {"query": "company"}) in captured_calls
     results = _tool_results(events)
@@ -136,21 +136,21 @@ def test_runAgent_failure_streak_blocks_repeat(monkeypatch: pytest.MonkeyPatch) 
     provider = _ScriptedProvider(
         [
             ProviderTurn(
-                content="", tool_calls=[ToolCall(id="t1", name="WebSearch", args={"query": "최근 섹터"})], raw=None
+                content="", toolCalls=[ToolCall(id="t1", name="WebSearch", args={"query": "최근 섹터"})], raw=None
             ),
             ProviderTurn(
-                content="", tool_calls=[ToolCall(id="t2", name="WebSearch", args={"query": "한국 섹터"})], raw=None
+                content="", toolCalls=[ToolCall(id="t2", name="WebSearch", args={"query": "한국 섹터"})], raw=None
             ),
             # 3 회째 — failure_streak 임계 도달 → blocked. agent 가 즉시 차단 응답 반환.
             ProviderTurn(
-                content="", tool_calls=[ToolCall(id="t3", name="WebSearch", args={"query": "섹터 트렌드"})], raw=None
+                content="", toolCalls=[ToolCall(id="t3", name="WebSearch", args={"query": "섹터 트렌드"})], raw=None
             ),
             # 차단 후 LLM 이 답변 생성.
-            ProviderTurn(content="외부 검색이 어려워 내부 데이터로 답변합니다 ...", tool_calls=[], raw=None),
+            ProviderTurn(content="외부 검색이 어려워 내부 데이터로 답변합니다 ...", toolCalls=[], raw=None),
         ]
     )
 
-    events = _collect(runAgent("최근 섹터", provider=provider, tool_names=("WebSearch",)))
+    events = _collect(runAgent("최근 섹터", provider=provider, toolNames=("WebSearch",)))
 
     # 실제 executeTool 호출은 2 회 (3 회째는 차단)
     assert call_count["WebSearch"] == 2, f"3 회째는 차단돼야 — actual {call_count}"
@@ -188,14 +188,14 @@ def test_runAgent_max_iterations_emits_error(monkeypatch: pytest.MonkeyPatch) ->
         [
             ProviderTurn(
                 content="",
-                tool_calls=[ToolCall(id=f"t{i}", name="ReadSkill", args={"_iter": i})],
+                toolCalls=[ToolCall(id=f"t{i}", name="ReadSkill", args={"_iter": i})],
                 raw=None,
             )
             for i in range(20)  # max_iterations 보다 충분히 많이
         ]
     )
 
-    events = _collect(runAgent("loop test", provider=provider, tool_names=("ReadSkill",), max_iterations=4))
+    events = _collect(runAgent("loop test", provider=provider, toolNames=("ReadSkill",), maxIterations=4))
 
     errors = [e for e in events if e.kind == "error"]
     assert errors, "max_iterations 도달 시 error 이벤트 emit 돼야 한다"
@@ -226,12 +226,12 @@ def test_runAgent_tool_result_propagates_to_next_turn(monkeypatch: pytest.Monkey
 
     provider = _Capture(
         [
-            ProviderTurn(content="", tool_calls=[ToolCall(id="t1", name="ReadSkill", args={"q": "x"})], raw=None),
-            ProviderTurn(content="값은 42 입니다.", tool_calls=[], raw=None),
+            ProviderTurn(content="", toolCalls=[ToolCall(id="t1", name="ReadSkill", args={"q": "x"})], raw=None),
+            ProviderTurn(content="값은 42 입니다.", toolCalls=[], raw=None),
         ]
     )
 
-    _collect(runAgent("값 알려줘", provider=provider, tool_names=("ReadSkill",)))
+    _collect(runAgent("값 알려줘", provider=provider, toolNames=("ReadSkill",)))
 
     assert len(captured_messages) >= 2, "최소 2 회 generate 호출"
     # 2 번째 호출의 messages 안에 'tool' role 있어야

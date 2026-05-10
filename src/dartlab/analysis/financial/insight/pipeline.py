@@ -131,7 +131,7 @@ def _extractAuditData(company: Company | None) -> AuditDataForAnomaly | None:
     )
 
 
-def _ratio_archetype_override(company: Company | None) -> str | None:
+def _ratioArchetypeOverride(company: Company | None) -> str | None:
     """업종별 비율 아키타입 강제 지정 (금융업 등 특수 업종)."""
     if company is None:
         return None
@@ -197,7 +197,7 @@ def analyzeFinancial(
         currency = getattr(company, "currency", "KRW")
     market = "US" if currency == "USD" else "KR"
 
-    ratios = calcRatios(aSeries, archetypeOverride=_ratio_archetype_override(company), currency=currency)
+    ratios = calcRatios(aSeries, archetypeOverride=_ratioArchetypeOverride(company), currency=currency)
 
     if company is None and corpName is None:
         try:

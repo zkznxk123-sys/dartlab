@@ -35,10 +35,10 @@ class _FinanceAccessor:
             self._company._cache[cacheKey] = None
             return None
 
-        from dartlab.core.utils.labels import get_korean_labels
+        from dartlab.core.utils.labels import getKoreanLabels
         from dartlab.providers.edgar.finance.mapper import EdgarMapper
 
-        krLabels = get_korean_labels()
+        krLabels = getKoreanLabels()
         lineOrder = EdgarMapper.getLineOrder()  # snakeId → line 번호
 
         # standardAccounts line 순서로 정렬 (매핑 없으면 맨 뒤)

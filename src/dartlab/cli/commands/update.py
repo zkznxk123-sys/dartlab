@@ -12,7 +12,7 @@
 from __future__ import annotations
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """update 서브커맨드 등록."""
     parser = subparsers.add_parser(
         "update",
@@ -40,9 +40,9 @@ def configure_parser(subparsers) -> None:
 
 def run(args) -> int:
     """로컬 데이터를 HF 최신으로 갱신."""
-    from dartlab.cli.services.output import get_console
+    from dartlab.cli.services.output import getConsole
 
-    console = get_console()
+    console = getConsole()
 
     if args.codes:
         return _updateCodes(console, args)

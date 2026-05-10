@@ -15,10 +15,10 @@ from __future__ import annotations
 import numpy as np
 
 
-def _meanBreakStat(series: np.ndarray, t_star: int) -> float:
+def _meanBreakStat(series: np.ndarray, tStar: int) -> float:
     """t_star 시점 평균 break 의 t-stat (등분산 가정)."""
-    s1 = series[:t_star]
-    s2 = series[t_star:]
+    s1 = series[:tStar]
+    s2 = series[tStar:]
     if len(s1) < 5 or len(s2) < 5:
         return float("nan")
     m1, m2 = float(s1.mean()), float(s2.mean())
@@ -73,8 +73,8 @@ def detectStructuralBreak(
         return {"error": "trim too large"}
 
     stats = np.full(n, np.nan, dtype=np.float64)
-    for t_star in range(lo, hi):
-        stats[t_star] = _meanBreakStat(s, t_star)
+    for tStar in range(lo, hi):
+        stats[tStar] = _meanBreakStat(s, tStar)
 
     valid = ~np.isnan(stats)
     if valid.sum() == 0:

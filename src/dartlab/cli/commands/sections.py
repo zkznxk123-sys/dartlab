@@ -5,10 +5,10 @@ from __future__ import annotations
 import polars as pl
 
 from dartlab.cli.services.errors import CLIError
-from dartlab.cli.services.runtime import configure_dartlab
+from dartlab.cli.services.runtime import configureDartlab
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """sections 서브커맨드 등록 — pure docs 수평화 sections 출력."""
     parser = subparsers.add_parser("sections", help="pure docs 수평화 sections 출력")
     parser.add_argument("company", help="종목코드 (005930) 또는 회사명 (삼성전자)")
@@ -17,10 +17,10 @@ def configure_parser(subparsers) -> None:
 
 def run(args) -> int:
     """docs.sections DataFrame을 콘솔에 출력한다."""
-    from dartlab.cli.services.output import get_console, print_dataframe
+    from dartlab.cli.services.output import getConsole, printDataframe
 
-    dartlab = configure_dartlab()
-    console = get_console()
+    dartlab = configureDartlab()
+    console = getConsole()
 
     try:
         company = dartlab.Company(args.company)
@@ -38,5 +38,5 @@ def run(args) -> int:
     if not isinstance(sections, pl.DataFrame):
         console.print("[bold red]오류:[/] sections 데이터 형식이 올바르지 않습니다.")
         return 1
-    print_dataframe(sections, title="Sections")
+    printDataframe(sections, title="Sections")
     return 0

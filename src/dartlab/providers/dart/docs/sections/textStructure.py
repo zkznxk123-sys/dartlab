@@ -85,12 +85,12 @@ _TOPIC_SEGMENT_ALIASES: dict[str, dict[str, str]] = {
 }
 
 
-def _clean_line(line: str) -> str:
+def _cleanLine(line: str) -> str:
     return line.replace("\u00a0", " ").replace("\t", " ").rstrip()
 
 
 @lru_cache(maxsize=2048)
-def _normalize_heading_text(text: str) -> str:
+def _normalizeHeadingText(text: str) -> str:
     cleaned = stripSectionPrefix(text.strip())
     cleaned = cleaned.strip("[]【】")
     m = _RE_SHORT_PAREN.match(cleaned)
@@ -103,14 +103,14 @@ def _normalize_heading_text(text: str) -> str:
 
 
 @lru_cache(maxsize=2048)
-def _heading_key(text: str) -> str:
-    normalized = _normalize_heading_text(text)
+def _headingKey(text: str) -> str:
+    normalized = _normalizeHeadingText(text)
     normalized = normalized.replace("·", "").replace("ㆍ", "")
     normalized = _RE_NONWORD.sub("", normalized)
     return normalized.strip()
 
 
-def _canonical_heading_key(
+def _canonicalHeadingKey(
     labelText: str,
     labelKey: str,
     *,
@@ -125,7 +125,7 @@ def _canonical_heading_key(
 
 
 @lru_cache(maxsize=4096)
-def _semantic_segment_key(labelKey: str, *, topic: str | None) -> str:
+def _semanticSegmentKey(labelKey: str, *, topic: str | None) -> str:
     if not labelKey or labelKey.startswith("@"):
         return labelKey
 
@@ -147,13 +147,13 @@ def _semantic_segment_key(labelKey: str, *, topic: str | None) -> str:
 
 
 @lru_cache(maxsize=512)
-def _is_temporal_marker(text: str) -> bool:
-    normalized = _normalize_heading_text(text)
+def _isTemporalMarker(text: str) -> bool:
+    normalized = _normalizeHeadingText(text)
     return bool(_RE_TEMPORAL_MARKER.fullmatch(normalized))
 
 
 @lru_cache(maxsize=8192)
-def _body_anchor(text: str) -> str:
+def _bodyAnchor(text: str) -> str:
     normalized = " ".join(text.split())
     if not normalized:
         return "empty"
@@ -162,7 +162,7 @@ def _body_anchor(text: str) -> str:
 
 
 @lru_cache(maxsize=16384)
-def _detect_heading(line: str) -> tuple[int, str, bool] | None:
+def _detectHeading(line: str) -> tuple[int, str, bool] | None:
     stripped = line.strip()
     if not stripped or stripped.startswith("|"):
         return None
@@ -172,7 +172,7 @@ def _detect_heading(line: str) -> tuple[int, str, bool] | None:
     m = _RE_BRACKET.match(stripped)
     if m:
         text = m.group(1) or m.group(2) or ""
-        structural = not _is_temporal_marker(text)
+        structural = not _isTemporalMarker(text)
         return (1, text.strip(), structural)
 
     m = _RE_ROMAN.match(stripped)
@@ -203,7 +203,7 @@ def _detect_heading(line: str) -> tuple[int, str, bool] | None:
     if m:
         inner = m.group(1).strip()
         if inner and len(inner) <= 48 and not _RE_HEADING_NOISE.match(inner):
-            structural = not _is_temporal_marker(inner)
+            structural = not _isTemporalMarker(inner)
             return (5, inner, structural)
 
     return None
@@ -222,7 +222,7 @@ def parseTextStructureWithState(
     bodyLines: list[str] = []
     segmentOrder = 0
 
-    def flush_body() -> None:
+    def flushBody() -> None:
         nonlocal bodyLines, segmentOrder
         body = "\n".join(bodyLines).strip()
         bodyLines = []
@@ -238,7 +238,7 @@ def parseTextStructureWithState(
         semanticPathKey = " > ".join(semanticPathKeys) if semanticPathKeys else None
         semanticParentPathKey = " > ".join(semanticPathKeys[:-1]) if len(semanticPathKeys) > 1 else None
         level = int(stack[-1]["level"]) if stack else 0
-        anchor = _body_anchor(body)
+        anchor = _bodyAnchor(body)
         # Text row identity should follow outline path first.
         # Raw coarse block order is preserved separately as sourceBlockOrder.
         stableKeyBase = f"body|p:{semanticPathKey}" if semanticPathKey else f"body|lv:{level}|a:{anchor}"
@@ -260,24 +260,24 @@ def parseTextStructureWithState(
         segmentOrder += 1
 
     for rawLine in text.splitlines():
-        line = _clean_line(rawLine)
+        line = _cleanLine(rawLine)
         stripped = line.strip()
         if not stripped:
             if bodyLines:
                 bodyLines.append("")
             continue
 
-        heading = _detect_heading(stripped)
+        heading = _detectHeading(stripped)
         if heading is None:
             bodyLines.append(stripped)
             continue
 
-        flush_body()
+        flushBody()
         level, label, structural = heading
-        labelText = _normalize_heading_text(label)
-        labelKey = _heading_key(label)
-        stackKey = _canonical_heading_key(labelText, labelKey, level=level, topic=topic)
-        semanticStackKey = _semantic_segment_key(stackKey, topic=topic)
+        labelText = _normalizeHeadingText(label)
+        labelKey = _headingKey(label)
+        stackKey = _canonicalHeadingKey(labelText, labelKey, level=level, topic=topic)
+        semanticStackKey = _semanticSegmentKey(stackKey, topic=topic)
         redundantTopicAlias = (
             structural
             and bool(stack)
@@ -328,7 +328,7 @@ def parseTextStructureWithState(
         )
         segmentOrder += 1
 
-    flush_body()
+    flushBody()
     return nodes, [dict(item) for item in stack]
 
 

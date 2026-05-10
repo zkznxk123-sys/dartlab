@@ -9,12 +9,12 @@ from __future__ import annotations
 import os
 
 
-def default_host() -> str:
+def defaultHost() -> str:
     """환경변수 또는 기본값에서 바인딩 호스트를 반환한다."""
     return os.environ.get("DARTLAB_HOST", "127.0.0.1")
 
 
-def _is_dartlab_alive(port: int) -> bool:
+def _isDartlabAlive(port: int) -> bool:
     """DartLab 서버가 살아있는지 health check."""
     import urllib.request
 
@@ -25,7 +25,7 @@ def _is_dartlab_alive(port: int) -> bool:
         return False
 
 
-def _kill_port(port: int) -> bool:
+def _killPort(port: int) -> bool:
     """포트를 점유 중인 좀비 프로세스를 종료한다. 성공 시 True."""
     import platform
     import subprocess
@@ -80,7 +80,7 @@ def _kill_port(port: int) -> bool:
     return True
 
 
-def ensure_port(port: int) -> str:
+def ensurePort(port: int) -> str:
     """포트 확보. "ok" | "already_running" | "failed" 반환."""
     import socket
     import sys
@@ -93,11 +93,11 @@ def ensure_port(port: int) -> str:
     except OSError:
         pass
 
-    if _is_dartlab_alive(port):
+    if _isDartlabAlive(port):
         print(f"\n  기존 서버 종료 중 (포트 {port})...")
     else:
         print(f"\n  포트 {port} 사용 중 (좀비) — 기존 프로세스 종료 중...")
-    if _kill_port(port):
+    if _killPort(port):
         print("  종료 완료. 재시작합니다.\n")
         return "ok"
 
@@ -106,10 +106,10 @@ def ensure_port(port: int) -> str:
     return "failed"
 
 
-def run_server(host: str | None = None, port: int = 8400):
+def runServer(host: str | None = None, port: int = 8400):
     """서버 실행 (blocking)."""
     import uvicorn
 
-    resolved_host = host or default_host()
+    resolved_host = host or defaultHost()
     os.environ["DARTLAB_HOST"] = resolved_host
     uvicorn.run("dartlab.server:app", host=resolved_host, port=port, log_level="info")

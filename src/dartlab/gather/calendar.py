@@ -49,7 +49,7 @@ _OUTPUT_SCHEMA = {
 def gatherCalendar(
     codes: str | Iterable[str],
     *,
-    horizon_days: int = 30,
+    horizonDays: int = 30,
     market: str = "KR",
 ) -> pl.DataFrame:
     """다가오는 catalyst 일정을 추론해 DataFrame 으로 반환.
@@ -92,7 +92,7 @@ def gatherCalendar(
         # US/해외 — P1 까지 미지원. 빈 DataFrame + 컬럼 schema 보존.
         return pl.DataFrame(schema=_OUTPUT_SCHEMA)
 
-    code_list = _normalize_codes(codes)
+    code_list = _normalizeCodes(codes)
     if not code_list:
         raise ValueError(
             "gather('calendar') 에는 종목코드가 필요합니다. "
@@ -100,7 +100,7 @@ def gatherCalendar(
         )
 
     today = date.today()
-    horizon_end = today + timedelta(days=horizon_days)
+    horizon_end = today + timedelta(days=horizonDays)
     rows: list[dict] = []
 
     for code in code_list:
@@ -113,7 +113,7 @@ def gatherCalendar(
         if history is None or history.is_empty():
             continue
 
-        prediction = _predict_next_filing(history, code=code)
+        prediction = _predictNextFiling(history, code=code)
         if prediction is None:
             continue
         predicted_date = prediction["date"]
@@ -126,7 +126,7 @@ def gatherCalendar(
     return pl.DataFrame(rows, schema=_OUTPUT_SCHEMA).sort("date")
 
 
-def _normalize_codes(codes: str | Iterable[str]) -> list[str]:
+def _normalizeCodes(codes: str | Iterable[str]) -> list[str]:
     if codes is None:
         return []
     if isinstance(codes, str):
@@ -134,7 +134,7 @@ def _normalize_codes(codes: str | Iterable[str]) -> list[str]:
     return [str(c).strip() for c in codes if str(c).strip()]
 
 
-def _predict_next_filing(history: pl.DataFrame, *, code: str) -> dict | None:
+def _predictNextFiling(history: pl.DataFrame, *, code: str) -> dict | None:
     """정기공시 시계열에서 다음 due date 추론.
 
     1. 가장 최근의 사업/반기/분기보고서 식별.
@@ -145,31 +145,31 @@ def _predict_next_filing(history: pl.DataFrame, *, code: str) -> dict | None:
         return None
 
     # 보고서 type 별 마지막 filedAt 추출
-    type_last_dates: dict[str, date] = {}
+    typeLastDates: dict[str, date] = {}
     type_counts: dict[str, int] = {}
     for row in history.iter_rows(named=True):
         title = row.get("title") or ""
-        filed_at = _parse_date(row.get("filedAt"))
+        filed_at = _parseDate(row.get("filedAt"))
         if not filed_at:
             continue
-        for kr_name, (cycle_key, _due_offset, event_type) in _KR_FILING_TYPES.items():
+        for kr_name, (cycle_key, _due_offset, eventType) in _KR_FILING_TYPES.items():
             if kr_name in title:
-                type_counts[event_type] = type_counts.get(event_type, 0) + 1
-                if event_type not in type_last_dates or filed_at > type_last_dates[event_type]:
-                    type_last_dates[event_type] = filed_at
+                type_counts[eventType] = type_counts.get(eventType, 0) + 1
+                if eventType not in typeLastDates or filed_at > typeLastDates[eventType]:
+                    typeLastDates[eventType] = filed_at
                 break
 
-    if not type_last_dates:
+    if not typeLastDates:
         return None
 
     # 다음 보고서 cycle 추론: 한국 정기 보고서는 분기 단위 cycle 이라
     # 가장 가까운 다음 cycle 의 due 를 계산.
-    next_event = _next_kr_cycle(type_last_dates)
+    next_event = _nextKrCycle(typeLastDates)
     if next_event is None:
         return None
 
-    event_type, predicted_date = next_event
-    count = type_counts.get(event_type, 0)
+    eventType, predicted_date = next_event
+    count = type_counts.get(eventType, 0)
     if count >= 2:
         confidence = "HIGH"
     elif count == 1:
@@ -177,19 +177,19 @@ def _predict_next_filing(history: pl.DataFrame, *, code: str) -> dict | None:
     else:
         confidence = "LOW"
 
-    title = _title_for_event(event_type, predicted_date)
+    title = _titleForEvent(eventType, predicted_date)
     return {
         "date": predicted_date,
         "code": code,
-        "eventType": event_type,
+        "eventType": eventType,
         "title": title,
-        "source": f"DART disclosure cycle inference (last {event_type} {type_last_dates[event_type].isoformat()})",
-        "impactHint": _IMPACT_HINTS.get(event_type, "medium"),
+        "source": f"DART disclosure cycle inference (last {eventType} {typeLastDates[eventType].isoformat()})",
+        "impactHint": _IMPACT_HINTS.get(eventType, "medium"),
         "confidence": confidence,
     }
 
 
-def _next_kr_cycle(type_last_dates: dict[str, date]) -> tuple[str, date] | None:
+def _nextKrCycle(typeLastDates: dict[str, date]) -> tuple[str, date] | None:
     """한국 정기공시 cycle 다음 due 계산.
 
     한국 fiscal year = calendar year 가정 (대다수 상장사):
@@ -215,17 +215,17 @@ def _next_kr_cycle(type_last_dates: dict[str, date]) -> tuple[str, date] | None:
         return None
 
     # 가장 가까운 cycle. 단 history 에 그 type 보고서가 한 번이라도 있어야 추론.
-    for event_type, predicted in upcoming:
-        if event_type in type_last_dates:
+    for eventType, predicted in upcoming:
+        if eventType in typeLastDates:
             # 마지막 보고서가 너무 오래된 (1 년 이상) 경우 skip — 회사가 비활성/폐지 가능
-            last = type_last_dates[event_type]
+            last = typeLastDates[eventType]
             if (today - last).days > 400:
                 continue
-            return event_type, predicted
+            return eventType, predicted
     return None
 
 
-def _parse_date(value) -> date | None:
+def _parseDate(value) -> date | None:
     if value is None:
         return None
     if isinstance(value, date) and not isinstance(value, datetime):
@@ -243,14 +243,14 @@ def _parse_date(value) -> date | None:
     return None
 
 
-def _title_for_event(event_type: str, predicted: date) -> str:
-    if event_type == "ANNUAL_REPORT":
+def _titleForEvent(eventType: str, predicted: date) -> str:
+    if eventType == "ANNUAL_REPORT":
         return f"사업보고서 제출 예상 (FY{predicted.year - 1})"
-    if event_type == "SEMI_REPORT":
+    if eventType == "SEMI_REPORT":
         return f"반기보고서 제출 예상 ({predicted.year} H1)"
-    if event_type == "QUARTERLY_REPORT":
+    if eventType == "QUARTERLY_REPORT":
         # 5 월 15 일 → Q1, 11 월 14 일 → Q3
         if predicted.month <= 6:
             return f"분기보고서 제출 예상 ({predicted.year} Q1)"
         return f"분기보고서 제출 예상 ({predicted.year} Q3)"
-    return f"{event_type} 제출 예상"
+    return f"{eventType} 제출 예상"

@@ -77,7 +77,7 @@ def calcRegime(stockCode: str, *, market: str = "auto", series: bool = False, **
         result["_series"] = _regimeSeries(close)
 
     # ── Hamilton 2-State HMM (EM 알고리즘) ──
-    hmm = _fit_hmm_2state(log_returns)
+    hmm = _fitHmm2state(log_returns)
     if hmm:
         result["regime"] = hmm["currentRegime"]
         result["regimeLabel"] = "강세" if hmm["currentRegime"] == "bull" else "약세"
@@ -99,10 +99,10 @@ def calcRegime(stockCode: str, *, market: str = "auto", series: bool = False, **
     # 단기(8일) vs 장기(32일) EWMA
     for fast, slow, label in [(8, 32, "short"), (21, 63, "medium"), (50, 200, "long")]:
         if n > slow:
-            ema_fast = _ewma(close, fast)
-            ema_slow = _ewma(close, slow)
-            signal = "long" if ema_fast[-1] > ema_slow[-1] else "short"
-            strength = abs(ema_fast[-1] - ema_slow[-1]) / ema_slow[-1]
+            emaFast = _ewma(close, fast)
+            emaSlow = _ewma(close, slow)
+            signal = "long" if emaFast[-1] > emaSlow[-1] else "short"
+            strength = abs(emaFast[-1] - emaSlow[-1]) / emaSlow[-1]
             result[f"trend_{label}"] = {
                 "signal": signal,
                 "strength": round(float(strength), 4),
@@ -159,7 +159,7 @@ def _ewma(data: np.ndarray, span: int) -> np.ndarray:
     return result
 
 
-def _fit_hmm_2state(returns: np.ndarray, max_iter: int = 100, tol: float = 1e-6) -> dict | None:
+def _fitHmm2state(returns: np.ndarray, maxIter: int = 100, tol: float = 1e-6) -> dict | None:
     """2-state Gaussian HMM — EM 알고리즘.
 
     State 0 = bull (높은 수익, 낮은 변동성)
@@ -187,12 +187,12 @@ def _fit_hmm_2state(returns: np.ndarray, max_iter: int = 100, tol: float = 1e-6)
     A = np.array([[0.95, 0.05], [0.10, 0.90]])
     pi = np.array([0.6, 0.4])
 
-    for _ in range(max_iter):
+    for _ in range(maxIter):
         # E-step: forward-backward
         B = np.column_stack(
             [
-                _gaussian_pdf(returns, mu[0], sigma[0]),
-                _gaussian_pdf(returns, mu[1], sigma[1]),
+                _gaussianPdf(returns, mu[0], sigma[0]),
+                _gaussianPdf(returns, mu[1], sigma[1]),
             ]
         )
         B = np.clip(B, 1e-300, None)
@@ -265,7 +265,7 @@ def _fit_hmm_2state(returns: np.ndarray, max_iter: int = 100, tol: float = 1e-6)
     }
 
 
-def _gaussian_pdf(x: np.ndarray, mu: float, sigma: float) -> np.ndarray:
+def _gaussianPdf(x: np.ndarray, mu: float, sigma: float) -> np.ndarray:
     """가우시안 확률밀도."""
     return np.exp(-0.5 * ((x - mu) / sigma) ** 2) / (sigma * np.sqrt(2 * np.pi))
 

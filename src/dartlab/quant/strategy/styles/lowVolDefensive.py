@@ -47,10 +47,10 @@ from dartlab.quant.volatility import _volatilitySeries
 def build(
     company,
     *,
-    vol_low_q: float = 0.40,
-    vol_high_q: float = 0.70,
-    mdd_z_entry: float = 0.0,
-    mdd_z_exit: float = -1.0,
+    volLowQ: float = 0.40,
+    volHighQ: float = 0.70,
+    mddZEntry: float = 0.0,
+    mddZExit: float = -1.0,
 ) -> Rule:
     """저변동방어 룰 빌드.
 
@@ -92,8 +92,8 @@ def build(
             meta={"style": "lowVolDefensive", "error": "no vol/mdd data"},
         )
 
-    q_low = float(np.quantile(valid_vol, vol_low_q))
-    q_high = float(np.quantile(valid_vol, vol_high_q))
+    q_low = float(np.quantile(valid_vol, volLowQ))
+    q_high = float(np.quantile(valid_vol, volHighQ))
 
     # MDD self-history z-score (Phase 4 R2)
     mdd_mu = float(np.mean(valid_mdd))
@@ -105,8 +105,8 @@ def build(
     s = Signal()
     s.add("vol_low", (realized < q_low) & ~np.isnan(realized))
     s.add("vol_high", (realized > q_high) & ~np.isnan(realized))
-    s.add("mdd_safer", (mdd_z > mdd_z_entry) & ~np.isnan(mdd_z))
-    s.add("mdd_riskier", (mdd_z < mdd_z_exit) & ~np.isnan(mdd_z))
+    s.add("mdd_safer", (mdd_z > mddZEntry) & ~np.isnan(mdd_z))
+    s.add("mdd_riskier", (mdd_z < mddZExit) & ~np.isnan(mdd_z))
 
     return Rule(
         entry_expr=s.vol_low & s.mdd_safer,

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.polarsUtil import isEmptyDf
 
 # 비교할 핵심 비율 목록 (scanRatio name → 표시 label)
@@ -27,7 +27,7 @@ _BENCHMARK_RATIOS = [
 # ── 핵심 비율 백분위 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcPeerRanking(company, *, basePeriod: str | None = None) -> dict | None:
     """핵심 재무비율 시장 내 백분위 순위.
 
@@ -70,7 +70,7 @@ def calcPeerRanking(company, *, basePeriod: str | None = None) -> dict | None:
 # ── 수익성 vs 안정성 포지션 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcRiskReturnPosition(company, *, basePeriod: str | None = None) -> dict | None:
     """수익-위험 매트릭스 포지션.
 
@@ -139,7 +139,7 @@ def calcRiskReturnPosition(company, *, basePeriod: str | None = None) -> dict | 
 # ── 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcPeerBenchmarkFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]]:
     """비교분석 경고/기회 플래그.
 

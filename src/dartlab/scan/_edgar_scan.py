@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.scan._edgar_helpers import pct, safe_div, scan_edgar_accounts
+from dartlab.scan._edgar_helpers import pct, safeDiv, scanEdgarAccounts
 
 
 def edgarScan(axis: str, **kwargs) -> pl.DataFrame:
@@ -55,7 +55,7 @@ def _scanProfitability(**_kw) -> pl.DataFrame:
         roa : float — 총자산이익률 (%)
         grade : str — 등급 (우수/양호/보통/저수익/적자)
     """
-    df = scan_edgar_accounts(
+    df = scanEdgarAccounts(
         ["sales", "operating_profit", "net_profit", "total_assets", "total_stockholders_equity"],
     )
     if df.is_empty():
@@ -105,7 +105,7 @@ def _scanGrowth(**_kw) -> pl.DataFrame:
         niYoy : float — 순이익 전년대비 (%)
         pattern : str — 패턴 (고성장/성장/정체/역성장/급감)
     """
-    df = scan_edgar_accounts(["sales", "operating_profit", "net_profit"])
+    df = scanEdgarAccounts(["sales", "operating_profit", "net_profit"])
     if df.is_empty():
         return df
     result = df.with_columns(
@@ -152,12 +152,12 @@ def _scanQuality(**_kw) -> pl.DataFrame:
         accrualRatio : float — 발생액비율 (NI-OCF)/총자산
         grade : str — 등급 (우수/양호/보통/주의/위험)
     """
-    df = scan_edgar_accounts(["net_profit", "operating_cashflow", "total_assets"])
+    df = scanEdgarAccounts(["net_profit", "operating_cashflow", "total_assets"])
     if df.is_empty():
         return df
     result = df.with_columns(
-        safe_div(pl.col("operating_cashflow"), pl.col("net_profit")).round(2).alias("cfToNi"),
-        safe_div(
+        safeDiv(pl.col("operating_cashflow"), pl.col("net_profit")).round(2).alias("cfToNi"),
+        safeDiv(
             pl.col("net_profit") - pl.col("operating_cashflow"),
             pl.col("total_assets"),
         )
@@ -204,7 +204,7 @@ def _scanLiquidity(**_kw) -> pl.DataFrame:
         quickRatio : float — 당좌비율 (%)
         grade : str — 등급 (우수/양호/보통/주의/위험)
     """
-    df = scan_edgar_accounts(["current_assets", "current_liabilities", "inventories"])
+    df = scanEdgarAccounts(["current_assets", "current_liabilities", "inventories"])
     if df.is_empty():
         return df
     result = df.with_columns(
@@ -250,7 +250,7 @@ def _scanEfficiency(**_kw) -> pl.DataFrame:
         ccc : float — 현금전환주기 (일)
         grade : str — 등급 (우수/양호/보통/비효율)
     """
-    df = scan_edgar_accounts(
+    df = scanEdgarAccounts(
         [
             "sales",
             "total_assets",
@@ -262,12 +262,12 @@ def _scanEfficiency(**_kw) -> pl.DataFrame:
     if df.is_empty():
         return df
     result = df.with_columns(
-        safe_div(pl.col("sales"), pl.col("total_assets")).round(2).alias("assetTurnover"),
+        safeDiv(pl.col("sales"), pl.col("total_assets")).round(2).alias("assetTurnover"),
         # CCC = 재고일수 + 매출채권일수 - 매입채무일수
         (
-            safe_div(pl.col("inventories").fill_null(0) * 365, pl.col("sales"))
-            + safe_div(pl.col("trade_and_other_receivables").fill_null(0) * 365, pl.col("sales"))
-            - safe_div(pl.col("trade_and_other_payables").fill_null(0) * 365, pl.col("sales"))
+            safeDiv(pl.col("inventories").fill_null(0) * 365, pl.col("sales"))
+            + safeDiv(pl.col("trade_and_other_receivables").fill_null(0) * 365, pl.col("sales"))
+            - safeDiv(pl.col("trade_and_other_payables").fill_null(0) * 365, pl.col("sales"))
         )
         .round(0)
         .alias("ccc"),
@@ -308,7 +308,7 @@ def _scanCashflow(**_kw) -> pl.DataFrame:
         ocfMargin : float — OCF/매출 (%)
         pattern : str — 패턴 (성장투자형/공격성장형/외부의존형/축소정리형/현금위기형/기타)
     """
-    df = scan_edgar_accounts(
+    df = scanEdgarAccounts(
         [
             "operating_cashflow",
             "investing_cashflow",
@@ -378,7 +378,7 @@ def _scanDividendTrend(**_kw) -> pl.DataFrame:
         payoutRatio : float — 배당성향 (%), 극단값(±200% 초과) 제거
         grade : str — 등급 (양호/보통/주의/무배당)
     """
-    df = scan_edgar_accounts(["dividends_paid", "net_profit"])
+    df = scanEdgarAccounts(["dividends_paid", "net_profit"])
     if df.is_empty():
         return df
     result = df.with_columns(
@@ -426,7 +426,7 @@ def _scanCapital(**_kw) -> pl.DataFrame:
         treasury_stock : float — 자기주식 (USD)
         classification : str — 분류 (적극환원/환원형/자사주/중립)
     """
-    df = scan_edgar_accounts(["dividends_paid", "net_profit", "treasury_stock"])
+    df = scanEdgarAccounts(["dividends_paid", "net_profit", "treasury_stock"])
     if df.is_empty():
         return df
     result = df.with_columns(
@@ -476,7 +476,7 @@ def _scanDebt(**_kw) -> pl.DataFrame:
         shortTermRatio : float — 단기차입금 비중 (%)
         riskLevel : str — 위험등급 (안전/주의/관찰/고위험)
     """
-    df = scan_edgar_accounts(
+    df = scanEdgarAccounts(
         [
             "total_liabilities",
             "total_stockholders_equity",
@@ -490,7 +490,7 @@ def _scanDebt(**_kw) -> pl.DataFrame:
         return df
     result = df.with_columns(
         pct(pl.col("total_liabilities"), pl.col("total_stockholders_equity")).alias("debtRatio"),
-        safe_div(pl.col("operating_profit"), pl.col("interest_expense").abs()).round(2).alias("icr"),
+        safeDiv(pl.col("operating_profit"), pl.col("interest_expense").abs()).round(2).alias("icr"),
         pct(
             pl.col("shortterm_borrowings").fill_null(0),
             pl.col("shortterm_borrowings").fill_null(0) + pl.col("longterm_borrowings").fill_null(0),
@@ -531,7 +531,7 @@ def _scanValuation(**_kw) -> pl.DataFrame:
         equityMultiplier : float — 자기자본승수 총자산/자본 (배)
         roe : float — 자기자본이익률 (%)
     """
-    df = scan_edgar_accounts(
+    df = scanEdgarAccounts(
         [
             "net_profit",
             "total_stockholders_equity",
@@ -552,7 +552,7 @@ def _scanValuation(**_kw) -> pl.DataFrame:
 
     # PER/PBR은 시가총액 필요 — 현재는 기본 재무비율만 제공
     result = result.with_columns(
-        safe_div(pl.col("total_assets"), pl.col("total_stockholders_equity")).round(2).alias("equityMultiplier"),
+        safeDiv(pl.col("total_assets"), pl.col("total_stockholders_equity")).round(2).alias("equityMultiplier"),
         pct(pl.col("net_profit"), pl.col("total_stockholders_equity")).alias("roe"),
     )
 
@@ -581,16 +581,16 @@ def _scanAudit(**_kw) -> pl.DataFrame:
         AllOtherFees : float — 기타 보수 (USD)
         TaxFees : float — 세무 보수 (USD)
     """
-    df = scan_edgar_accounts(
+    df = scanEdgarAccounts(
         ["sales"],  # 기본 계정으로 종목 목록 획득
     )
     if df.is_empty():
         return df
 
     # XBRL 감사비용 태그 직접 스캔
-    from dartlab.scan._edgar_helpers import scan_edgar_raw_tags
+    from dartlab.scan._edgar_helpers import scanEdgarRawTags
 
-    auditDf = scan_edgar_raw_tags(
+    auditDf = scanEdgarRawTags(
         ["AuditFees", "NonAuditServicesFees", "AllOtherFees", "TaxFees"],
     )
     if auditDf.is_empty():

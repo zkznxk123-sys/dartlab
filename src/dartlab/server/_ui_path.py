@@ -16,7 +16,7 @@ from pathlib import Path
 _PKG_ROOT = Path(__file__).resolve().parent.parent
 
 
-def resolve_ui_build_dir() -> Path:
+def resolveUiBuildDir() -> Path:
     """UI 빌드 결과물(index.html, assets/) 디렉토리를 반환한다."""
     # 1. 환경변수 — dartlab-desktop 등 외부 소비자가 명시
     if env := os.environ.get("DARTLAB_UI_DIR"):
@@ -40,7 +40,7 @@ def resolve_ui_build_dir() -> Path:
     return repo_root / "ui" / "web" / "build"
 
 
-def resolve_ui_source_dir() -> Path:
+def resolveUiSourceDir() -> Path:
     """UI 소스 디렉토리를 반환한다 (dev 모드 npm 명령용)."""
     if env := os.environ.get("DARTLAB_UI_DIR"):
         return Path(env)

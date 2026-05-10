@@ -1,24 +1,24 @@
 """DART/EDGAR 공통 docs 유틸리티."""
 
 from dartlab.core.docs.bridge import (
-    extract_amounts_from_text,
-    get_finance_amounts,
-    match_amounts,
+    extractAmountsFromText,
+    getFinanceAmounts,
+    matchAmounts,
 )
 from dartlab.core.docs.diff import (
     DiffEntry,
     DiffResult,
     DiffSummary,
     LineDiff,
-    build_diff_matrix,
-    build_heatmap_spec,
+    buildDiffMatrix,
+    buildHeatmapSpec,
     sectionsDiff,
     topicDiff,
 )
 from dartlab.core.docs.topicGraph import (
-    analyze_graph,
-    build_mention_matrix,
-    get_related_topics,
+    analyzeGraph,
+    buildMentionMatrix,
+    getRelatedTopics,
 )
 
 __all__ = [

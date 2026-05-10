@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 
-def classify_return(
-    has_dividend: bool,
-    has_buyback: bool,
-    recent_increase: bool,
+def classifyReturn(
+    hasDividend: bool,
+    hasBuyback: bool,
+    recentIncrease: bool,
 ) -> tuple[str, bool]:
     """순주주환원 방향 분류.
 
@@ -16,11 +16,11 @@ def classify_return(
         모순형: 배당하면서 최근 증자
     """
     return_score = 0
-    if has_dividend:
+    if hasDividend:
         return_score += 1
-    if has_buyback:
+    if hasBuyback:
         return_score += 1
-    if recent_increase:
+    if recentIncrease:
         return_score -= 1
 
     if return_score >= 2:
@@ -32,5 +32,5 @@ def classify_return(
     else:
         category = "희석형"
 
-    contradiction = has_dividend and recent_increase
+    contradiction = hasDividend and recentIncrease
     return category, contradiction

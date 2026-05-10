@@ -22,12 +22,12 @@ _EVENT_RULES = [
 ]
 
 
-def _classify(report_name: str) -> tuple[str, int]:
+def _classify(reportName: str) -> tuple[str, int]:
     """공시 유형 분류 + 임팩트 스코어."""
-    if not report_name:
+    if not reportName:
         return "routine", 1
     for etype, impact, keywords in _EVENT_RULES:
-        if any(kw in report_name for kw in keywords):
+        if any(kw in reportName for kw in keywords):
             return etype, impact
     return "routine", 1
 

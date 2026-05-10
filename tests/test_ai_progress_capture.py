@@ -8,9 +8,9 @@ pytestmark = pytest.mark.unit
 
 
 def test_workbench_emits_ordered_public_progress_events():
-    from dartlab.ai.kernel import _ask_events
+    from dartlab.ai.kernel import _askEvents
 
-    events = list(_ask_events("너 뭐 할 수 있니"))
+    events = list(_askEvents("너 뭐 할 수 있니"))
     kinds = [event.kind for event in events]
 
     assert "graph_node" in kinds

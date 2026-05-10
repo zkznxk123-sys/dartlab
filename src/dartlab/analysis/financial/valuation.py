@@ -11,9 +11,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from dartlab.analysis.valuation.pricetarget import compute_price_target
+from dartlab.analysis.valuation.pricetarget import computePriceTarget
 from dartlab.analysis.valuation.residualIncome import calcResidualIncome as _rimCalc
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 
 log = logging.getLogger(__name__)
 
@@ -97,14 +97,14 @@ def _fetchPriceContext(company: Any) -> dict | None:
 
     result = None
     try:
-        from dartlab.gather.http import run_async
+        from dartlab.gather.http import runAsync
         from dartlab.gather.price import fetch
 
-        snapshot = run_async(fetch(stockCode, market="KR"))
+        snapshot = runAsync(fetch(stockCode, market="KR"))
         if snapshot is not None:
             result = {
                 "currentPrice": snapshot.current,
-                "marketCap": snapshot.market_cap,
+                "marketCap": snapshot.marketCap,
                 "per": snapshot.per,
                 "pbr": snapshot.pbr,
                 "isStale": getattr(snapshot, "is_stale", False),
@@ -158,7 +158,7 @@ def _getSectorParams(company: Any):
 # ── calc 함수 9개 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcDcf(
     company: Any,
     *,
@@ -204,12 +204,12 @@ def calcDcf(
     currentPrice = price["currentPrice"] if price else None
     marketCap = price["marketCap"] if price else None
 
-    from dartlab.analysis.financial.proforma import compute_company_wacc
+    from dartlab.analysis.financial.proforma import computeCompanyWacc
 
-    wacc, _ = compute_company_wacc(
+    wacc, _ = computeCompanyWacc(
         series,
-        sector_params=sp,
-        market_cap=marketCap,
+        sectorParams=sp,
+        marketCap=marketCap,
         currency=currency,
     )
     wacc = applyOverride(wacc, "wacc", ov)
@@ -264,7 +264,7 @@ def calcDcf(
     return out
 
 
-@memoized_calc
+@memoizedCalc
 def calcDdm(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """DDM (배당 할인) 밸류에이션.
 
@@ -341,7 +341,7 @@ def calcDdm(company: Any, *, basePeriod: str | None = None) -> dict | None:
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcRelativeValuation(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """상대가치 (PER/PBR/EV-EBITDA/PSR/PEG) 밸류에이션.
 
@@ -384,7 +384,7 @@ def calcRelativeValuation(company: Any, *, basePeriod: str | None = None) -> dic
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcResidualIncome(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """RIM (잔여이익모델) 밸류에이션.
 
@@ -455,7 +455,7 @@ _HOLDING_SUBS: dict[str, list[tuple[str, float]]] = {
 }
 
 
-@memoized_calc
+@memoizedCalc
 def calcNavValuation(company: Any) -> dict | None:
     """지주사 NAV = Sum(상장 자회사 시총 x 지분율) - 순차입금. 할인 30%.
 
@@ -481,16 +481,14 @@ def calcNavValuation(company: Any) -> dict | None:
     subDetails = []
     for subCode, ratio in subs:
         try:
-            from dartlab.gather.http import run_async
+            from dartlab.gather.http import runAsync
             from dartlab.gather.price import fetch
 
-            snapshot = run_async(fetch(subCode, market="KR"))
-            if snapshot and snapshot.market_cap and snapshot.market_cap > 0:
-                subValue = snapshot.market_cap * ratio / 100
+            snapshot = runAsync(fetch(subCode, market="KR"))
+            if snapshot and snapshot.marketCap and snapshot.marketCap > 0:
+                subValue = snapshot.marketCap * ratio / 100
                 totalSubValue += subValue
-                subDetails.append(
-                    {"code": subCode, "ratio": ratio, "marketCap": snapshot.market_cap, "value": subValue}
-                )
+                subDetails.append({"code": subCode, "ratio": ratio, "marketCap": snapshot.marketCap, "value": subValue})
         except (ImportError, OSError, RuntimeError, AttributeError):
             pass
 
@@ -526,7 +524,7 @@ def calcNavValuation(company: Any) -> dict | None:
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcPriceTarget(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """확률 가중 주가 목표가 (5 시나리오 + Monte Carlo).
 
@@ -552,12 +550,12 @@ def calcPriceTarget(company: Any, *, basePeriod: str | None = None) -> dict | No
     marketCap = price["marketCap"] if price else None
     sectorKey = _resolveSectorKey(company)
 
-    result = compute_price_target(
+    result = computePriceTarget(
         series,
-        sector_key=sectorKey,
-        current_price=currentPrice,
+        sectorKey=sectorKey,
+        currentPrice=currentPrice,
         shares=shares,
-        market_cap=marketCap,
+        marketCap=marketCap,
     )
 
     # 금융업 등 DCF 불가 시: 시나리오 전부 0이면 DDM/RIM으로 대체
@@ -590,8 +588,8 @@ def calcPriceTarget(company: Any, *, basePeriod: str | None = None) -> dict | No
                 weighted_target=wt,
                 percentiles=result.percentiles,
                 expected_value=fallbackValue,
-                current_price=currentPrice,
-                upside_pct=up,
+                currentPrice=currentPrice,
+                upsidePct=up,
                 probability_above_current=result.probability_above_current,
                 signal=sig,
                 confidence="low",
@@ -603,7 +601,7 @@ def calcPriceTarget(company: Any, *, basePeriod: str | None = None) -> dict | No
     for s in result.scenarios:
         scenarios.append(
             {
-                "name": s.scenario_name,
+                "name": s.scenarioName,
                 "probability": s.probability,
                 "perShareValue": s.per_share_value,
                 "enterpriseValue": s.enterprise_value,
@@ -614,7 +612,7 @@ def calcPriceTarget(company: Any, *, basePeriod: str | None = None) -> dict | No
         "weightedTarget": result.weighted_target,
         "percentiles": result.percentiles,
         "expectedValue": result.expected_value,
-        "upside": result.upside_pct,
+        "upside": result.upsidePct,
         "probabilityAboveCurrent": result.probability_above_current,
         "signal": result.signal,
         "confidence": result.confidence,
@@ -626,7 +624,7 @@ def calcPriceTarget(company: Any, *, basePeriod: str | None = None) -> dict | No
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcReverseImplied(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """역내재성장률 -- 시장이 내재하는 매출 성장률 역산.
 
@@ -669,7 +667,7 @@ def calcReverseImplied(company: Any, *, basePeriod: str | None = None) -> dict |
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcSensitivity(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """WACC x 영구성장률 민감도 그리드.
 
@@ -829,7 +827,7 @@ def _classifyCompanyType(company: Any, series: dict) -> tuple[str, dict[str, flo
     return "general", {"DCF": 0.35, "DDM": 0.15, "상대가치": 0.25, "RIM": 0.25}
 
 
-@memoized_calc
+@memoizedCalc
 def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """종합 밸류에이션 -- 기업 유형별 자동 모델 선택 + 가중 합성.
 
@@ -862,17 +860,17 @@ def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> di
     companyType, weights = _classifyCompanyType(company, series)
 
     # 개별 beta (수익률 회귀) + CAPM 기반 동적 WACC
-    from dartlab.analysis.financial.proforma import _fetchBeta, compute_company_wacc
+    from dartlab.analysis.financial.proforma import _fetchBeta, computeCompanyWacc
 
     stockCode = getattr(company, "stockCode", "")
     betaCalc = _fetchBeta(stockCode, currency) if stockCode else None
 
-    wacc, _waccDetail = compute_company_wacc(
+    wacc, _waccDetail = computeCompanyWacc(
         series,
-        sector_params=sp,
-        market_cap=marketCap,
+        sectorParams=sp,
+        marketCap=marketCap,
         currency=currency,
-        beta_override=betaCalc,
+        betaOverride=betaCalc,
     )
 
     result = fullValuation(
@@ -992,7 +990,7 @@ def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> di
     }
 
 
-@memoized_calc
+@memoizedCalc
 def calcValuationFlags(company: Any, *, basePeriod: str | None = None) -> list[dict]:
     """가치평가 관련 플래그 집계.
 

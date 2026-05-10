@@ -8,7 +8,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-from dartlab.channel.adapters.base import ChannelAdapter, _chunk_text
+from dartlab.channel.adapters.base import ChannelAdapter, _chunkText
 
 # ---------------------------------------------------------------------------
 # 청킹 테스트
@@ -17,43 +17,43 @@ from dartlab.channel.adapters.base import ChannelAdapter, _chunk_text
 
 class TestChunkText:
     def test_short_text_no_split(self):
-        result = _chunk_text("hello world", 100)
+        result = _chunkText("hello world", 100)
         assert result == ["hello world"]
 
     def test_split_on_paragraph(self):
         text = "first paragraph\n\nsecond paragraph\n\nthird paragraph"
-        result = _chunk_text(text, 30)
+        result = _chunkText(text, 30)
         assert len(result) >= 2
         assert "first paragraph" in result[0]
 
     def test_split_on_newline(self):
         text = "line1\nline2\nline3\nline4"
-        result = _chunk_text(text, 12)
+        result = _chunkText(text, 12)
         assert all(len(chunk) <= 12 for chunk in result)
 
     def test_force_split(self):
         text = "a" * 100
-        result = _chunk_text(text, 30)
+        result = _chunkText(text, 30)
         assert all(len(chunk) <= 30 for chunk in result)
         assert "".join(result) == text
 
     def test_empty_text(self):
-        result = _chunk_text("", 100)
+        result = _chunkText("", 100)
         assert result == [""]
 
     def test_exact_limit(self):
         text = "a" * 50
-        result = _chunk_text(text, 50)
+        result = _chunkText(text, 50)
         assert result == [text]
 
     def test_telegram_limit(self):
         text = "x" * 8000
-        result = _chunk_text(text, 4096)
+        result = _chunkText(text, 4096)
         assert all(len(chunk) <= 4096 for chunk in result)
 
     def test_discord_limit(self):
         text = "x" * 5000
-        result = _chunk_text(text, 2000)
+        result = _chunkText(text, 2000)
         assert all(len(chunk) <= 2000 for chunk in result)
 
 
@@ -64,17 +64,17 @@ class TestChunkText:
 
 class TestCreateAdapter:
     def test_unknown_platform_raises(self):
-        from dartlab.channel.adapters import create_adapter
+        from dartlab.channel.adapters import createAdapter
 
         with pytest.raises(ValueError, match="알 수 없는 채널"):
-            create_adapter("whatsapp")
+            createAdapter("whatsapp")
 
     def test_telegram_factory(self):
         with patch("dartlab.channel.adapters.telegram.TelegramAdapter") as mock:
             mock.return_value = MagicMock(spec=ChannelAdapter)
-            from dartlab.channel.adapters import create_adapter
+            from dartlab.channel.adapters import createAdapter
 
-            adapter = create_adapter("telegram", token="fake-token")
+            adapter = createAdapter("telegram", token="fake-token")
             assert adapter is not None
 
 
@@ -96,15 +96,15 @@ class MockAdapter(ChannelAdapter):
     async def stop(self) -> None:
         pass
 
-    async def send_text(self, channel_id: str, text: str) -> None:
-        self.sent.append((channel_id, text))
+    async def sendText(self, channelId: str, text: str) -> None:
+        self.sent.append((channelId, text))
 
 
 class TestHandleAsk:
     @pytest.mark.asyncio
     async def test_empty_input(self):
         adapter = MockAdapter()
-        await adapter.handle_ask("ch1", "")
+        await adapter.handleAsk("ch1", "")
         assert len(adapter.sent) == 1
         assert "질문을 입력" in adapter.sent[0][1]
 
@@ -113,7 +113,7 @@ class TestHandleAsk:
         """종목 없는 질문도 AI에 전달된다 (company=None)."""
         with patch("dartlab.channel.adapters.base.ChannelAdapter._run_analysis", return_value="답변입니다") as mock_run:
             adapter = MockAdapter()
-            await adapter.handle_ask("ch1", "blah blah")
+            await adapter.handleAsk("ch1", "blah blah")
             # "분석 중..." + 결과 = 2개 메시지
             assert len(adapter.sent) == 2
             assert "분석 중" in adapter.sent[0][1]
@@ -125,7 +125,7 @@ class TestHandleAsk:
     async def test_successful_analysis(self):
         with patch("dartlab.channel.adapters.base.ChannelAdapter._run_analysis", return_value="삼성전자의 배당은..."):
             adapter = MockAdapter()
-            await adapter.handle_ask("ch1", "삼성전자 배당 분석")
+            await adapter.handleAsk("ch1", "삼성전자 배당 분석")
             # "분석 중..." + 결과 = 2개 메시지
             assert len(adapter.sent) == 2
             assert "분석 중" in adapter.sent[0][1]
@@ -137,7 +137,7 @@ class TestHandleAsk:
 
         with patch("dartlab.channel.adapters.base.ChannelAdapter._run_analysis", return_value=long_text):
             adapter = MockAdapter()
-            await adapter.handle_ask("ch1", "테스트 분석")
+            await adapter.handleAsk("ch1", "테스트 분석")
             # "분석 중..." + 청크들
             assert len(adapter.sent) >= 3
             # 모든 청크가 max_message_length 이하

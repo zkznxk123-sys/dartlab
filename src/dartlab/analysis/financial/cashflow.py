@@ -10,7 +10,7 @@ from dartlab.core.utils.safe import get as _get
 
 _getF = _getF2 = _getF3 = _getF4 = _get
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 _MAX_YEARS = 8
@@ -52,7 +52,7 @@ def _classifyCfPattern(ocf: float, icf: float, fcf: float) -> str | None:
 # ── 메인: CF 3구간 + FCF ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | None:
     """영업CF/투자CF/재무CF + FCF 시계열.
 
@@ -151,7 +151,7 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
 # ── 이익의 현금 뒷받침 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcCashQuality(company, *, basePeriod: str | None = None) -> dict | None:
     """영업CF/순이익, 영업CF/매출 — 이익이 현금으로 뒷받침되는가.
 
@@ -216,7 +216,7 @@ def calcCashQuality(company, *, basePeriod: str | None = None) -> dict | None:
 # ── CF 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcCashFlowFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """현금흐름 경고 신호.
 
@@ -271,7 +271,7 @@ def calcCashFlowFlags(company, *, basePeriod: str | None = None) -> list[str]:
 # ── 영업CF 내부 분해 (BS 변동 기반) ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcOcfDecomposition(company, *, basePeriod: str | None = None) -> dict | None:
     """영업CF를 구성요소로 분해 — 현금흐름의 원천을 파악.
 

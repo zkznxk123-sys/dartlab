@@ -12,11 +12,11 @@ from sse_starlette.sse import EventSourceResponse
 import dartlab
 from dartlab.ai.settings import (
     buildProviderCatalog,
-    get_profile_manager,
+    getProfileManager,
     getProviderSpec,
     publicProviderIds,
 )
-from dartlab.ai.settings.modelResolver import fallback_models, is_openai_chat_model, sort_openai_models
+from dartlab.ai.settings.modelResolver import fallbackModels, isOpenaiChatModel, sortOpenaiModels
 
 from ..chat import OLLAMA_MODEL_GUIDE
 from ..models import (
@@ -27,11 +27,11 @@ from ..models import (
     DartKeyUpdateRequest,
 )
 from ..services.aiProfile import (
-    build_codex_detail,
-    build_oauth_codex_detail,
-    build_ollama_detail,
-    probe_provider_availability,
-    validate_provider_connection,
+    buildCodexDetail,
+    buildOauthCodexDetail,
+    buildOllamaDetail,
+    probeProviderAvailability,
+    validateProviderConnection,
 )
 from .common import (
     HANDLED_API_ERRORS as _HANDLED_API_ERRORS,
@@ -40,7 +40,7 @@ from .common import (
     guideDetail as _guideDetail,
 )
 from .common import (
-    normalize_provider_name as _normalize_provider_name,
+    normalizeProviderName as _normalize_provider_name,
 )
 
 logger = logging.getLogger(__name__)
@@ -53,35 +53,35 @@ STATIC_MODELS: dict[str, list[str]] = {}
 _oauth_state: dict[str, Any] = {}
 
 
-def _build_open_dart_status() -> dict[str, Any]:
+def _buildOpenDartStatus() -> dict[str, Any]:
     from dartlab.providers.dart.openapi.dartKey import getDartKeyStatus
 
     return getDartKeyStatus().toDict()
 
 
-def _resolve_credential_source(meta: dict[str, Any], profile_provider: dict[str, Any]) -> str:
+def _resolveCredentialSource(meta: dict[str, Any], profileProvider: dict[str, Any]) -> str:
     auth_kind = meta.get("authKind", "none")
     if auth_kind == "api_key":
-        if profile_provider.get("secretConfigured"):
+        if profileProvider.get("secretConfigured"):
             return "secret_store"
         env_key = meta.get("envKey")
         if env_key and os.environ.get(env_key):
             return "env"
         return "none"
     if auth_kind == "oauth":
-        return "oauth" if profile_provider.get("secretConfigured") else "none"
+        return "oauth" if profileProvider.get("secretConfigured") else "none"
     if auth_kind == "cli":
         return "cli"
     return "none"
 
 
 @router.get("/api/status")
-def api_status(
+def apiStatus(
     provider: str | None = Query(None, description="상태를 적극 확인할 provider"),
     probe: bool = Query(True, description="True면 provider availability를 실제 점검"),
 ):
     """LLM provider 상태 확인 (설치/인증/모델 포함)."""
-    profile_snapshot = get_profile_manager().serialize()
+    profile_snapshot = getProfileManager().serialize()
     catalog = {item["id"]: item for item in buildProviderCatalog()}
     results = {}
     target_provider = _normalize_provider_name(provider) or provider
@@ -93,16 +93,16 @@ def api_status(
 
     for prov in UI_PROVIDERS:
         meta = catalog.get(prov, {})
-        profile_provider = profile_snapshot.get("providers", {}).get(prov, {})
+        profileProvider = profile_snapshot.get("providers", {}).get(prov, {})
         info: dict[str, Any] = {
             "available": None,
-            "model": profile_provider.get("model"),
+            "model": profileProvider.get("model"),
             "checked": False,
             "label": meta.get("label", prov),
             "desc": meta.get("description", ""),
             "auth": meta.get("authKind", "none"),
-            "secretConfigured": bool(profile_provider.get("secretConfigured")),
-            "credentialSource": _resolve_credential_source(meta, profile_provider),
+            "secretConfigured": bool(profileProvider.get("secretConfigured")),
+            "credentialSource": _resolveCredentialSource(meta, profileProvider),
             "selected": profile_snapshot.get("defaultProvider") == prov,
             "selectedRoles": [
                 role_name
@@ -118,7 +118,7 @@ def api_status(
             info["freeTierHint"] = meta["freeTierHint"]
         should_probe = probe and (target_provider is None or prov == target_provider)
         if should_probe:
-            available, model, checked = probe_provider_availability(prov)
+            available, model, checked = probeProviderAvailability(prov)
             info["available"] = available
             info["model"] = model
             info["checked"] = checked
@@ -129,11 +129,11 @@ def api_status(
             info["available"] = info["secretConfigured"]
         results[prov] = info
 
-    ollama_detail = build_ollama_detail(probe=probe and (target_provider is None or target_provider == "ollama"))
-    oauth_codex_detail = build_oauth_codex_detail(
+    ollama_detail = buildOllamaDetail(probe=probe and (target_provider is None or target_provider == "ollama"))
+    oauth_codex_detail = buildOauthCodexDetail(
         probe=probe and (target_provider is None or target_provider == "oauth-codex")
     )
-    codex_detail = build_codex_detail(probe=probe and (target_provider is None or target_provider == "codex"))
+    codex_detail = buildCodexDetail(probe=probe and (target_provider is None or target_provider == "codex"))
 
     version = dartlab.__version__ if hasattr(dartlab, "__version__") else "unknown"
 
@@ -142,10 +142,10 @@ def api_status(
     try:
         from ..room import room_manager
 
-        active_room = room_manager.get_room()
+        active_room = room_manager.getRoom()
         if active_room is not None:
             room_info = {
-                "roomId": active_room.room_id,
+                "roomId": active_room.roomId,
                 "members": len(active_room.members),
             }
     except ImportError:
@@ -156,7 +156,7 @@ def api_status(
         "ollama": ollama_detail,
         "codex": codex_detail,
         "oauthCodex": oauth_codex_detail,
-        "openDart": _build_open_dart_status(),
+        "openDart": _buildOpenDartStatus(),
         "profile": profile_snapshot,
         "version": version,
     }
@@ -178,12 +178,12 @@ def api_status(
 
 
 @router.get("/api/suggest")
-def api_suggest(stockCode: str = Query(..., description="추천 질문을 생성할 종목코드")):
+def apiSuggest(stockCode: str = Query(..., description="추천 질문을 생성할 종목코드")):
     """회사 데이터 상태에 맞는 추천 질문 목록을 반환한다."""
     try:
-        from ..services.companyApi import get_company
+        from ..services.companyApi import getCompany
 
-        company = get_company(stockCode)
+        company = getCompany(stockCode)
         return {
             "stockCode": getattr(company, "stockCode", stockCode),
             "company": getattr(company, "corpName", stockCode),
@@ -197,29 +197,29 @@ def api_suggest(stockCode: str = Query(..., description="추천 질문을 생성
 
 
 @router.post("/api/provider/validate")
-def api_validate_provider(req: ConfigureRequest):
+def apiValidateProvider(req: ConfigureRequest):
     """LLM provider 검증. 전역 상태는 변경하지 않는다."""
-    return validate_provider_connection(req)
+    return validateProviderConnection(req)
 
 
 @router.post("/api/configure")
-def api_configure(req: ConfigureRequest):
+def apiConfigure(req: ConfigureRequest):
     """구버전 alias. 현재는 provider 검증만 수행한다."""
-    return validate_provider_connection(req)
+    return validateProviderConnection(req)
 
 
 @router.get("/api/ai/profile")
-def api_ai_profile():
+def apiAiProfile():
     """공통 AI profile + provider catalog 반환."""
-    return get_profile_manager().serialize()
+    return getProfileManager().serialize()
 
 
 @router.put("/api/ai/profile")
-def api_ai_profile_update(req: AiProfileUpdateRequest):
+def apiAiProfileUpdate(req: AiProfileUpdateRequest):
     """공통 AI profile 갱신."""
     from dartlab.ai import configure as configure_ai
 
-    manager = get_profile_manager()
+    manager = getProfileManager()
     provider = _normalize_provider_name(req.provider) or req.provider
     if provider and getProviderSpec(provider) is None:
         raise HTTPException(status_code=400, detail=f"지원하지 않는 provider: {provider}")
@@ -227,27 +227,27 @@ def api_ai_profile_update(req: AiProfileUpdateRequest):
         provider=provider,
         role=req.role,
         model=req.model,
-        base_url=req.base_url,
+        baseUrl=req.baseUrl,
         temperature=req.temperature,
-        max_tokens=req.max_tokens,
-        system_prompt=req.system_prompt,
-        updated_by="ui",
+        maxTokens=req.maxTokens,
+        systemPrompt=req.systemPrompt,
+        updatedBy="ui",
     )
     if provider:
         configure_ai(
             provider=provider,
             role=req.role,
             model=req.model,
-            base_url=req.base_url,
+            baseUrl=req.baseUrl,
             temperature=req.temperature,
-            max_tokens=req.max_tokens,
-            system_prompt=req.system_prompt,
+            maxTokens=req.maxTokens,
+            systemPrompt=req.systemPrompt,
         )
     return manager.serialize() | {"revision": profile.revision}
 
 
 @router.post("/api/ai/profile/secrets")
-def api_ai_profile_secret(req: AiSecretUpdateRequest):
+def apiAiProfileSecret(req: AiSecretUpdateRequest):
     """provider secret 저장/삭제."""
     provider = _normalize_provider_name(req.provider) or req.provider
     spec = getProviderSpec(provider)
@@ -256,25 +256,25 @@ def api_ai_profile_secret(req: AiSecretUpdateRequest):
     if spec.auth_kind != "api_key":
         raise HTTPException(status_code=400, detail=f"{provider} provider는 API key secret을 사용하지 않습니다")
 
-    manager = get_profile_manager()
-    if req.clear or not req.api_key:
-        profile = manager.clear_api_key(provider, updated_by="ui")
+    manager = getProfileManager()
+    if req.clear or not req.apiKey:
+        profile = manager.clearApiKey(provider, updatedBy="ui")
     else:
-        profile = manager.save_api_key(provider, req.api_key, updated_by="ui")
+        profile = manager.saveApiKey(provider, req.apiKey, updatedBy="ui")
     return manager.serialize() | {"revision": profile.revision}
 
 
 @router.post("/api/openapi/dart-key/validate")
-def api_validate_dart_key(req: DartKeyUpdateRequest):
+def apiValidateDartKey(req: DartKeyUpdateRequest):
     """OpenDART API 키 유효성만 검증한다."""
     from dartlab.providers.dart.openapi.dartKey import validateDartApiKey
 
-    api_key = (req.api_key or "").strip()
-    if not api_key:
+    apiKey = (req.apiKey or "").strip()
+    if not apiKey:
         raise HTTPException(status_code=400, detail="DART API 키를 입력하세요.")
     try:
-        result = validateDartApiKey(api_key)
-        return result | {"openDart": _build_open_dart_status()}
+        result = validateDartApiKey(apiKey)
+        return result | {"openDart": _buildOpenDartStatus()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=_guideDetail(e)) from e
     except _HANDLED_API_ERRORS as e:
@@ -282,34 +282,34 @@ def api_validate_dart_key(req: DartKeyUpdateRequest):
 
 
 @router.put("/api/openapi/dart-key")
-def api_save_dart_key(req: DartKeyUpdateRequest):
+def apiSaveDartKey(req: DartKeyUpdateRequest):
     """프로젝트 .env에 OpenDART API 키를 저장한다."""
     from dartlab.providers.dart.openapi.dartKey import saveDartKeyToDotenv
 
-    api_key = (req.api_key or "").strip()
-    if not api_key:
+    apiKey = (req.apiKey or "").strip()
+    if not apiKey:
         raise HTTPException(status_code=400, detail="DART API 키를 입력하세요.")
     try:
-        env_path = saveDartKeyToDotenv(api_key)
-        return {"ok": True, "envPath": str(env_path), "openDart": _build_open_dart_status()}
+        env_path = saveDartKeyToDotenv(apiKey)
+        return {"ok": True, "envPath": str(env_path), "openDart": _buildOpenDartStatus()}
     except OSError as e:
         raise HTTPException(status_code=500, detail=_guideDetail(e)) from e
 
 
 @router.delete("/api/openapi/dart-key")
-def api_delete_dart_key():
+def apiDeleteDartKey():
     """프로젝트 .env의 OpenDART API 키를 제거한다."""
     from dartlab.providers.dart.openapi.dartKey import clearDartKeyFromDotenv
 
     try:
         env_path = clearDartKeyFromDotenv()
-        return {"ok": True, "envPath": str(env_path), "openDart": _build_open_dart_status()}
+        return {"ok": True, "envPath": str(env_path), "openDart": _buildOpenDartStatus()}
     except OSError as e:
         raise HTTPException(status_code=500, detail=_guideDetail(e)) from e
 
 
 @router.post("/api/channels/{platform}/start")
-def api_channel_start(platform: str, req: ChannelConnectRequest):
+def apiChannelStart(platform: str, req: ChannelConnectRequest):
     """외부 채널 어댑터 시작."""
     try:
         from ..services.channelRuntime import channel_runtime
@@ -323,7 +323,7 @@ def api_channel_start(platform: str, req: ChannelConnectRequest):
 
 
 @router.post("/api/channels/{platform}/stop")
-def api_channel_stop(platform: str):
+def apiChannelStop(platform: str):
     """외부 채널 어댑터 정지."""
     try:
         from ..services.channelRuntime import channel_runtime
@@ -335,14 +335,14 @@ def api_channel_stop(platform: str):
         raise HTTPException(status_code=500, detail=_guideDetail(e)) from e
 
 
-def _request_port(request: Request) -> int:
+def _requestPort(request: Request) -> int:
     if request.url.port:
         return int(request.url.port)
     return 8400
 
 
 @router.get("/api/channel")
-def api_dev_channel_status():
+def apiDevChannelStatus():
     """DevTunnels 모바일 접속 채널 상태를 반환한다."""
     try:
         from ..services.devChannelRuntime import dev_channel_runtime
@@ -353,18 +353,18 @@ def api_dev_channel_status():
 
 
 @router.post("/api/channel/start")
-def api_dev_channel_start(request: Request):
+def apiDevChannelStart(request: Request):
     """현재 Web UI를 모바일에서 열 수 있는 DevTunnels 채널을 시작한다."""
     try:
         from ..services.devChannelRuntime import dev_channel_runtime
 
-        return dev_channel_runtime.start(port=_request_port(request), auto_yes=True)
+        return dev_channel_runtime.start(port=_requestPort(request), autoYes=True)
     except _HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=500, detail=_guideDetail(e)) from e
 
 
 @router.post("/api/channel/stop")
-def api_dev_channel_stop():
+def apiDevChannelStop():
     """DevTunnels 채널을 종료한다."""
     try:
         from ..services.devChannelRuntime import dev_channel_runtime
@@ -375,9 +375,9 @@ def api_dev_channel_stop():
 
 
 @router.get("/api/ai/profile/events")
-async def api_ai_profile_events(request: Request):
+async def apiAiProfileEvents(request: Request):
     """profile 변경 SSE 스트림."""
-    manager = get_profile_manager()
+    manager = getProfileManager()
 
     async def _generate():
         last_fingerprint = ""
@@ -398,20 +398,20 @@ async def api_ai_profile_events(request: Request):
 
 
 @router.get("/api/models/{provider}")
-def api_models(provider: str):
+def apiModels(provider: str):
     """Provider별 사용 가능한 모델 목록 — SDK/API 자동 조회, 실패시 fallback."""
-    from dartlab.ai.providers import create_provider
+    from dartlab.ai.providers import createProvider
     from dartlab.ai.settings.types import LLMConfig
 
     provider = _normalize_provider_name(provider) or provider
 
     if provider == "codex":
         try:
-            from dartlab.ai.providers.support.codexCli import get_codex_model_catalog
+            from dartlab.ai.providers.support.codexCli import getCodexModelCatalog
 
-            return {"models": get_codex_model_catalog()}
+            return {"models": getCodexModelCatalog()}
         except (ImportError, OSError, RuntimeError, ValueError):
-            return {"models": fallback_models("codex", allow_fetch=False)}
+            return {"models": fallbackModels("codex", allowFetch=False)}
 
     if provider == "oauth-codex":
         try:
@@ -420,15 +420,15 @@ def api_models(provider: str):
             # cache 우선 — 비어 있으면 정적 fallback 즉시 반환 + background thread 에서 warm.
             # 이전: cold 1 회 ~43s (DNS/TLS cold + remote /codex/models fetch) 동안 UI 가
             # "설정 필요" 표시. allow_fetch=False 로 fallback 도 cold HTTP 안 트리거.
-            cached = availableModels(allow_fetch=False)
+            cached = availableModels(allowFetch=False)
             if cached:
                 return {"models": cached}
             import threading
 
             threading.Thread(target=availableModels, daemon=True).start()
-            return {"models": fallback_models("oauth-codex", allow_fetch=False)}
+            return {"models": fallbackModels("oauth-codex", allowFetch=False)}
         except (ImportError, OSError, RuntimeError, ValueError):
-            return {"models": fallback_models("oauth-codex", allow_fetch=False)}
+            return {"models": fallbackModels("oauth-codex", allowFetch=False)}
 
     if provider in STATIC_MODELS:
         return {"models": STATIC_MODELS[provider]}
@@ -436,59 +436,59 @@ def api_models(provider: str):
     if provider == "ollama":
         try:
             config = LLMConfig(provider="ollama")
-            prov = create_provider(config)
-            installed = prov.get_installed_models()
+            prov = createProvider(config)
+            installed = prov.getInstalledModels()
             return {"models": installed, "recommendations": OLLAMA_MODEL_GUIDE}
         except _HANDLED_API_ERRORS:
             return {"models": [], "recommendations": OLLAMA_MODEL_GUIDE}
 
     if provider == "openai":
-        models = _fetch_openai_models()
+        models = _fetchOpenaiModels()
         if models:
             return {"models": models}
-        return {"models": fallback_models("openai", allow_fetch=False)}
+        return {"models": fallbackModels("openai", allowFetch=False)}
 
     return {"models": []}
 
 
-def _get_api_key(provider: str) -> str | None:
+def _getApiKey(provider: str) -> str | None:
     """글로벌 config 또는 환경변수에서 API 키를 가져온다."""
-    from dartlab.ai import get_config
+    from dartlab.ai import getConfig
 
-    config = get_config(provider)
-    if config.api_key:
-        return config.api_key
+    config = getConfig(provider)
+    if config.apiKey:
+        return config.apiKey
     env_map = {"openai": "OPENAI_API_KEY"}
     return os.environ.get(env_map.get(provider, ""))
 
 
-def _fetch_openai_models() -> list[str]:
+def _fetchOpenaiModels() -> list[str]:
     """OpenAI SDK로 모델 목록을 가져온다."""
-    api_key = _get_api_key("openai")
-    if not api_key:
+    apiKey = _getApiKey("openai")
+    if not apiKey:
         return []
     try:
         from openai import OpenAI
 
-        client = OpenAI(api_key=api_key)
+        client = OpenAI(apiKey=apiKey)
         raw = client.models.list()
         models = []
         for model in raw:
             mid = model.id
-            if is_openai_chat_model(mid):
+            if isOpenaiChatModel(mid):
                 models.append(mid)
-        return sort_openai_models(models)
+        return sortOpenaiModels(models)
     except (ImportError, OSError, RuntimeError, ValueError):
         return []
 
 
 @router.post("/api/codex/logout")
-def api_codex_logout():
+def apiCodexLogout():
     """Codex CLI에 저장된 계정 인증을 제거한다."""
     try:
-        from dartlab.ai.providers.support.codexCli import logout_codex_cli
+        from dartlab.ai.providers.support.codexCli import logoutCodexCli
 
-        logout_codex_cli()
+        logoutCodexCli()
     except ImportError:
         return {"ok": True}
     except FileNotFoundError as exc:
@@ -499,24 +499,24 @@ def api_codex_logout():
 
 
 @router.get("/api/oauth/authorize")
-def api_oauth_authorize():
+def apiOauthAuthorize():
     """ChatGPT OAuth 인증 시작 — 브라우저 로그인 URL 반환 + 로컬 콜백 서버 시작."""
-    from dartlab.ai.providers.support.oauthToken import OAUTH_REDIRECT_PORT, build_auth_url
+    from dartlab.ai.providers.support.oauthToken import OAUTH_REDIRECT_PORT, buildAuthUrl
 
-    auth_url, verifier, state = build_auth_url()
+    auth_url, verifier, state = buildAuthUrl()
 
     _oauth_state["verifier"] = verifier
     _oauth_state["state"] = state
     _oauth_state["done"] = False
     _oauth_state["error"] = None
 
-    _start_oauth_callback_server(OAUTH_REDIRECT_PORT)
+    _startOauthCallbackServer(OAUTH_REDIRECT_PORT)
 
     return {"authUrl": auth_url, "state": state}
 
 
 @router.get("/api/oauth/status")
-def api_oauth_status():
+def apiOauthStatus():
     """OAuth 인증 완료 여부 폴링."""
     if _oauth_state.get("error"):
         return {"done": True, "error": _oauth_state["error"]}
@@ -526,19 +526,19 @@ def api_oauth_status():
 
 
 @router.post("/api/oauth/logout")
-def api_oauth_logout():
+def apiOauthLogout():
     """OAuth 토큰 제거."""
     try:
-        from dartlab.ai.providers.support.oauthToken import revoke_token
+        from dartlab.ai.providers.support.oauthToken import revokeToken
 
-        revoke_token()
+        revokeToken()
     except (ImportError, OSError, RuntimeError, ValueError):
         pass
-    get_profile_manager().update(provider="oauth-codex", updated_by="ui")
+    getProfileManager().update(provider="oauth-codex", updatedBy="ui")
     return {"ok": True}
 
 
-def _start_oauth_callback_server(port: int):
+def _startOauthCallbackServer(port: int):
     """OAuth 콜백을 받을 임시 HTTP 서버를 백그라운드 스레드로 시작."""
     import threading
     from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -560,34 +560,34 @@ def _start_oauth_callback_server(port: int):
             if error:
                 _oauth_state["error"] = error
                 _oauth_state["done"] = True
-                self._respond_html("인증 실패", f"오류: {error}")
+                self._respondHtml("인증 실패", f"오류: {error}")
                 return
 
             if state != _oauth_state.get("state"):
                 _oauth_state["error"] = "state_mismatch"
                 _oauth_state["done"] = True
-                self._respond_html("인증 실패", "보안 검증 실패 (state mismatch)")
+                self._respondHtml("인증 실패", "보안 검증 실패 (state mismatch)")
                 return
 
             if not code:
                 _oauth_state["error"] = "no_code"
                 _oauth_state["done"] = True
-                self._respond_html("인증 실패", "인증 코드를 받지 못했습니다")
+                self._respondHtml("인증 실패", "인증 코드를 받지 못했습니다")
                 return
 
             try:
-                from dartlab.ai.providers.support.oauthToken import exchange_code
+                from dartlab.ai.providers.support.oauthToken import exchangeCode
 
-                exchange_code(code, _oauth_state["verifier"])
-                get_profile_manager().update(provider="oauth-codex", updated_by="ui")
+                exchangeCode(code, _oauth_state["verifier"])
+                getProfileManager().update(provider="oauth-codex", updatedBy="ui")
                 _oauth_state["done"] = True
-                self._respond_html("인증 성공", "DartLab 인증이 완료되었습니다. 이 창을 닫아주세요.")
+                self._respondHtml("인증 성공", "DartLab 인증이 완료되었습니다. 이 창을 닫아주세요.")
             except _HANDLED_API_ERRORS as exc:
                 _oauth_state["error"] = str(exc)
                 _oauth_state["done"] = True
-                self._respond_html("인증 실패", f"토큰 교환 실패: {exc}")
+                self._respondHtml("인증 실패", f"토큰 교환 실패: {exc}")
 
-        def _respond_html(self, title: str, message: str):
+        def _respondHtml(self, title: str, message: str):
             import html as _html
 
             safe_title = _html.escape(title)
@@ -609,27 +609,27 @@ def _start_oauth_callback_server(port: int):
             self.end_headers()
             self.wfile.write(markup.encode("utf-8"))
 
-        def log_message(self, fmt, *args):
+        def logMessage(self, fmt, *args):
             pass
 
-    def _run_server():
+    def _runServer():
         server = HTTPServer(("127.0.0.1", port), CallbackHandler)
         server.timeout = 120
         server.handle_request()
         server.server_close()
 
-    thread = threading.Thread(target=_run_server, daemon=True)
+    thread = threading.Thread(target=_runServer, daemon=True)
     thread.start()
 
 
 @router.post("/api/ollama/pull")
-async def api_ollama_pull(req: dict):
+async def apiOllamaPull(req: dict):
     """Ollama 모델 다운로드 (SSE 스트리밍 진행률)."""
     model_name = req.get("model")
     if not model_name:
         raise HTTPException(400, "model name required")
 
-    async def _stream_pull():
+    async def _streamPull():
         import httpx
 
         try:
@@ -649,4 +649,4 @@ async def api_ollama_pull(req: dict):
         except _HANDLED_API_ERRORS as exc:
             yield {"event": "error", "data": json.dumps({"error": _guideDetail(exc)}, ensure_ascii=False)}
 
-    return EventSourceResponse(_stream_pull(), media_type="text/event-stream")
+    return EventSourceResponse(_streamPull(), media_type="text/event-stream")

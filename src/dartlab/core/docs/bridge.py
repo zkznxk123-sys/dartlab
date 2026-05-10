@@ -29,7 +29,7 @@ AMOUNT_PATTERNS = [
 ]
 
 
-def _parse_number(s: str) -> float:
+def _parseNumber(s: str) -> float:
     """쉼표 제거 후 float 변환."""
     if not s:
         return 0
@@ -42,7 +42,7 @@ def _parse_number(s: str) -> float:
         return 0
 
 
-def extract_amounts_from_text(text: str) -> list[dict]:
+def extractAmountsFromText(text: str) -> list[dict]:
     """텍스트에서 금액 추출 → [{value_억: float, raw: str, unit: str}].
 
     지원 단위: 조+억, 단독 조, 단독 억, 백만원, 천원.
@@ -66,8 +66,8 @@ def extract_amounts_from_text(text: str) -> list[dict]:
         if _overlaps(m):
             continue
         _mark(m)
-        jo = _parse_number(m.group(1))
-        eok = _parse_number(m.group(2)) if m.group(2) else 0
+        jo = _parseNumber(m.group(1))
+        eok = _parseNumber(m.group(2)) if m.group(2) else 0
         results.append({"value_억": jo * 10000 + eok, "raw": m.group(0), "unit": "조억"})
 
     # 단독 조
@@ -75,33 +75,33 @@ def extract_amounts_from_text(text: str) -> list[dict]:
         if _overlaps(m):
             continue
         _mark(m)
-        results.append({"value_억": _parse_number(m.group(1)) * 10000, "raw": m.group(0), "unit": "조"})
+        results.append({"value_억": _parseNumber(m.group(1)) * 10000, "raw": m.group(0), "unit": "조"})
 
     # 단독 억
     for m in AMOUNT_PATTERNS[2].finditer(text):
         if _overlaps(m):
             continue
         _mark(m)
-        results.append({"value_억": _parse_number(m.group(1)), "raw": m.group(0), "unit": "억"})
+        results.append({"value_억": _parseNumber(m.group(1)), "raw": m.group(0), "unit": "억"})
 
     # 백만원 → 억 (÷100)
     for m in AMOUNT_PATTERNS[3].finditer(text):
         if _overlaps(m):
             continue
         _mark(m)
-        results.append({"value_억": _parse_number(m.group(1)) / 100, "raw": m.group(0), "unit": "백만원"})
+        results.append({"value_억": _parseNumber(m.group(1)) / 100, "raw": m.group(0), "unit": "백만원"})
 
     # 천원 → 억 (÷100000)
     for m in AMOUNT_PATTERNS[4].finditer(text):
         if _overlaps(m):
             continue
         _mark(m)
-        results.append({"value_억": _parse_number(m.group(1)) / 100_000, "raw": m.group(0), "unit": "천원"})
+        results.append({"value_억": _parseNumber(m.group(1)) / 100_000, "raw": m.group(0), "unit": "천원"})
 
     return results
 
 
-def get_finance_amounts(company, period: str) -> dict[str, float]:
+def getFinanceAmounts(company, period: str) -> dict[str, float]:
     """finance에서 주요 계정 → {account: value_억}.
 
     sections 기간이 '2024'(연간)이면 finance에서 '2024Q4'를 찾고,
@@ -141,9 +141,9 @@ def get_finance_amounts(company, period: str) -> dict[str, float]:
     return result
 
 
-def match_amounts(
-    text_amounts: list[dict],
-    finance_amounts: dict[str, float],
+def matchAmounts(
+    textAmounts: list[dict],
+    financeAmounts: dict[str, float],
     *,
     tolerance: float = 0.05,
 ) -> list[dict]:
@@ -158,13 +158,13 @@ def match_amounts(
         [{text_raw, text_value_억, finance_account, finance_value_억, error_pct}]
     """
     matches: list[dict] = []
-    for ta in text_amounts:
+    for ta in textAmounts:
         tv = ta.get("value_억", 0)
         if tv == 0:
             continue
         best_match = None
         best_error = float("inf")
-        for account, fv in finance_amounts.items():
+        for account, fv in financeAmounts.items():
             if fv == 0:
                 continue
             error = abs(tv - fv) / abs(fv)

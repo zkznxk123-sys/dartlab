@@ -53,7 +53,7 @@ def build(company):
     if not isKr(company):
         from dartlab.quant.strategy.backtest import BacktestResult
 
-        return BacktestResult.not_applicable(
+        return BacktestResult.notApplicable(
             style="seasonalKR",
             reason="KR-only: Korean calendar TOM effect (KOSPI/KOSDAQ specific)",
         )

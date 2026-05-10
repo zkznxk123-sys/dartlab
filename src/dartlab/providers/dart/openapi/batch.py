@@ -827,7 +827,7 @@ def batchCollect(
 
         try:
             workers = [
-                asyncio.create_task(
+                asyncio.createTask(
                     _workerLoop(
                         i,
                         c,

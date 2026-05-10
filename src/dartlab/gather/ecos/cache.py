@@ -6,7 +6,7 @@ from typing import Any
 
 from dartlab.core.cache import TimeseriesCache
 
-_cache = TimeseriesCache(ttl_daily=6 * 3600, ttl_other=24 * 3600)
+_cache = TimeseriesCache(ttlDaily=6 * 3600, ttlOther=24 * 3600)
 
 
 def get(indicatorId: str, start: str | None, end: str | None) -> Any | None:

@@ -152,9 +152,9 @@ def toDict(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str
     needsBridge = labelCol not in ("항목",)
     krLabels: dict[str, str] | None = None
     if needsBridge:
-        from dartlab.core.utils.labels import get_korean_labels
+        from dartlab.core.utils.labels import getKoreanLabels
 
-        krLabels = get_korean_labels()
+        krLabels = getKoreanLabels()
 
     data: dict[str, dict] = {}
     for row in df.iter_rows(named=True):

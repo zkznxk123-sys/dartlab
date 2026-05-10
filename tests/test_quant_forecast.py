@@ -133,11 +133,11 @@ class TestModels:
         from dartlab.quant.forecast import _modelNaive
 
         y = np.array([0.001, 0.002, 0.003, -0.001, 0.002])
-        forecasts, in_sample = _modelNaive(y, horizon=3)
+        forecasts, inSample = _modelNaive(y, horizon=3)
         expected_drift = float(np.mean(y))
         assert forecasts.shape == (3,)
         np.testing.assert_allclose(forecasts, [expected_drift] * 3, atol=1e-12)
-        assert in_sample.shape == (5,)
+        assert inSample.shape == (5,)
 
     def test_ar1_recovers_persistence(self):
         from dartlab.quant.forecast import _modelAr1
@@ -148,17 +148,17 @@ class TestModels:
         y = np.zeros(n)
         for i in range(1, n):
             y[i] = 0.5 * y[i - 1] + 0.01 * rng.standard_normal()
-        forecasts, in_sample = _modelAr1(y, horizon=5)
+        forecasts, inSample = _modelAr1(y, horizon=5)
         # forecast 는 점차 0 으로 수렴 (장기평균)
         assert abs(forecasts[-1]) < abs(forecasts[0]) + 1e-3
-        assert in_sample.shape == (n,)
+        assert inSample.shape == (n,)
 
     def test_ets_holt_extrapolates_trend(self):
         from dartlab.quant.forecast import _modelEtsHolt
 
         # 명확한 선형 trend
         y = 0.001 + 0.0001 * np.arange(100, dtype=np.float64)
-        forecasts, in_sample = _modelEtsHolt(y, horizon=10)
+        forecasts, inSample = _modelEtsHolt(y, horizon=10)
         # 마지막 trend 가 양수 → 양수 forecast
         assert forecasts[-1] > forecasts[0]
         assert np.all(np.isfinite(forecasts))
@@ -167,7 +167,7 @@ class TestModels:
         from dartlab.quant.forecast import _modelTheta
 
         y = np.full(100, 0.001)
-        forecasts, in_sample = _modelTheta(y, horizon=5)
+        forecasts, inSample = _modelTheta(y, horizon=5)
         # 상수 시계열 → forecast 도 거의 같은 값
         np.testing.assert_allclose(forecasts, [0.001] * 5, atol=1e-3)
 
@@ -376,8 +376,8 @@ class TestForecastRuleFactory:
         from dartlab.quant.strategy.rule import Rule
 
         factory = forecastRuleFactory(threshold=0.002)
-        is_close = _uptrend_close(n=200)
-        rule = factory(is_close, oos_len=20)
+        isClose = _uptrend_close(n=200)
+        rule = factory(isClose, oosLen=20)
         assert isinstance(rule, Rule)
         assert len(rule.entry_expr) == 200 + 20
         assert len(rule.exit_expr) == 200 + 20
@@ -387,8 +387,8 @@ class TestForecastRuleFactory:
         from dartlab.quant.forecast import forecastRuleFactory
 
         factory = forecastRuleFactory(threshold=0.002)
-        is_close = _uptrend_close(n=200)
-        rule = factory(is_close, oos_len=20)
+        isClose = _uptrend_close(n=200)
+        rule = factory(isClose, oosLen=20)
         assert not rule.entry_expr[:200].any()
         assert not rule.exit_expr[:200].any()
 
@@ -396,7 +396,7 @@ class TestForecastRuleFactory:
         from dartlab.quant.forecast import forecastRuleFactory
 
         factory = forecastRuleFactory()
-        rule = factory(np.array([100.0, 101.0, 99.0]), oos_len=10)
+        rule = factory(np.array([100.0, 101.0, 99.0]), oosLen=10)
         # IS < 30 → 모두 False
         assert not rule.entry_expr.any()
         assert not rule.exit_expr.any()
@@ -407,7 +407,7 @@ class TestForecastRuleFactory:
 
         close = _uptrend_close(n=400)
         factory = forecastRuleFactory(threshold=0.0005, models=["ar1"])
-        bt = walkForward(close, rule=None, rule_factory=factory, train=200, test=50, step=50)
+        bt = walkForward(close, rule=None, ruleFactory=factory, train=200, test=50, step=50)
         assert bt.status == "ok"
         assert bt.oos is True
         assert bt.cpcv is not None
@@ -426,7 +426,7 @@ class TestForecastRuleFactory:
         n = 600
         close = 100.0 * np.exp(np.concatenate([[0.0], np.cumsum(0.003 + 0.005 * rng.standard_normal(n - 1))]))
         factory = forecastRuleFactory(threshold=0.0005, models=["ar1"])
-        bt = walkForward(close, rule=None, rule_factory=factory, train=200, test=40, step=40)
+        bt = walkForward(close, rule=None, ruleFactory=factory, train=200, test=40, step=40)
         assert bt.status == "ok"
         # 강한 trend → entry 일자 비율 > 50% (loose mode 검증)
         active_ratio = float(np.mean(bt.returns != 0))
@@ -441,12 +441,12 @@ class TestForecastRuleFactory:
 
         close = _uptrend_close(n=400)
         factory = forecastRuleFactory(threshold=0.0005, models=["ar1"], requireConfidence=True)
-        bt = walkForward(close, rule=None, rule_factory=factory, train=200, test=50, step=50)
+        bt = walkForward(close, rule=None, ruleFactory=factory, train=200, test=50, step=50)
         assert bt.status == "ok"
         # strict 는 entry 가 매우 적거나 0 (예상된 동작)
         active_ratio = float(np.mean(bt.returns != 0))
         loose_factory = forecastRuleFactory(threshold=0.0005, models=["ar1"], requireConfidence=False)
-        bt_loose = walkForward(close, rule=None, rule_factory=loose_factory, train=200, test=50, step=50)
+        bt_loose = walkForward(close, rule=None, ruleFactory=loose_factory, train=200, test=50, step=50)
         loose_active = float(np.mean(bt_loose.returns != 0))
         # strict 는 loose 보다 entry 적거나 같다
         assert active_ratio <= loose_active
@@ -481,14 +481,14 @@ class TestForecastRuleFactory:
         from dartlab.quant.strategy.backtest import walkForward
         from dartlab.quant.strategy.rule import Rule
 
-        def bad_factory(is_close, oos_len):
+        def bad_factory(isClose, oosLen):
             # 잘못된 길이 (train + test 아닌 len(is_close) 만)
             return Rule(
-                entry_expr=np.zeros(len(is_close), dtype=bool),
-                exit_expr=np.zeros(len(is_close), dtype=bool),
+                entry_expr=np.zeros(len(isClose), dtype=bool),
+                exit_expr=np.zeros(len(isClose), dtype=bool),
             )
 
         close = _uptrend_close(n=400)
-        bt = walkForward(close, rule=None, rule_factory=bad_factory, train=200, test=50, step=50)
+        bt = walkForward(close, rule=None, ruleFactory=bad_factory, train=200, test=50, step=50)
         assert bt.status == "error"
         assert "length" in (bt.reason or "")

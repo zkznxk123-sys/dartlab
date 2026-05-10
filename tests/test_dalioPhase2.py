@@ -260,7 +260,7 @@ def test_analyze_crisis_emits_dalio_keys(monkeypatch):
     """analyze_crisis 가 데이터 없어도 dict 구조 반환 (키 존재)."""
     import dartlab.macro.crisis as crisis_mod
 
-    monkeypatch.setattr(crisis_mod, "_fetch_crisis_data", lambda market, as_of=None: {})
-    r = crisis_mod.analyze_crisis(market="US")
+    monkeypatch.setattr(crisis_mod, "_fetch_crisis_data", lambda market, asOf=None: {})
+    r = crisis_mod.analyzeCrisis(market="US")
     assert "debtCyclePhase" in r
     assert "policyLeverStatus" in r

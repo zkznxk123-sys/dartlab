@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 
-def score_ownership(pct: float | None) -> float:
+def scoreOwnership(pct: float | None) -> float:
     """최대주주 지분율 → 거버넌스 점수.
 
     30~50% 구간이 최적(20점). 과소(경영권 불안)·과대(독단 리스크) 모두 감점.
@@ -35,7 +35,7 @@ def score_ownership(pct: float | None) -> float:
     return 8.0  # 70%+
 
 
-def score_outside_ratio(
+def scoreOutsideRatio(
     ratio: float | None,
     *,
     resign: int = 0,
@@ -86,7 +86,7 @@ def score_outside_ratio(
     return max(base - penalty, 0.0)
 
 
-def score_pay_ratio(ratio: float | None) -> float:
+def scorePayRatio(ratio: float | None) -> float:
     """임원-직원 보수 배율 → 거버넌스 점수.
 
     배율이 낮을수록 고점수. 2배 이하 만점(15), 20배 초과 최저(1).
@@ -117,7 +117,7 @@ def score_pay_ratio(ratio: float | None) -> float:
     return 1.0
 
 
-def score_audit(opinion: str | None) -> float:
+def scoreAudit(opinion: str | None) -> float:
     """감사의견 → 거버넌스 점수.
 
     적정의견 만점(25), 한정의견 5점, 부적정·의견거절 0점.
@@ -142,7 +142,7 @@ def score_audit(opinion: str | None) -> float:
     return 0.0  # 부적정의견, 의견거절
 
 
-def score_minority(pct: float | None) -> float:
+def scoreMinority(pct: float | None) -> float:
     """소액주주 지분율 → 거버넌스 점수.
 
     지분율이 높을수록 주주 분산이 양호하여 고점수.

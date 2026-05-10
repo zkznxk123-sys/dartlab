@@ -133,12 +133,12 @@ class TestFormatResults:
 
 class TestGatherCache:
     def test_put_and_get(self):
-        cache = GatherCache(max_entries=10)
+        cache = GatherCache(maxEntries=10)
         cache.put("key1", "value1", ttl=60)
         assert cache.get("key1") == "value1"
 
     def test_missing_key(self):
-        cache = GatherCache(max_entries=10)
+        cache = GatherCache(maxEntries=10)
         assert cache.get("nonexistent") is None
 
     def test_ttl_expiry(self, monkeypatch):
@@ -152,7 +152,7 @@ class TestGatherCache:
 
         monkeypatch.setattr(cache_mod.time, "monotonic", fake_monotonic)
 
-        cache = GatherCache(max_entries=10)
+        cache = GatherCache(maxEntries=10)
         cache.put("k", "v", ttl=10)
 
         # 아직 만료 안 됨
@@ -163,10 +163,10 @@ class TestGatherCache:
         assert cache.get("k") is None
 
         # stale에서 가져올 수 있다
-        assert cache.get_stale("k") == "v"
+        assert cache.getStale("k") == "v"
 
     def test_max_entries_eviction(self):
-        cache = GatherCache(max_entries=3)
+        cache = GatherCache(maxEntries=3)
         cache.put("a", 1, ttl=60)
         cache.put("b", 2, ttl=60)
         cache.put("c", 3, ttl=60)
@@ -177,7 +177,7 @@ class TestGatherCache:
         assert cache.get("d") == 4
 
     def test_invalidate(self):
-        cache = GatherCache(max_entries=10)
+        cache = GatherCache(maxEntries=10)
         cache.put("005930:price", "p", ttl=60)
         cache.put("005930:flow", "f", ttl=60)
         cache.put("000660:price", "p2", ttl=60)
@@ -187,15 +187,15 @@ class TestGatherCache:
         assert cache.get("000660:price") == "p2"
 
     def test_clear(self):
-        cache = GatherCache(max_entries=10)
+        cache = GatherCache(maxEntries=10)
         cache.put("a", 1, ttl=60)
         cache.put("b", 2, ttl=60)
         cache.clear()
         assert cache.size == 0
 
     def test_put_typed(self):
-        cache = GatherCache(max_entries=10)
-        cache.put_typed("005930", "price", "data")
+        cache = GatherCache(maxEntries=10)
+        cache.putTyped("005930", "price", "data")
         assert cache.get("005930:price") == "data"
 
 
@@ -206,34 +206,34 @@ class TestGatherCache:
 
 class TestCircuitBreaker:
     def test_initially_closed(self):
-        cb = CircuitBreaker(failure_threshold=3)
-        assert cb.is_open("src") is False
+        cb = CircuitBreaker(failureThreshold=3)
+        assert cb.isOpen("src") is False
         assert cb.state("src") == "closed"
 
     def test_opens_after_threshold(self):
-        cb = CircuitBreaker(failure_threshold=3, recovery_timeout=300.0)
-        cb.record_failure("src")
-        cb.record_failure("src")
-        assert cb.is_open("src") is False
-        cb.record_failure("src")
-        assert cb.is_open("src") is True
+        cb = CircuitBreaker(failureThreshold=3, recoveryTimeout=300.0)
+        cb.recordFailure("src")
+        cb.recordFailure("src")
+        assert cb.isOpen("src") is False
+        cb.recordFailure("src")
+        assert cb.isOpen("src") is True
 
     def test_success_resets(self):
-        cb = CircuitBreaker(failure_threshold=2)
-        cb.record_failure("src")
-        cb.record_failure("src")
+        cb = CircuitBreaker(failureThreshold=2)
+        cb.recordFailure("src")
+        cb.recordFailure("src")
         # 서킷 열림
-        assert cb.is_open("src") is True
-        cb.record_success("src")
-        assert cb.is_open("src") is False
+        assert cb.isOpen("src") is True
+        cb.recordSuccess("src")
+        assert cb.isOpen("src") is False
         assert cb.state("src") == "closed"
 
     def test_independent_sources(self):
-        cb = CircuitBreaker(failure_threshold=2)
-        cb.record_failure("a")
-        cb.record_failure("a")
-        assert cb.is_open("a") is True
-        assert cb.is_open("b") is False
+        cb = CircuitBreaker(failureThreshold=2)
+        cb.recordFailure("a")
+        cb.recordFailure("a")
+        assert cb.isOpen("a") is True
+        assert cb.isOpen("b") is False
 
 
 # ══════════════════════════════════════

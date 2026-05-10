@@ -235,43 +235,43 @@ class TestFuzzySearch:
 
 class TestKoreanUtils:
     def test_decompose_char_hangul(self):
-        from dartlab.gather.listing import _decompose_char
+        from dartlab.gather.listing import _decomposeChar
 
-        assert _decompose_char("삼") == "ㅅ"
-        assert _decompose_char("전") == "ㅈ"
-        assert _decompose_char("자") == "ㅈ"
+        assert _decomposeChar("삼") == "ㅅ"
+        assert _decomposeChar("전") == "ㅈ"
+        assert _decomposeChar("자") == "ㅈ"
 
     def test_decompose_char_already_jamo(self):
-        from dartlab.gather.listing import _decompose_char
+        from dartlab.gather.listing import _decomposeChar
 
-        assert _decompose_char("ㅅ") == "ㅅ"
-        assert _decompose_char("ㄱ") == "ㄱ"
+        assert _decomposeChar("ㅅ") == "ㅅ"
+        assert _decomposeChar("ㄱ") == "ㄱ"
 
     def test_decompose_char_non_korean(self):
-        from dartlab.gather.listing import _decompose_char
+        from dartlab.gather.listing import _decomposeChar
 
-        assert _decompose_char("A") == "A"
-        assert _decompose_char("1") == "1"
+        assert _decomposeChar("A") == "A"
+        assert _decomposeChar("1") == "1"
 
     def test_extract_chosung(self):
-        from dartlab.gather.listing import _extract_chosung
+        from dartlab.gather.listing import _extractChosung
 
-        assert _extract_chosung("삼성") == "ㅅㅅ"
-        assert _extract_chosung("카카오") == "ㅋㅋㅇ"
+        assert _extractChosung("삼성") == "ㅅㅅ"
+        assert _extractChosung("카카오") == "ㅋㅋㅇ"
 
     def test_extract_chosung_mixed(self):
-        from dartlab.gather.listing import _extract_chosung
+        from dartlab.gather.listing import _extractChosung
 
-        result = _extract_chosung("LG화학")
+        result = _extractChosung("LG화학")
         assert result.startswith("LG")
 
     def test_is_all_chosung(self):
-        from dartlab.gather.listing import _is_all_chosung
+        from dartlab.gather.listing import _isAllChosung
 
-        assert _is_all_chosung("ㅅㅅ") is True
-        assert _is_all_chosung("ㅅㅅㅈㅈ") is True
-        assert _is_all_chosung("삼성") is False
-        assert _is_all_chosung("AB") is False
+        assert _isAllChosung("ㅅㅅ") is True
+        assert _isAllChosung("ㅅㅅㅈㅈ") is True
+        assert _isAllChosung("삼성") is False
+        assert _isAllChosung("AB") is False
 
     def test_levenshtein_identical(self):
         from dartlab.gather.listing import _levenshtein

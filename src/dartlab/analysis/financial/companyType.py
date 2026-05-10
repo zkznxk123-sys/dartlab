@@ -38,9 +38,9 @@ def _extractCommon(company):
     }
 
 
-def _cv(values: list, min_count: int = 4) -> float | None:
+def _cv(values: list, minCount: int = 4) -> float | None:
     valid = [m for m in values if m is not None]
-    if len(valid) < min_count:
+    if len(valid) < minCount:
         return None
     avg = sum(valid) / len(valid)
     if avg == 0:

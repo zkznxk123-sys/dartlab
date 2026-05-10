@@ -147,7 +147,7 @@ def _scanIcrPerFile() -> dict[str, float]:
     return result
 
 
-def scan_icr() -> dict[str, float]:
+def scanIcr() -> dict[str, float]:
     """finance IS → {종목코드: ICR}.
 
     프리빌드 finance.parquet 우선, 없으면 per-file fallback.
@@ -161,9 +161,9 @@ def scan_icr() -> dict[str, float]:
     return _scanIcrPerFile()
 
 
-def classify_risk(
+def classifyRisk(
     icr: float | None,
-    short_ratio: float | None,
+    shortRatio: float | None,
     shortDebtTotal: float | None = None,
 ) -> str:
     """ICR x 단기비중 x 단기채무 → 위험등급.
@@ -173,7 +173,7 @@ def classify_risk(
     - 관찰:   ICR < 3
     - 안전:   그 외
     """
-    sr = short_ratio if short_ratio is not None else 0
+    sr = shortRatio if shortRatio is not None else 0
     hasShortDebt = shortDebtTotal is not None and shortDebtTotal > 0
 
     if icr is None:

@@ -21,7 +21,7 @@ from typing import Any
 
 from dartlab.ai.contracts import Ref
 
-from .formatting import short_text
+from .formatting import shortText
 from .runpythonGuard import _assertSafeAst, _safeOpenFactory
 from .types import ToolResult
 
@@ -45,7 +45,7 @@ _BLOCK_KEYWORDS = (
 )
 
 
-def _try_unindent_fallback(code: str) -> str | None:
+def _tryUnindentFallback(code: str) -> str | None:
     """단일 statement series 코드면 모든 줄 lstrip — IndentationError 자동 복구.
 
     블록 키워드 (def/for/if/...) 가 있으면 들여쓰기가 *의미 있다* — 안전상 None.
@@ -59,12 +59,12 @@ def _try_unindent_fallback(code: str) -> str | None:
     return stripped
 
 
-def _diagnose_error_hint(traceback_text: str) -> str:
+def _diagnoseErrorHint(tracebackText: str) -> str:
     """LLM 코드 결함 분류 — 자주 보이는 polars / pandas / dartlab API 패턴.
 
     LLM 다음 turn 에 같은 실수 안 하게 *짧은 한국어 hint* 반환. 매칭 안 되면 빈 문자열.
     """
-    text = traceback_text or ""
+    text = tracebackText or ""
     # polars projection 시 같은 출력 컬럼명 두 번 — agent 가 alias 강제 rename 시 자주.
     if "duplicate output name" in text or "DuplicateError" in text:
         return (
@@ -94,28 +94,28 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
     stderr = StringIO()
     emitted: dict[str, Any] = {}
 
-    def _coerce_value(value: Any) -> Any:
+    def _coerceValue(value: Any) -> Any:
         """JSON 가능한 형태로 재귀 변환. polars DataFrame/Series, dict, list 안까지 walk."""
         try:
             import polars as _pl
 
             if isinstance(value, _pl.DataFrame):
-                return [{k: _coerce_value(v) for k, v in row.items()} for row in value.to_dicts()]
+                return [{k: _coerceValue(v) for k, v in row.items()} for row in value.to_dicts()]
             if isinstance(value, _pl.Series):
-                return [_coerce_value(v) for v in value.to_list()]
+                return [_coerceValue(v) for v in value.to_list()]
         except ImportError:
             pass
         if isinstance(value, dict):
-            return {k: _coerce_value(v) for k, v in value.items()}
+            return {k: _coerceValue(v) for k, v in value.items()}
         if isinstance(value, (list, tuple)):
-            return [_coerce_value(v) for v in value]
+            return [_coerceValue(v) for v in value]
         return value
 
-    def emit_result(*args: Any, **kwargs: Any) -> None:
+    def emitResult(*args: Any, **kwargs: Any) -> None:
         """Result emitter — keyword args 권장. positional dict 도 dict 로 unpack 해서 받음."""
         payload: dict[str, Any] = {}
         for arg in args:
-            arg = _coerce_value(arg)
+            arg = _coerceValue(arg)
             if isinstance(arg, dict):
                 payload.update(arg)
             else:
@@ -123,14 +123,14 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
                 if isinstance(payload["values"], dict):
                     payload["values"][f"value_{len(payload['values'])}"] = arg
         for k, v in kwargs.items():
-            payload[k] = _coerce_value(v)
+            payload[k] = _coerceValue(v)
         emitted.update(payload)
         print("DARTLAB_RESULT_JSON=" + json.dumps(payload, ensure_ascii=False, default=str))
 
     # sandbox guard — write 가능 mode 의 open 은 안전 경로 prefix 로 제한.
     # 차단 호출 (os.system / subprocess.run 등) 은 exec 직전 AST 검사로 거부.
     globals_dict: dict[str, Any] = {
-        "emit_result": emit_result,
+        "emit_result": emitResult,
         "__builtins__": __builtins__,
         "open": _safeOpenFactory(),
     }
@@ -167,7 +167,7 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
                 try:
                     exec(normalized_code, globals_dict, globals_dict)  # noqa: S102
                 except IndentationError:
-                    fallback = _try_unindent_fallback(normalized_code)
+                    fallback = _tryUnindentFallback(normalized_code)
                     if fallback is None:
                         raise
                     _assertSafeAst(fallback)
@@ -207,7 +207,7 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
         )
         # 흔한 LLM 코드 결함 → LLM 다음 turn 에 같은 실수 안 하게 hint 부착.
         # 단순 substring 매칭 — 정밀도보다 다음 attempt 의 가이드성 우선.
-        hint = _diagnose_error_hint(container["error"])
+        hint = _diagnoseErrorHint(container["error"])
         summary = "run_python 실행 실패"
         if hint:
             summary = f"run_python 실행 실패 — {hint}"
@@ -240,8 +240,8 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
             source="run_python",
             payload={
                 "durationMs": duration,
-                "stdout": short_text(stdout.getvalue(), limit=4000),
-                "stderr": short_text(stderr.getvalue(), limit=4000),
+                "stdout": shortText(stdout.getvalue(), limit=4000),
+                "stderr": shortText(stderr.getvalue(), limit=4000),
                 "result": emitted,
             },
         )

@@ -17,7 +17,7 @@ pytestmark = pytest.mark.unit
 
 # ── _safeDiv 불변조건 ──
 
-_fin_float = st.floats(min_value=-1e15, max_value=1e15, allow_nan=False, allow_infinity=False)
+_fin_float = st.floats(min_value=-1e15, maxValue=1e15, allow_nan=False, allow_infinity=False)
 _fin_float_or_none = st.one_of(st.none(), _fin_float)
 
 
@@ -50,8 +50,8 @@ class TestSafeDivProperties:
         assert _safeDiv(num, None) is None
 
     @given(
-        num=st.floats(min_value=1, max_value=1e12, allow_nan=False, allow_infinity=False),
-        den=st.floats(min_value=1, max_value=1e12, allow_nan=False, allow_infinity=False),
+        num=st.floats(min_value=1, maxValue=1e12, allow_nan=False, allow_infinity=False),
+        den=st.floats(min_value=1, maxValue=1e12, allow_nan=False, allow_infinity=False),
     )
     @settings(max_examples=200)
     def test_positiveInputsGivePositiveResult(self, num, den):
@@ -72,8 +72,8 @@ class TestSafePctProperties:
         assert result is None or isinstance(result, float)
 
     @given(
-        num=st.floats(min_value=1, max_value=1e12, allow_nan=False, allow_infinity=False),
-        den=st.floats(min_value=1, max_value=1e12, allow_nan=False, allow_infinity=False),
+        num=st.floats(min_value=1, maxValue=1e12, allow_nan=False, allow_infinity=False),
+        den=st.floats(min_value=1, maxValue=1e12, allow_nan=False, allow_infinity=False),
     )
     @settings(max_examples=200)
     def test_resultIsRoundedHundredTimesDiv(self, num, den):

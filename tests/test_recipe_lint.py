@@ -51,12 +51,12 @@ def test_recipe_dir_exists():
 
 
 def test_every_recipe_has_kind_recipe():
-    from dartlab.skills.registry import _read_markdown_skill
+    from dartlab.skills.registry import _readMarkdownSkill
 
     failures: list[str] = []
     for path in _recipe_paths():
         text = path.read_text(encoding="utf-8")
-        data = _read_markdown_skill(text, path)
+        data = _readMarkdownSkill(text, path)
         if data.get("kind") != "recipe":
             failures.append(f"{path.name}: kind={data.get('kind')!r}")
     assert not failures, "engines/recipe/ 의 spec 은 kind: recipe 강제\n" + "\n".join(failures)
@@ -64,12 +64,12 @@ def test_every_recipe_has_kind_recipe():
 
 def test_every_recipe_public_call_block_parses_as_python():
     """ValidateRecipe 가 추출해서 실행할 코드블록이 AST 단계에서 깨지면 안 된다."""
-    from dartlab.skills.registry import _read_markdown_skill
+    from dartlab.skills.registry import _readMarkdownSkill
 
     failures: list[str] = []
     for path in _recipe_paths():
         text = path.read_text(encoding="utf-8")
-        data = _read_markdown_skill(text, path)
+        data = _readMarkdownSkill(text, path)
         body = str((data.get("source") or {}).get("body") or "")
         section = _public_call_section(body)
         if not section.strip():

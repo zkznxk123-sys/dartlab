@@ -9,8 +9,8 @@ import pytest
 from dartlab.gather.cache import GatherCache
 from dartlab.gather.marketConfig import (
     MARKETS,
-    get_market_config,
-    resolve_ticker,
+    getMarketConfig,
+    resolveTicker,
 )
 from dartlab.gather.resilience import CircuitBreaker, SourceHealthTracker
 from dartlab.gather.types import CircuitOpenError, PriceSnapshot
@@ -31,7 +31,7 @@ class TestMarketConfig:
         assert set(MARKETS.keys()) == expected
 
     def test_get_market_config_known(self):
-        config = get_market_config("KR")
+        config = getMarketConfig("KR")
         assert config.code == "KR"
         assert config.currency == "KRW"
         assert "naver" in config.fallback_chain
@@ -41,47 +41,47 @@ class TestMarketConfig:
         import pytest
 
         with pytest.raises(ValueError, match="알 수 없는 시장"):
-            get_market_config("XX")
+            getMarketConfig("XX")
 
     def test_get_market_config_case_strict(self):
         """consistency_no_alias: 정식 대문자만 인정. 'kr' 은 ValueError."""
         import pytest
 
         with pytest.raises(ValueError, match="정식 표기"):
-            get_market_config("kr")
+            getMarketConfig("kr")
 
     # ticker 변환
 
     def test_resolve_ticker_kr_naver(self):
-        assert resolve_ticker("005930", "KR", "naver") == "005930"
+        assert resolveTicker("005930", "KR", "naver") == "005930"
 
     def test_resolve_ticker_kr_yahoo(self):
-        assert resolve_ticker("005930", "KR", "yahoo_chart") == "005930.KS"
+        assert resolveTicker("005930", "KR", "yahoo_chart") == "005930.KS"
 
     def test_resolve_ticker_us(self):
-        assert resolve_ticker("AAPL", "US", "yahoo_chart") == "AAPL"
-        assert resolve_ticker("AAPL", "US", "fmp") == "AAPL"
+        assert resolveTicker("AAPL", "US", "yahoo_chart") == "AAPL"
+        assert resolveTicker("AAPL", "US", "fmp") == "AAPL"
 
     def test_resolve_ticker_jp(self):
-        assert resolve_ticker("7203", "JP", "yahoo_chart") == "7203.T"
+        assert resolveTicker("7203", "JP", "yahoo_chart") == "7203.T"
 
     def test_resolve_ticker_hk_padding(self):
         # HK 4자리 패딩
-        assert resolve_ticker("293", "HK", "yahoo_chart") == "0293.HK"
-        assert resolve_ticker("9988", "HK", "yahoo_chart") == "9988.HK"
+        assert resolveTicker("293", "HK", "yahoo_chart") == "0293.HK"
+        assert resolveTicker("9988", "HK", "yahoo_chart") == "9988.HK"
 
     def test_resolve_ticker_cn_shanghai(self):
-        assert resolve_ticker("600519", "CN", "yahoo_chart") == "600519.SS"
+        assert resolveTicker("600519", "CN", "yahoo_chart") == "600519.SS"
 
     def test_resolve_ticker_cn_shenzhen(self):
-        assert resolve_ticker("000858", "CN", "yahoo_chart") == "000858.SZ"
-        assert resolve_ticker("300750", "CN", "yahoo_chart") == "300750.SZ"
+        assert resolveTicker("000858", "CN", "yahoo_chart") == "000858.SZ"
+        assert resolveTicker("300750", "CN", "yahoo_chart") == "300750.SZ"
 
     def test_resolve_ticker_uk(self):
-        assert resolve_ticker("SHEL", "UK", "yahoo_chart") == "SHEL.L"
+        assert resolveTicker("SHEL", "UK", "yahoo_chart") == "SHEL.L"
 
     def test_resolve_ticker_de(self):
-        assert resolve_ticker("SAP", "DE", "fmp") == "SAP.DE"
+        assert resolveTicker("SAP", "DE", "fmp") == "SAP.DE"
 
     def test_fallback_chains_not_empty(self):
         for code, config in MARKETS.items():
@@ -98,65 +98,65 @@ class TestCircuitBreaker:
 
     def test_initially_closed(self):
         cb = CircuitBreaker()
-        assert not cb.is_open("test_source")
+        assert not cb.isOpen("test_source")
         assert cb.state("test_source") == "closed"
 
     def test_opens_after_threshold(self):
-        cb = CircuitBreaker(failure_threshold=3)
+        cb = CircuitBreaker(failureThreshold=3)
         for _ in range(3):
-            cb.record_failure("src")
-        assert cb.is_open("src")
+            cb.recordFailure("src")
+        assert cb.isOpen("src")
         assert cb.state("src") == "open"
 
     def test_stays_closed_below_threshold(self):
-        cb = CircuitBreaker(failure_threshold=5)
+        cb = CircuitBreaker(failureThreshold=5)
         for _ in range(4):
-            cb.record_failure("src")
-        assert not cb.is_open("src")
+            cb.recordFailure("src")
+        assert not cb.isOpen("src")
 
     def test_success_resets_count(self):
-        cb = CircuitBreaker(failure_threshold=3)
-        cb.record_failure("src")
-        cb.record_failure("src")
-        cb.record_success("src")
-        cb.record_failure("src")
-        cb.record_failure("src")
-        assert not cb.is_open("src")  # 2 failures, not 3
+        cb = CircuitBreaker(failureThreshold=3)
+        cb.recordFailure("src")
+        cb.recordFailure("src")
+        cb.recordSuccess("src")
+        cb.recordFailure("src")
+        cb.recordFailure("src")
+        assert not cb.isOpen("src")  # 2 failures, not 3
 
     def test_half_open_after_timeout(self):
-        cb = CircuitBreaker(failure_threshold=2, recovery_timeout=0.05)
-        cb.record_failure("src")
-        cb.record_failure("src")
-        assert cb.is_open("src")
+        cb = CircuitBreaker(failureThreshold=2, recoveryTimeout=0.05)
+        cb.recordFailure("src")
+        cb.recordFailure("src")
+        assert cb.isOpen("src")
         time.sleep(0.1)
-        assert not cb.is_open("src")  # timeout 경과 → 1회 시도 허용
+        assert not cb.isOpen("src")  # timeout 경과 → 1회 시도 허용
         # 허용 직후 다시 open (동시 통과 방지)
-        assert cb.is_open("src")
+        assert cb.isOpen("src")
 
     def test_half_open_success_closes(self):
-        cb = CircuitBreaker(failure_threshold=2, recovery_timeout=0.05)
-        cb.record_failure("src")
-        cb.record_failure("src")
+        cb = CircuitBreaker(failureThreshold=2, recoveryTimeout=0.05)
+        cb.recordFailure("src")
+        cb.recordFailure("src")
         time.sleep(0.1)
-        cb.is_open("src")  # 1회 허용
-        cb.record_success("src")
+        cb.isOpen("src")  # 1회 허용
+        cb.recordSuccess("src")
         assert cb.state("src") == "closed"
 
     def test_half_open_failure_keeps_open(self):
-        cb = CircuitBreaker(failure_threshold=2, recovery_timeout=0.05)
-        cb.record_failure("src")
-        cb.record_failure("src")
+        cb = CircuitBreaker(failureThreshold=2, recoveryTimeout=0.05)
+        cb.recordFailure("src")
+        cb.recordFailure("src")
         time.sleep(0.1)
-        cb.is_open("src")  # 1회 허용
-        cb.record_failure("src")
+        cb.isOpen("src")  # 1회 허용
+        cb.recordFailure("src")
         assert cb.state("src") == "open"
 
     def test_independent_sources(self):
-        cb = CircuitBreaker(failure_threshold=2)
-        cb.record_failure("a")
-        cb.record_failure("a")
-        assert cb.is_open("a")
-        assert not cb.is_open("b")
+        cb = CircuitBreaker(failureThreshold=2)
+        cb.recordFailure("a")
+        cb.recordFailure("a")
+        assert cb.isOpen("a")
+        assert not cb.isOpen("b")
 
 
 # ══════════════════════════════════════
@@ -208,9 +208,9 @@ class TestStaleCache:
 
     def test_get_typed_allow_stale(self):
         cache = GatherCache()
-        cache.put_typed("005930", "price", PriceSnapshot(current=200000))
+        cache.putTyped("005930", "price", PriceSnapshot(current=200000))
         # 정상 조회
-        assert cache.get_typed("005930", "price") is not None
+        assert cache.getTyped("005930", "price") is not None
 
     def test_stale_returns_expired(self):
         cache = GatherCache()
@@ -220,7 +220,7 @@ class TestStaleCache:
         # 일반 조회는 None (만료 → stale store로 이동)
         assert cache.get("key") is None
         # stale 조회는 반환
-        assert cache.get_stale("key") == "value"
+        assert cache.getStale("key") == "value"
 
     def test_get_typed_stale_fallback(self):
         cache = GatherCache()
@@ -228,9 +228,9 @@ class TestStaleCache:
         # 수동으로 만료
         cache._store["005930:price"].expires_at = time.monotonic() - 1.0
         # allow_stale=False → None (만료 데이터 stale로 이동)
-        assert cache.get_typed("005930", "price", allow_stale=False) is None
+        assert cache.getTyped("005930", "price", allowStale=False) is None
         # allow_stale=True → stale 데이터
-        result = cache.get_typed("005930", "price", allow_stale=True)
+        result = cache.getTyped("005930", "price", allowStale=True)
         assert result is not None
         assert result.current == 100000
 
@@ -276,14 +276,14 @@ class TestPriceFallback:
 
     def test_domains_registry_loads_all(self):
         """모든 도메인이 load_domain으로 로드 가능."""
-        from dartlab.gather.domains import load_domain
+        from dartlab.gather.domains import loadDomain
 
         for name in ("naver", "yahoo_chart", "fmp"):
-            module = load_domain(name)
+            module = loadDomain(name)
             assert hasattr(module, "fetch_price")
 
     def test_domains_registry_invalid_raises(self):
-        from dartlab.gather.domains import load_domain
+        from dartlab.gather.domains import loadDomain
 
         with pytest.raises(ValueError, match="알 수 없는 도메인"):
-            load_domain("nonexistent")
+            loadDomain("nonexistent")

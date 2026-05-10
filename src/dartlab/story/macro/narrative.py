@@ -41,7 +41,7 @@ def _safe(value, key: str = "") -> float | None:
 # ══════════════════════════════════════
 
 
-def _narrate_fci(fci: dict) -> str:
+def _narrateFci(fci: dict) -> str:
     """FCI What-Why-So What."""
     val = _safe(fci.get("value"), "fci")
     if val is None:
@@ -72,7 +72,7 @@ def _narrate_fci(fci: dict) -> str:
     return f"{what} {why} {so_what}"
 
 
-def _narrate_cycle(cycle: dict) -> str:
+def _narrateCycle(cycle: dict) -> str:
     """사이클 국면 해석."""
     phase = cycle.get("phaseLabel", "")
     confidence = cycle.get("confidence", "")
@@ -100,7 +100,7 @@ def _narrate_cycle(cycle: dict) -> str:
     return f"{what} {why} {so_what}"
 
 
-def _narrate_rates(rates: dict) -> str:
+def _narrateRates(rates: dict) -> str:
     """금리 환경 해석."""
     outlook = rates.get("outlook") or {}
     direction = outlook.get("direction", "")
@@ -146,7 +146,7 @@ def _narrate_rates(rates: dict) -> str:
     return " ".join(parts)
 
 
-def _narrate_crisis(crisis: dict) -> str:
+def _narrateCrisis(crisis: dict) -> str:
     """위기 프레임워크 해석."""
     parts = []
 
@@ -215,7 +215,7 @@ def _narrate_crisis(crisis: dict) -> str:
     return " ".join(parts)
 
 
-def _narrate_corporate(corporate: dict) -> str:
+def _narrateCorporate(corporate: dict) -> str:
     """기업 실태 해석."""
     ec = corporate.get("earningsCycle") or {}
     pr = corporate.get("ponziRatio") or {}
@@ -253,7 +253,7 @@ def _narrate_corporate(corporate: dict) -> str:
     return " ".join(parts) if parts else ""
 
 
-def _narrate_trade(trade: dict) -> str:
+def _narrateTrade(trade: dict) -> str:
     """교역 해석 (KR)."""
     tot = trade.get("termsOfTrade") or {}
     proxy = trade.get("totProxy") or {}
@@ -290,7 +290,7 @@ def _narrate_trade(trade: dict) -> str:
 # ══════════════════════════════════════
 
 
-def detect_conflicts(summary: dict) -> list[str]:
+def detectConflicts(summary: dict) -> list[str]:
     """상충하는 신호를 감지하여 해석."""
     conflicts = []
 
@@ -339,19 +339,19 @@ def detect_conflicts(summary: dict) -> list[str]:
 # ══════════════════════════════════════
 
 
-def generate_circulation_summary(summary: dict, template: str = "normal") -> str:
+def generateCirculationSummary(summary: dict, template: str = "normal") -> str:
     """순환 서사 — 보고서 첫 단락. 결론 먼저."""
-    cycle_text = _narrate_cycle(summary.get("cycle") or {})
-    crisis_text = _narrate_crisis(summary.get("crisis") or {})
-    corporate_text = _narrate_corporate(summary.get("corporate") or {})
-    trade_text = _narrate_trade(summary.get("trade") or {})
+    cycle_text = _narrateCycle(summary.get("cycle") or {})
+    crisis_text = _narrateCrisis(summary.get("crisis") or {})
+    corporate_text = _narrateCorporate(summary.get("corporate") or {})
+    trade_text = _narrateTrade(summary.get("trade") or {})
 
     if template == "crisis":
         return f"{crisis_text} {corporate_text} {cycle_text}".strip()
     elif template == "kr":
         return f"{cycle_text} {trade_text} {corporate_text}".strip()
     else:
-        fci_text = _narrate_fci((summary.get("liquidity") or {}).get("fci") or {})
+        fci_text = _narrateFci((summary.get("liquidity") or {}).get("fci") or {})
         return f"{cycle_text} {fci_text} {corporate_text}".strip()
 
 
@@ -413,7 +413,7 @@ def _transitionAct5(forecast: dict, crisis: dict, summary: dict) -> str:
         parts.append(f"침체확률 {rp * 100:.0f}%")
     if suggested:
         parts.append(f"다음 장 주의: {suggested}")
-    conflicts = detect_conflicts(summary)
+    conflicts = detectConflicts(summary)
     if conflicts:
         parts.append(conflicts[0])
     if parts:
@@ -430,7 +430,7 @@ _ACT_TRANSITION_DISPATCH: dict[int, object] = {
 }
 
 
-def generate_act_transition(act: int, summary: dict) -> str:
+def generateActTransition(act: int, summary: dict) -> str:
     """6막 인과 전환 orchestrator — 앞 막이 뒷 막의 원인 (Q3.1f split).
 
     각 act 는 별도 _transitionAct{N} sub 에 위임. act 6 이상은 빈 문자열.
@@ -452,7 +452,7 @@ def generate_act_transition(act: int, summary: dict) -> str:
     return handler(summary) if handler else ""
 
 
-def generate_so_what(summary: dict) -> str:
+def generateSoWhat(summary: dict) -> str:
     """So What — 투자 시사점. 왜 이 비중인가."""
     allocation = summary.get("allocation") or {}
     strategies = summary.get("strategies") or {}
@@ -479,9 +479,9 @@ def generate_so_what(summary: dict) -> str:
     return " ".join(parts) if parts else ""
 
 
-def generate_rates_narrative(rates: dict) -> str:
+def generateRatesNarrative(rates: dict) -> str:
     """금리 환경 서사."""
-    return _narrate_rates(rates)
+    return _narrateRates(rates)
 
 
 # ══════════════════════════════════════
@@ -489,7 +489,7 @@ def generate_rates_narrative(rates: dict) -> str:
 # ══════════════════════════════════════
 
 
-def narrate_transmission_chain(summary: dict) -> str:
+def narrateTransmissionChain(summary: dict) -> str:
     """데이터에서 활성화된 전파 경로를 자동 감지하고 서사로 변환.
 
     Goldman: "driven by → contributing to → resulting in"
@@ -538,7 +538,7 @@ def narrate_transmission_chain(summary: dict) -> str:
     return " ".join(parts)
 
 
-def narrate_overall_story(summary: dict) -> str:
+def narrateOverallStory(summary: dict) -> str:
     """보고서 전체를 관통하는 종합 서사 — 순환 서사보다 깊은 해석.
 
     Goldman 스타일: 결론 → 핵심 근거 3개 → 리스크 1개 → 시사점
@@ -565,7 +565,7 @@ def narrate_overall_story(summary: dict) -> str:
         parts.append("이 판단의 핵심 근거는 " + ", ".join(reasons) + "이다.")
 
     # 전파 경로
-    chain = narrate_transmission_chain(summary)
+    chain = narrateTransmissionChain(summary)
     if chain:
         parts.append(chain)
 

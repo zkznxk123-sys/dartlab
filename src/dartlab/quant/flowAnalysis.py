@@ -40,7 +40,7 @@ def calcFlow(stockCode: str, *, market: str = "auto", series: bool = False, **kw
         return result_us
 
     # gather("flow") 로드
-    flow_data = _fetch_flow(stockCode)
+    flow_data = _fetchFlow(stockCode)
     if flow_data is None:
         return {"stockCode": stockCode, "market": market, "error": "수급 데이터 없음"}
 
@@ -58,25 +58,25 @@ def calcFlow(stockCode: str, *, market: str = "auto", series: bool = False, **kw
             result["dataPoints"] = n
 
             # 외국인 순매수
-            foreign_col = _find_col(cols, ["외국인", "foreign", "foreignNet"])
+            foreign_col = _findCol(cols, ["외국인", "foreign", "foreignNet"])
             if foreign_col:
                 foreign = flow_data.get_column(foreign_col).to_numpy().astype(np.float64)
                 foreign = np.nan_to_num(foreign, nan=0.0)
-                result["foreignNetBuy"] = _analyze_investor(foreign, "외국인")
+                result["foreignNetBuy"] = _analyzeInvestor(foreign, "외국인")
 
             # 기관 순매수
-            inst_col = _find_col(cols, ["기관", "institution", "instNet", "기관계"])
+            inst_col = _findCol(cols, ["기관", "institution", "instNet", "기관계"])
             if inst_col:
                 inst = flow_data.get_column(inst_col).to_numpy().astype(np.float64)
                 inst = np.nan_to_num(inst, nan=0.0)
-                result["instNetBuy"] = _analyze_investor(inst, "기관")
+                result["instNetBuy"] = _analyzeInvestor(inst, "기관")
 
             # 개인 순매수
-            retail_col = _find_col(cols, ["개인", "retail", "retailNet"])
+            retail_col = _findCol(cols, ["개인", "retail", "retailNet"])
             if retail_col:
                 retail = flow_data.get_column(retail_col).to_numpy().astype(np.float64)
                 retail = np.nan_to_num(retail, nan=0.0)
-                result["retailNetBuy"] = _analyze_investor(retail, "개인")
+                result["retailNetBuy"] = _analyzeInvestor(retail, "개인")
 
             # 종합 수급 판단
             bull_signals = 0
@@ -112,7 +112,7 @@ def calcFlow(stockCode: str, *, market: str = "auto", series: bool = False, **kw
                     series_data["inst_cum5"] = _cum(inst, 5)
                     series_data["inst_cum20"] = _cum(inst, 20)
                 # date 컬럼 함께 노출 (OHLCV 매칭용)
-                date_col = _find_col(cols, ["date", "Date", "rcept_dt"])
+                date_col = _findCol(cols, ["date", "Date", "rcept_dt"])
                 if date_col:
                     series_data["date"] = flow_data.get_column(date_col).to_list()
                 result["_series"] = series_data
@@ -124,7 +124,7 @@ def calcFlow(stockCode: str, *, market: str = "auto", series: bool = False, **kw
     return result
 
 
-def _analyze_investor(data: np.ndarray, name: str) -> dict:
+def _analyzeInvestor(data: np.ndarray, name: str) -> dict:
     """투자자별 수급 분석."""
     n = len(data)
     if n == 0:
@@ -173,7 +173,7 @@ def _analyze_investor(data: np.ndarray, name: str) -> dict:
     return result
 
 
-def _fetch_flow(stockCode: str):
+def _fetchFlow(stockCode: str):
     """gather("flow") 호출."""
     try:
         from dartlab.gather.entry import GatherEntry
@@ -184,7 +184,7 @@ def _fetch_flow(stockCode: str):
         return None
 
 
-def _find_col(columns: list[str], candidates: list[str]) -> str | None:
+def _findCol(columns: list[str], candidates: list[str]) -> str | None:
     """컬럼 이름 매칭."""
     for c in candidates:
         for col in columns:

@@ -901,8 +901,8 @@ def _acceptsOverrides(fn) -> bool:
 class _GroupAccessor:
     """analysis.financial, analysis.valuation 등 그룹 accessor."""
 
-    def __init__(self, analysis_instance: "Analysis", group: str):
-        self._analysis = analysis_instance
+    def __init__(self, analysisInstance: "Analysis", group: str):
+        self._analysis = analysisInstance
         self._group = group
 
     def __call__(self, company=None, *, stockCode=None, basePeriod=None, overrides=None):
@@ -925,7 +925,7 @@ class _GroupAccessor:
         if resolved not in _GROUPS.get(self._group, []):
             raise AttributeError(f"'{name}' 축은 '{self._group}' 그룹에 속하지 않습니다")
 
-        def _bound_axis(company=None, *, stockCode=None, basePeriod=None, overrides=None):
+        def _boundAxis(company=None, *, stockCode=None, basePeriod=None, overrides=None):
             """그룹 내 특정 축 실행 바인딩. `stockCode` / `company` 호환."""
             return self._analysis(
                 self._group,
@@ -936,9 +936,9 @@ class _GroupAccessor:
                 overrides=overrides,
             )
 
-        _bound_axis.__name__ = name
-        _bound_axis.__doc__ = f'analysis("{self._group}", "{resolved}")'
-        return _bound_axis
+        _boundAxis.__name__ = name
+        _boundAxis.__doc__ = f'analysis("{self._group}", "{resolved}")'
+        return _boundAxis
 
     def __repr__(self) -> str:
         axes = _GROUPS.get(self._group, [])

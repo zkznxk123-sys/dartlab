@@ -58,7 +58,7 @@ _thread_loop: asyncio.AbstractEventLoop | None = None
 _thread_pool = ThreadPoolExecutor(max_workers=1)
 
 
-def _get_thread_loop() -> asyncio.AbstractEventLoop:
+def _getThreadLoop() -> asyncio.AbstractEventLoop:
     """별도 스레드 전용 persistent event loop 반환.
 
     기존 loop가 없거나 닫혀 있으면 새로 생성한다.
@@ -75,7 +75,7 @@ def _get_thread_loop() -> asyncio.AbstractEventLoop:
     return _thread_loop
 
 
-def _run_in_thread_loop(coro):
+def _runInThreadLoop(coro):
     """persistent loop에서 코루틴을 동기적으로 실행.
 
     loop를 닫지 않으므로 이후 호출에서도 동일 loop를 재사용한다.
@@ -90,11 +90,11 @@ def _run_in_thread_loop(coro):
     Any
         코루틴의 반환값. 타입은 전달된 코루틴에 따라 다르다.
     """
-    loop = _get_thread_loop()
+    loop = _getThreadLoop()
     return loop.run_until_complete(coro)
 
 
-def run_async(coro):
+def runAsync(coro):
     """코루틴을 동기 컨텍스트에서 안전하게 실행.
 
     이미 event loop가 실행 중이면(Marimo/FastAPI 등) 별도 스레드의
@@ -114,9 +114,9 @@ def run_async(coro):
         asyncio.get_running_loop()
     except RuntimeError:
         # loop 없음 — 직접 실행 (persistent loop 사용)
-        return _run_in_thread_loop(coro)
+        return _runInThreadLoop(coro)
     # 이미 loop 실행 중 → 별도 스레드의 persistent loop
-    return _thread_pool.submit(_run_in_thread_loop, coro).result()
+    return _thread_pool.submit(_runInThreadLoop, coro).result()
 
 
 # ══════════════════════════════════════
@@ -129,10 +129,10 @@ class _AsyncRateLimiter:
 
     __slots__ = ("_domain", "_rpm", "_min_interval", "_window", "_timestamps", "_lock")
 
-    def __init__(self, domain: str, rpm: int = 30, min_interval: float = 0.0) -> None:
+    def __init__(self, domain: str, rpm: int = 30, minInterval: float = 0.0) -> None:
         self._domain = domain
         self._rpm = rpm
-        self._min_interval = min_interval
+        self._min_interval = minInterval
         self._window = 60.0
         self._timestamps: list[float] = []
         self._lock = asyncio.Lock()
@@ -209,7 +209,7 @@ class GatherHttpClient:
         self._limiters: dict[str, _AsyncRateLimiter] = {}
         self._semaphores: dict[str, asyncio.Semaphore] = {}
 
-    def _get_policy(self, domain: str) -> DomainConfig:
+    def _getPolicy(self, domain: str) -> DomainConfig:
         """도메인별 정책 반환. 미등록 도메인은 기본 정책 사용.
 
         Parameters
@@ -228,7 +228,7 @@ class GatherHttpClient:
         """
         return DOMAIN_POLICY.get(domain, _DEFAULT_POLICY)
 
-    def _get_limiter(self, domain: str) -> _AsyncRateLimiter:
+    def _getLimiter(self, domain: str) -> _AsyncRateLimiter:
         """도메인별 rate limiter 인스턴스 반환 (lazy 생성).
 
         Parameters
@@ -242,11 +242,11 @@ class GatherHttpClient:
             해당 도메인의 sliding window rate limiter.
         """
         if domain not in self._limiters:
-            policy = self._get_policy(domain)
-            self._limiters[domain] = _AsyncRateLimiter(domain, policy.rpm, policy.min_interval)
+            policy = self._getPolicy(domain)
+            self._limiters[domain] = _AsyncRateLimiter(domain, policy.rpm, policy.minInterval)
         return self._limiters[domain]
 
-    def _get_semaphore(self, domain: str) -> asyncio.Semaphore:
+    def _getSemaphore(self, domain: str) -> asyncio.Semaphore:
         """도메인별 동시 연결 제한 세마포어 반환 (lazy 생성).
 
         Parameters
@@ -260,7 +260,7 @@ class GatherHttpClient:
             해당 도메인의 동시 요청 수 제한 세마포어.
         """
         if domain not in self._semaphores:
-            policy = self._get_policy(domain)
+            policy = self._getPolicy(domain)
             self._semaphores[domain] = asyncio.Semaphore(policy.concurrency)
         return self._semaphores[domain]
 
@@ -271,7 +271,7 @@ class GatherHttpClient:
         params: dict | None = None,
         headers: dict | None = None,
         timeout: float | None = None,
-        max_retries: int = 3,
+        maxRetries: int = 3,
     ) -> httpx.Response:
         """GET 요청 — rate limit + semaphore + 재시도 (async).
 
@@ -299,13 +299,13 @@ class GatherHttpClient:
             모든 재시도 실패 시.
         """
         domain = urlparse(url).netloc
-        policy = self._get_policy(domain)
-        limiter = self._get_limiter(domain)
-        semaphore = self._get_semaphore(domain)
+        policy = self._getPolicy(domain)
+        limiter = self._getLimiter(domain)
+        semaphore = self._getSemaphore(domain)
         req_timeout = timeout or policy.timeout
 
         last_exc: Exception | None = None
-        for attempt in range(max_retries):
+        for attempt in range(maxRetries):
             # 랜덤 지터: 동일 도메인 연속 호출 시 버스트 패턴 방지
             jitter = random.uniform(policy.jitter_min, policy.jitter_max)
             await asyncio.sleep(jitter)
@@ -337,10 +337,10 @@ class GatherHttpClient:
                     return resp
                 except httpx.HTTPError as exc:
                     last_exc = exc
-                    if attempt < max_retries - 1:
+                    if attempt < maxRetries - 1:
                         await asyncio.sleep(2**attempt + random.uniform(0.1, 0.5))
 
-        raise SourceUnavailableError(f"{domain} 요청 실패 ({max_retries}회 재시도): {last_exc}")
+        raise SourceUnavailableError(f"{domain} 요청 실패 ({maxRetries}회 재시도): {last_exc}")
 
     async def post(
         self,
@@ -350,7 +350,7 @@ class GatherHttpClient:
         json: dict | None = None,
         headers: dict | None = None,
         timeout: float | None = None,
-        max_retries: int = 3,
+        maxRetries: int = 3,
     ) -> httpx.Response:
         """POST 요청 -- rate limit + semaphore + 재시도 (async).
 
@@ -380,13 +380,13 @@ class GatherHttpClient:
             모든 재시도 실패 시.
         """
         domain = urlparse(url).netloc
-        policy = self._get_policy(domain)
-        limiter = self._get_limiter(domain)
-        semaphore = self._get_semaphore(domain)
+        policy = self._getPolicy(domain)
+        limiter = self._getLimiter(domain)
+        semaphore = self._getSemaphore(domain)
         req_timeout = timeout or policy.timeout
 
         last_exc: Exception | None = None
-        for attempt in range(max_retries):
+        for attempt in range(maxRetries):
             jitter = random.uniform(policy.jitter_min, policy.jitter_max)
             await asyncio.sleep(jitter)
 
@@ -418,10 +418,10 @@ class GatherHttpClient:
                     return resp
                 except httpx.HTTPError as exc:
                     last_exc = exc
-                    if attempt < max_retries - 1:
+                    if attempt < maxRetries - 1:
                         await asyncio.sleep(2**attempt + random.uniform(0.1, 0.5))
 
-        raise SourceUnavailableError(f"{domain} POST 요청 실패 ({max_retries}회 재시도): {last_exc}")
+        raise SourceUnavailableError(f"{domain} POST 요청 실패 ({maxRetries}회 재시도): {last_exc}")
 
     async def close(self) -> None:
         """HTTP 클라이언트 종료. 내부 httpx.AsyncClient의 커넥션 풀을 정리."""

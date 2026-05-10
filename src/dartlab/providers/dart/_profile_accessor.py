@@ -264,7 +264,7 @@ class _ProfileAccessor:
 
     @property
     def sections(self) -> pl.DataFrame | None:
-        return self._company._get_primary("sections")
+        return self._company._getPrimary("sections")
 
     @property
     def availableTopics(self) -> list[str]:

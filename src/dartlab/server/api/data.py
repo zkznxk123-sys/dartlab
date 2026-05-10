@@ -16,7 +16,7 @@ from dartlab import Company
 from .common import (
     HANDLED_API_ERRORS,
     guideDetail,
-    serialize_payload,
+    serializePayload,
 )
 
 router = APIRouter()
@@ -26,7 +26,7 @@ router = APIRouter()
 
 
 @router.get("/api/data/sources/{code}")
-async def api_data_sources(code: str):
+async def apiDataSources(code: str):
     """경량 데이터 소스 목록 — registry 메타 + 파일 존재 여부만 확인 (빠름)."""
     try:
         c = await asyncio.to_thread(Company, code)
@@ -83,7 +83,7 @@ async def api_data_sources(code: str):
 
 
 @router.get("/api/data/preview/{code}/{module}")
-async def api_data_preview(code: str, module: str, max_rows: int = Query(50, ge=1, le=500)):
+async def apiDataPreview(code: str, module: str, maxRows: int = Query(50, ge=1, le=500)):
     """데이터 미리보기 — 모듈 데이터를 JSON으로 반환 (테이블/텍스트)."""
     try:
         c = await asyncio.to_thread(Company, code)
@@ -99,7 +99,7 @@ async def api_data_preview(code: str, module: str, max_rows: int = Query(50, ge=
     import polars as pl
 
     try:
-        data = await asyncio.to_thread(_resolve_module_data, c, entry)
+        data = await asyncio.to_thread(_resolveModuleData, c, entry)
     except (AttributeError, ValueError, OSError, KeyError, TypeError) as e:
         raise HTTPException(status_code=404, detail=f"데이터를 가져올 수 없습니다: {e}")
 
@@ -109,14 +109,14 @@ async def api_data_preview(code: str, module: str, max_rows: int = Query(50, ge=
     if isinstance(data, pl.DataFrame):
         if "year" in data.columns:
             data = data.sort("year")
-        serialized = serialize_payload(data, max_rows=max_rows)
+        serialized = serializePayload(data, maxRows=maxRows)
         result: dict[str, Any] = {
             **serialized,
             "module": module,
             "label": entry.label,
             "unit": entry.unit,
         }
-        financeMeta = _build_finance_meta(module)
+        financeMeta = _buildFinanceMeta(module)
         if financeMeta:
             result["meta"] = financeMeta
         return result
@@ -161,7 +161,7 @@ async def api_data_preview(code: str, module: str, max_rows: int = Query(50, ge=
 
 
 @router.get("/api/data/stats")
-def api_data_stats():
+def apiDataStats():
     """로컬 데이터 현황 — 문서/재무 파일 수, dartlab 버전."""
     from dartlab.core.dataLoader import _dataDir
 
@@ -182,7 +182,7 @@ def api_data_stats():
 
 
 @router.get("/api/spec")
-def api_spec():
+def apiSpec():
     """시스템 스펙 조회 — LLM/MCP/외부 클라이언트용 (deprecated)."""
     raise HTTPException(
         status_code=501,
@@ -194,7 +194,7 @@ def api_spec():
 
 
 @router.get("/api/export/modules/{code}")
-async def api_export_modules(code: str):
+async def apiExportModules(code: str):
     """Excel 내보내기 가능한 모듈 목록."""
     try:
         c = await asyncio.to_thread(Company, code)
@@ -212,7 +212,7 @@ async def api_export_modules(code: str):
 
 
 @router.get("/api/export/sources/{code}")
-async def api_export_sources(code: str):
+async def apiExportSources(code: str):
     """데이터 소스 디스커버리 — registry 기반 전체 소스 트리."""
     try:
         c = await asyncio.to_thread(Company, code)
@@ -226,7 +226,7 @@ async def api_export_sources(code: str):
 
 
 @router.get("/api/export/templates")
-def api_export_templates():
+def apiExportTemplates():
     """저장된 템플릿 목록 (프리셋 포함)."""
     from dartlab.viz.export.store import TemplateStore
 
@@ -238,19 +238,19 @@ def api_export_templates():
 
 
 @router.get("/api/export/templates/{template_id}")
-def api_export_template_get(template_id: str):
+def apiExportTemplateGet(templateId: str):
     """단일 템플릿 조회."""
     from dartlab.viz.export.store import TemplateStore
 
     store = TemplateStore()
-    t = store.get(template_id)
+    t = store.get(templateId)
     if t is None:
-        raise HTTPException(status_code=404, detail=f"템플릿 '{template_id}'을 찾을 수 없습니다")
+        raise HTTPException(status_code=404, detail=f"템플릿 '{templateId}'을 찾을 수 없습니다")
     return t.toDict()
 
 
 @router.post("/api/export/templates")
-def api_export_template_save(req: dict):
+def apiExportTemplateSave(req: dict):
     """템플릿 저장 (신규 or 업데이트)."""
     from dartlab.viz.export.store import TemplateStore
     from dartlab.viz.export.template import ExcelTemplate
@@ -262,22 +262,22 @@ def api_export_template_save(req: dict):
 
 
 @router.delete("/api/export/templates/{template_id}")
-def api_export_template_delete(template_id: str):
+def apiExportTemplateDelete(templateId: str):
     """템플릿 삭제."""
     from dartlab.viz.export.store import TemplateStore
 
     store = TemplateStore()
-    deleted = store.delete(template_id)
+    deleted = store.delete(templateId)
     if not deleted:
         raise HTTPException(status_code=400, detail="프리셋 템플릿은 삭제할 수 없습니다")
     return {"ok": True}
 
 
 @router.get("/api/export/excel/{code}")
-async def api_export_excel(
+async def apiExportExcel(
     code: str,
     modules: str | None = Query(None, description="쉼표 구분 모듈: IS,BS,CF,ratios,dividend,employee"),
-    template_id: str | None = Query(None, description="템플릿 ID (preset_full, preset_summary 등)"),
+    templateId: str | None = Query(None, description="템플릿 ID (preset_full, preset_summary 등)"),
 ):
     """Excel 파일 내보내기 — .xlsx 다운로드."""
     import tempfile
@@ -290,14 +290,14 @@ async def api_export_excel(
     tmpDir = Path(tempfile.gettempdir())
     safeName = c.corpName.replace("/", "_").replace("\\", "_")
 
-    if template_id:
+    if templateId:
         from dartlab.viz.export.excel import exportWithTemplate
         from dartlab.viz.export.store import TemplateStore
 
         store = TemplateStore()
-        tmpl = store.get(template_id)
+        tmpl = store.get(templateId)
         if tmpl is None:
-            raise HTTPException(status_code=404, detail=f"템플릿 '{template_id}'을 찾을 수 없습니다")
+            raise HTTPException(status_code=404, detail=f"템플릿 '{templateId}'을 찾을 수 없습니다")
         templateSafe = tmpl.name.replace("/", "_").replace("\\", "_")
         outPath = tmpDir / f"{c.stockCode}_{safeName}_{templateSafe}.xlsx"
         try:
@@ -330,7 +330,7 @@ async def api_export_excel(
 # ── Internal Helpers ──
 
 
-def _resolve_module_data(c: Company, entry) -> Any:
+def _resolveModuleData(c: Company, entry) -> Any:
     """registry entry에서 실제 데이터를 추출한다."""
     import dataclasses
     import enum
@@ -400,7 +400,7 @@ def _resolve_module_data(c: Company, entry) -> Any:
     return data
 
 
-def _build_finance_meta(moduleName: str) -> dict[str, Any]:
+def _buildFinanceMeta(moduleName: str) -> dict[str, Any]:
     """finance 시계열 모듈의 메타데이터 — 한글 라벨, 정렬, 레벨 정보."""
     if not moduleName.startswith("annual.") and not moduleName.startswith("timeseries."):
         return {}

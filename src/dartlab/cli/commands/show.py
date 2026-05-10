@@ -5,10 +5,10 @@ from __future__ import annotations
 import polars as pl
 
 from dartlab.cli.services.errors import CLIError
-from dartlab.cli.services.runtime import configure_dartlab
+from dartlab.cli.services.runtime import configureDartlab
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """show 서브커맨드 등록 — topic 기반 데이터 조회."""
     parser = subparsers.add_parser(
         "show",
@@ -23,16 +23,16 @@ def configure_parser(subparsers) -> None:
     parser.set_defaults(handler=run)
 
 
-def _print_result(result, title: str | None = None, *, context: str = "") -> int:
-    from dartlab.cli.services.output import get_console, print_dataframe
+def _printResult(result, title: str | None = None, *, context: str = "") -> int:
+    from dartlab.cli.services.output import getConsole, printDataframe
 
-    console = get_console()
+    console = getConsole()
     if result is None:
         label = f"{context} " if context else ""
         console.print(f"[dim]{label}데이터가 없습니다.[/]")
         return 0
     if isinstance(result, pl.DataFrame):
-        print_dataframe(result, title=title)
+        printDataframe(result, title=title)
         return 0
     if isinstance(result, dict):
         from rich.table import Table
@@ -50,7 +50,7 @@ def _print_result(result, title: str | None = None, *, context: str = "") -> int
 
 def run(args) -> int:
     """topic/trace 인자에 따라 show/trace/topic 목록을 출력한다."""
-    dartlab = configure_dartlab()
+    dartlab = configureDartlab()
 
     try:
         company = dartlab.Company(args.company)
@@ -59,21 +59,21 @@ def run(args) -> int:
 
         raise CLIError(wrapError(exc, stockCode=args.company)) from exc
 
-    from dartlab.cli.services.output import get_console
+    from dartlab.cli.services.output import getConsole
 
-    console = get_console()
+    console = getConsole()
     console.print(f"\n  [bold]{company.corpName}[/] ({company.stockCode})\n")
 
     # trace 모드
     if args.trace:
-        return _print_result(
+        return _printResult(
             company.trace(args.trace),
             context=f"{company.corpName} trace({args.trace})",
         )
 
     # topic 미지정 → index (전체 topic 목차)
     if args.topic is None:
-        return _print_result(company.index, context=f"{company.corpName} index")
+        return _printResult(company.index, context=f"{company.corpName} index")
 
     # period 처리
     period = args.period
@@ -81,4 +81,4 @@ def run(args) -> int:
         period = period[0]
 
     result = company.show(args.topic, args.block, period=period, raw=args.raw)
-    return _print_result(result, context=f"{company.corpName} {args.topic}")
+    return _printResult(result, context=f"{company.corpName} {args.topic}")

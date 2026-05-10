@@ -133,11 +133,11 @@ def ponziRatio(financeDf: pl.DataFrame) -> PonziRatioResult:
     annual = _extract_annual_consolidated(financeDf)
 
     # 연도 목록
-    year_col = "fy" if isEdgarSchema(annual) else "bsns_year"
-    if year_col not in annual.columns:
+    yearCol = "fy" if isEdgarSchema(annual) else "bsns_year"
+    if yearCol not in annual.columns:
         return PonziRatioResult([], [], 0, "stable", "데이터부족", "이자비용 데이터 부족")
 
-    years = sorted(annual[year_col].unique().to_list())
+    years = sorted(annual[yearCol].unique().to_list())
 
     # 기간별 ICR<1 비중
     period_data: list[tuple[str, int, int]] = []
@@ -161,21 +161,21 @@ def ponziRatio(financeDf: pl.DataFrame) -> PonziRatioResult:
     current = ratios[-1]
     if len(ratios) >= 2:
         if ratios[-1] > ratios[-2] + 0.02:
-            trend, trend_label = "rising", "상승"
+            trend, trendLabel = "rising", "상승"
         elif ratios[-1] < ratios[-2] - 0.02:
-            trend, trend_label = "falling", "하락"
+            trend, trendLabel = "falling", "하락"
         else:
-            trend, trend_label = "stable", "안정"
+            trend, trendLabel = "stable", "안정"
     else:
-        trend, trend_label = "stable", "안정"
+        trend, trendLabel = "stable", "안정"
 
     return PonziRatioResult(
         periods=periods,
         ratios=ratios,
         currentRatio=current,
         trend=trend,
-        trendLabel=trend_label,
-        description=f"ICR<1 비중 {current:.1%} ({trend_label}) — {ponzi_counts[-1]}/{totals[-1]}개사",
+        trendLabel=trendLabel,
+        description=f"ICR<1 비중 {current:.1%} ({trendLabel}) — {ponzi_counts[-1]}/{totals[-1]}개사",
     )
 
 

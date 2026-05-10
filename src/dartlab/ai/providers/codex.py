@@ -18,24 +18,24 @@ class CodexProvider(BaseProvider):
     """OpenAI Codex CLI 기반 provider."""
 
     @property
-    def default_model(self) -> str:
-        return codex_cli.get_codex_configured_model() or "gpt-4.1"
+    def defaultModel(self) -> str:
+        return codex_cli.getCodexConfiguredModel() or "gpt-4.1"
 
-    def check_available(self) -> bool:
-        info = codex_cli.inspect_codex_cli()
+    def checkAvailable(self) -> bool:
+        info = codex_cli.inspectCodexCli()
         return bool(info.get("installed") and info.get("authenticated"))
 
-    def _ensure_available(self) -> None:
+    def _ensureAvailable(self) -> None:
         if not shutil.which("codex"):
-            from dartlab.ai.providers.support.cliSetup import get_codex_install_guide
+            from dartlab.ai.providers.support.cliSetup import getCodexInstallGuide
 
-            raise FileNotFoundError(f"Codex CLI를 찾을 수 없습니다.\n\n{get_codex_install_guide()}")
+            raise FileNotFoundError(f"Codex CLI를 찾을 수 없습니다.\n\n{getCodexInstallGuide()}")
 
-        info = codex_cli.inspect_codex_cli()
+        info = codex_cli.inspectCodexCli()
         if not info.get("installed"):
-            from dartlab.ai.providers.support.cliSetup import get_codex_install_guide
+            from dartlab.ai.providers.support.cliSetup import getCodexInstallGuide
 
-            raise FileNotFoundError(f"Codex CLI를 찾을 수 없습니다.\n\n{get_codex_install_guide()}")
+            raise FileNotFoundError(f"Codex CLI를 찾을 수 없습니다.\n\n{getCodexInstallGuide()}")
         if not info.get("authenticated"):
             raise PermissionError(
                 "Codex CLI가 설치되어 있지만 로그인이 필요합니다.\n\n"
@@ -43,7 +43,7 @@ class CodexProvider(BaseProvider):
                 "ChatGPT 계정으로 로그인한 뒤 다시 시도하세요."
             )
 
-    def _build_prompt(self, messages: list[dict[str, str]]) -> str:
+    def _buildPrompt(self, messages: list[dict[str, str]]) -> str:
         parts: list[str] = []
         for m in messages:
             if m["role"] == "system":
@@ -52,16 +52,16 @@ class CodexProvider(BaseProvider):
                 parts.append(m["content"])
         return "\n\n".join(parts)
 
-    def _select_sandbox(self, messages: list[dict[str, str]]) -> str:
-        return codex_cli.infer_codex_sandbox(messages)
+    def _selectSandbox(self, messages: list[dict[str, str]]) -> str:
+        return codex_cli.inferCodexSandbox(messages)
 
     def complete(self, messages: list[dict[str, str]]) -> LLMResponse:
-        self._ensure_available()
-        prompt = self._build_prompt(messages)
-        sandbox = self._select_sandbox(messages)
-        answer, usage = codex_cli.run_codex_exec(
+        self._ensureAvailable()
+        prompt = self._buildPrompt(messages)
+        sandbox = self._selectSandbox(messages)
+        answer, usage = codex_cli.runCodexExec(
             prompt,
-            model=self.resolved_model,
+            model=self.resolvedModel,
             sandbox=sandbox,
             timeout=300,
         )
@@ -69,26 +69,26 @@ class CodexProvider(BaseProvider):
         return LLMResponse(
             answer=answer,
             provider="codex",
-            model=self.resolved_model,
+            model=self.resolvedModel,
             usage=usage,
         )
 
     def stream(self, messages: list[dict[str, str]]) -> Generator[str, None, None]:
-        self._ensure_available()
-        prompt = self._build_prompt(messages)
-        sandbox = self._select_sandbox(messages)
-        full_text, _usage = codex_cli.run_codex_exec(
+        self._ensureAvailable()
+        prompt = self._buildPrompt(messages)
+        sandbox = self._selectSandbox(messages)
+        full_text, _usage = codex_cli.runCodexExec(
             prompt,
-            model=self.resolved_model,
+            model=self.resolvedModel,
             sandbox=sandbox,
             timeout=300,
         )
 
         if full_text:
-            yield from _simulate_stream(full_text)
+            yield from _simulateStream(full_text)
 
 
-def _simulate_stream(text: str) -> Generator[str, None, None]:
+def _simulateStream(text: str) -> Generator[str, None, None]:
     import re
 
     chunks = re.split(r"(?<=\n)", text)

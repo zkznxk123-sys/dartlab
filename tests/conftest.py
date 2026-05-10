@@ -31,7 +31,7 @@ from pathlib import Path
 import pytest
 
 from dartlab.core.dataLoader import _dataDir
-from dartlab.core.memory import PRESSURE_CRITICAL_MB, get_memory_mb
+from dartlab.core.memory import PRESSURE_CRITICAL_MB, getMemoryMb
 
 
 def pytest_configure(config):
@@ -159,7 +159,7 @@ def _memory_guard_per_test():
     """
     yield
     gc.collect()
-    mem = get_memory_mb()
+    mem = getMemoryMb()
     if mem > _PYTEST_MEMORY_LIMIT_MB:
         pytest.exit(
             f"⚠ 메모리 안전 종료: {mem:.0f}MB > {_PYTEST_MEMORY_LIMIT_MB:.0f}MB 한계 초과.\n"

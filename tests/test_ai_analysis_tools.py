@@ -58,7 +58,7 @@ def test_outcome_log_rejects_invalid_date():
         date="not-a-date",  # _normalize_date 가 None 반환 → wrote=False
         decision="x",
     )
-    # store_decision 은 invalid date 시 False 반환 (예외 X). 도구는 ok=True + wrote=False.
+    # storeDecision 은 invalid date 시 False 반환 (예외 X). 도구는 ok=True + wrote=False.
     assert result.ok is True
     assert result.data.get("wrote") is False
 

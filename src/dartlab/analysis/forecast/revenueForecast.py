@@ -225,7 +225,7 @@ def _fetchConsensusRevenue(
         from dartlab.gather import Gather
 
         g = Gather()
-        items = g.revenue_consensus(stockCode, market=market)
+        items = g.revenueConsensus(stockCode, market=market)
         try:
             g.close()
         except RuntimeError:

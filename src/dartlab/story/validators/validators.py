@@ -143,7 +143,7 @@ def _register(desc: str):
 
 
 @_register("영업이익 > 순이익이면 비영업손익 확인 필요")
-def _inv_op_gt_ni(m: dict) -> bool:
+def _invOpGtNi(m: dict) -> bool:
     opm = m.get("opm")
     roe = m.get("roe")
     if opm is not None and roe is not None and opm > 0 and roe > opm * 2:
@@ -152,7 +152,7 @@ def _inv_op_gt_ni(m: dict) -> bool:
 
 
 @_register("ROE 음수인데 배당 지급이면 경고")
-def _inv_negative_roe_dividend(m: dict) -> bool:
+def _invNegativeRoeDividend(m: dict) -> bool:
     roe = m.get("roe")
     if roe is not None and roe < 0:
         return False  # 세부 판단은 caller가 추가
@@ -160,7 +160,7 @@ def _inv_negative_roe_dividend(m: dict) -> bool:
 
 
 @_register("부채비율 300% 초과 + 이자보상 2 미만 = 재무위기")
-def _inv_distress_combo(m: dict) -> bool:
+def _invDistressCombo(m: dict) -> bool:
     dr = m.get("debtRatio")
     ic = m.get("interestCoverage")
     if dr and ic and dr > 300 and ic < 2:
@@ -169,7 +169,7 @@ def _inv_distress_combo(m: dict) -> bool:
 
 
 @_register("OPM 50% 초과는 독과점 아니면 의심")
-def _inv_extreme_margin(m: dict) -> bool:
+def _invExtremeMargin(m: dict) -> bool:
     opm = m.get("opm")
     if opm is not None and opm > 50:
         return False
@@ -177,7 +177,7 @@ def _inv_extreme_margin(m: dict) -> bool:
 
 
 @_register("FCF가 5년 연속 음수면 사업 모델 재검토")
-def _inv_persistent_negative_fcf(m: dict) -> bool:
+def _invPersistentNegativeFcf(m: dict) -> bool:
     fcf = m.get("fcf")
     if fcf is not None and fcf < 0:
         return False
@@ -188,7 +188,7 @@ def _inv_persistent_negative_fcf(m: dict) -> bool:
 
 
 @_register("FCF = OCF - Capex (계산 일관성)")
-def _inv_fcf_identity(m: dict) -> bool:
+def _invFcfIdentity(m: dict) -> bool:
     fcf, ocf, capex = m.get("fcf"), m.get("ocf"), m.get("capex")
     if fcf is not None and ocf is not None and capex is not None:
         expected = ocf - capex
@@ -198,7 +198,7 @@ def _inv_fcf_identity(m: dict) -> bool:
 
 
 @_register("영업이익 = 매출 - COGS - SGA (decomposition)")
-def _inv_operating_income_decomp(m: dict) -> bool:
+def _invOperatingIncomeDecomp(m: dict) -> bool:
     rev, cogs, sga, opi = m.get("revenue"), m.get("cogs"), m.get("sga"), m.get("operatingIncome")
     if all(x is not None for x in (rev, cogs, sga, opi)):
         expected = rev - cogs - sga
@@ -208,7 +208,7 @@ def _inv_operating_income_decomp(m: dict) -> bool:
 
 
 @_register("ROIC = NOPAT / InvestedCapital")
-def _inv_roic_identity(m: dict) -> bool:
+def _invRoicIdentity(m: dict) -> bool:
     roic, nopat, ic = m.get("roic"), m.get("nopat"), m.get("investedCapital")
     if all(x is not None for x in (roic, nopat, ic)) and ic != 0:
         expected_pct = (nopat / ic) * 100
@@ -218,7 +218,7 @@ def _inv_roic_identity(m: dict) -> bool:
 
 
 @_register("ROE = NI / Equity")
-def _inv_roe_identity(m: dict) -> bool:
+def _invRoeIdentity(m: dict) -> bool:
     roe, ni, eq = m.get("roe"), m.get("netIncome"), m.get("equity")
     if all(x is not None for x in (roe, ni, eq)) and eq != 0:
         expected_pct = (ni / eq) * 100
@@ -228,7 +228,7 @@ def _inv_roe_identity(m: dict) -> bool:
 
 
 @_register("Interest Coverage = EBIT / Interest")
-def _inv_interest_coverage(m: dict) -> bool:
+def _invInterestCoverage(m: dict) -> bool:
     ic, ebit, interest = m.get("interestCoverage"), m.get("ebit"), m.get("interestExpense")
     if all(x is not None for x in (ic, ebit, interest)) and interest != 0:
         expected = ebit / interest
@@ -238,7 +238,7 @@ def _inv_interest_coverage(m: dict) -> bool:
 
 
 @_register("Working Capital = CurrentAssets - CurrentLiabilities")
-def _inv_working_capital(m: dict) -> bool:
+def _invWorkingCapital(m: dict) -> bool:
     wc, ca, cl = m.get("workingCapital"), m.get("currentAssets"), m.get("currentLiabilities")
     if all(x is not None for x in (wc, ca, cl)):
         expected = ca - cl
@@ -248,7 +248,7 @@ def _inv_working_capital(m: dict) -> bool:
 
 
 @_register("Debt/EBITDA 3배 초과 = leverage warning")
-def _inv_debt_ebitda(m: dict) -> bool:
+def _invDebtEbitda(m: dict) -> bool:
     debt, ebitda = m.get("totalDebt"), m.get("ebitda")
     if debt and ebitda and ebitda > 0:
         if debt / ebitda > 3:
@@ -257,7 +257,7 @@ def _inv_debt_ebitda(m: dict) -> bool:
 
 
 @_register("Free Float × 주가 = Market Cap (sanity)")
-def _inv_market_cap(m: dict) -> bool:
+def _invMarketCap(m: dict) -> bool:
     mc, px, shares = m.get("marketCap"), m.get("price"), m.get("sharesOutstanding")
     if all(x is not None for x in (mc, px, shares)):
         expected = px * shares
@@ -267,7 +267,7 @@ def _inv_market_cap(m: dict) -> bool:
 
 
 @_register("Goodwill / TotalAssets > 30% = M&A 집중 (goodwill impairment risk)")
-def _inv_goodwill_ratio(m: dict) -> bool:
+def _invGoodwillRatio(m: dict) -> bool:
     gw, ta = m.get("goodwill"), m.get("totalAssets")
     if gw and ta and ta > 0:
         if gw / ta > 0.30:
@@ -276,7 +276,7 @@ def _inv_goodwill_ratio(m: dict) -> bool:
 
 
 @_register("Tax Rate 통상 범위 (5~40%)")
-def _inv_tax_rate(m: dict) -> bool:
+def _invTaxRate(m: dict) -> bool:
     tax_rate = m.get("effectiveTaxRate")
     if tax_rate is not None:
         if tax_rate < 0.05 or tax_rate > 0.40:
@@ -285,7 +285,7 @@ def _inv_tax_rate(m: dict) -> bool:
 
 
 @_register("NI > 0 인데 OCF < 0 (accrual 경고 — 이익품질)")
-def _inv_ni_ocf_bridge(m: dict) -> bool:
+def _invNiOcfBridge(m: dict) -> bool:
     ni, ocf = m.get("netIncome"), m.get("ocf")
     if ni and ocf and ni > 0 and ocf < 0:
         return False
@@ -293,7 +293,7 @@ def _inv_ni_ocf_bridge(m: dict) -> bool:
 
 
 @_register("CCC (DSO + DIO - DPO) 업종 평균의 2배 초과")
-def _inv_ccc_reasonable(m: dict) -> bool:
+def _invCccReasonable(m: dict) -> bool:
     ccc = m.get("ccc")
     if ccc is not None and ccc > 200:  # 극단 case
         return False
@@ -301,7 +301,7 @@ def _inv_ccc_reasonable(m: dict) -> bool:
 
 
 @_register("매출채권회전 < 3회 (DSO > 120일) = 회수 부실")
-def _inv_ar_turnover(m: dict) -> bool:
+def _invArTurnover(m: dict) -> bool:
     dso = m.get("dso")
     if dso is not None and dso > 120:
         return False
@@ -309,7 +309,7 @@ def _inv_ar_turnover(m: dict) -> bool:
 
 
 @_register("재고회전 < 2회 (DIO > 180일) = 재고 과다")
-def _inv_inventory_turnover(m: dict) -> bool:
+def _invInventoryTurnover(m: dict) -> bool:
     dio = m.get("dio")
     if dio is not None and dio > 180:
         return False
@@ -317,7 +317,7 @@ def _inv_inventory_turnover(m: dict) -> bool:
 
 
 @_register("ROIC < WACC (가치 파괴)")
-def _inv_roic_wacc_spread(m: dict) -> bool:
+def _invRoicWaccSpread(m: dict) -> bool:
     roic, wacc = m.get("roic"), m.get("wacc")
     if roic is not None and wacc is not None and roic < wacc:
         return False

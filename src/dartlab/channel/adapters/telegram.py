@@ -45,33 +45,33 @@ class TelegramAdapter(ChannelAdapter):
 
         adapter = self
 
-        async def on_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        async def onStart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             if update.effective_chat:
-                await adapter.send_text(
+                await adapter.sendText(
                     str(update.effective_chat.id),
                     "DartLab 분석 봇입니다.\n사용법: /ask 삼성전자 배당 분석\n또는 바로 메시지를 보내세요.",
                 )
 
-        async def on_ask(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        async def onAsk(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             if update.effective_chat and context.args:
                 text = " ".join(context.args)
-                await adapter.handle_ask(str(update.effective_chat.id), text)
+                await adapter.handleAsk(str(update.effective_chat.id), text)
             elif update.effective_chat:
-                await adapter.send_text(
+                await adapter.sendText(
                     str(update.effective_chat.id),
                     "사용법: /ask 삼성전자 배당 분석",
                 )
 
-        async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        async def onMessage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             if update.effective_chat and update.message and update.message.text:
                 text = update.message.text.strip()
                 if text.startswith("/"):
                     return
-                await adapter.handle_ask(str(update.effective_chat.id), text)
+                await adapter.handleAsk(str(update.effective_chat.id), text)
 
-        app.add_handler(CommandHandler("start", on_start))
-        app.add_handler(CommandHandler("ask", on_ask))
-        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_message))
+        app.add_handler(CommandHandler("start", onStart))
+        app.add_handler(CommandHandler("ask", onAsk))
+        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, onMessage))
 
         logger.info("Telegram 봇 시작 (polling)")
         await app.initialize()
@@ -93,10 +93,10 @@ class TelegramAdapter(ChannelAdapter):
             await self._app.stop()
             await self._app.shutdown()
 
-    async def send_text(self, channel_id: str, text: str) -> None:
+    async def sendText(self, channelId: str, text: str) -> None:
         """Telegram 채팅방에 텍스트 메시지 전송."""
         if self._app:
-            await self._app.bot.send_message(chat_id=channel_id, text=text)
+            await self._app.bot.send_message(chat_id=channelId, text=text)
 
 
 def create(*, token: str, **kwargs) -> TelegramAdapter:

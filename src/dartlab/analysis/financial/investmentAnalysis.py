@@ -11,7 +11,7 @@ from dartlab.core.utils.safe import get as _get
 _getF = _getF2 = _getF3 = _getF4 = _get
 
 from dartlab.analysis.financial.accountSums import sumBorrowings
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import (
     annualColsFromPeriods,
     toDictBySnakeId,
@@ -53,7 +53,7 @@ def _estimateWacc(company) -> float | None:
 
     result: float | None = None
     try:
-        from dartlab.analysis.financial.proforma import compute_company_wacc
+        from dartlab.analysis.financial.proforma import computeCompanyWacc
 
         annual = company._buildFinanceSeries(freq="Y")
         if annual is not None:
@@ -62,13 +62,13 @@ def _estimateWacc(company) -> float | None:
             # 시총: gather.price 경유 (beta 감쇠에 필요)
             marketCap = None
             try:
-                from dartlab.gather.http import run_async
+                from dartlab.gather.http import runAsync
                 from dartlab.gather.price import fetch
 
                 stockCode = getattr(company, "stockCode", "")
-                snapshot = run_async(fetch(stockCode, market="KR")) if stockCode else None
+                snapshot = runAsync(fetch(stockCode, market="KR")) if stockCode else None
                 if snapshot:
-                    marketCap = snapshot.market_cap
+                    marketCap = snapshot.marketCap
             except (ImportError, OSError, RuntimeError):
                 pass
             # 개별 beta
@@ -79,12 +79,12 @@ def _estimateWacc(company) -> float | None:
                 betaCalc = _fetchBeta(getattr(company, "stockCode", ""), getattr(company, "currency", "KRW"))
             except (ImportError, OSError, RuntimeError):
                 pass
-            wacc, _ = compute_company_wacc(
+            wacc, _ = computeCompanyWacc(
                 series,
-                sector_params=sectorParams,
-                market_cap=marketCap,
+                sectorParams=sectorParams,
+                marketCap=marketCap,
                 currency=getattr(company, "currency", "KRW"),
-                beta_override=betaCalc,
+                betaOverride=betaCalc,
             )
             result = round(wacc, 2)
     except (ImportError, AttributeError, TypeError, ValueError):
@@ -98,7 +98,7 @@ def _estimateWacc(company) -> float | None:
 # ── ROIC (NOPAT / 투하자본) ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """ROIC 시계열 -- 투하자본 대비 실제 수익률.
 
@@ -294,7 +294,7 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 # ── 투자 강도 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcInvestmentIntensity(company, *, basePeriod: str | None = None) -> dict | None:
     """투자 강도 시계열 -- CAPEX/매출, 유무형 비율.
 
@@ -368,7 +368,7 @@ def calcInvestmentIntensity(company, *, basePeriod: str | None = None) -> dict |
 # ── NOPAT + 투하자본 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """NOPAT + 투하자본 시계열.
 
@@ -475,7 +475,7 @@ def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 # ── 타법인 출자 현황 (docs) ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcInvestmentInOther(company, *, basePeriod: str | None = None) -> dict | None:
     """investmentInOtherDetail docs 토픽에서 타법인 출자 총액 추출.
 
@@ -545,7 +545,7 @@ def calcInvestmentInOther(company, *, basePeriod: str | None = None) -> dict | N
 # ── 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcInvestmentFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """투자 분석 경고 신호.
 

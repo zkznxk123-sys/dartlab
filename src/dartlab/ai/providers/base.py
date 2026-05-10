@@ -52,69 +52,69 @@ class BaseProvider(ABC):
         ...
 
     @abstractmethod
-    def check_available(self) -> bool:
+    def checkAvailable(self) -> bool:
         """provider 접근 가능 여부 확인."""
         ...
 
     @property
     @abstractmethod
-    def default_model(self) -> str:
+    def defaultModel(self) -> str:
         """provider 기본 모델명."""
         ...
 
     @property
-    def resolved_model(self) -> str:
+    def resolvedModel(self) -> str:
         """사용자 설정 모델 또는 기본 모델명 반환."""
-        return self.config.model or self.default_model
+        return self.config.model or self.defaultModel
 
     @property
-    def supports_native_tools(self) -> bool:
+    def supportsNativeTools(self) -> bool:
         """이 provider가 네이티브 tool calling을 지원하는지."""
         return False
 
     @property
-    def supports_cache_control(self) -> bool:
+    def supportsCacheControl(self) -> bool:
         """시스템 프롬프트 캐시 경계(cache_control)를 지원하는지."""
         return False
 
-    def complete_with_tools(
+    def completeWithTools(
         self,
         messages: list[dict],
         tools: list[dict],
         *,
-        tool_choice: str | None = None,
+        toolChoice: str | None = None,
     ) -> ToolResponse:
         response = self.complete(messages)
         return ToolResponse(
             answer=response.answer,
             provider=response.provider,
             model=response.model,
-            tool_calls=[],
+            toolCalls=[],
             usage=response.usage,
             context_tables=response.context_tables,
         )
 
-    def stream_with_tools(
+    def streamWithTools(
         self,
         messages: list[dict],
         tools: list[dict],
         *,
-        tool_choice: str | None = None,
+        toolChoice: str | None = None,
     ) -> Generator:
-        resp = self.complete_with_tools(messages, tools, tool_choice=tool_choice)
+        resp = self.completeWithTools(messages, tools, toolChoice=toolChoice)
         yield resp
 
-    def format_tool_result(self, tool_call_id: str, result: str) -> dict:
+    def formatToolResult(self, toolCallId: str, result: str) -> dict:
         return {
             "role": "tool",
-            "tool_call_id": tool_call_id,
+            "tool_call_id": toolCallId,
             "content": result,
         }
 
-    def format_assistant_tool_calls(
+    def formatAssistantToolCalls(
         self,
         answer: str | None,
-        tool_calls: list,
+        toolCalls: list,
     ) -> dict:
         import json
 
@@ -128,7 +128,7 @@ class BaseProvider(ABC):
                     "arguments": json.dumps(tc.arguments, ensure_ascii=False),
                 },
             }
-            for tc in tool_calls
+            for tc in toolCalls
         ]
         return msg
 

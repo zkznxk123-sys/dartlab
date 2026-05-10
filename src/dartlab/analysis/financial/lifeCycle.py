@@ -84,9 +84,9 @@ def calcLifeCycle(
 
     # KR 조정
     currency = (getattr(company, "currency", "KRW") or "KRW").upper()
-    growth_adj = _KR_GROWTH_ADJ if currency == "KRW" else 0.0
+    growthAdj = _KR_GROWTH_ADJ if currency == "KRW" else 0.0
 
-    phase, confidence, history = _classify(signals, growth_adj=growth_adj)
+    phase, confidence, history = _classify(signals, growthAdj=growthAdj)
     inflection = _detectInflection(signals, phase)
 
     return {
@@ -203,7 +203,7 @@ def _gatherSignals(company: Any, *, basePeriod: str | None) -> dict | None:
     }
 
 
-def _classify(signals: dict, *, growth_adj: float = 0.0) -> tuple[str, float, list[dict]]:
+def _classify(signals: dict, *, growthAdj: float = 0.0) -> tuple[str, float, list[dict]]:
     """신호 → 단계 판별. 보수적 confidence 로 반환."""
     cagr = signals.get("revenueCAGR")
     spread = signals.get("roicWACCSpread")
@@ -233,7 +233,7 @@ def _classify(signals: dict, *, growth_adj: float = 0.0) -> tuple[str, float, li
     # 모든 조건 충족 시에만 (이전: 일부 충족도 흡수 → matureGrowth/turnaround 사각지대)
     if (
         isinstance(cagr, (int, float))
-        and cagr <= 5 + growth_adj
+        and cagr <= 5 + growthAdj
         and payout >= 40
         and fcf_streak >= 3
         and (spread is None or abs(spread) < 3.0)
@@ -241,17 +241,17 @@ def _classify(signals: dict, *, growth_adj: float = 0.0) -> tuple[str, float, li
         return "matureStable", 0.85, _buildHistory(signals)
 
     # G20.4: earlyGrowth — 고성장 + 음수 마진 + FCF 음수
-    if isinstance(cagr, (int, float)) and cagr >= 30 + growth_adj:
+    if isinstance(cagr, (int, float)) and cagr >= 30 + growthAdj:
         if recent_margin is not None and recent_margin < 0 and fcf_streak == 0:
             return "earlyGrowth", 0.75, _buildHistory(signals)
 
     # G20.5: highGrowth — 빠른 성장 + spread 양수 (Damodaran: 고성장기 R&D 확대로 마진 변동 OK)
-    if isinstance(cagr, (int, float)) and 15 + growth_adj <= cagr < 35 + growth_adj:
+    if isinstance(cagr, (int, float)) and 15 + growthAdj <= cagr < 35 + growthAdj:
         if spread is None or spread > 0:
             return "highGrowth", 0.75, _buildHistory(signals)
 
     # G20.6: matureGrowth 활성화 — CAGR 5~18% + spread 양수 (조건 완화: fcf_streak 의무 제거)
-    if isinstance(cagr, (int, float)) and 5 + growth_adj <= cagr < 18 + growth_adj:
+    if isinstance(cagr, (int, float)) and 5 + growthAdj <= cagr < 18 + growthAdj:
         if spread is None or spread > 0:
             return "matureGrowth", 0.7, _buildHistory(signals)
 
@@ -281,7 +281,7 @@ def _buildHistory(signals: dict) -> list[dict]:
     ]
 
 
-def _detectInflection(signals: dict, current_phase: str) -> dict:
+def _detectInflection(signals: dict, currentPhase: str) -> dict:
     """단계 전환 신호 감지 — 최근 지표 방향성으로."""
     direction = signals.get("marginDirection")
     cagr = signals.get("revenueCAGR")
@@ -289,15 +289,15 @@ def _detectInflection(signals: dict, current_phase: str) -> dict:
     fcf_streak = signals.get("fcfPositiveStreak", 0)
 
     # matureGrowth → matureStable: 성장 둔화
-    if current_phase == "matureGrowth" and isinstance(cagr, (int, float)) and cagr < 8:
+    if currentPhase == "matureGrowth" and isinstance(cagr, (int, float)) and cagr < 8:
         return {"towards": "matureStable", "score": 0.6}
     # matureStable → decline: 마진 하락 + FCF 약화
-    if current_phase == "matureStable" and direction == "contracting" and fcf_streak <= 1:
+    if currentPhase == "matureStable" and direction == "contracting" and fcf_streak <= 1:
         return {"towards": "decline", "score": 0.55}
     # highGrowth → matureGrowth: CAGR 하락
-    if current_phase == "highGrowth" and isinstance(cagr, (int, float)) and cagr < 15:
+    if currentPhase == "highGrowth" and isinstance(cagr, (int, float)) and cagr < 15:
         return {"towards": "matureGrowth", "score": 0.5}
     # turnaround → highGrowth/matureGrowth: 지속 흑자
-    if current_phase == "turnaround" and len(margins) >= 3 and all(m > 0 for m in margins[:3]):
+    if currentPhase == "turnaround" and len(margins) >= 3 and all(m > 0 for m in margins[:3]):
         return {"towards": "matureGrowth", "score": 0.6}
     return {"towards": None, "score": 0.0}

@@ -56,7 +56,7 @@ def recordSkillUsage(
     return recordOutcome(skillId, ok=bool(final_ok), valueRefs=valueRefs)
 
 
-def _resolveCurrentStatuses(skill_ids: list[str]) -> dict[str, str]:
+def _resolveCurrentStatuses(skillIds: list[str]) -> dict[str, str]:
     """skill 의 현재 status 를 dartlab.skills.getSkill 로 조회.
 
     skill 이 spec 에 없거나 import 실패 시 unverified 로 가정.
@@ -65,8 +65,8 @@ def _resolveCurrentStatuses(skill_ids: list[str]) -> dict[str, str]:
     try:
         from dartlab.skills import getSkill
     except ImportError:
-        return {sid: "unverified" for sid in skill_ids}
-    for sid in skill_ids:
+        return {sid: "unverified" for sid in skillIds}
+    for sid in skillIds:
         try:
             spec = getSkill(sid)
             statuses[sid] = getattr(spec, "status", "unverified") or "unverified"

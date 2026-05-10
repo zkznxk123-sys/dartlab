@@ -75,7 +75,7 @@ _EDGE_LABELS = {"investment": "출자", "shareholder": "지분보유"}
 # ── favicon base64 ──
 
 
-def _favicon_b64() -> str:
+def _faviconB64() -> str:
     """landing/static/favicon.png → base64 data URI."""
     # 모듈 위치 기준 상대 경로로 찾기
     candidates = [
@@ -92,16 +92,16 @@ def _favicon_b64() -> str:
 # ── 데이터 변환 ──
 
 
-def _group_color_map(nodes: list[dict]) -> dict[str, str]:
+def _groupColorMap(nodes: list[dict]) -> dict[str, str]:
     groups = sorted({n.get("group", "") for n in nodes if n.get("type") == "company"})
     return {g: _GROUP_PALETTE[i % len(_GROUP_PALETTE)] for i, g in enumerate(groups)}
 
 
-def _prepare_vis_data(
+def _prepareVisData(
     nodes: list[dict],
     edges: list[dict],
-    group_colors: dict[str, str],
-    center_id: str | None = None,
+    groupColors: dict[str, str],
+    centerId: str | None = None,
 ) -> tuple[list[dict], list[dict]]:
     """export_full/export_ego → vis.js 노드/엣지."""
     label_map = {n["id"]: n.get("label", n["id"]) for n in nodes}
@@ -111,9 +111,9 @@ def _prepare_vis_data(
         if n.get("type") == "person":
             continue
         group = n.get("group", "")
-        color = group_colors.get(group, "#475569")
+        color = groupColors.get(group, "#475569")
         degree = n.get("degree", 1)
-        is_center = (n["id"] == center_id) if center_id else False
+        is_center = (n["id"] == centerId) if centerId else False
 
         vis_nodes.append(
             {
@@ -179,16 +179,16 @@ def _prepare_vis_data(
 # ── HTML 생성 ──
 
 
-def _build_html(
-    nodes_json: str,
-    edges_json: str,
+def _buildHtml(
+    nodesJson: str,
+    edgesJson: str,
     title: str,
     *,
-    center_id: str | None = None,
-    node_count: int = 0,
+    centerId: str | None = None,
+    nodeCount: int = 0,
 ) -> str:
-    is_large = node_count > 300
-    favicon = _favicon_b64()
+    is_large = nodeCount > 300
+    favicon = _faviconB64()
     b = _BRAND
 
     return f"""<!DOCTYPE html>
@@ -377,9 +377,9 @@ body {{ font-family: 'Pretendard', system-ui, -apple-system, sans-serif; backgro
 <div id="loading"><div class="spinner"></div><div class="ld-msg">네트워크 구성 중</div><div class="ld-pct" id="ldPct">0%</div></div>
 
 <script>
-const N = {nodes_json};
-const E = {edges_json};
-const CID = {json.dumps(center_id)};
+const N = {nodesJson};
+const E = {edgesJson};
+const CID = {json.dumps(centerId)};
 const BIG = {str(is_large).lower()};
 
 const nMap = {{}};
@@ -613,22 +613,22 @@ class NetworkView:
         return p
 
 
-def render_network(
+def renderNetwork(
     nodes: list[dict],
     edges: list[dict],
     title: str = "관계 네트워크",
     *,
-    center_id: str | None = None,
+    centerId: str | None = None,
 ) -> NetworkView:
     """export_full/export_ego 결과 → NetworkView."""
-    group_colors = _group_color_map(nodes)
-    vis_nodes, vis_edges = _prepare_vis_data(nodes, edges, group_colors, center_id=center_id)
-    html = _build_html(
+    groupColors = _groupColorMap(nodes)
+    vis_nodes, vis_edges = _prepareVisData(nodes, edges, groupColors, centerId=centerId)
+    html = _buildHtml(
         json.dumps(vis_nodes, ensure_ascii=False),
         json.dumps(vis_edges, ensure_ascii=False),
         title,
-        center_id=center_id,
-        node_count=len(vis_nodes),
+        centerId=centerId,
+        nodeCount=len(vis_nodes),
     )
-    name = f"ego_{center_id}" if center_id else "full"
+    name = f"ego_{centerId}" if centerId else "full"
     return NetworkView(html, name)

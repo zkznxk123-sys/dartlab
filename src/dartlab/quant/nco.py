@@ -64,16 +64,16 @@ def _hierarchicalClusters(dist: np.ndarray, k: int) -> list[list[int]]:
     return clusters
 
 
-def _intraClusterWeights(cov_sub: np.ndarray, mu_sub: np.ndarray | None) -> np.ndarray:
+def _intraClusterWeights(covSub: np.ndarray, muSub: np.ndarray | None) -> np.ndarray:
     """Cluster 내부: Markowitz tangency (μ 있으면) 또는 minimum variance."""
-    n = cov_sub.shape[0]
+    n = covSub.shape[0]
     try:
-        inv = np.linalg.inv(cov_sub + np.eye(n) * 1e-8)
+        inv = np.linalg.inv(covSub + np.eye(n) * 1e-8)
     except np.linalg.LinAlgError:
         return np.ones(n) / n
 
-    if mu_sub is not None:
-        w = inv @ mu_sub
+    if muSub is not None:
+        w = inv @ muSub
     else:
         w = inv @ np.ones(n)
     w = np.clip(w, 0, None)  # long-only

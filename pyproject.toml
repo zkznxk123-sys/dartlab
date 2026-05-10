@@ -162,7 +162,9 @@ exclude = ["experiments", "*/_reference"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
-ignore = ["E402", "E501", "E741", "F841"]
+# F401 = unused import — __init__.py 의 의도적 re-export 패턴이 dartlab 전반에 다수 (camelCase codemod 후 더 늘어남).
+# 진짜 unused import 는 deptry / vulture 가 catch.
+ignore = ["E402", "E501", "E741", "F841", "F401"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

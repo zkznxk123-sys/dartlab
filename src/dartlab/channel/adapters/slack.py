@@ -21,9 +21,9 @@ class SlackAdapter(ChannelAdapter):
     name = "slack"
     max_message_length = 3000
 
-    def __init__(self, bot_token: str, app_token: str):
-        self._bot_token = bot_token
-        self._app_token = app_token
+    def __init__(self, botToken: str, appToken: str):
+        self._bot_token = botToken
+        self._app_token = appToken
         self._app = None
         self._client = None
         self._handler = None
@@ -42,7 +42,7 @@ class SlackAdapter(ChannelAdapter):
         adapter = self
 
         @app.event("app_mention")
-        def on_mention(event, _say):
+        def onMention(event, _say):
             text = event.get("text", "")
             # @bot 멘션 제거
             import re
@@ -52,10 +52,10 @@ class SlackAdapter(ChannelAdapter):
 
             import asyncio
 
-            asyncio.run(adapter.handle_ask(channel, text))
+            asyncio.run(adapter.handleAsk(channel, text))
 
         @app.event("message")
-        def on_dm(event, _say):
+        def onDm(event, _say):
             # DM에서는 멘션 없이 바로 처리
             if event.get("channel_type") != "im":
                 return
@@ -64,7 +64,7 @@ class SlackAdapter(ChannelAdapter):
 
             import asyncio
 
-            asyncio.run(adapter.handle_ask(channel, text))
+            asyncio.run(adapter.handleAsk(channel, text))
 
         logger.info("Slack 봇 시작 (Socket Mode)")
         handler = SocketModeHandler(app, self._app_token)
@@ -87,7 +87,7 @@ class SlackAdapter(ChannelAdapter):
             if inspect.isawaitable(result):
                 await result
 
-    async def send_text(self, channel_id: str, text: str) -> None:
+    async def sendText(self, channelId: str, text: str) -> None:
         """Slack 채널에 텍스트 메시지 전송.
 
         slack_bolt 동기 클라이언트는 내부 HTTP 호출이라 이벤트 루프 블록.
@@ -96,11 +96,11 @@ class SlackAdapter(ChannelAdapter):
         if self._client:
             await asyncio.to_thread(
                 self._client.chat_postMessage,
-                channel=channel_id,
+                channel=channelId,
                 text=text,
             )
 
 
-def create(*, bot_token: str, app_token: str, **kwargs) -> SlackAdapter:
+def create(*, botToken: str, appToken: str, **kwargs) -> SlackAdapter:
     """SlackAdapter 팩토리."""
-    return SlackAdapter(bot_token, app_token)
+    return SlackAdapter(botToken, appToken)

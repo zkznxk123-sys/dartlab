@@ -195,15 +195,15 @@ def technicalVerdict(
             stockCode=stockCode,
             market=market,
             benchmarkMode=benchmarkMode,
-            return_meta=True,
+            returnMeta=True,
         )
         if isinstance(bench_result, tuple):
-            market_df, benchmark_meta = bench_result
+            marketDf, benchmark_meta = bench_result
         else:
-            market_df, benchmark_meta = bench_result, None
-        if market_df is not None and not market_df.is_empty():
-            rs = _relativeStrength(df, market_df)
-            beta = _calcBeta(df, market_df)
+            marketDf, benchmark_meta = bench_result, None
+        if marketDf is not None and not marketDf.is_empty():
+            rs = _relativeStrength(df, marketDf)
+            beta = _calcBeta(df, marketDf)
             result["relativeStrength"] = rs
             result["beta"] = beta
             if benchmark_meta:
@@ -558,9 +558,9 @@ def _categoryEdgeAudit(
     category: str,
     *,
     horizons: tuple[int, ...] = (5, 10, 20),
-    min_signals: int = 30,
-    ratio_threshold: float = 1.3,
-    t_threshold: float = 1.96,
+    minSignals: int = 30,
+    ratioThreshold: float = 1.3,
+    tThreshold: float = 1.96,
 ) -> dict[str, dict]:
     """카테고리 라벨 × horizon → forward return 통계 우위 검증 (Phase 5).
 
@@ -647,7 +647,7 @@ def _categoryEdgeAudit(
                     baseline_returns[h].append(fwd)
 
     # Welch's t-test (scipy 0)
-    def _welch_t(a, b):
+    def _welchT(a, b):
         na, nb = len(a), len(b)
         if na < 5 or nb < 5:
             return 0.0
@@ -675,12 +675,12 @@ def _categoryEdgeAudit(
             avg_fwd = float(np.mean(rets)) if rets else 0
             avg_base = float(np.mean(base)) if base else 0
             ratio = avg_fwd / avg_base if abs(avg_base) > 1e-9 else 0
-            t_stat = _welch_t(rets, base)
+            t_stat = _welchT(rets, base)
 
             passed = (
-                n_sig >= min_signals
-                and (abs(ratio) >= ratio_threshold or abs(ratio) <= 1 / ratio_threshold)
-                and abs(t_stat) >= t_threshold
+                n_sig >= minSignals
+                and (abs(ratio) >= ratioThreshold or abs(ratio) <= 1 / ratioThreshold)
+                and abs(t_stat) >= tThreshold
             )
             if passed:
                 passes_any = True
@@ -720,7 +720,7 @@ def _fetchBenchmark(
     benchmarkMode: str = "market",
     start: str | None = None,
     end: str | None = None,
-    return_meta: bool = False,
+    returnMeta: bool = False,
 ) -> pl.DataFrame | tuple[pl.DataFrame | None, dict] | None:
     """시장 지수 OHLCV 수집.
 
@@ -740,14 +740,14 @@ def _fetchBenchmark(
         benchmarkMode=benchmarkMode,
         start=start,
         end=end,
-        return_meta=return_meta,
+        returnMeta=returnMeta,
     )
 
 
-def _relativeStrength(stock_df: pl.DataFrame, market_df: pl.DataFrame) -> float | None:
+def _relativeStrength(stockDf: pl.DataFrame, marketDf: pl.DataFrame) -> float | None:
     """종목 RSI - 시장 RSI → 상대강도."""
-    s_close = stock_df["close"].to_numpy().astype(np.float64)
-    m_close = market_df["close"].to_numpy().astype(np.float64)
+    s_close = stockDf["close"].to_numpy().astype(np.float64)
+    m_close = marketDf["close"].to_numpy().astype(np.float64)
 
     s_rsi = ind.vrsi(s_close, 14)
     m_rsi = ind.vrsi(m_close, 14)
@@ -760,20 +760,18 @@ def _relativeStrength(stock_df: pl.DataFrame, market_df: pl.DataFrame) -> float 
     return None
 
 
-def _calcBeta(stock_df: pl.DataFrame, market_df: pl.DataFrame) -> dict | None:
+def _calcBeta(stockDf: pl.DataFrame, marketDf: pl.DataFrame) -> dict | None:
     """종목 vs 시장 OLS 베타 + CAPM."""
     # 날짜 매칭 (str 변환)
-    s_dates = set(str(d) for d in stock_df["date"].to_list())
-    m_dates = set(str(d) for d in market_df["date"].to_list())
+    s_dates = set(str(d) for d in stockDf["date"].to_list())
+    m_dates = set(str(d) for d in marketDf["date"].to_list())
     common = sorted(s_dates & m_dates)
 
     if len(common) < 30:
         return None
 
-    s_df = stock_df.with_columns(pl.col("date").cast(pl.Utf8).alias("_d")).filter(pl.col("_d").is_in(common)).sort("_d")
-    m_df = (
-        market_df.with_columns(pl.col("date").cast(pl.Utf8).alias("_d")).filter(pl.col("_d").is_in(common)).sort("_d")
-    )
+    s_df = stockDf.with_columns(pl.col("date").cast(pl.Utf8).alias("_d")).filter(pl.col("_d").is_in(common)).sort("_d")
+    m_df = marketDf.with_columns(pl.col("date").cast(pl.Utf8).alias("_d")).filter(pl.col("_d").is_in(common)).sort("_d")
 
     sc = s_df["close"].to_numpy().astype(np.float64)
     mc = m_df["close"].to_numpy().astype(np.float64)

@@ -81,21 +81,21 @@ def _ensureDir(path: Path) -> None:
 
 
 def remember(
-    memo_or_text: DecisionMemo | str,
+    memoOrText: DecisionMemo | str,
     *,
     tags: list[str] | None = None,
     refs: list[str] | None = None,
 ) -> None:
     """DecisionMemo 또는 string 받음 (overload)."""
-    if isinstance(memo_or_text, DecisionMemo):
-        memo = memo_or_text
+    if isinstance(memoOrText, DecisionMemo):
+        memo = memoOrText
         question = memo.question
         answer = memo.answer
         memo_refs = list(memo.refs) + list(refs or [])
         memo_tags = list(memo.tags) + list(tags or [])
         text = memo.text
     else:
-        text = str(memo_or_text or "").strip()
+        text = str(memoOrText or "").strip()
         if not text:
             return
         question = text
@@ -129,7 +129,7 @@ _TARGET_TAG_PREFIX = "target:"
 _METRIC_TAG_PREFIX = "metric:"
 
 
-def _scoreRecall(row: dict, q_tokens: set[str], q_meta: dict) -> float:
+def _scoreRecall(row: dict, qTokens: set[str], qMeta: dict) -> float:
     """recall 점수 — 토큰 overlap + target/skill category/metric 가중.
 
     가중치:
@@ -141,15 +141,15 @@ def _scoreRecall(row: dict, q_tokens: set[str], q_meta: dict) -> float:
     d_tokens = _tokenize(text_for_scoring)
     if not d_tokens:
         return 0.0
-    overlap = len(q_tokens & d_tokens)
-    base = overlap / (len(q_tokens) + 1) if overlap else 0.0
+    overlap = len(qTokens & d_tokens)
+    base = overlap / (len(qTokens) + 1) if overlap else 0.0
     if base == 0.0:
         return 0.0
 
     bonus = 0.0
     tags = row.get("tags") or []
     if isinstance(tags, list):
-        target_codes = q_meta.get("targets") or set()
+        target_codes = qMeta.get("targets") or set()
         for tag in tags:
             tag_str = str(tag)
             if tag_str.startswith(_TARGET_TAG_PREFIX):
@@ -163,7 +163,7 @@ def _scoreRecall(row: dict, q_tokens: set[str], q_meta: dict) -> float:
             tag_str = str(tag)
             if tag_str.startswith(_METRIC_TAG_PREFIX):
                 metric = tag_str[len(_METRIC_TAG_PREFIX) :].lower()
-                if metric and any(metric in tok for tok in q_tokens):
+                if metric and any(metric in tok for tok in qTokens):
                     bonus += 0.2
                     break
     return base + bonus
@@ -202,8 +202,8 @@ def recall(query: str, *, k: int = 5) -> list[DecisionMemo]:
     path = _resolveDecisionsPath()
     if not path.exists() or not query:
         return []
-    q_tokens = _tokenize(query)
-    q_meta = _extractQueryMeta(query)
+    qTokens = _tokenize(query)
+    qMeta = _extractQueryMeta(query)
     scored: list[tuple[float, dict]] = []
     with path.open("r", encoding="utf-8") as f:
         for line in f:
@@ -211,7 +211,7 @@ def recall(query: str, *, k: int = 5) -> list[DecisionMemo]:
                 row = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            score = _scoreRecall(row, q_tokens, q_meta)
+            score = _scoreRecall(row, qTokens, qMeta)
             if score > 0.0:
                 scored.append((score, row))
     scored.sort(key=lambda pair: pair[0], reverse=True)

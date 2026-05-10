@@ -13,11 +13,11 @@ from __future__ import annotations
 import numpy as np
 
 
-def _quantile_regression(
+def _quantileRegression(
     X: np.ndarray,
     y: np.ndarray,
     tau: float,
-    max_iter: int = 50,
+    maxIter: int = 50,
     tol: float = 1e-6,
 ) -> np.ndarray:
     """분위회귀 — IRLS 방식.
@@ -38,7 +38,7 @@ def _quantile_regression(
     # OLS 초기값
     beta = np.linalg.lstsq(X, y, rcond=None)[0]
 
-    for _ in range(max_iter):
+    for _ in range(maxIter):
         residuals = y - X @ beta
         # IRLS 가중치: pinball loss의 미분
         weights = np.where(residuals >= 0, tau, 1 - tau)
@@ -63,8 +63,8 @@ def _quantile_regression(
 
 
 def growthAtRisk(
-    fci_values: list[float],
-    gdp_growth_values: list[float],
+    fciValues: list[float],
+    gdpGrowthValues: list[float],
     *,
     horizon: int = 4,
     quantiles: tuple[float, ...] = (0.05, 0.25, 0.50, 0.75, 0.95),
@@ -81,8 +81,8 @@ def growthAtRisk(
         dict with GaR percentiles, tail risk, skewness
         None if insufficient data
     """
-    fci = np.array(fci_values, dtype=np.float64)
-    gdp = np.array(gdp_growth_values, dtype=np.float64)
+    fci = np.array(fciValues, dtype=np.float64)
+    gdp = np.array(gdpGrowthValues, dtype=np.float64)
 
     # 동일 길이로 맞춤
     min_len = min(len(fci), len(gdp))
@@ -121,7 +121,7 @@ def growthAtRisk(
     x_pred = np.array([1.0, current_fci])
 
     for tau in quantiles:
-        beta = _quantile_regression(X, y, tau)
+        beta = _quantileRegression(X, y, tau)
         predicted = float(x_pred @ beta)
         results[tau] = round(predicted, 2)
 

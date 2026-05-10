@@ -13,7 +13,7 @@ analysis-credit 간 순환 의존 제거를 위해 credit/ 내부로 이동.
 
 from __future__ import annotations
 
-from dartlab.core.memory import memoized_calc as _memoized_calc
+from dartlab.core.memory import memoizedCalc as _memoized_calc
 
 # ── credit 엔진 호출 ──
 

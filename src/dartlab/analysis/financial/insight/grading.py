@@ -59,14 +59,14 @@ def _getGrowthYoY(annualVals: list[float | None]) -> float | None:
     float | None
         yoyPct : float | None — YoY 변화율 (%). 유효값 2개 미만이면 None.
     """
-    from dartlab.analysis.financial.ratios import yoy_pct
+    from dartlab.analysis.financial.ratios import yoyPct
 
     valid = [(i, v) for i, v in enumerate(annualVals) if v is not None]
     if len(valid) < 2:
         return None
     _, prev = valid[-2]
     _, curr = valid[-1]
-    return yoy_pct(curr, prev)
+    return yoyPct(curr, prev)
 
 
 def _getVolatility(qVals: list[float | None]) -> float | None:

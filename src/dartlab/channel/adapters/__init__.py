@@ -17,7 +17,7 @@ _ADAPTER_MAP: dict[str, str] = {
 }
 
 
-def create_adapter(platform: str, **kwargs) -> ChannelAdapter:
+def createAdapter(platform: str, **kwargs) -> ChannelAdapter:
     """플랫폼별 어댑터를 생성한다.
 
     Args:

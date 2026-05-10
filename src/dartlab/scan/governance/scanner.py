@@ -5,14 +5,14 @@ from __future__ import annotations
 import polars as pl
 
 from dartlab.scan._helpers import (
-    find_latest_year,
+    findLatestYear,
     parse_num,
-    pick_best_quarter,
-    scan_parquets,
+    pickBestQuarter,
+    scanParquets,
 )
 
 
-def scan_major_holder_pct() -> dict[str, float]:
+def scanMajorHolderPct() -> dict[str, float]:
     """전종목 최대주주 지분율 스캔.
 
     majorHolder parquet에서 최신 연도의 최대주주 지분율을 추출한다.
@@ -24,14 +24,14 @@ def scan_major_holder_pct() -> dict[str, float]:
         종목코드 : 최대주주 지분율 (%)
         빈 dict — 데이터 없음
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "majorHolder",
         ["stockCode", "year", "quarter", "bsis_posesn_stock_qota_rt"],
     )
     if raw.is_empty():
         return {}
 
-    latest_year = find_latest_year(raw, "bsis_posesn_stock_qota_rt", 1000)
+    latest_year = findLatestYear(raw, "bsis_posesn_stock_qota_rt", 1000)
     if latest_year is None:
         return {}
 
@@ -48,7 +48,7 @@ def scan_major_holder_pct() -> dict[str, float]:
     return result
 
 
-def scan_outside_directors() -> dict[str, dict]:
+def scanOutsideDirectors() -> dict[str, dict]:
     """전종목 사외이사 현황 스캔.
 
     outsideDirector parquet의 drctr_co/otcmp_drctr_co 집계값을 사용한다.
@@ -64,7 +64,7 @@ def scan_outside_directors() -> dict[str, dict]:
             겸직 : int — 겸직 인원 (명)
         빈 dict — 데이터 없음
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "outsideDirector",
         ["stockCode", "year", "quarter", "drctr_co", "otcmp_drctr_co", "mdstrm_resig", "rlsofc"],
     )
@@ -95,7 +95,7 @@ def _outsideFromDedicated(raw: pl.DataFrame) -> dict[str, dict]:
             중도사임 : int — 중도사임 인원 (명)
             겸직 : int — 겸직 인원 (명)
     """
-    latestYear = find_latest_year(raw, "drctr_co", 500)
+    latestYear = findLatestYear(raw, "drctr_co", 500)
     if latestYear is None:
         return {}
 
@@ -104,7 +104,7 @@ def _outsideFromDedicated(raw: pl.DataFrame) -> dict[str, dict]:
 
     for code, group in sub.group_by("stockCode"):
         codeVal = code[0]
-        qdf = pick_best_quarter(group)
+        qdf = pickBestQuarter(group)
 
         totalDirectors = 0
         outsideDirectors = 0
@@ -150,14 +150,14 @@ def _outsideFromExecutive() -> dict[str, dict]:
             중도사임 : int — 항상 0 (명)
             겸직 : int — 항상 0 (명)
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "executive",
         ["stockCode", "year", "quarter", "ofcps"],
     )
     if raw.is_empty():
         return {}
 
-    latestYear = find_latest_year(raw, "ofcps", 1000)
+    latestYear = findLatestYear(raw, "ofcps", 1000)
     if latestYear is None:
         return {}
 
@@ -174,7 +174,7 @@ def _outsideFromExecutive() -> dict[str, dict]:
     return result
 
 
-def scan_pay_ratio() -> dict[str, float]:
+def scanPayRatio() -> dict[str, float]:
     """전종목 임원-직원 보수 배율 스캔.
 
     executivePayAllTotal parquet에서 임원 평균보수를, employee parquet에서
@@ -187,11 +187,11 @@ def scan_pay_ratio() -> dict[str, float]:
         종목코드 : 임원/직원 보수 배율 (배)
         빈 dict — 데이터 없음
     """
-    raw_pay = scan_parquets(
+    raw_pay = scanParquets(
         "executivePayAllTotal",
         ["stockCode", "year", "quarter", "nmpr", "jan_avrg_mendng_am"],
     )
-    raw_emp = scan_parquets(
+    raw_emp = scanParquets(
         "employee",
         ["stockCode", "year", "quarter", "sm", "jan_salary_am"],
     )
@@ -200,11 +200,11 @@ def scan_pay_ratio() -> dict[str, float]:
 
     # 임원 평균보수
     pay_map: dict[str, float] = {}
-    latest = find_latest_year(raw_pay, "jan_avrg_mendng_am", 500)
+    latest = findLatestYear(raw_pay, "jan_avrg_mendng_am", 500)
     if latest:
         sub = raw_pay.filter(pl.col("year") == latest)
         for code, group in sub.group_by("stockCode"):
-            qdf = pick_best_quarter(group)
+            qdf = pickBestQuarter(group)
             wsum, tnmpr = 0.0, 0
             for row in qdf.iter_rows(named=True):
                 n = parse_num(row.get("nmpr"))
@@ -216,12 +216,12 @@ def scan_pay_ratio() -> dict[str, float]:
                 pay_map[code[0]] = wsum / tnmpr
 
     # 직원 평균급여
-    sal_map: dict[str, float] = {}
-    latest = find_latest_year(raw_emp, "jan_salary_am", 500)
+    salMap: dict[str, float] = {}
+    latest = findLatestYear(raw_emp, "jan_salary_am", 500)
     if latest:
         sub = raw_emp.filter(pl.col("year") == latest)
         for code, group in sub.group_by("stockCode"):
-            qdf = pick_best_quarter(group)
+            qdf = pickBestQuarter(group)
             wsum, temp = 0.0, 0
             for row in qdf.iter_rows(named=True):
                 e = parse_num(row.get("sm"))
@@ -230,12 +230,12 @@ def scan_pay_ratio() -> dict[str, float]:
                     wsum += e * s
                     temp += int(e)
             if temp > 0:
-                sal_map[code[0]] = wsum / temp
+                salMap[code[0]] = wsum / temp
 
     result: dict[str, float] = {}
     for code in pay_map:
-        if code in sal_map and sal_map[code] > 0:
-            ratio = pay_map[code] / sal_map[code]
+        if code in salMap and salMap[code] > 0:
+            ratio = pay_map[code] / salMap[code]
             # pay_ratio 극단값 cap: 500배 초과는 데이터 오류
             if ratio > 500:
                 continue
@@ -243,7 +243,7 @@ def scan_pay_ratio() -> dict[str, float]:
     return result
 
 
-def scan_audit_opinion() -> dict[str, str]:
+def scanAuditOpinion() -> dict[str, str]:
     """전종목 감사의견 스캔.
 
     auditOpinion parquet에서 유효 데이터가 500건 이상인 최신 연도를 선택하고,
@@ -255,7 +255,7 @@ def scan_audit_opinion() -> dict[str, str]:
         종목코드 : 감사의견 문자열 (적정의견 | 한정의견 | 부적정의견 | 의견거절)
         빈 dict — 데이터 없음
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "auditOpinion",
         ["stockCode", "year", "quarter", "adt_opinion"],
     )
@@ -289,7 +289,7 @@ def scan_audit_opinion() -> dict[str, str]:
     return result
 
 
-def scan_minority_holder() -> dict[str, float]:
+def scanMinorityHolder() -> dict[str, float]:
     """전종목 소액주주 지분율 스캔.
 
     minorityHolder parquet에서 hold_stock_rate를 추출한다.
@@ -301,14 +301,14 @@ def scan_minority_holder() -> dict[str, float]:
         종목코드 : 소액주주 지분율 (%)
         빈 dict — 데이터 없음
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "minorityHolder",
         ["stockCode", "year", "quarter", "hold_stock_rate"],
     )
     if raw.is_empty():
         return {}
 
-    latestYear = find_latest_year(raw, "hold_stock_rate", 500)
+    latestYear = findLatestYear(raw, "hold_stock_rate", 500)
     if latestYear is None:
         return {}
 
@@ -317,7 +317,7 @@ def scan_minority_holder() -> dict[str, float]:
 
     for code, group in sub.group_by("stockCode"):
         codeVal = code[0]
-        qdf = pick_best_quarter(group)
+        qdf = pickBestQuarter(group)
         vals = []
         for row in qdf.iter_rows(named=True):
             raw_val = row.get("hold_stock_rate")

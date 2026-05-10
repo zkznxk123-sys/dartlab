@@ -26,35 +26,35 @@ def configure(provider: str = "dartlab", **kwargs: Any) -> ProviderConfig:
     else:
         _CONFIG = config
     try:
-        from dartlab.ai.settings import get_profile_manager, getProviderSpec, normalizeProvider, normalizeRole
+        from dartlab.ai.settings import getProfileManager, getProviderSpec, normalizeProvider, normalizeRole
 
         normalized = normalizeProvider(provider) or provider
         if getProviderSpec(normalized) is not None:
-            get_profile_manager().update(
+            getProfileManager().update(
                 provider=normalized,
                 role=normalizeRole(str(role)) if role else None,
                 model=config.model,
-                base_url=config.base_url,
+                baseUrl=config.baseUrl,
                 temperature=config.temperature,
-                max_tokens=config.max_tokens,
-                system_prompt=config.system_prompt,
-                updated_by="compat",
+                maxTokens=config.maxTokens,
+                systemPrompt=config.systemPrompt,
+                updatedBy="compat",
             )
     except (OSError, RuntimeError, ValueError):
         pass
     return config
 
 
-def get_config(provider: str | None = None, role: str | None = None, **kwargs: Any) -> ProviderConfig:
+def getConfig(provider: str | None = None, role: str | None = None, **kwargs: Any) -> ProviderConfig:
     """Return provider settings without owning the AI workbench loop."""
 
     base = (_ROLE_CONFIGS.get(str(role)) if role else None) or _CONFIG
     resolved: dict[str, Any] = {}
     if provider is not None or base.provider != "dartlab":
         try:
-            from dartlab.ai.settings import get_profile_manager
+            from dartlab.ai.settings import getProfileManager
 
-            resolved = get_profile_manager().resolve(provider, role=role)
+            resolved = getProfileManager().resolve(provider, role=role)
         except (OSError, RuntimeError, ValueError):
             resolved = {}
     resolved_provider = provider or resolved.get("provider") or base.provider
@@ -65,25 +65,25 @@ def get_config(provider: str | None = None, role: str | None = None, **kwargs: A
     #   4. profile_manager 저장 model (server 자동 저장)
     profile_model = resolved.get("model")
     if base.model:
-        resolved_model = base.model
+        resolvedModel = base.model
     else:
         try:
-            from dartlab.ai.settings.modelResolver import is_openai_family_provider, latest_openai_model
+            from dartlab.ai.settings.modelResolver import isOpenaiFamilyProvider, latestOpenaiModel
 
-            if is_openai_family_provider(resolved_provider):
-                resolved_model = latest_openai_model()
+            if isOpenaiFamilyProvider(resolved_provider):
+                resolvedModel = latestOpenaiModel()
             else:
-                resolved_model = profile_model
+                resolvedModel = profile_model
         except (ImportError, OSError, RuntimeError, ValueError):
-            resolved_model = profile_model
+            resolvedModel = profile_model
     values = {
         "provider": resolved_provider,
-        "model": resolved_model,
-        "api_key": resolved.get("api_key") or base.api_key,
-        "base_url": resolved.get("base_url") or base.base_url,
+        "model": resolvedModel,
+        "api_key": resolved.get("api_key") or base.apiKey,
+        "base_url": resolved.get("base_url") or base.baseUrl,
         "temperature": resolved.get("temperature") if resolved.get("temperature") is not None else base.temperature,
-        "max_tokens": resolved.get("max_tokens") if resolved.get("max_tokens") is not None else base.max_tokens,
-        "system_prompt": resolved.get("system_prompt") or base.system_prompt,
+        "max_tokens": resolved.get("max_tokens") if resolved.get("max_tokens") is not None else base.maxTokens,
+        "system_prompt": resolved.get("system_prompt") or base.systemPrompt,
     }
     for key, value in kwargs.items():
         if key in values and value is not None:

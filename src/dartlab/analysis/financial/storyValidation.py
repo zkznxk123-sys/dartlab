@@ -81,12 +81,12 @@ def calcStoryPrecedents(
             db = KnowledgeDB()
             records = db.get_sector_insights(sectorCode, limit=limit)
             for rec in records:
-                if rec.stock_code == stockCode:
+                if rec.stockCode == stockCode:
                     continue  # 자기 자신 제외
                 precedents.append(
                     {
-                        "stockCode": rec.stock_code,
-                        "name": rec.stock_code,
+                        "stockCode": rec.stockCode,
+                        "name": rec.stockCode,
                         "narrative": (rec.narrative or "")[:200],
                         "outcome": None,
                         "similarity": None,

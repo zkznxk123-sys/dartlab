@@ -32,7 +32,7 @@ class _SectionsSource:
 
     @property
     def raw(self) -> pl.DataFrame | None:
-        return self._company._get_primary("sections")
+        return self._company._getPrimary("sections")
 
     @property
     def frame(self) -> pl.DataFrame | None:
@@ -40,7 +40,7 @@ class _SectionsSource:
 
     def forTopics(self, topics: set[str]) -> pl.DataFrame | None:
         """특정 topic만 포함하는 부분 sections."""
-        return self._company._get_primary("sections", topics=frozenset(topics))
+        return self._company._getPrimary("sections", topics=frozenset(topics))
 
     def topics(self) -> list[str]:
         return self._company._docsSectionTopics()

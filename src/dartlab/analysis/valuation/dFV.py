@@ -37,7 +37,7 @@ _SELECTOR_IGNORE = {"primaryModel", "lifeCyclePhase", "companyType", "pSurvival"
 
 def _selectPrimaryWithOverrides(
     selected: str,
-    all_methods: dict,
+    allMethods: dict,
     overrides: dict,
 ) -> tuple[str, str | None]:
     """override 가 실제 영향 주는 primary 자동 선택.
@@ -58,7 +58,7 @@ def _selectPrimaryWithOverrides(
 
     # 감응 대안 모델 중 값 있는 것 선택
     for cand in ("dcf2stage", "dcf", "rim", "ddm"):
-        if cand in all_methods and all_methods[cand] and all_methods[cand] > 0:
+        if cand in allMethods and allMethods[cand] and allMethods[cand] > 0:
             cand_sens = _MODEL_SENSITIVITY.get(cand, set())
             if cand_sens & ov_keys:
                 return cand, f"{selected}→{cand} (override {sorted(ov_keys)} 반영)"
@@ -100,10 +100,10 @@ def _dfvEarlyDispatch(company: Any, basePeriod: str | None, ov: dict) -> dict | 
 
 def _dfvCheckRelativeExtreme(
     company: Any,
-    primary_key: str,
-    primary_value: float,
-    secondary_keys: list,
-    all_methods: dict,
+    primaryKey: str,
+    primaryValue: float,
+    secondaryKeys: list,
+    allMethods: dict,
 ) -> tuple[str, float]:
     """primary=relative 가 현재가 ±150% 이탈 시 secondary 중 현재가 근접 모델로 교체.
 
@@ -112,18 +112,18 @@ def _dfvCheckRelativeExtreme(
     tuple[str, float]
         (new_primary_key, new_primary_value). 정상 범위면 그대로 반환.
     """
-    if primary_key not in ("relative", "relativeSurvival"):
-        return primary_key, primary_value
+    if primaryKey not in ("relative", "relativeSurvival"):
+        return primaryKey, primaryValue
     try:
         cp = _getCurrentPrice(company)
         if not (cp and cp > 0):
-            return primary_key, primary_value
-        ratio = primary_value / cp
+            return primaryKey, primaryValue
+        ratio = primaryValue / cp
         if not (ratio > 2.5 or ratio < 0.4):
-            return primary_key, primary_value
+            return primaryKey, primaryValue
         sec_candidates: list[tuple[str, float, float]] = []
-        for sk in secondary_keys:
-            sv = all_methods.get(sk)
+        for sk in secondaryKeys:
+            sv = allMethods.get(sk)
             if sv and sv > 0:
                 sec_candidates.append((sk, sv, abs(sv / cp - 1.0)))
         if sec_candidates:
@@ -131,13 +131,13 @@ def _dfvCheckRelativeExtreme(
             return sec_candidates[0][0], sec_candidates[0][1]
     except (AttributeError, ValueError, TypeError, ZeroDivisionError):
         pass
-    return primary_key, primary_value
+    return primaryKey, primaryValue
 
 
-def _dfvApplyGoingConcern(out: dict, going_concern: float | None, survival: dict | None) -> None:
+def _dfvApplyGoingConcern(out: dict, goingConcern: float | None, survival: dict | None) -> None:
     """Going concern + Survival 가중 결과를 out 에 in-place 추가."""
-    if going_concern is not None:
-        out["goingConcernValue"] = round(going_concern)
+    if goingConcern is not None:
+        out["goingConcernValue"] = round(goingConcern)
     if survival is not None:
         out["survival"] = {
             "pSurvival": survival.get("pSurvival"),
@@ -146,21 +146,21 @@ def _dfvApplyGoingConcern(out: dict, going_concern: float | None, survival: dict
         }
 
 
-def _dfvApplyTwoStage(out: dict, two_stage_detail: dict | None) -> None:
+def _dfvApplyTwoStage(out: dict, twoStageDetail: dict | None) -> None:
     """Two-Stage DCF 상세를 out['twoStage'] 에 추가."""
-    if not two_stage_detail:
+    if not twoStageDetail:
         return
     out["twoStage"] = {
-        "growthYears": two_stage_detail.get("growthYears"),
-        "growthRates": two_stage_detail.get("growthRates"),
-        "terminalGrowthRate": two_stage_detail.get("terminalGrowthRate"),
-        "pvExplicit": two_stage_detail.get("pvExplicit"),
-        "pvTerminal": two_stage_detail.get("pvTerminal"),
-        "tvShare": two_stage_detail.get("tvShare"),
-        "phases": two_stage_detail.get("phases") or [],
-        "marginPath": two_stage_detail.get("marginPath"),
-        "reinvestmentPath": two_stage_detail.get("reinvestmentPath"),
-        "warnings": two_stage_detail.get("warnings") or [],
+        "growthYears": twoStageDetail.get("growthYears"),
+        "growthRates": twoStageDetail.get("growthRates"),
+        "terminalGrowthRate": twoStageDetail.get("terminalGrowthRate"),
+        "pvExplicit": twoStageDetail.get("pvExplicit"),
+        "pvTerminal": twoStageDetail.get("pvTerminal"),
+        "tvShare": twoStageDetail.get("tvShare"),
+        "phases": twoStageDetail.get("phases") or [],
+        "marginPath": twoStageDetail.get("marginPath"),
+        "reinvestmentPath": twoStageDetail.get("reinvestmentPath"),
+        "warnings": twoStageDetail.get("warnings") or [],
     }
 
 
@@ -180,16 +180,16 @@ def _dfvApplyRealOptions(out: dict, company: Any, basePeriod: str | None, ov: di
         pass
 
 
-def _dfvApplyLiquidation(out: dict, liquidation_detail: dict | None) -> None:
+def _dfvApplyLiquidation(out: dict, liquidationDetail: dict | None) -> None:
     """Liquidation 상세를 out['liquidation'] 에 추가."""
-    if not liquidation_detail:
+    if not liquidationDetail:
         return
     out["liquidation"] = {
-        "recoveries": liquidation_detail.get("recoveries"),
-        "grossRecovery": liquidation_detail.get("grossRecovery"),
-        "netToEquity": liquidation_detail.get("netToEquity"),
-        "perShare": liquidation_detail.get("perShare"),
-        "weightedRecoveryRate": liquidation_detail.get("weightedRecoveryRate"),
+        "recoveries": liquidationDetail.get("recoveries"),
+        "grossRecovery": liquidationDetail.get("grossRecovery"),
+        "netToEquity": liquidationDetail.get("netToEquity"),
+        "perShare": liquidationDetail.get("perShare"),
+        "weightedRecoveryRate": liquidationDetail.get("weightedRecoveryRate"),
     }
 
 
@@ -215,12 +215,12 @@ _DFV_OVERRIDE_ALLOWED_KEYS = (
 )
 
 
-def _dfvApplyOverrideMeta(out: dict, ov: dict, primary_switch_reason: str | None) -> None:
+def _dfvApplyOverrideMeta(out: dict, ov: dict, primarySwitchReason: str | None) -> None:
     """적용된 override + 자동 전환 메타데이터 기록."""
     if ov:
         out["overrideApplied"] = {k: v for k, v in ov.items() if k in _DFV_OVERRIDE_ALLOWED_KEYS}
-    if primary_switch_reason:
-        out.setdefault("overrideApplied", {})["primaryAutoSwitch"] = primary_switch_reason
+    if primarySwitchReason:
+        out.setdefault("overrideApplied", {})["primaryAutoSwitch"] = primarySwitchReason
 
 
 def calcDFV(
@@ -266,123 +266,121 @@ def calcDFV(
 
     forced_phase = applyOverride(None, "lifeCyclePhase", ov)
     models = selectModels(company, lifeCyclePhase=forced_phase)
-    primary_key = applyOverride(models["primary"], "primaryModel", ov)
-    secondary_keys = models["secondary"]
+    primaryKey = applyOverride(models["primary"], "primaryModel", ov)
+    secondaryKeys = models["secondary"]
     survival_adj = bool(models.get("survivalAdj", False))
-    life_phase = models.get("lifeCyclePhase")
+    lifePhase = models.get("lifeCyclePhase")
 
     # 2. 모든 방법론 적정가 수집 (+ liquidation 자산별 + dcf2stage 실로직)
-    all_methods = _collectAllValues(company, basePeriod)
+    allMethods = _collectAllValues(company, basePeriod)
 
     # 2a. Liquidation — 자산별 회수율 (Damodaran Dark Side Ch.9)
-    liquidation_detail = _calcLiquidationDetail(company, ov)
-    if liquidation_detail and liquidation_detail.get("perShare"):
-        all_methods["liquidation"] = liquidation_detail["perShare"]
+    liquidationDetail = _calcLiquidationDetail(company, ov)
+    if liquidationDetail and liquidationDetail.get("perShare"):
+        allMethods["liquidation"] = liquidationDetail["perShare"]
 
     # 2b. Two-Stage DCF — 고성장 n년 명시적 + terminal 수렴 (Damodaran Ch.12)
-    two_stage_detail = _calcTwoStageDcf(company, life_phase, ov)
-    if two_stage_detail and two_stage_detail.get("perShare"):
-        all_methods["dcf2stage"] = two_stage_detail["perShare"]
+    twoStageDetail = _calcTwoStageDcf(company, lifePhase, ov)
+    if twoStageDetail and twoStageDetail.get("perShare"):
+        allMethods["dcf2stage"] = twoStageDetail["perShare"]
 
     # 2c. relativeSurvival — relative 값 재사용 (survival 가중은 하단)
-    if "relative" in all_methods and "relativeSurvival" not in all_methods:
-        all_methods["relativeSurvival"] = all_methods["relative"]
-    if not all_methods:
+    if "relative" in allMethods and "relativeSurvival" not in allMethods:
+        allMethods["relativeSurvival"] = allMethods["relative"]
+    if not allMethods:
         return None
 
     # Phase 12 A1: Smart Primary Selector — override 가 있고 현재 primary 가 무감각이면 자동 전환
-    primary_key, _primary_switch_reason = _selectPrimaryWithOverrides(primary_key, all_methods, ov)
+    primaryKey, _primary_switch_reason = _selectPrimaryWithOverrides(primaryKey, allMethods, ov)
 
     # 3. Quality-Adjusted WACC
-    base_wacc = _getBaseWACC(company)
-    base_wacc = applyOverride(base_wacc, "wacc", ov)
+    baseWacc = _getBaseWACC(company)
+    baseWacc = applyOverride(baseWacc, "wacc", ov)
     from dartlab.analysis.valuation.qualityWACC import calcQualityWACC
 
-    qw = calcQualityWACC(company, base_wacc, basePeriod=basePeriod)
+    qw = calcQualityWACC(company, baseWacc, basePeriod=basePeriod)
     adjusted_wacc = qw["adjustedWACC"]
 
     # 4. Primary 모델 값 = dFV (Base)
-    primary_value = all_methods.get(primary_key)
+    primaryValue = allMethods.get(primaryKey)
 
     # primary가 없으면 fallback: 가장 적합도 높은 방법론 사용
-    if primary_value is None:
+    if primaryValue is None:
         from dartlab.analysis.valuation.fitness import calcMethodFitness
 
         fit = calcMethodFitness(company, basePeriod=basePeriod)
-        candidates = {k: v for k, v in all_methods.items() if v and v > 0}
+        candidates = {k: v for k, v in allMethods.items() if v and v > 0}
         best_key = max(candidates.keys(), key=lambda k: fit.get(k, {}).get("fitness", 0), default=None)
         if best_key:
-            primary_key = best_key
-            primary_value = all_methods[best_key]
+            primaryKey = best_key
+            primaryValue = allMethods[best_key]
         else:
             return None
 
-    if primary_value is None or primary_value <= 0:
+    if primaryValue is None or primaryValue <= 0:
         return None
 
-    primary_key, primary_value = _dfvCheckRelativeExtreme(
-        company, primary_key, primary_value, secondary_keys, all_methods
-    )
+    primaryKey, primaryValue = _dfvCheckRelativeExtreme(company, primaryKey, primaryValue, secondaryKeys, allMethods)
 
     # 5. Bull/Base/Bear 시나리오 (WACC ±1%p 효과 근사)
     # WACC 1%p 변화 ≈ 적정가 ±10~15% (경험칙)
     wacc_effect = 0.12  # 12% per 1%p WACC change
-    bull = primary_value * (1 + wacc_effect)
-    bear = primary_value * (1 - wacc_effect)
+    bull = primaryValue * (1 + wacc_effect)
+    bear = primaryValue * (1 - wacc_effect)
 
     # 6. 삼각검증
-    triangulation = _triangulate(primary_key, primary_value, secondary_keys, all_methods)
+    triangulation = _triangulate(primaryKey, primaryValue, secondaryKeys, allMethods)
 
     # 7. DDM floor
     ddm_floor = None
-    ddm_value = all_methods.get("ddm")
+    ddm_value = allMethods.get("ddm")
     if ddm_value and ddm_value > 0 and models["ddmRole"] == "floor":
         ddm_floor = {
             "value": round(ddm_value),
             "meaning": f"배당만으로도 최소 {ddm_value:,.0f}원의 가치",
-            "coverageRatio": round(ddm_value / primary_value, 2) if primary_value > 0 else 0,
+            "coverageRatio": round(ddm_value / primaryValue, 2) if primaryValue > 0 else 0,
         }
 
     # 8. Survival 가중 (Dark Side of Valuation)
     survival = None
-    adjusted_primary = primary_value
-    going_concern = None
+    adjusted_primary = primaryValue
+    goingConcern = None
     if survival_adj:
-        survival = _applySurvivalAdjustment(company, primary_value, ov)
+        survival = _applySurvivalAdjustment(company, primaryValue, ov)
         if survival and survival.get("adjustedValue") is not None:
-            going_concern = primary_value
+            goingConcern = primaryValue
             adjusted_primary = survival["adjustedValue"]
 
     # 9. 현재가 + upside (survival 반영한 adjusted_primary 기준)
-    current_price = _getCurrentPrice(company)
-    upside = (adjusted_primary - current_price) / current_price * 100 if current_price and current_price > 0 else None
+    currentPrice = _getCurrentPrice(company)
+    upside = (adjusted_primary - currentPrice) / currentPrice * 100 if currentPrice and currentPrice > 0 else None
 
     # 10. 신뢰도 + 의견
     confidence = triangulation.get("confidence", "low")
     opinion = _calcOpinion(upside)
 
     # 11. Cash Flow Consistency 검증
-    consistency = _buildConsistency(company, primary_key, primary_value, triangulation, adjusted_wacc, ov)
+    consistency = _buildConsistency(company, primaryKey, primaryValue, triangulation, adjusted_wacc, ov)
 
     out = {
         "dFV": round(adjusted_primary),
         "scenarios": {"bull": round(bull), "base": round(adjusted_primary), "bear": round(bear)},
-        "currentPrice": round(current_price) if current_price else None,
+        "currentPrice": round(currentPrice) if currentPrice else None,
         "upside": round(upside, 1) if upside is not None else None,
         "opinion": opinion,
         "confidence": confidence,
-        "primaryModel": primary_key,
+        "primaryModel": primaryKey,
         "companyType": models.get("companyType"),
-        "lifeCyclePhase": life_phase,
+        "lifeCyclePhase": lifePhase,
         "triangulation": triangulation,
         "dividendFloor": ddm_floor,
         "qualityWACC": qw,
-        "allMethods": {k: round(v) for k, v in all_methods.items()},
+        "allMethods": {k: round(v) for k, v in allMethods.items()},
     }
-    _dfvApplyGoingConcern(out, going_concern, survival)
-    _dfvApplyTwoStage(out, two_stage_detail)
+    _dfvApplyGoingConcern(out, goingConcern, survival)
+    _dfvApplyTwoStage(out, twoStageDetail)
     _dfvApplyRealOptions(out, company, basePeriod, ov)
-    _dfvApplyLiquidation(out, liquidation_detail)
+    _dfvApplyLiquidation(out, liquidationDetail)
     _dfvApplyConsistency(out, consistency)
     _dfvApplyOverrideMeta(out, ov, _primary_switch_reason)
     return out
@@ -435,14 +433,14 @@ def _getBaseWACC(company: Any) -> float:
     return 10.0  # 최종 fallback
 
 
-def _triangulate(primary_key: str, primary_value: float, secondary_keys: list[str], all_methods: dict) -> dict:
+def _triangulate(primaryKey: str, primaryValue: float, secondaryKeys: list[str], allMethods: dict) -> dict:
     """삼각검증 — primary와 secondary 괴리 체크."""
     checks = []
-    for key in secondary_keys:
-        sec_value = all_methods.get(key)
+    for key in secondaryKeys:
+        sec_value = allMethods.get(key)
         if sec_value is None or sec_value <= 0:
             continue
-        divergence = abs(primary_value - sec_value) / primary_value
+        divergence = abs(primaryValue - sec_value) / primaryValue
         if divergence < 0.20:
             verdict = "합의"
         elif divergence < 0.50:
@@ -650,7 +648,7 @@ def _tsdResolveWacc(company: Any, overrides: dict) -> float:
 
     if implied_flag or bottom_up_flag or country_code:
         try:
-            from dartlab.analysis.financial.proforma import compute_company_wacc
+            from dartlab.analysis.financial.proforma import computeCompanyWacc
 
             series = None
             try:
@@ -661,12 +659,12 @@ def _tsdResolveWacc(company: Any, overrides: dict) -> float:
                 series = None
 
             if series:
-                wacc_val, _details = compute_company_wacc(
+                wacc_val, _details = computeCompanyWacc(
                     series,
                     currency=getattr(company, "currency", "KRW"),
                     country=country_code,
-                    implied_erp=bool(implied_flag),
-                    bottom_up_beta=bool(bottom_up_flag),
+                    impliedErp=bool(implied_flag),
+                    bottomUpBeta=bool(bottom_up_flag),
                 )
                 return float(wacc_val)
         except (ImportError, AttributeError, ValueError, TypeError):
@@ -696,19 +694,19 @@ def _tsdResolveHighGrowth(company: Any) -> float:
         from dartlab.analysis.financial.growthAnalysis import calcGrowthTrend
     except ImportError:
         return 8.0
-    high_g: float | None = None
+    highG: float | None = None
     try:
         g = calcGrowthTrend(company)
         if g:
-            high_g = (g.get("cagr") or {}).get("revenue")
+            highG = (g.get("cagr") or {}).get("revenue")
     except (AttributeError, ValueError, TypeError):
         pass
-    if high_g is None:
-        high_g = 8.0
-    return max(-5.0, min(high_g, 25.0))
+    if highG is None:
+        highG = 8.0
+    return max(-5.0, min(highG, 25.0))
 
 
-def _tsdBuildPhases(life_phase: str | None, high_g: float, overrides: dict) -> tuple[list[int], list[float]]:
+def _tsdBuildPhases(lifePhase: str | None, highG: float, overrides: dict) -> tuple[list[int], list[float]]:
     """lifeCycle 별 phase 구성 (Damodaran Ch.12) + growthRates override.
 
     Returns
@@ -720,17 +718,17 @@ def _tsdBuildPhases(life_phase: str | None, high_g: float, overrides: dict) -> t
     try:
         from dartlab.core.overrides import applyOverride
     except ImportError:
-        return [5], [high_g]
+        return [5], [highG]
 
     phase_config: dict[str, tuple[list[int], list[float]]] = {
-        "earlyGrowth": ([5, 3, 2], [high_g, high_g * 0.5, high_g * 0.2]),
-        "highGrowth": ([5, 3, 2], [high_g, high_g * 0.7, high_g * 0.4]),
-        "matureGrowth": ([4], [min(high_g, 8.0)]),
-        "matureStable": ([3], [min(high_g, 3.0)]),
-        "decline": ([2], [min(high_g, -2.0) if high_g < 0 else min(high_g, 0.0)]),
-        "turnaround": ([5], [high_g]),
+        "earlyGrowth": ([5, 3, 2], [highG, highG * 0.5, highG * 0.2]),
+        "highGrowth": ([5, 3, 2], [highG, highG * 0.7, highG * 0.4]),
+        "matureGrowth": ([4], [min(highG, 8.0)]),
+        "matureStable": ([3], [min(highG, 3.0)]),
+        "decline": ([2], [min(highG, -2.0) if highG < 0 else min(highG, 0.0)]),
+        "turnaround": ([5], [highG]),
     }
-    years_vec, rates_vec = phase_config.get(life_phase or "", ([5], [high_g]))
+    years_vec, rates_vec = phase_config.get(lifePhase or "", ([5], [highG]))
 
     rates_override = applyOverride(None, "growthRates", overrides)
     if isinstance(rates_override, list) and rates_override:
@@ -741,7 +739,7 @@ def _tsdBuildPhases(life_phase: str | None, high_g: float, overrides: dict) -> t
     return years_vec, rates_vec
 
 
-def _tsdResolveTerminalGrowth(life_phase: str | None, company: Any, overrides: dict) -> float:
+def _tsdResolveTerminalGrowth(lifePhase: str | None, company: Any, overrides: dict) -> float:
     """영구성장률 — Phase 4 G12.3 phase 별 Rf 감쇠 매핑 + terminalGrowth override.
 
     Returns
@@ -767,7 +765,7 @@ def _tsdResolveTerminalGrowth(life_phase: str | None, company: Any, overrides: d
         "decline": 0.5,
         "turnaround": max(2.0, rf - 1.0),
     }
-    tg_default = tg_by_phase.get(life_phase or "", max(1.0, rf - 1.0))
+    tg_default = tg_by_phase.get(lifePhase or "", max(1.0, rf - 1.0))
     return float(applyOverride(tg_default, "terminalGrowth", overrides))
 
 
@@ -806,7 +804,7 @@ def _tsdExtractBaseFcf(company: Any) -> float | None:
     return None
 
 
-def _tsdMaybeNormalizeFcf(base_fcf: float, life_phase: str | None, company: Any) -> float:
+def _tsdMaybeNormalizeFcf(baseFcf: float, lifePhase: str | None, company: Any) -> float:
     """Phase 5 G16 — 사이클/회복/적자 이력 기업은 Normalized FCF 로 교체 (Damodaran Ch.22).
 
     Returns
@@ -819,7 +817,7 @@ def _tsdMaybeNormalizeFcf(base_fcf: float, life_phase: str | None, company: Any)
         from dartlab.analysis.financial.normalized import calcNormalizedFcf, needsNormalized
         from dartlab.core.utils.helpers import toDictBySnakeId
     except ImportError:
-        return base_fcf
+        return baseFcf
 
     roic_history_data: list[dict] = []
     try:
@@ -829,8 +827,8 @@ def _tsdMaybeNormalizeFcf(base_fcf: float, life_phase: str | None, company: Any)
     except (AttributeError, ValueError, TypeError):
         pass
 
-    if not needsNormalized(life_phase, roic_history_data):
-        return base_fcf
+    if not needsNormalized(lifePhase, roic_history_data):
+        return baseFcf
 
     rev_history: list[float] = []
     margin_history: list[float] = []
@@ -849,7 +847,7 @@ def _tsdMaybeNormalizeFcf(base_fcf: float, life_phase: str | None, company: Any)
                     rev_history.append(float(rv))
                     margin_history.append(float(op) / float(rv) if op else 0.0)
     except (AttributeError, KeyError, TypeError, ValueError):
-        return base_fcf
+        return baseFcf
 
     try:
         norm = calcNormalizedFcf(rev_history, margin_history)
@@ -857,7 +855,7 @@ def _tsdMaybeNormalizeFcf(base_fcf: float, life_phase: str | None, company: Any)
             return float(norm["normalizedFcf"])
     except (AttributeError, ValueError, TypeError):
         pass
-    return base_fcf
+    return baseFcf
 
 
 def _tsdExtractNetDebtShares(company: Any) -> tuple[float, float] | None:
@@ -902,7 +900,7 @@ def _tsdExtractNetDebtShares(company: Any) -> tuple[float, float] | None:
         return None
 
 
-def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> dict | None:
+def _calcTwoStageDcf(company: Any, lifePhase: str | None, overrides: dict) -> dict | None:
     """Damodaran Multi-stage DCF (Ch.12) — lifeCycle 별 phase 자동 구성.
 
     - earlyGrowth → 3-phase: [5, 3, 2]년 × [g_high, g_high×0.5, g_high×0.2]
@@ -921,17 +919,17 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
         return None
 
     wacc = _tsdResolveWacc(company, overrides)
-    high_g = _tsdResolveHighGrowth(company)
-    years_vec, rates_vec = _tsdBuildPhases(life_phase, high_g, overrides)
-    terminal_g = _tsdResolveTerminalGrowth(life_phase, company, overrides)
+    highG = _tsdResolveHighGrowth(company)
+    years_vec, rates_vec = _tsdBuildPhases(lifePhase, highG, overrides)
+    terminal_g = _tsdResolveTerminalGrowth(lifePhase, company, overrides)
 
     margin_path = applyOverride(None, "marginPath", overrides)
     reinvestment_path = applyOverride(None, "reinvestmentPath", overrides)
 
-    base_fcf = _tsdExtractBaseFcf(company)
-    if not base_fcf or base_fcf <= 0:
+    baseFcf = _tsdExtractBaseFcf(company)
+    if not baseFcf or baseFcf <= 0:
         return None
-    base_fcf = _tsdMaybeNormalizeFcf(base_fcf, life_phase, company)
+    baseFcf = _tsdMaybeNormalizeFcf(baseFcf, lifePhase, company)
 
     nd_shares = _tsdExtractNetDebtShares(company)
     if nd_shares is None:
@@ -939,7 +937,7 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
     net_debt, shares = nd_shares
 
     return multiStageDcf(
-        baseFcf=base_fcf,
+        baseFcf=baseFcf,
         growthYears=years_vec,
         growthRates=rates_vec,
         terminalGrowthRate=terminal_g,
@@ -951,7 +949,7 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
     )
 
 
-def _applySurvivalAdjustment(company: Any, primary_value: float, overrides: dict) -> dict | None:
+def _applySurvivalAdjustment(company: Any, primaryValue: float, overrides: dict) -> dict | None:
     """Dark Side of Valuation — Going-Concern × pSurvival 가중.
 
     CHS 부도확률 (12M PD) 을 chsFeatures 경로로 실제 추출. 실패 시 safe_default 폴백.
@@ -996,7 +994,7 @@ def _applySurvivalAdjustment(company: Any, primary_value: float, overrides: dict
     else:
         liq_per_share = _calcLiquidationValue(company, overrides)
 
-    weighted = applySurvivalWeight(primary_value, liq_per_share, survival_dict)
+    weighted = applySurvivalWeight(primaryValue, liq_per_share, survival_dict)
     if liq_per_share is not None:
         weighted["liquidationValue"] = liq_per_share
     weighted["pSurvival"] = survival_dict.get("pSurvival")
@@ -1007,8 +1005,8 @@ def _applySurvivalAdjustment(company: Any, primary_value: float, overrides: dict
 
 def _buildConsistency(
     company: Any,
-    primary_key: str,
-    primary_value: float,
+    primaryKey: str,
+    primaryValue: float,
     triangulation: dict,
     wacc: float | None,
     overrides: dict,
@@ -1041,7 +1039,7 @@ def _buildConsistency(
         roicPct=roic_pct,
         waccPct=wacc,
         terminalGrowthPct=tg,
-        primaryModel=primary_key,
+        primaryModel=primaryKey,
         modelsUsed=models_used,
         country=country,
         currency=currency,

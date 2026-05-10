@@ -16,12 +16,12 @@ from __future__ import annotations
 
 import polars as pl
 
-from .catalog import scenario_guide
-from .engine import compare_scenarios, run_scenario
-from .presets import get_scenario, list_all_scenarios
+from .catalog import scenarioGuide
+from .engine import compareScenarios, runScenario
+from .presets import getScenario, listAllScenarios
 
 
-def analyze_scenario(
+def analyzeScenario(
     name: str | None = None,
     *,
     market: str = "US",
@@ -64,9 +64,9 @@ def analyze_scenario(
         meta : dict — 시나리오 메타데이터 (name, description, type, severity 등)
     """
     if name is None:
-        return scenario_guide(market=market)
+        return scenarioGuide(market=market)
 
-    return run_scenario(name, severity=severity, market=market, compare=compare)
+    return runScenario(name, severity=severity, market=market, compare=compare)
 
 
 __all__ = [

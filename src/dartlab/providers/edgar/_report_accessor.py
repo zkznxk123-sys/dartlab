@@ -46,10 +46,10 @@ class _ReportAccessor:
     def availableApiTypes(self) -> list[str]:
         """데이터가 실제 존재하는 apiType."""
         available = []
-        for api_type in _SUPPORTED:
-            df = self.extract(api_type)
+        for apiType in _SUPPORTED:
+            df = self.extract(apiType)
             if df is not None and not df.is_empty():
-                available.append(api_type)
+                available.append(apiType)
         return available
 
     def extract(self, apiType: str) -> pl.DataFrame | None:
@@ -86,12 +86,12 @@ def _extractDividend(company: "Company") -> pl.DataFrame | None:
     from dartlab.core.show import isPeriodColumn, selectFromShow
 
     cf = company.show("CF")
-    is_df = company.show("IS")
+    isDf = company.show("IS")
     if cf is None:
         return None
 
     divs = selectFromShow(cf, ["dividends_paid"])
-    dps = selectFromShow(is_df, ["dividends_per_share"]) if is_df is not None else None
+    dps = selectFromShow(isDf, ["dividends_per_share"]) if isDf is not None else None
 
     rows: list[dict] = []
     if divs is not None:

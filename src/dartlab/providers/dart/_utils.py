@@ -26,7 +26,7 @@ def _shapeString(df: pl.DataFrame | None) -> str:
     return f"{df.height}x{df.width}"
 
 
-def _import_and_call(modulePath: str, funcName: str, stockCode: str, **kwargs) -> Any:
+def _importAndCall(modulePath: str, funcName: str, stockCode: str, **kwargs) -> Any:
     """모듈을 lazy import하고 함수 호출."""
     import importlib
 

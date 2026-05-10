@@ -56,13 +56,13 @@ _CODING_KEYWORDS = (
 _CODE_FILE_HINT = re.compile(r"\.(py|svelte|js|ts|tsx|jsx|json|toml|md|yml|yaml|css|html)\b", re.IGNORECASE)
 
 
-def codex_path() -> str | None:
+def codexPath() -> str | None:
     """Resolve Codex CLI executable."""
     return shutil.which("codex")
 
 
-def _run_codex_meta_command(*args: str, timeout: int = 10) -> tuple[int, str, str] | None:
-    exe = codex_path()
+def _runCodexMetaCommand(*args: str, timeout: int = 10) -> tuple[int, str, str] | None:
+    exe = codexPath()
     if not exe:
         return None
     try:
@@ -80,7 +80,7 @@ def _run_codex_meta_command(*args: str, timeout: int = 10) -> tuple[int, str, st
     return result.returncode, (result.stdout or "").strip(), (result.stderr or "").strip()
 
 
-def load_codex_config() -> dict[str, Any]:
+def loadCodexConfig() -> dict[str, Any]:
     if not _CODEX_CONFIG_PATH.exists():
         return {}
     try:
@@ -91,8 +91,8 @@ def load_codex_config() -> dict[str, Any]:
     return data if isinstance(data, dict) else {}
 
 
-def get_codex_configured_model() -> str | None:
-    data = load_codex_config()
+def getCodexConfiguredModel() -> str | None:
+    data = loadCodexConfig()
     root_model = data.get("model")
     if isinstance(root_model, str) and root_model.strip():
         return root_model.strip()
@@ -116,9 +116,9 @@ def get_codex_configured_model() -> str | None:
     return None
 
 
-def get_codex_model_catalog() -> list[str]:
+def getCodexModelCatalog() -> list[str]:
     models: list[str] = []
-    configured = get_codex_configured_model()
+    configured = getCodexConfiguredModel()
     if configured:
         models.append(configured)
 
@@ -136,11 +136,11 @@ def get_codex_model_catalog() -> list[str]:
     return unique
 
 
-def _extract_commands(help_text: str) -> list[str]:
-    help_text = help_text if isinstance(help_text, str) else str(help_text)
+def _extractCommands(helpText: str) -> list[str]:
+    helpText = helpText if isinstance(helpText, str) else str(helpText)
     commands: list[str] = []
     in_commands = False
-    for line in help_text.splitlines():
+    for line in helpText.splitlines():
         stripped = line.rstrip()
         if stripped.startswith("Commands:"):
             in_commands = True
@@ -157,16 +157,16 @@ def _extract_commands(help_text: str) -> list[str]:
     return commands
 
 
-def _extract_sandbox_modes(help_text: str) -> list[str]:
-    help_text = help_text if isinstance(help_text, str) else str(help_text)
-    match = re.search(r"possible values:\s*([^\]]+)", help_text)
+def _extractSandboxModes(helpText: str) -> list[str]:
+    helpText = helpText if isinstance(helpText, str) else str(helpText)
+    match = re.search(r"possible values:\s*([^\]]+)", helpText)
     if not match:
         return []
     values = match.group(1)
     return [value.strip() for value in values.split(",") if value.strip()]
 
 
-def _parse_login_status(stdout: str, stderr: str, returncode: int) -> tuple[bool, str | None, str | None]:
+def _parseLoginStatus(stdout: str, stderr: str, returncode: int) -> tuple[bool, str | None, str | None]:
     text = (stdout or stderr or "").strip()
     lowered = text.lower()
 
@@ -183,11 +183,11 @@ def _parse_login_status(stdout: str, stderr: str, returncode: int) -> tuple[bool
     return authenticated, auth_mode, text or None
 
 
-def inspect_codex_cli() -> dict[str, Any]:
+def inspectCodexCli() -> dict[str, Any]:
     result: dict[str, Any] = {
         "installed": False,
         "version": None,
-        "configuredModel": get_codex_configured_model(),
+        "configuredModel": getCodexConfiguredModel(),
         "authenticated": False,
         "authMode": None,
         "loginStatus": None,
@@ -204,7 +204,7 @@ def inspect_codex_cli() -> dict[str, Any]:
         "supportsApply": False,
     }
 
-    version_info = _run_codex_meta_command("--version")
+    version_info = _runCodexMetaCommand("--version")
     if version_info is None:
         return result
 
@@ -215,10 +215,10 @@ def inspect_codex_cli() -> dict[str, Any]:
     result["installed"] = True
     result["version"] = stdout or None
 
-    root_help = _run_codex_meta_command("--help")
+    root_help = _runCodexMetaCommand("--help")
     if root_help is not None and root_help[0] == 0:
-        help_text = root_help[1]
-        commands = _extract_commands(help_text)
+        helpText = root_help[1]
+        commands = _extractCommands(helpText)
         result["commands"] = commands
         result["supportsLogin"] = "login" in commands
         result["supportsLogout"] = "logout" in commands
@@ -226,32 +226,32 @@ def inspect_codex_cli() -> dict[str, Any]:
         result["supportsReview"] = "review" in commands
         result["supportsApply"] = "apply" in commands
 
-    login_status = _run_codex_meta_command("login", "status")
+    login_status = _runCodexMetaCommand("login", "status")
     if login_status is not None:
-        authenticated, auth_mode, status_text = _parse_login_status(*login_status[1:], login_status[0])
+        authenticated, auth_mode, status_text = _parseLoginStatus(*login_status[1:], login_status[0])
         result["authenticated"] = authenticated
         result["authMode"] = auth_mode
         result["loginStatus"] = status_text
 
-    exec_help = _run_codex_meta_command("exec", "--help")
+    exec_help = _runCodexMetaCommand("exec", "--help")
     if exec_help is not None and exec_help[0] == 0:
-        help_text = exec_help[1]
-        result["execCommands"] = _extract_commands(help_text)
-        sandbox_modes = _extract_sandbox_modes(help_text)
+        helpText = exec_help[1]
+        result["execCommands"] = _extractCommands(helpText)
+        sandbox_modes = _extractSandboxModes(helpText)
         result["sandboxModes"] = sandbox_modes
         result["supportsWorkspaceWrite"] = "workspace-write" in sandbox_modes
         result["supportsDangerFullAccess"] = "danger-full-access" in sandbox_modes
-        result["supportsJson"] = "--json" in help_text
+        result["supportsJson"] = "--json" in helpText
 
     return result
 
 
-def logout_codex_cli(timeout: int = 15) -> None:
-    info = inspect_codex_cli()
+def logoutCodexCli(timeout: int = 15) -> None:
+    info = inspectCodexCli()
     if not info.get("installed"):
         raise FileNotFoundError("Codex CLI가 설치되어 있지 않습니다.")
 
-    result = _run_codex_meta_command("logout", timeout=timeout)
+    result = _runCodexMetaCommand("logout", timeout=timeout)
     if result is None:
         raise RuntimeError("Codex CLI 로그아웃 명령을 실행할 수 없습니다.")
 
@@ -260,36 +260,36 @@ def logout_codex_cli(timeout: int = 15) -> None:
         raise RuntimeError(stderr or "Codex CLI 로그아웃에 실패했습니다.")
 
 
-def infer_codex_sandbox(messages: list[dict[str, str]], override: str | None = None) -> str:
-    info = inspect_codex_cli()
+def inferCodexSandbox(messages: list[dict[str, str]], override: str | None = None) -> str:
+    info = inspectCodexCli()
     sandbox_modes = set(info.get("sandboxModes") or [])
 
     requested = override or os.environ.get("DARTLAB_CODEX_SANDBOX")
     if requested and (not sandbox_modes or requested in sandbox_modes):
         return requested
 
-    user_text = "\n".join(m.get("content", "") for m in messages if m.get("role") == "user")
-    if _looks_like_code_task(user_text) and "workspace-write" in sandbox_modes:
+    userText = "\n".join(m.get("content", "") for m in messages if m.get("role") == "user")
+    if _looksLikeCodeTask(userText) and "workspace-write" in sandbox_modes:
         return "workspace-write"
     return "read-only"
 
 
-def _looks_like_code_task(text: str) -> bool:
+def _looksLikeCodeTask(text: str) -> bool:
     lowered = text.lower()
     if any(keyword in lowered for keyword in _CODING_KEYWORDS):
         return True
     return bool(_CODE_FILE_HINT.search(text))
 
 
-def build_codex_exec_command(*, model: str | None = None, sandbox: str = "read-only") -> list[str]:
-    exe = codex_path() or "codex"
+def buildCodexExecCommand(*, model: str | None = None, sandbox: str = "read-only") -> list[str]:
+    exe = codexPath() or "codex"
     cmd = [exe, "exec", "-", "--json", "--skip-git-repo-check", "--sandbox", sandbox]
     if model:
         cmd.extend(["--model", model])
     return cmd
 
 
-def parse_codex_jsonl(output: str) -> tuple[str, dict[str, int] | None]:
+def parseCodexJsonl(output: str) -> tuple[str, dict[str, int] | None]:
     answer = ""
     usage: dict[str, int] = {}
 
@@ -302,12 +302,12 @@ def parse_codex_jsonl(output: str) -> tuple[str, dict[str, int] | None]:
         except json.JSONDecodeError:
             continue
 
-        event_type = event.get("type", "")
-        if event_type == "item.completed":
+        eventType = event.get("type", "")
+        if eventType == "item.completed":
             item = event.get("item", {})
             if item.get("type") == "agent_message":
                 answer = item.get("text", "")
-        elif event_type == "turn.completed":
+        elif eventType == "turn.completed":
             turn_usage = event.get("usage", {})
             if turn_usage:
                 usage["prompt_tokens"] = turn_usage.get("input_tokens")
@@ -320,7 +320,7 @@ def parse_codex_jsonl(output: str) -> tuple[str, dict[str, int] | None]:
     return answer, usage or None
 
 
-def run_codex_exec(
+def runCodexExec(
     prompt: str,
     *,
     model: str | None = None,
@@ -328,7 +328,7 @@ def run_codex_exec(
     cwd: str | None = None,
     timeout: int = 300,
 ) -> tuple[str, dict[str, int] | None]:
-    cmd = build_codex_exec_command(model=model, sandbox=sandbox)
+    cmd = buildCodexExecCommand(model=model, sandbox=sandbox)
 
     try:
         result = subprocess.run(
@@ -349,7 +349,7 @@ def run_codex_exec(
 
     raw_out = result.stdout or b""
     stdout = raw_out.decode("utf-8", errors="replace") if isinstance(raw_out, bytes) else raw_out
-    answer, usage = parse_codex_jsonl(stdout)
+    answer, usage = parseCodexJsonl(stdout)
     if not answer:
         raise RuntimeError("Codex CLI에서 응답을 추출할 수 없습니다.")
     return answer, usage

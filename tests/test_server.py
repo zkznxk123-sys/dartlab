@@ -208,25 +208,25 @@ class TestConfigure:
 
     def test_validate_provider_does_not_mutate_global_config(self, client, monkeypatch):
         from dartlab.ai import configure as configure_global
-        from dartlab.ai import get_config
+        from dartlab.ai import getConfig
 
         class DummyProvider:
             def __init__(self, config):
-                self.resolved_model = config.model or "dummy-model"
+                self.resolvedModel = config.model or "dummy-model"
 
-            def check_available(self):
+            def checkAvailable(self):
                 return True
 
-        monkeypatch.setattr("dartlab.ai.providers.create_provider", lambda config: DummyProvider(config))
+        monkeypatch.setattr("dartlab.ai.providers.createProvider", lambda config: DummyProvider(config))
         configure_global(provider="ollama", model="qwen3")
-        before = get_config()
+        before = getConfig()
 
         resp = client.post(
             "/api/provider/validate",
             json={"provider": "openai", "model": "gpt-5.4", "api_key": "sk-test"},
         )
         assert resp.status_code == 200
-        after = get_config()
+        after = getConfig()
         assert after.provider == before.provider
         assert after.model == before.model
 
@@ -254,21 +254,21 @@ class TestAiProfile:
         assert "codex" in data["providers"]
 
     def test_put_ai_profile_updates_shared_config(self, client):
-        from dartlab.ai import get_config
+        from dartlab.ai import getConfig
 
         resp = client.put(
             "/api/ai/profile",
             json={"provider": "openai", "model": "gpt-5.4"},
         )
         assert resp.status_code == 200
-        config = get_config()
+        config = getConfig()
         assert config.provider == "openai"
         # 사용자 명시 model 보존 — 최신 자동 강제 X (configure/PUT 으로 선택한 모델은 의도된 선택)
         assert config.model == "gpt-5.4"
-        assert get_config(provider="openai", model="gpt-5.4").model == "gpt-5.4"
+        assert getConfig(provider="openai", model="gpt-5.4").model == "gpt-5.4"
 
     def test_post_ai_profile_secret_updates_shared_secret(self, client):
-        from dartlab.ai import get_config
+        from dartlab.ai import getConfig
 
         resp = client.post(
             "/api/ai/profile/secrets",
@@ -277,8 +277,8 @@ class TestAiProfile:
         assert resp.status_code == 200
         data = resp.json()
         assert data["providers"]["openai"]["secretConfigured"] is True
-        config = get_config("openai")
-        assert config.api_key == "sk-test"
+        config = getConfig("openai")
+        assert config.apiKey == "sk-test"
 
 
 class TestOpenDartKey:
@@ -782,10 +782,10 @@ class TestAsk:
         monkeypatch.setattr("dartlab.server.api.company.get_company", lambda code: DummyCompany())
         monkeypatch.setattr("dartlab.server.api.company.stream_topic_summary", _fake_topic_summary)
 
-        from dartlab.server.api.company import api_company_topic_summary
+        from dartlab.server.api.company import apiCompanyTopicSummary
 
         async def collect_events() -> list:
-            response = await api_company_topic_summary("000000", "businessOverview")
+            response = await apiCompanyTopicSummary("000000", "businessOverview")
             events = []
             async for chunk in response.body_iterator:
                 events.append(chunk)
@@ -847,7 +847,7 @@ class TestCompanyCache:
         cache = CompanyCache()
         mock = MagicMock()
         cache.put("005930", mock, {"old": True})
-        cache.update_snapshot("005930", {"new": True})
+        cache.updateSnapshot("005930", {"new": True})
         result = cache.get("005930")
         assert result[1] == {"new": True}
 

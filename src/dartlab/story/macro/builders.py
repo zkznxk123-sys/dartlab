@@ -17,23 +17,23 @@ from dartlab.story.blocks import (
 )
 
 from .charts import (
-    spec_corporate_table,
-    spec_cycle_indicators,
-    spec_earnings_cycle,
-    spec_fci_timeline,
-    spec_fear_greed_components,
-    spec_ponzi_ratio,
-    spec_recession_prob,
-    spec_trade_tot,
+    specCorporateTable,
+    specCycleIndicators,
+    specEarningsCycle,
+    specFciTimeline,
+    specFearGreedComponents,
+    specPonziRatio,
+    specRecessionProb,
+    specTradeTot,
 )
 from .narrative import (
-    _narrate_corporate,
-    _narrate_crisis,
-    _narrate_cycle,
-    _narrate_fci,
-    _narrate_rates,
-    _narrate_trade,
-    detect_conflicts,
+    _narrateCorporate,
+    _narrateCrisis,
+    _narrateCycle,
+    _narrateFci,
+    _narrateRates,
+    _narrateTrade,
+    detectConflicts,
 )
 
 # ══════════════════════════════════════
@@ -41,7 +41,7 @@ from .narrative import (
 # ══════════════════════════════════════
 
 
-def build_dashboard_blocks(summary: dict) -> list:
+def buildDashboardBlocks(summary: dict) -> list:
     """신호등 대시보드 — 전 축 상태를 한눈에."""
     blocks: list = []
     score = summary.get("score", 0)
@@ -97,12 +97,12 @@ def build_dashboard_blocks(summary: dict) -> list:
 
     # FCI 서사
     fci_data = liq.get("fci") or {}
-    fci_text = _narrate_fci(fci_data)
+    fci_text = _narrateFci(fci_data)
     if fci_text:
         blocks.append(TextBlock(fci_text))
 
     # FCI 차트
-    fci_chart = spec_fci_timeline(liq)
+    fci_chart = specFciTimeline(liq)
     if fci_chart:
         blocks.append(ChartBlock(fci_chart, caption="FCI 시계열"))
 
@@ -114,7 +114,7 @@ def build_dashboard_blocks(summary: dict) -> list:
 # ══════════════════════════════════════
 
 
-def build_phase_blocks(summary: dict) -> list:
+def buildPhaseBlocks(summary: dict) -> list:
     """제1막 — 사이클 + 금리 + 자산 + 심리 + 재고. 지금 어디인가."""
     blocks: list = []
     cycle = summary.get("cycle") or {}
@@ -127,7 +127,7 @@ def build_phase_blocks(summary: dict) -> list:
     blocks.append(HeadingBlock("경제 사이클", level=2))
 
     # 서사 먼저
-    cycle_text = _narrate_cycle(cycle)
+    cycle_text = _narrateCycle(cycle)
     if cycle_text:
         blocks.append(TextBlock(cycle_text))
 
@@ -153,14 +153,14 @@ def build_phase_blocks(summary: dict) -> list:
         )
 
     # 사이클 지표 차트
-    cycle_chart = spec_cycle_indicators(cycle.get("timeseries") or {})
+    cycle_chart = specCycleIndicators(cycle.get("timeseries") or {})
     if cycle_chart:
         blocks.append(ChartBlock(cycle_chart))
 
     # ── 금리 ──
     blocks.append(HeadingBlock("금리 환경", level=2))
 
-    rates_text = _narrate_rates(rates)
+    rates_text = _narrateRates(rates)
     if rates_text:
         blocks.append(TextBlock(rates_text))
 
@@ -299,7 +299,7 @@ def build_phase_blocks(summary: dict) -> list:
             comp_items = [(k, f"{v:.1f}") for k, v in comps.items()]
             blocks.append(MetricBlock(comp_items))
 
-        fg_chart = spec_fear_greed_components(fg)
+        fg_chart = specFearGreedComponents(fg)
         if fg_chart:
             blocks.append(ChartBlock(fg_chart, caption="공포탐욕 구성요소"))
 
@@ -345,7 +345,7 @@ def build_phase_blocks(summary: dict) -> list:
 # ══════════════════════════════════════
 
 
-def build_causation_blocks(summary: dict) -> list:
+def buildCausationBlocks(summary: dict) -> list:
     """제2막 — 위기 + 유동성 + 기업집계. 왜 이 국면인가."""
     blocks: list = []
     crisis = summary.get("crisis") or {}
@@ -353,7 +353,7 @@ def build_causation_blocks(summary: dict) -> list:
     corporate = summary.get("corporate") or {}
 
     # ── 위기 프레임워크 서사 ──
-    crisis_text = _narrate_crisis(crisis)
+    crisis_text = _narrateCrisis(crisis)
     if crisis_text:
         blocks.append(TextBlock(crisis_text))
 
@@ -497,7 +497,7 @@ def build_causation_blocks(summary: dict) -> list:
     if ec or pr or lc:
         blocks.append(HeadingBlock("기업 실태 (바텀업)", level=2))
 
-        corp_text = _narrate_corporate(corporate)
+        corp_text = _narrateCorporate(corporate)
         if corp_text:
             blocks.append(TextBlock(corp_text))
 
@@ -530,15 +530,15 @@ def build_causation_blocks(summary: dict) -> list:
             )
 
         # 기업집계 시계열 테이블
-        corp_table = spec_corporate_table(corporate)
+        corp_table = specCorporateTable(corporate)
         if corp_table:
             blocks.append(TableBlock("기업집계 시계열", pl.DataFrame(corp_table)))
 
         # 차트
-        ec_chart = spec_earnings_cycle(corporate)
+        ec_chart = specEarningsCycle(corporate)
         if ec_chart:
             blocks.append(ChartBlock(ec_chart))
-        ponzi_chart = spec_ponzi_ratio(corporate)
+        ponzi_chart = specPonziRatio(corporate)
         if ponzi_chart:
             blocks.append(ChartBlock(ponzi_chart))
 
@@ -550,7 +550,7 @@ def build_causation_blocks(summary: dict) -> list:
 # ══════════════════════════════════════
 
 
-def build_outlook_blocks(summary: dict) -> list:
+def buildOutlookBlocks(summary: dict) -> list:
     """제3막 — 예측 + 교역 + 리스크. 무엇이 올 것인가."""
     blocks: list = []
     forecast = summary.get("forecast") or {}
@@ -612,7 +612,7 @@ def build_outlook_blocks(summary: dict) -> list:
             )
 
     # 침체확률 차트
-    rc_chart = spec_recession_prob(forecast)
+    rc_chart = specRecessionProb(forecast)
     if rc_chart:
         blocks.append(ChartBlock(rc_chart))
 
@@ -630,14 +630,14 @@ def build_outlook_blocks(summary: dict) -> list:
         )
 
     # ── 교차 분석: 모순/확인 ──
-    conflicts = detect_conflicts(summary)
+    conflicts = detectConflicts(summary)
     if conflicts:
         blocks.append(HeadingBlock("신호 교차 분석", level=2))
         for c in conflicts:
             blocks.append(TextBlock(c))
 
     # ── 교역 전망 (KR) ──
-    trade_text = _narrate_trade(trade)
+    trade_text = _narrateTrade(trade)
     if trade_text:
         blocks.append(TextBlock(trade_text))
 
@@ -683,7 +683,7 @@ def build_outlook_blocks(summary: dict) -> list:
         blocks.append(MetricBlock([("미국소비→한국주가", usc.get("implication", "—"))]))
 
     # 교역 차트
-    tot_chart = spec_trade_tot(trade)
+    tot_chart = specTradeTot(trade)
     if tot_chart:
         blocks.append(ChartBlock(tot_chart))
 
@@ -737,7 +737,7 @@ def build_outlook_blocks(summary: dict) -> list:
 # ══════════════════════════════════════
 
 
-def build_allocation_blocks(summary: dict) -> list:
+def buildAllocationBlocks(summary: dict) -> list:
     """자산배분 — 포트폴리오 + 40전략 전체."""
     blocks: list = []
     allocation = summary.get("allocation")
@@ -776,7 +776,7 @@ def build_allocation_blocks(summary: dict) -> list:
         bullish = [s for s in sigs if s.get("active") and s.get("direction") == "bullish"]
         bearish = [s for s in sigs if s.get("active") and s.get("direction") == "bearish"]
 
-        def _strat_table(items, label):
+        def _stratTable(items, label):
             if not items:
                 return
             rows = [
@@ -790,7 +790,7 @@ def build_allocation_blocks(summary: dict) -> list:
             ]
             blocks.append(TableBlock(label, pl.DataFrame(rows)))
 
-        _strat_table(bullish, "Bullish 전략")
-        _strat_table(bearish, "Bearish 전략")
+        _stratTable(bullish, "Bullish 전략")
+        _stratTable(bearish, "Bearish 전략")
 
     return blocks

@@ -204,14 +204,14 @@ class _DocsAccessor:
         import warnings
 
         warnings.warn("docs.business → show('business') 경로 권장", DeprecationWarning, stacklevel=2)
-        return self._company._get_primary("business")
+        return self._company._getPrimary("business")
 
     @property
     def mdna(self):
         import warnings
 
         warnings.warn("docs.mdna → show('mdna') 경로 권장", DeprecationWarning, stacklevel=2)
-        return self._company._get_primary("mdna")
+        return self._company._getPrimary("mdna")
 
     @property
     def rawMaterial(self):

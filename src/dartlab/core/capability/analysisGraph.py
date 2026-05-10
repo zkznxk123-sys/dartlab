@@ -117,7 +117,7 @@ def inferQuestionProfile(question: str | None) -> QuestionProfile:
     types: list[str] = []
     for route in _routes():
         triggers = route.get("triggers") or {}
-        if _matches_triggers(q, triggers):
+        if _matchesTriggers(q, triggers):
             question_type = str(route.get("questionType") or "")
             if question_type:
                 types.append(question_type)
@@ -148,8 +148,8 @@ def routeQuestion(
         for name in route.get("toolNames") or []:
             if name and name not in tools:
                 tools.append(str(name))
-    for contract_id in contract_ids:
-        contract = allContracts().get(contract_id)
+    for contractId in contract_ids:
+        contract = allContracts().get(contractId)
         if contract is None:
             continue
         for name in contract.toolNames or ([contract.tool] if contract.tool else []):
@@ -163,7 +163,7 @@ def routeQuestion(
         "profileTypes": list(profile.types),
         "routeIds": route_ids,
         "contractIds": contract_ids,
-        "processMapIds": _process_map_ids_for_profile(profile),
+        "processMapIds": _processMapIdsForProfile(profile),
         "toolNames": tools,
         "graph": graphStatus(),
     }
@@ -172,10 +172,10 @@ def routeQuestion(
 def allContracts() -> dict[str, CapabilityContract]:
     """Return Analysis Graph contracts keyed by contractId."""
     out: dict[str, CapabilityContract] = {}
-    for contract_id, raw in (loadAnalysisGraph().get("contracts") or {}).items():
+    for contractId, raw in (loadAnalysisGraph().get("contracts") or {}).items():
         if not isinstance(raw, dict):
             continue
-        parsed = _contract_from_graph(str(contract_id), raw)
+        parsed = _contractFromGraph(str(contractId), raw)
         out[parsed.contractId] = parsed
     return out
 
@@ -200,7 +200,7 @@ def allProcessMaps() -> dict[str, dict[str, Any]]:
 
 def processMapsForQuestion(question: str | None) -> list[dict[str, Any]]:
     profile = inferQuestionProfile(question)
-    ids = _process_map_ids_for_profile(profile)
+    ids = _processMapIdsForProfile(profile)
     maps = allProcessMaps()
     return [maps[pid] for pid in ids if pid in maps]
 
@@ -214,11 +214,11 @@ def understandingPacketForQuestion(
 ) -> dict[str, Any]:
     """Compact LLM-facing contract packet for one request."""
     route = routeQuestion(question, category=category, intent=intent, stockCode=stockCode)
-    process_maps = processMapsForQuestion(question)
+    processMaps = processMapsForQuestion(question)
     contracts = [allContracts()[cid].toDict() for cid in route["contractIds"] if cid in allContracts()]
-    process_acceptance = _merge_dicts(p.get("acceptanceCriteria") for p in process_maps)
-    process_failure = _merge_dicts(p.get("failurePolicy") for p in process_maps)
-    return _drop_empty(
+    process_acceptance = _mergeDicts(p.get("acceptanceCriteria") for p in processMaps)
+    process_failure = _mergeDicts(p.get("failurePolicy") for p in processMaps)
+    return _dropEmpty(
         {
             "question": question,
             "routeIds": route["routeIds"],
@@ -226,13 +226,13 @@ def understandingPacketForQuestion(
             "processMapIds": route["processMapIds"],
             "candidateTools": route["toolNames"],
             "requiredEvidence": _unique(v for c in contracts for v in c.get("requiredEvidence") or []),
-            "artifactPolicy": _merge_dicts(c.get("artifactPolicy") for c in contracts),
-            "visualPolicy": _merge_dicts(c.get("visualPolicy") for c in contracts),
-            "freshness": _merge_dicts(c.get("freshness") for c in contracts),
-            "acceptanceCriteria": process_acceptance or _merge_dicts(c.get("acceptanceCriteria") for c in contracts),
-            "failurePolicy": process_failure or _merge_dicts(c.get("failurePolicy") for c in contracts),
+            "artifactPolicy": _mergeDicts(c.get("artifactPolicy") for c in contracts),
+            "visualPolicy": _mergeDicts(c.get("visualPolicy") for c in contracts),
+            "freshness": _mergeDicts(c.get("freshness") for c in contracts),
+            "acceptanceCriteria": process_acceptance or _mergeDicts(c.get("acceptanceCriteria") for c in contracts),
+            "failurePolicy": process_failure or _mergeDicts(c.get("failurePolicy") for c in contracts),
             "toolArgPolicy": _unique(v for c in contracts for v in c.get("toolArgPolicy") or []),
-            "processMaps": [_compact_process_map(p) for p in process_maps],
+            "processMaps": [_compactProcessMap(p) for p in processMaps],
             "graph": route.get("graph"),
         }
     )
@@ -257,16 +257,16 @@ def explainDartlabTool(toolName: str) -> dict[str, Any]:
         "contracts": contracts,
         "requiredEvidence": _unique(v for c in contracts for v in c.get("requiredEvidence") or []),
         "toolArgPolicy": _unique(v for c in contracts for v in c.get("toolArgPolicy") or []),
-        "artifactPolicy": _merge_dicts(c.get("artifactPolicy") for c in contracts),
-        "visualPolicy": _merge_dicts(c.get("visualPolicy") for c in contracts),
+        "artifactPolicy": _mergeDicts(c.get("artifactPolicy") for c in contracts),
+        "visualPolicy": _mergeDicts(c.get("visualPolicy") for c in contracts),
     }
 
 
 def validateDartlabPlan(question: str, proposedTools: list[str] | str) -> dict[str, Any]:
     """Validate an external agent's tool plan against graph contracts."""
-    tools = _coerce_tool_list(proposedTools)
+    tools = _coerceToolList(proposedTools)
     packet = understandingPacketForQuestion(question)
-    required_tools = _primary_tools(packet.get("processMaps") or [])
+    required_tools = _primaryTools(packet.get("processMaps") or [])
     candidate_tools = set(packet.get("candidateTools") or [])
     missing = [tool for tool in required_tools if tool not in tools]
     invalid = [tool for tool in tools if candidate_tools and tool not in candidate_tools]
@@ -291,18 +291,18 @@ def validateDartlabPlan(question: str, proposedTools: list[str] | str) -> dict[s
 
 def listDartlabProcesses() -> list[dict[str, Any]]:
     """List generated process maps in compact form."""
-    return [_compact_process_map(process) for process in allProcessMaps().values()]
+    return [_compactProcessMap(process) for process in allProcessMaps().values()]
 
 
 def contractForTool(name: str, arguments: dict[str, Any] | None = None) -> CapabilityContract | None:
     args = arguments or {}
     for contract in sorted(allContracts().values(), key=lambda item: item.priority, reverse=True):
-        raw = _raw_contract(contract.contractId)
+        raw = _rawContract(contract.contractId)
         for matcher in raw.get("toolMatch") or []:
-            if _matches_tool(name, args, matcher):
+            if _matchesTool(name, args, matcher):
                 return contract
     for contract in allContracts().values():
-        raw = _raw_contract(contract.contractId)
+        raw = _rawContract(contract.contractId)
         if raw.get("toolMatch"):
             continue
         if contract.tool == name:
@@ -344,8 +344,8 @@ def preflightActionsForQuestion(
         return []
     route = routeQuestion(question, category=category, intent=intent, stockCode=stockCode)
     actions: list[tuple[str, dict[str, Any], CapabilityContract]] = []
-    for contract_id in route["contractIds"]:
-        contract = allContracts().get(contract_id)
+    for contractId in route["contractIds"]:
+        contract = allContracts().get(contractId)
         if contract is None:
             continue
         for action in contract.preflightActions:
@@ -365,8 +365,8 @@ def preflightActionsForQuestion(
 def toolBudgetForQuestion(question: str | None, intent: str | None) -> dict[str, Any]:
     route = routeQuestion(question, intent=intent)
     budget: dict[str, Any] = {}
-    for contract_id in route["contractIds"]:
-        contract = allContracts().get(contract_id)
+    for contractId in route["contractIds"]:
+        contract = allContracts().get(contractId)
         if contract is not None:
             budget.update(contract.toolBudget)
     return budget
@@ -409,7 +409,7 @@ def queryAnalysisGraph(query: str, *, kind: str | None = None, topK: int = 10) -
         haystack = " ".join(str(node.get(k) or "") for k in ("id", "kind", "label", "source")).lower()
         if q in haystack:
             rows.append({"score": 1.0, **node})
-    for contract_id, contract in (graph.get("contracts") or {}).items():
+    for contractId, contract in (graph.get("contracts") or {}).items():
         haystack = " ".join(
             str(contract.get(k) or "") for k in ("contractId", "tool", "summary", "sourceKey", "questionTypes")
         ).lower()
@@ -417,9 +417,9 @@ def queryAnalysisGraph(query: str, *, kind: str | None = None, topK: int = 10) -
             rows.append(
                 {
                     "score": 0.9,
-                    "id": f"contract:{contract_id}",
+                    "id": f"contract:{contractId}",
                     "kind": "contract",
-                    "label": contract.get("summary") or contract_id,
+                    "label": contract.get("summary") or contractId,
                     "source": contract.get("sourceKey"),
                 }
             )
@@ -455,7 +455,7 @@ def _routes() -> list[dict[str, Any]]:
     return [route for route in loadAnalysisGraph().get("routes") or [] if isinstance(route, dict)]
 
 
-def _process_map_ids_for_profile(profile: QuestionProfile) -> list[str]:
+def _processMapIdsForProfile(profile: QuestionProfile) -> list[str]:
     ids: list[str] = []
     for route in _routes():
         if route.get("questionType") not in profile.types:
@@ -466,12 +466,12 @@ def _process_map_ids_for_profile(profile: QuestionProfile) -> list[str]:
     return ids
 
 
-def _raw_contract(contract_id: str) -> dict[str, Any]:
-    raw = (loadAnalysisGraph().get("contracts") or {}).get(contract_id) or {}
+def _rawContract(contractId: str) -> dict[str, Any]:
+    raw = (loadAnalysisGraph().get("contracts") or {}).get(contractId) or {}
     return raw if isinstance(raw, dict) else {}
 
 
-def _contract_from_graph(contract_id: str, entry: dict[str, Any]) -> CapabilityContract:
+def _contractFromGraph(contractId: str, entry: dict[str, Any]) -> CapabilityContract:
     preflights: list[PreflightAction] = []
     for raw in entry.get("preflightActions") or []:
         if isinstance(raw, dict) and raw.get("tool"):
@@ -483,7 +483,7 @@ def _contract_from_graph(contract_id: str, entry: dict[str, Any]) -> CapabilityC
                 )
             )
     return CapabilityContract(
-        contractId=str(entry.get("contractId") or contract_id),
+        contractId=str(entry.get("contractId") or contractId),
         tool=entry.get("tool"),
         questionTypes=tuple(str(v) for v in entry.get("questionTypes") or ()),
         requiredEvidence=tuple(str(v) for v in entry.get("requiredEvidence") or ()),
@@ -503,7 +503,7 @@ def _contract_from_graph(contract_id: str, entry: dict[str, Any]) -> CapabilityC
     )
 
 
-def _matches_triggers(q: str, triggers: dict[str, Any]) -> bool:
+def _matchesTriggers(q: str, triggers: dict[str, Any]) -> bool:
     if not triggers:
         return False
     any_terms = [str(v).lower() for v in triggers.get("any") or []]
@@ -519,7 +519,7 @@ def _matches_triggers(q: str, triggers: dict[str, Any]) -> bool:
     return False
 
 
-def _matches_tool(name: str, args: dict[str, Any], matcher: dict[str, Any]) -> bool:
+def _matchesTool(name: str, args: dict[str, Any], matcher: dict[str, Any]) -> bool:
     if str(matcher.get("tool") or "") != name:
         return False
     arg_rules = matcher.get("args") or {}
@@ -537,8 +537,8 @@ def _matches_tool(name: str, args: dict[str, Any], matcher: dict[str, Any]) -> b
     return True
 
 
-def _compact_process_map(process: dict[str, Any]) -> dict[str, Any]:
-    return _drop_empty(
+def _compactProcessMap(process: dict[str, Any]) -> dict[str, Any]:
+    return _dropEmpty(
         {
             "id": process.get("id"),
             "questionType": process.get("questionType"),
@@ -554,7 +554,7 @@ def _compact_process_map(process: dict[str, Any]) -> dict[str, Any]:
             "acceptanceCriteria": process.get("acceptanceCriteria") or {},
             "failurePolicy": process.get("failurePolicy") or {},
             "steps": [
-                _drop_empty(
+                _dropEmpty(
                     {
                         "tool": step.get("tool"),
                         "argsTemplate": step.get("argsTemplate") or {},
@@ -570,9 +570,9 @@ def _compact_process_map(process: dict[str, Any]) -> dict[str, Any]:
     )
 
 
-def _primary_tools(process_maps: list[dict[str, Any]]) -> list[str]:
+def _primaryTools(processMaps: list[dict[str, Any]]) -> list[str]:
     tools: list[str] = []
-    for process in process_maps:
+    for process in processMaps:
         for step in process.get("steps") or []:
             if not isinstance(step, dict) or not step.get("primaryEvidence"):
                 continue
@@ -582,7 +582,7 @@ def _primary_tools(process_maps: list[dict[str, Any]]) -> list[str]:
     return tools
 
 
-def _coerce_tool_list(value: list[str] | str) -> list[str]:
+def _coerceToolList(value: list[str] | str) -> list[str]:
     if isinstance(value, str):
         return [part.strip() for part in value.replace(">", ",").replace("→", ",").split(",") if part.strip()]
     return [str(v).strip() for v in value if str(v).strip()]
@@ -597,7 +597,7 @@ def _unique(values: Any) -> list[str]:
     return out
 
 
-def _merge_dicts(values: Any) -> dict[str, Any]:
+def _mergeDicts(values: Any) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for value in values:
         if isinstance(value, dict):
@@ -605,5 +605,5 @@ def _merge_dicts(values: Any) -> dict[str, Any]:
     return out
 
 
-def _drop_empty(data: dict[str, Any]) -> dict[str, Any]:
+def _dropEmpty(data: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in data.items() if v not in (None, "", [], {})}

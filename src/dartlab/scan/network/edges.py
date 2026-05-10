@@ -6,15 +6,15 @@ import re
 
 import polars as pl
 
-from dartlab.scan.network.scanner import _normalize_company_name
+from dartlab.scan.network.scanner import _normalizeCompanyName
 
 # ── investedCompany 엣지 ───────────────────────────────────
 
 
-def build_invest_edges(
+def buildInvestEdges(
     raw: pl.DataFrame,
-    name_to_code: dict[str, str],
-    code_to_name: dict[str, str],
+    nameToCode: dict[str, str],
+    codeToName: dict[str, str],
 ) -> pl.DataFrame:
     """investedCompany 원본 DataFrame을 정제된 출자 엣지 테이블로 변환한다.
 
@@ -98,8 +98,8 @@ def build_invest_edges(
     # 법인명 매칭
     norms, codes, listed = [], [], []
     for name in df["inv_prm"].to_list():
-        norm = _normalize_company_name(name)
-        code = name_to_code.get(name) or name_to_code.get(norm)
+        norm = _normalizeCompanyName(name)
+        code = nameToCode.get(name) or nameToCode.get(norm)
         norms.append(norm)
         codes.append(code)
         listed.append(code is not None)
@@ -108,7 +108,7 @@ def build_invest_edges(
         pl.Series("to_name_norm", norms),
         pl.Series("to_code", codes),
         pl.Series("is_listed", listed),
-        pl.col("stockCode").map_elements(lambda c: code_to_name.get(c, c), return_dtype=pl.Utf8).alias("from_name"),
+        pl.col("stockCode").map_elements(lambda c: codeToName.get(c, c), return_dtype=pl.Utf8).alias("from_name"),
     )
 
     return df.select(
@@ -127,7 +127,7 @@ def build_invest_edges(
     )
 
 
-def deduplicate_edges(edges: pl.DataFrame) -> pl.DataFrame:
+def deduplicateEdges(edges: pl.DataFrame) -> pl.DataFrame:
     """최신 연도만 남기고 (from_code, to_name_norm) 중복을 제거한다.
 
     동일 쌍이 여러 행이면 ownership_pct가 가장 높은 행을 유지한다.
@@ -162,7 +162,7 @@ _CORP_PATTERNS = re.compile(
 _NOISE_NAMES = {"합계", "-", "소계", "", "계", "기타"}
 
 
-def _classify_holder(name: str) -> str:
+def _classifyHolder(name: str) -> str:
     """주주명으로 유형을 분류한다.
 
     법인 패턴(㈜, 주식회사, Corp 등), 한글 이름 길이, 전체 문자열
@@ -190,9 +190,9 @@ def _classify_holder(name: str) -> str:
     return "person"
 
 
-def build_holder_edges(
+def buildHolderEdges(
     raw: pl.DataFrame,
-    name_to_code: dict[str, str],
+    nameToCode: dict[str, str],
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
     """majorHolder 원본을 법인 엣지와 개인 엣지로 분리한다.
 
@@ -249,11 +249,11 @@ def build_holder_edges(
     types, holder_codes = [], []
     for row in df.iter_rows(named=True):
         nm = row["nm"]
-        t = _classify_holder(nm)
+        t = _classifyHolder(nm)
         types.append(t)
         if t == "corp":
-            norm = _normalize_company_name(nm)
-            holder_codes.append(name_to_code.get(nm) or name_to_code.get(norm))
+            norm = _normalizeCompanyName(nm)
+            holder_codes.append(nameToCode.get(nm) or nameToCode.get(norm))
         else:
             holder_codes.append(None)
 
@@ -263,7 +263,7 @@ def build_holder_edges(
     )
 
     corp = df.filter(pl.col("holder_type") == "corp")
-    corp_edges = corp.select(
+    corpEdges = corp.select(
         [
             pl.col("holder_code").alias("from_code"),
             pl.col("nm").alias("from_name"),
@@ -275,7 +275,7 @@ def build_holder_edges(
     )
 
     person = df.filter(pl.col("holder_type") == "person")
-    person_edges = person.select(
+    personEdges = person.select(
         [
             pl.col("nm").alias("person_name"),
             pl.col("stockCode").alias("to_code"),
@@ -285,4 +285,4 @@ def build_holder_edges(
         ]
     )
 
-    return corp_edges, person_edges
+    return corpEdges, personEdges

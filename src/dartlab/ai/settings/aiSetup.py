@@ -2,7 +2,7 @@
 
 _SETUP_GUIDES, _PROVIDER_ALIAS, resolveAlias, providerGuide, noProviderMessage
 는 0.10 부터 core/providers/setupGuide 로 이전됨. 본 모듈은 가용성 체크
-(`_check_provider_available`) 와 status 테이블 (`providers_status`) 만 잔존
+(`_checkProviderAvailable`) 와 status 테이블 (`providersStatus`) 만 잔존
 (둘 다 ai.providers / ai.settings.types 의존).
 """
 
@@ -19,26 +19,26 @@ from dartlab.core.providers.setupGuide import (
 )
 
 # snake alias — 0.10 까지 backward-compat shim. 0.11 제거.
-resolve_alias = resolveAlias
+resolveAlias = resolveAlias
 provider_guide = providerGuide
 no_provider_message = noProviderMessage
 _DISPLAY_ORDER = DISPLAY_ORDER
 
 
-def _check_provider_available(provider_id: str) -> bool:
+def _checkProviderAvailable(providerId: str) -> bool:
     """provider 사용 가능 여부를 빠르게 체크 (네트워크 최소화)."""
     try:
-        from dartlab.ai.providers import create_provider
+        from dartlab.ai.providers import createProvider
         from dartlab.ai.settings.types import LLMConfig
 
-        config = LLMConfig(provider=provider_id)
-        prov = create_provider(config)
-        return prov.check_available()
+        config = LLMConfig(provider=providerId)
+        prov = createProvider(config)
+        return prov.checkAvailable()
     except (ImportError, RuntimeError, ConnectionError, OSError, ValueError):
         return False
 
 
-def providers_status() -> str:
+def providersStatus() -> str:
     """전체 AI provider 현황을 테이블 문자열로 반환."""
     lines = ["", "  AI Provider 현황", ""]
 
@@ -48,7 +48,7 @@ def providers_status() -> str:
         if spec is None or guide is None:
             continue
 
-        available = _check_provider_available(pid)
+        available = _checkProviderAvailable(pid)
         marker = "●" if available else "○"
         status = "✓ 사용 가능" if available else "✗ 설정 필요"
         name = guide["name"]
@@ -68,12 +68,12 @@ __all__ = [
     "_DISPLAY_ORDER",
     "_PROVIDER_ALIAS",
     "_SETUP_GUIDES",
-    "_check_provider_available",
+    "_checkProviderAvailable",
     "noProviderMessage",
     "no_provider_message",
     "providerGuide",
-    "providers_status",
+    "providersStatus",
     "provider_guide",
     "resolveAlias",
-    "resolve_alias",
+    "resolveAlias",
 ]

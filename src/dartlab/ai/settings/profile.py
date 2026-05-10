@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from dartlab.ai.settings.modelResolver import resolve_default_model
+from dartlab.ai.settings.modelResolver import resolveDefaultModel
 from dartlab.ai.settings.providerCatalog import (
     apiKeySecretName,
     buildProviderCatalog,
@@ -23,14 +23,14 @@ from dartlab.ai.settings.routing import AI_ROLES, DEFAULT_ROLE, normalizeRole
 from dartlab.ai.settings.secrets import SecretStore, getSecretStore
 
 
-def _dartlab_home() -> Path:
+def _dartlabHome() -> Path:
     raw = os.environ.get("DARTLAB_HOME")
     if raw:
         return Path(raw)
     return Path.home() / ".dartlab"
 
 
-def _utc_now() -> str:
+def _utcNow() -> str:
     return datetime.now(UTC).isoformat()
 
 
@@ -39,7 +39,7 @@ class ProviderProfile:
     """AI provider별 설정 (모델, base URL)."""
 
     model: str | None = None
-    base_url: str | None = None
+    baseUrl: str | None = None
 
 
 @dataclass
@@ -60,30 +60,30 @@ class AiProfile:
     providers: dict[str, ProviderProfile] = field(default_factory=dict)
     roles: dict[str, RoleBinding] = field(default_factory=dict)
     temperature: float = 0.3
-    max_tokens: int = 4096
-    system_prompt: str | None = None
+    maxTokens: int = 4096
+    systemPrompt: str | None = None
     updated_at: str | None = None
-    updated_by: str | None = None
+    updatedBy: str | None = None
 
 
-def _default_roles(provider: str, providers: dict[str, ProviderProfile]) -> dict[str, RoleBinding]:
-    default_model = providers.get(provider).model if provider in providers else None
-    return {role: RoleBinding(provider=provider, model=default_model) for role in AI_ROLES}
+def _defaultRoles(provider: str, providers: dict[str, ProviderProfile]) -> dict[str, RoleBinding]:
+    defaultModel = providers.get(provider).model if provider in providers else None
+    return {role: RoleBinding(provider=provider, model=defaultModel) for role in AI_ROLES}
 
 
 class AiProfileManager:
     """AI 프로필 로드/저장/업데이트 관리자."""
 
-    def __init__(self, path: Path | None = None, secret_store: SecretStore | None = None) -> None:
-        self.path = path or (_dartlab_home() / "ai_profile.json")
-        self.secret_store = secret_store or getSecretStore()
+    def __init__(self, path: Path | None = None, secretStore: SecretStore | None = None) -> None:
+        self.path = path or (_dartlabHome() / "ai_profile.json")
+        self.secretStore = secretStore or getSecretStore()
 
     def _bootstrap(self) -> AiProfile:
         return AiProfile(
             default_provider="oauth-codex",
-            roles=_default_roles("oauth-codex", {}),
-            updated_at=_utc_now(),
-            updated_by="bootstrap",
+            roles=_defaultRoles("oauth-codex", {}),
+            updated_at=_utcNow(),
+            updatedBy="bootstrap",
         )
 
     def load(self) -> AiProfile:
@@ -105,7 +105,7 @@ class AiProfileManager:
                     continue
                 providers[normalized] = ProviderProfile(
                     model=item.get("model"),
-                    base_url=item.get("base_url") or item.get("baseUrl"),
+                    baseUrl=item.get("base_url") or item.get("baseUrl"),
                 )
 
         default_provider = (
@@ -131,7 +131,7 @@ class AiProfileManager:
                     model=binding.get("model"),
                 )
 
-        for role_name, binding in _default_roles(default_provider, providers).items():
+        for role_name, binding in _defaultRoles(default_provider, providers).items():
             roles.setdefault(role_name, binding)
 
         return AiProfile(
@@ -141,10 +141,10 @@ class AiProfileManager:
             providers=providers,
             roles=roles,
             temperature=float(data.get("temperature", 0.3)),
-            max_tokens=int(data.get("max_tokens", data.get("maxTokens", 4096))),
-            system_prompt=data.get("system_prompt") or data.get("systemPrompt"),
-            updated_at=data.get("updated_at") or data.get("updatedAt") or _utc_now(),
-            updated_by=data.get("updated_by") or data.get("updatedBy") or "unknown",
+            maxTokens=int(data.get("max_tokens", data.get("maxTokens", 4096))),
+            systemPrompt=data.get("system_prompt") or data.get("systemPrompt"),
+            updated_at=data.get("updated_at") or data.get("updatedAt") or _utcNow(),
+            updatedBy=data.get("updated_by") or data.get("updatedBy") or "unknown",
         )
 
     def save(self, profile: AiProfile) -> AiProfile:
@@ -157,7 +157,7 @@ class AiProfileManager:
             "providers": {
                 name: {
                     "model": item.model,
-                    "base_url": item.base_url,
+                    "base_url": item.baseUrl,
                 }
                 for name, item in profile.providers.items()
             },
@@ -169,10 +169,10 @@ class AiProfileManager:
                 for role, binding in profile.roles.items()
             },
             "temperature": profile.temperature,
-            "max_tokens": profile.max_tokens,
-            "system_prompt": profile.system_prompt,
+            "max_tokens": profile.maxTokens,
+            "system_prompt": profile.systemPrompt,
             "updated_at": profile.updated_at,
-            "updated_by": profile.updated_by,
+            "updated_by": profile.updatedBy,
         }
         content = json.dumps(payload, ensure_ascii=False, indent=2)
         fd, tmp_path = tempfile.mkstemp(dir=self.path.parent, suffix=".tmp")
@@ -191,25 +191,25 @@ class AiProfileManager:
                 os.unlink(tmp_path)
         return profile
 
-    def ensure_provider(self, profile: AiProfile, provider: str) -> ProviderProfile:
+    def ensureProvider(self, profile: AiProfile, provider: str) -> ProviderProfile:
         """provider가 프로필에 없으면 기본 ProviderProfile로 생성."""
         normalized = normalizeProvider(provider) or provider
         if normalized not in profile.providers:
             profile.providers[normalized] = ProviderProfile()
         return profile.providers[normalized]
 
-    def ensure_role(self, profile: AiProfile, role: str) -> RoleBinding:
+    def ensureRole(self, profile: AiProfile, role: str) -> RoleBinding:
         """role이 프로필에 없으면 기본 RoleBinding으로 생성."""
         normalized = normalizeRole(role)
         if normalized is None:
             raise ValueError(f"지원하지 않는 role: {role}")
         if normalized not in profile.roles:
-            default_model = (
+            defaultModel = (
                 profile.providers.get(profile.default_provider).model
                 if profile.default_provider in profile.providers
                 else None
             )
-            profile.roles[normalized] = RoleBinding(provider=profile.default_provider, model=default_model)
+            profile.roles[normalized] = RoleBinding(provider=profile.default_provider, model=defaultModel)
         return profile.roles[normalized]
 
     def update(
@@ -218,11 +218,11 @@ class AiProfileManager:
         provider: str | None = None,
         model: str | None = None,
         role: str | None = None,
-        base_url: str | None = None,
+        baseUrl: str | None = None,
         temperature: float | None = None,
-        max_tokens: int | None = None,
-        system_prompt: str | None = None,
-        updated_by: str = "code",
+        maxTokens: int | None = None,
+        systemPrompt: str | None = None,
+        updatedBy: str = "code",
     ) -> AiProfile:
         """프로필 부분 업데이트 후 저장. revision 자동 증가."""
         profile = self.load()
@@ -240,11 +240,11 @@ class AiProfileManager:
             effective_provider = target_provider or profile.default_provider
             if target_provider is not None:
                 profile.default_provider = target_provider
-            target = self.ensure_provider(profile, effective_provider)
+            target = self.ensureProvider(profile, effective_provider)
             if model is not None:
                 target.model = model
-            if base_url is not None:
-                target.base_url = base_url
+            if baseUrl is not None:
+                target.baseUrl = baseUrl
             if target_provider is not None:
                 for binding in profile.roles.values():
                     if binding.provider in (None, old_default):
@@ -254,7 +254,7 @@ class AiProfileManager:
                         elif binding.model is None:
                             binding.model = target.model
         else:
-            binding = self.ensure_role(profile, normalized_role)
+            binding = self.ensureRole(profile, normalized_role)
             effective_provider = target_provider or binding.provider or profile.default_provider
             if getProviderSpec(effective_provider) is None:
                 effective_provider = profile.default_provider
@@ -262,23 +262,23 @@ class AiProfileManager:
             if model is not None:
                 binding.model = model
             elif binding.model is None:
-                binding.model = self.ensure_provider(profile, effective_provider).model
+                binding.model = self.ensureProvider(profile, effective_provider).model
             if target_provider is not None:
-                target = self.ensure_provider(profile, target_provider)
-                if base_url is not None:
-                    target.base_url = base_url
+                target = self.ensureProvider(profile, target_provider)
+                if baseUrl is not None:
+                    target.baseUrl = baseUrl
                 if model is not None and target.model is None:
                     target.model = model
 
         if temperature is not None:
             profile.temperature = temperature
-        if max_tokens is not None:
-            profile.max_tokens = max_tokens
-        if system_prompt is not None:
-            profile.system_prompt = system_prompt
+        if maxTokens is not None:
+            profile.maxTokens = maxTokens
+        if systemPrompt is not None:
+            profile.systemPrompt = systemPrompt
         profile.revision += 1
-        profile.updated_at = _utc_now()
-        profile.updated_by = updated_by
+        profile.updated_at = _utcNow()
+        profile.updatedBy = updatedBy
         return self.save(profile)
 
     def resolve(self, provider: str | None = None, *, role: str | None = None) -> dict[str, Any]:
@@ -300,34 +300,34 @@ class AiProfileManager:
 
         settings = profile.providers.get(target_provider) or ProviderProfile()
         spec = getProviderSpec(target_provider)
-        api_key = None
+        apiKey = None
         if spec and spec.auth_kind == "api_key":
-            api_key = self.secret_store.get(apiKeySecretName(target_provider))
+            apiKey = self.secretStore.get(apiKeySecretName(target_provider))
         return {
             "provider": target_provider,
             "model": role_model or settings.model,
-            "api_key": api_key,
-            "base_url": settings.base_url,
+            "api_key": apiKey,
+            "base_url": settings.baseUrl,
             "temperature": profile.temperature,
-            "max_tokens": profile.max_tokens,
-            "system_prompt": profile.system_prompt,
+            "max_tokens": profile.maxTokens,
+            "system_prompt": profile.systemPrompt,
         }
 
-    def save_api_key(self, provider: str, api_key: str, *, updated_by: str = "ui") -> AiProfile:
+    def saveApiKey(self, provider: str, apiKey: str, *, updatedBy: str = "ui") -> AiProfile:
         """provider API 키를 SecretStore에 저장하고 프로필 갱신."""
         normalized = normalizeProvider(provider) or provider
         if getProviderSpec(normalized) is None:
             raise ValueError(f"지원하지 않는 provider: {normalized}")
-        self.secret_store.set(apiKeySecretName(normalized), api_key)
-        return self.update(provider=normalized, updated_by=updated_by)
+        self.secretStore.set(apiKeySecretName(normalized), apiKey)
+        return self.update(provider=normalized, updatedBy=updatedBy)
 
-    def clear_api_key(self, provider: str, *, updated_by: str = "ui") -> AiProfile:
+    def clearApiKey(self, provider: str, *, updatedBy: str = "ui") -> AiProfile:
         """provider API 키를 SecretStore에서 삭제하고 프로필 갱신."""
         normalized = normalizeProvider(provider) or provider
         if getProviderSpec(normalized) is None:
             raise ValueError(f"지원하지 않는 provider: {normalized}")
-        self.secret_store.delete(apiKeySecretName(normalized))
-        return self.update(provider=normalized, updated_by=updated_by)
+        self.secretStore.delete(apiKeySecretName(normalized))
+        return self.update(provider=normalized, updatedBy=updatedBy)
 
     def serialize(self) -> dict[str, Any]:
         """프로필 + provider 카탈로그를 JSON-safe dict로 직렬화.
@@ -338,35 +338,35 @@ class AiProfileManager:
         """
         profile = self.load()
         # secret 존재 판정은 _load() 1 회로 일괄 — provider 별 has() 호출 (9x file IO) 회피.
-        secret_keys = self.secret_store.keys()
+        secret_keys = self.secretStore.keys()
         provider_settings: dict[str, dict[str, Any]] = {}
-        for provider_id in publicProviderIds():
-            settings = profile.providers.get(provider_id) or ProviderProfile()
-            spec = getProviderSpec(provider_id)
+        for providerId in publicProviderIds():
+            settings = profile.providers.get(providerId) or ProviderProfile()
+            spec = getProviderSpec(providerId)
             secret_configured = False
             if spec and spec.auth_kind == "api_key":
-                secret_configured = apiKeySecretName(provider_id) in secret_keys
+                secret_configured = apiKeySecretName(providerId) in secret_keys
             elif spec and spec.auth_kind == "oauth":
-                secret_configured = oauthSecretName(provider_id) in secret_keys
-            effective_model = resolve_default_model(provider_id, configured_model=settings.model, allow_fetch=False)
-            provider_settings[provider_id] = {
+                secret_configured = oauthSecretName(providerId) in secret_keys
+            effective_model = resolveDefaultModel(providerId, configuredModel=settings.model, allowFetch=False)
+            provider_settings[providerId] = {
                 "model": effective_model,
-                "baseUrl": settings.base_url,
+                "baseUrl": settings.baseUrl,
                 "secretConfigured": secret_configured,
             }
         return {
             "defaultProvider": profile.default_provider,
             "temperature": profile.temperature,
-            "maxTokens": profile.max_tokens,
-            "systemPrompt": profile.system_prompt,
+            "maxTokens": profile.maxTokens,
+            "systemPrompt": profile.systemPrompt,
             "updatedAt": profile.updated_at,
-            "updatedBy": profile.updated_by,
+            "updatedBy": profile.updatedBy,
             "revision": profile.revision,
             "providers": provider_settings,
             "roles": {
                 role: {
                     "provider": binding.provider,
-                    "model": resolve_default_model(binding.provider, configured_model=binding.model, allow_fetch=False),
+                    "model": resolveDefaultModel(binding.provider, configuredModel=binding.model, allowFetch=False),
                 }
                 for role, binding in profile.roles.items()
             },
@@ -379,9 +379,11 @@ class AiProfileManager:
         role_fingerprint = ",".join(
             f"{role}:{binding.provider}:{binding.model or ''}" for role, binding in sorted(profile.roles.items())
         )
-        return f"{profile.revision}:{profile.updated_at}:{profile.updated_by}:{profile.default_provider}:{role_fingerprint}"
+        return (
+            f"{profile.revision}:{profile.updated_at}:{profile.updatedBy}:{profile.default_provider}:{role_fingerprint}"
+        )
 
 
-def get_profile_manager() -> AiProfileManager:
+def getProfileManager() -> AiProfileManager:
     """기본 SecretStore를 사용하는 AiProfileManager 반환."""
-    return AiProfileManager(secret_store=getSecretStore())
+    return AiProfileManager(secretStore=getSecretStore())

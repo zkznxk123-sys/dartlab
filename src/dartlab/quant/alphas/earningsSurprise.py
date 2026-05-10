@@ -24,7 +24,7 @@ import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import extractAccount, loadScanParquet
-from dartlab.quant.factorBuild import _latest_year
+from dartlab.quant.factorBuild import _latestYear
 
 log = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ def calcEarningsSurprise(
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())
-        year = _latest_year(snap)
+        year = _latestYear(snap)
         if year is None:
             return None
     except (OSError, ValueError, KeyError, AttributeError) as exc:
@@ -66,14 +66,14 @@ def calcEarningsSurprise(
         return None
 
     edgar = isEdgarSchema(snap)
-    year_col = "fy" if edgar else "bsns_year"
+    yearCol = "fy" if edgar else "bsns_year"
     year_val = int(year) if edgar else year
     try:
         prev_year_val = int(year) - 1 if edgar else str(int(year) - 1)
     except ValueError:
         return None
-    cur = snap.filter(pl.col(year_col) == year_val)
-    prev = snap.filter(pl.col(year_col) == prev_year_val)
+    cur = snap.filter(pl.col(yearCol) == year_val)
+    prev = snap.filter(pl.col(yearCol) == prev_year_val)
     if cur.is_empty() or prev.is_empty():
         return None
 

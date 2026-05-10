@@ -6,15 +6,15 @@ import os
 import shutil
 from typing import Any
 
-from dartlab.ai.settings import DEFAULT_ROLE, get_profile_manager, normalizeProvider, normalizeRole
+from dartlab.ai.settings import DEFAULT_ROLE, getProfileManager, normalizeProvider, normalizeRole
 from dartlab.server.models import ConfigureRequest
 
 _TRUTHY = {"1", "true", "yes", "on"}
 
 
-def selected_provider(role: str | None = None) -> str | None:
+def selectedProvider(role: str | None = None) -> str | None:
     """Resolve selected provider from shared profile."""
-    profile = get_profile_manager().load()
+    profile = getProfileManager().load()
     normalized_role = normalizeRole(role)
     if normalized_role:
         binding = profile.roles.get(normalized_role)
@@ -23,29 +23,29 @@ def selected_provider(role: str | None = None) -> str | None:
     return normalizeProvider(profile.default_provider) or profile.default_provider
 
 
-def should_preload_ollama() -> bool:
+def shouldPreloadOllama() -> bool:
     """Only preload Ollama when explicitly enabled and currently selected."""
     raw = os.environ.get("DARTLAB_PRELOAD_OLLAMA", "")
     if raw.strip().lower() not in _TRUTHY:
         return False
-    profile = get_profile_manager().load()
-    if selected_provider() == "ollama":
+    profile = getProfileManager().load()
+    if selectedProvider() == "ollama":
         return True
     return any(
         (normalizeProvider(binding.provider) or binding.provider) == "ollama" for binding in profile.roles.values()
     )
 
 
-def probe_provider_availability(prov: str) -> tuple[bool | None, str | None, bool]:
+def probeProviderAvailability(prov: str) -> tuple[bool | None, str | None, bool]:
     """provider 사용 가능 여부와 모델을 실제로 점검한다."""
-    from dartlab.ai import get_config
-    from dartlab.ai.providers import create_provider
+    from dartlab.ai import getConfig
+    from dartlab.ai.providers import createProvider
 
     try:
-        config = get_config(prov)
-        provider = create_provider(config)
-        available = provider.check_available()
-        return available, provider.resolved_model, True
+        config = getConfig(prov)
+        provider = createProvider(config)
+        available = provider.checkAvailable()
+        return available, provider.resolvedModel, True
     except (
         AttributeError,
         FileNotFoundError,
@@ -59,13 +59,13 @@ def probe_provider_availability(prov: str) -> tuple[bool | None, str | None, boo
         return False, None, True
 
 
-def build_ollama_detail(*, probe: bool) -> dict[str, Any]:
+def buildOllamaDetail(*, probe: bool) -> dict[str, Any]:
     """Ollama 설치/실행/GPU 상태를 조회한다."""
     if probe:
         try:
-            from dartlab.ai.providers.support.ollamaSetup import detect_ollama, get_install_guide
+            from dartlab.ai.providers.support.ollamaSetup import detectOllama, getInstallGuide
 
-            ollama_info = detect_ollama()
+            ollama_info = detectOllama()
             detail = {
                 "installed": ollama_info.get("installed", False),
                 "running": ollama_info.get("running", False),
@@ -73,7 +73,7 @@ def build_ollama_detail(*, probe: bool) -> dict[str, Any]:
                 "checked": True,
             }
             if not ollama_info.get("installed"):
-                detail["installGuide"] = get_install_guide()
+                detail["installGuide"] = getInstallGuide()
             return detail
         except (FileNotFoundError, ImportError, OSError, PermissionError, RuntimeError, ValueError):
             return {"installed": False, "running": False, "gpu": None, "checked": True}
@@ -86,7 +86,7 @@ def build_ollama_detail(*, probe: bool) -> dict[str, Any]:
     }
 
 
-def build_codex_detail(*, probe: bool) -> dict[str, Any]:
+def buildCodexDetail(*, probe: bool) -> dict[str, Any]:
     """Codex CLI 상태. probe=False 면 subprocess 없이 PATH 존재만 확인.
 
     detect_codex() 는 codex CLI 5 회 직렬 호출 (Windows Node 콜드 스타트 회당 0.3~0.7s)
@@ -102,9 +102,9 @@ def build_codex_detail(*, probe: bool) -> dict[str, Any]:
             "checked": False,
         }
     try:
-        from dartlab.ai.providers.support.cliSetup import detect_codex
+        from dartlab.ai.providers.support.cliSetup import detectCodex
 
-        return detect_codex()
+        return detectCodex()
     except (
         AttributeError,
         FileNotFoundError,
@@ -125,7 +125,7 @@ def build_codex_detail(*, probe: bool) -> dict[str, Any]:
         }
 
 
-def build_oauth_codex_detail(*, probe: bool) -> dict[str, Any]:
+def buildOauthCodexDetail(*, probe: bool) -> dict[str, Any]:
     """OAuth Codex 인증/토큰 상태를 조회한다."""
     try:
         from dartlab.ai.providers.support import oauth_token as oauthToken
@@ -134,7 +134,7 @@ def build_oauth_codex_detail(*, probe: bool) -> dict[str, Any]:
 
     token_stored = False
     try:
-        token_stored = oauthToken.load_token() is not None
+        token_stored = oauthToken.loadToken() is not None
     except (OSError, ValueError):
         token_stored = False
 
@@ -147,8 +147,8 @@ def build_oauth_codex_detail(*, probe: bool) -> dict[str, Any]:
         }
 
     try:
-        authenticated = oauthToken.is_authenticated()
-        account_id = oauthToken.get_account_id() if authenticated else None
+        authenticated = oauthToken.isAuthenticated()
+        account_id = oauthToken.getAccountId() if authenticated else None
         return {
             "authenticated": authenticated,
             "tokenStored": token_stored,
@@ -170,31 +170,31 @@ def build_oauth_codex_detail(*, probe: bool) -> dict[str, Any]:
         }
 
 
-def validate_provider_connection(req: ConfigureRequest) -> dict[str, Any]:
+def validateProviderConnection(req: ConfigureRequest) -> dict[str, Any]:
     """LLM provider 연결 가능 여부만 검증한다."""
-    from dartlab.ai import get_config
-    from dartlab.ai.providers import create_provider
+    from dartlab.ai import getConfig
+    from dartlab.ai.providers import createProvider
     from dartlab.ai.settings.types import LLMConfig
 
     effective_provider = normalizeProvider(req.provider) or req.provider
-    current = get_config(effective_provider, role=normalizeRole(req.role) or DEFAULT_ROLE)
+    current = getConfig(effective_provider, role=normalizeRole(req.role) or DEFAULT_ROLE)
     kwargs: dict[str, Any] = {
         "provider": effective_provider,
         "model": req.model or current.model,
-        "api_key": req.api_key if req.api_key is not None else current.api_key,
-        "base_url": req.base_url or current.base_url,
+        "api_key": req.apiKey if req.apiKey is not None else current.apiKey,
+        "base_url": req.baseUrl or current.baseUrl,
         "temperature": current.temperature,
-        "max_tokens": current.max_tokens,
-        "system_prompt": current.system_prompt,
+        "max_tokens": current.maxTokens,
+        "system_prompt": current.systemPrompt,
     }
 
     available = False
     model = None
     try:
         config = LLMConfig(**kwargs)
-        provider = create_provider(config)
-        available = provider.check_available()
-        model = provider.resolved_model
+        provider = createProvider(config)
+        available = provider.checkAvailable()
+        model = provider.resolvedModel
     except (FileNotFoundError, ImportError, OSError, PermissionError, RuntimeError, ValueError):
         available = False
         model = None

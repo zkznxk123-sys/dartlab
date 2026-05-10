@@ -60,9 +60,9 @@ TOPIC_KEYWORDS: dict[str, list[str]] = {
 }
 
 
-def build_mention_matrix(
+def buildMentionMatrix(
     sections: pl.DataFrame,
-    topic_keywords: dict[str, list[str]] | None = None,
+    topicKeywords: dict[str, list[str]] | None = None,
 ) -> dict:
     """전 topic 텍스트에서 다른 topic 키워드 카운트 → 인접 행렬.
 
@@ -73,8 +73,8 @@ def build_mention_matrix(
     Returns:
         {adjacency: {(src, tgt): count}, topics_with_text: [...], period: str}
     """
-    if topic_keywords is None:
-        topic_keywords = TOPIC_KEYWORDS
+    if topicKeywords is None:
+        topicKeywords = TOPIC_KEYWORDS
 
     periods = [c for c in sections.columns if _PERIOD_RE.fullmatch(c)]
     if not periods:
@@ -96,7 +96,7 @@ def build_mention_matrix(
     # 인접 행렬
     adjacency: dict[tuple[str, str], int] = {}
     for source_topic, text in topic_texts.items():
-        for target_topic, keywords in topic_keywords.items():
+        for target_topic, keywords in topicKeywords.items():
             if source_topic == target_topic:
                 continue
             count = sum(text.count(kw) for kw in keywords)
@@ -110,7 +110,7 @@ def build_mention_matrix(
     }
 
 
-def analyze_graph(
+def analyzeGraph(
     adjacency: dict[tuple[str, str], int],
     *,
     threshold: int = 3,
@@ -154,13 +154,13 @@ def analyze_graph(
     }
 
 
-def get_related_topics(
+def getRelatedTopics(
     sections: pl.DataFrame,
     topic: str,
     *,
     limit: int = 5,
     threshold: int = 3,
-    topic_keywords: dict[str, list[str]] | None = None,
+    topicKeywords: dict[str, list[str]] | None = None,
 ) -> list[str]:
     """특정 topic과 연결된 관련 topic 목록.
 
@@ -174,7 +174,7 @@ def get_related_topics(
     Returns:
         관련 topic 이름 리스트 (mention 많은 순).
     """
-    matrix = build_mention_matrix(sections, topic_keywords)
+    matrix = buildMentionMatrix(sections, topicKeywords)
     adjacency = matrix.get("adjacency", {})
 
     # topic에서 나가는 + 들어오는 연결

@@ -20,13 +20,13 @@ from .settings.providerCatalog import wiredProviderIds
 from .workbench import WorkbenchLoop
 
 
-def create_task(question: str, **_: Any) -> WorkbenchTask:
+def createTask(question: str, **_: Any) -> WorkbenchTask:
     """Create a compact research task for compatibility callers."""
 
     return WorkbenchTask(question=(question or "").strip())
 
 
-def _ask_events(question: str, **kwargs: Any) -> Iterator[TraceEvent]:
+def _askEvents(question: str, **kwargs: Any) -> Iterator[TraceEvent]:
     """Internal event stream for server/CLI adapters.
 
     분기 룰:
@@ -54,9 +54,9 @@ def _ask_events(question: str, **kwargs: Any) -> Iterator[TraceEvent]:
 
 def _resolveProvider(kwargs: dict[str, Any]) -> Any:
     try:
-        from .providers import create_provider
+        from .providers import createProvider
 
-        return create_provider(
+        return createProvider(
             provider=kwargs.get("provider"),
             model=kwargs.get("model"),
         )
@@ -68,11 +68,11 @@ def _isLLMProvider(obj: Any) -> bool:
     if obj is None or not callable(getattr(obj, "generate", None)):
         return False
     config = getattr(obj, "config", None)
-    provider_id = (getattr(config, "provider", None) or "").lower()
-    if provider_id not in wiredProviderIds():
+    providerId = (getattr(config, "provider", None) or "").lower()
+    if providerId not in wiredProviderIds():
         return False
     try:
-        return bool(obj.check_available())
+        return bool(obj.checkAvailable())
     except Exception:  # noqa: BLE001
         return False
 
@@ -85,15 +85,15 @@ def ask(question: str, *, stream: bool = True, events: bool = False, **kwargs: A
     TraceEvent objects without exposing a second public answer entry point.
     """
 
-    event_iter = _ask_events(question, **kwargs)
+    event_iter = _askEvents(question, **kwargs)
     if events:
         return event_iter
     if stream:
-        return _chunk_iter(event_iter)
+        return _chunkIter(event_iter)
     return "".join(event.data.get("text", "") for event in event_iter if event.kind == "chunk")
 
 
-def _chunk_iter(events: Iterator[TraceEvent]) -> Iterator[str]:
+def _chunkIter(events: Iterator[TraceEvent]) -> Iterator[str]:
     for event in events:
         if event.kind == "chunk":
             text = event.data.get("text", "")
@@ -101,4 +101,4 @@ def _chunk_iter(events: Iterator[TraceEvent]) -> Iterator[str]:
                 yield str(text)
 
 
-__all__ = ["ask", "create_task"]
+__all__ = ["ask", "createTask"]

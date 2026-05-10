@@ -34,7 +34,7 @@ class DomainConfig:
     timeout: float = 10.0
     jitter_min: float = 0.3  # 요청 전 최소 랜덤 대기 (초)
     jitter_max: float = 1.5  # 요청 전 최대 랜덤 대기 (초)
-    min_interval: float = 0.0  # 요청 간 최소 간격 (초, 0=제한 없음)
+    minInterval: float = 0.0  # 요청 간 최소 간격 (초, 0=제한 없음)
 
 
 # ══════════════════════════════════════
@@ -88,7 +88,7 @@ class PriceSnapshot:
     high_52w: float = 0.0
     low_52w: float = 0.0
     volume: int = 0
-    market_cap: float = 0.0  # 억원
+    marketCap: float = 0.0  # 억원
     per: float | None = None
     pbr: float | None = None
     dividend_yield: float | None = None
@@ -447,7 +447,7 @@ class GatherResult:
 class GatherSnapshot:
     """전체 병렬 수집 통합 결과."""
 
-    stock_code: str = ""
+    stockCode: str = ""
     results: dict[str, GatherResult] = field(default_factory=dict)
     collected_at: str = ""
     _news: list[NewsItem] = field(default_factory=list)
@@ -537,7 +537,7 @@ class GatherSnapshot:
         return self._shortSelling
 
     @property
-    def sources_available(self) -> list[str]:
+    def sourcesAvailable(self) -> list[str]:
         """정상 응답한 소스 목록.
 
         Returns
@@ -548,7 +548,7 @@ class GatherSnapshot:
         return [d for d, r in self.results.items() if r.error is None]
 
     @property
-    def sources_failed(self) -> list[str]:
+    def sourcesFailed(self) -> list[str]:
         """오류가 발생한 소스 목록.
 
         Returns
@@ -558,7 +558,7 @@ class GatherSnapshot:
         """
         return [d for d, r in self.results.items() if r.error is not None]
 
-    def to_market_snapshot(self) -> MarketSnapshot:
+    def toMarketSnapshot(self) -> MarketSnapshot:
         """Analyst 엔진 호환 flat 스냅샷으로 변환.
 
         Returns
@@ -571,10 +571,10 @@ class GatherSnapshot:
 
         multiples: dict[str, float] = {}
         price_range: tuple[float, float] | None = None
-        current_price = 0.0
+        currentPrice = 0.0
 
         if price:
-            current_price = price.current
+            currentPrice = price.current
             if price.per is not None:
                 multiples["per"] = price.per
             if price.pbr is not None:
@@ -597,25 +597,25 @@ class GatherSnapshot:
             supply_demand["foreign_holding_ratio"] = flow.foreign_holding_ratio
 
         return MarketSnapshot(
-            stock_code=self.stock_code,
-            current_price=current_price,
+            stockCode=self.stockCode,
+            currentPrice=currentPrice,
             multiples=multiples,
             supply_demand=supply_demand,
             price_range_52w=price_range,
             collected_at=self.collected_at,
-            sources_available=self.sources_available,
-            sources_failed=self.sources_failed,
+            sourcesAvailable=self.sourcesAvailable,
+            sourcesFailed=self.sourcesFailed,
         )
 
     def __repr__(self) -> str:
-        lines = [f"[GatherSnapshot — {self.stock_code}]"]
+        lines = [f"[GatherSnapshot — {self.stockCode}]"]
         if self.price:
             lines.append(f"  {self.price}")
         if self.flow:
             lines.append(f"  {self.flow}")
-        lines.append(f"  소스: {', '.join(self.sources_available)}")
-        if self.sources_failed:
-            lines.append(f"  실패: {', '.join(self.sources_failed)}")
+        lines.append(f"  소스: {', '.join(self.sourcesAvailable)}")
+        if self.sourcesFailed:
+            lines.append(f"  실패: {', '.join(self.sourcesFailed)}")
         return "\n".join(lines)
 
 
@@ -649,7 +649,7 @@ class PeerData:
     per: float | None = None
     pbr: float | None = None
     ev_ebitda: float | None = None
-    market_cap: float | None = None
+    marketCap: float | None = None
 
     def __repr__(self) -> str:
         parts = [f"{self.ticker}({self.name})"]
@@ -690,20 +690,20 @@ class MarketSnapshot:
         오류 발생 소스 목록.
     """
 
-    stock_code: str = ""
-    current_price: float = 0.0
+    stockCode: str = ""
+    currentPrice: float = 0.0
     multiples: dict[str, float] = field(default_factory=dict)
     peer_multiples: list[PeerData] = field(default_factory=list)
     supply_demand: dict[str, float] = field(default_factory=dict)
     macro: dict[str, float] = field(default_factory=dict)
     price_range_52w: tuple[float, float] | None = None
     collected_at: str = ""
-    sources_available: list[str] = field(default_factory=list)
-    sources_failed: list[str] = field(default_factory=list)
+    sourcesAvailable: list[str] = field(default_factory=list)
+    sourcesFailed: list[str] = field(default_factory=list)
 
     def __repr__(self) -> str:
-        lines = [f"[MarketSnapshot — {self.stock_code}]"]
-        lines.append(f"  현재가: {self.current_price:,.0f}")
+        lines = [f"[MarketSnapshot — {self.stockCode}]"]
+        lines.append(f"  현재가: {self.currentPrice:,.0f}")
         if self.multiples:
             mult_str = ", ".join(f"{k}={v:.2f}" for k, v in self.multiples.items())
             lines.append(f"  멀티플: {mult_str}")

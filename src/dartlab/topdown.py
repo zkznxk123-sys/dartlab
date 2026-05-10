@@ -43,7 +43,7 @@ _CYCLE_SECTORS_US: dict[str, list[str]] = {
 }
 
 
-def _get_cycle_sectors(phase: str, market: str) -> list[str]:
+def _getCycleSectors(phase: str, market: str) -> list[str]:
     table = _CYCLE_SECTORS_KR if market.upper() == "KR" else _CYCLE_SECTORS_US
     return table.get(phase, [])
 
@@ -58,7 +58,7 @@ def topdown(
     *,
     sectors: list[str] | None = None,
     topN: int = 5,
-    as_of: str | None = None,
+    asOf: str | None = None,
     **kwargs,
 ) -> dict:
     """탑다운 분석 — 시장 → 섹터 → 종목.
@@ -79,27 +79,27 @@ def topdown(
         }
     """
     # 1. 시장 사이클
-    from dartlab.macro.cycle import analyze_cycle
+    from dartlab.macro.cycle import analyzeCycle
 
-    cycle = analyze_cycle(market=market, as_of=as_of)
+    cycle = analyzeCycle(market=market, asOf=asOf)
     phase = cycle.get("phase")
     if not phase:
         return {"error": "사이클 판별 실패", "market": market}
 
     # 2. 국면 → 추천 섹터
-    rec_sectors = sectors if sectors else _get_cycle_sectors(phase, market)
+    rec_sectors = sectors if sectors else _getCycleSectors(phase, market)
 
     # 3. 각 섹터에서 종목 후보 (scan 활용)
     screens: dict[str, list[dict]] = {}
     for sector in rec_sectors:
         try:
-            screens[sector] = _screen_sector(sector, market, topN, as_of)
+            screens[sector] = _screenSector(sector, market, topN, asOf)
         except (KeyError, ValueError, TypeError, ImportError) as e:
             log.debug("섹터 스크리닝 실패: %s — %s", sector, e)
             screens[sector] = []
 
     # 4. narrative 생성
-    narrative = _build_narrative(cycle, rec_sectors, screens, market)
+    narrative = _buildNarrative(cycle, rec_sectors, screens, market)
 
     return {
         "market": market.upper(),
@@ -121,7 +121,7 @@ def topdown(
 # ══════════════════════════════════════
 
 
-def _screen_sector(sector: str, market: str, topN: int, as_of: str | None) -> list[dict]:
+def _screenSector(sector: str, market: str, topN: int, asOf: str | None) -> list[dict]:
     """섹터 내 상위 종목 스크리닝.
 
     현재 구현: scan.financial 결과에서 섹터 일치 종목 필터 + 수익성 정렬.
@@ -172,7 +172,7 @@ def _screen_sector(sector: str, market: str, topN: int, as_of: str | None) -> li
 # ══════════════════════════════════════
 
 
-def _build_narrative(cycle: dict, sectors: list[str], screens: dict, market: str) -> str:
+def _buildNarrative(cycle: dict, sectors: list[str], screens: dict, market: str) -> str:
     phase = cycle.get("phaseLabel") or cycle.get("phase", "?")
     conf = cycle.get("confidence", "?")
 

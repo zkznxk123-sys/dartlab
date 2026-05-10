@@ -22,12 +22,12 @@ from dartlab.server.room import (
 
 class TestRoom:
     def test_room_creates_with_host(self):
-        room = Room("test-room", host_name="Alice")
+        room = Room("test-room", hostName="Alice")
         assert len(room.members) == 1
         host = list(room.members.values())[0]
         assert host.name == "Alice"
         assert host.role == "host"
-        assert host.access_level == "full"
+        assert host.accessLevel == "full"
 
     @pytest.mark.asyncio
     async def test_join(self):
@@ -56,9 +56,9 @@ class TestRoom:
         member = await room.join("Bob")
         assert len(room.members) == 2
 
-        await room.leave(member.member_id)
+        await room.leave(member.memberId)
         assert len(room.members) == 1
-        assert member.member_id not in room.members
+        assert member.memberId not in room.members
 
     @pytest.mark.asyncio
     async def test_leave_nonexistent(self):
@@ -74,10 +74,10 @@ class TestRoom:
 
     def test_get_member(self):
         room = Room("test-room")
-        host = room.get_member(room.host_member_id)
+        host = room.getMember(room.host_member_id)
         assert host is not None
         assert host.role == "host"
-        assert room.get_member("nope") is None
+        assert room.getMember("nope") is None
 
 
 # ---------------------------------------------------------------------------
@@ -116,10 +116,10 @@ class TestBroadcast:
             while not m.queue.empty():
                 m.queue.get_nowait()
 
-        await room.broadcast("test", {"msg": "hello"}, exclude=m1.member_id)
+        await room.broadcast("test", {"msg": "hello"}, exclude=m1.memberId)
 
         # Alice는 제외, host만 받아야 함
-        host = room.get_member(room.host_member_id)
+        host = room.getMember(room.host_member_id)
         assert not host.queue.empty()
         assert m1.queue.empty()
 
@@ -134,7 +134,7 @@ class TestBroadcast:
 
         # 큐 가득 찬 상태에서 브로드캐스트 → Alice 제거
         await room.broadcast("overflow", {"msg": "bye"})
-        assert m1.member_id not in room.members
+        assert m1.memberId not in room.members
 
 
 # ---------------------------------------------------------------------------
@@ -146,21 +146,21 @@ class TestChat:
     def test_add_chat(self):
         room = Room("test-room")
         host_id = room.host_member_id
-        msg = room.add_chat(host_id, "Hello!")
+        msg = room.addChat(host_id, "Hello!")
         assert msg is not None
         assert msg.text == "Hello!"
         assert len(room.chat_history) == 1
 
     def test_add_chat_nonexistent_member(self):
         room = Room("test-room")
-        msg = room.add_chat("nobody", "Hello!")
+        msg = room.addChat("nobody", "Hello!")
         assert msg is None
 
     def test_chat_history_cap(self):
         room = Room("test-room")
         host_id = room.host_member_id
         for i in range(MAX_CHAT_HISTORY + 20):
-            room.add_chat(host_id, f"msg-{i}")
+            room.addChat(host_id, f"msg-{i}")
         assert len(room.chat_history) == MAX_CHAT_HISTORY
 
 
@@ -172,10 +172,10 @@ class TestChat:
 class TestRoomState:
     @pytest.mark.asyncio
     async def test_get_state(self):
-        room = Room("test-room", host_name="Host")
+        room = Room("test-room", hostName="Host")
         await room.join("Bob")
 
-        state = room.get_state()
+        state = room.getState()
         assert state["roomId"] == "test-room"
         assert len(state["members"]) == 2
         assert isinstance(state["navState"], dict)
@@ -204,8 +204,8 @@ class TestCleanup:
         # 강제로 하트비트를 과거로 설정
         member.last_heartbeat = time.monotonic() - HEARTBEAT_TIMEOUT - 1
 
-        await room.cleanup_stale()
-        assert member.member_id not in room.members
+        await room.cleanupStale()
+        assert member.memberId not in room.members
         assert len(room.members) == 1  # host만 남음
 
     @pytest.mark.asyncio
@@ -213,10 +213,10 @@ class TestCleanup:
         import time
 
         room = Room("test-room")
-        host = room.get_member(room.host_member_id)
+        host = room.getMember(room.host_member_id)
         host.last_heartbeat = time.monotonic() - HEARTBEAT_TIMEOUT - 100
 
-        await room.cleanup_stale()
+        await room.cleanupStale()
         assert room.host_member_id in room.members
 
 
@@ -228,19 +228,19 @@ class TestCleanup:
 class TestRoomManager:
     def test_create_and_get(self):
         mgr = RoomManager()
-        room = mgr.create_room("TestHost")
-        assert mgr.get_room() is room
-        assert room.room_id
+        room = mgr.createRoom("TestHost")
+        assert mgr.getRoom() is room
+        assert room.roomId
 
     def test_destroy(self):
         mgr = RoomManager()
-        mgr.create_room()
-        mgr.destroy_room()
-        assert mgr.get_room() is None
+        mgr.createRoom()
+        mgr.destroyRoom()
+        assert mgr.getRoom() is None
 
     def test_no_room(self):
         mgr = RoomManager()
-        assert mgr.get_room() is None
+        assert mgr.getRoom() is None
 
 
 # ---------------------------------------------------------------------------
@@ -250,8 +250,8 @@ class TestRoomManager:
 
 class TestMemberInfo:
     def test_info_dict(self):
-        room = Room("test-room", host_name="Host")
-        host = room.get_member(room.host_member_id)
+        room = Room("test-room", hostName="Host")
+        host = room.getMember(room.host_member_id)
         info = host.info()
         assert info["name"] == "Host"
         assert info["role"] == "host"
@@ -267,7 +267,7 @@ class TestJoinBroadcast:
     @pytest.mark.asyncio
     async def test_join_broadcasts_to_existing(self):
         room = Room("test-room")
-        host = room.get_member(room.host_member_id)
+        host = room.getMember(room.host_member_id)
 
         # 큐 비우기
         while not host.queue.empty():

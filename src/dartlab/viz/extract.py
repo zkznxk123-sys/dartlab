@@ -16,7 +16,7 @@ import re
 _MARKER_RE = re.compile(r"<!--DARTLAB_VIZ:(.*?):VIZ_END-->", re.DOTALL)
 
 
-def extract_viz_specs(stdout: str) -> tuple[str, list[dict]]:
+def extractVizSpecs(stdout: str) -> tuple[str, list[dict]]:
     """stdout에서 VizSpec 마커를 추출하고 텍스트에서 제거.
 
     Args:

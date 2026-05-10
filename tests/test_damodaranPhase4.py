@@ -18,7 +18,7 @@ def test_boundedCache_accessor_pinned():
 
     cache = BoundedCache()
     for key in ("_showAccessor", "_selectAccessor", "_storyAccessor", "_creditAccessor", "_analysisAccessor"):
-        assert cache._is_pinned(key), f"{key} not pinned"
+        assert cache._isPinned(key), f"{key} not pinned"
 
 
 # ── G14b BlockMap _suggest int 방어 ────────────────────

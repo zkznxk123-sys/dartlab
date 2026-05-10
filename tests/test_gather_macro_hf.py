@@ -108,14 +108,14 @@ def test_gather_macro_api_key_uses_direct_fred_path(monkeypatch):
     from dartlab.gather import getDefaultGather
 
     class _FakeFred:
-        def __init__(self, api_key=None):
-            self.api_key = api_key
+        def __init__(self, apiKey=None):
+            self.apiKey = apiKey
 
-        def series(self, series_id, **kwargs):
+        def series(self, seriesId, **kwargs):
             return pl.DataFrame({"date": ["2024-01-01"], "value": [1.0]}).with_columns(pl.col("date").cast(pl.Date))
 
-        def compare(self, series_ids, **kwargs):
-            return pl.DataFrame({"date": ["2024-01-01"], series_ids[0]: [1.0]}).with_columns(
+        def compare(self, seriesIds, **kwargs):
+            return pl.DataFrame({"date": ["2024-01-01"], seriesIds[0]: [1.0]}).with_columns(
                 pl.col("date").cast(pl.Date)
             )
 

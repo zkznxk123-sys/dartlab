@@ -138,7 +138,7 @@ def findMinDForStationarity(
             results : list[dict] — 각 d 의 ADF stat, p-value, corr
             recommendation : str
     """
-    from dartlab.quant.pairsTrading import _adf_test
+    from dartlab.quant.pairsTrading import _adfTest
 
     results = []
     optimal = None
@@ -150,7 +150,7 @@ def findMinDForStationarity(
             d += step
             continue
         valid = out["transformed"][~np.isnan(out["transformed"])]
-        adf_stat, _, _ = _adf_test(valid)
+        adf_stat, _, _ = _adfTest(valid)
         # ADF critical 5% ≈ -2.86 (대수표본)
         adf_pass = adf_stat is not None and adf_stat < -2.86
         results.append(

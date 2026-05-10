@@ -22,11 +22,11 @@ _KR_DEFAULTS = {
 }
 
 
-def _default_start(days: int = 420) -> str:
+def _defaultStart(days: int = 420) -> str:
     return (_date.today() - timedelta(days=days)).isoformat()
 
 
-def _stock_market(stockCode: str | None) -> tuple[str | None, str]:
+def _stockMarket(stockCode: str | None) -> tuple[str | None, str]:
     """KRX 상장 목록에서 종목의 시장군을 찾는다."""
     if not stockCode:
         return None, "no_stock"
@@ -50,7 +50,7 @@ def _stock_market(stockCode: str | None) -> tuple[str | None, str]:
     return None, "fallback"
 
 
-def _resolve_explicit(benchmark: str) -> tuple[str, str]:
+def _resolveExplicit(benchmark: str) -> tuple[str, str]:
     key = str(benchmark).strip()
     if key in INDEX_ALIASES:
         return INDEX_ALIASES[key]
@@ -87,7 +87,7 @@ def _candidate(
     }
 
 
-def _market_candidate(listedMarket: str | None, reason: str) -> dict[str, Any]:
+def _marketCandidate(listedMarket: str | None, reason: str) -> dict[str, Any]:
     indexMarket, indexName = _KR_DEFAULTS.get(listedMarket or "KOSPI", _KR_DEFAULTS["KOSPI"])
     return _candidate(
         benchmarkType="market",
@@ -98,14 +98,14 @@ def _market_candidate(listedMarket: str | None, reason: str) -> dict[str, Any]:
     )
 
 
-def _latest_sector_candidate(stockCode: str, listedMarket: str | None) -> dict[str, Any] | None:
+def _latestSectorCandidate(stockCode: str, listedMarket: str | None) -> dict[str, Any] | None:
     """KRX 일별 가격의 SECT_TP_NM을 시장 섹터 지수 후보로 변환한다."""
     if not stockCode or listedMarket not in {"KOSPI", "KOSDAQ"}:
         return None
     try:
         from dartlab.gather._hfBulk import loadFiltered
 
-        raw = loadFiltered(start=_default_start(45), adjustment="raw")
+        raw = loadFiltered(start=_defaultStart(45), adjustment="raw")
         if isEmptyDf(raw) or not {"ISU_CD", "SECT_TP_NM", "BAS_DD"}.issubset(set(raw.columns)):
             return None
         rows = raw.filter(pl.col("ISU_CD") == stockCode).sort("BAS_DD", descending=True).head(1)
@@ -126,7 +126,7 @@ def _latest_sector_candidate(stockCode: str, listedMarket: str | None) -> dict[s
         return None
 
 
-def _sector_candidate(stockCode: str | None, listedMarket: str | None) -> dict[str, Any] | None:
+def _sectorCandidate(stockCode: str | None, listedMarket: str | None) -> dict[str, Any] | None:
     if not stockCode:
         return None
     node = primaryIndustryNode(stockCode)
@@ -141,17 +141,17 @@ def _sector_candidate(stockCode: str | None, listedMarket: str | None) -> dict[s
                     "industryConfidence": node.get("confidence"),
                     "industrySource": node.get("source"),
                 }
-    return _latest_sector_candidate(stockCode, listedMarket)
+    return _latestSectorCandidate(stockCode, listedMarket)
 
 
-def _style_candidate(stockCode: str | None, listedMarket: str | None) -> dict[str, Any] | None:
+def _styleCandidate(stockCode: str | None, listedMarket: str | None) -> dict[str, Any] | None:
     """시총 분위로 대형/중형/소형 스타일 지수 후보를 고른다."""
     if not stockCode or listedMarket not in {"KOSPI", "KOSDAQ"}:
         return None
     try:
         from dartlab.gather._hfBulk import loadFiltered
 
-        raw = loadFiltered(start=_default_start(45), adjustment="raw")
+        raw = loadFiltered(start=_defaultStart(45), adjustment="raw")
         required = {"ISU_CD", "MKT_NM", "BAS_DD", "MKTCAP"}
         if isEmptyDf(raw) or not required.issubset(set(raw.columns)):
             return None
@@ -196,7 +196,7 @@ def _style_candidate(stockCode: str | None, listedMarket: str | None) -> dict[st
         return None
 
 
-def _select_primary(stack: dict[str, Any], benchmarkMode: str) -> dict[str, Any]:
+def _selectPrimary(stack: dict[str, Any], benchmarkMode: str) -> dict[str, Any]:
     mode = (benchmarkMode or "market").strip()
     if mode == "auto":
         mode = "sector"
@@ -257,14 +257,14 @@ def resolveBenchmarkStack(
         }
         return {"primary": primary, "market": primary, "sector": None, "style": None, "candidates": [primary]}
 
-    listedMarket, reason = _stock_market(stockCode)
+    listedMarket, reason = _stockMarket(stockCode)
     mUpper = (market or "").upper()
     if mUpper in _KR_DEFAULTS:
         listedMarket, reason = mUpper, "market"
-    marketCand = _market_candidate(listedMarket, reason)
+    marketCand = _marketCandidate(listedMarket, reason)
 
     if benchmark:
-        indexMarket, indexName = _resolve_explicit(benchmark)
+        indexMarket, indexName = _resolveExplicit(benchmark)
         primary = _candidate(
             benchmarkType="explicit",
             indexMarket=indexMarket,
@@ -280,17 +280,17 @@ def resolveBenchmarkStack(
             "candidates": [primary, marketCand],
         }
 
-    sectorCand = _sector_candidate(stockCode, marketCand["indexMarket"])
+    sectorCand = _sectorCandidate(stockCode, marketCand["indexMarket"])
     styleCand = None
     if includeStyle or benchmarkMode == "style":
-        styleCand = _style_candidate(stockCode, marketCand["indexMarket"])
+        styleCand = _styleCandidate(stockCode, marketCand["indexMarket"])
     stack = {
         "market": marketCand,
         "sector": sectorCand,
         "style": styleCand,
     }
     candidates = [c for c in (marketCand, sectorCand, styleCand) if c]
-    primary = _select_primary(stack, benchmarkMode)
+    primary = _selectPrimary(stack, benchmarkMode)
     return {
         "primary": primary,
         "market": marketCand,
@@ -344,11 +344,11 @@ def resolveBenchmark(
     return primary
 
 
-def _krx_index_to_ohlcv(raw: pl.DataFrame, index_name: str) -> pl.DataFrame:
+def _krxIndexToOhlcv(raw: pl.DataFrame, indexName: str) -> pl.DataFrame:
     """KRX 지수 raw row를 quant OHLCV schema로 변환한다."""
     if raw is None or raw.is_empty():
         return pl.DataFrame()
-    df = raw.filter(pl.col("IDX_NM") == index_name)
+    df = raw.filter(pl.col("IDX_NM") == indexName)
     if df.is_empty():
         return pl.DataFrame()
     cols = {
@@ -376,7 +376,7 @@ def fetchBenchmarkOhlcv(
     benchmarkMode: str = "market",
     start: str | None = None,
     end: str | None = None,
-    return_meta: bool = False,
+    returnMeta: bool = False,
     includeStackDetail: bool = False,
 ) -> pl.DataFrame | tuple[pl.DataFrame | None, dict[str, Any]]:
     """quant용 벤치마크 OHLCV를 로드한다.
@@ -400,10 +400,10 @@ def fetchBenchmarkOhlcv(
 
             raw = loadFiltered(
                 market=meta["indexMarket"],
-                start=start or _default_start(),
+                start=start or _defaultStart(),
                 end=end,
             )
-            df = _krx_index_to_ohlcv(raw, meta["indexName"])
+            df = _krxIndexToOhlcv(raw, meta["indexName"])
         except Exception as exc:  # noqa: BLE001
             log.warning("KRX 벤치마크 로드 실패(%s): %s", meta["indexName"], type(exc).__name__)
             df = None
@@ -418,10 +418,10 @@ def fetchBenchmarkOhlcv(
 
     if isEmptyDf(df):
         meta["nObs"] = 0
-        return (None, meta) if return_meta else None
+        return (None, meta) if returnMeta else None
 
     meta["nObs"] = int(df.height)
-    return (df, meta) if return_meta else df
+    return (df, meta) if returnMeta else df
 
 
 def benchmarkSnapshot(
@@ -441,7 +441,7 @@ def benchmarkSnapshot(
         benchmarkMode=benchmarkMode,
         start=start,
         end=end,
-        return_meta=True,
+        returnMeta=True,
         includeStackDetail=True,
     )
     result: dict[str, Any] = {

@@ -70,7 +70,7 @@ def _momPct(series: list[float]) -> float | None:
     return ((series[-1] - prev) / abs(prev)) * 100
 
 
-def _fetch_trade_data(market: str, as_of: str | None = None) -> dict[str, float | list | None]:
+def _fetchTradeData(market: str, asOf: str | None = None) -> dict[str, float | list | None]:
     """gather에서 교역/환율/유가 지표 수집.
 
     Parameters
@@ -100,9 +100,9 @@ def _fetch_trade_data(market: str, as_of: str | None = None) -> dict[str, float 
             oil_series : list[float] — 유가 시계열
             us_retail_series : list[float] — 미국 소매판매 시계열 (백만달러)
     """
-    from dartlab.macro._helpers import fetch_series_list, get_gather
+    from dartlab.macro._helpers import fetchSeriesList, getGather
 
-    g = get_gather(as_of)
+    g = getGather(asOf)
     data: dict[str, float | list | None] = {}
 
     if market.upper() == "KR":
@@ -113,24 +113,24 @@ def _fetch_trade_data(market: str, as_of: str | None = None) -> dict[str, float 
             ("usdkrw", "USDKRW"),
             ("cli", "CLI"),
         ]:
-            series = fetch_series_list(g, sid)
+            series = fetchSeriesList(g, sid)
             if series:
                 data[f"{label}_series"] = series
                 data[label] = series[-1]
                 if len(series) > 1:
                     data[f"{label}_prev"] = series[-2]
 
-    data["oil_series"] = fetch_series_list(g, "DCOILWTICO")
+    data["oil_series"] = fetchSeriesList(g, "DCOILWTICO")
     oil_list = data.get("oil_series")
     if oil_list:
         data["oil"] = oil_list[-1]
 
-    data["us_retail_series"] = fetch_series_list(g, "RSAFS")
+    data["us_retail_series"] = fetchSeriesList(g, "RSAFS")
 
     return data
 
 
-def analyze_trade(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
+def analyzeTrade(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """교역 종합 분석.
 
     교역조건, 교역조건 대용치(환율-유가), 수출이익 선행,
@@ -179,11 +179,11 @@ def analyze_trade(*, market: str = "US", as_of: str | None = None, overrides: di
             implication : str — 시사 해설
         timeseries : dict — 주요 시계열 (oil, export_price, usdkrw 등)
     """
-    data = _fetch_trade_data(market, as_of=as_of)
+    data = _fetchTradeData(market, asOf=asOf)
     if overrides:
-        from dartlab.macro._helpers import apply_overrides
+        from dartlab.macro._helpers import applyOverrides
 
-        data = apply_overrides(data, overrides)
+        data = applyOverrides(data, overrides)
     result: dict = {"market": market.upper()}
 
     if market.upper() == "KR":
@@ -294,14 +294,14 @@ def analyze_trade(*, market: str = "US", as_of: str | None = None, overrides: di
         result["leadingRelativeStrength"] = None
         result["usConsumptionLink"] = None
 
-    from dartlab.macro._helpers import collect_timeseries, get_gather
+    from dartlab.macro._helpers import collectTimeseries, getGather
 
-    g_ts = get_gather(as_of)
+    g_ts = getGather(asOf)
     ts_map = {"oil": "DCOILWTICO"}
     if market.upper() == "KR":
         ts_map.update(
             {"export_price": "EXPORT_PRICE", "import_price": "IMPORT_PRICE", "usdkrw": "USDKRW", "export": "EXPORT"}
         )
-    result["timeseries"] = collect_timeseries(g_ts, ts_map)
+    result["timeseries"] = collectTimeseries(g_ts, ts_map)
 
     return result

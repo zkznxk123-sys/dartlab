@@ -19,7 +19,7 @@ from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays
 # ── 공분산 추정 ──────────────────────────────────────────
 
 
-def _ledoit_wolf_shrinkage(returns: np.ndarray) -> tuple[np.ndarray, float]:
+def _ledoitWolfShrinkage(returns: np.ndarray) -> tuple[np.ndarray, float]:
     """Ledoit-Wolf (2003) 공분산 수축.
 
     sample covariance를 (1-δ)*sample + δ*target 으로 수축.
@@ -60,7 +60,7 @@ def _ledoit_wolf_shrinkage(returns: np.ndarray) -> tuple[np.ndarray, float]:
 # ── Active-set QP (long-only) ────────────────────────────
 
 
-def _activeset_minvar(cov: np.ndarray, max_iter: int = 50) -> np.ndarray:
+def _activesetMinvar(cov: np.ndarray, maxIter: int = 50) -> np.ndarray:
     """Long-only Min-Variance via active-set algorithm.
 
     음수 가중치가 발생하면 그 자산을 active set에서 제거하고 재계산. 수렴 보장.
@@ -94,7 +94,7 @@ def _activeset_minvar(cov: np.ndarray, max_iter: int = 50) -> np.ndarray:
 
     # n > 12: iterative active-set
     active = list(range(n))
-    for _ in range(max_iter):
+    for _ in range(maxIter):
         sub = cov[np.ix_(active, active)]
         try:
             inv = np.linalg.inv(sub)
@@ -116,7 +116,7 @@ def _activeset_minvar(cov: np.ndarray, max_iter: int = 50) -> np.ndarray:
     return np.ones(n) / n
 
 
-def _activeset_tangency(mu_excess: np.ndarray, cov: np.ndarray, max_iter: int = 50) -> np.ndarray:
+def _activesetTangency(muExcess: np.ndarray, cov: np.ndarray, maxIter: int = 50) -> np.ndarray:
     """Long-only max Sharpe (Tangency) via active-set."""
     n = cov.shape[0]
 
@@ -125,20 +125,20 @@ def _activeset_tangency(mu_excess: np.ndarray, cov: np.ndarray, max_iter: int = 
         best_sr = -np.inf
         for mask in range(1, 1 << n):
             idx = [i for i in range(n) if mask & (1 << i)]
-            mu_sub = mu_excess[idx]
+            muSub = muExcess[idx]
             sub = cov[np.ix_(idx, idx)]
             try:
                 inv = np.linalg.inv(sub)
             except np.linalg.LinAlgError:
                 inv = np.linalg.pinv(sub)
-            w_sub = inv @ mu_sub
+            w_sub = inv @ muSub
             s = w_sub.sum()
             if s == 0:
                 continue
             w_sub = w_sub / s
             if (w_sub < -1e-10).any():
                 continue
-            ret = float(w_sub @ mu_sub)
+            ret = float(w_sub @ muSub)
             risk = float(np.sqrt(w_sub @ sub @ w_sub))
             if risk <= 0 or ret <= 0:
                 continue
@@ -153,14 +153,14 @@ def _activeset_tangency(mu_excess: np.ndarray, cov: np.ndarray, max_iter: int = 
 
     # n > 12: iterative
     active = list(range(n))
-    for _ in range(max_iter):
+    for _ in range(maxIter):
         sub = cov[np.ix_(active, active)]
-        mu_sub = mu_excess[active]
+        muSub = muExcess[active]
         try:
             inv = np.linalg.inv(sub)
         except np.linalg.LinAlgError:
             inv = np.linalg.pinv(sub)
-        w_sub = inv @ mu_sub
+        w_sub = inv @ muSub
         s = w_sub.sum()
         if s != 0:
             w_sub = w_sub / s
@@ -180,7 +180,7 @@ def _activeset_tangency(mu_excess: np.ndarray, cov: np.ndarray, max_iter: int = 
 log = logging.getLogger(__name__)
 
 
-def _build_returns(stockCodes: list[str]) -> tuple[np.ndarray | None, list[str]]:
+def _buildReturns(stockCodes: list[str]) -> tuple[np.ndarray | None, list[str]]:
     """종목별 OHLCV를 순차 수집하여 수익률 행렬 구성."""
     all_rets = []
     valid_codes = []
@@ -237,7 +237,7 @@ def optimizeMeanVar(
         w = {stockCodes[0]: 1.0} if stockCodes else {}
         return {**result, "minVariance": {"weights": w}, "info": "2종목 이상 필요"}
 
-    returns, codes = _build_returns(stockCodes)
+    returns, codes = _buildReturns(stockCodes)
     if returns is None:
         return {**result, "error": f"수익률 데이터 부족 ({len(codes)}종목)"}
 
@@ -245,7 +245,7 @@ def optimizeMeanVar(
     mu = np.mean(returns, axis=0) * 252
 
     if covEstimator == "ledoit_wolf":
-        cov_d, delta = _ledoit_wolf_shrinkage(returns)
+        cov_d, delta = _ledoitWolfShrinkage(returns)
         cov = cov_d * 252
         result["covShrinkage"] = round(float(delta), 4)
     else:
@@ -261,7 +261,7 @@ def optimizeMeanVar(
         result["dataAdequacy"] = "ok"
 
     # Min-Variance via active-set
-    w_mv = _activeset_minvar(cov)
+    w_mv = _activesetMinvar(cov)
     ret_mv = float(w_mv @ mu)
     risk_mv = float(np.sqrt(w_mv @ cov @ w_mv))
     sharpe_mv = (ret_mv - riskFree) / risk_mv if risk_mv > 0 else 0
@@ -274,8 +274,8 @@ def optimizeMeanVar(
     }
 
     # Tangency via active-set (excess returns)
-    mu_excess = mu - riskFree
-    w_tan = _activeset_tangency(mu_excess, cov)
+    muExcess = mu - riskFree
+    w_tan = _activesetTangency(muExcess, cov)
     ret_t = float(w_tan @ mu)
     risk_t = float(np.sqrt(w_tan @ cov @ w_tan))
     sharpe_t = (ret_t - riskFree) / risk_t if risk_t > 0 else 0
@@ -321,7 +321,7 @@ def optimizeRiskParity(stockCodes: list[str], *, market: str = "auto", **kwargs)
         w = {stockCodes[0]: 1.0} if stockCodes else {}
         return {**result, "weights": w, "info": "2종목 이상 필요"}
 
-    returns, codes = _build_returns(stockCodes)
+    returns, codes = _buildReturns(stockCodes)
     if returns is None:
         return {**result, "error": "수익률 데이터 부족"}
 
@@ -333,11 +333,11 @@ def optimizeRiskParity(stockCodes: list[str], *, market: str = "auto", **kwargs)
     dist = np.sqrt(0.5 * (1 - corr))
 
     # 2. Single-linkage clustering (numpy)
-    order = _hierarchical_cluster(dist, n)
+    order = _hierarchicalCluster(dist, n)
 
     # 3. Recursive bisection
     weights = np.ones(n)
-    _recursive_bisection(weights, cov, order)
+    _recursiveBisection(weights, cov, order)
     weights /= weights.sum()
 
     # Risk contribution
@@ -350,7 +350,7 @@ def optimizeRiskParity(stockCodes: list[str], *, market: str = "auto", **kwargs)
     return result
 
 
-def _hierarchical_cluster(dist: np.ndarray, n: int) -> list[int]:
+def _hierarchicalCluster(dist: np.ndarray, n: int) -> list[int]:
     """Single-linkage agglomerative clustering → quasi-diagonal leaf order.
 
     Lopez de Prado (2016) HRP의 1단계: 거리 행렬에서 가장 가까운 두 점/클러스터를
@@ -400,7 +400,7 @@ def _hierarchical_cluster(dist: np.ndarray, n: int) -> list[int]:
     return members[next_id - 1]
 
 
-def _recursive_bisection(weights: np.ndarray, cov: np.ndarray, order: list[int]):
+def _recursiveBisection(weights: np.ndarray, cov: np.ndarray, order: list[int]):
     """Recursive bisection for HRP weights."""
     if len(order) <= 1:
         return
@@ -409,8 +409,8 @@ def _recursive_bisection(weights: np.ndarray, cov: np.ndarray, order: list[int])
     left = order[:mid]
     right = order[mid:]
 
-    var_left = _cluster_variance(cov, left)
-    var_right = _cluster_variance(cov, right)
+    var_left = _clusterVariance(cov, left)
+    var_right = _clusterVariance(cov, right)
 
     alpha = 1 - var_left / (var_left + var_right) if (var_left + var_right) > 0 else 0.5
 
@@ -419,11 +419,11 @@ def _recursive_bisection(weights: np.ndarray, cov: np.ndarray, order: list[int])
     for i in right:
         weights[i] *= 1 - alpha
 
-    _recursive_bisection(weights, cov, left)
-    _recursive_bisection(weights, cov, right)
+    _recursiveBisection(weights, cov, left)
+    _recursiveBisection(weights, cov, right)
 
 
-def _cluster_variance(cov: np.ndarray, indices: list[int]) -> float:
+def _clusterVariance(cov: np.ndarray, indices: list[int]) -> float:
     """클러스터의 역분산 가중 분산."""
     sub_cov = cov[np.ix_(indices, indices)]
     n = len(indices)
@@ -467,7 +467,7 @@ def allocateERC(stockCodes: list[str], *, market: str = "auto", **kwargs) -> dic
         w = {stockCodes[0]: 1.0} if stockCodes else {}
         return {**result, "weights": w, "info": "2종목 이상 필요"}
 
-    returns, codes = _build_returns(stockCodes)
+    returns, codes = _buildReturns(stockCodes)
     if returns is None:
         return {**result, "error": "수익률 데이터 부족"}
 

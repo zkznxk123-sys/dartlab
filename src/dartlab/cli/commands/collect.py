@@ -35,7 +35,7 @@ def _detectSource(args) -> str:
     return "dart"
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """collect 서브커맨드 등록 — DART/EDGAR 데이터 수집."""
     parser = subparsers.add_parser(
         "collect",
@@ -161,9 +161,9 @@ def configure_parser(subparsers) -> None:
 
 def run(args) -> int:
     """소스 자동 감지 후 DART/EDGAR 데이터를 수집한다."""
-    from dartlab.cli.services.output import get_console
+    from dartlab.cli.services.output import getConsole
 
-    console = get_console()
+    console = getConsole()
 
     source = _detectSource(args)
 

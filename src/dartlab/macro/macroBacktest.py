@@ -48,7 +48,7 @@ class BacktestResult:
     description: str
 
 
-def _is_in_recession(d: date) -> bool:
+def _isInRecession(d: date) -> bool:
     """NBER 기준 침체 구간에 있는지 확인."""
     for start, end in _NBER_RECESSIONS:
         if start <= d <= end:
@@ -93,24 +93,24 @@ def walkForwardBacktest(
         score = None
 
         try:
-            from dartlab.macro.cycle import analyze_cycle
+            from dartlab.macro.cycle import analyzeCycle
 
-            cycle_result = analyze_cycle(market=market, as_of=as_of_str)
+            cycle_result = analyzeCycle(market=market, asOf=as_of_str)
             phase = cycle_result.get("phase")
         except (ImportError, KeyError, ValueError, AttributeError):
             pass
 
         try:
-            from dartlab.macro.forecast import analyze_forecast
+            from dartlab.macro.forecast import analyzeForecast
 
-            forecast_result = analyze_forecast(market=market, as_of=as_of_str)
-            rp = forecast_result.get("recessionProb")
+            forecastResult = analyzeForecast(market=market, asOf=as_of_str)
+            rp = forecastResult.get("recessionProb")
             if rp:
                 recession_prob = rp.get("probability")
         except (ImportError, KeyError, ValueError, AttributeError):
             pass
 
-        actual = _is_in_recession(current)
+        actual = _isInRecession(current)
 
         points.append(
             BacktestPoint(

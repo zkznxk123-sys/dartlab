@@ -40,7 +40,7 @@ class NowcastResult:
 # ══════════════════════════════════════
 
 
-def _kalman_filter(
+def _kalmanFilter(
     y: np.ndarray,
     A: np.ndarray,
     H: np.ndarray,
@@ -66,8 +66,8 @@ def _kalman_filter(
     T, n = y.shape
     rp = A.shape[0]
 
-    a_pred = np.zeros((T, rp))
-    a_filt = np.zeros((T, rp))
+    aPred = np.zeros((T, rp))
+    aFilt = np.zeros((T, rp))
     P_pred = np.zeros((T, rp, rp))
     P_filt = np.zeros((T, rp, rp))
     log_lik = 0.0
@@ -77,7 +77,7 @@ def _kalman_filter(
 
     for t in range(T):
         # Prediction
-        a_pred[t] = A @ a_prev
+        aPred[t] = A @ a_prev
         P_pred[t] = A @ P_prev @ A.T + Q
 
         # 관측 가능한 변수
@@ -86,7 +86,7 @@ def _kalman_filter(
 
         if len(W) == 0:
             # 결측 — update 스킵
-            a_filt[t] = a_pred[t]
+            aFilt[t] = aPred[t]
             P_filt[t] = P_pred[t]
         else:
             H_t = H[W, :]
@@ -94,7 +94,7 @@ def _kalman_filter(
             y_obs = y[t, W]
 
             # Innovation
-            v = y_obs - H_t @ a_pred[t]
+            v = y_obs - H_t @ aPred[t]
             F = H_t @ P_pred[t] @ H_t.T + R_t
 
             # Kalman gain (solve for numerical stability)
@@ -104,7 +104,7 @@ def _kalman_filter(
                 K = P_pred[t] @ H_t.T @ np.linalg.pinv(F)
 
             # Update
-            a_filt[t] = a_pred[t] + K @ v
+            aFilt[t] = aPred[t] + K @ v
             P_filt[t] = P_pred[t] - K @ H_t @ P_pred[t]
             # 대칭 보장
             P_filt[t] = 0.5 * (P_filt[t] + P_filt[t].T)
@@ -117,15 +117,15 @@ def _kalman_filter(
             except np.linalg.LinAlgError:
                 pass
 
-        a_prev = a_filt[t]
+        a_prev = aFilt[t]
         P_prev = P_filt[t]
 
-    return a_pred, a_filt, P_pred, P_filt, log_lik
+    return aPred, aFilt, P_pred, P_filt, log_lik
 
 
-def _kalman_smoother(
-    a_pred: np.ndarray,
-    a_filt: np.ndarray,
+def _kalmanSmoother(
+    aPred: np.ndarray,
+    aFilt: np.ndarray,
     P_pred: np.ndarray,
     P_filt: np.ndarray,
     A: np.ndarray,
@@ -135,13 +135,13 @@ def _kalman_smoother(
     Returns:
         a_smooth, P_smooth
     """
-    T = a_filt.shape[0]
+    T = aFilt.shape[0]
     A.shape[0]
 
-    a_smooth = np.zeros_like(a_filt)
+    a_smooth = np.zeros_like(aFilt)
     P_smooth = np.zeros_like(P_filt)
 
-    a_smooth[T - 1] = a_filt[T - 1]
+    a_smooth[T - 1] = aFilt[T - 1]
     P_smooth[T - 1] = P_filt[T - 1]
 
     for t in range(T - 2, -1, -1):
@@ -150,7 +150,7 @@ def _kalman_smoother(
         except np.linalg.LinAlgError:
             J = P_filt[t] @ A.T @ np.linalg.pinv(P_pred[t + 1])
 
-        a_smooth[t] = a_filt[t] + J @ (a_smooth[t + 1] - a_pred[t + 1])
+        a_smooth[t] = aFilt[t] + J @ (a_smooth[t + 1] - aPred[t + 1])
         P_smooth[t] = P_filt[t] + J @ (P_smooth[t + 1] - P_pred[t + 1]) @ J.T
         P_smooth[t] = 0.5 * (P_smooth[t] + P_smooth[t].T)
 
@@ -276,8 +276,8 @@ def gdpNowcast(
 
     for iteration in range(maxIter):
         # ── E-step ──
-        a_pred, a_filt, P_pred, P_filt, log_lik = _kalman_filter(y_std, A_comp, H, Q_full, R_diag, a0, P0)
-        a_smooth, P_smooth = _kalman_smoother(a_pred, a_filt, P_pred, P_filt, A_comp)
+        aPred, aFilt, P_pred, P_filt, log_lik = _kalmanFilter(y_std, A_comp, H, Q_full, R_diag, a0, P0)
+        a_smooth, P_smooth = _kalmanSmoother(aPred, aFilt, P_pred, P_filt, A_comp)
 
         if abs(log_lik - prev_ll) < tol:
             converged = True
@@ -352,8 +352,8 @@ def gdpNowcast(
         H[:, :r] = Lambda
 
     # 최종 필터
-    a_pred, a_filt, P_pred, P_filt, log_lik = _kalman_filter(y_std, A_comp, H, Q_full, R_diag, a0, P0)
-    a_smooth, P_smooth = _kalman_smoother(a_pred, a_filt, P_pred, P_filt, A_comp)
+    aPred, aFilt, P_pred, P_filt, log_lik = _kalmanFilter(y_std, A_comp, H, Q_full, R_diag, a0, P0)
+    a_smooth, P_smooth = _kalmanSmoother(aPred, aFilt, P_pred, P_filt, A_comp)
 
     # 팩터 추출
     factor = a_smooth[:, 0]

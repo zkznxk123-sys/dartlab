@@ -12,7 +12,7 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 
 from typing import Any
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 
 _MAX_YEARS = 8
@@ -100,7 +100,7 @@ def _sumOp(data: dict, col: str, simpleKeys: list[str], fallbackPairs: list[list
 # ── 메인: 자산 구조 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcAssetStructure(company, *, basePeriod: str | None = None) -> dict | None:
     """자산을 영업/비영업으로 재분류 — 시계열.
 
@@ -272,21 +272,21 @@ def calcAssetStructure(company, *, basePeriod: str | None = None) -> dict | None
 
     notesDetail = fetchNotesDetail(company, ["inventory", "tangibleAsset", "intangibleAsset", "investmentProperty"])
 
-    result_dict: dict[str, Any] = {
+    resultDict: dict[str, Any] = {
         "latest": latest,
         "history": history,
         "diagnosis": diagnosis,
     }
     if notesDetail:
-        result_dict["notesDetail"] = notesDetail
+        resultDict["notesDetail"] = notesDetail
 
-    return result_dict
+    return resultDict
 
 
 # ── 운전자본 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcWorkingCapital(company, *, basePeriod: str | None = None) -> dict | None:
     """운전자본 상세 + CCC.
 
@@ -386,7 +386,7 @@ def calcWorkingCapital(company, *, basePeriod: str | None = None) -> dict | None
 # ── CAPEX 패턴 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcCapexPattern(company, *, basePeriod: str | None = None) -> dict | None:
     """CAPEX vs 감가상각 + 건설중인자산 추이.
 
@@ -515,7 +515,7 @@ def calcCapexPattern(company, *, basePeriod: str | None = None) -> dict | None:
 # ── 투자부동산 추세 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcInvestmentPropertyTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """투자부동산 비중 + 공정가치 변동 추세.
 
@@ -587,22 +587,22 @@ def calcInvestmentPropertyTrend(company, *, basePeriod: str | None = None) -> di
         else:
             trend = "안정"
 
-    result_dict: dict[str, Any] = {"history": history, "trend": trend}
+    resultDict: dict[str, Any] = {"history": history, "trend": trend}
 
     # notes enrichment — 투자부동산 세부 항목 (공정가치, 취득/처분 등)
     from dartlab.analysis.financial.companyContext import fetchNotesDetail
 
     notesData = fetchNotesDetail(company, ["investmentProperty"])
     if notesData.get("investmentProperty"):
-        result_dict["notesDetail"] = notesData["investmentProperty"]
+        resultDict["notesDetail"] = notesData["investmentProperty"]
 
-    return result_dict
+    return resultDict
 
 
 # ── 무형자산 상세 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcIntangibleAssetDetail(company, *, basePeriod: str | None = None) -> dict | None:
     """무형자산 상세 분해 — 영업권/R&D/기타 비중 + 상각 추세.
 
@@ -695,7 +695,7 @@ def calcIntangibleAssetDetail(company, *, basePeriod: str | None = None) -> dict
         else:
             trend = "안정"
 
-    result_dict: dict[str, Any] = {
+    resultDict: dict[str, Any] = {
         "items": items,
         "totalIntangible": totalInt,
         "totalAssets": ta,
@@ -705,15 +705,15 @@ def calcIntangibleAssetDetail(company, *, basePeriod: str | None = None) -> dict
     }
 
     if rawRows:
-        result_dict["notesDetail"] = rawRows
+        resultDict["notesDetail"] = rawRows
 
-    return result_dict
+    return resultDict
 
 
 # ── 자산 플래그 ──
 
 
-@memoized_calc
+@memoizedCalc
 def calcAssetFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """자산 구조 경고 신호.
 

@@ -27,8 +27,8 @@ from typing import Any
 from dartlab.analysis.financial.proforma import (
     ProFormaResult,
     ProFormaYear,
-    build_proforma,
-    extract_historical_ratios,
+    buildProforma,
+    extractHistoricalRatios,
 )
 
 # ══════════════════════════════════════
@@ -93,9 +93,9 @@ class ScenarioSimulation:
 # ══════════════════════════════════════
 
 
-def _quarterlyValues(is_df: Any, snakeId: str, year: str) -> list[float]:
+def _quarterlyValues(isDf: Any, snakeId: str, year: str) -> list[float]:
     """IS DataFrame에서 특정 연도의 Q1~Q4 값 추출."""
-    row = is_df.filter(is_df["snakeId"] == snakeId)
+    row = isDf.filter(isDf["snakeId"] == snakeId)
     if row.height == 0:
         return []
     vals = []
@@ -107,11 +107,11 @@ def _quarterlyValues(is_df: Any, snakeId: str, year: str) -> list[float]:
     return vals if len(vals) == 4 else []
 
 
-def _computeSeasonality(is_df: Any, snakeId: str, years: list[str]) -> list[float]:
+def _computeSeasonality(isDf: Any, snakeId: str, years: list[str]) -> list[float]:
     """과거 N년 Q1~Q4 비중 평균."""
     all_w: list[list[float]] = []
     for y in years:
-        qv = _quarterlyValues(is_df, snakeId, y)
+        qv = _quarterlyValues(isDf, snakeId, y)
         if len(qv) == 4:
             total = sum(abs(v) for v in qv)
             if total > 0:
@@ -192,13 +192,13 @@ def _decideAction(revPath: str, oiPath: str, history: list[QuarterJudgment]) -> 
 
 def _scenarioDCF(
     projections: list[ProFormaYear],
-    wacc_pct: float,
+    waccPct: float,
     netDebt: float = 0,
     shares: int = 1,
     terminalGrowth: float = 0.02,
 ) -> int:
     """3년 ProForma FCF → DCF 적정가 (per share)."""
-    wacc = wacc_pct / 100
+    wacc = waccPct / 100
     if wacc <= terminalGrowth:
         wacc = terminalGrowth + 0.05
 
@@ -267,12 +267,12 @@ def createSimulation(
     series = {stmt: {k: v[:cutIdx] for k, v in fullSeries[stmt].items()} for stmt in ["IS", "BS", "CF"]}
 
     # 과거 비율 + 기준연도 비율
-    ratios = extract_historical_ratios(series)
-    is_df = company.show("IS")
+    ratios = extractHistoricalRatios(series)
+    isDf = company.show("IS")
 
-    rev_base = sum(_quarterlyValues(is_df, "sales", baseYear))
-    gp_base = sum(_quarterlyValues(is_df, "gross_profit", baseYear))
-    oi_base = sum(_quarterlyValues(is_df, "operating_profit", baseYear))
+    rev_base = sum(_quarterlyValues(isDf, "sales", baseYear))
+    gp_base = sum(_quarterlyValues(isDf, "gross_profit", baseYear))
+    oi_base = sum(_quarterlyValues(isDf, "operating_profit", baseYear))
 
     baseGM = gp_base / rev_base * 100 if rev_base else ratios.gross_margin
     baseOpMargin = oi_base / rev_base * 100 if rev_base else 0
@@ -298,10 +298,10 @@ def createSimulation(
         if overrides:
             combinedOverrides.update(overrides)
         try:
-            pf = build_proforma(
+            pf = buildProforma(
                 series,
-                revenue_growth_path=path,
-                scenario_name=scName,
+                revenueGrowthPath=path,
+                scenarioName=scName,
                 shares=shares,
                 overrides=combinedOverrides,
             )
@@ -316,8 +316,8 @@ def createSimulation(
 
     # 계절성 분해
     seasonYears = [str(int(baseYear) - i) for i in range(3) if int(baseYear) - i >= 2019]
-    revW = _computeSeasonality(is_df, "sales", seasonYears)
-    oiW = _computeSeasonality(is_df, "operating_profit", seasonYears)
+    revW = _computeSeasonality(isDf, "sales", seasonYears)
+    oiW = _computeSeasonality(isDf, "operating_profit", seasonYears)
 
     # 분기 목표
     qRevTargets: dict[str, list[float]] = {}

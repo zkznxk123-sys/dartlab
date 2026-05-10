@@ -20,10 +20,10 @@ def _ensure_data():
     global _data, _full, _gc
     if _data is not None:
         return
-    from dartlab.scan.network import build_graph, export_full
+    from dartlab.scan.network import buildGraph, exportFull
 
-    _data = build_graph(verbose=False)
-    _full = export_full(_data)
+    _data = buildGraph(verbose=False)
+    _full = exportFull(_data)
     _gc = Counter(_data["code_to_group"][n] for n in _data["all_node_ids"])
 
 
@@ -182,13 +182,13 @@ def test_full_json_size():
 
 def test_ego_enrichment():
     """독립 회사 ego가 최소 2노드 이상."""
-    from dartlab.scan.network import export_ego
+    from dartlab.scan.network import exportEgo
 
     _ensure_data()
     # 독립 회사 몇 개 샘플
     indep_codes = [n for n in _data["all_node_ids"] if _gc[_data["code_to_group"][n]] == 1][:20]
     for code in indep_codes:
-        ego = export_ego(_data, _full, code, hops=1)
+        ego = exportEgo(_data, _full, code, hops=1)
         assert ego["meta"]["nodeCount"] >= 2, f"{code}: ego 1노드 (보강 실패)"
 
 

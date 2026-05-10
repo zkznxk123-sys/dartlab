@@ -15,17 +15,17 @@ class TestProviderAdapterBoundary:
         assert importlib.util.find_spec("dartlab.ai.providers.ollama") is None
 
     def test_research_graph_adapter_is_available(self):
-        from dartlab.ai.providers import create_provider
+        from dartlab.ai.providers import createProvider
 
-        provider = create_provider(LLMConfig(provider="dartlab", model="research"))
+        provider = createProvider(LLMConfig(provider="dartlab", model="research"))
 
-        assert provider.check_available() is True
-        assert provider.resolved_model == "research"
+        assert provider.checkAvailable() is True
+        assert provider.resolvedModel == "research"
 
     def test_create_provider_ignores_unknown_dict_keys(self):
-        from dartlab.ai.providers import create_provider
+        from dartlab.ai.providers import createProvider
 
-        provider = create_provider({"provider": "dartlab", "model": "dict-model", "unknown": "x"})
+        provider = createProvider({"provider": "dartlab", "model": "dict-model", "unknown": "x"})
 
-        assert provider.check_available() is True
-        assert provider.resolved_model == "dict-model"
+        assert provider.checkAvailable() is True
+        assert provider.resolvedModel == "dict-model"

@@ -61,11 +61,11 @@ class GatherCache:
     - stale-while-revalidate: 만료 데이터를 별도 보관하여 최후 fallback 제공
     """
 
-    def __init__(self, max_entries: int = 200) -> None:
+    def __init__(self, maxEntries: int = 200) -> None:
         self._store: OrderedDict[str, _CacheEntry] = OrderedDict()
         self._stale: dict[str, object] = {}  # 만료 시 마지막 값 보존
-        self._max = max_entries
-        self._stale_max = max_entries  # stale도 용량 제한
+        self._max = maxEntries
+        self._stale_max = maxEntries  # stale도 용량 제한
         self._lock = threading.Lock()
 
     def get(self, key: str) -> object | None:
@@ -90,7 +90,7 @@ class GatherCache:
                 # stale store에 보존 후 live에서 제거
                 self._stale[key] = entry.value
                 del self._store[key]
-                self._trim_stale()
+                self._trimStale()
                 return None
             self._store.move_to_end(key)
             return entry.value
@@ -123,7 +123,7 @@ class GatherCache:
             while len(self._store) > self._max:
                 self._store.popitem(last=False)
 
-    def _trim_stale(self) -> None:
+    def _trimStale(self) -> None:
         """stale store 용량 제한 — 삽입순으로 가장 오래된 항목부터 제거 (lock 내에서 호출).
 
         Returns
@@ -136,7 +136,7 @@ class GatherCache:
             first_key = next(iter(self._stale))
             del self._stale[first_key]
 
-    def get_stale(self, key: str) -> object | None:
+    def getStale(self, key: str) -> object | None:
         """만료된 데이터 반환 — stale-while-revalidate 패턴의 최후 fallback.
 
         Parameters
@@ -153,7 +153,7 @@ class GatherCache:
         with self._lock:
             return self._stale.get(key)
 
-    def get_typed(self, stock_code: str, data_type: str, *, allow_stale: bool = False) -> object | None:
+    def getTyped(self, stockCode: str, dataType: str, *, allowStale: bool = False) -> object | None:
         """데이터 유형별 캐시 조회 — "{stock_code}:{data_type}" 키로 자동 조합.
 
         Parameters
@@ -171,15 +171,15 @@ class GatherCache:
             캐시된 값 (PriceSnapshot, ConsensusData, pl.DataFrame 등).
             None — 캐시 미스이고 allow_stale=False이거나 stale도 없을 때.
         """
-        key = f"{stock_code}:{data_type}"
+        key = f"{stockCode}:{dataType}"
         result = self.get(key)
         if result is not None:
             return result
-        if allow_stale:
-            return self.get_stale(key)
+        if allowStale:
+            return self.getStale(key)
         return None
 
-    def put_typed(self, stock_code: str, data_type: str, value: object) -> None:
+    def putTyped(self, stockCode: str, dataType: str, value: object) -> None:
         """데이터 유형에 맞는 TTL로 저장 — _TTL_MAP에서 자동 매핑.
 
         Parameters
@@ -196,10 +196,10 @@ class GatherCache:
         None
             "{stock_code}:{data_type}" 키로 적절한 TTL과 함께 저장한다.
         """
-        ttl = _TTL_MAP.get(data_type, TTL_DEFAULT)
-        self.put(f"{stock_code}:{data_type}", value, ttl)
+        ttl = _TTL_MAP.get(dataType, TTL_DEFAULT)
+        self.put(f"{stockCode}:{dataType}", value, ttl)
 
-    def invalidate(self, stock_code: str) -> None:
+    def invalidate(self, stockCode: str) -> None:
         """특정 종목의 모든 캐시 제거 — live + stale 양쪽에서 prefix 매칭 삭제.
 
         Parameters
@@ -213,7 +213,7 @@ class GatherCache:
             해당 종목의 price, flow 등 모든 데이터 유형 캐시를 삭제한다.
         """
         with self._lock:
-            prefix = f"{stock_code}:"
+            prefix = f"{stockCode}:"
             for store in (self._store, self._stale):
                 keys = [k for k in store if k.startswith(prefix)]
                 for k in keys:

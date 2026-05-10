@@ -29,7 +29,7 @@ from typing import Any
 import polars as pl
 
 from dartlab.scan.builder import buildChanges, buildFinance, buildReport, buildScan  # noqa: F401
-from dartlab.scan.payload import build_scan_payload, build_unified_payload  # noqa: F401
+from dartlab.scan.payload import buildScanPayload, buildUnifiedPayload  # noqa: F401
 from dartlab.scan.snapshot import buildScanSnapshot, getScanPosition  # noqa: F401
 
 # ── 한글 컬럼명 + 종목명 공통 변환 ──
@@ -521,7 +521,7 @@ def _resolveAxis(axis: str) -> str:
 # ── Scan Class ───────────────────────────────────────────
 
 
-def available_scans() -> list[str]:
+def availableScans() -> list[str]:
     """가용 scan 축 이름 목록.
 
     Capabilities:
@@ -893,12 +893,12 @@ class Scan:
         except ValueError:
             raise AttributeError(f"Scan에 '{name}' 속성이 없습니다")
 
-        def _bound_axis(target=None, **kwargs):
+        def _boundAxis(target=None, **kwargs):
             return self(resolved, target, **kwargs)
 
-        _bound_axis.__name__ = name
-        _bound_axis.__doc__ = f'scan("{resolved}")'
-        return _bound_axis
+        _boundAxis.__name__ = name
+        _boundAxis.__doc__ = f'scan("{resolved}")'
+        return _boundAxis
 
     def __repr__(self) -> str:
         n = len(_AXIS_REGISTRY)
@@ -927,8 +927,8 @@ class Scan:
 class _ScanGroupAccessor:
     """scan.financial 등 그룹 accessor."""
 
-    def __init__(self, scan_instance: Scan, group: str):
-        self._scan = scan_instance
+    def __init__(self, scanInstance: Scan, group: str):
+        self._scan = scanInstance
         self._group = group
 
     def __call__(self, target=None, **kwargs):
@@ -946,12 +946,12 @@ class _ScanGroupAccessor:
         if resolved not in members:
             raise AttributeError(f"'{name}' 축은 '{self._group}' 그룹에 속하지 않습니다")
 
-        def _bound_axis(target=None, **kwargs):
+        def _boundAxis(target=None, **kwargs):
             return self._scan(resolved, target, **kwargs)
 
-        _bound_axis.__name__ = name
-        _bound_axis.__doc__ = f'scan("{resolved}")'
-        return _bound_axis
+        _boundAxis.__name__ = name
+        _boundAxis.__doc__ = f'scan("{resolved}")'
+        return _boundAxis
 
     def __repr__(self) -> str:
         members = _SCAN_GROUPS.get(self._group, [])

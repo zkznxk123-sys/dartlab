@@ -25,12 +25,12 @@ SCRIPTS = Path(__file__).resolve().parents[3] / "scripts" / "audit"
 ROOT = Path(__file__).resolve().parents[3]
 
 
-def _run(script: str, extra_args: list[str]) -> int:
+def _run(script: str, extraArgs: list[str]) -> int:
     path = SCRIPTS / script
     if not path.exists():
         print(f"[fatal] 스크립트 없음: {path}")
         return 1
-    cmd = [sys.executable, str(path), *extra_args]
+    cmd = [sys.executable, str(path), *extraArgs]
     return subprocess.call(cmd)
 
 

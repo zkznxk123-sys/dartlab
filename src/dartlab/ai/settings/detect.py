@@ -22,20 +22,20 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 
-def _quick_check(provider_id: str) -> bool:
+def _quickCheck(providerId: str) -> bool:
     """provider 사용 가능 여부를 빠르게 체크."""
     try:
-        from dartlab.ai.providers import create_provider
+        from dartlab.ai.providers import createProvider
         from dartlab.ai.settings.types import LLMConfig
 
-        config = LLMConfig(provider=provider_id)
-        prov = create_provider(config)
-        return prov.check_available()
+        config = LLMConfig(provider=providerId)
+        prov = createProvider(config)
+        return prov.checkAvailable()
     except (ImportError, RuntimeError, ConnectionError, OSError, ValueError):
         return False
 
 
-def auto_detect_provider(*, verbose: bool = False) -> str | None:
+def autoDetectProvider(*, verbose: bool = False) -> str | None:
     """사용 가능한 provider를 우선순위 순으로 탐색.
 
     Args:
@@ -44,9 +44,9 @@ def auto_detect_provider(*, verbose: bool = False) -> str | None:
     Returns:
         사용 가능한 provider id. 모두 실패 시 None.
     """
-    for provider_id in _DETECT_ORDER:
-        if _quick_check(provider_id):
-            return provider_id
+    for providerId in _DETECT_ORDER:
+        if _quickCheck(providerId):
+            return providerId
 
     if verbose:
         from dartlab.ai.settings.aiSetup import no_provider_message

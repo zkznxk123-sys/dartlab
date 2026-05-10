@@ -47,14 +47,14 @@ from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays, getStockCode
 
 
-def _date_to_filing_flag(dates: list, filing_date_strs: list[str], window: int = 20) -> np.ndarray:
+def _dateToFilingFlag(dates: list, filingDateStrs: list[str], window: int = 20) -> np.ndarray:
     """OHLCV date 리스트에 high-impact filing 일자 매칭 → boolean flag.
 
     filing day 부터 window 일까지 True (PEAD drift 구간).
     """
     n = len(dates)
     flag = np.zeros(n, dtype=np.bool_)
-    if not filing_date_strs:
+    if not filingDateStrs:
         return flag
 
     # filing dates 정규화 — DART 는 'YYYYMMDD' (8자리), OHLCV 는 'YYYY-MM-DD'
@@ -67,7 +67,7 @@ def _date_to_filing_flag(dates: list, filing_date_strs: list[str], window: int =
         return s[:10]
 
     filing_set = set()
-    for s in filing_date_strs:
+    for s in filingDateStrs:
         normalized = _normalize(s)
         if normalized:
             filing_set.add(normalized)
@@ -80,7 +80,7 @@ def _date_to_filing_flag(dates: list, filing_date_strs: list[str], window: int =
     return flag
 
 
-def build(company, *, hold_window: int = 20, atr_k: float = 3.0) -> Rule:
+def build(company, *, holdWindow: int = 20, atrK: float = 3.0) -> Rule:
     """이벤트드리븐 룰 빌드 — DART 공시 발표 후 PEAD drift 포착.
 
     Parameters
@@ -115,7 +115,7 @@ def build(company, *, hold_window: int = 20, atr_k: float = 3.0) -> Rule:
     series = ev.get("_series") or {}
     high_impact_dates = series.get("high_impact_dates", [])
 
-    filing_flag = _date_to_filing_flag(dates, high_impact_dates, window=hold_window)
+    filing_flag = _dateToFilingFlag(dates, high_impact_dates, window=holdWindow)
     sma5 = vsma(close, 5)
 
     s = Signal()
@@ -127,4 +127,4 @@ def build(company, *, hold_window: int = 20, atr_k: float = 3.0) -> Rule:
         entry_expr=s.filing & s.above_sma5,
         exit_expr=s.not_filing,
         meta={"style": "eventDriven", "n_filings": len(high_impact_dates)},
-    ).with_stop("atr", k=atr_k, period=14)
+    ).withStop("atr", k=atrK, period=14)

@@ -6,14 +6,14 @@ import shutil
 import subprocess
 from typing import Any
 
-from .oauthToken import get_account_id, is_authenticated
+from .oauthToken import getAccountId, isAuthenticated
 
 
-def detect_codex() -> dict[str, Any]:
+def detectCodex() -> dict[str, Any]:
     """Return local CLI availability without importing legacy AI code."""
-    from .codexCli import inspect_codex_cli
+    from .codexCli import inspectCodexCli
 
-    info = inspect_codex_cli()
+    info = inspectCodexCli()
     executable = shutil.which("codex")
     version: str | None = None
     if executable:
@@ -28,7 +28,7 @@ def detect_codex() -> dict[str, Any]:
             version = (result.stdout or result.stderr).strip() or None
         except (OSError, subprocess.SubprocessError):
             version = None
-    authenticated = is_authenticated()
+    authenticated = isAuthenticated()
     return {
         "installed": executable is not None,
         "path": executable,
@@ -37,14 +37,14 @@ def detect_codex() -> dict[str, Any]:
         "authenticated": authenticated,
         "authMode": "oauth" if authenticated else None,
         "loginStatus": "authenticated" if authenticated else "not_authenticated",
-        "accountId": get_account_id() if authenticated else None,
+        "accountId": getAccountId() if authenticated else None,
         "supportsWorkspaceWrite": bool(
             info.get("supportsWorkspaceWrite") or "workspace-write" in (info.get("sandboxModes") or [])
         ),
     }
 
 
-def get_codex_install_guide() -> str:
+def getCodexInstallGuide() -> str:
     return (
         "[ Codex CLI 설치 안내 ]\n\n"
         "1. npm install -g @openai/codex\n"

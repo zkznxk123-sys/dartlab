@@ -58,7 +58,7 @@ class PluginContext:
     플러그인은 이 객체의 메서드를 호출하여 데이터/도구/엔진을 등록한다.
     """
 
-    def add_data_entry(self, entry: Any, *, meta: PluginMeta) -> None:
+    def addDataEntry(self, entry: Any, *, meta: PluginMeta) -> None:
         """DataEntry를 글로벌 레지스트리에 추가.
 
         등록된 엔트리는 Company.show(), AI context, Server API에서 자동 사용 가능.
@@ -66,16 +66,16 @@ class PluginContext:
         from dartlab.core.registry import registerEntry
 
         registerEntry(entry, source=f"plugin:{meta.name}")
-        _track_plugin(meta)
+        _trackPlugin(meta)
 
-    def add_tool(
+    def addTool(
         self,
         func: Callable,
         *,
         meta: PluginMeta,
         name: str | None = None,
         category: str = "plugin",
-        requires_company: bool = False,
+        requiresCompany: bool = False,
         tags: list[str] | None = None,
     ) -> None:
         """AI 도구를 canonical tool registry에 등록.
@@ -86,18 +86,18 @@ class PluginContext:
 
         tagsText = f" tags={','.join(tags)}" if tags else ""
         description = (func.__doc__ or "").strip() or f"{meta.name} plugin tool"
-        description = f"{description} category={category} requires_company={requires_company}{tagsText}"
+        description = f"{description} category={category} requires_company={requiresCompany}{tagsText}"
         registerTool(
             name=name or func.__name__,
             func=func,
             description=description,
         )
-        _track_plugin(meta)
+        _trackPlugin(meta)
 
-    def add_engine(
+    def addEngine(
         self,
         name: str,
-        analyze_func: Callable,
+        analyzeFunc: Callable,
         *,
         meta: PluginMeta,
         label: str = "",
@@ -112,13 +112,13 @@ class PluginContext:
             category="plugin",
             dataType="analysis",
             description=description or meta.description,
-            modulePath=analyze_func.__module__,
-            funcName=analyze_func.__name__,
+            modulePath=analyzeFunc.__module__,
+            funcName=analyzeFunc.__name__,
             aiExposed=True,
             aiHint=description or meta.description,
         )
         registerEntry(entry, source=f"plugin:{meta.name}")
-        _track_plugin(meta)
+        _trackPlugin(meta)
 
 
 # ── 내부 상태 ──
@@ -128,7 +128,7 @@ _loaded_names: set[str] = set()
 _discovered = False
 
 
-def _track_plugin(meta: PluginMeta) -> None:
+def _trackPlugin(meta: PluginMeta) -> None:
     """플러그인 메타데이터 중복 없이 추적."""
     if meta.name not in _loaded_names:
         _loaded_plugins.append(meta)
@@ -167,16 +167,16 @@ def discover() -> list[PluginMeta]:
     # DART Company 모듈 레지스트리 캐시 무효화
     if _loaded_plugins:
         try:
-            from dartlab.providers.dart.company import rebuild_module_registry
+            from dartlab.providers.dart.company import rebuildModuleRegistry
 
-            rebuild_module_registry()
+            rebuildModuleRegistry()
         except ImportError:
             pass
 
     return list(_loaded_plugins)
 
 
-def get_loaded_plugins() -> list[PluginMeta]:
+def getLoadedPlugins() -> list[PluginMeta]:
     """로드된 플러그인 목록 반환."""
     return list(_loaded_plugins)
 
@@ -190,7 +190,7 @@ def rediscover() -> list[PluginMeta]:
     return discover()
 
 
-def reset_for_testing() -> None:
+def resetForTesting() -> None:
     """테스트용 — 플러그인 상태 초기화."""
     global _discovered
     _loaded_plugins.clear()

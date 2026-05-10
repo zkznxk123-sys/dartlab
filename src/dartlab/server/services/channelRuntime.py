@@ -55,7 +55,7 @@ class ChannelRuntimeManager:
         self._sessions: dict[str, ChannelSession] = {}
         self._lock = threading.Lock()
 
-    def _base_payload(self, platform: str) -> dict[str, Any]:
+    def _basePayload(self, platform: str) -> dict[str, Any]:
         spec = CHANNEL_SPECS[platform]
         session = self._sessions.get(platform)
         return {
@@ -70,33 +70,33 @@ class ChannelRuntimeManager:
 
     def status(self) -> dict[str, dict[str, Any]]:
         """모든 채널의 현재 상태를 반환한다."""
-        return {platform: self._base_payload(platform) for platform in CHANNEL_SPECS}
+        return {platform: self._basePayload(platform) for platform in CHANNEL_SPECS}
 
     def get(self, platform: str) -> dict[str, Any]:
         """특정 채널의 상태를 반환한다."""
         if platform not in CHANNEL_SPECS:
             raise ValueError(f"지원하지 않는 채널: {platform}")
-        return self._base_payload(platform)
+        return self._basePayload(platform)
 
     def start(self, platform: str, **kwargs) -> dict[str, Any]:
         """채널 어댑터를 백그라운드 스레드로 시작한다."""
         if platform not in CHANNEL_SPECS:
             raise ValueError(f"지원하지 않는 채널: {platform}")
 
-        from dartlab.channel.adapters import create_adapter
+        from dartlab.channel.adapters import createAdapter
 
         with self._lock:
             existing = self._sessions.get(platform)
             if existing and existing.running and existing.thread.is_alive():
                 raise ValueError(f"{CHANNEL_SPECS[platform]['label']} 채널이 이미 실행 중입니다.")
 
-            mapped_kwargs = self._map_kwargs(platform, kwargs)
-            adapter = create_adapter(platform, **mapped_kwargs)
+            mapped_kwargs = self._mapKwargs(platform, kwargs)
+            adapter = createAdapter(platform, **mapped_kwargs)
             session = ChannelSession(
                 platform=platform,
                 adapter=adapter,
                 thread=threading.Thread(
-                    target=self._run_session,
+                    target=self._runSession,
                     args=(platform,),
                     name=f"dartlab-channel-{platform}",
                     daemon=True,
@@ -146,7 +146,7 @@ class ChannelRuntimeManager:
         session.loop = None
         return self.get(platform)
 
-    def shutdown_all(self) -> None:
+    def shutdownAll(self) -> None:
         """모든 채널 어댑터를 순차 종료한다."""
         for platform in list(CHANNEL_SPECS):
             try:
@@ -154,7 +154,7 @@ class ChannelRuntimeManager:
             except ValueError:
                 continue
 
-    def _run_session(self, platform: str) -> None:
+    def _runSession(self, platform: str) -> None:
         session = self._sessions[platform]
         loop = asyncio.new_event_loop()
         session.loop = loop
@@ -181,13 +181,13 @@ class ChannelRuntimeManager:
             session.loop = None
 
     @staticmethod
-    def _map_kwargs(platform: str, payload: dict[str, Any]) -> dict[str, Any]:
+    def _mapKwargs(platform: str, payload: dict[str, Any]) -> dict[str, Any]:
         if platform == "slack":
-            bot_token = (payload.get("botToken") or "").strip()
-            app_token = (payload.get("appToken") or "").strip()
-            if not bot_token or not app_token:
+            botToken = (payload.get("botToken") or "").strip()
+            appToken = (payload.get("appToken") or "").strip()
+            if not botToken or not appToken:
                 raise ValueError("Slack 연결에는 bot token과 app token이 모두 필요합니다.")
-            return {"bot_token": bot_token, "app_token": app_token}
+            return {"bot_token": botToken, "app_token": appToken}
 
         token = (payload.get("token") or "").strip()
         if not token:

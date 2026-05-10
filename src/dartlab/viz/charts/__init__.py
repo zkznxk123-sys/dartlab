@@ -25,27 +25,27 @@ from dartlab.core.palette import COLORS
 _PERIOD_COL_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
 
-def _auto_emit(company: Any, generator_name: str) -> None:
+def _autoEmit(company: Any, generatorName: str) -> None:
     """AI 런타임에서 도메인 차트 호출 시 VizSpec 마커를 자동 emit.
 
     Jupyter에서는 stdout에 HTML 주석이 찍히지만 사용자에게 보이지 않는다.
     VSCode/CLI AI 런타임에서는 마커가 캡처되어 인터랙티브 차트로 렌더링된다.
     """
     try:
-        from dartlab.viz import emit_chart
+        from dartlab.viz import emitChart
         from dartlab.viz import generators as gen
 
-        fn = getattr(gen, generator_name, None)
+        fn = getattr(gen, generatorName, None)
         if fn is None:
             return
         spec = fn(company)
         if spec:
-            emit_chart(spec)
+            emitChart(spec)
     except (ImportError, AttributeError, KeyError, OSError, TypeError, ValueError):
         pass
 
 
-def _ensure_plotly():
+def _ensurePlotly():
     """Lazy import with clear error."""
     try:
         import plotly.graph_objects as go
@@ -55,7 +55,7 @@ def _ensure_plotly():
         raise ImportError("plotly 패키지가 필요합니다.\n  pip install --upgrade dartlab") from None
 
 
-def _apply_theme(fig) -> None:
+def _applyTheme(fig) -> None:
     """DartLab 테마 적용."""
     fig.update_layout(
         font_family="Pretendard, -apple-system, sans-serif",
@@ -69,7 +69,7 @@ def _apply_theme(fig) -> None:
     fig.update_yaxes(showgrid=True, gridcolor="#f0f0f0", gridwidth=1)
 
 
-def _auto_numeric_cols(df: pl.DataFrame, exclude: list[str] | None = None) -> list[str]:
+def _autoNumericCols(df: pl.DataFrame, exclude: list[str] | None = None) -> list[str]:
     """숫자 컬럼 자동 감지."""
     exclude_set = set(exclude or [])
     return [
@@ -77,29 +77,29 @@ def _auto_numeric_cols(df: pl.DataFrame, exclude: list[str] | None = None) -> li
     ]
 
 
-def _find_row_value(df: pl.DataFrame, keyword: str, year_col: str) -> float | None:
-    label_col = "항목" if "항목" in df.columns else None
-    if label_col is None:
+def _findRowValue(df: pl.DataFrame, keyword: str, yearCol: str) -> float | None:
+    labelCol = "항목" if "항목" in df.columns else None
+    if labelCol is None:
         return None
-    matched = df.filter(pl.col(label_col).str.contains(keyword))
+    matched = df.filter(pl.col(labelCol).str.contains(keyword))
     if matched.height == 0:
         return None
-    val = matched.row(0, named=True).get(year_col)
+    val = matched.row(0, named=True).get(yearCol)
     return float(val) if isinstance(val, (int, float)) and val is not None else None
 
 
-def _ratio_table(bs: pl.DataFrame, is_: pl.DataFrame) -> pl.DataFrame:
+def _ratioTable(bs: pl.DataFrame, is_: pl.DataFrame) -> pl.DataFrame:
     year_cols = sorted([c for c in bs.columns if _PERIOD_COL_RE.match(c)], reverse=True)
     if not year_cols:
         return pl.DataFrame()
 
     rows = []
     for year in year_cols:
-        equity = _find_row_value(bs, "자본총계", year)
-        total_asset = _find_row_value(bs, "자산총계", year)
-        revenue = _find_row_value(is_, "매출액", year)
-        operating_income = _find_row_value(is_, "영업이익", year)
-        net_income = _find_row_value(is_, "당기순이익", year)
+        equity = _findRowValue(bs, "자본총계", year)
+        total_asset = _findRowValue(bs, "자산총계", year)
+        revenue = _findRowValue(is_, "매출액", year)
+        operating_income = _findRowValue(is_, "영업이익", year)
+        net_income = _findRowValue(is_, "당기순이익", year)
 
         rows.append(
             {
@@ -148,7 +148,7 @@ def line(
         title: 차트 제목.
         unit: Y축 단위 라벨.
     """
-    go = _ensure_plotly()
+    go = _ensurePlotly()
 
     if x not in df.columns:
         raise ValueError(f"'{x}' 컬럼이 DataFrame에 없습니다.")
@@ -159,7 +159,7 @@ def line(
     if isinstance(y, str):
         y = [y]
     if y is None:
-        y = _auto_numeric_cols(df, exclude=[x])
+        y = _autoNumericCols(df, exclude=[x])
 
     fig = go.Figure()
     for i, col in enumerate(y):
@@ -181,7 +181,7 @@ def line(
         xaxis_title=x,
         yaxis_title=f"({unit})" if unit else "",
     )
-    _apply_theme(fig)
+    _applyTheme(fig)
     return fig
 
 
@@ -199,7 +199,7 @@ def bar(
     Args:
         stacked: True면 누적 바 차트.
     """
-    go = _ensure_plotly()
+    go = _ensurePlotly()
 
     if x not in df.columns:
         raise ValueError(f"'{x}' 컬럼이 DataFrame에 없습니다.")
@@ -210,7 +210,7 @@ def bar(
     if isinstance(y, str):
         y = [y]
     if y is None:
-        y = _auto_numeric_cols(df, exclude=[x])
+        y = _autoNumericCols(df, exclude=[x])
 
     fig = go.Figure()
     for i, col in enumerate(y):
@@ -232,7 +232,7 @@ def bar(
         yaxis_title=f"({unit})" if unit else "",
         barmode=barmode,
     )
-    _apply_theme(fig)
+    _applyTheme(fig)
     return fig
 
 
@@ -244,7 +244,7 @@ def pie(
     title: str | None = None,
 ) -> Any:
     """파이 차트."""
-    go = _ensure_plotly()
+    go = _ensurePlotly()
 
     fig = go.Figure(
         go.Pie(
@@ -255,7 +255,7 @@ def pie(
         )
     )
     fig.update_layout(title=title or "")
-    _apply_theme(fig)
+    _applyTheme(fig)
     return fig
 
 
@@ -272,7 +272,7 @@ def waterfall(
         labels: 항목 이름 리스트.
         values: 증감 값 리스트 (마지막은 합계).
     """
-    go = _ensure_plotly()
+    go = _ensurePlotly()
 
     measures = ["relative"] * (len(values) - 1) + ["total"]
 
@@ -291,14 +291,14 @@ def waterfall(
         title=title or "",
         yaxis_title=f"({unit})" if unit else "",
     )
-    _apply_theme(fig)
+    _applyTheme(fig)
     return fig
 
 
 # ── 재무 템플릿 차트 ──
 
 
-def _extract_account_series(df: pl.DataFrame, keyword: str) -> dict[str, float | None]:
+def _extractAccountSeries(df: pl.DataFrame, keyword: str) -> dict[str, float | None]:
     """재무제표에서 항목 키워드로 연도별 값 추출."""
     labelCol = "항목" if "항목" in df.columns else None
     if labelCol is None:
@@ -311,25 +311,25 @@ def _extract_account_series(df: pl.DataFrame, keyword: str) -> dict[str, float |
     return {yr: row.get(yr) for yr in year_cols if row.get(yr) is not None}
 
 
-def revenue(company: Any, *, n_years: int = 5) -> Any:
+def revenue(company: Any, *, nYears: int = 5) -> Any:
     """매출·영업이익·순이익 추세 차트 (바+라인 combo).
 
     Args:
         company: Company 객체.
         n_years: 표시 연도 수.
     """
-    go = _ensure_plotly()
+    go = _ensurePlotly()
     from plotly.subplots import make_subplots
 
-    is_df = getattr(company, "IS", None)
-    if is_df is None:
+    isDf = getattr(company, "IS", None)
+    if isDf is None:
         raise ValueError("IS (손익계산서) 데이터가 없습니다.")
 
-    rev = _extract_account_series(is_df, "매출액")
-    oi = _extract_account_series(is_df, "영업이익")
-    ni = _extract_account_series(is_df, "당기순이익")
+    rev = _extractAccountSeries(isDf, "매출액")
+    oi = _extractAccountSeries(isDf, "영업이익")
+    ni = _extractAccountSeries(isDf, "당기순이익")
 
-    years = sorted(rev.keys())[-n_years:]
+    years = sorted(rev.keys())[-nYears:]
     if not years:
         raise ValueError("매출 데이터를 찾을 수 없습니다.")
 
@@ -366,24 +366,24 @@ def revenue(company: Any, *, n_years: int = 5) -> Any:
         yaxis_title="(백만원)",
     )
     fig.update_yaxes(title_text="(%)", secondary_y=True)
-    _apply_theme(fig)
-    _auto_emit(company, "spec_revenue_trend")
+    _applyTheme(fig)
+    _autoEmit(company, "spec_revenue_trend")
     return fig
 
 
-def cashflow(company: Any, *, n_years: int = 5) -> Any:
+def cashflow(company: Any, *, nYears: int = 5) -> Any:
     """영업CF/투자CF/재무CF 패턴 차트."""
-    go = _ensure_plotly()
+    go = _ensurePlotly()
 
     cf_df = getattr(company, "CF", None)
     if cf_df is None:
         raise ValueError("CF (현금흐름표) 데이터가 없습니다.")
 
-    op = _extract_account_series(cf_df, "영업활동")
-    inv = _extract_account_series(cf_df, "투자활동")
-    fin = _extract_account_series(cf_df, "재무활동")
+    op = _extractAccountSeries(cf_df, "영업활동")
+    inv = _extractAccountSeries(cf_df, "투자활동")
+    fin = _extractAccountSeries(cf_df, "재무활동")
 
-    years = sorted(set(op.keys()) | set(inv.keys()) | set(fin.keys()))[-n_years:]
+    years = sorted(set(op.keys()) | set(inv.keys()) | set(fin.keys()))[-nYears:]
     if not years:
         raise ValueError("현금흐름 데이터를 찾을 수 없습니다.")
 
@@ -397,14 +397,14 @@ def cashflow(company: Any, *, n_years: int = 5) -> Any:
         barmode="group",
         yaxis_title="(백만원)",
     )
-    _apply_theme(fig)
-    _auto_emit(company, "spec_cashflow_waterfall")
+    _applyTheme(fig)
+    _autoEmit(company, "spec_cashflow_waterfall")
     return fig
 
 
 def dividend(company: Any) -> Any:
     """DPS + 배당수익률 + 배당성향 차트."""
-    go = _ensure_plotly()
+    go = _ensurePlotly()
     from plotly.subplots import make_subplots
 
     div_df = getattr(company, "dividend", None)
@@ -450,23 +450,23 @@ def dividend(company: Any) -> Any:
     fig.update_layout(title=f"{company.corpName} 배당 분석")
     fig.update_yaxes(title_text="DPS (원)", secondary_y=False)
     fig.update_yaxes(title_text="(%)", secondary_y=True)
-    _apply_theme(fig)
-    _auto_emit(company, "spec_dividend")
+    _applyTheme(fig)
+    _autoEmit(company, "spec_dividend")
     return fig
 
 
-def balance_sheet(company: Any, *, n_years: int = 5) -> Any:
+def balanceSheet(company: Any, *, nYears: int = 5) -> Any:
     """자산/부채/자본 구성 누적 바 차트."""
-    go = _ensure_plotly()
+    go = _ensurePlotly()
 
     bs_df = getattr(company, "BS", None)
     if bs_df is None:
         raise ValueError("BS (재무상태표) 데이터가 없습니다.")
 
-    ca = _extract_account_series(bs_df, "유동자산")
-    nca = _extract_account_series(bs_df, "비유동자산")
+    ca = _extractAccountSeries(bs_df, "유동자산")
+    nca = _extractAccountSeries(bs_df, "비유동자산")
 
-    years = sorted(set(ca.keys()) | set(nca.keys()))[-n_years:]
+    years = sorted(set(ca.keys()) | set(nca.keys()))[-nYears:]
     if not years:
         raise ValueError("재무상태표 데이터를 찾을 수 없습니다.")
 
@@ -479,25 +479,25 @@ def balance_sheet(company: Any, *, n_years: int = 5) -> Any:
         barmode="stack",
         yaxis_title="(백만원)",
     )
-    _apply_theme(fig)
-    _auto_emit(company, "spec_balance_sheet")
+    _applyTheme(fig)
+    _autoEmit(company, "spec_balance_sheet")
     return fig
 
 
-def profitability(company: Any, *, n_years: int = 5) -> Any:
+def profitability(company: Any, *, nYears: int = 5) -> Any:
     """영업이익률·순이익률·ROE 추세 라인 차트."""
-    go = _ensure_plotly()
+    go = _ensurePlotly()
 
     bs_df = getattr(company, "BS", None)
-    is_df = getattr(company, "IS", None)
-    if bs_df is None or is_df is None:
+    isDf = getattr(company, "IS", None)
+    if bs_df is None or isDf is None:
         raise ValueError("BS, IS 데이터가 필요합니다.")
 
-    ratios = _ratio_table(bs_df, is_df)
+    ratios = _ratioTable(bs_df, isDf)
     if ratios.height == 0:
         raise ValueError("재무비율 계산 실패.")
 
-    ratios = ratios.sort("year").tail(n_years)
+    ratios = ratios.sort("year").tail(nYears)
     years = ratios["year"].to_list()
 
     fig = go.Figure()
@@ -518,8 +518,8 @@ def profitability(company: Any, *, n_years: int = 5) -> Any:
         title=f"{company.corpName} 수익성 추이",
         yaxis_title="(%)",
     )
-    _apply_theme(fig)
-    _auto_emit(company, "spec_profitability")
+    _applyTheme(fig)
+    _autoEmit(company, "spec_profitability")
     return fig
 
 
@@ -527,5 +527,5 @@ def profitability(company: Any, *, n_years: int = 5) -> Any:
 revenue_trend = revenue
 cashflow_pattern = cashflow
 dividend_analysis = dividend
-balance_sheet_composition = balance_sheet
+balance_sheet_composition = balanceSheet
 profitability_ratios = profitability

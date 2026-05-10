@@ -17,10 +17,10 @@ def test_emit_chart_rejects_empty_spec(capsys, caplog):
     """
     import logging
 
-    from dartlab.viz import emit_chart
+    from dartlab.viz import emitChart
 
     with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
-        emit_chart({})
+        emitChart({})
     out = capsys.readouterr().out
     log_text = caplog.text
     assert "DARTLAB_VIZ" not in out
@@ -32,10 +32,10 @@ def test_emit_chart_rejects_no_charttype(capsys, caplog):
     """R32-1: chartType / vizType 없으면 거부."""
     import logging
 
-    from dartlab.viz import emit_chart
+    from dartlab.viz import emitChart
 
     with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
-        emit_chart({"title": "test", "categories": ["A"], "series": [{"data": [1]}]})
+        emitChart({"title": "test", "categories": ["A"], "series": [{"data": [1]}]})
     out = capsys.readouterr().out
     assert "DARTLAB_VIZ" not in out
     assert "차트 거부" in caplog.text
@@ -45,10 +45,10 @@ def test_emit_chart_passes_with_charttype(capsys, caplog):
     """R32-1: chartType 있으면 통과."""
     import logging
 
-    from dartlab.viz import emit_chart
+    from dartlab.viz import emitChart
 
     with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
-        emit_chart(
+        emitChart(
             {
                 "chartType": "line",
                 "title": "test",
@@ -66,10 +66,10 @@ def test_emit_chart_rejects_no_evidence(capsys, caplog):
     """evidenceBinding / evidenceIds 가 모두 비어 있으면 거부."""
     import logging
 
-    from dartlab.viz import emit_chart
+    from dartlab.viz import emitChart
 
     with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
-        emit_chart(
+        emitChart(
             {
                 "chartType": "line",
                 "title": "no_evidence",
@@ -87,10 +87,10 @@ def test_emit_chart_passes_with_evidence_binding(capsys, caplog):
     """evidenceBinding 만 있어도 통과."""
     import logging
 
-    from dartlab.viz import emit_chart
+    from dartlab.viz import emitChart
 
     with caplog.at_level(logging.WARNING, logger="dartlab.viz"):
-        emit_chart(
+        emitChart(
             {
                 "chartType": "line",
                 "title": "with_binding",

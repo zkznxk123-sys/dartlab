@@ -116,16 +116,16 @@ def calcMomentum(stockCode: str, *, market: str = "auto", series: bool = False, 
     # 최근 실현변동성이 높으면 모멘텀 크래시 위험 증가
     if n >= 126:
         daily_returns = np.diff(np.log(close[-126:]))
-        realized_vol = float(np.std(daily_returns) * np.sqrt(252))
+        realizedVol = float(np.std(daily_returns) * np.sqrt(252))
         # 변동성 상위 구간이면 모멘텀 위험
-        if realized_vol > 0.5:
+        if realizedVol > 0.5:
             crash_risk = "high"
-        elif realized_vol > 0.3:
+        elif realizedVol > 0.3:
             crash_risk = "medium"
         else:
             crash_risk = "low"
         result["crashRisk"] = crash_risk
-        result["realizedVol6m"] = round(realized_vol, 4)
+        result["realizedVol6m"] = round(realizedVol, 4)
     else:
         result["crashRisk"] = None
 

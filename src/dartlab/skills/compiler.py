@@ -95,10 +95,10 @@ def buildSkillArtifacts(
 
     skills = listSkills(includeUser=includeUser)
     web_path = Path(webDir) if webDir is not None else Path(__file__).resolve().parent
-    _prepare_generated_dir(web_path)
+    _prepareGeneratedDir(web_path)
 
-    categories = _ordered_categories({skill.category for skill in skills})
-    search_index = [_search_doc(skill) for skill in skills]
+    categories = _orderedCategories({skill.category for skill in skills})
+    search_index = [_searchDoc(skill) for skill in skills]
     meta = {
         "entrySkillId": "start.dartlabSkillOs",
         "canonicalSurface": "DartLab Skill OS",
@@ -106,7 +106,7 @@ def buildSkillArtifacts(
         "categories": [
             {
                 "id": category,
-                **_category_meta(category),
+                **_categoryMeta(category),
                 "count": sum(1 for skill in skills if skill.category == category),
             }
             for category in categories
@@ -114,10 +114,10 @@ def buildSkillArtifacts(
         "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills.",
     }
     pyodide_manifest = [
-        _pyodide_doc(skill) for skill in skills if _runtime_status(skill, "pyodide") in {"supported", "limited"}
+        _pyodideDoc(skill) for skill in skills if _runtimeStatus(skill, "pyodide") in {"supported", "limited"}
     ]
-    _write_json(web_path / "index.json", {"meta": meta, "skills": search_index})
-    _write_json(web_path / "pyodide.json", {"skills": pyodide_manifest})
+    _writeJson(web_path / "index.json", {"meta": meta, "skills": search_index})
+    _writeJson(web_path / "pyodide.json", {"skills": pyodide_manifest})
 
     return {
         "skillCount": len(skills),
@@ -126,49 +126,49 @@ def buildSkillArtifacts(
     }
 
 
-def _search_doc(skill: Any) -> dict[str, Any]:
-    from dartlab.skills.registry import _steps_from_recipe_body
+def _searchDoc(skill: Any) -> dict[str, Any]:
+    from dartlab.skills.registry import _stepsFromRecipeBody
 
     # frontmatter recipeSteps 가 있으면 우선, 없으면 본문 ## 연계 절차 파싱 fallback.
     recipe_steps = (
-        list(skill.recipeSteps) if skill.recipeSteps else _steps_from_recipe_body(str(skill.source.get("body") or ""))
+        list(skill.recipeSteps) if skill.recipeSteps else _stepsFromRecipeBody(str(skill.source.get("body") or ""))
     )
 
     return {
         "id": skill.id,
-        "title": _public_text(skill.title),
+        "title": _publicText(skill.title),
         "category": skill.category,
-        "categoryTitle": _category_meta(skill.category)["title"],
+        "categoryTitle": _categoryMeta(skill.category)["title"],
         "kind": skill.kind,
         "status": skill.status,
-        "purpose": _public_text(skill.purpose),
-        "whenToUse": _public_list(skill.whenToUse),
-        "inputs": _public_list(skill.inputs),
-        "requiredInputs": _public_list(skill.requiredInputs),
-        "outputs": _public_list(skill.outputs),
-        "apiRefs": _public_list(skill.capabilityRefs),
-        "toolRefs": _public_list(skill.toolRefs),
-        "datasetRefs": _public_list(skill.datasetRefs),
-        "knowledgeRefs": _public_list(skill.knowledgeRefs),
-        "linkedSkills": _public_list(skill.linkedSkills),
-        "requires": _public_list(skill.requires),
-        "alternatives": _public_list(skill.alternatives),
-        "succeededBy": _public_list(skill.succeededBy),
-        "deprecatedBy": _public_list(skill.deprecatedBy),
-        "sourceRefs": _public_list(skill.sourceRefs),
-        "procedure": _public_list(skill.procedure),
+        "purpose": _publicText(skill.purpose),
+        "whenToUse": _publicList(skill.whenToUse),
+        "inputs": _publicList(skill.inputs),
+        "requiredInputs": _publicList(skill.requiredInputs),
+        "outputs": _publicList(skill.outputs),
+        "apiRefs": _publicList(skill.capabilityRefs),
+        "toolRefs": _publicList(skill.toolRefs),
+        "datasetRefs": _publicList(skill.datasetRefs),
+        "knowledgeRefs": _publicList(skill.knowledgeRefs),
+        "linkedSkills": _publicList(skill.linkedSkills),
+        "requires": _publicList(skill.requires),
+        "alternatives": _publicList(skill.alternatives),
+        "succeededBy": _publicList(skill.succeededBy),
+        "deprecatedBy": _publicList(skill.deprecatedBy),
+        "sourceRefs": _publicList(skill.sourceRefs),
+        "procedure": _publicList(skill.procedure),
         "recipeSteps": recipe_steps,
-        "requiredEvidence": _public_list(skill.requiredEvidence),
-        "expectedOutputs": _public_list(skill.expectedOutputs),
-        "visualGuidance": _public_list(skill.visualGuidance),
-        "failureModes": _public_list(skill.failureModes),
-        "forbidden": _public_list(skill.forbidden),
-        "examples": _public_list(skill.examples),
+        "requiredEvidence": _publicList(skill.requiredEvidence),
+        "expectedOutputs": _publicList(skill.expectedOutputs),
+        "visualGuidance": _publicList(skill.visualGuidance),
+        "failureModes": _publicList(skill.failureModes),
+        "forbidden": _publicList(skill.forbidden),
+        "examples": _publicList(skill.examples),
         "runtimeCompatibility": skill.runtimeCompatibility,
     }
 
 
-def _pyodide_doc(skill: Any) -> dict[str, Any]:
+def _pyodideDoc(skill: Any) -> dict[str, Any]:
     pyodide = skill.runtimeCompatibility.get("pyodide", {})
     return {
         "id": skill.id,
@@ -181,21 +181,21 @@ def _pyodide_doc(skill: Any) -> dict[str, Any]:
     }
 
 
-def _runtime_status(skill: Any, runtime: str) -> str:
+def _runtimeStatus(skill: Any, runtime: str) -> str:
     value = skill.runtimeCompatibility.get(runtime, {})
     return str(value.get("status", "unknown")) if isinstance(value, dict) else "unknown"
 
 
-def _public_list(values: list[Any]) -> list[str]:
+def _publicList(values: list[Any]) -> list[str]:
     items: list[str] = []
     for value in values:
-        text = _public_text(str(value))
+        text = _publicText(str(value))
         if text:
             items.append(text)
     return items
 
 
-def _public_text(value: str) -> str:
+def _publicText(value: str) -> str:
     text = value.strip()
     if not text:
         return ""
@@ -216,13 +216,13 @@ def _public_text(value: str) -> str:
     return text
 
 
-def _ordered_categories(categories: set[str]) -> list[str]:
+def _orderedCategories(categories: set[str]) -> list[str]:
     ordered = [category for category in _CATEGORY_ORDER if category in categories]
     ordered.extend(sorted(category for category in categories if category not in _CATEGORY_ORDER))
     return ordered
 
 
-def _category_meta(category: str) -> dict[str, str]:
+def _categoryMeta(category: str) -> dict[str, str]:
     return _CATEGORY_META.get(
         category,
         {
@@ -232,7 +232,7 @@ def _category_meta(category: str) -> dict[str, str]:
     )
 
 
-def _skill_source_path(skill: Any) -> str:
+def _skillSourcePath(skill: Any) -> str:
     source = skill.source if isinstance(skill.source, dict) else {}
     path = source.get("path") or source.get("file")
     if path:
@@ -240,11 +240,11 @@ def _skill_source_path(skill: Any) -> str:
     return f"generated:{skill.id}"
 
 
-def _write_json(path: Path, data: dict[str, Any]) -> None:
+def _writeJson(path: Path, data: dict[str, Any]) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def _prepare_generated_dir(path: Path) -> None:
+def _prepareGeneratedDir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
     for file_name in ("index.json", "pyodide.json"):
         target = path / file_name

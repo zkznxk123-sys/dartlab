@@ -40,10 +40,10 @@ def _ensureNetwork(company: Company) -> tuple[dict, dict] | None:
     data = company._cache.get("_network_data", _CACHE_MISSING)
     full = company._cache.get("_network_full", _CACHE_MISSING)
     if data is _CACHE_MISSING or full is _CACHE_MISSING:
-        from dartlab.scan.network import build_graph, export_full
+        from dartlab.scan.network import buildGraph, exportFull
 
-        data = build_graph(verbose=False)
-        full = export_full(data)
+        data = buildGraph(verbose=False)
+        full = exportFull(data)
         company._cache["_network_data"] = data
         company._cache["_network_full"] = full
     return data, full
@@ -52,9 +52,9 @@ def _ensureNetwork(company: Company) -> tuple[dict, dict] | None:
 def _ensureGovernance(company: Company) -> pl.DataFrame | None:
     val = company._cache.get("_governance", _CACHE_MISSING)
     if val is _CACHE_MISSING:
-        from dartlab.scan.governance import scan_governance
+        from dartlab.scan.governance import scanGovernance
 
-        val = scan_governance(verbose=False)
+        val = scanGovernance(verbose=False)
         company._cache["_governance"] = val
     return val
 
@@ -62,9 +62,9 @@ def _ensureGovernance(company: Company) -> pl.DataFrame | None:
 def _ensureWorkforce(company: Company) -> pl.DataFrame | None:
     val = company._cache.get("_workforce", _CACHE_MISSING)
     if val is _CACHE_MISSING:
-        from dartlab.scan.workforce import scan_workforce
+        from dartlab.scan.workforce import scanWorkforce
 
-        val = scan_workforce(verbose=False)
+        val = scanWorkforce(verbose=False)
         company._cache["_workforce"] = val
     return val
 
@@ -72,9 +72,9 @@ def _ensureWorkforce(company: Company) -> pl.DataFrame | None:
 def _ensureCapital(company: Company) -> pl.DataFrame | None:
     val = company._cache.get("_capital", _CACHE_MISSING)
     if val is _CACHE_MISSING:
-        from dartlab.scan.capital import scan_capital
+        from dartlab.scan.capital import scanCapital
 
-        val = scan_capital(verbose=False)
+        val = scanCapital(verbose=False)
         company._cache["_capital"] = val
     return val
 
@@ -82,9 +82,9 @@ def _ensureCapital(company: Company) -> pl.DataFrame | None:
 def _ensureDebt(company: Company) -> pl.DataFrame | None:
     val = company._cache.get("_debt", _CACHE_MISSING)
     if val is _CACHE_MISSING:
-        from dartlab.scan.debt import scan_debt
+        from dartlab.scan.debt import scanDebt
 
-        val = scan_debt(verbose=False)
+        val = scanDebt(verbose=False)
         company._cache["_debt"] = val
     return val
 
@@ -113,9 +113,9 @@ def companyScanView(company: Company, df: pl.DataFrame | None, view: str | None)
 
 def _scanMarketSummary(df: pl.DataFrame) -> pl.DataFrame:
     """시장별 요약 통계."""
-    from dartlab.scan._helpers import load_listing
+    from dartlab.scan._helpers import loadListing
 
-    _, _, _, listing_meta = load_listing()
+    _, _, _, listing_meta = loadListing()
     code_to_market = {code: meta.get("market", "") for code, meta in listing_meta.items()}
     codeCol = "종목코드" if "종목코드" in df.columns else "stockCode"
     df_with_market = df.with_columns(
@@ -148,16 +148,16 @@ def buildScanNetwork(company: Company, view: str | None = None, *, hops: int = 1
     group = data["code_to_group"].get(code, company.corpName or code)
 
     if view is None:
-        from dartlab.scan.network import export_ego
-        from dartlab.viz.network import render_network
+        from dartlab.scan.network import exportEgo
+        from dartlab.viz.network import renderNetwork
 
-        ego = export_ego(data, full, code, hops=hops)
+        ego = exportEgo(data, full, code, hops=hops)
         center_name = data["code_to_name"].get(code, code)
-        return render_network(
+        return renderNetwork(
             ego["nodes"],
             ego["edges"],
             f"{center_name} 관계 네트워크",
-            center_id=code,
+            centerId=code,
         )
     if view == "members":
         return _networkMembers(data, code, group)
@@ -253,9 +253,9 @@ def _networkCycles(data: dict, code: str) -> pl.DataFrame:
 
 def _networkPeers(data: dict, full: dict, code: str, *, hops: int = 1) -> pl.DataFrame:
     """이 회사 중심 서브그래프 (ego 뷰) → DataFrame."""
-    from dartlab.scan.network import export_ego
+    from dartlab.scan.network import exportEgo
 
-    ego = export_ego(data, full, code, hops=hops)
+    ego = exportEgo(data, full, code, hops=hops)
     rows = []
     for n in ego["nodes"]:
         if n["type"] != "company":

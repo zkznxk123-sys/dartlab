@@ -96,7 +96,7 @@ def fetchBenchmark(market: str = "KR", **kwargs: Any):
 # ── scan parquet 로드 (메모리 안전) ──────────────────────
 
 
-def _scan_data_root() -> Path:
+def _scanDataRoot() -> Path:
     """data/ 루트 경로."""
     from dartlab.core.dataLoader import _getDataRoot
 
@@ -115,7 +115,7 @@ def loadScanParquet(name: str, market: str = "KR"):
     """
     import polars as pl
 
-    root = _scan_data_root()
+    root = _scanDataRoot()
     if market == "KR":
         base = root / "dart" / "scan"
     else:
@@ -152,7 +152,7 @@ def loadSharesOutstanding(market: str = "KR"):
         scanDir = _ensureScanData()
         path = scanDir / "sharesOutstanding.parquet"
     else:
-        root = _scan_data_root()
+        root = _scanDataRoot()
         path = root / "edgar" / "scan" / "sharesOutstanding.parquet"
 
     if not path.exists():
@@ -169,7 +169,7 @@ def loadDocsForStock(stockCode: str):
     """
     import polars as pl
 
-    root = _scan_data_root()
+    root = _scanDataRoot()
     path = root / "dart" / "docs" / f"{stockCode}.parquet"
     if not path.exists():
         log.warning("docs parquet 없음: %s", path)
@@ -186,7 +186,7 @@ def loadChangesForStock(stockCode: str):
     """
     import polars as pl
 
-    root = _scan_data_root()
+    root = _scanDataRoot()
     path = root / "dart" / "scan" / "changes.parquet"
     if not path.exists():
         return None
@@ -203,7 +203,7 @@ def loadChangesForStock(stockCode: str):
 # ── scan parquet에서 종목 백분위 계산 ────────────────────
 
 
-def stockPercentile(lf, stockCode: str, col: str, stock_col: str = "stockCode", reverse: bool = False):
+def stockPercentile(lf, stockCode: str, col: str, stockCol: str = "stockCode", reverse: bool = False):
     """scan lazy frame에서 특정 종목의 컬럼 백분위를 계산.
 
     Args:
@@ -222,7 +222,7 @@ def stockPercentile(lf, stockCode: str, col: str, stock_col: str = "stockCode", 
         # 종목코드 컬럼 자동 탐색
         schema_names = lf.collect_schema().names()
         actual_stock_col = None
-        for c in (stock_col, "종목코드", "stockCode", "corp_code"):
+        for c in (stockCol, "종목코드", "stockCode", "corp_code"):
             if c in schema_names:
                 actual_stock_col = c
                 break
@@ -251,7 +251,7 @@ def stockPercentile(lf, stockCode: str, col: str, stock_col: str = "stockCode", 
         return None, None
 
 
-def loadAllfilingsForStock(stockCode: str, *, lookback_days: int | None = None):
+def loadAllfilingsForStock(stockCode: str, *, lookbackDays: int | None = None):
     """allFilings parquet 에서 단일 종목 데이터 로드.
 
     `data/dart/allFilings/*.parquet` 일자별 전종목 파일에서 stock_code 로 필터.
@@ -271,7 +271,7 @@ def loadAllfilingsForStock(stockCode: str, *, lookback_days: int | None = None):
     """
     import polars as pl
 
-    root = _scan_data_root()
+    root = _scanDataRoot()
     adir = root / "dart" / "allFilings"
     if not adir.exists():
         return None
@@ -281,8 +281,8 @@ def loadAllfilingsForStock(stockCode: str, *, lookback_days: int | None = None):
     if not parquets:
         return None
 
-    if lookback_days is not None and lookback_days > 0:
-        parquets = parquets[-lookback_days:]
+    if lookbackDays is not None and lookbackDays > 0:
+        parquets = parquets[-lookbackDays:]
 
     # 컬럼명 우선순위: STOCK_CODE_COLUMNS SSOT (snake_case 우선이라 별도 순서 — 그러나
     # SSOT 의 후보 셋과 동일). allFilings parquet 은 stock_code 가 일반적이라 첫 시도.

@@ -82,7 +82,7 @@ def test_webSearch_uses_cache(monkeypatch):
 
     from dartlab.gather.resilience import circuit_breaker
 
-    circuit_breaker.record_success("tavily")
+    circuit_breaker.recordSuccess("tavily")
 
     search._cache.clear()
 
@@ -151,8 +151,8 @@ def test_readUrl_fallback_to_bs4(monkeypatch):
     # circuit breaker 리셋
     from dartlab.gather.resilience import circuit_breaker
 
-    circuit_breaker.record_success("jina")
-    circuit_breaker.record_success("bs4_reader")
+    circuit_breaker.recordSuccess("jina")
+    circuit_breaker.recordSuccess("bs4_reader")
 
     result = reader.readUrl("https://example.com/test")
     assert result == "BS4 content"

@@ -172,18 +172,18 @@ def test_loadCostByNature_returnsPopulatedDict():
 
 def test_loadLabelSupplements_returnsPopulatedDict():
     """labelSupplements.json 이 번들되어 정상 로드 + 빈 dict 아님."""
-    from dartlab.core.utils.labels import _load_label_supplements
+    from dartlab.core.utils.labels import _loadLabelSupplements
 
-    result = _load_label_supplements()
+    result = _loadLabelSupplements()
     assert isinstance(result, dict)
     # supplements 는 비어있을 수도 있으므로 타입만 확인. 파일 존재는 위 _REQUIRED_FILES 에서 검증.
 
 
 def test_loadEdgarStandardAccounts_returnsPopulatedDict():
     """EDGAR standardAccounts.json 이 번들되어 정상 로드."""
-    from dartlab.core.utils.labels import _load_edgar_standard_accounts
+    from dartlab.core.utils.labels import _loadEdgarStandardAccounts
 
-    result = _load_edgar_standard_accounts()
+    result = _loadEdgarStandardAccounts()
     assert isinstance(result, dict)
     assert result, "_load_edgar_standard_accounts() 빈 dict — EDGAR 계정명 매핑 전멸"
 

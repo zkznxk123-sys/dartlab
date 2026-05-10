@@ -77,33 +77,33 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
     if verbose:
         _log.info("  [1/4] governance 스캔...")
     from dartlab.scan.governance.scanner import (
-        scan_audit_opinion,
-        scan_major_holder_pct,
-        scan_outside_directors,
-        scan_pay_ratio,
+        scanAuditOpinion,
+        scanMajorHolderPct,
+        scanOutsideDirectors,
+        scanPayRatio,
     )
     from dartlab.scan.governance.scorer import (
         grade,
-        score_audit,
-        score_outside_ratio,
-        score_ownership,
-        score_pay_ratio,
+        scoreAudit,
+        scoreOutsideRatio,
+        scoreOwnership,
+        scorePayRatio,
     )
 
-    holder_pct = scan_major_holder_pct()
-    outside_ratio = scan_outside_directors()
-    pay_ratio = scan_pay_ratio()
-    audit_opinion = scan_audit_opinion()
+    holder_pct = scanMajorHolderPct()
+    outside_ratio = scanOutsideDirectors()
+    pay_ratio = scanPayRatio()
+    audit_opinion = scanAuditOpinion()
 
     all_codes = set(holder_pct) | set(outside_ratio) | set(pay_ratio) | set(audit_opinion)
     governance_scores: dict[str, float] = {}
     governance_grades: dict[str, str] = {}
     for code in all_codes:
         s = (
-            score_ownership(holder_pct.get(code))
-            + score_outside_ratio(outside_ratio.get(code))
-            + score_pay_ratio(pay_ratio.get(code))
-            + score_audit(audit_opinion.get(code))
+            scoreOwnership(holder_pct.get(code))
+            + scoreOutsideRatio(outside_ratio.get(code))
+            + scorePayRatio(pay_ratio.get(code))
+            + scoreAudit(audit_opinion.get(code))
         )
         governance_scores[code] = s
         governance_grades[code] = grade(s)
@@ -114,25 +114,25 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
     # ── workforce: 직원당매출 ──
     if verbose:
         _log.info("  [2/4] workforce 스캔...")
-    from dartlab.scan.workforce.scanner import scan_revenue_per_employee
+    from dartlab.scan.workforce.scanner import scanRevenuePerEmployee
 
-    rev_per_emp = scan_revenue_per_employee()
+    rev_per_emp = scanRevenuePerEmployee()
     if verbose:
         _log.info("    workforce: %d종목", len(rev_per_emp))
 
     # ── capital: 분류 ──
     if verbose:
         _log.info("  [3/4] capital 스캔...")
-    from dartlab.scan.capital.classifier import classify_return
+    from dartlab.scan.capital.classifier import classifyReturn
     from dartlab.scan.capital.scanner import (
-        scan_capital_change,
-        scan_dividend,
-        scan_treasury_stock,
+        scanCapitalChange,
+        scanDividend,
+        scanTreasuryStock,
     )
 
-    dividends = scan_dividend()
-    treasury = scan_treasury_stock()
-    cap_changes = scan_capital_change()
+    dividends = scanDividend()
+    treasury = scanTreasuryStock()
+    cap_changes = scanCapitalChange()
 
     capital_classes: dict[str, str] = {}
     all_cap_codes = set(dividends) | set(treasury) | set(cap_changes)
@@ -142,10 +142,10 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
         chg_info = cap_changes.get(code, {})
 
         has_div = div_info.get("배당여부", False)
-        has_buyback = trs_info.get("당기취득", False)
+        hasBuyback = trs_info.get("당기취득", False)
         recent_inc = chg_info.get("최근증자", False)
 
-        cls, _ = classify_return(has_div, has_buyback, recent_inc)
+        cls, _ = classifyReturn(has_div, hasBuyback, recent_inc)
         capital_classes[code] = cls
 
     if verbose:
@@ -154,11 +154,11 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
     # ── debt: ICR + 위험등급 ──
     if verbose:
         _log.info("  [4/4] debt 스캔...")
-    from dartlab.scan.debt.risk import classify_risk, scan_icr
-    from dartlab.scan.debt.scanner import scan_bonds
+    from dartlab.scan.debt.risk import classifyRisk, scanIcr
+    from dartlab.scan.debt.scanner import scanBonds
 
-    icr_map = scan_icr()
-    bonds_map = scan_bonds()
+    icr_map = scanIcr()
+    bonds_map = scanBonds()
 
     debt_risk: dict[str, str] = {}
     debt_icr: dict[str, float] = {}
@@ -167,7 +167,7 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
         icr_val = icr_map.get(code)
         bond_info = bonds_map.get(code, {})
         short_pct = bond_info.get("단기비중")
-        debt_risk[code] = classify_risk(icr_val, short_pct)
+        debt_risk[code] = classifyRisk(icr_val, short_pct)
         if icr_val is not None:
             debt_icr[code] = icr_val
 
@@ -243,7 +243,7 @@ def _ensureCache() -> dict | None:
     return _CACHE
 
 
-def _percentile(sorted_arr: list[float], value: float) -> float:
+def _percentile(sortedArr: list[float], value: float) -> float:
     """정렬 배열에서 percentile rank 산출.
 
     Parameters
@@ -258,10 +258,10 @@ def _percentile(sorted_arr: list[float], value: float) -> float:
     float
         백분위 순위 (%) — 0.0~100.0.
     """
-    if not sorted_arr:
+    if not sortedArr:
         return 0.0
-    pos = bisect.bisect_right(sorted_arr, value)
-    return round(pos / len(sorted_arr) * 100, 1)
+    pos = bisect.bisect_right(sortedArr, value)
+    return round(pos / len(sortedArr) * 100, 1)
 
 
 def getScanPosition(stockCode: str) -> dict | None:

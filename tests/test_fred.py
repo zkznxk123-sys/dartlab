@@ -63,23 +63,23 @@ class TestClient:
         with patch.dict("os.environ", {}, clear=True):
             # 환경변수도 없고 인자도 없으면 에러
             with pytest.raises(AuthenticationError):
-                FredClient(api_key="")
+                FredClient(apiKey="")
 
     def test_multi_key_parsing(self):
         from dartlab.gather.fred.client import FredClient
 
-        client = FredClient(api_key="key1,key2,key3")
+        client = FredClient(apiKey="key1,key2,key3")
         assert len(client._keys) == 3
-        assert client._resolve_key() == "key1"
-        client._rotate_key()
-        assert client._resolve_key() == "key2"
+        assert client._resolveKey() == "key1"
+        client._rotateKey()
+        assert client._resolveKey() == "key2"
 
     def test_rate_limit_tracking(self):
         from dartlab.gather.fred.client import FredClient
 
-        client = FredClient(api_key="test_key")
+        client = FredClient(apiKey="test_key")
         # 타임스탬프 추적이 동작하는지 확인
-        client._rate_limit()
+        client._rateLimit()
         assert len(client._timestamps) == 1
 
 
@@ -88,9 +88,9 @@ class TestClient:
 
 class TestCatalog:
     def test_groups_exist(self):
-        from dartlab.gather.fred.catalog import get_groups
+        from dartlab.gather.fred.catalog import getGroups
 
-        groups = get_groups()
+        groups = getGroups()
         assert "growth" in groups
         assert "inflation" in groups
         assert "rates" in groups
@@ -101,46 +101,46 @@ class TestCatalog:
         assert len(groups) == 14
 
     def test_all_ids_nonempty(self):
-        from dartlab.gather.fred.catalog import get_all_ids
+        from dartlab.gather.fred.catalog import getAllIds
 
-        ids = get_all_ids()
+        ids = getAllIds()
         assert len(ids) >= 40
 
     def test_group_ids(self):
-        from dartlab.gather.fred.catalog import get_group_ids
+        from dartlab.gather.fred.catalog import getGroupIds
 
-        growth = get_group_ids("growth")
+        growth = getGroupIds("growth")
         assert "GDP" in growth
         assert "GDPC1" in growth
 
     def test_find_entry(self):
-        from dartlab.gather.fred.catalog import find_entry
+        from dartlab.gather.fred.catalog import findEntry
 
-        e = find_entry("UNRATE")
+        e = findEntry("UNRATE")
         assert e is not None
         assert e.group == "employment"
-        assert find_entry("NONEXISTENT") is None
+        assert findEntry("NONEXISTENT") is None
 
     def test_to_dataframe(self):
-        from dartlab.gather.fred.catalog import to_dataframe
+        from dartlab.gather.fred.catalog import toDataframe
 
-        df = to_dataframe()
+        df = toDataframe()
         assert isinstance(df, pl.DataFrame)
         assert "id" in df.columns
         assert "group" in df.columns
         assert df.height >= 40
 
     def test_to_dataframe_group(self):
-        from dartlab.gather.fred.catalog import to_dataframe
+        from dartlab.gather.fred.catalog import toDataframe
 
-        df = to_dataframe("rates")
+        df = toDataframe("rates")
         assert df.height >= 5
         assert all(row == "rates" for row in df["group"].to_list())
 
     def test_no_duplicate_ids(self):
-        from dartlab.gather.fred.catalog import get_all_ids
+        from dartlab.gather.fred.catalog import getAllIds
 
-        ids = get_all_ids()
+        ids = getAllIds()
         assert len(ids) == len(set(ids)), f"중복 시리즈 ID: {[x for x in ids if ids.count(x) > 1]}"
 
 
@@ -154,7 +154,7 @@ class TestSeriesMock:
         return client
 
     def test_fetch_series_basic(self):
-        from dartlab.gather.fred.series import fetch_series
+        from dartlab.gather.fred.series import fetchSeries
 
         obs = [
             {"date": "2024-01-01", "value": "100.5"},
@@ -162,7 +162,7 @@ class TestSeriesMock:
             {"date": "2024-03-01", "value": "."},
         ]
         client = self._mock_client(obs)
-        df = fetch_series(client, "TEST")
+        df = fetchSeries(client, "TEST")
 
         assert isinstance(df, pl.DataFrame)
         assert df.height == 3
@@ -171,7 +171,7 @@ class TestSeriesMock:
         assert df["value"][2] is None
 
     def test_fetch_multi(self):
-        from dartlab.gather.fred.series import fetch_multi
+        from dartlab.gather.fred.series import fetchMulti
 
         call_count = [0]
 
@@ -188,13 +188,13 @@ class TestSeriesMock:
         client = MagicMock()
         client.get.side_effect = mock_get
 
-        df = fetch_multi(client, ["A", "B"])
+        df = fetchMulti(client, ["A", "B"])
         assert "A" in df.columns
         assert "B" in df.columns
         assert df.height == 2
 
     def test_search_series(self):
-        from dartlab.gather.fred.series import search_series
+        from dartlab.gather.fred.series import searchSeries
 
         client = MagicMock()
         client.get.return_value = {
@@ -210,12 +210,12 @@ class TestSeriesMock:
             ]
         }
 
-        df = search_series(client, "GDP")
+        df = searchSeries(client, "GDP")
         assert df.height == 1
         assert df["id"][0] == "GDP"
 
     def test_fetch_meta(self):
-        from dartlab.gather.fred.series import fetch_meta
+        from dartlab.gather.fred.series import fetchMeta
 
         client = MagicMock()
         client.get.return_value = {
@@ -233,7 +233,7 @@ class TestSeriesMock:
                 }
             ]
         }
-        meta = fetch_meta(client, "GDP")
+        meta = fetchMeta(client, "GDP")
         assert meta.id == "GDP"
 
 
@@ -277,10 +277,10 @@ class TestTransform:
         assert result["value_diff1"][1] == pytest.approx(2.5)
 
     def test_moving_average(self):
-        from dartlab.gather.fred.transform import moving_average
+        from dartlab.gather.fred.transform import movingAverage
 
         df = self._sample_df()
-        result = moving_average(df, window=3)
+        result = movingAverage(df, window=3)
         assert "value_ma3" in result.columns
 
     def test_normalize(self):
@@ -307,7 +307,7 @@ class TestTransform:
         assert result.filter(pl.col("column") == "A")["B"][0] == pytest.approx(1.0)
 
     def test_lead_lag(self):
-        from dartlab.gather.fred.transform import lead_lag
+        from dartlab.gather.fred.transform import leadLag
 
         df = pl.DataFrame(
             {
@@ -315,7 +315,7 @@ class TestTransform:
                 "B": list(range(30)),
             }
         ).cast(pl.Float64)
-        result = lead_lag(df, "A", "B", max_lag=3)
+        result = leadLag(df, "A", "B", maxLag=3)
         assert "lag" in result.columns
         assert "correlation" in result.columns
         assert result.height == 7  # -3 to +3

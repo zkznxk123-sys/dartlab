@@ -33,7 +33,7 @@ class _CacheEntry:
         self.access_count += 1
         self.ttl = min(BASE_TTL + self.access_count * 300, MAX_TTL)
 
-    def is_expired(self) -> bool:
+    def isExpired(self) -> bool:
         """TTL 초과 여부를 반환한다."""
         return (time.monotonic() - self.created_at) > self.ttl
 
@@ -45,12 +45,12 @@ class CompanyCache:
         self._store: OrderedDict[str, _CacheEntry] = OrderedDict()
         self._max_size = MAX_SIZE
 
-    def _check_memory_pressure(self) -> None:
+    def _checkMemoryPressure(self) -> None:
         """메모리 압박 시 캐시 크기 자동 축소."""
         try:
-            from dartlab.core.memory import get_memory_mb
+            from dartlab.core.memory import getMemoryMb
 
-            mem = get_memory_mb()
+            mem = getMemoryMb()
             if mem <= 0:
                 return
             if mem > _MEMORY_THRESHOLD_MB * 1.5:
@@ -62,36 +62,36 @@ class CompanyCache:
         except ImportError:
             pass
 
-    def get(self, stock_code: str) -> tuple[Company, dict | None] | None:
+    def get(self, stockCode: str) -> tuple[Company, dict | None] | None:
         """캐시에서 Company와 snapshot을 조회한다."""
-        entry = self._store.get(stock_code)
+        entry = self._store.get(stockCode)
         if entry is None:
             return None
-        if entry.is_expired():
-            self._store.pop(stock_code, None)
+        if entry.isExpired():
+            self._store.pop(stockCode, None)
             return None
         entry.touch()
-        self._store.move_to_end(stock_code)
+        self._store.move_to_end(stockCode)
         return entry.company, entry.snapshot
 
-    def put(self, stock_code: str, company: Company, snapshot: dict | None) -> None:
+    def put(self, stockCode: str, company: Company, snapshot: dict | None) -> None:
         """Company와 snapshot을 캐시에 저장한다."""
-        self._check_memory_pressure()
-        if stock_code in self._store:
-            old = self._store[stock_code]
+        self._checkMemoryPressure()
+        if stockCode in self._store:
+            old = self._store[stockCode]
             new_entry = _CacheEntry(company, snapshot)
             new_entry.access_count = old.access_count + 1
             new_entry.ttl = min(BASE_TTL + new_entry.access_count * 300, MAX_TTL)
-            self._store.move_to_end(stock_code)
-            self._store[stock_code] = new_entry
+            self._store.move_to_end(stockCode)
+            self._store[stockCode] = new_entry
         else:
-            self._store[stock_code] = _CacheEntry(company, snapshot)
+            self._store[stockCode] = _CacheEntry(company, snapshot)
             while len(self._store) > self._max_size:
                 self._store.popitem(last=False)
 
-    def update_snapshot(self, stock_code: str, snapshot: dict | None) -> None:
+    def updateSnapshot(self, stockCode: str, snapshot: dict | None) -> None:
         """기존 캐시 항목의 snapshot만 갱신한다."""
-        entry = self._store.get(stock_code)
+        entry = self._store.get(stockCode)
         if entry:
             entry.snapshot = snapshot
 

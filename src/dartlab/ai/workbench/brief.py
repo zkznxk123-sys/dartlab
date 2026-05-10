@@ -125,10 +125,10 @@ def _fetchPastContext(state: WorkbenchState) -> str:
     targets = state.profile.get("targets") if isinstance(state.profile, dict) else None
     if not isinstance(targets, list) or not targets:
         return ""
-    stock_code = str(targets[0]).strip()
-    if not stock_code:
+    stockCode = str(targets[0]).strip()
+    if not stockCode:
         return ""
     market = str(state.profile.get("market") or "KR")
     from dartlab.ai.memory.wiring import fetchPastContext
 
-    return fetchPastContext(stock_code, market=market)
+    return fetchPastContext(stockCode, market=market)

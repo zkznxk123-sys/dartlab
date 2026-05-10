@@ -28,7 +28,7 @@ _TEXT = "#cbd5e1"
 _TEXT_DIM = "#64748b"
 
 
-def _svg_open(width: int, height: int, title: str = "") -> str:
+def _svgOpen(width: int, height: int, title: str = "") -> str:
     """SVG 루트 + 배경."""
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
@@ -40,15 +40,15 @@ def _svg_open(width: int, height: int, title: str = "") -> str:
     return "\n".join(parts)
 
 
-def _svg_close() -> str:
+def _svgClose() -> str:
     return "</svg>"
 
 
-def _bar_chart(spec: dict[str, Any], width: int, height: int) -> str:
+def _barChart(spec: dict[str, Any], width: int, height: int) -> str:
     series = spec.get("series") or []
     categories = spec.get("categories") or []
     if not series or not categories:
-        return _svg_open(width, height, spec.get("title", "")) + _svg_close()
+        return _svgOpen(width, height, spec.get("title", "")) + _svgClose()
 
     pad_l, pad_r, pad_t, pad_b = 50, 20, 40, 40
     plot_w = width - pad_l - pad_r
@@ -62,7 +62,7 @@ def _bar_chart(spec: dict[str, Any], width: int, height: int) -> str:
     group_w = plot_w / max(1, len(categories))
     bar_w = group_w / max(1, len(series)) * 0.8
 
-    parts = [_svg_open(width, height, spec.get("title", ""))]
+    parts = [_svgOpen(width, height, spec.get("title", ""))]
 
     # y grid 5개
     for i in range(5):
@@ -105,15 +105,15 @@ def _bar_chart(spec: dict[str, Any], width: int, height: int) -> str:
             f"{escape(s.get('name', ''))}</text>"
         )
 
-    parts.append(_svg_close())
+    parts.append(_svgClose())
     return "\n".join(parts)
 
 
-def _line_chart(spec: dict[str, Any], width: int, height: int) -> str:
+def _lineChart(spec: dict[str, Any], width: int, height: int) -> str:
     series = spec.get("series") or []
     categories = spec.get("categories") or []
     if not series:
-        return _svg_open(width, height, spec.get("title", "")) + _svg_close()
+        return _svgOpen(width, height, spec.get("title", "")) + _svgClose()
 
     pad_l, pad_r, pad_t, pad_b = 50, 20, 40, 40
     plot_w = width - pad_l - pad_r
@@ -121,11 +121,11 @@ def _line_chart(spec: dict[str, Any], width: int, height: int) -> str:
 
     all_vals = [v for s in series for v in (s.get("data") or []) if v is not None]
     if not all_vals:
-        return _svg_open(width, height, spec.get("title", "")) + _svg_close()
+        return _svgOpen(width, height, spec.get("title", "")) + _svgClose()
     lo, hi = min(all_vals), max(all_vals)
     span = hi - lo or 1
 
-    parts = [_svg_open(width, height, spec.get("title", ""))]
+    parts = [_svgOpen(width, height, spec.get("title", ""))]
 
     # grid
     for i in range(5):
@@ -161,17 +161,17 @@ def _line_chart(spec: dict[str, Any], width: int, height: int) -> str:
             f'font-size="10" text-anchor="middle">{escape(str(cat))}</text>'
         )
 
-    parts.append(_svg_close())
+    parts.append(_svgClose())
     return "\n".join(parts)
 
 
 def _sparkline(spec: dict[str, Any], width: int, height: int) -> str:
     series = spec.get("series") or []
     if not series:
-        return _svg_open(width, height, spec.get("title", "")) + _svg_close()
+        return _svgOpen(width, height, spec.get("title", "")) + _svgClose()
 
     row_h = min(40, (height - 30) // max(1, len(series)))
-    parts = [_svg_open(width, height, spec.get("title", ""))]
+    parts = [_svgOpen(width, height, spec.get("title", ""))]
 
     for si, s in enumerate(series):
         data = [v for v in (s.get("data") or []) if v is not None]
@@ -191,27 +191,27 @@ def _sparkline(spec: dict[str, Any], width: int, height: int) -> str:
         )
         parts.append(f'<polyline points="{" ".join(points)}" fill="none" stroke="{color}" stroke-width="1.8"/>')
 
-    parts.append(_svg_close())
+    parts.append(_svgClose())
     return "\n".join(parts)
 
 
-def _pie_chart(spec: dict[str, Any], width: int, height: int) -> str:
+def _pieChart(spec: dict[str, Any], width: int, height: int) -> str:
     import math
 
     series = spec.get("series") or []
     categories = spec.get("categories") or []
     if not series or not series[0].get("data"):
-        return _svg_open(width, height, spec.get("title", "")) + _svg_close()
+        return _svgOpen(width, height, spec.get("title", "")) + _svgClose()
 
     data = [v for v in (series[0]["data"] or []) if v is not None]
     if not data:
-        return _svg_open(width, height, spec.get("title", "")) + _svg_close()
+        return _svgOpen(width, height, spec.get("title", "")) + _svgClose()
 
     cx, cy = width * 0.35, height * 0.55
     r = min(width, height) * 0.3
     total = sum(data) or 1
 
-    parts = [_svg_open(width, height, spec.get("title", ""))]
+    parts = [_svgOpen(width, height, spec.get("title", ""))]
     acc = 0.0
     for i, v in enumerate(data):
         frac = v / total
@@ -242,11 +242,11 @@ def _pie_chart(spec: dict[str, Any], width: int, height: int) -> str:
             f"{escape(str(cat))} — {pct:.1f}%</text>"
         )
 
-    parts.append(_svg_close())
+    parts.append(_svgClose())
     return "\n".join(parts)
 
 
-def render_svg(spec: dict[str, Any], width: int = 800, height: int = 400) -> str:
+def renderSvg(spec: dict[str, Any], width: int = 800, height: int = 400) -> str:
     """VizSpec dict → SVG 문자열.
 
     Parameters
@@ -263,31 +263,31 @@ def render_svg(spec: dict[str, Any], width: int = 800, height: int = 400) -> str
     """
     if spec.get("vizType") == "diagram":
         return (
-            _svg_open(width, height, spec.get("title", "diagram"))
+            _svgOpen(width, height, spec.get("title", "diagram"))
             + f'<text x="14" y="60" fill="{_TEXT_DIM}" font-size="12">'
             + f"{escape(spec.get('diagramType', ''))}: {escape(spec.get('source', '')[:200])}</text>"
-            + _svg_close()
+            + _svgClose()
         )
 
     chart_type = spec.get("chartType", "")
 
     if chart_type == "bar":
-        return _bar_chart(spec, width, height)
+        return _barChart(spec, width, height)
     if chart_type in ("line", "combo"):
-        return _line_chart(spec, width, height)
+        return _lineChart(spec, width, height)
     if chart_type == "sparkline":
         return _sparkline(spec, width, height)
     if chart_type == "pie":
-        return _pie_chart(spec, width, height)
+        return _pieChart(spec, width, height)
 
     # radar/waterfall/heatmap: fallback to line
     if spec.get("series"):
-        return _line_chart(spec, width, height)
+        return _lineChart(spec, width, height)
 
     # empty fallback
     return (
-        _svg_open(width, height, spec.get("title", ""))
+        _svgOpen(width, height, spec.get("title", ""))
         + f'<text x="14" y="60" fill="{_TEXT_DIM}" font-size="12">'
         + f"chartType {chart_type} not supported</text>"
-        + _svg_close()
+        + _svgClose()
     )

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """plugin 서브커맨드 등록 — 플러그인 조회/생성."""
     parser = subparsers.add_parser("plugin", help="플러그인 관리 (list, create)")
     sub = parser.add_subparsers(dest="plugin_command")
@@ -24,19 +24,19 @@ def run(args) -> int:
     """서브커맨드(list/create) 분기 후 실행."""
     subcmd = getattr(args, "plugin_command", None)
     if subcmd == "list":
-        return _list_plugins()
+        return _listPlugins()
     if subcmd == "create":
-        return _create_plugin(args)
+        return _createPlugin(args)
 
     # 서브커맨드 없이 호출 시 list 기본
-    return _list_plugins()
+    return _listPlugins()
 
 
-def _list_plugins() -> int:
-    from dartlab.plugins import discover, get_loaded_plugins
+def _listPlugins() -> int:
+    from dartlab.plugins import discover, getLoadedPlugins
 
     discover()
-    plugins = get_loaded_plugins()
+    plugins = getLoadedPlugins()
 
     if not plugins:
         print("\n  설치된 플러그인이 없습니다.\n")
@@ -55,7 +55,7 @@ def _list_plugins() -> int:
     return 0
 
 
-def _create_plugin(args) -> int:
+def _createPlugin(args) -> int:
     from dartlab.ai.tools.plugin_creator import create_plugin
 
     result = create_plugin(

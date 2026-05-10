@@ -48,7 +48,7 @@ def _emit(obj: dict[str, Any]) -> None:
 
 def _handleAsk(msg: dict[str, Any]) -> None:
     """Process ask message -- stream ask events as JSON lines."""
-    from dartlab.ai.kernel import _ask_events
+    from dartlab.ai.kernel import _askEvents
 
     reqId = msg.get("id", "")
     question = msg.get("question", "")
@@ -81,7 +81,7 @@ def _handleAsk(msg: dict[str, Any]) -> None:
 
     emittedDone = False
     try:
-        for event in _ask_events(question, **kwargs):
+        for event in _askEvents(question, **kwargs):
             if event.kind == "error" and isinstance(event.data, dict):
                 _emit({"id": reqId, "event": "error", "data": _sanitizeErrorForUi(event.data)})
             else:
@@ -124,10 +124,10 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
 def _handleStatus(_msg: dict[str, Any]) -> None:
     """Return provider status with available providers list."""
     try:
-        from dartlab.ai.settings.profile import get_profile_manager
+        from dartlab.ai.settings.profile import getProfileManager
         from dartlab.ai.settings.providerCatalog import _PROVIDERS
 
-        profile = get_profile_manager().load()
+        profile = getProfileManager().load()
         provider = _sessionProvider or profile.default_provider or "none"
         model = _sessionModel or getattr(profile, "model", None) or ""
 
@@ -248,9 +248,9 @@ def _handleOAuthPasteToken(msg: dict[str, Any]) -> None:
         _emit({"event": "error", "data": {"error": "access_token이 없습니다."}})
         return
     try:
-        from dartlab.ai.providers.support.oauthToken import _save_token
+        from dartlab.ai.providers.support.oauthToken import _saveToken
 
-        _save_token(data)
+        _saveToken(data)
         _sessionProvider = provider
         _emit({"event": "providerChanged", "data": {"provider": provider, "model": ""}})
     except Exception as exc:  # noqa: BLE001
@@ -288,9 +288,9 @@ def _handleOAuthPasteCode(msg: dict[str, Any]) -> None:
             return
 
     try:
-        from dartlab.ai.providers.support.oauthToken import exchange_code
+        from dartlab.ai.providers.support.oauthToken import exchangeCode
 
-        exchange_code(code, verifier)
+        exchangeCode(code, verifier)
         _sessionProvider = provider
         _emit({"event": "providerChanged", "data": {"provider": provider, "model": ""}})
     except Exception as exc:  # noqa: BLE001
@@ -319,14 +319,14 @@ def _handleOAuthLogin(msg: dict[str, Any]) -> None:
     try:
         from dartlab.ai.providers.support.oauthToken import (
             OAUTH_REDIRECT_PORT,
-            build_auth_url,
-            exchange_code,
+            buildAuthUrl,
+            exchangeCode,
         )
     except ImportError:
         _emit({"event": "oauthResult", "data": {"success": False, "error": "OAuth 모듈 없음"}})
         return
 
-    auth_url, verifier, state = build_auth_url()
+    auth_url, verifier, state = buildAuthUrl()
     result: dict[str, Any] = {"done": False, "error": None}
 
     class _Handler(BaseHTTPRequestHandler):
@@ -348,7 +348,7 @@ def _handleOAuthLogin(msg: dict[str, Any]) -> None:
                 result["error"] = "no_code"
             else:
                 try:
-                    exchange_code(code, verifier)
+                    exchangeCode(code, verifier)
                 except (ConnectionError, OSError, RuntimeError, ValueError) as exc:
                     result["error"] = str(exc)
             result["done"] = True
@@ -368,7 +368,7 @@ def _handleOAuthLogin(msg: dict[str, Any]) -> None:
             self.end_headers()
             self.wfile.write(markup.encode("utf-8"))
 
-        def log_message(self, *_args):
+        def logMessage(self, *_args):
             pass
 
     server = HTTPServer(("127.0.0.1", OAUTH_REDIRECT_PORT), _Handler)
@@ -475,9 +475,9 @@ def _buildReadyDiag() -> dict[str, Any]:
     diag: dict[str, Any] = {"version": _getVersion()}
     diag["python"] = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
     try:
-        from dartlab.ai.settings.profile import get_profile_manager
+        from dartlab.ai.settings.profile import getProfileManager
 
-        profile = get_profile_manager().load()
+        profile = getProfileManager().load()
         diag["aiProvider"] = profile.default_provider or "none"
     except (ImportError, AttributeError, OSError):
         diag["aiProvider"] = "none"

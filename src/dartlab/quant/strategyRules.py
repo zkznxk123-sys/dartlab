@@ -343,18 +343,18 @@ def evaluateStrategies(macroData: dict) -> list[StrategySignal]:
 
     # 전략 20: 장단기차 — rates에서 term spread 변화
     expect = rates.get("expectation") or {}
-    spread_2y = expect.get("spread2yFf")
+    spread2y = expect.get("spread2yFf")
     results.append(
         _sig(
             20,
             "금리정책 전후 장단기차",
-            active=spread_2y is not None,
+            active=spread2y is not None,
             direction="bullish"
-            if rate_dir == "cut" and spread_2y is not None and spread_2y < -0.5
+            if rate_dir == "cut" and spread2y is not None and spread2y < -0.5
             else "bearish"
-            if rate_dir == "hike" and spread_2y is not None and spread_2y > 0.5
+            if rate_dir == "hike" and spread2y is not None and spread2y > 0.5
             else "neutral",
-            description=f"2Y-FF 스프레드 {spread_2y:+.2f}%p" if spread_2y is not None else "데이터 없음",
+            description=f"2Y-FF 스프레드 {spread2y:+.2f}%p" if spread2y is not None else "데이터 없음",
         )
     )
 
@@ -483,13 +483,13 @@ def evaluateStrategies(macroData: dict) -> list[StrategySignal]:
         _sig(
             30,
             "장단기차 → CLI 선행",
-            active=spread_2y is not None,
+            active=spread2y is not None,
             direction="bullish"
-            if spread_2y is not None and spread_2y > 0
+            if spread2y is not None and spread2y > 0
             else "bearish"
-            if spread_2y is not None and spread_2y < -0.5
+            if spread2y is not None and spread2y < -0.5
             else "neutral",
-            description=f"금리차 {spread_2y:+.2f}%p → CLI 방향 선행" if spread_2y is not None else "데이터 없음",
+            description=f"금리차 {spread2y:+.2f}%p → CLI 방향 선행" if spread2y is not None else "데이터 없음",
         )
     )
 
@@ -618,14 +618,14 @@ def evaluateStrategies(macroData: dict) -> list[StrategySignal]:
         _sig(
             40,
             "금융업주가 ← 장단기차",
-            active=spread_2y is not None,
+            active=spread2y is not None,
             direction="bullish"
-            if spread_2y is not None and spread_2y > 0.5
+            if spread2y is not None and spread2y > 0.5
             else "bearish"
-            if spread_2y is not None and spread_2y < -0.5
+            if spread2y is not None and spread2y < -0.5
             else "neutral",
-            description=f"장단기차 {spread_2y:+.2f}%p → 금융업 {'유리' if spread_2y is not None and spread_2y > 0.5 else '불리' if spread_2y is not None and spread_2y < -0.5 else '중립'}"
-            if spread_2y is not None
+            description=f"장단기차 {spread2y:+.2f}%p → 금융업 {'유리' if spread2y is not None and spread2y > 0.5 else '불리' if spread2y is not None and spread2y < -0.5 else '중립'}"
+            if spread2y is not None
             else "데이터 없음",
         )
     )

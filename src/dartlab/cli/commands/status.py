@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dartlab.cli.context import PROVIDERS
-from dartlab.cli.services.runtime import configure_dartlab
+from dartlab.cli.services.runtime import configureDartlab
 
 _SETUP_HINTS = {
     "oauth-codex": "dartlab setup oauth-codex",
@@ -14,7 +14,7 @@ _SETUP_HINTS = {
 }
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """status 서브커맨드 등록 — LLM 연결 상태 확인."""
     parser = subparsers.add_parser("status", help="LLM 연결 상태 확인")
     parser.add_argument("--provider", "-p", default=None, choices=PROVIDERS, help="확인할 provider")
@@ -24,10 +24,10 @@ def configure_parser(subparsers) -> None:
 
 def run(args) -> int:
     """LLM provider 연결 상태 또는 누적 비용 통계를 출력한다."""
-    dartlab = configure_dartlab()
+    dartlab = configureDartlab()
 
     if args.cost:
-        return _show_cost()
+        return _showCost()
 
     providers = [args.provider] if args.provider else PROVIDERS
     single = len(providers) == 1
@@ -37,17 +37,17 @@ def run(args) -> int:
         print("\n  Provider          │ 상태   │ 모델             │ 설정 방법")
         print("  ──────────────────┼────────┼──────────────────┼─────────────────────")
 
-    for provider_name in providers:
-        status = dartlab.llm.status(provider=provider_name)
+    for providerName in providers:
+        status = dartlab.llm.status(provider=providerName)
         available = status["available"]
 
         if single:
-            _print_detail(provider_name, status)
+            _printDetail(providerName, status)
         else:
             marker = "✓" if available else "✗"
             model = status.get("model", "-") or "-"
-            hint = "" if available else _SETUP_HINTS.get(provider_name, "")
-            print(f"  {provider_name:<18s} │ {marker:<5s}  │ {model:<16s} │ {hint}")
+            hint = "" if available else _SETUP_HINTS.get(providerName, "")
+            print(f"  {providerName:<18s} │ {marker:<5s}  │ {model:<16s} │ {hint}")
 
     if not single:
         avail = sum(1 for p in providers if dartlab.llm.status(provider=p)["available"])
@@ -59,15 +59,15 @@ def run(args) -> int:
     return 0
 
 
-def _print_detail(provider_name: str, status: dict) -> None:
+def _printDetail(providerName: str, status: dict) -> None:
     """단일 provider 상세 출력."""
     available = status["available"]
     marker = "●" if available else "○"
-    print(f"\n{marker} {provider_name}")
+    print(f"\n{marker} {providerName}")
     print(f"  model:     {status['model']}")
     print(f"  available: {available}")
 
-    if provider_name == "ollama" and "ollama" in status:
+    if providerName == "ollama" and "ollama" in status:
         info = status["ollama"]
         print(f"  installed: {info['installed']}")
         print(f"  running:   {info['running']}")
@@ -78,7 +78,7 @@ def _print_detail(provider_name: str, status: dict) -> None:
         elif not info["running"]:
             print("  setup:     ollama serve")
 
-    elif provider_name == "codex" and "codex" in status:
+    elif providerName == "codex" and "codex" in status:
         info = status["codex"]
         print(f"  installed: {info['installed']}")
         if info.get("version"):
@@ -86,7 +86,7 @@ def _print_detail(provider_name: str, status: dict) -> None:
         if not info["installed"]:
             print("  setup:     dartlab setup codex")
 
-    elif provider_name == "oauth-codex" and "oauth-codex" in status:
+    elif providerName == "oauth-codex" and "oauth-codex" in status:
         info = status["oauth-codex"]
         print(f"  token:     {info['tokenStored']}")
         print(f"  auth:      {info['authenticated']}")
@@ -96,25 +96,25 @@ def _print_detail(provider_name: str, status: dict) -> None:
         if not info["authenticated"]:
             print("  setup:     dartlab setup oauth-codex")
 
-    elif provider_name in ("openai", "custom") and not available:
-        print(f"  setup:     dartlab setup {provider_name}")
+    elif providerName in ("openai", "custom") and not available:
+        print(f"  setup:     dartlab setup {providerName}")
 
     print()
 
 
-def _show_cost() -> int:
+def _showCost() -> int:
     """누적 토큰/비용 통계 출력."""
     try:
-        from dartlab.cli.services.history import get_total_usage
+        from dartlab.cli.services.history import getTotalUsage
 
-        usage = get_total_usage()
+        usage = getTotalUsage()
     except (ImportError, OSError):
         print("  비용 데이터가 없습니다.")
         return 0
 
-    from dartlab.cli.services.output import get_console
+    from dartlab.cli.services.output import getConsole
 
-    console = get_console()
+    console = getConsole()
     console.print("\n  [bold]토큰 사용량 통계[/]\n")
     console.print(f"  총 요청 수:    {usage['총_요청수']:,}")
     console.print(f"  입력 토큰:     {usage['입력_토큰']:,}")

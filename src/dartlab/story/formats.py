@@ -6,7 +6,7 @@ import json
 from typing import Any
 
 
-def renderHtml(story, *, chart_dir: str | None = None) -> str:
+def renderHtml(story, *, chartDir: str | None = None) -> str:
     """HTML 렌더링. chart_dir 지정 시 ChartBlock을 SVG 이미지로 삽입."""
     from dartlab.story.blocks import (
         ChartBlock,
@@ -77,11 +77,11 @@ def renderHtml(story, *, chart_dir: str | None = None) -> str:
             elif isinstance(block, ChartBlock):
                 title = block.spec.get("title", "") if isinstance(block.spec, dict) else ""
                 rendered_chart = False
-                if chart_dir and isinstance(block.spec, dict):
+                if chartDir and isinstance(block.spec, dict):
                     from dartlab.viz.spec import VizSpec
 
                     key = title.replace(" ", "_")[:30] or "chart"
-                    img_path = f"{chart_dir}/chart-{key}.svg"
+                    img_path = f"{chartDir}/chart-{key}.svg"
                     try:
                         vs = VizSpec.fromDict(block.spec)
                         if vs.toImage(img_path):
@@ -197,7 +197,7 @@ def _mdRenderSectionHeader(section, mainAct: str, _ACT_HEADERS, renderedActs: se
     return parts
 
 
-def _mdRenderBlock(block, chart_dir: str | None, blockTypes: dict) -> list[str]:
+def _mdRenderBlock(block, chartDir: str | None, blockTypes: dict) -> list[str]:
     """단일 block → markdown 라인 리스트. 반환: 빈 리스트면 미지원."""
     HeadingBlock = blockTypes["HeadingBlock"]
     TextBlock = blockTypes["TextBlock"]
@@ -217,7 +217,7 @@ def _mdRenderBlock(block, chart_dir: str | None, blockTypes: dict) -> list[str]:
     if isinstance(block, TableBlock):
         return [_mdRenderTableBlock(block)]
     if isinstance(block, ChartBlock):
-        return [_mdRenderChartBlock(block, chart_dir)]
+        return [_mdRenderChartBlock(block, chartDir)]
     if isinstance(block, FlagBlock):
         return [f"- {block.icon} {f}" for f in block.flags]
     if hasattr(block, "render"):
@@ -237,14 +237,14 @@ def _mdRenderTableBlock(block) -> str:
     return _polarsToMarkdown(block.df)
 
 
-def _mdRenderChartBlock(block, chart_dir: str | None) -> str:
+def _mdRenderChartBlock(block, chartDir: str | None) -> str:
     """ChartBlock → 이미지 참조 또는 [chart: ...] placeholder."""
     title = block.spec.get("title", "차트") if isinstance(block.spec, dict) else "차트"
-    if chart_dir and isinstance(block.spec, dict):
+    if chartDir and isinstance(block.spec, dict):
         from dartlab.viz.spec import VizSpec
 
         key = block.spec.get("title", "chart").replace(" ", "_")[:30]
-        img_path = f"{chart_dir}/chart-{key}.svg"
+        img_path = f"{chartDir}/chart-{key}.svg"
         try:
             vs = VizSpec.fromDict(block.spec)
             if vs.toImage(img_path):
@@ -276,7 +276,7 @@ def _mdRenderSection(
     renderedThreads: set,
     _ACT_HEADERS,
     actFocus: dict,
-    chart_dir: str | None,
+    chartDir: str | None,
     detailMode: bool,
 ) -> list[str]:
     """단일 섹션 전체 렌더링. 반환: markdown 문자열 리스트."""
@@ -304,11 +304,11 @@ def _mdRenderSection(
         return parts
 
     for block in section.blocks:
-        parts.extend(_mdRenderBlock(block, chart_dir, blockTypes))
+        parts.extend(_mdRenderBlock(block, chartDir, blockTypes))
     return parts
 
 
-def renderMarkdown(story, *, chart_dir: str | None = None) -> str:
+def renderMarkdown(story, *, chartDir: str | None = None) -> str:
     """마크다운 렌더링 orchestrator (Q3.1f split).
 
     chart_dir 지정 시 ChartBlock 을 SVG 로 저장하고 이미지 참조 생성.
@@ -400,7 +400,7 @@ def renderMarkdown(story, *, chart_dir: str | None = None) -> str:
                 renderedThreads,
                 ACT_HEADERS,
                 actFocus,
-                chart_dir,
+                chartDir,
                 detailMode,
             )
         )
@@ -543,7 +543,7 @@ def renderAscii(story, *, width: int = 80) -> str:
         TableBlock,
         TextBlock,
     )
-    from dartlab.viz.ascii import render_ascii
+    from dartlab.viz.ascii import renderAscii
 
     lines: list[str] = []
     rule = "═" * width
@@ -612,7 +612,7 @@ def renderAscii(story, *, width: int = 80) -> str:
                 try:
                     spec = getattr(block, "spec", {}) or {}
                     if spec:
-                        chart_text = render_ascii(spec, width=width - 4, height=12)
+                        chart_text = renderAscii(spec, width=width - 4, height=12)
                         for line in chart_text.split("\n"):
                             lines.append(f"  {line}")
                 except Exception:

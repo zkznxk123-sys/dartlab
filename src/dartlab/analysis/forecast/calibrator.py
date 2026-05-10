@@ -13,9 +13,9 @@ from dartlab.gather.types import MarketSnapshot
 log = logging.getLogger(__name__)
 
 
-def calibrate_scenarios(
-    base_probs: dict[str, float],
-    dcf_baseline_price: float,
+def calibrateScenarios(
+    baseProbs: dict[str, float],
+    dcfBaselinePrice: float,
     market: MarketSnapshot,
 ) -> tuple[dict[str, float], list[str]]:
     """외부 시장 데이터로 DCF 시나리오 확률 보정.
@@ -28,7 +28,7 @@ def calibrate_scenarios(
     Returns:
         (보정된 확률 dict, 보정 근거 list).
     """
-    probs = dict(base_probs)
+    probs = dict(baseProbs)
     reasons: list[str] = []
 
     def _adjust(scenario: str, delta: float, reason: str) -> None:
@@ -38,10 +38,10 @@ def calibrate_scenarios(
             reasons.append(reason)
 
     # ── 규칙 1: 컨센서스 vs DCF 괴리 ──
-    if market.consensus and dcf_baseline_price > 0:
+    if market.consensus and dcfBaselinePrice > 0:
         consensus_price = market.consensus.target_price
         if consensus_price > 0:
-            ratio = consensus_price / dcf_baseline_price
+            ratio = consensus_price / dcfBaselinePrice
             if ratio > 1.5:
                 # 컨센서스가 DCF보다 50% 이상 높음 → optimistic ↑
                 _adjust(

@@ -63,7 +63,7 @@ class Notes:
 
     def __init__(self, company: Any):
         object.__setattr__(self, "_company", company)
-        object.__setattr__(self, "_cache", BoundedCache(max_entries=20, pressure_mb=1200.0))
+        object.__setattr__(self, "_cache", BoundedCache(maxEntries=20, pressureMb=1200.0))
 
     def __getattr__(self, name: str) -> pl.DataFrame | None:
         if name.startswith("_"):
@@ -96,7 +96,7 @@ class Notes:
             if module == "notesDetail":
                 result = self._company._call_notesDetail(krName, period=period)
             else:
-                result = self._company._call_module(module)
+                result = self._company._callModule(module)
             df = extractor(result) if result else None
         except (FileNotFoundError, ValueError, KeyError, AttributeError):
             import logging
@@ -128,7 +128,7 @@ class Notes:
         """지원하는 영문 속성명 목록."""
         return list(_REGISTRY.keys())
 
-    def keys_kr(self) -> list[str]:
+    def keysKr(self) -> list[str]:
         """지원하는 한글 키워드 목록."""
         return list(_KR_MAP.keys())
 

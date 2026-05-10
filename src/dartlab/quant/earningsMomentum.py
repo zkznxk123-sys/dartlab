@@ -70,9 +70,9 @@ def calcEarnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     yearly: dict[str, float] = {}
     if edgar:
         # EDGAR: operating_profit 컬럼 직접 사용
-        year_col = "fy"
+        yearCol = "fy"
         for row in annual.iter_rows(named=True):
-            y = str(row.get(year_col, ""))
+            y = str(row.get(yearCol, ""))
             v = row.get("operating_profit")
             if y and v is not None:
                 try:

@@ -7,10 +7,10 @@ import time
 from dartlab.cli.brand import CLR, CLR_MUTED
 from dartlab.cli.constants import toolLabel, toolResultPreview
 from dartlab.cli.services.errors import CLIError
-from dartlab.cli.services.runtime import configure_dartlab
+from dartlab.cli.services.runtime import configureDartlab
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """ask 서브커맨드 등록 -- one-shot AI 분석."""
     parser = subparsers.add_parser(
         "ask",
@@ -44,12 +44,12 @@ def run(args) -> int:
     from rich.spinner import Spinner
     from rich.text import Text
 
-    dartlab = configure_dartlab()
+    dartlab = configureDartlab()
     console = Console()
 
     # ── 종목 추출 ──
-    full_query = " ".join(args.query)
-    company, question = _resolveCompany(full_query, args, dartlab)
+    fullQuery = " ".join(args.query)
+    company, question = _resolveCompany(fullQuery, args, dartlab)
 
     # ── 헤더 ──
     if company is not None:
@@ -60,15 +60,15 @@ def run(args) -> int:
     console.print()
 
     # ── 히스토리 연속 ──
-    session_id = None
+    sessionId = None
     history = None
     if args.cont and company is not None:
-        session_id, history = _loadHistory(company.stockCode, console)
+        sessionId, history = _loadHistory(company.stockCode, console)
 
     # ── ask 내부 이벤트 스트림 ──
-    from dartlab.ai.kernel import _ask_events
+    from dartlab.ai.kernel import _askEvents
 
-    events = _ask_events(
+    events = _askEvents(
         question,
         include=args.include,
         exclude=args.exclude,
@@ -201,7 +201,7 @@ def run(args) -> int:
 
     # ── 히스토리 저장 ──
     if company is not None and buffer:
-        _saveHistory(company.stockCode, session_id, question, buffer)
+        _saveHistory(company.stockCode, sessionId, question, buffer)
 
     return 0
 
@@ -211,7 +211,7 @@ def run(args) -> int:
 # ---------------------------------------------------------------------------
 
 
-def _resolveCompany(full_query: str, args, dartlab):
+def _resolveCompany(fullQuery: str, args, dartlab):
     """--company 플래그만 처리. 나머지는 AI가 자율 판단."""
     if args.company:
         try:
@@ -220,8 +220,8 @@ def _resolveCompany(full_query: str, args, dartlab):
             from dartlab.cli.services.errors import wrapError
 
             raise CLIError(wrapError(exc, stockCode=args.company)) from exc
-        return company, full_query
-    return None, full_query
+        return company, fullQuery
+    return None, fullQuery
 
 
 def _kernelEventLine(kind: str, data: dict) -> str:
@@ -314,27 +314,27 @@ def _shortPreview(value: object, limit: int) -> str:
 def _loadHistory(stockCode: str, console):
     """이전 대화 세션 로드."""
     try:
-        from dartlab.cli.services.history import get_latest_session, get_messages
+        from dartlab.cli.services.history import getLatestSession, getMessages
 
-        session_id = get_latest_session(stockCode)
-        if session_id:
-            history = get_messages(session_id)
+        sessionId = getLatestSession(stockCode)
+        if sessionId:
+            history = getMessages(sessionId)
             console.print(f"  [{CLR_MUTED}]Resuming session ({len(history)} messages)[/]\n")
-            return session_id, history
+            return sessionId, history
     except (OSError, ImportError):
         pass
     return None, None
 
 
-def _saveHistory(stockCode: str, session_id, question: str, answer: str) -> None:
+def _saveHistory(stockCode: str, sessionId, question: str, answer: str) -> None:
     """대화 히스토리 SQLite 저장."""
     try:
-        from dartlab.cli.services.history import add_message, create_session
+        from dartlab.cli.services.history import addMessage, createSession
 
-        if session_id is None:
-            session_id = create_session(stockCode)
-        add_message(session_id, "user", question)
-        add_message(session_id, "assistant", answer)
+        if sessionId is None:
+            sessionId = createSession(stockCode)
+        addMessage(sessionId, "user", question)
+        addMessage(sessionId, "assistant", answer)
     except (OSError, ImportError):
         pass
 

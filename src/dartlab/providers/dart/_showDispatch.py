@@ -172,7 +172,7 @@ def reportFrameInner(company: Company, apiType: str, topic: str, *, raw: bool = 
 
 def showSegmentsSub(company: Company, sub: str) -> pl.DataFrame | None:
     """segments 하위 topic → DataFrame."""
-    segResult = company._call_module("segments")
+    segResult = company._callModule("segments")
     if segResult is None:
         return None
     typeMap = {"region": "region", "product": "product", "composition": "segment"}
@@ -365,7 +365,7 @@ def showSectionsTopic(
     미등록 topic 은 warning + None. registered-but-empty 는 silent None.
     """
     from dartlab.providers.dart._showSelectUtils import cleanFinanceDataFrame, warnUnknownTopic
-    from dartlab.providers.dart.company import _get_module_index
+    from dartlab.providers.dart.company import _getModuleIndex
 
     if "_sections" in company._cache:
         sec = company._cache["_sections"]
@@ -386,7 +386,7 @@ def showSectionsTopic(
                 return direct
         # registry 에 등록된 topic 은 "데이터 없음" 으로 간주해 silent None.
         # 미등록 topic 만 warning. registered-but-empty vs unknown-topic 구분.
-        if topic not in _get_module_index():
+        if topic not in _getModuleIndex():
             import warnings
 
             warnings.warn(

@@ -623,7 +623,7 @@ def _resolve(axis: str) -> str:
     raise KeyError(msg)
 
 
-def _is_stock_code(value: str) -> bool:
+def _isStockCode(value: str) -> bool:
     """값이 종목코드처럼 보이는지 판별.
 
     consistency_no_alias 원칙: case-insensitive lookup 안 함. ``s in _AXIS_REGISTRY``
@@ -767,7 +767,7 @@ class Quant:
 
         # ── 하위호환 브릿지 ──
         # 기존: quant("005930", "indicators") → 새: quant("indicators", "005930")
-        if axis is not None and isinstance(axis, str) and _is_stock_code(axis):
+        if axis is not None and isinstance(axis, str) and _isStockCode(axis):
             if stockCode is not None and isinstance(stockCode, str):
                 if stockCode in _AXIS_REGISTRY or stockCode in _ALIASES or stockCode in _OLD_METRICS:
                     # swap: quant("005930", "indicators") → quant("indicators", "005930")

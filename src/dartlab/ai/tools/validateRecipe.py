@@ -81,9 +81,9 @@ def _refsToIdList(refs: list[Ref]) -> list[str]:
         if isinstance(ref, Ref):
             out.append(ref.id)
         elif isinstance(ref, dict):
-            ref_id = ref.get("id")
-            if isinstance(ref_id, str):
-                out.append(ref_id)
+            refId = ref.get("id")
+            if isinstance(refId, str):
+                out.append(refId)
     return out
 
 
@@ -209,11 +209,11 @@ def validateRecipe(
     missing_evidence_overall: set[str] = set()
 
     for target in target_list:
-        run_id = uuid.uuid4().hex[:12]
-        run_ids.append(run_id)
+        runId = uuid.uuid4().hex[:12]
+        run_ids.append(runId)
         substituted = _substituteTarget(code, target)
         start = time.monotonic()
-        rp_result = runPython(substituted, runId=run_id)
+        rp_result = runPython(substituted, runId=runId)
         duration_ms = int((time.monotonic() - start) * 1000)
 
         emitted = (rp_result.data or {}).get("result") or {}
@@ -233,7 +233,7 @@ def validateRecipe(
         headline_metric, headline_value = _headlineFromEmitted(emitted)
 
         record = RecipeRunRecord(
-            runId=run_id,
+            runId=runId,
             skillId=skill_id,
             target=str(target),
             market=market,
@@ -252,7 +252,7 @@ def validateRecipe(
 
         runs_summary.append(
             {
-                "runId": run_id,
+                "runId": runId,
                 "target": str(target),
                 "ok": ok,
                 "evidenceKinds": evidence_kinds,
@@ -319,7 +319,7 @@ def validateRecipe(
         refs=[],
         data={
             "skillId": skill_id,
-            "scorecard": sc.to_dict(),
+            "scorecard": sc.toDict(),
             "runs": runs_summary,
             "runIds": run_ids,
             "missingEvidence": sorted(missing_evidence_overall),

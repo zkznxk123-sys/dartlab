@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.scan._helpers import scan_parquets
+from dartlab.scan._helpers import scanParquets
 
 _OPINION_RISK = {
     "의견거절": 3,
@@ -101,7 +101,7 @@ def scanAudit() -> pl.DataFrame:
         hasSpecialMatter : bool — 감사보고서 특기사항 존재 여부
         riskLevel : str — 종합 리스크 등급 (안전/관찰/주의/고위험)
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "auditOpinion",
         ["stockCode", "year", "quarter", "adt_opinion", "adtor", "adt_reprt_spcmnt_matter"],
     )

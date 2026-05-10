@@ -48,7 +48,7 @@ def calcPairs(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> 
     result: dict = {"market": market}
 
     # 자산 상위 5종목 선정 (finance.parquet)
-    top_codes = _get_top_stocks(market, n=5)
+    top_codes = _getTopStocks(market, n=5)
     if not top_codes:
         return {**result, "error": "종목 리스트 확보 실패"}
 
@@ -79,7 +79,7 @@ def calcPairs(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> 
                 continue
             spread = pa[-ml:] - pb[-ml:]
 
-            adf_stat, beta, half_life = _adf_test(spread)
+            adf_stat, beta, half_life = _adfTest(spread)
             if adf_stat is None:
                 continue
 
@@ -112,7 +112,7 @@ def calcPairs(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> 
     return result
 
 
-def _adf_test(spread: np.ndarray) -> tuple[float | None, float, float]:
+def _adfTest(spread: np.ndarray) -> tuple[float | None, float, float]:
     """ADF 검정 (numpy OLS).
 
     ΔX_t = α + β·X_{t-1} + ε
@@ -148,7 +148,7 @@ def _adf_test(spread: np.ndarray) -> tuple[float | None, float, float]:
     return float(t_stat), b, float(hl)
 
 
-def _get_top_stocks(market: str, n: int = 5) -> list[str]:
+def _getTopStocks(market: str, n: int = 5) -> list[str]:
     """finance.parquet에서 자산 상위 N종목 — scanBridge 경유."""
     import polars as pl
 
@@ -166,9 +166,9 @@ def _get_top_stocks(market: str, n: int = 5) -> list[str]:
         return []
 
     edgar = isEdgarSchema(annual)
-    year_col = "fy" if edgar else "bsns_year"
-    yr = annual.get_column(year_col).sort(descending=True).to_list()[0]
-    latest = annual.filter(pl.col(year_col) == yr)
+    yearCol = "fy" if edgar else "bsns_year"
+    yr = annual.get_column(yearCol).sort(descending=True).to_list()[0]
+    latest = annual.filter(pl.col(yearCol) == yr)
 
     assets_map = getAccountValue(latest, "자산총계")
     if not assets_map:

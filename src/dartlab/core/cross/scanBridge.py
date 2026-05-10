@@ -254,8 +254,8 @@ def _sumDart(df: pl.DataFrame, account: str) -> pl.DataFrame:
 
 def medianRatioByYear(
     df: pl.DataFrame,
-    numer_account: str,
-    denom_account: str,
+    numerAccount: str,
+    denomAccount: str,
 ) -> pl.DataFrame:
     """기간별 비율 중간값 — DART/EDGAR 자동 분기.
 
@@ -275,8 +275,8 @@ def medianRatioByYear(
         median_ratio : float — 중간값 (%)
     """
     if isEdgarSchema(df):
-        return _medianRatioEdgar(df, numer_account, denom_account)
-    return _medianRatioDart(df, numer_account, denom_account)
+        return _medianRatioEdgar(df, numerAccount, denomAccount)
+    return _medianRatioDart(df, numerAccount, denomAccount)
 
 
 def _medianRatioEdgar(df: pl.DataFrame, numer: str, denom: str) -> pl.DataFrame:

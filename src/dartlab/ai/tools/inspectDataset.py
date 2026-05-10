@@ -148,7 +148,7 @@ def _sample(df: Any, *, n: int = 5) -> list[dict]:
         if hasattr(head, "to_dicts"):
             return list(head.to_dicts())
         if hasattr(head, "to_dict"):
-            return list(head.to_dict("records"))
+            return list(head.toDict("records"))
     except Exception:  # noqa: BLE001
         pass
     return []

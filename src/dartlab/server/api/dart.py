@@ -16,17 +16,17 @@ _log = logging.getLogger(__name__)
 _MAX_ROWS = 200
 
 
-def _df_to_response(df, max_rows: int = _MAX_ROWS) -> dict:
+def _dfToResponse(df, maxRows: int = _MAX_ROWS) -> dict:
     """DataFrame → JSON 응답."""
     if df is None or (hasattr(df, "is_empty") and df.is_empty()):
         return {"count": 0, "total": 0, "rows": []}
     total = df.height if hasattr(df, "height") else len(df)
-    rows = df.head(max_rows).to_dicts() if hasattr(df, "to_dicts") else []
+    rows = df.head(maxRows).to_dicts() if hasattr(df, "to_dicts") else []
     return {"count": len(rows), "total": total, "rows": rows}
 
 
 @router.get("/filings")
-def dart_filings(
+def dartFilings(
     corp: str | None = Query(None, description="종목코드"),
     topK: int = Query(20, description="최대 건수"),
 ):
@@ -39,13 +39,13 @@ def dart_filings(
             df = c.filings(topK=topK)
         else:
             df = dartlab.listing("filings")
-        return _df_to_response(df, max_rows=topK)
+        return _dfToResponse(df, maxRows=topK)
     except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/company/{corp}")
-def dart_company_info(corp: str):
+def dartCompanyInfo(corp: str):
     """기업 기본 정보 — HF 데이터 기반."""
     try:
         import dartlab
@@ -62,7 +62,7 @@ def dart_company_info(corp: str):
 
 
 @router.get("/finance/{corp}")
-def dart_finance(
+def dartFinance(
     corp: str,
     statement: str = Query("IS", description="IS/BS/CF/CIS/SCE"),
     freq: str = Query("Q", description="Q(분기)/Y(연간)"),
@@ -76,13 +76,13 @@ def dart_finance(
             df = c.show(statement, freq="Y")
         else:
             df = c.show(statement)
-        return _df_to_response(df)
+        return _dfToResponse(df)
     except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/show/{corp}/{topic}")
-def dart_show(
+def dartShow(
     corp: str,
     topic: str,
     period: str | None = Query(None, description="기간 필터"),
@@ -97,14 +97,14 @@ def dart_show(
         else:
             result = c.show(topic)
         if hasattr(result, "to_dicts"):
-            return _df_to_response(result)
+            return _dfToResponse(result)
         return {"data": str(result)[:5000]}
     except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/report/{corp}/{category}")
-def dart_report(
+def dartReport(
     corp: str,
     category: str,
 ):
@@ -115,14 +115,14 @@ def dart_report(
         c = dartlab.Company(corp)
         df = c.show(category)
         if hasattr(df, "to_dicts"):
-            return _df_to_response(df)
+            return _dfToResponse(df)
         return {"data": str(df)[:5000]}
     except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/scan/{axis}")
-def dart_scan(
+def dartScan(
     axis: str,
     target: str | None = Query(None, description="축별 대상 (account: 계정명, ratio: 비율명)"),
 ):
@@ -134,13 +134,13 @@ def dart_scan(
             df = dartlab.scan(axis, target)
         else:
             df = dartlab.scan(axis)
-        return _df_to_response(df)
+        return _dfToResponse(df)
     except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/search")
-def dart_search(
+def dartSearch(
     q: str = Query(..., description="검색어"),
     corp: str | None = Query(None, description="종목코드 필터"),
 ):
@@ -152,13 +152,13 @@ def dart_search(
             df = dartlab.search(q, corp=corp)
         else:
             df = dartlab.search(q)
-        return _df_to_response(df)
+        return _dfToResponse(df)
     except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/listing")
-def dart_listing(
+def dartListing(
     kind: str = Query("companies", description="companies/filings/topics"),
     corp: str | None = Query(None, description="filings 시 종목코드"),
 ):
@@ -170,6 +170,6 @@ def dart_listing(
             df = dartlab.listing("filings", corp=corp)
         else:
             df = dartlab.listing(kind)
-        return _df_to_response(df)
+        return _dfToResponse(df)
     except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

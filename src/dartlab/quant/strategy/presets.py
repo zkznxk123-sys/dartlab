@@ -41,7 +41,7 @@ STYLE_ALIASES: dict[str, str] = {
 }
 
 
-def _lazy_styles() -> dict[str, Callable[..., Any]]:
+def _lazyStyles() -> dict[str, Callable[..., Any]]:
     """스타일 레지스트리 lazy import — circular import 방지."""
     from .styles import (
         breakout,
@@ -74,7 +74,7 @@ def STYLE_REGISTRY() -> dict[str, Callable[..., Any]]:  # noqa: N802
     """스타일 레지스트리 dict (lazy)."""
     global _REGISTRY_CACHE
     if _REGISTRY_CACHE is None:
-        _REGISTRY_CACHE = _lazy_styles()
+        _REGISTRY_CACHE = _lazyStyles()
     return _REGISTRY_CACHE
 
 

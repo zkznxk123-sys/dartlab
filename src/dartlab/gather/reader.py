@@ -20,7 +20,7 @@ TTL_READ = 3600  # 1시간
 
 _MAX_CONTENT_LENGTH = 8000  # LLM 컨텍스트 안전 한도 (문자)
 
-_cache = GatherCache(max_entries=50)
+_cache = GatherCache(maxEntries=50)
 
 _JINA_PREFIX = "https://r.jina.ai/"
 
@@ -146,27 +146,27 @@ def readUrl(url: str) -> str:
     result = ""
 
     # 1차: Jina Reader
-    if not _cb.is_open("jina"):
+    if not _cb.isOpen("jina"):
         t0 = time.monotonic()
         try:
             result = _readJina(url)
-            _cb.record_success("jina")
+            _cb.recordSuccess("jina")
             _ht.record(source="jina", success=True, latency=time.monotonic() - t0)
         except (OSError, ValueError, RuntimeError) as e:
             log.warning("Jina Reader 실패 (%s): %s", url, e)
-            _cb.record_failure("jina")
+            _cb.recordFailure("jina")
             _ht.record(source="jina", success=False, latency=time.monotonic() - t0)
 
     # 2차: BS4 fallback
-    if not result and not _cb.is_open("bs4_reader"):
+    if not result and not _cb.isOpen("bs4_reader"):
         t0 = time.monotonic()
         try:
             result = _readBs4(url)
-            _cb.record_success("bs4_reader")
+            _cb.recordSuccess("bs4_reader")
             _ht.record(source="bs4_reader", success=True, latency=time.monotonic() - t0)
         except (OSError, ValueError, RuntimeError) as e:
             log.warning("BS4 Reader 실패 (%s): %s", url, e)
-            _cb.record_failure("bs4_reader")
+            _cb.recordFailure("bs4_reader")
             _ht.record(source="bs4_reader", success=False, latency=time.monotonic() - t0)
 
     if not result:

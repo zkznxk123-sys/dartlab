@@ -11,20 +11,20 @@ from dartlab.ai.tools.types import ToolSpec
 
 class AnthropicProvider(BaseProvider):
     name = "anthropic"
-    default_model = "claude-sonnet-4-5-20250929"
+    defaultModel = "claude-sonnet-4-5-20250929"
 
     def _client(self) -> Any:
         try:
             from anthropic import Anthropic
         except ImportError as exc:
             raise RuntimeError("anthropic SDK 가 설치되지 않았다") from exc
-        api_key = self.config.api_key or os.getenv("ANTHROPIC_API_KEY")
-        if not api_key:
+        apiKey = self.config.apiKey or os.getenv("ANTHROPIC_API_KEY")
+        if not apiKey:
             raise RuntimeError("ANTHROPIC_API_KEY 가 없다")
-        return Anthropic(api_key=api_key, base_url=self.config.base_url or None)
+        return Anthropic(apiKey=apiKey, baseUrl=self.config.baseUrl or None)
 
-    def check_available(self) -> bool:
-        if not (self.config.api_key or os.getenv("ANTHROPIC_API_KEY")):
+    def checkAvailable(self) -> bool:
+        if not (self.config.apiKey or os.getenv("ANTHROPIC_API_KEY")):
             return False
         try:
             from anthropic import Anthropic  # noqa: F401
@@ -49,9 +49,9 @@ class AnthropicProvider(BaseProvider):
         client = self._client()
         system, normalized = _splitSystem(messages)
         kwargs: dict[str, Any] = {
-            "model": self.resolved_model,
+            "model": self.resolvedModel,
             "messages": normalized,
-            "max_tokens": self.config.max_tokens or 4096,
+            "max_tokens": self.config.maxTokens or 4096,
         }
         if system:
             kwargs["system"] = system

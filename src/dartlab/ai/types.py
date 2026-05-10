@@ -24,11 +24,11 @@ from .contracts import (  # noqa: F401
 class LLMConfig:
     provider: str | None = None
     model: str | None = None
-    api_key: str | None = None
-    base_url: str | None = None
+    apiKey: str | None = None
+    baseUrl: str | None = None
     temperature: float | None = None
-    max_tokens: int | None = None
-    system_prompt: str | None = None
+    maxTokens: int | None = None
+    systemPrompt: str | None = None
 
     def merge(self, overrides: dict[str, Any]) -> LLMConfig:
         values = asdict(self)
@@ -65,7 +65,7 @@ class ToolResponse:
     answer: str
     provider: str
     model: str
-    tool_calls: list[ToolCall]
+    toolCalls: list[ToolCall]
     context_tables: list[str] | None = None
     usage: dict[str, int] | None = None
     finish_reason: str = "stop"

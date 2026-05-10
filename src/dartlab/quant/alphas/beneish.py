@@ -30,7 +30,7 @@ import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import extractAccount, loadScanParquet
-from dartlab.quant.factorBuild import _latest_year
+from dartlab.quant.factorBuild import _latestYear
 
 log = logging.getLogger(__name__)
 
@@ -55,18 +55,18 @@ def _computeM(cur: pl.DataFrame, prev: pl.DataFrame) -> float | None:
     ni = extractAccount(cur, "net_income")
     ocf = extractAccount(cur, "operating_cf")
     # 전년
-    ta_p = extractAccount(prev, "total_assets")
-    ca_p = extractAccount(prev, "current_assets")
-    tl_p = extractAccount(prev, "total_liabilities")
+    taP = extractAccount(prev, "total_assets")
+    caP = extractAccount(prev, "current_assets")
+    tlP = extractAccount(prev, "total_liabilities")
     ar_p = extractAccount(prev, "accounts_receivable")
     sales_p = extractAccount(prev, "sales")
     gp_p = extractAccount(prev, "gross_profit")
-    dep_p = extractAccount(prev, "depreciation")
-    sga_p = extractAccount(prev, "selling_admin")
+    depP = extractAccount(prev, "depreciation")
+    sgaP = extractAccount(prev, "selling_admin")
 
     if not ta or ta <= 0 or not sales or sales <= 0:
         return None
-    if not ta_p or ta_p <= 0 or not sales_p or sales_p <= 0:
+    if not taP or taP <= 0 or not sales_p or sales_p <= 0:
         return None
 
     # DSRI
@@ -81,7 +81,7 @@ def _computeM(cur: pl.DataFrame, prev: pl.DataFrame) -> float | None:
 
     # AQI — (1 - CA/TA) / prev
     aqi_num = 1 - _safeDiv(ca, ta) if ca is not None else None
-    aqi_den = 1 - _safeDiv(ca_p, ta_p) if ca_p is not None else None
+    aqi_den = 1 - _safeDiv(caP, taP) if caP is not None else None
     aqi = _safeDiv(aqi_num, aqi_den) if (aqi_num and aqi_den and aqi_den > 0) else 1.0
 
     # SGI
@@ -89,12 +89,12 @@ def _computeM(cur: pl.DataFrame, prev: pl.DataFrame) -> float | None:
 
     # DEPI — 전년 감가율 / 현재 감가율 (감소 시 > 1)
     dep_rate = _safeDiv(dep, ta) if dep else None
-    dep_rate_p = _safeDiv(dep_p, ta_p) if dep_p else None
+    dep_rate_p = _safeDiv(depP, taP) if depP else None
     depi = _safeDiv(dep_rate_p, dep_rate) if (dep_rate and dep_rate_p and dep_rate > 0) else 1.0
 
     # SGAI
     sgai_num = _safeDiv(sga, sales)
-    sgai_den = _safeDiv(sga_p, sales_p)
+    sgai_den = _safeDiv(sgaP, sales_p)
     sgai = _safeDiv(sgai_num, sgai_den) if (sgai_num and sgai_den) else 1.0
 
     # TATA
@@ -102,7 +102,7 @@ def _computeM(cur: pl.DataFrame, prev: pl.DataFrame) -> float | None:
 
     # LVGI
     lvgi_num = _safeDiv(tl, ta) if tl is not None else None
-    lvgi_den = _safeDiv(tl_p, ta_p) if tl_p is not None else None
+    lvgi_den = _safeDiv(tlP, taP) if tlP is not None else None
     lvgi = _safeDiv(lvgi_num, lvgi_den) if (lvgi_num and lvgi_den and lvgi_den > 0) else 1.0
 
     m = (
@@ -176,7 +176,7 @@ def calcBeneishFactor(
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())
-        year = _latest_year(snap)
+        year = _latestYear(snap)
         if year is None:
             return None
     except (OSError, ValueError, KeyError, AttributeError) as exc:
@@ -184,15 +184,15 @@ def calcBeneishFactor(
         return None
 
     edgar = isEdgarSchema(snap)
-    year_col = "fy" if edgar else "bsns_year"
+    yearCol = "fy" if edgar else "bsns_year"
     year_val = int(year) if edgar else year
     try:
         prev_year_val = int(year) - 1 if edgar else str(int(year) - 1)
     except ValueError:
         return None
 
-    cur = snap.filter(pl.col(year_col) == year_val)
-    prev = snap.filter(pl.col(year_col) == prev_year_val)
+    cur = snap.filter(pl.col(yearCol) == year_val)
+    prev = snap.filter(pl.col(yearCol) == prev_year_val)
     if cur.is_empty() or prev.is_empty():
         return None
 

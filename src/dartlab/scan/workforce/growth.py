@@ -8,12 +8,12 @@ import polars as pl
 
 from dartlab.scan._helpers import (
     parse_num,
-    pick_best_quarter,
-    scan_parquets,
+    pickBestQuarter,
+    scanParquets,
 )
 
 
-def _weighted_avg_salary(group: pl.DataFrame) -> float | None:
+def _weightedAvgSalary(group: pl.DataFrame) -> float | None:
     """직원수 가중평균 급여.
 
     Parameters
@@ -38,12 +38,12 @@ def _weighted_avg_salary(group: pl.DataFrame) -> float | None:
     return None
 
 
-def scan_salary_growth() -> dict[str, dict]:
+def scanSalaryGrowth() -> dict[str, dict]:
     """employee 2개년도 → {종목코드: {급여성장률, 급여_신, 급여_구}}.
 
     급여는 만원/연 단위 가중평균.
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "employee",
         ["stockCode", "year", "quarter", "sm", "jan_salary_am"],
     )
@@ -69,8 +69,8 @@ def scan_salary_growth() -> dict[str, dict]:
         grp_old = raw.filter((pl.col("stockCode") == code) & (pl.col("year") == y_old))
         if grp_new.is_empty() or grp_old.is_empty():
             continue
-        sal_new = _weighted_avg_salary(pick_best_quarter(grp_new))
-        sal_old = _weighted_avg_salary(pick_best_quarter(grp_old))
+        sal_new = _weightedAvgSalary(pickBestQuarter(grp_new))
+        sal_old = _weightedAvgSalary(pickBestQuarter(grp_old))
         if sal_new and sal_old and sal_old > 100:
             growth = (sal_new - sal_old) / sal_old * 100
             result[code] = {
@@ -215,7 +215,7 @@ def _scanRevenueGrowthPerFile() -> dict[str, float]:
     return result
 
 
-def scan_revenue_growth() -> dict[str, float]:
+def scanRevenueGrowth() -> dict[str, float]:
     """finance IS 2개 완전연도 → {종목코드: 매출성장률(%)}.
 
     프리빌드 finance.parquet 우선, 없으면 per-file fallback.
@@ -229,26 +229,26 @@ def scan_revenue_growth() -> dict[str, float]:
     return _scanRevenueGrowthPerFile()
 
 
-def compute_salary_vs_revenue(
-    sal_map: dict[str, dict] | None = None,
-    rev_map: dict[str, float] | None = None,
+def computeSalaryVsRevenue(
+    salMap: dict[str, dict] | None = None,
+    revMap: dict[str, float] | None = None,
 ) -> pl.DataFrame:
     """급여성장률 vs 매출성장률 → DataFrame.
 
     컬럼: 종목코드, 급여성장률, 매출성장률, 급여매출괴리, 급여>매출
     """
-    if sal_map is None:
-        sal_map = scan_salary_growth()
-    if rev_map is None:
-        rev_map = scan_revenue_growth()
+    if salMap is None:
+        salMap = scanSalaryGrowth()
+    if revMap is None:
+        revMap = scanRevenueGrowth()
 
     _CAP = 500.0  # +-500% 초과 성장률은 의미 없음 (전기 매출 ~0 등)
     rows = []
-    for code in sal_map:
-        if code not in rev_map:
+    for code in salMap:
+        if code not in revMap:
             continue
-        sg = sal_map[code]["급여성장률"]
-        rg = rev_map[code]
+        sg = salMap[code]["급여성장률"]
+        rg = revMap[code]
         # 극단값 클램핑 — 전기 매출/급여가 극소일 때 수만% 발생 방지
         sg_c = max(-_CAP, min(_CAP, sg))
         rg_c = max(-_CAP, min(_CAP, rg))

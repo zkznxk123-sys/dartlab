@@ -5,10 +5,10 @@ DART sections(productService) + IS 활용.
 
 from __future__ import annotations
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 
 
-@memoized_calc
+@memoizedCalc
 def calcGamingKpis(company, *, basePeriod: str | None = None) -> dict | None:
     """게임·엔터 핵심 KPI.
 

@@ -30,5 +30,5 @@ def test_viz_spec_generators_still_registered():
 
     assert "revenue_trend" in viz.SPEC_GENERATORS
     assert "insight_radar" in viz.SPEC_GENERATORS
-    assert callable(viz.auto_chart)
+    assert callable(viz.autoChart)
     assert callable(viz.chart_from_spec)

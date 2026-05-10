@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from .domains import HISTORY_FALLBACK, load_domain
+from .domains import HISTORY_FALLBACK, loadDomain
 from .resilience import circuit_breaker
 from .types import GatherError
 
@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 
 async def fetch(
-    stock_code: str,
+    stockCode: str,
     *,
     start: str,
     end: str,
@@ -66,15 +66,15 @@ async def fetch(
         client = GatherHttpClient()
 
     for source_name in chain:
-        if circuit_breaker.is_open(source_name):
+        if circuit_breaker.isOpen(source_name):
             continue
 
         try:
-            module = load_domain(source_name)
+            module = loadDomain(source_name)
 
             if hasattr(module, "fetch_history"):
-                result = await module.fetch_history(
-                    stock_code,
+                result = await module.fetchHistory(
+                    stockCode,
                     client,
                     start=start,
                     end=end,

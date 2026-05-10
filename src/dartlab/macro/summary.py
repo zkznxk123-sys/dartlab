@@ -71,12 +71,12 @@ def _scoreLiquidity(liquidity: dict) -> tuple[float, list[str]]:
     return 0.0, []
 
 
-def _scoreForecast(forecast_result: dict | None) -> tuple[float, list[str]]:
-    if not forecast_result:
+def _scoreForecast(forecastResult: dict | None) -> tuple[float, list[str]]:
+    if not forecastResult:
         return 0.0, []
     contrib = 0.0
     reasons: list[str] = []
-    rp = forecast_result.get("recessionProb")
+    rp = forecastResult.get("recessionProb")
     if rp and rp.get("probability") is not None:
         prob = rp["probability"]
         if prob > 0.4:
@@ -85,7 +85,7 @@ def _scoreForecast(forecast_result: dict | None) -> tuple[float, list[str]]:
         elif prob < 0.15:
             contrib += 0.3
             reasons.append(f"침체확률 {prob * 100:.0f}% — 낮음")
-    lei = forecast_result.get("lei")
+    lei = forecastResult.get("lei")
     if lei and isinstance(lei, dict):
         lei_signal = lei.get("signal")
         if lei_signal == "recession_warning":
@@ -97,19 +97,19 @@ def _scoreForecast(forecast_result: dict | None) -> tuple[float, list[str]]:
     return contrib, reasons
 
 
-def _scoreCrisis(crisis_result: dict | None) -> tuple[float, list[str]]:
-    if not crisis_result:
+def _scoreCrisis(crisisResult: dict | None) -> tuple[float, list[str]]:
+    if not crisisResult:
         return 0.0, []
-    cg = crisis_result.get("creditGap")
+    cg = crisisResult.get("creditGap")
     if cg and cg.get("zone") in ("warning", "danger"):
         return -0.5, [f"Credit-to-GDP gap {cg.get('zoneLabel', '')}"]
     return 0.0, []
 
 
-def _scoreInventory(inventory_result: dict | None) -> tuple[float, list[str]]:
-    if not inventory_result:
+def _scoreInventory(inventoryResult: dict | None) -> tuple[float, list[str]]:
+    if not inventoryResult:
         return 0.0, []
-    ip = inventory_result.get("inventoryPhase")
+    ip = inventoryResult.get("inventoryPhase")
     if not ip:
         return 0.0, []
     eq = ip.get("equityImplication")
@@ -121,10 +121,10 @@ def _scoreInventory(inventory_result: dict | None) -> tuple[float, list[str]]:
     return 0.0, []
 
 
-def _scoreTrade(trade_result: dict | None, market: str) -> tuple[float, list[str]]:
-    if not trade_result or market.upper() != "KR":
+def _scoreTrade(tradeResult: dict | None, market: str) -> tuple[float, list[str]]:
+    if not tradeResult or market.upper() != "KR":
         return 0.0, []
-    tot = trade_result.get("termsOfTrade")
+    tot = tradeResult.get("termsOfTrade")
     if not tot:
         return 0.0, []
     direction = tot.get("direction")
@@ -135,19 +135,19 @@ def _scoreTrade(trade_result: dict | None, market: str) -> tuple[float, list[str
     return 0.0, []
 
 
-def _scoreCorporate(corporate_result: dict | None) -> tuple[float, list[str]]:
-    if not corporate_result:
+def _scoreCorporate(corporateResult: dict | None) -> tuple[float, list[str]]:
+    if not corporateResult:
         return 0.0, []
     contrib = 0.0
     reasons: list[str] = []
-    ec = corporate_result.get("earningsCycle")
+    ec = corporateResult.get("earningsCycle")
     if ec and ec.get("currentDirection") == "contracting":
         contrib -= 0.3
         reasons.append(f"기업이익 수축 ({ec.get('currentLabel', '')})")
     elif ec and ec.get("currentDirection") == "expanding":
         contrib += 0.3
         reasons.append(f"기업이익 확장 ({ec.get('currentLabel', '')})")
-    pr = corporate_result.get("ponziRatio")
+    pr = corporateResult.get("ponziRatio")
     if pr and pr.get("currentRatio", 0) > 0.3:
         contrib -= 0.3
         reasons.append(f"Ponzi 비율 {pr.get('currentRatio', 0):.1%} — 금융 취약")
@@ -155,7 +155,7 @@ def _scoreCorporate(corporate_result: dict | None) -> tuple[float, list[str]]:
 
 
 def _buildAllocation(
-    overall: str, cycle: dict, sentiment: dict, liquidity: dict, crisis_result: dict | None
+    overall: str, cycle: dict, sentiment: dict, liquidity: dict, crisisResult: dict | None
 ) -> dict | None:
     """포트폴리오 매핑 — regimeToAllocation → equity/bond/gold/cash 비중 dict."""
     try:
@@ -169,7 +169,7 @@ def _buildAllocation(
                 "liquidity": liquidity
                 if isinstance(liquidity, dict)
                 else {"regime": liquidity.get("regime") if isinstance(liquidity, dict) else ""},
-                "crisis": crisis_result,
+                "crisis": crisisResult,
             }
         )
         return {
@@ -190,11 +190,11 @@ def _buildStrategiesDashboard(
     assets,
     sentiment,
     liquidity,
-    forecast_result,
-    crisis_result,
-    inventory_result,
-    trade_result,
-    corporate_result,
+    forecastResult,
+    crisisResult,
+    inventoryResult,
+    tradeResult,
+    corporateResult,
 ) -> dict | None:
     """40개 투자전략 대시보드 — evaluateStrategies → signals list."""
     try:
@@ -207,11 +207,11 @@ def _buildStrategiesDashboard(
                 "assets": assets,
                 "sentiment": sentiment,
                 "liquidity": liquidity,
-                "forecast": forecast_result,
-                "crisis": crisis_result,
-                "inventory": inventory_result,
-                "trade": trade_result,
-                "corporate": corporate_result,
+                "forecast": forecastResult,
+                "crisis": crisisResult,
+                "inventory": inventoryResult,
+                "trade": tradeResult,
+                "corporate": corporateResult,
             }
         )
         return {
@@ -236,19 +236,19 @@ def _buildStrategiesDashboard(
         return None
 
 
-def _addGrowthAtRisk(forecast_result: dict | None, liquidity: dict, as_of: str | None) -> None:
+def _addGrowthAtRisk(forecastResult: dict | None, liquidity: dict, asOf: str | None) -> None:
     """Adrian-Boyarchenko-Giannone (2019) FCI → GDP 분위회귀. forecast_result 에 in-place 추가."""
-    if forecast_result is None:
+    if forecastResult is None:
         return
     try:
-        from dartlab.macro._helpers import fetch_series_list, get_gather
+        from dartlab.macro._helpers import fetchSeriesList, getGather
         from dartlab.macro.growthAtRisk import growthAtRisk as _gar
 
         fci_data = liquidity.get("fci") if isinstance(liquidity, dict) else None
         fci_series = fci_data.get("history") if isinstance(fci_data, dict) else None
 
-        _g = get_gather(as_of)
-        gdp_series = fetch_series_list(_g, "GDP")
+        _g = getGather(asOf)
+        gdp_series = fetchSeriesList(_g, "GDP")
         if not (gdp_series and len(gdp_series) >= 20):
             return
         gdp_growth = [
@@ -258,19 +258,19 @@ def _addGrowthAtRisk(forecast_result: dict | None, liquidity: dict, as_of: str |
         ]
 
         if not fci_series:
-            nfci_series = fetch_series_list(_g, "NFCI")
+            nfci_series = fetchSeriesList(_g, "NFCI")
             if nfci_series and len(nfci_series) >= 20:
                 fci_series = nfci_series
 
         if fci_series and gdp_growth:
             gar = _gar(fci_series, gdp_growth, horizon=4)
             if gar:
-                forecast_result["growthAtRisk"] = gar
+                forecastResult["growthAtRisk"] = gar
     except (KeyError, ValueError, TypeError, AttributeError, ImportError):
         return
 
 
-def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
+def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """매크로 전체 종합 판정 — **종목 분석 시 macro 호출은 이 함수 1회로 끝낸다**.
 
     11개 축(cycle, rates, assets, sentiment, liquidity, forecast, crisis,
@@ -333,20 +333,20 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
                 confidence : float — 신뢰도 (0~1)
                 description : str — 해설
     """
-    from dartlab.macro.assets import analyze_assets
-    from dartlab.macro.cycle import analyze_cycle
+    from dartlab.macro.assets import analyzeAssets
+    from dartlab.macro.cycle import analyzeCycle
     from dartlab.macro.liquidity import calcLiquidity
-    from dartlab.macro.rates import analyze_rates
+    from dartlab.macro.rates import analyzeRates
     from dartlab.macro.sentiment import calcSentiment
 
     # as_of/overrides를 전체 축에 전파
-    _ax = {"market": market, "as_of": as_of, "overrides": overrides}
+    _ax = {"market": market, "as_of": asOf, "overrides": overrides}
 
-    cycle = analyze_cycle(**_ax)
+    cycle = analyzeCycle(**_ax)
     _gcAfterAxis()
-    rates = analyze_rates(**_ax)
+    rates = analyzeRates(**_ax)
     _gcAfterAxis()
-    assets = analyze_assets(**_ax)
+    assets = analyzeAssets(**_ax)
     _gcAfterAxis()
     sentiment = calcSentiment(**_ax)
     _gcAfterAxis()
@@ -354,57 +354,57 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
     _gcAfterAxis()
 
     # 신규 축 (실패해도 종합 판정은 계속)
-    forecast_result = None
-    crisis_result = None
-    inventory_result = None
-    trade_result = None
+    forecastResult = None
+    crisisResult = None
+    inventoryResult = None
+    tradeResult = None
 
     try:
-        from dartlab.macro.forecast import analyze_forecast
+        from dartlab.macro.forecast import analyzeForecast
 
-        forecast_result = analyze_forecast(**_ax)
+        forecastResult = analyzeForecast(**_ax)
         _gcAfterAxis()
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
     try:
-        from dartlab.macro.crisis import analyze_crisis
+        from dartlab.macro.crisis import analyzeCrisis
 
         # 다른 축 결과를 crisis에 전달
         crisis_kwargs: dict = {}
-        if forecast_result:
-            rp = forecast_result.get("recessionProb")
+        if forecastResult:
+            rp = forecastResult.get("recessionProb")
             if rp:
                 crisis_kwargs["probitProb"] = rp.get("probability")
-            lei = forecast_result.get("lei")
+            lei = forecastResult.get("lei")
             if lei and isinstance(lei, dict) and "signal" in lei:
                 crisis_kwargs["leiSignal"] = lei.get("signal")
-        crisis_result = analyze_crisis(**_ax, **crisis_kwargs)
+        crisisResult = analyzeCrisis(**_ax, **crisis_kwargs)
         _gcAfterAxis()
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
     try:
-        from dartlab.macro.inventory import analyze_inventory
+        from dartlab.macro.inventory import analyzeInventory
 
-        inventory_result = analyze_inventory(**_ax)
+        inventoryResult = analyzeInventory(**_ax)
         _gcAfterAxis()
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
     try:
-        from dartlab.macro.trade import analyze_trade
+        from dartlab.macro.trade import analyzeTrade
 
-        trade_result = analyze_trade(**_ax)
+        tradeResult = analyzeTrade(**_ax)
         _gcAfterAxis()
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
-    corporate_result = None
+    corporateResult = None
     try:
-        from dartlab.macro.corporate import analyze_corporate
+        from dartlab.macro.corporate import analyzeCorporate
 
-        corporate_result = analyze_corporate(**_ax)
+        corporateResult = analyzeCorporate(**_ax)
         _gcAfterAxis()
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
@@ -419,11 +419,11 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
         ("rates", *_scoreRates(rates)),
         ("sentiment", *_scoreSentiment(sentiment)),
         ("liquidity", *_scoreLiquidity(liquidity)),
-        ("forecast", *_scoreForecast(forecast_result)),
-        ("crisis", *_scoreCrisis(crisis_result)),
-        ("inventory", *_scoreInventory(inventory_result)),
-        ("trade", *_scoreTrade(trade_result, market)),
-        ("corporate", *_scoreCorporate(corporate_result)),
+        ("forecast", *_scoreForecast(forecastResult)),
+        ("crisis", *_scoreCrisis(crisisResult)),
+        ("inventory", *_scoreInventory(inventoryResult)),
+        ("trade", *_scoreTrade(tradeResult, market)),
+        ("corporate", *_scoreCorporate(corporateResult)),
     ):
         score += contrib
         contributions[axisName] = contrib
@@ -440,20 +440,20 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
         overall = "neutral"
         overallLabel = "중립"
 
-    allocation_result = _buildAllocation(overall, cycle, sentiment, liquidity, crisis_result)
+    allocation_result = _buildAllocation(overall, cycle, sentiment, liquidity, crisisResult)
     strategies_result = _buildStrategiesDashboard(
         cycle,
         rates,
         assets,
         sentiment,
         liquidity,
-        forecast_result,
-        crisis_result,
-        inventory_result,
-        trade_result,
-        corporate_result,
+        forecastResult,
+        crisisResult,
+        inventoryResult,
+        tradeResult,
+        corporateResult,
     )
-    _addGrowthAtRisk(forecast_result, liquidity, as_of)
+    _addGrowthAtRisk(forecastResult, liquidity, asOf)
 
     return {
         "market": market.upper(),
@@ -467,11 +467,11 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
         "assets": assets,
         "sentiment": sentiment,
         "liquidity": liquidity,
-        "forecast": forecast_result,
-        "crisis": crisis_result,
-        "inventory": inventory_result,
-        "trade": trade_result,
-        "corporate": corporate_result,
+        "forecast": forecastResult,
+        "crisis": crisisResult,
+        "inventory": inventoryResult,
+        "trade": tradeResult,
+        "corporate": corporateResult,
         "allocation": allocation_result,
         "strategies": strategies_result,
     }

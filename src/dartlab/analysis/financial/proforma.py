@@ -123,8 +123,8 @@ class ProFormaResult:
     historical_ratios: HistoricalRatios
     base_year: dict[str, float]
     projections: list[ProFormaYear]
-    scenario_name: str
-    revenue_growth_path: list[float]
+    scenarioName: str
+    revenueGrowthPath: list[float]
     wacc: float
     wacc_details: dict[str, float] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
@@ -132,9 +132,9 @@ class ProFormaResult:
     DISCLAIMER: str = "본 분석은 투자 참고용이며 투자 권유가 아닙니다."
 
     def __repr__(self) -> str:
-        lines = [f"[Pro-Forma 재무제표 — {self.scenario_name}]"]
+        lines = [f"[Pro-Forma 재무제표 — {self.scenarioName}]"]
         lines.append(f"  WACC: {self.wacc:.1f}%")
-        lines.append(f"  성장률: {' → '.join(f'{g:+.1f}%' for g in self.revenue_growth_path)}")
+        lines.append(f"  성장률: {' → '.join(f'{g:+.1f}%' for g in self.revenueGrowthPath)}")
         lines.append("")
 
         # IS 요약
@@ -194,7 +194,7 @@ def _median(values: list[float]) -> float:
     return (s[n // 2 - 1] + s[n // 2]) / 2
 
 
-def _remove_outliers_iqr(values: list[float]) -> list[float]:
+def _removeOutliersIqr(values: list[float]) -> list[float]:
     """IQR 기반 이상치 제거 (Q1 - 1.5×IQR ~ Q3 + 1.5×IQR)."""
     if len(values) < 4:
         return values
@@ -208,7 +208,7 @@ def _remove_outliers_iqr(values: list[float]) -> list[float]:
     return [v for v in values if lower <= v <= upper]
 
 
-def _weighted_ratio(values: list[float]) -> tuple[float, float]:
+def _weightedRatio(values: list[float]) -> tuple[float, float]:
     """최근 가중 비율 + 연간 트렌드 기울기.
 
     v2 Adaptive Ratio: 정적 중위값 대신 최근 데이터에 높은 가중치를 두고,
@@ -223,7 +223,7 @@ def _weighted_ratio(values: list[float]) -> tuple[float, float]:
         return values[0], 0.0
 
     # IQR 이상치 제거 — 원본 순서 유지를 위해 인덱스 기반
-    cleaned = _remove_outliers_iqr(values)
+    cleaned = _removeOutliersIqr(values)
     if not cleaned:
         cleaned = values
 
@@ -262,7 +262,7 @@ def _weighted_ratio(values: list[float]) -> tuple[float, float]:
     return weighted_val, trend
 
 
-def _annual_ttm_values(series: dict, sj: str, key: str, n: int) -> list[float]:
+def _annualTtmValues(series: dict, sj: str, key: str, n: int) -> list[float]:
     """최근 N년간 연간 합산값(TTM 방식) 리스트.
 
     분기별 시계열에서 4분기 단위 rolling TTM을 역순으로 N개 추출.
@@ -281,7 +281,7 @@ def _annual_ttm_values(series: dict, sj: str, key: str, n: int) -> list[float]:
     return results
 
 
-def _annual_latest_values(series: dict, sj: str, key: str, n: int) -> list[float]:
+def _annualLatestValues(series: dict, sj: str, key: str, n: int) -> list[float]:
     """최근 N년간 BS 최신값 리스트 (분기 말 잔액)."""
     vals = series.get(sj, {}).get(key, [])
     if not vals:
@@ -297,10 +297,10 @@ def _annual_latest_values(series: dict, sj: str, key: str, n: int) -> list[float
     return results
 
 
-def _safe_ratio_list(num_vals: list[float], den_vals: list[float], *, pct: bool = True) -> list[float]:
+def _safeRatioList(numVals: list[float], denVals: list[float], *, pct: bool = True) -> list[float]:
     """두 값 리스트의 비율 리스트 (% 변환 옵션)."""
     ratios = []
-    for n, d in zip(num_vals, den_vals):
+    for n, d in zip(numVals, denVals):
         if d and abs(d) > 1e-12:
             r = n / d
             if pct:
@@ -318,10 +318,10 @@ def _ehrCollectSeries(series: dict, n: int) -> dict[str, list]:
     """IS/CF/BS 10+ 계정 시계열 일괄 수집. 반환: {key: list[float]}."""
 
     def ttm(sj: str, acc: str) -> list:
-        return _annual_ttm_values(series, sj, acc, n)
+        return _annualTtmValues(series, sj, acc, n)
 
     def bs(acc: str) -> list:
-        return _annual_latest_values(series, "BS", acc, n)
+        return _annualLatestValues(series, "BS", acc, n)
 
     return {
         "rev": ttm("IS", "sales"),
@@ -386,7 +386,7 @@ def _ehrInterestRate(s: dict) -> float:
             r = abs(fc_v) / d_v * 100
             if 0 < r < 30:
                 int_ratios.append(r)
-    return _weighted_ratio(int_ratios)[0] if int_ratios else 4.0
+    return _weightedRatio(int_ratios)[0] if int_ratios else 4.0
 
 
 def _ehrNwcRatio(s: dict, trends: dict) -> float:
@@ -397,7 +397,7 @@ def _ehrNwcRatio(s: dict, trends: dict) -> float:
         if s["rev"][i] and abs(s["rev"][i]) > 0:
             nwc_ratios.append(nwc / s["rev"][i] * 100)
     if nwc_ratios:
-        ratio, trends["nwc_to_revenue"] = _weighted_ratio(nwc_ratios)
+        ratio, trends["nwc_to_revenue"] = _weightedRatio(nwc_ratios)
         return ratio
     return 10.0
 
@@ -410,49 +410,49 @@ def _ehrPayoutRatio(s: dict) -> float:
             p = abs(dv) / ni * 100
             if 0 < p < 200:
                 payout_ratios.append(p)
-    return _weighted_ratio(payout_ratios)[0] if payout_ratios else 0.0
+    return _weightedRatio(payout_ratios)[0] if payout_ratios else 0.0
 
 
-def _ehrWeightedOrDefault(ratios: list[float], default: float, trends: dict, trend_key: str) -> float:
+def _ehrWeightedOrDefault(ratios: list[float], default: float, trends: dict, trendKey: str) -> float:
     """_weighted_ratio(ratios) 계산. 비어있으면 default. trend 는 trends[trend_key] 에 저장."""
     if not ratios:
         return default
-    val, trend = _weighted_ratio(ratios)
-    trends[trend_key] = trend
+    val, trend = _weightedRatio(ratios)
+    trends[trendKey] = trend
     return val
 
 
-def _ehrDepreciationRatio(s: dict, capex_ratio: float, trends: dict) -> tuple[float, list[str]]:
+def _ehrDepreciationRatio(s: dict, capexRatio: float, trends: dict) -> tuple[float, list[str]]:
     """감가상각/매출 비율 계산 — D&A 시계열 없으면 CAPEX×80% 추정. 반환: (비율, warnings)."""
-    dep_list = _safe_ratio_list(s["dep"], s["rev"]) if s["dep"] else []
+    dep_list = _safeRatioList(s["dep"], s["rev"]) if s["dep"] else []
     warnings: list[str] = []
     if dep_list:
-        ratio, trends["depreciation_ratio"] = _weighted_ratio(dep_list)
+        ratio, trends["depreciation_ratio"] = _weightedRatio(dep_list)
         return ratio, warnings
-    if capex_ratio > 0:
-        ratio = capex_ratio * 0.8
+    if capexRatio > 0:
+        ratio = capexRatio * 0.8
         warnings.append(f"감가상각 데이터 없음 — CAPEX×80% 추정 ({ratio:.1f}%)")
         return ratio, warnings
     return 3.0, warnings
 
 
-def _ehrBuildWarnings(s: dict, actual_years: int, capex_ratio: float) -> list[str]:
+def _ehrBuildWarnings(s: dict, actualYears: int, capexRatio: float) -> list[str]:
     """기본값 사용 / 저신뢰 경고 문자열 리스트."""
     warnings: list[str] = []
-    if actual_years < 2:
+    if actualYears < 2:
         warnings.append("과거 데이터 2년 미만 — 비율 신뢰도 낮음")
     if not s["gp"]:
         warnings.append("매출총이익 데이터 없음 — 기본값 30% 사용")
     if not s["sga"]:
         warnings.append("판관비 데이터 없음 — 기본값 15% 사용")
-    if not s["dep"] and capex_ratio <= 0:
+    if not s["dep"] and capexRatio <= 0:
         warnings.append("감가상각 데이터 없음 — 기본값 3% 사용")
     if not s["capex"]:
         warnings.append("CAPEX 데이터 없음 — 기본값 5% 사용")
     return warnings
 
 
-def extract_historical_ratios(
+def extractHistoricalRatios(
     series: dict,
     years: int = 5,
 ) -> HistoricalRatios:
@@ -476,38 +476,36 @@ def extract_historical_ratios(
     """
     s = _ehrCollectSeries(series, years)
     trends: dict[str, float] = {}
-    actual_years = len(s["rev"])
+    actualYears = len(s["rev"])
 
     gross_margin = _ehrWeightedOrDefault(
-        _safe_ratio_list(s["gp"], s["rev"]) if s["gp"] else [], 30.0, trends, "gross_margin"
+        _safeRatioList(s["gp"], s["rev"]) if s["gp"] else [], 30.0, trends, "gross_margin"
     )
-    sga_ratio = _ehrWeightedOrDefault(
-        _safe_ratio_list(s["sga"], s["rev"]) if s["sga"] else [], 15.0, trends, "sga_ratio"
-    )
+    sga_ratio = _ehrWeightedOrDefault(_safeRatioList(s["sga"], s["rev"]) if s["sga"] else [], 15.0, trends, "sga_ratio")
     capex_list = [abs(c) / r * 100 for c, r in zip(s["capex"], s["rev"]) if r > 0] if s["capex"] else []
-    capex_ratio = _ehrWeightedOrDefault(capex_list, 5.0, trends, "capex_to_revenue")
+    capexRatio = _ehrWeightedOrDefault(capex_list, 5.0, trends, "capex_to_revenue")
 
-    dep_ratio, warnings_extra = _ehrDepreciationRatio(s, capex_ratio, trends)
+    dep_ratio, warnings_extra = _ehrDepreciationRatio(s, capexRatio, trends)
     dep_in_sga = _ehrDepInSga(s)
     if dep_in_sga:
         warnings_extra.append("IS 구조 감지: D&A가 SGA에 포함 — 별도 차감 생략 (EBITDA 계산에만 사용)")
 
-    tax_ratios_raw = _safe_ratio_list(s["tax"], s["pbt"]) if s["tax"] and s["pbt"] else []
+    tax_ratios_raw = _safeRatioList(s["tax"], s["pbt"]) if s["tax"] and s["pbt"] else []
     effective_tax = _ehrWeightedOrDefault([t for t in tax_ratios_raw if 0 < t < 50], 22.0, trends, "effective_tax_rate")
 
     interest_rate = _ehrInterestRate(s)
     nwc_ratio = _ehrNwcRatio(s, trends)
 
-    ar_list = _safe_ratio_list(s["ar"], s["rev"][: len(s["ar"])]) if s["ar"] else []
-    inv_list = _safe_ratio_list(s["inv"], s["rev"][: len(s["inv"])]) if s["inv"] else []
-    ap_list = _safe_ratio_list(s["ap"], s["rev"][: len(s["ap"])]) if s["ap"] else []
-    ar_ratio = _weighted_ratio(ar_list)[0] if ar_list else 15.0
-    inv_ratio = _weighted_ratio(inv_list)[0] if inv_list else 10.0
-    ap_ratio = _weighted_ratio(ap_list)[0] if ap_list else 8.0
+    ar_list = _safeRatioList(s["ar"], s["rev"][: len(s["ar"])]) if s["ar"] else []
+    inv_list = _safeRatioList(s["inv"], s["rev"][: len(s["inv"])]) if s["inv"] else []
+    ap_list = _safeRatioList(s["ap"], s["rev"][: len(s["ap"])]) if s["ap"] else []
+    ar_ratio = _weightedRatio(ar_list)[0] if ar_list else 15.0
+    inv_ratio = _weightedRatio(inv_list)[0] if inv_list else 10.0
+    ap_ratio = _weightedRatio(ap_list)[0] if ap_list else 8.0
 
     payout = _ehrPayoutRatio(s)
-    confidence = "high" if actual_years >= 4 else "medium" if actual_years >= 2 else "low"
-    warnings = _ehrBuildWarnings(s, actual_years, capex_ratio) + warnings_extra
+    confidence = "high" if actualYears >= 4 else "medium" if actualYears >= 2 else "low"
+    warnings = _ehrBuildWarnings(s, actualYears, capexRatio) + warnings_extra
 
     return HistoricalRatios(
         gross_margin=gross_margin,
@@ -516,12 +514,12 @@ def extract_historical_ratios(
         depreciation_ratio=dep_ratio,
         interest_rate_on_debt=interest_rate,
         nwc_to_revenue=nwc_ratio,
-        capex_to_revenue=capex_ratio,
+        capex_to_revenue=capexRatio,
         dividend_payout=payout,
         receivables_to_revenue=ar_ratio,
         inventory_to_revenue=inv_ratio,
         payables_to_revenue=ap_ratio,
-        years_used=actual_years,
+        years_used=actualYears,
         confidence=confidence,
         dep_in_sga=dep_in_sga,
         warnings=warnings,
@@ -544,15 +542,15 @@ def _fetchBeta(stockCode: str, currency: str = "KRW") -> float | None:
     try:
         import httpx
 
-        from dartlab.gather.http import run_async
+        from dartlab.gather.http import runAsync
 
         async def _calc():
             async with httpx.AsyncClient(timeout=15) as client:
                 if currency == "KRW":
-                    from dartlab.gather.domains.naver import fetch_history
+                    from dartlab.gather.domains.naver import fetchHistory
 
-                    stockHist = await fetch_history(stockCode, client, market="KR")
-                    marketHist = await fetch_history("KOSPI", client, market="KR")
+                    stockHist = await fetchHistory(stockCode, client, market="KR")
+                    marketHist = await fetchHistory("KOSPI", client, market="KR")
                 else:
                     return None
 
@@ -594,7 +592,7 @@ def _fetchBeta(stockCode: str, currency: str = "KRW") -> float | None:
                 beta = float(cov / var)
                 return round(max(0.3, min(beta, 3.0)), 2)
 
-        return run_async(_calc())
+        return runAsync(_calc())
     except (ImportError, OSError, RuntimeError, AttributeError):
         return None
 
@@ -613,19 +611,19 @@ def _resolveCountryFromCurrency(currency: str) -> str:
         return "KR"
 
 
-def compute_company_wacc(
+def computeCompanyWacc(
     series: dict,
-    sector_params=None,
-    sector_elasticity: SectorElasticity | None = None,
-    risk_free_rate: float | None = None,
-    market_premium: float | None = None,
-    market_cap: float | None = None,
+    sectorParams=None,
+    sectorElasticity: SectorElasticity | None = None,
+    riskFreeRate: float | None = None,
+    marketPremium: float | None = None,
+    marketCap: float | None = None,
     currency: str = "KRW",
-    beta_override: float | None = None,
+    betaOverride: float | None = None,
     country: str | None = None,
-    country_risk_premium: float | None = None,
-    implied_erp: bool = False,
-    bottom_up_beta: bool = False,
+    countryRiskPremium: float | None = None,
+    impliedErp: bool = False,
+    bottomUpBeta: bool = False,
 ) -> tuple[float, dict[str, float]]:
     """회사 고유 WACC 계산 (Damodaran CAPM 기반).
 
@@ -643,8 +641,8 @@ def compute_company_wacc(
     from dartlab.core.sector import getMarketParams
 
     damodaran = None
-    if country or country_risk_premium is not None or implied_erp:
-        if implied_erp:
+    if country or countryRiskPremium is not None or impliedErp:
+        if impliedErp:
             from dartlab.macro.impliedERP import calcImpliedERP
 
             damodaran = calcImpliedERP(country=country or _resolveCountryFromCurrency(currency))
@@ -654,25 +652,25 @@ def compute_company_wacc(
             damodaran = loadDamodaranERP(countryCode=country, currency=currency)
 
     mkt = getMarketParams(currency)
-    if risk_free_rate is not None:
-        rf = risk_free_rate
+    if riskFreeRate is not None:
+        rf = riskFreeRate
     elif damodaran is not None:
         rf = damodaran["riskFreeRate"]
     else:
         rf = mkt.riskFreeRate
 
-    if market_premium is not None:
-        erp = market_premium
+    if marketPremium is not None:
+        erp = marketPremium
     elif damodaran is not None:
         base_erp = damodaran["matureMarketERP"]
-        crp = country_risk_premium if country_risk_premium is not None else damodaran["countryRiskPremium"]
+        crp = countryRiskPremium if countryRiskPremium is not None else damodaran["countryRiskPremium"]
         erp = base_erp + crp
     else:
         erp = mkt.totalErp
 
     # beta: 1순위 외부 주입, 2순위 bottom-up peer Hamada, 3순위 섹터 파라미터, 4순위 1.0
-    beta = beta_override
-    if beta is None and bottom_up_beta:
+    beta = betaOverride
+    if beta is None and bottomUpBeta:
         try:
             from dartlab.quant.bottomUpBeta import calcBottomUpBeta
 
@@ -684,7 +682,7 @@ def compute_company_wacc(
                 series, "BS", "owners_of_parent_equity"
             )
             de_bu = (debt_bu / equity_bu) if (equity_bu and equity_bu > 0) else 0.3
-            sector_name = sector_params.name if sector_params and hasattr(sector_params, "name") else "Unknown"
+            sector_name = sectorParams.name if sectorParams and hasattr(sectorParams, "name") else "Unknown"
             bu_result = calcBottomUpBeta(
                 sector=sector_name,
                 debtToEquity=de_bu,
@@ -696,16 +694,16 @@ def compute_company_wacc(
         except (ImportError, AttributeError, ValueError, TypeError):
             pass
     if beta is None:
-        if sector_params and hasattr(sector_params, "beta") and sector_params.beta:
-            beta = sector_params.beta
-        elif sector_elasticity and hasattr(sector_elasticity, "revenueToGdp"):
-            beta = max(0.5, min(sector_elasticity.revenueToGdp, 2.5))
+        if sectorParams and hasattr(sectorParams, "beta") and sectorParams.beta:
+            beta = sectorParams.beta
+        elif sectorElasticity and hasattr(sectorElasticity, "revenueToGdp"):
+            beta = max(0.5, min(sectorElasticity.revenueToGdp, 2.5))
         else:
             beta = 1.0
 
     # 시가총액 기반 beta 감쇠 — 대형주는 시장 대비 변동성이 낮음
-    if market_cap and market_cap > 0:
-        mcTrillion = market_cap / 1e12
+    if marketCap and marketCap > 0:
+        mcTrillion = marketCap / 1e12
         if mcTrillion > 50:
             beta *= 0.8
         elif mcTrillion > 10:
@@ -721,7 +719,7 @@ def compute_company_wacc(
     equity_book = getLatest(series, "BS", "total_stockholders_equity") or getLatest(
         series, "BS", "owners_of_parent_equity"
     )
-    equity_value = market_cap if market_cap else (equity_book or 1)
+    equity_value = marketCap if marketCap else (equity_book or 1)
 
     # Kd (타인자본비용) -- 실제 이자비용 역산
     fc = getTTM(series, "IS", "finance_costs") or getTTM(series, "IS", "interest_expense")
@@ -779,7 +777,7 @@ def compute_company_wacc(
 # ══════════════════════════════════════
 
 
-def _extract_base_year(series: dict) -> dict[str, float]:
+def _extractBaseYear(series: dict) -> dict[str, float]:
     """현재(기준) 연도 실적 스냅샷 추출."""
     rev = getTTM(series, "IS", "sales") or 0
     gp = getTTM(series, "IS", "gross_profit")
@@ -821,14 +819,14 @@ def _extract_base_year(series: dict) -> dict[str, float]:
     }
 
 
-def build_proforma(
+def buildProforma(
     series: dict,
-    revenue_growth_path: list[float],
-    sector_params=None,
-    sector_elasticity: SectorElasticity | None = None,
+    revenueGrowthPath: list[float],
+    sectorParams=None,
+    sectorElasticity: SectorElasticity | None = None,
     shares: int | None = None,
-    market_cap: float | None = None,
-    scenario_name: str = "base",
+    marketCap: float | None = None,
+    scenarioName: str = "base",
     overrides: dict[str, float] | None = None,
 ) -> ProFormaResult:
     """3-statement pro-forma 생성.
@@ -845,7 +843,7 @@ def build_proforma(
     warnings: list[str] = []
 
     # 1. 과거 비율 추출
-    ratios = extract_historical_ratios(series)
+    ratios = extractHistoricalRatios(series)
     warnings.extend(ratios.warnings)
 
     # 오버라이드 적용
@@ -855,23 +853,23 @@ def build_proforma(
                 setattr(ratios, k, v)
 
     # 2. WACC 계산
-    wacc, wacc_details = compute_company_wacc(
+    wacc, wacc_details = computeCompanyWacc(
         series,
-        sector_params=sector_params,
-        sector_elasticity=sector_elasticity,
-        market_cap=market_cap,
+        sectorParams=sectorParams,
+        sectorElasticity=sectorElasticity,
+        marketCap=marketCap,
     )
 
     # 3. 기준연도 추출
-    base = _extract_base_year(series)
+    base = _extractBaseYear(series)
     if base["revenue"] <= 0:
         warnings.append("기준 매출이 0 — pro-forma 불가")
         return ProFormaResult(
             historical_ratios=ratios,
             base_year=base,
             projections=[],
-            scenario_name=scenario_name,
-            revenue_growth_path=revenue_growth_path,
+            scenarioName=scenarioName,
+            revenueGrowthPath=revenueGrowthPath,
             wacc=wacc,
             wacc_details=wacc_details,
             warnings=warnings,
@@ -898,21 +896,19 @@ def build_proforma(
     prev_other_ncl = max(prev_other_ncl, 0)
 
     # v2: 비율 트렌드 경로 — 연도별 비율이 트렌드 방향으로 점진 변화
-    def _ratio_for_year(
-        base_val: float, trend_key: str, yr_idx: int, floor: float = 0.0, ceiling: float = 100.0
-    ) -> float:
-        trend = ratios.trends.get(trend_key, 0.0)
-        val = base_val + trend * yr_idx
+    def _ratioForYear(baseVal: float, trendKey: str, yrIdx: int, floor: float = 0.0, ceiling: float = 100.0) -> float:
+        trend = ratios.trends.get(trendKey, 0.0)
+        val = baseVal + trend * yrIdx
         return max(floor, min(val, ceiling))
 
-    for i, growth_pct in enumerate(revenue_growth_path):
+    for i, growth_pct in enumerate(revenueGrowthPath):
         yr = ProFormaYear(year_offset=i + 1)
 
         # v2: 연도별 비율 (트렌드 반영)
-        yr_gm = _ratio_for_year(ratios.gross_margin, "gross_margin", i, floor=5.0, ceiling=90.0)
-        yr_sga = _ratio_for_year(ratios.sga_ratio, "sga_ratio", i, floor=1.0, ceiling=50.0)
-        yr_dep = _ratio_for_year(ratios.depreciation_ratio, "depreciation_ratio", i, floor=0.5, ceiling=30.0)
-        yr_capex = _ratio_for_year(ratios.capex_to_revenue, "capex_to_revenue", i, floor=0.5, ceiling=40.0)
+        yr_gm = _ratioForYear(ratios.gross_margin, "gross_margin", i, floor=5.0, ceiling=90.0)
+        yr_sga = _ratioForYear(ratios.sga_ratio, "sga_ratio", i, floor=1.0, ceiling=50.0)
+        yr_dep = _ratioForYear(ratios.depreciation_ratio, "depreciation_ratio", i, floor=0.5, ceiling=30.0)
+        yr_capex = _ratioForYear(ratios.capex_to_revenue, "capex_to_revenue", i, floor=0.5, ceiling=40.0)
 
         # === IS ===
         yr.revenue = prev_revenue * (1 + growth_pct / 100)
@@ -1052,8 +1048,8 @@ def build_proforma(
         historical_ratios=ratios,
         base_year=base,
         projections=projections,
-        scenario_name=scenario_name,
-        revenue_growth_path=revenue_growth_path,
+        scenarioName=scenarioName,
+        revenueGrowthPath=revenueGrowthPath,
         wacc=wacc,
         wacc_details=wacc_details,
         warnings=warnings,

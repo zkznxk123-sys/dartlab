@@ -19,7 +19,7 @@ from typing import Any
 import polars as pl
 
 
-def _runs_dir_default() -> Path:
+def _runsDirDefault() -> Path:
     """운영 default: `~/.dartlab/recipeRuns/`. 환경변수 `DARTLAB_RECIPE_RUNS_DIR` 로 override 가능 (테스트용)."""
     override = os.environ.get("DARTLAB_RECIPE_RUNS_DIR")
     if override:
@@ -29,7 +29,7 @@ def _runs_dir_default() -> Path:
 
 # 함수 노출 — 매 호출마다 env 다시 평가 (테스트 monkeypatch 호환).
 def RECIPE_RUNS_DIR() -> Path:  # noqa: N802 - 의도적 SCREAMING_SNAKE 노출 (api 안정성)
-    return _runs_dir_default()
+    return _runsDirDefault()
 
 
 _SCHEMA: dict[str, pl.DataType] = {
@@ -73,7 +73,7 @@ class RecipeRunRecord:
     asOf: str | None = None
     capturedAt: str | None = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         d = asdict(self)
         if d["asOf"] is None:
             d["asOf"] = ""
@@ -88,12 +88,12 @@ def _slug(skillId: str) -> str:
     return skillId.replace("/", "_").replace("..", "_")
 
 
-def _path_for(skillId: str, *, runs_dir: Path | None = None) -> Path:
-    base = runs_dir if runs_dir is not None else RECIPE_RUNS_DIR()
+def _pathFor(skillId: str, *, runsDir: Path | None = None) -> Path:
+    base = runsDir if runsDir is not None else RECIPE_RUNS_DIR()
     return base / f"{_slug(skillId)}.parquet"
 
 
-def appendRun(record: RecipeRunRecord, *, runs_dir: Path | None = None) -> Path:
+def appendRun(record: RecipeRunRecord, *, runsDir: Path | None = None) -> Path:
     """단일 RecipeRunRecord 를 해당 skillId 의 parquet 에 append.
 
     Parameters
@@ -115,11 +115,11 @@ def appendRun(record: RecipeRunRecord, *, runs_dir: Path | None = None) -> Path:
     """
     if not record.skillId:
         raise ValueError("RecipeRunRecord.skillId is required")
-    base = runs_dir if runs_dir is not None else RECIPE_RUNS_DIR()
+    base = runsDir if runsDir is not None else RECIPE_RUNS_DIR()
     base.mkdir(parents=True, exist_ok=True)
-    path = _path_for(record.skillId, runs_dir=base)
+    path = _pathFor(record.skillId, runsDir=base)
 
-    new_row = pl.DataFrame([record.to_dict()], schema=_SCHEMA)
+    new_row = pl.DataFrame([record.toDict()], schema=_SCHEMA)
     if path.exists():
         existing = pl.read_parquet(path)
         # 누락 컬럼 (스키마 진화 대비) 채움 후 vstack.
@@ -134,9 +134,9 @@ def appendRun(record: RecipeRunRecord, *, runs_dir: Path | None = None) -> Path:
     return path
 
 
-def loadRuns(skillId: str, *, runs_dir: Path | None = None) -> pl.DataFrame:
+def loadRuns(skillId: str, *, runsDir: Path | None = None) -> pl.DataFrame:
     """skillId 의 누적 run 기록 로드. 파일 없으면 빈 DataFrame (스키마 일치) 반환."""
-    path = _path_for(skillId, runs_dir=runs_dir)
+    path = _pathFor(skillId, runsDir=runsDir)
     if not path.exists():
         return pl.DataFrame(schema=_SCHEMA)
     return pl.read_parquet(path)

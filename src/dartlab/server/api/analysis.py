@@ -8,69 +8,69 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query, Request, Response
 
 from ..services.companyApi import (
-    build_diff_summary,
-    get_company,
-    safe_topic_label,
+    buildDiffSummary,
+    getCompany,
+    safeTopicLabel,
 )
 from .common import (
     HANDLED_API_ERRORS,
-    etag_response,
+    etagResponse,
     guideDetail,
-    serialize_payload,
+    serializePayload,
 )
 
 router = APIRouter()
 
 
 @router.get("/api/company/{code}/diff")
-def api_company_diff(code: str):
+def apiCompanyDiff(code: str):
     """Company sections 전체 diff 요약."""
     try:
-        c = get_company(code)
+        c = getCompany(code)
         return {
             "stockCode": c.stockCode,
             "corpName": c.corpName,
-            "payload": serialize_payload(c.diff()),
+            "payload": serializePayload(c.diff()),
         }
     except HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))
 
 
 @router.get("/api/company/{code}/diff/matrix")
-def api_company_diff_matrix(
+def apiCompanyDiffMatrix(
     code: str,
     textOnly: bool = Query(False),
     topN: int = Query(20),
 ):
     """topic × period 변화 매트릭스 + 히트맵 스펙."""
     try:
-        c = get_company(code)
+        c = getCompany(code)
     except HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))
 
-    from dartlab.core.docs.diff import build_diff_matrix, build_heatmap_spec
+    from dartlab.core.docs.diff import buildDiffMatrix, buildHeatmapSpec
 
     try:
         sections = c._docs.sections.raw
-        matrix_data = build_diff_matrix(sections, textOnly=textOnly)
-        heatmap = build_heatmap_spec(matrix_data, c.corpName, top_n=topN)
+        matrixData = buildDiffMatrix(sections, textOnly=textOnly)
+        heatmap = buildHeatmapSpec(matrixData, c.corpName, topN=topN)
     except HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))
 
     return {
         "stockCode": c.stockCode,
         "corpName": c.corpName,
-        "matrix": matrix_data,
+        "matrix": matrixData,
         "heatmap": heatmap,
     }
 
 
 @router.get("/api/company/{code}/diff/{topic}/summary")
-def api_company_diff_topic_summary(code: str, topic: str):
+def apiCompanyDiffTopicSummary(code: str, topic: str):
     """뷰어용 diff 요약 — changeRate + 최신 변경의 added/removed 미리보기."""
     try:
-        c = get_company(code)
-        result = build_diff_summary(c, topic)
+        c = getCompany(code)
+        result = buildDiffSummary(c, topic)
         if result is None:
             raise HTTPException(status_code=404, detail="sections 없음")
         return result
@@ -81,7 +81,7 @@ def api_company_diff_topic_summary(code: str, topic: str):
 
 
 @router.get("/api/company/{code}/diff/{topic}")
-def api_company_diff_topic(
+def apiCompanyDiffTopic(
     code: str,
     topic: str,
     fromPeriod: str = Query(..., alias="from"),
@@ -89,7 +89,7 @@ def api_company_diff_topic(
 ):
     """Company 특정 topic의 두 기간 줄+글자 단위 diff."""
     try:
-        c = get_company(code)
+        c = getCompany(code)
         result = c.diff(topic, fromPeriod, toPeriod)
 
         diff_chunks: list[dict] = []
@@ -146,7 +146,7 @@ def api_company_diff_topic(
 
 
 @router.get("/api/company/{code}/bridge/{topic}")
-def api_company_bridge(
+def apiCompanyBridge(
     code: str,
     topic: str,
     period: str = Query("latest"),
@@ -154,16 +154,16 @@ def api_company_bridge(
 ):
     """텍스트-재무 숫자 교차 참조."""
     try:
-        c = get_company(code)
+        c = getCompany(code)
     except HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))
 
     import polars as pl
 
     from dartlab.core.docs.bridge import (
-        extract_amounts_from_text,
-        get_finance_amounts,
-        match_amounts,
+        extractAmountsFromText,
+        getFinanceAmounts,
+        matchAmounts,
     )
 
     try:
@@ -186,9 +186,9 @@ def api_company_bridge(
         texts = topic_rows[target_period].drop_nulls().to_list()
         full_text = "\n".join(str(t) for t in texts if t)
 
-        text_amounts = extract_amounts_from_text(full_text)
-        finance_amounts = get_finance_amounts(c, target_period)
-        matched = match_amounts(text_amounts, finance_amounts, tolerance=tolerance)
+        textAmounts = extractAmountsFromText(full_text)
+        financeAmounts = getFinanceAmounts(c, target_period)
+        matched = matchAmounts(textAmounts, financeAmounts, tolerance=tolerance)
     except HTTPException:
         raise
     except HANDLED_API_ERRORS as e:
@@ -199,33 +199,33 @@ def api_company_bridge(
         "corpName": c.corpName,
         "topic": topic,
         "period": target_period,
-        "extracted": len(text_amounts),
+        "extracted": len(textAmounts),
         "matched": len(matched),
-        "matchRate": round(len(matched) / max(len(text_amounts), 1), 3),
+        "matchRate": round(len(matched) / max(len(textAmounts), 1), 3),
         "matches": matched,
     }
 
 
 @router.get("/api/company/{code}/topics/graph")
-def api_company_topics_graph(
+def apiCompanyTopicsGraph(
     code: str,
     threshold: int = Query(3),
 ):
     """topic간 상호 참조 그래프."""
     try:
-        c = get_company(code)
+        c = getCompany(code)
     except HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))
 
     from dartlab.core.docs.topicGraph import (
-        analyze_graph,
-        build_mention_matrix,
+        analyzeGraph,
+        buildMentionMatrix,
     )
 
     try:
         sections = c._docs.sections.raw
-        matrix = build_mention_matrix(sections)
-        analysis = analyze_graph(matrix.get("adjacency", {}), threshold=threshold)
+        matrix = buildMentionMatrix(sections)
+        analysis = analyzeGraph(matrix.get("adjacency", {}), threshold=threshold)
 
         edges = [{"source": src, "target": tgt, "weight": cnt} for (src, tgt), cnt in analysis.get("top_edges", [])]
         hubs = [{"topic": t, "degree": d} for t, d in analysis.get("hubs", [])]
@@ -245,10 +245,10 @@ def api_company_topics_graph(
 
 
 @router.get("/api/company/{code}/search")
-def api_company_search_sections(code: str, q: str = Query("", description="검색어")):
+def apiCompanySearchSections(code: str, q: str = Query("", description="검색어")):
     """현재 회사의 sections 전체 텍스트에서 substring 검색."""
     try:
-        c = get_company(code)
+        c = getCompany(code)
         sec = c.sections
         if sec is None or not q.strip():
             return {"stockCode": c.stockCode, "corpName": c.corpName, "results": []}
@@ -280,7 +280,7 @@ def api_company_search_sections(code: str, q: str = Query("", description="검�
                     results.append(
                         {
                             "topic": topic,
-                            "label": safe_topic_label(c, topic),
+                            "label": safeTopicLabel(c, topic),
                             "period": p,
                             "snippet": snippet,
                             "matchCount": match_count,
@@ -297,7 +297,7 @@ def api_company_search_sections(code: str, q: str = Query("", description="검�
 
 
 @router.get("/api/company/{code}/searchIndex")
-def api_company_search_index(code: str, request: Request, response: Response):
+def apiCompanySearchIndex(code: str, request: Request, response: Response):
     """MiniSearch 인덱스용 flat document list.
 
     회사의 sections 전체를 topic × period × blockType 단위 문서로 평탄화하여 반환.
@@ -308,7 +308,7 @@ def api_company_search_index(code: str, request: Request, response: Response):
     _MAX_TEXT_LEN = 300
 
     try:
-        c = get_company(code)
+        c = getCompany(code)
         sec = c.sections
         if sec is None:
             return {"stockCode": c.stockCode, "corpName": c.corpName, "documents": []}
@@ -325,7 +325,7 @@ def api_company_search_index(code: str, request: Request, response: Response):
             block_type = str(row.get("blockType", ""))
             block_order = row.get("blockOrder", 0)
             chapter = row.get("chapter", "")
-            label = safe_topic_label(c, topic)
+            label = safeTopicLabel(c, topic)
 
             for p in period_cols:
                 if doc_id >= _MAX_DOCS:
@@ -355,16 +355,16 @@ def api_company_search_index(code: str, request: Request, response: Response):
             "truncated": doc_id >= _MAX_DOCS,
             "documents": documents,
         }
-        return etag_response(request, response, data, max_age=600, swr=1800)
+        return etagResponse(request, response, data, maxAge=600, swr=1800)
     except HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))
 
 
 @router.get("/api/company/{code}/modules")
-def api_company_modules(code: str):
+def apiCompanyModules(code: str):
     """기업의 사용 가능한 데이터 모듈 목록."""
     try:
-        c = get_company(code)
+        c = getCompany(code)
         # scan_available_modules 제거됨 — topics 목록으로 대체.
         # c.topics 는 Polars DataFrame 이므로 truthy 평가 금지 (ambiguous error).
         topics = getattr(c, "topics", None)

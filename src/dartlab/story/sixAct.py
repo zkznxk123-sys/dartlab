@@ -125,9 +125,9 @@ def _riskScore(c: Any) -> tuple[float | None, list[str], str]:
     insights = getattr(c, "insights", None)
     if insights is not None:
         risk_area = getattr(insights, "risk", None)
-        risk_score = _gradeScore(getattr(risk_area, "grade", None) if risk_area else None)
-        if risk_score is not None:
-            sub_scores.append(risk_score)
+        riskScore = _gradeScore(getattr(risk_area, "grade", None) if risk_area else None)
+        if riskScore is not None:
+            sub_scores.append(riskScore)
             refs.append("analysis:insights:risk")
 
     try:

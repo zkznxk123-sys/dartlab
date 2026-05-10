@@ -11,20 +11,20 @@ from dartlab.ai.tools.types import ToolSpec
 
 class GoogleProvider(BaseProvider):
     name = "google"
-    default_model = "gemini-2.0-flash-exp"
+    defaultModel = "gemini-2.0-flash-exp"
 
     def _client(self) -> Any:
         try:
             from google import genai
         except ImportError as exc:
             raise RuntimeError("google-genai SDK 가 설치되지 않았다") from exc
-        api_key = self.config.api_key or os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
-        if not api_key:
+        apiKey = self.config.apiKey or os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+        if not apiKey:
             raise RuntimeError("GOOGLE_API_KEY 가 없다")
-        return genai.Client(api_key=api_key)
+        return genai.Client(apiKey=apiKey)
 
-    def check_available(self) -> bool:
-        if not (self.config.api_key or os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")):
+    def checkAvailable(self) -> bool:
+        if not (self.config.apiKey or os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")):
             return False
         try:
             from google import genai  # noqa: F401
@@ -51,12 +51,12 @@ class GoogleProvider(BaseProvider):
         cfg: dict[str, Any] = {}
         if self.config.temperature is not None:
             cfg["temperature"] = self.config.temperature
-        if self.config.max_tokens is not None:
-            cfg["max_output_tokens"] = self.config.max_tokens
+        if self.config.maxTokens is not None:
+            cfg["max_output_tokens"] = self.config.maxTokens
         if tools:
             cfg["tools"] = [{"function_declarations": [self.toolSchema(t) for t in tools]}]
 
-        kwargs: dict[str, Any] = {"model": self.resolved_model, "contents": contents}
+        kwargs: dict[str, Any] = {"model": self.resolvedModel, "contents": contents}
         if cfg:
             kwargs["config"] = cfg
 

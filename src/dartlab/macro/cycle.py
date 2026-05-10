@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 from dartlab.macro._helpers import (
-    apply_overrides,
-    collect_timeseries,
-    fetch_change_pct,
-    fetch_latest,
-    fetch_yoy,
-    get_gather,
-    recent_timeseries,
+    applyOverrides,
+    collectTimeseries,
+    fetchChangePct,
+    fetchLatest,
+    fetchYoy,
+    getGather,
+    recentTimeseries,
 )
 from dartlab.macro.macroCycle import classifyCycle, detectTransitionSequence
 
 
-def _fetch_indicators(market: str, as_of: str | None = None) -> dict[str, float | None]:
+def _fetchIndicators(market: str, asOf: str | None = None) -> dict[str, float | None]:
     """gather에서 사이클 판별에 필요한 지표 수집.
 
     Parameters
@@ -38,27 +38,27 @@ def _fetch_indicators(market: str, as_of: str | None = None) -> dict[str, float 
         - cpi_yoy : float — CPI 전년비 (%)
         - cli_mom : float — OECD CLI 전월차 (pt, KR 전용)
     """
-    g = get_gather(as_of)
+    g = getGather(asOf)
     indicators: dict[str, float | None] = {}
 
     if market.upper() == "US":
-        hy = fetch_latest(g, "BAMLH0A0HYM2")
+        hy = fetchLatest(g, "BAMLH0A0HYM2")
         if hy is not None:
             indicators["hy_spread"] = hy * 100
-        hy_chg = fetch_change_pct(g, "BAMLH0A0HYM2", 63)
+        hy_chg = fetchChangePct(g, "BAMLH0A0HYM2", 63)
         if hy_chg is not None:
             indicators["hy_spread_3m_change"] = hy_chg
 
-        indicators["term_spread"] = fetch_latest(g, "T10Y2Y")
-        indicators["vix"] = fetch_latest(g, "VIXCLS")
-        indicators["gold_yoy"] = fetch_yoy(g, "IR14270")
-        indicators["bei_10y"] = fetch_latest(g, "T10YIE")
-        indicators["cpi_yoy"] = fetch_yoy(g, "CPIAUCSL")
+        indicators["term_spread"] = fetchLatest(g, "T10Y2Y")
+        indicators["vix"] = fetchLatest(g, "VIXCLS")
+        indicators["gold_yoy"] = fetchYoy(g, "IR14270")
+        indicators["bei_10y"] = fetchLatest(g, "T10YIE")
+        indicators["cpi_yoy"] = fetchYoy(g, "CPIAUCSL")
 
     elif market.upper() == "KR":
-        from dartlab.macro._helpers import fetch_latest_with_prev
+        from dartlab.macro._helpers import fetchLatestWithPrev
 
-        cli, cli_prev = fetch_latest_with_prev(g, "CLI")
+        cli, cli_prev = fetchLatestWithPrev(g, "CLI")
         if cli is not None and cli_prev is not None:
             indicators["cli_mom"] = cli - cli_prev
 
@@ -66,7 +66,7 @@ def _fetch_indicators(market: str, as_of: str | None = None) -> dict[str, float 
     return {k: v for k, v in indicators.items() if v is not None}
 
 
-def _build_signal_history(market: str, as_of: str | None = None) -> dict[str, list[tuple[str, float]]] | None:
+def _buildSignalHistory(market: str, asOf: str | None = None) -> dict[str, list[tuple[str, float]]] | None:
     """전환 시퀀스 순서 검증을 위한 시계열 이력 구축.
 
     최근 12개월 데이터를 ``[(날짜, 값)]`` 형태로 반환.
@@ -92,11 +92,11 @@ def _build_signal_history(market: str, as_of: str | None = None) -> dict[str, li
     """
     if market.upper() != "US":
         return None
-    g = get_gather(as_of)
+    g = getGather(asOf)
     history: dict[str, list[tuple[str, float]]] = {}
 
     # 신호 → FRED 시리즈 매핑
-    series_map = {
+    seriesMap = {
         "hy_spread_3m_change": "BAMLH0A0HYM2",
         "gold_yoy": "IR14270",
         "long_rate_change": "DGS10",
@@ -104,15 +104,15 @@ def _build_signal_history(market: str, as_of: str | None = None) -> dict[str, li
         "term_spread": "T10Y2Y",
         "bei_10y": "T10YIE",
     }
-    for key, sid in series_map.items():
-        ts = recent_timeseries(g.macro(sid), months=12)
+    for key, sid in seriesMap.items():
+        ts = recentTimeseries(g.macro(sid), months=12)
         if ts:
             history[key] = [(entry["date"], entry["value"]) for entry in ts if entry["value"] is not None]
 
     return history if history else None
 
 
-def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
+def analyzeCycle(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """경제 사이클 4국면 판별 + 전환 시퀀스 감지.
 
     Parameters
@@ -137,14 +137,14 @@ def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: di
         - timeseries : dict — hy_spread / vix / term_spread 시계열
         - quadrant : dict | None — Bridgewater 4분면 (성장×인플레)
     """
-    indicators = _fetch_indicators(market, as_of=as_of)
+    indicators = _fetchIndicators(market, asOf=asOf)
     if overrides:
-        indicators = apply_overrides(indicators, overrides)
+        indicators = applyOverrides(indicators, overrides)
 
     cycle = classifyCycle(indicators)
 
     # 시계열 이력 구축 — 전환 시퀀스 순서 검증용
-    history = _build_signal_history(market, as_of)
+    history = _buildSignalHistory(market, asOf)
     transition = detectTransitionSequence(cycle.phase, indicators, history=history)
 
     result: dict = {
@@ -171,8 +171,8 @@ def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: di
             t_dict["orderValid"] = transition.orderValid
         result["transition"] = t_dict
 
-    g = get_gather(as_of)
-    result["timeseries"] = collect_timeseries(
+    g = getGather(asOf)
+    result["timeseries"] = collectTimeseries(
         g,
         {
             "hy_spread": "BAMLH0A0HYM2",
@@ -187,24 +187,24 @@ def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: di
 
         if market.upper() == "US":
             # ISM PMI - 50 (성장 신호)
-            ism = fetch_latest(g, "AMTMNO")
+            ism = fetchLatest(g, "AMTMNO")
             # CPI YoY 3개월 모멘텀 (인플레 신호)
-            cpi_yoy = indicators.get("cpi_yoy")
-            cpi_yoy_prev = fetch_change_pct(g, "CPIAUCSL", 63)  # 3M ago
-            if ism is not None and cpi_yoy is not None:
-                growth_signal = ism - 50.0
+            cpiYoy = indicators.get("cpi_yoy")
+            cpi_yoy_prev = fetchChangePct(g, "CPIAUCSL", 63)  # 3M ago
+            if ism is not None and cpiYoy is not None:
+                growthSignal = ism - 50.0
                 # 인플레 모멘텀: 현재 CPI YoY 방향 (양수=상승 추세)
-                inflation_signal = cpi_yoy_prev if cpi_yoy_prev is not None else 0.0
-                result["quadrant"] = classifyQuadrant(growth_signal, inflation_signal)
+                inflationSignal = cpi_yoy_prev if cpi_yoy_prev is not None else 0.0
+                result["quadrant"] = classifyQuadrant(growthSignal, inflationSignal)
         elif market.upper() == "KR":
             # BSI 제조업 (성장 대용치)
-            bsi = fetch_latest(g, "BSI")
-            cpi_yoy_kr = fetch_yoy(g, "CPI")
-            cpi_change = fetch_change_pct(g, "CPI", 3)
+            bsi = fetchLatest(g, "BSI")
+            cpi_yoy_kr = fetchYoy(g, "CPI")
+            cpi_change = fetchChangePct(g, "CPI", 3)
             if bsi is not None and cpi_yoy_kr is not None:
-                growth_signal = bsi - 100.0  # BSI 100 기준
-                inflation_signal = cpi_change if cpi_change is not None else 0.0
-                result["quadrant"] = classifyQuadrant(growth_signal, inflation_signal)
+                growthSignal = bsi - 100.0  # BSI 100 기준
+                inflationSignal = cpi_change if cpi_change is not None else 0.0
+                result["quadrant"] = classifyQuadrant(growthSignal, inflationSignal)
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 

@@ -101,7 +101,7 @@ MARKETS: dict[str, MarketConfig] = {
 _CN_SZ_PREFIXES = ("00", "30")
 
 
-def get_market_config(market: str) -> MarketConfig:
+def getMarketConfig(market: str) -> MarketConfig:
     """시장 코드 → MarketConfig.
 
     consistency_no_alias 원칙: case-insensitive 매칭 (``market.upper()``) 은
@@ -134,7 +134,7 @@ def get_market_config(market: str) -> MarketConfig:
     return MARKETS[market]
 
 
-def resolve_ticker(stock_code: str, market: str, source: str) -> str:
+def resolveTicker(stockCode: str, market: str, source: str) -> str:
     """stock_code + market + source → 소스별 ticker 문자열.
 
     - naver: 종목코드 그대로 (KR only)
@@ -156,25 +156,25 @@ def resolve_ticker(stock_code: str, market: str, source: str) -> str:
         소스에 맞게 변환된 ticker 문자열.
         예: "7203.T" (JP/yahoo_chart), "0293.HK" (HK), "005930" (KR/naver).
     """
-    config = get_market_config(market)
+    config = getMarketConfig(market)
 
     # naver는 KR 종목코드를 그대로 사용
     if source == "naver":
-        return stock_code
+        return stockCode
 
     # US는 접미사 없음
     if market == "US":
-        return stock_code
+        return stockCode
 
     # CN 심천 거래소 분기
     if market == "CN":
         for prefix in _CN_SZ_PREFIXES:
-            if stock_code.startswith(prefix):
-                return f"{stock_code}.SZ"
-        return f"{stock_code}.SS"
+            if stockCode.startswith(prefix):
+                return f"{stockCode}.SZ"
+        return f"{stockCode}.SS"
 
     # HK: 4자리 패딩 (Yahoo는 0293.HK 형식)
-    if market == "HK" and stock_code.isdigit():
-        return f"{stock_code.zfill(4)}{config.exchange_suffix}"
+    if market == "HK" and stockCode.isdigit():
+        return f"{stockCode.zfill(4)}{config.exchange_suffix}"
 
-    return f"{stock_code}{config.exchange_suffix}"
+    return f"{stockCode}{config.exchange_suffix}"

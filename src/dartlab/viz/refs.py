@@ -53,7 +53,7 @@ def valueRef(stockCode: str, source: str, topic: str, account: str, period: str)
 _DART_BASE = "https://dart.fss.or.kr/dsaf001/main.do"
 
 
-def filingDeepLink(rcept_no: str | None, *, page: int | None = None) -> str | None:
+def filingDeepLink(rceptNo: str | None, *, page: int | None = None) -> str | None:
     """rcept_no → DART 정기보고서 원문 URL.
 
     rcept_no 가 비어 있으면 None.
@@ -64,9 +64,9 @@ def filingDeepLink(rcept_no: str | None, *, page: int | None = None) -> str | No
         filingDeepLink("20250315000123", page=42)
             → "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250315000123#page=42"
     """
-    if not rcept_no:
+    if not rceptNo:
         return None
-    url = f"{_DART_BASE}?rcpNo={rcept_no}"
+    url = f"{_DART_BASE}?rcpNo={rceptNo}"
     if page is not None:
         url = f"{url}#page={page}"
     return url

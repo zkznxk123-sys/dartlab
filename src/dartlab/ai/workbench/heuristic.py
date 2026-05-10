@@ -57,7 +57,7 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
     state.refs.extend(skill_result.refs)
     state.toolCalls.append({"pass": "brief", "tool": "ReadSkill", "ok": skill_result.ok})
     yield _toolResult(state, "ReadSkill", skill_result)
-    yield TraceEvent("reference", {"refs": [ref.to_dict() for ref in skill_result.refs], "query": state.question})
+    yield TraceEvent("reference", {"refs": [ref.toDict() for ref in skill_result.refs], "query": state.question})
 
     yield _toolStart(state, "ReadCapability", {"query": state.question, "limit": 10})
     spec_result = readCapability(state.question, limit=10)
@@ -139,7 +139,7 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
         yield TraceEvent(
             "done",
             {
-                "refs": [ref.to_dict() for ref in state.refs],
+                "refs": [ref.toDict() for ref in state.refs],
                 "artifacts": [],
                 "verification": {"ok": False, "issues": [state.failure], "refId": "verify:answer"},
                 "responseMeta": {
@@ -163,8 +163,8 @@ def streamHeuristic(question: str, *, graphNodes: tuple[str, ...], **kwargs: Any
     yield TraceEvent(
         "done",
         {
-            "refs": [ref.to_dict() for ref in state.refs],
-            "evidence": [ref.to_dict() for ref in state.refs if ref.kind != "verifyRef"],
+            "refs": [ref.toDict() for ref in state.refs],
+            "evidence": [ref.toDict() for ref in state.refs if ref.kind != "verifyRef"],
             "claims": list(state.claims),
             "artifacts": _harvestArtifacts(state),
             "verification": {"ok": True, "refId": "verify:answer"},
@@ -209,7 +209,7 @@ def _toolResult(state: WorkbenchState, tool: str, result: ToolResult) -> TraceEv
             "status": "done" if result.ok else "error",
             "outputSummary": result.summary,
             "evidenceRefs": [ref.id for ref in result.refs],
-            "artifacts": [ref.to_dict() for ref in result.refs if ref.kind == "artifactRef"],
+            "artifacts": [ref.toDict() for ref in result.refs if ref.kind == "artifactRef"],
             "error": result.error,
         },
     )
@@ -319,8 +319,8 @@ def _composeReferenceAnswer(state: WorkbenchState) -> str:
         lines.append("")
     if api_rows:
         lines.append("## 호출 가능한 API 후보")
-        for api_ref, summary in api_rows:
-            lines.append(f"- {api_ref}: {summary}")
+        for apiRef, summary in api_rows:
+            lines.append(f"- {apiRef}: {summary}")
         lines.append("")
     lines.append(
         "데이터 실행이 필요한 질문은 target, 기간, 지표를 포함하면 해당 skill/capability로 실행하고 ref 검증까지 진행합니다."
@@ -341,14 +341,14 @@ def _failureMessage(reason: str) -> str:
 def _toolSummary(tool: str, args: dict[str, Any]) -> str:
     if tool in ("EngineCall", "engine_call"):
         plan = args.get("plan") or args
-        api_ref = plan.get("apiRef") or f"{plan.get('engine')}.{plan.get('method')}"
+        apiRef = plan.get("apiRef") or f"{plan.get('engine')}.{plan.get('method')}"
         target = plan.get("target") or plan.get("axis") or plan.get("path") or ""
-        return f"{api_ref} {target}".strip()
+        return f"{apiRef} {target}".strip()
     return str(args.get("query") or args.get("target") or tool)
 
 
 def _harvestArtifacts(state: WorkbenchState) -> list[dict[str, Any]]:
-    return [ref.to_dict() for ref in state.refs if ref.kind == "artifactRef"]
+    return [ref.toDict() for ref in state.refs if ref.kind == "artifactRef"]
 
 
 def _chunks(text: str, *, size: int = 240) -> Iterator[str]:

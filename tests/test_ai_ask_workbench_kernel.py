@@ -36,9 +36,9 @@ def test_ask_stream_returns_public_events():
     - LLM path: llm_tool_use / tool_result
     responseStatus 는 환경 상태 (provider/data) 에 따라 ok 또는 gate_blocked/failed 가능.
     """
-    from dartlab.ai.kernel import _ask_events
+    from dartlab.ai.kernel import _askEvents
 
-    events = list(_ask_events("너 뭐 할 수 있니"))
+    events = list(_askEvents("너 뭐 할 수 있니"))
     kinds = [event.kind for event in events]
 
     assert kinds[0] == "graph_node"

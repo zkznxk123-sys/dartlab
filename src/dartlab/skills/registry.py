@@ -27,11 +27,11 @@ _LIST_SKILLS_CACHE: dict[bool, tuple[SkillSpec, ...]] = {}
 _KNOWN_CAPS_CACHE: frozenset[str] | None = None
 
 
-def _skills_cache_disabled() -> bool:
+def _skillsCacheDisabled() -> bool:
     return os.environ.get("DARTLAB_SKILL_NO_CACHE") == "1"
 
 
-def _load_intent_boosts() -> tuple[dict[str, Any], ...]:
+def _loadIntentBoosts() -> tuple[dict[str, Any], ...]:
     """``operation.intentBoosts`` skill frontmatter 에서 의도 boost 규칙을 로드.
 
     SSOT 는 ``src/dartlab/skills/specs/operation/intentBoosts.md`` 의 frontmatter
@@ -41,26 +41,26 @@ def _load_intent_boosts() -> tuple[dict[str, Any], ...]:
     global _INTENT_BOOSTS_CACHE
     if _INTENT_BOOSTS_CACHE is not None:
         return _INTENT_BOOSTS_CACHE
-    path = _builtin_specs_root() / "operation" / "intentBoosts.md"
+    path = _builtinSpecsRoot() / "operation" / "intentBoosts.md"
     if not path.exists():
         _INTENT_BOOSTS_CACHE = ()
         return _INTENT_BOOSTS_CACHE
-    data = _read_mapping(path)
+    data = _readMapping(path)
     raw = data.get("intentBoosts") or []
     out: list[dict[str, Any]] = []
     for entry in raw:
         if not isinstance(entry, dict):
             continue
-        skill_ids = tuple(entry.get("skillIds") or ())
+        skillIds = tuple(entry.get("skillIds") or ())
         terms = tuple(entry.get("terms") or ())
         boost = entry.get("boost")
-        if not skill_ids or not terms or boost is None:
+        if not skillIds or not terms or boost is None:
             continue
         try:
             boost_val = float(boost)
         except (TypeError, ValueError):
             continue
-        out.append({"skillIds": skill_ids, "terms": terms, "boost": boost_val})
+        out.append({"skillIds": skillIds, "terms": terms, "boost": boost_val})
     _INTENT_BOOSTS_CACHE = tuple(out)
     return _INTENT_BOOSTS_CACHE
 
@@ -114,20 +114,20 @@ def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
     searchSkills : 질의 기반 skill 검색.
     """
 
-    if not _skills_cache_disabled():
+    if not _skillsCacheDisabled():
         cached = _LIST_SKILLS_CACHE.get(includeUser)
         if cached is not None:
             return list(cached)
 
     # builtin spec 은 우리 책임 — 실패 시 raise (개발자 즉시 인지).
-    specs = [_load_spec(path, default_scope="builtin") for path in _builtin_spec_paths()]
+    specs = [_loadSpec(path, defaultScope="builtin") for path in _builtinSpecPaths()]
     if includeUser:
         # user spec 은 실험적 — 1 개 깨져도 전체 listSkills 가 무너지면 ReadSkill tool 자체가
         # 못 돈다. spec 단위로 skip + 경고. lintSkill 도 동일 — user spec 1 개의 lint 실패가
         # 전체 검색을 막지 않게.
-        for path in _user_spec_paths():
+        for path in _userSpecPaths():
             try:
-                spec = _load_spec(path, default_scope="user", force_user=True)
+                spec = _loadSpec(path, defaultScope="user", forceUser=True)
             except Exception as exc:  # noqa: BLE001
                 logger.warning("user skill spec skipped (%s): %s", path.name, exc)
                 continue
@@ -137,13 +137,13 @@ def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
                 logger.warning("user skill spec failed lint (%s): %s", path.name, exc)
                 continue
             specs.append(spec)
-    _validate_unique_ids(specs)
+    _validateUniqueIds(specs)
     for spec in specs:
         if spec.scope == "builtin":
             lintSkill(spec)
     result = sorted(specs, key=lambda item: item.id)
 
-    if not _skills_cache_disabled():
+    if not _skillsCacheDisabled():
         _LIST_SKILLS_CACHE[includeUser] = tuple(result)
     return result
 
@@ -174,7 +174,7 @@ def searchSkills(query: str, *, limit: int = 8, includeUser: bool = True) -> lis
 def describeSkill(skillId: str, *, includeUser: bool = True) -> dict[str, Any]:
     """Skill 설명 dict 반환."""
 
-    return getSkill(skillId, includeUser=includeUser).to_dict()
+    return getSkill(skillId, includeUser=includeUser).toDict()
 
 
 def checkEvidence(
@@ -189,7 +189,7 @@ def checkEvidence(
     """
 
     spec = getSkill(skillId, includeUser=includeUser)
-    present_names = _evidence_names(refs)
+    present_names = _evidenceNames(refs)
     required = set(spec.requiredEvidence)
     present = sorted(required & present_names)
     missing = sorted(required - present_names)
@@ -207,18 +207,18 @@ def lintSkill(spec: SkillSpec) -> None:
         lowered = item.lower()
         if any(marker in lowered for marker in _FORBIDDEN_TEMPLATE_MARKERS):
             raise ValueError(f"skill {spec.id} contains a final-answer template marker")
-    _validate_runtime_compatibility(spec)
-    _validate_status_evidence(spec)
+    _validateRuntimeCompatibility(spec)
+    _validateStatusEvidence(spec)
     if spec.kind == "curated" and "pyodide" not in spec.runtimeCompatibility:
         raise ValueError(f"curated skill {spec.id} must declare runtimeCompatibility.pyodide")
     if spec.kind == "recipe":
-        _validate_recipe_skill(spec)
+        _validateRecipeSkill(spec)
     else:
-        _validate_execution_skill_contract(spec)
-    _validate_capability_refs(spec)
+        _validateExecutionSkillContract(spec)
+    _validateCapabilityRefs(spec)
 
 
-def _validate_recipe_skill(spec: SkillSpec) -> None:
+def _validateRecipeSkill(spec: SkillSpec) -> None:
     """recipe kind 검증 — 본문 ## 연계 절차 + linkedSkills 또는 step list 비어있지 않음.
 
     순환 의존 검사는 listSkills() 재귀 위험으로 본 단계에서 수행하지 않는다 — 별도
@@ -231,7 +231,7 @@ def _validate_recipe_skill(spec: SkillSpec) -> None:
     if "## 연계 절차" not in body:
         raise ValueError(f"recipe skill {spec.id} missing '## 연계 절차' section")
     has_linked = bool(spec.linkedSkills)
-    has_body_steps = bool(_steps_from_recipe_body(body))
+    has_body_steps = bool(_stepsFromRecipeBody(body))
     if not (has_linked or has_body_steps):
         raise ValueError(f"recipe skill {spec.id} must declare linkedSkills frontmatter or '## 연계 절차' step list")
     if spec.gap:
@@ -246,7 +246,7 @@ def _validate_recipe_skill(spec: SkillSpec) -> None:
 _RECIPE_STEP_RE = re.compile(r"^\s*(?:\d+\.|-)\s*([\w.]+)(?:\s*[—\-:]\s*(.*))?$")
 
 
-def _steps_from_recipe_body(body: str) -> list[dict[str, str]]:
+def _stepsFromRecipeBody(body: str) -> list[dict[str, str]]:
     """recipe 본문의 '## 연계 절차' 섹션에서 step list 파싱.
 
     인식 형식:
@@ -278,7 +278,7 @@ def _steps_from_recipe_body(body: str) -> list[dict[str, str]]:
     return steps
 
 
-def _validate_execution_skill_contract(spec: SkillSpec) -> None:
+def _validateExecutionSkillContract(spec: SkillSpec) -> None:
     if spec.category != "engines":
         return
     body = str(spec.source.get("body") or "")
@@ -306,14 +306,14 @@ def validateExecutionSkillSubstance(spec: SkillSpec) -> list[str]:
     body = str(spec.source.get("body") or "")
     required = ("## 공개 호출 방식", "## 호출 동작", "## 대표 반환 형태")
     issues: list[str] = []
-    sections = _split_sections(body, required)
-    for heading, section_body in sections.items():
-        if not _section_has_substance(section_body, heading):
+    sections = _splitSections(body, required)
+    for heading, sectionBody in sections.items():
+        if not _sectionHasSubstance(sectionBody, heading):
             issues.append(f"engine skill {spec.id} section {heading} is empty or lacks code/table/prose substance")
     return issues
 
 
-def _split_sections(body: str, headings: tuple[str, ...]) -> dict[str, str]:
+def _splitSections(body: str, headings: tuple[str, ...]) -> dict[str, str]:
     """본문에서 각 강제 헤딩 아래의 텍스트 블록을 추출.
 
     다음 H2 헤딩 (`## `) 이 나오기 전까지를 한 섹션으로 본다.
@@ -330,65 +330,65 @@ def _split_sections(body: str, headings: tuple[str, ...]) -> dict[str, str]:
     return out
 
 
-def _section_has_substance(section_body: str, heading: str) -> bool:
+def _sectionHasSubstance(sectionBody: str, heading: str) -> bool:
     """섹션 본문이 빈 placeholder 가 아닌지 확인.
 
     `## 공개 호출 방식` 은 ``` 코드블록 1 개 이상 — 없으면 AI 가 따라 실행할 수 없다.
     `## 호출 동작` / `## 대표 반환 형태` 는 표 (`|...|---|...|`) 또는 코드블록 또는
     최소 60 자 이상의 산문.
     """
-    if not section_body:
+    if not sectionBody:
         return False
     if heading == "## 공개 호출 방식":
-        return "```" in section_body
-    has_code = "```" in section_body
-    has_table = "|" in section_body and "---" in section_body
-    long_prose = len(section_body) >= 60
+        return "```" in sectionBody
+    has_code = "```" in sectionBody
+    has_table = "|" in sectionBody and "---" in sectionBody
+    long_prose = len(sectionBody) >= 60
     return bool(has_code or has_table or long_prose)
 
 
-def _builtin_spec_paths() -> list[Path]:
-    root = _builtin_specs_root()
+def _builtinSpecPaths() -> list[Path]:
+    root = _builtinSpecsRoot()
     if not root.exists():
         return []
     return sorted([*root.rglob("*.md"), *root.rglob("*.yaml"), *root.rglob("*.yml"), *root.rglob("*.json")])
 
 
-def _user_spec_paths() -> list[Path]:
-    root = _repo_root() / ".dartlab" / "skills"
+def _userSpecPaths() -> list[Path]:
+    root = _repoRoot() / ".dartlab" / "skills"
     if not root.exists():
         return []
     return sorted([*root.rglob("*.md"), *root.rglob("*.yaml"), *root.rglob("*.yml"), *root.rglob("*.json")])
 
 
-def _load_spec(path: Path, *, default_scope: str, force_user: bool = False) -> SkillSpec:
-    data = _read_mapping(path)
-    if force_user:
+def _loadSpec(path: Path, *, defaultScope: str, forceUser: bool = False) -> SkillSpec:
+    data = _readMapping(path)
+    if forceUser:
         data["kind"] = "user"
         data["scope"] = "user"
         data["category"] = "user"
         data.setdefault("status", "unverified")
     else:
         data.setdefault("kind", "curated")
-        data.setdefault("scope", default_scope)
-        data.setdefault("category", _category_from_path(path))
+        data.setdefault("scope", defaultScope)
+        data.setdefault("category", _categoryFromPath(path))
     data.setdefault("source", {})
     data["source"].setdefault("path", str(path))
-    return SkillSpec(**_normalize_spec_data(data))
+    return SkillSpec(**_normalizeSpecData(data))
 
 
-def _read_mapping(path: Path) -> dict[str, Any]:
+def _readMapping(path: Path) -> dict[str, Any]:
     text = path.read_text(encoding="utf-8")
     suffix = path.suffix.lower()
     if suffix == ".md":
-        data = _read_markdown_skill(text, path)
+        data = _readMarkdownSkill(text, path)
     elif suffix == ".json":
         data = json.loads(text)
     else:
         try:
             import yaml
         except ImportError:
-            data = _read_simple_yaml(text)
+            data = _readSimpleYaml(text)
         else:
             data = yaml.safe_load(text)
     if not isinstance(data, dict):
@@ -396,7 +396,7 @@ def _read_mapping(path: Path) -> dict[str, Any]:
     return data
 
 
-def _read_markdown_skill(text: str, path: Path) -> dict[str, Any]:
+def _readMarkdownSkill(text: str, path: Path) -> dict[str, Any]:
     text = text.lstrip("\ufeff").lstrip()
     if not text.startswith("---"):
         raise ValueError(f"markdown skill requires frontmatter: {path}")
@@ -408,7 +408,7 @@ def _read_markdown_skill(text: str, path: Path) -> dict[str, Any]:
     try:
         import yaml
     except ImportError:
-        data = _read_simple_yaml(raw_meta)
+        data = _readSimpleYaml(raw_meta)
     else:
         data = yaml.safe_load(raw_meta)
     if not isinstance(data, dict):
@@ -417,13 +417,13 @@ def _read_markdown_skill(text: str, path: Path) -> dict[str, Any]:
     data["source"]["format"] = "markdown"
     data["source"]["body"] = body
     if body and not data.get("procedure"):
-        data["procedure"] = _procedure_from_markdown_body(body)
+        data["procedure"] = _procedureFromMarkdownBody(body)
     if body and not data.get("purpose"):
-        data["purpose"] = _short_text(body, limit=220)
+        data["purpose"] = _shortText(body, limit=220)
     return data
 
 
-def _procedure_from_markdown_body(body: str) -> list[str]:
+def _procedureFromMarkdownBody(body: str) -> list[str]:
     items: list[str] = []
     for raw in body.splitlines():
         line = raw.strip()
@@ -436,7 +436,7 @@ def _procedure_from_markdown_body(body: str) -> list[str]:
     return items
 
 
-def _coerce_string_item(value: Any) -> str:
+def _coerceStringItem(value: Any) -> str:
     """frontmatter 의 list 항목이 dict / 숫자 / None 으로 들어와도 string 으로 강제.
 
     근거: SkillSpec 의 string list 필드 (procedure / examples / inputs / ...) 는
@@ -466,7 +466,7 @@ def _coerce_string_item(value: Any) -> str:
     return str(value)
 
 
-def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
+def _normalizeSpecData(data: dict[str, Any]) -> dict[str, Any]:
     list_fields = {
         "inputs",
         "outputs",
@@ -500,7 +500,7 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
         elif isinstance(value, str):
             data[field] = [value]
         else:
-            data[field] = [_coerce_string_item(item) for item in builtins.list(value)]
+            data[field] = [_coerceStringItem(item) for item in builtins.list(value)]
     # recipeSteps 는 list[dict] — frontmatter 에 박혀 있을 수 있다 (운영자 명시).
     rs = data.get("recipeSteps")
     if rs is None:
@@ -544,8 +544,8 @@ def _normalize_spec_data(data: dict[str, Any]) -> dict[str, Any]:
     return data
 
 
-def _category_from_path(path: Path) -> str:
-    specs = _builtin_specs_root()
+def _categoryFromPath(path: Path) -> str:
+    specs = _builtinSpecsRoot()
     try:
         relative = path.relative_to(specs)
     except ValueError:
@@ -556,7 +556,7 @@ def _category_from_path(path: Path) -> str:
     return "engines"
 
 
-def _builtin_specs_root() -> Path:
+def _builtinSpecsRoot() -> Path:
     """Builtin SkillSpec root.
 
     `src/dartlab/skills/specs`가 repo checkout과 wheel에서 모두 같은 공식
@@ -566,7 +566,7 @@ def _builtin_specs_root() -> Path:
     return Path(__file__).resolve().parent / "specs"
 
 
-def _validate_unique_ids(specs: list[SkillSpec]) -> None:
+def _validateUniqueIds(specs: list[SkillSpec]) -> None:
     seen: set[str] = set()
     for spec in specs:
         if spec.id in seen:
@@ -574,22 +574,22 @@ def _validate_unique_ids(specs: list[SkillSpec]) -> None:
         seen.add(spec.id)
 
 
-def _validate_capability_refs(spec: SkillSpec) -> None:
+def _validateCapabilityRefs(spec: SkillSpec) -> None:
     if not spec.capabilityRefs:
         return
-    known = _known_capabilities()
+    known = _knownCapabilities()
     missing = [ref for ref in spec.capabilityRefs if ref not in known]
     if missing:
         raise ValueError(f"skill {spec.id} references unknown capabilities: {', '.join(missing)}")
 
 
-def _short_text(text: str, *, limit: int = 500) -> str:
+def _shortText(text: str, *, limit: int = 500) -> str:
     return " ".join(text.split())[:limit]
 
 
-def _known_capabilities() -> set[str]:
+def _knownCapabilities() -> set[str]:
     global _KNOWN_CAPS_CACHE
-    if _KNOWN_CAPS_CACHE is not None and not _skills_cache_disabled():
+    if _KNOWN_CAPS_CACHE is not None and not _skillsCacheDisabled():
         return set(_KNOWN_CAPS_CACHE)
     try:
         from dartlab.core.capability._generated import CAPABILITIES
@@ -600,7 +600,7 @@ def _known_capabilities() -> set[str]:
     return set(caps)
 
 
-def _validate_runtime_compatibility(spec: SkillSpec) -> None:
+def _validateRuntimeCompatibility(spec: SkillSpec) -> None:
     allowed = {"supported", "limited", "unsupported", "unknown"}
     for runtime, value in spec.runtimeCompatibility.items():
         if not isinstance(value, dict):
@@ -610,7 +610,7 @@ def _validate_runtime_compatibility(spec: SkillSpec) -> None:
             raise ValueError(f"skill {spec.id} runtimeCompatibility.{runtime}.status is invalid: {status}")
 
 
-def _validate_status_evidence(spec: SkillSpec) -> None:
+def _validateStatusEvidence(spec: SkillSpec) -> None:
     if spec.status == "auditP":
         count = int(spec.quality.get("serverAuditPCount") or 0)
         if count < 2 or not spec.verifiedBy:
@@ -622,16 +622,16 @@ def _validate_status_evidence(spec: SkillSpec) -> None:
             raise ValueError(f"skill {spec.id} official requires serverAuditP and userConfirmed quality evidence")
 
 
-def _read_simple_yaml(text: str) -> dict[str, Any]:
+def _readSimpleYaml(text: str) -> dict[str, Any]:
     lines = text.splitlines()
-    parsed, _ = _parse_yaml_block(lines, 0, 0)
+    parsed, _ = _parseYamlBlock(lines, 0, 0)
     if not isinstance(parsed, dict):
         raise ValueError("skill yaml fallback parser expected a mapping")
     return parsed
 
 
-def _parse_yaml_block(lines: list[str], start: int, indent: int) -> tuple[Any, int]:
-    index = _skip_yaml_blank(lines, start)
+def _parseYamlBlock(lines: list[str], start: int, indent: int) -> tuple[Any, int]:
+    index = _skipYamlBlank(lines, start)
     if index >= len(lines):
         return {}, index
     current = lines[index]
@@ -639,15 +639,15 @@ def _parse_yaml_block(lines: list[str], start: int, indent: int) -> tuple[Any, i
     if current_indent < indent:
         return {}, index
     if current.lstrip().startswith("- "):
-        return _parse_yaml_list(lines, index, current_indent)
-    return _parse_yaml_mapping(lines, index, indent)
+        return _parseYamlList(lines, index, current_indent)
+    return _parseYamlMapping(lines, index, indent)
 
 
-def _parse_yaml_mapping(lines: list[str], start: int, indent: int) -> tuple[dict[str, Any], int]:
+def _parseYamlMapping(lines: list[str], start: int, indent: int) -> tuple[dict[str, Any], int]:
     out: dict[str, Any] = {}
     index = start
     while index < len(lines):
-        index = _skip_yaml_blank(lines, index)
+        index = _skipYamlBlank(lines, index)
         if index >= len(lines):
             break
         line = lines[index]
@@ -662,12 +662,12 @@ def _parse_yaml_mapping(lines: list[str], start: int, indent: int) -> tuple[dict
         key, raw = stripped.split(":", 1)
         raw = raw.strip()
         if raw == ">":
-            value, index = _parse_yaml_folded(lines, index + 1, current_indent + 2)
+            value, index = _parseYamlFolded(lines, index + 1, current_indent + 2)
         elif raw:
-            value = _parse_yaml_scalar(raw)
+            value = _parseYamlScalar(raw)
             index += 1
         else:
-            value, index = _parse_yaml_block(lines, index + 1, current_indent + 2)
+            value, index = _parseYamlBlock(lines, index + 1, current_indent + 2)
         out[key] = value
     return out, index
 
@@ -675,11 +675,11 @@ def _parse_yaml_mapping(lines: list[str], start: int, indent: int) -> tuple[dict
 _DICT_LIST_KEY_RE = re.compile(r"^[A-Za-z_][\w]*\s*:")
 
 
-def _parse_yaml_list(lines: list[str], start: int, indent: int) -> tuple[list[Any], int]:
+def _parseYamlList(lines: list[str], start: int, indent: int) -> tuple[list[Any], int]:
     out: list[Any] = []
     index = start
     while index < len(lines):
-        index = _skip_yaml_blank(lines, index)
+        index = _skipYamlBlank(lines, index)
         if index >= len(lines):
             break
         line = lines[index]
@@ -700,13 +700,13 @@ def _parse_yaml_list(lines: list[str], start: int, indent: int) -> tuple[list[An
                 next_indent_is_dict = True
         if is_dict_form and next_indent_is_dict:
             key, raw = item.split(":", 1)
-            entry: dict[str, Any] = {key.strip(): _parse_yaml_scalar(raw.strip()) if raw.strip() else None}
+            entry: dict[str, Any] = {key.strip(): _parseYamlScalar(raw.strip()) if raw.strip() else None}
             index += 1
             inner_indent = current_indent + 2
             while index < len(lines):
-                next_line = lines[index]
-                next_indent = len(next_line) - len(next_line.lstrip(" "))
-                next_stripped = next_line.strip()
+                nextLine = lines[index]
+                next_indent = len(nextLine) - len(nextLine.lstrip(" "))
+                next_stripped = nextLine.strip()
                 if not next_stripped:
                     index += 1
                     continue
@@ -715,16 +715,16 @@ def _parse_yaml_list(lines: list[str], start: int, indent: int) -> tuple[list[An
                 if not _DICT_LIST_KEY_RE.match(next_stripped):
                     break
                 k2, r2 = next_stripped.split(":", 1)
-                entry[k2.strip()] = _parse_yaml_scalar(r2.strip()) if r2.strip() else None
+                entry[k2.strip()] = _parseYamlScalar(r2.strip()) if r2.strip() else None
                 index += 1
             out.append(entry)
             continue
-        out.append(_parse_yaml_scalar(item))
+        out.append(_parseYamlScalar(item))
         index += 1
     return out, index
 
 
-def _parse_yaml_folded(lines: list[str], start: int, indent: int) -> tuple[str, int]:
+def _parseYamlFolded(lines: list[str], start: int, indent: int) -> tuple[str, int]:
     parts: list[str] = []
     index = start
     while index < len(lines):
@@ -740,7 +740,7 @@ def _parse_yaml_folded(lines: list[str], start: int, indent: int) -> tuple[str, 
     return " ".join(parts), index
 
 
-def _parse_yaml_scalar(raw: str) -> Any:
+def _parseYamlScalar(raw: str) -> Any:
     if raw == "[]":
         return []
     if raw == "{}":
@@ -764,7 +764,7 @@ def _parse_yaml_scalar(raw: str) -> Any:
         return raw
 
 
-def _skip_yaml_blank(lines: list[str], start: int) -> int:
+def _skipYamlBlank(lines: list[str], start: int) -> int:
     index = start
     while index < len(lines) and (not lines[index].strip() or lines[index].lstrip().startswith("#")):
         index += 1
@@ -821,25 +821,25 @@ def _score(spec: SkillSpec, terms: list[str], *, query: str = "") -> tuple[float
     }
     score = 0.0
     reasons: list[str] = []
-    normalized_query = query.lower()
+    normalizedQuery = query.lower()
     for term in terms:
         for name, hay in haystacks.items():
             field = hay.lower()
             if term in field:
-                weight = _field_weight(name)
+                weight = _fieldWeight(name)
                 if spec.category in {"engines", "runtime", "operation", "start"}:
                     weight += 0.75
-                if normalized_query and normalized_query in field:
+                if normalizedQuery and normalizedQuery in field:
                     weight += 3.0
                 score += weight
                 reasons.append(f"{name}:{term}")
-    boost, boost_reasons = _intent_boost(spec, query)
+    boost, boost_reasons = _intentBoost(spec, query)
     if boost:
         score += boost
         reasons.extend(boost_reasons)
     if spec.status in {"auditP", "official"}:
         score += 0.5
-    domain_bonus, domain_reasons = _domainBonus(spec, normalized_query)
+    domain_bonus, domain_reasons = _domainBonus(spec, normalizedQuery)
     if domain_bonus:
         score += domain_bonus
         reasons.extend(domain_reasons)
@@ -859,7 +859,7 @@ _COMPOSITE_TERMS: tuple[str, ...] = (
 )
 
 
-def _domainBonus(spec: SkillSpec, normalized_query: str) -> tuple[float, list[str]]:
+def _domainBonus(spec: SkillSpec, normalizedQuery: str) -> tuple[float, list[str]]:
     """recipe / engines kind 우선 — 종합 키워드 매칭 시 recipe 추가 가중.
 
     base 가중:
@@ -872,7 +872,7 @@ def _domainBonus(spec: SkillSpec, normalized_query: str) -> tuple[float, list[st
     if spec.kind == "recipe":
         bonus += 1.0
         reasons.append("kind:recipe")
-        if normalized_query and any(term in normalized_query for term in _COMPOSITE_TERMS):
+        if normalizedQuery and any(term in normalizedQuery for term in _COMPOSITE_TERMS):
             bonus += 2.5
             reasons.append("composite_query+recipe")
     elif spec.category == "engines":
@@ -881,7 +881,7 @@ def _domainBonus(spec: SkillSpec, normalized_query: str) -> tuple[float, list[st
     return bonus, reasons
 
 
-def _field_weight(name: str) -> float:
+def _fieldWeight(name: str) -> float:
     if name == "id":
         return 4.0
     if name == "title":
@@ -904,11 +904,11 @@ def _field_weight(name: str) -> float:
     return 1.0
 
 
-def _intent_boost(spec: SkillSpec, query: str) -> tuple[float, list[str]]:
+def _intentBoost(spec: SkillSpec, query: str) -> tuple[float, list[str]]:
     query_text = query.lower()
     score = 0.0
     reasons: list[str] = []
-    for entry in _load_intent_boosts():
+    for entry in _loadIntentBoosts():
         if spec.id not in entry["skillIds"]:
             continue
         matched = [term for term in entry["terms"] if term.lower() in query_text]
@@ -929,16 +929,16 @@ def _terms(query: str) -> list[str]:
         if len(term) < 2:
             continue
         terms.append(term)
-        if _contains_hangul(term) and len(term) >= 3:
+        if _containsHangul(term) and len(term) >= 3:
             terms.extend(term[index : index + 2] for index in range(len(term) - 1))
     return list(dict.fromkeys(terms))
 
 
-def _contains_hangul(text: str) -> bool:
+def _containsHangul(text: str) -> bool:
     return any("\uac00" <= char <= "\ud7a3" for char in text)
 
 
-def _evidence_names(refs: list[dict[str, Any]] | list[Any]) -> set[str]:
+def _evidenceNames(refs: list[dict[str, Any]] | list[Any]) -> set[str]:
     names: set[str] = set()
     for ref in refs:
         payload = ref.get("payload", ref) if isinstance(ref, dict) else getattr(ref, "payload", {})
@@ -954,7 +954,7 @@ def _evidence_names(refs: list[dict[str, Any]] | list[Any]) -> set[str]:
     return names
 
 
-def _repo_root() -> Path:
+def _repoRoot() -> Path:
     here = Path.cwd()
     module_path = Path(__file__).resolve()
     for base in [here, *here.parents, *module_path.parents]:

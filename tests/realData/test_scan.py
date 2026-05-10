@@ -14,7 +14,7 @@ class TestScanEngine:
         """scan 이 노출하는 축 목록."""
         import dartlab
 
-        axes = dartlab.scan.available_scans()
+        axes = dartlab.scan.availableScans()
         assert axes
         assert isinstance(axes, list)
 
@@ -22,7 +22,7 @@ class TestScanEngine:
         """첫 번째 축을 실제로 호출해 None/빈 결과가 아님을 검증."""
         import dartlab
 
-        axes = dartlab.scan.available_scans()
+        axes = dartlab.scan.availableScans()
         if not axes:
             pytest.skip("scan axis 목록이 비어있음")
         sampleAxis = axes[0]

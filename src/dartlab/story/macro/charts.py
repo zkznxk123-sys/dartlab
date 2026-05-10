@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 
-def spec_fci_timeline(liquidity: dict) -> dict | None:
+def specFciTimeline(liquidity: dict) -> dict | None:
     """FCI 시계열."""
     ts = liquidity.get("timeseries") or {}
     hy_ts = ts.get("hy_spread")
@@ -18,7 +18,7 @@ def spec_fci_timeline(liquidity: dict) -> dict | None:
     }
 
 
-def spec_earnings_cycle(corporate: dict) -> dict | None:
+def specEarningsCycle(corporate: dict) -> dict | None:
     """전종목 영업이익 YoY."""
     ec = corporate.get("earningsCycle")
     if not ec or not ec.get("periods"):
@@ -32,7 +32,7 @@ def spec_earnings_cycle(corporate: dict) -> dict | None:
     }
 
 
-def spec_ponzi_ratio(corporate: dict) -> dict | None:
+def specPonziRatio(corporate: dict) -> dict | None:
     """ICR<1 비중 추이."""
     pr = corporate.get("ponziRatio")
     if not pr or not pr.get("periods"):
@@ -46,7 +46,7 @@ def spec_ponzi_ratio(corporate: dict) -> dict | None:
     }
 
 
-def spec_recession_prob(forecast: dict) -> dict | None:
+def specRecessionProb(forecast: dict) -> dict | None:
     """침체확률 지표."""
     rp = forecast.get("recessionProb")
     sahm = forecast.get("sahmRule")
@@ -64,7 +64,7 @@ def spec_recession_prob(forecast: dict) -> dict | None:
     }
 
 
-def spec_cycle_indicators(timeseries: dict) -> dict | None:
+def specCycleIndicators(timeseries: dict) -> dict | None:
     """사이클 핵심 지표 시계열 (HY/VIX/장단기차)."""
     series = []
     categories = None
@@ -85,7 +85,7 @@ def spec_cycle_indicators(timeseries: dict) -> dict | None:
     }
 
 
-def spec_fear_greed_components(fearGreed: dict) -> dict | None:
+def specFearGreedComponents(fearGreed: dict) -> dict | None:
     """공포탐욕 4요소 분해."""
     comps = fearGreed.get("components") or {}
     if not comps:
@@ -99,7 +99,7 @@ def spec_fear_greed_components(fearGreed: dict) -> dict | None:
     }
 
 
-def spec_trade_tot(trade: dict) -> dict | None:
+def specTradeTot(trade: dict) -> dict | None:
     """교역조건 추이 (KR)."""
     ts = trade.get("timeseries") or {}
     exp_ts = ts.get("export_price")
@@ -118,7 +118,7 @@ def spec_trade_tot(trade: dict) -> dict | None:
     }
 
 
-def spec_corporate_table(corporate: dict) -> list[dict] | None:
+def specCorporateTable(corporate: dict) -> list[dict] | None:
     """기업집계 연도별 테이블 데이터."""
     ec = corporate.get("earningsCycle")
     pr = corporate.get("ponziRatio")

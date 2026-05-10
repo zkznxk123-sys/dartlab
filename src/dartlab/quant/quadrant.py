@@ -64,11 +64,11 @@ _DESCRIPTIONS: dict[str, str] = {
 
 
 def classifyQuadrant(
-    growth_signal: float,
-    inflation_signal: float,
+    growthSignal: float,
+    inflationSignal: float,
     *,
-    growth_threshold: float = 0.0,
-    inflation_threshold: float = 0.0,
+    growthThreshold: float = 0.0,
+    inflationThreshold: float = 0.0,
 ) -> dict:
     """Growth × Inflation 2×2 → 4체제 판별.
 
@@ -81,8 +81,8 @@ def classifyQuadrant(
     Returns:
         dict with quadrant, labels, asset implications, confidence
     """
-    growth_rising = growth_signal > growth_threshold
-    inflation_rising = inflation_signal > inflation_threshold
+    growth_rising = growthSignal > growthThreshold
+    inflation_rising = inflationSignal > inflationThreshold
 
     if growth_rising and inflation_rising:
         quadrant = "reflation"
@@ -94,8 +94,8 @@ def classifyQuadrant(
         quadrant = "deflation"
 
     # 신뢰도: 신호 강도 기반
-    g_strength = abs(growth_signal)
-    i_strength = abs(inflation_signal)
+    g_strength = abs(growthSignal)
+    i_strength = abs(inflationSignal)
     if g_strength > 5.0 and i_strength > 0.5:
         confidence = "high"
     elif g_strength > 2.0 or i_strength > 0.3:
@@ -107,9 +107,9 @@ def classifyQuadrant(
         "quadrant": quadrant,
         "quadrantLabel": _LABELS[quadrant],
         "growth": "rising" if growth_rising else "falling",
-        "growthSignal": round(growth_signal, 2),
+        "growthSignal": round(growthSignal, 2),
         "inflation": "rising" if inflation_rising else "falling",
-        "inflationSignal": round(inflation_signal, 2),
+        "inflationSignal": round(inflationSignal, 2),
         "assetImplication": _ASSET_MAP[quadrant],
         "confidence": confidence,
         "description": _DESCRIPTIONS[quadrant],

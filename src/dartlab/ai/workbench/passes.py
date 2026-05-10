@@ -46,8 +46,8 @@ def streamLLMPasses(
 
     # GATE 차단 시 WORK 회귀. recipe 활성이면 최대 3 회, 아니면 2 회.
     # rate_limit / 외부 provider 실패는 retry 의미 없으므로 즉시 종료.
-    max_iter = 3 if _hasRecipe(state) else 2
-    while state.gateBlocked and state.iteration < max_iter and state.failure != "rate_limit":
+    maxIter = 3 if _hasRecipe(state) else 2
+    while state.gateBlocked and state.iteration < maxIter and state.failure != "rate_limit":
         state.iteration += 1
         yield TraceEvent("graph_node", {"node": "work", "status": "running", "round": state.iteration})
         yield from runWork(state, provider)
@@ -80,10 +80,10 @@ def streamLLMPasses(
     yield TraceEvent(
         "done",
         {
-            "refs": [r.to_dict() for r in state.refs],
-            "evidence": [r.to_dict() for r in state.refs if r.kind != "verifyRef"],
+            "refs": [r.toDict() for r in state.refs],
+            "evidence": [r.toDict() for r in state.refs if r.kind != "verifyRef"],
             "claims": list(state.claims),
-            "artifacts": [r.to_dict() for r in state.refs if r.kind == "artifactRef"],
+            "artifacts": [r.toDict() for r in state.refs if r.kind == "artifactRef"],
             "verification": state.verification,
             "responseMeta": {
                 "finalEvent": "answer",

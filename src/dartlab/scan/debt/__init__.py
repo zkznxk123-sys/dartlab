@@ -13,11 +13,11 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 
-from dartlab.scan.debt.risk import classify_risk, scan_icr
-from dartlab.scan.debt.scanner import scan_bonds, scan_debt_mix, scan_short_debt
+from dartlab.scan.debt.risk import classifyRisk, scanIcr
+from dartlab.scan.debt.scanner import scanBonds, scanDebtMix, scanShortDebt
 
 
-def scan_debt(*, verbose: bool = True) -> pl.DataFrame:
+def scanDebt(*, verbose: bool = True) -> pl.DataFrame:
     """전체 상장사 부채 스캔 → 종합 DataFrame.
 
     컬럼: 종목코드, 사채잔액, 단기잔액, 단기비중, 단기사채잔액, CP잔액,
@@ -29,19 +29,19 @@ def scan_debt(*, verbose: bool = True) -> pl.DataFrame:
             _log.info(msg)
 
     _say("1/4 사채 만기...")
-    bond_map = scan_bonds()
+    bond_map = scanBonds()
     _say(f"  -> {len(bond_map)}종목")
 
     _say("2/4 단기사채/CP...")
-    short_map = scan_short_debt()
+    short_map = scanShortDebt()
     _say(f"  -> {len(short_map)}종목")
 
     _say("3/4 부채비율...")
-    debt_map = scan_debt_mix()
+    debt_map = scanDebtMix()
     _say(f"  -> {len(debt_map)}종목")
 
     _say("4/4 이자보상배율...")
-    icr_map = scan_icr()
+    icr_map = scanIcr()
     _say(f"  -> {len(icr_map)}종목")
 
     all_codes = set(bond_map) | set(debt_map) | set(icr_map) | set(short_map)
@@ -53,16 +53,16 @@ def scan_debt(*, verbose: bool = True) -> pl.DataFrame:
         d = debt_map.get(code, {})
         icr = icr_map.get(code)
 
-        short_ratio = b.get("단기비중")
+        shortRatio = b.get("단기비중")
         shortDebtTotal = s.get("단기채무합계")
-        risk = classify_risk(icr, short_ratio, shortDebtTotal) if (b or s or icr is not None) else None
+        risk = classifyRisk(icr, shortRatio, shortDebtTotal) if (b or s or icr is not None) else None
 
         results.append(
             {
                 "stockCode": code,
                 "사채잔액": b.get("사채잔액"),
                 "단기잔액": b.get("단기잔액"),
-                "단기비중": short_ratio,
+                "단기비중": shortRatio,
                 "단기사채잔액": s.get("단기사채잔액"),
                 "CP잔액": s.get("CP잔액"),
                 "단기채무합계": shortDebtTotal,

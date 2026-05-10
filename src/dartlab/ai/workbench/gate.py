@@ -244,12 +244,12 @@ def _extractClaimsFromAnswer(text: str, refs: list[Ref]) -> list[dict]:
         if "…" in id_part or "..." in id_part:
             continue
         candidate = f"{kind_short}:{id_part}" if not id_part.startswith(f"{kind_short}:") else id_part
-        ref_id = candidate if candidate in state_ids else (id_part if id_part in state_ids else None)
-        if not ref_id:
+        refId = candidate if candidate in state_ids else (id_part if id_part in state_ids else None)
+        if not refId:
             continue
-        if ref_id in seen_ref_ids:
+        if refId in seen_ref_ids:
             continue
-        seen_ref_ids.add(ref_id)
+        seen_ref_ids.add(refId)
 
         # 주변 context 추출 (앞 80 char + 토큰 + 뒤 30 char)
         start = max(0, match.start() - 80)
@@ -257,7 +257,7 @@ def _extractClaimsFromAnswer(text: str, refs: list[Ref]) -> list[dict]:
         context = stripped[start:end].replace("\n", " ").strip()
 
         # claim kind 분류
-        ref_kind = state_kind_by_id.get(ref_id, f"{kind_short}Ref")
+        ref_kind = state_kind_by_id.get(refId, f"{kind_short}Ref")
         if ref_kind in {"valueRef", "tableRef", "executionRef"} and _hasMaterialNumber(context):
             claim_kind = "numeric"
         elif ref_kind == "dateRef":
@@ -271,7 +271,7 @@ def _extractClaimsFromAnswer(text: str, refs: list[Ref]) -> list[dict]:
             {
                 "id": f"claim:{len(claims) + 1}",
                 "text": context,
-                "refIds": [ref_id],
+                "refIds": [refId],
                 "kind": claim_kind,
             }
         )

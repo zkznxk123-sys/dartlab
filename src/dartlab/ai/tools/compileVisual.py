@@ -61,9 +61,9 @@ def compileVisual(
     if source:
         spec["source"] = source
 
-    ref_id = f"visual:{chart}:{uuid.uuid4().hex[:8]}"
+    refId = f"visual:{chart}:{uuid.uuid4().hex[:8]}"
     ref = Ref(
-        id=ref_id,
+        id=refId,
         kind="visualRef",
         title=title or f"{chart} chart",
         source=source or "",

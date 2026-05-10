@@ -53,10 +53,10 @@ from dartlab.quant.strategy.styles._common import getArrays
 def build(
     company,
     *,
-    ema_fast: int = 20,
-    ema_slow: int = 60,
-    atr_k: float = 3.0,
-    use_macd_filter: bool = True,
+    emaFast: int = 20,
+    emaSlow: int = 60,
+    atrK: float = 3.0,
+    useMacdFilter: bool = True,
 ) -> Rule:
     """추세추종 룰 빌드 — Moskowitz-Ooi-Pedersen 2012 TSMOM 정의.
 
@@ -83,8 +83,8 @@ def build(
             meta={"style": "trendFollow", "error": "insufficient data"},
         )
 
-    ef = vema(close, ema_fast)
-    es = vema(close, ema_slow)
+    ef = vema(close, emaFast)
+    es = vema(close, emaSlow)
     mom_series = _momentumSeries(close)
     ts12_1 = mom_series["ts12_1"]  # MOP 학술 정의
 
@@ -95,7 +95,7 @@ def build(
     s.add("ema_dn", (ef < es) & ~np.isnan(ef) & ~np.isnan(es))
 
     entry = s.tsmom_pos & s.ema_up
-    if use_macd_filter:
+    if useMacdFilter:
         macd_sig = vmacdSignal(close)
         s.add("macd_up", macd_sig == 1)
         # MACD 양전환은 단발 신호 → 진입 시점 필터로만 사용
@@ -107,4 +107,4 @@ def build(
         entry_expr=entry,
         exit_expr=s.tsmom_neg | s.ema_dn,  # 학술: tsmom 음전환 → 청산
         meta={"style": "trendFollow", "definition": "MOP2012_TSMOM"},
-    ).with_stop("atr", k=atr_k, period=14)
+    ).withStop("atr", k=atrK, period=14)

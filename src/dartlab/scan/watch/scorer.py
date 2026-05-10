@@ -64,8 +64,8 @@ class ScoredChange:
     reason: str  # 점수 주요 근거
 
 
-def score_changes(
-    diff_result: DiffResult,
+def scoreChanges(
+    diffResult: DiffResult,
     *,
     sections: pl.DataFrame | None = None,
 ) -> list[ScoredChange]:
@@ -99,11 +99,11 @@ def score_changes(
         - deltaBytes : int — 최근 변화의 바이트 크기 차이 (바이트)
         - reason : str — 점수 주요 근거 요약
     """
-    {s.topic: s for s in diff_result.summaries}
+    {s.topic: s for s in diffResult.summaries}
 
     # entries에서 topic별 최근 변화 추출
     latest_entry: dict[str, DiffEntry] = {}
-    for entry in diff_result.entries:
+    for entry in diffResult.entries:
         prev = latest_entry.get(entry.topic)
         if prev is None or entry.toPeriod > prev.toPeriod:
             latest_entry[entry.topic] = entry
@@ -136,7 +136,7 @@ def score_changes(
 
     scored: list[ScoredChange] = []
 
-    for summary in diff_result.summaries:
+    for summary in diffResult.summaries:
         topic = summary.topic
         change_rate = summary.changeRate
 
@@ -199,7 +199,7 @@ def score_changes(
     return scored
 
 
-def scored_to_dataframe(scored: list[ScoredChange]) -> pl.DataFrame:
+def scoredToDataframe(scored: list[ScoredChange]) -> pl.DataFrame:
     """ScoredChange 리스트를 DataFrame으로 변환한다.
 
     Parameters

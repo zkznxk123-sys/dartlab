@@ -46,7 +46,7 @@ class TestGatherCache:
         assert cache.get("key1") is None
 
     def test_max_entries_eviction(self):
-        cache = GatherCache(max_entries=3)
+        cache = GatherCache(maxEntries=3)
         cache.put("a", 1, ttl=60)
         cache.put("b", 2, ttl=60)
         cache.put("c", 3, ttl=60)
@@ -56,7 +56,7 @@ class TestGatherCache:
         assert cache.size == 3
 
     def test_lru_access_order(self):
-        cache = GatherCache(max_entries=3)
+        cache = GatherCache(maxEntries=3)
         cache.put("a", 1, ttl=60)
         cache.put("b", 2, ttl=60)
         cache.put("c", 3, ttl=60)
@@ -67,19 +67,19 @@ class TestGatherCache:
 
     def test_typed_put_and_get(self):
         cache = GatherCache()
-        cache.put_typed("005930", "flow", {"foreign_net": -2500000})
-        result = cache.get_typed("005930", "flow")
+        cache.putTyped("005930", "flow", {"foreign_net": -2500000})
+        result = cache.getTyped("005930", "flow")
         assert result == {"foreign_net": -2500000}
 
     def test_invalidate(self):
         cache = GatherCache()
-        cache.put_typed("005930", "flow", {"foreign_net": -2500000})
-        cache.put_typed("005930", "price", {"current": 200000})
-        cache.put_typed("000660", "flow", {"foreign_net": 1200000})
+        cache.putTyped("005930", "flow", {"foreign_net": -2500000})
+        cache.putTyped("005930", "price", {"current": 200000})
+        cache.putTyped("000660", "flow", {"foreign_net": 1200000})
         cache.invalidate("005930")
-        assert cache.get_typed("005930", "flow") is None
-        assert cache.get_typed("005930", "price") is None
-        assert cache.get_typed("000660", "flow") is not None
+        assert cache.getTyped("005930", "flow") is None
+        assert cache.getTyped("005930", "price") is None
+        assert cache.getTyped("000660", "flow") is not None
 
     def test_clear(self):
         cache = GatherCache()
@@ -89,7 +89,7 @@ class TestGatherCache:
         assert cache.size == 0
 
     def test_repr(self):
-        cache = GatherCache(max_entries=100)
+        cache = GatherCache(maxEntries=100)
         assert "GatherCache" in repr(cache)
 
 
@@ -120,10 +120,10 @@ class TestGatherHttpClient:
     """GatherHttpClient 기본 동작."""
 
     def test_close(self):
-        from dartlab.gather.http import run_async
+        from dartlab.gather.http import runAsync
 
         client = GatherHttpClient()
-        run_async(client.close())  # 에러 없이 종료
+        runAsync(client.close())  # 에러 없이 종료
 
 
 # ══════════════════════════════════════
@@ -158,10 +158,10 @@ class TestDataTypes:
 
     def test_market_snapshot_repr(self):
         snap = MarketSnapshot(
-            stock_code="005930",
-            current_price=200000,
+            stockCode="005930",
+            currentPrice=200000,
             multiples={"per": 12.5, "pbr": 1.3},
-            sources_available=["naver"],
+            sourcesAvailable=["naver"],
             collected_at="2026-03-22T00:00:00",
         )
         r = repr(snap)
@@ -170,13 +170,13 @@ class TestDataTypes:
 
     def test_market_snapshot_defaults(self):
         snap = MarketSnapshot()
-        assert snap.stock_code == ""
-        assert snap.current_price == 0.0
+        assert snap.stockCode == ""
+        assert snap.currentPrice == 0.0
         assert snap.multiples == {}
 
     def test_gather_snapshot_properties(self):
         snap = GatherSnapshot(
-            stock_code="005930",
+            stockCode="005930",
             results={
                 "naver": GatherResult(
                     domain="naver",
@@ -189,11 +189,11 @@ class TestDataTypes:
         assert snap.price is not None
         assert snap.price.current == 200000
         assert snap.flow is not None
-        assert snap.sources_available == ["naver"]
+        assert snap.sourcesAvailable == ["naver"]
 
     def test_gather_snapshot_to_market_snapshot(self):
         snap = GatherSnapshot(
-            stock_code="005930",
+            stockCode="005930",
             results={
                 "naver": GatherResult(
                     domain="naver",
@@ -211,9 +211,9 @@ class TestDataTypes:
             },
             collected_at="2026-03-22T00:00:00",
         )
-        ms = snap.to_market_snapshot()
-        assert ms.stock_code == "005930"
-        assert ms.current_price == 200000
+        ms = snap.toMarketSnapshot()
+        assert ms.stockCode == "005930"
+        assert ms.currentPrice == 200000
         assert ms.multiples["per"] == 12.5
         assert ms.multiples["sector_per"] == 15.0
         assert ms.price_range_52w == (150000, 250000)
@@ -238,7 +238,7 @@ class TestNaverSource:
     """네이버 소스 — mock HTTP 응답 (async)."""
 
     def test_fetch_price_success(self):
-        from dartlab.gather.domains.naver import fetch_price
+        from dartlab.gather.domains.naver import fetchPrice
 
         mock_client = _make_async_client(
             {
@@ -254,7 +254,7 @@ class TestNaverSource:
             }
         )
 
-        result = asyncio.run(fetch_price("005930", mock_client))
+        result = asyncio.run(fetchPrice("005930", mock_client))
         assert result is not None
         assert result.current == 200000
         assert result.per == 12.5
@@ -262,7 +262,7 @@ class TestNaverSource:
         assert result.high_52w == 250000
 
     def test_fetch_flow_success(self):
-        from dartlab.gather.domains.naver import fetch_flow
+        from dartlab.gather.domains.naver import fetchFlow
 
         mock_client = _make_async_client(
             {
@@ -278,7 +278,7 @@ class TestNaverSource:
             }
         )
 
-        result = asyncio.run(fetch_flow("005930", mock_client))
+        result = asyncio.run(fetchFlow("005930", mock_client))
         assert result is not None
         assert isinstance(result, list)
         assert result[0]["foreignHoldingRatio"] == 55.3
@@ -286,14 +286,14 @@ class TestNaverSource:
         assert result[0]["institutionNet"] == 1200000.0
 
     def test_clean_number_edge_cases(self):
-        from dartlab.gather.domains.naver import _clean_number
+        from dartlab.gather.domains.naver import _cleanNumber
 
-        assert _clean_number("1,234,567") == 1234567
-        assert _clean_number("+500") == 500
-        assert _clean_number("-100") == -100
-        assert _clean_number("N/A") is None
-        assert _clean_number("") is None
-        assert _clean_number(None) is None
+        assert _cleanNumber("1,234,567") == 1234567
+        assert _cleanNumber("+500") == 500
+        assert _cleanNumber("-100") == -100
+        assert _cleanNumber("N/A") is None
+        assert _cleanNumber("") is None
+        assert _cleanNumber(None) is None
 
 
 # ══════════════════════════════════════
@@ -330,19 +330,19 @@ class TestGatherFacade:
         g = Gather(client=mock_client)
 
         # naver fetch_all만 mock — yahoo 등 실제 네트워크 차단
-        async def _mock_domain(self_inner, domain_name, stock_code, market):
-            if domain_name == "naver":
+        async def _mock_domain(self_inner, domainName, stockCode, market):
+            if domainName == "naver":
                 from dartlab.gather.domains import naver
 
-                return await naver.fetch_all(stock_code, self_inner._client)
-            return GatherResult(domain=domain_name)
+                return await naver.fetchAll(stockCode, self_inner._client)
+            return GatherResult(domain=domainName)
 
         with pytest.MonkeyPatch.context() as mp:
             mp.setattr(Gather, "_fetch_domain_async", _mock_domain)
             snapshot = g.collect("005930")
 
-        assert snapshot.stock_code == "005930"
-        assert len(snapshot.sources_available) > 0
+        assert snapshot.stockCode == "005930"
+        assert len(snapshot.sourcesAvailable) > 0
         assert snapshot.collected_at != ""
 
     def test_collect_caches_result(self):
@@ -376,18 +376,18 @@ class TestGatherFacade:
         g = Gather(client=mock_client)
 
         # naver fetch_all만 mock — yahoo 등 실제 네트워크 차단
-        async def _mock_domain(self_inner, domain_name, stock_code, market):
-            if domain_name == "naver":
+        async def _mock_domain(self_inner, domainName, stockCode, market):
+            if domainName == "naver":
                 from dartlab.gather.domains import naver
 
-                return await naver.fetch_all(stock_code, self_inner._client)
-            return GatherResult(domain=domain_name)
+                return await naver.fetchAll(stockCode, self_inner._client)
+            return GatherResult(domain=domainName)
 
         with pytest.MonkeyPatch.context() as mp:
             mp.setattr(Gather, "_fetch_domain_async", _mock_domain)
             snapshot = g.collect("005930")
 
-        assert snapshot.stock_code == "005930"
+        assert snapshot.stockCode == "005930"
         # price는 성공 (naver basic URL), 다른 도메인은 mock_get 에러로 빈 결과
         assert snapshot.price is not None
         assert snapshot.price.current == 200000
@@ -419,4 +419,4 @@ class TestGatherFacade:
         g.invalidate("005930")
         # 캐시 무효화 후 재수집
         snap = g.collect("005930")
-        assert snap.stock_code == "005930"
+        assert snap.stockCode == "005930"

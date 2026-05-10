@@ -60,7 +60,7 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
     close = arr.get("close")
     if close is None or len(close) < 60:
         return {"error": f"{stockCode} 데이터 부족 (최소 60일)"}
-    stock_ret = np.diff(np.log(close))
+    stockRet = np.diff(np.log(close))
 
     from dartlab.quant.benchmark import fetchBenchmarkOhlcv
 
@@ -71,14 +71,14 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
         benchmarkMode=benchmarkMode,
         start=kwargs.get("start"),
         end=kwargs.get("end"),
-        return_meta=True,
+        returnMeta=True,
     )
     if isEmptyDf(bench):
         return {"error": "벤치마크 데이터 없음"}
     bench_close = ohlcvToArrays(bench).get("close")
     if bench_close is None:
         return {"error": "벤치마크 close 없음"}
-    bench_ret = np.diff(np.log(bench_close))
+    benchRet = np.diff(np.log(bench_close))
 
     # 진짜 횡단면 팩터 시계열 빌드/로드
     if market == "KR":
@@ -90,7 +90,7 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
 
     if factors is None:
         # fallback: 1-factor CAPM (MKT만)
-        out = _capm_fallback(stockCode, market, stock_ret, bench_ret)
+        out = _capmFallback(stockCode, market, stockRet, benchRet)
         if "error" not in out:
             out["benchmarkUsed"] = benchmark_meta
         return out
@@ -101,7 +101,7 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
     cma = factors.get("cma")
 
     # 길이 정렬
-    ml = min(len(stock_ret), len(bench_ret), len(smb), len(hml))
+    ml = min(len(stockRet), len(benchRet), len(smb), len(hml))
     if rmw is not None:
         ml = min(ml, len(rmw))
     if cma is not None:
@@ -109,8 +109,8 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
     if ml < 30:
         return {"error": f"공통 기간 부족 ({ml}일)"}
 
-    y = stock_ret[-ml:]
-    cols = [bench_ret[-ml:], smb[-ml:], hml[-ml:]]
+    y = stockRet[-ml:]
+    cols = [benchRet[-ml:], smb[-ml:], hml[-ml:]]
     names = ["MKT", "SMB", "HML"]
     if rmw is not None:
         cols.append(rmw[-ml:])
@@ -120,7 +120,7 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
         names.append("CMA")
 
     X = np.column_stack(cols)
-    betas, alpha_val, r2, t_stats, residuals = _multi_ols(y, X)
+    betas, alpha_val, r2, t_stats, residuals = _multiOls(y, X)
 
     # Grinold/Kahn Ch.5 — raw IR = mean(residual alpha) / std(residual alpha)
     # residuals 는 팩터 제거 후 잔여 일별 수익 (raw 알파 시계열)
@@ -218,15 +218,15 @@ def factorExposureLimits(loadings: dict, *, limits: dict | None = None) -> dict:
     return {"limits": limits, "breaches": breaches, "compliant": len(breaches) == 0}
 
 
-def hedgeRatio(target_loading: float, hedge_loading: float) -> float:
+def hedgeRatio(targetLoading: float, hedgeLoading: float) -> float:
     """단일 팩터 헤지비율 — target / hedge.
 
     예: 포트의 SMB loading +0.8을 헤지하려면 SMB-vehicle의 SMB loading이
     +1.0인 경우 hedgeRatio = -0.8 (포트 1당 hedge -0.8).
     """
-    if hedge_loading == 0:
+    if hedgeLoading == 0:
         return 0.0
-    return float(-target_loading / hedge_loading)
+    return float(-targetLoading / hedgeLoading)
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -276,13 +276,13 @@ def decomposeRisk(
     sys_risk = float(np.sqrt(max(sys_var, 0.0)) * scale)
     res_risk = float(np.sqrt(max(res_var, 0.0)) * scale)
     total_risk = float(np.sqrt(max(total_var, 0.0)) * scale)
-    sys_share = float(sys_var / total_var) if total_var > 0 else float("nan")
-    res_share = 1.0 - sys_share if not np.isnan(sys_share) else float("nan")
+    sysShare = float(sys_var / total_var) if total_var > 0 else float("nan")
+    res_share = 1.0 - sysShare if not np.isnan(sysShare) else float("nan")
     return {
         "systematicRisk": sys_risk,
         "residualRisk": res_risk,
         "totalRisk": total_risk,
-        "systematicShare": sys_share,
+        "systematicShare": sysShare,
         "residualShare": res_share,
         "trackingError": res_risk,
     }
@@ -360,7 +360,7 @@ def residualAlphaIR(residualSeries: np.ndarray, *, annualize: bool = True) -> di
     }
 
 
-def _capm_fallback(stockCode: str, market: str, sr: np.ndarray, br: np.ndarray) -> dict:
+def _capmFallback(stockCode: str, market: str, sr: np.ndarray, br: np.ndarray) -> dict:
     """팩터 빌드 실패 시 1-factor CAPM."""
     ml = min(len(sr), len(br))
     if ml < 30:
@@ -387,7 +387,7 @@ def _capm_fallback(stockCode: str, market: str, sr: np.ndarray, br: np.ndarray) 
     }
 
 
-def _multi_ols(y, X):
+def _multiOls(y, X):
     """다변수 OLS + t-stats + residuals.
 
     Returns:
@@ -701,15 +701,15 @@ def calcMultiFactorRisk(stockCode: str, *, market: str = "auto") -> dict | None:
 
     total_var = sys_var + res_var
     total_risk_pct = float(np.sqrt(total_var)) * 100  # %
-    sys_share = (sys_var / total_var * 100) if total_var > 0 else 0.0
+    sysShare = (sys_var / total_var * 100) if total_var > 0 else 0.0
 
     # 팩터별 marginal contribution = B_k × (Σ_f B)_k / sys_var
     Sigma_f_B = Sigma_f @ B
-    factor_contrib: dict[str, float] = {}
+    factorContrib: dict[str, float] = {}
     for i, name in enumerate(factor_names):
         marginal = float(Sigma_f_B[i]) * float(B[i])
         contrib = (marginal / sys_var * 100) if sys_var > 0 else 0.0
-        factor_contrib[name] = round(contrib, 1)
+        factorContrib[name] = round(contrib, 1)
 
     return {
         "stockCode": stockCode,
@@ -718,26 +718,26 @@ def calcMultiFactorRisk(stockCode: str, *, market: str = "auto") -> dict | None:
         "systematicRisk": round(sys_risk_pct, 2),
         "residualRisk": round(res_risk_pct, 2),
         "totalRisk": round(total_risk_pct, 2),
-        "systematicShare": round(sys_share, 1),
-        "factorContributions": factor_contrib,
+        "systematicShare": round(sysShare, 1),
+        "factorContributions": factorContrib,
         "loadings": {n: round(float(B[i]), 3) for i, n in enumerate(factor_names)},
-        "interpretation": _interpretRiskDecomp(sys_share, factor_contrib),
+        "interpretation": _interpretRiskDecomp(sysShare, factorContrib),
     }
 
 
-def _interpretRiskDecomp(sys_share: float, factor_contrib: dict) -> str:
+def _interpretRiskDecomp(sysShare: float, factorContrib: dict) -> str:
     """systematic 비중 + 최대 기여 팩터 → 정성 평가."""
-    if sys_share > 70:
+    if sysShare > 70:
         kind = "팩터 의존 (시장 분산효과 큼)"
-    elif sys_share > 50:
+    elif sysShare > 50:
         kind = "팩터 + 고유 균형"
-    elif sys_share > 30:
+    elif sysShare > 30:
         kind = "고유 리스크 우세"
     else:
         kind = "거의 idiosyncratic (팩터 노출 작음)"
-    if not factor_contrib:
+    if not factorContrib:
         return kind
-    top = max(factor_contrib.items(), key=lambda x: abs(x[1]))
+    top = max(factorContrib.items(), key=lambda x: abs(x[1]))
     return f"{kind} | 최대 팩터 기여: {top[0]} ({top[1]:+.1f}%)"
 
 
@@ -879,7 +879,7 @@ def calcFactorIC(
         from dartlab.core.cross.scanBridge import extractAnnualConsolidated
         from dartlab.gather._hfBulk import loadFiltered
         from dartlab.quant._helpers import loadScanParquet
-        from dartlab.quant.factorBuild import _build_universe_metrics, _latest_year
+        from dartlab.quant.factorBuild import _buildUniverseMetrics, _latestYear
     except Exception as exc:  # noqa: BLE001
         log.warning("calcFactorIC import 실패: %s", type(exc).__name__)
         return None
@@ -889,7 +889,7 @@ def calcFactorIC(
         if lf is None:
             return None
         snap = extractAnnualConsolidated(lf.collect())
-        year = _latest_year(snap)
+        year = _latestYear(snap)
         if year is None:
             return None
     except Exception as exc:  # noqa: BLE001
@@ -904,7 +904,7 @@ def calcFactorIC(
         return None
     ret_year = str(year)
 
-    metrics = _build_universe_metrics(market, fund_year)
+    metrics = _buildUniverseMetrics(market, fund_year)
     if len(metrics) < 50:
         return None
 
@@ -959,8 +959,8 @@ def calcFactorIC(
         valid = np.isfinite(row) & np.isfinite(score_vec)
         if valid.sum() < 20:
             continue
-        sr = _rank_1d(score_vec[valid])
-        rr = _rank_1d(row[valid])
+        sr = _rank1d(score_vec[valid])
+        rr = _rank1d(row[valid])
         if sr.std() == 0 or rr.std() == 0:
             continue
         ic = float(np.corrcoef(sr, rr)[0, 1])
@@ -1002,7 +1002,7 @@ def calcFactorIC(
     }
 
 
-def _rank_1d(arr: np.ndarray) -> np.ndarray:
+def _rank1d(arr: np.ndarray) -> np.ndarray:
     """1D array → rank (ties averaged, 1-based normalized to 0..1 scale irrelevant)."""
     order = arr.argsort()
     ranks = np.empty_like(order, dtype=np.float64)

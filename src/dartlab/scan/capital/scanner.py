@@ -5,9 +5,9 @@ from __future__ import annotations
 import polars as pl
 
 from dartlab.scan._helpers import (
-    parse_date_year,
     parse_num,
-    scan_parquets,
+    parseDateYear,
+    scanParquets,
 )
 
 # ── 배당 ──
@@ -17,7 +17,7 @@ YIELD_KEYS = {"현금배당수익률(%)", "현금배당수익률"}
 TOTAL_KEYS = {"현금배당금총액(백만원)", "현금배당금총액"}
 
 
-def scan_dividend() -> dict[str, dict]:
+def scanDividend() -> dict[str, dict]:
     """전종목 배당 스캔.
 
     최신 연도 Q4 기준. DPS 행이 100개 이상인 연도를 선택.
@@ -31,7 +31,7 @@ def scan_dividend() -> dict[str, dict]:
             배당수익률 : float — 현금배당수익률 (%)
             배당총액_백만 : float — 현금배당금 총액 (백만원)
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "dividend",
         ["stockCode", "year", "quarter", "se", "thstrm"],
     )
@@ -94,7 +94,7 @@ def scan_dividend() -> dict[str, dict]:
 # ── 자사주 ──
 
 
-def scan_treasury_stock() -> dict[str, dict]:
+def scanTreasuryStock() -> dict[str, dict]:
     """전종목 자사주 스캔.
 
     Returns
@@ -109,7 +109,7 @@ def scan_treasury_stock() -> dict[str, dict]:
             처분수량 : int — 당기 처분 주식수 (주)
             소각수량 : int — 당기 소각 주식수 (주)
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "treasuryStock",
         ["stockCode", "year", "quarter", "trmend_qy", "change_qy_acqs", "change_qy_dsps", "change_qy_incnr"],
     )
@@ -173,7 +173,7 @@ INCREASE_TYPES = {
 }
 
 
-def scan_capital_change() -> dict[str, dict]:
+def scanCapitalChange() -> dict[str, dict]:
     """전종목 증자/감자 스캔.
 
     최근 3년(2023~) 이내 증자(INCREASE_TYPES) 여부.
@@ -184,7 +184,7 @@ def scan_capital_change() -> dict[str, dict]:
         {종목코드: info} 매핑. 각 info:
             최근증자 : bool — 최근 3년 내 증자 여부
     """
-    raw = scan_parquets(
+    raw = scanParquets(
         "capitalChange",
         ["stockCode", "year", "quarter", "isu_dcrs_stle", "isu_dcrs_de"],
     )
@@ -198,12 +198,12 @@ def scan_capital_change() -> dict[str, dict]:
     result: dict[str, dict] = {}
     for code, group in valid.group_by("stockCode"):
         code_val = code[0]
-        recent_increase = False
+        recentIncrease = False
         for row in group.iter_rows(named=True):
             stle = row.get("isu_dcrs_stle", "")
-            event_year = parse_date_year(row.get("isu_dcrs_de"))
+            event_year = parseDateYear(row.get("isu_dcrs_de"))
             if stle in INCREASE_TYPES and event_year and event_year >= 2023:
-                recent_increase = True
+                recentIncrease = True
                 break
-        result[code_val] = {"최근증자": recent_increase}
+        result[code_val] = {"최근증자": recentIncrease}
     return result

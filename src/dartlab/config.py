@@ -35,7 +35,7 @@ dataDir: str = os.environ.get("DARTLAB_DATA_DIR", str(_DEFAULT_DATA_DIR))
 _project_config: dict | None = None
 
 
-def _find_config_file() -> Path | None:
+def _findConfigFile() -> Path | None:
     """cwd → parent → home 순으로 .dartlab.yml 탐색."""
     candidates = []
     cwd = Path.cwd()
@@ -56,13 +56,13 @@ def _find_config_file() -> Path | None:
     return None
 
 
-def load_project_config() -> dict:
+def loadProjectConfig() -> dict:
     """프로젝트 설정 로드 (1회만, 이후 캐싱)."""
     global _project_config
     if _project_config is not None:
         return _project_config
 
-    config_path = _find_config_file()
+    config_path = _findConfigFile()
     if config_path is None:
         _project_config = {}
         return _project_config
@@ -89,19 +89,19 @@ def load_project_config() -> dict:
     return _project_config
 
 
-def get_default_company() -> str | None:
+def getDefaultCompany() -> str | None:
     """프로젝트 설정의 기본 종목."""
-    cfg = load_project_config()
+    cfg = loadProjectConfig()
     return cfg.get("company")
 
 
-def get_default_provider() -> str | None:
+def getDefaultProvider() -> str | None:
     """프로젝트 설정의 기본 provider."""
-    cfg = load_project_config()
+    cfg = loadProjectConfig()
     return cfg.get("provider")
 
 
-def get_default_model() -> str | None:
+def getDefaultModel() -> str | None:
     """프로젝트 설정의 기본 model."""
-    cfg = load_project_config()
+    cfg = loadProjectConfig()
     return cfg.get("model")

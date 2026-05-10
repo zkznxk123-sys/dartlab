@@ -57,7 +57,7 @@ from dartlab.providers.dart._report_accessor import _ReportAccessor
 from dartlab.providers.dart._utils import (
     _checkDartDocsFreshness,
     _ensureAllData,
-    _import_and_call,
+    _importAndCall,
     _shapeString,
 )
 from dartlab.providers.dart.docs.notes import Notes
@@ -68,7 +68,7 @@ _MODULE_INDEX: dict[str, int] | None = None
 _ALL_PROPERTIES: list[tuple[str, str]] | None = None
 
 
-def _get_module_registry() -> list[tuple[str, str, str, Any]]:
+def _getModuleRegistry() -> list[tuple[str, str, str, Any]]:
     """lazy 모듈 레지스트리 — 최초 접근 시 구축."""
     global _MODULE_REGISTRY, _MODULE_INDEX
     if _MODULE_REGISTRY is None:
@@ -80,15 +80,15 @@ def _get_module_registry() -> list[tuple[str, str, str, Any]]:
     return _MODULE_REGISTRY
 
 
-def _get_module_index() -> dict[str, int]:
+def _getModuleIndex() -> dict[str, int]:
     """lazy 모듈 인덱스 — 최초 접근 시 구축."""
     global _MODULE_INDEX
     if _MODULE_INDEX is None:
-        _get_module_registry()
+        _getModuleRegistry()
     return _MODULE_INDEX  # type: ignore[return-value]
 
 
-def _get_all_properties() -> list[tuple[str, str]]:
+def _getAllProperties() -> list[tuple[str, str]]:
     """lazy all() 순서 목록 — 최초 접근 시 구축."""
     global _ALL_PROPERTIES
     if _ALL_PROPERTIES is None:
@@ -97,7 +97,7 @@ def _get_all_properties() -> list[tuple[str, str]]:
             ("IS", "손익계산서"),
             ("CF", "현금흐름표"),
         ]
-        for entry in _get_module_registry():
+        for entry in _getModuleRegistry():
             name = entry[1]
             if name in ("fsSummary", "statements", "companyOverview"):
                 continue
@@ -105,7 +105,7 @@ def _get_all_properties() -> list[tuple[str, str]]:
     return _ALL_PROPERTIES
 
 
-def rebuild_module_registry() -> None:
+def rebuildModuleRegistry() -> None:
     """플러그인 등록 후 호출 — 모듈 레지스트리 캐시 무효화."""
     global _MODULE_REGISTRY, _MODULE_INDEX, _ALL_PROPERTIES
     _MODULE_REGISTRY = None
@@ -249,23 +249,23 @@ def _filterPeriodColumnsByAsOf(df: "pl.DataFrame", asOf: str) -> "pl.DataFrame":
     asOf 형식: "YYYY-MM-DD" / "YYYYQn" / "YYYY". 컬럼 헤더가 fiscal period
     pattern 이면 비교, 아니면 그대로 유지 (snakeId / 항목 같은 metadata 컬럼).
     """
-    asof_year, asof_quarter = _parse_asof(asOf)
+    asof_year, asof_quarter = _parseAsof(asOf)
     if asof_year is None:
         return df
-    keep_cols: list[str] = []
+    keepCols: list[str] = []
     for col in df.columns:
-        col_year, col_quarter = _parse_asof(col)
+        col_year, col_quarter = _parseAsof(col)
         if col_year is None:
-            keep_cols.append(col)
+            keepCols.append(col)
             continue
         if col_year < asof_year:
-            keep_cols.append(col)
+            keepCols.append(col)
         elif col_year == asof_year and (col_quarter is None or asof_quarter is None or col_quarter <= asof_quarter):
-            keep_cols.append(col)
-    return df.select(keep_cols) if len(keep_cols) < len(df.columns) else df
+            keepCols.append(col)
+    return df.select(keepCols) if len(keepCols) < len(df.columns) else df
 
 
-def _parse_asof(value: str) -> tuple[int | None, int | None]:
+def _parseAsof(value: str) -> tuple[int | None, int | None]:
     """fiscal period or ISO date → (year, quarter or None). 미인식 → (None, None)."""
     import re as _re
 
@@ -295,7 +295,7 @@ def listExportModules() -> list[tuple[str, str]]:
         생성용. prop 은 Company 속성명 (예: "businessOverview"), label 은
         사용자 표시용 한글 라벨.
     """
-    return list(_get_all_properties())
+    return list(_getAllProperties())
 
 
 class Company:
@@ -391,7 +391,7 @@ class Company:
             self.stockCode = code
         from dartlab.core.memory import BoundedCache
 
-        self._cache: BoundedCache = BoundedCache(max_entries=30)
+        self._cache: BoundedCache = BoundedCache(maxEntries=30)
 
         _dataStatus = _ensureAllData(self.stockCode)
         self._hasDocs = _dataStatus.get("docs", False)
@@ -422,7 +422,7 @@ class Company:
         if not self._hasDocs and not self._hasFinanceParquet and not self._hasReport:
             from dartlab.core.messaging import emit
 
-            emit("error:no_data", stockCode=self.stockCode, raise_as=ValueError)
+            emit("error:no_data", stockCode=self.stockCode, raiseAs=ValueError)
 
         self._hintedKeys: set[str] = set()  # 동일 안내 반복 방지
 
@@ -552,16 +552,16 @@ class Company:
 
     # ── 내부 호출 ──
 
-    def _call_module(self, name: str, **kwargs) -> Any:
+    def _callModule(self, name: str, **kwargs) -> Any:
         """모듈 호출 + 캐싱. Notes에서도 사용."""
         if not self._hasDocs:
             return None
         cacheKey = f"{name}:{sorted(kwargs.items())}" if kwargs else name
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        idx = _get_module_index()[name]
-        entry = _get_module_registry()[idx]
-        result = _import_and_call(entry[0], entry[1], self.stockCode, **kwargs)
+        idx = _getModuleIndex()[name]
+        entry = _getModuleRegistry()[idx]
+        result = _importAndCall(entry[0], entry[1], self.stockCode, **kwargs)
         self._cache[cacheKey] = result
         return result
 
@@ -577,7 +577,7 @@ class Company:
         cacheKey = f"notesDetail:{keyword}:{period}"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        result = _import_and_call(
+        result = _importAndCall(
             "dartlab.providers.dart.docs.finance.notesDetail",
             "notesDetail",
             self.stockCode,
@@ -587,19 +587,19 @@ class Company:
         self._cache[cacheKey] = result
         return result
 
-    def _get_primary(self, name: str, **kwargs) -> Any:
+    def _getPrimary(self, name: str, **kwargs) -> Any:
         """모듈 호출 후 primary DataFrame 추출."""
         from dartlab import config
 
         cacheKey = f"{name}:{sorted(kwargs.items())}" if kwargs else name
-        idx = _get_module_index()[name]
-        entry = _get_module_registry()[idx]
+        idx = _getModuleIndex()[name]
+        entry = _getModuleRegistry()[idx]
         label = entry[2]
 
         if config.verbose and cacheKey not in self._cache and name != "sections":
             _log.info("  ▶ %s · %s", self.corpName, label)
 
-        result = self._call_module(name, **kwargs)
+        result = self._callModule(name, **kwargs)
         extractor = entry[3]
         if result is None:
             return None
@@ -1283,7 +1283,7 @@ class Company:
 
     def _safePrimary(self, name: str) -> pl.DataFrame | None:
         try:
-            payload = self._get_primary(name)
+            payload = self._getPrimary(name)
         except (KeyError, ValueError, TypeError, FileNotFoundError, AttributeError):
             import logging
 
@@ -2125,12 +2125,12 @@ class Company:
             - diff: 줄 단위 상세 변경 비교 (watch보다 세밀)
             - keywordTrend: 키워드 빈도 추이
         """
-        from dartlab.scan.watch.scanner import scan_company
+        from dartlab.scan.watch.scanner import scanCompany
 
-        result = scan_company(self, topic=topic)
+        result = scanCompany(self, topic=topic)
         if result is None:
             return None
-        return result.to_dataframe()
+        return result.toDataframe()
 
     @property
     def story(self):

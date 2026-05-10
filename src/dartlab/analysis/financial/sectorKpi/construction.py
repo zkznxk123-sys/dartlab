@@ -5,10 +5,10 @@ DART report(constructionOrders) + sections(productService) + notes(provisions/bo
 
 from __future__ import annotations
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 
 
-@memoized_calc
+@memoizedCalc
 def calcConstructionKpis(company, *, basePeriod: str | None = None) -> dict | None:
     """건설업 핵심 KPI 통합 반환.
 

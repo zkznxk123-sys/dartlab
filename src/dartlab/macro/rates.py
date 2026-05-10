@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from dartlab.macro._helpers import (
-    apply_overrides,
-    collect_timeseries,
-    fetch_latest,
-    fetch_yoy,
-    get_gather,
+    applyOverrides,
+    collectTimeseries,
+    fetchLatest,
+    fetchYoy,
+    getGather,
 )
 from dartlab.macro.macroCycle import decomposeLongRate, rateOutlook, realRateRegime
 from dartlab.macro.sentiment import (
@@ -18,7 +18,7 @@ from dartlab.macro.sentiment import (
 from dartlab.macro.yieldCurve import nelsonSiegel
 
 
-def _fetch_payrolls_3m_avg(g) -> float | None:
+def _fetchPayrolls3mAvg(g) -> float | None:
     """PAYEMS(비농업고용) 최근 3개월 평균 변화.
 
     PAYEMS는 누적 고용 수준(천명). 월간 변화 = 당월 - 전월.
@@ -48,7 +48,7 @@ def _fetch_payrolls_3m_avg(g) -> float | None:
         return None
 
 
-def _fetch_rate_data(market: str, as_of: str | None = None) -> dict[str, float | None]:
+def _fetchRateData(market: str, asOf: str | None = None) -> dict[str, float | None]:
     """gather에서 금리 관련 지표 수집.
 
     Parameters
@@ -75,7 +75,7 @@ def _fetch_rate_data(market: str, as_of: str | None = None) -> dict[str, float |
         - payrolls_3m_avg : float — 비농업고용 3개월 평균 변화 (천명)
         - base_rate : float — 한국 기준금리 (%, KR 전용)
     """
-    g = get_gather(as_of)
+    g = getGather(asOf)
     data: dict[str, float | None] = {}
 
     if market.upper() == "US":
@@ -88,20 +88,20 @@ def _fetch_rate_data(market: str, as_of: str | None = None) -> dict[str, float |
             ("unrate", "UNRATE"),
             ("t5yie", "T5YIE"),
         ]:
-            data[key] = fetch_latest(g, sid)
+            data[key] = fetchLatest(g, sid)
 
-        data["cpi_yoy"] = fetch_yoy(g, "CPIAUCSL")
-        data["core_cpi"] = fetch_yoy(g, "CPILFESL")
-        data["payrolls_3m_avg"] = _fetch_payrolls_3m_avg(g)
+        data["cpi_yoy"] = fetchYoy(g, "CPIAUCSL")
+        data["core_cpi"] = fetchYoy(g, "CPILFESL")
+        data["payrolls_3m_avg"] = _fetchPayrolls3mAvg(g)
 
     elif market.upper() == "KR":
-        data["base_rate"] = fetch_latest(g, "BASE_RATE")
-        data["cpi_yoy"] = fetch_yoy(g, "CPI")
+        data["base_rate"] = fetchLatest(g, "BASE_RATE")
+        data["cpi_yoy"] = fetchYoy(g, "CPI")
 
     return {k: v for k, v in data.items() if v is not None}
 
 
-def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
+def analyzeRates(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """금리 종합 분석 — 방향 전망 + 고용/물가 해석 + 수익률곡선 분해.
 
     Parameters
@@ -128,9 +128,9 @@ def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: di
         - bondRiskPremium : dict | None — Cochrane-Piazzesi 채권 리스크 프리미엄. US 전용.
         - timeseries : dict — fed_funds / dgs2 / dgs10 / bei / cpi 시계열
     """
-    data = _fetch_rate_data(market, as_of=as_of)
+    data = _fetchRateData(market, asOf=asOf)
     if overrides:
-        data = apply_overrides(data, overrides)
+        data = applyOverrides(data, overrides)
     result: dict = {"market": market.upper()}
 
     # 금리 방향 전망
@@ -164,8 +164,8 @@ def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: di
     # DKW 분해 (US만)
     result["decomposition"] = None
     if market.upper() == "US" and dgs10 and data.get("t10yie") and data.get("dfii10"):
-        acm_tp = fetch_latest(get_gather(as_of), "THREEFYTP10")
-        decomp = decomposeLongRate(dgs10, data["t10yie"], data["dfii10"], acm_term_premium=acm_tp)
+        acm_tp = fetchLatest(getGather(asOf), "THREEFYTP10")
+        decomp = decomposeLongRate(dgs10, data["t10yie"], data["dfii10"], acmTermPremium=acm_tp)
         result["decomposition"] = {
             "nominal": decomp.nominal,
             "expectedInflation": decomp.expectedInflation,
@@ -177,7 +177,7 @@ def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: di
     # 고용 해석
     unrate = data.get("unrate")
     if unrate is not None:
-        emp = interpretEmployment(unrate, payrolls_3m_avg=data.get("payrolls_3m_avg"))
+        emp = interpretEmployment(unrate, payrolls3mAvg=data.get("payrolls_3m_avg"))
         result["employment"] = {"state": emp.state, "stateLabel": emp.stateLabel, "reasoning": list(emp.reasoning)}
     else:
         result["employment"] = None
@@ -193,12 +193,12 @@ def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: di
     # Nelson-Siegel 수익률곡선 분해 (US만)
     result["yieldCurve"] = None
     if market.upper() == "US":
-        g = get_gather(as_of)
+        g = getGather(asOf)
         maturities = [1, 2, 3, 5, 7, 10, 20, 30]
-        series_ids = ["DGS1", "DGS2", "DGS3", "DGS5", "DGS7", "DGS10", "DGS20", "DGS30"]
+        seriesIds = ["DGS1", "DGS2", "DGS3", "DGS5", "DGS7", "DGS10", "DGS20", "DGS30"]
         yields_list, valid_mats = [], []
-        for mat, sid in zip(maturities, series_ids):
-            val = fetch_latest(g, sid)
+        for mat, sid in zip(maturities, seriesIds):
+            val = fetchLatest(g, sid)
             if val is not None:
                 yields_list.append(val)
                 valid_mats.append(mat)
@@ -231,7 +231,7 @@ def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: di
     result["termPremium"] = None
     if market.upper() == "US":
         try:
-            tp = fetch_latest(g, "THREEFYTP10")
+            tp = fetchLatest(g, "THREEFYTP10")
             if tp is not None:
                 if tp < 0:
                     tp_zone, tp_label = "compressed", "압축"
@@ -261,7 +261,7 @@ def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: di
 
             spot = {}
             for mat, sid in [(1, "DGS1"), (2, "DGS2"), (3, "DGS3"), (5, "DGS5")]:
-                v = fetch_latest(g, sid)
+                v = fetchLatest(g, sid)
                 if v is not None:
                     spot[mat] = v
             # 4Y는 3Y와 5Y 보간
@@ -276,8 +276,8 @@ def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: di
             pass
 
     # 시계열
-    g = get_gather(as_of)
-    result["timeseries"] = collect_timeseries(
+    g = getGather(asOf)
+    result["timeseries"] = collectTimeseries(
         g,
         {
             "fed_funds": "FEDFUNDS",

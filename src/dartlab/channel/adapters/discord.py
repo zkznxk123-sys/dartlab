@@ -39,7 +39,7 @@ class DiscordAdapter(ChannelAdapter):
         adapter = self
 
         @bot.event
-        async def on_ready():
+        async def onReady():
             logger.info("Discord 봇 준비 완료: %s", bot.user)
             try:
                 synced = await bot.tree.sync()
@@ -49,17 +49,17 @@ class DiscordAdapter(ChannelAdapter):
 
         @bot.tree.command(name="ask", description="DartLab 기업 분석")
         @app_commands.describe(query="종목명 + 질문 (예: 삼성전자 배당 분석)")
-        async def ask_cmd(interaction: discord.Interaction, query: str):
+        async def askCmd(interaction: discord.Interaction, query: str):
             await interaction.response.defer()
-            channel_id = str(interaction.channel_id)
+            channelId = str(interaction.channelId)
 
             # handle_ask가 send_text를 호출하므로, followup으로 대체
             adapter._interaction = interaction
             adapter._followup_sent = False
-            await adapter.handle_ask(channel_id, query)
+            await adapter.handleAsk(channelId, query)
 
         @bot.event
-        async def on_message(message: discord.Message):
+        async def onMessage(message: discord.Message):
             if message.author == bot.user:
                 return
             # DM이거나 봇이 멘션된 경우
@@ -75,7 +75,7 @@ class DiscordAdapter(ChannelAdapter):
 
             adapter._interaction = None
             adapter._channel_obj = message.channel
-            await adapter.handle_ask(str(message.channel.id), text)
+            await adapter.handleAsk(str(message.channel.id), text)
 
         logger.info("Discord 봇 시작")
         await bot.start(self._token)
@@ -85,7 +85,7 @@ class DiscordAdapter(ChannelAdapter):
         if self._bot:
             await self._bot.close()
 
-    async def send_text(self, channel_id: str, text: str) -> None:
+    async def sendText(self, channelId: str, text: str) -> None:
         """Discord 채널에 텍스트 메시지 전송."""
         # slash command의 경우 followup 사용
         interaction = getattr(self, "_interaction", None)
@@ -102,7 +102,7 @@ class DiscordAdapter(ChannelAdapter):
         if channel:
             await channel.send(text)
         elif self._bot:
-            ch = self._bot.get_channel(int(channel_id))
+            ch = self._bot.get_channel(int(channelId))
             if ch:
                 await ch.send(text)
 

@@ -32,7 +32,7 @@ class DriftReport:
     notes: list[str] = field(default_factory=list)
     suggestDeprecate: bool = False
 
-    def to_dict(self) -> dict[str, Any]:
+    def toDict(self) -> dict[str, Any]:
         return asdict(self)
 
 

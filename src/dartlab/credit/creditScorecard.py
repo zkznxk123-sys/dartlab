@@ -83,36 +83,36 @@ def weightedScore(axes: list[dict]) -> float:
 
 
 def cashFlowGrade(
-    ocf_to_sales: float | None,
-    fcf_positive: bool | None,
-    ocf_to_debt: float | None,
-    ocf_trend_stable: bool | None = None,
+    ocfToSales: float | None,
+    fcfPositive: bool | None,
+    ocfToDebt: float | None,
+    ocfTrendStable: bool | None = None,
 ) -> str:
     """현금흐름등급 eCR-1 ~ eCR-6.
 
     한국 신평사 현금흐름창출능력 별도 평가 대응.
     """
-    if ocf_to_sales is None:
+    if ocfToSales is None:
         return "eCR-?"
 
     # eCR-1: 최상의 현금흐름
-    if ocf_to_sales > 15 and (fcf_positive is True) and (ocf_to_debt is not None and ocf_to_debt > 30):
+    if ocfToSales > 15 and (fcfPositive is True) and (ocfToDebt is not None and ocfToDebt > 30):
         return "eCR-1"
 
     # eCR-2: 우수
-    if ocf_to_sales > 10 and (ocf_to_debt is not None and ocf_to_debt > 20):
+    if ocfToSales > 10 and (ocfToDebt is not None and ocfToDebt > 20):
         return "eCR-2"
 
     # eCR-3: 양호
-    if ocf_to_sales > 5 and (ocf_trend_stable is not False):
+    if ocfToSales > 5 and (ocfTrendStable is not False):
         return "eCR-3"
 
     # eCR-4: 보통
-    if ocf_to_sales > 0:
+    if ocfToSales > 0:
         return "eCR-4"
 
     # eCR-5: 취약
-    if ocf_to_sales > -5:
+    if ocfToSales > -5:
         return "eCR-5"
 
     # eCR-6: 심각

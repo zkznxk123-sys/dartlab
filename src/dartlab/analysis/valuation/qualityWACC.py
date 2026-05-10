@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 
-def calcQualityWACC(company: Any, base_wacc: float, *, basePeriod: str | None = None) -> dict:
+def calcQualityWACC(company: Any, baseWacc: float, *, basePeriod: str | None = None) -> dict:
     """4엔진 질적 요인 → WACC 가감 산출.
 
     Parameters
@@ -35,11 +35,11 @@ def calcQualityWACC(company: Any, base_wacc: float, *, basePeriod: str | None = 
     total_spread = sum(f["spread"] for f in factors)
     # Phase 4 G12.2: AA 등급 대기업은 시장평균 대비 음수 프리미엄 정당 — 하한 -1.5 → -2.5
     total_spread = max(-2.5, min(5.5, total_spread))
-    adjusted = base_wacc + total_spread
+    adjusted = baseWacc + total_spread
 
     return {
         "adjustedWACC": round(adjusted, 2),
-        "baseWACC": base_wacc,
+        "baseWACC": baseWacc,
         "totalSpread": round(total_spread, 2),
         "factors": factors,
     }

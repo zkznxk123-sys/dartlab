@@ -57,7 +57,7 @@ def test_looks_like_company_rejects_long_digit():
 
 def test_ensure_utf8_wraps_non_utf8_stdout(monkeypatch):
     """비-UTF8 인코딩 stdout이면 UTF8 wrapper로 교체한다."""
-    from dartlab.cli.main import _ensure_utf8
+    from dartlab.cli.main import _ensureUtf8
 
     original_stdout = sys.stdout
     original_stderr = sys.stderr
@@ -68,7 +68,7 @@ def test_ensure_utf8_wraps_non_utf8_stdout(monkeypatch):
         sys.stdout = fake_stdout
         sys.stderr = io.TextIOWrapper(io.BytesIO(), encoding="cp949")
 
-        _ensure_utf8()
+        _ensureUtf8()
 
         assert sys.stdout.encoding.lower() in ("utf-8", "utf8")
         assert sys.stderr.encoding.lower() in ("utf-8", "utf8")
@@ -79,14 +79,14 @@ def test_ensure_utf8_wraps_non_utf8_stdout(monkeypatch):
 
 def test_ensure_utf8_skips_if_already_utf8():
     """이미 UTF-8이면 교체하지 않는다."""
-    from dartlab.cli.main import _ensure_utf8
+    from dartlab.cli.main import _ensureUtf8
 
     original_stdout = sys.stdout
     try:
         # stdout이 이미 utf-8이면 변경 없어야 함
         if sys.stdout.encoding and sys.stdout.encoding.lower() in ("utf-8", "utf8"):
             old_id = id(sys.stdout)
-            _ensure_utf8()
+            _ensureUtf8()
             # stdout 객체가 동일해야 함
             assert id(sys.stdout) == old_id
     finally:
@@ -104,9 +104,9 @@ def test_main_routes_stock_code_to_review():
     assert _looksLikeCompany("005930") is True
     # main()의 implicit routing: raw = ["005930"] → raw = ["story", "005930"]
     # build_parser().parse_args(["story", "005930"])로 실행됨
-    from dartlab.cli.parser import build_parser
+    from dartlab.cli.parser import buildParser
 
-    parser = build_parser()
+    parser = buildParser()
     args = parser.parse_args(["story", "005930"])
     assert args.command == "story"
     assert args.company == "005930"
@@ -117,9 +117,9 @@ def test_main_routes_korean_name_to_review():
     from dartlab.cli.main import _looksLikeCompany
 
     assert _looksLikeCompany("삼성전자") is True
-    from dartlab.cli.parser import build_parser
+    from dartlab.cli.parser import buildParser
 
-    parser = build_parser()
+    parser = buildParser()
     args = parser.parse_args(["story", "삼성전자"])
     assert args.command == "story"
     assert args.company == "삼성전자"
@@ -144,7 +144,7 @@ def test_main_cli_error_returns_custom_exit_code(capsys):
     from dartlab.cli.main import main
     from dartlab.cli.services.errors import CLIError
 
-    with patch("dartlab.cli.commands.ask.run", side_effect=CLIError("test error", exit_code=42)):
+    with patch("dartlab.cli.commands.ask.run", side_effect=CLIError("test error", exitCode=42)):
         result = main(["ask", "005930", "test"])
 
     assert result == 42

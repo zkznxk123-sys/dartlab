@@ -138,7 +138,7 @@ def _parse(val) -> float | None:
     return parseNumStr(val)
 
 
-def _load_account(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[str, float]:
+def _loadAccount(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[str, float]:
     """특정 계정의 전종목 금액 추출 — scanBridge 경유 DART/EDGAR 통일."""
     try:
         full = lf.collect()
@@ -194,9 +194,9 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
 
     # 최신 연도 확인
     edgar = isEdgarSchema(lf)
-    year_col = "fy" if edgar else "bsns_year"
+    yearCol = "fy" if edgar else "bsns_year"
     try:
-        years = lf.select(year_col).unique().collect().to_series().sort(descending=True).to_list()
+        years = lf.select(yearCol).unique().collect().to_series().sort(descending=True).to_list()
         years = [str(y) for y in years]
     except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {**result, "error": str(e)}
@@ -207,7 +207,7 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
     # 데이터가 풍부한 연도 선택 (최신 → fallback)
     year = None
     for y in years:
-        assets_test = _load_account(lf, "BS", "자산총계", y)
+        assets_test = _loadAccount(lf, "BS", "자산총계", y)
         if len(assets_test) >= 100:
             year = y
             break
@@ -216,12 +216,12 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
     result["year"] = year
 
     # 계정별 전종목 추출 (LazyFrame 필터로 메모리 안전)
-    sales = _load_account(lf, "IS", "매출액", year)
-    op = _load_account(lf, "IS", "영업이익", year)
-    ni = _load_account(lf, "IS", "당기순이익", year)
-    assets = _load_account(lf, "BS", "자산총계", year)
-    debt = _load_account(lf, "BS", "부채총계", year)
-    equity = _load_account(lf, "BS", "자본총계", year)
+    sales = _loadAccount(lf, "IS", "매출액", year)
+    op = _loadAccount(lf, "IS", "영업이익", year)
+    ni = _loadAccount(lf, "IS", "당기순이익", year)
+    assets = _loadAccount(lf, "BS", "자산총계", year)
+    debt = _loadAccount(lf, "BS", "부채총계", year)
+    equity = _loadAccount(lf, "BS", "자본총계", year)
 
     # 시총 (KR 만) — size + bookYield 팩터용
     market_caps: dict[str, float] = {}

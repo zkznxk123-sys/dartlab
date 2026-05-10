@@ -1356,7 +1356,7 @@ def _buildMacroBlocks(company, keys, basePeriod, safe: Callable, need: Callable,
     _macro_summary: list = [None]
     _macro_market = getattr(company, "market", "KR")
 
-    def _ensure_summary():
+    def _ensureSummary():
         if _macro_summary[0] is None:
             import dartlab as _dl
 
@@ -1368,25 +1368,25 @@ def _buildMacroBlocks(company, keys, basePeriod, safe: Callable, need: Callable,
         return _macro_summary[0]
 
     if need("macroEnvironment"):
-        out["macroEnvironment"] = safe(lambda: macroEnvironmentBlock(_ensure_summary()))
+        out["macroEnvironment"] = safe(lambda: macroEnvironmentBlock(_ensureSummary()))
     if need("macroCycle"):
-        out["macroCycle"] = safe(lambda: macroCycleBlock(_ensure_summary().get("cycle", {})))
+        out["macroCycle"] = safe(lambda: macroCycleBlock(_ensureSummary().get("cycle", {})))
     if need("macroRates"):
-        out["macroRates"] = safe(lambda: macroRatesBlock(_ensure_summary().get("rates", {})))
+        out["macroRates"] = safe(lambda: macroRatesBlock(_ensureSummary().get("rates", {})))
     if need("macroLiquidity"):
-        out["macroLiquidity"] = safe(lambda: macroLiquidityBlock(_ensure_summary().get("liquidity", {})))
+        out["macroLiquidity"] = safe(lambda: macroLiquidityBlock(_ensureSummary().get("liquidity", {})))
     if need("macroSentiment"):
-        out["macroSentiment"] = safe(lambda: macroSentimentBlock(_ensure_summary().get("sentiment", {})))
+        out["macroSentiment"] = safe(lambda: macroSentimentBlock(_ensureSummary().get("sentiment", {})))
     if need("macroForecast"):
-        out["macroForecast"] = safe(lambda: macroForecastBlock(_ensure_summary().get("forecast")))
+        out["macroForecast"] = safe(lambda: macroForecastBlock(_ensureSummary().get("forecast")))
     if need("macroCorporate"):
-        out["macroCorporate"] = safe(lambda: macroCorporateBlock(_ensure_summary().get("corporate")))
+        out["macroCorporate"] = safe(lambda: macroCorporateBlock(_ensureSummary().get("corporate")))
     if need("macroTrade"):
         _market = getattr(company, "market", "KR")
         if _market == "KR":
-            out["macroTrade"] = safe(lambda: macroTradeBlock(_ensure_summary().get("trade")))
+            out["macroTrade"] = safe(lambda: macroTradeBlock(_ensureSummary().get("trade")))
     if need("macroFlags"):
-        out["macroFlags"] = safe(lambda: macroFlagsBlock(_ensure_summary()))
+        out["macroFlags"] = safe(lambda: macroFlagsBlock(_ensureSummary()))
     if need("macroSensitivity"):
         from dartlab.analysis.financial.macroExposure import calcMacroSensitivity
 
@@ -1398,7 +1398,7 @@ def _buildMacroBlocks(company, keys, basePeriod, safe: Callable, need: Callable,
     if need("companyCyclePosition"):
         from dartlab.story.builders import companyCyclePositionBlock
 
-        out["companyCyclePosition"] = safe(lambda: companyCyclePositionBlock(_ensure_summary().get("crisis", {})))
+        out["companyCyclePosition"] = safe(lambda: companyCyclePositionBlock(_ensureSummary().get("crisis", {})))
 
 
 def _buildScenarioBlocks(company, keys, basePeriod, safe: Callable, need: Callable, out: dict) -> None:

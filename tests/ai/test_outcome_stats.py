@@ -37,28 +37,28 @@ def test_get_stats_empty_returns_zero_counts(tmp_dartlab_home) -> None:
 def test_get_stats_per_ticker_aggregates_pending_and_resolved(tmp_dartlab_home) -> None:
     from dartlab.ai.memory.outcomeLog import (
         Update,
-        batch_update_with_outcomes,
-        store_decision,
+        batchUpdateWithOutcomes,
+        storeDecision,
     )
     from dartlab.ai.memory.outcomeStats import getStats
 
     # pending 1
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-04-01",
         theme="Buy",
-        decision_text="thesis A",
+        decisionText="thesis A",
     )
     # resolved positive
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-03-01",
         theme="Buy",
-        decision_text="thesis B",
+        decisionText="thesis B",
     )
-    batch_update_with_outcomes(
+    batchUpdateWithOutcomes(
         [
             Update(
                 stockCode="005930",
@@ -72,14 +72,14 @@ def test_get_stats_per_ticker_aggregates_pending_and_resolved(tmp_dartlab_home) 
         ]
     )
     # resolved negative
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-02-01",
         theme="Buy",
-        decision_text="thesis C",
+        decisionText="thesis C",
     )
-    batch_update_with_outcomes(
+    batchUpdateWithOutcomes(
         [
             Update(
                 stockCode="005930",
@@ -105,15 +105,15 @@ def test_get_stats_per_ticker_aggregates_pending_and_resolved(tmp_dartlab_home) 
 
 @pytest.mark.unit
 def test_get_regression_rate_returns_none_when_no_resolved(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcomeLog import store_decision
+    from dartlab.ai.memory.outcomeLog import storeDecision
     from dartlab.ai.memory.outcomeStats import getRegressionRate
 
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-04-01",
         theme="Buy",
-        decision_text="pending only",
+        decisionText="pending only",
     )
     assert getRegressionRate("005930", market="KR") is None
 
@@ -122,14 +122,14 @@ def test_get_regression_rate_returns_none_when_no_resolved(tmp_dartlab_home) -> 
 def test_get_market_summary_aggregates_multiple_tickers(tmp_dartlab_home) -> None:
     from dartlab.ai.memory.outcomeLog import (
         Update,
-        batch_update_with_outcomes,
-        store_decision,
+        batchUpdateWithOutcomes,
+        storeDecision,
     )
     from dartlab.ai.memory.outcomeStats import getMarketSummary
 
     for code, alpha in [("005930", "+2.0%vs_KOSPI"), ("000660", "-1.5%vs_KOSPI"), ("035720", "+0.5%vs_KOSPI")]:
-        store_decision(stockCode=code, market="KR", date="2026-03-01", theme="Buy", decision_text=f"thesis {code}")
-        batch_update_with_outcomes(
+        storeDecision(stockCode=code, market="KR", date="2026-03-01", theme="Buy", decisionText=f"thesis {code}")
+        batchUpdateWithOutcomes(
             [
                 Update(
                     stockCode=code,
@@ -154,11 +154,11 @@ def test_get_market_summary_aggregates_multiple_tickers(tmp_dartlab_home) -> Non
 
 @pytest.mark.unit
 def test_get_stats_date_range_filter(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcomeLog import store_decision
+    from dartlab.ai.memory.outcomeLog import storeDecision
     from dartlab.ai.memory.outcomeStats import getStats
 
     for d in ["2026-01-15", "2026-02-15", "2026-03-15", "2026-04-15"]:
-        store_decision(stockCode="005930", market="KR", date=d, theme="Hold", decision_text=f"d {d}")
+        storeDecision(stockCode="005930", market="KR", date=d, theme="Hold", decisionText=f"d {d}")
 
     full = getStats("KR", stockCode="005930")
     assert full["pendingCount"] == 4
@@ -172,15 +172,15 @@ def test_get_stats_date_range_filter(tmp_dartlab_home) -> None:
 
 @pytest.mark.unit
 def test_resolve_pending_skips_when_holding_short(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeLog import getPendingEntries, storeDecision
     from dartlab.ai.memory.outcomeResolver import resolvePending
 
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-05-01",
         theme="Buy",
-        decision_text="recent decision",
+        decisionText="recent decision",
     )
 
     def mock_pricer(symbol: str, asOf: str) -> float | None:
@@ -196,20 +196,20 @@ def test_resolve_pending_skips_when_holding_short(tmp_dartlab_home) -> None:
     assert report.pendingExamined == 1
     assert report.resolvedCount == 0
     assert report.skippedShortHolding == 1
-    assert len(get_pending_entries("005930")) == 1  # 여전히 pending
+    assert len(getPendingEntries("005930")) == 1  # 여전히 pending
 
 
 @pytest.mark.unit
 def test_resolve_pending_keeps_pending_when_pricer_returns_none(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeLog import getPendingEntries, storeDecision
     from dartlab.ai.memory.outcomeResolver import resolvePending
 
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-04-01",
         theme="Buy",
-        decision_text="thesis",
+        decisionText="thesis",
     )
 
     def missing_pricer(symbol: str, asOf: str) -> float | None:
@@ -225,24 +225,24 @@ def test_resolve_pending_keeps_pending_when_pricer_returns_none(tmp_dartlab_home
     assert report.pendingExamined == 1
     assert report.resolvedCount == 0
     assert report.skippedMissingPrice == 1
-    assert len(get_pending_entries("005930")) == 1
+    assert len(getPendingEntries("005930")) == 1
 
 
 @pytest.mark.unit
 def test_resolve_pending_writes_alpha_when_benchmark_provided(tmp_dartlab_home) -> None:
     from dartlab.ai.memory.outcomeLog import (
-        get_pending_entries,
-        store_decision,
+        getPendingEntries,
+        storeDecision,
     )
     from dartlab.ai.memory.outcomeResolver import resolvePending
     from dartlab.ai.memory.outcomeStats import getStats
 
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-04-01",
         theme="Buy",
-        decision_text="thesis",
+        decisionText="thesis",
     )
 
     # 종목 +10%, KOSPI +3% → alpha +7%
@@ -261,7 +261,7 @@ def test_resolve_pending_writes_alpha_when_benchmark_provided(tmp_dartlab_home) 
         minHoldingDays=30,
     )
     assert report.resolvedCount == 1
-    assert len(get_pending_entries("005930")) == 0
+    assert len(getPendingEntries("005930")) == 0
 
     stats = getStats("KR", stockCode="005930")
     assert stats["resolvedCount"] == 1
@@ -271,16 +271,16 @@ def test_resolve_pending_writes_alpha_when_benchmark_provided(tmp_dartlab_home) 
 
 @pytest.mark.unit
 def test_resolve_pending_no_benchmark_writes_raw_return_only(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeLog import getPendingEntries, storeDecision
     from dartlab.ai.memory.outcomeResolver import resolvePending
     from dartlab.ai.memory.outcomeStats import getEntries
 
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-04-01",
         theme="Buy",
-        decision_text="thesis",
+        decisionText="thesis",
     )
 
     def pricer(symbol: str, asOf: str) -> float | None:
@@ -294,9 +294,9 @@ def test_resolve_pending_no_benchmark_writes_raw_return_only(tmp_dartlab_home) -
         minHoldingDays=30,
     )
     assert report.resolvedCount == 1
-    assert len(get_pending_entries("005930")) == 0
+    assert len(getPendingEntries("005930")) == 0
 
-    resolved = [e for e in getEntries("KR", "005930") if not e.is_pending()]
+    resolved = [e for e in getEntries("KR", "005930") if not e.isPending()]
     assert len(resolved) == 1
     assert resolved[0].raw_return == "+10.0%"
     assert resolved[0].alpha == ""  # 벤치마크 미주입
@@ -305,16 +305,16 @@ def test_resolve_pending_no_benchmark_writes_raw_return_only(tmp_dartlab_home) -
 
 @pytest.mark.unit
 def test_resolve_pending_market_iterates_all_tickers(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcomeLog import store_decision
+    from dartlab.ai.memory.outcomeLog import storeDecision
     from dartlab.ai.memory.outcomeResolver import resolvePendingMarket
 
     for code in ["005930", "000660", "035720"]:
-        store_decision(
+        storeDecision(
             stockCode=code,
             market="KR",
             date="2026-04-01",
             theme="Buy",
-            decision_text=f"thesis {code}",
+            decisionText=f"thesis {code}",
         )
 
     def pricer(symbol: str, asOf: str) -> float | None:
@@ -342,33 +342,33 @@ def test_resolve_pending_market_iterates_all_tickers(tmp_dartlab_home) -> None:
 
 @pytest.mark.unit
 def test_try_resolve_pending_noop_without_pricer(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeLog import getPendingEntries, storeDecision
     from dartlab.ai.memory.wiring import tryResolvePending
 
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-04-01",
         theme="Buy",
-        decision_text="thesis",
+        decisionText="thesis",
     )
 
     # pricer 미주입 → 0 반환, pending 유지
     assert tryResolvePending("005930", "KR", today="2026-05-08") == 0
-    assert len(get_pending_entries("005930")) == 1
+    assert len(getPendingEntries("005930")) == 1
 
 
 @pytest.mark.unit
 def test_try_resolve_pending_with_callable_pricer(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeLog import getPendingEntries, storeDecision
     from dartlab.ai.memory.wiring import tryResolvePending
 
-    store_decision(
+    storeDecision(
         stockCode="005930",
         market="KR",
         date="2026-04-01",
         theme="Buy",
-        decision_text="thesis",
+        decisionText="thesis",
     )
 
     def pricer(symbol: str, asOf: str) -> float | None:
@@ -382,7 +382,7 @@ def test_try_resolve_pending_with_callable_pricer(tmp_dartlab_home) -> None:
         minHoldingDays=30,
     )
     assert resolved == 1
-    assert len(get_pending_entries("005930")) == 0
+    assert len(getPendingEntries("005930")) == 0
 
 
 @pytest.mark.unit
@@ -392,6 +392,6 @@ def test_try_resolve_pending_safe_on_invalid_stockcode(tmp_dartlab_home) -> None
     def pricer(symbol: str, asOf: str) -> float | None:
         return 100.0
 
-    # path traversal 시도 → safe_stockcode 가 ValueError → wrapper 가 0 반환
+    # path traversal 시도 → safeStockcode 가 ValueError → wrapper 가 0 반환
     assert tryResolvePending("../etc", "KR", pricer=pricer) == 0
     assert tryResolvePending(None, "KR", pricer=pricer) == 0

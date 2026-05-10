@@ -33,16 +33,16 @@ _NBER_RECESSIONS: list[tuple[str, str]] = [
 ]
 
 
-def _is_recession(month: str) -> bool:
+def _isRecession(month: str) -> bool:
     for start, end in _NBER_RECESSIONS:
         if start <= month <= end:
             return True
     return False
 
 
-def _months_to_next_recession(month: str) -> int:
+def _monthsToNextRecession(month: str) -> int:
     """다음 침체 시작까지 남은 개월 수. 침체 중이면 0. 이후 침체 없으면 999."""
-    if _is_recession(month):
+    if _isRecession(month):
         return 0
     for start, _ in _NBER_RECESSIONS:
         if month < start:
@@ -52,7 +52,7 @@ def _months_to_next_recession(month: str) -> int:
     return 999
 
 
-def _delta_n(d: dict[str, float], n: int = 3) -> dict[str, float]:
+def _deltaN(d: dict[str, float], n: int = 3) -> dict[str, float]:
     """N개월 전 대비 변화량."""
     months = sorted(d.keys())
     idx = {m: i for i, m in enumerate(months)}
@@ -191,10 +191,10 @@ class HistoricalContext:
 
 
 def hySpikesToRecession(
-    hy_monthly: dict[str, float],
+    hyMonthly: dict[str, float],
     *,
-    threshold_bp: float = 1.0,
-    current_delta: float | None = None,
+    thresholdBp: float = 1.0,
+    currentDelta: float | None = None,
 ) -> HYSpikeHistory:
     """HY 스프레드 3개월 급등 → 침체 선행 통계.
 
@@ -206,13 +206,13 @@ def hySpikesToRecession(
     Returns:
         HYSpikeHistory
     """
-    d3 = _delta_n(hy_monthly, 3)
+    d3 = _deltaN(hyMonthly, 3)
     spikes: list[tuple[str, float, int, bool]] = []  # (month, delta, months_to_rec, in_rec)
 
     for m in sorted(d3.keys()):
-        if d3[m] > threshold_bp:
-            mtr = _months_to_next_recession(m)
-            spikes.append((m, d3[m], mtr, _is_recession(m)))
+        if d3[m] > thresholdBp:
+            mtr = _monthsToNextRecession(m)
+            spikes.append((m, d3[m], mtr, _isRecession(m)))
 
     # 침체 중이 아닌 급등 → 12개월 내 침체 통계
     pre_rec = [s for s in spikes if not s[3] and s[2] < 999]
@@ -223,10 +223,10 @@ def hySpikesToRecession(
     nearest = None
     nearest_delta = None
     nearest_outcome = None
-    if current_delta is not None and spikes:
+    if currentDelta is not None and spikes:
         best_diff = float("inf")
         for m, delta, mtr, in_rec in spikes:
-            diff = abs(delta - current_delta)
+            diff = abs(delta - currentDelta)
             if diff < best_diff:
                 best_diff = diff
                 nearest = m
@@ -238,7 +238,7 @@ def hySpikesToRecession(
                 else:
                     nearest_outcome = "침체 없음"
 
-    desc_parts = [f"HY 스프레드 3개월 +{threshold_bp * 100:.0f}bp 이상 급등: 과거 {len(spikes)}회"]
+    desc_parts = [f"HY 스프레드 3개월 +{thresholdBp * 100:.0f}bp 이상 급등: 과거 {len(spikes)}회"]
     if pre_rec:
         desc_parts.append(f"12개월 내 침체 {within_12}/{len(pre_rec)} ({rate * 100:.0f}%)")
     if nearest:
@@ -251,27 +251,27 @@ def hySpikesToRecession(
         nearestMatch=nearest,
         nearestMatchDelta=round(nearest_delta, 2) if nearest_delta else None,
         nearestMatchOutcome=nearest_outcome,
-        currentDelta=round(current_delta, 2) if current_delta is not None else None,
+        currentDelta=round(currentDelta, 2) if currentDelta is not None else None,
         description=". ".join(desc_parts),
     )
 
 
 def yieldCurveInversionsToRecession(
-    spread_monthly: dict[str, float],
+    spreadMonthly: dict[str, float],
 ) -> YCInversionHistory:
     """Yield Curve 역전 시작점 → 침체까지 통계.
 
     Args:
         spread_monthly: {YYYY-MM: 10Y-3M spread %}
     """
-    months = sorted(spread_monthly.keys())
+    months = sorted(spreadMonthly.keys())
     inversions: list[tuple[str, float, int]] = []  # (start_month, spread, months_to_rec)
     prev_positive = True
 
     for m in months:
-        val = spread_monthly[m]
+        val = spreadMonthly[m]
         if val < 0 and prev_positive:
-            mtr = _months_to_next_recession(m)
+            mtr = _monthsToNextRecession(m)
             inversions.append((m, val, mtr))
         prev_positive = val >= 0
 
@@ -283,10 +283,10 @@ def yieldCurveInversionsToRecession(
     current_dur = None
     if months:
         latest = months[-1]
-        if spread_monthly[latest] < 0:
+        if spreadMonthly[latest] < 0:
             # 역전 시작점 역추적
             for m in reversed(months):
-                if spread_monthly[m] >= 0:
+                if spreadMonthly[m] >= 0:
                     break
                 current_start = m
             if current_start:
@@ -314,9 +314,9 @@ def yieldCurveInversionsToRecession(
 
 
 def unemploymentBounceToRecession(
-    ur_monthly: dict[str, float],
+    urMonthly: dict[str, float],
     *,
-    threshold_pp: float = 0.3,
+    thresholdPp: float = 0.3,
 ) -> URBounceHistory:
     """실업률 12개월 최저에서 반등 → 침체 선행 통계.
 
@@ -324,23 +324,23 @@ def unemploymentBounceToRecession(
         ur_monthly: {YYYY-MM: 실업률 %}
         threshold_pp: 반등 기준 (%p)
     """
-    months = sorted(ur_monthly.keys())
+    months = sorted(urMonthly.keys())
     bounces: list[tuple[str, float, float, int]] = []  # (month, ur, low, mtr)
 
     for i, m in enumerate(months):
         if i < 12:
             continue
-        window = [ur_monthly[months[j]] for j in range(i - 12, i + 1)]
+        window = [urMonthly[months[j]] for j in range(i - 12, i + 1)]
         low = min(window)
-        bounce = ur_monthly[m] - low
-        if bounce >= threshold_pp:
+        bounce = urMonthly[m] - low
+        if bounce >= thresholdPp:
             # 이번 달에 처음 돌파?
-            prev_bounce = ur_monthly[months[i - 1]] - min(ur_monthly[months[j]] for j in range(max(0, i - 13), i))
-            if prev_bounce < threshold_pp:
-                mtr = _months_to_next_recession(m)
-                bounces.append((m, ur_monthly[m], low, mtr))
+            prev_bounce = urMonthly[months[i - 1]] - min(urMonthly[months[j]] for j in range(max(0, i - 13), i))
+            if prev_bounce < thresholdPp:
+                mtr = _monthsToNextRecession(m)
+                bounces.append((m, urMonthly[m], low, mtr))
 
-    pre_rec = [b for b in bounces if not _is_recession(b[0]) and b[3] < 999]
+    pre_rec = [b for b in bounces if not _isRecession(b[0]) and b[3] < 999]
     within_12 = sum(1 for b in pre_rec if b[3] <= 12)
     rate = within_12 / len(pre_rec) if pre_rec else 0.0
 
@@ -350,14 +350,14 @@ def unemploymentBounceToRecession(
         latest = months[-1]
         i = len(months) - 1
         if i >= 12:
-            window = [ur_monthly[months[j]] for j in range(i - 12, i + 1)]
+            window = [urMonthly[months[j]] for j in range(i - 12, i + 1)]
             low = min(window)
-            current_bounce = round(ur_monthly[latest] - low, 2)
+            current_bounce = round(urMonthly[latest] - low, 2)
 
-    desc_parts = [f"실업률 12개월 저점 대비 +{threshold_pp}%p 이상 반등: 과거 {len(bounces)}회"]
+    desc_parts = [f"실업률 12개월 저점 대비 +{thresholdPp}%p 이상 반등: 과거 {len(bounces)}회"]
     if pre_rec:
         desc_parts.append(f"12개월 내 침체 {within_12}/{len(pre_rec)} ({rate * 100:.0f}%)")
-    if current_bounce is not None and current_bounce >= threshold_pp:
+    if current_bounce is not None and current_bounce >= thresholdPp:
         desc_parts.append(f"현재 저점 대비 +{current_bounce}%p 반등 중")
 
     return URBounceHistory(
@@ -370,9 +370,9 @@ def unemploymentBounceToRecession(
 
 
 def cpiAccelerationEvents(
-    cpi_raw_monthly: dict[str, float],
+    cpiRawMonthly: dict[str, float],
     *,
-    threshold_pp: float = 1.0,
+    thresholdPp: float = 1.0,
 ) -> dict:
     """CPI 가속 구간 식별.
 
@@ -383,23 +383,23 @@ def cpiAccelerationEvents(
     Returns:
         dict with count, currentAcceleration, description
     """
-    cpi_yoy = _yoy(cpi_raw_monthly)
-    accel = _delta_n(cpi_yoy, 3)
+    cpiYoy = _yoy(cpiRawMonthly)
+    accel = _deltaN(cpiYoy, 3)
 
-    events = [(m, accel[m]) for m in sorted(accel.keys()) if accel[m] > threshold_pp]
+    events = [(m, accel[m]) for m in sorted(accel.keys()) if accel[m] > thresholdPp]
 
     # 현재 가속도
     latest_month = max(accel.keys()) if accel else None
     current_accel = accel.get(latest_month) if latest_month else None
 
-    desc = f"CPI 3개월 +{threshold_pp}%p 이상 가속: 과거 {len(events)}회"
-    if current_accel is not None and current_accel > threshold_pp:
+    desc = f"CPI 3개월 +{thresholdPp}%p 이상 가속: 과거 {len(events)}회"
+    if current_accel is not None and current_accel > thresholdPp:
         desc += f". 현재 +{current_accel:.1f}%p 가속 중"
 
     return {
         "count": len(events),
         "currentAcceleration": round(current_accel, 2) if current_accel else None,
-        "isAccelerating": current_accel is not None and current_accel > threshold_pp,
+        "isAccelerating": current_accel is not None and current_accel > thresholdPp,
         "description": desc,
     }
 
@@ -422,13 +422,13 @@ def simultaneousWarningFlags(
         }
     """
     hy = data.get("hy_spread") or {}
-    hy_d3 = data.get("hy_spread_d3") or {}
+    hyD3 = data.get("hy_spread_d3") or {}
     yc = data.get("spread_10y2y") or {}
-    ur_d6 = data.get("ur_d6") or {}
-    vix_d = data.get("vix") or {}
-    nfci_d = data.get("nfci") or {}
-    ip_yoy = data.get("ip_yoy") or {}
-    cpi_yoy = data.get("cpi_yoy") or {}
+    urD6 = data.get("ur_d6") or {}
+    vixD = data.get("vix") or {}
+    nfciD = data.get("nfci") or {}
+    ipYoy = data.get("ip_yoy") or {}
+    cpiYoy = data.get("cpi_yoy") or {}
 
     # 공통 월 집합
     all_months = sorted(set(hy.keys()) & set(yc.keys()))
@@ -439,19 +439,19 @@ def simultaneousWarningFlags(
     if latest:
         if hy.get(latest, 0) > 5:
             active.append("HY>5%")
-        if hy_d3.get(latest, 0) > 0.5:
+        if hyD3.get(latest, 0) > 0.5:
             active.append("HY급등")
         if yc.get(latest, 1) < 0:
             active.append("YC역전")
-        if ur_d6.get(latest, 0) > 0.3:
+        if urD6.get(latest, 0) > 0.3:
             active.append("실업↑")
-        if vix_d.get(latest, 0) > 25:
+        if vixD.get(latest, 0) > 25:
             active.append("VIX>25")
-        if nfci_d.get(latest, -1) > 0:
+        if nfciD.get(latest, -1) > 0:
             active.append("NFCI긴축")
-        if ip_yoy.get(latest, 1) < 0:
+        if ipYoy.get(latest, 1) < 0:
             active.append("산업생산↓")
-        if cpi_yoy.get(latest, 0) > 5:
+        if cpiYoy.get(latest, 0) > 5:
             active.append("CPI>5%")
 
     # 역사적 동시 점등 통계
@@ -460,28 +460,26 @@ def simultaneousWarningFlags(
         flags: list[str] = []
         if hy.get(m, 0) > 5:
             flags.append("HY>5%")
-        if hy_d3.get(m, 0) > 0.5:
+        if hyD3.get(m, 0) > 0.5:
             flags.append("HY급등")
         if yc.get(m, 1) < 0:
             flags.append("YC역전")
-        if ur_d6.get(m, 0) > 0.3:
+        if urD6.get(m, 0) > 0.3:
             flags.append("실업↑")
-        if vix_d.get(m, 0) > 25:
+        if vixD.get(m, 0) > 25:
             flags.append("VIX>25")
-        if nfci_d.get(m, -1) > 0:
+        if nfciD.get(m, -1) > 0:
             flags.append("NFCI긴축")
-        if ip_yoy.get(m, 1) < 0:
+        if ipYoy.get(m, 1) < 0:
             flags.append("산업생산↓")
-        if cpi_yoy.get(m, 0) > 5:
+        if cpiYoy.get(m, 0) > 5:
             flags.append("CPI>5%")
         if len(flags) >= 3:
             multi_warn_months.append((m, flags))
 
     # 18개월 내 침체 비율
-    pre_rec = [
-        (m, flags) for m, flags in multi_warn_months if not _is_recession(m) and _months_to_next_recession(m) < 999
-    ]
-    within_18 = sum(1 for m, _ in pre_rec if _months_to_next_recession(m) <= 18)
+    pre_rec = [(m, flags) for m, flags in multi_warn_months if not _isRecession(m) and _monthsToNextRecession(m) < 999]
+    within_18 = sum(1 for m, _ in pre_rec if _monthsToNextRecession(m) <= 18)
     rate = within_18 / len(pre_rec) if pre_rec else 0.0
 
     # 유사 시기 매칭 (현재 경고등과 겹치는 과거)
@@ -493,8 +491,8 @@ def simultaneousWarningFlags(
                 continue
             overlap = set(flags) & active_set
             if len(overlap) >= 2:
-                mtr = _months_to_next_recession(m)
-                outcome = "침체 중" if _is_recession(m) else (f"{mtr}개월 후 침체" if mtr < 24 else "침체 없음")
+                mtr = _monthsToNextRecession(m)
+                outcome = "침체 중" if _isRecession(m) else (f"{mtr}개월 후 침체" if mtr < 24 else "침체 없음")
                 similar.append({"month": m, "flags": flags, "outcome": outcome, "overlap": list(overlap)})
             if len(similar) >= 5:
                 break
@@ -531,9 +529,9 @@ _EXPANSION_STARTS: list[str] = [
 ]
 
 
-def _months_since_recession_end(month: str) -> int | None:
+def _monthsSinceRecessionEnd(month: str) -> int | None:
     """마지막 침체 종료 이후 경과 개월. 침체 중이면 None."""
-    if _is_recession(month):
+    if _isRecession(month):
         return None
     for _, end in reversed(_NBER_RECESSIONS):
         if month > end:
@@ -544,47 +542,47 @@ def _months_since_recession_end(month: str) -> int | None:
 
 
 def hyCompressionToExpansion(
-    hy_monthly: dict[str, float],
+    hyMonthly: dict[str, float],
     *,
-    threshold_bp: float = -1.0,
+    thresholdBp: float = -1.0,
 ) -> HYCompressionHistory:
     """HY 스프레드 3개월 급락 (신용 완화) → 확장 통계.
 
     HY가 빠르게 줄어든다 = 신용 시장이 안정 = 경기 회복/확장 신호.
     """
-    d3 = _delta_n(hy_monthly, 3)
+    d3 = _deltaN(hyMonthly, 3)
     compressions: list[tuple[str, float, int | None]] = []
 
     for m in sorted(d3.keys()):
-        if d3[m] < threshold_bp:
-            since = _months_since_recession_end(m)
+        if d3[m] < thresholdBp:
+            since = _monthsSinceRecessionEnd(m)
             compressions.append((m, d3[m], since))
 
     # 침체 직후 급락인 경우 (회복 초기) — 이후 확장 기간
     recovery_compressions = [c for c in compressions if c[2] is not None and c[2] <= 12]
     expansion_durations = []
     for m, _, _ in recovery_compressions:
-        mtr = _months_to_next_recession(m)
+        mtr = _monthsToNextRecession(m)
         if mtr < 999:
             expansion_durations.append(mtr)
 
     avg_exp = float(np.mean(expansion_durations)) if expansion_durations else None
 
     latest = max(d3.keys()) if d3 else None
-    current_delta = d3.get(latest) if latest else None
+    currentDelta = d3.get(latest) if latest else None
 
     desc_parts = [
-        f"HY 스프레드 3개월 -{abs(threshold_bp) * 100:.0f}bp 이상 급락 (신용 완화): 과거 {len(compressions)}회"
+        f"HY 스프레드 3개월 -{abs(thresholdBp) * 100:.0f}bp 이상 급락 (신용 완화): 과거 {len(compressions)}회"
     ]
     if avg_exp:
         desc_parts.append(f"회복 초기 급락 후 평균 {avg_exp:.0f}개월 확장 지속")
-    if current_delta is not None and current_delta < threshold_bp:
-        desc_parts.append(f"현재 3개월 {current_delta * 100:+.0f}bp — 신용 완화 진행 중")
+    if currentDelta is not None and currentDelta < thresholdBp:
+        desc_parts.append(f"현재 3개월 {currentDelta * 100:+.0f}bp — 신용 완화 진행 중")
 
     return HYCompressionHistory(
         totalCompressions=len(compressions),
         avgExpansionMonths=round(avg_exp, 1) if avg_exp else None,
-        currentDelta=round(current_delta, 2) if current_delta is not None else None,
+        currentDelta=round(currentDelta, 2) if currentDelta is not None else None,
         description=". ".join(desc_parts),
     )
 
@@ -605,13 +603,13 @@ def bullishSignalFlags(
     - CPI 안정 (YoY 1~3%)
     """
     hy = data.get("hy_spread") or {}
-    hy_d3 = data.get("hy_spread_d3") or {}
+    hyD3 = data.get("hy_spread_d3") or {}
     yc = data.get("spread_10y2y") or {}
-    ur_d6 = data.get("ur_d6") or {}
-    vix_d = data.get("vix") or {}
-    nfci_d = data.get("nfci") or {}
-    ip_yoy = data.get("ip_yoy") or {}
-    cpi_yoy = data.get("cpi_yoy") or {}
+    urD6 = data.get("ur_d6") or {}
+    vixD = data.get("vix") or {}
+    nfciD = data.get("nfci") or {}
+    ipYoy = data.get("ip_yoy") or {}
+    cpiYoy = data.get("cpi_yoy") or {}
 
     all_months = sorted(set(hy.keys()) & set(yc.keys())) if hy and yc else []
     latest = all_months[-1] if all_months else None
@@ -620,19 +618,19 @@ def bullishSignalFlags(
     if latest:
         if hy.get(latest, 10) < 4:
             active.append("HY<4%")
-        if hy_d3.get(latest, 0) < -0.3:
+        if hyD3.get(latest, 0) < -0.3:
             active.append("HY축소")
         if yc.get(latest, 0) > 1.0:
             active.append("YC양수")
-        if ur_d6.get(latest, 0) < 0:
+        if urD6.get(latest, 0) < 0:
             active.append("실업↓")
-        if vix_d.get(latest, 30) < 18:
+        if vixD.get(latest, 30) < 18:
             active.append("VIX안정")
-        if nfci_d.get(latest, 0) < -0.5:
+        if nfciD.get(latest, 0) < -0.5:
             active.append("NFCI완화")
-        if ip_yoy.get(latest, 0) > 2:
+        if ipYoy.get(latest, 0) > 2:
             active.append("산업생산↑")
-        cpi = cpi_yoy.get(latest, 5)
+        cpi = cpiYoy.get(latest, 5)
         if 1 <= cpi <= 3:
             active.append("CPI안정")
 
@@ -642,19 +640,19 @@ def bullishSignalFlags(
         signals: list[str] = []
         if hy.get(m, 10) < 4:
             signals.append("HY<4%")
-        if hy_d3.get(m, 0) < -0.3:
+        if hyD3.get(m, 0) < -0.3:
             signals.append("HY축소")
         if yc.get(m, 0) > 1.0:
             signals.append("YC양수")
-        if ur_d6.get(m, 0) < 0:
+        if urD6.get(m, 0) < 0:
             signals.append("실업↓")
-        if vix_d.get(m, 30) < 18:
+        if vixD.get(m, 30) < 18:
             signals.append("VIX안정")
-        if nfci_d.get(m, 0) < -0.5:
+        if nfciD.get(m, 0) < -0.5:
             signals.append("NFCI완화")
-        if ip_yoy.get(m, 0) > 2:
+        if ipYoy.get(m, 0) > 2:
             signals.append("산업생산↑")
-        cpi_v = cpi_yoy.get(m, 5)
+        cpi_v = cpiYoy.get(m, 5)
         if 1 <= cpi_v <= 3:
             signals.append("CPI안정")
         if len(signals) >= 4:
@@ -663,8 +661,8 @@ def bullishSignalFlags(
     # 4개+ 호황 신호 후 확장 지속 기간
     expansion_months = []
     for m, _ in multi_bull:
-        mtr = _months_to_next_recession(m)
-        if mtr < 999 and not _is_recession(m):
+        mtr = _monthsToNextRecession(m)
+        if mtr < 999 and not _isRecession(m):
             expansion_months.append(mtr)
     avg_exp = float(np.mean(expansion_months)) if expansion_months else None
 
@@ -677,8 +675,8 @@ def bullishSignalFlags(
                 continue
             overlap = set(signals) & active_set
             if len(overlap) >= 3:
-                mtr = _months_to_next_recession(m)
-                outcome = f"{mtr}개월 확장 지속" if mtr < 999 and not _is_recession(m) else "확장 중"
+                mtr = _monthsToNextRecession(m)
+                outcome = f"{mtr}개월 확장 지속" if mtr < 999 and not _isRecession(m) else "확장 중"
                 similar.append({"month": m, "signals": signals, "outcome": outcome, "overlap": list(overlap)})
             if len(similar) >= 5:
                 break
@@ -886,42 +884,42 @@ def matchHistoricalEvents(
 
 
 def _buildSimultaneousWarningData(
-    hy, hy_d3, spread_2y, ur, ur_d6, vix_d, nfci_d, ip_yoy, cpi_yoy
+    hy, hyD3, spread2y, ur, urD6, vixD, nfciD, ipYoy, cpiYoy
 ) -> dict[str, dict[str, float] | None]:
     """simultaneousWarningFlags + matchHistoricalEvents 공용 data dict 조립."""
-    sw_data: dict[str, dict[str, float] | None] = {}
+    swData: dict[str, dict[str, float] | None] = {}
     if hy:
-        sw_data["hy_spread"] = hy
-        sw_data["hy_spread_d3"] = hy_d3
-    if spread_2y:
-        sw_data["spread_10y2y"] = spread_2y
+        swData["hy_spread"] = hy
+        swData["hy_spread_d3"] = hyD3
+    if spread2y:
+        swData["spread_10y2y"] = spread2y
     if ur:
-        sw_data["ur_d6"] = ur_d6
-    if vix_d:
-        sw_data["vix"] = vix_d
-    if nfci_d:
-        sw_data["nfci"] = nfci_d
-    if ip_yoy:
-        sw_data["ip_yoy"] = ip_yoy
-    if cpi_yoy:
-        sw_data["cpi_yoy"] = cpi_yoy
-    return sw_data
+        swData["ur_d6"] = urD6
+    if vixD:
+        swData["vix"] = vixD
+    if nfciD:
+        swData["nfci"] = nfciD
+    if ipYoy:
+        swData["ip_yoy"] = ipYoy
+    if cpiYoy:
+        swData["cpi_yoy"] = cpiYoy
+    return swData
 
 
-def _computeRawSignals(hy, hy_d3, spread_3m, ur, cpi_raw, sw_data) -> dict:
+def _computeRawSignals(hy, hyD3, spread3m, ur, cpiRaw, swData) -> dict:
     """7개 신호 계산: hy/yc/ur/cpi/sw/bull/hy_comp."""
     hy_result = None
-    if hy and hy_d3:
-        latest_hy_month = max(hy_d3.keys()) if hy_d3 else None
-        current_delta = hy_d3.get(latest_hy_month) if latest_hy_month else None
-        hy_result = hySpikesToRecession(hy, current_delta=current_delta)
+    if hy and hyD3:
+        latest_hy_month = max(hyD3.keys()) if hyD3 else None
+        currentDelta = hyD3.get(latest_hy_month) if latest_hy_month else None
+        hy_result = hySpikesToRecession(hy, currentDelta=currentDelta)
     return {
         "hy": hy_result,
-        "yc": yieldCurveInversionsToRecession(spread_3m) if spread_3m else None,
+        "yc": yieldCurveInversionsToRecession(spread3m) if spread3m else None,
         "ur": unemploymentBounceToRecession(ur) if ur else None,
-        "cpi": cpiAccelerationEvents(cpi_raw) if cpi_raw else None,
-        "sw": simultaneousWarningFlags(sw_data) if sw_data else None,
-        "bull": bullishSignalFlags(sw_data) if sw_data else None,
+        "cpi": cpiAccelerationEvents(cpiRaw) if cpiRaw else None,
+        "sw": simultaneousWarningFlags(swData) if swData else None,
+        "bull": bullishSignalFlags(swData) if swData else None,
         "hy_comp": hyCompressionToExpansion(hy) if hy else None,
     }
 
@@ -984,7 +982,7 @@ def _opportunityLevelFromScore(score: int) -> tuple[str, str]:
     return "neutral", "중립"
 
 
-def _buildDescriptionParts(risk_score: int, label: str, opp_label: str, signals: dict, events: list) -> list[str]:
+def _buildDescriptionParts(riskScore: int, label: str, oppLabel: str, signals: dict, events: list) -> list[str]:
     """종합 서술 조립."""
     hy_result = signals["hy"]
     yc_result = signals["yc"]
@@ -993,8 +991,8 @@ def _buildDescriptionParts(risk_score: int, label: str, opp_label: str, signals:
     hy_comp_result = signals["hy_comp"]
 
     parts: list[str] = []
-    if risk_score >= 2:
-        parts.append(f"위험 수준 {label} ({risk_score}점)")
+    if riskScore >= 2:
+        parts.append(f"위험 수준 {label} ({riskScore}점)")
     if hy_result and hy_result.currentDelta and hy_result.currentDelta > 0.5:
         parts.append(hy_result.description)
     if yc_result and yc_result.currentInversionStart:
@@ -1009,7 +1007,7 @@ def _buildDescriptionParts(risk_score: int, label: str, opp_label: str, signals:
         top = events[0]
         parts.append(f"역사적 유사 사건: {top.eventName} (유사도 {top.similarity}). 당시 결과: {top.outcome}")
     if not parts:
-        parts.append(f"역사적 맥락: 위험 {label}, 기회 {opp_label}")
+        parts.append(f"역사적 맥락: 위험 {label}, 기회 {oppLabel}")
     return parts
 
 
@@ -1051,35 +1049,35 @@ def buildHistoricalContext(
         HistoricalContext
     """
     hy = data.get("hy_spread")
-    spread_3m = data.get("spread_10y3m")
-    spread_2y = data.get("spread_10y2y")
+    spread3m = data.get("spread_10y3m")
+    spread2y = data.get("spread_10y2y")
     ur = data.get("unrate")
-    cpi_raw = data.get("cpi_raw")
+    cpiRaw = data.get("cpi_raw")
     indpro = data.get("indpro")
-    vix_d = data.get("vix")
-    nfci_d = data.get("nfci")
+    vixD = data.get("vix")
+    nfciD = data.get("nfci")
 
-    hy_d3 = _delta_n(hy, 3) if hy else {}
-    ur_d6 = _delta_n(ur, 6) if ur else {}
-    ip_yoy = _yoy(indpro) if indpro else {}
-    cpi_yoy = _yoy(cpi_raw) if cpi_raw else {}
+    hyD3 = _deltaN(hy, 3) if hy else {}
+    urD6 = _deltaN(ur, 6) if ur else {}
+    ipYoy = _yoy(indpro) if indpro else {}
+    cpiYoy = _yoy(cpiRaw) if cpiRaw else {}
 
-    sw_data = _buildSimultaneousWarningData(hy, hy_d3, spread_2y, ur, ur_d6, vix_d, nfci_d, ip_yoy, cpi_yoy)
+    swData = _buildSimultaneousWarningData(hy, hyD3, spread2y, ur, urD6, vixD, nfciD, ipYoy, cpiYoy)
 
-    signals = _computeRawSignals(hy, hy_d3, spread_3m, ur, cpi_raw, sw_data)
+    signals = _computeRawSignals(hy, hyD3, spread3m, ur, cpiRaw, swData)
 
-    event_data = dict(sw_data)
+    event_data = dict(swData)
     if data.get("fedfunds"):
         event_data["fedfunds"] = data["fedfunds"]
     events = matchHistoricalEvents(event_data) if event_data else []
 
-    risk_score = _computeRiskScore(signals)
-    level, label = _riskLevelFromScore(risk_score)
+    riskScore = _computeRiskScore(signals)
+    level, label = _riskLevelFromScore(riskScore)
 
     opp_score = _computeOpportunityScore(signals)
-    opp_level, opp_label = _opportunityLevelFromScore(opp_score)
+    opp_level, oppLabel = _opportunityLevelFromScore(opp_score)
 
-    desc_parts = _buildDescriptionParts(risk_score, label, opp_label, signals, events)
+    desc_parts = _buildDescriptionParts(riskScore, label, oppLabel, signals, events)
 
     suggested_scenario, suggested_reason = _findSuggestedScenario(events)
     if suggested_scenario:
@@ -1112,6 +1110,6 @@ def buildHistoricalContext(
         riskLevel=level,
         riskLabel=label,
         opportunityLevel=opp_level,
-        opportunityLabel=opp_label,
+        opportunityLabel=oppLabel,
         description=". ".join(desc_parts),
     )

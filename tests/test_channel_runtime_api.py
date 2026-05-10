@@ -26,7 +26,7 @@ class _FakeAdapter:
     async def stop(self) -> None:
         self._stop_event.set()
 
-    async def send_text(self, channel_id: str, text: str) -> None:  # pragma: no cover - contract only
+    async def sendText(self, channelId: str, text: str) -> None:  # pragma: no cover - contract only
         return None
 
 
@@ -43,11 +43,11 @@ class _FakeProcess:
 
 @pytest.fixture()
 def client():
-    channel_runtime.shutdown_all()
+    channel_runtime.shutdownAll()
     dev_channel_runtime.shutdown()
     with TestClient(app, raise_server_exceptions=False) as c:
         yield c
-    channel_runtime.shutdown_all()
+    channel_runtime.shutdownAll()
     dev_channel_runtime.shutdown()
 
 
@@ -87,7 +87,7 @@ def test_channel_start_validates_required_fields(client):
 def test_dev_channel_status_and_start(client, monkeypatch):
     monkeypatch.setattr(
         "dartlab.server.services.devChannelRuntime.setup_devtunnel",
-        lambda *, port, auto_yes: ("https://dartlab-8400.jpe1.devtunnels.ms/", _FakeProcess()),
+        lambda *, port, autoYes: ("https://dartlab-8400.jpe1.devtunnels.ms/", _FakeProcess()),
     )
 
     before = client.get("/api/channel")

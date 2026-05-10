@@ -19,7 +19,7 @@ import polars as pl
 from . import catalog as _catalog
 from . import transform as _transform
 from .client import FredClient
-from .series import fetch_meta, fetch_multi, fetch_releases, fetch_series, search_series
+from .series import fetchMeta, fetchMulti, fetchReleases, fetchSeries, searchSeries
 from .types import CatalogEntry, FredError, SeriesMeta
 
 if TYPE_CHECKING:
@@ -40,14 +40,14 @@ class Fred:
         f.correlation(["GDP", "UNRATE", "FEDFUNDS"])
     """
 
-    def __init__(self, api_key: str | None = None) -> None:
-        self._client = FredClient(api_key=api_key)
+    def __init__(self, apiKey: str | None = None) -> None:
+        self._client = FredClient(apiKey=apiKey)
 
     # ── 시계열 조회 ──
 
     def series(
         self,
-        series_id: str,
+        seriesId: str,
         *,
         start: str | None = None,
         end: str | None = None,
@@ -74,9 +74,9 @@ class Fred:
         pl.DataFrame
             컬럼: ``date`` (Date) — 관측일, ``value`` (Float64) — 지표값.
         """
-        return fetch_series(
+        return fetchSeries(
             self._client,
-            series_id,
+            seriesId,
             start=start,
             end=end,
             frequency=frequency,
@@ -100,9 +100,9 @@ class Fred:
             ``frequency`` (Utf8) — 주기, ``units`` (Utf8) — 단위,
             ``popularity`` (Int64) — 인기도.
         """
-        return search_series(self._client, query, limit=limit)
+        return searchSeries(self._client, query, limit=limit)
 
-    def meta(self, series_id: str) -> SeriesMeta:
+    def meta(self, seriesId: str) -> SeriesMeta:
         """시계열 메타데이터.
 
         Parameters
@@ -116,11 +116,11 @@ class Fred:
             id, title, frequency, units, seasonal_adjustment,
             observation_start, observation_end, last_updated, notes 포함.
         """
-        return fetch_meta(self._client, series_id)
+        return fetchMeta(self._client, seriesId)
 
     def compare(
         self,
-        series_ids: list[str],
+        seriesIds: list[str],
         *,
         start: str | None = None,
         end: str | None = None,
@@ -145,9 +145,9 @@ class Fred:
             컬럼: ``date`` (Date) — 관측일, 각 시리즈 ID (Float64) — 지표값.
             주파수가 다른 시리즈는 outer join 후 forward-fill.
         """
-        return fetch_multi(
+        return fetchMulti(
             self._client,
-            series_ids,
+            seriesIds,
             start=start,
             end=end,
             frequency=frequency,
@@ -167,7 +167,7 @@ class Fred:
             컬럼: ``id`` (Int64) — 릴리즈 ID, ``name`` (Utf8) — 릴리즈명,
             ``press_release`` (Boolean) — 보도자료 여부, ``link`` (Utf8) — URL.
         """
-        return fetch_releases(self._client, limit=limit)
+        return fetchReleases(self._client, limit=limit)
 
     # ── 카탈로그 ──
 
@@ -193,11 +193,11 @@ class Fred:
         ValueError
             존재하지 않는 그룹명.
         """
-        ids = _catalog.get_group_ids(name)
+        ids = _catalog.getGroupIds(name)
         if not ids:
-            available = ", ".join(_catalog.get_groups())
+            available = ", ".join(_catalog.getGroups())
             raise ValueError(f"그룹 '{name}'을 찾을 수 없습니다. 사용 가능: {available}")
-        return fetch_multi(self._client, ids, start=start, end=end)
+        return fetchMulti(self._client, ids, start=start, end=end)
 
     def catalog(self, group: str | None = None) -> pl.DataFrame:
         """카탈로그 조회.
@@ -214,11 +214,11 @@ class Fred:
             ``group`` (Utf8) — 그룹명, ``frequency`` (Utf8) — 주기,
             ``unit`` (Utf8) — 단위, ``description`` (Utf8) — 설명.
         """
-        return _catalog.to_dataframe(group)
+        return _catalog.toDataframe(group)
 
     # ── 변환 ──
 
-    def yoy(self, series_id: str, *, start: str | None = None, end: str | None = None) -> pl.DataFrame:
+    def yoy(self, seriesId: str, *, start: str | None = None, end: str | None = None) -> pl.DataFrame:
         """전년 동기 대비 변화율 (%).
 
         Parameters
@@ -235,10 +235,10 @@ class Fred:
         pl.DataFrame
             원본 컬럼 + ``value_yoy`` (Float64) — 전년 동기 대비 변화율 (%).
         """
-        df = self.series(series_id, start=start, end=end)
+        df = self.series(seriesId, start=start, end=end)
         return _transform.yoy(df)
 
-    def mom(self, series_id: str, *, start: str | None = None, end: str | None = None) -> pl.DataFrame:
+    def mom(self, seriesId: str, *, start: str | None = None, end: str | None = None) -> pl.DataFrame:
         """전월(전기) 대비 변화율 (%).
 
         Parameters
@@ -255,12 +255,12 @@ class Fred:
         pl.DataFrame
             원본 컬럼 + ``value_mom`` (Float64) — 전월 대비 변화율 (%).
         """
-        df = self.series(series_id, start=start, end=end)
+        df = self.series(seriesId, start=start, end=end)
         return _transform.mom(df)
 
     def movingAverage(
         self,
-        series_id: str,
+        seriesId: str,
         *,
         window: int = 12,
         start: str | None = None,
@@ -284,14 +284,14 @@ class Fred:
         pl.DataFrame
             원본 컬럼 + ``value_ma{window}`` (Float64) — 이동평균값.
         """
-        df = self.series(series_id, start=start, end=end)
-        return _transform.moving_average(df, window=window)
+        df = self.series(seriesId, start=start, end=end)
+        return _transform.movingAverage(df, window=window)
 
     # ── 분석 ──
 
     def correlation(
         self,
-        series_ids: list[str],
+        seriesIds: list[str],
         *,
         start: str | None = None,
         end: str | None = None,
@@ -313,15 +313,15 @@ class Fred:
             컬럼: ``column`` (Utf8) — 시리즈명, 각 시리즈 ID (Float64) — 상관계수.
             대각 = 1.0.
         """
-        df = self.compare(series_ids, start=start, end=end)
+        df = self.compare(seriesIds, start=start, end=end)
         return _transform.correlation(df)
 
     def leadLag(
         self,
-        id_a: str,
-        id_b: str,
+        idA: str,
+        idB: str,
         *,
-        max_lag: int = 12,
+        maxLag: int = 12,
         start: str | None = None,
         end: str | None = None,
     ) -> pl.DataFrame:
@@ -330,8 +330,8 @@ class Fred:
         Returns:
             DataFrame ``(lag, correlation)``. 양수 lag = id_b가 후행.
         """
-        df = self.compare([id_a, id_b], start=start, end=end)
-        return _transform.lead_lag(df, id_a, id_b, max_lag=max_lag)
+        df = self.compare([idA, idB], start=start, end=end)
+        return _transform.leadLag(df, idA, idB, maxLag=maxLag)
 
     # ── 정리 ──
 
@@ -345,8 +345,8 @@ class Fred:
         self._client.close()
 
     def __repr__(self) -> str:
-        n = len(_catalog.get_all_ids())
-        return f"Fred(catalog={n} series, groups={_catalog.get_groups()})"
+        n = len(_catalog.getAllIds())
+        return f"Fred(catalog={n} series, groups={_catalog.getGroups()})"
 
 
 __all__ = ["Fred", "FredError", "SeriesMeta", "CatalogEntry"]

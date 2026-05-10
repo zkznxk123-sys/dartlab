@@ -227,7 +227,7 @@ _SPECS: dict[str, ToolSpec] = {
             },
             "required": ["stockCode", "date", "decision"],
         },
-        # 디스크 쓰기 — write tool. 같은 (date, stockCode) 호출은 store_decision 이 skip 하지만
+        # 디스크 쓰기 — write tool. 같은 (date, stockCode) 호출은 storeDecision 이 skip 하지만
         # 도구 시그니처상 idempotent 단정 X.
         readOnlyHint=False,
         destructiveHint=False,
@@ -451,7 +451,7 @@ def toolSpecs(provider: Any = None) -> list[dict[str, Any]]:
     provider=LLMProvider 인스턴스 또는 provider id 문자열: 해당 provider 의 schema 형식.
     """
     if provider is None:
-        return [spec.to_dict() for spec in _SPECS.values()]
+        return [spec.toDict() for spec in _SPECS.values()]
 
     if isinstance(provider, str):
         from dartlab.ai.providers.catalog import PROVIDER_CLASSES
@@ -513,11 +513,11 @@ def unregisterTool(name: str) -> None:
 def executeTool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any]:
     canonical = _LEGACY_NAME_MAP.get(name, name)
     if canonical not in _TOOLS:
-        return ToolResult(False, f"Unknown tool: {name}", error="unknown_tool").to_dict()
+        return ToolResult(False, f"Unknown tool: {name}", error="unknown_tool").toDict()
     payload = dict(args or {})
     filtered = _filterKwargs(_TOOLS[canonical], payload)
     result = _TOOLS[canonical](**filtered)
-    return result.to_dict()
+    return result.toDict()
 
 
 def _filterKwargs(func: Callable[..., Any], payload: dict[str, Any]) -> dict[str, Any]:

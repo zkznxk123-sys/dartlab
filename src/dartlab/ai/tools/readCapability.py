@@ -16,22 +16,22 @@ def readCapability(query: str, *, limit: int = 8) -> ToolResult:
     results = searchCapabilities(query or "", topK=max(1, int(limit or 8)), minScore=0.0)
     refs: list[Ref] = []
     rows: list[dict] = []
-    for api_ref, entry, score in results:
+    for apiRef, entry, score in results:
         payload = dict(entry)
-        payload["apiRef"] = api_ref
+        payload["apiRef"] = apiRef
         payload["score"] = score
         refs.append(
             Ref(
-                id=f"api:{api_ref}",
+                id=f"api:{apiRef}",
                 kind="apiRef",
-                title=api_ref,
+                title=apiRef,
                 source="dartlab.core.capability._generated.CAPABILITIES",
                 payload=payload,
             )
         )
         rows.append(
             {
-                "apiRef": api_ref,
+                "apiRef": apiRef,
                 "summary": entry.get("summary") or "",
                 "guide": entry.get("guide") or "",
                 "llmSpecs": entry.get("llmSpecs") or {},

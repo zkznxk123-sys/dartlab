@@ -142,7 +142,7 @@ class TestEnsureScanData:
 class TestScanParquets:
     def test_prebuild_scan_parquet(self, tmp_path):
         """프리빌드 scan parquet에서 데이터를 읽는다."""
-        from dartlab.scan._helpers import scan_parquets
+        from dartlab.scan._helpers import scanParquets
 
         # Create a test parquet file
         report_dir = tmp_path / "scan" / "report"
@@ -161,7 +161,7 @@ class TestScanParquets:
         df.write_parquet(str(report_dir / "majorHolder.parquet"))
 
         with patch("dartlab.scan._helpers._ensureScanData", return_value=tmp_path / "scan"):
-            result = scan_parquets(
+            result = scanParquets(
                 "majorHolder",
                 ["stockCode", "year", "quarter", "name", "pct"],
             )
@@ -174,27 +174,27 @@ class TestScanParquets:
 
 class TestFindLatestYear:
     def test_finds_year_with_enough_data(self):
-        from dartlab.scan._helpers import find_latest_year
+        from dartlab.scan._helpers import findLatestYear
 
         rows = [{"year": "2023", "value": str(i)} for i in range(600)]
         rows += [{"year": "2022", "value": str(i)} for i in range(600)]
         df = pl.DataFrame(rows)
-        assert find_latest_year(df, "value", min_count=500) == "2023"
+        assert findLatestYear(df, "value", minCount=500) == "2023"
 
     def test_skips_sparse_year(self):
-        from dartlab.scan._helpers import find_latest_year
+        from dartlab.scan._helpers import findLatestYear
 
         rows_2023 = [{"year": "2023", "value": ""} for _ in range(600)]
         rows_2022 = [{"year": "2022", "value": str(i)} for i in range(600)]
         df = pl.DataFrame(rows_2023 + rows_2022)
-        assert find_latest_year(df, "value", min_count=500) == "2022"
+        assert findLatestYear(df, "value", minCount=500) == "2022"
 
     def test_returns_none_if_no_year_qualifies(self):
-        from dartlab.scan._helpers import find_latest_year
+        from dartlab.scan._helpers import findLatestYear
 
         rows = [{"year": "2023", "value": None} for _ in range(10)]
         df = pl.DataFrame(rows)
-        assert find_latest_year(df, "value", min_count=500) is None
+        assert findLatestYear(df, "value", minCount=500) is None
 
 
 # ── 6. pick_best_quarter ──
@@ -202,7 +202,7 @@ class TestFindLatestYear:
 
 class TestPickBestQuarter:
     def test_prefers_q2(self):
-        from dartlab.scan._helpers import pick_best_quarter
+        from dartlab.scan._helpers import pickBestQuarter
 
         df = pl.DataFrame(
             {
@@ -210,12 +210,12 @@ class TestPickBestQuarter:
                 "value": [1, 2, 3, 4],
             }
         )
-        result = pick_best_quarter(df)
+        result = pickBestQuarter(df)
         assert result.height == 1
         assert result["quarter"][0] == "2분기"
 
     def test_falls_back_to_q4(self):
-        from dartlab.scan._helpers import pick_best_quarter
+        from dartlab.scan._helpers import pickBestQuarter
 
         df = pl.DataFrame(
             {
@@ -223,7 +223,7 @@ class TestPickBestQuarter:
                 "value": [1, 4],
             }
         )
-        result = pick_best_quarter(df)
+        result = pickBestQuarter(df)
         assert result["quarter"][0] == "4분기"
 
 
@@ -232,26 +232,26 @@ class TestPickBestQuarter:
 
 class TestParseDateYear:
     def test_dot_format(self):
-        from dartlab.scan._helpers import parse_date_year
+        from dartlab.scan._helpers import parseDateYear
 
-        assert parse_date_year("2023.06.15") == 2023
+        assert parseDateYear("2023.06.15") == 2023
 
     def test_dash_format(self):
-        from dartlab.scan._helpers import parse_date_year
+        from dartlab.scan._helpers import parseDateYear
 
-        assert parse_date_year("2022-12-31") == 2022
+        assert parseDateYear("2022-12-31") == 2022
 
     def test_none(self):
-        from dartlab.scan._helpers import parse_date_year
+        from dartlab.scan._helpers import parseDateYear
 
-        assert parse_date_year(None) is None
-        assert parse_date_year("") is None
-        assert parse_date_year("-") is None
+        assert parseDateYear(None) is None
+        assert parseDateYear("") is None
+        assert parseDateYear("-") is None
 
     def test_out_of_range(self):
-        from dartlab.scan._helpers import parse_date_year
+        from dartlab.scan._helpers import parseDateYear
 
-        assert parse_date_year("1800.01.01") is None
+        assert parseDateYear("1800.01.01") is None
 
 
 # ── 8. QUARTER_ORDER constant ──

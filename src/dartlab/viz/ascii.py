@@ -25,19 +25,19 @@ _ANSI_COLORS = {
 _DEFAULT_ANSI = 250
 
 
-def _ansi_color(hex_color: str) -> int:
+def _ansiColor(hexColor: str) -> int:
     """Hex → ANSI 256 색상 코드."""
-    if not hex_color:
+    if not hexColor:
         return _DEFAULT_ANSI
-    return _ANSI_COLORS.get(hex_color.lower(), _DEFAULT_ANSI)
+    return _ANSI_COLORS.get(hexColor.lower(), _DEFAULT_ANSI)
 
 
-def _colorize(text: str, ansi_code: int) -> str:
+def _colorize(text: str, ansiCode: int) -> str:
     """ANSI 256 색상 적용."""
-    return f"\033[38;5;{ansi_code}m{text}\033[0m"
+    return f"\033[38;5;{ansiCode}m{text}\033[0m"
 
 
-def _try_plotext_bar(spec: dict[str, Any], width: int, height: int) -> str | None:
+def _tryPlotextBar(spec: dict[str, Any], width: int, height: int) -> str | None:
     """plotext bar chart. 설치 안 되어 있으면 None."""
     try:
         import plotext as plt
@@ -58,7 +58,7 @@ def _try_plotext_bar(spec: dict[str, Any], width: int, height: int) -> str | Non
     return plt.build()
 
 
-def _try_plotext_line(spec: dict[str, Any], width: int, height: int) -> str | None:
+def _tryPlotextLine(spec: dict[str, Any], width: int, height: int) -> str | None:
     """plotext line chart."""
     try:
         import plotext as plt
@@ -84,7 +84,7 @@ def _try_plotext_line(spec: dict[str, Any], width: int, height: int) -> str | No
     return plt.build()
 
 
-def _fallback_sparkline(values: list[float | None]) -> str:
+def _fallbackSparkline(values: list[float | None]) -> str:
     """Unicode 블록 문자 sparkline — plotext 없이 순수 파이썬."""
     bars = "▁▂▃▄▅▆▇█"
     clean = [v for v in values if v is not None]
@@ -102,7 +102,7 @@ def _fallback_sparkline(values: list[float | None]) -> str:
     return "".join(out)
 
 
-def _fallback_bar(spec: dict[str, Any], width: int) -> str:
+def _fallbackBar(spec: dict[str, Any], width: int) -> str:
     """순수 파이썬 가로 bar chart."""
     series = spec.get("series", [])
     categories = spec.get("categories", [])
@@ -110,7 +110,7 @@ def _fallback_bar(spec: dict[str, Any], width: int) -> str:
         return "(데이터 없음)"
     s = series[0]
     data = s.get("data", [])
-    color = _ansi_color(s.get("color", ""))
+    color = _ansiColor(s.get("color", ""))
     max_val = max((abs(v) for v in data if v is not None), default=1) or 1
     bar_w = max(10, width - 25)
 
@@ -130,7 +130,7 @@ def _fallback_bar(spec: dict[str, Any], width: int) -> str:
     return "\n".join(lines)
 
 
-def _fallback_summary(spec: dict[str, Any]) -> str:
+def _fallbackSummary(spec: dict[str, Any]) -> str:
     """지원 안 되는 차트 타입: 텍스트 요약."""
     lines = []
     if spec.get("title"):
@@ -145,7 +145,7 @@ def _fallback_summary(spec: dict[str, Any]) -> str:
     return "\n".join(lines) or "(데이터 없음)"
 
 
-def render_ascii(spec: dict[str, Any], width: int = 80, height: int = 20) -> str:
+def renderAscii(spec: dict[str, Any], width: int = 80, height: int = 20) -> str:
     """VizSpec dict → 터미널 ASCII 문자열.
 
     Parameters
@@ -167,13 +167,13 @@ def render_ascii(spec: dict[str, Any], width: int = 80, height: int = 20) -> str
 
     # plotext 우선 (bar, line)
     if chart_type == "bar":
-        result = _try_plotext_bar(spec, width, height)
+        result = _tryPlotextBar(spec, width, height)
         if result:
             return result
-        return _fallback_bar(spec, width)
+        return _fallbackBar(spec, width)
 
     if chart_type in ("line", "combo"):
-        result = _try_plotext_line(spec, width, height)
+        result = _tryPlotextLine(spec, width, height)
         if result:
             return result
 
@@ -183,8 +183,8 @@ def render_ascii(spec: dict[str, Any], width: int = 80, height: int = 20) -> str
         if spec.get("title"):
             lines.append(spec["title"])
         for s in series:
-            color = _ansi_color(s.get("color", ""))
-            spark = _fallback_sparkline(s.get("data", []))
+            color = _ansiColor(s.get("color", ""))
+            spark = _fallbackSparkline(s.get("data", []))
             lines.append(f"  {s.get('name', '?'):<12} {_colorize(spark, color)}")
         return "\n".join(lines)
 
@@ -204,4 +204,4 @@ def render_ascii(spec: dict[str, Any], width: int = 80, height: int = 20) -> str
             return "\n".join(lines)
 
     # 기타: 요약 fallback
-    return _fallback_summary(spec)
+    return _fallbackSummary(spec)

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 
 _PHASE_PATTERNS = [
     (re.compile(r"(phase\s*3|임상\s*3상|3상)", re.IGNORECASE), "Phase III"),
@@ -26,7 +26,7 @@ _POS_BY_PHASE = {
 }
 
 
-@memoized_calc
+@memoizedCalc
 def calcPharmaKpis(company, *, basePeriod: str | None = None) -> dict | None:
     """제약·바이오 핵심 KPI.
 

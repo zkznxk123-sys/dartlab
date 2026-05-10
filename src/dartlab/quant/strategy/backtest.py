@@ -93,7 +93,7 @@ class BacktestResult:
         )
 
     @classmethod
-    def not_applicable(cls, *, style: str, reason: str) -> "BacktestResult":
+    def notApplicable(cls, *, style: str, reason: str) -> "BacktestResult":
         """KR-only 스타일을 US 에서 호출 시 sentinel."""
         return cls(status="not_applicable", reason=reason, style=style)
 
@@ -110,13 +110,13 @@ def vectorBacktest(
     low: np.ndarray | None = None,
     volume: np.ndarray | None = None,
     dates: list | None = None,
-    fee_bps: float = DEFAULT_FEE_BPS,
-    slip_bps: float = DEFAULT_SLIP_BPS,
-    impact_bps_per_pct: float = DEFAULT_IMPACT_BPS_PER_PCT,
-    capital_pct_of_adv: float = 0.0,
+    feeBps: float = DEFAULT_FEE_BPS,
+    slipBps: float = DEFAULT_SLIP_BPS,
+    impactBpsPerPct: float = DEFAULT_IMPACT_BPS_PER_PCT,
+    capitalPctOfAdv: float = 0.0,
     style: str | None = None,
-    n_trials: int = 1,
-    exec_mode: str = "next_open",
+    nTrials: int = 1,
+    execMode: str = "next_open",
 ) -> BacktestResult:
     """단일 룰 백테스트 — long-only, 정밀 체결 모델.
 
@@ -154,26 +154,26 @@ def vectorBacktest(
         )
 
     # 체결 가격 선택
-    if exec_mode == "close":
+    if execMode == "close":
         exec_price = close
     else:
         exec_price = open_ if open_ is not None else close
 
-    base_cost = (fee_bps + slip_bps) / 1e4 / 2.0  # 한쪽
+    base_cost = (feeBps + slipBps) / 1e4 / 2.0  # 한쪽
 
     # ADV impact (거래량 비례)
-    def _impact_cost(t_idx: int) -> float:
+    def _impactCost(tIdx: int) -> float:
         """t_idx 봉의 거래량 대비 진입 비율 → impact bps 추가."""
-        if volume is None or capital_pct_of_adv <= 0 or t_idx >= len(volume):
+        if volume is None or capitalPctOfAdv <= 0 or tIdx >= len(volume):
             return 0.0
         # capital_pct_of_adv = 우리 진입 자본 / 평균 일거래량 (%)
-        return (capital_pct_of_adv * impact_bps_per_pct) / 1e4 / 2.0
+        return (capitalPctOfAdv * impactBpsPerPct) / 1e4 / 2.0
 
     # gap 가중 (open[t+1] vs close[t])
-    def _gap_cost(t_idx: int) -> float:
-        if open_ is None or t_idx + 1 >= n:
+    def _gapCost(tIdx: int) -> float:
+        if open_ is None or tIdx + 1 >= n:
             return 0.0
-        gap_pct = abs(open_[t_idx + 1] - close[t_idx]) / max(close[t_idx], 1e-9)
+        gap_pct = abs(open_[tIdx + 1] - close[tIdx]) / max(close[tIdx], 1e-9)
         if gap_pct >= GAP_THRESHOLD_PCT:
             return gap_pct * 0.5  # 갭의 50% 추가 슬리피지
         return 0.0
@@ -188,7 +188,7 @@ def vectorBacktest(
     # stop 시계열 (옵션)
     stop_series: np.ndarray | None = None
     if rule.stop and high is not None and low is not None:
-        stop_series = _build_stop_series(close, high, low, rule.stop)
+        stop_series = _buildStopSeries(close, high, low, rule.stop)
 
     for t in range(n - 1):
         # 청산 조건 체크 (홀딩 중일 때만)
@@ -215,9 +215,9 @@ def vectorBacktest(
                     exit_t = t
                 else:
                     # next-bar 시가 체결 (또는 close 모드)
-                    exit_raw = exec_price[t + 1] if exec_mode != "close" else close[t]
-                    exit_t = t + 1 if exec_mode != "close" else t
-                cost = base_cost + _impact_cost(t) + _gap_cost(t)
+                    exit_raw = exec_price[t + 1] if execMode != "close" else close[t]
+                    exit_t = t + 1 if execMode != "close" else t
+                cost = base_cost + _impactCost(t) + _gapCost(t)
                 exit_price = exit_raw * (1 - cost)
                 pnl = (exit_price - entry_price) / entry_price
                 trades.append(
@@ -238,10 +238,10 @@ def vectorBacktest(
 
         # 진입 조건 체크 (현금 상태에서만)
         if not in_pos and bool(rule.entry_expr[t]):
-            entry_raw = exec_price[t + 1] if exec_mode != "close" else close[t]
-            cost = base_cost + _impact_cost(t) + _gap_cost(t)
+            entry_raw = exec_price[t + 1] if execMode != "close" else close[t]
+            cost = base_cost + _impactCost(t) + _gapCost(t)
             entry_price = entry_raw * (1 + cost)
-            entry_idx = t + 1 if exec_mode != "close" else t
+            entry_idx = t + 1 if execMode != "close" else t
             in_pos = True
             pos[t + 1] = 1
         else:
@@ -249,7 +249,7 @@ def vectorBacktest(
 
     # 마지막 봉 청산 (열린 포지션 강제 마감)
     if in_pos:
-        cost = base_cost + _impact_cost(n - 1)
+        cost = base_cost + _impactCost(n - 1)
         exit_price = close[-1] * (1 - cost)
         pnl = (exit_price - entry_price) / entry_price
         trades.append(
@@ -300,7 +300,7 @@ def vectorBacktest(
     ex = expectancy(pnls)
     to = turnover(pos.astype(np.float64))
     expo = exposure(pos.astype(np.float64))
-    ds = dsr(sh, daily_ret, n_trials=n_trials)
+    ds = dsr(sh, daily_ret, nTrials=nTrials)
 
     period = (None, None)
     if dates and len(dates) >= 2:
@@ -326,10 +326,10 @@ def vectorBacktest(
     )
 
 
-def _build_stop_series(close, high, low, stop_spec) -> np.ndarray:
+def _buildStopSeries(close, high, low, stopSpec) -> np.ndarray:
     """rule.stop dict → 시계열 stop level."""
-    method = stop_spec.get("method", "atr")
-    kw = stop_spec.get("kwargs", {})
+    method = stopSpec.get("method", "atr")
+    kw = stopSpec.get("kwargs", {})
     if method == "atr":
         from dartlab.quant.signals import vAtrTrailingStop
 
@@ -357,9 +357,9 @@ def walkForward(
     low: np.ndarray | None = None,
     dates: list | None = None,
     style: str | None = None,
-    fee_bps: float = DEFAULT_FEE_BPS,
-    slip_bps: float = DEFAULT_SLIP_BPS,
-    rule_factory=None,
+    feeBps: float = DEFAULT_FEE_BPS,
+    slipBps: float = DEFAULT_SLIP_BPS,
+    ruleFactory=None,
 ) -> BacktestResult:
     """Walk-forward OOS 백테스트.
 
@@ -395,7 +395,7 @@ def walkForward(
     ...
     >>> walkForward(close, rule=None, rule_factory=factory, train=252, test=63)
     """
-    if rule is None and rule_factory is None:
+    if rule is None and ruleFactory is None:
         return BacktestResult(
             status="error",
             reason="rule 또는 rule_factory 중 하나 필수",
@@ -421,13 +421,13 @@ def walkForward(
     while start + train + test <= n:
         is_end = start + train
         oos_end = is_end + test
-        is_close = close[start:is_end]
+        isClose = close[start:is_end]
         oos_close = close[is_end:oos_end]
 
-        if rule_factory is not None:
+        if ruleFactory is not None:
             # IS 마다 재학습 — Rule length 는 train+test 이어야 함 (IS+OOS 일관)
             try:
-                fold_rule = rule_factory(is_close, test)
+                fold_rule = ruleFactory(isClose, test)
             except Exception as exc:  # noqa: BLE001
                 return BacktestResult(
                     status="error",
@@ -475,13 +475,13 @@ def walkForward(
             )
 
         is_bt = vectorBacktest(
-            is_close,
+            isClose,
             is_rule,
             open_=open_[start:is_end] if open_ is not None else None,
             high=high[start:is_end] if high is not None else None,
             low=low[start:is_end] if low is not None else None,
-            fee_bps=fee_bps,
-            slip_bps=slip_bps,
+            feeBps=feeBps,
+            slipBps=slipBps,
         )
         is_sharpes.append(is_bt.sharpe)
 
@@ -491,8 +491,8 @@ def walkForward(
             open_=open_[is_end:oos_end] if open_ is not None else None,
             high=high[is_end:oos_end] if high is not None else None,
             low=low[is_end:oos_end] if low is not None else None,
-            fee_bps=fee_bps,
-            slip_bps=slip_bps,
+            feeBps=feeBps,
+            slipBps=slipBps,
         )
         oos_sharpes.append(oos_bt.sharpe)
         oos_returns_all.append(oos_bt.returns)
@@ -513,7 +513,7 @@ def walkForward(
     sh = sharpe(aggregated_returns)
     so = sortino(aggregated_returns)
     md = mdd(equity)
-    ds = dsr(sh, aggregated_returns, n_trials=len(oos_sharpes))
+    ds = dsr(sh, aggregated_returns, nTrials=len(oos_sharpes))
 
     # PBO: IS 가 [trial=1, segment=k], OOS 도 동일.
     # rule_factory path 에서는 IS region 이 보통 학습용 (entry/exit 모두 False) 이라
@@ -552,12 +552,12 @@ def walkForward(
 
 
 def multiAssetBacktest(
-    stock_codes: list[str],
-    rule_builder,
+    stockCodes: list[str],
+    ruleBuilder,
     *,
     weighting: str = "equal",
-    fee_bps: float = DEFAULT_FEE_BPS,
-    slip_bps: float = DEFAULT_SLIP_BPS,
+    feeBps: float = DEFAULT_FEE_BPS,
+    slipBps: float = DEFAULT_SLIP_BPS,
     style: str | None = None,
 ) -> BacktestResult:
     """멀티 종목 포트폴리오 백테스트.
@@ -577,7 +577,7 @@ def multiAssetBacktest(
 
     from dartlab.quant._helpers import fetchOhlcv, ohlcvToArrays
 
-    if not stock_codes:
+    if not stockCodes:
         return BacktestResult(status="error", reason="empty stock_codes", style=style)
 
     @dataclass
@@ -589,14 +589,14 @@ def multiAssetBacktest(
     return_series: dict[str, np.ndarray] = {}
     min_len = float("inf")
 
-    for code in stock_codes:
+    for code in stockCodes:
         ohlcv = fetchOhlcv(code)
         if isEmptyDf(ohlcv):
             continue
         arr = ohlcvToArrays(ohlcv)
         if "close" not in arr or len(arr["close"]) < 60:
             continue
-        rule = rule_builder(_Stub(stockCode=code))
+        rule = ruleBuilder(_Stub(stockCode=code))
         if hasattr(rule, "status") and rule.status == "not_applicable":
             continue
         if not isinstance(rule, Rule):
@@ -610,8 +610,8 @@ def multiAssetBacktest(
             high=arr.get("high"),
             low=arr.get("low"),
             volume=arr.get("volume"),
-            fee_bps=fee_bps,
-            slip_bps=slip_bps,
+            feeBps=feeBps,
+            slipBps=slipBps,
         )
         if bt.status != "ok":
             continue
@@ -654,7 +654,7 @@ def multiAssetBacktest(
     sh = sharpe(portfolio_ret)
     so = sortino(portfolio_ret)
     md = mdd(equity)
-    ds = dsr(sh, portfolio_ret, n_trials=n_assets)
+    ds = dsr(sh, portfolio_ret, nTrials=n_assets)
 
     # 모든 trades 합산
     all_trades_list = []
@@ -701,8 +701,8 @@ def cpcv(
     close: np.ndarray,
     rule: Rule,
     *,
-    n_splits: int = 6,
-    n_test: int = 2,
+    nSplits: int = 6,
+    nTest: int = 2,
     embargo: int = 5,
     open_: np.ndarray | None = None,
     high: np.ndarray | None = None,
@@ -725,7 +725,7 @@ def cpcv(
     fold_sharpes: list[float] = []
     fold_returns: list[np.ndarray] = []
 
-    for train_idx, test_idx in cpcvSplits(n, n_splits, n_test, embargo):
+    for train_idx, test_idx in cpcvSplits(n, nSplits, nTest, embargo):
         if len(test_idx) < 30:
             continue
         sub_close = close[test_idx]
@@ -753,7 +753,7 @@ def cpcv(
     equity = np.cumprod(1.0 + aggregated)
     sh = sharpe(aggregated)
     md = mdd(equity)
-    ds = dsr(sh, aggregated, n_trials=len(fold_sharpes))
+    ds = dsr(sh, aggregated, nTrials=len(fold_sharpes))
 
     return BacktestResult(
         equity=equity,
@@ -766,7 +766,7 @@ def cpcv(
         dsr=ds,
         style=style,
         oos=True,
-        cpcv={"fold_sharpes": fold_sharpes, "n_folds": len(fold_sharpes), "n_splits": n_splits, "n_test": n_test},
+        cpcv={"fold_sharpes": fold_sharpes, "n_folds": len(fold_sharpes), "n_splits": nSplits, "n_test": nTest},
     )
 
 

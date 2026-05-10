@@ -18,11 +18,11 @@ def launchViewer(companyId: str, *, port: int = 8400) -> None:
     import time
     import webbrowser
 
-    def _is_port_in_use(p: int) -> bool:
+    def _isPortInUse(p: int) -> bool:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             return s.connect_ex(("127.0.0.1", p)) == 0
 
-    if not _is_port_in_use(port):
+    if not _isPortInUse(port):
 
         def _run() -> None:
             import uvicorn
@@ -32,7 +32,7 @@ def launchViewer(companyId: str, *, port: int = 8400) -> None:
         t = threading.Thread(target=_run, daemon=True)
         t.start()
         for _ in range(30):
-            if _is_port_in_use(port):
+            if _isPortInUse(port):
                 break
             time.sleep(0.1)
 

@@ -306,37 +306,37 @@ class TestCashFlowGrade:
         assert cashFlowGrade(None, True, 35) == "eCR-?"
 
     def test_ecr1_best_cash_flow(self):
-        result = cashFlowGrade(ocf_to_sales=20, fcf_positive=True, ocf_to_debt=35)
+        result = cashFlowGrade(ocfToSales=20, fcfPositive=True, ocfToDebt=35)
         assert result == "eCR-1"
 
     def test_ecr2_good_cash_flow(self):
-        result = cashFlowGrade(ocf_to_sales=12, fcf_positive=False, ocf_to_debt=25)
+        result = cashFlowGrade(ocfToSales=12, fcfPositive=False, ocfToDebt=25)
         assert result == "eCR-2"
 
     def test_ecr3_adequate(self):
-        result = cashFlowGrade(ocf_to_sales=7, fcf_positive=False, ocf_to_debt=10)
+        result = cashFlowGrade(ocfToSales=7, fcfPositive=False, ocfToDebt=10)
         assert result == "eCR-3"
 
     def test_ecr4_moderate(self):
-        result = cashFlowGrade(ocf_to_sales=2, fcf_positive=False, ocf_to_debt=5)
+        result = cashFlowGrade(ocfToSales=2, fcfPositive=False, ocfToDebt=5)
         assert result == "eCR-4"
 
     def test_ecr5_weak(self):
-        result = cashFlowGrade(ocf_to_sales=-3, fcf_positive=False, ocf_to_debt=0)
+        result = cashFlowGrade(ocfToSales=-3, fcfPositive=False, ocfToDebt=0)
         assert result == "eCR-5"
 
     def test_ecr6_severe(self):
-        result = cashFlowGrade(ocf_to_sales=-10, fcf_positive=False, ocf_to_debt=-5)
+        result = cashFlowGrade(ocfToSales=-10, fcfPositive=False, ocfToDebt=-5)
         assert result == "eCR-6"
 
     def test_ecr3_with_unstable_trend_falls_to_ecr4(self):
         # ocf_to_sales=7 would be eCR-3 but trend_stable=False blocks it
-        result = cashFlowGrade(ocf_to_sales=7, fcf_positive=False, ocf_to_debt=10, ocf_trend_stable=False)
+        result = cashFlowGrade(ocfToSales=7, fcfPositive=False, ocfToDebt=10, ocfTrendStable=False)
         assert result == "eCR-4"
 
     def test_ecr1_requires_all_conditions(self):
         # High ocf_to_sales but fcf_positive=False -> falls to eCR-2
-        result = cashFlowGrade(ocf_to_sales=20, fcf_positive=False, ocf_to_debt=35)
+        result = cashFlowGrade(ocfToSales=20, fcfPositive=False, ocfToDebt=35)
         assert result == "eCR-2"
 
 

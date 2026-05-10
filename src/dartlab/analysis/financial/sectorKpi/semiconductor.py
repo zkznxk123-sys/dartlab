@@ -5,10 +5,10 @@ DART sections(productService/생산실적) + IS(매출/CAPEX) 활용.
 
 from __future__ import annotations
 
-from dartlab.core.memory import memoized_calc
+from dartlab.core.memory import memoizedCalc
 
 
-@memoized_calc
+@memoizedCalc
 def calcSemiconductorKpis(company, *, basePeriod: str | None = None) -> dict | None:
     """반도체 핵심 KPI.
 

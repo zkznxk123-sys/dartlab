@@ -7,11 +7,11 @@ import subprocess
 import webbrowser
 
 from dartlab.cli.services.errors import CLIError
-from dartlab.cli.services.output import print_warning
-from dartlab.server._ui_path import resolve_ui_build_dir, resolve_ui_source_dir
+from dartlab.cli.services.output import printWarning
+from dartlab.server._ui_path import resolveUiBuildDir, resolveUiSourceDir
 
 
-def configure_parser(subparsers) -> None:
+def configureParser(subparsers) -> None:
     """ai 서브커맨드 등록 — FastAPI + SPA 웹 인터페이스."""
     parser = subparsers.add_parser("ai", help="AI 분석 웹 인터페이스 실행")
     parser.add_argument("--port", type=int, default=8400, help="포트 번호 (기본: 8400)")
@@ -36,12 +36,12 @@ def run(args) -> int:
         print(f"  {url}")
         print()
 
-    from dartlab.server import ensure_port, run_server
+    from dartlab.server import ensurePort, runServer
 
     shouldOpen = not args.no_browser and not os.environ.get("DARTLAB_NO_BROWSER")
     target = "http://localhost:5400" if args.dev else url
 
-    status = ensure_port(port)
+    status = ensurePort(port)
     if status == "already_running":
         if shouldOpen:
             webbrowser.open(target)
@@ -59,14 +59,14 @@ def run(args) -> int:
 
         threading.Thread(target=_open, daemon=True).start()
 
-    run_server(host=host, port=port)
+    runServer(host=host, port=port)
     return 0
 
 
 def _runDevMode(url: str) -> None:
     import threading
 
-    ui_src = resolve_ui_source_dir()
+    ui_src = resolveUiSourceDir()
     if not (ui_src / "node_modules").exists():
         print("npm install 실행 중...")
         result = subprocess.run(["npm", "install"], cwd=str(ui_src), timeout=300)  # noqa: S603, S607
@@ -76,7 +76,7 @@ def _runDevMode(url: str) -> None:
     def _vite() -> None:
         result = subprocess.run(["npm", "run", "dev"], cwd=str(ui_src))  # noqa: S603, S607
         if result.returncode != 0:
-            print_warning("Svelte dev 서버가 비정상 종료되었습니다.")
+            printWarning("Svelte dev 서버가 비정상 종료되었습니다.")
 
     print("\n  DartLab AI (개발 모드)")
     print(f"  API:     {url}")
@@ -87,7 +87,7 @@ def _runDevMode(url: str) -> None:
 
 
 def _checkBuiltUi() -> bool:
-    build_dir = resolve_ui_build_dir()
+    build_dir = resolveUiBuildDir()
     if build_dir.is_dir() and (build_dir / "index.html").exists():
         return True
 

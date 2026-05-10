@@ -128,39 +128,39 @@ def _defaultSafeRoots() -> list[str]:
 _WRITE_MODE_CHARS = ("w", "a", "x", "+")
 
 
-def _safeOpenFactory(safe_roots: list[str] | None = None) -> Callable[..., Any]:
+def _safeOpenFactory(safeRoots: list[str] | None = None) -> Callable[..., Any]:
     """write/append/create mode 의 path 를 안전 경로로 제한하는 open wrapper.
 
     read mode (`r`, `rb`) 는 그대로 통과 — 외부 본문 파일 분석 등 정상 use case 보존.
     `+` 도 write 권한 포함이라 검증 대상.
     """
-    roots = [os.path.normpath(r) for r in (safe_roots or _defaultSafeRoots())]
+    roots = [os.path.normpath(r) for r in (safeRoots or _defaultSafeRoots())]
     real_open = open  # 캡처 — 안에서 builtin 의존 안 하도록.
 
-    def safe_open(file: Any, mode: str = "r", *args: Any, **kwargs: Any) -> Any:
+    def safeOpen(file: Any, mode: str = "r", *args: Any, **kwargs: Any) -> Any:
         if any(ch in mode for ch in _WRITE_MODE_CHARS):
             try:
                 path_str = os.fspath(file)
             except TypeError:
                 # file descriptor (int) 등 — 검증 못 하지만 user 공격 surface 좁음.
                 return real_open(file, mode, *args, **kwargs)
-            abs_path = os.path.normpath(os.path.abspath(path_str))
-            if not _isUnderSafeRoots(abs_path, roots):
+            absPath = os.path.normpath(os.path.abspath(path_str))
+            if not _isUnderSafeRoots(absPath, roots):
                 raise PermissionError(
                     f"RunPython: 파일 쓰기는 안전 경로만 허용 ({', '.join(roots)}). "
-                    f"시도된 경로: {abs_path}. 결과 저장은 SaveArtifact 도구 사용 권장."
+                    f"시도된 경로: {absPath}. 결과 저장은 SaveArtifact 도구 사용 권장."
                 )
         return real_open(file, mode, *args, **kwargs)
 
-    return safe_open
+    return safeOpen
 
 
-def _isUnderSafeRoots(abs_path: str, roots: list[str]) -> bool:
+def _isUnderSafeRoots(absPath: str, roots: list[str]) -> bool:
     """abs_path 가 roots 중 하나의 직속/하위 인가."""
     for root in roots:
-        if abs_path == root:
+        if absPath == root:
             return True
         # path separator 추가해서 prefix-match — 'C:\\Users\\ab' 가 'C:\\Users\\a' 의 하위로 false 매칭 방지.
-        if abs_path.startswith(root + os.sep):
+        if absPath.startswith(root + os.sep):
             return True
     return False

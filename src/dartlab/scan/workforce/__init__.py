@@ -14,18 +14,18 @@ _log = getLogger(__name__)
 
 
 from dartlab.scan.workforce.growth import (
-    compute_salary_vs_revenue,
-    scan_revenue_growth,
-    scan_salary_growth,
+    computeSalaryVsRevenue,
+    scanRevenueGrowth,
+    scanSalaryGrowth,
 )
 from dartlab.scan.workforce.scanner import (
-    scan_employee,
-    scan_revenue_per_employee,
-    scan_top_pay,
+    scanEmployee,
+    scanRevenuePerEmployee,
+    scanTopPay,
 )
 
 
-def scan_workforce(*, verbose: bool = True) -> pl.DataFrame:
+def scanWorkforce(*, verbose: bool = True) -> pl.DataFrame:
     """전체 상장사 인력 스캔 → 종합 DataFrame.
 
     컬럼: 종목코드, 직원수, 평균급여_만원, 남녀격차, 근속_년,
@@ -39,24 +39,24 @@ def scan_workforce(*, verbose: bool = True) -> pl.DataFrame:
             _log.info(msg)
 
     _say("1/6 직원 현황...")
-    emp_map = scan_employee()
+    emp_map = scanEmployee()
     _say(f"  → {len(emp_map)}종목")
 
     _say("2/6 직원당 매출...")
-    rpe_map = scan_revenue_per_employee()
+    rpe_map = scanRevenuePerEmployee()
     _say(f"  → {len(rpe_map)}종목")
 
     _say("3/5 급여 vs 매출 성장률...")
-    sal_map = scan_salary_growth()
-    rev_map = scan_revenue_growth()
-    growth_df = compute_salary_vs_revenue(sal_map, rev_map)
+    salMap = scanSalaryGrowth()
+    revMap = scanRevenueGrowth()
+    growth_df = computeSalaryVsRevenue(salMap, revMap)
     growth_dict: dict[str, dict] = {}
     for row in growth_df.iter_rows(named=True):
         growth_dict[row["stockCode"]] = row
     _say(f"  → {len(growth_dict)}종목")
 
     _say("4/5 고액 보수...")
-    top_map = scan_top_pay()
+    top_map = scanTopPay()
     _say(f"  → {len(top_map)}종목")
 
     # 합집합
