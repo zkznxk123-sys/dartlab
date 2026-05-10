@@ -17,11 +17,20 @@ cadence recipe (catalystCalendar.md) 의 데이터 백본.
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable
 
 import polars as pl
 
-from dartlab.providers.dart import Company
+if TYPE_CHECKING:
+    from dartlab.providers.dart import Company  # noqa: F401
+
+
+def _resolveCompany():
+    """providers.dart.Company lazy resolver — gather ↔ providers cycle 회피용."""
+    import importlib
+
+    return importlib.import_module("dartlab.providers.dart").Company
+
 
 _KR_FILING_TYPES = {
     "사업보고서": ("annual", 90, "ANNUAL_REPORT"),
@@ -103,6 +112,7 @@ def gatherCalendar(
     horizon_end = today + timedelta(days=horizonDays)
     rows: list[dict] = []
 
+    Company = _resolveCompany()
     for code in code_list:
         try:
             company = Company(code)
