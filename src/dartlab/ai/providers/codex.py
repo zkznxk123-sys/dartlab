@@ -27,13 +27,13 @@ class CodexProvider(BaseProvider):
 
     def _ensure_available(self) -> None:
         if not shutil.which("codex"):
-            from dartlab.ai.providers.support.cli_setup import get_codex_install_guide
+            from dartlab.ai.providers.support.cliSetup import get_codex_install_guide
 
             raise FileNotFoundError(f"Codex CLI를 찾을 수 없습니다.\n\n{get_codex_install_guide()}")
 
         info = codex_cli.inspect_codex_cli()
         if not info.get("installed"):
-            from dartlab.ai.providers.support.cli_setup import get_codex_install_guide
+            from dartlab.ai.providers.support.cliSetup import get_codex_install_guide
 
             raise FileNotFoundError(f"Codex CLI를 찾을 수 없습니다.\n\n{get_codex_install_guide()}")
         if not info.get("authenticated"):

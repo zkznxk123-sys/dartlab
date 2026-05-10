@@ -127,7 +127,7 @@ def test_getDefaultProviderHandlesLegacyKey(tmp_path: Path, monkeypatch: pytest.
 
 def test_shimSnakeAliasesStillWork():
     """ai/settings/provider_catalog shim 의 snake alias — 0.10 까지 BC 보장."""
-    from dartlab.ai.settings.provider_catalog import (
+    from dartlab.ai.settings.providerCatalog import (
         get_provider_spec,
         normalize_provider,
     )

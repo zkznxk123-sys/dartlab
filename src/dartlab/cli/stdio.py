@@ -125,7 +125,7 @@ def _handleStatus(_msg: dict[str, Any]) -> None:
     """Return provider status with available providers list."""
     try:
         from dartlab.ai.settings.profile import get_profile_manager
-        from dartlab.ai.settings.provider_catalog import _PROVIDERS
+        from dartlab.ai.settings.providerCatalog import _PROVIDERS
 
         profile = get_profile_manager().load()
         provider = _sessionProvider or profile.default_provider or "none"
@@ -190,7 +190,7 @@ def _handleSetProvider(msg: dict[str, Any]) -> None:
     # provider 인증 확인
     if provider and not apiKey:
         try:
-            from dartlab.ai.settings.provider_catalog import get_provider_spec
+            from dartlab.ai.settings.providerCatalog import get_provider_spec
 
             spec = get_provider_spec(provider)
             if spec:
@@ -248,7 +248,7 @@ def _handleOAuthPasteToken(msg: dict[str, Any]) -> None:
         _emit({"event": "error", "data": {"error": "access_token이 없습니다."}})
         return
     try:
-        from dartlab.ai.providers.support.oauth_token import _save_token
+        from dartlab.ai.providers.support.oauthToken import _save_token
 
         _save_token(data)
         _sessionProvider = provider
@@ -288,7 +288,7 @@ def _handleOAuthPasteCode(msg: dict[str, Any]) -> None:
             return
 
     try:
-        from dartlab.ai.providers.support.oauth_token import exchange_code
+        from dartlab.ai.providers.support.oauthToken import exchange_code
 
         exchange_code(code, verifier)
         _sessionProvider = provider
@@ -317,7 +317,7 @@ def _handleOAuthLogin(msg: dict[str, Any]) -> None:
 
     provider = msg.get("provider", "oauth-codex")
     try:
-        from dartlab.ai.providers.support.oauth_token import (
+        from dartlab.ai.providers.support.oauthToken import (
             OAUTH_REDIRECT_PORT,
             build_auth_url,
             exchange_code,

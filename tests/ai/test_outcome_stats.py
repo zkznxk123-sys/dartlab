@@ -23,7 +23,7 @@ def tmp_dartlab_home(tmp_path, monkeypatch):
 
 @pytest.mark.unit
 def test_get_stats_empty_returns_zero_counts(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_stats import getStats
+    from dartlab.ai.memory.outcomeStats import getStats
 
     stats = getStats("KR")
     assert stats["pendingCount"] == 0
@@ -35,12 +35,12 @@ def test_get_stats_empty_returns_zero_counts(tmp_dartlab_home) -> None:
 
 @pytest.mark.unit
 def test_get_stats_per_ticker_aggregates_pending_and_resolved(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import (
+    from dartlab.ai.memory.outcomeLog import (
         Update,
         batch_update_with_outcomes,
         store_decision,
     )
-    from dartlab.ai.memory.outcome_stats import getStats
+    from dartlab.ai.memory.outcomeStats import getStats
 
     # pending 1
     store_decision(
@@ -105,8 +105,8 @@ def test_get_stats_per_ticker_aggregates_pending_and_resolved(tmp_dartlab_home) 
 
 @pytest.mark.unit
 def test_get_regression_rate_returns_none_when_no_resolved(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import store_decision
-    from dartlab.ai.memory.outcome_stats import getRegressionRate
+    from dartlab.ai.memory.outcomeLog import store_decision
+    from dartlab.ai.memory.outcomeStats import getRegressionRate
 
     store_decision(
         stockCode="005930",
@@ -120,12 +120,12 @@ def test_get_regression_rate_returns_none_when_no_resolved(tmp_dartlab_home) -> 
 
 @pytest.mark.unit
 def test_get_market_summary_aggregates_multiple_tickers(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import (
+    from dartlab.ai.memory.outcomeLog import (
         Update,
         batch_update_with_outcomes,
         store_decision,
     )
-    from dartlab.ai.memory.outcome_stats import getMarketSummary
+    from dartlab.ai.memory.outcomeStats import getMarketSummary
 
     for code, alpha in [("005930", "+2.0%vs_KOSPI"), ("000660", "-1.5%vs_KOSPI"), ("035720", "+0.5%vs_KOSPI")]:
         store_decision(stockCode=code, market="KR", date="2026-03-01", theme="Buy", decision_text=f"thesis {code}")
@@ -154,8 +154,8 @@ def test_get_market_summary_aggregates_multiple_tickers(tmp_dartlab_home) -> Non
 
 @pytest.mark.unit
 def test_get_stats_date_range_filter(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import store_decision
-    from dartlab.ai.memory.outcome_stats import getStats
+    from dartlab.ai.memory.outcomeLog import store_decision
+    from dartlab.ai.memory.outcomeStats import getStats
 
     for d in ["2026-01-15", "2026-02-15", "2026-03-15", "2026-04-15"]:
         store_decision(stockCode="005930", market="KR", date=d, theme="Hold", decision_text=f"d {d}")
@@ -172,8 +172,8 @@ def test_get_stats_date_range_filter(tmp_dartlab_home) -> None:
 
 @pytest.mark.unit
 def test_resolve_pending_skips_when_holding_short(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import get_pending_entries, store_decision
-    from dartlab.ai.memory.outcome_resolver import resolvePending
+    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeResolver import resolvePending
 
     store_decision(
         stockCode="005930",
@@ -201,8 +201,8 @@ def test_resolve_pending_skips_when_holding_short(tmp_dartlab_home) -> None:
 
 @pytest.mark.unit
 def test_resolve_pending_keeps_pending_when_pricer_returns_none(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import get_pending_entries, store_decision
-    from dartlab.ai.memory.outcome_resolver import resolvePending
+    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeResolver import resolvePending
 
     store_decision(
         stockCode="005930",
@@ -230,12 +230,12 @@ def test_resolve_pending_keeps_pending_when_pricer_returns_none(tmp_dartlab_home
 
 @pytest.mark.unit
 def test_resolve_pending_writes_alpha_when_benchmark_provided(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import (
+    from dartlab.ai.memory.outcomeLog import (
         get_pending_entries,
         store_decision,
     )
-    from dartlab.ai.memory.outcome_resolver import resolvePending
-    from dartlab.ai.memory.outcome_stats import getStats
+    from dartlab.ai.memory.outcomeResolver import resolvePending
+    from dartlab.ai.memory.outcomeStats import getStats
 
     store_decision(
         stockCode="005930",
@@ -271,9 +271,9 @@ def test_resolve_pending_writes_alpha_when_benchmark_provided(tmp_dartlab_home) 
 
 @pytest.mark.unit
 def test_resolve_pending_no_benchmark_writes_raw_return_only(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import get_pending_entries, store_decision
-    from dartlab.ai.memory.outcome_resolver import resolvePending
-    from dartlab.ai.memory.outcome_stats import getEntries
+    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeResolver import resolvePending
+    from dartlab.ai.memory.outcomeStats import getEntries
 
     store_decision(
         stockCode="005930",
@@ -305,8 +305,8 @@ def test_resolve_pending_no_benchmark_writes_raw_return_only(tmp_dartlab_home) -
 
 @pytest.mark.unit
 def test_resolve_pending_market_iterates_all_tickers(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import store_decision
-    from dartlab.ai.memory.outcome_resolver import resolvePendingMarket
+    from dartlab.ai.memory.outcomeLog import store_decision
+    from dartlab.ai.memory.outcomeResolver import resolvePendingMarket
 
     for code in ["005930", "000660", "035720"]:
         store_decision(
@@ -342,7 +342,7 @@ def test_resolve_pending_market_iterates_all_tickers(tmp_dartlab_home) -> None:
 
 @pytest.mark.unit
 def test_try_resolve_pending_noop_without_pricer(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
     from dartlab.ai.memory.wiring import tryResolvePending
 
     store_decision(
@@ -360,7 +360,7 @@ def test_try_resolve_pending_noop_without_pricer(tmp_dartlab_home) -> None:
 
 @pytest.mark.unit
 def test_try_resolve_pending_with_callable_pricer(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
     from dartlab.ai.memory.wiring import tryResolvePending
 
     store_decision(

@@ -34,7 +34,7 @@ from .api import (
 )
 from .embed import router as embed_router
 from .runtime import ensure_port, run_server  # noqa: F401 — re-exported
-from .services.ai_profile import should_preload_ollama as _should_preload_ollama
+from .services.aiProfile import should_preload_ollama as _should_preload_ollama
 from .web import register_spa
 
 logger = logging.getLogger(__name__)
@@ -77,7 +77,7 @@ async def _prewarm_oauth_codex_models() -> None:
     """
     await asyncio.sleep(1)  # uvicorn startup 완료 후 시작 — 첫 화면 fetch 와 race 안 함.
     try:
-        from dartlab.ai.providers.oauth_codex import availableModels
+        from dartlab.ai.providers.oauthCodex import availableModels
 
         await asyncio.to_thread(availableModels)
     except (ImportError, OSError, RuntimeError, ValueError) as exc:
@@ -104,8 +104,8 @@ async def lifespan(_: FastAPI):
     try:
         yield
     finally:
-        from .services.channel_runtime import channel_runtime
-        from .services.dev_channel_runtime import dev_channel_runtime
+        from .services.channelRuntime import channel_runtime
+        from .services.devChannelRuntime import dev_channel_runtime
 
         dev_channel_runtime.shutdown()
         channel_runtime.shutdown_all()

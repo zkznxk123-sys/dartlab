@@ -11,7 +11,7 @@ from dartlab.ai.settings.types import LLMConfig
 
 class TestProviderAdapterBoundary:
     def test_legacy_provider_modules_are_removed(self):
-        assert importlib.util.find_spec("dartlab.ai.providers.openai_compat") is None
+        assert importlib.util.find_spec("dartlab.ai.providers.openaiCompat") is None
         assert importlib.util.find_spec("dartlab.ai.providers.ollama") is None
 
     def test_research_graph_adapter_is_available(self):

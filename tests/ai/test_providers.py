@@ -43,7 +43,7 @@ def test_get_config_normalizes_openai_compat_aliases() -> None:
 
 @pytest.mark.unit
 def test_create_provider_oauth_codex_returns_oauth_provider() -> None:
-    from dartlab.ai.providers.oauth_codex import OAuthCodexProvider
+    from dartlab.ai.providers.oauthCodex import OAuthCodexProvider
 
     provider = create_provider(ProviderConfig(provider="oauth-codex"))
     assert isinstance(provider, OAuthCodexProvider)

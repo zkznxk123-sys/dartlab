@@ -305,6 +305,7 @@ dev = [
     "hatchling>=1.29.0",
     "hypothesis>=6.100.0",
     "import-linter>=2.0",  # scripts/audit/cycleScan.py + pyproject [tool.importlinter] — 레이어 단방향 강제 (P0 가드)
+    "libcst>=1.8.6",
     "networkx[default]>=3.0",  # scripts/build/buildIndustryMap.py — Kamada-Kawai+PageRank (default extra: scipy 포함)
     "pillow>=12.1.1",
     "pre-commit>=4.0.0",
@@ -314,6 +315,7 @@ dev = [
     "pytest-benchmark>=5.0.0",
     "pytest-cov>=6.0.0",
     "radon>=6.0.0",
+    "rope>=1.14.0",
     "vulture>=2.0",
 ]
 

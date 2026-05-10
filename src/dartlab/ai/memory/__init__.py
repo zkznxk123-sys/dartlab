@@ -2,13 +2,13 @@
 
 from .decisions import DecisionMemo, recall, remember
 from .frontmatter import readStatus, updateStatus
-from .outcome_log import (
+from .outcomeLog import (
     Entry as OutcomeEntry,
 )
-from .outcome_log import (
+from .outcomeLog import (
     Update as OutcomeUpdate,
 )
-from .outcome_log import (
+from .outcomeLog import (
     batch_update_with_outcomes,
     get_past_context,
     get_pending_entries,

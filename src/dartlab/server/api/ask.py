@@ -13,9 +13,9 @@ from sse_starlette.sse import EventSourceResponse
 import dartlab
 from dartlab import config as dartlab_config
 
-from ..agent_gateway import stream_agent_run
+from ..agentGateway import stream_agent_run
 from ..models import AgentRunMessage, AgentRunRequest, AskRequest
-from ..services.ai_analysis import run_plain_chat
+from ..services.aiAnalysis import run_plain_chat
 
 router = APIRouter()
 

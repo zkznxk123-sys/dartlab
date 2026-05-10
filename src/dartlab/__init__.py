@@ -602,7 +602,7 @@ def setup(provider: str | None = None):
 def _setup_oauth_interactive():
     """노트북/CLI에서 ChatGPT OAuth 브라우저 로그인."""
     try:
-        from dartlab.ai.providers.support.oauth_token import is_authenticated
+        from dartlab.ai.providers.support.oauthToken import is_authenticated
 
         if is_authenticated():
             print("\n  ✓ ChatGPT OAuth 이미 인증되어 있습니다.")
@@ -622,7 +622,7 @@ def _setup_oauth_interactive():
 
 def _setup_apikey_interactive(provider: str):
     """API 키 기반 provider 인터랙티브 설정."""
-    from dartlab.ai.settings.provider_catalog import _PROVIDERS
+    from dartlab.ai.settings.providerCatalog import _PROVIDERS
 
     spec = _PROVIDERS.get(provider)
     if spec is None or not spec.env_key:

@@ -57,7 +57,7 @@ def run(args) -> int:
 
 def _setupApiKeyProvider(providerId: str) -> None:
     """ProviderSpec 기반 범용 API 키 설정 안내."""
-    from dartlab.ai.settings.provider_catalog import get_provider_spec
+    from dartlab.ai.settings.providerCatalog import get_provider_spec
 
     spec = get_provider_spec(providerId)
     if spec is None:
@@ -109,7 +109,7 @@ def _do_oauth_login() -> None:
     from urllib.parse import parse_qs, urlparse
 
     try:
-        from dartlab.ai.providers.support.oauth_token import (
+        from dartlab.ai.providers.support.oauthToken import (
             OAUTH_REDIRECT_PORT,
             build_auth_url,
             exchange_code,

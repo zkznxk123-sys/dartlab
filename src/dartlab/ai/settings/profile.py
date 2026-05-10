@@ -10,8 +10,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from dartlab.ai.settings.model_resolver import resolve_default_model
-from dartlab.ai.settings.provider_catalog import (
+from dartlab.ai.settings.modelResolver import resolve_default_model
+from dartlab.ai.settings.providerCatalog import (
     api_key_secret_name,
     build_provider_catalog,
     get_provider_spec,

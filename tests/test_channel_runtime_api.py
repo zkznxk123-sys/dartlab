@@ -10,8 +10,8 @@ starlette = pytest.importorskip("starlette", reason="starlette not installed (op
 from starlette.testclient import TestClient  # noqa: E402
 
 from dartlab.server import app  # noqa: E402
-from dartlab.server.services.channel_runtime import channel_runtime  # noqa: E402
-from dartlab.server.services.dev_channel_runtime import dev_channel_runtime  # noqa: E402
+from dartlab.server.services.channelRuntime import channel_runtime  # noqa: E402
+from dartlab.server.services.devChannelRuntime import dev_channel_runtime  # noqa: E402
 
 pytestmark = pytest.mark.unit
 
@@ -86,7 +86,7 @@ def test_channel_start_validates_required_fields(client):
 
 def test_dev_channel_status_and_start(client, monkeypatch):
     monkeypatch.setattr(
-        "dartlab.server.services.dev_channel_runtime.setup_devtunnel",
+        "dartlab.server.services.devChannelRuntime.setup_devtunnel",
         lambda *, port, auto_yes: ("https://dartlab-8400.jpe1.devtunnels.ms/", _FakeProcess()),
     )
 

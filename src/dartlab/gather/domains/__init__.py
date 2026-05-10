@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ..market_config import get_market_config
+from ..marketConfig import get_market_config
 
 # 데이터 유형별 fallback 순서 (KR 기본값 — 하위호환)
 PRICE_FALLBACK = ["naver", "naver_global"]

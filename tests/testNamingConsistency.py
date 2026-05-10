@@ -74,8 +74,10 @@ def test_scanFilePassesStandardName(tmp_path: Path):
     assert nc._scanFile(target, aliasIndex) == []
 
 
-def test_loadAliasesReturnsEmptyOnPlaceholder():
-    """현재 aliases.json 은 placeholder (빈 dict) — 빈 dict 반환 확인."""
+def test_loadAliasesReturnsPopulatedDict():
+    """aliases.json (P5 1.0.0) 은 10 표준 의미 채워진 사전."""
     nc = _loadModule()
     aliases = nc._loadAliases()
-    assert aliases == {}
+    assert "stockIdentifier" in aliases
+    assert aliases["stockIdentifier"]["standard"] == "stockCode"
+    assert "code" in aliases["stockIdentifier"]["aliases"]

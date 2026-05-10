@@ -22,7 +22,7 @@ from typing import Any
 from dartlab.ai.contracts import Ref
 
 from .formatting import short_text
-from .runPython_guard import _assertSafeAst, _safeOpenFactory
+from .runpythonGuard import _assertSafeAst, _safeOpenFactory
 from .types import ToolResult
 
 logger = logging.getLogger(__name__)

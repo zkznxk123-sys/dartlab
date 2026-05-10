@@ -173,7 +173,7 @@ class TestStatus:
         company.stockCode = "005930"
         company.corpName = "삼성전자"
 
-        monkeypatch.setattr("dartlab.server.services.company_api.get_company", lambda code: company)
+        monkeypatch.setattr("dartlab.server.services.companyApi.get_company", lambda code: company)
 
         resp = client.get("/api/suggest", params={"stockCode": "005930"})
         assert resp.status_code == 200
@@ -711,7 +711,7 @@ class TestAsk:
             captured["kwargs"] = kwargs
             return {"answer": "core-answer", "artifacts": [{"format": "csv", "url": "/api/ask/artifacts/x/y.csv"}]}
 
-        monkeypatch.setattr("dartlab.server.services.ai_analysis.collect_analysis_result", _fake_collect)
+        monkeypatch.setattr("dartlab.server.services.aiAnalysis.collect_analysis_result", _fake_collect)
 
         resp = client.post(
             "/api/ask",
@@ -733,7 +733,7 @@ class TestAsk:
             captured["kwargs"] = kwargs
             return {"answer": "core-answer", "artifacts": []}
 
-        monkeypatch.setattr("dartlab.server.services.ai_analysis.collect_analysis_result", _fake_collect)
+        monkeypatch.setattr("dartlab.server.services.aiAnalysis.collect_analysis_result", _fake_collect)
 
         resp = client.post(
             "/api/ask",

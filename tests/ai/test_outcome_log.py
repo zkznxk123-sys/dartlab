@@ -13,7 +13,7 @@ def tmp_dartlab_home(tmp_path, monkeypatch):
 
 @pytest.mark.unit
 def test_safe_stockcode_kr_us_generic_path_traversal_blocked(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import safe_stockcode
+    from dartlab.ai.memory.outcomeLog import safe_stockcode
 
     assert safe_stockcode("005930") == "005930"
     assert safe_stockcode("AAPL") == "AAPL"
@@ -27,7 +27,7 @@ def test_safe_stockcode_kr_us_generic_path_traversal_blocked(tmp_dartlab_home) -
 
 @pytest.mark.unit
 def test_store_decision_appends_pending_entry_and_idempotent(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
 
     written_first = store_decision(
         stockCode="005930",
@@ -54,7 +54,7 @@ def test_store_decision_appends_pending_entry_and_idempotent(tmp_dartlab_home) -
 
 @pytest.mark.unit
 def test_batch_update_with_outcomes_atomic_rewrite_pending_to_resolved(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import (
+    from dartlab.ai.memory.outcomeLog import (
         Update,
         batch_update_with_outcomes,
         get_pending_entries,
@@ -90,7 +90,7 @@ def test_batch_update_with_outcomes_atomic_rewrite_pending_to_resolved(tmp_dartl
 
 @pytest.mark.unit
 def test_get_past_context_asymmetric_same_vs_cross(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import (
+    from dartlab.ai.memory.outcomeLog import (
         Update,
         batch_update_with_outcomes,
         get_past_context,
@@ -137,7 +137,7 @@ def test_get_past_context_asymmetric_same_vs_cross(tmp_dartlab_home) -> None:
 @pytest.mark.unit
 def test_html_separator_immune_to_prose_contamination(tmp_dartlab_home) -> None:
     """`---` 같은 markdown horizontal rule 이 entry 본문 안에 있어도 split 안 깨짐."""
-    from dartlab.ai.memory.outcome_log import get_pending_entries, store_decision
+    from dartlab.ai.memory.outcomeLog import get_pending_entries, store_decision
 
     store_decision(
         stockCode="005930",
@@ -154,7 +154,7 @@ def test_html_separator_immune_to_prose_contamination(tmp_dartlab_home) -> None:
 
 @pytest.mark.unit
 def test_atomic_write_no_dangling_tmp_file(tmp_dartlab_home) -> None:
-    from dartlab.ai.memory.outcome_log import store_decision
+    from dartlab.ai.memory.outcomeLog import store_decision
 
     store_decision(
         stockCode="005930",
@@ -171,6 +171,6 @@ def test_atomic_write_no_dangling_tmp_file(tmp_dartlab_home) -> None:
 @pytest.mark.unit
 def test_empty_past_context_returns_empty_string(tmp_dartlab_home) -> None:
     """env 새 세션 — pending/resolved 0 건이면 빈 문자열 반환 (placeholder 부재 전제)."""
-    from dartlab.ai.memory.outcome_log import get_past_context
+    from dartlab.ai.memory.outcomeLog import get_past_context
 
     assert get_past_context("005930", market="KR") == ""

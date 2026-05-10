@@ -9,11 +9,11 @@ from typing import Any
 
 import httpx
 
-from dartlab.ai.settings.model_resolver import fallback_models, sort_openai_models
+from dartlab.ai.settings.modelResolver import fallback_models, sort_openai_models
 
 from . import ProviderConfig, ProviderTurn, ToolCall
 from .support import oauth_token as oauthToken
-from .support.oauth_token import TokenRefreshError
+from .support.oauthToken import TokenRefreshError
 
 CODEX_API_BASE = "https://chatgpt.com/backend-api"
 CODEX_RESPONSES_PATH = "/codex/responses"

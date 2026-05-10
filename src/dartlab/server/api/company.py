@@ -10,8 +10,8 @@ from dartlab.core.polarsUtil import isEmptyDf
 
 _PERIOD_COL_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
-from ..services.ai_analysis import stream_topic_summary
-from ..services.company_api import (
+from ..services.aiAnalysis import stream_topic_summary
+from ..services.companyApi import (
     build_diff_summary,
     build_toc,
     build_viewer,

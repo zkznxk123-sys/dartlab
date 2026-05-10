@@ -4,7 +4,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-from dartlab.server.services.company_api import _VALID_CODE
+from dartlab.server.services.companyApi import _VALID_CODE
 
 
 class TestCompanyCodeValidation:

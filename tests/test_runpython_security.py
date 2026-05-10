@@ -174,7 +174,7 @@ def test_allow_write_under_tempdir():
 
 
 def test_assert_safe_ast_passes_clean_code():
-    from dartlab.ai.tools.runPython_guard import _assertSafeAst
+    from dartlab.ai.tools.runpythonGuard import _assertSafeAst
 
     _assertSafeAst("import polars as pl\nx = pl.DataFrame({'a':[1]})\nprint(x.height)")
     _assertSafeAst("import os\nprint(os.path.expanduser('~'))")
@@ -182,7 +182,7 @@ def test_assert_safe_ast_passes_clean_code():
 
 
 def test_assert_safe_ast_blocks_each_pattern():
-    from dartlab.ai.tools.runPython_guard import _assertSafeAst
+    from dartlab.ai.tools.runpythonGuard import _assertSafeAst
 
     blocked = [
         "import os; os.system('ls')",
@@ -198,7 +198,7 @@ def test_assert_safe_ast_blocks_each_pattern():
 
 
 def test_safe_open_factory_blocks_outside_roots(tmp_path):
-    from dartlab.ai.tools.runPython_guard import _safeOpenFactory
+    from dartlab.ai.tools.runpythonGuard import _safeOpenFactory
 
     safe_open = _safeOpenFactory(safe_roots=[str(tmp_path)])
     # 안전 경로 안 — write 통과
@@ -212,7 +212,7 @@ def test_safe_open_factory_blocks_outside_roots(tmp_path):
 
 def test_safe_open_factory_allows_read_anywhere(tmp_path):
     """read mode 는 어디든 통과 — 외부 본문 분석 use case 보존."""
-    from dartlab.ai.tools.runPython_guard import _safeOpenFactory
+    from dartlab.ai.tools.runpythonGuard import _safeOpenFactory
 
     target = tmp_path.parent / "outside_read.txt"
     target.write_text("hello", encoding="utf-8")
@@ -226,7 +226,7 @@ def test_safe_open_factory_allows_read_anywhere(tmp_path):
 
 
 def test_default_safe_roots_includes_dartlab_home_and_tmp():
-    from dartlab.ai.tools.runPython_guard import _defaultSafeRoots
+    from dartlab.ai.tools.runpythonGuard import _defaultSafeRoots
 
     roots = _defaultSafeRoots()
     expected_dartlab = os.path.normpath(os.path.join(os.path.expanduser("~"), ".dartlab"))

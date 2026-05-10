@@ -20,7 +20,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date, datetime
 
-from dartlab.ai.memory.outcome_log import (
+from dartlab.ai.memory.outcomeLog import (
     Entry,
     Update,
     _decisions_root,

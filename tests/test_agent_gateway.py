@@ -17,7 +17,7 @@ def _payload(event: dict[str, str]) -> dict:
 
 def test_display_name_uses_registry_legacy_map() -> None:
     """_displayName 은 registry._LEGACY_NAME_MAP SSOT 위에서 동작 — _TOOL_DISPLAY 중복 dict 폐기."""
-    from dartlab.server.agent_gateway import _PUBLIC_TOOL_NAMES, _displayName
+    from dartlab.server.agentGateway import _PUBLIC_TOOL_NAMES, _displayName
 
     # canonical PascalCase 그대로
     assert _displayName("RunPython") == "RunPython"
@@ -37,7 +37,7 @@ def test_display_name_uses_registry_legacy_map() -> None:
 
 
 def test_agent_gateway_public_events_hide_internal_kernel_names(monkeypatch) -> None:
-    import dartlab.server.agent_gateway as agent_gateway
+    import dartlab.server.agentGateway as agent_gateway
 
     class FakeGraph:
         nodes = (
@@ -92,7 +92,7 @@ def test_agent_gateway_public_events_hide_internal_kernel_names(monkeypatch) -> 
 
 
 def test_agent_gateway_failure_reason_is_public(monkeypatch) -> None:
-    import dartlab.server.agent_gateway as agent_gateway
+    import dartlab.server.agentGateway as agent_gateway
 
     class FakeGraph:
         nodes = ("route_intent", "repair_or_fail")
@@ -118,7 +118,7 @@ def test_agent_gateway_failure_reason_is_public(monkeypatch) -> None:
 
 
 def test_agent_gateway_failed_done_emits_public_error_without_internal_meta(monkeypatch) -> None:
-    import dartlab.server.agent_gateway as agent_gateway
+    import dartlab.server.agentGateway as agent_gateway
 
     class FakeGraph:
         nodes = ("route_intent", "repair_or_fail")

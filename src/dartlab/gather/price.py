@@ -8,7 +8,7 @@ import time
 
 from .cache import GatherCache
 from .domains import get_price_fallback, load_domain
-from .market_config import get_market_config
+from .marketConfig import get_market_config
 from .resilience import circuit_breaker, health_tracker
 from .types import GatherError, PriceSnapshot
 

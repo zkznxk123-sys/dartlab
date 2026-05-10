@@ -17,7 +17,7 @@ from collections.abc import Iterator
 from typing import Any
 
 from dartlab.ai.contracts import TraceEvent
-from dartlab.ai.settings.provider_catalog import wired_provider_ids
+from dartlab.ai.settings.providerCatalog import wired_provider_ids
 
 from .heuristic import streamHeuristic
 from .passes import streamLLMPasses

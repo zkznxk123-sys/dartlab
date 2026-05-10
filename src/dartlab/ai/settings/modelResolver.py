@@ -78,7 +78,7 @@ def _resolveBackendLatest(*, allow_fetch: bool = True) -> str | None:
     allow_fetch=False forwards to availableModels(allow_fetch=False) — cache only.
     """
     try:
-        from dartlab.ai.providers.oauth_codex import availableModels
+        from dartlab.ai.providers.oauthCodex import availableModels
     except Exception:  # noqa: BLE001
         return None
     try:

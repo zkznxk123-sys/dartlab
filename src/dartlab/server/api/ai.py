@@ -16,7 +16,7 @@ from dartlab.ai.settings import (
     get_provider_spec,
     public_provider_ids,
 )
-from dartlab.ai.settings.model_resolver import fallback_models, is_openai_chat_model, sort_openai_models
+from dartlab.ai.settings.modelResolver import fallback_models, is_openai_chat_model, sort_openai_models
 
 from ..chat import OLLAMA_MODEL_GUIDE
 from ..models import (
@@ -26,7 +26,7 @@ from ..models import (
     ConfigureRequest,
     DartKeyUpdateRequest,
 )
-from ..services.ai_profile import (
+from ..services.aiProfile import (
     build_codex_detail,
     build_oauth_codex_detail,
     build_ollama_detail,
@@ -163,13 +163,13 @@ def api_status(
     if room_info is not None:
         resp["room"] = room_info
     try:
-        from ..services.channel_runtime import channel_runtime
+        from ..services.channelRuntime import channel_runtime
 
         resp["channels"] = channel_runtime.status()
     except ImportError:
         resp["channels"] = {}
     try:
-        from ..services.dev_channel_runtime import dev_channel_runtime
+        from ..services.devChannelRuntime import dev_channel_runtime
 
         resp["channel"] = dev_channel_runtime.status()
     except ImportError:
@@ -181,7 +181,7 @@ def api_status(
 def api_suggest(stockCode: str = Query(..., description="추천 질문을 생성할 종목코드")):
     """회사 데이터 상태에 맞는 추천 질문 목록을 반환한다."""
     try:
-        from ..services.company_api import get_company
+        from ..services.companyApi import get_company
 
         company = get_company(stockCode)
         return {
@@ -312,7 +312,7 @@ def api_delete_dart_key():
 def api_channel_start(platform: str, req: ChannelConnectRequest):
     """외부 채널 어댑터 시작."""
     try:
-        from ..services.channel_runtime import channel_runtime
+        from ..services.channelRuntime import channel_runtime
 
         payload = req.model_dump(exclude_none=True)
         return channel_runtime.start(platform, **payload)
@@ -326,7 +326,7 @@ def api_channel_start(platform: str, req: ChannelConnectRequest):
 def api_channel_stop(platform: str):
     """외부 채널 어댑터 정지."""
     try:
-        from ..services.channel_runtime import channel_runtime
+        from ..services.channelRuntime import channel_runtime
 
         return channel_runtime.stop(platform)
     except ValueError as e:
@@ -345,7 +345,7 @@ def _request_port(request: Request) -> int:
 def api_dev_channel_status():
     """DevTunnels 모바일 접속 채널 상태를 반환한다."""
     try:
-        from ..services.dev_channel_runtime import dev_channel_runtime
+        from ..services.devChannelRuntime import dev_channel_runtime
 
         return dev_channel_runtime.status()
     except _HANDLED_API_ERRORS as e:
@@ -356,7 +356,7 @@ def api_dev_channel_status():
 def api_dev_channel_start(request: Request):
     """현재 Web UI를 모바일에서 열 수 있는 DevTunnels 채널을 시작한다."""
     try:
-        from ..services.dev_channel_runtime import dev_channel_runtime
+        from ..services.devChannelRuntime import dev_channel_runtime
 
         return dev_channel_runtime.start(port=_request_port(request), auto_yes=True)
     except _HANDLED_API_ERRORS as e:
@@ -367,7 +367,7 @@ def api_dev_channel_start(request: Request):
 def api_dev_channel_stop():
     """DevTunnels 채널을 종료한다."""
     try:
-        from ..services.dev_channel_runtime import dev_channel_runtime
+        from ..services.devChannelRuntime import dev_channel_runtime
 
         return dev_channel_runtime.stop()
     except _HANDLED_API_ERRORS as e:
@@ -407,7 +407,7 @@ def api_models(provider: str):
 
     if provider == "codex":
         try:
-            from dartlab.ai.providers.support.codex_cli import get_codex_model_catalog
+            from dartlab.ai.providers.support.codexCli import get_codex_model_catalog
 
             return {"models": get_codex_model_catalog()}
         except (ImportError, OSError, RuntimeError, ValueError):
@@ -415,7 +415,7 @@ def api_models(provider: str):
 
     if provider == "oauth-codex":
         try:
-            from dartlab.ai.providers.oauth_codex import availableModels
+            from dartlab.ai.providers.oauthCodex import availableModels
 
             # cache 우선 — 비어 있으면 정적 fallback 즉시 반환 + background thread 에서 warm.
             # 이전: cold 1 회 ~43s (DNS/TLS cold + remote /codex/models fetch) 동안 UI 가
@@ -486,7 +486,7 @@ def _fetch_openai_models() -> list[str]:
 def api_codex_logout():
     """Codex CLI에 저장된 계정 인증을 제거한다."""
     try:
-        from dartlab.ai.providers.support.codex_cli import logout_codex_cli
+        from dartlab.ai.providers.support.codexCli import logout_codex_cli
 
         logout_codex_cli()
     except ImportError:
@@ -501,7 +501,7 @@ def api_codex_logout():
 @router.get("/api/oauth/authorize")
 def api_oauth_authorize():
     """ChatGPT OAuth 인증 시작 — 브라우저 로그인 URL 반환 + 로컬 콜백 서버 시작."""
-    from dartlab.ai.providers.support.oauth_token import OAUTH_REDIRECT_PORT, build_auth_url
+    from dartlab.ai.providers.support.oauthToken import OAUTH_REDIRECT_PORT, build_auth_url
 
     auth_url, verifier, state = build_auth_url()
 
@@ -529,7 +529,7 @@ def api_oauth_status():
 def api_oauth_logout():
     """OAuth 토큰 제거."""
     try:
-        from dartlab.ai.providers.support.oauth_token import revoke_token
+        from dartlab.ai.providers.support.oauthToken import revoke_token
 
         revoke_token()
     except (ImportError, OSError, RuntimeError, ValueError):
@@ -576,7 +576,7 @@ def _start_oauth_callback_server(port: int):
                 return
 
             try:
-                from dartlab.ai.providers.support.oauth_token import exchange_code
+                from dartlab.ai.providers.support.oauthToken import exchange_code
 
                 exchange_code(code, _oauth_state["verifier"])
                 get_profile_manager().update(provider="oauth-codex", updated_by="ui")

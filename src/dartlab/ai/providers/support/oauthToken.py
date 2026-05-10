@@ -14,7 +14,7 @@ from typing import Any
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from dartlab.ai.settings.provider_catalog import oauth_secret_name
+from dartlab.ai.settings.providerCatalog import oauth_secret_name
 from dartlab.ai.settings.secrets import get_secret_store
 
 CHATGPT_AUTH_URL = "https://auth.openai.com/oauth/authorize"

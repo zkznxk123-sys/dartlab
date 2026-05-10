@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, Request, Response
 
-from ..services.company_api import (
+from ..services.companyApi import (
     build_diff_summary,
     get_company,
     safe_topic_label,

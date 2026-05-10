@@ -16,7 +16,7 @@ from typing import Any
 
 from .agent import runAgent
 from .contracts import TraceEvent, WorkbenchTask
-from .settings.provider_catalog import wired_provider_ids
+from .settings.providerCatalog import wired_provider_ids
 from .workbench import WorkbenchLoop
 
 

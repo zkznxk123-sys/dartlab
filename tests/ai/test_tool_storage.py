@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from dartlab.ai import tool_storage
-from dartlab.ai.tool_storage import (
+from dartlab.ai.toolStorage import (
     MAX_TOOL_RESULT_CHARS,
     PREVIEW_CHARS,
     buildPersistedContent,

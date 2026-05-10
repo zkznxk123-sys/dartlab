@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 from sse_starlette.sse import EventSourceResponse
 
-from ..agent_gateway import stream_agent_run
+from ..agentGateway import stream_agent_run
 from ..models import AgentRunRequest
 
 router = APIRouter(prefix="/api/agent", tags=["agent"])

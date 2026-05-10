@@ -68,7 +68,7 @@ def get_config(provider: str | None = None, role: str | None = None, **kwargs: A
         resolved_model = base.model
     else:
         try:
-            from dartlab.ai.settings.model_resolver import is_openai_family_provider, latest_openai_model
+            from dartlab.ai.settings.modelResolver import is_openai_family_provider, latest_openai_model
 
             if is_openai_family_provider(resolved_provider):
                 resolved_model = latest_openai_model()

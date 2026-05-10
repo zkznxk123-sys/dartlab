@@ -12,7 +12,7 @@ OLLAMA_DEFAULT_URL = "http://localhost:11434"
 
 def _buildInferenceOptions() -> dict:
     """GPU VRAM 기반 Ollama 추론 옵션 자동 결정."""
-    from dartlab.ai.providers.support.ollama_setup import _detect_gpu
+    from dartlab.ai.providers.support.ollamaSetup import _detect_gpu
 
     gpu = _detect_gpu()
     options: dict = {"num_gpu": 999 if gpu["available"] else 0}
@@ -44,7 +44,7 @@ _VRAM_MODEL_TIERS: list[tuple[int, str, str]] = [
 
 def recommendModel(vramMb: int | None = None) -> dict:
     if vramMb is None:
-        from dartlab.ai.providers.support.ollama_setup import _detect_gpu
+        from dartlab.ai.providers.support.ollamaSetup import _detect_gpu
 
         gpu = _detect_gpu()
         vramMb = gpu.get("vram_mb") or 0
@@ -146,7 +146,7 @@ class OllamaProvider(BaseProvider):
 
     def _ensure_available(self):
         if not self.check_available():
-            from dartlab.ai.providers.support.ollama_setup import get_install_guide
+            from dartlab.ai.providers.support.ollamaSetup import get_install_guide
 
             raise ConnectionError(f"Ollama 서버에 접근할 수 없습니다 ({OLLAMA_DEFAULT_URL}).\n\n{get_install_guide()}")
 

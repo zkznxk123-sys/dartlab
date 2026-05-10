@@ -38,7 +38,7 @@ from . import sector as _sector
 from .cache import GatherCache
 from .domains import load_domain
 from .http import GatherHttpClient, run_async
-from .market_config import get_market_config
+from .marketConfig import get_market_config
 from .types import (
     FlowData,
     GatherResult,

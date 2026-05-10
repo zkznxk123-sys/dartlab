@@ -1,7 +1,7 @@
 """AI provider/profile settings package."""
 
 from dartlab.ai.settings.profile import AiProfileManager, get_profile_manager
-from dartlab.ai.settings.provider_catalog import (
+from dartlab.ai.settings.providerCatalog import (
     build_provider_catalog,
     cli_provider_choices,
     get_provider_spec,

@@ -11,7 +11,7 @@ from collections.abc import Iterator
 from dataclasses import asdict, dataclass
 from typing import Any, Protocol
 
-from dartlab.ai.settings.model_resolver import resolve_default_model
+from dartlab.ai.settings.modelResolver import resolve_default_model
 
 
 @dataclass(frozen=True)
@@ -134,7 +134,7 @@ def _default_model_for(provider: str | None) -> str | None:
 
 def _oauth_access_token() -> str | None:
     try:
-        from .support.oauth_token import get_valid_token, load_token
+        from .support.oauthToken import get_valid_token, load_token
 
         value = get_valid_token()
         if isinstance(value, str) and value:
@@ -153,7 +153,7 @@ def _oauth_default_model(*, configured_model: str | None = None) -> str | None:
     if configured_model and os.environ.get("DARTLAB_ALLOW_STALE_OAUTH_MODEL") == "1":
         return configured_model
     try:
-        from .oauth_codex import availableModels
+        from .oauthCodex import availableModels
 
         models = availableModels()
         if models:
@@ -470,7 +470,7 @@ def create_provider(*args: Any, **kwargs: Any) -> WorkbenchProvider:
 
 
 def _make_oauth_codex(config: ProviderConfig) -> WorkbenchProvider:
-    from .oauth_codex import OAuthCodexProvider
+    from .oauthCodex import OAuthCodexProvider
 
     return OAuthCodexProvider(config)
 
@@ -511,7 +511,7 @@ _PROVIDER_FACTORIES: dict[str, Any] = {
 
 def available_providers() -> list[str]:
     """카탈로그 등록 provider id 목록. legacy alias 제외."""
-    from ..settings.provider_catalog import wired_provider_ids
+    from ..settings.providerCatalog import wired_provider_ids
 
     return sorted(wired_provider_ids())
 

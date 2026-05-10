@@ -1,4 +1,4 @@
-"""OutcomeLog — pending decision 기록 도구 (memory.outcome_log SSOT 경유).
+"""OutcomeLog — pending decision 기록 도구 (memory.outcomeLog SSOT 경유).
 
 dartlab 의 *진화 루프* 는 분석 결과를 시간 stamp 와 함께 기록 → N 일 뒤 시장 가격으로 reflection.
 지금까지 이 흐름은 workbench HARVEST 패스 안에 갇혀 있어 외부 클라이언트 또는 chat-native
@@ -32,7 +32,7 @@ def outcomeLog(
         decision: 의사결정 본문 — Buy / Hold / Sell + 근거.
         theme: 라벨 (default "Verdict").
     """
-    from dartlab.ai.memory.outcome_log import store_decision
+    from dartlab.ai.memory.outcomeLog import store_decision
 
     try:
         wrote = store_decision(
@@ -58,7 +58,7 @@ def outcomeLog(
                 id=f"decision:{market}:{stockCode}:{date}",
                 kind="decisionRef",
                 title=f"{stockCode} {date} {theme}",
-                source="dartlab.ai.memory.outcome_log",
+                source="dartlab.ai.memory.outcomeLog",
                 payload={
                     "stockCode": stockCode,
                     "market": market,

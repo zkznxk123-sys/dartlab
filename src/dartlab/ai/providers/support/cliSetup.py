@@ -6,12 +6,12 @@ import shutil
 import subprocess
 from typing import Any
 
-from .oauth_token import get_account_id, is_authenticated
+from .oauthToken import get_account_id, is_authenticated
 
 
 def detect_codex() -> dict[str, Any]:
     """Return local CLI availability without importing legacy AI code."""
-    from .codex_cli import inspect_codex_cli
+    from .codexCli import inspect_codex_cli
 
     info = inspect_codex_cli()
     executable = shutil.which("codex")

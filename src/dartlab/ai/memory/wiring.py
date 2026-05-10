@@ -21,7 +21,7 @@ from typing import Any
 
 from dartlab.ai.contracts import Ref
 from dartlab.ai.memory.decisions import recall, remember
-from dartlab.ai.memory.outcome_log import (
+from dartlab.ai.memory.outcomeLog import (
     get_past_context,
     safe_stockcode,
     store_decision,
@@ -216,7 +216,7 @@ def tryResolvePending(
     if pricer is None:
         return 0
     try:
-        from dartlab.ai.memory.outcome_resolver import resolvePending  # noqa: PLC0415
+        from dartlab.ai.memory.outcomeResolver import resolvePending  # noqa: PLC0415
 
         safe_code = safe_stockcode(stockCode)
         report = resolvePending(

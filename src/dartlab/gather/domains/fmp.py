@@ -9,7 +9,7 @@ import logging
 import os
 from datetime import datetime, timezone
 
-from ..market_config import resolve_ticker
+from ..marketConfig import resolve_ticker
 from ..types import GatherError, PriceSnapshot
 
 log = logging.getLogger(__name__)

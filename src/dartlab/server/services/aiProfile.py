@@ -63,7 +63,7 @@ def build_ollama_detail(*, probe: bool) -> dict[str, Any]:
     """Ollama 설치/실행/GPU 상태를 조회한다."""
     if probe:
         try:
-            from dartlab.ai.providers.support.ollama_setup import detect_ollama, get_install_guide
+            from dartlab.ai.providers.support.ollamaSetup import detect_ollama, get_install_guide
 
             ollama_info = detect_ollama()
             detail = {
@@ -102,7 +102,7 @@ def build_codex_detail(*, probe: bool) -> dict[str, Any]:
             "checked": False,
         }
     try:
-        from dartlab.ai.providers.support.cli_setup import detect_codex
+        from dartlab.ai.providers.support.cliSetup import detect_codex
 
         return detect_codex()
     except (

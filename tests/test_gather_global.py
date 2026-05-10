@@ -7,7 +7,7 @@ import time
 import pytest
 
 from dartlab.gather.cache import GatherCache
-from dartlab.gather.market_config import (
+from dartlab.gather.marketConfig import (
     MARKETS,
     get_market_config,
     resolve_ticker,
