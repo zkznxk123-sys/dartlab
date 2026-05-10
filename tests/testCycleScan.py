@@ -78,7 +78,7 @@ def test_toPrimaryNormalizesDeepPath():
     """dartlab.analysis.financial.proforma → dartlab.analysis (1 차 패키지)."""
     cs = _loadCycleScan()
     assert cs._toPrimary("dartlab.analysis.financial.proforma") == "dartlab.analysis"
-    assert cs._toPrimary("dartlab.credit.metrics") == "dartlab.credit"
+    assert cs._toPrimary("dartlab.credit.scoring.metrics") == "dartlab.credit"
 
 
 def test_toPrimaryRejectsUnknownPackage():

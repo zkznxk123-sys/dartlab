@@ -14,7 +14,7 @@ pytestmark = pytest.mark.unit
 
 # ── imports ──
 
-from dartlab.credit.creditScorecard import (
+from dartlab.credit.scoring.creditScorecard import (
     axisScore,
     cashFlowGrade,
     creditOutlook,

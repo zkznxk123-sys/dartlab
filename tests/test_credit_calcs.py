@@ -162,13 +162,13 @@ def company_no_ratios():
 
 class TestScoreMetric:
     def test_none_value(self):
-        from dartlab.credit.creditScorecard import scoreMetric
+        from dartlab.credit.scoring.creditScorecard import scoreMetric
 
         bp = {"lower_is_better": True, "breakpoints": [(0, 0), (100, 100)]}
         assert scoreMetric(None, bp) is None
 
     def test_lower_is_better(self):
-        from dartlab.credit.creditScorecard import scoreMetric
+        from dartlab.credit.scoring.creditScorecard import scoreMetric
 
         bp = {"lower_is_better": True, "breakpoints": [(0, 0), (50, 50), (100, 100)]}
         # 값 0 이하 → 0점(최저 위험)
@@ -181,7 +181,7 @@ class TestScoreMetric:
         assert abs(result - 25) < 1
 
     def test_higher_is_better(self):
-        from dartlab.credit.creditScorecard import scoreMetric
+        from dartlab.credit.scoring.creditScorecard import scoreMetric
 
         bp = {
             "lower_is_better": False,
@@ -199,7 +199,7 @@ class TestScoreMetric:
 
 class TestWeightedScore:
     def test_basic(self):
-        from dartlab.credit.creditScorecard import weightedScore
+        from dartlab.credit.scoring.creditScorecard import weightedScore
 
         axes = [
             {"score": 20, "weight": 0.5},
@@ -209,7 +209,7 @@ class TestWeightedScore:
         assert result == 30.0
 
     def test_none_axes_excluded(self):
-        from dartlab.credit.creditScorecard import weightedScore
+        from dartlab.credit.scoring.creditScorecard import weightedScore
 
         axes = [
             {"score": 20, "weight": 0.5},
@@ -220,7 +220,7 @@ class TestWeightedScore:
         assert result == 20.0
 
     def test_all_none(self):
-        from dartlab.credit.creditScorecard import weightedScore
+        from dartlab.credit.scoring.creditScorecard import weightedScore
 
         axes = [{"score": None, "weight": 0.5}]
         assert weightedScore(axes) == 50.0  # 중립
@@ -228,28 +228,28 @@ class TestWeightedScore:
 
 class TestMapTo20Grade:
     def test_aaa(self):
-        from dartlab.credit.creditScorecard import mapTo20Grade
+        from dartlab.credit.scoring.creditScorecard import mapTo20Grade
 
         grade, desc, pd = mapTo20Grade(1.0)
         assert grade == "AAA"
         assert pd == 0.0
 
     def test_d(self):
-        from dartlab.credit.creditScorecard import mapTo20Grade
+        from dartlab.credit.scoring.creditScorecard import mapTo20Grade
 
         grade, desc, pd = mapTo20Grade(100.0)
         assert grade == "D"
         assert pd == 100.0
 
     def test_mid_range(self):
-        from dartlab.credit.creditScorecard import mapTo20Grade
+        from dartlab.credit.scoring.creditScorecard import mapTo20Grade
 
         grade, desc, pd = mapTo20Grade(25.0)
         # 22~27 → BBB
         assert grade == "BBB"
 
     def test_clamp_negative(self):
-        from dartlab.credit.creditScorecard import mapTo20Grade
+        from dartlab.credit.scoring.creditScorecard import mapTo20Grade
 
         grade, _, _ = mapTo20Grade(-10.0)
         assert grade == "AAA"
@@ -257,7 +257,7 @@ class TestMapTo20Grade:
 
 class TestIsInvestmentGrade:
     def test_investment_grades(self):
-        from dartlab.credit.creditScorecard import isInvestmentGrade
+        from dartlab.credit.scoring.creditScorecard import isInvestmentGrade
 
         assert isInvestmentGrade("AAA") is True
         assert isInvestmentGrade("BBB-") is True
@@ -265,14 +265,14 @@ class TestIsInvestmentGrade:
         assert isInvestmentGrade("D") is False
 
     def test_unknown_grade(self):
-        from dartlab.credit.creditScorecard import isInvestmentGrade
+        from dartlab.credit.scoring.creditScorecard import isInvestmentGrade
 
         assert isInvestmentGrade("UNKNOWN") is False
 
 
 class TestGradeCategory:
     def test_categories(self):
-        from dartlab.credit.creditScorecard import gradeCategory
+        from dartlab.credit.scoring.creditScorecard import gradeCategory
 
         assert gradeCategory("AAA") == "최우량"
         assert gradeCategory("A") == "우량"
@@ -285,100 +285,100 @@ class TestGradeCategory:
 
 class TestNotchGrade:
     def test_upgrade(self):
-        from dartlab.credit.creditScorecard import notchGrade
+        from dartlab.credit.scoring.creditScorecard import notchGrade
 
         # A (index 5) +2 notches 하향 = A- → BBB+ (위험 증가)
         result = notchGrade("A", 2)
         assert result == "BBB+"
 
     def test_downgrade(self):
-        from dartlab.credit.creditScorecard import notchGrade
+        from dartlab.credit.scoring.creditScorecard import notchGrade
 
         # A (index 5) -2 notches 상향 = AA → AA- (위험 감소)
         result = notchGrade("A", -2)
         assert result == "AA-"
 
     def test_clamp_top(self):
-        from dartlab.credit.creditScorecard import notchGrade
+        from dartlab.credit.scoring.creditScorecard import notchGrade
 
         result = notchGrade("AAA", -5)
         assert result == "AAA"
 
     def test_clamp_bottom(self):
-        from dartlab.credit.creditScorecard import notchGrade
+        from dartlab.credit.scoring.creditScorecard import notchGrade
 
         result = notchGrade("D", 5)
         assert result == "D"
 
     def test_unknown(self):
-        from dartlab.credit.creditScorecard import notchGrade
+        from dartlab.credit.scoring.creditScorecard import notchGrade
 
         assert notchGrade("UNKNOWN", 1) == "UNKNOWN"
 
 
 class TestCashFlowGrade:
     def test_ecr1(self):
-        from dartlab.credit.creditScorecard import cashFlowGrade
+        from dartlab.credit.scoring.creditScorecard import cashFlowGrade
 
         result = cashFlowGrade(20.0, True, 35.0, True)
         assert result == "eCR-1"
 
     def test_ecr2(self):
-        from dartlab.credit.creditScorecard import cashFlowGrade
+        from dartlab.credit.scoring.creditScorecard import cashFlowGrade
 
         result = cashFlowGrade(12.0, False, 25.0, True)
         assert result == "eCR-2"
 
     def test_ecr3(self):
-        from dartlab.credit.creditScorecard import cashFlowGrade
+        from dartlab.credit.scoring.creditScorecard import cashFlowGrade
 
         result = cashFlowGrade(7.0, False, 5.0, True)
         assert result == "eCR-3"
 
     def test_ecr4(self):
-        from dartlab.credit.creditScorecard import cashFlowGrade
+        from dartlab.credit.scoring.creditScorecard import cashFlowGrade
 
         result = cashFlowGrade(2.0, False, 5.0, False)
         assert result == "eCR-4"
 
     def test_ecr5(self):
-        from dartlab.credit.creditScorecard import cashFlowGrade
+        from dartlab.credit.scoring.creditScorecard import cashFlowGrade
 
         result = cashFlowGrade(-3.0, False, None, None)
         assert result == "eCR-5"
 
     def test_ecr6(self):
-        from dartlab.credit.creditScorecard import cashFlowGrade
+        from dartlab.credit.scoring.creditScorecard import cashFlowGrade
 
         result = cashFlowGrade(-10.0, False, None, None)
         assert result == "eCR-6"
 
     def test_unknown(self):
-        from dartlab.credit.creditScorecard import cashFlowGrade
+        from dartlab.credit.scoring.creditScorecard import cashFlowGrade
 
         assert cashFlowGrade(None, None, None) == "eCR-?"
 
 
 class TestCreditOutlook:
     def test_positive(self):
-        from dartlab.credit.creditScorecard import creditOutlook
+        from dartlab.credit.scoring.creditScorecard import creditOutlook
 
         # 점수 하락 = 개선 = 긍정적
         assert creditOutlook([20, 30]) == "긍정적"
 
     def test_negative(self):
-        from dartlab.credit.creditScorecard import creditOutlook
+        from dartlab.credit.scoring.creditScorecard import creditOutlook
 
         # 점수 상승 = 악화 = 부정적
         assert creditOutlook([40, 30]) == "부정적"
 
     def test_stable(self):
-        from dartlab.credit.creditScorecard import creditOutlook
+        from dartlab.credit.scoring.creditScorecard import creditOutlook
 
         assert creditOutlook([30, 32]) == "안정적"
 
     def test_insufficient(self):
-        from dartlab.credit.creditScorecard import creditOutlook
+        from dartlab.credit.scoring.creditScorecard import creditOutlook
 
         assert creditOutlook([30]) == "N/A"
         assert creditOutlook([]) == "N/A"
@@ -386,33 +386,33 @@ class TestCreditOutlook:
 
 class TestAxisScore:
     def test_basic(self):
-        from dartlab.credit.creditScorecard import axisScore
+        from dartlab.credit.scoring.creditScorecard import axisScore
 
         scores = [("a", 20.0), ("b", 40.0), ("c", 60.0)]
         assert axisScore(scores) == 40.0
 
     def test_none_excluded(self):
-        from dartlab.credit.creditScorecard import axisScore
+        from dartlab.credit.scoring.creditScorecard import axisScore
 
         scores = [("a", 20.0), ("b", None), ("c", 40.0)]
         assert axisScore(scores) == 30.0
 
     def test_all_none(self):
-        from dartlab.credit.creditScorecard import axisScore
+        from dartlab.credit.scoring.creditScorecard import axisScore
 
         assert axisScore([("a", None)]) is None
 
 
 class TestEstimatePD:
     def test_known_grade(self):
-        from dartlab.credit.creditScorecard import estimatePD
+        from dartlab.credit.scoring.creditScorecard import estimatePD
 
         assert estimatePD("AAA") == 0.0
         assert estimatePD("D") == 100.0
         assert estimatePD("BBB") == 0.25
 
     def test_unknown_grade(self):
-        from dartlab.credit.creditScorecard import estimatePD
+        from dartlab.credit.scoring.creditScorecard import estimatePD
 
         assert estimatePD("UNKNOWN") == 50.0
 
@@ -424,7 +424,7 @@ class TestEstimatePD:
 
 class TestMetricsHelpers:
     def test_div_basic(self):
-        from dartlab.credit.metrics import _div
+        from dartlab.credit.scoring.metrics import _div
 
         assert _div(100, 200) == 0.5
         assert _div(100, 200, pct=True) == 50.0
@@ -433,14 +433,14 @@ class TestMetricsHelpers:
         assert _div(100, None) is None
 
     def test_div_negative_denominator(self):
-        from dartlab.credit.metrics import _div
+        from dartlab.credit.scoring.metrics import _div
 
         # abs(b) 사용
         result = _div(100, -200)
         assert result == 0.5
 
     def test_cv_basic(self):
-        from dartlab.credit.metrics import _cv
+        from dartlab.credit.scoring.metrics import _cv
 
         # CV of [10, 20, 30] = std/mean*100
         result = _cv([10, 20, 30])
@@ -448,25 +448,25 @@ class TestMetricsHelpers:
         assert result > 0
 
     def test_cv_insufficient(self):
-        from dartlab.credit.metrics import _cv
+        from dartlab.credit.scoring.metrics import _cv
 
         assert _cv([10, 20]) is None
         assert _cv([]) is None
 
     def test_cv_zero_mean(self):
-        from dartlab.credit.metrics import _cv
+        from dartlab.credit.scoring.metrics import _cv
 
         assert _cv([1, -1, 0]) is None
 
     def test_annualCols(self):
-        from dartlab.credit.metrics import _annualCols
+        from dartlab.credit.scoring.metrics import _annualCols
 
         periods = ["2024", "2023", "2022", "2021", "2024Q4"]
         result = _annualCols(periods, None, 3)
         assert result == ["2024", "2023", "2022"]
 
     def test_annualCols_basePeriod(self):
-        from dartlab.credit.metrics import _annualCols
+        from dartlab.credit.scoring.metrics import _annualCols
 
         periods = ["2024", "2023", "2022"]
         result = _annualCols(periods, "2023", 5)
@@ -476,7 +476,7 @@ class TestMetricsHelpers:
 
 class TestCalcAllMetrics:
     def test_returns_history(self, company):
-        from dartlab.credit.metrics import calcAllMetrics
+        from dartlab.credit.scoring.metrics import calcAllMetrics
 
         result = calcAllMetrics(company)
         assert result is not None
@@ -484,7 +484,7 @@ class TestCalcAllMetrics:
         assert len(result["history"]) >= 2
 
     def test_metric_keys(self, company):
-        from dartlab.credit.metrics import calcAllMetrics
+        from dartlab.credit.scoring.metrics import calcAllMetrics
 
         result = calcAllMetrics(company)
         row = result["history"][0]
@@ -499,7 +499,7 @@ class TestCalcAllMetrics:
         assert "ocfToSales" in row
 
     def test_ebitda_calculation(self, company):
-        from dartlab.credit.metrics import calcAllMetrics
+        from dartlab.credit.scoring.metrics import calcAllMetrics
 
         result = calcAllMetrics(company)
         row = result["history"][0]
@@ -507,7 +507,7 @@ class TestCalcAllMetrics:
         assert row["ebitda"] == 28_000
 
     def test_total_borrowing(self, company):
-        from dartlab.credit.metrics import calcAllMetrics
+        from dartlab.credit.scoring.metrics import calcAllMetrics
 
         result = calcAllMetrics(company)
         row = result["history"][0]
@@ -515,7 +515,7 @@ class TestCalcAllMetrics:
         assert row["totalBorrowing"] == 60_000
 
     def test_business_stability(self, company):
-        from dartlab.credit.metrics import calcAllMetrics
+        from dartlab.credit.scoring.metrics import calcAllMetrics
 
         result = calcAllMetrics(company)
         assert "businessStability" in result

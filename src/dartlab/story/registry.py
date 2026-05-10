@@ -787,7 +787,7 @@ def _buildCreditBlocks(company, keys, basePeriod, safe: Callable, need: Callable
         }
     ):
         return
-    from dartlab.credit.calcs import (
+    from dartlab.credit.scoring.calcs import (
         calcCashFlowGrade,
         calcCreditAudit,
         calcCreditFlags,
@@ -1420,7 +1420,7 @@ def _buildScenarioBlocks(company, keys, basePeriod, safe: Callable, need: Callab
         )
 
         if need("gradeUpgradePath"):
-            from dartlab.credit.calcs import calcGradeImprovement
+            from dartlab.credit.scoring.calcs import calcGradeImprovement
 
             out["gradeUpgradePath"] = safe(
                 lambda: gradeUpgradePathBlock(calcGradeImprovement(company, basePeriod=basePeriod))

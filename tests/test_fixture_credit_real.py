@@ -138,7 +138,7 @@ def test_calcAllMetrics(samsung):
 
 def test_scoreMetric_basic():
     """scoreMetric — 순수 함수, fixture 불필요."""
-    from dartlab.credit.creditScorecard import scoreMetric
+    from dartlab.credit.scoring.creditScorecard import scoreMetric
 
     # thresholdDef는 {"lower_is_better": bool, "breakpoints": [(value, score), ...]}
     threshold_def = {
@@ -151,7 +151,7 @@ def test_scoreMetric_basic():
 
 def test_scoreMetric_none_value():
     """scoreMetric — None 값 처리."""
-    from dartlab.credit.creditScorecard import scoreMetric
+    from dartlab.credit.scoring.creditScorecard import scoreMetric
 
     threshold_def = {
         "lower_is_better": True,
@@ -166,7 +166,7 @@ def test_scoreMetric_none_value():
 
 def test_creditScorecard_import():
     """creditScorecard 모듈 import — 순수 로직 존재 확인."""
-    from dartlab.credit.creditScorecard import creditOutlook
+    from dartlab.credit.scoring.creditScorecard import creditOutlook
 
     # 빈 이력 — crash 없음
     result = creditOutlook([])

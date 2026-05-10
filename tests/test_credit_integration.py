@@ -56,7 +56,7 @@ def test_evaluateCompany_detail_mode(mock_company):
 
 def test_calcAllMetrics(mock_company):
     """지표 산출 단계 — dict 또는 None."""
-    from dartlab.credit.metrics import calcAllMetrics
+    from dartlab.credit.scoring.metrics import calcAllMetrics
 
     mock_company._cache.clear()
     result = calcAllMetrics(mock_company)
@@ -65,7 +65,7 @@ def test_calcAllMetrics(mock_company):
 
 def test_calcAllMetrics_history_structure(mock_company):
     """history가 있으면 list of dict."""
-    from dartlab.credit.metrics import calcAllMetrics
+    from dartlab.credit.scoring.metrics import calcAllMetrics
 
     mock_company._cache.clear()
     result = calcAllMetrics(mock_company)
@@ -96,7 +96,7 @@ def test_evaluateCompany_empty(empty_mock_company):
 
 def test_calcAllMetrics_empty(empty_mock_company):
     """빈 데이터 — None 반환."""
-    from dartlab.credit.metrics import calcAllMetrics
+    from dartlab.credit.scoring.metrics import calcAllMetrics
 
     empty_mock_company._cache.clear()
     result = calcAllMetrics(empty_mock_company)

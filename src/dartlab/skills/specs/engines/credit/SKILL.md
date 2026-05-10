@@ -113,7 +113,7 @@ lastUpdated: '2026-05-08'
 `credit.migration` 모듈이 등급 전이 행렬과 forward PD ladder 를 제공한다. 학술 기반 — CreditMetrics (J.P. Morgan, 1997) Cohort 접근, Basel III IRB 표준. 관측 등급 변경 → row-stochastic transition matrix → 행렬 거듭제곱 (M^h) → 등급별 h 년 누적 부도확률.
 
 ```python
-from dartlab.credit.migration import buildTransitionMatrix, forwardPdLadder
+from dartlab.credit.scoring.migration import buildTransitionMatrix, forwardPdLadder
 
 matrix = buildTransitionMatrix()  # data/credit/transition.json 자동 로드
 ladder = forwardPdLadder(horizons=(1, 3, 5))

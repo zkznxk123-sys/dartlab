@@ -956,8 +956,8 @@ def _applySurvivalAdjustment(company: Any, primaryValue: float, overrides: dict)
     """
     try:
         from dartlab.core.overrides import applyOverride
-        from dartlab.credit.chsFeatures import computeChsProbability
-        from dartlab.credit.survival import applySurvivalWeight, calcSurvivalWeight
+        from dartlab.credit.features.chsFeatures import computeChsProbability
+        from dartlab.credit.models.survival import applySurvivalWeight, calcSurvivalWeight
     except ImportError:
         return None
 

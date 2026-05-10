@@ -6,7 +6,8 @@ Layer 1 (metrics.py) → Layer 2 (scorecard) → Layer 3 (등급 결정)
 
 from __future__ import annotations
 
-from dartlab.credit.creditScorecard import (
+from dartlab.credit.features.sectorThresholds import getSectorLabel, getThresholds
+from dartlab.credit.scoring.creditScorecard import (
     axisScore,
     cashFlowGrade,
     creditOutlook,
@@ -16,8 +17,7 @@ from dartlab.credit.creditScorecard import (
     scoreMetric,
     weightedScore,
 )
-from dartlab.credit.metrics import calcAllMetrics
-from dartlab.credit.sectorThresholds import getSectorLabel, getThresholds
+from dartlab.credit.scoring.metrics import calcAllMetrics
 
 # ═══════════════════════════════════════════════════════════
 # 설정 — 모든 매직 넘버를 여기서 관리
@@ -165,7 +165,7 @@ def _isCaptiveByOFS(company, consolidatedBorrowing: float) -> bool:
     if consolidatedBorrowing <= 0:
         return False
     try:
-        from dartlab.credit.metrics import calcSeparateMetrics
+        from dartlab.credit.scoring.metrics import calcSeparateMetrics
 
         sep = calcSeparateMetrics(company)
         if sep is None:
@@ -204,7 +204,7 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict:
         adjustment : float — ok 시 적용 조정치 (0 if unavailable).
     """
     try:
-        from dartlab.credit.chsModel import calcCHS
+        from dartlab.credit.models.chsModel import calcCHS
 
         priceData = company.gather("price") if hasattr(company, "gather") else None
         if priceData is None or len(priceData) < 20:
@@ -533,8 +533,8 @@ def _explainDivergence(
 
 def _applyPostAdjustments(company, overall, latest, metrics, axes, captive, holding, sepMetrics):
     """CHS + Notch + divergence — Track A/B 공통 후처리."""
-    from dartlab.credit.creditScorecard import estimatePD
-    from dartlab.credit.creditScorecard import notchGrade as _notchGrade
+    from dartlab.credit.scoring.creditScorecard import estimatePD
+    from dartlab.credit.scoring.creditScorecard import notchGrade as _notchGrade
 
     # CHS 보정
     chsResult = _calcCHSAdjustment(company, overall)
@@ -732,12 +732,12 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
 
     # 기준표 선택 (캡티브 > 지주 > 업종별 > 기본)
     if captive:
-        from dartlab.credit.sectorThresholds import _airlineThresholds
+        from dartlab.credit.features.sectorThresholds import _airlineThresholds
 
         thresholds = _airlineThresholds()
         sectorLabel = f"{getSectorLabel(sector)} (캡티브금융조정)"
     elif holding:
-        from dartlab.credit.sectorThresholds import _holdingThresholds
+        from dartlab.credit.features.sectorThresholds import _holdingThresholds
 
         thresholds = _holdingThresholds()
         sectorLabel = f"{getSectorLabel(sector)} (지주사조정)"
@@ -781,7 +781,7 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
     _needsOFS = holding or captive
     sepMetrics = None
     if _needsOFS and axis1 is not None:
-        from dartlab.credit.metrics import calcSeparateMetrics
+        from dartlab.credit.scoring.metrics import calcSeparateMetrics
 
         sepMetrics = calcSeparateMetrics(company)
         if sepMetrics is not None:
@@ -945,7 +945,7 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
         result["separateMetrics"] = sepMetrics
 
         # 서사 생성 — AI가 소비할 로데이터 + 해석
-        from dartlab.credit.narrative import (
+        from dartlab.credit.features.narrative import (
             buildNarratives,
             buildOverallNarrative,
             narrateBorrowings,
@@ -1182,13 +1182,13 @@ def _evaluateFinancial(company, *, detail: bool = False, basePeriod: str | None 
     D/EBITDA, FFO/Debt를 사용하지 않고
     자본비율, ROA, NIM, 충당금 비율로 평가.
     """
-    from dartlab.credit.metrics import calcFinancialMetrics
+    from dartlab.credit.scoring.metrics import calcFinancialMetrics
 
     metrics = calcFinancialMetrics(company, basePeriod=basePeriod)
     if metrics is None or not metrics.get("history"):
         return None
 
-    from dartlab.credit.sectorThresholds import financialTrackBThresholds
+    from dartlab.credit.features.sectorThresholds import financialTrackBThresholds
 
     thresholds = financialTrackBThresholds()
     latest = metrics["history"][0]

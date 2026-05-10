@@ -12,28 +12,28 @@ import pytest
 
 class TestDiv:
     def test_basic(self):
-        from dartlab.credit.metrics import _div
+        from dartlab.credit.scoring.metrics import _div
 
         assert _div(10, 2) == 5.0
 
     def test_pct(self):
-        from dartlab.credit.metrics import _div
+        from dartlab.credit.scoring.metrics import _div
 
         assert _div(1, 4, pct=True) == 25.0
 
     def test_zero_denominator(self):
-        from dartlab.credit.metrics import _div
+        from dartlab.credit.scoring.metrics import _div
 
         assert _div(10, 0) is None
 
     def test_none_inputs(self):
-        from dartlab.credit.metrics import _div
+        from dartlab.credit.scoring.metrics import _div
 
         assert _div(None, 5) is None
         assert _div(5, None) is None
 
     def test_negative_denominator(self):
-        from dartlab.credit.metrics import _div
+        from dartlab.credit.scoring.metrics import _div
 
         # abs(b) 사용
         assert _div(10, -2) == 5.0
@@ -41,57 +41,57 @@ class TestDiv:
 
 class TestCV:
     def test_basic(self):
-        from dartlab.credit.metrics import _cv
+        from dartlab.credit.scoring.metrics import _cv
 
         result = _cv([100, 100, 100])
         assert result == 0.0
 
     def test_variation(self):
-        from dartlab.credit.metrics import _cv
+        from dartlab.credit.scoring.metrics import _cv
 
         result = _cv([10, 20, 30])
         assert result is not None
         assert result > 0
 
     def test_too_few(self):
-        from dartlab.credit.metrics import _cv
+        from dartlab.credit.scoring.metrics import _cv
 
         assert _cv([1, 2]) is None
         assert _cv([]) is None
 
     def test_none_filtered(self):
-        from dartlab.credit.metrics import _cv
+        from dartlab.credit.scoring.metrics import _cv
 
         assert _cv([1, None, 2]) is None  # only 2 valid
 
     def test_zero_mean(self):
-        from dartlab.credit.metrics import _cv
+        from dartlab.credit.scoring.metrics import _cv
 
         assert _cv([1, -1, 0]) is None  # mean = 0
 
 
 class TestSegmentHHI:
     def test_none_input(self):
-        from dartlab.credit.metrics import _calcSegmentHHI
+        from dartlab.credit.scoring.metrics import _calcSegmentHHI
 
         assert _calcSegmentHHI(None) is None
         assert _calcSegmentHHI([]) is None
 
     def test_single_segment(self):
-        from dartlab.credit.metrics import _calcSegmentHHI
+        from dartlab.credit.scoring.metrics import _calcSegmentHHI
 
         # 1개 부문이면 다각화 의미 없음
         assert _calcSegmentHHI([{"매출액": 1000}]) is None
 
     def test_equal_split(self):
-        from dartlab.credit.metrics import _calcSegmentHHI
+        from dartlab.credit.scoring.metrics import _calcSegmentHHI
 
         # 2개 균등 → 50²×2 = 5000
         result = _calcSegmentHHI([{"매출액": 500}, {"매출액": 500}])
         assert result == 5000.0
 
     def test_concentrated(self):
-        from dartlab.credit.metrics import _calcSegmentHHI
+        from dartlab.credit.scoring.metrics import _calcSegmentHHI
 
         # 90:10 → 8100 + 100 = 8200
         result = _calcSegmentHHI([{"매출액": 900}, {"매출액": 100}])
@@ -166,7 +166,7 @@ class TestAxes:
 
 class TestSeverity:
     def test_thresholds(self):
-        from dartlab.credit.narrative import _severity
+        from dartlab.credit.features.narrative import _severity
 
         assert _severity(5) == "strong"
         assert _severity(10) == "adequate"
@@ -179,44 +179,44 @@ class TestSeverity:
 
 class TestFmt:
     def test_none(self):
-        from dartlab.credit.narrative import _fmt
+        from dartlab.credit.features.narrative import _fmt
 
         assert _fmt(None) == "N/A"
 
     def test_float(self):
-        from dartlab.credit.narrative import _fmt
+        from dartlab.credit.features.narrative import _fmt
 
         assert _fmt(3.14159, "%", 1) == "3.1%"
 
     def test_int(self):
-        from dartlab.credit.narrative import _fmt
+        from dartlab.credit.features.narrative import _fmt
 
         assert _fmt(42, "배") == "42배"
 
 
 class TestFmtTril:
     def test_trillion(self):
-        from dartlab.credit.narrative import _fmtTril
+        from dartlab.credit.features.narrative import _fmtTril
 
         assert _fmtTril(5e12) == "5.0조원"
 
     def test_billion(self):
-        from dartlab.credit.narrative import _fmtTril
+        from dartlab.credit.features.narrative import _fmtTril
 
         assert _fmtTril(3e10) == "300억원"
 
     def test_small(self):
-        from dartlab.credit.narrative import _fmtTril
+        from dartlab.credit.features.narrative import _fmtTril
 
         assert _fmtTril(50000) == "50,000원"
 
     def test_negative(self):
-        from dartlab.credit.narrative import _fmtTril
+        from dartlab.credit.features.narrative import _fmtTril
 
         assert _fmtTril(-2e12) == "-2.0조원"
 
     def test_none(self):
-        from dartlab.credit.narrative import _fmtTril
+        from dartlab.credit.features.narrative import _fmtTril
 
         assert _fmtTril(None) == "N/A"
 
@@ -226,22 +226,22 @@ class TestFmtTril:
 
 class TestNotchDiff:
     def test_same(self):
-        from dartlab.credit.audit import _notchDiff
+        from dartlab.credit.monitoring.audit import _notchDiff
 
         assert _notchDiff("AAA", "AAA") == 0
 
     def test_adjacent(self):
-        from dartlab.credit.audit import _notchDiff
+        from dartlab.credit.monitoring.audit import _notchDiff
 
         assert _notchDiff("AAA", "AA+") == 1
 
     def test_wide(self):
-        from dartlab.credit.audit import _notchDiff
+        from dartlab.credit.monitoring.audit import _notchDiff
 
         assert _notchDiff("AAA", "D") == 19
 
     def test_invalid(self):
-        from dartlab.credit.audit import _notchDiff
+        from dartlab.credit.monitoring.audit import _notchDiff
 
         assert _notchDiff("AAA", "INVALID") == 99
         assert _notchDiff("INVALID", "AAA") == 99

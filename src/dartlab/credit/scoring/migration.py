@@ -21,7 +21,7 @@ from __future__ import annotations
 import numpy as np
 import polars as pl
 
-from dartlab.credit.history import _loadTransition
+from dartlab.credit.monitoring.history import _loadTransition
 
 # dCR rating ordering (best → worst). 'dCR-D' 는 absorbing 부도 상태.
 # credit.history._updateTransition 가 result['grade'] (= "dCR-AA" 풀 prefix 형식) 로

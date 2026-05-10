@@ -9,7 +9,7 @@ import pytest
 
 @pytest.mark.requires_data
 def test_beautifulDeleveragingSubPhase_moneyPrinting():
-    from dartlab.credit.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
+    from dartlab.credit.monitoring.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
     # m2 YoY 12% + 실질금리 -1% → moneyPrinting
     sp = beautifulDeleveragingSubPhase(realRate=-1.0, m2GrowthYoy=12.0, debtServiceYoY=-1.0, npl=2.0, hySpread=400)
@@ -18,7 +18,7 @@ def test_beautifulDeleveragingSubPhase_moneyPrinting():
 
 @pytest.mark.requires_data
 def test_beautifulDeleveragingSubPhase_defaultRestructuring():
-    from dartlab.credit.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
+    from dartlab.credit.monitoring.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
     sp = beautifulDeleveragingSubPhase(realRate=1.0, m2GrowthYoy=5.0, debtServiceYoY=0.0, npl=8.0, hySpread=900)
     assert sp == "defaultRestructuring"
@@ -26,7 +26,7 @@ def test_beautifulDeleveragingSubPhase_defaultRestructuring():
 
 @pytest.mark.requires_data
 def test_beautifulDeleveragingSubPhase_wealthTransfer():
-    from dartlab.credit.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
+    from dartlab.credit.monitoring.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
     sp = beautifulDeleveragingSubPhase(
         realRate=0.5,
@@ -41,7 +41,7 @@ def test_beautifulDeleveragingSubPhase_wealthTransfer():
 
 @pytest.mark.requires_data
 def test_beautifulDeleveragingSubPhase_austerity():
-    from dartlab.credit.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
+    from dartlab.credit.monitoring.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
     sp = beautifulDeleveragingSubPhase(
         realRate=2.5,
@@ -56,7 +56,7 @@ def test_beautifulDeleveragingSubPhase_austerity():
 
 @pytest.mark.requires_data
 def test_beautifulDeleveragingSubPhase_insufficient_signals():
-    from dartlab.credit.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
+    from dartlab.credit.monitoring.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
     sp = beautifulDeleveragingSubPhase(realRate=1.0)  # 하나만
     assert sp is None
@@ -64,7 +64,7 @@ def test_beautifulDeleveragingSubPhase_insufficient_signals():
 
 @pytest.mark.requires_data
 def test_dalioRegimeVariant_deflationary_foreign_debt():
-    from dartlab.credit.crisisDetector import _dalioRegimeVariant as dalioRegimeVariant
+    from dartlab.credit.monitoring.crisisDetector import _dalioRegimeVariant as dalioRegimeVariant
 
     v = dalioRegimeVariant(fxFlexibility="pegged", reserveCurrency=False, realRate=3.0, foreignDebtPct=40)
     assert v == "deflationary"
@@ -72,7 +72,7 @@ def test_dalioRegimeVariant_deflationary_foreign_debt():
 
 @pytest.mark.requires_data
 def test_dalioRegimeVariant_inflationary_reserve_currency():
-    from dartlab.credit.crisisDetector import _dalioRegimeVariant as dalioRegimeVariant
+    from dartlab.credit.monitoring.crisisDetector import _dalioRegimeVariant as dalioRegimeVariant
 
     v = dalioRegimeVariant(fxFlexibility="flexible", reserveCurrency=True, realRate=-3.0)
     assert v == "inflationary"
@@ -81,7 +81,7 @@ def test_dalioRegimeVariant_inflationary_reserve_currency():
 @pytest.mark.requires_data
 def test_dalioDebtCyclePhase_emits_subPhase():
     """beautifulDeleveraging 진단 시 subPhase 활성."""
-    from dartlab.credit.crisisDetector import dalioDebtCyclePhase
+    from dartlab.credit.monitoring.crisisDetector import dalioDebtCyclePhase
 
     r = dalioDebtCyclePhase(
         totalDebtToGdp=240,
@@ -98,7 +98,7 @@ def test_dalioDebtCyclePhase_emits_subPhase():
 
 @pytest.mark.requires_data
 def test_dalioDebtCyclePhase_no_subphase_outside_deleveraging():
-    from dartlab.credit.crisisDetector import dalioDebtCyclePhase
+    from dartlab.credit.monitoring.crisisDetector import dalioDebtCyclePhase
 
     r = dalioDebtCyclePhase(
         totalDebtToGdp=150,

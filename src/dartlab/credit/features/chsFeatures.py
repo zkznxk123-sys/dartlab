@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.credit.chsModel import CHSResult, calcCHS
+from dartlab.credit.models.chsModel import CHSResult, calcCHS
 
 
 def extractChsFeatures(company: Any) -> dict | None:

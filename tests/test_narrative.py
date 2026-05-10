@@ -22,7 +22,7 @@ pytestmark = pytest.mark.unit
 
 class TestAxisNarrative:
     def test_basic_creation(self):
-        from dartlab.credit.narrative import AxisNarrative
+        from dartlab.credit.features.narrative import AxisNarrative
 
         n = AxisNarrative("테스트", "요약 문장", ["상세1", "상세2"], "strong")
         assert n.axisName == "테스트"
@@ -31,7 +31,7 @@ class TestAxisNarrative:
         assert n.severity == "strong"
 
     def test_to_paragraph(self):
-        from dartlab.credit.narrative import AxisNarrative
+        from dartlab.credit.features.narrative import AxisNarrative
 
         n = AxisNarrative("테스트", "요약.", ["상세1.", "상세2."], "adequate")
         paragraph = n.toParagraph()
@@ -40,13 +40,13 @@ class TestAxisNarrative:
         assert "상세2." in paragraph
 
     def test_to_paragraph_no_details(self):
-        from dartlab.credit.narrative import AxisNarrative
+        from dartlab.credit.features.narrative import AxisNarrative
 
         n = AxisNarrative("테스트", "요약만.", [], "strong")
         assert n.toParagraph() == "요약만."
 
     def test_severity_kr(self):
-        from dartlab.credit.narrative import AxisNarrative
+        from dartlab.credit.features.narrative import AxisNarrative
 
         assert AxisNarrative("", "", [], "strong").severityKr == "우수"
         assert AxisNarrative("", "", [], "adequate").severityKr == "양호"
@@ -54,7 +54,7 @@ class TestAxisNarrative:
         assert AxisNarrative("", "", [], "critical").severityKr == "위험"
 
     def test_default_severity(self):
-        from dartlab.credit.narrative import AxisNarrative
+        from dartlab.credit.features.narrative import AxisNarrative
 
         n = AxisNarrative("x", "y")
         assert n.severity == "adequate"
@@ -68,7 +68,7 @@ class TestAxisNarrative:
 
 class TestSeverityHelper:
     def test_severity_ranges(self):
-        from dartlab.credit.narrative import _severity
+        from dartlab.credit.features.narrative import _severity
 
         assert _severity(None) == "adequate"
         assert _severity(5) == "strong"
@@ -77,7 +77,7 @@ class TestSeverityHelper:
         assert _severity(50) == "critical"
 
     def test_boundary_values(self):
-        from dartlab.credit.narrative import _severity
+        from dartlab.credit.features.narrative import _severity
 
         assert _severity(0) == "strong"
         assert _severity(9.99) == "strong"
@@ -95,7 +95,7 @@ class TestSeverityHelper:
 
 class TestNarrateRepayment:
     def test_strong_repayment(self):
-        from dartlab.credit.narrative import narrateRepayment
+        from dartlab.credit.features.narrative import narrateRepayment
 
         latest = {
             "ebitda": 5e12,
@@ -112,7 +112,7 @@ class TestNarrateRepayment:
         assert len(result.details) >= 1
 
     def test_weak_repayment(self):
-        from dartlab.credit.narrative import narrateRepayment
+        from dartlab.credit.features.narrative import narrateRepayment
 
         latest = {
             "ebitda": 1e9,
@@ -127,7 +127,7 @@ class TestNarrateRepayment:
         assert len(result.details) >= 1
 
     def test_critical_repayment(self):
-        from dartlab.credit.narrative import narrateRepayment
+        from dartlab.credit.features.narrative import narrateRepayment
 
         latest = {
             "ebitda": -1e9,
@@ -140,14 +140,14 @@ class TestNarrateRepayment:
         assert "취약" in result.summary
 
     def test_no_ebitda(self):
-        from dartlab.credit.narrative import narrateRepayment
+        from dartlab.credit.features.narrative import narrateRepayment
 
         result = narrateRepayment({}, None, "기타")
         assert result.axisName == "채무상환능력"
         assert result.severity == "adequate"
 
     def test_high_icr_no_debt(self):
-        from dartlab.credit.narrative import narrateRepayment
+        from dartlab.credit.features.narrative import narrateRepayment
 
         latest = {"ebitdaInterestCoverage": 200}
         result = narrateRepayment(latest, 3, "IT")
@@ -162,7 +162,7 @@ class TestNarrateRepayment:
 
 class TestNarrateCapitalStructure:
     def test_low_debt_ratio(self):
-        from dartlab.credit.narrative import narrateCapitalStructure
+        from dartlab.credit.features.narrative import narrateCapitalStructure
 
         latest = {"debtRatio": 30, "borrowingDependency": 5}
         result = narrateCapitalStructure(latest, 5)
@@ -170,7 +170,7 @@ class TestNarrateCapitalStructure:
         assert any("보수적" in d for d in result.details)
 
     def test_high_debt_ratio(self):
-        from dartlab.credit.narrative import narrateCapitalStructure
+        from dartlab.credit.features.narrative import narrateCapitalStructure
 
         latest = {"debtRatio": 350, "borrowingDependency": 40}
         result = narrateCapitalStructure(latest, 50)
@@ -178,14 +178,14 @@ class TestNarrateCapitalStructure:
         assert any("과도한" in d for d in result.details)
 
     def test_net_cash_position(self):
-        from dartlab.credit.narrative import narrateCapitalStructure
+        from dartlab.credit.features.narrative import narrateCapitalStructure
 
         latest = {"debtRatio": 80, "netDebtToEbitda": -1.5}
         result = narrateCapitalStructure(latest, 8)
         assert any("순현금" in d for d in result.details)
 
     def test_empty_latest(self):
-        from dartlab.credit.narrative import narrateCapitalStructure
+        from dartlab.credit.features.narrative import narrateCapitalStructure
 
         result = narrateCapitalStructure({}, None)
         assert result.axisName == "자본구조"
@@ -198,7 +198,7 @@ class TestNarrateCapitalStructure:
 
 class TestNarrateLiquidity:
     def test_strong_liquidity(self):
-        from dartlab.credit.narrative import narrateLiquidity
+        from dartlab.credit.features.narrative import narrateLiquidity
 
         latest = {"currentRatio": 250, "shortTermDebtRatio": 20, "cashRatio": 40}
         result = narrateLiquidity(latest, 3)
@@ -206,14 +206,14 @@ class TestNarrateLiquidity:
         assert "충분" in result.summary
 
     def test_weak_liquidity(self):
-        from dartlab.credit.narrative import narrateLiquidity
+        from dartlab.credit.features.narrative import narrateLiquidity
 
         latest = {"currentRatio": 80, "shortTermDebtRatio": 60}
         result = narrateLiquidity(latest, 30)
         assert result.severity == "weak"
 
     def test_contradiction_explained(self):
-        from dartlab.credit.narrative import narrateLiquidity
+        from dartlab.credit.features.narrative import narrateLiquidity
 
         latest = {"currentRatio": 200, "shortTermDebtRatio": 55, "cashRatio": 35}
         result = narrateLiquidity(latest, 5)
@@ -221,7 +221,7 @@ class TestNarrateLiquidity:
         assert any("차환" in d for d in result.details)
 
     def test_empty_latest(self):
-        from dartlab.credit.narrative import narrateLiquidity
+        from dartlab.credit.features.narrative import narrateLiquidity
 
         result = narrateLiquidity({}, None)
         assert result.axisName == "유동성"
@@ -234,7 +234,7 @@ class TestNarrateLiquidity:
 
 class TestNarrateCashFlow:
     def test_strong_cashflow(self):
-        from dartlab.credit.narrative import narrateCashFlow
+        from dartlab.credit.features.narrative import narrateCashFlow
 
         latest = {"ocfToSales": 20, "fcf": 1e12}
         metrics = {
@@ -249,27 +249,27 @@ class TestNarrateCashFlow:
         assert any("우수" in d for d in result.details)
 
     def test_negative_fcf(self):
-        from dartlab.credit.narrative import narrateCashFlow
+        from dartlab.credit.features.narrative import narrateCashFlow
 
         latest = {"ocfToSales": 8, "fcf": -5e11}
         result = narrateCashFlow(latest, 20, {"history": []})
         assert any("음수" in d for d in result.details)
 
     def test_holding_company_ocf(self):
-        from dartlab.credit.narrative import narrateCashFlow
+        from dartlab.credit.features.narrative import narrateCashFlow
 
         latest = {"ocfToSales": 150}
         result = narrateCashFlow(latest, 8, {"history": []})
         assert any("자회사" in d or "매출 대비" in d for d in result.details)
 
     def test_empty_latest(self):
-        from dartlab.credit.narrative import narrateCashFlow
+        from dartlab.credit.features.narrative import narrateCashFlow
 
         result = narrateCashFlow({}, None, {})
         assert result.axisName == "현금흐름"
 
     def test_three_consecutive_positive_ocf(self):
-        from dartlab.credit.narrative import narrateCashFlow
+        from dartlab.credit.features.narrative import narrateCashFlow
 
         metrics = {
             "history": [
@@ -289,7 +289,7 @@ class TestNarrateCashFlow:
 
 class TestNarrateBusinessStability:
     def test_stable_business(self):
-        from dartlab.credit.narrative import narrateBusinessStability
+        from dartlab.credit.features.narrative import narrateBusinessStability
 
         biz = {"revenueCV": 5, "latestRevenue": 15e12, "segmentHHI": 1200}
         result = narrateBusinessStability(biz, 3)
@@ -297,14 +297,14 @@ class TestNarrateBusinessStability:
         assert any("안정" in d for d in result.details)
 
     def test_volatile_business(self):
-        from dartlab.credit.narrative import narrateBusinessStability
+        from dartlab.credit.features.narrative import narrateBusinessStability
 
         biz = {"revenueCV": 30, "latestRevenue": 5e11, "segmentHHI": 8000}
         result = narrateBusinessStability(biz, 35)
         assert result.severity == "weak"
 
     def test_empty_biz(self):
-        from dartlab.credit.narrative import narrateBusinessStability
+        from dartlab.credit.features.narrative import narrateBusinessStability
 
         result = narrateBusinessStability({}, None)
         assert result.axisName == "사업안정성"
@@ -317,7 +317,7 @@ class TestNarrateBusinessStability:
 
 class TestNarrateReliability:
     def test_clean_audit(self):
-        from dartlab.credit.narrative import narrateReliability
+        from dartlab.credit.features.narrative import narrateReliability
 
         rel = {"beneishMScore": -3.0, "piotroskiFScore": 8}
         result = narrateReliability(rel, "적정", 5)
@@ -326,7 +326,7 @@ class TestNarrateReliability:
         assert any("강건" in d for d in result.details)
 
     def test_manipulator_warning(self):
-        from dartlab.credit.narrative import narrateReliability
+        from dartlab.credit.features.narrative import narrateReliability
 
         rel = {"beneishMScore": -1.0, "piotroskiFScore": 2}
         result = narrateReliability(rel, "한정", 35)
@@ -334,13 +334,13 @@ class TestNarrateReliability:
         assert any("한정" in d for d in result.details)
 
     def test_adverse_audit(self):
-        from dartlab.credit.narrative import narrateReliability
+        from dartlab.credit.features.narrative import narrateReliability
 
         result = narrateReliability({}, "부적정", 50)
         assert any("비적정" in d or "심각" in d for d in result.details)
 
     def test_empty_reliability(self):
-        from dartlab.credit.narrative import narrateReliability
+        from dartlab.credit.features.narrative import narrateReliability
 
         result = narrateReliability({}, None, None)
         assert result.axisName == "재무신뢰성"
@@ -353,14 +353,14 @@ class TestNarrateReliability:
 
 class TestNarrateDisclosureRisk:
     def test_no_risk(self):
-        from dartlab.credit.narrative import narrateDisclosureRisk
+        from dartlab.credit.features.narrative import narrateDisclosureRisk
 
         result = narrateDisclosureRisk(None, 3)
         assert result.severity == "strong"
         assert "감지되지 않았다" in result.summary
 
     def test_chronic_contingent_liability(self):
-        from dartlab.credit.narrative import narrateDisclosureRisk
+        from dartlab.credit.features.narrative import narrateDisclosureRisk
 
         dr = {"chronicYears": 4, "riskKeyword": 2}
         result = narrateDisclosureRisk(dr, 35)
@@ -369,14 +369,14 @@ class TestNarrateDisclosureRisk:
         assert any("키워드" in d for d in result.details)
 
     def test_minor_risk(self):
-        from dartlab.credit.narrative import narrateDisclosureRisk
+        from dartlab.credit.features.narrative import narrateDisclosureRisk
 
         dr = {"chronicYears": 1, "riskKeyword": 0}
         result = narrateDisclosureRisk(dr, 15)
         assert any("증가 추세" in d for d in result.details)
 
     def test_empty_dr_dict(self):
-        from dartlab.credit.narrative import narrateDisclosureRisk
+        from dartlab.credit.features.narrative import narrateDisclosureRisk
 
         dr = {}
         result = narrateDisclosureRisk(dr, 5)
@@ -391,7 +391,7 @@ class TestNarrateDisclosureRisk:
 
 class TestBuildNarratives:
     def test_returns_seven_narratives(self):
-        from dartlab.credit.narrative import buildNarratives
+        from dartlab.credit.features.narrative import buildNarratives
 
         result = {
             "axes": [
@@ -433,7 +433,7 @@ class TestBuildNarratives:
         assert "공시리스크" in axis_names
 
     def test_empty_result(self):
-        from dartlab.credit.narrative import buildNarratives
+        from dartlab.credit.features.narrative import buildNarratives
 
         narratives = buildNarratives({})
         assert len(narratives) == 7  # Still returns 7 with defaults
@@ -446,7 +446,7 @@ class TestBuildNarratives:
 
 class TestNarrateProfile:
     def test_with_profile(self):
-        from dartlab.credit.narrative import narrateProfile
+        from dartlab.credit.features.narrative import narrateProfile
 
         profile = {"sector": "섹터: IT > 반도체", "products": "주요제품: 메모리반도체"}
         result = narrateProfile(profile, None, None)
@@ -454,7 +454,7 @@ class TestNarrateProfile:
         assert "반도체" in result
 
     def test_with_segments(self):
-        from dartlab.credit.narrative import narrateProfile
+        from dartlab.credit.features.narrative import narrateProfile
 
         segments = {
             "segments": [
@@ -467,7 +467,7 @@ class TestNarrateProfile:
         assert "DX" in result
 
     def test_empty(self):
-        from dartlab.credit.narrative import narrateProfile
+        from dartlab.credit.features.narrative import narrateProfile
 
         result = narrateProfile(None, None, None)
         assert result == ""
@@ -480,7 +480,7 @@ class TestNarrateProfile:
 
 class TestNarrateTrend:
     def test_with_history(self):
-        from dartlab.credit.narrative import narrateTrend
+        from dartlab.credit.features.narrative import narrateTrend
 
         history = [
             {"revenue": 100e12, "operatingIncome": 15e12, "debtToEbitda": 1.5, "debtRatio": 60, "period": "2024"},
@@ -492,13 +492,13 @@ class TestNarrateTrend:
         assert "매출" in result
 
     def test_too_short(self):
-        from dartlab.credit.narrative import narrateTrend
+        from dartlab.credit.features.narrative import narrateTrend
 
         result = narrateTrend([{"revenue": 100}])
         assert result == ""
 
     def test_no_change(self):
-        from dartlab.credit.narrative import narrateTrend
+        from dartlab.credit.features.narrative import narrateTrend
 
         history = [
             {"revenue": 100, "debtToEbitda": 2.0, "debtRatio": 60},
@@ -515,13 +515,13 @@ class TestNarrateTrend:
 
 class TestNarrateBorrowings:
     def test_no_debt(self):
-        from dartlab.credit.narrative import narrateBorrowings
+        from dartlab.credit.features.narrative import narrateBorrowings
 
         result = narrateBorrowings(None, {"totalBorrowing": 0})
         assert "불필요" in result
 
     def test_with_debt(self):
-        from dartlab.credit.narrative import narrateBorrowings
+        from dartlab.credit.features.narrative import narrateBorrowings
 
         latest = {
             "totalBorrowing": 5e12,
@@ -532,7 +532,7 @@ class TestNarrateBorrowings:
         assert "조원" in result
 
     def test_high_cash_coverage(self):
-        from dartlab.credit.narrative import narrateBorrowings
+        from dartlab.credit.features.narrative import narrateBorrowings
 
         latest = {
             "totalBorrowing": 2e12,
@@ -543,7 +543,7 @@ class TestNarrateBorrowings:
         assert "차환 위험" in result or "상회" in result
 
     def test_none_latest(self):
-        from dartlab.credit.narrative import narrateBorrowings
+        from dartlab.credit.features.narrative import narrateBorrowings
 
         result = narrateBorrowings(None, None)
         assert result == ""
@@ -556,7 +556,7 @@ class TestNarrateBorrowings:
 
 class TestNarrateCausalChain:
     def test_normal_company(self):
-        from dartlab.credit.narrative import narrateCausalChain
+        from dartlab.credit.features.narrative import narrateCausalChain
 
         latest = {
             "revenue": 30e12,
@@ -572,7 +572,7 @@ class TestNarrateCausalChain:
         assert "AA-" in text
 
     def test_holding_company(self):
-        from dartlab.credit.narrative import narrateCausalChain
+        from dartlab.credit.features.narrative import narrateCausalChain
 
         latest = {
             "revenue": 1e12,
@@ -585,7 +585,7 @@ class TestNarrateCausalChain:
         assert "지주사" in text
 
     def test_empty(self):
-        from dartlab.credit.narrative import narrateCausalChain
+        from dartlab.credit.features.narrative import narrateCausalChain
 
         text = narrateCausalChain({}, {"grade": "BBB"})
         assert isinstance(text, str)
@@ -598,7 +598,7 @@ class TestNarrateCausalChain:
 
 class TestBuildOverallNarrative:
     def test_with_strengths_and_weaknesses(self):
-        from dartlab.credit.narrative import AxisNarrative, buildOverallNarrative
+        from dartlab.credit.features.narrative import AxisNarrative, buildOverallNarrative
 
         narratives = [
             AxisNarrative("채무상환능력", "우수", [], "strong"),
@@ -613,14 +613,14 @@ class TestBuildOverallNarrative:
         assert "유동성" in text
 
     def test_captive_finance(self):
-        from dartlab.credit.narrative import buildOverallNarrative
+        from dartlab.credit.features.narrative import buildOverallNarrative
 
         result = {"grade": "BBB+", "score": 55.0, "captiveFinance": True}
         text = buildOverallNarrative(result, [])
         assert "캡티브" in text
 
     def test_holding(self):
-        from dartlab.credit.narrative import buildOverallNarrative
+        from dartlab.credit.features.narrative import buildOverallNarrative
 
         result = {"grade": "AA", "score": 80.0, "holding": True}
         text = buildOverallNarrative(result, [])
@@ -634,7 +634,7 @@ class TestBuildOverallNarrative:
 
 class TestFormatHelpers:
     def test_fmt(self):
-        from dartlab.credit.narrative import _fmt
+        from dartlab.credit.features.narrative import _fmt
 
         assert _fmt(None) == "N/A"
         assert _fmt(3.14, "%") == "3.1%"
@@ -643,7 +643,7 @@ class TestFormatHelpers:
         assert _fmt(5) == "5"  # int → no decimal
 
     def test_fmtTril(self):
-        from dartlab.credit.narrative import _fmtTril
+        from dartlab.credit.features.narrative import _fmtTril
 
         assert _fmtTril(None) == "N/A"
         assert "조원" in _fmtTril(5e12)

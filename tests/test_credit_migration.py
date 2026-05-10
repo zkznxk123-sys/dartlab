@@ -36,7 +36,7 @@ SAMPLE_COUNTS = {
 
 class TestBuildTransitionMatrix:
     def test_observed_row_sums_to_one(self):
-        from dartlab.credit.migration import _DEFAULT_RATING_ORDER, buildTransitionMatrix
+        from dartlab.credit.scoring.migration import _DEFAULT_RATING_ORDER, buildTransitionMatrix
 
         df = buildTransitionMatrix(SAMPLE_COUNTS)
         # 각 row 의 to_rating 컬럼 합 = 1 (within float tolerance)
@@ -46,7 +46,7 @@ class TestBuildTransitionMatrix:
 
     def test_empty_row_self_transition(self):
         """관측 0 인 등급은 self-loop (안정 가정)."""
-        from dartlab.credit.migration import buildTransitionMatrix
+        from dartlab.credit.scoring.migration import buildTransitionMatrix
 
         # dCR-AAA 만 관측 — 그 외 등급은 모두 빈 row → self-loop 만
         sparse = {"dCR-AAA": {"dCR-AAA": 10, "dCR-AA+": 1}}
@@ -60,7 +60,7 @@ class TestBuildTransitionMatrix:
 
     def test_D_is_absorbing(self):
         """D 행은 항상 self-loop only — 부도 흡수 상태."""
-        from dartlab.credit.migration import _DEFAULT_RATING_ORDER, buildTransitionMatrix
+        from dartlab.credit.scoring.migration import _DEFAULT_RATING_ORDER, buildTransitionMatrix
 
         # D 에서 임의 전이 시도 (실제로는 발생 X 인 데이터, absorbing 강제 검증)
         with_d_transition = {**SAMPLE_COUNTS, "dCR-D": {"dCR-AAA": 5, "dCR-D": 95}}
@@ -76,7 +76,7 @@ class TestBuildTransitionMatrix:
 
     def test_unknown_rating_in_counts_ignored(self):
         """ratings tuple 외 등급 키는 무시 (미정의 등급 안전 처리)."""
-        from dartlab.credit.migration import buildTransitionMatrix
+        from dartlab.credit.scoring.migration import buildTransitionMatrix
 
         with_unknown = {"dCR-AAA": {"dCR-AAA": 10, "ZZZ_UNKNOWN": 5}}
         df = buildTransitionMatrix(with_unknown)
@@ -94,7 +94,7 @@ class TestBuildTransitionMatrix:
 class TestForwardPdLadder:
     def test_horizon_monotonicity(self):
         """동일 등급에서 horizon ↑ → PD ↑ (누적)."""
-        from dartlab.credit.migration import forwardPdLadder
+        from dartlab.credit.scoring.migration import forwardPdLadder
 
         df = forwardPdLadder(SAMPLE_COUNTS, horizons=(1, 3, 5))
         for row in df.iter_rows(named=True):
@@ -103,7 +103,7 @@ class TestForwardPdLadder:
 
     def test_rating_quality_monotonicity_at_5y(self):
         """등급 악화 → PD 단조 증가 (5 년)."""
-        from dartlab.credit.migration import forwardPdLadder
+        from dartlab.credit.scoring.migration import forwardPdLadder
 
         df = forwardPdLadder(SAMPLE_COUNTS, horizons=(5,))
         # dCR-AAA → dCR-CCC 순으로 5yPD 가 단조 증가해야 정상 (학술 표준)
@@ -116,7 +116,7 @@ class TestForwardPdLadder:
 
     def test_AAA_pd_lower_than_CCC(self):
         """dCR-AAA 5yPD ≪ dCR-CCC 5yPD (강한 차이)."""
-        from dartlab.credit.migration import forwardPdLadder
+        from dartlab.credit.scoring.migration import forwardPdLadder
 
         df = forwardPdLadder(SAMPLE_COUNTS, horizons=(5,))
         aaa_pd = df.filter(df["rating"] == "dCR-AAA").row(0, named=True)["5yPD"]
@@ -126,7 +126,7 @@ class TestForwardPdLadder:
 
     def test_D_pd_is_one(self):
         """dCR-D 등급은 이미 부도 — 모든 horizon 에서 PD = 1.0."""
-        from dartlab.credit.migration import forwardPdLadder
+        from dartlab.credit.scoring.migration import forwardPdLadder
 
         df = forwardPdLadder(SAMPLE_COUNTS, horizons=(1, 3, 5))
         d_row = df.filter(df["rating"] == "dCR-D").row(0, named=True)
@@ -136,7 +136,7 @@ class TestForwardPdLadder:
 
     def test_empty_counts_returns_zero_pd(self):
         """관측 0 → 모두 self-loop → D 도달 0 → 모든 PD 0."""
-        from dartlab.credit.migration import forwardPdLadder
+        from dartlab.credit.scoring.migration import forwardPdLadder
 
         df = forwardPdLadder({}, horizons=(1, 3, 5))
         for row in df.iter_rows(named=True):
@@ -147,7 +147,7 @@ class TestForwardPdLadder:
 
     def test_zero_horizon_returns_zero(self):
         """horizon 0 → PD 0 (현재 시점은 부도 상태가 아니면 PD=0)."""
-        from dartlab.credit.migration import forwardPdLadder
+        from dartlab.credit.scoring.migration import forwardPdLadder
 
         df = forwardPdLadder(SAMPLE_COUNTS, horizons=(0,))
         for row in df.iter_rows(named=True):
@@ -164,7 +164,7 @@ class TestRealDataCompatibility:
     migration 모듈의 default ordering 도 동일 형식이어야 한다 (회귀 가드)."""
 
     def test_default_ordering_matches_history_format(self):
-        from dartlab.credit.migration import _DEFAULT_RATING_ORDER
+        from dartlab.credit.scoring.migration import _DEFAULT_RATING_ORDER
 
         for label in _DEFAULT_RATING_ORDER:
             assert label.startswith("dCR-"), (
@@ -173,7 +173,7 @@ class TestRealDataCompatibility:
 
     def test_real_grade_format_matched(self):
         """실 dartlab.credit() 가 emit 하는 grade 키와 default ordering 매칭."""
-        from dartlab.credit.migration import buildTransitionMatrix
+        from dartlab.credit.scoring.migration import buildTransitionMatrix
 
         # dartlab.credit('005930') 가 실제로 emit 하는 형식
         real_format = {"dCR-AA": {"dCR-AA+": 2, "dCR-AA": 8}}

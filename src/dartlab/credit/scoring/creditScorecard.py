@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 # 20단계 등급 매핑표 + 변환 함수는 credit 도메인 SSOT — analysis/bond 등은 단방향 import.
-from dartlab.credit.gradeTable import (  # noqa: F401
+from dartlab.credit.scoring.gradeTable import (  # noqa: F401
     estimatePD,
     gradeCategory,
     isInvestmentGrade,

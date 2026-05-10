@@ -149,14 +149,14 @@ class TestGdpNowcast:
 
 class TestCreditToGDPGap:
     def test_rising_credit(self):
-        from dartlab.credit.crisisDetector import creditToGDPGap
+        from dartlab.credit.monitoring.crisisDetector import creditToGDPGap
 
         series = list(range(100, 200, 5))
         r = creditToGDPGap(series)
         assert r.gap > 0
 
     def test_stable_credit(self):
-        from dartlab.credit.crisisDetector import creditToGDPGap
+        from dartlab.credit.monitoring.crisisDetector import creditToGDPGap
 
         r = creditToGDPGap([150.0] * 20)
         assert abs(r.gap) < 5
@@ -164,14 +164,14 @@ class TestCreditToGDPGap:
 
 class TestGHSCrisisScore:
     def test_high_risk(self):
-        from dartlab.credit.crisisDetector import ghsCrisisScore
+        from dartlab.credit.monitoring.crisisDetector import ghsCrisisScore
 
         r = ghsCrisisScore(creditGrowth3y=15, assetPriceGrowth3y=80)
         assert r.score >= 70
         assert r.crisisProb >= 0.3
 
     def test_normal(self):
-        from dartlab.credit.crisisDetector import ghsCrisisScore
+        from dartlab.credit.monitoring.crisisDetector import ghsCrisisScore
 
         r = ghsCrisisScore(creditGrowth3y=2, assetPriceGrowth3y=10)
         assert r.zone == "normal"
@@ -179,13 +179,13 @@ class TestGHSCrisisScore:
 
 class TestMinskyPhase:
     def test_overtrading(self):
-        from dartlab.credit.crisisDetector import minskyPhase
+        from dartlab.credit.monitoring.crisisDetector import minskyPhase
 
         r = minskyPhase(creditGap=12, assetReturn3y=70, hySpread=280, vix=14)
         assert r.phase == "overtrading"
 
     def test_discredit(self):
-        from dartlab.credit.crisisDetector import minskyPhase
+        from dartlab.credit.monitoring.crisisDetector import minskyPhase
 
         r = minskyPhase(hySpread=700, vix=40, assetReturn3y=-30)
         assert r.phase == "discredit"
@@ -193,7 +193,7 @@ class TestMinskyPhase:
 
 class TestKooRecession:
     def test_bsr_detected(self):
-        from dartlab.credit.crisisDetector import kooBalanceSheetRecession
+        from dartlab.credit.monitoring.crisisDetector import kooBalanceSheetRecession
 
         r = kooBalanceSheetRecession(5000, 3000, 20000, 0.5)
         assert r.isBSR
@@ -202,7 +202,7 @@ class TestKooRecession:
 
 class TestFisherDeflation:
     def test_deflation_risk(self):
-        from dartlab.credit.crisisDetector import fisherDebtDeflation
+        from dartlab.credit.monitoring.crisisDetector import fisherDebtDeflation
 
         r = fisherDebtDeflation(dsr=15, cpiYoy=-0.5, nplRate=6)
         assert r.risk == "high"

@@ -125,8 +125,8 @@ def calcCreditHistory(company, *, basePeriod: str | None = None) -> dict | None:
     if result is None:
         return None
 
-    from dartlab.credit.creditScorecard import mapTo20Grade, scoreMetric
-    from dartlab.credit.sectorThresholds import getThresholds
+    from dartlab.credit.scoring.creditScorecard import mapTo20Grade, scoreMetric
+    from dartlab.credit.features.sectorThresholds import getThresholds
 
     history_data = result.get("metricsHistory", [])
     if not history_data:
@@ -205,7 +205,7 @@ def calcCashFlowGrade(company, *, basePeriod: str | None = None) -> dict | None:
     if result is None:
         return None
 
-    from dartlab.credit.creditScorecard import cashFlowGrade
+    from dartlab.credit.scoring.creditScorecard import cashFlowGrade
 
     history_data = result.get("metricsHistory", [])
     if not history_data:
@@ -423,7 +423,7 @@ def calcCreditNarrative(company, *, basePeriod: str | None = None) -> dict | Non
     if result is None:
         return None
 
-    from dartlab.credit.narrative import buildNarratives
+    from dartlab.credit.features.narrative import buildNarratives
 
     try:
         narratives = buildNarratives(result)
@@ -483,7 +483,7 @@ def calcCreditAudit(company, *, basePeriod: str | None = None) -> dict | None:
     if not stockCode:
         return None
 
-    from dartlab.credit.audit import auditCredit
+    from dartlab.credit.monitoring.audit import auditCredit
 
     try:
         audit = auditCredit(stockCode, corpName, result=result)
@@ -538,8 +538,8 @@ def calcGradeImprovement(company, *, basePeriod: str | None = None) -> dict | No
     if not grade or not metrics:
         return None
 
-    from dartlab.credit.creditScorecard import mapTo20Grade, scoreMetric
-    from dartlab.credit.sectorThresholds import getThresholds
+    from dartlab.credit.scoring.creditScorecard import mapTo20Grade, scoreMetric
+    from dartlab.credit.features.sectorThresholds import getThresholds
 
     sector, ig = None, None
     try:

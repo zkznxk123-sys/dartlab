@@ -46,7 +46,7 @@ def test_annualSumFlow_credit_partial():
 def test_credit_ttmSum_delegates_to_annualSumFlow():
     """credit `_ttmSum` 가 annualSumFlow 위임."""
     from dartlab.core.utils.flow import annualSumFlow
-    from dartlab.credit.metrics import _ttmSum
+    from dartlab.credit.scoring.metrics import _ttmSum
 
     a = _ttmSum(_DATA_FULL, "2025Q4", _PERIODS)
     b = annualSumFlow(_DATA_FULL, "2025Q4", _PERIODS, withFallback=False)
