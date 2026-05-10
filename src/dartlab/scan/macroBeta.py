@@ -21,7 +21,7 @@ from dartlab.core.polarsUtil import isEmptyDf
 log = logging.getLogger(__name__)
 
 
-def scan_macroBeta(
+def scanMacroBeta(
     *,
     stockCode: str | None = None,
 ) -> pl.DataFrame:
@@ -352,7 +352,7 @@ def _emptyDf() -> pl.DataFrame:
     Returns
     -------
     pl.DataFrame
-        scan_macroBeta 스키마와 동일한 빈 DataFrame
+        scanMacroBeta 스키마와 동일한 빈 DataFrame
         (stockCode, companyName, sector, gdpBeta, rateBeta, fxBeta, rSquared, nObs, confidence).
     """
     return pl.DataFrame(

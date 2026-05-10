@@ -122,6 +122,13 @@ ARG_ALLOWLIST: frozenset[str] = frozenset(
         "df",
         "lf",
         "id",
+        # Kalman filter 수학 표준 표기 (Rauch-Tung-Striebel smoother 등)
+        "P_pred",
+        "P_filt",
+        "a_pred",
+        "a_filt",
+        "P_smooth",
+        "a_smooth",
     }
 )
 
@@ -154,6 +161,54 @@ METHOD_NAME_ALLOWLIST: frozenset[str] = frozenset(
         "_repr_latex_",
         "_repr_jpeg_",
         "_repr_svg_",
+        "_ipython_key_completions_",  # IPython tab completion
+        "_ipythonKeyCompletions_",  # camelCase 변환 alias
+        # Python http.server BaseHTTPRequestHandler 표준 메서드
+        "do_GET",
+        "do_POST",
+        "do_PUT",
+        "do_DELETE",
+        "do_HEAD",
+        "do_OPTIONS",
+        "log_message",
+    }
+)
+
+# Python keyword 회피용 trailing underscore 매개변수 — 변경 불가능
+ARG_KEYWORD_SUFFIX_ALLOWLIST: frozenset[str] = frozenset(
+    {
+        "open_",
+        "close_",
+        "type_",
+        "class_",
+        "id_",
+        "from_",
+        "import_",
+        "global_",
+        "lambda_",
+        "yield_",
+        "async_",
+        "await_",
+        "is_",
+        "and_",
+        "or_",
+        "not_",
+        "if_",
+        "else_",
+        "elif_",
+        "for_",
+        "while_",
+        "return_",
+        "raise_",
+        "try_",
+        "except_",
+        "finally_",
+        "with_",
+        "as_",
+        "pass_",
+        "break_",
+        "continue_",
+        "del_",
     }
 )
 
@@ -422,6 +477,8 @@ def _check_naming(ident: Identifier) -> str | None:
     if kind == "arg":
         if name in ARG_ALLOWLIST:
             return None
+        if name in ARG_KEYWORD_SUFFIX_ALLOWLIST:
+            return None
         # trailing underscore 매개변수 (is_/in_/for_) — Python keyword 회피용, 보존 허용
         import keyword
 
@@ -447,11 +504,17 @@ def _check_naming(ident: Identifier) -> str | None:
     if kind in ("func", "asyncfunc"):
         if CAMEL_RE.match(name):
             return None
+        # PascalCase 함수 = factory 패턴 인정 (Company(), Macro() 같은 callable factory)
+        if PASCAL_RE.match(name):
+            return None
         return "naming/func-snake"
 
     if kind == "var":
         # 모듈 변수: camelCase 허용 (ALL_CAPS 는 위에서 면제됨)
         if CAMEL_RE.match(name):
+            return None
+        # PascalCase 모듈 변수 = TypeAlias 또는 클래스 alias 인정 (Pydantic Literal 타입 등)
+        if PASCAL_RE.match(name):
             return None
         return "naming/var-snake"
 

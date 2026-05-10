@@ -565,7 +565,7 @@ class Company:
         self._cache[cacheKey] = result
         return result
 
-    def _call_notesDetail(self, keyword: str, period: str = "y") -> Any:
+    def _callNotesDetail(self, keyword: str, period: str = "y") -> Any:
         """notesDetail 호출 (키워드 + 기간별 캐싱).
 
         Args:
