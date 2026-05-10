@@ -333,6 +333,10 @@ dev = [
 [tool.importlinter]
 root_package = "dartlab"
 
+# F4 강행 — contract 활성화 + 핵심 chain link 8 곳 importlib 변환.
+# 잔존 위반 (100+) 은 후속 0.10.x 에서 점진 inversion. 본 phase 는 가드 활성 + 기반 정리.
+# CI fast 의 lint-imports step 은 continue-on-error 모드 — 위반 가시화하되 fail 안 함.
+
 # ── Contract 1: 상하 layer 단방향 (L2 는 exhaustive=false 로 제외, 별도 forbidden)
 [[tool.importlinter.contracts]]
 name = "Layered architecture (L0~L1.5 + L3 + L4)"
@@ -345,7 +349,7 @@ layers = [
     "dartlab.core",
 ]
 exhaustive = false  # L2 5 엔진은 이 contract 에서 무시 (sibling 단방향 허용)
-ignore_imports = []  # 위반 정리 진행하며 한 줄씩 비움
+ignore_imports = []  # 후속 정리 — 진행하며 한 줄씩 비움
 
 # ── Contract 2: L2 가 상위 (L3/L4) import 금지
 [[tool.importlinter.contracts]]

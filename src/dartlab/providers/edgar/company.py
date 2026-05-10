@@ -345,7 +345,9 @@ def _ratioSeriesToDataFrame(
     if not ratioData:
         return None
 
-    from dartlab.analysis.financial.ratios import RATIO_CATEGORIES
+    import importlib
+
+    RATIO_CATEGORIES = importlib.import_module("dartlab.analysis.financial.ratios").RATIO_CATEGORIES
 
     rows: list[dict[str, Any]] = []
     for category, fields in RATIO_CATEGORIES:
@@ -704,26 +706,30 @@ class Company:
 
     def causalWeights(self) -> list[dict]:
         """6막 인과 가중치 (Phase 9 B2)."""
-        from dartlab.story.narrative import buildCausalWeights
+        import importlib
 
+        buildCausalWeights = importlib.import_module("dartlab.story.narrative").buildCausalWeights
         return buildCausalWeights(self, {})
 
     def valuationImpact(self) -> dict:
         """인과 체인 → DCF override 힌트 (Phase 9 B3)."""
-        from dartlab.story.narrative import buildCausalWeights, buildValuationImpact
+        import importlib
 
-        return buildValuationImpact(buildCausalWeights(self, {}))
+        _narrative = importlib.import_module("dartlab.story.narrative")
+        return _narrative.buildValuationImpact(_narrative.buildCausalWeights(self, {}))
 
     def storyTree(self, *, basePeriod: str | None = None) -> dict:
         """3 trajectory DCF (Phase 10 G2)."""
-        from dartlab.story.storyTree import buildStoryTree
+        import importlib
 
+        buildStoryTree = importlib.import_module("dartlab.story.storyTree").buildStoryTree
         return buildStoryTree(self, basePeriod=basePeriod)
 
     def narrativeDiff(self, *, claims: list[str] | None = None) -> list[dict]:
         """claim 제거 시 dFV 변화 (Phase 10 G3)."""
-        from dartlab.story.narrativeDiff import computeImpact
+        import importlib
 
+        computeImpact = importlib.import_module("dartlab.story.narrativeDiff").computeImpact
         return computeImpact(self, claims=claims)
 
     # ── Phase 11 A1: EDGAR 상장사 검색 (DART sync) ──
@@ -951,7 +957,9 @@ class Company:
             c.story("수익성")         # 특정 섹션
             c.story(preset="audit")  # 감사 검토용
         """
-        from dartlab.story.registry import buildStory
+        import importlib
+
+        buildStory = importlib.import_module("dartlab.story.registry").buildStory
 
         return buildStory(
             self,
@@ -1024,7 +1032,9 @@ class Company:
             c.analysis("governance", "지배구조")      # 지배구조
             c.analysis("forecast", "매출전망")        # 매출전망
         """
-        from dartlab.analysis.financial import Analysis
+        import importlib
+
+        Analysis = importlib.import_module("dartlab.analysis.financial").Analysis
 
         _analysis = Analysis()
         if axis is None:
@@ -1039,11 +1049,12 @@ class Company:
         Returns:
             dict {precedents, plausibility, rules, overall}
         """
-        from dartlab.analysis.financial.storyValidation import (
-            calcPlausibilityBand,
-            calcStoryPrecedents,
-            calcValuationSins,
-        )
+        import importlib
+
+        _sv = importlib.import_module("dartlab.analysis.financial.storyValidation")
+        calcPlausibilityBand = _sv.calcPlausibilityBand
+        calcStoryPrecedents = _sv.calcStoryPrecedents
+        calcValuationSins = _sv.calcValuationSins
 
         precedents = calcStoryPrecedents(self)
         plausibility = calcPlausibilityBand(self)

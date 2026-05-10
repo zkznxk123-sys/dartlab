@@ -104,7 +104,9 @@ def _historyTest(company) -> TestResult:
 def _experienceTest(company) -> TestResult:
     """같은 업종 기업 3개 이상이 비교 가능한지. 동업 전례 확인."""
     try:
-        from dartlab.scan.extended import calcPeerPosition
+        import importlib
+
+        calcPeerPosition = importlib.import_module("dartlab.scan.extended").calcPeerPosition
 
         peer = calcPeerPosition(company)
         total = peer.get("total_stocks", 0) if peer else 0

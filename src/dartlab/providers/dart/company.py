@@ -2244,7 +2244,9 @@ class Company:
             Freshness:
                 finance/report 데이터의 c.update() 시점.
         """
-        from dartlab.story.registry import buildStory
+        import importlib
+
+        buildStory = importlib.import_module("dartlab.story.registry").buildStory
 
         return buildStory(
             self,
@@ -3920,7 +3922,9 @@ class Company:
             Freshness:
                 finance 시계열 시점.
         """
-        from dartlab.story.narrative import buildCausalWeights
+        import importlib
+
+        buildCausalWeights = importlib.import_module("dartlab.story.narrative").buildCausalWeights
 
         return buildCausalWeights(self, {})
 
@@ -3946,7 +3950,11 @@ class Company:
             Freshness:
                 story 인과 체인 기준 — finance 데이터 시점.
         """
-        from dartlab.story.narrative import buildCausalWeights, buildValuationImpact
+        import importlib
+
+        _narrative = importlib.import_module("dartlab.story.narrative")
+        buildCausalWeights = _narrative.buildCausalWeights
+        buildValuationImpact = _narrative.buildValuationImpact
 
         chains = buildCausalWeights(self, {})
         return buildValuationImpact(chains)
@@ -3973,7 +3981,9 @@ class Company:
             Freshness:
                 finance 시계열 시점.
         """
-        from dartlab.story.storyTree import buildStoryTree
+        import importlib
+
+        buildStoryTree = importlib.import_module("dartlab.story.storyTree").buildStoryTree
 
         return buildStoryTree(self, basePeriod=basePeriod)
 
@@ -4000,7 +4010,9 @@ class Company:
             Freshness:
                 story 인과 체인 시점.
         """
-        from dartlab.story.narrativeDiff import computeImpact
+        import importlib
+
+        computeImpact = importlib.import_module("dartlab.story.narrativeDiff").computeImpact
 
         return computeImpact(self, claims=claims)
 

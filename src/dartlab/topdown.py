@@ -128,7 +128,9 @@ def _screenSector(sector: str, market: str, topN: int, asOf: str | None) -> list
     scan API 변동에 견디도록 try-except로 감싸고 빈 리스트 fallback.
     """
     try:
-        from dartlab.scan import Scan
+        import importlib
+
+        Scan = importlib.import_module("dartlab.scan").Scan
 
         scan = Scan()
         # 수익성 축에서 전종목 → 섹터 필터 → 상위 N
