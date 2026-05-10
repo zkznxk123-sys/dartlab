@@ -45,7 +45,7 @@ def _saveToken(data: dict[str, Any]) -> None:
     expires_in = data.get("expires_in")
     if isinstance(expires_in, (int, float)):
         data["expires_at"] = time.time() + float(expires_in)
-    getSecretStore().set_json(_TOKEN_SECRET_NAME, data)
+    getSecretStore().setJson(_TOKEN_SECRET_NAME, data)
     TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
     tmp = TOKEN_PATH.with_suffix(TOKEN_PATH.suffix + ".tmp")
     tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -57,7 +57,7 @@ def loadToken() -> dict[str, Any] | None:
     env_token = os.environ.get("DARTLAB_OAUTH_TOKEN")
     if env_token:
         return {"access_token": env_token, "source": "env"}
-    data = getSecretStore().get_json(_TOKEN_SECRET_NAME)
+    data = getSecretStore().getJson(_TOKEN_SECRET_NAME)
     if isinstance(data, dict):
         return data
     for path in _tokenCandidates():
@@ -68,7 +68,7 @@ def loadToken() -> dict[str, Any] | None:
             continue
         data = json.loads(raw)
         if isinstance(data, dict):
-            getSecretStore().set_json(_TOKEN_SECRET_NAME, data)
+            getSecretStore().setJson(_TOKEN_SECRET_NAME, data)
             with suppress(OSError):
                 path.unlink()
             return data

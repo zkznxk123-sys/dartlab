@@ -120,11 +120,14 @@ class CredentialManager:
 
     def snapshot(self) -> EnvironmentSnapshot:
         """현재 전체 환경 상태를 스냅샷으로 반환."""
+        from importlib.metadata import PackageNotFoundError
+        from importlib.metadata import version as _pkgVersion
+
         from dartlab import config
 
         try:
-            from dartlab import __version__
-        except ImportError:
+            __version__ = _pkgVersion("dartlab")
+        except PackageNotFoundError:
             __version__ = "unknown"
 
         dartStatus = self.getCredential("dart_api_key")
