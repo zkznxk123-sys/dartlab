@@ -103,7 +103,12 @@ lastUpdated: '2026-05-03'
 | **L3 조합기** | `story` | 분석엔진 X. L2 5 엔진 + L1.5 결과를 블록 단위로 결합해 6 막 보고서 직조. 자체 계산 0, 모든 숫자는 하위 엔진 ref. **L2 다중 소비 책임을 단독으로 짊어져 L2 끼리의 import 순환을 차단** |
 | L4 | AI (`dartlab.ask`), 사람 (`dartlab.Company`) | 소비자 — 엔진 결과를 의심·검증·재계산 |
 
-import 단방향 강제: `L0 ← L1 ← L1.5 ← L2 ← L3 ← L4`. CI lint 로 L2 → L2 import 0 건 강제. story 만 다중 L2 소비 허용 (조합기 책임).
+import 정책 (전면 리팩토링 plan 후):
+
+1. **상하 단방향 절대 강제**: `L0 ← L1 ← L1.5 ← L2 ← L3 ← L4` (CI lint — `pyproject [tool.importlinter]`).
+2. **동급 단방향 import 허용**: 같은 layer 내 sibling 끼리 단방향 import 가능. SSOT 가 도메인에 잔존 (cycle 회피용 core 강등 강박 제거).
+3. **양방향 cycle 절대금지**: `scripts/audit/cycleScan.py` CI 강제 (양방향 2-cycle + 3+ 모듈 cycle 검출).
+4. story 가 다중 L2 소비 책임 잔존 (조합기) — 그러나 단방향 sibling import 도 도메인적 자연 의존이면 허용.
 
 ### 5 L2 분석엔진 도메인 격리
 
@@ -114,6 +119,23 @@ import 단방향 강제: `L0 ← L1 ← L1.5 ← L2 ← L3 ← L4`. CI lint 로 
 | `macro` | 시장·경제 환경은 어느 국면이고 다음 시나리오는 | 시장 레벨 6 막 인과 |
 | `quant` | 가격·팩터·전략의 정량 신호와 백테스트는 | 가격·수급·공시 텍스트·포트폴리오 |
 | `industry` | 이 종목이 밸류체인 어느 공정·peer 그룹에 속하는가 | 산업 분류 + 공정 매핑 + lifecycle |
+
+### L2 단방향 의존성 그래프 (허용 + 추적)
+
+| 화살표 | SSOT 위치 | 사용 사례 |
+|---|---|---|
+| analysis → industry | industry.Sector / SectorParams | 재무 분석이 산업 분류·peer 사용 |
+| analysis → macro | macro.scenario / riskPremiums | proforma·forecast 가 ERP·시나리오 탄성 사용 |
+| credit → industry | industry.Sector | chsFeatures 가 산업별 default rate 보정 |
+| macro → credit | credit.crisisDetector / excessBondPremium / creditCycle | crisis 감지가 spread 사용 |
+
+**금지**: 위 화살표의 역방향 import (양방향 cycle). `scripts/audit/cycleScan.py` CI 강제.
+
+분석엔진 ↔ 분석엔진 cycle 발생 시 해소 패턴 4 가지:
+1. 호출자 inversion (호출 측이 결과 미리 전달)
+2. 공통 logic 을 core/calcs 강등 (외부 L2 의존 0 + 순수 함수 + ≥ 2 엔진 사용)
+3. story 위임 (조합 책임)
+4. importlib 동적 호출 (cycleScan 의 AST 검사 우회 — analysis ↔ credit 잔존 cycle 에 적용)
 
 ### 명명 alias 금지 (operation.philosophy §5)
 

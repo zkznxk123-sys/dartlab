@@ -87,8 +87,10 @@ lastUpdated: '2026-05-03'
 - AI 역할 — Guide 에 명시한다 기준을 확인한다.
 - Returns 작성 규칙 — 키 + 타입 + 단위를 명시한다 기준을 확인한다.
 - 3. CAPABILITIES — 단일 진실의 원천으로 간다 기준을 확인한다.
-- 기존 코드의 네이밍 패턴을 따른다.
-- 이동된 기존 snake_case 는 하위호환 유지 (shim).
+- 0.10 부터 snake_case 절대금지. 모든 식별자 (함수·메서드·매개변수·모듈변수·**파일명**) camelCase. 클래스 PascalCase. 모듈 상수 ALL_CAPS.
+- 매개변수명은 `core/naming/aliases.json` 표준 사전 준수 (의미 같으면 같은 이름 — AI 추론 단순화). 신규 의미는 PR 로 사전 추가 후 사용.
+- 시그니처 단순화: 인자 5 개 초과 함수 → dataclass 묶기 권고.
+- 파일명 (`.py`) 도 camelCase. pytest discovery 패턴: `test_*.py` + `test*.py` (둘 다 허용).
 - **최신 먼저 역순** — 데이터 정렬 기본값.
 - `AI role:` 또는 `AI 역할:` 로 시작하는 짧은 문장을 둔다.
 
