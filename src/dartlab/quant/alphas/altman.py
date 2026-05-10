@@ -26,7 +26,7 @@ import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import extractAccount, loadScanParquet
-from dartlab.quant.factorBuild import _fetchYearEndMarketcaps, _latestYear
+from dartlab.quant.factor.build import _fetchYearEndMarketcaps, _latestYear
 
 log = logging.getLogger(__name__)
 

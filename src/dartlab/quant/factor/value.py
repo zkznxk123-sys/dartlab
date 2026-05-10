@@ -32,7 +32,7 @@ from dartlab.quant._helpers import (
     ohlcvToArrays,
     resolve_market,
 )
-from dartlab.quant.qualityFactor import _isFinancial
+from dartlab.quant.factor.quality import _isFinancial
 
 log = logging.getLogger(__name__)
 

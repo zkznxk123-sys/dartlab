@@ -149,7 +149,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="risk",
     ),
     "factor": _AxisEntry(
-        module="dartlab.quant.factor",
+        module="dartlab.quant.factor.calc",
         fn="decomposeFactor",
         label="팩터",
         description="Fama-French 5 + q-factor 분해 (MKT/SMB/HML/RMW/CMA)",
@@ -207,7 +207,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="fundamental",
     ),
     "quality": _AxisEntry(
-        module="dartlab.quant.qualityFactor",
+        module="dartlab.quant.factor.quality",
         fn="calcQuality",
         label="퀄리티",
         description="Asness 퀄리티 팩터: 수익성+안전성+성장성 복합",
@@ -215,7 +215,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="fundamental",
     ),
     "value": _AxisEntry(
-        module="dartlab.quant.valueFactor",
+        module="dartlab.quant.factor.value",
         fn="calcValue",
         label="가치",
         description="가치 신호: PBR/PER/PSR vs 가격 모멘텀",
@@ -273,7 +273,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── F: 횡단면 (crossSection) — 시장 레벨 ─────────────
     "ranking": _AxisEntry(
-        module="dartlab.quant.ranking",
+        module="dartlab.quant.factor.ranking",
         fn="calcRanking",
         label="순위",
         description="멀티팩터 복합 순위 (모멘텀+가치+퀄리티+리스크)",

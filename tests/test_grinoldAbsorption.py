@@ -148,7 +148,7 @@ def test_rollingTimeSeriesZscore_trend():
 @pytest.mark.unit
 def test_factor_result_has_ir_keys():
     """decomposeFactor 결과 dict 에 Grinold IR 키 존재 (스키마 회귀)."""
-    from dartlab.quant.factor import _multiOls
+    from dartlab.quant.factor.calc import _multiOls
 
     # OLS 결과에 residuals 포함 확인 (IR 계산 원료)
     np.random.seed(0)

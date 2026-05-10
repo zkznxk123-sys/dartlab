@@ -22,7 +22,7 @@ import numpy as np
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated
 from dartlab.quant._helpers import loadScanParquet
-from dartlab.quant.factorBuild import _buildUniverseMetrics, _latestYear
+from dartlab.quant.factor.build import _buildUniverseMetrics, _latestYear
 
 log = logging.getLogger(__name__)
 

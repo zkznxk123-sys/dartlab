@@ -41,7 +41,7 @@ def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     benchmarkMode = kwargs.pop("benchmarkMode", "market")
     result: dict = {"stockCode": stockCode, "market": market}
 
-    from dartlab.quant.factor import decomposeFactor
+    from dartlab.quant.factor.calc import decomposeFactor
 
     fr = decomposeFactor(stockCode, market=market, benchmark=benchmark, benchmarkMode=benchmarkMode)
     if "error" in fr:

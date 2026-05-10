@@ -82,7 +82,7 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
 
     # 진짜 횡단면 팩터 시계열 빌드/로드
     if market == "KR":
-        from dartlab.quant.factorBuild import buildFactors
+        from dartlab.quant.factor.build import buildFactors
 
         factors = buildFactors(market)
     else:
@@ -508,7 +508,7 @@ def calcFactorTearSheet(
             notes : str — 데이터 source 안내
 
     Examples:
-        >>> from dartlab.quant.factor import calcFactorTearSheet
+        >>> from dartlab.quant.factor.calc import calcFactorTearSheet
         >>> ts = calcFactorTearSheet("smb")
         >>> print(ts["longShortSharpe"], ts["interpretation"])
         0.85 약한 alpha (소형주 프리미엄)
@@ -524,7 +524,7 @@ def calcFactorTearSheet(
     if fname not in {"smb", "hml", "rmw", "cma"}:
         raise ValueError(f"factorName 알 수 없음: {factorName!r} — 허용: smb, hml, rmw, cma")
 
-    from dartlab.quant.factorBuild import buildFactors
+    from dartlab.quant.factor.build import buildFactors
 
     fb = buildFactors(market)
     if fb is None:
@@ -642,7 +642,7 @@ def calcMultiFactorRisk(stockCode: str, *, market: str = "auto") -> dict | None:
             interpretation : str — 정성 평가
 
     Examples:
-        >>> from dartlab.quant.factor import calcMultiFactorRisk
+        >>> from dartlab.quant.factor.calc import calcMultiFactorRisk
         >>> r = calcMultiFactorRisk("005930")
         >>> print(r["systematicShare"], r["interpretation"])
 
@@ -655,7 +655,7 @@ def calcMultiFactorRisk(stockCode: str, *, market: str = "auto") -> dict | None:
     if not decomp or "error" in decomp:
         return decomp
 
-    from dartlab.quant.factorBuild import buildFactors
+    from dartlab.quant.factor.build import buildFactors
 
     actual_market = decomp.get("market", market)
     fb = buildFactors(actual_market)
@@ -852,7 +852,7 @@ def calcFactorIC(
             notes : str — 데이터 source
 
     Examples:
-        >>> from dartlab.quant.factor import calcFactorIC
+        >>> from dartlab.quant.factor.calc import calcFactorIC
         >>> ic = calcFactorIC("value", horizon=5)
         >>> print(ic["icir"], ic["interpretation"])
         0.42 중간 예측력 (value)
@@ -879,7 +879,7 @@ def calcFactorIC(
         from dartlab.core.cross.scanBridge import extractAnnualConsolidated
         from dartlab.gather._hfBulk import loadFiltered
         from dartlab.quant._helpers import loadScanParquet
-        from dartlab.quant.factorBuild import _buildUniverseMetrics, _latestYear
+        from dartlab.quant.factor.build import _buildUniverseMetrics, _latestYear
     except Exception as exc:  # noqa: BLE001
         log.warning("calcFactorIC import 실패: %s", type(exc).__name__)
         return None

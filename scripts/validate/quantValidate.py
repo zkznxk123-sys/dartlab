@@ -197,7 +197,7 @@ def phase2a_blackLitterman():
 
 
 def phase2a_nco():
-    from dartlab.quant.nco import optimizeNCO
+    from dartlab.quant.factor.nco import optimizeNCO
 
     rng = np.random.default_rng(42)
     n = 12
@@ -216,7 +216,7 @@ def phase2a_nco():
 
 
 def phase2a_shrinkage():
-    from dartlab.quant.shrinkage import denoiseRMT, shrinkConstantCorrelation, shrinkOAS
+    from dartlab.quant.factor.shrinkage import denoiseRMT, shrinkConstantCorrelation, shrinkOAS
 
     rng = np.random.default_rng(42)
     R = rng.standard_normal((400, 10))
@@ -296,7 +296,7 @@ def phase2a_johansen():
 
 
 def phase2a_multipleTesting():
-    from dartlab.quant.multipleTesting import haircutSharpe, realityCheck
+    from dartlab.quant.factor.multipleTesting import haircutSharpe, realityCheck
 
     r = haircutSharpe(sharpe=1.5, nTests=20, nObs=1000, method="bonferroni")
     assert "haircutSharpe" in r, "haircutSharpe missing"

@@ -1280,7 +1280,7 @@ def _buildQuantTechnicalBlocks(company, keys, basePeriod, safe: Callable, need: 
     from dartlab.quant.alphas.piotroski import calcPiotroskiFactor
     from dartlab.quant.alphas.qFactor import calcQFactor
     from dartlab.quant.alphas.qmj import calcQMJ
-    from dartlab.quant.factor import calcFactorICAll, calcFactorTearSheetAll, calcMultiFactorRisk
+    from dartlab.quant.factor.calc import calcFactorICAll, calcFactorTearSheetAll, calcMultiFactorRisk
     from dartlab.story.narrate import (
         narrateAccruals,
         narrateAltman,

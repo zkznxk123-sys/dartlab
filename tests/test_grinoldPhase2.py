@@ -12,7 +12,7 @@ import pytest
 
 @pytest.mark.unit
 def test_calcCrossSectionIC_perfect():
-    from dartlab.quant.ranking import calcCrossSectionIC
+    from dartlab.quant.factor.ranking import calcCrossSectionIC
 
     scores = {f"S{i}": float(i) for i in range(20)}
     rets = {f"S{i}": float(i) * 2 for i in range(20)}
@@ -25,7 +25,7 @@ def test_calcCrossSectionIC_perfect():
 
 @pytest.mark.unit
 def test_calcCrossSectionIC_small_sample_nan():
-    from dartlab.quant.ranking import calcCrossSectionIC
+    from dartlab.quant.factor.ranking import calcCrossSectionIC
 
     scores = {"A": 1.0, "B": 2.0}
     rets = {"A": 1.0, "B": 2.0}
@@ -36,7 +36,7 @@ def test_calcCrossSectionIC_small_sample_nan():
 
 @pytest.mark.unit
 def test_calcCrossSectionIC_disjoint_keys():
-    from dartlab.quant.ranking import calcCrossSectionIC
+    from dartlab.quant.factor.ranking import calcCrossSectionIC
 
     r = calcCrossSectionIC({"A": 1.0}, {"B": 2.0})
     assert r["n_stocks"] == 0
@@ -44,7 +44,7 @@ def test_calcCrossSectionIC_disjoint_keys():
 
 @pytest.mark.unit
 def test_icTimeSeries_icir():
-    from dartlab.quant.ranking import icTimeSeries
+    from dartlab.quant.factor.ranking import icTimeSeries
 
     rng = np.random.default_rng(0)
     fss, frs = [], []
@@ -63,7 +63,7 @@ def test_icTimeSeries_icir():
 
 @pytest.mark.unit
 def test_decomposeRisk_pure_systematic():
-    from dartlab.quant.factor import decomposeRisk
+    from dartlab.quant.factor.calc import decomposeRisk
 
     rng = np.random.default_rng(1)
     T = 252
@@ -77,7 +77,7 @@ def test_decomposeRisk_pure_systematic():
 
 @pytest.mark.unit
 def test_decomposeRisk_trackingError_is_residual():
-    from dartlab.quant.factor import decomposeRisk
+    from dartlab.quant.factor.calc import decomposeRisk
 
     rng = np.random.default_rng(2)
     T = 100
@@ -91,7 +91,7 @@ def test_decomposeRisk_trackingError_is_residual():
 
 @pytest.mark.unit
 def test_residualAlphaIR_zero_mean():
-    from dartlab.quant.factor import residualAlphaIR
+    from dartlab.quant.factor.calc import residualAlphaIR
 
     rng = np.random.default_rng(3)
     eps = rng.normal(0, 0.02, 252)
@@ -101,7 +101,7 @@ def test_residualAlphaIR_zero_mean():
 
 @pytest.mark.unit
 def test_residualRiskForecast_basic():
-    from dartlab.quant.factor import residualRiskForecast
+    from dartlab.quant.factor.calc import residualRiskForecast
 
     rng = np.random.default_rng(4)
     eps = rng.normal(0, 0.02, 200)
