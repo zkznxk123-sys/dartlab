@@ -1,0 +1,34 @@
+{
+  "$schema": "https://eddmpython.github.io/dartlab/schemas/engine-manifest-v1.json",
+  "name": "credit",
+  "version": "0.1.0",
+  "role": "단일 기업 신용위험 7 축 + dCR 등급",
+  "layer": "L2",
+  "dependencies": {
+    "allowed": [
+      "dartlab.core",
+      "dartlab.gather",
+      "dartlab.scan",
+      "dartlab.industry"
+    ],
+    "forbidden": [
+      "dartlab.story",
+      "dartlab.ai",
+      "dartlab.company"
+    ],
+    "note": "동급 L2 단방향 import 허용. 양방향 cycle 절대금지."
+  },
+  "examples": [
+    "scorecard",
+    "merton",
+    "survival",
+    "crisisDetector"
+  ],
+  "stage": "production",
+  "consumers": [
+    "dartlab.story",
+    "dartlab.ai",
+    "dartlab.Company"
+  ],
+  "lastUpdated": "2026-05-10"
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://eddmpython.github.io/dartlab/schemas/engine-manifest-v1.json",
+  "name": "industry",
+  "version": "0.1.0",
+  "role": "산업 분류 + 공정 매핑 + lifecycle",
+  "layer": "L2",
+  "dependencies": {
+    "allowed": [
+      "dartlab.core",
+      "dartlab.gather",
+      "dartlab.scan"
+    ],
+    "forbidden": [
+      "dartlab.story",
+      "dartlab.ai",
+      "dartlab.company"
+    ],
+    "note": "동급 L2 단방향 import 허용. 양방향 cycle 절대금지."
+  },
+  "examples": [
+    "classify",
+    "lifecycle",
+    "sectorParams",
+    "taxonomy"
+  ],
+  "stage": "production",
+  "consumers": [
+    "dartlab.story",
+    "dartlab.ai",
+    "dartlab.Company"
+  ],
+  "lastUpdated": "2026-05-10"
+}
