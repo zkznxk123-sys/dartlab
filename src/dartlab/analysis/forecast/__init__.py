@@ -14,7 +14,14 @@ import math
 import random
 from dataclasses import dataclass, field
 
-from dartlab.core.cross.scenario import (
+from dartlab.core.utils.extract import (
+    getAnnualValues,
+    getLatest,
+    getTTM,
+)
+from dartlab.core.utils.fmt import fmtBig, fmtPrice
+from dartlab.industry import SectorParams
+from dartlab.macro.scenario import (
     BASELINE_FX,
     BASELINE_RATE,
     DEFAULT_ELASTICITY,
@@ -23,13 +30,6 @@ from dartlab.core.cross.scenario import (
     SectorElasticity,
     getElasticity,
 )
-from dartlab.core.utils.extract import (
-    getAnnualValues,
-    getLatest,
-    getTTM,
-)
-from dartlab.core.utils.fmt import fmtBig, fmtPrice
-from dartlab.industry import SectorParams
 
 # ══════════════════════════════════════
 # Layer 3: 기업 시뮬레이션

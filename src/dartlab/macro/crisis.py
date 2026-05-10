@@ -323,7 +323,7 @@ def _crisisMinsky(data: dict, credit_gap_val, hy_current, vix, dxy_current) -> d
 def _crisisDalioCaseMatch(data: dict, credit_gap_val) -> list | None:
     """Dalio Part 2 detail case matching (Weimar/GD/Subprime)."""
     try:
-        from dartlab.core.cross.dalioCaseMatch import matchDalioDetailCase
+        from dartlab.macro.dalioCaseMatch import matchDalioDetailCase
 
         case_state = {
             "totalDebtToGdp": data.get("total_debt_to_gdp"),
@@ -342,7 +342,7 @@ def _crisisDalioCaseMatch(data: dict, credit_gap_val) -> list | None:
 def _crisisDalio48Match(data: dict, credit_gap_val) -> list | None:
     """Dalio Part 3 — 48 case compendium matching."""
     try:
-        from dartlab.core.cross.dalio48Match import match48Cases
+        from dartlab.macro.dalio48Match import match48Cases
 
         state_48 = {
             "peakDebtToGdp": data.get("total_debt_to_gdp"),

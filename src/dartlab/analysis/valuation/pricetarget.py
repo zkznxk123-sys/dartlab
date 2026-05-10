@@ -18,14 +18,14 @@ from dartlab.analysis.financial.proforma import (
     extract_historical_ratios,
 )
 from dartlab.analysis.forecast.prediction import adjustProbabilities
-from dartlab.core.cross.scenario import (
+from dartlab.core.utils.extract import getLatest, getTTM
+from dartlab.macro.scenario import (
     PRESET_SCENARIOS,
     MacroScenario,
     SectorElasticity,
     getElasticity,
     getNoiseSigma,
 )
-from dartlab.core.utils.extract import getLatest, getTTM
 
 if TYPE_CHECKING:
     from dartlab.analysis.financial.proforma import ProFormaResult

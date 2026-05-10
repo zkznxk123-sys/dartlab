@@ -124,7 +124,7 @@ def collectSignals(company, *, usePredictionAxis: bool = False) -> ContextSignal
 
     # 4. sector 경기민감도
     try:
-        from dartlab.core.cross.scenario import getElasticity as get_elasticity
+        from dartlab.macro.scenario import getElasticity as get_elasticity
 
         sectorKey = None
         # sectorInfo dict에서 가져오기
