@@ -174,7 +174,7 @@ def _aggregateFinanceSnapshot() -> dict[str, Any] | None:
 
         _scanHelpers = importlib.import_module("dartlab.scan._helpers")
         _ensureScanData = _scanHelpers._ensureScanData
-        parse_num = _scanHelpers.parse_num
+        parseNumStr = _scanHelpers.parseNumStr
 
         scan_dir = _ensureScanData()
         path = scan_dir / "finance.parquet"
@@ -221,7 +221,7 @@ def _aggregateFinanceSnapshot() -> dict[str, Any] | None:
                 for nm in nms:
                     row = stock.filter(pl.col("account_nm") == nm)
                     if not row.is_empty():
-                        v = parse_num(row[field][0])
+                        v = parseNumStr(row[field][0])
                         if v is not None and v > 0:
                             total += v
                             count += 1

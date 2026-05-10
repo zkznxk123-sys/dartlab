@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import numpy as np
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 
 def _tailriskSeries(close: np.ndarray, window: int = 252) -> dict:
@@ -50,7 +51,7 @@ def calcTailrisk(
         - Sharpe: (annualReturn - riskFree) / volatility
         - annualReturn = mean(daily log return) × 252 (산술평균 연환산, CAGR 아님)
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음"}

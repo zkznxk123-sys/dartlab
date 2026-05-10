@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import numpy as np
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 
 def _volatilitySeries(close: np.ndarray, window: int = 20) -> dict:
@@ -57,7 +58,7 @@ def calcVolatility(
         series=True 시: _series = {realized_vol, garch_vol} 길이 N.
         forecast=True 시: forecastVar_h{H}, forecastVol_h{H} (annualized), forecastVolModel.
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음"}

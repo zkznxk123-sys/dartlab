@@ -6,7 +6,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan._helpers import parse_num
+from dartlab.scan._helpers import parseNumStr
 
 # ── 영업이익 ──
 
@@ -78,7 +78,7 @@ def _scanIcrFromMerged(scanPath: Path) -> dict[str, float]:
         for row in sub.iter_rows(named=True):
             aid = row.get("account_id", "")
             anm = row.get("account_nm", "")
-            val = parse_num(row.get("thstrm_amount"))
+            val = parseNumStr(row.get("thstrm_amount"))
             if val is None:
                 continue
             if (aid in OP_IDS or anm in OP_NMS) and opIncome is None:
@@ -133,7 +133,7 @@ def _scanIcrPerFile() -> dict[str, float]:
         for row in latest.iter_rows(named=True):
             aid = row.get("account_id", "")
             anm = row.get("account_nm", "")
-            val = parse_num(row.get("thstrm_amount"))
+            val = parseNumStr(row.get("thstrm_amount"))
             if val is None:
                 continue
             if (aid in OP_IDS or anm in OP_NMS) and opIncome is None:

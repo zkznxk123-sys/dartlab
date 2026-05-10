@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import numpy as np
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 
 def _momentumSeries(close: np.ndarray) -> dict:
@@ -45,7 +46,7 @@ def calcMomentum(stockCode: str, *, market: str = "auto", series: bool = False, 
         dict with momentum12_1, tsMomentum, highRatio52w, crashRisk.
         series=True 시 추가 키: _series = {ts12_1, ts6_1, ts_high52} (각 NDArray, 길이 N).
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음"}

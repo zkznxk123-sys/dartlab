@@ -39,7 +39,7 @@ def main() -> int:
 
     import polars as pl
 
-    from dartlab.scan._helpers import _ensureScanData, parse_num
+    from dartlab.scan._helpers import _ensureScanData, parseNumStr
 
     scan_dir = _ensureScanData()
     path = scan_dir / "finance.parquet"
@@ -79,7 +79,7 @@ def main() -> int:
         for nm in nms:
             r = df.filter(pl.col("account_nm") == nm)
             if not r.is_empty():
-                return parse_num(r[field][0])
+                return parseNumStr(r[field][0])
         return None
 
     rows = []

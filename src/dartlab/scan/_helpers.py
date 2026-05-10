@@ -260,7 +260,7 @@ def scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
     return pl.concat(unified).collect()
 
 
-from dartlab.core.utils.helpers import parseNumStr as parse_num  # noqa: E402 — SSOT re-export
+from dartlab.core.utils.helpers import parseNumStr  # noqa: E402
 
 
 def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_amount") -> float | None:
@@ -286,7 +286,7 @@ def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_
         aid = row.get("account_id", "")
         anm = row.get("account_nm", "")
         if aid in ids or anm in nms:
-            val = parse_num(row.get(amtCol))
+            val = parseNumStr(row.get(amtCol))
             if val is not None:
                 return val
     return None
@@ -472,7 +472,7 @@ def _scanFinanceFromMerged(
     for row in matched.iter_rows(named=True):
         code = row.get(scCol, "")
         if code and code not in result:
-            val = parse_num(row.get(amountCol))
+            val = parseNumStr(row.get(amountCol))
             if val is not None:
                 result[code] = val
 
@@ -608,7 +608,7 @@ def scanFinanceParquets(
         for row in latest.iter_rows(named=True):
             aid = row.get("account_id", "")
             anm = row.get("account_nm", "")
-            val = parse_num(row.get(amountCol))
+            val = parseNumStr(row.get(amountCol))
             if (aid in accountIds or anm in accountNms) and val is not None:
                 result[code] = val
                 break

@@ -18,7 +18,8 @@ import logging
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant.screen.dataAccess import extractAccount, loadScanParquet, resolve_market
+from dartlab.core.market import resolveMarket
+from dartlab.quant.screen.dataAccess import extractAccount, loadScanParquet
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     Returns:
         dict with qualityScore, profitabilityZ, safetyZ, grade, sector tag.
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
     if _isFinancial(stockCode):

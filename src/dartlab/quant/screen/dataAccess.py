@@ -9,10 +9,6 @@ from typing import Any
 log = logging.getLogger(__name__)
 
 
-# ── Market 감지 — core/market.py SSOT ────────────────────
-
-from dartlab.core.market import detectMarket as detect_market  # noqa: F401
-from dartlab.core.market import resolveMarket as resolve_market  # noqa: F401
 from dartlab.core.polarsUtil import isEmptyDf
 
 # ── 종목코드 컬럼 후보 SSOT ──────────────────────────────

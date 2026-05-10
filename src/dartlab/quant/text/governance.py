@@ -10,7 +10,8 @@ import logging
 
 import polars as pl
 
-from dartlab.quant.screen.dataAccess import loadScanParquet, resolve_market
+from dartlab.core.market import resolveMarket
+from dartlab.quant.screen.dataAccess import loadScanParquet
 
 log = logging.getLogger(__name__)
 
@@ -71,7 +72,7 @@ def calcGovernanceQuant(stockCode: str, *, market: str = "auto", **kwargs) -> di
         outsideDirectorRatio : float — 사외이사 비율 (%)
         availableData : list[str] — 사용된 데이터 목록
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
     sub_scores: dict[str, float | None] = {}
     available = []

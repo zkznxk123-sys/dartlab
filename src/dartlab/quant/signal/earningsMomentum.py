@@ -11,7 +11,8 @@ import numpy as np
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
-from dartlab.quant.screen.dataAccess import loadScanParquet, resolve_market
+from dartlab.core.market import resolveMarket
+from dartlab.quant.screen.dataAccess import loadScanParquet
 
 log = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ def calcEarnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         earningsTrend : str — "consistent_growth" | "mostly_growing" | "mostly_declining" | "mixed"
         opIncomeHistory : dict[str, float] — 연도별 영업이익 (원)
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
     lf = loadScanParquet("finance", market)

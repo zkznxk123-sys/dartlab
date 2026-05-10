@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import numpy as np
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 
 def _regimeSeries(close: np.ndarray) -> dict:
@@ -55,7 +56,7 @@ def calcRegime(stockCode: str, *, market: str = "auto", series: bool = False, **
         dict with regime, probability, trendSignal.
         series=True 시: _series = {state(int8 0/1/2), prob_bull(float)} 길이 N.
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음"}

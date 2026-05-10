@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import logging
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import loadDocsForStock, resolve_market
+from dartlab.quant.screen.dataAccess import loadDocsForStock
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ def calcSentiment(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
             period : str, score : float, pos : int, neg : int, words : int
         sentimentVerdict : str — "positive" | "negative" | "neutral"
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
     docs = loadDocsForStock(stockCode)

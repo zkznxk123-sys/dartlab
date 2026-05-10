@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import numpy as np
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 
 def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
@@ -36,7 +37,7 @@ def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         factorRSquared : float — 팩터 모델 R² (비율)
         residualVerdict : str — "positive_alpha" | "negative_alpha" | "neutral"
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     benchmark = kwargs.pop("benchmark", None)
     benchmarkMode = kwargs.pop("benchmarkMode", "market")
     result: dict = {"stockCode": stockCode, "market": market}

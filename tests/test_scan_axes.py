@@ -67,14 +67,14 @@ def test_debt_imports():
 
 
 def test_helpers_parse_num():
-    from dartlab.scan._helpers import parse_num
+    from dartlab.scan._helpers import parseNumStr
 
-    assert parse_num("1,234") == 1234.0
-    assert parse_num("-") is None
-    assert parse_num("") is None
-    assert parse_num(None) is None
-    assert parse_num(42) == 42.0
-    assert parse_num("3.14") == pytest.approx(3.14)
+    assert parseNumStr("1,234") == 1234.0
+    assert parseNumStr("-") is None
+    assert parseNumStr("") is None
+    assert parseNumStr(None) is None
+    assert parseNumStr(42) == 42.0
+    assert parseNumStr("3.14") == pytest.approx(3.14)
 
 
 # ── 데이터 의존 테스트 ────────────────────────────────────

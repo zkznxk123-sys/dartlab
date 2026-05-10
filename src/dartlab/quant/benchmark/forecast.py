@@ -17,8 +17,9 @@ from __future__ import annotations
 
 import numpy as np
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 _VALID_MODELS = ("naive", "ar1", "etsHolt", "theta")
 
@@ -356,7 +357,7 @@ def forecastReturns(
       (split conformal 단순화 — 정식 split 은 별도 fit/calib 파티션 필요).
     - 의존성 0 (numpy 만). statsmodels / scipy / sklearn import 금지.
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)
     if isEmptyDf(ohlcv):
         return {"error": f"{stockCode} 주가 데이터 없음", "stockCode": stockCode, "market": market}

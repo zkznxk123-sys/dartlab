@@ -13,45 +13,45 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-# ── 1. parse_num ──
+# ── 1. parseNumStr ──
 
 
 class TestParseNum:
     def test_int(self):
-        from dartlab.scan._helpers import parse_num
+        from dartlab.scan._helpers import parseNumStr
 
-        assert parse_num(42) == 42.0
+        assert parseNumStr(42) == 42.0
 
     def test_float(self):
-        from dartlab.scan._helpers import parse_num
+        from dartlab.scan._helpers import parseNumStr
 
-        assert parse_num(3.14) == 3.14
+        assert parseNumStr(3.14) == 3.14
 
     def test_string_number(self):
-        from dartlab.scan._helpers import parse_num
+        from dartlab.scan._helpers import parseNumStr
 
-        assert parse_num("1,234,567") == 1234567.0
+        assert parseNumStr("1,234,567") == 1234567.0
 
     def test_string_negative(self):
-        from dartlab.scan._helpers import parse_num
+        from dartlab.scan._helpers import parseNumStr
 
-        assert parse_num("-500") == -500.0
+        assert parseNumStr("-500") == -500.0
 
     def test_dash_returns_none(self):
-        from dartlab.scan._helpers import parse_num
+        from dartlab.scan._helpers import parseNumStr
 
-        assert parse_num("-") is None
+        assert parseNumStr("-") is None
 
     def test_empty_returns_none(self):
-        from dartlab.scan._helpers import parse_num
+        from dartlab.scan._helpers import parseNumStr
 
-        assert parse_num("") is None
-        assert parse_num(None) is None
+        assert parseNumStr("") is None
+        assert parseNumStr(None) is None
 
     def test_invalid_string(self):
-        from dartlab.scan._helpers import parse_num
+        from dartlab.scan._helpers import parseNumStr
 
-        assert parse_num("N/A") is None
+        assert parseNumStr("N/A") is None
 
 
 # ── 2. extractAccount ──

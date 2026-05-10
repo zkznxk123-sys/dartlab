@@ -9,7 +9,7 @@ import logging
 
 import numpy as np
 
-from dartlab.quant.screen.dataAccess import resolve_market
+from dartlab.core.market import resolveMarket
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def calcFlow(stockCode: str, *, market: str = "auto", series: bool = False, **kw
         series=True (KR only) 시: _series = {foreign_cum5, foreign_cum20, inst_cum5, inst_cum20}.
         US 면 _series = None.
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
 
     if market != "KR":
         result_us: dict = {

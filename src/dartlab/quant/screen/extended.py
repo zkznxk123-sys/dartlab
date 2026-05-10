@@ -17,7 +17,7 @@ from dartlab.core.polarsUtil import isEmptyDf
 # ── OHLCV 캐싱 헬퍼 ──
 
 
-def _fetchOHLCV(company: Any) -> pl.DataFrame | None:
+def _fetchOhlcv(company: Any) -> pl.DataFrame | None:
     """gather("price")로 OHLCV 수집 — Company._cache에 저장.
 
     모든 함수가 이 캐시를 공유하므로 네트워크 호출은 1회만 발생.
@@ -122,7 +122,7 @@ def calcTechnicalVerdict(company) -> dict | None:
     Returns:
         dict — verdict, score, rsi, adx, aboveSma20, aboveSma60, bbPosition, signals.
     """
-    ohlcv = _fetchOHLCV(company)
+    ohlcv = _fetchOhlcv(company)
     if isEmptyDf(ohlcv) or len(ohlcv) < 30:
         return None
 
@@ -151,7 +151,7 @@ def calcTechnicalSignals(company) -> dict | None:
     Returns:
         dict — signals, signalSummary, recentEvents.
     """
-    ohlcv = _fetchOHLCV(company)
+    ohlcv = _fetchOhlcv(company)
     if isEmptyDf(ohlcv) or len(ohlcv) < 60:
         return None
 
@@ -218,7 +218,7 @@ def calcMarketBeta(company) -> dict | None:
     Returns:
         dict — value, r2, capmExpected, relativeStrength, interpretation.
     """
-    ohlcv = _fetchOHLCV(company)
+    ohlcv = _fetchOhlcv(company)
     if isEmptyDf(ohlcv) or len(ohlcv) < 60:
         return None
 
@@ -282,7 +282,7 @@ def calcFundamentalDivergence(company, *, basePeriod: str | None = None) -> dict
             financialGrade = sc.get("overallGrade") or sc.get("grade")
 
     # 기술적 판단
-    ohlcv = _fetchOHLCV(company)
+    ohlcv = _fetchOhlcv(company)
     tv = None
     if ohlcv is not None and not ohlcv.is_empty() and len(ohlcv) >= 30:
         tv = technicalVerdict(
@@ -354,7 +354,7 @@ def calcMarketRisk(company) -> dict | None:
     Returns:
         dict — beta, atr, atrPercent, relativeStrength, volatilityGrade, price.
     """
-    ohlcv = _fetchOHLCV(company)
+    ohlcv = _fetchOhlcv(company)
     if isEmptyDf(ohlcv) or len(ohlcv) < 30:
         return None
 
@@ -412,7 +412,7 @@ def calcMarketAnalysisFlags(company) -> list[str]:
 
     flags: list[str] = []
 
-    ohlcv = _fetchOHLCV(company)
+    ohlcv = _fetchOhlcv(company)
     if isEmptyDf(ohlcv) or len(ohlcv) < 30:
         return flags
 
@@ -690,7 +690,7 @@ def calcStrategySnapshot(company) -> dict | None:
         dict {style_key: {sharpe, mdd, dsr, trades, entry_today, exit_today, status}}
         또는 None (데이터 부족).
     """
-    ohlcv = _fetchOHLCV(company)
+    ohlcv = _fetchOhlcv(company)
     if isEmptyDf(ohlcv) or len(ohlcv) < 60:
         return None
 
@@ -745,7 +745,7 @@ def calcActionableTargets(company, *, overrides: dict | None = None) -> dict | N
             confidence : str — low/medium/high
     """
     try:
-        ohlcv = _fetchOHLCV(company)
+        ohlcv = _fetchOhlcv(company)
     except (AttributeError, ValueError, TypeError):
         return None
 

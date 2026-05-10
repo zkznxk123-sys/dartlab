@@ -11,7 +11,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan._helpers import _ensureScanData, parse_num
+from dartlab.scan._helpers import _ensureScanData, parseNumStr
 
 # ── 영업활동CF ──
 
@@ -142,7 +142,7 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
         for row in sub.iter_rows(named=True):
             aid = row.get("account_id", "")
             anm = row.get("account_nm", "")
-            val = parse_num(row.get("thstrm_amount"))
+            val = parseNumStr(row.get("thstrm_amount"))
             if val is None:
                 continue
             if (aid in OCF_IDS or anm in OCF_NMS) and ocf is None:
@@ -219,7 +219,7 @@ def _scanPerFile() -> pl.DataFrame:
         for row in latest.iter_rows(named=True):
             aid = row.get("account_id", "")
             anm = row.get("account_nm", "")
-            val = parse_num(row.get("thstrm_amount"))
+            val = parseNumStr(row.get("thstrm_amount"))
             if val is None:
                 continue
             if (aid in OCF_IDS or anm in OCF_NMS) and ocf is None:

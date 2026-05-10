@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import logging
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import loadDocsForStock, resolve_market
+from dartlab.quant.screen.dataAccess import loadDocsForStock
 
 log = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ def calcRiskText(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         riskScore : float — 멘션 밀도 (천 단어당, 점)
         riskGrade : str — "high" | "medium" | "low"
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
     docs = loadDocsForStock(stockCode)

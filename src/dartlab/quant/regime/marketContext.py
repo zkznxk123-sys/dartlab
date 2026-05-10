@@ -23,8 +23,9 @@ from typing import Any
 import numpy as np
 import polars as pl
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 _KR_MACRO_DEFAULT = ("USDKRW", "BASE_RATE", "CPI", "M2")
 _US_MACRO_DEFAULT = ("FEDFUNDS", "DGS10", "DCOILWTICO", "CPIAUCSL")
@@ -258,7 +259,7 @@ def calcMarketContext(
     - flow 는 KR 전용. US 종목은 flowAvailable=False 로 관련 키 누락.
     - CAPM 의 시장 지수는 stockCode 의 상장 시장 (KOSPI/KOSDAQ) 또는 SPX (US) — `fetchBenchmarkOhlcv` SSOT 재사용.
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
 
     # 1. 종목 OHLCV
     ohlcv = fetchOhlcv(stockCode, **kwargs)

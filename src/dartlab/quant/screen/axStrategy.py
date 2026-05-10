@@ -17,8 +17,9 @@ from dataclasses import dataclass
 import numpy as np
 import polars as pl
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 from dartlab.quant.strategy.backtest import (
     BacktestResult,
     multiAssetBacktest,
@@ -195,7 +196,7 @@ def runBacktest(
     # KR-only 사전 체크 (OHLCV fetch 전) — _build_rule_from_style 이 NotApplicable 반환
     if isinstance(style, str):
         key = resolveStyle(style)
-        if key in {"flowFollow", "seasonalKR"} and resolve_market(stockCode, "auto") != "KR":
+        if key in {"flowFollow", "seasonalKR"} and resolveMarket(stockCode, "auto") != "KR":
             return BacktestResult.notApplicable(
                 style=key,
                 reason=f"KR-only style: {key} (data not available for non-KR markets)",

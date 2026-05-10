@@ -8,7 +8,7 @@ import polars as pl
 
 from dartlab.scan._helpers import (
     findLatestYear,
-    parse_num,
+    parseNumStr,
     pickBestQuarter,
     scanParquets,
 )
@@ -53,9 +53,9 @@ def scanEmployee() -> dict[str, dict]:
         tenure_emp, tenure_wsum = 0, 0.0
 
         for row in qdf.iter_rows(named=True):
-            emp = parse_num(row.get("sm"))
-            sal = parse_num(row.get("jan_salary_am"))
-            tenure = parse_num(row.get("avrg_cnwk_sdytrn"))
+            emp = parseNumStr(row.get("sm"))
+            sal = parseNumStr(row.get("jan_salary_am"))
+            tenure = parseNumStr(row.get("avrg_cnwk_sdytrn"))
             sex = row.get("sexdstn", "")
 
             if emp and emp > 0 and sal and sal > 0:
@@ -137,13 +137,13 @@ def scanTotalPayroll() -> dict[str, float]:
         total = 0.0
         usedDirect = False
         for row in qdf.iter_rows(named=True):
-            direct = parse_num(row.get("fyer_salary_totamt"))
+            direct = parseNumStr(row.get("fyer_salary_totamt"))
             if direct and direct > 0:
                 total += direct
                 usedDirect = True
             else:
-                emp = parse_num(row.get("sm"))
-                sal = parse_num(row.get("jan_salary_am"))
+                emp = parseNumStr(row.get("sm"))
+                sal = parseNumStr(row.get("jan_salary_am"))
                 if emp and emp > 0 and sal and sal > 0:
                     total += emp * sal
 
@@ -246,7 +246,7 @@ def _revenueFromMerged(scanPath: Path, revIds: set[str], revNms: set[str]) -> di
     revMap: dict[str, float] = {}
     for row in matched.iter_rows(named=True):
         code = row.get(scCol, "")
-        val = parse_num(row.get("thstrm_amount"))
+        val = parseNumStr(row.get("thstrm_amount"))
         if code and val and val > 0 and code not in revMap:
             revMap[code] = val
 
@@ -260,7 +260,7 @@ def _revenueFromMerged(scanPath: Path, revIds: set[str], revNms: set[str]) -> di
         )
         for row in fallbackRows.iter_rows(named=True):
             code = row.get(scCol, "")
-            val = parse_num(row.get("thstrm_amount"))
+            val = parseNumStr(row.get("thstrm_amount"))
             if code and val and val > 0 and code not in revMap:
                 revMap[code] = val
 
@@ -320,7 +320,7 @@ def _revenueFallback(revIds: set[str], revNms: set[str]) -> dict[str, float]:
             continue
         latest = rev_rows.filter(pl.col("bsns_year") == years[0])
         for row in latest.iter_rows(named=True):
-            val = parse_num(row.get("thstrm_amount"))
+            val = parseNumStr(row.get("thstrm_amount"))
             if val and val > 0:
                 revMap[code] = val
                 break
@@ -367,7 +367,7 @@ def scanTopPay() -> dict[str, dict]:
         max_pay = 0.0
         count = 0
         for row in group.iter_rows(named=True):
-            amt = parse_num(row.get("mendng_totamt"))
+            amt = parseNumStr(row.get("mendng_totamt"))
             if amt and amt > 0:
                 count += 1
                 pay_억 = amt / 1e8

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.scan._helpers import findLatestYear, parse_num, scanParquets
+from dartlab.scan._helpers import findLatestYear, parseNumStr, scanParquets
 
 
 def _scanHolderChange() -> dict[str, dict]:
@@ -48,7 +48,7 @@ def _scanHolderChange() -> dict[str, dict]:
     def _maxPct(group: pl.DataFrame) -> float | None:
         vals = []
         for row in group.iter_rows(named=True):
-            v = parse_num(row.get("bsis_posesn_stock_qota_rt"))
+            v = parseNumStr(row.get("bsis_posesn_stock_qota_rt"))
             if v is not None and 0 <= v <= 100:
                 vals.append(v)
         return max(vals) if vals else None
@@ -105,7 +105,7 @@ def _scanTreasuryStock() -> dict[str, dict]:
         grp = sub.filter(pl.col("stockCode") == code)
         totalShares = 0
         for row in grp.iter_rows(named=True):
-            v = parse_num(row.get("trmend_qy"))
+            v = parseNumStr(row.get("trmend_qy"))
             if v is not None and v > 0:
                 totalShares += int(v)
         if totalShares > 0:

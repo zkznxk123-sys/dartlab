@@ -7,7 +7,7 @@ from pathlib import Path
 import polars as pl
 
 from dartlab.scan._helpers import (
-    parse_num,
+    parseNumStr,
     pickBestQuarter,
     scanParquets,
 )
@@ -28,8 +28,8 @@ def _weightedAvgSalary(group: pl.DataFrame) -> float | None:
     """
     total_emp, total_wsum = 0, 0.0
     for row in group.iter_rows(named=True):
-        emp = parse_num(row.get("sm"))
-        sal = parse_num(row.get("jan_salary_am"))
+        emp = parseNumStr(row.get("sm"))
+        sal = parseNumStr(row.get("jan_salary_am"))
         if emp and emp > 0 and sal and sal > 0:
             total_emp += int(emp)
             total_wsum += emp * sal
@@ -136,14 +136,14 @@ def _scanRevenueGrowthFromMerged(scanPath: Path) -> dict[str, float]:
         newYear, oldYear = years[0], years[1]
         newRev = None
         for row in sub.filter(pl.col("bsns_year") == newYear).iter_rows(named=True):
-            val = parse_num(row.get("thstrm_amount"))
+            val = parseNumStr(row.get("thstrm_amount"))
             if val and val > 0:
                 if newRev is None or val > newRev:
                     newRev = val
 
         oldRev = None
         for row in sub.filter(pl.col("bsns_year") == oldYear).iter_rows(named=True):
-            val = parse_num(row.get("thstrm_amount"))
+            val = parseNumStr(row.get("thstrm_amount"))
             if val and val > 0:
                 if oldRev is None or val > oldRev:
                     oldRev = val
@@ -197,14 +197,14 @@ def _scanRevenueGrowthPerFile() -> dict[str, float]:
 
         newRev = None
         for row in revRows.filter(pl.col("bsns_year") == completeYears[0]).iter_rows(named=True):
-            val = parse_num(row.get("thstrm_amount"))
+            val = parseNumStr(row.get("thstrm_amount"))
             if val and val > 0:
                 if newRev is None or val > newRev:
                     newRev = val
 
         oldRev = None
         for row in revRows.filter(pl.col("bsns_year") == completeYears[1]).iter_rows(named=True):
-            val = parse_num(row.get("thstrm_amount"))
+            val = parseNumStr(row.get("thstrm_amount"))
             if val and val > 0:
                 if oldRev is None or val > oldRev:
                     oldRev = val

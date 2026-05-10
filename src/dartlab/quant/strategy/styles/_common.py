@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import numpy as np
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 
 def getArrays(company, *, start: str | None = None) -> dict:
@@ -36,7 +37,7 @@ def getArrays(company, *, start: str | None = None) -> dict:
 def isKr(company) -> bool:
     """KR 시장 여부."""
     code = getattr(company, "stockCode", None) or getattr(company, "stock_code", "")
-    return resolve_market(code, "auto") == "KR"
+    return resolveMarket(code, "auto") == "KR"
 
 
 def getStockCode(company) -> str:

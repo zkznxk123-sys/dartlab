@@ -144,7 +144,7 @@ def _loadRevenueSeries(scanDir: Path) -> pl.DataFrame | None:
         {year}A : float — 연도별 매출 (원). 컬럼명 예: "2024A"
         데이터 없으면 None.
     """
-    from dartlab.scan._helpers import parse_num
+    from dartlab.scan._helpers import parseNumStr
 
     scanPath = scanDir / "finance.parquet"
     if not scanPath.exists():
@@ -186,7 +186,7 @@ def _loadRevenueSeries(scanDir: Path) -> pl.DataFrame | None:
     for row in target.iter_rows(named=True):
         code = row.get(scCol, "")
         year = row.get("bsns_year", "")
-        val = parse_num(row.get("thstrm_amount"))
+        val = parseNumStr(row.get("thstrm_amount"))
         if not code or not year or val is None:
             continue
         if code not in rows:

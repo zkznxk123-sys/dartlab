@@ -6,7 +6,7 @@ import polars as pl
 
 from dartlab.scan._helpers import (
     findLatestYear,
-    parse_num,
+    parseNumStr,
     pickBestQuarter,
     scanParquets,
 )
@@ -40,7 +40,7 @@ def scanMajorHolderPct() -> dict[str, float]:
     for code, group in sub.group_by("stockCode"):
         vals = []
         for row in group.iter_rows(named=True):
-            v = parse_num(row.get("bsis_posesn_stock_qota_rt"))
+            v = parseNumStr(row.get("bsis_posesn_stock_qota_rt"))
             if v is not None and 0 <= v <= 100:
                 vals.append(v)
         if vals:
@@ -112,10 +112,10 @@ def _outsideFromDedicated(raw: pl.DataFrame) -> dict[str, dict]:
         concurrentCount = 0
 
         for row in qdf.iter_rows(named=True):
-            d = parse_num(row.get("drctr_co"))
-            o = parse_num(row.get("otcmp_drctr_co"))
-            r = parse_num(row.get("mdstrm_resig"))
-            c = parse_num(row.get("rlsofc"))
+            d = parseNumStr(row.get("drctr_co"))
+            o = parseNumStr(row.get("otcmp_drctr_co"))
+            r = parseNumStr(row.get("mdstrm_resig"))
+            c = parseNumStr(row.get("rlsofc"))
 
             if d and d > 0:
                 totalDirectors += int(d)
@@ -207,8 +207,8 @@ def scanPayRatio() -> dict[str, float]:
             qdf = pickBestQuarter(group)
             wsum, tnmpr = 0.0, 0
             for row in qdf.iter_rows(named=True):
-                n = parse_num(row.get("nmpr"))
-                p = parse_num(row.get("jan_avrg_mendng_am"))
+                n = parseNumStr(row.get("nmpr"))
+                p = parseNumStr(row.get("jan_avrg_mendng_am"))
                 if n and n > 0 and p and p > 0:
                     wsum += n * p
                     tnmpr += int(n)
@@ -224,8 +224,8 @@ def scanPayRatio() -> dict[str, float]:
             qdf = pickBestQuarter(group)
             wsum, temp = 0.0, 0
             for row in qdf.iter_rows(named=True):
-                e = parse_num(row.get("sm"))
-                s = parse_num(row.get("jan_salary_am"))
+                e = parseNumStr(row.get("sm"))
+                s = parseNumStr(row.get("jan_salary_am"))
                 if e and e > 0 and s and s > 0:
                     wsum += e * s
                     temp += int(e)
@@ -323,7 +323,7 @@ def scanMinorityHolder() -> dict[str, float]:
             raw_val = row.get("hold_stock_rate")
             if raw_val is not None:
                 cleaned = str(raw_val).strip().rstrip("%")
-                v = parse_num(cleaned)
+                v = parseNumStr(cleaned)
                 if v is not None and 0 <= v <= 100:
                     vals.append(v)
         if vals:

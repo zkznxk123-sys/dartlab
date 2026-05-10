@@ -30,7 +30,7 @@ import logging
 
 import polars as pl
 
-from dartlab.core.market import resolveMarket as resolve_market
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
 
 # 이전: quant._helpers.fetchOhlcv (gather entry wrapper) — gather 자체이므로 직접 호출.
@@ -166,7 +166,7 @@ def marketCap(
 
         데이터 없으면 None.
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
 
     if market == "KR":
         # KRX 일별 시총 직접 사용 — DART 합성 폐기 (Phase A)
@@ -272,7 +272,7 @@ def marketCapSnapshot(
     last = df.sort("date").row(-1, named=True)
     return {
         "stockCode": stockCode,
-        "market": resolve_market(stockCode, market),
+        "market": resolveMarket(stockCode, market),
         "date": last["date"],
         "close": last["close"],
         "commonOutstanding": last["commonOutstanding"],

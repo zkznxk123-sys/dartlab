@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import logging
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import loadAllfilingsForStock, resolve_market
+from dartlab.quant.screen.dataAccess import loadAllfilingsForStock
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ def calcEventSignal(stockCode: str, *, market: str = "auto", series: bool = Fals
         dict with totalEvents, eventTypes, impactScore, eventVerdict.
         series=True 시: _series = {high_impact_dates, pead_window}.
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
     filings = loadAllfilingsForStock(stockCode)

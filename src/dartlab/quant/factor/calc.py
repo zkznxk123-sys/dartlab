@@ -30,8 +30,9 @@ from typing import Any
 
 import numpy as np
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays, resolve_market
+from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 from dartlab.quant.strategy.metrics import TRADING_DAYS, calcIR, fundamentalLawIR
 
 log = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
         + Grinold/Kahn IR 지표 (informationRatio raw, informationRatioAnnualized,
         expectedIR via Fundamental Law).
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     benchmark = kwargs.pop("benchmark", None)
     benchmarkMode = kwargs.pop("benchmarkMode", "market")
 

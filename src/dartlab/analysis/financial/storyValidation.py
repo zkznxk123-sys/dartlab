@@ -154,7 +154,7 @@ def _findPhaseMatchingPeers(stockCode: str, phase: str, *, limit: int = 5) -> li
 
         _h = importlib.import_module("dartlab.scan._helpers")
         _ensureScanData = _h._ensureScanData
-        parse_num = _h.parse_num
+        parseNumStr = _h.parseNumStr
     except ImportError:
         return []
 
@@ -207,14 +207,14 @@ def _findPhaseMatchingPeers(stockCode: str, phase: str, *, limit: int = 5) -> li
         for nm in rev_nms:
             r = stock.filter(pl.col("account_nm") == nm)
             if not r.is_empty():
-                rev_cur = parse_num(r["thstrm_amount"][0])
+                rev_cur = parseNumStr(r["thstrm_amount"][0])
                 if "frmtrm_amount" in r.columns:
-                    rev_prev = parse_num(r["frmtrm_amount"][0])
+                    rev_prev = parseNumStr(r["frmtrm_amount"][0])
                 break
         for nm in op_nms:
             o = stock.filter(pl.col("account_nm") == nm)
             if not o.is_empty():
-                op_cur = parse_num(o["thstrm_amount"][0])
+                op_cur = parseNumStr(o["thstrm_amount"][0])
                 break
         if not (rev_cur and rev_prev and rev_prev > 0):
             continue
@@ -301,7 +301,7 @@ def calcPlausibilityBand(
 
         _h = importlib.import_module("dartlab.scan._helpers")
         _ensureScanData = _h._ensureScanData
-        parse_num = _h.parse_num
+        parseNumStr = _h.parseNumStr
 
         scan_dir = _ensureScanData()
         path = scan_dir / "finance.parquet"
@@ -341,14 +341,14 @@ def calcPlausibilityBand(
                         for nm in rev_nms:
                             r = stock.filter(pl.col("account_nm") == nm)
                             if not r.is_empty():
-                                rev_cur = parse_num(r["thstrm_amount"][0])
+                                rev_cur = parseNumStr(r["thstrm_amount"][0])
                                 if "frmtrm_amount" in r.columns:
-                                    rev_prev = parse_num(r["frmtrm_amount"][0])
+                                    rev_prev = parseNumStr(r["frmtrm_amount"][0])
                                 break
                         for nm in op_nms:
                             o = stock.filter(pl.col("account_nm") == nm)
                             if not o.is_empty():
-                                op_cur = parse_num(o["thstrm_amount"][0])
+                                op_cur = parseNumStr(o["thstrm_amount"][0])
                                 break
                         # YoY
                         if rev_cur and rev_prev and rev_prev > 0:

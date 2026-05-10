@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import logging
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant.screen.dataAccess import loadChangesForStock, resolve_market
+from dartlab.quant.screen.dataAccess import loadChangesForStock
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ def calcToneChange(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
             newNegatives : list[str]
         totalPeriods : int — 전체 분석 기간 수
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
     changes = loadChangesForStock(stockCode)

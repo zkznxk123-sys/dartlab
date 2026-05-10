@@ -150,7 +150,7 @@ def _extractKrPeers(sector: str, limit: int) -> list[dict[str, Any]]:
 
         _scanHelpers = importlib.import_module("dartlab.scan._helpers")
         _ensureScanData = _scanHelpers._ensureScanData
-        parse_num = _scanHelpers.parse_num
+        parseNumStr = _scanHelpers.parseNumStr
     except ImportError:
         return []
 
@@ -196,7 +196,7 @@ def _extractKrPeers(sector: str, limit: int) -> list[dict[str, Any]]:
         for nm in nms:
             r = df.filter(pl.col("account_nm") == nm)
             if not r.is_empty():
-                return parse_num(r["thstrm_amount"][0])
+                return parseNumStr(r["thstrm_amount"][0])
         return None
 
     peers: list[dict[str, Any]] = []

@@ -9,7 +9,7 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 
-from dartlab.scan._helpers import parse_num, scanParquets
+from dartlab.scan._helpers import parseNumStr, scanParquets
 
 
 def _classifyPattern(
@@ -174,9 +174,9 @@ def scanDividendTrend(*, verbose: bool = True) -> pl.DataFrame:
         best = q4 if not q4.is_empty() else yearSub
         row = best.row(0, named=True)
 
-        dps0 = parse_num(row.get("thstrm"))
-        dps1 = parse_num(row.get("frmtrm"))
-        dps2 = parse_num(row.get("lwfr"))
+        dps0 = parseNumStr(row.get("thstrm"))
+        dps1 = parseNumStr(row.get("frmtrm"))
+        dps2 = parseNumStr(row.get("lwfr"))
 
         # 배당수익률
         yieldVal = None
@@ -184,7 +184,7 @@ def scanDividendTrend(*, verbose: bool = True) -> pl.DataFrame:
         if not yieldSub.is_empty():
             yq4 = yieldSub.filter(pl.col("quarter") == "4분기")
             yBest = yq4 if not yq4.is_empty() else yieldSub
-            yieldVal = parse_num(yBest.row(0, named=True).get("thstrm"))
+            yieldVal = parseNumStr(yBest.row(0, named=True).get("thstrm"))
 
         # 배당성향
         payoutVal = None
@@ -192,7 +192,7 @@ def scanDividendTrend(*, verbose: bool = True) -> pl.DataFrame:
         if not payoutSub.is_empty():
             pq4 = payoutSub.filter(pl.col("quarter") == "4분기")
             pBest = pq4 if not pq4.is_empty() else payoutSub
-            payoutVal = parse_num(pBest.row(0, named=True).get("thstrm"))
+            payoutVal = parseNumStr(pBest.row(0, named=True).get("thstrm"))
 
         # DPS 성장률
         dpsGrowth = None

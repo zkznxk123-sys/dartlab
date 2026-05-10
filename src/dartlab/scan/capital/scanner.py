@@ -5,8 +5,8 @@ from __future__ import annotations
 import polars as pl
 
 from dartlab.scan._helpers import (
-    parse_num,
     parseDateYear,
+    parseNumStr,
     scanParquets,
 )
 
@@ -72,7 +72,7 @@ def scanDividend() -> dict[str, dict]:
             se = row.get("se", "")
             if not se:
                 continue
-            val = parse_num(row.get("thstrm"))
+            val = parseNumStr(row.get("thstrm"))
             if se in DPS_KEYS and val is not None and val > 0:
                 if dps is None or val > dps:
                     dps = val
@@ -136,10 +136,10 @@ def scanTreasuryStock() -> dict[str, dict]:
         total_dsps = 0
         total_incnr = 0
         for row in group.iter_rows(named=True):
-            held = parse_num(row.get("trmend_qy"))
-            acqs = parse_num(row.get("change_qy_acqs"))
-            dsps = parse_num(row.get("change_qy_dsps"))
-            incnr = parse_num(row.get("change_qy_incnr"))
+            held = parseNumStr(row.get("trmend_qy"))
+            acqs = parseNumStr(row.get("change_qy_acqs"))
+            dsps = parseNumStr(row.get("change_qy_dsps"))
+            incnr = parseNumStr(row.get("change_qy_incnr"))
             if held and held > 0:
                 total_held += int(held)
             if acqs and acqs > 0:

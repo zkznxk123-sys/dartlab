@@ -206,7 +206,7 @@ class TestCalcFundamentalDivergence:
             result = mock_fn(co)
             assert result is None
 
-    @patch("dartlab.quant.screen.extended._fetchOHLCV")
+    @patch("dartlab.quant.screen.extended._fetchOhlcv")
     @patch("dartlab.analysis.financial.scorecard.calcScorecard")
     def test_with_mock_scorecard(self, mock_sc, mock_ohlcv, ohlcv_up):
         from dartlab.quant.screen.extended import calcFundamentalDivergence

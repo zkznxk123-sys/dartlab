@@ -49,7 +49,7 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
     """
     import polars as pl
 
-    from dartlab.scan._helpers import _ensureScanData, parse_num
+    from dartlab.scan._helpers import _ensureScanData, parseNumStr
 
     code = getattr(company, "stockCode", None) or getattr(company, "stock_code", None)
     if not code:
@@ -99,7 +99,7 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
         for nm in accountNms:
             rows = df.filter(pl.col("account_nm") == nm)
             if not rows.is_empty():
-                v = parse_num(rows["thstrm_amount"][0])
+                v = parseNumStr(rows["thstrm_amount"][0])
                 if v is not None:
                     return v
         return None

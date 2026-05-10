@@ -25,13 +25,13 @@ import logging
 import polars as pl
 
 from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
+from dartlab.core.market import resolveMarket
 from dartlab.quant.factor.quality import _isFinancial
 from dartlab.quant.screen.dataAccess import (
     extractAccount,
     fetchOhlcv,
     loadScanParquet,
     ohlcvToArrays,
-    resolve_market,
 )
 
 log = logging.getLogger(__name__)
@@ -155,7 +155,7 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     Returns:
         dict — components, valueScore, valueGrade, limitation note.
     """
-    market = resolve_market(stockCode, market)
+    market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
     if _isFinancial(stockCode):

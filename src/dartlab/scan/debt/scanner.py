@@ -6,7 +6,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan._helpers import parse_num, scanParquets
+from dartlab.scan._helpers import parseNumStr, scanParquets
 
 
 def scanBonds() -> dict[str, dict]:
@@ -51,8 +51,8 @@ def scanBonds() -> dict[str, dict]:
         total_amount = 0
         short_term = 0
         for row in group.iter_rows(named=True):
-            sm = parse_num(row.get("sm"))
-            y1 = parse_num(row.get("yy1_below"))
+            sm = parseNumStr(row.get("sm"))
+            y1 = parseNumStr(row.get("yy1_below"))
             if sm and sm > 0:
                 total_amount = max(total_amount, sm)
             if y1 and y1 > 0:
@@ -104,7 +104,7 @@ def scanShortDebt() -> dict[str, dict]:
             codeVal = code[0]
             best = 0
             for row in group.iter_rows(named=True):
-                val = parse_num(row.get("sm"))
+                val = parseNumStr(row.get("sm"))
                 if val and val > best:
                     best = val
             if best > 0:
@@ -116,7 +116,7 @@ def scanShortDebt() -> dict[str, dict]:
             codeVal = code[0]
             best = 0
             for row in group.iter_rows(named=True):
-                val = parse_num(row.get("sm"))
+                val = parseNumStr(row.get("sm"))
                 if val and val > best:
                     best = val
             if best > 0:
@@ -188,7 +188,7 @@ def scanDebtMix() -> dict[str, dict]:
         for row in latest.iter_rows(named=True):
             aid = row.get("account_id", "")
             anm = row.get("account_nm", "")
-            val = parse_num(row.get("thstrm_amount"))
+            val = parseNumStr(row.get("thstrm_amount"))
             if (aid in LIABILITIES_IDS or anm in LIABILITIES_NMS) and val:
                 if liab is None or val > liab:
                     liab = val
@@ -246,14 +246,14 @@ def _debtMixFromMerged(scanPath: Path) -> dict[str, dict]:
     liabMap: dict[str, float] = {}
     for row in liabRows.iter_rows(named=True):
         code = row.get(scCol, "")
-        val = parse_num(row.get("thstrm_amount"))
+        val = parseNumStr(row.get("thstrm_amount"))
         if code and val and (code not in liabMap or val > liabMap[code]):
             liabMap[code] = val
 
     eqMap: dict[str, float] = {}
     for row in eqRows.iter_rows(named=True):
         code = row.get(scCol, "")
-        val = parse_num(row.get("thstrm_amount"))
+        val = parseNumStr(row.get("thstrm_amount"))
         if code and val and (code not in eqMap or val > eqMap[code]):
             eqMap[code] = val
 
