@@ -95,9 +95,9 @@ def scanEdgarRawTags(tags: list[str], *, annual: bool = True) -> pl.DataFrame:
         corpName : str — 회사명
         {tag} : float — 각 태그의 최신 연도 값 (USD)
     """
-    from dartlab.providers.edgar.report import edgarFinancePath
+    from dartlab.core.dataLoader import _getDataRoot
 
-    edgarDir = edgarFinancePath("_").parent
+    edgarDir = _getDataRoot() / "edgar" / "finance"
     if not edgarDir.exists():
         return pl.DataFrame()
 

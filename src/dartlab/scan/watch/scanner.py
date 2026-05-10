@@ -169,14 +169,15 @@ def scanMarket(
             pass
         codes = _filterBySector(codes, sector, classifier=classifier)
 
-    from dartlab.providers.dart.company import Company as DartCompany
+    # dartlab.company facade 경유 — provider 직접 의존 회피 (cycle 정공법 D).
+    from dartlab.company import Company as _CompanyFacade
 
     frames: list[pl.DataFrame] = []
     scanned = 0
 
     for code in codes:
         try:
-            c = DartCompany(code)
+            c = _CompanyFacade(code)
             result = scanCompany(c)
             if result is not None and result.scored:
                 df = result.toDataframe()
