@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.scan._helpers import scanParquets
+from dartlab.scan.parquetLoad import scanParquets
 
 _OPINION_RISK = {
     "의견거절": 3,

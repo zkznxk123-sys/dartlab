@@ -255,7 +255,7 @@ def _ddmFitness(company: Any, basePeriod: str | None) -> dict:
 def _relativeFitness(company: Any) -> dict:
     """상대가치 적합도: peer 수."""
     try:
-        from dartlab.scan.extended import calcPeerPosition
+        from dartlab.scan.builder.extended import calcPeerPosition
 
         data = calcPeerPosition(company)
         total = data.get("total_stocks", 0) if data else 0

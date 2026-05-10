@@ -9,25 +9,25 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 
-from dartlab.scan._helpers import (
+from dartlab.scan.parquetLoad import (
     NI_IDS as _NI_IDS,  # noqa: F401 (호환 alias 일부 호출 대비)
 )
-from dartlab.scan._helpers import (
+from dartlab.scan.parquetLoad import (
     OP_IDS as _OP_IDS,  # noqa: F401
 )
-from dartlab.scan._helpers import (
+from dartlab.scan.parquetLoad import (
     REVENUE_IDS as _REVENUE_IDS,
 )
-from dartlab.scan._helpers import (
+from dartlab.scan.parquetLoad import (
     REVENUE_NMS as _REVENUE_NMS,
 )
-from dartlab.scan._helpers import (
+from dartlab.scan.parquetLoad import (
     TA_IDS as _TA_IDS,
 )
-from dartlab.scan._helpers import (
+from dartlab.scan.parquetLoad import (
     TA_NMS as _TA_NMS,
 )
-from dartlab.scan._helpers import (
+from dartlab.scan.parquetLoad import (
     scanFinanceParquets,
 )
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.scan._helpers import findLatestYear, parseNumStr, scanParquets
+from dartlab.scan.parquetLoad import findLatestYear, parseNumStr, scanParquets
 
 
 def _scanHolderChange() -> dict[str, dict]:

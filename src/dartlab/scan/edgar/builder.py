@@ -5,7 +5,7 @@ DART scan/builder.py 패턴을 EDGAR에 이식.
 
 사용법::
 
-    from dartlab.scan.edgarBuilder import buildEdgarScan
+    from dartlab.scan.edgar.builder import buildEdgarScan
     path = buildEdgarScan(sinceYear=2021, verbose=True)
 """
 

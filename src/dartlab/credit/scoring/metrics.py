@@ -576,7 +576,7 @@ def _fetchRank(company) -> dict | None:
     try:
         import importlib
 
-        _r = importlib.import_module("dartlab.scan.rank")
+        _r = importlib.import_module("dartlab.scan.screen.rank")
         _SNAPSHOT = _r._SNAPSHOT
         _cacheDir = _r._cacheDir
 
@@ -588,7 +588,7 @@ def _fetchRank(company) -> dict | None:
 
         import importlib
 
-        getRankOrBuild = importlib.import_module("dartlab.scan.rank").getRankOrBuild
+        getRankOrBuild = importlib.import_module("dartlab.scan.screen.rank").getRankOrBuild
 
         stockCode = getattr(company, "stockCode", "")
         if not stockCode:

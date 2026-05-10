@@ -612,7 +612,7 @@ def _latestWideValue(df: pl.DataFrame, field: str) -> pl.DataFrame:
 def _loadValuation(field: str) -> pl.DataFrame:
     name = field.split(".", 1)[1]
     if name != "psr":
-        from dartlab.scan._helpers import loadValuationSnapshot
+        from dartlab.scan.parquetLoad import loadValuationSnapshot
 
         raw, _snapshot_at = loadValuationSnapshot()
         if raw is not None and not raw.is_empty() and name in raw.columns:
@@ -627,7 +627,7 @@ def _loadValuation(field: str) -> pl.DataFrame:
 
 
 def _loadReport(field: str) -> pl.DataFrame:
-    from dartlab.scan._helpers import scanParquets
+    from dartlab.scan.parquetLoad import scanParquets
 
     _, apiType, col = field.split(".", 2)
     if col == "__exists__":
@@ -645,7 +645,7 @@ def _loadReport(field: str) -> pl.DataFrame:
 
 def _loadReportExists(apiType: str) -> pl.DataFrame:
     from dartlab.core.dataLoader import _dataDir
-    from dartlab.scan._helpers import _ensureScanData
+    from dartlab.scan.parquetLoad import _ensureScanData
 
     scan_path = _ensureScanData() / "report" / f"{apiType}.parquet"
     if scan_path.exists():

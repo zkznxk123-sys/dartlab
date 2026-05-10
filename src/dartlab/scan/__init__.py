@@ -28,9 +28,9 @@ from typing import Any
 
 import polars as pl
 
-from dartlab.scan.builder import buildChanges, buildFinance, buildReport, buildScan  # noqa: F401
-from dartlab.scan.payload import buildScanPayload, buildUnifiedPayload  # noqa: F401
-from dartlab.scan.snapshot import buildScanSnapshot, getScanPosition  # noqa: F401
+from dartlab.scan.builder.core import buildChanges, buildFinance, buildReport, buildScan  # noqa: F401
+from dartlab.scan.builder.payload import buildScanPayload, buildUnifiedPayload  # noqa: F401
+from dartlab.scan.builder.snapshot import buildScanSnapshot, getScanPosition  # noqa: F401
 
 # ── 한글 컬럼명 + 종목명 공통 변환 ──
 
@@ -298,7 +298,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         example='scan("macroBeta")',
     ),
     "fields": _AxisEntry(
-        module="dartlab.scan.fields",
+        module="dartlab.scan.builder.fields",
         fn="scanFields",
         label="필드카탈로그",
         description="조건형 스크리닝용 필드 검색 (finance/report/docs/krx/krxIndex)",

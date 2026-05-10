@@ -122,7 +122,7 @@ def _scanMarketSummary(df: pl.DataFrame) -> pl.DataFrame:
     """시장별 요약 통계."""
     import importlib
 
-    loadListing = importlib.import_module("dartlab.scan._helpers").loadListing
+    loadListing = importlib.import_module("dartlab.scan.parquetLoad").loadListing
     _, _, _, listing_meta = loadListing()
     code_to_market = {code: meta.get("market", "") for code, meta in listing_meta.items()}
     codeCol = "종목코드" if "종목코드" in df.columns else "stockCode"

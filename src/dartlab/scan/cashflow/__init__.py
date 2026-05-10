@@ -11,7 +11,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan._helpers import _ensureScanData, parseNumStr
+from dartlab.scan.parquetLoad import _ensureScanData, parseNumStr
 
 # ── 영업활동CF ──
 

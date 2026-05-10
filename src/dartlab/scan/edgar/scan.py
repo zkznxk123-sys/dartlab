@@ -6,7 +6,7 @@ EDGAR scan은 개별 CIK parquet에서 전종목 계정을 스캔하여
 
 사용법::
 
-    from dartlab.scan._edgar_scan import edgarScan
+    from dartlab.scan.edgar.scan import edgarScan
     df = edgarScan("profitability")  # → stockCode | opMargin | netMargin | roe | roa | grade
 """
 
@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.scan._edgar_helpers import pct, safeDiv, scanEdgarAccounts
+from dartlab.scan.edgar.helpers import pct, safeDiv, scanEdgarAccounts
 
 
 def edgarScan(axis: str, **kwargs) -> pl.DataFrame:
@@ -588,7 +588,7 @@ def _scanAudit(**_kw) -> pl.DataFrame:
         return df
 
     # XBRL 감사비용 태그 직접 스캔
-    from dartlab.scan._edgar_helpers import scanEdgarRawTags
+    from dartlab.scan.edgar.helpers import scanEdgarRawTags
 
     auditDf = scanEdgarRawTags(
         ["AuditFees", "NonAuditServicesFees", "AllOtherFees", "TaxFees"],

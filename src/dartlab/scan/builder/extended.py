@@ -49,7 +49,7 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
     """
     import polars as pl
 
-    from dartlab.scan._helpers import _ensureScanData, parseNumStr
+    from dartlab.scan.parquetLoad import _ensureScanData, parseNumStr
 
     code = getattr(company, "stockCode", None) or getattr(company, "stock_code", None)
     if not code:

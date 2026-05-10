@@ -9,7 +9,7 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 
-from dartlab.scan._helpers import parseNumStr, scanParquets
+from dartlab.scan.parquetLoad import parseNumStr, scanParquets
 
 
 def _classifyPattern(

@@ -3376,7 +3376,7 @@ class Company:
             return self._cache[cacheKey]
         import importlib
 
-        getRank = importlib.import_module("dartlab.scan.rank").getRank
+        getRank = importlib.import_module("dartlab.scan.screen.rank").getRank
         result = getRank(self.stockCode)
         self._cache[cacheKey] = result
         return result

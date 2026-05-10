@@ -6,7 +6,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan._helpers import parseNumStr, scanParquets
+from dartlab.scan.parquetLoad import parseNumStr, scanParquets
 
 
 def scanBonds() -> dict[str, dict]:
@@ -142,7 +142,7 @@ def scanDebtMix() -> dict[str, dict]:
             총부채 : float — 부채총계 (원)
             부채비율 : float | None — 부채비율 (%)
     """
-    from dartlab.scan._helpers import _ensureScanData
+    from dartlab.scan.parquetLoad import _ensureScanData
 
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

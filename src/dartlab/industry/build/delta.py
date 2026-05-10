@@ -52,7 +52,7 @@ def _extract_by_ids(row_sub: pl.DataFrame, id_list, nm_list) -> float | None:
     float | None
         매칭된 계정의 금액 (원). 없으면 None.
     """
-    from dartlab.scan._helpers import extractAccount
+    from dartlab.scan.parquetLoad import extractAccount
 
     return extractAccount(row_sub, list(id_list), list(nm_list))
 
@@ -99,7 +99,7 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
     """
     from pathlib import Path
 
-    from dartlab.scan._helpers import _ensureScanData
+    from dartlab.scan.parquetLoad import _ensureScanData
     from dartlab.scan.profitability import (
         _EQ_IDS,
         _EQ_NMS,

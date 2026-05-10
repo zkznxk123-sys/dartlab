@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.scan._helpers import (
+from dartlab.scan.parquetLoad import (
     parseDateYear,
     parseNumStr,
     scanParquets,
