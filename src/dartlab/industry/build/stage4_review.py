@@ -32,8 +32,12 @@ def _loadOverrides() -> dict[str, list[dict]]:
 def applyOverrides(nodes: list[IndustryNode]) -> list[IndustryNode]:
     """overrides.json의 확정 매핑을 노드에 적용한다.
 
-    override가 있는 종목은 stage/confidence를 덮어쓴다.
-    override에만 있는 종목(신규)은 새 노드를 추가한다.
+    Override entry 포맷:
+    - 일반 매핑: ``{"stockCode": "X", "stage": "Y", "confidence": 1.0, ...}``
+      → (stockCode, industryId) 노드 stage/confidence 덮어쓰기 또는 신규 추가.
+    - 제외 (exclude): ``{"stockCode": "X", "exclude": true}``
+      → (stockCode, industryId) 매핑을 노드 리스트에서 제거. stage1-3 의 KSIC/제품/
+      docs 분류 오류 (예: SK 지주사가 software 로 잘못 매핑) 를 영구 차단.
 
     Parameters
     ----------
@@ -43,13 +47,26 @@ def applyOverrides(nodes: list[IndustryNode]) -> list[IndustryNode]:
     Returns
     -------
     list[IndustryNode]
-        override가 적용된 노드 리스트.
+        override 적용 후 노드 리스트 (제외된 노드는 빠지고 신규 매핑은 추가).
     """
     overrides = _loadOverrides()
     if not overrides:
         return nodes
 
-    # (stockCode, industry) → node 인덱스
+    # 1) exclude 적용 — (stockCode, industryId) 쌍 제거.
+    excludePairs: set[tuple[str, str]] = set()
+    for industryId, ovList in overrides.items():
+        for ov in ovList:
+            code = ov.get("stockCode", "")
+            if code and ov.get("exclude"):
+                excludePairs.add((code, industryId))
+
+    if excludePairs:
+        nodes = [n for n in nodes if (n.stockCode, n.industry) not in excludePairs]
+        for code, ind in sorted(excludePairs):
+            logger.info("override exclude: %s × %s 제거", code, ind)
+
+    # 2) 일반 매핑 적용 — stage 덮어쓰기 또는 신규 추가.
     nodeIndex: dict[tuple[str, str], IndustryNode] = {}
     for node in nodes:
         nodeIndex[(node.stockCode, node.industry)] = node
@@ -58,7 +75,7 @@ def applyOverrides(nodes: list[IndustryNode]) -> list[IndustryNode]:
         for ov in ovList:
             code = ov.get("stockCode", "")
             stage = ov.get("stage", "")
-            if not code or not stage:
+            if not code or not stage or ov.get("exclude"):
                 continue
 
             key = (code, industryId)

@@ -1248,19 +1248,6 @@
     "revenue": null
   },
   {
-    "stockCode": "001740",
-    "corpName": "SK네트웍스",
-    "industry": "software",
-    "stage": "solution",
-    "role": "서비스",
-    "stream": "midstream",
-    "confidence": 0.6,
-    "source": "docs",
-    "primary": true,
-    "updatedAt": "2026-04-14",
-    "revenue": 6745127000000.0
-  },
-  {
     "stockCode": "001750",
     "corpName": "한양증권",
     "industry": "finance",
@@ -3599,19 +3586,6 @@
     "primary": true,
     "updatedAt": "2026-04-14",
     "revenue": 271458652401.0
-  },
-  {
-    "stockCode": "006120",
-    "corpName": "SK디스커버리",
-    "industry": "software",
-    "stage": "platform",
-    "role": "서비스",
-    "stream": "downstream",
-    "confidence": 0.8,
-    "source": "docs",
-    "primary": true,
-    "updatedAt": "2026-04-14",
-    "revenue": 10164013989611.0
   },
   {
     "stockCode": "006140",
@@ -6994,19 +6968,6 @@
     "revenue": 54764190957.0
   },
   {
-    "stockCode": "018670",
-    "corpName": "SK가스",
-    "industry": "software",
-    "stage": "solution",
-    "role": "서비스",
-    "stream": "midstream",
-    "confidence": 0.3,
-    "source": "docs",
-    "primary": true,
-    "updatedAt": "2026-04-14",
-    "revenue": 7676318981997.0
-  },
-  {
     "stockCode": "018680",
     "corpName": "서울제약",
     "industry": "pharma",
@@ -9358,19 +9319,6 @@
     "primary": true,
     "updatedAt": "2026-04-14",
     "revenue": 962994363377.0
-  },
-  {
-    "stockCode": "034730",
-    "corpName": "SK",
-    "industry": "software",
-    "stage": "solution",
-    "role": "서비스",
-    "stream": "midstream",
-    "confidence": 1.0,
-    "source": "product",
-    "primary": true,
-    "updatedAt": "2026-04-14",
-    "revenue": 122703338000000.0
   },
   {
     "stockCode": "034810",
@@ -34629,6 +34577,54 @@
     "source": "docs",
     "primary": true,
     "updatedAt": "2026-04-14",
+    "revenue": null
+  },
+  {
+    "stockCode": "018670",
+    "corpName": "SK가스",
+    "industry": "energy",
+    "stage": "distribution",
+    "role": "",
+    "stream": "",
+    "confidence": 1.0,
+    "source": "manual",
+    "evidence": "",
+    "revenue": null
+  },
+  {
+    "stockCode": "001740",
+    "corpName": "SK네트웍스",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "",
+    "stream": "",
+    "confidence": 1.0,
+    "source": "manual",
+    "evidence": "",
+    "revenue": null
+  },
+  {
+    "stockCode": "034730",
+    "corpName": "SK",
+    "industry": "misc",
+    "stage": "general",
+    "role": "",
+    "stream": "",
+    "confidence": 1.0,
+    "source": "manual",
+    "evidence": "",
+    "revenue": null
+  },
+  {
+    "stockCode": "006120",
+    "corpName": "SK디스커버리",
+    "industry": "misc",
+    "stage": "general",
+    "role": "",
+    "stream": "",
+    "confidence": 1.0,
+    "source": "manual",
+    "evidence": "",
     "revenue": null
   }
 ]
