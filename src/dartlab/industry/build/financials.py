@@ -23,6 +23,13 @@ _ACCOUNTS = {
     "total_assets": "totalAssets",
 }
 
+# 단위 오류 sanity guard — 한 종목 매출이 500조 KRW (5e14) 초과하면 단위 mix 의심
+# (삼성전자 연결 매출 ~300조 미만이라 정상값은 절대 hit 안 함). DART 원본 또는 빌드
+# 단계에서 단위 혼동 (원/백만원 mix) 으로 7.34e16 같은 값이 들어오면 산업 집계 왜곡.
+_REVENUE_SANITY_LIMIT = 5.0e14
+_OPINCOME_SANITY_LIMIT = 1.0e14
+_ASSET_SANITY_LIMIT = 5.0e15
+
 
 def _finPath() -> Path:
     from dartlab.core.dataConfig import DATA_RELEASES
@@ -79,6 +86,44 @@ def _extractYearly(year: str) -> pl.DataFrame:
         )
         acct = pl.concat([cfs, ofs])
         result = result.join(acct, on="stockCode", how="left")
+
+    return _applySanityGuard(result, year=year)
+
+
+def _applySanityGuard(result: pl.DataFrame, *, year: str) -> pl.DataFrame:
+    """단위 오류 outlier 제거 + 경고 로깅.
+
+    한 종목 매출 > 500조 / 영업이익 > 100조 / 총자산 > 5,000조 면 단위 mix 의심
+    (예: 032680 소프트센 2022 sales = 7.34e16 = 73,373조 — 한국 GDP 30 배).
+    해당 종목의 해당 계정 값을 None 으로 대체해 산업 집계 왜곡 차단.
+    """
+    if result.height == 0:
+        return result
+
+    checks = (
+        ("revenue", _REVENUE_SANITY_LIMIT),
+        ("opIncome", _OPINCOME_SANITY_LIMIT),
+        ("totalAssets", _ASSET_SANITY_LIMIT),
+    )
+    for col, limit in checks:
+        if col not in result.columns:
+            continue
+        # null dtype (모든 값 None) 컬럼은 skip — abs 연산 불가
+        if not result.schema[col].is_numeric():
+            continue
+        outliers = result.filter(pl.col(col).abs() > limit)
+        if outliers.height == 0:
+            continue
+        for row in outliers.iter_rows(named=True):
+            logger.warning(
+                "%s %s outlier (단위 오류 의심): %s = %.2e (> %.2e), 산업 집계에서 제외",
+                year,
+                col,
+                row["stockCode"],
+                row[col],
+                limit,
+            )
+        result = result.with_columns(pl.when(pl.col(col).abs() > limit).then(None).otherwise(pl.col(col)).alias(col))
 
     return result
 
