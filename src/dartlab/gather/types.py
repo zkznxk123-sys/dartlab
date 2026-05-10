@@ -116,6 +116,30 @@ class PriceSnapshot:
 
 
 @dataclass
+class ConsensusData:
+    """애널리스트 컨센서스 (목표가·분석가수·출처) — backward compat shim.
+
+    Notes
+    -----
+    legacy test_analyst.py 와의 호환을 위한 stub. 신규 코드는 RevenueConsensus
+    또는 MarketSnapshot 사용 권장.
+
+    Attributes
+    ----------
+    target_price : float | None
+        애널리스트 목표주가 평균.
+    analyst_count : int
+        분석가 수.
+    source : str
+        데이터 출처 (예: "naver").
+    """
+
+    target_price: float | None = None
+    analyst_count: int = 0
+    source: str = ""
+
+
+@dataclass
 class RevenueConsensus:
     """애널리스트 매출/이익 컨센서스 — 네이버 금융 finance/annual API.
 

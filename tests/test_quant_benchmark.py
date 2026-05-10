@@ -88,7 +88,7 @@ def test_resolve_benchmark_stack_sector_fallbacks_to_market(monkeypatch):
 
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
     monkeypatch.setattr(bm, "primaryIndustryNode", lambda _: None)
-    monkeypatch.setattr(bm, "_latest_sector_candidate", lambda *_: None)
+    monkeypatch.setattr(bm, "_latestSectorCandidate", lambda *_: None)
 
     resolved = bm.resolveBenchmark("005930", market="KR", benchmarkMode="sector")
 

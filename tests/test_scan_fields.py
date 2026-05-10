@@ -42,7 +42,7 @@ def test_screen_spec_filters_selects_and_sorts(monkeypatch):
         "krx.marketCap": pl.DataFrame({"stockCode": ["000001", "000002"], "krx.marketCap": [1000, 2000]}),
     }
 
-    monkeypatch.setattr(scan_fields, "_load_field_values", lambda field, spec: values[field])
+    monkeypatch.setattr(scan_fields, "_loadFieldValues", lambda field, spec: values[field])
 
     df = scanScreen(
         spec={
@@ -71,7 +71,7 @@ def test_screen_spec_rejects_unknown_op(monkeypatch):
 
     monkeypatch.setattr(
         scan_fields,
-        "_load_field_values",
+        "_loadFieldValues",
         lambda field, spec: pl.DataFrame({"stockCode": ["000001"], field: [12.0]}),
     )
 
@@ -138,10 +138,10 @@ def test_krx_index_is_select_context(monkeypatch):
 
     monkeypatch.setattr(
         scan_fields,
-        "_load_field_values",
+        "_loadFieldValues",
         lambda field, spec: pl.DataFrame({"stockCode": ["000001"], field: [12.0]}),
     )
-    monkeypatch.setattr(scan_fields, "_load_krx_index_scalar", lambda field, spec: 3000.0)
+    monkeypatch.setattr(scan_fields, "_loadKrxIndexScalar", lambda field, spec: 3000.0)
 
     df = scanScreen(
         spec={

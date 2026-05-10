@@ -12,7 +12,7 @@ import httpx
 from dartlab.ai.settings.modelResolver import fallbackModels, sortOpenaiModels
 
 from . import ProviderConfig, ProviderTurn, ToolCall
-from .support import oauth_token as oauthToken
+from .support import oauthToken
 from .support.oauthToken import TokenRefreshError
 
 CODEX_API_BASE = "https://chatgpt.com/backend-api"

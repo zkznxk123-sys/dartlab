@@ -114,7 +114,7 @@ def test_scanValuation_prebuild_path_skips_naver(_isolateScanDir, monkeypatch):
         return pl.DataFrame(schema=vmod._RAW_SCHEMA)
 
     monkeypatch.setattr(vmod, "fetchValuationRaw", _fakeFetch)
-    monkeypatch.setattr(vmod, "scan_finance_parquets", lambda *a, **k: {"005930": 3e14, "000660": 5e13})
+    monkeypatch.setattr(vmod, "scanFinanceParquets", lambda *a, **k: {"005930": 3e14, "000660": 5e13})
 
     result = vmod.scanValuation(refresh=False, verbose=False)
 
@@ -150,7 +150,7 @@ def test_scanValuation_fallback_when_no_prebuild(_isolateScanDir, monkeypatch):
         return pl.DataFrame(rows, schema=vmod._RAW_SCHEMA)
 
     monkeypatch.setattr(vmod, "fetchValuationRaw", _fakeFetch)
-    monkeypatch.setattr(vmod, "scan_finance_parquets", lambda *a, **k: {})
+    monkeypatch.setattr(vmod, "scanFinanceParquets", lambda *a, **k: {})
 
     # dartlab.listing() mocking
     import dartlab as _dl
@@ -191,7 +191,7 @@ def test_scanValuation_refresh_true_bypasses_prebuild(_isolateScanDir, monkeypat
         )
 
     monkeypatch.setattr(vmod, "fetchValuationRaw", _fakeFetch)
-    monkeypatch.setattr(vmod, "scan_finance_parquets", lambda *a, **k: {})
+    monkeypatch.setattr(vmod, "scanFinanceParquets", lambda *a, **k: {})
 
     import dartlab as _dl
 
