@@ -23,29 +23,33 @@ import polars as pl
 
 from dartlab.credit.history import _loadTransition
 
-# dCR rating ordering (best → worst). 'D' 는 absorbing 부도 상태.
+# dCR rating ordering (best → worst). 'dCR-D' 는 absorbing 부도 상태.
+# credit.history._updateTransition 가 result['grade'] (= "dCR-AA" 풀 prefix 형식) 로
+# 누적하므로 본 ordering 도 같은 형식 유지 — 실 transition.json 와 직접 매칭.
 _DEFAULT_RATING_ORDER: tuple[str, ...] = (
-    "AAA",
-    "AA+",
-    "AA",
-    "AA-",
-    "A+",
-    "A",
-    "A-",
-    "BBB+",
-    "BBB",
-    "BBB-",
-    "BB+",
-    "BB",
-    "BB-",
-    "B+",
-    "B",
-    "B-",
-    "CCC",
-    "CC",
-    "C",
-    "D",
+    "dCR-AAA",
+    "dCR-AA+",
+    "dCR-AA",
+    "dCR-AA-",
+    "dCR-A+",
+    "dCR-A",
+    "dCR-A-",
+    "dCR-BBB+",
+    "dCR-BBB",
+    "dCR-BBB-",
+    "dCR-BB+",
+    "dCR-BB",
+    "dCR-BB-",
+    "dCR-B+",
+    "dCR-B",
+    "dCR-B-",
+    "dCR-CCC",
+    "dCR-CC",
+    "dCR-C",
+    "dCR-D",
 )
+# absorbing 부도 라벨 — D 식별에 사용.
+_DEFAULT_DEFAULT_LABEL = "dCR-D"
 
 
 def _countsToMatrix(
@@ -77,10 +81,11 @@ def _countsToMatrix(
         else:
             matrix[i, i] = 1.0
 
-    if "D" in idx:
-        d = idx["D"]
-        matrix[d, :] = 0.0
-        matrix[d, d] = 1.0
+    # absorbing 부도 식별 — full label ('dCR-D') 또는 short ('D') 둘 다 지원.
+    default_idx = idx.get(_DEFAULT_DEFAULT_LABEL, idx.get("D"))
+    if default_idx is not None:
+        matrix[default_idx, :] = 0.0
+        matrix[default_idx, default_idx] = 1.0
 
     return matrix
 
@@ -155,7 +160,9 @@ def forwardPdLadder(
     matrix = _countsToMatrix(counts, ratings)
     idx = {r: i for i, r in enumerate(ratings)}
 
-    if "D" not in idx:
+    # absorbing 부도 식별 — full label ('dCR-D') 또는 short ('D') 둘 다 지원.
+    default_idx = idx.get(_DEFAULT_DEFAULT_LABEL, idx.get("D"))
+    if default_idx is None:
         return pl.DataFrame(
             {
                 "rating": list(ratings),
@@ -163,12 +170,11 @@ def forwardPdLadder(
             }
         )
 
-    d = idx["D"]
     out: dict[str, list] = {"rating": list(ratings)}
     for h in horizons:
         if h <= 0:
             out[f"{h}yPD"] = [0.0] * len(ratings)
             continue
         powered = np.linalg.matrix_power(matrix, h)
-        out[f"{h}yPD"] = [float(x) for x in powered[:, d]]
+        out[f"{h}yPD"] = [float(x) for x in powered[:, default_idx]]
     return pl.DataFrame(out)
