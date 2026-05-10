@@ -379,7 +379,7 @@ def _resolveCompany(target: str):
                 return dartlab.Company(target)
         except (OSError, RuntimeError, TypeError, ValueError):
             pass
-        from dartlab.core.resolve import resolveFromText
+        from dartlab.company import resolveFromText
 
         try:
             with _quietExecutionNoise():

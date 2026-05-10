@@ -169,3 +169,39 @@ def Company(codeOrName: str) -> CompanyProtocol:
             f"  검색: dartlab.searchName('{codeOrName}')\n"
             f"  전체 목록: dartlab.listing(){hint}"
         )
+
+
+# ── facade resolveFromText (정공법 D — Facade re-export) ─────────────
+# core/resolve.py 가 stockCode/ticker 추출까지 담당하고, Company 인스턴스 생성은
+# 본 facade 가 책임. core 가 dartlab/Company 직접 import 하지 않게 layer 분리.
+
+
+_RESOLVE_ERRORS = (AttributeError, KeyError, OSError, RuntimeError, TypeError, ValueError)
+
+
+def resolveFromText(text: str) -> tuple[CompanyProtocol | None, str]:
+    """자연어 텍스트에서 Company 인스턴스와 남은 질문을 분리한다.
+
+    core/resolve.resolveStockCodeFromText 가 stockCode 추출까지 담당.
+    본 함수는 stockCode → Company 인스턴스 생성을 책임 (facade 역할).
+
+    Examples
+    --------
+        resolveFromText("삼성전자 재무건전성 분석해줘")
+        # → (Company("삼성전자"), "재무건전성 분석해줘")
+
+        resolveFromText("005930 영업이익률 추세는?")
+        # → (Company("005930"), "영업이익률 추세는?")
+
+        resolveFromText("오늘 날씨 어때")
+        # → (None, "오늘 날씨 어때")
+    """
+    from dartlab.core.resolve import resolveStockCodeFromText
+
+    stockCode, remaining = resolveStockCodeFromText(text)
+    if stockCode is None:
+        return None, remaining
+    try:
+        return Company(stockCode), remaining
+    except _RESOLVE_ERRORS:
+        return None, text

@@ -15,10 +15,6 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from dartlab.company import Company
 
 _RESOLVE_ERRORS = (AttributeError, KeyError, OSError, RuntimeError, TypeError, ValueError)
 
@@ -86,16 +82,18 @@ def collectCandidates(query: str, *, strict: bool) -> list[dict[str, str]]:
     strict=True: 정확히 일치하거나 prefix 관계만 허용
     strict=False: 부분 포함도 허용 (fuzzy — 초성/Levenshtein 포함)
     """
-    import dartlab
-
     if len(query) < 2:
         return []
-    try:
-        df = dartlab.searchName(query)
-        if len(df) == 0:
-            df = None
-    except (ValueError, OSError):
+    # ListingResolver registry 사용 (정공법 B — DIP). gather 직접 import 0.
+    from dartlab.core.listingResolver import getListingResolver
+
+    resolver = getListingResolver()
+    if resolver is None:
         df = None
+    else:
+        df = resolver.search(query)
+        if df is not None and len(df) == 0:
+            df = None
 
     exact: list[dict[str, str]] = []
     prefix: list[dict[str, str]] = []
@@ -117,29 +115,31 @@ def collectCandidates(query: str, *, strict: bool) -> list[dict[str, str]]:
 
     result = exact + prefix + contains
 
-    # fuzzy fallback: substring 매칭이 없으면 초성/Levenshtein 시도
-    if not result and not strict:
-        from dartlab.gather.listing import fuzzySearch
-
-        try:
-            fuzzy_df = fuzzySearch(query, maxResults=5)
-            if len(fuzzy_df) > 0:
-                seen = {e["stockCode"] for e in result}
-                for row in fuzzy_df.to_dicts():
-                    name = row.get("회사명", row.get("corpName", ""))
-                    code = row.get("종목코드", row.get("stockCode", ""))
-                    if code and code not in seen:
-                        seen.add(code)
-                        result.append({"corpName": name, "stockCode": code})
-        except (ValueError, OSError):
-            pass
+    # fuzzy fallback: substring 매칭이 없으면 ListingResolver fuzzy 시도 (정공법 B — DIP).
+    if not result and not strict and resolver is not None:
+        fuzzyDf = resolver.fuzzy(query, maxResults=5)
+        if fuzzyDf is not None and len(fuzzyDf) > 0:
+            seen = {e["stockCode"] for e in result}
+            for row in fuzzyDf.to_dicts():
+                name = row.get("회사명", row.get("corpName", ""))
+                code = row.get("종목코드", row.get("stockCode", ""))
+                if code and code not in seen:
+                    seen.add(code)
+                    result.append({"corpName": name, "stockCode": code})
 
     return result
 
 
 def searchSuggestions(question: str) -> list[dict[str, str]]:
-    """질문에서 단어를 추출하여 비슷한 종목 후보를 검색한다."""
-    import dartlab
+    """질문에서 단어를 추출하여 비슷한 종목 후보를 검색한다.
+
+    ListingResolver registry (정공법 B — DIP) 사용. core 가 dartlab/gather 직접 import 0.
+    """
+    from dartlab.core.listingResolver import getListingResolver
+
+    resolver = getListingResolver()
+    if resolver is None:
+        return []
 
     words = re.split(r"\s+", question)
     seen_codes: set[str] = set()
@@ -154,7 +154,9 @@ def searchSuggestions(question: str) -> list[dict[str, str]]:
                 queries.append(word[: -len(suffix)])
         for q in queries:
             try:
-                df = dartlab.searchName(q)
+                df = resolver.search(q)
+                if df is None:
+                    continue
                 for row in df.head(3).to_dicts():
                     code = row.get("종목코드", row.get("stockCode", ""))
                     name = row.get("회사명", row.get("corpName", ""))
@@ -168,52 +170,29 @@ def searchSuggestions(question: str) -> list[dict[str, str]]:
     return suggestions
 
 
-def resolveFromText(text: str) -> tuple[Company | None, str]:
-    """자연어 텍스트에서 종목과 질문을 분리한다.
+def resolveStockCodeFromText(text: str) -> tuple[str | None, str]:
+    """자연어 텍스트에서 stockCode/ticker 와 남은 질문을 분리한다.
+
+    core layer 책임 — Company 인스턴스 생성은 호출자 (dartlab.company.resolveFromText) 책임.
 
     Returns:
-        (Company | None, remaining_question)
-
-    Examples::
-
-        resolve_from_text("삼성전자 재무건전성 분석해줘")
-        # → (Company("삼성전자"), "재무건전성 분석해줘")
-
-        resolve_from_text("삼전 배당")
-        # → (Company("삼성전자"), "배당")
-
-        resolve_from_text("005930 영업이익률 추세는?")
-        # → (Company("005930"), "영업이익률 추세는?")
-
-        resolve_from_text("AAPL dividend trend?")
-        # → (Company("AAPL"), "dividend trend?")
-
-        resolve_from_text("오늘 날씨 어때")
-        # → (None, "오늘 날씨 어때")
+        (stockCode | ticker | None, remaining_question)
     """
-    from dartlab import Company
-
     text = text.strip()
     if not text:
         return None, text
 
-    # 1) 6자리 종목코드 먼저 시도
+    # 1) 6자리 종목코드 먼저
     code_match = re.match(r"^(\d{6})\s+(.+)$", text)
     if code_match:
-        try:
-            return Company(code_match.group(1)), code_match.group(2).strip()
-        except _RESOLVE_ERRORS:
-            pass
+        return code_match.group(1), code_match.group(2).strip()
 
     # 2) US ticker 패턴 (대문자 1~5글자 + 공백 + 나머지)
     ticker_match = re.match(r"^([A-Z]{1,5})\s+(.+)$", text)
     if ticker_match:
-        try:
-            return Company(ticker_match.group(1)), ticker_match.group(2).strip()
-        except _RESOLVE_ERRORS:
-            pass
+        return ticker_match.group(1), ticker_match.group(2).strip()
 
-    # 3) 약칭 → 정식명 (단어 조합, 긴 것 우선)
+    # 3) 약칭/회사명 (단어 조합, 긴 것 우선) — alias 우선, 매칭 1 개면 채택
     words = text.split()
     for length in range(min(4, len(words)), 0, -1):
         for i in range(len(words) - length + 1):
@@ -221,18 +200,12 @@ def resolveFromText(text: str) -> tuple[Company | None, str]:
             remaining_parts = words[:i] + words[i + length :]
             remaining = " ".join(remaining_parts).strip()
 
-            # 조사 제거 버전 우선 시도 ("하이닉스의" → "하이닉스")
             stripped = stripParticles(candidate)
             for term in dict.fromkeys([stripped, candidate]):
                 alias = COMMON_ALIASES.get(term)
                 if alias:
-                    try:
-                        company = Company(alias)
-                        return company, remaining if remaining else candidate
-                    except _RESOLVE_ERRORS:
-                        pass
+                    return alias, remaining if remaining else candidate
 
-            # 직접 매칭 시도
             for term in dict.fromkeys([stripped, candidate]):
                 candidates = collectCandidates(term, strict=True)
                 if candidates:
@@ -240,19 +213,10 @@ def resolveFromText(text: str) -> tuple[Company | None, str]:
             else:
                 candidates = []
             if len(candidates) == 1:
-                try:
-                    company = Company(candidates[0]["stockCode"])
-                    return company, remaining if remaining else candidate
-                except _RESOLVE_ERRORS:
-                    continue
+                return candidates[0]["stockCode"], remaining if remaining else candidate
 
-            # 정확히 일치하는 후보
             exact = [c for c in candidates if c["corpName"] == candidate]
             if len(exact) == 1:
-                try:
-                    company = Company(exact[0]["stockCode"])
-                    return company, remaining if remaining else candidate
-                except _RESOLVE_ERRORS:
-                    continue
+                return exact[0]["stockCode"], remaining if remaining else candidate
 
     return None, text

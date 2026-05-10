@@ -763,3 +763,37 @@ def getKrxList(*, forceRefresh: bool = False) -> pl.DataFrame:
         _krxMemoryTs = time.time()
         emit("listing:krx:done", count=df.height)
         return df
+
+
+# ── ListingResolver 구현 + register (정공법 B — DIP) ─────────────
+
+
+class GatherListingResolver:
+    """ListingResolver 구현 — core/resolve.py 가 이 인스턴스 사용 (registry 경유).
+
+    core 가 gather/listing.py 직접 import 안 함. module load 시점에 register.
+    """
+
+    def search(self, query: str) -> pl.DataFrame | None:
+        """회사명 검색 — searchName 위임."""
+        try:
+            return searchName(query)
+        except (ValueError, OSError):
+            return None
+
+    def fuzzy(self, query: str, *, maxResults: int = 5) -> pl.DataFrame | None:
+        """fuzzy 검색 — fuzzySearch 위임."""
+        try:
+            return fuzzySearch(query, maxResults=maxResults)
+        except (ValueError, OSError):
+            return None
+
+
+def _registerGatherListingResolver() -> None:
+    """import 시점 등록 — circular import 회피용 함수 lazy import."""
+    from dartlab.core.listingResolver import registerListingResolver
+
+    registerListingResolver(GatherListingResolver())
+
+
+_registerGatherListingResolver()
