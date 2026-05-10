@@ -189,3 +189,56 @@ def validateDartApiKey(key: str) -> dict[str, Any]:
         emptyOn013=True,
     )
     return {"ok": True}
+
+
+# ── CredentialProvider 구현 + register (정공법 B — DIP) ─────────────
+
+
+class DartKeyProvider:
+    """DART API key 의 CredentialProvider 구현 — core 가 직접 import 안 하고 registry 로 접근.
+
+    module load 시점에 registerCredentialProvider() 호출됨 (파일 끝).
+    core/credentials.py 의 CredentialManager 가 registry iterate 로 사용.
+    """
+
+    name = "dart_api_key"
+
+    def check(self):
+        """DART API 키 상태 → CredentialStatus."""
+        from dartlab.core.credentials import CredentialStatus
+
+        try:
+            status = getDartKeyStatus()
+        except Exception:
+            return CredentialStatus(name=self.name, configured=False, source="none")
+
+        masked: str | None = None
+        if status.configured:
+            try:
+                keys = resolveDartKeys()
+                if keys:
+                    k = keys[0]
+                    masked = k[:4] + "..." + k[-4:] if len(k) > 8 else "***"
+            except (TypeError, ValueError):
+                pass
+
+        return CredentialStatus(
+            name=self.name,
+            configured=status.configured,
+            source=status.source,
+            maskedValue=masked,
+        )
+
+    def save(self, value: str) -> None:
+        """프로젝트 .env 에 DART_API_KEY 저장."""
+        saveDartKeyToDotenv(value)
+
+
+def _registerDartKeyProvider() -> None:
+    """import 시점 등록 — circular import 회피 위해 함수 내부 lazy import."""
+    from dartlab.core.credentials import registerCredentialProvider
+
+    registerCredentialProvider(DartKeyProvider())
+
+
+_registerDartKeyProvider()
