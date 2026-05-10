@@ -51,3 +51,29 @@ __all__ = [
     "listLocalQuarters",
     "touchBulkFreshness",
 ]
+
+
+# ── LoaderProvider 구현 + register (정공법 B — DIP) ─────────────
+
+
+class EdgarBulkLoader:
+    """edgar 카테고리의 LoaderProvider 구현 (SEC 벌크 finance).
+
+    core/dataLoader.py 가 직접 ensureFinanceParquet 호출 대신 registry dispatch.
+    """
+
+    category = "edgar"
+
+    def ensure(self, stockCode, path, *, sinceYear=None, asOf=None, refresh="auto"):
+        """SEC 벌크 finance parquet 보장 — ensureFinanceParquet 위임."""
+        ensureFinanceParquet(stockCode, path, refresh=bool(refresh and refresh != "auto"))
+
+
+def _registerEdgarBulkLoader() -> None:
+    """import 시점 등록 — circular import 회피용 함수 lazy import."""
+    from dartlab.core.loaders import registerLoader
+
+    registerLoader(EdgarBulkLoader())
+
+
+_registerEdgarBulkLoader()

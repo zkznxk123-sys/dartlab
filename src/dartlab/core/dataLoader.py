@@ -405,9 +405,13 @@ def loadData(
     if category == "edgarDocs" and effectiveSinceYear is None:
         effectiveSinceYear = 2009
     if category == "edgarDocs":
-        from dartlab.providers.edgar.docs.loader import ensureEdgarDocs
+        # registry dispatch (정공법 B — DIP). providers/edgar 가 EdgarDocsLoader 등록.
+        from dartlab.core.loaders import getLoader
 
-        ensureEdgarDocs(
+        loader = getLoader("edgarDocs")
+        if loader is None:
+            raise RuntimeError("edgarDocs LoaderProvider 미등록 — providers.edgar 모듈 로드 실패")
+        loader.ensure(
             stockCode,
             path,
             sinceYear=effectiveSinceYear or 2009,
@@ -458,9 +462,13 @@ def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefr
     - 그 외 → HF 다운로드 + ETag 기반 증분 갱신
     """
     if category == "edgar":
-        from dartlab.providers.edgar.bulk import ensureFinanceParquet
+        # registry dispatch (정공법 B — DIP). providers/edgar 가 EdgarBulkLoader 등록.
+        from dartlab.core.loaders import getLoader
 
-        ensureFinanceParquet(stockCode, path, refresh=shouldRefresh)
+        loader = getLoader("edgar")
+        if loader is None:
+            raise RuntimeError("edgar LoaderProvider 미등록 — providers.edgar 모듈 로드 실패")
+        loader.ensure(stockCode, path, refresh=shouldRefresh)
         return
 
     if not path.exists():

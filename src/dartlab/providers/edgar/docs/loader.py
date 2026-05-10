@@ -270,3 +270,36 @@ __all__ = [
 # 옛 이름 (private prefix) 호환 — 외부에서 직접 부르면 안 되지만 dataLoader
 # 가 기존 lazy import 로 가지고 있을 수 있어 일정 기간 alias 노출.
 _ensureEdgarDocs = ensureEdgarDocs
+
+
+# ── LoaderProvider 구현 + register (정공법 B — DIP) ─────────────
+
+
+class EdgarDocsLoader:
+    """edgarDocs 카테고리의 LoaderProvider 구현.
+
+    core/dataLoader.py 가 직접 ensureEdgarDocs 호출 대신 registry dispatch.
+    module load 시점에 _registerEdgarDocsLoader() 가 등록.
+    """
+
+    category = "edgarDocs"
+
+    def ensure(self, stockCode, path, *, sinceYear=None, asOf=None, refresh="auto"):
+        """edgarDocs 보장 — ensureEdgarDocs 위임."""
+        ensureEdgarDocs(
+            stockCode,
+            path,
+            sinceYear=sinceYear or 2009,
+            asOf=asOf,
+            refresh=refresh,
+        )
+
+
+def _registerEdgarDocsLoader() -> None:
+    """import 시점 등록 — circular import 회피용 함수 lazy import."""
+    from dartlab.core.loaders import registerLoader
+
+    registerLoader(EdgarDocsLoader())
+
+
+_registerEdgarDocsLoader()
