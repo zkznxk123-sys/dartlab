@@ -31,9 +31,10 @@ def _stockMarket(stockCode: str | None) -> tuple[str | None, str]:
     if not stockCode:
         return None, "no_stock"
     try:
-        from dartlab.gather.listing import getKrxList
+        # F4: gather 직접 호출 제거 → IndustryDataAccessor (정공법 B)
+        from dartlab.core.di import getIndustryAccessor
 
-        df = getKrxList()
+        df = getIndustryAccessor().fetchListing(market="KR")
         if df is None or df.is_empty() or "short_code" not in df.columns:
             return None, "listing_empty"
         row = df.filter(pl.col("short_code") == stockCode).head(1)
