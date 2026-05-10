@@ -1,9 +1,19 @@
 """DART 공시 데이터 활용 라이브러리."""
 
+import os as _os
 import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
 from typing import TYPE_CHECKING, Any
+
+# Polars thread-local arena 가드: 스레드당 ~10–50 MB allocator arena 누적.
+# CPU > 8 환경에서 기본값 (= 코어 수) 그대로면 16 코어 노트북 ~100–500 MB 손해.
+# 회사 다중 분석·긴 세션 패턴에 8 스레드면 충분. 사용자 명시 설정은 존중.
+# polars 가 transitive 로 import 되기 전에 환경변수를 박아야 효과가 있어
+# 그 어떤 dartlab 서브모듈 import 보다 앞에 위치한다.
+if "POLARS_MAX_THREADS" not in _os.environ and (_os.cpu_count() or 4) > 8:
+    _os.environ["POLARS_MAX_THREADS"] = "8"
+del _os
 
 _IS_PYODIDE = sys.platform == "emscripten"
 

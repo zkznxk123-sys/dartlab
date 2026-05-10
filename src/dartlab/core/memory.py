@@ -154,6 +154,60 @@ def check_memory_and_gc(label: str = "") -> float:
     return mem
 
 
+def cleanupBetweenCompanies(label: str = "") -> tuple[float, float]:
+    """회사 다중 분석 워크플로우에서 회사 경계마다 호출하여 누적 메모리 회수.
+
+    BoundedCache EMERGENCY tier 의 정리 동작 (dataLoader 디스크 캐시 비우기 +
+    Polars string cache 회수 + GC) 을 명시 호출 가능하게 노출.
+
+    한 프로세스 안에서 회사 여러 개를 순차 분석할 때 회사 사이에 호출하면
+    누적 dataLoader 캐시 / Polars string interning 풀이 회수된다.
+    BoundedCache 자체는 EMERGENCY 임계 (기본 2500 MB) 가 자동 처리한다.
+
+    Polars Rust 힙은 allocator (mimalloc) 가 retained pages 를 보유해
+    이 함수만으로 RSS 가 즉시 감소하지는 않는다. 그러나 다음 할당이 보유
+    arena 를 재사용하므로 무한 누적은 막힌다.
+
+    Args:
+        label: 로그 식별자 (예: 회사 종목코드 / 분석 단계).
+
+    Returns:
+        (before_mb, after_mb): 호출 전 / 후 RSS (MB). 측정 실패 시 -1.0.
+
+    Example::
+
+        from dartlab.core.memory import cleanupBetweenCompanies
+        for code in ["005930", "000660", "035420"]:
+            company = Company(code)
+            analyze(company)
+            cleanupBetweenCompanies(label=code)
+    """
+    before = get_memory_mb()
+    try:
+        from dartlab.core.dataLoader import _clearLoadCache
+
+        _clearLoadCache()
+    except (ImportError, AttributeError):
+        pass
+    try:
+        import polars as pl
+
+        pl.disable_string_cache()
+    except (ImportError, AttributeError):
+        pass
+    gc.collect()
+    after = get_memory_mb()
+    if before > 0 and after > 0:
+        log.info(
+            "[memory] cleanupBetweenCompanies %s: %.0f → %.0f MB (-%.0f)",
+            label or "",
+            before,
+            after,
+            before - after,
+        )
+    return before, after
+
+
 class BoundedCache:
     """메모리 압박 감지 LRU 캐시 (thread-safe + pinned 키 보호).
 
