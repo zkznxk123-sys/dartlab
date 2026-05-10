@@ -141,7 +141,7 @@ def buildForCode(code: str, *, force: bool = False) -> dict[str, Any]:
 
     # peer — industry.peers + spec_peer_matrix
     try:
-        from dartlab.industry.peers import industryPeerMetricKeys, industryPeers
+        from dartlab.industry.calcs.peers import industryPeerMetricKeys, industryPeers
         from dartlab.viz import specPeerMatrix
 
         peer_rows = industryPeers(code, n=10)

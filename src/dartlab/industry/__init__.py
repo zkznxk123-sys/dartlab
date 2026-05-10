@@ -223,7 +223,7 @@ class Industry:
 
     def _lifecycle(self, industryId: str) -> pl.DataFrame:
         """산업 라이프사이클 phase 시계열 (Vernon 3-phase + 쇠퇴)."""
-        from dartlab.industry.lifecycle import classifyLifecycle
+        from dartlab.industry.calcs.lifecycle import classifyLifecycle
 
         return classifyLifecycle(industryId)
 

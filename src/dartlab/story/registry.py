@@ -509,7 +509,12 @@ def _buildIndustryBlocks(company, keys, basePeriod, safe: Callable, need: Callab
         out["sectorKpi"] = safe(lambda: sectorKpiBlock(_sectorKpi(company)))
 
     if keys is None or keys & {"chainPosition", "sectorMetrics", "sectorOutlook"}:
-        from dartlab.industry.calcs import calcChainPosition, calcSectorCycle, calcSectorDynamics, calcSectorMetrics
+        from dartlab.industry.calcs.companyCalcs import (
+            calcChainPosition,
+            calcSectorCycle,
+            calcSectorDynamics,
+            calcSectorMetrics,
+        )
         from dartlab.story.builders import chainPositionBlock, sectorMetricsBlock, sectorOutlookBlock
 
         if need("chainPosition"):

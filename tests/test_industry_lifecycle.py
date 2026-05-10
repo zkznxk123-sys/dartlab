@@ -20,39 +20,39 @@ pytestmark = [pytest.mark.unit]
 
 class TestClassifyPhase:
     def test_introduction_threshold(self):
-        from dartlab.industry.lifecycle import classifyPhase
+        from dartlab.industry.calcs.lifecycle import classifyPhase
 
         assert classifyPhase(40.0) == "도입"
         assert classifyPhase(30.0) == "도입"  # boundary inclusive
 
     def test_growth_band(self):
-        from dartlab.industry.lifecycle import classifyPhase
+        from dartlab.industry.calcs.lifecycle import classifyPhase
 
         assert classifyPhase(29.99) == "성장"
         assert classifyPhase(20.0) == "성장"
         assert classifyPhase(10.0) == "성장"  # boundary inclusive
 
     def test_maturity_band(self):
-        from dartlab.industry.lifecycle import classifyPhase
+        from dartlab.industry.calcs.lifecycle import classifyPhase
 
         assert classifyPhase(9.99) == "성숙"
         assert classifyPhase(5.0) == "성숙"
         assert classifyPhase(0.0) == "성숙"  # boundary inclusive
 
     def test_decline_band(self):
-        from dartlab.industry.lifecycle import classifyPhase
+        from dartlab.industry.calcs.lifecycle import classifyPhase
 
         assert classifyPhase(-0.01) == "쇠퇴"
         assert classifyPhase(-5.0) == "쇠퇴"
         assert classifyPhase(-50.0) == "쇠퇴"
 
     def test_unknown_for_none(self):
-        from dartlab.industry.lifecycle import classifyPhase
+        from dartlab.industry.calcs.lifecycle import classifyPhase
 
         assert classifyPhase(None) == "unknown"
 
     def test_unknown_for_nan(self):
-        from dartlab.industry.lifecycle import classifyPhase
+        from dartlab.industry.calcs.lifecycle import classifyPhase
 
         assert classifyPhase(math.nan) == "unknown"
 
@@ -65,7 +65,7 @@ class TestClassifyPhase:
 class TestClassifyLifecycleEmpty:
     def test_unknown_industryId_returns_empty_df_with_schema(self):
         """존재하지 않는 industryId → 빈 DataFrame (스키마는 유지)."""
-        from dartlab.industry.lifecycle import classifyLifecycle
+        from dartlab.industry.calcs.lifecycle import classifyLifecycle
 
         df = classifyLifecycle("__nonexistent_industry_zzz__")
         assert df.height == 0

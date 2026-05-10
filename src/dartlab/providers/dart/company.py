@@ -4076,7 +4076,7 @@ class Company:
             Freshness:
                 산업 지도 정의 시점 — 운영자 수동 업데이트.
         """
-        from dartlab.industry.calcs import calcChainPosition
+        from dartlab.industry.calcs.companyCalcs import calcChainPosition
 
         return calcChainPosition(self)
 
