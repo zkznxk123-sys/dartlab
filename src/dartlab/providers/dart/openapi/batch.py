@@ -988,9 +988,12 @@ def batchCollectAll(
       "new" — 파일 없는 종목만
       "all" — 전체
     """
-    from dartlab.gather.listing import getKindList
+    from dartlab.core.listingResolver import getListingResolver
 
-    kindDf = getKindList()
+    resolver = getListingResolver()
+    if resolver is None:
+        return {}
+    kindDf = resolver.kindList()
     # 코넥스 제외 (공시 제한적, 사용자 관심 대상 아님)
     kindDf = kindDf.filter(pl.col("시장구분") != "코넥스")
     allCodes = kindDf["종목코드"].to_list()

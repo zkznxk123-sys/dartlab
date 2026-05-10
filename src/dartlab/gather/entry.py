@@ -701,3 +701,27 @@ class GatherEntry:
             "노트북: https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/02_gather.py"
         )
         return "\n".join(lines)
+
+
+class _GatherProviderAdapter:
+    """GatherProvider Protocol 구현체 — gather/entry · getDefaultGather 위임체."""
+
+    def news(self, query: str, *, market: str = "KR", days: int = 30) -> Any | None:
+        """뉴스 수집 — gather.getDefaultGather().news 위임."""
+        from dartlab.gather import getDefaultGather
+
+        return getDefaultGather().news(query, market=market, days=days)
+
+    def entry(self, axis: str | None = None, stockCode: str | None = None, **kwargs: Any) -> Any:
+        """4축 entry 위임 — GatherEntry() callable 호출."""
+        gather = GatherEntry()
+        if axis is None:
+            return gather()
+        if stockCode is None:
+            return gather(axis, **kwargs)
+        return gather(axis, stockCode, **kwargs)
+
+
+from dartlab.core.gatherProvider import registerGatherProvider as _registerGatherProvider
+
+_registerGatherProvider(_GatherProviderAdapter())

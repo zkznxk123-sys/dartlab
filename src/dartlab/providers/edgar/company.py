@@ -1143,12 +1143,12 @@ class Company:
             c.gather()              # 사용 가능한 축 목록
             c.gather("price")       # Apple 주가 수집
         """
-        from dartlab.gather.entry import GatherEntry
+        from dartlab.core.gatherProvider import getGatherProvider
 
-        _gather = GatherEntry()
-        if axis is None:
-            return _gather()
-        return _gather(axis, self.ticker, market="US", **kwargs)
+        provider = getGatherProvider()
+        if provider is None:
+            return None
+        return provider.entry(axis, self.ticker, market="US", **kwargs)
 
     def filings(self) -> pl.DataFrame | None:
         """SEC 공시 문서 목록 — 10-K/10-Q 등 정기보고서 목록.
@@ -2242,9 +2242,10 @@ class Company:
             c.news()           # 최근 30일 뉴스
             c.news(days=7)     # 최근 7일
         """
-        from dartlab.gather import getDefaultGather
+        from dartlab.core.gatherProvider import getGatherProvider
 
-        return getDefaultGather().news(self.ticker, market="US", days=days)
+        provider = getGatherProvider()
+        return provider.news(self.ticker, market="US", days=days) if provider else None
 
     def watch(
         self,

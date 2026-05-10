@@ -569,9 +569,12 @@ def listUncollectedKind(
     list
         [(종목코드, 회사명), ...]
     """
-    from dartlab.gather.listing import getKindList
+    from dartlab.core.listingResolver import getListingResolver
 
-    kindDf = getKindList()
+    resolver = getListingResolver()
+    if resolver is None:
+        return []
+    kindDf = resolver.kindList()
     # 코넥스 제외, 종목코드 6자리 (영문자 포함 코드도 허용: 0001A0 등)
     kindDf = kindDf.filter(pl.col("시장구분") != "코넥스")
     kindDf = kindDf.filter(pl.col("종목코드").str.len_chars() == 6)

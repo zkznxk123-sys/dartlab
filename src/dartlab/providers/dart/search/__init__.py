@@ -155,9 +155,10 @@ def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:
     if len(corp) == 8 and corp.isdigit():
         return corp, None
     try:
-        from dartlab.gather.listing import searchListing
+        from dartlab.core.listingResolver import getListingResolver
 
-        match = searchListing(corp)
+        resolver = getListingResolver()
+        match = resolver.search(corp) if resolver else None
         if match is not None and match.height > 0:
             return None, match["stock_code"][0]
     except (ImportError, KeyError, ValueError, AttributeError):

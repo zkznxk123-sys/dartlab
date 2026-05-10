@@ -2114,9 +2114,10 @@ class Company:
             - liveFilings: 최신 공시 (뉴스가 아닌 공식 공시)
             - gather: 뉴스 포함 4축 외부 데이터 수집
         """
-        from dartlab.gather import getDefaultGather
+        from dartlab.core.gatherProvider import getGatherProvider
 
-        return getDefaultGather().news(self.corpName, market="KR", days=days)
+        provider = getGatherProvider()
+        return provider.news(self.corpName, market="KR", days=days) if provider else None
 
     def watch(
         self,
@@ -2644,12 +2645,12 @@ class Company:
             Freshness:
                 price/flow: T+1 (전일 종가). macro: ECOS/FRED 갱신 주기. news: 실시간 RSS.
         """
-        from dartlab.gather.entry import GatherEntry
+        from dartlab.core.gatherProvider import getGatherProvider
 
-        _gather = GatherEntry()
-        if axis is None:
-            return _gather()
-        return _gather(axis, self.stockCode, **kwargs)
+        provider = getGatherProvider()
+        if provider is None:
+            return None
+        return provider.entry(axis, self.stockCode, **kwargs)
 
     def table(
         self,
