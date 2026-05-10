@@ -15,7 +15,9 @@ default_whitelist:
   # ── 자동 생성물 ──
   - src/dartlab/core/_generated.py
   - src/dartlab/core/_generatedCapabilities.py
+  - src/dartlab/core/capability/_generated.py
   - src/dartlab/mcp/_generated_tools.py
+  - src/dartlab/skills/index.json  # generateSkills 산출 — refactorChecklist 본문 흡수
   - CAPABILITIES.md
   - landing/static/llms.txt
   - .claude/skills/dartlab/reference.md
