@@ -1367,11 +1367,12 @@ def _buildMacroBlocks(company, keys, basePeriod, safe: Callable, need: Callable,
 
     def _ensureSummary():
         if _macro_summary[0] is None:
-            import dartlab as _dl
-
+            # F6: dartlab root facade 우회 → macro.summary 직접 (정공법 D)
             try:
-                _macro_summary[0] = _dl.macro("종합", market=_macro_market)
-            except (ValueError, TypeError, KeyError, OSError) as e:
+                from dartlab.macro.summary import analyzeSummary
+
+                _macro_summary[0] = analyzeSummary(market=_macro_market)
+            except (ValueError, TypeError, KeyError, OSError, ImportError) as e:
                 _LOG.debug("macro 종합 실패 (market=%s): %s", _macro_market, e)
                 _macro_summary[0] = {}
         return _macro_summary[0]

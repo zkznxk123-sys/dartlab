@@ -645,109 +645,6 @@ def _autoStream(gen) -> str:
     return "".join(chunks)
 
 
-def ask(
-    question: str,
-    *,
-    stockCode: str | None = None,
-    provider: str | None = None,
-    model: str | None = None,
-    stream: bool = True,
-    raw: bool = False,
-    reflect: bool = False,
-    pattern: str | None = None,
-    template: str | None = None,
-    modules: list[str] | None = None,
-    **kwargs,
-):
-    """AI 에게 질문. LLM 이 DartLab 을 읽고 실행한 뒤 검산해 답한다.
-
-    Capabilities:
-        - 자연어로 기업/시장 분석 (DartLab API·데이터셋·skills 를 검색 후 실행)
-        - 스트리밍 출력 (기본) / 배치 반환 / Generator 직접 제어
-        - 원본 검증 · 가정 조정 · 업종 비교는 run_python 결과와 ref 로 검산
-
-    Requires:
-        AI: provider 설정 (dartlab.setup() 참조)
-
-    Guide:
-        - "삼성전자 수익성 분석" -> dartlab.ask("삼성전자 수익성 분석해줘")
-        - "삼성 vs SK하이닉스" -> dartlab.ask("삼성전자와 SK하이닉스 비교")
-        - "반도체 업황" -> dartlab.ask("반도체 업황 어때")  (종목 불필요)
-
-    SeeAlso:
-        - Company: 원본 데이터 조회 (show/select)
-        - scan: 전종목 비교 (프로그래밍)
-        - skills: 공용 분석 절차 검색
-
-    Args:
-        question: 자연어 질문.
-        stockCode: UI/서버가 현재 화면 종목코드를 힌트로 전달 (선택).
-        provider: LLM provider.
-        stream: True 면 실시간 스트리밍 출력 (기본). False 면 조용히 전체 텍스트 반환.
-        raw: True 면 Generator 를 직접 반환 (커스텀 UI 용).
-
-    Returns:
-        str | None: 전체 답변 텍스트. 설정 오류 시 None. (raw=True 일 때만 Generator[str])
-
-    Example::
-
-        import dartlab
-        dartlab.ask("삼성전자 수익성 분석해줘")
-        dartlab.ask("삼성전자 분석", stream=False)  # 조용히 전체 텍스트
-    """
-    from dartlab.ai.kernel import ask as _ask
-
-    if not question or not question.strip():
-        print("\n  질문을 입력해 주세요.")
-        print("  예: dartlab.ask('삼성전자 재무건전성 분석해줘')\n")
-        return None
-
-    _call_kwargs = dict(
-        stockCode=stockCode,
-        provider=provider,
-        model=model,
-        reflect=reflect,
-        pattern=pattern,
-        template=template,
-        modules=modules,
-        **kwargs,
-    )
-
-    if raw:
-        return _ask(question, stream=stream, **_call_kwargs)
-
-    if not stream:
-        return _ask(question, stream=False, **_call_kwargs)
-
-    gen = _ask(question, stream=True, **_call_kwargs)
-    return _autoStream(gen)
-
-
-def templates(name: str | None = None):
-    """분석 템플릿 목록 또는 특정 템플릿 내용.
-
-    Example::
-
-        dartlab.templates()          # 전체 목록
-        dartlab.templates("가치투자") # 특정 템플릿 내용
-    """
-    from dartlab.ai import templates as _templates
-
-    return _templates(name)
-
-
-def saveTemplate(name: str, *, content: str | None = None, file: str | None = None):
-    """사용자 분석 템플릿 저장. ~/.dartlab/templates/{name}.md
-
-    Example::
-
-        dartlab.saveTemplate("my_style", content="## 내 기준\\n- ROE > 15%")
-    """
-    from dartlab.ai import saveTemplate as _save
-
-    return _save(name, content=content, file=file)
-
-
 def plugins():
     """로드된 플러그인 목록 반환.
 
@@ -869,6 +766,13 @@ class _Module(sys.modules[__name__].__class__):
     def __getattr__(self, name):
         # PEP 562 lazy — Company / Fred / OpenDart / OpenEdgar / Story / listing / codeToName 등.
         # 첫 attribute access 까지 import 비용을 미룬다 (cold path 1.3 s → ~0.7 s 효과).
+        # F6: ai entries 도 lazy 로 import — dartlab → dartlab.ai 정적 chain 차단 (정공법 D).
+        if name in ("ask", "templates", "saveTemplate"):
+            from dartlab import _aiEntries
+
+            obj = getattr(_aiEntries, name)
+            setattr(self, name, obj)
+            return obj
         target = _LAZY_ATTRS.get(name)
         if target is not None:
             import importlib

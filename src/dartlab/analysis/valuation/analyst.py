@@ -12,13 +12,12 @@ Usage::
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from dartlab.core.types import MarketSnapshot
 
-if TYPE_CHECKING:  # type-only; Gather 는 runtime 에 di 경유
-    from dartlab.gather.entry import GatherEntry as Gather  # noqa: F401
-
+# Gather 는 runtime 에 core.di.getMacroProvider 경유 (정공법 B+C — gather 직접 의존 X)
+# type 주석은 문자열로 ("Gather") — TYPE_CHECKING import 도 lint-imports 위반이라 제거
 from .synthesizer import synthesize
 from .types import AnalystReport, ValuationMethod
 
@@ -57,7 +56,7 @@ class Analyst:
         log.info(report.opinion)
     """
 
-    def __init__(self, gather: "Gather | None" = None) -> None:
+    def __init__(self, gather: Any = None) -> None:
         if gather is None:
             from dartlab.core.di import getMacroProvider
 
