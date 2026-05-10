@@ -313,7 +313,7 @@ def optimizeRiskParity(stockCodes: list[str], *, market: str = "auto", **kwargs)
 
     Examples
     --------
-    >>> from dartlab.quant.portfolio import optimizeRiskParity
+    >>> from dartlab.quant.portfolio.optimize import optimizeRiskParity
     >>> optimizeRiskParity(["005930", "000660", "035720"])"""
     result: dict = {"stockCodes": stockCodes}
 
@@ -459,7 +459,7 @@ def allocateERC(stockCodes: list[str], *, market: str = "auto", **kwargs) -> dic
 
     Examples
     --------
-    >>> from dartlab.quant.portfolio import allocateERC
+    >>> from dartlab.quant.portfolio.optimize import allocateERC
     >>> allocateERC(["005930", "000660", "035720"])"""
     result: dict = {"stockCodes": stockCodes}
 

@@ -185,7 +185,7 @@ def test_impliedIR_fundamental_law():
 
 @pytest.mark.unit
 def test_holdingsToFactorExposure_weighted_sum():
-    from dartlab.quant.portfolio import holdingsToFactorExposure
+    from dartlab.quant.portfolio.optimize import holdingsToFactorExposure
 
     w = {"A": 0.5, "B": 0.5}
     L = {"A": {"MKT": 1.0, "SMB": -0.5}, "B": {"MKT": 1.2, "SMB": 0.3}}
@@ -196,7 +196,7 @@ def test_holdingsToFactorExposure_weighted_sum():
 
 @pytest.mark.unit
 def test_activeExposure_zero_when_identical():
-    from dartlab.quant.portfolio import activeExposure
+    from dartlab.quant.portfolio.optimize import activeExposure
 
     w = {"A": 0.5, "B": 0.5}
     L = {"A": {"MKT": 1.0}, "B": {"MKT": 1.2}}
@@ -206,7 +206,7 @@ def test_activeExposure_zero_when_identical():
 
 @pytest.mark.unit
 def test_riskBudgetByFactor_shares_sum_to_one():
-    from dartlab.quant.portfolio import riskBudgetByFactor
+    from dartlab.quant.portfolio.optimize import riskBudgetByFactor
 
     exp = {"MKT": 1.0, "SMB": 0.2}
     cov = {("MKT", "MKT"): 0.04, ("SMB", "SMB"): 0.01, ("MKT", "SMB"): 0.002}
@@ -220,7 +220,7 @@ def test_riskBudgetByFactor_shares_sum_to_one():
 
 @pytest.mark.unit
 def test_constrainedMinVariance_weights_sum_to_one():
-    from dartlab.quant.portfolio import constrainedMinVariance
+    from dartlab.quant.portfolio.optimize import constrainedMinVariance
 
     S = np.array([[0.04, 0.01], [0.01, 0.03]])
     r = constrainedMinVariance(S, boxMin=0.0, boxMax=1.0)
@@ -229,7 +229,7 @@ def test_constrainedMinVariance_weights_sum_to_one():
 
 @pytest.mark.unit
 def test_constrainedMinVariance_box_respected():
-    from dartlab.quant.portfolio import constrainedMinVariance
+    from dartlab.quant.portfolio.optimize import constrainedMinVariance
 
     S = np.array([[0.01, 0.0, 0.0], [0.0, 0.1, 0.0], [0.0, 0.0, 0.5]])
     r = constrainedMinVariance(S, boxMin=0.1, boxMax=0.5)
@@ -240,7 +240,7 @@ def test_constrainedMinVariance_box_respected():
 
 @pytest.mark.unit
 def test_factorExposureConstraint_breach_detection():
-    from dartlab.quant.portfolio import factorExposureConstraint
+    from dartlab.quant.portfolio.optimize import factorExposureConstraint
 
     w = np.array([0.6, 0.4])
     L = np.array([[1.5, 0.2], [1.3, 0.1]])
@@ -252,7 +252,7 @@ def test_factorExposureConstraint_breach_detection():
 
 @pytest.mark.unit
 def test_constrainedMinVariance_empty_cov():
-    from dartlab.quant.portfolio import constrainedMinVariance
+    from dartlab.quant.portfolio.optimize import constrainedMinVariance
 
     r = constrainedMinVariance(np.zeros((0, 0)))
     assert r["weights"].size == 0

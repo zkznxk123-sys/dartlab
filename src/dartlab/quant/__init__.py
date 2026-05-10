@@ -383,7 +383,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── G: 포트폴리오 (portfolio) — 멀티종목 ─────────────
     "meanvar": _AxisEntry(
-        module="dartlab.quant.portfolio",
+        module="dartlab.quant.portfolio.optimize",
         fn="optimizeMeanVar",
         label="평균분산",
         description="Markowitz 평균-분산 최적화",
@@ -392,7 +392,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         multiStock=True,
     ),
     "riskparity": _AxisEntry(
-        module="dartlab.quant.portfolio",
+        module="dartlab.quant.portfolio.optimize",
         fn="optimizeRiskParity",
         label="리스크패리티",
         description="HRP (Lopez de Prado) 계층적 리스크 패리티",
@@ -401,7 +401,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         multiStock=True,
     ),
     "allocation": _AxisEntry(
-        module="dartlab.quant.portfolio",
+        module="dartlab.quant.portfolio.optimize",
         fn="allocateERC",
         label="자산배분",
         description="Equal Risk Contribution (Maillard 2010) — 종목별 위험 기여도 균등 배분",

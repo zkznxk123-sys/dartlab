@@ -159,7 +159,7 @@ def _buildAllocation(
 ) -> dict | None:
     """포트폴리오 매핑 — regimeToAllocation → equity/bond/gold/cash 비중 dict."""
     try:
-        from dartlab.quant.portfolioMapping import regimeToAllocation
+        from dartlab.quant.portfolio.mapping import regimeToAllocation
 
         alloc = regimeToAllocation(
             {

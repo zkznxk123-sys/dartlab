@@ -147,7 +147,7 @@ def phase2a_matrixProfile():
 
 
 def phase2a_almgren():
-    from dartlab.quant.transactionCost import almgrenChrissCost, sharpeNetOfCost
+    from dartlab.quant.portfolio.transactionCost import almgrenChrissCost, sharpeNetOfCost
 
     r = almgrenChrissCost(quantity=10000, avgDailyVolume=1_000_000, price=70000, duration=1.0)
     assert r["totalCost"] > 0, "totalCost should be positive"
@@ -164,7 +164,7 @@ def phase2a_almgren():
 
 
 def phase2a_meanCVaR():
-    from dartlab.quant.meanCVaR import optimizeMeanCVaR
+    from dartlab.quant.portfolio.meanCVaR import optimizeMeanCVaR
 
     rng = np.random.default_rng(42)
     R = rng.standard_normal((500, 5)) * 0.01
@@ -181,7 +181,7 @@ def phase2a_meanCVaR():
 
 
 def phase2a_blackLitterman():
-    from dartlab.quant.blackLitterman import blackLittermanPosterior, buildSimpleViews
+    from dartlab.quant.portfolio.blackLitterman import blackLittermanPosterior, buildSimpleViews
 
     rng = np.random.default_rng(42)
     cov = np.cov(rng.standard_normal((252, 5)).T) * 0.0001
