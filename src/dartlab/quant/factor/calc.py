@@ -62,7 +62,7 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
         return {"error": f"{stockCode} 데이터 부족 (최소 60일)"}
     stockRet = np.diff(np.log(close))
 
-    from dartlab.quant.benchmark import fetchBenchmarkOhlcv
+    from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
 
     bench, benchmark_meta = fetchBenchmarkOhlcv(
         stockCode,

@@ -89,7 +89,7 @@ def patch_fetch_ohlcv(monkeypatch):
 
 class TestAdf:
     def test_random_walk_high_pvalue(self):
-        from dartlab.quant.forecast import _pAdfStationary
+        from dartlab.quant.benchmark.forecast import _pAdfStationary
 
         rng = np.random.default_rng(123)
         rw = np.cumsum(rng.standard_normal(300))
@@ -99,7 +99,7 @@ class TestAdf:
         assert p > 0.05
 
     def test_short_series_returns_one(self):
-        from dartlab.quant.forecast import _pAdfStationary
+        from dartlab.quant.benchmark.forecast import _pAdfStationary
 
         p = _pAdfStationary(np.array([1.0, 2.0, 3.0]))
         assert p == 1.0
@@ -107,13 +107,13 @@ class TestAdf:
 
 class TestDispatch:
     def test_short_series_picks_naive(self):
-        from dartlab.quant.forecast import _pickModel
+        from dartlab.quant.benchmark.forecast import _pickModel
 
         y = np.zeros(30)
         assert _pickModel(y) == "naive"
 
     def test_long_random_walk_picks_etsholt(self):
-        from dartlab.quant.forecast import _pickModel
+        from dartlab.quant.benchmark.forecast import _pickModel
 
         rng = np.random.default_rng(7)
         # log-return 시계열은 대개 stationary 라 _pickModel 에 직접 random-walk 의 log-return 줘도 theta 가능.
@@ -130,7 +130,7 @@ class TestDispatch:
 
 class TestModels:
     def test_naive_constant_drift(self):
-        from dartlab.quant.forecast import _modelNaive
+        from dartlab.quant.benchmark.forecast import _modelNaive
 
         y = np.array([0.001, 0.002, 0.003, -0.001, 0.002])
         forecasts, inSample = _modelNaive(y, horizon=3)
@@ -140,7 +140,7 @@ class TestModels:
         assert inSample.shape == (5,)
 
     def test_ar1_recovers_persistence(self):
-        from dartlab.quant.forecast import _modelAr1
+        from dartlab.quant.benchmark.forecast import _modelAr1
 
         # AR(1) 진짜 데이터 — ρ=0.5
         rng = np.random.default_rng(99)
@@ -154,7 +154,7 @@ class TestModels:
         assert inSample.shape == (n,)
 
     def test_ets_holt_extrapolates_trend(self):
-        from dartlab.quant.forecast import _modelEtsHolt
+        from dartlab.quant.benchmark.forecast import _modelEtsHolt
 
         # 명확한 선형 trend
         y = 0.001 + 0.0001 * np.arange(100, dtype=np.float64)
@@ -164,7 +164,7 @@ class TestModels:
         assert np.all(np.isfinite(forecasts))
 
     def test_theta_handles_constant(self):
-        from dartlab.quant.forecast import _modelTheta
+        from dartlab.quant.benchmark.forecast import _modelTheta
 
         y = np.full(100, 0.001)
         forecasts, inSample = _modelTheta(y, horizon=5)
@@ -172,7 +172,7 @@ class TestModels:
         np.testing.assert_allclose(forecasts, [0.001] * 5, atol=1e-3)
 
     def test_short_series_falls_back_to_naive(self):
-        from dartlab.quant.forecast import _modelAr1, _modelEtsHolt, _modelTheta
+        from dartlab.quant.benchmark.forecast import _modelAr1, _modelEtsHolt, _modelTheta
 
         y = np.array([0.001, 0.002])
         for fn in (_modelAr1, _modelEtsHolt, _modelTheta):
@@ -188,7 +188,7 @@ class TestModels:
 
 class TestConformal:
     def test_half_width_nonneg(self):
-        from dartlab.quant.forecast import _conformalHalfWidth
+        from dartlab.quant.benchmark.forecast import _conformalHalfWidth
 
         residuals = np.array([0.01, -0.02, 0.005, -0.015, 0.008])
         q = _conformalHalfWidth(residuals, alpha=0.10)
@@ -196,13 +196,13 @@ class TestConformal:
         assert q == pytest.approx(0.02, rel=0.5)  # 가장 큰 |residual| 근처
 
     def test_zero_residuals(self):
-        from dartlab.quant.forecast import _conformalHalfWidth
+        from dartlab.quant.benchmark.forecast import _conformalHalfWidth
 
         q = _conformalHalfWidth(np.zeros(10))
         assert q == 0.0
 
     def test_handles_nan(self):
-        from dartlab.quant.forecast import _conformalHalfWidth
+        from dartlab.quant.benchmark.forecast import _conformalHalfWidth
 
         residuals = np.array([0.01, np.nan, -0.02, np.inf])
         q = _conformalHalfWidth(residuals)
@@ -216,7 +216,7 @@ class TestConformal:
 
 class TestForecastReturns:
     def test_uptrend_positive_cumulative(self, patch_fetch_ohlcv):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         patch_fetch_ohlcv(_uptrend_close(n=250))
         r = forecastReturns("TEST1", market="KR", horizon=5)
@@ -229,7 +229,7 @@ class TestForecastReturns:
         assert r["forecastTable"][-1]["cumLogReturn"] > -0.05
 
     def test_downtrend_negative_or_neutral(self, patch_fetch_ohlcv):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         patch_fetch_ohlcv(_downtrend_close(n=250))
         r = forecastReturns("TEST2", market="KR", horizon=5)
@@ -237,7 +237,7 @@ class TestForecastReturns:
         assert r["forecastTable"][-1]["cumLogReturn"] < 0.05
 
     def test_sideways_small_forecast(self, patch_fetch_ohlcv):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         patch_fetch_ohlcv(_sideways_close(n=250))
         r = forecastReturns("TEST3", market="KR", horizon=5)
@@ -247,7 +247,7 @@ class TestForecastReturns:
             assert abs(row["pointForecast"]) < 0.05
 
     def test_interval_monotone(self, patch_fetch_ohlcv):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         patch_fetch_ohlcv(_uptrend_close(n=250))
         r = forecastReturns("TEST4", market="KR", horizon=5)
@@ -257,7 +257,7 @@ class TestForecastReturns:
             assert row["priceLower"] <= row["pricePoint"] <= row["priceUpper"]
 
     def test_no_nan_in_output(self, patch_fetch_ohlcv):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         patch_fetch_ohlcv(_uptrend_close(n=250))
         r = forecastReturns("TEST5", market="KR", horizon=10)
@@ -267,7 +267,7 @@ class TestForecastReturns:
                     assert np.isfinite(v), f"{k} NaN/inf detected: {v}"
 
     def test_explicit_models_ensemble(self, patch_fetch_ohlcv):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         patch_fetch_ohlcv(_uptrend_close(n=250))
         r = forecastReturns("TEST6", market="KR", horizon=5, models=["etsHolt", "theta"])
@@ -276,28 +276,28 @@ class TestForecastReturns:
         assert r["modelsConsidered"] == ["etsHolt", "theta"]
 
     def test_invalid_model_returns_error(self, patch_fetch_ohlcv):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         patch_fetch_ohlcv(_uptrend_close(n=250))
         r = forecastReturns("TEST7", market="KR", horizon=5, models=["xgboost"])
         assert "error" in r
 
     def test_short_series_returns_error(self, patch_fetch_ohlcv):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         patch_fetch_ohlcv(_uptrend_close(n=20))
         r = forecastReturns("TEST8", market="KR", horizon=5)
         assert "error" in r
 
     def test_no_data_returns_error(self, monkeypatch):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         monkeypatch.setattr("dartlab.quant.forecast.fetchOhlcv", lambda code, **kw: None)
         r = forecastReturns("FAIL", market="KR", horizon=5)
         assert "error" in r
 
     def test_horizon_clamp_to_min_1(self, patch_fetch_ohlcv):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         patch_fetch_ohlcv(_uptrend_close(n=250))
         r = forecastReturns("TEST9", market="KR", horizon=0)
@@ -306,7 +306,7 @@ class TestForecastReturns:
         assert len(r["forecastTable"]) == 1
 
     def test_evidence_fields_present(self, patch_fetch_ohlcv):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         patch_fetch_ohlcv(_uptrend_close(n=250))
         r = forecastReturns("TEST10", market="KR", horizon=5)
@@ -324,7 +324,7 @@ class TestForecastReturns:
             assert k in r, f"evidence 필드 누락: {k}"
 
     def test_summary_format(self, patch_fetch_ohlcv):
-        from dartlab.quant.forecast import forecastReturns
+        from dartlab.quant.benchmark.forecast import forecastReturns
 
         patch_fetch_ohlcv(_uptrend_close(n=250))
         r = forecastReturns("TEST11", market="KR", horizon=5)
@@ -372,7 +372,7 @@ class TestAxisRegistry:
 
 class TestForecastRuleFactory:
     def test_factory_returns_rule_of_correct_length(self):
-        from dartlab.quant.forecast import forecastRuleFactory
+        from dartlab.quant.benchmark.forecast import forecastRuleFactory
         from dartlab.quant.strategy.rule import Rule
 
         factory = forecastRuleFactory(threshold=0.002)
@@ -384,7 +384,7 @@ class TestForecastRuleFactory:
 
     def test_is_region_all_false(self):
         """IS 구간 (학습) 은 entry/exit 모두 False — 학습용."""
-        from dartlab.quant.forecast import forecastRuleFactory
+        from dartlab.quant.benchmark.forecast import forecastRuleFactory
 
         factory = forecastRuleFactory(threshold=0.002)
         isClose = _uptrend_close(n=200)
@@ -393,7 +393,7 @@ class TestForecastRuleFactory:
         assert not rule.exit_expr[:200].any()
 
     def test_short_is_returns_empty_rule(self):
-        from dartlab.quant.forecast import forecastRuleFactory
+        from dartlab.quant.benchmark.forecast import forecastRuleFactory
 
         factory = forecastRuleFactory()
         rule = factory(np.array([100.0, 101.0, 99.0]), oosLen=10)
@@ -402,7 +402,7 @@ class TestForecastRuleFactory:
         assert not rule.exit_expr.any()
 
     def test_walk_forward_with_factory(self):
-        from dartlab.quant.forecast import forecastRuleFactory
+        from dartlab.quant.benchmark.forecast import forecastRuleFactory
         from dartlab.quant.strategy.backtest import walkForward
 
         close = _uptrend_close(n=400)
@@ -418,7 +418,7 @@ class TestForecastRuleFactory:
 
     def test_walk_forward_factory_loose_mode_entry_active(self):
         """loose mode (default) — 강한 trend 합성 데이터에서 entry 활성화 (쓸만함 검증)."""
-        from dartlab.quant.forecast import forecastRuleFactory
+        from dartlab.quant.benchmark.forecast import forecastRuleFactory
         from dartlab.quant.strategy.backtest import walkForward
 
         # 강한 drift +0.3%/day
@@ -436,7 +436,7 @@ class TestForecastRuleFactory:
 
     def test_walk_forward_factory_strict_mode(self):
         """strict mode — interval 검증 추가. 일별 conformal width 가 커서 entry 적음."""
-        from dartlab.quant.forecast import forecastRuleFactory
+        from dartlab.quant.benchmark.forecast import forecastRuleFactory
         from dartlab.quant.strategy.backtest import walkForward
 
         close = _uptrend_close(n=400)

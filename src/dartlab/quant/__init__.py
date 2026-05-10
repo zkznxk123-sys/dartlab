@@ -92,7 +92,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="technical",
     ),
     "forecast": _AxisEntry(
-        module="dartlab.quant.forecast",
+        module="dartlab.quant.benchmark.forecast",
         fn="forecastReturns",
         label="예측",
         description="일별 수익률 horizon-step 예측 + 90% Conformal interval (Naive·AR(1)·ETS-Holt·Theta 자동 dispatch)",
@@ -141,7 +141,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="risk",
     ),
     "benchmark": _AxisEntry(
-        module="dartlab.quant.benchmark",
+        module="dartlab.quant.benchmark.data",
         fn="calcBenchmark",
         label="벤치마크",
         description="종목별 시장·섹터·스타일 KRX 벤치마크 스택과 기간 수익률",

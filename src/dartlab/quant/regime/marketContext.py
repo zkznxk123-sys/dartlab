@@ -295,7 +295,7 @@ def calcMarketContext(
 
     # 2. CAPM β / α (vs 시장 지수)
     try:
-        from dartlab.quant.benchmark import fetchBenchmarkOhlcv
+        from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
 
         bm_df = fetchBenchmarkOhlcv(
             stockCode,

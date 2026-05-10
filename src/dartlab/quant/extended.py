@@ -74,7 +74,7 @@ def _fetchBenchmarkForCompany(company: Any) -> pl.DataFrame | None:
     result = None
     meta = None
     try:
-        from dartlab.quant.benchmark import fetchBenchmarkOhlcv
+        from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
 
         result, meta = fetchBenchmarkOhlcv(
             stockCode,

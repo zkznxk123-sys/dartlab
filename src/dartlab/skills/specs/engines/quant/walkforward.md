@@ -104,7 +104,7 @@ result = dartlab.quant.walkforward("005930")
 기본 호출은 정적 Rule 슬라이스 — 같은 entry/exit 시계열을 IS/OOS 에 그대로 적용. forecast 모델처럼 *IS fit + OOS predict* 패턴은 ``walkForward(close, rule=None, rule_factory=...)`` 로 호출.
 
 ```python
-from dartlab.quant.forecast import forecastRuleFactory
+from dartlab.quant.benchmark.forecast import forecastRuleFactory
 from dartlab.quant.strategy.backtest import walkForward
 
 factory = forecastRuleFactory(threshold=0.002, models=["ar1"])

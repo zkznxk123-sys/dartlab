@@ -76,7 +76,7 @@ def fetchBenchmark(market: str = "KR", **kwargs: Any):
         volume : int — 거래량
         수집 실패 시 None."""
     try:
-        from dartlab.quant.benchmark import fetchBenchmarkOhlcv
+        from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
 
         stockCode = kwargs.pop("stockCode", None)
         benchmark = kwargs.pop("benchmark", None)

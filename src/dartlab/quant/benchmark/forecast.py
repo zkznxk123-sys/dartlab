@@ -516,7 +516,7 @@ def forecastRuleFactory(
 
     Examples
     --------
-    >>> from dartlab.quant.forecast import forecastRuleFactory
+    >>> from dartlab.quant.benchmark.forecast import forecastRuleFactory
     >>> from dartlab.quant.strategy.backtest import walkForward
     >>> factory = forecastRuleFactory(threshold=0.0005, models=["ar1"])
     >>> bt = walkForward(close, rule=None, rule_factory=factory, train=180, test=30, step=30)

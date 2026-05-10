@@ -26,7 +26,7 @@ def _dateStart(window: int) -> str:
 
 def _benchmarkReturns(indexMarket: str, start: str, *, indexName: str | None = None) -> dict[str, float]:
     """벤치마크 로그수익률 맵: return-date(YYYY-MM-DD) -> log return."""
-    from dartlab.quant.benchmark import fetchBenchmarkOhlcv
+    from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
 
     bench = fetchBenchmarkOhlcv(market=indexMarket, benchmark=indexName, start=start)
     if bench is None or bench.is_empty() or "close" not in bench.columns:
@@ -90,7 +90,7 @@ def calcBAB(
 
     try:
         from dartlab.gather._hfBulk import loadFiltered
-        from dartlab.quant.benchmark import resolveBenchmark
+        from dartlab.quant.benchmark.data import resolveBenchmark
     except ImportError:
         return None
 

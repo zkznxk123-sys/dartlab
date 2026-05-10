@@ -25,7 +25,7 @@ def _krx_listing() -> pl.DataFrame:
 def test_resolve_benchmark_uses_listing_market(monkeypatch):
     """KOSPI/KOSDAQ 종목은 상장시장 기준 기본 지수를 사용한다."""
     from dartlab.gather import listing
-    from dartlab.quant.benchmark import resolveBenchmark
+    from dartlab.quant.benchmark.data import resolveBenchmark
 
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
 
@@ -133,7 +133,7 @@ def test_resolve_benchmark_stack_adds_size_style_candidate(monkeypatch):
 
 def test_sector_map_targets_existing_local_krx_indices():
     """매핑된 지수명은 로컬 KRX index catalog에 존재해야 한다."""
-    from dartlab.quant.benchmarkMap import SECTOR_INDEX_MAP, availableIndexNames
+    from dartlab.quant.benchmark.map import SECTOR_INDEX_MAP, availableIndexNames
 
     names = availableIndexNames()
     if not names:
@@ -154,7 +154,7 @@ def test_fetch_benchmark_ohlcv_standardizes_krx_raw(monkeypatch):
 
     hf = importlib.import_module("dartlab.gather._hfIndexBulk")
     from dartlab.gather import listing
-    from dartlab.quant.benchmark import fetchBenchmarkOhlcv
+    from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
 
     raw = pl.DataFrame(
         [

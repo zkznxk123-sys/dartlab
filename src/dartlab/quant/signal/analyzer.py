@@ -728,7 +728,7 @@ def _fetchBenchmark(
     기존 테스트와 내부 호출 호환을 위해 기본 반환은 DataFrame 그대로 유지하고,
     ``return_meta=True`` 때만 ``(df, benchmarkUsed)`` 를 반환한다.
     """
-    from dartlab.quant.benchmark import fetchBenchmarkOhlcv
+    from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
 
     explicit = None if benchmark in {"KOSPI", "KR"} else benchmark
     if benchmark in {"S&P500", "^GSPC"} and market == "auto":

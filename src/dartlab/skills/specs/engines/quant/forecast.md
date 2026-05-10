@@ -181,7 +181,7 @@ forecast 결과를 인용할 때 다음을 함께 명시:
 forecast 모델을 walk-forward 로 OOS 검증하려면 `forecastRuleFactory` 를 `walkForward(rule_factory=...)` 에 전달:
 
 ```python
-from dartlab.quant.forecast import forecastRuleFactory
+from dartlab.quant.benchmark.forecast import forecastRuleFactory
 from dartlab.quant.strategy.backtest import walkForward
 
 # Loose mode (default) — point only
