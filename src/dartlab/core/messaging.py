@@ -231,10 +231,12 @@ class _Context:
     @property
     def hasDartKey(self) -> bool:
         if self._dart_key is None:
+            # CredentialProvider registry 사용 (정공법 B — DIP). providers 직접 import 0.
             try:
-                from dartlab.providers.dart.openapi.client import hasDartApiKey
+                from dartlab.core.credentials import getCredentialProvider
 
-                self._dart_key = hasDartApiKey()
+                provider = getCredentialProvider("dart_api_key")
+                self._dart_key = bool(provider and provider.check().configured)
             except ImportError:
                 self._dart_key = False
         return self._dart_key
