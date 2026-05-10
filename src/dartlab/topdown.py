@@ -79,7 +79,7 @@ def topdown(
         }
     """
     # 1. 시장 사이클
-    from dartlab.macro.cycle import analyzeCycle
+    from dartlab.macro.cycles.cycle import analyzeCycle
 
     cycle = analyzeCycle(market=market, asOf=asOf)
     phase = cycle.get("phase")

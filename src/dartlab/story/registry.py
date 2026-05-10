@@ -1430,7 +1430,7 @@ def _buildScenarioBlocks(company, keys, basePeriod, safe: Callable, need: Callab
 
             out["technicalActionTargets"] = safe(lambda: technicalActionTargetsBlock(calcActionableTargets(company)))
         if need("cyclicalActionPlan"):
-            from dartlab.macro.crisis import calcCyclicalAction
+            from dartlab.macro.crisis.crisis import calcCyclicalAction
 
             _market = getattr(company, "market", "KR")
             out["cyclicalActionPlan"] = safe(lambda: cyclicalActionPlanBlock(calcCyclicalAction(market=_market)))

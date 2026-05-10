@@ -11,7 +11,7 @@ from dartlab.macro._helpers import (
     getGather,
     recentTimeseries,
 )
-from dartlab.macro.macroCycle import classifyCycle, detectTransitionSequence
+from dartlab.macro.cycles.macroCycle import classifyCycle, detectTransitionSequence
 
 
 def _fetchIndicators(market: str, asOf: str | None = None) -> dict[str, float | None]:

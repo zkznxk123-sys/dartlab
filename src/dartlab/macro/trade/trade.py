@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from dartlab.macro.termsOfTrade import (
+from dartlab.macro.trade.termsOfTrade import (
     calcToT,
     exportProfitLeading,
     leadingIndexRelativeStrength,

@@ -242,7 +242,7 @@ def _addGrowthAtRisk(forecastResult: dict | None, liquidity: dict, asOf: str | N
         return
     try:
         from dartlab.macro._helpers import fetchSeriesList, getGather
-        from dartlab.macro.growthAtRisk import growthAtRisk as _gar
+        from dartlab.macro.crisis.growthAtRisk import growthAtRisk as _gar
 
         fci_data = liquidity.get("fci") if isinstance(liquidity, dict) else None
         fci_series = fci_data.get("history") if isinstance(fci_data, dict) else None
@@ -334,9 +334,9 @@ def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: di
                 description : str — 해설
     """
     from dartlab.macro.assets import analyzeAssets
-    from dartlab.macro.cycle import analyzeCycle
+    from dartlab.macro.cycles.cycle import analyzeCycle
     from dartlab.macro.liquidity import calcLiquidity
-    from dartlab.macro.rates import analyzeRates
+    from dartlab.macro.rates.rates import analyzeRates
     from dartlab.macro.sentiment import calcSentiment
 
     # as_of/overrides를 전체 축에 전파
@@ -360,7 +360,7 @@ def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: di
     tradeResult = None
 
     try:
-        from dartlab.macro.forecast import analyzeForecast
+        from dartlab.macro.forecast.forecast import analyzeForecast
 
         forecastResult = analyzeForecast(**_ax)
         _gcAfterAxis()
@@ -368,7 +368,7 @@ def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: di
         pass
 
     try:
-        from dartlab.macro.crisis import analyzeCrisis
+        from dartlab.macro.crisis.crisis import analyzeCrisis
 
         # 다른 축 결과를 crisis에 전달
         crisis_kwargs: dict = {}
@@ -385,7 +385,7 @@ def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: di
         pass
 
     try:
-        from dartlab.macro.inventory import analyzeInventory
+        from dartlab.macro.cycles.inventory import analyzeInventory
 
         inventoryResult = analyzeInventory(**_ax)
         _gcAfterAxis()
@@ -393,7 +393,7 @@ def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: di
         pass
 
     try:
-        from dartlab.macro.trade import analyzeTrade
+        from dartlab.macro.trade.trade import analyzeTrade
 
         tradeResult = analyzeTrade(**_ax)
         _gcAfterAxis()
@@ -402,7 +402,7 @@ def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: di
 
     corporateResult = None
     try:
-        from dartlab.macro.corporate import analyzeCorporate
+        from dartlab.macro.corporate.corporate import analyzeCorporate
 
         corporateResult = analyzeCorporate(**_ax)
         _gcAfterAxis()

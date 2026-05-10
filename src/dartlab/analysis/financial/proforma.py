@@ -18,7 +18,7 @@ from dartlab.core.utils.extract import (
 )
 
 if TYPE_CHECKING:
-    from dartlab.macro.scenario import SectorElasticity
+    from dartlab.macro.scenarios.scenario import SectorElasticity
 
 # ══════════════════════════════════════
 # 데이터 구조
@@ -604,7 +604,7 @@ def _fetchBeta(stockCode: str, currency: str = "KRW") -> float | None:
 def _resolveCountryFromCurrency(currency: str) -> str:
     """currency → ISO2 fallback. riskPremiums.resolveCountryCode 재사용."""
     try:
-        from dartlab.macro.riskPremiums import resolveCountryCode
+        from dartlab.macro.rates.riskPremiums import resolveCountryCode
 
         return resolveCountryCode(currency=currency)
     except ImportError:
@@ -643,11 +643,11 @@ def computeCompanyWacc(
     damodaran = None
     if country or countryRiskPremium is not None or impliedErp:
         if impliedErp:
-            from dartlab.macro.impliedERP import calcImpliedERP
+            from dartlab.macro.rates.impliedERP import calcImpliedERP
 
             damodaran = calcImpliedERP(country=country or _resolveCountryFromCurrency(currency))
         else:
-            from dartlab.macro.riskPremiums import loadDamodaranERP
+            from dartlab.macro.rates.riskPremiums import loadDamodaranERP
 
             damodaran = loadDamodaranERP(countryCode=country, currency=currency)
 

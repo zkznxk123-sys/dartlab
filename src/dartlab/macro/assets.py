@@ -6,7 +6,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
-from dartlab.macro.macroCycle import (
+from dartlab.macro.cycles.macroCycle import (
     classifyVixRegime,
     copperGoldRatio,
     interpretAssets,

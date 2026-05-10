@@ -43,7 +43,7 @@ def calcImpliedERP(
         impliedERP, indexLevel, aggregateE, aggregateD, buybackYield,
         payoutRatio, method, sampleCount
     """
-    from dartlab.macro.riskPremiums import loadDamodaranERP
+    from dartlab.macro.rates.riskPremiums import loadDamodaranERP
 
     fallback = loadDamodaranERP(countryCode=country)
 

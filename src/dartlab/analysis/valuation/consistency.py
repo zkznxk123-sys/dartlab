@@ -19,7 +19,7 @@ from __future__ import annotations
 from typing import Any
 
 from dartlab.core.utils.calc import reinvestmentIdentity
-from dartlab.macro.riskPremiums import loadDamodaranERP
+from dartlab.macro.rates.riskPremiums import loadDamodaranERP
 
 _SEV_INFO = "info"
 _SEV_WARN = "warn"

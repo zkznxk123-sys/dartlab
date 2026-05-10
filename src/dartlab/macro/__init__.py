@@ -69,7 +69,7 @@ class _AxisEntry:
     Attributes
     ----------
     module : str
-        축 구현 모듈의 정규화된 import 경로 (예: ``"dartlab.macro.cycle"``).
+        축 구현 모듈의 정규화된 import 경로 (예: ``"dartlab.macro.cycles.cycle"``).
     fn : str
         모듈 내 진입 함수 이름 (예: ``"analyze_cycle"``).
     label : str
@@ -93,7 +93,7 @@ class _AxisEntry:
 _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── 1막: 경제는 어디에 있나 (국면 진단) ──
     "cycle": _AxisEntry(
-        module="dartlab.macro.cycle",
+        module="dartlab.macro.cycles.cycle",
         fn="analyze_cycle",
         label="사이클",
         description="경제 사이클 4국면 식별 + 전환 시퀀스 감지",
@@ -101,7 +101,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         act=1,
     ),
     "inventory": _AxisEntry(
-        module="dartlab.macro.inventory",
+        module="dartlab.macro.cycles.inventory",
         fn="analyze_inventory",
         label="재고",
         description="ISM 재고순환 4국면 + 자산배분 바로미터",
@@ -110,7 +110,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── 2막: 왜 여기에 있나 (실물 인과) ──
     "corporate": _AxisEntry(
-        module="dartlab.macro.corporate",
+        module="dartlab.macro.corporate.corporate",
         fn="analyze_corporate",
         label="기업집계",
         description="전종목 이익사이클 + Ponzi비율 + 레버리지",
@@ -118,7 +118,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         act=2,
     ),
     "trade": _AxisEntry(
-        module="dartlab.macro.trade",
+        module="dartlab.macro.trade.trade",
         fn="analyze_trade",
         label="교역",
         description="교역조건 + 수출이익 선행 + 양국 선행지수",
@@ -127,7 +127,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── 3막: 정부는 뭘 하고 있나 (중앙은행 대응) ──
     "rates": _AxisEntry(
-        module="dartlab.macro.rates",
+        module="dartlab.macro.rates.rates",
         fn="analyze_rates",
         label="금리",
         description="금리 방향 + 고용/물가 + 수익률곡선 + 기간프리미엄",
@@ -144,7 +144,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         act=4,
     ),
     "crisis": _AxisEntry(
-        module="dartlab.macro.crisis",
+        module="dartlab.macro.crisis.crisis",
         fn="analyze_crisis",
         label="위기",
         description="Credit-to-GDP gap + GHS + Minsky + 역사적 맥락",
@@ -170,7 +170,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── 6막: 앞으로 어떻게 되나 (전망 + 시나리오) ──
     "forecast": _AxisEntry(
-        module="dartlab.macro.forecast",
+        module="dartlab.macro.forecast.forecast",
         fn="analyze_forecast",
         label="예측",
         description="LEI + Cleveland Fed 침체확률 + Sahm + Hamilton RS + GaR",

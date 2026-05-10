@@ -103,7 +103,7 @@ out()
 out("### 2.1 Cleveland Fed 프로빗")
 out()
 
-from dartlab.macro.regimeSwitching import clevelandProbit, sahmRule
+from dartlab.macro.cycles.regimeSwitching import clevelandProbit, sahmRule
 
 spread_df = g.macro("T10Y3M")
 monthly = spread_df.group_by(pl.col("date").dt.truncate("1mo")).agg(pl.col("value").mean()).sort("date")
@@ -221,7 +221,7 @@ out()
 out("### 2.4 Hamilton Regime Switching")
 out()
 
-from dartlab.macro.regimeSwitching import hamiltonRegime
+from dartlab.macro.cycles.regimeSwitching import hamiltonRegime
 
 gdp_df = g.macro("A191RL1Q225SBEA")
 if gdp_df is not None and len(gdp_df) > 0:
@@ -287,7 +287,7 @@ if ur_df is not None:
 # ── Nelson-Siegel 현재 ──
 out("### 2.6 Nelson-Siegel 현재 상태")
 out()
-from dartlab.macro.yieldCurve import nelsonSiegel
+from dartlab.macro.rates.yieldCurve import nelsonSiegel
 
 maturities = [1, 2, 3, 5, 7, 10, 20, 30]
 seriesIds = ["DGS1", "DGS2", "DGS3", "DGS5", "DGS7", "DGS10", "DGS20", "DGS30"]
@@ -311,7 +311,7 @@ out()
 out("### 2.7 FCI 현재 상태")
 out()
 from dartlab.macro._helpers import fetchSeriesList
-from dartlab.macro.fci import calcFCI
+from dartlab.macro.crisis.fci import calcFCI
 
 fci_vars = {}
 sid_map = {

@@ -12,7 +12,7 @@ from dartlab.macro._helpers import (
     fetchSeriesList,
     getGather,
 )
-from dartlab.macro.macroCycle import classifyVixRegime
+from dartlab.macro.cycles.macroCycle import classifyVixRegime
 
 # ══════════════════════════════════════
 # 데이터 구조

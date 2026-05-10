@@ -12,21 +12,21 @@ import numpy as np
 
 class TestClevelandProbit:
     def test_positive_spread_low_prob(self):
-        from dartlab.macro.regimeSwitching import clevelandProbit
+        from dartlab.macro.cycles.regimeSwitching import clevelandProbit
 
         r = clevelandProbit(2.0)
         assert r.probability < 0.1
         assert r.zone == "low"
 
     def test_negative_spread_high_prob(self):
-        from dartlab.macro.regimeSwitching import clevelandProbit
+        from dartlab.macro.cycles.regimeSwitching import clevelandProbit
 
         r = clevelandProbit(-0.5)
         assert r.probability > 0.3
         assert r.zone in ("moderate", "elevated")
 
     def test_zero_spread(self):
-        from dartlab.macro.regimeSwitching import clevelandProbit
+        from dartlab.macro.cycles.regimeSwitching import clevelandProbit
 
         r = clevelandProbit(0.0)
         assert 0.2 < r.probability < 0.4
@@ -34,21 +34,21 @@ class TestClevelandProbit:
 
 class TestSahmRule:
     def test_stable_unemployment(self):
-        from dartlab.macro.regimeSwitching import sahmRule
+        from dartlab.macro.cycles.regimeSwitching import sahmRule
 
         r = sahmRule([4.0] * 15)
         assert not r.triggered
         assert r.value == 0.0
 
     def test_rising_unemployment(self):
-        from dartlab.macro.regimeSwitching import sahmRule
+        from dartlab.macro.cycles.regimeSwitching import sahmRule
 
         series = [3.5] * 12 + [4.0, 4.2, 4.5]
         r = sahmRule(series)
         assert r.triggered or r.value >= 0.3
 
     def test_insufficient_data(self):
-        from dartlab.macro.regimeSwitching import sahmRule
+        from dartlab.macro.cycles.regimeSwitching import sahmRule
 
         r = sahmRule([4.0] * 5)
         assert r.zone == "normal"
@@ -56,14 +56,14 @@ class TestSahmRule:
 
 class TestConferenceBoardLEI:
     def test_basic_lei(self):
-        from dartlab.macro.regimeSwitching import conferenceBoardLEI
+        from dartlab.macro.cycles.regimeSwitching import conferenceBoardLEI
 
         r = conferenceBoardLEI({"avg_weekly_hours": 0.2, "sp500": 1.5, "term_spread": 1.8})
         assert r.level != 0
         assert r.signal in ("expansion", "caution", "recession_warning")
 
     def test_empty_components(self):
-        from dartlab.macro.regimeSwitching import conferenceBoardLEI
+        from dartlab.macro.cycles.regimeSwitching import conferenceBoardLEI
 
         r = conferenceBoardLEI({})
         assert r.signal == "caution"
@@ -71,7 +71,7 @@ class TestConferenceBoardLEI:
 
 class TestHamiltonRegime:
     def test_two_regime_separation(self):
-        from dartlab.macro.regimeSwitching import hamiltonRegime
+        from dartlab.macro.cycles.regimeSwitching import hamiltonRegime
 
         np.random.seed(42)
         y = np.concatenate([np.random.normal(3, 1, 50), np.random.normal(-1, 2, 20), np.random.normal(3, 1, 30)])
@@ -81,7 +81,7 @@ class TestHamiltonRegime:
         assert r.smoothedProbs[60, 1] > 0.7
 
     def test_short_series(self):
-        from dartlab.macro.regimeSwitching import hamiltonRegime
+        from dartlab.macro.cycles.regimeSwitching import hamiltonRegime
 
         r = hamiltonRegime([1.0, 2.0, 3.0])
         assert not r.converged
@@ -94,20 +94,20 @@ class TestHamiltonRegime:
 
 class TestNelsonSiegel:
     def test_normal_curve(self):
-        from dartlab.macro.yieldCurve import nelsonSiegel
+        from dartlab.macro.rates.yieldCurve import nelsonSiegel
 
         ns = nelsonSiegel([1, 2, 5, 10, 30], [4.5, 4.2, 3.9, 3.8, 4.0])
         assert ns.rmse < 0.3
         assert ns.beta0 > 3.0
 
     def test_inverted_curve(self):
-        from dartlab.macro.yieldCurve import nelsonSiegel
+        from dartlab.macro.rates.yieldCurve import nelsonSiegel
 
         ns = nelsonSiegel([0.25, 1, 2, 5, 10, 30], [5.3, 5.0, 4.8, 4.2, 3.8, 3.9])
         assert ns.interpretation in ("inverted", "flat")
 
     def test_insufficient_data(self):
-        from dartlab.macro.yieldCurve import nelsonSiegel
+        from dartlab.macro.rates.yieldCurve import nelsonSiegel
 
         ns = nelsonSiegel([1, 2], [4.0, 3.9])
         assert ns.interpretation == "insufficient"
@@ -120,7 +120,7 @@ class TestNelsonSiegel:
 
 class TestGdpNowcast:
     def test_factor_extraction(self):
-        from dartlab.macro.nowcast import gdpNowcast
+        from dartlab.macro.forecast.nowcast import gdpNowcast
 
         np.random.seed(42)
         T = 60
@@ -133,7 +133,7 @@ class TestGdpNowcast:
         assert corr > 0.8
 
     def test_missing_data(self):
-        from dartlab.macro.nowcast import gdpNowcast
+        from dartlab.macro.forecast.nowcast import gdpNowcast
 
         np.random.seed(42)
         indicators = np.random.normal(0, 1, (40, 4))
@@ -215,13 +215,13 @@ class TestFisherDeflation:
 
 class TestCopperGoldRatio:
     def test_rising(self):
-        from dartlab.macro.macroCycle import copperGoldRatio
+        from dartlab.macro.cycles.macroCycle import copperGoldRatio
 
         r = copperGoldRatio(10000, 2000, 9000, 2000)
         assert r.direction == "rising"
 
     def test_stable(self):
-        from dartlab.macro.macroCycle import copperGoldRatio
+        from dartlab.macro.cycles.macroCycle import copperGoldRatio
 
         r = copperGoldRatio(9000, 2000, 9000, 2000)
         assert r.direction == "stable"
@@ -229,13 +229,13 @@ class TestCopperGoldRatio:
 
 class TestRealRateRegime:
     def test_tightening(self):
-        from dartlab.macro.macroCycle import realRateRegime
+        from dartlab.macro.cycles.macroCycle import realRateRegime
 
         r = realRateRegime(2.5, 3.0)
         assert r.regime == "tightening"
 
     def test_goldilocks(self):
-        from dartlab.macro.macroCycle import realRateRegime
+        from dartlab.macro.cycles.macroCycle import realRateRegime
 
         r = realRateRegime(0.5, 1.8)
         assert r.regime == "goldilocks"
@@ -248,7 +248,7 @@ class TestRealRateRegime:
 
 class TestFCI:
     def test_tight(self):
-        from dartlab.macro.fci import calcFCI
+        from dartlab.macro.crisis.fci import calcFCI
 
         # 점진적으로 상승하는 금리 + 스프레드 → 최신값이 평균 위 → 긴축
         r = calcFCI(
@@ -261,7 +261,7 @@ class TestFCI:
         assert r.value > 0
 
     def test_loose(self):
-        from dartlab.macro.fci import calcFCI
+        from dartlab.macro.crisis.fci import calcFCI
 
         r = calcFCI({"policy_rate": [0.5] * 10, "credit_spread": [2.0] * 10, "equity": [20] * 10}, market="US")
         # 낮은 금리 + 낮은 스프레드 + 높은 주가 = 완화
@@ -275,13 +275,13 @@ class TestFCI:
 
 class TestInventoryCycle:
     def test_active_restock(self):
-        from dartlab.macro.inventoryCycle import classifyInventoryPhase
+        from dartlab.macro.cycles.inventoryCycle import classifyInventoryPhase
 
         r = classifyInventoryPhase(55, 48, 1.10)
         assert r.phase == "active_restock"
 
     def test_active_destock(self):
-        from dartlab.macro.inventoryCycle import classifyInventoryPhase
+        from dartlab.macro.cycles.inventoryCycle import classifyInventoryPhase
 
         r = classifyInventoryPhase(45, 52, 0.90)
         assert r.phase == "active_destock"
@@ -289,13 +289,13 @@ class TestInventoryCycle:
 
 class TestISMBarometer:
     def test_strong_expansion(self):
-        from dartlab.macro.inventoryCycle import ismBarometer
+        from dartlab.macro.cycles.inventoryCycle import ismBarometer
 
         r = ismBarometer(57)
         assert r.zone == "strong_expansion"
 
     def test_hike_end(self):
-        from dartlab.macro.inventoryCycle import ismBarometer
+        from dartlab.macro.cycles.inventoryCycle import ismBarometer
 
         r = ismBarometer(53, 56)
         assert r.rateImplication == "hike_end"
@@ -308,13 +308,13 @@ class TestISMBarometer:
 
 class TestTermsOfTrade:
     def test_improving(self):
-        from dartlab.macro.termsOfTrade import calcToT
+        from dartlab.macro.trade.termsOfTrade import calcToT
 
         r = calcToT(110, 100, 105, 100)
         assert r.direction == "improving"
 
     def test_proxy(self):
-        from dartlab.macro.termsOfTrade import totProxy
+        from dartlab.macro.trade.termsOfTrade import totProxy
 
         r = totProxy(fxYoy=10, oilYoy=-5)
         assert r.value > 10

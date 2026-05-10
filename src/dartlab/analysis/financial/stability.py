@@ -150,7 +150,7 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
     result: dict = {"history": history}
 
     # Phase 8 A5
-    from dartlab.macro.turningPoint import injectTurningPoints
+    from dartlab.macro.cycles.turningPoint import injectTurningPoints
 
     result["turningPoints"] = injectTurningPoints(history, seriesKey="debtRatio", minDeltaPct=25.0)
 

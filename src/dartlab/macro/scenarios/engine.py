@@ -49,7 +49,7 @@ def runScenario(
 
     preset = getScenario(name, severity=severity, market=market)
     if preset is None:
-        msg = f"시나리오 '{name}'을 찾을 수 없습니다. dartlab.macro.scenario()로 목록을 확인하세요."
+        msg = f"시나리오 '{name}'을 찾을 수 없습니다. dartlab.macro.scenarios.scenario()로 목록을 확인하세요."
         raise ValueError(msg)
 
     overrides = preset["overrides"]

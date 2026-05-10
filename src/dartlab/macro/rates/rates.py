@@ -9,13 +9,13 @@ from dartlab.macro._helpers import (
     fetchYoy,
     getGather,
 )
-from dartlab.macro.macroCycle import decomposeLongRate, rateOutlook, realRateRegime
+from dartlab.macro.cycles.macroCycle import decomposeLongRate, rateOutlook, realRateRegime
+from dartlab.macro.rates.yieldCurve import nelsonSiegel
 from dartlab.macro.sentiment import (
     estimateRateExpectation,
     interpretEmployment,
     interpretInflation,
 )
-from dartlab.macro.yieldCurve import nelsonSiegel
 
 
 def _fetchPayrolls3mAvg(g) -> float | None:
@@ -257,7 +257,7 @@ def analyzeRates(*, market: str = "US", asOf: str | None = None, overrides: dict
     result["bondRiskPremium"] = None
     if market.upper() == "US":
         try:
-            from dartlab.macro.bondRiskPremia import cochranePiazzesiFactor, forwardRatesFromSpot
+            from dartlab.macro.rates.bondRiskPremia import cochranePiazzesiFactor, forwardRatesFromSpot
 
             spot = {}
             for mat, sid in [(1, "DGS1"), (2, "DGS2"), (3, "DGS3"), (5, "DGS5")]:

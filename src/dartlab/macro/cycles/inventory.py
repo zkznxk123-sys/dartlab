@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from dartlab.macro.inventoryCycle import classifyInventoryPhase, ismBarometer
+from dartlab.macro.cycles.inventoryCycle import classifyInventoryPhase, ismBarometer
 from dartlab.macro.sentiment import ismAssetAllocation
 
 

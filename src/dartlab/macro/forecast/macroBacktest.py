@@ -93,7 +93,7 @@ def walkForwardBacktest(
         score = None
 
         try:
-            from dartlab.macro.cycle import analyzeCycle
+            from dartlab.macro.cycles.cycle import analyzeCycle
 
             cycle_result = analyzeCycle(market=market, asOf=as_of_str)
             phase = cycle_result.get("phase")
@@ -101,7 +101,7 @@ def walkForwardBacktest(
             pass
 
         try:
-            from dartlab.macro.forecast import analyzeForecast
+            from dartlab.macro.forecast.forecast import analyzeForecast
 
             forecastResult = analyzeForecast(market=market, asOf=as_of_str)
             rp = forecastResult.get("recessionProb")

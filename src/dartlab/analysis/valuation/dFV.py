@@ -749,7 +749,7 @@ def _tsdResolveTerminalGrowth(lifePhase: str | None, company: Any, overrides: di
     """
     try:
         from dartlab.core.overrides import applyOverride
-        from dartlab.macro.riskPremiums import loadDamodaranERP
+        from dartlab.macro.rates.riskPremiums import loadDamodaranERP
     except ImportError:
         return 2.5
 

@@ -199,7 +199,7 @@ def test_match48Cases_hyperinflation_recognized():
 
 @pytest.mark.requires_data
 def test_classifyCrisisType_triple_kr_1997():
-    from dartlab.macro.rrCrisisDB import classifyCrisisType
+    from dartlab.macro.crisis.rrCrisisDB import classifyCrisisType
 
     r = classifyCrisisType(
         hySpread=1200,
@@ -217,7 +217,7 @@ def test_classifyCrisisType_triple_kr_1997():
 
 @pytest.mark.requires_data
 def test_classifyCrisisType_stagflation():
-    from dartlab.macro.rrCrisisDB import classifyCrisisType
+    from dartlab.macro.crisis.rrCrisisDB import classifyCrisisType
 
     r = classifyCrisisType(inflationYoy=8, gdpGrowth=0.5)
     assert "stagflation" in r["activeTypes"]
@@ -225,7 +225,7 @@ def test_classifyCrisisType_stagflation():
 
 @pytest.mark.requires_data
 def test_classifyCrisisType_empty_normal():
-    from dartlab.macro.rrCrisisDB import classifyCrisisType
+    from dartlab.macro.crisis.rrCrisisDB import classifyCrisisType
 
     r = classifyCrisisType(hySpread=300, npl=1, fxDepreciationYoy=2, inflationYoy=2)
     assert r["activeTypes"] == []
@@ -234,7 +234,7 @@ def test_classifyCrisisType_empty_normal():
 
 @pytest.mark.requires_data
 def test_matchRrHistorical_kr_1997_bonus():
-    from dartlab.macro.rrCrisisDB import matchRrHistorical
+    from dartlab.macro.crisis.rrCrisisDB import matchRrHistorical
 
     r = matchRrHistorical(["banking", "currency", "sovereign_debt"], country="KR")
     assert r["matches"]
@@ -246,7 +246,7 @@ def test_matchRrHistorical_kr_1997_bonus():
 
 @pytest.mark.requires_data
 def test_matchRrHistorical_no_types():
-    from dartlab.macro.rrCrisisDB import matchRrHistorical
+    from dartlab.macro.crisis.rrCrisisDB import matchRrHistorical
 
     r = matchRrHistorical([])
     assert r["matches"] == []
@@ -258,7 +258,7 @@ def test_matchRrHistorical_no_types():
 @pytest.mark.requires_data
 def test_analyze_crisis_emits_dalio_keys(monkeypatch):
     """analyze_crisis 가 데이터 없어도 dict 구조 반환 (키 존재)."""
-    import dartlab.macro.crisis as crisis_mod
+    import dartlab.macro.crisis.crisis as crisis_mod
 
     monkeypatch.setattr(crisis_mod, "_fetch_crisis_data", lambda market, asOf=None: {})
     r = crisis_mod.analyzeCrisis(market="US")

@@ -14,7 +14,7 @@ import os
 
 import polars as pl
 
-from dartlab.macro.corporateAggregate import (
+from dartlab.macro.corporate.corporateAggregate import (
     aggregateEarningsCycle,
     leverageCycle,
     ponziRatio,

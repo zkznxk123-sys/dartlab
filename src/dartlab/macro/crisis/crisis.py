@@ -323,7 +323,7 @@ def _crisisMinsky(data: dict, creditGapVal, hyCurrent, vix, dxyCurrent) -> dict 
 def _crisisDalioCaseMatch(data: dict, creditGapVal) -> list | None:
     """Dalio Part 2 detail case matching (Weimar/GD/Subprime)."""
     try:
-        from dartlab.macro.dalioCaseMatch import matchDalioDetailCase
+        from dartlab.macro.scenarios.dalioCaseMatch import matchDalioDetailCase
 
         case_state = {
             "totalDebtToGdp": data.get("total_debt_to_gdp"),
@@ -342,7 +342,7 @@ def _crisisDalioCaseMatch(data: dict, creditGapVal) -> list | None:
 def _crisisDalio48Match(data: dict, creditGapVal) -> list | None:
     """Dalio Part 3 — 48 case compendium matching."""
     try:
-        from dartlab.macro.dalio48Match import match48Cases
+        from dartlab.macro.scenarios.dalio48Match import match48Cases
 
         state_48 = {
             "peakDebtToGdp": data.get("total_debt_to_gdp"),
@@ -360,7 +360,7 @@ def _crisisDalio48Match(data: dict, creditGapVal) -> list | None:
 def _crisisRRTypes(data: dict, hyCurrent, market: str, kwargs: dict) -> tuple[dict | None, list | None]:
     """R&R 위기 유형 분류 + 역사 매칭. 반환: (crisisType dict, rrMatch list)."""
     try:
-        from dartlab.macro.rrCrisisDB import classifyCrisisType, matchRrHistorical
+        from dartlab.macro.crisis.rrCrisisDB import classifyCrisisType, matchRrHistorical
 
         ct = classifyCrisisType(
             hySpread=hyCurrent,

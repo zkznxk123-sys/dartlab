@@ -11,7 +11,7 @@ def __getattr__(name: str):
     """0.10 BC — 사용 시점에 macro/dalio48Match 동적 lookup."""
     import importlib
 
-    mod = importlib.import_module("dartlab.macro.dalio48Match")
+    mod = importlib.import_module("dartlab.macro.scenarios.dalio48Match")
     try:
         return getattr(mod, name)
     except AttributeError as exc:

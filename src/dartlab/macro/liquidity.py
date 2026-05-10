@@ -269,7 +269,7 @@ def calcLiquidity(*, market: str = "US", asOf: str | None = None, overrides: dic
             }
 
     # 자체 FCI
-    from dartlab.macro.fci import calcFCI
+    from dartlab.macro.crisis.fci import calcFCI
 
     if market.upper() == "US":
         sid_map = {
