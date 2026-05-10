@@ -5,20 +5,13 @@
 <link>https://eddmpython.github.io/dartlab/industry/electrical</link>
 <description>electrical 산업 이번 회계연도 급변 회사</description>
 <language>ko-kr</language>
-<lastBuildDate>Sat, 18 Apr 2026 20:29:04 +0000</lastBuildDate>
+<lastBuildDate>Sun, 10 May 2026 12:43:59 +0000</lastBuildDate>
 <item>
-  <title>[수익성 개선 (ROE)] 와이투솔루션 (전기장비)</title>
-  <link>https://eddmpython.github.io/dartlab/map?focus=011690</link>
-  <guid isPermaLink="false">profitImprove-011690-2025</guid>
-  <category>수익성 개선 (ROE)</category>
-  <description>ROE Δ+95.2%p · 산업 z=+3.7σ | 수익성 개선. 원인은 본업 회복/일회성 여부 확인.</description>
-</item>
-<item>
-  <title>[수익성 악화 (ROE)] 센서뷰 (전기장비)</title>
-  <link>https://eddmpython.github.io/dartlab/map?focus=321370</link>
-  <guid isPermaLink="false">profitDecline-321370-2025</guid>
-  <category>수익성 악화 (ROE)</category>
-  <description>ROE Δ-76.3%p · 산업 z=-3.4σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
+  <title>[매출 급락 (YoY -20% 이하)] 대원전선 (전기장비)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=006340</link>
+  <guid isPermaLink="false">revenueDrop-006340-2026</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -69.7% — 급락 | 2025→2026 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
 </item>
 </channel>
 </rss>

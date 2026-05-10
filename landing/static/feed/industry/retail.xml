@@ -5,20 +5,13 @@
 <link>https://eddmpython.github.io/dartlab/industry/retail</link>
 <description>retail 산업 이번 회계연도 급변 회사</description>
 <language>ko-kr</language>
-<lastBuildDate>Sat, 18 Apr 2026 20:29:04 +0000</lastBuildDate>
+<lastBuildDate>Sun, 10 May 2026 12:43:59 +0000</lastBuildDate>
 <item>
-  <title>[⚠ 극단 변화 — 검증 필요] 소노스퀘어 (유통·소매)</title>
-  <link>https://eddmpython.github.io/dartlab/map?focus=007720</link>
-  <guid isPermaLink="false">extremeWarning-007720-2025</guid>
-  <category>⚠ 극단 변화 — 검증 필요</category>
-  <description>ROE Δ-320770.5%p — 극단 변화 | 1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.</description>
-</item>
-<item>
-  <title>[⚠ 극단 변화 — 검증 필요] SG세계물산 (유통·소매)</title>
-  <link>https://eddmpython.github.io/dartlab/map?focus=004060</link>
-  <guid isPermaLink="false">extremeWarning-004060-2025</guid>
-  <category>⚠ 극단 변화 — 검증 필요</category>
-  <description>ROE Δ+19040.3%p — 극단 변화 | 1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.</description>
+  <title>[매출 급락 (YoY -20% 이하)] 나라셀라 (유통·소매)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=405920</link>
+  <guid isPermaLink="false">revenueDrop-405920-2026</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -72.9% — 급락 | 2025→2026 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
 </item>
 </channel>
 </rss>

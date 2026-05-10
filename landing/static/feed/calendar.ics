@@ -6,891 +6,131 @@ METHOD:PUBLISH
 X-WR-CALNAME:dartlab 변화 감지
 X-WR-CALDESC:한국 상장사 이번 회계연도 급변 회사
 BEGIN:VEVENT
-UID:profitImprove-016740-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] 두올
-DESCRIPTION:ROE Δ+99.6%p · 산업 z=+2.1σ
-URL:https://eddmpython.github.io/dartlab/map?focus=016740
-END:VEVENT
-BEGIN:VEVENT
-UID:profitImprove-011690-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] 와이투솔루션
-DESCRIPTION:ROE Δ+95.2%p · 산업 z=+3.7σ
-URL:https://eddmpython.github.io/dartlab/map?focus=011690
-END:VEVENT
-BEGIN:VEVENT
-UID:profitImprove-189300-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] 인텔리안테크
-DESCRIPTION:ROE Δ+93.3%p · 산업 z=+2.2σ
-URL:https://eddmpython.github.io/dartlab/map?focus=189300
-END:VEVENT
-BEGIN:VEVENT
-UID:profitImprove-196490-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] 디에이테크놀로지
-DESCRIPTION:ROE Δ+89.3%p · 산업 z=-1.6σ
-URL:https://eddmpython.github.io/dartlab/map?focus=196490
-END:VEVENT
-BEGIN:VEVENT
-UID:profitImprove-065150-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] 대산F&B
-DESCRIPTION:ROE Δ+80.3%p · 산업 z=+2.9σ
-URL:https://eddmpython.github.io/dartlab/map?focus=065150
-END:VEVENT
-BEGIN:VEVENT
-UID:profitImprove-041510-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] 에스엠
-DESCRIPTION:ROE Δ+76.4%p · 산업 z=+2.4σ
-URL:https://eddmpython.github.io/dartlab/map?focus=041510
-END:VEVENT
-BEGIN:VEVENT
-UID:profitImprove-377460-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] 위니아에이드
-DESCRIPTION:ROE Δ+74.6%p · 산업 z=+4.0σ
-URL:https://eddmpython.github.io/dartlab/map?focus=377460
-END:VEVENT
-BEGIN:VEVENT
-UID:profitImprove-043150-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] 바텍
-DESCRIPTION:ROE Δ+68.8%p · 산업 z=+3.6σ
-URL:https://eddmpython.github.io/dartlab/map?focus=043150
-END:VEVENT
-BEGIN:VEVENT
-UID:profitImprove-067280-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] 멀티캠퍼스
-DESCRIPTION:ROE Δ+48.3%p · 산업 z=+2.3σ
-URL:https://eddmpython.github.io/dartlab/map?focus=067280
-END:VEVENT
-BEGIN:VEVENT
-UID:profitImprove-238120-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] 얼라인드
-DESCRIPTION:ROE Δ+14.8%p · 산업 z=+2.4σ
-URL:https://eddmpython.github.io/dartlab/map?focus=238120
-END:VEVENT
-BEGIN:VEVENT
-UID:profitImprove-064350-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] 현대로템
-DESCRIPTION:ROE Δ+13.2%p · 산업 z=+1.8σ
-URL:https://eddmpython.github.io/dartlab/map?focus=064350
-END:VEVENT
-BEGIN:VEVENT
-UID:profitImprove-001390-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 개선 (ROE)] KG케미칼
-DESCRIPTION:ROE Δ+5.0%p · 산업 z=+1.9σ
-URL:https://eddmpython.github.io/dartlab/map?focus=001390
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-445680-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 큐리옥스바이오시스템즈
-DESCRIPTION:ROE Δ-93.0%p · 산업 z=-2.2σ
-URL:https://eddmpython.github.io/dartlab/map?focus=445680
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-043090-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 더테크놀로지
-DESCRIPTION:ROE Δ-85.4%p · 산업 z=-3.7σ
-URL:https://eddmpython.github.io/dartlab/map?focus=043090
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-117730-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 티로보틱스
-DESCRIPTION:ROE Δ-83.0%p · 산업 z=-1.9σ
-URL:https://eddmpython.github.io/dartlab/map?focus=117730
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-321370-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 센서뷰
-DESCRIPTION:ROE Δ-76.3%p · 산업 z=-3.4σ
-URL:https://eddmpython.github.io/dartlab/map?focus=321370
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-076080-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 웰크론한텍
-DESCRIPTION:ROE Δ-75.3%p · 산업 z=-1.9σ
-URL:https://eddmpython.github.io/dartlab/map?focus=076080
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-036420-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 콘텐트리중앙
-DESCRIPTION:ROE Δ-72.7%p · 산업 z=-2.4σ
-URL:https://eddmpython.github.io/dartlab/map?focus=036420
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-300120-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 라온피플
-DESCRIPTION:ROE Δ-63.7%p · 산업 z=-1.6σ
-URL:https://eddmpython.github.io/dartlab/map?focus=300120
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-213500-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 한솔제지
-DESCRIPTION:ROE Δ-63.1%p · 산업 z=-4.8σ
-URL:https://eddmpython.github.io/dartlab/map?focus=213500
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-412350-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 레이저쎌
-DESCRIPTION:ROE Δ-55.1%p · 산업 z=-2.5σ
-URL:https://eddmpython.github.io/dartlab/map?focus=412350
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-044480-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 빌리언스
-DESCRIPTION:ROE Δ-46.0%p · 산업 z=-2.2σ
-URL:https://eddmpython.github.io/dartlab/map?focus=044480
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-199550-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 레이저옵텍
-DESCRIPTION:ROE Δ-40.5%p · 산업 z=-1.6σ
-URL:https://eddmpython.github.io/dartlab/map?focus=199550
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-241560-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 두산밥캣
-DESCRIPTION:ROE Δ-32.7%p · 산업 z=+2.0σ
-URL:https://eddmpython.github.io/dartlab/map?focus=241560
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-230980-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 비유테크놀러지
-DESCRIPTION:ROE Δ-22.7%p · 산업 z=-2.1σ
-URL:https://eddmpython.github.io/dartlab/map?focus=230980
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-014710-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 사조씨푸드
-DESCRIPTION:ROE Δ-15.2%p · 산업 z=-1.6σ
-URL:https://eddmpython.github.io/dartlab/map?focus=014710
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-091970-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 나노캠텍
-DESCRIPTION:ROE Δ-10.1%p · 산업 z=-1.8σ
-URL:https://eddmpython.github.io/dartlab/map?focus=091970
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-006570-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 대림통상
-DESCRIPTION:ROE Δ-8.5%p · 산업 z=-2.4σ
-URL:https://eddmpython.github.io/dartlab/map?focus=006570
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-105330-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 케이엔더블유
-DESCRIPTION:ROE Δ-5.7%p · 산업 z=-1.6σ
-URL:https://eddmpython.github.io/dartlab/map?focus=105330
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-250930-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 예선테크
-DESCRIPTION:ROE Δ-2.7%p · 산업 z=-1.7σ
-URL:https://eddmpython.github.io/dartlab/map?focus=250930
-END:VEVENT
-BEGIN:VEVENT
-UID:profitDecline-014820-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[수익성 악화 (ROE)] 동원시스템즈
-DESCRIPTION:ROE Δ-2.7%p · 산업 z=+1.5σ
-URL:https://eddmpython.github.io/dartlab/map?focus=014820
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-226330-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 신테카바이오
-DESCRIPTION:매출 YoY +7229.7% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=226330
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-066670-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 디티씨
-DESCRIPTION:매출 YoY +5131.6% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=066670
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-376930-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 노을
-DESCRIPTION:매출 YoY +4744.2% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=376930
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-083790-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] CG인바이츠
-DESCRIPTION:매출 YoY +3762.8% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=083790
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-263050-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 유틸렉스
-DESCRIPTION:매출 YoY +3155.3% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=263050
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-302440-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] SK바이오사이언스
-DESCRIPTION:매출 YoY +2332.5% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=302440
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-351320-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 넥사다이내믹스
-DESCRIPTION:매출 YoY +1991.8% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=351320
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-246960-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] SCL사이언스
-DESCRIPTION:매출 YoY +1841.8% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=246960
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-226950-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 올릭스
-DESCRIPTION:매출 YoY +1808.8% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=226950
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-286750-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 나노실리칸첨단소재
-DESCRIPTION:매출 YoY +1421.9% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=286750
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-440320-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 오픈놀
-DESCRIPTION:매출 YoY +1274.5% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=440320
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-322510-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 제이엘케이
-DESCRIPTION:매출 YoY +1235.1% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=322510
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-465770-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] STX그린로지스
-DESCRIPTION:매출 YoY +1072.8% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=465770
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-215600-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 신라젠
-DESCRIPTION:매출 YoY +1043.3% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=215600
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-277810-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 레인보우로보틱스
-DESCRIPTION:매출 YoY +1019.4% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=277810
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-069540-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 빛과전자
-DESCRIPTION:매출 YoY +909.9% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=069540
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-300080-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 플리토
-DESCRIPTION:매출 YoY +882.8% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=300080
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-100840-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] SNT에너지
-DESCRIPTION:매출 YoY +801.2% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=100840
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-043710-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 서울리거
-DESCRIPTION:매출 YoY +722.1% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=043710
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueSpike-056360-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급증 (YoY +30% 이상)] 코위버
-DESCRIPTION:매출 YoY +713.8% — 고성장
-URL:https://eddmpython.github.io/dartlab/map?focus=056360
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-308080-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 바이젠셀
-DESCRIPTION:매출 YoY -100.0% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=308080
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-041190-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 우리기술투자
-DESCRIPTION:매출 YoY -99.1% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=041190
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-046390-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 삼화네트웍스
-DESCRIPTION:매출 YoY -98.6% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=046390
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-001500-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 현대차증권
-DESCRIPTION:매출 YoY -98.5% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=001500
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-378340-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 필에너지
-DESCRIPTION:매출 YoY -97.6% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=378340
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-052770-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 아이톡시
-DESCRIPTION:매출 YoY -95.9% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=052770
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-230980-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 비유테크놀러지
-DESCRIPTION:매출 YoY -92.2% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=230980
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-106080-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 케이이엠텍
-DESCRIPTION:매출 YoY -91.5% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=106080
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-044180-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] KD
-DESCRIPTION:매출 YoY -91.0% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=044180
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-348210-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 넥스틴
-DESCRIPTION:매출 YoY -90.6% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=348210
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-199430-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 케이엔알시스템
-DESCRIPTION:매출 YoY -90.5% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=199430
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-007590-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 동방아그로
-DESCRIPTION:매출 YoY -88.9% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=007590
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-383310-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 에코프로에이치엔
-DESCRIPTION:매출 YoY -87.9% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=383310
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-474650-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 링크솔루션
-DESCRIPTION:매출 YoY -87.2% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=474650
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-177350-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 베셀
-DESCRIPTION:매출 YoY -86.2% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=177350
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-288620-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 에스퓨얼셀
-DESCRIPTION:매출 YoY -86.2% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=288620
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-049950-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 미래컴퍼니
-DESCRIPTION:매출 YoY -86.0% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=049950
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-065440-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 이루온
-DESCRIPTION:매출 YoY -86.0% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=065440
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-031980-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 피에스케이홀딩스
-DESCRIPTION:매출 YoY -85.5% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=031980
-END:VEVENT
-BEGIN:VEVENT
-UID:revenueDrop-072770-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[매출 급락 (YoY -20% 이하)] 멤레이비티
-DESCRIPTION:매출 YoY -85.4% — 급락
-URL:https://eddmpython.github.io/dartlab/map?focus=072770
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-064820-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 케이프
-DESCRIPTION:부채비율 1442% (+14900%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=064820
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-020560-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 아시아나항공
-DESCRIPTION:부채비율 915% (+14776%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=020560
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-351870-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 차이커뮤니케이션
-DESCRIPTION:부채비율 191% (+12057%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=351870
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-013310-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 아진산업
-DESCRIPTION:부채비율 343% (+11751%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=013310
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-298000-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 효성화학
-DESCRIPTION:부채비율 399% (+5167%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=298000
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-046070-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 코다코
-DESCRIPTION:부채비율 1754% (+3138%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=046070
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-023350-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 한국종합기술
-DESCRIPTION:부채비율 160% (+3050%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=023350
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-036420-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 콘텐트리중앙
-DESCRIPTION:부채비율 346% (+2941%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=036420
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-377460-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 위니아에이드
-DESCRIPTION:부채비율 334% (+2826%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=377460
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-245620-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] EDGC
-DESCRIPTION:부채비율 2025% (+1828%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=245620
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-372320-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 큐로셀
-DESCRIPTION:부채비율 356% (+1521%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=372320
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-066900-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 디에이피
-DESCRIPTION:부채비율 1341% (+1335%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=066900
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-210980-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] SK디앤디
-DESCRIPTION:부채비율 191% (+1022%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=210980
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-230980-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 비유테크놀러지
-DESCRIPTION:부채비율 1337% (+851%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=230980
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-059090-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 미코
-DESCRIPTION:부채비율 229% (+848%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=059090
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-082640-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 동양생명
-DESCRIPTION:부채비율 2082% (+788%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=082640
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-001750-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 한양증권
-DESCRIPTION:부채비율 922% (+685%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=001750
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-300120-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 라온피플
-DESCRIPTION:부채비율 346% (+630%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=300120
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-182400-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 엔케이젠바이오텍코리아
-DESCRIPTION:부채비율 512% (+619%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=182400
-END:VEVENT
-BEGIN:VEVENT
-UID:debtStress-047400-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[부채 스트레스] 유니온머티리얼
-DESCRIPTION:부채비율 632% (+508%p)
-URL:https://eddmpython.github.io/dartlab/map?focus=047400
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-007720-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 소노스퀘어
-DESCRIPTION:ROE Δ-320770.5%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=007720
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-012160-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 영흥
-DESCRIPTION:ROE Δ+90099.6%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=012160
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-092190-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 서울바이오시스
-DESCRIPTION:ROE Δ-19873.1%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=092190
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-004060-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] SG세계물산
-DESCRIPTION:ROE Δ+19040.3%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=004060
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-060240-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 스타코링크
-DESCRIPTION:ROE Δ-11324.4%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=060240
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-290650-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 엘앤씨바이오
-DESCRIPTION:ROE Δ-8838.8%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=290650
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-013700-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 까뮤이앤씨
-DESCRIPTION:ROE Δ-7608.5%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=013700
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-285130-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] SK케미칼
-DESCRIPTION:ROE Δ+5297.6%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=285130
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-011930-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 신성이엔지
-DESCRIPTION:ROE Δ-4048.5%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=011930
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-113810-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 디젠스
-DESCRIPTION:ROE Δ-4002.2%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=113810
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-043100-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 알파AI
-DESCRIPTION:ROE Δ-3634.9%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=043100
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-080520-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 오디텍
-DESCRIPTION:ROE Δ+2893.5%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=080520
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-036710-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 심텍홀딩스
-DESCRIPTION:ROE Δ-2421.1%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=036710
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-088130-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 동아엘텍
-DESCRIPTION:ROE Δ-2107.2%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=088130
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-007820-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 에스엠코어
-DESCRIPTION:ROE Δ-2022.9%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=007820
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-024070-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] WISCOM
-DESCRIPTION:ROE Δ-1909.5%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=024070
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-032620-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] GC메디아이
-DESCRIPTION:ROE Δ+1872.8%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=032620
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-237690-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 에스티팜
-DESCRIPTION:ROE Δ+1706.7%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=237690
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-082270-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 젬백스
-DESCRIPTION:ROE Δ+1604.7%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=082270
-END:VEVENT
-BEGIN:VEVENT
-UID:extremeWarning-451250-2026-04-18@dartlab
-DTSTAMP:20260418T000000Z
-DTSTART;VALUE=DATE:20260418
-SUMMARY:[⚠ 극단 변화 — 검증 필요] 삐아
-DESCRIPTION:ROE Δ-1283.4%p — 극단 변화
-URL:https://eddmpython.github.io/dartlab/map?focus=451250
+UID:revenueSpike-382800-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급증 (YoY +30% 이상)] 지앤비에스 에코
+DESCRIPTION:매출 YoY +130.7% — 고성장
+URL:https://eddmpython.github.io/dartlab/map?focus=382800
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueSpike-396470-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급증 (YoY +30% 이상)] 워트
+DESCRIPTION:매출 YoY +91.7% — 고성장
+URL:https://eddmpython.github.io/dartlab/map?focus=396470
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueSpike-451220-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급증 (YoY +30% 이상)] 아이엠티
+DESCRIPTION:매출 YoY +66.2% — 고성장
+URL:https://eddmpython.github.io/dartlab/map?focus=451220
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueSpike-318020-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급증 (YoY +30% 이상)] 포인트모바일
+DESCRIPTION:매출 YoY +43.6% — 고성장
+URL:https://eddmpython.github.io/dartlab/map?focus=318020
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueSpike-126730-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급증 (YoY +30% 이상)] 코칩
+DESCRIPTION:매출 YoY +39.7% — 고성장
+URL:https://eddmpython.github.io/dartlab/map?focus=126730
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueSpike-044990-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급증 (YoY +30% 이상)] 에이치엔에스하이텍
+DESCRIPTION:매출 YoY +34.5% — 고성장
+URL:https://eddmpython.github.io/dartlab/map?focus=044990
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueSpike-317330-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급증 (YoY +30% 이상)] 덕산테코피아
+DESCRIPTION:매출 YoY +30.2% — 고성장
+URL:https://eddmpython.github.io/dartlab/map?focus=317330
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueDrop-299900-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급락 (YoY -20% 이하)] 위지윅스튜디오
+DESCRIPTION:매출 YoY -86.6% — 급락
+URL:https://eddmpython.github.io/dartlab/map?focus=299900
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueDrop-080530-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급락 (YoY -20% 이하)] 코디
+DESCRIPTION:매출 YoY -73.9% — 급락
+URL:https://eddmpython.github.io/dartlab/map?focus=080530
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueDrop-405920-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급락 (YoY -20% 이하)] 나라셀라
+DESCRIPTION:매출 YoY -72.9% — 급락
+URL:https://eddmpython.github.io/dartlab/map?focus=405920
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueDrop-143540-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급락 (YoY -20% 이하)] 영우디에스피
+DESCRIPTION:매출 YoY -71.0% — 급락
+URL:https://eddmpython.github.io/dartlab/map?focus=143540
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueDrop-006340-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급락 (YoY -20% 이하)] 대원전선
+DESCRIPTION:매출 YoY -69.7% — 급락
+URL:https://eddmpython.github.io/dartlab/map?focus=006340
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueDrop-015360-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급락 (YoY -20% 이하)] INVENI
+DESCRIPTION:매출 YoY -56.9% — 급락
+URL:https://eddmpython.github.io/dartlab/map?focus=015360
+END:VEVENT
+BEGIN:VEVENT
+UID:revenueDrop-063440-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[매출 급락 (YoY -20% 이하)] SM Life Design
+DESCRIPTION:매출 YoY -42.6% — 급락
+URL:https://eddmpython.github.io/dartlab/map?focus=063440
+END:VEVENT
+BEGIN:VEVENT
+UID:extremeWarning-051360-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[⚠ 극단 변화 — 검증 필요] 토비스
+DESCRIPTION:ROE Δ-330.7%p — 극단 변화
+URL:https://eddmpython.github.io/dartlab/map?focus=051360
+END:VEVENT
+BEGIN:VEVENT
+UID:extremeWarning-298380-2026-05-10@dartlab
+DTSTAMP:20260510T000000Z
+DTSTART;VALUE=DATE:20260510
+SUMMARY:[⚠ 극단 변화 — 검증 필요] 에이비엘바이오
+DESCRIPTION:ROE Δ+119.2%p — 극단 변화
+URL:https://eddmpython.github.io/dartlab/map?focus=298380
 END:VEVENT
 END:VCALENDAR
