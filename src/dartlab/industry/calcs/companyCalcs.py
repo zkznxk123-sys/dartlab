@@ -431,9 +431,9 @@ def calcSectorDynamics(company: Any) -> dict | None:
     # 매크로 국면 가져오기 (실패 시 fallback)
     macroPhase = "미확인"
     try:
-        import dartlab
+        from dartlab.macro.cycles.cycle import analyzeCycle
 
-        macro_result = dartlab.macro("사이클")
+        macro_result = analyzeCycle()
         if hasattr(macro_result, "iter_rows"):
             for r in macro_result.iter_rows(named=True):
                 if r.get("국면"):

@@ -112,12 +112,13 @@ def computeChsProbability(company: Any) -> dict | None:
 def _gatherMarketData(company: Any) -> tuple[float | None, float | None, float | None, float | None]:
     """주가 시계열에서 시가총액 / 변동성 / excessReturn / 주가 추출."""
     try:
-        import dartlab
+        from dartlab.core.di import getMacroProvider
 
         code = getattr(company, "stockCode", None)
         if not code:
             return None, None, None, None
-        price_df = dartlab.gather("price", code)
+        g = getMacroProvider().getDefaultGather()
+        price_df = g("price", code)
         if price_df is None or not hasattr(price_df, "height") or price_df.height < 30:
             return None, None, None, None
         closes = [float(c) for c in price_df["close"].to_list() if c is not None]

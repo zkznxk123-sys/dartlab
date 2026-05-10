@@ -38,7 +38,7 @@ def publishReport(
     4. blog/05-company-reports/{순번}-{종목코드}-{기업명}/index.md 저장
     5. _registry.json 업데이트
     """
-    from dartlab import Company
+    from dartlab.company import Company
 
     company = Company(stockCode)
     path = publishReportFromCompany(company, template=template, basePeriod=basePeriod)

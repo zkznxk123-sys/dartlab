@@ -644,7 +644,7 @@ _CREDIT_SCORE_LEGEND = (
 
 def evaluate(stockCode: str, *, detail: bool = False, basePeriod: str | None = None) -> dict | None:
     """신용등급 산출 메인 진입점."""
-    from dartlab import Company
+    from dartlab.company import Company
 
     company = Company(stockCode)
     return evaluateCompany(company, detail=detail, basePeriod=basePeriod)

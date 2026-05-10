@@ -1125,7 +1125,7 @@ class Analysis:
         # stockCode 인자 수용 — 일관성 규약 (종목 = stockCode).
         # company 없고 stockCode 있으면 Company 생성.
         if company is None and stockCode is not None:
-            from dartlab import Company
+            from dartlab.company import Company
 
             company = Company(stockCode)
 

@@ -481,9 +481,10 @@ def _getCurrentPrice(company: Any) -> float | None:
         price = getattr(company, "currentPrice", None)
         if price:
             return float(price)
-        import dartlab
+        from dartlab.core.di import getMacroProvider
 
-        p = dartlab.gather("price", getattr(company, "stockCode", ""))
+        g = getMacroProvider().getDefaultGather()
+        p = g("price", getattr(company, "stockCode", ""))
         if p is not None and hasattr(p, "height") and p.height > 0:
             return float(p["close"][-1])
     except (ImportError, AttributeError, ValueError, TypeError, KeyError):
