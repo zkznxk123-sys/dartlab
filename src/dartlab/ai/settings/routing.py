@@ -1,14 +1,16 @@
-"""AI 역할(role) 정의 및 정규화."""
+"""[shim] ai/settings/routing → core/providers/routing 이전 (0.10 까지 BC).
 
-from __future__ import annotations
+본체: src/dartlab/core/providers/routing.py
+0.11 release 시 본 shim 제거. 직접 사용처는 `from dartlab.core.providers import ...` 로 갱신.
+"""
 
-AI_ROLES: tuple[str, ...] = ("analysis", "summary", "coding", "ui_control")
-DEFAULT_ROLE = "analysis"
+from dartlab.core.providers.routing import (
+    AI_ROLES,
+    DEFAULT_ROLE,
+    normalizeRole,
+)
 
+# snake alias — 0.10 까지 backward-compat shim. 0.11 제거.
+normalize_role = normalizeRole
 
-def normalize_role(role: str | None) -> str | None:
-    """role 문자열을 정규화. 알려진 role이면 반환, 아니면 None."""
-    if role is None:
-        return None
-    normalized = role.strip().lower()
-    return normalized if normalized in AI_ROLES else None
+__all__ = ["AI_ROLES", "DEFAULT_ROLE", "normalizeRole", "normalize_role"]

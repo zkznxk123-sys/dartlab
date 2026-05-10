@@ -548,7 +548,7 @@ def onKeyRequired(service: str) -> str:
         )
 
     try:
-        from dartlab.ai.settings.provider_catalog import _PROVIDERS
+        from dartlab.core.providers import _PROVIDERS
 
         spec = _PROVIDERS.get(service)
         if spec and spec.auth_kind == "api_key" and spec.env_key:
@@ -692,7 +692,7 @@ def promptKeyIfMissing(service: str) -> str | None:
             return None
 
     try:
-        from dartlab.ai.settings.provider_catalog import _PROVIDERS
+        from dartlab.core.providers import _PROVIDERS
 
         spec = _PROVIDERS.get(service)
         if spec and spec.auth_kind == "api_key" and spec.env_key:

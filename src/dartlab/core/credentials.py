@@ -64,17 +64,22 @@ class CredentialManager:
         return aiStatuses.get(name, CredentialStatus(name=name, configured=False, source="none"))
 
     def saveKey(self, name: str, value: str) -> None:
-        """키 저장 — 적절한 백엔드에 위임."""
+        """키 저장 — dart key 는 .env, AI provider 는 SecretStore 직접 저장.
+
+        이전: AiProfileManager.save_api_key 호출 (revision++ 부수효과 포함).
+        현재: SecretStore 직접 — core 가 ai 의존 안 함 (단방향 import 정책).
+        provider 카탈로그 변경은 별도 호출자가 ai/settings 통해 처리.
+        """
         if name == "dart_api_key":
             from dartlab.providers.dart.openapi.dartKey import saveDartKeyToDotenv
 
             saveDartKeyToDotenv(value)
             return
-        from dartlab.ai.settings.profile import get_profile_manager
+        from dartlab.core.providers import apiKeySecretName, getSecretStore, normalizeProvider
 
-        mgr = get_profile_manager()
         provider = name.replace("_api_key", "")
-        mgr.save_api_key(provider, value)
+        normalized = normalizeProvider(provider) or provider
+        getSecretStore().set(apiKeySecretName(normalized), value)
 
     def _checkDartKey(self) -> CredentialStatus:
         try:
@@ -106,14 +111,18 @@ class CredentialManager:
         try:
             import os
 
-            from dartlab.ai.settings.provider_catalog import _PROVIDERS, api_key_secret_name
-            from dartlab.ai.settings.secrets import get_secret_store
+            from dartlab.core.providers import (
+                _PROVIDERS,
+                apiKeySecretName,
+                getSecretStore,
+                oauthSecretName,
+            )
 
-            store = get_secret_store()
+            store = getSecretStore()
             for pid, spec in _PROVIDERS.items():
                 if spec.auth_kind == "api_key" and spec.env_key:
                     envVal = os.environ.get(spec.env_key)
-                    secretVal = store.get(api_key_secret_name(pid))
+                    secretVal = store.get(apiKeySecretName(pid))
                     configured = bool(envVal or secretVal)
                     source = "env" if envVal else ("secret_store" if secretVal else "none")
                     val = envVal or secretVal
@@ -125,9 +134,7 @@ class CredentialManager:
                         maskedValue=masked if configured else None,
                     )
                 elif spec.auth_kind == "oauth":
-                    from dartlab.ai.settings.provider_catalog import oauth_secret_name
-
-                    configured = store.has(oauth_secret_name(pid))
+                    configured = store.has(oauthSecretName(pid))
                     results[pid] = CredentialStatus(
                         name=f"{pid}_oauth",
                         configured=configured,
@@ -138,11 +145,10 @@ class CredentialManager:
         return results
 
     def _getDefaultProvider(self) -> str | None:
+        """ai_profile.json 의 defaultProvider 만 직접 조회 (core/providers thin 헬퍼)."""
         try:
-            from dartlab.ai.settings.profile import get_profile_manager
+            from dartlab.core.providers import getDefaultProvider
 
-            mgr = get_profile_manager()
-            profile = mgr.load()
-            return profile.default_provider
+            return getDefaultProvider()
         except ImportError:
             return None
