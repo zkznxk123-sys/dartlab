@@ -11,10 +11,10 @@ from sse_starlette.sse import EventSourceResponse
 
 import dartlab
 from dartlab.ai.settings import (
-    build_provider_catalog,
+    buildProviderCatalog,
     get_profile_manager,
-    get_provider_spec,
-    public_provider_ids,
+    getProviderSpec,
+    publicProviderIds,
 )
 from dartlab.ai.settings.modelResolver import fallback_models, is_openai_chat_model, sort_openai_models
 
@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-UI_PROVIDERS = public_provider_ids()
+UI_PROVIDERS = publicProviderIds()
 STATIC_MODELS: dict[str, list[str]] = {}
 
 _oauth_state: dict[str, Any] = {}
@@ -82,7 +82,7 @@ def api_status(
 ):
     """LLM provider 상태 확인 (설치/인증/모델 포함)."""
     profile_snapshot = get_profile_manager().serialize()
-    catalog = {item["id"]: item for item in build_provider_catalog()}
+    catalog = {item["id"]: item for item in buildProviderCatalog()}
     results = {}
     target_provider = _normalize_provider_name(provider) or provider
     if probe and target_provider is None:
@@ -221,7 +221,7 @@ def api_ai_profile_update(req: AiProfileUpdateRequest):
 
     manager = get_profile_manager()
     provider = _normalize_provider_name(req.provider) or req.provider
-    if provider and get_provider_spec(provider) is None:
+    if provider and getProviderSpec(provider) is None:
         raise HTTPException(status_code=400, detail=f"지원하지 않는 provider: {provider}")
     profile = manager.update(
         provider=provider,
@@ -250,7 +250,7 @@ def api_ai_profile_update(req: AiProfileUpdateRequest):
 def api_ai_profile_secret(req: AiSecretUpdateRequest):
     """provider secret 저장/삭제."""
     provider = _normalize_provider_name(req.provider) or req.provider
-    spec = get_provider_spec(provider)
+    spec = getProviderSpec(provider)
     if spec is None:
         raise HTTPException(status_code=400, detail=f"지원하지 않는 provider: {provider}")
     if spec.auth_kind != "api_key":

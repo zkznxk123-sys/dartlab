@@ -39,7 +39,7 @@ def test_topLevelSymbol_accessible(symbol):
     except Exception as e:
         pytest.fail(f"dartlab.{symbol} 접근 크래시: {type(e).__name__}: {e}")
     # 접근만 보장 — 값 자체는 타입 무관
-    assert value is not None or symbol in {"reload_plugins"}, f"dartlab.{symbol} 가 None — 공개 심볼에서 None 은 의심"
+    assert value is not None or symbol in {"reloadPlugins"}, f"dartlab.{symbol} 가 None — 공개 심볼에서 None 은 의심"
 
 
 @pytest.mark.realData

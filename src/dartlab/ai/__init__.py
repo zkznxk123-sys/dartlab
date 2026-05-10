@@ -26,13 +26,13 @@ def configure(provider: str = "dartlab", **kwargs: Any) -> ProviderConfig:
     else:
         _CONFIG = config
     try:
-        from dartlab.ai.settings import get_profile_manager, get_provider_spec, normalize_provider, normalize_role
+        from dartlab.ai.settings import get_profile_manager, getProviderSpec, normalizeProvider, normalizeRole
 
-        normalized = normalize_provider(provider) or provider
-        if get_provider_spec(normalized) is not None:
+        normalized = normalizeProvider(provider) or provider
+        if getProviderSpec(normalized) is not None:
             get_profile_manager().update(
                 provider=normalized,
-                role=normalize_role(str(role)) if role else None,
+                role=normalizeRole(str(role)) if role else None,
                 model=config.model,
                 base_url=config.base_url,
                 temperature=config.temperature,

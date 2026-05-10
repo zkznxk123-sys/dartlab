@@ -12,15 +12,15 @@ from typing import Any
 
 from dartlab.ai.settings.modelResolver import resolve_default_model
 from dartlab.ai.settings.providerCatalog import (
-    api_key_secret_name,
-    build_provider_catalog,
-    get_provider_spec,
-    normalize_provider,
-    oauth_secret_name,
-    public_provider_ids,
+    apiKeySecretName,
+    buildProviderCatalog,
+    getProviderSpec,
+    normalizeProvider,
+    oauthSecretName,
+    publicProviderIds,
 )
-from dartlab.ai.settings.routing import AI_ROLES, DEFAULT_ROLE, normalize_role
-from dartlab.ai.settings.secrets import SecretStore, get_secret_store
+from dartlab.ai.settings.routing import AI_ROLES, DEFAULT_ROLE, normalizeRole
+from dartlab.ai.settings.secrets import SecretStore, getSecretStore
 
 
 def _dartlab_home() -> Path:
@@ -76,7 +76,7 @@ class AiProfileManager:
 
     def __init__(self, path: Path | None = None, secret_store: SecretStore | None = None) -> None:
         self.path = path or (_dartlab_home() / "ai_profile.json")
-        self.secret_store = secret_store or get_secret_store()
+        self.secret_store = secret_store or getSecretStore()
 
     def _bootstrap(self) -> AiProfile:
         return AiProfile(
@@ -100,8 +100,8 @@ class AiProfileManager:
         providers: dict[str, ProviderProfile] = {}
         if isinstance(providers_raw, dict):
             for name, item in providers_raw.items():
-                normalized = normalize_provider(name) or name
-                if get_provider_spec(normalized) is None or not isinstance(item, dict):
+                normalized = normalizeProvider(name) or name
+                if getProviderSpec(normalized) is None or not isinstance(item, dict):
                     continue
                 providers[normalized] = ProviderProfile(
                     model=item.get("model"),
@@ -109,9 +109,9 @@ class AiProfileManager:
                 )
 
         default_provider = (
-            normalize_provider(data.get("defaultProvider")) or normalize_provider(data.get("provider")) or "oauth-codex"
+            normalizeProvider(data.get("defaultProvider")) or normalizeProvider(data.get("provider")) or "oauth-codex"
         )
-        default_spec = get_provider_spec(default_provider)
+        default_spec = getProviderSpec(default_provider)
         if default_spec is None or DEFAULT_ROLE not in default_spec.supported_roles:
             default_provider = "oauth-codex"
 
@@ -119,11 +119,11 @@ class AiProfileManager:
         roles_raw = data.get("roles", {})
         if isinstance(roles_raw, dict):
             for role_name, binding in roles_raw.items():
-                normalized_role = normalize_role(role_name)
+                normalized_role = normalizeRole(role_name)
                 if normalized_role is None or not isinstance(binding, dict):
                     continue
-                bound_provider = normalize_provider(binding.get("provider")) or default_provider
-                bound_spec = get_provider_spec(bound_provider)
+                bound_provider = normalizeProvider(binding.get("provider")) or default_provider
+                bound_spec = getProviderSpec(bound_provider)
                 if bound_spec is None or normalized_role not in bound_spec.supported_roles:
                     bound_provider = default_provider
                 roles[normalized_role] = RoleBinding(
@@ -193,14 +193,14 @@ class AiProfileManager:
 
     def ensure_provider(self, profile: AiProfile, provider: str) -> ProviderProfile:
         """provider가 프로필에 없으면 기본 ProviderProfile로 생성."""
-        normalized = normalize_provider(provider) or provider
+        normalized = normalizeProvider(provider) or provider
         if normalized not in profile.providers:
             profile.providers[normalized] = ProviderProfile()
         return profile.providers[normalized]
 
     def ensure_role(self, profile: AiProfile, role: str) -> RoleBinding:
         """role이 프로필에 없으면 기본 RoleBinding으로 생성."""
-        normalized = normalize_role(role)
+        normalized = normalizeRole(role)
         if normalized is None:
             raise ValueError(f"지원하지 않는 role: {role}")
         if normalized not in profile.roles:
@@ -226,12 +226,12 @@ class AiProfileManager:
     ) -> AiProfile:
         """프로필 부분 업데이트 후 저장. revision 자동 증가."""
         profile = self.load()
-        normalized_role = normalize_role(role)
+        normalized_role = normalizeRole(role)
         if role is not None and normalized_role is None:
             raise ValueError(f"지원하지 않는 role: {role}")
 
-        target_provider = normalize_provider(provider) if provider is not None else None
-        if target_provider is not None and get_provider_spec(target_provider) is None:
+        target_provider = normalizeProvider(provider) if provider is not None else None
+        if target_provider is not None and getProviderSpec(target_provider) is None:
             raise ValueError(f"지원하지 않는 provider: {target_provider}")
 
         old_default = profile.default_provider
@@ -256,7 +256,7 @@ class AiProfileManager:
         else:
             binding = self.ensure_role(profile, normalized_role)
             effective_provider = target_provider or binding.provider or profile.default_provider
-            if get_provider_spec(effective_provider) is None:
+            if getProviderSpec(effective_provider) is None:
                 effective_provider = profile.default_provider
             binding.provider = effective_provider
             if model is not None:
@@ -284,10 +284,10 @@ class AiProfileManager:
     def resolve(self, provider: str | None = None, *, role: str | None = None) -> dict[str, Any]:
         """provider/role 기반으로 최종 설정(model, api_key 등) 해석."""
         profile = self.load()
-        normalized_role = normalize_role(role)
-        explicit_provider = normalize_provider(provider) if provider is not None else None
+        normalized_role = normalizeRole(role)
+        explicit_provider = normalizeProvider(provider) if provider is not None else None
 
-        if explicit_provider is not None and get_provider_spec(explicit_provider) is not None:
+        if explicit_provider is not None and getProviderSpec(explicit_provider) is not None:
             target_provider = explicit_provider
             role_model = None
         else:
@@ -295,14 +295,14 @@ class AiProfileManager:
             target_provider = binding.provider if binding and binding.provider else profile.default_provider
             role_model = binding.model if binding else None
 
-        if get_provider_spec(target_provider) is None:
+        if getProviderSpec(target_provider) is None:
             target_provider = profile.default_provider
 
         settings = profile.providers.get(target_provider) or ProviderProfile()
-        spec = get_provider_spec(target_provider)
+        spec = getProviderSpec(target_provider)
         api_key = None
         if spec and spec.auth_kind == "api_key":
-            api_key = self.secret_store.get(api_key_secret_name(target_provider))
+            api_key = self.secret_store.get(apiKeySecretName(target_provider))
         return {
             "provider": target_provider,
             "model": role_model or settings.model,
@@ -315,18 +315,18 @@ class AiProfileManager:
 
     def save_api_key(self, provider: str, api_key: str, *, updated_by: str = "ui") -> AiProfile:
         """provider API 키를 SecretStore에 저장하고 프로필 갱신."""
-        normalized = normalize_provider(provider) or provider
-        if get_provider_spec(normalized) is None:
+        normalized = normalizeProvider(provider) or provider
+        if getProviderSpec(normalized) is None:
             raise ValueError(f"지원하지 않는 provider: {normalized}")
-        self.secret_store.set(api_key_secret_name(normalized), api_key)
+        self.secret_store.set(apiKeySecretName(normalized), api_key)
         return self.update(provider=normalized, updated_by=updated_by)
 
     def clear_api_key(self, provider: str, *, updated_by: str = "ui") -> AiProfile:
         """provider API 키를 SecretStore에서 삭제하고 프로필 갱신."""
-        normalized = normalize_provider(provider) or provider
-        if get_provider_spec(normalized) is None:
+        normalized = normalizeProvider(provider) or provider
+        if getProviderSpec(normalized) is None:
             raise ValueError(f"지원하지 않는 provider: {normalized}")
-        self.secret_store.delete(api_key_secret_name(normalized))
+        self.secret_store.delete(apiKeySecretName(normalized))
         return self.update(provider=normalized, updated_by=updated_by)
 
     def serialize(self) -> dict[str, Any]:
@@ -340,14 +340,14 @@ class AiProfileManager:
         # secret 존재 판정은 _load() 1 회로 일괄 — provider 별 has() 호출 (9x file IO) 회피.
         secret_keys = self.secret_store.keys()
         provider_settings: dict[str, dict[str, Any]] = {}
-        for provider_id in public_provider_ids():
+        for provider_id in publicProviderIds():
             settings = profile.providers.get(provider_id) or ProviderProfile()
-            spec = get_provider_spec(provider_id)
+            spec = getProviderSpec(provider_id)
             secret_configured = False
             if spec and spec.auth_kind == "api_key":
-                secret_configured = api_key_secret_name(provider_id) in secret_keys
+                secret_configured = apiKeySecretName(provider_id) in secret_keys
             elif spec and spec.auth_kind == "oauth":
-                secret_configured = oauth_secret_name(provider_id) in secret_keys
+                secret_configured = oauthSecretName(provider_id) in secret_keys
             effective_model = resolve_default_model(provider_id, configured_model=settings.model, allow_fetch=False)
             provider_settings[provider_id] = {
                 "model": effective_model,
@@ -370,7 +370,7 @@ class AiProfileManager:
                 }
                 for role, binding in profile.roles.items()
             },
-            "catalog": build_provider_catalog(),
+            "catalog": buildProviderCatalog(),
         }
 
     def fingerprint(self) -> str:
@@ -384,4 +384,4 @@ class AiProfileManager:
 
 def get_profile_manager() -> AiProfileManager:
     """기본 SecretStore를 사용하는 AiProfileManager 반환."""
-    return AiProfileManager(secret_store=get_secret_store())
+    return AiProfileManager(secret_store=getSecretStore())

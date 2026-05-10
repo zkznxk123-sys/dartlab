@@ -16,7 +16,7 @@ from typing import Any
 
 from .agent import runAgent
 from .contracts import TraceEvent, WorkbenchTask
-from .settings.providerCatalog import wired_provider_ids
+from .settings.providerCatalog import wiredProviderIds
 from .workbench import WorkbenchLoop
 
 
@@ -69,7 +69,7 @@ def _isLLMProvider(obj: Any) -> bool:
         return False
     config = getattr(obj, "config", None)
     provider_id = (getattr(config, "provider", None) or "").lower()
-    if provider_id not in wired_provider_ids():
+    if provider_id not in wiredProviderIds():
         return False
     try:
         return bool(obj.check_available())

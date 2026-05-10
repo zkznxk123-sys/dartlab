@@ -1,23 +1,19 @@
-"""[shim] ai/settings/secrets → core/providers/secrets 이전 (0.10 까지 BC).
+"""[shim] settings/secrets → core/providers/secrets 이전.
 
 본체: src/dartlab/core/providers/secrets.py
-0.11 release 시 본 shim 제거. 직접 사용처는 `from dartlab.core.providers import ...` 로 갱신.
+0.10 부터 snake alias 제거. 0.11 release 시 본 shim 제거.
 """
 
-from dartlab.core.providers.secrets import (
+from dartlab.core.providers.secrets import (  # noqa: F401
     SecretEntry,
     SecretStore,
     SecretStoreError,
     getSecretStore,
 )
 
-# snake alias — 0.10 까지 backward-compat shim. 0.11 제거.
-get_secret_store = getSecretStore
-
 __all__ = [
     "SecretEntry",
     "SecretStore",
     "SecretStoreError",
     "getSecretStore",
-    "get_secret_store",
 ]

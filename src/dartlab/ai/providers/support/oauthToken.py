@@ -14,8 +14,8 @@ from typing import Any
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from dartlab.ai.settings.providerCatalog import oauth_secret_name
-from dartlab.ai.settings.secrets import get_secret_store
+from dartlab.ai.settings.providerCatalog import oauthSecretName
+from dartlab.ai.settings.secrets import getSecretStore
 
 CHATGPT_AUTH_URL = "https://auth.openai.com/oauth/authorize"
 CHATGPT_TOKEN_URL = "https://auth.openai.com/oauth/token"
@@ -26,7 +26,7 @@ OAUTH_REDIRECT_URI = os.environ.get(
     "DARTLAB_OAUTH_REDIRECT_URI", f"http://localhost:{OAUTH_REDIRECT_PORT}/auth/callback"
 )
 TOKEN_PATH = Path(os.environ.get("DARTLAB_OAUTH_TOKEN_PATH", str(Path.home() / ".dartlab" / "oauth_token.json")))
-_TOKEN_SECRET_NAME = oauth_secret_name("oauth-codex")
+_TOKEN_SECRET_NAME = oauthSecretName("oauth-codex")
 
 
 class TokenRefreshError(RuntimeError):
@@ -45,7 +45,7 @@ def _save_token(data: dict[str, Any]) -> None:
     expires_in = data.get("expires_in")
     if isinstance(expires_in, (int, float)):
         data["expires_at"] = time.time() + float(expires_in)
-    get_secret_store().set_json(_TOKEN_SECRET_NAME, data)
+    getSecretStore().set_json(_TOKEN_SECRET_NAME, data)
     TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
     tmp = TOKEN_PATH.with_suffix(TOKEN_PATH.suffix + ".tmp")
     tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -56,7 +56,7 @@ def load_token() -> dict[str, Any] | None:
     env_token = os.environ.get("DARTLAB_OAUTH_TOKEN")
     if env_token:
         return {"access_token": env_token, "source": "env"}
-    data = get_secret_store().get_json(_TOKEN_SECRET_NAME)
+    data = getSecretStore().get_json(_TOKEN_SECRET_NAME)
     if isinstance(data, dict):
         return data
     for path in _token_candidates():
@@ -67,7 +67,7 @@ def load_token() -> dict[str, Any] | None:
             continue
         data = json.loads(raw)
         if isinstance(data, dict):
-            get_secret_store().set_json(_TOKEN_SECRET_NAME, data)
+            getSecretStore().set_json(_TOKEN_SECRET_NAME, data)
             with suppress(OSError):
                 path.unlink()
             return data
@@ -75,7 +75,7 @@ def load_token() -> dict[str, Any] | None:
 
 
 def revoke_token() -> None:
-    get_secret_store().delete(_TOKEN_SECRET_NAME)
+    getSecretStore().delete(_TOKEN_SECRET_NAME)
     for path in _token_candidates():
         try:
             if path.exists():

@@ -190,9 +190,9 @@ def _handleSetProvider(msg: dict[str, Any]) -> None:
     # provider 인증 확인
     if provider and not apiKey:
         try:
-            from dartlab.ai.settings.providerCatalog import get_provider_spec
+            from dartlab.ai.settings.providerCatalog import getProviderSpec
 
-            spec = get_provider_spec(provider)
+            spec = getProviderSpec(provider)
             if spec:
                 # OAuth provider → 바로 로그인 시작
                 if spec.auth_kind == "oauth":

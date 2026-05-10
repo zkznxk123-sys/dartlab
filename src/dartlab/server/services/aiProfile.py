@@ -6,7 +6,7 @@ import os
 import shutil
 from typing import Any
 
-from dartlab.ai.settings import DEFAULT_ROLE, get_profile_manager, normalize_provider, normalize_role
+from dartlab.ai.settings import DEFAULT_ROLE, get_profile_manager, normalizeProvider, normalizeRole
 from dartlab.server.models import ConfigureRequest
 
 _TRUTHY = {"1", "true", "yes", "on"}
@@ -15,12 +15,12 @@ _TRUTHY = {"1", "true", "yes", "on"}
 def selected_provider(role: str | None = None) -> str | None:
     """Resolve selected provider from shared profile."""
     profile = get_profile_manager().load()
-    normalized_role = normalize_role(role)
+    normalized_role = normalizeRole(role)
     if normalized_role:
         binding = profile.roles.get(normalized_role)
         if binding and binding.provider:
-            return normalize_provider(binding.provider) or binding.provider
-    return normalize_provider(profile.default_provider) or profile.default_provider
+            return normalizeProvider(binding.provider) or binding.provider
+    return normalizeProvider(profile.default_provider) or profile.default_provider
 
 
 def should_preload_ollama() -> bool:
@@ -32,7 +32,7 @@ def should_preload_ollama() -> bool:
     if selected_provider() == "ollama":
         return True
     return any(
-        (normalize_provider(binding.provider) or binding.provider) == "ollama" for binding in profile.roles.values()
+        (normalizeProvider(binding.provider) or binding.provider) == "ollama" for binding in profile.roles.values()
     )
 
 
@@ -176,8 +176,8 @@ def validate_provider_connection(req: ConfigureRequest) -> dict[str, Any]:
     from dartlab.ai.providers import create_provider
     from dartlab.ai.settings.types import LLMConfig
 
-    effective_provider = normalize_provider(req.provider) or req.provider
-    current = get_config(effective_provider, role=normalize_role(req.role) or DEFAULT_ROLE)
+    effective_provider = normalizeProvider(req.provider) or req.provider
+    current = get_config(effective_provider, role=normalizeRole(req.role) or DEFAULT_ROLE)
     kwargs: dict[str, Any] = {
         "provider": effective_provider,
         "model": req.model or current.model,

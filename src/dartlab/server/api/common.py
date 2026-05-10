@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import Request, Response
 
-from dartlab.ai.settings import normalize_provider
+from dartlab.ai.settings import normalizeProvider
 
 HANDLED_API_ERRORS = (
     AttributeError,
@@ -56,7 +56,7 @@ def guideDetail(exc: BaseException, *, feature: str | None = None) -> str:
 
 def normalize_provider_name(provider: str | None) -> str | None:
     """Provider 이름을 정규화한다."""
-    return normalize_provider(provider)
+    return normalizeProvider(provider)
 
 
 def serialize_payload(payload: Any, *, max_rows: int = 200) -> dict[str, Any]:

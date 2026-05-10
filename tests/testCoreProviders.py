@@ -128,21 +128,21 @@ def test_getDefaultProviderHandlesLegacyKey(tmp_path: Path, monkeypatch: pytest.
 def test_shimSnakeAliasesStillWork():
     """ai/settings/provider_catalog shim 의 snake alias — 0.10 까지 BC 보장."""
     from dartlab.ai.settings.providerCatalog import (
-        get_provider_spec,
-        normalize_provider,
+        getProviderSpec,
+        normalizeProvider,
     )
-    from dartlab.ai.settings.secrets import get_secret_store
+    from dartlab.ai.settings.secrets import getSecretStore
 
-    assert normalize_provider("openai") == "openai"
-    assert get_provider_spec("openai").id == "openai"
-    assert isinstance(get_secret_store(), SecretStore)
+    assert normalizeProvider("openai") == "openai"
+    assert getProviderSpec("openai").id == "openai"
+    assert isinstance(getSecretStore(), SecretStore)
 
 
 def test_shimRoutingAlias():
     """ai/settings/routing shim 도 동일 BC."""
     from dartlab.ai.settings.routing import AI_ROLES as legacyRoles
-    from dartlab.ai.settings.routing import normalize_role
+    from dartlab.ai.settings.routing import normalizeRole
 
     assert legacyRoles == AI_ROLES
-    assert normalize_role("Analysis") == "analysis"
-    assert normalize_role("nope") is None
+    assert normalizeRole("Analysis") == "analysis"
+    assert normalizeRole("nope") is None

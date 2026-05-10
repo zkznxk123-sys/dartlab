@@ -492,7 +492,7 @@ def _make_openai_compat(config: ProviderConfig) -> WorkbenchProvider:
 
 
 # Provider id → factory. provider_catalog._PROVIDERS 와 1:1 일치해야 한다.
-# wired_provider_ids() 가 본 dict 의 keys 와 catalog keys 의 정합을 보장.
+# wiredProviderIds() 가 본 dict 의 keys 와 catalog keys 의 정합을 보장.
 _PROVIDER_FACTORIES: dict[str, Any] = {
     "oauth-codex": _make_oauth_codex,
     "codex": _make_codex,
@@ -511,9 +511,9 @@ _PROVIDER_FACTORIES: dict[str, Any] = {
 
 def available_providers() -> list[str]:
     """카탈로그 등록 provider id 목록. legacy alias 제외."""
-    from ..settings.providerCatalog import wired_provider_ids
+    from ..settings.providerCatalog import wiredProviderIds
 
-    return sorted(wired_provider_ids())
+    return sorted(wiredProviderIds())
 
 
 from .base import BaseProvider, LLMEvent, LLMProvider, Msg, RateLimitError

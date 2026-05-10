@@ -74,9 +74,9 @@ class OpenAICompatProvider(BaseProvider):
             if not apiKey:
                 import os
 
-                from dartlab.ai.settings.providerCatalog import get_provider_spec
+                from dartlab.ai.settings.providerCatalog import getProviderSpec
 
-                spec = get_provider_spec(self.config.provider)
+                spec = getProviderSpec(self.config.provider)
                 if spec and spec.env_key:
                     apiKey = os.environ.get(spec.env_key)
             if apiKey:

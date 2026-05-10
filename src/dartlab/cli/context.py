@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from dartlab.ai.settings import cli_provider_choices, provider_choices
+from dartlab.ai.settings import cliProviderChoices, providerChoices
 
-PROVIDERS = provider_choices()
-CLI_PROVIDERS = cli_provider_choices()
+PROVIDERS = providerChoices()
+CLI_PROVIDERS = cliProviderChoices()
 
 EXIT_OK = 0
 EXIT_USAGE = 2

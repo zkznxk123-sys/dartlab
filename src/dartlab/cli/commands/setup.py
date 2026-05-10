@@ -57,9 +57,9 @@ def run(args) -> int:
 
 def _setupApiKeyProvider(providerId: str) -> None:
     """ProviderSpec 기반 범용 API 키 설정 안내."""
-    from dartlab.ai.settings.providerCatalog import get_provider_spec
+    from dartlab.ai.settings.providerCatalog import getProviderSpec
 
-    spec = get_provider_spec(providerId)
+    spec = getProviderSpec(providerId)
     if spec is None:
         print(f"\n  알 수 없는 provider: {providerId}\n")
         return

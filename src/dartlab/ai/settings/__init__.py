@@ -2,15 +2,15 @@
 
 from dartlab.ai.settings.profile import AiProfileManager, get_profile_manager
 from dartlab.ai.settings.providerCatalog import (
-    build_provider_catalog,
-    cli_provider_choices,
-    get_provider_spec,
-    normalize_provider,
-    provider_choices,
-    public_provider_ids,
+    buildProviderCatalog,
+    cliProviderChoices,
+    getProviderSpec,
+    normalizeProvider,
+    providerChoices,
+    publicProviderIds,
 )
-from dartlab.ai.settings.routing import AI_ROLES, DEFAULT_ROLE, normalize_role
-from dartlab.ai.settings.secrets import SecretStore, get_secret_store
+from dartlab.ai.settings.routing import AI_ROLES, DEFAULT_ROLE, normalizeRole
+from dartlab.ai.settings.secrets import SecretStore, getSecretStore
 from dartlab.ai.settings.types import LLMConfig
 
 __all__ = [
@@ -18,14 +18,14 @@ __all__ = [
     "AiProfileManager",
     "DEFAULT_ROLE",
     "SecretStore",
-    "build_provider_catalog",
-    "cli_provider_choices",
+    "buildProviderCatalog",
+    "cliProviderChoices",
     "get_profile_manager",
-    "get_provider_spec",
-    "get_secret_store",
+    "getProviderSpec",
+    "getSecretStore",
     "LLMConfig",
-    "normalize_provider",
-    "normalize_role",
-    "provider_choices",
-    "public_provider_ids",
+    "normalizeProvider",
+    "normalizeRole",
+    "providerChoices",
+    "publicProviderIds",
 ]
