@@ -30,9 +30,16 @@ from dartlab.core.providers.secrets import (
     SecretStoreError,
     getSecretStore,
 )
+from dartlab.core.providers.setupGuide import (
+    DISPLAY_ORDER,
+    noProviderMessage,
+    providerGuide,
+    resolveAlias,
+)
 
 __all__ = [
     "AI_ROLES",
+    "DISPLAY_ORDER",
     "ProviderSpec",
     "SecretEntry",
     "SecretStore",
@@ -44,9 +51,12 @@ __all__ = [
     "getDefaultProvider",
     "getProviderSpec",
     "getSecretStore",
+    "noProviderMessage",
     "normalizeProvider",
     "oauthSecretName",
     "providerChoices",
+    "providerGuide",
     "publicProviderIds",
+    "resolveAlias",
     "wiredProviderIds",
 ]

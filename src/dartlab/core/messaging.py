@@ -425,10 +425,10 @@ def missingDataHint(
 
 
 def apiKeyMissingHint(provider: str) -> str:
-    """provider 별 API 키 발급·설정 안내. ``ai/settings/aiSetup.provider_guide`` 위임."""
-    from dartlab.ai.settings.aiSetup import provider_guide
+    """provider 별 API 키 발급·설정 안내. ``core/providers.providerGuide`` 위임."""
+    from dartlab.core.providers import providerGuide
 
-    return provider_guide(provider)
+    return providerGuide(provider)
 
 
 # ── 맥락 인식 힌트 ──────────────────────────────────────────────────
