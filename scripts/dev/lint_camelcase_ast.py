@@ -32,14 +32,14 @@ diff 기준:
         python -X utf8 scripts/dev/lint_camelcase_ast.py --changed         # git diff (staged + unstaged)
         python -X utf8 scripts/dev/lint_camelcase_ast.py --all             # src/dartlab/ 전수
 
-    Hook 모드 — Claude Code PostToolUse stdin JSON::
+    Hook 모드 — PostToolUse 호환 stdin JSON::
 
         python -X utf8 scripts/dev/lint_camelcase_ast.py --hook
 
 종료 코드:
     0 — 통과 (검사 안 함 / 위반 없음)
     1 — 입력 오류
-    2 — 새 위반 발견 (Hook 모드에서 Claude Code edit 차단 의미)
+    2 — 새 위반 발견 (Hook 모드에서 edit 차단 의미)
 """
 
 from __future__ import annotations
@@ -617,7 +617,7 @@ def _emit(violations: list[Violation], stream) -> None:
 
 
 def _run_hook() -> int:
-    """Claude Code PostToolUse — stdin JSON 받아 lint, 위반 시 exit 2.
+    """PostToolUse 호환 hook — stdin JSON 받아 lint, 위반 시 exit 2.
 
     PostToolUse 입력::
 
@@ -628,7 +628,7 @@ def _run_hook() -> int:
           "tool_response": {...}
         }
 
-    exit 2 + stderr 메시지 → Claude Code 가 모델에게 피드백.
+    exit 2 + stderr 메시지 → 호스트 harness 가 모델에게 피드백.
     """
     try:
         payload = json.load(sys.stdin)
