@@ -40,24 +40,24 @@ from dartlab.core.palette import COLORS  # noqa: F401
 # core/select.py 가 viz 의존 없이 HTML 렌더 — viz import 시점에 자동 등록.
 # pyodide 등 plotly 미설치 환경은 viz import 자체가 실패해 register 도 안 됨.
 from dartlab.core.render import register as _registerRenderer
+from dartlab.viz.charts import (
+    balanceSheet as balance_sheet_chart,
+)
 
 # ── DataFrame → Plotly Figure (Jupyter) ──
 from dartlab.viz.charts import (  # noqa: F401
-    balance_sheet_composition,
+    balanceSheetComposition,
     bar,
     cashflow,
-    cashflow_pattern,
-    dividend_analysis,
+    cashflowPattern,
+    dividendAnalysis,
     line,
     pie,
-    profitability_ratios,
+    profitabilityRatios,
     revenue,
     # 하위호환 alias
-    revenue_trend,
+    revenueTrend,
     waterfall,
-)
-from dartlab.viz.charts import (
-    balanceSheet as balance_sheet_chart,
 )
 from dartlab.viz.charts import (
     dividend as dividend_chart,

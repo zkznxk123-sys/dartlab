@@ -144,6 +144,16 @@ METHOD_NAME_ALLOWLIST: frozenset[str] = frozenset(
         "model_validate",
         # asyncio
         "run_until_complete",
+        # Jupyter / IPython mime 표준 — 변환 시 Jupyter 가 인식 못 함
+        "_repr_html_",
+        "_repr_mimebundle_",
+        "_repr_pretty_",
+        "_repr_markdown_",
+        "_repr_png_",
+        "_repr_json_",
+        "_repr_latex_",
+        "_repr_jpeg_",
+        "_repr_svg_",
     }
 )
 
@@ -411,6 +421,11 @@ def _check_naming(ident: Identifier) -> str | None:
 
     if kind == "arg":
         if name in ARG_ALLOWLIST:
+            return None
+        # trailing underscore 매개변수 (is_/in_/for_) — Python keyword 회피용, 보존 허용
+        import keyword
+
+        if name.endswith("_") and keyword.iskeyword(name.rstrip("_")):
             return None
         # arg 도 camelCase
         if not CAMEL_RE.match(name):

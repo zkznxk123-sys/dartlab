@@ -524,8 +524,8 @@ def profitability(company: Any, *, nYears: int = 5) -> Any:
 
 
 # ── 하위호환 alias ──
-revenue_trend = revenue
-cashflow_pattern = cashflow
-dividend_analysis = dividend
-balance_sheet_composition = balanceSheet
-profitability_ratios = profitability
+revenueTrend = revenue
+cashflowPattern = cashflow
+dividendAnalysis = dividend
+balanceSheetComposition = balanceSheet
+profitabilityRatios = profitability
