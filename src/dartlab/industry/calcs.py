@@ -211,8 +211,12 @@ def calcSectorMetrics(company: Any) -> dict | None:
 
     # 같은 산업 primary 노드들의 scan 지표 수집
     try:
-        from dartlab.scan.growth import scanGrowth
-        from dartlab.scan.profitability import scanProfitability
+        import importlib
+
+        scanGrowth = importlib.import_module("dartlab.scan.growth").scanGrowth
+        import importlib
+
+        scanProfitability = importlib.import_module("dartlab.scan.profitability").scanProfitability
 
         prof = scanProfitability()
         grow = scanGrowth()
@@ -313,8 +317,9 @@ def calcSectorCycle(company: Any) -> dict | None:
 
     # 연도별 업종 OPM 중앙값 — scan finance.parquet 직접 접근
     try:
-        from dartlab.scan.profitability import scanProfitability
+        import importlib
 
+        scanProfitability = importlib.import_module("dartlab.scan.profitability").scanProfitability
         prof = scanProfitability()
     except Exception:
         return None

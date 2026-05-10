@@ -574,7 +574,11 @@ def _fetchSegmentComposition(company) -> dict | None:
 def _fetchRank(company) -> dict | None:
     """업종 내 순위 수집. scan 데이터 없으면 None (스냅샷 빌드 시도 안 함)."""
     try:
-        from dartlab.scan.rank import _SNAPSHOT, _cacheDir
+        import importlib
+
+        _r = importlib.import_module("dartlab.scan.rank")
+        _SNAPSHOT = _r._SNAPSHOT
+        _cacheDir = _r._cacheDir
 
         # 캐시된 스냅샷이 있을 때만 사용 (빌드 시도 X — 수분 소요)
         if _SNAPSHOT is None:
@@ -582,7 +586,9 @@ def _fetchRank(company) -> dict | None:
             if not cachePath.exists():
                 return None
 
-        from dartlab.scan.rank import getRankOrBuild
+        import importlib
+
+        getRankOrBuild = importlib.import_module("dartlab.scan.rank").getRankOrBuild
 
         stockCode = getattr(company, "stockCode", "")
         if not stockCode:
@@ -650,7 +656,9 @@ def _calcSegmentHHI(segmentsData: list[dict] | None) -> float | None:
 def _fetchDisclosureRisk(company) -> dict | None:
     """scan.disclosureRisk에서 기업별 리스크 신호 추출."""
     try:
-        from dartlab.scan.disclosureRisk import disclosureRisk
+        import importlib
+
+        disclosureRisk = importlib.import_module("dartlab.scan.disclosureRisk").disclosureRisk
 
         result = disclosureRisk(company)
         if result is not None and hasattr(result, "to_dicts"):
@@ -698,7 +706,9 @@ def _fetchAuditOpinion(company) -> str | None:
 
     # 2순위: scorer 직접 호출 (있으면)
     try:
-        from dartlab.scan.governance.scorer import _extractAuditOpinion
+        import importlib
+
+        _extractAuditOpinion = importlib.import_module("dartlab.scan.governance.scorer")._extractAuditOpinion
 
         result = _extractAuditOpinion(company)
         if result:

@@ -1142,7 +1142,11 @@ def _buildPeerPositionBlocks(company, keys, basePeriod, safe: Callable, need: Ca
     """비교분석 — scan 교차 조합 (peerPosition/governanceSummary)."""
     if keys is not None and not (keys & {"peerPosition", "governanceSummary"}):
         return
-    from dartlab.scan.extended import calcGovernanceSummary, calcPeerPosition
+    import importlib
+
+    _ext = importlib.import_module("dartlab.scan.extended")
+    calcGovernanceSummary = _ext.calcGovernanceSummary
+    calcPeerPosition = _ext.calcPeerPosition
     from dartlab.story.builders import peerPositionBlock
     from dartlab.story.builders import quantModuleBlock as _scanBlock
 

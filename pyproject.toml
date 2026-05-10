@@ -340,7 +340,7 @@ type = "layers"
 layers = [
     "dartlab.ai | dartlab.company",
     "dartlab.story",
-    "dartlab.scan | dartlab.search",
+    "dartlab.scan",
     "dartlab.gather",
     "dartlab.core",
 ]
@@ -378,7 +378,6 @@ source_modules = [
 ]
 forbidden_modules = [
     "dartlab.scan",
-    "dartlab.search",
     "dartlab.gather",
 ]
 ignore_imports = []

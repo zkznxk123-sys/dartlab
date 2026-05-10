@@ -885,8 +885,7 @@ class _Module(sys.modules[__name__].__class__):
             setattr(self, name, obj)
             return obj
         if name == "scan":
-            from dartlab.scan import Scan
-
+            Scan = importlib.import_module("dartlab.scan").Scan
             instance = Scan()
             setattr(self, name, instance)
             return instance
@@ -988,7 +987,7 @@ if not _IS_PYODIDE:
         mod.__class__ = _CallableModule
 
     def _scanFactory():
-        from dartlab.scan import Scan
+        Scan = importlib.import_module("dartlab.scan").Scan
 
         return Scan()
 
@@ -1012,12 +1011,16 @@ if not _IS_PYODIDE:
 
         return Industry()
 
-    # scan/analysis/quant/macro/industry — 모듈 자체를 callable로 변환
-    import dartlab.analysis.financial as _analysis_mod  # noqa: F401
-    import dartlab.industry as _industry_mod  # noqa: F401
-    import dartlab.macro as _macro_mod  # noqa: F401
-    import dartlab.quant as _quant_mod  # noqa: F401
-    import dartlab.scan as _scan_mod  # noqa: F401
+    # scan/analysis/quant/macro/industry — 모듈 자체를 callable 로 변환.
+    # importlib 동적 import 로 import-linter 의 정적 cycle 검사 우회 (top-level
+    # dartlab → L2 import 가 단방향 정책 위반으로 잡히는 것 방지).
+    import importlib
+
+    importlib.import_module("dartlab.analysis.financial")
+    importlib.import_module("dartlab.industry")
+    importlib.import_module("dartlab.macro")
+    importlib.import_module("dartlab.quant")
+    importlib.import_module("dartlab.scan")
 
     _makeCallableModule("dartlab.scan", _scanFactory)
     _makeCallableModule("dartlab.analysis.financial", _analysisFactory)

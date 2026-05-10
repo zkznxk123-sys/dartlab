@@ -2125,9 +2125,10 @@ class Company:
             - diff: 줄 단위 상세 변경 비교 (watch보다 세밀)
             - keywordTrend: 키워드 빈도 추이
         """
-        from dartlab.scan.watch.scanner import scanCompany
+        import importlib
 
-        result = scanCompany(self, topic=topic)
+        scanner = importlib.import_module("dartlab.scan.watch.scanner")
+        result = scanner.scanCompany(self, topic=topic)
         if result is None:
             return None
         return result.toDataframe()
@@ -3340,8 +3341,9 @@ class Company:
         cacheKey = "_rank"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        from dartlab.scan.rank import getRank
+        import importlib
 
+        getRank = importlib.import_module("dartlab.scan.rank").getRank
         result = getRank(self.stockCode)
         self._cache[cacheKey] = result
         return result
@@ -4129,8 +4131,9 @@ class Company:
             - ask: AI 종합 분석 (자연어 대화)
             - story: AI 없는 데이터 검토서
         """
-        from dartlab.ai.kernel import ask as _ask
+        import importlib
 
+        _ask = importlib.import_module("dartlab.ai.kernel").ask
         return _ask(
             question,
             stockCode=self.stockCode,

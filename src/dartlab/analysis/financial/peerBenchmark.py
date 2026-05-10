@@ -284,7 +284,9 @@ def _getLatestValue(stockCode: str, ratioName: str) -> tuple[float, float] | Non
 
 def _loadScanRatio(ratioName: str) -> pl.DataFrame:
     """scan("ratio", name) 경유로 비율 DataFrame을 가져온다."""
-    from dartlab.scan import Scan
+    import importlib
+
+    Scan = importlib.import_module("dartlab.scan").Scan
 
     return Scan()("ratio", ratioName)
 

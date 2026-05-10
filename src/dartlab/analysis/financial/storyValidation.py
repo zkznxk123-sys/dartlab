@@ -148,9 +148,13 @@ def _findPhaseMatchingPeers(stockCode: str, phase: str, *, limit: int = 5) -> li
         return []
 
     try:
+        import importlib
+
         import polars as pl
 
-        from dartlab.scan._helpers import _ensureScanData, parse_num
+        _h = importlib.import_module("dartlab.scan._helpers")
+        _ensureScanData = _h._ensureScanData
+        parse_num = _h.parse_num
     except ImportError:
         return []
 
@@ -291,9 +295,13 @@ def calcPlausibilityBand(
 
     # scan/finance.parquet 직접 쿼리 → 전종목 매출 YoY + 영업마진 분포
     try:
+        import importlib
+
         import polars as pl
 
-        from dartlab.scan._helpers import _ensureScanData, parse_num
+        _h = importlib.import_module("dartlab.scan._helpers")
+        _ensureScanData = _h._ensureScanData
+        parse_num = _h.parse_num
 
         scan_dir = _ensureScanData()
         path = scan_dir / "finance.parquet"

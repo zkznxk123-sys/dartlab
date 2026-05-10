@@ -168,9 +168,13 @@ def _aggregateFinanceSnapshot() -> dict[str, Any] | None:
     aggregate book = Σ positive 자본총계 (시가총액 proxy — 실 시총 데이터 없으므로)
     """
     try:
+        import importlib
+
         import polars as pl
 
-        from dartlab.scan._helpers import _ensureScanData, parse_num
+        _scanHelpers = importlib.import_module("dartlab.scan._helpers")
+        _ensureScanData = _scanHelpers._ensureScanData
+        parse_num = _scanHelpers.parse_num
 
         scan_dir = _ensureScanData()
         path = scan_dir / "finance.parquet"

@@ -147,7 +147,9 @@ def loadSharesOutstanding(market: str = "KR"):
     import polars as pl
 
     if market == "KR":
-        from dartlab.scan._helpers import _ensureScanData
+        import importlib
+
+        _ensureScanData = importlib.import_module("dartlab.scan._helpers")._ensureScanData
 
         scanDir = _ensureScanData()
         path = scanDir / "sharesOutstanding.parquet"

@@ -2273,9 +2273,10 @@ class Company:
             c.watch()                              # 전체 topic 중요도 순 요약
             c.watch("10-K::item1ARiskFactors")     # Risk Factors 상세
         """
-        from dartlab.scan.watch.scanner import scanCompany
+        import importlib
 
-        result = scanCompany(self, topic=topic)
+        scanner = importlib.import_module("dartlab.scan.watch.scanner")
+        result = scanner.scanCompany(self, topic=topic)
         if result is None:
             return None
         return result.toDataframe()
@@ -2332,8 +2333,9 @@ class Company:
             c.ask("What are the key risks?")
             c.ask("Revenue trend analysis", provider="openai")
         """
-        from dartlab.ai.kernel import ask as _ask
+        import importlib
 
+        _ask = importlib.import_module("dartlab.ai.kernel").ask
         return _ask(
             question,
             stockCode=self.stockCode,

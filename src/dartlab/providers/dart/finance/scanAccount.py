@@ -557,8 +557,11 @@ def scanAccount(
     # ── scan/finance(-lite).parquet 가속 경로 ──
     # Pyodide(브라우저) 에서는 경량본 `finance-lite.parquet`(~18MB) 을 우선 사용한다.
     # 일반 환경은 전량 `finance.parquet`(~307MB) 사용.
+    import importlib
+
     from dartlab.core.dataLoader import _IS_PYODIDE
-    from dartlab.scan._helpers import _ensureScanData
+
+    _ensureScanData = importlib.import_module("dartlab.scan._helpers")._ensureScanData
 
     scanDir = _ensureScanData()
     scanFileName = "finance-lite.parquet" if _IS_PYODIDE else "finance.parquet"

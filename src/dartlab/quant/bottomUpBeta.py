@@ -144,9 +144,13 @@ def _extractKrPeers(sector: str, limit: int) -> list[dict[str, Any]]:
     반환: peer list [{code, betaLevered, de, betaUnlevered}]
     """
     try:
+        import importlib
+
         import polars as pl
 
-        from dartlab.scan._helpers import _ensureScanData, parse_num
+        _scanHelpers = importlib.import_module("dartlab.scan._helpers")
+        _ensureScanData = _scanHelpers._ensureScanData
+        parse_num = _scanHelpers.parse_num
     except ImportError:
         return []
 

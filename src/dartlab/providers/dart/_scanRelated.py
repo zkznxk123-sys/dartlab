@@ -40,8 +40,11 @@ def _ensureNetwork(company: Company) -> tuple[dict, dict] | None:
     data = company._cache.get("_network_data", _CACHE_MISSING)
     full = company._cache.get("_network_full", _CACHE_MISSING)
     if data is _CACHE_MISSING or full is _CACHE_MISSING:
-        from dartlab.scan.network import buildGraph, exportFull
+        import importlib
 
+        _network = importlib.import_module("dartlab.scan.network")
+        buildGraph = _network.buildGraph
+        exportFull = _network.exportFull
         data = buildGraph(verbose=False)
         full = exportFull(data)
         company._cache["_network_data"] = data
@@ -52,8 +55,9 @@ def _ensureNetwork(company: Company) -> tuple[dict, dict] | None:
 def _ensureGovernance(company: Company) -> pl.DataFrame | None:
     val = company._cache.get("_governance", _CACHE_MISSING)
     if val is _CACHE_MISSING:
-        from dartlab.scan.governance import scanGovernance
+        import importlib
 
+        scanGovernance = importlib.import_module("dartlab.scan.governance").scanGovernance
         val = scanGovernance(verbose=False)
         company._cache["_governance"] = val
     return val
@@ -62,8 +66,9 @@ def _ensureGovernance(company: Company) -> pl.DataFrame | None:
 def _ensureWorkforce(company: Company) -> pl.DataFrame | None:
     val = company._cache.get("_workforce", _CACHE_MISSING)
     if val is _CACHE_MISSING:
-        from dartlab.scan.workforce import scanWorkforce
+        import importlib
 
+        scanWorkforce = importlib.import_module("dartlab.scan.workforce").scanWorkforce
         val = scanWorkforce(verbose=False)
         company._cache["_workforce"] = val
     return val
@@ -72,8 +77,9 @@ def _ensureWorkforce(company: Company) -> pl.DataFrame | None:
 def _ensureCapital(company: Company) -> pl.DataFrame | None:
     val = company._cache.get("_capital", _CACHE_MISSING)
     if val is _CACHE_MISSING:
-        from dartlab.scan.capital import scanCapital
+        import importlib
 
+        scanCapital = importlib.import_module("dartlab.scan.capital").scanCapital
         val = scanCapital(verbose=False)
         company._cache["_capital"] = val
     return val
@@ -82,8 +88,9 @@ def _ensureCapital(company: Company) -> pl.DataFrame | None:
 def _ensureDebt(company: Company) -> pl.DataFrame | None:
     val = company._cache.get("_debt", _CACHE_MISSING)
     if val is _CACHE_MISSING:
-        from dartlab.scan.debt import scanDebt
+        import importlib
 
+        scanDebt = importlib.import_module("dartlab.scan.debt").scanDebt
         val = scanDebt(verbose=False)
         company._cache["_debt"] = val
     return val
@@ -113,8 +120,9 @@ def companyScanView(company: Company, df: pl.DataFrame | None, view: str | None)
 
 def _scanMarketSummary(df: pl.DataFrame) -> pl.DataFrame:
     """시장별 요약 통계."""
-    from dartlab.scan._helpers import loadListing
+    import importlib
 
+    loadListing = importlib.import_module("dartlab.scan._helpers").loadListing
     _, _, _, listing_meta = loadListing()
     code_to_market = {code: meta.get("market", "") for code, meta in listing_meta.items()}
     codeCol = "종목코드" if "종목코드" in df.columns else "stockCode"
@@ -148,7 +156,9 @@ def buildScanNetwork(company: Company, view: str | None = None, *, hops: int = 1
     group = data["code_to_group"].get(code, company.corpName or code)
 
     if view is None:
-        from dartlab.scan.network import exportEgo
+        import importlib
+
+        exportEgo = importlib.import_module("dartlab.scan.network").exportEgo
         from dartlab.viz.network import renderNetwork
 
         ego = exportEgo(data, full, code, hops=hops)
@@ -253,8 +263,9 @@ def _networkCycles(data: dict, code: str) -> pl.DataFrame:
 
 def _networkPeers(data: dict, full: dict, code: str, *, hops: int = 1) -> pl.DataFrame:
     """이 회사 중심 서브그래프 (ego 뷰) → DataFrame."""
-    from dartlab.scan.network import exportEgo
+    import importlib
 
+    exportEgo = importlib.import_module("dartlab.scan.network").exportEgo
     ego = exportEgo(data, full, code, hops=hops)
     rows = []
     for n in ego["nodes"]:
