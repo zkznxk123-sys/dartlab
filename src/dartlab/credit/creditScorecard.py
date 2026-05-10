@@ -2,14 +2,13 @@
 
 업종별 기준표에서 각 지표를 0-100 위험 점수로 변환하고,
 5축 가중평균으로 종합 점수를 산출한다. 20단계 등급(AAA~D) 매핑표는
-``core/cross/creditGradeTable`` SSOT 에서 import.
+``credit.gradeTable`` SSOT (P3.6 후 도메인 복귀).
 """
 
 from __future__ import annotations
 
-# 20단계 등급 매핑표 + 변환 함수는 도메인-중립 표준 (S&P/KIS) — core/cross SSOT 사용.
-# distress 분석 등 다른 도메인도 같은 표를 import 하여 cross-domain 일관성 유지.
-from dartlab.core.cross.creditGradeTable import (  # noqa: F401
+# 20단계 등급 매핑표 + 변환 함수는 credit 도메인 SSOT — analysis/bond 등은 단방향 import.
+from dartlab.credit.gradeTable import (  # noqa: F401
     estimatePD,
     gradeCategory,
     isInvestmentGrade,
