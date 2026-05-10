@@ -29,14 +29,17 @@ def _listingLookup() -> tuple[dict[str, str], dict[str, str]]:
         (code_to_name, name_to_code) 두 딕셔너리.
         KindList 로드 실패 시 빈 딕셔너리 쌍 반환.
     """
-    try:
-        from dartlab.gather.listing import getKindList
+    # F4.1: gather 직접 호출 → IndustryDataAccessor 위임 (정공법 B+C)
+    from dartlab.core.di import getIndustryAccessor
 
-        df = getKindList()
+    try:
+        df = getIndustryAccessor().fetchListing()
+        if df is None:
+            return {}, {}
         c2n = dict(zip(df["종목코드"].to_list(), df["회사명"].to_list()))
         n2c = dict(zip(df["회사명"].to_list(), df["종목코드"].to_list()))
         return c2n, n2c
-    except Exception:
+    except (ValueError, KeyError, TypeError):
         return {}, {}
 
 

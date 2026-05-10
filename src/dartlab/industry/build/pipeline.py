@@ -32,9 +32,12 @@ def _getKindListDicts() -> list[dict]:
     list[dict]
         종목코드/회사명/업종 등 KindList 컬럼을 포함하는 행별 딕셔너리.
     """
-    from dartlab.gather.listing import getKindList
+    # F4.1: gather 직접 호출 → IndustryDataAccessor 위임 (정공법 B+C)
+    from dartlab.core.di import getIndustryAccessor
 
-    df = getKindList()
+    df = getIndustryAccessor().fetchListing()
+    if df is None:
+        return []
     return df.to_dicts()
 
 
