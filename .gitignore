@@ -125,3 +125,4 @@ crates/
 tests/fixtures/dart/docs/034730.parquet
 tests/fixtures/dart/docs/055550.parquet
 unsloth_compiled_cache/
+scripts/dev/_camelcaseIndex.json
