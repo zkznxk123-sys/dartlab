@@ -91,8 +91,8 @@ async def lifespan(_: FastAPI):
     # background thread 로 미리 깨움 — 사용자 첫 호출은 cache hit (즉시 응답).
     # 회귀 가드: 과거 secret_store prewarm 은 잘못된 DPAPI 가설 기반이라 제거됨.
     # 이번 prewarm 은 측정 기반 (cold availableModels() = 43s 검증).
-    models_prewarm_task = asyncio.createTask(_prewarmOauthCodexModels())
-    preload_task = asyncio.createTask(_preloadOllamaOnce()) if _should_preload_ollama() else None
+    models_prewarm_task = asyncio.create_task(_prewarmOauthCodexModels())
+    preload_task = asyncio.create_task(_preloadOllamaOnce()) if _should_preload_ollama() else None
 
     # 채널 모드: 협업 룸 자동 생성 + 백그라운드 정리
     from .room import room_manager

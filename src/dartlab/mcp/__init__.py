@@ -371,7 +371,7 @@ async def _runWithProgress(
                 # cancel 로만 (try 본문 정상 종료).
                 pass
 
-    progress_task = asyncio.createTask(_emit())
+    progress_task = asyncio.create_task(_emit())
     try:
         result = await asyncio.to_thread(_executeWorkspaceAgentTool, name, arguments)
     finally:

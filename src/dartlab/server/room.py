@@ -202,7 +202,7 @@ class RoomManager:
 
     def startBackgroundCleanup(self) -> None:
         """비활성 멤버 정리 백그라운드 태스크를 시작한다."""
-        self._cleanup_task = asyncio.createTask(self.startCleanupLoop())
+        self._cleanup_task = asyncio.create_task(self.startCleanupLoop())
 
     def stopBackgroundCleanup(self) -> None:
         """백그라운드 정리 태스크를 취소한다."""

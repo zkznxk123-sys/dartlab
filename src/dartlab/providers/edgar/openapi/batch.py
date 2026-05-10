@@ -332,7 +332,7 @@ def batchCollectEdgar(
 
         try:
             workers = [
-                asyncio.createTask(
+                asyncio.create_task(
                     _workerLoop(i, c, queue, cats, results, tickerMap, incremental, completeFn, statusFn, periodFn)
                 )
                 for i, c in enumerate(clients)
