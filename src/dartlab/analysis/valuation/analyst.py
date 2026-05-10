@@ -14,7 +14,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from dartlab.gather import Gather, MarketSnapshot
+from dartlab.core.types import MarketSnapshot
+
+if TYPE_CHECKING:  # type-only; Gather 는 runtime 에 di 경유
+    from dartlab.gather.entry import GatherEntry as Gather  # noqa: F401
 
 from .synthesizer import synthesize
 from .types import AnalystReport, ValuationMethod
@@ -54,8 +57,13 @@ class Analyst:
         log.info(report.opinion)
     """
 
-    def __init__(self, gather: Gather | None = None) -> None:
-        self._gather = gather or Gather()
+    def __init__(self, gather: "Gather | None" = None) -> None:
+        if gather is None:
+            from dartlab.core.di import getMacroProvider
+
+            self._gather = getMacroProvider().getDefaultGather()
+        else:
+            self._gather = gather
         self._owns_gather = gather is None
 
     def report(

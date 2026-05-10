@@ -222,9 +222,9 @@ def _fetchConsensusRevenue(
     Return type은 tuple (lru_cache는 hashable result 권장).
     """
     try:
-        from dartlab.gather import Gather
+        from dartlab.core.di import getMacroProvider
 
-        g = Gather()
+        g = getMacroProvider().getDefaultGather()
         items = g.revenueConsensus(stockCode, market=market)
         try:
             g.close()

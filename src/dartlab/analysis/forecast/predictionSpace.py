@@ -345,9 +345,9 @@ def _fetchMacroData() -> dict[str, list[float]]:
 
     Gather 레이어의 캐싱을 활용하므로 반복 호출 비용 낮음.
     """
-    from dartlab.gather import getDefaultGather
+    from dartlab.core.di import getMacroProvider
 
-    g = getDefaultGather()
+    g = getMacroProvider().getDefaultGather()
     result: dict[str, list[float]] = {}
 
     # 필요한 지표 목록

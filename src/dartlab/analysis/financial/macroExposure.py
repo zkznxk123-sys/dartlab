@@ -24,12 +24,12 @@ def _loadMacroIndicator(g, seriesId: str, source: str = "ecos", start: str = "20
 
 
 def _getGather():
-    """gather 싱글톤 로드 (lazy)."""
+    """gather 싱글톤 로드 — MacroDataProvider 위임 (정공법 B+C)."""
     try:
-        from dartlab.gather import getDefaultGather
+        from dartlab.core.di import getMacroProvider
 
-        return getDefaultGather()
-    except ImportError:
+        return getMacroProvider().getDefaultGather()
+    except (ImportError, AttributeError, RuntimeError):
         return None
 
 
