@@ -172,3 +172,98 @@ class ProfileProtocol(Protocol):
     def trace(self, topic: str, period: str | None = None) -> dict[str, Any] | None:
         """topic 출처 추적."""
         ...
+
+
+# ── F3: L2 분석엔진 데이터 의존성 추상화 (구현은 L1 gather, L1.5 scan) ──
+
+
+@runtime_checkable
+class FinanceDataAccessor(Protocol):
+    """analysis 엔진의 재무·가격·매크로 fetch 추상.
+
+    구현체는 gather/accessors.DefaultFinanceAccessor (gather 호출),
+    또는 테스트의 mock. caller (story/Company) 가 인스턴스를 L2 에 전달한다.
+    """
+
+    def fetchPriceSnapshot(
+        self, stockCode: str, *, market: str = "KR", start: str | None = None, end: str | None = None
+    ) -> pl.DataFrame | None:
+        """OHLCV 스냅샷 fetch."""
+        ...
+
+    def fetchMacroSeries(self, seriesId: str, *, source: str = "fred", start: str | None = None) -> pl.DataFrame | None:
+        """단일 macro 시계열 fetch."""
+        ...
+
+    def fetchExogenousAxes(self, stockCode: str) -> list[tuple[str, str]]:
+        """종목별 매크로 축 매핑 (seriesId, label) 리스트."""
+        ...
+
+    def fetchAlignedMacro(self, stockCode: str, periods: list[str]) -> pl.DataFrame | None:
+        """period 기준 정렬된 매크로 패널."""
+        ...
+
+    def lookupCompany(self, stockCode: str) -> "CompanyProtocol | None":
+        """종목코드 → CompanyProtocol 인스턴스."""
+        ...
+
+
+@runtime_checkable
+class QuantDataAccessor(Protocol):
+    """quant 엔진의 OHLCV·factor·indicator fetch 추상."""
+
+    def fetchOhlcv(self, stockCode: str, *, market: str = "KR", start: str | None = None) -> pl.DataFrame | None:
+        """단일 종목 OHLCV."""
+        ...
+
+    def fetchBenchmarkOhlcv(
+        self, stockCode: str, *, market: str = "KR", benchmark: str | None = None
+    ) -> tuple[pl.DataFrame | None, dict | None]:
+        """벤치마크 OHLCV + meta."""
+        ...
+
+    def fetchUniverseBulk(self, stockCodes: list[str], *, columns: list[str]) -> pl.DataFrame | None:
+        """다종목 bulk 패널."""
+        ...
+
+    def fetchTechnicalIndicators(self, stockCode: str, indicators: list[str]) -> dict[str, pl.DataFrame]:
+        """지표 번들."""
+        ...
+
+
+@runtime_checkable
+class IndustryDataAccessor(Protocol):
+    """industry 엔진의 listing·scan parquet fetch 추상."""
+
+    def fetchListing(self, *, market: str = "KR") -> pl.DataFrame | None:
+        """전종목 listing snapshot."""
+        ...
+
+    def fetchScanProfitability(self) -> pl.DataFrame | None:
+        """scan profitability parquet."""
+        ...
+
+    def fetchScanFinanceParquet(self, name: str = "finance") -> pl.DataFrame | None:
+        """scan finance parquet (또는 변형)."""
+        ...
+
+
+@runtime_checkable
+class MacroDataProvider(Protocol):
+    """macro 엔진의 gather·cycle 추상."""
+
+    def getDefaultGather(self) -> Any:
+        """현재 기본 GatherEntry 인스턴스."""
+        ...
+
+    def applyAsOf(self, dataFrame: pl.DataFrame, asOf: str) -> pl.DataFrame:
+        """as-of 필터링."""
+        ...
+
+    def fetchSeriesLatest(self, seriesId: str) -> float | None:
+        """seriesId 의 최신 값."""
+        ...
+
+    def fetchSeriesYoy(self, seriesId: str) -> float | None:
+        """seriesId 의 YoY 변화율."""
+        ...
