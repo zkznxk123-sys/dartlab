@@ -304,6 +304,7 @@ dev = [
     "dartlab[all]",
     "hatchling>=1.29.0",
     "hypothesis>=6.100.0",
+    "import-linter>=2.0",  # scripts/audit/cycleScan.py + pyproject [tool.importlinter] — 레이어 단방향 강제 (P0 가드)
     "networkx[default]>=3.0",  # scripts/build/buildIndustryMap.py — Kamada-Kawai+PageRank (default extra: scipy 포함)
     "pillow>=12.1.1",
     "pre-commit>=4.0.0",
@@ -315,3 +316,65 @@ dev = [
     "radon>=6.0.0",
     "vulture>=2.0",
 ]
+
+# ════════════════════════════════════════════════════════════════════
+# Import-linter — 레이어 단방향 강제 + L2 양방향 cycle 차단 (P0 가드)
+# ────────────────────────────────────────────────────────────────────
+# 정책 SSOT: src/dartlab/skills/specs/operation/architecture.md
+#   1. 상하 단방향: L0 ← L1 ← L1.5 ← L2 ← L3 ← L4 (이 contract)
+#   2. L2 동급 단방향 허용 (sibling import OK)
+#   3. L2 양방향 순환 절대금지 (별도: scripts/audit/cycleScan.py)
+# ════════════════════════════════════════════════════════════════════
+
+[tool.importlinter]
+root_package = "dartlab"
+
+# ── Contract 1: 상하 layer 단방향 (L2 는 exhaustive=false 로 제외, 별도 forbidden)
+[[tool.importlinter.contracts]]
+name = "Layered architecture (L0~L1.5 + L3 + L4)"
+type = "layers"
+layers = [
+    "dartlab.ai | dartlab.company",
+    "dartlab.story",
+    "dartlab.scan | dartlab.search",
+    "dartlab.gather",
+    "dartlab.core",
+]
+exhaustive = false  # L2 5 엔진은 이 contract 에서 무시 (sibling 단방향 허용)
+ignore_imports = []  # 위반 정리 진행하며 한 줄씩 비움
+
+# ── Contract 2: L2 가 상위 (L3/L4) import 금지
+[[tool.importlinter.contracts]]
+name = "L2 must not import L3/L4"
+type = "forbidden"
+source_modules = [
+    "dartlab.analysis",
+    "dartlab.credit",
+    "dartlab.macro",
+    "dartlab.quant",
+    "dartlab.industry",
+]
+forbidden_modules = [
+    "dartlab.story",
+    "dartlab.ai",
+    "dartlab.company",
+]
+ignore_imports = []
+
+# ── Contract 3: L2 가 하위 (L1.5/L1) 우회 import 금지 — L2 는 L0 만 직접 import
+[[tool.importlinter.contracts]]
+name = "L2 must not import L1.5/L1"
+type = "forbidden"
+source_modules = [
+    "dartlab.analysis",
+    "dartlab.credit",
+    "dartlab.macro",
+    "dartlab.quant",
+    "dartlab.industry",
+]
+forbidden_modules = [
+    "dartlab.scan",
+    "dartlab.search",
+    "dartlab.gather",
+]
+ignore_imports = []

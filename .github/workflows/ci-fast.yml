@@ -58,6 +58,26 @@ jobs:
       # operation.code SSOT. 새 코드만 게이트, tests/scripts/notebooks 면제.
       - name: camelCase + docstring lint (diff)
         run: python -X utf8 scripts/dev/lint_camelcase_ast.py --changed --strict
+      # Import cycle 검출 — 양방향 cycle (A↔B) + 3+ 모듈 cycle.
+      # 정책 SSOT: operation.architecture (동급 단방향 허용, 양방향 절대금지).
+      # P0~P3 동안 warning 모드 (continue-on-error). P3 끝 후 --strict 활성.
+      - name: Install networkx (cycle scan)
+        run: pip install networkx
+      - name: Cycle scan (lazy import 포함, P3 까지 warning)
+        run: python -X utf8 scripts/audit/cycleScan.py
+        continue-on-error: true
+      # Import-linter — 상하 layer 단방향 + L2 → L3/L4 forbidden.
+      # 정책 SSOT: pyproject [tool.importlinter] (3 contracts).
+      # P0~P3 동안 warning. P3 끝 후 strict 활성.
+      - name: Install import-linter
+        run: pip install import-linter
+      - name: Layered import contracts (P3 까지 warning)
+        run: pip install -e . && lint-imports
+        continue-on-error: true
+      # 매개변수 의미 일관성 — core/naming/aliases.json 표준 사전 검사.
+      # P0 는 placeholder (사전 비어있음 → 통과). P5 부터 실효성 발생.
+      - name: Naming consistency (parameter aliases)
+        run: python -X utf8 scripts/audit/namingConsistency.py
 
   typecheck:
     runs-on: ubuntu-latest

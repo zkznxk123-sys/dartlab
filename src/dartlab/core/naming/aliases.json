@@ -1,0 +1,9 @@
+{
+  "_metadata": {
+    "version": "0.1.0",
+    "description": "매개변수 의미 → 표준 이름 매핑 (SSOT). P5 에서 후보 추출 후 채워짐. 사용처: scripts/audit/namingConsistency.py.",
+    "policy": "src/dartlab/skills/specs/operation/code.md (의미 같으면 같은 이름).",
+    "lastUpdated": "2026-05-10"
+  },
+  "aliases": {}
+}

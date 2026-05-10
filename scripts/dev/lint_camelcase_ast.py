@@ -25,12 +25,18 @@ diff 기준:
     이번 edit 으로 *새로 추가된* identifier 만 검사한다.
     파일 자체가 신규면 모든 identifier 가 새 것 → 전수 검사.
 
+shim 모드:
+    기본은 `snake_alias = camelOrigin` 패턴을 backward-compat shim 으로 자동
+    인정 (operation.code 권고). 0.10 결정에 따라 shim 없이 절대금지가 필요한
+    경우 `--no-shim` 또는 환경변수 `DARTLAB_LINT_NO_SHIM=1` 로 비활성화.
+
 실행 모드:
     파일 모드 — 명시 파일 lint::
 
         python -X utf8 scripts/dev/lint_camelcase_ast.py path/to/file.py [...] [--strict]
         python -X utf8 scripts/dev/lint_camelcase_ast.py --changed         # git diff (staged + unstaged)
         python -X utf8 scripts/dev/lint_camelcase_ast.py --all             # src/dartlab/ 전수
+        python -X utf8 scripts/dev/lint_camelcase_ast.py --all --no-shim   # P6 codemod 후 absolute
 
     Hook 모드 — PostToolUse 호환 stdin JSON::
 
@@ -46,6 +52,7 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 import re
 import subprocess
 import sys
@@ -54,6 +61,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_DEFAULT = ROOT / "src" / "dartlab"
+
+# shim alias 자동 감지 비활성화 플래그.
+# 환경변수로 사전 set 또는 main 의 --no-shim 으로 런타임 set.
+_NO_SHIM: bool = bool(os.environ.get("DARTLAB_LINT_NO_SHIM"))
 
 # ── 정규식 ─────────────────────────────────────────────────
 
@@ -331,7 +342,10 @@ def _is_shim_alias(stmt: ast.Assign) -> bool:
     """`snake_alias = camelOrigin` 또는 `snake_alias = wrap(camelOrigin)` 패턴.
 
     operation.code "이동된 기존 snake_case 는 하위호환 유지 (shim)" 허용.
+    `--no-shim` (또는 환경변수 DARTLAB_LINT_NO_SHIM) 활성 시 항상 False.
     """
+    if _NO_SHIM:
+        return False
     if len(stmt.targets) != 1:
         return False
     tgt = stmt.targets[0]
@@ -346,6 +360,9 @@ def _is_shim_alias(stmt: ast.Assign) -> bool:
 
 
 def _is_shim_annassign(stmt: ast.AnnAssign) -> bool:
+    """AnnAssign 형태의 backwards-compat shim 감지 (`snake: T = camelOrigin`)."""
+    if _NO_SHIM:
+        return False
     if not isinstance(stmt.target, ast.Name) or stmt.value is None:
         return False
     name = stmt.target.id
@@ -493,8 +510,8 @@ def _lint_file(path: Path, *, baseline: bool = False) -> list[Violation]:
     try:
         path_rel = path.resolve().relative_to(ROOT).as_posix()
     except ValueError:
-        # 프로젝트 밖 파일 → 건너뜀
-        return violations
+        # 프로젝트 밖 파일 — absolute path 그대로 (단위 테스트·외부 호출 지원)
+        path_rel = path.resolve().as_posix()
 
     if _is_skipped_path(Path(path_rel)):
         return violations
@@ -665,6 +682,10 @@ def _run_hook() -> int:
 
 
 def main(argv: list[str]) -> int:
+    """CLI 진입점 — flag 파싱 후 모드별 lint 실행."""
+    global _NO_SHIM
+    if "--no-shim" in argv:
+        _NO_SHIM = True
     if "--hook" in argv:
         return _run_hook()
 
