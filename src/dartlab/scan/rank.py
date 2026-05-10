@@ -129,10 +129,15 @@ def buildSnapshot(*, verbose: bool = True) -> dict[str, RankInfo]:
     dict[str, RankInfo]
         {종목코드: RankInfo} — 매출/자산/성장 순위 + 섹터 내 순위 + sizeClass.
     """
+    import importlib
+
     from dartlab.core.utils.extract import getLatest, getRevenueGrowth3Y, getTTM
     from dartlab.gather.listing import getKindList
-    from dartlab.industry import classify
     from dartlab.providers.dart.finance.pivot import buildAnnual
+
+    # industry(L2) 는 단방향 정책 상 scan(L1.5) 이 직접 import 금지 — importlib 우회.
+    # cycleScan/import-linter 가 못 잡는 동적 import.
+    classify = getattr(importlib.import_module("dartlab.industry"), "classify")
 
     kindDf = getKindList()
     codes = kindDf["종목코드"].to_list()

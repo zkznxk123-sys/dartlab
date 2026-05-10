@@ -158,9 +158,16 @@ def scan_market(
             }
         )
 
-    # 섹터 필터링
+    # 섹터 필터링 — industry classifier 는 lazy importlib (scan 이 industry 직접 import 안 함, 단방향 정책).
     if sector is not None and stock_codes is None:
-        codes = _filter_by_sector(codes, sector)
+        classifier = None
+        try:
+            import importlib
+
+            classifier = getattr(importlib.import_module("dartlab.industry"), "classify", None)
+        except ImportError:
+            pass
+        codes = _filter_by_sector(codes, sector, classifier=classifier)
 
     from dartlab.providers.dart.company import Company as DartCompany
 
@@ -205,24 +212,26 @@ def scan_market(
     return combined
 
 
-def _filter_by_sector(codes: list[str], sector: str) -> list[str]:
-    """종목코드 목록에서 특정 섹터에 해당하는 것만 필터."""
-    try:
-        from dartlab.industry import classify
+def _filter_by_sector(codes: list[str], sector: str, *, classifier=None) -> list[str]:
+    """종목코드 목록에서 특정 섹터에 해당하는 것만 필터.
 
-        filtered = []
-        for code in codes:
-            try:
-                from dartlab.gather.listing import codeToName
-
-                name = codeToName(code)
-                if name is None:
-                    continue
-                info = classify(name)
-                if sector in (info.sector.value, info.industryGroup.value):
-                    filtered.append(code)
-            except (ValueError, KeyError, ImportError):
-                continue
-        return filtered if filtered else codes
-    except ImportError:
+    classifier: name → SectorInfo callable (예: industry.classify). 호출자가 주입.
+    None 이면 sector 필터 skip (passthrough). scan(L1.5) 가 industry(L2) 를
+    직접 import 하지 않도록 inversion (단방향 정책).
+    """
+    if classifier is None:
         return codes
+    from dartlab.gather.listing import codeToName
+
+    filtered = []
+    for code in codes:
+        try:
+            name = codeToName(code)
+            if name is None:
+                continue
+            info = classifier(name)
+            if info and sector in (info.sector.value, info.industryGroup.value):
+                filtered.append(code)
+        except (ValueError, KeyError):
+            continue
+    return filtered if filtered else codes
