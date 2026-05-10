@@ -107,9 +107,9 @@ def getGather(asOf: str | None = None):
     Gather
         macro() 호출 시 as_of 필터가 적용된 gather 인스턴스.
     """
-    from dartlab.gather import getDefaultGather
+    from dartlab.core.di import getMacroProvider
 
-    g = getDefaultGather()
+    g = getMacroProvider().getDefaultGather()
     if asOf is None:
         return g
 

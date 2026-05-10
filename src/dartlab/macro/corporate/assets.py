@@ -117,9 +117,9 @@ def analyzeAssets(*, market: str = "US", asOf: str | None = None, overrides: dic
         asset_input["real_rate_change"] = data["dfii10_change"]
     # BEI 변화 (T10YIE 3개월 변화)
     try:
-        from dartlab.gather import getDefaultGather
+        from dartlab.core.di import getMacroProvider
 
-        bei_df = getDefaultGather().macro("T10YIE")
+        bei_df = getMacroProvider().getDefaultGather().macro("T10YIE")
         if bei_df is not None and len(bei_df) > 0:
             vals = bei_df.get_column("value").drop_nulls()
             if len(vals) >= 63:
@@ -130,9 +130,9 @@ def analyzeAssets(*, market: str = "US", asOf: str | None = None, overrides: dic
     # 금리차-환율 교차 해석용: US 2Y - KR 기준금리
     if market.upper() == "KR":
         try:
-            from dartlab.gather import getDefaultGather
+            from dartlab.core.di import getMacroProvider
 
-            g = getDefaultGather()
+            g = getMacroProvider().getDefaultGather()
             us2y = g.macro("DGS2")
             kr_rate = g.macro("기준금리")
             if us2y is not None and kr_rate is not None:
@@ -219,9 +219,9 @@ def analyzeAssets(*, market: str = "US", asOf: str | None = None, overrides: dic
     # Copper/Gold Ratio
     result["copperGold"] = None
     try:
-        from dartlab.gather import getDefaultGather
+        from dartlab.core.di import getMacroProvider
 
-        g = getDefaultGather()
+        g = getMacroProvider().getDefaultGather()
         cu_df = g.macro("PCOPPUSDM")
         gold_df = g.macro("IR14270")
         if cu_df is not None and gold_df is not None:
