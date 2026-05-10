@@ -129,7 +129,7 @@ def buildSnapshot(*, verbose: bool = True) -> dict[str, RankInfo]:
     dict[str, RankInfo]
         {종목코드: RankInfo} — 매출/자산/성장 순위 + 섹터 내 순위 + sizeClass.
     """
-    from dartlab.analysis.financial.ratios import calcRatios
+    from dartlab.core.utils.extract import getLatest, getRevenueGrowth3Y, getTTM
     from dartlab.gather.listing import getKindList
     from dartlab.industry import classify
     from dartlab.providers.dart.finance.pivot import buildAnnual
@@ -161,11 +161,13 @@ def buildSnapshot(*, verbose: bool = True) -> dict[str, RankInfo]:
             aResult = buildAnnual(code)
             if aResult is not None:
                 aSeries, _ = aResult
-                ratios = calcRatios(aSeries)
-                if ratios.revenueTTM and ratios.revenueTTM > 0:
-                    rec["revenue"] = ratios.revenueTTM
-                rec["totalAssets"] = ratios.totalAssets
-                rec["revenueGrowth3Y"] = ratios.revenueGrowth3Y
+                # rank 가 필요한 3 필드만 직접 추출 (analysis.calcRatios 의존 제거 — 단방향 정책).
+                # analysis.financial.ratios.calcRatios 가 같은 헬퍼 사용 → 결과 동일.
+                revenueTtm = getTTM(aSeries, "IS", "sales") or getTTM(aSeries, "IS", "revenue")
+                if revenueTtm and revenueTtm > 0:
+                    rec["revenue"] = revenueTtm
+                rec["totalAssets"] = getLatest(aSeries, "BS", "total_assets")
+                rec["revenueGrowth3Y"] = getRevenueGrowth3Y(aSeries)
 
         records.append(rec)
 

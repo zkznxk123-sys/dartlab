@@ -30,8 +30,46 @@ import logging
 
 import polars as pl
 
+from dartlab.core.market import resolveMarket as resolve_market
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.quant._helpers import fetchOhlcv, loadSharesOutstanding, resolve_market
+
+# 이전: quant._helpers.fetchOhlcv (gather entry wrapper) — gather 자체이므로 직접 호출.
+# 이전: quant._helpers.loadSharesOutstanding — gather/_hfBulk + scan parquet wrapper —
+# scan._helpers / _hfBulk 직접 호출 (lazy, scan 미설치 환경 graceful).
+from dartlab.gather.entry import GatherEntry
+
+
+def fetchOhlcv(stockCode: str, **kwargs):
+    """gather("price") 직접 호출 — quant._helpers wrapper 우회 (단방향 정책)."""
+    try:
+        g = GatherEntry()
+        return g("price", stockCode, **kwargs)
+    except (ImportError, ValueError, TypeError, RuntimeError):
+        log.warning("OHLCV fetch 실패: %s", stockCode)
+        return None
+
+
+def loadSharesOutstanding(market: str = "KR"):
+    """발행주식수 LazyFrame — scan parquet 직접 로드.
+
+    KR/US 모두 dataDir 의 표준 경로에서 read-only 로드 (auto-download 책임은
+    호출자 측 — story/scan 이 미리 _ensureScanData 호출). gather 는 scan 위
+    layer 라 scan import 안 함 (단방향 정책).
+    """
+    from pathlib import Path
+
+    import polars as pl
+
+    from dartlab.core.dataConfig import dataDir
+
+    base = Path(dataDir()) / ("dart" if market == "KR" else "edgar") / "scan"
+    path = base / "sharesOutstanding.parquet"
+
+    if not path.exists():
+        log.warning("sharesOutstanding parquet 없음: %s — scan 으로 미리 다운로드 필요", path)
+        return None
+    return pl.scan_parquet(path)
+
 
 log = logging.getLogger(__name__)
 
