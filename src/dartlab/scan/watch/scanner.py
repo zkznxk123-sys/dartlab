@@ -169,15 +169,19 @@ def scanMarket(
             pass
         codes = _filterBySector(codes, sector, classifier=classifier)
 
-    # dartlab.company facade 경유 — provider 직접 의존 회피 (cycle 정공법 D).
-    from dartlab.company import Company as _CompanyFacade
+    # F5: scan → company 직접 의존 제거. FinanceDataAccessor.lookupCompany 위임 (정공법 B+C).
+    from dartlab.core.di import getFinanceAccessor
+
+    accessor = getFinanceAccessor()
 
     frames: list[pl.DataFrame] = []
     scanned = 0
 
     for code in codes:
         try:
-            c = _CompanyFacade(code)
+            c = accessor.lookupCompany(code)
+            if c is None:
+                continue
             result = scanCompany(c)
             if result is not None and result.scored:
                 df = result.toDataframe()

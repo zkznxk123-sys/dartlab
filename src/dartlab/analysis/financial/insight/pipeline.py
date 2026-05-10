@@ -202,11 +202,12 @@ def analyzeFinancial(
     ratios = calcRatios(aSeries, archetypeOverride=_ratioArchetypeOverride(company), currency=currency)
 
     if company is None and corpName is None:
+        # F5: company 직접 import 제거 → FinanceDataAccessor.lookupCompany (정공법 B)
         try:
-            from dartlab.company import Company
+            from dartlab.core.di import getFinanceAccessor
 
-            company = Company(stockCode)
-        except ValueError:
+            company = getFinanceAccessor().lookupCompany(stockCode)
+        except (ValueError, AttributeError, RuntimeError):
             pass
 
     isFinancial, _ = detectFinancialSector(aSeries, ratios)

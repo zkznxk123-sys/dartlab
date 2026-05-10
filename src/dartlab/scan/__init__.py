@@ -99,9 +99,10 @@ def _enrichWithKorean(df: pl.DataFrame) -> pl.DataFrame:
     # 종목명 매핑
     if "stockCode" in df.columns:
         try:
-            import dartlab as _dl
+            # F5: root facade 우회 → dartlab.listing 직접 (정공법 D)
+            from dartlab.listing import listing as _listing
 
-            listing = _dl.listing()
+            listing = _listing()
             if listing is not None:
                 name_col = next((c for c in ("종목명", "회사명") if c in listing.columns), None)
                 if name_col and "종목코드" in listing.columns:
