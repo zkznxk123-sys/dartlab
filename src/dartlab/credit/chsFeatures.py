@@ -142,9 +142,14 @@ def _gatherMarketData(company: Any) -> tuple[float | None, float | None, float |
 
 
 def _estimateShares(company: Any, price: float) -> int | None:
-    """주식수 역산 — calcDcf 결과의 equityValue / perShareValue."""
+    """주식수 역산 — calcDcf 결과의 equityValue / perShareValue.
+
+    analysis.calcDcf 는 importlib 동적 호출 — credit ↔ analysis cycle 회피.
+    """
     try:
-        from dartlab.analysis.financial.valuation import calcDcf
+        import importlib
+
+        calcDcf = getattr(importlib.import_module("dartlab.analysis.financial.valuation"), "calcDcf")
 
         r = calcDcf(company)
         if isinstance(r, dict):

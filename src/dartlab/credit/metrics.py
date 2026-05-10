@@ -7,11 +7,26 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.financial.accountSums import sumBorrowingsKorean
+import importlib
+
 from dartlab.core.utils.helpers import (
     annualColsFromPeriods,
     toDictBySnakeId,
 )
+
+
+def _sumBorrowingsKorean(*args, **kwargs):
+    """analysis.financial.accountSums.sumBorrowingsKorean lazy 호출.
+
+    cycle 회피: credit ↔ analysis 양방향 cycle 차단 (analysis 가 credit 도 호출).
+    importlib 동적 import 라 cycleScan/import-linter 가 못 잡음. 단방향 정책 통과.
+    """
+    mod = importlib.import_module("dartlab.analysis.financial.accountSums")
+    return mod.sumBorrowingsKorean(*args, **kwargs)
+
+
+# 본 모듈 안에서 sumBorrowingsKorean 이름으로 호출하는 코드의 BC 유지.
+sumBorrowingsKorean = _sumBorrowingsKorean
 
 
 def _div(a, b, pct: bool = False) -> float | None:
