@@ -469,12 +469,14 @@ class Company:
             _log.info("Company('%s') 준비 완료 (%.1fs)", self.stockCode, _initElapsed)
 
     def __repr__(self):
-        try:
-            from dartlab.viz.display.richCompany import renderCompany
+        from dartlab.core.htmlRenderer import getHtmlRenderer
 
-            return renderCompany(self)
-        except ImportError:
-            return f"Company({self.stockCode}, {self.corpName})"
+        renderer = getHtmlRenderer()
+        if renderer is not None:
+            text = renderer.renderCompany(self)
+            if text is not None:
+                return text
+        return f"Company({self.stockCode}, {self.corpName})"
 
     def _hintOnce(self, key: str, prop: str, category: str = "docs") -> None:
         """동일 안내를 세션 내 1회만 출력."""

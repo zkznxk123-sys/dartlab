@@ -47,6 +47,14 @@ class FinanceDocAccessor(Protocol):
         """분기 시리즈 (qSeries, qPeriods) 빌드 — finance/pivot 위임. 실패 시 None."""
         ...
 
+    def accountLabels(self) -> dict[str, str]:
+        """계정 코드 → 한글 라벨 사전 — finance/mapper 위임. 미설치/실패 시 빈 dict."""
+        ...
+
+    def exportModules(self) -> list[tuple[str, str]]:
+        """Export 가능한 모듈 (prop, label) 리스트 — provider company 위임. 미설치 시 빈 list."""
+        ...
+
 
 _ACCESSOR: FinanceDocAccessor | None = None
 

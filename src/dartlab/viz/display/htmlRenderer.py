@@ -56,5 +56,23 @@ class VizHtmlRenderer:
         except ImportError:
             return None
 
+    def renderCompany(self, company: Any) -> str | None:
+        """Company facade → rich 텍스트. 실패 시 None."""
+        try:
+            from dartlab.viz.display.richCompany import renderCompany
+
+            return renderCompany(company)
+        except ImportError:
+            return None
+
+    def renderNetwork(self, *args: Any, **kwargs: Any) -> Any | None:
+        """네트워크 그래프 → 렌더 — viz.network.renderNetwork 위임. 실패 시 None."""
+        try:
+            from dartlab.viz.network import renderNetwork
+
+            return renderNetwork(*args, **kwargs)
+        except ImportError:
+            return None
+
 
 registerHtmlRenderer(VizHtmlRenderer())

@@ -509,12 +509,14 @@ class Company:
         return Path(config.dataDir) / "edgar" / "tickers.parquet"
 
     def __repr__(self):
-        try:
-            from dartlab.viz.display.richCompany import renderCompany
+        from dartlab.core.htmlRenderer import getHtmlRenderer
 
-            return renderCompany(self)
-        except ImportError:
-            return f"Company('{self.ticker}', {self.corpName})"
+        renderer = getHtmlRenderer()
+        if renderer is not None:
+            text = renderer.renderCompany(self)
+            if text is not None:
+                return text
+        return f"Company('{self.ticker}', {self.corpName})"
 
     @property
     def fiscalYearEnd(self) -> str | None:

@@ -28,10 +28,11 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
+from dartlab.core.financeDocAccessor import getFinanceDocAccessor
 from dartlab.core.ratioCategories import RATIO_CATEGORIES
 
 if TYPE_CHECKING:
-    from dartlab.providers.dart.company import Company
+    from dartlab.core.protocols import CompanyProtocol as Company
     from dartlab.viz.export.template import ExcelTemplate
 
 
@@ -104,12 +105,8 @@ _CATEGORY_LABELS: dict[str, str] = {
 
 def _buildAccountLabels() -> dict[str, str]:
     """mapper.labelMap() 기반 + override 합성."""
-    try:
-        from dartlab.providers.dart.finance.mapper import AccountMapper
-
-        labels = dict(AccountMapper.get().labelMap())
-    except (ImportError, FileNotFoundError):
-        labels = {}
+    accessor = getFinanceDocAccessor()
+    labels = accessor.accountLabels() if accessor else {}
     labels.update(_ACCOUNT_LABELS_OVERRIDE)
     return labels
 
@@ -292,11 +289,8 @@ def _writeDataFrameSheet(
 
 
 def _getAvailableModules(c: Company) -> list[tuple[str, str]]:
-    from dartlab.providers.dart.company import listExportModules
-
-    available = []
-    for name, label in listExportModules():
-        available.append((name, label))
+    accessor = getFinanceDocAccessor()
+    available = list(accessor.exportModules()) if accessor else []
     available.append(("ratios", "재무비율"))
     return available
 
@@ -345,9 +339,8 @@ def exportToExcel(
 
     financeModules = [m for m in targetModules if m in _FINANCE_SHEETS]
     if financeModules and c._hasFinance:
-        from dartlab.providers.dart.finance.pivot import buildAnnual
-
-        result = buildAnnual(c.stockCode)
+        accessor = getFinanceDocAccessor()
+        result = accessor.buildAnnual(c.stockCode) if accessor else None
         if result:
             series, years = result
             for sjDiv in financeModules:
@@ -407,9 +400,8 @@ def exportWithTemplate(
             if not c._hasFinance:
                 continue
             if annualCache is None:
-                from dartlab.providers.dart.finance.pivot import buildAnnual
-
-                result = buildAnnual(c.stockCode)
+                accessor = getFinanceDocAccessor()
+                result = accessor.buildAnnual(c.stockCode) if accessor else None
                 if result is None:
                     continue
                 annualCache = result

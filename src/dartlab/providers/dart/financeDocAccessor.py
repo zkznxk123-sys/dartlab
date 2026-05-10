@@ -80,5 +80,23 @@ class DartFinanceDocAccessor:
         except (ValueError, KeyError, TypeError, AttributeError, FileNotFoundError):
             return None
 
+    def accountLabels(self) -> dict[str, str]:
+        """계정 코드 → 한글 라벨 — providers/dart/finance/mapper.AccountMapper 위임. 실패 시 빈 dict."""
+        try:
+            from dartlab.providers.dart.finance.mapper import AccountMapper
+
+            return dict(AccountMapper.get().labelMap())
+        except (ImportError, FileNotFoundError, AttributeError):
+            return {}
+
+    def exportModules(self) -> list[tuple[str, str]]:
+        """Export 가능한 DART 모듈 list — providers/dart/company.listExportModules 위임."""
+        try:
+            from dartlab.providers.dart.company import listExportModules
+
+            return list(listExportModules())
+        except (ImportError, AttributeError):
+            return []
+
 
 registerFinanceDocAccessor(DartFinanceDocAccessor())

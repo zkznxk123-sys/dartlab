@@ -20,7 +20,7 @@ import polars as pl
 from dartlab.core.registry import DataEntry, getEntries
 
 if TYPE_CHECKING:
-    from dartlab.providers.dart.company import Company
+    from dartlab.core.protocols import CompanyProtocol as Company
 
 
 @dataclass

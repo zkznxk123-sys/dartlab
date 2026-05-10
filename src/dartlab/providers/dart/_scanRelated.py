@@ -159,11 +159,14 @@ def buildScanNetwork(company: Company, view: str | None = None, *, hops: int = 1
         import importlib
 
         exportEgo = importlib.import_module("dartlab.scan.network").exportEgo
-        from dartlab.viz.network import renderNetwork
+        from dartlab.core.htmlRenderer import getHtmlRenderer
 
         ego = exportEgo(data, full, code, hops=hops)
         center_name = data["code_to_name"].get(code, code)
-        return renderNetwork(
+        renderer = getHtmlRenderer()
+        if renderer is None:
+            return None
+        return renderer.renderNetwork(
             ego["nodes"],
             ego["edges"],
             f"{center_name} 관계 네트워크",

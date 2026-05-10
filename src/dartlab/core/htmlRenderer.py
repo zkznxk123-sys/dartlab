@@ -36,6 +36,14 @@ class HtmlRenderer(Protocol):
         """AnalysisResult → HTML. 실패 시 None."""
         ...
 
+    def renderCompany(self, company: Any) -> str | None:
+        """Company facade → rich 텍스트. 실패 시 None."""
+        ...
+
+    def renderNetwork(self, *args: Any, **kwargs: Any) -> Any | None:
+        """네트워크 그래프 → 렌더 (HTML 또는 텍스트). 실패 시 None."""
+        ...
+
 
 _RENDERER: HtmlRenderer | None = None
 
