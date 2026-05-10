@@ -159,7 +159,7 @@ def calcTechnicalSignals(company) -> dict | None:
     ohlcv["high"].to_numpy().astype(np.float64)
     ohlcv["low"].to_numpy().astype(np.float64)
 
-    from dartlab.gather import indicators as ind
+    from dartlab.core import indicators as ind
     from dartlab.quant import signals as sig
 
     rsi = ind.vrsi(close, 14)
@@ -362,7 +362,7 @@ def calcMarketRisk(company) -> dict | None:
     high = ohlcv["high"].to_numpy().astype(np.float64)
     low = ohlcv["low"].to_numpy().astype(np.float64)
 
-    from dartlab.gather import indicators as ind
+    from dartlab.core import indicators as ind
 
     # ATR (변동성)
     atr = ind.vatr(high, low, close, 14)

@@ -10,8 +10,8 @@ from typing import Any
 import numpy as np
 import polars as pl
 
+from dartlab.core import indicators as ind
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.gather import indicators as ind
 from dartlab.quant.signal import generator as sig
 
 

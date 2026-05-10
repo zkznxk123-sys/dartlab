@@ -113,7 +113,7 @@ class DefaultQuantAccessor:
     def fetchTechnicalIndicators(self, stockCode: str, indicators: list[str]) -> dict[str, pl.DataFrame]:
         """지표 번들 — gather.indicators 의 함수 시리즈 호출."""
         try:
-            from dartlab.gather import indicators as ind
+            from dartlab.core import indicators as ind
         except ImportError:
             return {}
         out: dict[str, Any] = {}

@@ -14,12 +14,12 @@ story (L3) 등 상위 레이어가 import 해서 사용 (정방향, operation.ar
 
 사용법::
 
-    from dartlab.gather.indicators import vsma, vrsi, vmacd
+    from dartlab.core.indicators import vsma, vrsi, vmacd
     sma = vsma(close, period=20)
     rsi = vrsi(close, period=14)
 
 상위 레이어 사용 패턴:
-    - quant (L2): `from dartlab.gather.indicators import vsma` 정방향 import OK
+    - quant (L2): `from dartlab.core.indicators import vsma` 정방향 import OK
     - gather wide pivot: `dartlab.gather("krx", "rsi14", start=, end=)` — 자체 indicator dispatch
     - gather price: `dartlab.gather("price", "005930", indicators=True)` — OHLCV + 지표
 """

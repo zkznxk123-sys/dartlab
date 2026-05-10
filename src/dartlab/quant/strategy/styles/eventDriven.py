@@ -40,7 +40,7 @@ from datetime import date as Date
 
 import numpy as np
 
-from dartlab.gather.indicators import vsma
+from dartlab.core.indicators import vsma
 from dartlab.quant.signal.event import calcEventSignal
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal

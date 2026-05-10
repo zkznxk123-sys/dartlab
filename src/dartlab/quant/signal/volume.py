@@ -44,7 +44,7 @@ def calcVolume(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     }
 
     # ── OBV (On-Balance Volume) 추세 ──
-    from dartlab.gather.indicators import vobv
+    from dartlab.core.indicators import vobv
 
     obv = vobv(close, volume)
     if len(obv) >= 20:
@@ -66,7 +66,7 @@ def calcVolume(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
             result["obvDivergence"] = "confirm"
 
     # ── 누적분배선 (A/D Line) ──
-    from dartlab.gather.indicators import vadl
+    from dartlab.core.indicators import vadl
 
     adl = vadl(high, low, close, volume)
     if len(adl) >= 20:
@@ -93,7 +93,7 @@ def calcVolume(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
             result["volumeSignal"] = "보통"
 
     # ── MFI (Money Flow Index) ──
-    from dartlab.gather.indicators import vmfi
+    from dartlab.core.indicators import vmfi
 
     mfi = vmfi(high, low, close, volume)
     if not np.all(np.isnan(mfi)):
@@ -116,7 +116,7 @@ def calcVolume(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         # 음의 상관: 가격 상승 시 거래량 감소 (추세 약화)
 
     # ── Force Index ──
-    from dartlab.gather.indicators import vforceIndex
+    from dartlab.core.indicators import vforceIndex
 
     fi = vforceIndex(close, volume, period=13)
     if not np.all(np.isnan(fi)):

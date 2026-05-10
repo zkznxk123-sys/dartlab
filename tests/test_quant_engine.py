@@ -16,7 +16,7 @@ pytestmark = pytest.mark.unit
 
 # ── imports ──
 
-from dartlab.gather.indicators import vatr, vbollinger, vema, vmacd, vrsi, vsma
+from dartlab.core.indicators import vatr, vbollinger, vema, vmacd, vrsi, vsma
 from dartlab.quant.signal.generator import vcross, vcrossover, vcrossunder, vgoldenCross, vrsiSignal
 
 # ── helpers: synthetic OHLCV ──
