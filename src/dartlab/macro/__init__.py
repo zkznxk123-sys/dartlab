@@ -94,7 +94,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── 1막: 경제는 어디에 있나 (국면 진단) ──
     "cycle": _AxisEntry(
         module="dartlab.macro.cycles.cycle",
-        fn="analyze_cycle",
+        fn="analyzeCycle",
         label="사이클",
         description="경제 사이클 4국면 식별 + 전환 시퀀스 감지",
         example='macro("사이클")',
@@ -102,7 +102,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "inventory": _AxisEntry(
         module="dartlab.macro.cycles.inventory",
-        fn="analyze_inventory",
+        fn="analyzeInventory",
         label="재고",
         description="ISM 재고순환 4국면 + 자산배분 바로미터",
         example='macro("재고")',
@@ -111,7 +111,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── 2막: 왜 여기에 있나 (실물 인과) ──
     "corporate": _AxisEntry(
         module="dartlab.macro.corporate.corporate",
-        fn="analyze_corporate",
+        fn="analyzeCorporate",
         label="기업집계",
         description="전종목 이익사이클 + Ponzi비율 + 레버리지",
         example='macro("산업집계")',
@@ -119,7 +119,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "trade": _AxisEntry(
         module="dartlab.macro.trade.trade",
-        fn="analyze_trade",
+        fn="analyzeTrade",
         label="교역",
         description="교역조건 + 수출이익 선행 + 양국 선행지수",
         example='macro("교역", market="KR")',
@@ -128,7 +128,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── 3막: 정부는 뭘 하고 있나 (중앙은행 대응) ──
     "rates": _AxisEntry(
         module="dartlab.macro.rates.rates",
-        fn="analyze_rates",
+        fn="analyzeRates",
         label="금리",
         description="금리 방향 + 고용/물가 + 수익률곡선 + 기간프리미엄",
         example='macro("금리")',
@@ -145,7 +145,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "crisis": _AxisEntry(
         module="dartlab.macro.crisis.crisis",
-        fn="analyze_crisis",
+        fn="analyzeCrisis",
         label="위기",
         description="Credit-to-GDP gap + GHS + Minsky + 역사적 맥락",
         example='macro("위기")',
@@ -154,7 +154,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── 5막: 시장은 어떻게 반응하나 (자산/심리) ──
     "assets": _AxisEntry(
         module="dartlab.macro.assets",
-        fn="analyze_assets",
+        fn="analyzeAssets",
         label="자산",
         description="5대 자산 심층 해석 + Cu/Au + BEI 4분면",
         example='macro("자산")',
@@ -171,7 +171,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── 6막: 앞으로 어떻게 되나 (전망 + 시나리오) ──
     "forecast": _AxisEntry(
         module="dartlab.macro.forecast.forecast",
-        fn="analyze_forecast",
+        fn="analyzeForecast",
         label="예측",
         description="LEI + Cleveland Fed 침체확률 + Sahm + Hamilton RS + GaR",
         example='macro("예측")',
@@ -179,7 +179,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "scenario": _AxisEntry(
         module="dartlab.macro.scenarios",
-        fn="analyze_scenario",
+        fn="analyzeScenario",
         label="시나리오",
         description="역사적 충격 재현 + 유형별 스트레스 (~146개 프리셋)",
         example='macro("시나리오", "2008 금융위기")',
@@ -188,7 +188,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── 종합 ──
     "summary": _AxisEntry(
         module="dartlab.macro.summary",
-        fn="analyze_summary",
+        fn="analyzeSummary",
         label="종합",
         description="6막 전체 종합 — 점수 + 자산배분 + 40개 투자전략",
         example='macro("종합")',

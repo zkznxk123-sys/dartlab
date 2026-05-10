@@ -361,7 +361,7 @@ async def _runWithProgress(
                 continue
             try:
                 await session.send_progress_notification(
-                    progressToken=progressToken,
+                    progress_token=progressToken,
                     progress=elapsed,
                     total=None,
                     message=f"{name} 실행 중 ({elapsed:.0f} s)...",
@@ -452,7 +452,7 @@ def createServer():
             return None
         return ToolAnnotations(**specAnnotations)
 
-    @app.listTools()
+    @app.list_tools()
     async def listTools() -> list[Tool]:
         tools: list[Tool] = []
         for t in _advertisedTools():
@@ -470,7 +470,7 @@ def createServer():
             )
         return tools
 
-    @app.callTool()
+    @app.call_tool()
     async def callTool(name: str, arguments: dict) -> dict[str, Any]:
         # SDK 가 dict 반환을 받으면 structuredContent + serialized text 양쪽 모두 자동 채움.
         # 외부 LLM 은 ref/values/table 등을 structured 로 파싱 가능 + 텍스트 클라이언트 호환.
@@ -499,7 +499,7 @@ def createServer():
 
         return await _runWithProgress(name, arguments, progressToken, session)
 
-    @app.listResources()
+    @app.list_resources()
     async def listResources() -> list[Resource]:
         return [
             Resource(
@@ -534,7 +534,7 @@ def createServer():
             ),
         ]
 
-    @app.readResource()
+    @app.read_resource()
     async def readResource(uri: str) -> list[ReadResourceContents]:
         uriStr = str(uri)
         content, mime_type = _resourcePayload(uriStr)
@@ -544,7 +544,7 @@ def createServer():
     # 외부 LLM 이 한 번의 prompt 호출로 multi-step 분석 시나리오를 받음. arguments 는
     # skill 의 inputs frontmatter 에서 derive — required=False (LLM 이 채우거나 무시).
 
-    @app.listPrompts()
+    @app.list_prompts()
     async def listPrompts() -> list[Prompt]:
         prompts: list[Prompt] = []
         for spec in _recipeSkillsForPrompts():
@@ -562,7 +562,7 @@ def createServer():
         return prompts
 
     # ── logging/setLevel — 클라이언트가 dartlab logger 레벨 동적 조정 ─────────
-    @app.setLoggingLevel()
+    @app.set_logging_level()
     async def setLoggingLevel(level: str) -> None:
         # MCP LoggingLevel 은 RFC5424 (debug/info/notice/warning/error/critical/alert/emergency).
         # Python logging 은 이 중 일부만 매칭. 그 외는 가장 가까운 표준 레벨로 매핑.
@@ -580,7 +580,7 @@ def createServer():
         _log.setLevel(py_level)
         _log.info("logger level set to %s (Python %d) by client", level, py_level)
 
-    @app.getPrompt()
+    @app.get_prompt()
     async def getPrompt(name: str, arguments: dict[str, str] | None = None) -> GetPromptResult:
         from dartlab.skills import getSkill
 

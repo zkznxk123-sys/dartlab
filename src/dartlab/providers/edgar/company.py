@@ -1150,6 +1150,17 @@ class Company:
             return None
         return provider.entry(axis, self.ticker, market="US", **kwargs)
 
+    def calendar(self, *, horizonDays: int = 30) -> "pl.DataFrame":
+        """다가오는 정기공시 catalyst 일정 — EDGAR/SEC 시장.
+
+        현재 정기공시 cycle 추론은 KR DART 전용 (분기/반기/사업보고서 패턴 기반).
+        SEC 의 10-K/10-Q 패턴은 별도 추론기 필요 — 미구현. 빈 DataFrame 반환.
+        DartCompany.calendar 와 시그니처 일치 (CompanyProtocol 일관성).
+        """
+        from dartlab.providers.dart.calendar import OUTPUT_SCHEMA
+
+        return pl.DataFrame(schema=OUTPUT_SCHEMA)
+
     def filings(self) -> pl.DataFrame | None:
         """SEC 공시 문서 목록 — 10-K/10-Q 등 정기보고서 목록.
 

@@ -64,8 +64,8 @@ def test_mcp_create_server_cold_path_under_threshold():
     code = (
         "import time, sys\n"
         "t0 = time.perf_counter()\n"
-        "from dartlab.mcp import create_server\n"
-        "create_server()\n"
+        "from dartlab.mcp import createServer\n"
+        "createServer()\n"
         "t1 = time.perf_counter()\n"
         "sys.stdout.write(f'{(t1-t0)*1000:.0f}\\n')\n"
     )

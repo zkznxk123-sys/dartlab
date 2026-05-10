@@ -43,7 +43,7 @@ async def _run_probe() -> dict:
             await session.initialize()
 
             # 1. tools/list → annotations 확인
-            tools = await session.listTools()
+            tools = await session.list_tools()
             out["tool_annotations"] = {
                 t.name: {
                     "readOnly": t.annotations.readOnlyHint if t.annotations else None,
@@ -55,20 +55,20 @@ async def _run_probe() -> dict:
             }
 
             # 2. structuredContent 검증 (RunPython)
-            run_result = await session.callTool("RunPython", {"code": "emit_result(values={'sanity': 1})"})
+            run_result = await session.call_tool("RunPython", {"code": "emit_result(values={'sanity': 1})"})
             out["structured_content"] = run_result.structuredContent
 
             # 3. alias 회귀 가드
-            alias_result = await session.callTool("skill_search", {"query": "테스트"})
+            alias_result = await session.call_tool("skill_search", {"query": "테스트"})
             out["alias_dispatch_ok"] = alias_result.structuredContent is not None and not alias_result.isError
 
             # 4. prompts/list — recipe 카테고리 노출
-            prompts = await session.listPrompts()
+            prompts = await session.list_prompts()
             out["prompts"] = [(p.name, len(p.arguments or [])) for p in prompts.prompts]
 
             # 5. prompts/get — recipe 본문 + arguments prefix
             try:
-                got = await session.getPrompt("engines.recipe.dailyMorningNote", {"tickers": "005930"})
+                got = await session.get_prompt("engines.recipe.dailyMorningNote", {"tickers": "005930"})
                 out["prompt_body_chars"] = len(got.messages[0].content.text) if got.messages else 0
                 out["prompt_includes_user_input"] = "사용자 입력" in (got.messages[0].content.text or "")
             except Exception as exc:
@@ -76,13 +76,13 @@ async def _run_probe() -> dict:
 
             # 6. logging/setLevel — 동적 조정
             try:
-                await session.setLoggingLevel("debug")
+                await session.set_logging_level("debug")
                 out["set_level_ok"] = True
             except Exception as exc:
                 out["set_level_error"] = str(exc)
 
             # 7. 분석 추론 도구 3 종 (S3) — registry SSOT 경유 호출.
-            grounding = await session.callTool(
+            grounding = await session.call_tool(
                 "GroundingCheck",
                 {"answer": "삼성전자 ROE 는 12.3% 수준이다.", "refs": []},
             )
@@ -93,7 +93,7 @@ async def _run_probe() -> dict:
 
             # 7b. RequestUserInput (S4) — 표준 ClientSession 은 elicit handler 없음 →
             # 서버가 fallback dict 반환해야 함. dispatch 자체 회귀 가드.
-            elicit = await session.callTool(
+            elicit = await session.call_tool(
                 "RequestUserInput",
                 {"message": "회사 선택", "fields": [{"name": "company", "enum": ["005930"]}]},
             )
@@ -108,7 +108,7 @@ async def _run_probe() -> dict:
             async def _on_progress(progress: float, total: float | None, message: str | None) -> None:
                 progress_events.append({"progress": progress, "total": total, "message": message})
 
-            slow = await session.callTool(
+            slow = await session.call_tool(
                 "RunPython",
                 {"code": "import time\nfor _ in range(5): time.sleep(0.5)\nemit_result(values={'slept': True})"},
                 progress_callback=_on_progress,

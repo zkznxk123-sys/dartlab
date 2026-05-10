@@ -21,6 +21,23 @@ PROTECTED_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("subprocess", re.compile(r"\bsubprocess\.[a-z][a-zA-Z]*[A-Z]")),
     ("threading", re.compile(r"\bthreading\.[a-z][a-zA-Z]*[A-Z]")),
     ("multiprocessing", re.compile(r"\bmultiprocessing\.[a-z][a-zA-Z]*[A-Z]")),
+    # mcp Server/ClientSession 데코레이터·메서드 (snake_case stdlib 표준):
+    # list_tools, call_tool, list_resources, read_resource, list_prompts,
+    # get_prompt, set_logging_level, send_progress_notification 등.
+    (
+        "mcp.app",
+        re.compile(
+            r"@(?:app|server)\.(?:listTools|callTool|listResources|readResource|"
+            r"listPrompts|getPrompt|setLoggingLevel|sendProgressNotification)\("
+        ),
+    ),
+    (
+        "mcp.session",
+        re.compile(
+            r"\bsession\.(?:listTools|callTool|listResources|readResource|"
+            r"listPrompts|getPrompt|setLoggingLevel|sendProgressNotification)\("
+        ),
+    ),
 )
 
 
