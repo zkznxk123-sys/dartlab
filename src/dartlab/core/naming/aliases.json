@@ -1,9 +1,71 @@
 {
   "_metadata": {
-    "version": "0.1.0",
-    "description": "매개변수 의미 → 표준 이름 매핑 (SSOT). P5 에서 후보 추출 후 채워짐. 사용처: scripts/audit/namingConsistency.py.",
-    "policy": "src/dartlab/skills/specs/operation/code.md (의미 같으면 같은 이름).",
-    "lastUpdated": "2026-05-10"
+    "version": "1.0.0",
+    "description": "매개변수 의미 → 표준 이름 매핑 (SSOT). 사용처: scripts/audit/namingConsistency.py.",
+    "policy": "src/dartlab/skills/specs/operation/code.md (의미 같으면 같은 이름 → AI 추론 단순화).",
+    "lastUpdated": "2026-05-10",
+    "rule": "신규 매개변수는 표준 이름 사용. alias 사용 시 namingConsistency lint fail. 표준에 없는 의미는 PR 로 사전에 추가 후 사용."
   },
-  "aliases": {}
+  "aliases": {
+    "stockIdentifier": {
+      "standard": "stockCode",
+      "aliases": ["code", "codeOrName", "ticker", "corp_code", "corpCode", "stkCd", "stk_cd", "stock_code"],
+      "scope": ["arg", "var"],
+      "note": "종목코드/티커/회사명 통합 식별자. KR 6자리 숫자 또는 US 영문 ticker. 회사명 입력 자동 라우팅은 dartlab.Company 가 처리."
+    },
+    "marketCode": {
+      "standard": "market",
+      "aliases": ["mkt", "exchange"],
+      "scope": ["arg"],
+      "note": "시장 코드: 'KR' / 'US' / 'auto'. core.market.resolveMarket 으로 자동 감지."
+    },
+    "periodLabel": {
+      "standard": "period",
+      "aliases": ["date", "ts", "yyyymm", "yyyymmdd", "timeframe"],
+      "scope": ["arg"],
+      "note": "기간 라벨 (ISO date 또는 YYYYMM). 시계열 한 점 식별."
+    },
+    "periodList": {
+      "standard": "periods",
+      "aliases": ["dates", "yyyymms"],
+      "scope": ["arg"],
+      "note": "기간 라벨 리스트."
+    },
+    "limitInt": {
+      "standard": "limit",
+      "aliases": ["topK", "top_k", "maxItems", "max_items", "count", "size"],
+      "scope": ["arg"],
+      "note": "결과 개수 한도. None 이면 전수."
+    },
+    "verboseFlag": {
+      "standard": "verbose",
+      "aliases": ["debug", "loud"],
+      "scope": ["arg"],
+      "note": "진행 로그 출력 여부."
+    },
+    "freqLabel": {
+      "standard": "freq",
+      "aliases": ["periodKind", "period_kind", "frequency"],
+      "scope": ["arg"],
+      "note": "주기: 'Y' (annual) / 'Q' (quarterly) / 'M' (monthly)."
+    },
+    "rawFlag": {
+      "standard": "raw",
+      "aliases": ["asIs", "as_is", "noAdjust", "no_adjust"],
+      "scope": ["arg"],
+      "note": "수정 전 원본 사용 여부 (가격 등)."
+    },
+    "lookbackInt": {
+      "standard": "lookback",
+      "aliases": ["window", "lookbackDays", "windowDays"],
+      "scope": ["arg"],
+      "note": "과거 lookback 일수/기간."
+    },
+    "topicName": {
+      "standard": "topic",
+      "aliases": ["section"],
+      "scope": ["arg"],
+      "note": "공시 topic / 섹션 식별자 (예: 'IS', 'BS', 'businessOverview'). 'category' 는 의미 다름 (분류 일반) — alias 제외."
+    }
+  }
 }
