@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 
-from dartlab.gather.types import MarketSnapshot
+from dartlab.core.types import MarketSnapshot
 
 log = logging.getLogger(__name__)
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
-from dartlab.gather.types import MarketSnapshot
+from dartlab.core.types import MarketSnapshot
 
 from .types import AnalystReport, ValuationMethod, _classifyOpinion
 

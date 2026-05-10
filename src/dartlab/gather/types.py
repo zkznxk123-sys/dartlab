@@ -648,93 +648,9 @@ class GatherSnapshot:
 # ══════════════════════════════════════
 
 
-@dataclass
-class PeerData:
-    """피어 기업 멀티플 데이터.
-
-    Attributes
-    ----------
-    ticker : str
-        종목코드/티커.
-    name : str
-        기업명.
-    per : float | None
-        PER (배).
-    pbr : float | None
-        PBR (배).
-    ev_ebitda : float | None
-        EV/EBITDA (배).
-    market_cap : float | None
-        시가총액 (억원).
-    """
-
-    ticker: str = ""
-    name: str = ""
-    per: float | None = None
-    pbr: float | None = None
-    ev_ebitda: float | None = None
-    marketCap: float | None = None
-
-    def __repr__(self) -> str:
-        parts = [f"{self.ticker}({self.name})"]
-        if self.per is not None:
-            parts.append(f"PER={self.per:.1f}")
-        if self.pbr is not None:
-            parts.append(f"PBR={self.pbr:.2f}")
-        if self.ev_ebitda is not None:
-            parts.append(f"EV/EBITDA={self.ev_ebitda:.1f}")
-        return " ".join(parts)
-
-
-@dataclass
-class MarketSnapshot:
-    """Analyst 호환 flat 시장 데이터 — GatherSnapshot → MarketSnapshot 변환용.
-
-    Attributes
-    ----------
-    stock_code : str
-        종목코드.
-    current_price : float
-        현재가 (원 또는 해당 통화).
-    multiples : dict[str, float]
-        멀티플 (per, pbr, dividend_yield, sector_per 등) (배 또는 %).
-    peer_multiples : list[PeerData]
-        피어 기업 멀티플 리스트.
-    supply_demand : dict[str, float]
-        수급 (foreign_net, institution_net (주), foreign_holding_ratio (%)).
-    macro : dict[str, float]
-        매크로 지표.
-    price_range_52w : tuple[float, float] | None
-        52주 가격 범위 (최저, 최고) (원).
-    collected_at : str
-        수집 시각 (ISO 형식).
-    sources_available : list[str]
-        정상 응답 소스 목록.
-    sources_failed : list[str]
-        오류 발생 소스 목록.
-    """
-
-    stockCode: str = ""
-    currentPrice: float = 0.0
-    multiples: dict[str, float] = field(default_factory=dict)
-    peer_multiples: list[PeerData] = field(default_factory=list)
-    supply_demand: dict[str, float] = field(default_factory=dict)
-    macro: dict[str, float] = field(default_factory=dict)
-    price_range_52w: tuple[float, float] | None = None
-    collected_at: str = ""
-    sourcesAvailable: list[str] = field(default_factory=list)
-    sourcesFailed: list[str] = field(default_factory=list)
-
-    def __repr__(self) -> str:
-        lines = [f"[MarketSnapshot — {self.stockCode}]"]
-        lines.append(f"  현재가: {self.currentPrice:,.0f}")
-        if self.multiples:
-            mult_str = ", ".join(f"{k}={v:.2f}" for k, v in self.multiples.items())
-            lines.append(f"  멀티플: {mult_str}")
-        if self.price_range_52w:
-            lines.append(f"  52주 범위: {self.price_range_52w[0]:,.0f}~{self.price_range_52w[1]:,.0f}")
-        return "\n".join(lines)
-
+# PeerData / MarketSnapshot 은 L0 (core/types) 로 강등됨 (F4 — 정공법 A — Hierarchy).
+# gather.types 는 SSOT 위치 (core) 에서 import. 모듈 namespace 호환 노출.
+from dartlab.core.types import MarketSnapshot, PeerData  # noqa: F401, E402
 
 # ══════════════════════════════════════
 # 예외
