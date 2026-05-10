@@ -717,6 +717,28 @@ def promptKeyIfMissing(service: str) -> str | None:
 # ── 에러 → 사용자 친화 메시지 변환 ──────────────────────────────────
 
 
+def inferFeature(error: Exception) -> str | None:
+    """에러 타입/메시지에서 관련 feature 자동 추론. cli/server 양쪽이 사용.
+
+    이전 위치: cli/services/errors.py — server 가 cli 호출하면 cycle 이라 core 로 이전.
+    """
+    errStr = str(error).lower()
+
+    if any(kw in errStr for kw in ("api_key", "apikey", "provider", "oauth", "openai", "gemini", "ollama")):
+        return "ai"
+
+    if any(kw in errStr for kw in ("finance", "parquet", "재무", "financial")):
+        return "finance"
+
+    if isinstance(error, FileNotFoundError):
+        return "data"
+
+    if isinstance(error, (ConnectionError, TimeoutError)):
+        return "ai"
+
+    return None
+
+
 def handleError(error: Exception, *, feature: str | None = None) -> str:
     """에러를 사용자 친화적 안내 메시지로 변환.
 

@@ -8,6 +8,9 @@ CLI 가 모든 사용자 접점 (cli/commands/*, cli/main) 에서 호출하는 �
 from __future__ import annotations
 
 from dartlab.cli.context import EXIT_RUNTIME
+from dartlab.core.messaging import inferFeature as inferFeature
+
+__all__ = ["CLIError", "inferFeature", "wrapError"]
 
 
 class CLIError(RuntimeError):
@@ -44,22 +47,3 @@ def wrapError(error: Exception, *, feature: str | None = None, stockCode: str | 
     except ImportError:
         pass
     return str(error)
-
-
-def inferFeature(error: Exception) -> str | None:
-    """에러 타입/메시지에서 관련 feature 자동 추론."""
-    errStr = str(error).lower()
-
-    if any(kw in errStr for kw in ("api_key", "apikey", "provider", "oauth", "openai", "gemini", "ollama")):
-        return "ai"
-
-    if any(kw in errStr for kw in ("finance", "parquet", "재무", "financial")):
-        return "finance"
-
-    if isinstance(error, FileNotFoundError):
-        return "data"
-
-    if isinstance(error, (ConnectionError, TimeoutError)):
-        return "ai"
-
-    return None
