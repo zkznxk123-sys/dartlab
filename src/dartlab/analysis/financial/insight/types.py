@@ -165,12 +165,14 @@ class DistressResult:
 
     def _repr_html_(self) -> str:
         """Jupyter/Marimo용 HTML."""
-        try:
-            from dartlab.viz.display.notebook import htmlDistress
+        from dartlab.core.htmlRenderer import getHtmlRenderer
 
-            return htmlDistress(self)
-        except ImportError:
-            return f"<pre>{repr(self)}</pre>"
+        renderer = getHtmlRenderer()
+        if renderer is not None:
+            html = renderer.htmlDistress(self)
+            if html is not None:
+                return html
+        return f"<pre>{repr(self)}</pre>"
 
 
 @dataclass
@@ -224,21 +226,25 @@ class AnalysisResult:
         return result
 
     def __repr__(self):
-        try:
-            from dartlab.viz.display.richInsight import renderInsight
+        from dartlab.core.htmlRenderer import getHtmlRenderer
 
-            return renderInsight(self)
-        except ImportError:
-            g = self.grades()
-            gradeStr = " ".join(f"{k[:4]}={v}" for k, v in g.items())
-            anomalyStr = f" anomalies={len(self.anomalies)}" if self.anomalies else ""
-            return f"AnalysisResult({self.corpName}, {gradeStr}{anomalyStr})"
+        renderer = getHtmlRenderer()
+        if renderer is not None:
+            text = renderer.renderInsight(self)
+            if text is not None:
+                return text
+        g = self.grades()
+        gradeStr = " ".join(f"{k[:4]}={v}" for k, v in g.items())
+        anomalyStr = f" anomalies={len(self.anomalies)}" if self.anomalies else ""
+        return f"AnalysisResult({self.corpName}, {gradeStr}{anomalyStr})"
 
     def _repr_html_(self) -> str:
         """Jupyter/Marimo용 HTML."""
-        try:
-            from dartlab.viz.display.notebook import htmlInsight
+        from dartlab.core.htmlRenderer import getHtmlRenderer
 
-            return htmlInsight(self)
-        except ImportError:
-            return repr(self)
+        renderer = getHtmlRenderer()
+        if renderer is not None:
+            html = renderer.htmlInsight(self)
+            if html is not None:
+                return html
+        return repr(self)

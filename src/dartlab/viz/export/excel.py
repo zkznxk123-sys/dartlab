@@ -28,6 +28,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
+from dartlab.core.ratioCategories import RATIO_CATEGORIES
+
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
     from dartlab.viz.export.template import ExcelTemplate
@@ -193,7 +195,7 @@ def _writeFinanceSheet(
 
 
 def _writeRatiosSheet(wb: Workbook, c: Company, *, label: str = "") -> None:
-    from dartlab.analysis.financial.ratios import RATIO_CATEGORIES, calcRatioSeries, toSeriesDict
+    from dartlab.analysis.financial.ratios import calcRatioSeries, toSeriesDict
 
     annualResult = c._buildFinanceSeries(freq="Y")
     if annualResult is None or len(annualResult) != 2:

@@ -22,6 +22,8 @@ import math
 from dataclasses import dataclass, field
 from typing import ClassVar
 
+from dartlab.core.htmlRenderer import getHtmlRenderer
+from dartlab.core.ratioCategories import RATIO_CATEGORIES as RATIO_CATEGORIES
 from dartlab.core.utils.extract import getLatest, getRevenueGrowth3Y, getTTM
 
 
@@ -317,16 +319,11 @@ class RatioResult:
     }
 
     def __repr__(self) -> str:
-        try:
-            from rich.console import Console
-
-            from dartlab.viz.display.richRatio import renderRatio
-
-            console = Console(record=True, width=70)
-            console.print(renderRatio(self))
-            return console.export_text()
-        except ImportError:
-            pass
+        renderer = getHtmlRenderer()
+        if renderer is not None:
+            text = renderer.renderRatio(self)
+            if text is not None:
+                return text
         lines: list[str] = []
         for group, fields in self._DISPLAY_GROUPS:
             rows = []
@@ -2024,101 +2021,6 @@ def calcRatioSeries(
 
     _applyArchetypePolicySeries(rs, archetype)
     return rs
-
-
-RATIO_CATEGORIES: list[tuple[str, list[str]]] = [
-    (
-        "profitability",
-        [
-            "roe",
-            "roa",
-            "roce",
-            "operatingMargin",
-            "netMargin",
-            "preTaxMargin",
-            "grossMargin",
-            "ebitdaMargin",
-            "costOfSalesRatio",
-            "sgaRatio",
-            "effectiveTaxRate",
-            "incomeQualityRatio",
-        ],
-    ),
-    (
-        "stability",
-        [
-            "debtRatio",
-            "currentRatio",
-            "quickRatio",
-            "cashRatio",
-            "equityRatio",
-            "interestCoverage",
-            "netDebtRatio",
-            "noncurrentRatio",
-            "workingCapital",
-        ],
-    ),
-    (
-        "growth",
-        [
-            "revenueGrowth",
-            "operatingProfitGrowth",
-            "netProfitGrowth",
-            "assetGrowth",
-            "equityGrowthRate",
-        ],
-    ),
-    (
-        "efficiency",
-        [
-            "totalAssetTurnover",
-            "fixedAssetTurnover",
-            "inventoryTurnover",
-            "receivablesTurnover",
-            "payablesTurnover",
-            "operatingCycle",
-        ],
-    ),
-    (
-        "cashflow",
-        [
-            "fcf",
-            "operatingCfMargin",
-            "operatingCfToNetIncome",
-            "operatingCfToCurrentLiab",
-            "capexRatio",
-            "dividendPayoutRatio",
-            "fcfToOcfRatio",
-        ],
-    ),
-    (
-        "composite",
-        [
-            "roic",
-            "dupontMargin",
-            "dupontTurnover",
-            "dupontLeverage",
-            "debtToEbitda",
-            "ccc",
-            "dso",
-            "dio",
-            "dpo",
-            "piotroskiFScore",
-            "altmanZScore",
-        ],
-    ),
-    (
-        "absolute",
-        [
-            "revenue",
-            "operatingProfit",
-            "netProfit",
-            "totalAssets",
-            "totalEquity",
-            "operatingCashflow",
-        ],
-    ),
-]
 
 
 def toSeriesDict(

@@ -345,9 +345,7 @@ def _ratioSeriesToDataFrame(
     if not ratioData:
         return None
 
-    import importlib
-
-    RATIO_CATEGORIES = importlib.import_module("dartlab.analysis.financial.ratios").RATIO_CATEGORIES
+    from dartlab.core.ratioCategories import RATIO_CATEGORIES
 
     rows: list[dict[str, Any]] = []
     for category, fields in RATIO_CATEGORIES:

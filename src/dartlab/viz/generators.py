@@ -15,6 +15,7 @@ from __future__ import annotations
 from typing import Any
 
 from dartlab.core.palette import COLORS
+from dartlab.core.ratioCategories import RATIO_CATEGORIES
 from dartlab.viz.refs import chartEvidenceBinding
 
 # ── 7영역 인사이트 상수 ──
@@ -384,8 +385,6 @@ def specInsightRadar(company: Any) -> dict | None:
 
 def specRatioSparklines(company: Any) -> dict | None:
     """비율 스파크라인 배열 ChartSpec."""
-    from dartlab.analysis.financial.ratios import RATIO_CATEGORIES
-
     rs = getattr(company, "ratioSeries", None)
     if rs is None:
         return None
