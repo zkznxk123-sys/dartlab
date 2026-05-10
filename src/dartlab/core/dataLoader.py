@@ -28,7 +28,10 @@ _IS_PYODIDE = sys.platform == "emscripten"
 # max_entries 는 작게 유지: (stockCode × category=4) × 사용자 분석 빈도 =
 # 일반 세션 8~16. 초과분은 LRU evict.
 _LOAD_CACHE: "OrderedDict[tuple, pl.DataFrame]" = OrderedDict()
-_LOAD_CACHE_MAX = 16
+# 회사 1 개 docs DataFrame 이 ~수백 MB (대기업 + 10 년치) 라 16 entry 보유 시
+# 수 GB 잠재 점유. CLAUDE.md 병렬 에이전트 2 × 카테고리 4 = 8 이 정합. LRU 압박이
+# 잦으면 BoundedCache pinned (_finance_ 등) 가 in-memory 재사용을 잡는다.
+_LOAD_CACHE_MAX = 8
 
 
 def _clearLoadCache() -> None:

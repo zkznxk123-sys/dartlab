@@ -49,7 +49,10 @@ from dartlab.providers.dart.docs.sections.textStructure import parseTextStructur
 # ── Phase 1 캐시: parquet 로드 + topic 매핑 결과 재사용 ──
 
 _preparedCache: dict[str, "_PreparedRows"] = {}
-_PREPARED_CACHE_MAX = 2  # OOM 방지: 최대 2종목
+# _PreparedRows.periodRows 는 list[dict[str, object]] 형태 — DataFrame 을 Python
+# 객체로 변환해 보유하므로 회사 1 종목 ~수백 MB. 2 종목 동시 보유 시 GB 압박.
+# 회사 다중 분석 워크플로우는 회사 경계마다 다음 호출이 직전 캐시 evict.
+_PREPARED_CACHE_MAX = 1
 
 
 class _PreparedRows:

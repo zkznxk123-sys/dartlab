@@ -44,6 +44,32 @@ class TestGetMemoryMb:
         assert mem < 100_000, f"비현실적인 RSS: {mem} MB"
 
 
+class TestCacheCaps:
+    """대량 Polars 사용 시 RSS 폭증 가드 — 캐시 최대 entry 상수 회귀 방지."""
+
+    def test_load_cache_max_capped(self):
+        """dataLoader 의 _LOAD_CACHE_MAX 가 8 이하로 유지된다.
+
+        회사 1 개 docs DataFrame ~수백 MB × max entries = 잠재 점유. CLAUDE.md
+        병렬 2 × 카테고리 4 = 8 정합. 16 으로 회귀하면 메모리 압박 재유입.
+        """
+        from dartlab.core.dataLoader import _LOAD_CACHE_MAX
+
+        assert _LOAD_CACHE_MAX <= 8, f"_LOAD_CACHE_MAX={_LOAD_CACHE_MAX} — 8 초과는 회사 다중 분석 시 RSS 폭증"
+
+    def test_prepared_cache_max_capped(self):
+        """sections pipeline 의 _PREPARED_CACHE_MAX 가 1 로 유지된다.
+
+        _PreparedRows 는 DataFrame 을 list[dict] 로 변환 보유 → 회사 1 종목 ~수백 MB.
+        2 이상이면 회사 다중 분석 시 동시 보유로 OOM 위험.
+        """
+        from dartlab.providers.dart.docs.sections.pipeline import _PREPARED_CACHE_MAX
+
+        assert _PREPARED_CACHE_MAX == 1, (
+            f"_PREPARED_CACHE_MAX={_PREPARED_CACHE_MAX} — 1 초과는 회사 동시 보유로 GB 압박"
+        )
+
+
 class TestCleanupBetweenCompanies:
     def test_returns_before_after_tuple(self):
         """(before, after) 튜플 반환."""
