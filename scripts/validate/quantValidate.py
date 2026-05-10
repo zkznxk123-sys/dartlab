@@ -404,7 +404,7 @@ def phase2b_eventStudy():
 
 def phase2b_textComposite():
     """텍스트 composite 005930 호출."""
-    from dartlab.quant.textComposite import calcTextComposite
+    from dartlab.quant.text.composite import calcTextComposite
 
     def _check():
         r = calcTextComposite("005930", market="KR")

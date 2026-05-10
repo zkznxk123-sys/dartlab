@@ -232,7 +232,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     # ── E: 텍스트/공시 (text) — dartlab 고유 차별화 ───────
     "sentiment": _AxisEntry(
-        module="dartlab.quant.textSentiment",
+        module="dartlab.quant.text.sentiment",
         fn="calcSentiment",
         label="공시심리",
         description="Loughran-McDonald 감성 사전 기반 공시 텍스트 스코어링",
@@ -240,7 +240,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="text",
     ),
     "toneChange": _AxisEntry(
-        module="dartlab.quant.toneChange",
+        module="dartlab.quant.text.toneChange",
         fn="calcToneChange",
         label="톤변화",
         description="기간별 공시 톤 변화 감지",
@@ -256,7 +256,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="text",
     ),
     "riskText": _AxisEntry(
-        module="dartlab.quant.riskText",
+        module="dartlab.quant.text.risk",
         fn="calcRiskText",
         label="리스크텍스트",
         description="리스크 팩터 출현/소멸 텍스트 델타",
@@ -264,7 +264,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="text",
     ),
     "governanceQuant": _AxisEntry(
-        module="dartlab.quant.governanceQuant",
+        module="dartlab.quant.text.governance",
         fn="calcGovernanceQuant",
         label="거버넌스퀀트",
         description="지배구조 품질 정량화 (사외이사비율, 감사의견, 보수)",

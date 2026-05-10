@@ -51,7 +51,7 @@ def calcSentiment(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     if isEmptyDf(docs):
         return {**result, "error": "docs 데이터 없음"}
 
-    from dartlab.quant._lm_dict import NEGATIVE_KR, POSITIVE_KR, UNCERTAINTY_KR
+    from dartlab.quant.text.lmDict import NEGATIVE_KR, POSITIVE_KR, UNCERTAINTY_KR
 
     text_col = next((c for c in ["content", "section_content", "text", "body"] if c in docs.columns), None)
     if text_col is None:

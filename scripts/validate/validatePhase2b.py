@@ -80,7 +80,7 @@ def main():
             s[150 + 1 : 150 + 6] += 0.01
             r = calcCAR(s, m, eventIdx=150)
         elif ALPHA == "textComposite":
-            from dartlab.quant.textComposite import calcTextComposite
+            from dartlab.quant.text.composite import calcTextComposite
             r = calcTextComposite("005930", market="KR")
         else:
             print(json.dumps({{"error": "unknown alpha"}}))

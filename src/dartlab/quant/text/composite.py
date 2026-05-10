@@ -57,17 +57,17 @@ def calcTextComposite(
         None — 텍스트 데이터 0개
     """
     try:
-        from dartlab.quant.governanceQuant import calcGovernance
-        from dartlab.quant.riskText import calcRiskText
-        from dartlab.quant.textSentiment import calcSentiment
-        from dartlab.quant.toneChange import calcToneChange
+        from dartlab.quant.text.governance import calcGovernanceQuant
+        from dartlab.quant.text.risk import calcRiskText
+        from dartlab.quant.text.sentiment import calcSentiment
+        from dartlab.quant.text.toneChange import calcToneChange
     except ImportError:
         return None
 
     s_data = calcSentiment(stockCode, market=market)
     t_data = calcToneChange(stockCode, market=market)
     r_data = calcRiskText(stockCode, market=market)
-    g_data = calcGovernance(stockCode, market=market)
+    g_data = calcGovernanceQuant(stockCode, market=market)
 
     scores = {}
     if s_data and "score" in s_data:

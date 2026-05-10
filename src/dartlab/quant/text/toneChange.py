@@ -45,7 +45,7 @@ def calcToneChange(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     if isEmptyDf(changes):
         return {**result, "error": "changes 데이터 없음"}
 
-    from dartlab.quant._lm_dict import NEGATIVE_KR, POSITIVE_KR
+    from dartlab.quant.text.lmDict import NEGATIVE_KR, POSITIVE_KR
 
     text_col = next((c for c in ["preview", "content", "text", "sectionTitle"] if c in changes.columns), None)
     if text_col is None:
