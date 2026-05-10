@@ -201,7 +201,7 @@ def streamProvider(
     """
     from collections.abc import Iterator  # noqa: F401 — typing only
 
-    if hasattr(provider, "generate_stream") and callable(getattr(provider, "generate_stream")):
+    if hasattr(provider, "generateStream") and callable(getattr(provider, "generateStream")):
         yield from provider.generateStream(messages, tools)
         return
     turn = provider.generate(messages, tools)

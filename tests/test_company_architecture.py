@@ -89,7 +89,10 @@ def test_public_docs_do_not_reference_legacy_company_names():
 def test_export_module_does_not_depend_on_root_company_internals():
     text = _read("src/dartlab/viz/export/excel.py")
     assert "from dartlab.company import _ALL_PROPERTIES" not in text
-    assert "from dartlab.providers.dart.company import listExportModules" in text
+    # F1.7 (commit f01c30ac6) — viz 가 providers 직접 import 안 함. FinanceDocAccessor
+    # Protocol 통해 위임 (정공법 B Protocol DIP). exportModules 도 accessor 메서드.
+    assert "getFinanceDocAccessor" in text
+    assert "from dartlab.providers" not in text
 
 
 def test_ai_owned_helpers_do_not_live_in_src_root():
@@ -145,7 +148,11 @@ def test_core_does_not_own_retired_subpackages():
 
     forbidden_imports = [
         "dartlab.core.ai",
-        "dartlab.core.finance",
+        # 'dartlab.core.finance' 자체는 폐기 — single underscore prefix 으로 정확 매칭
+        # (financeDocAccessor 같은 정상 모듈명이 substring 으로 잡히지 않게).
+        "dartlab.core.finance.",
+        "dartlab.core.finance ",
+        "from dartlab.core.finance import",
         # CLI 통합 wrapper 는 cli/services/errors 로 이관됨 (Cut 2.5b 후)
         "dartlab.core.integration",
         # guide 패키지 자체가 폐기됨 (Cut 2.5b)

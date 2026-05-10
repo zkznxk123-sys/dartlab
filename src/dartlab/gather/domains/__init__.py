@@ -30,6 +30,14 @@ def getPriceFallback(market: str = "KR") -> list[str]:
     return list(config.fallback_chain)
 
 
+# marketConfig.fallback_chain 의 source 표시 이름 (사용자 visible) → 모듈 이름 (camelCase) alias.
+# fallback_chain 의 snake 표기는 PriceSnapshot.source 등 사용자 노출에 그대로 사용.
+_DOMAIN_ALIASES: dict[str, str] = {
+    "naver_global": "naverGlobal",
+    "yahoo_chart": "yahooChart",
+}
+
+
 def loadDomain(name: str):
     """도메인 모듈 lazy import.
 
@@ -37,40 +45,42 @@ def loadDomain(name: str):
     ----------
     name : str
         도메인 식별자. ``"naver"`` | ``"fmp"`` | ``"krx"`` | ``"fdr"``
-        | ``"naverGlobal"`` | ``"yahooChart"``.
+        | ``"naverGlobal"`` | ``"yahooChart"``. snake_case alias 도 허용
+        (``"naver_global"``, ``"yahoo_chart"``) — fallback_chain 의 source 표시 이름.
 
     Returns
     -------
     module
-        해당 도메인의 Python 모듈 객체. ``fetch_price`` 등 함수를 포함.
+        해당 도메인의 Python 모듈 객체. ``fetchPrice`` 등 함수를 포함.
 
     Raises
     ------
     ValueError
         등록되지 않은 도메인 이름일 때.
     """
-    if name == "naver":
+    canonical = _DOMAIN_ALIASES.get(name, name)
+    if canonical == "naver":
         from . import naver
 
         return naver
 
-    if name == "fmp":
+    if canonical == "fmp":
         from . import fmp
 
         return fmp
-    if name == "krx":
+    if canonical == "krx":
         from . import krx
 
         return krx
-    if name == "fdr":
+    if canonical == "fdr":
         from . import fdr
 
         return fdr
-    if name == "naverGlobal":
+    if canonical == "naverGlobal":
         from . import naverGlobal
 
         return naverGlobal
-    if name == "yahooChart":
+    if canonical == "yahooChart":
         from . import yahooChart
 
         return yahooChart

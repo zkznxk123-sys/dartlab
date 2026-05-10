@@ -78,7 +78,7 @@ async def fetch(
         t0 = time.monotonic()
         try:
             module = loadDomain(source_name)
-            if not hasattr(module, "fetch_price"):
+            if not hasattr(module, "fetchPrice"):
                 continue
 
             result = await module.fetchPrice(stockCode, client, market=market)

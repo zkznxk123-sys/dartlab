@@ -80,8 +80,8 @@ class _TableParser(HTMLParser):
         self._row: list[str] = []
         self._cell = ""
 
-    def handleStarttag(self, tag: str, _attrs):
-        """HTML 여는 태그 처리."""
+    def handle_starttag(self, tag: str, _attrs):
+        """HTML 여는 태그 처리 (stdlib HTMLParser hook)."""
         if tag == "table":
             self._inTable = True
         elif tag == "tr" and self._inTable:
@@ -91,8 +91,8 @@ class _TableParser(HTMLParser):
             self._inCell = True
             self._cell = ""
 
-    def handleEndtag(self, tag: str):
-        """HTML 닫는 태그 처리."""
+    def handle_endtag(self, tag: str):
+        """HTML 닫는 태그 처리 (stdlib HTMLParser hook)."""
         if tag in ("td", "th") and self._inCell:
             self._inCell = False
             self._row.append(self._cell.strip())
@@ -103,8 +103,8 @@ class _TableParser(HTMLParser):
         elif tag == "table":
             self._inTable = False
 
-    def handleData(self, data: str):
-        """HTML 텍스트 데이터 처리."""
+    def handle_data(self, data: str):
+        """HTML 텍스트 데이터 처리 (stdlib HTMLParser hook)."""
         if self._inCell:
             self._cell += data
 

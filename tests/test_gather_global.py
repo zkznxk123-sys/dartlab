@@ -275,12 +275,13 @@ class TestPriceFallback:
         assert result.current == 200000
 
     def test_domains_registry_loads_all(self):
-        """모든 도메인이 load_domain으로 로드 가능."""
+        """모든 도메인이 loadDomain 으로 로드 가능 (snake alias 포함)."""
         from dartlab.gather.domains import loadDomain
 
         for name in ("naver", "yahoo_chart", "fmp"):
             module = loadDomain(name)
-            assert hasattr(module, "fetch_price")
+            # codemod 로 fetch_price → fetchPrice (commit 452fbe3c6 ~)
+            assert hasattr(module, "fetchPrice")
 
     def test_domains_registry_invalid_raises(self):
         from dartlab.gather.domains import loadDomain

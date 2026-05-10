@@ -171,6 +171,17 @@ METHOD_NAME_ALLOWLIST: frozenset[str] = frozenset(
         "do_HEAD",
         "do_OPTIONS",
         "log_message",
+        # html.parser HTMLParser hook — parent 가 snake 이름으로 호출. camel 변환 시 호출 안 됨.
+        "handle_starttag",
+        "handle_endtag",
+        "handle_startendtag",
+        "handle_data",
+        "handle_entityref",
+        "handle_charref",
+        "handle_comment",
+        "handle_decl",
+        "handle_pi",
+        "unknown_decl",
     }
 )
 
