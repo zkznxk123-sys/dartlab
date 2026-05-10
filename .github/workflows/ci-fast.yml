@@ -34,6 +34,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2  # lint-camelcase diff (HEAD~1 vs HEAD) 위해 부모 커밋 필요
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -52,6 +54,10 @@ jobs:
         run: pip install pyyaml
       - name: Stale references check
         run: python scripts/audit/stale_references.py
+      # camelCase + docstring lint — diff 기준, legacy 비차단.
+      # operation.code SSOT. 새 코드만 게이트, tests/scripts/notebooks 면제.
+      - name: camelCase + docstring lint (diff)
+        run: python -X utf8 scripts/dev/lint_camelcase_ast.py --changed --strict
 
   typecheck:
     runs-on: ubuntu-latest

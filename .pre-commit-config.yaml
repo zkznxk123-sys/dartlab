@@ -34,6 +34,14 @@ repos:
         types: [python]
         pass_filenames: false
 
+      - id: lint-camelcase
+        name: lint-camelcase (camelCase + docstring, diff-based)
+        entry: python -X utf8 scripts/dev/lint_camelcase_ast.py --changed --strict
+        language: system
+        types: [python]
+        pass_filenames: false
+        exclude: ^(tests/|experiments/|notebooks/|scripts/)
+
       - id: generate-spec
         name: generate-spec (CAPABILITIES + llms.txt + reference.md)
         entry: uv run python scripts/build/generateSpec.py
