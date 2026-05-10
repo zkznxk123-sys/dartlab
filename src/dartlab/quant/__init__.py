@@ -100,7 +100,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="technical",
     ),
     "marketContext": _AxisEntry(
-        module="dartlab.quant.marketContext",
+        module="dartlab.quant.regime.marketContext",
         fn="calcMarketContext",
         label="시장맥락",
         description="시장 베타 + 거시 민감도 (USDKRW/금리/CPI/M2) + 외국인+기관 수급 강도 1 행 evidence (price-level OLS, scan.macroBeta 와 책임 분리)",
@@ -108,7 +108,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="risk",
     ),
     "regime": _AxisEntry(
-        module="dartlab.quant.regime",
+        module="dartlab.quant.regime.hmm",
         fn="calcRegime",
         label="레짐",
         description="Hamilton 2-state HMM (bull/bear), 추세추종 신호",
@@ -116,7 +116,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="technical",
     ),
     "pattern": _AxisEntry(
-        module="dartlab.quant.pattern",
+        module="dartlab.quant.regime.pattern",
         fn="calcPattern",
         label="패턴",
         description="캔들스틱 10종 + zigzag 기반 지지/저항",
@@ -124,7 +124,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="technical",
     ),
     "chartPatterns": _AxisEntry(
-        module="dartlab.quant.chartPatterns",
+        module="dartlab.quant.regime.chartPatterns",
         fn="calcChartPatterns",
         label="차트패턴",
         description="거시 차트 패턴 — W/M/H&S/삼중/원형 (자동 인식 + 목표가)",

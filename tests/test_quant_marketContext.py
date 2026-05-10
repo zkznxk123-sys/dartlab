@@ -129,7 +129,7 @@ def patch_market_data(monkeypatch):
 
 class TestOls:
     def test_perfect_fit(self):
-        from dartlab.quant.marketContext import _ols
+        from dartlab.quant.regime.marketContext import _ols
 
         x = np.arange(50, dtype=np.float64)
         y = 2.0 + 3.0 * x  # β=3, α=2
@@ -139,13 +139,13 @@ class TestOls:
         assert out["r2"] == pytest.approx(1.0, abs=1e-6)
 
     def test_handles_short_input(self):
-        from dartlab.quant.marketContext import _ols
+        from dartlab.quant.regime.marketContext import _ols
 
         out = _ols(np.array([1.0, 2.0]), np.array([1.0, 2.0]))
         assert not np.isfinite(out["beta"])
 
     def test_handles_constant_x(self):
-        from dartlab.quant.marketContext import _ols
+        from dartlab.quant.regime.marketContext import _ols
 
         x = np.full(20, 5.0)
         y = np.arange(20, dtype=np.float64)
@@ -161,7 +161,7 @@ class TestOls:
 
 class TestCapm:
     def test_capm_recovers_beta(self):
-        from dartlab.quant.marketContext import _capmBetaAlpha
+        from dartlab.quant.regime.marketContext import _capmBetaAlpha
 
         # 종목 = 1.5 * 시장 + noise
         rng = np.random.default_rng(123)
@@ -185,7 +185,7 @@ class TestCapm:
 
 class TestCalcMarketContext:
     def test_basic_kr_call(self, patch_market_data):
-        from dartlab.quant.marketContext import calcMarketContext
+        from dartlab.quant.regime.marketContext import calcMarketContext
 
         patch_market_data(_trending_close(n=250), market="KR")
         r = calcMarketContext("005930", market="KR")
@@ -199,7 +199,7 @@ class TestCalcMarketContext:
         assert r["lookbackDays"] <= 250
 
     def test_macro_betas_present(self, patch_market_data):
-        from dartlab.quant.marketContext import calcMarketContext
+        from dartlab.quant.regime.marketContext import calcMarketContext
 
         patch_market_data(_trending_close(n=250), market="KR")
         r = calcMarketContext("005930", market="KR")
@@ -209,7 +209,7 @@ class TestCalcMarketContext:
             assert k + "_r2" in r, f"R² 누락: {k}_r2"
 
     def test_flow_metrics_present(self, patch_market_data):
-        from dartlab.quant.marketContext import calcMarketContext
+        from dartlab.quant.regime.marketContext import calcMarketContext
 
         patch_market_data(_trending_close(n=250), market="KR", with_flow=True)
         r = calcMarketContext("005930", market="KR")
@@ -218,28 +218,28 @@ class TestCalcMarketContext:
         assert "flowMomentum20d" in r
 
     def test_flow_unavailable_for_us(self, patch_market_data):
-        from dartlab.quant.marketContext import calcMarketContext
+        from dartlab.quant.regime.marketContext import calcMarketContext
 
         patch_market_data(_trending_close(n=250), market="US")
         r = calcMarketContext("AAPL", market="US")
         assert r.get("flowAvailable") is False
 
     def test_short_data_returns_error(self, patch_market_data):
-        from dartlab.quant.marketContext import calcMarketContext
+        from dartlab.quant.regime.marketContext import calcMarketContext
 
         patch_market_data(_trending_close(n=30), market="KR")
         r = calcMarketContext("005930", market="KR")
         assert "error" in r
 
     def test_no_data_returns_error(self, monkeypatch):
-        from dartlab.quant.marketContext import calcMarketContext
+        from dartlab.quant.regime.marketContext import calcMarketContext
 
         monkeypatch.setattr("dartlab.quant.marketContext.fetchOhlcv", lambda code, **kw: None)
         r = calcMarketContext("FAIL", market="KR")
         assert "error" in r
 
     def test_user_macro_vars_override(self, patch_market_data):
-        from dartlab.quant.marketContext import calcMarketContext
+        from dartlab.quant.regime.marketContext import calcMarketContext
 
         patch_market_data(_trending_close(n=250), market="KR")
         r = calcMarketContext("005930", market="KR", macroVars=["USDKRW"])
@@ -247,7 +247,7 @@ class TestCalcMarketContext:
         assert "baseRateBeta" not in r  # 명시 안 했으니 미산출
 
     def test_summary_format(self, patch_market_data):
-        from dartlab.quant.marketContext import calcMarketContext
+        from dartlab.quant.regime.marketContext import calcMarketContext
 
         patch_market_data(_trending_close(n=250), market="KR")
         r = calcMarketContext("005930", market="KR")

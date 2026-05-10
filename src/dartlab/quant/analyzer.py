@@ -465,12 +465,12 @@ def _categoryPattern(df: pl.DataFrame) -> dict:
     chart_pattern = "none"
     chart_direction = 0
     try:
-        from dartlab.quant.chartPatterns import calcChartPatterns as _detect
+        from dartlab.quant.regime.chartPatterns import calcChartPatterns as _detect
 
         cp = _detect.__wrapped__(close, high, low) if hasattr(_detect, "__wrapped__") else None
         if cp is None:
             # 직접 호출 시도
-            from dartlab.quant.chartPatterns import (
+            from dartlab.quant.regime.chartPatterns import (
                 detectDoubleBottom,
                 detectDoubleTop,
                 detectHeadShoulders,
@@ -495,7 +495,7 @@ def _categoryPattern(df: pl.DataFrame) -> dict:
     # 캔들스틱 패턴 (pattern.py 흡수)
     candlestick_list = []
     try:
-        from dartlab.quant.pattern import calcPattern as _candle
+        from dartlab.quant.regime.pattern import calcPattern as _candle
 
         cp_result = _candle.__wrapped__(close, high, low, open_) if hasattr(_candle, "__wrapped__") else None
         if cp_result is None:
