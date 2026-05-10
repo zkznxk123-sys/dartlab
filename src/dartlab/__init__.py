@@ -4,7 +4,7 @@ import os as _os
 import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 # Polars thread-local arena 가드: 스레드당 ~10–50 MB allocator arena 누적.
 # CPU > 8 환경에서 기본값 (= 코어 수) 그대로면 16 코어 노트북 ~100–500 MB 손해.
@@ -26,19 +26,10 @@ if not _IS_PYODIDE:
 
     _loadEnv()
 
-# Type checker (mypy / pyright / IDE 자동완성) 호환 — 실제 런타임에는 PEP 562 __getattr__ 가
-# 첫 attribute access 시점에 lazy import. import dartlab cold path 1.3 s → ~0.7 s.
-if TYPE_CHECKING:
-    from dartlab import ai as llm  # noqa: F401
-    from dartlab.company import Company  # noqa: F401
-    from dartlab.core.select import ChartResult, SelectResult  # noqa: F401
-    from dartlab.gather.fred import Fred  # noqa: F401
-    from dartlab.gather.listing import codeToName, fuzzySearch, getKindList, nameToCode  # noqa: F401
-    from dartlab.listing import listing  # noqa: F401
-    from dartlab.providers.dart.company import Company as _DartEngineCompany  # noqa: F401
-    from dartlab.providers.dart.openapi.dart import OpenDart  # noqa: F401
-    from dartlab.providers.edgar.openapi.edgar import OpenEdgar  # noqa: F401
-    from dartlab.story import Story  # noqa: F401
+# IDE 자동완성/타입 추론은 PEP 562 ``__getattr__`` + ``__all__`` 로 — 별도 TYPE_CHECKING block
+# 두지 않는다. import-linter 가 TYPE_CHECKING 안 import 도 transitive chain 으로 분석해
+# layered contract 가 root facade 자체로 깨지는 것 회피 (정공법 D Facade — TYPE_CHECKING 제거
+# + PEP 562 만 사용). 런타임 cold-path 효과는 동일.
 
 # PEP 562 lazy attribute resolver — 이름 → (모듈경로, 속성명).
 # `from dartlab import Company` / `dartlab.Company` 두 패턴 모두 PEP 562 가 자동 처리.

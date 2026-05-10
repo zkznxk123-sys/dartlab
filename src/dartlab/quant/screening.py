@@ -50,10 +50,10 @@ def _screenPriceBased(preset: str, market: str, universe: list[str] | None = Non
             universe = getTopStocks(market=market, limit=100)
         except (ImportError, AttributeError):
             try:
-                from dartlab import listing
+                from dartlab.gather.listing import getKindList
 
-                df = listing(market=market) if callable(listing) else None
-                universe = df.head(100)["stockCode"].to_list() if df is not None else []
+                df = getKindList()
+                universe = df.head(100)["종목코드"].to_list() if df is not None else []
             except (ImportError, AttributeError, KeyError):
                 universe = []
 
