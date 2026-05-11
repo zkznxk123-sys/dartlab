@@ -661,7 +661,7 @@ def _buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
         생성된 sharesOutstanding.parquet 경로. 실패 시 None.
     """
     try:
-        from dartlab.providers.dart.docs.finance.shareCapital.builder import buildSharesOutstandingScan
+        from dartlab.providers.dart.docs.finance.shareCapital import buildSharesOutstandingScan
 
         if verbose:
             _say("[shares] 발행주식수 풀 빌드 시작")
