@@ -1,8 +1,46 @@
-"""주요 제품 및 서비스 테이블 파서."""
+"""주요 제품 및 서비스 파이프라인.
+
+P2 통합: 기존 productService/{parser,pipeline,types}.py 단일 모듈로 흡수.
+"""
+
+from __future__ import annotations
 
 import re
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+import polars as pl
+
+from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.reportSelector import selectReport
+
+if TYPE_CHECKING:
+    import polars as pl
 
 
+# types
+@dataclass
+class ProductServiceResult:
+    """주요 제품 및 서비스 분석 결과.
+
+    Attributes:
+        corpName: 기업명
+        nYears: 시계열 연도 수
+        unit: 단위 (억원, 백만원 등)
+        products: 제품/서비스 목록 [{label, amount, ratio}, ...]
+        noData: 해당사항 없음 여부
+        productDf: 제품/서비스 DataFrame (label | amount | ratio)
+    """
+
+    corpName: str | None = None
+    nYears: int = 0
+    unit: str = "백만원"
+    products: list[dict] = field(default_factory=list)
+    noData: bool = False
+    productDf: pl.DataFrame | None = None
+
+
+# parser
 def splitCells(line: str) -> list[str]:
     """splitCells — TODO 한국어 동작 설명."""
     cells = [c.strip() for c in line.split("|")]
@@ -185,3 +223,64 @@ def parseProductService(content: str) -> list[dict]:
         results.append(entry)
 
     return results
+
+
+# pipeline
+def productService(stockCode: str) -> ProductServiceResult | None:
+    """주요 제품 및 서비스 분석."""
+    try:
+        df = loadData(stockCode)
+    except FileNotFoundError:
+        return None
+
+    corpName = extractCorpName(df)
+    years = sorted(df["year"].unique().to_list(), reverse=True)
+
+    for year in years[:2]:
+        report = selectReport(df, year, reportKind="annual")
+        if report is None:
+            continue
+
+        for row in report.iter_rows(named=True):
+            title = row.get("section_title", "") or ""
+            if "주요 제품" in title or "주요 서비스" in title:
+                content = row.get("section_content", "") or ""
+                if len(content) < 50:
+                    continue
+
+                unit = detectUnit(content)
+                products = parseProductService(content)
+
+                if not products:
+                    if "없습니다" in content[:500] or len(content) < 200:
+                        return ProductServiceResult(
+                            corpName=corpName,
+                            nYears=1,
+                            unit=unit,
+                            noData=True,
+                        )
+                    continue
+
+                productDf = pl.DataFrame(
+                    {
+                        "label": [p["label"] for p in products],
+                        "amount": [p.get("amount") for p in products],
+                        "ratio": [p.get("ratio") for p in products],
+                    },
+                    schema={
+                        "label": pl.Utf8,
+                        "amount": pl.Int64,
+                        "ratio": pl.Float64,
+                    },
+                )
+
+                return ProductServiceResult(
+                    corpName=corpName,
+                    nYears=1,
+                    unit=unit,
+                    products=products,
+                    noData=False,
+                    productDf=productDf,
+                )
+
+    return None
