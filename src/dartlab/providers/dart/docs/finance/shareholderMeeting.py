@@ -1,8 +1,36 @@
-"""주주총회 등에 관한 사항 파서."""
+"""주주총회 등에 관한 사항 파이프라인.
+
+P2 통합: 기존 shareholderMeeting/{parser,pipeline,types}.py 단일 모듈로 흡수.
+"""
+
+from __future__ import annotations
 
 import re
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+import polars as pl
+
+from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.reportSelector import selectReport
+
+if TYPE_CHECKING:
+    import polars as pl
 
 
+# types
+@dataclass
+class ShareholderMeetingResult:
+    """주주총회 등에 관한 사항 분석 결과."""
+
+    corpName: str | None = None
+    nYears: int = 0
+    agendas: list[dict] = field(default_factory=list)
+    textOnly: bool = False
+    agendaDf: pl.DataFrame | None = None
+
+
+# parser
 def splitCells(line: str) -> list[str]:
     """파이프(|)로 구분된 셀을 분리."""
     cells = [c.strip() for c in line.split("|")]
@@ -87,3 +115,45 @@ def parseMeetingAgenda(content: str) -> list[dict]:
         results.append(entry)
 
     return results
+
+
+# pipeline
+def shareholderMeeting(stockCode: str) -> ShareholderMeetingResult | None:
+    """주주총회 등에 관한 사항 분석."""
+    try:
+        df = loadData(stockCode)
+    except FileNotFoundError:
+        return None
+
+    corpName = extractCorpName(df)
+    years = sorted(df["year"].unique().to_list(), reverse=True)
+
+    for year in years[:2]:
+        report = selectReport(df, year, reportKind="annual")
+        if report is None:
+            continue
+
+        for row in report.iter_rows(named=True):
+            title = row.get("section_title", "") or ""
+            if "주주총회" in title:
+                content = row.get("section_content", "") or ""
+                if len(content) < 50:
+                    continue
+
+                agendas = parseMeetingAgenda(content)
+                if agendas:
+                    agendaDf = pl.DataFrame(agendas)
+                    return ShareholderMeetingResult(
+                        corpName=corpName,
+                        nYears=1,
+                        agendas=agendas,
+                        agendaDf=agendaDf,
+                    )
+
+                if len(content) > 200:
+                    return ShareholderMeetingResult(
+                        corpName=corpName,
+                        nYears=1,
+                        textOnly=True,
+                    )
+    return None

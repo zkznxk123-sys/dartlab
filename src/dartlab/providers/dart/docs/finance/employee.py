@@ -1,10 +1,35 @@
-"""직원 현황 테이블 파서."""
+"""직원 현황 데이터 추출 파이프라인.
+
+P2 통합: 기존 employee/{parser,pipeline,types}.py 단일 모듈로 흡수.
+"""
+
+from __future__ import annotations
 
 import re
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
+import polars as pl
+
+from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.reportSelector import extractReportYear, selectReport
 from dartlab.core.tableParser import parseAmount
 
+if TYPE_CHECKING:
+    import polars as pl
 
+
+# types
+@dataclass
+class EmployeeResult:
+    """직원 현황 분석 결과."""
+
+    corpName: str | None
+    nYears: int
+    timeSeries: pl.DataFrame | None = None
+
+
+# parser
 def parseTenure(text: str) -> float | None:
     """평균근속연수 문자열 -> float (년 단위).
 
@@ -114,3 +139,73 @@ def parseEmployeeTable(content: str) -> dict:
                 return r
 
     return {}
+
+
+# pipeline
+def employee(stockCode: str) -> EmployeeResult | None:
+    """사업보고서에서 직원 현황 시계열 추출.
+
+    Args:
+        stockCode: 종목코드 (6자리)
+
+    Returns:
+        EmployeeResult 또는 데이터 부족 시 None
+    """
+    df = loadData(stockCode)
+    corpName = extractCorpName(df)
+
+    years = sorted(df["year"].unique().to_list(), reverse=True)
+
+    yearData: dict[int, dict] = {}
+
+    for year in years:
+        report = selectReport(df, year, reportKind="annual")
+        if report is None:
+            continue
+
+        empRows = report.filter(
+            pl.col("section_title").str.contains("직원") | pl.col("section_title").str.contains("임원")
+        )
+        if empRows.height == 0:
+            continue
+
+        reportYear = extractReportYear(empRows["report_type"][0])
+        if reportYear is None:
+            continue
+
+        content = empRows["section_content"][0]
+        parsed = parseEmployeeTable(content)
+
+        if not parsed.get("totalEmployees"):
+            continue
+
+        # avgSalary 있어야 신뢰할 수 있는 데이터
+        if not parsed.get("avgSalary"):
+            continue
+
+        if reportYear not in yearData:
+            yearData[reportYear] = parsed
+
+    if not yearData:
+        return None
+
+    records = []
+    for yr in sorted(yearData.keys()):
+        d = yearData[yr]
+        records.append(
+            {
+                "year": yr,
+                "totalEmployees": d.get("totalEmployees"),
+                "avgTenure": d.get("avgTenure"),
+                "totalSalary": d.get("totalSalary"),
+                "avgSalary": d.get("avgSalary"),
+            }
+        )
+
+    ts = pl.DataFrame(records)
+
+    return EmployeeResult(
+        corpName=corpName,
+        nYears=ts.height,
+        timeSeries=ts,
+    )

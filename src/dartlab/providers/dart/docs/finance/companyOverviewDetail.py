@@ -1,8 +1,33 @@
-"""회사의 개요 파서."""
+"""회사의 개요 파이프라인.
+
+P2 통합: 기존 companyOverviewDetail/{parser,pipeline,types}.py 단일 모듈로 흡수.
+"""
+
+from __future__ import annotations
 
 import re
+from dataclasses import dataclass
+
+from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.reportSelector import selectReport
 
 
+# types
+@dataclass
+class CompanyOverviewDetailResult:
+    """회사의 개요 분석 결과."""
+
+    corpName: str | None = None
+    nYears: int = 0
+    foundedDate: str | None = None
+    listedDate: str | None = None
+    address: str | None = None
+    ceo: str | None = None
+    mainBusiness: str | None = None
+    website: str | None = None
+
+
+# parser
 def splitCells(line: str) -> list[str]:
     """파이프(|)로 구분된 셀을 분리."""
     cells = [c.strip() for c in line.split("|")]
@@ -86,3 +111,44 @@ def parseCompanyInfoFallback(content: str) -> dict:
         info["website"] = m.group(1).strip()
 
     return info
+
+
+# pipeline
+def companyOverviewDetail(stockCode: str) -> CompanyOverviewDetailResult | None:
+    """회사의 개요 분석."""
+    try:
+        df = loadData(stockCode)
+    except FileNotFoundError:
+        return None
+
+    corpName = extractCorpName(df)
+    years = sorted(df["year"].unique().to_list(), reverse=True)
+
+    for year in years[:2]:
+        report = selectReport(df, year, reportKind="annual")
+        if report is None:
+            continue
+
+        for row in report.iter_rows(named=True):
+            title = row.get("section_title", "") or ""
+            if "회사의 개요" in title or "회사 의 개요" in title:
+                content = row.get("section_content", "") or ""
+                if len(content) < 50:
+                    continue
+
+                info = parseCompanyInfo(content)
+                if info:
+                    return CompanyOverviewDetailResult(
+                        corpName=corpName,
+                        nYears=1,
+                        foundedDate=info.get("foundedDate"),
+                        listedDate=info.get("listedDate"),
+                        address=info.get("address"),
+                        ceo=info.get("ceo"),
+                        mainBusiness=info.get("mainBusiness"),
+                        website=info.get("website"),
+                    )
+
+                if len(content) > 200:
+                    return CompanyOverviewDetailResult(corpName=corpName, nYears=1)
+    return None
