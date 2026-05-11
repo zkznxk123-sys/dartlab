@@ -17,7 +17,7 @@ def fetchSeries(
     *,
     start: str | None = None,
     end: str | None = None,
-    frequency: str | None = None,
+    freq: str | None = None,
     aggregation: str = "avg",
     enrich: bool = False,
 ) -> pl.DataFrame:
@@ -33,7 +33,7 @@ def fetchSeries(
         시작일 (YYYY-MM-DD). None이면 전체.
     end : str | None
         종료일. None이면 최신까지.
-    frequency : str | None
+    freq : str | None
         리샘플 주파수 (d/w/bw/m/q/sa/a). None이면 원본.
     aggregation : str
         리샘플 집계 방법 (avg/sum/eop).
@@ -46,7 +46,7 @@ def fetchSeries(
         컬럼: ``date`` (Date) — 관측일, ``value`` (Float64) — 지표값.
         enrich=True 시 변화율 컬럼 추가.
     """
-    cached = _cache.get(seriesId, start, end, frequency, aggregation)
+    cached = _cache.get(seriesId, start, end, freq, aggregation)
     if cached is not None:
         return cached
 
@@ -55,8 +55,8 @@ def fetchSeries(
         params["observation_start"] = start
     if end:
         params["observation_end"] = end
-    if frequency:
-        params["frequency"] = frequency
+    if freq:
+        params["frequency"] = freq
     if aggregation != "avg":
         params["aggregation_method"] = aggregation
 
@@ -87,8 +87,8 @@ def fetchSeries(
         pl.col("value").cast(pl.Float64),
     )
 
-    is_daily = frequency == "d" or (frequency is None and len(df) > 500)
-    _cache.put(seriesId, start, end, frequency, aggregation, df, daily=is_daily)
+    is_daily = freq == "d" or (freq is None and len(df) > 500)
+    _cache.put(seriesId, start, end, freq, aggregation, df, daily=is_daily)
 
     if enrich:
         from dartlab.gather.macro import enrichAndCache
@@ -104,7 +104,7 @@ def fetchMulti(
     *,
     start: str | None = None,
     end: str | None = None,
-    frequency: str | None = None,
+    freq: str | None = None,
 ) -> pl.DataFrame:
     """복수 시계열 → wide DataFrame ``(date, GDP, UNRATE, ...)``.
 
@@ -120,7 +120,7 @@ def fetchMulti(
         시작일. None이면 전체.
     end : str | None
         종료일. None이면 최신까지.
-    frequency : str | None
+    freq : str | None
         리샘플 주파수. None이면 원본.
 
     Returns
@@ -140,7 +140,7 @@ def fetchMulti(
     #   유도 (Python GC 만으로는 회수 불가 — CLAUDE.md "[최우선] 메모리 안전 규칙").
     frames: list[pl.DataFrame] = []
     for sid in seriesIds:
-        df = fetchSeries(client, sid, start=start, end=end, frequency=frequency)
+        df = fetchSeries(client, sid, start=start, end=end, freq=freq)
         df = df.rename({"value": sid})
         frames.append(df)
 

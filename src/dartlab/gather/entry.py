@@ -192,14 +192,14 @@ _INDEX_SYMBOLS: dict[str, str] = {
 }
 
 
-def _fetchNaverIndex(symbol: str, count: int = 500) -> pl.DataFrame:
+def _fetchNaverIndex(symbol: str, limit: int = 500) -> pl.DataFrame:
     """네이버 차트 API로 시장 지수 OHLCV 수집.
 
     Parameters
     ----------
     symbol : str
         지수 심볼 (예: ``"KOSPI"``, ``"KOSDAQ"``, ``"KPI200"``).
-    count : int
+    limit : int
         요청 거래일 수 (일). 기본 500.
 
     Returns
@@ -217,7 +217,7 @@ def _fetchNaverIndex(symbol: str, count: int = 500) -> pl.DataFrame:
 
     import httpx
 
-    url = f"https://fchart.stock.naver.com/sise.nhn?symbol={symbol}&timeframe=day&count={count}&requestType=0"
+    url = f"https://fchart.stock.naver.com/sise.nhn?symbol={symbol}&timeframe=day&count={limit}&requestType=0"
     r = httpx.get(url, timeout=15)
     items = re.findall(r'data="([^"]+)"', r.text)
     if not items:

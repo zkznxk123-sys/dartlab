@@ -18,14 +18,14 @@ log = logging.getLogger(__name__)
 _START_YEAR = 2000
 
 
-def _formatDate(dt: str, frequency: str, *, isEnd: bool = False) -> str:
+def _formatDate(dt: str, freq: str, *, isEnd: bool = False) -> str:
     """날짜를 ECOS 주기별 형식으로 변환.
 
     Parameters
     ----------
     dt : str
         날짜 문자열 (YYYY, YYYYMM, YYYYMMDD, 또는 YYYYQn).
-    frequency : str
+    freq : str
         ECOS 주기 코드. "A"(연), "Q"(분기), "M"(월), "D"(일).
     isEnd : bool
         True 면 기간 종료일 방향으로 확장 (12월/Q4/31일).
@@ -40,7 +40,7 @@ def _formatDate(dt: str, frequency: str, *, isEnd: bool = False) -> str:
 
     # 이미 분기 형식이면 그대로
     if "Q" in dt:
-        if frequency == "Q":
+        if freq == "Q":
             return dt
         # 분기 → 월로 변환
         year = dt[:4]
@@ -54,28 +54,28 @@ def _formatDate(dt: str, frequency: str, *, isEnd: bool = False) -> str:
     elif len(dt) == 6:
         dt = dt + ("31" if isEnd else "01")
 
-    if frequency == "A":
+    if freq == "A":
         return dt[:4]
-    if frequency == "Q":
+    if freq == "Q":
         if len(dt) >= 6:
             month = int(dt[4:6])
             quarter = (month - 1) // 3 + 1
             return dt[:4] + "Q" + str(quarter)
         return dt[:4] + ("Q4" if isEnd else "Q1")
-    if frequency == "M":
+    if freq == "M":
         return dt[:6]
     # D (일별)
     return dt[:8]
 
 
-def _parseDate(timeStr: str, frequency: str) -> date | None:
+def _parseDate(timeStr: str, freq: str) -> date | None:
     """ECOS TIME 문자열 → Python date.
 
     Parameters
     ----------
     timeStr : str
         ECOS 응답의 TIME 필드 (예: "2024", "2024Q1", "202401", "20240101").
-    frequency : str
+    freq : str
         ECOS 주기 코드. "A"/"Q"/"M"/"D".
 
     Returns
@@ -84,15 +84,15 @@ def _parseDate(timeStr: str, frequency: str) -> date | None:
         변환된 날짜. 파싱 실패 시 None.
     """
     try:
-        if frequency == "A":
+        if freq == "A":
             return datetime.strptime(timeStr, "%Y").date()
-        if frequency == "Q":
+        if freq == "Q":
             # "2024Q1" → 2024-01-01
             year = int(timeStr[:4])
             quarter = int(timeStr[-1])
             month = (quarter - 1) * 3 + 1
             return date(year, month, 1)
-        if frequency == "M":
+        if freq == "M":
             return datetime.strptime(timeStr, "%Y%m").date()
         # D
         return datetime.strptime(timeStr, "%Y%m%d").date()
@@ -100,12 +100,12 @@ def _parseDate(timeStr: str, frequency: str) -> date | None:
         return None
 
 
-def _defaultStart(frequency: str) -> str:
+def _defaultStart(freq: str) -> str:
     """기본 시작일 — 2000년을 주기 형식으로 반환.
 
     Parameters
     ----------
-    frequency : str
+    freq : str
         ECOS 주기 코드. "A"/"Q"/"M"/"D".
 
     Returns
@@ -113,15 +113,15 @@ def _defaultStart(frequency: str) -> str:
     str
         주기별 형식의 시작일 (예: A → "2000", M → "200001").
     """
-    return _formatDate(str(_START_YEAR), frequency)
+    return _formatDate(str(_START_YEAR), freq)
 
 
-def _defaultEnd(frequency: str) -> str:
+def _defaultEnd(freq: str) -> str:
     """기본 종료일 — 오늘 날짜를 주기 형식으로 반환.
 
     Parameters
     ----------
-    frequency : str
+    freq : str
         ECOS 주기 코드. "A"/"Q"/"M"/"D".
 
     Returns
@@ -130,7 +130,7 @@ def _defaultEnd(frequency: str) -> str:
         주기별 형식의 종료일 (예: A → "2026", Q → "2026Q2").
     """
     today = date.today()
-    return _formatDate(today.strftime("%Y%m%d"), frequency, isEnd=True)
+    return _formatDate(today.strftime("%Y%m%d"), freq, isEnd=True)
 
 
 def fetchSeries(
@@ -185,7 +185,7 @@ def fetchSeries(
 
     rows = client.get(
         tableCode=entry.tableCode,
-        frequency=entry.frequency,
+        freq=entry.frequency,
         startDate=startDate,
         endDate=endDate,
         itemCode=entry.itemCode,

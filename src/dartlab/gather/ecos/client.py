@@ -43,7 +43,7 @@ class EcosClient:
     def get(
         self,
         tableCode: str,
-        frequency: str,
+        freq: str,
         startDate: str,
         endDate: str,
         itemCode: str = "",
@@ -55,7 +55,7 @@ class EcosClient:
 
         Args:
             tableCode: 통계표코드 (예: "722Y001").
-            frequency: 주기 (D/M/Q/A).
+            freq: 주기 (D/M/Q/A).
             startDate: 시작일 (ECOS 형식).
             endDate: 종료일 (ECOS 형식).
             itemCode: 항목코드.
@@ -68,7 +68,7 @@ class EcosClient:
         # URL 경로 방식: /서비스/키/json/kr/시작/종료/테이블/주기/시작일/종료일/항목
         url = (
             f"{_BASE_URL}/StatisticSearch/{self._key}/json/kr"
-            f"/{startIdx}/{endIdx}/{tableCode}/{frequency}/{startDate}/{endDate}"
+            f"/{startIdx}/{endIdx}/{tableCode}/{freq}/{startDate}/{endDate}"
         )
         if itemCode:
             url += f"/{itemCode}"

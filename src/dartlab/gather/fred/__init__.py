@@ -51,7 +51,7 @@ class Fred:
         *,
         start: str | None = None,
         end: str | None = None,
-        frequency: str | None = None,
+        freq: str | None = None,
         aggregation: str = "avg",
     ) -> pl.DataFrame:
         """단일 시계열 조회 → DataFrame ``(date, value)``.
@@ -64,7 +64,7 @@ class Fred:
             시작일 (YYYY-MM-DD). None이면 전체.
         end : str | None
             종료일. None이면 최신까지.
-        frequency : str | None
+        freq : str | None
             리샘플 주파수 (d/w/bw/m/q/sa/a). None이면 원본.
         aggregation : str
             리샘플 집계 방법 (avg/sum/eop).
@@ -79,7 +79,7 @@ class Fred:
             seriesId,
             start=start,
             end=end,
-            frequency=frequency,
+            freq=freq,
             aggregation=aggregation,
         )
 
@@ -124,7 +124,7 @@ class Fred:
         *,
         start: str | None = None,
         end: str | None = None,
-        frequency: str | None = None,
+        freq: str | None = None,
     ) -> pl.DataFrame:
         """복수 시계열 비교 → wide DataFrame.
 
@@ -136,7 +136,7 @@ class Fred:
             시작일 (YYYY-MM-DD). None이면 전체.
         end : str | None
             종료일. None이면 최신까지.
-        frequency : str | None
+        freq : str | None
             리샘플 주파수. None이면 원본.
 
         Returns
@@ -150,7 +150,7 @@ class Fred:
             seriesIds,
             start=start,
             end=end,
-            frequency=frequency,
+            freq=freq,
         )
 
     def releases(self, *, limit: int = 20) -> pl.DataFrame:
