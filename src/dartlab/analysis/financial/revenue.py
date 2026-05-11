@@ -235,7 +235,7 @@ def calcCompanyProfile(company, *, basePeriod: str | None = None) -> dict | None
     else:
         # DART: KRX listing에서 주요제품
         try:
-            from dartlab.listing import listing as _listing
+            from dartlab._listingDispatch import listing as _listing
 
             listing = _listing()
             stockCode = getattr(company, "stockCode", "")

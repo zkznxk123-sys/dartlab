@@ -99,8 +99,8 @@ def _enrichWithKorean(df: pl.DataFrame) -> pl.DataFrame:
     # 종목명 매핑
     if "stockCode" in df.columns:
         try:
-            # F5: root facade 우회 → dartlab.listing 직접 (정공법 D)
-            from dartlab.listing import listing as _listing
+            # F5: root facade 우회 → _listingDispatch 직접 (정공법 D + submodule 명 충돌 회피)
+            from dartlab._listingDispatch import listing as _listing
 
             listing = _listing()
             if listing is not None:

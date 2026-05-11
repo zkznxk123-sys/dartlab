@@ -479,7 +479,7 @@ def _fetchProfile(company) -> dict | None:
         pass
 
     try:
-        from dartlab.listing import listing as _listing
+        from dartlab._listingDispatch import listing as _listing
 
         listing = _listing()
         stockCode = getattr(company, "stockCode", "")

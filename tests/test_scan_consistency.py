@@ -21,7 +21,7 @@ from dartlab.scan import _COLUMN_RENAME, _enrichWithKorean
 
 # The function does `import dartlab as _dl; _dl.listing()` internally.
 # We patch `dartlab.listing` on the top-level dartlab module.
-_LISTING_PATCH = "dartlab.listing.listing"  # F5: root facade 우회 → submodule 직접 patch path 갱신
+_LISTING_PATCH = "dartlab._listingDispatch.listing"  # _listingDispatch 직접 patch (submodule 명 충돌 회피)
 
 
 # ═══════════════════════════════════════════════════════════

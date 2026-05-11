@@ -47,7 +47,7 @@ if not _IS_PYODIDE:
             "nameToCode": ("dartlab.gather.listing", "nameToCode"),
             "fuzzySearch": ("dartlab.gather.listing", "fuzzySearch"),
             "getKindList": ("dartlab.gather.listing", "getKindList"),
-            "listing": ("dartlab.listing", "listing"),
+            "listing": ("dartlab._listingDispatch", "listing"),
             "OpenDart": ("dartlab.providers.dart.openapi.dart", "OpenDart"),
             "OpenEdgar": ("dartlab.providers.edgar.openapi.edgar", "OpenEdgar"),
             "Story": ("dartlab.story", "Story"),

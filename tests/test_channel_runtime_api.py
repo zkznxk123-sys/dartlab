@@ -62,7 +62,7 @@ def test_status_includes_channels(client):
 
 
 def test_channel_start_and_stop(client, monkeypatch):
-    monkeypatch.setattr("dartlab.channel.adapters.create_adapter", lambda platform, **kwargs: _FakeAdapter())
+    monkeypatch.setattr("dartlab.channel.adapters.createAdapter", lambda platform, **kwargs: _FakeAdapter())
 
     start = client.post("/api/channels/telegram/start", json={"token": "fake-token"})
     assert start.status_code == 200
