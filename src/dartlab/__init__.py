@@ -43,10 +43,10 @@ if not _IS_PYODIDE:
         {
             "llm": ("dartlab.ai", None),  # 모듈 alias
             "Fred": ("dartlab.gather.fred", "Fred"),
-            "codeToName": ("dartlab.gather.listing", "codeToName"),
-            "nameToCode": ("dartlab.gather.listing", "nameToCode"),
-            "fuzzySearch": ("dartlab.gather.listing", "fuzzySearch"),
-            "getKindList": ("dartlab.gather.listing", "getKindList"),
+            "codeToName": ("dartlab.gather.krx.listing", "codeToName"),
+            "nameToCode": ("dartlab.gather.krx.listing", "nameToCode"),
+            "fuzzySearch": ("dartlab.gather.krx.listing", "fuzzySearch"),
+            "getKindList": ("dartlab.gather.krx.listing", "getKindList"),
             "listing": ("dartlab._listingDispatch", "listing"),
             "OpenDart": ("dartlab.providers.dart.openapi.dart", "OpenDart"),
             "OpenEdgar": ("dartlab.providers.edgar.openapi.edgar", "OpenEdgar"),

@@ -68,8 +68,8 @@ default_whitelist:
   # ── internal accessor (외부 노출 X) ──
   # _finance_accessor.py 의 def BS/IS/CF 는 c.show('BS') 가 내부 호출하는 데이터
   # 접근 layer. 공개 facade 의 폐기 property 와 다른 등급 — 외부 사용자 노출 X.
-  - src/dartlab/providers/dart/_finance_accessor.py
-  - src/dartlab/providers/edgar/_finance_accessor.py
+  - src/dartlab/providers/dart/accessor/financeAccessor.py
+  - src/dartlab/providers/edgar/accessor/financeAccessor.py
 
   # ── fixture mock (테스트 인프라) ──
   - tests/conftest.py
