@@ -45,7 +45,7 @@ def test_gatherKrxIndexDefaultsToHf(monkeypatch):
     """apiKey 가 없으면 KRX API 가 아니라 HF raw parquet 경로를 사용한다."""
     import importlib
 
-    hf = importlib.import_module("dartlab.gather._hfIndexBulk")
+    hf = importlib.import_module("dartlab.gather.bulkData.hfIndexBulk")
     from dartlab.gather.krxIndex import gatherKrxIndex
 
     raw = pl.DataFrame(

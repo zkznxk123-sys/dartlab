@@ -99,7 +99,7 @@ def test_resolve_benchmark_stack_adds_size_style_candidate(monkeypatch):
     """시총 분위로 코스피/코스닥 대형·중형·소형 스타일 지수를 만든다."""
     import importlib
 
-    hf = importlib.import_module("dartlab.gather._hfBulk")
+    hf = importlib.import_module("dartlab.gather.bulkData.hfBulk")
     from dartlab.gather import listing
     from dartlab.quant import benchmark as bm
 
@@ -150,7 +150,7 @@ def test_fetch_benchmark_ohlcv_standardizes_krx_raw(monkeypatch):
     """KRX raw YYYYMMDD 지수 row를 quant OHLCV schema로 변환한다."""
     import importlib
 
-    hf = importlib.import_module("dartlab.gather._hfIndexBulk")
+    hf = importlib.import_module("dartlab.gather.bulkData.hfIndexBulk")
     from dartlab.gather import listing
     from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
 
@@ -186,7 +186,7 @@ def test_quant_benchmark_axis_dispatch(monkeypatch):
     """quant('benchmark') 축은 벤치마크 요약 dict를 반환한다."""
     import importlib
 
-    hf = importlib.import_module("dartlab.gather._hfIndexBulk")
+    hf = importlib.import_module("dartlab.gather.bulkData.hfIndexBulk")
     from dartlab.gather import listing
     from dartlab.quant import Quant
 
@@ -223,7 +223,7 @@ def test_bab_ranks_by_beta_not_vol(monkeypatch):
     """BAB 기본 topLow/topHigh는 realized vol이 아니라 beta 기준이다."""
     import importlib
 
-    hf = importlib.import_module("dartlab.gather._hfBulk")
+    hf = importlib.import_module("dartlab.gather.bulkData.hfBulk")
     from dartlab.quant.alphas.bab import calcBAB
 
     start = date(2025, 1, 1)

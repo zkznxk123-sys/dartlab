@@ -338,7 +338,7 @@ class TestGatherFacade:
             return GatherResult(domain=domainName)
 
         with pytest.MonkeyPatch.context() as mp:
-            mp.setattr(Gather, "_fetch_domain_async", _mock_domain)
+            mp.setattr(Gather, "_fetchDomainAsync", _mock_domain)
             snapshot = g.collect("005930")
 
         assert snapshot.stockCode == "005930"
@@ -384,7 +384,7 @@ class TestGatherFacade:
             return GatherResult(domain=domainName)
 
         with pytest.MonkeyPatch.context() as mp:
-            mp.setattr(Gather, "_fetch_domain_async", _mock_domain)
+            mp.setattr(Gather, "_fetchDomainAsync", _mock_domain)
             snapshot = g.collect("005930")
 
         assert snapshot.stockCode == "005930"
