@@ -1,5 +1,5 @@
 {
-  "_note": "P0.5 baseline — fetch/list/search 함수가 iter* 쌍 부재. P1.5+ 에서 메우며 축소",
+  "_note": "P1 rename 후 갱신 — fetch/list/search 함수가 iter* 쌍 부재. P1.5+ 메우며 축소",
   "violations": [
     "src/dartlab/providers/dart/company.py::listExportModules (iter pair iterExportModules 부재)",
     "src/dartlab/providers/dart/company.py::searchName (iter pair iterName 부재)",
@@ -11,10 +11,10 @@
     "src/dartlab/providers/dart/openapi/disclosure.py::listFilings (iter pair iterFilings 부재)",
     "src/dartlab/providers/dart/search/fieldIndex.py::searchContent (iter pair iterContent 부재)",
     "src/dartlab/providers/dart/search/ngramIndex.py::searchNgram (iter pair iterNgram 부재)",
-    "src/dartlab/providers/edgar/_finance_accessor.py::listTags (iter pair iterTags 부재)",
     "src/dartlab/providers/edgar/bulk/datasetBulk.py::listLocalQuarters (iter pair iterLocalQuarters 부재)",
     "src/dartlab/providers/edgar/docs/fetch.py::fetchEdgarDocs (iter pair iterEdgarDocs 부재)",
     "src/dartlab/providers/edgar/finance/explore.py::listTags (iter pair iterTags 부재)",
+    "src/dartlab/providers/edgar/financeAccessor.py::listTags (iter pair iterTags 부재)",
     "src/dartlab/providers/edgar/openapi/identity.py::searchIssuers (iter pair iterIssuers 부재)",
     "src/dartlab/providers/edinet/openapi/client.py::listDocuments (iter pair iterDocuments 부재)",
     "src/dartlab/providers/edinet/openapi/client.py::listEdinetCodes (iter pair iterEdinetCodes 부재)"
