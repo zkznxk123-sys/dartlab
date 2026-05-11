@@ -489,7 +489,7 @@ def gatherKrx(
         valueCol = _KRX_TO_STD.get(krxCol, krxCol)
     else:
         # 보조지표 — gather/indicators 함수 호출 (종목별 group 동시 계산)
-        from dartlab.gather._indicatorDispatch import computeIndicator
+        from dartlab.gather.transforms.indicatorDispatch import computeIndicator
 
         stdDf = stdDf.sort(["stockCode", "date"])
         indSeries = computeIndicator(stdDf, target)

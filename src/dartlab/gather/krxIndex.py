@@ -473,7 +473,7 @@ def gatherKrxIndex(
         if indicators == "basic":
             indicators = ["sma5", "sma20", "sma60", "ema12", "ema26", "rsi14", "macd", "atr14", "obv"]
         if indicators:
-            from dartlab.gather._indicatorDispatch import addIndicators
+            from dartlab.gather.transforms.indicatorDispatch import addIndicators
 
             single = addIndicators(single, indicators=indicators)
         return single

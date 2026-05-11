@@ -190,7 +190,7 @@ def applyAdjustment(
 
     Example::
 
-        from dartlab.gather._adjustPrice import applyAdjustment
+        from dartlab.gather.transforms.adjustPrice import applyAdjustment
         adjusted = applyAdjustment(raw, events, mode="split")
         tr = applyAdjustment(raw, events, mode="tr")
 

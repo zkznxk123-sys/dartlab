@@ -454,7 +454,7 @@ def _docsCatalogRows() -> list[dict[str, str]]:
 
 
 def _krxCatalogRows() -> list[dict[str, str]]:
-    from dartlab.gather._indicatorDispatch import _DEFAULT_INDICATORS_ALL
+    from dartlab.gather.transforms.indicatorDispatch import _DEFAULT_INDICATORS_ALL
 
     rows = [
         _row(
@@ -754,7 +754,7 @@ def _finalizeKrxValues(raw: pl.DataFrame, name: str, field: str) -> pl.DataFrame
     rename = {k: v for k, v in _KRX_TO_STD.items() if k in raw.columns}
     df = raw.rename(rename).sort(["stockCode", "date"])
     if name not in df.columns:
-        from dartlab.gather._indicatorDispatch import computeIndicator
+        from dartlab.gather.transforms.indicatorDispatch import computeIndicator
 
         df = df.with_columns(computeIndicator(df, name).alias(name))
     if name not in df.columns:

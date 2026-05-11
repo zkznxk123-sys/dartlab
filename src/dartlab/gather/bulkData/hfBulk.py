@@ -126,7 +126,7 @@ def loadFiltered(
         - quant/_helpers.py::fetchOhlcv 가 이 함수를 호출 (사용자 키 안 봄)
         - 결과 재현성 보장 — 모든 사용자가 동일 HF snapshot 으로 동일 결과
         - 데이터셋 publish 전이면 빈 DataFrame + 로그 (ValueError 던지지 않음)
-        - 수정주가 = `gather/_adjustPrice.applyAdjustment` 단일 SSOT 호출
+        - 수정주가 = `gather/transforms/adjustPrice.applyAdjustment` 단일 SSOT 호출
 
     Guide:
         - "삼성전자 2024년 수정주가" → loadFiltered(stockCode="005930", year=2024)
@@ -189,7 +189,7 @@ def loadFiltered(
 
     if adjustment == "raw":
         return raw
-    from dartlab.gather._adjustPrice import applyAdjustment, detectEventsFromPrices
+    from dartlab.gather.transforms.adjustPrice import applyAdjustment, detectEventsFromPrices
 
     # Stage 2 우선 — HF `krx/events/` parquet 있으면 정확 이벤트 사용
     events = _loadEvents(stockCode)

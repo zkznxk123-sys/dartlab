@@ -509,7 +509,7 @@ class GatherEntry:
             elif indicators is False:
                 indicators = None
             if indicators:
-                from dartlab.gather._indicatorDispatch import addIndicators
+                from dartlab.gather.transforms.indicatorDispatch import addIndicators
 
                 result = addIndicators(result, indicators=indicators)
             return result
