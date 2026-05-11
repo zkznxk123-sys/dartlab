@@ -569,7 +569,7 @@ class Company:
         """sections 구조 분석기 (lazy)."""
         cacheKey = "_sectionsAnalyzer"
         if cacheKey not in self._cache:
-            from dartlab.providers.dart._sectionsAnalyzer import SectionsAnalyzer
+            from dartlab.providers.dart.docsSectionsAnalyzer import SectionsAnalyzer
 
             self._cache[cacheKey] = SectionsAnalyzer(self)
         return self._cache[cacheKey]
@@ -1427,27 +1427,27 @@ class Company:
             Freshness:
                 docs/finance/report 3 source 각각의 최신 시점. c.update() 시점.
         """
-        from dartlab.providers.dart._sectionsBuilder import buildSections
+        from dartlab.providers.dart.docsProfileBuilder import buildSections
 
         return buildSections(self)
 
     def _profileTable(self) -> pl.DataFrame | None:
-        from dartlab.providers.dart._sectionsBuilder import profileTable
+        from dartlab.providers.dart.docsProfileBuilder import profileTable
 
         return profileTable(self)
 
     def _chapterMap(self) -> dict[str, str]:
-        from dartlab.providers.dart._sectionsBuilder import chapterMap
+        from dartlab.providers.dart.docsProfileBuilder import chapterMap
 
         return chapterMap(self)
 
     def _chapterForTopic(self, topic: str) -> str:
-        from dartlab.providers.dart._sectionsBuilder import chapterForTopic
+        from dartlab.providers.dart.docsProfileBuilder import chapterForTopic
 
         return chapterForTopic(self, topic)
 
     def _topicLabel(self, topic: str) -> str:
-        from dartlab.providers.dart._sectionsBuilder import topicLabel
+        from dartlab.providers.dart.docsProfileBuilder import topicLabel
 
         return topicLabel(self, topic)
 
@@ -1709,7 +1709,7 @@ class Company:
     # ── docs multi-block select 지원 ──────────────────────────
 
     def _buildDocsItemIndex(self, topic: str) -> dict[str, list[tuple[int, pl.DataFrame]]]:
-        from dartlab.providers.dart._selectHelpers import buildDocsItemIndex
+        from dartlab.providers.dart.docsSelectMatcher import buildDocsItemIndex
 
         return buildDocsItemIndex(self, topic)
 
@@ -1719,7 +1719,7 @@ class Company:
         indList: list[str],
         colList: list[str] | None,
     ) -> pl.DataFrame | None:
-        from dartlab.providers.dart._selectHelpers import selectFromDocsTopic
+        from dartlab.providers.dart.docsSelectMatcher import selectFromDocsTopic
 
         return selectFromDocsTopic(self, topic, indList, colList)
 
@@ -1729,7 +1729,7 @@ class Company:
         indList: list[str] | None,
         colList: list[str] | None,
     ) -> pl.DataFrame | None:
-        from dartlab.providers.dart._selectHelpers import selectFromDocsTopicAll
+        from dartlab.providers.dart.docsSelectMatcher import selectFromDocsTopicAll
 
         return selectFromDocsTopicAll(self, topic, indList, colList)
 
@@ -2806,7 +2806,7 @@ class Company:
 
         combined = rows + financeRows
         if not combined:
-            from dartlab.providers.dart._sectionsAnalyzer import _emptyTopicManifest
+            from dartlab.providers.dart.docsSectionsAnalyzer import _emptyTopicManifest
 
             result = _emptyTopicManifest()
         else:
