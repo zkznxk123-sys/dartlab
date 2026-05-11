@@ -195,6 +195,9 @@ def iterCompanies(
     Yields:
         row dict.
 
+    Raises:
+        없음.
+
     Example:
         >>> for row in iterCompanies(client, "삼성", limit=10):
         ...     print(row["corp_name"])

@@ -128,6 +128,9 @@ async def iterInsiderTradingRaw(stockCode: str, *, limit: int | None = None):
     Yields:
         거래 dict.
 
+    Raises:
+        없음 (DART 키 부재 또는 API 실패 시 빈 generator).
+
     Example:
         >>> async for row in iterInsiderTradingRaw("005930", limit=10):
         ...     print(row["name"])
@@ -146,6 +149,9 @@ async def iterMajorShareholdersRaw(stockCode: str, *, limit: int | None = None):
 
     Yields:
         대량보유 변동 dict.
+
+    Raises:
+        없음 (DART 키 부재 또는 API 실패 시 빈 generator).
 
     Example:
         >>> async for row in iterMajorShareholdersRaw("005930", limit=10):

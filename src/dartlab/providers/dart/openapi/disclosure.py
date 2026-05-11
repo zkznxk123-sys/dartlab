@@ -162,6 +162,9 @@ def iterFilings(
     Yields:
         공시 row dict.
 
+    Raises:
+        ValueError: ``corp`` 가 corp_code 변환 실패.
+
     Example:
         >>> for row in iterFilings(client, "005930", limit=10):
         ...     print(row["report_nm"])

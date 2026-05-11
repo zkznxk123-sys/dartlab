@@ -504,6 +504,9 @@ def iterUncollected(*, client: DartClient | None = None, limit: int | None = Non
     Yields:
         ``(종목코드, 회사명)`` 튜플.
 
+    Raises:
+        없음.
+
     Example:
         >>> for code, name in iterUncollected(limit=10):
         ...     print(code, name)
@@ -519,6 +522,9 @@ def iterUncollectedKind(*, limit: int | None = None):
 
     Yields:
         ``(종목코드, 회사명)`` 튜플.
+
+    Raises:
+        없음 (ListingResolver 부재 시 빈 generator).
 
     Example:
         >>> for code, name in iterUncollectedKind(limit=10):

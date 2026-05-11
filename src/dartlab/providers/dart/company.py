@@ -94,6 +94,9 @@ def iterName(keyword, *, limit: int | None = None):
     Yields:
         row dict.
 
+    Raises:
+        없음 (ListingResolver 부재 시 빈 generator).
+
     Example:
         >>> for row in iterName("삼성", limit=10):
         ...     print(row["corp_name"])
@@ -374,6 +377,9 @@ def iterExportModules(*, limit: int | None = None):
 
     Yields:
         ``(prop, label)`` 튜플.
+
+    Raises:
+        없음.
 
     Example:
         >>> for prop, label in iterExportModules(limit=20):
@@ -1670,23 +1676,32 @@ class Company:
 
     @property
     def show(self):
-        """원본 데이터 단일 진입점 — 재무제표(BS/IS/CF/CIS)/주석/공시 DataFrame. analysis 결과 검증용.
+        """원본 데이터 단일 진입점 — 재무제표 (BS/IS/CF/CIS) / 주석 / 공시 DataFrame.
+
+        analysis 결과 검증용 + LLM tool dispatch 의 공통 surface.
 
         Guide:
-            - "손익계산서" → c.show("IS")
-            - "재무상태" → c.show("BS")
-            - "현금흐름" → c.show("CF")
-            - "사업 개요" → c.show("businessOverview")
-            - "주요 제품" → c.show("mainProduct")
-            - "주요주주/최대주주" → c.show("majorHolder")  # majorShareholder 아님
-            - "차입금" → c.show("borrowings")
+            - "손익계산서" → ``c.show("IS")``
+            - "재무상태" → ``c.show("BS")``
+            - "현금흐름" → ``c.show("CF")``
+            - "사업 개요" → ``c.show("businessOverview")``
+            - "주요 제품" → ``c.show("mainProduct")``
+            - "주요주주/최대주주" → ``c.show("majorHolder")`` (``majorShareholder`` 아님)
+            - "차입금" → ``c.show("borrowings")``
 
-        Returns
-        -------
-        CallableAccessor
-            dual-access proxy. ``c.show("BS")`` call-form 또는 ``c.show.BS()``
-            attr-form 호출 시 ``_showImpl`` 이 실행되어 ``pl.DataFrame`` 반환.
-            반환 구조 상세는 ``_showImpl`` docstring 참조.
+        Returns:
+            ``CallableAccessor`` — dual-access proxy. ``c.show("BS")`` call-form 또는
+            ``c.show.BS()`` attr-form 호출 시 ``_showImpl`` 이 실행되어 ``pl.DataFrame``
+            반환. 반환 구조 상세는 ``_showImpl`` docstring.
+
+        Example:
+            >>> c = Company("005930")
+            >>> c.show("BS")          # 재무상태표
+            >>> c.show("IS", period="2024")
+            >>> c.show.dividend()     # attr-form
+
+        Raises:
+            없음 (topic 미존재 시 ``_showImpl`` 이 None 반환).
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -1877,20 +1892,20 @@ class Company:
 
     @property
     def select(self):
-        """show() 결과에서 행/열 필터 — dual access.
+        """``show()`` 결과에서 행/열 필터 — dual access proxy.
 
-            c.select("IS", ["매출액"])           # call form
-            c.select.IS(["매출액"])              # attr form
-            c.select.IS(["매출액"], freq="Y")    # attr + kwargs
+        Returns:
+            ``CallableAccessor`` — call/attr form 둘 다 ``_selectImpl`` 호출. ``SelectResult``
+            반환 (filtered DataFrame + meta). 상세는 ``_selectImpl`` docstring.
 
-        실제 동작은 ``_selectImpl`` 참조.
+        Example:
+            >>> c = Company("005930")
+            >>> c.select("IS", ["매출액"])           # call form
+            >>> c.select.IS(["매출액"])              # attr form
+            >>> c.select.IS(["매출액"], freq="Y")    # attr + kwargs
 
-        Returns
-        -------
-        CallableAccessor
-            dual-access proxy. call/attr form 둘 다 ``_selectImpl`` 호출
-            — ``SelectResult`` 반환 (filtered DataFrame + meta). 상세는
-            ``_selectImpl`` docstring.
+        Raises:
+            없음 (해당 topic 부재 시 ``_selectImpl`` 이 None 반환).
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2011,27 +2026,30 @@ class Company:
         )
 
     def trace(self, topic: str, period: str | None = None) -> dict[str, Any] | None:
-        """topic 데이터의 출처(docs/finance/report)와 선택 근거 추적.
+        """topic 데이터의 출처 (docs/finance/report) 와 선택 근거 추적.
 
         Capabilities:
-            - topic별 데이터 출처 확인 (docs, finance, report)
+            - topic 별 데이터 출처 확인 (docs, finance, report)
             - 출처 선택 이유 (우선순위, fallback 경로)
             - 각 출처별 데이터 행 수, 기간 수, 커버리지
 
         Args:
             topic: topic 이름.
-            period: 특정 기간. None이면 전체.
+            period: 특정 기간. None 이면 전체.
 
         Returns:
             dict — primarySource, fallbackSources, whySelected, availableSources 등.
+            topic 미존재 시 None.
+
+        Raises:
+            없음 (데이터 부재 시 None 반환).
 
         Requires:
             데이터: docs + finance + report (보유한 것만 추적)
 
-        Example::
-
-            c.trace("BS")           # 재무상태표 출처
-            c.trace("dividend")     # 배당 데이터 출처
+        Example:
+            >>> c.trace("BS")           # 재무상태표 출처
+            >>> c.trace("dividend")     # 배당 데이터 출처
 
         AIContext:
             - 데이터 출처 신뢰도 판단 — finance > report > docs 우선순위 확인
@@ -3046,15 +3064,17 @@ class Company:
             - profile: 통합 프로필 접근자
 
         Returns:
-            pl.DataFrame -- 컬럼: chapter, topic, label, kind, source, periods, shape, preview
+            pl.DataFrame — 컬럼: chapter, topic, label, kind, source, periods, shape, preview.
+
+        Raises:
+            없음 (데이터 부재 시 빈 DataFrame).
 
         Requires:
-            데이터: docs/finance/report 중 하나 이상 (자동 다운로드)
+            데이터: docs/finance/report 중 하나 이상 (자동 다운로드).
 
-        Example::
-
-            c = Company("005930")
-            c.index                    # 전체 구조 목차
+        Example:
+            >>> c = Company("005930")
+            >>> c.index                    # 전체 구조 목차
             c.index.filter(pl.col("source") == "docs")  # docs 항목만
 
         LLM Specifications:
@@ -4291,16 +4311,19 @@ class Company:
             **kwargs: provider별 추가 옵션.
 
         Returns:
-            str -- LLM 응답 텍스트. stream=True면 Generator[str].
+            str — LLM 응답 텍스트. ``stream=True`` 면 ``Generator[str]``.
+
+        Raises:
+            ValueError: provider/model 미설정 + 환경변수 키 부재.
+            RuntimeError: LLM API 호출 실패 (네트워크/quota).
 
         Requires:
-            API 키: LLM provider API 키 (OPENAI_API_KEY 등)
+            API 키: LLM provider API 키 (``OPENAI_API_KEY`` 등).
 
-        Example::
-
-            c = Company("005930")
-            c.ask("영업이익률 추세는?")
-            c.ask("핵심 리스크 3가지", provider="codex")
+        Example:
+            >>> c = Company("005930")
+            >>> c.ask("영업이익률 추세는?")
+            >>> c.ask("핵심 리스크 3가지", provider="codex")
 
             # 스트리밍
             for chunk in c.ask("배당 분석해줘", stream=True):

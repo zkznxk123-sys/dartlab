@@ -1713,11 +1713,18 @@ class Company:
     def show(self):
         """topic 데이터 조회 — dual access (api-contract).
 
-            c.show("IS")               # call form
-            c.show.IS()                # attr form
-            c.show.IS(freq="Y")        # attr + kwargs
+        Returns:
+            ``CallableAccessor`` — call/attr form 둘 다 ``_showImpl`` 호출. ``pl.DataFrame``
+            반환 (topic 부재 시 None). 상세는 ``_showImpl`` docstring.
 
-        실제 동작은 ``_showImpl``.
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.show("IS")               # call form
+            >>> c.show.IS()                # attr form
+            >>> c.show.IS(period="2024")
+
+        Raises:
+            없음 (topic 부재 시 ``_showImpl`` 이 None 반환).
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -1811,12 +1818,19 @@ class Company:
 
     @property
     def select(self):
-        """show() 결과에서 행/열 필터 — dual access.
+        """``show()`` 결과에서 행/열 필터 — dual access proxy.
 
-            c.select("IS", ["sales"])
-            c.select.IS(["sales"])
+        Returns:
+            ``CallableAccessor`` — call/attr form 둘 다 ``_selectImpl`` 호출. ``SelectResult``
+            반환. 상세는 ``_selectImpl`` docstring.
 
-        실제 동작은 ``_selectImpl``.
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.select("IS", ["sales"])    # call form
+            >>> c.select.IS(["sales"])       # attr form
+
+        Raises:
+            없음 (해당 topic 부재 시 ``_selectImpl`` 이 None 반환).
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -1961,11 +1975,13 @@ class Company:
         Returns:
             dict — topic, primarySource, whySelected, availableSources 등. 없으면 None.
 
-        Example::
+        Raises:
+            없음 (데이터 부재 시 None 반환).
 
-            c = Company("AAPL")
-            c.trace("BS")                          # finance 출처 확인
-            c.trace("10-K::item1ARiskFactors")     # docs 출처 확인
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.trace("BS")                          # finance 출처 확인
+            >>> c.trace("10-K::item1ARiskFactors")     # docs 출처 확인
         """
         topic = _TOPIC_ALIASES.get(topic, topic)
         if topic in _FINANCE_TOPICS:
@@ -2071,12 +2087,14 @@ class Company:
             - view: 브라우저에서 시각적 탐색
 
         Returns:
-            pl.DataFrame — chapter | topic | label | kind | source | periods | shape | preview.
+            pl.DataFrame — ``chapter | topic | label | kind | source | periods | shape | preview``.
 
-        Example::
+        Raises:
+            없음 (데이터 부재 시 빈 DataFrame).
 
-            c = Company("AAPL")
-            c.index  # Apple 전체 topic 인덱스 보드
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.index  # Apple 전체 topic 인덱스 보드
         """
         cacheKey = "_index"
         if cacheKey in self._cache:
@@ -2437,13 +2455,16 @@ class Company:
             reflect: 자기 반성 모드 (답변 품질 자가 검증).
 
         Returns:
-            str — LLM 응답 텍스트.
+            str — LLM 응답 텍스트. ``stream=True`` 면 ``Generator[str]``.
 
-        Example::
+        Raises:
+            ValueError: provider/model 미설정 + 환경변수 키 부재.
+            RuntimeError: LLM API 호출 실패.
 
-            c = Company("AAPL")
-            c.ask("What are the key risks?")
-            c.ask("Revenue trend analysis", provider="openai")
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.ask("What are the key risks?")
+            >>> c.ask("Revenue trend analysis", provider="openai")
         """
         import importlib
 
