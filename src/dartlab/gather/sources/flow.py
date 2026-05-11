@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import logging
 
-from .domains import FLOW_FALLBACK, loadDomain
-from .types import GatherError
+from ..domains import FLOW_FALLBACK, loadDomain
+from ..types import GatherError
 
 log = logging.getLogger(__name__)
 

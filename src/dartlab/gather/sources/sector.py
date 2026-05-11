@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import logging
 
-from .infra.http import GatherHttpClient
-from .types import SectorInfo, SourceUnavailableError
+from ..infra.http import GatherHttpClient
+from ..types import SectorInfo, SourceUnavailableError
 
 log = logging.getLogger(__name__)
 

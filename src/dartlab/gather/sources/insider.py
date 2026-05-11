@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from .types import InsiderTrade, MajorHolder
+from ..types import InsiderTrade, MajorHolder
 
 log = logging.getLogger(__name__)
 

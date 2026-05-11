@@ -63,7 +63,7 @@ def _estimateWacc(company) -> float | None:
             marketCap = None
             try:
                 from dartlab.gather.infra.http import runAsync
-                from dartlab.gather.price import fetch
+                from dartlab.gather.sources.price import fetch
 
                 stockCode = getattr(company, "stockCode", "")
                 snapshot = runAsync(fetch(stockCode, market="KR")) if stockCode else None

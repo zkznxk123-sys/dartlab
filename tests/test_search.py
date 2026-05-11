@@ -11,7 +11,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_searchResult_dataclass():
-    from dartlab.gather.search import SearchResult
+    from dartlab.gather.sources.search import SearchResult
 
     r = SearchResult(title="t", url="u", snippet="s", source="tavily")
     assert r.title == "t"
@@ -20,7 +20,7 @@ def test_searchResult_dataclass():
 
 
 def test_searchAvailable_returns_dict():
-    from dartlab.gather.search import searchAvailable
+    from dartlab.gather.sources.search import searchAvailable
 
     avail = searchAvailable()
     assert "tavily" in avail
@@ -29,13 +29,13 @@ def test_searchAvailable_returns_dict():
 
 
 def test_formatResults_empty():
-    from dartlab.gather.search import formatResults
+    from dartlab.gather.sources.search import formatResults
 
     assert "없음" in formatResults([])
 
 
 def test_formatResults_with_items():
-    from dartlab.gather.search import SearchResult, formatResults
+    from dartlab.gather.sources.search import SearchResult, formatResults
 
     results = [
         SearchResult(title="Test", url="https://example.com", snippet="Hello", source="tavily", published="2026-01-01"),
@@ -48,7 +48,7 @@ def test_formatResults_with_items():
 
 
 def test_formatResults_maxChars_truncation():
-    from dartlab.gather.search import SearchResult, formatResults
+    from dartlab.gather.sources.search import SearchResult, formatResults
 
     results = [
         SearchResult(title=f"Title{i}", url=f"https://example.com/{i}", snippet="x" * 200, source="tavily")
@@ -59,7 +59,7 @@ def test_formatResults_maxChars_truncation():
 
 
 def test_webSearch_returns_empty_when_no_backends(monkeypatch):
-    from dartlab.gather import search
+    from dartlab.gather.sources import search
 
     monkeypatch.setattr(search, "_tavilyAvailable", lambda: False)
 
@@ -68,8 +68,8 @@ def test_webSearch_returns_empty_when_no_backends(monkeypatch):
 
 
 def test_webSearch_uses_cache(monkeypatch):
-    from dartlab.gather import search
-    from dartlab.gather.search import SearchResult
+    from dartlab.gather.sources import search
+    from dartlab.gather.sources.search import SearchResult
 
     callCount = [0]
 
@@ -94,7 +94,7 @@ def test_webSearch_uses_cache(monkeypatch):
 
 
 def test_newsSearch_returns_empty_when_no_backends(monkeypatch):
-    from dartlab.gather import search
+    from dartlab.gather.sources import search
 
     monkeypatch.setattr(search, "_tavilyAvailable", lambda: False)
 
@@ -108,7 +108,7 @@ def test_newsSearch_returns_empty_when_no_backends(monkeypatch):
 
 
 def test_readUrl_invalid_url():
-    from dartlab.gather.reader import readUrl
+    from dartlab.gather.sources.reader import readUrl
 
     result = readUrl("")
     assert "[오류]" in result
@@ -118,7 +118,7 @@ def test_readUrl_invalid_url():
 
 
 def test_readUrl_uses_cache(monkeypatch):
-    from dartlab.gather import reader
+    from dartlab.gather.sources import reader
 
     callCount = [0]
 
@@ -137,7 +137,7 @@ def test_readUrl_uses_cache(monkeypatch):
 
 
 def test_readUrl_fallback_to_bs4(monkeypatch):
-    from dartlab.gather import reader
+    from dartlab.gather.sources import reader
 
     def failJina(url):
         raise OSError("Jina down")

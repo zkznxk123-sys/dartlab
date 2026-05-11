@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import logging
 
-from .domains import HISTORY_FALLBACK, loadDomain
-from .infra.resilience import circuitBreaker
-from .types import GatherError
+from ..domains import HISTORY_FALLBACK, loadDomain
+from ..infra.resilience import circuitBreaker
+from ..types import GatherError
 
 log = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ async def fetch(
 
     # client=None이면 자체 생성 (price.py와 동일 패턴)
     if client is None:
-        from .infra.http import GatherHttpClient
+        from ..infra.http import GatherHttpClient
 
         client = GatherHttpClient()
 

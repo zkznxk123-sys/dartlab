@@ -6,7 +6,7 @@ pytestmark = pytest.mark.unit
 
 from dartlab.gather.infra.cache import GatherCache
 from dartlab.gather.infra.resilience import CircuitBreaker, SourceHealthTracker
-from dartlab.gather.search import SearchResult, formatResults, searchAvailable
+from dartlab.gather.sources.search import SearchResult, formatResults, searchAvailable
 
 # ══════════════════════════════════════
 # SearchResult
@@ -53,7 +53,7 @@ class TestSearchAvailable:
     def test_with_tavily_key_but_no_sdk(self, monkeypatch):
         """API 키는 있지만 tavily SDK가 없으면 False."""
         monkeypatch.setenv("TAVILY_API_KEY", "test-key")
-        from dartlab.gather import search as mod
+        from dartlab.gather.sources import search as mod
 
         monkeypatch.setattr(mod, "_tavilyAvailable", lambda: False)
         result = searchAvailable()
@@ -61,7 +61,7 @@ class TestSearchAvailable:
 
     def test_with_tavily_available(self, monkeypatch):
         """tavily 사용 가능하면 True."""
-        from dartlab.gather import search as mod
+        from dartlab.gather.sources import search as mod
 
         monkeypatch.setattr(mod, "_tavilyAvailable", lambda: True)
         result = searchAvailable()

@@ -10,9 +10,9 @@ from html import unescape
 
 import polars as pl
 
-from .infra.resilience import circuitBreaker as _circuit_breaker
-from .infra.resilience import healthTracker as _health_tracker
-from .types import NewsItem
+from ..infra.resilience import circuitBreaker as _circuit_breaker
+from ..infra.resilience import healthTracker as _health_tracker
+from ..types import NewsItem
 
 log = logging.getLogger(__name__)
 
@@ -198,7 +198,7 @@ def fetchNews(
     Returns:
         (date, title, source, url) DataFrame.
     """
-    from .infra.http import runAsync
+    from ..infra.http import runAsync
 
     items = runAsync(_fetchAsync(query, market=market, days=days))
     return toDataFrame(items)

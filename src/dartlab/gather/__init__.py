@@ -28,17 +28,17 @@ if TYPE_CHECKING:
 
 from dartlab.core.polarsUtil import isEmptyDf
 
-from . import flow as _flow
-from . import history as _history
-from . import insider as _insider
-from . import news as _news
-from . import ownership as _ownership
-from . import price as _price
-from . import sector as _sector
 from .domains import loadDomain
 from .infra.cache import GatherCache
 from .infra.http import GatherHttpClient, runAsync
 from .marketConfig import getMarketConfig
+from .sources import flow as _flow
+from .sources import history as _history
+from .sources import insider as _insider
+from .sources import news as _news
+from .sources import ownership as _ownership
+from .sources import price as _price
+from .sources import sector as _sector
 from .types import (
     FlowData,
     GatherResult,

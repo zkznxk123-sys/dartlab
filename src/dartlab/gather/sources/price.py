@@ -6,11 +6,11 @@ import copy
 import logging
 import time
 
-from .domains import getPriceFallback, loadDomain
-from .infra.cache import GatherCache
-from .infra.resilience import circuitBreaker, healthTracker
-from .marketConfig import getMarketConfig
-from .types import GatherError, PriceSnapshot
+from ..domains import getPriceFallback, loadDomain
+from ..infra.cache import GatherCache
+from ..infra.resilience import circuitBreaker, healthTracker
+from ..marketConfig import getMarketConfig
+from ..types import GatherError, PriceSnapshot
 
 log = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ async def fetch(
 
     # client=None이면 자체 생성
     if client is None:
-        from .infra.http import GatherHttpClient
+        from ..infra.http import GatherHttpClient
 
         client = GatherHttpClient()
 

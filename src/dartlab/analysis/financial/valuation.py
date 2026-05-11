@@ -99,7 +99,7 @@ def _fetchPriceContext(company: Any) -> dict | None:
     result = None
     try:
         from dartlab.gather.infra.http import runAsync
-        from dartlab.gather.price import fetch
+        from dartlab.gather.sources.price import fetch
 
         snapshot = runAsync(fetch(stockCode, market="KR"))
         if snapshot is not None:
@@ -482,7 +482,7 @@ def calcNavValuation(company: Any) -> dict | None:
     for subCode, ratio in subs:
         try:
             from dartlab.gather.infra.http import runAsync
-            from dartlab.gather.price import fetch
+            from dartlab.gather.sources.price import fetch
 
             snapshot = runAsync(fetch(subCode, market="KR"))
             if snapshot and snapshot.marketCap and snapshot.marketCap > 0:

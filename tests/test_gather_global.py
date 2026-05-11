@@ -260,7 +260,7 @@ class TestPriceFallback:
         import asyncio
         from unittest.mock import AsyncMock, MagicMock
 
-        from dartlab.gather import price
+        from dartlab.gather.sources import price
 
         mock_resp = MagicMock()
         mock_resp.json.return_value = {
