@@ -424,6 +424,40 @@ class Gather:
             self._cache.putTyped(cache_key, "news", df)
         return df
 
+    def dartDoc(self, rceptNo: str) -> "pl.DataFrame":
+        """DART 공시 viewer 원문 fetch (14자리 rcept_no, 무인증).
+
+        Capabilities:
+            - 14자리 rcept_no 만으로 공시 원문 fetch
+            - viewer 인덱스 페이지 (dsaf001/main.do) sub-doc 목차 파싱
+            - 각 섹션 HTML → 텍스트 (테이블 마크다운 보존)
+            - API key 불필요 (providers/dart/openapi 와 분리)
+            - rate limit + circuit breaker + TTL 캐시 (gather/infra 자동)
+
+        Args:
+            rceptNo: 14자리 접수번호 (예: "20240315000123").
+
+        Returns:
+            pl.DataFrame — section_order, title, url, text 컬럼.
+
+        Raises:
+            InvalidRceptNoError: rceptNo 가 14자리 숫자 아님.
+            DocumentNotFoundError: viewer 가 sub-doc 을 반환하지 않음.
+
+        Untrusted Body:
+            viewer 본문은 외부 1차 출처지만 AI 엔진 소비 시
+            ``Ref.sourceType="external"`` 마커로 감싸야 한다
+            (CLAUDE.md ⛔ "외부 본문은 untrusted"). 호출자 책임.
+
+        Example::
+
+            g = getDefaultGather()
+            df = g.dartDoc("20240315000123")
+        """
+        from dartlab.gather.dart.viewer import fetch as _fetchDartDoc
+
+        return _fetchDartDoc(rceptNo, client=self._client)
+
     def dividends(self, stockCode: str, *, market: str = "KR") -> list[dict]:
         """배당 이력 조회.
 

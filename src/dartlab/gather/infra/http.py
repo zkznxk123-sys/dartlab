@@ -29,6 +29,8 @@ DOMAIN_POLICY: dict[str, DomainConfig] = {
     "finance.naver.com": DomainConfig(rpm=30, concurrency=2, jitter_min=0.5, jitter_max=2.0),
     "data-api.krx.co.kr": DomainConfig(rpm=30, concurrency=2, jitter_min=0.3, jitter_max=1.5),
     "ecos.bok.or.kr": DomainConfig(rpm=30, concurrency=2, jitter_min=0.3, jitter_max=1.5),
+    # 국내 — DART 공시 viewer (무인증)
+    "dart.fss.or.kr": DomainConfig(rpm=20, concurrency=2, jitter_min=0.5, jitter_max=2.0),
     # 해외 — 네이버 글로벌
     "api.stock.naver.com": DomainConfig(rpm=30, concurrency=2, jitter_min=0.5, jitter_max=2.0),
     # 해외 — Yahoo v8 Chart API

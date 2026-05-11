@@ -21,7 +21,7 @@ import polars as pl
 #   indicator  : 거시지표 코드 (예: "CPI", "FEDFUNDS")
 #   keyword    : 검색어 (자유 문자열)
 #   none       : target 안 받음
-TargetType = Literal["stockCode", "columnName", "indicator", "keyword", "none"]
+TargetType = Literal["stockCode", "columnName", "indicator", "keyword", "rceptNo", "none"]
 
 
 @dataclass(frozen=True)
@@ -130,6 +130,17 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         targetRequired=False,
         targetType="columnName",
     ),
+    "dartDoc": _GatherAxisEntry(
+        label="DART 공시 원문",
+        description=(
+            "14자리 rcept_no 만으로 DART 공시 viewer 의 원문 본문 fetch (무인증). "
+            "공시 인덱스 페이지에서 sub-doc 목차를 받고 각 섹션 HTML 을 텍스트 "
+            "(테이블 마크다운 보존) 로 변환. API key 불필요 — providers/dart/openapi "
+            "(key 기반 OpenDART) 와 분리된 viewer 단건 fetch 진입점."
+        ),
+        example='gather("dartDoc", "20240315000123")',
+        targetType="rceptNo",
+    ),
     "calendar": _GatherAxisEntry(
         label="catalyst 일정",
         description=(
@@ -157,6 +168,7 @@ _API_KEY_INFO: dict[str, str] = {
     "peers": "불필요",
     "krx": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX OpenAPI 직접 호출)",
     "krxIndex": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX idx OpenAPI 직접 호출)",
+    "dartDoc": "불필요 (viewer 무인증 단건 fetch)",
     "calendar": "DART_API_KEY (Company.disclosure 사용)",
 }
 
@@ -617,6 +629,12 @@ class GatherEntry:
                 "예: c = dartlab.Company('005930'); c.calendar(horizonDays=30). "
                 "이유: gather → providers cycle 회피 (책임 분리)."
             )
+        if axis == "dartDoc":
+            if not target:
+                raise ValueError("gather('dartDoc') 는 rcept_no (14자리) target 필요")
+            from dartlab.gather.dart.viewer import fetch as _fetchDartDoc
+
+            return _fetchDartDoc(target)
 
         raise ValueError(f"미지원 gather 축: {axis}")
 
