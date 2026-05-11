@@ -21,13 +21,16 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parent.parent / "src" / "dartlab" / "providers" / "dart" / "docs" / "finance"
-# Plan v4 root fix 가 적용된 파일 — normalize 헬퍼 경유 강제
-# notesDetail tableBuilder: notes 테이블 빌드 (매퍼 기반)
+# Plan v4 root fix 가 적용된 파일 — normalize 헬퍼 경유 강제.
+#
+# P2 (2026-05-11) 통합으로 일부 sub-doc 은 단일 .py 모듈로 흡수됨:
+#   - notesDetail/tableBuilder.py → notesDetail.py (parser + tableBuilder 본문 흡수)
+# 폴더 유지된 큰 sub-doc (costByNature/tangibleAsset/segment) 는 parser.py 그대로.
 _ENFORCED_PARSERS = {
     "costByNature": _ROOT / "costByNature" / "parser.py",
     "tangibleAsset": _ROOT / "tangibleAsset" / "parser.py",
     "segment": _ROOT / "segment" / "parser.py",
-    "notesDetail_tableBuilder": _ROOT / "notesDetail" / "tableBuilder.py",
+    "notesDetail": _ROOT / "notesDetail.py",
 }
 
 

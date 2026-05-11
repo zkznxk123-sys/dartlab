@@ -75,9 +75,14 @@ def test_scanFilePassesStandardName(tmp_path: Path):
 
 
 def test_loadAliasesReturnsPopulatedDict():
-    """aliases.json (P5 1.0.0) 은 10 표준 의미 채워진 사전."""
+    """aliases.json (P5 1.0.0) 은 10 표준 의미 채워진 사전.
+
+    P4.1 (2026-05-11) 에서 'code' / 'corpCode' alias 는 의미 충돌로 분리됨
+    ('code' = Python source code / OAuth code · 'corpCode' = DART API 8자리).
+    'codeOrName' 은 유지 — 명시적 종목코드/회사명 통합 의도.
+    """
     nc = _loadModule()
     aliases = nc._loadAliases()
     assert "stockIdentifier" in aliases
     assert aliases["stockIdentifier"]["standard"] == "stockCode"
-    assert "code" in aliases["stockIdentifier"]["aliases"]
+    assert "codeOrName" in aliases["stockIdentifier"]["aliases"]
