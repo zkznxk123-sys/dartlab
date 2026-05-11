@@ -94,3 +94,59 @@ lastUpdated: '2026-05-03'
 - **최신 먼저 역순** — 데이터 정렬 기본값.
 - `AI role:` 또는 `AI 역할:` 로 시작하는 짧은 문장을 둔다.
 
+## 11 룰 — 잘만든 라이브러리 구조 SSOT (P-트랙 박음)
+
+dartlab 의 엔진·provider 모듈은 다음 11 룰 동시 만족 필수. 각 룰은 prose + 머신 게이트 동행 — 미준수 시 audit/lint 차단. baseline 모드에서 시작, P-phase 통과마다 strict 전환.
+
+### 구조 룰 (7)
+
+1. **Protocol 동일 surface** — 동일 도메인의 3 provider (예: dart/edgar/edinet) 는 동일 Protocol (`DocsProvider`/`FinanceProvider`/`FilingsProvider`/`CompanyProtocol`) 모두 isinstance + 시그니처 introspection 일치. 새 regulator 추가 = Protocol 구현체 1 개 drop-in.
+   - 게이트: `tests/test_providerContract.py` · 정공법 (B) Protocol DIP.
+
+2. **폴더 mirror** — 동일 도메인 sibling 폴더는 sub-folder set 동일. dart/edgar/edinet 모두 `accessor/builder/parse/ops/docs/finance/openapi` 같은 골격. 누락 폴더는 placeholder `__init__.py` 만.
+   - 게이트: `scripts/audit/folderMirror.py` · 정공법 (A) Hierarchy.
+
+3. **LoC 임계** — 폴더화 vs 단일 .py 선택 규칙:
+   | 도메인 합계 LoC | 형태 |
+   |---|---|
+   | ≤ 400 | 단일 `.py` (예 `dividend.py`) |
+   | 401~800 | 폴더 + 1~2 sub-module |
+   | > 800 | 폴더 + parser/pipeline/types 분할 |
+   - 게이트: `scripts/audit/folderSize.py` · 정공법 (A) Hierarchy. 임계값 외 폴더화 (50~300 LoC 폴더화 등) 자동 차단.
+
+4. **`__init__.py` thin** — LoC ≤ 30 + 함수 정의 0. re-export (`from X import Y`) 와 `__all__` 만.
+   - 게이트: `scripts/audit/initThin.py`. 로직이 들어가면 즉시 `.py` 분리.
+
+5. **`_*.py` 0** — generic helper 파일명 (`_helpers.py`/`_utils.py`/`_*.py`) 폐지. helper 는 사용처 안으로 흡수하거나 도메인 명시 이름 (예: `_filings.py` → `filingsCatalog.py`).
+   - 게이트: `scripts/dev/lint_camelcase_ast.py --no-underscore-modules` · 정공법 (A) Hierarchy + 사용처 흡수.
+
+6. **Docstring 4-섹션 strict** — 모든 public 함수/메서드 docstring 에 Sig/Args/Example/Raises (또는 Returns 대체) 4 섹션 명시.
+   - 게이트: `scripts/dev/lint_camelcase_ast.py --docstring-strict`.
+
+7. **테스트 mirror** — `src/dartlab/providers/X/Y.py` ↔ `tests/providers/X/test_Y.py` 1:1 슬롯. 새 src 파일 = 테스트 자동 슬롯. 누락 시 차단.
+   - 게이트: `tests/test_structureMirror.py`.
+
+### 메모리-safe 룰 (4)
+
+8. **`fetchX()` full-df 금지** — provider 의 collection 반환 메서드는 `limit: int = 100` keyword 의무. cross-company 질문은 slim index 경유만.
+   - 게이트: `scripts/audit/limitDefault.py` · 정공법 (B) Protocol DIP + (C) 호출 inversion.
+
+9. **Raw cross-scan 금지** — `pl.scan_parquet("data/dart/docs/*.parquet")` 같은 전 회사 일괄 lazy scan 패턴 grep 차단. cross-company 는 `data/{provider}/scan/docsIndex.parquet` 같은 슬림 인덱스 경유만.
+   - 게이트: `tests/test_no_raw_cross_scan.py`.
+
+10. **`iterX()` + `fetchX(limit=)` 쌍** — collection 반환 provider 메서드는 iterator family 동행. 사용자가 streaming/limited 둘 다 고를 수 있게.
+    - 게이트: `tests/test_provider_iter_pairs.py`.
+
+11. **Company context manager** — `with Company(c) as c:` 종료 시 BoundedCache evict + RSS 회수. Polars 네이티브 힙 (gc 회수 불가) 누수 차단.
+    - 게이트: `tests/test_company_context.py` · 정공법 (D) Facade + (C) lifecycle inversion.
+
+### 적용 범위
+
+- providers/ (dart/edgar/edinet) 우선. P-트랙으로 적용.
+- L2 6 엔진 (analysis/credit/macro/quant/industry/scan) — F-트랙 재개 시 11 룰 inherit.
+- L3 story · L1.5 scan/search · L1 gather · L0 core 도 동일 적용 (단계적).
+
+### 회귀 가드
+
+각 룰의 게이트는 `scripts/audit/_baselines/*.json` 에 현 위반 항목 기록. P-phase 통과마다 baseline 축소. 최종적으로 모든 baseline JSON 의 `sum(values) == 0` 시점에 strict 전환 완료 = "더 안 건드릴" 상태.
+

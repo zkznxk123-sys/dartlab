@@ -144,3 +144,43 @@ import 정책 (전면 리팩토링 plan 후):
 - scan 을 "L2" 라고 부르지 않는다 — `L1.5` (전체 횡단).
 - story 를 "분석 엔진" 또는 "L2" 와 평탄화하지 않는다 — `L3 조합기` 명시.
 
+## Provider Protocol 동일 surface (3-provider mirror)
+
+P-트랙 박음: dart/edgar/edinet 3 provider 는 동일 Protocol contract 만족. 새 regulator (SGX, FSA 등) = Protocol 구현체 drop-in.
+
+### Protocol 4 + CompanyProtocol 확장
+
+| Protocol | 책임 | 핵심 메서드 |
+|---|---|---|
+| `DocsProvider` | 공시 본문 + 섹션 메타 | `fetchFiling(stockCode, *, period)`, `listSections(...)`, `iterSections(...)` |
+| `FinanceProvider` | XBRL / 재무제표 정규화 | `fetchStatements(stockCode, *, period, kind="annual", limit=100)`, `listAccounts(...)`, `iterAccounts(...)` |
+| `FilingsProvider` | 공시 검색·메타 | `search(query, *, market=None, limit=20)`, `iterSearch(...)` |
+| `MemorySafeProvider` | 메모리-safe surface (공통) | `cleanupCache() -> int`, `memorySnapshot() -> dict` |
+| `CompanyProtocol` 확장 | lifecycle | `__enter__()`, `__exit__()` 추가 |
+
+### 폴더 mirror 골격 (dart 기준, edgar/edinet 동일 정렬)
+
+```
+providers/{dart,edgar,edinet}/
+├── __init__.py        # __all__ + Company facade re-export
+├── company.py         # Company 진입점 (CompanyProtocol 구현)
+├── accessor/          # docsAccessor · financeAccessor · profileAccessor · reportAccessor
+├── builder/           # filingsCatalog · financeStatementBuilder · scanAggregator · dataDispatcher
+├── parse/             # viewerPageExtractor · tableHorizontalizer · diffEvaluator
+├── ops/               # calendar · insiderTrades
+├── docs/              # 공시 본문 파싱 (DocsProvider 구현)
+├── finance/           # XBRL 정규화 (FinanceProvider 구현)
+├── openapi/           # raw HTTP client
+├── report/            # 정형 report (옵션)
+├── filings/           # 공시 검색·메타 (FilingsProvider 구현)
+└── search/            # 도메인 검색 (옵션)
+```
+
+누락 폴더는 placeholder `__init__.py` 만 (Protocol satisfaction 위해). edinet 처럼 일부 폴더 미보유 가능 — 단, 노출 surface 는 Protocol contract 만족 (stub + NotImplementedError 명시).
+
+### 메모리-safe surface
+
+cross-company query 는 raw parquet lazy scan 금지. 모든 provider 가 `data/{provider}/scan/docsIndex.parquet` 슬림 인덱스 빌드 + `Scan.docsSections(market=..., limit=...)` 단일 API 노출. Company facade 는 context manager — `with Company(c) as c:` 종료 시 BoundedCache evict 자동.
+
+상세는 `operation.code` "11 룰" 섹션 참조.
+
