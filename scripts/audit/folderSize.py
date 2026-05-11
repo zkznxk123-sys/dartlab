@@ -36,6 +36,24 @@ _BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "folderSize.json"
 _SMALL_THRESHOLD = 400
 _MEDIUM_THRESHOLD = 800
 
+# 룰 2 (folder mirror) 가 강제하는 직속 sub-folder set — over_split 임계에서 제외.
+# providers/{dart,edgar,edinet}/<MIRROR_FOLDERS> 는 LoC 작아도 mirror 만족 위해 유지.
+_MIRROR_FOLDERS: frozenset[str] = frozenset(
+    {"accessor", "builder", "bulk", "docs", "finance", "openapi", "ops", "parse", "report", "search"}
+)
+
+
+def _isMirrorFolder(folder: Path) -> bool:
+    """provider 직속 sub-folder 인지 — providers/{X}/{MIRROR}/ 패턴 매칭."""
+    parts = folder.parts
+    if "providers" not in parts:
+        return False
+    idx = parts.index("providers")
+    # providers/<provider>/<sub>  → 정확히 idx+2 가 mirror folder
+    if len(parts) <= idx + 2:
+        return False
+    return parts[idx + 2] in _MIRROR_FOLDERS and len(parts) == idx + 3
+
 
 def _countLoc(path: Path) -> int:
     try:
@@ -65,6 +83,8 @@ def _scan(target: Path) -> dict[str, list[dict]]:
             pyFiles = [p for p in child.glob("*.py") if p.name != "__init__.py" and not p.name.startswith("_")]
             if not pyFiles or any(p.is_dir() for p in child.iterdir() if p.name != "__pycache__"):
                 continue  # 상위 폴더 (sub-folder 보유) 는 스킵
+            if _isMirrorFolder(child):
+                continue  # 룰 2 mirror 강제 폴더 — LoC 임계 면제
             loc = _folderLoc(child)
             if loc <= _SMALL_THRESHOLD:
                 violations["over_split"].append(

@@ -1,11 +1,15 @@
-"""사업의 내용 섹션 파싱 로직."""
+"""사업의 내용 — 추출 파이프라인 + 파서 + 타입 (LoC 325, 룰 3 단일 .py)."""
 
 from __future__ import annotations
 
 import difflib
 import re
+from dataclasses import dataclass, field
 
 import polars as pl
+
+from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.reportSelector import extractReportYear, selectReport
 
 SECTION_KEYS = {
     "overview": ["사업의 개요"],
@@ -19,6 +23,42 @@ SECTION_KEYS = {
 }
 
 _SPLIT_BY_NUMBER_RE = re.compile(r"^(\d+)\.\s+(.+?)$", re.MULTILINE)
+
+
+@dataclass
+class BusinessSection:
+    """사업의 내용 하위 섹션."""
+
+    key: str
+    title: str
+    chars: int
+    text: str
+
+
+@dataclass
+class BusinessChange:
+    """연도별 변경 정보."""
+
+    year: int
+    changedPct: float
+    added: int
+    removed: int
+    totalChars: int
+
+
+@dataclass
+class BusinessResult:
+    """사업의 내용 분석 결과.
+
+    sections: 최신 연도의 섹션 목록 (하위 호환).
+    yearSections: 연도별 전체 섹션 dict (LLM 다년도 비교용).
+    """
+
+    corpName: str | None
+    year: int
+    sections: list[BusinessSection] = field(default_factory=list)
+    changes: list[BusinessChange] = field(default_factory=list)
+    yearSections: dict[int, list[BusinessSection]] = field(default_factory=dict)
 
 
 def classifySection(title: str) -> str | None:
@@ -177,3 +217,75 @@ def computeChanges(df: pl.DataFrame, years: list[str]) -> list[dict]:
         prevText = text
 
     return changes
+
+
+def business(stockCode: str) -> BusinessResult | None:
+    """사업보고서에서 사업의 내용 섹션 추출 + 연도별 변경 탐지.
+
+    Args:
+        stockCode: 종목코드 (6자리).
+
+    Returns:
+        BusinessResult 또는 데이터 부족 시 None.
+
+    Example:
+        >>> business("005930")  # 삼성전자
+    """
+    df = loadData(stockCode)
+    corpName = extractCorpName(df)
+
+    years = sorted(df["year"].unique().to_list(), reverse=True)
+
+    allSections: dict[int, list[BusinessSection]] = {}
+    latestYear: int | None = None
+
+    for year in years:
+        report = selectReport(df, year, reportKind="annual")
+        if report is None:
+            continue
+
+        reportYear = extractReportYear(report["report_type"][0])
+        if reportYear is None:
+            continue
+
+        sections = extractFromSubSections(report)
+        if not sections:
+            sections = extractFromUnified(report)
+
+        if sections and reportYear not in allSections:
+            sectionList = [
+                BusinessSection(
+                    key=key,
+                    title=info["title"],
+                    chars=info["chars"],
+                    text=info["text"],
+                )
+                for key, info in sections.items()
+            ]
+            allSections[reportYear] = sectionList
+            if latestYear is None:
+                latestYear = reportYear
+
+    if not allSections or latestYear is None:
+        return None
+
+    allYears = sorted(df["year"].unique().to_list())
+    rawChanges = computeChanges(df, allYears)
+    changeList = [
+        BusinessChange(
+            year=c["year"],
+            changedPct=c["changedPct"],
+            added=c["added"],
+            removed=c["removed"],
+            totalChars=c["totalChars"],
+        )
+        for c in rawChanges
+    ]
+
+    return BusinessResult(
+        corpName=corpName,
+        year=latestYear,
+        sections=allSections[latestYear],
+        changes=changeList,
+        yearSections=allSections,
+    )

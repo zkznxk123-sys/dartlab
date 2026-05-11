@@ -1,12 +1,6 @@
 {
   "_note": "P-트랙 phase 통과마다 축소",
-  "over_split": [
-    "src/dartlab/providers/dart/docs/disclosure/business",
-    "src/dartlab/providers/dart/docs/disclosure/mdna",
-    "src/dartlab/providers/dart/ops",
-    "src/dartlab/providers/edgar/builder",
-    "src/dartlab/providers/edinet/openapi"
-  ],
+  "over_split": [],
   "under_split": [
     "src/dartlab/providers/dart/company.py",
     "src/dartlab/providers/dart/docs/finance/affiliate/parser.py",
