@@ -1,8 +1,44 @@
-"""우발부채·채무보증·소송 파서."""
+"""우발부채 데이터 추출 파이프라인.
+
+P2 통합: 기존 contingentLiability/{parser,pipeline,types}.py 단일 모듈로 흡수.
+"""
+
+from __future__ import annotations
 
 import re
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+import polars as pl
+
+from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.reportSelector import selectReport
+
+if TYPE_CHECKING:
+    import polars as pl
 
 
+# types
+@dataclass
+class ContingentLiabilityResult:
+    """우발부채·채무보증·소송 분석 결과.
+
+    Attributes:
+        corpName: 기업명
+        nYears: 시계열 연도 수
+        guaranteeDf: 채무보증 시계열 DataFrame
+            year | totalGuaranteeAmount | lineCount
+        lawsuitDf: 소송 현황 DataFrame
+            year | filingDate | parties | description | amount | amountValue | status
+    """
+
+    corpName: str | None = None
+    nYears: int = 0
+    guaranteeDf: pl.DataFrame | None = None
+    lawsuitDf: pl.DataFrame | None = None
+
+
+# parser
 def parseAmount(text: str) -> int | None:
     """숫자 문자열을 정수로 변환."""
     if not text or not isinstance(text, str):
@@ -188,3 +224,115 @@ def parseLawsuit(block: list[str]) -> dict | None:
         return None
 
     return result
+
+
+# pipeline
+def contingentLiability(stockCode: str) -> ContingentLiabilityResult | None:
+    """사업보고서에서 우발부채·채무보증·소송 시계열 추출.
+
+    Args:
+        stockCode: 종목코드 (6자리)
+
+    Returns:
+        ContingentLiabilityResult 또는 데이터 부족 시 None
+    """
+    df = loadData(stockCode)
+    corpName = extractCorpName(df)
+    years = sorted(df["year"].unique().to_list(), reverse=True)
+
+    guaranteeRows: list[dict] = []
+    lawsuitRows: list[dict] = []
+
+    for year in years:
+        report = selectReport(df, year, reportKind="annual")
+        if report is None:
+            continue
+
+        content = _findSection(report)
+        if content is None:
+            continue
+
+        blocks = extractTableBlocks(content)
+        yearGuarantee = None
+        yearLawsuits: list[dict] = []
+
+        for block in blocks:
+            kind = classifyBlock(block)
+
+            if kind == "guaranteeDetail" and yearGuarantee is None:
+                parsed = parseGuaranteeDetail(block)
+                if parsed:
+                    yearGuarantee = parsed
+                    yearGuarantee["year"] = int(year)
+
+            elif kind == "guaranteeSummary" and yearGuarantee is None:
+                parsed = parseGuaranteeSummary(block)
+                if parsed:
+                    yearGuarantee = parsed
+                    yearGuarantee["year"] = int(year)
+
+            elif kind == "lawsuit":
+                parsed = parseLawsuit(block)
+                if parsed:
+                    parsed["year"] = int(year)
+                    yearLawsuits.append(parsed)
+
+        if yearGuarantee:
+            guaranteeRows.append(yearGuarantee)
+        lawsuitRows.extend(yearLawsuits)
+
+    if not guaranteeRows and not lawsuitRows:
+        return None
+
+    guaranteeDf = _buildGuaranteeDf(guaranteeRows) if guaranteeRows else None
+    lawsuitDf = _buildLawsuitDf(lawsuitRows) if lawsuitRows else None
+
+    return ContingentLiabilityResult(
+        corpName=corpName,
+        nYears=max(len(guaranteeRows), len({r["year"] for r in lawsuitRows})) if lawsuitRows else len(guaranteeRows),
+        guaranteeDf=guaranteeDf,
+        lawsuitDf=lawsuitDf,
+    )
+
+
+def _findSection(report: pl.DataFrame) -> str | None:
+    """우발부채 섹션 content 반환."""
+    for row in report.iter_rows(named=True):
+        title = row.get("section_title", "") or ""
+        if re.search(r"우발부채", title):
+            content = row.get("section_content", "") or ""
+            if len(content) > 100:
+                return content
+    return None
+
+
+def _buildGuaranteeDf(rows: list[dict]) -> pl.DataFrame:
+    data = sorted(rows, key=lambda x: x["year"])
+    schema = {
+        "year": pl.Int64,
+        "totalGuaranteeAmount": pl.Int64,
+        "lineCount": pl.Int64,
+    }
+    for r in data:
+        for col in schema:
+            if col not in r:
+                r[col] = None
+    return pl.DataFrame(data, schema=schema)
+
+
+def _buildLawsuitDf(rows: list[dict]) -> pl.DataFrame:
+    data = sorted(rows, key=lambda x: x["year"])
+    schema = {
+        "year": pl.Int64,
+        "filingDate": pl.Utf8,
+        "parties": pl.Utf8,
+        "description": pl.Utf8,
+        "amount": pl.Utf8,
+        "amountValue": pl.Int64,
+        "status": pl.Utf8,
+    }
+    for r in data:
+        for col in schema:
+            if col not in r:
+                r[col] = None
+    return pl.DataFrame(data, schema=schema)
