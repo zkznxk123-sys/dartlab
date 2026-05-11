@@ -46,11 +46,21 @@ def createProvider(config: LLMConfig | dict[str, Any] | None = None) -> LLMProvi
     return DartLabProvider(cfg)
 
 
+_SNAKE_TO_CAMEL_LLM = {
+    "api_key": "apiKey",
+    "base_url": "baseUrl",
+    "max_tokens": "maxTokens",
+    "system_prompt": "systemPrompt",
+}
+
+
 def _coerceConfig(config: LLMConfig | dict[str, Any] | None) -> LLMConfig:
     if isinstance(config, LLMConfig):
         return config
     if isinstance(config, dict):
-        allowed = {k: v for k, v in config.items() if k in LLMConfig.__dataclass_fields__}
+        # 호환: 외부 caller 가 snake_case 키로 전달해도 camelCase 필드로 매핑
+        normalized = {_SNAKE_TO_CAMEL_LLM.get(k, k): v for k, v in config.items()}
+        allowed = {k: v for k, v in normalized.items() if k in LLMConfig.__dataclass_fields__}
         return LLMConfig(**allowed)
     return LLMConfig()
 

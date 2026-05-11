@@ -181,11 +181,11 @@ def validateProviderConnection(req: ConfigureRequest) -> dict[str, Any]:
     kwargs: dict[str, Any] = {
         "provider": effective_provider,
         "model": req.model or current.model,
-        "api_key": req.apiKey if req.apiKey is not None else current.apiKey,
-        "base_url": req.baseUrl or current.baseUrl,
+        "apiKey": req.apiKey if req.apiKey is not None else current.apiKey,
+        "baseUrl": req.baseUrl or current.baseUrl,
         "temperature": current.temperature,
-        "max_tokens": current.maxTokens,
-        "system_prompt": current.systemPrompt,
+        "maxTokens": current.maxTokens,
+        "systemPrompt": current.systemPrompt,
     }
 
     available = False
