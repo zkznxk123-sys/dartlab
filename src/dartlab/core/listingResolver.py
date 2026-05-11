@@ -44,8 +44,8 @@ class ListingResolver(Protocol):
 
 _RESOLVER: ListingResolver | None = None
 
-# Auto-discovery — gather/listing.py 가 register 하도록 lazy 로드.
-_KNOWN_RESOLVER_MODULES: tuple[str, ...] = ("dartlab.gather.listing",)
+# Auto-discovery — gather/krx/listing.py 가 register 하도록 lazy 로드.
+_KNOWN_RESOLVER_MODULES: tuple[str, ...] = ("dartlab.gather.krx.listing",)
 _DISCOVERED = False
 
 

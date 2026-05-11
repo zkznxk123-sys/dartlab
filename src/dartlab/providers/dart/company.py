@@ -46,7 +46,7 @@ def _listingResolver():
 
     resolver = getListingResolver()
     if resolver is None:
-        raise RuntimeError("ListingResolver 미등록 — dartlab.gather.listing 모듈 로드 실패")
+        raise RuntimeError("ListingResolver 미등록 — dartlab.gather.krx.listing 모듈 로드 실패")
     return resolver
 
 
