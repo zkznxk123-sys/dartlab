@@ -19,7 +19,21 @@ class _FinanceAccessor:
         self._company = company
 
     def _stmtDf(self, stmtKey: str, *, freq: str = "Q") -> pl.DataFrame | None:
-        """재무제표 DataFrame. freq="Q"(분기, 기본) 또는 "Y"(연간)."""
+        """재무제표 DataFrame. ``freq="Q"`` (분기, 기본) 또는 ``"Y"`` (연간).
+
+        Args:
+            stmtKey: BS/IS/CF/CI 중 하나.
+            freq: ``"Q"``/``"Y"``.
+
+        Returns:
+            ``snakeId/항목/period...`` 컬럼 wide DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._finance._stmtDf("BS")
+        """
         cacheKey = f"_finance_{stmtKey}_{freq}"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
@@ -74,27 +88,77 @@ class _FinanceAccessor:
 
     @property
     def BS(self) -> pl.DataFrame | None:
-        """BS — TODO 한국어 동작 설명."""
+        """재무상태표 (Balance Sheet) — XBRL companyfacts 기반.
+
+        Returns:
+            wide DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._finance.BS  # 내부 — 사용자는 c.show("BS")
+        """
         return self._stmtDf("BS")
 
     @property
     def IS(self) -> pl.DataFrame | None:
-        """IS — TODO 한국어 동작 설명."""
+        """손익계산서 (Income Statement) — XBRL companyfacts 기반.
+
+        Returns:
+            wide DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._finance.IS  # 내부 — 사용자는 c.show("IS")
+        """
         return self._stmtDf("IS")
 
     @property
     def CF(self) -> pl.DataFrame | None:
-        """CF — TODO 한국어 동작 설명."""
+        """현금흐름표 (Cash Flow) — XBRL companyfacts 기반.
+
+        Returns:
+            wide DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._finance.CF  # 내부 — 사용자는 c.show("CF")
+        """
         return self._stmtDf("CF")
 
     @property
     def CIS(self) -> pl.DataFrame | None:
-        """CIS — TODO 한국어 동작 설명."""
+        """포괄손익계산서 (Comprehensive IS) — IS + OCI.
+
+        Returns:
+            wide DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._finance.CIS  # 내부 — 사용자는 c.show("CIS")
+        """
         return self._stmtDf("CI")
 
     @property
     def ratios(self):
-        """ratios — TODO 한국어 동작 설명."""
+        """재무비율 snapshot — 연간 base.
+
+        Returns:
+            ``RatioResult`` dataclass 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._finance.ratios  # 내부 — 사용자는 c.show("ratios")
+        """
         val = self._company._cache.get("_ratios", _CACHE_MISSING)
         if val is _CACHE_MISSING:
             from dartlab.analysis.financial.ratios import calcRatios
@@ -110,7 +174,17 @@ class _FinanceAccessor:
 
     @property
     def ratioSeries(self):
-        """ratioSeries — TODO 한국어 동작 설명."""
+        """재무비율 시계열 — 연간 series.
+
+        Returns:
+            ``{ratio: [년도별 값...], ...}`` dict 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._finance.ratioSeries  # 내부 — 사용자는 c.show("ratioSeries")
+        """
         cacheKey = "_ratioSeries"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
@@ -127,7 +201,17 @@ class _FinanceAccessor:
 
     @property
     def SCE(self) -> pl.DataFrame | None:
-        """SCE — TODO 한국어 동작 설명."""
+        """자본변동표 (Statement of Changes in Equity).
+
+        Returns:
+            wide DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._finance.SCE  # 내부 — 사용자는 c.show("SCE")
+        """
         cacheKey = "_finance_SCE"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
@@ -138,7 +222,20 @@ class _FinanceAccessor:
         return result
 
     def explore(self, query: str) -> pl.DataFrame | None:
-        """XBRL 태그 검색 — 전 기간 값 탐색."""
+        """XBRL 태그 검색 — 전 기간 값 탐색.
+
+        Args:
+            query: 태그 패턴 (정규식 또는 substring).
+
+        Returns:
+            매칭 행 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._finance.explore("Revenue")
+        """
         from dartlab.providers.edgar.finance.explore import explore
 
         return explore(self._company.cik, query)

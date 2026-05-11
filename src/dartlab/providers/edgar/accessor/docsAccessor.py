@@ -27,7 +27,17 @@ class _DocsAccessor:
 
     @property
     def sections(self) -> pl.DataFrame | None:
-        """sections — TODO 한국어 동작 설명."""
+        """sections wide DataFrame — 10-K/10-Q section_title × period.
+
+        Returns:
+            sections DataFrame 또는 None (docs parquet 부재).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.head()
+        """
         key = "_docs_sections"
         val = self._company._cache.get(key, _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -39,7 +49,17 @@ class _DocsAccessor:
 
     @property
     def retrievalBlocks(self) -> pl.DataFrame | None:
-        """retrievalBlocks — TODO 한국어 동작 설명."""
+        """retrieval 용 chunk 블록 — RAG 검색 표면.
+
+        Returns:
+            ``block_id/text/topic/period`` 컬럼 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.retrievalBlocks.head()
+        """
         key = "_docs_retrievalBlocks"
         val = self._company._cache.get(key, _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -51,7 +71,17 @@ class _DocsAccessor:
 
     @property
     def contextSlices(self) -> pl.DataFrame | None:
-        """contextSlices — TODO 한국어 동작 설명."""
+        """context window 단위 슬라이스 — LLM 입력 최적화.
+
+        Returns:
+            슬라이스 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.contextSlices.head()
+        """
         key = "_docs_contextSlices"
         val = self._company._cache.get(key, _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -62,28 +92,73 @@ class _DocsAccessor:
         return val
 
     def notes(self, query: str | None = None) -> pl.DataFrame | None:
-        """XBRL TextBlock 주석 검색 (원본). query=None이면 전체 목록."""
+        """XBRL TextBlock 주석 검색 (원본). ``query=None`` 이면 전체 목록.
+
+        Args:
+            query: 검색어 (None 이면 전체 주석).
+
+        Returns:
+            주석 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.notes("inventory")
+        """
         from dartlab.providers.edgar.docs.notes import notes
 
         return notes(self._company.cik, query)
 
     def notesByCategory(self, category: str | None = None):
-        """카테고리별 구조화 Notes. DART 의 ``c.show("inventory")`` 등에 대응.
+        """카테고리별 구조화 Notes — DART ``c.show("inventory")`` 대응.
 
-        category=None이면 데이터 있는 카테고리 dict 반환.
+        ``category=None`` 이면 데이터 있는 카테고리 dict 반환.
+
+        Args:
+            category: 특정 카테고리 (None 이면 전체).
+
+        Returns:
+            DataFrame 또는 카테고리 dict 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.notesByCategory("inventory")
         """
         from dartlab.providers.edgar.docs.notes import notesByCategory
 
         return notesByCategory(self._company.cik, category)
 
     def noteCategories(self) -> list[str]:
-        """이 기업에서 데이터가 있는 notes 카테고리 목록."""
+        """이 기업에서 데이터가 있는 notes 카테고리 목록.
+
+        Returns:
+            카테고리 str 리스트.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.noteCategories()
+        """
         from dartlab.providers.edgar.docs.notes import noteCategories
 
         return noteCategories(self._company.cik)
 
     def freq(self) -> pl.DataFrame | None:
-        """freq — TODO 한국어 동작 설명."""
+        """sections 빈도 집계.
+
+        Returns:
+            빈도 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.freq()
+        """
         key = "_docs_freq"
         val = self._company._cache.get(key, _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -94,7 +169,17 @@ class _DocsAccessor:
         return val
 
     def coverage(self) -> pl.DataFrame | None:
-        """coverage — TODO 한국어 동작 설명."""
+        """topic × period 커버리지 — 결손 식별.
+
+        Returns:
+            커버리지 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.coverage()
+        """
         key = "_docs_coverage"
         val = self._company._cache.get(key, _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -105,7 +190,17 @@ class _DocsAccessor:
         return val
 
     def filings(self) -> pl.DataFrame | None:
-        """filings — TODO 한국어 동작 설명."""
+        """공시 목록 — 10-K/10-Q form_type 메타.
+
+        Returns:
+            ``period_key/form_type/accession_no/filed_date`` 컬럼 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.filings().head()
+        """
         key = "_docs_filings"
         if key in self._company._cache:
             return self._company._cache[key]

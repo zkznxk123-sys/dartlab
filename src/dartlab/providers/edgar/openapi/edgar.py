@@ -50,17 +50,46 @@ class OpenEdgar:
         Returns:
             매칭 DataFrame.
 
+        Raises:
+            없음.
+
         Example:
-            >>> Edgar().search("apple", limit=10)
+            >>> OpenEdgar().search("apple", limit=10)
         """
         return searchIssuers(query, self._client, limit=limit)
 
     def company(self, tickerOrCik: str) -> dict[str, Any]:
-        """티커 또는 CIK로 기업 identity 정보를 조회."""
+        """티커 또는 CIK 로 기업 identity 정보를 조회.
+
+        Args:
+            tickerOrCik: ticker (``"AAPL"``) 또는 CIK (``"0000320193"``).
+
+        Returns:
+            ``{ticker, cik, title, ...}`` dict.
+
+        Raises:
+            ValueError: 매칭 기업 부재 시.
+
+        Example:
+            >>> OpenEdgar().company("AAPL")
+        """
         return resolveIssuer(tickerOrCik, self._client)
 
     def submissionsJson(self, tickerOrCik: str) -> dict[str, Any]:
-        """SEC submissions API 원본 JSON을 반환."""
+        """SEC submissions API 원본 JSON 을 반환.
+
+        Args:
+            tickerOrCik: ticker 또는 CIK.
+
+        Returns:
+            원본 JSON dict.
+
+        Raises:
+            httpx.HTTPError: 네트워크 오류 시.
+
+        Example:
+            >>> OpenEdgar().submissionsJson("AAPL")
+        """
         cik = self.company(tickerOrCik)["cik"]
         return getSubmissionsJson(cik, self._client)
 
@@ -72,7 +101,23 @@ class OpenEdgar:
         since: str | None = None,
         until: str | None = None,
     ) -> pl.DataFrame:
-        """정기보고서(10-K/10-Q/20-F) 목록을 DataFrame으로 반환."""
+        """정기보고서 (10-K/10-Q/20-F) 목록을 DataFrame 으로 반환.
+
+        Args:
+            tickerOrCik: ticker 또는 CIK.
+            forms: form 유형 리스트 (None 이면 전체).
+            since: 시작일.
+            until: 종료일.
+
+        Returns:
+            ``form/filing_date/accession_no/...`` 컬럼 DataFrame.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> OpenEdgar().filings("AAPL", forms=["10-K"])
+        """
         info = self.company(tickerOrCik)
         submissions = getSubmissionsJson(info["cik"], self._client)
         return filingsFrame(
@@ -86,7 +131,20 @@ class OpenEdgar:
         )
 
     def companyFactsJson(self, tickerOrCik: str) -> dict[str, Any]:
-        """회사의 전체 XBRL fact 데이터를 JSON으로 반환."""
+        """회사의 전체 XBRL fact 데이터를 JSON 으로 반환.
+
+        Args:
+            tickerOrCik: ticker 또는 CIK.
+
+        Returns:
+            companyfacts API 원본 JSON.
+
+        Raises:
+            httpx.HTTPError: 네트워크 오류 시.
+
+        Example:
+            >>> OpenEdgar().companyFactsJson("AAPL")
+        """
         cik = self.company(tickerOrCik)["cik"]
         return getCompanyFactsJson(cik, self._client)
 
@@ -96,7 +154,22 @@ class OpenEdgar:
         taxonomy: str,
         tag: str,
     ) -> dict[str, Any]:
-        """특정 taxonomy/tag 조합의 concept 데이터를 JSON으로 반환."""
+        """특정 ``taxonomy``/``tag`` 조합의 concept 데이터를 JSON 으로 반환.
+
+        Args:
+            tickerOrCik: ticker 또는 CIK.
+            taxonomy: XBRL taxonomy (예: ``"us-gaap"``).
+            tag: XBRL tag (예: ``"Revenues"``).
+
+        Returns:
+            concept API 원본 JSON.
+
+        Raises:
+            httpx.HTTPError: 네트워크 오류 시.
+
+        Example:
+            >>> OpenEdgar().companyConceptJson("AAPL", "us-gaap", "Revenues")
+        """
         cik = self.company(tickerOrCik)["cik"]
         return getCompanyConceptJson(cik, taxonomy, tag, self._client)
 
@@ -107,7 +180,23 @@ class OpenEdgar:
         unit: str,
         period: str,
     ) -> dict[str, Any]:
-        """특정 기간의 전체 기업 XBRL frame 데이터를 JSON으로 반환."""
+        """특정 기간의 전체 기업 XBRL frame 데이터를 JSON 으로 반환.
+
+        Args:
+            taxonomy: XBRL taxonomy.
+            tag: XBRL tag.
+            unit: unit (예: ``"USD"``).
+            period: 기간 (예: ``"CY2024Q4I"``).
+
+        Returns:
+            frame API 원본 JSON (cross-sectional, 전 기업).
+
+        Raises:
+            httpx.HTTPError: 네트워크 오류 시.
+
+        Example:
+            >>> OpenEdgar().frameJson("us-gaap", "Revenues", "USD", "CY2024")
+        """
         return getFrameJson(taxonomy, tag, unit, period, self._client)
 
     def __call__(self, tickerOrCik: str) -> OpenEdgarCompany:
@@ -126,20 +215,62 @@ class OpenEdgarCompany:
 
     @property
     def ticker(self) -> str:
-        """회사 티커 심볼."""
+        """회사 티커 심볼.
+
+        Returns:
+            ticker str.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> e("AAPL").ticker
+            'AAPL'
+        """
         return str(self._identity["ticker"])
 
     @property
     def cik(self) -> str:
-        """SEC CIK 번호 (10자리 zero-padded)."""
+        """SEC CIK 번호 (10 자리 zero-padded).
+
+        Returns:
+            CIK str.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> e("AAPL").cik
+            '0000320193'
+        """
         return str(self._identity["cik"])
 
     def info(self) -> dict[str, Any]:
-        """기업 identity 정보(ticker, cik, title 등)를 dict로 반환."""
+        """기업 identity 정보 (ticker, cik, title 등) 를 dict 로 반환.
+
+        Returns:
+            ``{ticker, cik, title, ...}`` dict.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> e("AAPL").info()
+        """
         return dict(self._identity)
 
     def submissionsJson(self) -> dict[str, Any]:
-        """이 회사의 SEC submissions 원본 JSON을 반환."""
+        """이 회사의 SEC submissions 원본 JSON 을 반환.
+
+        Returns:
+            원본 JSON dict.
+
+        Raises:
+            httpx.HTTPError: 네트워크 오류 시.
+
+        Example:
+            >>> e("AAPL").submissionsJson()
+        """
         return getSubmissionsJson(self.cik, self._edgar._client)
 
     def filings(
@@ -149,7 +280,22 @@ class OpenEdgarCompany:
         since: str | None = None,
         until: str | None = None,
     ) -> pl.DataFrame:
-        """이 회사의 정기보고서 목록을 DataFrame으로 반환."""
+        """이 회사의 정기보고서 목록을 DataFrame 으로 반환.
+
+        Args:
+            forms: form 유형 리스트.
+            since: 시작일.
+            until: 종료일.
+
+        Returns:
+            ``form/filing_date/accession_no/...`` 컬럼 DataFrame.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> e("AAPL").filings(forms=["10-K"])
+        """
         submissions = self.submissionsJson()
         return filingsFrame(
             submissions,
@@ -162,19 +308,66 @@ class OpenEdgarCompany:
         )
 
     def companyFactsJson(self) -> dict[str, Any]:
-        """이 회사의 전체 XBRL fact 데이터를 JSON으로 반환."""
+        """이 회사의 전체 XBRL fact 데이터를 JSON 으로 반환.
+
+        Returns:
+            companyfacts API 원본 JSON.
+
+        Raises:
+            httpx.HTTPError: 네트워크 오류 시.
+
+        Example:
+            >>> e("AAPL").companyFactsJson()
+        """
         return getCompanyFactsJson(self.cik, self._edgar._client)
 
     def companyConceptJson(self, taxonomy: str, tag: str) -> dict[str, Any]:
-        """이 회사의 특정 taxonomy/tag concept 데이터를 JSON으로 반환."""
+        """이 회사의 특정 ``taxonomy``/``tag`` concept 데이터를 JSON 으로 반환.
+
+        Args:
+            taxonomy: XBRL taxonomy.
+            tag: XBRL tag.
+
+        Returns:
+            concept API 원본 JSON.
+
+        Raises:
+            httpx.HTTPError: 네트워크 오류 시.
+
+        Example:
+            >>> e("AAPL").companyConceptJson("us-gaap", "Revenues")
+        """
         return getCompanyConceptJson(self.cik, taxonomy, tag, self._edgar._client)
 
     def saveDocs(self, *, sinceYear: int = 2009) -> Path:
-        """10-K/10-Q 문서를 수집하여 로컬 parquet로 저장."""
+        """10-K/10-Q 문서를 수집하여 로컬 parquet 로 저장.
+
+        Args:
+            sinceYear: 시작 연도.
+
+        Returns:
+            저장된 parquet Path.
+
+        Raises:
+            ValueError: filing 부재 시 (``fetchEdgarDocs`` 위임).
+
+        Example:
+            >>> e("AAPL").saveDocs(sinceYear=2020)
+        """
         return _saveDocs(self.ticker, sinceYear=sinceYear)
 
     def saveFinance(self) -> Path:
-        """XBRL companyfacts를 수집하여 로컬 parquet로 저장."""
+        """XBRL companyfacts 를 수집하여 로컬 parquet 로 저장.
+
+        Returns:
+            저장된 parquet Path.
+
+        Raises:
+            httpx.HTTPError: 네트워크 오류 시.
+
+        Example:
+            >>> e("AAPL").saveFinance()
+        """
         return _saveFinance(self.cik, client=self._edgar._client)
 
     def __repr__(self) -> str:
