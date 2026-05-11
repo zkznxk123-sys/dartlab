@@ -345,7 +345,7 @@ class TestFetchKind:
 
         from dartlab.gather.krx.listing import _fetchKind
 
-        with patch("dartlab.gather.listing.httpx.post", side_effect=httpx.TimeoutException("timeout")):
+        with patch("dartlab.gather.krx.listing.httpx.post", side_effect=httpx.TimeoutException("timeout")):
             df = _fetchKind()
             assert isinstance(df, pl.DataFrame)
             assert df.height == 0
@@ -356,7 +356,7 @@ class TestFetchKind:
 
         from dartlab.gather.krx.listing import _fetchKind
 
-        with patch("dartlab.gather.listing.httpx.post", side_effect=httpx.ConnectError("refused")):
+        with patch("dartlab.gather.krx.listing.httpx.post", side_effect=httpx.ConnectError("refused")):
             df = _fetchKind()
             assert isinstance(df, pl.DataFrame)
             assert df.height == 0
@@ -368,7 +368,7 @@ class TestFetchKind:
         mock_response = MagicMock()
         mock_response.content = html.encode("euc-kr")
 
-        with patch("dartlab.gather.listing.httpx.post", return_value=mock_response):
+        with patch("dartlab.gather.krx.listing.httpx.post", return_value=mock_response):
             df = _fetchKind()
             assert isinstance(df, pl.DataFrame)
             if df.height > 0:

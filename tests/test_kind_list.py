@@ -13,7 +13,7 @@ def _listingMod():
     """GatherEntry가 attribute 접근을 가로채므로 sys.modules에서 직접 가져온다."""
     from dartlab.gather.krx.listing import searchName  # noqa: F401 — 모듈 로드 보장
 
-    return sys.modules["dartlab.gather.listing"]
+    return sys.modules["dartlab.gather.krx.listing"]
 
 
 class TestKindListSearch:
