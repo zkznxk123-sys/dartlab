@@ -521,6 +521,78 @@ class Company:
                 return text
         return f"Company('{self.ticker}', {self.corpName})"
 
+    # ── P7: Company context manager + 메모리-safe surface (룰 11 + MemorySafeProvider) ──
+
+    def __enter__(self) -> "Company":
+        """context manager 진입 — Company 인스턴스 그대로 반환.
+
+        Example:
+            with Company("AAPL") as c:
+                c.show("IS").head()
+
+        Returns:
+            self.
+
+        Raises:
+            없음.
+        """
+        return self
+
+    def __exit__(self, excType: object, excVal: object, excTb: object) -> None:
+        """context manager 종료 — BoundedCache evict + RSS 회수.
+
+        Args:
+            excType: 예외 type.
+            excVal: 예외 인스턴스.
+            excTb: traceback.
+
+        Raises:
+            없음.
+        """
+        try:
+            self.cleanupCache()
+        except (AttributeError, KeyError, RuntimeError):
+            pass
+
+    def cleanupCache(self) -> int:
+        """BoundedCache evict + cleanupBetweenCompanies.
+
+        Returns:
+            evict 된 entry 수.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.show("IS")
+            >>> n = c.cleanupCache()
+
+        Raises:
+            없음.
+        """
+        from dartlab.core.memory import cleanupBetweenCompanies
+
+        evicted = len(self._cache)
+        self._cache.clear()
+        cleanupBetweenCompanies(label=f"{self.ticker}_exit")
+        return evicted
+
+    def memorySnapshot(self) -> dict[str, int]:
+        """캐시 size + 현 RSS snapshot.
+
+        Returns:
+            keys: "cacheSize", "rssMb".
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.memorySnapshot()
+            {'cacheSize': 5, 'rssMb': 300}
+
+        Raises:
+            없음.
+        """
+        from dartlab.core.memory import getMemoryMb
+
+        return {"cacheSize": len(self._cache), "rssMb": int(getMemoryMb())}
+
     @property
     def fiscalYearEnd(self) -> str | None:
         """회계연도 종료 월-일 (예: AAPL → '09-26', MSFT → '06-30').

@@ -134,6 +134,81 @@ class Company:
         name = self._corpName or self.edinetCode
         return f"Company('{name}', market='JP')"
 
+    # ── P7: Company context manager + 메모리-safe surface (룰 11 + MemorySafeProvider) ──
+
+    def __enter__(self) -> "Company":
+        """context manager 진입.
+
+        Example:
+            with Company("7203") as c:
+                c.show("IS")
+
+        Returns:
+            self.
+
+        Raises:
+            없음.
+        """
+        return self
+
+    def __exit__(self, excType: object, excVal: object, excTb: object) -> None:
+        """context manager 종료 — 캐시 evict.
+
+        Args:
+            excType: 예외 type.
+            excVal: 예외 인스턴스.
+            excTb: traceback.
+
+        Raises:
+            없음.
+        """
+        try:
+            self.cleanupCache()
+        except (AttributeError, KeyError, RuntimeError):
+            pass
+
+    def cleanupCache(self) -> int:
+        """캐시 evict + cleanupBetweenCompanies.
+
+        EDINET 은 BoundedCache 사용 안 함 — _financeTimeseries dict 만 비움.
+
+        Returns:
+            비운 entry 수 (0 또는 1).
+
+        Example:
+            >>> c = Company("7203")
+            >>> c.cleanupCache()
+            0
+
+        Raises:
+            없음.
+        """
+        from dartlab.core.memory import cleanupBetweenCompanies
+
+        evicted = 1 if self._financeTimeseries else 0
+        self._financeTimeseries = None
+        cleanupBetweenCompanies(label=f"{self.edinetCode}_exit")
+        return evicted
+
+    def memorySnapshot(self) -> dict[str, int]:
+        """현 메모리 snapshot.
+
+        Returns:
+            keys: "cacheSize" (0 또는 1), "rssMb".
+
+        Example:
+            >>> c = Company("7203")
+            >>> c.memorySnapshot()
+            {'cacheSize': 0, 'rssMb': 250}
+
+        Raises:
+            없음.
+        """
+        from dartlab.core.memory import getMemoryMb
+
+        cacheSize = 1 if self._financeTimeseries else 0
+        return {"cacheSize": cacheSize, "rssMb": int(getMemoryMb())}
+
     @property
     def corpName(self) -> str | None:
         """회사명."""

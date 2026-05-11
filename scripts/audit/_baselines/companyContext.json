@@ -1,11 +1,4 @@
 {
-  "_note": "P1.5 후 갱신 — CompanyProtocol __enter__/__exit__ 추가 완료. 잔존: dart/edgar/edinet Company.__enter__/__exit__ 6 개 (P7 대상).",
-  "missingContextManagers": [
-    "dart: Company.__enter__",
-    "dart: Company.__exit__",
-    "edgar: Company.__enter__",
-    "edgar: Company.__exit__",
-    "edinet: Company.__enter__",
-    "edinet: Company.__exit__"
-  ]
+  "_note": "P7 후 갱신 — CompanyProtocol + dart/edgar/edinet Company 모두 __enter__/__exit__/cleanupCache/memorySnapshot 구현 완료. 룰 11 strict 달성.",
+  "missingContextManagers": []
 }

@@ -494,6 +494,85 @@ class Company:
             self._hintOnce(name, name, "finance")
         return result
 
+    # ── P7: Company context manager + 메모리-safe surface (룰 11 + MemorySafeProvider) ──
+
+    def __enter__(self) -> "Company":
+        """context manager 진입 — Company 인스턴스 그대로 반환.
+
+        Example:
+            with Company("005930") as c:
+                c.show("IS").head()
+
+        Returns:
+            self.
+
+        Raises:
+            없음.
+        """
+        return self
+
+    def __exit__(self, excType: object, excVal: object, excTb: object) -> None:
+        """context manager 종료 — BoundedCache evict + RSS 회수.
+
+        룰 11 만족. Polars 네이티브 힙 누수 차단.
+
+        Args:
+            excType: 예외 type (정상 종료 시 None).
+            excVal: 예외 인스턴스.
+            excTb: traceback.
+
+        Raises:
+            없음 (cleanup 실패 silent).
+        """
+        try:
+            self.cleanupCache()
+        except (AttributeError, KeyError, RuntimeError):
+            pass  # cleanup 실패는 silent — 정상 종료 우선
+
+    def cleanupCache(self) -> int:
+        """BoundedCache 전체 evict + cleanupBetweenCompanies 실행.
+
+        MemorySafeProvider Protocol 구현. with Company(c) 종료 시 자동 호출.
+
+        Returns:
+            evict 된 cache entry 수.
+
+        Example:
+            >>> c = Company("005930")
+            >>> c.show("IS")
+            >>> n = c.cleanupCache()
+            >>> print(f"evicted {n} entries")
+
+        Raises:
+            없음 (cleanupBetweenCompanies 가 내부 silent).
+        """
+        from dartlab.core.memory import cleanupBetweenCompanies
+
+        evicted = len(self._cache)
+        self._cache.clear()
+        cleanupBetweenCompanies(label=f"{self.stockCode}_exit")
+        return evicted
+
+    def memorySnapshot(self) -> dict[str, int]:
+        """캐시 size + 현 RSS snapshot.
+
+        MemorySafeProvider Protocol 구현.
+
+        Returns:
+            keys: "cacheSize" (BoundedCache entry 수), "rssMb" (현 RSS MB).
+
+        Example:
+            >>> c = Company("005930")
+            >>> c.memorySnapshot()
+            {'cacheSize': 12, 'rssMb': 450}
+
+        Raises:
+            없음.
+        """
+        from dartlab.core.memory import getMemoryMb
+
+        return {"cacheSize": len(self._cache), "rssMb": int(getMemoryMb())}
+
     def topicSummaries(self) -> dict[str, str]:
         """토픽별 요약 dict — AI가 경로 탐색에 사용.
 
