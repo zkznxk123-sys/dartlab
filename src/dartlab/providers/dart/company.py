@@ -1465,27 +1465,27 @@ class Company:
         freq: str = "Q",
         scope: str = "consolidated",
     ) -> pl.DataFrame | None:
-        from dartlab.providers.dart._showDispatch import showFinanceTopic
+        from dartlab.providers.dart.dataDispatcher import showFinanceTopic
 
         return showFinanceTopic(self, topic, period=period, freq=freq, scope=scope)
 
     def _traceFinanceTopic(self, topic: str, *, period: str | None = None) -> dict[str, Any] | None:
-        from dartlab.providers.dart._showDispatch import traceFinanceTopic
+        from dartlab.providers.dart.dataDispatcher import traceFinanceTopic
 
         return traceFinanceTopic(self, topic, period=period)
 
     def _showReportTopic(self, topic: str, *, period: str | None = None, raw: bool = False) -> pl.DataFrame | None:
-        from dartlab.providers.dart._showDispatch import showReportTopic
+        from dartlab.providers.dart.dataDispatcher import showReportTopic
 
         return showReportTopic(self, topic, period=period, raw=raw)
 
     def _showSegmentsSub(self, sub: str) -> pl.DataFrame | None:
-        from dartlab.providers.dart._showDispatch import showSegmentsSub
+        from dartlab.providers.dart.dataDispatcher import showSegmentsSub
 
         return showSegmentsSub(self, sub)
 
     def _showDirectTopic(self, topic: str, *, period: str | None = None, raw: bool = False) -> pl.DataFrame | None:
-        from dartlab.providers.dart._showDispatch import showDirectTopic
+        from dartlab.providers.dart.dataDispatcher import showDirectTopic
 
         return showDirectTopic(self, topic, period=period, raw=raw)
 
@@ -1496,7 +1496,7 @@ class Company:
         block: int | None = None,
         period: str | None = None,
     ) -> pl.DataFrame | None:
-        from dartlab.providers.dart._showDispatch import showSectionBlock
+        from dartlab.providers.dart.dataDispatcher import showSectionBlock
 
         return showSectionBlock(self, topicFrame, block=block, period=period)
 
@@ -1507,22 +1507,22 @@ class Company:
         periodCols: list[str],
         period: str | None = None,
     ) -> pl.DataFrame | None:
-        from dartlab.providers.dart._showDispatch import horizontalizeTableBlock
+        from dartlab.providers.dart.dataDispatcher import horizontalizeTableBlock
 
         return horizontalizeTableBlock(self, topicFrame, blockOrder, periodCols, period)
 
     def _reportFrame(self, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
-        from dartlab.providers.dart._showDispatch import reportFrame
+        from dartlab.providers.dart.dataDispatcher import reportFrame
 
         return reportFrame(self, topic, raw=raw)
 
     def _reportFrameInner(self, apiType: str, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
-        from dartlab.providers.dart._showDispatch import reportFrameInner
+        from dartlab.providers.dart.dataDispatcher import reportFrameInner
 
         return reportFrameInner(self, apiType, topic, raw=raw)
 
     def _applyPeriodFilter(self, payload: Any, period: str | None) -> Any:
-        from dartlab.providers.dart._showSelectUtils import applyPeriodFilter
+        from dartlab.providers.dart.dataShapeUtils import applyPeriodFilter
 
         return applyPeriodFilter(payload, period)
 
@@ -1652,7 +1652,7 @@ class Company:
             Freshness:
                 분기 마감 후 45일 (DART 공시 마감일). c.update() 로 증분 갱신.
         """
-        from dartlab.providers.dart._showDispatch import showImpl
+        from dartlab.providers.dart.dataDispatcher import showImpl
 
         result = showImpl(self, topic, block, period=period, freq=freq, scope=scope, raw=raw)
         if asOf is None or result is None:
@@ -1668,7 +1668,7 @@ class Company:
         freq: str,
         scope: str,
     ) -> pl.DataFrame | None:
-        from dartlab.providers.dart._showDispatch import showFinanceStatement
+        from dartlab.providers.dart.dataDispatcher import showFinanceStatement
 
         return showFinanceStatement(self, topic, block, period=period, freq=freq, scope=scope)
 
@@ -1682,25 +1682,25 @@ class Company:
         freq: str,
         scope: str,
     ) -> pl.DataFrame | None:
-        from dartlab.providers.dart._showDispatch import showSectionsTopic
+        from dartlab.providers.dart.dataDispatcher import showSectionsTopic
 
         return showSectionsTopic(self, topic, block, period=period, raw=raw, freq=freq, scope=scope)
 
     @staticmethod
     def _warnUnknownTopic(topic: str, sec: pl.DataFrame) -> None:
-        from dartlab.providers.dart._showSelectUtils import warnUnknownTopic
+        from dartlab.providers.dart.dataShapeUtils import warnUnknownTopic
 
         warnUnknownTopic(topic, sec)
 
     @staticmethod
     def _transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame | None:
-        from dartlab.providers.dart._showSelectUtils import transposeToVertical
+        from dartlab.providers.dart.dataShapeUtils import transposeToVertical
 
         return transposeToVertical(wide, periods)
 
     @staticmethod
     def _cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
-        from dartlab.providers.dart._showSelectUtils import cleanFinanceDataFrame
+        from dartlab.providers.dart.dataShapeUtils import cleanFinanceDataFrame
 
         return cleanFinanceDataFrame(df, sjDiv)
 
@@ -2980,17 +2980,17 @@ class Company:
         return df
 
     def _indexFinanceRows(self) -> list[dict[str, Any]]:
-        from dartlab.providers.dart._docsIndex import indexFinanceRows
+        from dartlab.providers.dart.docsIndexBuilder import indexFinanceRows
 
         return indexFinanceRows(self)
 
     def _indexDocsRows(self) -> list[dict[str, Any]]:
-        from dartlab.providers.dart._docsIndex import indexDocsRows
+        from dartlab.providers.dart.docsIndexBuilder import indexDocsRows
 
         return indexDocsRows(self)
 
     def _indexReportRows(self, *, existingTopics: set[str] | None = None) -> list[dict[str, Any]]:
-        from dartlab.providers.dart._docsIndex import indexReportRows
+        from dartlab.providers.dart.docsIndexBuilder import indexReportRows
 
         return indexReportRows(self, existingTopics=existingTopics)
 
