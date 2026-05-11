@@ -137,20 +137,27 @@ def buildTimeseries(
     stockCode: str,
     fsDivPref: str = "CFS",
 ) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
-    """finance parquet → 분기별 standalone 시계열. (캐시: 종목 × fsDiv 조합 8 개)
+    """finance parquet → 분기별 standalone 시계열 (캐시: 종목 × fsDiv 조합 8).
 
-    같은 종목/fsDiv 를 한 process 안에서 반복 호출해도 1 회만 매핑한다.
-    결과는 작은 dict (수 MB) 라 process-wide LRU 안전.
-    무효화: parquet 갱신 시 server 재기동 필요 (사용 패턴상 OK).
+    같은 종목/fsDiv 를 한 process 안에서 반복 호출해도 1 회만 매핑. 결과는 작은 dict
+    (수 MB) 라 process-wide LRU 안전. 무효화: parquet 갱신 시 server 재기동 필요.
 
     Args:
-            stockCode: 종목코드 (예: "005930")
-            fsDivPref: "CFS" (연결) 또는 "OFS" (별도). CFS 없으면 OFS fallback.
+        stockCode: 종목코드 (예: ``"005930"``).
+        fsDivPref: ``"CFS"`` (연결) 또는 ``"OFS"`` (별도). CFS 없으면 OFS fallback.
 
     Returns:
-            (series, periods) 또는 None.
-            series = {"BS": {"snakeId": [값...]}, "IS": {...}, "CF": {...}}
-            periods = ["2016-Q1", "2016-Q2", ..., "2024-Q4"]
+        ``(series, periods)`` 또는 None.
+
+        - ``series = {"BS": {"snakeId": [값...]}, "IS": {...}, "CF": {...}}``
+        - ``periods = ["2016-Q1", "2016-Q2", ..., "2024-Q4"]``
+
+    Raises:
+        없음 (데이터 부재 시 None 반환).
+
+    Example:
+        >>> series, periods = buildTimeseries("005930")
+        >>> series["IS"]["sales"][-1]
     """
     return _buildTimeseriesCached(str(stockCode).strip(), str(fsDivPref).strip() or "CFS")
 
@@ -169,7 +176,17 @@ def _buildTimeseriesCached(
 
 
 def clearFinanceCache() -> None:
-    """parquet 갱신 후 cached 결과 폐기. tests/dev 용."""
+    """parquet 갱신 후 cached 결과 폐기 — tests/dev 용.
+
+    Returns:
+        None (in-place cache clear).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> clearFinanceCache()  # parquet 재로드 강제
+    """
     _buildTimeseriesCached.cache_clear()
 
 
@@ -179,17 +196,24 @@ def buildAnnual(
 ) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
     """finance parquet → 연도별 시계열.
 
-    IS/CF: 해당 연도 분기별 standalone 합산.
-    BS: 해당 연도 마지막 분기(Q4 우선) 시점잔액.
+    - IS/CF: 해당 연도 분기별 standalone 합산.
+    - BS: 해당 연도 마지막 분기 (Q4 우선) 시점잔액.
 
     Args:
-            stockCode: 종목코드 (예: "005930")
-            fsDivPref: "CFS" (연결) 또는 "OFS" (별도).
+        stockCode: 종목코드 (예: ``"005930"``).
+        fsDivPref: ``"CFS"`` (연결) 또는 ``"OFS"`` (별도).
 
     Returns:
-            (series, years) 또는 None.
-            series = {"BS": {"snakeId": [값...]}, "IS": {...}, "CF": {...}}
-            years = ["2016", "2017", ..., "2024"]
+        ``(series, years)`` 또는 None.
+
+        - ``series = {"BS": {"snakeId": [값...]}, "IS": {...}, "CF": {...}}``
+        - ``years = ["2016", "2017", ..., "2024"]``
+
+    Raises:
+        없음 (데이터 부재 시 None 반환).
+
+    Example:
+        >>> series, years = buildAnnual("005930")
     """
     qResult = buildTimeseries(stockCode, fsDivPref)
     if qResult is None:
@@ -205,17 +229,24 @@ def buildCumulative(
 ) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
     """finance parquet → 분기별 누적 시계열.
 
-    IS/CF: 해당 연도 시작부터 누적합 (Q1, Q1+Q2, Q1+Q2+Q3, Q1+Q2+Q3+Q4).
-    BS: 시점잔액 그대로.
+    - IS/CF: 해당 연도 시작부터 누적합 (Q1, Q1+Q2, Q1+Q2+Q3, Q1+Q2+Q3+Q4).
+    - BS: 시점잔액 그대로.
 
     Args:
-            stockCode: 종목코드 (예: "005930")
-            fsDivPref: "CFS" (연결) 또는 "OFS" (별도).
+        stockCode: 종목코드 (예: ``"005930"``).
+        fsDivPref: ``"CFS"`` (연결) 또는 ``"OFS"`` (별도).
 
     Returns:
-            (series, periods) 또는 None.
-            series = {"BS": {"snakeId": [값...]}, "IS": {...}, "CF": {...}}
-            periods = ["2016-Q1", "2016-Q2", ..., "2024-Q4"]
+        ``(series, periods)`` 또는 None.
+
+        - ``series = {"BS": {"snakeId": [값...]}, "IS": {...}, "CF": {...}}``
+        - ``periods = ["2016-Q1", "2016-Q2", ..., "2024-Q4"]``
+
+    Raises:
+        없음 (데이터 부재 시 None 반환).
+
+    Example:
+        >>> series, periods = buildCumulative("005930")
     """
     qResult = buildTimeseries(stockCode, fsDivPref)
     if qResult is None:
@@ -626,16 +657,23 @@ def buildSceMatrix(
 ) -> tuple[dict[str, dict[str, dict[str, float | None]]], list[str]] | None:
     """SCE 원본 → 연도별 자본변동 매트릭스.
 
-    각 연도에서 가장 높은 분기(maxQ)만 사용.
+    각 연도에서 가장 높은 분기 (maxQ) 만 사용 — 누적 보고 인정.
 
     Args:
-            stockCode: 종목코드 (예: "005930")
-            fsDivPref: "CFS" (연결) 또는 "OFS" (별도).
+        stockCode: 종목코드 (예: ``"005930"``).
+        fsDivPref: ``"CFS"`` (연결) 또는 ``"OFS"`` (별도).
 
     Returns:
-            (matrix, years) 또는 None.
-            matrix[year][cause_snakeId][detail_snakeId] = 금액
-            years = ["2016", "2017", ..., "2024"]
+        ``(matrix, years)`` 또는 None.
+
+        - ``matrix[year][cause_snakeId][detail_snakeId] = 금액``
+        - ``years = ["2016", "2017", ..., "2024"]``
+
+    Raises:
+        없음 (데이터 부재 시 None 반환).
+
+    Example:
+        >>> matrix, years = buildSceMatrix("005930")
     """
     from dartlab.core.dataLoader import loadData
 
@@ -736,16 +774,23 @@ def buildSceAnnual(
     stockCode: str,
     fsDivPref: str = "CFS",
 ) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
-    """SCE → 연도별 시계열 (BS/IS/CF와 유사한 출력 형태).
+    """SCE → 연도별 시계열 (BS/IS/CF 와 유사한 출력 형태).
 
     Args:
-            stockCode: 종목코드 (예: "005930")
-            fsDivPref: "CFS" (연결) 또는 "OFS" (별도).
+        stockCode: 종목코드 (예: ``"005930"``).
+        fsDivPref: ``"CFS"`` (연결) 또는 ``"OFS"`` (별도).
 
     Returns:
-            (series, years) 또는 None.
-            series["SCE"]["cause__detail"] = [v2016, v2017, ..., v2024]
-            years = ["2016", "2017", ..., "2024"]
+        ``(series, years)`` 또는 None.
+
+        - ``series["SCE"]["cause__detail"] = [v2016, v2017, ..., v2024]``
+        - ``years = ["2016", "2017", ..., "2024"]``
+
+    Raises:
+        없음 (데이터 부재 시 None 반환).
+
+    Example:
+        >>> series, years = buildSceAnnual("005930")
     """
     result = buildSceMatrix(stockCode, fsDivPref)
     if result is None:

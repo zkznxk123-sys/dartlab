@@ -625,10 +625,22 @@ DETAIL_MAP: dict[str, str] = {
 
 
 def normalizeCause(accountNm: str) -> str:
-    """account_nm → 변동사유 snakeId.
+    """``account_nm`` → 변동사유 snakeId.
 
-    3-tier 매칭: 정확 → 공백 제거 → fallback 패턴.
-    미매핑 시 'unmapped:{원본}' 반환.
+    3-tier 매칭: 정확 → 공백 제거 → fallback 패턴. 미매핑 시 ``"unmapped:{원본}"`` 반환.
+
+    Args:
+        accountNm: SCE 변동사유 원문 (예: ``"당기순이익"``).
+
+    Returns:
+        변동사유 snakeId (예: ``"net_income"``) 또는 ``"unmapped:{원본}"``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> normalizeCause("당기순이익")
+        'net_income'
     """
     nm = accountNm.strip()
     if nm in CAUSE_SYNONYMS:
@@ -815,10 +827,24 @@ def _matchDetailMap(last: str) -> str | None:
 
 
 def normalizeDetail(detail: str | None) -> str:
-    """account_detail → 자본항목 snakeId (Q3.1e orchestrator split).
+    """``account_detail`` → 자본항목 snakeId (Q3.1e orchestrator split).
 
-    파이프(|) 구분 마지막 세그먼트에서 DETAIL_MAP → 7 패턴 그룹 → unmapped.
-    미매핑 시 'unmapped:{원본}' 반환.
+    파이프 (``|``) 구분 마지막 세그먼트에서 ``DETAIL_MAP`` → 7 패턴 그룹 → unmapped.
+    미매핑 시 ``"unmapped:{원본}"`` 반환.
+
+    Args:
+        detail: SCE ``account_detail`` 원문. None / 빈 문자열이면 ``"unknown"``.
+
+    Returns:
+        자본항목 snakeId (예: ``"retained_earnings"``) 또는 ``"unmapped:{원본}"`` 또는
+        special ``"total"``/``"total_separate"``/``"unknown"``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> normalizeDetail("자본의 구성요소 | 이익잉여금")
+        'retained_earnings'
     """
     if not detail:
         return "unknown"

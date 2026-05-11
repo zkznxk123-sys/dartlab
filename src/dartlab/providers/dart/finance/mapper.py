@@ -212,14 +212,35 @@ class AccountMapper:
 
     @classmethod
     def get(cls) -> AccountMapper:
-        """싱글턴 AccountMapper 인스턴스를 반환한다."""
+        """싱글턴 AccountMapper 인스턴스 반환.
+
+        Returns:
+            동일 process 안에서 항상 같은 ``AccountMapper`` 인스턴스.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> mapper = AccountMapper.get()
+            >>> mapper.map("ifrs-full_Revenue", "매출액")
+        """
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
 
     @classmethod
     def release(cls) -> None:
-        """메모리 해제. 다음 get() 호출 시 자동 재로드."""
+        """메모리 해제. 다음 ``get()`` 호출 시 자동 재로드.
+
+        Returns:
+            None (class-level cache reset).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> AccountMapper.release()  # accountMappings.json 갱신 후
+        """
         cls._instance = None
         cls._mappings = None
         cls._stdAccountsRaw = None
@@ -251,13 +272,24 @@ class AccountMapper:
         return AccountMapper._noHyphenIndex
 
     def map(self, accountId: str, accountNm: str) -> Optional[str]:
-        """account_id + account_nm → snakeId.
+        """``account_id`` + ``account_nm`` → snakeId.
 
-        v8 방식: 한글명 우선 조회 → 영문ID 조회 → 공백제거 → 괄호제거 fallback.
-        accountMappings.json의 snakeId(= standardAccounts 기준)를 그대로 반환.
+        v8 방식: 한글명 우선 조회 → 영문 ID 조회 → 공백제거 → 괄호제거 fallback.
+        ``accountMappings.json`` 의 ``snakeId`` (= standardAccounts 기준) 그대로 반환.
+
+        Args:
+            accountId: XBRL account_id (예: ``"ifrs-full_Revenue"``).
+            accountNm: 한글 account name (예: ``"매출액"``).
 
         Returns:
-                snakeId 또는 None (미매핑).
+            snakeId 또는 None (미매핑).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> mapper.map("ifrs-full_Revenue", "매출액")
+            'sales'
         """
         stripped = _stripPrefix(accountId) if accountId else ""
         normalizedId = ID_SYNONYMS.get(stripped, stripped)
@@ -291,15 +323,60 @@ class AccountMapper:
         return None
 
     def labelMap(self) -> dict[str, str]:
-        """snakeId → 대표 한글명 매핑. SSOT 위임 (core/finance/labels.py)."""
+        """``snakeId`` → 대표 한글명 매핑.
+
+        SSOT 위임 (``core/utils/labels.getKoreanLabels``).
+
+        Returns:
+            ``{snakeId: 한글 라벨, ...}`` dict.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> mapper.labelMap()["sales"]
+            '매출액'
+        """
         from dartlab.core.utils.labels import getKoreanLabels
 
         return getKoreanLabels()
 
     def sortOrder(self, sjDiv: str) -> dict[str, int]:
-        """sj_div별 snakeId → 표시 순서 (common/finance/ordering 위임)."""
+        """``sj_div`` 별 ``snakeId`` → 표시 순서.
+
+        ``common/finance/ordering`` 위임.
+
+        Args:
+            sjDiv: BS/IS/CF/CIS/SCE 중 하나.
+
+        Returns:
+            ``{snakeId: 정수 순서}`` dict — 낮을수록 먼저 표시.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> mapper.sortOrder("IS")["sales"]
+            10
+        """
         return _commonSortOrder(sjDiv)
 
     def levelMap(self, sjDiv: str) -> dict[str, int]:
-        """sj_div별 snakeId → 들여쓰기 레벨 (common/finance/ordering 위임)."""
+        """``sj_div`` 별 ``snakeId`` → 들여쓰기 레벨.
+
+        ``common/finance/ordering`` 위임.
+
+        Args:
+            sjDiv: BS/IS/CF/CIS/SCE 중 하나.
+
+        Returns:
+            ``{snakeId: 레벨}`` dict (0=root, 1=sub, ...).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> mapper.levelMap("BS")["current_assets"]
+            1
+        """
         return _commonLevelMap(sjDiv)

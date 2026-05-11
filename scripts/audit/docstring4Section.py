@@ -27,9 +27,35 @@ _REPO = Path(__file__).resolve().parents[2]
 _DEFAULT_TARGET = _REPO / "src" / "dartlab" / "providers"
 _BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "docstring4Section.json"
 
-_ARGS_KEYWORDS = ("Args:", "Arguments:", "Parameters:", "매개변수:", "인자:", "Returns:", "Return:")
-_EXAMPLE_KEYWORDS = ("Example:", "Examples:", "Usage:", "예:", "예제:", "사용법:")
-_RAISES_KEYWORDS = ("Raises:", "Errors:", "Throws:", "예외:", "에러:")
+_ARGS_KEYWORDS = (
+    "Args:",
+    "Arguments:",
+    "Parameters:",
+    "Parameters\n",
+    "매개변수:",
+    "인자:",
+    "Returns:",
+    "Returns\n",
+    "Return:",
+)
+_EXAMPLE_KEYWORDS = (
+    "Example:",
+    "Examples:",
+    "Example\n",
+    "Examples\n",
+    "Usage:",
+    "예:",
+    "예제:",
+    "사용법:",
+)
+_RAISES_KEYWORDS = (
+    "Raises:",
+    "Raises\n",
+    "Errors:",
+    "Throws:",
+    "예외:",
+    "에러:",
+)
 
 
 def _hasSection(docstring: str, keywords: tuple[str, ...]) -> bool:

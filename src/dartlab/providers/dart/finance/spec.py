@@ -4,7 +4,26 @@ from __future__ import annotations
 
 
 def buildSpec() -> dict:
-    """dart/finance 엔진 스펙 반환."""
+    """dart/finance 엔진 스펙 반환.
+
+    코드에서 자동 추출 — Skill OS / docs 생성용.
+
+    Returns:
+        ``{name, description, summary, detail}`` 구조 dict.
+
+        - ``summary.statements``: 지원 sj_div 리스트
+        - ``summary.mappedAccounts``: accountMappings.json 매핑 수
+        - ``detail.normalization``: 정규화 로직 설명
+        - ``detail.mappingPipeline``: ID → snakeId 매핑 순서
+
+    Raises:
+        없음.
+
+    Example:
+        >>> spec = buildSpec()
+        >>> spec["summary"]["statements"]
+        ['IS', 'BS', 'CF', 'SCE']
+    """
     import dataclasses
 
     from dartlab.analysis.financial.ratios import RatioResult

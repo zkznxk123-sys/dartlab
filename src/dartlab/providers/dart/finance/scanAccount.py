@@ -543,6 +543,10 @@ def scanAccount(
     scanRatio : 비율 시계열 (primitive 2/2) — 발굴 레시피·7 관점 SSOT
     scanAccountList : 지원 계정 목록
     scan("profitability") · scan("growth") 등 : 자주 쓰는 프리셋 (이 함수 + scanRatio 조합 결과)
+
+    Raises
+    ------
+    없음 (지원되지 않는 snakeId 또는 데이터 부재 시 빈 DataFrame).
     """
     from dartlab.core.dataLoader import _dataDir
 
@@ -900,6 +904,11 @@ def scanRatio(
     scanAccount : 단일 계정 시계열 (primitive 1/2)
     scanRatioList : 지원 비율 목록
     scan("profitability") · scan("quality") 등 : 프리셋 조합
+
+    Raises
+    ------
+    ValueError
+        지원하지 않는 ``ratioName`` 일 때 (사용 가능 목록 + hint 포함).
     """
     if ratioName not in _RATIO_DEFS:
         available = ", ".join(sorted(_RATIO_DEFS))
