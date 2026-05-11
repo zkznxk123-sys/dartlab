@@ -1232,7 +1232,7 @@ class Company:
         SEC 의 10-K/10-Q 패턴은 별도 추론기 필요 — 미구현. 빈 DataFrame 반환.
         DartCompany.calendar 와 시그니처 일치 (CompanyProtocol 일관성).
         """
-        from dartlab.providers.dart.calendar import OUTPUT_SCHEMA
+        from dartlab.providers.dart.ops.calendar import OUTPUT_SCHEMA
 
         return pl.DataFrame(schema=OUTPUT_SCHEMA)
 

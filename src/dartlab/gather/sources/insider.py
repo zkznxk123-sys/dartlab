@@ -42,7 +42,7 @@ async def fetchInsiderTrading(
     if market != "KR":
         return []
     try:
-        from dartlab.providers.dart.insiderTrades import fetchInsiderTradingRaw
+        from dartlab.providers.dart.ops.insiderTrades import fetchInsiderTradingRaw
 
         rawRows = await fetchInsiderTradingRaw(stockCode)
         return [InsiderTrade(**row) for row in rawRows]
@@ -82,7 +82,7 @@ async def fetchMajorShareholders(
     if market != "KR":
         return []
     try:
-        from dartlab.providers.dart.insiderTrades import fetchMajorShareholdersRaw
+        from dartlab.providers.dart.ops.insiderTrades import fetchMajorShareholdersRaw
 
         rawRows = await fetchMajorShareholdersRaw(stockCode)
         return [MajorHolder(**row) for row in rawRows]

@@ -26,7 +26,7 @@ import re
 
 import polars as pl
 
-from dartlab.providers.dart.viewerPageExtractor import DART_MAIN_BASE, htmlToText, parseSubDocs
+from dartlab.providers.dart.parse.viewerPageExtractor import DART_MAIN_BASE, htmlToText, parseSubDocs
 
 from ..infra.http import GatherHttpClient, runAsync
 from .types import DartDocMeta, DocumentNotFoundError, InvalidRceptNoError

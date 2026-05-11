@@ -57,7 +57,7 @@ def buildDocsItemIndex(company: Company, topic: str) -> dict[str, list[tuple[int
         if bt != "table" or src != "docs":
             continue
 
-        from dartlab.providers.dart.tableHorizontalizer import (
+        from dartlab.providers.dart.parse.tableHorizontalizer import (
             horizontalizeTableBlock,
         )
 

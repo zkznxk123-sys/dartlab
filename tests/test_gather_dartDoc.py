@@ -21,7 +21,7 @@ class TestViewerParseHelpers:
     def test_tableToMarkdown_simple_table(self):
         from bs4 import BeautifulSoup
 
-        from dartlab.providers.dart.viewerPageExtractor import tableToMarkdown
+        from dartlab.providers.dart.parse.viewerPageExtractor import tableToMarkdown
 
         html = "<table><tr><th>회사명</th><th>코드</th></tr><tr><td>삼성</td><td>005930</td></tr></table>"
         table = BeautifulSoup(html, "lxml").find("table")
@@ -33,13 +33,13 @@ class TestViewerParseHelpers:
     def test_tableToMarkdown_empty_returns_empty(self):
         from bs4 import BeautifulSoup
 
-        from dartlab.providers.dart.viewerPageExtractor import tableToMarkdown
+        from dartlab.providers.dart.parse.viewerPageExtractor import tableToMarkdown
 
         table = BeautifulSoup("<table></table>", "lxml").find("table")
         assert tableToMarkdown(table) == ""
 
     def test_htmlToText_preserves_table_markdown(self):
-        from dartlab.providers.dart.viewerPageExtractor import htmlToText
+        from dartlab.providers.dart.parse.viewerPageExtractor import htmlToText
 
         html = "<p>단락 1</p><table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table><p>단락 2</p>"
         text = htmlToText(html)
@@ -48,7 +48,7 @@ class TestViewerParseHelpers:
         assert "| A | B |" in text
 
     def test_htmlToText_strips_script_style(self):
-        from dartlab.providers.dart.viewerPageExtractor import htmlToText
+        from dartlab.providers.dart.parse.viewerPageExtractor import htmlToText
 
         html = "<script>alert(1)</script><style>p{color:red}</style><p>본문</p>"
         text = htmlToText(html)
@@ -57,7 +57,7 @@ class TestViewerParseHelpers:
         assert "color" not in text
 
     def test_parseSubDocs_multi_page(self):
-        from dartlab.providers.dart.viewerPageExtractor import parseSubDocs
+        from dartlab.providers.dart.parse.viewerPageExtractor import parseSubDocs
 
         # MULTI_PAGE_RE 가 매칭되는 viewer 페이지 인덱스 구조 mock
         content = (
@@ -80,7 +80,7 @@ class TestViewerParseHelpers:
         assert "report/viewer.do" in result[0]["url"]
 
     def test_parseSubDocs_empty_when_no_match(self):
-        from dartlab.providers.dart.viewerPageExtractor import parseSubDocs
+        from dartlab.providers.dart.parse.viewerPageExtractor import parseSubDocs
 
         assert parseSubDocs("<html><body>no nodes</body></html>", "20240315000123") == []
 

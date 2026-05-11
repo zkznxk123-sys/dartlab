@@ -3,6 +3,7 @@
   "over_split": [
     "src/dartlab/providers/dart/docs/disclosure/business",
     "src/dartlab/providers/dart/docs/disclosure/mdna",
+    "src/dartlab/providers/dart/ops",
     "src/dartlab/providers/edinet/openapi"
   ],
   "under_split": [

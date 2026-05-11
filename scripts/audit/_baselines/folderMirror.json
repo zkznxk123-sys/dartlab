@@ -8,6 +8,8 @@
       "extra": [
         "accessor",
         "builder",
+        "ops",
+        "parse",
         "search"
       ]
     },
@@ -15,6 +17,8 @@
       "missing": [
         "accessor",
         "builder",
+        "ops",
+        "parse",
         "search"
       ],
       "extra": [
@@ -26,6 +30,8 @@
         "accessor",
         "builder",
         "bulk",
+        "ops",
+        "parse",
         "report",
         "search"
       ],

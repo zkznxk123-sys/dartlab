@@ -4272,7 +4272,7 @@ class Company:
         본 회사 disclosure history 를 수집해 providers/dart/calendar 에 위임.
         intra-package import 라 cycle 0 (gather 의존 X).
         """
-        from dartlab.providers.dart.calendar import OUTPUT_SCHEMA, predictCalendar
+        from dartlab.providers.dart.ops.calendar import OUTPUT_SCHEMA, predictCalendar
 
         history = self.disclosure(days=400, type="A")
         if history is None or history.is_empty():

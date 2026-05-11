@@ -17,7 +17,7 @@ from datetime import date, datetime
 import polars as pl
 import pytest
 
-from dartlab.providers.dart.calendar import (
+from dartlab.providers.dart.ops.calendar import (
     _nextKrCycle,
     _parseDate,
     _predictNextFiling,
