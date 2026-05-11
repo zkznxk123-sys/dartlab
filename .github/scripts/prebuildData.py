@@ -41,6 +41,32 @@ def _buildScan(dataDir: str) -> dict[str, Path | list[Path] | None]:
     return buildScan(sinceYear=2021, verbose=True)
 
 
+def _buildDocsIndex(dataDir: str) -> Path | None:
+    """docs 슬림 인덱스 빌드 (P3 — whimsical 흡수).
+
+    Args:
+        dataDir: 데이터 디렉토리.
+
+    Returns:
+        산출 parquet 경로 또는 None (실패 시).
+
+    Raises:
+        없음 (실패는 silent → summary 에 표기).
+
+    Example:
+        >>> path = _buildDocsIndex("./data")
+        >>> path
+        PosixPath('data/dart/scan/docsIndex.parquet')
+    """
+    try:
+        from dartlab.scan.builder.docsIndex import buildDocsIndex
+
+        return buildDocsIndex(sinceYear=2016, batchSize=100, verbose=True)
+    except (FileNotFoundError, RuntimeError) as exc:
+        print(f"[prebuild] docsIndex 빌드 실패 (스킵): {exc}")
+        return None
+
+
 def _uploadScan(dataDir: str) -> None:
     """scan 결과를 HuggingFace에 업로드."""
     token = os.environ.get("HF_TOKEN", "")
@@ -129,7 +155,11 @@ def main():
         elapsed = time.time() - start
         print(f"[prebuild] scan 빌드 완료: {elapsed:.0f}초")
 
-        # 2.5단계: 데이터 품질 검증
+        # 2.5단계: docs 슬림 인덱스 (P3 — whimsical 흡수)
+        if counts.get("docs", 0) > 0:
+            results["docsIndex"] = _buildDocsIndex(dataDir)
+
+        # 2.6단계: 데이터 품질 검증
         _validateFinanceParquet(dataDir, counts["finance"])
 
         # 3단계: HF 업로드
