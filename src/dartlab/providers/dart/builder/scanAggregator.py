@@ -102,7 +102,19 @@ def _ensureDebt(company: Company) -> pl.DataFrame | None:
 def companyScanView(company: Company, df: pl.DataFrame | None, view: str | None) -> pl.DataFrame | None:
     """scan DataFrame 에서 view 별 필터.
 
-    None 이면 이 회사 행만, "all" 이면 전체, "market" 이면 시장별 요약.
+    Args:
+        company: Company 인스턴스 (stockCode 추출용).
+        df: scan DataFrame (None 또는 빈 DF 면 None 반환).
+        view: ``None`` 이면 본 회사 행만 / ``"all"`` 이면 전체 / ``"market"`` 이면 시장별 요약.
+
+    Returns:
+        필터된 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> companyScanView(c, df, view="market")
     """
     if isEmptyDf(df):
         return None
@@ -147,7 +159,22 @@ def _scanMarketSummary(df: pl.DataFrame) -> pl.DataFrame:
 
 
 def buildScanNetwork(company: Company, view: str | None = None, *, hops: int = 1):
-    """network() 구현."""
+    """``c.network()`` 구현 — 그룹 내 회사들의 네트워크 그래프 빌드.
+
+    Args:
+        company: Company 인스턴스.
+        view: 필터 view (``None``/``"all"``/``"market"`` 또는 ``"members"``/``"edges"``).
+        hops: 그래프 hop 깊이.
+
+    Returns:
+        view 에 따라 DataFrame/dict 반환 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildScanNetwork(c, view="members")
+    """
     result = _ensureNetwork(company)
     if result is None:
         return None
@@ -303,20 +330,76 @@ def _networkPeers(data: dict, full: dict, code: str, *, hops: int = 1) -> pl.Dat
 
 
 def buildScanGovernance(company: Company, view: str | None = None) -> pl.DataFrame | None:
-    """governance() 구현."""
+    """``c.governance()`` 구현 — 지배구조 scan view.
+
+    Args:
+        company: Company 인스턴스.
+        view: 필터 view (``None``/``"all"``/``"market"``).
+
+    Returns:
+        필터된 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildScanGovernance(c, view="market")
+    """
     return companyScanView(company, _ensureGovernance(company), view)
 
 
 def buildScanWorkforce(company: Company, view: str | None = None) -> pl.DataFrame | None:
-    """workforce() 구현."""
+    """``c.workforce()`` 구현 — 인력 scan view.
+
+    Args:
+        company: Company 인스턴스.
+        view: 필터 view.
+
+    Returns:
+        필터된 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildScanWorkforce(c)
+    """
     return companyScanView(company, _ensureWorkforce(company), view)
 
 
 def buildScanCapital(company: Company, view: str | None = None) -> pl.DataFrame | None:
-    """capital() 구현."""
+    """``c.capital()`` 구현 — 자본 scan view.
+
+    Args:
+        company: Company 인스턴스.
+        view: 필터 view.
+
+    Returns:
+        필터된 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildScanCapital(c)
+    """
     return companyScanView(company, _ensureCapital(company), view)
 
 
 def buildScanDebt(company: Company, view: str | None = None) -> pl.DataFrame | None:
-    """debt() 구현."""
+    """``c.debt()`` 구현 — 부채 scan view.
+
+    Args:
+        company: Company 인스턴스.
+        view: 필터 view.
+
+    Returns:
+        필터된 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildScanDebt(c)
+    """
     return companyScanView(company, _ensureDebt(company), view)

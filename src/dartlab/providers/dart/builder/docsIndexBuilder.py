@@ -42,7 +42,21 @@ _CHAPTER_ORDER: dict[str, int] = {chapter: idx for idx, chapter in enumerate(_CH
 
 
 def indexFinanceRows(company: Company) -> list[dict[str, Any]]:
-    """finance 영역의 index rows — BS/IS/CIS/CF/SCE + ratios."""
+    """finance 영역의 index rows — BS/IS/CIS/CF/SCE + ratios.
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        ``{chapter, topic, label, kind, source, periods, shape, preview, _sortKey}``
+        dict 리스트.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> indexFinanceRows(c)[:5]
+    """
     rows: list[dict[str, Any]] = []
     _STMT_ORDER = {"BS": 0, "IS": 1, "CIS": 2, "CF": 3, "SCE": 4}
     for stmt in ("BS", "IS", "CIS", "CF", "SCE"):
@@ -97,7 +111,21 @@ def indexFinanceRows(company: Company) -> list[dict[str, Any]]:
 
 
 def indexDocsRows(company: Company) -> list[dict[str, Any]]:
-    """docs 영역의 index rows — sections 기반."""
+    """docs 영역의 index rows — sections 기반 topic × period 통계.
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        ``{chapter, topic, label, kind, source, periods, shape, preview, _sortKey}``
+        dict 리스트.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> indexDocsRows(c)[:5]
+    """
     if not company._hasDocs:
         return []
 
@@ -135,7 +163,21 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
     latestPeriod = validPeriods[-1]
 
     def representativePeriodRank(period: str | None) -> int:
-        """representativePeriodRank — TODO 한국어 동작 설명."""
+        """대표 기간 정렬 rank — ``year*10 + quarter``.
+
+        Args:
+            period: ``"2024"`` 또는 ``"2024Q1"`` 등.
+
+        Returns:
+            정수 rank (None / 비문자 → -1).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> representativePeriodRank("2024Q4")
+            20244
+        """
         if not isinstance(period, str):
             return -1
         year = int(period[:4])
@@ -221,7 +263,20 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
     freqPriority = {"mixed": 0, "annual": 1, "quarterly": 2, "none": 3}
 
     def topicRowSortKey(key: tuple[str, str]) -> tuple[int, int, int, int, int, int, int, int, str]:
-        """topicRowSortKey — TODO 한국어 동작 설명."""
+        """topic/segment row 정렬 키 — chapter/freq/latest/order 다단 정렬.
+
+        Args:
+            key: ``(topic, segmentKey)`` 튜플.
+
+        Returns:
+            9-tuple 정렬 키.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> topicRowSortKey(("BS", "0"))  # nested function example
+        """
         topic, segmentKey = key
         majorNum, firstSeq = topicFirstSeq.get(topic, (99, 999999))
         topicIdx = topicIndex.get(topic, 999999)
@@ -283,7 +338,22 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
 
 
 def indexReportRows(company: Company, *, existingTopics: set[str] | None = None) -> list[dict[str, Any]]:
-    """report 영역의 index rows — API_TYPES 기반."""
+    """report 영역의 index rows — ``API_TYPES`` 기반.
+
+    Args:
+        company: Company 인스턴스.
+        existingTopics: 이미 등록된 topic 집합 (중복 회피, None 이면 빈 set).
+
+    Returns:
+        ``{chapter, topic, label, kind, source, periods, shape, preview, _sortKey}``
+        dict 리스트.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> indexReportRows(c, existingTopics={"BS", "IS"})
+    """
     rows: list[dict[str, Any]] = []
     if not company._hasReport:
         return rows

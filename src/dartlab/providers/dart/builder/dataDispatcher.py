@@ -48,8 +48,24 @@ def showFinanceTopic(
 ) -> pl.DataFrame | None:
     """finance source topic 의 실제 데이터 반환 (show 진입점).
 
-    ``c.show("IS", freq="Y", scope="separate")`` 같은 사용자 호출이
-    여기로 들어와서 freq/scope 에 따라 빌드.
+    ``c.show("IS", freq="Y", scope="separate")`` 같은 사용자 호출이 여기로 들어와서
+    freq/scope 에 따라 빌드.
+
+    Args:
+        company: Company 인스턴스.
+        topic: BS/IS/CF/CIS/SCE/ratios/ratioSeries/sceMatrix 중 하나.
+        period: 단일 기간 필터.
+        freq: ``"Q"``/``"Y"``/``"YTD"``.
+        scope: ``"consolidated"``/``"separate"``.
+
+    Returns:
+        wide DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> showFinanceTopic(c, "IS", freq="Y")
     """
     if topic == "ratios":
         return company._applyPeriodFilter(company._buildRatios(), period)
@@ -69,14 +85,44 @@ def showFinanceTopic(
 
 
 def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None) -> dict[str, Any] | None:
-    """finance authoritative topic provenance를 facts 빌드 없이 직접 계산."""
+    """finance authoritative topic provenance 를 facts 빌드 없이 직접 계산.
+
+    Args:
+        company: Company 인스턴스.
+        topic: BS/IS/CF/CIS/SCE 중 하나.
+        period: 특정 기간 필터.
+
+    Returns:
+        ``{topic, period, primarySource, fallbackSources, ...}`` dict 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> traceFinanceTopic(c, "BS", period="2024")
+    """
     from dartlab.providers.dart.docs.sections import rawPeriod
 
     requestedPeriod = rawPeriod(period) if isinstance(period, str) else period
     rows: list[tuple[str, str]] = []
 
     def collect(series: dict[str, list[Any]] | None, years: list[Any], payloadTopic: str) -> None:
-        """collect — TODO 한국어 동작 설명."""
+        """series → rows in-place 축적 — period 필터 적용.
+
+        Args:
+            series: ``{item: [value...], ...}`` dict 또는 None.
+            years: period 리스트.
+            payloadTopic: payloadRef prefix.
+
+        Returns:
+            None (in-place ``rows`` mutation).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> collect({"sales": [1000]}, [2024], "IS")  # nested function example
+        """
         if not series:
             return
         for item, values in series.items():
@@ -138,12 +184,43 @@ def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None
 def showReportTopic(
     company: Company, topic: str, *, period: str | None = None, raw: bool = False
 ) -> pl.DataFrame | None:
-    """report source topic의 실제 데이터 반환."""
+    """report source topic 의 실제 데이터 반환.
+
+    Args:
+        company: Company 인스턴스.
+        topic: report topic 이름 (예: ``"dividend"``).
+        period: 기간 필터.
+        raw: True 면 영문 컬럼 그대로, False 면 한글 매핑.
+
+    Returns:
+        DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> showReportTopic(c, "dividend", period="2024")
+    """
     return company._applyPeriodFilter(reportFrame(company, topic, raw=raw), period)
 
 
 def reportFrame(company: Company, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
-    """reportFrame — TODO 한국어 동작 설명."""
+    """report apiType DataFrame — topic → apiType 변환 + 정제.
+
+    Args:
+        company: Company 인스턴스.
+        topic: report topic 이름.
+        raw: True 면 영문 컬럼 그대로.
+
+    Returns:
+        정제 DataFrame 또는 None (apiType 미존재 / report 부재).
+
+    Raises:
+        없음 (Polars exception 모두 None 반환).
+
+    Example:
+        >>> reportFrame(c, "dividend")
+    """
     if company._report is None:
         return None
     from dartlab.providers.dart.company import _apiTypeForTopic
@@ -163,7 +240,23 @@ def reportFrame(company: Company, topic: str, *, raw: bool = False) -> pl.DataFr
 
 
 def reportFrameInner(company: Company, apiType: str, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
-    """report apiType의 정제된 DataFrame 반환."""
+    """report apiType 의 정제된 DataFrame 반환 (``reportAccessor`` 위임).
+
+    Args:
+        company: Company 인스턴스 (stockCode 추출용).
+        apiType: OpenDART apiType 키.
+        topic: topic 이름 (호환용).
+        raw: True 면 영문 컬럼.
+
+    Returns:
+        정제 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> reportFrameInner(c, "dividend", "dividend")
+    """
     from dartlab.providers.dart.accessor.reportAccessor import reportFrameInner as _reportFrameInner
 
     return _reportFrameInner(company.stockCode, apiType, topic, raw=raw)
@@ -173,7 +266,21 @@ def reportFrameInner(company: Company, apiType: str, topic: str, *, raw: bool = 
 
 
 def showSegmentsSub(company: Company, sub: str) -> pl.DataFrame | None:
-    """segments 하위 topic → DataFrame."""
+    """segments 하위 topic → DataFrame (region/product/composition).
+
+    Args:
+        company: Company 인스턴스.
+        sub: ``"region"``/``"product"``/``"composition"`` 중 하나.
+
+    Returns:
+        DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> showSegmentsSub(c, "region")
+    """
     segResult = company._callModule("segments")
     if segResult is None:
         return None
@@ -193,7 +300,25 @@ def showSegmentsSub(company: Company, sub: str) -> pl.DataFrame | None:
 def showDirectTopic(
     company: Company, topic: str, *, period: str | None = None, raw: bool = False
 ) -> pl.DataFrame | None:
-    """sections 외 경로에서 직접 회수 가능한 topic fallback."""
+    """sections 외 경로에서 직접 회수 가능한 topic fallback.
+
+    우선순위: report (apiType 일치) → notes (key 일치) → primary (safe call).
+
+    Args:
+        company: Company 인스턴스.
+        topic: topic 이름.
+        period: 기간 필터.
+        raw: True 면 영문 컬럼.
+
+    Returns:
+        DataFrame 또는 None.
+
+    Raises:
+        없음 (모든 예외 흡수).
+
+    Example:
+        >>> showDirectTopic(c, "dividend")
+    """
     if company._hasReport:
         try:
             report_api_types = set(getattr(company._report, "apiTypes", []) or [])
@@ -234,10 +359,25 @@ def showSectionBlock(
     block: int | None = None,
     period: str | None = None,
 ) -> pl.DataFrame | None:
-    """sections topicFrame에서 blockOrder별 text/table 반환.
+    """sections topicFrame 에서 blockOrder 별 text/table 반환.
 
-    block=None → topic 전체 (blockOrder 순서, text는 원문, table은 수평화)
-    block=N → 해당 blockOrder의 블록만 반환
+    - ``block=None`` → topic 전체 (blockOrder 순서, text 는 원문, table 은 수평화).
+    - ``block=N`` → 해당 blockOrder 의 블록만 반환.
+
+    Args:
+        company: Company 인스턴스.
+        topicFrame: topic 으로 필터된 sections DataFrame.
+        block: blockOrder (None 이면 전체).
+        period: 기간 필터.
+
+    Returns:
+        DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> showSectionBlock(c, topic_df, block=0)
     """
     if "blockType" not in topicFrame.columns or "blockOrder" not in topicFrame.columns:
         return company._applyPeriodFilter(topicFrame, period)
@@ -278,7 +418,24 @@ def horizontalizeTableBlock(
     periodCols: list[str],
     period: str | None = None,
 ) -> pl.DataFrame | None:
-    """table 블록을 기간 간 수평화 — 항목×기간 매트릭스."""
+    """table 블록을 기간 간 수평화 — 항목 × 기간 매트릭스.
+
+    Args:
+        company: Company 인스턴스.
+        topicFrame: topic 으로 필터된 sections DataFrame.
+        blockOrder: blockOrder 번호.
+        periodCols: 수평화 대상 period 컬럼 리스트.
+        period: 기간 필터 (선택).
+
+    Returns:
+        수평화 DataFrame 또는 None (수평화 실패).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> horizontalizeTableBlock(c, topic_df, 0, ["2024", "2023"])
+    """
     from dartlab.providers.dart.parse.tableHorizontalizer import (
         horizontalizeTableBlock as _horizontalize,
     )
@@ -302,7 +459,29 @@ def showImpl(
     scope: str = "consolidated",
     raw: bool = False,
 ) -> pl.DataFrame | None:
-    """topic 의 데이터를 반환 — 사용자 c.show 의 내부 구현."""
+    """topic 의 데이터를 반환 — 사용자 ``c.show`` 의 내부 구현.
+
+    Q1.5 dispatcher: alias 해석 → 5 사례 분기 (list period / segments / finance /
+    notes / sections).
+
+    Args:
+        company: Company 인스턴스.
+        topic: topic 이름 또는 alias.
+        block: blockOrder (None 이면 전체).
+        period: 단일 기간 또는 기간 리스트 (vertical 변환).
+        freq: ``"Q"``/``"Y"``/``"YTD"``.
+        scope: ``"consolidated"``/``"separate"``.
+        raw: True 면 영문 컬럼.
+
+    Returns:
+        DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> showImpl(c, "IS", freq="Y", scope="separate")
+    """
     from dartlab.providers.dart.builder.dataShapeUtils import transposeToVertical
     from dartlab.providers.dart.company import _resolveTopic
     from dartlab.providers.dart.docs.notes import _NOTES_DISPATCH
@@ -339,7 +518,24 @@ def showFinanceStatement(
 ) -> pl.DataFrame | None:
     """finance topic (BS/IS/CF/CIS/SCE/ratios/ratioSeries/sceMatrix) 조회.
 
-    block 이 지정되면 (not None and not 0) None. BS/IS/CIS/CF/SCE 는 clean 적용.
+    ``block`` 이 지정되면 (not None and not 0) None. BS/IS/CIS/CF/SCE 는 clean 적용.
+
+    Args:
+        company: Company 인스턴스.
+        topic: finance topic.
+        block: blockOrder (None / 0 이외는 None 반환).
+        period: 기간 필터.
+        freq: ``"Q"``/``"Y"``/``"YTD"``.
+        scope: ``"consolidated"``/``"separate"``.
+
+    Returns:
+        wide DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> showFinanceStatement(c, "IS", None, period="2024Q4", freq="Q", scope="consolidated")
     """
     from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame
 
@@ -363,8 +559,26 @@ def showSectionsTopic(
 ) -> pl.DataFrame | None:
     """docs/report sections 기반 topic 조회.
 
-    sections 캐시 → topic 필터 → block dispatch (finance / report / docs).
-    미등록 topic 은 warning + None. registered-but-empty 는 silent None.
+    sections 캐시 → topic 필터 → block dispatch (finance / report / docs). 미등록
+    topic 은 warning + None. registered-but-empty 는 silent None.
+
+    Args:
+        company: Company 인스턴스.
+        topic: topic 이름.
+        block: blockOrder (None 이면 block index, N 이면 해당 block).
+        period: 기간 필터.
+        raw: True 면 영문 컬럼.
+        freq: ``"Q"``/``"Y"``/``"YTD"``.
+        scope: ``"consolidated"``/``"separate"``.
+
+    Returns:
+        DataFrame 또는 None.
+
+    Raises:
+        없음 (미등록 topic 은 UserWarning 만 발생).
+
+    Example:
+        >>> showSectionsTopic(c, "executive", None, period="2024", raw=False, freq="Q", scope="consolidated")
     """
     from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame, warnUnknownTopic
     from dartlab.providers.dart.company import _getModuleIndex

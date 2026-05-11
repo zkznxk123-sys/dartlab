@@ -40,7 +40,20 @@ class SectionsAnalyzer:
     # ── topic manifest ──
 
     def topicManifest(self) -> pl.DataFrame:
-        """전체 topic 카탈로그 (chapter, topic, source, blocks, periods)."""
+        """전체 topic 카탈로그 — ``chapter/topic/source/blocks/periods/latestPeriod``.
+
+        docs parquet 의 section_title 을 mapper 통해 topic 정규화 + chapter 분류.
+        4 분기 마일스톤 보고서 (Q1/Q2/Q3/annual) 모두 흡수.
+
+        Returns:
+            카탈로그 wide DataFrame (chapter/order 정렬). docs 부재 시 빈 schema.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.topicManifest().head()
+        """
         cacheKey = "_docsTopicManifest"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
@@ -166,7 +179,17 @@ class SectionsAnalyzer:
         return result
 
     def sectionTopics(self) -> list[str]:
-        """topic 이름 목록."""
+        """topic 이름 목록 — manifest 에서 추출.
+
+        Returns:
+            topic str 리스트 (manifest 부재 시 빈 리스트).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.sectionTopics()[:5]
+        """
         manifest = self.topicManifest()
         if manifest.is_empty() or "topic" not in manifest.columns:
             return []
@@ -175,7 +198,20 @@ class SectionsAnalyzer:
     # ── topic outline ──
 
     def topicOutline(self, topic: str | None = None) -> pl.DataFrame:
-        """topic별 block outline (period, block, type, title, preview)."""
+        """topic 별 block outline — ``period/block/type/title/preview``.
+
+        Args:
+            topic: 특정 topic (None 이면 manifest 반환).
+
+        Returns:
+            block outline DataFrame.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.topicOutline("executive")
+        """
         if topic is None:
             return self.topicManifest()
 
@@ -290,7 +326,21 @@ class SectionsAnalyzer:
     # ── freq / ordered / coverage ──
 
     def sectionsFreq(self, freqScope: str, *, includeMixed: bool = True) -> pl.DataFrame | None:
-        """freq 범위별 sections 투영."""
+        """freq 범위별 sections 투영.
+
+        Args:
+            freqScope: ``"annual"`` / ``"quarterly"`` / ``"all"``.
+            includeMixed: 혼합 보고서 포함.
+
+        Returns:
+            투영 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.sectionsFreq("annual")
+        """
         if not self._hasDocs:
             return None
         normalizedScope = str(freqScope).strip().lower()
@@ -313,7 +363,21 @@ class SectionsAnalyzer:
         recentFirst: bool = True,
         annualAsQ4: bool = True,
     ) -> pl.DataFrame | None:
-        """기간 정렬된 sections."""
+        """기간 정렬된 sections — period 컬럼 재정렬.
+
+        Args:
+            recentFirst: 최근 period 우선.
+            annualAsQ4: 연도 단위 Q4 처리.
+
+        Returns:
+            정렬 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.sectionsOrdered()
+        """
         if not self._hasDocs:
             return None
         cacheKey = f"_docsSectionsOrdered:{int(recentFirst)}:{int(annualAsQ4)}"
@@ -338,7 +402,22 @@ class SectionsAnalyzer:
         recentFirst: bool = True,
         annualAsQ4: bool = True,
     ) -> pl.DataFrame | None:
-        """topic별 기간 커버리지 매트릭스."""
+        """topic 별 기간 커버리지 매트릭스 — null/non-null 비율.
+
+        Args:
+            topic: 특정 topic (None 이면 전체).
+            recentFirst: 최근 우선.
+            annualAsQ4: 연도 단위 Q4 처리.
+
+        Returns:
+            ``topic/period/rowCount/nonNullRows/coverageRatio`` 컬럼 DataFrame.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.sectionsCoverage(topic="executive")
+        """
         if not self._hasDocs:
             return None
         topicKey = topic or "*"
@@ -407,7 +486,23 @@ class SectionsAnalyzer:
         includeMixed: bool = True,
         collisionsOnly: bool = False,
     ) -> pl.DataFrame | None:
-        """semantic registry / collisions."""
+        """semantic registry / collisions — title 의 의미 매핑 + 충돌.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            collisionsOnly: True 면 collision 만.
+
+        Returns:
+            registry 또는 collision DataFrame.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.sectionsSemanticRegistry(collisionsOnly=True)
+        """
         if not self._hasDocs:
             return None
         normalizedScope = str(freqScope).strip().lower()
@@ -453,7 +548,24 @@ class SectionsAnalyzer:
         collisionsOnly: bool = False,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
-        """structure registry / collisions."""
+        """structure registry / collisions — 트리 노드 카탈로그 + 충돌.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            collisionsOnly: True 면 collision 만.
+            nodeType: 노드 종류 필터.
+
+        Returns:
+            registry 또는 collision DataFrame.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.sectionsStructureRegistry(nodeType="section")
+        """
         if not self._hasDocs:
             return None
         normalizedScope = str(freqScope).strip().lower()
@@ -500,7 +612,24 @@ class SectionsAnalyzer:
         changedOnly: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
-        """structure events."""
+        """structure events — 기간 별 구조 변화 이벤트.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            changedOnly: True 면 변경 노드만.
+            nodeType: 노드 종류.
+
+        Returns:
+            events DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.sectionsStructureEvents()
+        """
         if not self._hasDocs:
             return None
         normalizedScope = str(freqScope).strip().lower()
@@ -536,7 +665,23 @@ class SectionsAnalyzer:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
-        """structure summary."""
+        """structure summary — 노드 별 통계 요약.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            nodeType: 노드 종류.
+
+        Returns:
+            summary DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.sectionsStructureSummary()
+        """
         if not self._hasDocs:
             return None
         normalizedScope = str(freqScope).strip().lower()
@@ -575,7 +720,25 @@ class SectionsAnalyzer:
         latestOnly: bool = True,
         changedOnly: bool = True,
     ) -> pl.DataFrame | None:
-        """structure changes."""
+        """structure changes — 시간순 노드 변화 추적.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            nodeType: 노드 종류.
+            latestOnly: 최근 변경만.
+            changedOnly: 변경된 행만.
+
+        Returns:
+            changes DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.sectionsStructureChanges()
+        """
         if not self._hasDocs:
             return None
         normalizedScope = str(freqScope).strip().lower()
@@ -610,7 +773,20 @@ class SectionsAnalyzer:
     # ── subtables ──
 
     def topicSubtables(self, topic: str):
-        """topic subtable (wide + long)."""
+        """topic subtable (wide + long) — retrieval blocks 기반.
+
+        Args:
+            topic: topic 이름.
+
+        Returns:
+            ``{wide, long}`` namedtuple/dataclass 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.topicSubtables("rawMaterial")
+        """
         cacheKey = f"_topicSubtables:{topic}"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
@@ -625,12 +801,38 @@ class SectionsAnalyzer:
         return result
 
     def subtopicWide(self, topic: str) -> pl.DataFrame | None:
-        """subtable wide pivot."""
+        """subtable wide pivot — 항목 × 기간.
+
+        Args:
+            topic: topic 이름.
+
+        Returns:
+            wide DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.subtopicWide("rawMaterial")
+        """
         result = self.topicSubtables(topic)
         return None if result is None else result.wide
 
     def subtopicLong(self, topic: str) -> pl.DataFrame | None:
-        """subtable long format."""
+        """subtable long format — period column 가로 풀어둠.
+
+        Args:
+            topic: topic 이름.
+
+        Returns:
+            long DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> analyzer.subtopicLong("rawMaterial")
+        """
         result = self.topicSubtables(topic)
         return None if result is None else result.long
 

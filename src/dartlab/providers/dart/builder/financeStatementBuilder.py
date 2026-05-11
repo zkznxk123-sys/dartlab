@@ -49,7 +49,20 @@ _QUARTER_COL_RE = re.compile(r"^(\d{4})Q[1-4]$")
 
 
 def sceMatrix(company: Company):
-    """sceMatrix — TODO 한국어 동작 설명."""
+    """SCE 3 차원 매트릭스 — ``buildSceMatrix`` 위임 + 캐시.
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        ``(matrix, years)`` 또는 None (finance 부재).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> sceMatrix(c)
+    """
     if not company._hasFinance:
         return None
     cacheKey = "_sceMatrix_CFS"
@@ -63,7 +76,20 @@ def sceMatrix(company: Company):
 
 
 def sceSeriesAnnual(company: Company):
-    """sceSeriesAnnual — TODO 한국어 동작 설명."""
+    """SCE 연간 시계열 — ``buildSceAnnual`` 위임 + 캐시.
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        ``(series, years)`` 또는 None (finance 부재).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> sceSeriesAnnual(c)
+    """
     if not company._hasFinance:
         return None
     cacheKey = "_sceAnnual_CFS"
@@ -77,7 +103,20 @@ def sceSeriesAnnual(company: Company):
 
 
 def sce(company: Company) -> pl.DataFrame | None:
-    """sce — TODO 한국어 동작 설명."""
+    """SCE DataFrame — 분기/연도 정렬 + 메타 컬럼 우선.
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        SCE wide DataFrame (연도 역순 정렬) 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> sce(c)
+    """
     cacheKey = "_sceDataFrame_CFS"
     if cacheKey in company._cache:
         return company._cache[cacheKey]
@@ -100,7 +139,20 @@ def sce(company: Company) -> pl.DataFrame | None:
 
 
 def financeCisAnnual(company: Company):
-    """financeCisAnnual — TODO 한국어 동작 설명."""
+    """CIS 연간 series — ``_financeCisAnnual`` 위임 + 캐시.
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        ``(series, years)`` 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> financeCisAnnual(c)
+    """
     if not company._hasFinance:
         return None
     cacheKey = "_financeCISAnnual_CFS"
@@ -112,7 +164,20 @@ def financeCisAnnual(company: Company):
 
 
 def financeCisQuarterly(company: Company):
-    """CIS 분기별 시계열 (연간 합산 없이)."""
+    """CIS 분기별 시계열 (연간 합산 없이).
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        ``(series, periods)`` 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> financeCisQuarterly(c)
+    """
     if not company._hasFinance:
         return None
     cacheKey = "_financeCISQuarterly_CFS"
@@ -124,7 +189,22 @@ def financeCisQuarterly(company: Company):
 
 
 def aggregateCisAnnual(qDf: pl.DataFrame) -> pl.DataFrame | None:
-    """CIS 분기 DataFrame → 연간 (4분기 합)."""
+    """CIS 분기 DataFrame → 연간 (4 분기 합, strict).
+
+    4 분기 모두 있는 연도만 합산. 일부 분기 부재 연도는 결과에서 제외.
+
+    Args:
+        qDf: CIS 분기 wide DataFrame.
+
+    Returns:
+        연간 wide DataFrame 또는 None (분기 컬럼 부재).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> aggregateCisAnnual(cis_quarterly_df)
+    """
     yearGroups: dict[str, list[str]] = {}
     for col in qDf.columns:
         m = _QUARTER_COL_RE.match(col)
@@ -148,7 +228,22 @@ def aggregateCisAnnual(qDf: pl.DataFrame) -> pl.DataFrame | None:
 
 
 def ratioSeries(company: Company):
-    """ratioSeries — TODO 한국어 동작 설명."""
+    """비율 분기 series + 연간 fallback — ``calcRatioSeries`` 위임 + 캐시.
+
+    industry group 별 archetype override 적용. ``yoyLag=4`` (분기 단위 YoY).
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        ``(series, periods)`` 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> ratioSeries(c)
+    """
     if not company._hasFinance:
         return None
     cacheKey = "_ratioSeries_Q_CFS"
@@ -174,6 +269,18 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
 
     사용자는 ``c.show("ratios")`` 호출. show() 가 finance topic dispatch 에서
     이 빌더를 호출.
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        비율 wide DataFrame (period 컬럼 역순 정렬) 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildRatios(c)  # 내부 — 사용자는 c.show("ratios")
     """
     rs = ratioSeries(company)
     if rs is None:
@@ -192,9 +299,24 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
 
 
 def financeStmt(company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated") -> pl.DataFrame | None:
-    """finance 시계열에서 sjDiv DataFrame 생성 (캐싱).
+    """finance 시계열에서 ``sjDiv`` DataFrame 생성 (캐싱).
 
-    Internal helper. show("IS", freq=, scope=) 진입점이 호출.
+    Internal helper. ``c.show("IS", freq=, scope=)`` 진입점이 호출.
+
+    Args:
+        company: Company 인스턴스.
+        sjDiv: BS/IS/CF/CIS/SCE 중 하나.
+        freq: ``"Q"`` (분기) / ``"Y"`` (연간) / ``"YTD"`` (누적).
+        scope: ``"consolidated"`` (연결) / ``"separate"`` (별도).
+
+    Returns:
+        wide DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> financeStmt(c, "IS", freq="Y")
     """
     cacheKey = f"_financeStmt_{sjDiv}_{freq}_{scope}"
     if cacheKey in company._cache:
@@ -213,7 +335,26 @@ def financeStmt(company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "
 def financeOrDocsStatement(
     company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated"
 ) -> pl.DataFrame | None:
-    """financeOrDocsStatement — TODO 한국어 동작 설명."""
+    """finance 우선, docs fallback dispatch — ``sjDiv`` wide DataFrame.
+
+    CIS + consolidated 는 별도 quarterly 캐시 경로. 그 외는 ``financeStmt`` → ``docs``
+    순. docs fallback 은 분기 연결만 지원.
+
+    Args:
+        company: Company 인스턴스.
+        sjDiv: BS/IS/CF/CIS/SCE 중 하나.
+        freq: ``"Q"``/``"Y"``/``"YTD"``.
+        scope: ``"consolidated"``/``"separate"``.
+
+    Returns:
+        wide DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> financeOrDocsStatement(c, "BS")
+    """
     # CIS 는 별도 quarterly 캐시 — annual 은 4분기 합산 합성
     if sjDiv == "CIS" and scope == "consolidated":
         cisQ = financeCisQuarterly(company) if company._hasFinance else None
@@ -245,11 +386,18 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
     ``(series, periods)`` 튜플 형태가 필요할 때만 호출한다.
 
     Args:
+        company: Company 인스턴스.
         freq: ``"Q"`` (분기, 기본) / ``"Y"`` (연간) / ``"YTD"`` (누적).
         scope: ``"consolidated"`` (연결, 기본) / ``"separate"`` (별도).
 
     Returns:
         ``(series, periods)`` 또는 None.
+
+    Raises:
+        ValueError: ``freq`` / ``scope`` 가 허용 값 외일 때.
+
+    Example:
+        >>> buildFinanceSeries(c, freq="Y", scope="separate")
     """
     if freq not in ("Q", "Y", "YTD"):
         raise ValueError(f"freq 는 'Q' / 'Y' / 'YTD' 중 하나여야 합니다 (받음: {freq!r})")
