@@ -26,8 +26,8 @@ def test_dart_company_show_has_explicit_error_path():
     """
     import inspect
 
-    from dartlab.providers.dart.dataDispatcher import showSectionsTopic
-    from dartlab.providers.dart.dataShapeUtils import warnUnknownTopic
+    from dartlab.providers.dart.builder.dataDispatcher import showSectionsTopic
+    from dartlab.providers.dart.builder.dataShapeUtils import warnUnknownTopic
 
     src = inspect.getsource(showSectionsTopic) + inspect.getsource(warnUnknownTopic)
     assert "warnings.warn" in src

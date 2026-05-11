@@ -304,7 +304,7 @@ def showImpl(
 ) -> pl.DataFrame | None:
     """topic 의 데이터를 반환 — 사용자 c.show 의 내부 구현."""
     from dartlab.providers.dart.company import _resolveTopic
-    from dartlab.providers.dart.dataShapeUtils import transposeToVertical
+    from dartlab.providers.dart.builder.dataShapeUtils import transposeToVertical
     from dartlab.providers.dart.docs.notes import _NOTES_DISPATCH
 
     # Q1.5 dispatcher: alias 해석 → 5 사례 분기 (list period / segments / finance / notes / sections).
@@ -341,7 +341,7 @@ def showFinanceStatement(
 
     block 이 지정되면 (not None and not 0) None. BS/IS/CIS/CF/SCE 는 clean 적용.
     """
-    from dartlab.providers.dart.dataShapeUtils import cleanFinanceDataFrame
+    from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame
 
     if block not in (None, 0):
         return None
@@ -367,7 +367,7 @@ def showSectionsTopic(
     미등록 topic 은 warning + None. registered-but-empty 는 silent None.
     """
     from dartlab.providers.dart.company import _getModuleIndex
-    from dartlab.providers.dart.dataShapeUtils import cleanFinanceDataFrame, warnUnknownTopic
+    from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame, warnUnknownTopic
 
     if "_sections" in company._cache:
         sec = company._cache["_sections"]

@@ -7,12 +7,14 @@
       ],
       "extra": [
         "accessor",
+        "builder",
         "search"
       ]
     },
     "edgar": {
       "missing": [
         "accessor",
+        "builder",
         "search"
       ],
       "extra": [
@@ -22,6 +24,7 @@
     "edinet": {
       "missing": [
         "accessor",
+        "builder",
         "bulk",
         "report",
         "search"

@@ -1,5 +1,5 @@
 {
-  "_note": "P1 rename 후 갱신 — fetch/list/search 함수가 iter* 쌍 부재. P1.5+ 메우며 축소",
+  "_note": "P5.2 sync",
   "violations": [
     "src/dartlab/providers/dart/company.py::listExportModules (iter pair iterExportModules 부재)",
     "src/dartlab/providers/dart/company.py::searchName (iter pair iterName 부재)",

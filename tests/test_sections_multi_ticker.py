@@ -183,7 +183,7 @@ class _FakeCompany:
 
 def test_sections_analyzer_freq_cache_hit() -> None:
     """같은 (freqScope, includeMixed) 두 번 호출 시 두 번째는 cache 반환."""
-    from dartlab.providers.dart.docsSectionsAnalyzer import SectionsAnalyzer
+    from dartlab.providers.dart.builder.docsSectionsAnalyzer import SectionsAnalyzer
 
     df = _buildMockSections(freqScopes=["annual", "quarterly", "mixed"])
     fake = _FakeCompany(df)
@@ -197,7 +197,7 @@ def test_sections_analyzer_freq_cache_hit() -> None:
 
 
 def test_sections_analyzer_semantic_registry_cache_hit() -> None:
-    from dartlab.providers.dart.docsSectionsAnalyzer import SectionsAnalyzer
+    from dartlab.providers.dart.builder.docsSectionsAnalyzer import SectionsAnalyzer
 
     df = _buildMockSections(freqScopes=["annual", "quarterly", "mixed"])
     fake = _FakeCompany(df)
@@ -212,7 +212,7 @@ def test_sections_analyzer_semantic_registry_cache_hit() -> None:
 
 def test_sections_analyzer_freq_cache_distinct_scopes_isolated() -> None:
     """다른 freqScope 두 번 호출 시 cache key 분리, 결과도 분리."""
-    from dartlab.providers.dart.docsSectionsAnalyzer import SectionsAnalyzer
+    from dartlab.providers.dart.builder.docsSectionsAnalyzer import SectionsAnalyzer
 
     df = _buildMockSections(freqScopes=["annual", "quarterly", "mixed"])
     fake = _FakeCompany(df)

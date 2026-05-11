@@ -115,8 +115,8 @@ _KNOWN_VIOLATIONS = {
     # 가 그 결과 타입 (RatioResult dataclass) 을 import — 큰 레포 표준상 결과 dataclass
     # 는 review 통과해야 하지만 facade backend 의 cache/render 보조라 호출처 정리는
     # S8 으로 미룸. 그때 풀 예정.
-    ("dartlab.providers.dart.docsIndexBuilder", "dartlab.analysis"),
-    ("dartlab.providers.dart.financeStatementBuilder", "dartlab.analysis"),
+    ("dartlab.providers.dart.builder.docsIndexBuilder", "dartlab.analysis"),
+    ("dartlab.providers.dart.builder.financeStatementBuilder", "dartlab.analysis"),
     ("dartlab.providers.edgar.financeAccessor", "dartlab.analysis"),
 }
 
