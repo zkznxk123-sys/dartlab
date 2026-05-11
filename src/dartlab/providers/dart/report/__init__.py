@@ -1,8 +1,4 @@
-"""정기보고서 데이터 엔진.
-
-OpenDART 정기보고서 API 응답 parquet에서
-배당, 직원, 최대주주, 임원, 감사 등 구조화된 데이터를 추출한다.
-"""
+"""정기보고서 데이터 엔진 — OpenDART 정기보고서 API 응답 parquet 에서 구조화 데이터 추출."""
 
 from dartlab.providers.dart.report.extract import (
     extractAnnual,
@@ -43,7 +39,6 @@ __all__ = [
     "ReportResult",
     "DividendResult",
     "EmployeeResult",
-    "MajorHolderResult",
     "ExecutiveResult",
     "AuditResult",
 ]

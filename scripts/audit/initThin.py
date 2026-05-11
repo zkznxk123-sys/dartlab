@@ -1,7 +1,13 @@
 """`__init__.py` thin 검증 — P-트랙 룰 4.
 
-__init__.py 는 LoC ≤ 30 + 함수/클래스 정의 0. re-export (`from X import Y`) 와 `__all__` 만.
-로직이 들어가면 .py 분리.
+__init__.py 는 함수/클래스 정의 0 + 본문 노드 화이트리스트:
+- docstring (str expr)
+- import / from import
+- `__all__` 대입 (Assign / AnnAssign)
+- DI register 호출 (Expr Call)
+- `if TYPE_CHECKING` / `if sys.version_info`(conditional import) 같은 If 블록
+
+LoC 임계는 두지 않는다 — ruff `format` 의 magic-trailing-comma 와 충돌. 본질은 "로직 0".
 
 baseline (`_baselines/initThin.json`) 외 위반만 fail.
 
@@ -25,7 +31,40 @@ if hasattr(sys.stdout, "reconfigure"):
 _REPO = Path(__file__).resolve().parents[2]
 _DEFAULT_TARGET = _REPO / "src" / "dartlab" / "providers"
 _BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "initThin.json"
-_MAX_LOC = 30
+
+
+def _isThinBody(node: ast.AST) -> tuple[bool, str]:
+    """본문 노드 화이트리스트 검증. 통과면 (True, ""), 위반이면 (False, 이유)."""
+    if isinstance(node, (ast.Import, ast.ImportFrom)):
+        return True, ""
+    if isinstance(node, ast.Expr):
+        if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+            return True, ""
+        if isinstance(node.value, ast.Call):
+            return True, ""
+        return False, f"expr {type(node.value).__name__}"
+    if isinstance(node, ast.Assign):
+        if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) and node.targets[0].id == "__all__":
+            return True, ""
+        # alias 대입: target=Name + value=Name/Attribute (예: ``affiliate = affiliates``)
+        if (
+            len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+            and isinstance(node.value, (ast.Name, ast.Attribute))
+        ):
+            return True, ""
+        return False, f"assign {ast.unparse(node.targets[0]) if node.targets else '?'}"
+    if isinstance(node, ast.AnnAssign):
+        return True, ""
+    if isinstance(node, ast.If):
+        return True, ""
+    if isinstance(node, ast.Try):
+        return True, ""
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return False, f"함수 정의 {node.name}"
+    if isinstance(node, ast.ClassDef):
+        return False, f"클래스 정의 {node.name}"
+    return False, f"{type(node).__name__}"
 
 
 def _checkInit(path: Path) -> dict | None:
@@ -34,28 +73,23 @@ def _checkInit(path: Path) -> dict | None:
         text = path.read_text(encoding="utf-8")
     except (UnicodeDecodeError, OSError):
         return None
-    loc = sum(1 for line in text.splitlines() if line.strip() and not line.strip().startswith("#"))
     try:
         tree = ast.parse(text)
     except SyntaxError:
-        return {"path": str(path.relative_to(_REPO).as_posix()), "loc": loc, "reason": "syntax error"}
+        return {"path": str(path.relative_to(_REPO).as_posix()), "reason": "syntax error"}
 
-    has_function = any(isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) for node in tree.body)
-    has_class = any(isinstance(node, ast.ClassDef) for node in tree.body)
-    too_long = loc > _MAX_LOC
+    reasons: list[str] = []
+    for node in tree.body:
+        ok, why = _isThinBody(node)
+        if not ok:
+            reasons.append(why)
 
-    if not (has_function or has_class or too_long):
+    if not reasons:
         return None
-
-    reasons = []
-    if has_function:
-        reasons.append("함수 정의 존재")
-    if has_class:
-        reasons.append("클래스 정의 존재")
-    if too_long:
-        reasons.append(f"LoC {loc} > {_MAX_LOC}")
-
-    return {"path": str(path.relative_to(_REPO).as_posix()), "loc": loc, "reason": ", ".join(reasons)}
+    return {
+        "path": str(path.relative_to(_REPO).as_posix()),
+        "reason": "; ".join(reasons[:5]),
+    }
 
 
 def _scan(target: Path) -> list[dict]:
@@ -89,13 +123,16 @@ def main() -> int:
 
     violations = _scan(target)
     print(f"=== __init__.py thin audit (룰 4) — {args.target} ===")
-    print(f"위반 {len(violations)} 건 (LoC > {_MAX_LOC} 또는 함수/클래스 정의 존재)")
+    print(f"위반 {len(violations)} 건 (함수/클래스 정의 존재 또는 비-허용 노드)")
 
     if args.update_baseline:
         _BASELINE.parent.mkdir(parents=True, exist_ok=True)
         _BASELINE.write_text(
             json.dumps(
-                {"_note": "P-트랙 phase 통과마다 축소", "violations": [v["path"] for v in violations]},
+                {
+                    "_note": "AST 기반 — 함수/클래스 정의 0 + 본문 노드 화이트리스트",
+                    "violations": [v["path"] for v in violations],
+                },
                 indent=2,
                 ensure_ascii=False,
             ),

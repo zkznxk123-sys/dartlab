@@ -16,9 +16,7 @@ from dartlab.providers.dart.docs.sections.extractors import (
     parseSubtopicTable,
     topicSubtables,
 )
-from dartlab.providers.dart.docs.sections.pipeline import (
-    sections,
-)
+from dartlab.providers.dart.docs.sections.pipeline import sections
 from dartlab.providers.dart.docs.sections.sectionsBase import (
     displayPeriod,
     formatPeriodRange,
