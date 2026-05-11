@@ -91,7 +91,21 @@ class _ProfileAccessor:
 
     @property
     def facts(self) -> pl.DataFrame | None:
-        """facts — TODO 한국어 동작 설명."""
+        """기업 facts 통합 long-format — finance + CIS + SCE + report + docs.
+
+        4 source 의 facts 를 ``topic/period/source/valueType/valueKey/value/payloadRef/priority/summary``
+        통합 long DataFrame 으로 머지. priority 는 source 우선순위 (finance=300, report=200, docs=100).
+
+        Returns:
+            long-format facts DataFrame 또는 None (모든 source 부재).
+
+        Raises:
+            없음 (개별 source 부재 시 해당 부분만 누락).
+
+        Example:
+            >>> facts = c.profile.facts
+            >>> facts.filter(pl.col("topic") == "BS").head()
+        """
         cacheKey = "_profileFacts"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
@@ -265,12 +279,32 @@ class _ProfileAccessor:
 
     @property
     def sections(self) -> pl.DataFrame | None:
-        """sections — TODO 한국어 동작 설명."""
+        """merged canonical sections — docs spine + finance/report 통합 보드.
+
+        Returns:
+            ``topic/period/sectionTitle/...`` 등 컬럼 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.profile.sections.head()
+        """
         return self._company._getPrimary("sections")
 
     @property
     def availableTopics(self) -> list[str]:
-        """availableTopics — TODO 한국어 동작 설명."""
+        """profile 에서 접근 가능한 topic 목록 — sections + facts union.
+
+        Returns:
+            정렬된 topic str 리스트.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.profile.availableTopics[:10]
+        """
         topics = set()
         if self.sections is not None and "topic" in self.sections.columns:
             topics.update(self.sections["topic"].to_list())
@@ -280,7 +314,21 @@ class _ProfileAccessor:
         return sorted(str(t) for t in topics if t is not None)
 
     def get(self, topic: str) -> Any:
-        """get — TODO 한국어 동작 설명."""
+        """topic 데이터 조회 — deprecated alias (``c.show(topic)`` 권장).
+
+        Args:
+            topic: topic 이름 (BS/IS/CF/CIS/SCE 또는 report topic).
+
+        Returns:
+            DataFrame / dict 또는 None.
+
+        Raises:
+            DeprecationWarning: 호출 시 발생 (alias 패턴 — ``c.show(topic)`` 사용 권장).
+
+        Example:
+            >>> c.profile.get("BS")  # deprecated
+            >>> c.show("BS")  # 권장
+        """
         import warnings
 
         warnings.warn("profile.get(topic) → show(topic) 경로 권장", DeprecationWarning, stacklevel=2)
@@ -298,7 +346,22 @@ class _ProfileAccessor:
         return sections.filter(pl.col("topic") == topic)
 
     def trace(self, topic: str, period: str | None = None) -> pl.DataFrame | dict[str, Any] | None:
-        """trace — TODO 한국어 동작 설명."""
+        """topic 출처 추적 — finance/report/docs 우선순위 + payloadRef.
+
+        Args:
+            topic: topic 이름.
+            period: 특정 기간 (None 이면 전체).
+
+        Returns:
+            ``{topic, period, primarySource, fallbackSources, selectedPayloadRef,
+            availableSources, whySelected}`` dict 또는 None (출처 없음).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.profile.trace("BS", period="2024")
+        """
         from dartlab.providers.dart.docs.sections import rawPeriod
 
         requestedPeriod = rawPeriod(period) if isinstance(period, str) else period
@@ -361,7 +424,19 @@ class _ProfileAccessor:
 
     @property
     def sharesOutstanding(self) -> int | None:
-        """발행주식수 (유통중 보통주 기준, stockTotal report)."""
+        """발행주식수 (유통중 보통주 기준, ``stockTotal`` report).
+
+        ``se='보통주'`` 필터 + 최신 ``stlm_dt`` 의 ``istc_totqy`` (유통중주식총수) 추출.
+
+        Returns:
+            발행주식수 (정수) 또는 None (report 부재 / 추출 실패).
+
+        Raises:
+            없음 (모든 예외 잡아 None 반환).
+
+        Example:
+            >>> c.profile.sharesOutstanding
+        """
         cacheKey = "_sharesOutstanding"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]

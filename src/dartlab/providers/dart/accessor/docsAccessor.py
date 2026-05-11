@@ -1,6 +1,6 @@
 """docs source namespace accessor.
 
-company.py에서 분리된 accessor 클래스.
+``company.py`` 에서 분리된 accessor 클래스. ``c.docs.X`` 모든 접근의 본체.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 class _DocsAccessor:
-    """docs source namespace."""
+    """docs source namespace — Company 의 docs 관련 모든 표면 위임 (DART 공시 원문)."""
 
     def __init__(self, company: "Company"):
         self._company = company
@@ -24,20 +24,64 @@ class _DocsAccessor:
 
     @property
     def raw(self) -> pl.DataFrame | None:
-        """raw — TODO 한국어 동작 설명."""
+        """원본 docs parquet — 정규화 전 DART 공시 원본.
+
+        Returns:
+            전체 raw row DataFrame 또는 None (데이터 부재).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.raw.head()
+        """
         return self._company.rawDocs
 
     def filings(self) -> pl.DataFrame:
-        """filings — TODO 한국어 동작 설명."""
+        """공시 목록 — DART 정기/수시 보고서 메타.
+
+        Returns:
+            ``rcept_no/report_nm/rcept_dt`` 등 컬럼 DataFrame.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.filings().head(10)
+        """
         return self._company._filings()
 
     @property
     def sections(self) -> "_SectionsSource | None":
-        """sections — TODO 한국어 동작 설명."""
+        """sections sub-namespace — ``c.docs.sections.X`` 진입점.
+
+        Returns:
+            ``_SectionsSource`` 또는 None (docs 부재).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.frame()
+        """
         return self._sectionsAccessor if self._company._hasDocs else None
 
     def sectionsOrdered(self, *, recentFirst: bool = True, annualAsQ4: bool = True) -> pl.DataFrame | None:
-        """sectionsOrdered — TODO 한국어 동작 설명."""
+        """sections 시간순 정렬 — period 축 ordered DataFrame.
+
+        Args:
+            recentFirst: True 면 최근 period 가 앞.
+            annualAsQ4: 연도 단위 보고서를 Q4 로 취급.
+
+        Returns:
+            정렬된 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sectionsOrdered(recentFirst=True)
+        """
         sections = self.sections
         return None if sections is None else sections.ordered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
 
@@ -48,14 +92,43 @@ class _DocsAccessor:
         recentFirst: bool = True,
         annualAsQ4: bool = True,
     ) -> pl.DataFrame | None:
-        """sectionsCoverage — TODO 한국어 동작 설명."""
+        """topic × period 커버리지 매트릭스 — 데이터 결손 식별.
+
+        Args:
+            topic: 특정 topic 만 (None 이면 전체).
+            recentFirst: True 면 최근 period 우선.
+            annualAsQ4: 연도 단위 보고서를 Q4 로 취급.
+
+        Returns:
+            커버리지 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sectionsCoverage()
+        """
         sections = self.sections
         return (
             None if sections is None else sections.coverage(topic=topic, recentFirst=recentFirst, annualAsQ4=annualAsQ4)
         )
 
     def sectionsFreq(self, freqScope: str, *, includeMixed: bool = True) -> pl.DataFrame | None:
-        """sectionsFreq — TODO 한국어 동작 설명."""
+        """sections freq 집계 — section_title 출현 빈도.
+
+        Args:
+            freqScope: ``"annual"``/``"quarterly"``/``"all"`` 등 범위.
+            includeMixed: 정기+수시 혼합 보고서 포함.
+
+        Returns:
+            빈도 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sectionsFreq("annual")
+        """
         sections = self.sections
         return None if sections is None else sections.freq(freqScope, includeMixed=includeMixed)
 
@@ -66,7 +139,22 @@ class _DocsAccessor:
         freqScope: str = "all",
         includeMixed: bool = True,
     ) -> pl.DataFrame | None:
-        """sectionsSemanticRegistry — TODO 한국어 동작 설명."""
+        """semantic registry — section_title 의 의미 매핑 카탈로그.
+
+        Args:
+            topic: 특정 topic 필터.
+            freqScope: 범위 (annual/quarterly/all).
+            includeMixed: 혼합 포함.
+
+        Returns:
+            registry DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sectionsSemanticRegistry(freqScope="annual")
+        """
         sections = self.sections
         return (
             None
@@ -81,7 +169,22 @@ class _DocsAccessor:
         freqScope: str = "all",
         includeMixed: bool = True,
     ) -> pl.DataFrame | None:
-        """sectionsSemanticCollisions — TODO 한국어 동작 설명."""
+        """semantic collisions — 같은 의미 다른 title.
+
+        Args:
+            topic: 특정 topic 필터.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+
+        Returns:
+            collision DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sectionsSemanticCollisions()
+        """
         sections = self.sections
         return (
             None
@@ -97,7 +200,23 @@ class _DocsAccessor:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
-        """sectionsStructureRegistry — TODO 한국어 동작 설명."""
+        """structure registry — 섹션 트리 노드 카탈로그.
+
+        Args:
+            topic: 특정 topic 필터.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            nodeType: ``"section"``/``"table"`` 등 노드 종류.
+
+        Returns:
+            registry DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sectionsStructureRegistry(nodeType="section")
+        """
         sections = self.sections
         return (
             None
@@ -118,7 +237,23 @@ class _DocsAccessor:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
-        """sectionsStructureCollisions — TODO 한국어 동작 설명."""
+        """structure collisions — 트리 충돌 (같은 path 다른 의미).
+
+        Args:
+            topic: 특정 topic 필터.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            nodeType: 노드 종류.
+
+        Returns:
+            collision DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sectionsStructureCollisions()
+        """
         sections = self.sections
         return (
             None
@@ -140,7 +275,24 @@ class _DocsAccessor:
         changedOnly: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
-        """sectionsStructureEvents — TODO 한국어 동작 설명."""
+        """structure events — 기간 별 구조 변화 이벤트.
+
+        Args:
+            topic: 특정 topic 필터.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            changedOnly: True 면 변경된 노드만.
+            nodeType: 노드 종류.
+
+        Returns:
+            events DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sectionsStructureEvents(changedOnly=True)
+        """
         sections = self.sections
         return (
             None
@@ -162,7 +314,23 @@ class _DocsAccessor:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
-        """sectionsStructureSummary — TODO 한국어 동작 설명."""
+        """structure summary — 노드 별 통계 요약.
+
+        Args:
+            topic: 특정 topic 필터.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            nodeType: 노드 종류.
+
+        Returns:
+            summary DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sectionsStructureSummary()
+        """
         sections = self.sections
         return (
             None
@@ -185,7 +353,25 @@ class _DocsAccessor:
         latestOnly: bool = True,
         changedOnly: bool = True,
     ) -> pl.DataFrame | None:
-        """sectionsStructureChanges — TODO 한국어 동작 설명."""
+        """structure changes — 노드 path 의 시간순 변화 추적.
+
+        Args:
+            topic: 특정 topic 필터.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            nodeType: 노드 종류.
+            latestOnly: 최근 변경만.
+            changedOnly: 변경된 행만.
+
+        Returns:
+            changes DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sectionsStructureChanges(latestOnly=True)
+        """
         sections = self.sections
         return (
             None
@@ -202,22 +388,63 @@ class _DocsAccessor:
 
     @property
     def retrievalBlocks(self) -> pl.DataFrame | None:
-        """retrievalBlocks — TODO 한국어 동작 설명."""
+        """retrieval 용 chunk 블록 — RAG 검색 표면 SSOT.
+
+        Returns:
+            ``block_id/text/topic/period`` 컬럼 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.retrievalBlocks.head()
+        """
         return self._company._retrievalBlocks()
 
     @property
     def contextSlices(self) -> pl.DataFrame | None:
-        """contextSlices — TODO 한국어 동작 설명."""
+        """context window 단위 슬라이스 — LLM 입력 최적화.
+
+        Returns:
+            슬라이스 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.contextSlices.head()
+        """
         return self._company._contextSlices()
 
     @property
     def notes(self):
-        """notes — TODO 한국어 동작 설명."""
+        """주석 (notes) accessor — 재무제표 footnote 진입점.
+
+        Returns:
+            ``Notes`` 인스턴스 (lazy).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.notes.text("commitments")
+        """
         return self._company._notesAccessor
 
     @property
     def business(self):
-        """business — TODO 한국어 동작 설명."""
+        """사업의 내용 — deprecated alias (``c.show("business")`` 권장).
+
+        Returns:
+            BusinessResult 또는 None.
+
+        Raises:
+            DeprecationWarning: 호출 시 발생 (alias 패턴).
+
+        Example:
+            >>> c.docs.business  # deprecated
+            >>> c.show("business")  # 권장
+        """
         import warnings
 
         warnings.warn("docs.business → show('business') 경로 권장", DeprecationWarning, stacklevel=2)
@@ -225,7 +452,18 @@ class _DocsAccessor:
 
     @property
     def mdna(self):
-        """mdna — TODO 한국어 동작 설명."""
+        """MD&A — deprecated alias (``c.show("mdna")`` 권장).
+
+        Returns:
+            MdnaResult 또는 None.
+
+        Raises:
+            DeprecationWarning: 호출 시 발생 (alias 패턴).
+
+        Example:
+            >>> c.docs.mdna  # deprecated
+            >>> c.show("mdna")  # 권장
+        """
         import warnings
 
         warnings.warn("docs.mdna → show('mdna') 경로 권장", DeprecationWarning, stacklevel=2)
@@ -233,12 +471,37 @@ class _DocsAccessor:
 
     @property
     def rawMaterial(self):
-        """rawMaterial — TODO 한국어 동작 설명."""
+        """원재료 — deprecated alias (``c.show("rawMaterial")`` 권장).
+
+        Returns:
+            rawMaterial subtable 또는 fallback primary.
+
+        Raises:
+            DeprecationWarning: 호출 시 발생.
+
+        Example:
+            >>> c.docs.rawMaterial  # deprecated
+            >>> c.show("rawMaterial")  # 권장
+        """
         import warnings
 
         warnings.warn("docs.rawMaterial → show('rawMaterial') 경로 권장", DeprecationWarning, stacklevel=2)
         return self._company._sectionsSubtopicWide("rawMaterial") or self._company._safePrimary("rawMaterial")
 
     def subtables(self, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
-        """subtables — TODO 한국어 동작 설명."""
+        """topic 서브테이블 추출 — long/wide 변환 옵션.
+
+        Args:
+            topic: topic 이름 (예: ``"rawMaterial"``).
+            raw: True 면 long format, False 면 wide format.
+
+        Returns:
+            서브테이블 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.subtables("rawMaterial", raw=False)
+        """
         return self._company._sectionsSubtopicLong(topic) if raw else self._company._sectionsSubtopicWide(topic)

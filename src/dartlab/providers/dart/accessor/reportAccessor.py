@@ -152,7 +152,26 @@ _REPORT_COL_KR = REPORT_COL_KR
 
 
 def reportFrameInner(stockCode: str, apiType: str, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
-    """report apiType의 정제된 DataFrame 반환 (메타 컬럼 제거, 한글 매핑)."""
+    """report apiType 의 정제된 DataFrame 반환 (메타 컬럼 제거, 한글 매핑).
+
+    2015 년 데이터 제외 + 보통주 필터 + ``se`` 컬럼 있으면 ``se × period`` 수평화.
+    ``raw=False`` 면 컬럼명을 ``REPORT_COL_KR`` 매핑으로 한글 변경.
+
+    Args:
+        stockCode: 종목코드.
+        apiType: OpenDART apiType 키 (예: ``"dividend"``).
+        topic: topic 이름 (현재 미사용 — 시그니처 호환).
+        raw: True 면 원본 영문 컬럼, False 면 한글 매핑.
+
+    Returns:
+        정제 DataFrame 또는 None (데이터 부재).
+
+    Raises:
+        없음 (예외는 ``extractClean`` 내부에서 잡힘).
+
+    Example:
+        >>> reportFrameInner("005930", "stockTotal", "stockTotal")
+    """
     from dartlab.providers.dart.report.extract import extractClean
 
     df = extractClean(stockCode, apiType)
@@ -190,7 +209,21 @@ def reportFrameInner(stockCode: str, apiType: str, topic: str, *, raw: bool = Fa
 
 
 def reportPivotBySe(df: pl.DataFrame, *, raw: bool = False) -> pl.DataFrame | None:
-    """report se(항목) × period 수평화. 분기별 전체 데이터."""
+    """report ``se`` (항목) × period 수평화. 분기별 전체 데이터.
+
+    Args:
+        df: ``year/quarterNum/se/thstrm`` 컬럼 포함 DataFrame.
+        raw: True 면 ``se`` 컬럼 유지, False 면 ``"항목"`` 으로 rename.
+
+    Returns:
+        ``se × period`` 수평화 DataFrame 또는 None (``thstrm`` 모두 null).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> reportPivotBySe(extracted_df)
+    """
     df = df.with_columns((pl.col("year").cast(pl.Utf8) + "Q" + pl.col("quarterNum").cast(pl.Utf8)).alias("_period"))
     # null-only 행 제외
     if "thstrm" in df.columns:
@@ -252,7 +285,20 @@ class _ReportAccessor:
         return result
 
     def extract(self, apiType: str) -> pl.DataFrame | None:
-        """apiType별 정제된 DataFrame 반환."""
+        """apiType 별 정제된 DataFrame 반환 (BoundedCache 활용).
+
+        Args:
+            apiType: OpenDART apiType 키 (예: ``"dividend"``).
+
+        Returns:
+            정제 DataFrame 또는 None.
+
+        Raises:
+            없음 (KeyError/ValueError/TypeError/FileNotFoundError 모두 None 반환).
+
+        Example:
+            >>> c._report.extract("dividend")
+        """
         cacheKey = f"_extract_{apiType}"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
@@ -266,7 +312,21 @@ class _ReportAccessor:
         return result
 
     def extractAnnual(self, apiType: str, quarterNum: int | None = None) -> pl.DataFrame | None:
-        """apiType별 연간 DataFrame 반환."""
+        """apiType 별 연간 DataFrame 반환.
+
+        Args:
+            apiType: OpenDART apiType 키.
+            quarterNum: 특정 분기 (1~4). None 이면 preferred quarter 자동 선택.
+
+        Returns:
+            연간 DataFrame 또는 None.
+
+        Raises:
+            없음 (모든 예외 None 반환).
+
+        Example:
+            >>> c._report.extractAnnual("stockTotal")
+        """
         cacheKey = f"_annual_{apiType}_{quarterNum}"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
@@ -280,7 +340,21 @@ class _ReportAccessor:
         return result
 
     def result(self, apiType: str, quarterNum: int | None = None) -> Any | None:
-        """apiType별 통일된 Result 반환."""
+        """apiType 별 통일된 Result 반환 — pivot 5 종은 dataclass, 나머지는 generic.
+
+        Args:
+            apiType: OpenDART apiType 키.
+            quarterNum: 특정 분기.
+
+        Returns:
+            ``DividendResult/EmployeeResult/...`` 또는 generic Result 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._report.result("dividend")
+        """
         cacheKey = f"_result_{apiType}_{quarterNum}"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
@@ -300,7 +374,22 @@ class _ReportAccessor:
         return result
 
     def status(self, apiType: str | None = None) -> pl.DataFrame | dict[str, bool]:
-        """apiType availability 확인."""
+        """apiType availability 확인 — 전체 또는 특정.
+
+        Args:
+            apiType: 특정 apiType (None 이면 전체 28 종 상태).
+
+        Returns:
+            단일이면 ``{apiType: bool}`` dict, 전체면 ``apiType/label/preferredQuarter/...``
+            컬럼 DataFrame.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._report.status("dividend")
+            >>> c._report.status()  # 전체 28 종
+        """
         from dartlab.providers.dart.report.types import API_TYPE_LABELS, API_TYPES, PREFERRED_QUARTER
 
         if apiType is not None:
@@ -321,7 +410,17 @@ class _ReportAccessor:
 
     @property
     def dividend(self):
-        """배당 시계열 (DividendResult)."""
+        """배당 시계열 — deprecated alias (``c.show("dividend")`` 권장).
+
+        Returns:
+            DividendResult 또는 None.
+
+        Raises:
+            DeprecationWarning: 호출 시 발생.
+
+        Example:
+            >>> c.show("dividend")  # 권장
+        """
         import warnings
 
         warnings.warn("report.dividend → show('dividend') 경로 권장", DeprecationWarning, stacklevel=2)
@@ -329,7 +428,17 @@ class _ReportAccessor:
 
     @property
     def employee(self):
-        """직원현황 시계열 (EmployeeResult)."""
+        """직원현황 시계열 — deprecated alias (``c.show("employee")`` 권장).
+
+        Returns:
+            EmployeeResult 또는 None.
+
+        Raises:
+            DeprecationWarning: 호출 시 발생.
+
+        Example:
+            >>> c.show("employee")
+        """
         import warnings
 
         warnings.warn("report.employee → show('employee') 경로 권장", DeprecationWarning, stacklevel=2)
@@ -337,7 +446,17 @@ class _ReportAccessor:
 
     @property
     def majorHolder(self):
-        """최대주주현황 시계열 (MajorHolderResult)."""
+        """최대주주현황 시계열 — deprecated alias (``c.show("majorHolder")`` 권장).
+
+        Returns:
+            MajorHolderResult 또는 None.
+
+        Raises:
+            DeprecationWarning: 호출 시 발생.
+
+        Example:
+            >>> c.show("majorHolder")
+        """
         import warnings
 
         warnings.warn("report.majorHolder → show('majorHolder') 경로 권장", DeprecationWarning, stacklevel=2)
@@ -345,7 +464,17 @@ class _ReportAccessor:
 
     @property
     def executive(self):
-        """임원현황 (ExecutiveResult)."""
+        """임원현황 — deprecated alias (``c.show("executive")`` 권장).
+
+        Returns:
+            ExecutiveResult 또는 None.
+
+        Raises:
+            DeprecationWarning: 호출 시 발생.
+
+        Example:
+            >>> c.show("executive")
+        """
         import warnings
 
         warnings.warn("report.executive → show('executive') 경로 권장", DeprecationWarning, stacklevel=2)
@@ -353,7 +482,17 @@ class _ReportAccessor:
 
     @property
     def audit(self):
-        """감사의견 시계열 (AuditResult)."""
+        """감사의견 시계열 — deprecated alias (``c.show("audit")`` 권장).
+
+        Returns:
+            AuditResult 또는 None.
+
+        Raises:
+            DeprecationWarning: 호출 시 발생.
+
+        Example:
+            >>> c.show("audit")
+        """
         import warnings
 
         warnings.warn("report.audit → show('audit') 경로 권장", DeprecationWarning, stacklevel=2)
@@ -371,21 +510,52 @@ class _ReportAccessor:
 
     @property
     def apiTypes(self) -> list[str]:
-        """사용 가능한 apiType 목록."""
+        """사용 가능한 apiType 전체 목록 (28 종).
+
+        Returns:
+            apiType 키 리스트.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._report.apiTypes
+        """
         from dartlab.providers.dart.report.types import API_TYPES
 
         return list(API_TYPES)
 
     @property
     def labels(self) -> dict[str, str]:
-        """apiType → 한글명 매핑."""
+        """apiType → 한글명 매핑.
+
+        Returns:
+            ``{apiType: 한글 라벨}`` dict.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._report.labels["dividend"]
+            '배당'
+        """
         from dartlab.providers.dart.report.types import API_TYPE_LABELS
 
         return dict(API_TYPE_LABELS)
 
     @property
     def availableApiTypes(self) -> list[str]:
-        """현재 parquet에 실제 존재하는 apiType 목록."""
+        """현재 parquet 에 실제 존재하는 apiType 목록 (BoundedCache).
+
+        Returns:
+            존재하는 apiType 키 리스트 (API_TYPES 순서 보존).
+
+        Raises:
+            없음 (parquet 부재 시 빈 리스트).
+
+        Example:
+            >>> c._report.availableApiTypes
+        """
         cacheKey = "_availableApiTypes"
         if cacheKey in self._cache:
             return self._cache[cacheKey]

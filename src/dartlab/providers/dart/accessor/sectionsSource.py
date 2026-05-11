@@ -32,28 +32,98 @@ class _SectionsSource:
 
     @property
     def raw(self) -> pl.DataFrame | None:
-        """raw — TODO 한국어 동작 설명."""
+        """원본 sections wide DataFrame — topic × period 보드.
+
+        Returns:
+            sections DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.raw.head()
+        """
         return self._company._getPrimary("sections")
 
     @property
     def frame(self) -> pl.DataFrame | None:
-        """frame — TODO 한국어 동작 설명."""
+        """``raw`` 의 alias — DataFrame 직접 접근.
+
+        Returns:
+            sections DataFrame 또는 None (raw 와 동일).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.frame
+        """
         return self.raw
 
     def forTopics(self, topics: set[str]) -> pl.DataFrame | None:
-        """특정 topic만 포함하는 부분 sections."""
+        """특정 topic 만 포함하는 부분 sections.
+
+        Args:
+            topics: topic 이름 set.
+
+        Returns:
+            필터된 sections DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.forTopics({"BS", "IS"})
+        """
         return self._company._getPrimary("sections", topics=frozenset(topics))
 
     def topics(self) -> list[str]:
-        """topics — TODO 한국어 동작 설명."""
+        """sections 의 전체 topic 목록.
+
+        Returns:
+            topic str 리스트.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.topics()[:5]
+        """
         return self._company._docsSectionTopics()
 
     def outline(self, topic: str | None = None) -> pl.DataFrame | None:
-        """outline — TODO 한국어 동작 설명."""
+        """topic 구조 outline — 트리 path 와 노드 종류.
+
+        Args:
+            topic: 특정 topic (None 이면 전체).
+
+        Returns:
+            outline DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.outline("BS")
+        """
         return self._company._docsTopicOutline(topic=topic)
 
     def periods(self, *, recentFirst: bool = True, annualAsQ4: bool = True) -> list[str]:
-        """periods — TODO 한국어 동작 설명."""
+        """sections 의 period 컬럼 리스트.
+
+        Args:
+            recentFirst: True 면 최근 period 가 앞.
+            annualAsQ4: 연도 단위 보고서를 Q4 로 취급.
+
+        Returns:
+            period str 리스트 (sections 미존재 시 빈 리스트).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.periods(recentFirst=True)
+        """
         frame = self.raw
         if frame is None:
             return []
@@ -62,7 +132,21 @@ class _SectionsSource:
         return periodColumns(frame.columns, descending=recentFirst, annualAsQ4=annualAsQ4)
 
     def ordered(self, *, recentFirst: bool = True, annualAsQ4: bool = True) -> pl.DataFrame | None:
-        """ordered — TODO 한국어 동작 설명."""
+        """시간순 정렬 sections — period 축 ordered.
+
+        Args:
+            recentFirst: True 면 최근 period 우선.
+            annualAsQ4: 연도 단위 보고서를 Q4 로 취급.
+
+        Returns:
+            정렬된 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.ordered()
+        """
         return self._company._docsSectionsOrdered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
 
     def coverage(
@@ -72,7 +156,22 @@ class _SectionsSource:
         recentFirst: bool = True,
         annualAsQ4: bool = True,
     ) -> pl.DataFrame | None:
-        """coverage — TODO 한국어 동작 설명."""
+        """topic × period 커버리지 매트릭스 — 결손 식별.
+
+        Args:
+            topic: 특정 topic (None 이면 전체).
+            recentFirst: True 면 최근 우선.
+            annualAsQ4: 연도 단위 Q4 처리.
+
+        Returns:
+            커버리지 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.coverage()
+        """
         return self._company._docsSectionsCoverage(
             topic=topic,
             recentFirst=recentFirst,
@@ -80,7 +179,21 @@ class _SectionsSource:
         )
 
     def freq(self, freqScope: str, *, includeMixed: bool = True) -> pl.DataFrame | None:
-        """freq — TODO 한국어 동작 설명."""
+        """sections 빈도 집계.
+
+        Args:
+            freqScope: 범위 (``"annual"``/``"quarterly"``/``"all"``).
+            includeMixed: 혼합 보고서 포함.
+
+        Returns:
+            빈도 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.freq("annual")
+        """
         return self._company._docsSectionsFreq(freqScope, includeMixed=includeMixed)
 
     def semanticRegistry(
@@ -90,7 +203,22 @@ class _SectionsSource:
         freqScope: str = "all",
         includeMixed: bool = True,
     ) -> pl.DataFrame | None:
-        """semanticRegistry — TODO 한국어 동작 설명."""
+        """semantic registry — title 의 의미 매핑.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+
+        Returns:
+            registry DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.semanticRegistry()
+        """
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
             freqScope=freqScope,
@@ -105,7 +233,22 @@ class _SectionsSource:
         freqScope: str = "all",
         includeMixed: bool = True,
     ) -> pl.DataFrame | None:
-        """semanticCollisions — TODO 한국어 동작 설명."""
+        """semantic collisions — 의미 충돌만.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+
+        Returns:
+            collision DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.semanticCollisions()
+        """
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
             freqScope=freqScope,
@@ -121,7 +264,23 @@ class _SectionsSource:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
-        """structureRegistry — TODO 한국어 동작 설명."""
+        """structure registry — 트리 노드 카탈로그.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            nodeType: 노드 종류 필터.
+
+        Returns:
+            registry DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.structureRegistry()
+        """
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
             freqScope=freqScope,
@@ -138,7 +297,23 @@ class _SectionsSource:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
-        """structureCollisions — TODO 한국어 동작 설명."""
+        """structure collisions — 트리 충돌만.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            nodeType: 노드 종류.
+
+        Returns:
+            collision DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.structureCollisions()
+        """
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
             freqScope=freqScope,
@@ -156,7 +331,24 @@ class _SectionsSource:
         changedOnly: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
-        """structureEvents — TODO 한국어 동작 설명."""
+        """structure events — 기간별 구조 변화.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            changedOnly: True 면 변경 노드만.
+            nodeType: 노드 종류.
+
+        Returns:
+            events DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.structureEvents()
+        """
         return self._company._docsSectionsStructureEvents(
             topic=topic,
             freqScope=freqScope,
@@ -173,7 +365,23 @@ class _SectionsSource:
         includeMixed: bool = True,
         nodeType: str | None = None,
     ) -> pl.DataFrame | None:
-        """structureSummary — TODO 한국어 동작 설명."""
+        """structure summary — 노드별 통계.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            nodeType: 노드 종류.
+
+        Returns:
+            summary DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.structureSummary()
+        """
         return self._company._docsSectionsStructureSummary(
             topic=topic,
             freqScope=freqScope,
@@ -191,7 +399,25 @@ class _SectionsSource:
         latestOnly: bool = True,
         changedOnly: bool = True,
     ) -> pl.DataFrame | None:
-        """structureChanges — TODO 한국어 동작 설명."""
+        """structure changes — 시간순 변화.
+
+        Args:
+            topic: 특정 topic.
+            freqScope: 범위.
+            includeMixed: 혼합 포함.
+            nodeType: 노드 종류.
+            latestOnly: 최근 변경만.
+            changedOnly: 변경된 행만.
+
+        Returns:
+            changes DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.structureChanges()
+        """
         return self._company._docsSectionsStructureChanges(
             topic=topic,
             freqScope=freqScope,
@@ -210,8 +436,22 @@ class _SectionsSource:
     ) -> pl.DataFrame | None:
         """기간 간 변화 블록 추출 (벡터화).
 
-        sections wide DataFrame에서 인접 기간 비교로 변화만 추출.
-        5종 유형: appeared, disappeared, numeric, structural, wording.
+        sections wide DataFrame 에서 인접 기간 비교로 변화만 추출. 5 종 유형:
+        ``appeared``, ``disappeared``, ``numeric``, ``structural``, ``wording``.
+
+        Args:
+            topic: 특정 topic 필터.
+            fromPeriod: 시작 period.
+            toPeriod: 종료 period.
+
+        Returns:
+            변화 행만 포함 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.changes(topic="riskFactors")
         """
         frame = self.raw
         if frame is None:
@@ -219,7 +459,20 @@ class _SectionsSource:
         return _buildChanges(frame, topic=topic, fromPeriod=fromPeriod, toPeriod=toPeriod)
 
     def changeSummary(self, *, topN: int = 10) -> pl.DataFrame | None:
-        """topic별 변화 요약 — AI 컨텍스트용."""
+        """topic 별 변화 요약 — AI 컨텍스트용.
+
+        Args:
+            topN: 상위 N topic 요약 (각 topic 5 row 까지).
+
+        Returns:
+            ``topic/changeType/count/avgDelta`` 컬럼 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.docs.sections.changeSummary(topN=5)
+        """
         ch = self.changes()
         if isEmptyDf(ch):
             return None
